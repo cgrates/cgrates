@@ -71,7 +71,8 @@
 	"store_interval": "1s",
 },
 
-"apier": {	
+"apiers": {
+	"enabled": true,
 	"caches_conns":["conn1"],
 	"scheduler_conns": ["*internal"],
 },

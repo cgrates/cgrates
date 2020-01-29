@@ -1573,6 +1573,7 @@ func TestNewCGRConfigFromPathNotFound(t *testing.T) {
 
 func TestCgrCfgJSONDefaultApierCfg(t *testing.T) {
 	aCfg := &ApierCfg{
+		Enabled:         false,
 		CachesConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)},
 		SchedulerConns:  []string{},
 		AttributeSConns: []string{},

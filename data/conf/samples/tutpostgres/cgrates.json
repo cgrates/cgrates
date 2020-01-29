@@ -93,7 +93,8 @@
 },
 
 
-"apier": {
+"apiers": {
+	"enabled": true,
 	"scheduler_conns": ["*internal"],
 },
 }

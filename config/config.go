@@ -981,8 +981,8 @@ func (cfg *CGRConfig) AnalyzerSCfg() *AnalyzerSCfg {
 
 // ApierCfg reads the Apier configuration
 func (cfg *CGRConfig) ApierCfg() *ApierCfg {
-	cfg.lks[Apier].Lock()
-	defer cfg.lks[Apier].Unlock()
+	cfg.lks[ApierS].Lock()
+	defer cfg.lks[ApierS].Unlock()
 	return cfg.apier
 }
 
@@ -1080,7 +1080,7 @@ func (cfg *CGRConfig) V1GetConfigSection(args *StringWithArgDispatcher, reply *m
 		jsonString = utils.ToJSON(cfg.LoaderCgrCfg())
 	case CgrMigratorCfgJson:
 		jsonString = utils.ToJSON(cfg.MigratorCgrCfg())
-	case Apier:
+	case ApierS:
 		jsonString = utils.ToJSON(cfg.ApierCfg())
 	case CDRE_JSN:
 		jsonString = utils.ToJSON(cfg.CdreProfiles)
@@ -1193,7 +1193,7 @@ func (cfg *CGRConfig) getLoadFunctions() map[string]func(*CgrJsonCfg) error {
 		CgrMigratorCfgJson: cfg.loadMigratorCgrCfg,
 		DispatcherSJson:    cfg.loadDispatcherSCfg,
 		AnalyzerCfgJson:    cfg.loadAnalyzerCgrCfg,
-		Apier:              cfg.loadApierCfg,
+		ApierS:             cfg.loadApierCfg,
 		RPCConnsJsonName:   cfg.loadRPCConns,
 	}
 }
@@ -1388,7 +1388,7 @@ func (cfg *CGRConfig) reloadSections(sections ...string) (err error) {
 		RALS_JSN, CDRS_JSN, SessionSJson, ATTRIBUTE_JSN,
 		ChargerSCfgJson, RESOURCES_JSON, STATS_JSON, THRESHOLDS_JSON,
 		SupplierSJson, LoaderJson, DispatcherSJson})
-	subsystemsThatNeedStorDB := utils.NewStringSet([]string{STORDB_JSN, RALS_JSN, CDRS_JSN, Apier})
+	subsystemsThatNeedStorDB := utils.NewStringSet([]string{STORDB_JSN, RALS_JSN, CDRS_JSN, ApierS})
 	needsDataDB := false
 	needsStorDB := false
 	for _, section := range sections {
@@ -1457,8 +1457,8 @@ func (cfg *CGRConfig) reloadSections(sections ...string) (err error) {
 		case DispatcherSJson:
 			cfg.rldChans[DispatcherSJson] <- struct{}{}
 		case AnalyzerCfgJson:
-		case Apier:
-			cfg.rldChans[Apier] <- struct{}{}
+		case ApierS:
+			cfg.rldChans[ApierS] <- struct{}{}
 		}
 		return
 	}

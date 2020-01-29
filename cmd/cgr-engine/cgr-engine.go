@@ -486,9 +486,14 @@ func main() {
 	schS := services.NewSchedulerService(cfg, dmService, cacheS, filterSChan,
 		server, internalSchedulerSChan, connManager)
 
-	rals := services.NewRalService(cfg, dmService, storDBService, cacheS, filterSChan, server,
-		internalRALsChan, internalResponderChan, internalAPIerV1Chan, internalAPIerV2Chan,
-		schS, exitChan, connManager)
+	rals := services.NewRalService(cfg, cacheS, server,
+		internalRALsChan, internalResponderChan,
+		exitChan, connManager)
+
+	apierV1 := services.NewApierV1Service(cfg, dmService, storDBService, filterSChan, server, schS, rals.GetResponderService(),
+		internalAPIerV1Chan, connManager)
+
+	apierV2 := services.NewApierV2Service(apierV1, cfg, server, internalAPIerV2Chan)
 
 	cdrS := services.NewCDRServer(cfg, dmService, storDBService, filterSChan, server, internalCDRServerChan,
 		connManager)
@@ -500,7 +505,7 @@ func main() {
 	anz := services.NewAnalyzerService(cfg, server, exitChan, internalAnalyzerSChan)
 
 	srvManager.AddServices(attrS, chrS, tS, stS, reS, supS, schS, rals,
-		rals.GetResponder(), rals.GetAPIv1(), rals.GetAPIv2(), cdrS, smg,
+		rals.GetResponder(), apierV1, apierV2, cdrS, smg,
 		services.NewEventReaderService(cfg, filterSChan, exitChan, connManager),
 		services.NewDNSAgent(cfg, filterSChan, exitChan, connManager),
 		services.NewFreeswitchAgent(cfg, exitChan, connManager),
@@ -522,8 +527,8 @@ func main() {
 	engine.IntRPC = engine.NewRPCClientSet()
 	if cfg.DispatcherSCfg().Enabled {
 		engine.IntRPC.AddInternalRPCClient(utils.AnalyzerSv1, anz.GetIntenternalChan())
-		engine.IntRPC.AddInternalRPCClient(utils.ApierV1, rals.GetAPIv1().GetIntenternalChan())
-		engine.IntRPC.AddInternalRPCClient(utils.ApierV2, rals.GetAPIv2().GetIntenternalChan())
+		engine.IntRPC.AddInternalRPCClient(utils.ApierV1, apierV1.GetIntenternalChan())
+		engine.IntRPC.AddInternalRPCClient(utils.ApierV2, apierV2.GetIntenternalChan())
 		engine.IntRPC.AddInternalRPCClient(utils.AttributeSv1, attrS.GetIntenternalChan())
 		engine.IntRPC.AddInternalRPCClient(utils.CacheSv1, internalCacheSChan)
 		engine.IntRPC.AddInternalRPCClient(utils.CDRsV1, cdrS.GetIntenternalChan())

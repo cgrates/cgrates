@@ -58,7 +58,8 @@
 	"store_interval": "-1",
 },
 
-"apier": {
+"apiers": {
+	"enabled": true,
 	"scheduler_conns": ["*internal"],
 },
 

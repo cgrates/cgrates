@@ -44,7 +44,8 @@
 	"store_interval": "1s",
 },
 
-"apier": {
+"apiers": {
+	"enabled": true,
 	"scheduler_conns": ["*internal"],
 },
 

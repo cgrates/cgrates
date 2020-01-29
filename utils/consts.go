@@ -682,6 +682,7 @@ const (
 	CDRServer   = "CDRServer"
 	ResponderS  = "ResponderS"
 	GuardianS   = "GuardianS"
+	ApierS      = "ApierS"
 )
 
 // Lower service names
@@ -699,6 +700,7 @@ const (
 	LoaderSLow     = "loaders"
 	RALsLow        = "rals"
 	ReplicatorLow  = "replicator"
+	ApierSLow      = "apiers"
 )
 
 // Actions

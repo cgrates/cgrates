@@ -22,6 +22,7 @@ import "github.com/cgrates/cgrates/utils"
 
 // ApierCfg is the configuration of Apier service
 type ApierCfg struct {
+	Enabled         bool
 	CachesConns     []string // connections towards Cache
 	SchedulerConns  []string // connections towards Scheduler
 	AttributeSConns []string // connections towards AttributeS
@@ -30,6 +31,9 @@ type ApierCfg struct {
 func (aCfg *ApierCfg) loadFromJsonCfg(jsnCfg *ApierJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return
+	}
+	if jsnCfg.Enabled != nil {
+		aCfg.Enabled = *jsnCfg.Enabled
 	}
 	if jsnCfg.Caches_conns != nil {
 		aCfg.CachesConns = make([]string, len(*jsnCfg.Caches_conns))

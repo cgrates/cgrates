@@ -147,6 +147,8 @@ func (srvMngr *ServiceManager) GetConfig() *config.CGRConfig {
 func (srvMngr *ServiceManager) StartServices() (err error) {
 	go srvMngr.handleReload()
 	for serviceName, shouldRun := range map[string]bool{
+		utils.ApierV1:         srvMngr.GetConfig().ApierCfg().Enabled,
+		utils.ApierV2:         srvMngr.GetConfig().ApierCfg().Enabled,
 		utils.StorDB:          srvMngr.GetConfig().RalsCfg().Enabled || srvMngr.GetConfig().CdrsCfg().Enabled,
 		utils.AttributeS:      srvMngr.GetConfig().AttributeSCfg().Enabled,
 		utils.ChargerS:        srvMngr.GetConfig().ChargerSCfg().Enabled,
@@ -197,9 +199,7 @@ func (srvMngr *ServiceManager) handleReload() {
 		case ext := <-srvMngr.engineShutdown:
 			srvMngr.engineShutdown <- ext
 			for srviceName, srv := range srvMngr.subsystems { // gracefully stop all running subsystems
-				if !srv.IsRunning() ||
-					srv.ServiceName() == utils.ApierV1 || // apierv1 and apierv2 shutdown is handled by RaLs
-					srv.ServiceName() == utils.ApierV2 { // remove this once aqier is no longer dependent on RaLs
+				if !srv.IsRunning() {
 					continue
 				}
 				if err := srv.Shutdown(); err != nil {
@@ -240,7 +240,7 @@ func (srvMngr *ServiceManager) handleReload() {
 			if err = srvMngr.reloadService(utils.RALService); err != nil {
 				return
 			}
-		case <-srvMngr.GetConfig().GetReloadChan(config.Apier):
+		case <-srvMngr.GetConfig().GetReloadChan(config.ApierS):
 			if err = srvMngr.reloadService(utils.ApierV1); err != nil {
 				return
 			}

@@ -42,7 +42,8 @@
     "enabled": true
   },
 
-  "apier": {
+  "apiers": {
+    "enabled": true,
     "scheduler_conns": ["*internal"]
   }
 

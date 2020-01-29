@@ -95,7 +95,8 @@
 
 
 
-"apier": {
+"apiers": {
+	"enabled": true,
 	"scheduler_conns": ["*localhost"],
 },
 }

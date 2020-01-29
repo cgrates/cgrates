@@ -31,21 +31,16 @@ import (
 )
 
 // NewRalService returns the Ral Service
-func NewRalService(cfg *config.CGRConfig, dm *DataDBService,
-	storDB *StorDBService, cacheS *engine.CacheS, filterSChan chan *engine.FilterS, server *utils.Server,
-	internalRALsChan, internalResponderChan, internalAPIerV1Chan, internalAPIerV2Chan chan rpcclient.ClientConnector,
-	schedulerService *SchedulerService, exitChan chan bool,
+func NewRalService(cfg *config.CGRConfig, cacheS *engine.CacheS, server *utils.Server,
+	internalRALsChan, internalResponderChan chan rpcclient.ClientConnector, exitChan chan bool,
 	connMgr *engine.ConnManager) *RalService {
 	resp := NewResponderService(cfg, server, internalResponderChan, exitChan)
-	apiv1 := NewApierV1Service(cfg, dm, storDB, filterSChan, server, schedulerService, resp, internalAPIerV1Chan, connMgr)
-	apiv2 := NewApierV2Service(apiv1, cfg, server, internalAPIerV2Chan)
+
 	return &RalService{
 		connChan:  internalRALsChan,
 		cfg:       cfg,
 		cacheS:    cacheS,
 		server:    server,
-		apiv1:     apiv1,
-		apiv2:     apiv2,
 		responder: resp,
 		connMgr:   connMgr,
 	}
@@ -58,8 +53,6 @@ type RalService struct {
 	cacheS    *engine.CacheS
 	server    *utils.Server
 	rals      *v1.RALsV1
-	apiv1     *ApierV1Service
-	apiv2     *ApierV2Service
 	responder *ResponderService
 	connChan  chan rpcclient.ClientConnector
 	connMgr   *engine.ConnManager
@@ -90,14 +83,6 @@ func (rals *RalService) Start() (err error) {
 		return
 	}
 
-	if err = rals.apiv1.Start(); err != nil {
-		return
-	}
-
-	if err = rals.apiv2.Start(); err != nil {
-		return
-	}
-
 	rals.rals = v1.NewRALsV1()
 
 	if !rals.cfg.DispatcherSCfg().Enabled {
@@ -118,12 +103,6 @@ func (rals *RalService) GetIntenternalChan() (conn chan rpcclient.ClientConnecto
 // Reload handles the change of config
 func (rals *RalService) Reload() (err error) {
 	engine.SetRpSubjectPrefixMatching(rals.cfg.RalsCfg().RpSubjectPrefixMatching)
-	if err = rals.apiv1.Reload(); err != nil {
-		return
-	}
-	if err = rals.apiv2.Reload(); err != nil {
-		return
-	}
 	if err = rals.responder.Reload(); err != nil {
 		return
 	}
@@ -134,12 +113,6 @@ func (rals *RalService) Reload() (err error) {
 func (rals *RalService) Shutdown() (err error) {
 	rals.Lock()
 	defer rals.Unlock()
-	if err = rals.apiv1.Shutdown(); err != nil {
-		return
-	}
-	if err = rals.apiv2.Shutdown(); err != nil {
-		return
-	}
 	if err = rals.responder.Shutdown(); err != nil {
 		return
 	}
@@ -165,17 +138,12 @@ func (rals *RalService) ShouldRun() bool {
 	return rals.cfg.RalsCfg().Enabled
 }
 
-// GetAPIv1 returns the apiv1 service
-func (rals *RalService) GetAPIv1() servmanager.Service {
-	return rals.apiv1
-}
-
-// GetAPIv2 returns the apiv2 service
-func (rals *RalService) GetAPIv2() servmanager.Service {
-	return rals.apiv2
+// GetResponder returns the responder service
+func (rals *RalService) GetResponder() servmanager.Service {
+	return rals.responder
 }
 
 // GetResponder returns the responder service
-func (rals *RalService) GetResponder() servmanager.Service {
+func (rals *RalService) GetResponderService() *ResponderService {
 	return rals.responder
 }
