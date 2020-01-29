@@ -481,7 +481,7 @@ func diamErr(m *diam.Message, resCode uint32,
 		newDADataProvider(nil, m), reqVars,
 		config.NewNavigableMap(nil),
 		config.NewNavigableMap(nil),
-		nil, tnt, tmz, filterS)
+		nil, tnt, tmz, filterS, nil, nil)
 	var rplyData *config.NavigableMap
 	if rplyData, err = aReq.AsNavigableMap(tpl); err != nil {
 		return

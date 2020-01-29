@@ -225,7 +225,7 @@
 			"source_path": "/tmp/fwvErs/in",
 			"flags": ["*cdrs"],
 			"processed_path": "/tmp/fwvErs/out",
-			"content_fields": [
+			"fields": [
 				{"tag": "FileName", "field_id": "CdrFileName", "type": "*variable", "value": "~*hdr.95-135", "padding":"right"},
 				{"tag": "FileSeqNr", "field_id": "FileSeqNr", "type": "*variable", "value": "~*hdr.135-141", "padding":"zeroleft"},
 				{"tag": "AccId1", "field_id": "AccId1", "type": "*variable", "value": "~*hdr.135-141",  "padding":"zeroleft"},

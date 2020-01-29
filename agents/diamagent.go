@@ -208,7 +208,7 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 				reqProcessor.Tenant, da.cgrCfg.GeneralCfg().DefaultTenant,
 				utils.FirstNonEmpty(reqProcessor.Timezone,
 					da.cgrCfg.GeneralCfg().DefaultTimezone),
-				da.filterS))
+				da.filterS, nil, nil))
 		if lclProcessed {
 			processed = lclProcessed
 		}
@@ -452,7 +452,7 @@ func (da *DiameterAgent) V1DisconnectSession(args utils.AttrDisconnectSession, r
 		config.NewNavigableMap(nil),
 		nil,
 		da.cgrCfg.GeneralCfg().DefaultTenant,
-		da.cgrCfg.GeneralCfg().DefaultTimezone, da.filterS)
+		da.cgrCfg.GeneralCfg().DefaultTimezone, da.filterS, nil, nil)
 	nM, err := aReq.AsNavigableMap(da.cgrCfg.DiameterAgentCfg().Templates[da.cgrCfg.DiameterAgentCfg().ASRTemplate])
 	if err != nil {
 		utils.Logger.Warning(

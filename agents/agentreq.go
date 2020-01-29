@@ -38,7 +38,8 @@ func NewAgentRequest(req config.DataProvider,
 	rply *config.NavigableMap,
 	tntTpl config.RSRParsers,
 	dfltTenant, timezone string,
-	filterS *engine.FilterS) (ar *AgentRequest) {
+	filterS *engine.FilterS,
+	header, trailer config.DataProvider) (ar *AgentRequest) {
 	if cgrRply == nil {
 		cgrRply = config.NewNavigableMap(nil)
 	}
@@ -53,6 +54,8 @@ func NewAgentRequest(req config.DataProvider,
 		Reply:      rply,
 		Timezone:   timezone,
 		filterS:    filterS,
+		Header:     header,
+		Trailer:    trailer,
 	}
 	// populate tenant
 	if tntIf, err := ar.ParseField(
@@ -78,6 +81,8 @@ type AgentRequest struct {
 	Tenant,
 	Timezone string
 	filterS *engine.FilterS
+	Header  config.DataProvider
+	Trailer config.DataProvider
 }
 
 // String implements engine.DataProvider
@@ -107,6 +112,10 @@ func (ar *AgentRequest) FieldAsInterface(fldPath []string) (val interface{}, err
 		val, err = ar.Reply.FieldAsInterface(fldPath[1:])
 	case utils.MetaCGRAReq:
 		val, err = ar.CGRAReq.FieldAsInterface(fldPath[1:])
+	case utils.MetaHdr:
+		val, err = ar.Header.FieldAsInterface(fldPath[1:])
+	case utils.MetaTrl:
+		val, err = ar.Trailer.FieldAsInterface(fldPath[1:])
 	}
 	if nmItems, isNMItems := val.([]*config.NMItem); isNMItems { // special handling of NMItems, take the last value out of it
 		val = nmItems[len(nmItems)-1].Data // could be we need nil protection here
