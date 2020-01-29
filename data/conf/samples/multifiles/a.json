@@ -10,17 +10,17 @@
 "cdre": {
 	"*default": {
 		"fields": [								// template of the exported content fields
-			{"tag":"AccId", "cdr_field_id": "accid", "type": "cdrfield", "value": "accid"},
-			{"tag":"ReqType", "cdr_field_id": "reqtype", "type": "cdrfield", "value": "reqtype"},
-			{"tag":"Tenant", "cdr_field_id": "tenant", "type": "cdrfield", "value": "tenant"},
-			{"tag":"Category", "cdr_field_id": "category", "type": "cdrfield", "value": "category"},
-			{"tag":"Account", "cdr_field_id": "account", "type": "cdrfield", "value": "account"},
-			{"tag":"Subject", "cdr_field_id": "subject", "type": "cdrfield", "value": "subject"},
-			{"tag":"Destination", "cdr_field_id": "destination", "type": "cdrfield", "value": "destination"},
-			{"tag":"SetupTime", "cdr_field_id": "setup_time", "type": "cdrfield", "value": "setup_time", "layout": "2006-01-02T15:04:05Z07:00"},
-			{"tag":"AnswerTime", "cdr_field_id": "answer_time", "type": "cdrfield", "value": "answer_time", "layout": "2006-01-02T15:04:05Z07:00"},
-			{"tag":"Usage", "cdr_field_id": "usage", "type": "cdrfield", "value": "usage"},
-			{"tag":"Cost", "cdr_field_id": "cost", "type": "cdrfield", "value": "cost"},			
+			{"path": "*exp.AccId", "cdr_field_id": "accid", "type": "cdrfield", "value": "accid"},
+			{"path": "*exp.ReqType", "cdr_field_id": "reqtype", "type": "cdrfield", "value": "reqtype"},
+			{"path": "*exp.Tenant", "cdr_field_id": "tenant", "type": "cdrfield", "value": "tenant"},
+			{"path": "*exp.Category", "cdr_field_id": "category", "type": "cdrfield", "value": "category"},
+			{"path": "*exp.Account", "cdr_field_id": "account", "type": "cdrfield", "value": "account"},
+			{"path": "*exp.Subject", "cdr_field_id": "subject", "type": "cdrfield", "value": "subject"},
+			{"path": "*exp.Destination", "cdr_field_id": "destination", "type": "cdrfield", "value": "destination"},
+			{"path": "*exp.SetupTime", "cdr_field_id": "setup_time", "type": "cdrfield", "value": "setup_time", "layout": "2006-01-02T15:04:05Z07:00"},
+			{"path": "*exp.AnswerTime", "cdr_field_id": "answer_time", "type": "cdrfield", "value": "answer_time", "layout": "2006-01-02T15:04:05Z07:00"},
+			{"path": "*exp.Usage", "cdr_field_id": "usage", "type": "cdrfield", "value": "usage"},
+			{"path": "*exp.Cost", "cdr_field_id": "cost", "type": "cdrfield", "value": "cost"},			
 		],
 	}
 },

@@ -36,7 +36,7 @@ type v1Stat struct {
 	SaveInterval    time.Duration
 	Metrics         []string        // ASR, ACD, ACC
 	SetupInterval   []time.Time     // CDRFieldFilter on SetupInterval, 2 or less items (>= start interval,< stop_interval)
-	TOR             []string        // CDRFieldFilter on TORs
+	ToR             []string        // CDRFieldFilter on TORs
 	CdrHost         []string        // CDRFieldFilter on CdrHosts
 	CdrSource       []string        // CDRFieldFilter on CdrSources
 	ReqType         []string        // CDRFieldFilter on RequestTypes
@@ -268,8 +268,8 @@ func (v1Sts v1Stat) AsStatQP() (filter *engine.Filter, sq *engine.StatQueue, stq
 		filters = append(filters, x)
 	}
 
-	if len(v1Sts.TOR) != 0 {
-		x, err := engine.NewFilterRule(utils.MetaPrefix, "TOR", v1Sts.TOR)
+	if len(v1Sts.ToR) != 0 {
+		x, err := engine.NewFilterRule(utils.MetaPrefix, "ToR", v1Sts.ToR)
 		if err != nil {
 			return nil, nil, nil, err
 		}

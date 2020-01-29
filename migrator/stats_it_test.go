@@ -143,7 +143,7 @@ func testStsITMigrateAndMove(t *testing.T) {
 		SaveInterval:    time.Duration(1) * time.Second,
 		Metrics:         []string{"ASR", "ACD", "ACC"},
 		SetupInterval:   []time.Time{time.Now()},
-		TOR:             []string{},
+		ToR:             []string{},
 		CdrHost:         []string{},
 		CdrSource:       []string{},
 		ReqType:         []string{},

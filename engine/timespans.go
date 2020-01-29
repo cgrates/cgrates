@@ -105,7 +105,7 @@ type UnitInfo struct {
 	Value         float64
 	DestinationID string
 	Consumed      float64
-	TOR           string
+	ToR           string
 	RateInterval  *RateInterval
 }
 
@@ -124,7 +124,7 @@ func (ui *UnitInfo) Equal(other *UnitInfo) bool {
 	return ui.UUID == other.UUID &&
 		ui.DestinationID == other.DestinationID &&
 		ui.Consumed == other.Consumed &&
-		ui.TOR == other.TOR &&
+		ui.ToR == other.ToR &&
 		reflect.DeepEqual(ui.RateInterval, other.RateInterval)
 }
 

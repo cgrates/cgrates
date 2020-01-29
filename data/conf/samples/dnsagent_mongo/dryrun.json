@@ -7,7 +7,7 @@
 			"filters": ["*string:~*vars.QueryType:NAPTR", "*string:~*vars.E164Address:4986517174963"],
 			"flags": ["*dryrun"],
 			"request_fields":[
-				{"tag": "TOR", "path": "ToR", "type": "*constant", "value": "*sms"},
+				{"tag": "ToR", "path": "ToR", "type": "*constant", "value": "*sms"},
 			],
 			"reply_fields":[
 				{"tag": "NAPTROrder", "path": "Order", "type": "*constant", "value": "100"},

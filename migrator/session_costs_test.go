@@ -34,7 +34,7 @@ func TestV2toV3Cost(t *testing.T) {
 		Subject:     "1001",
 		Account:     "1001",
 		Destination: "1002",
-		TOR:         "ToR",
+		ToR:         "ToR",
 		Cost:        10,
 		Timespans: engine.TimeSpans{
 			&engine.TimeSpan{

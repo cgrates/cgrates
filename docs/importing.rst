@@ -13,7 +13,7 @@ Rates profile
 The rates profile describes the prices to be applied for various calls to various destinations in various time frames. When a call is made the CGRateS system will locate the rates to be applied to the call using the rating profiles.
 
 +------------+-----+-----------+-------------+----------------------+----------------+----------------------+
-| Tenant     | TOR | Direction | Subject     | RatesFallbackSubject | RatesTimingTag | ActivationTime       |
+| Tenant     | ToR | Direction | Subject     | RatesFallbackSubject | RatesTimingTag | ActivationTime       |
 +============+=====+===========+=============+======================+================+======================+
 | CUSTOMER_1 | 0   | OUT       | rif:from:tm | danb                 | PREMIUM        | 2012-01-01T00:00:00Z |
 +------------+-----+-----------+-------------+----------------------+----------------+----------------------+
@@ -22,7 +22,7 @@ The rates profile describes the prices to be applied for various calls to variou
 
 Tenant
     Used to distinguish between carriers if more than one share the same database in the CGRates system.
-TOR
+ToR
     Type of record specifies the kind of transmission this rate profile applies to.
 Direction
     Can be IN or OUT for the INBOUND and OUTBOUND calls.

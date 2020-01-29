@@ -50,7 +50,7 @@ type Account struct {
 func (ub *Account) getCreditForPrefix(cd *CallDescriptor) (duration time.Duration, credit float64, balances Balances) {
 	creditBalances := ub.getBalancesForPrefix(cd.Destination, cd.Category, utils.MONETARY, "", cd.TimeStart)
 
-	unitBalances := ub.getBalancesForPrefix(cd.Destination, cd.Category, cd.TOR, "", cd.TimeStart)
+	unitBalances := ub.getBalancesForPrefix(cd.Destination, cd.Category, cd.ToR, "", cd.TimeStart)
 	// gather all balances from shared groups
 	var extendedCreditBalances Balances
 	for _, cb := range creditBalances {
@@ -71,7 +71,7 @@ func (ub *Account) getCreditForPrefix(cd *CallDescriptor) (duration time.Duratio
 		if len(mb.SharedGroups) > 0 {
 			for sg := range mb.SharedGroups {
 				if sharedGroup, _ := dm.GetSharedGroup(sg, false, utils.NonTransactional); sharedGroup != nil {
-					sgb := sharedGroup.GetBalances(cd.Destination, cd.Category, cd.TOR, ub, cd.TimeStart)
+					sgb := sharedGroup.GetBalances(cd.Destination, cd.Category, cd.ToR, ub, cd.TimeStart)
 					sgb = sharedGroup.SortBalancesByStrategy(mb, sgb)
 					extendedMinuteBalances = append(extendedMinuteBalances, sgb...)
 				}
@@ -371,7 +371,7 @@ func (account *Account) getAlldBalancesForPrefix(destination, category,
 }
 
 func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun bool, goNegative bool) (cc *CallCost, err error) {
-	usefulUnitBalances := ub.getAlldBalancesForPrefix(cd.Destination, cd.Category, cd.TOR, cd.TimeStart)
+	usefulUnitBalances := ub.getAlldBalancesForPrefix(cd.Destination, cd.Category, cd.ToR, cd.TimeStart)
 	usefulMoneyBalances := ub.getAlldBalancesForPrefix(cd.Destination, cd.Category, utils.MONETARY, cd.TimeStart)
 	var leftCC *CallCost
 	cc = cd.CreateCallCost()
@@ -812,7 +812,7 @@ func (acc *Account) GetSharedGroups() (groups []string) {
 func (account *Account) GetUniqueSharedGroupMembers(cd *CallDescriptor) (utils.StringMap, error) { // ToDo: make sure we return accountIDs
 	var balances []*Balance
 	balances = append(balances, account.getBalancesForPrefix(cd.Destination, cd.Category, utils.MONETARY, "", cd.TimeStart)...)
-	balances = append(balances, account.getBalancesForPrefix(cd.Destination, cd.Category, cd.TOR, "", cd.TimeStart)...)
+	balances = append(balances, account.getBalancesForPrefix(cd.Destination, cd.Category, cd.ToR, "", cd.TimeStart)...)
 	// gather all shared group ids
 	var sharedGroupIds []string
 	for _, b := range balances {

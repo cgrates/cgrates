@@ -404,6 +404,12 @@ func TestWriteCdrs(t *testing.T) {
 	if err = cdre.processCDRs(); err != nil {
 		t.Error(err)
 	}
+	if err = cdre.composeHeader(); err != nil {
+		t.Error(err)
+	}
+	if err = cdre.composeTrailer(); err != nil {
+		t.Error(err)
+	}
 	if err := cdre.writeOut(wrBuf); err != nil {
 		t.Error(err)
 	}

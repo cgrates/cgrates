@@ -4,7 +4,7 @@ RatingProfiles.csv
 Main definitions file for the Rating subsystem.
 
 +------------------+------+-----------+---------+-----------------------+----------------------------+----------------------+
-| Tenant           | TOR  | Direction | Subject | ActivationTime        | DestinationRateTimingTag   | RatesFallbackSubject |
+| Tenant           | ToR  | Direction | Subject | ActivationTime        | DestinationRateTimingTag   | RatesFallbackSubject |
 +==================+======+===========+=========+=======================+============================+======================+
 | cgrates.org      | call | \*out     | \*any   | 2012-01-01T00:00:00Z  | RETAIL1                    |                      |
 +------------------+------+-----------+---------+-----------------------+----------------------------+----------------------+
@@ -13,7 +13,7 @@ Main definitions file for the Rating subsystem.
 
 Index 0 - *Tenant*
   Free-text field used to identify the tenant the entries are valid for.
-Index 1 - *TOR*
+Index 1 - *ToR*
   Free-text field used to identify the type of record the entries are valid for.
 Index 2 - *Direction*
   *Metatag* identifying the traffic direction the entries are valid for. Outbound direction is the only one supported for now.
@@ -34,6 +34,6 @@ Index 4 - *ActivationTime*
 Index 4 - *DestinationRateTimingTag*
   References profile in DestinationRateTimings.csv_.
 Index 5 - *RatesFallbackSubject*
-  Name of the fallback subject to be considered if existing subject has no destination matching the one searched. *Tenant*, *TOR*, *Direction*, *Subject* are kept when matching the fallback profile.
+  Name of the fallback subject to be considered if existing subject has no destination matching the one searched. *Tenant*, *ToR*, *Direction*, *Subject* are kept when matching the fallback profile.
 
 .. _DestinationRateTimings.csv: csv_tpdestinationrates.html

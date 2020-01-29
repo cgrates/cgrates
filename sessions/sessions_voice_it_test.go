@@ -1335,7 +1335,7 @@ func TestSMGDataDerivedChargingNoCredit(t *testing.T) {
 	}
 	smgEv := map[string]interface{}{
 		utils.EVENT_NAME:  "TEST_EVENT",
-		utils.TOR:         utils.VOICE,
+		utils.ToR:         utils.VOICE,
 		utils.OriginID:       "1234967",
 		utils.Account:     "1011",
 		utils.Subject:     "1011",

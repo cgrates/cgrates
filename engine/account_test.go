@@ -120,7 +120,7 @@ func TestGetSecondsForPrefix(t *testing.T) {
 		LoopIndex:     0,
 		DurationIndex: 10 * time.Second,
 		Destination:   "0723",
-		TOR:           utils.VOICE,
+		ToR:           utils.VOICE,
 	}
 	seconds, credit, bucketList := ub1.getCreditForPrefix(cd)
 	expected := 110 * time.Second
@@ -150,7 +150,7 @@ func TestGetSpecialPricedSeconds(t *testing.T) {
 		TimeEnd:     time.Date(2013, 10, 4, 15, 46, 60, 0, time.UTC),
 		LoopIndex:   0,
 		Destination: "0723",
-		TOR:         utils.VOICE,
+		ToR:         utils.VOICE,
 	}
 	seconds, credit, bucketList := ub1.getCreditForPrefix(cd)
 	expected := 20 * time.Second
@@ -201,14 +201,14 @@ func TestDebitCreditZeroSecond(t *testing.T) {
 						RateUnit: time.Second}}}},
 			},
 		},
-		TOR: utils.VOICE,
+		ToR: utils.VOICE,
 	}
 	cd := &CallDescriptor{
 		TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
 		TimeEnd:      time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
 		Destination:  "0723045326",
 		Category:     "0",
-		TOR:          utils.VOICE,
+		ToR:          utils.VOICE,
 		testCallcost: cc,
 	}
 	rifsBalance := &Account{ID: "other",
@@ -251,14 +251,14 @@ func TestDebitCreditBlocker(t *testing.T) {
 			},
 		},
 		deductConnectFee: true,
-		TOR:              utils.VOICE,
+		ToR:              utils.VOICE,
 	}
 	cd := &CallDescriptor{
 		TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
 		TimeEnd:      time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
 		Destination:  "0723045326",
 		Category:     "0",
-		TOR:          utils.VOICE,
+		ToR:          utils.VOICE,
 		testCallcost: cc,
 	}
 	rifsBalance := &Account{ID: "other",
@@ -294,7 +294,7 @@ func TestDebitFreeEmpty(t *testing.T) {
 			},
 		},
 		deductConnectFee: true,
-		TOR:              utils.VOICE,
+		ToR:              utils.VOICE,
 	}
 	cd := &CallDescriptor{
 		TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
@@ -303,7 +303,7 @@ func TestDebitFreeEmpty(t *testing.T) {
 		Subject:      "rif:from:tm",
 		Destination:  "112",
 		Category:     "0",
-		TOR:          utils.VOICE,
+		ToR:          utils.VOICE,
 		testCallcost: cc,
 	}
 	// empty account
@@ -341,14 +341,14 @@ func TestDebitCreditZeroMinute(t *testing.T) {
 							RateUnit:      time.Second}}}},
 			},
 		},
-		TOR: utils.VOICE,
+		ToR: utils.VOICE,
 	}
 	cd := &CallDescriptor{
 		TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
 		TimeEnd:      time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
 		Destination:  "0723045326",
 		Category:     "0",
-		TOR:          utils.VOICE,
+		ToR:          utils.VOICE,
 		testCallcost: cc,
 	}
 	rifsBalance := &Account{
@@ -397,13 +397,13 @@ func TestDebitCreditZeroMixedMinute(t *testing.T) {
 							RateUnit: time.Second}}}},
 			},
 		},
-		TOR: utils.VOICE,
+		ToR: utils.VOICE,
 	}
 	cd := &CallDescriptor{
 		TimeStart:     cc.Timespans[0].TimeStart,
 		TimeEnd:       cc.Timespans[0].TimeEnd,
 		Destination:   cc.Destination,
-		TOR:           cc.TOR,
+		ToR:           cc.ToR,
 		DurationIndex: cc.Timespans[0].GetDuration(),
 		testCallcost:  cc,
 	}
@@ -460,13 +460,13 @@ func TestDebitCreditNoCredit(t *testing.T) {
 								RateUnit:      time.Second}}}},
 			},
 		},
-		TOR: utils.VOICE,
+		ToR: utils.VOICE,
 	}
 	cd := &CallDescriptor{
 		TimeStart:     cc.Timespans[0].TimeStart,
 		TimeEnd:       cc.Timespans[1].TimeEnd,
 		Destination:   cc.Destination,
-		TOR:           cc.TOR,
+		ToR:           cc.ToR,
 		DurationIndex: cc.GetDuration(),
 		testCallcost:  cc,
 	}
@@ -523,13 +523,13 @@ func TestDebitCreditHasCredit(t *testing.T) {
 							RateUnit:      time.Second}}}},
 			},
 		},
-		TOR: utils.VOICE,
+		ToR: utils.VOICE,
 	}
 	cd := &CallDescriptor{
 		TimeStart:     cc.Timespans[0].TimeStart,
 		TimeEnd:       cc.Timespans[1].TimeEnd,
 		Destination:   cc.Destination,
-		TOR:           cc.TOR,
+		ToR:           cc.ToR,
 		DurationIndex: cc.GetDuration(),
 		testCallcost:  cc,
 	}
@@ -578,13 +578,13 @@ func TestDebitCreditSplitMinutesMoney(t *testing.T) {
 								RateUnit:      time.Second}}}},
 			},
 		},
-		TOR: utils.VOICE,
+		ToR: utils.VOICE,
 	}
 	cd := &CallDescriptor{
 		TimeStart:     cc.Timespans[0].TimeStart,
 		TimeEnd:       cc.Timespans[0].TimeEnd,
 		Destination:   cc.Destination,
-		TOR:           cc.TOR,
+		ToR:           cc.ToR,
 		DurationIndex: cc.GetDuration(),
 		testCallcost:  cc,
 	}
@@ -647,13 +647,13 @@ func TestDebitCreditMoreTimespans(t *testing.T) {
 							RateUnit:      time.Second}}}},
 			},
 		},
-		TOR: utils.VOICE,
+		ToR: utils.VOICE,
 	}
 	cd := &CallDescriptor{
 		TimeStart:     cc.Timespans[0].TimeStart,
 		TimeEnd:       cc.Timespans[1].TimeEnd,
 		Destination:   cc.Destination,
-		TOR:           cc.TOR,
+		ToR:           cc.ToR,
 		DurationIndex: cc.GetDuration(),
 		testCallcost:  cc,
 	}
@@ -711,13 +711,13 @@ func TestDebitCreditMoreTimespansMixed(t *testing.T) {
 							RateUnit:      time.Second}}}},
 			},
 		},
-		TOR: utils.VOICE,
+		ToR: utils.VOICE,
 	}
 	cd := &CallDescriptor{
 		TimeStart:     cc.Timespans[0].TimeStart,
 		TimeEnd:       cc.Timespans[1].TimeEnd,
 		Destination:   cc.Destination,
-		TOR:           cc.TOR,
+		ToR:           cc.ToR,
 		DurationIndex: cc.GetDuration(),
 		testCallcost:  cc,
 	}
@@ -775,14 +775,14 @@ func TestDebitCreditNoConectFeeCredit(t *testing.T) {
 								RateUnit:      time.Second}}}},
 			},
 		},
-		TOR:              utils.VOICE,
+		ToR:              utils.VOICE,
 		deductConnectFee: true,
 	}
 	cd := &CallDescriptor{
 		TimeStart:     cc.Timespans[0].TimeStart,
 		TimeEnd:       cc.Timespans[1].TimeEnd,
 		Destination:   cc.Destination,
-		TOR:           cc.TOR,
+		ToR:           cc.ToR,
 		DurationIndex: cc.GetDuration(),
 		testCallcost:  cc,
 	}
@@ -832,13 +832,13 @@ func TestDebitCreditMoneyOnly(t *testing.T) {
 								RateUnit:      time.Second}}}},
 			},
 		},
-		TOR: utils.VOICE,
+		ToR: utils.VOICE,
 	}
 	cd := &CallDescriptor{
 		TimeStart:     cc.Timespans[0].TimeStart,
 		TimeEnd:       cc.Timespans[1].TimeEnd,
 		Destination:   cc.Destination,
-		TOR:           cc.TOR,
+		ToR:           cc.ToR,
 		DurationIndex: cc.GetDuration(),
 		testCallcost:  cc,
 	}
@@ -892,7 +892,7 @@ func TestDebitCreditSubjectMinutes(t *testing.T) {
 							RateUnit:      time.Second}}}},
 			},
 		},
-		TOR:              utils.VOICE,
+		ToR:              utils.VOICE,
 		deductConnectFee: true,
 	}
 	cd := &CallDescriptor{
@@ -901,7 +901,7 @@ func TestDebitCreditSubjectMinutes(t *testing.T) {
 		TimeStart:     cc.Timespans[0].TimeStart,
 		TimeEnd:       cc.Timespans[0].TimeEnd,
 		Destination:   cc.Destination,
-		TOR:           cc.TOR,
+		ToR:           cc.ToR,
 		DurationIndex: cc.GetDuration(),
 		testCallcost:  cc,
 	}
@@ -955,7 +955,7 @@ func TestDebitCreditSubjectMoney(t *testing.T) {
 								RateUnit:      time.Second}}}},
 			},
 		},
-		TOR:              utils.VOICE,
+		ToR:              utils.VOICE,
 		deductConnectFee: true,
 	}
 	cd := &CallDescriptor{
@@ -964,7 +964,7 @@ func TestDebitCreditSubjectMoney(t *testing.T) {
 		TimeStart:     cc.Timespans[0].TimeStart,
 		TimeEnd:       cc.Timespans[0].TimeEnd,
 		Destination:   cc.Destination,
-		TOR:           cc.TOR,
+		ToR:           cc.ToR,
 		DurationIndex: cc.GetDuration(),
 		testCallcost:  cc,
 	}
@@ -1462,7 +1462,7 @@ func TestDebitShared(t *testing.T) {
 		TimeStart:     cc.Timespans[0].TimeStart,
 		TimeEnd:       cc.Timespans[0].TimeEnd,
 		Destination:   cc.Destination,
-		TOR:           cc.TOR,
+		ToR:           cc.ToR,
 		DurationIndex: cc.GetDuration(),
 		testCallcost:  cc,
 	}
@@ -1533,7 +1533,7 @@ func TestMaxDurationShared(t *testing.T) {
 		TimeStart:     cc.Timespans[0].TimeStart,
 		TimeEnd:       cc.Timespans[0].TimeEnd,
 		Destination:   cc.Destination,
-		TOR:           cc.TOR,
+		ToR:           cc.ToR,
 		DurationIndex: cc.GetDuration(),
 		testCallcost:  cc,
 	}
@@ -1567,7 +1567,7 @@ func TestMaxDurationConnectFeeOnly(t *testing.T) {
 		Destination:   "4444",
 		Subject:       "dy",
 		Account:       "dy",
-		TOR:           utils.VOICE,
+		ToR:           utils.VOICE,
 		DurationIndex: 600,
 	}
 	rif := &Account{ID: "rif", BalanceMap: map[string]Balances{
@@ -1602,13 +1602,13 @@ func TestDebitSMS(t *testing.T) {
 								RateUnit:      time.Nanosecond}}}},
 			},
 		},
-		TOR: utils.SMS,
+		ToR: utils.SMS,
 	}
 	cd := &CallDescriptor{
 		TimeStart:     cc.Timespans[0].TimeStart,
 		TimeEnd:       cc.Timespans[0].TimeEnd,
 		Destination:   cc.Destination,
-		TOR:           cc.TOR,
+		ToR:           cc.ToR,
 		DurationIndex: cc.GetDuration(),
 		testCallcost:  cc,
 	}
@@ -1661,13 +1661,13 @@ func TestDebitGeneric(t *testing.T) {
 				},
 			},
 		},
-		TOR: utils.GENERIC,
+		ToR: utils.GENERIC,
 	}
 	cd := &CallDescriptor{
 		TimeStart:     cc.Timespans[0].TimeStart,
 		TimeEnd:       cc.Timespans[0].TimeEnd,
 		Destination:   cc.Destination,
-		TOR:           cc.TOR,
+		ToR:           cc.ToR,
 		DurationIndex: cc.GetDuration(),
 		testCallcost:  cc,
 	}
@@ -1714,13 +1714,13 @@ func TestDebitGenericBalance(t *testing.T) {
 								RateUnit:      time.Second}}}},
 			},
 		},
-		TOR: utils.VOICE,
+		ToR: utils.VOICE,
 	}
 	cd := &CallDescriptor{
 		TimeStart:     cc.Timespans[0].TimeStart,
 		TimeEnd:       cc.Timespans[0].TimeEnd,
 		Destination:   cc.Destination,
-		TOR:           cc.TOR,
+		ToR:           cc.ToR,
 		DurationIndex: cc.GetDuration(),
 		testCallcost:  cc,
 	}
@@ -1766,13 +1766,13 @@ func TestDebitGenericBalanceWithRatingSubject(t *testing.T) {
 								RateUnit:      time.Second}}}},
 			},
 		},
-		TOR: utils.VOICE,
+		ToR: utils.VOICE,
 	}
 	cd := &CallDescriptor{
 		TimeStart:     cc.Timespans[0].TimeStart,
 		TimeEnd:       cc.Timespans[0].TimeEnd,
 		Destination:   cc.Destination,
-		TOR:           cc.TOR,
+		ToR:           cc.ToR,
 		DurationIndex: cc.GetDuration(),
 		testCallcost:  cc,
 	}
@@ -1826,13 +1826,13 @@ func TestDebitDataUnits(t *testing.T) {
 				},
 			},
 		},
-		TOR: utils.DATA,
+		ToR: utils.DATA,
 	}
 	cd := &CallDescriptor{
 		TimeStart:     cc.Timespans[0].TimeStart,
 		TimeEnd:       cc.Timespans[0].TimeEnd,
 		Destination:   cc.Destination,
-		TOR:           cc.TOR,
+		ToR:           cc.ToR,
 		DurationIndex: cc.GetDuration(),
 		testCallcost:  cc,
 	}
@@ -1885,13 +1885,13 @@ func TestDebitDataMoney(t *testing.T) {
 				},
 			},
 		},
-		TOR: utils.DATA,
+		ToR: utils.DATA,
 	}
 	cd := &CallDescriptor{
 		TimeStart:     cc.Timespans[0].TimeStart,
 		TimeEnd:       cc.Timespans[0].TimeEnd,
 		Destination:   cc.Destination,
-		TOR:           cc.TOR,
+		ToR:           cc.ToR,
 		DurationIndex: cc.GetDuration(),
 		testCallcost:  cc,
 	}

@@ -9,7 +9,7 @@
 				"*string:~*req.CC-Request-Type:4"],
 			"flags": ["*message", "*accounts", "*cdrs","*attributes"],
 			"request_fields":[
-				{"tag": "TOR", "path": "ToR", "type": "*constant", "value": "*sms"},
+				{"tag": "ToR", "path": "ToR", "type": "*constant", "value": "*sms"},
 				{"tag": "OriginID", "path": "OriginID", "type": "*variable", 
 					"value": "~*req.Session-Id", "mandatory": true},
 				{"tag": "Category", "path": "Category", "type": "*constant", "value": "sms"},

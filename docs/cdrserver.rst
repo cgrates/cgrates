@@ -106,7 +106,7 @@ The simplified StoredCdr object is represented by following:
  type StoredCdr struct {
    CgrId          string
    OrderId        int64             // Stor order id used as export order id
-   TOR            string            // type of record, meta-field, should map to one of the TORs hardcoded inside the server <*voice|*data|*sms>
+   ToR            string            // type of record, meta-field, should map to one of the TORs hardcoded inside the server <*voice|*data|*sms>
    AccId          string            // represents the unique accounting id given by the telecom switch generating the CDR
    CdrHost        string            // represents the IP address of the host generating the CDR (automatically populated by the server)
    CdrSource      string            // formally identifies the source of the CDR (free form field)

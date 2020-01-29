@@ -74,7 +74,7 @@ func TestMfCdreExport1Instance(t *testing.T) {
 	if len(mfCgrCfg.CdreProfiles[prfl].Fields) != 9 {
 		t.Error("Export1 instance has number of content fields: ", len(mfCgrCfg.CdreProfiles[prfl].Fields))
 	}
-	if mfCgrCfg.CdreProfiles[prfl].Fields[2].Tag != "Account" {
+	if mfCgrCfg.CdreProfiles[prfl].Fields[2].Tag != "*exp.Account" {
 		t.Error("Unexpected headerField value: ", mfCgrCfg.CdreProfiles[prfl].Fields[2].Tag)
 	}
 }
@@ -196,7 +196,7 @@ func TestMfHttpAgentMultipleFields(t *testing.T) {
 				Flags:  utils.FlagsWithParams{"*cdrs": []string{}},
 				RequestFields: []*FCTemplate{
 					{
-						Tag:       "TOR",
+						Tag:       "ToR",
 						Path:      "ToR",
 						Type:      "*constant",
 						Value:     NewRSRParsersMustCompile("*data", true, utils.INFIELD_SEP),

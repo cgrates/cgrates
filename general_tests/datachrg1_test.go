@@ -87,7 +87,7 @@ func TestGetDataCostDtChrg1(t *testing.T) {
 		TimeStart:     timeStart,
 		TimeEnd:       timeStart.Add(usageDur),
 		DurationIndex: usageDur,
-		TOR:           utils.DATA,
+		ToR:           utils.DATA,
 	}
 	if cc, err := cd.GetCost(); err != nil {
 		t.Error(err)
@@ -108,7 +108,7 @@ func TestGetDataCostSecondIntDtChrg1(t *testing.T) {
 		TimeStart:     timeStart,
 		TimeEnd:       timeStart.Add(usageDur),
 		DurationIndex: usageDur,
-		TOR:           utils.DATA,
+		ToR:           utils.DATA,
 	}
 	if cc, err := cd.GetCost(); err != nil {
 		t.Error(err)
@@ -129,7 +129,7 @@ func TestGetDataBetweenCostDtChrg1(t *testing.T) {
 		TimeStart:     timeStart,
 		TimeEnd:       timeStart.Add(usageDur),
 		DurationIndex: usageDur,
-		TOR:           utils.DATA,
+		ToR:           utils.DATA,
 	}
 	if cc, err := cd.GetCost(); err != nil {
 		t.Error(err)

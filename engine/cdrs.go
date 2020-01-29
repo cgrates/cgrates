@@ -242,7 +242,7 @@ func (cdrS *CDRServer) getCostFromRater(cdr *CDRWithArgDispatcher) (*CallCost, e
 		timeStart = cdr.SetupTime
 	}
 	cd := &CallDescriptor{
-		TOR:             cdr.ToR,
+		ToR:             cdr.ToR,
 		Tenant:          cdr.Tenant,
 		Category:        cdr.Category,
 		Subject:         cdr.Subject,

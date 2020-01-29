@@ -223,7 +223,7 @@ func TestSplitSpans(t *testing.T) {
 	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
 	cd := &CallDescriptor{Category: "0", Tenant: "vdf", Subject: "rif",
-		Destination: "0256", TimeStart: t1, TimeEnd: t2, TOR: utils.VOICE}
+		Destination: "0256", TimeStart: t1, TimeEnd: t2, ToR: utils.VOICE}
 
 	cd.LoadRatingPlans()
 	timespans := cd.splitInTimeSpans()
@@ -236,7 +236,7 @@ func TestSplitSpans(t *testing.T) {
 func TestSplitSpansWeekend(t *testing.T) {
 	cd := &CallDescriptor{
 		Category:        "postpaid",
-		TOR:             utils.VOICE,
+		ToR:             utils.VOICE,
 		Tenant:          "foehn",
 		Subject:         "foehn",
 		Account:         "foehn",
@@ -1223,7 +1223,7 @@ func TestMaxSessionTimeNoCredit(t *testing.T) {
 		Tenant:      "vdf",
 		Subject:     "broker",
 		Destination: "0723",
-		TOR:         utils.VOICE,
+		ToR:         utils.VOICE,
 	}
 	result, err := cd.GetMaxSessionDuration()
 	if result != time.Minute || err != nil {
@@ -1243,7 +1243,7 @@ func TestMaxSessionModifiesCallDesc(t *testing.T) {
 		Account:       "minu",
 		Destination:   "0723",
 		DurationIndex: t2.Sub(t1),
-		TOR:           utils.VOICE,
+		ToR:           utils.VOICE,
 	}
 	initial := cd.Clone()
 	_, err := cd.GetMaxSessionDuration()
@@ -1584,7 +1584,7 @@ func TestCDGetCostANY(t *testing.T) {
 		Destination: utils.ANY,
 		TimeStart:   time.Date(2014, 3, 4, 6, 0, 0, 0, time.UTC),
 		TimeEnd:     time.Date(2014, 3, 4, 6, 0, 1, 0, time.UTC),
-		TOR:         utils.DATA,
+		ToR:         utils.DATA,
 	}
 	cc, err := cd1.GetCost()
 	if err != nil || cc.Cost != 60 {
@@ -1600,7 +1600,7 @@ func TestCDSplitInDataSlots(t *testing.T) {
 		Destination:   utils.ANY,
 		TimeStart:     time.Date(2014, 3, 4, 6, 0, 0, 0, time.UTC),
 		TimeEnd:       time.Date(2014, 3, 4, 6, 1, 5, 0, time.UTC),
-		TOR:           utils.DATA,
+		ToR:           utils.DATA,
 		DurationIndex: 65 * time.Second,
 	}
 	cd.LoadRatingPlans()
@@ -1619,7 +1619,7 @@ func TestCDDataGetCost(t *testing.T) {
 		Destination: utils.ANY,
 		TimeStart:   time.Date(2014, 3, 4, 6, 0, 0, 0, time.UTC),
 		TimeEnd:     time.Date(2014, 3, 4, 6, 1, 5, 0, time.UTC),
-		TOR:         utils.DATA,
+		ToR:         utils.DATA,
 	}
 	cc, err := cd.GetCost()
 	if err != nil || cc.Cost != 65 {
@@ -1655,7 +1655,7 @@ func TestCDRefundIncrements(t *testing.T) {
 		&Increment{Duration: 4 * time.Second, BalanceInfo: &DebitInfo{
 			Unit: &UnitInfo{UUID: "minuteb"}, AccountID: ub.ID}},
 	}
-	cd := &CallDescriptor{TOR: utils.VOICE, Increments: increments}
+	cd := &CallDescriptor{ToR: utils.VOICE, Increments: increments}
 	cd.RefundIncrements()
 	ub, _ = dm.GetAccount(ub.ID)
 	if ub.BalanceMap[utils.MONETARY][0].GetValue() != 104 ||
@@ -1684,7 +1684,7 @@ func TestCDRefundIncrementsZeroValue(t *testing.T) {
 		&Increment{Cost: 0, Duration: 3 * time.Second, BalanceInfo: &DebitInfo{AccountID: ub.ID}},
 		&Increment{Cost: 0, Duration: 4 * time.Second, BalanceInfo: &DebitInfo{AccountID: ub.ID}},
 	}
-	cd := &CallDescriptor{TOR: utils.VOICE, Increments: increments}
+	cd := &CallDescriptor{ToR: utils.VOICE, Increments: increments}
 	cd.RefundIncrements()
 	ub, _ = dm.GetAccount(ub.ID)
 	if ub.BalanceMap[utils.MONETARY][0].GetValue() != 100 ||
@@ -1803,7 +1803,7 @@ func TestCDDebitBalanceSubjectWithFallback(t *testing.T) {
 		Destination: "1716",
 		TimeStart:   time.Date(2015, 01, 01, 9, 0, 0, 0, time.UTC),
 		TimeEnd:     time.Date(2015, 01, 01, 9, 2, 0, 0, time.UTC),
-		TOR:         utils.VOICE,
+		ToR:         utils.VOICE,
 	}
 	if cc, err := cd1.GetCost(); err != nil || cc.Cost != 0 {
 		t.Errorf("Error getting *any dest: %+v %v", cc, err)
@@ -1815,7 +1815,7 @@ func TestCDDebitBalanceSubjectWithFallback(t *testing.T) {
 		Destination: "1716",
 		TimeStart:   time.Date(2015, 01, 01, 9, 1, 0, 0, time.UTC),
 		TimeEnd:     time.Date(2015, 01, 01, 9, 2, 0, 0, time.UTC),
-		TOR:         utils.VOICE,
+		ToR:         utils.VOICE,
 	}
 	if cc, err := cd2.GetCost(); err != nil || cc.Cost != 0.6 {
 		t.Errorf("Error getting *any dest: %+v %v", cc, err)
@@ -1828,7 +1828,7 @@ func TestCDDebitBalanceSubjectWithFallback(t *testing.T) {
 		Destination: "1716",
 		TimeStart:   time.Date(2015, 01, 01, 9, 0, 0, 0, time.UTC),
 		TimeEnd:     time.Date(2015, 01, 01, 9, 2, 0, 0, time.UTC),
-		TOR:         utils.VOICE,
+		ToR:         utils.VOICE,
 	}
 	if cc, err := cd.Debit(); err != nil {
 		t.Error(err)

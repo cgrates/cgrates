@@ -637,7 +637,7 @@ purposes, you can read more, see :ref:`cdrstats-main`
 [5] - SetupInterval:
     TBD
 
-[6] - TOR:
+[6] - ToR:
     TBD
 
 [7] - CdrHost

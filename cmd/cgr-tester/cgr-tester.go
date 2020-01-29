@@ -228,7 +228,7 @@ func main() {
 			TimeStart:     tstart,
 			TimeEnd:       tend,
 			DurationIndex: 60 * time.Second,
-			TOR:           *tor,
+			ToR:           *tor,
 			Category:      *category,
 			Tenant:        *tenant,
 			Subject:       *subject,

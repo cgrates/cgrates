@@ -15,7 +15,7 @@
 			"flags": ["*initiate", "*accounts"],
 			"request_fields":[
 				{
-					"tag": "TOR", "path": "ToR", 
+					"tag": "ToR", "path": "ToR", 
 					"type": "*constant", "value": "*data"
 				},
 				{
@@ -77,7 +77,7 @@
 			"flags": ["*update", "*accounts"],
 			"request_fields":[
 				{
-					"tag": "TOR", "path": "ToR", 
+					"tag": "ToR", "path": "ToR", 
 					"type": "*constant", "value": "*data"
 				},
 				{
@@ -126,7 +126,7 @@
 			"flags": ["*update", "*accounts"],
 			"request_fields":[
 				{
-					"tag": "TOR", "path": "ToR", 
+					"tag": "ToR", "path": "ToR", 
 					"type": "*constant", "value": "*data"
 				},
 				{

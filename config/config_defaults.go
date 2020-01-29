@@ -280,21 +280,21 @@ const CGRATES_CFG_JSON = `
 		"attempts": 1,									// export attempts
 		"field_separator": ",",							// used field separator in some export formats, eg: *file_csv
 		"attributes_context": "",						// attributes context - empty disables attributes processing
-		"fields": [										// template of the exported content fields
-			{"path": "*exp.CGRID", "type": "*composed", "value": "~CGRID"},
-			{"path": "*exp.RunID", "type": "*composed", "value": "~RunID"},
-			{"path": "*exp.TOR", "type": "*composed", "value": "~ToR"},
-			{"path": "*exp.OriginID", "type": "*composed", "value": "~OriginID"},
-			{"path": "*exp.RequestType", "type": "*composed", "value": "~RequestType"},
-			{"path": "*exp.Tenant", "type": "*composed", "value": "~Tenant"},
-			{"path": "*exp.Category", "type": "*composed", "value": "~Category"},
-			{"path": "*exp.Account", "type": "*composed", "value": "~Account"},
-			{"path": "*exp.Subject", "type": "*composed", "value": "~Subject"},
-			{"path": "*exp.Destination", "type": "*composed", "value": "~Destination"},
-			{"path": "*exp.SetupTime", "type": "*composed", "value": "~SetupTime", "layout": "2006-01-02T15:04:05Z07:00"},
-			{"path": "*exp.AnswerTime", "type": "*composed", "value": "~AnswerTime", "layout": "2006-01-02T15:04:05Z07:00"},
-			{"path": "*exp.Usage", "type": "*composed", "value": "~Usage"},
-			{"path": "*exp.Cost", "type": "*composed", "value": "~Cost", "rounding_decimals": 4},
+		"fields": [								// template of the exported content fields
+			{"path": "*exp.CGRID", "type": "*composed", "value": "~*req.CGRID"},
+			{"path": "*exp.RunID", "type": "*composed", "value": "~*req.RunID"},
+			{"path": "*exp.ToR", "type": "*composed", "value": "~*req.ToR"},
+			{"path": "*exp.OriginID", "type": "*composed", "value": "~*req.OriginID"},
+			{"path": "*exp.RequestType", "type": "*composed", "value": "~*req.RequestType"},
+			{"path": "*exp.Tenant", "type": "*composed", "value": "~*req.Tenant"},
+			{"path": "*exp.Category", "type": "*composed", "value": "~*req.Category"},
+			{"path": "*exp.Account", "type": "*composed", "value": "~*req.Account"},
+			{"path": "*exp.Subject", "type": "*composed", "value": "~*req.Subject"},
+			{"path": "*exp.Destination", "type": "*composed", "value": "~*req.Destination"},
+			{"path": "*exp.SetupTime", "type": "*composed", "value": "~*req.SetupTime", "layout": "2006-01-02T15:04:05Z07:00"},
+			{"path": "*exp.AnswerTime", "type": "*composed", "value": "~*req.AnswerTime", "layout": "2006-01-02T15:04:05Z07:00"},
+			{"path": "*exp.Usage", "type": "*composed", "value": "~*req.Usage"},
+			{"path": "*exp.Cost", "type": "*composed", "value": "~*req.Cost", "rounding_decimals": 4},
 		],
 	},
 },
@@ -318,7 +318,7 @@ const CGRATES_CFG_JSON = `
 			"filters": [],										// limit parsing based on the filters
 			"flags": [],										// flags to influence the event processing
 			"fields":[											// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
-				{"tag": "TOR", "path": "ToR", "type": "*variable", "value": "~*req.2", "mandatory": true},
+				{"tag": "ToR", "path": "ToR", "type": "*variable", "value": "~*req.2", "mandatory": true},
 				{"tag": "OriginID", "path": "OriginID", "type": "*variable", "value": "~*req.3", "mandatory": true},
 				{"tag": "RequestType", "path": "RequestType", "type": "*variable", "value": "~*req.4", "mandatory": true},
 				{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.6", "mandatory": true},

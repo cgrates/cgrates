@@ -152,7 +152,8 @@ func (cdr *CDR) FormatCost(shiftDecimals, roundDecimals int) string {
 
 // FieldAsString is used to retrieve fields as string, primary fields are const labeled
 func (cdr *CDR) FieldAsString(rsrPrs *config.RSRParser) (parsed string, err error) {
-	parsed, err = rsrPrs.ParseDataProviderWithInterfaces(config.NewNavigableMap(cdr.AsMapStringIface()), utils.NestingSep)
+	parsed, err = rsrPrs.ParseDataProviderWithInterfaces(
+		config.NewNavigableMap(map[string]interface{}{utils.MetaReq: cdr.AsMapStringIface()}), utils.NestingSep)
 	if err != nil {
 		return
 	}
@@ -361,20 +362,20 @@ func (cdr *CDR) exportFieldValue(cfgCdrFld *config.FCTemplate, filterS *FilterS)
 	for _, rsrFld := range cfgCdrFld.Value {
 		var cdrVal string
 		switch cfgCdrFld.Tag {
-		case utils.COST:
+		case utils.COST, utils.MetaExp + utils.NestingSep + utils.COST:
 			cdrVal = cdr.FormatCost(cfgCdrFld.CostShiftDigits,
 				cfgCdrFld.RoundingDecimals)
-		case utils.SetupTime:
+		case utils.SetupTime, utils.MetaExp + utils.NestingSep + utils.SetupTime:
 			if cfgCdrFld.Layout == "" {
 				cfgCdrFld.Layout = time.RFC3339
 			}
 			cdrVal = cdr.SetupTime.Format(cfgCdrFld.Layout)
-		case utils.AnswerTime: // Format time based on layout
+		case utils.AnswerTime, utils.MetaExp + utils.NestingSep + utils.AnswerTime: // Format time based on layout
 			if cfgCdrFld.Layout == "" {
 				cfgCdrFld.Layout = time.RFC3339
 			}
 			cdrVal = cdr.AnswerTime.Format(cfgCdrFld.Layout)
-		case utils.Destination:
+		case utils.Destination, utils.MetaExp + utils.NestingSep + utils.Destination:
 			cdrVal, err = cdr.FieldAsString(rsrFld)
 			if err != nil {
 				return "", err
@@ -407,14 +408,14 @@ func (cdr *CDR) formatField(cfgFld *config.FCTemplate, httpSkipTLSCheck bool,
 		if err != nil {
 			return "", err
 		}
-		if dtFld, err := utils.ParseTimeDetectLayout(rawVal, cfgFld.Timezone); err != nil { // Only one rule makes sense here
+		dtFld, err := utils.ParseTimeDetectLayout(rawVal, cfgFld.Timezone)
+		if err != nil { // Only one rule makes sense here
 			return "", err
-		} else {
-			if cfgFld.Layout == "" {
-				cfgFld.Layout = time.RFC3339
-			}
-			outVal = dtFld.Format(cfgFld.Layout)
 		}
+		if cfgFld.Layout == "" {
+			cfgFld.Layout = time.RFC3339
+		}
+		outVal = dtFld.Format(cfgFld.Layout)
 	case utils.MetaHTTPPost:
 		var outValByte []byte
 		httpAddr, err := cfgFld.Value.ParseValue(utils.EmptyString)
@@ -455,8 +456,7 @@ func (cdr *CDR) formatField(cfgFld *config.FCTemplate, httpSkipTLSCheck bool,
 // ExportRecord is a []string to keep it compatible with encoding/csv Writer
 func (cdr *CDR) AsExportRecord(exportFields []*config.FCTemplate,
 	httpSkipTLSCheck bool, groupedCDRs []*CDR, filterS *FilterS) (expRecord []string, err error) {
-	nM := config.NewNavigableMap(nil)
-	nM.Set([]string{utils.MetaReq}, cdr.AsMapStringIface(), false, false)
+	nM := config.NewNavigableMap(map[string]interface{}{utils.MetaReq: cdr.AsMapStringIface()})
 	for _, cfgFld := range exportFields {
 		if !strings.HasPrefix(cfgFld.Path, utils.MetaExp) {
 			continue
@@ -486,6 +486,9 @@ func (cdr *CDR) AsExportMap(exportFields []*config.FCTemplate, httpSkipTLSCheck 
 	nM := config.NewNavigableMap(nil)
 	nM.Set([]string{utils.MetaReq}, cdr.AsMapStringIface(), false, false)
 	for _, cfgFld := range exportFields {
+		if !strings.HasPrefix(cfgFld.Path, utils.MetaExp+utils.NestingSep) {
+			continue
+		}
 		if pass, err := filterS.Pass(cdr.Tenant,
 			cfgFld.Filters, nM); err != nil {
 			return nil, err
@@ -498,7 +501,7 @@ func (cdr *CDR) AsExportMap(exportFields []*config.FCTemplate, httpSkipTLSCheck 
 				err.Error(), utils.ToJSON(cfgFld), utils.ToJSON(cdr)))
 			return nil, err
 		}
-		expMap[cfgFld.Path] += fmtOut
+		expMap[strings.TrimPrefix(cfgFld.Path, utils.MetaExp+utils.NestingSep)] += fmtOut
 	}
 	return
 }
@@ -708,7 +711,7 @@ func (self *UsageRecord) AsCallDescriptor(timezone string, denyNegative bool) (*
 	var err error
 	cd := &CallDescriptor{
 		CgrID:               self.GetId(),
-		TOR:                 self.ToR,
+		ToR:                 self.ToR,
 		Tenant:              self.Tenant,
 		Category:            self.Category,
 		Subject:             self.Subject,

@@ -194,7 +194,7 @@ func testSMCosts(cfg *config.CGRConfig) error {
 					Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
-		TOR: utils.VOICE,
+		ToR: utils.VOICE,
 	}
 	if err := cdrStorage.SetSMCost(&SMCost{CGRID: "164b0422fdc6a5117031b427439482c6a4f90e41",
 		RunID: utils.MetaDefault, OriginHost: "localhost", OriginID: "12345", CostSource: utils.UNIT_TEST,
@@ -540,13 +540,13 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 	} else if len(CDRs) != 5 {
 		return fmt.Errorf("testGetCDRs #23, unexpected number of CDRs returned: %+v", CDRs)
 	}
-	// Filter on TOR
+	// Filter on ToR
 	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{ToRs: []string{utils.SMS}}, false); err != nil {
 		return fmt.Errorf("testGetCDRs #23 err: %v", err)
 	} else if len(CDRs) != 2 {
 		return fmt.Errorf("testGetCDRs #24, unexpected number of CDRs returned: %+v", CDRs)
 	}
-	// Filter on multiple TOR
+	// Filter on multiple ToR
 	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{ToRs: []string{utils.SMS, utils.VOICE}}, false); err != nil {
 		return fmt.Errorf("testGetCDRs #25 err: %v", err)
 	} else if len(CDRs) != 10 {

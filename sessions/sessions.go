@@ -536,7 +536,7 @@ func (sS *SessionS) refundSession(s *Session, sRunIdx int, rUsage time.Duration)
 	} else if srplsEC == nil {
 		return
 	}
-	sCC := srplsEC.AsCallCost(sr.CD.TOR)
+	sCC := srplsEC.AsCallCost(sr.CD.ToR)
 	var incrmts engine.Increments
 	for _, tmspn := range sCC.Timespans {
 		for _, incr := range tmspn.Increments {
@@ -559,7 +559,7 @@ func (sS *SessionS) refundSession(s *Session, sRunIdx int, rUsage time.Duration)
 		Subject:     sr.CD.Subject,
 		Account:     sr.CD.Account,
 		Destination: sr.CD.Destination,
-		TOR:         utils.FirstNonEmpty(sr.CD.TOR, utils.VOICE),
+		ToR:         utils.FirstNonEmpty(sr.CD.ToR, utils.VOICE),
 		Increments:  incrmts,
 	}
 	var acnt engine.Account
@@ -1055,7 +1055,7 @@ func (sS *SessionS) forkSession(s *Session) (err error) {
 			CD: &engine.CallDescriptor{
 				CgrID:       s.CGRID,
 				RunID:       me.GetStringIgnoreErrors(utils.RunID),
-				TOR:         me.GetStringIgnoreErrors(utils.ToR),
+				ToR:         me.GetStringIgnoreErrors(utils.ToR),
 				Tenant:      s.Tenant,
 				Category:    category,
 				Subject:     subject,

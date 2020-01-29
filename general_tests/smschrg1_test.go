@@ -86,7 +86,7 @@ func TestSMSGetDataCostSmsChrg1(t *testing.T) {
 		TimeStart:     timeStart,
 		TimeEnd:       timeStart.Add(usageDur),
 		DurationIndex: usageDur,
-		TOR:           utils.SMS,
+		ToR:           utils.SMS,
 	}
 	if cc, err := cd.GetCost(); err != nil {
 		t.Error(err)

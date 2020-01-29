@@ -130,7 +130,7 @@ func testCdrITMigrateAndMove(t *testing.T) {
 				},
 			},
 		},
-		TOR: utils.VOICE,
+		ToR: utils.VOICE,
 	}
 	v1Cdr := &v1Cdrs{
 		CGRID:       utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()),

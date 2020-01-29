@@ -43,7 +43,7 @@ class JSONClient(object):
 
 rpc =JSONClient(("127.0.0.1", 2012))
 
-cd = {"TOR":"*voice",
+cd = {"ToR":"*voice",
       "Category": "call",
       "Tenant": "cgrates.org",
       "Subject": "1001",
