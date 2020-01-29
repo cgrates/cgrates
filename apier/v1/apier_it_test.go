@@ -145,7 +145,7 @@ func TestApierIT(t *testing.T) {
 	case utils.MetaInternal:
 		t.SkipNow() // need tests redesign
 		// apierv1ConfigDIR = "apier_internal"
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		apierv1ConfigDIR = "apier_mysql"
 	case utils.MetaMongo:
 		apierv1ConfigDIR = "apier_mongo"

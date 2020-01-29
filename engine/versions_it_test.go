@@ -46,7 +46,7 @@ func TestVersionsIT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		t.SkipNow()
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		versionsConfigDIR = "tutmysql"
 	case utils.MetaMongo:
 		versionsConfigDIR = "tutmongo"

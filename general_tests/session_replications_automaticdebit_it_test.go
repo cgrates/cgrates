@@ -58,7 +58,7 @@ func TestSessionSRpl(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		t.SkipNow()
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		smgRplcMasterCfgDIR = "smgreplcmaster_mysql"
 		smgRplcSlaveCfgDIR = "smgreplcslave_mysql"
 	case utils.MetaMongo:

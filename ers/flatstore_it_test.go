@@ -78,7 +78,7 @@ func TestFlatstoreFile(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		flatstoreCfgDIR = "ers_internal"
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		flatstoreCfgDIR = "ers_mysql"
 	case utils.MetaMongo:
 		flatstoreCfgDIR = "ers_mongo"

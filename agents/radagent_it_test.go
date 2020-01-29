@@ -63,7 +63,7 @@ func TestRAit(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		raonfigDIR = "radagent_internal"
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		raonfigDIR = "radagent_mysql"
 	case utils.MetaMongo:
 		raonfigDIR = "radagent_mongo"

@@ -66,7 +66,7 @@ func TestSes3ItSessions(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		ses3CfgDir = "sessions_internal"
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		ses3CfgDir = "sessions_mysql"
 	case utils.MetaMongo:
 		ses3CfgDir = "sessions_mongo"

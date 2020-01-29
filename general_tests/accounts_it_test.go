@@ -65,7 +65,7 @@ func TestAccIT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		accConfDIR = "tutinternal"
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		accConfDIR = "tutmysql"
 	case utils.MetaMongo:
 		accConfDIR = "tutmongo"

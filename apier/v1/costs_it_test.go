@@ -55,7 +55,7 @@ func TestCostIT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		costConfigDIR = "tutinternal"
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		costConfigDIR = "tutmysql"
 	case utils.MetaMongo:
 		costConfigDIR = "tutmongo"

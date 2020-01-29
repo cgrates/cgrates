@@ -56,7 +56,7 @@ func TestTPIT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		tpConfigDIR = "tutinternal"
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		tpConfigDIR = "tutmysql"
 	case utils.MetaMongo:
 		tpConfigDIR = "tutmongo"

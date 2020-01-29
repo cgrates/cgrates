@@ -67,7 +67,7 @@ func TestApierIT2(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		apierv2ConfigDIR = "tutinternal"
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		apierv2ConfigDIR = "tutmysql"
 	case utils.MetaMongo:
 		apierv2ConfigDIR = "tutmongo"

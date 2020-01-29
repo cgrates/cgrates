@@ -71,7 +71,7 @@ func TestDiamItTcp(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		diamConfigDIR = "diamagent_internal"
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		diamConfigDIR = "diamagent_mysql"
 	case utils.MetaMongo:
 		diamConfigDIR = "diamagent_mongo"
@@ -107,7 +107,7 @@ func TestDiamItSctp(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		diamConfigDIR = "diamsctpagent_internal"
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		diamConfigDIR = "diamsctpagent_mysql"
 	case utils.MetaMongo:
 		diamConfigDIR = "diamsctpagent_mongo"
@@ -126,7 +126,7 @@ func TestDiamItMaxConn(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		diamConfigDIR = "diamagentmaxconn_internal"
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		diamConfigDIR = "diamagentmaxconn_mysql"
 	case utils.MetaMongo:
 		diamConfigDIR = "diamagentmaxconn_mongo"
@@ -147,7 +147,7 @@ func TestDiamItSessionDisconnect(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		diamConfigDIR = "diamagent_internal"
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		diamConfigDIR = "diamagent_mysql"
 	case utils.MetaMongo:
 		diamConfigDIR = "diamagent_mongo"

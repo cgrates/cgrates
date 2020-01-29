@@ -69,7 +69,7 @@ func TestDispatcherSIT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		dispatcherConfigDIR = "tutinternal"
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		dispatcherConfigDIR = "tutmysql"
 	case utils.MetaMongo:
 		dispatcherConfigDIR = "tutmongo"

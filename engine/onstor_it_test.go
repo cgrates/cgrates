@@ -88,7 +88,7 @@ func TestOnStorIT(t *testing.T) {
 		sleepDelay = 10 * time.Millisecond
 		onStor = NewDataManager(NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items),
 			config.CgrConfig().CacheCfg(), nil)
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		cfg, _ := config.NewDefaultCGRConfig()
 		rdsITdb, err = NewRedisStorage(
 			fmt.Sprintf("%s:%s", cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort),

@@ -56,7 +56,7 @@ func TestSSv1ItProcessEventWithPrepaid(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		sessionsConfDIR = "sessions_internal"
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		sessionsConfDIR = "sessions_mysql"
 	case utils.MetaMongo:
 		sessionsConfDIR = "sessions_mongo"
@@ -76,7 +76,7 @@ func TestSSv1ItProcessEventWithPostPaid(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		sessionsConfDIR = "sessions_internal"
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		sessionsConfDIR = "sessions_mysql"
 	case utils.MetaMongo:
 		sessionsConfDIR = "sessions_mongo"
@@ -97,7 +97,7 @@ func TestSSv1ItProcessEventWithRated(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		sessionsConfDIR = "sessions_internal"
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		sessionsConfDIR = "sessions_mysql"
 	case utils.MetaMongo:
 		sessionsConfDIR = "sessions_mongo"
@@ -118,7 +118,7 @@ func TestSSv1ItProcessEventWithPseudoPrepaid(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		sessionsConfDIR = "sessions_internal"
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		sessionsConfDIR = "sessions_mysql"
 	case utils.MetaMongo:
 		sessionsConfDIR = "sessions_mongo"

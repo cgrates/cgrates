@@ -69,7 +69,7 @@ func TestAccITWithRemove(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		accTestsConfig = "tutinternal"
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		accTestsConfig = "tutmysql"
 	case utils.MetaMongo:
 		accTestsConfig = "tutmongo"
@@ -92,7 +92,7 @@ func TestAccITWithoutRemove(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		accTestsConfig = "acc_balance_keep_internal"
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		accTestsConfig = "acc_balance_keep_mysql"
 	case utils.MetaMongo:
 		accTestsConfig = "acc_balance_keep_mongo"

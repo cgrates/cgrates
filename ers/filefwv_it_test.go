@@ -59,7 +59,7 @@ func TestFWVReadFile(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		fwvCfgDIR = "ers_internal"
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		fwvCfgDIR = "ers_mysql"
 	case utils.MetaMongo:
 		fwvCfgDIR = "ers_mongo"

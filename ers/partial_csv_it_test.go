@@ -76,7 +76,7 @@ func TestPartReadFile(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		partCfgDIR = "ers_internal"
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		partCfgDIR = "ers_mysql"
 	case utils.MetaMongo:
 		partCfgDIR = "ers_mongo"

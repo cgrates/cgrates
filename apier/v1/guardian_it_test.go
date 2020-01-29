@@ -38,7 +38,7 @@ func TestGuardianSIT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		guardianConfigDIR = "tutinternal"
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		guardianConfigDIR = "tutmysql"
 	case utils.MetaMongo:
 		guardianConfigDIR = "tutmongo"

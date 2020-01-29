@@ -67,7 +67,7 @@ func TestHAit(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		haCfgDIR = "httpagent_internal"
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		haCfgDIR = "httpagent_mysql"
 	case utils.MetaMongo:
 		haCfgDIR = "httpagent_mongo"
@@ -91,7 +91,7 @@ func TestHAitTls(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		haCfgDIR = "httpagenttls_internal"
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		haCfgDIR = "httpagenttls_mysql"
 	case utils.MetaMongo:
 		haCfgDIR = "httpagenttls_mongo"

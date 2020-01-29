@@ -59,7 +59,7 @@ func TestVrsIT(t *testing.T) {
 		// vrsConfigDIR = "tutinternal"
 		// vrsStorageType = utils.INTERNAL
 		t.SkipNow() // as is commented below
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		vrsConfigDIR = "tutmysql"
 		vrsStorageType = utils.REDIS
 	case utils.MetaMongo:

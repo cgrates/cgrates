@@ -67,7 +67,7 @@ func TestTutorial(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		tutorialConfDIR = "tutinternal"
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		tutorialConfDIR = "tutmysql"
 	case utils.MetaMongo:
 		tutorialConfDIR = "tutmongo"

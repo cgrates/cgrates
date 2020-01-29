@@ -51,7 +51,7 @@ func TestDspAttributeS(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		t.SkipNow()
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		config1 = "all_mysql"
 		config2 = "all2_mysql"
 		config3 = "dispatchers_mysql"
@@ -73,7 +73,7 @@ func TestDspAttributeS(t *testing.T) {
 }
 
 func TestDspAttributeSNoConn(t *testing.T) {
-	if *dbType != utils.MetaSQL {
+	if *dbType != utils.MetaMySQL {
 		t.SkipNow()
 	}
 	testDsp(t, []func(t *testing.T){

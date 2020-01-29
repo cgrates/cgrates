@@ -55,7 +55,7 @@ func TestRsV1IT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		rlsV1ConfDIR = "tutinternal"
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		rlsV1ConfDIR = "tutmysql"
 	case utils.MetaMongo:
 		rlsV1ConfDIR = "tutmongo"

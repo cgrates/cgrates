@@ -64,7 +64,7 @@ func TestDataIT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		dataConfDIR = "tutinternal"
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		dataConfDIR = "tutmysql"
 	case utils.MetaMongo:
 		dataConfDIR = "tutmongo"

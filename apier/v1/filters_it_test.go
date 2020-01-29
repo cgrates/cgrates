@@ -62,7 +62,7 @@ func TestFilterIT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		filterConfigDIR = "tutinternal"
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		filterConfigDIR = "tutmysql"
 	case utils.MetaMongo:
 		filterConfigDIR = "tutmongo"

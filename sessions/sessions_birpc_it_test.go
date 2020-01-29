@@ -56,7 +56,7 @@ func TestSessionsBiRPC(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		sessionsBiRPCCfgDIR = "smg_automatic_debits_internal"
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		sessionsBiRPCCfgDIR = "smg_automatic_debits_mysql"
 	case utils.MetaMongo:
 		sessionsBiRPCCfgDIR = "smg_automatic_debits_mongo"

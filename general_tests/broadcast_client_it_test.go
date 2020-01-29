@@ -59,7 +59,7 @@ func TestBrodcastRPC(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		brodcastInternalCfgDIR = "tutinternal"
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		brodcastInternalCfgDIR = "tutmysql"
 	case utils.MetaMongo:
 		brodcastInternalCfgDIR = "tutmongo"

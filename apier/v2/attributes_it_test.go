@@ -59,7 +59,7 @@ func TestAttributeSIT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		alsPrfConfigDIR = "tutinternal"
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		alsPrfConfigDIR = "tutmysql"
 	case utils.MetaMongo:
 		alsPrfConfigDIR = "tutmongo"

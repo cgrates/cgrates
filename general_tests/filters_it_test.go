@@ -62,7 +62,7 @@ func TestFltrIT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		fltrConfDIR = "filters_internal"
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		fltrConfDIR = "filters_mysql"
 	case utils.MetaMongo:
 		fltrConfDIR = "filters_mongo"

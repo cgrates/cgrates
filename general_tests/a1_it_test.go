@@ -60,7 +60,7 @@ func TestA1It(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		a1ConfigDir = "tutinternal"
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		a1ConfigDir = "tutmysql"
 	case utils.MetaMongo:
 		a1ConfigDir = "tutmongo"

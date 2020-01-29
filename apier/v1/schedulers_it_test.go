@@ -56,7 +56,7 @@ func TestSchedWithoutFilters(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		schedConfDIR = "tutinternal"
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		schedConfDIR = "tutmysql"
 	case utils.MetaMongo:
 		schedConfDIR = "tutmongo"
@@ -76,7 +76,7 @@ func TestSchedWithFiltersSingleAccount(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		schedConfDIR = "filtered_scheduler_internal"
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		schedConfDIR = "filtered_scheduler_mysql"
 	case utils.MetaMongo:
 		schedConfDIR = "filtered_scheduler_mongo"
@@ -95,7 +95,7 @@ func TestSchedWithFilters2(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		schedConfDIR = "filtered_scheduler2_internal"
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		schedConfDIR = "filtered_scheduler2_mysql"
 	case utils.MetaMongo:
 		schedConfDIR = "filtered_scheduler2_mongo"

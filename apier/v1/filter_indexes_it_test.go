@@ -101,7 +101,7 @@ func TestFIdxV1IT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		tSv1ConfDIR = "tutinternal"
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		tSv1ConfDIR = "tutmysql"
 	case utils.MetaMongo:
 		tSv1ConfDIR = "tutmongo"
