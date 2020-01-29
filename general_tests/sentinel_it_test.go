@@ -67,7 +67,7 @@ func TestRedisSentinel(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		t.SkipNow()
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 	case utils.MetaMongo:
 		t.SkipNow()
 	case utils.MetaPostgres:

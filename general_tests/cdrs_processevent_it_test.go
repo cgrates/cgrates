@@ -66,7 +66,7 @@ func TestCDRsITPE(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		pecdrsConfDIR = "cdrsv1processevent"
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		pecdrsConfDIR = "cdrsv1processeventmysql"
 	case utils.MetaMongo:
 		pecdrsConfDIR = "cdrsv1processeventmongo"

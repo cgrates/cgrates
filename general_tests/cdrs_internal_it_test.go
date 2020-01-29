@@ -54,7 +54,7 @@ func TestCdrsIntIT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		cdrsIntCfgDIR = "internal_ttl_internal"
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		t.SkipNow()
 	case utils.MetaMongo:
 		t.SkipNow()

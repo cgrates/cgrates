@@ -58,7 +58,7 @@ func TestSessionsData(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		dataCfgDIR = "smg_internal"
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		dataCfgDIR = "smg_mysql"
 	case utils.MetaMongo:
 		dataCfgDIR = "smg_mongo"

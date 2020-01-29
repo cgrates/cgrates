@@ -58,7 +58,7 @@ func TestXMLReadFile(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		xmlCfgDIR = "ers_internal"
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		xmlCfgDIR = "ers_mysql"
 	case utils.MetaMongo:
 		xmlCfgDIR = "ers_mongo"

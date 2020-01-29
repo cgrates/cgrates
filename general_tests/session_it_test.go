@@ -57,7 +57,7 @@ func TestSesIt(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		sesCfgDIR = "tutinternal"
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		sesCfgDIR = "tutmysql_internal"
 	case utils.MetaMongo:
 		sesCfgDIR = "tutmongo"

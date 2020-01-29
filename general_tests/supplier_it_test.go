@@ -65,7 +65,7 @@ func TestSuplSV1IT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		splSv1ConfDIR = "tutinternal"
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		splSv1ConfDIR = "tutmysql"
 	case utils.MetaMongo:
 		splSv1ConfDIR = "tutmongo"

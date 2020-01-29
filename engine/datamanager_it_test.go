@@ -49,7 +49,7 @@ func TestDMitinitDB(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		t.SkipNow()
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		dataDB, err = NewRedisStorage(
 			fmt.Sprintf("%s:%s", cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort),
 			4, cfg.DataDbCfg().DataDbPass, cfg.GeneralCfg().DBDataEncoding,

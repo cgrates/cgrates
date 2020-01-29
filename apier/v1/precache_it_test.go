@@ -58,7 +58,7 @@ func TestPrecacheIT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		t.SkipNow()
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		precacheConfigDIR = "tutmysql"
 	case utils.MetaMongo:
 		precacheConfigDIR = "tutmongo"

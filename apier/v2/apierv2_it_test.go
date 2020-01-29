@@ -63,7 +63,7 @@ func TestV2IT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		t.Skip()
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		apierv2ConfDIR = "tutmysql"
 	case utils.MetaMongo:
 		apierv2ConfDIR = "tutmongo"

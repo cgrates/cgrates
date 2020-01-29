@@ -93,7 +93,7 @@ func TestAttributeSIT(t *testing.T) {
 	case utils.MetaInternal:
 		attrsTests = sTestsAlsPrf[:29]
 		alsPrfConfigDIR = "tutinternal"
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		alsPrfConfigDIR = "tutmysql"
 	case utils.MetaMongo:
 		alsPrfConfigDIR = "tutmongo"

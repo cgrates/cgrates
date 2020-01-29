@@ -60,7 +60,7 @@ func TestSrIt(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		srCfgDIR = "tutinternal"
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		srCfgDIR = "tutmysql_internal"
 	case utils.MetaMongo:
 		srCfgDIR = "tutmongo"

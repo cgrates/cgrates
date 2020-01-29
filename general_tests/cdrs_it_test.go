@@ -83,7 +83,7 @@ func TestCDRsIT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		cdrsConfDIR = "cdrsv2internal"
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		cdrsConfDIR = "cdrsv2mysql"
 	case utils.MetaMongo:
 		cdrsConfDIR = "cdrsv2mongo"

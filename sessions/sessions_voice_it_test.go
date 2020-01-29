@@ -61,7 +61,7 @@ func TestSessionsVoice(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		voiceCfgDIR = "smg_internal"
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		voiceCfgDIR = "smg_mysql"
 	case utils.MetaMongo:
 		voiceCfgDIR = "smg_mongo"

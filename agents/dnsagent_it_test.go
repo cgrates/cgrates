@@ -57,7 +57,7 @@ func TestDNSitSimple(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		dnsCfgDIR = "dnsagent_internal"
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		dnsCfgDIR = "dnsagent_mysql"
 	case utils.MetaMongo:
 		dnsCfgDIR = "dnsagent_mongo"

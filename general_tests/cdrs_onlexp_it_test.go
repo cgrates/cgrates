@@ -71,7 +71,7 @@ func TestCDRsOnExp(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		t.SkipNow()
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		cdrsMasterCfgDIR = "cdrsonexpmaster_mysql"
 		cdrsSlaveCfgDIR = "cdrsonexpslave_mysql"
 	case utils.MetaMongo:

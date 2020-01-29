@@ -60,7 +60,7 @@ func TestDspCDRsIT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		t.SkipNow()
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		config1 = "all_mysql"
 		config2 = "all2_mysql"
 		config3 = "dispatchers_mysql"
@@ -82,7 +82,7 @@ func TestDspCDRsIT(t *testing.T) {
 }
 
 func TestDspCDRsITMySQLWithoutAuth(t *testing.T) {
-	if *dbType != utils.MetaSQL {
+	if *dbType != utils.MetaMySQL {
 		t.SkipNow()
 	}
 	if *encoding == utils.MetaGOB {

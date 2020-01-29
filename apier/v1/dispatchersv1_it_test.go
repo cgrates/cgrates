@@ -57,7 +57,7 @@ func TestDspDspv1(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		t.SkipNow()
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		dispatcherConfigDIR = "dispatchers_mysql"
 	case utils.MetaMongo:
 		dispatcherConfigDIR = "dispatchers_mongo"

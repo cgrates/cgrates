@@ -84,7 +84,7 @@ func TestInternalRemoteIT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		t.SkipNow()
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		engineOneCfgDirPath = "engine1_redis"
 		engineTwoCfgDirPath = "engine2_redis"
 	case utils.MetaMongo:

@@ -59,7 +59,7 @@ func TestCDRsOfflineIT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		cdrsOfflineConfDIR = "cdrsv2internal"
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		cdrsOfflineConfDIR = "cdrsv2mysql"
 	case utils.MetaMongo:
 		cdrsOfflineConfDIR = "cdrsv2mongo"

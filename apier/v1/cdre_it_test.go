@@ -59,7 +59,7 @@ func TestCDRExport(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		cdreConfigDIR = "cdrewithfilter_internal"
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		cdreConfigDIR = "cdrewithfilter_mysql"
 	case utils.MetaMongo:
 		cdreConfigDIR = "cdrewithfilter_mongo"

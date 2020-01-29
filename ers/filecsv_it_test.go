@@ -83,7 +83,7 @@ func TestCsvReadFile(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		csvCfgDIR = "ers_internal"
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		csvCfgDIR = "ers_mysql"
 	case utils.MetaMongo:
 		csvCfgDIR = "ers_mongo"

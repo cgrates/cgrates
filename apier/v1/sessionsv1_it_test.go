@@ -73,7 +73,7 @@ func testSSv1ItInitCfgDir(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		sessionsConfDIR = "sessions_internal"
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		sessionsConfDIR = "sessions_mysql"
 	case utils.MetaMongo:
 		sessionsConfDIR = "sessions_mongo"

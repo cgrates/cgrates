@@ -46,7 +46,7 @@ func TestDspChargerST(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		t.SkipNow()
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		config1 = "all_mysql"
 		config2 = "all2_mysql"
 		config3 = "dispatchers_mysql"

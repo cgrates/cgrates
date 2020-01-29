@@ -77,7 +77,7 @@ func TestRPCITLcl(t *testing.T) {
 	case utils.MetaInternal:
 		rpcITCfgDIR1 = "multiral1_internal"
 		rpcITCfgDIR2 = "multiral2_internal"
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		rpcITCfgDIR1 = "multiral1_mysql"
 		rpcITCfgDIR2 = "multiral2_mysql"
 	case utils.MetaMongo:

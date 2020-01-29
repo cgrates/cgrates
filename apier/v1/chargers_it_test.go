@@ -84,7 +84,7 @@ func TestChargerSIT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		chargerConfigDIR = "tutinternal"
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		chargerConfigDIR = "tutmysql"
 	case utils.MetaMongo:
 		chargerConfigDIR = "tutmongo"

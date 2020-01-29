@@ -56,7 +56,7 @@ func TestTutSMG(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		t.SkipNow()
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		tutSMGCfgDIR = "smgeneric_mysql"
 	case utils.MetaMongo:
 		t.SkipNow()
