@@ -595,7 +595,7 @@ package general_tests
 // 			t.Errorf("Unexpected CGRID for CDR: %+v", cdrs[0])
 // 		}
 // 		if cdrs[0].ToR != eCdr.ToR {
-// 			t.Errorf("Unexpected TOR for CDR: %+v", cdrs[0])
+// 			t.Errorf("Unexpected ToR for CDR: %+v", cdrs[0])
 // 		}
 // 		if cdrs[0].Source != eCdr.Source {
 // 			t.Errorf("Unexpected Source for CDR: %+v", cdrs[0])
@@ -1334,7 +1334,7 @@ package general_tests
 // 								RateUnit:           time.Second}}}},
 // 			},
 // 		},
-// 		TOR: utils.VOICE}
+// 		ToR: utils.VOICE}
 // 	smCost := &engine.SMCost{CGRID: cdr.CGRID,
 // 		RunID:       utils.MetaDefault,
 // 		OriginHost:  cdr.OriginHost,

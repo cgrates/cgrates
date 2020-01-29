@@ -9,7 +9,7 @@ The call information comes to CGRateS having the following vital information lik
 
  type CallDescriptor struct {
 	Direction                             
-	TOR                                   
+	ToR                                   
 	Tenant, Subject, Account, Destination 
 	TimeStart, TimeEnd                    
 	LoopIndex       // indicates the position of this segment in a cost request loop
@@ -67,7 +67,7 @@ The **Price** structure defines the start (*GroupIntervalStart*) of a section of
 
 So when there is a need to define new sets of prices just define new RatingPlans with the activation time set to the moment when it becomes active.
 
-Let's get back to the engine. When a GetCost or Debit call comes to the engine it will try to match the best rating profile for the given *Direction*, *Tenant*, *TOR* and *Subject* using the longest *Subject* prefix method or using the *FallbackSubject* if not found. The rating profile contains the activation periods that might apply to the call in question.
+Let's get back to the engine. When a GetCost or Debit call comes to the engine it will try to match the best rating profile for the given *Direction*, *Tenant*, *ToR* and *Subject* using the longest *Subject* prefix method or using the *FallbackSubject* if not found. The rating profile contains the activation periods that might apply to the call in question.
 
 At this point in rating process the engine will start splitting the call into various time spans using the following criterias:
 

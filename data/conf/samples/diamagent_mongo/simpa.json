@@ -9,7 +9,7 @@
 				"*prefix:~*req.Service-Context-Id:simpa"],
 			"flags": ["*message", "*accounts", "*log"],
 			"request_fields":[
-				{"tag": "TOR", "path": "ToR", "type": "*constant", "value": "*generic"},
+				{"tag": "ToR", "path": "ToR", "type": "*constant", "value": "*generic"},
 				{"tag": "OriginID", "path": "OriginID", "type": "*variable", 
 					"value": "~*req.Session-Id", "mandatory": true},
 				{"tag": "RequestType", "path": "RequestType", "type": "*constant", "value": "*prepaid"},

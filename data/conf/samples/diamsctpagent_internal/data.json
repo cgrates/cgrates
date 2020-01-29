@@ -9,7 +9,7 @@
 			"filters": ["*string:~*vars.*cmd:CCR", "*string:~*req.CC-Request-Type:1", "*prefix:~*req.Service-Context-Id:gprs"],
 			"flags": ["*initiate", "*accounts"],
 			"request_fields":[
-				{"tag": "TOR", "path": "ToR", "type": "*constant", "value": "*data"},
+				{"tag": "ToR", "path": "ToR", "type": "*constant", "value": "*data"},
 				{"tag": "OriginID", "path": "OriginID", "type": "*variable", 
 					"value": "~*req.Session-Id", "mandatory": true},
 				{"tag": "RequestType", "path": "RequestType", "type": "*constant", "value": "*prepaid"},
@@ -36,7 +36,7 @@
 				"*string:~*req.Multiple-Services-Credit-Control.Rating-Group:1", "*prefix:~*req.Service-Context-Id:gprs"],
 			"flags": ["*update", "*accounts"],
 			"request_fields":[
-				{"tag": "TOR", "path": "ToR", "type": "*constant", "value": "*data"},
+				{"tag": "ToR", "path": "ToR", "type": "*constant", "value": "*data"},
 				{"tag": "InitialOriginID", "path": "InitialOriginID", "type": "*variable", 
 					"value": "~*req.Session-Id", "mandatory": true},
 				{"tag": "OriginID", "path": "OriginID", "type": "*composed", 
@@ -69,7 +69,7 @@
 				"*string:~*req.Multiple-Services-Credit-Control.Rating-Group[1]:2", "*prefix:~*req.Service-Context-Id:gprs"],
 			"flags": ["*update", "*accounts"],
 			"request_fields":[
-				{"tag": "TOR", "path": "ToR", "type": "*constant", "value": "*data"},
+				{"tag": "ToR", "path": "ToR", "type": "*constant", "value": "*data"},
 				{"tag": "InitialOriginID", "path": "InitialOriginID", "type": "*variable", 
 					"value": "~*req.Session-Id", "mandatory": true},
 				{"tag": "OriginID", "path": "OriginID", "type": "*composed", 
@@ -101,7 +101,7 @@
 				"*prefix:~*req.Service-Context-Id:gprs"],
 			"flags": ["*terminate", "*accounts"],
 			"request_fields":[
-				{"tag": "TOR", "path": "ToR", "type": "*constant", "value": "*data"},
+				{"tag": "ToR", "path": "ToR", "type": "*constant", "value": "*data"},
 				{"tag": "OriginID", "path": "OriginID", "type": "*variable", 
 					"value": "~*req.Session-Id", "mandatory": true},
 				{"tag": "OriginIDPrefix", "path": "OriginIDPrefix", "type": "*variable", 

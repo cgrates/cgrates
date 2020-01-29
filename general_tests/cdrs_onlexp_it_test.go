@@ -298,7 +298,7 @@ func testCDRsOnExpHttpCdrReplication(t *testing.T) {
 			rcvedCdrs[0].RunID != testCdr1.RunID {
 			//rcvedCdrs[0].Cost != testCdr1.Cost ||
 			//!reflect.DeepEqual(rcvedCdrs[0].ExtraFields, testCdr1.ExtraFields) {
-			t.Errorf("Expected: %+v, received: %+v", testCdr1, rcvedCdrs[0])
+			t.Errorf("Expected: %+v, received: %+v", utils.ToJSON(testCdr1), utils.ToJSON(rcvedCdrs[0]))
 		}
 	}
 }
@@ -500,7 +500,7 @@ func testCDRsOnExpFileFailover(t *testing.T) {
 			content = httpContent
 		}
 		if err := checkContent(ev, content); err != nil {
-			t.Errorf("For file <%s> and event <%s> receved %s", filePath, utils.ToJSON(ev), err)
+			t.Errorf("For file <%s> and event <%s> received %s", filePath, utils.ToJSON(ev), err)
 		}
 	}
 	if !reflect.DeepEqual(expectedFormats.Data(), rcvFormats.Data()) {

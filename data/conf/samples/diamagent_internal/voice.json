@@ -9,7 +9,7 @@
 				"*prefix:~*req.Service-Context-Id:voice"],
 			"flags": ["*initiate", "*accounts", "*attributes"],
 			"request_fields":[
-				{"tag": "TOR", "path": "ToR", "type": "*constant", "value": "*voice"},
+				{"tag": "ToR", "path": "ToR", "type": "*constant", "value": "*voice"},
 				{"tag": "OriginID", "path": "OriginID", "type": "*variable", 
 					"value": "~*req.Session-Id", "mandatory": true},
 				{"tag": "OriginHost", "path": "OriginHost", "type": "*remote_host", 
@@ -40,7 +40,7 @@
 				"*prefix:~*req.Service-Context-Id:voice"],
 			"flags": ["*update", "*accounts", "*attributes"],
 			"request_fields":[
-				{"tag": "TOR", "path": "ToR", "type": "*constant", "value": "*voice"},
+				{"tag": "ToR", "path": "ToR", "type": "*constant", "value": "*voice"},
 				{"tag": "OriginID", "path": "OriginID", "type": "*variable", 
 					"value": "~*req.Session-Id", "mandatory": true},
 				{"tag": "OriginHost", "path": "OriginHost", "type": "*remote_host", 
@@ -73,7 +73,7 @@
 				"*prefix:~*req.Service-Context-Id:voice"],
 			"flags": ["*terminate", "*accounts", "*attributes", "*cdrs"],
 			"request_fields":[
-				{"tag": "TOR", "path": "ToR", "type": "*constant", "value": "*voice"},
+				{"tag": "ToR", "path": "ToR", "type": "*constant", "value": "*voice"},
 				{"tag": "OriginID", "path": "OriginID", "type": "*variable", 
 					"value": "~*req.Session-Id", "mandatory": true},
 				{"tag": "OriginHost", "path": "OriginHost", "type": "*remote_host", 

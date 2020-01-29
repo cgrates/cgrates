@@ -135,7 +135,7 @@ func NewCallDescriptorFromCGREvent(cgrEv *utils.CGREvent,
 		cd.TimeEnd = cd.TimeStart.Add(usage)
 	}
 	if _, has := cgrEv.Event[utils.ToR]; has {
-		if cd.TOR, err = cgrEv.FieldAsString(utils.ToR); err != nil {
+		if cd.ToR, err = cgrEv.FieldAsString(utils.ToR); err != nil {
 			return nil, err
 		}
 	}
@@ -158,7 +158,7 @@ type CallDescriptor struct {
 	FallbackSubject string        // the subject to check for destination if not found on primary subject
 	RatingInfos     RatingInfos
 	Increments      Increments
-	TOR             string            // used unit balances selector
+	ToR             string            // used unit balances selector
 	ExtraFields     map[string]string // Extra fields, mostly used for user profile matching
 	// session limits
 	MaxRate             float64
@@ -184,7 +184,7 @@ func (cd *CallDescriptor) AsCGREvent() *utils.CGREvent {
 	for k, v := range cd.ExtraFields {
 		cgrEv.Event[k] = v
 	}
-	cgrEv.Event[utils.ToR] = cd.TOR
+	cgrEv.Event[utils.ToR] = cd.ToR
 	cgrEv.Event[utils.Tenant] = cd.Tenant
 	cgrEv.Event[utils.Category] = cd.Category
 	cgrEv.Event[utils.Account] = cd.Account
@@ -202,7 +202,7 @@ func (cd *CallDescriptor) UpdateFromCGREvent(cgrEv *utils.CGREvent, fields []str
 	for _, fldName := range fields {
 		switch fldName {
 		case utils.ToR:
-			if cd.TOR, err = cgrEv.FieldAsString(fldName); err != nil {
+			if cd.ToR, err = cgrEv.FieldAsString(fldName); err != nil {
 				return
 			}
 		case utils.Tenant:
@@ -432,7 +432,7 @@ func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
 		return
 	}
 	firstSpan.setRatingInfo(cd.RatingInfos[0])
-	if cd.TOR == utils.VOICE {
+	if cd.ToR == utils.VOICE {
 		// split on rating plans
 		afterStart, afterEnd := false, false //optimization for multiple activation periods
 		for _, rp := range cd.RatingInfos {
@@ -488,7 +488,7 @@ func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
 		//log.Print(timespans[i].RateInterval)
 		for _, interval := range rateIntervals {
 			//log.Printf("\tINTERVAL: %+v", interval.Timing)
-			newTs := timespans[i].SplitByRateInterval(interval, cd.TOR != utils.VOICE)
+			newTs := timespans[i].SplitByRateInterval(interval, cd.ToR != utils.VOICE)
 			//utils.PrintFull(timespans[i])
 			//utils.PrintFull(newTs)
 			if newTs != nil {
@@ -612,8 +612,8 @@ func (cd *CallDescriptor) getCost() (*CallCost, error) {
 	if cd.DurationIndex < cd.TimeEnd.Sub(cd.TimeStart) {
 		cd.DurationIndex = cd.TimeEnd.Sub(cd.TimeStart)
 	}
-	if cd.TOR == "" {
-		cd.TOR = utils.VOICE
+	if cd.ToR == "" {
+		cd.ToR = utils.VOICE
 	}
 	err := cd.LoadRatingPlans()
 	if err != nil {
@@ -658,8 +658,8 @@ func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Dura
 	if origCD.DurationIndex < origCD.TimeEnd.Sub(origCD.TimeStart) {
 		origCD.DurationIndex = origCD.TimeEnd.Sub(origCD.TimeStart)
 	}
-	if origCD.TOR == "" {
-		origCD.TOR = utils.VOICE
+	if origCD.ToR == "" {
+		origCD.ToR = utils.VOICE
 	}
 	cd := origCD.Clone()
 	initialDuration := cd.TimeEnd.Sub(cd.TimeStart)
@@ -755,8 +755,8 @@ func (cd *CallDescriptor) debit(account *Account, dryRun bool, goNegative bool) 
 		}
 		return cc, nil
 	}
-	if cd.TOR == "" {
-		cd.TOR = utils.VOICE
+	if cd.ToR == "" {
+		cd.ToR = utils.VOICE
 	}
 	//log.Printf("Debit CD: %+v", cd)
 	cc, err = account.debitCreditBalance(cd, !dryRun, dryRun, goNegative)
@@ -898,7 +898,7 @@ func (cd *CallDescriptor) refundIncrements() (acnt *Account, err error) {
 		}
 		//utils.Logger.Info(fmt.Sprintf("Refunding increment %+v", increment))
 		var balance *Balance
-		unitType := cd.TOR
+		unitType := cd.ToR
 		cc := cd.CreateCallCost()
 		if increment.BalanceInfo.Unit != nil && increment.BalanceInfo.Unit.UUID != "" {
 			if balance = account.BalanceMap[unitType].GetBalance(increment.BalanceInfo.Unit.UUID); balance == nil {
@@ -992,7 +992,7 @@ func (cd *CallDescriptor) CreateCallCost() *CallCost {
 		Subject:          cd.Subject,
 		Account:          cd.Account,
 		Destination:      cd.Destination,
-		TOR:              cd.TOR,
+		ToR:              cd.ToR,
 		deductConnectFee: cd.LoopIndex == 0,
 	}
 }
@@ -1012,7 +1012,7 @@ func (cd *CallDescriptor) Clone() *CallDescriptor {
 		MaxRateUnit:     cd.MaxRateUnit,
 		MaxCostSoFar:    cd.MaxCostSoFar,
 		FallbackSubject: cd.FallbackSubject,
-		TOR:             cd.TOR,
+		ToR:             cd.ToR,
 		ForceDuration:   cd.ForceDuration,
 		PerformRounding: cd.PerformRounding,
 		DryRun:          cd.DryRun,

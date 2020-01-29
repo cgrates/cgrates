@@ -321,7 +321,7 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 	if !b.IsActiveAt(cd.TimeStart) || b.GetValue() <= 0 {
 		return
 	}
-	if duration, err := utils.ParseZeroRatingSubject(cd.TOR, b.RatingSubject, config.CgrConfig().RalsCfg().BalanceRatingSubject); err == nil {
+	if duration, err := utils.ParseZeroRatingSubject(cd.ToR, b.RatingSubject, config.CgrConfig().RalsCfg().BalanceRatingSubject); err == nil {
 		// we have *zero based units
 		cc = cd.CreateCallCost()
 		cc.Timespans = append(cc.Timespans, &TimeSpan{
@@ -362,7 +362,7 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 
 			amount := float64(inc.Duration.Nanoseconds())
 			if b.Factor != nil {
-				amount = utils.Round(amount/b.Factor.GetValue(cd.TOR),
+				amount = utils.Round(amount/b.Factor.GetValue(cd.ToR),
 					globalRoundingDecimals, utils.ROUNDING_UP)
 			}
 			if b.GetValue() >= amount {
@@ -373,14 +373,14 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 					Value:         b.Value,
 					DestinationID: cc.Destination,
 					Consumed:      amount,
-					TOR:           cc.TOR,
+					ToR:           cc.ToR,
 					RateInterval:  nil,
 				}
 				inc.BalanceInfo.AccountID = ub.ID
 				inc.Cost = 0
 				inc.paid = true
 				if count {
-					ub.countUnits(amount, cc.TOR, cc, b)
+					ub.countUnits(amount, cc.ToR, cc, b)
 				}
 			} else {
 				inc.paid = false
@@ -454,7 +454,7 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 				// debit minutes and money
 				amount := float64(inc.Duration.Nanoseconds())
 				if b.Factor != nil {
-					amount = utils.Round(amount/b.Factor.GetValue(cd.TOR), globalRoundingDecimals, utils.ROUNDING_UP)
+					amount = utils.Round(amount/b.Factor.GetValue(cd.ToR), globalRoundingDecimals, utils.ROUNDING_UP)
 				}
 				cost := inc.Cost
 				inc.paid = false
@@ -507,7 +507,7 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 						Value:         b.Value,
 						DestinationID: cc.Destination,
 						Consumed:      amount,
-						TOR:           cc.TOR,
+						ToR:           cc.ToR,
 						RateInterval:  ts.RateInterval,
 					}
 					inc.BalanceInfo.AccountID = ub.ID
@@ -522,7 +522,7 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 					}
 					inc.paid = true
 					if count {
-						ub.countUnits(amount, cc.TOR, cc, b)
+						ub.countUnits(amount, cc.ToR, cc, b)
 						if cost != 0 {
 							ub.countUnits(cost, utils.MONETARY, cc, moneyBal)
 						}

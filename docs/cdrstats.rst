@@ -42,7 +42,7 @@ configuration object is internally represented as:
         SaveInterval      time.Duration   // Interval to store the info into database
         Metrics           []string        // ASR, ACD, ACC, TCC, TCD, PDD
         SetupInterval     []time.Time     // CDRFieldFilter on SetupInterval, 2 or less items (>= start interval,< stop_interval)
-        TOR               []string        // CDRFieldFilter on TORs
+        ToR               []string        // CDRFieldFilter on TORs
         CdrHost           []string        // CDRFieldFilter on CdrHosts
         CdrSource         []string        // CDRFieldFilter on CdrSources
         ReqType           []string        // CDRFieldFilter on ReqTypes

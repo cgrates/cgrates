@@ -454,74 +454,74 @@ func TestDfCdreJsonCfgs(t *testing.T) {
 		{
 			Path:  utils.StringPointer("*exp.CGRID"),
 			Type:  utils.StringPointer(utils.META_COMPOSED),
-			Value: utils.StringPointer(utils.DynamicDataPrefix + utils.CGRID),
+			Value: utils.StringPointer(utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.CGRID),
 		},
 		{
 			Path:  utils.StringPointer("*exp.RunID"),
 			Type:  utils.StringPointer(utils.META_COMPOSED),
-			Value: utils.StringPointer(utils.DynamicDataPrefix + utils.RunID),
+			Value: utils.StringPointer(utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.RunID),
 		},
 		{
-			Path:  utils.StringPointer("*exp.TOR"),
+			Path:  utils.StringPointer("*exp.ToR"),
 			Type:  utils.StringPointer(utils.META_COMPOSED),
-			Value: utils.StringPointer(utils.DynamicDataPrefix + utils.ToR),
+			Value: utils.StringPointer(utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.ToR),
 		},
 		{
 			Path:  utils.StringPointer("*exp.OriginID"),
 			Type:  utils.StringPointer(utils.META_COMPOSED),
-			Value: utils.StringPointer(utils.DynamicDataPrefix + utils.OriginID),
+			Value: utils.StringPointer(utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.OriginID),
 		},
 		{
 			Path:  utils.StringPointer("*exp.RequestType"),
 			Type:  utils.StringPointer(utils.META_COMPOSED),
-			Value: utils.StringPointer(utils.DynamicDataPrefix + utils.RequestType),
+			Value: utils.StringPointer(utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.RequestType),
 		},
 		{
 			Path:  utils.StringPointer("*exp.Tenant"),
 			Type:  utils.StringPointer(utils.META_COMPOSED),
-			Value: utils.StringPointer(utils.DynamicDataPrefix + utils.Tenant),
+			Value: utils.StringPointer(utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Tenant),
 		},
 		{
 			Path:  utils.StringPointer("*exp.Category"),
 			Type:  utils.StringPointer(utils.META_COMPOSED),
-			Value: utils.StringPointer(utils.DynamicDataPrefix + utils.Category),
+			Value: utils.StringPointer(utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Category),
 		},
 		{
 			Path:  utils.StringPointer("*exp.Account"),
 			Type:  utils.StringPointer(utils.META_COMPOSED),
-			Value: utils.StringPointer(utils.DynamicDataPrefix + utils.Account),
+			Value: utils.StringPointer(utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account),
 		},
 		{
 			Path:  utils.StringPointer("*exp.Subject"),
 			Type:  utils.StringPointer(utils.META_COMPOSED),
-			Value: utils.StringPointer(utils.DynamicDataPrefix + utils.Subject),
+			Value: utils.StringPointer(utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Subject),
 		},
 		{
 			Path:  utils.StringPointer("*exp.Destination"),
 			Type:  utils.StringPointer(utils.META_COMPOSED),
-			Value: utils.StringPointer(utils.DynamicDataPrefix + utils.Destination),
+			Value: utils.StringPointer(utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Destination),
 		},
 		{
 			Path:   utils.StringPointer("*exp.SetupTime"),
 			Type:   utils.StringPointer(utils.META_COMPOSED),
-			Value:  utils.StringPointer(utils.DynamicDataPrefix + utils.SetupTime),
+			Value:  utils.StringPointer(utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.SetupTime),
 			Layout: utils.StringPointer("2006-01-02T15:04:05Z07:00"),
 		},
 		{
 			Path:   utils.StringPointer("*exp.AnswerTime"),
 			Type:   utils.StringPointer(utils.META_COMPOSED),
-			Value:  utils.StringPointer(utils.DynamicDataPrefix + utils.AnswerTime),
+			Value:  utils.StringPointer(utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AnswerTime),
 			Layout: utils.StringPointer("2006-01-02T15:04:05Z07:00"),
 		},
 		{
 			Path:  utils.StringPointer("*exp.Usage"),
 			Type:  utils.StringPointer(utils.META_COMPOSED),
-			Value: utils.StringPointer(utils.DynamicDataPrefix + utils.Usage),
+			Value: utils.StringPointer(utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage),
 		},
 		{
 			Path:              utils.StringPointer("*exp.Cost"),
 			Type:              utils.StringPointer(utils.META_COMPOSED),
-			Value:             utils.StringPointer(utils.DynamicDataPrefix + utils.COST),
+			Value:             utils.StringPointer(utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.COST),
 			Rounding_decimals: utils.IntPointer(4),
 		},
 	}
@@ -1624,7 +1624,7 @@ func TestDfApierCfg(t *testing.T) {
 
 func TestDfEventReaderCfg(t *testing.T) {
 	cdrFields := []*FcTemplateJsonCfg{
-		{Tag: utils.StringPointer("TOR"), Path: utils.StringPointer(utils.ToR), Type: utils.StringPointer(utils.MetaVariable),
+		{Tag: utils.StringPointer("ToR"), Path: utils.StringPointer(utils.ToR), Type: utils.StringPointer(utils.MetaVariable),
 			Value: utils.StringPointer("~*req.2"), Mandatory: utils.BoolPointer(true)},
 		{Tag: utils.StringPointer("OriginID"), Path: utils.StringPointer(utils.OriginID), Type: utils.StringPointer(utils.MetaVariable),
 			Value: utils.StringPointer("~*req.3"), Mandatory: utils.BoolPointer(true)},

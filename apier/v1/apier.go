@@ -397,7 +397,7 @@ func (apiv1 *ApierV1) ImportTariffPlanFromFolder(attrs utils.AttrImportTPFromFol
 
 // Sets a specific rating profile working with data directly in the DataDB without involving storDb
 func (apiv1 *ApierV1) SetRatingProfile(attrs utils.AttrSetRatingProfile, reply *string) (err error) {
-	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "TOR", "Subject", "RatingPlanActivations"}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "ToR", "Subject", "RatingPlanActivations"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	for _, rpa := range attrs.RatingPlanActivations {

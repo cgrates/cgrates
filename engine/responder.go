@@ -93,7 +93,7 @@ func (rs *Responder) GetCost(arg *CallDescriptorWithArgDispatcher, reply *CallCo
 	if arg.Subject == "" {
 		arg.Subject = arg.Account
 	}
-	if !rs.usageAllowed(arg.TOR, arg.GetDuration()) {
+	if !rs.usageAllowed(arg.ToR, arg.GetDuration()) {
 		return utils.ErrMaxUsageExceeded
 	}
 	r, e := guardian.Guardian.Guard(func() (interface{}, error) {
@@ -132,7 +132,7 @@ func (rs *Responder) Debit(arg *CallDescriptorWithArgDispatcher, reply *CallCost
 	if arg.Subject == "" {
 		arg.Subject = arg.Account
 	}
-	if !rs.usageAllowed(arg.TOR, arg.GetDuration()) {
+	if !rs.usageAllowed(arg.ToR, arg.GetDuration()) {
 		err = utils.ErrMaxUsageExceeded
 		return
 	}
@@ -169,7 +169,7 @@ func (rs *Responder) MaxDebit(arg *CallDescriptorWithArgDispatcher, reply *CallC
 	if arg.Subject == "" {
 		arg.Subject = arg.Account
 	}
-	if !rs.usageAllowed(arg.TOR, arg.GetDuration()) {
+	if !rs.usageAllowed(arg.ToR, arg.GetDuration()) {
 		err = utils.ErrMaxUsageExceeded
 		return
 	}
@@ -207,7 +207,7 @@ func (rs *Responder) RefundIncrements(arg *CallDescriptorWithArgDispatcher, repl
 	if arg.Subject == "" {
 		arg.Subject = arg.Account
 	}
-	if !rs.usageAllowed(arg.TOR, arg.GetDuration()) {
+	if !rs.usageAllowed(arg.ToR, arg.GetDuration()) {
 		err = utils.ErrMaxUsageExceeded
 		return
 	}
@@ -244,7 +244,7 @@ func (rs *Responder) RefundRounding(arg *CallDescriptorWithArgDispatcher, reply 
 	if arg.Subject == "" {
 		arg.Subject = arg.Account
 	}
-	if !rs.usageAllowed(arg.TOR, arg.GetDuration()) {
+	if !rs.usageAllowed(arg.ToR, arg.GetDuration()) {
 		err = utils.ErrMaxUsageExceeded
 		return
 	}
@@ -256,7 +256,7 @@ func (rs *Responder) GetMaxSessionTime(arg *CallDescriptorWithArgDispatcher, rep
 	if arg.Subject == "" {
 		arg.Subject = arg.Account
 	}
-	if !rs.usageAllowed(arg.TOR, arg.GetDuration()) {
+	if !rs.usageAllowed(arg.ToR, arg.GetDuration()) {
 		return utils.ErrMaxUsageExceeded
 	}
 	*reply, err = arg.GetMaxSessionDuration()

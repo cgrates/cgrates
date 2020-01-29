@@ -7,7 +7,7 @@
 			"filters": ["*string:~*vars.*cmd:CCR", "*string:~*req.Service-Context-Id:TestDiamItDryRun"],
 			"flags": ["*dryrun"],
 			"request_fields":[
-				{"tag": "TOR", "path": "ToR", "type": "*constant", "value": "*sms"},
+				{"tag": "ToR", "path": "ToR", "type": "*constant", "value": "*sms"},
 				{"tag": "*api_key", "path": "*api_key", "type": "*constant", "value": "ses12345"},
 				{"tag": "Val1", "path": "Val1", "type": "*constant", "value": "1"},
 				{"tag": "Val2", "path": "Val2", "type": "*constant", "value": "2"},
@@ -43,7 +43,7 @@
 			"filters": ["*rsr::~*rep.Multiple-Services-Credit-Control.Used-Service-Unit.CC-Total-Octets[0](!^$)"], // make sure the CC-Total-Octets was populated in the previous processor
 			"flags": ["*dryrun"],
 			"request_fields":[
-				{"tag": "TOR", "path": "ToR", "type": "*constant", "value": "*sms"},
+				{"tag": "ToR", "path": "ToR", "type": "*constant", "value": "*sms"},
 				{"tag": "*api_key", "path": "*api_key", "type": "*constant", "value": "ses12345"},
 				{"tag": "Val1", "path": "Val1", "type": "*constant", "value": "1"},
 				{"tag": "Val2", "path": "Val2", "type": "*constant", "value": "2"},

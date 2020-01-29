@@ -104,7 +104,7 @@ func TestMultipleInputLeftMerge(t *testing.T) {
 	}
 	/*t1 = time.Date(2012, time.February, 2, 18, 01, 0, 0, time.UTC)
 	t2 = time.Date(2012, time.February, 2, 18, 02, 0, 0, time.UTC)
-	cd = &CallDescriptor{TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
+	cd = &CallDescriptor{ToR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
 	cc2, _ := cd.getCost()
 	if cc2.Cost != 30 {
 		t.Errorf("expected 30 was %v", cc2.Cost)
@@ -190,7 +190,7 @@ func TestCallCostToDataCostError(t *testing.T) {
 		Destination: utils.ANY,
 		TimeStart:   time.Date(2014, 3, 4, 6, 0, 0, 0, time.UTC),
 		TimeEnd:     time.Date(2014, 3, 4, 6, 1, 5, 0, time.UTC),
-		TOR:         utils.VOICE,
+		ToR:         utils.VOICE,
 	}
 	cc, _ := cd.getCost()
 	_, err := cc.ToDataCost()

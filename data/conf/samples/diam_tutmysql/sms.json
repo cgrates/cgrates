@@ -13,7 +13,7 @@
 			"flags": ["*event", "*accounts", "*cdrs"],
 			"request_fields":[
 				{
-					"tag": "TOR", "path": "ToR", 
+					"tag": "ToR", "path": "ToR", 
 					"type": "*constant", "value": "*sms"
 				},
 				{

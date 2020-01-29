@@ -27,7 +27,7 @@ func init() {
 	c := &CmdDebit{
 		name:       "debit",
 		rpcMethod:  utils.ResponderDebit,
-		clientArgs: []string{"Category", "TOR", "Tenant", "Subject", "Account", "Destination", "TimeStart", "TimeEnd", "CallDuration", "FallbackSubject", "DryRun"},
+		clientArgs: []string{"Category", "ToR", "Tenant", "Subject", "Account", "Destination", "TimeStart", "TimeEnd", "CallDuration", "FallbackSubject", "DryRun"},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}

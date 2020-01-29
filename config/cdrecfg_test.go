@@ -102,12 +102,12 @@ func TestCdreCfgloadFromJsonCfg(t *testing.T) {
 		"attempts": 1,									// Number of attempts if not success
 		"field_separator": ",",							// used field separator in some export formats, eg: *file_csv
 		"fields": [								// template of the exported content fields
-			{"path": "*exp.CGRID", "type": "*composed", "value": "~CGRID"},
+			{"path": "*exp.CGRID", "type": "*composed", "value": "~*req.CGRID"},
 		],
 	},
 },
 }`
-	val, err := NewRSRParsers("~CGRID", true, utils.INFIELD_SEP)
+	val, err := NewRSRParsers("~*req.CGRID", true, utils.INFIELD_SEP)
 	if err != nil {
 		t.Error(err)
 	}

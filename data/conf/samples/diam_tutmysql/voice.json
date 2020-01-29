@@ -11,7 +11,7 @@
 			],
 			"flags": ["*auth", "*accounts"],
 			"request_fields":[
-				{"tag": "TOR", "path": "ToR", "type": "*constant", "value": "*voice"},
+				{"tag": "ToR", "path": "ToR", "type": "*constant", "value": "*voice"},
 				{
 					"tag": "OriginID", "path": "OriginID", 
 					"type": "*variable", "mandatory": true, 

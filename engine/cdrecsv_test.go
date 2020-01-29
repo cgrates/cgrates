@@ -121,34 +121,70 @@ func TestExportVoiceWithConvert(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
 	cdreCfg := cfg.CdreProfiles[utils.MetaDefault]
 	cdreCfg.Fields = []*config.FCTemplate{
-		{Tag: "ToR", Type: "*composed",
-			Value: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"ToR", true, utils.INFIELD_SEP)},
-		{Tag: "OriginID", Type: "*composed",
-			Value: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"OriginID", true, utils.INFIELD_SEP)},
-		{Tag: "RequestType", Type: "*composed",
-			Value: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"RequestType", true, utils.INFIELD_SEP)},
-		{Tag: "Tenant", Type: "*composed",
-			Value: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"Tenant", true, utils.INFIELD_SEP)},
-		{Tag: "Category", Type: "*composed",
-			Value: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"Category", true, utils.INFIELD_SEP)},
-		{Tag: "Account", Type: "*composed",
-			Value: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"Account", true, utils.INFIELD_SEP)},
-		{Tag: "Destination", Type: "*composed",
-			Value: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"Destination", true, utils.INFIELD_SEP)},
-		{Tag: "AnswerTime", Type: "*composed",
-			Value:  config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"AnswerTime", true, utils.INFIELD_SEP),
+		{
+			Tag:   "*exp.ToR",
+			Path:  "*exp.ToR",
+			Type:  "*composed",
+			Value: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+"ToR", true, utils.INFIELD_SEP)},
+		{
+			Tag:   "*exp.OriginID",
+			Path:  "*exp.OriginID",
+			Type:  "*composed",
+			Value: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+"OriginID", true, utils.INFIELD_SEP)},
+		{
+			Tag:   "*exp.RequestType",
+			Path:  "*exp.RequestType",
+			Type:  "*composed",
+			Value: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+"RequestType", true, utils.INFIELD_SEP)},
+		{
+			Tag:   "*exp.Tenant",
+			Path:  "*exp.Tenant",
+			Type:  "*composed",
+			Value: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+"Tenant", true, utils.INFIELD_SEP)},
+		{
+			Tag:   "*exp.Category",
+			Path:  "*exp.Category",
+			Type:  "*composed",
+			Value: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+"Category", true, utils.INFIELD_SEP)},
+		{
+			Tag:   "*exp.Account",
+			Path:  "*exp.Account",
+			Type:  "*composed",
+			Value: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+"Account", true, utils.INFIELD_SEP)},
+		{
+			Tag:   "*exp.Destination",
+			Path:  "*exp.Destination",
+			Type:  "*composed",
+			Value: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+"Destination", true, utils.INFIELD_SEP)},
+		{
+			Tag:    "*exp.AnswerTime",
+			Path:   "*exp.AnswerTime",
+			Type:   "*composed",
+			Value:  config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+"AnswerTime", true, utils.INFIELD_SEP),
 			Layout: "2006-01-02T15:04:05Z07:00"},
-		{Tag: "UsageVoice", Type: "*composed",
+		{
+			Tag:     "*exp.UsageVoice",
+			Path:    "*exp.UsageVoice",
+			Type:    "*composed",
 			Filters: []string{"*string:~*req.ToR:*voice"},
-			Value:   config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"Usage{*duration_seconds}", true, utils.INFIELD_SEP)},
-		{Tag: "UsageData", Type: "*composed",
+			Value:   config.NewRSRParsersMustCompile("~*req.Usage{*duration_seconds}", true, utils.INFIELD_SEP)},
+		{
+			Tag:     "*exp.UsageData",
+			Path:    "*exp.UsageData",
+			Type:    "*composed",
 			Filters: []string{"*string:~*req.ToR:*data"},
-			Value:   config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"Usage{*duration_nanoseconds}", true, utils.INFIELD_SEP)},
-		{Tag: "UsageSMS", Type: "*composed",
+			Value:   config.NewRSRParsersMustCompile("~*req.Usage{*duration_nanoseconds}", true, utils.INFIELD_SEP)},
+		{
+			Tag:     "*exp.UsageSMS",
+			Path:    "*exp.UsageSMS",
+			Type:    "*composed",
 			Filters: []string{"*string:~*req.ToR:*sms"},
-			Value:   config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"Usage{*duration_nanoseconds}", true, utils.INFIELD_SEP)},
-		{Tag: "Cost", Type: "*composed",
-			Value:            config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"Cost", true, utils.INFIELD_SEP),
+			Value:   config.NewRSRParsersMustCompile("~*req.Usage{*duration_nanoseconds}", true, utils.INFIELD_SEP)},
+		{
+			Tag:              "*exp.Cost",
+			Path:             "*exp.Cost",
+			Type:             "*composed",
+			Value:            config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+"Cost", true, utils.INFIELD_SEP),
 			RoundingDecimals: 5},
 	}
 	cdrVoice := &CDR{
@@ -194,6 +230,12 @@ func TestExportVoiceWithConvert(t *testing.T) {
 		t.Error("Unexpected error received: ", err)
 	}
 	if err = cdre.processCDRs(); err != nil {
+		t.Error(err)
+	}
+	if err = cdre.composeHeader(); err != nil {
+		t.Error(err)
+	}
+	if err = cdre.composeTrailer(); err != nil {
 		t.Error(err)
 	}
 	csvWriter := csv.NewWriter(writer)
@@ -218,34 +260,70 @@ func TestExportWithFilter(t *testing.T) {
 	cdreCfg := cfg.CdreProfiles[utils.MetaDefault]
 	cdreCfg.Filters = []string{"*string:~*req.Tenant:cgrates.org"}
 	cdreCfg.Fields = []*config.FCTemplate{
-		{Tag: "ToR", Type: "*composed",
-			Value: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"ToR", true, utils.INFIELD_SEP)},
-		{Tag: "OriginID", Type: "*composed",
-			Value: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"OriginID", true, utils.INFIELD_SEP)},
-		{Tag: "RequestType", Type: "*composed",
-			Value: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"RequestType", true, utils.INFIELD_SEP)},
-		{Tag: "Tenant", Type: "*composed",
-			Value: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"Tenant", true, utils.INFIELD_SEP)},
-		{Tag: "Category", Type: "*composed",
-			Value: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"Category", true, utils.INFIELD_SEP)},
-		{Tag: "Account", Type: "*composed",
-			Value: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"Account", true, utils.INFIELD_SEP)},
-		{Tag: "Destination", Type: "*composed",
-			Value: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"Destination", true, utils.INFIELD_SEP)},
-		{Tag: "AnswerTime", Type: "*composed",
-			Value:  config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"AnswerTime", true, utils.INFIELD_SEP),
+		{
+			Tag:   "*exp.ToR",
+			Path:  "*exp.ToR",
+			Type:  "*composed",
+			Value: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+"ToR", true, utils.INFIELD_SEP)},
+		{
+			Tag:   "*exp.OriginID",
+			Path:  "*exp.OriginID",
+			Type:  "*composed",
+			Value: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+"OriginID", true, utils.INFIELD_SEP)},
+		{
+			Tag:   "*exp.RequestType",
+			Path:  "*exp.RequestType",
+			Type:  "*composed",
+			Value: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+"RequestType", true, utils.INFIELD_SEP)},
+		{
+			Tag:   "*exp.Tenant",
+			Path:  "*exp.Tenant",
+			Type:  "*composed",
+			Value: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+"Tenant", true, utils.INFIELD_SEP)},
+		{
+			Tag:   "*exp.Category",
+			Path:  "*exp.Category",
+			Type:  "*composed",
+			Value: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+"Category", true, utils.INFIELD_SEP)},
+		{
+			Tag:   "*exp.Account",
+			Path:  "*exp.Account",
+			Type:  "*composed",
+			Value: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+"Account", true, utils.INFIELD_SEP)},
+		{
+			Tag:   "*exp.Destination",
+			Path:  "*exp.Destination",
+			Type:  "*composed",
+			Value: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+"Destination", true, utils.INFIELD_SEP)},
+		{
+			Tag:    "*exp.AnswerTime",
+			Path:   "*exp.AnswerTime",
+			Type:   "*composed",
+			Value:  config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+"AnswerTime", true, utils.INFIELD_SEP),
 			Layout: "2006-01-02T15:04:05Z07:00"},
-		{Tag: "UsageVoice", Type: "*composed",
+		{
+			Tag:     "*exp.UsageVoice",
+			Path:    "*exp.UsageVoice",
+			Type:    "*composed",
 			Filters: []string{"*string:~*req.ToR:*voice"},
-			Value:   config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"Usage{*duration_seconds}", true, utils.INFIELD_SEP)},
-		{Tag: "UsageData", Type: "*composed",
+			Value:   config.NewRSRParsersMustCompile("~*req.Usage{*duration_seconds}", true, utils.INFIELD_SEP)},
+		{
+			Tag:     "*exp.UsageData",
+			Path:    "*exp.UsageData",
+			Type:    "*composed",
 			Filters: []string{"*string:~*req.ToR:*data"},
-			Value:   config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"Usage{*duration_nanoseconds}", true, utils.INFIELD_SEP)},
-		{Tag: "UsageSMS", Type: "*composed",
+			Value:   config.NewRSRParsersMustCompile("~*req.Usage{*duration_nanoseconds}", true, utils.INFIELD_SEP)},
+		{
+			Tag:     "*exp.UsageSMS",
+			Path:    "*exp.UsageSMS",
+			Type:    "*composed",
 			Filters: []string{"*string:~*req.ToR:*sms"},
-			Value:   config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"Usage{*duration_nanoseconds}", true, utils.INFIELD_SEP)},
-		{Tag: "Cost", Type: "*composed",
-			Value:            config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"Cost", true, utils.INFIELD_SEP),
+			Value:   config.NewRSRParsersMustCompile("~*req.Usage{*duration_nanoseconds}", true, utils.INFIELD_SEP)},
+		{
+			Tag:              "*exp.Cost",
+			Path:             "*exp.Cost",
+			Type:             "*composed",
+			Value:            config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+"Cost", true, utils.INFIELD_SEP),
 			RoundingDecimals: 5},
 	}
 	cdrVoice := &CDR{
@@ -293,6 +371,12 @@ func TestExportWithFilter(t *testing.T) {
 	if err = cdre.processCDRs(); err != nil {
 		t.Error(err)
 	}
+	if err = cdre.composeHeader(); err != nil {
+		t.Error(err)
+	}
+	if err = cdre.composeTrailer(); err != nil {
+		t.Error(err)
+	}
 	csvWriter := csv.NewWriter(writer)
 	if err := cdre.writeCsv(csvWriter); err != nil {
 		t.Error("Unexpected error: ", err)
@@ -314,34 +398,70 @@ func TestExportWithFilter2(t *testing.T) {
 	cdreCfg := cfg.CdreProfiles[utils.MetaDefault]
 	cdreCfg.Filters = []string{"*string:~*req.Tenant:cgrates.org", "*lte:~*req.Cost:0.5"}
 	cdreCfg.Fields = []*config.FCTemplate{
-		{Tag: "ToR", Type: "*composed",
-			Value: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"ToR", true, utils.INFIELD_SEP)},
-		{Tag: "OriginID", Type: "*composed",
-			Value: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"OriginID", true, utils.INFIELD_SEP)},
-		{Tag: "RequestType", Type: "*composed",
-			Value: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"RequestType", true, utils.INFIELD_SEP)},
-		{Tag: "Tenant", Type: "*composed",
-			Value: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"Tenant", true, utils.INFIELD_SEP)},
-		{Tag: "Category", Type: "*composed",
-			Value: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"Category", true, utils.INFIELD_SEP)},
-		{Tag: "Account", Type: "*composed",
-			Value: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"Account", true, utils.INFIELD_SEP)},
-		{Tag: "Destination", Type: "*composed",
-			Value: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"Destination", true, utils.INFIELD_SEP)},
-		{Tag: "AnswerTime", Type: "*composed",
-			Value:  config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"AnswerTime", true, utils.INFIELD_SEP),
+		{
+			Tag:   "*exp.ToR",
+			Path:  "*exp.ToR",
+			Type:  "*composed",
+			Value: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+"ToR", true, utils.INFIELD_SEP)},
+		{
+			Tag:   "*exp.OriginID",
+			Path:  "*exp.OriginID",
+			Type:  "*composed",
+			Value: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+"OriginID", true, utils.INFIELD_SEP)},
+		{
+			Tag:   "*exp.RequestType",
+			Path:  "*exp.RequestType",
+			Type:  "*composed",
+			Value: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+"RequestType", true, utils.INFIELD_SEP)},
+		{
+			Tag:   "*exp.Tenant",
+			Path:  "*exp.Tenant",
+			Type:  "*composed",
+			Value: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+"Tenant", true, utils.INFIELD_SEP)},
+		{
+			Tag:   "*exp.Category",
+			Path:  "*exp.Category",
+			Type:  "*composed",
+			Value: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+"Category", true, utils.INFIELD_SEP)},
+		{
+			Tag:   "*exp.Account",
+			Path:  "*exp.Account",
+			Type:  "*composed",
+			Value: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+"Account", true, utils.INFIELD_SEP)},
+		{
+			Tag:   "*exp.Destination",
+			Path:  "*exp.Destination",
+			Type:  "*composed",
+			Value: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+"Destination", true, utils.INFIELD_SEP)},
+		{
+			Tag:    "*exp.AnswerTime",
+			Path:   "*exp.AnswerTime",
+			Type:   "*composed",
+			Value:  config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+"AnswerTime", true, utils.INFIELD_SEP),
 			Layout: "2006-01-02T15:04:05Z07:00"},
-		{Tag: "UsageVoice", Type: "*composed",
+		{
+			Tag:     "*exp.UsageVoice",
+			Path:    "*exp.UsageVoice",
+			Type:    "*composed",
 			Filters: []string{"*string:~*req.ToR:*voice"},
-			Value:   config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"Usage{*duration_seconds}", true, utils.INFIELD_SEP)},
-		{Tag: "UsageData", Type: "*composed",
+			Value:   config.NewRSRParsersMustCompile("~*req.Usage{*duration_seconds}", true, utils.INFIELD_SEP)},
+		{
+			Tag:     "*exp.UsageData",
+			Path:    "*exp.UsageData",
+			Type:    "*composed",
 			Filters: []string{"*string:~*req.ToR:*data"},
-			Value:   config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"Usage{*duration_nanoseconds}", true, utils.INFIELD_SEP)},
-		{Tag: "UsageSMS", Type: "*composed",
+			Value:   config.NewRSRParsersMustCompile("~*req.Usage{*duration_nanoseconds}", true, utils.INFIELD_SEP)},
+		{
+			Tag:     "*exp.UsageSMS",
+			Path:    "*exp.UsageSMS",
+			Type:    "*composed",
 			Filters: []string{"*string:~*req.ToR:*sms"},
-			Value:   config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"Usage{*duration_nanoseconds}", true, utils.INFIELD_SEP)},
-		{Tag: "Cost", Type: "*composed",
-			Value:            config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"Cost", true, utils.INFIELD_SEP),
+			Value:   config.NewRSRParsersMustCompile("~*req.Usage{*duration_nanoseconds}", true, utils.INFIELD_SEP)},
+		{
+			Tag:              "*exp.Cost",
+			Path:             "*exp.Cost",
+			Type:             "*composed",
+			Value:            config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+"Cost", true, utils.INFIELD_SEP),
 			RoundingDecimals: 5},
 	}
 	cdrVoice := &CDR{
@@ -387,6 +507,12 @@ func TestExportWithFilter2(t *testing.T) {
 		t.Error("Unexpected error received: ", err)
 	}
 	if err = cdre.processCDRs(); err != nil {
+		t.Error(err)
+	}
+	if err = cdre.composeHeader(); err != nil {
+		t.Error(err)
+	}
+	if err = cdre.composeTrailer(); err != nil {
 		t.Error(err)
 	}
 	csvWriter := csv.NewWriter(writer)

@@ -31,7 +31,7 @@ func init() {
 	c := &CmdGetMaxDuration{
 		name:       "maxduration",
 		rpcMethod:  utils.ResponderGetMaxSessionTime,
-		clientArgs: []string{"Category", "TOR", "Tenant", "Subject", "Account", "Destination", "TimeStart", "TimeEnd", "CallDuration", "FallbackSubject"},
+		clientArgs: []string{"Category", "ToR", "Tenant", "Subject", "Account", "Destination", "TimeStart", "TimeEnd", "CallDuration", "FallbackSubject"},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}

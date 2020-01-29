@@ -321,7 +321,7 @@ func TestNewEventCostFromCallCost(t *testing.T) {
 		Subject:     "dan",
 		Account:     "dan",
 		Destination: "+4986517174963",
-		TOR:         utils.VOICE,
+		ToR:         utils.VOICE,
 		Cost:        0.85,
 		RatedUsage:  120.0,
 		Timespans: TimeSpans{
@@ -373,7 +373,7 @@ func TestNewEventCostFromCallCost(t *testing.T) {
 								ID:       "free_mins",
 								Value:    0,
 								Consumed: 1.0,
-								TOR:      utils.VOICE,
+								ToR:      utils.VOICE,
 							},
 							AccountID: "cgrates.org:dan",
 						},
@@ -388,7 +388,7 @@ func TestNewEventCostFromCallCost(t *testing.T) {
 								ID:       "discounted_mins",
 								Value:    0,
 								Consumed: 1.0,
-								TOR:      utils.VOICE,
+								ToR:      utils.VOICE,
 								RateInterval: &RateInterval{
 									Timing: &RITiming{
 										StartTime: "00:00:00",
@@ -693,7 +693,7 @@ func TestECAsRefundIncrements(t *testing.T) {
 	eCD := &CallDescriptor{
 		CgrID:         "164b0422fdc6a5117031b427439482c6a4f90e41",
 		RunID:         utils.MetaDefault,
-		TOR:           utils.VOICE,
+		ToR:           utils.VOICE,
 		TimeStart:     time.Date(2017, 1, 9, 16, 18, 21, 0, time.UTC),
 		TimeEnd:       time.Date(2017, 1, 9, 16, 28, 21, 0, time.UTC),
 		DurationIndex: time.Duration(10 * time.Minute),
@@ -1076,7 +1076,7 @@ func TestECAsCallCost(t *testing.T) {
 		},
 	}
 	eCC := &CallCost{
-		TOR:            utils.VOICE,
+		ToR:            utils.VOICE,
 		Cost:           0.85,
 		RatedUsage:     120000000000,
 		AccountSummary: acntSummary,

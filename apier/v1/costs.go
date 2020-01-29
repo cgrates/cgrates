@@ -87,7 +87,7 @@ func (apier *ApierV1) GetDataCost(attrs AttrGetDataCost, reply *engine.DataCost)
 		TimeStart:     aTime,
 		TimeEnd:       aTime.Add(attrs.Usage),
 		DurationIndex: attrs.Usage,
-		TOR:           utils.DATA,
+		ToR:           utils.DATA,
 	}
 	var cc engine.CallCost
 	if err := apier.Responder.GetCost(&engine.CallDescriptorWithArgDispatcher{CallDescriptor: cd,

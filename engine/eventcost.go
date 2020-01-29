@@ -269,7 +269,7 @@ func (ec *EventCost) AsRefundIncrements(tor string) (cd *CallDescriptor) {
 	cd = &CallDescriptor{
 		CgrID:         ec.CGRID,
 		RunID:         ec.RunID,
-		TOR:           tor,
+		ToR:           tor,
 		TimeStart:     ec.StartTime,
 		TimeEnd:       ec.StartTime.Add(ec.GetUsage()),
 		DurationIndex: ec.GetUsage(),
@@ -325,7 +325,7 @@ func (ec *EventCost) AsRefundIncrements(tor string) (cd *CallDescriptor) {
 // AsCallCost converts an EventCost into a CallCost
 func (ec *EventCost) AsCallCost(tor string) *CallCost {
 	cc := &CallCost{
-		TOR:            utils.FirstNonEmpty(tor, utils.VOICE),
+		ToR:            utils.FirstNonEmpty(tor, utils.VOICE),
 		Cost:           ec.GetCost(),
 		RatedUsage:     float64(ec.GetUsage().Nanoseconds()),
 		AccountSummary: ec.AccountSummary}

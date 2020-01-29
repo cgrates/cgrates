@@ -27,7 +27,7 @@ import (
 
 // The output structure that will be returned with the call cost information.
 type CallCost struct {
-	Category, Tenant, Subject, Account, Destination, TOR string
+	Category, Tenant, Subject, Account, Destination, ToR string
 	Cost                                                 float64
 	Timespans                                            TimeSpans
 	RatedUsage                                           float64
@@ -90,7 +90,7 @@ func (cc *CallCost) CreateCallDescriptor() *CallDescriptor {
 		Subject:     cc.Subject,
 		Account:     cc.Account,
 		Destination: cc.Destination,
-		TOR:         cc.TOR,
+		ToR:         cc.ToR,
 	}
 }
 
@@ -104,7 +104,7 @@ func (cc *CallCost) IsPaid() bool {
 }
 
 func (cc *CallCost) ToDataCost() (*DataCost, error) {
-	if cc.TOR == utils.VOICE {
+	if cc.ToR == utils.VOICE {
 		return nil, errors.New("Not a data call!")
 	}
 	dc := &DataCost{
@@ -113,7 +113,7 @@ func (cc *CallCost) ToDataCost() (*DataCost, error) {
 		Subject:          cc.Subject,
 		Account:          cc.Account,
 		Destination:      cc.Destination,
-		TOR:              cc.TOR,
+		ToR:              cc.ToR,
 		Cost:             cc.Cost,
 		deductConnectFee: cc.deductConnectFee,
 	}

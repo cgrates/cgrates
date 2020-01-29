@@ -34,7 +34,7 @@ func TestEventRedearClone(t *testing.T) {
 		Tenant:   NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
 		Fields: []*FCTemplate{
 			{
-				Tag:       "TOR",
+				Tag:       "ToR",
 				Path:      "ToR",
 				Type:      "*composed",
 				Value:     NewRSRParsersMustCompile("~*req.2", true, utils.INFIELD_SEP),
@@ -62,7 +62,7 @@ func TestEventRedearClone(t *testing.T) {
 		Tenant:   NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
 		Fields: []*FCTemplate{
 			{
-				Tag:       "TOR",
+				Tag:       "ToR",
 				Path:      "ToR",
 				Type:      "*composed",
 				Value:     NewRSRParsersMustCompile("~*req.2", true, utils.INFIELD_SEP),
@@ -81,7 +81,7 @@ func TestEventRedearClone(t *testing.T) {
 	orig.Filters = []string{"SingleFilter"}
 	orig.Fields = []*FCTemplate{
 		{
-			Tag:       "TOR",
+			Tag:       "ToR",
 			Path:      "ToR",
 			Type:      "*composed",
 			Value:     NewRSRParsersMustCompile("~2", true, utils.INFIELD_SEP),
@@ -112,7 +112,7 @@ func TestEventReaderLoadFromJSON(t *testing.T) {
 				Filters:        []string{},
 				Flags:          utils.FlagsWithParams{},
 				Fields: []*FCTemplate{
-					{Tag: "TOR", Path: "ToR", Type: utils.MetaVariable,
+					{Tag: "ToR", Path: "ToR", Type: utils.MetaVariable,
 						Value: NewRSRParsersMustCompile("~*req.2", true, utils.INFIELD_SEP), Mandatory: true},
 					{Tag: "OriginID", Path: "OriginID", Type: utils.MetaVariable,
 						Value: NewRSRParsersMustCompile("~*req.3", true, utils.INFIELD_SEP), Mandatory: true},
@@ -150,7 +150,7 @@ func TestEventReaderLoadFromJSON(t *testing.T) {
 				Filters:        nil,
 				Flags:          utils.FlagsWithParams{},
 				Fields: []*FCTemplate{
-					{Tag: "TOR", Path: "ToR", Type: utils.MetaVariable,
+					{Tag: "ToR", Path: "ToR", Type: utils.MetaVariable,
 						Value: NewRSRParsersMustCompile("~*req.2", true, utils.INFIELD_SEP), Mandatory: true},
 					{Tag: "OriginID", Path: "OriginID", Type: utils.MetaVariable,
 						Value: NewRSRParsersMustCompile("~*req.3", true, utils.INFIELD_SEP), Mandatory: true},

@@ -76,7 +76,7 @@
                 "source_path": "/tmp/ers/in",
                 "processed_path": "/tmp/ers/out",
                 "content_fields":[									// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
-                    {"tag": "TOR", "path": "ToR", "type": "*variable", "value": "~*req.2", "mandatory": true},
+                    {"tag": "ToR", "path": "ToR", "type": "*variable", "value": "~*req.2", "mandatory": true},
                     {"tag": "OriginID", "path": "OriginID", "type": "*variable", "value": "~*req.3", "mandatory": true},
                     {"tag": "RequestType", "path": "RequestType", "type": "*variable", "value": "~*req.4", "mandatory": true},
                     {"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.6", "mandatory": true},

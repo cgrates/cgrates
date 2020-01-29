@@ -100,7 +100,7 @@
 				"tenant": "cgrates.org",
 				"flags": ["*cdrs"],
 				"request_fields":[
-					{"tag": "TOR", "path": "ToR", "type": "*constant",
+					{"tag": "ToR", "path": "ToR", "type": "*constant",
 					 "value": "*data", "mandatory": true},
 					{"tag": "RequestType", "path": "RequestType", "type": "*constant", 
 						"value": "*pseudoprepaid", "mandatory": true},	

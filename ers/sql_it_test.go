@@ -110,7 +110,7 @@ type testModelSql struct {
 	OriginHost  string
 	Source      string
 	OriginID    string
-	TOR         string
+	ToR         string
 	RequestType string
 	Tenant      string
 	Category    string

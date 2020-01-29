@@ -773,7 +773,7 @@ func testRPCMethodsCdrsStoreSessionCost(t *testing.T) {
 		Subject:     "1001",
 		Account:     "1001",
 		Destination: "data",
-		TOR:         "*data",
+		ToR:         "*data",
 		Cost:        0,
 	}
 	args := &engine.ArgsV2CDRSStoreSMCost{

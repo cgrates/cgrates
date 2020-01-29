@@ -153,7 +153,7 @@ With explanations in the comments:
 			"flags": ["*event", "*accounts", "*cdrs"],	// influence processing logic within CGRateS workflow
 			"request_fields":[							// data exchanged between Diameter and CGRateS
 				{
-					"tag": "TOR",			// tag is used in debug, 
+					"tag": "ToR",			// tag is used in debug, 
 					"path": "ToR",		// path is the field on CGRateS side
 					"type": "*constant",	// type defines the method to provide the value
 					"value": "*sms"}		
