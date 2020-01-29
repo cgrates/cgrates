@@ -217,7 +217,7 @@ func testChargerSProcessEvent(t *testing.T) {
 		{
 			ChargerSProfile:    "Charger1",
 			AttributeSProfiles: []string{"ATTR_1001_SIMPLEAUTH"},
-			AlteredFields:      []string{"*req.Password"},
+			AlteredFields:      []string{"*req." + utils.RunID, "*req.Password"},
 			CGREvent: &utils.CGREvent{ // matching Charger1
 				Tenant: "cgrates.org",
 				ID:     "event1",

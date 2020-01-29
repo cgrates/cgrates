@@ -120,6 +120,7 @@ func (cS *ChargerService) processEvent(cgrEv *utils.CGREventWithArgDispatcher) (
 		rply[i] = &ChrgSProcessEventReply{
 			ChargerSProfile: cP.ID,
 			CGREvent:        clonedEv.CGREvent,
+			AlteredFields:   []string{utils.MetaReq + utils.NestingSep + utils.RunID},
 		}
 		if len(cP.AttributeIDs) == 1 && cP.AttributeIDs[0] == utils.META_NONE {
 			continue // AttributeS disabled
@@ -140,7 +141,9 @@ func (cS *ChargerService) processEvent(cgrEv *utils.CGREventWithArgDispatcher) (
 			return nil, err
 		}
 		rply[i].AttributeSProfiles = evReply.MatchedProfiles
-		rply[i].AlteredFields = evReply.AlteredFields
+		if len(evReply.AlteredFields) != 0 {
+			rply[i].AlteredFields = append(rply[i].AlteredFields, evReply.AlteredFields...)
+		}
 		if len(evReply.AlteredFields) != 0 {
 			rply[i].CGREvent = evReply.CGREvent
 		}
