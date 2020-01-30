@@ -429,17 +429,17 @@ func testCGRConfigReloadERs(t *testing.T) {
 	flags, _ := utils.FlagsWithParamsFromSlice([]string{"*dryrun"})
 	flagsDefault, _ := utils.FlagsWithParamsFromSlice([]string{})
 	content := []*FCTemplate{
-		&FCTemplate{Tag: "ToR", Path: utils.ToR, Type: utils.META_COMPOSED, Value: NewRSRParsersMustCompile("~*req.2", true, utils.INFIELD_SEP), Mandatory: true},
-		&FCTemplate{Tag: utils.OriginID, Path: utils.OriginID, Type: utils.META_COMPOSED, Value: NewRSRParsersMustCompile("~*req.3", true, utils.INFIELD_SEP), Mandatory: true},
-		&FCTemplate{Tag: utils.RequestType, Path: utils.RequestType, Type: utils.META_COMPOSED, Value: NewRSRParsersMustCompile("~*req.4", true, utils.INFIELD_SEP), Mandatory: true},
-		&FCTemplate{Tag: utils.Tenant, Path: utils.Tenant, Type: utils.META_COMPOSED, Value: NewRSRParsersMustCompile("~*req.6", true, utils.INFIELD_SEP), Mandatory: true},
-		&FCTemplate{Tag: utils.Category, Path: utils.Category, Type: utils.META_COMPOSED, Value: NewRSRParsersMustCompile("~*req.7", true, utils.INFIELD_SEP), Mandatory: true},
-		&FCTemplate{Tag: utils.Account, Path: utils.Account, Type: utils.META_COMPOSED, Value: NewRSRParsersMustCompile("~*req.8", true, utils.INFIELD_SEP), Mandatory: true},
-		&FCTemplate{Tag: utils.Subject, Path: utils.Subject, Type: utils.META_COMPOSED, Value: NewRSRParsersMustCompile("~*req.9", true, utils.INFIELD_SEP), Mandatory: true},
-		&FCTemplate{Tag: utils.Destination, Path: utils.Destination, Type: utils.META_COMPOSED, Value: NewRSRParsersMustCompile("~*req.10", true, utils.INFIELD_SEP), Mandatory: true},
-		&FCTemplate{Tag: utils.SetupTime, Path: utils.SetupTime, Type: utils.META_COMPOSED, Value: NewRSRParsersMustCompile("~*req.11", true, utils.INFIELD_SEP), Mandatory: true},
-		&FCTemplate{Tag: utils.AnswerTime, Path: utils.AnswerTime, Type: utils.META_COMPOSED, Value: NewRSRParsersMustCompile("~*req.12", true, utils.INFIELD_SEP), Mandatory: true},
-		&FCTemplate{Tag: utils.Usage, Path: utils.Usage, Type: utils.META_COMPOSED, Value: NewRSRParsersMustCompile("~*req.13", true, utils.INFIELD_SEP), Mandatory: true},
+		&FCTemplate{Tag: "ToR", Path: utils.ToR, Type: utils.MetaVariable, Value: NewRSRParsersMustCompile("~*req.2", true, utils.INFIELD_SEP), Mandatory: true},
+		&FCTemplate{Tag: utils.OriginID, Path: utils.OriginID, Type: utils.MetaVariable, Value: NewRSRParsersMustCompile("~*req.3", true, utils.INFIELD_SEP), Mandatory: true},
+		&FCTemplate{Tag: utils.RequestType, Path: utils.RequestType, Type: utils.MetaVariable, Value: NewRSRParsersMustCompile("~*req.4", true, utils.INFIELD_SEP), Mandatory: true},
+		&FCTemplate{Tag: utils.Tenant, Path: utils.Tenant, Type: utils.MetaVariable, Value: NewRSRParsersMustCompile("~*req.6", true, utils.INFIELD_SEP), Mandatory: true},
+		&FCTemplate{Tag: utils.Category, Path: utils.Category, Type: utils.MetaVariable, Value: NewRSRParsersMustCompile("~*req.7", true, utils.INFIELD_SEP), Mandatory: true},
+		&FCTemplate{Tag: utils.Account, Path: utils.Account, Type: utils.MetaVariable, Value: NewRSRParsersMustCompile("~*req.8", true, utils.INFIELD_SEP), Mandatory: true},
+		&FCTemplate{Tag: utils.Subject, Path: utils.Subject, Type: utils.MetaVariable, Value: NewRSRParsersMustCompile("~*req.9", true, utils.INFIELD_SEP), Mandatory: true},
+		&FCTemplate{Tag: utils.Destination, Path: utils.Destination, Type: utils.MetaVariable, Value: NewRSRParsersMustCompile("~*req.10", true, utils.INFIELD_SEP), Mandatory: true},
+		&FCTemplate{Tag: utils.SetupTime, Path: utils.SetupTime, Type: utils.MetaVariable, Value: NewRSRParsersMustCompile("~*req.11", true, utils.INFIELD_SEP), Mandatory: true},
+		&FCTemplate{Tag: utils.AnswerTime, Path: utils.AnswerTime, Type: utils.MetaVariable, Value: NewRSRParsersMustCompile("~*req.12", true, utils.INFIELD_SEP), Mandatory: true},
+		&FCTemplate{Tag: utils.Usage, Path: utils.Usage, Type: utils.MetaVariable, Value: NewRSRParsersMustCompile("~*req.13", true, utils.INFIELD_SEP), Mandatory: true},
 	}
 	expAttr := &ERsCfg{
 		Enabled:       true,
@@ -569,7 +569,7 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 			"Strip":            "",
 			"Tag":              "ToR",
 			"Timezone":         "",
-			"Type":             "*composed",
+			"Type":             "*variable",
 			"Value": []interface{}{
 				map[string]interface{}{
 					"AllFiltersMatch": true,
@@ -594,7 +594,7 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 			"Strip":            "",
 			"Tag":              "OriginID",
 			"Timezone":         "",
-			"Type":             "*composed",
+			"Type":             "*variable",
 			"Value": []interface{}{
 				map[string]interface{}{
 					"AllFiltersMatch": true,
@@ -619,7 +619,7 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 			"Strip":            "",
 			"Tag":              "RequestType",
 			"Timezone":         "",
-			"Type":             "*composed",
+			"Type":             "*variable",
 			"Value": []interface{}{
 				map[string]interface{}{
 					"AllFiltersMatch": true,
@@ -644,7 +644,7 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 			"Strip":            "",
 			"Tag":              "Tenant",
 			"Timezone":         "",
-			"Type":             "*composed",
+			"Type":             "*variable",
 			"Value": []interface{}{
 				map[string]interface{}{
 					"AllFiltersMatch": true,
@@ -669,7 +669,7 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 			"Strip":            "",
 			"Tag":              "Category",
 			"Timezone":         "",
-			"Type":             "*composed",
+			"Type":             "*variable",
 			"Value": []interface{}{
 				map[string]interface{}{
 					"AllFiltersMatch": true,
@@ -694,7 +694,7 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 			"Strip":            "",
 			"Tag":              "Account",
 			"Timezone":         "",
-			"Type":             "*composed",
+			"Type":             "*variable",
 			"Value": []interface{}{
 				map[string]interface{}{
 					"AllFiltersMatch": true,
@@ -719,7 +719,7 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 			"Strip":            "",
 			"Tag":              "Subject",
 			"Timezone":         "",
-			"Type":             "*composed",
+			"Type":             "*variable",
 			"Value": []interface{}{
 				map[string]interface{}{
 					"AllFiltersMatch": true,
@@ -744,7 +744,7 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 			"Strip":            "",
 			"Tag":              "Destination",
 			"Timezone":         "",
-			"Type":             "*composed",
+			"Type":             "*variable",
 			"Value": []interface{}{
 				map[string]interface{}{
 					"AllFiltersMatch": true,
@@ -769,7 +769,7 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 			"Strip":            "",
 			"Tag":              "SetupTime",
 			"Timezone":         "",
-			"Type":             "*composed",
+			"Type":             "*variable",
 			"Value": []interface{}{
 				map[string]interface{}{
 					"AllFiltersMatch": true,
@@ -794,7 +794,7 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 			"Strip":            "",
 			"Tag":              "AnswerTime",
 			"Timezone":         "",
-			"Type":             "*composed",
+			"Type":             "*variable",
 			"Value": []interface{}{
 				map[string]interface{}{
 					"AllFiltersMatch": true,
@@ -819,7 +819,7 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 			"Strip":            "",
 			"Tag":              "Usage",
 			"Timezone":         "",
-			"Type":             "*composed",
+			"Type":             "*variable",
 			"Value": []interface{}{
 				map[string]interface{}{
 					"AllFiltersMatch": true,
