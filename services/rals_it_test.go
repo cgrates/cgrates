@@ -65,12 +65,10 @@ func TestRalsReload(t *testing.T) {
 	stordb := NewStorDBService(cfg)
 	schS := NewSchedulerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil)
 	tS := NewThresholdService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1))
-	ralS := NewRalService(cfg, db, stordb, chS, filterSChan, server,
+	ralS := NewRalService(cfg, chS, server,
 		make(chan rpcclient.ClientConnector, 1),
 		make(chan rpcclient.ClientConnector, 1),
-		make(chan rpcclient.ClientConnector, 1),
-		make(chan rpcclient.ClientConnector, 1),
-		schS, engineShutdown, nil)
+		engineShutdown, nil)
 	srvMngr.AddServices(ralS, schS, tS,
 		NewLoaderService(cfg, db, filterSChan, server, engineShutdown, make(chan rpcclient.ClientConnector, 1), nil), db, stordb)
 	if err = srvMngr.StartServices(); err != nil {
@@ -99,14 +97,6 @@ func TestRalsReload(t *testing.T) {
 		t.Errorf("Expected service to be running")
 	}
 
-	if apiv1 := ralS.GetAPIv1(); !apiv1.IsRunning() {
-		t.Errorf("Expected service to be running")
-	}
-
-	if apiv2 := ralS.GetAPIv2(); !apiv2.IsRunning() {
-		t.Errorf("Expected service to be running")
-	}
-
 	if resp := ralS.GetResponder(); !resp.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
@@ -121,14 +111,6 @@ func TestRalsReload(t *testing.T) {
 	cfg.GetReloadChan(config.RALS_JSN) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)
 	if ralS.IsRunning() {
-		t.Errorf("Expected service to be down")
-	}
-
-	if apiv1 := ralS.GetAPIv1(); apiv1.IsRunning() {
-		t.Errorf("Expected service to be down")
-	}
-
-	if apiv2 := ralS.GetAPIv2(); apiv2.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
 
