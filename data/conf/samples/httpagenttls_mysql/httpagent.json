@@ -132,7 +132,7 @@
 				"id": "TextPlainDryRun",
 				"filters": ["*string:~*req.request_type:TextPlainDryRun","*string:~*req.Msisdn:497700056231"],
 				"tenant": "cgrates.org",
-				"flags": ["*dryrun"],
+				"flags": ["*dryrun","*continue"],
 				"request_fields":[
 				],
 				"reply_fields":[
@@ -147,7 +147,6 @@
 					{"tag": "Field5", "path": "Item1.1", "type": "*variable", 
 						"value": "Val1", "mandatory": true},
 				],
-				"continue": true,
 			},
 			{
 				"id": "TextPlainDryRun2",

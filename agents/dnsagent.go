@@ -131,7 +131,7 @@ func (da *DNSAgent) handleMessage(w dns.ResponseWriter, req *dns.Msg) {
 			processed = lclProcessed
 		}
 		if err != nil ||
-			(lclProcessed && !reqProcessor.Continue) {
+			(lclProcessed && !reqProcessor.Flags.GetBool(utils.MetaContinue)) {
 			break
 		}
 	}

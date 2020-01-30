@@ -77,18 +77,16 @@ func TestRequestProcessorloadFromJsonCfg(t *testing.T) {
 		t.Errorf("Expected: %+v ,recived: %+v", expected, dareq)
 	}
 	json := &ReqProcessorJsnCfg{
-		ID:       utils.StringPointer("cgrates"),
-		Tenant:   utils.StringPointer("tenant"),
-		Filters:  &[]string{"filter1", "filter2"},
-		Flags:    &[]string{"flag1", "flag2"},
-		Continue: utils.BoolPointer(true),
+		ID:      utils.StringPointer("cgrates"),
+		Tenant:  utils.StringPointer("tenant"),
+		Filters: &[]string{"filter1", "filter2"},
+		Flags:   &[]string{"flag1", "flag2"},
 	}
 	expected = RequestProcessor{
-		ID:       "cgrates",
-		Tenant:   NewRSRParsersMustCompile("tenant", true, utils.INFIELD_SEP),
-		Filters:  []string{"filter1", "filter2"},
-		Flags:    utils.FlagsWithParams{"flag1": []string{}, "flag2": []string{}},
-		Continue: true,
+		ID:      "cgrates",
+		Tenant:  NewRSRParsersMustCompile("tenant", true, utils.INFIELD_SEP),
+		Filters: []string{"filter1", "filter2"},
+		Flags:   utils.FlagsWithParams{"flag1": []string{}, "flag2": []string{}},
 	}
 	if err = dareq.loadFromJsonCfg(json, utils.INFIELD_SEP); err != nil {
 		t.Error(err)

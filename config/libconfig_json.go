@@ -353,7 +353,6 @@ type ReqProcessorJsnCfg struct {
 	Flags          *[]string
 	Request_fields *[]*FcTemplateJsonCfg
 	Reply_fields   *[]*FcTemplateJsonCfg
-	Continue       *bool
 }
 
 // Attribute service config section

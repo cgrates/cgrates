@@ -34,7 +34,7 @@
 			"id": "data_update_grp1",
 			"filters": ["*string:~*vars.*cmd:CCR", "*string:~*req.CC-Request-Type:2", 
 				"*string:~*req.Multiple-Services-Credit-Control.Rating-Group:1", "*prefix:~*req.Service-Context-Id:gprs"],
-			"flags": ["*update", "*accounts"],
+			"flags": ["*update", "*accounts","*continue"],
 			"request_fields":[
 				{"tag": "ToR", "path": "ToR", "type": "*constant", "value": "*data"},
 				{"tag": "InitialOriginID", "path": "InitialOriginID", "type": "*variable", 
@@ -60,7 +60,6 @@
 				{"tag": "ResultCode",  "filters": ["*rsr::~*cgrep.Error(!^$)"], 
 					"path": "Result-Code", "type": "*constant", "value": "5030", "blocker": true},
 			],
-			"continue": true,
 		},
 
 		{
