@@ -57,7 +57,7 @@ func TestCDRsPostFailoverIT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		cdrsPostFailConfDIR = "cdrsv_failover_internal"
-	case utils.MetaSQL:
+	case utils.MetaMySQL:
 		cdrsPostFailConfDIR = "cdrsv_failover_mysql"
 	case utils.MetaMongo:
 		cdrsPostFailConfDIR = "cdrsv_failover_mongo"

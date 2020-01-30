@@ -17,7 +17,7 @@
 
 "data_db": {
 	"db_type": "mongo",
-	"db_name": "10",
+	"db_name": "12",
 	"db_port": 27017,
 },
 
