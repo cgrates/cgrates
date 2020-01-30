@@ -375,6 +375,7 @@ const (
 	MetaCDRs                    = "*cdrs"
 	MetaCaches                  = "*caches"
 	MetaGuardian                = "*guardians"
+	MetaContinue                = "*continue"
 	Migrator                    = "migrator"
 	UnsupportedMigrationTask    = "unsupported migration task"
 	NoStorDBConnection          = "not connected to StorDB"

@@ -83,7 +83,7 @@ func (ha *HTTPAgent) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		if !lclProcessed {
 			continue
 		}
-		if lclProcessed && !reqProcessor.Continue {
+		if lclProcessed && !reqProcessor.Flags.GetBool(utils.MetaContinue) {
 			break
 		}
 	}

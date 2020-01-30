@@ -331,7 +331,6 @@ const CGRATES_CFG_JSON = `
 				{"tag": "Usage", "path": "Usage", "type": "*variable", "value": "~*req.13", "mandatory": true},
 			],
 			"cache_dump_fields": [],
-			"continue": false,									// continue to the next template if executed
 		},
 	],
 },

@@ -6,7 +6,7 @@
 			"id": "NAPTRSuppliersQuery",
 			"filters": ["*string:~*vars.QueryType:NAPTR", 
 				"*string:~*vars.E164Address:4986517174965"],
-			"flags": ["*message", "*suppliers"],
+			"flags": ["*message", "*suppliers","*continue"],
 			"request_fields":[
 				{"tag": "ToR", "path": "Account", "type": "*constant", "value": "1001"}, // so we can match the supplier profile
 			],
@@ -14,14 +14,13 @@
 				{"tag": "DispatchReply", "type": "*none", 
 					"blocker": true}, // enforces continue_on_success so we can check answer with filters
 			],
-			"continue": true,
 		},
 		{
 			"id": "NAPTRSuppliersOneSupplier",
 			"filters": ["*string:~*vars.QueryType:NAPTR", 
 				"*string:~*vars.E164Address:4986517174965", 
 				"*gte:~*cgrep.Suppliers.Count:1"],
-			"flags": ["*none"], // do not send request to CGRateS
+			"flags": ["*none","*continue"], // do not send request to CGRateS
 			"reply_fields":[
 				{"tag": "NAPTROrder", "path": "Order", 
 					"type": "*constant", "value": "100"},
@@ -36,14 +35,13 @@
 				{"tag": "NAPTRReplacement", "path": "Replacement",
 					"type": "*constant", "value": "."},
 			],
-			"continue": true,
 		},
 		{
 			"id": "NAPTRSuppliersTwoSuppliers",
 			"filters": ["*string:~*vars.QueryType:NAPTR", 
 				"*string:~*vars.E164Address:4986517174965", 
 				"*gte:~*cgrep.Suppliers.Count:2"],
-			"flags": ["*none"],
+			"flags": ["*none","*continue"],
 			"reply_fields":[
 				{"tag": "NAPTROrder", "type": "*constant", "new_branch": true,
 				 "path": "Order", "value": "100"},
@@ -58,7 +56,6 @@
 				{"tag": "NAPTRReplacement", "path": "Replacement",
 					"type": "*constant", "value": "."},
 			],
-			"continue": true,
 		},
 	],
 },

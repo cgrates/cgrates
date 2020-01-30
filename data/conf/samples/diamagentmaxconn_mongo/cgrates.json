@@ -66,10 +66,9 @@
 		{
 			"id": "maxconn",
 			"filters": ["*string:~*vars.*cmd:CCR", "*string:~*req.Service-Context-Id:TestDiamItDryRun"],
-			"flags": ["*dryrun"],
+			"flags": ["*dryrun","*continue"],
 			"request_fields":[],
 			"reply_fields":[],
-			"continue": true,
 		},
 	],
 },

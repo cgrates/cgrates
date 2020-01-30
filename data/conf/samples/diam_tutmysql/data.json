@@ -74,7 +74,7 @@
 				"*string:~*req.Multiple-Services-Credit-Control.Rating-Group:1",
 				"*prefix:~*req.Service-Context-Id:gprs"
 			],
-			"flags": ["*update", "*accounts"],
+			"flags": ["*update", "*accounts","*continue"],
 			"request_fields":[
 				{
 					"tag": "ToR", "path": "ToR", 
@@ -113,7 +113,6 @@
 					"type": "*constant", "value": "5030"
 				},
 			],
-			"continue": true, // so we can bill the second group out of  the same request
 		},
 
 		{

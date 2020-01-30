@@ -5,7 +5,7 @@
 		{
 			"id": "dryrun1",
 			"filters": ["*string:~*vars.*cmd:CCR", "*string:~*req.Service-Context-Id:TestDiamItDryRun"],
-			"flags": ["*dryrun"],
+			"flags": ["*dryrun","*continue"],
 			"request_fields":[
 				{"tag": "ToR", "path": "ToR", "type": "*constant", "value": "*sms"},
 				{"tag": "*api_key", "path": "*api_key", "type": "*constant", "value": "ses12345"},
@@ -36,7 +36,6 @@
 				{"tag": "GrantedUsage", "path": "Granted-Service-Unit.CC-Time", "type": "*sum", 
 					"value": "~*cgreq.Val1;~*cgreq.Val2;~*cgreq.Val3"},
 			],
-			"continue": true,
 		},
 		{
 			"id": "dryrun2",
