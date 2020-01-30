@@ -383,7 +383,7 @@ func (cdr *CDR) formatField(cfgFld *config.FCTemplate, httpSkipTLSCheck bool,
 		}
 	case utils.META_COMBIMED:
 		outVal, err = cdr.combimedCdrFieldVal(cfgFld, groupedCDRs, filterS)
-	case utils.META_COMPOSED:
+	case utils.META_COMPOSED, utils.MetaVariable:
 		outVal, err = cdr.exportFieldValue(cfgFld, filterS)
 	case utils.MetaMaskedDestination:
 		if len(cfgFld.MaskDestID) != 0 && CachedDestHasPrefix(cfgFld.MaskDestID, cdr.Destination) {
