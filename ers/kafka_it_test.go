@@ -55,7 +55,7 @@ func TestKafkaER(t *testing.T) {
 			"tenant": "cgrates.org",							// tenant used by import
 			"filters": [],										// limit parsing based on the filters
 			"flags": [],										// flags to influence the event processing
-			"content_fields":[									// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
+			"fields":[									// import fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
 				{"tag": "CGRID", "type": "*composed", "value": "~*req.CGRID", "path": "CGRID"},
 			],
 		},
