@@ -23,7 +23,7 @@ import (
 )
 
 // Creates a new resource within a tariff plan
-func (self *ApierV1) SetTPResource(attr *utils.TPResourceProfile, reply *string) error {
+func (self *APIerSv1) SetTPResource(attr *utils.TPResourceProfile, reply *string) error {
 	if missing := utils.MissingStructFields(attr, []string{"TPid", "Tenant", "ID", "Limit"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -35,7 +35,7 @@ func (self *ApierV1) SetTPResource(attr *utils.TPResourceProfile, reply *string)
 }
 
 // Queries specific Resource on Tariff plan
-func (self *ApierV1) GetTPResource(attr *utils.TPTntID, reply *utils.TPResourceProfile) error {
+func (self *APIerSv1) GetTPResource(attr *utils.TPTntID, reply *utils.TPResourceProfile) error {
 	if missing := utils.MissingStructFields(attr, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -56,7 +56,7 @@ type AttrGetTPResourceIds struct {
 }
 
 // Queries Resource identities on specific tariff plan.
-func (self *ApierV1) GetTPResourceIDs(attrs *AttrGetTPResourceIds, reply *[]string) error {
+func (self *APIerSv1) GetTPResourceIDs(attrs *AttrGetTPResourceIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -73,7 +73,7 @@ func (self *ApierV1) GetTPResourceIDs(attrs *AttrGetTPResourceIds, reply *[]stri
 }
 
 // Removes specific Resource on Tariff plan
-func (self *ApierV1) RemoveTPResource(attrs *utils.TPTntID, reply *string) error {
+func (self *APIerSv1) RemoveTPResource(attrs *utils.TPTntID, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

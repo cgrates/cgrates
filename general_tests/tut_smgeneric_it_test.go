@@ -116,7 +116,7 @@ func testTutSMGRpcConn(t *testing.T) {
 // Load the tariff plan, creating accounts and their balances
 func testTutSMGLoadTariffPlanFromFolder(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
-	if err := tutSMGRpc.Call(utils.ApierV2LoadTariffPlanFromFolder, attrs, &smgLoadInst); err != nil {
+	if err := tutSMGRpc.Call(utils.APIerSv2LoadTariffPlanFromFolder, attrs, &smgLoadInst); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
@@ -161,7 +161,7 @@ func testTutSMGCacheStats(t *testing.T) {
 	if err := tutSMGRpc.Call(utils.CacheSv1GetCacheStats, new(utils.AttrCacheIDsWithArgDispatcher), &rcvStats); err != nil {
 		t.Error("Got error on CacheSv1.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
-		t.Errorf("Calling ApierV2.CacheSv1 expected: %+v,\n received: %+v", utils.ToJSON(expectedStats), utils.ToJSON(rcvStats))
+		t.Errorf("Calling APIerSv2.CacheSv1 expected: %+v,\n received: %+v", utils.ToJSON(expectedStats), utils.ToJSON(rcvStats))
 	}
 }
 

@@ -131,7 +131,7 @@ func testPrecacheGetCacheStatsBeforeLoad(t *testing.T) {
 func testPrecacheFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "precache")}
-	if err := precacheRPC.Call(utils.ApierV1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	if err := precacheRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(500 * time.Millisecond)

@@ -180,7 +180,7 @@ func testLoaderCheckAttributes(t *testing.T) {
 		eAttrPrf.Attributes[1].FilterIDs = nil
 	}
 	var reply *engine.AttributeProfile
-	if err := loaderRPC.Call(utils.ApierV1GetAttributeProfile,
+	if err := loaderRPC.Call(utils.APIerSv1GetAttributeProfile,
 		&utils.TenantIDWithArgDispatcher{
 			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ALS1"},
 		}, &reply); err != nil {

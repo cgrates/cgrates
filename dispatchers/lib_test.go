@@ -121,7 +121,7 @@ func (d *testDispatcher) resetStorDb(t *testing.T) {
 func (d *testDispatcher) loadData(t *testing.T, path string) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path}
-	if err := d.RPC.Call(utils.ApierV1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	if err := d.RPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Errorf("<%s>Error at loading data from folder :%v", d.CfgParh, err)
 	}
 }

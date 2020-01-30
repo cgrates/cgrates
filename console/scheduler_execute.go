@@ -26,7 +26,7 @@ import (
 func init() {
 	c := &CmdExecuteScheduledActions{
 		name:      "scheduler_execute",
-		rpcMethod: utils.ApierV1ExecuteScheduledActions,
+		rpcMethod: utils.APIerSv1ExecuteScheduledActions,
 		rpcParams: &v1.AttrsExecuteScheduledActions{},
 	}
 	commands[c.Name()] = c

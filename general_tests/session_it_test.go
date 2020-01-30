@@ -108,7 +108,7 @@ func testSesItRPCConn(t *testing.T) {
 func testSesItLoadFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testit")}
-	if err := sesRPC.Call(utils.ApierV1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	if err := sesRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(500 * time.Millisecond)
@@ -120,7 +120,7 @@ func testAccountBalance2(t *testing.T, sracc, srten, balType string, expected fl
 		Tenant:  srten,
 		Account: sracc,
 	}
-	if err := sesRPC.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
+	if err := sesRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if rply := acnt.BalanceMap[balType].GetTotalValue(); rply != expected {
 		t.Errorf("Expecting: %v, received: %v",
@@ -140,7 +140,7 @@ func testSesItAddVoiceBalance(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := sesRPC.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {
+	if err := sesRPC.Call(utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)

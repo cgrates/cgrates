@@ -28,7 +28,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (apiv2 *ApierV2) GetAccounts(attr utils.AttrGetAccounts, reply *[]*engine.Account) error {
+func (apiv2 *APIerSv2) GetAccounts(attr utils.AttrGetAccounts, reply *[]*engine.Account) error {
 	if len(attr.Tenant) == 0 {
 		return utils.NewErrMandatoryIeMissing("Tenant")
 	}
@@ -81,7 +81,7 @@ func (apiv2 *ApierV2) GetAccounts(attr utils.AttrGetAccounts, reply *[]*engine.A
 }
 
 // Get balance
-func (apiv2 *ApierV2) GetAccount(attr *utils.AttrGetAccount, reply *engine.Account) error {
+func (apiv2 *APIerSv2) GetAccount(attr *utils.AttrGetAccount, reply *engine.Account) error {
 	tag := utils.ConcatenatedKey(attr.Tenant, attr.Account)
 	account, err := apiv2.DataManager.GetAccount(tag)
 	if err != nil {
@@ -102,7 +102,7 @@ type AttrSetAccount struct {
 	ReloadScheduler        bool
 }
 
-func (apiv2 *ApierV2) SetAccount(attr AttrSetAccount, reply *string) error {
+func (apiv2 *APIerSv2) SetAccount(attr AttrSetAccount, reply *string) error {
 	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

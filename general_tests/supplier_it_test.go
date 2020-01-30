@@ -117,7 +117,7 @@ func testV1SplSRpcConn(t *testing.T) {
 func testV1SplSFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testit")}
-	if err := splSv1Rpc.Call(utils.ApierV1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	if err := splSv1Rpc.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(100 * time.Millisecond)
@@ -125,7 +125,7 @@ func testV1SplSFromFolder(t *testing.T) {
 
 func testV1SplSSetSupplierProfilesWithoutRatingPlanIDs(t *testing.T) {
 	var reply *engine.SupplierProfile
-	if err := splSv1Rpc.Call(utils.ApierV1GetSupplierProfile,
+	if err := splSv1Rpc.Call(utils.APIerSv1GetSupplierProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE2"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -148,12 +148,12 @@ func testV1SplSSetSupplierProfilesWithoutRatingPlanIDs(t *testing.T) {
 		},
 	}
 	var result string
-	if err := splSv1Rpc.Call(utils.ApierV1SetSupplierProfile, splPrf, &result); err != nil {
+	if err := splSv1Rpc.Call(utils.APIerSv1SetSupplierProfile, splPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := splSv1Rpc.Call(utils.ApierV1GetSupplierProfile,
+	if err := splSv1Rpc.Call(utils.APIerSv1GetSupplierProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE2"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(splPrf.SupplierProfile, reply) {
@@ -177,7 +177,7 @@ func testV1SplSSetSupplierProfilesWithoutRatingPlanIDs(t *testing.T) {
 		ev, &suplsReply); err.Error() != utils.NewErrServerError(utils.NewErrMandatoryIeMissing("RatingPlanIDs")).Error() {
 		t.Errorf("Expected error MANDATORY_IE_MISSING: [RatingPlanIDs] recieved:%v\n", err)
 	}
-	if err := splSv1Rpc.Call(utils.ApierV1RemoveSupplierProfile, utils.TenantID{
+	if err := splSv1Rpc.Call(utils.APIerSv1RemoveSupplierProfile, utils.TenantID{
 		Tenant: splPrf.Tenant,
 		ID:     splPrf.ID,
 	}, &result); err != nil {
@@ -189,7 +189,7 @@ func testV1SplSSetSupplierProfilesWithoutRatingPlanIDs(t *testing.T) {
 
 func testV1SplSAddNewSplPrf(t *testing.T) {
 	var reply *engine.SupplierProfile
-	if err := splSv1Rpc.Call(utils.ApierV1GetSupplierProfile,
+	if err := splSv1Rpc.Call(utils.APIerSv1GetSupplierProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "SPL_ResourceTest"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -227,12 +227,12 @@ func testV1SplSAddNewSplPrf(t *testing.T) {
 		},
 	}
 	var result string
-	if err := splSv1Rpc.Call(utils.ApierV1SetSupplierProfile, splPrf, &result); err != nil {
+	if err := splSv1Rpc.Call(utils.APIerSv1SetSupplierProfile, splPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := splSv1Rpc.Call(utils.ApierV1GetSupplierProfile,
+	if err := splSv1Rpc.Call(utils.APIerSv1GetSupplierProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "SPL_ResourceTest"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(splPrf.SupplierProfile, reply) {
@@ -260,7 +260,7 @@ func testV1SplSAddNewResPrf(t *testing.T) {
 		},
 	}
 
-	if err := splSv1Rpc.Call(utils.ApierV1SetResourceProfile, rPrf, &result); err != nil {
+	if err := splSv1Rpc.Call(utils.APIerSv1SetResourceProfile, rPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -283,7 +283,7 @@ func testV1SplSAddNewResPrf(t *testing.T) {
 		},
 	}
 
-	if err := splSv1Rpc.Call(utils.ApierV1SetResourceProfile, rPrf2, &result); err != nil {
+	if err := splSv1Rpc.Call(utils.APIerSv1SetResourceProfile, rPrf2, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -306,7 +306,7 @@ func testV1SplSAddNewResPrf(t *testing.T) {
 		},
 	}
 
-	if err := splSv1Rpc.Call(utils.ApierV1SetResourceProfile, rPrf3, &result); err != nil {
+	if err := splSv1Rpc.Call(utils.APIerSv1SetResourceProfile, rPrf3, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -329,7 +329,7 @@ func testV1SplSAddNewResPrf(t *testing.T) {
 		},
 	}
 
-	if err := splSv1Rpc.Call(utils.ApierV1SetResourceProfile, rPrf4, &result); err != nil {
+	if err := splSv1Rpc.Call(utils.APIerSv1SetResourceProfile, rPrf4, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -462,7 +462,7 @@ func testV1SplSGetSortedSuppliers(t *testing.T) {
 
 func testV1SplSAddNewSplPrf2(t *testing.T) {
 	var reply *engine.SupplierProfile
-	if err := splSv1Rpc.Call(utils.ApierV1GetSupplierProfile,
+	if err := splSv1Rpc.Call(utils.APIerSv1GetSupplierProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "SPL_ResourceDescendent"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -500,12 +500,12 @@ func testV1SplSAddNewSplPrf2(t *testing.T) {
 		},
 	}
 	var result string
-	if err := splSv1Rpc.Call(utils.ApierV1SetSupplierProfile, splPrf, &result); err != nil {
+	if err := splSv1Rpc.Call(utils.APIerSv1SetSupplierProfile, splPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := splSv1Rpc.Call(utils.ApierV1GetSupplierProfile,
+	if err := splSv1Rpc.Call(utils.APIerSv1GetSupplierProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "SPL_ResourceDescendent"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(splPrf.SupplierProfile, reply) {

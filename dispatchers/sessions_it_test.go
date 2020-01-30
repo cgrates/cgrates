@@ -97,7 +97,7 @@ func testDspSessionAddBalacne(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := allEngine.RPC.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {
+	if err := allEngine.RPC.Call(utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
@@ -108,18 +108,18 @@ func testDspSessionAddBalacne(t *testing.T) {
 		Account: attrSetBalance.Account,
 	}
 	eAcntVal := float64(initUsage)
-	if err := allEngine.RPC.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
+	if err := allEngine.RPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
 		t.Errorf("Expecting: %v, received: %v",
 			time.Duration(eAcntVal), time.Duration(acnt.BalanceMap[utils.VOICE].GetTotalValue()))
 	}
-	if err := allEngine2.RPC.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {
+	if err := allEngine2.RPC.Call(utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
 	}
-	if err := allEngine2.RPC.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
+	if err := allEngine2.RPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
 		t.Errorf("Expecting: %v, received: %v",

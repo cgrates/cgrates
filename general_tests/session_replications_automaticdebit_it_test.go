@@ -88,7 +88,7 @@ func testSessionSRplAddVoiceBalance(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := smgRplcMstrRPC.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {
+	if err := smgRplcMstrRPC.Call(utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
@@ -99,7 +99,7 @@ func testSessionSRplAddVoiceBalance(t *testing.T) {
 		Account: "1005",
 	}
 	//get balance
-	if err := smgRplcMstrRPC.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
+	if err := smgRplcMstrRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if rply := acnt.BalanceMap[utils.VOICE].GetTotalValue(); rply != float64(5*time.Second) {
 		t.Errorf("Expecting: %v, received: %v",
@@ -156,7 +156,7 @@ func testSessionSRplApierRpcConn(t *testing.T) {
 func testSessionSRplTPFromFolder(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
 	var loadInst utils.LoadInstance
-	if err := smgRplcMstrRPC.Call(utils.ApierV2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
+	if err := smgRplcMstrRPC.Call(utils.APIerSv2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
@@ -281,7 +281,7 @@ func testSessionSRplInitiate(t *testing.T) {
 		Tenant:  "cgrates.org",
 		Account: "1005",
 	}
-	if err := smgRplcMstrRPC.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
+	if err := smgRplcMstrRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 		// a tolerance of +/- 5ms is acceptable
 	} else if rply := acnt.BalanceMap[utils.VOICE].GetTotalValue(); rply < float64(5*time.Second-25*time.Millisecond) || rply > float64(5*time.Second-15*time.Millisecond) {
@@ -354,7 +354,7 @@ func testSessionSRplCheckAccount(t *testing.T) {
 		Account: "1005",
 	}
 
-	if err := smgRplcSlvRPC.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
+	if err := smgRplcSlvRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 		// a tolerance of +/- 5ms is acceptable
 	} else if rply := acnt.BalanceMap[utils.VOICE].GetTotalValue(); rply < float64(5*time.Second-45*time.Millisecond) || rply > float64(5*time.Second-30*time.Millisecond) {
@@ -409,7 +409,7 @@ func testSessionSRplTerminate(t *testing.T) {
 		Account: "1005",
 	}
 
-	if err := smgRplcSlvRPC.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
+	if err := smgRplcSlvRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 		// a tolerance of +/- 5ms is acceptable
 	} else if rply := acnt.BalanceMap[utils.VOICE].GetTotalValue(); rply != float64(3*time.Second) {

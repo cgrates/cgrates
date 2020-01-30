@@ -26,7 +26,7 @@ import (
 func init() {
 	c := &LoadTpFromStorDb{
 		name:      "load_tp_from_stordb",
-		rpcMethod: utils.ApierV1LoadTariffPlanFromStorDb,
+		rpcMethod: utils.APIerSv1LoadTariffPlanFromStorDb,
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}

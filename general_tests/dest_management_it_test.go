@@ -111,7 +111,7 @@ func testDestManagRpcConn(t *testing.T) {
 func testDestManagLoadTariffPlanFromFolderAll(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "test", "destinations", "alldests")}
 	var destLoadInst utils.LoadInstance
-	if err := destRPC.Call(utils.ApierV2LoadTariffPlanFromFolder, attrs, &destLoadInst); err != nil {
+	if err := destRPC.Call(utils.APIerSv2LoadTariffPlanFromFolder, attrs, &destLoadInst); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
@@ -120,17 +120,17 @@ func testDestManagLoadTariffPlanFromFolderAll(t *testing.T) {
 
 func testDestManagAllDestinationLoaded(t *testing.T) {
 	dests := make([]*engine.Destination, 0)
-	if err := destRPC.Call(utils.ApierV2GetDestinations, v2.AttrGetDestinations{DestinationIDs: []string{}}, &dests); err != nil {
-		t.Error("Got error on ApierV2.GetDestinations: ", err.Error())
+	if err := destRPC.Call(utils.APIerSv2GetDestinations, v2.AttrGetDestinations{DestinationIDs: []string{}}, &dests); err != nil {
+		t.Error("Got error on APIerSv2.GetDestinations: ", err.Error())
 	} else if len(dests) != 6 {
-		t.Errorf("Calling ApierV2.GetDestinations got reply: %v", utils.ToIJSON(dests))
+		t.Errorf("Calling APIerSv2.GetDestinations got reply: %v", utils.ToIJSON(dests))
 	}
 
 	var rcvStats utils.CacheStats
-	if err := destRPC.Call(utils.ApierV1GetCacheStats, utils.AttrCacheStats{}, &rcvStats); err != nil {
-		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
+	if err := destRPC.Call(utils.APIerSv1GetCacheStats, utils.AttrCacheStats{}, &rcvStats); err != nil {
+		t.Error("Got error on APIerSv1.GetCacheStats: ", err.Error())
 	} else if rcvStats.Destinations != 9 {
-		t.Errorf("Calling ApierV1.GetCacheStats received: %+v", rcvStats)
+		t.Errorf("Calling APIerSv1.GetCacheStats received: %+v", rcvStats)
 	}
 }
 
@@ -138,7 +138,7 @@ func testDestManagAllDestinationLoaded(t *testing.T) {
 func testDestManagLoadTariffPlanFromFolderRemoveSome(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "test", "destinations", "removesome")}
 	var destLoadInst utils.LoadInstance
-	if err := destRPC.Call(utils.ApierV2LoadTariffPlanFromFolder, attrs, &destLoadInst); err != nil {
+	if err := destRPC.Call(utils.APIerSv2LoadTariffPlanFromFolder, attrs, &destLoadInst); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
@@ -146,24 +146,24 @@ func testDestManagLoadTariffPlanFromFolderRemoveSome(t *testing.T) {
 
 func testDestManagRemoveSomeDestinationLoaded(t *testing.T) {
 	dests := make([]*engine.Destination, 0)
-	if err := destRPC.Call(utils.ApierV2GetDestinations, v2.AttrGetDestinations{DestinationIDs: []string{}}, &dests); err != nil {
-		t.Error("Got error on ApierV2.GetDestinations: ", err.Error())
+	if err := destRPC.Call(utils.APIerSv2GetDestinations, v2.AttrGetDestinations{DestinationIDs: []string{}}, &dests); err != nil {
+		t.Error("Got error on APIerSv2.GetDestinations: ", err.Error())
 	} else if len(dests) != 6 {
-		t.Errorf("Calling ApierV2.GetDestinations got reply: %v", utils.ToIJSON(dests))
+		t.Errorf("Calling APIerSv2.GetDestinations got reply: %v", utils.ToIJSON(dests))
 	}
 
 	var rcvStats utils.CacheStats
-	if err := destRPC.Call(utils.ApierV1GetCacheStats, utils.AttrCacheStats{}, &rcvStats); err != nil {
-		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
+	if err := destRPC.Call(utils.APIerSv1GetCacheStats, utils.AttrCacheStats{}, &rcvStats); err != nil {
+		t.Error("Got error on APIerSv1.GetCacheStats: ", err.Error())
 	} else if rcvStats.Destinations != 9 {
-		t.Errorf("Calling ApierV1.GetCacheStats received: %+v", rcvStats)
+		t.Errorf("Calling APIerSv1.GetCacheStats received: %+v", rcvStats)
 	}
 }
 
 func testDestManagLoadTariffPlanFromFolderRemoveSomeFlush(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "test", "destinations", "removesome"), FlushDb: true}
 	var destLoadInst utils.LoadInstance
-	if err := destRPC.Call(utils.ApierV2LoadTariffPlanFromFolder, attrs, &destLoadInst); err != nil {
+	if err := destRPC.Call(utils.APIerSv2LoadTariffPlanFromFolder, attrs, &destLoadInst); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
@@ -171,24 +171,24 @@ func testDestManagLoadTariffPlanFromFolderRemoveSomeFlush(t *testing.T) {
 
 func testDestManagRemoveSomeFlushDestinationLoaded(t *testing.T) {
 	dests := make([]*engine.Destination, 0)
-	if err := destRPC.Call(utils.ApierV2GetDestinations, v2.AttrGetDestinations{DestinationIDs: []string{}}, &dests); err != nil {
-		t.Error("Got error on ApierV2.GetDestinations: ", err.Error())
+	if err := destRPC.Call(utils.APIerSv2GetDestinations, v2.AttrGetDestinations{DestinationIDs: []string{}}, &dests); err != nil {
+		t.Error("Got error on APIerSv2.GetDestinations: ", err.Error())
 	} else if len(dests) != 4 {
-		t.Errorf("Calling ApierV2.GetDestinations got reply: %v", utils.ToIJSON(dests))
+		t.Errorf("Calling APIerSv2.GetDestinations got reply: %v", utils.ToIJSON(dests))
 	}
 
 	var rcvStats utils.CacheStats
-	if err := destRPC.Call(utils.ApierV1GetCacheStats, utils.AttrCacheStats{}, &rcvStats); err != nil {
-		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
+	if err := destRPC.Call(utils.APIerSv1GetCacheStats, utils.AttrCacheStats{}, &rcvStats); err != nil {
+		t.Error("Got error on APIerSv1.GetCacheStats: ", err.Error())
 	} else if rcvStats.Destinations != 5 {
-		t.Errorf("Calling ApierV1.GetCacheStats received: %+v", rcvStats)
+		t.Errorf("Calling APIerSv1.GetCacheStats received: %+v", rcvStats)
 	}
 }
 
 func testDestManagLoadTariffPlanFromFolderAddBack(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "test", "destinations", "addback")}
 	var destLoadInst utils.LoadInstance
-	if err := destRPC.Call(utils.ApierV2LoadTariffPlanFromFolder, attrs, &destLoadInst); err != nil {
+	if err := destRPC.Call(utils.APIerSv2LoadTariffPlanFromFolder, attrs, &destLoadInst); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
@@ -196,24 +196,24 @@ func testDestManagLoadTariffPlanFromFolderAddBack(t *testing.T) {
 
 func testDestManagAddBackDestinationLoaded(t *testing.T) {
 	dests := make([]*engine.Destination, 0)
-	if err := destRPC.Call(utils.ApierV2GetDestinations, v2.AttrGetDestinations{DestinationIDs: []string{}}, &dests); err != nil {
-		t.Error("Got error on ApierV2.GetDestinations: ", err.Error())
+	if err := destRPC.Call(utils.APIerSv2GetDestinations, v2.AttrGetDestinations{DestinationIDs: []string{}}, &dests); err != nil {
+		t.Error("Got error on APIerSv2.GetDestinations: ", err.Error())
 	} else if len(dests) != 6 {
-		t.Errorf("Calling ApierV2.GetDestinations got reply: %v", utils.ToIJSON(dests))
+		t.Errorf("Calling APIerSv2.GetDestinations got reply: %v", utils.ToIJSON(dests))
 	}
 
 	var rcvStats utils.CacheStats
-	if err := destRPC.Call(utils.ApierV1GetCacheStats, utils.AttrCacheStats{}, &rcvStats); err != nil {
-		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
+	if err := destRPC.Call(utils.APIerSv1GetCacheStats, utils.AttrCacheStats{}, &rcvStats); err != nil {
+		t.Error("Got error on APIerSv1.GetCacheStats: ", err.Error())
 	} else if rcvStats.Destinations != 9 {
-		t.Errorf("Calling ApierV1.GetCacheStats received: %+v", rcvStats)
+		t.Errorf("Calling APIerSv1.GetCacheStats received: %+v", rcvStats)
 	}
 }
 
 func testDestManagLoadTariffPlanFromFolderAddOne(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "test", "destinations", "addone")}
 	var destLoadInst utils.LoadInstance
-	if err := destRPC.Call(utils.ApierV2LoadTariffPlanFromFolder, attrs, &destLoadInst); err != nil {
+	if err := destRPC.Call(utils.APIerSv2LoadTariffPlanFromFolder, attrs, &destLoadInst); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
@@ -221,17 +221,17 @@ func testDestManagLoadTariffPlanFromFolderAddOne(t *testing.T) {
 
 func testDestManagAddOneDestinationLoaded(t *testing.T) {
 	dests := make([]*engine.Destination, 0)
-	if err := destRPC.Call(utils.ApierV2GetDestinations, v2.AttrGetDestinations{DestinationIDs: []string{}}, &dests); err != nil {
-		t.Error("Got error on ApierV2.GetDestinations: ", err.Error())
+	if err := destRPC.Call(utils.APIerSv2GetDestinations, v2.AttrGetDestinations{DestinationIDs: []string{}}, &dests); err != nil {
+		t.Error("Got error on APIerSv2.GetDestinations: ", err.Error())
 	} else if len(dests) != 7 {
-		t.Errorf("Calling ApierV2.GetDestinations got reply: %v", utils.ToIJSON(dests))
+		t.Errorf("Calling APIerSv2.GetDestinations got reply: %v", utils.ToIJSON(dests))
 	}
 
 	var rcvStats utils.CacheStats
-	if err := destRPC.Call(utils.ApierV1GetCacheStats, utils.AttrCacheStats{}, &rcvStats); err != nil {
-		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
+	if err := destRPC.Call(utils.APIerSv1GetCacheStats, utils.AttrCacheStats{}, &rcvStats); err != nil {
+		t.Error("Got error on APIerSv1.GetCacheStats: ", err.Error())
 	} else if rcvStats.Destinations != 10 {
-		t.Errorf("Calling ApierV1.GetCacheStats received: %+v", rcvStats)
+		t.Errorf("Calling APIerSv1.GetCacheStats received: %+v", rcvStats)
 	}
 }
 
@@ -240,49 +240,49 @@ func testDestManagCacheWithGetCache(t *testing.T) {
 		t.Fatal(err)
 	}
 	var reply string
-	if err := destRPC.Call(utils.ApierV1ReloadCache, utils.AttrReloadCache{}, &reply); err != nil {
-		t.Error("Got error on ApierV1.ReloadCache: ", err.Error())
+	if err := destRPC.Call(utils.APIerSv1ReloadCache, utils.AttrReloadCache{}, &reply); err != nil {
+		t.Error("Got error on APIerSv1.ReloadCache: ", err.Error())
 	} else if reply != utils.OK {
-		t.Errorf("Calling ApierV1.ReloadCache received: %+v", reply)
+		t.Errorf("Calling APIerSv1.ReloadCache received: %+v", reply)
 	}
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "test", "destinations", "cacheall"), FlushDb: true}
 	var destLoadInst utils.LoadInstance
-	if err := destRPC.Call(utils.ApierV2LoadTariffPlanFromFolder, attrs, &destLoadInst); err != nil {
+	if err := destRPC.Call(utils.APIerSv2LoadTariffPlanFromFolder, attrs, &destLoadInst); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 
 	dests := make([]*engine.Destination, 0)
-	if err := destRPC.Call(utils.ApierV2GetDestinations, v2.AttrGetDestinations{DestinationIDs: []string{}}, &dests); err != nil {
-		t.Error("Got error on ApierV2.GetDestinations: ", err.Error())
+	if err := destRPC.Call(utils.APIerSv2GetDestinations, v2.AttrGetDestinations{DestinationIDs: []string{}}, &dests); err != nil {
+		t.Error("Got error on APIerSv2.GetDestinations: ", err.Error())
 	} else if len(dests) != 1 {
-		t.Errorf("Calling ApierV2.GetDestinations got reply: %v", utils.ToIJSON(dests))
+		t.Errorf("Calling APIerSv2.GetDestinations got reply: %v", utils.ToIJSON(dests))
 	}
 
 	var rcvStats utils.CacheStats
-	if err := destRPC.Call(utils.ApierV1GetCacheStats, utils.AttrCacheStats{}, &rcvStats); err != nil {
-		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
+	if err := destRPC.Call(utils.APIerSv1GetCacheStats, utils.AttrCacheStats{}, &rcvStats); err != nil {
+		t.Error("Got error on APIerSv1.GetCacheStats: ", err.Error())
 	} else if rcvStats.Destinations != 2 {
-		t.Errorf("Calling ApierV1.GetCacheStats received: %+v", rcvStats)
+		t.Errorf("Calling APIerSv1.GetCacheStats received: %+v", rcvStats)
 	}
 
 	attrs = &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "test", "destinations", "cacheone"), FlushDb: true}
-	if err := destRPC.Call(utils.ApierV2LoadTariffPlanFromFolder, attrs, &destLoadInst); err != nil {
+	if err := destRPC.Call(utils.APIerSv2LoadTariffPlanFromFolder, attrs, &destLoadInst); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 
 	dests = make([]*engine.Destination, 0)
-	if err := destRPC.Call(utils.ApierV2GetDestinations, v2.AttrGetDestinations{DestinationIDs: []string{}}, &dests); err != nil {
-		t.Error("Got error on ApierV2.GetDestinations: ", err.Error())
+	if err := destRPC.Call(utils.APIerSv2GetDestinations, v2.AttrGetDestinations{DestinationIDs: []string{}}, &dests); err != nil {
+		t.Error("Got error on APIerSv2.GetDestinations: ", err.Error())
 	} else if len(dests) != 1 {
-		t.Errorf("Calling ApierV2.GetDestinations got reply: %v", utils.ToIJSON(dests))
+		t.Errorf("Calling APIerSv2.GetDestinations got reply: %v", utils.ToIJSON(dests))
 	}
 
-	if err := destRPC.Call(utils.ApierV1GetCacheStats, utils.AttrCacheStats{}, &rcvStats); err != nil {
-		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
+	if err := destRPC.Call(utils.APIerSv1GetCacheStats, utils.AttrCacheStats{}, &rcvStats); err != nil {
+		t.Error("Got error on APIerSv1.GetCacheStats: ", err.Error())
 	} else if rcvStats.Destinations != 1 {
-		t.Errorf("Calling ApierV1.GetCacheStats received: %+v", rcvStats)
+		t.Errorf("Calling APIerSv1.GetCacheStats received: %+v", rcvStats)
 	}
 }
 
@@ -291,23 +291,23 @@ func testDestManagCacheWithGetCost(t *testing.T) {
 		t.Fatal(err)
 	}
 	var reply string
-	if err := destRPC.Call(utils.ApierV1ReloadCache, utils.AttrReloadCache{}, &reply); err != nil {
-		t.Error("Got error on ApierV1.ReloadCache: ", err.Error())
+	if err := destRPC.Call(utils.APIerSv1ReloadCache, utils.AttrReloadCache{}, &reply); err != nil {
+		t.Error("Got error on APIerSv1.ReloadCache: ", err.Error())
 	} else if reply != utils.OK {
-		t.Errorf("Calling ApierV1.ReloadCache received: %+v", reply)
+		t.Errorf("Calling APIerSv1.ReloadCache received: %+v", reply)
 	}
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "test", "destinations", "cacheall"), FlushDb: true}
 	var destLoadInst utils.LoadInstance
-	if err := destRPC.Call(utils.ApierV2LoadTariffPlanFromFolder, attrs, &destLoadInst); err != nil {
+	if err := destRPC.Call(utils.APIerSv2LoadTariffPlanFromFolder, attrs, &destLoadInst); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 
 	dests := make([]*engine.Destination, 0)
-	if err := destRPC.Call(utils.ApierV2GetDestinations, v2.AttrGetDestinations{DestinationIDs: []string{}}, &dests); err != nil {
-		t.Error("Got error on ApierV2.GetDestinations: ", err.Error())
+	if err := destRPC.Call(utils.APIerSv2GetDestinations, v2.AttrGetDestinations{DestinationIDs: []string{}}, &dests); err != nil {
+		t.Error("Got error on APIerSv2.GetDestinations: ", err.Error())
 	} else if len(dests) != 1 {
-		t.Errorf("Calling ApierV2.GetDestinations got reply: %v", utils.ToIJSON(dests))
+		t.Errorf("Calling APIerSv2.GetDestinations got reply: %v", utils.ToIJSON(dests))
 	}
 
 	var cc engine.CallCost
@@ -326,16 +326,16 @@ func testDestManagCacheWithGetCost(t *testing.T) {
 	}
 
 	attrs = &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "test", "destinations", "cacheone"), FlushDb: true}
-	if err := destRPC.Call(utils.ApierV2LoadTariffPlanFromFolder, attrs, &destLoadInst); err != nil {
+	if err := destRPC.Call(utils.APIerSv2LoadTariffPlanFromFolder, attrs, &destLoadInst); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 
 	dests = make([]*engine.Destination, 0)
-	if err := destRPC.Call(utils.ApierV2GetDestinations, v2.AttrGetDestinations{DestinationIDs: []string{}}, &dests); err != nil {
-		t.Error("Got error on ApierV2.GetDestinations: ", err.Error())
+	if err := destRPC.Call(utils.APIerSv2GetDestinations, v2.AttrGetDestinations{DestinationIDs: []string{}}, &dests); err != nil {
+		t.Error("Got error on APIerSv2.GetDestinations: ", err.Error())
 	} else if len(dests) != 1 {
-		t.Errorf("Calling ApierV2.GetDestinations got reply: %v", utils.ToIJSON(dests))
+		t.Errorf("Calling APIerSv2.GetDestinations got reply: %v", utils.ToIJSON(dests))
 	}
 
 	if err := destRPC.Call(utils.ResponderGetCost, cd, &cc); err.Error() != utils.ErrUnauthorizedDestination.Error() {

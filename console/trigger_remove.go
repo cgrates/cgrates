@@ -26,7 +26,7 @@ import (
 func init() {
 	c := &CmdRemoveTriggers{
 		name:      "triggers_remove",
-		rpcMethod: utils.ApierV1RemoveActionTrigger,
+		rpcMethod: utils.APIerSv1RemoveActionTrigger,
 		rpcParams: &v1.AttrRemoveActionTrigger{},
 	}
 	commands[c.Name()] = c

@@ -26,7 +26,7 @@ import (
 func init() {
 	c := &CmdAddBalance{
 		name:      "balance_add",
-		rpcMethod: utils.ApierV1AddBalance,
+		rpcMethod: utils.APIerSv1AddBalance,
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}

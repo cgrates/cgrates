@@ -119,7 +119,7 @@ func testCacheSRpcConn(t *testing.T) {
 func testCacheSLoadTariffPlanFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testtp")}
-	if err := chcRPC.Call(utils.ApierV1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	if err := chcRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
@@ -238,7 +238,7 @@ func testCacheSGetItemIDs(t *testing.T) {
 		CacheID: utils.CacheThresholdProfiles,
 	}
 	if err := chcRPC.Call(utils.CacheSv1GetItemIDs, argsAPI, &rcvKeys); err != nil {
-		t.Fatalf("Got error on ApierV1.GetCacheStats: %s ", err.Error())
+		t.Fatalf("Got error on APIerSv1.GetCacheStats: %s ", err.Error())
 	}
 	if !reflect.DeepEqual(expKeys, rcvKeys) {
 		t.Errorf("Expected: %+v, received: %+v", expKeys, rcvKeys)

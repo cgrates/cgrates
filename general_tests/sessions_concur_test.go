@@ -120,7 +120,7 @@ func testSCncrKillEngine(t *testing.T) {
 
 func testSCncrLoadTP(t *testing.T) {
 	var loadInst string
-	if err := sCncrRPC.Call(utils.ApierV1LoadTariffPlanFromFolder,
+	if err := sCncrRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder,
 		&utils.AttrLoadTpFromFolder{FolderPath: path.Join(
 			*dataDir, "tariffplans", "tp1cnt")}, &loadInst); err != nil {
 		t.Error(err)
@@ -140,7 +140,7 @@ func testSCncrLoadTP(t *testing.T) {
 		},
 	}
 	var resAttrSet string
-	if err := sCncrRPC.Call(utils.ApierV2SetAttributeProfile, attrPrfl, &resAttrSet); err != nil {
+	if err := sCncrRPC.Call(utils.APIerSv2SetAttributeProfile, attrPrfl, &resAttrSet); err != nil {
 		t.Error(err)
 	} else if resAttrSet != utils.OK {
 		t.Errorf("unexpected reply returned: <%s>", resAttrSet)
@@ -164,7 +164,7 @@ func testSCncrRunSessions(t *testing.T) {
 				},
 			}
 			var addBlcRply string
-			if err = sCncrRPC.Call(utils.ApierV1AddBalance, argsAddBalance, &addBlcRply); err != nil {
+			if err = sCncrRPC.Call(utils.APIerSv1AddBalance, argsAddBalance, &addBlcRply); err != nil {
 				t.Error(err)
 			} else if addBlcRply != utils.OK {
 				t.Errorf("received: <%s>", addBlcRply)
@@ -182,7 +182,7 @@ func testSCncrRunSessions(t *testing.T) {
 		acntAttrs := &utils.AttrGetAccount{
 			Tenant:  "cgrates.org",
 			Account: acntID}
-		if err = sCncrRPC.Call(utils.ApierV2GetAccount, acntAttrs, &acnt); err != nil {
+		if err = sCncrRPC.Call(utils.APIerSv2GetAccount, acntAttrs, &acnt); err != nil {
 			return
 		} else if vcBlnc := acnt.BalanceMap[utils.VOICE].GetTotalValue(); float64(bufferTopup.Nanoseconds())-vcBlnc > 1000000.0 { // eliminate rounding errors
 			t.Errorf("unexpected voice balance received: %+v", utils.ToIJSON(acnt))
@@ -215,10 +215,10 @@ func testRunSession(t *testing.T) {
 			utils.Weight: 10,
 		},
 	}
-	if err = sCncrRPC.Call(utils.ApierV1AddBalance, argsAddBalance, &addBlcRply); err != nil {
+	if err = sCncrRPC.Call(utils.APIerSv1AddBalance, argsAddBalance, &addBlcRply); err != nil {
 		t.Error(err)
 	} else if addBlcRply != utils.OK {
-		t.Errorf("received: <%s> to ApierV1.AddBalance", addBlcRply)
+		t.Errorf("received: <%s> to APIerSv1.AddBalance", addBlcRply)
 	}
 	time.Sleep(time.Duration(
 		utils.RandomInteger(0, 100)) * time.Millisecond) // randomize between tests
@@ -345,7 +345,7 @@ func testRunSession(t *testing.T) {
 	time.Sleep(time.Duration(20) * time.Millisecond)
 	var cdrs []*engine.ExternalCDR
 	argCDRs := utils.RPCCDRsFilter{OriginIDs: []string{originID}}
-	if err := sCncrRPC.Call(utils.ApierV2GetCDRs, argCDRs, &cdrs); err != nil {
+	if err := sCncrRPC.Call(utils.APIerSv2GetCDRs, argCDRs, &cdrs); err != nil {
 		t.Error(err)
 	} else if len(cdrs) != 1 {
 		t.Errorf("unexpected number of CDRs returned: %d", len(cdrs))

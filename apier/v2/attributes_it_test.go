@@ -135,7 +135,7 @@ func testAttributeSSetAlsPrf(t *testing.T) {
 		},
 	}
 	var result string
-	if err := attrSRPC.Call(utils.ApierV2SetAttributeProfile, extAlsPrf, &result); err != nil {
+	if err := attrSRPC.Call(utils.APIerSv2SetAttributeProfile, extAlsPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -162,7 +162,7 @@ func testAttributeSSetAlsPrf(t *testing.T) {
 	}
 	alsPrf.Compile()
 	var reply *engine.AttributeProfile
-	if err := attrSRPC.Call(utils.ApierV1GetAttributeProfile,
+	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfile,
 		utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ExternalAttribute"}}, &reply); err != nil {
 		t.Fatal(err)
 	}
@@ -197,7 +197,7 @@ func testAttributeSUpdateAlsPrf(t *testing.T) {
 		},
 	}
 	var result string
-	if err := attrSRPC.Call(utils.ApierV2SetAttributeProfile, extAlsPrf, &result); err != nil {
+	if err := attrSRPC.Call(utils.APIerSv2SetAttributeProfile, extAlsPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -229,7 +229,7 @@ func testAttributeSUpdateAlsPrf(t *testing.T) {
 	sort.Strings(alsPrf.AttributeProfile.Contexts)
 	alsPrf.Compile()
 	var reply *engine.AttributeProfile
-	if err := attrSRPC.Call(utils.ApierV1GetAttributeProfile,
+	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfile,
 		utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ExternalAttribute"}}, &reply); err != nil {
 		t.Fatal(err)
 	}

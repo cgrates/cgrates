@@ -25,7 +25,7 @@ import (
 func init() {
 	c := &CmdComputeFilterIndexes{
 		name:      "compute_filter_indexes",
-		rpcMethod: "ApierV1.ComputeFilterIndexes",
+		rpcMethod: "APIerSv1.ComputeFilterIndexes",
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}

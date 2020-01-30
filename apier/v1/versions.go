@@ -24,7 +24,7 @@ import (
 )
 
 // Queries all versions from dataDB
-func (self *ApierV1) GetDataDBVersions(ign string, reply *engine.Versions) error {
+func (self *APIerSv1) GetDataDBVersions(ign string, reply *engine.Versions) error {
 	if vrs, err := self.DataManager.DataDB().GetVersions(""); err != nil {
 		return utils.NewErrServerError(err)
 	} else if len(vrs) == 0 {
@@ -36,7 +36,7 @@ func (self *ApierV1) GetDataDBVersions(ign string, reply *engine.Versions) error
 }
 
 // Queries all versions from stordb
-func (self *ApierV1) GetStorDBVersions(ign string, reply *engine.Versions) error {
+func (self *APIerSv1) GetStorDBVersions(ign string, reply *engine.Versions) error {
 	if vrs, err := self.StorDb.GetVersions(""); err != nil {
 		return utils.NewErrServerError(err)
 	} else if len(vrs) == 0 {
@@ -53,7 +53,7 @@ type SetVersionsArg struct {
 }
 
 // Queries all versions from dataDB
-func (self *ApierV1) SetDataDBVersions(arg SetVersionsArg, reply *string) error {
+func (self *APIerSv1) SetDataDBVersions(arg SetVersionsArg, reply *string) error {
 	if arg.Versions == nil {
 		arg.Versions = engine.CurrentDataDBVersions()
 	}
@@ -65,7 +65,7 @@ func (self *ApierV1) SetDataDBVersions(arg SetVersionsArg, reply *string) error 
 }
 
 // Queries all versions from stordb
-func (self *ApierV1) SetStorDBVersions(arg SetVersionsArg, reply *string) error {
+func (self *APIerSv1) SetStorDBVersions(arg SetVersionsArg, reply *string) error {
 	if arg.Versions == nil {
 		arg.Versions = engine.CurrentDataDBVersions()
 	}

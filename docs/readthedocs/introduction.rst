@@ -18,5 +18,5 @@ URL: http://your_server_ip:2080/jsonrpc
 
 ::
 
-    {"method":"ApierV2.GetAccounts","params":[{"Tenant":"cgrates.org","AccountIds":["1001"],"Offset":0,"Limit":0}],"id":3}
+    {"method":"APIerSv2.GetAccounts","params":[{"Tenant":"cgrates.org","AccountIds":["1001"],"Offset":0,"Limit":0}],"id":3}
     Content-Type: application/json

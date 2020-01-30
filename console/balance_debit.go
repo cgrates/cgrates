@@ -26,7 +26,7 @@ import (
 func init() {
 	c := &CmdBalanceDebit{
 		name:      "balance_debit",
-		rpcMethod: utils.ApierV1DebitBalance,
+		rpcMethod: utils.APIerSv1DebitBalance,
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}

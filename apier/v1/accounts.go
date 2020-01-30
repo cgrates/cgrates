@@ -37,7 +37,7 @@ type AccountActionTiming struct {
 	NextExecTime time.Time // Next execution time
 }
 
-func (api *ApierV1) GetAccountActionPlan(attrs utils.TenantAccount, reply *[]*AccountActionTiming) error {
+func (api *APIerSv1) GetAccountActionPlan(attrs utils.TenantAccount, reply *[]*AccountActionTiming) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(strings.Join(missing, ","), "")
 	}
@@ -85,7 +85,7 @@ type AttrRemoveActionTiming struct {
 }
 
 // Removes an ActionTimings or parts of it depending on filters being set
-func (api *ApierV1) RemoveActionTiming(attrs AttrRemoveActionTiming, reply *string) (err error) {
+func (api *APIerSv1) RemoveActionTiming(attrs AttrRemoveActionTiming, reply *string) (err error) {
 	if missing := utils.MissingStructFields(&attrs, []string{"ActionPlanId"}); len(missing) != 0 { // Only mandatory ActionPlanId
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -176,7 +176,7 @@ func (api *ApierV1) RemoveActionTiming(attrs AttrRemoveActionTiming, reply *stri
 }
 
 // Ads a new account into dataDb. If already defined, returns success.
-func (api *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) (err error) {
+func (api *APIerSv1) SetAccount(attr utils.AttrSetAccount, reply *string) (err error) {
 	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -299,7 +299,7 @@ func (api *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) (err er
 	return nil
 }
 
-func (api *ApierV1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) (err error) {
+func (api *APIerSv1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) (err error) {
 	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -359,7 +359,7 @@ func (api *ApierV1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) (
 	return nil
 }
 
-func (api *ApierV1) GetAccounts(attr utils.AttrGetAccounts, reply *[]interface{}) error {
+func (api *APIerSv1) GetAccounts(attr utils.AttrGetAccounts, reply *[]interface{}) error {
 	if len(attr.Tenant) == 0 {
 		return utils.NewErrMandatoryIeMissing("Tenant")
 	}
@@ -406,7 +406,7 @@ func (api *ApierV1) GetAccounts(attr utils.AttrGetAccounts, reply *[]interface{}
 }
 
 // GetAccount returns the account
-func (api *ApierV1) GetAccount(attr *utils.AttrGetAccount, reply *interface{}) error {
+func (api *APIerSv1) GetAccount(attr *utils.AttrGetAccount, reply *interface{}) error {
 	tag := utils.ConcatenatedKey(attr.Tenant, attr.Account)
 	userBalance, err := api.DataManager.GetAccount(tag)
 	if err != nil {
@@ -428,14 +428,14 @@ type AttrAddBalance struct {
 	Cdrlog          bool
 }
 
-func (api *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
+func (api *APIerSv1) AddBalance(attr *AttrAddBalance, reply *string) error {
 	return api.modifyBalance(utils.TOPUP, attr, reply)
 }
-func (api *ApierV1) DebitBalance(attr *AttrAddBalance, reply *string) error {
+func (api *APIerSv1) DebitBalance(attr *AttrAddBalance, reply *string) error {
 	return api.modifyBalance(utils.DEBIT, attr, reply)
 }
 
-func (api *ApierV1) modifyBalance(aType string, attr *AttrAddBalance, reply *string) (err error) {
+func (api *APIerSv1) modifyBalance(aType string, attr *AttrAddBalance, reply *string) (err error) {
 	if missing := utils.MissingStructFields(attr, []string{"Tenant", "Account", "BalanceType", "Value"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -508,7 +508,7 @@ func (api *ApierV1) modifyBalance(aType string, attr *AttrAddBalance, reply *str
 
 // SetBalance sets the balance for the given account
 // if the account is not already created it will create the account also
-func (api *ApierV1) SetBalance(attr *utils.AttrSetBalance, reply *string) (err error) {
+func (api *APIerSv1) SetBalance(attr *utils.AttrSetBalance, reply *string) (err error) {
 	if missing := utils.MissingStructFields(attr, []string{"Tenant", "Account", "BalanceType"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -580,7 +580,7 @@ func (api *ApierV1) SetBalance(attr *utils.AttrSetBalance, reply *string) (err e
 }
 
 // RemoveBalances remove the matching balances for the account
-func (api *ApierV1) RemoveBalances(attr *utils.AttrSetBalance, reply *string) (err error) {
+func (api *APIerSv1) RemoveBalances(attr *utils.AttrSetBalance, reply *string) (err error) {
 	if missing := utils.MissingStructFields(attr, []string{"Tenant", "Account", "BalanceType"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -614,7 +614,7 @@ func (api *ApierV1) RemoveBalances(attr *utils.AttrSetBalance, reply *string) (e
 	return nil
 }
 
-func (api *ApierV1) GetAccountsCount(attr utils.TenantArg, reply *int) (err error) {
+func (api *APIerSv1) GetAccountsCount(attr utils.TenantArg, reply *int) (err error) {
 	if len(attr.Tenant) == 0 {
 		return utils.NewErrMandatoryIeMissing("Tenant")
 	}

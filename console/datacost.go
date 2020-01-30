@@ -27,7 +27,7 @@ import (
 func init() {
 	c := &CmdGetDataCost{
 		name:       "datacost",
-		rpcMethod:  utils.ApierV1GetDataCost,
+		rpcMethod:  utils.APIerSv1GetDataCost,
 		clientArgs: []string{"Category", "Tenant", "Account", "Subject", "StartTime", "Usage"},
 	}
 	commands[c.Name()] = c

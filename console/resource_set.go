@@ -26,7 +26,7 @@ import (
 func init() {
 	c := &CmdSetResource{
 		name:      "resource_set",
-		rpcMethod: utils.ApierV1SetResourceProfile,
+		rpcMethod: utils.APIerSv1SetResourceProfile,
 		rpcParams: &v1.ResourceWithCache{},
 	}
 	commands[c.Name()] = c

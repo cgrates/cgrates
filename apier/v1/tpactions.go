@@ -23,7 +23,7 @@ import (
 )
 
 // Creates a new Actions profile within a tariff plan
-func (self *ApierV1) SetTPActions(attrs utils.TPActions, reply *string) error {
+func (self *APIerSv1) SetTPActions(attrs utils.TPActions, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ID", "Actions"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -40,7 +40,7 @@ type AttrGetTPActions struct {
 }
 
 // Queries specific Actions profile on tariff plan
-func (self *ApierV1) GetTPActions(attrs AttrGetTPActions, reply *utils.TPActions) error {
+func (self *APIerSv1) GetTPActions(attrs AttrGetTPActions, reply *utils.TPActions) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -61,7 +61,7 @@ type AttrGetTPActionIds struct {
 }
 
 // Queries Actions identities on specific tariff plan.
-func (self *ApierV1) GetTPActionIds(attrs AttrGetTPActionIds, reply *[]string) error {
+func (self *APIerSv1) GetTPActionIds(attrs AttrGetTPActionIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -78,7 +78,7 @@ func (self *ApierV1) GetTPActionIds(attrs AttrGetTPActionIds, reply *[]string) e
 }
 
 // Removes specific Actions on Tariff plan
-func (self *ApierV1) RemoveTPActions(attrs AttrGetTPActions, reply *string) error {
+func (self *APIerSv1) RemoveTPActions(attrs AttrGetTPActions, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

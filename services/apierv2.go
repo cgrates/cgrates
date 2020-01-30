@@ -28,45 +28,45 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-// NewApierV2Service returns the ApierV2 Service
-func NewApierV2Service(apiv1 *ApierV1Service, cfg *config.CGRConfig,
+// NewAPIerSv2Service returns the APIerSv2 Service
+func NewAPIerSv2Service(apiv1 *APIerSv1Service, cfg *config.CGRConfig,
 	server *utils.Server,
-	internalAPIerV2Chan chan rpcclient.ClientConnector) *ApierV2Service {
-	return &ApierV2Service{
+	internalAPIerSv2Chan chan rpcclient.ClientConnector) *APIerSv2Service {
+	return &APIerSv2Service{
 		apiv1:    apiv1,
-		connChan: internalAPIerV2Chan,
+		connChan: internalAPIerSv2Chan,
 		cfg:      cfg,
 		server:   server,
 	}
 }
 
-// ApierV2Service implements Service interface
-type ApierV2Service struct {
+// APIerSv2Service implements Service interface
+type APIerSv2Service struct {
 	sync.RWMutex
 	cfg    *config.CGRConfig
 	server *utils.Server
 
-	apiv1    *ApierV1Service
-	api      *v2.ApierV2
+	apiv1    *APIerSv1Service
+	api      *v2.APIerSv2
 	connChan chan rpcclient.ClientConnector
 }
 
 // Start should handle the sercive start
 // For this service the start should be called from RAL Service
-func (api *ApierV2Service) Start() (err error) {
+func (api *APIerSv2Service) Start() (err error) {
 	if api.IsRunning() {
 		return fmt.Errorf("service aleady running")
 	}
 
-	apiV1Chan := api.apiv1.GetApierV1Chan()
+	apiV1Chan := api.apiv1.GetAPIerSv1Chan()
 	apiV1 := <-apiV1Chan
 	apiV1Chan <- apiV1
 
 	api.Lock()
 	defer api.Unlock()
 
-	api.api = &v2.ApierV2{
-		ApierV1: *apiV1,
+	api.api = &v2.APIerSv2{
+		APIerSv1: *apiV1,
 	}
 
 	if !api.cfg.DispatcherSCfg().Enabled {
@@ -75,23 +75,24 @@ func (api *ApierV2Service) Start() (err error) {
 
 	utils.RegisterRpcParams("", &v2.CDRsV2{})
 	utils.RegisterRpcParams("", api.api)
+	utils.RegisterRpcParams("ApierV2", api.api)
 
 	api.connChan <- api.api
 	return
 }
 
 // GetIntenternalChan returns the internal connection chanel
-func (api *ApierV2Service) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
+func (api *APIerSv2Service) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
 	return api.connChan
 }
 
 // Reload handles the change of config
-func (api *ApierV2Service) Reload() (err error) {
+func (api *APIerSv2Service) Reload() (err error) {
 	return
 }
 
 // Shutdown stops the service
-func (api *ApierV2Service) Shutdown() (err error) {
+func (api *APIerSv2Service) Shutdown() (err error) {
 	api.Lock()
 	defer api.Unlock()
 	api.api = nil
@@ -100,18 +101,18 @@ func (api *ApierV2Service) Shutdown() (err error) {
 }
 
 // IsRunning returns if the service is running
-func (api *ApierV2Service) IsRunning() bool {
+func (api *APIerSv2Service) IsRunning() bool {
 	api.RLock()
 	defer api.RUnlock()
 	return api != nil && api.api != nil
 }
 
 // ServiceName returns the service name
-func (api *ApierV2Service) ServiceName() string {
-	return utils.ApierV2
+func (api *APIerSv2Service) ServiceName() string {
+	return utils.APIerSv2
 }
 
 // ShouldRun returns if the service should be running
-func (api *ApierV2Service) ShouldRun() bool {
+func (api *APIerSv2Service) ShouldRun() bool {
 	return api.cfg.RalsCfg().Enabled
 }

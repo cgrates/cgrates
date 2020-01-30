@@ -32,7 +32,7 @@ type AttributeWithCache struct {
 }
 
 //SetAttributeProfile add/update a new Attribute Profile
-func (apierV2 *ApierV2) SetAttributeProfile(arg *AttributeWithCache, reply *string) error {
+func (APIerSv2 *APIerSv2) SetAttributeProfile(arg *AttributeWithCache, reply *string) error {
 	if missing := utils.MissingStructFields(arg.ExternalAttributeProfile, []string{utils.Tenant, utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -40,11 +40,11 @@ func (apierV2 *ApierV2) SetAttributeProfile(arg *AttributeWithCache, reply *stri
 	if err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	if err := apierV2.DataManager.SetAttributeProfile(alsPrf, true); err != nil {
+	if err := APIerSv2.DataManager.SetAttributeProfile(alsPrf, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheAttributeProfiles and store it in database
-	if err := apierV2.DataManager.SetLoadIDs(
+	if err := APIerSv2.DataManager.SetLoadIDs(
 		map[string]int64{utils.CacheAttributeProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
@@ -52,7 +52,7 @@ func (apierV2 *ApierV2) SetAttributeProfile(arg *AttributeWithCache, reply *stri
 		CacheID: utils.CacheAttributeProfiles,
 		ItemID:  alsPrf.TenantID(),
 	}
-	if err := apierV2.ApierV1.CallCache(
+	if err := APIerSv2.APIerSv1.CallCache(
 		v1.GetCacheOpt(arg.Cache),
 		args); err != nil {
 		return utils.APIErrorHandler(err)

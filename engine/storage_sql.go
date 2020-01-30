@@ -936,7 +936,7 @@ func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 	if len(qryFltr.NotOriginHosts) != 0 {
 		q = q.Where("origin_host not in (?)", qryFltr.NotOriginHosts)
 	}
-	if qryFltr.AnswerTimeStart != nil && !qryFltr.AnswerTimeStart.IsZero() { // With IsZero we keep backwards compatible with ApierV1
+	if qryFltr.AnswerTimeStart != nil && !qryFltr.AnswerTimeStart.IsZero() { // With IsZero we keep backwards compatible with APIerSv1
 		q = q.Where("answer_time >= ?", qryFltr.AnswerTimeStart)
 	}
 	if qryFltr.AnswerTimeEnd != nil && !qryFltr.AnswerTimeEnd.IsZero() {
@@ -1052,13 +1052,13 @@ func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 	if qryFltr.SetupTimeEnd != nil {
 		q = q.Where("setup_time < ?", qryFltr.SetupTimeEnd)
 	}
-	if qryFltr.CreatedAtStart != nil && !qryFltr.CreatedAtStart.IsZero() { // With IsZero we keep backwards compatible with ApierV1
+	if qryFltr.CreatedAtStart != nil && !qryFltr.CreatedAtStart.IsZero() { // With IsZero we keep backwards compatible with APIerSv1
 		q = q.Where("created_at >= ?", qryFltr.CreatedAtStart)
 	}
 	if qryFltr.CreatedAtEnd != nil && !qryFltr.CreatedAtEnd.IsZero() {
 		q = q.Where("created_at < ?", qryFltr.CreatedAtEnd)
 	}
-	if qryFltr.UpdatedAtStart != nil && !qryFltr.UpdatedAtStart.IsZero() { // With IsZero we keep backwards compatible with ApierV1
+	if qryFltr.UpdatedAtStart != nil && !qryFltr.UpdatedAtStart.IsZero() { // With IsZero we keep backwards compatible with APIerSv1
 		q = q.Where("updated_at >= ?", qryFltr.UpdatedAtStart)
 	}
 	if qryFltr.UpdatedAtEnd != nil && !qryFltr.UpdatedAtEnd.IsZero() {

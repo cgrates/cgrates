@@ -118,7 +118,7 @@ func testTPDispatcherRpcConn(t *testing.T) {
 
 func ttestTPDispatcherGetTPDispatcherBeforeSet(t *testing.T) {
 	var reply *utils.TPDispatcherProfile
-	if err := tpDispatcherRPC.Call(utils.ApierV1GetTPDispatcherProfile,
+	if err := tpDispatcherRPC.Call(utils.APIerSv1GetTPDispatcherProfile,
 		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "Dsp1"},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -140,7 +140,7 @@ func testTPDispatcherSetTPDispatcher(t *testing.T) {
 	}
 
 	var result string
-	if err := tpDispatcherRPC.Call(utils.ApierV1SetTPDispatcherProfile, tpDispatcher, &result); err != nil {
+	if err := tpDispatcherRPC.Call(utils.APIerSv1SetTPDispatcherProfile, tpDispatcher, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -149,7 +149,7 @@ func testTPDispatcherSetTPDispatcher(t *testing.T) {
 
 func testTPDispatcherGetTPDispatcherAfterSet(t *testing.T) {
 	var reply *utils.TPDispatcherProfile
-	if err := tpDispatcherRPC.Call(utils.ApierV1GetTPDispatcherProfile,
+	if err := tpDispatcherRPC.Call(utils.APIerSv1GetTPDispatcherProfile,
 		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "Dsp1"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpDispatcher, reply) {
@@ -160,7 +160,7 @@ func testTPDispatcherGetTPDispatcherAfterSet(t *testing.T) {
 func testTPDispatcherGetFilterIds(t *testing.T) {
 	var result []string
 	expectedTPID := []string{"Dsp1"}
-	if err := tpDispatcherRPC.Call(utils.ApierV1GetTPDispatcherProfileIDs,
+	if err := tpDispatcherRPC.Call(utils.APIerSv1GetTPDispatcherProfileIDs,
 		&AttrGetTPDispatcherIds{TPid: "TP1"}, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedTPID, result) {
@@ -170,7 +170,7 @@ func testTPDispatcherGetFilterIds(t *testing.T) {
 
 func testTPDispatcherUpdateTPDispatcher(t *testing.T) {
 	var result string
-	if err := tpDispatcherRPC.Call(utils.ApierV1SetTPDispatcherProfile, tpDispatcher, &result); err != nil {
+	if err := tpDispatcherRPC.Call(utils.APIerSv1SetTPDispatcherProfile, tpDispatcher, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -191,7 +191,7 @@ func testTPDispatcherGetTPDispatcherAfterUpdate(t *testing.T) {
 		Strategy: utils.MetaFirst,
 		Weight:   10,
 	}
-	if err := tpDispatcherRPC.Call(utils.ApierV1GetTPDispatcherProfile,
+	if err := tpDispatcherRPC.Call(utils.APIerSv1GetTPDispatcherProfile,
 		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "Dsp1"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpDispatcher, reply) && !reflect.DeepEqual(revHosts, reply) {
@@ -201,7 +201,7 @@ func testTPDispatcherGetTPDispatcherAfterUpdate(t *testing.T) {
 
 func testTPDispatcherRemTPDispatcher(t *testing.T) {
 	var resp string
-	if err := tpDispatcherRPC.Call(utils.ApierV1RemoveTPDispatcherProfile,
+	if err := tpDispatcherRPC.Call(utils.APIerSv1RemoveTPDispatcherProfile,
 		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "Dsp1"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
@@ -211,7 +211,7 @@ func testTPDispatcherRemTPDispatcher(t *testing.T) {
 
 func testTPDispatcherGetTPDispatcherAfterRemove(t *testing.T) {
 	var reply *utils.TPDispatcherProfile
-	if err := tpDispatcherRPC.Call(utils.ApierV1GetTPDispatcherProfile,
+	if err := tpDispatcherRPC.Call(utils.APIerSv1GetTPDispatcherProfile,
 		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "Dsp1"},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)

@@ -100,7 +100,7 @@ func testDestinationRpcConn(t *testing.T) {
 func testDestinationFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tp_destination_with_any")}
-	if err := tutorialRpc.Call(utils.ApierV1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	if err := tutorialRpc.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(500 * time.Millisecond)
@@ -116,7 +116,7 @@ func testDestinationGetCostFor1002(t *testing.T) {
 		Usage:       "1m",
 	}
 	var rply *engine.EventCost
-	if err := tutorialRpc.Call(utils.ApierV1GetCost, attrs, &rply); err != nil {
+	if err := tutorialRpc.Call(utils.APIerSv1GetCost, attrs, &rply); err != nil {
 		t.Error("Unexpected nil error received: ", err.Error())
 	} else if *rply.Cost != 0.01 {
 		t.Errorf("Unexpected cost received: %f", *rply.Cost)
@@ -133,7 +133,7 @@ func testDestinationGetCostFor1003(t *testing.T) {
 		Usage:       "1m",
 	}
 	var rply *engine.EventCost
-	if err := tutorialRpc.Call(utils.ApierV1GetCost, attrs, &rply); err != nil {
+	if err := tutorialRpc.Call(utils.APIerSv1GetCost, attrs, &rply); err != nil {
 		t.Error("Unexpected nil error received: ", err.Error())
 	} else if *rply.Cost != 0.3 {
 		t.Errorf("Unexpected cost received: %f", *rply.Cost)

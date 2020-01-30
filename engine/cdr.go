@@ -616,7 +616,7 @@ type ExternalCDR struct {
 	PreRated    bool // Mark the CDR as rated so we do not process it during mediation
 }
 
-// UsageRecord is used when authorizing requests from outside, eg ApierV1.GetMaxUsage
+// UsageRecord is used when authorizing requests from outside, eg APIerSv1.GetMaxUsage
 type UsageRecord struct {
 	ToR         string
 	RequestType string

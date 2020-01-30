@@ -23,7 +23,7 @@ import (
 )
 
 //SetTPDispatcher creates a new DispatcherProfile within a tariff plan
-func (self *ApierV1) SetTPDispatcherProfile(attr *utils.TPDispatcherProfile, reply *string) error {
+func (self *APIerSv1) SetTPDispatcherProfile(attr *utils.TPDispatcherProfile, reply *string) error {
 	if missing := utils.MissingStructFields(attr, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -35,7 +35,7 @@ func (self *ApierV1) SetTPDispatcherProfile(attr *utils.TPDispatcherProfile, rep
 }
 
 //GetTPCharger queries specific DispatcherProfile on Tariff plan
-func (self *ApierV1) GetTPDispatcherProfile(attr *utils.TPTntID, reply *utils.TPDispatcherProfile) error {
+func (self *APIerSv1) GetTPDispatcherProfile(attr *utils.TPTntID, reply *utils.TPDispatcherProfile) error {
 	if missing := utils.MissingStructFields(attr, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -56,7 +56,7 @@ type AttrGetTPDispatcherIds struct {
 }
 
 //GetTPDispatcherIDs queries dispatcher identities on specific tariff plan.
-func (self *ApierV1) GetTPDispatcherProfileIDs(attrs *AttrGetTPDispatcherIds, reply *[]string) error {
+func (self *APIerSv1) GetTPDispatcherProfileIDs(attrs *AttrGetTPDispatcherIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -73,7 +73,7 @@ func (self *ApierV1) GetTPDispatcherProfileIDs(attrs *AttrGetTPDispatcherIds, re
 }
 
 //RemoveTPCharger removes specific DispatcherProfile on Tariff plan
-func (self *ApierV1) RemoveTPDispatcherProfile(attrs *utils.TPTntID, reply *string) error {
+func (self *APIerSv1) RemoveTPDispatcherProfile(attrs *utils.TPTntID, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -87,7 +87,7 @@ func (self *ApierV1) RemoveTPDispatcherProfile(attrs *utils.TPTntID, reply *stri
 }
 
 //SetTPDispatcherHost creates a new DispatcherHost within a tariff plan
-func (self *ApierV1) SetTPDispatcherHost(attr *utils.TPDispatcherHost, reply *string) error {
+func (self *APIerSv1) SetTPDispatcherHost(attr *utils.TPDispatcherHost, reply *string) error {
 	if missing := utils.MissingStructFields(attr, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -99,7 +99,7 @@ func (self *ApierV1) SetTPDispatcherHost(attr *utils.TPDispatcherHost, reply *st
 }
 
 //GetTPDispatcherHost queries specific DispatcherHosts on Tariff plan
-func (self *ApierV1) GetTPDispatcherHost(attr *utils.TPTntID, reply *utils.TPDispatcherHost) error {
+func (self *APIerSv1) GetTPDispatcherHost(attr *utils.TPTntID, reply *utils.TPDispatcherHost) error {
 	if missing := utils.MissingStructFields(attr, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -115,7 +115,7 @@ func (self *ApierV1) GetTPDispatcherHost(attr *utils.TPTntID, reply *utils.TPDis
 }
 
 //GetTPDispatcherHostIDs queries dispatcher host identities on specific tariff plan.
-func (self *ApierV1) GetTPDispatcherHostIDs(attrs *AttrGetTPDispatcherIds, reply *[]string) error {
+func (self *APIerSv1) GetTPDispatcherHostIDs(attrs *AttrGetTPDispatcherIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -132,7 +132,7 @@ func (self *ApierV1) GetTPDispatcherHostIDs(attrs *AttrGetTPDispatcherIds, reply
 }
 
 //RemoveTPDispatcherHost removes specific DispatcherHost on Tariff plan
-func (self *ApierV1) RemoveTPDispatcherHost(attrs *utils.TPTntID, reply *string) error {
+func (self *APIerSv1) RemoveTPDispatcherHost(attrs *utils.TPTntID, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

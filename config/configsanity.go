@@ -462,18 +462,18 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 	// APIer sanity checks
 	for _, connID := range cfg.apier.AttributeSConns {
 		if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.attributeSCfg.Enabled {
-			return fmt.Errorf("<%s> not enabled but requested by <%s> component.", utils.AttributeS, utils.ApierV1)
+			return fmt.Errorf("<%s> not enabled but requested by <%s> component.", utils.AttributeS, utils.APIerSv1)
 		}
 		if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
-			return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.ApierV1, connID)
+			return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.APIerSv1, connID)
 		}
 	}
 	for _, connID := range cfg.apier.SchedulerConns {
 		if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.schedulerCfg.Enabled {
-			return fmt.Errorf("<%s> not enabled but requested by <%s> component.", utils.SchedulerS, utils.ApierV1)
+			return fmt.Errorf("<%s> not enabled but requested by <%s> component.", utils.SchedulerS, utils.APIerSv1)
 		}
 		if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
-			return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.ApierV1, connID)
+			return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.APIerSv1, connID)
 		}
 	}
 	// Dispatcher sanity check

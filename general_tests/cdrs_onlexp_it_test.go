@@ -182,7 +182,7 @@ func testCDRsOnExpLoadDefaultCharger(t *testing.T) {
 		Weight:       20,
 	}
 	var result string
-	if err := cdrsMasterRpc.Call(utils.ApierV1SetChargerProfile, chargerProfile, &result); err != nil {
+	if err := cdrsMasterRpc.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -274,7 +274,7 @@ func testCDRsOnExpHttpCdrReplication(t *testing.T) {
 	// ToDo: Fix cdr_http to be compatible with rest of processCdr methods
 	time.Sleep(200 * time.Millisecond)
 	var rcvedCdrs []*engine.ExternalCDR
-	if err := cdrsSlaveRpc.Call(utils.ApierV2GetCDRs,
+	if err := cdrsSlaveRpc.Call(utils.APIerSv2GetCDRs,
 		utils.RPCCDRsFilter{CGRIDs: []string{testCdr1.CGRID}, RunIDs: []string{utils.MetaDefault}}, &rcvedCdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(rcvedCdrs) != 1 {

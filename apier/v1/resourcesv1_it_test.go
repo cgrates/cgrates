@@ -122,7 +122,7 @@ func testV1RsRpcConn(t *testing.T) {
 func testV1RsFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
-	if err := rlsV1Rpc.Call(utils.ApierV1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	if err := rlsV1Rpc.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(500 * time.Millisecond)
@@ -618,7 +618,7 @@ func testV1RsDBStore(t *testing.T) {
 
 func testV1RsGetResourceProfileBeforeSet(t *testing.T) {
 	var reply *string
-	if err := rlsV1Rpc.Call(utils.ApierV1GetResourceProfile,
+	if err := rlsV1Rpc.Call(utils.APIerSv1GetResourceProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "RCFG1"},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -647,7 +647,7 @@ func testV1RsSetResourceProfile(t *testing.T) {
 
 	var result string
 
-	if err := rlsV1Rpc.Call(utils.ApierV1SetResourceProfile, rlsConfig, &result); err != nil {
+	if err := rlsV1Rpc.Call(utils.APIerSv1SetResourceProfile, rlsConfig, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -657,7 +657,7 @@ func testV1RsSetResourceProfile(t *testing.T) {
 func testV1RsGetResourceProfileIDs(t *testing.T) {
 	expected := []string{"ResGroup2", "ResGroup1", "ResGroup3", "RES_GR_TEST"}
 	var result []string
-	if err := rlsV1Rpc.Call(utils.ApierV1GetResourceProfileIDs, utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{Tenant: "cgrates.org"}}, &result); err != nil {
+	if err := rlsV1Rpc.Call(utils.APIerSv1GetResourceProfileIDs, utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{Tenant: "cgrates.org"}}, &result); err != nil {
 		t.Error(err)
 	} else if len(expected) != len(result) {
 		t.Errorf("Expecting : %+v, received: %+v", expected, result)
@@ -666,7 +666,7 @@ func testV1RsGetResourceProfileIDs(t *testing.T) {
 
 func testV1RsGetResourceProfileAfterSet(t *testing.T) {
 	var reply *engine.ResourceProfile
-	if err := rlsV1Rpc.Call(utils.ApierV1GetResourceProfile,
+	if err := rlsV1Rpc.Call(utils.APIerSv1GetResourceProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: rlsConfig.ID}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, rlsConfig.ResourceProfile) {
@@ -677,7 +677,7 @@ func testV1RsGetResourceProfileAfterSet(t *testing.T) {
 func testV1RsUpdateResourceProfile(t *testing.T) {
 	var result string
 	rlsConfig.FilterIDs = []string{"*string:~*req.Account:1001", "*prefix:~*req.DST:10"}
-	if err := rlsV1Rpc.Call(utils.ApierV1SetResourceProfile, rlsConfig, &result); err != nil {
+	if err := rlsV1Rpc.Call(utils.APIerSv1SetResourceProfile, rlsConfig, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -686,7 +686,7 @@ func testV1RsUpdateResourceProfile(t *testing.T) {
 
 func testV1RsGetResourceProfileAfterUpdate(t *testing.T) {
 	var reply *engine.ResourceProfile
-	if err := rlsV1Rpc.Call(utils.ApierV1GetResourceProfile,
+	if err := rlsV1Rpc.Call(utils.APIerSv1GetResourceProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: rlsConfig.ID}, &reply); err != nil {
 		t.Error(err)
 	} else {
@@ -700,13 +700,13 @@ func testV1RsGetResourceProfileAfterUpdate(t *testing.T) {
 
 func testV1RsRemResourceProfile(t *testing.T) {
 	var resp string
-	if err := rlsV1Rpc.Call(utils.ApierV1RemoveResourceProfile,
+	if err := rlsV1Rpc.Call(utils.APIerSv1RemoveResourceProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: rlsConfig.ID}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
 	}
-	if err := rlsV1Rpc.Call(utils.ApierV1RemoveResourceProfile,
+	if err := rlsV1Rpc.Call(utils.APIerSv1RemoveResourceProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: rlsConfig.ID}, &resp); err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected error: %v recived: %v", utils.ErrNotFound, err)
 	}
@@ -714,7 +714,7 @@ func testV1RsRemResourceProfile(t *testing.T) {
 
 func testV1RsGetResourceProfileAfterDelete(t *testing.T) {
 	var reply *string
-	if err := rlsV1Rpc.Call(utils.ApierV1GetResourceProfile,
+	if err := rlsV1Rpc.Call(utils.APIerSv1GetResourceProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "RCFG1"},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)

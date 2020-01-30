@@ -129,7 +129,7 @@ func testTPSharedGroupsRpcConn(t *testing.T) {
 
 func testTPSharedGroupsBeforeSet(t *testing.T) {
 	var reply *utils.TPSharedGroups
-	if err := tpSharedGroupRPC.Call(utils.ApierV1GetTPSharedGroups, AttrGetTPSharedGroups{TPid: "TPS1", ID: "Group1"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := tpSharedGroupRPC.Call(utils.APIerSv1GetTPSharedGroups, AttrGetTPSharedGroups{TPid: "TPS1", ID: "Group1"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
@@ -152,7 +152,7 @@ func testTPSharedGroupsSetSharedGroups(t *testing.T) {
 		},
 	}
 	var result string
-	if err := tpSharedGroupRPC.Call(utils.ApierV1SetTPSharedGroups, tpSharedGroups, &result); err != nil {
+	if err := tpSharedGroupRPC.Call(utils.APIerSv1SetTPSharedGroups, tpSharedGroups, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -161,7 +161,7 @@ func testTPSharedGroupsSetSharedGroups(t *testing.T) {
 
 func testTPSharedGroupsAfterSet(t *testing.T) {
 	var respond *utils.TPSharedGroups
-	if err := tpSharedGroupRPC.Call(utils.ApierV1GetTPSharedGroups, &AttrGetTPSharedGroups{TPid: tpSharedGroups.TPid, ID: tpSharedGroups.ID}, &respond); err != nil {
+	if err := tpSharedGroupRPC.Call(utils.APIerSv1GetTPSharedGroups, &AttrGetTPSharedGroups{TPid: tpSharedGroups.TPid, ID: tpSharedGroups.ID}, &respond); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpSharedGroups.TPid, respond.TPid) {
 		t.Errorf("Expecting: %+v, received: %+v", tpSharedGroups.TPid, respond.TPid)
@@ -175,7 +175,7 @@ func testTPSharedGroupsAfterSet(t *testing.T) {
 func testTPSharedGroupsGetTPSharedGroupIds(t *testing.T) {
 	var result []string
 	expectedTPID := []string{"Group1"}
-	if err := tpSharedGroupRPC.Call(utils.ApierV1GetTPSharedGroupIds,
+	if err := tpSharedGroupRPC.Call(utils.APIerSv1GetTPSharedGroupIds,
 		AttrGetTPSharedGroupIds{tpSharedGroups.TPid, utils.PaginatorWithSearch{}}, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(result, expectedTPID) {
@@ -202,7 +202,7 @@ func testTPSharedGroupsUpdateTPShareGroups(t *testing.T) {
 			RatingSubject: "SubPlus",
 		},
 	}
-	if err := tpSharedGroupRPC.Call(utils.ApierV1SetTPSharedGroups, tpSharedGroups, &result); err != nil {
+	if err := tpSharedGroupRPC.Call(utils.APIerSv1SetTPSharedGroups, tpSharedGroups, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -211,7 +211,7 @@ func testTPSharedGroupsUpdateTPShareGroups(t *testing.T) {
 
 func testTpSharedGroupsGetTPSharedGroupsAfterUpdate(t *testing.T) {
 	var expectedTPS *utils.TPSharedGroups
-	if err := tpSharedGroupRPC.Call(utils.ApierV1GetTPSharedGroups, &AttrGetTPSharedGroups{TPid: tpSharedGroups.TPid, ID: tpSharedGroups.ID}, &expectedTPS); err != nil {
+	if err := tpSharedGroupRPC.Call(utils.APIerSv1GetTPSharedGroups, &AttrGetTPSharedGroups{TPid: tpSharedGroups.TPid, ID: tpSharedGroups.ID}, &expectedTPS); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpSharedGroups.TPid, expectedTPS.TPid) {
 		t.Errorf("Expecting: %+v, received: %+v", tpSharedGroups.TPid, expectedTPS.TPid)
@@ -224,7 +224,7 @@ func testTpSharedGroupsGetTPSharedGroupsAfterUpdate(t *testing.T) {
 
 func testTPSharedGroupsRemoveTPSharedGroups(t *testing.T) {
 	var resp string
-	if err := tpSharedGroupRPC.Call(utils.ApierV1RemoveTPSharedGroups, &AttrGetTPSharedGroups{TPid: tpSharedGroups.TPid, ID: tpSharedGroups.ID}, &resp); err != nil {
+	if err := tpSharedGroupRPC.Call(utils.APIerSv1RemoveTPSharedGroups, &AttrGetTPSharedGroups{TPid: tpSharedGroups.TPid, ID: tpSharedGroups.ID}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
@@ -233,7 +233,7 @@ func testTPSharedGroupsRemoveTPSharedGroups(t *testing.T) {
 
 func testTPSharedGroupsGetTPSharedGroupsAfterRemove(t *testing.T) {
 	var reply *utils.TPSharedGroups
-	if err := tpSharedGroupRPC.Call(utils.ApierV1GetTPSharedGroups, AttrGetTPSharedGroups{TPid: "TPS1", ID: "Group1"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := tpSharedGroupRPC.Call(utils.APIerSv1GetTPSharedGroups, AttrGetTPSharedGroups{TPid: "TPS1", ID: "Group1"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }

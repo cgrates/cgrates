@@ -187,16 +187,16 @@ func testActionsExecuteRemoveSMCos1(t *testing.T) {
 			},
 		},
 	}
-	if err := actsRPC.Call(utils.ApierV2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
-		t.Error("Got error on ApierV2.SetActions: ", err.Error())
+	if err := actsRPC.Call(utils.APIerSv2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+		t.Error("Got error on APIerSv2.SetActions: ", err.Error())
 	} else if reply != utils.OK {
-		t.Errorf("Calling ApierV2.SetActions received: %s", reply)
+		t.Errorf("Calling APIerSv2.SetActions received: %s", reply)
 	}
 	attrsEA := &utils.AttrExecuteAction{Tenant: "cgrates.org", ActionsId: attrsAA.ActionsId}
-	if err := actsRPC.Call(utils.ApierV1ExecuteAction, attrsEA, &reply); err != nil {
-		t.Error("Got error on ApierV1.ExecuteAction: ", err.Error())
+	if err := actsRPC.Call(utils.APIerSv1ExecuteAction, attrsEA, &reply); err != nil {
+		t.Error("Got error on APIerSv1.ExecuteAction: ", err.Error())
 	} else if reply != utils.OK {
-		t.Errorf("Calling ApierV1.ExecuteAction received: %s", reply)
+		t.Errorf("Calling APIerSv1.ExecuteAction received: %s", reply)
 	}
 
 	// READ
@@ -220,16 +220,16 @@ func testActionsExecuteRemoveSMCos2(t *testing.T) {
 			},
 		},
 	}
-	if err := actsRPC.Call(utils.ApierV2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
-		t.Error("Got error on ApierV2.SetActions: ", err.Error())
+	if err := actsRPC.Call(utils.APIerSv2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+		t.Error("Got error on APIerSv2.SetActions: ", err.Error())
 	} else if reply != utils.OK {
-		t.Errorf("Calling ApierV2.SetActions received: %s", reply)
+		t.Errorf("Calling APIerSv2.SetActions received: %s", reply)
 	}
 	attrsEA := &utils.AttrExecuteAction{Tenant: "cgrates.org", ActionsId: attrsAA.ActionsId}
-	if err := actsRPC.Call(utils.ApierV1ExecuteAction, attrsEA, &reply); err != nil {
-		t.Error("Got error on ApierV1.ExecuteAction: ", err.Error())
+	if err := actsRPC.Call(utils.APIerSv1ExecuteAction, attrsEA, &reply); err != nil {
+		t.Error("Got error on APIerSv1.ExecuteAction: ", err.Error())
 	} else if reply != utils.OK {
-		t.Errorf("Calling ApierV1.ExecuteAction received: %s", reply)
+		t.Errorf("Calling APIerSv1.ExecuteAction received: %s", reply)
 	}
 
 	// READ
@@ -241,44 +241,44 @@ func testActionsExecuteRemoveSMCos2(t *testing.T) {
 func testActionsUpdateBalance(t *testing.T) {
 	var reply string
 	attrsSetAccount := &utils.AttrSetAccount{Tenant: "cgrates.org", Account: "testAcc"}
-	if err := actsRPC.Call(utils.ApierV1SetAccount, attrsSetAccount, &reply); err != nil {
-		t.Error("Got error on ApierV1.SetAccount: ", err.Error())
+	if err := actsRPC.Call(utils.APIerSv1SetAccount, attrsSetAccount, &reply); err != nil {
+		t.Error("Got error on APIerSv1.SetAccount: ", err.Error())
 	} else if reply != utils.OK {
-		t.Errorf("Calling ApierV1.SetAccount received: %s", reply)
+		t.Errorf("Calling APIerSv1.SetAccount received: %s", reply)
 	}
 	topupAction := &utils.AttrSetActions{ActionsId: "ACT_TOPUP_RST", Actions: []*utils.TPAction{
 		{Identifier: utils.TOPUP, BalanceId: "test", BalanceType: utils.MONETARY, Units: "5", ExpiryTime: utils.UNLIMITED, Weight: 20.0},
 	}}
-	if err := actsRPC.Call(utils.ApierV2SetActions, topupAction, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
-		t.Error("Got error on ApierV2.SetActions: ", err.Error())
+	if err := actsRPC.Call(utils.APIerSv2SetActions, topupAction, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+		t.Error("Got error on APIerSv2.SetActions: ", err.Error())
 	} else if reply != utils.OK {
-		t.Errorf("Calling ApierV2.SetActions received: %s", reply)
+		t.Errorf("Calling APIerSv2.SetActions received: %s", reply)
 	}
 	changeBlockerAction := &utils.AttrSetActions{ActionsId: "ACT_BAL_UPDT", Actions: []*utils.TPAction{
 		{Identifier: utils.SET_BALANCE, BalanceId: "test", BalanceBlocker: "true"},
 	}}
-	if err := actsRPC.Call(utils.ApierV2SetActions, changeBlockerAction, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
-		t.Error("Got error on ApierV2.SetActions: ", err.Error())
+	if err := actsRPC.Call(utils.APIerSv2SetActions, changeBlockerAction, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+		t.Error("Got error on APIerSv2.SetActions: ", err.Error())
 	} else if reply != utils.OK {
-		t.Errorf("Calling ApierV2.SetActions received: %s", reply)
+		t.Errorf("Calling APIerSv2.SetActions received: %s", reply)
 	}
 	attrsEA := &utils.AttrExecuteAction{Tenant: attrsSetAccount.Tenant, Account: attrsSetAccount.Account, ActionsId: topupAction.ActionsId}
-	if err := actsRPC.Call(utils.ApierV1ExecuteAction, attrsEA, &reply); err != nil {
-		t.Error("Got error on ApierV1.ExecuteAction: ", err.Error())
+	if err := actsRPC.Call(utils.APIerSv1ExecuteAction, attrsEA, &reply); err != nil {
+		t.Error("Got error on APIerSv1.ExecuteAction: ", err.Error())
 	} else if reply != utils.OK {
-		t.Errorf("Calling ApierV1.ExecuteAction received: %s", reply)
+		t.Errorf("Calling APIerSv1.ExecuteAction received: %s", reply)
 	}
 	time.Sleep(1)
 	attrsEA2 := &utils.AttrExecuteAction{Tenant: attrsSetAccount.Tenant, Account: attrsSetAccount.Account, ActionsId: changeBlockerAction.ActionsId}
-	if err := actsRPC.Call(utils.ApierV1ExecuteAction, attrsEA2, &reply); err != nil {
-		t.Error("Got error on ApierV1.ExecuteAction: ", err.Error())
+	if err := actsRPC.Call(utils.APIerSv1ExecuteAction, attrsEA2, &reply); err != nil {
+		t.Error("Got error on APIerSv1.ExecuteAction: ", err.Error())
 	} else if reply != utils.OK {
-		t.Errorf("Calling ApierV1.ExecuteAction received: %s", reply)
+		t.Errorf("Calling APIerSv1.ExecuteAction received: %s", reply)
 	}
 	var acc Account
 	attrs2 := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "testAcc"}
-	if err := actsRPC.Call(utils.ApierV2GetAccount, attrs2, &acc); err != nil {
-		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
+	if err := actsRPC.Call(utils.APIerSv2GetAccount, attrs2, &acc); err != nil {
+		t.Error("Got error on APIerSv1.GetAccount: ", err.Error())
 	} else if acc.BalanceMap[utils.MONETARY][0].ID != "test" {
 		t.Errorf("Expected test result received %v ", acc.BalanceMap[utils.MONETARY][0].ID)
 	} else if acc.BalanceMap[utils.MONETARY][0].Blocker != true {

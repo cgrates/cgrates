@@ -26,7 +26,7 @@ import (
 func init() {
 	c := &CmdAddAccount{
 		name:      "account_set",
-		rpcMethod: utils.ApierV2SetAccount,
+		rpcMethod: utils.APIerSv2SetAccount,
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}

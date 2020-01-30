@@ -12,7 +12,7 @@ GetCacheStats returns datadb cache status. Empty params return all stats:
 ::
 
    {
-   	"method": "ApierV1.GetCacheStats",
+   	"method": "APIerSv1.GetCacheStats",
    	"params": [{}],
    	"id": 0
    }

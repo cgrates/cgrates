@@ -117,7 +117,7 @@ func testV1AccRpcConn(t *testing.T) {
 
 func testV1AccGetAccountBeforeSet(t *testing.T) {
 	var reply *engine.Account
-	if err := accRpc.Call(utils.ApierV2GetAccount,
+	if err := accRpc.Call(utils.APIerSv2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -127,7 +127,7 @@ func testV1AccGetAccountBeforeSet(t *testing.T) {
 func testV1AccLoadTarrifPlans(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testit")}
-	if err := accRpc.Call(utils.ApierV1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	if err := accRpc.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
@@ -137,7 +137,7 @@ func testV1AccLoadTarrifPlans(t *testing.T) {
 
 func testV1AccGetAccountAfterLoad(t *testing.T) {
 	var reply *engine.Account
-	if err := accRpc.Call(utils.ApierV2GetAccount,
+	if err := accRpc.Call(utils.APIerSv2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"},
 		&reply); err != nil {
 		t.Error(err)
@@ -146,7 +146,7 @@ func testV1AccGetAccountAfterLoad(t *testing.T) {
 
 func testV1AccRemAccount(t *testing.T) {
 	var reply string
-	if err := accRpc.Call(utils.ApierV1RemoveAccount,
+	if err := accRpc.Call(utils.APIerSv1RemoveAccount,
 		&utils.AttrRemoveAccount{Tenant: "cgrates.org", Account: "1001"},
 		&reply); err != nil {
 		t.Error(err)
@@ -157,7 +157,7 @@ func testV1AccRemAccount(t *testing.T) {
 
 func testV1AccGetAccountAfterDelete(t *testing.T) {
 	var reply *engine.Account
-	if err := accRpc.Call(utils.ApierV2GetAccount,
+	if err := accRpc.Call(utils.APIerSv2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -166,7 +166,7 @@ func testV1AccGetAccountAfterDelete(t *testing.T) {
 
 func testV1AccSetAccount(t *testing.T) {
 	var reply string
-	if err := accRpc.Call(utils.ApierV2SetAccount,
+	if err := accRpc.Call(utils.APIerSv2SetAccount,
 		&utils.AttrSetAccount{Tenant: "cgrates.org", Account: "testacc"}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -176,7 +176,7 @@ func testV1AccSetAccount(t *testing.T) {
 
 func testV1AccGetAccountAfterSet(t *testing.T) {
 	var reply *engine.Account
-	if err := accRpc.Call(utils.ApierV2GetAccount,
+	if err := accRpc.Call(utils.APIerSv2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "testacc"}, &reply); err != nil {
 		t.Error(err)
 	}
@@ -184,7 +184,7 @@ func testV1AccGetAccountAfterSet(t *testing.T) {
 
 func testV1AccRemAccountSet(t *testing.T) {
 	var reply string
-	if err := accRpc.Call(utils.ApierV1RemoveAccount,
+	if err := accRpc.Call(utils.APIerSv1RemoveAccount,
 		&utils.AttrRemoveAccount{Tenant: "cgrates.org", Account: "testacc"},
 		&reply); err != nil {
 		t.Error(err)
@@ -195,7 +195,7 @@ func testV1AccRemAccountSet(t *testing.T) {
 
 func testV1AccGetAccountSetAfterDelete(t *testing.T) {
 	var reply *engine.Account
-	if err := accRpc.Call(utils.ApierV2GetAccount,
+	if err := accRpc.Call(utils.APIerSv2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "testacc"},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -206,7 +206,7 @@ func testV1AccGetAccountSetAfterDelete(t *testing.T) {
 Need to investigate for redis why didn't return not found
 func testV1AccRemAccountAfterDelete(t *testing.T) {
 	var reply string
-	if err := accRpc.Call(utils.ApierV1RemoveAccount,
+	if err := accRpc.Call(utils.APIerSv1RemoveAccount,
 		&utils.AttrRemoveAccount{Tenant: "cgrates.org", Account: "testacc"},
 		&reply); err == nil || err.Error() != utils.NewErrServerError(utils.ErrNotFound).Error() {
 		t.Error(err)
@@ -219,7 +219,7 @@ func testV1AccMonthly(t *testing.T) {
 	timeAfter := time.Now().Add(10*time.Second).AddDate(0, 1, 0)
 	timeBefore := time.Now().Add(-10*time.Second).AddDate(0, 1, 0)
 	var reply *engine.Account
-	if err := accRpc.Call(utils.ApierV2GetAccount,
+	if err := accRpc.Call(utils.APIerSv2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1002"},
 		&reply); err != nil {
 		t.Error(err)
@@ -243,10 +243,10 @@ func testV1AccSendToThreshold(t *testing.T) {
 		{Identifier: utils.DISABLE_ACCOUNT},
 		{Identifier: utils.LOG},
 	}}
-	if err := accRpc.Call(utils.ApierV2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
-		t.Error("Got error on ApierV2.SetActions: ", err.Error())
+	if err := accRpc.Call(utils.APIerSv2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+		t.Error("Got error on APIerSv2.SetActions: ", err.Error())
 	} else if reply != utils.OK {
-		t.Errorf("Calling ApierV2.SetActions received: %s", reply)
+		t.Errorf("Calling APIerSv2.SetActions received: %s", reply)
 	}
 	time.Sleep(10 * time.Millisecond)
 
@@ -263,7 +263,7 @@ func testV1AccSendToThreshold(t *testing.T) {
 		},
 	}
 
-	if err := accRpc.Call(utils.ApierV1SetThresholdProfile, tPrfl, &reply); err != nil {
+	if err := accRpc.Call(utils.APIerSv1SetThresholdProfile, tPrfl, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
@@ -278,10 +278,10 @@ func testV1AccSendToThreshold(t *testing.T) {
 			utils.ID: "testAccSetBalance",
 		},
 	}
-	if err := accRpc.Call(utils.ApierV1SetBalance, attrs, &reply); err != nil {
-		t.Error("Got error on ApierV1.SetBalance: ", err.Error())
+	if err := accRpc.Call(utils.APIerSv1SetBalance, attrs, &reply); err != nil {
+		t.Error("Got error on APIerSv1.SetBalance: ", err.Error())
 	} else if reply != utils.OK {
-		t.Errorf("Calling ApierV1.SetBalance received: %s", reply)
+		t.Errorf("Calling APIerSv1.SetBalance received: %s", reply)
 	}
 
 	// give time to threshold to made the change
@@ -292,7 +292,7 @@ func testV1AccSendToThreshold(t *testing.T) {
 		Tenant:  "cgrates.org",
 		Account: "testAccThreshold",
 	}
-	if err := accRpc.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
+	if err := accRpc.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.Disabled != true {
 		t.Errorf("Expecting: true, received: %v", acnt.Disabled)

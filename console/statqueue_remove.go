@@ -23,7 +23,7 @@ import "github.com/cgrates/cgrates/utils"
 func init() {
 	c := &CmdRemoveStatQueue{
 		name:      "statqueue_remove",
-		rpcMethod: utils.ApierV1RemoveStatQueueProfile,
+		rpcMethod: utils.APIerSv1RemoveStatQueueProfile,
 		rpcParams: &utils.TenantIDWithCache{},
 	}
 	commands[c.Name()] = c

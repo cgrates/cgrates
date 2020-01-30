@@ -140,7 +140,7 @@ func testFWVITLoadTPFromFolder(t *testing.T) {
 		},
 	}
 	var result string
-	if err := fwvRPC.Call(utils.ApierV1SetChargerProfile, chargerProfile, &result); err != nil {
+	if err := fwvRPC.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -199,12 +199,12 @@ func testFWVITHandleCdr1File(t *testing.T) {
 func testFWVITAnalyseCDRs(t *testing.T) {
 	time.Sleep(500 * time.Millisecond)
 	var reply []*engine.ExternalCDR
-	if err := fwvRPC.Call(utils.ApierV2GetCDRs, utils.RPCCDRsFilter{}, &reply); err != nil {
+	if err := fwvRPC.Call(utils.APIerSv2GetCDRs, utils.RPCCDRsFilter{}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 34 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	}
-	if err := fwvRPC.Call(utils.ApierV2GetCDRs, utils.RPCCDRsFilter{OriginIDs: []string{"CDR0000010"}}, &reply); err != nil {
+	if err := fwvRPC.Call(utils.APIerSv2GetCDRs, utils.RPCCDRsFilter{OriginIDs: []string{"CDR0000010"}}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))

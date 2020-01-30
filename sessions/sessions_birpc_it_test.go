@@ -131,7 +131,7 @@ func testSessionsBiRPCApierRpcConn(t *testing.T) {
 func testSessionsBiRPCTPFromFolder(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
 	var loadInst utils.LoadInstance
-	if err := sessionsRPC.Call(utils.ApierV2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
+	if err := sessionsRPC.Call(utils.APIerSv2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
@@ -149,7 +149,7 @@ func testSessionsBiRPCSessionAutomaticDisconnects(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := sessionsRPC.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {
+	if err := sessionsRPC.Call(utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
@@ -160,7 +160,7 @@ func testSessionsBiRPCSessionAutomaticDisconnects(t *testing.T) {
 		Account: attrSetBalance.Account,
 	}
 	eAcntVal := 0.01 * float64(time.Second)
-	if err := sessionsRPC.Call(utils.ApierV2GetAccount, attrGetAcnt, &acnt); err != nil {
+	if err := sessionsRPC.Call(utils.APIerSv2GetAccount, attrGetAcnt, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
 		t.Errorf("Expecting: %f, received: %f", eAcntVal,
@@ -236,7 +236,7 @@ func testSessionsBiRPCSessionAutomaticDisconnects(t *testing.T) {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(100 * time.Millisecond)) // Give time for  debits to occur
-	if err := sessionsRPC.Call(utils.ApierV2GetAccount, attrGetAcnt, &acnt); err != nil {
+	if err := sessionsRPC.Call(utils.APIerSv2GetAccount, attrGetAcnt, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != 0 {
 		t.Errorf("Balance should be empty, have: %f", acnt.BalanceMap[utils.VOICE].GetTotalValue())
@@ -250,7 +250,7 @@ func testSessionsBiRPCSessionAutomaticDisconnects(t *testing.T) {
 	var cdrs []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault},
 		DestinationPrefixes: []string{"1004"}}
-	if err := sessionsRPC.Call(utils.ApierV2GetCDRs, req, &cdrs); err != nil {
+	if err := sessionsRPC.Call(utils.APIerSv2GetCDRs, req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -275,7 +275,7 @@ func testSessionsBiRPCSessionOriginatorTerminate(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := sessionsRPC.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {
+	if err := sessionsRPC.Call(utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
@@ -283,7 +283,7 @@ func testSessionsBiRPCSessionOriginatorTerminate(t *testing.T) {
 	var acnt *engine.Account
 	attrGetAcnt := &utils.AttrGetAccount{Tenant: attrSetBalance.Tenant, Account: attrSetBalance.Account}
 	eAcntVal := 1.0 * float64(time.Second)
-	if err := sessionsRPC.Call(utils.ApierV2GetAccount, attrGetAcnt, &acnt); err != nil {
+	if err := sessionsRPC.Call(utils.APIerSv2GetAccount, attrGetAcnt, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
 		t.Errorf("Expecting: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.VOICE].GetTotalValue())
@@ -352,7 +352,7 @@ func testSessionsBiRPCSessionOriginatorTerminate(t *testing.T) {
 	}
 
 	time.Sleep(time.Duration(50 * time.Millisecond)) // Give time for  debits to occur
-	if err := sessionsRPC.Call(utils.ApierV2GetAccount, attrGetAcnt, &acnt); err != nil {
+	if err := sessionsRPC.Call(utils.APIerSv2GetAccount, attrGetAcnt, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() > 0.995*float64(time.Second) { // FixMe: should be not 0.93?
 		t.Errorf("Balance value: %f", acnt.BalanceMap[utils.VOICE].GetTotalValue())
@@ -368,7 +368,7 @@ func testSessionsBiRPCSessionOriginatorTerminate(t *testing.T) {
 	var cdrs []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault},
 		DestinationPrefixes: []string{"1005"}}
-	if err := sessionsRPC.Call(utils.ApierV2GetCDRs, req, &cdrs); err != nil {
+	if err := sessionsRPC.Call(utils.APIerSv2GetCDRs, req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))

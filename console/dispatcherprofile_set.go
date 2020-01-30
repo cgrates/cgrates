@@ -26,7 +26,7 @@ import (
 func init() {
 	c := &CmdSetDispatcherProfile{
 		name:      "dispatcherprofile_set",
-		rpcMethod: utils.ApierV1SetDispatcherProfile,
+		rpcMethod: utils.APIerSv1SetDispatcherProfile,
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}

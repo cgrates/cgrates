@@ -26,7 +26,7 @@ import (
 func init() {
 	c := &CmdGetFilter{
 		name:      "filter",
-		rpcMethod: utils.ApierV1GetFilter,
+		rpcMethod: utils.APIerSv1GetFilter,
 		rpcParams: &utils.TenantID{},
 	}
 	commands[c.Name()] = c

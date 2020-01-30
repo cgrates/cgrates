@@ -48,7 +48,7 @@ func TestDspApierITMongo(t *testing.T) {
 	testDsp(t, sTestsDspApier, "TestDspApier", "all", "all2", "dispatchers_mongo", "tutorial", "oldtutorial", "dispatchers")
 }
 
-//because we import dispatchers in apierV1 we will send information as map[string]interface{}
+//because we import dispatchers in APIerSv1 we will send information as map[string]interface{}
 func testDspApierSetAttributes(t *testing.T) {
 	ev := &map[string]interface{}{
 		utils.Tenant: "cgrates.org",
@@ -74,7 +74,7 @@ func testDspApierSetAttributes(t *testing.T) {
 		utils.APIKey: utils.StringPointer("apier12345"),
 	}
 	var result string
-	if err := dispEngine.RPC.Call(utils.ApierV1SetAttributeProfile, ev, &result); err != nil {
+	if err := dispEngine.RPC.Call(utils.APIerSv1SetAttributeProfile, ev, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -107,7 +107,7 @@ func testDspApierGetAttributes(t *testing.T) {
 		Weight: 10,
 	}
 	alsPrf.Compile()
-	if err := dispEngine.RPC.Call(utils.ApierV1GetAttributeProfile,
+	if err := dispEngine.RPC.Call(utils.APIerSv1GetAttributeProfile,
 		utils.TenantIDWithArgDispatcher{
 			TenantID:      &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_Dispatcher"},
 			ArgDispatcher: &utils.ArgDispatcher{APIKey: utils.StringPointer("apier12345")},
@@ -123,7 +123,7 @@ func testDspApierGetAttributes(t *testing.T) {
 
 func testDspApierUnkownAPiKey(t *testing.T) {
 	var reply *engine.AttributeProfile
-	if err := dispEngine.RPC.Call(utils.ApierV1GetAttributeProfile,
+	if err := dispEngine.RPC.Call(utils.APIerSv1GetAttributeProfile,
 		utils.TenantIDWithArgDispatcher{
 			TenantID:      &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_Dispatcher"},
 			ArgDispatcher: &utils.ArgDispatcher{APIKey: utils.StringPointer("RandomApiKey")},

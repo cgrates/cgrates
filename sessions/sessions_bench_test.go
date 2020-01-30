@@ -66,7 +66,7 @@ func loadTP() {
 	attrs := &utils.AttrLoadTpFromFolder{
 		FolderPath: path.Join(config.CgrConfig().DataFolderPath, "tariffplans", "tutorial")}
 	var tpLoadInst utils.LoadInstance
-	if err := sBenchRPC.Call(utils.ApierV2LoadTariffPlanFromFolder,
+	if err := sBenchRPC.Call(utils.APIerSv2LoadTariffPlanFromFolder,
 		attrs, &tpLoadInst); err != nil {
 		log.Fatal(err)
 	}
@@ -84,7 +84,7 @@ func addBalance(sBenchRPC *rpc.Client, sraccount string) {
 		},
 	}
 	var reply string
-	if err := sBenchRPC.Call(utils.ApierV2SetBalance,
+	if err := sBenchRPC.Call(utils.APIerSv2SetBalance,
 		attrSetBalance, &reply); err != nil {
 		log.Fatal(err)
 	}

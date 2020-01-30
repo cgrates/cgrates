@@ -183,7 +183,7 @@ func testHAitApierRpcConn(t *testing.T) {
 func testHAitTPFromFolder(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
 	var loadInst utils.LoadInstance
-	if err := haRPC.Call(utils.ApierV2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
+	if err := haRPC.Call(utils.APIerSv2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
@@ -232,7 +232,7 @@ func testHAitAuth1001(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := haRPC.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {
+	if err := haRPC.Call(utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
@@ -293,7 +293,7 @@ func testHAitCDRmtcall(t *testing.T) {
 	time.Sleep(50 * time.Millisecond)
 	var cdrs []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault}}
-	if err := haRPC.Call(utils.ApierV2GetCDRs, req, &cdrs); err != nil {
+	if err := haRPC.Call(utils.APIerSv2GetCDRs, req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -334,7 +334,7 @@ func testHAitCDRmtcall2(t *testing.T) {
 	time.Sleep(50 * time.Millisecond)
 	var cdrs []*engine.ExternalCDR
 	fltr := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault}, Accounts: []string{"447700086788"}}
-	if err := haRPC.Call(utils.ApierV2GetCDRs, fltr, &cdrs); err != nil {
+	if err := haRPC.Call(utils.APIerSv2GetCDRs, fltr, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))

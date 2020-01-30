@@ -112,7 +112,7 @@ func testCostRPCConn(t *testing.T) {
 func testCostLoadFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
-	if err := costRPC.Call(utils.ApierV1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	if err := costRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(500 * time.Millisecond)
@@ -122,7 +122,7 @@ func testCostGetCost(t *testing.T) {
 	attrs := AttrGetCost{Category: "call", Tenant: "cgrates.org",
 		Subject: "1001", AnswerTime: "*now", Destination: "1002", Usage: "120000000000"} //120s ( 2m)
 	var rply *engine.EventCost
-	if err := costRPC.Call(utils.ApierV1GetCost, attrs, &rply); err != nil {
+	if err := costRPC.Call(utils.APIerSv1GetCost, attrs, &rply); err != nil {
 		t.Error("Unexpected nil error received: ", err.Error())
 	} else if *rply.Cost != 0.700200 { // expect to get 0.7 (0.4 connect fee 0.2 first minute 0.1 each minute after)
 		t.Errorf("Unexpected cost received: %f", *rply.Cost)

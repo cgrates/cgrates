@@ -81,12 +81,12 @@ func TestNewBiRPCInternalClient(t *testing.T) {
 		t.Error("Client Connection must be not nil")
 	}
 
-	err := rcv.Call(ApierV1ComputeActionPlanIndexes, "arg1", "reply")
+	err := rcv.Call(APIerSv1ComputeActionPlanIndexes, "arg1", "reply")
 	if err != nil {
 		t.Error(err)
 	}
 	testrpc := &testBiRPCServer{
-		metod: ApierV1ComputeActionPlanIndexes,
+		metod: APIerSv1ComputeActionPlanIndexes,
 		args:  "arg1",
 		reply: "reply",
 	}

@@ -26,7 +26,7 @@ import (
 func init() {
 	c := &CmdRemoveActions{
 		name:      "actions_remove",
-		rpcMethod: utils.ApierV1RemoveActions,
+		rpcMethod: utils.APIerSv1RemoveActions,
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}

@@ -126,7 +126,7 @@ func testRPCMethodsRpcConn(t *testing.T) {
 func testRPCMethodsFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testit")}
-	if err := rpcRpc.Call(utils.ApierV1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	if err := rpcRpc.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(100 * time.Millisecond)
@@ -134,7 +134,7 @@ func testRPCMethodsFromFolder(t *testing.T) {
 
 func testRPCMethodsAddData(t *testing.T) {
 	var resp string
-	if err := rpcRpc.Call(utils.ApierV1RemoveThresholdProfile,
+	if err := rpcRpc.Call(utils.APIerSv1RemoveThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1001"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
@@ -146,20 +146,20 @@ func testRPCMethodsAddData(t *testing.T) {
 		{Identifier: utils.DISABLE_ACCOUNT},
 		{Identifier: utils.LOG},
 	}}
-	if err := rpcRpc.Call(utils.ApierV2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
-		t.Error("Got error on ApierV2.SetActions: ", err.Error())
+	if err := rpcRpc.Call(utils.APIerSv2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+		t.Error("Got error on APIerSv2.SetActions: ", err.Error())
 	} else if reply != utils.OK {
-		t.Errorf("Calling ApierV2.SetActions received: %s", reply)
+		t.Errorf("Calling APIerSv2.SetActions received: %s", reply)
 	}
 	// Add an enable and log action
 	attrsAA2 := &utils.AttrSetActions{ActionsId: "ENABLE_LOG", Actions: []*utils.TPAction{
 		{Identifier: utils.ENABLE_ACCOUNT},
 		{Identifier: utils.LOG},
 	}}
-	if err := rpcRpc.Call(utils.ApierV2SetActions, attrsAA2, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
-		t.Error("Got error on ApierV2.SetActions: ", err.Error())
+	if err := rpcRpc.Call(utils.APIerSv2SetActions, attrsAA2, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+		t.Error("Got error on APIerSv2.SetActions: ", err.Error())
 	} else if reply != utils.OK {
-		t.Errorf("Calling ApierV2.SetActions received: %s", reply)
+		t.Errorf("Calling APIerSv2.SetActions received: %s", reply)
 	}
 	time.Sleep(10 * time.Millisecond)
 
@@ -175,7 +175,7 @@ func testRPCMethodsAddData(t *testing.T) {
 			ActionIDs: []string{"DISABLE_LOG"},
 		},
 	}
-	if err := rpcRpc.Call(utils.ApierV1SetThresholdProfile, tPrfl, &reply); err != nil {
+	if err := rpcRpc.Call(utils.APIerSv1SetThresholdProfile, tPrfl, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
@@ -192,7 +192,7 @@ func testRPCMethodsAddData(t *testing.T) {
 			ActionIDs: []string{"ENABLE_LOG"},
 		},
 	}
-	if err := rpcRpc.Call(utils.ApierV1SetThresholdProfile, tPrfl2, &reply); err != nil {
+	if err := rpcRpc.Call(utils.APIerSv1SetThresholdProfile, tPrfl2, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
@@ -253,7 +253,7 @@ func testRPCMethodsAuthorizeSession(t *testing.T) {
 		Tenant:  "cgrates.org",
 		Account: "1001",
 	}
-	if err := rpcRpc.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
+	if err := rpcRpc.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.Disabled != true {
 		t.Errorf("Expecting: true, received: %v", acnt.Disabled)
@@ -348,7 +348,7 @@ func testRPCMethodsInitSession(t *testing.T) {
 		Tenant:  "cgrates.org",
 		Account: "1001",
 	}
-	if err := rpcRpc.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
+	if err := rpcRpc.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.Disabled != true {
 		t.Errorf("Expecting: true, received: %v", acnt.Disabled)
@@ -443,7 +443,7 @@ func testRPCMethodsUpdateSession(t *testing.T) {
 		Tenant:  "cgrates.org",
 		Account: "1001",
 	}
-	if err := rpcRpc.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
+	if err := rpcRpc.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.Disabled != true {
 		t.Errorf("Expecting: true, received: %v", acnt.Disabled)
@@ -657,7 +657,7 @@ func testRPCMethodsProcessEvent(t *testing.T) {
 		Tenant:  "cgrates.org",
 		Account: "1001",
 	}
-	if err := rpcRpc.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
+	if err := rpcRpc.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.Disabled != true {
 		t.Errorf("Expecting: true, received: %v", acnt.Disabled)
@@ -819,7 +819,7 @@ func testRPCMethodsCdrsStoreSessionCost(t *testing.T) {
 // Load the tariff plan, creating accounts and their balances
 func testRPCMethodsLoadData(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testtp")}
-	if err := rpcRpc.Call(utils.ApierV2LoadTariffPlanFromFolder, attrs, &tpLoadInst); err != nil {
+	if err := rpcRpc.Call(utils.APIerSv2LoadTariffPlanFromFolder, attrs, &tpLoadInst); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups

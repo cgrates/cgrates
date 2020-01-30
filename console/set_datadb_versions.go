@@ -26,7 +26,7 @@ import (
 func init() {
 	c := &CmdSetDataDBVersions{
 		name:      "set_datadb_versions",
-		rpcMethod: utils.ApierV1SetDataDBVersions,
+		rpcMethod: utils.APIerSv1SetDataDBVersions,
 		rpcParams: &v1.SetVersionsArg{},
 	}
 	commands[c.Name()] = c

@@ -34,12 +34,12 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-type ApierV2 struct {
-	v1.ApierV1
+type APIerSv2 struct {
+	v1.APIerSv1
 }
 
 // Call implements rpcclient.ClientConnector interface for internal RPC
-func (apiv2 *ApierV2) Call(serviceMethod string,
+func (apiv2 *APIerSv2) Call(serviceMethod string,
 	args interface{}, reply interface{}) error {
 	return utils.APIerRPCCall(apiv2, serviceMethod, args, reply)
 }
@@ -50,7 +50,7 @@ type AttrLoadRatingProfile struct {
 }
 
 // Process dependencies and load a specific rating profile from storDb into dataDb.
-func (apiv2 *ApierV2) LoadRatingProfile(attrs AttrLoadRatingProfile, reply *string) error {
+func (apiv2 *APIerSv2) LoadRatingProfile(attrs AttrLoadRatingProfile, reply *string) error {
 	if len(attrs.TPid) == 0 {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
@@ -74,7 +74,7 @@ type AttrLoadAccountActions struct {
 }
 
 // Process dependencies and load a specific AccountActions profile from storDb into dataDb.
-func (apiv2 *ApierV2) LoadAccountActions(attrs AttrLoadAccountActions, reply *string) error {
+func (apiv2 *APIerSv2) LoadAccountActions(attrs AttrLoadAccountActions, reply *string) error {
 	if len(attrs.TPid) == 0 {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
@@ -99,7 +99,7 @@ func (apiv2 *ApierV2) LoadAccountActions(attrs AttrLoadAccountActions, reply *st
 	return nil
 }
 
-func (apiv2 *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, reply *utils.LoadInstance) error {
+func (apiv2 *APIerSv2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, reply *utils.LoadInstance) error {
 	if len(attrs.FolderPath) == 0 {
 		return fmt.Errorf("%s:%s", utils.ErrMandatoryIeMissing.Error(), "FolderPath")
 	}
@@ -135,7 +135,7 @@ func (apiv2 *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder,
 		return utils.NewErrServerError(err)
 	}
 
-	utils.Logger.Info("ApierV2.LoadTariffPlanFromFolder, reloading cache.")
+	utils.Logger.Info("APIerSv2.LoadTariffPlanFromFolder, reloading cache.")
 	//verify If Caching is present in arguments
 	caching := config.CgrConfig().GeneralCfg().DefaultCaching
 	if attrs.Caching != nil {
@@ -145,7 +145,7 @@ func (apiv2 *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder,
 		return utils.NewErrServerError(err)
 	}
 	if len(apiv2.Config.ApierCfg().SchedulerConns) != 0 {
-		utils.Logger.Info("ApierV2.LoadTariffPlanFromFolder, reloading scheduler.")
+		utils.Logger.Info("APIerSv2.LoadTariffPlanFromFolder, reloading scheduler.")
 		if err := loader.ReloadScheduler(true); err != nil {
 			return utils.NewErrServerError(err)
 		}
@@ -169,7 +169,7 @@ type AttrGetActions struct {
 }
 
 // Retrieves actions attached to specific ActionsId within cache
-func (apiv2 *ApierV2) GetActions(attr AttrGetActions, reply *map[string]engine.Actions) error {
+func (apiv2 *APIerSv2) GetActions(attr AttrGetActions, reply *map[string]engine.Actions) error {
 	var actionKeys []string
 	var err error
 	if len(attr.ActionIDs) == 0 {
@@ -222,7 +222,7 @@ type AttrGetDestinations struct {
 }
 
 // GetDestinations returns a list of destination based on the destinationIDs given
-func (apiv2 *ApierV2) GetDestinations(attr AttrGetDestinations, reply *[]*engine.Destination) (err error) {
+func (apiv2 *APIerSv2) GetDestinations(attr AttrGetDestinations, reply *[]*engine.Destination) (err error) {
 	if len(attr.DestinationIDs) == 0 {
 		// get all destination ids
 		if attr.DestinationIDs, err = apiv2.DataManager.DataDB().GetKeysForPrefix(utils.DESTINATION_PREFIX); err != nil {
@@ -242,7 +242,7 @@ func (apiv2 *ApierV2) GetDestinations(attr AttrGetDestinations, reply *[]*engine
 	return
 }
 
-func (apiv2 *ApierV2) SetActions(attrs utils.AttrSetActions, reply *string) error {
+func (apiv2 *APIerSv2) SetActions(attrs utils.AttrSetActions, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"ActionsId", "Actions"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

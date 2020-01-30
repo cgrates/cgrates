@@ -118,13 +118,13 @@ func testCdrsIntTestTTL(t *testing.T) {
 		t.Error("Unexpected reply received: ", reply)
 	}
 	var cdrs []*engine.ExternalCDR
-	if err := cdrsIntRPC.Call(utils.ApierV2GetCDRs, &utils.RPCCDRsFilter{}, &cdrs); err != nil {
+	if err := cdrsIntRPC.Call(utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{}, &cdrs); err != nil {
 		t.Fatal("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Errorf("Expected 1 result received %v ", len(cdrs))
 	}
 	time.Sleep(3 * time.Second)
-	if err := cdrsIntRPC.Call(utils.ApierV2GetCDRs, &utils.RPCCDRsFilter{}, &cdrs); err == nil ||
+	if err := cdrsIntRPC.Call(utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{}, &cdrs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatal("Unexpected error: ", err.Error())
 	}

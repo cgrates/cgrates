@@ -27,7 +27,7 @@ import (
 func init() {
 	c := &CmdSetChargers{
 		name:      "chargers_set",
-		rpcMethod: utils.ApierV1SetChargerProfile,
+		rpcMethod: utils.APIerSv1SetChargerProfile,
 		rpcParams: &v1.ChargerWithCache{},
 	}
 	commands[c.Name()] = c

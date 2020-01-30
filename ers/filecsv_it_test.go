@@ -156,7 +156,7 @@ func testCsvITLoadTPFromFolder(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{
 		FolderPath: path.Join(*dataDir, "tariffplans", "testit")}
 	var loadInst utils.LoadInstance
-	if err := csvRPC.Call(utils.ApierV2LoadTariffPlanFromFolder,
+	if err := csvRPC.Call(utils.APIerSv2LoadTariffPlanFromFolder,
 		attrs, &loadInst); err != nil {
 		t.Error(err)
 	}
@@ -192,7 +192,7 @@ func testCsvITHandleSessionFile(t *testing.T) {
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	eAcntVal := 10.0
-	if err := csvRPC.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
+	if err := csvRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
@@ -284,7 +284,7 @@ func testCsvITAnalyseCDRs(t *testing.T) {
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	eAcntVal := 9.85
-	if err := csvRPC.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
+	if err := csvRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())

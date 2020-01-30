@@ -313,30 +313,30 @@ func testRPCITLclStatusBcastRALs1Up(t *testing.T) {
 /*
 func TestRPCITStatusBcastCmd(t *testing.T) {
 	var stats utils.CacheStats
-	if err := rpcRAL1.Call(utils.ApierV2GetCacheStats, utils.AttrCacheStats{}, &stats); err != nil {
+	if err := rpcRAL1.Call(utils.APIerSv2GetCacheStats, utils.AttrCacheStats{}, &stats); err != nil {
 		t.Error(err)
 	} else if stats.LastRatingLoadID != utils.NOT_AVAILABLE || stats.LastAccountingLoadID != utils.NOT_AVAILABLE {
 		t.Errorf("Received unexpected stats: %+v", stats)
 	}
 	var loadInst utils.LoadInstance
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(**dataDir, "tariffplans", "oldtutorial")}
-	if err := rpcRAL1.Call(utils.ApierV2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
+	if err := rpcRAL1.Call(utils.APIerSv2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
 		t.Error(err)
 	} else if loadInst.RatingLoadID == "" || loadInst.AccountingLoadID == "" {
 		t.Errorf("Empty loadId received, loadInstance: %+v", loadInst)
 	}
 	var reply string
-	if err := rpcPoolBroadcast.Call(utils.ApierV1ReloadCache, utils.AttrReloadCache{}, &reply); err != nil {
-		t.Error("Got error on ApierV1.ReloadCache: ", err.Error())
+	if err := rpcPoolBroadcast.Call(utils.APIerSv1ReloadCache, utils.AttrReloadCache{}, &reply); err != nil {
+		t.Error("Got error on APIerSv1.ReloadCache: ", err.Error())
 	} else if reply != utils.OK {
-		t.Error("Calling ApierV1.ReloadCache got reply: ", reply)
+		t.Error("Calling APIerSv1.ReloadCache got reply: ", reply)
 	}
-	if err := rpcRAL1.Call(utils.ApierV2GetCacheStats, utils.AttrCacheStats{}, &stats); err != nil {
+	if err := rpcRAL1.Call(utils.APIerSv2GetCacheStats, utils.AttrCacheStats{}, &stats); err != nil {
 		t.Error(err)
 	} else if stats.LastRatingLoadID != loadInst.RatingLoadID {
 		t.Errorf("Received unexpected stats:  %+v vs %+v", stats, loadInst)
 	}
-	if err := rpcRAL2.Call(utils.ApierV2GetCacheStats, utils.AttrCacheStats{}, &stats); err != nil {
+	if err := rpcRAL2.Call(utils.APIerSv2GetCacheStats, utils.AttrCacheStats{}, &stats); err != nil {
 		t.Error(err)
 	} else if stats.LastRatingLoadID != loadInst.RatingLoadID {
 		t.Errorf("Received unexpected stats: %+v vs %+v", stats, loadInst)

@@ -132,7 +132,7 @@ func testV1SplSRpcConn(t *testing.T) {
 func testV1SplSFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testit")}
-	if err := splSv1Rpc.Call(utils.ApierV1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	if err := splSv1Rpc.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(500 * time.Millisecond)
@@ -761,7 +761,7 @@ func testV1SplSGetSupplierWithoutFilter(t *testing.T) {
 
 func testV1SplSSetSupplierProfiles(t *testing.T) {
 	var reply *engine.SupplierProfile
-	if err := splSv1Rpc.Call(utils.ApierV1GetSupplierProfile,
+	if err := splSv1Rpc.Call(utils.APIerSv1GetSupplierProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -791,12 +791,12 @@ func testV1SplSSetSupplierProfiles(t *testing.T) {
 	}
 
 	var result string
-	if err := splSv1Rpc.Call(utils.ApierV1SetSupplierProfile, splPrf, &result); err != nil {
+	if err := splSv1Rpc.Call(utils.APIerSv1SetSupplierProfile, splPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := splSv1Rpc.Call(utils.ApierV1GetSupplierProfile,
+	if err := splSv1Rpc.Call(utils.APIerSv1GetSupplierProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(splPrf.SupplierProfile, reply) {
@@ -808,7 +808,7 @@ func testV1SplSGetSupplierProfileIDs(t *testing.T) {
 	expected := []string{"SPL_HIGHESTCOST_1", "SPL_QOS_1", "SPL_QOS_2", "SPL_QOS_FILTRED", "SPL_QOS_FILTRED2",
 		"SPL_ACNT_1001", "SPL_LEASTCOST_1", "SPL_WEIGHT_2", "SPL_WEIGHT_1", "SPL_QOS_3", "TEST_PROFILE1", "SPL_LCR"}
 	var result []string
-	if err := splSv1Rpc.Call(utils.ApierV1GetSupplierProfileIDs,
+	if err := splSv1Rpc.Call(utils.APIerSv1GetSupplierProfileIDs,
 		&utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{"cgrates.org"}}, &result); err != nil {
 		t.Error(err)
 	} else if len(expected) != len(result) {
@@ -866,13 +866,13 @@ func testV1SplSUpdateSupplierProfiles(t *testing.T) {
 		},
 	}
 	var result string
-	if err := splSv1Rpc.Call(utils.ApierV1SetSupplierProfile, splPrf, &result); err != nil {
+	if err := splSv1Rpc.Call(utils.APIerSv1SetSupplierProfile, splPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 	var reply *engine.SupplierProfile
-	if err := splSv1Rpc.Call(utils.ApierV1GetSupplierProfile,
+	if err := splSv1Rpc.Call(utils.APIerSv1GetSupplierProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(splPrf.Suppliers, reply.Suppliers) && !reflect.DeepEqual(reverseSuppliers, reply.Suppliers) {
@@ -882,19 +882,19 @@ func testV1SplSUpdateSupplierProfiles(t *testing.T) {
 
 func testV1SplSRemSupplierProfiles(t *testing.T) {
 	var resp string
-	if err := splSv1Rpc.Call(utils.ApierV1RemoveSupplierProfile,
+	if err := splSv1Rpc.Call(utils.APIerSv1RemoveSupplierProfile,
 		&utils.TenantIDWithCache{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
 	}
 	var reply *engine.SupplierProfile
-	if err := splSv1Rpc.Call(utils.ApierV1GetSupplierProfile,
+	if err := splSv1Rpc.Call(utils.APIerSv1GetSupplierProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	if err := splSv1Rpc.Call(utils.ApierV1RemoveSupplierProfile,
+	if err := splSv1Rpc.Call(utils.APIerSv1RemoveSupplierProfile,
 		&utils.TenantIDWithCache{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &resp); err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected error: %v recived: %v", utils.ErrNotFound, err)
 	}
@@ -983,7 +983,7 @@ func testV1SplSGetSupplierForEvent(t *testing.T) {
 // supplier1 have attached RP_LOCAL and supplier2 have attach RP_MOBILE
 func testV1SplsOneSupplierWithoutDestination(t *testing.T) {
 	var reply *engine.SupplierProfile
-	if err := splSv1Rpc.Call(utils.ApierV1GetSupplierProfile,
+	if err := splSv1Rpc.Call(utils.APIerSv1GetSupplierProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "SPL_DESTINATION"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -1012,7 +1012,7 @@ func testV1SplsOneSupplierWithoutDestination(t *testing.T) {
 	}
 
 	var result string
-	if err := splSv1Rpc.Call(utils.ApierV1SetSupplierProfile, splPrf, &result); err != nil {
+	if err := splSv1Rpc.Call(utils.APIerSv1SetSupplierProfile, splPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)

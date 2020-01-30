@@ -108,7 +108,7 @@ func testSTIRpcConn(t *testing.T) {
 // Load the tariff plan, creating accounts and their balances
 func testSTILoadTariffPlanFromFolder(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: *tpDir}
-	if err := stiRpc.Call(utils.ApierV2LoadTariffPlanFromFolder, attrs, &stiLoadInst); err != nil {
+	if err := stiRpc.Call(utils.APIerSv2LoadTariffPlanFromFolder, attrs, &stiLoadInst); err != nil {
 		t.Error(err)
 	} else if stiLoadInst.RatingLoadID == "" || stiLoadInst.AccountingLoadID == "" {
 		t.Error("Empty loadId received, loadInstance: ", stiLoadInst)
@@ -121,10 +121,10 @@ func testSTICacheStats(t *testing.T) {
 	var rcvStats *utils.CacheStats
 	expectedStats := &utils.CacheStats{Destinations: 1, RatingPlans: 1, RatingProfiles: 1}
 	var args utils.AttrCacheStats
-	if err := stiRpc.Call(utils.ApierV2GetCacheStats, args, &rcvStats); err != nil {
-		t.Error("Got error on ApierV2.GetCacheStats: ", err.Error())
+	if err := stiRpc.Call(utils.APIerSv2GetCacheStats, args, &rcvStats); err != nil {
+		t.Error("Got error on APIerSv2.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
-		t.Errorf("Calling ApierV2.GetCacheStats expected: %+v, received: %+v", expectedStats, rcvStats)
+		t.Errorf("Calling APIerSv2.GetCacheStats expected: %+v, received: %+v", expectedStats, rcvStats)
 	}
 }
 
@@ -148,7 +148,7 @@ func testSTIProcessExternalCdr(t *testing.T) {
 func testSTIGetCdrs(t *testing.T) {
 	var cdrs []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault}, Accounts: []string{"1001"}}
-	if err := stiRpc.Call(utils.ApierV2GetCDRs, req, &cdrs); err != nil {
+	if err := stiRpc.Call(utils.APIerSv2GetCDRs, req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -158,7 +158,7 @@ func testSTIGetCdrs(t *testing.T) {
 		}
 	}
 	req = utils.RPCCDRsFilter{RunIDs: []string{utils.META_SURETAX}, Accounts: []string{"1001"}}
-	if err := stiRpc.Call(utils.ApierV2GetCDRs, req, &cdrs); err != nil {
+	if err := stiRpc.Call(utils.APIerSv2GetCDRs, req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))

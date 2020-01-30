@@ -38,7 +38,7 @@ var (
 	apierCfgPath     string
 	apierCfg         *config.CGRConfig
 	apierRPC         *rpc.Client
-	apierv2ConfigDIR string //run tests for specific configuration
+	APIerSv2ConfigDIR string //run tests for specific configuration
 
 	sTestsAPIer = []func(t *testing.T){
 		testAPIerInitCfg,
@@ -66,24 +66,24 @@ func TestApierIT2(t *testing.T) {
 	// no need for a new config with *gob transport in this case
 	switch *dbType {
 	case utils.MetaInternal:
-		apierv2ConfigDIR = "tutinternal"
+		APIerSv2ConfigDIR = "tutinternal"
 	case utils.MetaMySQL:
-		apierv2ConfigDIR = "tutmysql"
+		APIerSv2ConfigDIR = "tutmysql"
 	case utils.MetaMongo:
-		apierv2ConfigDIR = "tutmongo"
+		APIerSv2ConfigDIR = "tutmongo"
 	case utils.MetaPostgres:
 		t.SkipNow()
 	default:
 		t.Fatal("Unknown Database type")
 	}
 	for _, stest := range sTestsAPIer {
-		t.Run(apierv2ConfigDIR, stest)
+		t.Run(APIerSv2ConfigDIR, stest)
 	}
 }
 
 func testAPIerInitCfg(t *testing.T) {
 	var err error
-	apierCfgPath = path.Join(costDataDir, "conf", "samples", apierv2ConfigDIR)
+	apierCfgPath = path.Join(costDataDir, "conf", "samples", APIerSv2ConfigDIR)
 	apierCfg, err = config.NewCGRConfigFromPath(apierCfgPath)
 	if err != nil {
 		t.Error(err)
@@ -124,7 +124,7 @@ func testAPIerRPCConn(t *testing.T) {
 func testAPIerLoadFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
-	if err := apierRPC.Call(utils.ApierV1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	if err := apierRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(500 * time.Millisecond)
@@ -184,7 +184,7 @@ func testAPIerVerifyAttributesAfterLoad(t *testing.T) {
 func testAPIerRemoveTPFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
-	if err := apierRPC.Call(utils.ApierV1RemoveTPFromFolder, attrs, &reply); err != nil {
+	if err := apierRPC.Call(utils.APIerSv1RemoveTPFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(500 * time.Millisecond)
@@ -192,13 +192,13 @@ func testAPIerRemoveTPFromFolder(t *testing.T) {
 
 func testAPIerAfterDelete(t *testing.T) {
 	var reply *engine.AttributeProfile
-	if err := apierRPC.Call(utils.ApierV1GetAttributeProfile,
+	if err := apierRPC.Call(utils.APIerSv1GetAttributeProfile,
 		utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1001_SIMPLEAUTH"}}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatal(err)
 	}
 	var replyTh *engine.ThresholdProfile
-	if err := apierRPC.Call(utils.ApierV1GetThresholdProfile,
+	if err := apierRPC.Call(utils.APIerSv1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1001"}, &replyTh); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -287,7 +287,7 @@ func testAPIerGetRatingPlanCost3(t *testing.T) {
 
 func testAPIerGetActionPlanIDs(t *testing.T) {
 	var reply []string
-	if err := apierRPC.Call(utils.ApierV1GetActionPlanIDs,
+	if err := apierRPC.Call(utils.APIerSv1GetActionPlanIDs,
 		utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{Tenant: "cgrates.org"}},
 		&reply); err != nil {
 		t.Error(err)
@@ -301,7 +301,7 @@ func testAPIerGetActionPlanIDs(t *testing.T) {
 func testAPIerGetRatingPlanIDs(t *testing.T) {
 	var reply []string
 	expected := []string{"RP_1002_LOW", "RP_1003", "RP_1001", "RP_SMS", "RP_1002"}
-	if err := apierRPC.Call(utils.ApierV1GetRatingPlanIDs,
+	if err := apierRPC.Call(utils.APIerSv1GetRatingPlanIDs,
 		utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{Tenant: "cgrates.org"}},
 		&reply); err != nil {
 		t.Error(err)

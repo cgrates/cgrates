@@ -27,7 +27,7 @@ import (
 func init() {
 	c := &CmdSetAttributes{
 		name:      "attributes_set",
-		rpcMethod: utils.ApierV2SetAttributeProfile,
+		rpcMethod: utils.APIerSv2SetAttributeProfile,
 		rpcParams: &v2.AttributeWithCache{},
 	}
 	commands[c.Name()] = c

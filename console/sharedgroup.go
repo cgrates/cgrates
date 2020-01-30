@@ -26,7 +26,7 @@ import (
 func init() {
 	c := &CmdGetSharedGroup{
 		name:      "sharedgroup",
-		rpcMethod: utils.ApierV1GetSharedGroup,
+		rpcMethod: utils.APIerSv1GetSharedGroup,
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}

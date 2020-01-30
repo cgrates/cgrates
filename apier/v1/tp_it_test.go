@@ -107,12 +107,12 @@ func testTPRpcConn(t *testing.T) {
 
 func testTPImportTPFromFolderPath(t *testing.T) {
 	var reply string
-	if err := tpRPC.Call(utils.ApierV1ImportTariffPlanFromFolder,
+	if err := tpRPC.Call(utils.APIerSv1ImportTariffPlanFromFolder,
 		utils.AttrImportTPFromFolder{TPid: "TEST_TPID2",
 			FolderPath: path.Join(tpDataDir, "tariffplans", "tutorial")}, &reply); err != nil {
-		t.Error("Got error on ApierV1.ImportTarrifPlanFromFolder: ", err.Error())
+		t.Error("Got error on APIerSv1.ImportTarrifPlanFromFolder: ", err.Error())
 	} else if reply != utils.OK {
-		t.Error("Calling ApierV1.ImportTarrifPlanFromFolder got reply: ", reply)
+		t.Error("Calling APIerSv1.ImportTarrifPlanFromFolder got reply: ", reply)
 	}
 	time.Sleep(500 * time.Millisecond)
 }
@@ -130,8 +130,8 @@ func testTPExportTPToFolder(t *testing.T) {
 	tpid := "TEST_TPID2"
 	compress := true
 	exportPath := "/tmp/"
-	if err := tpRPC.Call(utils.ApierV1ExportTPToFolder, &utils.AttrDirExportTP{TPid: &tpid, ExportPath: &exportPath, Compress: &compress}, &reply); err != nil {
-		t.Error("Got error on ApierV1.ExportTPToFolder: ", err.Error())
+	if err := tpRPC.Call(utils.APIerSv1ExportTPToFolder, &utils.AttrDirExportTP{TPid: &tpid, ExportPath: &exportPath, Compress: &compress}, &reply); err != nil {
+		t.Error("Got error on APIerSv1.ExportTPToFolder: ", err.Error())
 	} else if !reflect.DeepEqual(reply.ExportPath, expectedTPStas.ExportPath) {
 		t.Errorf("Expecting : %+v, received: %+v", expectedTPStas.ExportPath, reply.ExportPath)
 	} else if !reflect.DeepEqual(reply.Compressed, expectedTPStas.Compressed) {

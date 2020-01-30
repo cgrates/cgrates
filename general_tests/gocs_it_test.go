@@ -148,24 +148,24 @@ func testGOCSLoadData(t *testing.T) {
 		},
 	}
 	var result string
-	if err := usRPC.Call(utils.ApierV1SetChargerProfile, chargerProfile, &result); err != nil {
+	if err := usRPC.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 	var rpl *engine.ChargerProfile
-	if err := usRPC.Call(utils.ApierV1GetChargerProfile,
+	if err := usRPC.Call(utils.APIerSv1GetChargerProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "DEFAULT"}, &rpl); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(chargerProfile.ChargerProfile, rpl) {
 		t.Errorf("Expecting : %+v, received: %+v", chargerProfile.ChargerProfile, rpl)
 	}
-	if err := usRPC.Call(utils.ApierV1SetChargerProfile, chargerProfile, &result); err != nil {
+	if err := usRPC.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := usRPC.Call(utils.ApierV1GetChargerProfile,
+	if err := usRPC.Call(utils.APIerSv1GetChargerProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "DEFAULT"}, &rpl); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(chargerProfile.ChargerProfile, rpl) {
@@ -207,13 +207,13 @@ func testGOCSLoadData(t *testing.T) {
 	}
 	// add a voice balance of 59 minutes
 	var reply string
-	if err := usRPC.Call(utils.ApierV1SetBalance, attrSetBalance, &reply); err != nil {
+	if err := usRPC.Call(utils.APIerSv1SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("received: %s", reply)
 	}
 	expectedVoice := 3540000000000.0
-	if err := usRPC.Call(utils.ApierV2GetAccount, acntAttrs, &acnt); err != nil {
+	if err := usRPC.Call(utils.APIerSv2GetAccount, acntAttrs, &acnt); err != nil {
 		t.Error(err)
 	} else if rply := acnt.BalanceMap[utils.VOICE].GetTotalValue(); rply != expectedVoice {
 		t.Errorf("Expecting: %v, received: %v", expectedVoice, rply)
@@ -313,13 +313,13 @@ func testGOCSInitSession(t *testing.T) {
 	}
 
 	// 59 mins - 5 mins = 54 mins
-	if err := auRPC.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
+	if err := auRPC.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != 3240000000000.0 {
 		t.Errorf("Expecting : %+v, received: %+v", 3240000000000.0, acnt.BalanceMap[utils.VOICE].GetTotalValue())
 	}
 
-	if err := usRPC.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
+	if err := usRPC.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != 3240000000000.0 {
 		t.Errorf("Expecting : %+v, received: %+v", 3240000000000.0, acnt.BalanceMap[utils.VOICE].GetTotalValue())
@@ -376,7 +376,7 @@ func testGOCSUpdateSession(t *testing.T) {
 
 	// balanced changed in AU_SITE
 	// 54 min - 5 mins = 49 min
-	if err := auRPC.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
+	if err := auRPC.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != 2940000000000.0 {
 		t.Errorf("Expecting : %+v, received: %+v", 2940000000000.0, acnt.BalanceMap[utils.VOICE].GetTotalValue())
@@ -391,13 +391,13 @@ func testGOCSVerifyAccountsAfterStart(t *testing.T) {
 		Account: "1001",
 	}
 	// because US_SITE was down we should notice a difference between balance from accounts from US_SITE and AU_SITE
-	if err := auRPC.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
+	if err := auRPC.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != 2940000000000.0 {
 		t.Errorf("Expecting : %+v, received: %+v", 2940000000000.0, acnt.BalanceMap[utils.VOICE].GetTotalValue())
 	}
 
-	if err := usRPC.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
+	if err := usRPC.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != 3240000000000.0 {
 		t.Errorf("Expecting : %+v, received: %+v", 3240000000000.0, acnt.BalanceMap[utils.VOICE].GetTotalValue())
@@ -463,13 +463,13 @@ func testGOCSUpdateSession2(t *testing.T) {
 		Account: "1001",
 	}
 
-	if err := auRPC.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
+	if err := auRPC.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != 2940000000000.0 {
 		t.Errorf("Expecting : %+v, received: %+v", 2940000000000.0, acnt.BalanceMap[utils.VOICE].GetTotalValue())
 	}
 
-	if err := usRPC.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
+	if err := usRPC.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != 2940000000000.0 {
 		t.Errorf("Expecting : %+v, received: %+v", 2940000000000.0, acnt.BalanceMap[utils.VOICE].GetTotalValue())
@@ -523,13 +523,13 @@ func testGOCSTerminateSession(t *testing.T) {
 		Account: "1001",
 	}
 
-	if err := auRPC.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
+	if err := auRPC.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != 2640000000000.0 {
 		t.Errorf("Expecting : %+v, received: %+v", 2640000000000.0, acnt.BalanceMap[utils.VOICE].GetTotalValue())
 	}
 
-	if err := usRPC.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
+	if err := usRPC.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != 2640000000000.0 {
 		t.Errorf("Expecting : %+v, received: %+v", 2640000000000.0, acnt.BalanceMap[utils.VOICE].GetTotalValue())
@@ -573,13 +573,13 @@ func testGOCSProcessCDR(t *testing.T) {
 		Account: "1001",
 	}
 
-	if err := auRPC.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
+	if err := auRPC.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != 2640000000000.0 {
 		t.Errorf("Expecting : %+v, received: %+v", 2640000000000.0, acnt.BalanceMap[utils.VOICE].GetTotalValue())
 	}
 
-	if err := usRPC.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
+	if err := usRPC.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != 2640000000000.0 {
 		t.Errorf("Expecting : %+v, received: %+v", 2640000000000.0, acnt.BalanceMap[utils.VOICE].GetTotalValue())

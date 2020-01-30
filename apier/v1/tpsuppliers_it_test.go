@@ -120,7 +120,7 @@ func testTPSplPrfRPCConn(t *testing.T) {
 
 func testTPSplPrfGetTPSplPrfBeforeSet(t *testing.T) {
 	var reply *utils.TPSupplier
-	if err := tpSplPrfRPC.Call(utils.ApierV1GetTPSupplierProfile,
+	if err := tpSplPrfRPC.Call(utils.APIerSv1GetTPSupplierProfile,
 		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "SUPL_1"},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -156,7 +156,7 @@ func testTPSplPrfSetTPSplPrf(t *testing.T) {
 	}
 	sort.Strings(tpSplPr.FilterIDs)
 	var result string
-	if err := tpSplPrfRPC.Call(utils.ApierV1SetTPSupplierProfile,
+	if err := tpSplPrfRPC.Call(utils.APIerSv1SetTPSupplierProfile,
 		tpSplPr, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
@@ -166,7 +166,7 @@ func testTPSplPrfSetTPSplPrf(t *testing.T) {
 
 func testTPSplPrfGetTPSplPrfAfterSet(t *testing.T) {
 	var reply *utils.TPSupplierProfile
-	if err := tpSplPrfRPC.Call(utils.ApierV1GetTPSupplierProfile,
+	if err := tpSplPrfRPC.Call(utils.APIerSv1GetTPSupplierProfile,
 		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "SUPL_1"}, &reply); err != nil {
 		t.Fatal(err)
 	}
@@ -179,7 +179,7 @@ func testTPSplPrfGetTPSplPrfAfterSet(t *testing.T) {
 func testTPSplPrfGetTPSplPrfIDs(t *testing.T) {
 	var result []string
 	expectedTPID := []string{"SUPL_1"}
-	if err := tpSplPrfRPC.Call(utils.ApierV1GetTPSupplierProfileIDs,
+	if err := tpSplPrfRPC.Call(utils.APIerSv1GetTPSupplierProfileIDs,
 		&AttrGetTPSupplierProfileIDs{TPid: "TP1"}, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedTPID, result) {
@@ -214,7 +214,7 @@ func testTPSplPrfUpdateTPSplPrf(t *testing.T) {
 		},
 	}
 	var result string
-	if err := tpSplPrfRPC.Call(utils.ApierV1SetTPSupplierProfile,
+	if err := tpSplPrfRPC.Call(utils.APIerSv1SetTPSupplierProfile,
 		tpSplPr, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
@@ -227,7 +227,7 @@ func testTPSplPrfUpdateTPSplPrf(t *testing.T) {
 
 func testTPSplPrfGetTPSplPrfAfterUpdate(t *testing.T) {
 	var reply *utils.TPSupplierProfile
-	if err := tpSplPrfRPC.Call(utils.ApierV1GetTPSupplierProfile,
+	if err := tpSplPrfRPC.Call(utils.APIerSv1GetTPSupplierProfile,
 		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "SUPL_1"}, &reply); err != nil {
 		t.Fatal(err)
 	}
@@ -242,7 +242,7 @@ func testTPSplPrfGetTPSplPrfAfterUpdate(t *testing.T) {
 
 func testTPSplPrfRemTPSplPrf(t *testing.T) {
 	var resp string
-	if err := tpSplPrfRPC.Call(utils.ApierV1RemoveTPSupplierProfile,
+	if err := tpSplPrfRPC.Call(utils.APIerSv1RemoveTPSupplierProfile,
 		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "SUPL_1"},
 		&resp); err != nil {
 		t.Error(err)
@@ -253,7 +253,7 @@ func testTPSplPrfRemTPSplPrf(t *testing.T) {
 
 func testTPSplPrfGetTPSplPrfAfterRemove(t *testing.T) {
 	var reply *utils.TPSupplierProfile
-	if err := tpSplPrfRPC.Call(utils.ApierV1GetTPSupplierProfile,
+	if err := tpSplPrfRPC.Call(utils.APIerSv1GetTPSupplierProfile,
 		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "SUPL_1"},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)

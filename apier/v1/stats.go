@@ -26,11 +26,11 @@ import (
 )
 
 // GetStatQueueProfile returns a StatQueue profile
-func (apierV1 *ApierV1) GetStatQueueProfile(arg *utils.TenantID, reply *engine.StatQueueProfile) (err error) {
+func (APIerSv1 *APIerSv1) GetStatQueueProfile(arg *utils.TenantID, reply *engine.StatQueueProfile) (err error) {
 	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if sCfg, err := apierV1.DataManager.GetStatQueueProfile(arg.Tenant, arg.ID,
+	if sCfg, err := APIerSv1.DataManager.GetStatQueueProfile(arg.Tenant, arg.ID,
 		true, true, utils.NonTransactional); err != nil {
 		return utils.APIErrorHandler(err)
 	} else {
@@ -40,12 +40,12 @@ func (apierV1 *ApierV1) GetStatQueueProfile(arg *utils.TenantID, reply *engine.S
 }
 
 // GetStatQueueProfileIDs returns list of statQueueProfile IDs registered for a tenant
-func (apierV1 *ApierV1) GetStatQueueProfileIDs(args utils.TenantArgWithPaginator, stsPrfIDs *[]string) error {
+func (APIerSv1 *APIerSv1) GetStatQueueProfileIDs(args utils.TenantArgWithPaginator, stsPrfIDs *[]string) error {
 	if missing := utils.MissingStructFields(&args, []string{utils.Tenant}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	prfx := utils.StatQueueProfilePrefix + args.Tenant + ":"
-	keys, err := apierV1.DataManager.DataDB().GetKeysForPrefix(prfx)
+	keys, err := APIerSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
 	if err != nil {
 		return err
 	}
@@ -66,17 +66,17 @@ type StatQueueWithCache struct {
 }
 
 // SetStatQueueProfile alters/creates a StatQueueProfile
-func (apierV1 *ApierV1) SetStatQueueProfile(arg *StatQueueWithCache, reply *string) error {
+func (APIerSv1 *APIerSv1) SetStatQueueProfile(arg *StatQueueWithCache, reply *string) error {
 	if missing := utils.MissingStructFields(arg.StatQueueProfile, []string{"Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := apierV1.DataManager.SetStatQueueProfile(arg.StatQueueProfile, true); err != nil {
+	if err := APIerSv1.DataManager.SetStatQueueProfile(arg.StatQueueProfile, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheStatQueueProfiles and CacheStatQueues and store it in database
 	//make 1 insert for both StatQueueProfile and StatQueue instead of 2
 	loadID := time.Now().UnixNano()
-	if err := apierV1.DataManager.SetLoadIDs(map[string]int64{utils.CacheStatQueueProfiles: loadID, utils.CacheStatQueues: loadID}); err != nil {
+	if err := APIerSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheStatQueueProfiles: loadID, utils.CacheStatQueues: loadID}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for StatQueueProfile
@@ -84,10 +84,10 @@ func (apierV1 *ApierV1) SetStatQueueProfile(arg *StatQueueWithCache, reply *stri
 		CacheID: utils.CacheStatQueueProfiles,
 		ItemID:  arg.TenantID(),
 	}
-	if err := apierV1.CallCache(GetCacheOpt(arg.Cache), argCache); err != nil {
+	if err := APIerSv1.CallCache(GetCacheOpt(arg.Cache), argCache); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	if has, err := apierV1.DataManager.HasData(utils.StatQueuePrefix, arg.ID, arg.Tenant); err != nil {
+	if has, err := APIerSv1.DataManager.HasData(utils.StatQueuePrefix, arg.ID, arg.Tenant); err != nil {
 		return err
 	} else if !has {
 		//compose metrics for StatQueue
@@ -99,7 +99,7 @@ func (apierV1 *ApierV1) SetStatQueueProfile(arg *StatQueueWithCache, reply *stri
 				metrics[metric.MetricID] = stsMetric
 			}
 		}
-		if err := apierV1.DataManager.SetStatQueue(&engine.StatQueue{Tenant: arg.Tenant, ID: arg.ID, SQMetrics: metrics}); err != nil {
+		if err := APIerSv1.DataManager.SetStatQueue(&engine.StatQueue{Tenant: arg.Tenant, ID: arg.ID, SQMetrics: metrics}); err != nil {
 			return utils.APIErrorHandler(err)
 		}
 		//handle caching for StatQueues
@@ -107,7 +107,7 @@ func (apierV1 *ApierV1) SetStatQueueProfile(arg *StatQueueWithCache, reply *stri
 			CacheID: utils.CacheStatQueues,
 			ItemID:  arg.TenantID(),
 		}
-		if err := apierV1.CallCache(GetCacheOpt(arg.Cache), argCache); err != nil {
+		if err := APIerSv1.CallCache(GetCacheOpt(arg.Cache), argCache); err != nil {
 			return utils.APIErrorHandler(err)
 		}
 	}
@@ -117,11 +117,11 @@ func (apierV1 *ApierV1) SetStatQueueProfile(arg *StatQueueWithCache, reply *stri
 }
 
 // Remove a specific stat configuration
-func (apierV1 *ApierV1) RemoveStatQueueProfile(args *utils.TenantIDWithCache, reply *string) error {
+func (APIerSv1 *APIerSv1) RemoveStatQueueProfile(args *utils.TenantIDWithCache, reply *string) error {
 	if missing := utils.MissingStructFields(args, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := apierV1.DataManager.RemoveStatQueueProfile(args.Tenant, args.ID, utils.NonTransactional, true); err != nil {
+	if err := APIerSv1.DataManager.RemoveStatQueueProfile(args.Tenant, args.ID, utils.NonTransactional, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for StatQueueProfile
@@ -129,16 +129,16 @@ func (apierV1 *ApierV1) RemoveStatQueueProfile(args *utils.TenantIDWithCache, re
 		CacheID: utils.CacheStatQueueProfiles,
 		ItemID:  args.TenantID(),
 	}
-	if err := apierV1.CallCache(GetCacheOpt(args.Cache), argCache); err != nil {
+	if err := APIerSv1.CallCache(GetCacheOpt(args.Cache), argCache); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	if err := apierV1.DataManager.RemoveStatQueue(args.Tenant, args.ID, utils.NonTransactional); err != nil {
+	if err := APIerSv1.DataManager.RemoveStatQueue(args.Tenant, args.ID, utils.NonTransactional); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheStatQueueProfiles and CacheStatQueues and store it in database
 	//make 1 insert for both StatQueueProfile and StatQueue instead of 2
 	loadID := time.Now().UnixNano()
-	if err := apierV1.DataManager.SetLoadIDs(map[string]int64{utils.CacheStatQueueProfiles: loadID, utils.CacheStatQueues: loadID}); err != nil {
+	if err := APIerSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheStatQueueProfiles: loadID, utils.CacheStatQueues: loadID}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for StatQueues
@@ -146,7 +146,7 @@ func (apierV1 *ApierV1) RemoveStatQueueProfile(args *utils.TenantIDWithCache, re
 		CacheID: utils.CacheStatQueues,
 		ItemID:  args.TenantID(),
 	}
-	if err := apierV1.CallCache(GetCacheOpt(args.Cache), argCache); err != nil {
+	if err := APIerSv1.CallCache(GetCacheOpt(args.Cache), argCache); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

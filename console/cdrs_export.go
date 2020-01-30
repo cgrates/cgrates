@@ -26,7 +26,7 @@ import (
 func init() {
 	c := &CmdExportCdrs{
 		name:      "cdrs_export",
-		rpcMethod: utils.ApierV1ExportCDRs,
+		rpcMethod: utils.APIerSv1ExportCDRs,
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}

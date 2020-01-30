@@ -26,7 +26,7 @@ import (
 func init() {
 	c := &CmdGetFilterIndexes{
 		name:      "filter_indexes",
-		rpcMethod: utils.ApierV1GetFilterIndexes,
+		rpcMethod: utils.APIerSv1GetFilterIndexes,
 		rpcParams: &v1.AttrGetFilterIndexes{},
 	}
 	commands[c.Name()] = c

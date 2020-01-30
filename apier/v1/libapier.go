@@ -25,7 +25,7 @@ import (
 
 // GetCacheOpt receive the apiOpt and compare with default value
 // overwrite the default if it's present
-// visible in ApierV2
+// visible in APIerSv2
 func GetCacheOpt(apiOpt *string) string {
 	cacheOpt := config.CgrConfig().GeneralCfg().DefaultCaching
 	if apiOpt != nil && *apiOpt != utils.EmptyString {

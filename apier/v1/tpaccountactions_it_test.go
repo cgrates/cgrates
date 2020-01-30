@@ -128,7 +128,7 @@ func testTPAccActionsRpcConn(t *testing.T) {
 
 func testTPAccActionsGetTPAccActionBeforeSet(t *testing.T) {
 	var reply *utils.TPAccountActions
-	if err := tpAccActionsRPC.Call(utils.ApierV1GetTPAccountActions,
+	if err := tpAccActionsRPC.Call(utils.APIerSv1GetTPAccountActions,
 		&AttrGetTPAccountActions{TPid: "TPAcc", AccountActionsId: tpAccActionID}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -148,7 +148,7 @@ func testTPAccActionsSetTPAccAction(t *testing.T) {
 		Disabled:      false,
 	}
 	var result string
-	if err := tpAccActionsRPC.Call(utils.ApierV1SetTPAccountActions, tpAccActions, &result); err != nil {
+	if err := tpAccActionsRPC.Call(utils.APIerSv1SetTPAccountActions, tpAccActions, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -157,7 +157,7 @@ func testTPAccActionsSetTPAccAction(t *testing.T) {
 
 func testTPAccActionsGetTPAccActionAfterSet(t *testing.T) {
 	var reply *utils.TPAccountActions
-	if err := tpAccActionsRPC.Call(utils.ApierV1GetTPAccountActions,
+	if err := tpAccActionsRPC.Call(utils.APIerSv1GetTPAccountActions,
 		&AttrGetTPAccountActions{TPid: "TPAcc", AccountActionsId: tpAccActionID}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpAccActions, reply) {
@@ -167,7 +167,7 @@ func testTPAccActionsGetTPAccActionAfterSet(t *testing.T) {
 
 func testTPAccActionsGetTPAccountActionsByLoadId(t *testing.T) {
 	var reply *[]*utils.TPAccountActions
-	if err := tpAccActionsRPC.Call(utils.ApierV1GetTPAccountActionsByLoadId,
+	if err := tpAccActionsRPC.Call(utils.APIerSv1GetTPAccountActionsByLoadId,
 		&utils.TPAccountActions{TPid: "TPAcc", LoadId: "ID"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpAccActions, (*reply)[0]) {
@@ -178,7 +178,7 @@ func testTPAccActionsGetTPAccountActionsByLoadId(t *testing.T) {
 func testTPAccActionsGetTPAccountActionLoadIds(t *testing.T) {
 	var result []string
 	expectedTPID := []string{"ID"}
-	if err := tpAccActionsRPC.Call(utils.ApierV1GetTPAccountActionLoadIds,
+	if err := tpAccActionsRPC.Call(utils.APIerSv1GetTPAccountActionLoadIds,
 		&AttrGetTPAccountActionIds{TPid: "TPAcc"}, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedTPID, result) {
@@ -189,7 +189,7 @@ func testTPAccActionsGetTPAccountActionLoadIds(t *testing.T) {
 func testTPAccActionsGetTPAccountActionIds(t *testing.T) {
 	var result []string
 	expectedTPID := []string{"ID:cgrates.org:1001"}
-	if err := tpAccActionsRPC.Call(utils.ApierV1GetTPAccountActionIds,
+	if err := tpAccActionsRPC.Call(utils.APIerSv1GetTPAccountActionIds,
 		&AttrGetTPAccountActionIds{TPid: "TPAcc"}, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedTPID, result) {
@@ -200,7 +200,7 @@ func testTPAccActionsGetTPAccountActionIds(t *testing.T) {
 func testTPAccActionsUpdateTPAccAction(t *testing.T) {
 	tpAccActions.ActionPlanId = "PlanOne"
 	var result string
-	if err := tpAccActionsRPC.Call(utils.ApierV1SetTPAccountActions, tpAccActions, &result); err != nil {
+	if err := tpAccActionsRPC.Call(utils.APIerSv1SetTPAccountActions, tpAccActions, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -210,7 +210,7 @@ func testTPAccActionsUpdateTPAccAction(t *testing.T) {
 
 func testTPAccActionsGetTPAccActionAfterUpdate(t *testing.T) {
 	var reply *utils.TPAccountActions
-	if err := tpAccActionsRPC.Call(utils.ApierV1GetTPAccountActions,
+	if err := tpAccActionsRPC.Call(utils.APIerSv1GetTPAccountActions,
 		&AttrGetTPAccountActions{TPid: "TPAcc", AccountActionsId: tpAccActionID}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpAccActions, reply) {
@@ -221,7 +221,7 @@ func testTPAccActionsGetTPAccActionAfterUpdate(t *testing.T) {
 
 func testTPAccActionsRemTPAccAction(t *testing.T) {
 	var resp string
-	if err := tpAccActionsRPC.Call(utils.ApierV1RemoveTPAccountActions,
+	if err := tpAccActionsRPC.Call(utils.APIerSv1RemoveTPAccountActions,
 		&AttrGetTPAccountActions{TPid: "TPAcc", AccountActionsId: tpAccActionID}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
@@ -232,7 +232,7 @@ func testTPAccActionsRemTPAccAction(t *testing.T) {
 
 func testTPAccActionsGetTPAccActionAfterRemove(t *testing.T) {
 	var reply *utils.TPAccountActions
-	if err := tpAccActionsRPC.Call(utils.ApierV1GetTPAccountActions,
+	if err := tpAccActionsRPC.Call(utils.APIerSv1GetTPAccountActions,
 		&AttrGetTPAccountActions{TPid: "TPAcc", AccountActionsId: tpAccActionID}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)

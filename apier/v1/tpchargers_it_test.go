@@ -119,7 +119,7 @@ func testTPChrgsRPCConn(t *testing.T) {
 
 func testTPChrgsGetTPChrgsBeforeSet(t *testing.T) {
 	var reply *utils.TPChargerProfile
-	if err := tpChrgsRPC.Call(utils.ApierV1GetTPCharger,
+	if err := tpChrgsRPC.Call(utils.APIerSv1GetTPCharger,
 		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "Chrgs"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -143,7 +143,7 @@ func testTPChrgsSetTPChrgs(t *testing.T) {
 	sort.Strings(tpChrgs.FilterIDs)
 	sort.Strings(tpChrgs.AttributeIDs)
 	var result string
-	if err := tpChrgsRPC.Call(utils.ApierV1SetTPCharger, tpChrgs, &result); err != nil {
+	if err := tpChrgsRPC.Call(utils.APIerSv1SetTPCharger, tpChrgs, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -152,7 +152,7 @@ func testTPChrgsSetTPChrgs(t *testing.T) {
 
 func testTPChrgsGetTPChrgsAfterSet(t *testing.T) {
 	var reply *utils.TPChargerProfile
-	if err := tpChrgsRPC.Call(utils.ApierV1GetTPCharger,
+	if err := tpChrgsRPC.Call(utils.APIerSv1GetTPCharger,
 		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "Chrgs"}, &reply); err != nil {
 		t.Fatal(err)
 	}
@@ -166,7 +166,7 @@ func testTPChrgsGetTPChrgsAfterSet(t *testing.T) {
 func testTPChrgsGetTPChrgsIDs(t *testing.T) {
 	var result []string
 	expectedTPID := []string{"Chrgs"}
-	if err := tpChrgsRPC.Call(utils.ApierV1GetTPChargerIDs,
+	if err := tpChrgsRPC.Call(utils.APIerSv1GetTPChargerIDs,
 		&AttrGetTPAttributeProfileIds{TPid: "TP1"}, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedTPID, result) {
@@ -177,7 +177,7 @@ func testTPChrgsGetTPChrgsIDs(t *testing.T) {
 func testTPChrgsUpdateTPChrgs(t *testing.T) {
 	tpChrgs.AttributeIDs = []string{"Attr1", "Attr2", "Attr3"}
 	var result string
-	if err := tpChrgsRPC.Call(utils.ApierV1SetTPCharger, tpChrgs, &result); err != nil {
+	if err := tpChrgsRPC.Call(utils.APIerSv1SetTPCharger, tpChrgs, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -186,7 +186,7 @@ func testTPChrgsUpdateTPChrgs(t *testing.T) {
 
 func testTPChrgsGetTPChrgsAfterUpdate(t *testing.T) {
 	var reply *utils.TPChargerProfile
-	if err := tpChrgsRPC.Call(utils.ApierV1GetTPCharger,
+	if err := tpChrgsRPC.Call(utils.APIerSv1GetTPCharger,
 		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "Chrgs"}, &reply); err != nil {
 		t.Fatal(err)
 	}
@@ -199,7 +199,7 @@ func testTPChrgsGetTPChrgsAfterUpdate(t *testing.T) {
 
 func testTPChrgsRemTPChrgs(t *testing.T) {
 	var resp string
-	if err := tpChrgsRPC.Call(utils.ApierV1RemoveTPCharger,
+	if err := tpChrgsRPC.Call(utils.APIerSv1RemoveTPCharger,
 		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "Chrgs"},
 		&resp); err != nil {
 		t.Error(err)
@@ -210,7 +210,7 @@ func testTPChrgsRemTPChrgs(t *testing.T) {
 
 func testTPChrgsGetTPChrgsAfterRemove(t *testing.T) {
 	var reply *utils.TPChargerProfile
-	if err := tpChrgsRPC.Call(utils.ApierV1GetTPCharger,
+	if err := tpChrgsRPC.Call(utils.APIerSv1GetTPCharger,
 		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "Chrgs"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)

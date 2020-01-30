@@ -110,7 +110,7 @@ func testSrItRPCConn(t *testing.T) {
 func testSrItLoadFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
-	if err := srrpc.Call(utils.ApierV1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	if err := srrpc.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(500 * time.Millisecond)
@@ -122,7 +122,7 @@ func testAccountBalance(t *testing.T, sracc, srten, balType string, expected flo
 		Tenant:  srten,
 		Account: sracc,
 	}
-	if err := srrpc.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
+	if err := srrpc.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if rply := acnt.BalanceMap[balType].GetTotalValue(); rply != expected {
 		t.Errorf("Expecting: %v, received: %v",
@@ -142,7 +142,7 @@ func testSrItAddVoiceBalance(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := srrpc.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {
+	if err := srrpc.Call(utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
@@ -231,7 +231,7 @@ func testSrItAddMonetaryBalance(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := srrpc.Call(utils.ApierV2SetBalance, attrs, &reply); err != nil {
+	if err := srrpc.Call(utils.APIerSv2SetBalance, attrs, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)

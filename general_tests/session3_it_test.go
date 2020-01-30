@@ -116,7 +116,7 @@ func testSes3ItRPCConn(t *testing.T) {
 func testSes3ItLoadFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testit")}
-	if err := ses3RPC.Call(utils.ApierV1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	if err := ses3RPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(500 * time.Millisecond)
@@ -271,7 +271,7 @@ func testSes3ItAddVoiceBalance(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := ses3RPC.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {
+	if err := ses3RPC.Call(utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
@@ -281,7 +281,7 @@ func testSes3ItAddVoiceBalance(t *testing.T) {
 		Tenant:  "cgrates.org",
 		Account: "1002",
 	}
-	if err := ses3RPC.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
+	if err := ses3RPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if rply := acnt.BalanceMap[utils.VOICE].GetTotalValue(); rply != float64(5*time.Second) {
 		t.Errorf("Expecting: %v, received: %v",
@@ -368,7 +368,7 @@ func testSes3ItBalance(t *testing.T) {
 		Tenant:  "cgrates.org",
 		Account: "1002",
 	}
-	if err := ses3RPC.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
+	if err := ses3RPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if rply := acnt.BalanceMap[utils.VOICE].GetTotalValue(); rply != float64(3*time.Second) {
 		t.Errorf("Expecting: %v, received: %v",
@@ -405,7 +405,7 @@ func testSes3ItCDRs(t *testing.T) {
 	var cdrs []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{RunIDs: []string{"CustomerCharges"},
 		Accounts: []string{"1002"}}
-	if err := ses3RPC.Call(utils.ApierV2GetCDRs, req, &cdrs); err != nil {
+	if err := ses3RPC.Call(utils.APIerSv2GetCDRs, req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))

@@ -124,7 +124,7 @@ func testTpRpcConn(t *testing.T) {
 // Load the tariff plan, creating accounts and their balances
 func testTpLoadTariffPlanFromFolder(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testtp")}
-	if err := tpRPC.Call(utils.ApierV2LoadTariffPlanFromFolder, attrs, &tpLoadInst); err != nil {
+	if err := tpRPC.Call(utils.APIerSv2LoadTariffPlanFromFolder, attrs, &tpLoadInst); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
@@ -151,22 +151,22 @@ func testTpBalanceCounter(t *testing.T) {
 	}
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
-	if err := tpRPC.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
-		t.Error("Got error on ApierV2.GetAccount: ", err.Error())
+	if err := tpRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
+		t.Error("Got error on APIerSv2.GetAccount: ", err.Error())
 	} else if acnt.UnitCounters[utils.MONETARY][1].Counters[0].Value != 20.0 {
-		t.Errorf("Calling ApierV2.GetBalance received: %s", utils.ToIJSON(acnt))
+		t.Errorf("Calling APIerSv2.GetBalance received: %s", utils.ToIJSON(acnt))
 	}
 }
 
 func testTpActionTriggers(t *testing.T) {
 	var atrs engine.ActionTriggers
-	if err := tpRPC.Call(utils.ApierV1GetActionTriggers, v1.AttrGetActionTriggers{GroupIDs: []string{}}, &atrs); err != nil {
-		t.Error("Got error on ApierV1.GetActionTriggers: ", err.Error())
+	if err := tpRPC.Call(utils.APIerSv1GetActionTriggers, v1.AttrGetActionTriggers{GroupIDs: []string{}}, &atrs); err != nil {
+		t.Error("Got error on APIerSv1.GetActionTriggers: ", err.Error())
 	} else if len(atrs) != 4 {
 		t.Errorf("Calling v1.GetActionTriggers got: %v", atrs)
 	}
 	var reply string
-	if err := tpRPC.Call(utils.ApierV1SetActionTrigger, v1.AttrSetActionTrigger{
+	if err := tpRPC.Call(utils.APIerSv1SetActionTrigger, v1.AttrSetActionTrigger{
 		GroupID:  "TestATR",
 		UniqueID: "Unique atr id",
 		ActionTrigger: map[string]interface{}{
@@ -177,13 +177,13 @@ func testTpActionTriggers(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Calling v1.SetActionTrigger got: %v", reply)
 	}
-	if err := tpRPC.Call(utils.ApierV1GetActionTriggers, v1.AttrGetActionTriggers{GroupIDs: []string{}}, &atrs); err != nil {
+	if err := tpRPC.Call(utils.APIerSv1GetActionTriggers, v1.AttrGetActionTriggers{GroupIDs: []string{}}, &atrs); err != nil {
 		t.Error(err)
 	} else if len(atrs) != 5 {
 		t.Errorf("Calling v1.GetActionTriggers got: %v", atrs)
 	}
-	if err := tpRPC.Call(utils.ApierV1GetActionTriggers, v1.AttrGetActionTriggers{GroupIDs: []string{"TestATR"}}, &atrs); err != nil {
-		t.Error("Got error on ApierV1.GetActionTriggers: ", err.Error())
+	if err := tpRPC.Call(utils.APIerSv1GetActionTriggers, v1.AttrGetActionTriggers{GroupIDs: []string{"TestATR"}}, &atrs); err != nil {
+		t.Error("Got error on APIerSv1.GetActionTriggers: ", err.Error())
 	} else if len(atrs) != 1 {
 		t.Errorf("Calling v1.GetActionTriggers got: %v", atrs)
 	}
@@ -204,8 +204,8 @@ func testTpActionTriggers(t *testing.T) {
 func testTpZeroCost(t *testing.T) {
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1012"}
-	if err := tpRPC.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
-		t.Error("Got error on ApierV2.GetAccount: ", err.Error())
+	if err := tpRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
+		t.Error("Got error on APIerSv2.GetAccount: ", err.Error())
 	}
 	if acnt == nil {
 		t.Errorf("Expecting acnt to not be nil")
@@ -234,10 +234,10 @@ func testTpZeroCost(t *testing.T) {
 	} else if cc.GetDuration() != 20*time.Second {
 		t.Errorf("Calling Responder.MaxDebit got callcost: %v", utils.ToIJSON(cc))
 	}
-	if err := tpRPC.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
-		t.Error("Got error on ApierV2.GetAccount: ", err.Error())
+	if err := tpRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
+		t.Error("Got error on APIerSv2.GetAccount: ", err.Error())
 	} else if acnt.BalanceMap[utils.MONETARY][0].Value != balanceValueBefore {
-		t.Errorf("Calling ApierV2.GetAccount received: %s", utils.ToIJSON(acnt))
+		t.Errorf("Calling APIerSv2.GetAccount received: %s", utils.ToIJSON(acnt))
 	}
 }
 
@@ -263,52 +263,52 @@ func testTpZeroNegativeCost(t *testing.T) {
 	}
 	var acnt engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1013"}
-	if err := tpRPC.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
-		t.Error("Got error on ApierV2.GetAccount: ", err.Error())
+	if err := tpRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
+		t.Error("Got error on APIerSv2.GetAccount: ", err.Error())
 	} else if acnt.BalanceMap[utils.VOICE][0].Value != 100.0 {
-		t.Errorf("Calling ApierV2.GetAccount received: %s", utils.ToIJSON(acnt))
+		t.Errorf("Calling APIerSv2.GetAccount received: %s", utils.ToIJSON(acnt))
 	}
 }
 
 func testTpExecuteActionCgrRpc(t *testing.T) {
 	var reply string
-	if err := tpRPC.Call(utils.ApierV2ExecuteAction, utils.AttrExecuteAction{ActionsId: "RPC"}, &reply); err != nil {
-		t.Error("Got error on ApierV2.ExecuteAction: ", err.Error())
+	if err := tpRPC.Call(utils.APIerSv2ExecuteAction, utils.AttrExecuteAction{ActionsId: "RPC"}, &reply); err != nil {
+		t.Error("Got error on APIerSv2.ExecuteAction: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling ExecuteAction got reply: %s", reply)
 	}
 	var acnt engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1013"}
-	if err := tpRPC.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
-		t.Error("Got error on ApierV2.GetAccount: ", err.Error())
+	if err := tpRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
+		t.Error("Got error on APIerSv2.GetAccount: ", err.Error())
 	}
 }
 
 func testTpExecuteActionCgrRpcAcc(t *testing.T) {
 	var reply string
-	if err := tpRPC.Call(utils.ApierV2ExecuteAction, utils.AttrExecuteAction{
+	if err := tpRPC.Call(utils.APIerSv2ExecuteAction, utils.AttrExecuteAction{
 		Tenant:    "cgrates.org",
 		Account:   "1016",
 		ActionsId: "RPC_DEST",
 	}, &reply); err != nil {
-		t.Error("Got error on ApierV2.ExecuteAction: ", err.Error())
+		t.Error("Got error on APIerSv2.ExecuteAction: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling ExecuteAction got reply: %s", reply)
 	}
 	var dests []*engine.Destination
 	attrs := &v2.AttrGetDestinations{DestinationIDs: []string{}}
-	if err := tpRPC.Call(utils.ApierV2GetDestinations, attrs, &dests); err != nil {
-		t.Error("Got error on ApierV2.GetDestinations: ", err.Error())
+	if err := tpRPC.Call(utils.APIerSv2GetDestinations, attrs, &dests); err != nil {
+		t.Error("Got error on APIerSv2.GetDestinations: ", err.Error())
 	}
 }
 
 // Deprecated
 // func //(t *testing.T) {
 // 	var reply string
-// 	if err := tpRPC.Call(utils.ApierV2ExecuteAction, utils.AttrExecuteAction{
+// 	if err := tpRPC.Call(utils.APIerSv2ExecuteAction, utils.AttrExecuteAction{
 // 		ActionsId: "RPC_CDRSTATS",
 // 	}, &reply); err != nil {
-// 		t.Error("Got error on ApierV2.ExecuteAction: ", err.Error())
+// 		t.Error("Got error on APIerSv2.ExecuteAction: ", err.Error())
 // 	} else if reply != utils.OK {
 // 		t.Errorf("Calling ExecuteAction got reply: %s", reply)
 // 	}
@@ -321,7 +321,7 @@ func testTpExecuteActionCgrRpcAcc(t *testing.T) {
 
 func testTpCreateExecuteActionMatch(t *testing.T) {
 	var reply string
-	if err := tpRPC.Call(utils.ApierV2SetActions, utils.AttrSetActions{
+	if err := tpRPC.Call(utils.APIerSv2SetActions, utils.AttrSetActions{
 		ActionsId: "PAYMENT_2056bd2fe137082970f97102b64e42fd",
 		Actions: []*utils.TPAction{
 			{
@@ -333,32 +333,32 @@ func testTpCreateExecuteActionMatch(t *testing.T) {
 			},
 		},
 	}, &reply); err != nil {
-		t.Error("Got error on ApierV2.SetActions: ", err.Error())
+		t.Error("Got error on APIerSv2.SetActions: ", err.Error())
 	} else if reply != utils.OK {
-		t.Errorf("Calling ApierV2.SetActions got reply: %s", reply)
+		t.Errorf("Calling APIerSv2.SetActions got reply: %s", reply)
 	}
-	if err := tpRPC.Call(utils.ApierV2ExecuteAction, utils.AttrExecuteAction{
+	if err := tpRPC.Call(utils.APIerSv2ExecuteAction, utils.AttrExecuteAction{
 		Tenant:    "cgrates.org",
 		Account:   "1015",
 		ActionsId: "PAYMENT_2056bd2fe137082970f97102b64e42fd",
 	}, &reply); err != nil {
-		t.Error("Got error on ApierV2.ExecuteAction: ", err.Error())
+		t.Error("Got error on APIerSv2.ExecuteAction: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling ExecuteAction got reply: %s", reply)
 	}
-	if err := tpRPC.Call(utils.ApierV2ExecuteAction, utils.AttrExecuteAction{
+	if err := tpRPC.Call(utils.APIerSv2ExecuteAction, utils.AttrExecuteAction{
 		Tenant:    "cgrates.org",
 		Account:   "1015",
 		ActionsId: "PAYMENT_2056bd2fe137082970f97102b64e42fd",
 	}, &reply); err != nil {
-		t.Error("Got error on ApierV2.ExecuteAction: ", err.Error())
+		t.Error("Got error on APIerSv2.ExecuteAction: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling ExecuteAction got reply: %s", reply)
 	}
 	var acnt engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1015"}
-	if err := tpRPC.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
-		t.Error("Got error on ApierV2.GetAccount: ", err.Error())
+	if err := tpRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
+		t.Error("Got error on APIerSv2.GetAccount: ", err.Error())
 	}
 	if len(acnt.BalanceMap) != 1 ||
 		len(acnt.BalanceMap[utils.MONETARY]) != 1 ||
@@ -369,7 +369,7 @@ func testTpCreateExecuteActionMatch(t *testing.T) {
 
 func testTpSetRemoveActions(t *testing.T) {
 	var reply string
-	if err := tpRPC.Call(utils.ApierV2SetActions, utils.AttrSetActions{
+	if err := tpRPC.Call(utils.APIerSv2SetActions, utils.AttrSetActions{
 		ActionsId: "TO_BE_DELETED",
 		Actions: []*utils.TPAction{
 			{
@@ -381,54 +381,54 @@ func testTpSetRemoveActions(t *testing.T) {
 			},
 		},
 	}, &reply); err != nil {
-		t.Error("Got error on ApierV2.SetActions: ", err.Error())
+		t.Error("Got error on APIerSv2.SetActions: ", err.Error())
 	} else if reply != utils.OK {
-		t.Errorf("Calling ApierV2.SetActions got reply: %s", reply)
+		t.Errorf("Calling APIerSv2.SetActions got reply: %s", reply)
 	}
 	actionsMap := make(map[string]engine.Actions)
-	if err := tpRPC.Call(utils.ApierV2GetActions, v2.AttrGetActions{
+	if err := tpRPC.Call(utils.APIerSv2GetActions, v2.AttrGetActions{
 		ActionIDs: []string{"PAYMENT_2056bd2fe137082970f97102b64e42fd"},
 	}, &actionsMap); err != nil {
-		t.Error("Got error on ApierV2.GetActions: ", err.Error())
+		t.Error("Got error on APIerSv2.GetActions: ", err.Error())
 	} else if len(actionsMap) != 1 {
-		t.Errorf("Calling ApierV2.GetActions got reply: %s", utils.ToIJSON(actionsMap))
+		t.Errorf("Calling APIerSv2.GetActions got reply: %s", utils.ToIJSON(actionsMap))
 	}
-	if err := tpRPC.Call(utils.ApierV2RemoveActions, v1.AttrRemoveActions{
+	if err := tpRPC.Call(utils.APIerSv2RemoveActions, v1.AttrRemoveActions{
 		ActionIDs: []string{"PAYMENT_2056bd2fe137082970f97102b64e42fd"},
 	}, &reply); err != nil {
-		t.Error("Got error on ApierV2.RemoveActions: ", err.Error())
+		t.Error("Got error on APIerSv2.RemoveActions: ", err.Error())
 	} else if reply != utils.OK {
-		t.Errorf("Calling ApierV2.RemoveActions got reply: %s", reply)
+		t.Errorf("Calling APIerSv2.RemoveActions got reply: %s", reply)
 	}
-	if err := tpRPC.Call(utils.ApierV2GetActions, v2.AttrGetActions{
+	if err := tpRPC.Call(utils.APIerSv2GetActions, v2.AttrGetActions{
 		ActionIDs: []string{"PAYMENT_2056bd2fe137082970f97102b64e42fd"},
 	}, &actionsMap); err == nil {
-		t.Error("no error on ApierV2.GetActions: ", err)
+		t.Error("no error on APIerSv2.GetActions: ", err)
 	}
 }
 
 func testTpRemoveActionsRefenced(t *testing.T) {
 	actionsMap := make(map[string]engine.Actions)
-	if err := tpRPC.Call(utils.ApierV2GetActions, v2.AttrGetActions{
+	if err := tpRPC.Call(utils.APIerSv2GetActions, v2.AttrGetActions{
 		ActionIDs: []string{"TOPUP_VOICE"},
 	}, &actionsMap); err != nil {
-		t.Error("Got error on ApierV2.GetActions: ", err.Error())
+		t.Error("Got error on APIerSv2.GetActions: ", err.Error())
 	} else if len(actionsMap) != 1 {
-		t.Errorf("Calling ApierV2.GetActions got reply: %s", utils.ToIJSON(actionsMap))
+		t.Errorf("Calling APIerSv2.GetActions got reply: %s", utils.ToIJSON(actionsMap))
 	}
 	var reply string
-	if err := tpRPC.Call(utils.ApierV2RemoveActions, v1.AttrRemoveActions{
+	if err := tpRPC.Call(utils.APIerSv2RemoveActions, v1.AttrRemoveActions{
 		ActionIDs: []string{"TOPUP_VOICE"},
 	}, &reply); err != nil {
-		t.Error("Error on ApierV2.RemoveActions: ", err.Error())
+		t.Error("Error on APIerSv2.RemoveActions: ", err.Error())
 	} else if reply != utils.OK {
-		t.Errorf("Calling ApierV2.RemoveActions got reply: %s", reply)
+		t.Errorf("Calling APIerSv2.RemoveActions got reply: %s", reply)
 	}
 	/*
-		if err := tpRPC.Call(utils.ApierV2GetActions, v2.AttrGetActions{
+		if err := tpRPC.Call(utils.APIerSv2GetActions, v2.AttrGetActions{
 			ActionIDs: []string{"PAYMENT_2056bd2fe137082970f97102b64e42fd"},
 		}, &actionsMap); err == nil {
-			t.Error("no error on ApierV2.GetActions: ", err)
+			t.Error("no error on APIerSv2.GetActions: ", err)
 		}
 	*/
 }
@@ -436,23 +436,23 @@ func testTpRemoveActionsRefenced(t *testing.T) {
 func testTpApierResetAccountActionTriggers(t *testing.T) {
 	var acnt engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1005"}
-	if err := tpRPC.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
+	if err := tpRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.ActionTriggers[0].Executed != true {
 		t.Skip("Skipping test since Executed is not yet true")
 	}
 	var reply string
-	if err := tpRPC.Call(utils.ApierV2ResetAccountActionTriggers, v1.AttrResetAccountActionTriggers{
+	if err := tpRPC.Call(utils.APIerSv2ResetAccountActionTriggers, v1.AttrResetAccountActionTriggers{
 		Tenant:   "cgrates.org",
 		Account:  "1005",
 		GroupID:  "STANDARD_TRIGGERS",
 		Executed: true,
 	}, &reply); err != nil {
-		t.Error("Error on ApierV2.ResetAccountActionTriggers: ", err.Error())
+		t.Error("Error on APIerSv2.ResetAccountActionTriggers: ", err.Error())
 	} else if reply != utils.OK {
-		t.Errorf("Calling ApierV2.ResetAccountActionTriggers got reply: %s", reply)
+		t.Errorf("Calling APIerSv2.ResetAccountActionTriggers got reply: %s", reply)
 	}
-	if err := tpRPC.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
+	if err := tpRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.ActionTriggers[0].Executed == false {
 		t.Errorf("wrong action trigger executed flag: %s", utils.ToIJSON(acnt.ActionTriggers))

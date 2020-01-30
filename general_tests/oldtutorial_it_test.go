@@ -87,7 +87,7 @@ package general_tests
 // // Load the tariff plan, creating accounts and their balances
 // func TestTutITLoadTariffPlanFromFolder(t *testing.T) {
 // 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(**dataDir, "tariffplans", "oldtutorial")}
-// 	if err := tutLocalRpc.Call(utils.ApierV2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
+// 	if err := tutLocalRpc.Call(utils.APIerSv2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
 // 		t.Error(err)
 // 	}
 // 	time.Sleep(100*time.Millisecond + time.Duration(**waitRater)*time.Millisecond) // Give time for scheduler to execute topups
@@ -96,7 +96,7 @@ package general_tests
 // // Check loaded stats
 // func TestTutITCacheStats(t *testing.T) {
 // 	var reply string
-// 	if err := tutLocalRpc.Call("ApierV1.LoadCache", utils.AttrReloadCache{}, &reply); err != nil {
+// 	if err := tutLocalRpc.Call("APIerSv1.LoadCache", utils.AttrReloadCache{}, &reply); err != nil {
 // 		t.Error(err)
 // 	} else if reply != utils.OK {
 // 		t.Error(reply)
@@ -108,10 +108,10 @@ package general_tests
 // 		ThresholdProfiles: 7, Filters: 16, SupplierProfiles: 3, AttributeProfiles: 1,
 // 		CdrStats: 0, Users: 0} // CdrStats and Users are 0 because deprecated. To be removed
 // 	var args utils.AttrCacheStats
-// 	if err := tutLocalRpc.Call(utils.ApierV1GetCacheStats, args, &rcvStats); err != nil {
-// 		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
+// 	if err := tutLocalRpc.Call(utils.APIerSv1GetCacheStats, args, &rcvStats); err != nil {
+// 		t.Error("Got error on APIerSv1.GetCacheStats: ", err.Error())
 // 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
-// 		t.Errorf("Calling ApierV1.GetCacheStats expected: %+v, received: %+v", utils.ToJSON(expectedStats), utils.ToJSON(rcvStats))
+// 		t.Errorf("Calling APIerSv1.GetCacheStats expected: %+v, received: %+v", utils.ToJSON(expectedStats), utils.ToJSON(rcvStats))
 // 	}
 // 	expKeys := utils.ArgsCache{
 // 		DestinationIDs: &[]string{"DST_1003", "DST_1002", "DST_DE_MOBILE", "DST_1007", "DST_FS"},
@@ -120,8 +120,8 @@ package general_tests
 // 	var rcvKeys utils.ArgsCache
 // 	argsAPI := utils.ArgsCacheKeys{ArgsCache: utils.ArgsCache{
 // 		DestinationIDs: &[]string{}, RatingPlanIDs: &[]string{"RP_RETAIL1", "RP_GENERIC", "NONEXISTENT"}}}
-// 	if err := tutLocalRpc.Call(utils.ApierV1GetCacheKeys, argsAPI, &rcvKeys); err != nil {
-// 		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
+// 	if err := tutLocalRpc.Call(utils.APIerSv1GetCacheKeys, argsAPI, &rcvKeys); err != nil {
+// 		t.Error("Got error on APIerSv1.GetCacheStats: ", err.Error())
 // 	} else {
 // 		if rcvKeys.DestinationIDs == nil {
 // 			t.Errorf("Expecting rcvKeys.DestinationIDs to not be nil")
@@ -145,10 +145,10 @@ package general_tests
 // 	if err != nil {
 // 		t.Fatal(err)
 // 	}
-// 	if err := tutLocalRpc.Call(utils.ApierV1GetCacheStats, args, &rcvStats); err != nil {
-// 		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
+// 	if err := tutLocalRpc.Call(utils.APIerSv1GetCacheStats, args, &rcvStats); err != nil {
+// 		t.Error("Got error on APIerSv1.GetCacheStats: ", err.Error())
 // 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
-// 		t.Errorf("Calling ApierV1.GetCacheStats expected: %+v, received: %+v", expectedStats, rcvStats)
+// 		t.Errorf("Calling APIerSv1.GetCacheStats expected: %+v, received: %+v", expectedStats, rcvStats)
 // 	}
 // }
 
@@ -514,19 +514,19 @@ package general_tests
 // 		SetupTime: "2014-08-04T13:00:00Z", Usage: "1s",
 // 	}
 // 	var maxTime float64
-// 	if err := tutLocalRpc.Call("ApierV2.GetMaxUsage", setupReq, &maxTime); err != nil {
+// 	if err := tutLocalRpc.Call("APIerSv2.GetMaxUsage", setupReq, &maxTime); err != nil {
 // 		t.Error(err)
 // 	} else if maxTime != 1 {
-// 		t.Errorf("Calling ApierV2.MaxUsage got maxTime: %f", maxTime)
+// 		t.Errorf("Calling APIerSv2.MaxUsage got maxTime: %f", maxTime)
 // 	}
 // 	setupReq = &engine.UsageRecord{ToR: utils.VOICE, RequestType: utils.META_RATED, Tenant: "cgrates.org", Category: "call",
 // 		Account: "test_max_usage", Destination: "1001",
 // 		SetupTime: "2014-08-04T13:00:00Z",
 // 	}
-// 	if err := tutLocalRpc.Call("ApierV2.GetMaxUsage", setupReq, &maxTime); err != nil {
+// 	if err := tutLocalRpc.Call("APIerSv2.GetMaxUsage", setupReq, &maxTime); err != nil {
 // 		t.Error(err)
 // 	} else if maxTime != -1 {
-// 		t.Errorf("Calling ApierV2.MaxUsage got maxTime: %f", maxTime)
+// 		t.Errorf("Calling APIerSv2.MaxUsage got maxTime: %f", maxTime)
 // 	}
 // }
 
@@ -537,10 +537,10 @@ package general_tests
 // 		AnswerTime: "2014-08-04T13:00:00Z", Usage: "1",
 // 	}
 // 	var reply string
-// 	if err := tutLocalRpc.Call("ApierV2.DebitUsage", setupReq, &reply); err != nil {
+// 	if err := tutLocalRpc.Call("APIerSv2.DebitUsage", setupReq, &reply); err != nil {
 // 		t.Error(err)
 // 	} else if reply != utils.OK {
-// 		t.Error("Calling ApierV2.DebitUsage reply: ", reply)
+// 		t.Error("Calling APIerSv2.DebitUsage reply: ", reply)
 // 	}
 // }
 
@@ -586,7 +586,7 @@ package general_tests
 // 	var cdrs []*engine.ExternalCDR
 // 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault},
 // 		Accounts: []string{"1004"}, DestinationPrefixes: []string{"1001"}}
-// 	if err := tutLocalRpc.Call(utils.ApierV2GetCDRs, req, &cdrs); err != nil {
+// 	if err := tutLocalRpc.Call(utils.APIerSv2GetCDRs, req, &cdrs); err != nil {
 // 		t.Error("Unexpected error: ", err.Error())
 // 	} else if len(cdrs) != 1 {
 // 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -646,7 +646,7 @@ package general_tests
 // 	time.Sleep(time.Duration(**waitRater) * time.Millisecond)
 // 	var cdrs []*engine.ExternalCDR
 // 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault}, Accounts: []string{cdr.Account}, DestinationPrefixes: []string{cdr.Destination}}
-// 	if err := tutLocalRpc.Call(utils.ApierV2GetCDRs, req, &cdrs); err != nil {
+// 	if err := tutLocalRpc.Call(utils.APIerSv2GetCDRs, req, &cdrs); err != nil {
 // 		t.Error("Unexpected error: ", err.Error())
 // 	} else if len(cdrs) != 1 {
 // 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -671,7 +671,7 @@ package general_tests
 // 	}
 // 	time.Sleep(time.Duration(**waitRater) * time.Millisecond) // Give time for CDR to be processed
 // 	req = utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault}, Accounts: []string{cdr2.Account}, DestinationPrefixes: []string{cdr2.Destination}}
-// 	if err := tutLocalRpc.Call(utils.ApierV2GetCDRs, req, &cdrs); err != nil {
+// 	if err := tutLocalRpc.Call(utils.APIerSv2GetCDRs, req, &cdrs); err != nil {
 // 		t.Error("Unexpected error: ", err.Error())
 // 	} else if len(cdrs) != 1 {
 // 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -696,7 +696,7 @@ package general_tests
 // 	}
 // 	time.Sleep(time.Duration(**waitRater) * time.Millisecond) // Give time for CDR to be processed
 // 	req = utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault}, Accounts: []string{cdr3.Account}, DestinationPrefixes: []string{cdr3.Destination}}
-// 	if err := tutLocalRpc.Call(utils.ApierV2GetCDRs, req, &cdrs); err != nil {
+// 	if err := tutLocalRpc.Call(utils.APIerSv2GetCDRs, req, &cdrs); err != nil {
 // 		t.Error("Unexpected error: ", err.Error())
 // 	} else if len(cdrs) != 1 {
 // 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -1158,10 +1158,10 @@ package general_tests
 // func TestTutITSetAccount(t *testing.T) {
 // 	var reply string
 // 	attrs := &v2.AttrSetAccount{Tenant: "cgrates.org", Account: "tutacnt1", ActionPlanIDs: &[]string{"PACKAGE_10"}, ActionTriggerIDs: &[]string{"STANDARD_TRIGGERS"}, ReloadScheduler: true}
-// 	if err := tutLocalRpc.Call(utils.ApierV2SetAccount, attrs, &reply); err != nil {
-// 		t.Error("Got error on ApierV2.SetAccount: ", err.Error())
+// 	if err := tutLocalRpc.Call(utils.APIerSv2SetAccount, attrs, &reply); err != nil {
+// 		t.Error("Got error on APIerSv2.SetAccount: ", err.Error())
 // 	} else if reply != utils.OK {
-// 		t.Errorf("Calling ApierV2.SetAccount received: %s", reply)
+// 		t.Errorf("Calling APIerSv2.SetAccount received: %s", reply)
 // 	}
 // 	type AttrGetAccounts struct {
 // 		Tenant     string
@@ -1171,7 +1171,7 @@ package general_tests
 // 	}
 // 	time.Sleep(time.Duration(**waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 // 	var acnts []*engine.Account
-// 	if err := tutLocalRpc.Call("ApierV2.GetAccounts", utils.AttrGetAccounts{Tenant: attrs.Tenant, AccountIds: []string{attrs.Account}}, &acnts); err != nil {
+// 	if err := tutLocalRpc.Call("APIerSv2.GetAccounts", utils.AttrGetAccounts{Tenant: attrs.Tenant, AccountIds: []string{attrs.Account}}, &acnts); err != nil {
 // 		t.Error(err)
 // 	} else if len(acnts) != 1 {
 // 		t.Errorf("Accounts received: %+v", acnts)
@@ -1196,12 +1196,12 @@ package general_tests
 // 	}
 // 	attrs = &v2.AttrSetAccount{Tenant: "cgrates.org", Account: "tutacnt1", ActionPlanIDs: &[]string{"PACKAGE_10"}, ActionTriggerIDs: &[]string{"STANDARD_TRIGGERS"}, AllowNegative: utils.BoolPointer(true), Disabled: utils.BoolPointer(true), ReloadScheduler: true}
 
-// 	if err := tutLocalRpc.Call(utils.ApierV2SetAccount, attrs, &reply); err != nil {
-// 		t.Error("Got error on ApierV2.SetAccount: ", err.Error())
+// 	if err := tutLocalRpc.Call(utils.APIerSv2SetAccount, attrs, &reply); err != nil {
+// 		t.Error("Got error on APIerSv2.SetAccount: ", err.Error())
 // 	} else if reply != utils.OK {
-// 		t.Errorf("Calling ApierV2.SetAccount received: %s", reply)
+// 		t.Errorf("Calling APIerSv2.SetAccount received: %s", reply)
 // 	}
-// 	if err := tutLocalRpc.Call("ApierV2.GetAccounts", utils.AttrGetAccounts{Tenant: attrs.Tenant, AccountIds: []string{attrs.Account}}, &acnts); err != nil {
+// 	if err := tutLocalRpc.Call("APIerSv2.GetAccounts", utils.AttrGetAccounts{Tenant: attrs.Tenant, AccountIds: []string{attrs.Account}}, &acnts); err != nil {
 // 		t.Error(err)
 // 	} else if len(acnts) != 1 {
 // 		t.Errorf("Accounts received: %+v", acnts)
@@ -1226,13 +1226,13 @@ package general_tests
 // 	}
 // 	attrs = &v2.AttrSetAccount{Tenant: "cgrates.org", Account: "tutacnt1", ActionPlanIDs: &[]string{"PACKAGE_1001"}, ActionTriggerIDs: &[]string{"CDRST1_WARN"}, AllowNegative: utils.BoolPointer(true), Disabled: utils.BoolPointer(true), ReloadScheduler: true}
 
-// 	if err := tutLocalRpc.Call(utils.ApierV2SetAccount, attrs, &reply); err != nil {
-// 		t.Error("Got error on ApierV2.SetAccount: ", err.Error())
+// 	if err := tutLocalRpc.Call(utils.APIerSv2SetAccount, attrs, &reply); err != nil {
+// 		t.Error("Got error on APIerSv2.SetAccount: ", err.Error())
 // 	} else if reply != utils.OK {
-// 		t.Errorf("Calling ApierV2.SetAccount received: %s", reply)
+// 		t.Errorf("Calling APIerSv2.SetAccount received: %s", reply)
 // 	}
 // 	time.Sleep(100*time.Millisecond + time.Duration(**waitRater)*time.Millisecond) // Give time for scheduler to execute topups
-// 	if err := tutLocalRpc.Call("ApierV2.GetAccounts", utils.AttrGetAccounts{Tenant: attrs.Tenant, AccountIds: []string{attrs.Account}}, &acnts); err != nil {
+// 	if err := tutLocalRpc.Call("APIerSv2.GetAccounts", utils.AttrGetAccounts{Tenant: attrs.Tenant, AccountIds: []string{attrs.Account}}, &acnts); err != nil {
 // 		t.Error(err)
 // 	} else if len(acnts) != 1 {
 // 		t.Errorf("Accounts received: %+v", acnts)
@@ -1357,7 +1357,7 @@ package general_tests
 // 	time.Sleep(time.Duration(**waitRater) * time.Millisecond) // Give time for CDR to be processed
 // 	var cdrs []*engine.ExternalCDR
 // 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault}, CGRIDs: []string{cdr.CGRID}}
-// 	if err := tutLocalRpc.Call(utils.ApierV2GetCDRs, req, &cdrs); err != nil {
+// 	if err := tutLocalRpc.Call(utils.APIerSv2GetCDRs, req, &cdrs); err != nil {
 // 		t.Error("Unexpected error: ", err.Error())
 // 	} else if len(cdrs) != 1 {
 // 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -1389,7 +1389,7 @@ package general_tests
 // 		time.Sleep(time.Duration(7000) * time.Millisecond) // Give time for CDR to be processed
 // 		var cdrs []*engine.ExternalCDR
 // 		req := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault}, CGRIDs: []string{cdr.CGRID}}
-// 		if err := tutLocalRpc.Call(utils.ApierV2GetCDRs, req, &cdrs); err != nil {
+// 		if err := tutLocalRpc.Call(utils.APIerSv2GetCDRs, req, &cdrs); err != nil {
 // 			t.Error("Unexpected error: ", err.Error())
 // 		} else if len(cdrs) != 1 {
 // 			t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -1420,7 +1420,7 @@ package general_tests
 // 	time.Sleep(time.Duration(50) * time.Millisecond) // Give time for CDR to be processed
 // 	var cdrs []*engine.ExternalCDR
 // 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault}, CGRIDs: []string{cdr.CGRID}}
-// 	if err := tutLocalRpc.Call(utils.ApierV2GetCDRs, req, &cdrs); err != nil {
+// 	if err := tutLocalRpc.Call(utils.APIerSv2GetCDRs, req, &cdrs); err != nil {
 // 		t.Error("Unexpected error: ", err.Error())
 // 	} else if len(cdrs) != 1 {
 // 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -1438,7 +1438,7 @@ package general_tests
 // 		ExportFileName: utils.StringPointer("TestTutITExportCDR.csv"),
 // 		ExportTemplate: utils.StringPointer("TestTutITExportCDR"),
 // 		RPCCDRsFilter:  utils.RPCCDRsFilter{CGRIDs: []string{cdr.CGRID}, NotRunIDs: []string{utils.MetaRaw}}}
-// 	if err := tutLocalRpc.Call(utils.ApierV1ExportCDRs, exportArgs, &replyExport); err != nil {
+// 	if err := tutLocalRpc.Call(utils.APIerSv1ExportCDRs, exportArgs, &replyExport); err != nil {
 // 		t.Error(err)
 // 	}
 // 	eExportContent := `f0a92222a7d21b4d9f72744aabe82daef52e20d8,*default,testexportcdr1,*rated,cgrates.org,call,1001,1003,2016-11-30T18:06:04+01:00,98,1.33340,RETA
