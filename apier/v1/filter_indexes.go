@@ -42,7 +42,7 @@ type AttrRemFilterIndexes struct {
 	ItemType string
 }
 
-func (api *ApierV1) RemoveFilterIndexes(arg AttrRemFilterIndexes, reply *string) (err error) {
+func (api *APIerSv1) RemoveFilterIndexes(arg AttrRemFilterIndexes, reply *string) (err error) {
 	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ItemType"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -78,7 +78,7 @@ func (api *ApierV1) RemoveFilterIndexes(arg AttrRemFilterIndexes, reply *string)
 	return nil
 }
 
-func (api *ApierV1) GetFilterIndexes(arg AttrGetFilterIndexes, reply *[]string) (err error) {
+func (api *APIerSv1) GetFilterIndexes(arg AttrGetFilterIndexes, reply *[]string) (err error) {
 	var indexes map[string]utils.StringMap
 	var indexedSlice []string
 	indexesFilter := make(map[string]utils.StringMap)
@@ -201,7 +201,7 @@ func (api *ApierV1) GetFilterIndexes(arg AttrGetFilterIndexes, reply *[]string) 
 }
 
 // ComputeFilterIndexes selects which index filters to recompute
-func (api *ApierV1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, reply *string) (err error) {
+func (api *APIerSv1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, reply *string) (err error) {
 	transactionID := utils.GenUUID()
 	//ThresholdProfile Indexes
 	var thdsIndexers *engine.FilterIndexer
@@ -308,7 +308,7 @@ func (api *ApierV1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, re
 }
 
 // ComputeFilterIndexIDs computes specific filter indexes
-func (api *ApierV1) ComputeFilterIndexIDs(args utils.ArgsComputeFilterIndexIDs, reply *string) (err error) {
+func (api *APIerSv1) ComputeFilterIndexIDs(args utils.ArgsComputeFilterIndexIDs, reply *string) (err error) {
 	transactionID := utils.GenUUID()
 	//ThresholdProfile Indexes
 	thdsIndexers, err := api.computeThresholdIndexes(args.Tenant, &args.ThresholdIDs, transactionID)
@@ -456,7 +456,7 @@ func (api *ApierV1) ComputeFilterIndexIDs(args utils.ArgsComputeFilterIndexIDs, 
 	return nil
 }
 
-func (api *ApierV1) computeThresholdIndexes(tenant string, thIDs *[]string,
+func (api *APIerSv1) computeThresholdIndexes(tenant string, thIDs *[]string,
 	transactionID string) (filterIndexer *engine.FilterIndexer, err error) {
 	var thresholdIDs []string
 	thdsIndexers := engine.NewFilterIndexer(api.DataManager, utils.ThresholdProfilePrefix, tenant)
@@ -522,7 +522,7 @@ func (api *ApierV1) computeThresholdIndexes(tenant string, thIDs *[]string,
 	return thdsIndexers, nil
 }
 
-func (api *ApierV1) computeAttributeIndexes(tenant, context string, attrIDs *[]string,
+func (api *APIerSv1) computeAttributeIndexes(tenant, context string, attrIDs *[]string,
 	transactionID string) (filterIndexer *engine.FilterIndexer, err error) {
 	var attributeIDs []string
 	attrIndexers := engine.NewFilterIndexer(api.DataManager, utils.AttributeProfilePrefix,
@@ -592,7 +592,7 @@ func (api *ApierV1) computeAttributeIndexes(tenant, context string, attrIDs *[]s
 	return attrIndexers, nil
 }
 
-func (api *ApierV1) computeResourceIndexes(tenant string, rsIDs *[]string,
+func (api *APIerSv1) computeResourceIndexes(tenant string, rsIDs *[]string,
 	transactionID string) (filterIndexer *engine.FilterIndexer, err error) {
 	var resourceIDs []string
 	rpIndexers := engine.NewFilterIndexer(api.DataManager, utils.ResourceProfilesPrefix, tenant)
@@ -658,7 +658,7 @@ func (api *ApierV1) computeResourceIndexes(tenant string, rsIDs *[]string,
 	return rpIndexers, nil
 }
 
-func (api *ApierV1) computeStatIndexes(tenant string, stIDs *[]string,
+func (api *APIerSv1) computeStatIndexes(tenant string, stIDs *[]string,
 	transactionID string) (filterIndexer *engine.FilterIndexer, err error) {
 	var statIDs []string
 	sqpIndexers := engine.NewFilterIndexer(api.DataManager, utils.StatQueueProfilePrefix, tenant)
@@ -724,7 +724,7 @@ func (api *ApierV1) computeStatIndexes(tenant string, stIDs *[]string,
 	return sqpIndexers, nil
 }
 
-func (api *ApierV1) computeSupplierIndexes(tenant string, sppIDs *[]string,
+func (api *APIerSv1) computeSupplierIndexes(tenant string, sppIDs *[]string,
 	transactionID string) (filterIndexer *engine.FilterIndexer, err error) {
 	var supplierIDs []string
 	sppIndexers := engine.NewFilterIndexer(api.DataManager, utils.SupplierProfilePrefix, tenant)
@@ -790,7 +790,7 @@ func (api *ApierV1) computeSupplierIndexes(tenant string, sppIDs *[]string,
 	return sppIndexers, nil
 }
 
-func (api *ApierV1) computeChargerIndexes(tenant string, cppIDs *[]string,
+func (api *APIerSv1) computeChargerIndexes(tenant string, cppIDs *[]string,
 	transactionID string) (filterIndexer *engine.FilterIndexer, err error) {
 	var chargerIDs []string
 	cppIndexes := engine.NewFilterIndexer(api.DataManager, utils.ChargerProfilePrefix, tenant)
@@ -856,7 +856,7 @@ func (api *ApierV1) computeChargerIndexes(tenant string, cppIDs *[]string,
 	return cppIndexes, nil
 }
 
-func (api *ApierV1) computeDispatcherIndexes(tenant, context string, dspIDs *[]string,
+func (api *APIerSv1) computeDispatcherIndexes(tenant, context string, dspIDs *[]string,
 	transactionID string) (filterIndexer *engine.FilterIndexer, err error) {
 	var dispatcherIDs []string
 	dspIndexes := engine.NewFilterIndexer(api.DataManager, utils.DispatcherProfilePrefix,

@@ -23,7 +23,7 @@ import "github.com/cgrates/cgrates/utils"
 func init() {
 	c := &CmdRemoveFilter{
 		name:      "filter_remove",
-		rpcMethod: utils.ApierV1RemoveFilter,
+		rpcMethod: utils.APIerSv1RemoveFilter,
 		rpcParams: &utils.TenantIDWithCache{},
 	}
 	commands[c.Name()] = c

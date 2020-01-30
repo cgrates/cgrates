@@ -25,7 +25,7 @@ import (
 )
 
 // Creates a new DestinationRateTiming profile within a tariff plan
-func (self *ApierV1) SetTPRatingPlan(attrs utils.TPRatingPlan, reply *string) error {
+func (self *APIerSv1) SetTPRatingPlan(attrs utils.TPRatingPlan, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ID", "RatingPlanBindings"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -43,7 +43,7 @@ type AttrGetTPRatingPlan struct {
 }
 
 // Queries specific RatingPlan profile on tariff plan
-func (self *ApierV1) GetTPRatingPlan(attrs AttrGetTPRatingPlan, reply *utils.TPRatingPlan) error {
+func (self *APIerSv1) GetTPRatingPlan(attrs AttrGetTPRatingPlan, reply *utils.TPRatingPlan) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -64,7 +64,7 @@ type AttrGetTPRatingPlanIds struct {
 }
 
 // Queries RatingPlan identities on specific tariff plan.
-func (self *ApierV1) GetTPRatingPlanIds(attrs AttrGetTPRatingPlanIds, reply *[]string) error {
+func (self *APIerSv1) GetTPRatingPlanIds(attrs AttrGetTPRatingPlanIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -81,7 +81,7 @@ func (self *ApierV1) GetTPRatingPlanIds(attrs AttrGetTPRatingPlanIds, reply *[]s
 }
 
 // Removes specific RatingPlan on Tariff plan
-func (self *ApierV1) RemoveTPRatingPlan(attrs AttrGetTPRatingPlan, reply *string) error {
+func (self *APIerSv1) RemoveTPRatingPlan(attrs AttrGetTPRatingPlan, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

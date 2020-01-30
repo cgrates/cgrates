@@ -147,8 +147,8 @@ func (srvMngr *ServiceManager) GetConfig() *config.CGRConfig {
 func (srvMngr *ServiceManager) StartServices() (err error) {
 	go srvMngr.handleReload()
 	for serviceName, shouldRun := range map[string]bool{
-		utils.ApierV1:         srvMngr.GetConfig().ApierCfg().Enabled,
-		utils.ApierV2:         srvMngr.GetConfig().ApierCfg().Enabled,
+		utils.APIerSv1:         srvMngr.GetConfig().ApierCfg().Enabled,
+		utils.APIerSv2:         srvMngr.GetConfig().ApierCfg().Enabled,
 		utils.StorDB:          srvMngr.GetConfig().RalsCfg().Enabled || srvMngr.GetConfig().CdrsCfg().Enabled,
 		utils.AttributeS:      srvMngr.GetConfig().AttributeSCfg().Enabled,
 		utils.ChargerS:        srvMngr.GetConfig().ChargerSCfg().Enabled,
@@ -241,10 +241,10 @@ func (srvMngr *ServiceManager) handleReload() {
 				return
 			}
 		case <-srvMngr.GetConfig().GetReloadChan(config.ApierS):
-			if err = srvMngr.reloadService(utils.ApierV1); err != nil {
+			if err = srvMngr.reloadService(utils.APIerSv1); err != nil {
 				return
 			}
-			if err = srvMngr.reloadService(utils.ApierV2); err != nil {
+			if err = srvMngr.reloadService(utils.APIerSv2); err != nil {
 				return
 			}
 		case <-srvMngr.GetConfig().GetReloadChan(config.CDRS_JSN):

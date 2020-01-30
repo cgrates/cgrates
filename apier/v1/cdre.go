@@ -39,7 +39,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (api *ApierV1) ExportCdrsToZipString(attr utils.AttrExpFileCdrs, reply *string) error {
+func (api *APIerSv1) ExportCdrsToZipString(attr utils.AttrExpFileCdrs, reply *string) error {
 	tmpDir := "/tmp"
 	attr.ExportDir = &tmpDir // Enforce exporting to tmp always so we avoid cleanup issues
 	efc := utils.ExportedFileCdrs{}
@@ -92,7 +92,7 @@ func (api *ApierV1) ExportCdrsToZipString(attr utils.AttrExpFileCdrs, reply *str
 }
 
 // Deprecated by AttrExportCDRsToFile
-func (api *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.ExportedFileCdrs) (err error) {
+func (api *APIerSv1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.ExportedFileCdrs) (err error) {
 	exportTemplate := api.Config.CdreProfiles[utils.MetaDefault]
 	if attr.ExportTemplate != nil && len(*attr.ExportTemplate) != 0 { // Export template prefered, use it
 		var hasIt bool
@@ -174,7 +174,7 @@ type ConfigPathArg struct {
 }
 
 // Reloads CDRE configuration out of folder specified
-func (apier *ApierV1) ReloadCdreConfig(attrs ConfigPathArg, reply *string) error {
+func (apier *APIerSv1) ReloadCdreConfig(attrs ConfigPathArg, reply *string) error {
 	if attrs.ConfigPath == "" {
 		attrs.ConfigPath = utils.CONFIG_PATH
 	}
@@ -208,7 +208,7 @@ type RplExportedCDRs struct {
 }
 
 // ExportCDRs exports CDRs on a path (file or remote)
-func (api *ApierV1) ExportCDRs(arg ArgExportCDRs, reply *RplExportedCDRs) (err error) {
+func (api *APIerSv1) ExportCDRs(arg ArgExportCDRs, reply *RplExportedCDRs) (err error) {
 	cdreReloadStruct := <-api.Config.ConfigReloads[utils.CDRE]                  // Read the content of the channel, locking it
 	defer func() { api.Config.ConfigReloads[utils.CDRE] <- cdreReloadStruct }() // Unlock reloads at exit
 	exportTemplate := api.Config.CdreProfiles[utils.MetaDefault]

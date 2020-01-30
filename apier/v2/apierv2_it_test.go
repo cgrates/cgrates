@@ -38,24 +38,24 @@ var (
 	apierCfg       *config.CGRConfig
 	apierRPC       *rpc.Client
 	dm             *engine.DataManager // share db connection here so we can check data we set through APIs
-	apierv2ConfDIR string
+	APIerSv2ConfDIR string
 
 	sTestsv2it = []func(t *testing.T){
-		testApierV2itLoadConfig,
-		testApierV2itResetDataDb,
-		testApierV2itResetStorDb,
-		testApierV2itConnectDataDB,
-		testApierV2itStartEngine,
-		testApierV2itRpcConn,
-		testApierV2itAddBalance,
-		testApierV2itSetAction,
-		testApierV2itSetAccountActionTriggers,
-		testApierV2itFraudMitigation,
-		testApierV2itSetAccountWithAP,
-		testApierV2itSetActionWithCategory,
-		testApierV2itSetActionPlanWithWrongTiming,
-		testApierV2itSetActionPlanWithWrongTiming2,
-		testApierV2itKillEngine,
+		testAPIerSv2itLoadConfig,
+		testAPIerSv2itResetDataDb,
+		testAPIerSv2itResetStorDb,
+		testAPIerSv2itConnectDataDB,
+		testAPIerSv2itStartEngine,
+		testAPIerSv2itRpcConn,
+		testAPIerSv2itAddBalance,
+		testAPIerSv2itSetAction,
+		testAPIerSv2itSetAccountActionTriggers,
+		testAPIerSv2itFraudMitigation,
+		testAPIerSv2itSetAccountWithAP,
+		testAPIerSv2itSetActionWithCategory,
+		testAPIerSv2itSetActionPlanWithWrongTiming,
+		testAPIerSv2itSetActionPlanWithWrongTiming2,
+		testAPIerSv2itKillEngine,
 	}
 )
 
@@ -64,9 +64,9 @@ func TestV2IT(t *testing.T) {
 	case utils.MetaInternal:
 		t.Skip()
 	case utils.MetaMySQL:
-		apierv2ConfDIR = "tutmysql"
+		APIerSv2ConfDIR = "tutmysql"
 	case utils.MetaMongo:
-		apierv2ConfDIR = "tutmongo"
+		APIerSv2ConfDIR = "tutmongo"
 	case utils.MetaPostgres:
 		t.SkipNow()
 	default:
@@ -74,32 +74,32 @@ func TestV2IT(t *testing.T) {
 	}
 
 	for _, stest := range sTestsv2it {
-		t.Run(apierv2ConfDIR, stest)
+		t.Run(APIerSv2ConfDIR, stest)
 	}
 }
 
-func testApierV2itLoadConfig(t *testing.T) {
-	apierCfgPath = path.Join(*dataDir, "conf", "samples", apierv2ConfDIR)
+func testAPIerSv2itLoadConfig(t *testing.T) {
+	apierCfgPath = path.Join(*dataDir, "conf", "samples", APIerSv2ConfDIR)
 	if apierCfg, err = config.NewCGRConfigFromPath(apierCfgPath); err != nil {
 		t.Error(err)
 	}
 }
 
 // Remove data in both rating and accounting db
-func testApierV2itResetDataDb(t *testing.T) {
+func testAPIerSv2itResetDataDb(t *testing.T) {
 	if err := engine.InitDataDb(apierCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Wipe out the cdr database
-func testApierV2itResetStorDb(t *testing.T) {
+func testAPIerSv2itResetStorDb(t *testing.T) {
 	if err := engine.InitStorDb(apierCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func testApierV2itConnectDataDB(t *testing.T) {
+func testAPIerSv2itConnectDataDB(t *testing.T) {
 	rdsITdb, err := engine.NewDataDBConn(apierCfg.DataDbCfg().DataDbType,
 		apierCfg.DataDbCfg().DataDbHost, apierCfg.DataDbCfg().DataDbPort,
 		apierCfg.DataDbCfg().DataDbName, apierCfg.DataDbCfg().DataDbUser,
@@ -112,21 +112,21 @@ func testApierV2itConnectDataDB(t *testing.T) {
 }
 
 // Start CGR Engine
-func testApierV2itStartEngine(t *testing.T) {
+func testAPIerSv2itStartEngine(t *testing.T) {
 	if _, err := engine.StopStartEngine(apierCfgPath, 200); err != nil { // Mongo requires more time to start
 		t.Fatal(err)
 	}
 }
 
 // Connect rpc client to rater
-func testApierV2itRpcConn(t *testing.T) {
+func testAPIerSv2itRpcConn(t *testing.T) {
 	apierRPC, err = newRPCClient(apierCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
 }
 
-func testApierV2itAddBalance(t *testing.T) {
+func testAPIerSv2itAddBalance(t *testing.T) {
 	attrs := &utils.AttrSetBalance{
 		Tenant:      "cgrates.org",
 		Account:     "dan",
@@ -138,34 +138,34 @@ func testApierV2itAddBalance(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := apierRPC.Call(utils.ApierV2SetBalance, attrs, &reply); err != nil {
+	if err := apierRPC.Call(utils.APIerSv2SetBalance, attrs, &reply); err != nil {
 		t.Fatal(err)
 	}
 	var acnt engine.Account
-	if err := apierRPC.Call(utils.ApierV2GetAccount, &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "dan"}, &acnt); err != nil {
+	if err := apierRPC.Call(utils.APIerSv2GetAccount, &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "dan"}, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MONETARY][0].Value != 5.0 {
 		t.Errorf("Unexpected balance received: %+v", acnt.BalanceMap[utils.MONETARY][0])
 	}
 }
 
-func testApierV2itSetAction(t *testing.T) {
+func testAPIerSv2itSetAction(t *testing.T) {
 	attrs := utils.AttrSetActions{ActionsId: "DISABLE_ACCOUNT", Actions: []*utils.TPAction{
 		{Identifier: utils.DISABLE_ACCOUNT, Weight: 10.0},
 	}}
 	var reply string
-	if err := apierRPC.Call(utils.ApierV2SetActions, attrs, &reply); err != nil {
+	if err := apierRPC.Call(utils.APIerSv2SetActions, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	var acts map[string]engine.Actions
-	if err := apierRPC.Call(utils.ApierV2GetActions, AttrGetActions{ActionIDs: []string{attrs.ActionsId}}, &acts); err != nil {
+	if err := apierRPC.Call(utils.APIerSv2GetActions, AttrGetActions{ActionIDs: []string{attrs.ActionsId}}, &acts); err != nil {
 		t.Error(err)
 	} else if len(acts) != 1 {
 		t.Errorf("Received actions: %+v", acts)
 	}
 }
 
-func testApierV2itSetAccountActionTriggers(t *testing.T) {
+func testAPIerSv2itSetAccountActionTriggers(t *testing.T) {
 	attrs := v1.AttrSetAccountActionTriggers{
 		Tenant:  "cgrates.org",
 		Account: "dan",
@@ -180,27 +180,27 @@ func testApierV2itSetAccountActionTriggers(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := apierRPC.Call(utils.ApierV2SetAccountActionTriggers, attrs, &reply); err != nil {
+	if err := apierRPC.Call(utils.APIerSv2SetAccountActionTriggers, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	var ats engine.ActionTriggers
-	if err := apierRPC.Call(utils.ApierV2GetAccountActionTriggers, utils.TenantAccount{Tenant: "cgrates.org", Account: "dan"}, &ats); err != nil {
+	if err := apierRPC.Call(utils.APIerSv2GetAccountActionTriggers, utils.TenantAccount{Tenant: "cgrates.org", Account: "dan"}, &ats); err != nil {
 		t.Error(err)
 	} else if len(ats) != 1 || ats[0].ID != attrs.GroupID || ats[0].ThresholdValue != 50.0 {
 		t.Errorf("Received: %+v", ats)
 	}
 	attrs.ActionTrigger[utils.ThresholdValue] = 55 // Change the threshold
-	if err := apierRPC.Call(utils.ApierV2SetAccountActionTriggers, attrs, &reply); err != nil {
+	if err := apierRPC.Call(utils.APIerSv2SetAccountActionTriggers, attrs, &reply); err != nil {
 		t.Error(err)
 	}
-	if err := apierRPC.Call(utils.ApierV2GetAccountActionTriggers, utils.TenantAccount{Tenant: "cgrates.org", Account: "dan"}, &ats); err != nil {
+	if err := apierRPC.Call(utils.APIerSv2GetAccountActionTriggers, utils.TenantAccount{Tenant: "cgrates.org", Account: "dan"}, &ats); err != nil {
 		t.Error(err)
 	} else if len(ats) != 1 || ats[0].ID != attrs.GroupID || ats[0].ThresholdValue != 55.0 {
 		t.Errorf("Received: %+v", ats)
 	}
 }
 
-func testApierV2itFraudMitigation(t *testing.T) {
+func testAPIerSv2itFraudMitigation(t *testing.T) {
 	attrs := &utils.AttrSetBalance{
 		Tenant:      "cgrates.org",
 		Account:     "dan",
@@ -212,11 +212,11 @@ func testApierV2itFraudMitigation(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := apierRPC.Call(utils.ApierV2SetBalance, attrs, &reply); err != nil {
+	if err := apierRPC.Call(utils.APIerSv2SetBalance, attrs, &reply); err != nil {
 		t.Fatal(err)
 	}
 	var acnt engine.Account
-	if err := apierRPC.Call(utils.ApierV2GetAccount, &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "dan"}, &acnt); err != nil {
+	if err := apierRPC.Call(utils.APIerSv2GetAccount, &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "dan"}, &acnt); err != nil {
 		t.Error(err)
 	} else if len(acnt.BalanceMap) != 1 || acnt.BalanceMap[utils.MONETARY][0].Value != 60.0 {
 		t.Errorf("Unexpected balance received: %+v", acnt.BalanceMap[utils.MONETARY][0])
@@ -230,11 +230,11 @@ func testApierV2itFraudMitigation(t *testing.T) {
 			utils.Disabled: false,
 		},
 	}
-	if err := apierRPC.Call(utils.ApierV2SetAccount, attrSetAcnt, &reply); err != nil {
+	if err := apierRPC.Call(utils.APIerSv2SetAccount, attrSetAcnt, &reply); err != nil {
 		t.Fatal(err)
 	}
 	acnt = engine.Account{} // gob doesn't update the fields with default values
-	if err := apierRPC.Call(utils.ApierV2GetAccount, &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "dan"}, &acnt); err != nil {
+	if err := apierRPC.Call(utils.APIerSv2GetAccount, &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "dan"}, &acnt); err != nil {
 		t.Error(err)
 	} else if len(acnt.BalanceMap) != 1 || acnt.BalanceMap[utils.MONETARY][0].Value != 60.0 {
 		t.Errorf("Unexpected balance received: %+v", acnt.BalanceMap[utils.MONETARY][0])
@@ -243,18 +243,18 @@ func testApierV2itFraudMitigation(t *testing.T) {
 	}
 }
 
-func testApierV2itSetAccountWithAP(t *testing.T) {
-	argActs1 := utils.AttrSetActions{ActionsId: "TestApierV2itSetAccountWithAP_ACT_1",
+func testAPIerSv2itSetAccountWithAP(t *testing.T) {
+	argActs1 := utils.AttrSetActions{ActionsId: "TestAPIerSv2itSetAccountWithAP_ACT_1",
 		Actions: []*utils.TPAction{
 			{Identifier: utils.TOPUP_RESET,
 				BalanceType: utils.MONETARY, Units: "5.0", Weight: 20.0},
 		}}
 	var reply string
-	if err := apierRPC.Call(utils.ApierV2SetActions, argActs1, &reply); err != nil {
+	if err := apierRPC.Call(utils.APIerSv2SetActions, argActs1, &reply); err != nil {
 		t.Error(err)
 	}
 	tNow := time.Now().Add(time.Duration(time.Minute))
-	argAP1 := &v1.AttrSetActionPlan{Id: "TestApierV2itSetAccountWithAP_AP_1",
+	argAP1 := &v1.AttrSetActionPlan{Id: "TestAPIerSv2itSetAccountWithAP_AP_1",
 		ActionPlan: []*v1.AttrActionPlan{
 			{ActionsId: argActs1.ActionsId,
 				Time:   fmt.Sprintf("%v:%v:%v", tNow.Hour(), tNow.Minute(), tNow.Second()), // 10:4:12
@@ -262,21 +262,21 @@ func testApierV2itSetAccountWithAP(t *testing.T) {
 	if _, err := dm.GetActionPlan(argAP1.Id, true, utils.NonTransactional); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
-	if err := apierRPC.Call(utils.ApierV1SetActionPlan, argAP1, &reply); err != nil {
-		t.Error("Got error on ApierV1.SetActionPlan: ", err.Error())
+	if err := apierRPC.Call(utils.APIerSv1SetActionPlan, argAP1, &reply); err != nil {
+		t.Error("Got error on APIerSv1.SetActionPlan: ", err.Error())
 	} else if reply != utils.OK {
-		t.Errorf("Calling ApierV1.SetActionPlan received: %s", reply)
+		t.Errorf("Calling APIerSv1.SetActionPlan received: %s", reply)
 	}
 	argSetAcnt1 := AttrSetAccount{
 		Tenant:        "cgrates.org",
-		Account:       "TestApierV2itSetAccountWithAP1",
+		Account:       "TestAPIerSv2itSetAccountWithAP1",
 		ActionPlanIDs: []string{argAP1.Id},
 	}
 	acntID := utils.ConcatenatedKey(argSetAcnt1.Tenant, argSetAcnt1.Account)
 	if _, err := dm.GetAccountActionPlans(acntID, true, utils.NonTransactional); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
-	if err := apierRPC.Call(utils.ApierV2SetAccount, argSetAcnt1, &reply); err != nil {
+	if err := apierRPC.Call(utils.APIerSv2SetAccount, argSetAcnt1, &reply); err != nil {
 		t.Fatal(err)
 	}
 	if ap, err := dm.GetActionPlan(argAP1.Id, true, utils.NonTransactional); err != nil {
@@ -291,24 +291,24 @@ func testApierV2itSetAccountWithAP(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eAAPids, aapIDs)
 	}
 	// Set second AP so we can see the proper indexing done
-	argAP2 := &v1.AttrSetActionPlan{Id: "TestApierV2itSetAccountWithAP_AP_2",
+	argAP2 := &v1.AttrSetActionPlan{Id: "TestAPIerSv2itSetAccountWithAP_AP_2",
 		ActionPlan: []*v1.AttrActionPlan{
 			{ActionsId: argActs1.ActionsId, MonthDays: "1", Time: "00:00:00", Weight: 20.0}}}
 	if _, err := dm.GetActionPlan(argAP2.Id, true, utils.NonTransactional); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
-	if err := apierRPC.Call(utils.ApierV2SetActionPlan, argAP2, &reply); err != nil {
-		t.Error("Got error on ApierV2.SetActionPlan: ", err.Error())
+	if err := apierRPC.Call(utils.APIerSv2SetActionPlan, argAP2, &reply); err != nil {
+		t.Error("Got error on APIerSv2.SetActionPlan: ", err.Error())
 	} else if reply != utils.OK {
-		t.Errorf("Calling ApierV2.SetActionPlan received: %s", reply)
+		t.Errorf("Calling APIerSv2.SetActionPlan received: %s", reply)
 	}
 	// Test adding new AP
 	argSetAcnt2 := AttrSetAccount{
 		Tenant:        "cgrates.org",
-		Account:       "TestApierV2itSetAccountWithAP1",
+		Account:       "TestAPIerSv2itSetAccountWithAP1",
 		ActionPlanIDs: []string{argAP2.Id},
 	}
-	if err := apierRPC.Call(utils.ApierV2SetAccount, argSetAcnt2, &reply); err != nil {
+	if err := apierRPC.Call(utils.APIerSv2SetAccount, argSetAcnt2, &reply); err != nil {
 		t.Fatal(err)
 	}
 	if ap, err := dm.GetActionPlan(argAP2.Id, true, utils.NonTransactional); err != nil {
@@ -330,11 +330,11 @@ func testApierV2itSetAccountWithAP(t *testing.T) {
 	// test remove and overwrite
 	argSetAcnt2 = AttrSetAccount{
 		Tenant:               "cgrates.org",
-		Account:              "TestApierV2itSetAccountWithAP1",
+		Account:              "TestAPIerSv2itSetAccountWithAP1",
 		ActionPlanIDs:        []string{argAP2.Id},
 		ActionPlansOverwrite: true,
 	}
-	if err := apierRPC.Call(utils.ApierV2SetAccount, argSetAcnt2, &reply); err != nil {
+	if err := apierRPC.Call(utils.APIerSv2SetAccount, argSetAcnt2, &reply); err != nil {
 		t.Fatal(err)
 	}
 	if ap, err := dm.GetActionPlan(argAP1.Id, true, utils.NonTransactional); err != nil {
@@ -355,35 +355,35 @@ func testApierV2itSetAccountWithAP(t *testing.T) {
 	}
 }
 
-func testApierV2itSetActionWithCategory(t *testing.T) {
+func testAPIerSv2itSetActionWithCategory(t *testing.T) {
 	var reply string
-	attrsSetAccount := &utils.AttrSetAccount{Tenant: "cgrates.org", Account: "TestApierV2itSetActionWithCategory"}
-	if err := apierRPC.Call(utils.ApierV1SetAccount, attrsSetAccount, &reply); err != nil {
-		t.Error("Got error on ApierV1.SetAccount: ", err.Error())
+	attrsSetAccount := &utils.AttrSetAccount{Tenant: "cgrates.org", Account: "TestAPIerSv2itSetActionWithCategory"}
+	if err := apierRPC.Call(utils.APIerSv1SetAccount, attrsSetAccount, &reply); err != nil {
+		t.Error("Got error on APIerSv1.SetAccount: ", err.Error())
 	} else if reply != utils.OK {
-		t.Errorf("Calling ApierV1.SetAccount received: %s", reply)
+		t.Errorf("Calling APIerSv1.SetAccount received: %s", reply)
 	}
 
-	argActs1 := utils.AttrSetActions{ActionsId: "TestApierV2itSetActionWithCategory_ACT",
+	argActs1 := utils.AttrSetActions{ActionsId: "TestAPIerSv2itSetActionWithCategory_ACT",
 		Actions: []*utils.TPAction{
 			{Identifier: utils.TOPUP_RESET,
 				BalanceType: utils.MONETARY, Categories: "test", Units: "5.0", Weight: 20.0},
 		}}
 
-	if err := apierRPC.Call(utils.ApierV2SetActions, argActs1, &reply); err != nil {
+	if err := apierRPC.Call(utils.APIerSv2SetActions, argActs1, &reply); err != nil {
 		t.Error(err)
 	}
 
 	attrsEA := &utils.AttrExecuteAction{Tenant: attrsSetAccount.Tenant, Account: attrsSetAccount.Account, ActionsId: argActs1.ActionsId}
-	if err := apierRPC.Call(utils.ApierV1ExecuteAction, attrsEA, &reply); err != nil {
-		t.Error("Got error on ApierV1.ExecuteAction: ", err.Error())
+	if err := apierRPC.Call(utils.APIerSv1ExecuteAction, attrsEA, &reply); err != nil {
+		t.Error("Got error on APIerSv1.ExecuteAction: ", err.Error())
 	} else if reply != utils.OK {
-		t.Errorf("Calling ApierV1.ExecuteAction received: %s", reply)
+		t.Errorf("Calling APIerSv1.ExecuteAction received: %s", reply)
 	}
 
 	var acnt engine.Account
-	if err := apierRPC.Call(utils.ApierV2GetAccount, &utils.AttrGetAccount{Tenant: "cgrates.org",
-		Account: "TestApierV2itSetActionWithCategory"}, &acnt); err != nil {
+	if err := apierRPC.Call(utils.APIerSv2GetAccount, &utils.AttrGetAccount{Tenant: "cgrates.org",
+		Account: "TestAPIerSv2itSetActionWithCategory"}, &acnt); err != nil {
 		t.Error(err)
 	} else if len(acnt.BalanceMap) != 1 || acnt.BalanceMap[utils.MONETARY][0].Value != 5.0 {
 		t.Errorf("Unexpected balance received: %+v", acnt.BalanceMap[utils.MONETARY][0])
@@ -393,44 +393,44 @@ func testApierV2itSetActionWithCategory(t *testing.T) {
 	}
 }
 
-func testApierV2itSetActionPlanWithWrongTiming(t *testing.T) {
+func testAPIerSv2itSetActionPlanWithWrongTiming(t *testing.T) {
 	var reply string
 	tNow := time.Now().Add(time.Duration(time.Minute)).String()
-	argAP1 := &v1.AttrSetActionPlan{Id: "TestApierV2itSetAccountWithAPWithWrongTiming",
+	argAP1 := &v1.AttrSetActionPlan{Id: "TestAPIerSv2itSetAccountWithAPWithWrongTiming",
 		ActionPlan: []*v1.AttrActionPlan{
 			&v1.AttrActionPlan{
-				ActionsId: "TestApierV2itSetAccountWithAP_ACT_1",
+				ActionsId: "TestAPIerSv2itSetAccountWithAP_ACT_1",
 				Time:      tNow,
 				Weight:    20.0,
 			},
 		},
 	}
 
-	if err := apierRPC.Call(utils.ApierV1SetActionPlan, argAP1, &reply); err == nil ||
+	if err := apierRPC.Call(utils.APIerSv1SetActionPlan, argAP1, &reply); err == nil ||
 		err.Error() != fmt.Sprintf("UNSUPPORTED_FORMAT:%s", tNow) {
 		t.Error("Expecting error ", err)
 	}
 }
 
-func testApierV2itSetActionPlanWithWrongTiming2(t *testing.T) {
+func testAPIerSv2itSetActionPlanWithWrongTiming2(t *testing.T) {
 	var reply string
-	argAP1 := &v1.AttrSetActionPlan{Id: "TestApierV2itSetAccountWithAPWithWrongTiming",
+	argAP1 := &v1.AttrSetActionPlan{Id: "TestAPIerSv2itSetAccountWithAPWithWrongTiming",
 		ActionPlan: []*v1.AttrActionPlan{
 			&v1.AttrActionPlan{
-				ActionsId: "TestApierV2itSetAccountWithAP_ACT_1",
+				ActionsId: "TestAPIerSv2itSetAccountWithAP_ACT_1",
 				Time:      "aa:bb:cc",
 				Weight:    20.0,
 			},
 		},
 	}
 
-	if err := apierRPC.Call(utils.ApierV1SetActionPlan, argAP1, &reply); err == nil ||
+	if err := apierRPC.Call(utils.APIerSv1SetActionPlan, argAP1, &reply); err == nil ||
 		err.Error() != fmt.Sprintf("UNSUPPORTED_FORMAT:aa:bb:cc") {
 		t.Error("Expecting error ", err)
 	}
 }
 
-func testApierV2itKillEngine(t *testing.T) {
+func testAPIerSv2itKillEngine(t *testing.T) {
 	if err := engine.KillEngine(delay); err != nil {
 		t.Error(err)
 	}

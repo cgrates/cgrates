@@ -23,7 +23,7 @@ import "github.com/cgrates/cgrates/engine"
 func init() {
 	c := &CmdGetMaxUsage{
 		name:      "maxusage",
-		rpcMethod: "ApierV1.GetMaxUsage",
+		rpcMethod: "APIerSv1.GetMaxUsage",
 		clientArgs: []string{"ToR", "RequestType", "Tenant",
 			"Category", "Account", "Subject", "Destination",
 			"SetupTime", "AnswerTime", "Usage", "ExtraFields"},

@@ -28,7 +28,7 @@ import (
 )
 
 var (
-	apierDebit        *ApierV1
+	apierDebit        *APIerSv1
 	apierDebitStorage *engine.InternalDB
 	responder         *engine.Responder
 	dm                *engine.DataManager
@@ -42,7 +42,7 @@ func init() {
 	responder := &engine.Responder{MaxComputedUsage: cfg.RalsCfg().MaxComputedUsage}
 	dm = engine.NewDataManager(apierDebitStorage, config.CgrConfig().CacheCfg(), nil)
 	engine.SetDataStorage(dm)
-	apierDebit = &ApierV1{
+	apierDebit = &APIerSv1{
 		DataManager: dm,
 		Config:      cfg,
 		Responder:   responder,
@@ -56,7 +56,7 @@ func TestDebitUsageWithOptionsSetConfig(t *testing.T) {
 	responder := &engine.Responder{MaxComputedUsage: cfg.RalsCfg().MaxComputedUsage}
 	dm = engine.NewDataManager(apierDebitStorage, config.CgrConfig().CacheCfg(), nil)
 	engine.SetDataStorage(dm)
-	apierDebit = &ApierV1{
+	apierDebit = &APIerSv1{
 		DataManager: dm,
 		Config:      cfg,
 		Responder:   responder,

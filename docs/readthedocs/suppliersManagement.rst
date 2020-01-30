@@ -12,7 +12,7 @@
 ::
 
     {
-    	"method": "ApierV1.GetSupplierProfile",
+    	"method": "APIerSv1.GetSupplierProfile",
     	"params": [{
     		"Tenant": "cgrates.org",
     		"ID": "SPP_1"

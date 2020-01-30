@@ -125,7 +125,7 @@ func testVrsDataDB(t *testing.T) {
 		"RatingProfile": 1, "User": 1, "Accounts": 3, "ActionPlans": 3, "Chargers": 1,
 		"Destinations": 1, "LoadIDs": 1, "SharedGroups": 2, "Stats": 2, "Resource": 1,
 		"Subscribers": 1, "Suppliers": 1, "Thresholds": 3, "Timing": 1}
-	if err := vrsRPC.Call(utils.ApierV1GetDataDBVersions, "", &result); err != nil {
+	if err := vrsRPC.Call(utils.APIerSv1GetDataDBVersions, "", &result); err != nil {
 		t.Error(err)
 	} else if expectedVrs.Compare(result, vrsStorageType, true) != "" {
 		t.Errorf("Expecting: %+v, received: %+v", expectedVrs, result)
@@ -139,7 +139,7 @@ func testVrsStorDB(t *testing.T) {
 		"TpSharedGroups": 1, "TpSuppliers": 1, "SessionSCosts": 3, "TpRatingProfiles": 1, "TpStats": 1, "TpTiming": 1,
 		"CostDetails": 2, "TpAccountActions": 1, "TpActionPlans": 1, "TpChargers": 1, "TpRatingProfile": 1,
 		"TpRatingPlan": 1, "TpResources": 1}
-	if err := vrsRPC.Call(utils.ApierV1GetStorDBVersions, "", &result); err != nil {
+	if err := vrsRPC.Call(utils.APIerSv1GetStorDBVersions, "", &result); err != nil {
 		t.Error(err)
 	} else if expectedVrs.Compare(result, vrsStorageType, true) != "" {
 		t.Errorf("Expecting: %+v, received: %+v", result, expectedVrs)
@@ -153,7 +153,7 @@ func testVrsSetDataDBVrs(t *testing.T) {
 			"Attributes": 3,
 		},
 	}
-	if err := vrsRPC.Call(utils.ApierV1SetDataDBVersions, args, &reply); err != nil {
+	if err := vrsRPC.Call(utils.APIerSv1SetDataDBVersions, args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expecting: %+v, received: %+v", utils.OK, reply)
@@ -165,7 +165,7 @@ func testVrsSetDataDBVrs(t *testing.T) {
 		"RatingProfile": 1, "User": 1, "Accounts": 3, "ActionPlans": 3, "Chargers": 1,
 		"Destinations": 1, "LoadIDs": 1, "SharedGroups": 2, "Stats": 2, "Resource": 1,
 		"Subscribers": 1, "Suppliers": 1, "Thresholds": 3, "Timing": 1}
-	if err := vrsRPC.Call(utils.ApierV1GetDataDBVersions, "", &result); err != nil {
+	if err := vrsRPC.Call(utils.APIerSv1GetDataDBVersions, "", &result); err != nil {
 		t.Error(err)
 	} else if expectedVrs.Compare(result, vrsStorageType, true) != "" {
 		t.Errorf("Expecting: %+v, received: %+v", expectedVrs, result)
@@ -174,7 +174,7 @@ func testVrsSetDataDBVrs(t *testing.T) {
 	args = SetVersionsArg{
 		Versions: nil,
 	}
-	if err := vrsRPC.Call(utils.ApierV1SetDataDBVersions, args, &reply); err != nil {
+	if err := vrsRPC.Call(utils.APIerSv1SetDataDBVersions, args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expecting: %+v, received: %+v", utils.OK, reply)
@@ -188,7 +188,7 @@ func testVrsSetStorDBVrs(t *testing.T) {
 			"TpResources": 2,
 		},
 	}
-	if err := vrsRPC.Call(utils.ApierV1SetStorDBVersions, args, &reply); err != nil {
+	if err := vrsRPC.Call(utils.APIerSv1SetStorDBVersions, args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expecting: %+v, received: %+v", utils.OK, reply)
@@ -200,7 +200,7 @@ func testVrsSetStorDBVrs(t *testing.T) {
 		"TpSharedGroups": 1, "TpSuppliers": 1, "SessionSCosts": 3, "TpRatingProfiles": 1, "TpStats": 1, "TpTiming": 1,
 		"CostDetails": 2, "TpAccountActions": 1, "TpActionPlans": 1, "TpChargers": 1, "TpRatingProfile": 1,
 		"TpRatingPlan": 1, "TpResources": 2}
-	if err := vrsRPC.Call(utils.ApierV1GetStorDBVersions, "", &result); err != nil {
+	if err := vrsRPC.Call(utils.APIerSv1GetStorDBVersions, "", &result); err != nil {
 		t.Error(err)
 	} else if expectedVrs.Compare(result, vrsStorageType, true) != "" {
 		t.Errorf("Expecting: %+v, received: %+v", result, expectedVrs)
@@ -209,7 +209,7 @@ func testVrsSetStorDBVrs(t *testing.T) {
 	args = SetVersionsArg{
 		Versions: nil,
 	}
-	if err := vrsRPC.Call(utils.ApierV1SetStorDBVersions, args, &reply); err != nil {
+	if err := vrsRPC.Call(utils.APIerSv1SetStorDBVersions, args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expecting: %+v, received: %+v", utils.OK, reply)

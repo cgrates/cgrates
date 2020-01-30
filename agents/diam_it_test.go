@@ -238,7 +238,7 @@ func testDiamItApierRpcConn(t *testing.T) {
 func testDiamItTPFromFolder(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
 	var loadInst utils.LoadInstance
-	if err := apierRpc.Call(utils.ApierV2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
+	if err := apierRpc.Call(utils.APIerSv2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
 		t.Error(err)
 	}
 	if isDispatcherActive {
@@ -912,7 +912,7 @@ func testDiamInitWithSessionDisconnect(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := apierRpc.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {
+	if err := apierRpc.Call(utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)

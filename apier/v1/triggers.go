@@ -30,7 +30,7 @@ import (
 )
 
 // Returns a list of ActionTriggers on an account
-func (api *ApierV1) GetAccountActionTriggers(attrs utils.TenantAccount, reply *engine.ActionTriggers) error {
+func (api *APIerSv1) GetAccountActionTriggers(attrs utils.TenantAccount, reply *engine.ActionTriggers) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -55,7 +55,7 @@ type AttrAddAccountActionTriggers struct {
 	Executed               bool
 }
 
-func (api *ApierV1) AddAccountActionTriggers(attr AttrAddAccountActionTriggers, reply *string) (err error) {
+func (api *APIerSv1) AddAccountActionTriggers(attr AttrAddAccountActionTriggers, reply *string) (err error) {
 	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -110,7 +110,7 @@ type AttrRemoveAccountActionTriggers struct {
 	UniqueID string
 }
 
-func (api *ApierV1) RemoveAccountActionTriggers(attr AttrRemoveAccountActionTriggers, reply *string) error {
+func (api *APIerSv1) RemoveAccountActionTriggers(attr AttrRemoveAccountActionTriggers, reply *string) error {
 	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -151,7 +151,7 @@ type AttrResetAccountActionTriggers struct {
 	Executed bool
 }
 
-func (api *ApierV1) ResetAccountActionTriggers(attr AttrResetAccountActionTriggers, reply *string) error {
+func (api *APIerSv1) ResetAccountActionTriggers(attr AttrResetAccountActionTriggers, reply *string) error {
 
 	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -336,7 +336,7 @@ func (attr *AttrSetActionTrigger) UpdateActionTrigger(at *engine.ActionTrigger, 
 }
 
 // SetAccountActionTriggers updates or creates if not present the ActionTrigger for an Account
-func (api *ApierV1) SetAccountActionTriggers(attr AttrSetAccountActionTriggers, reply *string) error {
+func (api *APIerSv1) SetAccountActionTriggers(attr AttrSetAccountActionTriggers, reply *string) error {
 	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -382,7 +382,7 @@ type AttrRemoveActionTrigger struct {
 	UniqueID string
 }
 
-func (api *ApierV1) RemoveActionTrigger(attr AttrRemoveActionTrigger, reply *string) error {
+func (api *APIerSv1) RemoveActionTrigger(attr AttrRemoveActionTrigger, reply *string) error {
 	if missing := utils.MissingStructFields(&attr, []string{"GroupID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -419,7 +419,7 @@ func (api *ApierV1) RemoveActionTrigger(attr AttrRemoveActionTrigger, reply *str
 }
 
 // SetActionTrigger updates a ActionTrigger
-func (api *ApierV1) SetActionTrigger(attr AttrSetActionTrigger, reply *string) (err error) {
+func (api *APIerSv1) SetActionTrigger(attr AttrSetActionTrigger, reply *string) (err error) {
 	if missing := utils.MissingStructFields(&attr, []string{"GroupID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -462,7 +462,7 @@ type AttrGetActionTriggers struct {
 	GroupIDs []string
 }
 
-func (api *ApierV1) GetActionTriggers(attr AttrGetActionTriggers, atrs *engine.ActionTriggers) error {
+func (api *APIerSv1) GetActionTriggers(attr AttrGetActionTriggers, atrs *engine.ActionTriggers) error {
 	var allAttrs engine.ActionTriggers
 	if len(attr.GroupIDs) > 0 {
 		for _, key := range attr.GroupIDs {
@@ -508,7 +508,7 @@ type AttrAddActionTrigger struct {
 }
 
 // Deprecated in rc8, replaced by AddAccountActionTriggers
-func (api *ApierV1) AddTriggeredAction(attr AttrAddActionTrigger, reply *string) error {
+func (api *APIerSv1) AddTriggeredAction(attr AttrAddActionTrigger, reply *string) error {
 	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

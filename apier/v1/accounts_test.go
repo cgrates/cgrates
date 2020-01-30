@@ -27,14 +27,14 @@ import (
 )
 
 var (
-	apierAcnts            *ApierV1
+	apierAcnts            *APIerSv1
 	apierAcntsAcntStorage *engine.InternalDB
 )
 
 func init() {
 	cfg, _ := config.NewDefaultCGRConfig()
 	apierAcntsAcntStorage = engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	apierAcnts = &ApierV1{
+	apierAcnts = &APIerSv1{
 		DataManager: engine.NewDataManager(apierAcntsAcntStorage, config.CgrConfig().CacheCfg(), nil),
 		Config:      cfg,
 	}

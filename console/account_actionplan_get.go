@@ -26,7 +26,7 @@ import (
 func init() {
 	c := &CmdGetAccountActionPlan{
 		name:      "account_actionplan_get",
-		rpcMethod: utils.ApierV1GetAccountActionPlan,
+		rpcMethod: utils.APIerSv1GetAccountActionPlan,
 		rpcParams: &utils.TenantAccount{},
 	}
 	commands[c.Name()] = c

@@ -26,7 +26,7 @@ import (
 func init() {
 	c := &CmdCdreConfigReload{
 		name:      "cdre_config_reload",
-		rpcMethod: utils.ApierV1ReloadCdreConfig,
+		rpcMethod: utils.APIerSv1ReloadCdreConfig,
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}

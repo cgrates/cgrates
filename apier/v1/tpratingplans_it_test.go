@@ -129,7 +129,7 @@ func testTPRatingPlansRpcConn(t *testing.T) {
 
 func testTPRatingPlansGetTPRatingPlanBeforeSet(t *testing.T) {
 	var reply *utils.TPRatingPlan
-	if err := tpRatingPlanRPC.Call(utils.ApierV1GetTPRatingPlan,
+	if err := tpRatingPlanRPC.Call(utils.APIerSv1GetTPRatingPlan,
 		&AttrGetTPRatingPlan{TPid: "TPRP1", ID: "Plan1"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -153,7 +153,7 @@ func testTPRatingPlansSetTPRatingPlan(t *testing.T) {
 		},
 	}
 	var result string
-	if err := tpRatingPlanRPC.Call(utils.ApierV1SetTPRatingPlan, tpRatingPlan, &result); err != nil {
+	if err := tpRatingPlanRPC.Call(utils.APIerSv1SetTPRatingPlan, tpRatingPlan, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -162,7 +162,7 @@ func testTPRatingPlansSetTPRatingPlan(t *testing.T) {
 
 func testTPRatingPlansGetTPRatingPlanAfterSet(t *testing.T) {
 	var respond *utils.TPRatingPlan
-	if err := tpRatingPlanRPC.Call(utils.ApierV1GetTPRatingPlan,
+	if err := tpRatingPlanRPC.Call(utils.APIerSv1GetTPRatingPlan,
 		&AttrGetTPRatingPlan{TPid: "TPRP1", ID: "Plan1"}, &respond); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpRatingPlan.TPid, respond.TPid) {
@@ -177,7 +177,7 @@ func testTPRatingPlansGetTPRatingPlanAfterSet(t *testing.T) {
 func testTPRatingPlansGetTPRatingPlanIds(t *testing.T) {
 	var result []string
 	expected := []string{"Plan1"}
-	if err := tpRatingPlanRPC.Call(utils.ApierV1GetTPRatingPlanIds,
+	if err := tpRatingPlanRPC.Call(utils.APIerSv1GetTPRatingPlanIds,
 		&AttrGetTPRatingPlanIds{TPid: tpRatingPlan.TPid}, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, result) {
@@ -204,7 +204,7 @@ func testTPRatingPlansUpdateTPRatingPlan(t *testing.T) {
 		},
 	}
 	var result string
-	if err := tpRatingPlanRPC.Call(utils.ApierV1SetTPRatingPlan, tpRatingPlan, &result); err != nil {
+	if err := tpRatingPlanRPC.Call(utils.APIerSv1SetTPRatingPlan, tpRatingPlan, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -213,7 +213,7 @@ func testTPRatingPlansUpdateTPRatingPlan(t *testing.T) {
 
 func testTPRatingPlansGetTPRatingPlanAfterUpdate(t *testing.T) {
 	var respond *utils.TPRatingPlan
-	if err := tpRatingPlanRPC.Call(utils.ApierV1GetTPRatingPlan,
+	if err := tpRatingPlanRPC.Call(utils.APIerSv1GetTPRatingPlan,
 		&AttrGetTPRatingPlan{TPid: "TPRP1", ID: "Plan1"}, &respond); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpRatingPlan.TPid, respond.TPid) {
@@ -227,7 +227,7 @@ func testTPRatingPlansGetTPRatingPlanAfterUpdate(t *testing.T) {
 
 func testTPRatingPlansRemoveTPRatingPlan(t *testing.T) {
 	var resp string
-	if err := tpRatingPlanRPC.Call(utils.ApierV1RemoveTPRatingPlan,
+	if err := tpRatingPlanRPC.Call(utils.APIerSv1RemoveTPRatingPlan,
 		&AttrGetTPRatingPlan{TPid: "TPRP1", ID: "Plan1"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
@@ -237,7 +237,7 @@ func testTPRatingPlansRemoveTPRatingPlan(t *testing.T) {
 
 func testTPRatingPlansGetTPRatingPlanAfterRemove(t *testing.T) {
 	var respond *utils.TPRatingPlan
-	if err := tpRatingPlanRPC.Call(utils.ApierV1GetTPRatingPlan,
+	if err := tpRatingPlanRPC.Call(utils.APIerSv1GetTPRatingPlan,
 		&AttrGetTPRatingPlan{TPid: "TPRP1", ID: "Plan1"}, &respond); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}

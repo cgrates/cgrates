@@ -30,16 +30,16 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-// NewApierV1Service returns the ApierV1 Service
-func NewApierV1Service(cfg *config.CGRConfig, dm *DataDBService,
+// NewAPIerSv1Service returns the APIerSv1 Service
+func NewAPIerSv1Service(cfg *config.CGRConfig, dm *DataDBService,
 	storDB *StorDBService, filterSChan chan *engine.FilterS,
 	server *utils.Server,
 	schedService *SchedulerService,
 	responderService *ResponderService,
-	internalAPIerV1Chan chan rpcclient.ClientConnector,
-	connMgr *engine.ConnManager) *ApierV1Service {
-	return &ApierV1Service{
-		connChan:         internalAPIerV1Chan,
+	internalAPIerSv1Chan chan rpcclient.ClientConnector,
+	connMgr *engine.ConnManager) *APIerSv1Service {
+	return &APIerSv1Service{
+		connChan:         internalAPIerSv1Chan,
 		cfg:              cfg,
 		dm:               dm,
 		storDB:           storDB,
@@ -48,12 +48,12 @@ func NewApierV1Service(cfg *config.CGRConfig, dm *DataDBService,
 		schedService:     schedService,
 		responderService: responderService,
 		connMgr:          connMgr,
-		apierV1Chan:      make(chan *v1.ApierV1, 1),
+		APIerSv1Chan:     make(chan *v1.APIerSv1, 1),
 	}
 }
 
-// ApierV1Service implements Service interface
-type ApierV1Service struct {
+// APIerSv1Service implements Service interface
+type APIerSv1Service struct {
 	sync.RWMutex
 	cfg              *config.CGRConfig
 	dm               *DataDBService
@@ -64,17 +64,17 @@ type ApierV1Service struct {
 	responderService *ResponderService
 	connMgr          *engine.ConnManager
 
-	api      *v1.ApierV1
+	api      *v1.APIerSv1
 	connChan chan rpcclient.ClientConnector
 
 	syncStop chan struct{}
 
-	apierV1Chan chan *v1.ApierV1
+	APIerSv1Chan chan *v1.APIerSv1
 }
 
 // Start should handle the sercive start
 // For this service the start should be called from RAL Service
-func (apiService *ApierV1Service) Start() (err error) {
+func (apiService *APIerSv1Service) Start() (err error) {
 	if apiService.IsRunning() {
 		return fmt.Errorf("service aleady running")
 	}
@@ -93,7 +93,7 @@ func (apiService *ApierV1Service) Start() (err error) {
 	apiService.storDB.RegisterSyncChan(storDBChan)
 	stordb := <-storDBChan
 
-	apiService.api = &v1.ApierV1{
+	apiService.api = &v1.APIerSv1{
 		DataManager:      datadb,
 		CdrDb:            stordb,
 		StorDb:           stordb,
@@ -105,7 +105,7 @@ func (apiService *ApierV1Service) Start() (err error) {
 		StorDBChan:       storDBChan,
 	}
 
-	go func(api *v1.ApierV1, stopChan chan struct{}) {
+	go func(api *v1.APIerSv1, stopChan chan struct{}) {
 		if err := api.ListenAndServe(stopChan); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.CDRServer, err.Error()))
 			// erS.exitChan <- true
@@ -121,25 +121,27 @@ func (apiService *ApierV1Service) Start() (err error) {
 	utils.RegisterRpcParams("", &v1.CDRsV1{})
 	utils.RegisterRpcParams("", &v1.SMGenericV1{})
 	utils.RegisterRpcParams("", apiService.api)
+	utils.RegisterRpcParams("ApierV1", apiService.api)
+	//backwards compatible
 
 	apiService.connChan <- apiService.api
 
-	apiService.apierV1Chan <- apiService.api
+	apiService.APIerSv1Chan <- apiService.api
 	return
 }
 
 // GetIntenternalChan returns the internal connection chanel
-func (apiService *ApierV1Service) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
+func (apiService *APIerSv1Service) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
 	return apiService.connChan
 }
 
 // Reload handles the change of config
-func (apiService *ApierV1Service) Reload() (err error) {
+func (apiService *APIerSv1Service) Reload() (err error) {
 	return
 }
 
 // Shutdown stops the service
-func (apiService *ApierV1Service) Shutdown() (err error) {
+func (apiService *APIerSv1Service) Shutdown() (err error) {
 	apiService.Lock()
 	close(apiService.syncStop)
 	apiService.api = nil
@@ -149,32 +151,32 @@ func (apiService *ApierV1Service) Shutdown() (err error) {
 }
 
 // IsRunning returns if the service is running
-func (apiService *ApierV1Service) IsRunning() bool {
+func (apiService *APIerSv1Service) IsRunning() bool {
 	apiService.RLock()
 	defer apiService.RUnlock()
 	return apiService != nil && apiService.api != nil
 }
 
 // ServiceName returns the service name
-func (apiService *ApierV1Service) ServiceName() string {
-	return utils.ApierV1
+func (apiService *APIerSv1Service) ServiceName() string {
+	return utils.APIerSv1
 }
 
-// GetApierV1 returns the apierV1
-func (apiService *ApierV1Service) GetApierV1() *v1.ApierV1 {
+// GetAPIerSv1 returns the APIerSv1
+func (apiService *APIerSv1Service) GetAPIerSv1() *v1.APIerSv1 {
 	apiService.RLock()
 	defer apiService.RUnlock()
 	return apiService.api
 }
 
 // ShouldRun returns if the service should be running
-func (apiService *ApierV1Service) ShouldRun() bool {
+func (apiService *APIerSv1Service) ShouldRun() bool {
 	return apiService.cfg.RalsCfg().Enabled
 }
 
 // GetDMChan returns the DataManager chanel
-func (apiService *ApierV1Service) GetApierV1Chan() chan *v1.ApierV1 {
+func (apiService *APIerSv1Service) GetAPIerSv1Chan() chan *v1.APIerSv1 {
 	apiService.RLock()
 	defer apiService.RUnlock()
-	return apiService.apierV1Chan
+	return apiService.APIerSv1Chan
 }

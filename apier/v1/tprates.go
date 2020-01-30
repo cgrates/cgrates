@@ -25,7 +25,7 @@ import (
 )
 
 // Creates a new rate within a tariff plan
-func (self *ApierV1) SetTPRate(attrs utils.TPRate, reply *string) error {
+func (self *APIerSv1) SetTPRate(attrs utils.TPRate, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ID", "RateSlots"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -42,7 +42,7 @@ type AttrGetTPRate struct {
 }
 
 // Queries specific Rate on tariff plan
-func (self *ApierV1) GetTPRate(attrs AttrGetTPRate, reply *utils.TPRate) error {
+func (self *APIerSv1) GetTPRate(attrs AttrGetTPRate, reply *utils.TPRate) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -63,7 +63,7 @@ type AttrGetTPRateIds struct {
 }
 
 // Queries rate identities on specific tariff plan.
-func (self *ApierV1) GetTPRateIds(attrs AttrGetTPRateIds, reply *[]string) error {
+func (self *APIerSv1) GetTPRateIds(attrs AttrGetTPRateIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -80,7 +80,7 @@ func (self *ApierV1) GetTPRateIds(attrs AttrGetTPRateIds, reply *[]string) error
 }
 
 // Removes specific Rate on Tariff plan
-func (self *ApierV1) RemoveTPRate(attrs AttrGetTPRate, reply *string) error {
+func (self *APIerSv1) RemoveTPRate(attrs AttrGetTPRate, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

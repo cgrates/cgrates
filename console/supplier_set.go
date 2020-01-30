@@ -27,7 +27,7 @@ import (
 func init() {
 	c := &CmdSetSupplier{
 		name:      "supplier_set",
-		rpcMethod: utils.ApierV1SetSupplierProfile,
+		rpcMethod: utils.APIerSv1SetSupplierProfile,
 		rpcParams: &v1.SupplierWithCache{},
 	}
 	commands[c.Name()] = c

@@ -24,7 +24,7 @@ import (
 )
 
 // Retrieves the callCost out of CGR logDb
-func (apier *ApierV1) GetEventCost(attrs utils.AttrGetCallCost, reply *engine.EventCost) error {
+func (apier *APIerSv1) GetEventCost(attrs utils.AttrGetCallCost, reply *engine.EventCost) error {
 	if attrs.CgrId == "" {
 		return utils.NewErrMandatoryIeMissing("CgrId")
 	}
@@ -50,7 +50,7 @@ func (apier *ApierV1) GetEventCost(attrs utils.AttrGetCallCost, reply *engine.Ev
 }
 
 // Retrieves CDRs based on the filters
-func (apier *ApierV1) GetCDRs(attrs utils.AttrGetCdrs, reply *[]*engine.ExternalCDR) error {
+func (apier *APIerSv1) GetCDRs(attrs utils.AttrGetCdrs, reply *[]*engine.ExternalCDR) error {
 	cdrsFltr, err := attrs.AsCDRsFilter(apier.Config.GeneralCfg().DefaultTimezone)
 	if err != nil {
 		return utils.NewErrServerError(err)
@@ -68,7 +68,7 @@ func (apier *ApierV1) GetCDRs(attrs utils.AttrGetCdrs, reply *[]*engine.External
 }
 
 // New way of removing CDRs
-func (apier *ApierV1) RemoveCDRs(attrs utils.RPCCDRsFilter, reply *string) error {
+func (apier *APIerSv1) RemoveCDRs(attrs utils.RPCCDRsFilter, reply *string) error {
 	cdrsFilter, err := attrs.AsCDRsFilter(apier.Config.GeneralCfg().DefaultTimezone)
 	if err != nil {
 		return utils.NewErrServerError(err)

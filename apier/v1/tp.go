@@ -34,7 +34,7 @@ type AttrGetTPIds struct {
 }
 
 // Queries tarrif plan identities gathered from all tables.
-func (self *ApierV1) GetTPIds(attrs AttrGetTPIds, reply *[]string) error {
+func (self *APIerSv1) GetTPIds(attrs AttrGetTPIds, reply *[]string) error {
 	if ids, err := self.StorDb.GetTpIds(""); err != nil {
 		return utils.NewErrServerError(err)
 	} else if ids == nil {
@@ -50,7 +50,7 @@ type AttrImportTPZipFile struct {
 	File []byte
 }
 
-func (self *ApierV1) ImportTPZipFile(attrs AttrImportTPZipFile, reply *string) error {
+func (self *APIerSv1) ImportTPZipFile(attrs AttrImportTPZipFile, reply *string) error {
 	tmpDir, err := ioutil.TempDir("/tmp", "cgr_")
 	if err != nil {
 		*reply = "ERROR: creating temp directory!"
@@ -103,7 +103,7 @@ type AttrRemTp struct {
 	TPid string
 }
 
-func (self *ApierV1) RemTP(attrs AttrRemTp, reply *string) error {
+func (self *APIerSv1) RemTP(attrs AttrRemTp, reply *string) error {
 	if len(attrs.TPid) == 0 {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
@@ -115,7 +115,7 @@ func (self *ApierV1) RemTP(attrs AttrRemTp, reply *string) error {
 	return nil
 }
 
-func (self *ApierV1) ExportTPToFolder(attrs utils.AttrDirExportTP, exported *utils.ExportedTPStats) error {
+func (self *APIerSv1) ExportTPToFolder(attrs utils.AttrDirExportTP, exported *utils.ExportedTPStats) error {
 	if attrs.TPid == nil || *attrs.TPid == "" {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
@@ -148,7 +148,7 @@ func (self *ApierV1) ExportTPToFolder(attrs utils.AttrDirExportTP, exported *uti
 	return nil
 }
 
-func (self *ApierV1) ExportTPToZipString(attrs utils.AttrDirExportTP, reply *string) error {
+func (self *APIerSv1) ExportTPToZipString(attrs utils.AttrDirExportTP, reply *string) error {
 	if attrs.TPid == nil || *attrs.TPid == "" {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}

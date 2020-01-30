@@ -14,7 +14,7 @@
 ::
 
     {
-    	"method": "ApierV1.SetBalance",
+    	"method": "APIerSv1.SetBalance",
     	"params": [{
     		"Tenant": "cgrates.org",
     		"Account": "1003",
@@ -56,7 +56,7 @@
 ::
 
     {
-    	"method": "ApierV1.AddBalance",
+    	"method": "APIerSv1.AddBalance",
     	"params": [{
     		"Tenant": "cgrates.org",
     		"Account": "1003",
@@ -99,7 +99,7 @@
 ::
 
     {
-    	"method": "ApierV1.DebitBalance",
+    	"method": "APIerSv1.DebitBalance",
     	"params": [{
     		"Tenant": "cgrates.org",
     		"Account": "1003",
@@ -132,7 +132,7 @@
 3.4 Get Remaining Balance
 -------------------------
 
-Sum of BalanceMap.Value resulted from ApierV2.GetAccounts request
+Sum of BalanceMap.Value resulted from APIerSv2.GetAccounts request
 
 
 3.5 Debit Air Time (TBV)
@@ -247,7 +247,7 @@ Sum of BalanceMap.Value resulted from ApierV2.GetAccounts request
 ::
 
     {
-    	"method": "ApierV1.SetBalance",
+    	"method": "APIerSv1.SetBalance",
     	"params": [{
     		"Tenant": "cgrates.org",
     		"Account": "1001",
@@ -291,7 +291,7 @@ Sum of BalanceMap.Value resulted from ApierV2.GetAccounts request
 ::
 
     {
-    	"method": "ApierV1.SetBalance",
+    	"method": "APIerSv1.SetBalance",
     	"params": [{
     		"Tenant": "cgrates.org",
     		"Account": "1001",

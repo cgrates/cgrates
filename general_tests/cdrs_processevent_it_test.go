@@ -116,7 +116,7 @@ func testV1CDRsRpcConn(t *testing.T) {
 
 func testV1CDRsLoadTariffPlanFromFolder(t *testing.T) {
 	var loadInst string
-	if err := pecdrsRpc.Call(utils.ApierV1LoadTariffPlanFromFolder,
+	if err := pecdrsRpc.Call(utils.APIerSv1LoadTariffPlanFromFolder,
 		&utils.AttrLoadTpFromFolder{FolderPath: path.Join(
 			*dataDir, "tariffplans", "testit")}, &loadInst); err != nil {
 		t.Error(err)
@@ -140,13 +140,13 @@ func testV1CDRsProcessEventAttrS(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := pecdrsRpc.Call(utils.ApierV1SetBalance, attrSetBalance, &reply); err != nil {
+	if err := pecdrsRpc.Call(utils.APIerSv1SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("received: %s", reply)
 	}
 	expectedVoice := 120000000000.0
-	if err := pecdrsRpc.Call(utils.ApierV2GetAccount, acntAttrs, &acnt); err != nil {
+	if err := pecdrsRpc.Call(utils.APIerSv2GetAccount, acntAttrs, &acnt); err != nil {
 		t.Error(err)
 	} else if rply := acnt.BalanceMap[utils.VOICE].GetTotalValue(); rply != expectedVoice {
 		t.Errorf("Expecting: %v, received: %v", expectedVoice, rply)
@@ -186,13 +186,13 @@ func testV1CDRsProcessEventAttrS(t *testing.T) {
 	}
 	alsPrf.Compile()
 	var result string
-	if err := pecdrsRpc.Call(utils.ApierV1SetAttributeProfile, alsPrf, &result); err != nil {
+	if err := pecdrsRpc.Call(utils.APIerSv1SetAttributeProfile, alsPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 	var replyAt *engine.AttributeProfile
-	if err := pecdrsRpc.Call(utils.ApierV1GetAttributeProfile, &utils.TenantIDWithArgDispatcher{
+	if err := pecdrsRpc.Call(utils.APIerSv1GetAttributeProfile, &utils.TenantIDWithArgDispatcher{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}}, &replyAt); err != nil {
 		t.Fatal(err)
 	}
@@ -434,7 +434,7 @@ func testV1CDRsProcessEventStore(t *testing.T) {
 
 func testV1CDRsProcessEventThreshold(t *testing.T) {
 	var reply string
-	if err := pecdrsRpc.Call(utils.ApierV2SetActions, &utils.AttrSetActions{
+	if err := pecdrsRpc.Call(utils.APIerSv2SetActions, &utils.AttrSetActions{
 		ActionsId: "ACT_LOG",
 		Actions: []*utils.TPAction{
 			&utils.TPAction{
@@ -447,7 +447,7 @@ func testV1CDRsProcessEventThreshold(t *testing.T) {
 	}, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error(err)
 	} else if reply != utils.OK {
-		t.Errorf("Calling ApierV2.SetActions received: %s", reply)
+		t.Errorf("Calling APIerSv2.SetActions received: %s", reply)
 	}
 	tPrfl := engine.ThresholdWithCache{
 		ThresholdProfile: &engine.ThresholdProfile{
@@ -463,7 +463,7 @@ func testV1CDRsProcessEventThreshold(t *testing.T) {
 			Async:     true,
 		},
 	}
-	if err := pecdrsRpc.Call(utils.ApierV1SetThresholdProfile, tPrfl, &reply); err != nil {
+	if err := pecdrsRpc.Call(utils.APIerSv1SetThresholdProfile, tPrfl, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
@@ -475,7 +475,7 @@ func testV1CDRsProcessEventThreshold(t *testing.T) {
 			utils.AllowNegative: true,
 		},
 	}
-	if err := pecdrsRpc.Call(utils.ApierV2SetAccount, attrSetAcnt, &reply); err != nil {
+	if err := pecdrsRpc.Call(utils.APIerSv2SetAccount, attrSetAcnt, &reply); err != nil {
 		t.Fatal(err)
 	}
 	attrs := &utils.AttrSetBalance{
@@ -488,7 +488,7 @@ func testV1CDRsProcessEventThreshold(t *testing.T) {
 			utils.Weight: 10.0,
 		},
 	}
-	if err := pecdrsRpc.Call(utils.ApierV2SetBalance, attrs, &reply); err != nil {
+	if err := pecdrsRpc.Call(utils.APIerSv2SetBalance, attrs, &reply); err != nil {
 		t.Fatal(err)
 	}
 	args := &engine.ArgV1ProcessEvent{
@@ -537,7 +537,7 @@ func testV1CDRsProcessEventThreshold(t *testing.T) {
 		Account: "1005"}
 	time.Sleep(50 * time.Millisecond)
 	expectedVoice := 10.0
-	if err := pecdrsRpc.Call(utils.ApierV2GetAccount, acntAttrs, &acnt); err != nil {
+	if err := pecdrsRpc.Call(utils.APIerSv2GetAccount, acntAttrs, &acnt); err != nil {
 		t.Error(err)
 	} else if rply := acnt.BalanceMap[utils.VOICE].GetTotalValue(); rply != expectedVoice {
 		t.Errorf("Expecting: %v, received: %v", expectedVoice, rply)

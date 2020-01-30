@@ -23,7 +23,7 @@ import (
 )
 
 // Creates a new SharedGroups profile within a tariff plan
-func (self *ApierV1) SetTPSharedGroups(attrs utils.TPSharedGroups, reply *string) error {
+func (self *APIerSv1) SetTPSharedGroups(attrs utils.TPSharedGroups, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ID", "SharedGroups"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -40,7 +40,7 @@ type AttrGetTPSharedGroups struct {
 }
 
 // Queries specific SharedGroup on tariff plan
-func (self *ApierV1) GetTPSharedGroups(attrs AttrGetTPSharedGroups, reply *utils.TPSharedGroups) error {
+func (self *APIerSv1) GetTPSharedGroups(attrs AttrGetTPSharedGroups, reply *utils.TPSharedGroups) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -61,7 +61,7 @@ type AttrGetTPSharedGroupIds struct {
 }
 
 // Queries SharedGroups identities on specific tariff plan.
-func (self *ApierV1) GetTPSharedGroupIds(attrs AttrGetTPSharedGroupIds, reply *[]string) error {
+func (self *APIerSv1) GetTPSharedGroupIds(attrs AttrGetTPSharedGroupIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -78,7 +78,7 @@ func (self *ApierV1) GetTPSharedGroupIds(attrs AttrGetTPSharedGroupIds, reply *[
 }
 
 // Removes specific SharedGroups on Tariff plan
-func (self *ApierV1) RemoveTPSharedGroups(attrs AttrGetTPSharedGroups, reply *string) error {
+func (self *APIerSv1) RemoveTPSharedGroups(attrs AttrGetTPSharedGroups, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

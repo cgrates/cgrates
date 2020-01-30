@@ -225,7 +225,7 @@ func testDspChcGetItemIDs(t *testing.T) {
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.CacheSv1GetItemIDs, argsAPI, &rcvKeys); err != nil {
-		t.Fatalf("Got error on ApierV1.GetCacheStats: %s ", err.Error())
+		t.Fatalf("Got error on APIerSv1.GetCacheStats: %s ", err.Error())
 	}
 	sort.Strings(rcvKeys)
 	if !reflect.DeepEqual(expKeys, rcvKeys) {

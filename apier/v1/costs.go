@@ -35,7 +35,7 @@ type AttrGetCost struct {
 	*utils.ArgDispatcher
 }
 
-func (apier *ApierV1) GetCost(attrs AttrGetCost, ec *engine.EventCost) error {
+func (apier *APIerSv1) GetCost(attrs AttrGetCost, ec *engine.EventCost) error {
 	usage, err := utils.ParseDurationWithNanosecs(attrs.Usage)
 	if err != nil {
 		return err
@@ -74,7 +74,7 @@ type AttrGetDataCost struct {
 	*utils.ArgDispatcher
 }
 
-func (apier *ApierV1) GetDataCost(attrs AttrGetDataCost, reply *engine.DataCost) error {
+func (apier *APIerSv1) GetDataCost(attrs AttrGetDataCost, reply *engine.DataCost) error {
 	aTime, err := utils.ParseTimeDetectLayout(attrs.AnswerTime,
 		apier.Config.GeneralCfg().DefaultTimezone)
 	if err != nil {

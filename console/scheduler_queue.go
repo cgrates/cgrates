@@ -26,7 +26,7 @@ import (
 func init() {
 	c := &CmdGetScheduledActions{
 		name:      "scheduler_queue",
-		rpcMethod: utils.ApierV1GetScheduledActions,
+		rpcMethod: utils.APIerSv1GetScheduledActions,
 		rpcParams: &scheduler.ArgsGetScheduledActions{},
 	}
 	commands[c.Name()] = c

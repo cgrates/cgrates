@@ -143,7 +143,7 @@ func testSessionSv1ItTPFromFolder(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{
 		FolderPath: path.Join(*dataDir, "tariffplans", "testit")}
 	var loadInst utils.LoadInstance
-	if err := sSApierRpc2.Call(utils.ApierV2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
+	if err := sSApierRpc2.Call(utils.APIerSv2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(500 * time.Millisecond)
@@ -165,7 +165,7 @@ func testSessionSv1ItGetThreshold(t *testing.T) {
 		Async:     false,
 	}
 	var reply *engine.ThresholdProfile
-	if err := sSApierRpc2.Call(utils.ApierV1GetThresholdProfile,
+	if err := sSApierRpc2.Call(utils.APIerSv1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org",
 			ID: "THD_ACNT_1001"}, &reply); err != nil {
 		t.Error(err)
@@ -188,7 +188,7 @@ func testSessionSv1ItGetThreshold(t *testing.T) {
 	// Uuid will be generated
 	// so we will compare ID from Account and Value from BalanceMap
 	var reply2 *engine.Account
-	if err := sSApierRpc2.Call(utils.ApierV2GetAccount,
+	if err := sSApierRpc2.Call(utils.APIerSv2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org",
 			Account: "1001"}, &reply2); err != nil {
 		t.Error(err)
@@ -247,7 +247,7 @@ func testSessionSv1ItAuth(t *testing.T) {
 	// Uuid will be generated
 	// so we will compare ID from Account and Value from BalanceMap
 	var reply *engine.Account
-	if err := sSApierRpc2.Call(utils.ApierV2GetAccount,
+	if err := sSApierRpc2.Call(utils.APIerSv2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org",
 			Account: "1001"}, &reply); err != nil {
 		t.Error(err)
@@ -310,7 +310,7 @@ func testSessionSv1ItInitiateSession(t *testing.T) {
 	// Uuid will be generated
 	// so we will compare ID from Account and Value from BalanceMap
 	var reply *engine.Account
-	if err := sSApierRpc2.Call(utils.ApierV2GetAccount,
+	if err := sSApierRpc2.Call(utils.APIerSv2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org",
 			Account: "1001"}, &reply); err != nil {
 		t.Error(err)
@@ -367,7 +367,7 @@ func testSessionSv1ItTerminateSession(t *testing.T) {
 	// Uuid will be generated
 	// so we will compare ID from Account and Value from BalanceMap
 	var reply2 *engine.Account
-	if err := sSApierRpc2.Call(utils.ApierV2GetAccount,
+	if err := sSApierRpc2.Call(utils.APIerSv2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org",
 			Account: "1001"}, &reply2); err != nil {
 		t.Error(err)
@@ -509,7 +509,7 @@ func testSessionSv1ItTerminateNotFoundThreshold(t *testing.T) {
 
 func testSessionSv1ItAuthNotFoundThresholdAndStats(t *testing.T) {
 	var resp string
-	if err := sSApierRpc2.Call(utils.ApierV1RemoveStatQueueProfile,
+	if err := sSApierRpc2.Call(utils.APIerSv1RemoveStatQueueProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "Stat_2"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {

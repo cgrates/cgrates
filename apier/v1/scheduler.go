@@ -100,7 +100,7 @@ import (
 ]
 */
 
-func (self *ApierV1) GetScheduledActions(args scheduler.ArgsGetScheduledActions, reply *[]*scheduler.ScheduledAction) error {
+func (self *APIerSv1) GetScheduledActions(args scheduler.ArgsGetScheduledActions, reply *[]*scheduler.ScheduledAction) error {
 	sched := self.SchedulerService.GetScheduler()
 	if sched == nil {
 		return errors.New(utils.SchedulerNotRunningCaps)
@@ -118,7 +118,7 @@ type AttrsExecuteScheduledActions struct {
 	TimeStart, TimeEnd time.Time // replay the action timings between the two dates
 }
 
-func (self *ApierV1) ExecuteScheduledActions(attr AttrsExecuteScheduledActions, reply *string) error {
+func (self *APIerSv1) ExecuteScheduledActions(attr AttrsExecuteScheduledActions, reply *string) error {
 	if attr.ActionPlanID != "" { // execute by ActionPlanID
 		apl, err := self.DataManager.GetActionPlan(attr.ActionPlanID, false, utils.NonTransactional)
 		if err != nil {

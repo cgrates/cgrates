@@ -119,7 +119,7 @@ func testSessionsItApierRpcConn(t *testing.T) {
 func testSessionsItTPFromFolder(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
 	var loadInst utils.LoadInstance
-	if err := sItRPC.Call(utils.ApierV2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
+	if err := sItRPC.Call(utils.APIerSv2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
@@ -129,7 +129,7 @@ func testSessionsItTerminatUnexist(t *testing.T) {
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	eAcntVal := 10.0
-	if err := sItRPC.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
+	if err := sItRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
@@ -166,7 +166,7 @@ func testSessionsItTerminatUnexist(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
 
 	eAcntVal = 9.299800
-	if err := sItRPC.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
+	if err := sItRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
@@ -183,7 +183,7 @@ func testSessionsItTerminatUnexist(t *testing.T) {
 		DestinationPrefixes: []string{"1002"},
 		RunIDs:              []string{utils.MetaDefault},
 	}
-	if err := sItRPC.Call(utils.ApierV2GetCDRs, req, &cdrs); err != nil {
+	if err := sItRPC.Call(utils.APIerSv2GetCDRs, req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Errorf("Unexpected number of CDRs returned: %v \n cdrs=%s", len(cdrs), utils.ToJSON(cdrs))
@@ -202,7 +202,7 @@ func testSessionsItUpdateUnexist(t *testing.T) {
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	eAcntVal := 9.299800
-	if err := sItRPC.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
+	if err := sItRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
@@ -243,7 +243,7 @@ func testSessionsItUpdateUnexist(t *testing.T) {
 	time.Sleep(10 * time.Millisecond)
 
 	eAcntVal = 8.582900
-	if err := sItRPC.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
+	if err := sItRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
@@ -382,7 +382,7 @@ func testSessionsItEventCostCompressing(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := sItRPC.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {
+	if err := sItRPC.Call(utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
@@ -463,7 +463,7 @@ func testSessionsItEventCostCompressing(t *testing.T) {
 	time.Sleep(20 * time.Millisecond)
 	cgrID := utils.Sha1("TestSessionsItEventCostCompressing", "")
 	var ec *engine.EventCost
-	if err := sItRPC.Call(utils.ApierV1GetEventCost,
+	if err := sItRPC.Call(utils.APIerSv1GetEventCost,
 		utils.AttrGetCallCost{CgrId: cgrID, RunId: utils.MetaDefault},
 		&ec); err != nil {
 		t.Fatal(err)

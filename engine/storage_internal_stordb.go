@@ -1541,7 +1541,7 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 				continue
 			}
 		}
-		if filter.AnswerTimeStart != nil && !filter.AnswerTimeStart.IsZero() { // With IsZero we keep backwards compatible with ApierV1
+		if filter.AnswerTimeStart != nil && !filter.AnswerTimeStart.IsZero() { // With IsZero we keep backwards compatible with APIerSv1
 			if cdr.AnswerTime.Before(*filter.AnswerTimeStart) {
 				continue
 			}

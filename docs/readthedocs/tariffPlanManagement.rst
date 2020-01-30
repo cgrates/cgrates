@@ -20,7 +20,7 @@
 ::
 
     {
-    	"method": "ApierV1.GetCost",
+    	"method": "APIerSv1.GetCost",
     	"params": [{
     		"Tenant": "cgrates.org",
     		"Category": "call",

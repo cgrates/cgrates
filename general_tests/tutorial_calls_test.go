@@ -251,7 +251,7 @@ func testCallRpcConn(t *testing.T) {
 func testCallLoadTariffPlanFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
-	if err := tutorialCallsRpc.Call(utils.ApierV1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	if err := tutorialCallsRpc.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
@@ -261,24 +261,24 @@ func testCallLoadTariffPlanFromFolder(t *testing.T) {
 func testCallAccountsBefore(t *testing.T) {
 	var reply *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
-	if err := tutorialCallsRpc.Call(utils.ApierV2GetAccount, attrs, &reply); err != nil {
-		t.Error("Got error on ApierV2.GetAccount: ", err.Error())
+	if err := tutorialCallsRpc.Call(utils.APIerSv2GetAccount, attrs, &reply); err != nil {
+		t.Error("Got error on APIerSv2.GetAccount: ", err.Error())
 	} else if reply.BalanceMap[utils.MONETARY].GetTotalValue() != 10.0 {
-		t.Errorf("Calling ApierV1.GetBalance received: %f", reply.BalanceMap[utils.MONETARY].GetTotalValue())
+		t.Errorf("Calling APIerSv1.GetBalance received: %f", reply.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
 	var reply2 *engine.Account
 	attrs2 := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1002"}
-	if err := tutorialCallsRpc.Call(utils.ApierV2GetAccount, attrs2, &reply2); err != nil {
-		t.Error("Got error on ApierV2.GetAccount: ", err.Error())
+	if err := tutorialCallsRpc.Call(utils.APIerSv2GetAccount, attrs2, &reply2); err != nil {
+		t.Error("Got error on APIerSv2.GetAccount: ", err.Error())
 	} else if reply2.BalanceMap[utils.MONETARY].GetTotalValue() != 10.0 {
-		t.Errorf("Calling ApierV1.GetBalance received: %f", reply2.BalanceMap[utils.MONETARY].GetTotalValue())
+		t.Errorf("Calling APIerSv1.GetBalance received: %f", reply2.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
 	var reply3 *engine.Account
 	attrs3 := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1003"}
-	if err := tutorialCallsRpc.Call(utils.ApierV2GetAccount, attrs3, &reply3); err != nil {
-		t.Error("Got error on ApierV2.GetAccount: ", err.Error())
+	if err := tutorialCallsRpc.Call(utils.APIerSv2GetAccount, attrs3, &reply3); err != nil {
+		t.Error("Got error on APIerSv2.GetAccount: ", err.Error())
 	} else if reply3.BalanceMap[utils.MONETARY].GetTotalValue() != 10.0 {
-		t.Errorf("Calling ApierV1.GetBalance received: %f", reply3.BalanceMap[utils.MONETARY].GetTotalValue())
+		t.Errorf("Calling APIerSv1.GetBalance received: %f", reply3.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
 }
 
@@ -476,7 +476,7 @@ func testCallCheckResourceAllocation(t *testing.T) {
 func testCallAccount1001(t *testing.T) {
 	var reply *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
-	if err := tutorialCallsRpc.Call(utils.ApierV2GetAccount, attrs, &reply); err != nil {
+	if err := tutorialCallsRpc.Call(utils.APIerSv2GetAccount, attrs, &reply); err != nil {
 		t.Error(err.Error())
 	} else if reply.BalanceMap[utils.MONETARY].GetTotalValue() == 10.0 { // Make sure we debitted
 		t.Errorf("Expected: 10, received: %+v", reply.BalanceMap[utils.MONETARY].GetTotalValue())
@@ -489,7 +489,7 @@ func testCallAccount1001(t *testing.T) {
 func testCall1001Cdrs(t *testing.T) {
 	var reply []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault}, Accounts: []string{"1001"}}
-	if err := tutorialCallsRpc.Call(utils.ApierV2GetCDRs, req, &reply); err != nil {
+	if err := tutorialCallsRpc.Call(utils.APIerSv2GetCDRs, req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 2 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
@@ -530,7 +530,7 @@ func testCall1002Cdrs(t *testing.T) {
 	var reply []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault},
 		Accounts: []string{"1002"}, DestinationPrefixes: []string{"1001"}}
-	if err := tutorialCallsRpc.Call(utils.ApierV2GetCDRs, req, &reply); err != nil {
+	if err := tutorialCallsRpc.Call(utils.APIerSv2GetCDRs, req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
@@ -556,7 +556,7 @@ func testCall1003Cdrs(t *testing.T) {
 	var reply []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault},
 		Accounts: []string{"1003"}, DestinationPrefixes: []string{"1001"}}
-	if err := tutorialCallsRpc.Call(utils.ApierV2GetCDRs, req, &reply); err != nil {
+	if err := tutorialCallsRpc.Call(utils.APIerSv2GetCDRs, req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 2 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
@@ -779,7 +779,7 @@ func testCallSyncSessions(t *testing.T) {
 		RunIDs:   []string{utils.MetaDefault},
 		Accounts: []string{"1001"},
 	}
-	if err := tutorialCallsRpc.Call(utils.ApierV2GetCDRs, req, &rplCdrs); err != nil {
+	if err := tutorialCallsRpc.Call(utils.APIerSv2GetCDRs, req, &rplCdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(rplCdrs) != numberOfCDR { // cdr from sync session + cdr from before
 		t.Fatal("Unexpected number of CDRs returned: ", len(rplCdrs), utils.ToJSON(rplCdrs))

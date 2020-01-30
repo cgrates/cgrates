@@ -17,7 +17,7 @@ Following steps will cover use-case "User Life cycle"
 ::
 
     {
-    	"method": "ApierV2.SetAccount",
+    	"method": "APIerSv2.SetAccount",
     	"params": [{
     		"Tenant": "cgrates.org",
     		"Account": "1003",
@@ -49,7 +49,7 @@ Following steps will cover use-case "User Life cycle"
 ::
 
     {
-    	"method": "ApierV2.GetAccounts",
+    	"method": "APIerSv2.GetAccounts",
     	"params": [{
     		"Tenant": "cgrates.org",
     		"AccountIds": ["1003"],
@@ -308,7 +308,7 @@ Following steps will cover use-case "User Life cycle"
 ::
 
     {
-    	"method": "ApierV1.RemoveAccount",
+    	"method": "APIerSv1.RemoveAccount",
     	"params": [{
     		"Tenant": "cgrates.org",
     		"Account": "1003",
@@ -468,7 +468,7 @@ Returns a list of all ActionPlans defined on user accounts:
 ::
 
    {
-   	"method": "ApierV1.GetActionPlan",
+   	"method": "APIerSv1.GetActionPlan",
    	"params": [{
    		"ID": ""
    	}],
@@ -657,7 +657,7 @@ Returns a list of accounts where ActionPlan for "PACKAGE_10" is allocated:
 ::
 
    {
-   	"method": "ApierV1.GetActionPlan",
+   	"method": "APIerSv1.GetActionPlan",
    	"params": [{
    		"ID": "PACKAGE_10"
    	}],

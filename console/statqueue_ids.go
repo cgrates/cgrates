@@ -25,7 +25,7 @@ import (
 func init() {
 	c := &CmdGetStatQueueIDs{
 		name:      "statqueue_ids",
-		rpcMethod: utils.ApierV1GetStatQueueProfileIDs,
+		rpcMethod: utils.APIerSv1GetStatQueueProfileIDs,
 		rpcParams: &utils.TenantArgWithPaginator{},
 	}
 	commands[c.Name()] = c

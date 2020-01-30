@@ -442,7 +442,7 @@ func (fS *FilterS) getFieldNameDataProvider(initialDP config.DataProvider,
 			return nil, fmt.Errorf("invalid fieldname <%s>", fieldName)
 		}
 		var account *Account
-		if err = fS.connMgr.Call(fS.cfg.FilterSCfg().RALsConns, nil, utils.ApierV2GetAccount,
+		if err = fS.connMgr.Call(fS.cfg.FilterSCfg().RALsConns, nil, utils.APIerSv2GetAccount,
 			&utils.AttrGetAccount{Tenant: tenant, Account: splitFldName[1]}, &account); err != nil {
 			return
 		}
@@ -517,7 +517,7 @@ func (fS *FilterS) getFieldValueDataProvider(initialDP config.DataProvider,
 			return nil, fmt.Errorf("invalid fieldname <%s>", fieldValue)
 		}
 		var account *Account
-		if err = fS.connMgr.Call(fS.cfg.FilterSCfg().RALsConns, nil, utils.ApierV2GetAccount,
+		if err = fS.connMgr.Call(fS.cfg.FilterSCfg().RALsConns, nil, utils.APIerSv2GetAccount,
 			&utils.AttrGetAccount{Tenant: tenant, Account: splitFldName[1]}, &account); err != nil {
 			return
 		}

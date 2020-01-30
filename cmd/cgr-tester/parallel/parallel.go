@@ -35,7 +35,7 @@ func main() {
 	for i := 1; i < 1002; i++ {
 		go func(index int) {
 			wg.Add(1)
-			resp, err := http.Post("http://localhost:2080/jsonrpc", "application/json", bytes.NewBuffer([]byte(fmt.Sprintf(`{"method": "ApierV1.SetAccount","params": [{"Tenant":"reglo","Account":"100%d","ActionPlanId":"PACKAGE_NEW_FOR795", "ReloadScheduler":false}], "id":%d}`, index, index))))
+			resp, err := http.Post("http://localhost:2080/jsonrpc", "application/json", bytes.NewBuffer([]byte(fmt.Sprintf(`{"method": "APIerSv1.SetAccount","params": [{"Tenant":"reglo","Account":"100%d","ActionPlanId":"PACKAGE_NEW_FOR795", "ReloadScheduler":false}], "id":%d}`, index, index))))
 			if err != nil {
 				log.Print("Post error: ", err)
 			}
@@ -49,7 +49,7 @@ func main() {
 	}
 	wg.Wait()
 	for index := 1; index < 1002; index++ {
-		resp, err := http.Post("http://localhost:2080/jsonrpc", "application/json", bytes.NewBuffer([]byte(fmt.Sprintf(`{"method": "%s","params": [{"Tenant":"reglo","Account":"100%d"}], "id":%d}`, utils.ApierV1GetAccountActionPlan, index, index))))
+		resp, err := http.Post("http://localhost:2080/jsonrpc", "application/json", bytes.NewBuffer([]byte(fmt.Sprintf(`{"method": "%s","params": [{"Tenant":"reglo","Account":"100%d"}], "id":%d}`, utils.APIerSv1GetAccountActionPlan, index, index))))
 		if err != nil {
 			log.Print("Post error: ", err)
 		}

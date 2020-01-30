@@ -148,13 +148,13 @@ func testRedisSentinelSetGetAttribute(t *testing.T) {
 	}
 	alsPrf.Compile()
 	var result string
-	if err := sentinelRPC.Call(utils.ApierV1SetAttributeProfile, alsPrf, &result); err != nil {
+	if err := sentinelRPC.Call(utils.APIerSv1SetAttributeProfile, alsPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 	var reply *engine.AttributeProfile
-	if err := sentinelRPC.Call(utils.ApierV1GetAttributeProfile,
+	if err := sentinelRPC.Call(utils.APIerSv1GetAttributeProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err != nil {
 		t.Error(err)
 	}
@@ -186,7 +186,7 @@ func testRedisSentinelInsertion(t *testing.T) {
 	var result string
 	addFunc := func(t *testing.T, nrFail *int) {
 		alsPrf.ID = id
-		if err := sentinelRPC.Call(utils.ApierV1SetAttributeProfile, alsPrf, &result); err != nil {
+		if err := sentinelRPC.Call(utils.APIerSv1SetAttributeProfile, alsPrf, &result); err != nil {
 			if err.Error() == "SERVER_ERROR: No sentinels active" {
 				*nrFail = *nrFail + 1
 			} else {
@@ -266,7 +266,7 @@ func testRedisSentinelGetAttrAfterFailover(t *testing.T) {
 	}
 	alsPrf.Compile()
 	var reply *engine.AttributeProfile
-	if err := sentinelRPC.Call(utils.ApierV1GetAttributeProfile,
+	if err := sentinelRPC.Call(utils.APIerSv1GetAttributeProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err != nil {
 		t.Error(err)
 	}

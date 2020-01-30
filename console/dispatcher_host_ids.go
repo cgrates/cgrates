@@ -25,7 +25,7 @@ import (
 func init() {
 	c := &CmdGetDispatcherHostIDs{
 		name:      "dispatcher_host_ids",
-		rpcMethod: utils.ApierV1GetDispatcherHostIDs,
+		rpcMethod: utils.APIerSv1GetDispatcherHostIDs,
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}

@@ -23,7 +23,7 @@ import (
 )
 
 // Creates a new ChargerProfile within a tariff plan
-func (self *ApierV1) SetTPCharger(attr *utils.TPChargerProfile, reply *string) error {
+func (self *APIerSv1) SetTPCharger(attr *utils.TPChargerProfile, reply *string) error {
 	if missing := utils.MissingStructFields(attr, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -35,7 +35,7 @@ func (self *ApierV1) SetTPCharger(attr *utils.TPChargerProfile, reply *string) e
 }
 
 // Queries specific ChargerProfile on Tariff plan
-func (self *ApierV1) GetTPCharger(attr *utils.TPTntID, reply *utils.TPChargerProfile) error {
+func (self *APIerSv1) GetTPCharger(attr *utils.TPTntID, reply *utils.TPChargerProfile) error {
 	if missing := utils.MissingStructFields(attr, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -56,7 +56,7 @@ type AttrGetTPChargerIds struct {
 }
 
 // Queries Charger identities on specific tariff plan.
-func (self *ApierV1) GetTPChargerIDs(attrs *AttrGetTPChargerIds, reply *[]string) error {
+func (self *APIerSv1) GetTPChargerIDs(attrs *AttrGetTPChargerIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -73,7 +73,7 @@ func (self *ApierV1) GetTPChargerIDs(attrs *AttrGetTPChargerIds, reply *[]string
 }
 
 // Removes specific ChargerProfile on Tariff plan
-func (self *ApierV1) RemoveTPCharger(attrs *utils.TPTntID, reply *string) error {
+func (self *APIerSv1) RemoveTPCharger(attrs *utils.TPTntID, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

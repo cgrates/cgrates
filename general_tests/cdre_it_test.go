@@ -110,7 +110,7 @@ func testCDRERpcConn(t *testing.T) {
 func testCDREGetCdrs(t *testing.T) {
 	var reply []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{}
-	if err := cdreRPC.Call(utils.ApierV1GetCDRs, req, &reply); err.Error() != utils.ErrNotFound.Error() {
+	if err := cdreRPC.Call(utils.APIerSv1GetCDRs, req, &reply); err.Error() != utils.ErrNotFound.Error() {
 		t.Error("Unexpected error: ", err.Error())
 	}
 }
@@ -125,7 +125,7 @@ func testCDREExportNotFound(t *testing.T) {
 		},
 		RPCCDRsFilter: utils.RPCCDRsFilter{},
 	}
-	if err := cdreRPC.Call(utils.ApierV1ExportCDRs, exportArgs,
+	if err := cdreRPC.Call(utils.APIerSv1ExportCDRs, exportArgs,
 		&replyExport); err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -172,7 +172,7 @@ func testCDREExport(t *testing.T) {
 		},
 		RPCCDRsFilter: utils.RPCCDRsFilter{},
 	}
-	if err := cdreRPC.Call(utils.ApierV1ExportCDRs, exportArgs, &replyExport); err != nil {
+	if err := cdreRPC.Call(utils.APIerSv1ExportCDRs, exportArgs, &replyExport); err != nil {
 		t.Error(err)
 	} else if replyExport.TotalRecords != 1 {
 		t.Errorf("Unexpected total records: %+v", replyExport.TotalRecords)

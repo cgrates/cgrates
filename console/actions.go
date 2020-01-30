@@ -27,7 +27,7 @@ import (
 func init() {
 	c := &CmdGetActions{
 		name:      "actions",
-		rpcMethod: utils.ApierV2GetActions,
+		rpcMethod: utils.APIerSv2GetActions,
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}

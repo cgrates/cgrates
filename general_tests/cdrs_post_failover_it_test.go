@@ -109,21 +109,21 @@ func testCDRsPostFailoverRpcConn(t *testing.T) {
 
 func testCDRsPostFailoverLoadTariffPlanFromFolder(t *testing.T) {
 	var loadInst utils.LoadInstance
-	if err := cdrsPostFailRpc.Call(utils.ApierV2LoadTariffPlanFromFolder,
+	if err := cdrsPostFailRpc.Call(utils.APIerSv2LoadTariffPlanFromFolder,
 		&utils.AttrLoadTpFromFolder{FolderPath: path.Join(
 			*dataDir, "tariffplans", "testit")}, &loadInst); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 	var resp string
-	if err := cdrsPostFailRpc.Call(utils.ApierV1RemoveChargerProfile,
+	if err := cdrsPostFailRpc.Call(utils.APIerSv1RemoveChargerProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "SupplierCharges"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
 	}
 	var reply *engine.ChargerProfile
-	if err := cdrsPostFailRpc.Call(utils.ApierV1GetChargerProfile,
+	if err := cdrsPostFailRpc.Call(utils.APIerSv1GetChargerProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "SupplierCharges"},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)

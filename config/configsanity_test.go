@@ -794,11 +794,11 @@ func TestConfigSanityAPIer(t *testing.T) {
 	cfg, _ = NewDefaultCGRConfig()
 	cfg.apier.AttributeSConns = []string{utils.MetaInternal}
 
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != "<AttributeS> not enabled but requested by <ApierV1> component." {
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != "<AttributeS> not enabled but requested by <APIerSv1> component." {
 		t.Error(err)
 	}
 	cfg.apier.AttributeSConns = []string{"test"}
-	expected := "<ApierV1> connection with id: <test> not defined"
+	expected := "<APIerSv1> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -806,11 +806,11 @@ func TestConfigSanityAPIer(t *testing.T) {
 	cfg.attributeSCfg.Enabled = true
 	cfg.apier.SchedulerConns = []string{utils.MetaInternal}
 
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != "<SchedulerS> not enabled but requested by <ApierV1> component." {
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != "<SchedulerS> not enabled but requested by <APIerSv1> component." {
 		t.Error(err)
 	}
 	cfg.apier.SchedulerConns = []string{"test"}
-	expected = "<ApierV1> connection with id: <test> not defined"
+	expected = "<APIerSv1> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}

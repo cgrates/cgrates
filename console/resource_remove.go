@@ -23,7 +23,7 @@ import "github.com/cgrates/cgrates/utils"
 func init() {
 	c := &CmdRemoveResource{
 		name:      "resource_remove",
-		rpcMethod: utils.ApierV1RemoveResourceProfile,
+		rpcMethod: utils.APIerSv1RemoveResourceProfile,
 		rpcParams: &utils.TenantIDWithCache{},
 	}
 	commands[c.Name()] = c

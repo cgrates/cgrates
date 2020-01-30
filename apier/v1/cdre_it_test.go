@@ -174,7 +174,7 @@ func testCDReExportCDRs(t *testing.T) {
 		Verbose: true,
 	}
 	var rply *RplExportedCDRs
-	if err := cdreRPC.Call(utils.ApierV1ExportCDRs, attr, &rply); err != nil {
+	if err := cdreRPC.Call(utils.APIerSv1ExportCDRs, attr, &rply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(rply.ExportedCGRIDs) != 2 {
 		t.Errorf("Unexpected number of CDR exported: %s ", utils.ToJSON(rply))
@@ -184,7 +184,7 @@ func testCDReExportCDRs(t *testing.T) {
 func testCDReFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
-	if err := cdreRPC.Call(utils.ApierV1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	if err := cdreRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(500 * time.Millisecond)
@@ -217,7 +217,7 @@ func testCDReProcessExternalCdr(t *testing.T) {
 	time.Sleep(50 * time.Millisecond)
 	var cdrs []*engine.ExternalCDR
 	args := utils.RPCCDRsFilter{OriginIDs: []string{"testextcdr1"}}
-	if err := cdreRPC.Call(utils.ApierV2GetCDRs, args, &cdrs); err != nil {
+	if err := cdreRPC.Call(utils.APIerSv2GetCDRs, args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Errorf("Unexpected number of CDRs returned: %v, cdrs=%s ", len(cdrs), utils.ToJSON(cdrs))
@@ -304,13 +304,13 @@ func testCDReAddAttributes(t *testing.T) {
 	}
 	alsPrf.Compile()
 	var result string
-	if err := cdreRPC.Call(utils.ApierV1SetAttributeProfile, alsPrf, &result); err != nil {
+	if err := cdreRPC.Call(utils.APIerSv1SetAttributeProfile, alsPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 	var reply *engine.AttributeProfile
-	if err := cdreRPC.Call(utils.ApierV1GetAttributeProfile,
+	if err := cdreRPC.Call(utils.APIerSv1GetAttributeProfile,
 		utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_CDRE"}}, &reply); err != nil {
 		t.Fatal(err)
 	}
@@ -328,7 +328,7 @@ func testCDReExportCDRsWithAttributes(t *testing.T) {
 		Verbose: true,
 	}
 	var rply *RplExportedCDRs
-	if err := cdreRPC.Call(utils.ApierV1ExportCDRs, attr, &rply); err != nil {
+	if err := cdreRPC.Call(utils.APIerSv1ExportCDRs, attr, &rply); err != nil {
 		t.Fatal("Unexpected error: ", err.Error())
 	} else if len(rply.ExportedCGRIDs) != 2 {
 		t.Errorf("Unexpected number of CDR exported: %s ", utils.ToJSON(rply))

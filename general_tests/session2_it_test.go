@@ -105,7 +105,7 @@ func testSes2ItRPCConn(t *testing.T) {
 func testSes2ItLoadFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
-	if err := ses2RPC.Call(utils.ApierV1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	if err := ses2RPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(500 * time.Millisecond)
@@ -123,7 +123,7 @@ func testSes2ItInitSession(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := ses2RPC.Call(utils.ApierV2SetBalance,
+	if err := ses2RPC.Call(utils.APIerSv2SetBalance,
 		attrSetBalance, &reply); err != nil {
 		t.Fatal(err)
 	}

@@ -24,7 +24,7 @@ import (
 )
 
 // Creates a new AccountActions profile within a tariff plan
-func (self *ApierV1) SetTPAccountActions(attrs utils.TPAccountActions, reply *string) error {
+func (self *APIerSv1) SetTPAccountActions(attrs utils.TPAccountActions, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs,
 		[]string{"TPid", "LoadId", "Tenant", "Account", "ActionPlanId"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -42,7 +42,7 @@ type AttrGetTPAccountActionsByLoadId struct {
 }
 
 // Queries specific AccountActions profile on tariff plan
-func (self *ApierV1) GetTPAccountActionsByLoadId(attrs utils.TPAccountActions, reply *[]*utils.TPAccountActions) error {
+func (self *APIerSv1) GetTPAccountActionsByLoadId(attrs utils.TPAccountActions, reply *[]*utils.TPAccountActions) error {
 	mndtryFlds := []string{"TPid", "LoadId"}
 	if len(attrs.Account) != 0 { // If account provided as filter, make all related fields mandatory
 		mndtryFlds = append(mndtryFlds, "Tenant", "Account")
@@ -67,7 +67,7 @@ type AttrGetTPAccountActions struct {
 }
 
 // Queries specific DerivedCharge on tariff plan
-func (self *ApierV1) GetTPAccountActions(attrs AttrGetTPAccountActions, reply *utils.TPAccountActions) error {
+func (self *APIerSv1) GetTPAccountActions(attrs AttrGetTPAccountActions, reply *utils.TPAccountActions) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "AccountActionsId"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -92,7 +92,7 @@ type AttrGetTPAccountActionIds struct {
 }
 
 // Queries AccountActions identities on specific tariff plan.
-func (self *ApierV1) GetTPAccountActionLoadIds(attrs AttrGetTPAccountActionIds, reply *[]string) error {
+func (self *APIerSv1) GetTPAccountActionLoadIds(attrs AttrGetTPAccountActionIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -109,7 +109,7 @@ func (self *ApierV1) GetTPAccountActionLoadIds(attrs AttrGetTPAccountActionIds, 
 }
 
 // Queries DerivedCharges identities on specific tariff plan.
-func (self *ApierV1) GetTPAccountActionIds(attrs AttrGetTPAccountActionIds, reply *[]string) error {
+func (self *APIerSv1) GetTPAccountActionIds(attrs AttrGetTPAccountActionIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -126,7 +126,7 @@ func (self *ApierV1) GetTPAccountActionIds(attrs AttrGetTPAccountActionIds, repl
 }
 
 // Removes specific AccountActions on Tariff plan
-func (self *ApierV1) RemoveTPAccountActions(attrs AttrGetTPAccountActions, reply *string) error {
+func (self *APIerSv1) RemoveTPAccountActions(attrs AttrGetTPAccountActions, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "LoadId", "Tenant", "Account"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

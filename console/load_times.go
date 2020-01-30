@@ -26,7 +26,7 @@ import (
 func init() {
 	c := &CmdLoadTimes{
 		name:      "get_load_times",
-		rpcMethod: utils.ApierV1GetLoadTimes,
+		rpcMethod: utils.APIerSv1GetLoadTimes,
 		rpcParams: &v1.LoadTimeArgs{},
 	}
 	commands[c.Name()] = c

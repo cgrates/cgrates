@@ -107,7 +107,7 @@ func testV1CDRsRpcConn(t *testing.T) {
 
 func testV1CDRsLoadTariffPlanFromFolder(t *testing.T) {
 	var loadInst string
-	if err := cdrsRpc.Call(utils.ApierV1LoadTariffPlanFromFolder,
+	if err := cdrsRpc.Call(utils.APIerSv1LoadTariffPlanFromFolder,
 		&utils.AttrLoadTpFromFolder{FolderPath: path.Join(
 			*dataDir, "tariffplans", "testit")}, &loadInst); err != nil {
 		t.Error(err)
@@ -131,7 +131,7 @@ func testV1CDRsProcessEventWithRefund(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := cdrsRpc.Call(utils.ApierV1SetBalance, attrSetBalance, &reply); err != nil {
+	if err := cdrsRpc.Call(utils.APIerSv1SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("received: %s", reply)
@@ -146,13 +146,13 @@ func testV1CDRsProcessEventWithRefund(t *testing.T) {
 			utils.Weight: 10,
 		},
 	}
-	if err := cdrsRpc.Call(utils.ApierV1SetBalance, attrSetBalance, &reply); err != nil {
+	if err := cdrsRpc.Call(utils.APIerSv1SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("received: <%s>", reply)
 	}
 	expectedVoice := 300000000000.0
-	if err := cdrsRpc.Call(utils.ApierV2GetAccount, acntAttrs, &acnt); err != nil {
+	if err := cdrsRpc.Call(utils.APIerSv2GetAccount, acntAttrs, &acnt); err != nil {
 		t.Error(err)
 	} else if rply := acnt.BalanceMap[utils.VOICE].GetTotalValue(); rply != expectedVoice {
 		t.Errorf("Expecting: %v, received: %v", expectedVoice, rply)
@@ -178,7 +178,7 @@ func testV1CDRsProcessEventWithRefund(t *testing.T) {
 		t.Error("Unexpected reply received: ", reply)
 	}
 	var cdrs []*engine.ExternalCDR
-	if err := cdrsRpc.Call(utils.ApierV1GetCDRs, utils.AttrGetCdrs{}, &cdrs); err != nil {
+	if err := cdrsRpc.Call(utils.APIerSv1GetCDRs, utils.AttrGetCdrs{}, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -187,7 +187,7 @@ func testV1CDRsProcessEventWithRefund(t *testing.T) {
 			t.Errorf("Unexpected cost for CDR: %f", cdrs[0].Cost)
 		}
 	}
-	if err := cdrsRpc.Call(utils.ApierV2GetAccount, acntAttrs, &acnt); err != nil {
+	if err := cdrsRpc.Call(utils.APIerSv2GetAccount, acntAttrs, &acnt); err != nil {
 		t.Error(err)
 	} else if blc1 := acnt.GetBalanceWithID(utils.VOICE, "BALANCE1"); blc1.Value != 0 {
 		t.Errorf("Balance1 is: %s", utils.ToIJSON(blc1))
@@ -198,7 +198,7 @@ func testV1CDRsProcessEventWithRefund(t *testing.T) {
 	if err := cdrsRpc.Call(utils.CDRsV1ProcessEvent, argsEv, &reply); err == nil {
 		t.Error("should receive error here")
 	}
-	if err := cdrsRpc.Call(utils.ApierV2GetAccount, acntAttrs, &acnt); err != nil {
+	if err := cdrsRpc.Call(utils.APIerSv2GetAccount, acntAttrs, &acnt); err != nil {
 		t.Error(err)
 	} else if blc1 := acnt.GetBalanceWithID(utils.VOICE, "BALANCE1"); blc1.Value != 0 {
 		t.Errorf("Balance1 is: %s", utils.ToIJSON(blc1))
@@ -225,7 +225,7 @@ func testV1CDRsProcessEventWithRefund(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
-	if err := cdrsRpc.Call(utils.ApierV2GetAccount, acntAttrs, &acnt); err != nil {
+	if err := cdrsRpc.Call(utils.APIerSv2GetAccount, acntAttrs, &acnt); err != nil {
 		t.Error(err)
 	} else if blc1 := acnt.GetBalanceWithID(utils.VOICE, "BALANCE1"); blc1.Value != 120000000000 { // refund is done after debit
 		t.Errorf("Balance1 is: %s", utils.ToIJSON(blc1))
@@ -252,14 +252,14 @@ func testV1CDRsRefundOutOfSessionCost(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := cdrsRpc.Call(utils.ApierV1SetBalance, attrSetBalance, &reply); err != nil {
+	if err := cdrsRpc.Call(utils.APIerSv1SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("received: %s", reply)
 	}
 
 	exp := 123.0
-	if err := cdrsRpc.Call(utils.ApierV2GetAccount, acntAttrs, &acnt); err != nil {
+	if err := cdrsRpc.Call(utils.APIerSv2GetAccount, acntAttrs, &acnt); err != nil {
 		t.Error(err)
 	} else if rply := acnt.BalanceMap[utils.MONETARY].GetTotalValue(); rply != exp {
 		t.Errorf("Expecting: %v, received: %v", exp, rply)
@@ -377,7 +377,7 @@ func testV1CDRsRefundOutOfSessionCost(t *testing.T) {
 	// Initial the balance was 123.0
 	// after refunc the balance become 123.0+2.3=125.3
 	exp = 124.0454
-	if err := cdrsRpc.Call(utils.ApierV2GetAccount, acntAttrs, &acnt); err != nil {
+	if err := cdrsRpc.Call(utils.APIerSv2GetAccount, acntAttrs, &acnt); err != nil {
 		t.Error(err)
 	} else if rply := acnt.BalanceMap[utils.MONETARY].GetTotalValue(); rply != exp {
 		t.Errorf("Expecting: %v, received: %v", exp, rply)
@@ -401,14 +401,14 @@ func testV1CDRsRefundCDR(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := cdrsRpc.Call(utils.ApierV1SetBalance, attrSetBalance, &reply); err != nil {
+	if err := cdrsRpc.Call(utils.APIerSv1SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("received: %s", reply)
 	}
 
 	exp := 123.0
-	if err := cdrsRpc.Call(utils.ApierV2GetAccount, acntAttrs, &acnt); err != nil {
+	if err := cdrsRpc.Call(utils.APIerSv2GetAccount, acntAttrs, &acnt); err != nil {
 		t.Error(err)
 	} else if rply := acnt.BalanceMap[utils.MONETARY].GetTotalValue(); rply != exp {
 		t.Errorf("Expecting: %v, received: %v", exp, rply)
@@ -510,7 +510,7 @@ func testV1CDRsRefundCDR(t *testing.T) {
 	// Initial the balance was 123.0
 	// after refund the balance become 123.0 + 2.3 = 125.3
 	exp = 125.3
-	if err := cdrsRpc.Call(utils.ApierV2GetAccount, acntAttrs, &acnt); err != nil {
+	if err := cdrsRpc.Call(utils.APIerSv2GetAccount, acntAttrs, &acnt); err != nil {
 		t.Error(err)
 	} else if rply := acnt.BalanceMap[utils.MONETARY].GetTotalValue(); rply != exp {
 		t.Errorf("Expecting: %v, received: %v", exp, rply)

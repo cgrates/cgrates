@@ -115,7 +115,7 @@ func testV1DataRpcConn(t *testing.T) {
 
 func testV1DataGetAccountBeforeSet(t *testing.T) {
 	var reply *engine.Account
-	if err := dataRpc.Call(utils.ApierV2GetAccount,
+	if err := dataRpc.Call(utils.APIerSv2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -125,7 +125,7 @@ func testV1DataGetAccountBeforeSet(t *testing.T) {
 func testV1DataLoadTarrifPlans(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testData")}
-	if err := dataRpc.Call(utils.ApierV1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	if err := dataRpc.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
@@ -146,7 +146,7 @@ func testV1DataDataDebitUsageWith10Kilo(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := dataRpc.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {
+	if err := dataRpc.Call(utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
@@ -154,7 +154,7 @@ func testV1DataDataDebitUsageWith10Kilo(t *testing.T) {
 
 	expected := 356000000.0
 	var acc *engine.Account
-	if err := dataRpc.Call(utils.ApierV2GetAccount,
+	if err := dataRpc.Call(utils.APIerSv2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "testV1DataDataCost"},
 		&acc); err != nil {
 		t.Error(err)
@@ -176,7 +176,7 @@ func testV1DataDataDebitUsageWith10Kilo(t *testing.T) {
 		AnswerTime:  time.Date(2013, 11, 7, 7, 42, 20, 0, time.UTC).String(),
 	}
 	tStart := time.Now()
-	if err := dataRpc.Call(utils.ApierV1DebitUsage,
+	if err := dataRpc.Call(utils.APIerSv1DebitUsage,
 		engine.UsageRecordWithArgDispatcher{UsageRecord: usageRecord}, &reply); err != nil {
 		t.Error(err)
 	}
@@ -185,7 +185,7 @@ func testV1DataDataDebitUsageWith10Kilo(t *testing.T) {
 	}
 
 	expected = 100000000.0
-	if err := dataRpc.Call(utils.ApierV2GetAccount,
+	if err := dataRpc.Call(utils.APIerSv2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "testV1DataDataCost"},
 		&acc); err != nil {
 		t.Error(err)
@@ -202,7 +202,7 @@ func testV1DataGetCostWith10Kilo(t *testing.T) {
 		Subject: "10kilo", AnswerTime: "*now", Usage: 256000000}
 	var rply *engine.DataCost
 	tStart := time.Now()
-	if err := dataRpc.Call(utils.ApierV1GetDataCost, attrs, &rply); err != nil {
+	if err := dataRpc.Call(utils.APIerSv1GetDataCost, attrs, &rply); err != nil {
 		t.Error("Unexpected nil error received: ", err.Error())
 	} else if rply.Cost != 25600.000000 {
 		t.Errorf("Unexpected cost received: %f", rply.Cost)
@@ -225,7 +225,7 @@ func testV1DataDebitBalanceWith10Kilo(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := dataRpc.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {
+	if err := dataRpc.Call(utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
@@ -233,7 +233,7 @@ func testV1DataDebitBalanceWith10Kilo(t *testing.T) {
 
 	expected := 356000000.0
 	var acc *engine.Account
-	if err := dataRpc.Call(utils.ApierV2GetAccount,
+	if err := dataRpc.Call(utils.APIerSv2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "testV1DataDebitBalance"},
 		&acc); err != nil {
 		t.Error(err)
@@ -244,7 +244,7 @@ func testV1DataDebitBalanceWith10Kilo(t *testing.T) {
 			expected, rply)
 	}
 	tStart := time.Now()
-	if err := dataRpc.Call(utils.ApierV1DebitBalance, &v1.AttrAddBalance{
+	if err := dataRpc.Call(utils.APIerSv1DebitBalance, &v1.AttrAddBalance{
 		Tenant:      "cgrates.org",
 		Account:     "testV1DataDebitBalance",
 		BalanceType: utils.DATA,
@@ -259,7 +259,7 @@ func testV1DataDebitBalanceWith10Kilo(t *testing.T) {
 	}
 
 	expected = 100000000.0
-	if err := dataRpc.Call(utils.ApierV2GetAccount,
+	if err := dataRpc.Call(utils.APIerSv2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "testV1DataDebitBalance"},
 		&acc); err != nil {
 		t.Error(err)
@@ -284,7 +284,7 @@ func testV1DataDataDebitUsage1G0(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := dataRpc.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {
+	if err := dataRpc.Call(utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
@@ -292,7 +292,7 @@ func testV1DataDataDebitUsage1G0(t *testing.T) {
 
 	expected := 1100000000.0
 	var acc *engine.Account
-	if err := dataRpc.Call(utils.ApierV2GetAccount,
+	if err := dataRpc.Call(utils.APIerSv2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "testV1DataDataDebitUsage1G0"},
 		&acc); err != nil {
 		t.Error(err)
@@ -314,7 +314,7 @@ func testV1DataDataDebitUsage1G0(t *testing.T) {
 		AnswerTime:  time.Date(2013, 11, 7, 7, 42, 20, 0, time.UTC).String(),
 	}
 	tStart := time.Now()
-	if err := dataRpc.Call(utils.ApierV1DebitUsage,
+	if err := dataRpc.Call(utils.APIerSv1DebitUsage,
 		engine.UsageRecordWithArgDispatcher{UsageRecord: usageRecord}, &reply); err != nil {
 		t.Error(err)
 	}
@@ -323,7 +323,7 @@ func testV1DataDataDebitUsage1G0(t *testing.T) {
 	}
 
 	expected = 100000000.0
-	if err := dataRpc.Call(utils.ApierV2GetAccount,
+	if err := dataRpc.Call(utils.APIerSv2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "testV1DataDataDebitUsage1G0"},
 		&acc); err != nil {
 		t.Error(err)
@@ -340,7 +340,7 @@ func testV1DataGetCost1G0(t *testing.T) {
 		Subject: "10kilo", AnswerTime: "*now", Usage: 1000000000}
 	var rply *engine.DataCost
 	tStart := time.Now()
-	if err := dataRpc.Call(utils.ApierV1GetDataCost, attrs, &rply); err != nil {
+	if err := dataRpc.Call(utils.APIerSv1GetDataCost, attrs, &rply); err != nil {
 		t.Error("Unexpected nil error received: ", err.Error())
 	} else if rply.Cost != 100000.000000 {
 		t.Errorf("Unexpected cost received: %f", rply.Cost)
@@ -363,7 +363,7 @@ func testV1DataDebitBalance1G0(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := dataRpc.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {
+	if err := dataRpc.Call(utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
@@ -371,7 +371,7 @@ func testV1DataDebitBalance1G0(t *testing.T) {
 
 	expected := 1100000000.0
 	var acc *engine.Account
-	if err := dataRpc.Call(utils.ApierV2GetAccount,
+	if err := dataRpc.Call(utils.APIerSv2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "testV1DataDebitBalance1G0"},
 		&acc); err != nil {
 		t.Error(err)
@@ -382,7 +382,7 @@ func testV1DataDebitBalance1G0(t *testing.T) {
 			expected, rply)
 	}
 	tStart := time.Now()
-	if err := dataRpc.Call(utils.ApierV1DebitBalance, &v1.AttrAddBalance{
+	if err := dataRpc.Call(utils.APIerSv1DebitBalance, &v1.AttrAddBalance{
 		Tenant:      "cgrates.org",
 		Account:     "testV1DataDebitBalance1G0",
 		BalanceType: utils.DATA,
@@ -397,7 +397,7 @@ func testV1DataDebitBalance1G0(t *testing.T) {
 	}
 
 	expected = 100000000.0
-	if err := dataRpc.Call(utils.ApierV2GetAccount,
+	if err := dataRpc.Call(utils.APIerSv2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "testV1DataDebitBalance1G0"},
 		&acc); err != nil {
 		t.Error(err)
@@ -422,7 +422,7 @@ func testV1DataInitSession(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := dataRpc.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {
+	if err := dataRpc.Call(utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
@@ -430,7 +430,7 @@ func testV1DataInitSession(t *testing.T) {
 
 	expected := 1100000000.0
 	var acc *engine.Account
-	if err := dataRpc.Call(utils.ApierV2GetAccount,
+	if err := dataRpc.Call(utils.APIerSv2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "testV1DataInitSession"},
 		&acc); err != nil {
 		t.Error(err)

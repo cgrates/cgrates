@@ -27,7 +27,7 @@ import (
 )
 
 // Returns MaxUsage (for calls in seconds), -1 for no limit
-func (self *ApierV1) GetMaxUsage(usageRecord engine.UsageRecordWithArgDispatcher, maxUsage *int64) error {
+func (self *APIerSv1) GetMaxUsage(usageRecord engine.UsageRecordWithArgDispatcher, maxUsage *int64) error {
 	if usageRecord.ToR == "" {
 		usageRecord.ToR = utils.VOICE
 	}

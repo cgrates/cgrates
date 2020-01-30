@@ -409,15 +409,15 @@ func main() {
 	internalSchedulerSChan := make(chan rpcclient.ClientConnector, 1)
 	internalRALsChan := make(chan rpcclient.ClientConnector, 1)
 	internalResponderChan := make(chan rpcclient.ClientConnector, 1)
-	internalAPIerV1Chan := make(chan rpcclient.ClientConnector, 1)
-	internalAPIerV2Chan := make(chan rpcclient.ClientConnector, 1)
+	internalAPIerSv1Chan := make(chan rpcclient.ClientConnector, 1)
+	internalAPIerSv2Chan := make(chan rpcclient.ClientConnector, 1)
 	internalLoaderSChan := make(chan rpcclient.ClientConnector, 1)
 
 	// initialize the connManager before creating the DMService
 	// because we need to pass the connection to it
 	connManager := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAnalyzer):       internalAnalyzerSChan,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier):          internalAPIerV1Chan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier):          internalAPIerSv1Chan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes):     internalAttributeSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches):         internalCacheSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs):           internalCDRServerChan,
@@ -490,10 +490,10 @@ func main() {
 		internalRALsChan, internalResponderChan,
 		exitChan, connManager)
 
-	apierV1 := services.NewApierV1Service(cfg, dmService, storDBService, filterSChan, server, schS, rals.GetResponderService(),
-		internalAPIerV1Chan, connManager)
+	APIerSv1 := services.NewAPIerSv1Service(cfg, dmService, storDBService, filterSChan, server, schS, rals.GetResponderService(),
+		internalAPIerSv1Chan, connManager)
 
-	apierV2 := services.NewApierV2Service(apierV1, cfg, server, internalAPIerV2Chan)
+	APIerSv2 := services.NewAPIerSv2Service(APIerSv1, cfg, server, internalAPIerSv2Chan)
 
 	cdrS := services.NewCDRServer(cfg, dmService, storDBService, filterSChan, server, internalCDRServerChan,
 		connManager)
@@ -505,7 +505,7 @@ func main() {
 	anz := services.NewAnalyzerService(cfg, server, exitChan, internalAnalyzerSChan)
 
 	srvManager.AddServices(attrS, chrS, tS, stS, reS, supS, schS, rals,
-		rals.GetResponder(), apierV1, apierV2, cdrS, smg,
+		rals.GetResponder(), APIerSv1, APIerSv2, cdrS, smg,
 		services.NewEventReaderService(cfg, filterSChan, exitChan, connManager),
 		services.NewDNSAgent(cfg, filterSChan, exitChan, connManager),
 		services.NewFreeswitchAgent(cfg, exitChan, connManager),
@@ -527,8 +527,8 @@ func main() {
 	engine.IntRPC = engine.NewRPCClientSet()
 	if cfg.DispatcherSCfg().Enabled {
 		engine.IntRPC.AddInternalRPCClient(utils.AnalyzerSv1, anz.GetIntenternalChan())
-		engine.IntRPC.AddInternalRPCClient(utils.ApierV1, apierV1.GetIntenternalChan())
-		engine.IntRPC.AddInternalRPCClient(utils.ApierV2, apierV2.GetIntenternalChan())
+		engine.IntRPC.AddInternalRPCClient(utils.APIerSv1, APIerSv1.GetIntenternalChan())
+		engine.IntRPC.AddInternalRPCClient(utils.APIerSv2, APIerSv2.GetIntenternalChan())
 		engine.IntRPC.AddInternalRPCClient(utils.AttributeSv1, attrS.GetIntenternalChan())
 		engine.IntRPC.AddInternalRPCClient(utils.CacheSv1, internalCacheSChan)
 		engine.IntRPC.AddInternalRPCClient(utils.CDRsV1, cdrS.GetIntenternalChan())

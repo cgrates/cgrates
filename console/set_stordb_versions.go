@@ -26,7 +26,7 @@ import (
 func init() {
 	c := &CmdSetStorDBVersions{
 		name:      "set_stordb_versions",
-		rpcMethod: utils.ApierV1SetStorDBVersions,
+		rpcMethod: utils.APIerSv1SetStorDBVersions,
 		rpcParams: &v1.SetVersionsArg{},
 	}
 	commands[c.Name()] = c

@@ -178,7 +178,7 @@ func testInternalRemoteITRPCConn(t *testing.T) {
 func testInternalRemoteLoadDataInEngineTwo(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
-	if err := engineTwoRPC.Call(utils.ApierV1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	if err := engineTwoRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(500 * time.Millisecond)
@@ -203,7 +203,7 @@ func testInternalRemoteITGetAccount(t *testing.T) {
 		Account: "1001",
 	}
 	// make sure account exist in engine2
-	if err := engineTwoRPC.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
+	if err := engineTwoRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.ID != expAcc.ID {
 		t.Errorf("expecting: %+v, received: %+v", expAcc.ID, acnt.ID)
@@ -211,7 +211,7 @@ func testInternalRemoteITGetAccount(t *testing.T) {
 		t.Errorf("unexpected number of balances received: %+v", utils.ToJSON(acnt))
 	}
 	// check the account in internal
-	if err := internalRPC.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
+	if err := internalRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.ID != expAcc.ID {
 		t.Errorf("expecting: %+v, received: %+v", expAcc.ID, acnt.ID)
@@ -223,7 +223,7 @@ func testInternalRemoteITGetAccount(t *testing.T) {
 		Tenant:  "cgrates.org",
 		Account: "nonexistAccount",
 	}
-	if err := internalRPC.Call(utils.ApierV2GetAccount, attrs, &acnt); err == nil ||
+	if err := internalRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expecting: %+v, received: %+v", utils.ErrNotFound, err)
 	}
@@ -250,7 +250,7 @@ func testInternalRemoteITGetAttribute(t *testing.T) {
 	}
 	alsPrf.Compile()
 	var reply *engine.AttributeProfile
-	if err := internalRPC.Call(utils.ApierV1GetAttributeProfile,
+	if err := internalRPC.Call(utils.APIerSv1GetAttributeProfile,
 		utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1001_SIMPLEAUTH"}}, &reply); err != nil {
 		t.Fatal(err)
 	}
@@ -292,7 +292,7 @@ func testInternalRemoteITGetThresholdProfile(t *testing.T) {
 			Async:     true,
 		},
 	}
-	if err := internalRPC.Call(utils.ApierV1GetThresholdProfile,
+	if err := internalRPC.Call(utils.APIerSv1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1001"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, reply) {
@@ -333,7 +333,7 @@ func testInternalRemoteITGetResourceProfile(t *testing.T) {
 		},
 	}
 	var reply *engine.ResourceProfile
-	if err := internalRPC.Call(utils.ApierV1GetResourceProfile,
+	if err := internalRPC.Call(utils.APIerSv1GetResourceProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: rlsPrf.ID}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, rlsPrf.ResourceProfile) {
@@ -390,7 +390,7 @@ func testInternalRemoteITGetStatQueueProfile(t *testing.T) {
 		ThresholdIDs: []string{utils.META_NONE},
 	}
 	var reply *engine.StatQueueProfile
-	if err := internalRPC.Call(utils.ApierV1GetStatQueueProfile,
+	if err := internalRPC.Call(utils.APIerSv1GetStatQueueProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "Stats2"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expStq, reply) && !reflect.DeepEqual(reply, expStq2) {
@@ -449,7 +449,7 @@ func testInternalRemoteITGetSupplier(t *testing.T) {
 		splPrf2.SortingParameters = nil
 	}
 
-	if err := internalRPC.Call(utils.ApierV1GetSupplierProfile,
+	if err := internalRPC.Call(utils.APIerSv1GetSupplierProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "SPL_ACNT_1001"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(splPrf, reply) && !reflect.DeepEqual(splPrf2, reply) {
@@ -473,7 +473,7 @@ func testInternalRemoteITGetFilter(t *testing.T) {
 		},
 	}
 	var reply *engine.Filter
-	if err := internalRPC.Call(utils.ApierV1GetFilter,
+	if err := internalRPC.Call(utils.APIerSv1GetFilter,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "FLTR_ACNT_1001"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expFltr, reply) {
@@ -483,7 +483,7 @@ func testInternalRemoteITGetFilter(t *testing.T) {
 
 func testInternalRemoteITGetRatingPlan(t *testing.T) {
 	var reply engine.RatingPlan
-	if err := internalRPC.Call(utils.ApierV1GetRatingPlan, "RP_1001", &reply); err != nil {
+	if err := internalRPC.Call(utils.APIerSv1GetRatingPlan, "RP_1001", &reply); err != nil {
 		t.Error(err.Error())
 	} else if reply.Id != "RP_1001" {
 		t.Errorf("Expected: %+v, received: %+v", "RP_1001", reply.Id)
@@ -507,7 +507,7 @@ func testInternalRemoteITGetRatingProfile(t *testing.T) {
 			},
 		},
 	}
-	if err := internalRPC.Call(utils.ApierV1GetRatingProfile, attrGetRatingPlan, &rpl); err != nil {
+	if err := internalRPC.Call(utils.APIerSv1GetRatingProfile, attrGetRatingPlan, &rpl); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rpl) {
 		t.Errorf("Expected: %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rpl))
@@ -521,8 +521,8 @@ func testInternalRemoteITGetAction(t *testing.T) {
 			BalanceDisabled: "false", ExpiryTime: utils.UNLIMITED, Weight: 10.0}}
 
 	var reply []*utils.TPAction
-	if err := internalRPC.Call(utils.ApierV1GetActions, "ACT_TOPUP_RST_10", &reply); err != nil {
-		t.Error("Got error on ApierV1.GetActions: ", err.Error())
+	if err := internalRPC.Call(utils.APIerSv1GetActions, "ACT_TOPUP_RST_10", &reply); err != nil {
+		t.Error("Got error on APIerSv1.GetActions: ", err.Error())
 	} else if !reflect.DeepEqual(expectActs, reply) {
 		t.Errorf("Expected: %v,\n received: %v", utils.ToJSON(expectActs), utils.ToJSON(reply))
 	}
@@ -535,7 +535,7 @@ func testInternalRemoteITGetActionPlan(t *testing.T) {
 		"cgrates.org:1002": true,
 		"cgrates.org:1003": true,
 	}
-	if err := internalRPC.Call(utils.ApierV1GetActionPlan,
+	if err := internalRPC.Call(utils.APIerSv1GetActionPlan,
 		AttrGetActionPlan{ID: "AP_PACKAGE_10"}, &aps); err != nil {
 		t.Error(err)
 	} else if len(aps) != 1 {
@@ -545,7 +545,7 @@ func testInternalRemoteITGetActionPlan(t *testing.T) {
 	} else if !reflect.DeepEqual(aps[0].AccountIDs, accIDsStrMp) {
 		t.Errorf("Expected: %v,\n received: %v", accIDsStrMp, aps[0].AccountIDs)
 	}
-	if err := internalRPC.Call(utils.ApierV1GetActionPlan,
+	if err := internalRPC.Call(utils.APIerSv1GetActionPlan,
 		AttrGetActionPlan{ID: utils.EmptyString}, &aps); err != nil {
 		t.Error(err)
 	} else if len(aps) != 1 {
@@ -559,7 +559,7 @@ func testInternalRemoteITGetActionPlan(t *testing.T) {
 
 func testInternalRemoteITGetAccountActionPlan(t *testing.T) {
 	var aap []*AccountActionTiming
-	if err := internalRPC.Call(utils.ApierV1GetAccountActionPlan,
+	if err := internalRPC.Call(utils.APIerSv1GetAccountActionPlan,
 		utils.TenantAccount{
 			Tenant:  "cgrates.org",
 			Account: "1001",
@@ -580,7 +580,7 @@ func testInternalRemoteITGetDestination(t *testing.T) {
 		Id:       "DST_1002",
 		Prefixes: []string{"1002"},
 	}
-	if err := internalRPC.Call(utils.ApierV1GetDestination, "DST_1002", &dst); err != nil {
+	if err := internalRPC.Call(utils.APIerSv1GetDestination, "DST_1002", &dst); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eDst, dst) {
 		t.Errorf("Expected: %v,\n received: %v", eDst, dst)
@@ -590,7 +590,7 @@ func testInternalRemoteITGetDestination(t *testing.T) {
 func testInternalRemoteITGetReverseDestination(t *testing.T) {
 	var ids []string
 	eIDs := []string{"DST_1002"}
-	if err := internalRPC.Call(utils.ApierV1GetReverseDestination, "1002", &ids); err != nil {
+	if err := internalRPC.Call(utils.APIerSv1GetReverseDestination, "1002", &ids); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eIDs, ids) {
 		t.Errorf("Expected: %v,\n received: %v", eIDs, ids)
@@ -600,7 +600,7 @@ func testInternalRemoteITGetReverseDestination(t *testing.T) {
 func testInternalReplicationSetThreshold(t *testing.T) {
 	var reply *engine.ThresholdProfile
 	var result string
-	if err := internalRPC.Call(utils.ApierV1GetThresholdProfile,
+	if err := internalRPC.Call(utils.APIerSv1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_Replication"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -609,7 +609,7 @@ func testInternalReplicationSetThreshold(t *testing.T) {
 	var indexes []string
 	expectedIDX := []string{"*string:~*req.Account:1001:THD_ACNT_1001",
 		"*string:~*req.Account:1002:THD_ACNT_1002"}
-	if err := engineTwoRPC.Call(utils.ApierV1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := engineTwoRPC.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaThresholds, Tenant: "cgrates.org", FilterType: utils.MetaString},
 		&indexes); err != nil {
 		t.Error(err)
@@ -620,7 +620,7 @@ func testInternalReplicationSetThreshold(t *testing.T) {
 			expectedIDX, utils.ToJSON(indexes))
 	}
 	//verify indexes on internal before adding new threshold profile
-	if err := internalRPC.Call(utils.ApierV1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := internalRPC.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaThresholds, Tenant: "cgrates.org", FilterType: utils.MetaString},
 		&indexes); err != nil {
 		t.Error(err)
@@ -647,13 +647,13 @@ func testInternalReplicationSetThreshold(t *testing.T) {
 			Async:     true,
 		},
 	}
-	if err := internalRPC.Call(utils.ApierV1SetThresholdProfile, tPrfl, &result); err != nil {
+	if err := internalRPC.Call(utils.APIerSv1SetThresholdProfile, tPrfl, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 	time.Sleep(50 * time.Millisecond)
-	if err := internalRPC.Call(utils.ApierV1GetThresholdProfile,
+	if err := internalRPC.Call(utils.APIerSv1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_Replication"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, reply) {
@@ -667,7 +667,7 @@ func testInternalReplicationSetThreshold(t *testing.T) {
 	}
 	// verify index on internal
 	sort.Strings(expectedIDX)
-	if err := internalRPC.Call(utils.ApierV1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := internalRPC.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaThresholds, Tenant: "cgrates.org", FilterType: utils.MetaString},
 		&indexes); err != nil {
 		t.Error(err)
@@ -678,7 +678,7 @@ func testInternalReplicationSetThreshold(t *testing.T) {
 			expectedIDX, utils.ToJSON(indexes))
 	}
 	// verify data on engine1
-	if err := engineOneRPC.Call(utils.ApierV1GetThresholdProfile,
+	if err := engineOneRPC.Call(utils.APIerSv1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_Replication"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, reply) {
@@ -690,7 +690,7 @@ func testInternalReplicationSetThreshold(t *testing.T) {
 		"*string:~*req.CustomField:CustomValue:THD_Replication",
 	}
 	// verify indexes on engine1 (should be the same as internal)
-	if err := engineOneRPC.Call(utils.ApierV1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := engineOneRPC.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaThresholds, Tenant: "cgrates.org", FilterType: utils.MetaString},
 		&indexes); err != nil {
 		t.Error(err)
@@ -701,7 +701,7 @@ func testInternalReplicationSetThreshold(t *testing.T) {
 			expectedIDX2, utils.ToJSON(indexes))
 	}
 	// verify data on engine2
-	if err := engineTwoRPC.Call(utils.ApierV1GetThresholdProfile,
+	if err := engineTwoRPC.Call(utils.APIerSv1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_Replication"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, reply) {
@@ -713,7 +713,7 @@ func testInternalReplicationSetThreshold(t *testing.T) {
 		"*string:~*req.CustomField:CustomValue:THD_Replication",
 	}
 	// check if indexes was created correctly on engine2
-	if err := engineTwoRPC.Call(utils.ApierV1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := engineTwoRPC.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaThresholds, Tenant: "cgrates.org", FilterType: utils.MetaString},
 		&indexes); err != nil {
 		t.Error(err)
@@ -784,7 +784,7 @@ func testInternalAccountBalanceOperations(t *testing.T) {
 			utils.ID: "testAccSetBalance",
 		},
 	}
-	if err := internalRPC.Call(utils.ApierV1SetBalance, attrs, &reply); err != nil {
+	if err := internalRPC.Call(utils.APIerSv1SetBalance, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(100 * time.Millisecond)
@@ -794,7 +794,7 @@ func testInternalAccountBalanceOperations(t *testing.T) {
 		Account: "testAccount1",
 	}
 	// verify account on engineOne
-	if err := engineOneRPC.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
+	if err := engineOneRPC.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
 	} else if len(acnt.BalanceMap[utils.MONETARY]) != 1 {
 		t.Errorf("Expecting: %+v, received: %+v",
@@ -805,7 +805,7 @@ func testInternalAccountBalanceOperations(t *testing.T) {
 	}
 
 	// verify account on engineTwo
-	if err := engineTwoRPC.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
+	if err := engineTwoRPC.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
 	} else if len(acnt.BalanceMap[utils.MONETARY]) != 1 {
 		t.Errorf("Expecting: %+v, received: %+v",
@@ -816,7 +816,7 @@ func testInternalAccountBalanceOperations(t *testing.T) {
 	}
 
 	// debit balance on internal and the account should be replicated to other engines
-	if err := internalRPC.Call(utils.ApierV1DebitBalance, &AttrAddBalance{
+	if err := internalRPC.Call(utils.APIerSv1DebitBalance, &AttrAddBalance{
 		Tenant:      "cgrates.org",
 		Account:     "testAccount1",
 		BalanceType: utils.MONETARY,
@@ -828,7 +828,7 @@ func testInternalAccountBalanceOperations(t *testing.T) {
 	}
 	time.Sleep(50 * time.Millisecond)
 	// verify debited account on engineOne
-	if err := engineOneRPC.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
+	if err := engineOneRPC.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
 	} else if len(acnt.BalanceMap[utils.MONETARY]) != 1 {
 		t.Errorf("Expecting: %+v, received: %+v",
@@ -839,7 +839,7 @@ func testInternalAccountBalanceOperations(t *testing.T) {
 	}
 
 	// verify debited account on engineTwo
-	if err := engineTwoRPC.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
+	if err := engineTwoRPC.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
 	} else if len(acnt.BalanceMap[utils.MONETARY]) != 1 {
 		t.Errorf("Expecting: %+v, received: %+v",
@@ -856,12 +856,12 @@ func testInternalAccountBalanceOperations(t *testing.T) {
 		Value:       12.765,
 	}
 	// add balance for the account on internal and this should be replicated to other engines
-	if err := internalRPC.Call(utils.ApierV1AddBalance, addBal, &reply); err != nil {
+	if err := internalRPC.Call(utils.APIerSv1AddBalance, addBal, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(50 * time.Millisecond)
 	// verify account on engineOne
-	if err := engineOneRPC.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
+	if err := engineOneRPC.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
 	} else if len(acnt.BalanceMap[utils.MONETARY]) != 1 {
 		t.Errorf("Expecting: %+v, received: %+v",
@@ -872,7 +872,7 @@ func testInternalAccountBalanceOperations(t *testing.T) {
 	}
 
 	// verify account on engineTwo
-	if err := engineTwoRPC.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
+	if err := engineTwoRPC.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
 	} else if len(acnt.BalanceMap[utils.MONETARY]) != 1 {
 		t.Errorf("Expecting: %+v, received: %+v",
@@ -887,7 +887,7 @@ func testInternalAccountBalanceOperations(t *testing.T) {
 func testInternalSetAccount(t *testing.T) {
 	var reply string
 
-	if err := internalRPC.Call(utils.ApierV1SetAccount,
+	if err := internalRPC.Call(utils.APIerSv1SetAccount,
 		utils.AttrSetAccount{
 			Tenant:          "cgrates.org",
 			Account:         "testSetAccount",
@@ -905,7 +905,7 @@ func testInternalSetAccount(t *testing.T) {
 		Account: "testSetAccount",
 	}
 	// verify account on engineOne
-	if err := engineOneRPC.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
+	if err := engineOneRPC.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
 	} else if len(acnt.BalanceMap[utils.MONETARY]) != 1 {
 		t.Errorf("Expecting: %+v, received: %+v",
@@ -916,7 +916,7 @@ func testInternalSetAccount(t *testing.T) {
 	}
 
 	// verify account on engineTwo
-	if err := engineTwoRPC.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
+	if err := engineTwoRPC.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
 	} else if len(acnt.BalanceMap[utils.MONETARY]) != 1 {
 		t.Errorf("Expecting: %+v, received: %+v",
@@ -954,20 +954,20 @@ func testInternalReplicateStats(t *testing.T) {
 		},
 	}
 
-	if err := internalRPC.Call(utils.ApierV1SetStatQueueProfile, statConfig, &reply); err != nil {
+	if err := internalRPC.Call(utils.APIerSv1SetStatQueueProfile, statConfig, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
 	}
 	var rcv *engine.StatQueueProfile
-	if err := engineOneRPC.Call(utils.ApierV1GetStatQueueProfile,
+	if err := engineOneRPC.Call(utils.APIerSv1GetStatQueueProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "StatsToReplicate"}, &rcv); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(statConfig.StatQueueProfile, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(statConfig.StatQueueProfile), utils.ToJSON(rcv))
 	}
 
-	if err := engineTwoRPC.Call(utils.ApierV1GetStatQueueProfile,
+	if err := engineTwoRPC.Call(utils.APIerSv1GetStatQueueProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "StatsToReplicate"}, &rcv); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(statConfig.StatQueueProfile, rcv) {

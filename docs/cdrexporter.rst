@@ -72,7 +72,7 @@ Principles behind exports:
 
  ::
 
-  rpc.call("ApierV1.ExportCsvCdrs",{"TimeStart":"1383823746","TimeEnd":"1383833746"} )
+  rpc.call("APIerSv1.ExportCsvCdrs",{"TimeStart":"1383823746","TimeEnd":"1383833746"} )
 
 - On each export call there will be a .csv format file generated using configured separator. Location of the export folder is definable inside *cgrates.cfg*.
 - File name of the export will appear like: *cdrs_$(timestamp).csv* where $(timestamp) will be replaced by unix timestamp of the server running the export process or requested via API call.

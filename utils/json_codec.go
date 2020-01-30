@@ -87,7 +87,7 @@ func (c *jsonServerCodec) ReadRequestHeader(r *rpc.Request) error {
 	if err := c.dec.Decode(&c.req); err != nil {
 		return err
 	}
-	// in case we get a request with ApierV1 or ApierV2 we redirect
+	// in case we get a request with APIerSv1 or APIerSv2 we redirect
 	// to Dispatcher to send it according to ArgDispatcher
 	if c.req.isApier = strings.HasPrefix(c.req.Method, ApierV); c.req.isApier {
 		r.ServiceMethod = DispatcherSv1Apier
@@ -115,8 +115,8 @@ func (c *jsonServerCodec) ReadRequestBody(x interface{}) error {
 	if c.req.Params == nil {
 		return errMissingParams
 	}
-	// following example from ReadRequestHeader in case we get ApierV1
-	// or ApierV2 we compose the parameters
+	// following example from ReadRequestHeader in case we get APIerSv1
+	// or APIerSv2 we compose the parameters
 	if c.req.isApier {
 		cx := x.(*MethodParameters)
 		cx.Method = c.req.Method

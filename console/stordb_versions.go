@@ -26,7 +26,7 @@ import (
 func init() {
 	c := &CmdGetStorDBVersions{
 		name:      "stordb_versions",
-		rpcMethod: utils.ApierV1GetStorDBVersions,
+		rpcMethod: utils.APIerSv1GetStorDBVersions,
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}

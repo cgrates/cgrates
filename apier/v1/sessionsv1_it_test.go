@@ -190,7 +190,7 @@ func testSSv1ItTPFromFolder(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{
 		FolderPath: path.Join(*dataDir, "tariffplans", "testit")}
 	var loadInst utils.LoadInstance
-	if err := sSApierRpc.Call(utils.ApierV2LoadTariffPlanFromFolder,
+	if err := sSApierRpc.Call(utils.APIerSv2LoadTariffPlanFromFolder,
 		attrs, &loadInst); err != nil {
 		t.Error(err)
 	}
@@ -737,7 +737,7 @@ func testSSv1ItForceUpdateSession(t *testing.T) {
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	eAcntVal := 9.55
-	if err := sSApierRpc.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
+	if err := sSApierRpc.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
@@ -807,7 +807,7 @@ func testSSv1ItForceUpdateSession(t *testing.T) {
 	}
 
 	eAcntVal = 9.4
-	if err := sSApierRpc.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
+	if err := sSApierRpc.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
@@ -824,7 +824,7 @@ func testSSv1ItForceUpdateSession(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	if err := sSApierRpc.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
+	if err := sSApierRpc.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal { // no monetary change bacause the sessin was terminated
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
@@ -879,7 +879,7 @@ func testSSv1ItDynamicDebit(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := sSApierRpc.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {
+	if err := sSApierRpc.Call(utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
@@ -890,7 +890,7 @@ func testSSv1ItDynamicDebit(t *testing.T) {
 		Account: attrSetBalance.Account,
 	}
 	eAcntVal := 2 * float64(time.Second)
-	if err := sSApierRpc.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
+	if err := sSApierRpc.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
 		t.Errorf("Expecting: %v, received: %v",
@@ -936,7 +936,7 @@ func testSSv1ItDynamicDebit(t *testing.T) {
 	}
 	time.Sleep(time.Millisecond)
 	eAcntVal -= float64(time.Millisecond) * 30 * 2 // 2 session
-	if err := sSApierRpc.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
+	if err := sSApierRpc.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
 		t.Errorf("Expecting: %v, received: %v",
@@ -944,7 +944,7 @@ func testSSv1ItDynamicDebit(t *testing.T) {
 	}
 
 	time.Sleep(10 * time.Millisecond)
-	if err := sSApierRpc.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
+	if err := sSApierRpc.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
 		t.Errorf("Expecting: %v, received: %v",
@@ -952,7 +952,7 @@ func testSSv1ItDynamicDebit(t *testing.T) {
 	}
 	time.Sleep(20 * time.Millisecond)
 	eAcntVal -= float64(time.Millisecond) * 30 * 2 // 2 session
-	if err := sSApierRpc.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
+	if err := sSApierRpc.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
 		t.Errorf("Expecting: %v, received: %v",

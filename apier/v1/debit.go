@@ -25,7 +25,7 @@ import (
 
 // DebitUsage will debit the balance for the usage cost, allowing the
 // account to go negative if the cost calculated is greater than the balance
-func (apier *ApierV1) DebitUsage(usageRecord engine.UsageRecordWithArgDispatcher, reply *string) error {
+func (apier *APIerSv1) DebitUsage(usageRecord engine.UsageRecordWithArgDispatcher, reply *string) error {
 	return apier.DebitUsageWithOptions(AttrDebitUsageWithOptions{
 		UsageRecord:          &usageRecord,
 		AllowNegativeAccount: true,
@@ -40,7 +40,7 @@ type AttrDebitUsageWithOptions struct {
 
 // DebitUsageWithOptions will debit the account based on the usage cost with
 // additional options to control if the balance can go negative
-func (apier *ApierV1) DebitUsageWithOptions(args AttrDebitUsageWithOptions, reply *string) error {
+func (apier *APIerSv1) DebitUsageWithOptions(args AttrDebitUsageWithOptions, reply *string) error {
 	usageRecord := args.UsageRecord.UsageRecord
 	if missing := utils.MissingStructFields(usageRecord, []string{"Account", "Destination", "Usage"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)

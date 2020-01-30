@@ -111,7 +111,7 @@ func testA1itRPCConn(t *testing.T) {
 func testA1itLoadTPFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "test", "a1")}
-	if err := a1rpc.Call(utils.ApierV1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	if err := a1rpc.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error(reply)
@@ -147,7 +147,7 @@ func testA1itLoadTPFromFolder(t *testing.T) {
 		},
 	}
 	var result string
-	if err := a1rpc.Call(utils.ApierV1SetChargerProfile, chargerProfile, &result); err != nil {
+	if err := a1rpc.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -165,14 +165,14 @@ func testA1itAddBalance1(t *testing.T) {
 			utils.ID: "rpdata1_test",
 		},
 	}
-	if err := a1rpc.Call(utils.ApierV1AddBalance, argAdd, &reply); err != nil {
+	if err := a1rpc.Call(utils.APIerSv1AddBalance, argAdd, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf(reply)
 	}
 	argGet := &utils.AttrGetAccount{Tenant: argAdd.Tenant, Account: argAdd.Account}
 	var acnt *engine.Account
-	if err := a1rpc.Call(utils.ApierV2GetAccount, argGet, &acnt); err != nil {
+	if err := a1rpc.Call(utils.APIerSv2GetAccount, argGet, &acnt); err != nil {
 		t.Error(err)
 	} else {
 		if acnt.BalanceMap[utils.DATA].GetTotalValue() != argAdd.Value { // We expect 11.5 since we have added in the previous test 1.5
@@ -292,7 +292,7 @@ func testA1itDataSession1(t *testing.T) {
 
 	var cdrs []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault}}
-	if err := a1rpc.Call(utils.ApierV2GetCDRs, req, &cdrs); err != nil {
+	if err := a1rpc.Call(utils.APIerSv2GetCDRs, req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -315,7 +315,7 @@ func testA1itDataSession1(t *testing.T) {
 	}
 	expBalance := float64(10000000000 - 2202800) // initial - total usage
 	var acnt *engine.Account
-	if err := a1rpc.Call(utils.ApierV2GetAccount,
+	if err := a1rpc.Call(utils.APIerSv2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "rpdata1"}, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != expBalance { // We expect 11.5 since we have added in the previous test 1.5
@@ -339,7 +339,7 @@ func testA1itConcurrentAPs(t *testing.T) {
 				ActionPlanIDs: []string{"PACKAGE_1"},
 			}
 			var reply string
-			if err := a1rpc.Call(utils.ApierV2SetAccount, attrSetAcnt, &reply); err != nil {
+			if err := a1rpc.Call(utils.APIerSv2SetAccount, attrSetAcnt, &reply); err != nil {
 				t.Error(err)
 			}
 			wg.Done()
@@ -348,7 +348,7 @@ func testA1itConcurrentAPs(t *testing.T) {
 	wg.Wait()
 	// Make sure action plan was properly set
 	var aps []*engine.ActionPlan
-	if err := a1rpc.Call(utils.ApierV1GetActionPlan, v1.AttrGetActionPlan{ID: "PACKAGE_1"}, &aps); err != nil {
+	if err := a1rpc.Call(utils.APIerSv1GetActionPlan, v1.AttrGetActionPlan{ID: "PACKAGE_1"}, &aps); err != nil {
 		t.Error(err)
 	} else if len(aps[0].AccountIDs.Slice()) != len(acnts) {
 		t.Errorf("Received: %+v", aps[0])
@@ -358,7 +358,7 @@ func testA1itConcurrentAPs(t *testing.T) {
 		wg.Add(3)
 		go func(acnt string) {
 			var atms []*v1.AccountActionTiming
-			if err := a1rpc.Call(utils.ApierV1GetAccountActionPlan,
+			if err := a1rpc.Call(utils.APIerSv1GetAccountActionPlan,
 				utils.TenantAccount{Tenant: "cgrates.org", Account: acnt}, &atms); err != nil {
 				t.Error(err)
 				//} else if len(atms) != 2 || atms[0].ActionPlanId != "PACKAGE_1" {
@@ -368,7 +368,7 @@ func testA1itConcurrentAPs(t *testing.T) {
 		}(acnt)
 		go func(acnt string) {
 			var reply string
-			if err := a1rpc.Call(utils.ApierV1RemoveActionTiming,
+			if err := a1rpc.Call(utils.APIerSv1RemoveActionTiming,
 				v1.AttrRemoveActionTiming{Tenant: "cgrates.org", Account: acnt, ActionPlanId: "PACKAGE_1"}, &reply); err != nil {
 				t.Error(err)
 			}
@@ -381,7 +381,7 @@ func testA1itConcurrentAPs(t *testing.T) {
 				ActionPlanIDs: []string{"PACKAGE_2"},
 			}
 			var reply string
-			if err := a1rpc.Call(utils.ApierV2SetAccount, attrSetAcnt, &reply); err != nil {
+			if err := a1rpc.Call(utils.APIerSv2SetAccount, attrSetAcnt, &reply); err != nil {
 				t.Error(err)
 			}
 			wg.Done()
@@ -390,13 +390,13 @@ func testA1itConcurrentAPs(t *testing.T) {
 	wg.Wait()
 	// Make sure action plan was properly rem/set
 	aps = []*engine.ActionPlan{}
-	if err := a1rpc.Call(utils.ApierV1GetActionPlan, v1.AttrGetActionPlan{ID: "PACKAGE_1"}, &aps); err != nil {
+	if err := a1rpc.Call(utils.APIerSv1GetActionPlan, v1.AttrGetActionPlan{ID: "PACKAGE_1"}, &aps); err != nil {
 		t.Error(err)
 	} else if len(aps[0].AccountIDs.Slice()) != 0 {
 		t.Errorf("Received: %+v", aps[0])
 	}
 	aps = []*engine.ActionPlan{}
-	if err := a1rpc.Call(utils.ApierV1GetActionPlan, v1.AttrGetActionPlan{ID: "PACKAGE_2"}, &aps); err != nil {
+	if err := a1rpc.Call(utils.APIerSv1GetActionPlan, v1.AttrGetActionPlan{ID: "PACKAGE_2"}, &aps); err != nil {
 		t.Error(err)
 	} else if len(aps[0].AccountIDs.Slice()) != len(acnts) {
 		t.Errorf("Received: %+v", aps[0])

@@ -23,7 +23,7 @@ import (
 )
 
 // Creates a new stat within a tariff plan
-func (self *ApierV1) SetTPStat(attr *utils.TPStatProfile, reply *string) error {
+func (self *APIerSv1) SetTPStat(attr *utils.TPStatProfile, reply *string) error {
 	if missing := utils.MissingStructFields(attr, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -35,7 +35,7 @@ func (self *ApierV1) SetTPStat(attr *utils.TPStatProfile, reply *string) error {
 }
 
 // Queries specific Stat on Tariff plan
-func (self *ApierV1) GetTPStat(attr *utils.TPTntID, reply *utils.TPStatProfile) error {
+func (self *APIerSv1) GetTPStat(attr *utils.TPTntID, reply *utils.TPStatProfile) error {
 	if missing := utils.MissingStructFields(attr, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -57,7 +57,7 @@ type AttrGetTPStatIds struct {
 }
 
 // Queries Stat identities on specific tariff plan.
-func (self *ApierV1) GetTPStatIDs(attrs *AttrGetTPStatIds, reply *[]string) error {
+func (self *APIerSv1) GetTPStatIDs(attrs *AttrGetTPStatIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -74,7 +74,7 @@ func (self *ApierV1) GetTPStatIDs(attrs *AttrGetTPStatIds, reply *[]string) erro
 }
 
 // Removes specific Stat on Tariff plan
-func (self *ApierV1) RemoveTPStat(attrs *utils.TPTntID, reply *string) error {
+func (self *APIerSv1) RemoveTPStat(attrs *utils.TPTntID, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

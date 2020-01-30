@@ -12,7 +12,7 @@
 ::
 
     {
-    	"method": "ApierV1.ExportCDRs",
+    	"method": "APIerSv1.ExportCDRs",
     	"params": [{
     		"ExportTemplate": null,
     		"ExportFormat": null,

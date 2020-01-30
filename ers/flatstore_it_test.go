@@ -158,7 +158,7 @@ func testFlatstoreITLoadTPFromFolder(t *testing.T) {
 		},
 	}
 	var result string
-	if err := flatstoreRPC.Call(utils.ApierV1SetChargerProfile, chargerProfile, &result); err != nil {
+	if err := flatstoreRPC.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -205,12 +205,12 @@ func testFlatstoreITHandleCdr1File(t *testing.T) {
 
 func testFlatstoreITAnalyseCDRs(t *testing.T) {
 	var reply []*engine.ExternalCDR
-	if err := flatstoreRPC.Call(utils.ApierV2GetCDRs, utils.RPCCDRsFilter{}, &reply); err != nil {
+	if err := flatstoreRPC.Call(utils.APIerSv2GetCDRs, utils.RPCCDRsFilter{}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 8 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	}
-	if err := flatstoreRPC.Call(utils.ApierV2GetCDRs, utils.RPCCDRsFilter{MinUsage: "1"}, &reply); err != nil {
+	if err := flatstoreRPC.Call(utils.APIerSv2GetCDRs, utils.RPCCDRsFilter{MinUsage: "1"}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 5 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
