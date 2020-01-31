@@ -93,6 +93,59 @@ func (nM *NavigableMap) Set(path []string, data interface{}, apnd, ordered bool)
 	}
 }
 
+// GetField returns a field in it's original format, without converting from ie. *NMItem
+func (nM *NavigableMap) GetField(path []string) (fldVal interface{}, err error) {
+	lenPath := len(path)
+	if lenPath == 0 {
+		return nil, errors.New("empty field path")
+	}
+	lastMp := nM.data // last map when layered
+	for i, spath := range path {
+		if i == lenPath-1 { // lastElement
+			return nM.getLastRealItem(lastMp, spath)
+		}
+		if lastMp, err = nM.getNextMap(lastMp, spath); err != nil {
+			return
+		}
+	}
+	panic("BUG") // should never make it here
+}
+
+// getLastItem returns the item from the map
+// checking if it needs to return the item or an element of him if the item is a slice
+func (nM *NavigableMap) getLastRealItem(mp map[string]interface{}, spath string) (val interface{}, err error) {
+	var idx *int
+	spath, idx = nM.getIndex(spath)
+	var has bool
+	val, has = mp[spath]
+	if !has {
+		return nil, utils.ErrNotFound
+	}
+	if idx == nil {
+		return val, nil
+	}
+	switch vt := val.(type) {
+	case []string:
+		if *idx > len(vt) {
+			return nil, fmt.Errorf("selector index %d out of range", *idx)
+		}
+		return vt[*idx], nil
+	default:
+	}
+	// only if all above fails use reflect:
+	vr := reflect.ValueOf(val)
+	if vr.Kind() == reflect.Ptr {
+		vr = vr.Elem()
+	}
+	if vr.Kind() != reflect.Slice && vr.Kind() != reflect.Array {
+		return nil, fmt.Errorf("selector index used on non slice type(%T)", val)
+	}
+	if *idx > vr.Len() {
+		return nil, fmt.Errorf("selector index %d out of range", *idx)
+	}
+	return vr.Index(*idx).Interface(), nil
+}
+
 // FieldAsInterface returns the field value as interface{} for the path specified
 // implements DataProvider
 // supports spath with selective elements in case of []*NMItem

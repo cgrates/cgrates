@@ -83,6 +83,7 @@ type AgentRequest struct {
 	filterS *engine.FilterS
 	Header  config.DataProvider
 	Trailer config.DataProvider
+	diamreq *config.NavigableMap // used in case of building requests (ie. DisconnectSession)
 }
 
 // String implements engine.DataProvider
@@ -103,22 +104,17 @@ func (ar *AgentRequest) FieldAsInterface(fldPath []string) (val interface{}, err
 	case utils.MetaReq:
 		val, err = ar.Request.FieldAsInterface(fldPath[1:])
 	case utils.MetaVars:
-		val, err = ar.Vars.FieldAsInterface(fldPath[1:])
+		val, err = ar.Vars.GetField(fldPath[1:])
 	case utils.MetaCgreq:
-		val, err = ar.CGRRequest.FieldAsInterface(fldPath[1:])
+		val, err = ar.CGRRequest.GetField(fldPath[1:])
 	case utils.MetaCgrep:
-		val, err = ar.CGRReply.FieldAsInterface(fldPath[1:])
+		val, err = ar.CGRReply.GetField(fldPath[1:])
 	case utils.MetaRep:
-		val, err = ar.Reply.FieldAsInterface(fldPath[1:])
-	case utils.MetaCGRAReq:
-		val, err = ar.CGRAReq.FieldAsInterface(fldPath[1:])
+		val, err = ar.Reply.GetField(fldPath[1:])
 	case utils.MetaHdr:
 		val, err = ar.Header.FieldAsInterface(fldPath[1:])
 	case utils.MetaTrl:
 		val, err = ar.Trailer.FieldAsInterface(fldPath[1:])
-	}
-	if nmItems, isNMItems := val.([]*config.NMItem); isNMItems { // special handling of NMItems, take the last value out of it
-		val = nmItems[len(nmItems)-1].Data // could be we need nil protection here
 	}
 	return
 }
@@ -129,17 +125,24 @@ func (ar *AgentRequest) FieldAsString(fldPath []string) (val string, err error) 
 	if iface, err = ar.FieldAsInterface(fldPath); err != nil {
 		return
 	}
+	if nmItems, isNMItems := iface.([]*config.NMItem); isNMItems { // special handling of NMItems, take the last value out of it
+		iface = nmItems[len(nmItems)-1].Data // could be we need nil protection here
+	}
 	return utils.IfaceAsString(iface), nil
 }
 
 // AsNavigableMap implements engine.DataProvider
 func (ar *AgentRequest) AsNavigableMap(tplFlds []*config.FCTemplate) (
 	nM *config.NavigableMap, err error) {
-	ar.CGRAReq = config.NewNavigableMap(nil)
+	return nil, utils.ErrNotImplemented
+}
+
+//SetFields will populate fields of AgentRequest out of templates
+func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 	for _, tplFld := range tplFlds {
 		if pass, err := ar.filterS.Pass(ar.Tenant,
 			tplFld.Filters, ar); err != nil {
-			return nil, err
+			return err
 		} else if !pass {
 			continue
 		}
@@ -153,15 +156,15 @@ func (ar *AgentRequest) AsNavigableMap(tplFlds []*config.FCTemplate) (
 					}
 					err = utils.ErrPrefixNotFound(tplFld.Tag)
 				}
-				return nil, err
+				return err
 			}
 			var valSet []*config.NMItem
 			fldPath := strings.Split(tplFld.Path, utils.NestingSep)
 
-			nMItm := &config.NMItem{Data: out, Path: fldPath, Config: tplFld}
-			if nMFields, err := ar.CGRAReq.FieldAsInterface(fldPath); err != nil {
+			nMItm := &config.NMItem{Data: out, Path: fldPath[1:], Config: tplFld}
+			if nMFields, err := ar.FieldAsInterface(fldPath); err != nil {
 				if err != utils.ErrNotFound {
-					return nil, err
+					return err
 				}
 			} else {
 				valSet = nMFields.([]*config.NMItem) // start from previous stored fields
@@ -173,13 +176,29 @@ func (ar *AgentRequest) AsNavigableMap(tplFlds []*config.FCTemplate) (
 				valSet = valSet[:len(valSet)-1] // discard the last item
 			}
 			valSet = append(valSet, nMItm)
-			ar.CGRAReq.Set(fldPath, valSet, false, true)
+			switch fldPath[0] {
+			default:
+				return fmt.Errorf("unsupported field prefix: <%s> when set fields", fldPath[0])
+			case utils.MetaVars:
+				ar.Vars.Set(fldPath[1:], valSet, false, true)
+			case utils.MetaCgreq:
+				ar.CGRRequest.Set(fldPath[1:], valSet, false, true)
+			case utils.MetaCgrep:
+				ar.CGRReply.Set(fldPath[1:], valSet, false, true)
+			case utils.MetaRep:
+				ar.Reply.Set(fldPath[1:], valSet, false, true)
+			case utils.MetaDiamreq:
+				if ar.diamreq == nil {
+					ar.diamreq = config.NewNavigableMap(nil) // special case when CGRateS is building the request
+				}
+				ar.diamreq.Set(fldPath[1:], valSet, false, true)
+			}
 		}
 		if tplFld.Blocker { // useful in case of processing errors first
 			break
 		}
 	}
-	return ar.CGRAReq, nil
+	return
 }
 
 // ParseField outputs the value based on the template item
