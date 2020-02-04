@@ -293,7 +293,7 @@ func (sS *SessionS) setSTerminator(s *Session) {
 			s.sTerminator.timer.Stop()
 		}
 	}()
-	time.Sleep(1) // force context switch to fix process message
+	time.Sleep(1) // force context switching
 }
 
 // forceSTerminate is called when a session times-out or it is forced from CGRateS side

@@ -160,8 +160,7 @@ func (spS *SupplierService) matchingSupplierProfilesForEvent(ev *utils.CGREvent,
 	if singleResult {
 		matchingSLP = make([]*SupplierProfile, 1)
 	}
-	evNm := config.NewNavigableMap(nil)
-	evNm.Set([]string{utils.MetaReq}, ev.Event, false, false)
+	evNm := config.NewNavigableMap(map[string]interface{}{utils.MetaReq: ev.Event})
 	for lpID := range sPrflIDs {
 		splPrfl, err := spS.dm.GetSupplierProfile(ev.Tenant, lpID, true, true, utils.NonTransactional)
 		if err != nil {

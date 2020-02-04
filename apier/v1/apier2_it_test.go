@@ -35,9 +35,9 @@ import (
 )
 
 var (
-	apierCfgPath     string
-	apierCfg         *config.CGRConfig
-	apierRPC         *rpc.Client
+	apierCfgPath      string
+	apierCfg          *config.CGRConfig
+	apierRPC          *rpc.Client
 	APIerSv2ConfigDIR string //run tests for specific configuration
 
 	sTestsAPIer = []func(t *testing.T){

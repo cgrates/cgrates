@@ -20,11 +20,15 @@ package engine
 
 import (
 	"errors"
+	"fmt"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
 
+// NewBareEventCost will intialize the EventCost with minimum information
 func NewBareEventCost() *EventCost {
 	return &EventCost{
 		Rating:        make(Rating),
@@ -36,6 +40,7 @@ func NewBareEventCost() *EventCost {
 	}
 }
 
+// NewEventCostFromCallCost will initilaize the EventCost from a CallCost
 func NewEventCostFromCallCost(cc *CallCost, cgrID, runID string) (ec *EventCost) {
 	ec = NewBareEventCost()
 	ec.CGRID = cgrID
@@ -169,6 +174,7 @@ func (ec *EventCost) rateIntervalForRatingID(ratingID string) (ri *RateInterval)
 	return
 }
 
+// Clone will create a clone of the object
 func (ec *EventCost) Clone() (cln *EventCost) {
 	if ec == nil {
 		return
@@ -228,7 +234,7 @@ func (ec *EventCost) ResetCounters() {
 	}
 }
 
-// ComputeCost iterates through Charges, computing EventCost.Cost
+// GetCost iterates through Charges, computing EventCost.Cost
 func (ec *EventCost) GetCost() float64 {
 	if ec.Cost == nil {
 		var cost float64
@@ -241,7 +247,7 @@ func (ec *EventCost) GetCost() float64 {
 	return *ec.Cost
 }
 
-// ComputeUsage iterates through Charges, computing EventCost.Usage
+// GetUsage iterates through Charges, computing EventCost.Usage
 func (ec *EventCost) GetUsage() time.Duration {
 	if ec.Usage == nil {
 		var usage time.Duration
@@ -264,7 +270,7 @@ func (ec *EventCost) ComputeEventCostUsageIndexes() {
 	}
 }
 
-// AsCallDescriptor converts an EventCost into a CallDescriptor
+// AsRefundIncrements converts an EventCost into a CallDescriptor
 func (ec *EventCost) AsRefundIncrements(tor string) (cd *CallDescriptor) {
 	cd = &CallDescriptor{
 		CgrID:         ec.CGRID,
@@ -463,7 +469,7 @@ func (ec *EventCost) appendCIlFromEC(oEC *EventCost, cIlIdx int) {
 func (ec *EventCost) appendChargingIntervalFromEventCost(oEC *EventCost, cIlIdx int) {
 	lenChargers := len(ec.Charges)
 	if lenChargers != 0 && ec.Charges[lenChargers-1].PartiallyEquals(oEC.Charges[cIlIdx]) {
-		ec.Charges[lenChargers-1].CompressFactor += 1
+		ec.Charges[lenChargers-1].CompressFactor++
 	} else {
 		ec.appendCIlFromEC(oEC, cIlIdx)
 	}
@@ -793,7 +799,7 @@ func (ec *EventCost) Trim(atUsage time.Duration) (srplusEC *EventCost, err error
 		}
 		if len(srplsIncrements) != 0 { // partially covering, need trim
 			if lastActiveCIl.CompressFactor > 1 { // ChargingInterval not covering in full, need to split it
-				lastActiveCIl.CompressFactor -= 1
+				lastActiveCIl.CompressFactor--
 				ec.Charges = append(ec.Charges, lastActiveCIl.Clone())
 				lastActiveCIl = ec.Charges[len(ec.Charges)-1]
 				lastActiveCIl.CompressFactor = 1
@@ -832,4 +838,143 @@ func (ec *EventCost) Trim(atUsage time.Duration) (srplusEC *EventCost, err error
 	}
 	ec.RemoveStaleReferences() // data should be transferred by now, can clean the old one
 	return
+}
+
+// getIndex returns the path and index if index present
+// path[index]=>path,index
+// path=>path,nil
+func getIndex(spath string) (opath string, idx *int) {
+	idxStart := strings.Index(spath, utils.IdxStart)
+	if idxStart == -1 || !strings.HasSuffix(spath, utils.IdxEnd) {
+		return spath, nil
+	}
+	slctr := spath[idxStart+1 : len(spath)-1]
+	opath = spath[:idxStart]
+	if strings.HasPrefix(slctr, utils.DynamicDataPrefix) {
+		return
+	}
+	idxVal, err := strconv.Atoi(slctr)
+	if err != nil {
+		return spath, nil
+	}
+	return opath, &idxVal
+}
+
+// FieldAsInterface func to implement DataProvider
+func (ec *EventCost) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+	if len(fldPath) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	switch fldPath[0] {
+	default: //"Charges [1]"
+		opath, indx := getIndex(fldPath[0])
+		if opath != utils.Charges {
+			return nil, fmt.Errorf("unsupported field prefix: <%s>", opath)
+		}
+		if indx != nil {
+			chr := ec.Charges[*indx]
+			if len(fldPath) == 1 {
+				return chr, nil
+			}
+			if fldPath[1] == utils.Rating {
+				return ec.getRatingForPath(fldPath[2:], ec.Rating[chr.RatingID])
+			}
+		}
+	case utils.Charges: // not needed?
+		// 	return ec.Charges.FieldAsInterface(fldPath[1:])
+	case utils.CGRID:
+		if len(fldPath) != 1 {
+			return nil, utils.ErrNotFound
+		}
+		return ec.CGRID, nil
+	case utils.RunID:
+		if len(fldPath) != 1 {
+			return nil, utils.ErrNotFound
+		}
+		return ec.RunID, nil
+	case utils.StartTime:
+		if len(fldPath) != 1 {
+			return nil, utils.ErrNotFound
+		}
+		return ec.StartTime, nil
+	case utils.Usage:
+		if len(fldPath) != 1 {
+			return nil, utils.ErrNotFound
+		}
+		return ec.Usage, nil
+	case utils.Cost:
+		if len(fldPath) != 1 {
+			return nil, utils.ErrNotFound
+		}
+		return ec.Cost, nil
+	case utils.AccountSummary:
+		// return ec.AccountSummary.FieldAsInterface(fldPath[1:])
+	case utils.Timings: // not needed?
+		// return ec.Timings.FieldAsInterface(fldPath[1:])
+	case utils.Rates: // not needed?
+		// 	return ec.Rates.FieldAsInterface(fldPath[1:])
+	case utils.RatingFilters: // not needed?
+		// 	return ec.RatingFilters.FieldAsInterface(fldPath[1:])
+	case utils.Accounting: // not needed?
+	// 	return ec.Accounting.FieldAsInterface(fldPath[1:])
+	case utils.Rating: // not needed?
+		// 	return ec.Rating.FieldAsInterface(fldPath[1:])
+	}
+	return nil, fmt.Errorf("unsupported field prefix: <%s>", fldPath[0])
+}
+
+func (ec *EventCost) getRatingForPath(fldPath []string, rating *RatingUnit) (val interface{}, err error) {
+	if rating == nil {
+		return nil, utils.ErrNotFound
+	}
+	if len(fldPath) == 0 {
+		return rating, nil
+	}
+
+	switch fldPath[0] {
+	default:
+		opath, indx := getIndex(fldPath[0])
+		if opath != utils.Rates {
+			return nil, fmt.Errorf("unsupported field prefix: <%s>", opath)
+		}
+		rts, has := ec.Rates[rating.RatesID]
+		if !has || rts == nil {
+			return nil, utils.ErrNotFound
+		}
+		if indx != nil {
+			rt := rts[*indx]
+			if len(fldPath) == 1 {
+				return rt, nil
+			}
+			return rt.FieldAsInterface(fldPath[1:])
+		}
+	case utils.Rates:
+		rts, has := ec.Rates[rating.RatesID]
+		if !has || rts == nil {
+			return nil, utils.ErrNotFound
+		}
+		if len(fldPath) != 1 {
+			return nil, utils.ErrNotFound // no field on slice
+		}
+		return rts, nil
+	case utils.Timing:
+		tmg, has := ec.Timings[rating.TimingID]
+		if !has || tmg == nil {
+			return nil, utils.ErrNotFound
+		}
+		if len(fldPath) == 1 {
+			return tmg, nil
+		}
+		return tmg.FieldAsInterface(fldPath[1:])
+	case utils.RatingFilter:
+		rtFltr, has := ec.RatingFilters[rating.RatingFiltersID]
+		if !has || rtFltr == nil {
+			return nil, utils.ErrNotFound
+		}
+		if len(fldPath) == 1 {
+			return rtFltr, nil
+		}
+		return rtFltr.FieldAsInterface(fldPath[1:])
+	}
+	return rating.FieldAsInterface(fldPath)
 }
