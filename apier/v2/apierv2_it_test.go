@@ -34,10 +34,10 @@ import (
 )
 
 var (
-	apierCfgPath   string
-	apierCfg       *config.CGRConfig
-	apierRPC       *rpc.Client
-	dm             *engine.DataManager // share db connection here so we can check data we set through APIs
+	apierCfgPath    string
+	apierCfg        *config.CGRConfig
+	apierRPC        *rpc.Client
+	dm              *engine.DataManager // share db connection here so we can check data we set through APIs
 	APIerSv2ConfDIR string
 
 	sTestsv2it = []func(t *testing.T){

@@ -59,9 +59,9 @@ README:
   * Execute remote Apis and test their replies(follow testtp scenario so we can test load in dataDb also).
 */
 var (
-	cfgPath          string
-	cfg              *config.CGRConfig
-	rater            *rpc.Client
+	cfgPath           string
+	cfg               *config.CGRConfig
+	rater             *rpc.Client
 	APIerSv1ConfigDIR string
 
 	apierTests = []func(t *testing.T){

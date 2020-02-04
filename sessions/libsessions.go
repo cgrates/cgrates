@@ -48,6 +48,7 @@ type BiRPClient interface {
 
 // getSessionTTL retrieves SessionTTL setting out of ev
 // if SessionTTLMaxDelay is present in ev, the return is randomized
+// ToDo: remove if not needed
 func getSessionTTL(ev *engine.MapEvent, cfgSessionTTL time.Duration,
 	cfgSessionTTLMaxDelay *time.Duration) (ttl time.Duration, err error) {
 	if ttl, err = ev.GetDuration(utils.SessionTTL); err != nil {

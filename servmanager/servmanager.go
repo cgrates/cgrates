@@ -147,8 +147,8 @@ func (srvMngr *ServiceManager) GetConfig() *config.CGRConfig {
 func (srvMngr *ServiceManager) StartServices() (err error) {
 	go srvMngr.handleReload()
 	for serviceName, shouldRun := range map[string]bool{
-		utils.APIerSv1:         srvMngr.GetConfig().ApierCfg().Enabled,
-		utils.APIerSv2:         srvMngr.GetConfig().ApierCfg().Enabled,
+		utils.APIerSv1:        srvMngr.GetConfig().ApierCfg().Enabled,
+		utils.APIerSv2:        srvMngr.GetConfig().ApierCfg().Enabled,
 		utils.StorDB:          srvMngr.GetConfig().RalsCfg().Enabled || srvMngr.GetConfig().CdrsCfg().Enabled,
 		utils.AttributeS:      srvMngr.GetConfig().AttributeSCfg().Enabled,
 		utils.ChargerS:        srvMngr.GetConfig().ChargerSCfg().Enabled,

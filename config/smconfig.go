@@ -236,6 +236,13 @@ func (scfg *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) (err error) {
 			scfg.SessionTTLLastUsed = &sessionTTLLastUsed
 		}
 	}
+	if jsnCfg.Session_ttl_usage != nil {
+		if sessionTTLUsage, err := utils.ParseDurationWithNanosecs(*jsnCfg.Session_ttl_usage); err != nil {
+			return err
+		} else {
+			scfg.SessionTTLUsage = &sessionTTLUsage
+		}
+	}
 	if jsnCfg.Session_indexes != nil {
 		scfg.SessionIndexes = utils.StringMapFromSlice(*jsnCfg.Session_indexes)
 	}
