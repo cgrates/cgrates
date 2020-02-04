@@ -7,7 +7,7 @@ After=network.target
 
 [Service]
 Type=simple
-EnvironmentFile=/etc/default/cgrates
+EnvironmentFile=-/etc/default/cgrates
 ExecStart=/usr/bin/cgr-engine $DAEMON_OPTS
 KillMode=mixed
 User=cgrates
