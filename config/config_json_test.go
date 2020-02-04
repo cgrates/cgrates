@@ -19,6 +19,7 @@ package config
 
 import (
 	"encoding/json"
+	"fmt"
 	"reflect"
 	"testing"
 
@@ -661,96 +662,114 @@ func TestDiameterAgentJsonCfg(t *testing.T) {
 		Asr_template:         utils.StringPointer(""),
 		Templates: map[string][]*FcTemplateJsonCfg{
 			utils.MetaErr: {
-				{Tag: utils.StringPointer("SessionId"),
-					Path:      utils.StringPointer("Session-Id"),
+				{
+					Tag:       utils.StringPointer("SessionId"),
+					Path:      utils.StringPointer(fmt.Sprintf("%s.Session-Id", utils.MetaRep)),
 					Type:      utils.StringPointer(utils.MetaVariable),
 					Value:     utils.StringPointer("~*req.Session-Id"),
 					Mandatory: utils.BoolPointer(true)},
-				{Tag: utils.StringPointer("OriginHost"),
-					Path:      utils.StringPointer("Origin-Host"),
+				{
+					Tag:       utils.StringPointer("OriginHost"),
+					Path:      utils.StringPointer(fmt.Sprintf("%s.Origin-Host", utils.MetaRep)),
 					Type:      utils.StringPointer(utils.MetaVariable),
 					Value:     utils.StringPointer("~*vars.OriginHost"),
 					Mandatory: utils.BoolPointer(true)},
-				{Tag: utils.StringPointer("OriginRealm"),
-					Path:      utils.StringPointer("Origin-Realm"),
+				{
+					Tag:       utils.StringPointer("OriginRealm"),
+					Path:      utils.StringPointer(fmt.Sprintf("%s.Origin-Realm", utils.MetaRep)),
 					Type:      utils.StringPointer(utils.MetaVariable),
 					Value:     utils.StringPointer("~*vars.OriginRealm"),
 					Mandatory: utils.BoolPointer(true)},
 			},
 			utils.MetaCCA: {
-				{Tag: utils.StringPointer("SessionId"),
-					Path:      utils.StringPointer("Session-Id"),
+				{
+					Tag:       utils.StringPointer("SessionId"),
+					Path:      utils.StringPointer(fmt.Sprintf("%s.Session-Id", utils.MetaRep)),
 					Type:      utils.StringPointer(utils.MetaVariable),
 					Value:     utils.StringPointer("~*req.Session-Id"),
 					Mandatory: utils.BoolPointer(true)},
-				{Tag: utils.StringPointer("ResultCode"),
-					Path:  utils.StringPointer("Result-Code"),
+				{
+					Tag:   utils.StringPointer("ResultCode"),
+					Path:  utils.StringPointer(fmt.Sprintf("%s.Result-Code", utils.MetaRep)),
 					Type:  utils.StringPointer(utils.META_CONSTANT),
 					Value: utils.StringPointer("2001")},
-				{Tag: utils.StringPointer("OriginHost"),
-					Path:      utils.StringPointer("Origin-Host"),
+				{
+					Tag:       utils.StringPointer("OriginHost"),
+					Path:      utils.StringPointer(fmt.Sprintf("%s.Origin-Host", utils.MetaRep)),
 					Type:      utils.StringPointer(utils.MetaVariable),
 					Value:     utils.StringPointer("~*vars.OriginHost"),
 					Mandatory: utils.BoolPointer(true)},
-				{Tag: utils.StringPointer("OriginRealm"),
-					Path:      utils.StringPointer("Origin-Realm"),
+				{
+					Tag:       utils.StringPointer("OriginRealm"),
+					Path:      utils.StringPointer(fmt.Sprintf("%s.Origin-Realm", utils.MetaRep)),
 					Type:      utils.StringPointer(utils.MetaVariable),
 					Value:     utils.StringPointer("~*vars.OriginRealm"),
 					Mandatory: utils.BoolPointer(true)},
-				{Tag: utils.StringPointer("AuthApplicationId"),
-					Path:      utils.StringPointer("Auth-Application-Id"),
+				{
+					Tag:       utils.StringPointer("AuthApplicationId"),
+					Path:      utils.StringPointer(fmt.Sprintf("%s.Auth-Application-Id", utils.MetaRep)),
 					Type:      utils.StringPointer(utils.MetaVariable),
 					Value:     utils.StringPointer("~*vars.*appid"),
 					Mandatory: utils.BoolPointer(true)},
-				{Tag: utils.StringPointer("CCRequestType"),
-					Path:      utils.StringPointer("CC-Request-Type"),
+				{
+					Tag:       utils.StringPointer("CCRequestType"),
+					Path:      utils.StringPointer(fmt.Sprintf("%s.CC-Request-Type", utils.MetaRep)),
 					Type:      utils.StringPointer(utils.MetaVariable),
 					Value:     utils.StringPointer("~*req.CC-Request-Type"),
 					Mandatory: utils.BoolPointer(true)},
-				{Tag: utils.StringPointer("CCRequestNumber"),
-					Path:      utils.StringPointer("CC-Request-Number"),
+				{
+					Tag:       utils.StringPointer("CCRequestNumber"),
+					Path:      utils.StringPointer(fmt.Sprintf("%s.CC-Request-Number", utils.MetaRep)),
 					Type:      utils.StringPointer(utils.MetaVariable),
 					Value:     utils.StringPointer("~*req.CC-Request-Number"),
 					Mandatory: utils.BoolPointer(true)},
 			},
 			utils.MetaASR: {
-				{Tag: utils.StringPointer("SessionId"),
-					Path:      utils.StringPointer("Session-Id"),
+				{
+					Tag:       utils.StringPointer("SessionId"),
+					Path:      utils.StringPointer(fmt.Sprintf("%s.Session-Id", utils.MetaDiamreq)),
 					Type:      utils.StringPointer(utils.MetaVariable),
 					Value:     utils.StringPointer("~*req.Session-Id"),
 					Mandatory: utils.BoolPointer(true)},
-				{Tag: utils.StringPointer("OriginHost"),
-					Path:      utils.StringPointer("Origin-Host"),
+				{
+					Tag:       utils.StringPointer("OriginHost"),
+					Path:      utils.StringPointer(fmt.Sprintf("%s.Origin-Host", utils.MetaDiamreq)),
 					Type:      utils.StringPointer(utils.MetaVariable),
 					Value:     utils.StringPointer("~*req.Destination-Host"),
 					Mandatory: utils.BoolPointer(true)},
-				{Tag: utils.StringPointer("OriginRealm"),
-					Path:      utils.StringPointer("Origin-Realm"),
+				{
+					Tag:       utils.StringPointer("OriginRealm"),
+					Path:      utils.StringPointer(fmt.Sprintf("%s.Origin-Realm", utils.MetaDiamreq)),
 					Type:      utils.StringPointer(utils.MetaVariable),
 					Value:     utils.StringPointer("~*req.Destination-Realm"),
 					Mandatory: utils.BoolPointer(true)},
-				{Tag: utils.StringPointer("DestinationRealm"),
-					Path:      utils.StringPointer("Destination-Realm"),
+				{
+					Tag:       utils.StringPointer("DestinationRealm"),
+					Path:      utils.StringPointer(fmt.Sprintf("%s.Destination-Realm", utils.MetaDiamreq)),
 					Type:      utils.StringPointer(utils.MetaVariable),
 					Value:     utils.StringPointer("~*req.Origin-Realm"),
 					Mandatory: utils.BoolPointer(true)},
-				{Tag: utils.StringPointer("DestinationHost"),
-					Path:      utils.StringPointer("Destination-Host"),
+				{
+					Tag:       utils.StringPointer("DestinationHost"),
+					Path:      utils.StringPointer(fmt.Sprintf("%s.Destination-Host", utils.MetaDiamreq)),
 					Type:      utils.StringPointer(utils.MetaVariable),
 					Value:     utils.StringPointer("~*req.Origin-Host"),
 					Mandatory: utils.BoolPointer(true)},
-				{Tag: utils.StringPointer("AuthApplicationId"),
-					Path:      utils.StringPointer("Auth-Application-Id"),
+				{
+					Tag:       utils.StringPointer("AuthApplicationId"),
+					Path:      utils.StringPointer(fmt.Sprintf("%s.Auth-Application-Id", utils.MetaDiamreq)),
 					Type:      utils.StringPointer(utils.MetaVariable),
 					Value:     utils.StringPointer("~*vars.*appid"),
 					Mandatory: utils.BoolPointer(true)},
-				{Tag: utils.StringPointer("UserName"),
-					Path:      utils.StringPointer("User-Name"),
+				{
+					Tag:       utils.StringPointer("UserName"),
+					Path:      utils.StringPointer(fmt.Sprintf("%s.User-Name", utils.MetaDiamreq)),
 					Type:      utils.StringPointer(utils.MetaVariable),
 					Value:     utils.StringPointer("~*req.User-Name"),
 					Mandatory: utils.BoolPointer(true)},
-				{Tag: utils.StringPointer("OriginStateID"),
-					Path:  utils.StringPointer("Origin-State-Id"),
+				{
+					Tag:   utils.StringPointer("OriginStateID"),
+					Path:  utils.StringPointer(fmt.Sprintf("%s.Origin-State-Id", utils.MetaDiamreq)),
 					Type:  utils.StringPointer(utils.META_CONSTANT),
 					Value: utils.StringPointer("1")},
 			},
