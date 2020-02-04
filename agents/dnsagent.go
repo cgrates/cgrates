@@ -158,6 +158,7 @@ func (da *DNSAgent) handleMessage(w dns.ResponseWriter, req *dns.Msg) {
 		dnsWriteMsg(w, rply)
 		return
 	}
+	fmt.Println(utils.ToJSON(rply))
 	if err = dnsWriteMsg(w, rply); err != nil { // failed sending, most probably content issue
 		rply = new(dns.Msg)
 		rply.SetReply(req)
@@ -173,7 +174,7 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 		reqProcessor.Filters, agReq); err != nil || !pass {
 		return pass, err
 	}
-	if agReq.CGRRequest, err = agReq.AsNavigableMap(reqProcessor.RequestFields); err != nil {
+	if err = agReq.SetFields(reqProcessor.RequestFields); err != nil {
 		return
 	}
 	cgrEv := agReq.CGRRequest.AsCGREvent(agReq.Tenant, utils.NestingSep)
@@ -188,6 +189,7 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 			break
 		}
 	}
+	fmt.Println(utils.ToJSON(cgrEv))
 	cgrArgs := cgrEv.ExtractArgs(reqProcessor.Flags.HasKey(utils.MetaDispatchers),
 		reqType == utils.MetaAuth || reqType == utils.MetaMessage || reqType == utils.MetaEvent)
 	if reqProcessor.Flags.HasKey(utils.MetaLog) {
@@ -226,6 +228,7 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 		if err = agReq.setCGRReply(rply, err); err != nil {
 			return
 		}
+		fmt.Println(utils.ToJSON(rply))
 	case utils.MetaInitiate:
 		initArgs := sessions.NewV1InitSessionArgs(
 			reqProcessor.Flags.HasKey(utils.MetaAttributes),
@@ -338,10 +341,8 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 			agReq.CGRReply.Set([]string{utils.Error}, err.Error(), false, false)
 		}
 	}
-	if nM, err := agReq.AsNavigableMap(reqProcessor.ReplyFields); err != nil {
+	if err := agReq.SetFields(reqProcessor.ReplyFields); err != nil {
 		return false, err
-	} else {
-		agReq.Reply.Merge(nM)
 	}
 	if reqProcessor.Flags.HasKey(utils.MetaLog) {
 		utils.Logger.Info(
