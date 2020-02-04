@@ -90,19 +90,19 @@
 				},
 				{
 					"tag": "RatingGroup",
-					"path": "*cgreq.Multiple-Services-Credit-Control.Rating-Group",
+					"path": "*rep.Multiple-Services-Credit-Control.Rating-Group",
 					"type": "*constant",
 					"value": "1"
 				},
 				{
 					"tag": "CCTotalOctets1",
-					"path": "*cgreq.Multiple-Services-Credit-Control.Used-Service-Unit.CC-Total-Octets",
+					"path": "*rep.Multiple-Services-Credit-Control.Used-Service-Unit.CC-Total-Octets",
 					"type": "*variable",
 					"value": "~*cgreq.UsedUnits1"
 				},
 				{
 					"tag": "GrantedUsage",
-					"path": "*cgreq.Granted-Service-Unit.CC-Time",
+					"path": "*rep.Granted-Service-Unit.CC-Time",
 					"type": "*sum", 
 					"value": "~*cgreq.Val1;~*cgreq.Val2;~*cgreq.Val3"},
 			],

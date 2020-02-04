@@ -67,7 +67,6 @@ var (
 
 // Test start here
 func TestDiamItTcp(t *testing.T) {
-	engine.KillEngine(0)
 	switch *dbType {
 	case utils.MetaInternal:
 		diamConfigDIR = "diamagent_internal"
@@ -98,12 +97,10 @@ func TestDiamItDispatcher(t *testing.T) {
 	for _, stest := range sTestsDiam {
 		t.Run(diamConfigDIR, stest)
 	}
-	engine.KillEngine(100)
 	isDispatcherActive = false
 }
 
 func TestDiamItSctp(t *testing.T) {
-	engine.KillEngine(0)
 	switch *dbType {
 	case utils.MetaInternal:
 		diamConfigDIR = "diamsctpagent_internal"
@@ -122,7 +119,6 @@ func TestDiamItSctp(t *testing.T) {
 }
 
 func TestDiamItMaxConn(t *testing.T) {
-	engine.KillEngine(0)
 	switch *dbType {
 	case utils.MetaInternal:
 		diamConfigDIR = "diamagentmaxconn_internal"
@@ -143,7 +139,6 @@ func TestDiamItMaxConn(t *testing.T) {
 }
 
 func TestDiamItSessionDisconnect(t *testing.T) {
-	engine.KillEngine(0)
 	switch *dbType {
 	case utils.MetaInternal:
 		diamConfigDIR = "diamagent_internal"
@@ -380,6 +375,7 @@ func testDiamItDryRun(t *testing.T) {
 		} else if val != eVal {
 			t.Errorf("expecting: %s, received: <%s>", eVal, val)
 		}
+
 		eVal = "cgrates;1451911932;00082"
 		if avps, err := msg.FindAVPsWithPath([]interface{}{"Session-Id"}, dict.UndefinedVendorID); err != nil {
 			t.Error(err)

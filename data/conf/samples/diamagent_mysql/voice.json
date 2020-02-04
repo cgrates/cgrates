@@ -270,7 +270,7 @@
 				},
 				{
 					"tag": "LastUsed",
-					"path": "LastUsed", 
+					"path": "*cgreq.LastUsed", 
 					"type": "*variable", 
 					"value": "~*req.Used-Service-Unit.CC-Time:s/(.*)/${1}s/",
 					"mandatory": true
