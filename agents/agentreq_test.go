@@ -134,6 +134,49 @@ func TestAgReqAsNavigableMap(t *testing.T) {
 }
 
 
+func TestAgentRequestSetFields(t *testing.T) {
+	req := map[string]interface{}{
+		utils.Account: 1009,
+	}
+	vars := map[string]interface{}{}
+	ar := NewAgentRequest(config.NewNavigableMap(req), vars, nil, nil, config.NewRSRParsersMustCompile("", false, utils.NestingSep), "cgrates.org", "", &engine.FilterS{}, nil, nil)
+	input := []*config.FCTemplate{}
+	if err := ar.SetFields(input); err != nil {
+		t.Error(err)
+	}
+	// tplFld.Type == utils.META_NONE
+	input = []*config.FCTemplate{&config.FCTemplate{Type: utils.META_NONE}}
+	if err := ar.SetFields(input); err != nil {
+		t.Error(err)
+	}
+	// unsupported type: <>
+	input = []*config.FCTemplate{&config.FCTemplate{Blocker: true}}
+	if err := ar.SetFields(input); err == nil || err.Error() != "unsupported type: <>" {
+		t.Error(err)
+	}
+	// case utils.MetaVars
+	input = []*config.FCTemplate{
+		&config.FCTemplate{
+			Path:  "*vars.Account",
+			Tag:   "*vars.Account",
+			Type:  utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("~*req.Account", false, ";"),
+		},
+	}
+	if err := ar.SetFields(input); err != nil {
+		t.Error(err)
+	} else if val, err := ar.Vars.GetField([]string{"Account"}); err != nil {
+		t.Error(err)
+	} else if nm, ok := val.([]*config.NMItem); !ok {
+		t.Error("Expecting NM items")
+	} else if len(nm) != 1 {
+		t.Error("Expecting one item")
+	} else if nm[0].Data != "1009" {
+		t.Error("Expecting 1009, received: ", nm[0].Data)
+	}
+
+}
+
 func TestAgReqMaxCost(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
