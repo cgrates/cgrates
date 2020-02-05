@@ -132,14 +132,15 @@ func TestAgReqAsNavigableMap(t *testing.T) {
 		t.Errorf("expecting: %+v, received: %+v", eMp, mpOut)
 	}
 }
-
+*/
 
 func TestAgentRequestSetFields(t *testing.T) {
 	req := map[string]interface{}{
 		utils.Account: 1009,
+		utils.Tenant:  "cgrates.org",
 	}
 	vars := map[string]interface{}{}
-	ar := NewAgentRequest(config.NewNavigableMap(req), vars, nil, nil, config.NewRSRParsersMustCompile("", false, utils.NestingSep), "cgrates.org", "", &engine.FilterS{}, nil, nil)
+	ar := NewAgentRequest(config.NewNavigableMap(req), vars, nil, nil, config.NewRSRParsersMustCompile("", false, utils.NestingSep), "cgrates.org", "", &engine.FilterS{}, config.NewNavigableMap(req), config.NewNavigableMap(req))
 	input := []*config.FCTemplate{}
 	if err := ar.SetFields(input); err != nil {
 		t.Error(err)
@@ -175,8 +176,294 @@ func TestAgentRequestSetFields(t *testing.T) {
 		t.Error("Expecting 1009, received: ", nm[0].Data)
 	}
 
+	// case utils.MetaCgreq
+	input = []*config.FCTemplate{
+		&config.FCTemplate{
+			Path:  "*cgreq.Account",
+			Tag:   "*cgreq.Account",
+			Type:  utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("~*req.Account", false, ";"),
+		},
+	}
+	if err := ar.SetFields(input); err != nil {
+		t.Error(err)
+	} else if val, err := ar.CGRRequest.GetField([]string{"Account"}); err != nil {
+		t.Error(err)
+	} else if nm, ok := val.([]*config.NMItem); !ok {
+		t.Error("Expecting NM items")
+	} else if len(nm) != 1 {
+		t.Error("Expecting one item")
+	} else if nm[0].Data != "1009" {
+		t.Error("Expecting 1009, received: ", nm[0].Data)
+	}
+
+	// case utils.MetaCgrep
+	input = []*config.FCTemplate{
+		&config.FCTemplate{
+			Path:  "*cgrep.Account",
+			Tag:   "*cgrep.Account",
+			Type:  utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("~*req.Account", false, ";"),
+		},
+	}
+	if err := ar.SetFields(input); err != nil {
+		t.Error(err)
+	} else if val, err := ar.Vars.GetField([]string{"Account"}); err != nil {
+		t.Error(err)
+	} else if nm, ok := val.([]*config.NMItem); !ok {
+		t.Error("Expecting NM items")
+	} else if len(nm) != 1 {
+		t.Error("Expecting one item")
+	} else if nm[0].Data != "1009" {
+		t.Error("Expecting 1009, received: ", nm[0].Data)
+	}
+
+	// case utils.MetaRep
+	input = []*config.FCTemplate{
+		&config.FCTemplate{
+			Path:  "*rep.Account",
+			Tag:   "*rep.Account",
+			Type:  utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("~*req.Account", false, ";"),
+		},
+	}
+	if err := ar.SetFields(input); err != nil {
+		t.Error(err)
+	} else if val, err := ar.Vars.GetField([]string{"Account"}); err != nil {
+		t.Error(err)
+	} else if nm, ok := val.([]*config.NMItem); !ok {
+		t.Error("Expecting NM items")
+	} else if len(nm) != 1 {
+		t.Error("Expecting one item")
+	} else if nm[0].Data != "1009" {
+		t.Error("Expecting 1009, received: ", nm[0].Data)
+	}
+
+	// case utils.MetaDiamreq
+	// input = []*config.FCTemplate{
+	// 	&config.FCTemplate{
+	// 		Path:  "*diamreq.Account",
+	// 		Tag:   "*diamreq.Account",
+	// 		Type:  utils.MetaVariable,
+	// 		Value: config.NewRSRParsersMustCompile("~*req.Account", false, ";"),
+	// 	},
+	// }
+	// if err := ar.SetFields(input); err != nil {
+	// 	t.Error(err)
+	// } else if val, err := ar.Vars.GetField([]string{"Account"}); err != nil {
+	// 	t.Error(err)
+	// } else if nm, ok := val.([]*config.NMItem); !ok {
+	// 	t.Error("Expecting NM items")
+	// } else if len(nm) != 1 {
+	// 	t.Error("Expecting one item")
+	// } else if nm[0].Data != "1009" {
+	// 	t.Error("Expecting 1009, received: ", nm[0].Data)
+	// }
+
+	//META_COMPOSED
+
+	input = []*config.FCTemplate{
+		&config.FCTemplate{
+			Path:  "*vars.AccountID",
+			Tag:   "*vars.AccountID",
+			Type:  utils.META_COMPOSED,
+			Value: config.NewRSRParsersMustCompile("~*req.Tenant", false, ";"),
+		},
+		&config.FCTemplate{
+			Path:  "*vars.AccountID",
+			Tag:   "*vars.AccountID",
+			Type:  utils.META_COMPOSED,
+			Value: config.NewRSRParsersMustCompile(":", false, ";"),
+		},
+		&config.FCTemplate{
+			Path:  "*vars.AccountID",
+			Tag:   "*vars.AccountID",
+			Type:  utils.META_COMPOSED,
+			Value: config.NewRSRParsersMustCompile("~*req.Account", false, ";"),
+		},
+	}
+	if err := ar.SetFields(input); err != nil {
+		t.Error(err)
+	} else if val, err := ar.Vars.GetField([]string{"AccountID"}); err != nil {
+		t.Error(err)
+	} else if nm, ok := val.([]*config.NMItem); !ok {
+		t.Error("Expecting NM items")
+	} else if len(nm) != 1 {
+		t.Error("Expecting one item")
+	} else if nm[0].Data != "cgrates.org:1009" {
+		t.Error("Expecting 'cgrates.org:1009', received: ", nm[0].Data)
+	}
+
+	// META_CONSTANT
+	input = []*config.FCTemplate{
+		&config.FCTemplate{
+			Path:  "*vars.Account",
+			Tag:   "*vars.Account",
+			Type:  utils.META_CONSTANT,
+			Value: config.NewRSRParsersMustCompile("2020", false, ";"),
+		},
+	}
+	if err := ar.SetFields(input); err != nil {
+		t.Error(err)
+	} else if val, err := ar.Vars.GetField([]string{"Account"}); err != nil {
+		t.Error(err)
+	} else if nm, ok := val.([]*config.NMItem); !ok {
+		t.Error("Expecting NM items")
+	} else if len(nm) != 2 {
+		t.Error("Expecting one item")
+	} else if nm[0].Data != "1009" {
+		t.Error("Expecting 1009, received: ", nm[0].Data)
+	} else if nm[1].Data != "2020" {
+		t.Error("Expecting 1009, received: ", nm[0].Data)
+	}
+
+	// Filters
+	input = []*config.FCTemplate{
+		&config.FCTemplate{
+			Path:    "*vars.AccountID",
+			Tag:     "*vars.AccountID",
+			Filters: []string{"*string:~*vars.Account:1003"},
+			Type:    utils.META_CONSTANT,
+			Value:   config.NewRSRParsersMustCompile("2021", false, ";"),
+		},
+	}
+	if err := ar.SetFields(input); err != nil {
+		t.Error(err)
+	} else if val, err := ar.Vars.GetField([]string{"AccountID"}); err != nil {
+		t.Error(err)
+	} else if nm, ok := val.([]*config.NMItem); !ok {
+		t.Error("Expecting NM items")
+	} else if len(nm) != 1 {
+		t.Error("Expecting one item ", utils.ToJSON(nm))
+	} else if nm[0].Data != "cgrates.org:1009" {
+		t.Error("Expecting 'cgrates.org:1009', received: ", nm[0].Data)
+	}
+
+	input = []*config.FCTemplate{
+		&config.FCTemplate{
+			Path:    "*vars.Account",
+			Tag:     "*vars.Account",
+			Filters: []string{"Not really a filter"},
+			Type:    utils.META_CONSTANT,
+			Value:   config.NewRSRParsersMustCompile("2021", false, ";"),
+		},
+	}
+	if err := ar.SetFields(input); err == nil || err.Error() != "NO_DATA_BASE_CONNECTION" {
+		t.Errorf("Expecting: 'NO_DATA_BASE_CONNECTION', received: %+v", err)
+	}
+
+	// Blocker: true
+	input = []*config.FCTemplate{
+		&config.FCTemplate{
+			Path:    "*vars.Name",
+			Tag:     "*vars.Name",
+			Type:    utils.MetaVariable,
+			Value:   config.NewRSRParsersMustCompile("~*req.Account", false, ";"),
+			Blocker: true,
+		},
+		&config.FCTemplate{
+			Path:  "*vars.Name",
+			Tag:   "*vars.Name",
+			Type:  utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("1005", false, ";"),
+		},
+	}
+	if err := ar.SetFields(input); err != nil {
+		t.Error(err)
+	} else if val, err := ar.Vars.GetField([]string{"Name"}); err != nil {
+		t.Error(err)
+	} else if nm, ok := val.([]*config.NMItem); !ok {
+		t.Error("Expecting NM items")
+	} else if len(nm) != 1 {
+		t.Error("Expecting one item: rcv :", utils.ToJSON(nm))
+	} else if nm[0].Data != "1009" {
+		t.Error("Expecting 1009, received: ", nm[0].Data)
+	}
+
+	// ErrNotFound
+	input = []*config.FCTemplate{
+		&config.FCTemplate{
+			Path:  "*vars.Test",
+			Tag:   "*vars.Test",
+			Type:  utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("~*req.Test", false, ";"),
+		},
+	}
+	if err := ar.SetFields(input); err != nil {
+		t.Error(err)
+	} else if _, err := ar.Vars.GetField([]string{"Test"}); err == nil || err != utils.ErrNotFound {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ErrNotFound, err)
+	}
+	input = []*config.FCTemplate{
+		&config.FCTemplate{
+			Path:      "*vars.Test",
+			Tag:       "*vars.Test",
+			Type:      utils.MetaVariable,
+			Value:     config.NewRSRParsersMustCompile("~*req.Test", false, ";"),
+			Mandatory: true,
+		},
+	}
+	if err := ar.SetFields(input); err == nil || err.Error() != "NOT_FOUND:*vars.Test" {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ErrNotFound, err)
+	}
+
+	//Not found
+	input = []*config.FCTemplate{
+		&config.FCTemplate{
+			Path:      "wrong",
+			Tag:       "wrong",
+			Type:      utils.MetaVariable,
+			Value:     config.NewRSRParsersMustCompile("~*req.Account", false, ";"),
+			Mandatory: true,
+		},
+	}
+	if err := ar.SetFields(input); err == nil || err.Error() != "unsupported field prefix: <wrong>" {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ErrNotFound, err)
+	}
+
+	// MetaHdr/MetaTrl
+	input = []*config.FCTemplate{
+		&config.FCTemplate{
+			Path:  "*vars.Account4",
+			Tag:   "*vars.Account4",
+			Type:  utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("~*hdr.Account", false, ";"),
+		},
+	}
+	if err := ar.SetFields(input); err != nil {
+		t.Error(err)
+	} else if val, err := ar.Vars.GetField([]string{"Account4"}); err != nil {
+		t.Error(err)
+	} else if nm, ok := val.([]*config.NMItem); !ok {
+		t.Error("Expecting NM items")
+	} else if len(nm) != 1 {
+		t.Error("Expecting one item")
+	} else if nm[0].Data != "1009" {
+		t.Error("Expecting 1009, received: ", nm[0].Data)
+	}
+
+	input = []*config.FCTemplate{
+		&config.FCTemplate{
+			Path:  "*vars.Account5",
+			Tag:   "*vars.Account5",
+			Type:  utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("~*trl.Account", false, ";"),
+		},
+	}
+	if err := ar.SetFields(input); err != nil {
+		t.Error(err)
+	} else if val, err := ar.Vars.GetField([]string{"Account5"}); err != nil {
+		t.Error(err)
+	} else if nm, ok := val.([]*config.NMItem); !ok {
+		t.Error("Expecting NM items")
+	} else if len(nm) != 1 {
+		t.Error("Expecting one item")
+	} else if nm[0].Data != "1009" {
+		t.Error("Expecting 1009, received: ", nm[0].Data)
+	}
 }
 
+/*
 func TestAgReqMaxCost(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
