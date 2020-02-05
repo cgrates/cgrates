@@ -1674,7 +1674,7 @@ func TestDfEventReaderCfg(t *testing.T) {
 				Id:                  utils.StringPointer(utils.MetaDefault),
 				Type:                utils.StringPointer(utils.MetaFileCSV),
 				Field_separator:     utils.StringPointer(","),
-				Run_delay:           utils.IntPointer(0),
+				Run_delay:           utils.StringPointer("0"),
 				Concurrent_requests: utils.IntPointer(1024),
 				Source_path:         utils.StringPointer("/var/spool/cgrates/cdrc/in"),
 				Processed_path:      utils.StringPointer("/var/spool/cgrates/cdrc/out"),
