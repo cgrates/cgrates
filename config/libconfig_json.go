@@ -169,7 +169,7 @@ type EventReaderJsonCfg struct {
 	Id                          *string
 	Type                        *string
 	Field_separator             *string
-	Run_delay                   *int
+	Run_delay                   *string
 	Concurrent_requests         *int
 	Source_path                 *string
 	Processed_path              *string

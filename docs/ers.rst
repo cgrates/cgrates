@@ -36,7 +36,7 @@ With explanations in the comments:
 	"readers": [						// list of active readers
 		{
 			"id": "file_reader2",		// file_reader2 reader
-			"run_delay": -1,			// reading of events it is triggered outside of ERs
+			"run_delay":  "-1",			// reading of events it is triggered outside of ERs
 			"field_separator": ";",		// field separator definition
 			"type": "*file_csv",		// type of reader, *file_csv can read .csv files
 			"flags": [					// influence processing logic within CGRateS workflow
