@@ -50,6 +50,7 @@ func NewAgentRequest(req config.DataProvider,
 		Request:    req,
 		Vars:       config.NewNavigableMap(vars),
 		CGRRequest: config.NewNavigableMap(nil),
+		diamreq:    config.NewNavigableMap(nil), // special case when CGRateS is building the request
 		CGRReply:   cgrRply,
 		Reply:      rply,
 		Timezone:   timezone,
@@ -109,6 +110,8 @@ func (ar *AgentRequest) FieldAsInterface(fldPath []string) (val interface{}, err
 		val, err = ar.CGRRequest.GetField(fldPath[1:])
 	case utils.MetaCgrep:
 		val, err = ar.CGRReply.GetField(fldPath[1:])
+	case utils.MetaDiamreq:
+		val, err = ar.diamreq.FieldAsInterface(fldPath[1:])
 	case utils.MetaRep:
 		val, err = ar.Reply.GetField(fldPath[1:])
 	case utils.MetaHdr:
@@ -188,9 +191,6 @@ func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 			case utils.MetaRep:
 				ar.Reply.Set(fldPath[1:], valSet, false, true)
 			case utils.MetaDiamreq:
-				if ar.diamreq == nil {
-					ar.diamreq = config.NewNavigableMap(nil) // special case when CGRateS is building the request
-				}
 				ar.diamreq.Set(fldPath[1:], valSet, false, true)
 			}
 		}
