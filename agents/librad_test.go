@@ -78,11 +78,11 @@ func init() {
 }
 
 func TestAttrVendorFromPath(t *testing.T) {
-	if attrName, vendorName := attrVendorFromPath("User-Name"); attrName != "User-Name" ||
+	if attrName, vendorName := attrVendorFromPath("*rep.User-Name"); attrName != "User-Name" ||
 		vendorName != "" {
 		t.Error("failed")
 	}
-	if attrName, vendorName := attrVendorFromPath("Cisco>Cisco-NAS-Port"); attrName != "Cisco-NAS-Port" ||
+	if attrName, vendorName := attrVendorFromPath("*rep.Cisco.Cisco-NAS-Port"); attrName != "Cisco-NAS-Port" ||
 		vendorName != "Cisco" {
 		t.Error("failed")
 	}
@@ -134,7 +134,7 @@ func TestRadReplyAppendAttributes(t *testing.T) {
 	rplyFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "ReplyCode", Path: MetaRadReplyCode, Type: utils.META_COMPOSED,
 			Value: config.NewRSRParsersMustCompile("~*cgrep.Attributes.RadReply", true, utils.INFIELD_SEP)},
-		&config.FCTemplate{Tag: "Acct-Session-Time", Path: "Acct-Session-Time", Type: utils.META_COMPOSED,
+		&config.FCTemplate{Tag: "Acct-Session-Time", Path: "*rep.Acct-Session-Time", Type: utils.META_COMPOSED,
 			Value: config.NewRSRParsersMustCompile("~*cgrep.MaxUsage{*duration_seconds}", true, utils.INFIELD_SEP)},
 	}
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", nil, nil, nil)
