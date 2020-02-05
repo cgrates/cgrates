@@ -3,11 +3,11 @@
 # TOPUP_RST_MONETARY_10 resets the <*default> <*monetary> balance to 10 units
 TOPUP_RST_MONETARY_10,*topup_reset,,,*default,*monetary,,,,,,,10,10,,,10
 
-# TOPUP_RST_5M_VOICE resets the special <PER_CALL> *voice balance valid to destination <DST_10> with special rates <RPF_SPECIAL_BLC> to 10m
-TOPUP_RST_5M_VOICE,*topup_reset,,,PER_CALL,*voice,,DST_10,RPF_SPECIAL_BLC,,,,10m,10,,,10
+# TOPUP_RST_10M_VOICE resets the special <PER_CALL> *voice balance valid to destination <DST_10> with special rates <RPF_SPECIAL_BLC> to 10m
+TOPUP_RST_10M_VOICE,*topup_reset,,,PER_CALL,*voice,,DST_10,RPF_SPECIAL_BLC,,,,10m,10,,,10
 
-# TOPUP_RST_10M_VOICE resets *voice balance <FREE_MINS> with 0 costs rounded up to minute to 5m and priority 20
-TOPUP_RST_10M_VOICE,*topup_reset,,,FREE_MINS,*voice,,,*zero1m,,,,5m,20,,,10
+# TOPUP_RST_5M_VOICE resets *voice balance <FREE_MINS> with 0 costs rounded up to minute to 5m and priority 20
+TOPUP_RST_5M_VOICE,*topup_reset,,,FREE_MINS,*voice,,,*zero1m,,,,5m,20,,,10
 
 # TOPUP_RST_100_SMS resets the <FREE_SMSes> *sms balance to 100 units and priority 20 in balance chain
 TOPUP_RST_100_SMS,*topup_reset,,,FREE_SMSes,*sms,,,,,,,100,20,,,10

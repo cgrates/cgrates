@@ -24,3 +24,6 @@ RT_20C1,0,0.2,1,1,0
 
 # RT_1CNT charges 0.01 units of cost for each 1s of usage
 RT_1CNT,0,0.01,1s,1s,0
+
+# RT_10CNT charges 0.1 units of cost for each call connected
+RT_10CNT,0.1,0,1s,1s,0

@@ -266,6 +266,32 @@ func testTutGetCost(t *testing.T) {
 	} else if *rply.Cost != 0.1 {
 		t.Errorf("Unexpected cost received: %f", *rply.Cost)
 	}
+	// reseller1 pricing for 1001->1002
+	attrs = v1.AttrGetCost{
+		Subject:     "1001",
+		Destination: "1002",
+		AnswerTime:  "*now",
+		Usage:       "45s",
+		Category:    "reseller1",
+	}
+	if err := tutRpc.Call(utils.APIerSv1GetCost, attrs, &rply); err != nil {
+		t.Error("Unexpected nil error received: ", err.Error())
+	} else if *rply.Cost != 0.1 {
+		t.Errorf("Unexpected cost received: %f", *rply.Cost)
+	}
+	// reseller1 pricing for 1001->1002 duration independent
+	attrs = v1.AttrGetCost{
+		Subject:     "1001",
+		Destination: "1002",
+		AnswerTime:  "*now",
+		Usage:       "10m45s",
+		Category:    "reseller1",
+	}
+	if err := tutRpc.Call(utils.APIerSv1GetCost, attrs, &rply); err != nil {
+		t.Error("Unexpected nil error received: ", err.Error())
+	} else if *rply.Cost != 0.1 {
+		t.Errorf("Unexpected cost received: %f", *rply.Cost)
+	}
 }
 
 func testTutAccounts(t *testing.T) {
