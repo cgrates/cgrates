@@ -78,7 +78,7 @@
 						"value": "~*req.leg_duration;s", "mandatory": true},
 				],
 				"reply_fields":[
-					{"tag": "ResultCode",  "filters": ["*rsr::~*cgrep.Error(!^$)"], 
+					{"tag": "ResultCode",  "filters": ["*notempty:~*cgrep.Error:"], 
 					"path": "*rep.CDR_RESPONSE.RESULT_CODE", "type": "*variable", "value": "~*cgrep.Error", "blocker": true},
 					{"tag": "CDR_ID", "path": "*rep.CDR_RESPONSE.CDR_ID", "type": "*variable",
 						"value": "~*req.CDR_ID", "mandatory": true},

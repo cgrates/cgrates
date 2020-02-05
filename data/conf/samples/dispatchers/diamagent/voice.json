@@ -28,7 +28,7 @@
 					"value": "~*req.Subscription-Id.Subscription-Id-Data", "mandatory": true},
 			],
 			"reply_fields":[
-				{"tag": "ResultCode",  "filters": ["*rsr::~*cgrep.Error(!^$)"], 
+				{"tag": "ResultCode",  "filters": ["*notempty:~*cgrep.Error:"], 
 					"path": "*rep.Result-Code", "type": "*constant", "value": "5030", "blocker": true},
 				{"tag": "ResultCode", "path": "*rep.Result-Code", "type": "*constant", "value": "2001"},
 				{"tag": "GrantedUnits", "path": "*rep.Granted-Service-Unit.CC-Time", "type": "*variable",
@@ -62,7 +62,7 @@
 					"value": "~*req.Subscription-Id.Subscription-Id-Data", "mandatory": true},
 			],
 			"reply_fields":[
-				{"tag": "ResultCode",  "filters": ["*rsr::~*cgrep.Error(!^$)"], 
+				{"tag": "ResultCode",  "filters": ["*notempty:~*cgrep.Error:"], 
 					"path": "*rep.Result-Code", "type": "*constant", "value": "5030", "blocker": true},
 				{"tag": "ResultCode", "path": "*rep.Result-Code", "type": "*constant", "value": "2001"},
 				{"tag": "GrantedUnits", "path": "*rep.Granted-Service-Unit.CC-Time", "type": "*variable",
@@ -95,7 +95,7 @@
 					"value": "~*req.Subscription-Id.Subscription-Id-Data", "mandatory": true},
 			],
 			"reply_fields":[
-				{"tag": "ResultCode",  "filters": ["*rsr::~*cgrep.Error(!^$)"], 
+				{"tag": "ResultCode",  "filters": ["*notempty:~*cgrep.Error:"], 
 					"path": "*rep.Result-Code", "type": "*constant", "value": "5030", "blocker": true},
 				{"tag": "ResultCode", "path": "*rep.Result-Code", "type": "*constant", "value": "2001"},
 			],

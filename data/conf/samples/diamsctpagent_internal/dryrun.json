@@ -38,7 +38,7 @@
 		},
 		{
 			"id": "dryrun2",
-			"filters": ["*rsr::~*rep.Multiple-Services-Credit-Control.Used-Service-Unit.CC-Total-Octets[0](!^$)"], // make sure the CC-Total-Octets was populated in the previous processor
+			"filters": ["*notempty:~*rep.Multiple-Services-Credit-Control.Used-Service-Unit.CC-Total-Octets[0]:"], // make sure the CC-Total-Octets was populated in the previous processor
 			"flags": ["*dryrun"],
 			"request_fields":[
 				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*sms"},
