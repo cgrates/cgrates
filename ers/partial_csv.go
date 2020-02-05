@@ -168,8 +168,7 @@ func (rdr *PartialCSVFileER) processFile(fPath, fName string) (err error) {
 			agReq); err != nil || !pass {
 			continue
 		}
-		navMp, err := agReq.AsNavigableMap(rdr.Config().Fields)
-		if err != nil {
+		if err := agReq.SetFields(rdr.Config().Fields); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> reading file: <%s> row <%d>, ignoring due to error: <%s>",
 					utils.ERs, absPath, rowNr, err.Error()))
@@ -177,14 +176,14 @@ func (rdr *PartialCSVFileER) processFile(fPath, fName string) (err error) {
 		}
 
 		// take OriginID and OriginHost to compose CGRID
-		orgId, err := navMp.FieldAsString([]string{utils.OriginID})
+		orgId, err := agReq.CGRRequest.FieldAsString([]string{utils.OriginID})
 		if err == utils.ErrNotFound {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> Missing <OriginID> field for row <%d> , <%s>",
 					utils.ERs, rowNr, record))
 			continue
 		}
-		orgHost, err := navMp.FieldAsString([]string{utils.OriginHost})
+		orgHost, err := agReq.CGRRequest.FieldAsString([]string{utils.OriginHost})
 		if err == utils.ErrNotFound {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> Missing <OriginHost> field for row <%d> , <%s>",
@@ -193,19 +192,19 @@ func (rdr *PartialCSVFileER) processFile(fPath, fName string) (err error) {
 		}
 		cgrID := utils.Sha1(orgId, orgHost)
 		// take Partial field from NavigableMap
-		partial, _ := navMp.FieldAsString([]string{utils.Partial})
+		partial, _ := agReq.CGRRequest.FieldAsString([]string{utils.Partial})
 		if val, has := rdr.cache.Get(cgrID); !has {
 			if utils.IsSliceMember([]string{"false", utils.EmptyString}, partial) { // complete CDR
-				rdr.rdrEvents <- &erEvent{cgrEvent: navMp.AsCGREvent(agReq.Tenant, utils.NestingSep),
+				rdr.rdrEvents <- &erEvent{cgrEvent: agReq.CGRRequest.AsCGREvent(agReq.Tenant, utils.NestingSep),
 					rdrCfg: rdr.Config()}
 				evsPosted++
 			} else {
 				rdr.cache.Set(cgrID,
-					[]*utils.CGREvent{navMp.AsCGREvent(agReq.Tenant, utils.NestingSep)}, nil)
+					[]*utils.CGREvent{agReq.CGRRequest.AsCGREvent(agReq.Tenant, utils.NestingSep)}, nil)
 			}
 		} else {
 			origCgrEvs := val.([]*utils.CGREvent)
-			origCgrEvs = append(origCgrEvs, navMp.AsCGREvent(agReq.Tenant, utils.NestingSep))
+			origCgrEvs = append(origCgrEvs, agReq.CGRRequest.AsCGREvent(agReq.Tenant, utils.NestingSep))
 			if utils.IsSliceMember([]string{"false", utils.EmptyString}, partial) { // complete CDR
 				//sort CGREvents based on AnswertTime and SetupTime
 				sort.Slice(origCgrEvs, func(i, j int) bool {

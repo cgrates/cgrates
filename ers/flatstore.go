@@ -176,7 +176,7 @@ func (rdr *FlatstoreER) processFile(fPath, fName string) (err error) {
 
 		// build Usage from Fields based on record lenght
 		for i, cntFld := range rdr.Config().Fields {
-			if cntFld.Path == utils.Usage {
+			if cntFld.Path == utils.MetaCgreq+utils.NestingSep+utils.Usage {
 				rdr.Config().Fields[i].Value = config.NewRSRParsersMustCompile("~*req."+strconv.Itoa(len(record)-1), true, utils.INFIELD_SEP) // in case of flatstore, last element will be the duration computed by us
 			}
 		}
@@ -192,15 +192,14 @@ func (rdr *FlatstoreER) processFile(fPath, fName string) (err error) {
 			agReq); err != nil || !pass {
 			continue
 		}
-		navMp, err := agReq.AsNavigableMap(rdr.Config().Fields)
-		if err != nil {
+		if err := agReq.SetFields(rdr.Config().Fields); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> reading file: <%s> row <%d>, ignoring due to error: <%s>",
 					utils.ERs, absPath, rowNr, err.Error()))
 			continue
 		}
 
-		rdr.rdrEvents <- &erEvent{cgrEvent: navMp.AsCGREvent(
+		rdr.rdrEvents <- &erEvent{cgrEvent: agReq.CGRRequest.AsCGREvent(
 			agReq.Tenant, utils.NestingSep),
 			rdrCfg: rdr.Config()}
 		evsPosted++
