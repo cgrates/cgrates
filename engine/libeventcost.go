@@ -106,6 +106,7 @@ func (cIl *ChargingInterval) Cost() float64 {
 	return *cIl.cost
 }
 
+// TotalCost returns the cost of charges
 func (cIl *ChargingInterval) TotalCost() float64 {
 	return utils.Round((cIl.Cost() * float64(cIl.CompressFactor)),
 		globalRoundingDecimals, utils.ROUNDING_MIDDLE)
@@ -131,6 +132,7 @@ type ChargingIncrement struct {
 	CompressFactor int
 }
 
+// Equals returns if the structure has the same value
 func (cIt *ChargingIncrement) Equals(oCIt *ChargingIncrement) bool {
 	return cIt.Usage == oCIt.Usage &&
 		cIt.Cost == oCIt.Cost &&
@@ -145,6 +147,7 @@ func (cIt *ChargingIncrement) PartiallyEquals(oCIt *ChargingIncrement) bool {
 		cIt.AccountingID == oCIt.AccountingID
 }
 
+// Clone creates a copy of ChargingIncrement
 func (cIt *ChargingIncrement) Clone() (cln *ChargingIncrement) {
 	cln = new(ChargingIncrement)
 	*cln = *cIt
@@ -156,8 +159,28 @@ func (cIt *ChargingIncrement) TotalUsage() time.Duration {
 	return time.Duration(cIt.Usage.Nanoseconds() * int64(cIt.CompressFactor))
 }
 
+// TotalCost returns the cost of the increment
 func (cIt *ChargingIncrement) TotalCost() float64 {
 	return cIt.Cost * float64(cIt.CompressFactor)
+}
+
+// FieldAsInterface func to help EventCost FieldAsInterface
+func (cIt *ChargingIncrement) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+	if len(fldPath) != 1 {
+		return nil, utils.ErrNotFound
+	}
+	switch fldPath[0] {
+	default:
+		return nil, fmt.Errorf("unsupported field prefix: <%s>", fldPath[0])
+	case utils.Usage:
+		return cIt.Usage, nil
+	case utils.Cost:
+		return cIt.Cost, nil
+	case utils.AccountingID:
+		return cIt.AccountingID, nil
+	case utils.CompressFactor:
+		return cIt.CompressFactor, nil
+	}
 }
 
 // BalanceCharge represents one unit charged to a balance
@@ -169,6 +192,28 @@ type BalanceCharge struct {
 	ExtraChargeID string  // used in cases when paying *voice with *monetary
 }
 
+// FieldAsInterface func to help EventCost FieldAsInterface
+func (bc *BalanceCharge) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+	if len(fldPath) != 1 {
+		return nil, utils.ErrNotFound
+	}
+	switch fldPath[0] {
+	default:
+		return nil, fmt.Errorf("unsupported field prefix: <%s>", fldPath[0])
+	case utils.AccountID:
+		return bc.AccountID, nil
+	case utils.BalanceUUID:
+		return bc.BalanceUUID, nil
+	case utils.RatingID:
+		return bc.RatingID, nil
+	case utils.Units:
+		return bc.Units, nil
+	case utils.ExtraChargeID:
+		return bc.ExtraChargeID, nil
+	}
+}
+
+// Equals returns if the structure have the same fields
 func (bc *BalanceCharge) Equals(oBC *BalanceCharge) bool {
 	bcExtraChargeID := bc.ExtraChargeID
 	if bcExtraChargeID == "" {
@@ -185,14 +230,17 @@ func (bc *BalanceCharge) Equals(oBC *BalanceCharge) bool {
 		bcExtraChargeID == oBCExtraChargerID
 }
 
+// Clone creates a copy of BalanceCharge
 func (bc *BalanceCharge) Clone() *BalanceCharge {
 	clnBC := new(BalanceCharge)
 	*clnBC = *bc
 	return clnBC
 }
 
+// RatingMatchedFilters a rating filter
 type RatingMatchedFilters map[string]interface{}
 
+// Equals returns if the RatingMatchedFilters are equal
 func (rf RatingMatchedFilters) Equals(oRF RatingMatchedFilters) bool {
 	for k := range rf {
 		if rf[k] != oRF[k] {
@@ -202,6 +250,7 @@ func (rf RatingMatchedFilters) Equals(oRF RatingMatchedFilters) bool {
 	return true
 }
 
+// Clone creates a copy of RatingMatchedFilters
 func (rf RatingMatchedFilters) Clone() (cln map[string]interface{}) {
 	if rf == nil {
 		return nil
@@ -213,6 +262,18 @@ func (rf RatingMatchedFilters) Clone() (cln map[string]interface{}) {
 	return
 }
 
+// FieldAsInterface func to help EventCost FieldAsInterface
+func (rf *RatingMatchedFilters) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+	if len(fldPath) != 1 {
+		return nil, utils.ErrNotFound
+	}
+	ct, has := (*rf)[fldPath[0]]
+	if !has || ct == nil {
+		return nil, utils.ErrNotFound
+	}
+	return ct, nil
+}
+
 // ChargedTiming represents one timing attached to a charge
 type ChargedTiming struct {
 	Years     utils.Years
@@ -222,6 +283,7 @@ type ChargedTiming struct {
 	StartTime string
 }
 
+// Equals returns if the timings are equal
 func (ct *ChargedTiming) Equals(oCT *ChargedTiming) bool {
 	return ct.Years.Equals(oCT.Years) &&
 		ct.Months.Equals(oCT.Months) &&
@@ -230,10 +292,32 @@ func (ct *ChargedTiming) Equals(oCT *ChargedTiming) bool {
 		ct.StartTime == oCT.StartTime
 }
 
+// Clone creates a copy of ChargedTiming
 func (ct *ChargedTiming) Clone() (cln *ChargedTiming) {
 	cln = new(ChargedTiming)
 	*cln = *ct
 	return
+}
+
+// FieldAsInterface func to help EventCost FieldAsInterface
+func (ct *ChargedTiming) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+	if len(fldPath) != 1 {
+		return nil, utils.ErrNotFound
+	}
+	switch fldPath[0] {
+	default:
+		return nil, fmt.Errorf("unsupported field prefix: <%s>", fldPath[0])
+	case utils.YearsFieldName:
+		return ct.Years, nil
+	case utils.MonthsFieldName:
+		return ct.Months, nil
+	case utils.MonthDaysFieldName:
+		return ct.MonthDays, nil
+	case utils.WeekDaysFieldName:
+		return ct.WeekDays, nil
+	case utils.StartTime:
+		return ct.StartTime, nil
+	}
 }
 
 // RatingUnit represents one unit out of RatingPlan matching for an event
@@ -248,6 +332,7 @@ type RatingUnit struct {
 	RatingFiltersID  string
 }
 
+// Equals returns if RatingUnit is equal to the other
 func (ru *RatingUnit) Equals(oRU *RatingUnit) bool {
 	return ru.ConnectFee == oRU.ConnectFee &&
 		ru.RoundingMethod == oRU.RoundingMethod &&
@@ -259,15 +344,44 @@ func (ru *RatingUnit) Equals(oRU *RatingUnit) bool {
 		ru.RatingFiltersID == oRU.RatingFiltersID
 }
 
+// Clone creates a copy of RatingUnit
 func (ru *RatingUnit) Clone() (cln *RatingUnit) {
 	cln = new(RatingUnit)
 	*cln = *ru
 	return
 }
 
+// FieldAsInterface func to help EventCost FieldAsInterface
+func (ru *RatingUnit) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+	if len(fldPath) != 1 {
+		return nil, utils.ErrNotFound
+	}
+	switch fldPath[0] {
+	default:
+		return nil, fmt.Errorf("unsupported field prefix: <%s>", fldPath[0])
+	case utils.ConnectFee:
+		return ru.ConnectFee, nil
+	case utils.RoundingMethod:
+		return ru.RoundingMethod, nil
+	case utils.RoundingDecimals:
+		return ru.RoundingDecimals, nil
+	case utils.MaxCost:
+		return ru.MaxCost, nil
+	case utils.MaxCostStrategy:
+		return ru.MaxCostStrategy, nil
+	case utils.TimingID:
+		return ru.TimingID, nil
+	case utils.RatesID:
+		return ru.RatesID, nil
+	case utils.RatingFiltersID:
+		return ru.RatingFiltersID, nil
+	}
+}
+
+// RatingFilters the map of rating filters
 type RatingFilters map[string]RatingMatchedFilters // so we can define search methods
 
-// GetWithSet attempts to retrieve the UUID of a matching data or create a new one
+// GetIDWithSet attempts to retrieve the UUID of a matching data or create a new one
 func (rfs RatingFilters) GetIDWithSet(rmf RatingMatchedFilters) string {
 	if rmf == nil || len(rmf) == 0 {
 		return ""
@@ -283,6 +397,7 @@ func (rfs RatingFilters) GetIDWithSet(rmf RatingMatchedFilters) string {
 	return uuid
 }
 
+// Clone creates a copy of RatingFilters
 func (rfs RatingFilters) Clone() (cln RatingFilters) {
 	cln = make(RatingFilters, len(rfs))
 	for k, v := range rfs {
@@ -291,6 +406,22 @@ func (rfs RatingFilters) Clone() (cln RatingFilters) {
 	return
 }
 
+// FieldAsInterface func to help EventCost FieldAsInterface
+func (rfs *RatingFilters) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+	if len(fldPath) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	ct, has := (*rfs)[fldPath[0]]
+	if !has || ct == nil {
+		return nil, utils.ErrNotFound
+	}
+	if len(fldPath) == 1 {
+		return ct, nil
+	}
+	return ct.FieldAsInterface(fldPath[1:])
+}
+
+// Rating the map of rating units
 type Rating map[string]*RatingUnit
 
 // GetIDWithSet attempts to retrieve the UUID of a matching data or create a new one
@@ -309,6 +440,7 @@ func (crus Rating) GetIDWithSet(cru *RatingUnit) string {
 	return uuid
 }
 
+// Clone creates a copy of Rating
 func (crus Rating) Clone() (cln Rating) {
 	cln = make(Rating, len(crus))
 	for k, v := range crus {
@@ -317,7 +449,49 @@ func (crus Rating) Clone() (cln Rating) {
 	return
 }
 
+// FieldAsInterface func to help EventCost FieldAsInterface
+func (crus *Rating) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+	if len(fldPath) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	rt, has := (*crus)[fldPath[0]]
+	if !has || rt == nil {
+		return nil, utils.ErrNotFound
+	}
+	if len(fldPath) == 1 {
+		return rt, nil
+	}
+	return rt.FieldAsInterface(fldPath[1:])
+}
+
+// ChargedRates the map with rateGroups
 type ChargedRates map[string]RateGroups
+
+// FieldAsInterface func to help EventCost FieldAsInterface
+func (crs *ChargedRates) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+	if len(fldPath) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	opath, indx := utils.GetPathIndex(fldPath[0])
+	cr, has := (*crs)[opath]
+	if !has || cr == nil {
+		return nil, utils.ErrNotFound
+	}
+	if indx != nil {
+		if len(cr) < *indx {
+			return nil, utils.ErrNotFound
+		}
+		rg := cr[*indx]
+		if len(fldPath) == 1 {
+			return rg, nil
+		}
+		return rg.FieldAsInterface(fldPath[1:])
+	}
+	if len(fldPath) != 1 {
+		return nil, utils.ErrNotFound
+	}
+	return cr, nil
+}
 
 // GetIDWithSet attempts to retrieve the UUID of a matching data or create a new one
 func (crs ChargedRates) GetIDWithSet(rg RateGroups) string {
@@ -335,6 +509,7 @@ func (crs ChargedRates) GetIDWithSet(rg RateGroups) string {
 	return uuid
 }
 
+// Clone creates a copy of ChargedRates
 func (crs ChargedRates) Clone() (cln ChargedRates) {
 	cln = make(ChargedRates, len(crs))
 	for k, v := range crs {
@@ -343,7 +518,23 @@ func (crs ChargedRates) Clone() (cln ChargedRates) {
 	return
 }
 
+// ChargedTimings the map of ChargedTiming
 type ChargedTimings map[string]*ChargedTiming
+
+// FieldAsInterface func to help EventCost FieldAsInterface
+func (cts *ChargedTimings) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+	if len(fldPath) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	ct, has := (*cts)[fldPath[0]]
+	if !has || ct == nil {
+		return nil, utils.ErrNotFound
+	}
+	if len(fldPath) == 1 {
+		return ct, nil
+	}
+	return ct.FieldAsInterface(fldPath[1:])
+}
 
 // GetIDWithSet attempts to retrieve the UUID of a matching data or create a new one
 func (cts ChargedTimings) GetIDWithSet(ct *ChargedTiming) string {
@@ -361,6 +552,7 @@ func (cts ChargedTimings) GetIDWithSet(ct *ChargedTiming) string {
 	return uuid
 }
 
+// Clone creates a copy of ChargedTimings
 func (cts ChargedTimings) Clone() (cln ChargedTimings) {
 	cln = make(ChargedTimings, len(cts))
 	for k, v := range cts {
@@ -369,6 +561,7 @@ func (cts ChargedTimings) Clone() (cln ChargedTimings) {
 	return
 }
 
+// Accounting the map of debited balances
 type Accounting map[string]*BalanceCharge
 
 // GetIDWithSet attempts to retrieve the UUID of a matching data or create a new one
@@ -387,12 +580,28 @@ func (cbs Accounting) GetIDWithSet(cb *BalanceCharge) string {
 	return uuid
 }
 
+// Clone creates a copy of Accounting
 func (cbs Accounting) Clone() (cln Accounting) {
 	cln = make(Accounting, len(cbs))
 	for k, v := range cbs {
 		cln[k] = v.Clone()
 	}
 	return
+}
+
+// FieldAsInterface func to help EventCost FieldAsInterface
+func (cbs *Accounting) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+	if len(fldPath) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	ac, has := (*cbs)[fldPath[0]]
+	if !has || ac == nil {
+		return nil, utils.ErrNotFound
+	}
+	if len(fldPath) == 1 {
+		return ac, nil
+	}
+	return ac.FieldAsInterface(fldPath[1:])
 }
 
 // IfaceAsEventCost converts an interface to EventCost

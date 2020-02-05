@@ -233,6 +233,25 @@ type Rate struct {
 	RateUnit           time.Duration
 }
 
+// FieldAsInterface func to help EventCost FieldAsInterface
+func (r *Rate) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+	if len(fldPath) != 1 {
+		return nil, utils.ErrNotFound
+	}
+	switch fldPath[0] {
+	default:
+		return nil, fmt.Errorf("unsupported field prefix: <%s>", fldPath[0])
+	case utils.GroupIntervalStart:
+		return r.GroupIntervalStart, nil
+	case utils.Value:
+		return r.Value, nil
+	case utils.RateIncrement:
+		return r.RateIncrement, nil
+	case utils.RateUnit:
+		return r.RateUnit, nil
+	}
+}
+
 func (r *Rate) Stringify() string {
 	return utils.Sha1(fmt.Sprintf("%v", r))[:8]
 }

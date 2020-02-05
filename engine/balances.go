@@ -892,7 +892,7 @@ func (f ValueFactor) GetValue(tor string) float64 {
 	return 1.0
 }
 
-// BalanceDigest represents compressed information about a balance
+// BalanceSummary represents compressed information about a balance
 type BalanceSummary struct {
 	UUID     string // Balance UUID
 	ID       string // Balance ID  if not defined
@@ -901,9 +901,10 @@ type BalanceSummary struct {
 	Disabled bool
 }
 
+// BalanceSummaries is a list of BalanceSummaries
 type BalanceSummaries []*BalanceSummary
 
-// GetBalanceSummary returns a BalanceSummary based on an UUID
+// BalanceSummaryWithUUD returns a BalanceSummary based on an UUID
 func (bs BalanceSummaries) BalanceSummaryWithUUD(bsUUID string) (b *BalanceSummary) {
 	for _, blc := range bs {
 		if blc.UUID == bsUUID {
@@ -912,4 +913,25 @@ func (bs BalanceSummaries) BalanceSummaryWithUUD(bsUUID string) (b *BalanceSumma
 		}
 	}
 	return
+}
+
+// FieldAsInterface func to help EventCost FieldAsInterface
+func (bl *BalanceSummary) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+	if len(fldPath) != 1 {
+		return nil, utils.ErrNotFound
+	}
+	switch fldPath[0] {
+	default:
+		return nil, fmt.Errorf("unsupported field prefix: <%s>", fldPath[0])
+	case utils.UUID:
+		return bl.UUID, nil
+	case utils.ID:
+		return bl.ID, nil
+	case utils.Type:
+		return bl.Type, nil
+	case utils.Value:
+		return bl.Value, nil
+	case utils.Disabled:
+		return bl.Disabled, nil
+	}
 }
