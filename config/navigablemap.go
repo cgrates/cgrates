@@ -159,8 +159,18 @@ func (nM *NavigableMap) FieldAsInterface(fldPath []string) (fldVal interface{}, 
 		if i == lenPath-1 { // lastElement
 			return nM.getLastItem(lastMp, spath)
 		}
-		if lastMp, err = nM.getNextMap(lastMp, spath); err != nil {
+		var dp interface{}
+		if dp, err = nM.getNextMap(lastMp, spath); err != nil {
 			return
+		}
+		switch mv := dp.(type) { // used for cdr when populating eventCost whitin
+		case map[string]interface{}:
+			lastMp = mv
+		case DataProvider:
+			return mv.FieldAsInterface(fldPath[i+1:])
+		default:
+			return nil, fmt.Errorf("cannot cast field: <%+v> type: %T with path: <%s> to map[string]interface{}",
+				dp, dp, spath)
 		}
 	}
 	err = errors.New("end of function")
@@ -213,7 +223,7 @@ func (nM *NavigableMap) getLastItem(mp map[string]interface{}, spath string) (va
 
 // getNextMap returns the next map from the given map
 // used only for path parsing
-func (nM *NavigableMap) getNextMap(mp map[string]interface{}, spath string) (map[string]interface{}, error) {
+func (nM *NavigableMap) getNextMap(mp map[string]interface{}, spath string) (interface{}, error) {
 	var idx *int
 	spath, idx = nM.getIndex(spath)
 	mi, has := mp[spath]
@@ -230,6 +240,8 @@ func (nM *NavigableMap) getNextMap(mp map[string]interface{}, spath string) (map
 			return mv.data, nil
 		case *NavigableMap:
 			return mv.data, nil
+		case DataProvider: // used for cdr when populating eventCost whitin
+			return mv, nil
 		default:
 		}
 	} else {
@@ -263,6 +275,10 @@ func (nM *NavigableMap) getNextMap(mp map[string]interface{}, spath string) (map
 		case []*NavigableMap:
 			if *idx < len(mv) {
 				return mv[*idx].data, nil
+			}
+		case []DataProvider: // used for cdr when populating eventCost whitin
+			if *idx < len(mv) {
+				return mv[*idx], nil
 			}
 		default:
 		}
