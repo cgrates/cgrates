@@ -18,7 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"encoding/json"
 	"reflect"
 	"strconv"
 	"testing"
@@ -489,6 +488,7 @@ func TestCdrClone(t *testing.T) {
 			Cost:  utils.Float64Pointer(0.74),
 		},
 	}
+	eOut.CostDetails.initCache()
 	if rcv := cdr.Clone(); !reflect.DeepEqual(rcv, eOut) {
 		t.Errorf("Expecting: %+v,\n received: %+v", eOut, rcv)
 	}
@@ -579,8 +579,6 @@ func TestCDRTestCDRAsMapStringIface2(t *testing.T) {
 		CostDetails: NewEventCostFromCallCost(cc, "TestCDRTestCDRAsMapStringIface2", utils.MetaDefault),
 	}
 
-	var result map[string]interface{}
-	json.Unmarshal([]byte(utils.ToJSON(cdr.CostDetails)), &result)
 	mp := map[string]interface{}{
 		"field_extr1":     "val_extr1",
 		"fieldextr2":      "valextr2",
@@ -605,7 +603,7 @@ func TestCDRTestCDRAsMapStringIface2(t *testing.T) {
 		utils.PreRated:    false,
 		utils.Partial:     false,
 		utils.ExtraInfo:   cdr.ExtraInfo,
-		utils.CostDetails: result,
+		utils.CostDetails: cdr.CostDetails,
 	}
 	if cdrMp := cdr.AsMapStringIface(); !reflect.DeepEqual(mp, cdrMp) {
 		t.Errorf("Expecting: %+v, received: %+v", mp, cdrMp)

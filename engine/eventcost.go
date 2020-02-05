@@ -37,6 +37,7 @@ func NewBareEventCost() *EventCost {
 		Rates:         make(ChargedRates),
 		Timings:       make(ChargedTimings),
 		Charges:       make([]*ChargingInterval, 0),
+		cache:         config.NewNavigableMap(nil),
 	}
 }
 
@@ -117,6 +118,14 @@ type EventCost struct {
 	RatingFilters  RatingFilters
 	Rates          ChargedRates
 	Timings        ChargedTimings
+
+	cache *config.NavigableMap
+}
+
+func (ec *EventCost) initCache() {
+	if ec != nil {
+		ec.cache = config.NewNavigableMap(nil)
+	}
 }
 
 func (ec *EventCost) ratingIDForRateInterval(ri *RateInterval, rf RatingMatchedFilters) string {
@@ -180,6 +189,7 @@ func (ec *EventCost) Clone() (cln *EventCost) {
 		return
 	}
 	cln = new(EventCost)
+	cln.initCache()
 	cln.CGRID = ec.CGRID
 	cln.RunID = ec.RunID
 	cln.StartTime = ec.StartTime
@@ -845,6 +855,27 @@ func (ec *EventCost) FieldAsInterface(fldPath []string) (val interface{}, err er
 	if len(fldPath) == 0 {
 		return nil, utils.ErrNotFound
 	}
+	if val, err = ec.cache.FieldAsInterface(fldPath); err != nil {
+		if err != utils.ErrNotFound { // item found in cache
+			return
+		}
+		err = nil // cancel previous err
+	} else if val == nil {
+		return nil, utils.ErrNotFound
+	} else {
+		return // data found in cache
+	}
+	val, err = ec.fieldAsInterface(fldPath)
+	if err == nil {
+		ec.cache.Set(fldPath, val, false, false)
+	} else if err == utils.ErrNotFound {
+		ec.cache.Set(fldPath, nil, false, false)
+	}
+	return
+}
+
+// FieldAsInterface the implementation of FieldAsInterface
+func (ec *EventCost) fieldAsInterface(fldPath []string) (val interface{}, err error) {
 	switch fldPath[0] {
 	default: // "Charges[1]"
 		opath, indx := utils.GetPathIndex(fldPath[0])
@@ -888,16 +919,34 @@ func (ec *EventCost) FieldAsInterface(fldPath []string) (val interface{}, err er
 		}
 		return ec.Cost, nil
 	case utils.AccountSummary:
+		if len(fldPath) == 1 {
+			return ec.AccountSummary, nil
+		}
 		return ec.AccountSummary.FieldAsInterface(fldPath[1:])
 	case utils.Timings:
+		if len(fldPath) == 1 {
+			return ec.Timings, nil
+		}
 		return ec.Timings.FieldAsInterface(fldPath[1:])
 	case utils.Rates:
+		if len(fldPath) == 1 {
+			return ec.Rates, nil
+		}
 		return ec.Rates.FieldAsInterface(fldPath[1:])
 	case utils.RatingFilters:
+		if len(fldPath) == 1 {
+			return ec.RatingFilters, nil
+		}
 		return ec.RatingFilters.FieldAsInterface(fldPath[1:])
 	case utils.Accounting:
+		if len(fldPath) == 1 {
+			return ec.Accounting, nil
+		}
 		return ec.Accounting.FieldAsInterface(fldPath[1:])
 	case utils.Rating:
+		if len(fldPath) == 1 {
+			return ec.Rating, nil
+		}
 		return ec.Rating.FieldAsInterface(fldPath[1:])
 	}
 	return nil, fmt.Errorf("unsupported field prefix: <%s>", fldPath[0])

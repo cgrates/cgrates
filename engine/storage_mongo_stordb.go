@@ -906,6 +906,7 @@ func (ms *MongoStorage) GetSMCosts(cgrid, runid, originHost, originIDPrefix stri
 				return err
 			}
 			clone := smCost
+			clone.CostDetails.initCache()
 			smcs = append(smcs, &clone)
 		}
 		if len(smcs) == 0 {
@@ -1165,6 +1166,7 @@ func (ms *MongoStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 				return err
 			}
 			clone := cdr
+			clone.CostDetails.initCache()
 			cdrs = append(cdrs, &clone)
 		}
 		if len(cdrs) == 0 {

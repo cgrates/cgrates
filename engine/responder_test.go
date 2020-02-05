@@ -124,6 +124,7 @@ func TestResponderGobSMCost(t *testing.T) {
 	if err != nil {
 		t.Error("decode error: ", err)
 	}
+	q.Cost.CostDetails.initCache()
 	if !reflect.DeepEqual(attr, q) {
 		t.Error("wrong transmission")
 	}
