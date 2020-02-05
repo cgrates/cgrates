@@ -31,7 +31,6 @@ import (
 	"log"
 	"math"
 	math_rand "math/rand"
-	"net/url"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -799,70 +798,6 @@ func APIerRPCCall(inst interface{}, serviceMethod string, args interface{}, repl
 		return ErrServerError
 	}
 	return err
-}
-
-// NewFallbackFileNameFronString will revert the meta information in the fallback file name into original data
-func NewFallbackFileNameFronString(fileName string) (ffn *FallbackFileName, err error) {
-	ffn = new(FallbackFileName)
-	moduleIdx := strings.Index(fileName, HandlerArgSep)
-	ffn.Module = fileName[:moduleIdx]
-	var supportedModule bool
-	for _, prfx := range []string{ActionsPoster, CDRPoster} {
-		if strings.HasPrefix(ffn.Module, prfx) {
-			supportedModule = true
-			break
-		}
-	}
-	if !supportedModule {
-		return nil, fmt.Errorf("unsupported module: %s", ffn.Module)
-	}
-	fileNameWithoutModule := fileName[moduleIdx+1:]
-	for _, trspt := range []string{MetaHTTPjsonCDR, MetaHTTPjsonMap, MetaHTTPjson, MetaHTTPPost, MetaAMQPjsonCDR, MetaAMQPjsonMap, MetaAMQPV1jsonMap, MetaSQSjsonMap, MetaKafkajsonMap, MetaS3jsonMap} {
-		if strings.HasPrefix(fileNameWithoutModule, trspt) {
-			ffn.Transport = trspt
-			break
-		}
-	}
-	if ffn.Transport == "" {
-		return nil, fmt.Errorf("unsupported transport in fallback file path: %s", fileName)
-	}
-	fileNameWithoutTransport := fileNameWithoutModule[len(ffn.Transport)+1:]
-	reqIDidx := strings.LastIndex(fileNameWithoutTransport, HandlerArgSep)
-	if reqIDidx == -1 {
-		return nil, fmt.Errorf("cannot find request ID in fallback file path: %s", fileName)
-	}
-	if ffn.Address, err = url.QueryUnescape(fileNameWithoutTransport[:reqIDidx]); err != nil {
-		return nil, err
-	}
-	fileNameWithoutAddress := fileNameWithoutTransport[reqIDidx+1:]
-	for _, suffix := range []string{TxtSuffix, JSNSuffix, FormSuffix} {
-		if strings.HasSuffix(fileNameWithoutAddress, suffix) {
-			ffn.FileSuffix = suffix
-			break
-		}
-	}
-	if ffn.FileSuffix == "" {
-		return nil, fmt.Errorf("unsupported suffix in fallback file path: %s", fileName)
-	}
-	ffn.RequestID = fileNameWithoutAddress[:len(fileNameWithoutAddress)-len(ffn.FileSuffix)]
-	return
-}
-
-// FallbackFileName is the struct defining the name of a file where CGRateS will dump data which fails to be sent remotely
-type FallbackFileName struct {
-	Module     string // name of the module writing the file
-	Transport  string // transport used to send data remotely
-	Address    string // remote address where data should have been sent
-	RequestID  string // unique identifier of the request which should make files unique
-	FileSuffix string // informative file termination suffix
-}
-
-func (ffn *FallbackFileName) AsString() string {
-	if ffn.FileSuffix == "" { // Autopopulate FileSuffix based on the transport used
-		ffn.FileSuffix = CDREFileSuffixes[ffn.Transport]
-	}
-	// instead of using fmt.Sprintf we use "+" as binary operator (small optimization)
-	return ffn.Module + HandlerArgSep + ffn.Transport + HandlerArgSep + url.QueryEscape(ffn.Address) + HandlerArgSep + ffn.RequestID + ffn.FileSuffix
 }
 
 // CachedRPCResponse is used to cache a RPC response
