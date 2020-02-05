@@ -56,7 +56,7 @@ func TestKafkaER(t *testing.T) {
 			"filters": [],										// limit parsing based on the filters
 			"flags": [],										// flags to influence the event processing
 			"fields":[									// import fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
-				{"tag": "CGRID", "type": "*composed", "value": "~*req.CGRID", "path": "CGRID"},
+				{"tag": "CGRID", "type": "*composed", "value": "~*req.CGRID", "path": "*cgreq.CGRID"},
 			],
 		},
 	],
