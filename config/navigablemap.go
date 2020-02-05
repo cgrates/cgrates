@@ -104,8 +104,18 @@ func (nM *NavigableMap) GetField(path []string) (fldVal interface{}, err error) 
 		if i == lenPath-1 { // lastElement
 			return nM.getLastRealItem(lastMp, spath)
 		}
-		if lastMp, err = nM.getNextMap(lastMp, spath); err != nil {
+		var dp interface{}
+		if dp, err = nM.getNextMap(lastMp, spath); err != nil {
 			return
+		}
+		switch mv := dp.(type) { // used for cdr when populating eventCost whitin
+		case map[string]interface{}:
+			lastMp = mv
+		case DataProvider:
+			return mv.FieldAsInterface(path[i+1:])
+		default:
+			return nil, fmt.Errorf("cannot cast field: <%+v> type: %T with path: <%s> to map[string]interface{}",
+				dp, dp, spath)
 		}
 	}
 	panic("BUG") // should never make it here
