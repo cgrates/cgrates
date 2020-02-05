@@ -881,6 +881,8 @@ const (
 	MetaNotDestinations = "*notdestinations"
 	MetaNotResources    = "*notresources"
 	MetaNotEqual        = "*noteq"
+
+	MetaEC = "*ec"
 )
 
 // ReplicatorSv1 APIs

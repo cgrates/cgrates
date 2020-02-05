@@ -1017,3 +1017,167 @@ func TestPassFilterMissingField(t *testing.T) {
 		t.Errorf("Expecting: false , received: %+v", pass)
 	}
 }
+
+func TestEventCostFilter(t *testing.T) {
+
+	cfg, _ := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dmFilterPass := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	filterS := FilterS{
+		cfg: cfg,
+		dm:  dmFilterPass,
+	}
+	cd := &EventCost{
+		Cost:  utils.Float64Pointer(0.264933),
+		CGRID: "d8534def2b7067f4f5ad4f7ec7bbcc94bb46111a",
+		Rates: ChargedRates{
+			"3db483c": RateGroups{
+				{
+					Value:              0.1574,
+					RateUnit:           60000000000,
+					RateIncrement:      30000000000,
+					GroupIntervalStart: 0,
+				},
+				{
+					Value:              0.1574,
+					RateUnit:           60000000000,
+					RateIncrement:      1000000000,
+					GroupIntervalStart: 30000000000,
+				},
+			},
+		},
+		RunID: "*default",
+		Usage: utils.DurationPointer(101 * time.Second),
+		Rating: Rating{
+			"7f3d423": &RatingUnit{
+				MaxCost:          40,
+				RatesID:          "3db483c",
+				TimingID:         "128e970",
+				ConnectFee:       0,
+				RoundingMethod:   "*up",
+				MaxCostStrategy:  "*disconnect",
+				RatingFiltersID:  "f8e95f2",
+				RoundingDecimals: 4,
+			},
+		},
+		Charges: []*ChargingInterval{
+			{
+				RatingID: "7f3d423",
+				Increments: []*ChargingIncrement{
+					{
+						Cost:           0.0787,
+						Usage:          30000000000,
+						AccountingID:   "fee8a3a",
+						CompressFactor: 1,
+					},
+				},
+				CompressFactor: 1,
+			},
+			{
+				RatingID: "7f3d423",
+				Increments: []*ChargingIncrement{
+					{
+						Cost:           0.002623,
+						Usage:          1000000000,
+						AccountingID:   "3463957",
+						CompressFactor: 71,
+					},
+				},
+				CompressFactor: 1,
+			},
+		},
+		Timings: ChargedTimings{
+			"128e970": &ChargedTiming{
+				StartTime: "00:00:00",
+			},
+		},
+		StartTime: time.Date(2019, 12, 06, 11, 57, 32, 0, time.UTC),
+		Accounting: Accounting{
+			"3463957": &BalanceCharge{
+				Units:         0.002623,
+				RatingID:      "",
+				AccountID:     "cgrates.org:1001",
+				BalanceUUID:   "154419f2-45e0-4629-a203-06034ccb493f",
+				ExtraChargeID: "",
+			},
+			"fee8a3a": &BalanceCharge{
+				Units:         0.0787,
+				RatingID:      "",
+				AccountID:     "cgrates.org:1001",
+				BalanceUUID:   "154419f2-45e0-4629-a203-06034ccb493f",
+				ExtraChargeID: "",
+			},
+		},
+		RatingFilters: RatingFilters{
+			"f8e95f2": RatingMatchedFilters{
+				"Subject":           "*out:cgrates.org:mo_call_UK_Mobile_O2_GBRCN:*any",
+				"RatingPlanID":      "RP_MO_CALL_44800",
+				"DestinationID":     "DST_44800",
+				"DestinationPrefix": "44800",
+			},
+		},
+		AccountSummary: &AccountSummary{
+			ID:            "234189200129930",
+			Tenant:        "cgrates.org",
+			Disabled:      false,
+			AllowNegative: false,
+			BalanceSummaries: BalanceSummaries{
+				&BalanceSummary{
+					ID:       "MOBILE_DATA",
+					Type:     "*data",
+					UUID:     "08a05723-5849-41b9-b6a9-8ee362539280",
+					Value:    3221225472,
+					Disabled: false,
+				},
+				&BalanceSummary{
+					ID:       "MOBILE_SMS",
+					Type:     "*sms",
+					UUID:     "06a87f20-3774-4eeb-826e-a79c5f175fd3",
+					Value:    247,
+					Disabled: false,
+				},
+				&BalanceSummary{
+					ID:       "MOBILE_VOICE",
+					Type:     "*voice",
+					UUID:     "4ad16621-6e22-4e35-958e-5e1ff93ad7b7",
+					Value:    14270000000000,
+					Disabled: false,
+				},
+				&BalanceSummary{
+					ID:       "MONETARY_POSTPAID",
+					Type:     "*monetary",
+					UUID:     "154419f2-45e0-4629-a203-06034ccb493f",
+					Value:    50,
+					Disabled: false,
+				},
+			},
+		},
+	}
+
+	cgrDp := config.NewNavigableMap(map[string]interface{}{utils.MetaEC: cd})
+
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*string:~*ec.Charges[0].Increments[0].Accounting.Balance.Value:50"}, cgrDp); err != nil {
+		t.Errorf(err.Error())
+	} else if !pass {
+		t.Errorf("Expecting: true , received: %+v", pass)
+	}
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*string:~*ec.Charges[0].Increments[0].Accounting.AccountID:cgrates.org:1001"}, cgrDp); err != nil {
+		t.Errorf(err.Error())
+	} else if !pass {
+		t.Errorf("Expecting: true , received: %+v", pass)
+	}
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*string:~*ec.Charges[0].Rating.Rates[0].Value:0.1574"}, cgrDp); err != nil {
+		t.Errorf(err.Error())
+	} else if !pass {
+		t.Errorf("Expecting: true , received: %+v", pass)
+	}
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*string:~*ec.Charges[0].Increments[0].Accounting.Balance.ID:MONETARY_POSTPAID"}, cgrDp); err != nil {
+		t.Errorf(err.Error())
+	} else if !pass {
+		t.Errorf("Expecting: true , received: %+v", pass)
+	}
+}

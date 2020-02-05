@@ -484,7 +484,8 @@ func (fS *FilterS) getFieldNameDataProvider(initialDP config.DataProvider,
 		strings.HasPrefix(fieldName, utils.DynamicDataPrefix+utils.MetaCgrep),
 		strings.HasPrefix(fieldName, utils.DynamicDataPrefix+utils.MetaRep),
 		strings.HasPrefix(fieldName, utils.DynamicDataPrefix+utils.MetaCGRAReq),
-		strings.HasPrefix(fieldName, utils.DynamicDataPrefix+utils.MetaAct):
+		strings.HasPrefix(fieldName, utils.DynamicDataPrefix+utils.MetaAct),
+		strings.HasPrefix(fieldName, utils.DynamicDataPrefix+utils.MetaEC):
 		dp = initialDP
 	// don't need to take out the prefix because the navigable map have ~*req prefix
 	case fieldName == utils.EmptyString:

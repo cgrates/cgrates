@@ -153,7 +153,10 @@ func (cdr *CDR) FormatCost(shiftDecimals, roundDecimals int) string {
 // FieldAsString is used to retrieve fields as string, primary fields are const labeled
 func (cdr *CDR) FieldAsString(rsrPrs *config.RSRParser) (parsed string, err error) {
 	parsed, err = rsrPrs.ParseDataProviderWithInterfaces(
-		config.NewNavigableMap(map[string]interface{}{utils.MetaReq: cdr.AsMapStringIface()}), utils.NestingSep)
+		config.NewNavigableMap(map[string]interface{}{
+			utils.MetaReq: cdr.AsMapStringIface(),
+			utils.MetaEC:  cdr.CostDetails,
+			}), utils.NestingSep)
 	if err != nil {
 		return
 	}
@@ -163,7 +166,10 @@ func (cdr *CDR) FieldAsString(rsrPrs *config.RSRParser) (parsed string, err erro
 // FieldsAsString concatenates values of multiple fields defined in template, used eg in CDR templates
 func (cdr *CDR) FieldsAsString(rsrFlds config.RSRParsers) string {
 	outVal, err := rsrFlds.ParseDataProviderWithInterfaces(
-		config.NewNavigableMap(map[string]interface{}{utils.MetaReq: cdr.AsMapStringIface()}), utils.NestingSep)
+		config.NewNavigableMap(map[string]interface{}{
+			utils.MetaReq: cdr.AsMapStringIface(),
+			utils.MetaEC:  cdr.CostDetails,
+			}), utils.NestingSep)
 	if err != nil {
 		return ""
 	}
@@ -403,7 +409,10 @@ func (cdr *CDR) formatField(cfgFld *config.FCTemplate, httpSkipTLSCheck bool,
 // ExportRecord is a []string to keep it compatible with encoding/csv Writer
 func (cdr *CDR) AsExportRecord(exportFields []*config.FCTemplate,
 	httpSkipTLSCheck bool, groupedCDRs []*CDR, filterS *FilterS) (expRecord []string, err error) {
-	nM := config.NewNavigableMap(map[string]interface{}{utils.MetaReq: cdr.AsMapStringIface()})
+	nM := config.NewNavigableMap(map[string]interface{}{
+		utils.MetaReq: cdr.AsMapStringIface(),
+		utils.MetaEC:  cdr.CostDetails,
+	})
 	for _, cfgFld := range exportFields {
 		if !strings.HasPrefix(cfgFld.Path, utils.MetaExp) {
 			continue
@@ -430,7 +439,10 @@ func (cdr *CDR) AsExportRecord(exportFields []*config.FCTemplate,
 func (cdr *CDR) AsExportMap(exportFields []*config.FCTemplate, httpSkipTLSCheck bool,
 	groupedCDRs []*CDR, filterS *FilterS) (expMap map[string]string, err error) {
 	expMap = make(map[string]string)
-	nM := config.NewNavigableMap(map[string]interface{}{utils.MetaReq: cdr.AsMapStringIface()})
+	nM := config.NewNavigableMap(map[string]interface{}{
+		utils.MetaReq: cdr.AsMapStringIface(),
+		utils.MetaEC:  cdr.CostDetails,
+	})
 	for _, cfgFld := range exportFields {
 		if !strings.HasPrefix(cfgFld.Path, utils.MetaExp+utils.NestingSep) {
 			continue
