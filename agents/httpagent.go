@@ -109,7 +109,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 		reqProcessor.Filters, agReq); err != nil || !pass {
 		return pass, err
 	}
-	if agReq.CGRRequest, err = agReq.AsNavigableMap(reqProcessor.RequestFields); err != nil {
+	if err = agReq.SetFields(reqProcessor.RequestFields); err != nil {
 		return
 	}
 	cgrEv := agReq.CGRRequest.AsCGREvent(agReq.Tenant, utils.NestingSep)
@@ -268,10 +268,8 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 			agReq.CGRReply.Set([]string{utils.Error}, err.Error(), false, false)
 		}
 	}
-	if nM, err := agReq.AsNavigableMap(reqProcessor.ReplyFields); err != nil {
+	if err := agReq.SetFields(reqProcessor.ReplyFields); err != nil {
 		return false, err
-	} else {
-		agReq.Reply.Merge(nM)
 	}
 	if reqProcessor.Flags.HasKey(utils.MetaLog) {
 		utils.Logger.Info(

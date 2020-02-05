@@ -153,14 +153,13 @@ func (rdr *CSVFileER) processFile(fPath, fName string) (err error) {
 			agReq); err != nil || !pass {
 			continue
 		}
-		navMp, err := agReq.AsNavigableMap(rdr.Config().Fields)
-		if err != nil {
+		if err := agReq.SetFields(rdr.Config().Fields); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> reading file: <%s> row <%d>, ignoring due to error: <%s>",
 					utils.ERs, absPath, rowNr, err.Error()))
 			continue
 		}
-		rdr.rdrEvents <- &erEvent{cgrEvent: navMp.AsCGREvent(
+		rdr.rdrEvents <- &erEvent{cgrEvent: agReq.CGRRequest.AsCGREvent(
 			agReq.Tenant, utils.NestingSep),
 			rdrCfg: rdr.Config()}
 		evsPosted++

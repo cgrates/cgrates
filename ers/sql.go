@@ -198,12 +198,11 @@ func (rdr *SQLEventReader) processMessage(msg map[string]interface{}) (err error
 		agReq); err != nil || !pass {
 		return
 	}
-	var navMp *config.NavigableMap
-	if navMp, err = agReq.AsNavigableMap(rdr.Config().Fields); err != nil {
+	if err = agReq.SetFields(rdr.Config().Fields); err != nil {
 		return
 	}
 	rdr.rdrEvents <- &erEvent{
-		cgrEvent: navMp.AsCGREvent(agReq.Tenant, utils.NestingSep),
+		cgrEvent: agReq.CGRRequest.AsCGREvent(agReq.Tenant, utils.NestingSep),
 		rdrCfg:   rdr.Config(),
 	}
 	return

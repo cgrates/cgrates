@@ -482,11 +482,10 @@ func diamErr(m *diam.Message, resCode uint32,
 		config.NewNavigableMap(nil),
 		config.NewNavigableMap(nil),
 		nil, tnt, tmz, filterS, nil, nil)
-	var rplyData *config.NavigableMap
-	if rplyData, err = aReq.AsNavigableMap(tpl); err != nil {
+	if err = aReq.SetFields(tpl); err != nil {
 		return
 	}
-	return diamAnswer(m, resCode, true, rplyData, tmz)
+	return diamAnswer(m, resCode, true, aReq.Reply, tmz)
 }
 
 func diamBareErr(m *diam.Message, resCode uint32) (a *diam.Message) {

@@ -997,6 +997,77 @@ func TestNavMapgetLastItem(t *testing.T) {
 	}
 }
 
+func TestNavMapGetField(t *testing.T) {
+	nM := &NavigableMap{
+		data: map[string]interface{}{
+			"FirstLevel": map[string]interface{}{
+				"SecondLevel": map[string]interface{}{
+					"ThirdLevel": map[string]interface{}{
+						"Fld1": []*NMItem{
+							{
+								Path: []string{"FirstLevel", "SecondLevel", "ThirdLevel", "Fld1"},
+								Data: "Val1",
+							},
+							{
+								Path: []string{"FirstLevel", "SecondLevel", "ThirdLevel", "Fld1"},
+								Data: "Val2",
+							},
+						},
+					},
+				},
+			},
+			"FirstLevel2": map[string]interface{}{
+				"SecondLevel2": []map[string]interface{}{
+					map[string]interface{}{
+						"ThirdLevel2": map[string]interface{}{
+							"Fld1": "Val1",
+						},
+					},
+					map[string]interface{}{
+						"Count": 10,
+						"ThirdLevel2": map[string]interface{}{
+							"Fld2": []string{"Val1", "Val2", "Val3"},
+						},
+					},
+				},
+			},
+			"AnotherFirstLevel": "ValAnotherFirstLevel",
+		},
+	}
+	pth := []string{"FirstLevel", "SecondLevel", "ThirdLevel", "Fld1[0]"}
+	eFld := &NMItem{
+		Path: []string{"FirstLevel", "SecondLevel", "ThirdLevel", "Fld1"},
+		Data: "Val1",
+	}
+	if fld, err := nM.GetField(pth); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eFld, fld) {
+		t.Errorf("expecting: %s, received: %s", utils.ToIJSON(eFld), utils.ToIJSON(fld))
+	}
+	eFld2 := map[string]interface{}{"Fld1": "Val1"}
+	pth = []string{"FirstLevel2", "SecondLevel2[0]", "ThirdLevel2"}
+	if fld, err := nM.GetField(pth); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eFld2, fld) {
+		t.Errorf("expecting: %s, received: %s", utils.ToIJSON(eFld2), utils.ToIJSON(fld))
+	}
+	eFld3 := "ValAnotherFirstLevel"
+	pth = []string{"AnotherFirstLevel"}
+	if fld, err := nM.GetField(pth); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eFld3, fld) {
+		t.Errorf("expecting: %s, received: %s", utils.ToIJSON(eFld3), utils.ToIJSON(fld))
+	}
+	pth = []string{"AnotherFirstLevel2"}
+	if _, err := nM.GetField(pth); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	}
+	pth = []string{"FirstLevel", "SecondLevel[1]", "ThirdLevel", "Fld1[0]"}
+	if _, err := nM.GetField(pth); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	}
+}
+
 func TestNavMapFieldAsInterface(t *testing.T) {
 	nM := &NavigableMap{
 		data: map[string]interface{}{

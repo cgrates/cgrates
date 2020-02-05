@@ -196,8 +196,7 @@ func (rdr *FWVFileER) processFile(fPath, fName string) (err error) {
 			agReq); err != nil || !pass {
 			continue
 		}
-		navMp, err := agReq.AsNavigableMap(rdr.Config().Fields)
-		if err != nil {
+		if err := agReq.SetFields(rdr.Config().Fields); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> reading file: <%s> row <%d>, ignoring due to error: <%s>",
 					utils.ERs, absPath, rowNr, err.Error()))
@@ -205,7 +204,7 @@ func (rdr *FWVFileER) processFile(fPath, fName string) (err error) {
 			continue
 		}
 		rdr.offset += rdr.lineLen // increase the offset
-		rdr.rdrEvents <- &erEvent{cgrEvent: navMp.AsCGREvent(
+		rdr.rdrEvents <- &erEvent{cgrEvent: agReq.CGRRequest.AsCGREvent(
 			agReq.Tenant, utils.NestingSep),
 			rdrCfg: rdr.Config()}
 		evsPosted++
@@ -286,14 +285,13 @@ func (rdr *FWVFileER) processTrailer(file *os.File, rowNr, evsPosted int, absPat
 		agReq); err != nil || !pass {
 		return nil
 	}
-	navMp, err := agReq.AsNavigableMap(trailerFields)
-	if err != nil {
+	if err := agReq.SetFields(trailerFields); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> reading file: <%s> row <%d>, ignoring due to error: <%s>",
 				utils.ERs, absPath, rowNr, err.Error()))
 		return err
 	}
-	rdr.rdrEvents <- &erEvent{cgrEvent: navMp.AsCGREvent(
+	rdr.rdrEvents <- &erEvent{cgrEvent: agReq.CGRRequest.AsCGREvent(
 		agReq.Tenant, utils.NestingSep),
 		rdrCfg: rdr.Config()}
 	evsPosted++
@@ -326,8 +324,7 @@ func (rdr *FWVFileER) createHeaderMap(record string, rowNr, evsPosted int, absPa
 		agReq); err != nil || !pass {
 		return nil
 	}
-	navMp, err := agReq.AsNavigableMap(hdrFields)
-	if err != nil {
+	if err := agReq.SetFields(hdrFields); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> reading file: <%s> row <%d>, ignoring due to error: <%s>",
 				utils.ERs, absPath, rowNr, err.Error()))
@@ -335,7 +332,7 @@ func (rdr *FWVFileER) createHeaderMap(record string, rowNr, evsPosted int, absPa
 		return err
 	}
 	rdr.offset += rdr.headerOffset // increase the offset
-	rdr.rdrEvents <- &erEvent{cgrEvent: navMp.AsCGREvent(
+	rdr.rdrEvents <- &erEvent{cgrEvent: agReq.CGRRequest.AsCGREvent(
 		agReq.Tenant, utils.NestingSep),
 		rdrCfg: rdr.Config()}
 	evsPosted++

@@ -15,43 +15,43 @@
 			"flags": ["*initiate", "*accounts"],
 			"request_fields":[
 				{
-					"tag": "ToR", "path": "ToR", 
+					"tag": "ToR", "path": "*cgreq.ToR",
 					"type": "*constant", "value": "*data"
 				},
 				{
-					"tag": "OriginID", "path": "OriginID", 
+					"tag": "OriginID", "path": "*cgreq.OriginID",
 					"type": "*variable", "mandatory": true, 
 					"value": "~*req.Session-Id"
 				},
 				{
-					"tag": "RequestType", "path": "RequestType", 
+					"tag": "RequestType", "path": "*cgreq.RequestType",
 					"type": "*constant", "value": "*prepaid"
 				},
 				{
-					"tag": "Category", "path": "Category", 
+					"tag": "Category", "path": "*cgreq.Category",
 					"type": "*constant", "value": "data"
 				},
 				{
-					"tag": "Account", "path": "Account", 
+					"tag": "Account", "path": "*cgreq.Account",
 					"type": "*variable", "mandatory": true, 
 					"value": "~*req.Subscription-Id.Subscription-Id-Data[~Subscription-Id-Type(1)]"
 				},
 				{
-					"tag": "Destination", "path": "Destination", 
+					"tag": "Destination", "path": "*cgreq.Destination",
 					"type": "*constant", "value": "data"
 				},
 				{
-					"tag": "SetupTime", "path": "SetupTime", 
+					"tag": "SetupTime", "path": "*cgreq.SetupTime",
 					"type": "*variable", "mandatory": true, 
 					"value": "~*req.Event-Timestamp"
 				},
 				{
-					"tag": "AnswerTime", "path": "AnswerTime", 
+					"tag": "AnswerTime", "path": "*cgreq.AnswerTime",
 					"type": "*variable", "mandatory": true, 
 					"value": "~*req.Event-Timestamp"
 				},
 				{
-					"tag": "Usage", "path": "Usage", 
+					"tag": "Usage", "path": "*cgreq.Usage",
 					"type": "*constant", "value": "2048"
 				},
 			],
@@ -60,7 +60,7 @@
 				{
 					"tag": "ResultCodeError",
 					"filters": ["*notempty:~*cgrep.Error:"],
-					"path": "Result-Code", "blocker": true,
+					"path": "*rep.Result-Code", "blocker": true,
 					"type": "*constant", "value": "5030"
 				},
 			],
@@ -109,7 +109,7 @@
 				{
 					"tag": "ResultCodeError",
 					"filters": ["*notempty:~*cgrep.Error:"],
-					"path": "Result-Code", "blocker": true,
+					"path": "*rep.Result-Code", "blocker": true,
 					"type": "*constant", "value": "5030"
 				},
 			],
@@ -178,7 +178,7 @@
 				{
 					"tag": "ResultCodeError",
 					"filters": ["*notempty:~*cgrep.Error:"],
-					"path": "Result-Code", "blocker": true,
+					"path": "*rep.Result-Code", "blocker": true,
 					"type": "*constant", "value": "5030"
 				},
 			],

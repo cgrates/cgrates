@@ -31,11 +31,11 @@ import (
 // radAttrVendorFromPath returns AttributenName and VendorName from path
 // path should be the form attributeName or vendorName/attributeName
 func attrVendorFromPath(path string) (attrName, vendorName string) {
-	splt := strings.Split(path, utils.HIERARCHY_SEP)
-	if len(splt) > 1 {
-		vendorName, attrName = splt[0], splt[1]
+	splt := strings.Split(path, utils.NestingSep)
+	if len(splt) > 2 {
+		vendorName, attrName = splt[1], splt[2]
 	} else {
-		attrName = splt[0]
+		attrName = splt[1]
 	}
 	return
 }

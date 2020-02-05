@@ -621,6 +621,7 @@ const (
 	MaxCost                     = "MaxCost"
 	MetaLoaders                 = "*loaders"
 	TmpSuffix                   = ".tmp"
+	MetaDiamreq                 = "*diamreq"
 )
 
 // Migrator Action
