@@ -25,7 +25,7 @@
 			],
 			"reply_fields": [
 				{"tag": "CCATemplate", "type": "*template", "value": "*cca"},
-				{"tag": "ResultCode",  "filters": ["*rsr::~*cgrep.Error(!^$)"], 
+				{"tag": "ResultCode",  "filters": ["*notempty:~*cgrep.Error:"], 
 					"path": "*rep.Result-Code", "type": "*constant", "value": "5030", "blocker": true},
 			],
 		},
@@ -57,7 +57,7 @@
 			],
 			"reply_fields": [
 				{"tag": "CCATemplate", "type": "*template", "value": "*cca"},
-				{"tag": "ResultCode",  "filters": ["*rsr::~*cgrep.Error(!^$)"], 
+				{"tag": "ResultCode",  "filters": ["*notempty:~*cgrep.Error:"], 
 					"path": "*rep.Result-Code", "type": "*constant", "value": "5030", "blocker": true},
 			],
 		},
@@ -89,7 +89,7 @@
 			],
 			"reply_fields": [
 				{"tag": "CCATemplate", "type": "*template", "value": "*cca"},
-				{"tag": "ResultCode",  "filters": ["*rsr::~*cgrep.Error(!^$)"], 
+				{"tag": "ResultCode",  "filters": ["*notempty:~*cgrep.Error:"], 
 					"path": "*rep.Result-Code", "type": "*constant", "value": "5030", "blocker": true},
 			],
 		},

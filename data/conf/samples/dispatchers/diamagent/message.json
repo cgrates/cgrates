@@ -27,7 +27,7 @@
 					"value": "~*req.Requested-Service-Unit.CC-Time", "mandatory": true},
 			],
 			"reply_fields":[
-				{"tag": "ResultCode",  "filters": ["*rsr::~*cgrep.Error(!^$)"], 
+				{"tag": "ResultCode",  "filters": ["*notempty:~*cgrep.Error:"], 
 					"path": "*rep.Result-Code", "type": "*constant", "value": "5030", "blocker": true},
 			],
 		},

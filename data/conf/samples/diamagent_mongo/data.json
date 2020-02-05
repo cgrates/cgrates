@@ -76,7 +76,7 @@
 				},
 				{
 					"tag": "ResultCode",
-					"filters": ["*rsr::~*cgrep.Error(!^$)"], 
+					"filters": ["*notempty:~*cgrep.Error:"], 
 					"path": "*rep.Result-Code",
 					"type": "*constant",
 					"value": "5030",
@@ -180,7 +180,7 @@
 				},
 				{
 					"tag": "ResultCode",
-					"filters": ["*rsr::~*cgrep.Error(!^$)"], 
+					"filters": ["*notempty:~*cgrep.Error:"], 
 					"path": "*rep.Result-Code",
 					"type": "*constant",
 					"value": "5030",
@@ -285,7 +285,7 @@
 				},
 				{
 					"tag": "ResultCode",
-					"filters": ["*rsr::~*cgrep.Error(!^$)"], 
+					"filters": ["*notempty:~*cgrep.Error:"], 
 					"path": "*rep.Result-Code",
 					"type": "*constant",
 					"value": "5030",
