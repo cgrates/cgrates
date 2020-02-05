@@ -189,7 +189,6 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 			break
 		}
 	}
-	fmt.Println(utils.ToJSON(cgrEv))
 	cgrArgs := cgrEv.ExtractArgs(reqProcessor.Flags.HasKey(utils.MetaDispatchers),
 		reqType == utils.MetaAuth || reqType == utils.MetaMessage || reqType == utils.MetaEvent)
 	if reqProcessor.Flags.HasKey(utils.MetaLog) {
