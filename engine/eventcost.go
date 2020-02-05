@@ -21,10 +21,10 @@ package engine
 import (
 	"errors"
 	"fmt"
-	"strconv"
-	"strings"
+	"net"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -840,48 +840,28 @@ func (ec *EventCost) Trim(atUsage time.Duration) (srplusEC *EventCost, err error
 	return
 }
 
-// getIndex returns the path and index if index present
-// path[index]=>path,index
-// path=>path,nil
-func getIndex(spath string) (opath string, idx *int) {
-	idxStart := strings.Index(spath, utils.IdxStart)
-	if idxStart == -1 || !strings.HasSuffix(spath, utils.IdxEnd) {
-		return spath, nil
-	}
-	slctr := spath[idxStart+1 : len(spath)-1]
-	opath = spath[:idxStart]
-	if strings.HasPrefix(slctr, utils.DynamicDataPrefix) {
-		return
-	}
-	idxVal, err := strconv.Atoi(slctr)
-	if err != nil {
-		return spath, nil
-	}
-	return opath, &idxVal
-}
-
 // FieldAsInterface func to implement DataProvider
 func (ec *EventCost) FieldAsInterface(fldPath []string) (val interface{}, err error) {
 	if len(fldPath) == 0 {
 		return nil, utils.ErrNotFound
 	}
 	switch fldPath[0] {
-	default: //"Charges [1]"
-		opath, indx := getIndex(fldPath[0])
+	default: // "Charges[1]"
+		opath, indx := utils.GetPathIndex(fldPath[0])
 		if opath != utils.Charges {
 			return nil, fmt.Errorf("unsupported field prefix: <%s>", opath)
 		}
 		if indx != nil {
-			chr := ec.Charges[*indx]
-			if len(fldPath) == 1 {
-				return chr, nil
+			if len(ec.Charges) < *indx {
+				return nil, utils.ErrNotFound
 			}
-			if fldPath[1] == utils.Rating {
-				return ec.getRatingForPath(fldPath[2:], ec.Rating[chr.RatingID])
-			}
+			return ec.getChargesForPath(fldPath[1:], ec.Charges[*indx])
 		}
-	case utils.Charges: // not needed?
-		// 	return ec.Charges.FieldAsInterface(fldPath[1:])
+	case utils.Charges:
+		if len(fldPath) != 1 { // slice has no members
+			return nil, utils.ErrNotFound
+		}
+		return ec.Charges, nil
 	case utils.CGRID:
 		if len(fldPath) != 1 {
 			return nil, utils.ErrNotFound
@@ -908,19 +888,55 @@ func (ec *EventCost) FieldAsInterface(fldPath []string) (val interface{}, err er
 		}
 		return ec.Cost, nil
 	case utils.AccountSummary:
-		// return ec.AccountSummary.FieldAsInterface(fldPath[1:])
-	case utils.Timings: // not needed?
-		// return ec.Timings.FieldAsInterface(fldPath[1:])
-	case utils.Rates: // not needed?
-		// 	return ec.Rates.FieldAsInterface(fldPath[1:])
-	case utils.RatingFilters: // not needed?
-		// 	return ec.RatingFilters.FieldAsInterface(fldPath[1:])
-	case utils.Accounting: // not needed?
-	// 	return ec.Accounting.FieldAsInterface(fldPath[1:])
-	case utils.Rating: // not needed?
-		// 	return ec.Rating.FieldAsInterface(fldPath[1:])
+		return ec.AccountSummary.FieldAsInterface(fldPath[1:])
+	case utils.Timings:
+		return ec.Timings.FieldAsInterface(fldPath[1:])
+	case utils.Rates:
+		return ec.Rates.FieldAsInterface(fldPath[1:])
+	case utils.RatingFilters:
+		return ec.RatingFilters.FieldAsInterface(fldPath[1:])
+	case utils.Accounting:
+		return ec.Accounting.FieldAsInterface(fldPath[1:])
+	case utils.Rating:
+		return ec.Rating.FieldAsInterface(fldPath[1:])
 	}
 	return nil, fmt.Errorf("unsupported field prefix: <%s>", fldPath[0])
+}
+
+func (ec *EventCost) getChargesForPath(fldPath []string, chr *ChargingInterval) (val interface{}, err error) {
+	if chr == nil {
+		return nil, utils.ErrNotFound
+	}
+	if len(fldPath) == 0 {
+		return chr, nil
+	}
+	if fldPath[0] == utils.CompressFactor {
+		if len(fldPath) != 1 {
+			return nil, utils.ErrNotFound
+		}
+		return chr.CompressFactor, nil
+	}
+	if fldPath[0] == utils.Rating {
+		return ec.getRatingForPath(fldPath[1:], ec.Rating[chr.RatingID])
+	}
+	opath, indx := utils.GetPathIndex(fldPath[0])
+	if opath != utils.Increments {
+		return nil, fmt.Errorf("unsupported field prefix: <%s>", opath)
+	}
+	if indx == nil {
+		if len(fldPath) != 1 {
+			return nil, utils.ErrNotFound
+		}
+		return chr.Increments, nil
+	}
+	incr := chr.Increments[*indx]
+	if len(fldPath) == 1 {
+		return incr, nil
+	}
+	if fldPath[1] == utils.Accounting {
+		return ec.getAcountingForPath(fldPath[3:], ec.Accounting[incr.AccountingID])
+	}
+	return incr.FieldAsInterface(fldPath)
 }
 
 func (ec *EventCost) getRatingForPath(fldPath []string, rating *RatingUnit) (val interface{}, err error) {
@@ -933,7 +949,7 @@ func (ec *EventCost) getRatingForPath(fldPath []string, rating *RatingUnit) (val
 
 	switch fldPath[0] {
 	default:
-		opath, indx := getIndex(fldPath[0])
+		opath, indx := utils.GetPathIndex(fldPath[0])
 		if opath != utils.Rates {
 			return nil, fmt.Errorf("unsupported field prefix: <%s>", opath)
 		}
@@ -977,4 +993,50 @@ func (ec *EventCost) getRatingForPath(fldPath []string, rating *RatingUnit) (val
 		return rtFltr.FieldAsInterface(fldPath[1:])
 	}
 	return rating.FieldAsInterface(fldPath)
+}
+
+func (ec *EventCost) getAcountingForPath(fldPath []string, bc *BalanceCharge) (val interface{}, err error) {
+	if bc == nil {
+		return nil, utils.ErrNotFound
+	}
+	if len(fldPath) == 0 {
+		return bc, nil
+	}
+
+	if fldPath[0] == utils.Balance {
+		bl := ec.AccountSummary.BalanceSummaries.BalanceSummaryWithUUD(bc.BalanceUUID)
+		if bl == nil {
+			return nil, utils.ErrNotFound
+		}
+		if len(fldPath) == 1 {
+			return bl, nil
+		}
+		return bl.FieldAsInterface(fldPath[1:])
+
+	}
+	return bc.FieldAsInterface(fldPath)
+}
+
+// String to implement Dataprovider
+func (ec *EventCost) String() string {
+	return utils.ToJSON(ec)
+}
+
+// FieldAsString to implement Dataprovider
+func (ec *EventCost) FieldAsString(fldPath []string) (string, error) {
+	ival, err := ec.FieldAsInterface(fldPath)
+	if err != nil {
+		return utils.EmptyString, err
+	}
+	return utils.IfaceAsString(ival), nil
+}
+
+// AsNavigableMap to implement Dataprovider
+func (ec *EventCost) AsNavigableMap([]*config.FCTemplate) (*config.NavigableMap, error) {
+	return nil, utils.ErrNotImplemented
+}
+
+// RemoteHost to implement Dataprovider
+func (ec *EventCost) RemoteHost() net.Addr {
+	return utils.LocalAddr()
 }
