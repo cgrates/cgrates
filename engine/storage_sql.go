@@ -863,6 +863,7 @@ func (self *SQLStorage) GetSMCosts(cgrid, runid, originHost, originIDPrefix stri
 		if err := json.Unmarshal([]byte(result.CostDetails), smc.CostDetails); err != nil {
 			return nil, err
 		}
+		smc.CostDetails.initCache()
 		smCosts = append(smCosts, smc)
 	}
 	if len(smCosts) == 0 {
@@ -1158,6 +1159,7 @@ func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 		if cdr, err := NewCDRFromSQL(result); err != nil {
 			return nil, 0, err
 		} else {
+			cdr.CostDetails.initCache()
 			cdrs = append(cdrs, cdr)
 		}
 	}

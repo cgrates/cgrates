@@ -1019,7 +1019,6 @@ func TestPassFilterMissingField(t *testing.T) {
 }
 
 func TestEventCostFilter(t *testing.T) {
-
 	cfg, _ := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dmFilterPass := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
@@ -1153,7 +1152,7 @@ func TestEventCostFilter(t *testing.T) {
 			},
 		},
 	}
-
+	cd.initCache()
 	cgrDp := config.NewNavigableMap(map[string]interface{}{utils.MetaEC: cd})
 
 	if pass, err := filterS.Pass("cgrates.org",

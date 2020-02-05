@@ -60,6 +60,7 @@ func NewCDRFromExternalCDR(extCdr *ExternalCDR, timezone string) (*CDR, error) {
 		if err = json.Unmarshal([]byte(extCdr.CostDetails), cdr.CostDetails); err != nil {
 			return nil, err
 		}
+		cdr.CostDetails.initCache()
 	}
 	if extCdr.ExtraFields != nil {
 		cdr.ExtraFields = make(map[string]string)
@@ -156,7 +157,7 @@ func (cdr *CDR) FieldAsString(rsrPrs *config.RSRParser) (parsed string, err erro
 		config.NewNavigableMap(map[string]interface{}{
 			utils.MetaReq: cdr.AsMapStringIface(),
 			utils.MetaEC:  cdr.CostDetails,
-			}), utils.NestingSep)
+		}), utils.NestingSep)
 	if err != nil {
 		return
 	}
@@ -169,7 +170,7 @@ func (cdr *CDR) FieldsAsString(rsrFlds config.RSRParsers) string {
 		config.NewNavigableMap(map[string]interface{}{
 			utils.MetaReq: cdr.AsMapStringIface(),
 			utils.MetaEC:  cdr.CostDetails,
-			}), utils.NestingSep)
+		}), utils.NestingSep)
 	if err != nil {
 		return ""
 	}
@@ -242,9 +243,7 @@ func (cdr *CDR) AsMapStringIface() (mp map[string]interface{}) {
 	mp[utils.CostSource] = cdr.CostSource
 	mp[utils.Cost] = cdr.Cost
 	if cdr.CostDetails != nil {
-		var result map[string]interface{}
-		json.Unmarshal([]byte(utils.ToJSON(cdr.CostDetails)), &result)
-		mp[utils.CostDetails] = result
+		mp[utils.CostDetails] = cdr.CostDetails
 	}
 	return
 }
