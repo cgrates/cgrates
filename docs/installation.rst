@@ -58,7 +58,7 @@ Run the following commands:
 ::
 
     wget http://pkg.cgrates.org/debian/cgrates_current_amd64.deb
-    dpkg -i cgrates_0.9.1~rc8_amd64.deb
+    dpkg -i cgrates_0.10.0_amd64.deb
 
 As a side note on http://pkg.cgrates.org one can find an entire archive of CGRateS packages.
 
