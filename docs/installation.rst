@@ -35,7 +35,7 @@ Add the repository in apt sources list:
 
 ::
 
-    echo "deb http://apt.cgrates.org/debian/ nightly main" | sudo tee /etc/apt/sources.list.d/cgrates.list
+    echo "deb http://apt.cgrates.org/debian/ v0.10 main" | sudo tee /etc/apt/sources.list.d/cgrates.list
 
 Update & install:
 
@@ -57,8 +57,8 @@ Run the following commands:
 
 ::
 
-    wget http://pkg.cgrates.org/debian/cgrates_current_amd64.deb
-    dpkg -i cgrates_0.10.0_amd64.deb
+    wget http://pkg.cgrates.org/debian/v0.10/cgrates_current_amd64.deb
+    dpkg -i cgrates_current_amd64.deb
 
 As a side note on http://pkg.cgrates.org one can find an entire archive of CGRateS packages.
 
