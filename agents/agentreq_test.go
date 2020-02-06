@@ -240,25 +240,25 @@ func TestAgentRequestSetFields(t *testing.T) {
 	}
 
 	// case utils.MetaDiamreq
-	// input = []*config.FCTemplate{
-	// 	&config.FCTemplate{
-	// 		Path:  "*diamreq.Account",
-	// 		Tag:   "*diamreq.Account",
-	// 		Type:  utils.MetaVariable,
-	// 		Value: config.NewRSRParsersMustCompile("~*req.Account", false, ";"),
-	// 	},
-	// }
-	// if err := ar.SetFields(input); err != nil {
-	// 	t.Error(err)
-	// } else if val, err := ar.Vars.GetField([]string{"Account"}); err != nil {
-	// 	t.Error(err)
-	// } else if nm, ok := val.([]*config.NMItem); !ok {
-	// 	t.Error("Expecting NM items")
-	// } else if len(nm) != 1 {
-	// 	t.Error("Expecting one item")
-	// } else if nm[0].Data != "1009" {
-	// 	t.Error("Expecting 1009, received: ", nm[0].Data)
-	// }
+	input = []*config.FCTemplate{
+		&config.FCTemplate{
+			Path:  "*diamreq.Account",
+			Tag:   "*diamreq.Account",
+			Type:  utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("~*req.Account", false, ";"),
+		},
+	}
+	if err := ar.SetFields(input); err != nil {
+		t.Error(err)
+	} else if val, err := ar.Vars.GetField([]string{"Account"}); err != nil {
+		t.Error(err)
+	} else if nm, ok := val.([]*config.NMItem); !ok {
+		t.Error("Expecting NM items")
+	} else if len(nm) != 1 {
+		t.Error("Expecting one item")
+	} else if nm[0].Data != "1009" {
+		t.Error("Expecting 1009, received: ", nm[0].Data)
+	}
 
 	//META_COMPOSED
 
