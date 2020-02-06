@@ -64,6 +64,8 @@ var (
 		testV2CDRsProcessCDRWithThreshold,
 		testV2CDRsGetThreshold,
 
+		testv2CDRsGetCDRsDest,
+
 		testV2CDRsKillEngine,
 	}
 )
@@ -793,6 +795,44 @@ func testV2CDRsGetThreshold(t *testing.T) {
 		t.Error(err)
 	} else if td.Hits != 1 {
 		t.Errorf("Expecting threshold to be hit once received: %v", td.Hits)
+	}
+}
+
+func testv2CDRsGetCDRsDest(t *testing.T) {
+	args := &engine.ArgV1ProcessEvent{
+		Flags: []string{utils.MetaStore},
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				utils.CGRID:       "9b3cd5e698af94f8916220866c831a982ed16318",
+				utils.ToR:         utils.VOICE,
+				utils.RunID:       utils.MetaRaw,
+				utils.OriginID:    "25160047719:0",
+				utils.OriginHost:  "192.168.1.1",
+				utils.Source:      "*sessions",
+				utils.RequestType: utils.META_NONE,
+				utils.Category:    "call",
+				utils.Account:     "1001",
+				utils.Subject:     "1001",
+				utils.Destination: "+4915117174963",
+				utils.AnswerTime:  time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+				utils.Usage:       100 * time.Minute,
+			},
+		},
+	}
+	var reply string
+	if err := cdrsRpc.Call(utils.CDRsV1ProcessEvent, args, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply received: ", reply)
+	}
+
+	var cdrs []*engine.ExternalCDR
+	if err := cdrsRpc.Call(utils.APIerSv2GetCDRs, utils.RPCCDRsFilter{DestinationPrefixes: []string{"+4915117174963"}},
+		&cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 3 {
+		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	}
 }
 

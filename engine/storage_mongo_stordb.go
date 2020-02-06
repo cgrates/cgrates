@@ -1033,6 +1033,9 @@ func (ms *MongoStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 			if len(prefix) == 0 {
 				continue
 			}
+			if strings.HasPrefix(prefix, "+") {
+				prefix = "\\" + prefix
+			}
 			if len(regexpRule) != 0 {
 				regexpRule += "|"
 			}
