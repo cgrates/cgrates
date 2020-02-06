@@ -206,9 +206,17 @@
 - hosts: pkg
   remote_user: '{{ gouser }}'
   tasks:
+    - name: Creates directory
+      become: yes
+      file:
+        path: /var/packages/debian/v0.10/
+        state: directory
+        
     - name: Remove symlink from current deb package
       become: yes
-      shell: "sudo rm /var/packages/debian/cgrates_current_amd64.deb"
+      file:
+        path: /var/packages/debian/v0.10/cgrates_current_amd64.deb
+        state: absent
 
     - name: Move the new package to /var/packages/debian
       become: yes
@@ -217,5 +225,5 @@
 
     - name: Create the new symlink cgrates_current_amd64.deb
       become: yes
-      shell: "sudo ln -s /var/packages/debian/{{ item }} /var/packages/debian/cgrates_current_amd64.deb"
+      shell: "sudo ln -s /var/packages/debian/v0.10/{{ item }} /var/packages/debian/v0.10/cgrates_current_amd64.deb"
       with_items: "{{ hostvars['apt']['debFileName']['stdout_lines'] }}"
