@@ -21,6 +21,7 @@ package agents
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"net/http"
 	"reflect"
 	"strings"
@@ -242,8 +243,8 @@ func TestAgentRequestSetFields(t *testing.T) {
 	// case utils.MetaDiamreq
 	input = []*config.FCTemplate{
 		&config.FCTemplate{
-			Path:  "*diamreq.Account",
-			Tag:   "*diamreq.Account",
+			Path:  fmt.Sprintf("%s.Account", utils.MetaDiamreq),
+			Tag:   fmt.Sprintf("%s.Account", utils.MetaDiamreq),
 			Type:  utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("~*req.Account", false, ";"),
 		},
