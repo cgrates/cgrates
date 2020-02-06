@@ -59,29 +59,19 @@ var sTestsTPResources = []func(t *testing.T){
 }
 
 //Test start here
-func TestTPResITMySql(t *testing.T) {
-	tpResConfigDIR = "tutmysql"
-	for _, stest := range sTestsTPResources {
-		t.Run(tpResConfigDIR, stest)
+func TestTPResIT(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		tpResConfigDIR = "tutinternal"
+	case utils.MetaMySQL:
+		tpResConfigDIR = "tutmysql"
+	case utils.MetaMongo:
+		tpResConfigDIR = "tutmongo"
+	case utils.MetaPostgres:
+		tpResConfigDIR = "tutpostgres"
+	default:
+		t.Fatal("Unknown Database type")
 	}
-}
-
-func TestTPResITMongo(t *testing.T) {
-	tpResConfigDIR = "tutmongo"
-	for _, stest := range sTestsTPResources {
-		t.Run(tpResConfigDIR, stest)
-	}
-}
-
-func TestTPResITPG(t *testing.T) {
-	tpResConfigDIR = "tutpostgres"
-	for _, stest := range sTestsTPResources {
-		t.Run(tpResConfigDIR, stest)
-	}
-}
-
-func TestTPResITInternal(t *testing.T) {
-	tpResConfigDIR = "tutinternal"
 	for _, stest := range sTestsTPResources {
 		t.Run(tpResConfigDIR, stest)
 	}

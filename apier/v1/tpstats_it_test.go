@@ -60,29 +60,20 @@ var sTestsTPStats = []func(t *testing.T){
 }
 
 //Test start here
-func TestTPStatITMySql(t *testing.T) {
+func TestTPStatIT(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		tpStatConfigDIR = "tutinternal"
+	case utils.MetaMySQL:
+		tpStatConfigDIR = "tutmysql"
+	case utils.MetaMongo:
+		tpStatConfigDIR = "tutmongo"
+	case utils.MetaPostgres:
+		tpStatConfigDIR = "tutpostgres"
+	default:
+		t.Fatal("Unknown Database type")
+	}
 	tpStatConfigDIR = "tutmysql"
-	for _, stest := range sTestsTPStats {
-		t.Run(tpStatConfigDIR, stest)
-	}
-}
-
-func TestTPStatITMongo(t *testing.T) {
-	tpStatConfigDIR = "tutmongo"
-	for _, stest := range sTestsTPStats {
-		t.Run(tpStatConfigDIR, stest)
-	}
-}
-
-func TestTPStatITPG(t *testing.T) {
-	tpStatConfigDIR = "tutpostgres"
-	for _, stest := range sTestsTPStats {
-		t.Run(tpStatConfigDIR, stest)
-	}
-}
-
-func TestTPStatITInternal(t *testing.T) {
-	tpStatConfigDIR = "tutinternal"
 	for _, stest := range sTestsTPStats {
 		t.Run(tpStatConfigDIR, stest)
 	}
