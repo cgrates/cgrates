@@ -182,7 +182,7 @@
   # Include the package with reprepro
     - name : Include the package with reprepro
       become: yes
-      command: sudo reprepro -A amd64 -Vb . include v0.10.0 /var/packages/debian/incoming/{{ item }}
+      command: sudo reprepro -A amd64 -Vb . include v0.10 /var/packages/debian/incoming/{{ item }}
       ignore_errors: true
       args :
         chdir: /var/packages/debian
