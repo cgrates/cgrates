@@ -1,4 +1,4 @@
-%global version 0.9.1
+%global version 0.10.0
 %global git_commit c284710623aef128f97369833d3fa4cb29943613
 
 %global git_short_commit %(c=%{git_commit}; echo ${c:0:7})

@@ -697,7 +697,7 @@ func GetCGRVersion() (vers string, err error) {
 	if commitHash == "" || commitDate.IsZero() {
 		return vers, fmt.Errorf("Cannot find commitHash or commitDate information")
 	}
-	//CGRateS@v0.9.1~rc8-20200110075344-7572e7b11e00
+	//CGRateS@v0.10.0-20200110075344-7572e7b11e00
 	return fmt.Sprintf("%s@%s-%s-%s", CGRateS, VERSION, commitDate.UTC().Format("20060102150405"), commitHash[:12]), nil
 }
 
