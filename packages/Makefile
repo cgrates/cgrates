@@ -1,4 +1,4 @@
-DISTRIBUTION ?= nightly
+DISTRIBUTION ?= stable
 
 GIT_COMMIT=$(shell git log -n1 --format=format:%h)
 GIT_DATE=$(shell date +%Y%m%d%H%M%S --date="@$(shell git log -n1 --format=format:%ct)")
