@@ -60,29 +60,19 @@ var sTestsTPThreshold = []func(t *testing.T){
 }
 
 //Test start here
-func TestTPThresholdITMySql(t *testing.T) {
-	tpThresholdConfigDIR = "tutmysql"
-	for _, stest := range sTestsTPThreshold {
-		t.Run(tpThresholdConfigDIR, stest)
+func TestTPThresholdIT(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		tpThresholdConfigDIR = "tutinternal"
+	case utils.MetaMySQL:
+		tpThresholdConfigDIR = "tutmysql"
+	case utils.MetaMongo:
+		tpThresholdConfigDIR = "tutmongo"
+	case utils.MetaPostgres:
+		tpThresholdConfigDIR = "tutpostgres"
+	default:
+		t.Fatal("Unknown Database type")
 	}
-}
-
-func TestTPThresholdITMongo(t *testing.T) {
-	tpThresholdConfigDIR = "tutmongo"
-	for _, stest := range sTestsTPThreshold {
-		t.Run(tpThresholdConfigDIR, stest)
-	}
-}
-
-func TestTPThresholdITPG(t *testing.T) {
-	tpThresholdConfigDIR = "tutpostgres"
-	for _, stest := range sTestsTPThreshold {
-		t.Run(tpThresholdConfigDIR, stest)
-	}
-}
-
-func TestTPThresholdITInternal(t *testing.T) {
-	tpThresholdConfigDIR = "tutinternal"
 	for _, stest := range sTestsTPThreshold {
 		t.Run(tpThresholdConfigDIR, stest)
 	}

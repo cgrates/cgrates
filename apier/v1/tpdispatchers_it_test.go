@@ -59,22 +59,19 @@ var sTestsTPDispatchers = []func(t *testing.T){
 }
 
 //Test start here
-func TestTPDispatcherITMySql(t *testing.T) {
-	tpDispatcherConfigDIR = "tutmysql"
-	for _, stest := range sTestsTPDispatchers {
-		t.Run(tpDispatcherConfigDIR, stest)
+func TestTPDispatcherIT(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		tpDispatcherConfigDIR = "tutinternal"
+	case utils.MetaMySQL:
+		tpDispatcherConfigDIR = "tutmysql"
+	case utils.MetaMongo:
+		tpDispatcherConfigDIR = "tutmongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
 	}
-}
-
-func TestTPDispatcherITMongo(t *testing.T) {
-	tpDispatcherConfigDIR = "tutmongo"
-	for _, stest := range sTestsTPDispatchers {
-		t.Run(tpDispatcherConfigDIR, stest)
-	}
-}
-
-func TestTPDispatcherITInternal(t *testing.T) {
-	tpDispatcherConfigDIR = "tutinternal"
 	for _, stest := range sTestsTPDispatchers {
 		t.Run(tpDispatcherConfigDIR, stest)
 	}

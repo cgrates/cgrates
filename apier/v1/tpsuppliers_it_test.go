@@ -61,22 +61,19 @@ var sTestsTPSplPrf = []func(t *testing.T){
 }
 
 //Test start here
-func TestTPSplPrfITMySql(t *testing.T) {
-	tpSplPrfConfigDIR = "tutmysql"
-	for _, stest := range sTestsTPSplPrf {
-		t.Run(tpSplPrfConfigDIR, stest)
+func TestTPSplPrfIT(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		tpSplPrfConfigDIR = "tutinternal"
+	case utils.MetaMySQL:
+		tpSplPrfConfigDIR = "tutmysql"
+	case utils.MetaMongo:
+		tpSplPrfConfigDIR = "tutmongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
 	}
-}
-
-func TestTPSplPrfITMongo(t *testing.T) {
-	tpSplPrfConfigDIR = "tutmongo"
-	for _, stest := range sTestsTPSplPrf {
-		t.Run(tpSplPrfConfigDIR, stest)
-	}
-}
-
-func TestTPSplPrfITInternal(t *testing.T) {
-	tpSplPrfConfigDIR = "tutinternal"
 	for _, stest := range sTestsTPSplPrf {
 		t.Run(tpSplPrfConfigDIR, stest)
 	}
