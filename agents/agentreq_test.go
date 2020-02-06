@@ -159,10 +159,10 @@ func TestAgentRequestSetFields(t *testing.T) {
 	// case utils.MetaVars
 	input = []*config.FCTemplate{
 		&config.FCTemplate{
-			Path:  "*vars.Account",
-			Tag:   "*vars.Account",
+			Path:  fmt.Sprintf("%s.Account", utils.MetaVars),
+			Tag:   fmt.Sprintf("%s.Account", utils.MetaVars),
 			Type:  utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*req.Account", false, ";"),
+			Value: config.NewRSRParsersMustCompile("~"+utils.MetaReq+".Account", false, ";"),
 		},
 	}
 	if err := ar.SetFields(input); err != nil {
@@ -180,10 +180,10 @@ func TestAgentRequestSetFields(t *testing.T) {
 	// case utils.MetaCgreq
 	input = []*config.FCTemplate{
 		&config.FCTemplate{
-			Path:  "*cgreq.Account",
-			Tag:   "*cgreq.Account",
+			Path:  fmt.Sprintf("%s.Account", utils.MetaCgreq),
+			Tag:   fmt.Sprintf("%s.Account", utils.MetaCgreq),
 			Type:  utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*req.Account", false, ";"),
+			Value: config.NewRSRParsersMustCompile("~"+utils.MetaReq+".Account", false, ";"),
 		},
 	}
 	if err := ar.SetFields(input); err != nil {
@@ -201,10 +201,10 @@ func TestAgentRequestSetFields(t *testing.T) {
 	// case utils.MetaCgrep
 	input = []*config.FCTemplate{
 		&config.FCTemplate{
-			Path:  "*cgrep.Account",
-			Tag:   "*cgrep.Account",
+			Path:  fmt.Sprintf("%s.Account", utils.MetaCgrep),
+			Tag:   fmt.Sprintf("%s.Account", utils.MetaCgrep),
 			Type:  utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*req.Account", false, ";"),
+			Value: config.NewRSRParsersMustCompile("~"+utils.MetaReq+".Account", false, ";"),
 		},
 	}
 	if err := ar.SetFields(input); err != nil {
@@ -222,10 +222,10 @@ func TestAgentRequestSetFields(t *testing.T) {
 	// case utils.MetaRep
 	input = []*config.FCTemplate{
 		&config.FCTemplate{
-			Path:  "*rep.Account",
-			Tag:   "*rep.Account",
+			Path:  fmt.Sprintf("%s.Account", utils.MetaRep),
+			Tag:   fmt.Sprintf("%s.Account", utils.MetaRep),
 			Type:  utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*req.Account", false, ";"),
+			Value: config.NewRSRParsersMustCompile("~"+utils.MetaReq+".Account", false, ";"),
 		},
 	}
 	if err := ar.SetFields(input); err != nil {
@@ -246,7 +246,7 @@ func TestAgentRequestSetFields(t *testing.T) {
 			Path:  fmt.Sprintf("%s.Account", utils.MetaDiamreq),
 			Tag:   fmt.Sprintf("%s.Account", utils.MetaDiamreq),
 			Type:  utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*req.Account", false, ";"),
+			Value: config.NewRSRParsersMustCompile("~"+utils.MetaReq+".Account", false, ";"),
 		},
 	}
 	if err := ar.SetFields(input); err != nil {
@@ -265,22 +265,22 @@ func TestAgentRequestSetFields(t *testing.T) {
 
 	input = []*config.FCTemplate{
 		&config.FCTemplate{
-			Path:  "*vars.AccountID",
-			Tag:   "*vars.AccountID",
+			Path:  fmt.Sprintf("%s.AccountID", utils.MetaVars),
+			Tag:   fmt.Sprintf("%s.AccountID", utils.MetaVars),
 			Type:  utils.META_COMPOSED,
-			Value: config.NewRSRParsersMustCompile("~*req.Tenant", false, ";"),
+			Value: config.NewRSRParsersMustCompile("~"+utils.MetaReq+".Tenant", false, ";"),
 		},
 		&config.FCTemplate{
-			Path:  "*vars.AccountID",
-			Tag:   "*vars.AccountID",
+			Path:  fmt.Sprintf("%s.AccountID", utils.MetaVars),
+			Tag:   fmt.Sprintf("%s.AccountID", utils.MetaVars),
 			Type:  utils.META_COMPOSED,
 			Value: config.NewRSRParsersMustCompile(":", false, ";"),
 		},
 		&config.FCTemplate{
-			Path:  "*vars.AccountID",
-			Tag:   "*vars.AccountID",
+			Path:  fmt.Sprintf("%s.AccountID", utils.MetaVars),
+			Tag:   fmt.Sprintf("%s.AccountID", utils.MetaVars),
 			Type:  utils.META_COMPOSED,
-			Value: config.NewRSRParsersMustCompile("~*req.Account", false, ";"),
+			Value: config.NewRSRParsersMustCompile("~"+utils.MetaReq+".Account", false, ";"),
 		},
 	}
 	if err := ar.SetFields(input); err != nil {
@@ -298,8 +298,8 @@ func TestAgentRequestSetFields(t *testing.T) {
 	// META_CONSTANT
 	input = []*config.FCTemplate{
 		&config.FCTemplate{
-			Path:  "*vars.Account",
-			Tag:   "*vars.Account",
+			Path:  fmt.Sprintf("%s.Account", utils.MetaVars),
+			Tag:   fmt.Sprintf("%s.Account", utils.MetaVars),
 			Type:  utils.META_CONSTANT,
 			Value: config.NewRSRParsersMustCompile("2020", false, ";"),
 		},
@@ -321,9 +321,9 @@ func TestAgentRequestSetFields(t *testing.T) {
 	// Filters
 	input = []*config.FCTemplate{
 		&config.FCTemplate{
-			Path:    "*vars.AccountID",
-			Tag:     "*vars.AccountID",
-			Filters: []string{"*string:~*vars.Account:1003"},
+			Path:    fmt.Sprintf("%s.AccountID", utils.MetaVars),
+			Tag:     fmt.Sprintf("%s.AccountID", utils.MetaVars),
+			Filters: []string{utils.MetaString + ":~" + utils.MetaVars + ".Account:1003"},
 			Type:    utils.META_CONSTANT,
 			Value:   config.NewRSRParsersMustCompile("2021", false, ";"),
 		},
@@ -342,8 +342,8 @@ func TestAgentRequestSetFields(t *testing.T) {
 
 	input = []*config.FCTemplate{
 		&config.FCTemplate{
-			Path:    "*vars.Account",
-			Tag:     "*vars.Account",
+			Path:    fmt.Sprintf("%s.Account", utils.MetaVars),
+			Tag:     fmt.Sprintf("%s.Account", utils.MetaVars),
 			Filters: []string{"Not really a filter"},
 			Type:    utils.META_CONSTANT,
 			Value:   config.NewRSRParsersMustCompile("2021", false, ";"),
@@ -356,15 +356,15 @@ func TestAgentRequestSetFields(t *testing.T) {
 	// Blocker: true
 	input = []*config.FCTemplate{
 		&config.FCTemplate{
-			Path:    "*vars.Name",
-			Tag:     "*vars.Name",
+			Path:    fmt.Sprintf("%s.Name", utils.MetaVars),
+			Tag:     fmt.Sprintf("%s.Name", utils.MetaVars),
 			Type:    utils.MetaVariable,
-			Value:   config.NewRSRParsersMustCompile("~*req.Account", false, ";"),
+			Value:   config.NewRSRParsersMustCompile("~"+utils.MetaReq+".Account", false, ";"),
 			Blocker: true,
 		},
 		&config.FCTemplate{
-			Path:  "*vars.Name",
-			Tag:   "*vars.Name",
+			Path:  fmt.Sprintf("%s.Name", utils.MetaVars),
+			Tag:   fmt.Sprintf("%s.Name", utils.MetaVars),
 			Type:  utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("1005", false, ";"),
 		},
@@ -376,7 +376,7 @@ func TestAgentRequestSetFields(t *testing.T) {
 	} else if nm, ok := val.([]*config.NMItem); !ok {
 		t.Error("Expecting NM items")
 	} else if len(nm) != 1 {
-		t.Error("Expecting one item: rcv :", utils.ToJSON(nm))
+		t.Error("Expecting one item")
 	} else if nm[0].Data != "1009" {
 		t.Error("Expecting 1009, received: ", nm[0].Data)
 	}
@@ -384,10 +384,10 @@ func TestAgentRequestSetFields(t *testing.T) {
 	// ErrNotFound
 	input = []*config.FCTemplate{
 		&config.FCTemplate{
-			Path:  "*vars.Test",
-			Tag:   "*vars.Test",
+			Path:  fmt.Sprintf("%s.Test", utils.MetaVars),
+			Tag:   fmt.Sprintf("%s.Test", utils.MetaVars),
 			Type:  utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*req.Test", false, ";"),
+			Value: config.NewRSRParsersMustCompile("~"+utils.MetaReq+".Test", false, ";"),
 		},
 	}
 	if err := ar.SetFields(input); err != nil {
@@ -397,14 +397,14 @@ func TestAgentRequestSetFields(t *testing.T) {
 	}
 	input = []*config.FCTemplate{
 		&config.FCTemplate{
-			Path:      "*vars.Test",
-			Tag:       "*vars.Test",
+			Path:      fmt.Sprintf("%s.Test", utils.MetaVars),
+			Tag:       fmt.Sprintf("%s.Test", utils.MetaVars),
 			Type:      utils.MetaVariable,
-			Value:     config.NewRSRParsersMustCompile("~*req.Test", false, ";"),
+			Value:     config.NewRSRParsersMustCompile("~"+utils.MetaReq+".Test", false, ";"),
 			Mandatory: true,
 		},
 	}
-	if err := ar.SetFields(input); err == nil || err.Error() != "NOT_FOUND:*vars.Test" {
+	if err := ar.SetFields(input); err == nil || err.Error() != "NOT_FOUND:"+utils.MetaVars+".Test" {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ErrNotFound, err)
 	}
 
@@ -425,10 +425,10 @@ func TestAgentRequestSetFields(t *testing.T) {
 	// MetaHdr/MetaTrl
 	input = []*config.FCTemplate{
 		&config.FCTemplate{
-			Path:  "*vars.Account4",
-			Tag:   "*vars.Account4",
+			Path:  fmt.Sprintf("%s.Account4", utils.MetaVars),
+			Tag:   fmt.Sprintf("%s.Account4", utils.MetaVars),
 			Type:  utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*hdr.Account", false, ";"),
+			Value: config.NewRSRParsersMustCompile("~"+utils.MetaHdr+".Account", false, ";"),
 		},
 	}
 	if err := ar.SetFields(input); err != nil {
@@ -445,10 +445,10 @@ func TestAgentRequestSetFields(t *testing.T) {
 
 	input = []*config.FCTemplate{
 		&config.FCTemplate{
-			Path:  "*vars.Account5",
-			Tag:   "*vars.Account5",
+			Path:  fmt.Sprintf("%s.Account5", utils.MetaVars),
+			Tag:   fmt.Sprintf("%s.Account5", utils.MetaVars),
 			Type:  utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*trl.Account", false, ";"),
+			Value: config.NewRSRParsersMustCompile("~"+utils.MetaTrl+".Account", false, ";"),
 		},
 	}
 	if err := ar.SetFields(input); err != nil {
