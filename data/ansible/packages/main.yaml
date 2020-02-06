@@ -212,7 +212,7 @@
 
     - name: Move the new package to /var/packages/debian
       become: yes
-      shell: "sudo mv /tmp/{{ item}} /var/packages/debian/"
+      shell: "sudo mv /tmp/{{ item}} /var/packages/debian/v0.10/"
       with_items: "{{ hostvars['apt']['debFileName']['stdout_lines'] }}"
 
     - name: Create the new symlink cgrates_current_amd64.deb
