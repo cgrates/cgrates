@@ -510,14 +510,5 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.FilterS, connID)
 		}
 	}
-	for _, connID := range cfg.filterSCfg.RALsConns {
-		if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.ralsCfg.Enabled {
-			return fmt.Errorf("<%s> not enabled but requested by <%s> component.", utils.RALService, utils.FilterS)
-		}
-		if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
-			return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.FilterS, connID)
-		}
-	}
-
 	return nil
 }

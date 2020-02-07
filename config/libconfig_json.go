@@ -107,7 +107,6 @@ type ItemOptJson struct {
 type FilterSJsonCfg struct {
 	Stats_conns     *[]string
 	Resources_conns *[]string
-	Rals_conns      *[]string
 }
 
 // Rater config section
