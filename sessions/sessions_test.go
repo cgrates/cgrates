@@ -55,6 +55,35 @@ var attrs = &engine.AttrSProcessEventReply{
 	},
 }
 
+func TestIsIndexed(t *testing.T) {
+	sS := &SessionS{}
+	if sS.isIndexed(&Session{CGRID: "test"}, true) {
+		t.Error("Expecting: false, received: true")
+	}
+	if sS.isIndexed(&Session{CGRID: "test"}, false) {
+		t.Error("Expecting: false, received: true")
+	}
+	sS = &SessionS{
+		aSessions: map[string]*Session{"test": &Session{CGRID: "test"}},
+	}
+	if !sS.isIndexed(&Session{CGRID: "test"}, false) {
+		t.Error("Expecting: true, received: false")
+	}
+	if sS.isIndexed(&Session{CGRID: "test"}, true) {
+		t.Error("Expecting: true, received: false")
+	}
+
+	sS = &SessionS{
+		pSessions: map[string]*Session{"test": &Session{CGRID: "test"}},
+	}
+	if !sS.isIndexed(&Session{CGRID: "test"}, true) {
+		t.Error("Expecting: false, received: true")
+	}
+	if sS.isIndexed(&Session{CGRID: "test"}, false) {
+		t.Error("Expecting: false, received: true")
+	}
+}
+
 func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 	sSCfg, _ := config.NewDefaultCGRConfig()
 	sSCfg.SessionSCfg().SessionIndexes = utils.StringMap{
