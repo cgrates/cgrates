@@ -1,3 +1,15 @@
+cgrates (0.11.0~dev) UNRELEASED; urgency=medium
+
+  * Dev version.
+
+ -- DanB <danb@cgrates.org>  Thu, 6 Feb 2020 12:05:00 +0200
+
+cgrates (0.10.0) UNRELEASED; urgency=medium
+
+  * Creating first stable branch. 
+
+ -- DanB <danb@cgrates.org>  Thu, 6 Feb 2020 12:05:00 +0200
+
 cgrates (0.9.1~rc8) UNRELEASED; urgency=medium
 
   * RC8.
