@@ -206,7 +206,6 @@
 // "filters": {								// Filters configuration (*new)
 // 	"stats_conns": [],						// connections to StatS for <*stats> filters, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
 // 	"resources_conns": [],					// connections to ResourceS for <*resources> filters, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
-// 	"rals_conns": [],						// connections to RALs for <*accounts> filters, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
 // },
 
 

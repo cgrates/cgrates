@@ -23,7 +23,6 @@ import "github.com/cgrates/cgrates/utils"
 type FilterSCfg struct {
 	StatSConns     []string
 	ResourceSConns []string
-	RALsConns      []string
 }
 
 func (fSCfg *FilterSCfg) loadFromJsonCfg(jsnCfg *FilterSJsonCfg) (err error) {
@@ -49,17 +48,6 @@ func (fSCfg *FilterSCfg) loadFromJsonCfg(jsnCfg *FilterSJsonCfg) (err error) {
 				fSCfg.ResourceSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)
 			} else {
 				fSCfg.ResourceSConns[idx] = connID
-			}
-		}
-	}
-	if jsnCfg.Rals_conns != nil {
-		fSCfg.RALsConns = make([]string, len(*jsnCfg.Rals_conns))
-		for idx, connID := range *jsnCfg.Rals_conns {
-			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
-			if connID == utils.MetaInternal {
-				fSCfg.RALsConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder)
-			} else {
-				fSCfg.RALsConns[idx] = connID
 			}
 		}
 	}
