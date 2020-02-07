@@ -662,7 +662,7 @@ func CapitalizedMessage(errMessage string) (capStr string) {
 
 func GetCGRVersion() (vers string, err error) {
 	vers = fmt.Sprintf("%s@%s", CGRateS, VERSION)
-	return vers, nil // remove this if the commit is not tagged
+	// return vers, nil // remove this if the commit is not tagged
 	if GitLastLog == "" {
 		return vers, nil
 	}
