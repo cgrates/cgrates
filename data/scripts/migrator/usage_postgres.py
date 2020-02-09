@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 # depends:
 #   ^ psycopg2 (debian: python-psycopg2)
