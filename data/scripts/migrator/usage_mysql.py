@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 # depends:
 #   ^ mysql (debian: python-mysql.connector)
