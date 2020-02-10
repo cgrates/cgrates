@@ -872,12 +872,12 @@ func TestConfigSanityFilterS(t *testing.T) {
 	}
 	cfg.filterSCfg.ResourceSConns = []string{}
 
-	cfg.filterSCfg.RALsConns = []string{utils.MetaInternal}
+	cfg.filterSCfg.ApierSConns = []string{utils.MetaInternal}
 
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != "<RALs> not enabled but requested by <FilterS> component." {
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != "<ApierS> not enabled but requested by <FilterS> component." {
 		t.Error(err)
 	}
-	cfg.filterSCfg.RALsConns = []string{"test"}
+	cfg.filterSCfg.ApierSConns = []string{"test"}
 	expected = "<FilterS> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)

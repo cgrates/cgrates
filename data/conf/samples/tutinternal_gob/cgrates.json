@@ -106,4 +106,8 @@
 },
 
 
+"filters": {								
+	"apiers_conns": ["*internal"],
+},
+
 }

@@ -761,7 +761,7 @@ func TestCgrCfgJSONDefaultFiltersCfg(t *testing.T) {
 	eFiltersCfg := &FilterSCfg{
 		StatSConns:     []string{},
 		ResourceSConns: []string{},
-		RALsConns:      []string{},
+		ApierSConns:    []string{},
 	}
 	if !reflect.DeepEqual(cgrCfg.filterSCfg, eFiltersCfg) {
 		t.Errorf("received: %+v, expecting: %+v", cgrCfg.filterSCfg, eFiltersCfg)
