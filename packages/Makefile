@@ -19,7 +19,7 @@ ifeq ($(DEBIAN_VERSION),)
 	exit 1
 endif
 
-DEBIAN_PKG_VERSION=$(DEBIAN_VERSION)#+$(GIT_DATE)+$(GIT_COMMIT) # uncomment this when we do this manual
+DEBIAN_PKG_VERSION=$(DEBIAN_VERSION)+$(GIT_DATE)+$(GIT_COMMIT)
 
 make deb:
 	cd ..;\
