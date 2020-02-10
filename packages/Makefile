@@ -19,14 +19,25 @@ ifeq ($(DEBIAN_VERSION),)
 	exit 1
 endif
 
-DEBIAN_PKG_VERSION=$(DEBIAN_VERSION)+$(GIT_DATE)+$(GIT_COMMIT)
+DEBIAN_PKG_VERSION=$(DEBIAN_VERSION)
 
-make deb:
+DEBIAN_PKG_VERSION_WITH_HASH=$(DEBIAN_VERSION)+$(GIT_DATE)+$(GIT_COMMIT)
+
+deb:
 	cd ..;\
 	ln -sf packages/debian debian ;\
 	dch -v "$(DEBIAN_PKG_VERSION)" -m "Package build for git commit $(GIT_COMMIT) ($(GIT_DATE))." -D "$(DISTRIBUTION)" --force-distribution ;\
 	dpkg-buildpackage -rfakeroot -tc; \
 	rm debian
 	git checkout debian/changelog
+
+deb_hash:
+	cd ..;\
+	ln -sf packages/debian debian ;\
+	dch -v "$(DEBIAN_PKG_VERSION_WITH_HASH)" -m "Package build for git commit $(GIT_COMMIT) ($(GIT_DATE))." -D "$(DISTRIBUTION)" --force-distribution ;\
+	dpkg-buildpackage -rfakeroot -tc; \
+	rm debian
+	git checkout debian/changelog
+
 
 .PHONY: deb squeeze
