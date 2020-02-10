@@ -136,6 +136,7 @@ var (
 		testApierReplayFailedPosts,
 		testApierGetDataDBVesions,
 		testApierGetStorDBVesions,
+		testApierBackwardsCompatible,
 		testApierStopEngine,
 	}
 )
@@ -1996,6 +1997,15 @@ func testApierGetStorDBVesions(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(engine.CurrentStorDBVersions(), *reply) {
 		t.Errorf("Expecting : %+v, received: %+v", engine.CurrentStorDBVersions(), *reply)
+	}
+}
+
+func testApierBackwardsCompatible(t *testing.T) {
+	var reply string
+	if err := rater.Call("ApierV1.Ping", new(utils.CGREvent), &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.Pong {
+		t.Errorf("Expecting : %+v, received: %+v", utils.Pong, reply)
 	}
 }
 

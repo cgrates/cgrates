@@ -55,6 +55,7 @@ var (
 		testAPIerSv2itSetActionWithCategory,
 		testAPIerSv2itSetActionPlanWithWrongTiming,
 		testAPIerSv2itSetActionPlanWithWrongTiming2,
+		testAPIerSv2BackwardsCompatible,
 		testAPIerSv2itKillEngine,
 	}
 )
@@ -427,6 +428,15 @@ func testAPIerSv2itSetActionPlanWithWrongTiming2(t *testing.T) {
 	if err := apierRPC.Call(utils.APIerSv1SetActionPlan, argAP1, &reply); err == nil ||
 		err.Error() != fmt.Sprintf("UNSUPPORTED_FORMAT:aa:bb:cc") {
 		t.Error("Expecting error ", err)
+	}
+}
+
+func testAPIerSv2BackwardsCompatible(t *testing.T) {
+	var reply string
+	if err := apierRPC.Call("ApierV2.Ping", new(utils.CGREvent), &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.Pong {
+		t.Errorf("Expecting : %+v, received: %+v", utils.Pong, reply)
 	}
 }
 
