@@ -345,16 +345,19 @@ func (fltr *FilterRule) passDestinations(fielNameDP config.DataProvider, fieldVa
 		return false, err
 	}
 	for _, p := range utils.SplitPrefix(dst, MIN_PREFIX_MATCH) {
-		if destIDs, err := dm.GetReverseDestination(p, false, utils.NonTransactional); err == nil {
-			for _, dID := range destIDs {
-				for i, valDstID := range fltr.Values {
-					valDstID, err := config.DPDynamicString(valDstID, fieldValuesDP[i])
-					if err != nil {
-						continue
-					}
-					if valDstID == dID {
-						return true, nil
-					}
+		var destIDs []string
+		if err = connMgr.Call(config.CgrConfig().FilterSCfg().ApierSConns, nil, utils.APIerSv1GetReverseDestination,
+			p, &destIDs); err != nil {
+			continue
+		}
+		for _, dID := range destIDs {
+			for i, valDstID := range fltr.Values {
+				valDstID, err := config.DPDynamicString(valDstID, fieldValuesDP[i])
+				if err != nil {
+					continue
+				}
+				if valDstID == dID {
+					return true, nil
 				}
 			}
 		}
@@ -442,7 +445,7 @@ func (fS *FilterS) getFieldNameDataProvider(initialDP config.DataProvider,
 			return nil, fmt.Errorf("invalid fieldname <%s>", fieldName)
 		}
 		var account *Account
-		if err = fS.connMgr.Call(fS.cfg.FilterSCfg().RALsConns, nil, utils.APIerSv2GetAccount,
+		if err = fS.connMgr.Call(fS.cfg.FilterSCfg().ApierSConns, nil, utils.APIerSv2GetAccount,
 			&utils.AttrGetAccount{Tenant: tenant, Account: splitFldName[1]}, &account); err != nil {
 			return
 		}
@@ -518,7 +521,7 @@ func (fS *FilterS) getFieldValueDataProvider(initialDP config.DataProvider,
 			return nil, fmt.Errorf("invalid fieldname <%s>", fieldValue)
 		}
 		var account *Account
-		if err = fS.connMgr.Call(fS.cfg.FilterSCfg().RALsConns, nil, utils.APIerSv2GetAccount,
+		if err = fS.connMgr.Call(fS.cfg.FilterSCfg().ApierSConns, nil, utils.APIerSv2GetAccount,
 			&utils.AttrGetAccount{Tenant: tenant, Account: splitFldName[1]}, &account); err != nil {
 			return
 		}

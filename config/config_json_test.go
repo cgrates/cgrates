@@ -867,7 +867,7 @@ func TestDfFilterSJsonCfg(t *testing.T) {
 	eCfg := &FilterSJsonCfg{
 		Stats_conns:     &[]string{},
 		Resources_conns: &[]string{},
-		Rals_conns:      &[]string{},
+		Apiers_conns:    &[]string{},
 	}
 	if cfg, err := dfCgrJsonCfg.FilterSJsonCfg(); err != nil {
 		t.Error(err)

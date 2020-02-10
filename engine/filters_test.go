@@ -21,6 +21,7 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 func TestFilterPassString(t *testing.T) {
@@ -305,9 +306,37 @@ func TestFilterPassRSRFields(t *testing.T) {
 	}
 }
 
+// structure to mimic the APIerSv1 to test *destination
+type apierSv1Dummy struct {
+	DataManager *DataManager
+}
+
+func (apiv1 *apierSv1Dummy) GetReverseDestination(prefix string, reply *[]string) (err error) {
+	if prefix == "" {
+		return utils.NewErrMandatoryIeMissing("prefix")
+	}
+	var revLst []string
+	if revLst, err = apiv1.DataManager.GetReverseDestination(prefix, false, utils.NonTransactional); err != nil {
+		return
+	}
+	*reply = revLst
+	return
+}
+
+func (apiv1 *apierSv1Dummy) Call(serviceMethod string,
+	args interface{}, reply interface{}) error {
+	return utils.APIerRPCCall(apiv1, serviceMethod, args, reply)
+}
+
 func TestFilterPassDestinations(t *testing.T) {
 	Cache.Set(utils.CacheReverseDestinations, "+49",
 		[]string{"DE", "EU_LANDLINE"}, nil, true, "")
+	config.CgrConfig().FilterSCfg().ApierSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier)}
+	internalAPIerSv1Chan := make(chan rpcclient.ClientConnector, 1)
+	internalAPIerSv1Chan <- &apierSv1Dummy{DataManager: dm}
+	connMgr = NewConnManager(config.CgrConfig(), map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier): internalAPIerSv1Chan,
+	})
 	cd := &CallDescriptor{
 		Category:      "call",
 		Tenant:        "cgrates.org",
