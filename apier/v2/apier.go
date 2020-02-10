@@ -334,3 +334,9 @@ func (apiv2 *APIerSv2) SetActions(attrs utils.AttrSetActions, reply *string) err
 	*reply = utils.OK
 	return nil
 }
+
+// Ping return pong if the service is active
+func (apiv2 *APIerSv2) Ping(ign *utils.CGREvent, reply *string) error {
+	*reply = utils.Pong
+	return nil
+}
