@@ -968,6 +968,8 @@ const (
 
 // APIerSv1 APIs
 const (
+	ApierV1                             = "ApierV1"
+	ApierV2                             = "ApierV2"
 	APIerSv1                            = "APIerSv1"
 	APIerSv1ComputeFilterIndexes        = "APIerSv1.ComputeFilterIndexes"
 	APIerSv1ComputeFilterIndexIDs       = "APIerSv1.ComputeFilterIndexIDs"
