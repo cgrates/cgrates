@@ -1,0 +1,122 @@
+---
+- name: create gopath directory
+  file:
+    state: directory
+    mode: 'u=rwx,go=rx'
+    dest: '{{ golang_gopath }}'
+
+- name: create download directory
+  file:
+    state: directory
+    mode: 'u=rwx,go=rx'
+    dest: '{{ golang_download_dir }}'
+
+- name: Register the current Go version (if any)
+  command: /usr/local/go/bin/go version
+  ignore_errors: yes
+  register: go_version
+  changed_when: false
+
+- name: Remove old installation of Go
+  become: yes
+  file:
+    path: /usr/local/go
+    state: absent
+  when: go_version is failed or go_version.stdout != go_version_target
+
+- name: download Go language SDK
+  get_url:
+    url: '{{ golang_mirror }}/{{ golang_redis_filename }}'
+    dest: '{{ golang_download_dir }}/{{ golang_redis_filename }}'
+    mode: 'u=rw,go=r'
+
+- name: create Go language SDK installation directory
+  become: yes
+  file:
+    state: directory
+    owner: root
+    group: root
+    mode: 'u=rwx,go=rx'
+    dest: '{{ golang_install_dir }}'
+
+- name: install Go language SDK
+  become: yes
+  unarchive:
+    src: '{{ golang_download_dir }}/{{ golang_redis_filename }}'
+    remote_src: yes
+    extra_opts: '--strip-components=1'
+    dest: '{{ golang_install_dir }}'
+    owner: root
+    group: root
+    creates: '{{ golang_install_dir }}/bin'
+
+# Set Go language SDK environment variables
+- name: make sure /etc/profile.d exists
+  become: yes
+  file:
+    path: /etc/profile.d
+    state: directory
+    owner: root
+    group: root
+    mode: 'u=rwx,go=rx'
+
+- name: export Go language SDK environment variables
+  become: yes
+  template:
+    src: golang.sh.j2
+    dest: /etc/profile.d/golang.sh
+    owner: root
+    group: root
+    mode: 'u=rw,go=r'
+
+- name: Export GOROOT for root
+  become: yes
+  lineinfile:
+    path: ~/.bashrc
+    line: export GOROOT='{{ golang_install_dir }}'
+    insertafter: last
+
+- name: Add GOROOT to PATH for root
+  become: yes
+  lineinfile:
+    dest: ~/.bashrc
+    line: export PATH=$PATH:$GOROOT/bin
+    insertafter: last
+
+- name: Export GOPATH for root
+  become: yes
+  lineinfile:
+    dest: ~/.bashrc
+    line: export GOPATH='{{ golang_gopath }}'
+    insertafter: last
+
+- name: Add GOPATH to PATH for root
+  become: yes
+  lineinfile:
+    dest: ~/.bashrc
+    line: export PATH=$PATH:$GOPATH/bin
+    insertafter: last
+
+- name: Export GOROOT
+  lineinfile:
+    dest: ~/.bashrc
+    line: export GOROOT='{{ golang_install_dir }}'
+    insertafter: last
+
+- name: Add GOROOT to PATH
+  lineinfile:
+    dest: ~/.bashrc
+    line: export PATH=$PATH:$GOROOT/bin
+    insertafter: last
+
+- name: Export GOPATH
+  lineinfile:
+    dest: ~/.bashrc
+    line: export GOPATH='{{ golang_gopath }}'
+    insertafter: last
+
+- name: Add GOPATH to PATH
+  lineinfile:
+    dest: ~/.bashrc
+    line: export PATH=$PATH:$GOPATH/bin
+    insertafter: last
