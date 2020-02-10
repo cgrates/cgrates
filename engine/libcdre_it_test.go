@@ -23,9 +23,11 @@ package engine
 import (
 	"os"
 	"path/filepath"
+	"reflect"
 	"testing"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/utils"
 )
 
 func TestWriteFailedPosts(t *testing.T) {
@@ -46,11 +48,65 @@ func TestWriteFailedPosts(t *testing.T) {
 	config.CgrConfig().GeneralCfg().FailedPostsDir = dir
 	writeFailedPosts("itmID", exportEvent)
 
-	if filename, err := filepath.Glob(filepath.Join(dir, "*.gob")); err != nil {
+	if filename, err := filepath.Glob(filepath.Join(dir, "module|*.gob")); err != nil {
 		t.Error(err)
 	} else if len(filename) == 0 {
 		t.Error("Expecting one file")
 	} else if len(filename) > 1 {
 		t.Error("Expecting only one file")
+	}
+}
+
+func TestWriteToFile(t *testing.T) {
+	filePath := "/tmp/engine/libcdre_test/writeToFile.txt"
+	exportEvent := &ExportEvents{}
+	//call WriteToFile function
+	if err := exportEvent.WriteToFile(filePath); err != nil {
+		t.Error(err)
+	}
+	// check if the file exists / throw error if the file doesn't exist
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		t.Fatalf("File doesn't exists")
+	}
+	//check if the file was written correctly
+	rcv, err := NewExportEventsFromFile(filePath)
+	if err != nil {
+		t.Errorf("Error deconding the file content: %+v", err)
+	}
+	if !reflect.DeepEqual(rcv, exportEvent) {
+		t.Errorf("\nExpecting: %+v,\nReceived: %+v", utils.ToJSON(exportEvent), utils.ToJSON(rcv))
+	}
+	//populate the exportEvent struct
+	exportEvent = &ExportEvents{
+		Events: []interface{}{"something1", "something2"},
+		Path:   "path",
+		Format: "test",
+	}
+	filePath = "/tmp/engine/libcdre_test/writeToFile2.txt"
+	if err := exportEvent.WriteToFile(filePath); err != nil {
+		t.Error(err)
+	}
+	// check if the file exists / throw error if the file doesn't exist
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		t.Fatalf("File doesn't exists")
+	}
+	//check if the file was written correctly
+	rcv, err = NewExportEventsFromFile(filePath)
+	if err != nil {
+		t.Errorf("Error deconding the file content: %+v", err)
+	}
+	if !reflect.DeepEqual(rcv, exportEvent) {
+		t.Errorf("\nExpected: %+v,\nReceived: %+v", utils.ToJSON(exportEvent), utils.ToJSON(rcv))
+	}
+	//wrong path *reading
+	exportEvent = &ExportEvents{}
+	filePath = "/tmp/engine/libcdre_test/wrongpath.txt"
+	if rcv, err = NewExportEventsFromFile(filePath); err == nil || err.Error() != "open /tmp/engine/libcdre_test/wrongpath.txt: no such file or directory" {
+		t.Errorf("\nExpecting: 'open /tmp/engine/libcdre_test/wrongpath.txt: no such file or directory',\nReceived: '%+v'", err)
+	}
+	//wrong path *writing
+	filePath = utils.EmptyString
+	if err := exportEvent.WriteToFile(filePath); err == nil || err.Error() != "open : no such file or directory" {
+		t.Error(err)
 	}
 }
