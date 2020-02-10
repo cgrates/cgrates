@@ -21,7 +21,6 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 func TestFilterPassString(t *testing.T) {
@@ -296,77 +295,6 @@ func TestFilterPassRSRFields(t *testing.T) {
 	}
 	//not
 	rf, err = NewFilterRule(utils.MetaNotRSR, "", []string{"~navigation(off)"})
-	if err != nil {
-		t.Error(err)
-	}
-	if passes, err := rf.Pass(cd, []config.DataProvider{cd}); err != nil {
-		t.Error(err)
-	} else if passes {
-		t.Error("Passing")
-	}
-}
-
-// structure to mimic the APIerSv1 to test *destination
-type apierSv1Dummy struct {
-	DataManager *DataManager
-}
-
-func (apiv1 *apierSv1Dummy) GetReverseDestination(prefix string, reply *[]string) (err error) {
-	if prefix == "" {
-		return utils.NewErrMandatoryIeMissing("prefix")
-	}
-	var revLst []string
-	if revLst, err = apiv1.DataManager.GetReverseDestination(prefix, false, utils.NonTransactional); err != nil {
-		return
-	}
-	*reply = revLst
-	return
-}
-
-func (apiv1 *apierSv1Dummy) Call(serviceMethod string,
-	args interface{}, reply interface{}) error {
-	return utils.APIerRPCCall(apiv1, serviceMethod, args, reply)
-}
-
-func TestFilterPassDestinations(t *testing.T) {
-	Cache.Set(utils.CacheReverseDestinations, "+49",
-		[]string{"DE", "EU_LANDLINE"}, nil, true, "")
-	config.CgrConfig().FilterSCfg().ApierSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier)}
-	internalAPIerSv1Chan := make(chan rpcclient.ClientConnector, 1)
-	internalAPIerSv1Chan <- &apierSv1Dummy{DataManager: dm}
-	connMgr = NewConnManager(config.CgrConfig(), map[string]chan rpcclient.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier): internalAPIerSv1Chan,
-	})
-	cd := &CallDescriptor{
-		Category:      "call",
-		Tenant:        "cgrates.org",
-		Subject:       "dan",
-		Destination:   "+4986517174963",
-		TimeStart:     time.Date(2013, time.October, 7, 14, 50, 0, 0, time.UTC),
-		TimeEnd:       time.Date(2013, time.October, 7, 14, 52, 12, 0, time.UTC),
-		DurationIndex: 132 * time.Second,
-		ExtraFields:   map[string]string{"navigation": "off"},
-	}
-	rf, err := NewFilterRule(utils.MetaDestinations, "~Destination", []string{"DE"})
-	if err != nil {
-		t.Error(err)
-	}
-	if passes, err := rf.passDestinations(cd, []config.DataProvider{cd}); err != nil {
-		t.Error(err)
-	} else if !passes {
-		t.Error("Not passing")
-	}
-	rf, err = NewFilterRule(utils.MetaDestinations, "~Destination", []string{"RO"})
-	if err != nil {
-		t.Error(err)
-	}
-	if passes, err := rf.passDestinations(cd, []config.DataProvider{cd}); err != nil {
-		t.Error(err)
-	} else if passes {
-		t.Error("Passing")
-	}
-	//not
-	rf, err = NewFilterRule(utils.MetaNotDestinations, "~Destination", []string{"DE"})
 	if err != nil {
 		t.Error(err)
 	}
@@ -744,30 +672,6 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 		t.Errorf(err.Error())
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
-	}
-	Cache.Set(utils.CacheReverseDestinations, "+49",
-		[]string{"DE", "EU_LANDLINE"}, nil, true, "")
-	failEvent = map[string]interface{}{
-		utils.Destination: "+5086517174963",
-	}
-	passEvent = map[string]interface{}{
-		utils.Destination: "+4986517174963",
-	}
-	fEv = config.NewNavigableMap(nil)
-	fEv.Set([]string{utils.MetaReq}, failEvent, false, false)
-	pEv = config.NewNavigableMap(nil)
-	pEv.Set([]string{utils.MetaReq}, passEvent, false, false)
-	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*destinations:~*req.Destination:EU"}, fEv); err != nil {
-		t.Errorf(err.Error())
-	} else if pass {
-		t.Errorf("Expecting: %+v, received: %+v", false, pass)
-	}
-	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*destinations:~*req.Destination:EU_LANDLINE"}, pEv); err != nil {
-		t.Errorf(err.Error())
-	} else if !pass {
-		t.Errorf("Expecting: %+v, received: %+v", true, pass)
 	}
 	failEvent = map[string]interface{}{
 		utils.Weight: 10,
