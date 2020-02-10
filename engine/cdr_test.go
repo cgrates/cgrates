@@ -1138,7 +1138,7 @@ func TestCDRexportFieldValue(t *testing.T) {
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 	}
 
-	cfgCdrFld := &config.FCTemplate{Tag: "SetupTime", Type: utils.META_COMPOSED,
+	cfgCdrFld := &config.FCTemplate{Path: "*exp.SetupTime", Type: utils.META_COMPOSED,
 		Value: config.NewRSRParsersMustCompile("~SetupTime", true, utils.INFIELD_SEP)}
 
 	eVal := "2013-11-07T08:42:20Z"
