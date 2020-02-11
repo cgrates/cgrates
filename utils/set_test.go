@@ -42,43 +42,43 @@ func TestNewStringSet(t *testing.T) {
 	}
 }
 
-func TestAdd(t *testing.T){
+func TestAdd(t *testing.T) {
 	s := &StringSet{data: map[string]struct{}{}}
 	eOut := &StringSet{data: map[string]struct{}{
-		"test" : struct{}{},
+		"test": struct{}{},
 	}}
-	if reflect.DeepEqual(eOut,s){
-		t.Errorf("Expecting: %+v, received: %+v",eOut,s)
+	if reflect.DeepEqual(eOut, s) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, s)
 	}
 	s.Add("test")
-	if !reflect.DeepEqual(eOut,s){
-		t.Errorf("Expecting: %+v, received: %+v",eOut,s)
+	if !reflect.DeepEqual(eOut, s) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, s)
 	}
 }
 
-func TestRemove(t *testing.T){
+func TestRemove(t *testing.T) {
 	eOut := &StringSet{data: map[string]struct{}{}}
 	s := &StringSet{data: map[string]struct{}{
-		"test" : struct{}{},
+		"test": struct{}{},
 	}}
-	if reflect.DeepEqual(eOut,s){
-		t.Errorf("Expecting: %+v, received: %+v",eOut,s)
+	if reflect.DeepEqual(eOut, s) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, s)
 	}
 	s.Remove("test")
-	if !reflect.DeepEqual(eOut,s){
-		t.Errorf("Expecting: %+v, received: %+v",eOut,s)
+	if !reflect.DeepEqual(eOut, s) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, s)
 	}
 }
 
-func TestHas(t *testing.T){
+func TestHas(t *testing.T) {
 	s := &StringSet{}
-	if s.Has("test"){
+	if s.Has("test") {
 		t.Error("Expecting: false, received: true")
 	}
 	s = &StringSet{data: map[string]struct{}{
-		"test" : struct{}{},
+		"test": struct{}{},
 	}}
-	if !s.Has("test"){
+	if !s.Has("test") {
 		t.Error("Expecting: true, received: false")
 	}
 }

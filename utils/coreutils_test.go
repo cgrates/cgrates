@@ -1307,4 +1307,45 @@ func TestRandomInteger(t *testing.T) {
 	if a == 100 || b == 100 || c == 100 {
 		t.Errorf("one of the numbers equals the max limit")
 	}
+	if a == 0 || b == 0 || c == 0 {
+		t.Errorf("one of the numbers equals the min limit")
+	}
+}
+
+func TestGetPathIndex(t *testing.T) {
+	if rcv, _ := GetPathIndex(EmptyString); rcv != EmptyString {
+		t.Errorf("Expecting: \"\"(EmptyString), received: \"%+v\"", rcv)
+	}
+	eOut := "test"
+	if rcv, _ := GetPathIndex("test"); rcv != eOut {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+	if rcv, index := GetPathIndex("test[10]"); rcv != eOut {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	} else if *index != 10 {
+		t.Errorf("Expecting: %+v, received: %+v", 10, *index)
+	}
+	if rcv, index := GetPathIndex("test[0]"); rcv != eOut {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	} else if *index != 0 {
+		t.Errorf("Expecting: %+v, received: %+v", 0, *index)
+	}
+	eOut = "test[notanumber]"
+	if rcv, index := GetPathIndex("test[notanumber]"); rcv != eOut {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	} else if index != nil {
+		t.Errorf("Expecting: nil, received: %+v", *index)
+	}
+	eOut = "test[]"
+	if rcv, index := GetPathIndex("test[]"); rcv != eOut {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	} else if index != nil {
+		t.Errorf("Expecting: nil, received: %+v", *index)
+	}
+	eOut = "[]"
+	if rcv, index := GetPathIndex("[]"); rcv != eOut {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	} else if index != nil {
+		t.Errorf("Expecting: nil, received: %+v", *index)
+	}
 }

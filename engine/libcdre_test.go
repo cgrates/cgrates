@@ -52,13 +52,13 @@ func TestAddFailedPost(t *testing.T) {
 		t.Error("Error when casting")
 	}
 	eOut := &ExportEvents{
-		Path: "path1",
+		Path:   "path1",
 		Format: "format1",
 		module: "module1",
 		Events: []interface{}{"1"},
 	}
 	if !reflect.DeepEqual(eOut, failedPost) {
-		t.Errorf("Expecting: %+v, received: %+v",utils.ToJSON(eOut),utils.ToJSON(failedPost))
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(failedPost))
 	}
 	addFailedPost("path1", "format1", "module1", "2")
 	addFailedPost("path2", "format2", "module2", "3")
@@ -74,13 +74,13 @@ func TestAddFailedPost(t *testing.T) {
 		t.Error("Error when casting")
 	}
 	eOut = &ExportEvents{
-		Path: "path1",
+		Path:   "path1",
 		Format: "format1",
 		module: "module1",
-		Events: []interface{}{"1","2"},
+		Events: []interface{}{"1", "2"},
 	}
 	if !reflect.DeepEqual(eOut, failedPost) {
-		t.Errorf("Expecting: %+v, received: %+v",utils.ToJSON(eOut),utils.ToJSON(failedPost))
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(failedPost))
 	}
 	x, ok = failedPostCache.Get(utils.ConcatenatedKey("path2", "format2", "module2"))
 	if !ok {
@@ -94,13 +94,13 @@ func TestAddFailedPost(t *testing.T) {
 		t.Error("Error when casting")
 	}
 	eOut = &ExportEvents{
-		Path: "path2",
+		Path:   "path2",
 		Format: "format2",
 		module: "module2",
 		Events: []interface{}{"3"},
 	}
 	if !reflect.DeepEqual(eOut, failedPost) {
-		t.Errorf("Expecting: %+v, received: %+v",utils.ToJSON(eOut),utils.ToJSON(failedPost))
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(failedPost))
 	}
 }
 

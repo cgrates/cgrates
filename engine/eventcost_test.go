@@ -2548,3 +2548,195 @@ func TestECAsDataProvider(t *testing.T) {
 		t.Errorf("Expecting: <%s> \nreceived: <%s>", "*voice", data)
 	}
 }
+
+func TestInitCache(t *testing.T) {
+	eventCost := &EventCost{}
+	eventCost.initCache()
+	eOut := config.NewNavigableMap(nil)
+	if !reflect.DeepEqual(eOut, eventCost.cache) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(eventCost.cache))
+	}
+}
+
+func TestEventCostFieldAsInterface(t *testing.T) {
+	eventCost := &EventCost{}
+	eventCost.initCache()
+	// empty check
+	if rcv, err := eventCost.FieldAsInterface([]string{}); err != utils.ErrNotFound {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ErrNotFound, err)
+	} else if rcv != nil {
+		t.Errorf("Expecting: nil, received: %+v", rcv)
+	}
+	// item found in cache
+	eventCost.cache = config.NewNavigableMap(map[string]interface{}{"test": nil})
+	if rcv, err := eventCost.FieldAsInterface([]string{"test"}); err == nil || err != utils.ErrNotFound {
+		t.Errorf("Expecting: nil, received: %+v", err)
+	} else if rcv != nil {
+		t.Errorf("Expecting: nil, received: %+v", rcv)
+	}
+	// data found in cache
+	eventCost.cache = config.NewNavigableMap(map[string]interface{}{"test": "test"})
+	if rcv, err := eventCost.FieldAsInterface([]string{"test"}); err != nil {
+		t.Errorf("Expecting: nil, received: %+v", err)
+	} else if rcv != "test" {
+		t.Errorf("Expecting: nil, received: %+v", rcv)
+	}
+}
+
+func TestEventCostfieldAsInterface(t *testing.T) {
+	eventCost := &EventCost{}
+	// default case
+	if rcv, err := eventCost.fieldAsInterface([]string{utils.EmptyString}); err == nil || err.Error() != "unsupported field prefix: <>" {
+		t.Error(err)
+	} else if rcv != nil {
+		t.Errorf("Expecting: nil, received: %+v", rcv)
+	}
+	// case utils.Charges:
+	if rcv, err := eventCost.fieldAsInterface([]string{utils.Charges, utils.Charges}); err == nil || err != utils.ErrNotFound {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ErrNotFound, err)
+	} else if rcv != nil {
+		t.Errorf("Expecting: nil, received: %+v", rcv)
+	}
+	eventCost = &EventCost{
+		Charges: []*ChargingInterval{
+			&ChargingInterval{
+				RatingID: "RatingID1",
+			},
+			&ChargingInterval{
+				RatingID: "RatingID2",
+			},
+		},
+	}
+	expectedCharges := []*ChargingInterval{
+		&ChargingInterval{
+			RatingID: "RatingID1",
+		},
+		&ChargingInterval{
+			RatingID: "RatingID2",
+		},
+	}
+	if rcv, err := eventCost.fieldAsInterface([]string{utils.Charges}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedCharges, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", expectedCharges, rcv)
+	}
+	// case utils.CGRID:
+	if rcv, err := eventCost.fieldAsInterface([]string{utils.CGRID, utils.CGRID}); err == nil || err != utils.ErrNotFound {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ErrNotFound, err)
+	} else if rcv != nil {
+		t.Errorf("Expecting: nil, received: %+v", rcv)
+	}
+	eventCost = &EventCost{
+		CGRID: "CGRID",
+	}
+	if rcv, err := eventCost.fieldAsInterface([]string{utils.CGRID}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual("CGRID", rcv) {
+		t.Errorf("Expecting: \"CGRID\", received: %+v", rcv)
+	}
+	// case utils.RunID:
+	if rcv, err := eventCost.fieldAsInterface([]string{utils.RunID, utils.RunID}); err == nil || err != utils.ErrNotFound {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ErrNotFound, err)
+	} else if rcv != nil {
+		t.Errorf("Expecting: nil, received: %+v", rcv)
+	}
+	eventCost = &EventCost{
+		RunID: "RunID",
+	}
+	if rcv, err := eventCost.fieldAsInterface([]string{utils.RunID}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual("RunID", rcv) {
+		t.Errorf("Expecting: \"RunID\", received: %+v", rcv)
+	}
+	// case utils.StartTime:
+	if rcv, err := eventCost.fieldAsInterface([]string{utils.StartTime, utils.StartTime}); err == nil || err != utils.ErrNotFound {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ErrNotFound, err)
+	} else if rcv != nil {
+		t.Errorf("Expecting: nil, received: %+v", rcv)
+	}
+	eventCost = &EventCost{
+		StartTime: time.Date(2020, time.April, 18, 23, 0, 4, 0, time.UTC),
+	}
+	expectedStartTime := time.Date(2020, time.April, 18, 23, 0, 4, 0, time.UTC)
+	if rcv, err := eventCost.fieldAsInterface([]string{utils.StartTime}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedStartTime, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", expectedStartTime, rcv)
+	}
+	// case utils.Usage:
+	if rcv, err := eventCost.fieldAsInterface([]string{utils.Usage, utils.Usage}); err == nil || err != utils.ErrNotFound {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ErrNotFound, err)
+	} else if rcv != nil {
+		t.Errorf("Expecting: nil, received: %+v", rcv)
+	}
+	eventCost = &EventCost{
+		Usage: utils.DurationPointer(time.Duration(5 * time.Minute)),
+	}
+	if rcv, err := eventCost.fieldAsInterface([]string{utils.Usage}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(utils.DurationPointer(5*time.Minute), rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.DurationPointer(5*time.Minute), rcv)
+	}
+	// case utils.Cost:
+	if rcv, err := eventCost.fieldAsInterface([]string{utils.Cost, utils.Cost}); err == nil || err != utils.ErrNotFound {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ErrNotFound, err)
+	} else if rcv != nil {
+		t.Errorf("Expecting: nil, received: %+v", rcv)
+	}
+	eventCost = &EventCost{
+		Cost: utils.Float64Pointer(0.7),
+	}
+	if rcv, err := eventCost.fieldAsInterface([]string{utils.Cost}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(utils.Float64Pointer(0.7), rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.Float64Pointer(0.7), rcv)
+	}
+	// case utils.AccountSummary:
+	eventCost = &EventCost{
+		AccountSummary: &AccountSummary{
+			ID: "IDtest",
+		},
+	}
+	expectedAccountSummary := &AccountSummary{ID: "IDtest"}
+	if rcv, err := eventCost.fieldAsInterface([]string{utils.AccountSummary}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedAccountSummary, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", expectedAccountSummary, rcv)
+	}
+	eventCost = &EventCost{
+		AccountSummary: &AccountSummary{
+			ID:     "IDtest1",
+			Tenant: "Tenant",
+		},
+		CGRID: "test",
+	}
+	if rcv, err := eventCost.fieldAsInterface([]string{utils.AccountSummary, utils.Tenant}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual("Tenant", rcv) {
+		t.Errorf("Expecting: Tenant, received: %+v", utils.ToJSON(rcv))
+	}
+	// case utils.Timings:
+	eventCost = &EventCost{
+		Timings: ChargedTimings{
+			"test1": &ChargedTiming{
+				StartTime: "StartTime",
+			},
+		},
+	}
+	eTimings := ChargedTimings{"test1": &ChargedTiming{StartTime: "StartTime"}}
+	if rcv, err := eventCost.fieldAsInterface([]string{utils.Timings}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eTimings, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eTimings, rcv)
+	}
+	eChargedTiming := &ChargedTiming{
+		StartTime: "StartTime",
+	}
+	if rcv, err := eventCost.fieldAsInterface([]string{utils.Timings, "test1"}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eChargedTiming, rcv) {
+		fmt.Printf("%T", rcv)
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eChargedTiming), utils.ToJSON(rcv))
+	}
+
+}
