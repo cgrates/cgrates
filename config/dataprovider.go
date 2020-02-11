@@ -30,7 +30,6 @@ type DataProvider interface {
 	String() string // printable version of data
 	FieldAsInterface(fldPath []string) (interface{}, error)
 	FieldAsString(fldPath []string) (string, error)
-	// AsNavigableMap([]*FCTemplate) (*NavigableMap, error)
 	RemoteHost() net.Addr
 }
 
