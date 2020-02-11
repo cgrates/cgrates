@@ -1,5 +1,5 @@
 ---
-- name: Add apt.cgrates.vhost in nginx
+- name: Add yum.cgrates.vhost in nginx
   become: true
   template:
     src: nginx.conf.j2
@@ -7,7 +7,7 @@
     mode: '0600'
     owner: "{{ rootUser }}"
 
-- name: Create a symlink for apt.cgrates.org
+- name: Create a symlink for yum.cgrates.org
   become: true
   file:
     src: "/etc/nginx/sites-available/yum.cgrates.org.vhost"
