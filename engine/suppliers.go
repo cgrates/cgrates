@@ -166,7 +166,7 @@ func (spS *SupplierService) matchingSupplierProfilesForEvent(ev *utils.CGREvent,
 	if singleResult {
 		matchingSLP = make([]*SupplierProfile, 1)
 	}
-	evNm := config.NewNavigableMap(map[string]interface{}{utils.MetaReq: ev.Event})
+	evNm := utils.MapStorage{utils.MetaReq: ev.Event}
 	for lpID := range sPrflIDs {
 		splPrfl, err := spS.dm.GetSupplierProfile(ev.Tenant, lpID, true, true, utils.NonTransactional)
 		if err != nil {
@@ -455,9 +455,10 @@ func (spS *SupplierService) populateSortingData(ev *utils.CGREvent, spl *Supplie
 	//filter the supplier
 	if len(spl.FilterIDs) != 0 {
 		//construct the DP and pass it to filterS
-		nM := config.NewNavigableMap(nil)
-		nM.Set([]string{utils.MetaReq}, ev.Event, false, false)
-		nM.Set([]string{utils.MetaVars}, sortedSpl.SortingData, false, false)
+		nM := utils.MapStorage{
+			utils.MetaReq:  ev.Event,
+			utils.MetaVars: sortedSpl.SortingData,
+		}
 
 		if pass, err = spS.filterS.Pass(ev.Tenant, spl.FilterIDs,
 			nM); err != nil {

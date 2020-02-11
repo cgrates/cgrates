@@ -84,7 +84,7 @@ func (ld LoaderData) UpdateFromCSV(fileName string, record []string,
 }
 
 // newCsvProvider constructs a DataProvider
-func newCsvProvider(record []string, fileName string) (dP config.DataProvider) {
+func newCsvProvider(record []string, fileName string) (dP utils.DataProvider) {
 	dP = &csvProvider{
 		req:      record,
 		fileName: fileName,
@@ -108,7 +108,7 @@ func (cP *csvProvider) String() string {
 
 // FieldAsInterface is part of engine.DataProvider interface
 func (cP *csvProvider) FieldAsInterface(fldPath []string) (data interface{}, err error) {
-	if data, err = cP.cache.Get(fldPath); err == nil ||
+	if data, err = cP.cache.FieldAsInterface(fldPath); err == nil ||
 		err != utils.ErrNotFound { // item found in cache
 		return
 	}

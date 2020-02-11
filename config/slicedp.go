@@ -28,14 +28,14 @@ import (
 
 // NewSliceDP constructs a DataProvider
 func NewSliceDP(record []string) (dP DataProvider) {
-	dP = &SliceDP{req: record, cache: NewNavigableMap(nil)}
+	dP = &SliceDP{req: record, cache: utils.MapStorage{}}
 	return
 }
 
 // SliceDP implements engine.DataProvider so we can pass it to filters
 type SliceDP struct {
 	req   []string
-	cache *NavigableMap
+	cache utils.MapStorage
 }
 
 // String is part of engine.DataProvider interface
@@ -65,7 +65,7 @@ func (cP *SliceDP) FieldAsInterface(fldPath []string) (data interface{}, err err
 	} else {
 		data = cP.req[cfgFieldIdx]
 	}
-	cP.cache.Set(fldPath, data, false, false)
+	cP.cache.Set(fldPath, data)
 	return
 }
 

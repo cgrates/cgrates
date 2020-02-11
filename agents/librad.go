@@ -118,7 +118,7 @@ func radReplyAppendAttributes(reply *radigo.Packet, agReq *AgentRequest,
 }
 
 // newRADataProvider constructs a DataProvider
-func newRADataProvider(req *radigo.Packet) (dP config.DataProvider) {
+func newRADataProvider(req *radigo.Packet) (dP utils.DataProvider) {
 	dP = &radiusDP{req: req, cache: utils.MapStorage{}}
 	return
 }
@@ -141,7 +141,7 @@ func (pk *radiusDP) FieldAsInterface(fldPath []string) (data interface{}, err er
 	if len(fldPath) != 1 {
 		return nil, utils.ErrNotFound
 	}
-	if data, err = pk.cache.Get(fldPath); err != nil {
+	if data, err = pk.cache.FieldAsInterface(fldPath); err != nil {
 		if err != utils.ErrNotFound { // item found in cache
 			return
 		}

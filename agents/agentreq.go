@@ -32,14 +32,14 @@ import (
 )
 
 // NewAgentRequest returns a new AgentRequest
-func NewAgentRequest(req config.DataProvider,
+func NewAgentRequest(req utils.DataProvider,
 	vars map[string]interface{},
 	cgrRply *config.NavigableMap,
 	rply *config.NavigableMap,
 	tntTpl config.RSRParsers,
 	dfltTenant, timezone string,
 	filterS *engine.FilterS,
-	header, trailer config.DataProvider) (ar *AgentRequest) {
+	header, trailer utils.DataProvider) (ar *AgentRequest) {
 	if cgrRply == nil {
 		cgrRply = config.NewNavigableMap(nil)
 	}
@@ -73,7 +73,7 @@ func NewAgentRequest(req config.DataProvider,
 // AgentRequest represents data related to one request towards agent
 // implements engine.DataProvider so we can pass it to filters
 type AgentRequest struct {
-	Request    config.DataProvider  // request
+	Request    utils.DataProvider  // request
 	Vars       *config.NavigableMap // shared data
 	CGRRequest *config.NavigableMap // Used in reply to access the request that was send
 	CGRReply   *config.NavigableMap
@@ -81,8 +81,8 @@ type AgentRequest struct {
 	Tenant,
 	Timezone string
 	filterS *engine.FilterS
-	Header  config.DataProvider
-	Trailer config.DataProvider
+	Header  utils.DataProvider
+	Trailer utils.DataProvider
 	diamreq *config.NavigableMap // used in case of building requests (ie. DisconnectSession)
 	tmp     *config.NavigableMap // used in case you want to store temporary items and access them later
 }

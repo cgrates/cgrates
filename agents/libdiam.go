@@ -288,7 +288,7 @@ func writeOnConn(c diam.Conn, m *diam.Message) (err error) {
 }
 
 // newDADataProvider constructs a DataProvider for a diameter message
-func newDADataProvider(c diam.Conn, m *diam.Message) config.DataProvider {
+func newDADataProvider(c diam.Conn, m *diam.Message) utils.DataProvider {
 	return &diameterDP{c: c, m: m, cache: utils.MapStorage{}}
 
 }
@@ -324,7 +324,7 @@ func (dP *diameterDP) RemoteHost() net.Addr {
 
 // FieldAsInterface is part of engine.DataProvider interface
 func (dP *diameterDP) FieldAsInterface(fldPath []string) (data interface{}, err error) {
-	if data, err = dP.cache.Get(fldPath); err != nil {
+	if data, err = dP.cache.FieldAsInterface(fldPath); err != nil {
 		if err != utils.ErrNotFound { // item found in cache
 			return nil, err
 		}
