@@ -60,7 +60,7 @@ func domainNameFromNAPTR(name string) (dName string) {
 
 // newDADataProvider constructs a DataProvider for a diameter message
 func newDNSDataProvider(req *dns.Msg,
-	w dns.ResponseWriter) config.DataProvider {
+	w dns.ResponseWriter) utils.DataProvider {
 	return &dnsDP{req: req, w: w,
 		cache: utils.MapStorage{}}
 }
@@ -96,7 +96,7 @@ func (dP *dnsDP) RemoteHost() net.Addr {
 
 // FieldAsInterface is part of engine.DataProvider interface
 func (dP *dnsDP) FieldAsInterface(fldPath []string) (data interface{}, err error) {
-	if data, err = dP.cache.Get(fldPath); err != nil {
+	if data, err = dP.cache.FieldAsInterface(fldPath); err != nil {
 		if err != utils.ErrNotFound { // item found in cache
 			return nil, err
 		}

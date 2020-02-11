@@ -53,7 +53,7 @@ func TestSafEventMapEvent(t *testing.T) {
 }
 
 func TestSafEventFieldAsInterface(t *testing.T) {
-	data := config.DataProvider(safEv)
+	data := utils.DataProvider(safEv)
 	if _, err := data.FieldAsInterface([]string{"first", "second"}); err != utils.ErrNotFound {
 		t.Error(err)
 	}
@@ -73,7 +73,7 @@ func TestSafEventFieldAsInterface(t *testing.T) {
 }
 
 func TestSafEventFieldAsString(t *testing.T) {
-	data := config.DataProvider(safEv)
+	data := utils.DataProvider(safEv)
 	if _, err := data.FieldAsString([]string{"first", "second"}); err != utils.ErrNotFound {
 		t.Error(err)
 	}
@@ -93,7 +93,7 @@ func TestSafEventFieldAsString(t *testing.T) {
 }
 
 func TestSafEventRemoteHost(t *testing.T) {
-	data := config.DataProvider(safEv)
+	data := utils.DataProvider(safEv)
 	if rply, expected := data.RemoteHost(), utils.LocalAddr(); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}

@@ -2552,7 +2552,7 @@ func TestECAsDataProvider(t *testing.T) {
 func TestInitCache(t *testing.T) {
 	eventCost := &EventCost{}
 	eventCost.initCache()
-	eOut := config.NewNavigableMap(nil)
+	eOut := utils.MapStorage{}
 	if !reflect.DeepEqual(eOut, eventCost.cache) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(eventCost.cache))
 	}
@@ -2568,14 +2568,14 @@ func TestEventCostFieldAsInterface(t *testing.T) {
 		t.Errorf("Expecting: nil, received: %+v", rcv)
 	}
 	// item found in cache
-	eventCost.cache = config.NewNavigableMap(map[string]interface{}{"test": nil})
+	eventCost.cache = utils.MapStorage{"test": nil}
 	if rcv, err := eventCost.FieldAsInterface([]string{"test"}); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expecting: nil, received: %+v", err)
 	} else if rcv != nil {
 		t.Errorf("Expecting: nil, received: %+v", rcv)
 	}
 	// data found in cache
-	eventCost.cache = config.NewNavigableMap(map[string]interface{}{"test": "test"})
+	eventCost.cache = utils.MapStorage{"test": "test"}
 	if rcv, err := eventCost.FieldAsInterface([]string{"test"}); err != nil {
 		t.Errorf("Expecting: nil, received: %+v", err)
 	} else if rcv != "test" {

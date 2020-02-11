@@ -29,14 +29,14 @@ import (
 
 // NewfwvProvider constructs a DataProvider
 func NewFWVProvider(record string) (dP DataProvider) {
-	dP = &FWVProvider{req: record, cache: NewNavigableMap(nil)}
+	dP = &FWVProvider{req: record, cache: utils.MapStorage{}}
 	return
 }
 
 // fwvProvider implements engine.DataProvider so we can pass it to filters
 type FWVProvider struct {
 	req   string
-	cache *NavigableMap
+	cache utils.MapStorage
 }
 
 // String is part of engine.DataProvider interface
@@ -75,7 +75,7 @@ func (fP *FWVProvider) FieldAsInterface(fldPath []string) (data interface{}, err
 		return "", fmt.Errorf("FinalIndex : %+v is greater than : %+v", finalIndex, len(fP.req))
 	}
 	data = fP.req[startIndex:finalIndex]
-	fP.cache.Set(fldPath, data, false, false)
+	fP.cache.Set(fldPath, data)
 	return
 }
 
