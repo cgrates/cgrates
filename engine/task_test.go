@@ -23,7 +23,6 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -35,38 +34,6 @@ func TestTaskString(t *testing.T) {
 	}
 	eOut := "{\"Uuid\":\"test\",\"AccountID\":\"test2\",\"ActionsID\":\"test3\"}"
 	rcv := task.String()
-	if !reflect.DeepEqual(eOut, rcv) {
-		t.Errorf("Expecting: %q, received: %q", eOut, rcv)
-	}
-}
-
-func TestTaskAsMavigableMap(t *testing.T) {
-	//empty check
-	task := new(Task)
-	eOut := config.NewNavigableMap(nil)
-	eOut.Set([]string{utils.UUID}, "", false, false)
-	eOut.Set([]string{utils.AccountID}, "", false, false)
-	eOut.Set([]string{utils.ActionsID}, "", false, false)
-	rcv, err := task.AsNavigableMap(nil)
-	if err != nil {
-		t.Error(err)
-	}
-	if !reflect.DeepEqual(eOut, rcv) {
-		t.Errorf("Expecting: %q, received: %q", eOut, rcv)
-	}
-	//normal check
-	task = &Task{
-		Uuid:      "test",
-		AccountID: "test2",
-		ActionsID: "test3",
-	}
-	eOut.Set([]string{utils.UUID}, "test", false, false)
-	eOut.Set([]string{utils.AccountID}, "test2", false, false)
-	eOut.Set([]string{utils.ActionsID}, "test3", false, false)
-	rcv, err = task.AsNavigableMap(nil)
-	if err != nil {
-		t.Error(err)
-	}
 	if !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting: %q, received: %q", eOut, rcv)
 	}

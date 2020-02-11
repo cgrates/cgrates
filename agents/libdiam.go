@@ -307,12 +307,6 @@ func (dP *diameterDP) String() string {
 	return dP.m.String()
 }
 
-// AsNavigableMap is part of engine.DataProvider interface
-func (dP *diameterDP) AsNavigableMap([]*config.FCTemplate) (
-	nm *config.NavigableMap, err error) {
-	return nil, utils.ErrNotImplemented
-}
-
 // FieldAsString is part of engine.DataProvider interface
 func (dP *diameterDP) FieldAsString(fldPath []string) (data string, err error) {
 	var valIface interface{}

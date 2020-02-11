@@ -136,12 +136,6 @@ func (ar *AgentRequest) FieldAsString(fldPath []string) (val string, err error) 
 	return utils.IfaceAsString(iface), nil
 }
 
-// AsNavigableMap implements engine.DataProvider
-func (ar *AgentRequest) AsNavigableMap(tplFlds []*config.FCTemplate) (
-	nM *config.NavigableMap, err error) {
-	return nil, utils.ErrNotImplemented
-}
-
 //SetFields will populate fields of AgentRequest out of templates
 func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 	ar.tmp = config.NewNavigableMap(nil)

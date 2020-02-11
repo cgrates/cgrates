@@ -950,12 +950,6 @@ func (cdrP *cdrLogProvider) FieldAsString(fldPath []string) (data string, err er
 	return utils.IfaceAsString(valIface), nil
 }
 
-// AsNavigableMap is part of engine.DataProvider interface
-func (cdrP *cdrLogProvider) AsNavigableMap([]*config.FCTemplate) (
-	nm *config.NavigableMap, err error) {
-	return nil, utils.ErrNotImplemented
-}
-
 // RemoteHost is part of engine.DataProvider interface
 func (cdrP *cdrLogProvider) RemoteHost() net.Addr {
 	return utils.LocalAddr()

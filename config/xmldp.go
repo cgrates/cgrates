@@ -91,12 +91,6 @@ func (xP *XmlProvider) FieldAsString(fldPath []string) (data string, err error) 
 	return utils.IfaceAsString(valIface), nil
 }
 
-// AsNavigableMap is part of engine.DataProvider interface
-func (xP *XmlProvider) AsNavigableMap([]*FCTemplate) (
-	nm *NavigableMap, err error) {
-	return nil, utils.ErrNotImplemented
-}
-
 // RemoteHost is part of engine.DataProvider interface
 func (xP *XmlProvider) RemoteHost() net.Addr {
 	return utils.LocalAddr()

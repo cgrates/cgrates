@@ -60,10 +60,6 @@ func (me MapEvent) FieldAsString(fldPath []string) (string, error) {
 	return me.GetString(fldPath[0])
 }
 
-func (me MapEvent) AsNavigableMap([]*config.FCTemplate) (*config.NavigableMap, error) {
-	return config.NewNavigableMap(me), nil
-}
-
 func (me MapEvent) RemoteHost() net.Addr {
 	return utils.LocalAddr()
 }
