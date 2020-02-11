@@ -867,7 +867,7 @@ func (apl Actions) Clone() (interface{}, error) {
 
 // newCdrLogProvider constructs a DataProvider
 func newCdrLogProvider(acnt *Account, action *Action) (dP config.DataProvider) {
-	dP = &cdrLogProvider{acnt: acnt, action: action, cache: config.NewNavigableMap(nil)}
+	dP = &cdrLogProvider{acnt: acnt, action: action, cache: utils.MapStorage{}}
 	return
 }
 
@@ -875,7 +875,7 @@ func newCdrLogProvider(acnt *Account, action *Action) (dP config.DataProvider) {
 type cdrLogProvider struct {
 	acnt   *Account
 	action *Action
-	cache  *config.NavigableMap
+	cache  utils.MapStorage
 }
 
 // String is part of engine.DataProvider interface
@@ -889,7 +889,7 @@ func (cdrP *cdrLogProvider) FieldAsInterface(fldPath []string) (data interface{}
 	if len(fldPath) != 1 {
 		return nil, utils.ErrNotFound
 	}
-	if data, err = cdrP.cache.FieldAsInterface(fldPath); err == nil ||
+	if data, err = cdrP.cache.Get(fldPath); err == nil ||
 		err != utils.ErrNotFound { // item found in cache
 		return
 	}
@@ -936,7 +936,7 @@ func (cdrP *cdrLogProvider) FieldAsInterface(fldPath []string) (data interface{}
 	default:
 		data = fldPath[0]
 	}
-	cdrP.cache.Set(fldPath, data, false, false)
+	cdrP.cache.Set(fldPath, data)
 	return
 }
 

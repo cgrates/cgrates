@@ -37,7 +37,7 @@ func NewBareEventCost() *EventCost {
 		Rates:         make(ChargedRates),
 		Timings:       make(ChargedTimings),
 		Charges:       make([]*ChargingInterval, 0),
-		cache:         config.NewNavigableMap(nil),
+		cache:         utils.MapStorage{},
 	}
 }
 
@@ -119,12 +119,12 @@ type EventCost struct {
 	Rates          ChargedRates
 	Timings        ChargedTimings
 
-	cache *config.NavigableMap
+	cache utils.MapStorage
 }
 
 func (ec *EventCost) initCache() {
 	if ec != nil {
-		ec.cache = config.NewNavigableMap(nil)
+		ec.cache = utils.MapStorage{}
 	}
 }
 
@@ -855,7 +855,7 @@ func (ec *EventCost) FieldAsInterface(fldPath []string) (val interface{}, err er
 	if len(fldPath) == 0 {
 		return nil, utils.ErrNotFound
 	}
-	if val, err = ec.cache.FieldAsInterface(fldPath); err != nil {
+	if val, err = ec.cache.Get(fldPath); err != nil {
 		if err != utils.ErrNotFound { // item found in cache
 			return
 		}
@@ -867,9 +867,9 @@ func (ec *EventCost) FieldAsInterface(fldPath []string) (val interface{}, err er
 	}
 	val, err = ec.fieldAsInterface(fldPath)
 	if err == nil {
-		ec.cache.Set(fldPath, val, false, false)
+		ec.cache.Set(fldPath, val)
 	} else if err == utils.ErrNotFound {
-		ec.cache.Set(fldPath, nil, false, false)
+		ec.cache.Set(fldPath, nil)
 	}
 	return
 }
