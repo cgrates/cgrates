@@ -206,7 +206,7 @@
 // "filters": {								// Filters configuration (*new)
 // 	"stats_conns": [],						// connections to StatS for <*stats> filters, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
 // 	"resources_conns": [],					// connections to ResourceS for <*resources> filters, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
-// 	"rals_conns": [],						// connections to RALs for <*accounts> filters, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
+// 	"apiers_conns": [],						// connections to RALs for <*accounts> filters, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
 // },
 
 
@@ -287,7 +287,7 @@
 // 			"id": "*default",									// identifier of the EventReader profile
 // 			"type": "*file_csv",								// reader type <*file_csv>
 // 			"field_separator": ",",								// separator used in case of csv files
-// 			"run_delay": 0,										// sleep interval in seconds between consecutive runs, -1 to use automation via inotify or 0 to disable running all together
+// 			"run_delay": "0",										// sleep interval in seconds between consecutive runs, -1 to use automation via inotify or 0 to disable running all together
 // 			"concurrent_requests": 1024,						// maximum simultaneous requests/files to process, 0 for unlimited
 // 			"source_path": "/var/spool/cgrates/cdrc/in",		// read data from this path
 // 			"processed_path": "/var/spool/cgrates/cdrc/out",	// move processed data here
@@ -296,7 +296,7 @@
 // 			"timezone": "",										// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
 // 			"filters": [],										// limit parsing based on the filters
 // 			"flags": [],										// flags to influence the event processing
-// 			"fields":[											// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
+// 			"fields":[											// import fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
 // 				{"tag": "ToR", "path": "ToR", "type": "*variable", "value": "~*req.2", "mandatory": true},
 // 				{"tag": "OriginID", "path": "OriginID", "type": "*variable", "value": "~*req.3", "mandatory": true},
 // 				{"tag": "RequestType", "path": "RequestType", "type": "*variable", "value": "~*req.4", "mandatory": true},
@@ -396,45 +396,45 @@
 // 	"asr_template": "",											// enable AbortSession message being sent to client on DisconnectSession
 // 	"templates":{												// default message templates
 // 		"*err": [
-// 				{"tag": "SessionId", "path": "Session-Id", "type": "*variable",
+// 				{"tag": "SessionId", "path": "*rep.Session-Id", "type": "*variable",
 // 					"value": "~*req.Session-Id", "mandatory": true},
-// 				{"tag": "OriginHost", "path": "Origin-Host", "type": "*variable",
+// 				{"tag": "OriginHost", "path": "*rep.Origin-Host", "type": "*variable",
 // 					"value": "~*vars.OriginHost", "mandatory": true},
-// 				{"tag": "OriginRealm", "path": "Origin-Realm", "type": "*variable",
+// 				{"tag": "OriginRealm", "path": "*rep.Origin-Realm", "type": "*variable",
 // 					"value": "~*vars.OriginRealm", "mandatory": true},
 // 		],
 // 		"*cca": [
-// 				{"tag": "SessionId", "path": "Session-Id", "type": "*variable",
+// 				{"tag": "SessionId", "path": "*rep.Session-Id", "type": "*variable",
 // 					"value": "~*req.Session-Id", "mandatory": true},
-// 				{"tag": "ResultCode", "path": "Result-Code", "type": "*constant",
+// 				{"tag": "ResultCode", "path": "*rep.Result-Code", "type": "*constant",
 // 					"value": "2001"},
-// 				{"tag": "OriginHost", "path": "Origin-Host", "type": "*variable",
+// 				{"tag": "OriginHost", "path": "*rep.Origin-Host", "type": "*variable",
 // 					"value": "~*vars.OriginHost", "mandatory": true},
-// 				{"tag": "OriginRealm", "path": "Origin-Realm", "type": "*variable",
+// 				{"tag": "OriginRealm", "path": "*rep.Origin-Realm", "type": "*variable",
 // 					"value": "~*vars.OriginRealm", "mandatory": true},
-// 				{"tag": "AuthApplicationId", "path": "Auth-Application-Id", "type": "*variable",
+// 				{"tag": "AuthApplicationId", "path": "*rep.Auth-Application-Id", "type": "*variable",
 // 					 "value": "~*vars.*appid", "mandatory": true},
-// 				{"tag": "CCRequestType", "path": "CC-Request-Type", "type": "*variable",
+// 				{"tag": "CCRequestType", "path": "*rep.CC-Request-Type", "type": "*variable",
 // 					"value": "~*req.CC-Request-Type", "mandatory": true},
-// 				{"tag": "CCRequestNumber", "path": "CC-Request-Number", "type": "*variable",
+// 				{"tag": "CCRequestNumber", "path": "*rep.CC-Request-Number", "type": "*variable",
 // 					"value": "~*req.CC-Request-Number", "mandatory": true},
 // 		],
 // 		"*asr": [
-// 				{"tag": "SessionId", "path": "Session-Id", "type": "*variable",
+// 				{"tag": "SessionId", "path": "*diamreq.Session-Id", "type": "*variable",
 // 					"value": "~*req.Session-Id", "mandatory": true},
-// 				{"tag": "OriginHost", "path": "Origin-Host", "type": "*variable",
+// 				{"tag": "OriginHost", "path": "*diamreq.Origin-Host", "type": "*variable",
 // 					"value": "~*req.Destination-Host", "mandatory": true},
-// 				{"tag": "OriginRealm", "path": "Origin-Realm", "type": "*variable",
+// 				{"tag": "OriginRealm", "path": "*diamreq.Origin-Realm", "type": "*variable",
 // 					"value": "~*req.Destination-Realm", "mandatory": true},
-// 				{"tag": "DestinationRealm", "path": "Destination-Realm", "type": "*variable",
+// 				{"tag": "DestinationRealm", "path": "*diamreq.Destination-Realm", "type": "*variable",
 // 					"value": "~*req.Origin-Realm", "mandatory": true},
-// 				{"tag": "DestinationHost", "path": "Destination-Host", "type": "*variable",
+// 				{"tag": "DestinationHost", "path": "*diamreq.Destination-Host", "type": "*variable",
 // 					"value": "~*req.Origin-Host", "mandatory": true},
-// 				{"tag": "AuthApplicationId", "path": "Auth-Application-Id", "type": "*variable",
+// 				{"tag": "AuthApplicationId", "path": "*diamreq.Auth-Application-Id", "type": "*variable",
 // 					 "value": "~*vars.*appid", "mandatory": true},
-// 				{"tag": "UserName", "path": "User-Name", "type": "*variable",
+// 				{"tag": "UserName", "path": "*diamreq.User-Name", "type": "*variable",
 // 					"value": "~*req.User-Name", "mandatory": true},
-// 				{"tag": "OriginStateID", "path": "Origin-State-Id", "type": "*constant",
+// 				{"tag": "OriginStateID", "path": "*diamreq.Origin-State-Id", "type": "*constant",
 // 					"value": "1"},
 // 		]
 // 	},
