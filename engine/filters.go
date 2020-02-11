@@ -49,7 +49,7 @@ type FilterS struct {
 // there should be at least one filter passing, ie: if filters are not active event will fail to pass
 // receives the event as DataProvider so we can accept undecoded data (ie: HttpRequest)
 func (fS *FilterS) Pass(tenant string, filterIDs []string,
-	ev config.DataProvider) (pass bool, err error) {
+	ev utils.DataProvider) (pass bool, err error) {
 	if len(filterIDs) == 0 {
 		return true, nil
 	}
@@ -201,7 +201,7 @@ func (fltr *FilterRule) CompileValues() (err error) {
 }
 
 // Pass is the method which should be used from outside.
-func (fltr *FilterRule) Pass(dDP config.DataProvider) (result bool, err error) {
+func (fltr *FilterRule) Pass(dDP utils.DataProvider) (result bool, err error) {
 	if fltr.negative == nil {
 		fltr.negative = utils.BoolPointer(strings.HasPrefix(fltr.Type, utils.MetaNot))
 	}
@@ -236,7 +236,7 @@ func (fltr *FilterRule) Pass(dDP config.DataProvider) (result bool, err error) {
 	return result != *(fltr.negative), nil
 }
 
-func (fltr *FilterRule) passString(dDP config.DataProvider) (bool, error) {
+func (fltr *FilterRule) passString(dDP utils.DataProvider) (bool, error) {
 	strVal, err := config.DPDynamicString(fltr.Element, dDP)
 	if err != nil {
 		if err == utils.ErrNotFound {
@@ -256,7 +256,7 @@ func (fltr *FilterRule) passString(dDP config.DataProvider) (bool, error) {
 	return false, nil
 }
 
-func (fltr *FilterRule) passExists(dDP config.DataProvider) (bool, error) {
+func (fltr *FilterRule) passExists(dDP utils.DataProvider) (bool, error) {
 	var err error
 	path := fltr.Element
 	if fltr.rsrFields != nil {
@@ -273,7 +273,7 @@ func (fltr *FilterRule) passExists(dDP config.DataProvider) (bool, error) {
 	return true, nil
 }
 
-func (fltr *FilterRule) passEmpty(fielNameDP config.DataProvider) (bool, error) {
+func (fltr *FilterRule) passEmpty(fielNameDP utils.DataProvider) (bool, error) {
 	val, err := config.DPDynamicInterface(fltr.Element, fielNameDP)
 	if err != nil {
 		if err == utils.ErrNotFound {
@@ -303,7 +303,7 @@ func (fltr *FilterRule) passEmpty(fielNameDP config.DataProvider) (bool, error) 
 	}
 }
 
-func (fltr *FilterRule) passStringPrefix(dDP config.DataProvider) (bool, error) {
+func (fltr *FilterRule) passStringPrefix(dDP utils.DataProvider) (bool, error) {
 	strVal, err := config.DPDynamicString(fltr.Element, dDP)
 	if err != nil {
 		if err == utils.ErrNotFound {
@@ -323,7 +323,7 @@ func (fltr *FilterRule) passStringPrefix(dDP config.DataProvider) (bool, error) 
 	return false, nil
 }
 
-func (fltr *FilterRule) passStringSuffix(dDP config.DataProvider) (bool, error) {
+func (fltr *FilterRule) passStringSuffix(dDP utils.DataProvider) (bool, error) {
 	strVal, err := config.DPDynamicString(fltr.Element, dDP)
 	if err != nil {
 		if err == utils.ErrNotFound {
@@ -344,11 +344,11 @@ func (fltr *FilterRule) passStringSuffix(dDP config.DataProvider) (bool, error) 
 }
 
 // ToDo when Timings will be available in DataDb
-func (fltr *FilterRule) passTimings(dDP config.DataProvider) (bool, error) {
+func (fltr *FilterRule) passTimings(dDP utils.DataProvider) (bool, error) {
 	return false, utils.ErrNotImplemented
 }
 
-func (fltr *FilterRule) passDestinations(dDP config.DataProvider) (bool, error) {
+func (fltr *FilterRule) passDestinations(dDP utils.DataProvider) (bool, error) {
 	dst, err := config.DPDynamicString(fltr.Element, dDP)
 	if err != nil {
 		if err == utils.ErrNotFound {
@@ -377,7 +377,7 @@ func (fltr *FilterRule) passDestinations(dDP config.DataProvider) (bool, error) 
 	return false, nil
 }
 
-func (fltr *FilterRule) passRSR(dDP config.DataProvider) (bool, error) {
+func (fltr *FilterRule) passRSR(dDP utils.DataProvider) (bool, error) {
 	_, err := fltr.rsrFields.ParseDataProviderWithInterfaces(dDP, utils.NestingSep)
 	if err != nil {
 		if err == utils.ErrNotFound || err == utils.ErrFilterNotPassingNoCaps {
@@ -388,7 +388,7 @@ func (fltr *FilterRule) passRSR(dDP config.DataProvider) (bool, error) {
 	return true, nil
 }
 
-func (fltr *FilterRule) passGreaterThan(dDP config.DataProvider) (bool, error) {
+func (fltr *FilterRule) passGreaterThan(dDP utils.DataProvider) (bool, error) {
 	fldIf, err := config.DPDynamicInterface(fltr.Element, dDP)
 	if err != nil {
 		if err == utils.ErrNotFound {
@@ -420,7 +420,7 @@ func (fltr *FilterRule) passGreaterThan(dDP config.DataProvider) (bool, error) {
 	return false, nil
 }
 
-func (fltr *FilterRule) passEqualTo(dDP config.DataProvider) (bool, error) {
+func (fltr *FilterRule) passEqualTo(dDP utils.DataProvider) (bool, error) {
 	fldIf, err := config.DPDynamicInterface(fltr.Element, dDP)
 	if err != nil {
 		if err == utils.ErrNotFound {
@@ -446,13 +446,13 @@ func (fltr *FilterRule) passEqualTo(dDP config.DataProvider) (bool, error) {
 }
 
 func newDynamicDP(cfg *config.CGRConfig, connMgr *ConnManager,
-	tenant string, initialDP config.DataProvider) *dynamicDP {
+	tenant string, initialDP utils.DataProvider) *dynamicDP {
 	return &dynamicDP{
 		cfg:       cfg,
 		connMgr:   connMgr,
 		tenant:    tenant,
 		initialDP: initialDP,
-		cache:     config.NewNavigableMap(nil),
+		cache:     utils.MapStorage{},
 	}
 }
 
@@ -460,9 +460,9 @@ type dynamicDP struct {
 	cfg       *config.CGRConfig
 	connMgr   *ConnManager
 	tenant    string
-	initialDP config.DataProvider
+	initialDP utils.DataProvider
 
-	cache *config.NavigableMap
+	cache utils.MapStorage
 }
 
 func (dDP *dynamicDP) String() string { return utils.ToJSON(dDP) }
@@ -473,9 +473,6 @@ func (dDP *dynamicDP) FieldAsString(fldPath []string) (string, error) {
 		return "", err
 	}
 	return utils.IfaceAsString(val), nil
-}
-func (dDP *dynamicDP) AsNavigableMap([]*config.FCTemplate) (*config.NavigableMap, error) {
-	return nil, utils.ErrNotImplemented
 }
 func (dDP *dynamicDP) RemoteHost() net.Addr {
 	return utils.LocalAddr()
@@ -516,7 +513,7 @@ func (dDP *dynamicDP) fieldAsInterface(fldPath []string) (val interface{}, err e
 		}
 		//construct dataProvider from account and set it furthder
 		dp := config.NewObjectDP(account)
-		dDP.cache.Set(fldPath[:2], dp, false, false)
+		dDP.cache.Set(fldPath[:2], dp)
 		return dp.FieldAsInterface(fldPath[2:])
 	case utils.MetaResources:
 		// sample of fieldName : ~*resources.ResourceID.Field
@@ -526,7 +523,7 @@ func (dDP *dynamicDP) fieldAsInterface(fldPath []string) (val interface{}, err e
 			return nil, err
 		}
 		dp := config.NewObjectDP(reply)
-		dDP.cache.Set(fldPath[:2], dp, false, false)
+		dDP.cache.Set(fldPath[:2], dp)
 		return dp.FieldAsInterface(fldPath[2:])
 	case utils.MetaStats:
 		// sample of fieldName : ~*stats.StatID.*acd
@@ -538,10 +535,10 @@ func (dDP *dynamicDP) fieldAsInterface(fldPath []string) (val interface{}, err e
 			return nil, err
 		}
 		for k, v := range statValues {
-			dDP.cache.Set([]string{utils.MetaStats, fldPath[1], k}, v, false, false)
+			dDP.cache.Set([]string{utils.MetaStats, fldPath[1], k}, v)
 		}
 		return dDP.cache.FieldAsInterface(fldPath)
-	default: // in case of constant we give an empty DataProvider ( empty navigable map )
+	default:
 	}
 	return nil, utils.ErrNotFound
 }

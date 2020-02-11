@@ -40,18 +40,18 @@ func (t *Task) Execute() error {
 	}).Execute(nil, nil)
 }
 
-// String implements config.DataProvider
+// String implements utils.DataProvider
 func (t *Task) String() string {
 	return utils.ToJSON(t)
 }
 
-// FieldAsInterface implements config.DataProvider
+// FieldAsInterface implements utils.DataProvider
 // ToDo: support Action fields
 func (t *Task) FieldAsInterface(fldPath []string) (iface interface{}, err error) {
 	return t.FieldAsString(fldPath)
 }
 
-// FieldAsInterface implements config.DataProvider
+// FieldAsInterface implements utils.DataProvider
 // ToDo: support Action fields
 func (t *Task) FieldAsString(fldPath []string) (s string, err error) {
 	if len(fldPath) == 0 {
@@ -72,7 +72,7 @@ func (t *Task) FieldAsString(fldPath []string) (s string, err error) {
 	}
 }
 
-// RemoteHost implements config.DataProvider
+// RemoteHost implements utils.DataProvider
 func (t *Task) RemoteHost() (rh net.Addr) {
 	return
 }
