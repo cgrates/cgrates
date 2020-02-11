@@ -289,7 +289,7 @@ func writeOnConn(c diam.Conn, m *diam.Message) (err error) {
 
 // newDADataProvider constructs a DataProvider for a diameter message
 func newDADataProvider(c diam.Conn, m *diam.Message) config.DataProvider {
-	return &diameterDP{c: c, m: m, cache: config.NewNavigableMap(nil)}
+	return &diameterDP{c: c, m: m, cache: utils.MapStorage{}}
 
 }
 
@@ -298,7 +298,7 @@ func newDADataProvider(c diam.Conn, m *diam.Message) config.DataProvider {
 type diameterDP struct {
 	c     diam.Conn
 	m     *diam.Message
-	cache *config.NavigableMap
+	cache utils.MapStorage
 }
 
 // String is part of engine.DataProvider interface
@@ -330,7 +330,7 @@ func (dP *diameterDP) RemoteHost() net.Addr {
 
 // FieldAsInterface is part of engine.DataProvider interface
 func (dP *diameterDP) FieldAsInterface(fldPath []string) (data interface{}, err error) {
-	if data, err = dP.cache.FieldAsInterface(fldPath); err != nil {
+	if data, err = dP.cache.Get(fldPath); err != nil {
 		if err != utils.ErrNotFound { // item found in cache
 			return nil, err
 		}
@@ -414,7 +414,7 @@ func (dP *diameterDP) FieldAsInterface(fldPath []string) (data interface{}, err 
 	if data, err = diamAVPAsIface(avps[slectedIdx]); err != nil {
 		return nil, err
 	}
-	dP.cache.Set(fldPath, data, false, false)
+	dP.cache.Set(fldPath, data)
 	return
 }
 
