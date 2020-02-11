@@ -874,7 +874,7 @@ func (ec *EventCost) FieldAsInterface(fldPath []string) (val interface{}, err er
 	return
 }
 
-// FieldAsInterface the implementation of FieldAsInterface
+// fieldAsInterface the implementation of FieldAsInterface
 func (ec *EventCost) fieldAsInterface(fldPath []string) (val interface{}, err error) {
 	switch fldPath[0] {
 	default: // "Charges[1]"
