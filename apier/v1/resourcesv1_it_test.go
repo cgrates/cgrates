@@ -156,7 +156,7 @@ func testV1RsGetResourcesForEvent(t *testing.T) {
 		return
 	}
 	if len(*reply) != 1 {
-		t.Errorf("Expecting: %+v, received: %+v", 1, len(*reply))
+		t.Fatalf("Expecting: %+v, received: %+v", 1, len(*reply))
 	}
 	if (*reply)[0].ID != "ResGroup2" {
 		t.Errorf("Expecting: %+v, received: %+v", "ResGroup2", (*reply)[0].ID)

@@ -305,49 +305,6 @@ func TestFilterPassRSRFields(t *testing.T) {
 	}
 }
 
-func TestFilterPassDestinations(t *testing.T) {
-	Cache.Set(utils.CacheReverseDestinations, "+49",
-		[]string{"DE", "EU_LANDLINE"}, nil, true, "")
-	cd := &CallDescriptor{
-		Category:      "call",
-		Tenant:        "cgrates.org",
-		Subject:       "dan",
-		Destination:   "+4986517174963",
-		TimeStart:     time.Date(2013, time.October, 7, 14, 50, 0, 0, time.UTC),
-		TimeEnd:       time.Date(2013, time.October, 7, 14, 52, 12, 0, time.UTC),
-		DurationIndex: 132 * time.Second,
-		ExtraFields:   map[string]string{"navigation": "off"},
-	}
-	rf, err := NewFilterRule(utils.MetaDestinations, "~Destination", []string{"DE"})
-	if err != nil {
-		t.Error(err)
-	}
-	if passes, err := rf.passDestinations(cd, []config.DataProvider{cd}); err != nil {
-		t.Error(err)
-	} else if !passes {
-		t.Error("Not passing")
-	}
-	rf, err = NewFilterRule(utils.MetaDestinations, "~Destination", []string{"RO"})
-	if err != nil {
-		t.Error(err)
-	}
-	if passes, err := rf.passDestinations(cd, []config.DataProvider{cd}); err != nil {
-		t.Error(err)
-	} else if passes {
-		t.Error("Passing")
-	}
-	//not
-	rf, err = NewFilterRule(utils.MetaNotDestinations, "~Destination", []string{"DE"})
-	if err != nil {
-		t.Error(err)
-	}
-	if passes, err := rf.Pass(cd, []config.DataProvider{cd}); err != nil {
-		t.Error(err)
-	} else if passes {
-		t.Error("Passing")
-	}
-}
-
 func TestFilterPassGreaterThan(t *testing.T) {
 	rf, err := NewFilterRule(utils.MetaLessThan, "~ASR", []string{"40"})
 	if err != nil {
@@ -715,30 +672,6 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 		t.Errorf(err.Error())
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
-	}
-	Cache.Set(utils.CacheReverseDestinations, "+49",
-		[]string{"DE", "EU_LANDLINE"}, nil, true, "")
-	failEvent = map[string]interface{}{
-		utils.Destination: "+5086517174963",
-	}
-	passEvent = map[string]interface{}{
-		utils.Destination: "+4986517174963",
-	}
-	fEv = config.NewNavigableMap(nil)
-	fEv.Set([]string{utils.MetaReq}, failEvent, false, false)
-	pEv = config.NewNavigableMap(nil)
-	pEv.Set([]string{utils.MetaReq}, passEvent, false, false)
-	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*destinations:~*req.Destination:EU"}, fEv); err != nil {
-		t.Errorf(err.Error())
-	} else if pass {
-		t.Errorf("Expecting: %+v, received: %+v", false, pass)
-	}
-	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*destinations:~*req.Destination:EU_LANDLINE"}, pEv); err != nil {
-		t.Errorf(err.Error())
-	} else if !pass {
-		t.Errorf("Expecting: %+v, received: %+v", true, pass)
 	}
 	failEvent = map[string]interface{}{
 		utils.Weight: 10,

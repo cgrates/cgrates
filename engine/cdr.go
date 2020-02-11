@@ -313,21 +313,21 @@ func (cdr *CDR) combimedCdrFieldVal(cfgCdrFld *config.FCTemplate, groupCDRs []*C
 func (cdr *CDR) exportFieldValue(cfgCdrFld *config.FCTemplate, filterS *FilterS) (retVal string, err error) {
 	for _, rsrFld := range cfgCdrFld.Value {
 		var cdrVal string
-		switch cfgCdrFld.Tag {
-		case utils.COST, utils.MetaExp + utils.NestingSep + utils.COST:
+		switch cfgCdrFld.Path {
+		case utils.MetaExp + utils.NestingSep + utils.COST:
 			cdrVal = cdr.FormatCost(cfgCdrFld.CostShiftDigits,
 				cfgCdrFld.RoundingDecimals)
-		case utils.SetupTime, utils.MetaExp + utils.NestingSep + utils.SetupTime:
+		case utils.MetaExp + utils.NestingSep + utils.SetupTime:
 			if cfgCdrFld.Layout == "" {
 				cfgCdrFld.Layout = time.RFC3339
 			}
 			cdrVal = cdr.SetupTime.Format(cfgCdrFld.Layout)
-		case utils.AnswerTime, utils.MetaExp + utils.NestingSep + utils.AnswerTime: // Format time based on layout
+		case utils.MetaExp + utils.NestingSep + utils.AnswerTime: // Format time based on layout
 			if cfgCdrFld.Layout == "" {
 				cfgCdrFld.Layout = time.RFC3339
 			}
 			cdrVal = cdr.AnswerTime.Format(cfgCdrFld.Layout)
-		case utils.Destination, utils.MetaExp + utils.NestingSep + utils.Destination:
+		case utils.MetaExp + utils.NestingSep + utils.Destination:
 			cdrVal, err = cdr.FieldAsString(rsrFld)
 			if err != nil {
 				return "", err
@@ -413,7 +413,7 @@ func (cdr *CDR) AsExportRecord(exportFields []*config.FCTemplate,
 		utils.MetaEC:  cdr.CostDetails,
 	})
 	for _, cfgFld := range exportFields {
-		if !strings.HasPrefix(cfgFld.Path, utils.MetaExp) {
+		if !strings.HasPrefix(cfgFld.Path, utils.MetaExp+utils.NestingSep) {
 			continue
 		}
 		if pass, err := filterS.Pass(cdr.Tenant,

@@ -99,4 +99,9 @@
 	"enabled": true,
 	"scheduler_conns": ["*localhost"],
 },
+
+"filters": {								
+	"apiers_conns": ["*internal"],
+},
+
 }

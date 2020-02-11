@@ -108,4 +108,9 @@
 	"enabled": true,
 	"scheduler_conns": ["*internal"],
 },
+
+"filters": {								
+	"apiers_conns": ["*internal"],
+},
+
 }
