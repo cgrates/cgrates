@@ -79,12 +79,6 @@ func (dP *dnsDP) String() string {
 	return utils.ToJSON(dP.req)
 }
 
-// AsNavigableMap is part of engine.DataProvider interface
-func (dP *dnsDP) AsNavigableMap([]*config.FCTemplate) (
-	nm *config.NavigableMap, err error) {
-	return nil, utils.ErrNotImplemented
-}
-
 // FieldAsString is part of engine.DataProvider interface
 func (dP *dnsDP) FieldAsString(fldPath []string) (data string, err error) {
 	var valIface interface{}

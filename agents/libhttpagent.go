@@ -94,12 +94,6 @@ func (hU *httpUrlDP) FieldAsString(fldPath []string) (data string, err error) {
 	return utils.IfaceAsString(valIface), nil
 }
 
-// AsNavigableMap is part of engine.DataProvider interface
-func (hU *httpUrlDP) AsNavigableMap([]*config.FCTemplate) (
-	nm *config.NavigableMap, err error) {
-	return nil, utils.ErrNotImplemented
-}
-
 // RemoteHost is part of engine.DataProvider interface
 func (hU *httpUrlDP) RemoteHost() net.Addr {
 	return utils.NewNetAddr("TCP", hU.req.RemoteAddr)
@@ -186,12 +180,6 @@ func (hU *httpXmlDP) FieldAsString(fldPath []string) (data string, err error) {
 		return
 	}
 	return utils.IfaceAsString(valIface), nil
-}
-
-// AsNavigableMap is part of engine.DataProvider interface
-func (hU *httpXmlDP) AsNavigableMap([]*config.FCTemplate) (
-	nm *config.NavigableMap, err error) {
-	return nil, utils.ErrNotImplemented
 }
 
 // RemoteHost is part of engine.DataProvider interface

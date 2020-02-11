@@ -369,12 +369,6 @@ func (nM *NavigableMap) Values() (vals []interface{}) {
 	return
 }
 
-// AsNavigableMap implements both NavigableMapper as well as DataProvider interfaces
-func (nM *NavigableMap) AsNavigableMap(
-	tpl []*FCTemplate) (oNM *NavigableMap, err error) {
-	return nil, utils.ErrNotImplemented
-}
-
 // Merge will update nM with values from a second one
 func (nM *NavigableMap) Merge(nM2 *NavigableMap) {
 	if nM2 == nil {

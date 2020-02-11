@@ -70,13 +70,6 @@ func (se *SafEvent) FieldAsString(fldPath []string) (out string, err error) {
 	return
 }
 
-func (se *SafEvent) AsNavigableMap(fctemplate []*config.FCTemplate) (out *config.NavigableMap, err error) {
-	se.RLock()
-	out, err = se.Me.AsNavigableMap(fctemplate)
-	se.RUnlock()
-	return
-}
-
 func (se *SafEvent) RemoteHost() (out net.Addr) {
 	se.RLock()
 	out = se.Me.RemoteHost()

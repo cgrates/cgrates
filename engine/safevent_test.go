@@ -92,14 +92,6 @@ func TestSafEventFieldAsString(t *testing.T) {
 	}
 }
 
-func TestSafEventAsNavigableMap(t *testing.T) {
-	if rply, err := safEv.AsNavigableMap(nil); err != nil {
-		t.Error(err)
-	} else if expected := config.NewNavigableMap(sMap); !reflect.DeepEqual(expected, rply) {
-		t.Errorf("Expecting %+v, received: %+v", expected, rply)
-	}
-}
-
 func TestSafEventRemoteHost(t *testing.T) {
 	data := config.DataProvider(safEv)
 	if rply, expected := data.RemoteHost(), utils.LocalAddr(); !reflect.DeepEqual(expected, rply) {
