@@ -165,19 +165,8 @@
       file:
         path: /var/packages/debian/v0.10/
         state: directory
-        
-    - name: Remove symlink from current deb package
-      become: yes
-      file:
-        path: /var/packages/debian/v0.10/cgrates_current_amd64.deb
-        state: absent
 
     - name: Move the new package to /var/packages/debian
       become: yes
       shell: "sudo mv /tmp/{{ item}} /var/packages/debian/v0.10/"
-      with_items: "{{ hostvars['apt']['debFileName']['stdout_lines'] }}"
-
-    - name: Create the new symlink cgrates_current_amd64.deb
-      become: yes
-      shell: "sudo ln -s /var/packages/debian/v0.10/{{ item }} /var/packages/debian/v0.10/cgrates_current_amd64.deb"
       with_items: "{{ hostvars['apt']['debFileName']['stdout_lines'] }}"
