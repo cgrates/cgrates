@@ -1,0 +1,13 @@
+{{ ansible_managed | comment }}
+%echo Generating a basic OpenPGP key
+%no-protection
+Key-Type: RSA
+Key-Length: {{ gpg_keylength }}
+Subkey-Type: RSA
+Subkey-Length: {{ 2048 }}
+Name-Real: {{ gpg_realname }}
+Name-Email: {{ gpg_useremail }}
+Expire-Date: {{ gpg_expire }}
+%no-ask-passphrase
+%commit
+%echo done
