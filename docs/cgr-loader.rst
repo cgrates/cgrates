@@ -10,7 +10,7 @@ Can be used to:
  * import TariffPlan data from **csv files** to **StorDB** as offline data. ``-to_stordb -tpid``
  * import TariffPlan data from **StorDB** to **DataDB**. ``-from_stordb -tpid``
 
-Customisable through the use of *json* :ref:`configuration <engine_configuration>` or command line arguments (higher prio).
+Customisable through the use of :ref:`JSON configuration <configuration>` or command line arguments (higher prio).
 
 
 ::

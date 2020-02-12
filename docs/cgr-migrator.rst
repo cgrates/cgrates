@@ -5,7 +5,7 @@ cgr-migrator
 
 Command line migration tool.
 
-Customisable through the use of *json* :ref:`configuration <engine_configuration>` or command line arguments (higher prio).
+Customisable through the use of :ref:`JSON configuration <configuration>` or command line arguments (higher prio).
 
 ::
 

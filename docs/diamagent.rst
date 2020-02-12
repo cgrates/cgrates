@@ -7,7 +7,7 @@ DiameterAgent
 
 **DiameterAgent** translates between Diameter_ and **CGRateS**, sending *RPC* requests towards **CGRateS/SessionS** component and returning replies from it to the *DiameterClient*.
 
-Implements Diameter_ protocol in a standard agnostic manner, giving users the ability to implement own interfaces by defining simple *processor templates* within the :ref:`configuration <engine_configuration>`  files.
+Implements Diameter_ protocol in a standard agnostic manner, giving users the ability to implement own interfaces by defining simple *processor templates* within the :ref:`JSON configuration <configuration>`  files.
 
 Used mostly in modern mobile networks (LTE/xG).
 
@@ -15,7 +15,7 @@ Used mostly in modern mobile networks (LTE/xG).
 Configuration
 -------------
 
-The **DiameterAgent** is configured within *diameter_agent* section from :ref:`JSON configuration <engine_configuration>`.
+The **DiameterAgent** is configured within *diameter_agent* section from :ref:`JSON configuration <configuration>`.
 
 
 Sample config 
@@ -40,104 +40,104 @@ With explanations in the comments:
 	"synced_conn_requests": false,		// process one request at the time per connection
 	"asr_template": "*asr",				// enable AbortSession message being sent to client 
 										// forcing session disconnection from CGRateS side
-
 	"templates":{						// message templates which can be injected within request/replies
 		"*err": [						// *err is used mostly in automatic diameter replies with errors
 				{
-					"tag": "SessionId", "path": "Session-Id",
+					"tag": "SessionId", "path": "*rep.Session-Id",
 					"type": "*variable", "mandatory": true,
 					"value": "~*req.Session-Id"
 				},
 				{
-					"tag": "OriginHost", "path": "Origin-Host",
+					"tag": "OriginHost", "path": "*rep.Origin-Host",
 					"type": "*variable", "mandatory": true,
 					"value": "~*vars.OriginHost"
 				},
 				{
-					"tag": "OriginRealm", "path": "Origin-Realm",
+					"tag": "OriginRealm", "path": "*rep.Origin-Realm",
 					"type": "*variable", "mandatory": true,
 					"value": "~*vars.OriginRealm"
 				},
 		],
 		"*cca": [		// *cca is used into CallControlAnswer messages
 				{
-					"tag": "SessionId", "path": "Session-Id",
+					"tag": "SessionId", "path": "*rep.Session-Id",
 					"type": "*composed", "mandatory": true,
 					"value": "~*req.Session-Id"
 				},
 				{
-					"tag": "ResultCode", "path": "Result-Code",
+					"tag": "ResultCode", "path": "*rep.Result-Code",
 					"type": "*constant", "value": "2001"},
 				{
-					"tag": "OriginHost", "path": "Origin-Host",
+					"tag": "OriginHost", "path": "*rep.Origin-Host",
 					"type": "*variable", "mandatory": true,
 					"value": "~*vars.OriginHost"
 				},
 				{
-					"tag": "OriginRealm", "path": "Origin-Realm",
+					"tag": "OriginRealm", "path": "*rep.Origin-Realm",
 					"type": "*variable", "mandatory": true,
 					"value": "~*vars.OriginRealm"
 				},
 				{
 					"tag": "AuthApplicationId",
-					"path": "Auth-Application-Id",
+					"path": "rep.Auth-Application-Id",
 					"type": "*variable", "mandatory": true,
 					 "value": "~*vars.*appid"
 				},
 				{
 					"tag": "CCRequestType",
-					"path": "CC-Request-Type",
+					"path": "*rep.CC-Request-Type",
 					"type": "*variable", "mandatory": true,
 					"value": "~*req.CC-Request-Type"
 				},
 				{
 					"tag": "CCRequestNumber",
-					"path": "CC-Request-Number",
+					"path": "*rep.CC-Request-Number",
 					"type": "*variable", "mandatory": true,
 					"value": "~*req.CC-Request-Number"
 				},
 		],
 		"*asr": [	// *asr is used to build AbortSessionRequest
 				{
-					"tag": "SessionId", "path": "Session-Id",
+					"tag": "SessionId", "path": "*diamreq.Session-Id",
 					"type": "*variable", "mandatory": true,
 					"value": "~*req.Session-Id"
 				},
 				{
-					"tag": "OriginHost", "path": "Origin-Host",
+					"tag": "OriginHost", "path": "diamreq.Origin-Host",
 					"type": "*variable", "mandatory": true,
 					"value": "~*req.Destination-Host"
 				},
 				{
-					"tag": "OriginRealm", "path": "Origin-Realm",
+					"tag": "OriginRealm", "path": "diamreq.Origin-Realm",
 					"type": "*variable", "mandatory": true,
 					"value": "~*req.Destination-Realm"
 				},
 				{
 					"tag": "DestinationRealm",
-					"path": "Destination-Realm",
+					"path": "*diamreq.Destination-Realm",
 					"type": "*variable", "mandatory": true,
 					"value": "~*req.Origin-Realm"
 				},
 				{
 					"tag": "DestinationHost", 
-					"path": "Destination-Host",
+					"path": "*diamreq.Destination-Host",
 					"type": "*variable", "mandatory": true,
 					"value": "~*req.Origin-Host"
 				},
 				{
 					"tag": "AuthApplicationId", 
-					"path": "Auth-Application-Id",
+					"path": "*diamreq.Auth-Application-Id",
 					"type": "*variable", "mandatory": true,
 					 "value": "~*vars.*appid"
 				},
 				{
-					"tag": "UserName", "path": "User-Name",
+					"tag": "UserName", "path": "*diamreq.User-Name",
 					"type": "*variable", "mandatory": true,
 					"value": "~*req.User-Name"
 				},
 				{
-					"tag": "OriginStateID", "path": "Origin-State-Id",
+					"tag": "OriginStateID",
+					"path": "*diamreq.Origin-State-Id",
 					"type": "*constant", "value": "1"
 				}
 		]
@@ -154,52 +154,52 @@ With explanations in the comments:
 			"request_fields":[							// data exchanged between Diameter and CGRateS
 				{
 					"tag": "ToR",			// tag is used in debug, 
-					"path": "ToR",		// path is the field on CGRateS side
+					"path": "*cgreq.ToR",	// path is the field on CGRateS side
 					"type": "*constant",	// type defines the method to provide the value
 					"value": "*sms"}		
 				{
-					"tag": "OriginID",		// OriginID will identify uniquely 
-					"path": "OriginID",	// the session on CGRateS side
-					"type": "*variable",	// it's value will be taken from Diameter AVP:
-					"mandatory": true,		// Multiple-Services-Credit-Control.Service-Identifier
+					"tag": "OriginID",			// OriginID will identify uniquely 
+					"path": "*cgreq.OriginID",	// the session on CGRateS side
+					"type": "*variable",		// it's value will be taken from Diameter AVP:
+					"mandatory": true,			// Multiple-Services-Credit-Control.Service-Identifier
 					"value": "~*req.Multiple-Services-Credit-Control.Service-Identifier"
 				},
 				{
 					"tag": "OriginHost",		// OriginHost combined with OriginID 
-					"path": "OriginHost",	// is used by CGRateS to build the CGRID
+					"path": "*cgreq.OriginHost",// is used by CGRateS to build the CGRID
 					"mandatory": true,
 					"type": "*variable",		// have the value out of special variable: *vars
 					"value": "*vars.OriginHost"
 				},
 				{
-					"tag": "RequestType",		// RequestType instructs SessionS 
-					"path": "RequestType",	//  about charging type to apply for the event
+					"tag": "RequestType",			// RequestType instructs SessionS 
+					"path": "*cgreq.RequestType",	//  about charging type to apply for the event
 					"type": "*constant",
 					"value": "*prepaid"
 				},
 				{
 					"tag": "Category",			// Category serves for ataching Account
-					"path": "Category",		//   and RatingProfile to the request
+					"path": "*cgreq.Category",	//   and RatingProfile to the request
 					"type": "*constant",
 					"value": "sms"
 				},
 				{
 					"tag": "Account",			// Account is required by charging
-					"path": "Account",
+					"path": "*cgreq.Account",
 					"type": "*variable",		// value is taken dynamically from a group AVP
 					"mandatory": true,			//   where Subscription-Id-Type is 0
 					"value": "~*req.Subscription-Id.Subscription-Id-Data[~Subscription-Id-Type(0)]" 
 				},
 				{
-					"tag": "Destination",		// Destination is used for charging
-					"path": "Destination",	// value from Diameter will be mediated before sent to CGRateS
+					"tag": "Destination",			// Destination is used for charging
+					"path": "*cgreq.Destination",	// value from Diameter will be mediated before sent to CGRateS
 					"type": "*variable",
 					"mandatory": true,
 					"value": "~*req.Service-Information.SMS-Information.Recipient-Info.Recipient-Address.Address-Data:s/^\\+49(\\d+)/int${1}/:s/^0049(\\d+)/int${1}/:s/^49(\\d+)/int${1}/:s/^00(\\d+)/+${1}/:s/^[\\+]?(\\d+)/int${1}/:s/int(\\d+)/+49${1}/"
 				},
 				{
 					"tag": "Destination",		// Second Destination will overwrite the first if filter matches
-					"path": "Destination",
+					"path": "*cgreq.Destination",
 					"filters":[					// Only overwrite when filters are matching
 						"*notprefix:~*req.Service-Information.SMS-Information.Recipient-Info.Recipient-Address.Address-Data:49",
 						"*notprefix:~*req.Service-Information.SMS-Information.Recipient-Info.Recipient-Address.Address-Data:3312"
@@ -210,28 +210,28 @@ With explanations in the comments:
 				},
 				{
 					"tag": "SetupTime",			// SetupTime is used by charging
-					"path": "SetupTime",
+					"path": "*cgreq.SetupTime",
 					"type": "*variable",
 					"value": "~*req.Event-Timestamp",
 					"mandatory": true
 				},
 				{
 					"tag": "AnswerTime",		// AnswerTime is used by charging
-					"path": "AnswerTime",
+					"path": "*cgreq.AnswerTime",
 					"type": "*variable",
 					"mandatory": true,
 					"value": "~*req.Event-Timestamp"
 				},
 				{
 					"tag": "Usage",			// Usage is used by charging
-					"path": "Usage",				
+					"path": "*cgreq.Usage",				
 					"type": "*variable",
 					"mandatory": true,
 					"value": "~*req.Multiple-Services-Credit-Control.Requested-Service-Unit.CC-Service-Specific-Units"
 				},
 				{
-					"tag": "Originator-SCCP-Address",		// Originator-SCCP-Address is an extra field which we want in CDR
-					"path": "Originator-SCCP-Address",	// not used by CGRateS
+					"tag": "Originator-SCCP-Address",			// Originator-SCCP-Address is an extra field which we want in CDR
+					"path": "*cgreq.Originator-SCCP-Address",	// not used by CGRateS
 					"type": "*variable", "mandatory": true,
 					"value": "~*req.Service-Information.SMS-Information.Originator-SCCP-Address"
 				},
@@ -245,13 +245,13 @@ With explanations in the comments:
 				{
 					"tag": "ResultCode",  	// Change the ResultCode if the reply received from CGRateS contains a 0 MaxUsage
 					"filters": ["*eq:~*cgrep.MaxUsage:0"],
-					"path": "Result-Code", 
+					"path": "*rep.Result-Code", 
 					"blocker": true,		// do not consider further fields if this one is processed
 					"type": "*constant",
 					"value": "4012"},
 				{"tag": "ResultCode",		// Change the ResultCode AVP if there was an error received from CGRateS
 					"filters": ["*notempty:~*cgrep.Error:"],
-					"path": "Result-Code",
+					"path": "*rep.Result-Code",
 					"blocker": true,
 					"type": "*constant",
 					"value": "5030"}
@@ -268,7 +268,7 @@ With explanations in the comments:
 Config params
 ^^^^^^^^^^^^^
 
-Most of the parameters are explained in :ref:`configuration <engine_configuration>`, hence we mention here only the ones where additional info is necessary or there will be particular implementation for *DiameterAgent*.
+Most of the parameters are explained in :ref:`JSON configuration <configuration>`, hence we mention here only the ones where additional info is necessary or there will be particular implementation for *DiameterAgent*.
 
 
 listen_net
@@ -313,6 +313,7 @@ filters
 		* **OriginHost**: agent configured *origin_host*
 		* **OriginRealm**: agent configured *origin_realm*
 		* **ProductName**: agent configured *product_name*
+		* **RemoteHost**: the Address of the remote client
 		* **\*app**: current request application name (out of diameter dictionary)
 		* **\*appid**: current request application id (out of diameter dictionary)
 		* **\*cmd**: current command short naming (out of diameter dictionary) plus *R" as suffix - ie: *CCR*
@@ -325,14 +326,17 @@ filters
 		Example 1: *~\*req.Multiple-Services-Credit-Control.Rating-Group[1]* translates to: value of the group attribute at path Multiple-Services-Credit-Control.Rating-Group which is located in the second group (groups start at index 0).
 		Example 2: *~\*req.Multiple-Services-Credit-Control.Used-Service-Unit.CC-Input-Octets[~Rating-Group(1)]* which translates to: value of the group attribute at path: *Multiple-Services-Credit-Control.Used-Service-Unit.CC-Input-Octets* where Multiple-Services-Credit-Control.Used-Service-Unit.Rating-Group has value of "1".
 
+	* **\*rep**
+		Diameter reply going to *DiameterClient*. 
+
 	* **\*cgreq**
-		Request which was sent to CGRateS (mostly useful in replies).
+		Request sent to CGRateS.
 
 	* **\*cgrep** 
 		Reply coming from CGRateS.
 
-	* **\*cgrareq**
-		Active request in relation to CGRateS side. It can be used in both *request_fields*, referring to CGRRequest object being built, or in *reply_fields*, referring to CGRReply object.
+	* **\*diamreq**
+		Diameter request generated by CGRateS (ie: *ASR*).
 
 flags
 	Found within processors, special tags enforcing the actions/verbs done on a request. There are two types of flags: **main** and **auxiliary**. 
@@ -343,7 +347,7 @@ flags
 
 	The **auxiliary** flags only make sense in combination with **main** ones. 
 
-	Implemented flags are (in order of priority, and not working simultaneously unless specified):
+	Implemented **main** flags are (in order of priority, and not working simultaneously unless specified):
 
 	* **\*log**
 		Logs the Diameter request/reply. Can be used together with other *main* actions.
@@ -357,7 +361,7 @@ flags
 	* **\*auth**
 		Sends the request for authorization on CGRateS.
 
-		Auxiliary flags available: **\*attributes**, **\*thresholds**, **\*stats**, **\*resources**, **\*accounts**, **\*suppliers**, **\*suppliers_ignore_errors**, **\*suppliers_event_cost** which are used to influence the auth behavior on CGRateS side. More info on that can be found on the **SessionS** component APIs behavior.
+		Auxiliary flags available: **\*attributes**, **\*thresholds**, **\*stats**, **\*resources**, **\*accounts**, **\*suppliers**, **\*suppliers_ignore_errors**, **\*suppliers_event_cost** which are used to influence the auth behavior on CGRateS side. More info on that can be found on the **SessionS** component's API behavior.
 
 	* **\*initiate**
 		Initiates a session out of request on CGRateS side.
@@ -367,17 +371,17 @@ flags
 	* **\*update**
 		Updates a session with the request on CGRateS side.
 
-		Auxiliary flags available: **\*attributes**, **\*accounts** which are used to influence the auth behavior on CGRateS side.
+		Auxiliary flags available: **\*attributes**, **\*accounts** which are used to influence the behavior on CGRateS side.
 
 	* **\*terminate**
 		Terminates a session using the request on CGRateS side.
 
-		Auxiliary flags available: **\*thresholds**, **\*stats**, **\*resources**, **\*accounts** which are used to influence the auth behavior on CGRateS side.
+		Auxiliary flags available: **\*thresholds**, **\*stats**, **\*resources**, **\*accounts** which are used to influence the behavior on CGRateS side.
 
 	* **\*message**
 		Process the request as individual message charging on CGRateS side.
 
-		Auxiliary flags available: **\*attributes**, **\*thresholds**, **\*stats**, **\*resources**, **\*accounts**, **\*suppliers**, **\*suppliers_ignore_errors**, **\*suppliers_event_cost** which are used to influence the auth behavior on CGRateS side.
+		Auxiliary flags available: **\*attributes**, **\*thresholds**, **\*stats**, **\*resources**, **\*accounts**, **\*suppliers**, **\*suppliers_ignore_errors**, **\*suppliers_event_cost** which are used to influence the behavior on CGRateS side.
 
 
 	* **\*event**
@@ -392,14 +396,20 @@ flags
 path
 	Defined within field, specifies the path where the value will be written. Possible values:
 
+	* **\*vars**
+		Write the value in the special container, *\*vars*, available for the duration of the request.
+
 	* **\*cgreq**
 		Write the value in the request object which will be sent to CGRateS side.
 
-	* **\*req**
-		Write the value to request built by *DiameterAgent* to be sent out on *Diameter* side.
+	* **\*cgrep**
+		Write the value in the reply returned by CGRateS.
 
 	* **\*rep**
 		Write the value to reply going out on *Diameter* side.
+
+	* **\*diamreq**
+		Write the value to request built by *DiameterAgent* to be sent out on *Diameter* side.
 
 type
 	Defined within field, specifies the logic type to be used when writing the value of the field. Possible values:

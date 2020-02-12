@@ -5,7 +5,7 @@ cgr-engine
 
 Groups most of functionality from services and components.
 
-Customisable through the use of *json* :ref:`configuration <engine_configuration>` or command line arguments (higher prio).
+Customisable through the use of *json* :ref:`JSON configuration <configuration>` or command line arguments (higher prio).
 
 Able to read the configuration from either a local directory  of *.json* files with an unlimited number of subfolders (ordered alphabetically) or a list of http paths (separated by ";").
 

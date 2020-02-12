@@ -14,13 +14,13 @@ EventReaderService
 
 **EventReaderService/ERs** is a subsystem designed to read events coming from external sources and convert them into internal ones. The converted events are then sent to other CGRateS subsystems, like *SessionS* where further processing logic is applied to them.
 
-The translation between external and internal events is done based on field mapping, defined in :ref:`json configuration <engine_configuration>`.
+The translation between external and internal events is done based on field mapping, defined in :ref:`JSON configuration <configuration>`.
 
 
 Configuration
 -------------
 
-The **EventReaderService** is configured within *ers* section  from :ref:`JSON configuration <engine_configuration>`.
+The **EventReaderService** is configured within *ers* section  from :ref:`JSON configuration <configuration>`.
 
 
 Sample config 
@@ -48,63 +48,63 @@ With explanations in the comments:
 			"content_fields":[					// mapping definition between line index in the file and CGRateS field 
 				{
 					"tag": "OriginID",			// OriginID together with OriginHost will 
-					"path": "OriginID",		//   uniquely identify the session on CGRateS side
+					"path": "*cgreq.OriginID",	//   uniquely identify the session on CGRateS side
 					"type": "*variable",
 					"value": "~*req.0",q		// take the content from line index 0
 					"mandatory": true			//   in the request file
 				},
 				{
 					"tag": "RequestType",		// RequestType instructs SessionS
-					"path": "RequestType",	//   about charging type to apply for the event
+					"path": "*cgreq.RequestType",//   about charging type to apply for the event
 					"type": "*variable",
 					"value": "~*req.1",
 					"mandatory": true
 				},
 				{
 					"tag": "Category",			// Category serves for ataching Account
-					"path": "Category",		//   and RatingProfile to the request
+					"path": "*cgreq.Category",	//   and RatingProfile to the request
 					"type": "*constant",
 					"value": "call",
 					"mandatory": true
 				},
 				{
 					"tag": "Account",			// Account is required by charging
-					"path": "Account",
+					"path": "*cgreq.Account",
 					"type": "*variable",
 					"value": "~*req.3",
 					"mandatory": true
 				},
 				{
 					"tag": "Subject",			// Subject is required by charging
-					"path": "Subject",
+					"path": "*cgreq.Subject",
 					"type": "*variable",
 					"value": "~*req.3",
 					"mandatory": true
 				},
 				{
 					"tag": "Destination",		// Destination is required by charging
-					"path": "Destination",
+					"path": "*cgreq.Destination",
 					"type": "*variable",
 					"value": "~*req.4:s/0([1-9]\\d+)/+49${1}/",
 					"mandatory": true			// Additional mediation is performed on number format
 				},
 				{
 					"tag": "AnswerTime",		// AnswerTime is required by charging
-					"path": "AnswerTime",
+					"path": "*cgreq.AnswerTime",
 					"type": "*variable",
 					"value": "~*req.5",
 					"mandatory": true
 				},
 				{
 					"tag": "Usage",				// Usage is required by charging
-					"path": "Usage",
+					"path": "*cgreq.Usage",
 					"type": "*variable",
 					"value": "~*req.6",
 					"mandatory": true
 				},
 				{
 					"tag": "HDRExtra1",			// HDRExtra1 is transparently stored into CDR
-					"path": "HDRExtra1",	//   as extra field not used by CGRateS
+					"path": "*cgreq.HDRExtra1",	//   as extra field not used by CGRateS
 					"type": "*composed",
 					"value": "~*req.6",
 					"mandatory": true
@@ -118,7 +118,7 @@ With explanations in the comments:
  Config params
 ^^^^^^^^^^^^^
 
-Most of the parameters are explained in :ref:`JSON configuration <engine_configuration>`, hence we mention here only the ones where additional info is necessary or there will be particular implementation for *EventReaderService*.
+Most of the parameters are explained in :ref:`JSON configuration <configuration>`, hence we mention here only the ones where additional info is necessary or there will be particular implementation for *EventReaderService*.
 
 
 readers
@@ -173,7 +173,19 @@ timezone
 	Defines the timezone for source content which does not carry that information. If undefined, default one from *general* section will be used.
 
 filters
-	List of filters to pass for the reader to process the event. In case of file content without field name, the index will be passed instead of field source path.
+	List of filters to pass for the reader to process the event. For the dynamic content (prefixed with *~*) following special variables are available:
+
+	* **\*vars**
+		Request related shared variables between processors, populated especially by core functions. The data put inthere is not automatically transfered into requests sent to CGRateS, unless instructed inside templates.
+
+	* **\*req**
+		Request read from the source. In case of file content without field name, the index will be passed instead of field source path.
+
+	* **\*hdr**
+		Header values (available only in case of *\*file_fwv*). In case of file content without field name, the index will be passed instead of field source path.
+
+	* **\*trl**
+		Trailer values (available only in case of *\*file_fwv*). In case of file content without field name, the index will be passed instead of field source path.
 
 flags
 	Special tags enforcing the actions/verbs done on an event. There are two types of flags: **main** and **auxiliary**. 
@@ -184,11 +196,101 @@ flags
 
 	The **auxiliary** flags only make sense in combination with **main** ones. 
 
-	Implemented flags are (in order of priority, and not working simultaneously unless specified):
+	Implemented **main** flags are (in order of priority, and not working simultaneously unless specified):
+
+	* **\*log**
+		Logs the Event read. Can be used together with other *main* flags.
 
 	**\*none**
-		Disable transfering the request from *Reader* to *CGRateS* side.
+		Disable transfering the Event from *Reader* to *CGRateS* side.
 
+	* **\*dryrun**
+		Together with not transfering the Event on CGRateS side will also log it, useful for troubleshooting.
+
+	* **\*auth**
+		Sends the Event for authorization on CGRateS.
+
+		Auxiliary flags available: **\*attributes**, **\*thresholds**, **\*stats**, **\*resources**, **\*accounts**, **\*suppliers**, **\*suppliers_ignore_errors**, **\*suppliers_event_cost** which are used to influence the auth behavior on CGRateS side. More info on that can be found on the **SessionS** component's API behavior.
+
+	* **\*initiate**
+		Initiates a session out of Event on CGRateS side.
+
+		Auxiliary flags available: **\*attributes**, **\*thresholds**, **\*stats**, **\*resources**, **\*accounts** which are used to influence the behavior on CGRateS side.
+
+	* **\*update**
+		Updates a session with the Event on CGRateS side.
+
+		Auxiliary flags available: **\*attributes**, **\*accounts** which are used to influence the behavior on CGRateS side.
+
+	* **\*terminate**
+		Terminates a session using the Event on CGRateS side.
+
+		Auxiliary flags available: **\*thresholds**, **\*stats**, **\*resources**, **\*accounts** which are used to influence the behavior on CGRateS side.
+
+	* **\*message**
+		Process the Event as individual message charging on CGRateS side.
+
+		Auxiliary flags available: **\*attributes**, **\*thresholds**, **\*stats**, **\*resources**, **\*accounts**, **\*suppliers**, **\*suppliers_ignore_errors**, **\*suppliers_event_cost** which are used to influence the behavior on CGRateS side.
+
+	* **\*event**
+		Process the Event as generic event on CGRateS side.
+
+		Auxiliary flags available: all flags supported by the "SessionSv1.ProcessEvent" generic API
+
+	* **\*cdrs**
+		Build a CDR out of the Event on CGRateS side. Can be used simultaneously with other flags (except *\*dry_run)
+
+path
+	Defined within field, specifies the path where the value will be written. Possible values:
+
+	* **\*vars**
+		Write the value in the special container, *\*vars*, available for the duration of the request.
+
+	* **\*cgreq**
+		Write the value in the request object which will be sent to CGRateS side.
+
+	* **\*hdr**
+		Header values (available only in case of *\*file_fwv*). In case of file content without field name, the index will be passed instead of field source path.
+
+	* **\*trl**
+		Trailer values (available only in case of *\*file_fwv*). In case of file content without field name, the index will be passed instead of field source path.
+
+
+type
+	Defined within field, specifies the logic type to be used when writing the value of the field. Possible values:
+
+	* **\*none**
+		Pass
+
+	* **\*filler**
+		Fills the values with an empty string
+
+	* **\*constant**
+		Writes out a constant
+
+	* **\*remote_host**
+		Writes out the Address of the remote host sending us the Event
+
+	* **\*variable**
+		Writes out the variable value, overwriting previous one set
+
+	* **\*composed**
+		Writes out the variable value, postpending to previous value set
+
+	* **\*usage_difference**
+		Calculates the usage difference between two arguments passed in the *value*. Requires 2 arguments: *$stopTime;$startTime*
+
+	* **\*sum**
+		Calculates the sum of all arguments passed within *value*. It supports summing up duration, time, float, int autodetecting them in this order.
+
+	* **\*difference**
+		Calculates the difference between all arguments passed within *value*. Possible value types are (in this order): duration, time, float, int.
+
+	* **\*value_exponent**
+		Calculates the exponent of a value. It requires two values: *$val;$exp*
+
+	* **\*template**
+		Specifies a template of fields to be injected here. Value should be one of the template ids defined.
 
 
 
