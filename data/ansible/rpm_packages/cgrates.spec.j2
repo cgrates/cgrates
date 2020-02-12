@@ -1,8 +1,8 @@
 {{ ansible_managed | comment }}
-%global version 0.10.0
-%global git_commit {{ git_version.stdout_lines[0] }}
+%global version 0.11.0~dev
+%global git_commit {{ gitVersion.stdout_lines[0] }}
 
-%global git_short_commit %(c=%{git_commit}; echo ${c:0:7})
+%global git_short_commit {{ gitShortVersion.stdout_lines[0] }}
 %define debug_package  %{nil}
 %global _logdir	       /var/log/%name
 %global _spooldir      /var/spool/%name
@@ -10,7 +10,7 @@
 
 Name:           cgrates
 Version:        %{version}
-Release:        %{git_commit}
+Release:        {{ gitDate.stdout_lines[0] }}+%{git_short_commit}
 Summary:        Carrier Grade Real-time Charging System
 License:        GPLv3
 URL:            https://github.com/cgrates/cgrates

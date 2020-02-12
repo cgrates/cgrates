@@ -136,6 +136,7 @@
         dest: '{{ cgrates_dir }}'
         update: yes
         force: yes
+        version: master
       become: yes
       become_user: "{{ gouser }}"
 
@@ -148,7 +149,19 @@
         
     - name: get git version
       shell: git rev-parse HEAD
-      register: git_version
+      register: gitVersion
+      args:
+        chdir: '{{ cgrates_dir }}'
+    
+    - name: get git short version
+      shell: git log -1 --format=%ci | date +%Y%m%d%H%M%S
+      register: gitDate
+      args:
+        chdir: '{{ cgrates_dir }}'
+    
+    - name: get git date
+      shell: git rev-parse --short HEAD
+      register: gitShortVersion
       args:
         chdir: '{{ cgrates_dir }}'
 
@@ -175,7 +188,7 @@
        
     - name: Download the tar.gz for the last commit
       become: yes
-      shell: wget https://github.com/cgrates/cgrates/archive/{{ git_version.stdout_lines[0] }}.tar.gz
+      shell: wget https://github.com/cgrates/cgrates/archive/{{ gitVersion.stdout_lines[0] }}.tar.gz
       args:
         chdir: cgr_build/SOURCES
      
@@ -205,25 +218,25 @@
       become: yes
       shell: 'sudo rpm --addsign cgr_build/RPMS/x86_64/{{ rmpFileName.stdout_lines[0] }}'
       
-    - name: Check if is something in /var/packages/yum/
+    - name: Check if is something in /var/packages/yum/master/
       become: yes
-      shell : "ls /var/packages/yum/"
+      shell : "ls /var/packages/yum/master/"
       register: yumFiles
       
     # Clean the folder
     - name: Clean the incoming folder
       become: yes
-      shell: "sudo rm /var/packages/yum/*"
+      shell: "sudo rm -rf /var/packages/yum/master/*"
       when: yumFiles.stdout_lines|length > 1
     
-    - name: Move the files to /var/packages/yum/
+    - name: Move the files to /var/packages/yum/master
       become: yes
-      command: mv cgr_build/RPMS/x86_64/{{ rmpFileName.stdout_lines[0] }} /var/packages/yum/
+      command: mv cgr_build/RPMS/x86_64/{{ rmpFileName.stdout_lines[0] }} /var/packages/yum/master/
       when : rmpFileName.stdout_lines|length > 0
     
     - name: Include the package with createrepo
       become: yes
-      shell: createrepo /var/packages/yum
+      shell: createrepo /var/packages/yum/master
       
 - hosts: pkg
   remote_user: '{{ gouser }}'
@@ -231,21 +244,21 @@
     - name: Creates directory
       become: yes
       file:
-        path: /var/packages/yum/master/
+        path: /var/packages/rpm/master/
         state: directory
         
     - name: Remove symlink from current rpm package
       become: yes
       file:
-        path: /var/packages/debian/master/cgrates_current.rpm
+        path: /var/packages/rpm/master/cgrates_current.rpm
         state: absent
 
     - name: Move the new package to /var/packages/rpm
       become: yes
-      shell: "sudo mv /tmp/{{ item}} /var/packages/yum/master/"
+      shell: "sudo mv /tmp/{{ item}} /var/packages/rpm/master/"
       with_items: "{{ hostvars['yum']['rmpFileName']['stdout_lines'] }}"
 
     - name: Create the new symlink cgrates_current.rpm
       become: yes
-      shell: "sudo ln -s /var/packages/yum/master/{{ item }} /var/packages/yum/master/cgrates_current.rpm"
+      shell: "sudo ln -s /var/packages/rpmrpm/master/{{ item }} /var/packages/rpm/master/cgrates_current.rpm"
       with_items: "{{ hostvars['yum']['rmpFileName']['stdout_lines'] }}"
