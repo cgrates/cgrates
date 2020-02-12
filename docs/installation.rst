@@ -100,7 +100,7 @@ Run the following commands:
 
 ::
 
-    sudo yum install http://pkg.cgrates.org/rpm/master/cgrates_current.rpm
+    sudo rpm -i http://pkg.cgrates.org/rpm/master/cgrates_current.rpm
 
 As a side note on http://pkg.cgrates.org one can find an entire archive of CGRateS packages.
 
