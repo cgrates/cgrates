@@ -2738,5 +2738,189 @@ func TestEventCostfieldAsInterface(t *testing.T) {
 		fmt.Printf("%T", rcv)
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eChargedTiming), utils.ToJSON(rcv))
 	}
+	// case utils.Rates:
+	eventCost = &EventCost{
+		Rates: ChargedRates{
+			"test1": RateGroups{
+				&Rate{Value: 0.7},
+			},
+		},
+	}
+	eChargedRates := ChargedRates{
+		"test1": RateGroups{
+			&Rate{Value: 0.7},
+		},
+	}
+	if rcv, err := eventCost.fieldAsInterface([]string{utils.Rates}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eChargedRates, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eChargedRates), utils.ToJSON(rcv))
+	}
+	eRateGroup := RateGroups{
+		&Rate{Value: 0.7},
+	}
+	if rcv, err := eventCost.fieldAsInterface([]string{utils.Rates, "test1"}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eRateGroup, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eRateGroup), utils.ToJSON(rcv))
+	}
+	// case utils.RatingFilters:
+	eventCost = &EventCost{
+		RatingFilters: RatingFilters{
+			"test1": RatingMatchedFilters{
+				AccountActionsCSVContent: "AccountActionsCSVContent",
+			},
+		},
+	}
+	eRatingFilters := RatingFilters{
+		"test1": RatingMatchedFilters{
+			AccountActionsCSVContent: "AccountActionsCSVContent",
+		},
+	}
+	if rcv, err := eventCost.fieldAsInterface([]string{utils.RatingFilters}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eRatingFilters, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eRatingFilters), utils.ToJSON(rcv))
+	}
+	eRatingMatchedFilters := RatingMatchedFilters{
+		AccountActionsCSVContent: "AccountActionsCSVContent",
+	}
+	if rcv, err := eventCost.fieldAsInterface([]string{utils.RatingFilters, "test1"}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eRatingMatchedFilters, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eRatingMatchedFilters), utils.ToJSON(rcv))
+	}
+	// case utils.Accounting:
+	eventCost = &EventCost{
+		Accounting: Accounting{
+			"test1": &BalanceCharge{
+				AccountID: "AccountID",
+			},
+		},
+	}
+	eAccounting := Accounting{
+		"test1": &BalanceCharge{
+			AccountID: "AccountID",
+		},
+	}
+	if rcv, err := eventCost.fieldAsInterface([]string{utils.Accounting}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eAccounting, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eAccounting), utils.ToJSON(rcv))
+	}
+	eBalanceCharge := &BalanceCharge{
+		AccountID: "AccountID",
+	}
+	if rcv, err := eventCost.fieldAsInterface([]string{utils.Accounting, "test1"}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eBalanceCharge, rcv) {
+		t.Errorf("\nExpecting: %+v, \nreceived: %+v", utils.ToJSON(eBalanceCharge), utils.ToJSON(rcv))
+	}
+	// case utils.Rating:
+	eventCost = &EventCost{
+		Rating: Rating{
+			"test1": &RatingUnit{
+				ConnectFee: 0.7,
+			},
+		},
+	}
+	eRating := Rating{
+		"test1": &RatingUnit{
+			ConnectFee: 0.7,
+		},
+	}
+	if rcv, err := eventCost.fieldAsInterface([]string{utils.Rating}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eRating, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eRating), utils.ToJSON(rcv))
+	}
+	eRateUnit := &RatingUnit{
+		ConnectFee: 0.7,
+	}
+	if rcv, err := eventCost.fieldAsInterface([]string{utils.Rating, "test1"}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eRateUnit, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eRateUnit), utils.ToJSON(rcv))
+	}
+	//default case, utils.Charges
+	eventCost = &EventCost{
+		Charges: []*ChargingInterval{
+			&ChargingInterval{
+				RatingID: "RatingID",
+			},
+		},
+	}
+	eCharges := []*ChargingInterval{&ChargingInterval{RatingID: "RatingID"}}
+	if rcv, err := eventCost.fieldAsInterface([]string{utils.Charges}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCharges, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eCharges), utils.ToJSON(rcv))
+	}
+	if rcv, err := eventCost.fieldAsInterface([]string{utils.Charges + "[0]"}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCharges[0], rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eCharges[0]), utils.ToJSON(rcv))
+	}
+	if rcv, err := eventCost.fieldAsInterface([]string{utils.Charges + "[1]"}); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	} else if rcv != nil {
+		t.Errorf("Expecting: nil, received: %+v", rcv)
+	}
+}
 
+func TestEventCostgetChargesForPath(t *testing.T) {
+	eventCost := &EventCost{}
+	chargingInterval := &ChargingInterval{
+		RatingID: "RatingID",
+	}
+	//nil check
+	if rcv, err := eventCost.getChargesForPath(nil, nil); err == nil || err != utils.ErrNotFound {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ErrNotFound, err)
+	} else if rcv != nil {
+		t.Errorf("Expecting: nil, received: %+v", rcv)
+	}
+	//len(fldPath) == 0
+	eChargingInterval := &ChargingInterval{
+		RatingID: "RatingID",
+	}
+	if rcv, err := eventCost.getChargesForPath([]string{}, chargingInterval); err != nil {
+		t.Errorf("Expecting: nil, received: %+v", err)
+	} else if !reflect.DeepEqual(eChargingInterval, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eChargingInterval, rcv)
+	}
+	// fldPath[0] == utils.CompressFactor
+	chargingInterval = &ChargingInterval{
+		RatingID:       "RatingID",
+		CompressFactor: 7,
+	}
+	if rcv, err := eventCost.getChargesForPath([]string{utils.CompressFactor}, chargingInterval); err != nil {
+		t.Errorf("Expecting: nil, received: %+v", err)
+	} else if rcv != 7 {
+		t.Errorf("Expecting: 7, received: %+v", rcv)
+	}
+	if rcv, err := eventCost.getChargesForPath([]string{utils.CompressFactor, "mustFail"}, chargingInterval); err == nil || err != utils.ErrNotFound {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ErrNotFound, err)
+	} else if rcv != nil {
+		t.Errorf("Expecting: nil, received: %+v", rcv)
+	}
+	// fldPath[0] == utils.Rating
+	eventCost = &EventCost{
+		Rates: ChargedRates{
+			"RatingID": RateGroups{&Rate{Value: 0.8}}},
+	}
+	if rcv, err := eventCost.getChargesForPath([]string{utils.Rating}, chargingInterval); err == nil || err != utils.ErrNotFound {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ErrNotFound, err)
+	} else if rcv != nil {
+		t.Errorf("Expecting: nil, received: %+v", rcv)
+	}
+	eventCost = &EventCost{
+		Rating: Rating{"RatingID": &RatingUnit{}},
+		Rates: ChargedRates{
+			"RatingID": RateGroups{&Rate{Value: 0.8}}},
+	}
+	if rcv, err := eventCost.getChargesForPath([]string{utils.Rating, "unsupportedfield"}, chargingInterval); err == nil || err.Error() != "unsupported field prefix: <unsupportedfield>" {
+		t.Errorf("Expecting: unsupported field prefix: <unsupportedfield>, received: %+v", err)
+	} else if rcv != nil {
+		t.Errorf("Expecting: nil, received: %+v", rcv)
+	}
 }

@@ -478,7 +478,7 @@ func (crs *ChargedRates) FieldAsInterface(fldPath []string) (val interface{}, er
 		return nil, utils.ErrNotFound
 	}
 	if indx != nil {
-		if len(cr) < *indx {
+		if len(cr) <= *indx {
 			return nil, utils.ErrNotFound
 		}
 		rg := cr[*indx]

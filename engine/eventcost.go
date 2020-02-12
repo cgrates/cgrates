@@ -883,7 +883,7 @@ func (ec *EventCost) fieldAsInterface(fldPath []string) (val interface{}, err er
 			return nil, fmt.Errorf("unsupported field prefix: <%s>", opath)
 		}
 		if indx != nil {
-			if len(ec.Charges) < *indx {
+			if len(ec.Charges) <= *indx {
 				return nil, utils.ErrNotFound
 			}
 			return ec.getChargesForPath(fldPath[1:], ec.Charges[*indx])
