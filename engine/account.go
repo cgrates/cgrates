@@ -1211,7 +1211,7 @@ func (as *AccountSummary) FieldAsInterface(fldPath []string) (val interface{}, e
 	default:
 		opath, indx := utils.GetPathIndex(fldPath[0])
 		if opath == utils.BalanceSummaries && indx != nil {
-			if len(as.BalanceSummaries) < *indx {
+			if len(as.BalanceSummaries) <= *indx {
 				return nil, utils.ErrNotFound
 			}
 			bl := as.BalanceSummaries[*indx]
