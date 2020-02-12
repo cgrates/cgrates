@@ -174,7 +174,7 @@ func (rdr *KafkaER) processMessage(msg []byte) (err error) {
 	if err = agReq.SetFields(rdr.Config().Fields); err != nil {
 		return
 	}
-	rdr.rdrEvents <- &erEvent{cgrEvent: agReq.CGRRequest.AsCGREvent(
+	rdr.rdrEvents <- &erEvent{cgrEvent: config.NMAsCGREvent(agReq.CGRRequest,
 		agReq.Tenant, utils.NestingSep),
 		rdrCfg: rdr.Config()}
 	return

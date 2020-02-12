@@ -237,7 +237,7 @@ func (fltr *FilterRule) Pass(dDP utils.DataProvider) (result bool, err error) {
 }
 
 func (fltr *FilterRule) passString(dDP utils.DataProvider) (bool, error) {
-	strVal, err := config.DPDynamicString(fltr.Element, dDP)
+	strVal, err := utils.DPDynamicString(fltr.Element, dDP)
 	if err != nil {
 		if err == utils.ErrNotFound {
 			return false, nil
@@ -245,7 +245,7 @@ func (fltr *FilterRule) passString(dDP utils.DataProvider) (bool, error) {
 		return false, err
 	}
 	for _, val := range fltr.Values {
-		sval, err := config.DPDynamicString(val, dDP)
+		sval, err := utils.DPDynamicString(val, dDP)
 		if err != nil {
 			continue
 		}
@@ -264,7 +264,7 @@ func (fltr *FilterRule) passExists(dDP utils.DataProvider) (bool, error) {
 			return false, err
 		}
 	}
-	if _, err = config.DPDynamicInterface(path, dDP); err != nil {
+	if _, err = utils.DPDynamicInterface(path, dDP); err != nil {
 		if err == utils.ErrNotFound {
 			return false, nil
 		}
@@ -274,7 +274,7 @@ func (fltr *FilterRule) passExists(dDP utils.DataProvider) (bool, error) {
 }
 
 func (fltr *FilterRule) passEmpty(fielNameDP utils.DataProvider) (bool, error) {
-	val, err := config.DPDynamicInterface(fltr.Element, fielNameDP)
+	val, err := utils.DPDynamicInterface(fltr.Element, fielNameDP)
 	if err != nil {
 		if err == utils.ErrNotFound {
 			return true, nil
@@ -304,7 +304,7 @@ func (fltr *FilterRule) passEmpty(fielNameDP utils.DataProvider) (bool, error) {
 }
 
 func (fltr *FilterRule) passStringPrefix(dDP utils.DataProvider) (bool, error) {
-	strVal, err := config.DPDynamicString(fltr.Element, dDP)
+	strVal, err := utils.DPDynamicString(fltr.Element, dDP)
 	if err != nil {
 		if err == utils.ErrNotFound {
 			return false, nil
@@ -312,7 +312,7 @@ func (fltr *FilterRule) passStringPrefix(dDP utils.DataProvider) (bool, error) {
 		return false, err
 	}
 	for _, prfx := range fltr.Values {
-		prfx, err := config.DPDynamicString(prfx, dDP)
+		prfx, err := utils.DPDynamicString(prfx, dDP)
 		if err != nil {
 			continue
 		}
@@ -324,7 +324,7 @@ func (fltr *FilterRule) passStringPrefix(dDP utils.DataProvider) (bool, error) {
 }
 
 func (fltr *FilterRule) passStringSuffix(dDP utils.DataProvider) (bool, error) {
-	strVal, err := config.DPDynamicString(fltr.Element, dDP)
+	strVal, err := utils.DPDynamicString(fltr.Element, dDP)
 	if err != nil {
 		if err == utils.ErrNotFound {
 			return false, nil
@@ -332,7 +332,7 @@ func (fltr *FilterRule) passStringSuffix(dDP utils.DataProvider) (bool, error) {
 		return false, err
 	}
 	for _, prfx := range fltr.Values {
-		prfx, err := config.DPDynamicString(prfx, dDP)
+		prfx, err := utils.DPDynamicString(prfx, dDP)
 		if err != nil {
 			continue
 		}
@@ -349,7 +349,7 @@ func (fltr *FilterRule) passTimings(dDP utils.DataProvider) (bool, error) {
 }
 
 func (fltr *FilterRule) passDestinations(dDP utils.DataProvider) (bool, error) {
-	dst, err := config.DPDynamicString(fltr.Element, dDP)
+	dst, err := utils.DPDynamicString(fltr.Element, dDP)
 	if err != nil {
 		if err == utils.ErrNotFound {
 			return false, nil
@@ -364,7 +364,7 @@ func (fltr *FilterRule) passDestinations(dDP utils.DataProvider) (bool, error) {
 		}
 		for _, dID := range destIDs {
 			for _, valDstID := range fltr.Values {
-				valDstID, err := config.DPDynamicString(valDstID, dDP)
+				valDstID, err := utils.DPDynamicString(valDstID, dDP)
 				if err != nil {
 					continue
 				}
@@ -389,7 +389,7 @@ func (fltr *FilterRule) passRSR(dDP utils.DataProvider) (bool, error) {
 }
 
 func (fltr *FilterRule) passGreaterThan(dDP utils.DataProvider) (bool, error) {
-	fldIf, err := config.DPDynamicInterface(fltr.Element, dDP)
+	fldIf, err := utils.DPDynamicInterface(fltr.Element, dDP)
 	if err != nil {
 		if err == utils.ErrNotFound {
 			return false, nil
@@ -405,7 +405,7 @@ func (fltr *FilterRule) passGreaterThan(dDP utils.DataProvider) (bool, error) {
 		orEqual = true
 	}
 	for _, val := range fltr.Values {
-		sval, err := config.DPDynamicInterface(val, dDP)
+		sval, err := utils.DPDynamicInterface(val, dDP)
 		if err != nil {
 			continue
 		}
@@ -421,7 +421,7 @@ func (fltr *FilterRule) passGreaterThan(dDP utils.DataProvider) (bool, error) {
 }
 
 func (fltr *FilterRule) passEqualTo(dDP utils.DataProvider) (bool, error) {
-	fldIf, err := config.DPDynamicInterface(fltr.Element, dDP)
+	fldIf, err := utils.DPDynamicInterface(fltr.Element, dDP)
 	if err != nil {
 		if err == utils.ErrNotFound {
 			return false, nil
@@ -432,7 +432,7 @@ func (fltr *FilterRule) passEqualTo(dDP utils.DataProvider) (bool, error) {
 		fldIf = utils.StringToInterface(fldStr)
 	}
 	for _, val := range fltr.Values {
-		sval, err := config.DPDynamicInterface(val, dDP)
+		sval, err := utils.DPDynamicInterface(val, dDP)
 		if err != nil {
 			continue
 		}

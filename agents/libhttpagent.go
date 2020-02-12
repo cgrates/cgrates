@@ -48,25 +48,25 @@ func newHADataProvider(reqPayload string,
 }
 
 func newHTTPUrlDP(req *http.Request) (dP utils.DataProvider, err error) {
-	dP = &httpUrlDP{req: req, cache: config.NewNavigableMap(nil)}
+	dP = &httpUrlDP{req: req, cache: utils.MapStorage{}}
 	return
 }
 
-// httpUrlDP implements engine.DataProvider, serving as url data decoder
+// httpUrlDP implements utils.DataProvider, serving as url data decoder
 // decoded data is only searched once and cached
 type httpUrlDP struct {
 	req   *http.Request
-	cache *config.NavigableMap
+	cache utils.MapStorage
 }
 
-// String is part of engine.DataProvider interface
+// String is part of utils.DataProvider interface
 // when called, it will display the already parsed values out of cache
 func (hU *httpUrlDP) String() string {
 	byts, _ := httputil.DumpRequest(hU.req, true)
 	return string(byts)
 }
 
-// FieldAsInterface is part of engine.DataProvider interface
+// FieldAsInterface is part of utils.DataProvider interface
 func (hU *httpUrlDP) FieldAsInterface(fldPath []string) (data interface{}, err error) {
 	if len(fldPath) != 1 {
 		return nil, utils.ErrNotFound
@@ -80,11 +80,11 @@ func (hU *httpUrlDP) FieldAsInterface(fldPath []string) (data interface{}, err e
 		return // data found in cache
 	}
 	data = hU.req.FormValue(fldPath[0])
-	hU.cache.Set(fldPath, data, false, false)
+	hU.cache.Set(fldPath, data)
 	return
 }
 
-// FieldAsString is part of engine.DataProvider interface
+// FieldAsString is part of utils.DataProvider interface
 func (hU *httpUrlDP) FieldAsString(fldPath []string) (data string, err error) {
 	var valIface interface{}
 	valIface, err = hU.FieldAsInterface(fldPath)
@@ -94,7 +94,7 @@ func (hU *httpUrlDP) FieldAsString(fldPath []string) (data string, err error) {
 	return utils.IfaceAsString(valIface), nil
 }
 
-// RemoteHost is part of engine.DataProvider interface
+// RemoteHost is part of utils.DataProvider interface
 func (hU *httpUrlDP) RemoteHost() net.Addr {
 	return utils.NewNetAddr("TCP", hU.req.RemoteAddr)
 }
@@ -109,25 +109,25 @@ func newHTTPXmlDP(req *http.Request) (dP utils.DataProvider, err error) {
 	if err != nil {
 		return nil, err
 	}
-	dP = &httpXmlDP{xmlDoc: doc, cache: config.NewNavigableMap(nil), addr: req.RemoteAddr}
+	dP = &httpXmlDP{xmlDoc: doc, cache: utils.MapStorage{}, addr: req.RemoteAddr}
 	return
 }
 
-// httpXmlDP implements engine.DataProvider, serving as xml data decoder
+// httpXmlDP implements utils.DataProvider, serving as xml data decoder
 // decoded data is only searched once and cached
 type httpXmlDP struct {
-	cache  *config.NavigableMap
+	cache  utils.MapStorage
 	xmlDoc *xmlquery.Node
 	addr   string
 }
 
-// String is part of engine.DataProvider interface
+// String is part of utils.DataProvider interface
 // when called, it will display the already parsed values out of cache
 func (hU *httpXmlDP) String() string {
 	return hU.xmlDoc.OutputXML(true)
 }
 
-// FieldAsInterface is part of engine.DataProvider interface
+// FieldAsInterface is part of utils.DataProvider interface
 func (hU *httpXmlDP) FieldAsInterface(fldPath []string) (data interface{}, err error) {
 	//if path is missing return here error because if it arrived in xmlquery library will panic
 	if len(fldPath) == 0 {
@@ -168,11 +168,11 @@ func (hU *httpXmlDP) FieldAsInterface(fldPath []string) (data interface{}, err e
 	}
 	//add the content in data and cache it
 	data = elmnt.InnerText()
-	hU.cache.Set(fldPath, data, false, false)
+	hU.cache.Set(fldPath, data)
 	return
 }
 
-// FieldAsString is part of engine.DataProvider interface
+// FieldAsString is part of utils.DataProvider interface
 func (hU *httpXmlDP) FieldAsString(fldPath []string) (data string, err error) {
 	var valIface interface{}
 	valIface, err = hU.FieldAsInterface(fldPath)
@@ -182,7 +182,7 @@ func (hU *httpXmlDP) FieldAsString(fldPath []string) (data string, err error) {
 	return utils.IfaceAsString(valIface), nil
 }
 
-// RemoteHost is part of engine.DataProvider interface
+// RemoteHost is part of utils.DataProvider interface
 func (hU *httpXmlDP) RemoteHost() net.Addr {
 	return utils.NewNetAddr("TCP", hU.addr)
 }
@@ -190,7 +190,7 @@ func (hU *httpXmlDP) RemoteHost() net.Addr {
 // httpAgentReplyEncoder will encode  []*engine.NMElement
 // and write content to http writer
 type httpAgentReplyEncoder interface {
-	Encode(*config.NavigableMap) error
+	Encode(*utils.OrderedNavigableMap) error
 }
 
 // newHAReplyEncoder constructs a httpAgentReqDecoder based on encoder type
@@ -215,9 +215,9 @@ type haXMLEncoder struct {
 }
 
 // Encode implements httpAgentReplyEncoder
-func (xE *haXMLEncoder) Encode(nM *config.NavigableMap) (err error) {
+func (xE *haXMLEncoder) Encode(nM *utils.OrderedNavigableMap) (err error) {
 	var xmlElmnts []*config.XMLElement
-	if xmlElmnts, err = nM.AsXMLElements(); err != nil {
+	if xmlElmnts, err = config.NMAsXMLElements(nM); err != nil {
 		return
 	}
 	if len(xmlElmnts) == 0 {
@@ -243,7 +243,7 @@ type haTextPlainEncoder struct {
 }
 
 // Encode implements httpAgentReplyEncoder
-func (xE *haTextPlainEncoder) Encode(nM *config.NavigableMap) (err error) {
+func (xE *haTextPlainEncoder) Encode(nM *utils.OrderedNavigableMap) (err error) {
 	var str, nmPath string
 	msgFields := make(map[string]string) // work around to NMap issue
 	for _, val := range nM.Values() {

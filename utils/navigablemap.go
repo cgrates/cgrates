@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"net"
 	"reflect"
+	"strings"
 )
 
 // DataProvider is a data source from multiple formats
@@ -31,6 +32,29 @@ type DataProvider interface {
 	FieldAsInterface(fldPath []string) (interface{}, error)
 	FieldAsString(fldPath []string) (string, error) // remove this
 	RemoteHost() net.Addr
+}
+
+// CGRReplier is the interface supported by replies convertible to CGRReply
+type NavigableMapper interface {
+	AsNavigableMap() MapStorage
+}
+
+// DPDynamicInterface returns the value of the field if the path is dynamic
+func DPDynamicInterface(dnVal string, dP DataProvider) (interface{}, error) {
+	if strings.HasPrefix(dnVal, DynamicDataPrefix) {
+		dnVal = strings.TrimPrefix(dnVal, DynamicDataPrefix)
+		return dP.FieldAsInterface(strings.Split(dnVal, NestingSep))
+	}
+	return StringToInterface(dnVal), nil
+}
+
+// DPDynamicString returns the string value of the field if the path is dynamic
+func DPDynamicString(dnVal string, dP DataProvider) (string, error) {
+	if strings.HasPrefix(dnVal, DynamicDataPrefix) {
+		dnVal = strings.TrimPrefix(dnVal, DynamicDataPrefix)
+		return dP.FieldAsString(strings.Split(dnVal, NestingSep))
+	}
+	return dnVal, nil
 }
 
 // dataStorage is the DataProvider that can be updated
@@ -66,12 +90,12 @@ func (ms MapStorage) FieldAsInterface(fldPath []string) (val interface{}, err er
 		}
 		switch rv := val.(type) {
 		case []string:
-			if len(rv) < *indx {
+			if len(rv) <= *indx {
 				return nil, ErrNotFound
 			}
 			val = rv[*indx]
 		case []interface{}:
-			if len(rv) < *indx {
+			if len(rv) <= *indx {
 				return nil, ErrNotFound
 			}
 			val = rv[*indx]
@@ -85,7 +109,7 @@ func (ms MapStorage) FieldAsInterface(fldPath []string) (val interface{}, err er
 		if vr.Kind() != reflect.Slice && vr.Kind() != reflect.Array {
 			return nil, ErrNotFound
 		}
-		if *indx > vr.Len() {
+		if *indx >= vr.Len() {
 			return nil, ErrNotFound
 		}
 		return vr.Index(*indx).Interface(), nil
@@ -101,19 +125,19 @@ func (ms MapStorage) FieldAsInterface(fldPath []string) (val interface{}, err er
 			return
 		}
 	}
-	switch dp := ms[fldPath[0]].(type) {
+	switch dp := ms[opath].(type) {
 	case []DataProvider:
-		if len(dp) < *indx {
+		if len(dp) <= *indx {
 			return nil, ErrNotFound
 		}
 		return dp[*indx].FieldAsInterface(fldPath[1:])
 	case []map[string]interface{}:
-		if len(dp) < *indx {
+		if len(dp) <= *indx {
 			return nil, ErrNotFound
 		}
 		return MapStorage(dp[*indx]).FieldAsInterface(fldPath[1:])
 	case []interface{}:
-		if len(dp) < *indx {
+		if len(dp) <= *indx {
 			return nil, ErrNotFound
 		}
 		switch ds := dp[*indx].(type) {
@@ -122,13 +146,11 @@ func (ms MapStorage) FieldAsInterface(fldPath []string) (val interface{}, err er
 		case map[string]interface{}:
 			return MapStorage(ds).FieldAsInterface(fldPath[1:])
 		default:
-			err = fmt.Errorf("Wrong path")
-			return
 		}
 	default:
-		err = fmt.Errorf("Wrong path")
-		return
 	}
+	err = ErrNotFound // xml compatible
+	return
 }
 
 // FieldAsString returns the value from path as string
@@ -167,11 +189,16 @@ func (ms MapStorage) Set(fldPath []string, val interface{}) (err error) {
 
 // GetKeys returns all the keys from map
 func (ms MapStorage) GetKeys(nesteed bool) (keys []string) {
-	for k, v := range ms {
-		if !nesteed {
-			keys = append(keys, k)
-			continue
+	if !nesteed {
+		keys = make([]string, len(ms))
+		i := 0
+		for k := range ms {
+			keys[i] = k
+			i++
 		}
+		return
+	}
+	for k, v := range ms {
 		switch rv := v.(type) {
 		case dataStorage:
 			keys = append(keys, k)
@@ -228,12 +255,14 @@ func (ms MapStorage) Remove(fldPath []string) (err error) {
 		delete(ms, fldPath[0])
 		return
 	}
-	ds, ok := val.(dataStorage)
-	if !ok {
-		err = fmt.Errorf("Wrong type")
-		return
+	switch dp := val.(type) {
+	case dataStorage:
+		return dp.Remove(fldPath[1:])
+	case map[string]interface{}:
+		return MapStorage(dp).Remove(fldPath[1:])
+	default:
+		return fmt.Errorf("Wrong path")
 	}
-	return ds.Remove(fldPath[1:])
 }
 
 // RemoteHost is part of dataStorage interface
@@ -241,108 +270,11 @@ func (ms MapStorage) RemoteHost() net.Addr {
 	return LocalAddr()
 }
 
-/*
-// NavigableMap is a dataStorage
-type NavigableMap map[string]dataStorage
-
-// String returns the map as json string
-func (nm NavigableMap) String() string { return ToJSON(nm) }
-
-// Get returns the value from the path
-func (nm NavigableMap) FieldAsInterface(fldPath []string) (val interface{}, err error) {
-	if len(fldPath) == 0 {
-		err = errors.New("empty field path")
-		return
-	}
-	ds, has := nm[fldPath[0]]
-	if !has {
-		err = ErrNotFound
-		return
-	}
-	if len(fldPath) == 1 {
-		val = ds
-		return
-	}
-	return ds.FieldAsInterface(fldPath[1:])
-}
-
-// GetString returns thevalue from path as string
-func (nm NavigableMap) GetString(fldPath []string) (str string, err error) {
-	var val interface{}
-	if val, err = nm.FieldAsInterface(fldPath); err != nil {
-		return
-	}
-	return IfaceAsString(val), nil
-}
-
-// Set sets the value at the given path
-func (nm NavigableMap) Set(fldPath []string, val interface{}) (err error) {
-	if len(fldPath) == 0 {
-		return fmt.Errorf("Wrong path")
-	}
-	if len(fldPath) == 1 {
-		ds, ok := val.(dataStorage)
-		if !ok {
-			return fmt.Errorf("Wrong type")
-		}
-		nm[fldPath[0]] = ds
-		return
-	}
-	if _, has := nm[fldPath[0]]; !has {
-		nm[fldPath[0]] = MapStorage{}
-	}
-	return nm[fldPath[0]].Set(fldPath[1:], val)
-}
-
-// GetKeys returns all the keys from map
-func (nm NavigableMap) GetKeys(nesteed bool) (keys []string) {
-	for k, v := range nm {
-		keys = append(keys, k)
-		if !nesteed {
-			continue
-		}
-		for _, dsKey := range v.GetKeys(nesteed) {
-			keys = append(keys, k+NestingSep+dsKey)
-		}
-	}
-	return
-}
-
-// Remove removes the item at path
-func (nm NavigableMap) Remove(fldPath []string) (err error) {
-	if len(fldPath) == 0 {
-		return fmt.Errorf("Wrong path")
-	}
-	var val dataStorage
-	var has bool
-	if val, has = nm[fldPath[0]]; !has {
-		return // ignore (already removed)
-	}
-	if len(fldPath) == 1 {
-		delete(nm, fldPath[0])
-		return
-	}
-	return val.Remove(fldPath[1:])
-}
-
-// RemoteHost is part of dataStorage interface
-func (nm NavigableMap) RemoteHost() net.Addr {
-	return LocalAddr()
-}
-
-// remove this after we replace all places with NavMap2:
-
-// FieldAsInterface is part of dataStorage interface
-func (nm NavigableMap) FieldAsInterface(fldPath []string) (interface{}, error) { return nm.FieldAsInterface(fldPath) }
-
-// FieldAsString is part of dataStorage interface
-func (nm NavigableMap) FieldAsString(fldPath []string) (string, error) { return nm.GetString(fldPath) }
-
 // NewOrderedNavigableMap initializates a structure of OrderedNavigableMap with a NavigableMap
-func NewOrderedNavigableMap(nm NavigableMap) *OrderedNavigableMap {
+func NewOrderedNavigableMap(nm dataStorage) *OrderedNavigableMap {
 	if nm == nil {
 		return &OrderedNavigableMap{
-			nm:    NavigableMap{},
+			nm:    MapStorage{},
 			order: [][]string{},
 		}
 	}
@@ -359,21 +291,21 @@ func NewOrderedNavigableMap(nm NavigableMap) *OrderedNavigableMap {
 
 // OrderedNavigableMap is the same as NavigableMap but keeps the order of fields
 type OrderedNavigableMap struct {
-	nm    NavigableMap
+	nm    dataStorage
 	order [][]string
 }
 
 // String returns the map as json string
 func (onm *OrderedNavigableMap) String() string { return ToJSON(onm.nm) }
 
-// Get returns the value from the path
+// FieldAsInterface returns the value from the path
 func (onm *OrderedNavigableMap) FieldAsInterface(fldPath []string) (val interface{}, err error) {
 	return onm.nm.FieldAsInterface(fldPath)
 }
 
-// GetString returns thevalue from path as string
-func (onm *OrderedNavigableMap) GetString(fldPath []string) (str string, err error) {
-	return onm.nm.GetString(fldPath)
+// FieldAsString returns thevalue from path as string
+func (onm *OrderedNavigableMap) FieldAsString(fldPath []string) (str string, err error) {
+	return onm.nm.FieldAsString(fldPath)
 }
 
 // Set sets the value at the given path
@@ -382,11 +314,11 @@ func (onm *OrderedNavigableMap) Set(fldPath []string, val interface{}) (err erro
 		return
 	}
 	onm.order = append(onm.order, fldPath)
-	if dp, canCast := val.(dataStorage); canCast {
-		for _, key := range dp.GetKeys(true) {
-			onm.order = append(onm.order, append(fldPath, strings.Split(key, NestingSep)...))
-		}
-	}
+	// if dp, canCast := val.(dataStorage); canCast {
+	// 	for _, key := range dp.GetKeys(true) {
+	// 		onm.order = append(onm.order, append(fldPath, strings.Split(key, NestingSep)...))
+	// 	}
+	// }
 	return
 }
 
@@ -400,21 +332,25 @@ func (onm *OrderedNavigableMap) GetKeys(nesteed bool) (keys []string) {
 }
 
 // Remove removes the item at path
+// this function is not needed for now
 func (onm *OrderedNavigableMap) Remove(fldPath []string) (err error) {
-	if len(fldPath) == 0 {
-		return fmt.Errorf("Wrong path")
-	}
-	if err = onm.nm.Remove(fldPath); err != nil {
-		return
-	}
-	fld := strings.Join(fldPath, NestingSep)
-	for i, order := range onm.order {
-		o := strings.Join(order, NestingSep)
-		if len(o) == 0 || strings.HasPrefix(o, fld) {
-			onm.order = append(onm.order[:i], onm.order[i+1:]...)
+	return ErrNotImplemented
+	/*
+		if len(fldPath) == 0 {
+			return fmt.Errorf("Wrong path")
 		}
-	}
-	return
+		if err = onm.nm.Remove(fldPath); err != nil {
+			return
+		}
+		fld := strings.Join(fldPath, NestingSep)
+		for i, order := range onm.order {
+			o := strings.Join(order, NestingSep)
+			if len(o) == 0 || strings.HasPrefix(o, fld) {
+				onm.order = append(onm.order[:i], onm.order[i+1:]...)
+			}
+		}
+		return
+	*/
 }
 
 // RemoteHost is part of dataStorage interface
@@ -422,15 +358,61 @@ func (onm OrderedNavigableMap) RemoteHost() net.Addr {
 	return LocalAddr()
 }
 
-// remove this after we replace all places with NavMap2:
-
-// FieldAsInterface is part of dataStorage interface
-func (onm OrderedNavigableMap) FieldAsInterface(fldPath []string) (interface{}, error) {
-	return onm.FieldAsInterface(fldPath)
+// Values returns the values in map, ordered by order information
+func (onm *OrderedNavigableMap) Values() (vals []interface{}) {
+	if len(onm.order) == 0 {
+		return
+	}
+	vals = make([]interface{}, len(onm.order))
+	for i, path := range onm.order {
+		val, _ := onm.FieldAsInterface(path)
+		vals[i] = val
+	}
+	return
 }
 
-// FieldAsString is part of dataStorage interface
-func (onm OrderedNavigableMap) FieldAsString(fldPath []string) (string, error) {
-	return onm.GetString(fldPath)
+// Walk returns the values in map, ordered by order information
+func (onm *OrderedNavigableMap) Walk(proccess func(interface{}) error) (err error) {
+	for _, path := range onm.order {
+		val, _ := onm.FieldAsInterface(path)
+		if err = proccess(val); err != nil {
+			return
+		}
+	}
+	return
 }
-*/
+
+func (onm *OrderedNavigableMap) GetOrder() [][]string { return onm.order }
+
+// type NMItem interface {
+// 	GetData() interface{}
+// 	IsAttribute() bool
+// }
+
+// AsCGREvent builds a CGREvent considering Time as time.Now()
+// and Event as linear map[string]interface{} with joined paths
+// treats particular case when the value of map is []*NMItem - used in agents/AgentRequest
+// func (onm *OrderedNavigableMap) AsCGREvent(tnt string, pathSep string) (cgrEv *CGREvent) {
+// 	if onm == nil || len(onm.order) == 0 {
+// 		return
+// 	}
+// 	cgrEv = &CGREvent{
+// 		Tenant: tnt,
+// 		ID:     UUIDSha1Prefix(),
+// 		Time:   TimePointer(time.Now()),
+// 		Event:  make(map[string]interface{})}
+// 	for _, branchPath := range onm.order {
+// 		val, _ := onm.FieldAsInterface(branchPath)
+// 		if nmItms, isNMItems := val.([]NMItem); isNMItems { // special case when we have added multiple items inside a key, used in agents
+// 			for _, nmItm := range nmItms {
+// 				if !nmItm.IsAttribute() {
+// 					val = nmItm.GetData() // first item which is not an attribute will become the value
+// 					break
+// 				}
+// 			}
+// 		} else {
+// 		}
+// 		cgrEv.Event[strings.Join(branchPath, pathSep)] = val
+// 	}
+// 	return
+// }
