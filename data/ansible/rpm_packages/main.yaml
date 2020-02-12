@@ -1,0 +1,270 @@
+---
+- name: Check and set python version on YUM server
+  hosts: yum
+  remote_user: '{{ gouser }}'
+  gather_facts: false
+  tasks:
+    - name: symlink /usr/bin/python -> /usr/bin/python3
+      raw: |
+        if [ -f /usr/bin/python3 ] && [ ! -f /usr/bin/python ]; then
+          ln --symbolic /usr/bin/python3 /usr/bin/python; 
+        fi
+      become: true
+
+- hosts: yum
+  vars:
+    ###############################################################
+    ##################### Golang Vars #############################
+    ###############################################################
+    # Go language SDK version number
+    golang_version: '1.13'
+    go_version_target: "go version go{{ golang_version }} linux/amd64"
+    # Mirror to download the Go language SDK redistributable package from
+    golang_mirror: 'https://storage.googleapis.com/golang'
+    # Base installation directory the Go language SDK distribution
+    golang_install_dir: '/usr/local/go'
+    # Directory to store files downloaded for Go language SDK installation
+    golang_download_dir: "{{ x_ansible_download_dir | default(ansible_env.HOME + '/.ansible/tmp/downloads') }}"
+    # Location for GOPATH environment variable
+    golang_gopath: "/home/{{ gouser }}/go"
+    # Filename of Go language SDK redistributable package
+    golang_redis_filename: 'go{{ golang_version }}.linux-amd64.tar.gz'
+
+    ###############################################################
+    # CGRateS location
+    cgrates_dir: "{{ golang_gopath }}/src/github.com/cgrates/cgrates"
+    ###############################################################
+    ##################### GPG Vars #############################
+    ###############################################################
+    gpg_home: "/root"
+    gpg_realname: "CGRateS"
+    gpg_useremail: "cgrates@itsyscom.com"
+    gpg_pubkeyfileexport: "yum.cgrates.org.gpg.key"
+
+    gpg_keylength: 2048
+    gpg_subkeylength: 2048
+    gpg_expire: 360
+
+    rootUser : root
+
+    customPath: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
+
+    dependencies:
+      - build-essential
+      - git
+      - devscripts
+      - nginx
+      - rpm
+      - createrepo
+      - wget
+      - sshpass
+      - gnupg2
+
+  remote_user: '{{ gouser }}'
+  tasks:
+###########################################################################################################################
+###########################################################################################################################
+# install dependencies
+    - name: Install dependencies
+      become: yes
+      apt: name={{ dependencies }} state=present
+###########################################################################################################################
+###########################################################################################################################
+# Prepare for configuration
+    - name: Check if /var/packages/yum directory exists
+      become: true
+      file:
+        path: /var/packages/yum
+        state: directory
+
+    - name: Check if /var/packages/yum/v0.10 directory exists
+      become: true
+      file:
+        path: /var/packages/yum/v0.10
+        state: directory
+        
+    - name: Generate GPG Key
+      include: gpg.yaml
+
+    - name: Check if NGINX needs to be configured
+      become: true
+      shell: "ls /etc/nginx/sites-enabled | grep 'yum.cgrates.org.vhost'"
+      ignore_errors: true
+      register: nginxConfig
+
+    - name: Configure NGINX server
+      include: nginx.yaml
+      when: nginxConfig.stdout_lines|length < 1
+      
+    - name: Add .rpmmacros in root directory
+      become: true
+      template:
+        src: rpmmacros.j2
+        dest: "{{ gpg_home }}/.rpmmacros"
+        mode: '0600'
+        owner: "{{ rootUser }}"
+        
+    - name: Import the key in rpm
+      become: true
+      shell: rpm --import /var/packages/yum.cgrates.org.gpg.key
+
+###########################################################################################################################
+###########################################################################################################################
+# Install Golang
+    - name: install unarchive dependencies (zypper)
+      become: yes
+      zypper:
+        name:
+          - gzip
+          - tar
+        state: present
+      when: ansible_pkg_mgr == 'zypper'
+
+    - name: Install golang
+      include: go.yaml
+
+###########################################################################################################################
+###########################################################################################################################
+# Install CGRateS
+    - name: create cgrates directory
+      become: yes
+      file:
+        state: directory
+        mode: 'u=rwx,go=rx'
+        owner: "{{ gouser }}"
+        group: "{{ gouser }}"
+        dest: '{{ cgrates_dir }}'
+      become_user: "{{ gouser }}"
+
+    - name: git clone cgrates
+      git:
+        repo: https://github.com/cgrates/cgrates.git
+        dest: '{{ cgrates_dir }}'
+        update: yes
+        force: yes
+        version: v0.10
+      become: yes
+      become_user: "{{ gouser }}"
+
+    - name:  build cgrates
+      shell: "sh {{ cgrates_dir }}/build.sh"
+      environment:
+        PATH: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
+      args:
+        chdir: '{{ cgrates_dir }}'
+        
+    - name: get git version
+      shell: git rev-parse HEAD
+      register: gitVersion
+      args:
+        chdir: '{{ cgrates_dir }}'
+    
+    - name: get git short version
+      shell: git log -1 --format=%ci | date +%Y%m%d%H%M%S
+      register: gitDate
+      args:
+        chdir: '{{ cgrates_dir }}'
+    
+    - name: get git date
+      shell: git rev-parse --short HEAD
+      register: gitShortVersion
+      args:
+        chdir: '{{ cgrates_dir }}'
+
+    - name: symbol link
+      become: yes
+      file:
+        src: "{{ cgrates_dir }}/data"
+        dest: "/usr/share/cgrates"
+        state: link
+###########################################################################################################################
+###########################################################################################################################
+# Generate package
+    - name: Create the folders for build
+      become: yes
+      file:
+        path: cgr_build/{{ item.dirName }}
+        state: directory
+      loop:
+        - { dirName: BUILD }
+        - { dirName: SOURCES }
+        - { dirName: SPECS }
+        - { dirName: SRPMS }
+        - { dirName: RPMS }
+       
+    - name: Download the tar.gz for the last commit
+      become: yes
+      shell: wget https://github.com/cgrates/cgrates/archive/{{ gitVersion.stdout_lines[0] }}.tar.gz
+      args:
+        chdir: cgr_build/SOURCES
+     
+    - name: Add cgrates.spec in SPECS
+      become: yes
+      template:
+        src: cgrates.spec.j2
+        dest: cgr_build/SPECS/cgrates.spec
+        
+    - name: Generate the .rpm file
+      become: yes
+      shell: 'rpmbuild -bb --define "_topdir /home/{{ gouser }}/cgr_build" cgr_build/SPECS/cgrates.spec'
+      environment:
+        PATH: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
+        
+    - name: Take the name of the .rpm package
+      become: yes
+      shell : "ls cgr_build/RPMS/x86_64/ | grep '.rpm'"
+      register: rmpFileName
+    
+    # Move the file to PKG server
+    - name: Copy the file to PKG server
+      shell: 'sshpass -p {{ pkgPass }} scp cgr_build/RPMS/x86_64/{{ item }} {{ gouser }}@{{ internalPkgAddr }}:/tmp/'
+      with_items: '{{ rmpFileName.stdout_lines }}'
+    
+    - name: Sign with rpm --addsign the .rpm file
+      become: yes
+      shell: 'sudo rpm --addsign cgr_build/RPMS/x86_64/{{ rmpFileName.stdout_lines[0] }}'
+      
+    - name: Check if is something in /var/packages/yum/v0.10/
+      become: yes
+      shell : "ls /var/packages/yum/v0.10/"
+      register: yumFiles
+      
+    # Clean the folder
+    - name: Clean the incoming folder
+      become: yes
+      shell: "sudo rm -rf /var/packages/yum/v0.10/*"
+      when: yumFiles.stdout_lines|length > 1
+    
+    - name: Move the files to /var/packages/yum/v0.10
+      become: yes
+      command: mv cgr_build/RPMS/x86_64/{{ rmpFileName.stdout_lines[0] }} /var/packages/yum/v0.10/
+      when : rmpFileName.stdout_lines|length > 0
+    
+    - name: Include the package with createrepo
+      become: yes
+      shell: createrepo /var/packages/yum/v0.10
+      
+- hosts: pkg
+  remote_user: '{{ gouser }}'
+  tasks:
+    - name: Creates directory
+      become: yes
+      file:
+        path: /var/packages/rpm/v0.10/
+        state: directory
+        
+    - name: Remove symlink from current rpm package
+      become: yes
+      file:
+        path: /var/packages/rpm/v0.10/cgrates_current.rpm
+        state: absent
+
+    - name: Move the new package to /var/packages/rpm
+      become: yes
+      shell: "sudo mv /tmp/{{ item }} /var/packages/rpm/v0.10/"
+      with_items: "{{ hostvars['yum']['rmpFileName']['stdout_lines'] }}"
+
+    - name: Create the new symlink cgrates_current.rpm
+      become: yes
+      shell: "sudo ln -s /var/packages/rpm/v0.10/{{ item }} /var/packages/rpm/v0.10/cgrates_current.rpm"
+      with_items: "{{ hostvars['yum']['rmpFileName']['stdout_lines'] }}"

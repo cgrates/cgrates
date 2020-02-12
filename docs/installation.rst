@@ -63,6 +63,52 @@ Run the following commands:
 As a side note on http://pkg.cgrates.org one can find an entire archive of CGRateS packages.
 
 
+3.1.2. Redhat/Fedora/CentOS
+-------------
+
+There are two main ways of installing the maintained packages:
+
+
+3.1.2.1. YUM repository
+++++++++++++++++++++++++++++
+
+
+Create a file called cgrates.repo in /etc/yum.repos.d/ and add the following lines:
+
+::
+
+    [cgrates]
+    name=CGRateS
+    baseurl=http://yum.cgrates.org/yum/v0.10/
+    enabled=1
+    gpgcheck=1
+    gpgkey=http://yum.cgrates.org/yum.cgrates.org.gpg.key
+
+After that run the following commands:
+
+::
+
+    sudo yum update
+    sudo yum install cgrates
+
+Once the installation is completed, one should perform the :ref:`post-install` section in order to have the CGRateS properly set and ready to run.
+After *post-install* actions are performed, CGRateS will be configured in **/etc/cgrates/cgrates.json** and enabled in **/etc/default/cgrates**.
+
+
+3.1.2.2. Manual installation of .rpm package out of archive server
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+Run the following commands:
+
+::
+
+    wget http://pkg.cgrates.org/rpm/v0.10/cgrates_current.rpm
+    sudo rpm -i cgrates_current.rpm
+
+As a side note on http://pkg.cgrates.org one can find an entire archive of CGRateS packages.
+
+
 3.2. Using source
 ~~~~~~~~~~~~~~~~~
 
