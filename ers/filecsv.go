@@ -165,7 +165,7 @@ func (rdr *CSVFileER) processFile(fPath, fName string) (err error) {
 					utils.ERs, absPath, rowNr, err.Error()))
 			continue
 		}
-		rdr.rdrEvents <- &erEvent{cgrEvent: agReq.CGRRequest.AsCGREvent(
+		rdr.rdrEvents <- &erEvent{cgrEvent: config.NMAsCGREvent(agReq.CGRRequest,
 			agReq.Tenant, utils.NestingSep),
 			rdrCfg: rdr.Config()}
 		evsPosted++

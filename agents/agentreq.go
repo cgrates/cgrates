@@ -34,23 +34,26 @@ import (
 // NewAgentRequest returns a new AgentRequest
 func NewAgentRequest(req utils.DataProvider,
 	vars map[string]interface{},
-	cgrRply *config.NavigableMap,
-	rply *config.NavigableMap,
+	cgrRply *utils.OrderedNavigableMap,
+	rply *utils.OrderedNavigableMap,
 	tntTpl config.RSRParsers,
 	dfltTenant, timezone string,
 	filterS *engine.FilterS,
 	header, trailer utils.DataProvider) (ar *AgentRequest) {
 	if cgrRply == nil {
-		cgrRply = config.NewNavigableMap(nil)
+		cgrRply = utils.NewOrderedNavigableMap(nil)
 	}
 	if rply == nil {
-		rply = config.NewNavigableMap(nil)
+		rply = utils.NewOrderedNavigableMap(nil)
+	}
+	if vars == nil {
+		vars = map[string]interface{}{}
 	}
 	ar = &AgentRequest{
 		Request:    req,
-		Vars:       config.NewNavigableMap(vars),
-		CGRRequest: config.NewNavigableMap(nil),
-		diamreq:    config.NewNavigableMap(nil), // special case when CGRateS is building the request
+		Vars:       utils.NewOrderedNavigableMap(utils.MapStorage(vars)),
+		CGRRequest: utils.NewOrderedNavigableMap(nil),
+		diamreq:    utils.NewOrderedNavigableMap(nil), // special case when CGRateS is building the request
 		CGRReply:   cgrRply,
 		Reply:      rply,
 		Timezone:   timezone,
@@ -66,38 +69,38 @@ func NewAgentRequest(req utils.DataProvider,
 	} else {
 		ar.Tenant = dfltTenant
 	}
-	ar.Vars.Set([]string{utils.NodeID}, config.CgrConfig().GeneralCfg().NodeID, false, true)
+	ar.Vars.Set([]string{utils.NodeID}, config.CgrConfig().GeneralCfg().NodeID)
 	return
 }
 
 // AgentRequest represents data related to one request towards agent
-// implements engine.DataProvider so we can pass it to filters
+// implements utils.DataProvider so we can pass it to filters
 type AgentRequest struct {
-	Request    utils.DataProvider  // request
-	Vars       *config.NavigableMap // shared data
-	CGRRequest *config.NavigableMap // Used in reply to access the request that was send
-	CGRReply   *config.NavigableMap
-	Reply      *config.NavigableMap
+	Request    utils.DataProvider         // request
+	Vars       *utils.OrderedNavigableMap // shared data
+	CGRRequest *utils.OrderedNavigableMap // Used in reply to access the request that was send
+	CGRReply   *utils.OrderedNavigableMap
+	Reply      *utils.OrderedNavigableMap
 	Tenant,
 	Timezone string
 	filterS *engine.FilterS
 	Header  utils.DataProvider
 	Trailer utils.DataProvider
-	diamreq *config.NavigableMap // used in case of building requests (ie. DisconnectSession)
-	tmp     *config.NavigableMap // used in case you want to store temporary items and access them later
+	diamreq *utils.OrderedNavigableMap // used in case of building requests (ie. DisconnectSession)
+	tmp     *utils.OrderedNavigableMap // used in case you want to store temporary items and access them later
 }
 
-// String implements engine.DataProvider
+// String implements utils.DataProvider
 func (ar *AgentRequest) String() string {
 	return utils.ToIJSON(ar)
 }
 
-// RemoteHost implements engine.DataProvider
+// RemoteHost implements utils.DataProvider
 func (ar *AgentRequest) RemoteHost() net.Addr {
 	return ar.Request.RemoteHost()
 }
 
-// FieldAsInterface implements engine.DataProvider
+// FieldAsInterface implements utils.DataProvider
 func (ar *AgentRequest) FieldAsInterface(fldPath []string) (val interface{}, err error) {
 	switch fldPath[0] {
 	default:
@@ -105,15 +108,15 @@ func (ar *AgentRequest) FieldAsInterface(fldPath []string) (val interface{}, err
 	case utils.MetaReq:
 		val, err = ar.Request.FieldAsInterface(fldPath[1:])
 	case utils.MetaVars:
-		val, err = ar.Vars.GetField(fldPath[1:])
+		val, err = ar.Vars.FieldAsInterface(fldPath[1:])
 	case utils.MetaCgreq:
-		val, err = ar.CGRRequest.GetField(fldPath[1:])
+		val, err = ar.CGRRequest.FieldAsInterface(fldPath[1:])
 	case utils.MetaCgrep:
-		val, err = ar.CGRReply.GetField(fldPath[1:])
+		val, err = ar.CGRReply.FieldAsInterface(fldPath[1:])
 	case utils.MetaDiamreq:
 		val, err = ar.diamreq.FieldAsInterface(fldPath[1:])
 	case utils.MetaRep:
-		val, err = ar.Reply.GetField(fldPath[1:])
+		val, err = ar.Reply.FieldAsInterface(fldPath[1:])
 	case utils.MetaHdr:
 		val, err = ar.Header.FieldAsInterface(fldPath[1:])
 	case utils.MetaTrl:
@@ -124,7 +127,7 @@ func (ar *AgentRequest) FieldAsInterface(fldPath []string) (val interface{}, err
 	return
 }
 
-// FieldAsString implements engine.DataProvider
+// FieldAsString implements utils.DataProvider
 func (ar *AgentRequest) FieldAsString(fldPath []string) (val string, err error) {
 	var iface interface{}
 	if iface, err = ar.FieldAsInterface(fldPath); err != nil {
@@ -138,7 +141,7 @@ func (ar *AgentRequest) FieldAsString(fldPath []string) (val string, err error) 
 
 //SetFields will populate fields of AgentRequest out of templates
 func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
-	ar.tmp = config.NewNavigableMap(nil)
+	ar.tmp = utils.NewOrderedNavigableMap(nil)
 	for _, tplFld := range tplFlds {
 		if pass, err := ar.filterS.Pass(ar.Tenant,
 			tplFld.Filters, ar); err != nil {
@@ -184,17 +187,17 @@ func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 			default:
 				return fmt.Errorf("unsupported field prefix: <%s> when set fields", fldPath[0])
 			case utils.MetaVars:
-				ar.Vars.Set(fldPath[1:], valSet, false, true)
+				ar.Vars.Set(fldPath[1:], valSet)
 			case utils.MetaCgreq:
-				ar.CGRRequest.Set(fldPath[1:], valSet, false, true)
+				ar.CGRRequest.Set(fldPath[1:], valSet)
 			case utils.MetaCgrep:
-				ar.CGRReply.Set(fldPath[1:], valSet, false, true)
+				ar.CGRReply.Set(fldPath[1:], valSet)
 			case utils.MetaRep:
-				ar.Reply.Set(fldPath[1:], valSet, false, true)
+				ar.Reply.Set(fldPath[1:], valSet)
 			case utils.MetaDiamreq:
-				ar.diamreq.Set(fldPath[1:], valSet, false, true)
+				ar.diamreq.Set(fldPath[1:], valSet)
 			case utils.MetaTmp:
-				ar.tmp.Set(fldPath[1:], valSet, false, true)
+				ar.tmp.Set(fldPath[1:], valSet)
 			}
 		}
 		if tplFld.Blocker { // useful in case of processing errors first
@@ -375,19 +378,17 @@ func (ar *AgentRequest) ParseField(
 
 // setCGRReply will set the aReq.cgrReply based on reply coming from upstream or error
 // returns error in case of reply not converting to NavigableMap
-func (ar *AgentRequest) setCGRReply(rply config.NavigableMapper, errRply error) (err error) {
-	var nm *config.NavigableMap
+func (ar *AgentRequest) setCGRReply(rply utils.NavigableMapper, errRply error) (err error) {
+	var nm *utils.OrderedNavigableMap
 	if errRply != nil {
-		nm = config.NewNavigableMap(map[string]interface{}{
+		nm = utils.NewOrderedNavigableMap(utils.MapStorage{
 			utils.Error: errRply.Error()})
 	} else {
-		nm = config.NewNavigableMap(nil)
+		nm = utils.NewOrderedNavigableMap(nil)
 		if rply != nil {
-			if nm, err = rply.AsNavigableMap(nil); err != nil {
-				return
-			}
+			nm = utils.NewOrderedNavigableMap(rply.AsNavigableMap())
 		}
-		nm.Set([]string{utils.Error}, "", false, false) // enforce empty error
+		nm.Set([]string{utils.Error}, "") // enforce empty error
 	}
 	*ar.CGRReply = *nm // update value so we can share CGRReply
 	return

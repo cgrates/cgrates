@@ -23,7 +23,6 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -162,22 +161,22 @@ func (sSpls *SortedSuppliers) Digest() string {
 	return strings.Join(sSpls.SuppliersWithParams(), utils.FIELDS_SEP)
 }
 
-func (sSpls *SortedSuppliers) AsNavigableMap() (nm *config.NavigableMap) {
-	mp := map[string]interface{}{
+func (sSpls *SortedSuppliers) AsNavigableMap() (nm utils.MapStorage) {
+	nm = utils.MapStorage{
 		"ProfileID": sSpls.ProfileID,
 		"Sorting":   sSpls.Sorting,
 		"Count":     sSpls.Count,
 	}
-	sm := make([]map[string]interface{}, len(sSpls.SortedSuppliers))
+	sm := make([]utils.MapStorage, len(sSpls.SortedSuppliers))
 	for i, ss := range sSpls.SortedSuppliers {
-		sm[i] = map[string]interface{}{
+		sm[i] = utils.MapStorage{
 			"SupplierID":         ss.SupplierID,
 			"SupplierParameters": ss.SupplierParameters,
 			"SortingData":        ss.SortingData,
 		}
 	}
-	mp["SortedSuppliers"] = sm
-	return config.NewNavigableMap(mp)
+	nm["SortedSuppliers"] = sm
+	return
 }
 
 type SupplierWithParams struct {

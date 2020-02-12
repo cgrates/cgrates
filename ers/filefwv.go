@@ -210,7 +210,7 @@ func (rdr *FWVFileER) processFile(fPath, fName string) (err error) {
 			continue
 		}
 		rdr.offset += rdr.lineLen // increase the offset
-		rdr.rdrEvents <- &erEvent{cgrEvent: agReq.CGRRequest.AsCGREvent(
+		rdr.rdrEvents <- &erEvent{cgrEvent: config.NMAsCGREvent(agReq.CGRRequest,
 			agReq.Tenant, utils.NestingSep),
 			rdrCfg: rdr.Config()}
 		evsPosted++
@@ -297,7 +297,7 @@ func (rdr *FWVFileER) processTrailer(file *os.File, rowNr, evsPosted int, absPat
 				utils.ERs, absPath, rowNr, err.Error()))
 		return err
 	}
-	rdr.rdrEvents <- &erEvent{cgrEvent: agReq.CGRRequest.AsCGREvent(
+	rdr.rdrEvents <- &erEvent{cgrEvent: config.NMAsCGREvent(agReq.CGRRequest,
 		agReq.Tenant, utils.NestingSep),
 		rdrCfg: rdr.Config()}
 	evsPosted++
@@ -338,7 +338,7 @@ func (rdr *FWVFileER) createHeaderMap(record string, rowNr, evsPosted int, absPa
 		return err
 	}
 	rdr.offset += rdr.headerOffset // increase the offset
-	rdr.rdrEvents <- &erEvent{cgrEvent: agReq.CGRRequest.AsCGREvent(
+	rdr.rdrEvents <- &erEvent{cgrEvent: config.NMAsCGREvent(agReq.CGRRequest,
 		agReq.Tenant, utils.NestingSep),
 		rdrCfg: rdr.Config()}
 	evsPosted++

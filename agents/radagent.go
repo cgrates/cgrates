@@ -75,8 +75,8 @@ func (ra *RadiusAgent) handleAuth(req *radigo.Packet) (rpl *radigo.Packet, err e
 	dcdr := newRADataProvider(req) // dcdr will provide information from request
 	rpl = req.Reply()
 	rpl.Code = radigo.AccessAccept
-	cgrRplyNM := config.NewNavigableMap(nil)
-	rplyNM := config.NewNavigableMap(nil)
+	cgrRplyNM := utils.NewOrderedNavigableMap(nil)
+	rplyNM := utils.NewOrderedNavigableMap(nil)
 	var processed bool
 	reqVars[utils.RemoteHost] = req.RemoteAddr().String()
 	for _, reqProcessor := range ra.cgrCfg.RadiusAgentCfg().RequestProcessors {
@@ -85,7 +85,7 @@ func (ra *RadiusAgent) handleAuth(req *radigo.Packet) (rpl *radigo.Packet, err e
 			utils.FirstNonEmpty(reqProcessor.Timezone,
 				config.CgrConfig().GeneralCfg().DefaultTimezone),
 			ra.filterS, nil, nil)
-		agReq.Vars.Set([]string{MetaRadReqType}, utils.StringToInterface(MetaRadAuth), false, true)
+		agReq.Vars.Set([]string{MetaRadReqType}, utils.StringToInterface(MetaRadAuth))
 		var lclProcessed bool
 		if lclProcessed, err = ra.processRequest(reqProcessor, agReq, rpl); lclProcessed {
 			processed = lclProcessed
@@ -114,8 +114,8 @@ func (ra *RadiusAgent) handleAcct(req *radigo.Packet) (rpl *radigo.Packet, err e
 	dcdr := newRADataProvider(req) // dcdr will provide information from request
 	rpl = req.Reply()
 	rpl.Code = radigo.AccountingResponse
-	cgrRplyNM := config.NewNavigableMap(nil)
-	rplyNM := config.NewNavigableMap(nil)
+	cgrRplyNM := utils.NewOrderedNavigableMap(nil)
+	rplyNM := utils.NewOrderedNavigableMap(nil)
 	var processed bool
 	reqVars[utils.RemoteHost] = req.RemoteAddr().String()
 	for _, reqProcessor := range ra.cgrCfg.RadiusAgentCfg().RequestProcessors {
@@ -154,7 +154,7 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RequestProcessor,
 	if err = agReq.SetFields(reqProcessor.RequestFields); err != nil {
 		return
 	}
-	cgrEv := agReq.CGRRequest.AsCGREvent(agReq.Tenant, utils.NestingSep)
+	cgrEv := config.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep)
 	var reqType string
 	for _, typ := range []string{
 		utils.MetaDryRun, utils.MetaAuth,
@@ -300,7 +300,7 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RequestProcessor,
 			&utils.CGREventWithArgDispatcher{CGREvent: cgrEv,
 				ArgDispatcher: cgrArgs.ArgDispatcher},
 			rplyCDRs); err != nil {
-			agReq.CGRReply.Set([]string{utils.Error}, err.Error(), false, false)
+			agReq.CGRReply.Set([]string{utils.Error}, err.Error())
 		}
 	}
 	if err := agReq.SetFields(reqProcessor.ReplyFields); err != nil {

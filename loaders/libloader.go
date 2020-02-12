@@ -93,20 +93,20 @@ func newCsvProvider(record []string, fileName string) (dP utils.DataProvider) {
 	return
 }
 
-// csvProvider implements engine.DataProvider so we can pass it to filters
+// csvProvider implements utils.DataProvider so we can pass it to filters
 type csvProvider struct {
 	req      []string
 	fileName string
 	cache    utils.MapStorage
 }
 
-// String is part of engine.DataProvider interface
+// String is part of utils.DataProvider interface
 // when called, it will display the already parsed values out of cache
 func (cP *csvProvider) String() string {
 	return utils.ToJSON(cP)
 }
 
-// FieldAsInterface is part of engine.DataProvider interface
+// FieldAsInterface is part of utils.DataProvider interface
 func (cP *csvProvider) FieldAsInterface(fldPath []string) (data interface{}, err error) {
 	if data, err = cP.cache.FieldAsInterface(fldPath); err == nil ||
 		err != utils.ErrNotFound { // item found in cache
@@ -133,7 +133,7 @@ func (cP *csvProvider) FieldAsInterface(fldPath []string) (data interface{}, err
 	return
 }
 
-// FieldAsString is part of engine.DataProvider interface
+// FieldAsString is part of utils.DataProvider interface
 func (cP *csvProvider) FieldAsString(fldPath []string) (data string, err error) {
 	var valIface interface{}
 	valIface, err = cP.FieldAsInterface(fldPath)
@@ -143,7 +143,7 @@ func (cP *csvProvider) FieldAsString(fldPath []string) (data string, err error) 
 	return utils.IfaceAsString(valIface), nil
 }
 
-// RemoteHost is part of engine.DataProvider interface
+// RemoteHost is part of utils.DataProvider interface
 func (cP *csvProvider) RemoteHost() net.Addr {
 	return utils.LocalAddr()
 }

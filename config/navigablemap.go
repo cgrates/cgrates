@@ -31,11 +31,6 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// CGRReplier is the interface supported by replies convertible to CGRReply
-type NavigableMapper interface {
-	AsNavigableMap([]*FCTemplate) (*NavigableMap, error)
-}
-
 // NewNavigableMap constructs a NavigableMap
 func NewNavigableMap(data map[string]interface{}) *NavigableMap {
 	if data == nil {
@@ -111,7 +106,7 @@ func (nM *NavigableMap) GetField(path []string) (fldVal interface{}, err error) 
 		switch mv := dp.(type) { // used for cdr when populating eventCost whitin
 		case map[string]interface{}:
 			lastMp = mv
-		case DataProvider:
+		case utils.DataProvider:
 			return mv.FieldAsInterface(path[i+1:])
 		default:
 			return nil, fmt.Errorf("cannot cast field: <%+v> type: %T with path: <%s> to map[string]interface{}",
@@ -157,7 +152,7 @@ func (nM *NavigableMap) getLastRealItem(mp map[string]interface{}, spath string)
 }
 
 // FieldAsInterface returns the field value as interface{} for the path specified
-// implements DataProvider
+// implements utils.DataProvider
 // supports spath with selective elements in case of []*NMItem
 func (nM *NavigableMap) FieldAsInterface(fldPath []string) (fldVal interface{}, err error) {
 	lenPath := len(fldPath)
@@ -176,7 +171,7 @@ func (nM *NavigableMap) FieldAsInterface(fldPath []string) (fldVal interface{}, 
 		switch mv := dp.(type) { // used for cdr when populating eventCost whitin
 		case map[string]interface{}:
 			lastMp = mv
-		case DataProvider:
+		case utils.DataProvider:
 			return mv.FieldAsInterface(fldPath[i+1:])
 		default:
 			return nil, fmt.Errorf("cannot cast field: <%+v> type: %T with path: <%s> to map[string]interface{}",
@@ -250,7 +245,7 @@ func (nM *NavigableMap) getNextMap(mp map[string]interface{}, spath string) (int
 			return mv.data, nil
 		case *NavigableMap:
 			return mv.data, nil
-		case DataProvider: // used for cdr when populating eventCost whitin
+		case utils.DataProvider: // used for cdr when populating eventCost whitin
 			return mv, nil
 		default:
 		}
@@ -286,7 +281,7 @@ func (nM *NavigableMap) getNextMap(mp map[string]interface{}, spath string) (int
 			if *idx < len(mv) {
 				return mv[*idx].data, nil
 			}
-		case []DataProvider: // used for cdr when populating eventCost whitin
+		case []utils.DataProvider: // used for cdr when populating eventCost whitin
 			if *idx < len(mv) {
 				return mv[*idx], nil
 			}
@@ -319,7 +314,7 @@ func (nM *NavigableMap) getIndex(spath string) (opath string, idx *int) {
 }
 
 // FieldAsString returns the field value as string for the path specified
-// implements DataProvider
+// implements utils.DataProvider
 func (nM *NavigableMap) FieldAsString(fldPath []string) (fldVal string, err error) {
 	var valIface interface{}
 	valIface, err = nM.FieldAsInterface(fldPath)
@@ -329,12 +324,12 @@ func (nM *NavigableMap) FieldAsString(fldPath []string) (fldVal string, err erro
 	return utils.IfaceAsString(valIface), nil
 }
 
-// String is part of engine.DataProvider interface
+// String is part of utils.DataProvider interface
 func (nM *NavigableMap) String() string {
 	return utils.ToJSON(nM.data)
 }
 
-// RemoteHost is part of engine.DataProvider interface
+// RemoteHost is part of utils.DataProvider interface
 func (nM *NavigableMap) RemoteHost() net.Addr {
 	return utils.LocalAddr()
 }
@@ -464,6 +459,117 @@ func (nM *NavigableMap) AsMapStringIface(pathSep string) (mp map[string]interfac
 	return
 }
 
+func getPathFromValue(in reflect.Value, prefix string) (out []string) {
+	switch in.Kind() {
+	case reflect.Ptr:
+		return getPathFromValue(in.Elem(), prefix)
+	case reflect.Array, reflect.Slice:
+		prefix = strings.TrimSuffix(prefix, utils.NestingSep)
+		for i := 0; i < in.Len(); i++ {
+			pref := fmt.Sprintf("%s[%v]", prefix, i)
+			out = append(out, pref)
+			out = append(out, getPathFromValue(in.Index(i), pref+utils.NestingSep)...)
+		}
+	case reflect.Map:
+		iter := reflect.ValueOf(in).MapRange()
+		for iter.Next() {
+			pref := prefix + iter.Key().String()
+			out = append(out, pref)
+			out = append(out, getPathFromValue(iter.Value(), pref+utils.NestingSep)...)
+		}
+	case reflect.Struct:
+		inType := in.Type()
+		for i := 0; i < in.NumField(); i++ {
+			pref := prefix + inType.Field(i).Name
+			out = append(out, pref)
+			out = append(out, getPathFromValue(in.Field(i), pref+utils.NestingSep)...)
+		}
+	case reflect.Invalid, reflect.Bool, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr, reflect.Float32, reflect.Float64, reflect.Complex64, reflect.Complex128, reflect.String, reflect.Chan, reflect.Func, reflect.UnsafePointer, reflect.Interface:
+	default:
+	}
+	return
+}
+
+func GetPathFromInterface(in interface{}, prefix string) (out []string) {
+	switch vin := in.(type) {
+	case map[string]interface{}:
+		for k, val := range vin {
+			pref := prefix + k
+			out = append(out, pref)
+			out = append(out, GetPathFromInterface(val, pref+utils.NestingSep)...)
+		}
+	case []map[string]interface{}:
+		prefix = strings.TrimSuffix(prefix, utils.NestingSep)
+		for i, val := range vin {
+			pref := fmt.Sprintf("%s[%v]", prefix, i)
+			out = append(out, pref)
+			out = append(out, GetPathFromInterface(val, pref+utils.NestingSep)...)
+		}
+	case []interface{}:
+		prefix = strings.TrimSuffix(prefix, utils.NestingSep)
+		for i, val := range vin {
+			pref := fmt.Sprintf("%s[%v]", prefix, i)
+			out = append(out, pref)
+			out = append(out, GetPathFromInterface(val, pref+utils.NestingSep)...)
+		}
+	case []string:
+		prefix = strings.TrimSuffix(prefix, utils.NestingSep)
+		for i := range vin {
+			pref := fmt.Sprintf("%s[%v]", prefix, i)
+			out = append(out, pref)
+		}
+	case nil, int, int32, int64, uint32, uint64, bool, float32, float64, []uint8, time.Duration, time.Time, string: //no path
+	default: //reflect based
+		out = getPathFromValue(reflect.ValueOf(vin), prefix)
+	}
+	return
+}
+
+// GetKeys returns all posibble keys
+func (nM *NavigableMap) GetKeys() (keys []string) {
+	for k, val := range nM.data {
+		keys = append(keys, k)
+		keys = append(keys, GetPathFromInterface(val, k+utils.NestingSep)...)
+	}
+	return
+}
+
+// Remove will remove the items from the given path
+func (nM *NavigableMap) Remove(path []string) {
+	// if ordered {
+	// 	nM.order = append(nM.order, path)
+	// }
+	mp := nM.data
+	for i, spath := range path {
+		oData, has := mp[spath]
+		if !has { // no need to remove
+			return
+		}
+		if i == len(path)-1 { // last path
+			delete(mp, spath)
+			return
+		}
+		defer func(np map[string]interface{}, p string) {
+			o, has := np[p]
+			if !has {
+				return
+			}
+			if o == nil {
+				delete(np, p)
+				return
+			}
+			v, ok := o.(map[string]interface{})
+			if !ok {
+				return
+			}
+			if len(v) == 0 {
+				delete(np, p)
+			}
+		}(mp, spath)
+		mp = oData.(map[string]interface{}) // so we can check further down
+	}
+}
+
 // XMLElement is specially crafted to be automatically marshalled by encoding/xml
 type XMLElement struct {
 	XMLName    xml.Name
@@ -549,113 +655,121 @@ func (nM *NavigableMap) AsXMLElements() (ents []*XMLElement, err error) {
 	return
 }
 
-func getPathFromValue(in reflect.Value, prefix string) (out []string) {
-	switch in.Kind() {
-	case reflect.Ptr:
-		return getPathFromValue(in.Elem(), prefix)
-	case reflect.Array, reflect.Slice:
-		prefix = strings.TrimSuffix(prefix, utils.NestingSep)
-		for i := 0; i < in.Len(); i++ {
-			pref := fmt.Sprintf("%s[%v]", prefix, i)
-			out = append(out, pref)
-			out = append(out, getPathFromValue(in.Index(i), pref+utils.NestingSep)...)
+// NMAsXMLElements returns the values as []*XMLElement which can be later marshaled
+// considers each value returned by .Values() in the form of []*NMItem, otherwise errors
+func NMAsXMLElements(nm *utils.OrderedNavigableMap) (ents []*XMLElement, err error) {
+	pathIdx := make(map[string]*XMLElement) // Keep the index of elements based on path
+	err = nm.Walk(func(val interface{}) error {
+		nmItms, isNMItems := val.([]*NMItem)
+		if !isNMItems {
+			return fmt.Errorf("value: %+v is not []*NMItem", val)
 		}
-	case reflect.Map:
-		iter := reflect.ValueOf(in).MapRange()
-		for iter.Next() {
-			pref := prefix + iter.Key().String()
-			out = append(out, pref)
-			out = append(out, getPathFromValue(iter.Value(), pref+utils.NestingSep)...)
+		for _, nmItm := range nmItms {
+			if nmItm.Config != nil && nmItm.Config.NewBranch {
+				pathIdx = make(map[string]*XMLElement) // reset cache so we can start having other elements with same path
+			}
+			val := utils.IfaceAsString(nmItm.Data)
+			var pathCached bool
+			for i := len(nmItm.Path); i > 0; i-- {
+				var cachedElm *XMLElement
+				if cachedElm, pathCached = pathIdx[strings.Join(nmItm.Path[:i], "")]; !pathCached {
+					continue
+				}
+				if i == len(nmItm.Path) { // lastElmnt, overwrite value or add attribute
+					if nmItm.Config != nil &&
+						nmItm.Config.AttributeID != "" {
+						cachedElm.Attributes = append(cachedElm.Attributes,
+							&xml.Attr{
+								Name:  xml.Name{Local: nmItm.Config.AttributeID},
+								Value: val,
+							})
+					} else {
+						cachedElm.Value = val
+					}
+					break
+				}
+				// create elements in reverse order so we can append already created
+				var newElm *XMLElement
+				for j := len(nmItm.Path); j > i; j-- {
+					elm := &XMLElement{XMLName: xml.Name{Local: nmItm.Path[j-1]}}
+					pathIdx[strings.Join(nmItm.Path[:j], "")] = elm
+					if newElm == nil {
+						if nmItm.Config != nil &&
+							nmItm.Config.AttributeID != "" {
+							elm.Attributes = append(elm.Attributes,
+								&xml.Attr{
+									Name:  xml.Name{Local: nmItm.Config.AttributeID},
+									Value: val,
+								})
+						} else {
+							elm.Value = val
+						}
+						newElm = elm // last element
+					} else {
+						elm.Elements = append(elm.Elements, newElm)
+						newElm = elm
+					}
+				}
+				cachedElm.Elements = append(cachedElm.Elements, newElm)
+			}
+			if !pathCached { // not an update but new element to be created
+				var newElm *XMLElement
+				for i := len(nmItm.Path); i > 0; i-- {
+					elm := &XMLElement{XMLName: xml.Name{Local: nmItm.Path[i-1]}}
+					pathIdx[strings.Join(nmItm.Path[:i], "")] = elm
+					if newElm == nil { // last element, create data inside
+						if nmItm.Config != nil &&
+							nmItm.Config.AttributeID != "" {
+							elm.Attributes = append(elm.Attributes,
+								&xml.Attr{
+									Name:  xml.Name{Local: nmItm.Config.AttributeID},
+									Value: val,
+								})
+						} else {
+							elm.Value = val
+						}
+						newElm = elm // last element
+					} else {
+						elm.Elements = append(elm.Elements, newElm)
+						newElm = elm
+					}
+				}
+				ents = append(ents, newElm)
+			}
 		}
-	case reflect.Struct:
-		inType := in.Type()
-		for i := 0; i < in.NumField(); i++ {
-			pref := prefix + inType.Field(i).Name
-			out = append(out, pref)
-			out = append(out, getPathFromValue(in.Field(i), pref+utils.NestingSep)...)
-		}
-	case reflect.Invalid, reflect.Bool, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr, reflect.Float32, reflect.Float64, reflect.Complex64, reflect.Complex128, reflect.String, reflect.Chan, reflect.Func, reflect.UnsafePointer, reflect.Interface:
-	default:
-	}
+		return nil
+	})
 	return
 }
 
-func getPathFromInterface(in interface{}, prefix string) (out []string) {
-	switch vin := in.(type) {
-	case map[string]interface{}:
-		for k, val := range vin {
-			pref := prefix + k
-			out = append(out, pref)
-			out = append(out, getPathFromInterface(val, pref+utils.NestingSep)...)
+// AsCGREvent builds a CGREvent considering Time as time.Now()
+// and Event as linear map[string]interface{} with joined paths
+// treats particular case when the value of map is []*NMItem - used in agents/AgentRequest
+func NMAsCGREvent(nM *utils.OrderedNavigableMap, tnt string, pathSep string) (cgrEv *utils.CGREvent) {
+	if nM == nil {
+		return
+	}
+	order := nM.GetOrder()
+	if len(order) == 0 {
+		return
+	}
+	cgrEv = &utils.CGREvent{
+		Tenant: tnt,
+		ID:     utils.UUIDSha1Prefix(),
+		Time:   utils.TimePointer(time.Now()),
+		Event:  make(map[string]interface{})}
+	for _, branchPath := range order {
+		val, _ := nM.FieldAsInterface(branchPath)
+		if nmItms, isNMItems := val.([]*NMItem); isNMItems { // special case when we have added multiple items inside a key, used in agents
+			for _, nmItm := range nmItms {
+				if nmItm.Config == nil ||
+					nmItm.Config.AttributeID == "" {
+					val = nmItm.Data // first item which is not an attribute will become the value
+					break
+				}
+			}
 		}
-	case []map[string]interface{}:
-		prefix = strings.TrimSuffix(prefix, utils.NestingSep)
-		for i, val := range vin {
-			pref := fmt.Sprintf("%s[%v]", prefix, i)
-			out = append(out, pref)
-			out = append(out, getPathFromInterface(val, pref+utils.NestingSep)...)
-		}
-	case []interface{}:
-		prefix = strings.TrimSuffix(prefix, utils.NestingSep)
-		for i, val := range vin {
-			pref := fmt.Sprintf("%s[%v]", prefix, i)
-			out = append(out, pref)
-			out = append(out, getPathFromInterface(val, pref+utils.NestingSep)...)
-		}
-	case []string:
-		prefix = strings.TrimSuffix(prefix, utils.NestingSep)
-		for i := range vin {
-			pref := fmt.Sprintf("%s[%v]", prefix, i)
-			out = append(out, pref)
-		}
-	case nil, int, int32, int64, uint32, uint64, bool, float32, float64, []uint8, time.Duration, time.Time, string: //no path
-	default: //reflect based
-		out = getPathFromValue(reflect.ValueOf(vin), prefix)
+		cgrEv.Event[strings.Join(branchPath, pathSep)] = val
 	}
 	return
-}
-
-// GetKeys returns all posibble keys
-func (nM *NavigableMap) GetKeys() (keys []string) {
-	for k, val := range nM.data {
-		keys = append(keys, k)
-		keys = append(keys, getPathFromInterface(val, k+utils.NestingSep)...)
-	}
-	return
-}
-
-// Remove will remove the items from the given path
-func (nM *NavigableMap) Remove(path []string) {
-	// if ordered {
-	// 	nM.order = append(nM.order, path)
-	// }
-	mp := nM.data
-	for i, spath := range path {
-		oData, has := mp[spath]
-		if !has { // no need to remove
-			return
-		}
-		if i == len(path)-1 { // last path
-			delete(mp, spath)
-			return
-		}
-		defer func(np map[string]interface{}, p string) {
-			o, has := np[p]
-			if !has {
-				return
-			}
-			if o == nil {
-				delete(np, p)
-				return
-			}
-			v, ok := o.(map[string]interface{})
-			if !ok {
-				return
-			}
-			if len(v) == 0 {
-				delete(np, p)
-			}
-		}(mp, spath)
-		mp = oData.(map[string]interface{}) // so we can check further down
-	}
 }

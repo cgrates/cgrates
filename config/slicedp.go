@@ -26,25 +26,25 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// NewSliceDP constructs a DataProvider
-func NewSliceDP(record []string) (dP DataProvider) {
+// NewSliceDP constructs a utils.DataProvider
+func NewSliceDP(record []string) (dP utils.DataProvider) {
 	dP = &SliceDP{req: record, cache: utils.MapStorage{}}
 	return
 }
 
-// SliceDP implements engine.DataProvider so we can pass it to filters
+// SliceDP implements utils.DataProvider so we can pass it to filters
 type SliceDP struct {
 	req   []string
 	cache utils.MapStorage
 }
 
-// String is part of engine.DataProvider interface
+// String is part of utils.DataProvider interface
 // when called, it will display the already parsed values out of cache
 func (cP *SliceDP) String() string {
 	return utils.ToJSON(cP)
 }
 
-// FieldAsInterface is part of engine.DataProvider interface
+// FieldAsInterface is part of utils.DataProvider interface
 func (cP *SliceDP) FieldAsInterface(fldPath []string) (data interface{}, err error) {
 	if len(fldPath) == 0 {
 		return
@@ -69,7 +69,7 @@ func (cP *SliceDP) FieldAsInterface(fldPath []string) (data interface{}, err err
 	return
 }
 
-// FieldAsString is part of engine.DataProvider interface
+// FieldAsString is part of utils.DataProvider interface
 func (cP *SliceDP) FieldAsString(fldPath []string) (data string, err error) {
 	var valIface interface{}
 	valIface, err = cP.FieldAsInterface(fldPath)
@@ -79,7 +79,7 @@ func (cP *SliceDP) FieldAsString(fldPath []string) (data string, err error) {
 	return utils.IfaceAsString(valIface), nil
 }
 
-// RemoteHost is part of engine.DataProvider interface
+// RemoteHost is part of utils.DataProvider interface
 func (cP *SliceDP) RemoteHost() net.Addr {
 	return utils.LocalAddr()
 }
