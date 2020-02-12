@@ -261,10 +261,8 @@
 
     - name: Move the new package to /var/packages/rpm
       become: yes
-      shell: "sudo mv /tmp/{{ item}} /var/packages/rpm/master/"
-      with_items: "{{ hostvars['yum']['rmpFileName']['stdout_lines'] }}"
+      shell: "sudo mv /tmp/{{ hostvars['yum']['rmpFileName']['stdout_lines'][0] }} /var/packages/rpm/master/"
 
     - name: Create the new symlink cgrates_current.rpm
       become: yes
-      shell: "sudo ln -s /var/packages/rpmrpm/master/{{ item }} /var/packages/rpm/master/cgrates_current.rpm"
-      with_items: "{{ hostvars['yum']['rmpFileName']['stdout_lines'] }}"
+      shell: "sudo ln -s /var/packages/rpm/master/{{ hostvars['yum']['rmpFileName']['stdout_lines'][0] }} /var/packages/rpm/master/cgrates_current.rpm"
