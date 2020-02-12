@@ -76,6 +76,12 @@
       file:
         path: /var/packages/yum
         state: directory
+
+    - name: Check if /var/packages/yum/master directory exists
+      become: true
+      file:
+        path: /var/packages/yum/master
+        state: directory
         
     - name: Generate GPG Key
       include: gpg.yaml
