@@ -73,21 +73,17 @@ There are two main ways of installing the maintained packages:
 ++++++++++++++++++++++++++++
 
 
-Create a file called cgrates.repo in /etc/yum.repos.d/ and add the following lines:
+To install CGRateS out of YUM execute the following commands
 
 ::
-
+    sudo tee -a /etc/yum.repos.d/cgrates.repo > /dev/null <<EOT
     [cgrates]
     name=CGRateS
     baseurl=http://yum.cgrates.org/yum/master/
     enabled=1
     gpgcheck=1
     gpgkey=http://yum.cgrates.org/yum.cgrates.org.gpg.key
-
-After that run the following commands:
-
-::
-
+    EOT
     sudo yum update
     sudo yum install cgrates
 
