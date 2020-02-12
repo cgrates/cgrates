@@ -76,6 +76,7 @@ There are two main ways of installing the maintained packages:
 To install CGRateS out of YUM execute the following commands
 
 ::
+
     sudo tee -a /etc/yum.repos.d/cgrates.repo > /dev/null <<EOT
     [cgrates]
     name=CGRateS
@@ -99,8 +100,7 @@ Run the following commands:
 
 ::
 
-    wget http://pkg.cgrates.org/rpm/master/cgrates_current.rpm
-    sudo rpm -i cgrates_current.rpm
+    sudo yum install http://pkg.cgrates.org/rpm/master/cgrates_current.rpm
 
 As a side note on http://pkg.cgrates.org one can find an entire archive of CGRateS packages.
 
