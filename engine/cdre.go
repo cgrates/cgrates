@@ -390,10 +390,10 @@ func (cdre *CDRExporter) processCDRs() (err error) {
 			continue
 		}
 		if len(cdre.exportTemplate.Filters) != 0 {
-			cgrDp := config.NewNavigableMap(map[string]interface{}{
+			cgrDp := utils.MapStorage{
 				utils.MetaReq: cdr.AsMapStringIface(),
 				utils.MetaEC:  cdr.CostDetails,
-			})
+			}
 			if pass, err := cdre.filterS.Pass(cdre.exportTemplate.Tenant,
 				cdre.exportTemplate.Filters, cgrDp); err != nil || !pass {
 				continue // Not passes filters, ignore this CDR

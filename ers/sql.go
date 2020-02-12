@@ -202,7 +202,7 @@ func (rdr *SQLEventReader) processMessage(msg map[string]interface{}) (err error
 		return
 	}
 	rdr.rdrEvents <- &erEvent{
-		cgrEvent: agReq.CGRRequest.AsCGREvent(agReq.Tenant, utils.NestingSep),
+		cgrEvent: config.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep),
 		rdrCfg:   rdr.Config(),
 	}
 	return

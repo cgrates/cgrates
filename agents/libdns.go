@@ -65,7 +65,7 @@ func newDNSDataProvider(req *dns.Msg,
 		cache: utils.MapStorage{}}
 }
 
-// dnsDP implements engien.DataProvider, serving as dns.Msg decoder
+// dnsDP implements utils.DataProvider, serving as dns.Msg decoder
 // cache is used to cache queries within the message
 type dnsDP struct {
 	req   *dns.Msg
@@ -73,13 +73,13 @@ type dnsDP struct {
 	cache utils.MapStorage
 }
 
-// String is part of engine.DataProvider interface
+// String is part of utils.DataProvider interface
 // when called, it will display the already parsed values out of cache
 func (dP *dnsDP) String() string {
 	return utils.ToJSON(dP.req)
 }
 
-// FieldAsString is part of engine.DataProvider interface
+// FieldAsString is part of utils.DataProvider interface
 func (dP *dnsDP) FieldAsString(fldPath []string) (data string, err error) {
 	var valIface interface{}
 	valIface, err = dP.FieldAsInterface(fldPath)
@@ -89,12 +89,12 @@ func (dP *dnsDP) FieldAsString(fldPath []string) (data string, err error) {
 	return utils.IfaceAsString(valIface), nil
 }
 
-// RemoteHost is part of engine.DataProvider interface
+// RemoteHost is part of utils.DataProvider interface
 func (dP *dnsDP) RemoteHost() net.Addr {
 	return utils.NewNetAddr(dP.w.RemoteAddr().Network(), dP.w.RemoteAddr().String())
 }
 
-// FieldAsInterface is part of engine.DataProvider interface
+// FieldAsInterface is part of utils.DataProvider interface
 func (dP *dnsDP) FieldAsInterface(fldPath []string) (data interface{}, err error) {
 	if data, err = dP.cache.FieldAsInterface(fldPath); err != nil {
 		if err != utils.ErrNotFound { // item found in cache
@@ -153,7 +153,7 @@ func appendDNSAnswer(msg *dns.Msg) (err error) {
 }
 
 // updateDNSMsgFromNM will update DNS message with values from NavigableMap
-func updateDNSMsgFromNM(msg *dns.Msg, nm *config.NavigableMap) (err error) {
+func updateDNSMsgFromNM(msg *dns.Msg, nm *utils.OrderedNavigableMap) (err error) {
 	msgFields := make(map[string]struct{}) // work around to NMap issue
 	for _, valX := range nm.Values() {
 		nmItms, cast := valX.([]*config.NMItem)

@@ -199,8 +199,8 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 			da.aReqsLck.Unlock()
 		}()
 	}
-	cgrRplyNM := config.NewNavigableMap(nil)
-	rply := config.NewNavigableMap(nil) // share it among different processors
+	cgrRplyNM := utils.NewOrderedNavigableMap(nil)
+	rply := utils.NewOrderedNavigableMap(nil) // share it among different processors
 	var processed bool
 	for _, reqProcessor := range da.cgrCfg.DiameterAgentCfg().RequestProcessors {
 		var lclProcessed bool
@@ -253,7 +253,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 	if err = agReq.SetFields(reqProcessor.RequestFields); err != nil {
 		return
 	}
-	cgrEv := agReq.CGRRequest.AsCGREvent(agReq.Tenant, utils.NestingSep)
+	cgrEv := config.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep)
 	var reqType string
 	for _, typ := range []string{
 		utils.MetaDryRun, utils.MetaAuth,
@@ -400,7 +400,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 		if err = da.connMgr.Call(da.cgrCfg.DiameterAgentCfg().SessionSConns, da, utils.SessionSv1ProcessCDR,
 			&utils.CGREventWithArgDispatcher{CGREvent: cgrEv,
 				ArgDispatcher: cgrArgs.ArgDispatcher}, rplyCDRs); err != nil {
-			agReq.CGRReply.Set([]string{utils.Error}, err.Error(), false, false)
+			agReq.CGRReply.Set([]string{utils.Error}, err.Error())
 		}
 	}
 	if err = agReq.SetFields(reqProcessor.ReplyFields); err != nil {
@@ -444,8 +444,8 @@ func (da *DiameterAgent) V1DisconnectSession(args utils.AttrDisconnectSession, r
 	aReq := NewAgentRequest(
 		newDADataProvider(dmd.c, dmd.m),
 		dmd.vars,
-		config.NewNavigableMap(nil),
-		config.NewNavigableMap(nil),
+		utils.NewOrderedNavigableMap(nil),
+		utils.NewOrderedNavigableMap(nil),
 		nil,
 		da.cgrCfg.GeneralCfg().DefaultTenant,
 		da.cgrCfg.GeneralCfg().DefaultTimezone, da.filterS, nil, nil)

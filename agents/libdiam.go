@@ -293,7 +293,7 @@ func newDADataProvider(c diam.Conn, m *diam.Message) utils.DataProvider {
 
 }
 
-// diameterDP implements engine.DataProvider, serving as diam.Message data decoder
+// diameterDP implements utils.DataProvider, serving as diam.Message data decoder
 // decoded data is only searched once and cached
 type diameterDP struct {
 	c     diam.Conn
@@ -301,13 +301,13 @@ type diameterDP struct {
 	cache utils.MapStorage
 }
 
-// String is part of engine.DataProvider interface
+// String is part of utils.DataProvider interface
 // when called, it will display the already parsed values out of cache
 func (dP *diameterDP) String() string {
 	return dP.m.String()
 }
 
-// FieldAsString is part of engine.DataProvider interface
+// FieldAsString is part of utils.DataProvider interface
 func (dP *diameterDP) FieldAsString(fldPath []string) (data string, err error) {
 	var valIface interface{}
 	valIface, err = dP.FieldAsInterface(fldPath)
@@ -317,12 +317,12 @@ func (dP *diameterDP) FieldAsString(fldPath []string) (data string, err error) {
 	return utils.IfaceAsString(valIface), nil
 }
 
-// RemoteHost is part of engine.DataProvider interface
+// RemoteHost is part of utils.DataProvider interface
 func (dP *diameterDP) RemoteHost() net.Addr {
 	return utils.NewNetAddr(dP.c.RemoteAddr().Network(), dP.c.RemoteAddr().String())
 }
 
-// FieldAsInterface is part of engine.DataProvider interface
+// FieldAsInterface is part of utils.DataProvider interface
 func (dP *diameterDP) FieldAsInterface(fldPath []string) (data interface{}, err error) {
 	if data, err = dP.cache.FieldAsInterface(fldPath); err != nil {
 		if err != utils.ErrNotFound { // item found in cache
@@ -413,7 +413,7 @@ func (dP *diameterDP) FieldAsInterface(fldPath []string) (data interface{}, err 
 }
 
 // updateDiamMsgFromNavMap will update the diameter message with items from navigable map
-func updateDiamMsgFromNavMap(m *diam.Message, navMp *config.NavigableMap, tmz string) (err error) {
+func updateDiamMsgFromNavMap(m *diam.Message, navMp *utils.OrderedNavigableMap, tmz string) (err error) {
 	// write reply into message
 	pathIdx := make(map[string]int) // group items for same path
 	for _, val := range navMp.Values() {
@@ -455,7 +455,7 @@ func updateDiamMsgFromNavMap(m *diam.Message, navMp *config.NavigableMap, tmz st
 
 // diamAnswer builds up the answer to be sent back to the client
 func diamAnswer(m *diam.Message, resCode uint32, errFlag bool,
-	rply *config.NavigableMap, tmz string) (a *diam.Message, err error) {
+	rply *utils.OrderedNavigableMap, tmz string) (a *diam.Message, err error) {
 	a = m.Answer(resCode)
 	if errFlag {
 		a.Header.CommandFlags = diam.ErrorFlag
@@ -473,8 +473,8 @@ func diamErr(m *diam.Message, resCode uint32,
 	filterS *engine.FilterS) (a *diam.Message, err error) {
 	aReq := NewAgentRequest(
 		newDADataProvider(nil, m), reqVars,
-		config.NewNavigableMap(nil),
-		config.NewNavigableMap(nil),
+		utils.NewOrderedNavigableMap(nil),
+		utils.NewOrderedNavigableMap(nil),
 		nil, tnt, tmz, filterS, nil, nil)
 	if err = aReq.SetFields(tpl); err != nil {
 		return

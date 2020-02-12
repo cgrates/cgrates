@@ -112,8 +112,8 @@ func (da *DNSAgent) handleMessage(w dns.ResponseWriter, req *dns.Msg) {
 		reqVars[DomainName] = domainNameFromNAPTR(req.Question[0].Name)
 	}
 	reqVars[utils.RemoteHost] = w.RemoteAddr().String()
-	cgrRplyNM := config.NewNavigableMap(nil)
-	rplyNM := config.NewNavigableMap(nil) // share it among different processors
+	cgrRplyNM := utils.NewOrderedNavigableMap(nil)
+	rplyNM := utils.NewOrderedNavigableMap(nil) // share it among different processors
 	var processed bool
 	var err error
 	for _, reqProcessor := range da.cgrCfg.DNSAgentCfg().RequestProcessors {
@@ -177,7 +177,7 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 	if err = agReq.SetFields(reqProcessor.RequestFields); err != nil {
 		return
 	}
-	cgrEv := agReq.CGRRequest.AsCGREvent(agReq.Tenant, utils.NestingSep)
+	cgrEv := config.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep)
 	var reqType string
 	for _, typ := range []string{
 		utils.MetaDryRun, utils.MetaAuth,
@@ -331,7 +331,7 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 			utils.SessionSv1ProcessCDR,
 			&utils.CGREventWithArgDispatcher{CGREvent: cgrEv,
 				ArgDispatcher: cgrArgs.ArgDispatcher}, &rplyCDRs); err != nil {
-			agReq.CGRReply.Set([]string{utils.Error}, err.Error(), false, false)
+			agReq.CGRReply.Set([]string{utils.Error}, err.Error())
 		}
 	}
 	if err := agReq.SetFields(reqProcessor.ReplyFields); err != nil {

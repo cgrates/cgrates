@@ -1730,12 +1730,11 @@ type V1AuthorizeReply struct {
 }
 
 // AsNavigableMap is part of engine.NavigableMapper interface
-func (v1AuthReply *V1AuthorizeReply) AsNavigableMap(
-	ignr []*config.FCTemplate) (*config.NavigableMap, error) {
-	cgrReply := make(map[string]interface{})
+func (v1AuthReply *V1AuthorizeReply) AsNavigableMap() (cgrReply utils.MapStorage) {
+	cgrReply = make(utils.MapStorage)
 	if v1AuthReply != nil {
 		if v1AuthReply.Attributes != nil {
-			attrs := make(map[string]interface{})
+			attrs := make(utils.MapStorage)
 			for _, fldName := range v1AuthReply.Attributes.AlteredFields {
 				fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
 				if v1AuthReply.Attributes.CGREvent.HasField(fldName) {
@@ -1760,7 +1759,7 @@ func (v1AuthReply *V1AuthorizeReply) AsNavigableMap(
 			cgrReply[utils.CapStatQueues] = *v1AuthReply.StatQueueIDs
 		}
 	}
-	return config.NewNavigableMap(cgrReply), nil
+	return
 }
 
 // BiRPCv1AuthorizeEvent performs authorization for CGREvent based on specific components
@@ -1995,12 +1994,11 @@ type V1InitSessionReply struct {
 }
 
 // AsNavigableMap is part of engine.NavigableMapper interface
-func (v1Rply *V1InitSessionReply) AsNavigableMap(
-	ignr []*config.FCTemplate) (*config.NavigableMap, error) {
-	cgrReply := make(map[string]interface{})
+func (v1Rply *V1InitSessionReply) AsNavigableMap() (cgrReply utils.MapStorage) {
+	cgrReply = make(utils.MapStorage)
 	if v1Rply != nil {
 		if v1Rply.Attributes != nil {
-			attrs := make(map[string]interface{})
+			attrs := make(utils.MapStorage)
 			for _, fldName := range v1Rply.Attributes.AlteredFields {
 				fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
 				if v1Rply.Attributes.CGREvent.HasField(fldName) {
@@ -2022,7 +2020,7 @@ func (v1Rply *V1InitSessionReply) AsNavigableMap(
 			cgrReply[utils.CapStatQueues] = *v1Rply.StatQueueIDs
 		}
 	}
-	return config.NewNavigableMap(cgrReply), nil
+	return
 }
 
 // BiRPCv1InitiateSession initiates a new session
@@ -2219,12 +2217,11 @@ type V1UpdateSessionReply struct {
 }
 
 // AsNavigableMap is part of engine.NavigableMapper interface
-func (v1Rply *V1UpdateSessionReply) AsNavigableMap(
-	ignr []*config.FCTemplate) (*config.NavigableMap, error) {
-	cgrReply := make(map[string]interface{})
+func (v1Rply *V1UpdateSessionReply) AsNavigableMap() (cgrReply utils.MapStorage) {
+	cgrReply = make(utils.MapStorage)
 	if v1Rply != nil {
 		if v1Rply.Attributes != nil {
-			attrs := make(map[string]interface{})
+			attrs := make(utils.MapStorage)
 			for _, fldName := range v1Rply.Attributes.AlteredFields {
 				fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
 				if v1Rply.Attributes.CGREvent.HasField(fldName) {
@@ -2237,7 +2234,7 @@ func (v1Rply *V1UpdateSessionReply) AsNavigableMap(
 			cgrReply[utils.CapMaxUsage] = *v1Rply.MaxUsage
 		}
 	}
-	return config.NewNavigableMap(cgrReply), nil
+	return
 }
 
 // BiRPCv1UpdateSession updates an existing session, returning the duration which the session can still last
@@ -2679,9 +2676,8 @@ type V1ProcessMessageReply struct {
 }
 
 // AsNavigableMap is part of engine.NavigableMapper interface
-func (v1Rply *V1ProcessMessageReply) AsNavigableMap(
-	ignr []*config.FCTemplate) (*config.NavigableMap, error) {
-	cgrReply := make(map[string]interface{})
+func (v1Rply *V1ProcessMessageReply) AsNavigableMap() (cgrReply utils.MapStorage) {
+	cgrReply = make(utils.MapStorage)
 	if v1Rply != nil {
 		if v1Rply.MaxUsage != nil {
 			cgrReply[utils.CapMaxUsage] = *v1Rply.MaxUsage
@@ -2690,7 +2686,7 @@ func (v1Rply *V1ProcessMessageReply) AsNavigableMap(
 			cgrReply[utils.CapResourceAllocation] = *v1Rply.ResourceAllocation
 		}
 		if v1Rply.Attributes != nil {
-			attrs := make(map[string]interface{})
+			attrs := make(utils.MapStorage)
 			for _, fldName := range v1Rply.Attributes.AlteredFields {
 				fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
 				if v1Rply.Attributes.CGREvent.HasField(fldName) {
@@ -2709,7 +2705,7 @@ func (v1Rply *V1ProcessMessageReply) AsNavigableMap(
 			cgrReply[utils.CapStatQueues] = *v1Rply.StatQueueIDs
 		}
 	}
-	return config.NewNavigableMap(cgrReply), nil
+	return
 }
 
 // BiRPCv1ProcessMessage processes one event with the right subsystems based on arguments received
@@ -2847,9 +2843,8 @@ type V1ProcessEventReply struct {
 }
 
 // AsNavigableMap is part of engine.NavigableMapper interface
-func (v1Rply *V1ProcessEventReply) AsNavigableMap(
-	ignr []*config.FCTemplate) (*config.NavigableMap, error) {
-	cgrReply := make(map[string]interface{})
+func (v1Rply *V1ProcessEventReply) AsNavigableMap() (cgrReply utils.MapStorage) {
+	cgrReply = make(utils.MapStorage)
 	if v1Rply != nil {
 		if v1Rply.MaxUsage != nil {
 			cgrReply[utils.CapMaxUsage] = *v1Rply.MaxUsage
@@ -2858,7 +2853,7 @@ func (v1Rply *V1ProcessEventReply) AsNavigableMap(
 			cgrReply[utils.CapResourceMessage] = *v1Rply.ResourceMessage
 		}
 		if v1Rply.Attributes != nil {
-			attrs := make(map[string]interface{})
+			attrs := make(utils.MapStorage)
 			for _, fldName := range v1Rply.Attributes.AlteredFields {
 				fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
 				if v1Rply.Attributes.CGREvent.HasField(fldName) {
@@ -2880,7 +2875,7 @@ func (v1Rply *V1ProcessEventReply) AsNavigableMap(
 			cgrReply[utils.Cost] = *v1Rply.Cost
 		}
 	}
-	return config.NewNavigableMap(cgrReply), nil
+	return
 }
 
 // BiRPCv1ProcessEvent processes one event with the right subsystems based on arguments received

@@ -64,8 +64,8 @@ func (ha *HTTPAgent) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 				utils.HTTPAgent, err.Error()))
 		return
 	}
-	cgrRplyNM := config.NewNavigableMap(nil)
-	rplyNM := config.NewNavigableMap(nil)
+	cgrRplyNM := utils.NewOrderedNavigableMap(nil)
+	rplyNM := utils.NewOrderedNavigableMap(nil)
 	reqVars[utils.RemoteHost] = req.RemoteAddr
 	for _, reqProcessor := range ha.reqProcessors {
 		agReq := NewAgentRequest(dcdr, reqVars, cgrRplyNM, rplyNM,
@@ -112,7 +112,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 	if err = agReq.SetFields(reqProcessor.RequestFields); err != nil {
 		return
 	}
-	cgrEv := agReq.CGRRequest.AsCGREvent(agReq.Tenant, utils.NestingSep)
+	cgrEv := config.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep)
 	var reqType string
 	for _, typ := range []string{
 		utils.MetaDryRun, utils.MetaAuth,
@@ -260,7 +260,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 			&utils.CGREventWithArgDispatcher{CGREvent: cgrEv,
 				ArgDispatcher: cgrArgs.ArgDispatcher},
 			rplyCDRs); err != nil {
-			agReq.CGRReply.Set([]string{utils.Error}, err.Error(), false, false)
+			agReq.CGRReply.Set([]string{utils.Error}, err.Error())
 		}
 	}
 	if err := agReq.SetFields(reqProcessor.ReplyFields); err != nil {
