@@ -194,7 +194,7 @@
        
     - name: Download the tar.gz for the last commit
       become: yes
-      shell: wget https://github.com/cgrates/cgrates/archive/{{ gitVersion.stdout_lines[0] }}.tar.gz
+      shell: wget https://github.com/cgrates/cgrates/archive/v0.10/{{ gitVersion.stdout_lines[0] }}.tar.gz
       args:
         chdir: cgr_build/SOURCES
      
@@ -261,10 +261,8 @@
 
     - name: Move the new package to /var/packages/rpm
       become: yes
-      shell: "sudo mv /tmp/{{ item }} /var/packages/rpm/v0.10/"
-      with_items: "{{ hostvars['yum']['rmpFileName']['stdout_lines'] }}"
+      shell: "sudo mv /tmp/{{ hostvars['yum']['rmpFileName']['stdout_lines'][0] }} /var/packages/rpm/v0.10/"
 
     - name: Create the new symlink cgrates_current.rpm
       become: yes
-      shell: "sudo ln -s /var/packages/rpm/v0.10/{{ item }} /var/packages/rpm/v0.10/cgrates_current.rpm"
-      with_items: "{{ hostvars['yum']['rmpFileName']['stdout_lines'] }}"
+      shell: "sudo ln -s /var/packages/rpm/v0.10/{{ hostvars['yum']['rmpFileName']['stdout_lines'][0] }} /var/packages/rpm/v0.10/cgrates_current.rpm"

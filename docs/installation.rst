@@ -100,8 +100,7 @@ Run the following commands:
 
 ::
 
-    wget http://pkg.cgrates.org/rpm/v0.10/cgrates_current.rpm
-    sudo rpm -i cgrates_current.rpm
+    sudo rpm -i http://pkg.cgrates.org/rpm/v0.10/cgrates_current.rpm
 
 As a side note on http://pkg.cgrates.org one can find an entire archive of CGRateS packages.
 
