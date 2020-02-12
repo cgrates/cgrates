@@ -24,7 +24,7 @@ Overview
 
 Starting as a pure **billing engine**, CGRateS has evolved over the years into a reliable **real-time charging framework**, able to accommodate various business cases in a *generic way*.
 
-Being an *"engine style"* the project focuses on providing best ratio between **functionality** (over 15 daemons/services implemented with a rich number of `features <cgrates_features>`_ and a development team agile in developing new ones) and **performance** (dedicated benchmark tool, asynchronous request processing, own transactional cache component), however not losing focus of **quality** (test driven development policy).
+Being an *"engine style"* the project focuses on providing best ratio between **functionality** (over 15 daemons/services implemented with a rich number of `features <cgrates-features>`_ and a development team agile in implementing new ones) and **performance** (dedicated benchmark tool, asynchronous request processing, own transactional cache component), however not losing focus of **quality** (test driven development policy).
 
 It is written in `Go`_ programming language and accessible from any programming language via JSON RPC.
 The code is well documented (**go doc** compliant `API docs`_) and heavily tested (**5k+** tests are part of the unit test suite).
@@ -39,6 +39,7 @@ Modular and flexible, CGRateS provides APIs over a variety of simultaneously acc
  - **JSON over Websockets** : useful where 2 ways interaction over same TCP socket is required
  - **GOB over TCP**         : slightly faster than JSON one but only accessible for the moment out of Go (`<https://golang.org/>`_).
 
+.. _charging-modes:
 
 CGRateS is capable of four charging modes:
 
@@ -67,7 +68,7 @@ CGRateS is capable of four charging modes:
    - Least CPU usage out of the four modes (fastest charging).
 
 
-.. _cgrates_features:
+.. _cgrates-features:
 
 Features
 --------
@@ -196,4 +197,4 @@ Links
 License
 -------
 
-`CGRateS`_ is released under the terms of the `[GNU GENERAL PUBLIC LICENSE Version 3] <http://www.gnu.org/licenses/gpl-3.0.en.html>`_. See **LICENSE.txt** file for details.
+`CGRateS`_ is released under the terms of the `[GNU GENERAL PUBLIC LICENSE Version 3] <http://www.gnu.org/licenses/gpl-3.0.en.html>`_.
