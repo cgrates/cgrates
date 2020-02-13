@@ -146,14 +146,28 @@
         src: "{{ cgrates_dir }}/data"
         dest: "/usr/share/cgrates"
         state: link
+    
+    - name: get git tag
+      shell: "git tag -l --points-at HEAD"
+      args:
+        chdir: '{{ cgrates_dir }}'
+      register: gitTagVar
 ###########################################################################################################################
 ###########################################################################################################################
 # Generate package
-    - name:  Generate package
+    - name:  Generate package without hash
       become: yes
       command: 'sudo env "PATH={{ customPath }}" make deb'
       args:
         chdir: '{{ cgrates_dir }}/packages'
+      when : gitTagVar.stdout_lines|length > 0
+    
+    - name:  Generate package with hash
+      become: yes
+      command: 'sudo env "PATH={{ customPath }}" make deb_hash'
+      args:
+        chdir: '{{ cgrates_dir }}/packages'
+      when : gitTagVar.stdout_lines|length == 0
 
     - name: Check if the package was generated
       become: yes
@@ -187,6 +201,7 @@
       args :
         chdir: /var/packages/debian
       with_items: '{{ changesFileNames.stdout_lines }}'
+      when : gitTagVar.stdout_lines|length > 0
 
     # Move the file to PKG server
     - name: Copy the file to PKG server
@@ -217,6 +232,7 @@
       file:
         path: /var/packages/debian/v0.10/cgrates_current_amd64.deb
         state: absent
+      when : hostvars['apt']['gitTagVar'].stdout_lines|length > 0
 
     - name: Move the new package to /var/packages/debian
       become: yes
@@ -227,3 +243,4 @@
       become: yes
       shell: "sudo ln -s /var/packages/debian/v0.10/{{ item }} /var/packages/debian/v0.10/cgrates_current_amd64.deb"
       with_items: "{{ hostvars['apt']['debFileName']['stdout_lines'] }}"
+      when : hostvars['apt']['gitTagVar'].stdout_lines|length > 0
