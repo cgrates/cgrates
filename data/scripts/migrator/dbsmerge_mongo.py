@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python
 
 # depends:
 #   ^ pymongo # install via: easy_install pymongo
