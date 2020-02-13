@@ -33,7 +33,7 @@ func MatchingItemIDsForEvent(ev map[string]interface{}, stringFldIDs, prefixFldI
 	dm *DataManager, cacheID, itemIDPrefix string, indexedSelects, nestedFields bool) (itemIDs utils.StringMap, err error) {
 	itemIDs = make(utils.StringMap)
 	var allFieldIDs []string
-	navEv := utils.MapStorage(ev)
+	navEv := utils.NavigableMap(ev)
 	if indexedSelects && (stringFldIDs == nil || prefixFldIDs == nil) {
 		allFieldIDs = navEv.GetKeys(nestedFields)
 	}

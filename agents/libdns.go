@@ -62,7 +62,7 @@ func domainNameFromNAPTR(name string) (dName string) {
 func newDNSDataProvider(req *dns.Msg,
 	w dns.ResponseWriter) utils.DataProvider {
 	return &dnsDP{req: req, w: w,
-		cache: utils.MapStorage{}}
+		cache: utils.NavigableMap{}}
 }
 
 // dnsDP implements utils.DataProvider, serving as dns.Msg decoder
@@ -70,7 +70,7 @@ func newDNSDataProvider(req *dns.Msg,
 type dnsDP struct {
 	req   *dns.Msg
 	w     dns.ResponseWriter
-	cache utils.MapStorage
+	cache utils.NavigableMap
 }
 
 // String is part of utils.DataProvider interface

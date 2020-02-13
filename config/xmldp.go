@@ -30,7 +30,7 @@ import (
 
 // NewXmlProvider constructs a utils.DataProvider
 func NewXmlProvider(req *xmlquery.Node, cdrPath utils.HierarchyPath) (dP utils.DataProvider) {
-	dP = &XmlProvider{req: req, cdrPath: cdrPath, cache: utils.MapStorage{}}
+	dP = &XmlProvider{req: req, cdrPath: cdrPath, cache: utils.NavigableMap{}}
 	return
 }
 
@@ -38,7 +38,7 @@ func NewXmlProvider(req *xmlquery.Node, cdrPath utils.HierarchyPath) (dP utils.D
 type XmlProvider struct {
 	req     *xmlquery.Node
 	cdrPath utils.HierarchyPath //used to compute relative path
-	cache   utils.MapStorage
+	cache   utils.NavigableMap
 }
 
 // String is part of utils.DataProvider interface

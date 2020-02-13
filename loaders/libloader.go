@@ -88,7 +88,7 @@ func newCsvProvider(record []string, fileName string) (dP utils.DataProvider) {
 	dP = &csvProvider{
 		req:      record,
 		fileName: fileName,
-		cache:    utils.MapStorage{},
+		cache:    utils.NavigableMap{},
 	}
 	return
 }
@@ -97,7 +97,7 @@ func newCsvProvider(record []string, fileName string) (dP utils.DataProvider) {
 type csvProvider struct {
 	req      []string
 	fileName string
-	cache    utils.MapStorage
+	cache    utils.NavigableMap
 }
 
 // String is part of utils.DataProvider interface

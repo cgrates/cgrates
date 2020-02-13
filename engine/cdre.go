@@ -390,7 +390,7 @@ func (cdre *CDRExporter) processCDRs() (err error) {
 			continue
 		}
 		if len(cdre.exportTemplate.Filters) != 0 {
-			cgrDp := utils.MapStorage{
+			cgrDp := utils.NavigableMap{
 				utils.MetaReq: cdr.AsMapStringIface(),
 				utils.MetaEC:  cdr.CostDetails,
 			}

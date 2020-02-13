@@ -36,7 +36,7 @@ func NewBareEventCost() *EventCost {
 		Rates:         make(ChargedRates),
 		Timings:       make(ChargedTimings),
 		Charges:       make([]*ChargingInterval, 0),
-		cache:         utils.MapStorage{},
+		cache:         utils.NavigableMap{},
 	}
 }
 
@@ -118,12 +118,12 @@ type EventCost struct {
 	Rates          ChargedRates
 	Timings        ChargedTimings
 
-	cache utils.MapStorage
+	cache utils.NavigableMap
 }
 
 func (ec *EventCost) initCache() {
 	if ec != nil {
-		ec.cache = utils.MapStorage{}
+		ec.cache = utils.NavigableMap{}
 	}
 }
 

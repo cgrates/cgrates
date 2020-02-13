@@ -483,7 +483,7 @@ func (rS *ResourceService) matchingResourcesForEvent(ev *utils.CGREvent,
 		}
 		return
 	}
-	evNm := utils.MapStorage{utils.MetaReq: ev.Event}
+	evNm := utils.NavigableMap{utils.MetaReq: ev.Event}
 	lockIDs := utils.PrefixSliceItems(rs.IDs(), utils.ResourcesPrefix)
 	guardian.Guardian.Guard(func() (gIface interface{}, gErr error) {
 		for resName := range rIDs {

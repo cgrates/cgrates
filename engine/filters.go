@@ -452,7 +452,7 @@ func newDynamicDP(cfg *config.CGRConfig, connMgr *ConnManager,
 		connMgr:   connMgr,
 		tenant:    tenant,
 		initialDP: initialDP,
-		cache:     utils.MapStorage{},
+		cache:     utils.NavigableMap{},
 	}
 }
 
@@ -462,7 +462,7 @@ type dynamicDP struct {
 	tenant    string
 	initialDP utils.DataProvider
 
-	cache utils.MapStorage
+	cache utils.NavigableMap
 }
 
 func (dDP *dynamicDP) String() string { return utils.ToJSON(dDP) }
