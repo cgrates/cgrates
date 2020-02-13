@@ -6,7 +6,9 @@ go:
 script: go test -v ./...
 
 branches:
-  only: master
+  only: 
+    - master
+    - v0.10
 
 notifications:
   irc:
