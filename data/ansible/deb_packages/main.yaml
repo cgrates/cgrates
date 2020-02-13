@@ -43,10 +43,12 @@
     golang_redis_filename: 'go{{ golang_version }}.linux-amd64.tar.gz'
 
     ###############################################################
-    # CGRateS location
+    # CGRateS vars
     cgrates_dir: "{{ golang_gopath }}/src/github.com/cgrates/cgrates"
+    cgrates_version: "v0.10"
+    cgrates_distribution: "nightly"
     ###############################################################
-    ##################### GPG Vars #############################
+    ######################## GPG Vars #############################
     ###############################################################
     gpg_home: "/root"
     gpg_realname: "CGRateS"
@@ -70,6 +72,9 @@
 
   remote_user: '{{ gouser }}'
   tasks:
+    - name: set cgrates cgrates_version
+      set_fact:
+        cgrates_version: "{{ cgrates_version }}"
 ###########################################################################################################################
 ###########################################################################################################################
 # install dependencies
@@ -129,7 +134,7 @@
         dest: '{{ cgrates_dir }}'
         update: yes
         force: yes
-        version: v0.10
+        version: "{{ cgrates_version }}"
       become: yes
       become_user: "{{ gouser }}"
 
@@ -146,7 +151,7 @@
         src: "{{ cgrates_dir }}/data"
         dest: "/usr/share/cgrates"
         state: link
-    
+            
     - name: get git tag
       shell: "git tag -l --points-at HEAD"
       args:
@@ -155,19 +160,11 @@
 ###########################################################################################################################
 ###########################################################################################################################
 # Generate package
-    - name:  Generate package without hash
+    - name:  Generate package
       become: yes
       command: 'sudo env "PATH={{ customPath }}" make deb'
       args:
         chdir: '{{ cgrates_dir }}/packages'
-      when : gitTagVar.stdout_lines|length > 0
-    
-    - name:  Generate package with hash
-      become: yes
-      command: 'sudo env "PATH={{ customPath }}" make deb_hash'
-      args:
-        chdir: '{{ cgrates_dir }}/packages'
-      when : gitTagVar.stdout_lines|length == 0
 
     - name: Check if the package was generated
       become: yes
@@ -193,15 +190,21 @@
       shell : "sudo ls /var/packages/debian/incoming/ | grep '.changes'"
       register: changesFileNames
 
+  # get reprepro version
+    - name: set cgrates distribution
+      set_fact:
+        cgrates_distribution: "{{ cgrates_version }}"
+      when: cgrates_version != "master"
+
   # Include the package with reprepro
     - name : Include the package with reprepro
       become: yes
-      command: sudo reprepro -A amd64 -Vb . include v0.10 /var/packages/debian/incoming/{{ item }}
+      command: sudo reprepro -A amd64 -Vb . include {{ cgrates_distribution }} /var/packages/debian/incoming/{{ item }}
       ignore_errors: true
       args :
         chdir: /var/packages/debian
       with_items: '{{ changesFileNames.stdout_lines }}'
-      when : gitTagVar.stdout_lines|length > 0
+      when : cgrates_version == "master" or gitTagVar.stdout_lines|length > 0
 
     # Move the file to PKG server
     - name: Copy the file to PKG server
@@ -221,26 +224,30 @@
 - hosts: pkg
   remote_user: '{{ gouser }}'
   tasks:
+    - name: set cgrates cgrates_version
+      set_fact:
+        cgrates_version: "{{ hostvars['apt']['cgrates_version'] }}"
+
     - name: Creates directory
       become: yes
       file:
-        path: /var/packages/debian/v0.10/
+        path: /var/packages/debian/{{ cgrates_version }}/
         state: directory
         
     - name: Remove symlink from current deb package
       become: yes
       file:
-        path: /var/packages/debian/v0.10/cgrates_current_amd64.deb
+        path: /var/packages/debian/{{ cgrates_version }}/cgrates_current_amd64.deb
         state: absent
-      when : hostvars['apt']['gitTagVar'].stdout_lines|length > 0
+      when : cgrates_version == "master" or hostvars['apt']['gitTagVar'].stdout_lines|length > 0
 
     - name: Move the new package to /var/packages/debian
       become: yes
-      shell: "sudo mv /tmp/{{ item}} /var/packages/debian/v0.10/"
+      shell: "sudo mv /tmp/{{ item}} /var/packages/debian/{{ cgrates_version }}/"
       with_items: "{{ hostvars['apt']['debFileName']['stdout_lines'] }}"
 
     - name: Create the new symlink cgrates_current_amd64.deb
       become: yes
-      shell: "sudo ln -s /var/packages/debian/v0.10/{{ item }} /var/packages/debian/v0.10/cgrates_current_amd64.deb"
+      shell: "sudo ln -s /var/packages/debian/{{ cgrates_version }}/{{ item }} /var/packages/debian/{{ cgrates_version }}/cgrates_current_amd64.deb"
       with_items: "{{ hostvars['apt']['debFileName']['stdout_lines'] }}"
-      when : hostvars['apt']['gitTagVar'].stdout_lines|length > 0
+      when : cgrates_version == "master" or hostvars['apt']['gitTagVar'].stdout_lines|length > 0
