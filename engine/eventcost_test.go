@@ -2923,4 +2923,243 @@ func TestEventCostgetChargesForPath(t *testing.T) {
 	} else if rcv != nil {
 		t.Errorf("Expecting: nil, received: %+v", rcv)
 	}
+	eventCost = &EventCost{
+		Rates: ChargedRates{
+			"RatingID": RateGroups{&Rate{Value: 0.8}}},
+	}
+	eventCost = &EventCost{
+		Timings: ChargedTimings{
+			"RatingID": &ChargedTiming{
+				StartTime: "StartTime",
+			},
+		},
+	}
+	//tbd
+	eventCost = &EventCost{}
+	chargingInterval = &ChargingInterval{
+		Increments: []*ChargingIncrement{
+			&ChargingIncrement{
+				AccountingID: "AccountingID",
+			},
+		},
+	}
+	eChargingIncrement := &ChargingIncrement{
+		AccountingID: "AccountingID",
+	}
+	if rcv, err := eventCost.getChargesForPath([]string{"Increments[0]"}, chargingInterval); err != nil {
+		t.Errorf("Expecting: nil, received: %+v", err)
+	} else if !reflect.DeepEqual(eChargingIncrement, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eChargingIncrement, rcv)
+
+	}
+
+}
+
+func TestEventCostgetRatingForPath(t *testing.T) {
+	eventCost := &EventCost{}
+	ratingUnit := &RatingUnit{}
+	// rating == nil
+	if rcv, err := eventCost.getRatingForPath(nil, nil); err == nil || err != utils.ErrNotFound {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ErrNotFound, err)
+	} else if rcv != nil {
+		t.Errorf("Expecting: nil, received: %+v", rcv)
+	}
+	// len(fldPath) == 0
+	eratingUnit := &RatingUnit{}
+	if rcv, err := eventCost.getRatingForPath([]string{}, ratingUnit); err != nil {
+		t.Errorf("Expecting: nil, received: %+v", err)
+	} else if !reflect.DeepEqual(eratingUnit, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eratingUnit, rcv)
+	}
+	// case utils.Rates:
+	eventCost = &EventCost{
+		Rates: ChargedRates{
+			"RatesID": RateGroups{
+				&Rate{Value: 0.7},
+			},
+		},
+	}
+	eChargedRates := RateGroups{
+		&Rate{Value: 0.7},
+	}
+
+	// !has || rts == nil
+	ratingUnit = &RatingUnit{
+		RatesID: "notfound",
+	}
+	if rcv, err := eventCost.getRatingForPath([]string{utils.Rates}, ratingUnit); err == nil || err != utils.ErrNotFound {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ErrNotFound, err)
+	} else if rcv != nil {
+		t.Errorf("Expecting: nil, received: %+v", rcv)
+	}
+	// len(fldPath) != 1
+	ratingUnit = &RatingUnit{
+		RatesID: "RatesID",
+	}
+	if rcv, err := eventCost.getRatingForPath([]string{utils.Rates, utils.Rates}, ratingUnit); err == nil || err != utils.ErrNotFound {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ErrNotFound, err)
+	} else if rcv != nil {
+		t.Errorf("Expecting: nil, received: %+v", rcv)
+	}
+	//normal case
+	if rcv, err := eventCost.getRatingForPath([]string{utils.Rates}, ratingUnit); err != nil {
+		t.Errorf("Expecting: nil, received: %+v", err)
+	} else if !reflect.DeepEqual(eChargedRates, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eChargedRates), utils.ToJSON(rcv))
+	}
+	// case utils.Timing:
+	eventCost = &EventCost{
+		Timings: ChargedTimings{
+			"test1": &ChargedTiming{
+				StartTime: "StartTime",
+			},
+		},
+	}
+	eTimings := &ChargedTiming{
+		StartTime: "StartTime",
+	}
+
+	// !has || tmg == nil
+	ratingUnit = &RatingUnit{
+		TimingID: "notfound",
+	}
+	if rcv, err := eventCost.getRatingForPath([]string{utils.Timing}, ratingUnit); err == nil || err != utils.ErrNotFound {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ErrNotFound, err)
+	} else if rcv != nil {
+		t.Errorf("Expecting: nil, received: %+v", rcv)
+	}
+	// len(fldPath) == 1
+	ratingUnit = &RatingUnit{
+		TimingID: "test1",
+	}
+	if rcv, err := eventCost.getRatingForPath([]string{utils.Timing}, ratingUnit); err != nil {
+		t.Errorf("Expecting: nil, received: %+v", err)
+	} else if !reflect.DeepEqual(eTimings, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eTimings), utils.ToJSON(rcv))
+	}
+	//normal case
+	eventCost = &EventCost{
+		Timings: ChargedTimings{
+			"test1": &ChargedTiming{
+				Months:    utils.Months{time.April},
+				StartTime: "StartTime",
+			},
+		},
+	}
+	eMonths := utils.Months{time.April}
+	if rcv, err := eventCost.getRatingForPath([]string{utils.Timing, utils.MonthsFieldName}, ratingUnit); err != nil {
+		t.Errorf("Expecting: nil, received: %+v", err)
+	} else if !reflect.DeepEqual(eMonths, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eMonths), utils.ToJSON(rcv))
+	}
+	// case utils.RatingFilter:
+	eventCost = &EventCost{
+		RatingFilters: RatingFilters{
+			"RatingFilters1": RatingMatchedFilters{
+				"test1": "test1",
+			},
+		},
+	}
+	eRatingMatchedFilters := RatingMatchedFilters{
+		"test1": "test1",
+	}
+
+	// !has || tmg == nil
+	ratingUnit = &RatingUnit{
+		TimingID: "notfound",
+	}
+	if rcv, err := eventCost.getRatingForPath([]string{utils.RatingFilter}, ratingUnit); err == nil || err != utils.ErrNotFound {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ErrNotFound, err)
+	} else if rcv != nil {
+		t.Errorf("Expecting: nil, received: %+v", rcv)
+	}
+	// len(fldPath) == 1
+	ratingUnit = &RatingUnit{
+		RatingFiltersID: "RatingFilters1",
+	}
+	if rcv, err := eventCost.getRatingForPath([]string{utils.RatingFilter}, ratingUnit); err != nil {
+		t.Errorf("Expecting: nil, received: %+v", err)
+	} else if !reflect.DeepEqual(eRatingMatchedFilters, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eRatingMatchedFilters, rcv)
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eRatingMatchedFilters), utils.ToJSON(rcv))
+	}
+	//normal case
+	eventCost = &EventCost{
+		RatingFilters: RatingFilters{
+			"RatingFilters1": RatingMatchedFilters{
+				"test1": "test-1",
+			},
+		},
+	}
+	if rcv, err := eventCost.getRatingForPath([]string{utils.RatingFilter, "test1"}, ratingUnit); err != nil {
+		t.Errorf("Expecting: nil, received: %+v", err)
+	} else if !reflect.DeepEqual("test-1", rcv) {
+		t.Errorf("Expecting: test-1, received: %+v", utils.ToJSON(rcv))
+	}
+	//default case
+	eventCost = &EventCost{
+		Rates: ChargedRates{
+			"RatesID": RateGroups{
+				&Rate{Value: 0.7},
+			},
+			"RatesID2": RateGroups{
+				&Rate{Value: 0.7},
+			},
+		},
+	}
+	if rcv, err := eventCost.getRatingForPath([]string{
+		"unsupportedprefix"}, ratingUnit); err == nil || err.Error() != "unsupported field prefix: <unsupportedprefix>" {
+		t.Errorf("Expecting: 'unsupported field prefix:  <unsupportedprefix>', received: %+v", err)
+	} else if rcv != nil {
+		t.Errorf("Expecting: nil, received: %+v", utils.ToJSON(rcv))
+	}
+	ratingUnit = &RatingUnit{
+		RatesID: "RatesID",
+	}
+	eRate := &Rate{Value: 0.7}
+	if rcv, err := eventCost.getRatingForPath([]string{"Rates[0]"}, ratingUnit); err != nil {
+		t.Errorf("Expecting: nil, received: %+v", err)
+	} else if !reflect.DeepEqual(eRate, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eRate), utils.ToJSON(rcv))
+	}
+	ratingUnit = &RatingUnit{}
+	if rcv, err := eventCost.getRatingForPath([]string{"Rates[1]"}, ratingUnit); err == nil || err != utils.ErrNotFound {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ErrNotFound, err)
+	} else if rcv != nil {
+		t.Errorf("Expecting: nil, received: %+v", rcv)
+	}
+}
+
+func TestEventCostgetAcountingForPath(t *testing.T) {
+	eventCost := &EventCost{}
+	balanceCharge := &BalanceCharge{}
+	if rcv, err := eventCost.getAcountingForPath(nil, nil); err == nil || err != utils.ErrNotFound {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ErrNotFound, err)
+	} else if rcv != nil {
+		t.Errorf("Expecting: nil, received: %+v", rcv)
+	}
+	eBalanceCharge := &BalanceCharge{}
+	if rcv, err := eventCost.getAcountingForPath([]string{}, balanceCharge); err != nil {
+		t.Errorf("Expecting: nil, received: %+v", err)
+	} else if !reflect.DeepEqual(eBalanceCharge, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eBalanceCharge, rcv)
+	}
+	eventCost = &EventCost{
+		AccountSummary: &AccountSummary{
+			BalanceSummaries: BalanceSummaries{
+				&BalanceSummary{
+					ID: "ID",
+				},
+			},
+		},
+	}
+	eBalanceSummaries := &BalanceSummary{
+		ID: "ID",
+	}
+	if rcv, err := eventCost.getAcountingForPath([]string{utils.Balance}, balanceCharge); err != nil {
+		t.Errorf("Expecting: nil, received: %+v", err)
+	} else if !reflect.DeepEqual(eBalanceSummaries, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eBalanceSummaries, rcv)
+	}
+
 }
