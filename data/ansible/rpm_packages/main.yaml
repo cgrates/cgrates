@@ -11,6 +11,18 @@
         fi
       become: true
 
+- name: Check and set python version on PKG server
+  hosts: pkg
+  remote_user: '{{ gouser }}'
+  gather_facts: false
+  tasks:
+    - name: symlink /usr/bin/python -> /usr/bin/python3
+      raw: |
+        if [ -f /usr/bin/python3 ] && [ ! -f /usr/bin/python ]; then
+          ln --symbolic /usr/bin/python3 /usr/bin/python;
+        fi
+      become: true
+
 - hosts: yum
   vars:
     ###############################################################
@@ -33,6 +45,7 @@
     ###############################################################
     # CGRateS location
     cgrates_dir: "{{ golang_gopath }}/src/github.com/cgrates/cgrates"
+    cgrates_version: "master"
     ###############################################################
     ##################### GPG Vars #############################
     ###############################################################
@@ -68,6 +81,10 @@
     - name: Install dependencies
       become: yes
       apt: name={{ dependencies }} state=present
+
+    - name: set cgrates cgrates_version
+      set_fact:
+        cgrates_version: "{{ cgrates_version }}"
 ###########################################################################################################################
 ###########################################################################################################################
 # Prepare for configuration
@@ -77,10 +94,10 @@
         path: /var/packages/yum
         state: directory
 
-    - name: Check if /var/packages/yum/master directory exists
+    - name: Check if /var/packages/yum/{{ cgrates_version }} directory exists
       become: true
       file:
-        path: /var/packages/yum/master
+        path: /var/packages/yum/{{ cgrates_version }}
         state: directory
         
     - name: Generate GPG Key
@@ -142,7 +159,7 @@
         dest: '{{ cgrates_dir }}'
         update: yes
         force: yes
-        version: master
+        version: "{{ cgrates_version }}"
       become: yes
       become_user: "{{ gouser }}"
 
@@ -224,45 +241,51 @@
       become: yes
       shell: 'sudo rpm --addsign cgr_build/RPMS/x86_64/{{ rmpFileName.stdout_lines[0] }}'
       
-    - name: Check if is something in /var/packages/yum/master/
+    - name: Check if is something in /var/packages/yum/{{ cgrates_version }}
       become: yes
-      shell : "ls /var/packages/yum/master/"
+      shell : "ls /var/packages/yum/{{ cgrates_version }}/"
       register: yumFiles
       
     # Clean the folder
     - name: Clean the incoming folder
       become: yes
-      shell: "sudo rm -rf /var/packages/yum/master/*"
+      shell: "sudo rm -rf /var/packages/yum/{{ cgrates_version }}/*"
       when: yumFiles.stdout_lines|length > 1
     
-    - name: Move the files to /var/packages/yum/master
+    - name: Move the files to /var/packages/yum/{{ cgrates_version }}
       become: yes
-      command: mv cgr_build/RPMS/x86_64/{{ rmpFileName.stdout_lines[0] }} /var/packages/yum/master/
+      command: mv cgr_build/RPMS/x86_64/{{ rmpFileName.stdout_lines[0] }} /var/packages/yum/{{ cgrates_version }}/
       when : rmpFileName.stdout_lines|length > 0
     
     - name: Include the package with createrepo
       become: yes
-      shell: createrepo /var/packages/yum/master
+      shell: createrepo /var/packages/yum/{{ cgrates_version }}
       
 - hosts: pkg
   remote_user: '{{ gouser }}'
   tasks:
+    - name: set cgrates cgrates_version
+        set_fact:
+          cgrates_version: "{{ hostvars['yum']['cgrates_version'] }}"
+
     - name: Creates directory
       become: yes
       file:
-        path: /var/packages/rpm/master/
+        path: /var/packages/rpm/{{ cgrates_version }}/
         state: directory
         
     - name: Remove symlink from current rpm package
       become: yes
       file:
-        path: /var/packages/rpm/master/cgrates_current.rpm
+        path: /var/packages/rpm/{{ cgrates_version }}/cgrates_current.rpm
         state: absent
+      when : cgrates_version == "master" or hostvars['yum']['gitTagVar'].stdout_lines|length > 0
 
     - name: Move the new package to /var/packages/rpm
       become: yes
-      shell: "sudo mv /tmp/{{ hostvars['yum']['rmpFileName']['stdout_lines'][0] }} /var/packages/rpm/master/"
+      shell: "sudo mv /tmp/{{ hostvars['yum']['rmpFileName']['stdout_lines'][0] }} /var/packages/rpm/{{ cgrates_version }}/"
 
     - name: Create the new symlink cgrates_current.rpm
       become: yes
-      shell: "sudo ln -s /var/packages/rpm/master/{{ hostvars['yum']['rmpFileName']['stdout_lines'][0] }} /var/packages/rpm/master/cgrates_current.rpm"
+      shell: "sudo ln -s /var/packages/rpm/{{ cgrates_version }}/{{ hostvars['yum']['rmpFileName']['stdout_lines'][0] }} /var/packages/rpm/{{ cgrates_version }}/cgrates_current.rpm"
+      when : cgrates_version == "master" or hostvars['yum']['gitTagVar'].stdout_lines|length > 0
