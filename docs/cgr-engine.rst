@@ -52,25 +52,29 @@ Able to read the configuration from either a local directory  of *.json* files w
    Internal Architecture of **cgr-engine**
 
 
-Agents
-------
-
-**Agents** are interfaces towards external systems, implementing protocols enforced by the communication channels opened. 
-These can be standard or privately defined.
-
-All of the **Agents** implemented within CGRateS are flexible to be configured with generic parameters configurable for both *request* and *replies*.
-
-Following *Agents* are implemented within CGRateS:
+The components from the diagram can be found documented in the links bellow:
 
 .. toctree::
    :maxdepth: 1
 
-   diamagent
-   radagent
-   httpagent
-   dnsagent
-   astagent
-   fsagent
-   kamagent
-   ers
+   agents
+   sessions
+   rals
+   cdrs
+   attributes
+   chargers
+   resources
+   suppliers
+   stats
+   thresholds
+   filters
+   dispatchers
+   schedulers
+   cdre
+   apiers
+   loaders
+   datadb
+   stordb
+   caches
+   
 
