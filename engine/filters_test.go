@@ -1086,7 +1086,7 @@ func TestEventCostFilter(t *testing.T) {
 		},
 	}
 	cd.initCache()
-	cgrDp := utils.MapStorage{utils.MetaEC: cd}
+	cgrDp := utils.NavigableMap{utils.MetaEC: cd}
 
 	if pass, err := filterS.Pass("cgrates.org",
 		[]string{"*string:~*ec.Charges[0].Increments[0].Accounting.Balance.Value:50"}, cgrDp); err != nil {

@@ -54,7 +54,7 @@ func TestAgReqSetFields(t *testing.T) {
 	agReq.CGRRequest.Set([]string{utils.RequestType}, utils.META_PREPAID)
 	agReq.CGRRequest.Set([]string{utils.Usage}, time.Duration(3*time.Minute))
 
-	cgrRply := utils.MapStorage{
+	cgrRply := utils.NavigableMap{
 		utils.CapAttributes: map[string]interface{}{
 			"PaypalAccount": "cgrates@paypal.com",
 		},
@@ -142,10 +142,10 @@ func TestAgentRequestSetFields(t *testing.T) {
 	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items),
 		config.CgrConfig().CacheCfg(), nil)
 	vars := map[string]interface{}{}
-	ar := NewAgentRequest(config.NewNavigableMap(req), vars,
+	ar := NewAgentRequest(utils.NavigableMap(req), vars,
 		nil, nil, config.NewRSRParsersMustCompile("", false, utils.NestingSep),
 		"cgrates.org", "", engine.NewFilterS(cfg, nil, dm),
-		config.NewNavigableMap(req), config.NewNavigableMap(req))
+		utils.NavigableMap(req), utils.NavigableMap(req))
 	input := []*config.FCTemplate{}
 	if err := ar.SetFields(input); err != nil {
 		t.Error(err)
@@ -474,7 +474,7 @@ func TestAgReqMaxCost(t *testing.T) {
 	// populate request, emulating the way will be done in HTTPAgent
 	agReq.CGRRequest.Set([]string{utils.CapMaxUsage}, "120s")
 
-	cgrRply := utils.MapStorage{
+	cgrRply := utils.NavigableMap{
 		utils.CapMaxUsage: time.Duration(120 * time.Second),
 	}
 	agReq.CGRReply = utils.NewOrderedNavigableMap(cgrRply)
@@ -957,17 +957,17 @@ func TestAgReqNewARWithCGRRplyAndRply(t *testing.T) {
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 
-	ev := utils.MapStorage{
-		"FirstLevel": utils.MapStorage{
-			"SecondLevel": utils.MapStorage{
+	ev := utils.NavigableMap{
+		"FirstLevel": utils.NavigableMap{
+			"SecondLevel": utils.NavigableMap{
 				"Fld1": "Val1",
 			},
 		},
 	}
 	rply := utils.NewOrderedNavigableMap(ev)
 
-	ev2 := utils.MapStorage{
-		utils.CapAttributes: utils.MapStorage{
+	ev2 := utils.NavigableMap{
+		utils.CapAttributes: utils.NavigableMap{
 			"PaypalAccount": "cgrates@paypal.com",
 		},
 		utils.CapMaxUsage: time.Duration(120 * time.Second),
@@ -1007,9 +1007,9 @@ func TestAgReqSetCGRReplyWithError(t *testing.T) {
 		config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 
-	ev := utils.MapStorage{
-		"FirstLevel": utils.MapStorage{
-			"SecondLevel": utils.MapStorage{
+	ev := utils.NavigableMap{
+		"FirstLevel": utils.NavigableMap{
+			"SecondLevel": utils.NavigableMap{
 				"Fld1": "Val1",
 			},
 		},
@@ -1038,8 +1038,8 @@ func TestAgReqSetCGRReplyWithError(t *testing.T) {
 
 type myEv map[string]interface{}
 
-func (ev myEv) AsNavigableMap() utils.MapStorage {
-	return utils.MapStorage(ev)
+func (ev myEv) AsNavigableMap() utils.NavigableMap {
+	return utils.NavigableMap(ev)
 }
 
 func TestAgReqSetCGRReplyWithoutError(t *testing.T) {
@@ -1048,9 +1048,9 @@ func TestAgReqSetCGRReplyWithoutError(t *testing.T) {
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 
-	ev := utils.MapStorage{
-		"FirstLevel": utils.MapStorage{
-			"SecondLevel": utils.MapStorage{
+	ev := utils.NavigableMap{
+		"FirstLevel": utils.NavigableMap{
+			"SecondLevel": utils.NavigableMap{
 				"Fld1": "Val1",
 			},
 		},
@@ -1058,7 +1058,7 @@ func TestAgReqSetCGRReplyWithoutError(t *testing.T) {
 	rply := utils.NewOrderedNavigableMap(ev)
 
 	myEv := myEv{
-		utils.CapAttributes: utils.MapStorage{
+		utils.CapAttributes: utils.NavigableMap{
 			"PaypalAccount": "cgrates@paypal.com",
 		},
 		utils.CapMaxUsage: time.Duration(120 * time.Second),

@@ -29,14 +29,14 @@ import (
 
 // NewfwvProvider constructs a utils.DataProvider
 func NewFWVProvider(record string) (dP utils.DataProvider) {
-	dP = &FWVProvider{req: record, cache: utils.MapStorage{}}
+	dP = &FWVProvider{req: record, cache: utils.NavigableMap{}}
 	return
 }
 
 // fwvProvider implements utils.DataProvider so we can pass it to filters
 type FWVProvider struct {
 	req   string
-	cache utils.MapStorage
+	cache utils.NavigableMap
 }
 
 // String is part of utils.DataProvider interface

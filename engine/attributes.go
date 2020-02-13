@@ -94,7 +94,7 @@ func (alS *AttributeService) attributeProfileForEvent(args *AttrArgsProcessEvent
 		}
 		attrIDs = aPrflIDs.Slice()
 	}
-	evNm := utils.MapStorage{utils.MetaReq: args.Event}
+	evNm := utils.NavigableMap{utils.MetaReq: args.Event}
 	for _, apID := range attrIDs {
 		aPrfl, err := alS.dm.GetAttributeProfile(args.Tenant, apID, true, true, utils.NonTransactional)
 		if err != nil {
@@ -169,7 +169,7 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent) (
 		MatchedProfiles: []string{attrPrf.ID},
 		CGREvent:        args.CGREvent,
 		blocker:         attrPrf.Blocker}
-	evNm := utils.MapStorage{utils.MetaReq: rply.CGREvent.Event}
+	evNm := utils.NavigableMap{utils.MetaReq: rply.CGREvent.Event}
 	for _, attribute := range attrPrf.Attributes {
 		//in case that we have filter for attribute send them to FilterS to be processed
 		if len(attribute.FilterIDs) != 0 {

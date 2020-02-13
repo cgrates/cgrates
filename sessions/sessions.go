@@ -918,7 +918,7 @@ func (sS *SessionS) filterSessions(sf *utils.SessionFilter, psv bool) (aSs []*Ex
 			return
 		}
 		var err error
-		ev := utils.MapStorage{utils.MetaReq: me.Data()}
+		ev := utils.NavigableMap{utils.MetaReq: me.Data()}
 		for _, fltr := range filterRules {
 			if pass, err = fltr.Pass(ev); err != nil || !pass {
 				pass = false
@@ -973,7 +973,7 @@ func (sS *SessionS) filterSessionsCount(sf *utils.SessionFilter, psv bool) (coun
 			return
 		}
 		var err error
-		ev := utils.MapStorage{utils.MetaReq: me.Data()}
+		ev := utils.NavigableMap{utils.MetaReq: me.Data()}
 		for _, fltr := range filterRules {
 			if pass, err = fltr.Pass(ev); err != nil || !pass {
 				return
@@ -1730,11 +1730,11 @@ type V1AuthorizeReply struct {
 }
 
 // AsNavigableMap is part of engine.NavigableMapper interface
-func (v1AuthReply *V1AuthorizeReply) AsNavigableMap() (cgrReply utils.MapStorage) {
-	cgrReply = make(utils.MapStorage)
+func (v1AuthReply *V1AuthorizeReply) AsNavigableMap() (cgrReply utils.NavigableMap) {
+	cgrReply = make(utils.NavigableMap)
 	if v1AuthReply != nil {
 		if v1AuthReply.Attributes != nil {
-			attrs := make(utils.MapStorage)
+			attrs := make(utils.NavigableMap)
 			for _, fldName := range v1AuthReply.Attributes.AlteredFields {
 				fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
 				if v1AuthReply.Attributes.CGREvent.HasField(fldName) {
@@ -1994,11 +1994,11 @@ type V1InitSessionReply struct {
 }
 
 // AsNavigableMap is part of engine.NavigableMapper interface
-func (v1Rply *V1InitSessionReply) AsNavigableMap() (cgrReply utils.MapStorage) {
-	cgrReply = make(utils.MapStorage)
+func (v1Rply *V1InitSessionReply) AsNavigableMap() (cgrReply utils.NavigableMap) {
+	cgrReply = make(utils.NavigableMap)
 	if v1Rply != nil {
 		if v1Rply.Attributes != nil {
-			attrs := make(utils.MapStorage)
+			attrs := make(utils.NavigableMap)
 			for _, fldName := range v1Rply.Attributes.AlteredFields {
 				fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
 				if v1Rply.Attributes.CGREvent.HasField(fldName) {
@@ -2217,11 +2217,11 @@ type V1UpdateSessionReply struct {
 }
 
 // AsNavigableMap is part of engine.NavigableMapper interface
-func (v1Rply *V1UpdateSessionReply) AsNavigableMap() (cgrReply utils.MapStorage) {
-	cgrReply = make(utils.MapStorage)
+func (v1Rply *V1UpdateSessionReply) AsNavigableMap() (cgrReply utils.NavigableMap) {
+	cgrReply = make(utils.NavigableMap)
 	if v1Rply != nil {
 		if v1Rply.Attributes != nil {
-			attrs := make(utils.MapStorage)
+			attrs := make(utils.NavigableMap)
 			for _, fldName := range v1Rply.Attributes.AlteredFields {
 				fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
 				if v1Rply.Attributes.CGREvent.HasField(fldName) {
@@ -2676,8 +2676,8 @@ type V1ProcessMessageReply struct {
 }
 
 // AsNavigableMap is part of engine.NavigableMapper interface
-func (v1Rply *V1ProcessMessageReply) AsNavigableMap() (cgrReply utils.MapStorage) {
-	cgrReply = make(utils.MapStorage)
+func (v1Rply *V1ProcessMessageReply) AsNavigableMap() (cgrReply utils.NavigableMap) {
+	cgrReply = make(utils.NavigableMap)
 	if v1Rply != nil {
 		if v1Rply.MaxUsage != nil {
 			cgrReply[utils.CapMaxUsage] = *v1Rply.MaxUsage
@@ -2686,7 +2686,7 @@ func (v1Rply *V1ProcessMessageReply) AsNavigableMap() (cgrReply utils.MapStorage
 			cgrReply[utils.CapResourceAllocation] = *v1Rply.ResourceAllocation
 		}
 		if v1Rply.Attributes != nil {
-			attrs := make(utils.MapStorage)
+			attrs := make(utils.NavigableMap)
 			for _, fldName := range v1Rply.Attributes.AlteredFields {
 				fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
 				if v1Rply.Attributes.CGREvent.HasField(fldName) {
@@ -2843,8 +2843,8 @@ type V1ProcessEventReply struct {
 }
 
 // AsNavigableMap is part of engine.NavigableMapper interface
-func (v1Rply *V1ProcessEventReply) AsNavigableMap() (cgrReply utils.MapStorage) {
-	cgrReply = make(utils.MapStorage)
+func (v1Rply *V1ProcessEventReply) AsNavigableMap() (cgrReply utils.NavigableMap) {
+	cgrReply = make(utils.NavigableMap)
 	if v1Rply != nil {
 		if v1Rply.MaxUsage != nil {
 			cgrReply[utils.CapMaxUsage] = *v1Rply.MaxUsage
@@ -2853,7 +2853,7 @@ func (v1Rply *V1ProcessEventReply) AsNavigableMap() (cgrReply utils.MapStorage) 
 			cgrReply[utils.CapResourceMessage] = *v1Rply.ResourceMessage
 		}
 		if v1Rply.Attributes != nil {
-			attrs := make(utils.MapStorage)
+			attrs := make(utils.NavigableMap)
 			for _, fldName := range v1Rply.Attributes.AlteredFields {
 				fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
 				if v1Rply.Attributes.CGREvent.HasField(fldName) {

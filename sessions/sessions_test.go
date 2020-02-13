@@ -1173,13 +1173,13 @@ func TestSessionSV1AuthorizeReplyAsNavigableMap(t *testing.T) {
 	thIDs := &[]string{"THD_RES_1", "THD_STATS_1", "THD_STATS_2", "THD_CDRS_1"}
 	statIDs := &[]string{"Stats2", "Stats1", "Stats3"}
 	v1AuthRpl := new(V1AuthorizeReply)
-	expected := utils.MapStorage{}
+	expected := utils.NavigableMap{}
 	if rply := v1AuthRpl.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
 	v1AuthRpl.Attributes = attrs
 	expected.Set([]string{utils.CapAttributes},
-		utils.MapStorage{"OfficeGroup": "Marketing"},
+		utils.NavigableMap{"OfficeGroup": "Marketing"},
 	)
 	if rply := v1AuthRpl.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
@@ -1198,8 +1198,8 @@ func TestSessionSV1AuthorizeReplyAsNavigableMap(t *testing.T) {
 		ThresholdIDs:       thIDs,
 		StatQueueIDs:       statIDs,
 	}
-	expected = utils.MapStorage{
-		utils.CapAttributes:         utils.MapStorage{"OfficeGroup": "Marketing"},
+	expected = utils.NavigableMap{
+		utils.CapAttributes:         utils.NavigableMap{"OfficeGroup": "Marketing"},
 		utils.CapResourceAllocation: "ResGr1",
 		utils.CapMaxUsage:           5 * time.Minute,
 		utils.CapSuppliers:          splrs.AsNavigableMap(),
@@ -1215,13 +1215,13 @@ func TestSessionSV1InitSessionReplyAsNavigableMap(t *testing.T) {
 	thIDs := &[]string{"THD_RES_1", "THD_STATS_1", "THD_STATS_2", "THD_CDRS_1"}
 	statIDs := &[]string{"Stats2", "Stats1", "Stats3"}
 	v1InitRpl := new(V1InitSessionReply)
-	expected := utils.MapStorage{}
+	expected := utils.NavigableMap{}
 	if rply := v1InitRpl.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
 	v1InitRpl.Attributes = attrs
 	expected.Set([]string{utils.CapAttributes},
-		utils.MapStorage{"OfficeGroup": "Marketing"},
+		utils.NavigableMap{"OfficeGroup": "Marketing"},
 	)
 	if rply := v1InitRpl.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
@@ -1239,8 +1239,8 @@ func TestSessionSV1InitSessionReplyAsNavigableMap(t *testing.T) {
 		ThresholdIDs:       thIDs,
 		StatQueueIDs:       statIDs,
 	}
-	expected = utils.MapStorage{
-		utils.CapAttributes:         utils.MapStorage{"OfficeGroup": "Marketing"},
+	expected = utils.NavigableMap{
+		utils.CapAttributes:         utils.NavigableMap{"OfficeGroup": "Marketing"},
 		utils.CapResourceAllocation: "ResGr1",
 		utils.CapMaxUsage:           5 * time.Minute,
 		utils.CapThresholds:         *thIDs,
@@ -1253,13 +1253,13 @@ func TestSessionSV1InitSessionReplyAsNavigableMap(t *testing.T) {
 
 func TestSessionSV1UpdateSessionReplyAsNavigableMap(t *testing.T) {
 	v1UpdtRpl := new(V1UpdateSessionReply)
-	expected := utils.MapStorage{}
+	expected := utils.NavigableMap{}
 	if rply := v1UpdtRpl.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
 	v1UpdtRpl.Attributes = attrs
 	expected.Set([]string{utils.CapAttributes},
-		utils.MapStorage{"OfficeGroup": "Marketing"},
+		utils.NavigableMap{"OfficeGroup": "Marketing"},
 	)
 	if rply := v1UpdtRpl.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
@@ -1274,13 +1274,13 @@ func TestSessionSV1UpdateSessionReplyAsNavigableMap(t *testing.T) {
 
 func TestSessionSV1ProcessMessageReplyAsNavigableMap(t *testing.T) {
 	v1PrcEvRpl := new(V1ProcessMessageReply)
-	expected := utils.MapStorage{}
+	expected := utils.NavigableMap{}
 	if rply := v1PrcEvRpl.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
 
 	v1PrcEvRpl.Attributes = attrs
-	expected.Set([]string{utils.CapAttributes}, utils.MapStorage{"OfficeGroup": "Marketing"})
+	expected.Set([]string{utils.CapAttributes}, utils.NavigableMap{"OfficeGroup": "Marketing"})
 	if rply := v1PrcEvRpl.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
@@ -1319,7 +1319,7 @@ func TestSessionSV1ProcessMessageReplyAsNavigableMap(t *testing.T) {
 func TestV1ProcessEventReplyAsNavigableMap(t *testing.T) {
 	//empty check
 	v1per := new(V1ProcessEventReply)
-	expected := utils.MapStorage{}
+	expected := utils.NavigableMap{}
 	if rply := v1per.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
@@ -1337,7 +1337,7 @@ func TestV1ProcessEventReplyAsNavigableMap(t *testing.T) {
 	}
 	//attributes check
 	v1per.Attributes = attrs
-	expected.Set([]string{utils.CapAttributes}, utils.MapStorage{"OfficeGroup": "Marketing"})
+	expected.Set([]string{utils.CapAttributes}, utils.NavigableMap{"OfficeGroup": "Marketing"})
 	if rply := v1per.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}

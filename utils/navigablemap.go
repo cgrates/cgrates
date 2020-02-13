@@ -24,56 +24,17 @@ import (
 	"net"
 	"reflect"
 	"strings"
+	"time"
 )
 
-// DataProvider is a data source from multiple formats
-type DataProvider interface {
-	String() string // printable version of data
-	FieldAsInterface(fldPath []string) (interface{}, error)
-	FieldAsString(fldPath []string) (string, error) // remove this
-	RemoteHost() net.Addr
-}
-
-// CGRReplier is the interface supported by replies convertible to CGRReply
-type NavigableMapper interface {
-	AsNavigableMap() MapStorage
-}
-
-// DPDynamicInterface returns the value of the field if the path is dynamic
-func DPDynamicInterface(dnVal string, dP DataProvider) (interface{}, error) {
-	if strings.HasPrefix(dnVal, DynamicDataPrefix) {
-		dnVal = strings.TrimPrefix(dnVal, DynamicDataPrefix)
-		return dP.FieldAsInterface(strings.Split(dnVal, NestingSep))
-	}
-	return StringToInterface(dnVal), nil
-}
-
-// DPDynamicString returns the string value of the field if the path is dynamic
-func DPDynamicString(dnVal string, dP DataProvider) (string, error) {
-	if strings.HasPrefix(dnVal, DynamicDataPrefix) {
-		dnVal = strings.TrimPrefix(dnVal, DynamicDataPrefix)
-		return dP.FieldAsString(strings.Split(dnVal, NestingSep))
-	}
-	return dnVal, nil
-}
-
-// dataStorage is the DataProvider that can be updated
-type dataStorage interface {
-	DataProvider
-
-	Set(fldPath []string, val interface{}) error
-	Remove(fldPath []string) error
-	GetKeys(nesteed bool) []string
-}
-
-// MapStorage is the basic dataStorage
-type MapStorage map[string]interface{}
+// NavigableMap is the basic dataStorage
+type NavigableMap map[string]interface{}
 
 // String returns the map as json string
-func (ms MapStorage) String() string { return ToJSON(ms) }
+func (ms NavigableMap) String() string { return ToJSON(ms) }
 
 // FieldAsInterface returns the value from the path
-func (ms MapStorage) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+func (ms NavigableMap) FieldAsInterface(fldPath []string) (val interface{}, err error) {
 	if len(fldPath) == 0 {
 		err = errors.New("empty field path")
 		return
@@ -94,11 +55,13 @@ func (ms MapStorage) FieldAsInterface(fldPath []string) (val interface{}, err er
 				return nil, ErrNotFound
 			}
 			val = rv[*indx]
+			return
 		case []interface{}:
 			if len(rv) <= *indx {
 				return nil, ErrNotFound
 			}
 			val = rv[*indx]
+			return
 		default:
 		}
 		// only if all above fails use reflect:
@@ -119,7 +82,7 @@ func (ms MapStorage) FieldAsInterface(fldPath []string) (val interface{}, err er
 		case DataProvider:
 			return dp.FieldAsInterface(fldPath[1:])
 		case map[string]interface{}:
-			return MapStorage(dp).FieldAsInterface(fldPath[1:])
+			return NavigableMap(dp).FieldAsInterface(fldPath[1:])
 		default:
 			err = fmt.Errorf("Wrong path")
 			return
@@ -131,7 +94,7 @@ func (ms MapStorage) FieldAsInterface(fldPath []string) (val interface{}, err er
 			return nil, ErrNotFound
 		}
 		return dp[*indx].FieldAsInterface(fldPath[1:])
-	case []MapStorage:
+	case []NavigableMap:
 		if len(dp) <= *indx {
 			return nil, ErrNotFound
 		}
@@ -140,7 +103,7 @@ func (ms MapStorage) FieldAsInterface(fldPath []string) (val interface{}, err er
 		if len(dp) <= *indx {
 			return nil, ErrNotFound
 		}
-		return MapStorage(dp[*indx]).FieldAsInterface(fldPath[1:])
+		return NavigableMap(dp[*indx]).FieldAsInterface(fldPath[1:])
 	case []interface{}:
 		if len(dp) <= *indx {
 			return nil, ErrNotFound
@@ -149,7 +112,7 @@ func (ms MapStorage) FieldAsInterface(fldPath []string) (val interface{}, err er
 		case DataProvider:
 			return ds.FieldAsInterface(fldPath[1:])
 		case map[string]interface{}:
-			return MapStorage(ds).FieldAsInterface(fldPath[1:])
+			return NavigableMap(ds).FieldAsInterface(fldPath[1:])
 		default:
 		}
 	default:
@@ -160,7 +123,7 @@ func (ms MapStorage) FieldAsInterface(fldPath []string) (val interface{}, err er
 }
 
 // FieldAsString returns the value from path as string
-func (ms MapStorage) FieldAsString(fldPath []string) (str string, err error) {
+func (ms NavigableMap) FieldAsString(fldPath []string) (str string, err error) {
 	var val interface{}
 	if val, err = ms.FieldAsInterface(fldPath); err != nil {
 		return
@@ -169,7 +132,7 @@ func (ms MapStorage) FieldAsString(fldPath []string) (str string, err error) {
 }
 
 // Set sets the value at the given path
-func (ms MapStorage) Set(fldPath []string, val interface{}) (err error) {
+func (ms NavigableMap) Set(fldPath []string, val interface{}) (err error) {
 	if len(fldPath) == 0 {
 		return fmt.Errorf("Wrong path")
 	}
@@ -179,7 +142,7 @@ func (ms MapStorage) Set(fldPath []string, val interface{}) (err error) {
 	}
 
 	if _, has := ms[fldPath[0]]; !has {
-		nMap := MapStorage{}
+		nMap := NavigableMap{}
 		ms[fldPath[0]] = nMap
 		return nMap.Set(fldPath[1:], val)
 	}
@@ -187,14 +150,14 @@ func (ms MapStorage) Set(fldPath []string, val interface{}) (err error) {
 	case dataStorage:
 		return dp.Set(fldPath[1:], val)
 	case map[string]interface{}:
-		return MapStorage(dp).Set(fldPath[1:], val)
+		return NavigableMap(dp).Set(fldPath[1:], val)
 	default:
 		return fmt.Errorf("Wrong path")
 	}
 }
 
 // GetKeys returns all the keys from map
-func (ms MapStorage) GetKeys(nesteed bool) (keys []string) {
+func (ms NavigableMap) GetKeys(nesteed bool) (keys []string) {
 	if !nesteed {
 		keys = make([]string, len(ms))
 		i := 0
@@ -205,18 +168,17 @@ func (ms MapStorage) GetKeys(nesteed bool) (keys []string) {
 		return
 	}
 	for k, v := range ms {
+		keys = append(keys, k)
 		switch rv := v.(type) {
 		case dataStorage:
-			keys = append(keys, k)
 			for _, dsKey := range rv.GetKeys(nesteed) {
 				keys = append(keys, k+NestingSep+dsKey)
 			}
 		case map[string]interface{}:
-			keys = append(keys, k)
-			for _, dsKey := range MapStorage(rv).GetKeys(nesteed) {
+			for _, dsKey := range NavigableMap(rv).GetKeys(nesteed) {
 				keys = append(keys, k+NestingSep+dsKey)
 			}
-		case []MapStorage:
+		case []NavigableMap:
 			for i, dp := range rv {
 				pref := k + fmt.Sprintf("[%v]", i)
 				keys = append(keys, pref)
@@ -236,7 +198,7 @@ func (ms MapStorage) GetKeys(nesteed bool) (keys []string) {
 			for i, dp := range rv {
 				pref := k + fmt.Sprintf("[%v]", i)
 				keys = append(keys, pref)
-				for _, dsKey := range MapStorage(dp).GetKeys(nesteed) {
+				for _, dsKey := range NavigableMap(dp).GetKeys(nesteed) {
 					keys = append(keys, pref+NestingSep+dsKey)
 				}
 			}
@@ -249,14 +211,14 @@ func (ms MapStorage) GetKeys(nesteed bool) (keys []string) {
 				keys = append(keys, k+fmt.Sprintf("[%v]", i))
 			}
 		default:
-			keys = append(keys, k)
+			keys = append(keys, getPathFromInterface(v, k+NestingSep)...)
 		}
 	}
 	return
 }
 
 // Remove removes the item at path
-func (ms MapStorage) Remove(fldPath []string) (err error) {
+func (ms NavigableMap) Remove(fldPath []string) (err error) {
 	if len(fldPath) == 0 {
 		return fmt.Errorf("Wrong path")
 	}
@@ -273,14 +235,14 @@ func (ms MapStorage) Remove(fldPath []string) (err error) {
 	case dataStorage:
 		return dp.Remove(fldPath[1:])
 	case map[string]interface{}:
-		return MapStorage(dp).Remove(fldPath[1:])
+		return NavigableMap(dp).Remove(fldPath[1:])
 	default:
 		return fmt.Errorf("Wrong path")
 	}
 }
 
 // RemoteHost is part of dataStorage interface
-func (ms MapStorage) RemoteHost() net.Addr {
+func (ms NavigableMap) RemoteHost() net.Addr {
 	return LocalAddr()
 }
 
@@ -288,10 +250,11 @@ func (ms MapStorage) RemoteHost() net.Addr {
 func NewOrderedNavigableMap(nm dataStorage) *OrderedNavigableMap {
 	if nm == nil {
 		return &OrderedNavigableMap{
-			nm:    MapStorage{},
+			nm:    NavigableMap{},
 			order: [][]string{},
 		}
 	}
+	// Index problem
 	keys := nm.GetKeys(true)
 	order := make([][]string, len(keys))
 	for i, k := range keys {
@@ -396,12 +359,41 @@ func (onm *OrderedNavigableMap) Walk(proccess func(interface{}) error) (err erro
 	return
 }
 
-func (onm *OrderedNavigableMap) GetOrder() [][]string { return onm.order }
-
-// type NMItem interface {
-// 	GetData() interface{}
-// 	IsAttribute() bool
+// func (onm *OrderedNavigableMap) indexOrder() {
+// 	keys := nm.GetKeys(true)
+// 	order := make([][]string, len(keys))
+// 	for i, k := range keys {
+// 		order[i] = strings.Split(k, NestingSep)
+// 	}
 // }
+
+// // indexMapElements will recursively go through map and index the element paths into elmns
+// func indexMapElements(mp map[string]interface{}, path []string, vals *[]interface{}) {
+// 	for k, v := range mp {
+// 		vPath := append(path, k)
+// 		if mpIface, isMap := v.(map[string]interface{}); isMap {
+// 			indexMapElements(mpIface, vPath, vals)
+// 			continue
+// 		}
+// 		valsOut := append(*vals, v)
+// 		*vals = valsOut
+// 	}
+// }
+
+// // indexMapPaths parses map returning the parsed branchPath, useful when not having order for NavigableMap
+// func indexMapPaths(mp map[string]interface{}, branchPath []string, parsedPaths *[][]string) {
+// 	for k, v := range mp {
+// 		if mpIface, isMap := v.(map[string]interface{}); isMap {
+// 			indexMapPaths(mpIface, append(branchPath, k), parsedPaths)
+// 			continue
+// 		}
+// 		tmpPaths := append(*parsedPaths, append(branchPath, k))
+// 		*parsedPaths = tmpPaths
+// 	}
+// }
+
+// GetOrder returns the order the fields were set in map
+func (onm *OrderedNavigableMap) GetOrder() [][]string { return onm.order }
 
 // AsCGREvent builds a CGREvent considering Time as time.Now()
 // and Event as linear map[string]interface{} with joined paths
@@ -430,3 +422,69 @@ func (onm *OrderedNavigableMap) GetOrder() [][]string { return onm.order }
 // 	}
 // 	return
 // }
+
+func getPathFromValue(in reflect.Value, prefix string) (out []string) {
+	switch in.Kind() {
+	case reflect.Ptr:
+		return getPathFromValue(in.Elem(), prefix)
+	case reflect.Array, reflect.Slice:
+		prefix = strings.TrimSuffix(prefix, NestingSep)
+		for i := 0; i < in.Len(); i++ {
+			pref := fmt.Sprintf("%s[%v]", prefix, i)
+			out = append(out, pref)
+			out = append(out, getPathFromValue(in.Index(i), pref+NestingSep)...)
+		}
+	case reflect.Map:
+		iter := reflect.ValueOf(in).MapRange()
+		for iter.Next() {
+			pref := prefix + iter.Key().String()
+			out = append(out, pref)
+			out = append(out, getPathFromValue(iter.Value(), pref+NestingSep)...)
+		}
+	case reflect.Struct:
+		inType := in.Type()
+		for i := 0; i < in.NumField(); i++ {
+			pref := prefix + inType.Field(i).Name
+			out = append(out, pref)
+			out = append(out, getPathFromValue(in.Field(i), pref+NestingSep)...)
+		}
+	case reflect.Invalid, reflect.Bool, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr, reflect.Float32, reflect.Float64, reflect.Complex64, reflect.Complex128, reflect.String, reflect.Chan, reflect.Func, reflect.UnsafePointer, reflect.Interface:
+	default:
+	}
+	return
+}
+
+func getPathFromInterface(in interface{}, prefix string) (out []string) {
+	switch vin := in.(type) {
+	case map[string]interface{}:
+		for k, val := range vin {
+			pref := prefix + k
+			out = append(out, pref)
+			out = append(out, getPathFromInterface(val, pref+NestingSep)...)
+		}
+	case []map[string]interface{}:
+		prefix = strings.TrimSuffix(prefix, NestingSep)
+		for i, val := range vin {
+			pref := fmt.Sprintf("%s[%v]", prefix, i)
+			out = append(out, pref)
+			out = append(out, getPathFromInterface(val, pref+NestingSep)...)
+		}
+	case []interface{}:
+		prefix = strings.TrimSuffix(prefix, NestingSep)
+		for i, val := range vin {
+			pref := fmt.Sprintf("%s[%v]", prefix, i)
+			out = append(out, pref)
+			out = append(out, getPathFromInterface(val, pref+NestingSep)...)
+		}
+	case []string:
+		prefix = strings.TrimSuffix(prefix, NestingSep)
+		for i := range vin {
+			pref := fmt.Sprintf("%s[%v]", prefix, i)
+			out = append(out, pref)
+		}
+	case nil, int, int32, int64, uint32, uint64, bool, float32, float64, []uint8, time.Duration, time.Time, string: //no path
+	default: //reflect based
+		out = getPathFromValue(reflect.ValueOf(vin), prefix)
+	}
+	return
+}

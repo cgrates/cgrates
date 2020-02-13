@@ -168,7 +168,7 @@ func (sS *StatService) matchingStatQueuesForEvent(args *StatsArgsProcessEvent) (
 		}
 		sqIDs = mapIDs.Slice()
 	}
-	evNm := utils.MapStorage{utils.MetaReq: args.Event}
+	evNm := utils.NavigableMap{utils.MetaReq: args.Event}
 	for _, sqID := range sqIDs {
 		sqPrfl, err := sS.dm.GetStatQueueProfile(args.Tenant, sqID, true, true, utils.NonTransactional)
 		if err != nil {

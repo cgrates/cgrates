@@ -48,7 +48,7 @@ func newHADataProvider(reqPayload string,
 }
 
 func newHTTPUrlDP(req *http.Request) (dP utils.DataProvider, err error) {
-	dP = &httpUrlDP{req: req, cache: utils.MapStorage{}}
+	dP = &httpUrlDP{req: req, cache: utils.NavigableMap{}}
 	return
 }
 
@@ -56,7 +56,7 @@ func newHTTPUrlDP(req *http.Request) (dP utils.DataProvider, err error) {
 // decoded data is only searched once and cached
 type httpUrlDP struct {
 	req   *http.Request
-	cache utils.MapStorage
+	cache utils.NavigableMap
 }
 
 // String is part of utils.DataProvider interface
@@ -109,14 +109,14 @@ func newHTTPXmlDP(req *http.Request) (dP utils.DataProvider, err error) {
 	if err != nil {
 		return nil, err
 	}
-	dP = &httpXmlDP{xmlDoc: doc, cache: utils.MapStorage{}, addr: req.RemoteAddr}
+	dP = &httpXmlDP{xmlDoc: doc, cache: utils.NavigableMap{}, addr: req.RemoteAddr}
 	return
 }
 
 // httpXmlDP implements utils.DataProvider, serving as xml data decoder
 // decoded data is only searched once and cached
 type httpXmlDP struct {
-	cache  utils.MapStorage
+	cache  utils.NavigableMap
 	xmlDoc *xmlquery.Node
 	addr   string
 }

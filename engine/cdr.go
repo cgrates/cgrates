@@ -154,7 +154,7 @@ func (cdr *CDR) FormatCost(shiftDecimals, roundDecimals int) string {
 // FieldAsString is used to retrieve fields as string, primary fields are const labeled
 func (cdr *CDR) FieldAsString(rsrPrs *config.RSRParser) (parsed string, err error) {
 	parsed, err = rsrPrs.ParseDataProviderWithInterfaces(
-		utils.MapStorage{
+		utils.NavigableMap{
 			utils.MetaReq: cdr.AsMapStringIface(),
 			utils.MetaEC:  cdr.CostDetails,
 		}, utils.NestingSep)
@@ -167,7 +167,7 @@ func (cdr *CDR) FieldAsString(rsrPrs *config.RSRParser) (parsed string, err erro
 // FieldsAsString concatenates values of multiple fields defined in template, used eg in CDR templates
 func (cdr *CDR) FieldsAsString(rsrFlds config.RSRParsers) string {
 	outVal, err := rsrFlds.ParseDataProviderWithInterfaces(
-		utils.MapStorage{
+		utils.NavigableMap{
 			utils.MetaReq: cdr.AsMapStringIface(),
 			utils.MetaEC:  cdr.CostDetails,
 		}, utils.NestingSep)
@@ -408,7 +408,7 @@ func (cdr *CDR) formatField(cfgFld *config.FCTemplate, httpSkipTLSCheck bool,
 // ExportRecord is a []string to keep it compatible with encoding/csv Writer
 func (cdr *CDR) AsExportRecord(exportFields []*config.FCTemplate,
 	httpSkipTLSCheck bool, groupedCDRs []*CDR, filterS *FilterS) (expRecord []string, err error) {
-	nM := utils.MapStorage{
+	nM := utils.NavigableMap{
 		utils.MetaReq: cdr.AsMapStringIface(),
 		utils.MetaEC:  cdr.CostDetails,
 	}
@@ -438,7 +438,7 @@ func (cdr *CDR) AsExportRecord(exportFields []*config.FCTemplate,
 func (cdr *CDR) AsExportMap(exportFields []*config.FCTemplate, httpSkipTLSCheck bool,
 	groupedCDRs []*CDR, filterS *FilterS) (expMap map[string]string, err error) {
 	expMap = make(map[string]string)
-	nM := utils.MapStorage{
+	nM := utils.NavigableMap{
 		utils.MetaReq: cdr.AsMapStringIface(),
 		utils.MetaEC:  cdr.CostDetails,
 	}
