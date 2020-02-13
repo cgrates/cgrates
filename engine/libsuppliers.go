@@ -161,15 +161,15 @@ func (sSpls *SortedSuppliers) Digest() string {
 	return strings.Join(sSpls.SuppliersWithParams(), utils.FIELDS_SEP)
 }
 
-func (sSpls *SortedSuppliers) AsNavigableMap() (nm utils.MapStorage) {
-	nm = utils.MapStorage{
+func (sSpls *SortedSuppliers) AsNavigableMap() (nm utils.NavigableMap) {
+	nm = utils.NavigableMap{
 		"ProfileID": sSpls.ProfileID,
 		"Sorting":   sSpls.Sorting,
 		"Count":     sSpls.Count,
 	}
-	sm := make([]utils.MapStorage, len(sSpls.SortedSuppliers))
+	sm := make([]utils.NavigableMap, len(sSpls.SortedSuppliers))
 	for i, ss := range sSpls.SortedSuppliers {
-		sm[i] = utils.MapStorage{
+		sm[i] = utils.NavigableMap{
 			"SupplierID":         ss.SupplierID,
 			"SupplierParameters": ss.SupplierParameters,
 			"SortingData":        ss.SortingData,

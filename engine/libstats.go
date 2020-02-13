@@ -230,7 +230,7 @@ func (sq *StatQueue) addStatEvent(ev *utils.CGREvent, filterS *FilterS) (err err
 			ExpiryTime *time.Time
 		}{ev.ID, expTime})
 	var pass bool
-	evNm := utils.MapStorage{utils.MetaReq: ev.Event}
+	evNm := utils.NavigableMap{utils.MetaReq: ev.Event}
 	for metricID, metric := range sq.SQMetrics {
 		if pass, err = filterS.Pass(ev.Tenant, metric.GetFilterIDs(),
 			evNm); err != nil {

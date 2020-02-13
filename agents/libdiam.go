@@ -289,7 +289,7 @@ func writeOnConn(c diam.Conn, m *diam.Message) (err error) {
 
 // newDADataProvider constructs a DataProvider for a diameter message
 func newDADataProvider(c diam.Conn, m *diam.Message) utils.DataProvider {
-	return &diameterDP{c: c, m: m, cache: utils.MapStorage{}}
+	return &diameterDP{c: c, m: m, cache: utils.NavigableMap{}}
 
 }
 
@@ -298,7 +298,7 @@ func newDADataProvider(c diam.Conn, m *diam.Message) utils.DataProvider {
 type diameterDP struct {
 	c     diam.Conn
 	m     *diam.Message
-	cache utils.MapStorage
+	cache utils.NavigableMap
 }
 
 // String is part of utils.DataProvider interface

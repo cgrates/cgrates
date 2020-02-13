@@ -28,14 +28,14 @@ import (
 
 // NewSliceDP constructs a utils.DataProvider
 func NewSliceDP(record []string) (dP utils.DataProvider) {
-	dP = &SliceDP{req: record, cache: utils.MapStorage{}}
+	dP = &SliceDP{req: record, cache: utils.NavigableMap{}}
 	return
 }
 
 // SliceDP implements utils.DataProvider so we can pass it to filters
 type SliceDP struct {
 	req   []string
-	cache utils.MapStorage
+	cache utils.NavigableMap
 }
 
 // String is part of utils.DataProvider interface

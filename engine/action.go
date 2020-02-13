@@ -867,7 +867,7 @@ func (apl Actions) Clone() (interface{}, error) {
 
 // newCdrLogProvider constructs a DataProvider
 func newCdrLogProvider(acnt *Account, action *Action) (dP utils.DataProvider) {
-	dP = &cdrLogProvider{acnt: acnt, action: action, cache: utils.MapStorage{}}
+	dP = &cdrLogProvider{acnt: acnt, action: action, cache: utils.NavigableMap{}}
 	return
 }
 
@@ -875,7 +875,7 @@ func newCdrLogProvider(acnt *Account, action *Action) (dP utils.DataProvider) {
 type cdrLogProvider struct {
 	acnt   *Account
 	action *Action
-	cache  utils.MapStorage
+	cache  utils.NavigableMap
 }
 
 // String is part of utils.DataProvider interface

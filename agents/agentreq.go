@@ -51,7 +51,7 @@ func NewAgentRequest(req utils.DataProvider,
 	}
 	ar = &AgentRequest{
 		Request:    req,
-		Vars:       utils.NewOrderedNavigableMap(utils.MapStorage(vars)),
+		Vars:       utils.NavigableMap(vars),
 		CGRRequest: utils.NewOrderedNavigableMap(nil),
 		diamreq:    utils.NewOrderedNavigableMap(nil), // special case when CGRateS is building the request
 		CGRReply:   cgrRply,
@@ -77,7 +77,7 @@ func NewAgentRequest(req utils.DataProvider,
 // implements utils.DataProvider so we can pass it to filters
 type AgentRequest struct {
 	Request    utils.DataProvider         // request
-	Vars       *utils.OrderedNavigableMap // shared data
+	Vars       utils.NavigableMap         // shared data
 	CGRRequest *utils.OrderedNavigableMap // Used in reply to access the request that was send
 	CGRReply   *utils.OrderedNavigableMap
 	Reply      *utils.OrderedNavigableMap
@@ -381,7 +381,7 @@ func (ar *AgentRequest) ParseField(
 func (ar *AgentRequest) setCGRReply(rply utils.NavigableMapper, errRply error) (err error) {
 	var nm *utils.OrderedNavigableMap
 	if errRply != nil {
-		nm = utils.NewOrderedNavigableMap(utils.MapStorage{
+		nm = utils.NewOrderedNavigableMap(utils.NavigableMap{
 			utils.Error: errRply.Error()})
 	} else {
 		nm = utils.NewOrderedNavigableMap(nil)

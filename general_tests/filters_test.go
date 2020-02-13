@@ -101,8 +101,8 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	passEvent := map[string]interface{}{
 		utils.Destination: "+4986517174963",
 	}
-	fEv := utils.MapStorage{utils.MetaReq: failEvent}
-	pEv := utils.MapStorage{utils.MetaReq: passEvent}
+	fEv := utils.NavigableMap{utils.MetaReq: failEvent}
+	pEv := utils.NavigableMap{utils.MetaReq: passEvent}
 	if pass, err := filterS.Pass("cgrates.org",
 		[]string{"*destinations:~*req.Destination:EU"}, fEv); err != nil {
 		t.Errorf(err.Error())
