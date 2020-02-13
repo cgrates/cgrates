@@ -1,5 +1,6 @@
 {{ ansible_managed | comment }}
 %global version 0.10.0
+%global branch 0.10
 %global git_commit {{ gitVersion.stdout_lines[0] }}
 
 %global git_short_commit {{ gitShortVersion.stdout_lines[0] }}
@@ -10,7 +11,7 @@
 
 Name:           cgrates
 Version:        %{version}
-Release:        {{ gitDate.stdout_lines[0] }}+%{git_short_commit}
+Release:        {{ releaseTag }}
 Summary:        Carrier Grade Real-time Charging System
 License:        GPLv3
 URL:            https://github.com/cgrates/cgrates
@@ -33,7 +34,7 @@ CGRateS is a very fast and easy scalable real-time charging system for Telecom e
 %prep
 %setup -q -n %{name}-%{version} -c
 mkdir -p src/github.com/cgrates
-ln -sf ../../../%{name}-%{git_commit} src/github.com/cgrates/cgrates
+ln -sf ../../../%{name}-%{branch} src/github.com/cgrates/cgrates
 
 %pre
 getent group %{name} >/dev/null || groupadd -r %{name}
