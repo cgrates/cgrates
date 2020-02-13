@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python
 
 # depends:
 #   ^ redis # install via easy_install redis
