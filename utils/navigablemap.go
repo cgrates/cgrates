@@ -131,6 +131,11 @@ func (ms MapStorage) FieldAsInterface(fldPath []string) (val interface{}, err er
 			return nil, ErrNotFound
 		}
 		return dp[*indx].FieldAsInterface(fldPath[1:])
+	case []MapStorage:
+		if len(dp) <= *indx {
+			return nil, ErrNotFound
+		}
+		return dp[*indx].FieldAsInterface(fldPath[1:])
 	case []map[string]interface{}:
 		if len(dp) <= *indx {
 			return nil, ErrNotFound
@@ -150,6 +155,7 @@ func (ms MapStorage) FieldAsInterface(fldPath []string) (val interface{}, err er
 	default:
 	}
 	err = ErrNotFound // xml compatible
+	val = nil
 	return
 }
 
@@ -209,6 +215,14 @@ func (ms MapStorage) GetKeys(nesteed bool) (keys []string) {
 			keys = append(keys, k)
 			for _, dsKey := range MapStorage(rv).GetKeys(nesteed) {
 				keys = append(keys, k+NestingSep+dsKey)
+			}
+		case []MapStorage:
+			for i, dp := range rv {
+				pref := k + fmt.Sprintf("[%v]", i)
+				keys = append(keys, pref)
+				for _, dsKey := range dp.GetKeys(nesteed) {
+					keys = append(keys, pref+NestingSep+dsKey)
+				}
 			}
 		case []dataStorage:
 			for i, dp := range rv {
