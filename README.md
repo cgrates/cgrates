@@ -2,6 +2,7 @@
 
 [![Build Status](https://secure.travis-ci.org/cgrates/cgrates.png)](http://travis-ci.org/cgrates/cgrates)
 [![Documentation Status](https://readthedocs.org/projects/cgrates/badge/?version=v0.10)](https://cgrates.readthedocs.io/en/v0.10/?badge=v0.10)
+[![GoDoc](https://godoc.org/github.com/cgrates/cgrates?status.svg)](https://pkg.go.dev/github.com/cgrates/cgrates/apier)
 
 ### Features ###
 + Real-time Online/Offline Charging System (OCS).
@@ -23,9 +24,9 @@
 + Commercial support available
 
 ### Documentation ###
-[Step by steps tutorials](https://cgrates.readthedocs.org/en/latest/tut_freeswitch.html)
+[Step by steps tutorials](https://cgrates.readthedocs.org/en/v0.10/tut_freeswitch.html)
 
-[Debian apt-get repository](https://cgrates.readthedocs.io/en/latest/installation.html#debian-jessie-wheezy)
+[Debian apt-get repository](https://cgrates.readthedocs.io/en/v0.10/installation.html#debian-jessie-wheezy)
 
 [Installing CGRateS from sources on minimal debian](https://asciinema.org/a/0lwlputceg52xssqgra7wjza0) (for devel or testing)
 
