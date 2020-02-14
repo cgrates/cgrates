@@ -2873,13 +2873,13 @@ func TestEventCostgetChargesForPath(t *testing.T) {
 	chargingInterval := &ChargingInterval{
 		RatingID: "RatingID",
 	}
-	//nil check
+	// chr == nil
 	if rcv, err := eventCost.getChargesForPath(nil, nil); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ErrNotFound, err)
 	} else if rcv != nil {
 		t.Errorf("Expecting: nil, received: %+v", rcv)
 	}
-	//len(fldPath) == 0
+	// len(fldPath) == 0
 	eChargingInterval := &ChargingInterval{
 		RatingID: "RatingID",
 	}
@@ -2923,18 +2923,31 @@ func TestEventCostgetChargesForPath(t *testing.T) {
 	} else if rcv != nil {
 		t.Errorf("Expecting: nil, received: %+v", rcv)
 	}
-	eventCost = &EventCost{
-		Rates: ChargedRates{
-			"RatingID": RateGroups{&Rate{Value: 0.8}}},
+
+	chargingInterval = &ChargingInterval{
+		RatingID:       "RatingID",
+		CompressFactor: 7,
 	}
 	eventCost = &EventCost{
-		Timings: ChargedTimings{
-			"RatingID": &ChargedTiming{
-				StartTime: "StartTime",
-			},
-		},
+		Rating: Rating{"RatingID": &RatingUnit{
+			RatesID: "RatesID",
+		}},
+		Rates: ChargedRates{"RatesID": RateGroups{&Rate{Value: 0.8}}},
 	}
-	//tbd
+	RateGroups := RateGroups{&Rate{Value: 0.8}}
+	if rcv, err := eventCost.getChargesForPath([]string{utils.Rating, utils.Rates}, chargingInterval); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(RateGroups, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(RateGroups), utils.ToJSON(rcv))
+		t.Errorf("Expecting: %+v, received: %+v", RateGroups, rcv)
+	}
+	// opath != utils.Increments
+	if rcv, err := eventCost.getChargesForPath([]string{"unsupportedfield"}, chargingInterval); err == nil || err.Error() != "unsupported field prefix: <unsupportedfield>" {
+		t.Errorf("Expecting: unsupported field prefix: <unsupportedfield>, received: %+v", err)
+	} else if rcv != nil {
+		t.Errorf("Expecting: nil, received: %+v", rcv)
+	}
+	// utils.Increments
 	eventCost = &EventCost{}
 	chargingInterval = &ChargingInterval{
 		Increments: []*ChargingIncrement{
@@ -2950,7 +2963,37 @@ func TestEventCostgetChargesForPath(t *testing.T) {
 		t.Errorf("Expecting: nil, received: %+v", err)
 	} else if !reflect.DeepEqual(eChargingIncrement, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", eChargingIncrement, rcv)
-
+	}
+	eIncrements := []*ChargingIncrement{
+		&ChargingIncrement{
+			AccountingID: "AccountingID",
+		},
+	}
+	// indx == nil
+	if rcv, err := eventCost.getChargesForPath([]string{"Increments"}, chargingInterval); err != nil {
+		t.Errorf("Expecting: nil, received: %+v", err)
+	} else if !reflect.DeepEqual(eIncrements, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eIncrements, utils.ToJSON(rcv))
+	}
+	// len(fldPath) != 1
+	if rcv, err := eventCost.getChargesForPath([]string{"Increments", utils.Accounting}, chargingInterval); err == nil || err != utils.ErrNotFound {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ErrNotFound, err)
+	} else if rcv != nil {
+		t.Errorf("Expecting: nil, received: %+v", rcv)
+	}
+	// fldPath[1] == utils.Accounting
+	eventCost = &EventCost{
+		Accounting: Accounting{
+			"AccountingID": &BalanceCharge{
+				AccountID: "AccountID",
+			},
+		},
+	}
+	eBalanceCharge := &BalanceCharge{AccountID: "AccountID"}
+	if rcv, err := eventCost.getChargesForPath([]string{"Increments[0]", utils.Accounting}, chargingInterval); err != nil {
+		t.Errorf("Expecting: nil, received: %+v", err)
+	} else if !reflect.DeepEqual(eBalanceCharge,rcv){
+		t.Errorf("Expecting: %+v, received: %+v",eBalanceCharge, rcv)
 	}
 
 }
@@ -3133,17 +3176,20 @@ func TestEventCostgetRatingForPath(t *testing.T) {
 func TestEventCostgetAcountingForPath(t *testing.T) {
 	eventCost := &EventCost{}
 	balanceCharge := &BalanceCharge{}
+	// bc == nil
 	if rcv, err := eventCost.getAcountingForPath(nil, nil); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ErrNotFound, err)
 	} else if rcv != nil {
 		t.Errorf("Expecting: nil, received: %+v", rcv)
 	}
+	// len(fldPath) == 0
 	eBalanceCharge := &BalanceCharge{}
 	if rcv, err := eventCost.getAcountingForPath([]string{}, balanceCharge); err != nil {
 		t.Errorf("Expecting: nil, received: %+v", err)
 	} else if !reflect.DeepEqual(eBalanceCharge, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", eBalanceCharge, rcv)
 	}
+	// fldPath[0] == utils.Balance
 	eventCost = &EventCost{
 		AccountSummary: &AccountSummary{
 			BalanceSummaries: BalanceSummaries{
@@ -3156,10 +3202,88 @@ func TestEventCostgetAcountingForPath(t *testing.T) {
 	eBalanceSummaries := &BalanceSummary{
 		ID: "ID",
 	}
+	//len(fldPath) == 1
 	if rcv, err := eventCost.getAcountingForPath([]string{utils.Balance}, balanceCharge); err != nil {
 		t.Errorf("Expecting: nil, received: %+v", err)
 	} else if !reflect.DeepEqual(eBalanceSummaries, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", eBalanceSummaries, rcv)
+	}
+	// bl == nil
+	eventCost = &EventCost{AccountSummary: &AccountSummary{}}
+	if rcv, err := eventCost.getAcountingForPath([]string{utils.Balance}, balanceCharge); err == nil || err != utils.ErrNotFound {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ErrNotFound, err)
+	} else if rcv != nil {
+		t.Errorf("Expecting: nil, received: %+v", rcv)
+	}
+	// len(fldPath) != 1
+	eventCost = &EventCost{
+		AccountSummary: &AccountSummary{
+			BalanceSummaries: BalanceSummaries{
+				&BalanceSummary{
+					ID: "ID",
+				},
+			},
+		},
+	}
+	if rcv, err := eventCost.getAcountingForPath([]string{utils.Balance, "ID"}, balanceCharge); err != nil {
+		t.Errorf("Expecting: nil, received: %+v", err)
+	} else if !reflect.DeepEqual("ID", rcv) {
+		t.Errorf("Expecting: \"ID\", received: %+v", rcv)
+	}
+	//  fldPath[0] != utils.Balance
+	balanceCharge = &BalanceCharge{
+		AccountID: "AccountID",
+	}
+	if rcv, err := eventCost.getAcountingForPath([]string{utils.AccountID}, balanceCharge); err != nil {
+		t.Errorf("Expecting: nil, received: %+v", err)
+	} else if !reflect.DeepEqual("AccountID", rcv) {
+		t.Errorf("Expecting: \"AccountID\", received: %+v", rcv)
+	}
+}
+
+func TestEventCostString(t *testing.T) {
+	eventCost := &EventCost{}
+	eOut := `{"CGRID":"","RunID":"","StartTime":"0001-01-01T00:00:00Z","Usage":null,"Cost":null,"Charges":null,"AccountSummary":null,"Rating":null,"Accounting":null,"RatingFilters":null,"Rates":null,"Timings":null}`
+	if rcv := eventCost.String(); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+	eventCost = &EventCost{
+		AccountSummary: &AccountSummary{
+			BalanceSummaries: BalanceSummaries{
+				&BalanceSummary{
+					ID: "ID",
+				},
+			},
+		},
+	}
+	eOut = `{"CGRID":"","RunID":"","StartTime":"0001-01-01T00:00:00Z","Usage":null,"Cost":null,"Charges":null,"AccountSummary":{"Tenant":"","ID":"","BalanceSummaries":[{"UUID":"","ID":"ID","Type":"","Value":0,"Disabled":false}],"AllowNegative":false,"Disabled":false},"Rating":null,"Accounting":null,"RatingFilters":null,"Rates":null,"Timings":null}`
+	if rcv := eventCost.String(); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+}
+
+func TestEventCostFieldAsString(t *testing.T) {
+	eventCost := &EventCost{
+		CGRID: "CGRID",
+	}
+	eventCost.initCache()
+	if rcv, err := eventCost.FieldAsString([]string{utils.CGRID}); err != nil {
+		t.Error(err)
+	} else if rcv != "CGRID" {
+		t.Errorf("Expecting: CGRID, received: %+v", rcv)
+	}
+	if rcv, err := eventCost.FieldAsString([]string{"err"}); err == nil || err.Error() != "unsupported field prefix: <err>" {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, utils.EmptyString) {
+		t.Errorf("Expecting: EmptyString, received: %+v", rcv)
+	}
+}
+
+func TestEventCostRemoteHost(t *testing.T) {
+	eventCost := &EventCost{}
+	eOut := utils.LocalAddr()
+	if rcv := eventCost.RemoteHost(); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
 	}
 
 }
