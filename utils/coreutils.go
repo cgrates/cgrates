@@ -913,6 +913,19 @@ func GetPathIndex(spath string) (opath string, idx *int) {
 	return opath, &idxVal
 }
 
+// GetPathIndex returns the path and index if index present
+// path[index]=>path,index
+// path=>path,nil
+func getPathIndex(spath string) (opath string, idx string) {
+	idxStart := strings.Index(spath, IdxStart)
+	if idxStart == -1 || !strings.HasSuffix(spath, IdxEnd) {
+		return spath, ""
+	}
+	idx = spath[idxStart+1 : len(spath)-1]
+	opath = spath[:idxStart]
+	return
+}
+
 type GetFilterIndexesArgWithArgDispatcher struct {
 	*GetFilterIndexesArg
 	TenantArg

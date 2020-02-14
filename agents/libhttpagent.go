@@ -247,14 +247,18 @@ func (xE *haTextPlainEncoder) Encode(nM *utils.OrderedNavigableMap) (err error) 
 	var str, nmPath string
 	msgFields := make(map[string]string) // work around to NMap issue
 	for _, val := range nM.Values() {
-		nmItms, isNMItems := val.([]*config.NMItem)
+		nmItms, isNMItems := val.(*utils.NMSlice)
 		if !isNMItems {
-			return fmt.Errorf("value: %+v is not []*NMItem", val)
+			return fmt.Errorf("value: %s is not []*NMItem", val)
 		}
-		if len(nmItms) == 0 {
+		if nmItms.Empty() {
 			continue
 		}
-		for i, nmItem := range nmItms {
+		for i, nmItem2 := range *nmItms {
+			nmItem, isNMItem := nmItem2.(*config.NMItem)
+			if !isNMItem {
+				return fmt.Errorf("value: %s is not []*NMItem", nmItem2)
+			}
 			if i == 0 { // compose the path only 1 time
 				nmPath = strings.Join(nmItem.Path, utils.NestingSep)
 			}

@@ -133,8 +133,8 @@ func (ar *AgentRequest) FieldAsString(fldPath []string) (val string, err error) 
 	if iface, err = ar.FieldAsInterface(fldPath); err != nil {
 		return
 	}
-	if nmItems, isNMItems := iface.([]*config.NMItem); isNMItems { // special handling of NMItems, take the last value out of it
-		iface = nmItems[len(nmItems)-1].Data // could be we need nil protection here
+	if nmItems, isNMItems := iface.(*utils.NMSlice); isNMItems { // special handling of NMItems, take the last value out of it
+		iface = (*nmItems)[len(*nmItems)-1].Interface // could be we need nil protection here
 	}
 	return utils.IfaceAsString(iface), nil
 }
@@ -161,7 +161,7 @@ func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 				}
 				return err
 			}
-			var valSet []*config.NMItem
+			valSet := &utils.NMSlice{}
 			fldPath := strings.Split(tplFld.Path, utils.NestingSep)
 
 			nMItm := &config.NMItem{Data: out, Path: fldPath[1:], Config: tplFld}
@@ -182,7 +182,7 @@ func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 					valSet = nil
 				}
 			}
-			valSet = append(valSet, nMItm)
+			*valSet = append(*valSet, nMItm)
 			switch fldPath[0] {
 			default:
 				return fmt.Errorf("unsupported field prefix: <%s> when set fields", fldPath[0])
