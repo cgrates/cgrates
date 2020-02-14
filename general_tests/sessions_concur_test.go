@@ -148,7 +148,7 @@ func testSCncrLoadTP(t *testing.T) {
 }
 
 func testSCncrRunSessions(t *testing.T) {
-	acntIDsSet := utils.NewStringSet(nil)
+	acntIDsSet := utils.StringSet{}
 	bufferTopup := time.Duration(8760) * time.Hour
 	for i := 0; i < *sCncrSessions; i++ {
 		acntID := fmt.Sprintf("100%d", utils.RandomInteger(100, 200))
