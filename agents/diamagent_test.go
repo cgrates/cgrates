@@ -62,7 +62,7 @@ func TestProcessRequest(t *testing.T) {
 
 	cgrRplyNM := utils.NewOrderedNavigableMap(nil)
 	rply := utils.NewOrderedNavigableMap(nil)
-	diamDP := utisl.NavigableMap(map[string]interface{}{
+	diamDP := utils.NavigableMap(map[string]interface{}{
 		"SessionId":   "123456",
 		"Account":     "1001",
 		"Destination": "1003",

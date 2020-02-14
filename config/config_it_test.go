@@ -396,7 +396,7 @@ func testCGRConfigReloadSessionS(t *testing.T) {
 		SessionIndexes:    utils.NewStringMap(),
 		ClientProtocol:    1,
 		TerminateAttempts: 5,
-		AlterableFields:   utils.NewStringSet([]string{}),
+		AlterableFields:   utils.StringSet{},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.SessionSCfg()) {
 		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.SessionSCfg()))
@@ -947,7 +947,7 @@ func testCGRConfigReloadConfigFromJSONSessionS(t *testing.T) {
 		SessionIndexes:    utils.NewStringMap(),
 		ClientProtocol:    1,
 		TerminateAttempts: 5,
-		AlterableFields:   utils.NewStringSet([]string{}),
+		AlterableFields:   utils.StringSet{},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.SessionSCfg()) {
 		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.SessionSCfg()))
@@ -988,7 +988,7 @@ func testCGRConfigReloadAll(t *testing.T) {
 		SessionIndexes:    utils.NewStringMap(),
 		ClientProtocol:    1,
 		TerminateAttempts: 5,
-		AlterableFields:   utils.NewStringSet([]string{}),
+		AlterableFields:   utils.StringSet{},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.SessionSCfg()) {
 		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.SessionSCfg()))

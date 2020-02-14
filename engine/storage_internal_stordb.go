@@ -864,7 +864,7 @@ func (iDB *InternalDB) SetCDR(cdr *CDR, allowUpdate bool) (err error) {
 			return utils.ErrExists
 		}
 	}
-	idxs := utils.NewStringSet(nil)
+	idxs := utils.StringSet{}
 	iDB.indexedFieldsMutex.RLock()
 	if len(iDB.stringIndexedFields) == 0 && len(iDB.prefixIndexedFields) == 0 { // add default indexes
 		idxs.Add(utils.ConcatenatedKey(utils.CGRID, cdr.CGRID))
@@ -1144,13 +1144,13 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 	}
 
 	// find indexed fields
-	var cdrMpIDs *utils.StringSet
+	var cdrMpIDs utils.StringSet
 	// Apply string filter
 	for _, fltrSlc := range pairSlice {
 		if len(fltrSlc.ids) == 0 {
 			continue
 		}
-		grpMpIDs := utils.NewStringSet([]string{})
+		grpMpIDs := utils.StringSet{}
 		for _, id := range fltrSlc.ids {
 			grpIDs := iDB.db.GetGroupItemIDs(utils.CDRsTBL, utils.ConcatenatedKey(fltrSlc.key, id))
 			grpMpIDs.AddSlice(grpIDs)
@@ -1802,7 +1802,7 @@ func (iDB *InternalDB) SetSMCost(smCost *SMCost) (err error) {
 	if smCost.CostDetails == nil {
 		return nil
 	}
-	idxs := utils.NewStringSet(nil)
+	idxs := utils.StringSet{}
 	idxs.Add(utils.ConcatenatedKey(utils.CGRID, smCost.CGRID))
 	idxs.Add(utils.ConcatenatedKey(utils.RunID, smCost.RunID))
 	idxs.Add(utils.ConcatenatedKey(utils.OriginHost, smCost.OriginHost))

@@ -19,45 +19,43 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 // NewStringSet returns a new StringSet
-func NewStringSet(dataSlice []string) (s *StringSet) {
-	s = &StringSet{data: make(map[string]struct{})}
+func NewStringSet(dataSlice []string) (s StringSet) {
+	s = StringSet{}
 	s.AddSlice(dataSlice)
 	return s
 }
 
 // StringSet will manage data within a set
-type StringSet struct {
-	data map[string]struct{}
-}
+type StringSet map[string]struct{}
 
 // Add adds a key in set
-func (s *StringSet) Add(val string) {
-	s.data[val] = struct{}{}
+func (s StringSet) Add(val string) {
+	s[val] = struct{}{}
 }
 
 // Remove removes a key from set
-func (s *StringSet) Remove(val string) {
-	delete(s.data, val)
+func (s StringSet) Remove(val string) {
+	delete(s, val)
 }
 
 // Has returns if the key is in set
-func (s *StringSet) Has(val string) bool {
-	_, has := s.data[val]
+func (s StringSet) Has(val string) bool {
+	_, has := s[val]
 	return has
 }
 
 // AddSlice adds all the element of a slice
-func (s *StringSet) AddSlice(dataSlice []string) {
+func (s StringSet) AddSlice(dataSlice []string) {
 	for _, val := range dataSlice {
 		s.Add(val)
 	}
 }
 
 // AsSlice returns the keys as string slice
-func (s *StringSet) AsSlice() []string {
-	result := make([]string, len(s.data))
+func (s StringSet) AsSlice() []string {
+	result := make([]string, len(s))
 	i := 0
-	for k := range s.data {
+	for k := range s {
 		result[i] = k
 		i++
 	}
@@ -65,21 +63,18 @@ func (s *StringSet) AsSlice() []string {
 }
 
 // Data exports the internal map, so we can benefit for example of key iteration
-func (s *StringSet) Data() map[string]struct{} {
-	return s.data
+func (s StringSet) Data() map[string]struct{} {
+	return s
 }
 
 // Size returns the size of the set
-func (s *StringSet) Size() int {
-	if s == nil || s.data == nil {
-		return 0
-	}
-	return len(s.data)
+func (s StringSet) Size() int {
+	return len(s)
 }
 
 // Intersect removes all key s2 do not have
-func (s *StringSet) Intersect(s2 *StringSet) {
-	for k := range s.data {
+func (s StringSet) Intersect(s2 StringSet) {
+	for k := range s {
 		if !s2.Has(k) {
 			s.Remove(k)
 		}
