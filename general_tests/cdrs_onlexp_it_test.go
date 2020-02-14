@@ -481,7 +481,7 @@ func testCDRsOnExpFileFailover(t *testing.T) {
 	}
 	expectedFormats := utils.NewStringSet([]string{utils.MetaHTTPPost, utils.MetaAMQPjsonMap,
 		utils.MetaAMQPV1jsonMap, utils.MetaSQSjsonMap, utils.MetaS3jsonMap})
-	rcvFormats := utils.NewStringSet([]string{})
+	rcvFormats := utils.StringSet{}
 	for _, file := range filesInDir { // First file in directory is the one we need, harder to find it's name out of config
 		fileName := file.Name()
 		filePath := path.Join(cdrsMasterCfg.GeneralCfg().FailedPostsDir, fileName)

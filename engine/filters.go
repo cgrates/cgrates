@@ -130,16 +130,16 @@ func (fltr *Filter) Compile() (err error) {
 	return
 }
 
-var supportedFiltersType *utils.StringSet = utils.NewStringSet([]string{utils.MetaString, utils.MetaPrefix, utils.MetaSuffix,
+var supportedFiltersType utils.StringSet = utils.NewStringSet([]string{utils.MetaString, utils.MetaPrefix, utils.MetaSuffix,
 	utils.MetaTimings, utils.MetaRSR, utils.MetaDestinations,
 	utils.MetaEmpty, utils.MetaExists, utils.MetaLessThan, utils.MetaLessOrEqual,
 	utils.MetaGreaterThan, utils.MetaGreaterOrEqual, utils.MetaEqual,
 	utils.MetaNotEqual})
-var needsFieldName *utils.StringSet = utils.NewStringSet([]string{utils.MetaString, utils.MetaPrefix,
+var needsFieldName utils.StringSet = utils.NewStringSet([]string{utils.MetaString, utils.MetaPrefix,
 	utils.MetaSuffix, utils.MetaTimings, utils.MetaDestinations, utils.MetaLessThan,
 	utils.MetaEmpty, utils.MetaExists, utils.MetaLessOrEqual, utils.MetaGreaterThan,
 	utils.MetaGreaterOrEqual, utils.MetaEqual, utils.MetaNotEqual})
-var needsValues *utils.StringSet = utils.NewStringSet([]string{utils.MetaString, utils.MetaPrefix,
+var needsValues utils.StringSet = utils.NewStringSet([]string{utils.MetaString, utils.MetaPrefix,
 	utils.MetaSuffix, utils.MetaTimings, utils.MetaRSR, utils.MetaDestinations,
 	utils.MetaLessThan, utils.MetaLessOrEqual, utils.MetaGreaterThan, utils.MetaGreaterOrEqual,
 	utils.MetaEqual, utils.MetaNotEqual})
