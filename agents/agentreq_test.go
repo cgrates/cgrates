@@ -61,7 +61,7 @@ func TestAgReqSetFields(t *testing.T) {
 		utils.CapMaxUsage: time.Duration(120 * time.Second),
 		utils.Error:       "",
 	}
-	agReq.CGRReply = utils.NewOrderedNavigableMap(cgrRply)
+	agReq.CGRReply = &cgrRply
 
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Tenant",
@@ -106,7 +106,7 @@ func TestAgReqSetFields(t *testing.T) {
 			Value: config.NewRSRParsersMustCompile(
 				"~*cgrep.Error", true, utils.INFIELD_SEP)},
 	}
-	eMp := utils.NewOrderedNavigableMap(nil)
+	eMp := utils.NewOrderedNavigableMap()
 	eMp.Set([]string{utils.Tenant}, []*config.NMItem{
 		&config.NMItem{Data: "cgrates.org", Path: []string{utils.Tenant},
 			Config: tplFlds[0]}})
@@ -477,7 +477,7 @@ func TestAgReqMaxCost(t *testing.T) {
 	cgrRply := utils.NavigableMap{
 		utils.CapMaxUsage: time.Duration(120 * time.Second),
 	}
-	agReq.CGRReply = utils.NewOrderedNavigableMap(cgrRply)
+	agReq.CGRReply = &cgrRply
 
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "MaxUsage",
@@ -486,7 +486,7 @@ func TestAgReqMaxCost(t *testing.T) {
 			Value: config.NewRSRParsersMustCompile(
 				"~*cgrep.MaxUsage{*duration_seconds}", true, utils.INFIELD_SEP)},
 	}
-	eMp := utils.NewOrderedNavigableMap(nil)
+	eMp := utils.NewOrderedNavigableMap()
 
 	eMp.Set([]string{"MaxUsage"}, []*config.NMItem{
 		&config.NMItem{Data: "120", Path: []string{"MaxUsage"},
@@ -725,7 +725,7 @@ func TestAgReqEmptyFilter(t *testing.T) {
 			Path: utils.MetaCgrep + utils.NestingSep + utils.Destination, Type: utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("~*cgreq.Destination", true, utils.INFIELD_SEP)},
 	}
-	eMp := utils.NewOrderedNavigableMap(nil)
+	eMp := utils.NewOrderedNavigableMap()
 	eMp.Set([]string{utils.Tenant}, []*config.NMItem{
 		&config.NMItem{Data: "cgrates.org", Path: []string{utils.Tenant},
 			Config: tplFlds[0]}})
@@ -757,7 +757,7 @@ func TestAgReqMetaExponent(t *testing.T) {
 			Path: utils.MetaCgrep + utils.NestingSep + "TestExpo", Type: utils.MetaValueExponent,
 			Value: config.NewRSRParsersMustCompile("~*cgreq.Value;~*cgreq.Exponent", true, utils.INFIELD_SEP)},
 	}
-	eMp := utils.NewOrderedNavigableMap(nil)
+	eMp := utils.NewOrderedNavigableMap()
 	eMp.Set([]string{"TestExpo"}, []*config.NMItem{
 		&config.NMItem{Data: "200", Path: []string{"TestExpo"},
 			Config: tplFlds[0]}})
@@ -792,7 +792,7 @@ func TestAgReqFieldAsNone(t *testing.T) {
 			Path: utils.MetaCgrep + utils.NestingSep + utils.Destination, Type: utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("~*cgreq.Destination", true, utils.INFIELD_SEP)},
 	}
-	eMp := utils.NewOrderedNavigableMap(nil)
+	eMp := utils.NewOrderedNavigableMap()
 	eMp.Set([]string{utils.Tenant}, []*config.NMItem{
 		&config.NMItem{Data: "cgrates.org", Path: []string{utils.Tenant},
 			Config: tplFlds[0]}})
@@ -829,7 +829,7 @@ func TestAgReqFieldAsNone2(t *testing.T) {
 			Path: utils.MetaCgrep + utils.NestingSep + utils.Destination, Type: utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("~*cgreq.Destination", true, utils.INFIELD_SEP)},
 	}
-	eMp := utils.NewOrderedNavigableMap(nil)
+	eMp := utils.NewOrderedNavigableMap()
 	eMp.Set([]string{utils.Tenant}, []*config.NMItem{
 		&config.NMItem{Data: "cgrates.org", Path: []string{utils.Tenant},
 			Config: tplFlds[0]}})
@@ -860,7 +860,7 @@ func TestAgReqSetField2(t *testing.T) {
 		time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC))
 	agReq.CGRRequest.Set([]string{utils.RequestType}, utils.META_PREPAID)
 
-	agReq.CGRReply = utils.NewOrderedNavigableMap(nil)
+	agReq.CGRReply = &utils.NavigableMap{}
 
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Tenant",
@@ -880,7 +880,7 @@ func TestAgReqSetField2(t *testing.T) {
 			Type: "*difference", Value: config.NewRSRParsersMustCompile("~*cgreq.AnswerTime;~*cgrep.Usage", true, utils.INFIELD_SEP),
 		},
 	}
-	eMp := utils.NewOrderedNavigableMap(nil)
+	eMp := utils.NewOrderedNavigableMap()
 	eMp.Set([]string{utils.Tenant}, []*config.NMItem{
 		&config.NMItem{Data: "cgrates.org", Path: []string{utils.Tenant},
 			Config: tplFlds[0]}})
@@ -911,7 +911,7 @@ func TestAgReqFieldAsInterface(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	// populate request, emulating the way will be done in HTTPAgent
-	agReq.CGRRequest = utils.NewOrderedNavigableMap(nil)
+	agReq.CGRRequest = utils.NewOrderedNavigableMap()
 	agReq.CGRRequest.Set([]string{utils.Usage}, []*config.NMItem{{Data: 3 * time.Minute}})
 	agReq.CGRRequest.Set([]string{utils.ToR}, []*config.NMItem{{Data: utils.VOICE}})
 	agReq.CGRRequest.Set([]string{utils.Account}, "1001")
@@ -957,23 +957,16 @@ func TestAgReqNewARWithCGRRplyAndRply(t *testing.T) {
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 
-	ev := utils.NavigableMap{
-		"FirstLevel": utils.NavigableMap{
-			"SecondLevel": utils.NavigableMap{
-				"Fld1": "Val1",
-			},
-		},
-	}
-	rply := utils.NewOrderedNavigableMap(ev)
+	rply := utils.NewOrderedNavigableMap()
+	rply.Set([]string{"FirstLevel", "SecondLevel", "Fld1"}, "Val1")
 
-	ev2 := utils.NavigableMap{
+	cgrRply := &utils.NavigableMap{
 		utils.CapAttributes: utils.NavigableMap{
 			"PaypalAccount": "cgrates@paypal.com",
 		},
 		utils.CapMaxUsage: time.Duration(120 * time.Second),
 		utils.Error:       "",
 	}
-	cgrRply := utils.NewOrderedNavigableMap(ev2)
 
 	agReq := NewAgentRequest(nil, nil, cgrRply, rply, nil, "cgrates.org", "", filterS, nil, nil)
 
@@ -986,7 +979,7 @@ func TestAgReqNewARWithCGRRplyAndRply(t *testing.T) {
 			Value: config.NewRSRParsersMustCompile("~*cgrep.Attributes.PaypalAccount", true, utils.INFIELD_SEP)},
 	}
 
-	eMp := utils.NewOrderedNavigableMap(nil)
+	eMp := utils.NewOrderedNavigableMap()
 	eMp.Set([]string{"Fld1"}, []*config.NMItem{
 		&config.NMItem{Data: "Val1", Path: []string{"Fld1"},
 			Config: tplFlds[0]}})
@@ -1007,15 +1000,8 @@ func TestAgReqSetCGRReplyWithError(t *testing.T) {
 		config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 
-	ev := utils.NavigableMap{
-		"FirstLevel": utils.NavigableMap{
-			"SecondLevel": utils.NavigableMap{
-				"Fld1": "Val1",
-			},
-		},
-	}
-	rply := utils.NewOrderedNavigableMap(ev)
-
+	rply := utils.NewOrderedNavigableMap()
+	rply.Set([]string{"FirstLevel", "SecondLevel", "Fld1"}, "Val1")
 	agReq := NewAgentRequest(nil, nil, nil, rply, nil, "cgrates.org", "", filterS, nil, nil)
 
 	agReq.setCGRReply(nil, utils.ErrNotFound)
@@ -1048,14 +1034,8 @@ func TestAgReqSetCGRReplyWithoutError(t *testing.T) {
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 
-	ev := utils.NavigableMap{
-		"FirstLevel": utils.NavigableMap{
-			"SecondLevel": utils.NavigableMap{
-				"Fld1": "Val1",
-			},
-		},
-	}
-	rply := utils.NewOrderedNavigableMap(ev)
+	rply := utils.NewOrderedNavigableMap()
+	rply.Set([]string{"FirstLevel", "SecondLevel", "Fld1"}, "Val1")
 
 	myEv := myEv{
 		utils.CapAttributes: utils.NavigableMap{
@@ -1079,7 +1059,7 @@ func TestAgReqSetCGRReplyWithoutError(t *testing.T) {
 			Value: config.NewRSRParsersMustCompile("~*cgrep.Attributes.PaypalAccount", true, utils.INFIELD_SEP)},
 	}
 
-	eMp := utils.NewOrderedNavigableMap(nil)
+	eMp := utils.NewOrderedNavigableMap()
 	eMp.Set([]string{"Fld1"}, []*config.NMItem{
 		&config.NMItem{Data: "Val1", Path: []string{"Fld1"},
 			Config: tplFlds[0]}})
@@ -1493,7 +1473,7 @@ func TestAgReqOverwrite(t *testing.T) {
 		time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC))
 	agReq.CGRRequest.Set([]string{utils.RequestType}, utils.META_PREPAID)
 
-	agReq.CGRReply = utils.NewOrderedNavigableMap(nil)
+	agReq.CGRReply = &utils.NavigableMap{}
 
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Account",
@@ -1543,7 +1523,7 @@ func TestAgReqGroupType(t *testing.T) {
 		time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC))
 	agReq.CGRRequest.Set([]string{utils.RequestType}, utils.META_PREPAID)
 
-	agReq.CGRReply = utils.NewOrderedNavigableMap(nil)
+	agReq.CGRReply = &utils.NavigableMap{}
 
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Account",
@@ -1587,7 +1567,7 @@ func TestAgReqSetFieldsInTmp(t *testing.T) {
 			Path: utils.MetaTmp + utils.NestingSep + utils.Account, Type: utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("~*cgreq.Account", true, utils.INFIELD_SEP)},
 	}
-	eMp := utils.NewOrderedNavigableMap(nil)
+	eMp := &utils.NavigableMap{}
 	eMp.Set([]string{utils.Tenant}, []*config.NMItem{
 		&config.NMItem{Data: "cgrates.org", Path: []string{utils.Tenant},
 			Config: tplFlds[0]}})

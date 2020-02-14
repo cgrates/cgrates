@@ -46,10 +46,10 @@ type XMLElement struct {
 // considers each value returned by .Values() in the form of []*NMItem, otherwise errors
 func NMAsXMLElements(nm *utils.OrderedNavigableMap) (ents []*XMLElement, err error) {
 	pathIdx := make(map[string]*XMLElement) // Keep the index of elements based on path
-	err = nm.Walk(func(val interface{}) error {
+	for _, val := range nm.Values() {
 		nmItms, isNMItems := val.([]*NMItem)
 		if !isNMItems {
-			return fmt.Errorf("value: %+v is not []*NMItem", val)
+			return nil, fmt.Errorf("value: %+v is not []*NMItem", val)
 		}
 		for _, nmItm := range nmItms {
 			if nmItm.Config != nil && nmItm.Config.NewBranch {
@@ -124,8 +124,7 @@ func NMAsXMLElements(nm *utils.OrderedNavigableMap) (ents []*XMLElement, err err
 				ents = append(ents, newElm)
 			}
 		}
-		return nil
-	})
+	}
 	return
 }
 

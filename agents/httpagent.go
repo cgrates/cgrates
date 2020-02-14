@@ -64,8 +64,8 @@ func (ha *HTTPAgent) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 				utils.HTTPAgent, err.Error()))
 		return
 	}
-	cgrRplyNM := utils.NewOrderedNavigableMap(nil)
-	rplyNM := utils.NewOrderedNavigableMap(nil)
+	rplyNM := utils.NewOrderedNavigableMap()
+	cgrRplyNM := &utils.NavigableMap{}
 	reqVars[utils.RemoteHost] = req.RemoteAddr
 	for _, reqProcessor := range ha.reqProcessors {
 		agReq := NewAgentRequest(dcdr, reqVars, cgrRplyNM, rplyNM,

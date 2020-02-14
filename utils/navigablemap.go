@@ -211,6 +211,7 @@ func (ms NavigableMap) GetKeys(nesteed bool) (keys []string) {
 				keys = append(keys, k+fmt.Sprintf("[%v]", i))
 			}
 		default:
+			// ToDo:should not be called
 			keys = append(keys, getPathFromInterface(v, k+NestingSep)...)
 		}
 	}
@@ -247,29 +248,19 @@ func (ms NavigableMap) RemoteHost() net.Addr {
 }
 
 // NewOrderedNavigableMap initializates a structure of OrderedNavigableMap with a NavigableMap
-func NewOrderedNavigableMap(nm dataStorage) *OrderedNavigableMap {
-	if nm == nil {
-		return &OrderedNavigableMap{
-			nm:    NavigableMap{},
-			order: [][]string{},
-		}
-	}
-	// Index problem
-	keys := nm.GetKeys(true)
-	order := make([][]string, len(keys))
-	for i, k := range keys {
-		order[i] = strings.Split(k, NestingSep)
-	}
+func NewOrderedNavigableMap() *OrderedNavigableMap {
 	return &OrderedNavigableMap{
-		nm:    nm,
-		order: order,
+		nm:       NavigableMap{},
+		order:    [][]string{},
+		orderSet: StringSet{},
 	}
 }
 
 // OrderedNavigableMap is the same as NavigableMap but keeps the order of fields
 type OrderedNavigableMap struct {
-	nm    dataStorage
-	order [][]string
+	nm       dataStorage
+	order    [][]string
+	orderSet StringSet // to prevent duplicate values
 }
 
 // String returns the map as json string
@@ -290,28 +281,24 @@ func (onm *OrderedNavigableMap) Set(fldPath []string, val interface{}) (err erro
 	if err = onm.nm.Set(fldPath, val); err != nil {
 		return
 	}
+	// path := strings.Join(fldPath, NestingSep)
+	// if !onm.orderSet.Has(path) {
 	onm.order = append(onm.order, fldPath)
-	// if dp, canCast := val.(dataStorage); canCast {
-	// 	for _, key := range dp.GetKeys(true) {
-	// 		onm.order = append(onm.order, append(fldPath, strings.Split(key, NestingSep)...))
-	// 	}
+	// onm.orderSet.Add(path)
 	// }
 	return
 }
 
 // GetKeys returns all the keys from map
 func (onm *OrderedNavigableMap) GetKeys(nesteed bool) (keys []string) {
-	keys = make([]string, len(onm.order))
-	for i, k := range onm.order {
-		keys[i] = strings.Join(k, NestingSep)
-	}
-	return
+	return onm.orderSet.AsSlice()
 }
 
 // Remove removes the item at path
 // this function is not needed for now
+// ToDo: remove this function
 func (onm *OrderedNavigableMap) Remove(fldPath []string) (err error) {
-	return ErrNotImplemented
+	return ErrNotImplemented // this should handle the order corectly
 	/*
 		if len(fldPath) == 0 {
 			return fmt.Errorf("Wrong path")
@@ -336,6 +323,7 @@ func (onm OrderedNavigableMap) RemoteHost() net.Addr {
 }
 
 // Values returns the values in map, ordered by order information
+// ToDo: use GetOrder instead of this as it is not memmory efficient
 func (onm *OrderedNavigableMap) Values() (vals []interface{}) {
 	if len(onm.order) == 0 {
 		return
@@ -348,81 +336,10 @@ func (onm *OrderedNavigableMap) Values() (vals []interface{}) {
 	return
 }
 
-// Walk returns the values in map, ordered by order information
-func (onm *OrderedNavigableMap) Walk(proccess func(interface{}) error) (err error) {
-	for _, path := range onm.order {
-		val, _ := onm.FieldAsInterface(path)
-		if err = proccess(val); err != nil {
-			return
-		}
-	}
-	return
-}
-
-// func (onm *OrderedNavigableMap) indexOrder() {
-// 	keys := nm.GetKeys(true)
-// 	order := make([][]string, len(keys))
-// 	for i, k := range keys {
-// 		order[i] = strings.Split(k, NestingSep)
-// 	}
-// }
-
-// // indexMapElements will recursively go through map and index the element paths into elmns
-// func indexMapElements(mp map[string]interface{}, path []string, vals *[]interface{}) {
-// 	for k, v := range mp {
-// 		vPath := append(path, k)
-// 		if mpIface, isMap := v.(map[string]interface{}); isMap {
-// 			indexMapElements(mpIface, vPath, vals)
-// 			continue
-// 		}
-// 		valsOut := append(*vals, v)
-// 		*vals = valsOut
-// 	}
-// }
-
-// // indexMapPaths parses map returning the parsed branchPath, useful when not having order for NavigableMap
-// func indexMapPaths(mp map[string]interface{}, branchPath []string, parsedPaths *[][]string) {
-// 	for k, v := range mp {
-// 		if mpIface, isMap := v.(map[string]interface{}); isMap {
-// 			indexMapPaths(mpIface, append(branchPath, k), parsedPaths)
-// 			continue
-// 		}
-// 		tmpPaths := append(*parsedPaths, append(branchPath, k))
-// 		*parsedPaths = tmpPaths
-// 	}
-// }
-
-// GetOrder returns the order the fields were set in map
+// GetOrder returns the order the fields were set in NavigableMap
 func (onm *OrderedNavigableMap) GetOrder() [][]string { return onm.order }
 
-// AsCGREvent builds a CGREvent considering Time as time.Now()
-// and Event as linear map[string]interface{} with joined paths
-// treats particular case when the value of map is []*NMItem - used in agents/AgentRequest
-// func (onm *OrderedNavigableMap) AsCGREvent(tnt string, pathSep string) (cgrEv *CGREvent) {
-// 	if onm == nil || len(onm.order) == 0 {
-// 		return
-// 	}
-// 	cgrEv = &CGREvent{
-// 		Tenant: tnt,
-// 		ID:     UUIDSha1Prefix(),
-// 		Time:   TimePointer(time.Now()),
-// 		Event:  make(map[string]interface{})}
-// 	for _, branchPath := range onm.order {
-// 		val, _ := onm.FieldAsInterface(branchPath)
-// 		if nmItms, isNMItems := val.([]NMItem); isNMItems { // special case when we have added multiple items inside a key, used in agents
-// 			for _, nmItm := range nmItms {
-// 				if !nmItm.IsAttribute() {
-// 					val = nmItm.GetData() // first item which is not an attribute will become the value
-// 					break
-// 				}
-// 			}
-// 		} else {
-// 		}
-// 		cgrEv.Event[strings.Join(branchPath, pathSep)] = val
-// 	}
-// 	return
-// }
-
+// ToDo: remove the following functions
 func getPathFromValue(in reflect.Value, prefix string) (out []string) {
 	switch in.Kind() {
 	case reflect.Ptr:
@@ -454,6 +371,7 @@ func getPathFromValue(in reflect.Value, prefix string) (out []string) {
 	return
 }
 
+// used by NavigableMap GetKeys to return all values
 func getPathFromInterface(in interface{}, prefix string) (out []string) {
 	switch vin := in.(type) {
 	case map[string]interface{}:

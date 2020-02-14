@@ -441,10 +441,7 @@ func updateDiamMsgFromNavMap(m *diam.Message, navMp *utils.OrderedNavigableMap, 
 		if itm == nil {
 			continue // all attributes, not writable to diameter packet
 		}
-		var newBranch bool
-		if itm.Config != nil && itm.Config.NewBranch {
-			newBranch = true
-		}
+		newBranch := itm.Config != nil && itm.Config.NewBranch
 		if err = messageSetAVPsWithPath(m, itm.Path,
 			utils.IfaceAsString(itm.Data), newBranch, tmz); err != nil {
 			return fmt.Errorf("setting item with path: %+v got err: %s", itm.Path, err.Error())
@@ -473,9 +470,7 @@ func diamErr(m *diam.Message, resCode uint32,
 	filterS *engine.FilterS) (a *diam.Message, err error) {
 	aReq := NewAgentRequest(
 		newDADataProvider(nil, m), reqVars,
-		utils.NewOrderedNavigableMap(nil),
-		utils.NewOrderedNavigableMap(nil),
-		nil, tnt, tmz, filterS, nil, nil)
+		nil, nil, nil, tnt, tmz, filterS, nil, nil)
 	if err = aReq.SetFields(tpl); err != nil {
 		return
 	}
