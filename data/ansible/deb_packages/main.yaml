@@ -231,23 +231,23 @@
     - name: Creates directory
       become: yes
       file:
-        path: /var/packages/debian/{{ cgrates_version }}/
+        path: /var/packages/deb/{{ cgrates_version }}/
         state: directory
         
     - name: Remove symlink from current deb package
       become: yes
       file:
-        path: /var/packages/debian/{{ cgrates_version }}/cgrates_current_amd64.deb
+        path: /var/packages/deb/{{ cgrates_version }}/cgrates_current_amd64.deb
         state: absent
       when : cgrates_version == "master" or hostvars['apt']['gitTagVar'].stdout_lines|length > 0
 
-    - name: Move the new package to /var/packages/debian
+    - name: Move the new package to /var/packages/deb
       become: yes
-      shell: "sudo mv /tmp/{{ item}} /var/packages/debian/{{ cgrates_version }}/"
+      shell: "sudo mv /tmp/{{ item}} /var/packages/deb/{{ cgrates_version }}/"
       with_items: "{{ hostvars['apt']['debFileName']['stdout_lines'] }}"
 
     - name: Create the new symlink cgrates_current_amd64.deb
       become: yes
-      shell: "sudo ln -s /var/packages/debian/{{ cgrates_version }}/{{ item }} /var/packages/debian/{{ cgrates_version }}/cgrates_current_amd64.deb"
+      shell: "sudo ln -s /var/packages/deb/{{ cgrates_version }}/{{ item }} /var/packages/deb/{{ cgrates_version }}/cgrates_current_amd64.deb"
       with_items: "{{ hostvars['apt']['debFileName']['stdout_lines'] }}"
       when : cgrates_version == "master" or hostvars['apt']['gitTagVar'].stdout_lines|length > 0
