@@ -24,7 +24,7 @@ Overview
 
 Starting as a pure **billing engine**, CGRateS has evolved over the years into a reliable **real-time charging framework**, able to accommodate various business cases in a *generic way*.
 
-Being an *"engine style"* the project focuses on providing best ratio between **functionality** (over 15 daemons/services implemented with a rich number of `features <cgrates-features>`_ and a development team agile in implementing new ones) and **performance** (dedicated benchmark tool, asynchronous request processing, own transactional cache component), however not losing focus of **quality** (test driven development policy).
+Being an *"engine style"* the project focuses on providing best ratio between **functionality** (over 15 daemons/services implemented with a rich number of `features`_ and a development team agile in implementing new ones) and **performance** (dedicated benchmark tool, asynchronous request processing, own transactional cache component), however not losing focus of **quality** (test driven development policy).
 
 It is written in `Go`_ programming language and accessible from any programming language via JSON RPC.
 The code is well documented (**go doc** compliant `API docs`_) and heavily tested (**5k+** tests are part of the unit test suite).
@@ -68,7 +68,7 @@ CGRateS is capable of four charging modes:
    - Least CPU usage out of the four modes (fastest charging).
 
 
-.. _cgrates-features:
+.. _features:
 
 Features
 --------
