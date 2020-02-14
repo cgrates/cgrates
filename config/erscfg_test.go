@@ -204,7 +204,7 @@ func TestEventReaderLoadFromJSON(t *testing.T) {
 
 }
 
-func TestEventReaderSanitisation(t *testing.T) {
+func TestEventReaderSanitization(t *testing.T) {
 	cfgJSONStr := `{
 "ers": {
 	"enabled": true,
@@ -223,4 +223,109 @@ func TestEventReaderSanitisation(t *testing.T) {
 	if _, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	}
+}
+
+func TestEventReaderSameID(t *testing.T) {
+	expectedERsCfg := &ERsCfg{
+		Enabled:       true,
+		SessionSConns: []string{"conn1"},
+		Readers: []*EventReaderCfg{
+			&EventReaderCfg{
+				ID:             utils.MetaDefault,
+				Type:           utils.MetaFileCSV,
+				FieldSep:       ",",
+				RunDelay:       time.Duration(0),
+				ConcurrentReqs: 1024,
+				SourcePath:     "/var/spool/cgrates/cdrc/in",
+				ProcessedPath:  "/var/spool/cgrates/cdrc/out",
+				XmlRootPath:    utils.HierarchyPath{utils.EmptyString},
+				Tenant:         nil,
+				Timezone:       utils.EmptyString,
+				Filters:        []string{},
+				Flags:          utils.FlagsWithParams{},
+				Fields: []*FCTemplate{
+					{Tag: "ToR", Path: "ToR", Type: utils.MetaVariable,
+						Value: NewRSRParsersMustCompile("~*req.2", true, utils.INFIELD_SEP), Mandatory: true},
+					{Tag: "OriginID", Path: "OriginID", Type: utils.MetaVariable,
+						Value: NewRSRParsersMustCompile("~*req.3", true, utils.INFIELD_SEP), Mandatory: true},
+					{Tag: "RequestType", Path: "RequestType", Type: utils.MetaVariable,
+						Value: NewRSRParsersMustCompile("~*req.4", true, utils.INFIELD_SEP), Mandatory: true},
+					{Tag: "Tenant", Path: "Tenant", Type: utils.MetaVariable,
+						Value: NewRSRParsersMustCompile("~*req.6", true, utils.INFIELD_SEP), Mandatory: true},
+					{Tag: "Category", Path: "Category", Type: utils.MetaVariable,
+						Value: NewRSRParsersMustCompile("~*req.7", true, utils.INFIELD_SEP), Mandatory: true},
+					{Tag: "Account", Path: "Account", Type: utils.MetaVariable,
+						Value: NewRSRParsersMustCompile("~*req.8", true, utils.INFIELD_SEP), Mandatory: true},
+					{Tag: "Subject", Path: "Subject", Type: utils.MetaVariable,
+						Value: NewRSRParsersMustCompile("~*req.9", true, utils.INFIELD_SEP), Mandatory: true},
+					{Tag: "Destination", Path: "Destination", Type: utils.MetaVariable,
+						Value: NewRSRParsersMustCompile("~*req.10", true, utils.INFIELD_SEP), Mandatory: true},
+					{Tag: "SetupTime", Path: "SetupTime", Type: utils.MetaVariable,
+						Value: NewRSRParsersMustCompile("~*req.11", true, utils.INFIELD_SEP), Mandatory: true},
+					{Tag: "AnswerTime", Path: "AnswerTime", Type: utils.MetaVariable,
+						Value: NewRSRParsersMustCompile("~*req.12", true, utils.INFIELD_SEP), Mandatory: true},
+					{Tag: "Usage", Path: "Usage", Type: utils.MetaVariable,
+						Value: NewRSRParsersMustCompile("~*req.13", true, utils.INFIELD_SEP), Mandatory: true},
+				},
+				CacheDumpFields: make([]*FCTemplate, 0),
+			},
+			&EventReaderCfg{
+				ID:             "file_reader1",
+				Type:           utils.MetaFileCSV,
+				FieldSep:       ",",
+				RunDelay:       time.Duration(-1),
+				ConcurrentReqs: 1024,
+				SourcePath:     "/tmp/ers/in",
+				ProcessedPath:  "/tmp/ers/out",
+				XmlRootPath:    utils.HierarchyPath{utils.EmptyString},
+				Tenant:         nil,
+				Timezone:       utils.EmptyString,
+				Filters:        nil,
+				Flags:          utils.FlagsWithParams{},
+				Fields: []*FCTemplate{
+					{Tag: "CustomTag2", Path: "CustomPath2", Type: utils.MetaVariable,
+						Value: NewRSRParsersMustCompile("CustomValue2", true, utils.INFIELD_SEP), Mandatory: true},
+				},
+				CacheDumpFields: make([]*FCTemplate, 0),
+			},
+		},
+	}
+
+	cfgJSONStr := `{
+"ers": {
+	"enabled": true,
+	"sessions_conns":["conn1"],
+	"readers": [
+		{
+			"id": "file_reader1",
+			"run_delay":  "-1",
+			"type": "*file_csv",
+			"source_path": "/tmp/ers/in",
+			"processed_path": "/tmp/ers/out",
+			"fields":[
+				{"tag": "CustomTag1", "path": "CustomPath1", "type": "*variable", "value": "CustomValue1", "mandatory": true},
+			],
+			"cache_dump_fields": [],
+		},
+		{
+			"id": "file_reader1",
+			"run_delay":  "-1",
+			"type": "*file_csv",
+			"source_path": "/tmp/ers/in",
+			"processed_path": "/tmp/ers/out",
+			"fields":[
+				{"tag": "CustomTag2", "path": "CustomPath2", "type": "*variable", "value": "CustomValue2", "mandatory": true},
+			],
+			"cache_dump_fields": [],
+		},
+	],
+}
+}`
+
+	if cfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedERsCfg, cfg.ersCfg) {
+		t.Errorf("Expected: %+v ,\n recived: %+v", utils.ToJSON(expectedERsCfg), utils.ToJSON(cfg.ersCfg))
+	}
+
 }
