@@ -417,22 +417,30 @@ func updateDiamMsgFromNavMap(m *diam.Message, navMp *utils.OrderedNavigableMap, 
 	// write reply into message
 	pathIdx := make(map[string]int) // group items for same path
 	for _, val := range navMp.Values() {
-		nmItms, isNMItems := val.([]*config.NMItem)
+		nmItms, isNMItems := val.(*utils.NMSlice)
 		if !isNMItems {
 			return fmt.Errorf("cannot encode reply value: %s, err: not NMItems", utils.ToJSON(val))
 		}
 		// find out the first itm which is not an attribute
 		var itm *config.NMItem
-		if len(nmItms) == 1 {
-			itm = nmItms[0]
+		if len(*nmItms) == 1 {
+			var isNMItem bool
+			itm, isNMItem = (*nmItms)[0].(*config.NMItem)
+			if !isNMItem {
+				return fmt.Errorf("cannot encode reply value: %s, err: not NMItems", utils.ToJSON(val))
+			}
 		} else { // only for groups
-			for i, cfgItm := range nmItms {
-				itmPath := strings.Join(cfgItm.Path, utils.NestingSep)
+			for i, cfgItm := range *nmItms {
+				cfgIt, isNMItem := cfgItm.(*config.NMItem)
+				if !isNMItem {
+					return fmt.Errorf("cannot encode reply value: %s, err: not NMItems", utils.ToJSON(val))
+				}
+				itmPath := strings.Join(cfgIt.Path, utils.NestingSep)
 				if i == 0 { // path is common, increase it only once
 					pathIdx[itmPath]++
 				}
 				if i == pathIdx[itmPath]-1 { // revert from multiple items to only one per config path
-					itm = cfgItm
+					itm = cfgIt
 					break
 				}
 			}

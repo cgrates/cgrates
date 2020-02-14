@@ -36,15 +36,6 @@ type NavigableMapper interface {
 	AsNavigableMap() NavigableMap
 }
 
-// dataStorage is the DataProvider that can be updated
-type dataStorage interface {
-	DataProvider
-
-	Set(fldPath []string, val interface{}) error
-	Remove(fldPath []string) error
-	GetKeys(nesteed bool) []string
-}
-
 // DPDynamicInterface returns the value of the field if the path is dynamic
 func DPDynamicInterface(dnVal string, dP DataProvider) (interface{}, error) {
 	if strings.HasPrefix(dnVal, DynamicDataPrefix) {
@@ -61,4 +52,24 @@ func DPDynamicString(dnVal string, dP DataProvider) (string, error) {
 		return dP.FieldAsString(strings.Split(dnVal, NestingSep))
 	}
 	return dnVal, nil
+}
+
+// NMType the type used for navigable Map
+type NMType byte
+
+const (
+	NMInterfaceType NMType = iota
+	NMMapType
+	NMSliceType
+)
+
+// NM the basic interface
+type NM interface {
+	String() string
+	Interface() interface{}
+	Field(path []string) (val NM, err error)
+	Set(path []string, val NM, overwrite bool) (err error)
+	Remove(path []string) (err error)
+	Type() NMType
+	Empty() bool
 }

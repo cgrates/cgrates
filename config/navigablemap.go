@@ -34,6 +34,20 @@ type NMItem struct {
 	Config *FCTemplate // so we can store additional configuration
 }
 
+func (nmi *NMItem) String() string         { return utils.IfaceAsString(nmi) }
+func (nmi *NMItem) Interface() interface{} { return nmi.Data }
+func (nmi *NMItem) Field(path []string) (val utils.NM, err error) {
+	return nil, utils.ErrNotImplemented
+}
+func (nmi *NMItem) Set(path []string, val utils.NM, overwrite bool) (err error) {
+	return utils.ErrNotImplemented
+}
+func (nmi *NMItem) Remove(path []string) (err error) {
+	return utils.ErrNotImplemented
+}
+func (nmi *NMItem) Type() utils.NMType { return utils.NMInterfaceType }
+func (nmi *NMItem) Empty() bool        { return nmi != nil && nmi.Data != nil }
+
 // XMLElement is specially crafted to be automatically marshalled by encoding/xml
 type XMLElement struct {
 	XMLName    xml.Name
