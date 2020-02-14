@@ -281,8 +281,7 @@ func (rdr *FWVFileER) processTrailer(file *os.File, rowNr, evsPosted int, absPat
 	reqVars := make(map[string]interface{})
 	rdr.trailerDP = config.NewFWVProvider(record)
 	agReq := agents.NewAgentRequest(
-		nil, reqVars,
-		nil, nil, rdr.Config().Tenant,
+		nil, reqVars, nil, nil, rdr.Config().Tenant,
 		rdr.cgrCfg.GeneralCfg().DefaultTenant,
 		utils.FirstNonEmpty(rdr.Config().Timezone,
 			rdr.cgrCfg.GeneralCfg().DefaultTimezone),
@@ -320,8 +319,7 @@ func (rdr *FWVFileER) createHeaderMap(record string, rowNr, evsPosted int, absPa
 	reqVars := make(map[string]interface{})
 	rdr.headerDP = config.NewFWVProvider(record)
 	agReq := agents.NewAgentRequest(
-		nil, reqVars,
-		nil, nil, rdr.Config().Tenant,
+		nil, reqVars, nil, nil, rdr.Config().Tenant,
 		rdr.cgrCfg.GeneralCfg().DefaultTenant,
 		utils.FirstNonEmpty(rdr.Config().Timezone,
 			rdr.cgrCfg.GeneralCfg().DefaultTimezone),

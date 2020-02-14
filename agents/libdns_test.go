@@ -175,7 +175,7 @@ func TestUpdateDNSMsgFromNM(t *testing.T) {
 	m := new(dns.Msg)
 	m.SetQuestion("3.6.9.4.7.1.7.1.5.6.8.9.4.e164.arpa.", dns.TypeNAPTR)
 
-	nM := utils.NewOrderedNavigableMap(nil)
+	nM := utils.NewOrderedNavigableMap()
 	itm := &config.NMItem{
 		Path: []string{},
 		Data: "Val1",
@@ -186,14 +186,14 @@ func TestUpdateDNSMsgFromNM(t *testing.T) {
 		t.Error(err)
 	}
 
-	nM = utils.NewOrderedNavigableMap(nil)
+	nM = utils.NewOrderedNavigableMap()
 	nM.Set([]string{"Path"}, "test")
 	if err := updateDNSMsgFromNM(m, nM); err == nil ||
 		err.Error() != `cannot cast val: "test" into []*config.NMItem` {
 		t.Error(err)
 	}
 
-	nM = utils.NewOrderedNavigableMap(nil)
+	nM = utils.NewOrderedNavigableMap()
 	itm = &config.NMItem{
 		Path: []string{utils.Rcode},
 		Data: 10,
@@ -206,7 +206,7 @@ func TestUpdateDNSMsgFromNM(t *testing.T) {
 		t.Errorf("expecting: <10>, received: <%+v>", m.Rcode)
 	}
 
-	nM = utils.NewOrderedNavigableMap(nil)
+	nM = utils.NewOrderedNavigableMap()
 	itm = &config.NMItem{
 		Path: []string{utils.Rcode},
 		Data: "RandomValue",
@@ -217,7 +217,7 @@ func TestUpdateDNSMsgFromNM(t *testing.T) {
 		t.Error(err)
 	}
 
-	nM = utils.NewOrderedNavigableMap(nil)
+	nM = utils.NewOrderedNavigableMap()
 	itm = &config.NMItem{
 		Path: []string{utils.Order},
 		Data: "RandomValue",
@@ -228,7 +228,7 @@ func TestUpdateDNSMsgFromNM(t *testing.T) {
 		t.Error(err)
 	}
 
-	nM = utils.NewOrderedNavigableMap(nil)
+	nM = utils.NewOrderedNavigableMap()
 	itm = &config.NMItem{
 		Path: []string{utils.Preference},
 		Data: "RandomValue",
@@ -241,7 +241,7 @@ func TestUpdateDNSMsgFromNM(t *testing.T) {
 
 	m = new(dns.Msg)
 	m.SetQuestion("3.6.9.4.7.1.7.1.5.6.8.9.4.e164.arpa.", dns.TypeA)
-	nM = utils.NewOrderedNavigableMap(nil)
+	nM = utils.NewOrderedNavigableMap()
 	itm = &config.NMItem{
 		Path: []string{utils.Order},
 		Data: 10,
@@ -252,7 +252,7 @@ func TestUpdateDNSMsgFromNM(t *testing.T) {
 		t.Error(err)
 	}
 
-	nM = utils.NewOrderedNavigableMap(nil)
+	nM = utils.NewOrderedNavigableMap()
 	itm = &config.NMItem{
 		Path: []string{utils.Preference},
 		Data: 10,
@@ -263,7 +263,7 @@ func TestUpdateDNSMsgFromNM(t *testing.T) {
 		t.Error(err)
 	}
 
-	nM = utils.NewOrderedNavigableMap(nil)
+	nM = utils.NewOrderedNavigableMap()
 	itm = &config.NMItem{
 		Path: []string{utils.Flags},
 		Data: 10,
@@ -274,7 +274,7 @@ func TestUpdateDNSMsgFromNM(t *testing.T) {
 		t.Error(err)
 	}
 
-	nM = utils.NewOrderedNavigableMap(nil)
+	nM = utils.NewOrderedNavigableMap()
 	itm = &config.NMItem{
 		Path: []string{utils.Service},
 		Data: 10,
@@ -285,7 +285,7 @@ func TestUpdateDNSMsgFromNM(t *testing.T) {
 		t.Error(err)
 	}
 
-	nM = utils.NewOrderedNavigableMap(nil)
+	nM = utils.NewOrderedNavigableMap()
 	itm = &config.NMItem{
 		Path: []string{utils.Regexp},
 		Data: 10,
@@ -296,7 +296,7 @@ func TestUpdateDNSMsgFromNM(t *testing.T) {
 		t.Error(err)
 	}
 
-	nM = utils.NewOrderedNavigableMap(nil)
+	nM = utils.NewOrderedNavigableMap()
 	itm = &config.NMItem{
 		Path: []string{utils.Replacement},
 		Data: 10,

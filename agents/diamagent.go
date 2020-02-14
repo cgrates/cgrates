@@ -198,8 +198,8 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 			da.aReqsLck.Unlock()
 		}()
 	}
-	cgrRplyNM := utils.NewOrderedNavigableMap(nil)
-	rply := utils.NewOrderedNavigableMap(nil) // share it among different processors
+	rply := utils.NewOrderedNavigableMap() // share it among different processors
+	cgrRplyNM := &utils.NavigableMap{}
 	var processed bool
 	for _, reqProcessor := range da.cgrCfg.DiameterAgentCfg().RequestProcessors {
 		var lclProcessed bool
@@ -442,10 +442,7 @@ func (da *DiameterAgent) V1DisconnectSession(args utils.AttrDisconnectSession, r
 	dmd := msg.(*diamMsgData)
 	aReq := NewAgentRequest(
 		newDADataProvider(dmd.c, dmd.m),
-		dmd.vars,
-		utils.NewOrderedNavigableMap(nil),
-		utils.NewOrderedNavigableMap(nil),
-		nil,
+		dmd.vars, nil, nil, nil,
 		da.cgrCfg.GeneralCfg().DefaultTenant,
 		da.cgrCfg.GeneralCfg().DefaultTimezone, da.filterS, nil, nil)
 	if err = aReq.SetFields(da.cgrCfg.DiameterAgentCfg().Templates[da.cgrCfg.DiameterAgentCfg().ASRTemplate]); err != nil {

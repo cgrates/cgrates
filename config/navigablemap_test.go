@@ -18,228 +18,248 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"encoding/xml"
 	"reflect"
 	"testing"
 
 	"github.com/cgrates/cgrates/utils"
 )
 
-// func TestNavMapAsXMLElements(t *testing.T) {
-// 	nM := &utils.OrderedNavigableMap{
-// 		nm: utils.NavigableMap{
-// 			"FirstLevel": map[string]interface{}{
-// 				"SecondLevel": map[string]interface{}{
-// 					"ThirdLevel": map[string]interface{}{
-// 						"Fld1": []*NMItem{
-// 							&NMItem{Path: []string{"FirstLevel", "SecondLevel", "ThirdLevel", "Fld1"},
-// 								Data: "Val1"}},
-// 					},
-// 				},
-// 			},
-// 			"FirstLevel2": map[string]interface{}{
-// 				"SecondLevel2": map[string]interface{}{
-// 					"Field2": []*NMItem{
-// 						&NMItem{Path: []string{"FirstLevel2", "SecondLevel2", "Field2"},
-// 							Data:   "attrVal1",
-// 							Config: &FCTemplate{Tag: "AttributeTest", AttributeID: "attribute1"}},
-// 						&NMItem{Path: []string{"FirstLevel2", "SecondLevel2", "Field2"},
-// 							Data: "Value2"}},
-// 				},
-// 				"Field3": []*NMItem{
-// 					&NMItem{Path: []string{"FirstLevel2", "Field3"},
-// 						Data: "Value3"}},
-// 				"Field5": []*NMItem{
-// 					&NMItem{Path: []string{"FirstLevel2", "Field5"},
-// 						Data: "Value5"},
-// 					&NMItem{Path: []string{"FirstLevel2", "Field5"},
-// 						Data:   "attrVal5",
-// 						Config: &FCTemplate{Tag: "AttributeTest", AttributeID: "attribute5"}}},
-// 				"Field6": []*NMItem{
-// 					&NMItem{Path: []string{"FirstLevel2", "Field6"},
-// 						Data:   "Value6",
-// 						Config: &FCTemplate{Tag: "NewBranchTest", NewBranch: true}},
-// 					&NMItem{Path: []string{"FirstLevel2", "Field6"},
-// 						Data:   "attrVal6",
-// 						Config: &FCTemplate{Tag: "AttributeTest", AttributeID: "attribute6"}},
-// 				},
-// 			},
-// 			"Field4": []*NMItem{
-// 				&NMItem{Path: []string{"Field4"},
-// 					Data: "Val4"},
-// 				&NMItem{Path: []string{"Field4"},
-// 					Data:   "attrVal2",
-// 					Config: &FCTemplate{Tag: "AttributeTest", AttributeID: "attribute2"}}},
-// 		},
-// 		order: [][]string{
-// 			[]string{"FirstLevel2", "SecondLevel2", "Field2"},
-// 			[]string{"FirstLevel", "SecondLevel", "ThirdLevel", "Fld1"},
-// 			[]string{"FirstLevel2", "Field3"},
-// 			[]string{"FirstLevel2", "Field5"},
-// 			[]string{"Field4"},
-// 			[]string{"FirstLevel2", "Field6"},
-// 		},
-// 	}
-// 	eXMLElmnts := []*XMLElement{
-// 		&XMLElement{
-// 			XMLName: xml.Name{Local: nM.order[0][0]},
-// 			Elements: []*XMLElement{
-// 				&XMLElement{
-// 					XMLName: xml.Name{Local: nM.order[0][1]},
-// 					Elements: []*XMLElement{
-// 						&XMLElement{
-// 							XMLName: xml.Name{Local: nM.order[0][2]},
-// 							Attributes: []*xml.Attr{
-// 								&xml.Attr{
-// 									Name:  xml.Name{Local: "attribute1"},
-// 									Value: "attrVal1",
-// 								},
-// 							},
-// 							Value: "Value2",
-// 						},
-// 					},
-// 				},
-// 				&XMLElement{
-// 					XMLName: xml.Name{Local: nM.order[2][1]},
-// 					Value:   "Value3",
-// 				},
-// 				&XMLElement{
-// 					XMLName: xml.Name{Local: nM.order[3][1]},
-// 					Attributes: []*xml.Attr{
-// 						&xml.Attr{
-// 							Name:  xml.Name{Local: "attribute5"},
-// 							Value: "attrVal5",
-// 						},
-// 					},
-// 					Value: "Value5",
-// 				},
-// 			},
-// 		},
-// 		&XMLElement{
-// 			XMLName: xml.Name{Local: nM.order[1][0]},
-// 			Elements: []*XMLElement{
-// 				&XMLElement{
-// 					XMLName: xml.Name{Local: nM.order[1][1]},
-// 					Elements: []*XMLElement{
-// 						&XMLElement{
-// 							XMLName: xml.Name{Local: nM.order[1][2]},
-// 							Elements: []*XMLElement{
-// 								&XMLElement{
-// 									XMLName: xml.Name{Local: nM.order[1][3]},
-// 									Value:   "Val1",
-// 								},
-// 							},
-// 						},
-// 					},
-// 				},
-// 			},
-// 		},
-// 		&XMLElement{
-// 			XMLName: xml.Name{Local: nM.order[4][0]},
-// 			Attributes: []*xml.Attr{
-// 				&xml.Attr{
-// 					Name:  xml.Name{Local: "attribute2"},
-// 					Value: "attrVal2",
-// 				},
-// 			},
-// 			Value: "Val4",
-// 		},
-// 		&XMLElement{
-// 			XMLName: xml.Name{Local: nM.order[5][0]},
-// 			Elements: []*XMLElement{
-// 				&XMLElement{
-// 					XMLName: xml.Name{Local: nM.order[5][1]},
-// 					Attributes: []*xml.Attr{
-// 						&xml.Attr{
-// 							Name:  xml.Name{Local: "attribute6"},
-// 							Value: "attrVal6",
-// 						},
-// 					},
-// 					Value: "Value6",
-// 				},
-// 			},
-// 		},
-// 	}
-// 	xmlEnts, err := nM.AsXMLElements()
-// 	if err != nil {
-// 		t.Error(err)
-// 	} else if !reflect.DeepEqual(eXMLElmnts, xmlEnts) {
-// 		t.Errorf("expecting: %s, received: %s", utils.ToJSON(eXMLElmnts), utils.ToJSON(xmlEnts))
-// 	}
-// 	eXML := []byte(`<FirstLevel2>
-//   <SecondLevel2>
-//     <Field2 attribute1="attrVal1">Value2</Field2>
-//   </SecondLevel2>
-//   <Field3>Value3</Field3>
-//   <Field5 attribute5="attrVal5">Value5</Field5>
-// </FirstLevel2>
-// <FirstLevel>
-//   <SecondLevel>
-//     <ThirdLevel>
-//       <Fld1>Val1</Fld1>
-//     </ThirdLevel>
-//   </SecondLevel>
-// </FirstLevel>
-// <Field4 attribute2="attrVal2">Val4</Field4>
-// <FirstLevel2>
-//   <Field6 attribute6="attrVal6">Value6</Field6>
-// </FirstLevel2>`)
-// 	if output, err := xml.MarshalIndent(xmlEnts, "", "  "); err != nil {
-// 		t.Error(err)
-// 	} else if !reflect.DeepEqual(eXML, output) {
-// 		t.Errorf("expecting: \n%s, received: \n%s\n", string(eXML), string(output))
-// 	}
-// }
-
-func TestNavMapAsCGREvent(t *testing.T) {
-	nM := utils.NewOrderedNavigableMap(utils.NavigableMap{
-		"FirstLevel": map[string]interface{}{
-			"SecondLevel": map[string]interface{}{
-				"ThirdLevel": map[string]interface{}{
-					"Fld1": []*NMItem{
-						&NMItem{Path: []string{"FirstLevel", "SecondLevel", "ThirdLevel", "Fld1"},
-							Data: "Val1"}},
+func TestNavMapAsXMLElements(t *testing.T) {
+	nM := utils.NewOrderedNavigableMap()
+	order := [][]string{
+		[]string{"FirstLevel2", "SecondLevel2", "Field2"},
+		[]string{"FirstLevel", "SecondLevel", "ThirdLevel", "Fld1"},
+		[]string{"FirstLevel2", "Field3"},
+		[]string{"FirstLevel2", "Field5"},
+		[]string{"Field4"},
+		[]string{"FirstLevel2", "Field6"},
+	}
+	if err := nM.Set(order[0], []*NMItem{
+		&NMItem{Path: order[0],
+			Data:   "attrVal1",
+			Config: &FCTemplate{Tag: "AttributeTest", AttributeID: "attribute1"}},
+		&NMItem{Path: order[0],
+			Data: "Value2"}}); err != nil {
+		t.Error(err)
+	}
+	if err := nM.Set(order[1], []*NMItem{
+		&NMItem{Path: order[1],
+			Data: "Val1"}}); err != nil {
+		t.Error(err)
+	}
+	if err := nM.Set(order[2], []*NMItem{
+		&NMItem{Path: order[2],
+			Data: "Value3"}}); err != nil {
+		t.Error(err)
+	}
+	if err := nM.Set(order[3], []*NMItem{
+		&NMItem{Path: order[3],
+			Data: "Value5"},
+		&NMItem{Path: order[3],
+			Data:   "attrVal5",
+			Config: &FCTemplate{Tag: "AttributeTest", AttributeID: "attribute5"}}}); err != nil {
+		t.Error(err)
+	}
+	if err := nM.Set(order[4], []*NMItem{
+		&NMItem{Path: order[4],
+			Data: "Val4"},
+		&NMItem{Path: order[4],
+			Data:   "attrVal2",
+			Config: &FCTemplate{Tag: "AttributeTest", AttributeID: "attribute2"}}}); err != nil {
+		t.Error(err)
+	}
+	if err := nM.Set(order[5], []*NMItem{
+		&NMItem{Path: order[5],
+			Data:   "Value6",
+			Config: &FCTemplate{Tag: "NewBranchTest", NewBranch: true}},
+		&NMItem{Path: order[5],
+			Data:   "attrVal6",
+			Config: &FCTemplate{Tag: "AttributeTest", AttributeID: "attribute6"}}}); err != nil {
+		t.Error(err)
+	}
+	eXMLElmnts := []*XMLElement{
+		&XMLElement{
+			XMLName: xml.Name{Local: order[0][0]},
+			Elements: []*XMLElement{
+				&XMLElement{
+					XMLName: xml.Name{Local: order[0][1]},
+					Elements: []*XMLElement{
+						&XMLElement{
+							XMLName: xml.Name{Local: order[0][2]},
+							Attributes: []*xml.Attr{
+								&xml.Attr{
+									Name:  xml.Name{Local: "attribute1"},
+									Value: "attrVal1",
+								},
+							},
+							Value: "Value2",
+						},
+					},
+				},
+				&XMLElement{
+					XMLName: xml.Name{Local: order[2][1]},
+					Value:   "Value3",
+				},
+				&XMLElement{
+					XMLName: xml.Name{Local: order[3][1]},
+					Attributes: []*xml.Attr{
+						&xml.Attr{
+							Name:  xml.Name{Local: "attribute5"},
+							Value: "attrVal5",
+						},
+					},
+					Value: "Value5",
 				},
 			},
 		},
-		"FirstLevel2": map[string]interface{}{
-			"SecondLevel2": map[string]interface{}{
-				"Field2": []*NMItem{
-					&NMItem{Path: []string{"FirstLevel2", "SecondLevel2", "Field2"},
-						Data: "attrVal1",
-						Config: &FCTemplate{Tag: "AttributeTest",
-							AttributeID: "attribute1"}},
-					&NMItem{Path: []string{"FirstLevel2", "SecondLevel2", "Field2"},
-						Data: "Value2"}},
-			},
-			"Field3": []*NMItem{
-				&NMItem{Path: []string{"FirstLevel2", "Field3"},
-					Data: "Value3"}},
-			"Field5": []*NMItem{
-				&NMItem{Path: []string{"FirstLevel2", "Field5"},
-					Data: "Value5"},
-				&NMItem{Path: []string{"FirstLevel2", "Field5"},
-					Data: "attrVal5",
-					Config: &FCTemplate{Tag: "AttributeTest",
-						AttributeID: "attribute5"}}},
-			"Field6": []*NMItem{
-				&NMItem{Path: []string{"FirstLevel2", "Field6"},
-					Data: "Value6",
-					Config: &FCTemplate{Tag: "NewBranchTest",
-						NewBranch: true}},
-				&NMItem{Path: []string{"FirstLevel2", "Field6"},
-					Data: "attrVal6",
-					Config: &FCTemplate{Tag: "AttributeTest",
-						AttributeID: "attribute6"}},
+		&XMLElement{
+			XMLName: xml.Name{Local: order[1][0]},
+			Elements: []*XMLElement{
+				&XMLElement{
+					XMLName: xml.Name{Local: order[1][1]},
+					Elements: []*XMLElement{
+						&XMLElement{
+							XMLName: xml.Name{Local: order[1][2]},
+							Elements: []*XMLElement{
+								&XMLElement{
+									XMLName: xml.Name{Local: order[1][3]},
+									Value:   "Val1",
+								},
+							},
+						},
+					},
+				},
 			},
 		},
-		"Field4": []*NMItem{
-			&NMItem{Path: []string{"Field4"},
-				Data: "Val4"},
-			&NMItem{Path: []string{"Field4"},
-				Data: "attrVal2",
-				Config: &FCTemplate{Tag: "AttributeTest",
-					AttributeID: "attribute2"}}},
-	})
+		&XMLElement{
+			XMLName: xml.Name{Local: order[4][0]},
+			Attributes: []*xml.Attr{
+				&xml.Attr{
+					Name:  xml.Name{Local: "attribute2"},
+					Value: "attrVal2",
+				},
+			},
+			Value: "Val4",
+		},
+		&XMLElement{
+			XMLName: xml.Name{Local: order[5][0]},
+			Elements: []*XMLElement{
+				&XMLElement{
+					XMLName: xml.Name{Local: order[5][1]},
+					Attributes: []*xml.Attr{
+						&xml.Attr{
+							Name:  xml.Name{Local: "attribute6"},
+							Value: "attrVal6",
+						},
+					},
+					Value: "Value6",
+				},
+			},
+		},
+	}
+	xmlEnts, err := NMAsXMLElements(nM)
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eXMLElmnts, xmlEnts) {
+		t.Errorf("expecting: %s, received: %s", utils.ToJSON(eXMLElmnts), utils.ToJSON(xmlEnts))
+	}
+	eXML := []byte(`<FirstLevel2>
+  <SecondLevel2>
+    <Field2 attribute1="attrVal1">Value2</Field2>
+  </SecondLevel2>
+  <Field3>Value3</Field3>
+  <Field5 attribute5="attrVal5">Value5</Field5>
+</FirstLevel2>
+<FirstLevel>
+  <SecondLevel>
+    <ThirdLevel>
+      <Fld1>Val1</Fld1>
+    </ThirdLevel>
+  </SecondLevel>
+</FirstLevel>
+<Field4 attribute2="attrVal2">Val4</Field4>
+<FirstLevel2>
+  <Field6 attribute6="attrVal6">Value6</Field6>
+</FirstLevel2>`)
+	if output, err := xml.MarshalIndent(xmlEnts, "", "  "); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eXML, output) {
+		t.Errorf("expecting: \n%s, received: \n%s\n", string(eXML), string(output))
+	}
+}
+
+func TestNavMapAsCGREvent(t *testing.T) {
+	nM := utils.NewOrderedNavigableMap()
+	path := []string{"FirstLevel", "SecondLevel", "ThirdLevel", "Fld1"}
+	if err := nM.Set(path, []*NMItem{{
+		Path: path,
+		Data: "Val1",
+	}}); err != nil {
+		t.Error(err)
+	}
+
+	path = []string{"FirstLevel2", "SecondLevel2", "Field2"}
+	if err := nM.Set(path, []*NMItem{{
+		Path: path,
+		Data: "attrVal1",
+		Config: &FCTemplate{Tag: "AttributeTest",
+			AttributeID: "attribute1"},
+	}, {
+		Path: path,
+		Data: "Value2",
+	}}); err != nil {
+		t.Error(err)
+	}
+
+	path = []string{"FirstLevel2", "Field3"}
+	if err := nM.Set(path, []*NMItem{{
+		Path: path,
+		Data: "Value3",
+	}}); err != nil {
+		t.Error(err)
+	}
+
+	path = []string{"FirstLevel2", "Field5"}
+	if err := nM.Set(path, []*NMItem{{
+		Path: path,
+		Data: "Value5",
+	}, {
+		Path: path,
+		Data: "attrVal5",
+		Config: &FCTemplate{Tag: "AttributeTest",
+			AttributeID: "attribute5"},
+	}}); err != nil {
+		t.Error(err)
+	}
+
+	path = []string{"FirstLevel2", "Field6"}
+	if err := nM.Set(path, []*NMItem{{
+		Path: path,
+		Data: "Value6",
+		Config: &FCTemplate{Tag: "NewBranchTest",
+			NewBranch: true},
+	}, {
+		Path: path,
+		Data: "attrVal6",
+		Config: &FCTemplate{Tag: "AttributeTest",
+			AttributeID: "attribute6"},
+	}}); err != nil {
+		t.Error(err)
+	}
+
+	path = []string{"Field4"}
+	if err := nM.Set(path, []*NMItem{{
+		Path: path,
+		Data: "Val4",
+	}, {
+		Path: path,
+		Data: "attrVal2",
+		Config: &FCTemplate{Tag: "AttributeTest",
+			AttributeID: "attribute2"},
+	}}); err != nil {
+		t.Error(err)
+	}
 	eEv := map[string]interface{}{
 		"FirstLevel2.SecondLevel2.Field2":        "Value2",
 		"FirstLevel.SecondLevel.ThirdLevel.Fld1": "Val1",

@@ -45,8 +45,8 @@ func TestProcessRequest(t *testing.T) {
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filters := engine.NewFilterS(config.CgrConfig(), nil, nil, nil, dm) // no need for filterS but stiil try to configure the dm :D
 
-	cgrRplyNM := utils.NewOrderedNavigableMap(nil)
-	rply := utils.NewOrderedNavigableMap(nil)
+	cgrRplyNM := &utils.NavigableMap{}
+	rply := utils.NewOrderedNavigableMap()
 	diamDP := utisl.NavigableMap(map[string]interface{}{
 		"SessionId":   "123456",
 		"Account":     "1001",
@@ -209,8 +209,8 @@ func TestProcessRequest(t *testing.T) {
 	}}
 
 	reqProcessor.Flags, _ = utils.FlagsWithParamsFromSlice([]string{utils.MetaInitiate, utils.MetaAccounts, utils.MetaAttributes})
-	cgrRplyNM = utils.NewOrderedNavigableMap(nil)
-	rply = utils.NewOrderedNavigableMap(nil)
+	cgrRplyNM = utils.NavigableMap{}
+	rply = utils.NewOrderedNavigableMap()
 
 	agReq = NewAgentRequest(diamDP, reqVars, cgrRplyNM, rply,
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -230,8 +230,8 @@ func TestProcessRequest(t *testing.T) {
 	}
 
 	reqProcessor.Flags, _ = utils.FlagsWithParamsFromSlice([]string{utils.MetaUpdate, utils.MetaAccounts, utils.MetaAttributes})
-	cgrRplyNM = utils.NewOrderedNavigableMap(nil)
-	rply = utils.NewOrderedNavigableMap(nil)
+	cgrRplyNM = utils.NavigableMap{}
+	rply = utils.NewOrderedNavigableMap()
 
 	sS = &testMockSessionConn{calls: map[string]func(arg interface{}, rply interface{}) error{
 		utils.SessionSv1UpdateSession: func(arg interface{}, rply interface{}) error {
@@ -319,8 +319,8 @@ func TestProcessRequest(t *testing.T) {
 
 	reqProcessor.Flags, _ = utils.FlagsWithParamsFromSlice([]string{utils.MetaTerminate, utils.MetaAccounts, utils.MetaAttributes, utils.MetaCDRs})
 	reqProcessor.ReplyFields = []*config.FCTemplate{&config.FCTemplate{Tag: "ResultCode", Type: utils.META_CONSTANT, Path: "ResultCode", Value: config.NewRSRParsersMustCompile("2001", true, utils.INFIELD_SEP)}}
-	cgrRplyNM = utils.NewOrderedNavigableMap(nil)
-	rply = utils.NewOrderedNavigableMap(nil)
+	cgrRplyNM = utils.NavigableMap{}
+	rply = utils.NewOrderedNavigableMap()
 
 	sS = &testMockSessionConn{calls: map[string]func(arg interface{}, rply interface{}) error{
 		utils.SessionSv1ProcessCDR: func(arg interface{}, rply interface{}) error {
@@ -420,8 +420,8 @@ func TestProcessRequest(t *testing.T) {
 	}
 
 	reqProcessor.Flags, _ = utils.FlagsWithParamsFromSlice([]string{utils.MetaMessage, utils.MetaAccounts, utils.MetaAttributes})
-	cgrRplyNM = utils.NewOrderedNavigableMap(nil)
-	rply = utils.NewOrderedNavigableMap(nil)
+	cgrRplyNM = utils.NavigableMap{}
+	rply = utils.NewOrderedNavigableMap()
 
 	sS = &testMockSessionConn{calls: map[string]func(arg interface{}, rply interface{}) error{
 		utils.SessionSv1ProcessMessage: func(arg interface{}, rply interface{}) error {
