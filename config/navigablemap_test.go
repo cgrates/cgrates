@@ -17,14 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package config
 
-import (
-	"encoding/xml"
-	"reflect"
-	"testing"
-
-	"github.com/cgrates/cgrates/utils"
-)
-
+/*
 func TestNavMapAsXMLElements(t *testing.T) {
 	nM := utils.NewOrderedNavigableMap()
 	order := [][]string{
@@ -275,3 +268,4 @@ func TestNavMapAsCGREvent(t *testing.T) {
 		t.Errorf("expecting: %+v, \nreceived: %+v", utils.ToJSON(eEv), utils.ToJSON(cgrEv.Event))
 	}
 }
+*/

@@ -173,12 +173,12 @@ func TestAgentRequestSetFields(t *testing.T) {
 		t.Error(err)
 	} else if val, err := ar.Vars.FieldAsInterface([]string{"Account"}); err != nil {
 		t.Error(err)
-	} else if nm, ok := val.([]*config.NMItem); !ok {
+	} else if nm, ok := val.(*utils.NMSlice); !ok {
 		t.Error("Expecting NM items")
-	} else if len(nm) != 1 {
+	} else if len(*nm) != 1 {
 		t.Error("Expecting one item")
-	} else if nm[0].Data != "1009" {
-		t.Error("Expecting 1009, received: ", nm[0].Data)
+	} else if (*nm)[0].Interface() != "1009" {
+		t.Error("Expecting 1009, received: ", (*nm)[0])
 	}
 
 	// case utils.MetaCgreq
@@ -194,12 +194,12 @@ func TestAgentRequestSetFields(t *testing.T) {
 		t.Error(err)
 	} else if val, err := ar.CGRRequest.FieldAsInterface([]string{"Account"}); err != nil {
 		t.Error(err)
-	} else if nm, ok := val.([]*config.NMItem); !ok {
+	} else if nm, ok := val.(*utils.NMSlice); !ok {
 		t.Error("Expecting NM items")
-	} else if len(nm) != 1 {
+	} else if len(*nm) != 1 {
 		t.Error("Expecting one item")
-	} else if nm[0].Data != "1009" {
-		t.Error("Expecting 1009, received: ", nm[0].Data)
+	} else if (*nm)[0].Interface() != "1009" {
+		t.Error("Expecting 1009, received: ", (*nm)[0])
 	}
 
 	// case utils.MetaCgrep
@@ -215,12 +215,12 @@ func TestAgentRequestSetFields(t *testing.T) {
 		t.Error(err)
 	} else if val, err := ar.CGRReply.FieldAsInterface([]string{"Account"}); err != nil {
 		t.Error(err)
-	} else if nm, ok := val.([]*config.NMItem); !ok {
+	} else if nm, ok := val.(*utils.NMSlice); !ok {
 		t.Error("Expecting NM items")
-	} else if len(nm) != 1 {
+	} else if len(*nm) != 1 {
 		t.Error("Expecting one item")
-	} else if nm[0].Data != "1009" {
-		t.Error("Expecting 1009, received: ", nm[0].Data)
+	} else if (*nm)[0].Interface() != "1009" {
+		t.Error("Expecting 1009, received: ", (*nm)[0])
 	}
 
 	// case utils.MetaRep
@@ -236,12 +236,12 @@ func TestAgentRequestSetFields(t *testing.T) {
 		t.Error(err)
 	} else if val, err := ar.Reply.FieldAsInterface([]string{"Account"}); err != nil {
 		t.Error(err)
-	} else if nm, ok := val.([]*config.NMItem); !ok {
+	} else if nm, ok := val.(*utils.NMSlice); !ok {
 		t.Error("Expecting NM items")
-	} else if len(nm) != 1 {
+	} else if len(*nm) != 1 {
 		t.Error("Expecting one item")
-	} else if nm[0].Data != "1009" {
-		t.Error("Expecting 1009, received: ", nm[0].Data)
+	} else if (*nm)[0].Interface() != "1009" {
+		t.Error("Expecting 1009, received: ", (*nm)[0])
 	}
 
 	// case utils.MetaDiamreq
@@ -257,12 +257,12 @@ func TestAgentRequestSetFields(t *testing.T) {
 		t.Error(err)
 	} else if val, err := ar.diamreq.FieldAsInterface([]string{"Account"}); err != nil {
 		t.Error(err)
-	} else if nm, ok := val.([]*config.NMItem); !ok {
+	} else if nm, ok := val.(*utils.NMSlice); !ok {
 		t.Error("Expecting NM items")
-	} else if len(nm) != 1 {
+	} else if len(*nm) != 1 {
 		t.Error("Expecting one item")
-	} else if nm[0].Data != "1009" {
-		t.Error("Expecting 1009, received: ", nm[0].Data)
+	} else if (*nm)[0].Interface() != "1009" {
+		t.Error("Expecting 1009, received: ", (*nm)[0])
 	}
 
 	//META_COMPOSED
@@ -290,12 +290,12 @@ func TestAgentRequestSetFields(t *testing.T) {
 		t.Error(err)
 	} else if val, err := ar.Vars.FieldAsInterface([]string{"AccountID"}); err != nil {
 		t.Error(err)
-	} else if nm, ok := val.([]*config.NMItem); !ok {
+	} else if nm, ok := val.(*utils.NMSlice); !ok {
 		t.Error("Expecting NM items")
-	} else if len(nm) != 1 {
+	} else if len(*nm) != 1 {
 		t.Error("Expecting one item")
-	} else if nm[0].Data != "cgrates.org:1009" {
-		t.Error("Expecting 'cgrates.org:1009', received: ", nm[0].Data)
+	} else if (*nm)[0].Interface() != "cgrates.org:1009" {
+		t.Error("Expecting cgrates.org:1009, received: ", (*nm)[0])
 	}
 
 	// META_CONSTANT
@@ -311,7 +311,7 @@ func TestAgentRequestSetFields(t *testing.T) {
 		t.Error(err)
 	} else if val, err := ar.Vars.FieldAsInterface([]string{"Account"}); err != nil {
 		t.Error(err)
-	} else if nm, ok := val.([]*config.NMItem); !ok {
+	} else if nm, ok := val.(*utils.NMSlice); !ok {
 		t.Error("Expecting NM items")
 	} else if len(nm) != 1 {
 		t.Error("Expecting one item")
@@ -333,12 +333,12 @@ func TestAgentRequestSetFields(t *testing.T) {
 		t.Error(err)
 	} else if val, err := ar.Vars.FieldAsInterface([]string{"AccountID"}); err != nil {
 		t.Error(err)
-	} else if nm, ok := val.([]*config.NMItem); !ok {
+	} else if nm, ok := val.(*utils.NMSlice); !ok {
 		t.Error("Expecting NM items")
-	} else if len(nm) != 1 {
-		t.Error("Expecting one item ", utils.ToJSON(nm))
-	} else if nm[0].Data != "cgrates.org:1009" {
-		t.Error("Expecting 'cgrates.org:1009', received: ", nm[0].Data)
+	} else if len(*nm) != 1 {
+		t.Error("Expecting one item")
+	} else if (*nm)[0].Interface() != "cgrates.org:1009" {
+		t.Error("Expecting cgrates.org:1009, received: ", (*nm)[0])
 	}
 
 	input = []*config.FCTemplate{
@@ -374,12 +374,12 @@ func TestAgentRequestSetFields(t *testing.T) {
 		t.Error(err)
 	} else if val, err := ar.Vars.FieldAsInterface([]string{"Name"}); err != nil {
 		t.Error(err)
-	} else if nm, ok := val.([]*config.NMItem); !ok {
+	} else if nm, ok := val.(*utils.NMSlice); !ok {
 		t.Error("Expecting NM items")
-	} else if len(nm) != 1 {
+	} else if len(*nm) != 1 {
 		t.Error("Expecting one item")
-	} else if nm[0].Data != "1009" {
-		t.Error("Expecting 1009, received: ", nm[0].Data)
+	} else if (*nm)[0].Interface() != "1009" {
+		t.Error("Expecting 1009, received: ", (*nm)[0])
 	}
 
 	// ErrNotFound
@@ -436,12 +436,12 @@ func TestAgentRequestSetFields(t *testing.T) {
 		t.Error(err)
 	} else if val, err := ar.Vars.FieldAsInterface([]string{"Account4"}); err != nil {
 		t.Error(err)
-	} else if nm, ok := val.([]*config.NMItem); !ok {
+	} else if nm, ok := val.(*utils.NMSlice); !ok {
 		t.Error("Expecting NM items")
-	} else if len(nm) != 1 {
+	} else if len(*nm) != 1 {
 		t.Error("Expecting one item")
-	} else if nm[0].Data != "1009" {
-		t.Error("Expecting 1009, received: ", nm[0].Data)
+	} else if (*nm)[0].Interface() != "1009" {
+		t.Error("Expecting 1009, received: ", (*nm)[0])
 	}
 
 	input = []*config.FCTemplate{
@@ -456,12 +456,12 @@ func TestAgentRequestSetFields(t *testing.T) {
 		t.Error(err)
 	} else if val, err := ar.Vars.FieldAsInterface([]string{"Account5"}); err != nil {
 		t.Error(err)
-	} else if nm, ok := val.([]*config.NMItem); !ok {
+	} else if nm, ok := val.(*utils.NMSlice); !ok {
 		t.Error("Expecting NM items")
-	} else if len(nm) != 1 {
+	} else if len(*nm) != 1 {
 		t.Error("Expecting one item")
-	} else if nm[0].Data != "1009" {
-		t.Error("Expecting 1009, received: ", nm[0].Data)
+	} else if (*nm)[0].Interface() != "1009" {
+		t.Error("Expecting 1009, received: ", (*nm)[0])
 	}
 }
 
