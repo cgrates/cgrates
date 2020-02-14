@@ -75,8 +75,8 @@ func (ra *RadiusAgent) handleAuth(req *radigo.Packet) (rpl *radigo.Packet, err e
 	dcdr := newRADataProvider(req) // dcdr will provide information from request
 	rpl = req.Reply()
 	rpl.Code = radigo.AccessAccept
-	cgrRplyNM := utils.NewOrderedNavigableMap(nil)
-	rplyNM := utils.NewOrderedNavigableMap(nil)
+	rplyNM := utils.NewOrderedNavigableMap()
+	cgrRplyNM := &utils.NavigableMap{}
 	var processed bool
 	reqVars[utils.RemoteHost] = req.RemoteAddr().String()
 	for _, reqProcessor := range ra.cgrCfg.RadiusAgentCfg().RequestProcessors {
@@ -114,8 +114,8 @@ func (ra *RadiusAgent) handleAcct(req *radigo.Packet) (rpl *radigo.Packet, err e
 	dcdr := newRADataProvider(req) // dcdr will provide information from request
 	rpl = req.Reply()
 	rpl.Code = radigo.AccountingResponse
-	cgrRplyNM := utils.NewOrderedNavigableMap(nil)
-	rplyNM := utils.NewOrderedNavigableMap(nil)
+	rplyNM := utils.NewOrderedNavigableMap()
+	cgrRplyNM := &utils.NavigableMap{}
 	var processed bool
 	reqVars[utils.RemoteHost] = req.RemoteAddr().String()
 	for _, reqProcessor := range ra.cgrCfg.RadiusAgentCfg().RequestProcessors {

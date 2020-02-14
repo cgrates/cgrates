@@ -33,27 +33,27 @@ import (
 
 // NewAgentRequest returns a new AgentRequest
 func NewAgentRequest(req utils.DataProvider,
-	vars map[string]interface{},
-	cgrRply *utils.OrderedNavigableMap,
+	vars utils.NavigableMap,
+	cgrRply *utils.NavigableMap,
 	rply *utils.OrderedNavigableMap,
 	tntTpl config.RSRParsers,
 	dfltTenant, timezone string,
 	filterS *engine.FilterS,
 	header, trailer utils.DataProvider) (ar *AgentRequest) {
 	if cgrRply == nil {
-		cgrRply = utils.NewOrderedNavigableMap(nil)
+		cgrRply = &utils.NavigableMap{}
 	}
 	if rply == nil {
-		rply = utils.NewOrderedNavigableMap(nil)
+		rply = utils.NewOrderedNavigableMap()
 	}
 	if vars == nil {
-		vars = map[string]interface{}{}
+		vars = utils.NavigableMap{}
 	}
 	ar = &AgentRequest{
 		Request:    req,
-		Vars:       utils.NavigableMap(vars),
-		CGRRequest: utils.NewOrderedNavigableMap(nil),
-		diamreq:    utils.NewOrderedNavigableMap(nil), // special case when CGRateS is building the request
+		Vars:       vars,
+		CGRRequest: utils.NewOrderedNavigableMap(),
+		diamreq:    utils.NewOrderedNavigableMap(), // special case when CGRateS is building the request
 		CGRReply:   cgrRply,
 		Reply:      rply,
 		Timezone:   timezone,
@@ -78,8 +78,8 @@ func NewAgentRequest(req utils.DataProvider,
 type AgentRequest struct {
 	Request    utils.DataProvider         // request
 	Vars       utils.NavigableMap         // shared data
+	CGRReply   *utils.NavigableMap        // the reply from the sessions
 	CGRRequest *utils.OrderedNavigableMap // Used in reply to access the request that was send
-	CGRReply   *utils.OrderedNavigableMap
 	Reply      *utils.OrderedNavigableMap
 	Tenant,
 	Timezone string
@@ -141,7 +141,7 @@ func (ar *AgentRequest) FieldAsString(fldPath []string) (val string, err error) 
 
 //SetFields will populate fields of AgentRequest out of templates
 func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
-	ar.tmp = utils.NewOrderedNavigableMap(nil)
+	ar.tmp = utils.NewOrderedNavigableMap()
 	for _, tplFld := range tplFlds {
 		if pass, err := ar.filterS.Pass(ar.Tenant,
 			tplFld.Filters, ar); err != nil {
@@ -379,17 +379,16 @@ func (ar *AgentRequest) ParseField(
 // setCGRReply will set the aReq.cgrReply based on reply coming from upstream or error
 // returns error in case of reply not converting to NavigableMap
 func (ar *AgentRequest) setCGRReply(rply utils.NavigableMapper, errRply error) (err error) {
-	var nm *utils.OrderedNavigableMap
+	var nm utils.NavigableMap
 	if errRply != nil {
-		nm = utils.NewOrderedNavigableMap(utils.NavigableMap{
-			utils.Error: errRply.Error()})
+		nm = utils.NavigableMap{utils.Error: errRply.Error()}
 	} else {
-		nm = utils.NewOrderedNavigableMap(nil)
+		nm = utils.NavigableMap{}
 		if rply != nil {
-			nm = utils.NewOrderedNavigableMap(rply.AsNavigableMap())
+			nm = rply.AsNavigableMap()
 		}
 		nm.Set([]string{utils.Error}, "") // enforce empty error
 	}
-	*ar.CGRReply = *nm // update value so we can share CGRReply
+	*ar.CGRReply = nm // update value so we can share CGRReply
 	return
 }

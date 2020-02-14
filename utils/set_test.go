@@ -147,7 +147,7 @@ func TestIntersect(t *testing.T) {
 		"test0": struct{}{},
 		"test1": struct{}{},
 		"test2": struct{}{}}
-	s2 := &StringSet{
+	s2 := StringSet{
 		"test0": struct{}{},
 		"test2": struct{}{},
 		"test3": struct{}{}}
@@ -162,12 +162,12 @@ func TestIntersect(t *testing.T) {
 		"test0": struct{}{},
 		"test1": struct{}{},
 		"test2": struct{}{}}
-	s2 = &StringSet{
+	s2 = StringSet{
 		"test3": struct{}{},
 		"test4": struct{}{},
 		"test5": struct{}{}}
 	s1.Intersect(s2)
-	eOut = &StringSet{}}
+	eOut = &StringSet{}
 	if !reflect.DeepEqual(eOut, s1) {
 		t.Errorf("Expecting: %+v, received: %+v", eOut, s1)
 	}

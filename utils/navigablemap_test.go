@@ -112,7 +112,7 @@ func TestNavMapAsNavigableMap(t *testing.T) {
 }
 
 func TestNavMapAdd(t *testing.T) {
-	nM := NewOrderedNavigableMap(nil)
+	nM := NewOrderedNavigableMap()
 	path := []string{"FistLever2", "SecondLevel2", "Field2"}
 	data := "Value2"
 	nM.Set(path, data)
@@ -203,23 +203,19 @@ func TestNavMapAdd2(t *testing.T) {
 }
 
 func TestNavMapItems(t *testing.T) {
-	myData := NavigableMap{
-		"FirstLevel": NavigableMap{
-			"SecondLevel": NavigableMap{
-				"ThirdLevel": NavigableMap{
-					"Fld1": "Val1",
-				},
-			},
-		},
-		"FistLever2": NavigableMap{
-			"SecondLevel2": NavigableMap{
-				"Field2": "Value2",
-			},
-			"Field3": "Value3",
-		},
-		"Field4": "Val4",
+	nM := NewOrderedNavigableMap()
+	if err := nM.Set([]string{"FirstLevel", "SecondLevel", "ThirdLevel", "Fld1"}, "Val1"); err != nil {
+		t.Error(err)
 	}
-	nM := NewOrderedNavigableMap(myData)
+	if err := nM.Set([]string{"FistLever2", "SecondLevel2", "Field2"}, "Value2"); err != nil {
+		t.Error(err)
+	}
+	if err := nM.Set([]string{"FistLever2", "Field3"}, "Value3"); err != nil {
+		t.Error(err)
+	}
+	if err := nM.Set([]string{"Field4"}, "Val4"); err != nil {
+		t.Error(err)
+	}
 	eItems := []interface{}{"Val1", "Value2", "Value3", "Val4"}
 	if vals := nM.Values(); len(vals) != len(eItems) {
 		t.Errorf("Expecting: %+v, received: %+v",
@@ -228,26 +224,22 @@ func TestNavMapItems(t *testing.T) {
 }
 
 func TestNavMapItems2(t *testing.T) {
-	myData := NavigableMap{
-		"FirstLevel": NavigableMap{
-			"SecondLevel": NavigableMap{
-				"ThirdLevel": NavigableMap{
-					"Fld1": 123.123,
-				},
-			},
-		},
-		"FistLever2": NavigableMap{
-			"SecondLevel2": NavigableMap{
-				"Field2": 123,
-			},
-			"Field3": "Value3",
-		},
-		"Field4": &testStruct{
-			Item1: "Ten",
-			Item2: 10,
-		},
+	nM := NewOrderedNavigableMap()
+	if err := nM.Set([]string{"FirstLevel", "SecondLevel", "ThirdLevel", "Fld1"}, 123.123); err != nil {
+		t.Error(err)
 	}
-	nM := NewOrderedNavigableMap(myData)
+	if err := nM.Set([]string{"FistLever2", "SecondLevel2", "Field2"}, 123); err != nil {
+		t.Error(err)
+	}
+	if err := nM.Set([]string{"FistLever2", "Field3"}, "Value3"); err != nil {
+		t.Error(err)
+	}
+	if err := nM.Set([]string{"Field4"}, &testStruct{
+		Item1: "Ten",
+		Item2: 10,
+	}); err != nil {
+		t.Error(err)
+	}
 	eItems := []interface{}{123.123, 123, "Value3", &testStruct{
 		Item1: "Ten",
 		Item2: 10,
@@ -281,8 +273,10 @@ func TestNavMapOrder(t *testing.T) {
 		[]string{"FistLever2", "Field3"},
 		[]string{"Field4"},
 	}
-	nM := NewOrderedNavigableMap(myData)
-	nM.order = order
+	nM := &OrderedNavigableMap{
+		nm:    myData,
+		order: order,
+	}
 	eItems := []interface{}{"Val1", "Value2", "Value3", "Val4"}
 	if vals := nM.Values(); !reflect.DeepEqual(vals, eItems) {
 		t.Errorf("Expecting: %+v, received: %+v",
@@ -313,8 +307,10 @@ func TestNavMapOrder2(t *testing.T) {
 		[]string{"FistLever2", "Field3"},
 		[]string{"FirstLevel", "SecondLevel", "ThirdLevel", "Fld1"},
 	}
-	nM := NewOrderedNavigableMap(myData)
-	nM.order = order
+	nM := &OrderedNavigableMap{
+		nm:    myData,
+		order: order,
+	}
 	eItems := []interface{}{"Value2", "Val4", "Value3", "Val1"}
 	if vals := nM.Values(); !reflect.DeepEqual(eItems, vals) {
 		t.Errorf("Expecting: %+v, received: %+v",

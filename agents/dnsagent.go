@@ -112,8 +112,8 @@ func (da *DNSAgent) handleMessage(w dns.ResponseWriter, req *dns.Msg) {
 		reqVars[DomainName] = domainNameFromNAPTR(req.Question[0].Name)
 	}
 	reqVars[utils.RemoteHost] = w.RemoteAddr().String()
-	cgrRplyNM := utils.NewOrderedNavigableMap(nil)
-	rplyNM := utils.NewOrderedNavigableMap(nil) // share it among different processors
+	rplyNM := utils.NewOrderedNavigableMap() // share it among different processors
+	cgrRplyNM := &utils.NavigableMap{}
 	var processed bool
 	var err error
 	for _, reqProcessor := range da.cgrCfg.DNSAgentCfg().RequestProcessors {

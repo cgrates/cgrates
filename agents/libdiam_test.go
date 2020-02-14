@@ -426,7 +426,7 @@ func TestUpdateDiamMsgFromNavMap1(t *testing.T) {
 	},
 	)
 
-	nM := utils.NewOrderedNavigableMap(nil)
+	nM := utils.NewOrderedNavigableMap()
 	itm := &config.NMItem{
 		Path: []string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Redirect-Server", "Redirect-Address-Type"},
 		Data: datatype.Enumerated(2),
@@ -501,7 +501,7 @@ func TestUpdateDiamMsgFromNavMap2(t *testing.T) {
 	},
 	)
 
-	nM := utils.NewOrderedNavigableMap(nil)
+	nM := utils.NewOrderedNavigableMap()
 	itm2 := &config.NMItem{
 		Path: []string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Redirect-Server", "Redirect-Address-Type"},
 		Data: datatype.Enumerated(2),
@@ -560,7 +560,7 @@ func TestUpdateDiamMsgFromNavMap3(t *testing.T) {
 	m2 := diam.NewMessage(diam.CreditControl, diam.RequestFlag, 4,
 		eMessage.Header.HopByHopID, eMessage.Header.EndToEndID, nil)
 
-	nM := utils.NewOrderedNavigableMap(nil)
+	nM := utils.NewOrderedNavigableMap()
 
 	itm := &config.NMItem{
 		Path: []string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Final-Unit-Action"},
@@ -641,7 +641,7 @@ func TestUpdateDiamMsgFromNavMap4(t *testing.T) {
 	m2 := diam.NewMessage(diam.CreditControl, diam.RequestFlag, 4,
 		eMessage.Header.HopByHopID, eMessage.Header.EndToEndID, nil)
 
-	nM := utils.NewOrderedNavigableMap(nil)
+	nM := utils.NewOrderedNavigableMap()
 
 	itm := &config.NMItem{
 		Path: []string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Final-Unit-Action"},
