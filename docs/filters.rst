@@ -1,3 +1,5 @@
+.. _FilterS:
+
 FilterS 
 =======
 
@@ -7,7 +9,7 @@ A Tenant will define multiple Filter profiles via .csv or API calls. The Filter 
 
 In order to be used in event processing, a Filter profile will be attached inside another subsystem profile definition, otherwise Filter profile will have no effect on it's own. 
 
-A subsystem can use a Filter via Filter profile or in-line (ad-hock in the same place where subsystem profile is defined).
+A subsystem can use a *Filter* via *FilterProfile* or in-line (ad-hock in the same place where subsystem profile is defined).
 
 Filter profile 
 --------------
@@ -44,39 +46,57 @@ The matching logic of each FilterRule is given by it's type.
 
 The following types are implemented:
 
-- *\*string* will match in full the *Element* with at least one value defined inside *Values*. Any of the values matching will have the FilterRule as *matched*. 
+\*string*
+	Will match in full the *Element* with at least one value defined inside *Values*.
+	Any of the values matching will have the FilterRule as *matched*. 
 
-- *\*notstring* is the negation of *\*string*.
+\*notstring 
+	Is the negation of *\*string*.
 
-- *\*prefix* will match at beginning of *Element* one of the values defined inside *Values*.
+\*prefix
+	Will match at beginning of *Element* one of the values defined inside *Values*.
 
-- *\*notprefix* is the negation of *\*prefix*.
+\*notprefix 
+	Is the negation of *\*prefix*.
 
-- *\*suffix* will match at end of *Element* one of the values defined inside *Values*.
+\*suffix
+	Will match at end of *Element* one of the values defined inside *Values*.
 
-- *\*notsuffix* is the negation of *\*suffix*.
+\*notsuffix* 
+	Is the negation of *\*suffix*.
 
-- *\*empty* will make sure that *Element* is empty or it does not exist in the event.
+\*empty
+	Will make sure that *Element* is empty or it does not exist in the event.
 
-- *\*notempty* is the negation of *\*empty*.
+\*notempty 
+	Is the negation of *\*empty*.
 
-- *\*exists* will make sure that *Element* exists in the event.
+\*exists
+	Will make sure that *Element* exists in the event.
 
-- *\*notexists* is the negation of *\*exists*.
+\*notexists
+	Is the negation of *\*exists*.
 
-- *\*timings* will compare the time contained in *Element* with one of the TimingIDs defined in Values.
+\*timings
+	Will compare the time contained in *Element* with one of the TimingIDs defined in Values.
 
-- *\*nottimings* is the negation of *\*timings*.
+\*nottimings
+	Is the negation of *\*timings*.
 
-- *\*destinations* will make sure that the *Element* is a prefix contained inside one of the destination IDs as *Values*.
+\*destinations
+	Will make sure that the *Element* is a prefix contained inside one of the destination IDs as *Values*.
 
-- *\*notdestinations* is the negation of *\*destinations*.
+\*notdestinations
+	Is the negation of *\*destinations*.
 
-- *\*rsr* will match the *RSRRules* defined in Values.
+\*rsr
+	Will match the *RSRRules* defined in Values.
 
-- *\*notrsr* is the negation of *\*rsr*.
+\*notrsr*
+	Is the negation of *\*rsr*.
 
-- *\*lt* (less than), *\*lte* (less than or equal), *\*gt* (greather than), *\*gte* (greather than or equal) are comparison operators and they pass if at least one of the values defined in *Values* are passing for the *Element* of event. The operators are able to compare string, float, int, time.Time, time.Duration, however both types need to be the same, otherwise the filter will raise *incomparable* as error.
+*\*lt* (less than), *\*lte* (less than or equal), *\*gt* (greather than), *\*gte* (greather than or equal) 
+	Are comparison operators and they pass if at least one of the values defined in *Values* are passing for the *Element* of event. The operators are able to compare string, float, int, time.Time, time.Duration, however both types need to be the same, otherwise the filter will raise *incomparable* as error.
 
 
 Inline Filter 
@@ -93,18 +113,19 @@ Example::
  *string:WebsiteName:CGRateS.org
 
 
-
 Subsystem profiles selection based on Filters
 ---------------------------------------------
 
-
-When a subsystem will process an event it will need to find fast enough (close to real-time and most preferably with constant speed) all the profiles having filters matching the event. For low number of profiles (tens of) we can go through all available profiles and check their filters but as soon as the number of profiles is growing, processing time will exponentially grow also. As an example, the *AttributeS* need to deal with 20 mil+ profiles for a number portability implementation.
+When a subsystem will process an event it will need to find fast enough (close to real-time and most preferably with constant speed) all the profiles having filters matching the event. For low number of profiles (tens of) we can go through all available profiles and check their filters but as soon as the number of profiles is growing, processing time will exponentially grow also. As an example, the *AttributeS* need to deal with 20 mil+ profiles in case of number portability implementation.
 
 In order to guarantee constant processing time - **O(1)** - *CGRateS* will use internally a profile selection mechanism based on indexed filters which can be enabled within *.json* configuration file via *indexed_selects*. When *indexed_selects* is disabled, the indexes will not be used at all and profiles will be checked one by one. On  the other hand, if *indexed_selects* is enabled, each FilterProfile needs to have at least one *\*string* or *\*prefix* type in order to be visible to the indexes (otherwise being completely ignored).
 
-Following settings are further applied once *indexed_selects* is enabled:
+The following settings are further applied once *indexed_selects* is enabled:
 
- *string_indexed_fields - list of field names in the event which will be checked against string indexes (defaults to nil which means check all fields)
- *prefix_indexed_fields - list of field names in the event which will be checked against prefix indexes (default is empty, hence prefix matching is disabled inside indexes - small optimization since for prefixes there are multiple queries done for one field)
+string_indexed_fields
+	list of field names in the event which will be checked against string indexes (defaults to nil which means check all fields)
+
+prefix_indexed_fields
+	list of field names in the event which will be checked against prefix indexes (default is empty, hence prefix matching is disabled inside indexes - small optimization since for prefixes there are multiple queries done for one field)
 
  
