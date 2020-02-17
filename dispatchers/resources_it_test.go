@@ -301,4 +301,20 @@ func testDspResTestAuthKey3(t *testing.T) {
 			t.Errorf("Unexpected resource: %+v", utils.ToJSON(r))
 		}
 	}
+	var r *engine.Resource
+	argsGetResource := &utils.TenantIDWithArgDispatcher{
+		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ResGroup1"},
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("res12345"),
+		},
+	}
+	if err := dispEngine.RPC.Call(utils.ResourceSv1GetResource, argsGetResource, &r); err != nil {
+		t.Fatal(err)
+	}
+	// make sure Resource1 have no more active resources
+	if r.ID == "ResGroup1" &&
+		(len(r.Usages) != 1 || len(r.TTLIdx) != 0) {
+		t.Errorf("Unexpected resource: %+v", utils.ToJSON(r))
+	}
+
 }
