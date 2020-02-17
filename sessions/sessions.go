@@ -2880,6 +2880,7 @@ type V1ProcessEventArgs struct {
 // V1ProcessEventReply is the reply for the ProcessEvent API
 type V1ProcessEventReply struct {
 	MaxUsage        time.Duration
+	Cost            *float64 // Cost is the cost received from Rater, ignoring accounting part
 	ResourceMessage *string
 	Attributes      *engine.AttrSProcessEventReply
 	Suppliers       *engine.SortedSuppliers
@@ -2925,6 +2926,9 @@ func (v1Rply *V1ProcessEventReply) AsNavigableMap(
 		}
 		if v1Rply.StatQueueIDs != nil {
 			cgrReply[utils.CapStatQueues] = *v1Rply.StatQueueIDs
+		}
+		if v1Rply.Cost != nil {
+			cgrReply[utils.Cost] = *v1Rply.Cost
 		}
 	}
 	return config.NewNavigableMap(cgrReply), nil
@@ -2983,6 +2987,66 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 		} else if err.Error() != utils.ErrNotFound.Error() {
 			return utils.NewErrAttributeS(err)
 		}
+	}
+	// check for *cost
+	if argsFlagsWithParams.HasKey(utils.MetaCost) {
+		//compose the CallDescriptor with Args
+		me := engine.MapEvent(args.CGREvent.Event).Clone()
+		startTime := me.GetTimeIgnoreErrors(utils.AnswerTime,
+			sS.cgrCfg.GeneralCfg().DefaultTimezone)
+		if startTime.IsZero() { // AnswerTime not parsable, try SetupTime
+			startTime = me.GetTimeIgnoreErrors(utils.SetupTime,
+				sS.cgrCfg.GeneralCfg().DefaultTimezone)
+		}
+		category := me.GetStringIgnoreErrors(utils.Category)
+		if len(category) == 0 {
+			category = sS.cgrCfg.GeneralCfg().DefaultCategory
+		}
+		subject := me.GetStringIgnoreErrors(utils.Subject)
+		if len(subject) == 0 {
+			subject = me.GetStringIgnoreErrors(utils.Account)
+		}
+
+		cd := &engine.CallDescriptor{
+			RunID:       me.GetStringIgnoreErrors(utils.RunID),
+			ToR:         me.GetStringIgnoreErrors(utils.ToR),
+			Tenant:      args.CGREvent.Tenant,
+			Category:    category,
+			Subject:     subject,
+			Account:     me.GetStringIgnoreErrors(utils.Account),
+			Destination: me.GetStringIgnoreErrors(utils.Destination),
+			TimeStart:   startTime,
+			TimeEnd:     startTime.Add(me.GetDurationIgnoreErrors(utils.Usage)),
+			ExtraFields: me.AsMapString(utils.MainCDRFields),
+		}
+		var argDsp *utils.ArgDispatcher
+		//check if we have APIKey in event and in case it has add it in ArgDispatcher
+		apiKey, errAPIKey := me.GetString(utils.MetaApiKey)
+		if errAPIKey == nil {
+			argDsp = &utils.ArgDispatcher{
+				APIKey: utils.StringPointer(apiKey),
+			}
+		}
+		//check if we have RouteID in event and in case it has add it in ArgDispatcher
+		if routeID, err := me.GetString(utils.MetaRouteID); err == nil {
+			if errAPIKey == utils.ErrNotFound { //in case we don't have APIKey, but we have RouteID we need to initialize the struct
+				argDsp = &utils.ArgDispatcher{
+					RouteID: utils.StringPointer(routeID),
+				}
+			} else {
+				argDsp.RouteID = utils.StringPointer(routeID)
+			}
+		}
+
+		var cc engine.CallCost
+		if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().RALsConns, nil,
+			utils.ResponderGetCost,
+			&engine.CallDescriptorWithArgDispatcher{CallDescriptor: cd,
+				ArgDispatcher: argDsp}, &cc); err != nil {
+			return
+		}
+		cc.UpdateCost()
+		rply.Cost = utils.Float64Pointer(cc.Cost)
 	}
 	// check for *resources
 	if argsFlagsWithParams.HasKey(utils.MetaResources) {

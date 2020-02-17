@@ -56,8 +56,10 @@ func (apier *APIerSv1) GetCost(attrs AttrGetCost, ec *engine.EventCost) error {
 		DurationIndex: usage,
 	}
 	var cc engine.CallCost
-	if err := apier.Responder.GetCost(&engine.CallDescriptorWithArgDispatcher{CallDescriptor: cd,
-		ArgDispatcher: attrs.ArgDispatcher}, &cc); err != nil {
+	if err := apier.Responder.GetCost(
+		&engine.CallDescriptorWithArgDispatcher{
+			CallDescriptor: cd,
+			ArgDispatcher:  attrs.ArgDispatcher}, &cc); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*ec = *engine.NewEventCostFromCallCost(&cc, "", "")
