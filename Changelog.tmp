@@ -1,3 +1,4 @@
 - [FilterS] Renamed rals_conns to apiers_conns
 - [FilterS] Updated *destination filter to get ReverseDestination form API
 - [SessionS] Added check for missing CGRevent
+- [Packages] Change yum dir name to be the same as in reprepro ( nightly )
