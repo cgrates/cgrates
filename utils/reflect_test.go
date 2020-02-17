@@ -641,6 +641,56 @@ func TestDifference(t *testing.T) {
 
 }
 
+func TestMultiply(t *testing.T) {
+	if _, err := Multiply(10); err == nil || err != ErrNotEnoughParameters {
+		t.Error(err)
+	}
+	if _, err := Multiply(10, 1.2, false); err == nil || err.Error() != "cannot convert field: 1.2 to int" {
+		t.Error(err)
+	}
+	if diff, err := Multiply(12, 1, 2, 3); err != nil {
+		t.Error(err)
+	} else if diff != int64(72) {
+		t.Errorf("Expecting: 72, received: %+v", diff)
+	}
+	if diff, err := Multiply(8.0, 4.0, 2.0, 1.0); err != nil {
+		t.Error(err)
+	} else if diff != 64.0 {
+		t.Errorf("Expecting: 64.0, received: %+v", diff)
+	}
+
+	if diff, err := Multiply(8.0, 4, 6.0, 1.0); err != nil {
+		t.Error(err)
+	} else if diff != 192.0 {
+		t.Errorf("Expecting: 192.0, received: %+v", diff)
+	}
+}
+
+func TestDivide(t *testing.T) {
+	if _, err := Divide(10); err == nil || err != ErrNotEnoughParameters {
+		t.Error(err)
+	}
+	if _, err := Divide(10, 1.2, false); err == nil || err.Error() != "cannot convert field: 1.2 to int" {
+		t.Error(err)
+	}
+	if diff, err := Divide(12, 1, 2, 3); err != nil {
+		t.Error(err)
+	} else if diff != int64(2) {
+		t.Errorf("Expecting: 2, received: %+v", diff)
+	}
+	if diff, err := Divide(8.0, 4.0, 2.0, 1.0); err != nil {
+		t.Error(err)
+	} else if diff != 1.0 {
+		t.Errorf("Expecting: 1.0, received: %+v", diff)
+	}
+
+	if diff, err := Divide(8.0, 4, 6.0, 1.0); err != nil {
+		t.Error(err)
+	} else if diff != 0.3333333333333333 {
+		t.Errorf("Expecting: 0.3333333333333333, received: %+v", diff)
+	}
+}
+
 func TestEqualTo(t *testing.T) {
 	if gte, err := EqualTo(1, 1.2); err != nil {
 		t.Error(err)

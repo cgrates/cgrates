@@ -303,6 +303,26 @@ func (ar *AgentRequest) ParseField(
 			iFaceVals[i] = utils.StringToInterface(strVal)
 		}
 		out, err = utils.Difference(iFaceVals...)
+	case utils.MetaMultiply:
+		iFaceVals := make([]interface{}, len(cfgFld.Value))
+		for i, val := range cfgFld.Value {
+			strVal, err := val.ParseDataProvider(ar, utils.NestingSep)
+			if err != nil {
+				return "", err
+			}
+			iFaceVals[i] = utils.StringToInterface(strVal)
+		}
+		out, err = utils.Multiply(iFaceVals...)
+	case utils.MetaDivide:
+		iFaceVals := make([]interface{}, len(cfgFld.Value))
+		for i, val := range cfgFld.Value {
+			strVal, err := val.ParseDataProvider(ar, utils.NestingSep)
+			if err != nil {
+				return "", err
+			}
+			iFaceVals[i] = utils.StringToInterface(strVal)
+		}
+		out, err = utils.Divide(iFaceVals...)
 	case utils.MetaValueExponent:
 		if len(cfgFld.Value) != 2 {
 			return nil, fmt.Errorf("invalid arguments <%s> to %s",

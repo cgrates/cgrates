@@ -627,6 +627,98 @@ func Difference(items ...interface{}) (diff interface{}, err error) {
 	return
 }
 
+// Multiply attempts to multiply multiple items
+// returns the result or error if not comparable
+func Multiply(items ...interface{}) (mlt interface{}, err error) {
+	//we need at least 2 items to diff them
+	if len(items) < 2 {
+		return nil, ErrNotEnoughParameters
+	}
+	switch dt := items[0].(type) {
+	case float64:
+		mlt = dt
+		for _, item := range items[1:] {
+			if itmVal, err := IfaceAsFloat64(item); err != nil {
+				return nil, err
+			} else {
+				mlt = mlt.(float64) * itmVal
+			}
+		}
+	case int64:
+		mlt = dt
+		for _, item := range items[1:] {
+			if itmVal, err := IfaceAsInt64(item); err != nil {
+				return nil, err
+			} else {
+				mlt = mlt.(int64) * itmVal
+			}
+		}
+	case int:
+		// need explicit conversion for int
+		if firstItmVal, err := IfaceAsInt64(dt); err != nil {
+			return nil, err
+		} else {
+			mlt = firstItmVal
+		}
+		for _, item := range items[1:] {
+			if itmVal, err := IfaceAsInt64(item); err != nil {
+				return nil, err
+			} else {
+				mlt = mlt.(int64) * itmVal
+			}
+		}
+	default: // unsupported comparison
+		return nil, fmt.Errorf("unsupported type")
+	}
+	return
+}
+
+// Divide attempts to divide multiple items
+// returns the result or error if not comparable
+func Divide(items ...interface{}) (mlt interface{}, err error) {
+	//we need at least 2 items to diff them
+	if len(items) < 2 {
+		return nil, ErrNotEnoughParameters
+	}
+	switch dt := items[0].(type) {
+	case float64:
+		mlt = dt
+		for _, item := range items[1:] {
+			if itmVal, err := IfaceAsFloat64(item); err != nil {
+				return nil, err
+			} else {
+				mlt = mlt.(float64) / itmVal
+			}
+		}
+	case int64:
+		mlt = dt
+		for _, item := range items[1:] {
+			if itmVal, err := IfaceAsInt64(item); err != nil {
+				return nil, err
+			} else {
+				mlt = mlt.(int64) / itmVal
+			}
+		}
+	case int:
+		// need explicit conversion for int
+		if firstItmVal, err := IfaceAsInt64(dt); err != nil {
+			return nil, err
+		} else {
+			mlt = firstItmVal
+		}
+		for _, item := range items[1:] {
+			if itmVal, err := IfaceAsInt64(item); err != nil {
+				return nil, err
+			} else {
+				mlt = mlt.(int64) / itmVal
+			}
+		}
+	default: // unsupported comparison
+		return nil, fmt.Errorf("unsupported type")
+	}
+	return
+}
+
 // ReflectFieldMethodInterface parses intf attepting to return the field value or error otherwise
 // Supports "ExtraFields" where additional fields are dynamically inserted in map with field name: extraFieldsLabel
 func ReflectFieldMethodInterface(obj interface{}, fldName string) (retIf interface{}, err error) {

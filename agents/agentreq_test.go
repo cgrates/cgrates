@@ -1381,6 +1381,94 @@ func TestAgReqParseFieldMetaDifference(t *testing.T) {
 	}
 }
 
+func TestAgReqParseFieldMetaMultiply(t *testing.T) {
+	//creater diameter message
+	m := diam.NewRequest(diam.CreditControl, 4, nil)
+	m.NewAVP("Session-Id", avp.Mbit, 0, datatype.UTF8String("simuhuawei;1449573472;00002"))
+	m.NewAVP("Subscription-Id", avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(450, avp.Mbit, 0, datatype.Enumerated(2)),              // Subscription-Id-Type
+			diam.NewAVP(444, avp.Mbit, 0, datatype.UTF8String("208708000004")), // Subscription-Id-Data
+			diam.NewAVP(avp.ValueDigits, avp.Mbit, 0, datatype.Integer64(20000)),
+		}})
+	//create diameterDataProvider
+	dP := newDADataProvider(nil, m)
+	cfg, _ := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, dm)
+	//pass the data provider to agent request
+	agReq := NewAgentRequest(dP, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
+
+	tplFlds := []*config.FCTemplate{
+		&config.FCTemplate{Tag: "Multiply", Filters: []string{},
+			Path: "Multiply", Type: utils.MetaMultiply,
+			Value:     config.NewRSRParsersMustCompile("15;~*req.Session-Id", true, utils.INFIELD_SEP),
+			Mandatory: true},
+	}
+	if _, err := agReq.ParseField(tplFlds[0]); err == nil ||
+		err.Error() != `strconv.ParseInt: parsing "simuhuawei;1449573472;00002": invalid syntax` {
+		t.Error(err)
+	}
+
+	tplFlds = []*config.FCTemplate{
+		&config.FCTemplate{Tag: "Multiply", Filters: []string{},
+			Path: "Multiply", Type: utils.MetaMultiply,
+			Value:     config.NewRSRParsersMustCompile("15;15", true, utils.INFIELD_SEP),
+			Mandatory: true},
+	}
+	expected := int64(225)
+	if out, err := agReq.ParseField(tplFlds[0]); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(out, expected) {
+		t.Errorf("expecting: <%+v>, %T received: <%+v> %T", expected, expected, out, out)
+	}
+}
+
+func TestAgReqParseFieldMetaDivide(t *testing.T) {
+	//creater diameter message
+	m := diam.NewRequest(diam.CreditControl, 4, nil)
+	m.NewAVP("Session-Id", avp.Mbit, 0, datatype.UTF8String("simuhuawei;1449573472;00002"))
+	m.NewAVP("Subscription-Id", avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(450, avp.Mbit, 0, datatype.Enumerated(2)),              // Subscription-Id-Type
+			diam.NewAVP(444, avp.Mbit, 0, datatype.UTF8String("208708000004")), // Subscription-Id-Data
+			diam.NewAVP(avp.ValueDigits, avp.Mbit, 0, datatype.Integer64(20000)),
+		}})
+	//create diameterDataProvider
+	dP := newDADataProvider(nil, m)
+	cfg, _ := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, dm)
+	//pass the data provider to agent request
+	agReq := NewAgentRequest(dP, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
+
+	tplFlds := []*config.FCTemplate{
+		&config.FCTemplate{Tag: "Divide", Filters: []string{},
+			Path: "Divide", Type: utils.MetaDivide,
+			Value:     config.NewRSRParsersMustCompile("15;~*req.Session-Id", true, utils.INFIELD_SEP),
+			Mandatory: true},
+	}
+	if _, err := agReq.ParseField(tplFlds[0]); err == nil ||
+		err.Error() != `strconv.ParseInt: parsing "simuhuawei;1449573472;00002": invalid syntax` {
+		t.Error(err)
+	}
+
+	tplFlds = []*config.FCTemplate{
+		&config.FCTemplate{Tag: "Divide", Filters: []string{},
+			Path: "Divide", Type: utils.MetaDivide,
+			Value:     config.NewRSRParsersMustCompile("15;3", true, utils.INFIELD_SEP),
+			Mandatory: true},
+	}
+	expected := int64(5)
+	if out, err := agReq.ParseField(tplFlds[0]); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(out, expected) {
+		t.Errorf("expecting: <%+v>, %T received: <%+v> %T", expected, expected, out, out)
+	}
+}
+
 func TestAgReqParseFieldMetaValueExponent(t *testing.T) {
 	//creater diameter message
 	m := diam.NewRequest(diam.CreditControl, 4, nil)
