@@ -80,7 +80,7 @@ To install CGRateS out of YUM execute the following commands
     sudo tee -a /etc/yum.repos.d/cgrates.repo > /dev/null <<EOT
     [cgrates]
     name=CGRateS
-    baseurl=http://yum.cgrates.org/yum/master/
+    baseurl=http://yum.cgrates.org/yum/nightly/
     enabled=1
     gpgcheck=1
     gpgkey=http://yum.cgrates.org/yum.cgrates.org.gpg.key

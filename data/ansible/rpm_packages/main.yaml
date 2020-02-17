@@ -46,6 +46,7 @@
     # CGRateS location
     cgrates_dir: "{{ golang_gopath }}/src/github.com/cgrates/cgrates"
     cgrates_version: "master"
+    cgrates_distribution: "nightly"
     ###############################################################
     ##################### GPG Vars #############################
     ###############################################################
@@ -88,16 +89,22 @@
 ###########################################################################################################################
 ###########################################################################################################################
 # Prepare for configuration
+    # get yum version
+    - name: set cgrates distribution
+      set_fact:
+        cgrates_distribution: "{{ cgrates_version }}"
+      when: cgrates_version != "master"
+
     - name: Check if /var/packages/yum directory exists
       become: true
       file:
         path: /var/packages/yum
         state: directory
 
-    - name: Check if /var/packages/yum/{{ cgrates_version }} directory exists
+    - name: Check if /var/packages/yum/{{ cgrates_distribution }} directory exists
       become: true
       file:
-        path: /var/packages/yum/{{ cgrates_version }}
+        path: /var/packages/yum/{{ cgrates_distribution }}
         state: directory
         
     - name: Generate GPG Key
@@ -240,26 +247,26 @@
     - name: Sign with rpm --addsign the .rpm file
       become: yes
       shell: 'sudo rpm --addsign cgr_build/RPMS/x86_64/{{ rmpFileName.stdout_lines[0] }}'
-      
-    - name: Check if is something in /var/packages/yum/{{ cgrates_version }}
+
+    - name: Check if is something in /var/packages/yum/{{ cgrates_distribution }}
       become: yes
-      shell : "ls /var/packages/yum/{{ cgrates_version }}/"
+      shell : "ls /var/packages/yum/{{ cgrates_distribution }}/"
       register: yumFiles
       
     # Clean the folder
     - name: Clean the incoming folder
       become: yes
-      shell: "sudo rm -rf /var/packages/yum/{{ cgrates_version }}/*"
+      shell: "sudo rm -rf /var/packages/yum/{{ cgrates_distribution }}/*"
       when: yumFiles.stdout_lines|length > 1
     
-    - name: Move the files to /var/packages/yum/{{ cgrates_version }}
+    - name: Move the files to /var/packages/yum/{{ cgrates_distribution }}
       become: yes
-      command: mv cgr_build/RPMS/x86_64/{{ rmpFileName.stdout_lines[0] }} /var/packages/yum/{{ cgrates_version }}/
+      command: mv cgr_build/RPMS/x86_64/{{ rmpFileName.stdout_lines[0] }} /var/packages/yum/{{ cgrates_distribution }}/
       when : rmpFileName.stdout_lines|length > 0
     
     - name: Include the package with createrepo
       become: yes
-      shell: createrepo /var/packages/yum/{{ cgrates_version }}
+      shell: createrepo /var/packages/yum/{{ cgrates_distribution }}
       
 - hosts: pkg
   remote_user: '{{ gouser }}'
