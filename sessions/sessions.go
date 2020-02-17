@@ -3293,18 +3293,18 @@ func (sS *SessionS) BiRPCv1RegisterInternalBiJSONConn(clnt rpcclient.ClientConne
 // BiRPCv1ActivateSessions is called to activate a list/all sessions
 // returns utils.ErrPartiallyExecuted in case of errors
 func (sS *SessionS) BiRPCv1ActivateSessions(clnt rpcclient.ClientConnector,
-	sIDs []string, reply *string) (err error) {
-	if len(sIDs) == 0 {
+	sIDs *utils.SessionIDsWithArgsDispatcher, reply *string) (err error) {
+	if len(sIDs.IDs) == 0 {
 		sS.pSsMux.RLock()
 		i := 0
-		sIDs = make([]string, len(sS.pSessions))
+		sIDs.IDs = make([]string, len(sS.pSessions))
 		for sID := range sS.pSessions {
-			sIDs[i] = sID
+			sIDs.IDs[i] = sID
 			i++
 		}
 		sS.pSsMux.RUnlock()
 	}
-	for _, sID := range sIDs {
+	for _, sID := range sIDs.IDs {
 		if s := sS.transitSState(sID, false); s == nil {
 			utils.Logger.Warning(fmt.Sprintf("<%s> no passive session with id: <%s>", utils.SessionS, sID))
 			err = utils.ErrPartiallyExecuted
@@ -3319,18 +3319,18 @@ func (sS *SessionS) BiRPCv1ActivateSessions(clnt rpcclient.ClientConnector,
 // BiRPCv1DeactivateSessions is called to deactivate a list/all active sessios
 // returns utils.ErrPartiallyExecuted in case of errors
 func (sS *SessionS) BiRPCv1DeactivateSessions(clnt rpcclient.ClientConnector,
-	sIDs []string, reply *string) (err error) {
-	if len(sIDs) == 0 {
+	sIDs *utils.SessionIDsWithArgsDispatcher, reply *string) (err error) {
+	if len(sIDs.IDs) == 0 {
 		sS.aSsMux.RLock()
 		i := 0
-		sIDs = make([]string, len(sS.aSessions))
+		sIDs.IDs = make([]string, len(sS.aSessions))
 		for sID := range sS.aSessions {
-			sIDs[i] = sID
+			sIDs.IDs[i] = sID
 			i++
 		}
 		sS.aSsMux.RUnlock()
 	}
-	for _, sID := range sIDs {
+	for _, sID := range sIDs.IDs {
 		if s := sS.transitSState(sID, true); s == nil {
 			utils.Logger.Warning(fmt.Sprintf("<%s> no active session with id: <%s>", utils.SessionS, sID))
 			err = utils.ErrPartiallyExecuted

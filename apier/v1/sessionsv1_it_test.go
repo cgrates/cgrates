@@ -1025,7 +1025,7 @@ func testSSv1ItDeactivateSessions(t *testing.T) {
 		t.Error(err)
 	}
 	var reply string
-	err := sSv1BiRpc.Call(utils.SessionSv1DeactivateSessions, []string{}, &reply)
+	err := sSv1BiRpc.Call(utils.SessionSv1DeactivateSessions, &utils.SessionIDsWithArgsDispatcher{}, &reply)
 	if err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {

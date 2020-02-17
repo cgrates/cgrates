@@ -417,3 +417,47 @@ func (dS *DispatcherService) SessionSv1SetPassiveSession(args *sessions.Session,
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaSessionS, routeID,
 		utils.SessionSv1SetPassiveSession, args, reply)
 }
+
+func (dS *DispatcherService) SessionSv1ActivateSessions(args *utils.SessionIDsWithArgsDispatcher, reply *string) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if args.ArgDispatcher == nil {
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
+		}
+		if err = dS.authorize(utils.SessionSv1ActivateSessions,
+			tnt, args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	var routeID *string
+	if args.ArgDispatcher != nil {
+		routeID = args.ArgDispatcher.RouteID
+	}
+	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaSessionS, routeID,
+		utils.SessionSv1ActivateSessions, args, reply)
+}
+
+func (dS *DispatcherService) SessionSv1DeactivateSessions(args *utils.SessionIDsWithArgsDispatcher, reply *string) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if args.ArgDispatcher == nil {
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
+		}
+		if err = dS.authorize(utils.SessionSv1DeactivateSessions,
+			tnt, args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	var routeID *string
+	if args.ArgDispatcher != nil {
+		routeID = args.ArgDispatcher.RouteID
+	}
+	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaSessionS, routeID,
+		utils.SessionSv1DeactivateSessions, args, reply)
+}

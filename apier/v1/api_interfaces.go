@@ -92,6 +92,8 @@ type SessionSv1Interface interface {
 	Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error
 	ReplicateSessions(args dispatchers.ArgsReplicateSessionsWithApiKey, rply *string) error
 	SetPassiveSession(args *sessions.Session, reply *string) error
+	ActivateSessions(args *utils.SessionIDsWithArgsDispatcher, reply *string) error
+	DeactivateSessions(args *utils.SessionIDsWithArgsDispatcher, reply *string) error
 }
 
 type ResponderInterface interface {

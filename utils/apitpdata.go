@@ -1387,3 +1387,8 @@ type RatingPlanCostArg struct {
 	Usage         string
 	*ArgDispatcher
 }
+type SessionIDsWithArgsDispatcher struct {
+	IDs []string
+	Tenant string
+	*ArgDispatcher
+}
