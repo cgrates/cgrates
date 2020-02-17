@@ -1,0 +1,2 @@
+- [FilterS] Removed rals_conns in favor of reading the account directly from DataDB
+- [SessionS] Added check for missing CGRevent
