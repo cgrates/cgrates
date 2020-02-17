@@ -49,6 +49,10 @@ var sTestSessionSv1ProcessEvent = []func(t *testing.T){
 	testSSv1ItProcessEventTerminateSession,
 	testSSv1ItProcessCDRForSessionFromProcessEvent,
 	testSSv1ItGetCDRs,
+	testSSv1ItProcessEventWithGetCost,
+	testSSv1ItProcessEventWithGetCost2,
+	testSSv1ItProcessEventWithGetCost3,
+	testSSv1ItProcessEventWithGetCost4,
 	testSSv1ItStopCgrEngine,
 }
 
@@ -87,7 +91,7 @@ func TestSSv1ItProcessEventWithPostPaid(t *testing.T) {
 	}
 
 	sSV1RequestType = utils.META_POSTPAID
-	sTestSessionSv1ProcessEvent = append(sTestSessionSv1ProcessEvent[:len(sTestSessionSv1ProcessEvent)-3], testSSv1ItStopCgrEngine)
+	sTestSessionSv1ProcessEvent = append(sTestSessionSv1ProcessEvent[:len(sTestSessionSv1ProcessEvent)-7], testSSv1ItStopCgrEngine)
 	for _, stest := range sTestSessionSv1ProcessEvent {
 		t.Run(sessionsConfDIR+utils.EmptyString+sSV1RequestType, stest)
 	}
@@ -108,7 +112,7 @@ func TestSSv1ItProcessEventWithRated(t *testing.T) {
 	}
 
 	sSV1RequestType = utils.META_RATED
-	sTestSessionSv1ProcessEvent = append(sTestSessionSv1ProcessEvent[:len(sTestSessionSv1ProcessEvent)-3], testSSv1ItStopCgrEngine)
+	sTestSessionSv1ProcessEvent = append(sTestSessionSv1ProcessEvent[:len(sTestSessionSv1ProcessEvent)-7], testSSv1ItStopCgrEngine)
 	for _, stest := range sTestSessionSv1ProcessEvent {
 		t.Run(sessionsConfDIR+utils.EmptyString+sSV1RequestType, stest)
 	}
@@ -463,4 +467,150 @@ func testSSv1ItGetCDRs(t *testing.T) {
 			t.Errorf("Unexpected cost for CDR: %f", cdrs[0].Cost)
 		}
 	}
+}
+
+func testSSv1ItProcessEventWithGetCost(t *testing.T) {
+	// GetCost for ANY2CNT Subject
+	args := &sessions.V1ProcessEventArgs{
+		Flags: []string{utils.MetaAttributes, utils.MetaCost},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testSSv1ItProcessEventWithGetCost",
+			Event: map[string]interface{}{
+				utils.Tenant:      "cgrates.org",
+				utils.ToR:         utils.MONETARY,
+				utils.OriginID:    "testSSv1ItProcessEventWithGetCost",
+				utils.RequestType: sSV1RequestType,
+				utils.Subject:     "*attributes",
+				utils.Destination: "1002",
+				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+				utils.Usage:       10 * time.Minute,
+			},
+		},
+	}
+	var rply sessions.V1ProcessEventReply
+	if err := sSv1BiRpc.Call(utils.SessionSv1ProcessEvent,
+		args, &rply); err != nil {
+		t.Error(err)
+	}
+	if rply.Attributes == nil {
+		t.Error("Received nil Attributes")
+	} else if !reflect.DeepEqual(rply.Attributes.MatchedProfiles, []string{"ATTR_SUBJECT_CASE1"}) {
+		t.Errorf("Expected: %+v,received: %+v", []string{"ATTR_SUBJECT_CASE1"}, rply.Attributes.MatchedProfiles)
+	} else if !reflect.DeepEqual(rply.Attributes.AlteredFields, []string{"*req.Subject"}) {
+		t.Errorf("Expected: %+v,received: %+v", []string{"*req.Subject"}, rply.Attributes.AlteredFields)
+	}
+	if rply.Cost == nil {
+		t.Errorf("Received nil Cost")
+	} else if *rply.Cost != 0.198 { // same cost as in CDR
+		t.Errorf("Expected: %+v,received: %+v", 0.198, *rply.Cost)
+	}
+}
+
+func testSSv1ItProcessEventWithGetCost2(t *testing.T) {
+	// GetCost for SPECIAL_1002 Subject
+	args := &sessions.V1ProcessEventArgs{
+		Flags: []string{utils.MetaAttributes, utils.MetaCost},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testSSv1ItProcessEventWithGetCost2",
+			Event: map[string]interface{}{
+				utils.Tenant:      "cgrates.org",
+				utils.ToR:         utils.MONETARY,
+				utils.OriginID:    "testSSv1ItProcessEventWithGetCost2",
+				utils.RequestType: sSV1RequestType,
+				utils.Subject:     "*attributes",
+				utils.Destination: "1002",
+				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+				utils.Usage:       10 * time.Minute,
+			},
+		},
+	}
+	var rply sessions.V1ProcessEventReply
+	if err := sSv1BiRpc.Call(utils.SessionSv1ProcessEvent,
+		args, &rply); err != nil {
+		t.Error(err)
+	}
+	if rply.Attributes == nil {
+		t.Error("Received nil Attributes")
+	} else if !reflect.DeepEqual(rply.Attributes.MatchedProfiles, []string{"ATTR_SUBJECT_CASE2"}) {
+		t.Errorf("Expected: %+v,received: %+v", []string{"ATTR_SUBJECT_CASE2"}, rply.Attributes.MatchedProfiles)
+	} else if !reflect.DeepEqual(rply.Attributes.AlteredFields, []string{"*req.Subject"}) {
+		t.Errorf("Expected: %+v,received: %+v", []string{"*req.Subject"}, rply.Attributes.AlteredFields)
+	}
+	if rply.Cost == nil {
+		t.Errorf("Received nil Cost")
+	} else if *rply.Cost != 0.102 { // same cost as in CDR
+		t.Errorf("Expected: %+v,received: %+v", 0.102, *rply.Cost)
+	}
+}
+
+func testSSv1ItProcessEventWithGetCost3(t *testing.T) {
+	// GetCost for RP_RETAIL Subject
+	// 0.8 connect fee + 0.4 for first minute
+	// for the 9 minutes remaining apply
+	args := &sessions.V1ProcessEventArgs{
+		Flags: []string{utils.MetaAttributes, utils.MetaCost},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testSSv1ItProcessEventWithGetCost3",
+			Event: map[string]interface{}{
+				utils.Tenant:      "cgrates.org",
+				utils.ToR:         utils.MONETARY,
+				utils.OriginID:    "testSSv1ItProcessEventWithGetCost3",
+				utils.RequestType: sSV1RequestType,
+				utils.Subject:     "*attributes",
+				utils.Destination: "1002",
+				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+				utils.Usage:       10 * time.Minute,
+			},
+		},
+	}
+	var rply sessions.V1ProcessEventReply
+	if err := sSv1BiRpc.Call(utils.SessionSv1ProcessEvent,
+		args, &rply); err != nil {
+		t.Error(err)
+	}
+	if rply.Attributes == nil {
+		t.Error("Received nil Attributes")
+	} else if !reflect.DeepEqual(rply.Attributes.MatchedProfiles, []string{"ATTR_SUBJECT_CASE3"}) {
+		t.Errorf("Expected: %+v,received: %+v", []string{"ATTR_SUBJECT_CASE3"}, rply.Attributes.MatchedProfiles)
+	} else if !reflect.DeepEqual(rply.Attributes.AlteredFields, []string{"*req.Subject"}) {
+		t.Errorf("Expected: %+v,received: %+v", []string{"*req.Subject"}, rply.Attributes.AlteredFields)
+	}
+	if rply.Cost == nil {
+		t.Errorf("Received nil Cost")
+	} else if *rply.Cost != 2.9999 {
+		t.Errorf("Expected: %+v,received: %+v", 2.9999, *rply.Cost)
+	}
+}
+
+func testSSv1ItProcessEventWithGetCost4(t *testing.T) {
+	args := &sessions.V1ProcessEventArgs{
+		Flags: []string{utils.MetaAttributes, utils.MetaCost},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testSSv1ItProcessEventWithGetCost4",
+			Event: map[string]interface{}{
+				utils.Tenant:      "cgrates.org",
+				utils.ToR:         utils.MONETARY,
+				utils.OriginID:    "testSSv1ItProcessEventWithGetCost4",
+				utils.RequestType: sSV1RequestType,
+				utils.Subject:     "*attributes",
+				utils.Destination: "1002",
+				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+				utils.Usage:       10 * time.Minute,
+			},
+		},
+	}
+	var rply sessions.V1ProcessEventReply
+	if err := sSv1BiRpc.Call(utils.SessionSv1ProcessEvent,
+		args, &rply); err == nil || err.Error() != utils.ErrRatingPlanNotFound.Error() {
+		t.Error(err)
+	}
+
 }

@@ -3017,7 +3017,6 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 			Destination: me.GetStringIgnoreErrors(utils.Destination),
 			TimeStart:   startTime,
 			TimeEnd:     startTime.Add(me.GetDurationIgnoreErrors(utils.Usage)),
-			ExtraFields: me.AsMapString(utils.MainCDRFields),
 		}
 		var argDsp *utils.ArgDispatcher
 		//check if we have APIKey in event and in case it has add it in ArgDispatcher
@@ -3045,7 +3044,6 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 				ArgDispatcher: argDsp}, &cc); err != nil {
 			return
 		}
-		cc.UpdateCost()
 		rply.Cost = utils.Float64Pointer(cc.Cost)
 	}
 	// check for *resources
