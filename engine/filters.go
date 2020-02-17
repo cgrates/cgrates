@@ -444,7 +444,7 @@ func (fS *FilterS) getFieldNameDataProvider(initialDP config.DataProvider,
 		if len(splitFldName) != 3 {
 			return nil, fmt.Errorf("invalid fieldname <%s>", fieldName)
 		}
-		var account *Account
+		var account Account
 		if err = fS.connMgr.Call(fS.cfg.FilterSCfg().ApierSConns, nil, utils.APIerSv2GetAccount,
 			&utils.AttrGetAccount{Tenant: tenant, Account: splitFldName[1]}, &account); err != nil {
 			return
