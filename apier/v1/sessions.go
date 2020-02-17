@@ -121,12 +121,13 @@ func (ssv1 *SessionSv1) SetPassiveSession(args *sessions.Session,
 	return ssv1.Ss.BiRPCv1SetPassiveSession(nil, args, reply)
 }
 
-func (ssv1 *SessionSv1) ActivateSessions(args []string, reply *string) error {
+// ActivateSessions is called to activate a list/all sessions
+func (ssv1 *SessionSv1) ActivateSessions(args *utils.SessionIDsWithArgsDispatcher, reply *string) error {
 	return ssv1.Ss.BiRPCv1ActivateSessions(nil, args, reply)
 }
 
 // DeactivateSessions is called to deactivate a list/all active sessios
-func (ssv1 *SessionSv1) DeactivateSessions(args []string, reply *string) error {
+func (ssv1 *SessionSv1) DeactivateSessions(args *utils.SessionIDsWithArgsDispatcher, reply *string) error {
 	return ssv1.Ss.BiRPCv1DeactivateSessions(nil, args, reply)
 }
 
