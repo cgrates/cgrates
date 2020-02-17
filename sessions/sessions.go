@@ -1785,6 +1785,9 @@ func (v1AuthReply *V1AuthorizeReply) AsNavigableMap(
 // BiRPCv1AuthorizeEvent performs authorization for CGREvent based on specific components
 func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.ClientConnector,
 	args *V1AuthorizeArgs, authReply *V1AuthorizeReply) (err error) {
+	if args.CGREvent == nil {
+		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
+	}
 	var withErrors bool
 	if args.CGREvent.ID == "" {
 		args.CGREvent.ID = utils.GenUUID()
@@ -2051,6 +2054,9 @@ func (v1Rply *V1InitSessionReply) AsNavigableMap(
 // BiRPCv1InitiateSession initiates a new session
 func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.ClientConnector,
 	args *V1InitSessionArgs, rply *V1InitSessionReply) (err error) {
+	if args.CGREvent == nil {
+		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
+	}
 	var withErrors bool
 	if args.CGREvent.ID == "" {
 		args.CGREvent.ID = utils.GenUUID()
@@ -2272,6 +2278,9 @@ func (v1Rply *V1UpdateSessionReply) AsNavigableMap(
 // BiRPCv1UpdateSession updates an existing session, returning the duration which the session can still last
 func (sS *SessionS) BiRPCv1UpdateSession(clnt rpcclient.ClientConnector,
 	args *V1UpdateSessionArgs, rply *V1UpdateSessionReply) (err error) {
+	if args.CGREvent == nil {
+		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
+	}
 	if args.CGREvent.ID == "" {
 		args.CGREvent.ID = utils.GenUUID()
 	}
@@ -2400,6 +2409,9 @@ func (args *V1TerminateSessionArgs) ParseFlags(flags string) {
 // BiRPCv1TerminateSession will stop debit loops as well as release any used resources
 func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.ClientConnector,
 	args *V1TerminateSessionArgs, rply *string) (err error) {
+	if args.CGREvent == nil {
+		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
+	}
 	var withErrors bool
 	if args.CGREvent.ID == "" {
 		args.CGREvent.ID = utils.GenUUID()
@@ -2745,6 +2757,9 @@ func (v1Rply *V1ProcessMessageReply) AsNavigableMap(
 // BiRPCv1ProcessMessage processes one event with the right subsystems based on arguments received
 func (sS *SessionS) BiRPCv1ProcessMessage(clnt rpcclient.ClientConnector,
 	args *V1ProcessMessageArgs, rply *V1ProcessMessageReply) (err error) {
+	if args.CGREvent == nil {
+		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
+	}
 	var withErrors bool
 	if args.CGREvent.ID == "" {
 		args.CGREvent.ID = utils.GenUUID()
@@ -2918,6 +2933,9 @@ func (v1Rply *V1ProcessEventReply) AsNavigableMap(
 // BiRPCv1ProcessEvent processes one event with the right subsystems based on arguments received
 func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 	args *V1ProcessEventArgs, rply *V1ProcessEventReply) (err error) {
+	if args.CGREvent == nil {
+		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
+	}
 	var withErrors bool
 	if args.CGREvent.ID == "" {
 		args.CGREvent.ID = utils.GenUUID()
