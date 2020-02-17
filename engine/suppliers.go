@@ -368,9 +368,9 @@ func (spS *SupplierService) resourceUsage(resIDs []string, tenant string) (tUsag
 		for _, resID := range resIDs {
 			var res Resource
 			if err = spS.connMgr.Call(spS.cgrcfg.SupplierSCfg().ResourceSConns, nil, utils.ResourceSv1GetResource,
-				&utils.TenantID{Tenant: tenant, ID: resID}, &res); err != nil &&
-				err.Error() != utils.ErrNotFound.Error() {
-				utils.Logger.Warning(
+				&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{ Tenant: tenant, ID: resID}}, &res); 
+				err != nil && err.Error() != utils.ErrNotFound.Error() {
+					utils.Logger.Warning(
 					fmt.Sprintf("<SupplierS> error: %s getting resource for ID : %s", err.Error(), resID))
 				continue
 			}

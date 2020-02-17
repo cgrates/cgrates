@@ -458,8 +458,8 @@ func (fS *FilterS) getFieldNameDataProvider(initialDP config.DataProvider,
 			return nil, fmt.Errorf("invalid fieldname <%s>", fieldName)
 		}
 		var reply *Resource
-		if err := fS.connMgr.Call(fS.cfg.FilterSCfg().ResourceSConns, nil, utils.ResourceSv1GetResource,
-			&utils.TenantID{Tenant: tenant, ID: splitFldName[1]}, &reply); err != nil {
+		if err := fS.connMgr.Call(fS.cfg.FilterSCfg().ResourceSConns, nil, utils.ResourceSv1GetResource, &utils.TenantIDWithArgDispatcher{
+			TenantID: &utils.TenantID{Tenant: tenant, ID: splitFldName[1]}}, &reply); err != nil {
 			return nil, err
 		}
 		dp = config.NewObjectDP(reply, []string{utils.MetaResources, reply.ID})
@@ -535,7 +535,8 @@ func (fS *FilterS) getFieldValueDataProvider(initialDP config.DataProvider,
 		}
 		var reply *Resource
 		if err := fS.connMgr.Call(fS.cfg.FilterSCfg().ResourceSConns, nil, utils.ResourceSv1GetResource,
-			&utils.TenantID{Tenant: tenant, ID: splitFldName[1]}, &reply); err != nil {
+			&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{
+				Tenant: tenant, ID: splitFldName[1]}}, &reply); err != nil {
 			return nil, err
 		}
 		dp = config.NewObjectDP(reply, []string{utils.MetaResources, reply.ID})

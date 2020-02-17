@@ -1265,6 +1265,7 @@ const (
 const (
 	ResourceSv1AuthorizeResources   = "ResourceSv1.AuthorizeResources"
 	ResourceSv1GetResourcesForEvent = "ResourceSv1.GetResourcesForEvent"
+	ResourceSv1GetResources         = "ResourceSv1.GetResources"
 	ResourceSv1AllocateResources    = "ResourceSv1.AllocateResources"
 	ResourceSv1ReleaseResources     = "ResourceSv1.ReleaseResources"
 	ResourceSv1Ping                 = "ResourceSv1.Ping"

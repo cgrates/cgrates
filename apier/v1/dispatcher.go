@@ -303,6 +303,10 @@ func (dRs *DispatcherResourceSv1) GetResourcesForEvent(args utils.ArgRSv1Resourc
 	return dRs.dRs.ResourceSv1GetResourcesForEvent(args, reply)
 }
 
+func (dRs *DispatcherResourceSv1) GetResource(args *utils.TenantIDWithArgDispatcher, reply *engine.Resource) error {
+	return dRs.dRs.ResourceSv1GetResource(args, reply)
+}
+
 func (dRs *DispatcherResourceSv1) AuthorizeResources(args utils.ArgRSv1ResourceUsage,
 	reply *string) error {
 	return dRs.dRs.ResourceSv1AuthorizeResources(args, reply)

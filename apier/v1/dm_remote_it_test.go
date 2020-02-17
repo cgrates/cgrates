@@ -308,7 +308,7 @@ func testInternalRemoteITGetResource(t *testing.T) {
 		Usages: map[string]*engine.ResourceUsage{},
 	}
 	if err := internalRPC.Call(utils.ResourceSv1GetResource,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "ResGroup1"}, &reply); err != nil {
+		&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ResGroup1"}}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expectedResources) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedResources), utils.ToJSON(reply))
