@@ -304,7 +304,7 @@ type diameterDP struct {
 // String is part of engine.DataProvider interface
 // when called, it will display the already parsed values out of cache
 func (dP *diameterDP) String() string {
-	return utils.ToJSON(dP.m)
+	return dP.m.String()
 }
 
 // AsNavigableMap is part of engine.DataProvider interface
