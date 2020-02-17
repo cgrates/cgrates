@@ -176,6 +176,8 @@ func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 					*nMItm = *prevNMItem                // inherit the particularities, ie AttributeName
 					nMItm.Data = utils.IfaceAsString(prevNMItem.Data) + utils.IfaceAsString(out)
 					valSet = valSet[:len(valSet)-1] // discard the last item since we have captured it in nmItem
+				} else {
+					valSet = nil
 				}
 			}
 			valSet = append(valSet, nMItm)
