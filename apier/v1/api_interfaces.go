@@ -51,6 +51,7 @@ type ResourceSv1Interface interface {
 	AuthorizeResources(args utils.ArgRSv1ResourceUsage, reply *string) error
 	AllocateResources(args utils.ArgRSv1ResourceUsage, reply *string) error
 	ReleaseResources(args utils.ArgRSv1ResourceUsage, reply *string) error
+	GetResource(args *utils.TenantIDWithArgDispatcher, reply *engine.Resource) error
 	Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error
 }
 
@@ -138,6 +139,9 @@ type CDRsV1Interface interface {
 	ProcessExternalCDR(cdr *engine.ExternalCDRWithArgDispatcher, reply *string) error
 	RateCDRs(arg *engine.ArgRateCDRs, reply *string) error
 	StoreSessionCost(attr *engine.AttrCDRSStoreSMCost, reply *string) error
+	GetCDRsCount(args *utils.RPCCDRsFilterWithArgDispatcher, reply *int64) error
+	GetCDRs(args utils.RPCCDRsFilterWithArgDispatcher, reply *[]*engine.CDR) error
+	Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error
 }
 
 type ServiceManagerV1Interface interface {

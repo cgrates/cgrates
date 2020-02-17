@@ -749,7 +749,7 @@ func (rS *ResourceService) V1ReleaseResource(args utils.ArgRSv1ResourceUsage, re
 }
 
 // GetResource returns a resource configuration
-func (rS *ResourceService) V1GetResource(arg *utils.TenantID, reply *Resource) error {
+func (rS *ResourceService) V1GetResource(arg *utils.TenantIDWithArgDispatcher, reply *Resource) error {
 	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package dispatchers
 
 import (
+	"time"
+
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -139,4 +141,25 @@ func (dS *DispatcherService) ResourceSv1ReleaseResources(args utils.ArgRSv1Resou
 	}
 	return dS.Dispatch(args.CGREvent, utils.MetaResources, routeID,
 		utils.ResourceSv1ReleaseResources, args, reply)
+}
+
+func (dS *DispatcherService) ResourceSv1GetResource(args *utils.TenantIDWithArgDispatcher, reply *engine.Resource) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.TenantID != nil && args.TenantID.Tenant != utils.EmptyString {
+		tnt = args.TenantID.Tenant
+	}
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(utils.ResourceSv1GetResources, tnt,
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	routeID := args.ArgDispatcher.RouteID
+	return dS.Dispatch(&utils.CGREvent{
+		Tenant: tnt,
+		ID:     args.ID,
+	}, utils.MetaResources, routeID, utils.ResourceSv1GetResources, args, reply)
 }

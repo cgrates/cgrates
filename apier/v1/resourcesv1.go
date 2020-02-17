@@ -60,7 +60,7 @@ func (rsv1 *ResourceSv1) ReleaseResources(args utils.ArgRSv1ResourceUsage, reply
 }
 
 // GetResource returns a resource configuration
-func (rsv1 *ResourceSv1) GetResource(args *utils.TenantID, reply *engine.Resource) error {
+func (rsv1 *ResourceSv1) GetResource(args *utils.TenantIDWithArgDispatcher, reply *engine.Resource) error {
 	return rsv1.rls.V1GetResource(args, reply)
 }
 
