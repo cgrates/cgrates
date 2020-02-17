@@ -223,6 +223,48 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent) (
 				return nil, err
 			}
 			substitute = utils.IfaceAsString(ifaceSum)
+		case utils.MetaDifference:
+			iFaceVals := make([]interface{}, len(attribute.Value))
+			for i, val := range attribute.Value {
+				strVal, err := val.ParseDataProvider(evNm, utils.NestingSep)
+				if err != nil {
+					return nil, err
+				}
+				iFaceVals[i] = utils.StringToInterface(strVal)
+			}
+			ifaceSum, err := utils.Difference(iFaceVals...)
+			if err != nil {
+				return nil, err
+			}
+			substitute = utils.IfaceAsString(ifaceSum)
+		case utils.MetaMultiply:
+			iFaceVals := make([]interface{}, len(attribute.Value))
+			for i, val := range attribute.Value {
+				strVal, err := val.ParseDataProvider(evNm, utils.NestingSep)
+				if err != nil {
+					return nil, err
+				}
+				iFaceVals[i] = utils.StringToInterface(strVal)
+			}
+			ifaceSum, err := utils.Multiply(iFaceVals...)
+			if err != nil {
+				return nil, err
+			}
+			substitute = utils.IfaceAsString(ifaceSum)
+		case utils.MetaDivide:
+			iFaceVals := make([]interface{}, len(attribute.Value))
+			for i, val := range attribute.Value {
+				strVal, err := val.ParseDataProvider(evNm, utils.NestingSep)
+				if err != nil {
+					return nil, err
+				}
+				iFaceVals[i] = utils.StringToInterface(strVal)
+			}
+			ifaceSum, err := utils.Divide(iFaceVals...)
+			if err != nil {
+				return nil, err
+			}
+			substitute = utils.IfaceAsString(ifaceSum)
 		case utils.MetaValueExponent:
 			if len(attribute.Value) != 2 {
 				return nil, fmt.Errorf("invalid arguments <%s> to %s",
@@ -247,6 +289,16 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent) (
 			}
 			substitute = strconv.FormatFloat(utils.Round(val*math.Pow10(exp),
 				config.CgrConfig().GeneralCfg().RoundingDecimals, utils.ROUNDING_MIDDLE), 'f', -1, 64)
+		case utils.MetaUnixTimestamp:
+			val, err := attribute.Value.ParseDataProvider(evNm, utils.NestingSep)
+			if err != nil {
+				return nil, err
+			}
+			t, err := utils.ParseTimeDetectLayout(val, alS.cgrcfg.GeneralCfg().DefaultTimezone)
+			if err != nil {
+				return nil, err
+			}
+			substitute = strconv.Itoa(int(t.Unix()))
 		default: // backwards compatible in case that Type is empty
 			substitute, err = attribute.Value.ParseDataProvider(evNm, utils.NestingSep)
 		}
