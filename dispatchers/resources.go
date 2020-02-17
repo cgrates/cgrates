@@ -152,7 +152,7 @@ func (dS *DispatcherService) ResourceSv1GetResource(args *utils.TenantIDWithArgD
 		return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.ResourceSv1GetResources, tnt,
+		if err = dS.authorize(utils.ResourceSv1GetResource, tnt,
 			args.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
@@ -161,5 +161,5 @@ func (dS *DispatcherService) ResourceSv1GetResource(args *utils.TenantIDWithArgD
 	return dS.Dispatch(&utils.CGREvent{
 		Tenant: tnt,
 		ID:     args.ID,
-	}, utils.MetaResources, routeID, utils.ResourceSv1GetResources, args, reply)
+	}, utils.MetaResources, routeID, utils.ResourceSv1GetResource, args, reply)
 }

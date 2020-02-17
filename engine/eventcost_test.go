@@ -2992,8 +2992,8 @@ func TestEventCostgetChargesForPath(t *testing.T) {
 	eBalanceCharge := &BalanceCharge{AccountID: "AccountID"}
 	if rcv, err := eventCost.getChargesForPath([]string{"Increments[0]", utils.Accounting}, chargingInterval); err != nil {
 		t.Errorf("Expecting: nil, received: %+v", err)
-	} else if !reflect.DeepEqual(eBalanceCharge,rcv){
-		t.Errorf("Expecting: %+v, received: %+v",eBalanceCharge, rcv)
+	} else if !reflect.DeepEqual(eBalanceCharge, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eBalanceCharge, rcv)
 	}
 
 }
