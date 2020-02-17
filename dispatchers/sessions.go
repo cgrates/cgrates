@@ -151,7 +151,7 @@ func (dS *DispatcherService) SessionSv1UpdateSession(args *sessions.V1UpdateSess
 }
 
 func (dS *DispatcherService) SessionSv1SyncSessions(args *utils.TenantWithArgDispatcher,
-	reply *sessions.V1UpdateSessionReply) (err error) {
+	reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.TenantArg != nil && args.TenantArg.Tenant != utils.EmptyString {
 		tnt = args.TenantArg.Tenant

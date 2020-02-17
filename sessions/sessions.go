@@ -3242,7 +3242,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 
 // BiRPCv1SyncSessions will sync sessions on demand
 func (sS *SessionS) BiRPCv1SyncSessions(clnt rpcclient.ClientConnector,
-	ignParam string, reply *string) error {
+	ignParam *utils.TenantWithArgDispatcher, reply *string) error {
 	sS.syncSessions()
 	*reply = utils.OK
 	return nil

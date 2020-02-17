@@ -79,7 +79,7 @@ type SessionSv1Interface interface {
 	InitiateSession(args *sessions.V1InitSessionArgs, rply *sessions.V1InitSessionReply) error
 	InitiateSessionWithDigest(args *sessions.V1InitSessionArgs, rply *sessions.V1InitReplyWithDigest) error
 	UpdateSession(args *sessions.V1UpdateSessionArgs, rply *sessions.V1UpdateSessionReply) error
-	// SyncSessions(args *string, rply *string) error
+	SyncSessions(args *utils.TenantWithArgDispatcher, rply *string) error
 	TerminateSession(args *sessions.V1TerminateSessionArgs, rply *string) error
 	ProcessCDR(cgrEv *utils.CGREventWithArgDispatcher, rply *string) error
 	ProcessMessage(args *sessions.V1ProcessMessageArgs, rply *sessions.V1ProcessMessageReply) error
