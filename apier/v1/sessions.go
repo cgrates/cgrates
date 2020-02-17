@@ -58,9 +58,9 @@ func (ssv1 *SessionSv1) UpdateSession(args *sessions.V1UpdateSessionArgs,
 	return ssv1.Ss.BiRPCv1UpdateSession(nil, args, rply)
 }
 
-func (ssv1 *SessionSv1) SyncSessions(args *string,
+func (ssv1 *SessionSv1) SyncSessions(args *utils.TenantWithArgDispatcher,
 	rply *string) error {
-	return ssv1.Ss.BiRPCv1SyncSessions(nil, "", rply)
+	return ssv1.Ss.BiRPCv1SyncSessions(nil, &utils.TenantWithArgDispatcher{}, rply)
 }
 
 func (ssv1 *SessionSv1) TerminateSession(args *sessions.V1TerminateSessionArgs,

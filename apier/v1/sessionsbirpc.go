@@ -79,9 +79,9 @@ func (ssv1 *SessionSv1) BiRPCv1UpdateSession(clnt *rpc2.Client, args *sessions.V
 	return ssv1.Ss.BiRPCv1UpdateSession(clnt, args, rply)
 }
 
-func (ssv1 *SessionSv1) BiRPCv1SyncSessions(clnt *rpc2.Client, args *string,
+func (ssv1 *SessionSv1) BiRPCv1SyncSessions(clnt *rpc2.Client, args *utils.TenantWithArgDispatcher,
 	rply *string) error {
-	return ssv1.Ss.BiRPCv1SyncSessions(clnt, "", rply)
+	return ssv1.Ss.BiRPCv1SyncSessions(clnt, &utils.TenantWithArgDispatcher{}, rply)
 }
 
 func (ssv1 *SessionSv1) BiRPCv1TerminateSession(clnt *rpc2.Client, args *sessions.V1TerminateSessionArgs,
