@@ -1,0 +1,9 @@
+cgrates (0.10) UNRELEASED; urgency=medium
+
+  * [FilterS] Removed rals_conns in favor of reading the account
+    directly from DataDB
+  * [SessionS] Added check for missing CGRevent
+  * [DiameterAgent] Using String function from diam.Message instead of
+    ToJSON for request String method
+
+ -- Alexandru Tripon <alexandru.tripon@itsyscom.com>  Tue, 18 Feb 2020 08:44:41 +0200
