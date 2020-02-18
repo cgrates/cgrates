@@ -1530,3 +1530,45 @@ func TestAgReqOverwrite(t *testing.T) {
 			"OverwrittenAccountWithComposed", (rcv.([]*config.NMItem))[0].Data)
 	}
 }
+
+func TestAgReqGroupType(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, dm)
+	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
+	// populate request, emulating the way will be done in HTTPAgent
+	agReq.CGRRequest.Set([]string{utils.ToR}, utils.VOICE, false, false)
+	agReq.CGRRequest.Set([]string{utils.Account}, "1001", false, false)
+	agReq.CGRRequest.Set([]string{utils.Destination}, "1002", false, false)
+	agReq.CGRRequest.Set([]string{utils.AnswerTime},
+		time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC), false, false)
+	agReq.CGRRequest.Set([]string{utils.RequestType}, utils.META_PREPAID, false, false)
+
+	agReq.CGRReply = config.NewNavigableMap(nil)
+
+	tplFlds := []*config.FCTemplate{
+		&config.FCTemplate{Tag: "Account",
+			Path: utils.MetaCgrep + utils.NestingSep + utils.Account, Type: utils.MetaGroup,
+			Value: config.NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP)},
+		&config.FCTemplate{Tag: "Account",
+			Path: utils.MetaCgrep + utils.NestingSep + utils.Account, Type: utils.MetaGroup,
+			Value: config.NewRSRParsersMustCompile("test", true, utils.INFIELD_SEP)},
+	}
+
+	if err := agReq.SetFields(tplFlds); err != nil {
+		t.Error(err)
+	}
+
+	if rcv, err := agReq.CGRReply.GetField([]string{utils.Account}); err != nil {
+		t.Error(err)
+	} else if sls, canCast := rcv.([]*config.NMItem); !canCast {
+		t.Errorf("Cannot cast to []*config.NMItem %+v", rcv)
+	} else if len(sls) != 2 {
+		t.Errorf("expecting: %+v, \n received: %+v ", 1, len(sls))
+	} else if sls[0].Data != "cgrates.org" {
+		t.Errorf("expecting: %+v, \n received: %+v ", "cgrates.org", sls[0].Data)
+	} else if sls[1].Data != "test" {
+		t.Errorf("expecting: %+v, \n received: %+v ", "test", sls[0].Data)
+	}
+}

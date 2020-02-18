@@ -1,63 +1,63 @@
 {
 
-"dns_agent": {
-	"request_processors": [
-		{
-			"id": "NAPTRSuppliersQuery",
-			"filters": ["*string:~*vars.QueryType:NAPTR", 
-				"*string:~*vars.E164Address:4986517174965"],
-			"flags": ["*message", "*suppliers","*continue"],
-			"request_fields":[
-				{"tag": "ToR", "path": "*cgreq.Account", "type": "*constant", "value": "1001"}, // so we can match the supplier profile
-			],
-			"reply_fields":[
-				{"tag": "DispatchReply", "type": "*none", 
-					"blocker": true}, // enforces continue_on_success so we can check answer with filters
-			],
-		},
-		{
-			"id": "NAPTRSuppliersOneSupplier",
-			"filters": ["*string:~*vars.QueryType:NAPTR", 
-				"*string:~*vars.E164Address:4986517174965", 
-				"*gte:~*cgrep.Suppliers.Count:1"],
-			"flags": ["*none","*continue"], // do not send request to CGRateS
-			"reply_fields":[
-				{"tag": "NAPTROrder", "path": "*rep.Order",
-					"type": "*constant", "value": "100"},
-				{"tag": "NAPTRPreference", "path": "*rep.Preference",
-					"type": "*constant", "value": "10"},
-				{"tag": "NAPTRFlags", "path": "*rep.Flags",
-					"type": "*constant", "value": "U"},
-				{"tag": "NAPTRService", "path": "*rep.Service",
-					"type": "*constant", "value": "E2U+SIP"},
-				{"tag": "NAPTRRegexp", "path": "*rep.Regexp", "type": "*variable",
-					"value": "~*cgrep.Suppliers.SortedSuppliers[0].SupplierParameters"},
-				{"tag": "NAPTRReplacement", "path": "*rep.Replacement",
-					"type": "*constant", "value": "."},
-			],
-		},
-		{
-			"id": "NAPTRSuppliersTwoSuppliers",
-			"filters": ["*string:~*vars.QueryType:NAPTR", 
-				"*string:~*vars.E164Address:4986517174965", 
-				"*gte:~*cgrep.Suppliers.Count:2"],
-			"flags": ["*none","*continue"],
-			"reply_fields":[
-				{"tag": "NAPTROrder", "type": "*constant", "new_branch": true,
-				 "path": "*rep.Order", "value": "100"},
-				{"tag": "NAPTRPreference", "path": "*rep.Preference",
-					"type": "*constant", "value": "10"},
-				{"tag": "NAPTRFlags", "path": "*rep.Flags",
-					"type": "*constant", "value": "U"},
-				{"tag": "NAPTRService", "path": "*rep.Service",
-					"type": "*constant", "value": "E2U+SIP"},
-				{"tag": "NAPTRRegexp", "path": "*rep.Regexp", "type": "*variable",
-					"value": "~*cgrep.Suppliers.SortedSuppliers[1].SupplierParameters"},
-				{"tag": "NAPTRReplacement", "path": "*rep.Replacement",
-					"type": "*constant", "value": "."},
-			],
-		},
-	],
-},
+	"dns_agent": {
+		"request_processors": [
+			{
+				"id": "NAPTRSuppliersQuery",
+				"filters": ["*string:~*vars.QueryType:NAPTR",
+					"*string:~*vars.E164Address:4986517174965"],
+				"flags": ["*message", "*suppliers","*continue"],
+				"request_fields":[
+					{"tag": "ToR", "path": "*cgreq.Account", "type": "*constant", "value": "1001"}, // so we can match the supplier profile
+				],
+				"reply_fields":[
+					{"tag": "DispatchReply", "type": "*none",
+						"blocker": true}, // enforces continue_on_success so we can check answer with filters
+				],
+			},
+			{
+				"id": "NAPTRSuppliersOneSupplier",
+				"filters": ["*string:~*vars.QueryType:NAPTR",
+					"*string:~*vars.E164Address:4986517174965",
+					"*gte:~*cgrep.Suppliers.Count:1"],
+				"flags": ["*none","*continue"], // do not send request to CGRateS
+				"reply_fields":[
+					{"tag": "NAPTROrder", "path": "*rep.Order",
+						"type": "*group", "value": "100"},
+					{"tag": "NAPTRPreference", "path": "*rep.Preference",
+						"type": "*group", "value": "10"},
+					{"tag": "NAPTRFlags", "path": "*rep.Flags",
+						"type": "*group", "value": "U"},
+					{"tag": "NAPTRService", "path": "*rep.Service",
+						"type": "*group", "value": "E2U+SIP"},
+					{"tag": "NAPTRRegexp", "path": "*rep.Regexp", "type": "*group",
+						"value": "~*cgrep.Suppliers.SortedSuppliers[0].SupplierParameters"},
+					{"tag": "NAPTRReplacement", "path": "*rep.Replacement",
+						"type": "*group", "value": "."},
+				],
+			},
+			{
+				"id": "NAPTRSuppliersTwoSuppliers",
+				"filters": ["*string:~*vars.QueryType:NAPTR",
+					"*string:~*vars.E164Address:4986517174965",
+					"*gte:~*cgrep.Suppliers.Count:2"],
+				"flags": ["*none","*continue"],
+				"reply_fields":[
+					{"tag": "NAPTROrder", "type": "*group", "new_branch": true,
+						"path": "*rep.Order", "value": "100"},
+					{"tag": "NAPTRPreference", "path": "*rep.Preference",
+						"type": "*group", "value": "10"},
+					{"tag": "NAPTRFlags", "path": "*rep.Flags",
+						"type": "*group", "value": "U"},
+					{"tag": "NAPTRService", "path": "*rep.Service",
+						"type": "*group", "value": "E2U+SIP"},
+					{"tag": "NAPTRRegexp", "path": "*rep.Regexp", "type": "*group",
+						"value": "~*cgrep.Suppliers.SortedSuppliers[1].SupplierParameters"},
+					{"tag": "NAPTRReplacement", "path": "*rep.Replacement",
+						"type": "*group", "value": "."},
+				],
+			},
+		],
+	},
 
 }
