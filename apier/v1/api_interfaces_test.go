@@ -103,3 +103,8 @@ func TestCoreSv1Interface(t *testing.T) {
 	_ = CoreSv1Interface(NewDispatcherCoreSv1(nil))
 	_ = CoreSv1Interface(NewCoreSv1(nil))
 }
+
+func TestReplicatorSv1Interface(t *testing.T) {
+	_ = ReplicatorSv1Interface(NewDispatcherReplicatorSv1(nil))
+	_ = ReplicatorSv1Interface(NewReplicatorSv1(nil))
+}

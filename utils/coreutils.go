@@ -912,3 +912,9 @@ func GetPathIndex(spath string) (opath string, idx *int) {
 	}
 	return opath, &idxVal
 }
+
+type GetFilterIndexesArgWithArgDispatcher struct {
+	*GetFilterIndexesArg
+	TenantArg
+	*ArgDispatcher
+}

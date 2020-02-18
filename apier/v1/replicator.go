@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"github.com/cgrates/cgrates/dispatchers"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -38,8 +39,8 @@ func (rplSv1 *ReplicatorSv1) Call(serviceMethod string, args interface{}, reply 
 }
 
 //GetAccount
-func (rplSv1 *ReplicatorSv1) GetAccount(id string, reply *engine.Account) error {
-	if rcv, err := rplSv1.dm.GetAccount(id); err != nil {
+func (rplSv1 *ReplicatorSv1) GetAccount(args *dispatchers.StringWithApiKey, reply *engine.Account) error {
+	if rcv, err := rplSv1.dm.GetAccount(args.Arg); err != nil {
 		return err
 	} else {
 		*reply = *rcv
@@ -48,8 +49,8 @@ func (rplSv1 *ReplicatorSv1) GetAccount(id string, reply *engine.Account) error 
 }
 
 //GetDestination
-func (rplSv1 *ReplicatorSv1) GetDestination(key string, reply *engine.Destination) error {
-	if rcv, err := rplSv1.dm.DataDB().GetDestinationDrv(key, true, utils.NonTransactional); err != nil {
+func (rplSv1 *ReplicatorSv1) GetDestination(key *dispatchers.StringWithApiKey, reply *engine.Destination) error {
+	if rcv, err := rplSv1.dm.DataDB().GetDestinationDrv(key.Arg, true, utils.NonTransactional); err != nil {
 		return err
 	} else {
 		*reply = *rcv
@@ -58,8 +59,8 @@ func (rplSv1 *ReplicatorSv1) GetDestination(key string, reply *engine.Destinatio
 }
 
 //GetDestination
-func (rplSv1 *ReplicatorSv1) GetReverseDestination(key string, reply *[]string) error {
-	if rcv, err := rplSv1.dm.DataDB().GetReverseDestinationDrv(key, true, utils.NonTransactional); err != nil {
+func (rplSv1 *ReplicatorSv1) GetReverseDestination(key *dispatchers.StringWithApiKey, reply *[]string) error {
+	if rcv, err := rplSv1.dm.DataDB().GetReverseDestinationDrv(key.Arg, true, utils.NonTransactional); err != nil {
 		return err
 	} else {
 		*reply = rcv
@@ -68,7 +69,7 @@ func (rplSv1 *ReplicatorSv1) GetReverseDestination(key string, reply *[]string) 
 }
 
 //GetStatQueue
-func (rplSv1 *ReplicatorSv1) GetStatQueue(tntID *utils.TenantID, reply *engine.StatQueue) error {
+func (rplSv1 *ReplicatorSv1) GetStatQueue(tntID *utils.TenantIDWithArgDispatcher, reply *engine.StatQueue) error {
 	if rcv, err := rplSv1.dm.DataDB().GetStatQueueDrv(tntID.Tenant, tntID.ID); err != nil {
 		return err
 	} else {
@@ -78,7 +79,7 @@ func (rplSv1 *ReplicatorSv1) GetStatQueue(tntID *utils.TenantID, reply *engine.S
 }
 
 //GetFilter
-func (rplSv1 *ReplicatorSv1) GetFilter(tntID *utils.TenantID, reply *engine.Filter) error {
+func (rplSv1 *ReplicatorSv1) GetFilter(tntID *utils.TenantIDWithArgDispatcher, reply *engine.Filter) error {
 	if rcv, err := rplSv1.dm.DataDB().GetFilterDrv(tntID.Tenant, tntID.ID); err != nil {
 		return err
 	} else {
@@ -88,7 +89,7 @@ func (rplSv1 *ReplicatorSv1) GetFilter(tntID *utils.TenantID, reply *engine.Filt
 }
 
 //GetThreshold
-func (rplSv1 *ReplicatorSv1) GetThreshold(tntID *utils.TenantID, reply *engine.Threshold) error {
+func (rplSv1 *ReplicatorSv1) GetThreshold(tntID *utils.TenantIDWithArgDispatcher, reply *engine.Threshold) error {
 	if rcv, err := rplSv1.dm.DataDB().GetThresholdDrv(tntID.Tenant, tntID.ID); err != nil {
 		return err
 	} else {
@@ -98,7 +99,7 @@ func (rplSv1 *ReplicatorSv1) GetThreshold(tntID *utils.TenantID, reply *engine.T
 }
 
 //GetThresholdProfile
-func (rplSv1 *ReplicatorSv1) GetThresholdProfile(tntID *utils.TenantID, reply *engine.ThresholdProfile) error {
+func (rplSv1 *ReplicatorSv1) GetThresholdProfile(tntID *utils.TenantIDWithArgDispatcher, reply *engine.ThresholdProfile) error {
 	if rcv, err := rplSv1.dm.DataDB().GetThresholdProfileDrv(tntID.Tenant, tntID.ID); err != nil {
 		return err
 	} else {
@@ -108,7 +109,7 @@ func (rplSv1 *ReplicatorSv1) GetThresholdProfile(tntID *utils.TenantID, reply *e
 }
 
 //GetStatQueueProfile
-func (rplSv1 *ReplicatorSv1) GetStatQueueProfile(tntID *utils.TenantID, reply *engine.StatQueueProfile) error {
+func (rplSv1 *ReplicatorSv1) GetStatQueueProfile(tntID *utils.TenantIDWithArgDispatcher, reply *engine.StatQueueProfile) error {
 	if rcv, err := rplSv1.dm.DataDB().GetStatQueueProfileDrv(tntID.Tenant, tntID.ID); err != nil {
 		return err
 	} else {
@@ -118,8 +119,8 @@ func (rplSv1 *ReplicatorSv1) GetStatQueueProfile(tntID *utils.TenantID, reply *e
 }
 
 //GetTiming
-func (rplSv1 *ReplicatorSv1) GetTiming(id string, reply *utils.TPTiming) error {
-	if rcv, err := rplSv1.dm.DataDB().GetTimingDrv(id); err != nil {
+func (rplSv1 *ReplicatorSv1) GetTiming(id *dispatchers.StringWithApiKey, reply *utils.TPTiming) error {
+	if rcv, err := rplSv1.dm.DataDB().GetTimingDrv(id.Arg); err != nil {
 		return err
 	} else {
 		*reply = *rcv
@@ -128,7 +129,7 @@ func (rplSv1 *ReplicatorSv1) GetTiming(id string, reply *utils.TPTiming) error {
 }
 
 //GetResource
-func (rplSv1 *ReplicatorSv1) GetResource(tntID *utils.TenantID, reply *engine.Resource) error {
+func (rplSv1 *ReplicatorSv1) GetResource(tntID *utils.TenantIDWithArgDispatcher, reply *engine.Resource) error {
 	if rcv, err := rplSv1.dm.DataDB().GetResourceDrv(tntID.Tenant, tntID.ID); err != nil {
 		return err
 	} else {
@@ -138,7 +139,7 @@ func (rplSv1 *ReplicatorSv1) GetResource(tntID *utils.TenantID, reply *engine.Re
 }
 
 //GetResourceProfile
-func (rplSv1 *ReplicatorSv1) GetResourceProfile(tntID *utils.TenantID, reply *engine.ResourceProfile) error {
+func (rplSv1 *ReplicatorSv1) GetResourceProfile(tntID *utils.TenantIDWithArgDispatcher, reply *engine.ResourceProfile) error {
 	if rcv, err := rplSv1.dm.DataDB().GetResourceProfileDrv(tntID.Tenant, tntID.ID); err != nil {
 		return err
 	} else {
@@ -148,18 +149,18 @@ func (rplSv1 *ReplicatorSv1) GetResourceProfile(tntID *utils.TenantID, reply *en
 }
 
 //GetActionTriggers
-func (rplSv1 *ReplicatorSv1) GetActionTriggers(id string, reply engine.ActionTriggers) error {
-	if rcv, err := rplSv1.dm.DataDB().GetActionTriggersDrv(id); err != nil {
+func (rplSv1 *ReplicatorSv1) GetActionTriggers(id *dispatchers.StringWithApiKey, reply *engine.ActionTriggers) error {
+	if rcv, err := rplSv1.dm.DataDB().GetActionTriggersDrv(id.Arg); err != nil {
 		return err
 	} else {
-		reply = rcv
+		*reply = rcv
 	}
 	return nil
 }
 
 //GetShareGroup
-func (rplSv1 *ReplicatorSv1) GetShareGroup(id string, reply *engine.SharedGroup) error {
-	if rcv, err := rplSv1.dm.DataDB().GetSharedGroupDrv(id); err != nil {
+func (rplSv1 *ReplicatorSv1) GetShareGroup(id *dispatchers.StringWithApiKey, reply *engine.SharedGroup) error {
+	if rcv, err := rplSv1.dm.DataDB().GetSharedGroupDrv(id.Arg); err != nil {
 		return err
 	} else {
 		*reply = *rcv
@@ -168,8 +169,8 @@ func (rplSv1 *ReplicatorSv1) GetShareGroup(id string, reply *engine.SharedGroup)
 }
 
 //GetActions
-func (rplSv1 *ReplicatorSv1) GetActions(id string, reply *engine.Actions) error {
-	if rcv, err := rplSv1.dm.DataDB().GetActionsDrv(id); err != nil {
+func (rplSv1 *ReplicatorSv1) GetActions(id *dispatchers.StringWithApiKey, reply *engine.Actions) error {
+	if rcv, err := rplSv1.dm.DataDB().GetActionsDrv(id.Arg); err != nil {
 		return err
 	} else {
 		*reply = rcv
@@ -178,8 +179,8 @@ func (rplSv1 *ReplicatorSv1) GetActions(id string, reply *engine.Actions) error 
 }
 
 //GetActions
-func (rplSv1 *ReplicatorSv1) GetActionPlan(id string, reply *engine.ActionPlan) error {
-	if rcv, err := rplSv1.dm.DataDB().GetActionPlanDrv(id, true, utils.NonTransactional); err != nil {
+func (rplSv1 *ReplicatorSv1) GetActionPlan(id *dispatchers.StringWithApiKey, reply *engine.ActionPlan) error {
+	if rcv, err := rplSv1.dm.DataDB().GetActionPlanDrv(id.Arg, true, utils.NonTransactional); err != nil {
 		return err
 	} else {
 		*reply = *rcv
@@ -188,7 +189,7 @@ func (rplSv1 *ReplicatorSv1) GetActionPlan(id string, reply *engine.ActionPlan) 
 }
 
 //GetAllActionPlans
-func (rplSv1 *ReplicatorSv1) GetAllActionPlans(_ string, reply *map[string]*engine.ActionPlan) error {
+func (rplSv1 *ReplicatorSv1) GetAllActionPlans(_ *dispatchers.StringWithApiKey, reply *map[string]*engine.ActionPlan) error {
 	if rcv, err := rplSv1.dm.DataDB().GetAllActionPlansDrv(); err != nil {
 		return err
 	} else {
@@ -198,8 +199,8 @@ func (rplSv1 *ReplicatorSv1) GetAllActionPlans(_ string, reply *map[string]*engi
 }
 
 //GetAccountActionPlans
-func (rplSv1 *ReplicatorSv1) GetAccountActionPlans(id string, reply *[]string) error {
-	if rcv, err := rplSv1.dm.DataDB().GetAccountActionPlansDrv(id, false, utils.NonTransactional); err != nil {
+func (rplSv1 *ReplicatorSv1) GetAccountActionPlans(id *dispatchers.StringWithApiKey, reply *[]string) error {
+	if rcv, err := rplSv1.dm.DataDB().GetAccountActionPlansDrv(id.Arg, false, utils.NonTransactional); err != nil {
 		return err
 	} else {
 		*reply = rcv
@@ -208,8 +209,8 @@ func (rplSv1 *ReplicatorSv1) GetAccountActionPlans(id string, reply *[]string) e
 }
 
 //GetAllActionPlans
-func (rplSv1 *ReplicatorSv1) GetRatingPlan(id string, reply *engine.RatingPlan) error {
-	if rcv, err := rplSv1.dm.DataDB().GetRatingPlanDrv(id); err != nil {
+func (rplSv1 *ReplicatorSv1) GetRatingPlan(id *dispatchers.StringWithApiKey, reply *engine.RatingPlan) error {
+	if rcv, err := rplSv1.dm.DataDB().GetRatingPlanDrv(id.Arg); err != nil {
 		return err
 	} else {
 		*reply = *rcv
@@ -218,8 +219,8 @@ func (rplSv1 *ReplicatorSv1) GetRatingPlan(id string, reply *engine.RatingPlan) 
 }
 
 //GetAllActionPlans
-func (rplSv1 *ReplicatorSv1) GetRatingProfile(id string, reply *engine.RatingProfile) error {
-	if rcv, err := rplSv1.dm.DataDB().GetRatingProfileDrv(id); err != nil {
+func (rplSv1 *ReplicatorSv1) GetRatingProfile(id *dispatchers.StringWithApiKey, reply *engine.RatingProfile) error {
+	if rcv, err := rplSv1.dm.DataDB().GetRatingProfileDrv(id.Arg); err != nil {
 		return err
 	} else {
 		*reply = *rcv
@@ -228,7 +229,7 @@ func (rplSv1 *ReplicatorSv1) GetRatingProfile(id string, reply *engine.RatingPro
 }
 
 //GetResourceProfile
-func (rplSv1 *ReplicatorSv1) GetSupplierProfile(tntID *utils.TenantID, reply *engine.SupplierProfile) error {
+func (rplSv1 *ReplicatorSv1) GetSupplierProfile(tntID *utils.TenantIDWithArgDispatcher, reply *engine.SupplierProfile) error {
 	if rcv, err := rplSv1.dm.DataDB().GetSupplierProfileDrv(tntID.Tenant, tntID.ID); err != nil {
 		return err
 	} else {
@@ -238,7 +239,7 @@ func (rplSv1 *ReplicatorSv1) GetSupplierProfile(tntID *utils.TenantID, reply *en
 }
 
 //GetResourceProfile
-func (rplSv1 *ReplicatorSv1) GetAttributeProfile(tntID *utils.TenantID, reply *engine.AttributeProfile) error {
+func (rplSv1 *ReplicatorSv1) GetAttributeProfile(tntID *utils.TenantIDWithArgDispatcher, reply *engine.AttributeProfile) error {
 	if rcv, err := rplSv1.dm.DataDB().GetAttributeProfileDrv(tntID.Tenant, tntID.ID); err != nil {
 		return err
 	} else {
@@ -248,7 +249,7 @@ func (rplSv1 *ReplicatorSv1) GetAttributeProfile(tntID *utils.TenantID, reply *e
 }
 
 //GetResourceProfile
-func (rplSv1 *ReplicatorSv1) GetChargerProfile(tntID *utils.TenantID, reply *engine.ChargerProfile) error {
+func (rplSv1 *ReplicatorSv1) GetChargerProfile(tntID *utils.TenantIDWithArgDispatcher, reply *engine.ChargerProfile) error {
 	if rcv, err := rplSv1.dm.DataDB().GetChargerProfileDrv(tntID.Tenant, tntID.ID); err != nil {
 		return err
 	} else {
@@ -258,7 +259,7 @@ func (rplSv1 *ReplicatorSv1) GetChargerProfile(tntID *utils.TenantID, reply *eng
 }
 
 //GetResourceProfile
-func (rplSv1 *ReplicatorSv1) GetDispatcherProfile(tntID *utils.TenantID, reply *engine.DispatcherProfile) error {
+func (rplSv1 *ReplicatorSv1) GetDispatcherProfile(tntID *utils.TenantIDWithArgDispatcher, reply *engine.DispatcherProfile) error {
 	if rcv, err := rplSv1.dm.DataDB().GetDispatcherProfileDrv(tntID.Tenant, tntID.ID); err != nil {
 		return err
 	} else {
@@ -268,7 +269,7 @@ func (rplSv1 *ReplicatorSv1) GetDispatcherProfile(tntID *utils.TenantID, reply *
 }
 
 //GetResourceProfile
-func (rplSv1 *ReplicatorSv1) GetDispatcherHost(tntID *utils.TenantID, reply *engine.DispatcherHost) error {
+func (rplSv1 *ReplicatorSv1) GetDispatcherHost(tntID *utils.TenantIDWithArgDispatcher, reply *engine.DispatcherHost) error {
 	if rcv, err := rplSv1.dm.DataDB().GetDispatcherHostDrv(tntID.Tenant, tntID.ID); err != nil {
 		return err
 	} else {
@@ -278,8 +279,8 @@ func (rplSv1 *ReplicatorSv1) GetDispatcherHost(tntID *utils.TenantID, reply *eng
 }
 
 //GetResourceProfile
-func (rplSv1 *ReplicatorSv1) GetItemLoadIDs(itemID string, reply *map[string]int64) error {
-	if rcv, err := rplSv1.dm.DataDB().GetItemLoadIDsDrv(itemID); err != nil {
+func (rplSv1 *ReplicatorSv1) GetItemLoadIDs(itemID *dispatchers.StringWithApiKey, reply *map[string]int64) error {
+	if rcv, err := rplSv1.dm.DataDB().GetItemLoadIDsDrv(itemID.Arg); err != nil {
 		return err
 	} else {
 		*reply = rcv
@@ -288,7 +289,7 @@ func (rplSv1 *ReplicatorSv1) GetItemLoadIDs(itemID string, reply *map[string]int
 }
 
 //GetResourceProfile
-func (rplSv1 *ReplicatorSv1) GetFilterIndexes(args *utils.GetFilterIndexesArg, reply *map[string]utils.StringMap) error {
+func (rplSv1 *ReplicatorSv1) GetFilterIndexes(args *utils.GetFilterIndexesArgWithArgDispatcher, reply *map[string]utils.StringMap) error {
 	if rcv, err := rplSv1.dm.DataDB().GetFilterIndexesDrv(args.CacheID, args.ItemIDPrefix,
 		args.FilterType, args.FldNameVal); err != nil {
 		return err

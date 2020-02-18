@@ -361,6 +361,7 @@ const (
 	MetaScheduler               = "*scheduler"
 	MetaSessionsCosts           = "*sessions_costs"
 	MetaRALs                    = "*rals"
+	MetaReplicator              = "*replicator"
 	MetaRerate                  = "*rerate"
 	MetaRefund                  = "*refund"
 	MetaStats                   = "*stats"
