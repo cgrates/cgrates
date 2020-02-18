@@ -55,13 +55,18 @@ func NewPartialCSVFileER(cfg *config.CGRConfig, cfgIdx int,
 		rdrDir:    srcPath,
 		rdrEvents: rdrEvents,
 		rdrError:  rdrErr,
-		rdrExit:   rdrExit}
+		rdrExit:   rdrExit,
+		conReqs:   make(chan struct{}, cfg.ERsCfg().Readers[cfgIdx].ConcurrentReqs)}
 
 	var function func(itmID string, value interface{})
 	if cfg.ERsCfg().Readers[cfgIdx].PartialCacheExpiryAction == utils.MetaDumpToFile {
 		function = pCSVFileER.dumpToFile
 	} else {
 		function = pCSVFileER.postCDR
+	}
+	var processFile struct{}
+	for i := 0; i < cfg.ERsCfg().Readers[cfgIdx].ConcurrentReqs; i++ {
+		pCSVFileER.conReqs <- processFile // Empty initiate so we do not need to wait later when we pop
 	}
 	pCSVFileER.cache = ltcache.NewCache(ltcache.UnlimitedCaching, cfg.ERsCfg().Readers[cfgIdx].PartialRecordCache, false, function)
 	return pCSVFileER, nil
