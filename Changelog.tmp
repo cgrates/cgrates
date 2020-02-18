@@ -1,6 +1,0 @@
-- [FilterS] Renamed rals_conns to apiers_conns
-- [FilterS] Updated *destination filter to get ReverseDestination form API
-- [SessionS] Added check for missing CGRevent
-- [SessionS] Add *cost flag for SessionSv1.ProcessEvent to calculate the rater cost
-- [ConnManager] Added ApierSv2 as internal connection channel instead of ApierSv1
-- [DiameterAgent] Using String function from diam.Message instead of ToJSON for request String method
