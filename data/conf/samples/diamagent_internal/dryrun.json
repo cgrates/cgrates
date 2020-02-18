@@ -181,14 +181,14 @@
 				{
 					"tag": "RatingGroup",
 					"path": "*rep.Multiple-Services-Credit-Control.Rating-Group",
-					"type": "*constant",
+					"type": "*group",
 					"value": "2",
 					"new_branch": true
 				},
 				{
 					"tag": "CCTotalOctets2",
 					"path": "*rep.Multiple-Services-Credit-Control.Used-Service-Unit.CC-Total-Octets",
-					"type": "*variable",
+					"type": "*group",
 					"value": "~*cgreq.UsedUnits2"
 				},
 			],

@@ -653,6 +653,7 @@ const (
 	TmpSuffix                   = ".tmp"
 	MetaDiamreq                 = "*diamreq"
 	MetaCost                    = "*cost"
+	MetaGroup                   = "*group"
 )
 
 // Migrator Action
