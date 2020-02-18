@@ -115,7 +115,7 @@ With explanations in the comments:
  }
 
 
- Config params
+Config params
 ^^^^^^^^^^^^^
 
 Most of the parameters are explained in :ref:`JSON configuration <configuration>`, hence we mention here only the ones where additional info is necessary or there will be particular implementation for *EventReaderService*.
@@ -175,16 +175,16 @@ timezone
 filters
 	List of filters to pass for the reader to process the event. For the dynamic content (prefixed with *~*) following special variables are available:
 
-	* **\*vars**
+	**\*vars**
 		Request related shared variables between processors, populated especially by core functions. The data put inthere is not automatically transfered into requests sent to CGRateS, unless instructed inside templates.
 
-	* **\*req**
+	**\*req**
 		Request read from the source. In case of file content without field name, the index will be passed instead of field source path.
 
-	* **\*hdr**
+	**\*hdr**
 		Header values (available only in case of *\*file_fwv*). In case of file content without field name, the index will be passed instead of field source path.
 
-	* **\*trl**
+	**\*trl**
 		Trailer values (available only in case of *\*file_fwv*). In case of file content without field name, the index will be passed instead of field source path.
 
 flags
@@ -198,98 +198,98 @@ flags
 
 	Implemented **main** flags are (in order of priority, and not working simultaneously unless specified):
 
-	* **\*log**
+	**\*log**
 		Logs the Event read. Can be used together with other *main* flags.
 
 	**\*none**
 		Disable transfering the Event from *Reader* to *CGRateS* side.
 
-	* **\*dryrun**
+	**\*dryrun**
 		Together with not transfering the Event on CGRateS side will also log it, useful for troubleshooting.
 
-	* **\*auth**
+	**\*auth**
 		Sends the Event for authorization on CGRateS.
 
 		Auxiliary flags available: **\*attributes**, **\*thresholds**, **\*stats**, **\*resources**, **\*accounts**, **\*suppliers**, **\*suppliers_ignore_errors**, **\*suppliers_event_cost** which are used to influence the auth behavior on CGRateS side. More info on that can be found on the **SessionS** component's API behavior.
 
-	* **\*initiate**
+	**\*initiate**
 		Initiates a session out of Event on CGRateS side.
 
 		Auxiliary flags available: **\*attributes**, **\*thresholds**, **\*stats**, **\*resources**, **\*accounts** which are used to influence the behavior on CGRateS side.
 
-	* **\*update**
+	**\*update**
 		Updates a session with the Event on CGRateS side.
 
 		Auxiliary flags available: **\*attributes**, **\*accounts** which are used to influence the behavior on CGRateS side.
 
-	* **\*terminate**
+	**\*terminate**
 		Terminates a session using the Event on CGRateS side.
 
 		Auxiliary flags available: **\*thresholds**, **\*stats**, **\*resources**, **\*accounts** which are used to influence the behavior on CGRateS side.
 
-	* **\*message**
+	**\*message**
 		Process the Event as individual message charging on CGRateS side.
 
 		Auxiliary flags available: **\*attributes**, **\*thresholds**, **\*stats**, **\*resources**, **\*accounts**, **\*suppliers**, **\*suppliers_ignore_errors**, **\*suppliers_event_cost** which are used to influence the behavior on CGRateS side.
 
-	* **\*event**
+	**\*event**
 		Process the Event as generic event on CGRateS side.
 
 		Auxiliary flags available: all flags supported by the "SessionSv1.ProcessEvent" generic API
 
-	* **\*cdrs**
+	**\*cdrs**
 		Build a CDR out of the Event on CGRateS side. Can be used simultaneously with other flags (except *\*dry_run)
 
 path
 	Defined within field, specifies the path where the value will be written. Possible values:
 
-	* **\*vars**
+	**\*vars**
 		Write the value in the special container, *\*vars*, available for the duration of the request.
 
-	* **\*cgreq**
+	**\*cgreq**
 		Write the value in the request object which will be sent to CGRateS side.
 
-	* **\*hdr**
+	**\*hdr**
 		Header values (available only in case of *\*file_fwv*). In case of file content without field name, the index will be passed instead of field source path.
 
-	* **\*trl**
+	**\*trl**
 		Trailer values (available only in case of *\*file_fwv*). In case of file content without field name, the index will be passed instead of field source path.
 
 
 type
 	Defined within field, specifies the logic type to be used when writing the value of the field. Possible values:
 
-	* **\*none**
+	**\*none**
 		Pass
 
-	* **\*filler**
+	**\*filler**
 		Fills the values with an empty string
 
-	* **\*constant**
+	**\*constant**
 		Writes out a constant
 
-	* **\*remote_host**
+	**\*remote_host**
 		Writes out the Address of the remote host sending us the Event
 
-	* **\*variable**
+	**\*variable**
 		Writes out the variable value, overwriting previous one set
 
-	* **\*composed**
+	**\*composed**
 		Writes out the variable value, postpending to previous value set
 
-	* **\*usage_difference**
+	**\*usage_difference**
 		Calculates the usage difference between two arguments passed in the *value*. Requires 2 arguments: *$stopTime;$startTime*
 
-	* **\*sum**
+	**\*sum**
 		Calculates the sum of all arguments passed within *value*. It supports summing up duration, time, float, int autodetecting them in this order.
 
-	* **\*difference**
+	**\*difference**
 		Calculates the difference between all arguments passed within *value*. Possible value types are (in this order): duration, time, float, int.
 
-	* **\*value_exponent**
+	**\*value_exponent**
 		Calculates the exponent of a value. It requires two values: *$val;$exp*
 
-	* **\*template**
+	**\*template**
 		Specifies a template of fields to be injected here. Value should be one of the template ids defined.
 
 
