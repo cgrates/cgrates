@@ -1480,3 +1480,53 @@ func TestAgReqParseFieldMetaValueExponent(t *testing.T) {
 		t.Errorf("expecting: <%+v>, %T received: <%+v> %T", expected, expected, out, out)
 	}
 }
+
+func TestAgReqOverwrite(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, dm)
+	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
+	// populate request, emulating the way will be done in HTTPAgent
+	agReq.CGRRequest.Set([]string{utils.ToR}, utils.VOICE, false, false)
+	agReq.CGRRequest.Set([]string{utils.Account}, "1001", false, false)
+	agReq.CGRRequest.Set([]string{utils.Destination}, "1002", false, false)
+	agReq.CGRRequest.Set([]string{utils.AnswerTime},
+		time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC), false, false)
+	agReq.CGRRequest.Set([]string{utils.RequestType}, utils.META_PREPAID, false, false)
+
+	agReq.CGRReply = config.NewNavigableMap(nil)
+
+	tplFlds := []*config.FCTemplate{
+		&config.FCTemplate{Tag: "Account",
+			Path: utils.MetaCgrep + utils.NestingSep + utils.Account, Type: utils.META_COMPOSED,
+			Value: config.NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP)},
+		&config.FCTemplate{Tag: "Account",
+			Path: utils.MetaCgrep + utils.NestingSep + utils.Account, Type: utils.META_COMPOSED,
+			Value: config.NewRSRParsersMustCompile(":", true, utils.INFIELD_SEP)},
+		&config.FCTemplate{Tag: "Account",
+			Path: utils.MetaCgrep + utils.NestingSep + utils.Account, Type: utils.META_COMPOSED,
+			Value: config.NewRSRParsersMustCompile("~*cgreq.Account", true, utils.INFIELD_SEP)},
+		&config.FCTemplate{Tag: "Account",
+			Path: utils.MetaCgrep + utils.NestingSep + utils.Account, Type: utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("OverwrittenAccount", true, utils.INFIELD_SEP)},
+		&config.FCTemplate{Tag: "Account",
+			Path: utils.MetaCgrep + utils.NestingSep + utils.Account, Type: utils.META_COMPOSED,
+			Value: config.NewRSRParsersMustCompile("WithComposed", true, utils.INFIELD_SEP)},
+	}
+
+	if err := agReq.SetFields(tplFlds); err != nil {
+		t.Error(err)
+	}
+
+	if rcv, err := agReq.CGRReply.GetField([]string{utils.Account}); err != nil {
+		t.Error(err)
+	} else if sls, canCast := rcv.([]*config.NMItem); !canCast {
+		t.Errorf("Cannot cast to []*config.NMItem %+v", rcv)
+	} else if len(sls) != 1 {
+		t.Errorf("expecting: %+v, \n received: %+v ", 1, len(sls))
+	} else if sls[0].Data != "OverwrittenAccountWithComposed" {
+		t.Errorf("expecting: %+v, \n received: %+v ",
+			"OverwrittenAccountWithComposed", (rcv.([]*config.NMItem))[0].Data)
+	}
+}
