@@ -170,12 +170,14 @@ func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 				}
 			} else {
 				valSet = nMFields.([]*config.NMItem) // start from previous stored fields
-				if tplFld.Type == utils.META_COMPOSED {
+				switch tplFld.Type {
+				case utils.META_COMPOSED:
 					prevNMItem := valSet[len(valSet)-1] // could be we need nil protection here
 					*nMItm = *prevNMItem                // inherit the particularities, ie AttributeName
 					nMItm.Data = utils.IfaceAsString(prevNMItem.Data) + utils.IfaceAsString(out)
 					valSet = valSet[:len(valSet)-1] // discard the last item since we have captured it in nmItem
-				} else {
+				case utils.MetaGroup: // in case of *group type simply append to valSet
+				default:
 					valSet = nil
 				}
 			}
@@ -221,7 +223,7 @@ func (ar *AgentRequest) ParseField(
 	case utils.MetaRemoteHost:
 		out = ar.RemoteHost().String()
 		isString = true
-	case utils.MetaVariable, utils.META_COMPOSED:
+	case utils.MetaVariable, utils.META_COMPOSED, utils.MetaGroup:
 		out, err = cfgFld.Value.ParseDataProvider(ar, utils.NestingSep)
 		isString = true
 	case utils.META_USAGE_DIFFERENCE:

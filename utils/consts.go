@@ -652,6 +652,7 @@ const (
 	MetaLoaders                 = "*loaders"
 	TmpSuffix                   = ".tmp"
 	MetaDiamreq                 = "*diamreq"
+	MetaGroup                   = "*group"
 )
 
 // Migrator Action

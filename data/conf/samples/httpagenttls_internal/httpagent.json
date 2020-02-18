@@ -155,7 +155,7 @@
 				"flags": ["*dryrun"],
 				"request_fields":[],
 				"reply_fields":[
-					{"tag": "Field1", "path": "*rep.Item1.1", "type": "*variable",
+					{"tag": "Field1", "path": "*rep.Item1.1", "type": "*group",
 						"value": "Val2", "mandatory": true},
 				],
 			},
