@@ -168,3 +168,33 @@ type CoreSv1Interface interface {
 	Status(arg *utils.TenantWithArgDispatcher, reply *map[string]interface{}) error
 	Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error
 }
+
+type ReplicatorSv1Interface interface {
+	Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error
+	GetAccount(args *dispatchers.StringWithApiKey, reply *engine.Account) error
+	GetDestination(key *dispatchers.StringWithApiKey, reply *engine.Destination) error
+	GetReverseDestination(key *dispatchers.StringWithApiKey, reply *[]string) error
+	GetStatQueue(tntID *utils.TenantIDWithArgDispatcher, reply *engine.StatQueue) error
+	GetFilter(tntID *utils.TenantIDWithArgDispatcher, reply *engine.Filter) error
+	GetThreshold(tntID *utils.TenantIDWithArgDispatcher, reply *engine.Threshold) error
+	GetThresholdProfile(tntID *utils.TenantIDWithArgDispatcher, reply *engine.ThresholdProfile) error
+	GetStatQueueProfile(tntID *utils.TenantIDWithArgDispatcher, reply *engine.StatQueueProfile) error
+	GetTiming(id *dispatchers.StringWithApiKey, reply *utils.TPTiming) error
+	GetResource(tntID *utils.TenantIDWithArgDispatcher, reply *engine.Resource) error
+	GetResourceProfile(tntID *utils.TenantIDWithArgDispatcher, reply *engine.ResourceProfile) error
+	GetActionTriggers(id *dispatchers.StringWithApiKey, reply *engine.ActionTriggers) error
+	GetShareGroup(id *dispatchers.StringWithApiKey, reply *engine.SharedGroup) error
+	GetActions(id *dispatchers.StringWithApiKey, reply *engine.Actions) error
+	GetActionPlan(id *dispatchers.StringWithApiKey, reply *engine.ActionPlan) error
+	GetAllActionPlans(_ *dispatchers.StringWithApiKey, reply *map[string]*engine.ActionPlan) error
+	GetAccountActionPlans(id *dispatchers.StringWithApiKey, reply *[]string) error
+	GetRatingPlan(id *dispatchers.StringWithApiKey, reply *engine.RatingPlan) error
+	GetRatingProfile(id *dispatchers.StringWithApiKey, reply *engine.RatingProfile) error
+	GetSupplierProfile(tntID *utils.TenantIDWithArgDispatcher, reply *engine.SupplierProfile) error
+	GetAttributeProfile(tntID *utils.TenantIDWithArgDispatcher, reply *engine.AttributeProfile) error
+	GetChargerProfile(tntID *utils.TenantIDWithArgDispatcher, reply *engine.ChargerProfile) error
+	GetDispatcherProfile(tntID *utils.TenantIDWithArgDispatcher, reply *engine.DispatcherProfile) error
+	GetDispatcherHost(tntID *utils.TenantIDWithArgDispatcher, reply *engine.DispatcherHost) error
+	GetItemLoadIDs(itemID *dispatchers.StringWithApiKey, reply *map[string]int64) error
+	GetFilterIndexes(args *utils.GetFilterIndexesArgWithArgDispatcher, reply *map[string]utils.StringMap) error
+}

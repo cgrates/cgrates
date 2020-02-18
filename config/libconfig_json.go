@@ -101,6 +101,9 @@ type ItemOptJson struct {
 	Remote    *bool
 	Replicate *bool
 	Ttl       *string
+	// used for ArgDispatcher in case we send this to a dispatcer engine
+	Route_id *string
+	Api_key  *string
 }
 
 // Filters config

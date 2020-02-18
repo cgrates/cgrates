@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package dispatchers
 
 import (
+	"time"
+
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -52,7 +54,7 @@ func (dS *DispatcherService) RALsV1GetRatingPlansCost(args *utils.RatingPlanCost
 		}
 		if err = dS.authorize(utils.RALsV1GetRatingPlansCost,
 			tenant,
-			args.APIKey, &nowTime); err != nil {
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
