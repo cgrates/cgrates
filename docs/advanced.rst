@@ -11,6 +11,5 @@
    cdrstats
    derived_charging
    ratinglogic
-   filters
 
 
