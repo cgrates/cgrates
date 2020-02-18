@@ -10,5 +10,7 @@ cgrates (0.10) UNRELEASED; urgency=medium
   [ Voivozeanu Teofil ]
   * [AgentRequest] Add support for *group type and correctly overwrite
     the values in case of *variable
+  * [EventReader] Correctly populate ConcurrentRequest from config in
+    EventReader
 
  -- Alexandru Tripon <alexandru.tripon@itsyscom.com>  Tue, 18 Feb 2020 08:44:41 +0200
