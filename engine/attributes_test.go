@@ -1852,3 +1852,534 @@ func TestGetAttributeProfileFromInline(t *testing.T) {
 		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(expAttrPrf1), utils.ToJSON(attr))
 	}
 }
+
+func TestProcessAttributeConstant(t *testing.T) {
+	defaultCfg, _ := config.NewDefaultCGRConfig()
+	defaultCfg.AttributeSCfg().ProcessRuns = 1
+	data := NewInternalDB(nil, nil, true, defaultCfg.DataDbCfg().Items)
+	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	attrService, _ = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
+	attrPrf := &AttributeProfile{
+		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:        "ATTR_CONSTANT",
+		Contexts:  []string{utils.MetaSessionS},
+		FilterIDs: []string{"*string:~*req.Field1:Val1"},
+		Attributes: []*Attribute{
+			{
+				Path:  utils.MetaReq + utils.NestingSep + "Field2",
+				Type:  utils.META_CONSTANT,
+				Value: config.NewRSRParsersMustCompile("Val2", true, utils.INFIELD_SEP),
+			},
+		},
+		Weight: 10,
+	}
+	// Add attribute in DM
+	if err := dmAtr.SetAttributeProfile(attrPrf, true); err != nil {
+		t.Error(err)
+	}
+	ev := &AttrArgsProcessEvent{
+		Context: utils.StringPointer(utils.MetaSessionS),
+		CGREvent: &utils.CGREvent{ //matching ATTR_CONSTANT
+			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:     "TestProcessAttributeConstant",
+			Event: map[string]interface{}{
+				"Field1":     "Val1",
+				utils.Weight: "20.0",
+			},
+		},
+	}
+	rcv, err := attrService.processEvent(ev)
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	ev.CGREvent.Event["Field2"] = "Val2"
+	eRply := &AttrSProcessEventReply{
+		MatchedProfiles: []string{"ATTR_CONSTANT"},
+		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "Field2"},
+		CGREvent:        ev.CGREvent,
+	}
+	if !reflect.DeepEqual(eRply, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eRply), utils.ToJSON(rcv))
+	}
+}
+
+func TestProcessAttributeVariable(t *testing.T) {
+	defaultCfg, _ := config.NewDefaultCGRConfig()
+	defaultCfg.AttributeSCfg().ProcessRuns = 1
+	data := NewInternalDB(nil, nil, true, defaultCfg.DataDbCfg().Items)
+	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	attrService, _ = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
+	attrPrf := &AttributeProfile{
+		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:        "ATTR_VARIABLE",
+		Contexts:  []string{utils.MetaSessionS},
+		FilterIDs: []string{"*string:~*req.Field1:Val1"},
+		Attributes: []*Attribute{
+			{
+				Path:  utils.MetaReq + utils.NestingSep + "Field2",
+				Type:  utils.MetaVariable,
+				Value: config.NewRSRParsersMustCompile("~*req.RandomField", true, utils.INFIELD_SEP),
+			},
+		},
+		Weight: 10,
+	}
+	// Add attribute in DM
+	if err := dmAtr.SetAttributeProfile(attrPrf, true); err != nil {
+		t.Error(err)
+	}
+	ev := &AttrArgsProcessEvent{
+		Context: utils.StringPointer(utils.MetaSessionS),
+		CGREvent: &utils.CGREvent{ //matching ATTR_VARIABLE
+			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:     "TestProcessAttributeVariable",
+			Event: map[string]interface{}{
+				"Field1":      "Val1",
+				"RandomField": "Val2",
+				utils.Weight:  "20.0",
+			},
+		},
+	}
+	rcv, err := attrService.processEvent(ev)
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	clnEv := ev.Clone()
+	clnEv.Event["Field2"] = "Val2"
+	eRply := &AttrSProcessEventReply{
+		MatchedProfiles: []string{"ATTR_VARIABLE"},
+		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "Field2"},
+		CGREvent:        clnEv,
+	}
+	if !reflect.DeepEqual(eRply, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eRply), utils.ToJSON(rcv))
+	}
+}
+
+func TestProcessAttributeComposed(t *testing.T) {
+	defaultCfg, _ := config.NewDefaultCGRConfig()
+	defaultCfg.AttributeSCfg().ProcessRuns = 1
+	data := NewInternalDB(nil, nil, true, defaultCfg.DataDbCfg().Items)
+	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	attrService, _ = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
+	attrPrf := &AttributeProfile{
+		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:        "ATTR_COMPOSED",
+		Contexts:  []string{utils.MetaSessionS},
+		FilterIDs: []string{"*string:~*req.Field1:Val1"},
+		Attributes: []*Attribute{
+			{
+				Path:  utils.MetaReq + utils.NestingSep + "Field2",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.RandomField", true, utils.INFIELD_SEP),
+			},
+			{
+				Path:  utils.MetaReq + utils.NestingSep + "Field2",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.RandomField2", true, utils.INFIELD_SEP),
+			},
+		},
+		Weight: 10,
+	}
+	// Add attribute in DM
+	if err := dmAtr.SetAttributeProfile(attrPrf, true); err != nil {
+		t.Error(err)
+	}
+	ev := &AttrArgsProcessEvent{
+		Context: utils.StringPointer(utils.MetaSessionS),
+		CGREvent: &utils.CGREvent{ //matching ATTR_COMPOSED
+			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:     "TestProcessAttributeComposed",
+			Event: map[string]interface{}{
+				"Field1":       "Val1",
+				"RandomField":  "Val2",
+				"RandomField2": "Concatenated",
+				utils.Weight:   "20.0",
+			},
+		},
+	}
+	rcv, err := attrService.processEvent(ev)
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	clnEv := ev.Clone()
+	clnEv.Event["Field2"] = "Val2Concatenated"
+	eRply := &AttrSProcessEventReply{
+		MatchedProfiles: []string{"ATTR_COMPOSED"},
+		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "Field2"},
+		CGREvent:        clnEv,
+	}
+	if !reflect.DeepEqual(eRply, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eRply), utils.ToJSON(rcv))
+	}
+}
+
+func TestProcessAttributeUsageDifference(t *testing.T) {
+	defaultCfg, _ := config.NewDefaultCGRConfig()
+	defaultCfg.AttributeSCfg().ProcessRuns = 1
+	data := NewInternalDB(nil, nil, true, defaultCfg.DataDbCfg().Items)
+	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	attrService, _ = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
+	attrPrf := &AttributeProfile{
+		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:        "ATTR_USAGE_DIFF",
+		Contexts:  []string{utils.MetaSessionS},
+		FilterIDs: []string{"*string:~*req.Field1:Val1"},
+		Attributes: []*Attribute{
+			{
+				Path:  utils.MetaReq + utils.NestingSep + "Field2",
+				Type:  utils.META_USAGE_DIFFERENCE,
+				Value: config.NewRSRParsersMustCompile("~*req.RandomField;~*req.RandomField2", true, utils.INFIELD_SEP),
+			},
+		},
+		Weight: 10,
+	}
+	// Add attribute in DM
+	if err := dmAtr.SetAttributeProfile(attrPrf, true); err != nil {
+		t.Error(err)
+	}
+	ev := &AttrArgsProcessEvent{
+		Context: utils.StringPointer(utils.MetaSessionS),
+		CGREvent: &utils.CGREvent{ //matching ATTR_USAGE_DIFF
+			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:     "TestProcessAttributeUsageDifference",
+			Event: map[string]interface{}{
+				"Field1":       "Val1",
+				"RandomField":  "1514808000",
+				"RandomField2": "1514804400",
+				utils.Weight:   "20.0",
+			},
+		},
+	}
+	rcv, err := attrService.processEvent(ev)
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	clnEv := ev.Clone()
+	clnEv.Event["Field2"] = "1h0m0s"
+	eRply := &AttrSProcessEventReply{
+		MatchedProfiles: []string{"ATTR_USAGE_DIFF"},
+		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "Field2"},
+		CGREvent:        clnEv,
+	}
+	if !reflect.DeepEqual(eRply, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eRply), utils.ToJSON(rcv))
+	}
+}
+
+func TestProcessAttributeSum(t *testing.T) {
+	defaultCfg, _ := config.NewDefaultCGRConfig()
+	defaultCfg.AttributeSCfg().ProcessRuns = 1
+	data := NewInternalDB(nil, nil, true, defaultCfg.DataDbCfg().Items)
+	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	attrService, _ = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
+	attrPrf := &AttributeProfile{
+		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:        "ATTR_SUM",
+		Contexts:  []string{utils.MetaSessionS},
+		FilterIDs: []string{"*string:~*req.Field1:Val1"},
+		Attributes: []*Attribute{
+			{
+				Path:  utils.MetaReq + utils.NestingSep + "Field2",
+				Type:  utils.MetaSum,
+				Value: config.NewRSRParsersMustCompile("~*req.RandomField;~*req.RandomField2;10", true, utils.INFIELD_SEP),
+			},
+		},
+		Weight: 10,
+	}
+	// Add attribute in DM
+	if err := dmAtr.SetAttributeProfile(attrPrf, true); err != nil {
+		t.Error(err)
+	}
+	ev := &AttrArgsProcessEvent{
+		Context: utils.StringPointer(utils.MetaSessionS),
+		CGREvent: &utils.CGREvent{ //matching ATTR_SUM
+			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:     "TestProcessAttributeSum",
+			Event: map[string]interface{}{
+				"Field1":       "Val1",
+				"RandomField":  "1",
+				"RandomField2": "5",
+				utils.Weight:   "20.0",
+			},
+		},
+	}
+	rcv, err := attrService.processEvent(ev)
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	clnEv := ev.Clone()
+	clnEv.Event["Field2"] = "16"
+	eRply := &AttrSProcessEventReply{
+		MatchedProfiles: []string{"ATTR_SUM"},
+		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "Field2"},
+		CGREvent:        clnEv,
+	}
+	if !reflect.DeepEqual(eRply, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eRply), utils.ToJSON(rcv))
+	}
+}
+
+func TestProcessAttributeDiff(t *testing.T) {
+	defaultCfg, _ := config.NewDefaultCGRConfig()
+	defaultCfg.AttributeSCfg().ProcessRuns = 1
+	data := NewInternalDB(nil, nil, true, defaultCfg.DataDbCfg().Items)
+	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	attrService, _ = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
+	attrPrf := &AttributeProfile{
+		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:        "ATTR_DIFF",
+		Contexts:  []string{utils.MetaSessionS},
+		FilterIDs: []string{"*string:~*req.Field1:Val1"},
+		Attributes: []*Attribute{
+			{
+				Path:  utils.MetaReq + utils.NestingSep + "Field2",
+				Type:  utils.MetaDifference,
+				Value: config.NewRSRParsersMustCompile("55;~*req.RandomField;~*req.RandomField2;10", true, utils.INFIELD_SEP),
+			},
+		},
+		Weight: 10,
+	}
+	// Add attribute in DM
+	if err := dmAtr.SetAttributeProfile(attrPrf, true); err != nil {
+		t.Error(err)
+	}
+	ev := &AttrArgsProcessEvent{
+		Context: utils.StringPointer(utils.MetaSessionS),
+		CGREvent: &utils.CGREvent{ //matching ATTR_DIFF
+			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:     "TestProcessAttributeDiff",
+			Event: map[string]interface{}{
+				"Field1":       "Val1",
+				"RandomField":  "1",
+				"RandomField2": "5",
+				utils.Weight:   "20.0",
+			},
+		},
+	}
+	rcv, err := attrService.processEvent(ev)
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	clnEv := ev.Clone()
+	clnEv.Event["Field2"] = "39"
+	eRply := &AttrSProcessEventReply{
+		MatchedProfiles: []string{"ATTR_DIFF"},
+		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "Field2"},
+		CGREvent:        clnEv,
+	}
+	if !reflect.DeepEqual(eRply, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eRply), utils.ToJSON(rcv))
+	}
+}
+
+func TestProcessAttributeMultiply(t *testing.T) {
+	defaultCfg, _ := config.NewDefaultCGRConfig()
+	defaultCfg.AttributeSCfg().ProcessRuns = 1
+	data := NewInternalDB(nil, nil, true, defaultCfg.DataDbCfg().Items)
+	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	attrService, _ = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
+	attrPrf := &AttributeProfile{
+		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:        "ATTR_MULTIPLY",
+		Contexts:  []string{utils.MetaSessionS},
+		FilterIDs: []string{"*string:~*req.Field1:Val1"},
+		Attributes: []*Attribute{
+			{
+				Path:  utils.MetaReq + utils.NestingSep + "Field2",
+				Type:  utils.MetaMultiply,
+				Value: config.NewRSRParsersMustCompile("55;~*req.RandomField;~*req.RandomField2;10", true, utils.INFIELD_SEP),
+			},
+		},
+		Weight: 10,
+	}
+	// Add attribute in DM
+	if err := dmAtr.SetAttributeProfile(attrPrf, true); err != nil {
+		t.Error(err)
+	}
+	ev := &AttrArgsProcessEvent{
+		Context: utils.StringPointer(utils.MetaSessionS),
+		CGREvent: &utils.CGREvent{ //matching ATTR_MULTIPLY
+			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:     "TestProcessAttributeMultiply",
+			Event: map[string]interface{}{
+				"Field1":       "Val1",
+				"RandomField":  "1",
+				"RandomField2": "5",
+				utils.Weight:   "20.0",
+			},
+		},
+	}
+	rcv, err := attrService.processEvent(ev)
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	clnEv := ev.Clone()
+	clnEv.Event["Field2"] = "2750"
+	eRply := &AttrSProcessEventReply{
+		MatchedProfiles: []string{"ATTR_MULTIPLY"},
+		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "Field2"},
+		CGREvent:        clnEv,
+	}
+	if !reflect.DeepEqual(eRply, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eRply), utils.ToJSON(rcv))
+	}
+}
+
+func TestProcessAttributeDivide(t *testing.T) {
+	defaultCfg, _ := config.NewDefaultCGRConfig()
+	defaultCfg.AttributeSCfg().ProcessRuns = 1
+	data := NewInternalDB(nil, nil, true, defaultCfg.DataDbCfg().Items)
+	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	attrService, _ = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
+	attrPrf := &AttributeProfile{
+		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:        "ATTR_DIVIDE",
+		Contexts:  []string{utils.MetaSessionS},
+		FilterIDs: []string{"*string:~*req.Field1:Val1"},
+		Attributes: []*Attribute{
+			{
+				Path:  utils.MetaReq + utils.NestingSep + "Field2",
+				Type:  utils.MetaDivide,
+				Value: config.NewRSRParsersMustCompile("55.0;~*req.RandomField;~*req.RandomField2;4", true, utils.INFIELD_SEP),
+			},
+		},
+		Weight: 10,
+	}
+	// Add attribute in DM
+	if err := dmAtr.SetAttributeProfile(attrPrf, true); err != nil {
+		t.Error(err)
+	}
+	ev := &AttrArgsProcessEvent{
+		Context: utils.StringPointer(utils.MetaSessionS),
+		CGREvent: &utils.CGREvent{ //matching ATTR_DIVIDE
+			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:     "TestProcessAttributeDivide",
+			Event: map[string]interface{}{
+				"Field1":       "Val1",
+				"RandomField":  "1",
+				"RandomField2": "5",
+				utils.Weight:   "20.0",
+			},
+		},
+	}
+	rcv, err := attrService.processEvent(ev)
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	clnEv := ev.Clone()
+	clnEv.Event["Field2"] = "2.75"
+	eRply := &AttrSProcessEventReply{
+		MatchedProfiles: []string{"ATTR_DIVIDE"},
+		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "Field2"},
+		CGREvent:        clnEv,
+	}
+	if !reflect.DeepEqual(eRply, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eRply), utils.ToJSON(rcv))
+	}
+}
+
+func TestProcessAttributeValueExponent(t *testing.T) {
+	defaultCfg, _ := config.NewDefaultCGRConfig()
+	defaultCfg.AttributeSCfg().ProcessRuns = 1
+	data := NewInternalDB(nil, nil, true, defaultCfg.DataDbCfg().Items)
+	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	attrService, _ = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
+	attrPrf := &AttributeProfile{
+		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:        "ATTR_VAL_EXP",
+		Contexts:  []string{utils.MetaSessionS},
+		FilterIDs: []string{"*string:~*req.Field1:Val1"},
+		Attributes: []*Attribute{
+			{
+				Path:  utils.MetaReq + utils.NestingSep + "Field2",
+				Type:  utils.MetaValueExponent,
+				Value: config.NewRSRParsersMustCompile("~*req.RandomField2;4", true, utils.INFIELD_SEP),
+			},
+		},
+		Weight: 10,
+	}
+	// Add attribute in DM
+	if err := dmAtr.SetAttributeProfile(attrPrf, true); err != nil {
+		t.Error(err)
+	}
+	ev := &AttrArgsProcessEvent{
+		Context: utils.StringPointer(utils.MetaSessionS),
+		CGREvent: &utils.CGREvent{ //matching ATTR_VAL_EXP
+			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:     "TestProcessAttributeValueExponent",
+			Event: map[string]interface{}{
+				"Field1":       "Val1",
+				"RandomField":  "1",
+				"RandomField2": "5",
+				utils.Weight:   "20.0",
+			},
+		},
+	}
+	rcv, err := attrService.processEvent(ev)
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	clnEv := ev.Clone()
+	clnEv.Event["Field2"] = "50000"
+	eRply := &AttrSProcessEventReply{
+		MatchedProfiles: []string{"ATTR_VAL_EXP"},
+		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "Field2"},
+		CGREvent:        clnEv,
+	}
+	if !reflect.DeepEqual(eRply, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eRply), utils.ToJSON(rcv))
+	}
+}
+
+func TestProcessAttributeUnixTimeStamp(t *testing.T) {
+	defaultCfg, _ := config.NewDefaultCGRConfig()
+	defaultCfg.AttributeSCfg().ProcessRuns = 1
+	data := NewInternalDB(nil, nil, true, defaultCfg.DataDbCfg().Items)
+	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	attrService, _ = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
+	attrPrf := &AttributeProfile{
+		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:        "ATTR_UNIX_TIMESTAMP",
+		Contexts:  []string{utils.MetaSessionS},
+		FilterIDs: []string{"*string:~*req.Field1:Val1"},
+		Attributes: []*Attribute{
+			{
+				Path:  utils.MetaReq + utils.NestingSep + "Field2",
+				Type:  utils.MetaUnixTimestamp,
+				Value: config.NewRSRParsersMustCompile("~*req.RandomField2", true, utils.INFIELD_SEP),
+			},
+		},
+		Weight: 10,
+	}
+	// Add attribute in DM
+	if err := dmAtr.SetAttributeProfile(attrPrf, true); err != nil {
+		t.Error(err)
+	}
+	ev := &AttrArgsProcessEvent{
+		Context: utils.StringPointer(utils.MetaSessionS),
+		CGREvent: &utils.CGREvent{ //matching ATTR_UNIX_TIMESTAMP
+			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:     "TestProcessAttributeUnixTimeStamp",
+			Event: map[string]interface{}{
+				"Field1":       "Val1",
+				"RandomField":  "1",
+				"RandomField2": "2013-12-30T15:00:01Z",
+				utils.Weight:   "20.0",
+			},
+		},
+	}
+	rcv, err := attrService.processEvent(ev)
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	clnEv := ev.Clone()
+	clnEv.Event["Field2"] = "1388415601"
+	eRply := &AttrSProcessEventReply{
+		MatchedProfiles: []string{"ATTR_UNIX_TIMESTAMP"},
+		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "Field2"},
+		CGREvent:        clnEv,
+	}
+	if !reflect.DeepEqual(eRply, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eRply), utils.ToJSON(rcv))
+	}
+}
