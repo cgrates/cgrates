@@ -43,14 +43,20 @@ func NewXMLFileER(cfg *config.CGRConfig, cfgIdx int,
 	if strings.HasSuffix(srcPath, utils.Slash) {
 		srcPath = srcPath[:len(srcPath)-1]
 	}
-	return &XMLFileER{
+	xmlER := &XMLFileER{
 		cgrCfg:    cfg,
 		cfgIdx:    cfgIdx,
 		fltrS:     fltrS,
 		rdrDir:    srcPath,
 		rdrEvents: rdrEvents,
 		rdrError:  rdrErr,
-		rdrExit:   rdrExit}, nil
+		rdrExit:   rdrExit,
+		conReqs:   make(chan struct{}, cfg.ERsCfg().Readers[cfgIdx].ConcurrentReqs)}
+	var processFile struct{}
+	for i := 0; i < cfg.ERsCfg().Readers[cfgIdx].ConcurrentReqs; i++ {
+		xmlER.conReqs <- processFile // Empty initiate so we do not need to wait later when we pop
+	}
+	return xmlER, nil
 }
 
 // XMLFileER implements EventReader interface for .xml files

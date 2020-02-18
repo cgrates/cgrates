@@ -51,14 +51,25 @@ func TestNewCsvReader(t *testing.T) {
 	if len(cfg.ERsCfg().Readers) != 2 {
 		t.Errorf("Expecting: <2>, received: <%+v>", len(cfg.ERsCfg().Readers))
 	}
-	expected, err := NewCSVFileER(cfg, 1, nil, nil, fltr, nil)
-	if err != nil {
-		t.Errorf("Expecting: <nil>, received: <%+v>", err)
-	}
+	exp := &CSVFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    1,
+		fltrS:     fltr,
+		rdrDir:    cfg.ERsCfg().Readers[1].SourcePath,
+		rdrEvents: nil,
+		rdrError:  nil,
+		rdrExit:   nil,
+		conReqs:   nil}
+	var expected EventReader = exp
 	if rcv, err := NewEventReader(cfg, 1, nil, nil, fltr, nil); err != nil {
 		t.Errorf("Expecting: <nil>, received: <%+v>", err)
-	} else if !reflect.DeepEqual(expected, rcv) {
-		t.Errorf("Expecting: <%+v>, received: <%+v>", expected, rcv)
+	} else {
+		// because we use function make to init the channel when we create the EventReader reflect.DeepEqual
+		// says it doesn't match
+		rcv.(*CSVFileER).conReqs = nil
+		if !reflect.DeepEqual(expected, rcv) {
+			t.Errorf("Expecting: <%+v>, received: <%+v>", expected, rcv)
+		}
 	}
 }
 
