@@ -120,3 +120,10 @@ ExpiryTime
 Units
 	Number of units allocated by this *ResourceUsage*.
 
+
+Use cases
+---------
+
+* Monitor resources for a group of accounts(ie. based on a special field in the events).
+* Limit the number of CPS for a destination/supplier/account (done via UsageTTL of 1s).
+* Limit resources for a destination/supplier/account/time of day/etc.
