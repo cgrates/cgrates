@@ -10,6 +10,8 @@ cgrates (0.11) UNRELEASED; urgency=medium
   * [ConnManager] Added ApierSv2 as internal connection channel instead of ApierSv1 
   * [DiameterAgent] Using String function from diam.Message instead of
     ToJSON for request String method
+  * [DiameterAgent] Updated 3gp_vendor dictionary
+  * [Templates] Added new dataconvertor: *ip2hex
 
   [ Voivozeanu Teofil ]
   * [AgentRequest] Add support for *group type and correctly overwrite
