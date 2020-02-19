@@ -3240,6 +3240,129 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 	return
 }
 
+// V1GetCostReply is the reply for the GetCost API
+type V1GetCostReply struct {
+	Attributes *engine.AttrSProcessEventReply
+	EventCost  *engine.EventCost
+}
+
+// BiRPCv1ProcessEvent processes one event with the right subsystems based on arguments received
+func (sS *SessionS) BiRPCv1GetCost(clnt rpcclient.ClientConnector,
+	args *V1ProcessEventArgs, rply *V1GetCostReply) (err error) {
+	if args.CGREvent == nil {
+		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
+	}
+	var withErrors bool
+	if args.CGREvent.ID == "" {
+		args.CGREvent.ID = utils.GenUUID()
+	}
+
+	// RPC caching
+	if sS.cgrCfg.CacheCfg()[utils.CacheRPCResponses].Limit != 0 {
+		cacheKey := utils.ConcatenatedKey(utils.SessionSv1GetCost, args.CGREvent.ID)
+		refID := guardian.Guardian.GuardIDs("",
+			sS.cgrCfg.GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
+		defer guardian.Guardian.UnguardIDs(refID)
+
+		if itm, has := engine.Cache.Get(utils.CacheRPCResponses, cacheKey); has {
+			cachedResp := itm.(*utils.CachedRPCResponse)
+			if cachedResp.Error == nil {
+				*rply = *cachedResp.Result.(*V1GetCostReply)
+			}
+			return cachedResp.Error
+		}
+		defer engine.Cache.Set(utils.CacheRPCResponses, cacheKey,
+			&utils.CachedRPCResponse{Result: rply, Error: err},
+			nil, true, utils.NonTransactional)
+	}
+	// end of RPC caching
+
+	if args.CGREvent.Tenant == "" {
+		args.CGREvent.Tenant = sS.cgrCfg.GeneralCfg().DefaultTenant
+	}
+
+	//convert from Flags []string to utils.FlagsWithParams
+	var argsFlagsWithParams utils.FlagsWithParams
+	if argsFlagsWithParams, err = utils.FlagsWithParamsFromSlice(args.Flags); err != nil {
+		return
+	}
+	// check for *attribute
+	if argsFlagsWithParams.HasKey(utils.MetaAttributes) {
+		rplyAttr, err := sS.processAttributes(args.CGREvent, args.ArgDispatcher,
+			argsFlagsWithParams.ParamsSlice(utils.MetaAttributes))
+		if err == nil {
+			args.CGREvent = rplyAttr.CGREvent.Clone()
+			rply.Attributes = &rplyAttr
+		} else if err.Error() != utils.ErrNotFound.Error() {
+			return utils.NewErrAttributeS(err)
+		}
+	}
+	// check for *cost
+	if argsFlagsWithParams.HasKey(utils.MetaCost) {
+		//compose the CallDescriptor with Args
+		me := engine.MapEvent(args.CGREvent.Event).Clone()
+		startTime := me.GetTimeIgnoreErrors(utils.AnswerTime,
+			sS.cgrCfg.GeneralCfg().DefaultTimezone)
+		if startTime.IsZero() { // AnswerTime not parsable, try SetupTime
+			startTime = me.GetTimeIgnoreErrors(utils.SetupTime,
+				sS.cgrCfg.GeneralCfg().DefaultTimezone)
+		}
+		category := me.GetStringIgnoreErrors(utils.Category)
+		if len(category) == 0 {
+			category = sS.cgrCfg.GeneralCfg().DefaultCategory
+		}
+		subject := me.GetStringIgnoreErrors(utils.Subject)
+		if len(subject) == 0 {
+			subject = me.GetStringIgnoreErrors(utils.Account)
+		}
+
+		cd := &engine.CallDescriptor{
+			RunID:       me.GetStringIgnoreErrors(utils.RunID),
+			ToR:         me.GetStringIgnoreErrors(utils.ToR),
+			Tenant:      args.CGREvent.Tenant,
+			Category:    category,
+			Subject:     subject,
+			Account:     me.GetStringIgnoreErrors(utils.Account),
+			Destination: me.GetStringIgnoreErrors(utils.Destination),
+			TimeStart:   startTime,
+			TimeEnd:     startTime.Add(me.GetDurationIgnoreErrors(utils.Usage)),
+		}
+		var argDsp *utils.ArgDispatcher
+		//check if we have APIKey in event and in case it has add it in ArgDispatcher
+		apiKey, errAPIKey := me.GetString(utils.MetaApiKey)
+		if errAPIKey == nil {
+			argDsp = &utils.ArgDispatcher{
+				APIKey: utils.StringPointer(apiKey),
+			}
+		}
+		//check if we have RouteID in event and in case it has add it in ArgDispatcher
+		if routeID, err := me.GetString(utils.MetaRouteID); err == nil {
+			if errAPIKey == utils.ErrNotFound { //in case we don't have APIKey, but we have RouteID we need to initialize the struct
+				argDsp = &utils.ArgDispatcher{
+					RouteID: utils.StringPointer(routeID),
+				}
+			} else {
+				argDsp.RouteID = utils.StringPointer(routeID)
+			}
+		}
+
+		var cc engine.CallCost
+		if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().RALsConns, nil,
+			utils.ResponderGetCost,
+			&engine.CallDescriptorWithArgDispatcher{CallDescriptor: cd,
+				ArgDispatcher: argDsp}, &cc); err != nil {
+			return
+		}
+		ec := engine.NewEventCostFromCallCost(&cc, args.CGREvent.ID, me.GetStringIgnoreErrors(utils.RunID))
+		ec.Compute()
+		rply.EventCost = ec
+	}
+	if withErrors {
+		err = utils.ErrPartiallyExecuted
+	}
+	return
+}
+
 // BiRPCv1SyncSessions will sync sessions on demand
 func (sS *SessionS) BiRPCv1SyncSessions(clnt rpcclient.ClientConnector,
 	ignParam *utils.TenantWithArgDispatcher, reply *string) error {

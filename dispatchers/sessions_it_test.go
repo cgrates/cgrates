@@ -51,6 +51,7 @@ var sTestsDspSession = []func(t *testing.T){
 
 	testDspSessionProcessEvent3,
 
+	testDspSessionGetCost,
 	testDspSessionReplicate,
 	testDspSessionPassive,
 	testDspSessionForceDisconect,
@@ -931,4 +932,44 @@ func testDspSessionProcessEvent3(t *testing.T) {
 	} else if repl != 0 {
 		t.Errorf("Expected no active sessions recived %v", repl)
 	}
+}
+
+func testDspSessionGetCost(t *testing.T) {
+
+	args := &sessions.V1ProcessEventArgs{
+		Flags: []string{utils.MetaCost},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testSSv1ItGetCost",
+			Event: map[string]interface{}{
+				utils.Tenant:      "cgrates.org",
+				utils.ToR:         utils.MONETARY,
+				utils.OriginID:    "testSSv1ItProcessEventWithGetCost",
+				utils.RequestType: utils.META_PREPAID,
+				utils.Subject:     "ANY2CNT",
+				utils.Destination: "1002",
+				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+				utils.Usage:       10 * time.Minute,
+			},
+		},
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("ses12345"),
+		},
+	}
+
+	var rply sessions.V1GetCostReply
+	if err := dispEngine.RPC.Call(utils.SessionSv1GetCost,
+		args, &rply); err != nil {
+		t.Error(err)
+	}
+
+	if rply.EventCost == nil {
+		t.Errorf("Received nil EventCost")
+	} else if *rply.EventCost.Cost != 0.198 { // same cost as in CDR
+		t.Errorf("Expected: %+v,received: %+v", 0.198, *rply.EventCost.Cost)
+	} else if *rply.EventCost.Usage != 10*time.Minute {
+		t.Errorf("Expected: %+v,received: %+v", 10*time.Minute, *rply.EventCost.Usage)
+	}
+
 }

@@ -82,6 +82,11 @@ func (ssv1 *SessionSv1) ProcessEvent(args *sessions.V1ProcessEventArgs,
 	return ssv1.Ss.BiRPCv1ProcessEvent(nil, args, rply)
 }
 
+func (ssv1 *SessionSv1) GetCost(args *sessions.V1ProcessEventArgs,
+	rply *sessions.V1GetCostReply) error {
+	return ssv1.Ss.BiRPCv1GetCost(nil, args, rply)
+}
+
 func (ssv1 *SessionSv1) GetActiveSessions(args *utils.SessionFilter,
 	rply *[]*sessions.ExternalSession) error {
 	return ssv1.Ss.BiRPCv1GetActiveSessions(nil, args, rply)
