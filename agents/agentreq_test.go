@@ -93,12 +93,12 @@ func TestAgReqSetFields(t *testing.T) {
 
 		&config.FCTemplate{Tag: "AttrPaypalAccount",
 			Path: utils.MetaRep + utils.NestingSep + "PaypalAccount", Type: utils.MetaVariable,
-			Filters: []string{"*string:~*cgrep.Error:"},
+			Filters: []string{"*empty:~*cgrep.Error:"},
 			Value: config.NewRSRParsersMustCompile(
 				"~*cgrep.Attributes.PaypalAccount", true, utils.INFIELD_SEP)},
 		&config.FCTemplate{Tag: "MaxUsage",
 			Path: utils.MetaRep + utils.NestingSep + "MaxUsage", Type: utils.MetaVariable,
-			Filters: []string{"*string:~*cgrep.Error:"},
+			Filters: []string{"*empty:~*cgrep.Error:"},
 			Value: config.NewRSRParsersMustCompile(
 				"~*cgrep.MaxUsage{*duration_seconds}", true, utils.INFIELD_SEP)},
 		&config.FCTemplate{Tag: "Error",
