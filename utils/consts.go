@@ -586,6 +586,7 @@ const (
 	ResourceUsage               = "ResourceUsage"
 	MetaDuration                = "*duration"
 	MetaLibPhoneNumber          = "*libphonenumber"
+	MetaIP2Hex                  = "*ip2hex"
 	MetaReload                  = "*reload"
 	MetaLoad                    = "*load"
 	MetaRemove                  = "*remove"
