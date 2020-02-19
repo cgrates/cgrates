@@ -2,11 +2,12 @@ ResourceS
 =========
 
 
-**ResourceS** is a standalone subsystem part of the **CGRateS** infrastructure, designed allocate virtual resources for the generic *Events* (hashmaps) it receives.
+**ResourceS** is a standalone subsystem part of the **CGRateS** infrastructure, designed to allocate virtual resources for the generic *Events* (hashmaps) it receives.
 
 Both receiving of *Events* as well as operational commands on the virtual resources is performed via a complete set of :ref:`CGRateS RPC APIs<remote-management>`.
 
 Due it's real-time nature, **ResourceS** are designed towards high throughput being able to process thousands of *Events* per second. This is doable since each *Resource* is a very light object, held in memory and eventually backed up in *DataDB*.
+
 
 Processing logic
 ----------------
@@ -44,10 +45,16 @@ ResourceS
 
 **ResourceS** is the **CGRateS** component responsible of handling the *Resources*. 
 
-It is configured within *resources* section from :ref:`JSON configuration <configuration>` via the following parameters:
+It is configured within **resources** section from :ref:`JSON configuration <configuration>` via the following parameters:
 
 enabled
 	Will enable starting of the service. Possible values: <true|false>.
+
+store_interval
+	Time interval for backing up the stats into *DataDB*.
+
+thresholds_conns
+	Connections IDs towards *ThresholdS* component. If not defined, there will be no notifications sent to *ThresholdS* on *Resource* changes.
 
 indexed_selects
 	Enable profile matching exclusively on indexes. If not enabled, the *ResourceProfiles* are checked one by one which for a larger number can slow down the processing time. Possible values: <true|false>.
@@ -99,8 +106,6 @@ Weight
 
 ThresholdIDs
 	List of ThresholdProfiles targetted by the *Resource*. If empty, the match will be done in :ref:`ThresholdS` component.
-
-
 
 
 ResourceUsage

@@ -4,7 +4,7 @@ AttributeS
 **AttributeS** is a standalone subsystem within **CGRateS** and it is the equivalent of a key-value store. It is accessed via :ref:`CGRateS RPC APIs<remote-management>`.
 
 As most of the other subsystems, it is performance oriented, stored inside *DataDB* but cached inside the *cgr-engine* process. 
-Caching can be done dynamically/on-demand or at start-time/precached and it is configurable within "cache" section in the .json configuration file.
+Caching can be done dynamically/on-demand or at start-time/precached and it is configurable within *cache* section in the :ref:`JSON configuration <configuration>`.
 
 Selection
 ---------
@@ -18,8 +18,36 @@ Parameters
 ----------
 
 
+AttributeS
+^^^^^^^^^^
+
+**AttributeS** is the **CGRateS** component responsible of handling the *AttributeProfiles*.
+
+It is configured within **attributes** section from :ref:`JSON configuration <configuration>` via the following parameters:
+
+enabled
+  Will enable starting of the service. Possible values: <true|false>.
+
+indexed_selects
+  Enable profile matching exclusively on indexes. If not enabled, the *ResourceProfiles* are checked one by one which for a larger number can slow down the processing time. Possible values: <true|false>.
+
+string_indexed_fields
+  Query string indexes based only on these fields for faster processing. If commented out, each field from the event will be checked against indexes. If uncommented and defined as empty list, no fields will be checked.
+
+prefix_indexed_fields
+  Query prefix indexes based only on these fields for faster processing. If defined as empty list, no fields will be checked.
+
+nested_fields
+  Applied when all event fields are checked against indexes, and decides whether subfields are also checked.
+
+process_runs
+  Limit the number of loops when processing an Event. The event loop is however clever enough to stop when the same processing occurs or no more additional profiles are matching, so higher numbers are ignored if not needed.
+
+
 AttributeProfile
 ^^^^^^^^^^^^^^^^
+
+Represents the configuration for a group of attributes applied.
 
 Tenant
  	The tenant on the platform (one can see the tenant as partition ID)
@@ -77,7 +105,21 @@ Type
   		Will compute the exponent of the first field in the *Value*.
 
 Value
-	The value which will be set for *Path*. It can be a list of :ref:`RSRParsers` capturing even from multiple sources in the same event. If the *Value* is *\*none* the field with *Path* will be removed from *Event*
+	The value which will be set for *Path*. It can be a list of :ref:`RSRParsers` capturing even from multiple sources in the same event. If the *Value* is *\*remove* the field with *Path* will be removed from *Event*
+
+
+Inline Attribute 
+^^^^^^^^^^^^^^^^
+
+In order to facilitate quick attribute definition (without the need of separate *AttributeProfile*), one can define attributes directly as *AttributeIDs* following the special format.
+
+Inline filter format::
+ 
+ attributeType:attributePath:attributeValue
+
+Example::
+ 
+ *constant:*req.RequestType:*prepaid
 
 
 Use cases

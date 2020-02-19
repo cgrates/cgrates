@@ -331,16 +331,23 @@ func (spS *SupplierService) statMetricsForLoadDistribution(statIDs []string, ten
 			// check if we get an ID in the following form (StatID:MetricID)
 			statWithMetric := strings.Split(statID, utils.InInFieldSep)
 			var metrics map[string]float64
-			if err = spS.connMgr.Call(spS.cgrcfg.SupplierSCfg().StatSConns, nil, utils.StatSv1GetQueueFloatMetrics,
-				&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: tenant, ID: statWithMetric[0]}}, &metrics); err != nil &&
+			if err = spS.connMgr.Call(
+				spS.cgrcfg.SupplierSCfg().StatSConns, nil,
+				utils.StatSv1GetQueueFloatMetrics,
+				&utils.TenantIDWithArgDispatcher{
+					TenantID: &utils.TenantID{
+						Tenant: tenant, ID: statWithMetric[0]}},
+				&metrics); err != nil &&
 				err.Error() != utils.ErrNotFound.Error() {
 				utils.Logger.Warning(
-					fmt.Sprintf("<SupplierS> error: %s getting statMetrics for stat : %s", err.Error(), statWithMetric[0]))
+					fmt.Sprintf("<SupplierS> error: %s getting statMetrics for stat : %s",
+						err.Error(), statWithMetric[0]))
 			}
 			if len(statWithMetric) == 2 { // in case we have MetricID defined with StatID we consider only that metric
 				// check if statQueue have metric defined
 				if metricVal, has := metrics[statWithMetric[1]]; !has {
-					return 0, fmt.Errorf("<%s> error: %s metric %s for statID: %s", utils.SupplierS, utils.ErrNotFound, statWithMetric[1], statWithMetric[0])
+					return 0, fmt.Errorf("<%s> error: %s metric %s for statID: %s",
+						utils.SupplierS, utils.ErrNotFound, statWithMetric[1], statWithMetric[0])
 				} else {
 					provStsMetrics[statWithMetric[1]] = append(provStsMetrics[statWithMetric[1]], metricVal)
 				}
