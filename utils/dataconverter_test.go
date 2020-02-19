@@ -19,6 +19,7 @@ package utils
 
 import (
 	"math"
+	"net"
 	"reflect"
 	"testing"
 	"time"
@@ -609,5 +610,22 @@ func TestPhoneNumberConverter(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(phoneNumberConverted, "+496502530000") {
 		t.Errorf("expecting: %+v, received: %+v", "+496502530000", phoneNumberConverted)
+	}
+}
+
+func TestHexConvertor(t *testing.T) {
+	hx := IP2HexConvertor{}
+	val := "127.0.0.1"
+	expected := "0x7f000001"
+	if rpl, err := hx.Convert(val); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rpl) {
+		t.Errorf("expecting: %+v, received: %+v", expected, rpl)
+	}
+	val2 := net.ParseIP("127.0.0.1")
+	if rpl, err := hx.Convert(val2); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rpl) {
+		t.Errorf("expecting: %+v, received: %+v", expected, rpl)
 	}
 }

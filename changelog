@@ -6,6 +6,8 @@ cgrates (0.10) UNRELEASED; urgency=medium
   * [SessionS] Added check for missing CGRevent
   * [DiameterAgent] Using String function from diam.Message instead of
     ToJSON for request String method
+  * [DiameterAgent] Updated 3gp_vendor dictionary
+  * [Templates] Added new dataconvertor: *ip2hex
 
   [ Voivozeanu Teofil ]
   * [AgentRequest] Add support for *group type and correctly overwrite
