@@ -1,3 +1,19 @@
+cgrates (0.10.1~dev) UNRELEASED; urgency=medium
+
+  * [FilterS] Removed rals_conns in favor of reading the account
+    directly from DataDB
+  * [SessionS] Added check for missing CGRevent
+  * [DiameterAgent] Using String function from diam.Message instead of
+    ToJSON for request String method
+  * [DiameterAgent] Updated 3gp_vendor dictionary
+  * [Templates] Added new dataconvertor: *ip2hex
+  * [AgentRequest] Add support for *group type and correctly overwrite
+    the values in case of *variable
+  * [EventReader] Correctly populate ConcurrentRequest from config in
+    EventReader
+
+ -- Alexandru Tripon <alexandru.tripon@itsyscom.com>  Wed, 19 Feb 2020 15:22:59 +0200
+
 cgrates (0.10.0) UNRELEASED; urgency=medium
 
   * Creating first stable branch. 
