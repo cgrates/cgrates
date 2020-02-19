@@ -18,4 +18,8 @@ cgrates (0.11) UNRELEASED; urgency=medium
     the values in case of *variable
   * [EventReader] Correctly populate ConcurrentRequest from config
 
+  [ Alexandru Tripon ]
+  * [FilterS] Updated *exists to dynamicaly compute the path if the path
+    is mentioned as Values in filter
+
  -- Alexandru Tripon <alexandru.tripon@itsyscom.com>  Tue, 18 Feb 2020 08:24:39 +0200

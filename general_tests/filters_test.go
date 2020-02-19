@@ -55,7 +55,7 @@ func TestFilterPassDestinations(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if passes, err := rf.Pass(cd, []config.DataProvider{cd}); err != nil {
+	if passes, err := rf.Pass(cd); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("Not passing")
@@ -64,7 +64,7 @@ func TestFilterPassDestinations(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if passes, err := rf.Pass(cd, []config.DataProvider{cd}); err != nil {
+	if passes, err := rf.Pass(cd); err != nil {
 		t.Error(err)
 	} else if passes {
 		t.Error("Passing")
@@ -74,7 +74,7 @@ func TestFilterPassDestinations(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if passes, err := rf.Pass(cd, []config.DataProvider{cd}); err != nil {
+	if passes, err := rf.Pass(cd); err != nil {
 		t.Error(err)
 	} else if passes {
 		t.Error("Passing")

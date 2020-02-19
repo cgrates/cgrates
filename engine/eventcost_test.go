@@ -2526,7 +2526,7 @@ func TestECSyncKeys(t *testing.T) {
 }
 
 func TestECAsDataProvider(t *testing.T) {
-	ecDP := config.NewObjectDP(testEC, nil)
+	ecDP := config.NewObjectDP(testEC)
 	if data, err := ecDP.FieldAsInterface([]string{"RunID"}); err != nil {
 		t.Error(err)
 	} else if data != utils.MetaDefault {
