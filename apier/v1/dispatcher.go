@@ -847,17 +847,17 @@ func (dS *DispatcherReplicatorSv1) Ping(args *utils.CGREventWithArgDispatcher, r
 }
 
 // GetAccount
-func (dS *DispatcherReplicatorSv1) GetAccount(args *dispatchers.StringWithApiKey, reply *engine.Account) error {
+func (dS *DispatcherReplicatorSv1) GetAccount(args *utils.StringWithApiKey, reply *engine.Account) error {
 	return dS.dS.ReplicatorSv1GetAccount(args, reply)
 }
 
 // GetDestination
-func (dS *DispatcherReplicatorSv1) GetDestination(key *dispatchers.StringWithApiKey, reply *engine.Destination) error {
+func (dS *DispatcherReplicatorSv1) GetDestination(key *utils.StringWithApiKey, reply *engine.Destination) error {
 	return dS.dS.ReplicatorSv1GetDestination(key, reply)
 }
 
 // GetReverseDestination
-func (dS *DispatcherReplicatorSv1) GetReverseDestination(key *dispatchers.StringWithApiKey, reply *[]string) error {
+func (dS *DispatcherReplicatorSv1) GetReverseDestination(key *utils.StringWithApiKey, reply *[]string) error {
 	return dS.dS.ReplicatorSv1GetReverseDestination(key, reply)
 }
 
@@ -887,7 +887,7 @@ func (dS *DispatcherReplicatorSv1) GetStatQueueProfile(tntID *utils.TenantIDWith
 }
 
 // GetTiming
-func (dS *DispatcherReplicatorSv1) GetTiming(id *dispatchers.StringWithApiKey, reply *utils.TPTiming) error {
+func (dS *DispatcherReplicatorSv1) GetTiming(id *utils.StringWithApiKey, reply *utils.TPTiming) error {
 	return dS.dS.ReplicatorSv1GetTiming(id, reply)
 }
 
@@ -902,42 +902,42 @@ func (dS *DispatcherReplicatorSv1) GetResourceProfile(tntID *utils.TenantIDWithA
 }
 
 // GetActionTriggers
-func (dS *DispatcherReplicatorSv1) GetActionTriggers(id *dispatchers.StringWithApiKey, reply *engine.ActionTriggers) error {
+func (dS *DispatcherReplicatorSv1) GetActionTriggers(id *utils.StringWithApiKey, reply *engine.ActionTriggers) error {
 	return dS.dS.ReplicatorSv1GetActionTriggers(id, reply)
 }
 
 // GetShareGroup
-func (dS *DispatcherReplicatorSv1) GetShareGroup(id *dispatchers.StringWithApiKey, reply *engine.SharedGroup) error {
+func (dS *DispatcherReplicatorSv1) GetShareGroup(id *utils.StringWithApiKey, reply *engine.SharedGroup) error {
 	return dS.dS.ReplicatorSv1GetShareGroup(id, reply)
 }
 
 // GetActions
-func (dS *DispatcherReplicatorSv1) GetActions(id *dispatchers.StringWithApiKey, reply *engine.Actions) error {
+func (dS *DispatcherReplicatorSv1) GetActions(id *utils.StringWithApiKey, reply *engine.Actions) error {
 	return dS.dS.ReplicatorSv1GetActions(id, reply)
 }
 
 // GetActionPlan
-func (dS *DispatcherReplicatorSv1) GetActionPlan(id *dispatchers.StringWithApiKey, reply *engine.ActionPlan) error {
+func (dS *DispatcherReplicatorSv1) GetActionPlan(id *utils.StringWithApiKey, reply *engine.ActionPlan) error {
 	return dS.dS.ReplicatorSv1GetActionPlan(id, reply)
 }
 
 // GetAllActionPlans
-func (dS *DispatcherReplicatorSv1) GetAllActionPlans(args *dispatchers.StringWithApiKey, reply *map[string]*engine.ActionPlan) error {
+func (dS *DispatcherReplicatorSv1) GetAllActionPlans(args *utils.StringWithApiKey, reply *map[string]*engine.ActionPlan) error {
 	return dS.dS.ReplicatorSv1GetAllActionPlans(args, reply)
 }
 
 // GetAccountActionPlans
-func (dS *DispatcherReplicatorSv1) GetAccountActionPlans(id *dispatchers.StringWithApiKey, reply *[]string) error {
+func (dS *DispatcherReplicatorSv1) GetAccountActionPlans(id *utils.StringWithApiKey, reply *[]string) error {
 	return dS.dS.ReplicatorSv1GetAccountActionPlans(id, reply)
 }
 
 // GetRatingPlan
-func (dS *DispatcherReplicatorSv1) GetRatingPlan(id *dispatchers.StringWithApiKey, reply *engine.RatingPlan) error {
+func (dS *DispatcherReplicatorSv1) GetRatingPlan(id *utils.StringWithApiKey, reply *engine.RatingPlan) error {
 	return dS.dS.ReplicatorSv1GetRatingPlan(id, reply)
 }
 
 // GetRatingProfile
-func (dS *DispatcherReplicatorSv1) GetRatingProfile(id *dispatchers.StringWithApiKey, reply *engine.RatingProfile) error {
+func (dS *DispatcherReplicatorSv1) GetRatingProfile(id *utils.StringWithApiKey, reply *engine.RatingProfile) error {
 	return dS.dS.ReplicatorSv1GetRatingProfile(id, reply)
 }
 
@@ -967,11 +967,53 @@ func (dS *DispatcherReplicatorSv1) GetDispatcherHost(tntID *utils.TenantIDWithAr
 }
 
 // GetItemLoadIDs
-func (dS *DispatcherReplicatorSv1) GetItemLoadIDs(itemID *dispatchers.StringWithApiKey, reply *map[string]int64) error {
+func (dS *DispatcherReplicatorSv1) GetItemLoadIDs(itemID *utils.StringWithApiKey, reply *map[string]int64) error {
 	return dS.dS.ReplicatorSv1GetItemLoadIDs(itemID, reply)
 }
 
 // GetFilterIndexes
 func (dS *DispatcherReplicatorSv1) GetFilterIndexes(args *utils.GetFilterIndexesArgWithArgDispatcher, reply *map[string]utils.StringMap) error {
 	return dS.dS.ReplicatorSv1GetFilterIndexes(args, reply)
+}
+
+// MatchFilterIndex
+func (dS *DispatcherReplicatorSv1) MatchFilterIndex(args *utils.MatchFilterIndexArgWithArgDispatcher, reply *utils.StringMap) error {
+	return dS.dS.ReplicatorSv1MatchFilterIndex(args, reply)
+}
+
+//finished all the above
+
+// SetThresholdProfile
+func (dS *DispatcherReplicatorSv1) SetThresholdProfile(args *engine.ThresholdProfileWithArgDispatcher, reply *string) error {
+	return dS.dS.ReplicatorSv1SetThresholdProfile(args, reply)
+}
+
+// SetThreshold
+func (dS *DispatcherReplicatorSv1) SetThreshold(args *engine.ThresholdWithArgDispatcher, reply *string) error {
+	return dS.dS.ReplicatorSv1SetThreshold(args, reply)
+}
+
+// SetFilterIndexes
+func (dS *DispatcherReplicatorSv1) SetFilterIndexes(args *utils.SetFilterIndexesArgWithArgDispatcher, reply *string) error {
+	return dS.dS.ReplicatorSv1SetFilterIndexes(args, reply)
+}
+
+// SetAccount
+func (dS *DispatcherReplicatorSv1) SetAccount(args *engine.AccountWithArgDispatcher, reply *string) error {
+	return dS.dS.ReplicatorSv1SetAccount(args, reply)
+}
+
+// SetReverseDestination
+func (dS *DispatcherReplicatorSv1) SetReverseDestination(args *engine.DestinationWithArgDispatcher, reply *string) error {
+	return dS.dS.ReplicatorSv1SetReverseDestination(args, reply)
+}
+
+// SetStatQueue
+func (dS *DispatcherReplicatorSv1) SetStatQueue(args *engine.StoredStatQueueWithArgDispatcher, reply *string) error {
+	return dS.dS.ReplicatorSv1SetStatQueue(args, reply)
+}
+
+// SetFilter
+func (dS *DispatcherReplicatorSv1) SetFilter(args *engine.FilterWithArgDispatcher, reply *string) error {
+	return dS.dS.ReplicatorSv1SetFilter(args, reply)
 }

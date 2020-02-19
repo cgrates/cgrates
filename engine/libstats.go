@@ -86,6 +86,11 @@ type StoredStatQueue struct {
 	Compressed bool
 }
 
+type StoredStatQueueWithArgDispatcher struct {
+	*StoredStatQueue
+	*utils.ArgDispatcher
+}
+
 // SqID will compose the unique identifier for the StatQueue out of Tenant and ID
 func (ssq *StoredStatQueue) SqID() string {
 	return utils.ConcatenatedKey(ssq.Tenant, ssq.ID)

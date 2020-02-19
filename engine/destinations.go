@@ -37,6 +37,12 @@ type Destination struct {
 	Prefixes []string
 }
 
+type DestinationWithArgDispatcher struct {
+	*Destination
+	utils.TenantArg
+	*utils.ArgDispatcher
+}
+
 // returns prefix precision
 func (d *Destination) containsPrefix(prefix string) int {
 	if d == nil {

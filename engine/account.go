@@ -44,6 +44,11 @@ type Account struct {
 	executingTriggers bool
 }
 
+type AccountWithArgDispatcher struct {
+	*Account
+	*utils.ArgDispatcher
+}
+
 // User's available minutes for the specified destination
 func (acc *Account) getCreditForPrefix(cd *CallDescriptor) (duration time.Duration, credit float64, balances Balances) {
 	creditBalances := acc.getBalancesForPrefix(cd.Destination, cd.Category, utils.MONETARY, "", cd.TimeStart)

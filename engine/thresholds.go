@@ -34,6 +34,12 @@ type ThresholdWithCache struct {
 	Cache *string
 }
 
+// ThresholdProfileWithArgDispatcher is used in replicatorV1 for dispatcher
+type ThresholdProfileWithArgDispatcher struct {
+	*ThresholdProfile
+	*utils.ArgDispatcher
+}
+
 type ThresholdProfile struct {
 	Tenant             string
 	ID                 string
@@ -50,6 +56,12 @@ type ThresholdProfile struct {
 
 func (tp *ThresholdProfile) TenantID() string {
 	return utils.ConcatenatedKey(tp.Tenant, tp.ID)
+}
+
+// ThresholdWithArgDispatcher is used in replicatorV1 for dispatcher
+type ThresholdWithArgDispatcher struct {
+	*Threshold
+	*utils.ArgDispatcher
 }
 
 // Threshold is the unit matched by filters
