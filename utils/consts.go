@@ -552,6 +552,7 @@ const (
 	MetaExp                     = "*exp"
 	MetaHdr                     = "*hdr"
 	MetaTrl                     = "*trl"
+	MetaTmp                     = "*tmp"
 	CGROriginHost               = "cgr_originhost"
 	MetaInitiate                = "*initiate"
 	MetaUpdate                  = "*update"

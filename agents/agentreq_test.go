@@ -1572,3 +1572,34 @@ func TestAgReqGroupType(t *testing.T) {
 		t.Errorf("expecting: %+v, \n received: %+v ", "test", sls[0].Data)
 	}
 }
+
+func TestAgReqSetFieldsInTmp(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, dm)
+	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
+	agReq.CGRRequest.Set([]string{utils.Account}, "1001", false, false)
+
+	tplFlds := []*config.FCTemplate{
+		&config.FCTemplate{Tag: "Tenant",
+			Path: utils.MetaTmp + utils.NestingSep + utils.Tenant, Type: utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP)},
+		&config.FCTemplate{Tag: "Account",
+			Path: utils.MetaTmp + utils.NestingSep + utils.Account, Type: utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("~*cgreq.Account", true, utils.INFIELD_SEP)},
+	}
+	eMp := config.NewNavigableMap(nil)
+	eMp.Set([]string{utils.Tenant}, []*config.NMItem{
+		&config.NMItem{Data: "cgrates.org", Path: []string{utils.Tenant},
+			Config: tplFlds[0]}}, false, true)
+	eMp.Set([]string{utils.Account}, []*config.NMItem{
+		&config.NMItem{Data: "1001", Path: []string{utils.Account},
+			Config: tplFlds[1]}}, false, true)
+
+	if err := agReq.SetFields(tplFlds); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(agReq.tmp, eMp) {
+		t.Errorf("expecting: %+v,\n received: %+v", eMp, agReq.tmp)
+	}
+}
