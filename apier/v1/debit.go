@@ -41,6 +41,9 @@ type AttrDebitUsageWithOptions struct {
 // DebitUsageWithOptions will debit the account based on the usage cost with
 // additional options to control if the balance can go negative
 func (apier *APIerSv1) DebitUsageWithOptions(args AttrDebitUsageWithOptions, reply *string) error {
+	if apier.Responder == nil {
+		return utils.NewErrNotConnected(utils.RALService)
+	}
 	usageRecord := args.UsageRecord.UsageRecord
 	if missing := utils.MissingStructFields(usageRecord, []string{"Account", "Destination", "Usage"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)

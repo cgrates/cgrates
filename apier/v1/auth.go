@@ -28,6 +28,9 @@ import (
 
 // Returns MaxUsage (for calls in seconds), -1 for no limit
 func (self *APIerSv1) GetMaxUsage(usageRecord engine.UsageRecordWithArgDispatcher, maxUsage *int64) error {
+	if self.Responder == nil {
+		return utils.NewErrNotConnected(utils.RALService)
+	}
 	if usageRecord.ToR == "" {
 		usageRecord.ToR = utils.VOICE
 	}
