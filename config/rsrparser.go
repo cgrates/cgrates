@@ -155,7 +155,7 @@ func NewRSRParser(parserRules string, allFiltersMatch bool) (rsrParser *RSRParse
 		}
 		parserRules = parserRules[:idxConverters]
 	}
-	if !strings.HasPrefix(parserRules, utils.DynamicDataPrefix) { // special case when RSR is defined as static attribute=value
+	if !strings.HasPrefix(parserRules, utils.DynamicDataPrefix) || len(parserRules) == 1 { // special case when RSR is defined as static attribute=value
 		var staticHdr, staticVal string
 		if splt := strings.Split(parserRules, utils.AttrValueSep); len(splt) == 2 { // using '='' as separator since ':' is often use in date/time fields
 			staticHdr, staticVal = splt[0], splt[1]               // strip the separator

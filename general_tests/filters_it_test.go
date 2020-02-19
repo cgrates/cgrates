@@ -53,6 +53,7 @@ var (
 		testV1FltrGetThresholdForEvent2,
 		testV1FltrPopulateResources,
 		testV1FltrAccounts,
+		testV1FltrAccountsExistsDynamicaly,
 		testV1FltrStopEngine,
 	}
 )
@@ -285,7 +286,6 @@ func testV1FltrPupulateThreshold(t *testing.T) {
 	} else if result != utils.OK {
 		t.Errorf("Calling APIerSv2.SetActions received: %s", result)
 	}
-	time.Sleep(10 * time.Millisecond)
 
 	//Add a threshold with filter from above and an inline filter for Account 1010
 	tPrfl := &engine.ThresholdWithCache{
@@ -582,7 +582,6 @@ func testV1FltrAccounts(t *testing.T) {
 	} else if result != utils.OK {
 		t.Errorf("Calling APIerSv2.SetActions received: %s", result)
 	}
-	time.Sleep(10 * time.Millisecond)
 	//Add a threshold with filter from above and an inline filter for Account 1010
 	tPrfl := &engine.ThresholdWithCache{
 		ThresholdProfile: &engine.ThresholdProfile{
@@ -648,6 +647,80 @@ func testV1FltrAccounts(t *testing.T) {
 
 	if err := fltrRpc.Call(utils.ThresholdSv1ProcessEvent, tEv, &ids); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+}
+
+func testV1FltrAccountsExistsDynamicaly(t *testing.T) {
+	var resp string
+	if err := fltrRpc.Call(utils.APIerSv1RemoveThresholdProfile,
+		&utils.TenantIDWithCache{Tenant: "cgrates.org", ID: "TH_Account"}, &resp); err != nil {
+		if err.Error() != utils.ErrNotFound.Error() { // no error if the threshold is already removed
+			t.Error(err)
+		}
+	} else if resp != utils.OK {
+		t.Error("Unexpected reply returned", resp)
+	}
+
+	var result string
+	// Add a log action
+	attrsAA := &utils.AttrSetActions{ActionsId: "LOG", Actions: []*utils.TPAction{
+		{Identifier: utils.LOG},
+	}}
+	if err := fltrRpc.Call(utils.APIerSv2SetActions, attrsAA, &result); err != nil && err.Error() != utils.ErrExists.Error() {
+		t.Error("Got error on APIerSv2.SetActions: ", err.Error())
+	}
+	//Add a threshold with filter from above and an inline filter for Account 1010
+	tPrfl := &engine.ThresholdWithCache{
+		ThresholdProfile: &engine.ThresholdProfile{
+			Tenant:    "cgrates.org",
+			ID:        "TH_AccountDinamic",
+			FilterIDs: []string{"*exists::~;*accounts.;~*req.Account"},
+			MaxHits:   -1,
+			MinSleep:  time.Duration(1 * time.Millisecond),
+			Weight:    90.0,
+			ActionIDs: []string{"LOG"},
+			Async:     true,
+		},
+	}
+	if err := fltrRpc.Call(utils.APIerSv1SetThresholdProfile, tPrfl, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	var rcvTh *engine.ThresholdProfile
+	if err := fltrRpc.Call(utils.APIerSv1GetThresholdProfile,
+		&utils.TenantID{Tenant: tPrfl.Tenant, ID: tPrfl.ID}, &rcvTh); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, rcvTh) {
+		t.Errorf("Expecting: %+v, received: %+v", tPrfl.ThresholdProfile, rcvTh)
+	}
+
+	tEv := &engine.ArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				utils.Account: "1001"},
+		},
+	}
+	var ids []string
+	if err := fltrRpc.Call(utils.ThresholdSv1ProcessEvent, tEv, &ids); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(ids, []string{"TH_AccountDinamic"}) {
+		t.Error("Unexpected reply returned", ids)
+	}
+
+	tEv = &engine.ArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event2",
+			Event: map[string]interface{}{
+				utils.Account: "non"},
+		},
+	}
+	ids = nil
+	if err := fltrRpc.Call(utils.ThresholdSv1ProcessEvent, tEv, &ids); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }

@@ -1693,10 +1693,15 @@ func (tps TpFilterS) AsTPFilter() (result []*utils.TPFilterProfile) {
 			}
 		}
 		if tp.Type != "" {
+			var vals []string
+			if tp.Values != utils.EmptyString {
+				vals = strings.Split(tp.Values, utils.INFIELD_SEP)
+			}
 			th.Filters = append(th.Filters, &utils.TPFilter{
 				Type:    tp.Type,
 				Element: tp.Element,
-				Values:  strings.Split(tp.Values, utils.INFIELD_SEP)})
+				Values:  vals,
+			})
 		}
 		mst[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()] = th
 	}
