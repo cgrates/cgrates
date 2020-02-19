@@ -57,7 +57,7 @@ Run the following commands:
 
 ::
 
-    wget http://pkg.cgrates.org/deb/master/cgrates_current_amd64.deb
+    wget http://pkg.cgrates.org/deb/nightly/cgrates_current_amd64.deb
     dpkg -i cgrates_current_amd64.deb
 
 As a side note on http://pkg.cgrates.org one can find an entire archive of CGRateS packages.
@@ -100,7 +100,7 @@ Run the following commands:
 
 ::
 
-    sudo rpm -i http://pkg.cgrates.org/rpm/master/cgrates_current.rpm
+    sudo rpm -i http://pkg.cgrates.org/rpm/nightly/cgrates_current.rpm
 
 As a side note on http://pkg.cgrates.org one can find an entire archive of CGRateS packages.
 

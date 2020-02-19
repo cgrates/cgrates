@@ -271,28 +271,28 @@
 - hosts: pkg
   remote_user: '{{ gouser }}'
   tasks:
-    - name: set cgrates cgrates_version
+    - name: set cgrates cgrates_distribution
       set_fact:
-        cgrates_version: "{{ hostvars['yum']['cgrates_version'] }}"
+        cgrates_distribution: "{{ hostvars['yum']['cgrates_distribution'] }}"
 
     - name: Creates directory
       become: yes
       file:
-        path: /var/packages/rpm/{{ cgrates_version }}/
+        path: /var/packages/rpm/{{ cgrates_distribution }}/
         state: directory
         
     - name: Remove symlink from current rpm package
       become: yes
       file:
-        path: /var/packages/rpm/{{ cgrates_version }}/cgrates_current.rpm
+        path: /var/packages/rpm/{{ cgrates_distribution }}/cgrates_current.rpm
         state: absent
-      when : cgrates_version == "master" or hostvars['yum']['gitTagVar'].stdout_lines|length > 0
+      when : cgrates_distribution == "nightly" or hostvars['yum']['gitTagVar'].stdout_lines|length > 0
 
     - name: Move the new package to /var/packages/rpm
       become: yes
-      shell: "sudo mv /tmp/{{ hostvars['yum']['rmpFileName']['stdout_lines'][0] }} /var/packages/rpm/{{ cgrates_version }}/"
+      shell: "sudo mv /tmp/{{ hostvars['yum']['rmpFileName']['stdout_lines'][0] }} /var/packages/rpm/{{ cgrates_distribution }}/"
 
     - name: Create the new symlink cgrates_current.rpm
       become: yes
-      shell: "sudo ln -s /var/packages/rpm/{{ cgrates_version }}/{{ hostvars['yum']['rmpFileName']['stdout_lines'][0] }} /var/packages/rpm/{{ cgrates_version }}/cgrates_current.rpm"
-      when : cgrates_version == "master" or hostvars['yum']['gitTagVar'].stdout_lines|length > 0
+      shell: "sudo ln -s /var/packages/rpm/{{ cgrates_distribution }}/{{ hostvars['yum']['rmpFileName']['stdout_lines'][0] }} /var/packages/rpm/{{ cgrates_distribution }}/cgrates_current.rpm"
+      when : cgrates_distribution == "nightly" or hostvars['yum']['gitTagVar'].stdout_lines|length > 0
