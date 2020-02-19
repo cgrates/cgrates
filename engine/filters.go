@@ -110,6 +110,11 @@ type Filter struct {
 	ActivationInterval *utils.ActivationInterval
 }
 
+type FilterWithArgDispatcher struct {
+	*Filter
+	*utils.ArgDispatcher
+}
+
 // TenantID returns the tenant wit the ID
 func (fltr *Filter) TenantID() string {
 	return utils.ConcatenatedKey(fltr.Tenant, fltr.ID)

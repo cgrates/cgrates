@@ -918,3 +918,21 @@ type GetFilterIndexesArgWithArgDispatcher struct {
 	TenantArg
 	*ArgDispatcher
 }
+
+type MatchFilterIndexArgWithArgDispatcher struct {
+	*MatchFilterIndexArg
+	TenantArg
+	*ArgDispatcher
+}
+
+type StringWithApiKey struct {
+	*ArgDispatcher
+	TenantArg
+	Arg string
+}
+
+type SetFilterIndexesArgWithArgDispatcher struct {
+	*SetFilterIndexesArg
+	TenantArg
+	*ArgDispatcher
+}

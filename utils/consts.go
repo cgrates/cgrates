@@ -925,7 +925,7 @@ const (
 	ReplicatorSv1SetThresholdProfile     = "ReplicatorSv1.SetThresholdProfile"
 	ReplicatorSv1SetThreshold            = "ReplicatorSv1.SetThreshold"
 	ReplicatorSv1SetFilterIndexes        = "ReplicatorSv1.SetFilterIndexes"
-	ReplicatorSv1Account                 = "ReplicatorSv1.SetAccount"
+	ReplicatorSv1SetAccount              = "ReplicatorSv1.SetAccount"
 	ReplicatorSv1SetDestination          = "ReplicatorSv1.SetDestination"
 	ReplicatorSv1SetReverseDestination   = "ReplicatorSv1.SetReverseDestination"
 	ReplicatorSv1SetStatQueue            = "ReplicatorSv1.SetStatQueue"

@@ -59,12 +59,6 @@ type AttrRemoteUnlockWithApiKey struct {
 	RefID string
 }
 
-type StringWithApiKey struct {
-	*utils.ArgDispatcher
-	utils.TenantArg
-	Arg string
-}
-
 type ArgStartServiceWithApiKey struct {
 	*utils.ArgDispatcher
 	utils.TenantArg
