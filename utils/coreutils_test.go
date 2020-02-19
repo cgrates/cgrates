@@ -1091,7 +1091,7 @@ Date:   Fri Dec 30 19:48:09 2016 +0100
 
 	Fixes for db driver to avoid returning new values in case of errors
 `
-	eVers := "CGRateS@v0.10.0-20161230184809-73014daa0c1d"
+	eVers := "CGRateS@v0.10.1~dev-20161230184809-73014daa0c1d"
 	if vers, err := GetCGRVersion(); err != nil {
 		t.Error(err)
 	} else if vers != eVers {
@@ -1100,35 +1100,35 @@ Date:   Fri Dec 30 19:48:09 2016 +0100
 	GitLastLog = ""
 	if vers, err := GetCGRVersion(); err != nil {
 		t.Error(err)
-	} else if vers != "CGRateS@v0.10.0" {
-		t.Errorf("Expecting: <CGRateS@v0.10.0>, received: <%s>", vers)
+	} else if vers != "CGRateS@v0.10.1~dev" {
+		t.Errorf("Expecting: <CGRateS@v0.10.1~dev>, received: <%s>", vers)
 	}
 	GitLastLog = "\n"
 	if vers, err := GetCGRVersion(); err == nil || err.Error() != "Building version - error: <EOF> reading line from file" {
 		t.Error(err)
-	} else if vers != "CGRateS@v0.10.0" {
-		t.Errorf("Expecting: <CGRateS@v0.10.0>, received: <%s>", vers)
+	} else if vers != "CGRateS@v0.10.1~dev" {
+		t.Errorf("Expecting: <CGRateS@v0.10.1~dev>, received: <%s>", vers)
 	}
 	GitLastLog = `commit . . .
 `
 	if vers, err := GetCGRVersion(); err == nil || err.Error() != "Building version - cannot extract commit hash" {
 		t.Error(err)
-	} else if vers != "CGRateS@v0.10.0" {
-		t.Errorf("Expecting: <CGRateS@v0.10.0>, received: <%s>", vers)
+	} else if vers != "CGRateS@v0.10.1~dev" {
+		t.Errorf("Expecting: <CGRateS@v0.10.1~dev>, received: <%s>", vers)
 	}
 	GitLastLog = `Date: : :
 `
 	if vers, err := GetCGRVersion(); err == nil || err.Error() != "Building version - cannot split commit date" {
 		t.Error(err)
-	} else if vers != "CGRateS@v0.10.0" {
-		t.Errorf("Expecting: <CGRateS@v0.10.0>, received: <%s>", vers)
+	} else if vers != "CGRateS@v0.10.1~dev" {
+		t.Errorf("Expecting: <CGRateS@v0.10.1~dev>, received: <%s>", vers)
 	}
 	GitLastLog = `Date: wrong format
 `
 	if vers, err := GetCGRVersion(); err == nil || err.Error() != `Building version - error: <parsing time "wrong format" as "Mon Jan 2 15:04:05 2006 -0700": cannot parse "wrong format" as "Mon"> compiling commit date` {
 		t.Error(err)
-	} else if vers != "CGRateS@v0.10.0" {
-		t.Errorf("Expecting: <CGRateS@v0.10.0>, received: <%s>", vers)
+	} else if vers != "CGRateS@v0.10.1~dev" {
+		t.Errorf("Expecting: <CGRateS@v0.10.1~dev>, received: <%s>", vers)
 	}
 	GitLastLog = `ommit 73014daa0c1d7edcb532d5fe600b8a20d588cdf8
 Author: DanB <danb@cgrates.org>
@@ -1138,8 +1138,8 @@ Date:   Fri Dec 30 19:48:09 2016 +0100
 `
 	if vers, err := GetCGRVersion(); err == nil || err.Error() != "Cannot find commitHash or commitDate information" {
 		t.Error(err)
-	} else if vers != "CGRateS@v0.10.0" {
-		t.Errorf("Expecting: <CGRateS@v0.10.0>, received: <%s>", vers)
+	} else if vers != "CGRateS@v0.10.1~dev" {
+		t.Errorf("Expecting: <CGRateS@v0.10.1~dev>, received: <%s>", vers)
 	}
 }
 
