@@ -84,6 +84,7 @@ type AgentRequest struct {
 	Header  config.DataProvider
 	Trailer config.DataProvider
 	diamreq *config.NavigableMap // used in case of building requests (ie. DisconnectSession)
+	tmp     *config.NavigableMap // used in case you want to store temporary items and access them later
 }
 
 // String implements engine.DataProvider
@@ -117,6 +118,8 @@ func (ar *AgentRequest) FieldAsInterface(fldPath []string) (val interface{}, err
 		val, err = ar.Header.FieldAsInterface(fldPath[1:])
 	case utils.MetaTrl:
 		val, err = ar.Trailer.FieldAsInterface(fldPath[1:])
+	case utils.MetaTmp:
+		val, err = ar.tmp.FieldAsInterface(fldPath[1:])
 	}
 	return
 }
@@ -141,6 +144,7 @@ func (ar *AgentRequest) AsNavigableMap(tplFlds []*config.FCTemplate) (
 
 //SetFields will populate fields of AgentRequest out of templates
 func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
+	ar.tmp = config.NewNavigableMap(nil)
 	for _, tplFld := range tplFlds {
 		if pass, err := ar.filterS.Pass(ar.Tenant,
 			tplFld.Filters, ar); err != nil {
@@ -195,6 +199,8 @@ func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 				ar.Reply.Set(fldPath[1:], valSet, false, true)
 			case utils.MetaDiamreq:
 				ar.diamreq.Set(fldPath[1:], valSet, false, true)
+			case utils.MetaTmp:
+				ar.tmp.Set(fldPath[1:], valSet, false, true)
 			}
 		}
 		if tplFld.Blocker { // useful in case of processing errors first
