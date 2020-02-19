@@ -8,6 +8,7 @@ Both receiving of *Events* as well as *Metrics* displaying is performed via a co
 
 Due it's real-time nature, **StatS** are designed towards high throughput being able to process thousands of *Events* per second. This is doable since each *StatQueue* is a very light object, held in memory and eventually backed up in *DataDB*.
 
+
 Processing logic
 ----------------
 
@@ -24,6 +25,38 @@ Parameters
 ----------
 
 
+StatS
+^^^^^
+
+**StatS** is the **CGRateS** component responsible of handling the *StatQueues*. 
+
+It is configured within **stats** section from :ref:`JSON configuration <configuration>` via the following parameters:
+
+enabled
+	Will enable starting of the service. Possible values: <true|false>.
+
+store_interval
+	Time interval for backing up the stats into *DataDB*.
+
+store_uncompressed_limit
+	After this limit is hit the events within *StatQueue* will be stored aggregated.
+
+thresholds_conns
+	Connections IDs towards *ThresholdS* component. If not defined, there will be no notifications sent to *ThresholdS* on *StatQueue* changes.
+
+indexed_selects
+	Enable profile matching exclusively on indexes. If not enabled, the *StatQueues* are checked one by one which for a larger number can slow down the processing time. Possible values: <true|false>.
+
+string_indexed_fields
+	Query string indexes based only on these fields for faster processing. If commented out, each field from the event will be checked against indexes. If uncommented and defined as empty list, no fields will be checked.
+
+prefix_indexed_fields
+	Query prefix indexes based only on these fields for faster processing. If defined as empty list, no fields will be checked.
+
+nested_fields
+	Applied when all event fields are checked against indexes, and decides whether subfields are also checked.
+
+
 StatQueueProfile
 ^^^^^^^^^^^^^^^^
 
@@ -36,7 +69,7 @@ ID
 	Identifier for the *StatQueueProfile*, unique within a *Tenant*.
 
 FilterIDs
-	List of *FilterProfiles* which should match in order to consider the *StatQueueProfile* matching the event.
+	List of *FilterProfileIDs* which should match in order to consider the profile matching the event.
 
 ActivationInterval
 	The time interval when this profile becomes active. If undefined, the profile is always active. Other options are start time, end time or both.
