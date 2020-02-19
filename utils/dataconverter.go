@@ -19,7 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"encoding/hex"
 	"fmt"
+	"net"
 	"strconv"
 	"strings"
 	"time"
@@ -71,6 +73,8 @@ func NewDataConverter(params string) (conv DataConverter, err error) {
 		return NewDivideConverter(params[len(MetaDivide)+1:])
 	case params == MetaDuration:
 		return NewDurationConverter("")
+	case params == MetaIP2Hex:
+		return &IP2HexConvertor{}, nil
 	case strings.HasPrefix(params, MetaLibPhoneNumber):
 		if len(params) == len(MetaLibPhoneNumber) {
 			return NewPhoneNumberConverter("")
@@ -272,4 +276,26 @@ func (lc *PhoneNumberConverter) Convert(in interface{}) (out interface{}, err er
 		return nil, err
 	}
 	return phonenumbers.Format(num, lc.Format), nil
+}
+
+// HexConvertor will round floats
+type IP2HexConvertor struct{}
+
+func (_ *IP2HexConvertor) Convert(in interface{}) (out interface{}, err error) {
+	var ip net.IP
+	switch val := in.(type) {
+	case string:
+		ip = net.ParseIP(val)
+	case net.IP:
+		ip = val
+	default:
+		src := IfaceAsString(in)
+		ip = net.ParseIP(src)
+	}
+
+	hx := hex.EncodeToString([]byte(ip))
+	if len(hx) < 8 {
+		return hx, nil
+	}
+	return "0x" + string([]byte(hx)[len(hx)-8:]), nil
 }

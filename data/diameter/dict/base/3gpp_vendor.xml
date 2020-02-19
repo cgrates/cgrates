@@ -2061,7 +2061,7 @@
       <data type="UTF8String" />
     </avp>
     <avp name="3GPP-SGSN-Address" code="6" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
-      <data type="OctetString" />
+      <data type="IPv4" />
     </avp>
     <avp name="3GPP-GGSN-Address" code="7" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="OctetString" />
