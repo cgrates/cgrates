@@ -84,6 +84,7 @@ type SessionSv1Interface interface {
 	ProcessCDR(cgrEv *utils.CGREventWithArgDispatcher, rply *string) error
 	ProcessMessage(args *sessions.V1ProcessMessageArgs, rply *sessions.V1ProcessMessageReply) error
 	ProcessEvent(args *sessions.V1ProcessEventArgs, rply *sessions.V1ProcessEventReply) error
+	GetCost(args *sessions.V1ProcessEventArgs, rply *sessions.V1GetCostReply) error
 	GetActiveSessions(args *utils.SessionFilter, rply *[]*sessions.ExternalSession) error
 	GetActiveSessionsCount(args *utils.SessionFilter, rply *int) error
 	ForceDisconnect(args *utils.SessionFilter, rply *string) error

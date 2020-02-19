@@ -455,6 +455,12 @@ func (dS *DispatcherSessionSv1) ProcessEvent(args *sessions.V1ProcessEventArgs,
 	return dS.dS.SessionSv1ProcessEvent(args, reply)
 }
 
+// GetCost implements SessionSv1GetCost
+func (dS *DispatcherSessionSv1) GetCost(args *sessions.V1ProcessEventArgs,
+	reply *sessions.V1GetCostReply) (err error) {
+	return dS.dS.SessionSv1GetCost(args, reply)
+}
+
 // TerminateSession implements SessionSv1TerminateSession
 func (dS *DispatcherSessionSv1) TerminateSession(args *sessions.V1TerminateSessionArgs,
 	reply *string) (err error) {

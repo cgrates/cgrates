@@ -53,6 +53,7 @@ var sTestSessionSv1ProcessEvent = []func(t *testing.T){
 	testSSv1ItProcessEventWithGetCost2,
 	testSSv1ItProcessEventWithGetCost3,
 	testSSv1ItProcessEventWithGetCost4,
+	testSSv1ItGetCost,
 	testSSv1ItStopCgrEngine,
 }
 
@@ -613,4 +614,45 @@ func testSSv1ItProcessEventWithGetCost4(t *testing.T) {
 		t.Error(err)
 	}
 
+}
+
+func testSSv1ItGetCost(t *testing.T) {
+	// GetCost for ANY2CNT Subject
+	args := &sessions.V1ProcessEventArgs{
+		Flags: []string{utils.MetaAttributes, utils.MetaCost},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testSSv1ItGetCost",
+			Event: map[string]interface{}{
+				utils.Tenant:      "cgrates.org",
+				utils.ToR:         utils.MONETARY,
+				utils.OriginID:    "testSSv1ItProcessEventWithGetCost",
+				utils.RequestType: sSV1RequestType,
+				utils.Subject:     "*attributes",
+				utils.Destination: "1002",
+				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+				utils.Usage:       10 * time.Minute,
+			},
+		},
+	}
+	var rply sessions.V1GetCostReply
+	if err := sSv1BiRpc.Call(utils.SessionSv1GetCost,
+		args, &rply); err != nil {
+		t.Error(err)
+	}
+	if rply.Attributes == nil {
+		t.Error("Received nil Attributes")
+	} else if !reflect.DeepEqual(rply.Attributes.MatchedProfiles, []string{"ATTR_SUBJECT_CASE1"}) {
+		t.Errorf("Expected: %+v,received: %+v", []string{"ATTR_SUBJECT_CASE1"}, rply.Attributes.MatchedProfiles)
+	} else if !reflect.DeepEqual(rply.Attributes.AlteredFields, []string{"*req.Subject"}) {
+		t.Errorf("Expected: %+v,received: %+v", []string{"*req.Subject"}, rply.Attributes.AlteredFields)
+	}
+	if rply.EventCost == nil {
+		t.Errorf("Received nil EventCost")
+	} else if *rply.EventCost.Cost != 0.198 { // same cost as in CDR
+		t.Errorf("Expected: %+v,received: %+v", 0.198, *rply.EventCost.Cost)
+	} else if *rply.EventCost.Usage != 10*time.Minute {
+		t.Errorf("Expected: %+v,received: %+v", 10*time.Minute, *rply.EventCost.Usage)
+	}
 }
