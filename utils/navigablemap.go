@@ -43,7 +43,7 @@ func (nmi *NMInterface) Remove(path []string) (err error) {
 	return ErrNotImplemented
 }
 func (nmi *NMInterface) Type() NMType { return NMInterfaceType }
-func (nmi *NMInterface) Empty() bool  { return nmi != nil && nmi.data != nil }
+func (nmi *NMInterface) Empty() bool  { return nmi == nil || nmi.data == nil }
 
 type NavigableMap2 map[string]NM
 
@@ -197,7 +197,7 @@ func (nmm NavigableMap2) Remove(path []string) (err error) {
 	return
 }
 func (nmm NavigableMap2) Type() NMType { return NMMapType }
-func (nmm NavigableMap2) Empty() bool  { return nmm != nil && len(nmm) != 0 }
+func (nmm NavigableMap2) Empty() bool  { return nmm == nil || len(nmm) == 0 }
 
 type NMSlice []NM
 
@@ -317,7 +317,7 @@ func (nms *NMSlice) Remove(path []string) (err error) {
 	panic("BUG")
 }
 func (nms NMSlice) Type() NMType { return NMSliceType }
-func (nms NMSlice) Empty() bool  { return nms != nil && len(nms) != 0 }
+func (nms NMSlice) Empty() bool  { return nms == nil || len(nms) == 0 }
 
 // NewOrderedNavigableMap initializates a structure of OrderedNavigableMap2 with a NavigableMap2
 func NewOrderedNavigableMap() *OrderedNavigableMap {

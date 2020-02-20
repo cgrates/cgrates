@@ -45,14 +45,14 @@ func TestAgReqSetFields(t *testing.T) {
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	// populate request, emulating the way will be done in HTTPAgent
 	agReq.CGRRequest.Set([]string{utils.CGRID},
-		utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()))
-	agReq.CGRRequest.Set([]string{utils.ToR}, utils.VOICE)
-	agReq.CGRRequest.Set([]string{utils.Account}, "1001")
-	agReq.CGRRequest.Set([]string{utils.Destination}, "1002")
+		utils.NewNMInterface(utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String())))
+	agReq.CGRRequest.Set([]string{utils.ToR}, utils.NewNMInterface(utils.VOICE))
+	agReq.CGRRequest.Set([]string{utils.Account}, utils.NewNMInterface("1001"))
+	agReq.CGRRequest.Set([]string{utils.Destination}, utils.NewNMInterface("1002"))
 	agReq.CGRRequest.Set([]string{utils.AnswerTime},
-		time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC))
-	agReq.CGRRequest.Set([]string{utils.RequestType}, utils.META_PREPAID)
-	agReq.CGRRequest.Set([]string{utils.Usage}, time.Duration(3*time.Minute))
+		utils.NewNMInterface(time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC)))
+	agReq.CGRRequest.Set([]string{utils.RequestType}, utils.NewNMInterface(utils.META_PREPAID))
+	agReq.CGRRequest.Set([]string{utils.Usage}, utils.NewNMInterface(time.Duration(3*time.Minute)))
 
 	cgrRply := utils.NavigableMap{
 		utils.CapAttributes: map[string]interface{}{
@@ -107,22 +107,22 @@ func TestAgReqSetFields(t *testing.T) {
 				"~*cgrep.Error", true, utils.INFIELD_SEP)},
 	}
 	eMp := utils.NewOrderedNavigableMap()
-	eMp.Set([]string{utils.Tenant}, []*config.NMItem{
+	eMp.Set([]string{utils.Tenant}, &utils.NMSlice{
 		&config.NMItem{Data: "cgrates.org", Path: []string{utils.Tenant},
 			Config: tplFlds[0]}})
-	eMp.Set([]string{utils.Account}, []*config.NMItem{
+	eMp.Set([]string{utils.Account}, &utils.NMSlice{
 		&config.NMItem{Data: "1001", Path: []string{utils.Account},
 			Config: tplFlds[1]}})
-	eMp.Set([]string{utils.Destination}, []*config.NMItem{
+	eMp.Set([]string{utils.Destination}, &utils.NMSlice{
 		&config.NMItem{Data: "1002", Path: []string{utils.Destination},
 			Config: tplFlds[2]}})
-	eMp.Set([]string{"RequestedUsage"}, []*config.NMItem{
+	eMp.Set([]string{"RequestedUsage"}, &utils.NMSlice{
 		&config.NMItem{Data: "180", Path: []string{"RequestedUsage"},
 			Config: tplFlds[3]}})
-	eMp.Set([]string{"PaypalAccount"}, []*config.NMItem{
+	eMp.Set([]string{"PaypalAccount"}, &utils.NMSlice{
 		&config.NMItem{Data: "cgrates@paypal.com", Path: []string{"PaypalAccount"},
 			Config: tplFlds[6]}})
-	eMp.Set([]string{"MaxUsage"}, []*config.NMItem{
+	eMp.Set([]string{"MaxUsage"}, &utils.NMSlice{
 		&config.NMItem{Data: "120", Path: []string{"MaxUsage"},
 			Config: tplFlds[7]}})
 
@@ -313,10 +313,12 @@ func TestAgentRequestSetFields(t *testing.T) {
 		t.Error(err)
 	} else if nm, ok := val.(*utils.NMSlice); !ok {
 		t.Error("Expecting NM items")
-	} else if len(nm) != 1 {
+	} else if len(*nm) != 1 {
 		t.Error("Expecting one item")
-	} else if nm[0].Data != "2020" {
-		t.Error("Expecting 1009, received: ", nm[0].Data)
+	} else if nmi, canCast := (*nm)[0].(*config.NMItem); !canCast {
+		t.Error("Expecting NM item")
+	} else if nmi.Data != "2020" {
+		t.Error("Expecting 1009, received: ", nmi.Data)
 	}
 
 	// Filters
@@ -472,7 +474,7 @@ func TestAgReqMaxCost(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	// populate request, emulating the way will be done in HTTPAgent
-	agReq.CGRRequest.Set([]string{utils.CapMaxUsage}, "120s")
+	agReq.CGRRequest.Set([]string{utils.CapMaxUsage}, utils.NewNMInterface("120s"))
 
 	cgrRply := utils.NavigableMap{
 		utils.CapMaxUsage: time.Duration(120 * time.Second),
@@ -488,7 +490,7 @@ func TestAgReqMaxCost(t *testing.T) {
 	}
 	eMp := utils.NewOrderedNavigableMap()
 
-	eMp.Set([]string{"MaxUsage"}, []*config.NMItem{
+	eMp.Set([]string{"MaxUsage"}, &utils.NMSlice{
 		&config.NMItem{Data: "120", Path: []string{"MaxUsage"},
 			Config: tplFlds[0]}})
 
@@ -709,9 +711,9 @@ func TestAgReqEmptyFilter(t *testing.T) {
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	// populate request, emulating the way will be done in HTTPAgent
 	agReq.CGRRequest.Set([]string{utils.CGRID},
-		utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()))
-	agReq.CGRRequest.Set([]string{utils.Account}, "1001")
-	agReq.CGRRequest.Set([]string{utils.Destination}, "1002")
+		utils.NewNMInterface(utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String())))
+	agReq.CGRRequest.Set([]string{utils.Account}, utils.NewNMInterface("1001"))
+	agReq.CGRRequest.Set([]string{utils.Destination}, utils.NewNMInterface("1002"))
 
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Tenant", Filters: []string{},
@@ -725,14 +727,14 @@ func TestAgReqEmptyFilter(t *testing.T) {
 			Path: utils.MetaCgrep + utils.NestingSep + utils.Destination, Type: utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("~*cgreq.Destination", true, utils.INFIELD_SEP)},
 	}
-	eMp := utils.NewOrderedNavigableMap()
-	eMp.Set([]string{utils.Tenant}, []*config.NMItem{
+	eMp := &utils.NavigableMap{}
+	eMp.Set([]string{utils.Tenant}, &utils.NMSlice{
 		&config.NMItem{Data: "cgrates.org", Path: []string{utils.Tenant},
 			Config: tplFlds[0]}})
-	eMp.Set([]string{utils.Account}, []*config.NMItem{
+	eMp.Set([]string{utils.Account}, &utils.NMSlice{
 		&config.NMItem{Data: "1001", Path: []string{utils.Account},
 			Config: tplFlds[1]}})
-	eMp.Set([]string{utils.Destination}, []*config.NMItem{
+	eMp.Set([]string{utils.Destination}, &utils.NMSlice{
 		&config.NMItem{Data: "1002", Path: []string{utils.Destination},
 			Config: tplFlds[2]}})
 
@@ -749,16 +751,16 @@ func TestAgReqMetaExponent(t *testing.T) {
 		config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
-	agReq.CGRRequest.Set([]string{"Value"}, "2")
-	agReq.CGRRequest.Set([]string{"Exponent"}, "2")
+	agReq.CGRRequest.Set([]string{"Value"}, utils.NewNMInterface("2"))
+	agReq.CGRRequest.Set([]string{"Exponent"}, utils.NewNMInterface("2"))
 
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "TestExpo", Filters: []string{},
 			Path: utils.MetaCgrep + utils.NestingSep + "TestExpo", Type: utils.MetaValueExponent,
 			Value: config.NewRSRParsersMustCompile("~*cgreq.Value;~*cgreq.Exponent", true, utils.INFIELD_SEP)},
 	}
-	eMp := utils.NewOrderedNavigableMap()
-	eMp.Set([]string{"TestExpo"}, []*config.NMItem{
+	eMp := &utils.NavigableMap{}
+	eMp.Set([]string{"TestExpo"}, &utils.NMSlice{
 		&config.NMItem{Data: "200", Path: []string{"TestExpo"},
 			Config: tplFlds[0]}})
 
@@ -776,9 +778,9 @@ func TestAgReqFieldAsNone(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	// populate request, emulating the way will be done in HTTPAgent
-	agReq.CGRRequest.Set([]string{utils.ToR}, utils.VOICE)
-	agReq.CGRRequest.Set([]string{utils.Account}, "1001")
-	agReq.CGRRequest.Set([]string{utils.Destination}, "1002")
+	agReq.CGRRequest.Set([]string{utils.ToR}, utils.NewNMInterface(utils.VOICE))
+	agReq.CGRRequest.Set([]string{utils.Account}, utils.NewNMInterface("1001"))
+	agReq.CGRRequest.Set([]string{utils.Destination}, utils.NewNMInterface("1002"))
 
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Tenant",
@@ -792,11 +794,11 @@ func TestAgReqFieldAsNone(t *testing.T) {
 			Path: utils.MetaCgrep + utils.NestingSep + utils.Destination, Type: utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("~*cgreq.Destination", true, utils.INFIELD_SEP)},
 	}
-	eMp := utils.NewOrderedNavigableMap()
-	eMp.Set([]string{utils.Tenant}, []*config.NMItem{
+	eMp := &utils.NavigableMap{}
+	eMp.Set([]string{utils.Tenant}, &utils.NMSlice{
 		&config.NMItem{Data: "cgrates.org", Path: []string{utils.Tenant},
 			Config: tplFlds[0]}})
-	eMp.Set([]string{utils.Account}, []*config.NMItem{
+	eMp.Set([]string{utils.Account}, &utils.NMSlice{
 		&config.NMItem{Data: "1001", Path: []string{utils.Account},
 			Config: tplFlds[1]}})
 	if err := agReq.SetFields(tplFlds); err != nil {
@@ -813,9 +815,9 @@ func TestAgReqFieldAsNone2(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	// populate request, emulating the way will be done in HTTPAgent
-	agReq.CGRRequest.Set([]string{utils.ToR}, utils.VOICE)
-	agReq.CGRRequest.Set([]string{utils.Account}, "1001")
-	agReq.CGRRequest.Set([]string{utils.Destination}, "1002")
+	agReq.CGRRequest.Set([]string{utils.ToR}, utils.NewNMInterface(utils.VOICE))
+	agReq.CGRRequest.Set([]string{utils.Account}, utils.NewNMInterface("1001"))
+	agReq.CGRRequest.Set([]string{utils.Destination}, utils.NewNMInterface("1002"))
 
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Tenant",
@@ -829,14 +831,14 @@ func TestAgReqFieldAsNone2(t *testing.T) {
 			Path: utils.MetaCgrep + utils.NestingSep + utils.Destination, Type: utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("~*cgreq.Destination", true, utils.INFIELD_SEP)},
 	}
-	eMp := utils.NewOrderedNavigableMap()
-	eMp.Set([]string{utils.Tenant}, []*config.NMItem{
+	eMp := &utils.NavigableMap{}
+	eMp.Set([]string{utils.Tenant}, &utils.NMSlice{
 		&config.NMItem{Data: "cgrates.org", Path: []string{utils.Tenant},
 			Config: tplFlds[0]}})
-	eMp.Set([]string{utils.Account}, []*config.NMItem{
+	eMp.Set([]string{utils.Account}, &utils.NMSlice{
 		&config.NMItem{Data: "1001", Path: []string{utils.Account},
 			Config: tplFlds[1]}})
-	eMp.Set([]string{utils.Destination}, []*config.NMItem{
+	eMp.Set([]string{utils.Destination}, &utils.NMSlice{
 		&config.NMItem{Data: "1002", Path: []string{utils.Destination},
 			Config: tplFlds[3]}})
 	if err := agReq.SetFields(tplFlds); err != nil {
@@ -853,12 +855,12 @@ func TestAgReqSetField2(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	// populate request, emulating the way will be done in HTTPAgent
-	agReq.CGRRequest.Set([]string{utils.ToR}, utils.VOICE)
-	agReq.CGRRequest.Set([]string{utils.Account}, "1001")
-	agReq.CGRRequest.Set([]string{utils.Destination}, "1002")
+	agReq.CGRRequest.Set([]string{utils.ToR}, utils.NewNMInterface(utils.VOICE))
+	agReq.CGRRequest.Set([]string{utils.Account}, utils.NewNMInterface("1001"))
+	agReq.CGRRequest.Set([]string{utils.Destination}, utils.NewNMInterface("1002"))
 	agReq.CGRRequest.Set([]string{utils.AnswerTime},
-		time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC))
-	agReq.CGRRequest.Set([]string{utils.RequestType}, utils.META_PREPAID)
+		utils.NewNMInterface(time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC)))
+	agReq.CGRRequest.Set([]string{utils.RequestType}, utils.NewNMInterface(utils.META_PREPAID))
 
 	agReq.CGRReply = &utils.NavigableMap{}
 
@@ -880,20 +882,20 @@ func TestAgReqSetField2(t *testing.T) {
 			Type: "*difference", Value: config.NewRSRParsersMustCompile("~*cgreq.AnswerTime;~*cgrep.Usage", true, utils.INFIELD_SEP),
 		},
 	}
-	eMp := utils.NewOrderedNavigableMap()
-	eMp.Set([]string{utils.Tenant}, []*config.NMItem{
+	eMp := &utils.NavigableMap{}
+	eMp.Set([]string{utils.Tenant}, &utils.NMSlice{
 		&config.NMItem{Data: "cgrates.org", Path: []string{utils.Tenant},
 			Config: tplFlds[0]}})
-	eMp.Set([]string{utils.Account}, []*config.NMItem{
+	eMp.Set([]string{utils.Account}, &utils.NMSlice{
 		&config.NMItem{Data: "1001", Path: []string{utils.Account},
 			Config: tplFlds[1]}})
-	eMp.Set([]string{utils.Destination}, []*config.NMItem{
+	eMp.Set([]string{utils.Destination}, &utils.NMSlice{
 		&config.NMItem{Data: "1002", Path: []string{utils.Destination},
 			Config: tplFlds[2]}})
-	eMp.Set([]string{"Usage"}, []*config.NMItem{
+	eMp.Set([]string{"Usage"}, &utils.NMSlice{
 		&config.NMItem{Data: "30s", Path: []string{"Usage"},
 			Config: tplFlds[3]}})
-	eMp.Set([]string{"CalculatedUsage"}, []*config.NMItem{
+	eMp.Set([]string{"CalculatedUsage"}, &utils.NMSlice{
 		&config.NMItem{Data: time.Date(2013, 12, 30, 14, 59, 31, 0, time.UTC), Path: []string{"CalculatedUsage"},
 			Config: tplFlds[4]}})
 
@@ -912,14 +914,14 @@ func TestAgReqFieldAsInterface(t *testing.T) {
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	// populate request, emulating the way will be done in HTTPAgent
 	agReq.CGRRequest = utils.NewOrderedNavigableMap()
-	agReq.CGRRequest.Set([]string{utils.Usage}, []*config.NMItem{{Data: 3 * time.Minute}})
-	agReq.CGRRequest.Set([]string{utils.ToR}, []*config.NMItem{{Data: utils.VOICE}})
-	agReq.CGRRequest.Set([]string{utils.Account}, "1001")
-	agReq.CGRRequest.Set([]string{utils.Destination}, "1002")
+	agReq.CGRRequest.Set([]string{utils.Usage}, &utils.NMSlice{&config.NMItem{Data: 3 * time.Minute}})
+	agReq.CGRRequest.Set([]string{utils.ToR}, &utils.NMSlice{&config.NMItem{Data: utils.VOICE}})
+	agReq.CGRRequest.Set([]string{utils.Account}, utils.NewNMInterface("1001"))
+	agReq.CGRRequest.Set([]string{utils.Destination}, utils.NewNMInterface("1002"))
 
 	path := []string{utils.MetaCgreq, utils.Usage}
 	var expVal interface{}
-	expVal = []*config.NMItem{{Data: 3 * time.Minute}}
+	expVal = &utils.NMSlice{&config.NMItem{Data: 3 * time.Minute}}
 	if rply, err := agReq.FieldAsInterface(path); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rply, expVal) {
@@ -927,7 +929,7 @@ func TestAgReqFieldAsInterface(t *testing.T) {
 	}
 
 	path = []string{utils.MetaCgreq, utils.ToR}
-	expVal = []*config.NMItem{{Data: utils.VOICE}}
+	expVal = &utils.NMSlice{&config.NMItem{Data: utils.VOICE}}
 	if rply, err := agReq.FieldAsInterface(path); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rply, expVal) {
@@ -938,16 +940,20 @@ func TestAgReqFieldAsInterface(t *testing.T) {
 	expVal = "1001"
 	if rply, err := agReq.FieldAsInterface(path); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(rply, expVal) {
-		t.Errorf("Expected %v , received: %v", utils.ToJSON(expVal), utils.ToJSON(rply))
+	} else if nm, canCast := rply.(utils.NM); !canCast {
+		t.Errorf("Cant cast %T to NM interface", rply)
+	} else if !reflect.DeepEqual(nm.Interface(), expVal) {
+		t.Errorf("Expected %v , received: %v", utils.ToJSON(expVal), utils.ToJSON(nm.Interface()))
 	}
 
 	path = []string{utils.MetaCgreq, utils.Destination}
 	expVal = "1002"
 	if rply, err := agReq.FieldAsInterface(path); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(rply, expVal) {
-		t.Errorf("Expected %v , received: %v", utils.ToJSON(expVal), utils.ToJSON(rply))
+	} else if nm, canCast := rply.(utils.NM); !canCast {
+		t.Errorf("Cant cast %T to NM interface", rply)
+	} else if !reflect.DeepEqual(nm.Interface(), expVal) {
+		t.Errorf("Expected %v , received: %v", utils.ToJSON(expVal), utils.ToJSON(nm.Interface()))
 	}
 }
 
@@ -958,7 +964,7 @@ func TestAgReqNewARWithCGRRplyAndRply(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, nil, dm)
 
 	rply := utils.NewOrderedNavigableMap()
-	rply.Set([]string{"FirstLevel", "SecondLevel", "Fld1"}, "Val1")
+	rply.Set([]string{"FirstLevel", "SecondLevel", "Fld1"}, utils.NewNMInterface("Val1"))
 
 	cgrRply := &utils.NavigableMap{
 		utils.CapAttributes: utils.NavigableMap{
@@ -980,10 +986,10 @@ func TestAgReqNewARWithCGRRplyAndRply(t *testing.T) {
 	}
 
 	eMp := utils.NewOrderedNavigableMap()
-	eMp.Set([]string{"Fld1"}, []*config.NMItem{
+	eMp.Set([]string{"Fld1"}, &utils.NMSlice{
 		&config.NMItem{Data: "Val1", Path: []string{"Fld1"},
 			Config: tplFlds[0]}})
-	eMp.Set([]string{"Fld2"}, []*config.NMItem{
+	eMp.Set([]string{"Fld2"}, &utils.NMSlice{
 		&config.NMItem{Data: "cgrates@paypal.com", Path: []string{"Fld2"},
 			Config: tplFlds[1]}})
 
@@ -1001,7 +1007,7 @@ func TestAgReqSetCGRReplyWithError(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, nil, dm)
 
 	rply := utils.NewOrderedNavigableMap()
-	rply.Set([]string{"FirstLevel", "SecondLevel", "Fld1"}, "Val1")
+	rply.Set([]string{"FirstLevel", "SecondLevel", "Fld1"}, utils.NewNMInterface("Val1"))
 	agReq := NewAgentRequest(nil, nil, nil, rply, nil, "cgrates.org", "", filterS, nil, nil)
 
 	agReq.setCGRReply(nil, utils.ErrNotFound)
@@ -1035,7 +1041,7 @@ func TestAgReqSetCGRReplyWithoutError(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, nil, dm)
 
 	rply := utils.NewOrderedNavigableMap()
-	rply.Set([]string{"FirstLevel", "SecondLevel", "Fld1"}, "Val1")
+	rply.Set([]string{"FirstLevel", "SecondLevel", "Fld1"}, utils.NewNMInterface("Val1"))
 
 	myEv := myEv{
 		utils.CapAttributes: utils.NavigableMap{
@@ -1060,10 +1066,10 @@ func TestAgReqSetCGRReplyWithoutError(t *testing.T) {
 	}
 
 	eMp := utils.NewOrderedNavigableMap()
-	eMp.Set([]string{"Fld1"}, []*config.NMItem{
+	eMp.Set([]string{"Fld1"}, &utils.NMSlice{
 		&config.NMItem{Data: "Val1", Path: []string{"Fld1"},
 			Config: tplFlds[0]}})
-	eMp.Set([]string{"Fld2"}, []*config.NMItem{
+	eMp.Set([]string{"Fld2"}, &utils.NMSlice{
 		&config.NMItem{Data: "cgrates@paypal.com", Path: []string{"Fld2"},
 			Config: tplFlds[1]}})
 
@@ -1466,12 +1472,12 @@ func TestAgReqOverwrite(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	// populate request, emulating the way will be done in HTTPAgent
-	agReq.CGRRequest.Set([]string{utils.ToR}, utils.VOICE)
-	agReq.CGRRequest.Set([]string{utils.Account}, "1001")
-	agReq.CGRRequest.Set([]string{utils.Destination}, "1002")
+	agReq.CGRRequest.Set([]string{utils.ToR}, utils.NewNMInterface(utils.VOICE))
+	agReq.CGRRequest.Set([]string{utils.Account}, utils.NewNMInterface("1001"))
+	agReq.CGRRequest.Set([]string{utils.Destination}, utils.NewNMInterface("1002"))
 	agReq.CGRRequest.Set([]string{utils.AnswerTime},
-		time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC))
-	agReq.CGRRequest.Set([]string{utils.RequestType}, utils.META_PREPAID)
+		utils.NewNMInterface(time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC)))
+	agReq.CGRRequest.Set([]string{utils.RequestType}, utils.NewNMInterface(utils.META_PREPAID))
 
 	agReq.CGRReply = &utils.NavigableMap{}
 
@@ -1499,13 +1505,15 @@ func TestAgReqOverwrite(t *testing.T) {
 
 	if rcv, err := agReq.CGRReply.FieldAsInterface([]string{utils.Account}); err != nil {
 		t.Error(err)
-	} else if sls, canCast := rcv.([]*config.NMItem); !canCast {
-		t.Errorf("Cannot cast to []*config.NMItem %+v", rcv)
-	} else if len(sls) != 1 {
-		t.Errorf("expecting: %+v, \n received: %+v ", 1, len(sls))
-	} else if sls[0].Data != "OverwrittenAccountWithComposed" {
+	} else if sls, canCast := rcv.(*utils.NMSlice); !canCast {
+		t.Errorf("Cannot cast to &utils.NMSlice %+v", rcv)
+	} else if len(*sls) != 1 {
+		t.Errorf("expecting: %+v, \n received: %+v ", 1, len(*sls))
+	} else if nmi, canCast := (*sls)[0].(*config.NMItem); !canCast {
+		t.Error("Expecting NM item")
+	} else if nmi.Data != "OverwrittenAccountWithComposed" {
 		t.Errorf("expecting: %+v, \n received: %+v ",
-			"OverwrittenAccountWithComposed", (rcv.([]*config.NMItem))[0].Data)
+			"OverwrittenAccountWithComposed", nmi.Data)
 	}
 }
 
@@ -1516,12 +1524,12 @@ func TestAgReqGroupType(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	// populate request, emulating the way will be done in HTTPAgent
-	agReq.CGRRequest.Set([]string{utils.ToR}, utils.VOICE)
-	agReq.CGRRequest.Set([]string{utils.Account}, "1001")
-	agReq.CGRRequest.Set([]string{utils.Destination}, "1002")
+	agReq.CGRRequest.Set([]string{utils.ToR}, utils.NewNMInterface(utils.VOICE))
+	agReq.CGRRequest.Set([]string{utils.Account}, utils.NewNMInterface("1001"))
+	agReq.CGRRequest.Set([]string{utils.Destination}, utils.NewNMInterface("1002"))
 	agReq.CGRRequest.Set([]string{utils.AnswerTime},
-		time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC))
-	agReq.CGRRequest.Set([]string{utils.RequestType}, utils.META_PREPAID)
+		utils.NewNMInterface(time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC)))
+	agReq.CGRRequest.Set([]string{utils.RequestType}, utils.NewNMInterface(utils.META_PREPAID))
 
 	agReq.CGRReply = &utils.NavigableMap{}
 
@@ -1540,14 +1548,18 @@ func TestAgReqGroupType(t *testing.T) {
 
 	if rcv, err := agReq.CGRReply.FieldAsInterface([]string{utils.Account}); err != nil {
 		t.Error(err)
-	} else if sls, canCast := rcv.([]*config.NMItem); !canCast {
-		t.Errorf("Cannot cast to []*config.NMItem %+v", rcv)
-	} else if len(sls) != 2 {
-		t.Errorf("expecting: %+v, \n received: %+v ", 1, len(sls))
-	} else if sls[0].Data != "cgrates.org" {
-		t.Errorf("expecting: %+v, \n received: %+v ", "cgrates.org", sls[0].Data)
-	} else if sls[1].Data != "test" {
-		t.Errorf("expecting: %+v, \n received: %+v ", "test", sls[0].Data)
+	} else if sls, canCast := rcv.(*utils.NMSlice); !canCast {
+		t.Errorf("Cannot cast to &utils.NMSlice %+v", rcv)
+	} else if len(*sls) != 2 {
+		t.Errorf("expecting: %+v, \n received: %+v ", 1, len(*sls))
+	} else if nmi, canCast := (*sls)[0].(*config.NMItem); !canCast {
+		t.Error("Expecting NM item")
+	} else if nmi.Data != "cgrates.org" {
+		t.Errorf("expecting: %+v, \n received: %+v ", "cgrates.org", nmi.Data)
+	} else if nmi, canCast := (*sls)[1].(*config.NMItem); !canCast {
+		t.Error("Expecting NM item")
+	} else if nmi.Data != "test" {
+		t.Errorf("expecting: %+v, \n received: %+v ", "test", nmi.Data)
 	}
 }
 
@@ -1557,7 +1569,7 @@ func TestAgReqSetFieldsInTmp(t *testing.T) {
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
-	agReq.CGRRequest.Set([]string{utils.Account}, "1001")
+	agReq.CGRRequest.Set([]string{utils.Account}, utils.NewNMInterface("1001"))
 
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Tenant",
@@ -1567,11 +1579,11 @@ func TestAgReqSetFieldsInTmp(t *testing.T) {
 			Path: utils.MetaTmp + utils.NestingSep + utils.Account, Type: utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("~*cgreq.Account", true, utils.INFIELD_SEP)},
 	}
-	eMp := &utils.NavigableMap{}
-	eMp.Set([]string{utils.Tenant}, []*config.NMItem{
+	eMp := utils.NavigableMap{}
+	eMp.Set([]string{utils.Tenant}, &utils.NMSlice{
 		&config.NMItem{Data: "cgrates.org", Path: []string{utils.Tenant},
 			Config: tplFlds[0]}})
-	eMp.Set([]string{utils.Account}, []*config.NMItem{
+	eMp.Set([]string{utils.Account}, &utils.NMSlice{
 		&config.NMItem{Data: "1001", Path: []string{utils.Account},
 			Config: tplFlds[1]}})
 
