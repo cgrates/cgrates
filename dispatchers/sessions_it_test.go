@@ -406,7 +406,7 @@ func testDspSessionUpdate(t *testing.T) {
 		t.Errorf("expecting: %+v, received: %+v",
 			utils.ToJSON(eAttrs), utils.ToJSON(rply.Attributes))
 	}
-	if rply.MaxUsage != reqUsage {
+	if rply.MaxUsage == nil || *rply.MaxUsage != reqUsage {
 		t.Errorf("Unexpected MaxUsage: %v", utils.ToJSON(rply))
 	}
 }
@@ -479,7 +479,7 @@ func testDspSessionUpdate2(t *testing.T) {
 		t.Errorf("expecting: %+v, received: %+v",
 			utils.ToJSON(eAttrs), utils.ToJSON(rply.Attributes))
 	}
-	if rply.MaxUsage != reqUsage {
+	if rply.MaxUsage == nil || *rply.MaxUsage != reqUsage {
 		t.Errorf("Unexpected MaxUsage: %v", utils.ToJSON(rply))
 	}
 }
@@ -585,7 +585,7 @@ func testDspSessionProcessEvent(t *testing.T) {
 		args, &rply); err != nil {
 		t.Fatal(err)
 	}
-	if rply.MaxUsage != initUsage {
+	if rply.MaxUsage == nil || *rply.MaxUsage != initUsage {
 		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
 	}
 	if *rply.ResourceAllocation != "RES_ACNT_1001" {
@@ -658,7 +658,7 @@ func testDspSessionProcessEvent2(t *testing.T) {
 		args, &rply); err != nil {
 		t.Fatal(err)
 	}
-	if rply.MaxUsage != initUsage {
+	if rply.MaxUsage == nil || *rply.MaxUsage != initUsage {
 		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
 	}
 	if *rply.ResourceAllocation != "RES_ACNT_1001" {

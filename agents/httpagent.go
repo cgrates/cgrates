@@ -157,7 +157,6 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 		rply := new(sessions.V1AuthorizeReply)
 		err = ha.connMgr.Call(ha.sessionConns, nil, utils.SessionSv1AuthorizeEvent,
 			authArgs, rply)
-		rply.SetMaxUsageNeeded(authArgs.GetMaxUsage)
 		if err = agReq.setCGRReply(rply, err); err != nil {
 			return
 		}
@@ -175,7 +174,6 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 		rply := new(sessions.V1InitSessionReply)
 		err = ha.connMgr.Call(ha.sessionConns, nil, utils.SessionSv1InitiateSession,
 			initArgs, rply)
-		rply.SetMaxUsageNeeded(initArgs.InitSession)
 		if err = agReq.setCGRReply(rply, err); err != nil {
 			return
 		}
@@ -188,7 +186,6 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 		rply := new(sessions.V1UpdateSessionReply)
 		err = ha.connMgr.Call(ha.sessionConns, nil, utils.SessionSv1UpdateSession,
 			updateArgs, rply)
-		rply.SetMaxUsageNeeded(updateArgs.UpdateSession)
 		if err = agReq.setCGRReply(rply, err); err != nil {
 			return
 		}
@@ -229,7 +226,6 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 		} else if evArgs.Debit {
 			cgrEv.Event[utils.Usage] = rply.MaxUsage // make sure the CDR reflects the debit
 		}
-		rply.SetMaxUsageNeeded(evArgs.Debit)
 		if err = agReq.setCGRReply(nil, err); err != nil {
 			return
 		}
@@ -251,7 +247,6 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 		} else if needMaxUsage {
 			cgrEv.Event[utils.Usage] = rply.MaxUsage // make sure the CDR reflects the debit
 		}
-		rply.SetMaxUsageNeeded(needMaxUsage)
 		if err = agReq.setCGRReply(rply, err); err != nil {
 			return
 		}

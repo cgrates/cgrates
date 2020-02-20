@@ -216,7 +216,7 @@ func TestKamEvAsKamAuthReply(t *testing.T) {
 		},
 	}
 	authRply := &sessions.V1AuthorizeReply{
-		MaxUsage: time.Duration(5 * time.Second),
+		MaxUsage: utils.DurationPointer(5 * time.Second),
 	}
 	expected := &KamReply{
 		Event:    CGR_AUTH_REPLY,
@@ -403,7 +403,7 @@ func TestKamEvAsKamProcessEventReply(t *testing.T) {
 		},
 	}
 	procEvhRply := &sessions.V1ProcessMessageReply{
-		MaxUsage: 5 * time.Second,
+		MaxUsage: utils.DurationPointer(5 * time.Second),
 	}
 	expected := &KamReply{
 		Event:    CGR_PROCESS_MESSAGE,

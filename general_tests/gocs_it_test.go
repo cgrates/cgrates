@@ -246,7 +246,7 @@ func testGOCSAuthSession(t *testing.T) {
 	if err := dspRPC.Call(utils.SessionSv1AuthorizeEvent, args, &rply); err != nil {
 		t.Fatal(err)
 	}
-	if rply.MaxUsage != authUsage {
+	if rply.MaxUsage == nil || *rply.MaxUsage != authUsage {
 		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
 	}
 }
@@ -278,7 +278,7 @@ func testGOCSInitSession(t *testing.T) {
 		args, &rply); err != nil {
 		t.Fatal(err)
 	}
-	if rply.MaxUsage != initUsage {
+	if rply.MaxUsage == nil || *rply.MaxUsage != initUsage {
 		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
 	}
 	// give a bit of time to session to be replicate
@@ -431,7 +431,7 @@ func testGOCSUpdateSession2(t *testing.T) {
 	// With this update the account should be replicate from US_SITE to AU_SITE and forgot about the update than happens on AU_SITE
 	if err := dspRPC.Call(utils.SessionSv1UpdateSession, args, &rply); err != nil {
 		t.Errorf("Expecting : %+v, received: %+v", nil, err)
-	} else if rply.MaxUsage != reqUsage {
+	} else if rply.MaxUsage == nil || *rply.MaxUsage != reqUsage {
 		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
 	}
 
