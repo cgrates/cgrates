@@ -18,6 +18,7 @@ cgrates (0.11.0~dev) UNRELEASED; urgency=medium
     path
   * [AgentRequest] Add support for *tmp path
   * [SessionS] Add new API SessionSv1.GetCost
+  * [SessionS] Update MaxUsage field from API replies
   * [SessionS] Add support for *cdrs flag in SessionSv1.ProcessEvent
   * [StatS] Update metric definition to include path for example:
     *sum:~*req.Field1

@@ -223,7 +223,6 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 		err = da.connMgr.Call(da.cgrCfg.DNSAgentCfg().SessionSConns, nil,
 			utils.SessionSv1AuthorizeEvent,
 			authArgs, rply)
-		rply.SetMaxUsageNeeded(authArgs.GetMaxUsage)
 		if err = agReq.setCGRReply(rply, err); err != nil {
 			return
 		}
@@ -243,7 +242,6 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 		err = da.connMgr.Call(da.cgrCfg.DNSAgentCfg().SessionSConns, nil,
 			utils.SessionSv1InitiateSession,
 			initArgs, rply)
-		rply.SetMaxUsageNeeded(initArgs.InitSession)
 		if err = agReq.setCGRReply(rply, err); err != nil {
 			return
 		}
@@ -257,7 +255,6 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 		err = da.connMgr.Call(da.cgrCfg.DNSAgentCfg().SessionSConns, nil,
 			utils.SessionSv1UpdateSession,
 			updateArgs, rply)
-		rply.SetMaxUsageNeeded(updateArgs.UpdateSession)
 		if err = agReq.setCGRReply(rply, err); err != nil {
 			return
 		}
@@ -300,7 +297,6 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 		} else if evArgs.Debit {
 			cgrEv.Event[utils.Usage] = rply.MaxUsage // make sure the CDR reflects the debit
 		}
-		rply.SetMaxUsageNeeded(evArgs.Debit)
 		if err = agReq.setCGRReply(rply, err); err != nil {
 			return
 		}
@@ -323,7 +319,6 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 		} else if needMaxUsage {
 			cgrEv.Event[utils.Usage] = rply.MaxUsage // make sure the CDR reflects the debit
 		}
-		rply.SetMaxUsageNeeded(needMaxUsage)
 		if err = agReq.setCGRReply(rply, err); err != nil {
 			return
 		}

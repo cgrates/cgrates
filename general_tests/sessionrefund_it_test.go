@@ -176,7 +176,7 @@ func testSrItInitSession(t *testing.T) {
 		args1, &rply1); err != nil {
 		t.Error(err)
 		return
-	} else if rply1.MaxUsage != 2*time.Second {
+	} else if rply1.MaxUsage == nil || *rply1.MaxUsage != 2*time.Second {
 		t.Errorf("Unexpected MaxUsage: %v", rply1.MaxUsage)
 	}
 	t.Run("TestInitSession", func(t *testing.T) { testAccountBalance(t, sraccount, srtenant, utils.VOICE, 3*float64(time.Second)) })
@@ -265,7 +265,7 @@ func testSrItInitSession2(t *testing.T) {
 		args1, &rply1); err != nil {
 		t.Error(err)
 		return
-	} else if rply1.MaxUsage != 2*time.Minute {
+	} else if rply1.MaxUsage == nil || *rply1.MaxUsage != 2*time.Minute {
 		t.Errorf("Unexpected MaxUsage: %v", rply1.MaxUsage)
 	}
 	t.Run("TestInitSession", func(t *testing.T) { testAccountBalance(t, sraccount, srtenant, utils.MONETARY, 10.3002) })

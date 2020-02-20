@@ -213,7 +213,7 @@ func testA1itDataSession1(t *testing.T) {
 		initArgs, &initRpl); err != nil {
 		t.Fatal(err)
 	}
-	if initRpl.MaxUsage != usage {
+	if initRpl.MaxUsage == nil || *initRpl.MaxUsage != usage {
 		t.Errorf("Expecting : %+v, received: %+v", usage, initRpl.MaxUsage)
 	}
 
@@ -249,7 +249,7 @@ func testA1itDataSession1(t *testing.T) {
 	if err := a1rpc.Call(utils.SessionSv1UpdateSession, updateArgs, &updateRpl); err != nil {
 		t.Error(err)
 	}
-	if updateRpl.MaxUsage != usage {
+	if updateRpl.MaxUsage == nil || *updateRpl.MaxUsage != usage {
 		t.Errorf("Expected: %+v, received: %+v", usage, updateRpl.MaxUsage)
 	}
 

@@ -224,7 +224,7 @@ func testRPCMethodsAuthorizeSession(t *testing.T) {
 	if err := rpcRpc.Call(utils.SessionSv1AuthorizeEvent, args, &rplyFirst); err != nil {
 		t.Fatal(err)
 	}
-	if rplyFirst.MaxUsage != authUsage {
+	if rplyFirst.MaxUsage == nil || *rplyFirst.MaxUsage != authUsage {
 		t.Errorf("Unexpected MaxUsage: %v", rplyFirst.MaxUsage)
 	}
 
@@ -319,7 +319,7 @@ func testRPCMethodsInitSession(t *testing.T) {
 		args, &rplyFirst); err != nil {
 		t.Error(err)
 	}
-	if rplyFirst.MaxUsage != initUsage {
+	if rplyFirst.MaxUsage == nil || *rplyFirst.MaxUsage != initUsage {
 		t.Errorf("Unexpected MaxUsage: %v", rplyFirst.MaxUsage)
 	}
 
@@ -414,7 +414,7 @@ func testRPCMethodsUpdateSession(t *testing.T) {
 		args, &rplyFirst); err != nil {
 		t.Error(err)
 	}
-	if rplyFirst.MaxUsage != reqUsage {
+	if rplyFirst.MaxUsage == nil || *rplyFirst.MaxUsage != reqUsage {
 		t.Errorf("Unexpected MaxUsage: %v", rplyFirst.MaxUsage)
 	}
 
@@ -628,7 +628,7 @@ func testRPCMethodsProcessEvent(t *testing.T) {
 	if err := rpcRpc.Call(utils.SessionSv1ProcessMessage,
 		args, &rplyFirst); err != nil {
 		t.Error(err)
-	} else if rplyFirst.MaxUsage != initUsage {
+	} else if rplyFirst.MaxUsage == nil || *rplyFirst.MaxUsage != initUsage {
 		t.Errorf("Unexpected MaxUsage: %v", rplyFirst.MaxUsage)
 	}
 

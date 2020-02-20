@@ -179,7 +179,7 @@ func testSSv1ItProcessEventAuth(t *testing.T) {
 	if err := sSv1BiRpc.Call(utils.SessionSv1ProcessEvent, args, &rply); err != nil {
 		t.Fatal(err)
 	}
-	if rply.MaxUsage != authUsage {
+	if rply.MaxUsage == nil || *rply.MaxUsage != authUsage {
 		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
 	}
 	if *rply.ResourceMessage == utils.EmptyString {
@@ -263,7 +263,7 @@ func testSSv1ItProcessEventInitiateSession(t *testing.T) {
 	// in case of prepaid and pseudoprepade we expect a MaxUsage of 5min
 	// and in case of postpaid and rated we expect the value of Usage field
 	// if this was missing the MaxUsage should be equal to MaxCallDuration from config
-	if rply.MaxUsage != initUsage {
+	if rply.MaxUsage == nil || *rply.MaxUsage != initUsage {
 		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
 	}
 	if *rply.ResourceMessage != "RES_ACNT_1001" {
@@ -356,7 +356,7 @@ func testSSv1ItProcessEventUpdateSession(t *testing.T) {
 	// in case of prepaid and pseudoprepade we expect a MaxUsage of 5min
 	// and in case of postpaid and rated we expect the value of Usage field
 	// if this was missing the MaxUsage should be equal to MaxCallDuration from config
-	if rply.MaxUsage != reqUsage {
+	if rply.MaxUsage == nil || *rply.MaxUsage != reqUsage {
 		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
 	}
 	aSessions := make([]*sessions.ExternalSession, 0)

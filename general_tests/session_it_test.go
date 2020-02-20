@@ -174,7 +174,7 @@ func testSesItInitSession(t *testing.T) {
 		args1, &rply1); err != nil {
 		t.Error(err)
 		return
-	} else if rply1.MaxUsage != 0 {
+	} else if rply1.MaxUsage != nil && *rply1.MaxUsage != 0 {
 		t.Errorf("Unexpected MaxUsage: %v", rply1.MaxUsage)
 	}
 	t.Run("TestInitSession", func(t *testing.T) { testAccountBalance2(t, sesAccount, sesTenant, utils.MONETARY, 0) })

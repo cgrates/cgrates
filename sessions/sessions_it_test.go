@@ -236,7 +236,7 @@ func testSessionsItUpdateUnexist(t *testing.T) {
 	if err := sItRPC.Call(utils.SessionSv1UpdateSession, updtArgs, &updtRpl); err != nil {
 		t.Error(err)
 	}
-	if updtRpl.MaxUsage != usage {
+	if updtRpl.MaxUsage == nil || *updtRpl.MaxUsage != usage {
 		t.Errorf("Expecting : %+v, received: %+v", usage, updtRpl.MaxUsage)
 	}
 
@@ -408,7 +408,7 @@ func testSessionsItEventCostCompressing(t *testing.T) {
 		initArgs, &initRpl); err != nil {
 		t.Error(err)
 	}
-	if initRpl.MaxUsage != time.Duration(1*time.Second) {
+	if initRpl.MaxUsage == nil || *initRpl.MaxUsage != time.Duration(1*time.Second) {
 		t.Errorf("received: %+v", initRpl.MaxUsage)
 	}
 	updateArgs := &V1UpdateSessionArgs{

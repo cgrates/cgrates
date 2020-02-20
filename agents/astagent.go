@@ -196,7 +196,7 @@ func (sma *AsteriskAgent) handleStasisStart(ev *SMAsteriskEvent) {
 		}
 	}
 	if authArgs.GetMaxUsage {
-		if authReply.MaxUsage == time.Duration(0) {
+		if authReply.MaxUsage == nil || *authReply.MaxUsage == time.Duration(0) {
 			sma.hangupChannel(ev.ChannelID(), "")
 			return
 		}
@@ -273,7 +273,7 @@ func (sma *AsteriskAgent) handleChannelStateChange(ev *SMAsteriskEvent) {
 			fmt.Sprintf("<%s> error: %s when attempting to initiate session for channelID: %s",
 				utils.AsteriskAgent, err.Error(), ev.ChannelID()))
 		return
-	} else if initSessionArgs.InitSession && initReply.MaxUsage == time.Duration(0) {
+	} else if initSessionArgs.InitSession && (initReply.MaxUsage == nil || *initReply.MaxUsage == time.Duration(0)) {
 		sma.hangupChannel(ev.ChannelID(), "")
 		return
 	}

@@ -446,7 +446,7 @@ func testSessionSv1ItInitNotFoundThreshold(t *testing.T) {
 		args, &rply); err != nil {
 		t.Error(err)
 	}
-	if rply.MaxUsage != time.Duration(1024) {
+	if rply.MaxUsage == nil || *rply.MaxUsage != time.Duration(1024) {
 		t.Errorf("Expecting: %+v, received: %+v",
 			time.Duration(1024), rply.MaxUsage)
 	}
@@ -579,7 +579,7 @@ func testSessionSv1ItInitNotFoundThresholdAndStats(t *testing.T) {
 		args, &rply); err != nil {
 		t.Error(err)
 	}
-	if rply.MaxUsage != time.Duration(1024) {
+	if rply.MaxUsage == nil || *rply.MaxUsage != time.Duration(1024) {
 		t.Errorf("Expecting: %+v, received: %+v",
 			time.Duration(1024), rply.MaxUsage)
 	}
