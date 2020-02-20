@@ -44,6 +44,13 @@ type SharedGroup struct {
 	//members           []*Account // accounts caching
 }
 
+// SharedGroupWithArgDispatcher is used in replicatorV1 for dispatcher
+type SharedGroupWithArgDispatcher struct {
+	*SharedGroup
+	utils.TenantArg
+	*utils.ArgDispatcher
+}
+
 type SharingParameters struct {
 	Strategy      string
 	RatingSubject string

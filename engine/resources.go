@@ -50,6 +50,12 @@ type ResourceProfile struct {
 	ThresholdIDs       []string // Thresholds to check after changing Limit
 }
 
+// ResourceProfileWithArgDispatcher is used in replicatorV1 for dispatcher
+type ResourceProfileWithArgDispatcher struct {
+	*ResourceProfile
+	*utils.ArgDispatcher
+}
+
 // TenantID returns unique identifier of the ResourceProfile in a multi-tenant environment
 func (rp *ResourceProfile) TenantID() string {
 	return utils.ConcatenatedKey(rp.Tenant, rp.ID)
@@ -90,6 +96,12 @@ type Resource struct {
 	tUsage *float64         // sum of all usages
 	dirty  *bool            // the usages were modified, needs save, *bool so we only save if enabled in config
 	rPrf   *ResourceProfile // for ordering purposes
+}
+
+// ResourceWithArgDispatcher is used in replicatorV1 for dispatcher
+type ResourceWithArgDispatcher struct {
+	*Resource
+	*utils.ArgDispatcher
 }
 
 // TenantID returns the unique ID in a multi-tenant environment

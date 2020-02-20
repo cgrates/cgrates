@@ -58,6 +58,12 @@ type SupplierProfile struct {
 	cache map[string]interface{}
 }
 
+// SupplierProfileWithArgDispatcher is used in replicatorV1 for dispatcher
+type SupplierProfileWithArgDispatcher struct {
+	*SupplierProfile
+	*utils.ArgDispatcher
+}
+
 func (sp *SupplierProfile) compileCacheParameters() error {
 	if sp.Sorting == utils.MetaLoad {
 		// construct the map for ratio

@@ -113,6 +113,12 @@ type DispatcherProfile struct {
 	Hosts              DispatcherHostProfiles // dispatch to these connections
 }
 
+// DispatcherProfileWithArgDispatcher is used in replicatorV1 for dispatcher
+type DispatcherProfileWithArgDispatcher struct {
+	*DispatcherProfile
+	*utils.ArgDispatcher
+}
+
 func (dP *DispatcherProfile) TenantID() string {
 	return utils.ConcatenatedKey(dP.Tenant, dP.ID)
 }
@@ -131,6 +137,12 @@ type DispatcherHost struct {
 	ID      string
 	Conns   []*config.RemoteHost
 	rpcConn rpcclient.ClientConnector
+}
+
+// DispatcherHostWithArgDispatcher is used in replicatorV1 for dispatcher
+type DispatcherHostWithArgDispatcher struct {
+	*DispatcherHost
+	*utils.ArgDispatcher
 }
 
 func (dH *DispatcherHost) TenantID() string {

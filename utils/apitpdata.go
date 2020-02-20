@@ -177,6 +177,13 @@ type TPTiming struct {
 	EndTime   string
 }
 
+// TPTimingWithArgDispatcher is used in replicatorV1 for dispatcher
+type TPTimingWithArgDispatcher struct {
+	*TPTiming
+	TenantArg
+	*ArgDispatcher
+}
+
 func NewTiming(ID, years, mounths, mounthdays, weekdays, time string) (rt *TPTiming) {
 	rt = &TPTiming{}
 	rt.ID = ID

@@ -47,6 +47,12 @@ type AttributeProfile struct {
 	Weight             float64
 }
 
+// AttributeProfileWithArgDispatcher is used in replicatorV1 for dispatcher
+type AttributeProfileWithArgDispatcher struct {
+	*AttributeProfile
+	*utils.ArgDispatcher
+}
+
 func (ap *AttributeProfile) compileSubstitutes() (err error) {
 	for _, attr := range ap.Attributes {
 		if err = attr.Value.Compile(); err != nil {
