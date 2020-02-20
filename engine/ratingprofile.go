@@ -33,6 +33,13 @@ type RatingProfile struct {
 	RatingPlanActivations RatingPlanActivations
 }
 
+// RatingProfileWithArgDispatcher is used in replicatorV1 for dispatcher
+type RatingProfileWithArgDispatcher struct {
+	*RatingProfile
+	utils.TenantArg
+	*utils.ArgDispatcher
+}
+
 type RatingPlanActivation struct {
 	ActivationTime time.Time
 	RatingPlanId   string

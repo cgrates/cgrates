@@ -20,6 +20,8 @@ package engine
 
 import (
 	"math"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 /*
@@ -30,6 +32,13 @@ type RatingPlan struct {
 	Timings          map[string]*RITiming
 	Ratings          map[string]*RIRate
 	DestinationRates map[string]RPRateList
+}
+
+// RatingPlanWithArgDispatcher is used in replicatorV1 for dispatcher
+type RatingPlanWithArgDispatcher struct {
+	*RatingPlan
+	utils.TenantArg
+	*utils.ArgDispatcher
 }
 
 type RPRate struct {

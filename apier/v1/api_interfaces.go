@@ -206,4 +206,30 @@ type ReplicatorSv1Interface interface {
 	SetReverseDestination(dst *engine.DestinationWithArgDispatcher, reply *string) error
 	SetStatQueue(ssq *engine.StoredStatQueueWithArgDispatcher, reply *string) error
 	SetFilter(fltr *engine.FilterWithArgDispatcher, reply *string) error
+	SetStatQueueProfile(sq *engine.StatQueueProfileWithArgDispatcher, reply *string) error
+	SetTiming(tm *utils.TPTimingWithArgDispatcher, reply *string) error
+	SetResource(rs *engine.ResourceWithArgDispatcher, reply *string) error
+	SetResourceProfile(rs *engine.ResourceProfileWithArgDispatcher, reply *string) error
+	SetActionTriggers(args *engine.SetActionTriggersArgWithArgDispatcher, reply *string) error
+	SetSharedGroup(shg *engine.SharedGroupWithArgDispatcher, reply *string) error
+	SetActions(args *engine.SetActionsArgsWithArgDispatcher, reply *string) error
+	SetRatingPlan(rp *engine.RatingPlanWithArgDispatcher, reply *string) error
+	SetRatingProfile(rp *engine.RatingProfileWithArgDispatcher, reply *string) error
+	SetSupplierProfile(sp *engine.SupplierProfileWithArgDispatcher, reply *string) error
+	SetAttributeProfile(ap *engine.AttributeProfileWithArgDispatcher, reply *string) error
+	SetChargerProfile(cp *engine.ChargerProfileWithArgDispatcher, reply *string) error
+	SetDispatcherProfile(dpp *engine.DispatcherProfileWithArgDispatcher, reply *string) error
+	SetActionPlan(args *engine.SetActionPlanArgWithArgDispatcher, reply *string) error
+	SetAccountActionPlans(args *engine.SetAccountActionPlansArgWithArgDispatcher, reply *string) error
+	SetDispatcherHost(dpp *engine.DispatcherHostWithArgDispatcher, reply *string) error
+	RemoveThreshold(args *utils.TenantIDWithArgDispatcher, reply *string) error
+	RemoveDestination(id *utils.StringWithApiKey, reply *string) error
+	RemoveAccount(id *utils.StringWithApiKey, reply *string) error
+	RemoveStatQueue(args *utils.TenantIDWithArgDispatcher, reply *string) error
+	RemoveFilter(args *utils.TenantIDWithArgDispatcher, reply *string) error
+	RemoveThresholdProfile(args *utils.TenantIDWithArgDispatcher, reply *string) error
+	RemoveStatQueueProfile(args *utils.TenantIDWithArgDispatcher, reply *string) error
+	RemoveTiming(id *utils.StringWithApiKey, reply *string) error
+	RemoveResource(args *utils.TenantIDWithArgDispatcher, reply *string) error
+	RemoveResourceProfile(args *utils.TenantIDWithArgDispatcher, reply *string) error
 }

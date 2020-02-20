@@ -360,10 +360,16 @@ func (dm *DataManager) RemoveDestination(destID string, transactionID string) (e
 	if err = dm.dataDB.RemoveDestinationDrv(destID, transactionID); err != nil {
 		return
 	}
-	if config.CgrConfig().DataDbCfg().Items[utils.MetaDestinations].Replicate {
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaDestinations]; itm.Replicate {
 		var reply string
 		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil, utils.ReplicatorSv1RemoveDestination,
-			destID, &reply)
+			&utils.StringWithApiKey{
+				Arg:       destID,
+				TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
+				ArgDispatcher: &utils.ArgDispatcher{
+					APIKey:  utils.StringPointer(itm.APIKey),
+					RouteID: utils.StringPointer(itm.RouteID),
+				}}, &reply)
 	}
 	return
 }
@@ -465,10 +471,17 @@ func (dm *DataManager) RemoveAccount(id string) (err error) {
 	if err = dm.dataDB.RemoveAccountDrv(id); err != nil {
 		return
 	}
-	if config.CgrConfig().DataDbCfg().Items[utils.MetaAccounts].Replicate {
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaAccounts]; itm.Replicate {
 		var reply string
 		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
-			utils.ReplicatorSv1RemoveAccount, id, &reply)
+			utils.ReplicatorSv1RemoveAccount,
+			&utils.StringWithApiKey{
+				Arg:       id,
+				TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
+				ArgDispatcher: &utils.ArgDispatcher{
+					APIKey:  utils.StringPointer(itm.APIKey),
+					RouteID: utils.StringPointer(itm.RouteID),
+				}}, &reply)
 	}
 	return
 }
@@ -558,10 +571,16 @@ func (dm *DataManager) RemoveStatQueue(tenant, id string, transactionID string) 
 	if err = dm.dataDB.RemStatQueueDrv(tenant, id); err != nil {
 		return
 	}
-	if config.CgrConfig().DataDbCfg().Items[utils.MetaStatQueues].Replicate {
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaStatQueues]; itm.Replicate {
 		var reply string
 		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
-			utils.ReplicatorSv1RemoveStatQueue, &utils.TenantID{Tenant: tenant, ID: id}, &reply)
+			utils.ReplicatorSv1RemoveStatQueue,
+			&utils.TenantIDWithArgDispatcher{
+				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
+				ArgDispatcher: &utils.ArgDispatcher{
+					APIKey:  utils.StringPointer(itm.APIKey),
+					RouteID: utils.StringPointer(itm.RouteID),
+				}}, &reply)
 	}
 	return
 }
@@ -618,10 +637,16 @@ func (dm *DataManager) SetFilter(fltr *Filter) (err error) {
 	if err = dm.DataDB().SetFilterDrv(fltr); err != nil {
 		return
 	}
-	if config.CgrConfig().DataDbCfg().Items[utils.MetaFilters].Replicate {
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaFilters]; itm.Replicate {
 		var reply string
 		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
-			utils.ReplicatorSv1SetFilter, fltr, &reply); err != nil {
+			utils.ReplicatorSv1SetFilter,
+			&FilterWithArgDispatcher{
+				Filter: fltr,
+				ArgDispatcher: &utils.ArgDispatcher{
+					APIKey:  utils.StringPointer(itm.APIKey),
+					RouteID: utils.StringPointer(itm.RouteID),
+				}}, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
 		}
@@ -634,10 +659,16 @@ func (dm *DataManager) RemoveFilter(tenant, id, transactionID string) (err error
 	if err = dm.DataDB().RemoveFilterDrv(tenant, id); err != nil {
 		return
 	}
-	if config.CgrConfig().DataDbCfg().Items[utils.MetaFilters].Replicate {
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaFilters]; itm.Replicate {
 		var reply string
 		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
-			utils.ReplicatorSv1RemoveFilter, &utils.TenantID{Tenant: tenant, ID: id}, &reply)
+			utils.ReplicatorSv1RemoveFilter,
+			&utils.TenantIDWithArgDispatcher{
+				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
+				ArgDispatcher: &utils.ArgDispatcher{
+					APIKey:  utils.StringPointer(itm.APIKey),
+					RouteID: utils.StringPointer(itm.RouteID),
+				}}, &reply)
 	}
 	return
 }
@@ -707,10 +738,15 @@ func (dm *DataManager) RemoveThreshold(tenant, id, transactionID string) (err er
 	if err = dm.DataDB().RemoveThresholdDrv(tenant, id); err != nil {
 		return
 	}
-	if config.CgrConfig().DataDbCfg().Items[utils.MetaThresholds].Replicate {
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaThresholds]; itm.Replicate {
 		var reply string
-		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
-			utils.ReplicatorSv1RemoveThreshold, &utils.TenantID{Tenant: tenant, ID: id}, &reply)
+		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil, utils.ReplicatorSv1RemoveThreshold,
+			&utils.TenantIDWithArgDispatcher{
+				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
+				ArgDispatcher: &utils.ArgDispatcher{
+					APIKey:  utils.StringPointer(itm.APIKey),
+					RouteID: utils.StringPointer(itm.RouteID),
+				}}, &reply)
 	}
 	return
 }
@@ -820,10 +856,15 @@ func (dm *DataManager) RemoveThresholdProfile(tenant, id,
 			return
 		}
 	}
-	if config.CgrConfig().DataDbCfg().Items[utils.MetaThresholdProfiles].Replicate {
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaThresholdProfiles]; itm.Replicate {
 		var reply string
 		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil, utils.ReplicatorSv1RemoveThresholdProfile,
-			&utils.TenantID{Tenant: tenant, ID: id}, &reply)
+			&utils.TenantIDWithArgDispatcher{
+				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
+				ArgDispatcher: &utils.ArgDispatcher{
+					APIKey:  utils.StringPointer(itm.APIKey),
+					RouteID: utils.StringPointer(itm.RouteID),
+				}}, &reply)
 	}
 	return
 }
@@ -898,10 +939,16 @@ func (dm *DataManager) SetStatQueueProfile(sqp *StatQueueProfile, withIndex bool
 			return
 		}
 	}
-	if config.CgrConfig().DataDbCfg().Items[utils.MetaStatQueueProfiles].Replicate {
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaStatQueueProfiles]; itm.Replicate {
 		var reply string
 		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
-			utils.ReplicatorSv1SetStatQueueProfile, sqp, &reply); err != nil {
+			utils.ReplicatorSv1SetStatQueueProfile,
+			&StatQueueProfileWithArgDispatcher{
+				StatQueueProfile: sqp,
+				ArgDispatcher: &utils.ArgDispatcher{
+					APIKey:  utils.StringPointer(itm.APIKey),
+					RouteID: utils.StringPointer(itm.RouteID),
+				}}, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
 		}
@@ -927,10 +974,15 @@ func (dm *DataManager) RemoveStatQueueProfile(tenant, id,
 			return
 		}
 	}
-	if config.CgrConfig().DataDbCfg().Items[utils.MetaStatQueueProfiles].Replicate {
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaStatQueueProfiles]; itm.Replicate {
 		var reply string
-		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
-			utils.ReplicatorSv1RemoveStatQueueProfile, &utils.TenantID{Tenant: tenant, ID: id}, &reply)
+		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil, utils.ReplicatorSv1RemoveStatQueueProfile,
+			&utils.TenantIDWithArgDispatcher{
+				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
+				ArgDispatcher: &utils.ArgDispatcher{
+					APIKey:  utils.StringPointer(itm.APIKey),
+					RouteID: utils.StringPointer(itm.RouteID),
+				}}, &reply)
 	}
 	return
 }
@@ -982,10 +1034,16 @@ func (dm *DataManager) SetTiming(t *utils.TPTiming) (err error) {
 	if err = dm.CacheDataFromDB(utils.TimingsPrefix, []string{t.ID}, true); err != nil {
 		return
 	}
-	if config.CgrConfig().DataDbCfg().Items[utils.MetaTimings].Replicate {
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaTimings]; itm.Replicate {
 		var reply string
 		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
-			utils.ReplicatorSv1SetTiming, t, &reply); err != nil {
+			utils.ReplicatorSv1SetTiming,
+			&utils.TPTimingWithArgDispatcher{
+				TPTiming: t,
+				ArgDispatcher: &utils.ArgDispatcher{
+					APIKey:  utils.StringPointer(itm.APIKey),
+					RouteID: utils.StringPointer(itm.RouteID),
+				}}, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
 		}
@@ -1053,10 +1111,16 @@ func (dm *DataManager) SetResource(rs *Resource) (err error) {
 	if err = dm.DataDB().SetResourceDrv(rs); err != nil {
 		return
 	}
-	if config.CgrConfig().DataDbCfg().Items[utils.MetaResources].Replicate {
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaResources]; itm.Replicate {
 		var reply string
 		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
-			utils.ReplicatorSv1SetResource, rs, &reply); err != nil {
+			utils.ReplicatorSv1SetResource,
+			&ResourceWithArgDispatcher{
+				Resource: rs,
+				ArgDispatcher: &utils.ArgDispatcher{
+					APIKey:  utils.StringPointer(itm.APIKey),
+					RouteID: utils.StringPointer(itm.RouteID),
+				}}, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
 		}
@@ -1068,10 +1132,16 @@ func (dm *DataManager) RemoveResource(tenant, id, transactionID string) (err err
 	if err = dm.DataDB().RemoveResourceDrv(tenant, id); err != nil {
 		return
 	}
-	if config.CgrConfig().DataDbCfg().Items[utils.MetaResources].Replicate {
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaResources]; itm.Replicate {
 		var reply string
 		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
-			utils.ReplicatorSv1RemoveResource, &utils.TenantID{Tenant: tenant, ID: id}, &reply)
+			utils.ReplicatorSv1RemoveResource,
+			&utils.TenantIDWithArgDispatcher{
+				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
+				ArgDispatcher: &utils.ArgDispatcher{
+					APIKey:  utils.StringPointer(itm.APIKey),
+					RouteID: utils.StringPointer(itm.RouteID),
+				}}, &reply)
 	}
 	return
 }
@@ -1145,10 +1215,16 @@ func (dm *DataManager) SetResourceProfile(rp *ResourceProfile, withIndex bool) (
 		}
 		Cache.Clear([]string{utils.CacheEventResources})
 	}
-	if config.CgrConfig().DataDbCfg().Items[utils.MetaResourceProfile].Replicate {
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaResourceProfile]; itm.Replicate {
 		var reply string
 		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
-			utils.ReplicatorSv1SetResourceProfile, rp, &reply); err != nil {
+			utils.ReplicatorSv1SetResourceProfile,
+			&ResourceProfileWithArgDispatcher{
+				ResourceProfile: rp,
+				ArgDispatcher: &utils.ArgDispatcher{
+					APIKey:  utils.StringPointer(itm.APIKey),
+					RouteID: utils.StringPointer(itm.RouteID),
+				}}, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
 		}
@@ -1173,10 +1249,15 @@ func (dm *DataManager) RemoveResourceProfile(tenant, id, transactionID string, w
 			return
 		}
 	}
-	if config.CgrConfig().DataDbCfg().Items[utils.MetaResourceProfile].Replicate {
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaResourceProfile]; itm.Replicate {
 		var reply string
 		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
-			utils.ReplicatorSv1RemoveResourceProfile, &utils.TenantID{Tenant: tenant, ID: id}, &reply)
+			utils.ReplicatorSv1RemoveResourceProfile, &utils.TenantIDWithArgDispatcher{
+				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
+				ArgDispatcher: &utils.ArgDispatcher{
+					APIKey:  utils.StringPointer(itm.APIKey),
+					RouteID: utils.StringPointer(itm.RouteID),
+				}}, &reply)
 	}
 	return
 }
@@ -1234,10 +1315,12 @@ func (dm *DataManager) RemoveActionTriggers(id, transactionID string) (err error
 	return
 }
 
-//SetActionTriggersArg is used to send the key and the ActionTriggers to Replicator
-type SetActionTriggersArg struct {
+//SetActionTriggersArgWithArgDispatcher is used to send the key and the ActionTriggers to Replicator
+type SetActionTriggersArgWithArgDispatcher struct {
 	Key   string
 	Attrs ActionTriggers
+	utils.TenantArg
+	*utils.ArgDispatcher
 }
 
 func (dm *DataManager) SetActionTriggers(key string, attr ActionTriggers,
@@ -1248,10 +1331,16 @@ func (dm *DataManager) SetActionTriggers(key string, attr ActionTriggers,
 	if err = dm.CacheDataFromDB(utils.ACTION_TRIGGER_PREFIX, []string{key}, true); err != nil {
 		return
 	}
-	if config.CgrConfig().DataDbCfg().Items[utils.MetaActionTriggers].Replicate {
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaActionTriggers]; itm.Replicate {
 		var reply string
 		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil, utils.ReplicatorSv1SetActionTriggers,
-			&SetActionTriggersArg{Attrs: attr, Key: key}, &reply); err != nil {
+			&SetActionTriggersArgWithArgDispatcher{
+				Attrs: attr, Key: key,
+				ArgDispatcher: &utils.ArgDispatcher{
+					APIKey:  utils.StringPointer(itm.APIKey),
+					RouteID: utils.StringPointer(itm.RouteID)},
+				TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
+			}, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
 		}
@@ -1307,10 +1396,17 @@ func (dm *DataManager) SetSharedGroup(sg *SharedGroup,
 		[]string{sg.Id}, true); err != nil {
 		return
 	}
-	if config.CgrConfig().DataDbCfg().Items[utils.MetaSharedGroups].Replicate {
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaSharedGroups]; itm.Replicate {
 		var reply string
 		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
-			utils.ReplicatorSv1SetSharedGroup, sg, &reply); err != nil {
+			utils.ReplicatorSv1SetSharedGroup,
+			&SharedGroupWithArgDispatcher{
+				SharedGroup: sg,
+				TenantArg:   utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
+				ArgDispatcher: &utils.ArgDispatcher{
+					APIKey:  utils.StringPointer(itm.APIKey),
+					RouteID: utils.StringPointer(itm.RouteID),
+				}}, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
 		}
@@ -1373,10 +1469,12 @@ func (dm *DataManager) GetActions(key string, skipCache bool, transactionID stri
 	return
 }
 
-//SetActionsArgs is used to send the key and the Actions to replicator
-type SetActionsArgs struct {
+//SetActionsArgsWithArgDispatcher is used to send the key and the Actions to replicator
+type SetActionsArgsWithArgDispatcher struct {
 	Key string
 	Acs Actions
+	utils.TenantArg
+	*utils.ArgDispatcher
 }
 
 func (dm *DataManager) SetActions(key string, as Actions, transactionID string) (err error) {
@@ -1386,10 +1484,16 @@ func (dm *DataManager) SetActions(key string, as Actions, transactionID string) 
 	if err = dm.CacheDataFromDB(utils.ACTION_PREFIX, []string{key}, true); err != nil {
 		return
 	}
-	if config.CgrConfig().DataDbCfg().Items[utils.MetaActions].Replicate {
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaActions]; itm.Replicate {
 		var reply string
-		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
-			utils.ReplicatorSv1SetActions, &SetActionsArgs{Key: key, Acs: as}, &reply); err != nil {
+		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil, utils.ReplicatorSv1SetActions,
+			&SetActionsArgsWithArgDispatcher{
+				Key: key, Acs: as,
+				TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
+				ArgDispatcher: &utils.ArgDispatcher{
+					APIKey:  utils.StringPointer(itm.APIKey),
+					RouteID: utils.StringPointer(itm.RouteID),
+				}}, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
 		}
@@ -1433,10 +1537,13 @@ func (dm *DataManager) GetActionPlan(key string, skipCache bool, transactionID s
 	return
 }
 
-type SetActionPlanArg struct {
+// SetActionPlanArgWithArgDispatcher is used in replicatorV1 for dispatcher
+type SetActionPlanArgWithArgDispatcher struct {
 	Key       string
 	Ats       *ActionPlan
 	Overwrite bool
+	utils.TenantArg
+	*utils.ArgDispatcher
 }
 
 func (dm *DataManager) SetActionPlan(key string, ats *ActionPlan,
@@ -1444,14 +1551,18 @@ func (dm *DataManager) SetActionPlan(key string, ats *ActionPlan,
 	if err = dm.dataDB.SetActionPlanDrv(key, ats, overwrite, transactionID); err != nil {
 		return
 	}
-	if config.CgrConfig().DataDbCfg().Items[utils.MetaActionPlans].Replicate {
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaActionPlans]; itm.Replicate {
 		var reply string
 		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
-			utils.ReplicatorSv1SetActionPlan, &SetActionPlanArg{
+			utils.ReplicatorSv1SetActionPlan, &SetActionPlanArgWithArgDispatcher{
 				Key:       key,
 				Ats:       ats,
 				Overwrite: overwrite,
-			}, &reply); err != nil {
+				TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
+				ArgDispatcher: &utils.ArgDispatcher{
+					APIKey:  utils.StringPointer(itm.APIKey),
+					RouteID: utils.StringPointer(itm.RouteID),
+				}}, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
 		}
@@ -1515,24 +1626,31 @@ func (dm *DataManager) GetAccountActionPlans(acntID string,
 	return
 }
 
-type SetAccountActionPlansArg struct {
+//SetAccountActionPlansArgWithArgDispatcher is used to send the key and the Actions to replicator
+type SetAccountActionPlansArgWithArgDispatcher struct {
 	AcntID    string
 	AplIDs    []string
 	Overwrite bool
+	utils.TenantArg
+	*utils.ArgDispatcher
 }
 
 func (dm *DataManager) SetAccountActionPlans(acntID string, aPlIDs []string, overwrite bool) (err error) {
 	if err = dm.dataDB.SetAccountActionPlansDrv(acntID, aPlIDs, overwrite); err != nil {
 		return
 	}
-	if config.CgrConfig().DataDbCfg().Items[utils.MetaAccountActionPlans].Replicate {
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaAccountActionPlans]; itm.Replicate {
 		var reply string
 		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
-			utils.ReplicatorSv1SetAccountActionPlans, &SetAccountActionPlansArg{
+			utils.ReplicatorSv1SetAccountActionPlans, &SetAccountActionPlansArgWithArgDispatcher{
 				AcntID:    acntID,
 				AplIDs:    aPlIDs,
 				Overwrite: overwrite,
-			}, &reply); err != nil {
+				TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
+				ArgDispatcher: &utils.ArgDispatcher{
+					APIKey:  utils.StringPointer(itm.APIKey),
+					RouteID: utils.StringPointer(itm.RouteID),
+				}}, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
 		}
@@ -1604,10 +1722,17 @@ func (dm *DataManager) SetRatingPlan(rp *RatingPlan, transactionID string) (err 
 	if err = dm.CacheDataFromDB(utils.RATING_PLAN_PREFIX, []string{rp.Id}, true); err != nil {
 		return
 	}
-	if config.CgrConfig().DataDbCfg().Items[utils.MetaRatingPlans].Replicate {
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRatingPlans]; itm.Replicate {
 		var reply string
 		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
-			utils.ReplicatorSv1SetRatingPlan, rp, &reply); err != nil {
+			utils.ReplicatorSv1SetRatingPlan,
+			&RatingPlanWithArgDispatcher{
+				RatingPlan: rp,
+				TenantArg:  utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
+				ArgDispatcher: &utils.ArgDispatcher{
+					APIKey:  utils.StringPointer(itm.APIKey),
+					RouteID: utils.StringPointer(itm.RouteID),
+				}}, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
 		}
@@ -1680,10 +1805,17 @@ func (dm *DataManager) SetRatingProfile(rpf *RatingProfile,
 	if err = dm.CacheDataFromDB(utils.RATING_PROFILE_PREFIX, []string{rpf.Id}, true); err != nil {
 		return
 	}
-	if config.CgrConfig().DataDbCfg().Items[utils.MetaRatingProfiles].Replicate {
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRatingProfiles]; itm.Replicate {
 		var reply string
 		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
-			utils.ReplicatorSv1SetRatingProfile, rpf, &reply); err != nil {
+			utils.ReplicatorSv1SetRatingProfile,
+			&RatingProfileWithArgDispatcher{
+				RatingProfile: rpf,
+				TenantArg:     utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
+				ArgDispatcher: &utils.ArgDispatcher{
+					APIKey:  utils.StringPointer(itm.APIKey),
+					RouteID: utils.StringPointer(itm.RouteID),
+				}}, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
 		}
@@ -1903,10 +2035,16 @@ func (dm *DataManager) SetSupplierProfile(supp *SupplierProfile, withIndex bool)
 			return
 		}
 	}
-	if config.CgrConfig().DataDbCfg().Items[utils.MetaSupplierProfiles].Replicate {
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaSupplierProfiles]; itm.Replicate {
 		var reply string
 		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
-			utils.ReplicatorSv1SetSupplierProfile, supp, &reply); err != nil {
+			utils.ReplicatorSv1SetSupplierProfile,
+			&SupplierProfileWithArgDispatcher{
+				SupplierProfile: supp,
+				ArgDispatcher: &utils.ArgDispatcher{
+					APIKey:  utils.StringPointer(itm.APIKey),
+					RouteID: utils.StringPointer(itm.RouteID),
+				}}, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
 		}
@@ -2036,10 +2174,16 @@ func (dm *DataManager) SetAttributeProfile(ap *AttributeProfile, withIndex bool)
 			}
 		}
 	}
-	if config.CgrConfig().DataDbCfg().Items[utils.MetaAttributeProfiles].Replicate {
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaAttributeProfiles]; itm.Replicate {
 		var reply string
 		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
-			utils.ReplicatorSv1SetAttributeProfile, ap, &reply); err != nil {
+			utils.ReplicatorSv1SetAttributeProfile,
+			&AttributeProfileWithArgDispatcher{
+				AttributeProfile: ap,
+				ArgDispatcher: &utils.ArgDispatcher{
+					APIKey:  utils.StringPointer(itm.APIKey),
+					RouteID: utils.StringPointer(itm.RouteID),
+				}}, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
 		}
@@ -2144,10 +2288,16 @@ func (dm *DataManager) SetChargerProfile(cpp *ChargerProfile, withIndex bool) (e
 			return
 		}
 	}
-	if config.CgrConfig().DataDbCfg().Items[utils.MetaChargerProfiles].Replicate {
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaChargerProfiles]; itm.Replicate {
 		var reply string
 		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
-			utils.ReplicatorSv1SetChargerProfile, cpp, &reply); err != nil {
+			utils.ReplicatorSv1SetChargerProfile,
+			&ChargerProfileWithArgDispatcher{
+				ChargerProfile: cpp,
+				ArgDispatcher: &utils.ArgDispatcher{
+					APIKey:  utils.StringPointer(itm.APIKey),
+					RouteID: utils.StringPointer(itm.RouteID),
+				}}, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
 		}
@@ -2258,10 +2408,16 @@ func (dm *DataManager) SetDispatcherProfile(dpp *DispatcherProfile, withIndex bo
 			}
 		}
 	}
-	if config.CgrConfig().DataDbCfg().Items[utils.MetaDispatcherProfiles].Replicate {
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaDispatcherProfiles]; itm.Replicate {
 		var reply string
 		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
-			utils.ReplicatorSv1SetDispatcherProfile, dpp, &reply); err != nil {
+			utils.ReplicatorSv1SetDispatcherProfile,
+			&DispatcherProfileWithArgDispatcher{
+				DispatcherProfile: dpp,
+				ArgDispatcher: &utils.ArgDispatcher{
+					APIKey:  utils.StringPointer(itm.APIKey),
+					RouteID: utils.StringPointer(itm.RouteID),
+				}}, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
 		}
@@ -2353,10 +2509,16 @@ func (dm *DataManager) SetDispatcherHost(dpp *DispatcherHost) (err error) {
 	if err = dm.DataDB().SetDispatcherHostDrv(dpp); err != nil {
 		return
 	}
-	if config.CgrConfig().DataDbCfg().Items[utils.MetaDispatcherHosts].Replicate {
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaDispatcherHosts]; itm.Replicate {
 		var reply string
 		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
-			utils.ReplicatorSv1SetDispatcherHost, dpp, &reply); err != nil {
+			utils.ReplicatorSv1SetDispatcherHost,
+			&DispatcherHostWithArgDispatcher{
+				DispatcherHost: dpp,
+				ArgDispatcher: &utils.ArgDispatcher{
+					APIKey:  utils.StringPointer(itm.APIKey),
+					RouteID: utils.StringPointer(itm.RouteID),
+				}}, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
 		}

@@ -1017,3 +1017,133 @@ func (dS *DispatcherReplicatorSv1) SetStatQueue(args *engine.StoredStatQueueWith
 func (dS *DispatcherReplicatorSv1) SetFilter(args *engine.FilterWithArgDispatcher, reply *string) error {
 	return dS.dS.ReplicatorSv1SetFilter(args, reply)
 }
+
+// SetStatQueueProfile
+func (dS *DispatcherReplicatorSv1) SetStatQueueProfile(args *engine.StatQueueProfileWithArgDispatcher, reply *string) error {
+	return dS.dS.ReplicatorSv1SetStatQueueProfile(args, reply)
+}
+
+// SetTiming
+func (dS *DispatcherReplicatorSv1) SetTiming(args *utils.TPTimingWithArgDispatcher, reply *string) error {
+	return dS.dS.ReplicatorSv1SetTiming(args, reply)
+}
+
+// SetResource
+func (dS *DispatcherReplicatorSv1) SetResource(args *engine.ResourceWithArgDispatcher, reply *string) error {
+	return dS.dS.ReplicatorSv1SetResource(args, reply)
+}
+
+// SetResourceProfile
+func (dS *DispatcherReplicatorSv1) SetResourceProfile(args *engine.ResourceProfileWithArgDispatcher, reply *string) error {
+	return dS.dS.ReplicatorSv1SetResourceProfile(args, reply)
+}
+
+// SetActionTriggers
+func (dS *DispatcherReplicatorSv1) SetActionTriggers(args *engine.SetActionTriggersArgWithArgDispatcher, reply *string) error {
+	return dS.dS.ReplicatorSv1SetActionTriggers(args, reply)
+}
+
+// SetSharedGroup
+func (dS *DispatcherReplicatorSv1) SetSharedGroup(args *engine.SharedGroupWithArgDispatcher, reply *string) error {
+	return dS.dS.ReplicatorSv1SetSharedGroup(args, reply)
+}
+
+// SetActions
+func (dS *DispatcherReplicatorSv1) SetActions(args *engine.SetActionsArgsWithArgDispatcher, reply *string) error {
+	return dS.dS.ReplicatorSv1SetActions(args, reply)
+}
+
+// SetRatingPlan
+func (dS *DispatcherReplicatorSv1) SetRatingPlan(args *engine.RatingPlanWithArgDispatcher, reply *string) error {
+	return dS.dS.ReplicatorSv1SetRatingPlan(args, reply)
+}
+
+// SetRatingProfile
+func (dS *DispatcherReplicatorSv1) SetRatingProfile(args *engine.RatingProfileWithArgDispatcher, reply *string) error {
+	return dS.dS.ReplicatorSv1SetRatingProfile(args, reply)
+}
+
+// SetSupplierProfile
+func (dS *DispatcherReplicatorSv1) SetSupplierProfile(args *engine.SupplierProfileWithArgDispatcher, reply *string) error {
+	return dS.dS.ReplicatorSv1SetSupplierProfile(args, reply)
+}
+
+// SetAttributeProfile
+func (dS *DispatcherReplicatorSv1) SetAttributeProfile(args *engine.AttributeProfileWithArgDispatcher, reply *string) error {
+	return dS.dS.ReplicatorSv1SetAttributeProfile(args, reply)
+}
+
+// SetChargerProfile
+func (dS *DispatcherReplicatorSv1) SetChargerProfile(args *engine.ChargerProfileWithArgDispatcher, reply *string) error {
+	return dS.dS.ReplicatorSv1SetChargerProfile(args, reply)
+}
+
+// SetDispatcherProfile
+func (dS *DispatcherReplicatorSv1) SetDispatcherProfile(args *engine.DispatcherProfileWithArgDispatcher, reply *string) error {
+	return dS.dS.ReplicatorSv1SetDispatcherProfile(args, reply)
+}
+
+// SetActionPlan
+func (dS *DispatcherReplicatorSv1) SetActionPlan(args *engine.SetActionPlanArgWithArgDispatcher, reply *string) error {
+	return dS.dS.ReplicatorSv1SetActionPlan(args, reply)
+}
+
+// SetAccountActionPlans
+func (dS *DispatcherReplicatorSv1) SetAccountActionPlans(args *engine.SetAccountActionPlansArgWithArgDispatcher, reply *string) error {
+	return dS.dS.ReplicatorSv1SetAccountActionPlans(args, reply)
+}
+
+// SetDispatcherHost
+func (dS *DispatcherReplicatorSv1) SetDispatcherHost(args *engine.DispatcherHostWithArgDispatcher, reply *string) error {
+	return dS.dS.ReplicatorSv1SetDispatcherHost(args, reply)
+}
+
+// RemoveThreshold
+func (dS *DispatcherReplicatorSv1) RemoveThreshold(args *utils.TenantIDWithArgDispatcher, reply *string) error {
+	return dS.dS.ReplicatorSv1RemoveThreshold(args, reply)
+}
+
+// RemoveDestination
+func (dS *DispatcherReplicatorSv1) RemoveDestination(args *utils.StringWithApiKey, reply *string) error {
+	return dS.dS.ReplicatorSv1RemoveDestination(args, reply)
+}
+
+// RemoveAccount
+func (dS *DispatcherReplicatorSv1) RemoveAccount(args *utils.StringWithApiKey, reply *string) error {
+	return dS.dS.ReplicatorSv1RemoveAccount(args, reply)
+}
+
+// RemoveStatQueue
+func (dS *DispatcherReplicatorSv1) RemoveStatQueue(args *utils.TenantIDWithArgDispatcher, reply *string) error {
+	return dS.dS.ReplicatorSv1RemoveStatQueue(args, reply)
+}
+
+// RemoveFilter
+func (dS *DispatcherReplicatorSv1) RemoveFilter(args *utils.TenantIDWithArgDispatcher, reply *string) error {
+	return dS.dS.ReplicatorSv1RemoveFilter(args, reply)
+}
+
+// RemoveThresholdProfile
+func (dS *DispatcherReplicatorSv1) RemoveThresholdProfile(args *utils.TenantIDWithArgDispatcher, reply *string) error {
+	return dS.dS.ReplicatorSv1RemoveThresholdProfile(args, reply)
+}
+
+// RemoveStatQueueProfile
+func (dS *DispatcherReplicatorSv1) RemoveStatQueueProfile(args *utils.TenantIDWithArgDispatcher, reply *string) error {
+	return dS.dS.ReplicatorSv1RemoveStatQueueProfile(args, reply)
+}
+
+// RemoveTiming
+func (dS *DispatcherReplicatorSv1) RemoveTiming(args *utils.StringWithApiKey, reply *string) error {
+	return dS.dS.ReplicatorSv1RemoveTiming(args, reply)
+}
+
+// RemoveResource
+func (dS *DispatcherReplicatorSv1) RemoveResource(args *utils.TenantIDWithArgDispatcher, reply *string) error {
+	return dS.dS.ReplicatorSv1RemoveResource(args, reply)
+}
+
+// RemoveResourceProfile
+func (dS *DispatcherReplicatorSv1) RemoveResourceProfile(args *utils.TenantIDWithArgDispatcher, reply *string) error {
+	return dS.dS.ReplicatorSv1RemoveResourceProfile(args, reply)
+}

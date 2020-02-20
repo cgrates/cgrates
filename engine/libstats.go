@@ -44,6 +44,12 @@ type StatQueueProfile struct {
 	ThresholdIDs       []string // list of thresholds to be checked after changes
 }
 
+// StatQueueProfileWithArgDispatcher is used in replicatorV1 for dispatcher
+type StatQueueProfileWithArgDispatcher struct {
+	*StatQueueProfile
+	*utils.ArgDispatcher
+}
+
 func (sqp *StatQueueProfile) TenantID() string {
 	return utils.ConcatenatedKey(sqp.Tenant, sqp.ID)
 }

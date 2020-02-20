@@ -355,7 +355,7 @@ func (rplSv1 *ReplicatorSv1) SetDestination(dst *engine.Destination, reply *stri
 	return nil
 }
 
-// SetDestination
+// SetReverseDestination
 func (rplSv1 *ReplicatorSv1) SetReverseDestination(dst *engine.DestinationWithArgDispatcher, reply *string) error {
 	if err := rplSv1.dm.DataDB().SetReverseDestinationDrv(dst.Destination, utils.NonTransactional); err != nil {
 		return err
@@ -364,7 +364,7 @@ func (rplSv1 *ReplicatorSv1) SetReverseDestination(dst *engine.DestinationWithAr
 	return nil
 }
 
-// SetDestination
+// SetStatQueue
 func (rplSv1 *ReplicatorSv1) SetStatQueue(ssq *engine.StoredStatQueueWithArgDispatcher, reply *string) error {
 	if err := rplSv1.dm.DataDB().SetStatQueueDrv(ssq.StoredStatQueue, nil); err != nil {
 		return err
@@ -373,7 +373,7 @@ func (rplSv1 *ReplicatorSv1) SetStatQueue(ssq *engine.StoredStatQueueWithArgDisp
 	return nil
 }
 
-// SetDestination
+// SetFilter
 func (rplSv1 *ReplicatorSv1) SetFilter(fltr *engine.FilterWithArgDispatcher, reply *string) error {
 	if err := rplSv1.dm.DataDB().SetFilterDrv(fltr.Filter); err != nil {
 		return err
@@ -382,39 +382,44 @@ func (rplSv1 *ReplicatorSv1) SetFilter(fltr *engine.FilterWithArgDispatcher, rep
 	return nil
 }
 
-func (rplSv1 *ReplicatorSv1) SetStatQueueProfile(sq *engine.StatQueueProfile, reply *string) error {
-	if err := rplSv1.dm.DataDB().SetStatQueueProfileDrv(sq); err != nil {
+// SetStatQueueProfile
+func (rplSv1 *ReplicatorSv1) SetStatQueueProfile(sq *engine.StatQueueProfileWithArgDispatcher, reply *string) error {
+	if err := rplSv1.dm.DataDB().SetStatQueueProfileDrv(sq.StatQueueProfile); err != nil {
 		return err
 	}
 	*reply = utils.OK
 	return nil
 }
 
-func (rplSv1 *ReplicatorSv1) SetTiming(tm *utils.TPTiming, reply *string) error {
-	if err := rplSv1.dm.DataDB().SetTimingDrv(tm); err != nil {
+// SetTiming
+func (rplSv1 *ReplicatorSv1) SetTiming(tm *utils.TPTimingWithArgDispatcher, reply *string) error {
+	if err := rplSv1.dm.DataDB().SetTimingDrv(tm.TPTiming); err != nil {
 		return err
 	}
 	*reply = utils.OK
 	return nil
 }
 
-func (rplSv1 *ReplicatorSv1) SetResource(rs *engine.Resource, reply *string) error {
-	if err := rplSv1.dm.DataDB().SetResourceDrv(rs); err != nil {
+// SetResource
+func (rplSv1 *ReplicatorSv1) SetResource(rs *engine.ResourceWithArgDispatcher, reply *string) error {
+	if err := rplSv1.dm.DataDB().SetResourceDrv(rs.Resource); err != nil {
 		return err
 	}
 	*reply = utils.OK
 	return nil
 }
 
-func (rplSv1 *ReplicatorSv1) SetResourceProfile(rs *engine.ResourceProfile, reply *string) error {
-	if err := rplSv1.dm.DataDB().SetResourceProfileDrv(rs); err != nil {
+// SetResourceProfile
+func (rplSv1 *ReplicatorSv1) SetResourceProfile(rs *engine.ResourceProfileWithArgDispatcher, reply *string) error {
+	if err := rplSv1.dm.DataDB().SetResourceProfileDrv(rs.ResourceProfile); err != nil {
 		return err
 	}
 	*reply = utils.OK
 	return nil
 }
 
-func (rplSv1 *ReplicatorSv1) SetActionTriggers(args *engine.SetActionTriggersArg, reply *string) error {
+// SetActionTriggers
+func (rplSv1 *ReplicatorSv1) SetActionTriggers(args *engine.SetActionTriggersArgWithArgDispatcher, reply *string) error {
 	if err := rplSv1.dm.DataDB().SetActionTriggersDrv(args.Key, args.Attrs); err != nil {
 		return err
 	}
@@ -422,15 +427,17 @@ func (rplSv1 *ReplicatorSv1) SetActionTriggers(args *engine.SetActionTriggersArg
 	return nil
 }
 
-func (rplSv1 *ReplicatorSv1) SetSharedGroup(shg *engine.SharedGroup, reply *string) error {
-	if err := rplSv1.dm.DataDB().SetSharedGroupDrv(shg); err != nil {
+// SetSharedGroup
+func (rplSv1 *ReplicatorSv1) SetSharedGroup(shg *engine.SharedGroupWithArgDispatcher, reply *string) error {
+	if err := rplSv1.dm.DataDB().SetSharedGroupDrv(shg.SharedGroup); err != nil {
 		return err
 	}
 	*reply = utils.OK
 	return nil
 }
 
-func (rplSv1 *ReplicatorSv1) SetActions(args *engine.SetActionsArgs, reply *string) error {
+// SetActions
+func (rplSv1 *ReplicatorSv1) SetActions(args *engine.SetActionsArgsWithArgDispatcher, reply *string) error {
 	if err := rplSv1.dm.DataDB().SetActionsDrv(args.Key, args.Acs); err != nil {
 		return err
 	}
@@ -438,55 +445,62 @@ func (rplSv1 *ReplicatorSv1) SetActions(args *engine.SetActionsArgs, reply *stri
 	return nil
 }
 
-func (rplSv1 *ReplicatorSv1) SetRatingPlan(rp *engine.RatingPlan, reply *string) error {
-	if err := rplSv1.dm.DataDB().SetRatingPlanDrv(rp); err != nil {
+// SetRatingPlan
+func (rplSv1 *ReplicatorSv1) SetRatingPlan(rp *engine.RatingPlanWithArgDispatcher, reply *string) error {
+	if err := rplSv1.dm.DataDB().SetRatingPlanDrv(rp.RatingPlan); err != nil {
 		return err
 	}
 	*reply = utils.OK
 	return nil
 }
 
-func (rplSv1 *ReplicatorSv1) SetRatingProfile(rp *engine.RatingProfile, reply *string) error {
-	if err := rplSv1.dm.DataDB().SetRatingProfileDrv(rp); err != nil {
+// SetRatingProfile
+func (rplSv1 *ReplicatorSv1) SetRatingProfile(rp *engine.RatingProfileWithArgDispatcher, reply *string) error {
+	if err := rplSv1.dm.DataDB().SetRatingProfileDrv(rp.RatingProfile); err != nil {
 		return err
 	}
 	*reply = utils.OK
 	return nil
 }
 
-func (rplSv1 *ReplicatorSv1) SetSupplierProfile(sp *engine.SupplierProfile, reply *string) error {
-	if err := rplSv1.dm.DataDB().SetSupplierProfileDrv(sp); err != nil {
+// SetSupplierProfile
+func (rplSv1 *ReplicatorSv1) SetSupplierProfile(sp *engine.SupplierProfileWithArgDispatcher, reply *string) error {
+	if err := rplSv1.dm.DataDB().SetSupplierProfileDrv(sp.SupplierProfile); err != nil {
 		return err
 	}
 	*reply = utils.OK
 	return nil
 }
 
-func (rplSv1 *ReplicatorSv1) SetAttributeProfile(ap *engine.AttributeProfile, reply *string) error {
-	if err := rplSv1.dm.DataDB().SetAttributeProfileDrv(ap); err != nil {
+// SetAttributeProfile
+func (rplSv1 *ReplicatorSv1) SetAttributeProfile(ap *engine.AttributeProfileWithArgDispatcher, reply *string) error {
+	if err := rplSv1.dm.DataDB().SetAttributeProfileDrv(ap.AttributeProfile); err != nil {
 		return err
 	}
 	*reply = utils.OK
 	return nil
 }
 
-func (rplSv1 *ReplicatorSv1) SetChargerProfile(cp *engine.ChargerProfile, reply *string) error {
-	if err := rplSv1.dm.DataDB().SetChargerProfileDrv(cp); err != nil {
+// SetChargerProfile
+func (rplSv1 *ReplicatorSv1) SetChargerProfile(cp *engine.ChargerProfileWithArgDispatcher, reply *string) error {
+	if err := rplSv1.dm.DataDB().SetChargerProfileDrv(cp.ChargerProfile); err != nil {
 		return err
 	}
 	*reply = utils.OK
 	return nil
 }
 
-func (rplSv1 *ReplicatorSv1) SetDispatcherProfile(dpp *engine.DispatcherProfile, reply *string) error {
-	if err := rplSv1.dm.DataDB().SetDispatcherProfileDrv(dpp); err != nil {
+// SetDispatcherProfile
+func (rplSv1 *ReplicatorSv1) SetDispatcherProfile(dpp *engine.DispatcherProfileWithArgDispatcher, reply *string) error {
+	if err := rplSv1.dm.DataDB().SetDispatcherProfileDrv(dpp.DispatcherProfile); err != nil {
 		return err
 	}
 	*reply = utils.OK
 	return nil
 }
 
-func (rplSv1 *ReplicatorSv1) SetActionPlan(args *engine.SetActionPlanArg, reply *string) error {
+// SetActionPlan
+func (rplSv1 *ReplicatorSv1) SetActionPlan(args *engine.SetActionPlanArgWithArgDispatcher, reply *string) error {
 	if err := rplSv1.dm.DataDB().SetActionPlanDrv(args.Key, args.Ats, args.Overwrite, utils.NonTransactional); err != nil {
 		return err
 	}
@@ -494,7 +508,8 @@ func (rplSv1 *ReplicatorSv1) SetActionPlan(args *engine.SetActionPlanArg, reply 
 	return nil
 }
 
-func (rplSv1 *ReplicatorSv1) SetAccountActionPlans(args *engine.SetAccountActionPlansArg, reply *string) error {
+// SetAccountActionPlans
+func (rplSv1 *ReplicatorSv1) SetAccountActionPlans(args *engine.SetAccountActionPlansArgWithArgDispatcher, reply *string) error {
 	if err := rplSv1.dm.DataDB().SetAccountActionPlansDrv(args.AcntID, args.AplIDs, args.Overwrite); err != nil {
 		return err
 	}
@@ -502,15 +517,17 @@ func (rplSv1 *ReplicatorSv1) SetAccountActionPlans(args *engine.SetAccountAction
 	return nil
 }
 
-func (rplSv1 *ReplicatorSv1) SetDispatcherHost(dpp *engine.DispatcherHost, reply *string) error {
-	if err := rplSv1.dm.DataDB().SetDispatcherHostDrv(dpp); err != nil {
+// SetDispatcherHost
+func (rplSv1 *ReplicatorSv1) SetDispatcherHost(dpp *engine.DispatcherHostWithArgDispatcher, reply *string) error {
+	if err := rplSv1.dm.DataDB().SetDispatcherHostDrv(dpp.DispatcherHost); err != nil {
 		return err
 	}
 	*reply = utils.OK
 	return nil
 }
 
-func (rplSv1 *ReplicatorSv1) RemoveThreshold(args *utils.TenantID, reply *string) error {
+// RemoveThreshold
+func (rplSv1 *ReplicatorSv1) RemoveThreshold(args *utils.TenantIDWithArgDispatcher, reply *string) error {
 	if err := rplSv1.dm.DataDB().RemoveThresholdDrv(args.Tenant, args.ID); err != nil {
 		return err
 	}
@@ -518,6 +535,7 @@ func (rplSv1 *ReplicatorSv1) RemoveThreshold(args *utils.TenantID, reply *string
 	return nil
 }
 
+// SetLoadIDs
 func (rplSv1 *ReplicatorSv1) SetLoadIDs(loadIDs map[string]int64, reply *string) error {
 	if err := rplSv1.dm.DataDB().SetLoadIDsDrv(loadIDs); err != nil {
 		return err
@@ -526,23 +544,26 @@ func (rplSv1 *ReplicatorSv1) SetLoadIDs(loadIDs map[string]int64, reply *string)
 	return nil
 }
 
-func (rplSv1 *ReplicatorSv1) RemoveDestination(id string, reply *string) error {
-	if err := rplSv1.dm.DataDB().RemoveDestinationDrv(id, utils.NonTransactional); err != nil {
+// RemoveDestination
+func (rplSv1 *ReplicatorSv1) RemoveDestination(id *utils.StringWithApiKey, reply *string) error {
+	if err := rplSv1.dm.DataDB().RemoveDestinationDrv(id.Arg, utils.NonTransactional); err != nil {
 		return err
 	}
 	*reply = utils.OK
 	return nil
 }
 
-func (rplSv1 *ReplicatorSv1) RemoveAccount(id string, reply *string) error {
-	if err := rplSv1.dm.DataDB().RemoveAccountDrv(id); err != nil {
+// RemoveAccount
+func (rplSv1 *ReplicatorSv1) RemoveAccount(id *utils.StringWithApiKey, reply *string) error {
+	if err := rplSv1.dm.DataDB().RemoveAccountDrv(id.Arg); err != nil {
 		return err
 	}
 	*reply = utils.OK
 	return nil
 }
 
-func (rplSv1 *ReplicatorSv1) RemoveStatQueue(args *utils.TenantID, reply *string) error {
+// RemoveStatQueue
+func (rplSv1 *ReplicatorSv1) RemoveStatQueue(args *utils.TenantIDWithArgDispatcher, reply *string) error {
 	if err := rplSv1.dm.DataDB().RemStatQueueDrv(args.Tenant, args.ID); err != nil {
 		return err
 	}
@@ -550,7 +571,8 @@ func (rplSv1 *ReplicatorSv1) RemoveStatQueue(args *utils.TenantID, reply *string
 	return nil
 }
 
-func (rplSv1 *ReplicatorSv1) RemoveFilter(args *utils.TenantID, reply *string) error {
+// RemoveFilter
+func (rplSv1 *ReplicatorSv1) RemoveFilter(args *utils.TenantIDWithArgDispatcher, reply *string) error {
 	if err := rplSv1.dm.DataDB().RemoveFilterDrv(args.Tenant, args.ID); err != nil {
 		return err
 	}
@@ -558,7 +580,8 @@ func (rplSv1 *ReplicatorSv1) RemoveFilter(args *utils.TenantID, reply *string) e
 	return nil
 }
 
-func (rplSv1 *ReplicatorSv1) RemoveThresholdProfile(args *utils.TenantID, reply *string) error {
+// RemoveThresholdProfile
+func (rplSv1 *ReplicatorSv1) RemoveThresholdProfile(args *utils.TenantIDWithArgDispatcher, reply *string) error {
 	if err := rplSv1.dm.DataDB().RemThresholdProfileDrv(args.Tenant, args.ID); err != nil {
 		return err
 	}
@@ -566,7 +589,8 @@ func (rplSv1 *ReplicatorSv1) RemoveThresholdProfile(args *utils.TenantID, reply 
 	return nil
 }
 
-func (rplSv1 *ReplicatorSv1) RemoveStatQueueProfile(args *utils.TenantID, reply *string) error {
+// RemoveStatQueueProfile
+func (rplSv1 *ReplicatorSv1) RemoveStatQueueProfile(args *utils.TenantIDWithArgDispatcher, reply *string) error {
 	if err := rplSv1.dm.DataDB().RemStatQueueProfileDrv(args.Tenant, args.ID); err != nil {
 		return err
 	}
@@ -574,15 +598,17 @@ func (rplSv1 *ReplicatorSv1) RemoveStatQueueProfile(args *utils.TenantID, reply 
 	return nil
 }
 
-func (rplSv1 *ReplicatorSv1) RemoveTiming(id string, reply *string) error {
-	if err := rplSv1.dm.DataDB().RemoveTimingDrv(id); err != nil {
+// RemoveTiming
+func (rplSv1 *ReplicatorSv1) RemoveTiming(id *utils.StringWithApiKey, reply *string) error {
+	if err := rplSv1.dm.DataDB().RemoveTimingDrv(id.Arg); err != nil {
 		return err
 	}
 	*reply = utils.OK
 	return nil
 }
 
-func (rplSv1 *ReplicatorSv1) RemoveResource(args *utils.TenantID, reply *string) error {
+// RemoveResource
+func (rplSv1 *ReplicatorSv1) RemoveResource(args *utils.TenantIDWithArgDispatcher, reply *string) error {
 	if err := rplSv1.dm.DataDB().RemoveResourceDrv(args.Tenant, args.ID); err != nil {
 		return err
 	}
@@ -590,7 +616,8 @@ func (rplSv1 *ReplicatorSv1) RemoveResource(args *utils.TenantID, reply *string)
 	return nil
 }
 
-func (rplSv1 *ReplicatorSv1) RemoveResourceProfile(args *utils.TenantID, reply *string) error {
+// RemoveResourceProfile
+func (rplSv1 *ReplicatorSv1) RemoveResourceProfile(args *utils.TenantIDWithArgDispatcher, reply *string) error {
 	if err := rplSv1.dm.DataDB().RemoveResourceProfileDrv(args.Tenant, args.ID); err != nil {
 		return err
 	}
