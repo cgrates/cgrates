@@ -87,7 +87,7 @@ type AgentRequest struct {
 	Header  utils.DataProvider
 	Trailer utils.DataProvider
 	diamreq *utils.OrderedNavigableMap // used in case of building requests (ie. DisconnectSession)
-	tmp     *utils.OrderedNavigableMap // used in case you want to store temporary items and access them later
+	tmp     utils.NavigableMap         // used in case you want to store temporary items and access them later
 }
 
 // String implements utils.DataProvider
@@ -134,14 +134,14 @@ func (ar *AgentRequest) FieldAsString(fldPath []string) (val string, err error) 
 		return
 	}
 	if nmItems, isNMItems := iface.(*utils.NMSlice); isNMItems { // special handling of NMItems, take the last value out of it
-		iface = (*nmItems)[len(*nmItems)-1].Interface // could be we need nil protection here
+		iface = (*nmItems)[len(*nmItems)-1].Interface() // could be we need nil protection here
 	}
 	return utils.IfaceAsString(iface), nil
 }
 
 //SetFields will populate fields of AgentRequest out of templates
 func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
-	ar.tmp = utils.NewOrderedNavigableMap()
+	ar.tmp = utils.NavigableMap{}
 	for _, tplFld := range tplFlds {
 		if pass, err := ar.filterS.Pass(ar.Tenant,
 			tplFld.Filters, ar); err != nil {
@@ -161,7 +161,7 @@ func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 				}
 				return err
 			}
-			valSet := &utils.NMSlice{}
+			valSet := utils.NMSlice{}
 			fldPath := strings.Split(tplFld.Path, utils.NestingSep)
 
 			nMItm := &config.NMItem{Data: out, Path: fldPath[1:], Config: tplFld}
@@ -170,34 +170,36 @@ func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 					return err
 				}
 			} else {
-				valSet = nMFields.([]*config.NMItem) // start from previous stored fields
+				valSet = *(nMFields.(*utils.NMSlice)) // start from previous stored fields
 				switch tplFld.Type {
 				case utils.META_COMPOSED:
 					prevNMItem := valSet[len(valSet)-1] // could be we need nil protection here
-					*nMItm = *prevNMItem                // inherit the particularities, ie AttributeName
-					nMItm.Data = utils.IfaceAsString(prevNMItem.Data) + utils.IfaceAsString(out)
+
+					*nMItm = *(prevNMItem.(*config.NMItem)) // inherit the particularities, ie AttributeName
+					nMItm.Data = utils.IfaceAsString(nMItm.Data) + utils.IfaceAsString(out)
+
 					valSet = valSet[:len(valSet)-1] // discard the last item since we have captured it in nmItem
 				case utils.MetaGroup: // in case of *group type simply append to valSet
 				default:
 					valSet = nil
 				}
 			}
-			*valSet = append(*valSet, nMItm)
+			valSet = append(valSet, nMItm)
 			switch fldPath[0] {
 			default:
 				return fmt.Errorf("unsupported field prefix: <%s> when set fields", fldPath[0])
 			case utils.MetaVars:
-				ar.Vars.Set(fldPath[1:], valSet)
+				ar.Vars.Set(fldPath[1:], &valSet)
 			case utils.MetaCgreq:
-				ar.CGRRequest.Set(fldPath[1:], valSet)
+				ar.CGRRequest.Set(fldPath[1:], &valSet)
 			case utils.MetaCgrep:
-				ar.CGRReply.Set(fldPath[1:], valSet)
+				ar.CGRReply.Set(fldPath[1:], &valSet)
 			case utils.MetaRep:
-				ar.Reply.Set(fldPath[1:], valSet)
+				ar.Reply.Set(fldPath[1:], &valSet)
 			case utils.MetaDiamreq:
-				ar.diamreq.Set(fldPath[1:], valSet)
+				ar.diamreq.Set(fldPath[1:], &valSet)
 			case utils.MetaTmp:
-				ar.tmp.Set(fldPath[1:], valSet)
+				ar.tmp.Set(fldPath[1:], &valSet)
 			}
 		}
 		if tplFld.Blocker { // useful in case of processing errors first
