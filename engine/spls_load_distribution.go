@@ -52,7 +52,13 @@ func (ws *LoadDistributionSorter) SortSuppliers(prflID string,
 			return nil, err
 		} else if pass && srtSpl != nil {
 			// Add the ratio in SortingData so we can used it later in SortLoadDistribution
-			srtSpl.SortingData[utils.Ratio] = s.cacheSupplier[utils.MetaRatio].(float64)
+			floatRatio, err := utils.IfaceAsFloat64(s.cacheSupplier[utils.MetaRatio])
+			if err != nil {
+				utils.Logger.Warning(
+					fmt.Sprintf("<%s> cannot convert ratio <%s> to float64 supplier: <%s>",
+						utils.SupplierS, s.cacheSupplier[utils.MetaRatio], s.ID))
+			}
+			srtSpl.SortingData[utils.Ratio] = floatRatio
 			sortedSuppls.SortedSuppliers = append(sortedSuppls.SortedSuppliers, srtSpl)
 		}
 	}

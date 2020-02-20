@@ -56,6 +56,9 @@ var (
 		//tests for *reds sorting strategy
 		testV1SplSAddNewSplPrf2,
 		testV1SplSGetSortedSuppliers2,
+		//tests for *load sorting strategy
+		testV1SplSPopulateStats,
+		testV1SplSGetSoredSuppliersWithLoad,
 		testV1SplSStopEngine,
 	}
 )
@@ -540,6 +543,215 @@ func testV1SplSGetSortedSuppliers2(t *testing.T) {
 		if !reflect.DeepEqual(rcvSupl, expSupplierIDs) {
 			t.Errorf("Expecting: %+v, \n received: %+v",
 				expSupplierIDs, utils.ToJSON(suplsReply))
+		}
+	}
+}
+
+func testV1SplSPopulateStats(t *testing.T) {
+	// in this test we simulate some Stat Requests
+	// so we can check the metrics in Suppliers for *load strategy
+	var reply []string
+	expected := []string{"Stat_Supplier1"}
+	ev1 := &engine.StatsArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				"LoadReq": 1,
+				"StatID":  "Stat_Supplier1",
+			},
+		},
+	}
+	if err := splSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
+	}
+
+	expected = []string{"Stat_Supplier1"}
+	ev1 = &engine.StatsArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event2",
+			Event: map[string]interface{}{
+				"LoadReq": 1,
+				"StatID":  "Stat_Supplier1",
+			},
+		},
+	}
+	if err := splSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
+	}
+
+	var metrics map[string]string
+	expectedMetrics := map[string]string{
+		utils.ConcatenatedKey(utils.MetaSum, utils.DynamicDataPrefix+"LoadReq"): "2",
+	}
+	if err := splSv1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
+		&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stat_Supplier1"}},
+		&metrics); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
+		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
+	}
+
+	expected = []string{"Stat_Supplier2"}
+	ev1 = &engine.StatsArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event3",
+			Event: map[string]interface{}{
+				"LoadReq": 1,
+				"StatID":  "Stat_Supplier2",
+			},
+		},
+	}
+	if err := splSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
+	}
+
+	expected = []string{"Stat_Supplier2"}
+	ev1 = &engine.StatsArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event4",
+			Event: map[string]interface{}{
+				"LoadReq": 1,
+				"StatID":  "Stat_Supplier2",
+			},
+		},
+	}
+	if err := splSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
+	}
+
+	if err := splSv1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
+		&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stat_Supplier2"}},
+		&metrics); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
+		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
+	}
+
+	expected = []string{"Stat_Supplier3"}
+	ev1 = &engine.StatsArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event5",
+			Event: map[string]interface{}{
+				"LoadReq": 1,
+				"StatID":  "Stat_Supplier3",
+			},
+		},
+	}
+	if err := splSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
+	}
+
+	expected = []string{"Stat_Supplier3"}
+	ev1 = &engine.StatsArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event6",
+			Event: map[string]interface{}{
+				"LoadReq": 1,
+				"StatID":  "Stat_Supplier3",
+			},
+		},
+	}
+	if err := splSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
+	}
+
+	expected = []string{"Stat_Supplier3"}
+	ev1 = &engine.StatsArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event7",
+			Event: map[string]interface{}{
+				"LoadReq": 1,
+				"StatID":  "Stat_Supplier3",
+			},
+		},
+	}
+	if err := splSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
+	}
+
+	expectedMetrics = map[string]string{
+		utils.ConcatenatedKey(utils.MetaSum, utils.DynamicDataPrefix+"LoadReq"): "3",
+	}
+
+	if err := splSv1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
+		&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stat_Supplier3"}},
+		&metrics); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
+		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
+	}
+}
+
+func testV1SplSGetSoredSuppliersWithLoad(t *testing.T) {
+	ev := &engine.ArgsGetSuppliers{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testV1SplSGetSoredSuppliersWithLoad",
+			Event: map[string]interface{}{
+				"DistinctMatch": "LoadDistStrategy",
+			},
+		},
+	}
+	expSuppliers := []*engine.SortedSupplier{
+		&engine.SortedSupplier{
+			SupplierID:         "supplier2",
+			SupplierParameters: "",
+			SortingData: map[string]interface{}{
+				"Load":   2.0,
+				"Ratio":  7.0,
+				"Weight": 20.0},
+		},
+		&engine.SortedSupplier{
+			SupplierID:         "supplier3",
+			SupplierParameters: "",
+			SortingData: map[string]interface{}{
+				"Load":   3.0,
+				"Ratio":  5.0,
+				"Weight": 35.0},
+		},
+		&engine.SortedSupplier{
+			SupplierID:         "supplier1",
+			SupplierParameters: "",
+			SortingData: map[string]interface{}{
+				"Load":   2.0,
+				"Ratio":  2.0,
+				"Weight": 10.0},
+		},
+	}
+
+	var suplsReply engine.SortedSuppliers
+	if err := splSv1Rpc.Call(utils.SupplierSv1GetSuppliers,
+		ev, &suplsReply); err != nil {
+		t.Error(err)
+	} else {
+		if suplsReply.ProfileID != "SPL_LOAD_DIST" {
+			t.Errorf("Expecting: SPL_LOAD_DIST, received: %s",
+				suplsReply.ProfileID)
+		}
+		if !reflect.DeepEqual(suplsReply.SortedSuppliers, expSuppliers) {
+			t.Errorf("Expecting: %+v, \n received: %+v",
+				utils.ToJSON(expSuppliers), utils.ToJSON(suplsReply.SortedSuppliers))
 		}
 	}
 }
