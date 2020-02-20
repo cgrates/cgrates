@@ -3226,6 +3226,16 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 		}
 		rply.StatQueueIDs = &sIDs
 	}
+	if argsFlagsWithParams.HasKey(utils.MetaCDRs) {
+		var cdrRply string
+		if err := sS.connMgr.Call(sS.cgrCfg.SessionSCfg().CDRsConns, nil, utils.CDRsV1ProcessEvent,
+			&engine.ArgV1ProcessEvent{
+				Flags:         argsFlagsWithParams[utils.MetaCDRs],
+				CGREvent:      *args.CGREvent,
+				ArgDispatcher: args.ArgDispatcher}, &cdrRply); err != nil {
+			return err
+		}
+	}
 	if withErrors {
 		err = utils.ErrPartiallyExecuted
 	}

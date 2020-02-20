@@ -6,6 +6,7 @@
 
 "general": {
     "log_level": 7,
+	"reply_timeout": "10s"
 },
 
 
@@ -36,6 +37,7 @@
 
 "cdrs": {
 	"enabled": true,
+	"session_cost_retries": 1,
 	"chargers_conns":["*internal"],
 	"rals_conns": ["*internal"],
 },
