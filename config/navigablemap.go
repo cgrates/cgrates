@@ -34,7 +34,7 @@ type NMItem struct {
 	Config *FCTemplate // so we can store additional configuration
 }
 
-func (nmi *NMItem) String() string         { return utils.IfaceAsString(nmi) }
+func (nmi *NMItem) String() string         { return utils.ToJSON(nmi) }
 func (nmi *NMItem) Interface() interface{} { return nmi.Data }
 func (nmi *NMItem) Field(path []string) (val utils.NM, err error) {
 	return nil, utils.ErrNotImplemented
@@ -46,7 +46,7 @@ func (nmi *NMItem) Remove(path []string) (err error) {
 	return utils.ErrNotImplemented
 }
 func (nmi *NMItem) Type() utils.NMType { return utils.NMInterfaceType }
-func (nmi *NMItem) Empty() bool        { return nmi != nil && nmi.Data != nil }
+func (nmi *NMItem) Empty() bool        { return nmi == nil || nmi.Data == nil }
 
 // XMLElement is specially crafted to be automatically marshalled by encoding/xml
 type XMLElement struct {
@@ -61,11 +61,15 @@ type XMLElement struct {
 func NMAsXMLElements(nm *utils.OrderedNavigableMap) (ents []*XMLElement, err error) {
 	pathIdx := make(map[string]*XMLElement) // Keep the index of elements based on path
 	for _, val := range nm.Values() {
-		nmItms, isNMItems := val.([]*NMItem)
+		nmItms, isNMItems := val.(*utils.NMSlice)
 		if !isNMItems {
 			return nil, fmt.Errorf("value: %+v is not []*NMItem", val)
 		}
-		for _, nmItm := range nmItms {
+		for _, nmIt := range *nmItms {
+			nmItm, isNMItems := nmIt.(*NMItem)
+			if !isNMItems {
+				continue
+			}
 			if nmItm.Config != nil && nmItm.Config.NewBranch {
 				pathIdx = make(map[string]*XMLElement) // reset cache so we can start having other elements with same path
 			}
@@ -160,8 +164,12 @@ func NMAsCGREvent(nM *utils.OrderedNavigableMap, tnt string, pathSep string) (cg
 		Event:  make(map[string]interface{})}
 	for _, branchPath := range order {
 		val, _ := nM.FieldAsInterface(branchPath)
-		if nmItms, isNMItems := val.([]*NMItem); isNMItems { // special case when we have added multiple items inside a key, used in agents
-			for _, nmItm := range nmItms {
+		if nmItms, isNMItems := val.(*utils.NMSlice); isNMItems { // special case when we have added multiple items inside a key, used in agents
+			for _, nmIt := range *nmItms {
+				nmItm, isNMItem := nmIt.(*NMItem)
+				if !isNMItem {
+					continue
+				}
 				if nmItm.Config == nil ||
 					nmItm.Config.AttributeID == "" {
 					val = nmItm.Data // first item which is not an attribute will become the value
