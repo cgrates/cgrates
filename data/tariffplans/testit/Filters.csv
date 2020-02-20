@@ -25,3 +25,4 @@ cgrates.org,FLTR_SPP_QOS_2,*string,~*req.DistinctMatch,*qos_filtred2,2014-07-29T
 cgrates.org,FLTR_QOS_SP1_2,*gte,~*vars.Cost,0.1,2014-07-29T15:00:00Z
 cgrates.org,FLTR_QOS_SP2_2,*gte,~*vars.Cost,0.2,2014-07-29T15:00:00Z
 cgrates.org,FLTR_TEST,*string,~*req.Subject,TEST,2014-07-29T15:00:00Z
+cgrates.org,FLTR_SPP_LOAD_DIST,*string,~*req.DistinctMatch,LoadDistStrategy,2014-07-29T15:00:00Z
