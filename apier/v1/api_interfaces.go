@@ -203,6 +203,7 @@ type ReplicatorSv1Interface interface {
 	SetThreshold(th *engine.ThresholdWithArgDispatcher, reply *string) error
 	SetFilterIndexes(args *utils.SetFilterIndexesArgWithArgDispatcher, reply *string) error
 	SetAccount(acc *engine.AccountWithArgDispatcher, reply *string) error
+	SetDestination(dst *engine.DestinationWithArgDispatcher, reply *string) error
 	SetReverseDestination(dst *engine.DestinationWithArgDispatcher, reply *string) error
 	SetStatQueue(ssq *engine.StoredStatQueueWithArgDispatcher, reply *string) error
 	SetFilter(fltr *engine.FilterWithArgDispatcher, reply *string) error
@@ -223,6 +224,7 @@ type ReplicatorSv1Interface interface {
 	SetAccountActionPlans(args *engine.SetAccountActionPlansArgWithArgDispatcher, reply *string) error
 	SetDispatcherHost(dpp *engine.DispatcherHostWithArgDispatcher, reply *string) error
 	RemoveThreshold(args *utils.TenantIDWithArgDispatcher, reply *string) error
+	SetLoadIDs(args *utils.LoadIDsWithArgDispatcher, reply *string) error
 	RemoveDestination(id *utils.StringWithApiKey, reply *string) error
 	RemoveAccount(id *utils.StringWithApiKey, reply *string) error
 	RemoveStatQueue(args *utils.TenantIDWithArgDispatcher, reply *string) error
@@ -232,4 +234,16 @@ type ReplicatorSv1Interface interface {
 	RemoveTiming(id *utils.StringWithApiKey, reply *string) error
 	RemoveResource(args *utils.TenantIDWithArgDispatcher, reply *string) error
 	RemoveResourceProfile(args *utils.TenantIDWithArgDispatcher, reply *string) error
+	RemoveActionTriggers(id *utils.StringWithApiKey, reply *string) error
+	RemoveSharedGroup(id *utils.StringWithApiKey, reply *string) error
+	RemoveActions(id *utils.StringWithApiKey, reply *string) error
+	RemoveActionPlan(id *utils.StringWithApiKey, reply *string) error
+	RemAccountActionPlans(args *engine.RemAccountActionPlansArgsWithArgDispatcher, reply *string) error
+	RemoveRatingPlan(id *utils.StringWithApiKey, reply *string) error
+	RemoveRatingProfile(id *utils.StringWithApiKey, reply *string) error
+	RemoveSupplierProfile(args *utils.TenantIDWithArgDispatcher, reply *string) error
+	RemoveAttributeProfile(args *utils.TenantIDWithArgDispatcher, reply *string) error
+	RemoveChargerProfile(args *utils.TenantIDWithArgDispatcher, reply *string) error
+	RemoveDispatcherProfile(args *utils.TenantIDWithArgDispatcher, reply *string) error
+	RemoveDispatcherHost(args *utils.TenantIDWithArgDispatcher, reply *string) error
 }

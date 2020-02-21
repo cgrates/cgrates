@@ -695,6 +695,28 @@ func (dS *DispatcherService) ReplicatorSv1SetFilterIndexes(args *utils.SetFilter
 		utils.ReplicatorSv1SetFilterIndexes, args, rpl)
 }
 
+func (dS *DispatcherService) ReplicatorSv1SetDestination(args *engine.DestinationWithArgDispatcher, rpl *string) (err error) {
+	if args == nil {
+		args = &engine.DestinationWithArgDispatcher{}
+	}
+	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if args.ArgDispatcher == nil {
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
+		}
+		if err = dS.authorize(utils.ReplicatorSv1SetDestination, args.Tenant,
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	var routeID *string
+	if args.ArgDispatcher != nil {
+		routeID = args.ArgDispatcher.RouteID
+	}
+	return dS.Dispatch(&utils.CGREvent{Tenant: args.Tenant}, utils.MetaReplicator, routeID,
+		utils.ReplicatorSv1SetDestination, args, rpl)
+}
+
 func (dS *DispatcherService) ReplicatorSv1SetAccount(args *engine.AccountWithArgDispatcher, rpl *string) (err error) {
 	if args == nil {
 		args = &engine.AccountWithArgDispatcher{}
@@ -1179,6 +1201,28 @@ func (dS *DispatcherService) ReplicatorSv1RemoveDestination(args *utils.StringWi
 		utils.ReplicatorSv1RemoveDestination, args, rpl)
 }
 
+func (dS *DispatcherService) ReplicatorSv1SetLoadIDs(args *utils.LoadIDsWithArgDispatcher, rpl *string) (err error) {
+	if args == nil {
+		args = &utils.LoadIDsWithArgDispatcher{}
+	}
+	args.TenantArg.Tenant = utils.FirstNonEmpty(args.TenantArg.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if args.ArgDispatcher == nil {
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
+		}
+		if err = dS.authorize(utils.ReplicatorSv1SetLoadIDs, args.TenantArg.Tenant,
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	var routeID *string
+	if args.ArgDispatcher != nil {
+		routeID = args.ArgDispatcher.RouteID
+	}
+	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaReplicator, routeID,
+		utils.ReplicatorSv1SetLoadIDs, args, rpl)
+}
+
 func (dS *DispatcherService) ReplicatorSv1RemoveAccount(args *utils.StringWithApiKey, rpl *string) (err error) {
 	if args == nil {
 		args = &utils.StringWithApiKey{}
@@ -1353,4 +1397,268 @@ func (dS *DispatcherService) ReplicatorSv1RemoveResourceProfile(args *utils.Tena
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: args.Tenant}, utils.MetaReplicator, routeID,
 		utils.ReplicatorSv1RemoveResourceProfile, args, rpl)
+}
+
+func (dS *DispatcherService) ReplicatorSv1RemoveActionTriggers(args *utils.StringWithApiKey, rpl *string) (err error) {
+	if args == nil {
+		args = &utils.StringWithApiKey{}
+	}
+	args.TenantArg.Tenant = utils.FirstNonEmpty(args.TenantArg.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if args.ArgDispatcher == nil {
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
+		}
+		if err = dS.authorize(utils.ReplicatorSv1RemoveActionTriggers, args.TenantArg.Tenant,
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	var routeID *string
+	if args.ArgDispatcher != nil {
+		routeID = args.ArgDispatcher.RouteID
+	}
+	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaReplicator, routeID,
+		utils.ReplicatorSv1RemoveActionTriggers, args, rpl)
+}
+
+func (dS *DispatcherService) ReplicatorSv1RemoveSharedGroup(args *utils.StringWithApiKey, rpl *string) (err error) {
+	if args == nil {
+		args = &utils.StringWithApiKey{}
+	}
+	args.TenantArg.Tenant = utils.FirstNonEmpty(args.TenantArg.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if args.ArgDispatcher == nil {
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
+		}
+		if err = dS.authorize(utils.ReplicatorSv1RemoveSharedGroup, args.TenantArg.Tenant,
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	var routeID *string
+	if args.ArgDispatcher != nil {
+		routeID = args.ArgDispatcher.RouteID
+	}
+	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaReplicator, routeID,
+		utils.ReplicatorSv1RemoveSharedGroup, args, rpl)
+}
+
+func (dS *DispatcherService) ReplicatorSv1RemoveActions(args *utils.StringWithApiKey, rpl *string) (err error) {
+	if args == nil {
+		args = &utils.StringWithApiKey{}
+	}
+	args.TenantArg.Tenant = utils.FirstNonEmpty(args.TenantArg.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if args.ArgDispatcher == nil {
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
+		}
+		if err = dS.authorize(utils.ReplicatorSv1RemoveActions, args.TenantArg.Tenant,
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	var routeID *string
+	if args.ArgDispatcher != nil {
+		routeID = args.ArgDispatcher.RouteID
+	}
+	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaReplicator, routeID,
+		utils.ReplicatorSv1RemoveActions, args, rpl)
+}
+
+func (dS *DispatcherService) ReplicatorSv1RemoveActionPlan(args *utils.StringWithApiKey, rpl *string) (err error) {
+	if args == nil {
+		args = &utils.StringWithApiKey{}
+	}
+	args.TenantArg.Tenant = utils.FirstNonEmpty(args.TenantArg.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if args.ArgDispatcher == nil {
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
+		}
+		if err = dS.authorize(utils.ReplicatorSv1RemoveActionPlan, args.TenantArg.Tenant,
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	var routeID *string
+	if args.ArgDispatcher != nil {
+		routeID = args.ArgDispatcher.RouteID
+	}
+	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaReplicator, routeID,
+		utils.ReplicatorSv1RemoveActionPlan, args, rpl)
+}
+
+func (dS *DispatcherService) ReplicatorSv1RemAccountActionPlans(args *engine.RemAccountActionPlansArgsWithArgDispatcher, rpl *string) (err error) {
+	if args == nil {
+		args = &engine.RemAccountActionPlansArgsWithArgDispatcher{}
+	}
+	args.TenantArg.Tenant = utils.FirstNonEmpty(args.TenantArg.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if args.ArgDispatcher == nil {
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
+		}
+		if err = dS.authorize(utils.ReplicatorSv1RemAccountActionPlans, args.TenantArg.Tenant,
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	var routeID *string
+	if args.ArgDispatcher != nil {
+		routeID = args.ArgDispatcher.RouteID
+	}
+	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaReplicator, routeID,
+		utils.ReplicatorSv1RemAccountActionPlans, args, rpl)
+}
+
+func (dS *DispatcherService) ReplicatorSv1RemoveRatingPlan(args *utils.StringWithApiKey, rpl *string) (err error) {
+	if args == nil {
+		args = &utils.StringWithApiKey{}
+	}
+	args.TenantArg.Tenant = utils.FirstNonEmpty(args.TenantArg.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if args.ArgDispatcher == nil {
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
+		}
+		if err = dS.authorize(utils.ReplicatorSv1RemoveRatingPlan, args.TenantArg.Tenant,
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	var routeID *string
+	if args.ArgDispatcher != nil {
+		routeID = args.ArgDispatcher.RouteID
+	}
+	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaReplicator, routeID,
+		utils.ReplicatorSv1RemoveRatingPlan, args, rpl)
+}
+
+func (dS *DispatcherService) ReplicatorSv1RemoveRatingProfile(args *utils.StringWithApiKey, rpl *string) (err error) {
+	if args == nil {
+		args = &utils.StringWithApiKey{}
+	}
+	args.TenantArg.Tenant = utils.FirstNonEmpty(args.TenantArg.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if args.ArgDispatcher == nil {
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
+		}
+		if err = dS.authorize(utils.ReplicatorSv1RemoveRatingProfile, args.TenantArg.Tenant,
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	var routeID *string
+	if args.ArgDispatcher != nil {
+		routeID = args.ArgDispatcher.RouteID
+	}
+	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaReplicator, routeID,
+		utils.ReplicatorSv1RemoveRatingProfile, args, rpl)
+}
+
+func (dS *DispatcherService) ReplicatorSv1RemoveSupplierProfile(args *utils.TenantIDWithArgDispatcher, rpl *string) (err error) {
+	if args == nil {
+		args = &utils.TenantIDWithArgDispatcher{}
+	}
+	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if args.ArgDispatcher == nil {
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
+		}
+		if err = dS.authorize(utils.ReplicatorSv1RemoveSupplierProfile, args.Tenant,
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	var routeID *string
+	if args.ArgDispatcher != nil {
+		routeID = args.ArgDispatcher.RouteID
+	}
+	return dS.Dispatch(&utils.CGREvent{Tenant: args.Tenant}, utils.MetaReplicator, routeID,
+		utils.ReplicatorSv1RemoveSupplierProfile, args, rpl)
+}
+
+func (dS *DispatcherService) ReplicatorSv1RemoveAttributeProfile(args *utils.TenantIDWithArgDispatcher, rpl *string) (err error) {
+	if args == nil {
+		args = &utils.TenantIDWithArgDispatcher{}
+	}
+	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if args.ArgDispatcher == nil {
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
+		}
+		if err = dS.authorize(utils.ReplicatorSv1RemoveAttributeProfile, args.Tenant,
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	var routeID *string
+	if args.ArgDispatcher != nil {
+		routeID = args.ArgDispatcher.RouteID
+	}
+	return dS.Dispatch(&utils.CGREvent{Tenant: args.Tenant}, utils.MetaReplicator, routeID,
+		utils.ReplicatorSv1RemoveAttributeProfile, args, rpl)
+}
+
+func (dS *DispatcherService) ReplicatorSv1RemoveChargerProfile(args *utils.TenantIDWithArgDispatcher, rpl *string) (err error) {
+	if args == nil {
+		args = &utils.TenantIDWithArgDispatcher{}
+	}
+	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if args.ArgDispatcher == nil {
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
+		}
+		if err = dS.authorize(utils.ReplicatorSv1RemoveChargerProfile, args.Tenant,
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	var routeID *string
+	if args.ArgDispatcher != nil {
+		routeID = args.ArgDispatcher.RouteID
+	}
+	return dS.Dispatch(&utils.CGREvent{Tenant: args.Tenant}, utils.MetaReplicator, routeID,
+		utils.ReplicatorSv1RemoveChargerProfile, args, rpl)
+}
+
+func (dS *DispatcherService) ReplicatorSv1RemoveDispatcherProfile(args *utils.TenantIDWithArgDispatcher, rpl *string) (err error) {
+	if args == nil {
+		args = &utils.TenantIDWithArgDispatcher{}
+	}
+	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if args.ArgDispatcher == nil {
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
+		}
+		if err = dS.authorize(utils.ReplicatorSv1RemoveDispatcherProfile, args.Tenant,
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	var routeID *string
+	if args.ArgDispatcher != nil {
+		routeID = args.ArgDispatcher.RouteID
+	}
+	return dS.Dispatch(&utils.CGREvent{Tenant: args.Tenant}, utils.MetaReplicator, routeID,
+		utils.ReplicatorSv1RemoveDispatcherProfile, args, rpl)
+}
+
+func (dS *DispatcherService) ReplicatorSv1RemoveDispatcherHost(args *utils.TenantIDWithArgDispatcher, rpl *string) (err error) {
+	if args == nil {
+		args = &utils.TenantIDWithArgDispatcher{}
+	}
+	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if args.ArgDispatcher == nil {
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
+		}
+		if err = dS.authorize(utils.ReplicatorSv1RemoveDispatcherHost, args.Tenant,
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	var routeID *string
+	if args.ArgDispatcher != nil {
+		routeID = args.ArgDispatcher.RouteID
+	}
+	return dS.Dispatch(&utils.CGREvent{Tenant: args.Tenant}, utils.MetaReplicator, routeID,
+		utils.ReplicatorSv1RemoveDispatcherHost, args, rpl)
 }

@@ -936,3 +936,9 @@ type SetFilterIndexesArgWithArgDispatcher struct {
 	TenantArg
 	*ArgDispatcher
 }
+
+type LoadIDsWithArgDispatcher struct {
+	LoadIDs map[string]int64
+	TenantArg
+	*ArgDispatcher
+}

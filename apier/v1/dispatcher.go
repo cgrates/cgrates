@@ -998,6 +998,11 @@ func (dS *DispatcherReplicatorSv1) SetFilterIndexes(args *utils.SetFilterIndexes
 	return dS.dS.ReplicatorSv1SetFilterIndexes(args, reply)
 }
 
+// SetDestination
+func (dS *DispatcherReplicatorSv1) SetDestination(args *engine.DestinationWithArgDispatcher, reply *string) error {
+	return dS.dS.ReplicatorSv1SetDestination(args, reply)
+}
+
 // SetAccount
 func (dS *DispatcherReplicatorSv1) SetAccount(args *engine.AccountWithArgDispatcher, reply *string) error {
 	return dS.dS.ReplicatorSv1SetAccount(args, reply)
@@ -1103,6 +1108,11 @@ func (dS *DispatcherReplicatorSv1) RemoveThreshold(args *utils.TenantIDWithArgDi
 	return dS.dS.ReplicatorSv1RemoveThreshold(args, reply)
 }
 
+// SetLoadIDs
+func (dS *DispatcherReplicatorSv1) SetLoadIDs(args *utils.LoadIDsWithArgDispatcher, reply *string) error {
+	return dS.dS.ReplicatorSv1SetLoadIDs(args, reply)
+}
+
 // RemoveDestination
 func (dS *DispatcherReplicatorSv1) RemoveDestination(args *utils.StringWithApiKey, reply *string) error {
 	return dS.dS.ReplicatorSv1RemoveDestination(args, reply)
@@ -1146,4 +1156,64 @@ func (dS *DispatcherReplicatorSv1) RemoveResource(args *utils.TenantIDWithArgDis
 // RemoveResourceProfile
 func (dS *DispatcherReplicatorSv1) RemoveResourceProfile(args *utils.TenantIDWithArgDispatcher, reply *string) error {
 	return dS.dS.ReplicatorSv1RemoveResourceProfile(args, reply)
+}
+
+// RemoveActionTriggers
+func (dS *DispatcherReplicatorSv1) RemoveActionTriggers(args *utils.StringWithApiKey, reply *string) error {
+	return dS.dS.ReplicatorSv1RemoveActionTriggers(args, reply)
+}
+
+// RemoveSharedGroup
+func (dS *DispatcherReplicatorSv1) RemoveSharedGroup(args *utils.StringWithApiKey, reply *string) error {
+	return dS.dS.ReplicatorSv1RemoveSharedGroup(args, reply)
+}
+
+// RemoveActions
+func (dS *DispatcherReplicatorSv1) RemoveActions(args *utils.StringWithApiKey, reply *string) error {
+	return dS.dS.ReplicatorSv1RemoveActions(args, reply)
+}
+
+// RemoveActionPlan
+func (dS *DispatcherReplicatorSv1) RemoveActionPlan(args *utils.StringWithApiKey, reply *string) error {
+	return dS.dS.ReplicatorSv1RemoveActionPlan(args, reply)
+}
+
+// RemAccountActionPlans
+func (dS *DispatcherReplicatorSv1) RemAccountActionPlans(args *engine.RemAccountActionPlansArgsWithArgDispatcher, reply *string) error {
+	return dS.dS.ReplicatorSv1RemAccountActionPlans(args, reply)
+}
+
+// RemoveRatingPlan
+func (dS *DispatcherReplicatorSv1) RemoveRatingPlan(args *utils.StringWithApiKey, reply *string) error {
+	return dS.dS.ReplicatorSv1RemoveRatingPlan(args, reply)
+}
+
+// RemoveRatingProfile
+func (dS *DispatcherReplicatorSv1) RemoveRatingProfile(args *utils.StringWithApiKey, reply *string) error {
+	return dS.dS.ReplicatorSv1RemoveRatingProfile(args, reply)
+}
+
+// RemoveSupplierProfile
+func (dS *DispatcherReplicatorSv1) RemoveSupplierProfile(args *utils.TenantIDWithArgDispatcher, reply *string) error {
+	return dS.dS.ReplicatorSv1RemoveSupplierProfile(args, reply)
+}
+
+// RemoveAttributeProfile
+func (dS *DispatcherReplicatorSv1) RemoveAttributeProfile(args *utils.TenantIDWithArgDispatcher, reply *string) error {
+	return dS.dS.ReplicatorSv1RemoveAttributeProfile(args, reply)
+}
+
+// RemoveChargerProfile
+func (dS *DispatcherReplicatorSv1) RemoveChargerProfile(args *utils.TenantIDWithArgDispatcher, reply *string) error {
+	return dS.dS.ReplicatorSv1RemoveChargerProfile(args, reply)
+}
+
+// RemoveDispatcherProfile
+func (dS *DispatcherReplicatorSv1) RemoveDispatcherProfile(args *utils.TenantIDWithArgDispatcher, reply *string) error {
+	return dS.dS.ReplicatorSv1RemoveDispatcherProfile(args, reply)
+}
+
+// RemoveDispatcherHost
+func (dS *DispatcherReplicatorSv1) RemoveDispatcherHost(args *utils.TenantIDWithArgDispatcher, reply *string) error {
+	return dS.dS.ReplicatorSv1RemoveDispatcherHost(args, reply)
 }
