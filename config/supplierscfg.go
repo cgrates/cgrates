@@ -29,6 +29,7 @@ type SupplierSCfg struct {
 	AttributeSConns     []string
 	ResourceSConns      []string
 	StatSConns          []string
+	ResponderSConns     []string
 	DefaultRatio        int
 	NestedFields        bool
 }
@@ -87,6 +88,17 @@ func (spl *SupplierSCfg) loadFromJsonCfg(jsnCfg *SupplierSJsonCfg) (err error) {
 				spl.StatSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)
 			} else {
 				spl.StatSConns[idx] = conn
+			}
+		}
+	}
+	if jsnCfg.Rals_conns != nil {
+		spl.ResponderSConns = make([]string, len(*jsnCfg.Rals_conns))
+		for idx, conn := range *jsnCfg.Rals_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			if conn == utils.MetaInternal {
+				spl.ResponderSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder)
+			} else {
+				spl.ResponderSConns[idx] = conn
 			}
 		}
 	}

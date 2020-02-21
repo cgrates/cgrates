@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"fmt"
 	"reflect"
 	"strings"
 	"sync"
@@ -104,6 +105,71 @@ func (rs *Responder) GetCost(arg *CallDescriptorWithArgDispatcher, reply *CallCo
 	}
 	if e != nil {
 		return e
+	}
+	return
+}
+
+//GetCostOnRatingPlans is used by SupplierS to calculate the cost
+// Receive a list of RatingPlans and pick the first without error
+func (rs *Responder) GetCostOnRatingPlans(arg *utils.GetCostOnRatingPlansArgs, reply *map[string]interface{}) (err error) {
+	// RPC caching
+	if config.CgrConfig().CacheCfg()[utils.CacheRPCResponses].Limit != 0 {
+		cacheKey := utils.ConcatenatedKey(utils.ResponderGetCostOnRatingPlans, utils.UUIDSha1Prefix())
+		refID := guardian.Guardian.GuardIDs("",
+			config.CgrConfig().GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
+		defer guardian.Guardian.UnguardIDs(refID)
+
+		if itm, has := Cache.Get(utils.CacheRPCResponses, cacheKey); has {
+			cachedResp := itm.(*utils.CachedRPCResponse)
+			if cachedResp.Error == nil {
+				*reply = *cachedResp.Result.(*map[string]interface{})
+			}
+			return cachedResp.Error
+		}
+		defer Cache.Set(utils.CacheRPCResponses, cacheKey,
+			&utils.CachedRPCResponse{Result: reply, Error: err},
+			nil, true, utils.NonTransactional)
+	}
+	// end of RPC caching
+
+	for _, rp := range arg.RatingPlanIDs { // loop through RatingPlans until we find one without errors
+		rPrfl := &RatingProfile{
+			Id: utils.ConcatenatedKey(utils.META_OUT,
+				arg.Tenant, utils.MetaTmp, arg.Subject),
+			RatingPlanActivations: RatingPlanActivations{
+				&RatingPlanActivation{
+					ActivationTime: arg.SetupTime,
+					RatingPlanId:   rp,
+				},
+			},
+		}
+		// force cache set so it can be picked by calldescriptor for cost calculation
+		Cache.Set(utils.CacheRatingProfilesTmp, rPrfl.Id, rPrfl, nil,
+			true, utils.NonTransactional)
+		cd := &CallDescriptor{
+			Category:      utils.MetaTmp,
+			Tenant:        arg.Tenant,
+			Subject:       arg.Subject,
+			Account:       arg.Account,
+			Destination:   arg.Destination,
+			TimeStart:     arg.SetupTime,
+			TimeEnd:       arg.SetupTime.Add(arg.Usage),
+			DurationIndex: arg.Usage,
+		}
+		cc, err := cd.GetCost()
+		Cache.Remove(utils.CacheRatingProfilesTmp, rPrfl.Id,
+			true, utils.NonTransactional) // Remove here so we don't overload memory
+		if err != nil {
+			if err != utils.ErrNotFound {
+				return err
+			}
+			continue
+		}
+		*reply = map[string]interface{}{
+			utils.Cost:         cc.Cost,
+			utils.RatingPlanID: rp,
+		}
+		return nil
 	}
 	return
 }
@@ -260,6 +326,34 @@ func (rs *Responder) GetMaxSessionTime(arg *CallDescriptorWithArgDispatcher, rep
 		return utils.ErrMaxUsageExceeded
 	}
 	*reply, err = arg.GetMaxSessionDuration()
+	return
+}
+
+func (rs *Responder) GetMaxSessionTimeOnAccounts(arg *utils.GetMaxSessionTimeOnAccountsArgs,
+	reply *map[string]interface{}) (err error) {
+	for _, anctID := range arg.AccountIDs {
+		cd := &CallDescriptor{
+			Category:      utils.MetaSuppliers,
+			Tenant:        arg.Tenant,
+			Subject:       arg.Subject,
+			Account:       anctID,
+			Destination:   arg.Destination,
+			TimeStart:     arg.SetupTime,
+			TimeEnd:       arg.SetupTime.Add(arg.Usage),
+			DurationIndex: arg.Usage,
+		}
+		if maxDur, err := cd.GetMaxSessionDuration(); err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> ignoring cost for account: %s, err: %s",
+					utils.Responder, anctID, err.Error()))
+		} else if maxDur >= arg.Usage {
+			*reply = map[string]interface{}{
+				utils.Cost:    0.0,
+				utils.Account: anctID,
+			}
+			return nil
+		}
+	}
 	return
 }
 

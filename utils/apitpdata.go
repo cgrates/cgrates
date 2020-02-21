@@ -1392,3 +1392,22 @@ type SessionIDsWithArgsDispatcher struct {
 	Tenant string
 	*ArgDispatcher
 }
+
+type GetCostOnRatingPlansArgs struct {
+	Account       string
+	Subject       string
+	Destination   string
+	Tenant        string
+	SetupTime     time.Time
+	Usage         time.Duration
+	RatingPlanIDs []string
+}
+
+type GetMaxSessionTimeOnAccountsArgs struct {
+	Subject     string
+	Destination string
+	Tenant      string
+	SetupTime   time.Time
+	Usage       time.Duration
+	AccountIDs  []string
+}

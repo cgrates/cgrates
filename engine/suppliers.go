@@ -229,65 +229,28 @@ func (spS *SupplierService) costForEvent(ev *utils.CGREvent,
 	if usage, err = ev.FieldAsDuration(utils.Usage); err != nil {
 		return
 	}
-	for _, anctID := range acntIDs {
-		cd := &CallDescriptor{
-			Category:      utils.MetaSuppliers,
-			Tenant:        ev.Tenant,
-			Subject:       subj,
-			Account:       anctID,
-			Destination:   dst,
-			TimeStart:     sTime,
-			TimeEnd:       sTime.Add(usage),
-			DurationIndex: usage,
-		}
-		if maxDur, err := cd.GetMaxSessionDuration(); err != nil {
-			utils.Logger.Warning(
-				fmt.Sprintf("<%s> ignoring cost for account: %s, err: %s",
-					utils.SupplierS, anctID, err.Error()))
-		} else if maxDur >= usage {
-			return map[string]interface{}{
-				utils.Cost:    0.0,
-				utils.Account: anctID,
-			}, nil
-		}
+	if err := spS.connMgr.Call(spS.cgrcfg.SupplierSCfg().ResponderSConns, nil, utils.ResponderGetMaxSessionTimeOnAccounts,
+		&utils.GetMaxSessionTimeOnAccountsArgs{
+			Tenant:      ev.Tenant,
+			Subject:     subj,
+			Destination: dst,
+			SetupTime:   sTime,
+			Usage:       usage,
+			AccountIDs:  acntIDs,
+		}, &costData); err != nil {
+		return nil, err
 	}
-	for _, rp := range rpIDs { // loop through RatingPlans until we find one without errors
-		rPrfl := &RatingProfile{
-			Id: utils.ConcatenatedKey(utils.META_OUT,
-				ev.Tenant, utils.MetaSuppliers, subj),
-			RatingPlanActivations: RatingPlanActivations{
-				&RatingPlanActivation{
-					ActivationTime: sTime,
-					RatingPlanId:   rp,
-				},
-			},
-		}
-		// force cache set so it can be picked by calldescriptor for cost calculation
-		Cache.Set(utils.CacheRatingProfilesTmp, rPrfl.Id, rPrfl, nil,
-			true, utils.NonTransactional)
-		cd := &CallDescriptor{
-			Category:      utils.MetaSuppliers,
+	if err := spS.connMgr.Call(spS.cgrcfg.SupplierSCfg().ResponderSConns, nil, utils.ResponderGetCostOnRatingPlans,
+		&utils.GetCostOnRatingPlansArgs{
 			Tenant:        ev.Tenant,
-			Subject:       subj,
 			Account:       acnt,
+			Subject:       subj,
 			Destination:   dst,
-			TimeStart:     sTime,
-			TimeEnd:       sTime.Add(usage),
-			DurationIndex: usage,
-		}
-		cc, err := cd.GetCost()
-		Cache.Remove(utils.CacheRatingProfilesTmp, rPrfl.Id,
-			true, utils.NonTransactional) // Remove here so we don't overload memory
-		if err != nil {
-			if err != utils.ErrNotFound {
-				return nil, err
-			}
-			continue
-		}
-		ec := NewEventCostFromCallCost(cc, "", "")
-		return map[string]interface{}{
-			utils.Cost:         ec.GetCost(),
-			utils.RatingPlanID: rp}, nil
+			SetupTime:     sTime,
+			Usage:         usage,
+			RatingPlanIDs: rpIDs,
+		}, &costData); err != nil {
+		return nil, err
 	}
 	return
 }
