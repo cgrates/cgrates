@@ -347,8 +347,8 @@ func (rplSv1 *ReplicatorSv1) SetAccount(acc *engine.AccountWithArgDispatcher, re
 }
 
 // SetDestination
-func (rplSv1 *ReplicatorSv1) SetDestination(dst *engine.Destination, reply *string) error {
-	if err := rplSv1.dm.DataDB().SetDestinationDrv(dst, utils.NonTransactional); err != nil {
+func (rplSv1 *ReplicatorSv1) SetDestination(dst *engine.DestinationWithArgDispatcher, reply *string) error {
+	if err := rplSv1.dm.DataDB().SetDestinationDrv(dst.Destination, utils.NonTransactional); err != nil {
 		return err
 	}
 	*reply = utils.OK
@@ -536,8 +536,8 @@ func (rplSv1 *ReplicatorSv1) RemoveThreshold(args *utils.TenantIDWithArgDispatch
 }
 
 // SetLoadIDs
-func (rplSv1 *ReplicatorSv1) SetLoadIDs(loadIDs map[string]int64, reply *string) error {
-	if err := rplSv1.dm.DataDB().SetLoadIDsDrv(loadIDs); err != nil {
+func (rplSv1 *ReplicatorSv1) SetLoadIDs(args *utils.LoadIDsWithArgDispatcher, reply *string) error {
+	if err := rplSv1.dm.DataDB().SetLoadIDsDrv(args.LoadIDs); err != nil {
 		return err
 	}
 	*reply = utils.OK
@@ -625,39 +625,39 @@ func (rplSv1 *ReplicatorSv1) RemoveResourceProfile(args *utils.TenantIDWithArgDi
 	return nil
 }
 
-func (rplSv1 *ReplicatorSv1) RemoveActionTriggers(id string, reply *string) error {
-	if err := rplSv1.dm.DataDB().RemoveActionTriggersDrv(id); err != nil {
+func (rplSv1 *ReplicatorSv1) RemoveActionTriggers(id *utils.StringWithApiKey, reply *string) error {
+	if err := rplSv1.dm.DataDB().RemoveActionTriggersDrv(id.Arg); err != nil {
 		return err
 	}
 	*reply = utils.OK
 	return nil
 }
 
-func (rplSv1 *ReplicatorSv1) RemoveSharedGroup(id string, reply *string) error {
-	if err := rplSv1.dm.DataDB().RemoveSharedGroupDrv(id); err != nil {
+func (rplSv1 *ReplicatorSv1) RemoveSharedGroup(id *utils.StringWithApiKey, reply *string) error {
+	if err := rplSv1.dm.DataDB().RemoveSharedGroupDrv(id.Arg); err != nil {
 		return err
 	}
 	*reply = utils.OK
 	return nil
 }
 
-func (rplSv1 *ReplicatorSv1) RemoveActions(id string, reply *string) error {
-	if err := rplSv1.dm.DataDB().RemoveActionsDrv(id); err != nil {
+func (rplSv1 *ReplicatorSv1) RemoveActions(id *utils.StringWithApiKey, reply *string) error {
+	if err := rplSv1.dm.DataDB().RemoveActionsDrv(id.Arg); err != nil {
 		return err
 	}
 	*reply = utils.OK
 	return nil
 }
 
-func (rplSv1 *ReplicatorSv1) RemoveActionPlan(id string, reply *string) error {
-	if err := rplSv1.dm.DataDB().RemoveActionPlanDrv(id, utils.NonTransactional); err != nil {
+func (rplSv1 *ReplicatorSv1) RemoveActionPlan(id *utils.StringWithApiKey, reply *string) error {
+	if err := rplSv1.dm.DataDB().RemoveActionPlanDrv(id.Arg, utils.NonTransactional); err != nil {
 		return err
 	}
 	*reply = utils.OK
 	return nil
 }
 
-func (rplSv1 *ReplicatorSv1) RemAccountActionPlans(args *engine.RemAccountActionPlansArgs, reply *string) error {
+func (rplSv1 *ReplicatorSv1) RemAccountActionPlans(args *engine.RemAccountActionPlansArgsWithArgDispatcher, reply *string) error {
 	if err := rplSv1.dm.DataDB().RemAccountActionPlansDrv(args.AcntID, args.ApIDs); err != nil {
 		return err
 	}
@@ -665,23 +665,23 @@ func (rplSv1 *ReplicatorSv1) RemAccountActionPlans(args *engine.RemAccountAction
 	return nil
 }
 
-func (rplSv1 *ReplicatorSv1) RemoveRatingPlan(id string, reply *string) error {
-	if err := rplSv1.dm.DataDB().RemoveRatingPlanDrv(id); err != nil {
+func (rplSv1 *ReplicatorSv1) RemoveRatingPlan(id *utils.StringWithApiKey, reply *string) error {
+	if err := rplSv1.dm.DataDB().RemoveRatingPlanDrv(id.Arg); err != nil {
 		return err
 	}
 	*reply = utils.OK
 	return nil
 }
 
-func (rplSv1 *ReplicatorSv1) RemoveRatingProfile(id string, reply *string) error {
-	if err := rplSv1.dm.DataDB().RemoveRatingProfileDrv(id); err != nil {
+func (rplSv1 *ReplicatorSv1) RemoveRatingProfile(id *utils.StringWithApiKey, reply *string) error {
+	if err := rplSv1.dm.DataDB().RemoveRatingProfileDrv(id.Arg); err != nil {
 		return err
 	}
 	*reply = utils.OK
 	return nil
 }
 
-func (rplSv1 *ReplicatorSv1) RemoveSupplierProfile(args *utils.TenantID, reply *string) error {
+func (rplSv1 *ReplicatorSv1) RemoveSupplierProfile(args *utils.TenantIDWithArgDispatcher, reply *string) error {
 	if err := rplSv1.dm.DataDB().RemoveSupplierProfileDrv(args.Tenant, args.ID); err != nil {
 		return err
 	}
@@ -689,7 +689,7 @@ func (rplSv1 *ReplicatorSv1) RemoveSupplierProfile(args *utils.TenantID, reply *
 	return nil
 }
 
-func (rplSv1 *ReplicatorSv1) RemoveAttributeProfile(args *utils.TenantID, reply *string) error {
+func (rplSv1 *ReplicatorSv1) RemoveAttributeProfile(args *utils.TenantIDWithArgDispatcher, reply *string) error {
 	if err := rplSv1.dm.DataDB().RemoveAttributeProfileDrv(args.Tenant, args.ID); err != nil {
 		return err
 	}
@@ -697,7 +697,7 @@ func (rplSv1 *ReplicatorSv1) RemoveAttributeProfile(args *utils.TenantID, reply 
 	return nil
 }
 
-func (rplSv1 *ReplicatorSv1) RemoveChargerProfile(args *utils.TenantID, reply *string) error {
+func (rplSv1 *ReplicatorSv1) RemoveChargerProfile(args *utils.TenantIDWithArgDispatcher, reply *string) error {
 	if err := rplSv1.dm.DataDB().RemoveChargerProfileDrv(args.Tenant, args.ID); err != nil {
 		return err
 	}
@@ -705,7 +705,7 @@ func (rplSv1 *ReplicatorSv1) RemoveChargerProfile(args *utils.TenantID, reply *s
 	return nil
 }
 
-func (rplSv1 *ReplicatorSv1) RemoveDispatcherProfile(args *utils.TenantID, reply *string) error {
+func (rplSv1 *ReplicatorSv1) RemoveDispatcherProfile(args *utils.TenantIDWithArgDispatcher, reply *string) error {
 	if err := rplSv1.dm.DataDB().RemoveDispatcherProfileDrv(args.Tenant, args.ID); err != nil {
 		return err
 	}
@@ -713,7 +713,7 @@ func (rplSv1 *ReplicatorSv1) RemoveDispatcherProfile(args *utils.TenantID, reply
 	return nil
 }
 
-func (rplSv1 *ReplicatorSv1) RemoveDispatcherHost(args *utils.TenantID, reply *string) error {
+func (rplSv1 *ReplicatorSv1) RemoveDispatcherHost(args *utils.TenantIDWithArgDispatcher, reply *string) error {
 	if err := rplSv1.dm.DataDB().RemoveDispatcherHostDrv(args.Tenant, args.ID); err != nil {
 		return err
 	}
