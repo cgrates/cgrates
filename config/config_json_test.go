@@ -936,6 +936,7 @@ func TestDfSupplierSJsonCfg(t *testing.T) {
 		Attributes_conns:      &[]string{},
 		Resources_conns:       &[]string{},
 		Stats_conns:           &[]string{},
+		Rals_conns:            &[]string{},
 		Default_ratio:         utils.IntPointer(1),
 		Nested_fields:         utils.BoolPointer(false),
 	}

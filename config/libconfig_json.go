@@ -421,6 +421,7 @@ type SupplierSJsonCfg struct {
 	Attributes_conns      *[]string
 	Resources_conns       *[]string
 	Stats_conns           *[]string
+	Rals_conns            *[]string
 	Default_ratio         *int
 }
 

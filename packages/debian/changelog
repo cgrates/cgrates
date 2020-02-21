@@ -21,6 +21,8 @@ cgrates (0.11.0~dev) UNRELEASED; urgency=medium
   * [SessionS] Add support for *cdrs flag in SessionSv1.ProcessEvent
   * [StatS] Update metric definition to include path for example:
     *sum:~*req.Field1
+  * [SupplierS] SupplierS require a connection to rals when give
+    AccountIDs and RatingPlanIDs to calculate
 
  -- Alexandru Tripon <alexandru.tripon@itsyscom.com>  Wed, 19 Feb 2020 13:25:52 +0200
 

@@ -558,6 +558,7 @@ const CGRATES_CFG_JSON = `
 	"attributes_conns": [],					// connections to AttributeS for altering events before supplier queries: <""|*internal|127.0.0.1:2013>
 	"resources_conns": [],					// connections to ResourceS for *res sorting, empty to disable functionality: <""|*internal|x.y.z.y:1234>
 	"stats_conns": [],						// connections to StatS for *stats sorting, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
+	"rals_conns": [],						// connections to Rater for calculating cost, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
 	"default_ratio":1						// default ratio used in case of *load strategy
 },
 

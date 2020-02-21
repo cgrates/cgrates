@@ -1309,15 +1309,17 @@ const (
 
 // Responder APIs
 const (
-	Responder                  = "Responder"
-	ResponderDebit             = "Responder.Debit"
-	ResponderRefundIncrements  = "Responder.RefundIncrements"
-	ResponderGetMaxSessionTime = "Responder.GetMaxSessionTime"
-	ResponderMaxDebit          = "Responder.MaxDebit"
-	ResponderRefundRounding    = "Responder.RefundRounding"
-	ResponderGetCost           = "Responder.GetCost"
-	ResponderShutdown          = "Responder.Shutdown"
-	ResponderPing              = "Responder.Ping"
+	Responder                            = "Responder"
+	ResponderDebit                       = "Responder.Debit"
+	ResponderRefundIncrements            = "Responder.RefundIncrements"
+	ResponderGetMaxSessionTime           = "Responder.GetMaxSessionTime"
+	ResponderMaxDebit                    = "Responder.MaxDebit"
+	ResponderRefundRounding              = "Responder.RefundRounding"
+	ResponderGetCost                     = "Responder.GetCost"
+	ResponderGetCostOnRatingPlans        = "Responder.GetCostOnRatingPlans"
+	ResponderGetMaxSessionTimeOnAccounts = "Responder.GetMaxSessionTimeOnAccounts"
+	ResponderShutdown                    = "Responder.Shutdown"
+	ResponderPing                        = "Responder.Ping"
 )
 
 // DispatcherS APIs
