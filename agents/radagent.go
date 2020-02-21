@@ -70,22 +70,22 @@ type RadiusAgent struct {
 
 // handleAuth handles RADIUS Authorization request
 func (ra *RadiusAgent) handleAuth(req *radigo.Packet) (rpl *radigo.Packet, err error) {
-	reqVars := make(map[string]interface{})
+	reqVars := make(utils.NavigableMap2)
 	req.SetAVPValues()             // populate string values in AVPs
 	dcdr := newRADataProvider(req) // dcdr will provide information from request
 	rpl = req.Reply()
 	rpl.Code = radigo.AccessAccept
 	rplyNM := utils.NewOrderedNavigableMap()
-	cgrRplyNM := &utils.NavigableMap{}
+	cgrRplyNM := &utils.NavigableMap2{}
 	var processed bool
-	reqVars[utils.RemoteHost] = req.RemoteAddr().String()
+	reqVars[utils.RemoteHost] = utils.NewNMInterface(req.RemoteAddr().String())
 	for _, reqProcessor := range ra.cgrCfg.RadiusAgentCfg().RequestProcessors {
 		agReq := NewAgentRequest(dcdr, reqVars, cgrRplyNM, rplyNM,
 			reqProcessor.Tenant, ra.cgrCfg.GeneralCfg().DefaultTenant,
 			utils.FirstNonEmpty(reqProcessor.Timezone,
 				config.CgrConfig().GeneralCfg().DefaultTimezone),
 			ra.filterS, nil, nil)
-		agReq.Vars.Set([]string{MetaRadReqType}, utils.StringToInterface(MetaRadAuth))
+		agReq.Vars.Set([]string{MetaRadReqType}, utils.NewNMInterface(utils.StringToInterface(MetaRadAuth)))
 		var lclProcessed bool
 		if lclProcessed, err = ra.processRequest(reqProcessor, agReq, rpl); lclProcessed {
 			processed = lclProcessed
@@ -109,15 +109,15 @@ func (ra *RadiusAgent) handleAuth(req *radigo.Packet) (rpl *radigo.Packet, err e
 // handleAcct handles RADIUS Accounting request
 // supports: Acct-Status-Type = Start, Interim-Update, Stop
 func (ra *RadiusAgent) handleAcct(req *radigo.Packet) (rpl *radigo.Packet, err error) {
-	reqVars := make(map[string]interface{})
+	reqVars := make(utils.NavigableMap2)
 	req.SetAVPValues()             // populate string values in AVPs
 	dcdr := newRADataProvider(req) // dcdr will provide information from request
 	rpl = req.Reply()
 	rpl.Code = radigo.AccountingResponse
 	rplyNM := utils.NewOrderedNavigableMap()
-	cgrRplyNM := &utils.NavigableMap{}
+	cgrRplyNM := &utils.NavigableMap2{}
 	var processed bool
-	reqVars[utils.RemoteHost] = req.RemoteAddr().String()
+	reqVars[utils.RemoteHost] = utils.NewNMInterface(req.RemoteAddr().String())
 	for _, reqProcessor := range ra.cgrCfg.RadiusAgentCfg().RequestProcessors {
 		agReq := NewAgentRequest(dcdr, reqVars, cgrRplyNM, rplyNM,
 			reqProcessor.Tenant, ra.cgrCfg.GeneralCfg().DefaultTenant,
@@ -300,7 +300,7 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RequestProcessor,
 			&utils.CGREventWithArgDispatcher{CGREvent: cgrEv,
 				ArgDispatcher: cgrArgs.ArgDispatcher},
 			rplyCDRs); err != nil {
-			agReq.CGRReply.Set([]string{utils.Error}, err.Error())
+			agReq.CGRReply.Set([]string{utils.Error}, utils.NewNMInterface(err.Error()))
 		}
 	}
 	if err := agReq.SetFields(reqProcessor.ReplyFields); err != nil {

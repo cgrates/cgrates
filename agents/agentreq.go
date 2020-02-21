@@ -33,21 +33,21 @@ import (
 
 // NewAgentRequest returns a new AgentRequest
 func NewAgentRequest(req utils.DataProvider,
-	vars utils.NavigableMap,
-	cgrRply *utils.NavigableMap,
+	vars utils.NavigableMap2,
+	cgrRply *utils.NavigableMap2,
 	rply *utils.OrderedNavigableMap,
 	tntTpl config.RSRParsers,
 	dfltTenant, timezone string,
 	filterS *engine.FilterS,
 	header, trailer utils.DataProvider) (ar *AgentRequest) {
 	if cgrRply == nil {
-		cgrRply = &utils.NavigableMap{}
+		cgrRply = &utils.NavigableMap2{}
 	}
 	if rply == nil {
 		rply = utils.NewOrderedNavigableMap()
 	}
 	if vars == nil {
-		vars = utils.NavigableMap{}
+		vars = utils.NavigableMap2{}
 	}
 	ar = &AgentRequest{
 		Request:    req,
@@ -69,7 +69,7 @@ func NewAgentRequest(req utils.DataProvider,
 	} else {
 		ar.Tenant = dfltTenant
 	}
-	ar.Vars.Set([]string{utils.NodeID}, config.CgrConfig().GeneralCfg().NodeID)
+	ar.Vars.Set([]string{utils.NodeID}, utils.NewNMInterface(config.CgrConfig().GeneralCfg().NodeID))
 	return
 }
 
@@ -77,8 +77,8 @@ func NewAgentRequest(req utils.DataProvider,
 // implements utils.DataProvider so we can pass it to filters
 type AgentRequest struct {
 	Request    utils.DataProvider         // request
-	Vars       utils.NavigableMap         // shared data
-	CGRReply   *utils.NavigableMap        // the reply from the sessions
+	Vars       utils.NavigableMap2        // shared data
+	CGRReply   *utils.NavigableMap2       // the reply from the sessions
 	CGRRequest *utils.OrderedNavigableMap // Used in reply to access the request that was send
 	Reply      *utils.OrderedNavigableMap
 	Tenant,
@@ -87,7 +87,7 @@ type AgentRequest struct {
 	Header  utils.DataProvider
 	Trailer utils.DataProvider
 	diamreq *utils.OrderedNavigableMap // used in case of building requests (ie. DisconnectSession)
-	tmp     utils.NavigableMap         // used in case you want to store temporary items and access them later
+	tmp     utils.NavigableMap2        // used in case you want to store temporary items and access them later
 }
 
 // String implements utils.DataProvider
@@ -108,21 +108,21 @@ func (ar *AgentRequest) FieldAsInterface(fldPath []string) (val interface{}, err
 	case utils.MetaReq:
 		val, err = ar.Request.FieldAsInterface(fldPath[1:])
 	case utils.MetaVars:
-		val, err = ar.Vars.FieldAsInterface(fldPath[1:])
+		val, err = ar.Vars.Field(fldPath[1:])
 	case utils.MetaCgreq:
-		val, err = ar.CGRRequest.FieldAsInterface(fldPath[1:])
+		val, err = ar.CGRRequest.Field(fldPath[1:])
 	case utils.MetaCgrep:
-		val, err = ar.CGRReply.FieldAsInterface(fldPath[1:])
+		val, err = ar.CGRReply.Field(fldPath[1:])
 	case utils.MetaDiamreq:
-		val, err = ar.diamreq.FieldAsInterface(fldPath[1:])
+		val, err = ar.diamreq.Field(fldPath[1:])
 	case utils.MetaRep:
-		val, err = ar.Reply.FieldAsInterface(fldPath[1:])
+		val, err = ar.Reply.Field(fldPath[1:])
 	case utils.MetaHdr:
 		val, err = ar.Header.FieldAsInterface(fldPath[1:])
 	case utils.MetaTrl:
 		val, err = ar.Trailer.FieldAsInterface(fldPath[1:])
 	case utils.MetaTmp:
-		val, err = ar.tmp.FieldAsInterface(fldPath[1:])
+		val, err = ar.tmp.Field(fldPath[1:])
 	}
 	return
 }
@@ -141,7 +141,7 @@ func (ar *AgentRequest) FieldAsString(fldPath []string) (val string, err error) 
 
 //SetFields will populate fields of AgentRequest out of templates
 func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
-	ar.tmp = utils.NavigableMap{}
+	ar.tmp = utils.NavigableMap2{}
 	for _, tplFld := range tplFlds {
 		if pass, err := ar.filterS.Pass(ar.Tenant,
 			tplFld.Filters, ar); err != nil {
@@ -381,15 +381,15 @@ func (ar *AgentRequest) ParseField(
 // setCGRReply will set the aReq.cgrReply based on reply coming from upstream or error
 // returns error in case of reply not converting to NavigableMap
 func (ar *AgentRequest) setCGRReply(rply utils.NavigableMapper, errRply error) (err error) {
-	var nm utils.NavigableMap
+	var nm utils.NavigableMap2
 	if errRply != nil {
-		nm = utils.NavigableMap{utils.Error: errRply.Error()}
+		nm = utils.NavigableMap2{utils.Error: utils.NewNMInterface(errRply.Error())}
 	} else {
-		nm = utils.NavigableMap{}
+		nm = utils.NavigableMap2{}
 		if rply != nil {
 			nm = rply.AsNavigableMap()
 		}
-		nm.Set([]string{utils.Error}, "") // enforce empty error
+		nm.Set([]string{utils.Error}, utils.NewNMInterface("")) // enforce empty error
 	}
 	*ar.CGRReply = nm // update value so we can share CGRReply
 	return

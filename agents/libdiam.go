@@ -415,37 +415,16 @@ func (dP *diameterDP) FieldAsInterface(fldPath []string) (data interface{}, err 
 // updateDiamMsgFromNavMap will update the diameter message with items from navigable map
 func updateDiamMsgFromNavMap(m *diam.Message, navMp *utils.OrderedNavigableMap, tmz string) (err error) {
 	// write reply into message
-	pathIdx := make(map[string]int) // group items for same path
-	for _, val := range navMp.Values() {
-		nmItms, isNMItems := val.(*utils.NMSlice)
-		if !isNMItems {
+	for _, val := range navMp.GetOrder() {
+		var nmIt utils.NM
+		if nmIt, err = navMp.Field(val); err != nil {
+			return
+		}
+		itm, isNMItem := nmIt.(*config.NMItem)
+		if !isNMItem {
 			return fmt.Errorf("cannot encode reply value: %s, err: not NMItems", utils.ToJSON(val))
 		}
 		// find out the first itm which is not an attribute
-		var itm *config.NMItem
-		if len(*nmItms) == 1 {
-			var isNMItem bool
-			itm, isNMItem = (*nmItms)[0].(*config.NMItem)
-			if !isNMItem {
-				return fmt.Errorf("cannot encode reply value: %s, err: not NMItems", utils.ToJSON(val))
-			}
-		} else { // only for groups
-			for i, cfgItm := range *nmItms {
-				cfgIt, isNMItem := cfgItm.(*config.NMItem)
-				if !isNMItem {
-					return fmt.Errorf("cannot encode reply value: %s, err: not NMItems", utils.ToJSON(val))
-				}
-				itmPath := strings.Join(cfgIt.Path, utils.NestingSep)
-				if i == 0 { // path is common, increase it only once
-					pathIdx[itmPath]++
-				}
-				if i == pathIdx[itmPath]-1 { // revert from multiple items to only one per config path
-					itm = cfgIt
-					break
-				}
-			}
-		}
-
 		if itm == nil {
 			continue // all attributes, not writable to diameter packet
 		}
@@ -473,7 +452,7 @@ func diamAnswer(m *diam.Message, resCode uint32, errFlag bool,
 
 // negDiamAnswer is used to return the negative answer we need previous to
 func diamErr(m *diam.Message, resCode uint32,
-	reqVars map[string]interface{},
+	reqVars utils.NavigableMap2,
 	tpl []*config.FCTemplate, tnt, tmz string,
 	filterS *engine.FilterS) (a *diam.Message, err error) {
 	aReq := NewAgentRequest(
@@ -508,5 +487,5 @@ func disectDiamListen(addrs string) (ipAddrs []net.IP) {
 type diamMsgData struct {
 	c    diam.Conn
 	m    *diam.Message
-	vars map[string]interface{}
+	vars utils.NavigableMap2
 }

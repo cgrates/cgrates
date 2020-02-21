@@ -91,14 +91,14 @@ func (da *DNSAgent) Reload() (err error) {
 // requests are reaching here asynchronously
 func (da *DNSAgent) handleMessage(w dns.ResponseWriter, req *dns.Msg) {
 	dnsDP := newDNSDataProvider(req, w)
-	reqVars := make(map[string]interface{})
-	reqVars[QueryType] = dns.TypeToString[req.Question[0].Qtype]
+	reqVars := utils.NavigableMap2{}
+	reqVars[QueryType] = utils.NewNMInterface(dns.TypeToString[req.Question[0].Qtype])
 	rply := new(dns.Msg)
 	rply.SetReply(req)
 	// message preprocesing
 	switch req.Question[0].Qtype {
 	case dns.TypeNAPTR:
-		reqVars[QueryName] = req.Question[0].Name
+		reqVars[QueryName] = utils.NewNMInterface(req.Question[0].Name)
 		e164, err := e164FromNAPTR(req.Question[0].Name)
 		if err != nil {
 			utils.Logger.Warning(
@@ -108,12 +108,12 @@ func (da *DNSAgent) handleMessage(w dns.ResponseWriter, req *dns.Msg) {
 			dnsWriteMsg(w, rply)
 			return
 		}
-		reqVars[E164Address] = e164
-		reqVars[DomainName] = domainNameFromNAPTR(req.Question[0].Name)
+		reqVars[E164Address] = utils.NewNMInterface(e164)
+		reqVars[DomainName] = utils.NewNMInterface(domainNameFromNAPTR(req.Question[0].Name))
 	}
-	reqVars[utils.RemoteHost] = w.RemoteAddr().String()
+	reqVars[utils.RemoteHost] = utils.NewNMInterface(w.RemoteAddr().String())
 	rplyNM := utils.NewOrderedNavigableMap() // share it among different processors
-	cgrRplyNM := &utils.NavigableMap{}
+	cgrRplyNM := &utils.NavigableMap2{}
 	var processed bool
 	var err error
 	for _, reqProcessor := range da.cgrCfg.DNSAgentCfg().RequestProcessors {
@@ -331,7 +331,7 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 			utils.SessionSv1ProcessCDR,
 			&utils.CGREventWithArgDispatcher{CGREvent: cgrEv,
 				ArgDispatcher: cgrArgs.ArgDispatcher}, &rplyCDRs); err != nil {
-			agReq.CGRReply.Set([]string{utils.Error}, err.Error())
+			agReq.CGRReply.Set([]string{utils.Error}, utils.NewNMInterface(err.Error()))
 		}
 	}
 	if err := agReq.SetFields(reqProcessor.ReplyFields); err != nil {

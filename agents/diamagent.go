@@ -143,14 +143,14 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 		return
 	}
 	diamDP := newDADataProvider(c, m)
-	reqVars := map[string]interface{}{
-		utils.OriginHost:  da.cgrCfg.DiameterAgentCfg().OriginHost, // used in templates
-		utils.OriginRealm: da.cgrCfg.DiameterAgentCfg().OriginRealm,
-		utils.ProductName: da.cgrCfg.DiameterAgentCfg().ProductName,
-		utils.MetaApp:     dApp.Name,
-		utils.MetaAppID:   dApp.ID,
-		utils.MetaCmd:     dCmd.Short + "R",
-		utils.RemoteHost:  c.RemoteAddr().String(),
+	reqVars := utils.NavigableMap2{
+		utils.OriginHost:  utils.NewNMInterface(da.cgrCfg.DiameterAgentCfg().OriginHost), // used in templates
+		utils.OriginRealm: utils.NewNMInterface(da.cgrCfg.DiameterAgentCfg().OriginRealm),
+		utils.ProductName: utils.NewNMInterface(da.cgrCfg.DiameterAgentCfg().ProductName),
+		utils.MetaApp:     utils.NewNMInterface(dApp.Name),
+		utils.MetaAppID:   utils.NewNMInterface(dApp.ID),
+		utils.MetaCmd:     utils.NewNMInterface(dCmd.Short + "R"),
+		utils.RemoteHost:  utils.NewNMInterface(c.RemoteAddr().String()),
 	}
 	// build the negative error answer
 	diamErr, err := diamErr(
@@ -199,7 +199,7 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 		}()
 	}
 	rply := utils.NewOrderedNavigableMap() // share it among different processors
-	cgrRplyNM := &utils.NavigableMap{}
+	cgrRplyNM := &utils.NavigableMap2{}
 	var processed bool
 	for _, reqProcessor := range da.cgrCfg.DiameterAgentCfg().RequestProcessors {
 		var lclProcessed bool
@@ -399,7 +399,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 		if err = da.connMgr.Call(da.cgrCfg.DiameterAgentCfg().SessionSConns, da, utils.SessionSv1ProcessCDR,
 			&utils.CGREventWithArgDispatcher{CGREvent: cgrEv,
 				ArgDispatcher: cgrArgs.ArgDispatcher}, rplyCDRs); err != nil {
-			agReq.CGRReply.Set([]string{utils.Error}, err.Error())
+			agReq.CGRReply.Set([]string{utils.Error}, utils.NewNMInterface(err.Error()))
 		}
 	}
 	if err = agReq.SetFields(reqProcessor.ReplyFields); err != nil {

@@ -313,7 +313,7 @@ func TestFilterPassGreaterThan(t *testing.T) {
 	ev := utils.NavigableMap{}
 	ev.Set([]string{"ASR"}, 20)
 	if passes, err := rf.passGreaterThan(ev); err != nil {
-	t.Error(err)
+		t.Error(err)
 	} else if !passes {
 		t.Error("not passing")
 	}

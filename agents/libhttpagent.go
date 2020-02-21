@@ -246,24 +246,17 @@ type haTextPlainEncoder struct {
 func (xE *haTextPlainEncoder) Encode(nM *utils.OrderedNavigableMap) (err error) {
 	var str, nmPath string
 	msgFields := make(map[string]string) // work around to NMap issue
-	for _, val := range nM.Values() {
-		nmItms, isNMItems := val.(*utils.NMSlice)
+	for _, val := range nM.GetOrder() {
+		var nmIt utils.NM
+		if nmIt, err = nM.Field(val); err != nil {
+			return
+		}
+		nmItem, isNMItems := nmIt.(*config.NMItem)
 		if !isNMItems {
-			return fmt.Errorf("value: %s is not []*NMItem", val)
+			return fmt.Errorf("value: %s is not *NMItem", val)
 		}
-		if nmItms.Empty() {
-			continue
-		}
-		for i, nmItem2 := range *nmItms {
-			nmItem, isNMItem := nmItem2.(*config.NMItem)
-			if !isNMItem {
-				return fmt.Errorf("value: %s is not []*NMItem", nmItem2)
-			}
-			if i == 0 { // compose the path only 1 time
-				nmPath = strings.Join(nmItem.Path, utils.NestingSep)
-			}
-			msgFields[utils.ConcatenatedKey(nmPath, utils.IfaceAsString(nmItem.Data))] = utils.IfaceAsString(nmItem.Data)
-		}
+		nmPath = strings.Join(nmItem.Path, utils.NestingSep)
+		msgFields[utils.ConcatenatedKey(nmPath, utils.IfaceAsString(nmItem.Data))] = utils.IfaceAsString(nmItem.Data)
 	}
 	for key, val := range msgFields {
 		str += fmt.Sprintf("%s=%s\n", strings.Split(key, utils.InInFieldSep)[0], val)
