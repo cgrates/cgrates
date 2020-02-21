@@ -19,6 +19,8 @@ cgrates (0.11.0~dev) UNRELEASED; urgency=medium
   * [AgentRequest] Add support for *tmp path
   * [SessionS] Add new API SessionSv1.GetCost
   * [SessionS] Add support for *cdrs flag in SessionSv1.ProcessEvent
+  * [StatS] Update metric definition to include path for example:
+    *sum:~*req.Field1
 
  -- Alexandru Tripon <alexandru.tripon@itsyscom.com>  Wed, 19 Feb 2020 13:25:52 +0200
 
