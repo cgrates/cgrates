@@ -1,3 +1,5 @@
+.. _SessionS:
+
 SessionS
 ========
 

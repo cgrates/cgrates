@@ -397,7 +397,7 @@ func (tS *ThresholdService) V1GetThresholdsForEvent(args *ArgsProcessEvent, repl
 	return
 }
 
-// V1GetQueueIDs returns list of queueIDs registered for a tenant
+// V1GetQueueIDs returns list of thresholdIDs configured for a tenant
 func (tS *ThresholdService) V1GetThresholdIDs(tenant string, tIDs *[]string) (err error) {
 	prfx := utils.ThresholdPrefix + tenant + ":"
 	keys, err := tS.dm.DataDB().GetKeysForPrefix(prfx)
