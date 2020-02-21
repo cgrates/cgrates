@@ -1,3 +1,11 @@
+.. _Asterisk: https://www.asterisk.org/
+.. _FreeSWITCH: https://freeswitch.com/
+.. _Kamailio: https://www.kamailio.org/w/
+.. _OpenSIPS: https://opensips.org/
+
+
+.. _Suppliers:
+
 SupplierS
 =========
 
@@ -5,17 +13,18 @@ SupplierS
 **SupplierS** is a standalone subsystem within **CGRateS** responsible to compute a list of suppliers which can be used for a specific event received to process. It is accessed via :ref:`CGRateS RPC APIs<remote-management>`.
 
 As most of the other subsystems, it is performance oriented, stored inside *DataDB* but cached inside the *cgr-engine* process. 
-Caching can be done dynamically/on-demand or at start-time/precached and it is configurable within *cache* section in the .json configuration file.
+Caching can be done dynamically/on-demand or at start-time/precached and it is configurable within *cache* section in the :ref:`JSON configuration <configuration>`.
 
 
 Processing logic
 ----------------
 
-When a new *Event* is received, **SupplierS** will pass it to :ref:`FilterS` in order to find all *SupplierProfiles* matching the *Event*. 
+When a new *Event* is received, **SupplierS** will pass it to :ref:`FilterS` in order to find all :ref:`SupplierProfiles<SupplierProfile>` matching the *Event*. 
 
-As a result of the selection process we will get a single *SupplierProfile* matching the *Event* is active at the *EventTime* and has a higher priority than the other matching *SupplierProfiles*. 
+As a result of the selection process we will get a single :ref:`SupplierProfile` matching the *Event*, is active at the *EventTime* and has a higher priority than the other matching :ref:`SupplierProfiles<SupplierProfile>`. 
 
 Depending on the *Strategy* defined in the *SupplierProfile*, further steps will be taken (ie: query cost, stats, ordering) for each of the individual *SupplierIDs* defined within the *SupplierProfile*.
+
 
 APIs logic
 ----------
@@ -72,6 +81,8 @@ stats_conns
 default_ratio
 	Default ratio used in case of *load strategy
 
+
+.. _SupplierProfile:
 
 SupplierProfile
 ^^^^^^^^^^^^^^^
@@ -131,8 +142,10 @@ Weight
 	Priority in case of multiple *SupplierProfiles* matching an *Event*. Higher *Weight* will have more priority.
 
 Suppliers
-	List of *Supplier* objects which are part of this *SupplierProfile*
+	List of :ref:`Supplier` objects which are part of this *SupplierProfile*
 
+
+.. _Supplier:
 
 Supplier
 ^^^^^^^^

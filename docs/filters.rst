@@ -11,6 +11,7 @@ In order to be used in event processing, a Filter profile will be attached insid
 
 A subsystem can use a *Filter* via *FilterProfile* or in-line (ad-hock in the same place where subsystem profile is defined).
 
+
 Filter profile 
 --------------
 

@@ -43,6 +43,7 @@ nested_fields
 process_runs
   Limit the number of loops when processing an Event. The event loop is however clever enough to stop when the same processing occurs or no more additional profiles are matching, so higher numbers are ignored if not needed.
 
+.. _AttributeProfile:
 
 AttributeProfile
 ^^^^^^^^^^^^^^^^
@@ -71,8 +72,10 @@ Weight
 	Used in case of multiple profiles matching an event. The higher, the better (0 has lowest possible priority).
 
 Attributes
-	List of [Attribute](#attribute) objects part of this profile
+	List of :ref:`Attribute` objects part of this profile.
 
+
+.. _Attribute:
 
 Attribute
 ^^^^^^^^^

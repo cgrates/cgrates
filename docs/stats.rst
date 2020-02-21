@@ -107,7 +107,7 @@ Following metrics are implemented:
 \*asr
 	`Answer-seizure ratio <https://en.wikipedia.org/wiki/Answer-seizure_ratio>`_. Relies on *AnswerTime* field in the *Event*.
 \*acd
-	`Average call duration <https://en.wikipedia.org/wiki/Average_call_duration>`. Uses *AnswerTime* and *Usage* fields in the *Event*.
+	`Average call duration <https://en.wikipedia.org/wiki/Average_call_duration>`_. Uses *AnswerTime* and *Usage* fields in the *Event*.
 \*tcd
 	Total call duration. Uses *Usage* out of *Event*.
 
