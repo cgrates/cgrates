@@ -33,7 +33,7 @@ type DataProvider interface {
 
 // NavigableMapper is the interface supported by replies convertible to CGRReply
 type NavigableMapper interface {
-	AsNavigableMap() NavigableMap
+	AsNavigableMap() NavigableMap2
 }
 
 // DPDynamicInterface returns the value of the field if the path is dynamic
@@ -68,8 +68,11 @@ type NM interface {
 	String() string
 	Interface() interface{}
 	Field(path []string) (val NM, err error)
-	Set(path []string, val NM, overwrite bool) (err error)
+	GetField(path string) (val NM, err error)
+	SetField(path string, val NM) (err error)
+	Set(path []string, val NM) (err error)
 	Remove(path []string) (err error)
 	Type() NMType
 	Empty() bool
+	Len() int
 }

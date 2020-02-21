@@ -39,7 +39,7 @@ func (nmi *NMItem) Interface() interface{} { return nmi.Data }
 func (nmi *NMItem) Field(path []string) (val utils.NM, err error) {
 	return nil, utils.ErrNotImplemented
 }
-func (nmi *NMItem) Set(path []string, val utils.NM, overwrite bool) (err error) {
+func (nmi *NMItem) Set(path []string, val utils.NM) (err error) {
 	return utils.ErrNotImplemented
 }
 func (nmi *NMItem) Remove(path []string) (err error) {
@@ -47,6 +47,14 @@ func (nmi *NMItem) Remove(path []string) (err error) {
 }
 func (nmi *NMItem) Type() utils.NMType { return utils.NMInterfaceType }
 func (nmi *NMItem) Empty() bool        { return nmi == nil || nmi.Data == nil }
+
+func (nmi *NMItem) GetField(path string) (val utils.NM, err error) {
+	return nil, utils.ErrNotImplemented
+}
+
+func (nmi *NMItem) SetField(path string, val utils.NM) (err error) { return utils.ErrNotImplemented }
+
+func (nmi *NMItem) Len() int { return 0 }
 
 // XMLElement is specially crafted to be automatically marshalled by encoding/xml
 type XMLElement struct {
@@ -60,87 +68,85 @@ type XMLElement struct {
 // considers each value returned by .Values() in the form of []*NMItem, otherwise errors
 func NMAsXMLElements(nm *utils.OrderedNavigableMap) (ents []*XMLElement, err error) {
 	pathIdx := make(map[string]*XMLElement) // Keep the index of elements based on path
-	for _, val := range nm.Values() {
-		nmItms, isNMItems := val.(*utils.NMSlice)
-		if !isNMItems {
+	for _, val := range nm.GetOrder() {
+		var nmIt utils.NM
+		if nmIt, err = nm.Field(val); err != nil {
+			return
+		}
+		nmItm, isNMItem := nmIt.(*NMItem)
+		if !isNMItem {
 			return nil, fmt.Errorf("value: %+v is not []*NMItem", val)
 		}
-		for _, nmIt := range *nmItms {
-			nmItm, isNMItems := nmIt.(*NMItem)
-			if !isNMItems {
+		if nmItm.Config != nil && nmItm.Config.NewBranch {
+			pathIdx = make(map[string]*XMLElement) // reset cache so we can start having other elements with same path
+		}
+		val := utils.IfaceAsString(nmItm.Data)
+		var pathCached bool
+		for i := len(nmItm.Path); i > 0; i-- {
+			var cachedElm *XMLElement
+			if cachedElm, pathCached = pathIdx[strings.Join(nmItm.Path[:i], "")]; !pathCached {
 				continue
 			}
-			if nmItm.Config != nil && nmItm.Config.NewBranch {
-				pathIdx = make(map[string]*XMLElement) // reset cache so we can start having other elements with same path
-			}
-			val := utils.IfaceAsString(nmItm.Data)
-			var pathCached bool
-			for i := len(nmItm.Path); i > 0; i-- {
-				var cachedElm *XMLElement
-				if cachedElm, pathCached = pathIdx[strings.Join(nmItm.Path[:i], "")]; !pathCached {
-					continue
+			if i == len(nmItm.Path) { // lastElmnt, overwrite value or add attribute
+				if nmItm.Config != nil &&
+					nmItm.Config.AttributeID != "" {
+					cachedElm.Attributes = append(cachedElm.Attributes,
+						&xml.Attr{
+							Name:  xml.Name{Local: nmItm.Config.AttributeID},
+							Value: val,
+						})
+				} else {
+					cachedElm.Value = val
 				}
-				if i == len(nmItm.Path) { // lastElmnt, overwrite value or add attribute
+				break
+			}
+			// create elements in reverse order so we can append already created
+			var newElm *XMLElement
+			for j := len(nmItm.Path); j > i; j-- {
+				elm := &XMLElement{XMLName: xml.Name{Local: nmItm.Path[j-1]}}
+				pathIdx[strings.Join(nmItm.Path[:j], "")] = elm
+				if newElm == nil {
 					if nmItm.Config != nil &&
 						nmItm.Config.AttributeID != "" {
-						cachedElm.Attributes = append(cachedElm.Attributes,
+						elm.Attributes = append(elm.Attributes,
 							&xml.Attr{
 								Name:  xml.Name{Local: nmItm.Config.AttributeID},
 								Value: val,
 							})
 					} else {
-						cachedElm.Value = val
+						elm.Value = val
 					}
-					break
+					newElm = elm // last element
+				} else {
+					elm.Elements = append(elm.Elements, newElm)
+					newElm = elm
 				}
-				// create elements in reverse order so we can append already created
-				var newElm *XMLElement
-				for j := len(nmItm.Path); j > i; j-- {
-					elm := &XMLElement{XMLName: xml.Name{Local: nmItm.Path[j-1]}}
-					pathIdx[strings.Join(nmItm.Path[:j], "")] = elm
-					if newElm == nil {
-						if nmItm.Config != nil &&
-							nmItm.Config.AttributeID != "" {
-							elm.Attributes = append(elm.Attributes,
-								&xml.Attr{
-									Name:  xml.Name{Local: nmItm.Config.AttributeID},
-									Value: val,
-								})
-						} else {
-							elm.Value = val
-						}
-						newElm = elm // last element
-					} else {
-						elm.Elements = append(elm.Elements, newElm)
-						newElm = elm
-					}
-				}
-				cachedElm.Elements = append(cachedElm.Elements, newElm)
 			}
-			if !pathCached { // not an update but new element to be created
-				var newElm *XMLElement
-				for i := len(nmItm.Path); i > 0; i-- {
-					elm := &XMLElement{XMLName: xml.Name{Local: nmItm.Path[i-1]}}
-					pathIdx[strings.Join(nmItm.Path[:i], "")] = elm
-					if newElm == nil { // last element, create data inside
-						if nmItm.Config != nil &&
-							nmItm.Config.AttributeID != "" {
-							elm.Attributes = append(elm.Attributes,
-								&xml.Attr{
-									Name:  xml.Name{Local: nmItm.Config.AttributeID},
-									Value: val,
-								})
-						} else {
-							elm.Value = val
-						}
-						newElm = elm // last element
+			cachedElm.Elements = append(cachedElm.Elements, newElm)
+		}
+		if !pathCached { // not an update but new element to be created
+			var newElm *XMLElement
+			for i := len(nmItm.Path); i > 0; i-- {
+				elm := &XMLElement{XMLName: xml.Name{Local: nmItm.Path[i-1]}}
+				pathIdx[strings.Join(nmItm.Path[:i], "")] = elm
+				if newElm == nil { // last element, create data inside
+					if nmItm.Config != nil &&
+						nmItm.Config.AttributeID != "" {
+						elm.Attributes = append(elm.Attributes,
+							&xml.Attr{
+								Name:  xml.Name{Local: nmItm.Config.AttributeID},
+								Value: val,
+							})
 					} else {
-						elm.Elements = append(elm.Elements, newElm)
-						newElm = elm
+						elm.Value = val
 					}
+					newElm = elm // last element
+				} else {
+					elm.Elements = append(elm.Elements, newElm)
+					newElm = elm
 				}
-				ents = append(ents, newElm)
 			}
+			ents = append(ents, newElm)
 		}
 	}
 	return
@@ -163,21 +169,21 @@ func NMAsCGREvent(nM *utils.OrderedNavigableMap, tnt string, pathSep string) (cg
 		Time:   utils.TimePointer(time.Now()),
 		Event:  make(map[string]interface{})}
 	for _, branchPath := range order {
-		val, _ := nM.FieldAsInterface(branchPath)
-		if nmItms, isNMItems := val.(*utils.NMSlice); isNMItems { // special case when we have added multiple items inside a key, used in agents
-			for _, nmIt := range *nmItms {
-				nmItm, isNMItem := nmIt.(*NMItem)
-				if !isNMItem {
-					continue
-				}
-				if nmItm.Config == nil ||
-					nmItm.Config.AttributeID == "" {
-					val = nmItm.Data // first item which is not an attribute will become the value
-					break
+		var val interface{}
+		val, _ = nM.Field(branchPath)
+		if nmItm, isNMItem := val.(*NMItem); isNMItem { // special case when we have added multiple items inside a key, used in agents
+			if nmItm.Config == nil ||
+				nmItm.Config.AttributeID == "" {
+				val = nmItm.Data // first item which is not an attribute will become the value
+				if _, has := cgrEv.Event[strings.Join(branchPath, pathSep)]; !has {
+					cgrEv.Event[strings.Join(branchPath, pathSep)] = nmItm.Data
 				}
 			}
+			continue
 		}
-		cgrEv.Event[strings.Join(branchPath, pathSep)] = val
+		if _, has := cgrEv.Event[strings.Join(branchPath, pathSep)]; !has {
+			cgrEv.Event[strings.Join(branchPath, pathSep)] = val
+		}
 	}
 	return
 }

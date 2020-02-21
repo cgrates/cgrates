@@ -56,7 +56,7 @@ type HTTPAgent struct {
 
 // ServeHTTP implements http.Handler interface
 func (ha *HTTPAgent) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	reqVars := make(map[string]interface{})
+	reqVars := make(utils.NavigableMap2)
 	dcdr, err := newHADataProvider(ha.reqPayload, req) // dcdr will provide information from request
 	if err != nil {
 		utils.Logger.Warning(
@@ -65,8 +65,8 @@ func (ha *HTTPAgent) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	rplyNM := utils.NewOrderedNavigableMap()
-	cgrRplyNM := &utils.NavigableMap{}
-	reqVars[utils.RemoteHost] = req.RemoteAddr
+	cgrRplyNM := &utils.NavigableMap2{}
+	reqVars[utils.RemoteHost] = utils.NewNMInterface(req.RemoteAddr)
 	for _, reqProcessor := range ha.reqProcessors {
 		agReq := NewAgentRequest(dcdr, reqVars, cgrRplyNM, rplyNM,
 			reqProcessor.Tenant, ha.dfltTenant,
@@ -260,7 +260,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 			&utils.CGREventWithArgDispatcher{CGREvent: cgrEv,
 				ArgDispatcher: cgrArgs.ArgDispatcher},
 			rplyCDRs); err != nil {
-			agReq.CGRReply.Set([]string{utils.Error}, err.Error())
+			agReq.CGRReply.Set([]string{utils.Error}, utils.NewNMInterface(err.Error()))
 		}
 	}
 	if err := agReq.SetFields(reqProcessor.ReplyFields); err != nil {

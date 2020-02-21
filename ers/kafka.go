@@ -158,9 +158,8 @@ func (rdr *KafkaER) processMessage(msg []byte) (err error) {
 		return
 	}
 
-	reqVars := make(map[string]interface{})
 	agReq := agents.NewAgentRequest(
-		utils.NavigableMap(decodedMessage), reqVars,
+		utils.NavigableMap(decodedMessage), nil,
 		nil, nil, rdr.Config().Tenant,
 		rdr.cgrCfg.GeneralCfg().DefaultTenant,
 		utils.FirstNonEmpty(rdr.Config().Timezone,
