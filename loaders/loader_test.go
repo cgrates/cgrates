@@ -635,13 +635,13 @@ func TestLoaderProcessStats(t *testing.T) {
 		TTL:         time.Duration(1 * time.Second),
 		Metrics: []*engine.MetricWithFilters{
 			&engine.MetricWithFilters{
-				MetricID: "*sum:~Value",
+				MetricID: "*sum:~*req.Value",
 			},
 			&engine.MetricWithFilters{
-				MetricID: "*average:~Value",
+				MetricID: "*average:~*req.Value",
 			},
 			&engine.MetricWithFilters{
-				MetricID: "*sum:~Usage",
+				MetricID: "*sum:~*req.Usage",
 			},
 		},
 		ThresholdIDs: []string{"Th1", "Th2"},

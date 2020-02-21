@@ -28,6 +28,6 @@ cgrates.org,SPL_QOS_FILTRED2,,,,,supplier2,FLTR_QOS_SP2_2,,RP_RETAIL1,,Stat_2,20
 cgrates.org,SPL_QOS_FILTRED2,,,,,supplier3,,,,,Stat_3,35,,,
 cgrates.org,SPL_LCR,FLTR_TEST,2017-11-27T00:00:00Z,*lc,,supplier_1,,,RP_TEST_1,,,10,,,50
 cgrates.org,SPL_LCR,,,,,supplier_2,,,RP_TEST_2,,,,,,
-cgrates.org,SPL_LOAD_DIST,FLTR_SPP_LOAD_DIST,,*load,supplier1:2;supplier2:7;*default:5,supplier1,,,,,Stat_Supplier1:*sum:~LoadReq,10,false,,20
-cgrates.org,SPL_LOAD_DIST,,,,,supplier2,,,,,Stat_Supplier2:*sum:~LoadReq,20,,,
-cgrates.org,SPL_LOAD_DIST,,,,,supplier3,,,,,Stat_Supplier3:*sum:~LoadReq,35,,,
+cgrates.org,SPL_LOAD_DIST,FLTR_SPP_LOAD_DIST,,*load,supplier1:2;supplier2:7;*default:5,supplier1,,,,,Stat_Supplier1:*sum:~*req.LoadReq,10,false,,20
+cgrates.org,SPL_LOAD_DIST,,,,,supplier2,,,,,Stat_Supplier2:*sum:~*req.LoadReq,20,,,
+cgrates.org,SPL_LOAD_DIST,,,,,supplier3,,,,,Stat_Supplier3:*sum:~*req.LoadReq,35,,,

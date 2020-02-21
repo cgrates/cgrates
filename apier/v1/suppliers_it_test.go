@@ -806,7 +806,8 @@ func testV1SplSSetSupplierProfiles(t *testing.T) {
 
 func testV1SplSGetSupplierProfileIDs(t *testing.T) {
 	expected := []string{"SPL_HIGHESTCOST_1", "SPL_QOS_1", "SPL_QOS_2", "SPL_QOS_FILTRED", "SPL_QOS_FILTRED2",
-		"SPL_ACNT_1001", "SPL_LEASTCOST_1", "SPL_WEIGHT_2", "SPL_WEIGHT_1", "SPL_QOS_3", "TEST_PROFILE1", "SPL_LCR"}
+		"SPL_ACNT_1001", "SPL_LEASTCOST_1", "SPL_WEIGHT_2", "SPL_WEIGHT_1", "SPL_QOS_3",
+		"TEST_PROFILE1", "SPL_LOAD_DIST", "SPL_LCR"}
 	var result []string
 	if err := splSv1Rpc.Call(utils.APIerSv1GetSupplierProfileIDs,
 		&utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{"cgrates.org"}}, &result); err != nil {

@@ -59,7 +59,7 @@ func NewStatMetric(metricID string, minItems int, filterIDs []string) (sm StatMe
 		utils.MetaDistinct: NewStatDistinct,
 	}
 	// split the metricID
-	// in case of *sum we have *sum:~FieldName
+	// in case of *sum we have *sum:~*req.FieldName
 	metricSplit := utils.SplitConcatenatedKey(metricID)
 	if _, has := metrics[metricSplit[0]]; !has {
 		return nil, fmt.Errorf("unsupported metric type <%s>", metricSplit[0])

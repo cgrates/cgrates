@@ -481,7 +481,7 @@ func testV2CDRsSetStats(t *testing.T) {
 			// QueueLength: 10,
 			Metrics: []*engine.MetricWithFilters{
 				&engine.MetricWithFilters{
-					MetricID: "*sum:~Usage",
+					MetricID: "*sum:~*req.Usage",
 				},
 			},
 			ThresholdIDs: []string{utils.META_NONE},
@@ -592,7 +592,7 @@ func testV2CDRsGetStats1(t *testing.T) {
 	expectedIDs := []string{"STS_PoccessCDR"}
 	var metrics map[string]string
 	expectedMetrics := map[string]string{
-		utils.ConcatenatedKey(utils.MetaSum, utils.DynamicDataPrefix+utils.Usage): utils.NOT_AVAILABLE,
+		utils.ConcatenatedKey(utils.MetaSum, utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+utils.Usage): utils.NOT_AVAILABLE,
 	}
 	if err := cdrsRpc.Call(utils.StatSv1GetQueueStringMetrics,
 		&utils.TenantIDWithArgDispatcher{
@@ -659,7 +659,7 @@ func testV2CDRsGetStats2(t *testing.T) {
 	expectedIDs := []string{"STS_PoccessCDR"}
 	var metrics map[string]string
 	expectedMetrics := map[string]string{
-		utils.ConcatenatedKey(utils.MetaSum, utils.DynamicDataPrefix+utils.Usage): "60000000000",
+		utils.ConcatenatedKey(utils.MetaSum, utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+utils.Usage): "60000000000",
 	}
 	if err := cdrsRpc.Call(utils.StatSv1GetQueueStringMetrics,
 		&utils.TenantIDWithArgDispatcher{

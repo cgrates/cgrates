@@ -534,7 +534,7 @@ func testV1FIdxCaSetStatQueueProfile(t *testing.T) {
 			TTL:         time.Duration(10) * time.Second,
 			Metrics: []*engine.MetricWithFilters{
 				&engine.MetricWithFilters{
-					MetricID: "*sum:~Val",
+					MetricID: "*sum:~*req.Val",
 				},
 			},
 			ThresholdIDs: []string{"Val1", "Val2"},
@@ -687,7 +687,7 @@ func testV1FIdxCaUpdateStatQueueProfile(t *testing.T) {
 			TTL:         time.Duration(10) * time.Second,
 			Metrics: []*engine.MetricWithFilters{
 				&engine.MetricWithFilters{
-					MetricID: "*sum:~Val",
+					MetricID: "*sum:~*req.Val",
 				},
 			},
 			ThresholdIDs: []string{"*none"},
