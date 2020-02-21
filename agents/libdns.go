@@ -155,17 +155,14 @@ func appendDNSAnswer(msg *dns.Msg) (err error) {
 // updateDNSMsgFromNM will update DNS message with values from NavigableMap
 func updateDNSMsgFromNM(msg *dns.Msg, nm *utils.OrderedNavigableMap) (err error) {
 	msgFields := make(map[string]struct{}) // work around to NMap issue
-	for _, valX := range nm.Values() {
-		nmItms, cast := valX.(*utils.NMSlice)
+	for _, val := range nm.GetOrder() {
+		var nmIt utils.NM
+		if nmIt, err = nm.Field(val); err != nil {
+			return
+		}
+		cfgItm, cast := nmIt.(*config.NMItem)
 		if !cast {
-			return fmt.Errorf("cannot cast val: %s into []*config.NMItem", valX)
-		}
-		if len(*nmItms) == 0 {
-			continue
-		}
-		cfgItm, isNMITem := (*nmItms)[0].(*config.NMItem) // first item gives some config for the rest, cannot iterate through NMItems since they are multipled by order
-		if !isNMITem {
-			return fmt.Errorf("cannot cast val: %s into []*config.NMItem", valX)
+			return fmt.Errorf("cannot cast val: %s into *config.NMItem", val)
 		}
 		if len(cfgItm.Path) == 0 {
 			return errors.New("empty path in config item")
@@ -180,10 +177,7 @@ func updateDNSMsgFromNM(msg *dns.Msg, nm *utils.OrderedNavigableMap) (err error)
 			}
 			msgFields = make(map[string]struct{}) // reset the fields inside since we have a new message
 		}
-		itmData := (*nmItms)[0].Interface() // populate default with first item's data
-		if len(*nmItms) >= len(msg.Answer) {
-			itmData = (*nmItms)[len(msg.Answer)-1].Interface() // data at same index as answer
-		}
+		itmData := cfgItm.Data // populate default with first item's data
 		switch cfgItm.Path[0] {
 		case utils.Rcode:
 			var itm int64

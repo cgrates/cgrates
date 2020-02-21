@@ -185,9 +185,8 @@ func (rdr *SQLEventReader) readLoop(db *gorm.DB) {
 }
 
 func (rdr *SQLEventReader) processMessage(msg map[string]interface{}) (err error) {
-	reqVars := make(map[string]interface{})
 	agReq := agents.NewAgentRequest(
-		utils.NavigableMap(msg), reqVars,
+		utils.NavigableMap(msg), nil,
 		nil, nil, rdr.Config().Tenant,
 		rdr.cgrCfg.GeneralCfg().DefaultTenant,
 		utils.FirstNonEmpty(rdr.Config().Timezone,

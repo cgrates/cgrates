@@ -54,12 +54,12 @@ func TestAgReqSetFields(t *testing.T) {
 	agReq.CGRRequest.Set([]string{utils.RequestType}, utils.NewNMInterface(utils.META_PREPAID))
 	agReq.CGRRequest.Set([]string{utils.Usage}, utils.NewNMInterface(time.Duration(3*time.Minute)))
 
-	cgrRply := utils.NavigableMap{
-		utils.CapAttributes: map[string]interface{}{
-			"PaypalAccount": "cgrates@paypal.com",
+	cgrRply := utils.NavigableMap2{
+		utils.CapAttributes: utils.NavigableMap2{
+			"PaypalAccount": utils.NewNMInterface("cgrates@paypal.com"),
 		},
-		utils.CapMaxUsage: time.Duration(120 * time.Second),
-		utils.Error:       "",
+		utils.CapMaxUsage: utils.NewNMInterface(time.Duration(120 * time.Second)),
+		utils.Error:       utils.NewNMInterface(""),
 	}
 	agReq.CGRReply = &cgrRply
 
@@ -141,8 +141,7 @@ func TestAgentRequestSetFields(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
 	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items),
 		config.CgrConfig().CacheCfg(), nil)
-	vars := map[string]interface{}{}
-	ar := NewAgentRequest(utils.NavigableMap(req), vars,
+	ar := NewAgentRequest(utils.NavigableMap(req), nil,
 		nil, nil, config.NewRSRParsersMustCompile("", false, utils.NestingSep),
 		"cgrates.org", "", engine.NewFilterS(cfg, nil, dm),
 		utils.NavigableMap(req), utils.NavigableMap(req))
@@ -476,8 +475,8 @@ func TestAgReqMaxCost(t *testing.T) {
 	// populate request, emulating the way will be done in HTTPAgent
 	agReq.CGRRequest.Set([]string{utils.CapMaxUsage}, utils.NewNMInterface("120s"))
 
-	cgrRply := utils.NavigableMap{
-		utils.CapMaxUsage: time.Duration(120 * time.Second),
+	cgrRply := utils.NavigableMap2{
+		utils.CapMaxUsage: utils.NewNMInterface(time.Duration(120 * time.Second)),
 	}
 	agReq.CGRReply = &cgrRply
 
@@ -862,7 +861,7 @@ func TestAgReqSetField2(t *testing.T) {
 		utils.NewNMInterface(time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC)))
 	agReq.CGRRequest.Set([]string{utils.RequestType}, utils.NewNMInterface(utils.META_PREPAID))
 
-	agReq.CGRReply = &utils.NavigableMap{}
+	agReq.CGRReply = &utils.NavigableMap2{}
 
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Tenant",
@@ -966,12 +965,12 @@ func TestAgReqNewARWithCGRRplyAndRply(t *testing.T) {
 	rply := utils.NewOrderedNavigableMap()
 	rply.Set([]string{"FirstLevel", "SecondLevel", "Fld1"}, utils.NewNMInterface("Val1"))
 
-	cgrRply := &utils.NavigableMap{
-		utils.CapAttributes: utils.NavigableMap{
-			"PaypalAccount": "cgrates@paypal.com",
+	cgrRply := &utils.NavigableMap2{
+		utils.CapAttributes: utils.NavigableMap2{
+			"PaypalAccount": utils.NewNMInterface("cgrates@paypal.com"),
 		},
-		utils.CapMaxUsage: time.Duration(120 * time.Second),
-		utils.Error:       "",
+		utils.CapMaxUsage: utils.NewNMInterface(time.Duration(120 * time.Second)),
+		utils.Error:       utils.NewNMInterface(""),
 	}
 
 	agReq := NewAgentRequest(nil, nil, cgrRply, rply, nil, "cgrates.org", "", filterS, nil, nil)
@@ -1028,10 +1027,10 @@ func TestAgReqSetCGRReplyWithError(t *testing.T) {
 	}
 }
 
-type myEv map[string]interface{}
+type myEv map[string]utils.NM
 
-func (ev myEv) AsNavigableMap() utils.NavigableMap {
-	return utils.NavigableMap(ev)
+func (ev myEv) AsNavigableMap() utils.NavigableMap2 {
+	return utils.NavigableMap2(ev)
 }
 
 func TestAgReqSetCGRReplyWithoutError(t *testing.T) {
@@ -1044,11 +1043,11 @@ func TestAgReqSetCGRReplyWithoutError(t *testing.T) {
 	rply.Set([]string{"FirstLevel", "SecondLevel", "Fld1"}, utils.NewNMInterface("Val1"))
 
 	myEv := myEv{
-		utils.CapAttributes: utils.NavigableMap{
-			"PaypalAccount": "cgrates@paypal.com",
+		utils.CapAttributes: utils.NavigableMap2{
+			"PaypalAccount": utils.NewNMInterface("cgrates@paypal.com"),
 		},
-		utils.CapMaxUsage: time.Duration(120 * time.Second),
-		utils.Error:       "",
+		utils.CapMaxUsage: utils.NewNMInterface(time.Duration(120 * time.Second)),
+		utils.Error:       utils.NewNMInterface(""),
 	}
 
 	agReq := NewAgentRequest(nil, nil, nil, rply,
@@ -1479,7 +1478,7 @@ func TestAgReqOverwrite(t *testing.T) {
 		utils.NewNMInterface(time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC)))
 	agReq.CGRRequest.Set([]string{utils.RequestType}, utils.NewNMInterface(utils.META_PREPAID))
 
-	agReq.CGRReply = &utils.NavigableMap{}
+	agReq.CGRReply = &utils.NavigableMap2{}
 
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Account",
@@ -1531,7 +1530,7 @@ func TestAgReqGroupType(t *testing.T) {
 		utils.NewNMInterface(time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC)))
 	agReq.CGRRequest.Set([]string{utils.RequestType}, utils.NewNMInterface(utils.META_PREPAID))
 
-	agReq.CGRReply = &utils.NavigableMap{}
+	agReq.CGRReply = &utils.NavigableMap2{}
 
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Account",

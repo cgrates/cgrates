@@ -160,22 +160,29 @@ func (sSpls *SortedSuppliers) SortLoadDistribution() {
 func (sSpls *SortedSuppliers) Digest() string {
 	return strings.Join(sSpls.SuppliersWithParams(), utils.FIELDS_SEP)
 }
-
-func (sSpls *SortedSuppliers) AsNavigableMap() (nm utils.NavigableMap) {
-	nm = utils.NavigableMap{
-		"ProfileID": sSpls.ProfileID,
-		"Sorting":   sSpls.Sorting,
-		"Count":     sSpls.Count,
+func (ss *SortedSupplier) AsNavigableMap() (nm utils.NavigableMap2) {
+	nm = utils.NavigableMap2{
+		"SupplierID":         utils.NewNMInterface(ss.SupplierID),
+		"SupplierParameters": utils.NewNMInterface(ss.SupplierParameters),
 	}
-	sm := make([]utils.NavigableMap, len(sSpls.SortedSuppliers))
+	sd := utils.NavigableMap2{}
+	for k, d := range ss.SortingData {
+		sd[k] = utils.NewNMInterface(d)
+	}
+	nm["SortingData"] = sd
+	return
+}
+func (sSpls *SortedSuppliers) AsNavigableMap() (nm utils.NavigableMap2) {
+	nm = utils.NavigableMap2{
+		"ProfileID": utils.NewNMInterface(sSpls.ProfileID),
+		"Sorting":   utils.NewNMInterface(sSpls.Sorting),
+		"Count":     utils.NewNMInterface(sSpls.Count),
+	}
+	sm := make(utils.NMSlice, len(sSpls.SortedSuppliers))
 	for i, ss := range sSpls.SortedSuppliers {
-		sm[i] = utils.NavigableMap{
-			"SupplierID":         ss.SupplierID,
-			"SupplierParameters": ss.SupplierParameters,
-			"SortingData":        ss.SortingData,
-		}
+		sm[i] = ss.AsNavigableMap()
 	}
-	nm["SortedSuppliers"] = sm
+	nm["SortedSuppliers"] = &sm
 	return
 }
 
