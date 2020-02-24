@@ -171,18 +171,19 @@ func NMAsCGREvent(nM *utils.OrderedNavigableMap, tnt string, pathSep string) (cg
 	for _, branchPath := range order {
 		var val interface{}
 		val, _ = nM.Field(branchPath)
+		opath := utils.GetPathWithoutIndex(strings.Join(branchPath, pathSep))
 		if nmItm, isNMItem := val.(*NMItem); isNMItem { // special case when we have added multiple items inside a key, used in agents
 			if nmItm.Config == nil ||
 				nmItm.Config.AttributeID == "" {
 				val = nmItm.Data // first item which is not an attribute will become the value
-				if _, has := cgrEv.Event[strings.Join(branchPath, pathSep)]; !has {
-					cgrEv.Event[strings.Join(branchPath, pathSep)] = nmItm.Data
+				if _, has := cgrEv.Event[opath]; !has {
+					cgrEv.Event[opath] = nmItm.Data
 				}
 			}
 			continue
 		}
-		if _, has := cgrEv.Event[strings.Join(branchPath, pathSep)]; !has {
-			cgrEv.Event[strings.Join(branchPath, pathSep)] = val
+		if _, has := cgrEv.Event[opath]; !has {
+			cgrEv.Event[opath] = val
 		}
 	}
 	return

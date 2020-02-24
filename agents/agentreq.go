@@ -108,21 +108,21 @@ func (ar *AgentRequest) FieldAsInterface(fldPath []string) (val interface{}, err
 	case utils.MetaReq:
 		val, err = ar.Request.FieldAsInterface(fldPath[1:])
 	case utils.MetaVars:
-		val, err = ar.Vars.Field(fldPath[1:])
+		val, err = ar.Vars.FieldAsInterface(fldPath[1:])
 	case utils.MetaCgreq:
-		val, err = ar.CGRRequest.Field(fldPath[1:])
+		val, err = ar.CGRRequest.FieldAsInterface(fldPath[1:])
 	case utils.MetaCgrep:
-		val, err = ar.CGRReply.Field(fldPath[1:])
+		val, err = ar.CGRReply.FieldAsInterface(fldPath[1:])
 	case utils.MetaDiamreq:
-		val, err = ar.diamreq.Field(fldPath[1:])
+		val, err = ar.diamreq.FieldAsInterface(fldPath[1:])
 	case utils.MetaRep:
-		val, err = ar.Reply.Field(fldPath[1:])
+		val, err = ar.Reply.FieldAsInterface(fldPath[1:])
 	case utils.MetaHdr:
 		val, err = ar.Header.FieldAsInterface(fldPath[1:])
 	case utils.MetaTrl:
 		val, err = ar.Trailer.FieldAsInterface(fldPath[1:])
 	case utils.MetaTmp:
-		val, err = ar.tmp.Field(fldPath[1:])
+		val, err = ar.tmp.FieldAsInterface(fldPath[1:])
 	}
 	return
 }
@@ -134,7 +134,7 @@ func (ar *AgentRequest) FieldAsString(fldPath []string) (val string, err error) 
 		return
 	}
 	if nmItems, isNMItems := iface.(*utils.NMSlice); isNMItems { // special handling of NMItems, take the last value out of it
-		iface = (*nmItems)[len(*nmItems)-1].Interface() // could be we need nil protection here
+		iface = (*nmItems)[len(*nmItems)-1].Interface()
 	}
 	return utils.IfaceAsString(iface), nil
 }
@@ -161,8 +161,9 @@ func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 				}
 				return err
 			}
-			valSet := utils.NMSlice{}
 			fldPath := strings.Split(tplFld.Path, utils.NestingSep)
+
+			valIndx := 0
 
 			nMItm := &config.NMItem{Data: out, Path: fldPath[1:], Config: tplFld}
 			if nMFields, err := ar.FieldAsInterface(fldPath); err != nil {
@@ -170,36 +171,42 @@ func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 					return err
 				}
 			} else {
-				valSet = *(nMFields.(*utils.NMSlice)) // start from previous stored fields
+				valSet := *(nMFields.(*utils.NMSlice)) // start from previous stored fields
 				switch tplFld.Type {
 				case utils.META_COMPOSED:
-					prevNMItem := valSet[len(valSet)-1] // could be we need nil protection here
+					valIndx = valSet.Len() - 1
+					prevNMItem := valSet[valIndx] // could be we need nil protection here
+					nMItm.Data = utils.IfaceAsString(prevNMItem.Interface()) + utils.IfaceAsString(out)
 
-					*nMItm = *(prevNMItem.(*config.NMItem)) // inherit the particularities, ie AttributeName
-					nMItm.Data = utils.IfaceAsString(nMItm.Data) + utils.IfaceAsString(out)
-
-					valSet = valSet[:len(valSet)-1] // discard the last item since we have captured it in nmItem
 				case utils.MetaGroup: // in case of *group type simply append to valSet
+					valIndx = valSet.Len()
 				default:
-					valSet = nil
+					valIndx = -1
 				}
 			}
-			valSet = append(valSet, nMItm)
-			switch fldPath[0] {
+			path := make([]string, len(fldPath))
+			copy(path, fldPath)
+			var nm utils.NM = nMItm
+			if valIndx == -1 {
+				nm = &utils.NMSlice{nm}
+			} else {
+				path[len(path)-1] += utils.IdxStart + strconv.Itoa(valIndx) + utils.IdxEnd
+			}
+			switch path[0] {
 			default:
-				return fmt.Errorf("unsupported field prefix: <%s> when set fields", fldPath[0])
+				return fmt.Errorf("unsupported field prefix: <%s> when set fields", path[0])
 			case utils.MetaVars:
-				ar.Vars.Set(fldPath[1:], &valSet)
+				ar.Vars.Set(path[1:], nm)
 			case utils.MetaCgreq:
-				ar.CGRRequest.Set(fldPath[1:], &valSet)
+				ar.CGRRequest.Set(path[1:], nm)
 			case utils.MetaCgrep:
-				ar.CGRReply.Set(fldPath[1:], &valSet)
+				ar.CGRReply.Set(path[1:], nm)
 			case utils.MetaRep:
-				ar.Reply.Set(fldPath[1:], &valSet)
+				ar.Reply.Set(path[1:], nm)
 			case utils.MetaDiamreq:
-				ar.diamreq.Set(fldPath[1:], &valSet)
+				ar.diamreq.Set(path[1:], nm)
 			case utils.MetaTmp:
-				ar.tmp.Set(fldPath[1:], &valSet)
+				ar.tmp.Set(path[1:], nm)
 			}
 		}
 		if tplFld.Blocker { // useful in case of processing errors first
