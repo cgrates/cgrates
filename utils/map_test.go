@@ -127,6 +127,10 @@ func MapKeysStringMapParse(t *testing.T) {
 	if include, has := sm["5"]; include != false && has != false {
 		t.Error("Error detecting missing: ", sm)
 	}
+	eOut := make(StringMap)
+	if rcv := ParseStringMap(ZERO); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
 }
 
 func TestMapMergeMapsStringIface(t *testing.T) {

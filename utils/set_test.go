@@ -20,6 +20,7 @@ package utils
 
 import (
 	"reflect"
+	"sort"
 	"testing"
 )
 
@@ -80,5 +81,95 @@ func TestHas(t *testing.T) {
 	}}
 	if !s.Has("test") {
 		t.Error("Expecting: true, received: false")
+	}
+}
+
+func TestAddSlice(t *testing.T) {
+	s := &StringSet{data: map[string]struct{}{
+		"test": struct{}{}}}
+	eOut := &StringSet{data: map[string]struct{}{
+		"test":  struct{}{},
+		"test1": struct{}{},
+		"test2": struct{}{}}}
+	s.AddSlice([]string{"test1", "test2"})
+	if !reflect.DeepEqual(eOut, s) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, s)
+	}
+}
+
+func TestAsSlice(t *testing.T) {
+	s := &StringSet{}
+	eOut := make([]string, 0)
+	if rcv := s.AsSlice(); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+	s = &StringSet{data: map[string]struct{}{
+		"test":  struct{}{},
+		"test1": struct{}{},
+		"test2": struct{}{}}}
+	eOut = []string{"test", "test1", "test2"}
+	rcv := s.AsSlice()
+	sort.Strings(rcv)
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+}
+
+func TestData(t *testing.T) {
+	s := &StringSet{data: map[string]struct{}{
+		"test":  struct{}{},
+		"test1": struct{}{},
+		"test2": struct{}{}}}
+	eOut := map[string]struct{}{
+		"test":  struct{}{},
+		"test1": struct{}{},
+		"test2": struct{}{}}
+	if rcv := s.Data(); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+}
+
+func TestSize(t *testing.T) {
+	s := &StringSet{}
+	if rcv := s.Size(); rcv != 0 {
+		t.Errorf("Expecting: 0, received %+v", rcv)
+	}
+	s = &StringSet{data: map[string]struct{}{
+		"test0": struct{}{},
+		"test1": struct{}{},
+		"test2": struct{}{}}}
+	if rcv := s.Size(); rcv != 3 {
+		t.Errorf("Expecting: 3, received %+v", rcv)
+	}
+}
+
+func TestIntersect(t *testing.T) {
+	s1 := &StringSet{data: map[string]struct{}{
+		"test0": struct{}{},
+		"test1": struct{}{},
+		"test2": struct{}{}}}
+	s2 := &StringSet{data: map[string]struct{}{
+		"test0": struct{}{},
+		"test2": struct{}{},
+		"test3": struct{}{}}}
+	eOut := &StringSet{data: map[string]struct{}{
+		"test0": struct{}{},
+		"test2": struct{}{}}}
+	s1.Intersect(s2)
+	if !reflect.DeepEqual(eOut, s1) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, s1)
+	}
+	s1 = &StringSet{data: map[string]struct{}{
+		"test0": struct{}{},
+		"test1": struct{}{},
+		"test2": struct{}{}}}
+	s2 = &StringSet{data: map[string]struct{}{
+		"test3": struct{}{},
+		"test4": struct{}{},
+		"test5": struct{}{}}}
+	s1.Intersect(s2)
+	eOut = &StringSet{data: map[string]struct{}{}}
+	if !reflect.DeepEqual(eOut, s1) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, s1)
 	}
 }

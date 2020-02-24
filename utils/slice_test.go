@@ -19,24 +19,82 @@ package utils
 
 import (
 	"reflect"
+	"sort"
 	"testing"
 )
 
-func TestAvg(t *testing.T) {
-	values := []float64{1, 2, 3}
-	result := Avg(values)
-	expected := 2.0
-	if expected != result {
-		t.Errorf("Wrong Avg: expected %v got %v", expected, result)
+func TestIsSliceMember(t *testing.T) {
+	if !IsSliceMember([]string{"1", "2", "3", "4", "5"}, "5") {
+		t.Error("Expecting: true, received: false")
+	}
+	if IsSliceMember([]string{"1", "2", "3", "4", "5"}, "6") {
+		t.Error("Expecting: true, received: false")
 	}
 }
 
-func TestAvgEmpty(t *testing.T) {
-	values := []float64{}
-	result := Avg(values)
-	expected := 0.0
-	if expected != result {
-		t.Errorf("Wrong Avg: expected %v got %v", expected, result)
+func TestSliceHasMember(t *testing.T) {
+	if !SliceHasMember([]string{"1", "2", "3", "4", "5"}, "5") {
+		t.Error("Expecting: true, received: false")
+	}
+	if SliceHasMember([]string{"1", "2", "3", "4", "5"}, "6") {
+		t.Error("Expecting: true, received: false")
+	}
+}
+
+func TestSliceWithoutMember(t *testing.T) {
+	rcv := SliceWithoutMember([]string{"1", "2", "3", "4", "5"}, "5")
+	sort.Strings(rcv)
+	eOut := []string{"1", "2", "3", "4"}
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+	rcv = SliceWithoutMember([]string{"1", "2", "3", "4", "5"}, "6")
+	sort.Strings(rcv)
+	eOut = []string{"1", "2", "3", "4", "5"}
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+}
+
+func TestSliceMemberHasPrefix(t *testing.T) {
+	if !SliceMemberHasPrefix([]string{"1", "*2", "3", "4", "5"}, "*") {
+		t.Error("Expecting: true, received: false")
+	}
+	if SliceMemberHasPrefix([]string{"1", "2", "3", "4", "5"}, "*") {
+		t.Error("Expecting: true, received: false")
+	}
+}
+
+func TestAvg(t *testing.T) {
+	if rcv := Avg([]float64{}); rcv != 0 {
+		t.Errorf("Expecting: 0, received: %+v", rcv)
+	}
+	if rcv := Avg([]float64{1, 2, 3}); rcv != 2 {
+		t.Errorf("Expecting: 2, received: %+v", rcv)
+	}
+	if rcv := Avg([]float64{1.5, 2.75, 3.25}); rcv != 2.5 {
+		t.Errorf("Expecting: 2.5, received: %+v", rcv)
+	}
+}
+
+func TestAvgNegative(t *testing.T) {
+	if rcv := AvgNegative([]float64{}); rcv != -1 {
+		t.Errorf("Expecting: -1, received: %+v", rcv)
+	}
+	if rcv := AvgNegative([]float64{1, 2, 3}); rcv != 2 {
+		t.Errorf("Expecting: 2, received: %+v", rcv)
+	}
+	if rcv := Avg([]float64{1.5, 2.75, 3.25}); rcv != 2.5 {
+		t.Errorf("Expecting: 2.5, received: %+v", rcv)
+	}
+}
+
+func TestPrefixSliceItems(t *testing.T) {
+	rcv := PrefixSliceItems([]string{"1", "2", "3", "4", "5"}, "*")
+	sort.Strings(rcv)
+	eOut := []string{"*1", "*2", "*3", "*4", "*5"}
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
 	}
 }
 
@@ -56,9 +114,8 @@ func TestStripSlicePrefix(t *testing.T) {
 }
 
 func TestSliceStringToIface(t *testing.T) {
-	args := []string{"*default", "ToR", "*voice"}
 	exp := []interface{}{"*default", "ToR", "*voice"}
-	if rply := SliceStringToIface(args); !reflect.DeepEqual(exp, rply) {
+	if rply := SliceStringToIface([]string{"*default", "ToR", "*voice"}); !reflect.DeepEqual(exp, rply) {
 		t.Errorf("Expected: %s ,received: %s", ToJSON(exp), ToJSON(rply))
 	}
 }
