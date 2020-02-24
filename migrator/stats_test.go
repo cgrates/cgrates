@@ -96,7 +96,7 @@ func TestV1StatsAsStats(t *testing.T) {
 				MetricID: "*asr",
 			},
 			&engine.MetricWithFilters{
-				MetricID: "*acd",
+				MetricID: utils.MetaACD,
 			},
 			&engine.MetricWithFilters{
 				MetricID: "*acc",

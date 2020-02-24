@@ -340,7 +340,7 @@ func testV1STSSetStatQueueProfile(t *testing.T) {
 			ID:     "FLTR_1",
 			Rules: []*engine.FilterRule{
 				{
-					Element: "~*req.Account",
+					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
 					Type:    utils.MetaString,
 					Values:  []string{"1001"},
 				},
@@ -375,10 +375,10 @@ func testV1STSSetStatQueueProfile(t *testing.T) {
 			TTL:         time.Duration(10) * time.Second,
 			Metrics: []*engine.MetricWithFilters{
 				&engine.MetricWithFilters{
-					MetricID: "*acd",
+					MetricID: utils.MetaACD,
 				},
 				&engine.MetricWithFilters{
-					MetricID: "*tcd",
+					MetricID: utils.MetaTCD,
 				},
 			},
 			ThresholdIDs: []string{"Val1", "Val2"},
@@ -420,7 +420,7 @@ func testV1STSUpdateStatQueueProfile(t *testing.T) {
 			ID:     "FLTR_2",
 			Rules: []*engine.FilterRule{
 				{
-					Element: "~*req.Account",
+					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
 					Type:    utils.MetaString,
 					Values:  []string{"1001"},
 				},
@@ -483,15 +483,15 @@ func testV1STSProcessMetricsWithFilter(t *testing.T) {
 			TTL:         time.Duration(1) * time.Second,
 			Metrics: []*engine.MetricWithFilters{
 				&engine.MetricWithFilters{
-					MetricID:  "*acd",
+					MetricID:  utils.MetaACD,
 					FilterIDs: []string{"*rsr::~*req.Usage{*duration}(>10s)"},
 				},
 				&engine.MetricWithFilters{
-					MetricID:  "*tcd",
+					MetricID:  utils.MetaTCD,
 					FilterIDs: []string{"*gt:~*req.Usage:5s"},
 				},
 				&engine.MetricWithFilters{
-					MetricID:  "*sum:~CustomValue",
+					MetricID:  utils.ConcatenatedKey(utils.MetaSum, utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+"CustomValue"),
 					FilterIDs: []string{"*exists:~*req.CustomValue:", "*gte:~*req.CustomValue:10.0"},
 				},
 			},
@@ -523,7 +523,7 @@ func testV1STSProcessMetricsWithFilter(t *testing.T) {
 	expectedMetrics := map[string]string{
 		utils.MetaACD: utils.NOT_AVAILABLE,
 		utils.MetaTCD: utils.NOT_AVAILABLE,
-		utils.ConcatenatedKey(utils.MetaSum, "~CustomValue"): utils.NOT_AVAILABLE,
+		utils.ConcatenatedKey(utils.MetaSum, utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+"CustomValue"): utils.NOT_AVAILABLE,
 	}
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
 		&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]}}, &metrics); err != nil {
@@ -551,7 +551,7 @@ func testV1STSProcessMetricsWithFilter(t *testing.T) {
 	expectedMetrics = map[string]string{
 		utils.MetaACD: utils.NOT_AVAILABLE,
 		utils.MetaTCD: "6s",
-		utils.ConcatenatedKey(utils.MetaSum, "~CustomValue"): utils.NOT_AVAILABLE,
+		utils.ConcatenatedKey(utils.MetaSum, utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+"CustomValue"): utils.NOT_AVAILABLE,
 	}
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
 		&utils.TenantIDWithArgDispatcher{
@@ -578,7 +578,7 @@ func testV1STSProcessMetricsWithFilter(t *testing.T) {
 	expectedMetrics = map[string]string{
 		utils.MetaACD: "12s",
 		utils.MetaTCD: "18s",
-		utils.ConcatenatedKey(utils.MetaSum, "~CustomValue"): "10",
+		utils.ConcatenatedKey(utils.MetaSum, utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+"CustomValue"): "10",
 	}
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
 		&utils.TenantIDWithArgDispatcher{
@@ -602,10 +602,10 @@ func testV1STSProcessStaticMetrics(t *testing.T) {
 			TTL:         time.Duration(1) * time.Second,
 			Metrics: []*engine.MetricWithFilters{
 				&engine.MetricWithFilters{
-					MetricID: "*sum:1",
+					MetricID: utils.ConcatenatedKey(utils.MetaSum, "1"),
 				},
 				&engine.MetricWithFilters{
-					MetricID: "*average:2",
+					MetricID: utils.ConcatenatedKey(utils.MetaAverage, "2"),
 				},
 			},
 			ThresholdIDs: []string{"*none"},
@@ -707,10 +707,10 @@ func testV1STSProcessStatWithThreshold(t *testing.T) {
 			TTL:         time.Duration(1) * time.Second,
 			Metrics: []*engine.MetricWithFilters{
 				&engine.MetricWithFilters{
-					MetricID: "*tcd",
+					MetricID: utils.MetaTCD,
 				},
 				&engine.MetricWithFilters{
-					MetricID: "*sum:2",
+					MetricID: utils.ConcatenatedKey(utils.MetaSum, "2"),
 				},
 			},
 			Stored:   true,

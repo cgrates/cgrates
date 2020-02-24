@@ -1122,7 +1122,7 @@ func testStorDBitCRUDTpStats(t *testing.T) {
 			MetricID: "*asr",
 		},
 		&utils.MetricWithFilters{
-			MetricID: "*acd",
+			MetricID: utils.MetaACD,
 		},
 	}
 	if err := storDB.SetTPStats(eTPs); err != nil {
@@ -1141,7 +1141,7 @@ func testStorDBitCRUDTpStats(t *testing.T) {
 			TTL:         "1s",
 			Metrics: []*utils.MetricWithFilters{
 				&utils.MetricWithFilters{
-					MetricID: "*acd",
+					MetricID: utils.MetaACD,
 				},
 				&utils.MetricWithFilters{
 					MetricID: "*asr",
