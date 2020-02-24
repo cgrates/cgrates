@@ -27,7 +27,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestSetFailedPostCacheTTL(t *testing.T) {
+func TestSetFldPostCacheTTL(t *testing.T) {
 	var1 := failedPostCache
 	SetFailedPostCacheTTL(time.Duration(50 * time.Millisecond))
 	var2 := failedPostCache
@@ -36,7 +36,7 @@ func TestSetFailedPostCacheTTL(t *testing.T) {
 	}
 }
 
-func TestAddFailedPost(t *testing.T) {
+func TestAddFldPost(t *testing.T) {
 	SetFailedPostCacheTTL(time.Duration(5 * time.Second))
 	addFailedPost("path1", "format1", "module1", "1")
 	x, ok := failedPostCache.Get(utils.ConcatenatedKey("path1", "format1", "module1"))

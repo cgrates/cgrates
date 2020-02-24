@@ -30,7 +30,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestWriteFailedPosts(t *testing.T) {
+func TestWriteFldPosts(t *testing.T) {
 	// can't convert
 	var notanExportEvent string
 	writeFailedPosts("somestring", notanExportEvent)
