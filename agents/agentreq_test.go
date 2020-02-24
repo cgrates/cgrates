@@ -102,7 +102,7 @@ func TestAgReqSetFields(t *testing.T) {
 				"~*cgrep.MaxUsage{*duration_seconds}", true, utils.INFIELD_SEP)},
 		&config.FCTemplate{Tag: "Error",
 			Path: utils.MetaRep + utils.NestingSep + "Error", Type: utils.MetaVariable,
-			Filters: []string{"*rsr::~*cgrep.Error(!^$)"},
+			Filters: []string{"*notempty:~*cgrep.Error:"},
 			Value: config.NewRSRParsersMustCompile(
 				"~*cgrep.Error", true, utils.INFIELD_SEP)},
 	}
@@ -726,7 +726,7 @@ func TestAgReqEmptyFilter(t *testing.T) {
 			Path: utils.MetaCgrep + utils.NestingSep + utils.Destination, Type: utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("~*cgreq.Destination", true, utils.INFIELD_SEP)},
 	}
-	eMp := &utils.NavigableMap{}
+	eMp := &utils.NavigableMap2{}
 	eMp.Set([]string{utils.Tenant}, &utils.NMSlice{
 		&config.NMItem{Data: "cgrates.org", Path: []string{utils.Tenant},
 			Config: tplFlds[0]}})
@@ -758,7 +758,7 @@ func TestAgReqMetaExponent(t *testing.T) {
 			Path: utils.MetaCgrep + utils.NestingSep + "TestExpo", Type: utils.MetaValueExponent,
 			Value: config.NewRSRParsersMustCompile("~*cgreq.Value;~*cgreq.Exponent", true, utils.INFIELD_SEP)},
 	}
-	eMp := &utils.NavigableMap{}
+	eMp := &utils.NavigableMap2{}
 	eMp.Set([]string{"TestExpo"}, &utils.NMSlice{
 		&config.NMItem{Data: "200", Path: []string{"TestExpo"},
 			Config: tplFlds[0]}})
@@ -793,7 +793,7 @@ func TestAgReqFieldAsNone(t *testing.T) {
 			Path: utils.MetaCgrep + utils.NestingSep + utils.Destination, Type: utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("~*cgreq.Destination", true, utils.INFIELD_SEP)},
 	}
-	eMp := &utils.NavigableMap{}
+	eMp := &utils.NavigableMap2{}
 	eMp.Set([]string{utils.Tenant}, &utils.NMSlice{
 		&config.NMItem{Data: "cgrates.org", Path: []string{utils.Tenant},
 			Config: tplFlds[0]}})
@@ -830,7 +830,7 @@ func TestAgReqFieldAsNone2(t *testing.T) {
 			Path: utils.MetaCgrep + utils.NestingSep + utils.Destination, Type: utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("~*cgreq.Destination", true, utils.INFIELD_SEP)},
 	}
-	eMp := &utils.NavigableMap{}
+	eMp := &utils.NavigableMap2{}
 	eMp.Set([]string{utils.Tenant}, &utils.NMSlice{
 		&config.NMItem{Data: "cgrates.org", Path: []string{utils.Tenant},
 			Config: tplFlds[0]}})
@@ -881,7 +881,7 @@ func TestAgReqSetField2(t *testing.T) {
 			Type: "*difference", Value: config.NewRSRParsersMustCompile("~*cgreq.AnswerTime;~*cgrep.Usage", true, utils.INFIELD_SEP),
 		},
 	}
-	eMp := &utils.NavigableMap{}
+	eMp := &utils.NavigableMap2{}
 	eMp.Set([]string{utils.Tenant}, &utils.NMSlice{
 		&config.NMItem{Data: "cgrates.org", Path: []string{utils.Tenant},
 			Config: tplFlds[0]}})
@@ -1578,7 +1578,7 @@ func TestAgReqSetFieldsInTmp(t *testing.T) {
 			Path: utils.MetaTmp + utils.NestingSep + utils.Account, Type: utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("~*cgreq.Account", true, utils.INFIELD_SEP)},
 	}
-	eMp := utils.NavigableMap{}
+	eMp := utils.NavigableMap2{}
 	eMp.Set([]string{utils.Tenant}, &utils.NMSlice{
 		&config.NMItem{Data: "cgrates.org", Path: []string{utils.Tenant},
 			Config: tplFlds[0]}})

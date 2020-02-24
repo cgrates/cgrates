@@ -27,7 +27,7 @@ func TestNewNMInterface(t *testing.T) {
 	if nm.Empty() {
 		t.Error("Expected not empty type")
 	}
-	if nm.String() != "\"1001\"" {
+	if nm.String() != "1001" {
 		t.Errorf("Expected \"1001\" ,received: %q", nm.String())
 	}
 	if nm.Interface() != "1001" {

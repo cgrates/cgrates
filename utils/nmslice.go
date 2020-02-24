@@ -35,7 +35,7 @@ func (nms *NMSlice) String() (out string) {
 	out = out[1:]
 	return "[" + out + "]"
 }
-func (nms *NMSlice) Interface() interface{} { return *nms }
+func (nms *NMSlice) Interface() interface{} { return nms }
 func (nms *NMSlice) Field(path []string) (val NM, err error) {
 	if len(path) == 0 {
 		return nil, fmt.Errorf("Wrong path")

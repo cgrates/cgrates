@@ -97,9 +97,9 @@ func TestRadComposedFieldValue(t *testing.T) {
 		t.Error(err)
 	}
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", nil, nil, nil)
-	agReq.Vars.Set([]string{MetaRadReqType}, MetaRadAcctStart)
-	agReq.Vars.Set([]string{"Cisco"}, "CGR1")
-	agReq.Vars.Set([]string{"User-Name"}, "flopsy")
+	agReq.Vars.Set([]string{MetaRadReqType}, utils.NewNMInterface(MetaRadAcctStart))
+	agReq.Vars.Set([]string{"Cisco"}, utils.NewNMInterface("CGR1"))
+	agReq.Vars.Set([]string{"User-Name"}, utils.NewNMInterface("flopsy"))
 	eOut := "*radAcctStart|flopsy|CGR1"
 	if out := radComposedFieldValue(pkt, agReq,
 		config.NewRSRParsersMustCompile("~*vars.*radReqType;|;~*vars.User-Name;|;~*vars.Cisco", true, utils.INFIELD_SEP)); out != eOut {
@@ -117,9 +117,9 @@ func TestRadFieldOutVal(t *testing.T) {
 	}
 	eOut := fmt.Sprintf("%s|flopsy|CGR1", MetaRadAcctStart)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", nil, nil, nil)
-	agReq.Vars.Set([]string{MetaRadReqType}, MetaRadAcctStart)
-	agReq.Vars.Set([]string{"Cisco"}, "CGR1")
-	agReq.Vars.Set([]string{"User-Name"}, "flopsy")
+	agReq.Vars.Set([]string{MetaRadReqType}, utils.NewNMInterface(MetaRadAcctStart))
+	agReq.Vars.Set([]string{"Cisco"}, utils.NewNMInterface("CGR1"))
+	agReq.Vars.Set([]string{"User-Name"}, utils.NewNMInterface("flopsy"))
 	cfgFld := &config.FCTemplate{Tag: "ComposedTest", Type: utils.META_COMPOSED, Path: utils.Destination,
 		Value: config.NewRSRParsersMustCompile("~*vars.*radReqType;|;~*vars.User-Name;|;~*vars.Cisco", true, utils.INFIELD_SEP), Mandatory: true}
 	if outVal, err := radFieldOutVal(pkt, agReq, cfgFld); err != nil {
@@ -138,9 +138,9 @@ func TestRadReplyAppendAttributes(t *testing.T) {
 			Value: config.NewRSRParsersMustCompile("~*cgrep.MaxUsage{*duration_seconds}", true, utils.INFIELD_SEP)},
 	}
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", nil, nil, nil)
-	agReq.CGRReply.Set([]string{utils.CapMaxUsage}, time.Duration(time.Hour))
-	agReq.CGRReply.Set([]string{utils.CapAttributes, "RadReply"}, "AccessAccept")
-	agReq.CGRReply.Set([]string{utils.CapAttributes, utils.Account}, "1001")
+	agReq.CGRReply.Set([]string{utils.CapMaxUsage}, utils.NewNMInterface(time.Duration(time.Hour)))
+	agReq.CGRReply.Set([]string{utils.CapAttributes, "RadReply"}, utils.NewNMInterface("AccessAccept"))
+	agReq.CGRReply.Set([]string{utils.CapAttributes, utils.Account}, utils.NewNMInterface("1001"))
 	if err := radReplyAppendAttributes(rply, agReq, rplyFlds); err != nil {
 		t.Error(err)
 	}

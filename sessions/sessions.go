@@ -1747,7 +1747,7 @@ func (v1AuthReply *V1AuthorizeReply) AsNavigableMap() (cgrReply utils.NavigableM
 			cgrReply[utils.CapResourceAllocation] = utils.NewNMInterface(*v1AuthReply.ResourceAllocation)
 		}
 		if v1AuthReply.MaxUsage != nil {
-			cgrReply[utils.CapMaxUsage] = utils.NewNMInterface(v1AuthReply.MaxUsage)
+			cgrReply[utils.CapMaxUsage] = utils.NewNMInterface(*v1AuthReply.MaxUsage)
 		}
 		if v1AuthReply.Suppliers != nil {
 			cgrReply[utils.CapSuppliers] = v1AuthReply.Suppliers.AsNavigableMap()
@@ -1764,7 +1764,7 @@ func (v1AuthReply *V1AuthorizeReply) AsNavigableMap() (cgrReply utils.NavigableM
 			for i, v := range *v1AuthReply.StatQueueIDs {
 				stIDs[i] = utils.NewNMInterface(v)
 			}
-			cgrReply[utils.CapThresholds] = &stIDs
+			cgrReply[utils.CapStatQueues] = &stIDs
 		}
 	}
 	return
@@ -2019,7 +2019,7 @@ func (v1Rply *V1InitSessionReply) AsNavigableMap() (cgrReply utils.NavigableMap2
 			cgrReply[utils.CapResourceAllocation] = utils.NewNMInterface(*v1Rply.ResourceAllocation)
 		}
 		if v1Rply.MaxUsage != nil {
-			cgrReply[utils.CapMaxUsage] = utils.NewNMInterface(v1Rply.MaxUsage)
+			cgrReply[utils.CapMaxUsage] = utils.NewNMInterface(*v1Rply.MaxUsage)
 		}
 		if v1Rply.ThresholdIDs != nil {
 			thIDs := make(utils.NMSlice, len(*v1Rply.ThresholdIDs))
@@ -2033,7 +2033,7 @@ func (v1Rply *V1InitSessionReply) AsNavigableMap() (cgrReply utils.NavigableMap2
 			for i, v := range *v1Rply.StatQueueIDs {
 				stIDs[i] = utils.NewNMInterface(v)
 			}
-			cgrReply[utils.CapThresholds] = &stIDs
+			cgrReply[utils.CapStatQueues] = &stIDs
 		}
 	}
 	return
@@ -2244,10 +2244,10 @@ func (v1Rply *V1UpdateSessionReply) AsNavigableMap() (cgrReply utils.NavigableMa
 					attrs[fldName] = utils.NewNMInterface(v1Rply.Attributes.CGREvent.Event[fldName])
 				}
 			}
-			cgrReply[utils.CapAttributes] = utils.NewNMInterface(attrs)
+			cgrReply[utils.CapAttributes] = attrs
 		}
 		if v1Rply.MaxUsage != nil {
-			cgrReply[utils.CapMaxUsage] = utils.NewNMInterface(v1Rply.MaxUsage)
+			cgrReply[utils.CapMaxUsage] = utils.NewNMInterface(*v1Rply.MaxUsage)
 		}
 	}
 	return
@@ -2696,7 +2696,7 @@ func (v1Rply *V1ProcessMessageReply) AsNavigableMap() (cgrReply utils.NavigableM
 	cgrReply = make(utils.NavigableMap2)
 	if v1Rply != nil {
 		if v1Rply.MaxUsage != nil {
-			cgrReply[utils.CapMaxUsage] = utils.NewNMInterface(v1Rply.MaxUsage)
+			cgrReply[utils.CapMaxUsage] = utils.NewNMInterface(*v1Rply.MaxUsage)
 		}
 		if v1Rply.ResourceAllocation != nil {
 			cgrReply[utils.CapResourceAllocation] = utils.NewNMInterface(*v1Rply.ResourceAllocation)
@@ -2709,7 +2709,7 @@ func (v1Rply *V1ProcessMessageReply) AsNavigableMap() (cgrReply utils.NavigableM
 					attrs[fldName] = utils.NewNMInterface(v1Rply.Attributes.CGREvent.Event[fldName])
 				}
 			}
-			cgrReply[utils.CapAttributes] = utils.NewNMInterface(attrs)
+			cgrReply[utils.CapAttributes] = attrs
 		}
 		if v1Rply.Suppliers != nil {
 			cgrReply[utils.CapSuppliers] = v1Rply.Suppliers.AsNavigableMap()
@@ -2726,7 +2726,7 @@ func (v1Rply *V1ProcessMessageReply) AsNavigableMap() (cgrReply utils.NavigableM
 			for i, v := range *v1Rply.StatQueueIDs {
 				stIDs[i] = utils.NewNMInterface(v)
 			}
-			cgrReply[utils.CapThresholds] = &stIDs
+			cgrReply[utils.CapStatQueues] = &stIDs
 		}
 	}
 	return
@@ -2871,7 +2871,7 @@ func (v1Rply *V1ProcessEventReply) AsNavigableMap() (cgrReply utils.NavigableMap
 	cgrReply = make(utils.NavigableMap2)
 	if v1Rply != nil {
 		if v1Rply.MaxUsage != nil {
-			cgrReply[utils.CapMaxUsage] = utils.NewNMInterface(v1Rply.MaxUsage)
+			cgrReply[utils.CapMaxUsage] = utils.NewNMInterface(*v1Rply.MaxUsage)
 		}
 		if v1Rply.ResourceMessage != nil {
 			cgrReply[utils.CapResourceMessage] = utils.NewNMInterface(*v1Rply.ResourceMessage)
@@ -2884,7 +2884,7 @@ func (v1Rply *V1ProcessEventReply) AsNavigableMap() (cgrReply utils.NavigableMap
 					attrs[fldName] = utils.NewNMInterface(v1Rply.Attributes.CGREvent.Event[fldName])
 				}
 			}
-			cgrReply[utils.CapAttributes] = utils.NewNMInterface(attrs)
+			cgrReply[utils.CapAttributes] = attrs
 		}
 		if v1Rply.Suppliers != nil {
 			cgrReply[utils.CapSuppliers] = v1Rply.Suppliers.AsNavigableMap()
@@ -2901,7 +2901,7 @@ func (v1Rply *V1ProcessEventReply) AsNavigableMap() (cgrReply utils.NavigableMap
 			for i, v := range *v1Rply.StatQueueIDs {
 				stIDs[i] = utils.NewNMInterface(v)
 			}
-			cgrReply[utils.CapThresholds] = &stIDs
+			cgrReply[utils.CapStatQueues] = &stIDs
 		}
 		if v1Rply.Cost != nil {
 			cgrReply[utils.Cost] = utils.NewNMInterface(*v1Rply.Cost)

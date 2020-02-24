@@ -60,7 +60,7 @@ func TestProcessRequest(t *testing.T) {
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filters := engine.NewFilterS(config.CgrConfig(), nil, dm) // no need for filterS but still try to configure the dm :D
 
-	cgrRplyNM := &utils.NavigableMap{}
+	cgrRplyNM := &utils.NavigableMap2{}
 	rply := utils.NewOrderedNavigableMap()
 	diamDP := utils.NavigableMap(map[string]interface{}{
 		"SessionId":   "123456",
@@ -104,13 +104,13 @@ func TestProcessRequest(t *testing.T) {
 				Mandatory: true},
 		},
 	}
-	reqVars := map[string]interface{}{
-		utils.OriginHost:  config.CgrConfig().DiameterAgentCfg().OriginHost,
-		utils.OriginRealm: config.CgrConfig().DiameterAgentCfg().OriginRealm,
-		utils.ProductName: config.CgrConfig().DiameterAgentCfg().ProductName,
-		utils.MetaApp:     "appName",
-		utils.MetaAppID:   "appID",
-		utils.MetaCmd:     "cmdR",
+	reqVars := utils.NavigableMap2{
+		utils.OriginHost:  utils.NewNMInterface(config.CgrConfig().DiameterAgentCfg().OriginHost),
+		utils.OriginRealm: utils.NewNMInterface(config.CgrConfig().DiameterAgentCfg().OriginRealm),
+		utils.ProductName: utils.NewNMInterface(config.CgrConfig().DiameterAgentCfg().ProductName),
+		utils.MetaApp:     utils.NewNMInterface("appName"),
+		utils.MetaAppID:   utils.NewNMInterface("appID"),
+		utils.MetaCmd:     utils.NewNMInterface("cmdR"),
 	}
 
 	sS := &testMockSessionConn{calls: map[string]func(arg interface{}, rply interface{}) error{
@@ -448,12 +448,12 @@ func TestProcessRequest(t *testing.T) {
 		t.Error(err)
 	} else if !pr {
 		t.Errorf("Expected the request to be processed")
-	} else if len(rply.Values()) != 2 {
+	} else if len(rply.GetOrder()) != 2 {
 		t.Errorf("Expected the reply to have 2 values received: %s", rply.String())
 	}
 
 	reqProcessor.Flags, _ = utils.FlagsWithParamsFromSlice([]string{utils.MetaInitiate, utils.MetaAccounts, utils.MetaAttributes})
-	cgrRplyNM = &utils.NavigableMap{}
+	cgrRplyNM = &utils.NavigableMap2{}
 	rply = utils.NewOrderedNavigableMap()
 
 	agReq = NewAgentRequest(diamDP, reqVars, cgrRplyNM, rply,
@@ -465,12 +465,12 @@ func TestProcessRequest(t *testing.T) {
 		t.Error(err)
 	} else if !pr {
 		t.Errorf("Expected the request to be processed")
-	} else if len(rply.Values()) != 2 {
+	} else if len(rply.GetOrder()) != 2 {
 		t.Errorf("Expected the reply to have 2 values received: %s", rply.String())
 	}
 
 	reqProcessor.Flags, _ = utils.FlagsWithParamsFromSlice([]string{utils.MetaUpdate, utils.MetaAccounts, utils.MetaAttributes})
-	cgrRplyNM = &utils.NavigableMap{}
+	cgrRplyNM = &utils.NavigableMap2{}
 	rply = utils.NewOrderedNavigableMap()
 
 	agReq = NewAgentRequest(diamDP, reqVars, cgrRplyNM, rply,
@@ -482,7 +482,7 @@ func TestProcessRequest(t *testing.T) {
 		t.Error(err)
 	} else if !pr {
 		t.Errorf("Expected the request to be processed")
-	} else if len(rply.Values()) != 2 {
+	} else if len(rply.GetOrder()) != 2 {
 		t.Errorf("Expected the reply to have 2 values received: %s", rply.String())
 	}
 
@@ -490,7 +490,7 @@ func TestProcessRequest(t *testing.T) {
 	reqProcessor.ReplyFields = []*config.FCTemplate{&config.FCTemplate{Tag: "ResultCode",
 		Type: utils.META_CONSTANT, Path: utils.MetaRep + utils.NestingSep + "ResultCode",
 		Value: config.NewRSRParsersMustCompile("2001", true, utils.INFIELD_SEP)}}
-	cgrRplyNM = &utils.NavigableMap{}
+	cgrRplyNM = &utils.NavigableMap2{}
 	rply = utils.NewOrderedNavigableMap()
 
 	agReq = NewAgentRequest(diamDP, reqVars, cgrRplyNM, rply,
@@ -502,12 +502,12 @@ func TestProcessRequest(t *testing.T) {
 		t.Error(err)
 	} else if !pr {
 		t.Errorf("Expected the request to be processed")
-	} else if len(rply.Values()) != 1 {
+	} else if len(rply.GetOrder()) != 1 {
 		t.Errorf("Expected the reply to have one value received: %s", rply.String())
 	}
 
 	reqProcessor.Flags, _ = utils.FlagsWithParamsFromSlice([]string{utils.MetaMessage, utils.MetaAccounts, utils.MetaAttributes})
-	cgrRplyNM = &utils.NavigableMap{}
+	cgrRplyNM = &utils.NavigableMap2{}
 	rply = utils.NewOrderedNavigableMap()
 
 	agReq = NewAgentRequest(diamDP, reqVars, cgrRplyNM, rply,
@@ -519,7 +519,7 @@ func TestProcessRequest(t *testing.T) {
 		t.Error(err)
 	} else if !pr {
 		t.Errorf("Expected the request to be processed")
-	} else if len(rply.Values()) != 1 {
+	} else if len(rply.GetOrder()) != 1 {
 		t.Errorf("Expected the reply to have one value received: %s", rply.String())
 	}
 

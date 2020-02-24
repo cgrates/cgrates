@@ -247,5 +247,9 @@ func (nmm NavigableMap2) FieldAsString(fldPath []string) (str string, err error)
 }
 
 func (nmm NavigableMap2) FieldAsInterface(fldPath []string) (str interface{}, err error) {
-	return nmm.Field(fldPath)
+	var nm NM
+	if nm, err = nmm.Field(fldPath); err != nil {
+		return
+	}
+	return nm.Interface(), nil
 }

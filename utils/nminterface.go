@@ -22,7 +22,7 @@ func NewNMInterface(val interface{}) *NMInterface { return &NMInterface{data: va
 
 type NMInterface struct{ data interface{} }
 
-func (nmi *NMInterface) String() string         { return ToJSON(nmi.data) }
+func (nmi *NMInterface) String() string         { return IfaceAsString(nmi.data) }
 func (nmi *NMInterface) Interface() interface{} { return nmi.data }
 func (nmi *NMInterface) Field(path []string) (val NM, err error) {
 	return nil, ErrNotImplemented
