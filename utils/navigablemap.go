@@ -41,11 +41,15 @@ type OrderedNavigableMap struct {
 func (onm *OrderedNavigableMap) String() string { return onm.nm.String() }
 
 // GetOrder returns the order the fields were set in NavigableMap2
-func (onm *OrderedNavigableMap) GetOrder() [][]string                    { return onm.order }
-func (onm *OrderedNavigableMap) Interface() interface{}                  { return onm.nm }
-func (onm *OrderedNavigableMap) Field(path []string) (val NM, err error) { return onm.nm.Field(path) }
-func (onm *OrderedNavigableMap) Type() NMType                            { return onm.nm.Type() }
-func (onm *OrderedNavigableMap) Empty() bool                             { return onm.nm.Empty() }
+func (onm *OrderedNavigableMap) GetOrder() [][]string   { return onm.order }
+func (onm *OrderedNavigableMap) Interface() interface{} { return onm.nm }
+func (onm *OrderedNavigableMap) Field(fldPath []string) (val NM, err error) {
+	path := make([]string, len(fldPath))
+	copy(path, fldPath)
+	return onm.nm.Field(path)
+}
+func (onm *OrderedNavigableMap) Type() NMType { return onm.nm.Type() }
+func (onm *OrderedNavigableMap) Empty() bool  { return onm.nm.Empty() }
 
 func (onm *OrderedNavigableMap) Remove(path []string) (err error) {
 	if err = onm.nm.Remove(path); err != nil {
@@ -144,11 +148,11 @@ func (onm *OrderedNavigableMap) removePath(path []string) {
 		}
 		match := true
 		for j, field := range path {
-			if len(path)-1 == j {
+			if lenpath-1 == j {
 				match = strings.HasPrefix(p[j], field)
 				break
 			}
-			if match = field != path[j]; !match {
+			if match = field == p[j]; !match {
 				break
 			}
 		}

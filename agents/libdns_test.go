@@ -189,7 +189,7 @@ func TestUpdateDNSMsgFromNM(t *testing.T) {
 	nM = utils.NewOrderedNavigableMap()
 	nM.Set([]string{"Path"}, utils.NewNMInterface("test"))
 	if err := updateDNSMsgFromNM(m, nM); err == nil ||
-		err.Error() != `cannot cast val: test into []*config.NMItem` {
+		err.Error() != `cannot cast val: test into *config.NMItem` {
 		t.Error(err)
 	}
 

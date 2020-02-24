@@ -1170,22 +1170,21 @@ func TestSessionSV1AuthorizeReplyAsNavigableMap(t *testing.T) {
 			},
 		},
 	}
-	thIDs := &[]string{"THD_RES_1", "THD_STATS_1", "THD_STATS_2", "THD_CDRS_1"}
-	statIDs := &[]string{"Stats2", "Stats1", "Stats3"}
 	v1AuthRpl := new(V1AuthorizeReply)
-	expected := utils.NavigableMap{}
+	expected := utils.NavigableMap2{}
 	if rply := v1AuthRpl.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
 	v1AuthRpl.Attributes = attrs
 	expected.Set([]string{utils.CapAttributes},
-		utils.NavigableMap{"OfficeGroup": "Marketing"},
+		utils.NavigableMap2{"OfficeGroup": utils.NewNMInterface("Marketing")},
 	)
 	if rply := v1AuthRpl.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
 	v1AuthRpl.MaxUsage = utils.DurationPointer(5 * time.Minute)
-	expected.Set([]string{utils.CapMaxUsage}, 5*time.Minute)
+	expected.Set([]string{utils.CapMaxUsage},
+		utils.NewNMInterface(5*time.Minute))
 	if rply := v1AuthRpl.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
@@ -1194,16 +1193,16 @@ func TestSessionSV1AuthorizeReplyAsNavigableMap(t *testing.T) {
 		ResourceAllocation: utils.StringPointer("ResGr1"),
 		MaxUsage:           utils.DurationPointer(5 * time.Minute),
 		Suppliers:          splrs,
-		ThresholdIDs:       thIDs,
-		StatQueueIDs:       statIDs,
+		ThresholdIDs:       &[]string{"THD_RES_1", "THD_STATS_1", "THD_STATS_2", "THD_CDRS_1"},
+		StatQueueIDs:       &[]string{"Stats2", "Stats1", "Stats3"},
 	}
-	expected = utils.NavigableMap{
-		utils.CapAttributes:         utils.NavigableMap{"OfficeGroup": "Marketing"},
-		utils.CapResourceAllocation: "ResGr1",
-		utils.CapMaxUsage:           5 * time.Minute,
+	expected = utils.NavigableMap2{
+		utils.CapAttributes:         utils.NavigableMap2{"OfficeGroup": utils.NewNMInterface("Marketing")},
+		utils.CapResourceAllocation: utils.NewNMInterface("ResGr1"),
+		utils.CapMaxUsage:           utils.NewNMInterface(5 * time.Minute),
 		utils.CapSuppliers:          splrs.AsNavigableMap(),
-		utils.CapThresholds:         *thIDs,
-		utils.CapStatQueues:         *statIDs,
+		utils.CapThresholds:         &utils.NMSlice{utils.NewNMInterface("THD_RES_1"), utils.NewNMInterface("THD_STATS_1"), utils.NewNMInterface("THD_STATS_2"), utils.NewNMInterface("THD_CDRS_1")},
+		utils.CapStatQueues:         &utils.NMSlice{utils.NewNMInterface("Stats2"), utils.NewNMInterface("Stats1"), utils.NewNMInterface("Stats3")},
 	}
 	if rply := v1AuthRpl.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
@@ -1214,19 +1213,20 @@ func TestSessionSV1InitSessionReplyAsNavigableMap(t *testing.T) {
 	thIDs := &[]string{"THD_RES_1", "THD_STATS_1", "THD_STATS_2", "THD_CDRS_1"}
 	statIDs := &[]string{"Stats2", "Stats1", "Stats3"}
 	v1InitRpl := new(V1InitSessionReply)
-	expected := utils.NavigableMap{}
+	expected := utils.NavigableMap2{}
 	if rply := v1InitRpl.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
 	v1InitRpl.Attributes = attrs
 	expected.Set([]string{utils.CapAttributes},
-		utils.NavigableMap{"OfficeGroup": "Marketing"},
+		utils.NavigableMap2{"OfficeGroup": utils.NewNMInterface("Marketing")},
 	)
 	if rply := v1InitRpl.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
 	v1InitRpl.MaxUsage = utils.DurationPointer(5 * time.Minute)
-	expected.Set([]string{utils.CapMaxUsage}, 5*time.Minute)
+	expected.Set([]string{utils.CapMaxUsage},
+		utils.NewNMInterface(5*time.Minute))
 	if rply := v1InitRpl.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
@@ -1237,12 +1237,12 @@ func TestSessionSV1InitSessionReplyAsNavigableMap(t *testing.T) {
 		ThresholdIDs:       thIDs,
 		StatQueueIDs:       statIDs,
 	}
-	expected = utils.NavigableMap{
-		utils.CapAttributes:         utils.NavigableMap{"OfficeGroup": "Marketing"},
-		utils.CapResourceAllocation: "ResGr1",
-		utils.CapMaxUsage:           5 * time.Minute,
-		utils.CapThresholds:         *thIDs,
-		utils.CapStatQueues:         *statIDs,
+	expected = utils.NavigableMap2{
+		utils.CapAttributes:         utils.NavigableMap2{"OfficeGroup": utils.NewNMInterface("Marketing")},
+		utils.CapResourceAllocation: utils.NewNMInterface("ResGr1"),
+		utils.CapMaxUsage:           utils.NewNMInterface(5 * time.Minute),
+		utils.CapThresholds:         &utils.NMSlice{utils.NewNMInterface("THD_RES_1"), utils.NewNMInterface("THD_STATS_1"), utils.NewNMInterface("THD_STATS_2"), utils.NewNMInterface("THD_CDRS_1")},
+		utils.CapStatQueues:         &utils.NMSlice{utils.NewNMInterface("Stats2"), utils.NewNMInterface("Stats1"), utils.NewNMInterface("Stats3")},
 	}
 	if rply := v1InitRpl.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
@@ -1251,19 +1251,20 @@ func TestSessionSV1InitSessionReplyAsNavigableMap(t *testing.T) {
 
 func TestSessionSV1UpdateSessionReplyAsNavigableMap(t *testing.T) {
 	v1UpdtRpl := new(V1UpdateSessionReply)
-	expected := utils.NavigableMap{}
+	expected := utils.NavigableMap2{}
 	if rply := v1UpdtRpl.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
 	v1UpdtRpl.Attributes = attrs
 	expected.Set([]string{utils.CapAttributes},
-		utils.NavigableMap{"OfficeGroup": "Marketing"},
+		utils.NavigableMap2{"OfficeGroup": utils.NewNMInterface("Marketing")},
 	)
 	if rply := v1UpdtRpl.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
 	v1UpdtRpl.MaxUsage = utils.DurationPointer(5 * time.Minute)
-	expected.Set([]string{utils.CapMaxUsage}, 5*time.Minute)
+	expected.Set([]string{utils.CapMaxUsage},
+		utils.NewNMInterface(5*time.Minute))
 	if rply := v1UpdtRpl.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
@@ -1271,25 +1272,25 @@ func TestSessionSV1UpdateSessionReplyAsNavigableMap(t *testing.T) {
 
 func TestSessionSV1ProcessMessageReplyAsNavigableMap(t *testing.T) {
 	v1PrcEvRpl := new(V1ProcessMessageReply)
-	expected := utils.NavigableMap{}
+	expected := utils.NavigableMap2{}
 	if rply := v1PrcEvRpl.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
 
 	v1PrcEvRpl.Attributes = attrs
-	expected.Set([]string{utils.CapAttributes}, utils.NavigableMap{"OfficeGroup": "Marketing"})
+	expected.Set([]string{utils.CapAttributes}, utils.NavigableMap2{"OfficeGroup": utils.NewNMInterface("Marketing")})
 	if rply := v1PrcEvRpl.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
 
 	v1PrcEvRpl.MaxUsage = utils.DurationPointer(5 * time.Minute)
-	expected.Set([]string{utils.CapMaxUsage}, 5*time.Minute)
+	expected.Set([]string{utils.CapMaxUsage}, utils.NewNMInterface(5*time.Minute))
 	if rply := v1PrcEvRpl.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
 
 	v1PrcEvRpl.ResourceAllocation = utils.StringPointer("ResGr1")
-	expected.Set([]string{utils.CapResourceAllocation}, "ResGr1")
+	expected.Set([]string{utils.CapResourceAllocation}, utils.NewNMInterface("ResGr1"))
 	if rply := v1PrcEvRpl.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
@@ -1304,10 +1305,10 @@ func TestSessionSV1ProcessMessageReplyAsNavigableMap(t *testing.T) {
 	v1PrcEvRpl.Suppliers = tmpSuppliers
 	v1PrcEvRpl.ThresholdIDs = &tmpTresholdIDs
 	v1PrcEvRpl.StatQueueIDs = &tmpStatQueueIDs
-	expected.Set([]string{utils.CapResourceAllocation}, "ResGr1")
+	expected.Set([]string{utils.CapResourceAllocation}, utils.NewNMInterface("ResGr1"))
 	expected.Set([]string{utils.CapSuppliers}, tmpSuppliers.AsNavigableMap())
-	expected.Set([]string{utils.CapThresholds}, tmpTresholdIDs)
-	expected.Set([]string{utils.CapStatQueues}, tmpStatQueueIDs)
+	expected.Set([]string{utils.CapThresholds}, &utils.NMSlice{utils.NewNMInterface("ID1"), utils.NewNMInterface("ID2")})
+	expected.Set([]string{utils.CapStatQueues}, &utils.NMSlice{utils.NewNMInterface("Que1"), utils.NewNMInterface("Que2")})
 	if rply := v1PrcEvRpl.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
@@ -1316,25 +1317,25 @@ func TestSessionSV1ProcessMessageReplyAsNavigableMap(t *testing.T) {
 func TestV1ProcessEventReplyAsNavigableMap(t *testing.T) {
 	//empty check
 	v1per := new(V1ProcessEventReply)
-	expected := utils.NavigableMap{}
+	expected := utils.NavigableMap2{}
 	if rply := v1per.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
 	//max usage check
 	v1per.MaxUsage = utils.DurationPointer(5 * time.Minute)
-	expected.Set([]string{utils.CapMaxUsage}, 5*time.Minute)
+	expected.Set([]string{utils.CapMaxUsage}, utils.NewNMInterface(5*time.Minute))
 	if rply := v1per.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
 	//resource message check
 	v1per.ResourceMessage = utils.StringPointer("Resource")
-	expected.Set([]string{utils.CapResourceMessage}, "Resource")
+	expected.Set([]string{utils.CapResourceMessage}, utils.NewNMInterface("Resource"))
 	if rply := v1per.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
 	//attributes check
 	v1per.Attributes = attrs
-	expected.Set([]string{utils.CapAttributes}, utils.NavigableMap{"OfficeGroup": "Marketing"})
+	expected.Set([]string{utils.CapAttributes}, utils.NavigableMap2{"OfficeGroup": utils.NewNMInterface("Marketing")})
 	if rply := v1per.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
@@ -1351,14 +1352,14 @@ func TestV1ProcessEventReplyAsNavigableMap(t *testing.T) {
 	//tmpTresholdIDs check
 	tmpTresholdIDs := []string{"ID1", "ID2"}
 	v1per.ThresholdIDs = &tmpTresholdIDs
-	expected.Set([]string{utils.CapThresholds}, tmpTresholdIDs)
+	expected.Set([]string{utils.CapThresholds}, &utils.NMSlice{utils.NewNMInterface("ID1"), utils.NewNMInterface("ID2")})
 	if rply := v1per.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
 	//StatQueue check
 	tmpStatQueueIDs := []string{"Que1", "Que2"}
 	v1per.StatQueueIDs = &tmpStatQueueIDs
-	expected.Set([]string{utils.CapStatQueues}, tmpStatQueueIDs)
+	expected.Set([]string{utils.CapStatQueues}, &utils.NMSlice{utils.NewNMInterface("Que1"), utils.NewNMInterface("Que2")})
 	if rply := v1per.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}

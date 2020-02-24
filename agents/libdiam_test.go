@@ -502,13 +502,13 @@ func TestUpdateDiamMsgFromNavMap2(t *testing.T) {
 	)
 
 	nM := utils.NewOrderedNavigableMap()
-	itm2 := &config.NMItem{
+	itm := &config.NMItem{
 		Path: []string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Redirect-Server", "Redirect-Address-Type"},
 		Data: datatype.Enumerated(2),
 	}
-	nM.Set(itm2.Path, &utils.NMSlice{itm2})
+	nM.Set(itm.Path, &utils.NMSlice{itm})
 
-	itm := &config.NMItem{
+	itm = &config.NMItem{
 		Path: []string{"Multiple-Services-Credit-Control", "Tariff-Change-Usage"},
 		Data: datatype.Enumerated(2),
 	}
@@ -525,7 +525,7 @@ func TestUpdateDiamMsgFromNavMap2(t *testing.T) {
 		Path: []string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Redirect-Server", "Redirect-Address-Type"},
 		Data: datatype.Enumerated(2),
 	}
-	nM.Set(itm.Path, &utils.NMSlice{itm2, itm})
+	nM.Set([]string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Redirect-Server", "Redirect-Address-Type[1]"}, itm)
 
 	if err := updateDiamMsgFromNavMap(m2, nM, ""); err != nil {
 		t.Error(err)

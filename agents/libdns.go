@@ -162,7 +162,7 @@ func updateDNSMsgFromNM(msg *dns.Msg, nm *utils.OrderedNavigableMap) (err error)
 		}
 		cfgItm, cast := nmIt.(*config.NMItem)
 		if !cast {
-			return fmt.Errorf("cannot cast val: %s into *config.NMItem", val)
+			return fmt.Errorf("cannot cast val: %s into *config.NMItem", nmIt)
 		}
 		if len(cfgItm.Path) == 0 {
 			return errors.New("empty path in config item")
