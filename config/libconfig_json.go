@@ -98,10 +98,12 @@ type DbJsonCfg struct {
 }
 
 type ItemOptJson struct {
-	Remote    *bool
-	Replicate *bool
-	Ttl       *string
-	// used for ArgDispatcher in case we send this to a dispatcer engine
+	Remote     *bool
+	Replicate  *bool
+	Ttl        *string
+	Limit      *int
+	Static_ttl *bool
+	// used for ArgDispatcher in case we send this to a dispatcher engine
 	Route_id *string
 	Api_key  *string
 }
