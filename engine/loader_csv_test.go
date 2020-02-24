@@ -1151,7 +1151,7 @@ func TestLoadFilters(t *testing.T) {
 			ID:     "FLTR_1",
 			Filters: []*utils.TPFilter{
 				&utils.TPFilter{
-					Element: "~*req.Account",
+					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
 					Type:    utils.MetaString,
 					Values:  []string{"1001", "1002"},
 				},
@@ -1176,7 +1176,7 @@ func TestLoadFilters(t *testing.T) {
 			ID:     "FLTR_ACNT_dan",
 			Filters: []*utils.TPFilter{
 				&utils.TPFilter{
-					Element: "~*req.Account",
+					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
 					Type:    utils.MetaString,
 					Values:  []string{"dan"},
 				},

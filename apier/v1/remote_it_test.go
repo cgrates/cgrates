@@ -470,7 +470,7 @@ func testInternalRemoteITGetFilter(t *testing.T) {
 		Rules: []*engine.FilterRule{
 			{
 				Type:    utils.MetaString,
-				Element: "~*req.Account",
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
 				Values:  []string{"1001"},
 			},
 		},
@@ -1044,10 +1044,10 @@ func testInternalReplicateStats(t *testing.T) {
 			TTL:         time.Duration(10) * time.Second,
 			Metrics: []*engine.MetricWithFilters{
 				&engine.MetricWithFilters{
-					MetricID: "*acd",
+					MetricID: utils.MetaACD,
 				},
 				&engine.MetricWithFilters{
-					MetricID: "*tcd",
+					MetricID: utils.MetaTCD,
 				},
 			},
 			ThresholdIDs: []string{"*none"},
