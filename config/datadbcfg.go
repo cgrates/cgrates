@@ -130,6 +130,11 @@ type ItemOpt struct {
 	Remote    bool
 	Replicate bool
 	TTL       time.Duration
+	Limit     int
+	StaticTTL bool
+	// used for ArgDispatcher in case we send this to a dispatcher engine
+	RouteID string
+	APIKey  string
 }
 
 func (itm *ItemOpt) loadFromJsonCfg(jsonItm *ItemOptJson) (err error) {
@@ -146,6 +151,18 @@ func (itm *ItemOpt) loadFromJsonCfg(jsonItm *ItemOptJson) (err error) {
 		if itm.TTL, err = utils.ParseDurationWithNanosecs(*jsonItm.Ttl); err != nil {
 			return err
 		}
+	}
+	if jsonItm.Limit != nil {
+		itm.Limit = *jsonItm.Limit
+	}
+	if jsonItm.Static_ttl != nil {
+		itm.StaticTTL = *jsonItm.Static_ttl
+	}
+	if jsonItm.Route_id != nil {
+		itm.RouteID = *jsonItm.Route_id
+	}
+	if jsonItm.Api_key != nil {
+		itm.APIKey = *jsonItm.Api_key
 	}
 	return
 }
