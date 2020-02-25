@@ -71,7 +71,7 @@ func testTpResITConnect(t *testing.T) {
 	storDBIn, err := NewMigratorStorDB(tpResCfgIn.StorDbCfg().Type,
 		tpResCfgIn.StorDbCfg().Host, tpResCfgIn.StorDbCfg().Port,
 		tpResCfgIn.StorDbCfg().Name, tpResCfgIn.StorDbCfg().User,
-		tpResCfgIn.StorDbCfg().Password, tpResCfgIn.StorDbCfg().SSLMode,
+		tpResCfgIn.StorDbCfg().Password, tpResCfgIn.GeneralCfg().DBDataEncoding, tpResCfgIn.StorDbCfg().SSLMode,
 		tpResCfgIn.StorDbCfg().MaxOpenConns, tpResCfgIn.StorDbCfg().MaxIdleConns,
 		tpResCfgIn.StorDbCfg().ConnMaxLifetime, tpResCfgIn.StorDbCfg().StringIndexedFields,
 		tpResCfgIn.StorDbCfg().PrefixIndexedFields, tpResCfgIn.StorDbCfg().Items)
@@ -81,7 +81,7 @@ func testTpResITConnect(t *testing.T) {
 	storDBOut, err := NewMigratorStorDB(tpResCfgOut.StorDbCfg().Type,
 		tpResCfgOut.StorDbCfg().Host, tpResCfgOut.StorDbCfg().Port,
 		tpResCfgOut.StorDbCfg().Name, tpResCfgOut.StorDbCfg().User,
-		tpResCfgOut.StorDbCfg().Password, tpResCfgIn.StorDbCfg().SSLMode,
+		tpResCfgOut.StorDbCfg().Password, tpResCfgOut.GeneralCfg().DBDataEncoding, tpResCfgIn.StorDbCfg().SSLMode,
 		tpResCfgIn.StorDbCfg().MaxOpenConns, tpResCfgIn.StorDbCfg().MaxIdleConns,
 		tpResCfgIn.StorDbCfg().ConnMaxLifetime, tpResCfgIn.StorDbCfg().StringIndexedFields,
 		tpResCfgIn.StorDbCfg().PrefixIndexedFields, tpResCfgOut.StorDbCfg().Items)

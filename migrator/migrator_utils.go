@@ -54,12 +54,12 @@ func NewMigratorDataDB(db_type, host, port, name, user, pass,
 	return d, nil
 }
 
-func NewMigratorStorDB(db_type, host, port, name, user, pass, sslmode string,
+func NewMigratorStorDB(db_type, host, port, name, user, pass, marshaler, sslmode string,
 	maxConn, maxIdleConn, connMaxLifetime int, stringIndexedFields, prefixIndexedFields []string,
 	itemsCacheCfg map[string]*config.ItemOpt) (db MigratorStorDB, err error) {
 	var d MigratorStorDB
 	storDb, err := engine.NewStorDBConn(db_type, host, port, name, user,
-		pass, sslmode, maxConn, maxIdleConn, connMaxLifetime,
+		pass, marshaler, sslmode, maxConn, maxIdleConn, connMaxLifetime,
 		stringIndexedFields, prefixIndexedFields, itemsCacheCfg)
 	if err != nil {
 		return nil, err

@@ -81,7 +81,7 @@ func testInitDataDB(t *testing.T) {
 	storageDb, err = NewStorDBConn(cfg.StorDbCfg().Type,
 		cfg.StorDbCfg().Host, cfg.StorDbCfg().Port,
 		cfg.StorDbCfg().Name, cfg.StorDbCfg().User,
-		cfg.StorDbCfg().Password, cfg.StorDbCfg().SSLMode,
+		cfg.StorDbCfg().Password, cfg.GeneralCfg().DBDataEncoding, cfg.StorDbCfg().SSLMode,
 		cfg.StorDbCfg().MaxOpenConns, cfg.StorDbCfg().MaxIdleConns,
 		cfg.StorDbCfg().ConnMaxLifetime, cfg.StorDbCfg().StringIndexedFields,
 		cfg.StorDbCfg().PrefixIndexedFields, cfg.StorDbCfg().Items)

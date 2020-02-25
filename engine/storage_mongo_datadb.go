@@ -125,7 +125,7 @@ func TimeDecodeValue1(dc bsoncodec.DecodeContext, vr bsonrw.ValueReader, val ref
 }
 
 // NewMongoStorage givese new mongo driver
-func NewMongoStorage(host, port, db, user, pass, storageType string, cdrsIndexes []string,
+func NewMongoStorage(host, port, db, user, pass, mrshlerStr, storageType string, cdrsIndexes []string,
 	isDataDB bool) (ms *MongoStorage, err error) {
 	url := host
 	if port != "" {
@@ -162,13 +162,18 @@ func NewMongoStorage(host, port, db, user, pass, storageType string, cdrsIndexes
 	if err != nil {
 		return nil, err
 	}
+	mrshler, err := NewMarshaler(mrshlerStr)
+	if err != nil {
+		return nil, err
+	}
+
 	ms = &MongoStorage{
 		client:      client,
 		ctx:         ctx,
 		ctxTTL:      ttl,
 		db:          dbName,
 		storageType: storageType,
-		ms:          NewCodecMsgpackMarshaler(),
+		ms:          mrshler,
 		cdrsIndexes: cdrsIndexes,
 		isDataDB:    isDataDB,
 	}

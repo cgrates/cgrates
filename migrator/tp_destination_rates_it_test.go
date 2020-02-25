@@ -70,7 +70,7 @@ func testTpDstRtITConnect(t *testing.T) {
 	storDBIn, err := NewMigratorStorDB(tpDstRtCfgIn.StorDbCfg().Type,
 		tpDstRtCfgIn.StorDbCfg().Host, tpDstRtCfgIn.StorDbCfg().Port,
 		tpDstRtCfgIn.StorDbCfg().Name, tpDstRtCfgIn.StorDbCfg().User,
-		tpDstRtCfgIn.StorDbCfg().Password, tpDstRtCfgIn.StorDbCfg().SSLMode,
+		tpDstRtCfgIn.StorDbCfg().Password, tpDstRtCfgIn.GeneralCfg().DBDataEncoding, tpDstRtCfgIn.StorDbCfg().SSLMode,
 		tpDstRtCfgIn.StorDbCfg().MaxOpenConns, tpDstRtCfgIn.StorDbCfg().MaxIdleConns,
 		tpDstRtCfgIn.StorDbCfg().ConnMaxLifetime, tpDstRtCfgIn.StorDbCfg().StringIndexedFields,
 		tpDstRtCfgIn.StorDbCfg().PrefixIndexedFields, tpDstRtCfgIn.StorDbCfg().Items)
@@ -80,7 +80,7 @@ func testTpDstRtITConnect(t *testing.T) {
 	storDBOut, err := NewMigratorStorDB(tpDstRtCfgOut.StorDbCfg().Type,
 		tpDstRtCfgOut.StorDbCfg().Host, tpDstRtCfgOut.StorDbCfg().Port,
 		tpDstRtCfgOut.StorDbCfg().Name, tpDstRtCfgOut.StorDbCfg().User,
-		tpDstRtCfgOut.StorDbCfg().Password, tpDstRtCfgIn.StorDbCfg().SSLMode,
+		tpDstRtCfgOut.StorDbCfg().Password, tpDstRtCfgOut.GeneralCfg().DBDataEncoding, tpDstRtCfgIn.StorDbCfg().SSLMode,
 		tpDstRtCfgIn.StorDbCfg().MaxOpenConns, tpDstRtCfgIn.StorDbCfg().MaxIdleConns,
 		tpDstRtCfgIn.StorDbCfg().ConnMaxLifetime, tpDstRtCfgIn.StorDbCfg().StringIndexedFields,
 		tpDstRtCfgIn.StorDbCfg().PrefixIndexedFields, tpDstRtCfgOut.StorDbCfg().Items)
