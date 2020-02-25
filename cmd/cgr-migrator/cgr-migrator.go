@@ -316,9 +316,10 @@ func main() {
 	if storDBIn, err = migrator.NewMigratorStorDB(mgrCfg.StorDbCfg().Type,
 		mgrCfg.StorDbCfg().Host, mgrCfg.StorDbCfg().Port,
 		mgrCfg.StorDbCfg().Name, mgrCfg.StorDbCfg().User,
-		mgrCfg.StorDbCfg().Password, mgrCfg.StorDbCfg().SSLMode,
-		mgrCfg.StorDbCfg().MaxOpenConns, mgrCfg.StorDbCfg().MaxIdleConns,
-		mgrCfg.StorDbCfg().ConnMaxLifetime, mgrCfg.StorDbCfg().StringIndexedFields,
+		mgrCfg.StorDbCfg().Password, mgrCfg.GeneralCfg().DBDataEncoding,
+		mgrCfg.StorDbCfg().SSLMode, mgrCfg.StorDbCfg().MaxOpenConns,
+		mgrCfg.StorDbCfg().MaxIdleConns, mgrCfg.StorDbCfg().ConnMaxLifetime,
+		mgrCfg.StorDbCfg().StringIndexedFields,
 		mgrCfg.StorDbCfg().PrefixIndexedFields, mgrCfg.StorDbCfg().Items); err != nil {
 		log.Fatal(err)
 	}
@@ -328,9 +329,10 @@ func main() {
 	} else if storDBOut, err = migrator.NewMigratorStorDB(mgrCfg.MigratorCgrCfg().OutStorDBType,
 		mgrCfg.MigratorCgrCfg().OutStorDBHost, mgrCfg.MigratorCgrCfg().OutStorDBPort,
 		mgrCfg.MigratorCgrCfg().OutStorDBName, mgrCfg.MigratorCgrCfg().OutStorDBUser,
-		mgrCfg.MigratorCgrCfg().OutStorDBPassword, mgrCfg.StorDbCfg().SSLMode,
-		mgrCfg.StorDbCfg().MaxOpenConns, mgrCfg.StorDbCfg().MaxIdleConns,
-		mgrCfg.StorDbCfg().ConnMaxLifetime, mgrCfg.StorDbCfg().StringIndexedFields,
+		mgrCfg.MigratorCgrCfg().OutStorDBPassword, mgrCfg.GeneralCfg().DBDataEncoding,
+		mgrCfg.StorDbCfg().SSLMode, mgrCfg.StorDbCfg().MaxOpenConns,
+		mgrCfg.StorDbCfg().MaxIdleConns, mgrCfg.StorDbCfg().ConnMaxLifetime,
+		mgrCfg.StorDbCfg().StringIndexedFields,
 		mgrCfg.StorDbCfg().PrefixIndexedFields, mgrCfg.StorDbCfg().Items); err != nil {
 		log.Fatal(err)
 	}

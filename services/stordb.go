@@ -59,7 +59,8 @@ func (db *StorDBService) Start() (err error) {
 	db.oldDBCfg = db.cfg.StorDbCfg().Clone()
 	d, err := engine.NewStorDBConn(db.cfg.StorDbCfg().Type, db.cfg.StorDbCfg().Host,
 		db.cfg.StorDbCfg().Port, db.cfg.StorDbCfg().Name, db.cfg.StorDbCfg().User,
-		db.cfg.StorDbCfg().Password, db.cfg.StorDbCfg().SSLMode, db.cfg.StorDbCfg().MaxOpenConns,
+		db.cfg.StorDbCfg().Password, db.cfg.GeneralCfg().DBDataEncoding,
+		db.cfg.StorDbCfg().SSLMode, db.cfg.StorDbCfg().MaxOpenConns,
 		db.cfg.StorDbCfg().MaxIdleConns, db.cfg.StorDbCfg().ConnMaxLifetime,
 		db.cfg.StorDbCfg().StringIndexedFields, db.cfg.StorDbCfg().PrefixIndexedFields,
 		db.cfg.StorDbCfg().Items)
@@ -90,7 +91,8 @@ func (db *StorDBService) Reload() (err error) {
 		var d engine.StorDB
 		if d, err = engine.NewStorDBConn(db.cfg.StorDbCfg().Type, db.cfg.StorDbCfg().Host,
 			db.cfg.StorDbCfg().Port, db.cfg.StorDbCfg().Name, db.cfg.StorDbCfg().User,
-			db.cfg.StorDbCfg().Password, db.cfg.StorDbCfg().SSLMode, db.cfg.StorDbCfg().MaxOpenConns,
+			db.cfg.StorDbCfg().Password, db.cfg.GeneralCfg().DBDataEncoding,
+			db.cfg.StorDbCfg().SSLMode, db.cfg.StorDbCfg().MaxOpenConns,
 			db.cfg.StorDbCfg().MaxIdleConns, db.cfg.StorDbCfg().ConnMaxLifetime,
 			db.cfg.StorDbCfg().StringIndexedFields, db.cfg.StorDbCfg().PrefixIndexedFields,
 			db.cfg.StorDbCfg().Items); err != nil {

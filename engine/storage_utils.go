@@ -48,7 +48,7 @@ func NewDataDBConn(dbType, host, port, name, user,
 		}
 		d, err = NewRedisStorage(host, dbNo, pass, marshaler, utils.REDIS_MAX_CONNS, sentinelName)
 	case utils.MONGO:
-		d, err = NewMongoStorage(host, port, name, user, pass, utils.DataDB, nil, true)
+		d, err = NewMongoStorage(host, port, name, user, pass, marshaler, utils.DataDB, nil, true)
 	case utils.INTERNAL:
 		d = NewInternalDB(nil, nil, true, itemsCacheCfg)
 	default:
@@ -58,13 +58,13 @@ func NewDataDBConn(dbType, host, port, name, user,
 }
 
 // NewStorDBConn returns a StorDB(implements Storage interface) based on dbType
-func NewStorDBConn(dbType, host, port, name, user, pass, sslmode string,
+func NewStorDBConn(dbType, host, port, name, user, pass, marshaler, sslmode string,
 	maxConn, maxIdleConn, connMaxLifetime int,
 	stringIndexedFields, prefixIndexedFields []string,
 	itemsCacheCfg map[string]*config.ItemOpt) (db StorDB, err error) {
 	switch dbType {
 	case utils.MONGO:
-		db, err = NewMongoStorage(host, port, name, user, pass, utils.StorDB, stringIndexedFields, false)
+		db, err = NewMongoStorage(host, port, name, user, pass, marshaler, utils.StorDB, stringIndexedFields, false)
 	case utils.POSTGRES:
 		db, err = NewPostgresStorage(host, port, name, user, pass, sslmode, maxConn, maxIdleConn, connMaxLifetime)
 	case utils.MYSQL:
