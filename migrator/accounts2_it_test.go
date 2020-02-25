@@ -84,7 +84,7 @@ func testAcc2ITConnect(t *testing.T) {
 	storDBIn, err := NewMigratorStorDB(acc2CfgIn.StorDbCfg().Type,
 		acc2CfgIn.StorDbCfg().Host, acc2CfgIn.StorDbCfg().Port,
 		acc2CfgIn.StorDbCfg().Name, acc2CfgIn.StorDbCfg().User,
-		acc2CfgIn.StorDbCfg().Password, acc2CfgIn.StorDbCfg().SSLMode,
+		acc2CfgIn.StorDbCfg().Password, acc2CfgIn.GeneralCfg().DBDataEncoding, acc2CfgIn.StorDbCfg().SSLMode,
 		acc2CfgIn.StorDbCfg().MaxOpenConns, acc2CfgIn.StorDbCfg().MaxIdleConns,
 		acc2CfgIn.StorDbCfg().ConnMaxLifetime, acc2CfgIn.StorDbCfg().StringIndexedFields,
 		acc2CfgIn.StorDbCfg().PrefixIndexedFields, acc2CfgIn.StorDbCfg().Items)
@@ -94,7 +94,7 @@ func testAcc2ITConnect(t *testing.T) {
 	storDBOut, err := NewMigratorStorDB(acc2CfgOut.StorDbCfg().Type,
 		acc2CfgOut.StorDbCfg().Host, acc2CfgOut.StorDbCfg().Port,
 		acc2CfgOut.StorDbCfg().Name, acc2CfgOut.StorDbCfg().User,
-		acc2CfgOut.StorDbCfg().Password, acc2CfgIn.StorDbCfg().SSLMode,
+		acc2CfgOut.StorDbCfg().Password, acc2CfgIn.GeneralCfg().DBDataEncoding, acc2CfgIn.StorDbCfg().SSLMode,
 		acc2CfgOut.StorDbCfg().MaxOpenConns, acc2CfgOut.StorDbCfg().MaxIdleConns,
 		acc2CfgOut.StorDbCfg().ConnMaxLifetime, acc2CfgOut.StorDbCfg().StringIndexedFields,
 		acc2CfgOut.StorDbCfg().PrefixIndexedFields, acc2CfgOut.StorDbCfg().Items)
