@@ -54,6 +54,7 @@ var (
 		testInternalRemoteITStartEngine,
 		testInternalRemoteITRPCConn,
 		testInternalRemoteLoadDataInEngineTwo,
+
 		testInternalRemoteITGetAccount,
 		testInternalRemoteITGetAttribute,
 		testInternalRemoteITGetThreshold,
@@ -70,11 +71,16 @@ var (
 		testInternalRemoteITGetAccountActionPlan,
 		testInternalRemoteITGetDestination,
 		testInternalRemoteITGetReverseDestination,
+		testInternalRemoteITGetChargerProfile,
+		testInternalRemoteITGetDispatcherProfile,
+		testInternalRemoteITGetDispatcherHost,
+
 		testInternalReplicationSetThreshold,
 		testInternalMatchThreshold,
 		testInternalAccountBalanceOperations,
 		testInternalSetAccount,
 		testInternalReplicateStats,
+
 		testInternalRemoteITKillEngine,
 	}
 )
@@ -594,6 +600,102 @@ func testInternalRemoteITGetReverseDestination(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eIDs, ids) {
 		t.Errorf("Expected: %v,\n received: %v", eIDs, ids)
+	}
+}
+
+func testInternalRemoteITGetChargerProfile(t *testing.T) {
+	chargerProfile := &engine.ChargerProfile{
+		Tenant:       "cgrates.org",
+		ID:           "DEFAULT",
+		FilterIDs:    []string{},
+		RunID:        utils.MetaDefault,
+		AttributeIDs: []string{utils.META_NONE},
+		Weight:       0,
+	}
+	var reply *engine.ChargerProfile
+	if err := internalRPC.Call(utils.APIerSv1GetChargerProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "DEFAULT"}, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(chargerProfile, reply) {
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(chargerProfile), utils.ToJSON(reply))
+	}
+}
+
+func testInternalRemoteITGetDispatcherProfile(t *testing.T) {
+	var reply string
+	if err := internalRPC.Call(utils.APIerSv1GetDispatcherProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "Dsp1"},
+		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+
+	dispatcherProfile = &DispatcherWithCache{
+		DispatcherProfile: &engine.DispatcherProfile{
+			Tenant:    "cgrates.org",
+			ID:        "Dsp1",
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			Strategy:  utils.MetaFirst,
+			Weight:    20,
+		},
+	}
+
+	if err := engineTwoRPC.Call(utils.APIerSv1SetDispatcherProfile,
+		dispatcherProfile,
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expecting : %+v, received: %+v", utils.OK, reply)
+	}
+
+	var dsp *engine.DispatcherProfile
+	if err := internalRPC.Call(utils.APIerSv1GetDispatcherProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "Dsp1"},
+		&dsp); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(dispatcherProfile.DispatcherProfile, dsp) {
+		t.Errorf("Expecting : %+v, received: %+v", dispatcherProfile.DispatcherProfile, dsp)
+	}
+}
+func testInternalRemoteITGetDispatcherHost(t *testing.T) {
+	var reply string
+	if err := internalRPC.Call(utils.APIerSv1GetDispatcherHost,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "Dsp1"},
+		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+
+	dispatcherHost = &DispatcherHostWithCache{
+		DispatcherHost: &engine.DispatcherHost{
+			Tenant: "cgrates.org",
+			ID:     "DspHst1",
+			Conns: []*config.RemoteHost{
+				&config.RemoteHost{
+					Address: "*internal",
+				},
+				&config.RemoteHost{
+					Address:   ":2012",
+					Transport: utils.MetaJSON,
+					TLS:       true,
+				},
+			},
+		},
+	}
+
+	if err := engineTwoRPC.Call(utils.APIerSv1SetDispatcherHost,
+		dispatcherHost,
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expecting : %+v, received: %+v", utils.OK, reply)
+	}
+
+	var dsp *engine.DispatcherHost
+	if err := internalRPC.Call(utils.APIerSv1GetDispatcherHost,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "DspHst1"},
+		&dsp); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(dispatcherHost.DispatcherHost, dsp) {
+		t.Errorf("Expecting : %+v, received: %+v", dispatcherHost.DispatcherHost, dsp)
 	}
 }
 
