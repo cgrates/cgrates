@@ -66,6 +66,7 @@ func TestDMitinitDB(t *testing.T) {
 		dataDB, err = NewMongoStorage(mgoITCfg.StorDbCfg().Host,
 			mgoITCfg.StorDbCfg().Port, mgoITCfg.StorDbCfg().Name,
 			mgoITCfg.StorDbCfg().User, mgoITCfg.StorDbCfg().Password,
+			mgoITCfg.GeneralCfg().DBDataEncoding,
 			utils.StorDB, nil, false)
 		if err != nil {
 			t.Fatal("Could not connect to Mongo", err.Error())

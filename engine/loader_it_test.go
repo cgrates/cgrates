@@ -102,9 +102,10 @@ func testLoaderITInitStoreDB(t *testing.T) {
 	// NewStorDBConn
 	db, err := NewStorDBConn(lCfg.StorDbCfg().Type,
 		lCfg.StorDbCfg().Host, lCfg.StorDbCfg().Port, lCfg.StorDbCfg().Name,
-		lCfg.StorDbCfg().User, lCfg.StorDbCfg().Password, lCfg.StorDbCfg().SSLMode,
-		lCfg.StorDbCfg().MaxOpenConns, lCfg.StorDbCfg().MaxIdleConns, lCfg.StorDbCfg().ConnMaxLifetime,
-		lCfg.StorDbCfg().StringIndexedFields, lCfg.StorDbCfg().PrefixIndexedFields, lCfg.StorDbCfg().Items)
+		lCfg.StorDbCfg().User, lCfg.StorDbCfg().Password, lCfg.GeneralCfg().DBDataEncoding,
+		lCfg.StorDbCfg().SSLMode, lCfg.StorDbCfg().MaxOpenConns, lCfg.StorDbCfg().MaxIdleConns,
+		lCfg.StorDbCfg().ConnMaxLifetime, lCfg.StorDbCfg().StringIndexedFields,
+		lCfg.StorDbCfg().PrefixIndexedFields, lCfg.StorDbCfg().Items)
 	if err != nil {
 		t.Error("Error on opening database connection: ", err)
 	}
