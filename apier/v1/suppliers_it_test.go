@@ -48,6 +48,7 @@ var (
 		testV1SplSFromFolder,
 		testV1SplSGetWeightSuppliers,
 		testV1SplSGetLeastCostSuppliers,
+		testV1SplSGetLeastCostSuppliersWithoutUsage,
 		testV1SplSGetLeastCostSuppliersWithMaxCost,
 		testV1SplSGetLeastCostSuppliersWithMaxCost2,
 		testV1SplSGetLeastCostSuppliersWithMaxCostNotFound,
@@ -217,6 +218,60 @@ func testV1SplSGetLeastCostSuppliers(t *testing.T) {
 				SupplierID: "supplier2",
 				SortingData: map[string]interface{}{
 					utils.Cost:         1.26666,
+					utils.RatingPlanID: "RP_RETAIL1",
+					utils.Weight:       20.0,
+				},
+			},
+		},
+	}
+	var suplsReply engine.SortedSuppliers
+	if err := splSv1Rpc.Call(utils.SupplierSv1GetSuppliers,
+		ev, &suplsReply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eSpls, suplsReply) {
+		t.Errorf("Expecting: %s, received: %s",
+			utils.ToJSON(eSpls), utils.ToJSON(suplsReply))
+	}
+}
+
+func testV1SplSGetLeastCostSuppliersWithoutUsage(t *testing.T) {
+	ev := &engine.ArgsGetSuppliers{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testV1SplSGetLeastCostSuppliers",
+			Event: map[string]interface{}{
+				utils.Account:     "1003",
+				utils.Subject:     "1003",
+				utils.Destination: "1002",
+				utils.SetupTime:   time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
+			},
+		},
+	}
+	eSpls := engine.SortedSuppliers{
+		ProfileID: "SPL_LEASTCOST_1",
+		Sorting:   utils.MetaLC,
+		Count:     3,
+		SortedSuppliers: []*engine.SortedSupplier{
+			{
+				SupplierID: "supplier3",
+				SortingData: map[string]interface{}{
+					utils.Cost:         0.0102,
+					utils.RatingPlanID: "RP_SPECIAL_1002",
+					utils.Weight:       15.0,
+				},
+			},
+			{
+				SupplierID: "supplier1",
+				SortingData: map[string]interface{}{
+					utils.Cost:         0.0102,
+					utils.RatingPlanID: "RP_SPECIAL_1002",
+					utils.Weight:       10.0,
+				},
+			},
+			{
+				SupplierID: "supplier2",
+				SortingData: map[string]interface{}{
+					utils.Cost:         1.2,
 					utils.RatingPlanID: "RP_RETAIL1",
 					utils.Weight:       20.0,
 				},
