@@ -227,7 +227,12 @@ func (spS *SupplierService) costForEvent(ev *utils.CGREvent,
 	}
 	var usage time.Duration
 	if usage, err = ev.FieldAsDuration(utils.Usage); err != nil {
-		return
+		if err != utils.ErrNotFound {
+			return
+		}
+		// in case usage is missing from event we decide to use 1 minute as default
+		usage = time.Duration(1 * time.Minute)
+		err = nil
 	}
 	for _, anctID := range acntIDs {
 		cd := &CallDescriptor{
