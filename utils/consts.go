@@ -1012,6 +1012,7 @@ const (
 	APIerSv1GetRatingPlan               = "APIerSv1.GetRatingPlan"
 	APIerSv1RemoveRatingPlan            = "APIerSv1.RemoveRatingPlan"
 	APIerSv1GetDestination              = "APIerSv1.GetDestination"
+	APIerSv1RemoveDestination 			= "APIerSv1.RemoveDestination"
 	APIerSv1GetReverseDestination       = "APIerSv1.GetReverseDestination"
 	APIerSv1AddBalance                  = "APIerSv1.AddBalance"
 	APIerSv1DebitBalance                = "APIerSv1.DebitBalance"
