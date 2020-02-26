@@ -23,7 +23,16 @@
 			{"address": "127.0.0.1:2022", "transport":"*json"},
 			{"address": "127.0.0.1:2032", "transport":"*json"}
 		],
+	},
+	"connCache": {
+		"strategy": "*broadcast",
+		"conns": [
+			{"address": "*internal"},
+			{"address": "127.0.0.1:2022", "transport":"*json"},
+			{"address": "127.0.0.1:2032", "transport":"*json"}
+		],
 	}
+
 },
 
 
@@ -92,6 +101,7 @@
 "apiers": {
 	"enabled": true,
 	"scheduler_conns": ["*internal"],
+	"caches_conns":["connCache"],
 },
 
 }
