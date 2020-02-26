@@ -1,0 +1,49 @@
+{
+"general": {
+	"log_level": 7,
+	"node_id": "Engine1",
+},
+
+
+"listen": {
+	"rpc_json": ":2012",
+	"rpc_gob": ":2013",
+	"http": ":2080",
+},
+
+
+"rpc_conns": {
+	"cacheConn": {
+		"strategy": "*broadcast",
+		"conns": [
+			{"address": "*internal"},
+			{"address": "127.0.0.1:20212", "transport":"*json"}
+		],
+	},
+},
+
+
+"data_db": {
+	"db_type": "redis",
+	"db_port": 6379,
+	"db_name": "10",
+},
+
+
+"stor_db": {
+	"db_password": "CGRateS.org",
+},
+
+
+"rals": {
+	"enabled": true,
+},
+
+
+"apiers": {
+	"enabled": true,
+	"caches_conns":["cacheConn"]
+},
+
+
+}
