@@ -16,3 +16,6 @@ data/tutorials/fs_evsock/freeswitch/etc/freeswitch/
 data/tutorial_tests/fs_evsock/freeswitch/etc/freeswitch/
 vendor
 *.test
+# do not save the binary created by the docker build script
+data/docker/scratch/cgrates.json 
+data/docker/scratch/cgr-engine
