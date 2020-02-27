@@ -59,6 +59,12 @@ func (cM *ConnManager) getConn(connID string, biRPCClient rpcclient.ClientConnec
 		isBiRPCCLient = true
 	} else {
 		connCfg = cM.cfg.RPCConns()[connID]
+		for _, rpcConn := range connCfg.Conns {
+			if rpcConn.Address == utils.MetaInternal {
+				intChan = IntRPC.GetInternalChanel()
+				break
+			}
+		}
 	}
 	switch {
 	case biRPCClient != nil && isBiRPCCLient: // special handling for SessionS BiJSONRPCClient

@@ -53,6 +53,7 @@ var sTestsTwoEnginesIT = []func(t *testing.T){
 	testTwoEnginesCheckCacheBeforeSet,
 	testTwoEnginesSetThreshold,
 	testTwoEnginesCheckCacheAfterSet,
+	testTwoEnginesUpdateThreshold,
 	testTwoEnginesKillEngines,
 }
 
@@ -138,6 +139,12 @@ func testTwoEnginesCheckCacheBeforeSet(t *testing.T) {
 
 func testTwoEnginesSetThreshold(t *testing.T) {
 	var reply *engine.ThresholdProfile
+	// enforce caching with nil on engine2 so CacheSv1.ReloadCache load correctly the threshold
+	if err := engineTwoRpc.Call(utils.APIerSv1GetThresholdProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_TwoEnginesTest"}, &reply); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
 	var result string
 	tPrfl := &engine.ThresholdWithCache{
 		ThresholdProfile: &engine.ThresholdProfile{
@@ -151,7 +158,6 @@ func testTwoEnginesSetThreshold(t *testing.T) {
 			ActionIDs: []string{"ACT_1"},
 			Async:     true,
 		},
-		Cache: utils.StringPointer(utils.MetaLoad),
 	}
 	if err := engineOneRpc.Call(utils.APIerSv1SetThresholdProfile, tPrfl, &result); err != nil {
 		t.Error(err)
@@ -199,6 +205,64 @@ func testTwoEnginesCheckCacheAfterSet(t *testing.T) {
 		t.Fatalf("Got error on APIerSv1.GetCacheStats: %s ", err.Error())
 	} else if !reflect.DeepEqual(expKeys, rcvKeys) {
 		t.Errorf("Expected: %+v, received: %+v", expKeys, rcvKeys)
+	}
+	// after we verify the cache make sure it was set correctly there
+	tPrfl := &engine.ThresholdWithCache{
+		ThresholdProfile: &engine.ThresholdProfile{
+			Tenant:    "cgrates.org",
+			ID:        "THD_TwoEnginesTest",
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			MaxHits:   -1,
+			MinSleep:  time.Duration(5 * time.Minute),
+			Blocker:   false,
+			Weight:    20.0,
+			ActionIDs: []string{"ACT_1"},
+			Async:     true,
+		},
+	}
+	var rplTh *engine.ThresholdProfile
+	if err := engineTwoRpc.Call(utils.APIerSv1GetThresholdProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_TwoEnginesTest"}, &rplTh); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, rplTh) {
+		t.Errorf("Expecting: %+v, received: %+v", tPrfl.ThresholdProfile, rplTh)
+	}
+}
+
+func testTwoEnginesUpdateThreshold(t *testing.T) {
+	var rplTh *engine.ThresholdProfile
+	var result string
+	tPrfl := &engine.ThresholdWithCache{
+		ThresholdProfile: &engine.ThresholdProfile{
+			Tenant:    "cgrates.org",
+			ID:        "THD_TwoEnginesTest",
+			FilterIDs: []string{"*string:~*req.Account:10"},
+			MaxHits:   -1,
+			MinSleep:  time.Duration(1 * time.Minute),
+			Blocker:   false,
+			Weight:    50.0,
+			ActionIDs: []string{"ACT_1.1"},
+			Async:     true,
+		},
+		Cache: utils.StringPointer(utils.MetaReload),
+	}
+	if err := engineOneRpc.Call(utils.APIerSv1SetThresholdProfile, tPrfl, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	time.Sleep(50 * time.Millisecond)
+	if err := engineOneRpc.Call(utils.APIerSv1GetThresholdProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_TwoEnginesTest"}, &rplTh); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, rplTh) {
+		t.Errorf("Expecting: %+v, received: %+v", tPrfl.ThresholdProfile, rplTh)
+	}
+	if err := engineTwoRpc.Call(utils.APIerSv1GetThresholdProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_TwoEnginesTest"}, &rplTh); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, rplTh) {
+		t.Errorf("Expecting: %+v, received: %+v", tPrfl.ThresholdProfile, rplTh)
 	}
 }
 
