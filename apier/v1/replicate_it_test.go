@@ -38,11 +38,17 @@ var (
 		testInternalReplicateITRPCConn,
 		testInternalReplicateLoadDataInEngineTwo,
 
-		// testInternalReplicateSetDestination,
-		testInternalReplicateITSetAttributeProfile,
-		// testInternalReplicateITSetRatingProfile,
-		testInternalReplicateITSetSupplierProfile,
-		testInternalReplicateITSetStatQueueProfile,
+		// testInternalReplicateITDestination,
+		testInternalReplicateITAttributeProfile,
+		// testInternalReplicateITRatingProfile,
+		testInternalReplicateITSupplierProfile,
+		testInternalReplicateITStatQueueProfile,
+		testInternalReplicateITDispatcherProfile,
+		testInternalReplicateITChargerProfile,
+		testInternalReplicateITDispatcherHost,
+		testInternalReplicateITFilter,
+		testInternalReplicateITResourceProfile,
+		// testInternalReplicateITActions,
 
 		testInternalReplicateITKillEngine,
 	}
@@ -99,7 +105,6 @@ func testInternalReplicateITInitCfg(t *testing.T) {
 		t.Error(err)
 	}
 	engineTwoCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
-
 }
 
 func testInternalReplicateITDataFlush(t *testing.T) {
@@ -153,7 +158,7 @@ func testInternalReplicateLoadDataInEngineTwo(t *testing.T) {
 	time.Sleep(500 * time.Millisecond)
 }
 
-func testInternalReplicateSetDestination(t *testing.T) {
+func testInternalReplicateITDestination(t *testing.T) {
 	//set
 	attrs := utils.AttrSetDestination{Id: "TEST_SET_DESTINATION3", Prefixes: []string{"004", "005"}}
 	var reply string
@@ -193,10 +198,9 @@ func testInternalReplicateSetDestination(t *testing.T) {
 	if err := engineTwoRPC.Call(utils.APIerSv1GetDestination, "TEST_SET_DESTINATION", &rpl); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
-
 }
 
-func testInternalReplicateITSetAttributeProfile(t *testing.T) {
+func testInternalReplicateITAttributeProfile(t *testing.T) {
 	//set
 	alsPrf := &AttributeWithCache{
 		AttributeProfile: &engine.AttributeProfile{
@@ -255,7 +259,7 @@ func testInternalReplicateITSetAttributeProfile(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	time.Sleep(50 * time.Millisecond)
+	time.Sleep(70 * time.Millisecond)
 	//check again
 	if err := engineOneRPC.Call(utils.APIerSv1GetAttributeProfile,
 		utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: alsPrf.Tenant, ID: alsPrf.ID}}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
@@ -267,7 +271,7 @@ func testInternalReplicateITSetAttributeProfile(t *testing.T) {
 	}
 }
 
-func testInternalReplicateITSetRatingProfile(t *testing.T) {
+func testInternalReplicateITRatingProfile(t *testing.T) {
 	// set
 	var reply string
 	attrSetRatingProfile := &utils.AttrSetRatingProfile{
@@ -319,11 +323,9 @@ func testInternalReplicateITSetRatingProfile(t *testing.T) {
 	} else if !reflect.DeepEqual(expected, rpl) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rpl))
 	}
-	//remove
-
 }
 
-func testInternalReplicateITSetSupplierProfile(t *testing.T) {
+func testInternalReplicateITSupplierProfile(t *testing.T) {
 	// check
 	var reply *engine.SupplierProfile
 	if err := engineOneRPC.Call(utils.APIerSv1GetSupplierProfile,
@@ -386,7 +388,7 @@ func testInternalReplicateITSetSupplierProfile(t *testing.T) {
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
 	}
-	time.Sleep(30 * time.Millisecond)
+	time.Sleep(70 * time.Millisecond)
 	// check
 	if err := engineOneRPC.Call(utils.APIerSv1GetSupplierProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &reply); err == nil ||
@@ -400,7 +402,7 @@ func testInternalReplicateITSetSupplierProfile(t *testing.T) {
 	}
 }
 
-func testInternalReplicateITSetStatQueueProfile(t *testing.T) {
+func testInternalReplicateITStatQueueProfile(t *testing.T) {
 	// check
 	var reply *engine.StatQueueProfile
 	if err := engineOneRPC.Call(utils.APIerSv1GetStatQueueProfile,
@@ -477,6 +479,389 @@ func testInternalReplicateITSetStatQueueProfile(t *testing.T) {
 		&utils.TenantID{Tenant: tenant, ID: "TEST_PROFILE1"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
+	}
+}
+
+func testInternalReplicateITDispatcherProfile(t *testing.T) {
+	// check
+	var reply string
+	if err := engineOneRPC.Call(utils.APIerSv1GetDispatcherProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "Dsp1"},
+		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	if err := engineTwoRPC.Call(utils.APIerSv1GetDispatcherProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "Dsp1"},
+		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	// set
+	dispatcherProfile = &DispatcherWithCache{
+		DispatcherProfile: &engine.DispatcherProfile{
+			Tenant:    "cgrates.org",
+			ID:        "Dsp1",
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			Strategy:  utils.MetaFirst,
+			Weight:    20,
+		},
+	}
+	if err := internalRPC.Call(utils.APIerSv1SetDispatcherProfile, dispatcherProfile,
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expecting : %+v, received: %+v", utils.OK, reply)
+	}
+	time.Sleep(20 * time.Millisecond)
+	// check
+	var dsp *engine.DispatcherProfile
+	if err := engineOneRPC.Call(utils.APIerSv1GetDispatcherProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "Dsp1"},
+		&dsp); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(dispatcherProfile.DispatcherProfile, dsp) {
+		t.Errorf("Expecting : %+v, received: %+v", dispatcherProfile.DispatcherProfile, dsp)
+	}
+	if err := engineTwoRPC.Call(utils.APIerSv1GetDispatcherProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "Dsp1"},
+		&dsp); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(dispatcherProfile.DispatcherProfile, dsp) {
+		t.Errorf("Expecting : %+v, received: %+v", dispatcherProfile.DispatcherProfile, dsp)
+	}
+	// remove
+	var result string
+	if err := internalRPC.Call(utils.APIerSv1RemoveDispatcherProfile,
+		&utils.TenantIDWithCache{Tenant: "cgrates.org", ID: "Dsp1"}, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Errorf("Expecting : %+v, received: %+v", utils.OK, result)
+	}
+	time.Sleep(50 * time.Millisecond)
+	// remove again
+	if err := internalRPC.Call(utils.APIerSv1RemoveDispatcherProfile,
+		&utils.TenantIDWithCache{Tenant: "cgrates.org", ID: "Dsp1"}, &result); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	// check again
+	if err := engineOneRPC.Call(utils.APIerSv1GetDispatcherProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "Dsp1"}, &dsp); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	if err := engineTwoRPC.Call(utils.APIerSv1GetDispatcherProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "Dsp1"}, &dsp); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+}
+
+func testInternalReplicateITChargerProfile(t *testing.T) {
+	// check
+	var reply *engine.ChargerProfile
+	if err := engineOneRPC.Call(utils.APIerSv1GetChargerProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	if err := engineTwoRPC.Call(utils.APIerSv1GetChargerProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	// set
+	chargerProfile = &ChargerWithCache{
+		ChargerProfile: &engine.ChargerProfile{
+			Tenant:    "cgrates.org",
+			ID:        "ApierTest",
+			FilterIDs: []string{"*string:~*req.Account:1001", "*string:~Account:1002"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			},
+			RunID:        utils.MetaDefault,
+			AttributeIDs: []string{"Attr1", "Attr2"},
+			Weight:       20,
+		},
+	}
+	var result string
+	if err := internalRPC.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	// check
+	if err := engineOneRPC.Call(utils.APIerSv1GetChargerProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(chargerProfile.ChargerProfile, reply) {
+		t.Errorf("Expecting : %+v, received: %+v", chargerProfile.ChargerProfile, reply)
+	}
+	if err := engineTwoRPC.Call(utils.APIerSv1GetChargerProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(chargerProfile.ChargerProfile, reply) {
+		t.Errorf("Expecting : %+v, received: %+v", chargerProfile.ChargerProfile, reply)
+	}
+	// remove
+	if err := internalRPC.Call(utils.APIerSv1RemoveChargerProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	time.Sleep(50 * time.Millisecond)
+	//check
+	if err := engineOneRPC.Call(utils.APIerSv1GetChargerProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"},
+		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	if err := engineTwoRPC.Call(utils.APIerSv1GetChargerProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"},
+		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+}
+
+func testInternalReplicateITDispatcherHost(t *testing.T) {
+	// check
+	var reply string
+	if err := engineOneRPC.Call(utils.APIerSv1GetDispatcherHost,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "Dsp1"},
+		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	if err := engineTwoRPC.Call(utils.APIerSv1GetDispatcherHost,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "Dsp1"},
+		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	dispatcherHost = &DispatcherHostWithCache{
+		DispatcherHost: &engine.DispatcherHost{
+			Tenant: "cgrates.org",
+			ID:     "DspHst1",
+			Conns: []*config.RemoteHost{
+				&config.RemoteHost{
+					Address: "*internal",
+				},
+				&config.RemoteHost{
+					Address:   ":2012",
+					Transport: utils.MetaJSON,
+					TLS:       true,
+				},
+			},
+		},
+	}
+	//set
+	if err := internalRPC.Call(utils.APIerSv1SetDispatcherHost,
+		dispatcherHost,
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expecting : %+v, received: %+v", utils.OK, reply)
+	}
+	// check
+	var dsp *engine.DispatcherHost
+	if err := engineOneRPC.Call(utils.APIerSv1GetDispatcherHost,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "DspHst1"},
+		&dsp); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(dispatcherHost.DispatcherHost, dsp) {
+		t.Errorf("Expecting : %+v, received: %+v", dispatcherHost.DispatcherHost, dsp)
+	}
+	if err := engineTwoRPC.Call(utils.APIerSv1GetDispatcherHost,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "DspHst1"},
+		&dsp); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(dispatcherHost.DispatcherHost, dsp) {
+		t.Errorf("Expecting : %+v, received: %+v", dispatcherHost.DispatcherHost, dsp)
+	}
+	// remove
+	if err := internalRPC.Call(utils.APIerSv1RemoveDispatcherHost,
+		&utils.TenantIDWithCache{Tenant: "cgrates.org", ID: "DspHst1"},
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expecting : %+v, received: %+v", utils.OK, reply)
+	}
+	//check
+	if err := engineOneRPC.Call(utils.APIerSv1GetDispatcherHost,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "DspHst1"},
+		&dsp); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	if err := engineTwoRPC.Call(utils.APIerSv1GetDispatcherHost,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "DspHst1"},
+		&dsp); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+}
+
+func testInternalReplicateITFilter(t *testing.T) {
+	// check
+	var reply *engine.Filter
+	if err := engineOneRPC.Call(utils.APIerSv1GetFilter, &utils.TenantID{Tenant: "cgrates.org", ID: "Filter1"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	if err := engineTwoRPC.Call(utils.APIerSv1GetFilter, &utils.TenantID{Tenant: "cgrates.org", ID: "Filter1"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	//set
+	filter = &FilterWithCache{
+		Filter: &engine.Filter{
+			Tenant: "cgrates.org",
+			ID:     "Filter1",
+			Rules: []*engine.FilterRule{
+				{
+					Element: utils.MetaString,
+					Type:    "~Account",
+					Values:  []string{"1001", "1002"},
+				},
+			},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			},
+		},
+	}
+	var rcv string
+	if err := internalRPC.Call(utils.APIerSv1SetFilter, filter, &rcv); err != nil {
+		t.Error(err)
+	} else if rcv != utils.OK {
+		t.Error("Unexpected reply returned", rcv)
+	}
+	// check
+	if err := engineOneRPC.Call(utils.APIerSv1GetFilter, &utils.TenantID{Tenant: "cgrates.org", ID: "Filter1"}, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(filter.Filter, reply) {
+		t.Errorf("Expecting : %+v, received: %+v", filter.Filter, reply)
+	}
+	if err := engineTwoRPC.Call(utils.APIerSv1GetFilter, &utils.TenantID{Tenant: "cgrates.org", ID: "Filter1"}, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(filter.Filter, reply) {
+		t.Errorf("Expecting : %+v, received: %+v", filter.Filter, reply)
+	}
+	// remove
+	var resp string
+	if err := internalRPC.Call(utils.APIerSv1RemoveFilter,
+		&utils.TenantIDWithCache{Tenant: "cgrates.org", ID: "Filter1"}, &resp); err != nil {
+		t.Error(err)
+	} else if resp != utils.OK {
+		t.Error("Unexpected reply returned", resp)
+	}
+	// check again
+	if err := engineOneRPC.Call(utils.APIerSv1GetFilter, &utils.TenantID{Tenant: "cgrates.org", ID: "Filter1"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	if err := engineTwoRPC.Call(utils.APIerSv1GetFilter, &utils.TenantID{Tenant: "cgrates.org", ID: "Filter1"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+}
+
+func testInternalReplicateITResourceProfile(t *testing.T) {
+	// check
+	var reply *engine.ResourceProfile
+	if err := engineOneRPC.Call(utils.APIerSv1GetResourceProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "RES_GR_TEST"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	if err := engineTwoRPC.Call(utils.APIerSv1GetResourceProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "RES_GR_TEST"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	// set
+	rlsConfig = &ResourceWithCache{
+		ResourceProfile: &engine.ResourceProfile{
+			Tenant:    "cgrates.org",
+			ID:        "RES_GR_TEST",
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			},
+			UsageTTL:          time.Duration(1) * time.Nanosecond,
+			Limit:             10,
+			AllocationMessage: "MessageAllocation",
+			Blocker:           true,
+			Stored:            true,
+			Weight:            20,
+			ThresholdIDs:      []string{"Val1"},
+		},
+	}
+
+	var result string
+	if err := internalRPC.Call(utils.APIerSv1SetResourceProfile, rlsConfig, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	// check
+	if err := engineOneRPC.Call(utils.APIerSv1GetResourceProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "RES_GR_TEST"}, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, rlsConfig.ResourceProfile) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(rlsConfig.ResourceProfile), utils.ToJSON(reply))
+	}
+	if err := engineTwoRPC.Call(utils.APIerSv1GetResourceProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "RES_GR_TEST"}, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, rlsConfig.ResourceProfile) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(rlsConfig.ResourceProfile), utils.ToJSON(reply))
+	}
+	// remove
+	if err := internalRPC.Call(utils.APIerSv1RemoveResourceProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "RES_GR_TEST"}, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	time.Sleep(50 * time.Millisecond)
+	// check again
+	if err := engineOneRPC.Call(utils.APIerSv1GetResourceProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "RES_GR_TEST"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	if err := engineTwoRPC.Call(utils.APIerSv1GetResourceProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "RES_GR_TEST"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+}
+
+func testInternalReplicateITActions(t *testing.T) {
+	// check
+	var reply1 []*utils.TPAction
+	if err := engineOneRPC.Call(utils.APIerSv1GetActions, "ACTS_1", &reply1); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	if err := engineTwoRPC.Call(utils.APIerSv1GetActions, "ACTS_1", &reply1); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	// set
+	attrs1 := &V1AttrSetActions{
+		ActionsId: "ACTS_1",
+		Actions: []*V1TPAction{
+			&V1TPAction{
+				Identifier:  utils.TOPUP_RESET,
+				BalanceType: utils.MONETARY,
+				Units:       75.0,
+				ExpiryTime:  utils.UNLIMITED,
+				Weight:      20.0}}}
+	var reply string
+	if err := internalRPC.Call(utils.APIerSv1SetActions, attrs1, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Unexpected reply returned: %s", reply)
+	}
+	// Calling the second time should raise EXISTS
+	if err := internalRPC.Call(utils.APIerSv1SetActions, attrs1, &reply); err == nil || err.Error() != "EXISTS" {
+		t.Error("Unexpected result on duplication: ", err.Error())
+	}
+	//check
+	if err := engineOneRPC.Call(utils.APIerSv1GetActions, "ACTS_1", &reply1); err != nil {
+		t.Error("Got error on APIerSv1.GetActions: ", err.Error())
+	} else if !reflect.DeepEqual(attrs1.Actions, reply1) {
+		t.Errorf("Expected: %v, received: %v", utils.ToJSON(attrs1.Actions), utils.ToJSON(reply1))
+	}
+	if err := engineTwoRPC.Call(utils.APIerSv1GetActions, "ACTS_1", &reply1); err != nil {
+		t.Error("Got error on APIerSv1.GetActions: ", err.Error())
+	} else if !reflect.DeepEqual(attrs1.Actions, reply1) {
+		t.Errorf("Expected: %v, received: %v", utils.ToJSON(attrs1.Actions), utils.ToJSON(reply1))
 	}
 }
 
