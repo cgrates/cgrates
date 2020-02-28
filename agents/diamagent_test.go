@@ -154,7 +154,7 @@ func TestProcessRequest(t *testing.T) {
 				return nil
 			}
 			*prply = sessions.V1AuthorizeReply{
-				MaxUsage: utils.DurationPointer(time.Duration(-1)),
+				MaxUsage: time.Duration(-1),
 			}
 			return nil
 		},
@@ -218,7 +218,7 @@ func TestProcessRequest(t *testing.T) {
 						},
 					},
 				},
-				MaxUsage: utils.DurationPointer(10 * time.Second),
+				MaxUsage: 10 * time.Second,
 			}
 			return nil
 		},
@@ -282,7 +282,7 @@ func TestProcessRequest(t *testing.T) {
 						},
 					},
 				},
-				MaxUsage: utils.DurationPointer(10 * time.Second),
+				MaxUsage: 10 * time.Second,
 			}
 			return nil
 		},
@@ -423,7 +423,7 @@ func TestProcessRequest(t *testing.T) {
 						},
 					},
 				},
-				MaxUsage: utils.DurationPointer(10 * time.Second),
+				MaxUsage: 10 * time.Second,
 			}
 			return nil
 		},
