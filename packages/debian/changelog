@@ -11,6 +11,13 @@ cgrates (0.10.1~dev) UNRELEASED; urgency=medium
     the values in case of *variable
   * [EventReader] Correctly populate ConcurrentRequest from config in
     EventReader
+  * [SupplierS] In case of missing usage from Event use 1 minute as
+    default value
+  * [DataDB] Mongo support different marshaler than msgpack
+  * [General] Fix rpc_conns handling id with two connections and one of
+    it *internal
+  * [Replicator] Add Limit and StaticTTL otions for Items from
+    DataDB/StorDB
 
  -- Alexandru Tripon <alexandru.tripon@itsyscom.com>  Wed, 19 Feb 2020 15:22:59 +0200
 
