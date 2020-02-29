@@ -89,6 +89,7 @@
 	"stats_conns": ["*internal"],
 	"suppliers_conns": ["*internal"],
 	"attributes_conns": ["*internal"],
+	"alterable_fields": ["Extra1"]
 },
 
 
