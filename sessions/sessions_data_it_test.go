@@ -57,11 +57,11 @@ var (
 func TestSessionsData(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
-		dataCfgDIR = "smg_internal"
+		dataCfgDIR = "sessions_internal"
 	case utils.MetaMySQL:
-		dataCfgDIR = "smg_mysql"
+		dataCfgDIR = "sessions_mysql"
 	case utils.MetaMongo:
-		dataCfgDIR = "smg_mongo"
+		dataCfgDIR = "sessions_mongo"
 	case utils.MetaPostgres:
 		t.SkipNow()
 	default:

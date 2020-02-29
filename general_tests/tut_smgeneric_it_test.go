@@ -57,7 +57,7 @@ func TestTutSMG(t *testing.T) {
 	case utils.MetaInternal:
 		t.SkipNow()
 	case utils.MetaMySQL:
-		tutSMGCfgDIR = "smgeneric_mysql"
+		tutSMGCfgDIR = "sessions_mysql"
 	case utils.MetaMongo:
 		t.SkipNow()
 	case utils.MetaPostgres:
