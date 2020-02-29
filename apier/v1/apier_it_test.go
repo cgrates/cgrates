@@ -145,7 +145,6 @@ func TestApierIT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		t.SkipNow() // need tests redesign
-		// APIerSv1ConfigDIR = "apier_internal"
 	case utils.MetaMySQL:
 		APIerSv1ConfigDIR = "apier_mysql"
 	case utils.MetaMongo:
