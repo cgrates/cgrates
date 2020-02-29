@@ -34,7 +34,7 @@ import (
 var (
 	actsLclCfg       *config.CGRConfig
 	actsLclRpc       *rpc.Client
-	actsLclCfgPath   = path.Join(*dataDir, "conf", "samples", "actions")
+	actsLclCfgPath   string
 	actionsConfigDIR string
 
 	sTestsActionsit = []func(t *testing.T){
