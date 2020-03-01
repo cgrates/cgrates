@@ -453,7 +453,7 @@ func TestActionPlanFunctionNotAvailable(t *testing.T) {
 func TestActionTimingPriorityListSortByWeight(t *testing.T) {
 	at1 := &ActionTiming{Timing: &RateInterval{
 		Timing: &RITiming{
-			Years: utils.Years{2020},
+			Years: utils.Years{2040},
 			Months: utils.Months{time.January, time.February, time.March,
 				time.April, time.May, time.June, time.July, time.August, time.September,
 				time.October, time.November, time.December},
@@ -464,7 +464,7 @@ func TestActionTimingPriorityListSortByWeight(t *testing.T) {
 	}}
 	at2 := &ActionTiming{Timing: &RateInterval{
 		Timing: &RITiming{
-			Years: utils.Years{2020},
+			Years: utils.Years{2040},
 			Months: utils.Months{time.January, time.February, time.March,
 				time.April, time.May, time.June, time.July, time.August, time.September,
 				time.October, time.November, time.December},
@@ -477,7 +477,8 @@ func TestActionTimingPriorityListSortByWeight(t *testing.T) {
 	atpl = append(atpl, at2, at1)
 	atpl.Sort()
 	if atpl[0] != at1 || atpl[1] != at2 {
-		t.Error("Timing list not sorted correctly: ", at1, at2, atpl)
+		t.Errorf("Timing list not sorted correctly: \n %+v, \n %+v \n %+v",
+			utils.ToJSON(at1), utils.ToJSON(at2), utils.ToJSON(atpl))
 	}
 }
 

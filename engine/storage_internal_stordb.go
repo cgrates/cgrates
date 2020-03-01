@@ -29,7 +29,22 @@ import (
 
 //implement LoadReader interface
 func (iDB *InternalDB) GetTpIds(colName string) (ids []string, err error) {
-	return nil, utils.ErrNotImplemented
+	tpIDs := utils.NewStringSet(nil)
+	if colName == "" { // if colName is empty we need to parse all partitions
+		for _, conNm := range utils.CacheStorDBPartitions.AsSlice() {
+			keys := iDB.db.GetItemIDs(conNm, utils.EmptyString)
+			for _, key := range keys {
+				tpIDs.Add(strings.Split(key, utils.InInFieldSep)[0])
+			}
+		}
+		// iterate through all columns
+	} else {
+		keys := iDB.db.GetItemIDs(colName, utils.EmptyString)
+		for _, key := range keys {
+			tpIDs.Add(strings.Split(key, utils.InInFieldSep)[0])
+		}
+	}
+	return tpIDs.AsSlice(), nil
 }
 
 func (iDB *InternalDB) GetTpTableIds(tpid, table string, distinct utils.TPDistinctIds,

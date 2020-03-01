@@ -130,6 +130,11 @@ var (
 		CacheThresholdFilterIndexes, CacheSupplierFilterIndexes, CacheAttributeFilterIndexes,
 		CacheChargerFilterIndexes, CacheDispatcherFilterIndexes, CacheLoadIDs, CacheAccounts})
 
+	CacheStorDBPartitions = NewStringSet([]string{TBLTPTimings, TBLTPDestinations, TBLTPRates,
+		TBLTPDestinationRates, TBLTPRatingPlans, TBLTPRateProfiles, TBLTPSharedGroups,
+		TBLTPActions, TBLTPActionPlans, TBLTPActionTriggers, TBLTPAccountActions, TBLTPResources, TBLTPStats,
+		TBLTPThresholds, TBLTPFilters, SessionCostsTBL, CDRsTBL,
+		TBLTPSuppliers, TBLTPAttributes, TBLTPChargers, TBLTPDispatchers, TBLTPDispatcherHosts})
 	// ProtectedSFlds are the fields that sessions should not alter
 	ProtectedSFlds = NewStringSet([]string{CGRID, OriginHost, OriginID, Usage})
 )
