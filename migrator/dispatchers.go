@@ -22,21 +22,22 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 func (m *Migrator) migrateCurrentDispatcher() (err error) {
 	var ids []string
-	tenant := config.CgrConfig().GeneralCfg().DefaultTenant
 	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.DispatcherProfilePrefix)
 	if err != nil {
 		return err
 	}
 	for _, id := range ids {
-		idg := strings.TrimPrefix(id, utils.DispatcherProfilePrefix+tenant+":")
-		dpp, err := m.dmIN.DataManager().GetDispatcherProfile(tenant, idg, false, false, utils.NonTransactional)
+		tntID := strings.SplitN(strings.TrimPrefix(id, utils.DispatcherProfilePrefix), utils.InInFieldSep, 2)
+		if len(tntID) < 2 {
+			return fmt.Errorf("Invalid key <%s> when migrating dispatcher profiles", id)
+		}
+		dpp, err := m.dmIN.DataManager().GetDispatcherProfile(tntID[0], tntID[1], false, false, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
@@ -46,8 +47,8 @@ func (m *Migrator) migrateCurrentDispatcher() (err error) {
 		if err := m.dmOut.DataManager().SetDispatcherProfile(dpp, true); err != nil {
 			return err
 		}
-		if err := m.dmIN.DataManager().RemoveDispatcherProfile(tenant,
-			idg, utils.NonTransactional, false); err != nil {
+		if err := m.dmIN.DataManager().RemoveDispatcherProfile(tntID[0],
+			tntID[1], utils.NonTransactional, false); err != nil {
 			return err
 		}
 		m.stats[utils.Dispatchers] += 1
@@ -57,14 +58,16 @@ func (m *Migrator) migrateCurrentDispatcher() (err error) {
 
 func (m *Migrator) migrateCurrentDispatcherHost() (err error) {
 	var ids []string
-	tenant := config.CgrConfig().GeneralCfg().DefaultTenant
 	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.DispatcherHostPrefix)
 	if err != nil {
 		return err
 	}
 	for _, id := range ids {
-		idg := strings.TrimPrefix(id, utils.DispatcherHostPrefix+tenant+":")
-		dpp, err := m.dmIN.DataManager().GetDispatcherHost(tenant, idg, false, false, utils.NonTransactional)
+		tntID := strings.SplitN(strings.TrimPrefix(id, utils.DispatcherHostPrefix), utils.InInFieldSep, 2)
+		if len(tntID) < 2 {
+			return fmt.Errorf("Invalid key <%s> when migrating dispatcher hosts", id)
+		}
+		dpp, err := m.dmIN.DataManager().GetDispatcherHost(tntID[0], tntID[1], false, false, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
@@ -74,8 +77,8 @@ func (m *Migrator) migrateCurrentDispatcherHost() (err error) {
 		if err := m.dmOut.DataManager().SetDispatcherHost(dpp); err != nil {
 			return err
 		}
-		if err := m.dmIN.DataManager().RemoveDispatcherHost(tenant,
-			idg, utils.NonTransactional); err != nil {
+		if err := m.dmIN.DataManager().RemoveDispatcherHost(tntID[0],
+			tntID[1], utils.NonTransactional); err != nil {
 			return err
 		}
 	}
