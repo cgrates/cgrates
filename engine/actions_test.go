@@ -453,7 +453,7 @@ func TestActionPlanFunctionNotAvailable(t *testing.T) {
 func TestActionTimingPriorityListSortByWeight(t *testing.T) {
 	at1 := &ActionTiming{Timing: &RateInterval{
 		Timing: &RITiming{
-			Years: utils.Years{2020},
+			Years: utils.Years{2040},
 			Months: utils.Months{time.January, time.February, time.March,
 				time.April, time.May, time.June, time.July, time.August, time.September,
 				time.October, time.November, time.December},
@@ -464,7 +464,7 @@ func TestActionTimingPriorityListSortByWeight(t *testing.T) {
 	}}
 	at2 := &ActionTiming{Timing: &RateInterval{
 		Timing: &RITiming{
-			Years: utils.Years{2020},
+			Years: utils.Years{2040},
 			Months: utils.Months{time.January, time.February, time.March,
 				time.April, time.May, time.June, time.July, time.August, time.September,
 				time.October, time.November, time.December},
