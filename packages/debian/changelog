@@ -31,6 +31,7 @@ cgrates (0.11.0~dev) UNRELEASED; urgency=medium
     it *internal
   * [Replicator] Add Limit and StaticTTL otions for Items from
     DataDB/StorDB
+  * Migrator discover tenant from key instead of taking it from config
 
  -- Alexandru Tripon <alexandru.tripon@itsyscom.com>  Wed, 19 Feb 2020 13:25:52 +0200
 

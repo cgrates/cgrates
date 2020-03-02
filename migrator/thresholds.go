@@ -49,15 +49,17 @@ type v2ActionTriggers []*v2ActionTrigger
 
 func (m *Migrator) migrateCurrentThresholds() (err error) {
 	var ids []string
-	tenant := config.CgrConfig().GeneralCfg().DefaultTenant
 	//Thresholds
 	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.ThresholdPrefix)
 	if err != nil {
 		return err
 	}
 	for _, id := range ids {
-		idg := strings.TrimPrefix(id, utils.ThresholdPrefix+tenant+":")
-		ths, err := m.dmIN.DataManager().GetThreshold(tenant, idg, false, false, utils.NonTransactional)
+		tntID := strings.SplitN(strings.TrimPrefix(id, utils.ThresholdPrefix), utils.InInFieldSep, 2)
+		if len(tntID) < 2 {
+			return fmt.Errorf("Invalid key <%s> when migrating thresholds", id)
+		}
+		ths, err := m.dmIN.DataManager().GetThreshold(tntID[0], tntID[1], false, false, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
@@ -65,6 +67,9 @@ func (m *Migrator) migrateCurrentThresholds() (err error) {
 			continue
 		}
 		if err := m.dmOut.DataManager().SetThreshold(ths); err != nil {
+			return err
+		}
+		if err := m.dmIN.DataManager().RemoveThreshold(tntID[0], tntID[1], utils.NonTransactional); err != nil {
 			return err
 		}
 		m.stats[utils.Thresholds] += 1
@@ -75,8 +80,11 @@ func (m *Migrator) migrateCurrentThresholds() (err error) {
 		return err
 	}
 	for _, id := range ids {
-		idg := strings.TrimPrefix(id, utils.ThresholdProfilePrefix+tenant+":")
-		ths, err := m.dmIN.DataManager().GetThresholdProfile(tenant, idg, false, false, utils.NonTransactional)
+		tntID := strings.SplitN(strings.TrimPrefix(id, utils.ThresholdProfilePrefix), utils.InInFieldSep, 2)
+		if len(tntID) < 2 {
+			return fmt.Errorf("Invalid key <%s> when migrating threshold profiles", id)
+		}
+		ths, err := m.dmIN.DataManager().GetThresholdProfile(tntID[0], tntID[1], false, false, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
@@ -84,6 +92,9 @@ func (m *Migrator) migrateCurrentThresholds() (err error) {
 			continue
 		}
 		if err := m.dmOut.DataManager().SetThresholdProfile(ths, true); err != nil {
+			return err
+		}
+		if err := m.dmIN.DataManager().RemoveThresholdProfile(tntID[0], tntID[1], utils.NonTransactional, false); err != nil {
 			return err
 		}
 	}

@@ -22,21 +22,22 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 func (m *Migrator) migrateCurrentResource() (err error) {
 	var ids []string
-	tenant := config.CgrConfig().GeneralCfg().DefaultTenant
 	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.ResourceProfilesPrefix)
 	if err != nil {
 		return err
 	}
 	for _, id := range ids {
-		idg := strings.TrimPrefix(id, utils.ResourceProfilesPrefix+tenant+":")
-		res, err := m.dmIN.DataManager().GetResourceProfile(tenant, idg, false, false, utils.NonTransactional)
+		tntID := strings.SplitN(strings.TrimPrefix(id, utils.ResourceProfilesPrefix), utils.InInFieldSep, 2)
+		if len(tntID) < 2 {
+			return fmt.Errorf("Invalid key <%s> when migrating resource profiles", id)
+		}
+		res, err := m.dmIN.DataManager().GetResourceProfile(tntID[0], tntID[1], false, false, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
@@ -46,7 +47,7 @@ func (m *Migrator) migrateCurrentResource() (err error) {
 		if err := m.dmOut.DataManager().SetResourceProfile(res, true); err != nil {
 			return err
 		}
-		if err := m.dmIN.DataManager().RemoveResourceProfile(tenant, idg, utils.NonTransactional, false); err != nil {
+		if err := m.dmIN.DataManager().RemoveResourceProfile(tntID[0], tntID[1], utils.NonTransactional, false); err != nil {
 			return err
 		}
 		m.stats[utils.Resource] += 1

@@ -61,21 +61,26 @@ type v1Stats []*v1Stat
 
 func (m *Migrator) moveStatQueueProfile() (err error) {
 	//StatQueueProfile
-	tenant := config.CgrConfig().GeneralCfg().DefaultTenant
 	var ids []string
 	if ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.StatQueueProfilePrefix); err != nil {
 		return err
 	}
 	for _, id := range ids {
-		idg := strings.TrimPrefix(id, utils.StatQueueProfilePrefix+tenant+":")
-		sgs, err := m.dmIN.DataManager().GetStatQueueProfile(tenant, idg, false, false, utils.NonTransactional)
+		tntID := strings.SplitN(strings.TrimPrefix(id, utils.StatQueueProfilePrefix), utils.InInFieldSep, 2)
+		if len(tntID) < 2 {
+			return fmt.Errorf("Invalid key <%s> when migrating stat queue profiles", id)
+		}
+		sgs, err := m.dmIN.DataManager().GetStatQueueProfile(tntID[0], tntID[1], false, false, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
 		if sgs == nil || m.dryRun {
 			continue
 		}
-		if err = m.dmOut.DataManager().SetStatQueueProfile(sgs, true); err != nil {
+		if err := m.dmOut.DataManager().SetStatQueueProfile(sgs, true); err != nil {
+			return err
+		}
+		if err := m.dmIN.DataManager().RemoveStatQueueProfile(tntID[0], tntID[1], utils.NonTransactional, false); err != nil {
 			return err
 		}
 	}
@@ -84,14 +89,16 @@ func (m *Migrator) moveStatQueueProfile() (err error) {
 
 func (m *Migrator) migrateCurrentStats() (err error) {
 	var ids []string
-	tenant := config.CgrConfig().GeneralCfg().DefaultTenant
 	//StatQueue
 	if ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.StatQueuePrefix); err != nil {
 		return err
 	}
 	for _, id := range ids {
-		idg := strings.TrimPrefix(id, utils.StatQueuePrefix+tenant+":")
-		sgs, err := m.dmIN.DataManager().GetStatQueue(tenant, idg, false, false, utils.NonTransactional)
+		tntID := strings.SplitN(strings.TrimPrefix(id, utils.StatQueuePrefix), utils.InInFieldSep, 2)
+		if len(tntID) < 2 {
+			return fmt.Errorf("Invalid key <%s> when migrating stat queues", id)
+		}
+		sgs, err := m.dmIN.DataManager().GetStatQueue(tntID[0], tntID[1], false, false, utils.NonTransactional)
 		if err != nil {
 
 			return err
@@ -100,6 +107,9 @@ func (m *Migrator) migrateCurrentStats() (err error) {
 			continue
 		}
 		if err := m.dmOut.DataManager().SetStatQueue(sgs); err != nil {
+			return err
+		}
+		if err := m.dmIN.DataManager().RemoveStatQueue(tntID[0], tntID[1], utils.NonTransactional); err != nil {
 			return err
 		}
 		m.stats[utils.StatS] += 1
@@ -177,22 +187,26 @@ func remakeQueue(sq *engine.StatQueue) (out *engine.StatQueue) {
 
 func (m *Migrator) migrateV2Stats() (err error) {
 	var ids []string
-	tenant := config.CgrConfig().GeneralCfg().DefaultTenant
 	//StatQueue
 	if ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.StatQueuePrefix); err != nil {
 		return err
 	}
 	for _, id := range ids {
-		idg := strings.TrimPrefix(id, utils.StatQueuePrefix+tenant+":")
-		sgs, err := m.dmIN.DataManager().GetStatQueue(tenant, idg, false, false, utils.NonTransactional)
+		tntID := strings.SplitN(strings.TrimPrefix(id, utils.StatQueuePrefix), utils.InInFieldSep, 2)
+		if len(tntID) < 2 {
+			return fmt.Errorf("Invalid key <%s> when migrating stat queues", id)
+		}
+		sgs, err := m.dmIN.DataManager().GetStatQueue(tntID[0], tntID[1], false, false, utils.NonTransactional)
 		if err != nil {
-
 			return err
 		}
 		if sgs == nil || m.dryRun {
 			continue
 		}
 		if err = m.dmOut.DataManager().SetStatQueue(remakeQueue(sgs)); err != nil {
+			return err
+		}
+		if err = m.dmIN.DataManager().RemoveStatQueue(tntID[0], tntID[1], utils.NonTransactional); err != nil {
 			return err
 		}
 		m.stats[utils.StatS] += 1

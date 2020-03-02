@@ -22,21 +22,22 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 func (m *Migrator) migrateCurrentSupplierProfile() (err error) {
 	var ids []string
-	tenant := config.CgrConfig().GeneralCfg().DefaultTenant
 	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.SupplierProfilePrefix)
 	if err != nil {
 		return err
 	}
 	for _, id := range ids {
-		idg := strings.TrimPrefix(id, utils.SupplierProfilePrefix+tenant+":")
-		splp, err := m.dmIN.DataManager().GetSupplierProfile(tenant, idg, false, false, utils.NonTransactional)
+		tntID := strings.SplitN(strings.TrimPrefix(id, utils.SupplierProfilePrefix), utils.InInFieldSep, 2)
+		if len(tntID) < 2 {
+			return fmt.Errorf("Invalid key <%s> when migrating supplier profiles", id)
+		}
+		splp, err := m.dmIN.DataManager().GetSupplierProfile(tntID[0], tntID[1], false, false, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
@@ -46,7 +47,7 @@ func (m *Migrator) migrateCurrentSupplierProfile() (err error) {
 		if err := m.dmOut.DataManager().SetSupplierProfile(splp, true); err != nil {
 			return err
 		}
-		if err := m.dmIN.DataManager().RemoveSupplierProfile(tenant, idg, utils.NonTransactional, true); err != nil {
+		if err := m.dmIN.DataManager().RemoveSupplierProfile(tntID[0], tntID[1], utils.NonTransactional, true); err != nil {
 			return err
 		}
 		m.stats[utils.Suppliers] += 1
