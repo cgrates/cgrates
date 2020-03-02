@@ -44,8 +44,11 @@ var (
 		testdoubleRemoveInitDataDb,
 		testdoubleRemoveStartEngine,
 		testdoubleRemoveRpcConn,
-		testdoubleRemoveFromFolder,
+
 		testdoubleRemoveStatQueueProfile,
+		testdoubleRemoveActions,
+		testdoubleRemoveActionPlan,
+
 		testdoubleRemoveKillEngine,
 	}
 )
@@ -96,15 +99,6 @@ func testdoubleRemoveRpcConn(t *testing.T) {
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
-}
-
-func testdoubleRemoveFromFolder(t *testing.T) {
-	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
-	if err := sesRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
-		t.Error(err)
-	}
-	time.Sleep(500 * time.Millisecond)
 }
 
 func testdoubleRemoveStatQueueProfile(t *testing.T) {
@@ -180,6 +174,133 @@ func testdoubleRemoveStatQueueProfile(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
+}
+
+func testdoubleRemoveActions(t *testing.T) {
+	// check
+	var reply1 []*utils.TPAction
+	if err := sesRPC.Call(utils.APIerSv1GetActions, "ACTS_1", &reply1); err == nil || err.Error() != "SERVER_ERROR: NOT_FOUND" {
+		t.Error(err)
+	}
+	// set
+	attrs1 := &v1.V1AttrSetActions{
+		ActionsId: "ACTS_1",
+		Actions: []*v1.V1TPAction{
+			&v1.V1TPAction{
+				Identifier:  utils.TOPUP_RESET,
+				BalanceType: utils.MONETARY,
+				Units:       75.0,
+				ExpiryTime:  utils.UNLIMITED,
+				Weight:      20.0}}}
+	var reply string
+	if err := sesRPC.Call(utils.APIerSv1SetActions, attrs1, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Unexpected reply returned: %s", reply)
+	}
+	// set it again (expect EXISTS)
+	if err := sesRPC.Call(utils.APIerSv1SetActions, attrs1, &reply); err == nil || err.Error() != "EXISTS" {
+		t.Error(err)
+	}
+	// check
+	if err := sesRPC.Call(utils.APIerSv1GetActions, "ACTS_1", &reply1); err != nil {
+		t.Error("Got error on APIerSv1.GetActions: ", err.Error())
+	} else if !reflect.DeepEqual(attrs1.Actions, reply1) {
+		t.Errorf("Expected: %v, received: %v", utils.ToJSON(attrs1.Actions), utils.ToJSON(reply1))
+	}
+	// remove
+	if err := sesRPC.Call(utils.APIerSv1RemoveActions, &v1.AttrRemoveActions{
+		ActionIDs: []string{"ACTS_1"}}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+	// remove it again (expect ErrNotFound)
+	// if err := sesRPC.Call(utils.APIerSv1RemoveActions, &v1.AttrRemoveActions{
+	// 	ActionIDs: []string{"ACTS_1"}}, &reply); err == nil ||
+	// 	err.Error() != utils.ErrNotFound.Error() {
+	// 	t.Error(err)
+	// }
+	// check again
+	if err := sesRPC.Call(utils.APIerSv1GetActions, "ACTS_1", &reply1); err == nil || err.Error() != "SERVER_ERROR: NOT_FOUND" {
+		t.Error(err)
+	}
+}
+
+func testdoubleRemoveActionPlan(t *testing.T) {
+	//set action
+	var reply string
+
+	if err := sesRPC.Call(utils.APIerSv2SetActions, &utils.AttrSetActions{
+		ActionsId: "ACTS_1",
+		Actions:   []*utils.TPAction{{Identifier: utils.LOG}},
+	}, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Calling APIerSv2.SetActions received: %s", reply)
+	}
+	// check action
+	attrs1 := &utils.AttrSetActions{
+		ActionsId: "ACTS_1",
+		Actions:   []*utils.TPAction{{Identifier: utils.LOG}}}
+	var reply1 []*utils.TPAction
+	if err := sesRPC.Call(utils.APIerSv1GetActions, "ACTS_1", &reply1); err != nil {
+		t.Error("Got error on APIerSv1.GetActions: ", err.Error())
+	} else if !reflect.DeepEqual(attrs1.Actions, reply) {
+		t.Errorf("Expected: %v, received: %v", utils.ToJSON(attrs1.Actions), utils.ToJSON(reply1))
+	}
+	// check
+	var aps []*engine.ActionPlan
+	if err := sesRPC.Call(utils.APIerSv1GetActionPlan,
+		v1.AttrGetActionPlan{ID: utils.EmptyString}, &aps); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Error: %+v, rcv: %+v", err, utils.ToJSON(aps))
+	}
+	// set
+	atms1 := &v1.AttrSetActionPlan{
+		Id: "ATMS_1",
+		ActionPlan: []*v1.AttrActionPlan{
+			&v1.AttrActionPlan{
+				ActionsId: "ACTS_1",
+				Time:      utils.ASAP,
+				Weight:    20.0},
+		},
+	}
+	if err := sesRPC.Call(utils.APIerSv1SetActionPlan, atms1, &reply); err != nil {
+		t.Error("Got error on APIerSv1.SetActionPlan: ", err.Error())
+	} else if reply != utils.OK {
+		t.Errorf("Unexpected reply returned: %s", reply)
+	}
+	// // set it again (expect EXISTS)
+	// if err := sesRPC.Call(utils.APIerSv1SetActionPlan, atms1, &reply); err == nil || err.Error() != "EXISTS" {
+	// 	t.Error(err)
+	// }
+	// check
+	if err := sesRPC.Call(utils.APIerSv1GetActionPlan,
+		v1.AttrGetActionPlan{ID: "ATMS_1"}, &aps); err != nil {
+		t.Error(err)
+	} else if len(aps) != 1 {
+		t.Errorf("Expected: %v,\n received: %v", 1, len(aps))
+	} else if aps[0].Id != "ATMS_1" {
+		t.Errorf("Expected: ATMS_1,\n received: %v", aps[0].Id)
+	} else if aps[0].ActionTimings[0].ActionsID != "ACTS_1" {
+		t.Errorf("Expected: ACTS_1,\n received: %v", aps[0].ActionTimings[0].ActionsID)
+	} else if aps[0].ActionTimings[0].Weight != 20.0 {
+		t.Errorf("Expected: 20.0,\n received: %v", aps[0].ActionTimings[0].Weight)
+	}
+
+	// // // remove
+	// if err := sesRPC.Call(utils.APIerSv1RemoveActionPlan, &v1.AttrGetActionPlan{
+	// 	ID: "ATMS_1"}, &reply); err != nil {
+	// 	t.Error(err)
+	// } else if reply != utils.OK {
+	// 	t.Error("Unexpected reply returned", reply)
+	// }
+	// //check again
+	// if err := sesRPC.Call(utils.APIerSv1GetActionPlan,
+	// 	v1.AttrGetActionPlan{ID: utils.EmptyString}, &aps); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	// 	t.Errorf("Error: %+v, rcv: %+v", err, utils.ToJSON(aps))
+	// }
+
 }
 
 func testdoubleRemoveKillEngine(t *testing.T) {

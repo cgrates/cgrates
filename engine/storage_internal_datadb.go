@@ -738,8 +738,15 @@ func (iDB *InternalDB) GetActionsDrv(id string) (acts Actions, err error) {
 }
 
 func (iDB *InternalDB) SetActionsDrv(id string, acts Actions) (err error) {
+	utils.Logger.Debug("ENTER IN SET ACTIONS DRV ??? ")
 	iDB.db.Set(utils.CacheActions, id, acts, nil,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
+	utils.Logger.Debug("Set With Success ")
+	x, ok := iDB.db.Get(utils.CacheActions, id)
+	if !ok || x == nil {
+		utils.Logger.Debug("NOT FOUND ")
+	}
+	utils.Logger.Debug(fmt.Sprintf("ACTIONS : %+v", utils.ToJSON(x.(Actions))))
 	return
 }
 

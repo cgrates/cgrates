@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"fmt"
 	"path"
 	"reflect"
 	"testing"
@@ -37,19 +38,20 @@ var (
 		testInternalReplicateITStartEngine,
 		testInternalReplicateITRPCConn,
 
-		// testInternalReplicateITDestination,
-		testInternalReplicateITAttributeProfile,
-		// testInternalReplicateITRatingProfile,
-		testInternalReplicateITSupplierProfile,
-		testInternalReplicateITStatQueueProfile,
-		testInternalReplicateITDispatcherProfile,
-		testInternalReplicateITChargerProfile,
-		testInternalReplicateITDispatcherHost,
-		testInternalReplicateITFilter,
-		testInternalReplicateITResourceProfile,
-		// testInternalReplicateITActions,
+		// // testInternalReplicateITDestination,was commetner
+		// testInternalReplicateITAttributeProfile,
+		// // testInternalReplicateITRatingProfile, was commetner
+		// testInternalReplicateITSupplierProfile,
+		// testInternalReplicateITStatQueueProfile,
+		// testInternalReplicateITDispatcherProfile,
+		// testInternalReplicateITChargerProfile,
+		// testInternalReplicateITDispatcherHost,
+		// testInternalReplicateITFilter,
+		// testInternalReplicateITResourceProfile,
+		testInternalReplicateITActions, //-> was commetner
 		testInternalReplicateITActionPlan,
-		testInternalReplicateITThresholdProfile,
+		// testInternalReplicateITThresholdProfile,
+		// testInternalReplicateITSetAccount,
 
 		testInternalReplicateITKillEngine,
 	}
@@ -836,10 +838,15 @@ func testInternalReplicateITActions(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Unexpected reply returned: %s", reply)
 	}
-	if err := internalRPC.Call(utils.APIerSv1SetActions, attrs1, &reply); err == nil || err.Error() != "EXISTS" {
-		t.Error("Unexpected result on duplication: ", err.Error())
-	}
+	// if err := internalRPC.Call(utils.APIerSv1SetActions, attrs1, &reply); err == nil || err.Error() != "EXISTS" {
+	// 	t.Error("Unexpected result on duplication: ", err.Error())
+	// }
 	//check
+	if err := internalRPC.Call(utils.APIerSv1GetActions, "ACTS_1", &reply1); err != nil {
+		t.Error("Got error on APIerSv1.GetActions: ", err.Error())
+	} else if !reflect.DeepEqual(attrs1.Actions, reply1) {
+		t.Errorf("Expected: %v, received: %v", utils.ToJSON(attrs1.Actions), utils.ToJSON(reply1))
+	}
 	if err := engineOneRPC.Call(utils.APIerSv1GetActions, "ACTS_1", &reply1); err != nil {
 		t.Error("Got error on APIerSv1.GetActions: ", err.Error())
 	} else if !reflect.DeepEqual(attrs1.Actions, reply1) {
@@ -853,33 +860,32 @@ func testInternalReplicateITActions(t *testing.T) {
 }
 
 func testInternalReplicateITActionPlan(t *testing.T) {
-	var reply string
-	if err := internalRPC.Call(utils.APIerSv2SetActions, &utils.AttrSetActions{
-		ActionsId: "ACTS_1",
-		Actions:   []*utils.TPAction{{Identifier: utils.LOG}},
-	}, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("Calling APIerSv2.SetActions received: %s", reply)
-	}
+	//var reply string
+	// if err := internalRPC.Call(utils.APIerSv2SetActions, &utils.AttrSetActions{
+	// 	ActionsId: "ACTS_1",
+	// 	Actions:   []*utils.TPAction{{Identifier: utils.LOG}},
+	// }, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+	// 	t.Error(err)
+	// } else if reply != utils.OK {
+	// 	t.Errorf("Calling APIerSv2.SetActions received: %s", reply)
+	// }
 	// check
 	var aps []*engine.ActionPlan
-	if err := engineOneRPC.Call(utils.APIerSv1GetActionPlan,
-		AttrGetActionPlan{ID: utils.EmptyString}, &aps); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Error: %+v, rcv: %+v", err, utils.ToJSON(aps))
-	}
-	if err := engineTwoRPC.Call(utils.APIerSv1GetActionPlan,
-		AttrGetActionPlan{ID: utils.EmptyString}, &aps); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Error: %+v, rcv: %+v", err, utils.ToJSON(aps))
-	}
+	// if err := engineOneRPC.Call(utils.APIerSv1GetActionPlan,
+	// 	AttrGetActionPlan{ID: utils.EmptyString}, &aps); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	// 	t.Errorf("Error: %+v, rcv: %+v", err, utils.ToJSON(aps))
+	// }
+	// if err := engineTwoRPC.Call(utils.APIerSv1GetActionPlan,
+	// 	AttrGetActionPlan{ID: utils.EmptyString}, &aps); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	// 	t.Errorf("Error: %+v, rcv: %+v", err, utils.ToJSON(aps))
+	// }
 	// set
 	atms1 := &AttrSetActionPlan{
 		Id: "ATMS_1",
 		ActionPlan: []*AttrActionPlan{
 			&AttrActionPlan{
 				ActionsId: "ACTS_1",
-				MonthDays: "1",
-				Time:      "00:00:00",
+				Time:      utils.ASAP,
 				Weight:    20.0},
 		},
 	}
@@ -888,6 +894,19 @@ func testInternalReplicateITActionPlan(t *testing.T) {
 		t.Error("Got error on APIerSv1.SetActionPlan: ", err.Error())
 	} else if reply1 != utils.OK {
 		t.Errorf("Unexpected reply returned: %s", reply1)
+	}
+	// check
+	if err := internalRPC.Call(utils.APIerSv1GetActionPlan,
+		AttrGetActionPlan{ID: utils.EmptyString}, &aps); err != nil {
+		t.Error(err)
+	} else if len(aps) != 1 {
+		t.Errorf("Expected: %v,\n received: %v", 1, len(aps))
+	} else if aps[0].Id != "ATMS_1" {
+		t.Errorf("Expected: ATMS_1,\n received: %v", aps[0].Id)
+	} else if aps[0].ActionTimings[0].ActionsID != "ACTS_1" {
+		t.Errorf("Expected: ACTS_1,\n received: %v", aps[0].ActionTimings[0].ActionsID)
+	} else if aps[0].ActionTimings[0].Weight != 20.0 {
+		t.Errorf("Expected: 20.0,\n received: %v", aps[0].ActionTimings[0].Weight)
 	}
 	// check
 	if err := engineOneRPC.Call(utils.APIerSv1GetActionPlan,
@@ -902,22 +921,35 @@ func testInternalReplicateITActionPlan(t *testing.T) {
 	} else if aps[0].ActionTimings[0].Weight != 20.0 {
 		t.Errorf("Expected: 20.0,\n received: %v", aps[0].ActionTimings[0].Weight)
 	}
-	// remove
-	if err := internalRPC.Call(utils.APIerSv1RemoveActionPlan, &AttrGetActionPlan{
-		ID: "ATMS_1"}, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Error("Unexpected reply returned", reply)
-	}
-	//check again
-	if err := engineOneRPC.Call(utils.APIerSv1GetActionPlan,
-		AttrGetActionPlan{ID: utils.EmptyString}, &aps); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Error: %+v, rcv: %+v", err, utils.ToJSON(aps))
-	}
+	// check
 	if err := engineTwoRPC.Call(utils.APIerSv1GetActionPlan,
-		AttrGetActionPlan{ID: utils.EmptyString}, &aps); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Error: %+v, rcv: %+v", err, utils.ToJSON(aps))
+		AttrGetActionPlan{ID: utils.EmptyString}, &aps); err != nil {
+		t.Error(err)
+	} else if len(aps) != 1 {
+		t.Errorf("Expected: %v,\n received: %v", 1, len(aps))
+	} else if aps[0].Id != "ATMS_1" {
+		t.Errorf("Expected: ATMS_1,\n received: %v", aps[0].Id)
+	} else if aps[0].ActionTimings[0].ActionsID != "ACTS_1" {
+		t.Errorf("Expected: ACTS_1,\n received: %v", aps[0].ActionTimings[0].ActionsID)
+	} else if aps[0].ActionTimings[0].Weight != 20.0 {
+		t.Errorf("Expected: 20.0,\n received: %v", aps[0].ActionTimings[0].Weight)
 	}
+	// // remove
+	// if err := internalRPC.Call(utils.APIerSv1RemoveActionPlan, &AttrGetActionPlan{
+	// 	ID: "ATMS_1"}, &reply); err != nil {
+	// 	t.Error(err)
+	// } else if reply != utils.OK {
+	// 	t.Error("Unexpected reply returned", reply)
+	// }
+	// //check again
+	// if err := engineOneRPC.Call(utils.APIerSv1GetActionPlan,
+	// 	AttrGetActionPlan{ID: utils.EmptyString}, &aps); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	// 	t.Errorf("Error: %+v, rcv: %+v", err, utils.ToJSON(aps))
+	// }
+	// if err := engineTwoRPC.Call(utils.APIerSv1GetActionPlan,
+	// 	AttrGetActionPlan{ID: utils.EmptyString}, &aps); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	// 	t.Errorf("Error: %+v, rcv: %+v", err, utils.ToJSON(aps))
+	// }
 }
 
 func testInternalReplicateITThresholdProfile(t *testing.T) {
@@ -1008,6 +1040,62 @@ func testInternalReplicateITThresholdProfile(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
+	//chec kalso the treshold
+	// with GetThreshold
+}
+
+func testInternalReplicateITSetAccount(t *testing.T) {
+	//check
+	var reply string
+	if err := engineOneRPC.Call(utils.APIerSv1GetAccount,
+		&utils.AttrGetAccount{Account: "AccountTest", Tenant: tenant}, &reply); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	if err := engineTwoRPC.Call(utils.APIerSv1GetAccount,
+		&utils.AttrGetAccount{Account: "AccountTest", Tenant: tenant}, &reply); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	//set
+	attrSetAccount := &utils.AttrSetAccount{
+		Account: "AccountTest",
+		Tenant:  tenant}
+	if err := internalRPC.Call(utils.APIerSv1SetAccount, attrSetAccount, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+	//check
+	tmp := engine.Account{}
+	rcvAccount := tmp.AsOldStructure()
+	if err := engineOneRPC.Call(utils.APIerSv1GetAccount,
+		&utils.AttrGetAccount{Account: "AccountTest", Tenant: tenant}, &rcvAccount); err != nil {
+		t.Errorf("Unexpected error : %+v\nRCV: %+v", err, rcvAccount)
+	}
+	if err := engineTwoRPC.Call(utils.APIerSv1GetAccount,
+		&utils.AttrGetAccount{Account: "AccountTest", Tenant: tenant}, &rcvAccount); err != nil {
+		t.Errorf("Unexpected error : %+v", err)
+	}
+	//remove
+	if err := internalRPC.Call(utils.APIerSv1RemoveAccount,
+		&utils.AttrRemoveAccount{
+			Account: "AccountTest",
+			Tenant:  tenant}, &reply); err != nil {
+		t.Errorf("Unexpected error : %+v", err)
+	}
+	//check
+	if err := engineOneRPC.Call(utils.APIerSv1GetAccount,
+		&utils.AttrGetAccount{Account: "AccountTest", Tenant: tenant}, &reply); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	if err := engineTwoRPC.Call(utils.APIerSv1GetAccount,
+		&utils.AttrGetAccount{Account: "AccountTest", Tenant: tenant}, &reply); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	fmt.Println("PASSED")
 }
 
 func testInternalReplicateITKillEngine(t *testing.T) {
