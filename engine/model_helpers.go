@@ -2174,6 +2174,38 @@ func APItoAttributeProfile(tpAttr *utils.TPAttributeProfile, timezone string) (a
 	return attrPrf, nil
 }
 
+func AttributeProfileToAPI(attrPrf *AttributeProfile, tpid string) (tpAttr *utils.TPAttributeProfile) {
+	tpAttr = &utils.TPAttributeProfile{
+		TPid:       tpid,
+		Tenant:     attrPrf.Tenant,
+		ID:         attrPrf.ID,
+		FilterIDs:  make([]string, len(attrPrf.FilterIDs)),
+		Contexts:   make([]string, len(attrPrf.Contexts)),
+		Attributes: make([]*utils.TPAttribute, len(tpAttr.Attributes)),
+		Blocker:    attrPrf.Blocker,
+		Weight:     attrPrf.Weight,
+	}
+	for i, fli := range attrPrf.FilterIDs {
+		tpAttr.FilterIDs[i] = fli
+	}
+	for i, fli := range attrPrf.Contexts {
+		tpAttr.Contexts[i] = fli
+	}
+	for i, attr := range attrPrf.Attributes {
+		tpAttr.Attributes[i] = &utils.TPAttribute{
+			FilterIDs: attr.FilterIDs,
+			Path:      attr.Path,
+			Type:      attr.Type,
+			Value:     attr.Value.GetRule(),
+		}
+	}
+	tpAttr.ActivationInterval = &utils.TPActivationInterval{
+		ActivationTime: attrPrf.ActivationInterval.ActivationTime.Format(time.RFC3339),
+		ExpiryTime:     attrPrf.ActivationInterval.ExpiryTime.Format(time.RFC3339),
+	}
+	return
+}
+
 type TPChargers []*TPCharger
 
 func (tps TPChargers) AsTPChargers() (result []*utils.TPChargerProfile) {
