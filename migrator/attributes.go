@@ -46,14 +46,16 @@ type v1AttributeProfile struct {
 
 func (m *Migrator) migrateCurrentAttributeProfile() (err error) {
 	var ids []string
-	tenant := config.CgrConfig().GeneralCfg().DefaultTenant
 	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.AttributeProfilePrefix)
 	if err != nil {
 		return err
 	}
 	for _, id := range ids {
-		idg := strings.TrimPrefix(id, utils.AttributeProfilePrefix+tenant+":")
-		attrPrf, err := m.dmIN.DataManager().GetAttributeProfile(tenant, idg, false, false, utils.NonTransactional)
+		tntID := strings.SplitN(strings.TrimPrefix(id, utils.AttributeProfilePrefix), utils.InInFieldSep, 2)
+		if len(tntID) < 2 {
+			return fmt.Errorf("Invalid key <%s> when migrating attributes", id)
+		}
+		attrPrf, err := m.dmIN.DataManager().GetAttributeProfile(tntID[0], tntID[1], false, false, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
@@ -63,8 +65,8 @@ func (m *Migrator) migrateCurrentAttributeProfile() (err error) {
 		if err := m.dmOut.DataManager().SetAttributeProfile(attrPrf, true); err != nil {
 			return err
 		}
-		if err := m.dmIN.DataManager().RemoveAttributeProfile(tenant,
-			idg, utils.NonTransactional, false); err != nil {
+		if err := m.dmIN.DataManager().RemoveAttributeProfile(tntID[0],
+			tntID[1], utils.NonTransactional, false); err != nil {
 			return err
 		}
 		m.stats[utils.Attributes]++
