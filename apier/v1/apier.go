@@ -579,6 +579,14 @@ func (apiv1 *APIerSv1) SetActions(attrs V1AttrSetActions, reply *string) (err er
 	if err := apiv1.DataManager.SetActions(attrs.ActionsId, storeActions, utils.NonTransactional); err != nil {
 		return utils.NewErrServerError(err)
 	}
+	if err := apiv1.ConnMgr.Call(apiv1.Config.ApierCfg().CachesConns, nil,
+		utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
+			AttrReloadCache: utils.AttrReloadCache{
+				ArgsCache: utils.ArgsCache{ActionIDs: &[]string{attrs.ActionsId}},
+			},
+		}, reply); err != nil {
+		return err
+	}
 	//generate a loadID for CacheActions and store it in database
 	if err := apiv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheActions: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
@@ -668,6 +676,7 @@ func (apiv1 *APIerSv1) SetActionPlan(attrs AttrSetActionPlan, reply *string) (er
 			if exists, err := apiv1.DataManager.HasData(utils.ACTION_PREFIX, apiAtm.ActionsId, ""); err != nil {
 				return 0, utils.NewErrServerError(err)
 			} else if !exists {
+				utils.Logger.Debug("TEST IF EXIT HERE ??? ")
 				return 0, fmt.Errorf("%s:%s", utils.ErrBrokenReference.Error(), apiAtm.ActionsId)
 			}
 			timing := new(engine.RITiming)

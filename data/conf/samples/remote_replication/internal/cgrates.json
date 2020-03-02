@@ -27,7 +27,6 @@
 	"connCache": {
 		"strategy": "*broadcast",
 		"conns": [
-			{"address": "*internal"},
 			{"address": "127.0.0.1:2022", "transport":"*json"},
 			{"address": "127.0.0.1:2032", "transport":"*json"}
 		],
@@ -46,7 +45,7 @@
 		"*destinations": {"remote":true,"replicate":true},
 		"*rating_plans": {"remote":true,"replicate":true},
 		"*rating_profiles":{"remote":true,"replicate":true},
-		"*actions":{"remote":true,"replicate":true},
+		"*actions":{"remote":false,"replicate":true},
 		"*action_plans": {"remote":true,"replicate":true},
 		"*account_action_plans":{"remote":true,"replicate":true},
 		"*action_triggers":{"remote":true,"replicate":true},

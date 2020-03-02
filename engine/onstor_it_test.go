@@ -728,6 +728,11 @@ func testOnStorITActions(t *testing.T) {
 		acts, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
+	if rcv, err := onStor.HasData(utils.ACTION_PREFIX, acts[0].Id, ""); err != nil {
+		t.Error(err)
+	} else if rcv != true {
+		t.Errorf("Expecting: true, received: %v", rcv)
+	}
 	//get from cache
 	if rcv, err := onStor.GetActions(acts[0].Id,
 		false, utils.NonTransactional); err != nil {
