@@ -301,6 +301,25 @@ func testAttrITMigrateAndMove(t *testing.T) {
 		},
 		Weight: 20,
 	}
+	attrPrf2 := &engine.AttributeProfile{
+		Tenant:    "cgrates.com",
+		ID:        "ATTR_1",
+		Contexts:  []string{utils.MetaSessionS},
+		FilterIDs: []string{"*string:Accont:1001"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		},
+		Attributes: []*engine.Attribute{
+			{
+				FilterIDs: []string{"*string:FL1:In1"},
+				Path:      utils.MetaReq + utils.NestingSep + "FL1",
+				Type:      utils.MetaVariable,
+				Value:     config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
+			},
+		},
+		Weight: 20,
+	}
 	switch attrAction {
 	case utils.Migrate:
 		err := attrMigrator.dmIN.setV1AttributeProfile(v1Attribute)
@@ -343,22 +362,29 @@ func testAttrITMigrateAndMove(t *testing.T) {
 		if err := attrMigrator.dmIN.DataManager().SetAttributeProfile(attrPrf, false); err != nil {
 			t.Error(err)
 		}
+		if err := attrMigrator.dmIN.DataManager().SetAttributeProfile(attrPrf2, false); err != nil {
+			t.Error(err)
+		}
 		currentVersion := engine.CurrentDataDBVersions()
 		err := attrMigrator.dmOut.DataManager().DataDB().SetVersions(currentVersion, false)
 		if err != nil {
 			t.Error("Error when setting version for Attributes ", err.Error())
 		}
-
-		_, err = attrMigrator.dmOut.DataManager().GetAttributeProfile("cgrates.org",
-			"ATTR_1", false, false, utils.NonTransactional)
-		if err != utils.ErrNotFound {
+		// make sure we don't have attributes in dmOut
+		if _, err = attrMigrator.dmOut.DataManager().GetAttributeProfile("cgrates.org",
+			"ATTR_1", false, false, utils.NonTransactional); err == nil || err != utils.ErrNotFound {
 			t.Error(err)
 		}
-
+		if _, err = attrMigrator.dmOut.DataManager().GetAttributeProfile("cgrates.com",
+			"ATTR_1", false, false, utils.NonTransactional); err == nil || err != utils.ErrNotFound {
+			t.Error(err)
+		}
+		// move
 		err, _ = attrMigrator.Migrate([]string{utils.MetaAttributes})
 		if err != nil {
 			t.Error("Error when migrating Attributes ", err.Error())
 		}
+		// verify ATTR_1 with tenant cgrates.org
 		result, err := attrMigrator.dmOut.DataManager().GetAttributeProfile("cgrates.org",
 			"ATTR_1", false, false, utils.NonTransactional)
 		if err != nil {
@@ -369,9 +395,24 @@ func testAttrITMigrateAndMove(t *testing.T) {
 		if !reflect.DeepEqual(result, attrPrf) {
 			t.Errorf("Expecting: %+v, received: %+v", attrPrf, result)
 		}
-		result, err = attrMigrator.dmIN.DataManager().GetAttributeProfile("cgrates.org",
+		// verify ATTR_1 with tenant cgrates.com
+		result, err = attrMigrator.dmOut.DataManager().GetAttributeProfile("cgrates.com",
 			"ATTR_1", false, false, utils.NonTransactional)
-		if err != utils.ErrNotFound {
+		if err != nil {
+			t.Fatal(err)
+		}
+		result.Compile()
+		attrPrf2.Compile()
+		if !reflect.DeepEqual(result, attrPrf2) {
+			t.Errorf("Expecting: %+v, received: %+v", attrPrf2, result)
+		}
+		// make sure we don't have attributes in dmIn
+		if _, err = attrMigrator.dmIN.DataManager().GetAttributeProfile("cgrates.org",
+			"ATTR_1", false, false, utils.NonTransactional); err == nil || err != utils.ErrNotFound {
+			t.Error(err)
+		}
+		if _, err = attrMigrator.dmIN.DataManager().GetAttributeProfile("cgrates.com",
+			"ATTR_1", false, false, utils.NonTransactional); err == nil || err != utils.ErrNotFound {
 			t.Error(err)
 		}
 	}

@@ -185,10 +185,24 @@ func testChrgITMigrateAndMove(t *testing.T) {
 		AttributeIDs: []string{"ATTR_1"},
 		Weight:       20,
 	}
+	chrgPrf2 := &engine.ChargerProfile{
+		Tenant:    "cgrates.com",
+		ID:        "CHRG_1",
+		FilterIDs: []string{"*string:Accont:1001"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		},
+		AttributeIDs: []string{"ATTR_1"},
+		Weight:       20,
+	}
 	switch chrgAction {
 	case utils.Migrate: // for the momment only one version of chargers exists
 	case utils.Move:
 		if err := chrgMigrator.dmIN.DataManager().SetChargerProfile(chrgPrf, false); err != nil {
+			t.Error(err)
+		}
+		if err := chrgMigrator.dmIN.DataManager().SetChargerProfile(chrgPrf2, false); err != nil {
 			t.Error(err)
 		}
 		currentVersion := engine.CurrentDataDBVersions()
@@ -207,17 +221,24 @@ func testChrgITMigrateAndMove(t *testing.T) {
 		if err != nil {
 			t.Error("Error when migrating Chargers ", err.Error())
 		}
-		result, err := chrgMigrator.dmOut.DataManager().GetChargerProfile("cgrates.org",
-			"CHRG_1", false, false, utils.NonTransactional)
-		if err != nil {
+		if result, err := chrgMigrator.dmOut.DataManager().GetChargerProfile("cgrates.org",
+			"CHRG_1", false, false, utils.NonTransactional); err != nil {
 			t.Fatal(err)
-		}
-		if !reflect.DeepEqual(result, chrgPrf) {
+		} else if !reflect.DeepEqual(result, chrgPrf) {
 			t.Errorf("Expecting: %+v, received: %+v", chrgPrf, result)
 		}
-		result, err = chrgMigrator.dmIN.DataManager().GetChargerProfile("cgrates.org",
-			"CHRG_1", false, false, utils.NonTransactional)
-		if err != utils.ErrNotFound {
+		if result, err := chrgMigrator.dmOut.DataManager().GetChargerProfile("cgrates.com",
+			"CHRG_1", false, false, utils.NonTransactional); err != nil {
+			t.Fatal(err)
+		} else if !reflect.DeepEqual(result, chrgPrf2) {
+			t.Errorf("Expecting: %+v, received: %+v", chrgPrf2, result)
+		}
+		if _, err = chrgMigrator.dmIN.DataManager().GetChargerProfile("cgrates.org",
+			"CHRG_1", false, false, utils.NonTransactional); err == nil || err != utils.ErrNotFound {
+			t.Error(err)
+		}
+		if _, err = chrgMigrator.dmIN.DataManager().GetChargerProfile("cgrates.com",
+			"CHRG_1", false, false, utils.NonTransactional); err == nil || err != utils.ErrNotFound {
 			t.Error(err)
 		}
 	}
