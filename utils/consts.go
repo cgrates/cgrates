@@ -654,6 +654,7 @@ const (
 	TmpSuffix                   = ".tmp"
 	MetaDiamreq                 = "*diamreq"
 	MetaGroup                   = "*group"
+	InternalRPCSet              = "InternalRPCSet"
 )
 
 // Migrator Action
