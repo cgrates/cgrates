@@ -26,12 +26,12 @@ func TestOrderedNavigableMap(t *testing.T) {
 	// var err error
 	onm := NewOrderedNavigableMap()
 
-	onm.Set([]string{"Field1"}, NewNMInterface(10))
-	onm.Set([]string{"Field2[0]"}, NewNMInterface("1001"))
-	onm.Set([]string{"Field2[1]", "Account[0]"}, NewNMInterface(10))
-	onm.Set([]string{"Field2[1]", "Account[1]"}, NewNMInterface(11))
-	onm.Set([]string{"Field2[2]"}, NewNMInterface(111))
-	onm.Set([]string{"Field3", "Field4", "Field5"}, NewNMInterface(5))
+	onm.Set([]*PathItem{{Field: "Field1"}}, NewNMInterface(10))
+	onm.Set([]*PathItem{{Field: "Field2", Index: IntPointer(0)}}, NewNMInterface("1001"))
+	onm.Set([]*PathItem{{Field: "Field2", Index: IntPointer(1)}, {Field: "Account", Index: IntPointer(0)}}, NewNMInterface(10))
+	onm.Set([]*PathItem{{Field: "Field2", Index: IntPointer(1)}, {Field: "Account", Index: IntPointer(1)}}, NewNMInterface(11))
+	onm.Set([]*PathItem{{Field: "Field2", Index: IntPointer(2)}}, NewNMInterface(111))
+	onm.Set([]*PathItem{{Field: "Field3"}, {Field: "Field4"}, {Field: "Field5"}}, NewNMInterface(5))
 	var expnm NM = NavigableMap2{
 		"Field1": NewNMInterface(10),
 		"Field2": &NMSlice{
@@ -56,42 +56,43 @@ func TestOrderedNavigableMap(t *testing.T) {
 	if !reflect.DeepEqual(expnm, onm.nm) {
 		t.Errorf("Expected %s ,received: %s", expnm, onm.nm)
 	}
-	expOrder := [][]string{
-		[]string{"Field1"},
-		[]string{"Field2[0]"},
-		[]string{"Field2[1]", "Account[0]"},
-		[]string{"Field2[1]", "Account[1]"},
-		[]string{"Field2[2]"},
-		[]string{"Field3", "Field4", "Field5"},
+	expOrder := [][]*PathItem{
+		[]*PathItem{{Field: "Field1"}},
+		[]*PathItem{{Field: "Field2", Index: IntPointer(0)}},
+		[]*PathItem{{Field: "Field2", Index: IntPointer(1)}, {Field: "Account", Index: IntPointer(0)}},
+		[]*PathItem{{Field: "Field2", Index: IntPointer(1)}, {Field: "Account", Index: IntPointer(1)}},
+		[]*PathItem{{Field: "Field2", Index: IntPointer(2)}},
+		[]*PathItem{{Field: "Field3"}, {Field: "Field4"}, {Field: "Field5"}},
 	}
 	if !reflect.DeepEqual(expOrder, onm.order) {
 		t.Errorf("Expected %s ,received: %s", expOrder, onm.order)
 	}
 
-	path := []string{"Field2"}
+	path := []*PathItem{{Field: "Field2"}}
 	//
 	// sliceDeNM
 	exp := &NMSlice{NewNMInterface("500"), NewNMInterface("502")}
 	if err := onm.Set(path, exp); err != nil {
 		t.Error(err)
 	}
-	path = []string{"Field2"}
+	path = []*PathItem{{Field: "Field2"}}
 	if val, err := onm.Field(path); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(val, exp) {
 		t.Errorf("Expected %q ,received: %q", exp, val.Interface())
 	}
-	expOrder = [][]string{
-		[]string{"Field1"},
-		[]string{"Field3", "Field4", "Field5"},
-		[]string{"Field2[0]"},
-		[]string{"Field2[1]"},
+
+	expOrder = [][]*PathItem{
+		[]*PathItem{{Field: "Field1"}},
+		[]*PathItem{{Field: "Field3"}, {Field: "Field4"}, {Field: "Field5"}},
+		[]*PathItem{{Field: "Field2", Index: IntPointer(0)}},
+		[]*PathItem{{Field: "Field2", Index: IntPointer(1)}},
 	}
 	if !reflect.DeepEqual(expOrder, onm.order) {
 		t.Errorf("Expected %s ,received: %s", expOrder, onm.order)
 	}
 
-	path = []string{"Field2[0]"}
+	path = []*PathItem{{Field: "Field2", Index: IntPointer(0)}}
 	if val, err := onm.Field(path); err != nil {
 		t.Error(err)
 	} else if val.Interface() != "500" {

@@ -330,7 +330,7 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 			utils.SessionSv1ProcessCDR,
 			&utils.CGREventWithArgDispatcher{CGREvent: cgrEv,
 				ArgDispatcher: cgrArgs.ArgDispatcher}, &rplyCDRs); err != nil {
-			agReq.CGRReply.Set([]string{utils.Error}, utils.NewNMInterface(err.Error()))
+			agReq.CGRReply.Set([]*utils.PathItem{{Field: utils.Error}}, utils.NewNMInterface(err.Error()))
 		}
 	}
 	if err := agReq.SetFields(reqProcessor.ReplyFields); err != nil {

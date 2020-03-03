@@ -260,7 +260,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 			&utils.CGREventWithArgDispatcher{CGREvent: cgrEv,
 				ArgDispatcher: cgrArgs.ArgDispatcher},
 			rplyCDRs); err != nil {
-			agReq.CGRReply.Set([]string{utils.Error}, utils.NewNMInterface(err.Error()))
+			agReq.CGRReply.Set([]*utils.PathItem{{Field: utils.Error}}, utils.NewNMInterface(err.Error()))
 		}
 	}
 	if err := agReq.SetFields(reqProcessor.ReplyFields); err != nil {

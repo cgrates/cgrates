@@ -69,7 +69,7 @@ func NewAgentRequest(req utils.DataProvider,
 	} else {
 		ar.Tenant = dfltTenant
 	}
-	ar.Vars.Set([]string{utils.NodeID}, utils.NewNMInterface(config.CgrConfig().GeneralCfg().NodeID))
+	ar.Vars.Set([]*utils.PathItem{{Field: utils.NodeID}}, utils.NewNMInterface(config.CgrConfig().GeneralCfg().NodeID))
 	return
 }
 
@@ -162,7 +162,7 @@ func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 				return err
 			}
 			fldPath := strings.Split(tplFld.Path, utils.NestingSep)
-
+			path := utils.NewPathToItem(tplFld.Path)
 			valIndx := 0
 
 			nMItm := &config.NMItem{Data: out, Path: fldPath[1:], Config: tplFld}
@@ -184,15 +184,13 @@ func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 					valIndx = -1
 				}
 			}
-			path := make([]string, len(fldPath))
-			copy(path, fldPath)
 			var nm utils.NM = nMItm
 			if valIndx == -1 {
 				nm = &utils.NMSlice{nm}
 			} else {
-				path[len(path)-1] += utils.IdxStart + strconv.Itoa(valIndx) + utils.IdxEnd
+				path[len(path)-1].Index = &valIndx
 			}
-			switch path[0] {
+			switch path[0].Field {
 			default:
 				return fmt.Errorf("unsupported field prefix: <%s> when set fields", path[0])
 			case utils.MetaVars:
@@ -396,7 +394,7 @@ func (ar *AgentRequest) setCGRReply(rply utils.NavigableMapper, errRply error) (
 		if rply != nil {
 			nm = rply.AsNavigableMap()
 		}
-		nm.Set([]string{utils.Error}, utils.NewNMInterface("")) // enforce empty error
+		nm.Set([]*utils.PathItem{{Field: utils.Error}}, utils.NewNMInterface("")) // enforce empty error
 	}
 	*ar.CGRReply = nm // update value so we can share CGRReply
 	return
