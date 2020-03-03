@@ -662,6 +662,7 @@ const (
 	MetaDiamreq                 = "*diamreq"
 	MetaCost                    = "*cost"
 	MetaGroup                   = "*group"
+	InternalRPCSet              = "InternalRPCSet"
 )
 
 // Migrator Action
