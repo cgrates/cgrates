@@ -37,13 +37,13 @@ func TestNewNMInterface(t *testing.T) {
 		t.Errorf("Expected %v ,received: %v", NMInterfaceType, nm.Type())
 	}
 
-	if _, err := nm.Field([]string{}); err != ErrNotImplemented {
+	if _, err := nm.Field(nil); err != ErrNotImplemented {
 		t.Error(err)
 	}
-	if err := nm.Set([]string{}, nil); err != ErrNotImplemented {
+	if err := nm.Set(nil, nil); err != ErrNotImplemented {
 		t.Error(err)
 	}
-	if err := nm.Remove([]string{}); err != ErrNotImplemented {
+	if err := nm.Remove(nil); err != ErrNotImplemented {
 		t.Error(err)
 	}
 }

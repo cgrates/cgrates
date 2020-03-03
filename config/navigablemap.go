@@ -36,23 +36,25 @@ type NMItem struct {
 
 func (nmi *NMItem) String() string         { return utils.ToJSON(nmi) }
 func (nmi *NMItem) Interface() interface{} { return nmi.Data }
-func (nmi *NMItem) Field(path []string) (val utils.NM, err error) {
+func (nmi *NMItem) Field(path []*utils.PathItem) (val utils.NM, err error) {
 	return nil, utils.ErrNotImplemented
 }
-func (nmi *NMItem) Set(path []string, val utils.NM) (err error) {
+func (nmi *NMItem) Set(path []*utils.PathItem, val utils.NM) (err error) {
 	return utils.ErrNotImplemented
 }
-func (nmi *NMItem) Remove(path []string) (err error) {
+func (nmi *NMItem) Remove(path []*utils.PathItem) (err error) {
 	return utils.ErrNotImplemented
 }
 func (nmi *NMItem) Type() utils.NMType { return utils.NMInterfaceType }
 func (nmi *NMItem) Empty() bool        { return nmi == nil || nmi.Data == nil }
 
-func (nmi *NMItem) GetField(path string) (val utils.NM, err error) {
+func (nmi *NMItem) GetField(path *utils.PathItem) (val utils.NM, err error) {
 	return nil, utils.ErrNotImplemented
 }
 
-func (nmi *NMItem) SetField(path string, val utils.NM) (err error) { return utils.ErrNotImplemented }
+func (nmi *NMItem) SetField(path *utils.PathItem, val utils.NM) (err error) {
+	return utils.ErrNotImplemented
+}
 
 func (nmi *NMItem) Len() int { return 0 }
 
@@ -171,7 +173,7 @@ func NMAsCGREvent(nM *utils.OrderedNavigableMap, tnt string, pathSep string) (cg
 	for _, branchPath := range order {
 		var val interface{}
 		val, _ = nM.Field(branchPath)
-		opath := utils.GetPathWithoutIndex(strings.Join(branchPath, pathSep))
+		opath := utils.GetPathWithoutIndex(utils.PathItemsToString(branchPath))
 		if nmItm, isNMItem := val.(*NMItem); isNMItem { // special case when we have added multiple items inside a key, used in agents
 			if nmItm.Config == nil ||
 				nmItm.Config.AttributeID == "" {

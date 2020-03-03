@@ -927,7 +927,7 @@ func getPathIndex(spath string) (opath string, idx string) {
 }
 
 func GetPathWithoutIndex(spath string) (opath string) {
-	idxStart := strings.Index(spath, IdxStart)
+	idxStart := strings.LastIndex(spath, IdxStart)
 	if idxStart == -1 || !strings.HasSuffix(spath, IdxEnd) {
 		return spath
 	}

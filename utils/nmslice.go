@@ -20,7 +20,6 @@ package utils
 
 import (
 	"fmt"
-	"strconv"
 )
 
 type NMSlice []NM
@@ -36,17 +35,14 @@ func (nms *NMSlice) String() (out string) {
 	return "[" + out + "]"
 }
 func (nms *NMSlice) Interface() interface{} { return nms }
-func (nms *NMSlice) Field(path []string) (val NM, err error) {
+func (nms *NMSlice) Field(path []*PathItem) (val NM, err error) {
 	if len(path) == 0 {
 		return nil, fmt.Errorf("Wrong path")
 	}
-	if nms.Empty() {
+	if nms.Empty() || path[0].Index == nil {
 		return nil, ErrNotFound
 	}
-	var idx int
-	if idx, err = strconv.Atoi(path[0]); err != nil {
-		return
-	}
+	idx := *path[0].Index
 	if idx < 0 {
 		idx = len(*nms) + idx
 	}
@@ -58,14 +54,11 @@ func (nms *NMSlice) Field(path []string) (val NM, err error) {
 	}
 	return (*nms)[idx].Field(path[1:])
 }
-func (nms *NMSlice) Set(path []string, val NM) (err error) {
-	if len(path) == 0 {
+func (nms *NMSlice) Set(path []*PathItem, val NM) (err error) {
+	if len(path) == 0 || path[0].Index == nil {
 		return fmt.Errorf("Wrong path")
 	}
-	var idx int
-	if idx, err = strconv.Atoi(path[0]); err != nil {
-		return
-	}
+	idx := *path[0].Index
 	if idx == len(*nms) { // append element
 		if len(path) == 1 {
 			*nms = append(*nms, val)
@@ -93,14 +86,11 @@ func (nms *NMSlice) Set(path []string, val NM) (err error) {
 	}
 	return (*nms)[idx].Set(path[1:], val)
 }
-func (nms *NMSlice) Remove(path []string) (err error) {
-	if len(path) == 0 {
+func (nms *NMSlice) Remove(path []*PathItem) (err error) {
+	if len(path) == 0 || path[0].Index == nil {
 		return fmt.Errorf("Wrong path")
 	}
-	var idx int
-	if idx, err = strconv.Atoi(path[0]); err != nil {
-		return
-	}
+	idx := *path[0].Index
 	if idx < 0 {
 		idx = len(*nms) + idx
 	}
@@ -134,14 +124,11 @@ func (nms *NMSlice) Remove(path []string) (err error) {
 func (nms NMSlice) Type() NMType { return NMSliceType }
 func (nms NMSlice) Empty() bool  { return nms == nil || len(nms) == 0 }
 
-func (nms *NMSlice) GetField(path string) (val NM, err error) {
-	if nms.Empty() {
+func (nms *NMSlice) GetField(path *PathItem) (val NM, err error) {
+	if nms.Empty() || path.Index == nil {
 		return nil, ErrNotFound
 	}
-	var idx int
-	if idx, err = strconv.Atoi(path); err != nil {
-		return
-	}
+	idx := *path.Index
 	if idx < 0 {
 		idx = len(*nms) + idx
 	}
@@ -151,11 +138,11 @@ func (nms *NMSlice) GetField(path string) (val NM, err error) {
 	return (*nms)[idx], nil
 }
 
-func (nms *NMSlice) SetField(path string, val NM) (err error) {
-	var idx int
-	if idx, err = strconv.Atoi(path); err != nil {
-		return
+func (nms *NMSlice) SetField(path *PathItem, val NM) (err error) {
+	if path.Index == nil {
+		return fmt.Errorf("Wrong path")
 	}
+	idx := *path.Index
 	if idx == len(*nms) { // append element
 		*nms = append(*nms, val)
 		return

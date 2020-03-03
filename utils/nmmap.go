@@ -35,23 +35,22 @@ func (nmm NavigableMap2) String() (out string) {
 	return "{" + out + "}"
 }
 func (nmm NavigableMap2) Interface() interface{} { return nmm }
-func (nmm NavigableMap2) Field(path []string) (val NM, err error) {
+func (nmm NavigableMap2) Field(path []*PathItem) (val NM, err error) {
 	if len(path) == 0 {
 		return nil, fmt.Errorf("Wrong path")
 	}
-	opath, indx := getPathIndex(path[0])
-	el, has := nmm[opath]
+	el, has := nmm[path[0].Field]
 	if !has {
 		return nil, ErrNotFound
 	}
 	switch el.Type() {
 	case NMInterfaceType:
-		if len(path) != 1 || indx != "" {
+		if len(path) != 1 || path[0].Index != nil {
 			return nil, ErrNotFound
 		}
 		return el, nil
 	case NMMapType:
-		if indx != "" {
+		if path[0].Index != nil {
 			return nil, ErrNotFound
 		}
 		if len(path) == 1 {
@@ -59,72 +58,60 @@ func (nmm NavigableMap2) Field(path []string) (val NM, err error) {
 		}
 		return el.Field(path[1:])
 	case NMSliceType:
-		if len(path) == 1 && indx == "" {
+		if len(path) == 1 && path[0].Index == nil {
 			return el, nil
 		}
-		if indx == "" {
-			return nil, ErrNotFound
-		}
-		path[0] = indx
 		return el.Field(path)
 	}
 	panic("BUG")
 }
-func (nmm NavigableMap2) Set(path []string, val NM) (err error) {
+func (nmm NavigableMap2) Set(path []*PathItem, val NM) (err error) {
 	if len(path) == 0 {
 		return fmt.Errorf("Wrong path")
 	}
-	opath, indx := getPathIndex(path[0])
-	el, has := nmm[opath]
+	el, has := nmm[path[0].Field]
 	if len(path) == 1 {
 		if !has {
-			if indx != "" {
+			if path[0].Index != nil {
 				nel := &NMSlice{}
-				if err = nel.Set([]string{indx}, val); err != nil {
+				if err = nel.Set(path, val); err != nil {
 					return
 				}
-				nmm[opath] = nel
+				nmm[path[0].Field] = nel
 				return
 			}
-			nmm[opath] = val
+			nmm[path[0].Field] = val
 			return
 		}
-		if indx != "" {
+		if path[0].Index != nil {
 			if el.Type() != NMSliceType {
 				return fmt.Errorf("Wrong path")
 			}
-			return el.Set([]string{indx}, val)
+			return el.Set(path, val)
 		}
-		// if el.Type() == NMSliceType {
-		// 	el = &NMSlice{} //only works if the last element from path is part of a slice
-		// 	nmm[opath] = el
-		// 	return el.Set([]string{"0"}, val)
-		// }
-		nmm[opath] = val
+		nmm[path[0].Field] = val
 		return
 	}
 	if !has {
-		if indx != "" {
+		if path[0].Index != nil {
 			nel := &NMSlice{}
-			path[0] = indx
 			if err = nel.Set(path, val); err != nil {
 				return
 			}
-			nmm[opath] = nel
+			nmm[path[0].Field] = nel
 			return
 		}
 		nel := NavigableMap2{}
 		if err = nel.Set(path[1:], val); err != nil {
 			return
 		}
-		nmm[opath] = nel
+		nmm[path[0].Field] = nel
 		return
 	}
-	if indx != "" {
+	if path[0].Index != nil {
 		if el.Type() != NMSliceType {
 			return fmt.Errorf("Wrong path")
 		}
-		path[0] = indx
 		return el.Set(path, val)
 	}
 	if el.Type() != NMMapType { // do not try to overwrite an interface
@@ -132,35 +119,33 @@ func (nmm NavigableMap2) Set(path []string, val NM) (err error) {
 	}
 	return el.Set(path[1:], val)
 }
-func (nmm NavigableMap2) Remove(path []string) (err error) {
+func (nmm NavigableMap2) Remove(path []*PathItem) (err error) {
 	if len(path) == 0 {
 		return fmt.Errorf("Wrong path")
 	}
-	opath, indx := getPathIndex(path[0])
-	el, has := nmm[opath]
+	el, has := nmm[path[0].Field]
 	if !has {
 		return // already removed
 	}
 	if len(path) == 1 {
-		if indx != "" {
+		if path[0].Index != nil {
 			if el.Type() != NMSliceType {
 				return fmt.Errorf("Wrong path")
 			}
-			return el.Remove([]string{indx})
+			return el.Remove(path)
 		}
-		delete(nmm, opath)
+		delete(nmm, path[0].Field)
 		return
 	}
-	if indx != "" {
+	if path[0].Index != nil {
 		if el.Type() != NMSliceType {
 			return fmt.Errorf("Wrong path")
 		}
-		path[0] = indx
 		if err = el.Remove(path); err != nil {
 			return
 		}
 		if el.Empty() {
-			delete(nmm, opath)
+			delete(nmm, path[0].Field)
 		}
 		return
 	}
@@ -171,66 +156,59 @@ func (nmm NavigableMap2) Remove(path []string) (err error) {
 		return
 	}
 	if el.Empty() {
-		delete(nmm, opath)
+		delete(nmm, path[0].Field)
 	}
 	return
 }
 func (nmm NavigableMap2) Type() NMType { return NMMapType }
 func (nmm NavigableMap2) Empty() bool  { return nmm == nil || len(nmm) == 0 }
 
-func (nmm NavigableMap2) GetField(path string) (val NM, err error) {
-	opath, indx := getPathIndex(path)
-	el, has := nmm[opath]
+func (nmm NavigableMap2) GetField(path *PathItem) (val NM, err error) {
+	el, has := nmm[path.Field]
 	if !has {
 		return nil, ErrNotFound
 	}
 	switch el.Type() {
 	case NMInterfaceType:
-		if indx != "" {
+		if path.Index != nil {
 			return nil, ErrNotFound
 		}
 		return el, nil
 	case NMMapType:
-		if indx != "" {
+		if path.Index != nil {
 			return nil, ErrNotFound
 		}
 		return el, nil
 	case NMSliceType:
-		if indx == "" {
+		if path.Index == nil {
 			return el, nil
 		}
-		return el.GetField(indx)
+		return el.GetField(path)
 	}
 	panic("BUG")
 }
 
-func (nmm NavigableMap2) SetField(path string, val NM) (err error) {
-	opath, indx := getPathIndex(path)
-	el, has := nmm[opath]
+func (nmm NavigableMap2) SetField(path *PathItem, val NM) (err error) {
+	el, has := nmm[path.Field]
 	if !has {
-		if indx != "" {
+		if path.Index != nil {
 			nel := &NMSlice{}
-			if err = nel.Set([]string{indx}, val); err != nil {
+			if err = nel.SetField(path, val); err != nil {
 				return
 			}
-			nmm[opath] = nel
+			nmm[path.Field] = nel
 			return
 		}
-		nmm[opath] = val
+		nmm[path.Field] = val
 		return
 	}
-	if indx != "" {
+	if path.Index != nil {
 		if el.Type() != NMSliceType {
 			return fmt.Errorf("Wrong path")
 		}
-		return el.Set([]string{indx}, val)
+		return el.SetField(path, val)
 	}
-	// if el.Type() == NMSliceType {
-	// 	el = &NMSlice{} //only works if the last element from path is part of a slice
-	// 	nmm[opath] = el
-	// 	return el.Set([]string{"0"}, val)
-	// }
-	nmm[opath] = val
+	nmm[path.Field] = val
 	return
 
 }
@@ -239,7 +217,7 @@ func (nmm NavigableMap2) Len() int { return len(nmm) }
 // FieldAsString returns thevalue from path as string
 func (nmm NavigableMap2) FieldAsString(fldPath []string) (str string, err error) {
 	var val interface{}
-	val, err = nmm.Field(fldPath)
+	val, err = nmm.Field(NewPathToItemFromSlice(fldPath))
 	if err != nil {
 		return
 	}
@@ -248,7 +226,7 @@ func (nmm NavigableMap2) FieldAsString(fldPath []string) (str string, err error)
 
 func (nmm NavigableMap2) FieldAsInterface(fldPath []string) (str interface{}, err error) {
 	var nm NM
-	if nm, err = nmm.Field(fldPath); err != nil {
+	if nm, err = nmm.Field(NewPathToItemFromSlice(fldPath)); err != nil {
 		return
 	}
 	return nm.Interface(), nil

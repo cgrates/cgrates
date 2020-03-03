@@ -20,6 +20,7 @@ package utils
 
 import (
 	"net"
+	"strconv"
 	"strings"
 )
 
@@ -63,16 +64,70 @@ const (
 	NMSliceType
 )
 
+// PathItem used by the NM interface to store the path information
+type PathItem struct {
+	Field string
+	Index *int
+}
+
 // NM the basic interface
 type NM interface {
 	String() string
 	Interface() interface{}
-	Field(path []string) (val NM, err error)
-	GetField(path string) (val NM, err error)
-	SetField(path string, val NM) (err error)
-	Set(path []string, val NM) (err error)
-	Remove(path []string) (err error)
+	Field(path []*PathItem) (val NM, err error)
+	GetField(path *PathItem) (val NM, err error)
+	SetField(path *PathItem, val NM) (err error)
+	Set(path []*PathItem, val NM) (err error)
+	Remove(path []*PathItem) (err error)
 	Type() NMType
 	Empty() bool
 	Len() int
+}
+
+func NewPathToItemFromSlice(path []string) (pItms []*PathItem) {
+	pItms = make([]*PathItem, len(path))
+	for i, v := range path {
+		field, indx := GetPathIndex(v)
+		pItms[i] = &PathItem{
+			Field: field,
+			Index: indx,
+		}
+	}
+	return
+}
+
+func NewPathToItem(path string) []*PathItem {
+	return NewPathToItemFromSlice(strings.Split(path, NestingSep))
+}
+
+func (p *PathItem) String() (out string) {
+	out = p.Field
+	if p.Index != nil {
+		out += IdxStart + strconv.Itoa(*p.Index) + IdxEnd
+	}
+	return
+}
+
+func (p *PathItem) Equal(p2 *PathItem) bool {
+	if p.Field != p2.Field {
+		return false
+	}
+	if p.Index == nil && p2.Index == nil {
+		return true
+	}
+	if p.Index != nil && p2.Index != nil {
+		return *p.Index == *p2.Index
+	}
+	return false
+}
+
+func PathItemsToString(path []*PathItem) (out string) {
+	for _, v := range path {
+		out += NestingSep + v.String()
+	}
+	if out == "" {
+		return
+	}
+	return out[1:]
+
 }
