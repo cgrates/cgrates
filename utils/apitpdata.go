@@ -1418,3 +1418,9 @@ type GetMaxSessionTimeOnAccountsArgs struct {
 	Usage       time.Duration
 	AccountIDs  []string
 }
+
+type ArgExportToFolder struct {
+	Tenant string
+	Path   string
+	Items  []string
+}

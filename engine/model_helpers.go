@@ -91,7 +91,8 @@ func csvLoad(s interface{}, values []string) (interface{}, error) {
 	return elem.Interface(), nil
 }
 
-func csvDump(s interface{}) ([]string, error) {
+//CsvDump receive and interface and convert it to a slice of string
+func CsvDump(s interface{}) ([]string, error) {
 	fieldIndexMap := make(map[string]int)
 	st := reflect.ValueOf(s)
 	if st.Kind() == reflect.Ptr {
@@ -2010,6 +2011,8 @@ func APItoSupplierProfile(tpSPP *utils.TPSupplierProfile, timezone string) (spp 
 
 type TPAttributes []*TPAttribute
 
+// create a function for models that return the CSV header
+
 func (tps TPAttributes) AsTPAttributes() (result []*utils.TPAttributeProfile) {
 	mst := make(map[string]*utils.TPAttributeProfile)
 	filterMap := make(map[string]utils.StringMap)
@@ -2174,16 +2177,17 @@ func APItoAttributeProfile(tpAttr *utils.TPAttributeProfile, timezone string) (a
 	return attrPrf, nil
 }
 
-func AttributeProfileToAPI(attrPrf *AttributeProfile, tpid string) (tpAttr *utils.TPAttributeProfile) {
+func AttributeProfileToAPI(attrPrf *AttributeProfile) (tpAttr *utils.TPAttributeProfile) {
 	tpAttr = &utils.TPAttributeProfile{
-		TPid:       tpid,
-		Tenant:     attrPrf.Tenant,
-		ID:         attrPrf.ID,
-		FilterIDs:  make([]string, len(attrPrf.FilterIDs)),
-		Contexts:   make([]string, len(attrPrf.Contexts)),
-		Attributes: make([]*utils.TPAttribute, len(tpAttr.Attributes)),
-		Blocker:    attrPrf.Blocker,
-		Weight:     attrPrf.Weight,
+		TPid:               utils.EmptyString,
+		Tenant:             attrPrf.Tenant,
+		ID:                 attrPrf.ID,
+		FilterIDs:          make([]string, len(attrPrf.FilterIDs)),
+		Contexts:           make([]string, len(attrPrf.Contexts)),
+		Attributes:         make([]*utils.TPAttribute, len(attrPrf.Attributes)),
+		ActivationInterval: new(utils.TPActivationInterval),
+		Blocker:            attrPrf.Blocker,
+		Weight:             attrPrf.Weight,
 	}
 	for i, fli := range attrPrf.FilterIDs {
 		tpAttr.FilterIDs[i] = fli
@@ -2199,9 +2203,13 @@ func AttributeProfileToAPI(attrPrf *AttributeProfile, tpid string) (tpAttr *util
 			Value:     attr.Value.GetRule(),
 		}
 	}
-	tpAttr.ActivationInterval = &utils.TPActivationInterval{
-		ActivationTime: attrPrf.ActivationInterval.ActivationTime.Format(time.RFC3339),
-		ExpiryTime:     attrPrf.ActivationInterval.ExpiryTime.Format(time.RFC3339),
+	if attrPrf.ActivationInterval != nil {
+		if !attrPrf.ActivationInterval.ActivationTime.IsZero() {
+			tpAttr.ActivationInterval.ActivationTime = attrPrf.ActivationInterval.ActivationTime.Format(time.RFC3339)
+		}
+		if !attrPrf.ActivationInterval.ExpiryTime.IsZero() {
+			tpAttr.ActivationInterval.ExpiryTime = attrPrf.ActivationInterval.ExpiryTime.Format(time.RFC3339)
+		}
 	}
 	return
 }

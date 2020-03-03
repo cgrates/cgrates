@@ -367,7 +367,7 @@ func (self *TPExporter) writeOut(fileName string, tpData []interface{}) error {
 		writerOut = utils.NewCgrIORecordWriter(fWriter)
 	}
 	for _, tpItem := range tpData {
-		record, err := csvDump(tpItem)
+		record, err := CsvDump(tpItem)
 		if err != nil {
 			return err
 		}

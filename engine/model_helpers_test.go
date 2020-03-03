@@ -39,7 +39,7 @@ func TestModelHelperCsvDump(t *testing.T) {
 	tpd := TpDestination{
 		Tag:    "TEST_DEST",
 		Prefix: "+492"}
-	csv, err := csvDump(tpd)
+	csv, err := CsvDump(tpd)
 	if err != nil || csv[0] != "TEST_DEST" || csv[1] != "+492" {
 		t.Errorf("model load failed: %+v", tpd)
 	}
@@ -59,7 +59,7 @@ func TestTPDestinationAsExportSlice(t *testing.T) {
 	mdst := APItoModelDestination(tpDst)
 	var slc [][]string
 	for _, md := range mdst {
-		lc, err := csvDump(md)
+		lc, err := CsvDump(md)
 		if err != nil {
 			t.Error("Error dumping to csv: ", err)
 		}
@@ -109,7 +109,7 @@ func TestTPRateAsExportSlice(t *testing.T) {
 	ms := APItoModelRate(tpRate)
 	var slc [][]string
 	for _, m := range ms {
-		lc, err := csvDump(m)
+		lc, err := CsvDump(m)
 		if err != nil {
 			t.Error("Error dumping to csv: ", err)
 		}
@@ -144,7 +144,7 @@ func TestTPDestinationRateAsExportSlice(t *testing.T) {
 	ms := APItoModelDestinationRate(tpDstRate)
 	var slc [][]string
 	for _, m := range ms {
-		lc, err := csvDump(m)
+		lc, err := CsvDump(m)
 		if err != nil {
 			t.Error("Error dumping to csv: ", err)
 		}
@@ -172,7 +172,7 @@ func TestApierTPTimingAsExportSlice(t *testing.T) {
 	ms := APItoModelTiming(tpTiming)
 	var slc [][]string
 
-	lc, err := csvDump(ms)
+	lc, err := CsvDump(ms)
 	if err != nil {
 		t.Error("Error dumping to csv: ", err)
 	}
@@ -205,7 +205,7 @@ func TestTPRatingPlanAsExportSlice(t *testing.T) {
 	ms := APItoModelRatingPlan(tpRpln)
 	var slc [][]string
 	for _, m := range ms {
-		lc, err := csvDump(m)
+		lc, err := CsvDump(m)
 		if err != nil {
 			t.Error("Error dumping to csv: ", err)
 		}
@@ -242,7 +242,7 @@ func TestTPRatingProfileAsExportSlice(t *testing.T) {
 	ms := APItoModelRatingProfile(tpRpf)
 	var slc [][]string
 	for _, m := range ms {
-		lc, err := csvDump(m)
+		lc, err := CsvDump(m)
 		if err != nil {
 			t.Error("Error dumping to csv: ", err)
 		}
@@ -293,7 +293,7 @@ func TestTPActionsAsExportSlice(t *testing.T) {
 	ms := APItoModelAction(tpActs)
 	var slc [][]string
 	for _, m := range ms {
-		lc, err := csvDump(m)
+		lc, err := CsvDump(m)
 		if err != nil {
 			t.Error("Error dumping to csv: ", err)
 		}
@@ -329,7 +329,7 @@ func TestTPSharedGroupsAsExportSlice(t *testing.T) {
 	ms := APItoModelSharedGroup(tpSGs)
 	var slc [][]string
 	for _, m := range ms {
-		lc, err := csvDump(m)
+		lc, err := CsvDump(m)
 		if err != nil {
 			t.Error("Error dumping to csv: ", err)
 		}
@@ -362,7 +362,7 @@ func TestTPActionTriggersAsExportSlice(t *testing.T) {
 	ms := APItoModelActionPlan(ap)
 	var slc [][]string
 	for _, m := range ms {
-		lc, err := csvDump(m)
+		lc, err := CsvDump(m)
 		if err != nil {
 			t.Error("Error dumping to csv: ", err)
 		}
@@ -427,7 +427,7 @@ func TestTPActionPlanAsExportSlice(t *testing.T) {
 	ms := APItoModelActionTrigger(at)
 	var slc [][]string
 	for _, m := range ms {
-		lc, err := csvDump(m)
+		lc, err := CsvDump(m)
 		if err != nil {
 			t.Error("Error dumping to csv: ", err)
 		}
@@ -452,7 +452,7 @@ func TestTPAccountActionsAsExportSlice(t *testing.T) {
 	}
 	ms := APItoModelAccountAction(aa)
 	var slc [][]string
-	lc, err := csvDump(*ms)
+	lc, err := CsvDump(*ms)
 	if err != nil {
 		t.Error("Error dumping to csv: ", err)
 	}
@@ -1237,6 +1237,94 @@ func TestAPItoAttributeProfile(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rcv) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
+func TestAttributeProfileToAPI(t *testing.T) {
+	exp := &utils.TPAttributeProfile{
+		TPid:      utils.EmptyString,
+		Tenant:    "cgrates.org",
+		ID:        "ALS1",
+		Contexts:  []string{"con1"},
+		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-14T14:35:00Z",
+			ExpiryTime:     "",
+		},
+		Attributes: []*utils.TPAttribute{
+			&utils.TPAttribute{
+				Path:  utils.MetaReq + utils.NestingSep + "FL1",
+				Value: "Al1",
+			},
+		},
+		Weight: 20,
+	}
+	attr := &AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ALS1",
+		Contexts:  []string{"con1"},
+		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+		},
+		Attributes: []*Attribute{
+			&Attribute{
+				Path:  utils.MetaReq + utils.NestingSep + "FL1",
+				Value: config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
+			},
+		},
+		Weight: 20,
+	}
+	if rcv := AttributeProfileToAPI(attr); !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
+
+func TestAttributeProfileToAPI2(t *testing.T) {
+	exp := &utils.TPAttributeProfile{
+		TPid:      utils.EmptyString,
+		Tenant:    "cgrates.org",
+		ID:        "ALS1",
+		Contexts:  []string{"con1"},
+		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-14T14:35:00Z",
+			ExpiryTime:     "",
+		},
+		Attributes: []*utils.TPAttribute{
+			&utils.TPAttribute{
+				Path:  utils.MetaReq + utils.NestingSep + "FL1",
+				Value: "Al1",
+			},
+			&utils.TPAttribute{
+				Path:  utils.MetaReq + utils.NestingSep + "Test",
+				Value: "~*req.Account",
+			},
+		},
+		Weight: 20,
+	}
+	attr := &AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ALS1",
+		Contexts:  []string{"con1"},
+		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+		},
+		Attributes: []*Attribute{
+			&Attribute{
+				Path:  utils.MetaReq + utils.NestingSep + "FL1",
+				Value: config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
+			},
+			&Attribute{
+				Path:  utils.MetaReq + utils.NestingSep + "Test",
+				Value: config.NewRSRParsersMustCompile("~*req.Account", true, utils.INFIELD_SEP),
+			},
+		},
+		Weight: 20,
+	}
+	if rcv := AttributeProfileToAPI(attr); !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(exp), utils.ToJSON(rcv))
 	}
 }
 
