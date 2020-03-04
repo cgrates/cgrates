@@ -440,6 +440,8 @@ func (apiv1 *APIerSv1) SetRatingProfile(attrs utils.AttrSetRatingProfile, reply 
 	if err := apiv1.DataManager.SetRatingProfile(rpfl, utils.NonTransactional); err != nil {
 		return utils.NewErrServerError(err)
 	}
+	//CacheReload
+
 	//generate a loadID for CacheRatingProfiles and store it in database
 	if err := apiv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheRatingProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
@@ -1364,8 +1366,8 @@ func (apiv1 *APIerSv1) Ping(ign *utils.CGREvent, reply *string) error {
 func (apiV1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *string) error {
 	// if items is empy we need to export all items
 	if len(arg.Items) == 0 {
-		arg.Items = []string{utils.MetaAttributes, utils.MetaChargers, utils.MetaDispatchers, utils.MetaFilters,
-			utils.MetaResources, utils.MetaStats, utils.MetaSuppliers, utils.MetaThresholds}
+		arg.Items = []string{utils.MetaAttributes, utils.MetaChargers, utils.MetaDispatchers, utils.MetaDispatcherHosts,
+			utils.MetaFilters, utils.MetaResources, utils.MetaStats, utils.MetaSuppliers, utils.MetaThresholds}
 	}
 	for _, item := range arg.Items {
 		switch item {
@@ -1375,7 +1377,6 @@ func (apiV1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *strin
 			if err != nil {
 				return err
 			}
-			// take the tenant + id from key
 			if len(keys) == 0 { // if we don't find items we skip
 				continue
 			}
@@ -1388,13 +1389,10 @@ func (apiV1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *strin
 			csvWriter := csv.NewWriter(f)
 			csvWriter.Comma = utils.CSV_SEP
 			//write the header of the file
-			// #Tenant,ID,Contexts,FilterIDs,ActivationInterval,AttributeFilterIDs,Path,Type,Value,Blocker,Weight
-			if err := csvWriter.Write([]string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.ActivationInternal,
-				utils.AttributeFilterIDs, utils.Path, utils.Type, utils.Value, utils.Blocker, utils.Weight}); err != nil {
+			if err := csvWriter.Write(engine.TPAttributes{}.CSVHeader()); err != nil {
 				return err
 			}
 			for _, key := range keys {
-				// take tntID from key
 				tntID := strings.SplitN(key[len(prfx):], utils.InInFieldSep, 2)
 				attPrf, err := apiV1.DataManager.GetAttributeProfile(tntID[0], tntID[1],
 					true, false, utils.NonTransactional)
@@ -1409,7 +1407,196 @@ func (apiV1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *strin
 						return err
 					}
 				}
+			}
+			csvWriter.Flush()
+		case utils.MetaChargers:
+			prfx := utils.ChargerProfilePrefix
+			keys, err := apiV1.DataManager.DataDB().GetKeysForPrefix(prfx)
+			if err != nil {
+				return err
+			}
+			if len(keys) == 0 { // if we don't find items we skip
+				continue
+			}
+			f, err := os.Create(path.Join(arg.Path, utils.ChargersCsv))
+			if err != nil {
+				return err
+			}
+			defer f.Close()
 
+			csvWriter := csv.NewWriter(f)
+			csvWriter.Comma = utils.CSV_SEP
+			//write the header of the file
+			if err := csvWriter.Write(engine.TPChargers{}.CSVHeader()); err != nil {
+				return err
+			}
+			for _, key := range keys {
+				tntID := strings.SplitN(key[len(prfx):], utils.InInFieldSep, 2)
+				chrPrf, err := apiV1.DataManager.GetChargerProfile(tntID[0], tntID[1],
+					true, false, utils.NonTransactional)
+				if err != nil {
+					return err
+				}
+				for _, model := range engine.APItoModelTPCharger(
+					engine.ChargerProfileToAPI(chrPrf)) {
+					if record, err := engine.CsvDump(model); err != nil {
+						return err
+					} else if err := csvWriter.Write(record); err != nil {
+						return err
+					}
+				}
+			}
+			csvWriter.Flush()
+		case utils.MetaDispatchers:
+			prfx := utils.DispatcherProfilePrefix
+			keys, err := apiV1.DataManager.DataDB().GetKeysForPrefix(prfx)
+			if err != nil {
+				return err
+			}
+			if len(keys) == 0 { // if we don't find items we skip
+				continue
+			}
+			f, err := os.Create(path.Join(arg.Path, utils.DispatcherProfilesCsv))
+			if err != nil {
+				return err
+			}
+			defer f.Close()
+
+			csvWriter := csv.NewWriter(f)
+			csvWriter.Comma = utils.CSV_SEP
+			//write the header of the file
+			if err := csvWriter.Write(engine.TPDispatcherProfiles{}.CSVHeader()); err != nil {
+				return err
+			}
+			for _, key := range keys {
+				tntID := strings.SplitN(key[len(prfx):], utils.InInFieldSep, 2)
+				dpsPrf, err := apiV1.DataManager.GetDispatcherProfile(tntID[0], tntID[1],
+					true, false, utils.NonTransactional)
+				if err != nil {
+					return err
+				}
+				for _, model := range engine.APItoModelTPDispatcherProfile(
+					engine.DispatcherProfileToAPI(dpsPrf)) {
+					if record, err := engine.CsvDump(model); err != nil {
+						return err
+					} else if err := csvWriter.Write(record); err != nil {
+						return err
+					}
+				}
+			}
+			csvWriter.Flush()
+		case utils.MetaDispatcherHosts:
+			prfx := utils.DispatcherHostPrefix
+			keys, err := apiV1.DataManager.DataDB().GetKeysForPrefix(prfx)
+			if err != nil {
+				return err
+			}
+			if len(keys) == 0 { // if we don't find items we skip
+				continue
+			}
+			f, err := os.Create(path.Join(arg.Path, utils.DispatcherHostsCsv))
+			if err != nil {
+				return err
+			}
+			defer f.Close()
+
+			csvWriter := csv.NewWriter(f)
+			csvWriter.Comma = utils.CSV_SEP
+			//write the header of the file
+			if err := csvWriter.Write(engine.TPDispatcherHosts{}.CSVHeader()); err != nil {
+				return err
+			}
+			for _, key := range keys {
+				tntID := strings.SplitN(key[len(prfx):], utils.InInFieldSep, 2)
+				dpsPrf, err := apiV1.DataManager.GetDispatcherHost(tntID[0], tntID[1],
+					true, false, utils.NonTransactional)
+				if err != nil {
+					return err
+				}
+				for _, model := range engine.APItoModelTPDispatcherHost(
+					engine.DispatcherHostToAPI(dpsPrf)) {
+					if record, err := engine.CsvDump(model); err != nil {
+						return err
+					} else if err := csvWriter.Write(record); err != nil {
+						return err
+					}
+				}
+			}
+			csvWriter.Flush()
+		case utils.MetaFilters:
+			prfx := utils.FilterPrefix
+			keys, err := apiV1.DataManager.DataDB().GetKeysForPrefix(prfx)
+			if err != nil {
+				return err
+			}
+			if len(keys) == 0 { // if we don't find items we skip
+				continue
+			}
+			f, err := os.Create(path.Join(arg.Path, utils.FiltersCsv))
+			if err != nil {
+				return err
+			}
+			defer f.Close()
+
+			csvWriter := csv.NewWriter(f)
+			csvWriter.Comma = utils.CSV_SEP
+			//write the header of the file
+			if err := csvWriter.Write(engine.TpFilterS{}.CSVHeader()); err != nil {
+				return err
+			}
+			for _, key := range keys {
+				tntID := strings.SplitN(key[len(prfx):], utils.InInFieldSep, 2)
+				fltr, err := engine.GetFilter(apiV1.DataManager, tntID[0], tntID[1],
+					true, false, utils.NonTransactional)
+				if err != nil {
+					return err
+				}
+				for _, model := range engine.APItoModelTPFilter(
+					engine.FilterToTPFilter(fltr)) {
+					if record, err := engine.CsvDump(model); err != nil {
+						return err
+					} else if err := csvWriter.Write(record); err != nil {
+						return err
+					}
+				}
+			}
+			csvWriter.Flush()
+		case utils.MetaResources:
+			prfx := utils.ResourceProfilesPrefix
+			keys, err := apiV1.DataManager.DataDB().GetKeysForPrefix(prfx)
+			if err != nil {
+				return err
+			}
+			if len(keys) == 0 { // if we don't find items we skip
+				continue
+			}
+			f, err := os.Create(path.Join(arg.Path, utils.ResourcesCsv))
+			if err != nil {
+				return err
+			}
+			defer f.Close()
+
+			csvWriter := csv.NewWriter(f)
+			csvWriter.Comma = utils.CSV_SEP
+			//write the header of the file
+			if err := csvWriter.Write(engine.TpResources{}.CSVHeader()); err != nil {
+				return err
+			}
+			for _, key := range keys {
+				tntID := strings.SplitN(key[len(prfx):], utils.InInFieldSep, 2)
+				resPrf, err := apiV1.DataManager.GetResourceProfile(tntID[0], tntID[1],
+					true, false, utils.NonTransactional)
+				if err != nil {
+					return err
+				}
+				for _, model := range engine.APItoModelResource(
+					engine.ResourceProfileToAPI(resPrf)) {
+					if record, err := engine.CsvDump(model); err != nil {
+						return err
+					} else if err := csvWriter.Write(record); err != nil {
+						return err
+					}
+				}
 			}
 			csvWriter.Flush()
 		}

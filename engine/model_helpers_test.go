@@ -561,6 +561,35 @@ func TestAPItoResource(t *testing.T) {
 	}
 }
 
+func TestResourceProfileToAPI(t *testing.T) {
+	expected := &utils.TPResourceProfile{
+		Tenant:             "cgrates.org",
+		ID:                 "ResGroup1",
+		FilterIDs:          []string{"FLTR_RES_GR_1"},
+		ActivationInterval: &utils.TPActivationInterval{ActivationTime: "2014-07-29T15:00:00Z"},
+		Weight:             10,
+		Limit:              "2",
+		ThresholdIDs:       []string{"TRes1"},
+		AllocationMessage:  "asd",
+	}
+	rp := &ResourceProfile{
+		Tenant: "cgrates.org",
+		ID:     "ResGroup1",
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
+		},
+		Weight:            10,
+		FilterIDs:         []string{"FLTR_RES_GR_1"},
+		ThresholdIDs:      []string{"TRes1"},
+		AllocationMessage: "asd",
+		Limit:             2,
+	}
+
+	if rcv := ResourceProfileToAPI(rp); !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expecting: %+v, \n received: %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
 func TestAPItoModelResource(t *testing.T) {
 	tpRL := &utils.TPResourceProfile{
 		Tenant:             "cgrates.org",
@@ -1366,6 +1395,65 @@ func TestAPItoModelTPAttribute(t *testing.T) {
 	}
 }
 
+func TestCsvDumpForAttributeModels(t *testing.T) {
+	tpAlsPrf := &utils.TPAttributeProfile{
+		TPid:      "TP1",
+		Tenant:    "cgrates.org",
+		ID:        "ALS1",
+		Contexts:  []string{"con1"},
+		FilterIDs: []string{"FLTR_ACNT_dan"},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-14T14:35:00Z",
+			ExpiryTime:     "",
+		},
+		Attributes: []*utils.TPAttribute{
+			&utils.TPAttribute{
+				Path:  utils.MetaReq + utils.NestingSep + "FL1",
+				Value: "Al1",
+			},
+			&utils.TPAttribute{
+				Path:  utils.MetaReq + utils.NestingSep + "FL2",
+				Value: "Al2",
+			},
+		},
+		Weight: 20,
+	}
+	expected := TPAttributes{
+		&TPAttribute{
+			Tpid:               "TP1",
+			Tenant:             "cgrates.org",
+			ID:                 "ALS1",
+			Contexts:           "con1",
+			FilterIDs:          "FLTR_ACNT_dan",
+			Path:               utils.MetaReq + utils.NestingSep + "FL1",
+			Value:              "Al1",
+			ActivationInterval: "2014-07-14T14:35:00Z",
+			Weight:             20,
+		},
+		&TPAttribute{
+			Tpid:   "TP1",
+			Tenant: "cgrates.org",
+			ID:     "ALS1",
+			Path:   utils.MetaReq + utils.NestingSep + "FL2",
+			Value:  "Al2",
+		},
+	}
+	rcv := APItoModelTPAttribute(tpAlsPrf)
+	if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expecting : %+v,\n received: %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+	expRecord := []string{"cgrates.org", "ALS1", "con1", "FLTR_ACNT_dan", "2014-07-14T14:35:00Z", "", "*req.FL1", "", "Al1", "false", "20"}
+	for i, model := range rcv {
+		if i == 1 {
+			expRecord = []string{"cgrates.org", "ALS1", "", "", "", "", "*req.FL2", "", "Al2", "false", "0"}
+		}
+		if csvRecordRcv, _ := CsvDump(model); !reflect.DeepEqual(expRecord, csvRecordRcv) {
+			t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(expRecord), utils.ToJSON(csvRecordRcv))
+		}
+	}
+
+}
+
 func TestModelAsTPAttribute(t *testing.T) {
 	models := TPAttributes{
 		&TPAttribute{
@@ -1454,6 +1542,38 @@ func TestAPItoChargerProfile(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rcv) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
+func TestChargerProfileToAPI(t *testing.T) {
+	exp := &utils.TPChargerProfile{
+		Tenant:    "cgrates.org",
+		ID:        "Charger1",
+		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
+		RunID:     "*rated",
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-14T14:35:00Z",
+			ExpiryTime:     "",
+		},
+		AttributeIDs: []string{"ATTR1", "ATTR2"},
+		Weight:       20,
+	}
+
+	chargerPrf := &ChargerProfile{
+		Tenant:    "cgrates.org",
+		ID:        "Charger1",
+		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+		},
+		RunID:        "*rated",
+		AttributeIDs: []string{"ATTR1", "ATTR2"},
+		Weight:       20,
+	}
+	if rcv := ChargerProfileToAPI(chargerPrf); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("Expecting : %+v, \n received: %+v", utils.ToJSON(exp), utils.ToJSON(rcv))
 	}
 }
 
@@ -1763,6 +1883,80 @@ func TestAPItoDispatcherProfile(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rcv) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
+func TestDispatcherProfileToAPI(t *testing.T) {
+	exp := &utils.TPDispatcherProfile{
+		Tenant:     "cgrates.org",
+		ID:         "Dsp",
+		Subsystems: []string{"*any"},
+		FilterIDs:  []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
+		Strategy:   utils.MetaFirst,
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-14T14:35:00Z",
+			ExpiryTime:     "",
+		},
+		StrategyParams: []interface{}{},
+		Weight:         20,
+		Hosts: []*utils.TPDispatcherHostProfile{
+			&utils.TPDispatcherHostProfile{
+				ID:        "C1",
+				FilterIDs: []string{},
+				Weight:    10,
+				Params:    []interface{}{"192.168.54.203", "*ratio:2"},
+				Blocker:   false,
+			},
+		},
+	}
+	exp2 := &utils.TPDispatcherProfile{
+		Tenant:     "cgrates.org",
+		ID:         "Dsp",
+		Subsystems: []string{"*any"},
+		FilterIDs:  []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
+		Strategy:   utils.MetaFirst,
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-14T14:35:00Z",
+			ExpiryTime:     "",
+		},
+		StrategyParams: []interface{}{},
+		Weight:         20,
+		Hosts: []*utils.TPDispatcherHostProfile{
+			&utils.TPDispatcherHostProfile{
+				ID:        "C1",
+				FilterIDs: []string{},
+				Weight:    10,
+				Params:    []interface{}{"*ratio:2", "192.168.54.203"},
+				Blocker:   false,
+			},
+		},
+	}
+
+	dspPrf := &DispatcherProfile{
+		Tenant:     "cgrates.org",
+		ID:         "Dsp",
+		Subsystems: []string{"*any"},
+		FilterIDs:  []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
+		Strategy:   utils.MetaFirst,
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+		},
+		StrategyParams: map[string]interface{}{},
+		Weight:         20,
+		Hosts: DispatcherHostProfiles{
+			&DispatcherHostProfile{
+				ID:        "C1",
+				FilterIDs: []string{},
+				Weight:    10,
+				Params:    map[string]interface{}{"0": "192.168.54.203", utils.MetaRatio: "2"},
+				Blocker:   false,
+			},
+		},
+	}
+	if rcv := DispatcherProfileToAPI(dspPrf); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rcv) && !reflect.DeepEqual(exp2, rcv) {
+		t.Errorf("Expecting : \n %+v \n  or \n %+v \n ,\n received: %+v", utils.ToJSON(exp), utils.ToJSON(exp2), utils.ToJSON(rcv))
 	}
 }
 
