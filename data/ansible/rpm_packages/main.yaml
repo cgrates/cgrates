@@ -85,10 +85,6 @@
     - name: Install dependencies
       become: yes
       apt: name={{ dependencies }} state=present
-
-    - name: set cgrates cgrates_version
-      set_fact:
-        cgrates_version: "{{ cgrates_version }}"
 ###########################################################################################################################
 ###########################################################################################################################
 # Prepare for configuration
@@ -204,6 +200,21 @@
         src: "{{ cgrates_dir }}/data"
         dest: "/usr/share/cgrates"
         state: link
+
+    - name: get git tag
+      shell: "git tag -l --points-at HEAD"
+      args:
+        chdir: '{{ cgrates_dir }}'
+      register: gitTagVar
+
+    - name: Compose the ReleaseTag
+      set_fact:
+        releaseTag: ""
+
+    - name: Compose the ReleaseTag with values
+      set_fact:
+        releaseTag: "{{ gitDate.stdout_lines[0] }}+{{ gitShortVersion.stdout_lines[0] }}"
+      when : gitTagVar.stdout_lines|length == 0
 ###########################################################################################################################
 ###########################################################################################################################
 # Generate package
@@ -221,7 +232,7 @@
        
     - name: Download the tar.gz for the last commit
       become: yes
-      shell: wget https://github.com/cgrates/cgrates/archive/{{ gitVersion.stdout_lines[0] }}.tar.gz
+      shell: wget https://github.com/cgrates/cgrates/archive/{{ cgrates_version }}/{{ gitVersion.stdout_lines[0] }}.tar.gz
       args:
         chdir: cgr_build/SOURCES
      
@@ -250,26 +261,29 @@
     - name: Sign with rpm --addsign the .rpm file
       become: yes
       shell: 'sudo rpm --addsign cgr_build/RPMS/x86_64/{{ rmpFileName.stdout_lines[0] }}'
-
+      when : cgrates_version == "master" or gitTagVar.stdout_lines|length > 0
+      
     - name: Check if is something in /var/packages/yum/{{ cgrates_distribution }}
       become: yes
       shell : "ls /var/packages/yum/{{ cgrates_distribution }}/"
       register: yumFiles
-      
+      when : cgrates_version == "master" or gitTagVar.stdout_lines|length > 0
+
     # Clean the folder
     - name: Clean the incoming folder
       become: yes
       shell: "sudo rm -rf /var/packages/yum/{{ cgrates_distribution }}/*"
-      when: yumFiles.stdout_lines|length > 1
+      when: (cgrates_version == "master" or gitTagVar.stdout_lines|length > 0) and yumFiles.stdout_lines|length > 1
     
     - name: Move the files to /var/packages/yum/{{ cgrates_distribution }}
       become: yes
       command: mv cgr_build/RPMS/x86_64/{{ rmpFileName.stdout_lines[0] }} /var/packages/yum/{{ cgrates_distribution }}/
-      when : rmpFileName.stdout_lines|length > 0
-    
+      when: (cgrates_version == "master" or gitTagVar.stdout_lines|length > 0) and rmpFileName.stdout_lines|length > 0
+ 
     - name: Include the package with createrepo
       become: yes
       shell: createrepo /var/packages/yum/{{ cgrates_distribution }}
+      when : cgrates_version == "master" or gitTagVar.stdout_lines|length > 0
       
 - hosts: pkg
   remote_user: '{{ gouser }}'
@@ -293,9 +307,14 @@
 
     - name: Move the new package to /var/packages/rpm
       become: yes
-      shell: "sudo mv /tmp/{{ hostvars['yum']['rmpFileName']['stdout_lines'][0] }} /var/packages/rpm/{{ cgrates_distribution }}/"
+      shell: "mv /tmp/{{ item }} /var/packages/rpm/{{ cgrates_distribution }}/"
+      with_items: "{{ hostvars['yum']['rmpFileName']['stdout_lines'] }}"
 
     - name: Create the new symlink cgrates_current.rpm
       become: yes
-      shell: "sudo ln -s /var/packages/rpm/{{ cgrates_distribution }}/{{ hostvars['yum']['rmpFileName']['stdout_lines'][0] }} /var/packages/rpm/{{ cgrates_distribution }}/cgrates_current.rpm"
+      file:
+        src: /var/packages/rpm/{{ cgrates_distribution }}/{{ item }}
+        dest: /var/packages/rpm/{{ cgrates_distribution }}/cgrates_current.rpm"
+        state: link
+      with_items: "{{ hostvars['yum']['rmpFileName']['stdout_lines'] }}"
       when : cgrates_distribution == "nightly" or hostvars['yum']['gitTagVar'].stdout_lines|length > 0
