@@ -12,7 +12,7 @@ Release:        {{ releaseTag }}
 Summary:        Carrier Grade Real-time Charging System
 License:        GPLv3
 URL:            https://github.com/cgrates/cgrates
-Source0:        https://github.com/cgrates/cgrates/archive/{{ cgrates_version }}/{{ gitVersion.stdout_lines[0] }}.tar.gz
+Source0:        https://github.com/cgrates/cgrates/archive/{{ cgrates_branch }}/{{ gitVersion.stdout_lines[0] }}.tar.gz
 
 %if 0%{?fedora} > 16 || 0%{?rhel} > 6
 Requires(pre): shadow-utils
