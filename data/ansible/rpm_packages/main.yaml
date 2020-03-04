@@ -45,7 +45,7 @@
     ###############################################################
     # CGRateS location
     cgrates_dir: "{{ golang_gopath }}/src/github.com/cgrates/cgrates"
-    cgrates_version: "v0.10"
+    cgrates_branch: "v0.10"
     cgrates_distribution: "nightly"
     ###############################################################
     ##################### GPG Vars #############################
@@ -91,8 +91,8 @@
     # get yum version
     - name: set cgrates distribution
       set_fact:
-        cgrates_distribution: "{{ cgrates_version }}"
-      when: cgrates_version != "master"
+        cgrates_distribution: "{{ cgrates_branch }}"
+      when: cgrates_branch != "master"
 
     - name: Check if /var/packages/yum directory exists
       become: true
@@ -167,7 +167,7 @@
         dest: '{{ cgrates_dir }}'
         update: yes
         force: yes
-        version: "{{ cgrates_version }}"
+        version: "{{ cgrates_branch }}"
       become: yes
       become_user: "{{ gouser }}"
 
@@ -235,7 +235,7 @@
     - name: Download the tar.gz for the last commit
       become: yes
       get_url:
-        url: https://github.com/cgrates/cgrates/archive/{{ cgrates_version }}/{{ gitVersion.stdout_lines[0] }}.tar.gz
+        url: https://github.com/cgrates/cgrates/archive/{{ cgrates_branch }}/{{ gitVersion.stdout_lines[0] }}.tar.gz
         dest: cgr_build/SOURCES/{{ gitVersion.stdout_lines[0] }}.tar.gz
      
     - name: Add cgrates.spec in SPECS
@@ -264,30 +264,30 @@
       become: yes
       shell: 'sudo rpm --addsign cgr_build/RPMS/x86_64/{{ item }}'
       with_items: "{{ rmpFileName.stdout_lines }}"
-      when : cgrates_version == "master" or gitTagVar.stdout_lines|length > 0
+      when : cgrates_branch == "master" or gitTagVar.stdout_lines|length > 0
       
     - name: Check if is something in /var/packages/yum/{{ cgrates_distribution }}
       become: yes
       shell : "ls /var/packages/yum/{{ cgrates_distribution }}/"
       register: yumFiles
-      when : cgrates_version == "master" or gitTagVar.stdout_lines|length > 0
+      when : cgrates_branch == "master" or gitTagVar.stdout_lines|length > 0
 
     # Clean the folder
     - name: Clean the incoming folder
       become: yes
       shell: "sudo rm -rf /var/packages/yum/{{ cgrates_distribution }}/*"
-      when: (cgrates_version == "master" or gitTagVar.stdout_lines|length > 0) and yumFiles.stdout_lines|length > 1
+      when: (cgrates_branch == "master" or gitTagVar.stdout_lines|length > 0) and yumFiles.stdout_lines|length > 1
     
     - name: Move the files to /var/packages/yum/{{ cgrates_distribution }}
       become: yes
       command: mv cgr_build/RPMS/x86_64/{{ item }} /var/packages/yum/{{ cgrates_distribution }}/
       with_items: "{{ rmpFileName.stdout_lines }}"
-      when: (cgrates_version == "master" or gitTagVar.stdout_lines|length > 0) and rmpFileName.stdout_lines|length > 0
+      when: (cgrates_branch == "master" or gitTagVar.stdout_lines|length > 0) and rmpFileName.stdout_lines|length > 0
  
     - name: Include the package with createrepo
       become: yes
       shell: createrepo /var/packages/yum/{{ cgrates_distribution }}
-      when : cgrates_version == "master" or gitTagVar.stdout_lines|length > 0
+      when : cgrates_branch == "master" or gitTagVar.stdout_lines|length > 0
 
     - name: Remove rpm files
       become: yes
@@ -295,7 +295,7 @@
         path: cgr_build/RPMS/x86_64/{{ item }}
         state: absent
       with_items: "{{ rmpFileName.stdout_lines }}"
-      when: cgrates_version != "master" and gitTagVar.stdout_lines|length == 0
+      when: cgrates_branch != "master" and gitTagVar.stdout_lines|length == 0
       
 - hosts: pkg
   remote_user: '{{ gouser }}'
