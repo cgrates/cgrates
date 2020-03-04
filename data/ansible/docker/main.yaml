@@ -1,0 +1,156 @@
+---
+- name: Check and set python version on APT server
+  hosts: apt
+  remote_user: '{{ gouser }}'
+  gather_facts: false
+  tasks:
+    - name: symlink /usr/bin/python -> /usr/bin/python3
+      raw: |
+        if [ -f /usr/bin/python3 ] && [ ! -f /usr/bin/python ]; then
+          ln --symbolic /usr/bin/python3 /usr/bin/python; 
+        fi
+      become: true
+
+- name: Check and set python version on PKG server
+  hosts: pkg
+  remote_user: '{{ gouser }}'
+  gather_facts: false
+  tasks:
+    - name: symlink /usr/bin/python -> /usr/bin/python3
+      raw: |
+        if [ -f /usr/bin/python3 ] && [ ! -f /usr/bin/python ]; then
+          ln --symbolic /usr/bin/python3 /usr/bin/python; 
+        fi
+      become: true
+
+- hosts: apt
+  vars:
+    ###############################################################
+    ##################### Golang Vars #############################
+    ###############################################################
+    # Go language SDK version number
+    golang_version: '1.13'
+    go_version_target: "go version go{{ golang_version }} linux/amd64"
+    # Mirror to download the Go language SDK redistributable package from
+    golang_mirror: 'https://storage.googleapis.com/golang'
+    # Base installation directory the Go language SDK distribution
+    golang_install_dir: '/usr/local/go'
+    # Directory to store files downloaded for Go language SDK installation
+    golang_download_dir: "{{ x_ansible_download_dir | default(ansible_env.HOME + '/.ansible/tmp/downloads') }}"
+    # Location for GOPATH environment variable
+    golang_gopath: "/home/{{ gouser }}/go"
+    # Filename of Go language SDK redistributable package
+    golang_redis_filename: 'go{{ golang_version }}.linux-amd64.tar.gz'
+
+    ###############################################################
+    # CGRateS vars
+    cgrates_dir: "{{ golang_gopath }}/src/github.com/cgrates/cgrates"
+    cgrates_branch: "master"
+    cgrates_distribution: "nightly"
+    ###############################################################
+    ######################## GPG Vars #############################
+    ###############################################################
+    gpg_home: "/root"
+    gpg_realname: "CGRateS"
+    gpg_useremail: "cgrates@itsyscom.com"
+    gpg_pubkeyfileexport: "apt.cgrates.org.gpg.key"
+
+    gpg_keylength: 2048
+    gpg_subkeylength: 2048
+    gpg_expire: 360
+
+    rootUser : root
+
+    customPath: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
+
+    dependencies:
+      - build-essential
+      - git
+      - devscripts
+      - apt-transport-https
+      - ca-certificates
+      - gnupg2
+      - software-properties-common
+      - nginx
+
+  remote_user: '{{ gouser }}'
+  tasks:
+    - name: set cgrates cgrates_distribution
+      set_fact:
+        cgrates_distribution: "{{ cgrates_distribution }}"
+###########################################################################################################################
+###########################################################################################################################
+# install dependencies
+    - name: Install dependencies
+      become: yes
+      apt: name={{ dependencies }} state=present
+###########################################################################################################################
+###########################################################################################################################
+# Prepare for configuration
+    - name: Check if NGINX needs to be configured
+      become: true
+      shell: "ls /etc/nginx/sites-enabled | grep 'apt.cgrates.org.vhost'"
+      ignore_errors: true
+      register: nginxConfig
+
+    - name: Configure NGINX server
+      include: nginx.yaml
+      when: nginxConfig.stdout_lines|length < 1
+
+###########################################################################################################################
+###########################################################################################################################
+# Install Golang
+    - name: install unarchive dependencies (zypper)
+      become: yes
+      zypper:
+        name:
+          - gzip
+          - tar
+        state: present
+      when: ansible_pkg_mgr == 'zypper'
+
+    - name: Install golang
+      include: go.yaml
+
+###########################################################################################################################
+###########################################################################################################################
+# Install CGRateS
+    - name: create cgrates directory
+      become: yes
+      file:
+        state: directory
+        mode: 'u=rwx,go=rx'
+        owner: "{{ gouser }}"
+        group: "{{ gouser }}"
+        dest: '{{ cgrates_dir }}'
+      become_user: "{{ gouser }}"
+
+    - name: git clone cgrates
+      git:
+        repo: https://github.com/cgrates/cgrates.git
+        dest: '{{ cgrates_dir }}'
+        update: yes
+        force: yes
+        version: "{{ cgrates_branch }}"
+      become: yes
+      become_user: "{{ gouser }}"
+
+    - name:  build cgrates
+      shell: "sh {{ cgrates_dir }}/build.sh"
+      environment:
+        PATH: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
+      args:
+        chdir: '{{ cgrates_dir }}'
+
+    - name: symbol link
+      become: yes
+      file:
+        src: "{{ cgrates_dir }}/data"
+        dest: "/usr/share/cgrates"
+        state: link
+            
+    - name: get git tag
+      shell: "git tag -l --points-at HEAD"
+      args:
+        chdir: '{{ cgrates_dir }}'
+      register: gitTagVar
