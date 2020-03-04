@@ -248,6 +248,9 @@
 
     - name: Create the new symlink cgrates_current_amd64.deb
       become: yes
-      shell: "sudo ln -s /var/packages/deb/{{ cgrates_distribution }}/{{ item }} /var/packages/deb/{{ cgrates_distribution }}/cgrates_current_amd64.deb"
+      file:
+        src: /var/packages/deb/{{ cgrates_distribution }}/{{ item }}
+        dest: /var/packages/deb/{{ cgrates_distribution }}/cgrates_current_amd64.deb
+        state: link
       with_items: "{{ hostvars['apt']['debFileName']['stdout_lines'] }}"
       when : cgrates_distribution == "nightly" or hostvars['apt']['gitTagVar'].stdout_lines|length > 0
