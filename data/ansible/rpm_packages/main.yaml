@@ -130,6 +130,8 @@
     - name: Import the key in rpm
       become: true
       shell: rpm --import /var/packages/yum.cgrates.org.gpg.key
+      args:
+        warn: false
 
 ###########################################################################################################################
 ###########################################################################################################################
@@ -232,9 +234,9 @@
        
     - name: Download the tar.gz for the last commit
       become: yes
-      shell: wget https://github.com/cgrates/cgrates/archive/{{ cgrates_version }}/{{ gitVersion.stdout_lines[0] }}.tar.gz
-      args:
-        chdir: cgr_build/SOURCES
+      get_url:
+        url: https://github.com/cgrates/cgrates/archive/{{ cgrates_version }}/{{ gitVersion.stdout_lines[0] }}.tar.gz
+        dest: cgr_build/SOURCES/{{ gitVersion.stdout_lines[0] }}.tar.gz
      
     - name: Add cgrates.spec in SPECS
       become: yes
@@ -260,7 +262,8 @@
     
     - name: Sign with rpm --addsign the .rpm file
       become: yes
-      shell: 'sudo rpm --addsign cgr_build/RPMS/x86_64/{{ rmpFileName.stdout_lines[0] }}'
+      shell: 'sudo rpm --addsign cgr_build/RPMS/x86_64/{{ item }}'
+      with_items: "{{ rmpFileName.stdout_lines }}"
       when : cgrates_version == "master" or gitTagVar.stdout_lines|length > 0
       
     - name: Check if is something in /var/packages/yum/{{ cgrates_distribution }}
@@ -277,13 +280,22 @@
     
     - name: Move the files to /var/packages/yum/{{ cgrates_distribution }}
       become: yes
-      command: mv cgr_build/RPMS/x86_64/{{ rmpFileName.stdout_lines[0] }} /var/packages/yum/{{ cgrates_distribution }}/
+      command: mv cgr_build/RPMS/x86_64/{{ item }} /var/packages/yum/{{ cgrates_distribution }}/
+      with_items: "{{ rmpFileName.stdout_lines }}"
       when: (cgrates_version == "master" or gitTagVar.stdout_lines|length > 0) and rmpFileName.stdout_lines|length > 0
  
     - name: Include the package with createrepo
       become: yes
       shell: createrepo /var/packages/yum/{{ cgrates_distribution }}
       when : cgrates_version == "master" or gitTagVar.stdout_lines|length > 0
+
+    - name: Remove rpm files
+      become: yes
+      file:
+        path: cgr_build/RPMS/x86_64/{{ item }}
+        state: absent
+      with_items: "{{ rmpFileName.stdout_lines }}"
+      when: cgrates_version != "master" and gitTagVar.stdout_lines|length == 0
       
 - hosts: pkg
   remote_user: '{{ gouser }}'
