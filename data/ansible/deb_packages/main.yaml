@@ -45,7 +45,7 @@
     ###############################################################
     # CGRateS vars
     cgrates_dir: "{{ golang_gopath }}/src/github.com/cgrates/cgrates"
-    cgrates_version: "v0.10"
+    cgrates_branch: "v0.10"
     cgrates_distribution: "nightly"
     ###############################################################
     ######################## GPG Vars #############################
@@ -134,7 +134,7 @@
         dest: '{{ cgrates_dir }}'
         update: yes
         force: yes
-        version: "{{ cgrates_version }}"
+        version: "{{ cgrates_branch }}"
       become: yes
       become_user: "{{ gouser }}"
 
@@ -193,8 +193,8 @@
   # get reprepro version
     - name: set cgrates distribution
       set_fact:
-        cgrates_distribution: "{{ cgrates_version }}"
-      when: cgrates_version != "master"
+        cgrates_distribution: "{{ cgrates_branch }}"
+      when: cgrates_branch != "master"
 
   # Include the package with reprepro
     - name : Include the package with reprepro
@@ -204,7 +204,7 @@
       args :
         chdir: /var/packages/debian
       with_items: '{{ changesFileNames.stdout_lines }}'
-      when : cgrates_version == "master" or gitTagVar.stdout_lines|length > 0
+      when : cgrates_branch == "master" or gitTagVar.stdout_lines|length > 0
 
     # Move the file to PKG server
     - name: Copy the file to PKG server
