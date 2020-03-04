@@ -75,9 +75,6 @@
     - name: set cgrates cgrates_distribution
       set_fact:
         cgrates_distribution: "{{ cgrates_distribution }}"
-    - name: set cgrates cgrates_version
-      set_fact:
-        cgrates_version: "{{ cgrates_version }}"
 ###########################################################################################################################
 ###########################################################################################################################
 # install dependencies
