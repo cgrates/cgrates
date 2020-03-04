@@ -131,48 +131,6 @@ func CsvDump(s interface{}) ([]string, error) {
 	return result, nil
 }
 
-func modelEqual(this interface{}, other interface{}) bool {
-	var fieldNames []string
-	st := reflect.TypeOf(this)
-	stO := reflect.TypeOf(other)
-	if st != stO {
-		return false
-	}
-	numFields := st.NumField()
-	for i := 0; i < numFields; i++ {
-		field := st.Field(i)
-		index := field.Tag.Get("index")
-		if index != "" {
-			fieldNames = append(fieldNames, field.Name)
-		}
-	}
-	thisElem := reflect.ValueOf(this)
-	otherElem := reflect.ValueOf(other)
-	for _, fieldName := range fieldNames {
-		thisField := thisElem.FieldByName(fieldName)
-		otherField := otherElem.FieldByName(fieldName)
-		switch thisField.Kind() {
-		case reflect.Float64:
-			if thisField.Float() != otherField.Float() {
-				return false
-			}
-		case reflect.Int:
-			if thisField.Int() != otherField.Int() {
-				return false
-			}
-		case reflect.Bool:
-			if thisField.Bool() != otherField.Bool() {
-				return false
-			}
-		case reflect.String:
-			if thisField.String() != otherField.String() {
-				return false
-			}
-		}
-	}
-	return true
-}
-
 func getColumnCount(s interface{}) int {
 	st := reflect.TypeOf(s)
 	numFields := st.NumField()
@@ -1114,6 +1072,13 @@ func APItoModelAccountActions(aas []*utils.TPAccountActions) (result TpAccountAc
 
 type TpResources []*TpResource
 
+// CSVHeader return the header for csv fields as a slice of string
+func (tps TpResources) CSVHeader() (result []string) {
+	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.ActivationIntervalString,
+		utils.UsageTTL, utils.Limit, utils.AllocationMessage, utils.Blocker, utils.Stored,
+		utils.Weight, utils.ThresholdIDs}
+}
+
 func (tps TpResources) AsTPResources() (result []*utils.TPResourceProfile) {
 	mrl := make(map[string]*utils.TPResourceProfile)
 	filterMap := make(map[string]utils.StringMap)
@@ -1294,6 +1259,40 @@ func APItoResource(tpRL *utils.TPResourceProfile, timezone string) (rp *Resource
 		}
 	}
 	return rp, nil
+}
+
+func ResourceProfileToAPI(rp *ResourceProfile) (tpRL *utils.TPResourceProfile) {
+	tpRL = &utils.TPResourceProfile{
+		Tenant:             rp.Tenant,
+		ID:                 rp.ID,
+		FilterIDs:          make([]string, len(rp.FilterIDs)),
+		ActivationInterval: new(utils.TPActivationInterval),
+		Limit:              strconv.FormatFloat(rp.Limit, 'f', -1, 64),
+		AllocationMessage:  rp.AllocationMessage,
+		Blocker:            rp.Blocker,
+		Stored:             rp.Stored,
+		Weight:             rp.Weight,
+		ThresholdIDs:       make([]string, len(rp.ThresholdIDs)),
+	}
+	if rp.UsageTTL != time.Duration(0) {
+		tpRL.UsageTTL = rp.UsageTTL.String()
+	}
+	for i, fli := range rp.FilterIDs {
+		tpRL.FilterIDs[i] = fli
+	}
+	for i, fli := range rp.ThresholdIDs {
+		tpRL.ThresholdIDs[i] = fli
+	}
+
+	if rp.ActivationInterval != nil {
+		if !rp.ActivationInterval.ActivationTime.IsZero() {
+			tpRL.ActivationInterval.ActivationTime = rp.ActivationInterval.ActivationTime.Format(time.RFC3339)
+		}
+		if !rp.ActivationInterval.ExpiryTime.IsZero() {
+			tpRL.ActivationInterval.ExpiryTime = rp.ActivationInterval.ExpiryTime.Format(time.RFC3339)
+		}
+	}
+	return
 }
 
 type TpStats []*TpStat
@@ -1672,6 +1671,12 @@ func APItoThresholdProfile(tpTH *utils.TPThresholdProfile, timezone string) (th 
 
 type TpFilterS []*TpFilter
 
+// CSVHeader return the header for csv fields as a slice of string
+func (tps TpFilterS) CSVHeader() (result []string) {
+	return []string{"#" + utils.Tenant, utils.ID, utils.Type, utils.Element,
+		utils.Values, utils.ActivationIntervalString}
+}
+
 func (tps TpFilterS) AsTPFilter() (result []*utils.TPFilterProfile) {
 	mst := make(map[string]*utils.TPFilterProfile)
 	for _, tp := range tps {
@@ -1769,9 +1774,10 @@ func APItoFilter(tpTH *utils.TPFilterProfile, timezone string) (th *Filter, err 
 
 func FilterToTPFilter(f *Filter) (tpFltr *utils.TPFilterProfile) {
 	tpFltr = &utils.TPFilterProfile{
-		Tenant:  f.Tenant,
-		ID:      f.ID,
-		Filters: make([]*utils.TPFilter, len(f.Rules)),
+		Tenant:             f.Tenant,
+		ID:                 f.ID,
+		Filters:            make([]*utils.TPFilter, len(f.Rules)),
+		ActivationInterval: new(utils.TPActivationInterval),
 	}
 	for i, reqFltr := range f.Rules {
 		tpFltr.Filters[i] = &utils.TPFilter{
@@ -2011,7 +2017,11 @@ func APItoSupplierProfile(tpSPP *utils.TPSupplierProfile, timezone string) (spp 
 
 type TPAttributes []*TPAttribute
 
-// create a function for models that return the CSV header
+// CSVHeader return the header for csv fields as a slice of string
+func (tps TPAttributes) CSVHeader() (result []string) {
+	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.ActivationIntervalString,
+		utils.AttributeFilterIDs, utils.Path, utils.Type, utils.Value, utils.Blocker, utils.Weight}
+}
 
 func (tps TPAttributes) AsTPAttributes() (result []*utils.TPAttributeProfile) {
 	mst := make(map[string]*utils.TPAttributeProfile)
@@ -2179,7 +2189,6 @@ func APItoAttributeProfile(tpAttr *utils.TPAttributeProfile, timezone string) (a
 
 func AttributeProfileToAPI(attrPrf *AttributeProfile) (tpAttr *utils.TPAttributeProfile) {
 	tpAttr = &utils.TPAttributeProfile{
-		TPid:               utils.EmptyString,
 		Tenant:             attrPrf.Tenant,
 		ID:                 attrPrf.ID,
 		FilterIDs:          make([]string, len(attrPrf.FilterIDs)),
@@ -2215,6 +2224,12 @@ func AttributeProfileToAPI(attrPrf *AttributeProfile) (tpAttr *utils.TPAttribute
 }
 
 type TPChargers []*TPCharger
+
+// CSVHeader return the header for csv fields as a slice of string
+func (tps TPChargers) CSVHeader() (result []string) {
+	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.ActivationIntervalString,
+		utils.RunID, utils.AttributeIDs, utils.Weight}
+}
 
 func (tps TPChargers) AsTPChargers() (result []*utils.TPChargerProfile) {
 	mst := make(map[string]*utils.TPChargerProfile)
@@ -2385,7 +2400,41 @@ func APItoChargerProfile(tpCPP *utils.TPChargerProfile, timezone string) (cpp *C
 	return cpp, nil
 }
 
+func ChargerProfileToAPI(chargerPrf *ChargerProfile) (tpCharger *utils.TPChargerProfile) {
+	tpCharger = &utils.TPChargerProfile{
+		Tenant:             chargerPrf.Tenant,
+		ID:                 chargerPrf.ID,
+		FilterIDs:          make([]string, len(chargerPrf.FilterIDs)),
+		ActivationInterval: new(utils.TPActivationInterval),
+		RunID:              chargerPrf.RunID,
+		AttributeIDs:       make([]string, len(chargerPrf.AttributeIDs)),
+		Weight:             chargerPrf.Weight,
+	}
+	for i, fli := range chargerPrf.FilterIDs {
+		tpCharger.FilterIDs[i] = fli
+	}
+	for i, fli := range chargerPrf.AttributeIDs {
+		tpCharger.AttributeIDs[i] = fli
+	}
+	if chargerPrf.ActivationInterval != nil {
+		if !chargerPrf.ActivationInterval.ActivationTime.IsZero() {
+			tpCharger.ActivationInterval.ActivationTime = chargerPrf.ActivationInterval.ActivationTime.Format(time.RFC3339)
+		}
+		if !chargerPrf.ActivationInterval.ExpiryTime.IsZero() {
+			tpCharger.ActivationInterval.ExpiryTime = chargerPrf.ActivationInterval.ExpiryTime.Format(time.RFC3339)
+		}
+	}
+	return
+}
+
 type TPDispatcherProfiles []*TPDispatcherProfile
+
+// CSVHeader return the header for csv fields as a slice of string
+func (tps TPDispatcherProfiles) CSVHeader() (result []string) {
+	return []string{"#" + utils.Tenant, utils.ID, utils.Subsystems, utils.FilterIDs, utils.ActivationIntervalString,
+		utils.Strategy, utils.StrategyParameters, utils.ConnID, utils.ConnFilterIDs,
+		utils.ConnWeight, utils.ConnBlocker, utils.ConnParameters, utils.Weight}
+}
 
 func (tps TPDispatcherProfiles) AsTPDispatcherProfiles() (result []*utils.TPDispatcherProfile) {
 	mst := make(map[string]*utils.TPDispatcherProfile)
@@ -2642,8 +2691,72 @@ func APItoDispatcherProfile(tpDPP *utils.TPDispatcherProfile, timezone string) (
 	return dpp, nil
 }
 
+func DispatcherProfileToAPI(dpp *DispatcherProfile) (tpDPP *utils.TPDispatcherProfile) {
+	tpDPP = &utils.TPDispatcherProfile{
+		Tenant:             dpp.Tenant,
+		ID:                 dpp.ID,
+		Subsystems:         make([]string, len(dpp.Subsystems)),
+		FilterIDs:          make([]string, len(dpp.FilterIDs)),
+		ActivationInterval: new(utils.TPActivationInterval),
+		Strategy:           dpp.Strategy,
+		StrategyParams:     make([]interface{}, len(dpp.StrategyParams)),
+		Weight:             dpp.Weight,
+		Hosts:              make([]*utils.TPDispatcherHostProfile, len(dpp.Hosts)),
+	}
+
+	for i, fli := range dpp.FilterIDs {
+		tpDPP.FilterIDs[i] = fli
+	}
+	for i, sub := range dpp.Subsystems {
+		tpDPP.Subsystems[i] = sub
+	}
+	for key, val := range dpp.StrategyParams {
+		// here we expect that the key to be an integer because
+		// according to APItoDispatcherProfile when we convert from TP to obj we use index as key
+		// so we can ignore error
+		idx, _ := strconv.Atoi(key)
+		tpDPP.StrategyParams[idx] = val
+	}
+	for i, host := range dpp.Hosts {
+		tpDPP.Hosts[i] = &utils.TPDispatcherHostProfile{
+			ID:        host.ID,
+			FilterIDs: make([]string, len(host.FilterIDs)),
+			Weight:    host.Weight,
+			Params:    make([]interface{}, len(host.Params)),
+			Blocker:   host.Blocker,
+		}
+		for j, fltr := range host.FilterIDs {
+			tpDPP.Hosts[i].FilterIDs[j] = fltr
+		}
+		idx := 0
+		for key, val := range host.Params {
+			paramVal := val
+			if _, err := strconv.Atoi(key); err != nil {
+				paramVal = utils.ConcatenatedKey(key, utils.IfaceAsString(val))
+			}
+			tpDPP.Hosts[i].Params[idx] = paramVal
+			idx++
+		}
+	}
+
+	if dpp.ActivationInterval != nil {
+		if !dpp.ActivationInterval.ActivationTime.IsZero() {
+			tpDPP.ActivationInterval.ActivationTime = dpp.ActivationInterval.ActivationTime.Format(time.RFC3339)
+		}
+		if !dpp.ActivationInterval.ExpiryTime.IsZero() {
+			tpDPP.ActivationInterval.ExpiryTime = dpp.ActivationInterval.ExpiryTime.Format(time.RFC3339)
+		}
+	}
+	return
+}
+
 // TPHosts
 type TPDispatcherHosts []*TPDispatcherHost
+
+// CSVHeader return the header for csv fields as a slice of string
+func (tps TPDispatcherHosts) CSVHeader() (result []string) {
+	return []string{"#" + utils.Tenant, utils.ID, utils.Address, utils.Transport, utils.TLS}
+}
 
 func (tps TPDispatcherHosts) AsTPDispatcherHosts() (result []*utils.TPDispatcherHost) {
 	hostsMap := make(map[string]*utils.TPDispatcherHost)
@@ -2711,6 +2824,23 @@ func APItoDispatcherHost(tpDPH *utils.TPDispatcherHost) (dpp *DispatcherHost) {
 	}
 	for i, conn := range tpDPH.Conns {
 		dpp.Conns[i] = &config.RemoteHost{
+			Address:   conn.Address,
+			Transport: conn.Transport,
+			TLS:       conn.TLS,
+		}
+	}
+	return
+}
+
+func DispatcherHostToAPI(dph *DispatcherHost) (tpDPH *utils.TPDispatcherHost) {
+	tpDPH = &utils.TPDispatcherHost{
+		Tenant: dph.Tenant,
+		ID:     dph.ID,
+		Conns:  make([]*utils.TPDispatcherHostConn, len(dph.Conns)),
+	}
+
+	for i, conn := range dph.Conns {
+		tpDPH.Conns[i] = &utils.TPDispatcherHostConn{
 			Address:   conn.Address,
 			Transport: conn.Transport,
 			TLS:       conn.TLS,
