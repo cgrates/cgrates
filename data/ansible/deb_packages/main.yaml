@@ -75,9 +75,6 @@
     - name: set cgrates cgrates_distribution
       set_fact:
         cgrates_distribution: "{{ cgrates_distribution }}"
-    - name: set cgrates cgrates_version
-      set_fact:
-        cgrates_version: "{{ cgrates_version }}"
 ###########################################################################################################################
 ###########################################################################################################################
 # install dependencies
@@ -227,30 +224,30 @@
 - hosts: pkg
   remote_user: '{{ gouser }}'
   tasks:
-    - name: set cgrates cgrates_version
+    - name: set cgrates cgrates_distribution
       set_fact:
-        cgrates_version: "{{ hostvars['apt']['cgrates_version'] }}"
+        cgrates_distribution: "{{ hostvars['apt']['cgrates_distribution'] }}"
 
     - name: Creates directory
       become: yes
       file:
-        path: /var/packages/deb/{{ cgrates_version }}/
+        path: /var/packages/deb/{{ cgrates_distribution }}/
         state: directory
         
     - name: Remove symlink from current deb package
       become: yes
       file:
-        path: /var/packages/deb/{{ cgrates_version }}/cgrates_current_amd64.deb
+        path: /var/packages/deb/{{ cgrates_distribution }}/cgrates_current_amd64.deb
         state: absent
-      when : cgrates_version == "master" or hostvars['apt']['gitTagVar'].stdout_lines|length > 0
+      when : cgrates_distribution == "nightly" or hostvars['apt']['gitTagVar'].stdout_lines|length > 0
 
     - name: Move the new package to /var/packages/deb
       become: yes
-      shell: "sudo mv /tmp/{{ item}} /var/packages/deb/{{ cgrates_version }}/"
+      shell: "sudo mv /tmp/{{ item}} /var/packages/deb/{{ cgrates_distribution }}/"
       with_items: "{{ hostvars['apt']['debFileName']['stdout_lines'] }}"
 
     - name: Create the new symlink cgrates_current_amd64.deb
       become: yes
-      shell: "sudo ln -s /var/packages/deb/{{ cgrates_version }}/{{ item }} /var/packages/deb/{{ cgrates_version }}/cgrates_current_amd64.deb"
+      shell: "sudo ln -s /var/packages/deb/{{ cgrates_distribution }}/{{ item }} /var/packages/deb/{{ cgrates_distribution }}/cgrates_current_amd64.deb"
       with_items: "{{ hostvars['apt']['debFileName']['stdout_lines'] }}"
-      when : cgrates_version == "master" or hostvars['apt']['gitTagVar'].stdout_lines|length > 0
+      when : cgrates_distribution == "nightly" or hostvars['apt']['gitTagVar'].stdout_lines|length > 0
