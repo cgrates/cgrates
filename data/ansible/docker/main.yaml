@@ -121,6 +121,7 @@
 
     - name: copy default config
       copy:
+        remote_src: yes
         src: "{{ cgrates_dir }}/data/conf/cgrates/cgrates.json"
         dest: "{{ cgrates_dir }}/data/docker/scratch/cgrates.json"
     
@@ -132,8 +133,8 @@
     
     - name: tag docker image
       become: yes
-      shell: "sudo docker tag cgrates 127.0.0.1:5000/cgrates:{{ cgrates_branch }}"
+      shell: "docker tag cgrates 127.0.0.1:5000/cgrates:{{ cgrates_branch }}"
 
     - name: push docker image to repo
       become: yes
-      shell: "sudo docker image push 127.0.0.1:5000/cgrates:{{ cgrates_branch }}"
+      shell: "docker image push 127.0.0.1:5000/cgrates:{{ cgrates_branch }}"

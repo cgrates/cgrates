@@ -4,8 +4,18 @@ map $upstream_http_docker_distribution_api_version $docker_distribution_api_vers
 }
 
 server {
-  listen 80;
-  server_name 192.168.59.203;
+  listen 80; # ssl;
+  server_name dkr.cgrates.org;
+
+  # SSL
+  # ssl_certificate /etc/nginx/conf.d/domain.crt;
+  # ssl_certificate_key /etc/nginx/conf.d/domain.key;
+
+  # Recommendations from https://raymii.org/s/tutorials/Strong_SSL_Security_On_nginx.html
+  # ssl_protocols TLSv1.1 TLSv1.2;
+  # ssl_ciphers 'EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH';
+  # ssl_prefer_server_ciphers on;
+  # ssl_session_cache shared:SSL:10m;
 
   access_log /var/log/nginx/docker-error.log;
   error_log /var/log/nginx/docker-error.log;
@@ -35,7 +45,7 @@ server {
     proxy_set_header  Host              $http_host;   # required for docker client's sake
     proxy_set_header  X-Real-IP         $remote_addr; # pass on real client's IP
     proxy_set_header  X-Forwarded-For   $proxy_add_x_forwarded_for;
-    # proxy_set_header  X-Forwarded-Proto $scheme;
+    proxy_set_header  X-Forwarded-Proto $scheme;
     proxy_read_timeout                  900;
   }
 }

@@ -53,7 +53,7 @@
 
 - name:  Start registry
   become: yes
-  shell: sudo docker run -d --name registry --restart=always -v "$(pwd)":/var/lib/registry -p 5000:5000 registry:2
+  shell: docker run -d --name registry --restart=always -v "$(pwd)":/var/lib/registry -p 5000:5000 registry:2
   args:
     chdir: /var/docker/registry
   when: continerList.stdout_lines|length == 0
