@@ -20,3 +20,4 @@ cgrates.org,ATTR_API_PSE_AUTH,*auth,*string:~*req.APIKey:pse12345,,,*req.APIMeth
 cgrates.org,ATTR_API_CFG_AUTH,*auth,*string:~*req.APIKey:cfg12345,,,*req.APIMethods,*constant,ConfigSv1.GetJSONSection&ConfigSv1.ReloadConfig,false,20
 cgrates.org,ATTR_API_APIER_AUTH,*auth,*string:~*req.APIKey:apier12345,,,*req.APIMethods,*constant,APIerSv1.GetAttributeProfile&APIerSv1.SetAttributeProfile,false,20
 cgrates.org,ATTR_API_RALS_AUTH,*auth,*string:~*req.APIKey:rals12345,,,*req.APIMethods,*constant,RALsV1.Ping&RALsV1.GetRatingPlansCost,false,20
+cgrates.org,ATTR_API_REPLICATOR_AUTH,*auth,*string:~*req.APIKey:repl12345,,,*req.APIMethods,*constant,ReplicatorSv1.Ping,false,20
