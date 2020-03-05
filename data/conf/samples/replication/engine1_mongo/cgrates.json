@@ -39,6 +39,8 @@
 	"enabled": true,
 	"scheduler_conns": ["*internal"],
 },
-
+"thresholds": {
+	"enabled": true,
+},
 
 }
