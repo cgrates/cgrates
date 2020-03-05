@@ -741,6 +741,59 @@ func TestAPItoTPStats(t *testing.T) {
 	}
 }
 
+func TestStatQueueProfileToAPI(t *testing.T) {
+	expected := &utils.TPStatProfile{
+		Tenant:             "cgrates.org",
+		ID:                 "Stats1",
+		FilterIDs:          []string{"FLTR_1"},
+		ActivationInterval: &utils.TPActivationInterval{ActivationTime: "2014-07-29T15:00:00Z"},
+		QueueLength:        100,
+		TTL:                "1s",
+		Metrics: []*utils.MetricWithFilters{
+			&utils.MetricWithFilters{
+				MetricID: "*sum#BalanceValue",
+			},
+			&utils.MetricWithFilters{
+				MetricID: "*average#BalanceValue",
+			},
+			&utils.MetricWithFilters{
+				MetricID: "*tcc",
+			},
+		},
+		MinItems:     1,
+		ThresholdIDs: []string{"THRESH1", "THRESH2"},
+		Weight:       20.0,
+	}
+	sqPrf := &StatQueueProfile{
+		Tenant:      "cgrates.org",
+		ID:          "Stats1",
+		QueueLength: 100,
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
+		},
+		Metrics: []*MetricWithFilters{
+			&MetricWithFilters{
+				MetricID: "*sum#BalanceValue",
+			},
+			&MetricWithFilters{
+				MetricID: "*average#BalanceValue",
+			},
+			&MetricWithFilters{
+				MetricID: "*tcc",
+			},
+		},
+		TTL:          time.Duration(1 * time.Second),
+		ThresholdIDs: []string{"THRESH1", "THRESH2"},
+		FilterIDs:    []string{"FLTR_1"},
+		Weight:       20.0,
+		MinItems:     1,
+	}
+
+	if rcv := StatQueueProfileToAPI(sqPrf); !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expecting: %+v,\n received: %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
 func TestAPItoModelStats(t *testing.T) {
 	tpS := &utils.TPStatProfile{
 		TPid:      "TPS1",
@@ -1073,6 +1126,39 @@ func TestAPItoTPThreshold(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eTPs, st) {
 		t.Errorf("Expecting: %+v, received: %+v", eTPs, st)
+	}
+}
+
+func TestThresholdProfileToAPI(t *testing.T) {
+	expected := &utils.TPThresholdProfile{
+		Tenant:             "cgrates.org",
+		ID:                 "TH1",
+		FilterIDs:          []string{"FilterID1", "FilterID2"},
+		ActivationInterval: &utils.TPActivationInterval{ActivationTime: "2014-07-29T15:00:00Z"},
+		MaxHits:            12,
+		MinHits:            10,
+		MinSleep:           "1s",
+		Weight:             20.0,
+		ActionIDs:          []string{"WARN3"},
+	}
+
+	thPrf := &ThresholdProfile{
+		Tenant:    "cgrates.org",
+		ID:        "TH1",
+		FilterIDs: []string{"FilterID1", "FilterID2"},
+
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
+		},
+		MaxHits:   12,
+		MinHits:   10,
+		MinSleep:  time.Duration(1 * time.Second),
+		Weight:    20.0,
+		ActionIDs: []string{"WARN3"},
+	}
+
+	if rcv := ThresholdProfileToAPI(thPrf); !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expecting: %+v,\n received: %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
 }
 
