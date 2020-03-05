@@ -1297,6 +1297,13 @@ func ResourceProfileToAPI(rp *ResourceProfile) (tpRL *utils.TPResourceProfile) {
 
 type TpStats []*TpStat
 
+// CSVHeader return the header for csv fields as a slice of string
+func (tps TpStats) CSVHeader() (result []string) {
+	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.ActivationIntervalString,
+		utils.QueueLength, utils.TTL, utils.MinItems, utils.MetricIDs, utils.MetricFilterIDs,
+		utils.Stored, utils.Blocker, utils.Weight, utils.ThresholdIDs}
+}
+
 func (models TpStats) AsTPStats() (result []*utils.TPStatProfile) {
 	filterMap := make(map[string]utils.StringMap)
 	thresholdMap := make(map[string]utils.StringMap)
@@ -1490,7 +1497,61 @@ func APItoStats(tpST *utils.TPStatProfile, timezone string) (st *StatQueueProfil
 	return st, nil
 }
 
+func StatQueueProfileToAPI(st *StatQueueProfile) (tpST *utils.TPStatProfile) {
+	tpST = &utils.TPStatProfile{
+		Tenant:             st.Tenant,
+		ID:                 st.ID,
+		FilterIDs:          make([]string, len(st.FilterIDs)),
+		ActivationInterval: new(utils.TPActivationInterval),
+		QueueLength:        st.QueueLength,
+		Metrics:            make([]*utils.MetricWithFilters, len(st.Metrics)),
+		Blocker:            st.Blocker,
+		Stored:             st.Stored,
+		Weight:             st.Weight,
+		MinItems:           st.MinItems,
+		ThresholdIDs:       make([]string, len(st.ThresholdIDs)),
+	}
+	for i, metric := range st.Metrics {
+		tpST.Metrics[i] = &utils.MetricWithFilters{
+			MetricID: metric.MetricID,
+		}
+		if len(metric.FilterIDs) != 0 {
+			tpST.Metrics[i].FilterIDs = make([]string, len(metric.FilterIDs))
+			for j, fltr := range metric.FilterIDs {
+				tpST.Metrics[i].FilterIDs[j] = fltr
+			}
+		}
+
+	}
+	if st.TTL != time.Duration(0) {
+		tpST.TTL = st.TTL.String()
+	}
+	for i, fli := range st.FilterIDs {
+		tpST.FilterIDs[i] = fli
+	}
+	for i, fli := range st.ThresholdIDs {
+		tpST.ThresholdIDs[i] = fli
+	}
+
+	if st.ActivationInterval != nil {
+		if !st.ActivationInterval.ActivationTime.IsZero() {
+			tpST.ActivationInterval.ActivationTime = st.ActivationInterval.ActivationTime.Format(time.RFC3339)
+		}
+		if !st.ActivationInterval.ExpiryTime.IsZero() {
+			tpST.ActivationInterval.ExpiryTime = st.ActivationInterval.ExpiryTime.Format(time.RFC3339)
+		}
+	}
+	return
+}
+
 type TpThresholds []*TpThreshold
+
+// CSVHeader return the header for csv fields as a slice of string
+func (tps TpThresholds) CSVHeader() (result []string) {
+	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.ActivationIntervalString,
+		utils.MaxHits, utils.MinHits, utils.MinSleep,
+		utils.Blocker, utils.Weight, utils.ActionIDs, utils.Async}
+}
 
 func (tps TpThresholds) AsTPThreshold() (result []*utils.TPThresholdProfile) {
 	mst := make(map[string]*utils.TPThresholdProfile)
@@ -1669,6 +1730,40 @@ func APItoThresholdProfile(tpTH *utils.TPThresholdProfile, timezone string) (th 
 	return th, nil
 }
 
+func ThresholdProfileToAPI(th *ThresholdProfile) (tpTH *utils.TPThresholdProfile) {
+	tpTH = &utils.TPThresholdProfile{
+		Tenant:             th.Tenant,
+		ID:                 th.ID,
+		FilterIDs:          make([]string, len(th.FilterIDs)),
+		ActivationInterval: new(utils.TPActivationInterval),
+		MaxHits:            th.MaxHits,
+		MinHits:            th.MinHits,
+		Blocker:            th.Blocker,
+		Weight:             th.Weight,
+		ActionIDs:          make([]string, len(th.ActionIDs)),
+		Async:              th.Async,
+	}
+	if th.MinSleep != time.Duration(0) {
+		tpTH.MinSleep = th.MinSleep.String()
+	}
+	for i, fli := range th.FilterIDs {
+		tpTH.FilterIDs[i] = fli
+	}
+	for i, fli := range th.ActionIDs {
+		tpTH.ActionIDs[i] = fli
+	}
+
+	if th.ActivationInterval != nil {
+		if !th.ActivationInterval.ActivationTime.IsZero() {
+			tpTH.ActivationInterval.ActivationTime = th.ActivationInterval.ActivationTime.Format(time.RFC3339)
+		}
+		if !th.ActivationInterval.ExpiryTime.IsZero() {
+			tpTH.ActivationInterval.ExpiryTime = th.ActivationInterval.ExpiryTime.Format(time.RFC3339)
+		}
+	}
+	return
+}
+
 type TpFilterS []*TpFilter
 
 // CSVHeader return the header for csv fields as a slice of string
@@ -1799,6 +1894,16 @@ func FilterToTPFilter(f *Filter) (tpFltr *utils.TPFilterProfile) {
 }
 
 type TpSuppliers []*TpSupplier
+
+// CSVHeader return the header for csv fields as a slice of string
+func (tps TpSuppliers) CSVHeader() (result []string) {
+	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.ActivationIntervalString,
+		utils.Sorting, utils.SortingParameters, utils.SupplierID, utils.SupplierFilterIDs,
+		utils.SupplierAccountIDs, utils.SupplierRatingplanIDs, utils.SupplierResourceIDs,
+		utils.SupplierStatIDs, utils.SupplierWeight, utils.SupplierBlocker,
+		utils.SupplierParameters, utils.Weight,
+	}
+}
 
 func (tps TpSuppliers) AsTPSuppliers() (result []*utils.TPSupplierProfile) {
 	filtermap := make(map[string]utils.StringMap)
@@ -2013,6 +2118,48 @@ func APItoSupplierProfile(tpSPP *utils.TPSupplierProfile, timezone string) (spp 
 		}
 	}
 	return spp, nil
+}
+
+func SupplierProfileToAPI(spp *SupplierProfile) (tpSPP *utils.TPSupplierProfile) {
+	tpSPP = &utils.TPSupplierProfile{
+		Tenant:             spp.Tenant,
+		ID:                 spp.ID,
+		FilterIDs:          make([]string, len(spp.FilterIDs)),
+		ActivationInterval: new(utils.TPActivationInterval),
+		Sorting:            spp.Sorting,
+		SortingParameters:  make([]string, len(spp.SortingParameters)),
+		Suppliers:          make([]*utils.TPSupplier, len(spp.Suppliers)),
+		Weight:             spp.Weight,
+	}
+
+	for i, supp := range spp.Suppliers {
+		tpSPP.Suppliers[i] = &utils.TPSupplier{
+			ID:                 supp.ID,
+			FilterIDs:          supp.FilterIDs,
+			AccountIDs:         supp.AccountIDs,
+			RatingPlanIDs:      supp.RatingPlanIDs,
+			ResourceIDs:        supp.ResourceIDs,
+			StatIDs:            supp.StatIDs,
+			Weight:             supp.Weight,
+			Blocker:            supp.Blocker,
+			SupplierParameters: supp.SupplierParameters,
+		}
+	}
+	for i, fli := range spp.FilterIDs {
+		tpSPP.FilterIDs[i] = fli
+	}
+	for i, fli := range spp.SortingParameters {
+		tpSPP.SortingParameters[i] = fli
+	}
+	if spp.ActivationInterval != nil {
+		if !spp.ActivationInterval.ActivationTime.IsZero() {
+			tpSPP.ActivationInterval.ActivationTime = spp.ActivationInterval.ActivationTime.Format(time.RFC3339)
+		}
+		if !spp.ActivationInterval.ExpiryTime.IsZero() {
+			tpSPP.ActivationInterval.ExpiryTime = spp.ActivationInterval.ExpiryTime.Format(time.RFC3339)
+		}
+	}
+	return
 }
 
 type TPAttributes []*TPAttribute

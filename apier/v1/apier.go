@@ -1369,6 +1369,9 @@ func (apiV1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *strin
 		arg.Items = []string{utils.MetaAttributes, utils.MetaChargers, utils.MetaDispatchers, utils.MetaDispatcherHosts,
 			utils.MetaFilters, utils.MetaResources, utils.MetaStats, utils.MetaSuppliers, utils.MetaThresholds}
 	}
+	if _, err := os.Stat(arg.Path); os.IsNotExist(err) {
+		os.Mkdir(arg.Path, os.ModeDir)
+	}
 	for _, item := range arg.Items {
 		switch item {
 		case utils.MetaAttributes:
@@ -1591,6 +1594,120 @@ func (apiV1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *strin
 				}
 				for _, model := range engine.APItoModelResource(
 					engine.ResourceProfileToAPI(resPrf)) {
+					if record, err := engine.CsvDump(model); err != nil {
+						return err
+					} else if err := csvWriter.Write(record); err != nil {
+						return err
+					}
+				}
+			}
+			csvWriter.Flush()
+		case utils.MetaStatS:
+			prfx := utils.StatQueueProfilePrefix
+			keys, err := apiV1.DataManager.DataDB().GetKeysForPrefix(prfx)
+			if err != nil {
+				return err
+			}
+			if len(keys) == 0 { // if we don't find items we skip
+				continue
+			}
+			f, err := os.Create(path.Join(arg.Path, utils.StatsCsv))
+			if err != nil {
+				return err
+			}
+			defer f.Close()
+
+			csvWriter := csv.NewWriter(f)
+			csvWriter.Comma = utils.CSV_SEP
+			//write the header of the file
+			if err := csvWriter.Write(engine.TpStats{}.CSVHeader()); err != nil {
+				return err
+			}
+			for _, key := range keys {
+				tntID := strings.SplitN(key[len(prfx):], utils.InInFieldSep, 2)
+				stsPrf, err := apiV1.DataManager.GetStatQueueProfile(tntID[0], tntID[1],
+					true, false, utils.NonTransactional)
+				if err != nil {
+					return err
+				}
+				for _, model := range engine.APItoModelStats(
+					engine.StatQueueProfileToAPI(stsPrf)) {
+					if record, err := engine.CsvDump(model); err != nil {
+						return err
+					} else if err := csvWriter.Write(record); err != nil {
+						return err
+					}
+				}
+			}
+			csvWriter.Flush()
+		case utils.MetaSuppliers:
+			prfx := utils.SupplierProfilePrefix
+			keys, err := apiV1.DataManager.DataDB().GetKeysForPrefix(prfx)
+			if err != nil {
+				return err
+			}
+			if len(keys) == 0 { // if we don't find items we skip
+				continue
+			}
+			f, err := os.Create(path.Join(arg.Path, utils.SuppliersCsv))
+			if err != nil {
+				return err
+			}
+			defer f.Close()
+
+			csvWriter := csv.NewWriter(f)
+			csvWriter.Comma = utils.CSV_SEP
+			//write the header of the file
+			if err := csvWriter.Write(engine.TpSuppliers{}.CSVHeader()); err != nil {
+				return err
+			}
+			for _, key := range keys {
+				tntID := strings.SplitN(key[len(prfx):], utils.InInFieldSep, 2)
+				spp, err := apiV1.DataManager.GetSupplierProfile(tntID[0], tntID[1],
+					true, false, utils.NonTransactional)
+				if err != nil {
+					return err
+				}
+				for _, model := range engine.APItoModelTPSuppliers(
+					engine.SupplierProfileToAPI(spp)) {
+					if record, err := engine.CsvDump(model); err != nil {
+						return err
+					} else if err := csvWriter.Write(record); err != nil {
+						return err
+					}
+				}
+			}
+			csvWriter.Flush()
+		case utils.MetaThresholds:
+			prfx := utils.ThresholdProfilePrefix
+			keys, err := apiV1.DataManager.DataDB().GetKeysForPrefix(prfx)
+			if err != nil {
+				return err
+			}
+			if len(keys) == 0 { // if we don't find items we skip
+				continue
+			}
+			f, err := os.Create(path.Join(arg.Path, utils.ThresholdsCsv))
+			if err != nil {
+				return err
+			}
+			defer f.Close()
+
+			csvWriter := csv.NewWriter(f)
+			csvWriter.Comma = utils.CSV_SEP
+			//write the header of the file
+			if err := csvWriter.Write(engine.TpThresholds{}.CSVHeader()); err != nil {
+				return err
+			}
+			for _, key := range keys {
+				tntID := strings.SplitN(key[len(prfx):], utils.InInFieldSep, 2)
+				thPrf, err := apiV1.DataManager.GetThresholdProfile(tntID[0], tntID[1],
+					true, false, utils.NonTransactional)
+				if err != nil {
+					return err
+				}
+				for _, model := range engine.APItoModelTPThreshold(
+					engine.ThresholdProfileToAPI(thPrf)) {
 					if record, err := engine.CsvDump(model); err != nil {
 						return err
 					} else if err := csvWriter.Write(record); err != nil {
