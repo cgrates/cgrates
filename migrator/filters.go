@@ -363,14 +363,16 @@ func (m *Migrator) migrateFilters() (err error) {
 
 func (m *Migrator) migrateResourceProfileFiltersV1() (err error) {
 	var ids []string
-	tenant := config.CgrConfig().GeneralCfg().DefaultTenant
 	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.ResourceProfilesPrefix)
 	if err != nil {
 		return err
 	}
 	for _, id := range ids {
-		idg := strings.TrimPrefix(id, utils.ResourceProfilesPrefix+tenant+":")
-		res, err := m.dmIN.DataManager().GetResourceProfile(tenant, idg, false, false, utils.NonTransactional)
+		tntID := strings.SplitN(strings.TrimPrefix(id, utils.ResourceProfilesPrefix), utils.InInFieldSep, 2)
+		if len(tntID) < 2 {
+			return fmt.Errorf("Invalid key <%s> when migrating filter for resourceProfile", id)
+		}
+		res, err := m.dmIN.DataManager().GetResourceProfile(tntID[0], tntID[1], false, false, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
@@ -390,14 +392,16 @@ func (m *Migrator) migrateResourceProfileFiltersV1() (err error) {
 
 func (m *Migrator) migrateStatQueueProfileFiltersV1() (err error) {
 	var ids []string
-	tenant := config.CgrConfig().GeneralCfg().DefaultTenant
 	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.StatQueueProfilePrefix)
 	if err != nil {
 		return err
 	}
 	for _, id := range ids {
-		idg := strings.TrimPrefix(id, utils.StatQueueProfilePrefix+tenant+":")
-		sgs, err := m.dmIN.DataManager().GetStatQueueProfile(tenant, idg, false, false, utils.NonTransactional)
+		tntID := strings.SplitN(strings.TrimPrefix(id, utils.StatQueueProfilePrefix), utils.InInFieldSep, 2)
+		if len(tntID) < 2 {
+			return fmt.Errorf("Invalid key <%s> when migrating filter for statQueueProfile", id)
+		}
+		sgs, err := m.dmIN.DataManager().GetStatQueueProfile(tntID[0], tntID[1], false, false, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
@@ -417,14 +421,16 @@ func (m *Migrator) migrateStatQueueProfileFiltersV1() (err error) {
 
 func (m *Migrator) migrateThresholdsProfileFiltersV1() (err error) {
 	var ids []string
-	tenant := config.CgrConfig().GeneralCfg().DefaultTenant
 	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.ThresholdProfilePrefix)
 	if err != nil {
 		return err
 	}
 	for _, id := range ids {
-		idg := strings.TrimPrefix(id, utils.ThresholdProfilePrefix+tenant+":")
-		ths, err := m.dmIN.DataManager().GetThresholdProfile(tenant, idg, false, false, utils.NonTransactional)
+		tntID := strings.SplitN(strings.TrimPrefix(id, utils.ThresholdProfilePrefix), utils.InInFieldSep, 2)
+		if len(tntID) < 2 {
+			return fmt.Errorf("Invalid key <%s> when migrating filter for thresholdProfile", id)
+		}
+		ths, err := m.dmIN.DataManager().GetThresholdProfile(tntID[0], tntID[1], false, false, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
@@ -444,14 +450,16 @@ func (m *Migrator) migrateThresholdsProfileFiltersV1() (err error) {
 
 func (m *Migrator) migrateSupplierProfileFiltersV1() (err error) {
 	var ids []string
-	tenant := config.CgrConfig().GeneralCfg().DefaultTenant
 	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.SupplierProfilePrefix)
 	if err != nil {
 		return err
 	}
 	for _, id := range ids {
-		idg := strings.TrimPrefix(id, utils.SupplierProfilePrefix)
-		splp, err := m.dmIN.DataManager().GetSupplierProfile(tenant, idg, false, false, utils.NonTransactional)
+		tntID := strings.SplitN(strings.TrimPrefix(id, utils.SupplierProfilePrefix), utils.InInFieldSep, 2)
+		if len(tntID) < 2 {
+			return fmt.Errorf("Invalid key <%s> when migrating filter for supplierProfile", id)
+		}
+		splp, err := m.dmIN.DataManager().GetSupplierProfile(tntID[0], tntID[1], false, false, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
@@ -471,14 +479,16 @@ func (m *Migrator) migrateSupplierProfileFiltersV1() (err error) {
 
 func (m *Migrator) migrateAttributeProfileFiltersV1() (err error) {
 	var ids []string
-	tenant := config.CgrConfig().GeneralCfg().DefaultTenant
 	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.AttributeProfilePrefix)
 	if err != nil {
 		return err
 	}
 	for _, id := range ids {
-		idg := strings.TrimPrefix(id, utils.AttributeProfilePrefix+tenant+":")
-		attrPrf, err := m.dmIN.DataManager().GetAttributeProfile(tenant, idg, false, false, utils.NonTransactional)
+		tntID := strings.SplitN(strings.TrimPrefix(id, utils.AttributeProfilePrefix), utils.InInFieldSep, 2)
+		if len(tntID) < 2 {
+			return fmt.Errorf("Invalid key <%s> when migrating filter for attributeProfile", id)
+		}
+		attrPrf, err := m.dmIN.DataManager().GetAttributeProfile(tntID[0], tntID[1], false, false, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
@@ -503,14 +513,16 @@ func (m *Migrator) migrateAttributeProfileFiltersV1() (err error) {
 
 func (m *Migrator) migrateChargerProfileFiltersV1() (err error) {
 	var ids []string
-	tenant := config.CgrConfig().GeneralCfg().DefaultTenant
 	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.ChargerProfilePrefix)
 	if err != nil {
 		return err
 	}
 	for _, id := range ids {
-		idg := strings.TrimPrefix(id, utils.ChargerProfilePrefix+tenant+":")
-		cpp, err := m.dmIN.DataManager().GetChargerProfile(tenant, idg, false, false, utils.NonTransactional)
+		tntID := strings.SplitN(strings.TrimPrefix(id, utils.ChargerProfilePrefix), utils.InInFieldSep, 2)
+		if len(tntID) < 2 {
+			return fmt.Errorf("Invalid key <%s> when migrating filter for chragerProfile", id)
+		}
+		cpp, err := m.dmIN.DataManager().GetChargerProfile(tntID[0], tntID[1], false, false, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
@@ -530,14 +542,16 @@ func (m *Migrator) migrateChargerProfileFiltersV1() (err error) {
 
 func (m *Migrator) migrateDispatcherProfileFiltersV1() (err error) {
 	var ids []string
-	tenant := config.CgrConfig().GeneralCfg().DefaultTenant
 	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.DispatcherProfilePrefix)
 	if err != nil {
 		return err
 	}
 	for _, id := range ids {
-		idg := strings.TrimPrefix(id, utils.DispatcherProfilePrefix+tenant+":")
-		dpp, err := m.dmIN.DataManager().GetDispatcherProfile(tenant, idg, false, false, utils.NonTransactional)
+		tntID := strings.SplitN(strings.TrimPrefix(id, utils.DispatcherProfilePrefix), utils.InInFieldSep, 2)
+		if len(tntID) < 2 {
+			return fmt.Errorf("Invalid key <%s> when migrating filter for dispatcherProfile", id)
+		}
+		dpp, err := m.dmIN.DataManager().GetDispatcherProfile(tntID[0], tntID[1], false, false, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
@@ -558,17 +572,19 @@ func (m *Migrator) migrateDispatcherProfileFiltersV1() (err error) {
 // migrate filters from v2 to v3 for items
 func (m *Migrator) migrateResourceProfileFiltersV2() (err error) {
 	var ids []string
-	tenant := config.CgrConfig().GeneralCfg().DefaultTenant
 	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.ResourceProfilesPrefix)
 	if err != nil {
 		return fmt.Errorf("error: <%s> when getting resource profile IDs", err.Error())
 	}
 	for _, id := range ids {
-		idg := strings.TrimPrefix(id, utils.ResourceProfilesPrefix+tenant+":")
-		res, err := m.dmIN.DataManager().GetResourceProfile(tenant, idg, false, false, utils.NonTransactional)
+		tntID := strings.SplitN(strings.TrimPrefix(id, utils.ResourceProfilesPrefix), utils.InInFieldSep, 2)
+		if len(tntID) < 2 {
+			return fmt.Errorf("Invalid key <%s> when migrating filter for resourcerProfile", id)
+		}
+		res, err := m.dmIN.DataManager().GetResourceProfile(tntID[0], tntID[1], false, false, utils.NonTransactional)
 		if err != nil {
 			return fmt.Errorf("error: <%s> when getting resource profile with tenant: <%s> and id: <%s>",
-				err.Error(), tenant, idg)
+				err.Error(), tntID[0], tntID[1])
 		}
 		if m.dryRun || res == nil {
 			continue
@@ -578,7 +594,7 @@ func (m *Migrator) migrateResourceProfileFiltersV2() (err error) {
 		}
 		if err := m.dmOut.DataManager().SetResourceProfile(res, true); err != nil {
 			return fmt.Errorf("error: <%s> when setting resource profile with tenant: <%s> and id: <%s>",
-				err.Error(), tenant, idg)
+				err.Error(), tntID[0], tntID[1])
 		}
 		m.stats[utils.RQF]++
 	}
@@ -587,17 +603,19 @@ func (m *Migrator) migrateResourceProfileFiltersV2() (err error) {
 
 func (m *Migrator) migrateStatQueueProfileFiltersV2() (err error) {
 	var ids []string
-	tenant := config.CgrConfig().GeneralCfg().DefaultTenant
 	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.StatQueueProfilePrefix)
 	if err != nil {
 		return fmt.Errorf("error: <%s> when getting statQueue profile IDs", err.Error())
 	}
 	for _, id := range ids {
-		idg := strings.TrimPrefix(id, utils.StatQueueProfilePrefix+tenant+":")
-		sgs, err := m.dmIN.DataManager().GetStatQueueProfile(tenant, idg, false, false, utils.NonTransactional)
+		tntID := strings.SplitN(strings.TrimPrefix(id, utils.StatQueueProfilePrefix), utils.InInFieldSep, 2)
+		if len(tntID) < 2 {
+			return fmt.Errorf("Invalid key <%s> when migrating filter for statQueueProfile", id)
+		}
+		sgs, err := m.dmIN.DataManager().GetStatQueueProfile(tntID[0], tntID[1], false, false, utils.NonTransactional)
 		if err != nil {
 			return fmt.Errorf("error: <%s> when getting statQueue profile with tenant: <%s> and id: <%s>",
-				err.Error(), tenant, idg)
+				err.Error(), tntID[0], tntID[1])
 		}
 		if sgs == nil || m.dryRun {
 			continue
@@ -607,7 +625,7 @@ func (m *Migrator) migrateStatQueueProfileFiltersV2() (err error) {
 		}
 		if err = m.dmOut.DataManager().SetStatQueueProfile(sgs, true); err != nil {
 			return fmt.Errorf("error: <%s> when setting statQueue profile with tenant: <%s> and id: <%s>",
-				err.Error(), tenant, idg)
+				err.Error(), tntID[0], tntID[1])
 		}
 		m.stats[utils.RQF]++
 	}
@@ -616,17 +634,19 @@ func (m *Migrator) migrateStatQueueProfileFiltersV2() (err error) {
 
 func (m *Migrator) migrateThresholdsProfileFiltersV2() (err error) {
 	var ids []string
-	tenant := config.CgrConfig().GeneralCfg().DefaultTenant
 	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.ThresholdProfilePrefix)
 	if err != nil {
 		return fmt.Errorf("error: <%s> when getting threshold profile IDs", err)
 	}
 	for _, id := range ids {
-		idg := strings.TrimPrefix(id, utils.ThresholdProfilePrefix+tenant+":")
-		ths, err := m.dmIN.DataManager().GetThresholdProfile(tenant, idg, false, false, utils.NonTransactional)
+		tntID := strings.SplitN(strings.TrimPrefix(id, utils.ThresholdProfilePrefix), utils.InInFieldSep, 2)
+		if len(tntID) < 2 {
+			return fmt.Errorf("Invalid key <%s> when migrating filter for thresholdProfile", id)
+		}
+		ths, err := m.dmIN.DataManager().GetThresholdProfile(tntID[0], tntID[1], false, false, utils.NonTransactional)
 		if err != nil {
 			return fmt.Errorf("error: <%s> when getting threshold profile with tenant: <%s> and id: <%s>",
-				err.Error(), tenant, idg)
+				err.Error(), tntID[0], tntID[1])
 		}
 		if ths == nil || m.dryRun {
 			continue
@@ -636,7 +656,7 @@ func (m *Migrator) migrateThresholdsProfileFiltersV2() (err error) {
 		}
 		if err := m.dmOut.DataManager().SetThresholdProfile(ths, true); err != nil {
 			return fmt.Errorf("error: <%s> when setting threshold profile with tenant: <%s> and id: <%s>",
-				err.Error(), tenant, idg)
+				err.Error(), tntID[0], tntID[1])
 		}
 		m.stats[utils.RQF]++
 	}
@@ -645,17 +665,19 @@ func (m *Migrator) migrateThresholdsProfileFiltersV2() (err error) {
 
 func (m *Migrator) migrateSupplierProfileFiltersV2() (err error) {
 	var ids []string
-	tenant := config.CgrConfig().GeneralCfg().DefaultTenant
 	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.SupplierProfilePrefix)
 	if err != nil {
 		return fmt.Errorf("error: <%s> when getting supplier profile IDs", err)
 	}
 	for _, id := range ids {
-		idg := strings.TrimPrefix(id, utils.SupplierProfilePrefix)
-		splp, err := m.dmIN.DataManager().GetSupplierProfile(tenant, idg, false, false, utils.NonTransactional)
+		tntID := strings.SplitN(strings.TrimPrefix(id, utils.SupplierProfilePrefix), utils.InInFieldSep, 2)
+		if len(tntID) < 2 {
+			return fmt.Errorf("Invalid key <%s> when migrating filter for supplierProfile", id)
+		}
+		splp, err := m.dmIN.DataManager().GetSupplierProfile(tntID[0], tntID[1], false, false, utils.NonTransactional)
 		if err != nil {
 			return fmt.Errorf("error: <%s> when getting supplier profile with tenant: <%s> and id: <%s>",
-				err.Error(), tenant, idg)
+				err.Error(), tntID[0], tntID[1])
 		}
 		if splp == nil || m.dryRun {
 			continue
@@ -665,7 +687,7 @@ func (m *Migrator) migrateSupplierProfileFiltersV2() (err error) {
 		}
 		if err := m.dmOut.DataManager().SetSupplierProfile(splp, true); err != nil {
 			return fmt.Errorf("error: <%s> when setting supplier profile with tenant: <%s> and id: <%s>",
-				err.Error(), tenant, idg)
+				err.Error(), tntID[0], tntID[1])
 		}
 		m.stats[utils.RQF]++
 	}
@@ -674,17 +696,19 @@ func (m *Migrator) migrateSupplierProfileFiltersV2() (err error) {
 
 func (m *Migrator) migrateAttributeProfileFiltersV2() (err error) {
 	var ids []string
-	tenant := config.CgrConfig().GeneralCfg().DefaultTenant
 	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.AttributeProfilePrefix)
 	if err != nil {
 		return fmt.Errorf("error: <%s> when getting attribute profile IDs", err)
 	}
 	for _, id := range ids {
-		idg := strings.TrimPrefix(id, utils.AttributeProfilePrefix+tenant+":")
-		attrPrf, err := m.dmIN.DataManager().GetAttributeProfile(tenant, idg, false, false, utils.NonTransactional)
+		tntID := strings.SplitN(strings.TrimPrefix(id, utils.AttributeProfilePrefix), utils.InInFieldSep, 2)
+		if len(tntID) < 2 {
+			return fmt.Errorf("Invalid key <%s> when migrating filter for attributeProfile", id)
+		}
+		attrPrf, err := m.dmIN.DataManager().GetAttributeProfile(tntID[0], tntID[1], false, false, utils.NonTransactional)
 		if err != nil {
 			return fmt.Errorf("error: <%s> when getting attribute profile with tenant: <%s> and id: <%s>",
-				err.Error(), tenant, idg)
+				err.Error(), tntID[0], tntID[1])
 		}
 		if attrPrf == nil || m.dryRun {
 			continue
@@ -699,7 +723,7 @@ func (m *Migrator) migrateAttributeProfileFiltersV2() (err error) {
 		}
 		if err := m.dmOut.DataManager().SetAttributeProfile(attrPrf, true); err != nil {
 			return fmt.Errorf("error: <%s> when setting attribute profile with tenant: <%s> and id: <%s>",
-				err.Error(), tenant, idg)
+				err.Error(), tntID[0], tntID[1])
 		}
 		m.stats[utils.RQF]++
 	}
@@ -708,17 +732,19 @@ func (m *Migrator) migrateAttributeProfileFiltersV2() (err error) {
 
 func (m *Migrator) migrateChargerProfileFiltersV2() (err error) {
 	var ids []string
-	tenant := config.CgrConfig().GeneralCfg().DefaultTenant
 	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.ChargerProfilePrefix)
 	if err != nil {
 		return fmt.Errorf("error: <%s> when getting charger profile IDs", err)
 	}
 	for _, id := range ids {
-		idg := strings.TrimPrefix(id, utils.ChargerProfilePrefix+tenant+":")
-		cpp, err := m.dmIN.DataManager().GetChargerProfile(tenant, idg, false, false, utils.NonTransactional)
+		tntID := strings.SplitN(strings.TrimPrefix(id, utils.ChargerProfilePrefix), utils.InInFieldSep, 2)
+		if len(tntID) < 2 {
+			return fmt.Errorf("Invalid key <%s> when migrating filter for chargerProfile", id)
+		}
+		cpp, err := m.dmIN.DataManager().GetChargerProfile(tntID[0], tntID[1], false, false, utils.NonTransactional)
 		if err != nil {
 			return fmt.Errorf("error: <%s> when getting charger profile with tenant: <%s> and id: <%s>",
-				err.Error(), tenant, idg)
+				err.Error(), tntID[0], tntID[1])
 		}
 		if cpp == nil || m.dryRun {
 			continue
@@ -728,7 +754,7 @@ func (m *Migrator) migrateChargerProfileFiltersV2() (err error) {
 		}
 		if err := m.dmOut.DataManager().SetChargerProfile(cpp, true); err != nil {
 			return fmt.Errorf("error: <%s> when setting charger profile with tenant: <%s> and id: <%s>",
-				err.Error(), tenant, idg)
+				err.Error(), tntID[0], tntID[1])
 		}
 		m.stats[utils.RQF]++
 	}
@@ -737,17 +763,19 @@ func (m *Migrator) migrateChargerProfileFiltersV2() (err error) {
 
 func (m *Migrator) migrateDispatcherProfileFiltersV2() (err error) {
 	var ids []string
-	tenant := config.CgrConfig().GeneralCfg().DefaultTenant
 	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.DispatcherProfilePrefix)
 	if err != nil {
 		return fmt.Errorf("error: <%s> when getting dispatcher profile IDs", err)
 	}
 	for _, id := range ids {
-		idg := strings.TrimPrefix(id, utils.DispatcherProfilePrefix+tenant+":")
-		dpp, err := m.dmIN.DataManager().GetDispatcherProfile(tenant, idg, false, false, utils.NonTransactional)
+		tntID := strings.SplitN(strings.TrimPrefix(id, utils.DispatcherProfilePrefix), utils.InInFieldSep, 2)
+		if len(tntID) < 2 {
+			return fmt.Errorf("Invalid key <%s> when migrating filter for dispatcherProfile", id)
+		}
+		dpp, err := m.dmIN.DataManager().GetDispatcherProfile(tntID[0], tntID[1], false, false, utils.NonTransactional)
 		if err != nil {
 			return fmt.Errorf("error: <%s> when getting dispatcher profile with tenant: <%s> and id: <%s>",
-				err.Error(), tenant, idg)
+				err.Error(), tntID[0], tntID[1])
 		}
 		if dpp == nil || m.dryRun {
 			continue
@@ -757,7 +785,7 @@ func (m *Migrator) migrateDispatcherProfileFiltersV2() (err error) {
 		}
 		if err := m.dmOut.DataManager().SetDispatcherProfile(dpp, true); err != nil {
 			return fmt.Errorf("error: <%s> when setting dispatcher profile with tenant: <%s> and id: <%s>",
-				err.Error(), tenant, idg)
+				err.Error(), tntID[0], tntID[1])
 		}
 		m.stats[utils.RQF]++
 	}
