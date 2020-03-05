@@ -53,7 +53,8 @@ var (
 		testInternalReplicateITThresholdProfile,
 		testInternalReplicateITSetAccount,
 		testInternalReplicateITActionTrigger,
-		// testInternalReplicateITThreshold,
+		testInternalReplicateITThreshold,
+		testInternalReplicateITLoadIds,
 
 		testInternalReplicateITKillEngine,
 	}
@@ -626,11 +627,6 @@ func testInternalReplicateITChargerProfile(t *testing.T) {
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	// if err := internalRPC.Call(utils.APIerSv1GetChargerProfile,
-	// 	&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"},
-	// 	&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
-	// 	t.Errorf("Error: %v, rcv: %+v", err, utils.ToJSON(reply))
-	// }
 }
 
 func testInternalReplicateITDispatcherHost(t *testing.T) {
@@ -1134,14 +1130,14 @@ func testInternalReplicateITSetAccount(t *testing.T) {
 func testInternalReplicateITActionTrigger(t *testing.T) {
 	// check
 	var atrs engine.ActionTriggers
-	// if err := engineOneRPC.Call(utils.APIerSv1GetActionTriggers,
-	// 	AttrGetActionTriggers{GroupIDs: []string{"TestATR"}}, &atrs); err == nil || err.Error() != utils.ErrNotFound.Error() {
-	// 	t.Error("Got error on APIerSv1.GetActionTriggers: ", err)
-	// }
-	// if err := engineTwoRPC.Call(utils.APIerSv1GetActionTriggers,
-	// 	AttrGetActionTriggers{GroupIDs: []string{"TestATR"}}, &atrs); err == nil || err.Error() != utils.ErrNotFound.Error() {
-	// 	t.Error("Got error on APIerSv1.GetActionTriggers: ", err)
-	// }
+	if err := engineOneRPC.Call(utils.APIerSv1GetActionTriggers,
+		AttrGetActionTriggers{GroupIDs: []string{"TestATR"}}, &atrs); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error("Got error on APIerSv1.GetActionTriggers: ", err)
+	}
+	if err := engineTwoRPC.Call(utils.APIerSv1GetActionTriggers,
+		AttrGetActionTriggers{GroupIDs: []string{"TestATR"}}, &atrs); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error("Got error on APIerSv1.GetActionTriggers: ", err)
+	}
 	// set
 	var reply string
 	attrSet := AttrSetActionTrigger{
@@ -1201,18 +1197,36 @@ func testInternalReplicateITActionTrigger(t *testing.T) {
 }
 
 func testInternalReplicateITThreshold(t *testing.T) {
-	tEvs := []*engine.ArgsProcessEvent{
-		{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "event1",
-				Event: map[string]interface{}{
-					utils.EventType:     utils.AccountUpdate,
-					utils.Account:       "1002",
-					utils.AllowNegative: true,
-					utils.Disabled:      false,
-					utils.Units:         12.3},
-			},
+	// get threshold
+	var td engine.Threshold
+	if err := engineOneRPC.Call(utils.ThresholdSv1GetThreshold,
+		&utils.TenantIDWithArgDispatcher{
+			TenantID: &utils.TenantID{
+				Tenant: tenant,
+				ID:     "THD_Test"},
+		}, &td); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	if err := engineTwoRPC.Call(utils.ThresholdSv1GetThreshold,
+		&utils.TenantIDWithArgDispatcher{
+			TenantID: &utils.TenantID{
+				Tenant: tenant,
+				ID:     "THD_Test"},
+		}, &td); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	tEvs := engine.ArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				utils.EventType:     utils.AccountUpdate,
+				utils.Account:       "1005",
+				utils.AllowNegative: true,
+				utils.Disabled:      false,
+				utils.Units:         12.3},
 		},
 	}
 	//set Actions
@@ -1242,7 +1256,6 @@ func testInternalReplicateITThreshold(t *testing.T) {
 		t.Error("Unexpected reply returned", reply)
 	}
 	//get
-	var td engine.Threshold
 	if err := internalRPC.Call(utils.ThresholdSv1GetThreshold,
 		&utils.TenantIDWithArgDispatcher{
 			TenantID: &utils.TenantID{
@@ -1253,13 +1266,40 @@ func testInternalReplicateITThreshold(t *testing.T) {
 	} else if td.Hits != 0 { //still not processed
 		t.Errorf("Expecting threshold to be hit once received: %v", td.Hits)
 	}
-
+	//set account
+	attrSetAccount := &utils.AttrSetAccount{
+		Account: "1005",
+		Tenant:  tenant,
+		ExtraOptions: map[string]bool{
+			utils.AllowNegative: true}}
+	if err := internalRPC.Call(utils.APIerSv1SetAccount, attrSetAccount, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+	//set balance
+	attrs := &utils.AttrSetBalance{
+		Tenant:      tenant,
+		Account:     "1005",
+		BalanceType: utils.MONETARY,
+		Value:       1,
+		Balance: map[string]interface{}{
+			utils.ID:     utils.MetaDefault,
+			utils.Weight: 10.0,
+		},
+	}
+	if err := internalRPC.Call(utils.APIerSv2SetBalance, attrs, &reply); err != nil {
+		t.Fatal(err)
+	}
 	// processEvent
 	var ids []string
 	//eIDs := []string{}
-	if err := internalRPC.Call(utils.ThresholdSv1ProcessEvent, &tEvs[0], &ids); err == nil ||
-		err.Error() != utils.ErrNotFound.Error() {
+	if err := internalRPC.Call(utils.ThresholdSv1ProcessEvent, &tEvs, &ids); err != nil {
 		t.Error(err)
+	} else if len(ids) != 1 {
+		t.Errorf("Expecting 1: ,received %+v", len(ids))
+	} else if ids[0] != "THD_Test" {
+		t.Errorf("Expecting: THD_Test, received %q", ids[0])
 	}
 	//get
 	if err := internalRPC.Call(utils.ThresholdSv1GetThreshold,
@@ -1271,29 +1311,6 @@ func testInternalReplicateITThreshold(t *testing.T) {
 		t.Error(err)
 	} else if td.Hits != 1 { //processed
 		t.Errorf("Expecting threshold to be hit once received: %v", td.Hits)
-	}
-	// attrSetAcnt := AttrSetAccount{
-	// 	Tenant:  "cgrates.org",
-	// 	Account: "1005",
-	// 	ExtraOptions: map[string]bool{
-	// 		utils.AllowNegative: true,
-	// 	},
-	// }
-	// if err := internalRPC.Call(utils.APIerSv2SetAccount, attrSetAcnt, &reply); err != nil {
-	// 	t.Fatal(err)
-	// }
-	attrs := &utils.AttrSetBalance{
-		Tenant:      "cgrates.org",
-		Account:     "1005",
-		BalanceType: utils.MONETARY,
-		Value:       1,
-		Balance: map[string]interface{}{
-			utils.ID:     utils.MetaDefault,
-			utils.Weight: 10.0,
-		},
-	}
-	if err := internalRPC.Call(utils.APIerSv2SetBalance, attrs, &reply); err != nil {
-		t.Fatal(err)
 	}
 
 	// remove
@@ -1310,12 +1327,132 @@ func testInternalReplicateITThreshold(t *testing.T) {
 			TenantID: &utils.TenantID{
 				Tenant: tenant,
 				ID:     "THD_Test"},
-		}, &td); err != nil {
+		}, &td); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
-	} else if td.Hits != 1 {
-		t.Errorf("Expecting threshold to be hit once received: %v", td.Hits)
+	}
+	if err := engineTwoRPC.Call(utils.ThresholdSv1GetThreshold,
+		&utils.TenantIDWithArgDispatcher{
+			TenantID: &utils.TenantID{
+				Tenant: tenant,
+				ID:     "THD_Test"},
+		}, &td); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
 	}
 
+}
+
+func testInternalReplicateITLoadIds(t *testing.T) {
+	// get LoadIDs
+	var rcv1e1 map[string]int64
+	if err := engineOneRPC.Call(utils.APIerSv1GetLoadIDs, utils.EmptyString, &rcv1e1); err != nil {
+		t.Error(err)
+	}
+	var rcv1e2 map[string]int64
+	if err := engineTwoRPC.Call(utils.APIerSv1GetLoadIDs, utils.EmptyString, &rcv1e2); err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(rcv1e1, rcv1e2) {
+		t.Errorf("Expecting same LoadIDs for both engines")
+	}
+	// set AttributeProfile
+	alsPrf = &AttributeWithCache{
+		AttributeProfile: &engine.AttributeProfile{
+			Tenant:    "cgrates.org",
+			ID:        "AttributeWithNonSubstitute",
+			Contexts:  []string{utils.MetaSessionS},
+			FilterIDs: []string{"*string:~*req.Account:1008"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2020, 4, 18, 14, 35, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2020, 4, 18, 14, 35, 0, 0, time.UTC),
+			},
+			Attributes: []*engine.Attribute{
+				{
+					FilterIDs: []string{"*string:~*req.Account:1008"},
+					Path:      utils.MetaReq + utils.NestingSep + utils.Account,
+					Value:     config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
+				},
+				{
+					Path:  utils.MetaReq + utils.NestingSep + utils.Subject,
+					Value: config.NewRSRParsersMustCompile(utils.MetaRemove, true, utils.INFIELD_SEP),
+				},
+			},
+			Weight: 20,
+		},
+	}
+	alsPrf.Compile()
+	var result string
+	if err := internalRPC.Call(utils.APIerSv1SetAttributeProfile, alsPrf, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	// check AttributeProfile
+	var reply *engine.AttributeProfile
+	if err := engineOneRPC.Call(utils.APIerSv1GetAttributeProfile,
+		utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: alsPrf.Tenant, ID: alsPrf.ID}}, &reply); err != nil {
+		t.Fatal(err)
+	}
+	reply.Compile()
+	if !reflect.DeepEqual(alsPrf.AttributeProfile, reply) {
+		t.Errorf("Expecting : %+v, received: %+v", alsPrf.AttributeProfile, reply)
+	}
+	// check again the LoadIDs
+	var rcv2e1 map[string]int64
+	if err := engineOneRPC.Call(utils.APIerSv1GetLoadIDs, utils.EmptyString, &rcv2e1); err != nil {
+		t.Error(err)
+	}
+	var rcv2e2 map[string]int64
+	if err := engineTwoRPC.Call(utils.APIerSv1GetLoadIDs, utils.EmptyString, &rcv2e2); err != nil {
+		t.Error(err)
+	}
+
+	// needs to be different LoadIds after the APIerSv1SetAttributeProfile call
+	if reflect.DeepEqual(rcv1e1, rcv2e1) {
+		t.Errorf("Expecting same LoadIDs for both engines")
+	}
+	// needs to be same LoadIds in both engines
+	if !reflect.DeepEqual(rcv2e1, rcv2e2) {
+		t.Errorf("Expecting same LoadIDs for both engines")
+	}
+	// check if the data was corectly modified after the APIerSv1SetAttributeProfile call
+	// only CacheAttributeProfiles should differ
+	if rcv1e1[utils.CacheAttributeProfiles] == rcv2e1[utils.CacheAttributeProfiles] {
+		t.Errorf("Expecting: %+v, received: %+v", rcv1e1[utils.CacheAttributeProfiles], rcv2e1[utils.CacheAttributeProfiles])
+	} else if rcv1e1[utils.CacheAccountActionPlans] != rcv2e1[utils.CacheAccountActionPlans] {
+		t.Errorf("Expecting: %+v, received: %+v", rcv1e1[utils.CacheAccountActionPlans], rcv2e1[utils.CacheAccountActionPlans])
+	} else if rcv1e1[utils.CacheActionPlans] != rcv2e1[utils.CacheActionPlans] {
+		t.Errorf("Expecting: %+v, received: %+v", rcv1e1[utils.CacheActionPlans], rcv2e1[utils.CacheActionPlans])
+	} else if rcv1e1[utils.CacheActions] != rcv2e1[utils.CacheActions] {
+		t.Errorf("Expecting: %+v, received: %+v", rcv1e1[utils.CacheActions], rcv2e1[utils.CacheActions])
+	} else if rcv1e1[utils.CacheChargerProfiles] != rcv2e1[utils.CacheChargerProfiles] {
+		t.Errorf("Expecting: %+v, received: %+v", rcv1e1[utils.CacheChargerProfiles], rcv2e1[utils.CacheChargerProfiles])
+	} else if rcv1e1[utils.CacheDestinations] != rcv2e1[utils.CacheDestinations] {
+		t.Errorf("Expecting: %+v, received: %+v", rcv1e1[utils.CacheDestinations], rcv2e1[utils.CacheDestinations])
+	} else if rcv1e1[utils.CacheFilters] != rcv2e1[utils.CacheFilters] {
+		t.Errorf("Expecting: %+v, received: %+v", rcv1e1[utils.CacheFilters], rcv2e1[utils.CacheFilters])
+	} else if rcv1e1[utils.CacheRatingPlans] != rcv2e1[utils.CacheRatingPlans] {
+		t.Errorf("Expecting: %+v, received: %+v", rcv1e1[utils.CacheRatingPlans], rcv2e1[utils.CacheRatingPlans])
+	} else if rcv1e1[utils.CacheRatingProfiles] != rcv2e1[utils.CacheRatingProfiles] {
+		t.Errorf("Expecting: %+v, received: %+v", rcv1e1[utils.CacheRatingProfiles], rcv2e1[utils.CacheRatingProfiles])
+	} else if rcv1e1[utils.CacheResourceProfiles] != rcv2e1[utils.CacheResourceProfiles] {
+		t.Errorf("Expecting: %+v, received: %+v", rcv1e1[utils.CacheResourceProfiles], rcv2e1[utils.CacheResourceProfiles])
+	} else if rcv1e1[utils.CacheResources] != rcv2e1[utils.CacheResources] {
+		t.Errorf("Expecting: %+v, received: %+v", rcv1e1[utils.CacheResources], rcv2e1[utils.CacheResources])
+	} else if rcv1e1[utils.CacheReverseDestinations] != rcv2e1[utils.CacheReverseDestinations] {
+		t.Errorf("Expecting: %+v, received: %+v", rcv1e1[utils.CacheReverseDestinations], rcv2e1[utils.CacheReverseDestinations])
+	} else if rcv1e1[utils.CacheStatQueueProfiles] != rcv2e1[utils.CacheStatQueueProfiles] {
+		t.Errorf("Expecting: %+v, received: %+v", rcv1e1[utils.CacheStatQueueProfiles], rcv2e1[utils.CacheStatQueueProfiles])
+	} else if rcv1e1[utils.CacheSupplierProfiles] != rcv2e1[utils.CacheSupplierProfiles] {
+		t.Errorf("Expecting: %+v, received: %+v", rcv1e1[utils.CacheSupplierProfiles], rcv2e1[utils.CacheSupplierProfiles])
+	} else if rcv1e1[utils.CacheThresholdProfiles] != rcv2e1[utils.CacheThresholdProfiles] {
+		t.Errorf("Expecting: %+v, received: %+v", rcv1e1[utils.CacheThresholdProfiles], rcv2e1[utils.CacheThresholdProfiles])
+	} else if rcv1e1[utils.CacheThresholds] != rcv2e1[utils.CacheThresholds] {
+		t.Errorf("Expecting: %+v, received: %+v", rcv1e1[utils.CacheThresholds], rcv2e1[utils.CacheThresholds])
+	} else if rcv1e1[utils.CacheTimings] != rcv2e1[utils.CacheTimings] {
+		t.Errorf("Expecting: %+v, received: %+v", rcv1e1[utils.CacheTimings], rcv2e1[utils.CacheTimings])
+	}
 }
 
 func testInternalReplicateITKillEngine(t *testing.T) {
