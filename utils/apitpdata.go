@@ -1420,7 +1420,6 @@ type GetMaxSessionTimeOnAccountsArgs struct {
 }
 
 type ArgExportToFolder struct {
-	Tenant string
-	Path   string
-	Items  []string
+	Path  string
+	Items []string
 }
