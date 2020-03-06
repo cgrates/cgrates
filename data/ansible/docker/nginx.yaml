@@ -1,19 +1,9 @@
 ---
-- name: copy certificates nginx
+- name: Delete default page
   become: true
-  copy:
-    src: server.crt
-    dest: "/etc/nginx/conf.d/domain.crt"
-    mode: '0600'
-    owner: "{{ rootUser }}"
-
-- name: copy certificates key nginx
-  become: true
-  copy:
-    src: server.key
-    dest: "/etc/nginx/conf.d/domain.key"
-    mode: '0600'
-    owner: "{{ rootUser }}"
+  file:
+    path: "/etc/nginx/sites-enabled/default"
+    state: absent
 
 - name: Add apt.cgrates.vhost in nginx
   become: true

@@ -808,7 +808,6 @@ const (
 	RESET_COUNTERS            = "*reset_counters"
 	ENABLE_ACCOUNT            = "*enable_account"
 	DISABLE_ACCOUNT           = "*disable_account"
-	HttpPost                  = "*http_post"
 	HttpPostAsync             = "*http_post_async"
 	MAIL_ASYNC                = "*mail_async"
 	UNLIMITED                 = "*unlimited"
