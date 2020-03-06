@@ -86,7 +86,7 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 		utils.RESET_COUNTERS:            resetCountersAction,
 		utils.ENABLE_ACCOUNT:            enableAccountAction,
 		utils.DISABLE_ACCOUNT:           disableAccountAction,
-		utils.HttpPost:                  callURL,
+		utils.MetaHTTPPost:              callURL,
 		utils.HttpPostAsync:             callURLAsync,
 		utils.MAIL_ASYNC:                mailAsync,
 		utils.SET_DDESTINATIONS:         setddestinations,
