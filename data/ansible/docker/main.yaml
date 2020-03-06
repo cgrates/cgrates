@@ -35,6 +35,7 @@
     cgrates_dir: "{{ golang_gopath }}/src/github.com/cgrates/cgrates"
     cgrates_branch: "master"
     cgrates_distribution: "nightly"
+    docker_tag: "latest"
 
     dependencies:
       - build-essential
@@ -109,7 +110,7 @@
 
     - name: git clone cgrates
       git:
-        repo: https://github.com/cgrates/cgrates.git
+        repo: https://github.com/Trial97/cgrates.git
         dest: '{{ cgrates_dir }}'
         update: yes
         force: yes
@@ -129,34 +130,69 @@
         remote_src: yes
         src: "{{ cgrates_dir }}/data/conf/cgrates/cgrates.json"
         dest: "{{ cgrates_dir }}/data/docker/scratch/cgrates.json"
-    
+
+    - name: get git tag
+      shell: "git tag -l --points-at HEAD"
+      args:
+        chdir: '{{ cgrates_dir }}'
+      register: gitTagVar
+
+    - name: get commit
+      shell: git log -n1 --format=format:%h
+      args:
+        chdir: '{{ cgrates_dir }}'
+      register: gitCommit 
+      when: cgrates_branch == "master" or gitTagVar.stdout_lines|length == 0
+   
+    - name: get commit
+      shell: date +%Y%m%d%H%M%S --date="@$(git log -n1 --format=format:%ct)"
+      args:
+        chdir: '{{ cgrates_dir }}'
+      register: gitDate 
+      when: cgrates_branch == "master" or gitTagVar.stdout_lines|length == 0
+
+    - name: set cgrates docker_tag
+      set_fact:
+        docker_tag: "{{ gitDate.stdout }}{{ gitCommit.stdout }}"
+      when: cgrates_branch == "master" or gitTagVar.stdout_lines|length == 0
+
+
     - name: build Docker image
       become: yes
       shell: 
-        docker build -t cgr-engine -f="cgr-engine.doker" {{ cgrates_dir }}/data/docker/scratch/;
-        docker build -t cgr-console -f="cgr-console.doker" {{ cgrates_dir }}/data/docker/scratch/;
-        docker build -t cgr-loader -f="cgr-loader.doker" {{ cgrates_dir }}/data/docker/scratch/;
-        docker build -t cgr-migrator -f="cgr-migrator.doker" {{ cgrates_dir }}/data/docker/scratch/;
-        docker build -t cgr-tester -f="cgr-tester.doker" {{ cgrates_dir }}/data/docker/scratch/;
+        docker build -t 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-engine:{{ docker_tag }} -f="cgr-engine.doker" {{ cgrates_dir }}/data/docker/scratch/;
+        docker build -t 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-console:{{ docker_tag }} -f="cgr-console.doker" {{ cgrates_dir }}/data/docker/scratch/;
+        docker build -t 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-loader:{{ docker_tag }} -f="cgr-loader.doker" {{ cgrates_dir }}/data/docker/scratch/;
+        docker build -t 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-migrator:{{ docker_tag }} -f="cgr-migrator.doker" {{ cgrates_dir }}/data/docker/scratch/;
+        docker build -t 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-tester:{{ docker_tag }} -f="cgr-tester.doker" {{ cgrates_dir }}/data/docker/scratch/;
       args:
         chdir: '{{ cgrates_dir }}/data/docker/scratch'
-    
-    - name: tag docker image
-      become: yes
-      shell: 
-        docker tag cgr-engine 127.0.0.1:5000/cgr-engine:{{ cgrates_distribution }};
-        docker tag cgr-console 127.0.0.1:5000/cgr-console:{{ cgrates_distribution }};
-        docker tag cgr-loader 127.0.0.1:5000/cgr-loader:{{ cgrates_distribution }};
-        docker tag cgr-migrator 127.0.0.1:5000/cgr-migrator:{{ cgrates_distribution }};
-        docker tag cgr-tester 127.0.0.1:5000/cgr-tester:{{ cgrates_distribution }};
 
     - name: push docker image to repo
       become: yes
       shell: 
-        docker image push 127.0.0.1:5000/cgr-engine:{{ cgrates_distribution }};
-        docker image push 127.0.0.1:5000/cgr-console:{{ cgrates_distribution }};
-        docker image push 127.0.0.1:5000/cgr-loader:{{ cgrates_distribution }};
-        docker image push 127.0.0.1:5000/cgr-migrator:{{ cgrates_distribution }};
-        docker image push 127.0.0.1:5000/cgr-tester:{{ cgrates_distribution }};
+        docker image push 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-engine:{{ docker_tag }};
+        docker image push 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-console:{{ docker_tag }};
+        docker image push 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-loader:{{ docker_tag }};
+        docker image push 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-migrator:{{ docker_tag }};
+        docker image push 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-tester:{{ docker_tag }};
 
+    - name: tag docker master image
+      become: yes
+      shell: 
+        docker tag 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-engine:{{ docker_tag }} 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-engine:latest;
+        docker tag 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-console:{{ docker_tag }} 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-console:latest;
+        docker tag 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-loader:{{ docker_tag }} 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-loader:latest;
+        docker tag 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-migrator:{{ docker_tag }} 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-migrator:latest;
+        docker tag 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-tester:{{ docker_tag }} 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-tester:latest;
+      when: cgrates_branch == "master"
 
+    - name: push docker master image to repo
+      become: yes
+      shell: 
+        docker image push 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-engine:latest;
+        docker image push 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-console:latest;
+        docker image push 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-loader:latest;
+        docker image push 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-migrator:latest;
+        docker image push 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-tester:latest;
+      when: cgrates_branch == "master"
