@@ -1,0 +1,15 @@
+version: "3.7"
+services:
+  cgr-engine:
+    image: dkr.cgrates.org/nightly/cgr-engine
+    container_name: cgr-engine
+    ports:
+      - 2012:2012
+      - 2080:2080
+    volumes:
+      - ../../conf/samples/docker/:/etc/cgrates/:ro
+    command: /cgr-engine --logger=*stdout -httprof_path=/pprof
+networks:
+  default:
+    external:
+      name: cgrates-net

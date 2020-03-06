@@ -1,0 +1,112 @@
+{
+// CGRateS Configuration file
+//
+
+
+"general": {
+	"log_level": 7,
+	"reply_timeout": "50s",
+},
+
+
+"listen": {
+	"rpc_json": "0.0.0.0:2012",			// RPC JSON listening address
+	"rpc_gob": "0.0.0.0:2013",			// RPC GOB listening address
+	"http": "0.0.0.0:2080",				// HTTP listening address
+	"rpc_json_tls" : "0.0.0.0:2022",		// RPC JSON TLS listening address
+	"rpc_gob_tls": "0.0.0.0:2023",		// RPC GOB TLS listening address
+	"http_tls": "0.0.0.0:2280",			// HTTP TLS listening address
+},
+
+
+"data_db": {
+	"db_type": "*internal",	
+},
+
+
+"stor_db": {
+	"db_type": "*internal",	
+},
+
+
+"rals": {
+	"enabled": true,
+	"thresholds_conns": ["*internal"],
+	"max_increments":3000000,
+},
+
+
+"schedulers": {
+	"enabled": true,
+	"cdrs_conns": ["*internal"],
+},
+
+
+"cdrs": {
+	"enabled": true,
+	"chargers_conns":["*internal"],
+},
+
+
+"attributes": {
+	"enabled": true,
+},
+
+
+"chargers": {
+	"enabled": true,
+	"attributes_conns": ["*internal"],
+},
+
+
+"resources": {
+	"enabled": true,
+	"store_interval": "-1",
+	"thresholds_conns": ["*internal"]
+},
+
+
+"stats": {
+	"enabled": true,
+	"store_interval": "-1",
+	"thresholds_conns": ["*internal"],
+},
+
+"thresholds": {
+	"enabled": true,
+	"store_interval": "-1",
+},
+
+
+"suppliers": {
+	"enabled": true,
+	"prefix_indexed_fields":["Destination"],
+	"stats_conns": ["*internal"],
+	"resources_conns": ["*internal"],
+	"rals_conns": ["*internal"],
+},
+
+
+"sessions": {
+	"enabled": true,
+	"listen_bijson": "0.0.0.0:2014",
+	"suppliers_conns": ["*internal"],
+	"resources_conns": ["*internal"],
+	"attributes_conns": ["*internal"],
+	"rals_conns": ["*internal"],
+	"cdrs_conns": ["*internal"],
+	"chargers_conns": ["*internal"],
+},
+
+
+"apiers": {
+	"enabled": true,
+	"scheduler_conns": ["*internal"],
+},
+
+
+"filters": {								
+	"apiers_conns": ["*internal"],
+},
+
+}
