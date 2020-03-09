@@ -1,0 +1,123 @@
+{
+// CGRateS Configuration file
+//
+
+
+"general": {
+	"log_level": 7,
+	"reply_timeout": "50s",
+},
+
+
+"listen": {
+	"rpc_json": "*env:DOCKER_IP:2012",			// RPC JSON listening address
+	"rpc_gob": "*env:DOCKER_IP:2013",			// RPC GOB listening address
+	"http": "*env:DOCKER_IP:2080",				// HTTP listening address
+	"rpc_json_tls" : "*env:DOCKER_IP:2022",		// RPC JSON TLS listening address
+	"rpc_gob_tls": "*env:DOCKER_IP:2023",		// RPC GOB TLS listening address
+	"http_tls": "*env:DOCKER_IP:2280",			// HTTP TLS listening address
+},
+
+"rpc_conns": {
+	"conn1": {
+		"strategy": "*first",
+		"conns": [{"address": "*env:DOCKER_IP:2012", "transport":"*json"}],
+	},
+},
+
+
+"data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
+	"db_type": "*redis",					// data_db type: <redis|mongo>
+	"db_host": "redis",						// data_db host address
+	"db_port": 6379, 						// data_db port to reach the database
+	"db_name": "10", 						// data_db database name to connect to
+},
+
+
+"stor_db": {
+	"db_host": "mariadb",					// the host to connect to
+	"db_password": "CGRateS.org",
+},
+
+
+"rals": {
+	"enabled": true,
+	"thresholds_conns": ["*internal"],
+	"max_increments":3000000,
+},
+
+
+"schedulers": {
+	"enabled": true,
+	"cdrs_conns": ["*internal"],
+},
+
+
+"cdrs": {
+	"enabled": true,
+	"chargers_conns":["*internal"],
+},
+
+
+"attributes": {
+	"enabled": true,
+},
+
+
+"chargers": {
+	"enabled": true,
+	"attributes_conns": ["*internal"],
+},
+
+
+"resources": {
+	"enabled": true,
+	"store_interval": "-1",
+	"thresholds_conns": ["*internal"]
+},
+
+
+"stats": {
+	"enabled": true,
+	"store_interval": "-1",
+	"thresholds_conns": ["*internal"],
+},
+
+"thresholds": {
+	"enabled": true,
+	"store_interval": "-1",
+},
+
+
+"suppliers": {
+	"enabled": true,
+	"prefix_indexed_fields":["Destination"],
+	"stats_conns": ["*internal"],
+	"resources_conns": ["*internal"],
+	"rals_conns": ["*internal"],
+},
+
+
+"sessions": {
+	"enabled": true,
+	"listen_bijson": "*env:DOCKER_IP:2014",
+	"suppliers_conns": ["*internal"],
+	"resources_conns": ["*internal"],
+	"attributes_conns": ["*internal"],
+	"rals_conns": ["*internal"],
+	"cdrs_conns": ["*internal"],
+	"chargers_conns": ["*internal"],
+},
+
+
+"apiers": {
+	"enabled": true,
+	"scheduler_conns": ["*internal"],
+},
+
+
+"filters": {								
+	"apiers_conns": ["*internal"],
+},
+
+}

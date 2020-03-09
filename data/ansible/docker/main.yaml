@@ -1,0 +1,198 @@
+---
+- name: Check and set python version on APT server
+  hosts: docker
+  remote_user: '{{ gouser }}'
+  gather_facts: false
+  tasks:
+    - name: symlink /usr/bin/python -> /usr/bin/python3
+      raw: |
+        if [ -f /usr/bin/python3 ] && [ ! -f /usr/bin/python ]; then
+          ln --symbolic /usr/bin/python3 /usr/bin/python; 
+        fi
+      become: true
+
+- hosts: docker
+  vars:
+    ###############################################################
+    ##################### Golang Vars #############################
+    ###############################################################
+    # Go language SDK version number
+    golang_version: '1.14'
+    go_version_target: "go version go{{ golang_version }} linux/amd64"
+    # Mirror to download the Go language SDK redistributable package from
+    golang_mirror: 'https://storage.googleapis.com/golang'
+    # Base installation directory the Go language SDK distribution
+    golang_install_dir: '/usr/local/go'
+    # Directory to store files downloaded for Go language SDK installation
+    golang_download_dir: "{{ x_ansible_download_dir | default(ansible_env.HOME + '/.ansible/tmp/downloads') }}"
+    # Location for GOPATH environment variable
+    golang_gopath: "/home/{{ gouser }}/go"
+    # Filename of Go language SDK redistributable package
+    golang_redis_filename: 'go{{ golang_version }}.linux-amd64.tar.gz'
+
+    ###############################################################
+    # CGRateS vars
+    cgrates_dir: "{{ golang_gopath }}/src/github.com/cgrates/cgrates"
+    cgrates_branch: "v0.10"
+    cgrates_distribution: "nightly"
+    docker_tag: "latest"
+
+    dependencies:
+      - build-essential
+      - git
+      - devscripts
+      - apt-transport-https
+      - ca-certificates
+      - gnupg2
+      - software-properties-common
+      - nginx
+      - python3
+      - python3-pip
+      - virtualenv
+      - python3-setuptools
+    rootUser : root
+    
+  remote_user: '{{ gouser }}'
+  tasks:
+    - name: set cgrates distribution
+      set_fact:
+        cgrates_distribution: "{{ cgrates_branch }}"
+      when: cgrates_branch != "master"
+###########################################################################################################################
+###########################################################################################################################
+# install dependencies
+    - name: Install dependencies
+      become: yes
+      apt: name={{ dependencies }} state=present
+###########################################################################################################################
+###########################################################################################################################
+# Prepare for configuration
+    - name: Check if NGINX needs to be configured
+      become: true
+      shell: "ls /etc/nginx/sites-enabled | grep 'dkr.cgrates.org.vhost'"
+      ignore_errors: true
+      register: nginxConfig
+
+    - name: Configure NGINX server
+      include: nginx.yaml
+      when: nginxConfig.stdout_lines|length < 1
+
+    - name: Configure docker 
+      include: docker.yaml
+
+###########################################################################################################################
+###########################################################################################################################
+# Install Golang
+    - name: install unarchive dependencies (zypper)
+      become: yes
+      zypper:
+        name:
+          - gzip
+          - tar
+        state: present
+      when: ansible_pkg_mgr == 'zypper'
+
+    - name: Install golang
+      include: go.yaml
+
+###########################################################################################################################
+###########################################################################################################################
+# Install CGRateS
+    - name: create cgrates directory
+      become: yes
+      file:
+        state: directory
+        mode: 'u=rwx,go=rx'
+        owner: "{{ gouser }}"
+        group: "{{ gouser }}"
+        dest: '{{ cgrates_dir }}'
+      become_user: "{{ gouser }}"
+
+    - name: git clone cgrates
+      git:
+        repo: https://github.com/cgrates/cgrates.git
+        dest: '{{ cgrates_dir }}'
+        update: yes
+        force: yes
+        version: "{{ cgrates_branch }}"
+      become: yes
+      become_user: "{{ gouser }}"
+
+    - name:  build cgrates for docker
+      shell: "sh {{ cgrates_dir }}/data/docker/scratch/build.sh"
+      environment:
+        PATH: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
+      args:
+        chdir: '{{ cgrates_dir }}/data/docker/scratch'
+
+    - name: copy default config
+      copy:
+        remote_src: yes
+        src: "{{ cgrates_dir }}/data/conf/cgrates/cgrates.json"
+        dest: "{{ cgrates_dir }}/data/docker/scratch/cgrates.json"
+
+    - name: get git tag
+      shell: "git tag -l --points-at HEAD"
+      args:
+        chdir: '{{ cgrates_dir }}'
+      register: gitTagVar
+
+    - name: get commit
+      shell: git log -n1 --format=format:%h
+      args:
+        chdir: '{{ cgrates_dir }}'
+      register: gitCommit 
+      when: cgrates_branch == "master" or gitTagVar.stdout_lines|length == 0
+   
+    - name: get commit
+      shell: date +%Y%m%d%H%M%S --date="@$(git log -n1 --format=format:%ct)"
+      args:
+        chdir: '{{ cgrates_dir }}'
+      register: gitDate 
+      when: cgrates_branch == "master" or gitTagVar.stdout_lines|length == 0
+
+    - name: set cgrates docker_tag
+      set_fact:
+        docker_tag: "{{ gitDate.stdout }}{{ gitCommit.stdout }}"
+      when: cgrates_branch == "master" or gitTagVar.stdout_lines|length == 0
+
+
+    - name: build Docker image
+      become: yes
+      shell: 
+        docker build -t 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-engine:{{ docker_tag }} -f="cgr-engine.doker" {{ cgrates_dir }}/data/docker/scratch/;
+        docker build -t 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-console:{{ docker_tag }} -f="cgr-console.doker" {{ cgrates_dir }}/data/docker/scratch/;
+        docker build -t 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-loader:{{ docker_tag }} -f="cgr-loader.doker" {{ cgrates_dir }}/data/docker/scratch/;
+        docker build -t 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-migrator:{{ docker_tag }} -f="cgr-migrator.doker" {{ cgrates_dir }}/data/docker/scratch/;
+        docker build -t 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-tester:{{ docker_tag }} -f="cgr-tester.doker" {{ cgrates_dir }}/data/docker/scratch/;
+      args:
+        chdir: '{{ cgrates_dir }}/data/docker/scratch'
+
+    - name: push docker image to repo
+      become: yes
+      shell: 
+        docker image push 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-engine:{{ docker_tag }};
+        docker image push 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-console:{{ docker_tag }};
+        docker image push 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-loader:{{ docker_tag }};
+        docker image push 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-migrator:{{ docker_tag }};
+        docker image push 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-tester:{{ docker_tag }};
+
+    - name: tag docker master image
+      become: yes
+      shell: 
+        docker tag 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-engine:{{ docker_tag }} 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-engine:latest;
+        docker tag 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-console:{{ docker_tag }} 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-console:latest;
+        docker tag 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-loader:{{ docker_tag }} 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-loader:latest;
+        docker tag 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-migrator:{{ docker_tag }} 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-migrator:latest;
+        docker tag 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-tester:{{ docker_tag }} 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-tester:latest;
+      when: cgrates_branch == "master"
+
+    - name: push docker master image to repo
+      become: yes
+      shell: 
+        docker image push 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-engine:latest;
+        docker image push 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-console:latest;
+        docker image push 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-loader:latest;
+        docker image push 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-migrator:latest;
+        docker image push 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-tester:latest;
+      when: cgrates_branch == "master"

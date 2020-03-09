@@ -58,6 +58,9 @@ func main() {
 	}
 
 	fmt.Println("Generating configuration file ...")
+	if err := os.Remove(*cfgPath); err != nil && !os.IsNotExist(err) {
+		log.Fatal(err)
+	}
 	if err := writeDefaultCofig(*cfgPath); err != nil {
 		log.Fatal(err)
 	}
