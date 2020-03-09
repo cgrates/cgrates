@@ -10,22 +10,33 @@
 
 
 "listen": {
-	"rpc_json": "0.0.0.0:2012",			// RPC JSON listening address
-	"rpc_gob": "0.0.0.0:2013",			// RPC GOB listening address
-	"http": "0.0.0.0:2080",				// HTTP listening address
-	"rpc_json_tls" : "0.0.0.0:2022",		// RPC JSON TLS listening address
-	"rpc_gob_tls": "0.0.0.0:2023",		// RPC GOB TLS listening address
-	"http_tls": "0.0.0.0:2280",			// HTTP TLS listening address
+	"rpc_json": "*env:DOCKER_IP:2012",			// RPC JSON listening address
+	"rpc_gob": "*env:DOCKER_IP:2013",			// RPC GOB listening address
+	"http": "*env:DOCKER_IP:2080",				// HTTP listening address
+	"rpc_json_tls" : "*env:DOCKER_IP:2022",		// RPC JSON TLS listening address
+	"rpc_gob_tls": "*env:DOCKER_IP:2023",		// RPC GOB TLS listening address
+	"http_tls": "*env:DOCKER_IP:2280",			// HTTP TLS listening address
+},
+
+"rpc_conns": {
+	"conn1": {
+		"strategy": "*first",
+		"conns": [{"address": "*env:DOCKER_IP:2012", "transport":"*json"}],
+	},
 },
 
 
-"data_db": {
-	"db_type": "*internal",	
+"data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
+	"db_type": "*redis",					// data_db type: <redis|mongo>
+	"db_host": "redis",						// data_db host address
+	"db_port": 6379, 						// data_db port to reach the database
+	"db_name": "10", 						// data_db database name to connect to
 },
 
 
 "stor_db": {
-	"db_type": "*internal",	
+	"db_host": "mariadb",					// the host to connect to
+	"db_password": "CGRateS.org",
 },
 
 
@@ -89,7 +100,7 @@
 
 "sessions": {
 	"enabled": true,
-	"listen_bijson": "0.0.0.0:2014",
+	"listen_bijson": "*env:DOCKER_IP:2014",
 	"suppliers_conns": ["*internal"],
 	"resources_conns": ["*internal"],
 	"attributes_conns": ["*internal"],

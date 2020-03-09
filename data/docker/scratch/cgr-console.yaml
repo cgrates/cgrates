@@ -4,10 +4,12 @@ services:
     image: dkr.cgrates.org/nightly/cgr-console
     container_name: cgr-console
     command: /cgr-console -server=cgr-engine:2012
-    # stdin_open: true
+    stdin_open: true
     tty: true
 
 networks:
   default:
     external:
       name: cgrates-net
+
+# sudo docker-compose -f cgr-console.yaml run --rm cgr-console
