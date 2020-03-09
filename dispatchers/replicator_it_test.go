@@ -33,6 +33,10 @@ var sTestsDspRpl = []func(t *testing.T){
 	testDspRplSupplierProfile,
 	testDspRplAttributeProfile,
 	testDspRplChargerProfile,
+	testDspRplDispatcherProfile,
+	testDspRplDispatcherHost,
+	testDspRplFilter,
+	testDspRplThreshold,
 }
 
 //Test start here
@@ -341,6 +345,234 @@ func testDspRplChargerProfile(t *testing.T) {
 
 	// Get ChargerProfile
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetChargerProfile, argsChargerProfile, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
+	}
+}
+
+func testDspRplDispatcherProfile(t *testing.T) {
+	// Set DispatcherProfile
+	var replyStr string
+	setDispatcherProfile := &engine.DispatcherProfileWithArgDispatcher{
+		DispatcherProfile: &engine.DispatcherProfile{
+			Tenant: "cgrates.org",
+			ID:     "ID",
+		},
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("repl12345")},
+	}
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetDispatcherProfile, setDispatcherProfile, &replyStr); err != nil {
+		t.Error("Unexpected error when calling ReplicatorSv1.SetDispatcherProfile: ", err)
+	} else if replyStr != utils.OK {
+		t.Error("Unexpected reply returned", replyStr)
+	}
+	// Get DispatcherProfile
+	var reply engine.DispatcherProfile
+	argsDispatcherProfile := &utils.TenantIDWithArgDispatcher{
+		TenantID: &utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "ID",
+		},
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("repl12345")},
+	}
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetDispatcherProfile, argsDispatcherProfile, &reply); err != nil {
+		t.Error("Unexpected error when calling ReplicatorSv1.GetDispatcherProfile: ", err)
+	} else if reply.ID != argsDispatcherProfile.ID {
+		t.Errorf("Expecting: %+v, received: %+v", argsDispatcherProfile.ID, reply.ID)
+	} else if reply.Tenant != argsDispatcherProfile.Tenant {
+		t.Errorf("Expecting: %+v, received: %+v", argsDispatcherProfile.Tenant, reply.Tenant)
+	}
+	// Stop engine 1
+	allEngine.stopEngine(t)
+
+	// Get DispatcherProfile
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetDispatcherProfile, argsDispatcherProfile, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
+	}
+
+	// Start engine 1
+	allEngine.startEngine(t)
+
+	// Remove DispatcherProfile
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1RemoveDispatcherProfile, argsDispatcherProfile, &replyStr); err != nil {
+		t.Error(err)
+	} else if replyStr != utils.OK {
+		t.Error("Unexpected reply returned", replyStr)
+	}
+
+	// Get DispatcherProfile
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetDispatcherProfile, argsDispatcherProfile, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
+	}
+}
+
+func testDspRplDispatcherHost(t *testing.T) {
+	// Set DispatcherHost
+	var replyStr string
+	setDispatcherHost := &engine.DispatcherHostWithArgDispatcher{
+		DispatcherHost: &engine.DispatcherHost{
+			Tenant: "cgrates.org",
+			ID:     "ID",
+		},
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("repl12345")},
+	}
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetDispatcherHost, setDispatcherHost, &replyStr); err != nil {
+		t.Error("Unexpected error when calling ReplicatorSv1.SetDispatcherHost: ", err)
+	} else if replyStr != utils.OK {
+		t.Error("Unexpected reply returned", replyStr)
+	}
+	// Get DispatcherHost
+	var reply engine.DispatcherHost
+	argsDispatcherHost := &utils.TenantIDWithArgDispatcher{
+		TenantID: &utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "ID",
+		},
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("repl12345")},
+	}
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetDispatcherHost, argsDispatcherHost, &reply); err != nil {
+		t.Error("Unexpected error when calling ReplicatorSv1.GetDispatcherHost: ", err)
+	} else if reply.ID != argsDispatcherHost.ID {
+		t.Errorf("Expecting: %+v, received: %+v", argsDispatcherHost.ID, reply.ID)
+	} else if reply.Tenant != argsDispatcherHost.Tenant {
+		t.Errorf("Expecting: %+v, received: %+v", argsDispatcherHost.Tenant, reply.Tenant)
+	}
+	// Stop engine 1
+	allEngine.stopEngine(t)
+
+	// Get DispatcherHost
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetDispatcherHost, argsDispatcherHost, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
+	}
+
+	// Start engine 1
+	allEngine.startEngine(t)
+
+	// Remove DispatcherHost
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1RemoveDispatcherHost, argsDispatcherHost, &replyStr); err != nil {
+		t.Error(err)
+	} else if replyStr != utils.OK {
+		t.Error("Unexpected reply returned", replyStr)
+	}
+
+	// Get DispatcherHost
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetDispatcherHost, argsDispatcherHost, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
+	}
+}
+
+func testDspRplFilter(t *testing.T) {
+	// Set Filter
+	var replyStr string
+	setFilter := &engine.FilterWithArgDispatcher{
+		Filter: &engine.Filter{
+			Tenant: "cgrates.org",
+			ID:     "ID",
+		},
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("repl12345")},
+	}
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetFilter, setFilter, &replyStr); err != nil {
+		t.Error("Unexpected error when calling ReplicatorSv1.SetFilter: ", err)
+	} else if replyStr != utils.OK {
+		t.Error("Unexpected reply returned", replyStr)
+	}
+	// Get Filter
+	var reply engine.Filter
+	argsFilter := &utils.TenantIDWithArgDispatcher{
+		TenantID: &utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "ID",
+		},
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("repl12345")},
+	}
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetFilter, argsFilter, &reply); err != nil {
+		t.Error("Unexpected error when calling ReplicatorSv1.GetFilter: ", err)
+	} else if reply.ID != argsFilter.ID {
+		t.Errorf("Expecting: %+v, received: %+v", argsFilter.ID, reply.ID)
+	} else if reply.Tenant != argsFilter.Tenant {
+		t.Errorf("Expecting: %+v, received: %+v", argsFilter.Tenant, reply.Tenant)
+	}
+	// Stop engine 1
+	allEngine.stopEngine(t)
+
+	// Get Filter
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetFilter, argsFilter, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
+	}
+
+	// Start engine 1
+	allEngine.startEngine(t)
+
+	// Remove Filter
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1RemoveFilter, argsFilter, &replyStr); err != nil {
+		t.Error(err)
+	} else if replyStr != utils.OK {
+		t.Error("Unexpected reply returned", replyStr)
+	}
+
+	// Get Filter
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetFilter, argsFilter, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
+	}
+}
+
+func testDspRplThreshold(t *testing.T) {
+	// Set DispatcherProfile
+	var replyStr string
+	setThreshold := &engine.ThresholdProfileWithArgDispatcher{
+		ThresholdProfile: &engine.ThresholdProfile{
+			Tenant: "cgrates.org",
+			ID:     "ID",
+		},
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("repl12345")},
+	}
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetThreshold, setThreshold, &replyStr); err != nil {
+		t.Error("Unexpected error when calling ReplicatorSv1.SetThreshold: ", err)
+	} else if replyStr != utils.OK {
+		t.Error("Unexpected reply returned", replyStr)
+	}
+	// Get DispatcherProfile
+	var reply engine.Threshold
+	argsThreshold := &utils.TenantIDWithArgDispatcher{
+		TenantID: &utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "ID",
+		},
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("repl12345")},
+	}
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetThreshold, argsThreshold, &reply); err != nil {
+		t.Error("Unexpected error when calling ReplicatorSv1.GetDispatcherProfile: ", err)
+	} else if reply.ID != argsThreshold.ID {
+		t.Errorf("Expecting: %+v, received: %+v", argsThreshold.ID, reply.ID)
+	} else if reply.Tenant != argsThreshold.Tenant {
+		t.Errorf("Expecting: %+v, received: %+v", argsThreshold.Tenant, reply.Tenant)
+	}
+	// Stop engine 1
+	allEngine.stopEngine(t)
+
+	// Get DispatcherProfile
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetThreshold, argsThreshold, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
+	}
+
+	// Start engine 1
+	allEngine.startEngine(t)
+
+	// Remove DispatcherProfile
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1RemoveThreshold, argsThreshold, &replyStr); err != nil {
+		t.Error(err)
+	} else if replyStr != utils.OK {
+		t.Error("Unexpected reply returned", replyStr)
+	}
+
+	// Get DispatcherProfile
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetThreshold, argsThreshold, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
 	}
 }
