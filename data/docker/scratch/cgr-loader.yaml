@@ -1,0 +1,17 @@
+version: "3.7"
+services:
+  cgr-loader:
+    image: dkr.cgrates.org/v0.10/cgr-loader
+    container_name: cgr-loader
+    volumes:
+      - ../../conf/samples/docker/:/etc/cgrates/:ro
+      - ../../tariffplans/tutorial/:/data/:ro
+    environment:
+      - DOCKER_IP=cgr-engine
+    command: /cgr-loader -config_path=/etc/cgrates/ -path=/data/ -caches_address="conn1" -scheduler_address="conn1" -verbose
+networks:
+  default:
+    external:
+      name: cgrates-net
+
+# sudo docker-compose -f cgr-loader.yaml up

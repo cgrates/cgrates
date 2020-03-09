@@ -1,0 +1,61 @@
+---
+
+- name: Add Docker's public GPG key to the APT keyring
+  become: true
+  apt_key:
+    url: https://download.docker.com/linux/{{ ansible_distribution | lower }}/gpg
+    state: present
+
+- name: Configure Docker's upstream APT repository
+  become: true
+  apt_repository:
+    repo: deb [arch=amd64] https://download.docker.com/linux/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} stable
+    state: present
+    update_cache: yes
+
+- name: Install Docker
+  become: true
+  apt:
+    name:
+      - docker-ce 
+      - docker-ce-cli 
+      - containerd.io
+    state: "present"
+
+- name: Add user(s) to "docker" group
+  become: true
+  user:
+    name: "{{ gouser }}"
+    groups: "docker"
+    append: true
+
+- name: Enable service docker and ensure it is not masked
+  become: true
+  systemd:
+    name: docker
+    state: started
+    enabled: yes
+    masked: no
+
+- name: Install Docker Module for Python
+  shell: "pip3 install docker"
+
+- name: Creates directory
+  become: yes
+  file:
+    path: /var/docker/registry
+    state: directory
+
+- name: Check if registry is running
+  become: yes
+  shell: docker container ls -q -f="name=registry"
+  register: continerList
+
+- name:  Start registry
+  become: yes
+  shell: docker run -d --name registry --restart=always -v "$(pwd)":/var/lib/registry -p 5000:5000 registry:2
+  args:
+    chdir: /var/docker/registry
+  when: continerList.stdout_lines|length == 0
+
+   
