@@ -3,13 +3,49 @@ services:
   cgr-engine:
     image: dkr.cgrates.org/nightly/cgr-engine
     container_name: cgr-engine
+    depends_on: 
+      - redis
+      - mariadb
+    restart: always
     ports:
       - 2012:2012
       - 2080:2080
     volumes:
       - ../../conf/samples/docker/:/etc/cgrates/:ro
+      - ../../tariffplans/tutorial/:/data/:ro
+    environment:
+      - DOCKER_IP=0.0.0.0
     command: /cgr-engine --logger=*stdout -httprof_path=/pprof
+  
+  redis:
+    image: redis
+    command: ["redis-server", "--appendonly", "yes"]
+    restart: always
+    hostname: redis
+    volumes:
+      - /tmp/redis_data:/data:rw
+    ports:
+      - 6379:6379
+
+  mariadb:
+    image: mariadb
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: CGRateS.org
+      MYSQL_DATABASE: cgrates
+      MYSQL_USER: cgrates
+      MYSQL_PASSWORD: CGRateS.org
+    ports:
+        - 3306:3306
+    volumes:
+      - /tmp/mysql_data/:/var/lib/mysql/:rw
+      - ../../storage/docker_mysql/scripts/:/scripts
+      - ../../storage/docker_mysql/:/docker-entrypoint-initdb.d/
+
+
 networks:
   default:
     external:
       name: cgrates-net
+
+# sudo docker-compose -f cgr-engine.yaml up

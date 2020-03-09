@@ -1,0 +1,16 @@
+version: "3.7"
+services:
+  cgr-tester:
+    image: dkr.cgrates.org/nightly/cgr-tester
+    container_name: cgr-tester
+    volumes:
+      - ../../conf/samples/docker/:/etc/cgrates/:ro
+    environment:
+      - DOCKER_IP=cgr-engine
+    command: /cgr-tester -config_path=/etc/cgrates/ 
+networks:
+  default:
+    external:
+      name: cgrates-net
+
+# sudo docker-compose -f cgr-tester.yaml up
