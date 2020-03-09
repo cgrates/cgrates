@@ -1,7 +1,7 @@
 version: "3.7"
 services:
   cgr-tester:
-    image: dkr.cgrates.org/v0.10/cgr-tester
+    image: dkr.cgrates.org/v0.10/cgr-tester:20200309151603f0ba1bc9c
     container_name: cgr-tester
     volumes:
       - ../../conf/samples/docker/:/etc/cgrates/:ro

@@ -1,7 +1,7 @@
 version: "3.7"
 services:
   cgr-console:
-    image: dkr.cgrates.org/v0.10/cgr-console
+    image: dkr.cgrates.org/v0.10/cgr-console:20200309151603f0ba1bc9c
     container_name: cgr-console
     command: /cgr-console -server=cgr-engine:2012
     stdin_open: true

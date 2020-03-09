@@ -1,7 +1,7 @@
 version: "3.7"
 services:
   cgr-engine:
-    image: dkr.cgrates.org/v0.10/cgr-engine
+    image: dkr.cgrates.org/v0.10/cgr-engine:20200309151603f0ba1bc9c
     container_name: cgr-engine
     depends_on: 
       - redis

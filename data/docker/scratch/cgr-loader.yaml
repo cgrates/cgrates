@@ -1,7 +1,7 @@
 version: "3.7"
 services:
   cgr-loader:
-    image: dkr.cgrates.org/v0.10/cgr-loader
+    image: dkr.cgrates.org/v0.10/cgr-loader:20200309151603f0ba1bc9c
     container_name: cgr-loader
     volumes:
       - ../../conf/samples/docker/:/etc/cgrates/:ro
