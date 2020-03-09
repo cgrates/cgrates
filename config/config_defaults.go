@@ -261,7 +261,7 @@ const CGRATES_CFG_JSON = `
 	"store_cdrs": true,						// store cdrs in StorDB
 	"session_cost_retries": 5,				// number of queries to session_costs before recalculating CDR
 	"chargers_conns": [],					// connection to ChargerS for CDR forking, empty to disable billing for CDRs: <""|*internal|x.y.z.y:1234>
-	"rals_conns": [],							// connections to RALs for cost calculation: <""|*internal|x.y.z.y:1234>
+	"rals_conns": [],						// connections to RALs for cost calculation: <""|*internal|x.y.z.y:1234>
 	"attributes_conns": [],					// connection to AttributeS for altering *raw CDRs, empty to disable attributes functionality: <""|*internal|x.y.z.y:1234>
 	"thresholds_conns": [],					// connection to ThresholdS for CDR reporting, empty to disable thresholds functionality: <""|*internal|x.y.z.y:1234>
 	"stats_conns": [],						// connections to StatS for CDR reporting, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>

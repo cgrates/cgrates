@@ -11,6 +11,46 @@ Due to multiple interfaces exposed, the **CDRs** is designed to function as cent
 	* \*files* like *.csv*, *.fwv*, *.xml*, *.json*.
 	* \*database events* like *sql*, *kafka*, *rabbitmq*.
 
+Parameters
+----------
+
+
+CDRs
+^^^^
+
+**CDRs** is configured within **cdrs** section from :ref:`JSON configuration <configuration>` via the following parameters:
+
+enabled
+	Will enable starting of the service. Possible values: <true|false>.
+
+extra_fields
+	Select extra fields from the request, other than the primary ones used by CGRateS (see storage schemas for listing those). Used in particular applications where the received fields are not selectable at the source(ie. FreeSWITCH JSON).
+
+store_cdrs
+	Controls storing of the received CDR within the *StorDB*. Possible values: <true|false>.
+
+session_cost_retries
+	In case of decoupling the events charging from CDRs, the charges done by :ref:`SessionS` will be stored in *sessions_costs* *StorDB* table. When receiving the CDR, these costs will be retrieved and attached to the CDR. To avoid concurrency between events and CDRs, it is possible to configure a multiple number of retries from *StorDB* table.
+
+chargers_conns
+	Connections towards :ref:`ChargerS` component to query charges for CDR events. Empty to disable the functionality.
+
+rals_conns
+	Connections towards :ref:`RALs` component to query costs for CDR events. Empty to disable the functionality.
+
+attributes_conns
+	Connections towards :ref:`AttributeS` component to alter information within CDR events. Empty to disable the functionality.
+
+thresholds_conns
+	Connections towards :ref:`ThresholdS` component to monitor and react to information within CDR events. Empty to disable the functionality.
+
+stats_conns
+	Connections towards :ref:`StatS` component to compute stat metrics for CDR events. Empty to disable the functionality.
+
+online_cdr_exports
+	List of :ref:`CDRe` profiles which will be processed for each CDR event. Empty to disable online CDR exports.
+
+
 
 APIs logic
 ----------
