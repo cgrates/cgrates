@@ -108,7 +108,7 @@ As a side note on http://pkg.cgrates.org one can find an entire archive of CGRat
 3.2. Using source
 ~~~~~~~~~~~~~~~~~
 
-For developing CGRateS and switching between its versions, we are using the **new go mods feature** introduced in go 1.13.
+For developing CGRateS and switching between its versions, we are using the **new go mods feature** introduced in go 1.14.
 
 
 3.2.1 Install GO Lang
@@ -116,7 +116,7 @@ For developing CGRateS and switching between its versions, we are using the **ne
 
 First we have to setup the GO Lang to our OS. Feel free to download 
 the latest GO binary release from https://golang.org/dl/
-In this Tutorial we are going to install Go 1.13
+In this Tutorial we are going to install Go 1.14
 
 ::
 
