@@ -110,7 +110,7 @@
 
     - name: git clone cgrates
       git:
-        repo: https://github.com/Trial97/cgrates.git
+        repo: https://github.com/cgrates/cgrates.git
         dest: '{{ cgrates_dir }}'
         update: yes
         force: yes
@@ -196,3 +196,8 @@
         docker image push 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-migrator:latest;
         docker image push 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-tester:latest;
       when: cgrates_branch == "master"
+
+    - name:  docker_tag is
+      debug:
+        msg: "{{ docker_tag }}"
+      when: docker_tag != ""
