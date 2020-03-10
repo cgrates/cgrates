@@ -639,6 +639,7 @@ const (
 	MetaReload                = "*reload"
 	MetaLoad                  = "*load"
 	MetaRemove                = "*remove"
+	MetaRemoveAll             = "*removeall"
 	MetaStore                 = "*store"
 	MetaClear                 = "*clear"
 	MetaExport                = "*export"

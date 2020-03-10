@@ -1603,3 +1603,138 @@ func TestAgReqSetFieldsInTmp(t *testing.T) {
 		t.Errorf("expecting: %+v,\n received: %+v", eMp, agReq.tmp)
 	}
 }
+
+func TestAgReqSetFieldsWithRemove(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, dm)
+	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
+	// populate request, emulating the way will be done in HTTPAgent
+	agReq.CGRRequest.Set([]string{utils.CGRID},
+		utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
+		false, false)
+	agReq.CGRRequest.Set([]string{utils.ToR}, utils.VOICE, false, false)
+	agReq.CGRRequest.Set([]string{utils.Account}, "1001", false, false)
+	agReq.CGRRequest.Set([]string{utils.Destination}, "1002", false, false)
+	agReq.CGRRequest.Set([]string{utils.AnswerTime},
+		time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC), false, false)
+	agReq.CGRRequest.Set([]string{utils.RequestType}, utils.META_PREPAID, false, false)
+	agReq.CGRRequest.Set([]string{utils.Usage}, time.Duration(3*time.Minute), false, false)
+
+	cgrRply := map[string]interface{}{
+		utils.CapAttributes: map[string]interface{}{
+			"PaypalAccount": "cgrates@paypal.com",
+		},
+		utils.CapMaxUsage: time.Duration(120 * time.Second),
+		utils.Error:       "",
+	}
+	agReq.CGRReply = config.NewNavigableMap(cgrRply)
+
+	tplFlds := []*config.FCTemplate{
+		&config.FCTemplate{Tag: "Tenant",
+			Path: utils.MetaRep + utils.NestingSep + utils.Tenant, Type: utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP)},
+		&config.FCTemplate{Tag: "Account",
+			Path: utils.MetaRep + utils.NestingSep + utils.Account, Type: utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("~*cgreq.Account", true, utils.INFIELD_SEP)},
+		&config.FCTemplate{Tag: "Destination",
+			Path: utils.MetaRep + utils.NestingSep + utils.Destination, Type: utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("~*cgreq.Destination", true, utils.INFIELD_SEP)},
+
+		&config.FCTemplate{Tag: "RequestedUsageVoice",
+			Path: utils.MetaRep + utils.NestingSep + "RequestedUsage", Type: utils.MetaVariable,
+			Filters: []string{"*string:~*cgreq.ToR:*voice"},
+			Value: config.NewRSRParsersMustCompile(
+				"~*cgreq.Usage{*duration_seconds}", true, utils.INFIELD_SEP)},
+		&config.FCTemplate{Tag: "RequestedUsageData",
+			Path: utils.MetaRep + utils.NestingSep + "RequestedUsage", Type: utils.MetaVariable,
+			Filters: []string{"*string:~*cgreq.ToR:*data"},
+			Value: config.NewRSRParsersMustCompile(
+				"~*cgreq.Usage{*duration_nanoseconds}", true, utils.INFIELD_SEP)},
+		&config.FCTemplate{Tag: "RequestedUsageSMS",
+			Path: utils.MetaRep + utils.NestingSep + "RequestedUsage", Type: utils.MetaVariable,
+			Filters: []string{"*string:~*cgreq.ToR:*sms"},
+			Value: config.NewRSRParsersMustCompile(
+				"~*cgreq.Usage{*duration_nanoseconds}", true, utils.INFIELD_SEP)},
+
+		&config.FCTemplate{Tag: "AttrPaypalAccount",
+			Path: utils.MetaRep + utils.NestingSep + "PaypalAccount", Type: utils.MetaVariable,
+			Filters: []string{"*empty:~*cgrep.Error:"},
+			Value: config.NewRSRParsersMustCompile(
+				"~*cgrep.Attributes.PaypalAccount", true, utils.INFIELD_SEP)},
+		&config.FCTemplate{Tag: "MaxUsage",
+			Path: utils.MetaRep + utils.NestingSep + "MaxUsage", Type: utils.MetaVariable,
+			Filters: []string{"*empty:~*cgrep.Error:"},
+			Value: config.NewRSRParsersMustCompile(
+				"~*cgrep.MaxUsage{*duration_seconds}", true, utils.INFIELD_SEP)},
+		&config.FCTemplate{Tag: "Error",
+			Path: utils.MetaRep + utils.NestingSep + "Error", Type: utils.MetaVariable,
+			Filters: []string{"*rsr::~*cgrep.Error(!^$)"},
+			Value: config.NewRSRParsersMustCompile(
+				"~*cgrep.Error", true, utils.INFIELD_SEP)},
+	}
+	eMp := config.NewNavigableMap(nil)
+	eMp.Set([]string{utils.Tenant}, []*config.NMItem{
+		&config.NMItem{Data: "cgrates.org", Path: []string{utils.Tenant},
+			Config: tplFlds[0]}}, false, true)
+	eMp.Set([]string{utils.Account}, []*config.NMItem{
+		&config.NMItem{Data: "1001", Path: []string{utils.Account},
+			Config: tplFlds[1]}}, false, true)
+	eMp.Set([]string{utils.Destination}, []*config.NMItem{
+		&config.NMItem{Data: "1002", Path: []string{utils.Destination},
+			Config: tplFlds[2]}}, false, true)
+	eMp.Set([]string{"RequestedUsage"}, []*config.NMItem{
+		&config.NMItem{Data: "180", Path: []string{"RequestedUsage"},
+			Config: tplFlds[3]}}, false, true)
+	eMp.Set([]string{"PaypalAccount"}, []*config.NMItem{
+		&config.NMItem{Data: "cgrates@paypal.com", Path: []string{"PaypalAccount"},
+			Config: tplFlds[6]}}, false, true)
+	eMp.Set([]string{"MaxUsage"}, []*config.NMItem{
+		&config.NMItem{Data: "120", Path: []string{"MaxUsage"},
+			Config: tplFlds[7]}}, false, true)
+
+	if err := agReq.SetFields(tplFlds); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(agReq.Reply, eMp) {
+		t.Errorf("expecting: %+v,\n received: %+v", eMp, agReq.Reply)
+	}
+
+	tplFldsRemove := []*config.FCTemplate{
+		&config.FCTemplate{Tag: "Tenant",
+			Path: utils.MetaRep + utils.NestingSep + utils.Tenant, Type: utils.MetaRemove},
+		&config.FCTemplate{Tag: "Account",
+			Path: utils.MetaRep + utils.NestingSep + utils.Account, Type: utils.MetaRemove},
+	}
+
+	eMpRemove := config.NewNavigableMap(nil)
+	eMpRemove.Set([]string{utils.Destination}, []*config.NMItem{
+		&config.NMItem{Data: "1002", Path: []string{utils.Destination},
+			Config: tplFlds[2]}}, false, true)
+	eMpRemove.Set([]string{"RequestedUsage"}, []*config.NMItem{
+		&config.NMItem{Data: "180", Path: []string{"RequestedUsage"},
+			Config: tplFlds[3]}}, false, true)
+	eMpRemove.Set([]string{"PaypalAccount"}, []*config.NMItem{
+		&config.NMItem{Data: "cgrates@paypal.com", Path: []string{"PaypalAccount"},
+			Config: tplFlds[6]}}, false, true)
+	eMpRemove.Set([]string{"MaxUsage"}, []*config.NMItem{
+		&config.NMItem{Data: "120", Path: []string{"MaxUsage"},
+			Config: tplFlds[7]}}, false, true)
+
+	if err := agReq.SetFields(tplFldsRemove); err != nil {
+		t.Error(err)
+	} else if agReq.Reply.String() != eMpRemove.String() { // when compare ignore orders
+		t.Errorf("expecting: %+v,\n received: %+v", eMpRemove.String(), agReq.Reply.String())
+	}
+
+	tplFldsRemove = []*config.FCTemplate{
+		&config.FCTemplate{Path: utils.MetaRep, Type: utils.MetaRemoveAll},
+	}
+
+	eMpRemove = config.NewNavigableMap(nil)
+	if err := agReq.SetFields(tplFldsRemove); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(agReq.Reply, eMpRemove) {
+		t.Errorf("expecting: %+v,\n received: %+v", eMpRemove, agReq.Reply)
+	}
+}
