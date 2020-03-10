@@ -63,6 +63,17 @@ func NewRSRParsersMustCompile(parsersRules string, allFiltersMatch bool, rsrSepa
 // RSRParsers is a set of RSRParser
 type RSRParsers []*RSRParser
 
+func (prsrs RSRParsers) GetRule() (out string) {
+	for i, prsr := range prsrs {
+		if i == 0 {
+			out = prsr.Rules
+		} else {
+			out = out + utils.NestingSep + prsr.Rules
+		}
+	}
+	return
+}
+
 func (prsrs RSRParsers) Compile() (err error) {
 	for _, prsr := range prsrs {
 		if err = prsr.Compile(); err != nil {
