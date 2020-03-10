@@ -160,7 +160,7 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RequestProcessor,
 		utils.MetaDryRun, utils.MetaAuth,
 		utils.MetaInitiate, utils.MetaUpdate,
 		utils.MetaTerminate, utils.MetaMessage,
-		utils.MetaCDRs, utils.MetaEvent, utils.META_NONE} {
+		utils.MetaCDRs, utils.MetaEvent, utils.META_NONE, utils.MetaRadauth} {
 		if reqProcessor.Flags.HasKey(typ) { // request type is identified through flags
 			reqType = typ
 			break
@@ -292,6 +292,18 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RequestProcessor,
 			return
 		}
 	case utils.MetaCDRs: // allow this method
+	case utils.MetaRadauth:
+		radiusPass, err := agReq.Vars.FieldAsString([]string{utils.RadiusPassword})
+		if err != nil {
+			return false, err
+		}
+		userPass, err := agReq.Vars.FieldAsString([]string{utils.UserPassword})
+		if err != nil {
+			return false, err
+		}
+		if radiusPass != userPass {
+			agReq.CGRReply.Set([]string{utils.Error}, "Failed to authenticate request", false, false)
+		}
 	}
 	// separate request so we can capture the Terminate/Event also here
 	if reqProcessor.Flags.HasKey(utils.MetaCDRs) {
@@ -306,13 +318,14 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RequestProcessor,
 	if err := agReq.SetFields(reqProcessor.ReplyFields); err != nil {
 		return false, err
 	}
+	utils.ToJSON(agReq.Reply)
 	if err := radReplyAppendAttributes(rply, agReq, reqProcessor.ReplyFields); err != nil {
 		return false, err
 	}
 	if reqProcessor.Flags.HasKey(utils.MetaLog) {
 		utils.Logger.Info(
 			fmt.Sprintf("<%s> LOG, Radius reply: %s",
-				utils.RadiusAgent, utils.ToJSON(rply)))
+				utils.RadiusAgent, utils.ToIJSON(rply)))
 	}
 	if reqType == utils.MetaDryRun {
 		utils.Logger.Info(

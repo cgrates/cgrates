@@ -80,6 +80,8 @@ func radFieldOutVal(pkt *radigo.Packet, agReq *AgentRequest,
 		outVal, err = cfgFld.Value.ParseValue(utils.EmptyString)
 	case utils.META_COMPOSED, utils.MetaVariable:
 		outVal = radComposedFieldValue(pkt, agReq, cfgFld.Value)
+	case utils.META_NONE:
+		return
 	default:
 		return utils.EmptyString, fmt.Errorf("unsupported configuration field type: <%s>", cfgFld.Type)
 	}
@@ -100,15 +102,18 @@ func radReplyAppendAttributes(reply *radigo.Packet, agReq *AgentRequest,
 		if err != nil {
 			return err
 		}
-		if cfgFld.Path == MetaRadReplyCode { // Special case used to control the reply code of RADIUS reply
-			if err = reply.SetCodeWithName(fmtOut); err != nil {
+		utils.Logger.Debug(utils.ToJSON(cfgFld))
+		if cfgFld.Path != utils.EmptyString || cfgFld.Type == utils.MetaRemoveAll {
+			if cfgFld.Path == MetaRadReplyCode { // Special case used to control the reply code of RADIUS reply
+				if err = reply.SetCodeWithName(fmtOut); err != nil {
+					return err
+				}
+				continue
+			}
+			attrName, vendorName := attrVendorFromPath(cfgFld.Path)
+			if err = reply.AddAVPWithName(attrName, fmtOut, vendorName); err != nil {
 				return err
 			}
-			continue
-		}
-		attrName, vendorName := attrVendorFromPath(cfgFld.Path)
-		if err = reply.AddAVPWithName(attrName, fmtOut, vendorName); err != nil {
-			return err
 		}
 		if cfgFld.BreakOnSuccess {
 			break
