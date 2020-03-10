@@ -592,16 +592,16 @@ func testAttrITMigrateV4(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_1",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:Accont:1001"},
+		FilterIDs: []string{"*string:~*req.Accont:1001"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 		Attributes: []*v4Attribute{
 			&v4Attribute{
-				FilterIDs: []string{"*string:FL1:In1"},
+				FilterIDs: []string{"*string:~*req.FL1:In1"},
 				FieldName: "FL1",
-				Value:     config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
+				Value:     config.NewRSRParsersMustCompile("~Category:s/(.*)/${1}_UK_Mobile_Vodafone_GBRVF/", true, utils.INFIELD_SEP),
 				Type:      utils.MetaVariable,
 			},
 		},
@@ -612,17 +612,17 @@ func testAttrITMigrateV4(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_1",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:Accont:1001"},
+		FilterIDs: []string{"*string:~*req.Accont:1001"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 		Attributes: []*engine.Attribute{
 			{
-				FilterIDs: []string{"*string:FL1:In1"},
+				FilterIDs: []string{"*string:~*req.FL1:In1"},
 				Path:      utils.MetaReq + utils.NestingSep + "FL1",
 				Type:      utils.MetaVariable,
-				Value:     config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
+				Value:     config.NewRSRParsersMustCompile("~*req.Category:s/(.*)/${1}_UK_Mobile_Vodafone_GBRVF/", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 20,

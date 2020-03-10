@@ -214,3 +214,48 @@ func TestV3AttributeProfileAsAttributeProfile(t *testing.T) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(attrPrf), utils.ToJSON(ap))
 	}
 }
+
+func TestV4AttributeProfileAsAttributeProfile(t *testing.T) {
+	cloneExpTime := time.Now().Add(time.Duration(20 * time.Minute))
+	v4Attribute := v4AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "attributeprofile1",
+		Contexts:  []string{utils.MetaSessionS},
+		FilterIDs: []string{"filter1"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     cloneExpTime,
+		},
+		Attributes: []*v4Attribute{
+			&v4Attribute{
+				FieldName: "FL1",
+				Type:      utils.MetaVariable,
+				Value:     config.NewRSRParsersMustCompile("~Category:s/(.*)/${1}_UK_Mobile_Vodafone_GBRVF/", true, utils.INFIELD_SEP),
+			},
+		},
+		Weight: 20,
+	}
+	attrPrf := &engine.AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "attributeprofile1",
+		Contexts:  []string{utils.MetaSessionS},
+		FilterIDs: []string{"filter1"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     cloneExpTime,
+		},
+		Attributes: []*engine.Attribute{
+			&engine.Attribute{
+				Path:  utils.MetaReq + utils.NestingSep + "FL1",
+				Type:  utils.MetaVariable,
+				Value: config.NewRSRParsersMustCompile("~*req.Category:s/(.*)/${1}_UK_Mobile_Vodafone_GBRVF/", true, utils.INFIELD_SEP),
+			},
+		},
+		Weight: 20,
+	}
+	if ap, err := v4Attribute.AsAttributeProfile(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(attrPrf, ap) {
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(attrPrf), utils.ToJSON(ap))
+	}
+}
