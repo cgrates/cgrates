@@ -30,11 +30,11 @@ func TestCdreCfgClone(t *testing.T) {
 	initContentFlds := []*FCTemplate{
 		{Tag: "CgrId",
 			Type:  utils.META_COMPOSED,
-			Path:  "cgrid",
+			Path:  utils.PathItems{{Field: "cgrid"}},
 			Value: cgrIDRsrs},
 		{Tag: "RunId",
 			Type:  utils.META_COMPOSED,
-			Path:  "runid",
+			Path:  utils.PathItems{{Field: "runid"}},
 			Value: runIDRsrs},
 	}
 	initCdreCfg := &CdreCfg{
@@ -48,11 +48,11 @@ func TestCdreCfgClone(t *testing.T) {
 	eClnContentFlds := []*FCTemplate{
 		{Tag: "CgrId",
 			Type:  utils.META_COMPOSED,
-			Path:  "cgrid",
+			Path:  utils.PathItems{{Field: "cgrid"}},
 			Value: cgrIDRsrs},
 		{Tag: "RunId",
 			Type:  utils.META_COMPOSED,
-			Path:  "runid",
+			Path:  utils.PathItems{{Field: "runid"}},
 			Value: runIDRsrs},
 	}
 	eClnCdreCfg := &CdreCfg{
@@ -72,9 +72,9 @@ func TestCdreCfgClone(t *testing.T) {
 	if !reflect.DeepEqual(eClnCdreCfg, clnCdreCfg) { // MOdifying a field after clone should not affect cloned instance
 		t.Errorf("Cloned result: %+v", clnCdreCfg)
 	}
-	clnCdreCfg.Fields[0].Path = "destination"
-	if initCdreCfg.Fields[0].Path != "cgrid" {
-		t.Error("Unexpected change of Path: ", initCdreCfg.Fields[0].Path)
+	clnCdreCfg.Fields[0].Path[0].Field = "destination"
+	if initCdreCfg.Fields[0].Path[0].Field != "cgrid" {
+		t.Error("Unexpected change of Path:  ", initCdreCfg.Fields[0].Path.String())
 	}
 
 }
@@ -119,7 +119,7 @@ func TestCdreCfgloadFromJsonCfg(t *testing.T) {
 		Attempts:       1,
 		FieldSeparator: utils.CSV_SEP,
 		Fields: []*FCTemplate{{
-			Path:  "*exp.CGRID",
+			Path:  utils.PathItems{{Field: utils.MetaExp}, {Field: "CGRID"}},
 			Tag:   "*exp.CGRID",
 			Type:  "*composed",
 			Value: val,

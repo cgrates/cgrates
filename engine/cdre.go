@@ -29,7 +29,6 @@ import (
 	"path"
 	"path/filepath"
 	"strconv"
-	"strings"
 	"sync"
 	"time"
 
@@ -145,7 +144,7 @@ func (cdre *CDRExporter) metaHandler(tag, arg string) (string, error) {
 // Compose and cache the header
 func (cdre *CDRExporter) composeHeader() (err error) {
 	for _, cfgFld := range cdre.exportTemplate.Fields {
-		if !strings.HasPrefix(cfgFld.Path, utils.MetaHdr) {
+		if cfgFld.Path[0].Field != utils.MetaHdr {
 			continue
 		}
 		if len(cfgFld.Filters) != 0 {
@@ -194,7 +193,7 @@ func (cdre *CDRExporter) composeHeader() (err error) {
 // Compose and cache the trailer
 func (cdre *CDRExporter) composeTrailer() (err error) {
 	for _, cfgFld := range cdre.exportTemplate.Fields {
-		if !strings.HasPrefix(cfgFld.Path, utils.MetaTrl) {
+		if cfgFld.Path[0].Field != utils.MetaTrl {
 			continue
 		}
 		if len(cfgFld.Filters) != 0 {

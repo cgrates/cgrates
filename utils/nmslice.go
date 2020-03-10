@@ -35,7 +35,7 @@ func (nms *NMSlice) String() (out string) {
 	return "[" + out + "]"
 }
 func (nms *NMSlice) Interface() interface{} { return nms }
-func (nms *NMSlice) Field(path []*PathItem) (val NM, err error) {
+func (nms *NMSlice) Field(path PathItems) (val NM, err error) {
 	if len(path) == 0 {
 		return nil, fmt.Errorf("Wrong path")
 	}
@@ -54,7 +54,7 @@ func (nms *NMSlice) Field(path []*PathItem) (val NM, err error) {
 	}
 	return (*nms)[idx].Field(path[1:])
 }
-func (nms *NMSlice) Set(path []*PathItem, val NM) (err error) {
+func (nms *NMSlice) Set(path PathItems, val NM) (err error) {
 	if len(path) == 0 || path[0].Index == nil {
 		return fmt.Errorf("Wrong path")
 	}
@@ -86,7 +86,7 @@ func (nms *NMSlice) Set(path []*PathItem, val NM) (err error) {
 	}
 	return (*nms)[idx].Set(path[1:], val)
 }
-func (nms *NMSlice) Remove(path []*PathItem) (err error) {
+func (nms *NMSlice) Remove(path PathItems) (err error) {
 	if len(path) == 0 || path[0].Index == nil {
 		return fmt.Errorf("Wrong path")
 	}

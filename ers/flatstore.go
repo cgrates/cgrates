@@ -159,8 +159,9 @@ func (rdr *FlatstoreER) processFile(fPath, fName string) (err error) {
 		} else {
 			pr, err := NewUnpairedRecord(record, rdr.Config().Timezone, fName)
 			if err != nil {
-				fmt.Sprintf("<%s> Converting row : <%s> to unpairedRecord , ignoring due to error: <%s>",
-					utils.ERs, record, err.Error())
+				utils.Logger.Warning(
+					fmt.Sprintf("<%s> Converting row : <%s> to unpairedRecord , ignoring due to error: <%s>",
+						utils.ERs, record, err.Error()))
 				continue
 			}
 			if val, has := rdr.cache.Get(pr.OriginID); !has {
@@ -170,8 +171,9 @@ func (rdr *FlatstoreER) processFile(fPath, fName string) (err error) {
 				pair := val.(*UnpairedRecord)
 				record, err = pairToRecord(pair, pr)
 				if err != nil {
-					fmt.Sprintf("<%s> Merging unpairedRecords : <%s> and <%s> to record , ignoring due to error: <%s>",
-						utils.ERs, utils.ToJSON(pair), utils.ToJSON(pr), err.Error())
+					utils.Logger.Warning(
+						fmt.Sprintf("<%s> Merging unpairedRecords : <%s> and <%s> to record , ignoring due to error: <%s>",
+							utils.ERs, utils.ToJSON(pair), utils.ToJSON(pr), err.Error()))
 					continue
 				}
 				rdr.cache.Remove(pr.OriginID)
@@ -180,7 +182,7 @@ func (rdr *FlatstoreER) processFile(fPath, fName string) (err error) {
 
 		// build Usage from Fields based on record lenght
 		for i, cntFld := range rdr.Config().Fields {
-			if cntFld.Path == utils.MetaCgreq+utils.NestingSep+utils.Usage {
+			if cntFld.Path.String() == utils.MetaCgreq+utils.NestingSep+utils.Usage {
 				rdr.Config().Fields[i].Value = config.NewRSRParsersMustCompile("~*req."+strconv.Itoa(len(record)-1), true, utils.INFIELD_SEP) // in case of flatstore, last element will be the duration computed by us
 			}
 		}

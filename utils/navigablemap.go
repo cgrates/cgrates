@@ -22,29 +22,29 @@ package utils
 func NewOrderedNavigableMap() *OrderedNavigableMap {
 	return &OrderedNavigableMap{
 		nm:    NavigableMap2{},
-		order: [][]*PathItem{},
+		order: []PathItems{},
 	}
 }
 
 // OrderedNavigableMap is the same as NavigableMap2 but keeps the order of fields
 type OrderedNavigableMap struct {
 	nm    NM
-	order [][]*PathItem
+	order []PathItems
 }
 
 // String returns the map as json string
 func (onm *OrderedNavigableMap) String() string { return onm.nm.String() }
 
 // GetOrder returns the order the fields were set in NavigableMap2
-func (onm *OrderedNavigableMap) GetOrder() [][]*PathItem { return onm.order }
-func (onm *OrderedNavigableMap) Interface() interface{}  { return onm.nm }
-func (onm *OrderedNavigableMap) Field(fldPath []*PathItem) (val NM, err error) {
+func (onm *OrderedNavigableMap) GetOrder() []PathItems  { return onm.order }
+func (onm *OrderedNavigableMap) Interface() interface{} { return onm.nm }
+func (onm *OrderedNavigableMap) Field(fldPath PathItems) (val NM, err error) {
 	return onm.nm.Field(fldPath)
 }
 func (onm *OrderedNavigableMap) Type() NMType { return onm.nm.Type() }
 func (onm *OrderedNavigableMap) Empty() bool  { return onm.nm.Empty() }
 
-func (onm *OrderedNavigableMap) Remove(path []*PathItem) (err error) {
+func (onm *OrderedNavigableMap) Remove(path PathItems) (err error) {
 	if err = onm.nm.Remove(path); err != nil {
 		return
 	}
@@ -53,7 +53,7 @@ func (onm *OrderedNavigableMap) Remove(path []*PathItem) (err error) {
 }
 
 // Set sets the value at the given path
-func (onm *OrderedNavigableMap) Set(fldPath []*PathItem, val NM) (err error) {
+func (onm *OrderedNavigableMap) Set(fldPath PathItems, val NM) (err error) {
 	switch val.Type() {
 	case NMInterfaceType:
 		var dataMap NM = onm.nm
@@ -91,7 +91,7 @@ func (onm *OrderedNavigableMap) Set(fldPath []*PathItem, val NM) (err error) {
 				}
 				l := val.Len()
 				for j := 0; j < l; j++ {
-					newpath := make([]*PathItem, len(fldPath))
+					newpath := make(PathItems, len(fldPath))
 					copy(newpath, fldPath)
 					newpath[len(newpath)-1].Index = IntPointer(j)
 					onm.order = append(onm.order, newpath)
@@ -108,7 +108,7 @@ func (onm *OrderedNavigableMap) Set(fldPath []*PathItem, val NM) (err error) {
 				}
 				l := val.Len()
 				for j := 0; j < l; j++ {
-					newpath := make([]*PathItem, len(fldPath))
+					newpath := make(PathItems, len(fldPath))
 					copy(newpath, fldPath)
 					newpath[len(newpath)-1] = &PathItem{
 						Field: newpath[len(newpath)-1].Field,
@@ -128,7 +128,7 @@ func (onm *OrderedNavigableMap) Set(fldPath []*PathItem, val NM) (err error) {
 
 // removePath removes any reference to the given path from order
 // extremly slow method
-func (onm *OrderedNavigableMap) removePath(path []*PathItem) {
+func (onm *OrderedNavigableMap) removePath(path PathItems) {
 	lenpath := len(path)
 	for i := 0; i < len(onm.order); {
 		p := onm.order[i]

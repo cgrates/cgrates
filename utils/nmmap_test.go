@@ -45,21 +45,21 @@ func TestNavigableMap(t *testing.T) {
 	if nm.Type() != NMMapType {
 		t.Errorf("Expected %v ,received: %v", NMInterfaceType, nm.Type())
 	}
-	path := []*PathItem{{Field: "Field1"}}
+	path := PathItems{{Field: "Field1"}}
 	if val, err := nm.Field(path); err != nil {
 		t.Error(err)
 	} else if val.Interface() != 10 {
 		t.Errorf("Expected %q ,received: %q", 10, val.Interface())
 	}
 
-	path = []*PathItem{{Field: "Field3"}, {Field: "Field4"}, {Field: "Field5"}}
+	path = PathItems{{Field: "Field3"}, {Field: "Field4"}, {Field: "Field5"}}
 	if val, err := nm.Field(path); err != nil {
 		t.Error(err)
 	} else if val.Interface() != 5 {
 		t.Errorf("Expected %q ,received: %q", 5, val.Interface())
 	}
 
-	path = []*PathItem{{Field: "Field2", Index: IntPointer(2)}}
+	path = PathItems{{Field: "Field2", Index: IntPointer(2)}}
 	if err := nm.Set(path, NewNMInterface("500")); err != nil {
 		t.Error(err)
 	}
@@ -69,17 +69,17 @@ func TestNavigableMap(t *testing.T) {
 		t.Errorf("Expected %q ,received: %q", "500", val.Interface())
 	}
 
-	path = []*PathItem{{Field: "Field2", Index: IntPointer(1)}, {Field: "Account"}}
+	path = PathItems{{Field: "Field2", Index: IntPointer(1)}, {Field: "Account"}}
 	if err := nm.Set(path, NewNMInterface("5")); err != nil {
 		t.Error(err)
 	}
-	path = []*PathItem{{Field: "Field2", Index: IntPointer(1)}, {Field: "Account"}}
+	path = PathItems{{Field: "Field2", Index: IntPointer(1)}, {Field: "Account"}}
 	if val, err := nm.Field(path); err != nil {
 		t.Error(err)
 	} else if val.Interface() != "5" {
 		t.Errorf("Expected %q ,received: %q", "5", val.Interface())
 	}
-	path = []*PathItem{{Field: "Field2", Index: IntPointer(1)}, {Field: "Account", Index: IntPointer(0)}}
+	path = PathItems{{Field: "Field2", Index: IntPointer(1)}, {Field: "Account", Index: IntPointer(0)}}
 	if _, err := nm.Field(path); err != ErrNotFound {
 		t.Error(err)
 	}
