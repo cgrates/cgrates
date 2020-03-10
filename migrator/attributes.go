@@ -425,10 +425,21 @@ func (v4AttrPrf v4AttributeProfile) AsAttributeProfile() (attrPrf *engine.Attrib
 		ActivationInterval: v4AttrPrf.ActivationInterval,
 	}
 	for _, attr := range v4AttrPrf.Attributes {
+		val := attr.Value.GetRule()
+		rsrVal := attr.Value
+		if strings.HasPrefix(val, utils.DynamicDataPrefix) {
+			val = val[1:] // remove the DynamicDataPrefix
+			val = utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + val
+			rsrVal, err = config.NewRSRParsers(val, true, config.CgrConfig().GeneralCfg().RSRSep)
+			if err != nil {
+				return nil, err
+			}
+		}
+
 		attrPrf.Attributes = append(attrPrf.Attributes, &engine.Attribute{
 			FilterIDs: attr.FilterIDs,
 			Path:      utils.MetaReq + utils.NestingSep + attr.FieldName,
-			Value:     attr.Value,
+			Value:     rsrVal,
 			Type:      attr.Type,
 		})
 	}
