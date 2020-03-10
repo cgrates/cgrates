@@ -152,7 +152,45 @@ func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 		} else if !pass {
 			continue
 		}
-		if tplFld.Type != utils.META_NONE {
+		switch tplFld.Type {
+		case utils.META_NONE:
+		case utils.MetaRemove:
+			fldPath := strings.Split(tplFld.Path, utils.NestingSep)
+			switch fldPath[0] {
+			default:
+				return fmt.Errorf("unsupported field prefix: <%s> when set fields", fldPath[0])
+			case utils.MetaVars:
+				ar.Vars.Remove(fldPath[1:])
+			case utils.MetaCgreq:
+				ar.CGRRequest.Remove(fldPath[1:])
+			case utils.MetaCgrep:
+				ar.CGRReply.Remove(fldPath[1:])
+			case utils.MetaRep:
+				ar.Reply.Remove(fldPath[1:])
+			case utils.MetaDiamreq:
+				ar.diamreq.Remove(fldPath[1:])
+			case utils.MetaTmp:
+				ar.tmp.Remove(fldPath[1:])
+			}
+		case utils.MetaRemoveAll:
+			fldPath := strings.Split(tplFld.Path, utils.NestingSep)
+			switch fldPath[0] {
+			default:
+				return fmt.Errorf("unsupported field prefix: <%s> when set fields", fldPath[0])
+			case utils.MetaVars:
+				ar.Vars = config.NewNavigableMap(nil)
+			case utils.MetaCgreq:
+				ar.CGRRequest = config.NewNavigableMap(nil)
+			case utils.MetaCgrep:
+				ar.CGRReply = config.NewNavigableMap(nil)
+			case utils.MetaRep:
+				ar.Reply = config.NewNavigableMap(nil)
+			case utils.MetaDiamreq:
+				ar.diamreq = config.NewNavigableMap(nil)
+			case utils.MetaTmp:
+				ar.tmp = config.NewNavigableMap(nil)
+			}
+		default:
 			out, err := ar.ParseField(tplFld)
 			if err != nil {
 				if err == utils.ErrNotFound {
