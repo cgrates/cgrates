@@ -655,7 +655,7 @@ func TestCDRAsExportRecord(t *testing.T) {
 	prsr := config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+utils.Destination, true, utils.INFIELD_SEP)
 	cfgCdrFld := &config.FCTemplate{
 		Tag:      "destination",
-		Path:     "*exp.Destination",
+		Path:     utils.PathItems{{Field: utils.MetaExp}, {Field: "Destination"}},
 		Type:     utils.META_COMPOSED,
 		Value:    prsr,
 		Timezone: "UTC",
@@ -672,7 +672,7 @@ func TestCDRAsExportRecord(t *testing.T) {
 
 	cfgCdrFld = &config.FCTemplate{
 		Tag:        "Destination",
-		Path:       "*exp.Destination",
+		Path:       utils.PathItems{{Field: utils.MetaExp}, {Field: "Destination"}},
 		Type:       utils.META_COMPOSED,
 		Value:      prsr,
 		MaskDestID: "MASKED_DESTINATIONS",
@@ -687,7 +687,7 @@ func TestCDRAsExportRecord(t *testing.T) {
 
 	cfgCdrFld = &config.FCTemplate{
 		Tag:        "MaskedDest",
-		Path:       "*exp.MaskedDest",
+		Path:       utils.PathItems{{Field: utils.MetaExp}, {Field: "MaskedDest"}},
 		Type:       utils.MetaMaskedDestination,
 		Value:      prsr,
 		MaskDestID: "MASKED_DESTINATIONS",
@@ -702,7 +702,7 @@ func TestCDRAsExportRecord(t *testing.T) {
 	dmForCDR := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	cfgCdrFld = &config.FCTemplate{
 		Tag:      "destination",
-		Path:     "*exp.Destination",
+		Path:     utils.PathItems{{Field: utils.MetaExp}, {Field: "Destination"}},
 		Type:     utils.META_COMPOSED,
 		Value:    prsr,
 		Filters:  []string{"*string:~*req.Tenant:itsyscom.com"},
@@ -720,7 +720,7 @@ func TestCDRAsExportRecord(t *testing.T) {
 	cfgCdrFld = &config.FCTemplate{
 		Tag:      "stop_time",
 		Type:     utils.MetaDateTime,
-		Path:     "*exp.stop_time",
+		Path:     utils.PathItems{{Field: utils.MetaExp}, {Field: "stop_time"}},
 		Value:    prsr,
 		Layout:   layout,
 		Timezone: "UTC",
@@ -735,7 +735,7 @@ func TestCDRAsExportRecord(t *testing.T) {
 	cfgCdrFld = &config.FCTemplate{
 		Tag:      "stop_time",
 		Type:     utils.MetaDateTime,
-		Path:     "*exp.stop_time",
+		Path:     utils.PathItems{{Field: utils.MetaExp}, {Field: "stop_time"}},
 		Value:    prsr,
 		Filters:  []string{"*string:~*req.Tenant:itsyscom.com"},
 		Layout:   layout,
@@ -751,7 +751,7 @@ func TestCDRAsExportRecord(t *testing.T) {
 	cfgCdrFld = &config.FCTemplate{
 		Tag:      "stop_time",
 		Type:     utils.MetaDateTime,
-		Path:     "*exp.stop_time",
+		Path:     utils.PathItems{{Field: utils.MetaExp}, {Field: "stop_time"}},
 		Value:    prsr,
 		Layout:   layout,
 		Timezone: "UTC"}
@@ -764,7 +764,7 @@ func TestCDRAsExportRecord(t *testing.T) {
 	cfgCdrFld = &config.FCTemplate{
 		Tag:   "CGRIDFromCostDetails",
 		Type:  utils.META_COMPOSED,
-		Path:  "*exp.CGRIDFromCostDetails",
+		Path:  utils.PathItems{{Field: utils.MetaExp}, {Field: "CGRIDFromCostDetails"}},
 		Value: prsr,
 	}
 	if expRecord, err := cdr.AsExportRecord([]*config.FCTemplate{cfgCdrFld}, false, nil, nil); err != nil {
@@ -776,7 +776,7 @@ func TestCDRAsExportRecord(t *testing.T) {
 	cfgCdrFld = &config.FCTemplate{
 		Tag:   "AccountID",
 		Type:  utils.META_COMPOSED,
-		Path:  "*exp.CustomAccountID",
+		Path:  utils.PathItems{{Field: utils.MetaExp}, {Field: "CustomAccountID"}},
 		Value: prsr,
 	}
 	if expRecord, err := cdr.AsExportRecord([]*config.FCTemplate{cfgCdrFld}, false, nil, nil); err != nil {
@@ -790,7 +790,7 @@ func TestCDRAsExportRecord(t *testing.T) {
 	cfgCdrFld = &config.FCTemplate{
 		Tag:   "DestinationID",
 		Type:  utils.META_COMPOSED,
-		Path:  "*exp.CustomDestinationID",
+		Path:  utils.PathItems{{Field: utils.MetaExp}, {Field: "CustomDestinationID"}},
 		Value: prsr,
 	}
 	if expRecord, err := cdr.AsExportRecord([]*config.FCTemplate{cfgCdrFld}, false, nil, nil); err != nil {
@@ -804,7 +804,7 @@ func TestCDRAsExportRecord(t *testing.T) {
 	cfgCdrFld = &config.FCTemplate{
 		Tag:   "DestinationID",
 		Type:  utils.META_COMPOSED,
-		Path:  "*exp.CustomDestinationID",
+		Path:  utils.PathItems{{Field: utils.MetaExp}, {Field: "CustomDestinationID"}},
 		Value: prsr,
 	}
 	if expRecord, err := cdr.AsExportRecord([]*config.FCTemplate{cfgCdrFld}, false, nil, nil); err != nil {
@@ -832,11 +832,11 @@ func TestCDRAsExportMap(t *testing.T) {
 		"FieldExtra1":     "val_extr1",
 	}
 	expFlds := []*config.FCTemplate{
-		&config.FCTemplate{Path: utils.MetaExp + utils.NestingSep + utils.CGRID, Type: utils.META_COMPOSED,
+		&config.FCTemplate{Path: utils.PathItems{{Field: utils.MetaExp}, {Field: utils.CGRID}}, Type: utils.META_COMPOSED,
 			Value: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+utils.CGRID, true, utils.INFIELD_SEP)},
-		&config.FCTemplate{Path: utils.MetaExp + utils.NestingSep + utils.Destination, Type: utils.META_COMPOSED,
+		&config.FCTemplate{Path: utils.PathItems{{Field: utils.MetaExp}, {Field: utils.Destination}}, Type: utils.META_COMPOSED,
 			Value: config.NewRSRParsersMustCompile("~*req.Destination:s/^\\+(\\d+)$/00${1}/", true, utils.INFIELD_SEP)},
-		&config.FCTemplate{Path: utils.MetaExp + utils.NestingSep + "FieldExtra1", Type: utils.META_COMPOSED,
+		&config.FCTemplate{Path: utils.PathItems{{Field: utils.MetaExp}, {Field: "FieldExtra1"}}, Type: utils.META_COMPOSED,
 			Value: config.NewRSRParsersMustCompile("~*req.field_extr1", true, utils.INFIELD_SEP)},
 	}
 	if cdrMp, err := cdr.AsExportMap(expFlds, false, nil, nil); err != nil {
@@ -1138,7 +1138,7 @@ func TestCDRexportFieldValue(t *testing.T) {
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 	}
 
-	cfgCdrFld := &config.FCTemplate{Path: "*exp.SetupTime", Type: utils.META_COMPOSED,
+	cfgCdrFld := &config.FCTemplate{Path: utils.PathItems{{Field: utils.MetaExp}, {Field: "SetupTime"}}, Type: utils.META_COMPOSED,
 		Value: config.NewRSRParsersMustCompile("~SetupTime", true, utils.INFIELD_SEP)}
 
 	eVal := "2013-11-07T08:42:20Z"

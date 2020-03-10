@@ -204,7 +204,7 @@ func testPartITHandleCdr3File(t *testing.T) {
 func testPartITVerifyFiles(t *testing.T) {
 	filesInDir, _ := ioutil.ReadDir("/tmp/partErs1/out/")
 	if len(filesInDir) == 0 {
-		t.Errorf("No files found in folder: <%s>", "/tmp/partErs1/out")
+		t.Fatalf("No files found in folder: <%s>", "/tmp/partErs1/out")
 	}
 	var fileName string
 	for _, file := range filesInDir { // First file in directory is the one we need, harder to find it's name out of config

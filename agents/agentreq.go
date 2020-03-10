@@ -69,7 +69,7 @@ func NewAgentRequest(req utils.DataProvider,
 	} else {
 		ar.Tenant = dfltTenant
 	}
-	ar.Vars.Set([]*utils.PathItem{{Field: utils.NodeID}}, utils.NewNMInterface(config.CgrConfig().GeneralCfg().NodeID))
+	ar.Vars.Set(utils.PathItems{{Field: utils.NodeID}}, utils.NewNMInterface(config.CgrConfig().GeneralCfg().NodeID))
 	return
 }
 
@@ -161,8 +161,8 @@ func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 				}
 				return err
 			}
-			fldPath := strings.Split(tplFld.Path, utils.NestingSep)
-			path := utils.NewPathToItem(tplFld.Path)
+			fldPath := tplFld.Path.StringSlice()
+			path := tplFld.Path.Clone() // need to clone so me do not modify the template
 			valIndx := 0
 
 			nMItm := &config.NMItem{Data: out, Path: fldPath[1:], Config: tplFld}
@@ -177,7 +177,6 @@ func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 					valIndx = valSet.Len() - 1
 					prevNMItem := valSet[valIndx] // could be we need nil protection here
 					nMItm.Data = utils.IfaceAsString(prevNMItem.Interface()) + utils.IfaceAsString(out)
-
 				case utils.MetaGroup: // in case of *group type simply append to valSet
 					valIndx = valSet.Len()
 				default:
@@ -394,7 +393,7 @@ func (ar *AgentRequest) setCGRReply(rply utils.NavigableMapper, errRply error) (
 		if rply != nil {
 			nm = rply.AsNavigableMap()
 		}
-		nm.Set([]*utils.PathItem{{Field: utils.Error}}, utils.NewNMInterface("")) // enforce empty error
+		nm.Set(utils.PathItems{{Field: utils.Error}}, utils.NewNMInterface("")) // enforce empty error
 	}
 	*ar.CGRReply = nm // update value so we can share CGRReply
 	return

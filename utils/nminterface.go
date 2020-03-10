@@ -24,13 +24,13 @@ type NMInterface struct{ data interface{} }
 
 func (nmi *NMInterface) String() string         { return IfaceAsString(nmi.data) }
 func (nmi *NMInterface) Interface() interface{} { return nmi.data }
-func (nmi *NMInterface) Field(path []*PathItem) (val NM, err error) {
+func (nmi *NMInterface) Field(path PathItems) (val NM, err error) {
 	return nil, ErrNotImplemented
 }
-func (nmi *NMInterface) Set(path []*PathItem, val NM) (err error) {
+func (nmi *NMInterface) Set(path PathItems, val NM) (err error) {
 	return ErrNotImplemented
 }
-func (nmi *NMInterface) Remove(path []*PathItem) (err error) {
+func (nmi *NMInterface) Remove(path PathItems) (err error) {
 	return ErrNotImplemented
 }
 func (nmi *NMInterface) Type() NMType { return NMInterfaceType }

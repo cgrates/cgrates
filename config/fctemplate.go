@@ -31,9 +31,9 @@ func NewFCTemplateFromFCTemplateJsonCfg(jsnCfg *FcTemplateJsonCfg, separator str
 		fcTmp.Type = *jsnCfg.Type
 	}
 	if jsnCfg.Path != nil {
-		fcTmp.Path = *jsnCfg.Path
+		fcTmp.Path = utils.NewPathToItem(*jsnCfg.Path)
+		fcTmp.Tag = *jsnCfg.Path
 	}
-	fcTmp.Tag = fcTmp.Path
 	if jsnCfg.Tag != nil {
 		fcTmp.Tag = *jsnCfg.Tag
 	}
@@ -95,9 +95,9 @@ func NewFCTemplateFromFCTemplateJsonCfg(jsnCfg *FcTemplateJsonCfg, separator str
 
 type FCTemplate struct {
 	Tag              string
-	Type             string   // Type of field
-	Path             string   // Field identifier
-	Filters          []string // list of filter profiles
+	Type             string          // Type of field
+	Path             utils.PathItems // Field identifier
+	Filters          []string        // list of filter profiles
 	Value            RSRParsers
 	Width            int
 	Strip            string
@@ -162,7 +162,7 @@ func (self *FCTemplate) Clone() *FCTemplate {
 	cln := new(FCTemplate)
 	cln.Tag = self.Tag
 	cln.Type = self.Type
-	cln.Path = self.Path
+	cln.Path = self.Path.Clone()
 	if len(self.Filters) != 0 {
 		cln.Filters = make([]string, len(self.Filters))
 		for idx, val := range self.Filters {

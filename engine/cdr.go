@@ -313,21 +313,21 @@ func (cdr *CDR) combimedCdrFieldVal(cfgCdrFld *config.FCTemplate, groupCDRs []*C
 func (cdr *CDR) exportFieldValue(cfgCdrFld *config.FCTemplate, filterS *FilterS) (retVal string, err error) {
 	for _, rsrFld := range cfgCdrFld.Value {
 		var cdrVal string
-		switch cfgCdrFld.Path {
-		case utils.MetaExp + utils.NestingSep + utils.COST:
+		switch cfgCdrFld.Path[1].Field {
+		case utils.COST:
 			cdrVal = cdr.FormatCost(cfgCdrFld.CostShiftDigits,
 				cfgCdrFld.RoundingDecimals)
-		case utils.MetaExp + utils.NestingSep + utils.SetupTime:
+		case utils.SetupTime:
 			if cfgCdrFld.Layout == "" {
 				cfgCdrFld.Layout = time.RFC3339
 			}
 			cdrVal = cdr.SetupTime.Format(cfgCdrFld.Layout)
-		case utils.MetaExp + utils.NestingSep + utils.AnswerTime: // Format time based on layout
+		case utils.AnswerTime: // Format time based on layout
 			if cfgCdrFld.Layout == "" {
 				cfgCdrFld.Layout = time.RFC3339
 			}
 			cdrVal = cdr.AnswerTime.Format(cfgCdrFld.Layout)
-		case utils.MetaExp + utils.NestingSep + utils.Destination:
+		case utils.Destination:
 			cdrVal, err = cdr.FieldAsString(rsrFld)
 			if err != nil {
 				return "", err
@@ -413,7 +413,7 @@ func (cdr *CDR) AsExportRecord(exportFields []*config.FCTemplate,
 		utils.MetaEC:  cdr.CostDetails,
 	}
 	for _, cfgFld := range exportFields {
-		if !strings.HasPrefix(cfgFld.Path, utils.MetaExp+utils.NestingSep) {
+		if cfgFld.Path[0].Field != utils.MetaExp {
 			continue
 		}
 		if pass, err := filterS.Pass(cdr.Tenant,
@@ -443,7 +443,7 @@ func (cdr *CDR) AsExportMap(exportFields []*config.FCTemplate, httpSkipTLSCheck 
 		utils.MetaEC:  cdr.CostDetails,
 	}
 	for _, cfgFld := range exportFields {
-		if !strings.HasPrefix(cfgFld.Path, utils.MetaExp+utils.NestingSep) {
+		if cfgFld.Path[0].Field != utils.MetaExp {
 			continue
 		}
 		if pass, err := filterS.Pass(cdr.Tenant,
@@ -458,7 +458,7 @@ func (cdr *CDR) AsExportMap(exportFields []*config.FCTemplate, httpSkipTLSCheck 
 				err.Error(), utils.ToJSON(cfgFld), utils.ToJSON(cdr)))
 			return nil, err
 		}
-		expMap[strings.TrimPrefix(cfgFld.Path, utils.MetaExp+utils.NestingSep)] += fmtOut
+		expMap[cfgFld.Path[1:].String()] += fmtOut
 	}
 	return
 }

@@ -216,13 +216,14 @@ func messageSetAVPsWithPath(m *diam.Message, pathStr []string,
 	if len(pathStr) == 0 {
 		return errors.New("empty path as AVP filter")
 	}
-	path := utils.SliceStringToIface(pathStr)
+	path := make([]interface{}, len(pathStr))
 	dictAVPs := make([]*dict.AVP, len(path)) // for each subpath, one dictionary AVP
-	for i, subpath := range path {
+	for i, subpath := range pathStr {
+		path[i] = subpath
 		if dictAVP, err := m.Dictionary().FindAVP(m.Header.ApplicationID, subpath); err != nil {
 			return err
 		} else if dictAVP == nil {
-			return fmt.Errorf("cannot find AVP with id: %s", path[len(path)-1])
+			return fmt.Errorf("cannot find AVP with id: %s", pathStr[len(pathStr)-1])
 		} else {
 			dictAVPs[i] = dictAVP
 		}

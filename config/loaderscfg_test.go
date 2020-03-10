@@ -83,7 +83,7 @@ func TestLoaderSCfgloadFromJsonCfg(t *testing.T) {
 				Fields: []*FCTemplate{
 					{
 						Tag:       "TenantID",
-						Path:      "Tenant",
+						Path:      utils.PathItems{{Field: "Tenant"}},
 						Type:      "*composed",
 						Value:     val,
 						Mandatory: true,

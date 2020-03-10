@@ -64,19 +64,20 @@ func (ld LoaderData) UpdateFromCSV(fileName string, record []string,
 		if err != nil {
 			return err
 		}
+		path := cfgFld.Path.String()
 		switch cfgFld.Type {
 		case utils.META_COMPOSED:
-			if _, has := ld[cfgFld.Path]; !has {
-				ld[cfgFld.Path] = out
-			} else if valOrig, canCast := ld[cfgFld.Path].(string); canCast {
+			if _, has := ld[path]; !has {
+				ld[path] = out
+			} else if valOrig, canCast := ld[path].(string); canCast {
 				valOrig += out
-				ld[cfgFld.Path] = valOrig
+				ld[path] = valOrig
 			}
 		case utils.MetaVariable:
-			ld[cfgFld.Path] = out
+			ld[path] = out
 		case utils.MetaString:
-			if _, has := ld[cfgFld.Path]; !has {
-				ld[cfgFld.Path] = out
+			if _, has := ld[path]; !has {
+				ld[path] = out
 			}
 		}
 	}

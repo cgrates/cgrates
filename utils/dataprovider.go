@@ -74,18 +74,18 @@ type PathItem struct {
 type NM interface {
 	String() string
 	Interface() interface{}
-	Field(path []*PathItem) (val NM, err error)
+	Field(path PathItems) (val NM, err error)
 	GetField(path *PathItem) (val NM, err error)
 	SetField(path *PathItem, val NM) (err error)
-	Set(path []*PathItem, val NM) (err error)
-	Remove(path []*PathItem) (err error)
+	Set(path PathItems, val NM) (err error)
+	Remove(path PathItems) (err error)
 	Type() NMType
 	Empty() bool
 	Len() int
 }
 
-func NewPathToItemFromSlice(path []string) (pItms []*PathItem) {
-	pItms = make([]*PathItem, len(path))
+func NewPathToItemFromSlice(path []string) (pItms PathItems) {
+	pItms = make(PathItems, len(path))
 	for i, v := range path {
 		field, indx := GetPathIndex(v)
 		pItms[i] = &PathItem{
@@ -96,7 +96,7 @@ func NewPathToItemFromSlice(path []string) (pItms []*PathItem) {
 	return
 }
 
-func NewPathToItem(path string) []*PathItem {
+func NewPathToItem(path string) PathItems {
 	return NewPathToItemFromSlice(strings.Split(path, NestingSep))
 }
 
@@ -121,7 +121,21 @@ func (p *PathItem) Equal(p2 *PathItem) bool {
 	return false
 }
 
-func PathItemsToString(path []*PathItem) (out string) {
+func (p *PathItem) Clone() (c *PathItem) {
+	if p == nil {
+		return
+	}
+	c = new(PathItem)
+	c.Field = p.Field
+	if p.Index != nil {
+		c.Index = IntPointer(*p.Index)
+	}
+	return
+}
+
+type PathItems []*PathItem
+
+func (path PathItems) String() (out string) {
 	for _, v := range path {
 		out += NestingSep + v.String()
 	}
@@ -130,4 +144,23 @@ func PathItemsToString(path []*PathItem) (out string) {
 	}
 	return out[1:]
 
+}
+
+func (path PathItems) StringSlice() (out []string) {
+	out = make([]string, len(path))
+	for i, v := range path {
+		out[i] = v.String()
+	}
+	return
+}
+
+func (path PathItems) Clone() (c PathItems) {
+	if path == nil {
+		return
+	}
+	c = make(PathItems, len(path))
+	for i, v := range path {
+		c[i] = v.Clone()
+	}
+	return
 }

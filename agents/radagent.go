@@ -85,7 +85,7 @@ func (ra *RadiusAgent) handleAuth(req *radigo.Packet) (rpl *radigo.Packet, err e
 			utils.FirstNonEmpty(reqProcessor.Timezone,
 				config.CgrConfig().GeneralCfg().DefaultTimezone),
 			ra.filterS, nil, nil)
-		agReq.Vars.Set([]*utils.PathItem{{Field: MetaRadReqType}}, utils.NewNMInterface(utils.StringToInterface(MetaRadAuth)))
+		agReq.Vars.Set(utils.PathItems{{Field: MetaRadReqType}}, utils.NewNMInterface(utils.StringToInterface(MetaRadAuth)))
 		var lclProcessed bool
 		if lclProcessed, err = ra.processRequest(reqProcessor, agReq, rpl); lclProcessed {
 			processed = lclProcessed
@@ -300,7 +300,7 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RequestProcessor,
 			&utils.CGREventWithArgDispatcher{CGREvent: cgrEv,
 				ArgDispatcher: cgrArgs.ArgDispatcher},
 			rplyCDRs); err != nil {
-			agReq.CGRReply.Set([]*utils.PathItem{{Field: utils.Error}}, utils.NewNMInterface(err.Error()))
+			agReq.CGRReply.Set(utils.PathItems{{Field: utils.Error}}, utils.NewNMInterface(err.Error()))
 		}
 	}
 	if err := agReq.SetFields(reqProcessor.ReplyFields); err != nil {

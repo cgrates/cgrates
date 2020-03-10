@@ -35,7 +35,7 @@ func (nmm NavigableMap2) String() (out string) {
 	return "{" + out + "}"
 }
 func (nmm NavigableMap2) Interface() interface{} { return nmm }
-func (nmm NavigableMap2) Field(path []*PathItem) (val NM, err error) {
+func (nmm NavigableMap2) Field(path PathItems) (val NM, err error) {
 	if len(path) == 0 {
 		return nil, fmt.Errorf("Wrong path")
 	}
@@ -65,7 +65,7 @@ func (nmm NavigableMap2) Field(path []*PathItem) (val NM, err error) {
 	}
 	panic("BUG")
 }
-func (nmm NavigableMap2) Set(path []*PathItem, val NM) (err error) {
+func (nmm NavigableMap2) Set(path PathItems, val NM) (err error) {
 	if len(path) == 0 {
 		return fmt.Errorf("Wrong path")
 	}
@@ -119,7 +119,7 @@ func (nmm NavigableMap2) Set(path []*PathItem, val NM) (err error) {
 	}
 	return el.Set(path[1:], val)
 }
-func (nmm NavigableMap2) Remove(path []*PathItem) (err error) {
+func (nmm NavigableMap2) Remove(path PathItems) (err error) {
 	if len(path) == 0 {
 		return fmt.Errorf("Wrong path")
 	}

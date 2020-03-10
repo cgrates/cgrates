@@ -36,13 +36,13 @@ type NMItem struct {
 
 func (nmi *NMItem) String() string         { return utils.ToJSON(nmi) }
 func (nmi *NMItem) Interface() interface{} { return nmi.Data }
-func (nmi *NMItem) Field(path []*utils.PathItem) (val utils.NM, err error) {
+func (nmi *NMItem) Field(path utils.PathItems) (val utils.NM, err error) {
 	return nil, utils.ErrNotImplemented
 }
-func (nmi *NMItem) Set(path []*utils.PathItem, val utils.NM) (err error) {
+func (nmi *NMItem) Set(path utils.PathItems, val utils.NM) (err error) {
 	return utils.ErrNotImplemented
 }
-func (nmi *NMItem) Remove(path []*utils.PathItem) (err error) {
+func (nmi *NMItem) Remove(path utils.PathItems) (err error) {
 	return utils.ErrNotImplemented
 }
 func (nmi *NMItem) Type() utils.NMType { return utils.NMInterfaceType }
@@ -173,7 +173,7 @@ func NMAsCGREvent(nM *utils.OrderedNavigableMap, tnt string, pathSep string) (cg
 	for _, branchPath := range order {
 		var val interface{}
 		val, _ = nM.Field(branchPath)
-		opath := utils.GetPathWithoutIndex(utils.PathItemsToString(branchPath))
+		opath := utils.GetPathWithoutIndex(branchPath.String())
 		if nmItm, isNMItem := val.(*NMItem); isNMItem { // special case when we have added multiple items inside a key, used in agents
 			if nmItm.Config == nil ||
 				nmItm.Config.AttributeID == "" {
