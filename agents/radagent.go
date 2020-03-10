@@ -103,6 +103,11 @@ func (ra *RadiusAgent) handleAuth(req *radigo.Packet) (rpl *radigo.Packet, err e
 			utils.RadiusAgent, utils.ToJSON(req)))
 		return nil, nil
 	}
+	if err := radReplyAppendAttributes(rpl, rplyNM); err != nil {
+		utils.Logger.Err(fmt.Sprintf("<%s> err: %s, replying to message: %+v",
+			utils.RadiusAgent, err.Error(), utils.ToIJSON(req)))
+		return nil, err
+	}
 	return
 }
 
@@ -134,12 +139,17 @@ func (ra *RadiusAgent) handleAcct(req *radigo.Packet) (rpl *radigo.Packet, err e
 	}
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s> ignoring request: %s, ",
-			utils.RadiusAgent, err.Error(), utils.ToJSON(req)))
+			utils.RadiusAgent, err.Error(), utils.ToIJSON(req)))
 		return nil, nil
 	} else if !processed {
 		utils.Logger.Err(fmt.Sprintf("<%s> no request processor enabled, ignoring request %s",
-			utils.RadiusAgent, utils.ToJSON(req)))
+			utils.RadiusAgent, utils.ToIJSON(req)))
 		return nil, nil
+	}
+	if err := radReplyAppendAttributes(rpl, rplyNM); err != nil {
+		utils.Logger.Err(fmt.Sprintf("<%s> err: %s, replying to message: %+v",
+			utils.RadiusAgent, err.Error(), utils.ToIJSON(req)))
+		return nil, err
 	}
 	return
 }
@@ -293,17 +303,16 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RequestProcessor,
 		}
 	case utils.MetaCDRs: // allow this method
 	case utils.MetaRadauth:
-		radiusPass, err := agReq.Vars.FieldAsString([]string{utils.RadiusPassword})
-		if err != nil {
-			return false, err
-		}
-		userPass, err := agReq.Vars.FieldAsString([]string{utils.UserPassword})
-		if err != nil {
-			return false, err
-		}
-		if radiusPass != userPass {
-			agReq.CGRReply.Set([]string{utils.Error}, "Failed to authenticate request", false, false)
-		}
+		// To be implemented
+		//// radius pass will be taken from request directly
+		//radiusPass := "CGRateS.org"
+		//userPass, err := agReq.Vars.FieldAsString([]string{utils.UserPassword})
+		//if err != nil {
+		//	return false, err
+		//}
+		//if radiusPass != userPass {
+		//	agReq.CGRReply.Set([]string{utils.Error}, "Failed to authenticate request", false, false)
+		//}
 	}
 	// separate request so we can capture the Terminate/Event also here
 	if reqProcessor.Flags.HasKey(utils.MetaCDRs) {
@@ -318,10 +327,7 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RequestProcessor,
 	if err := agReq.SetFields(reqProcessor.ReplyFields); err != nil {
 		return false, err
 	}
-	utils.ToJSON(agReq.Reply)
-	if err := radReplyAppendAttributes(rply, agReq, reqProcessor.ReplyFields); err != nil {
-		return false, err
-	}
+
 	if reqProcessor.Flags.HasKey(utils.MetaLog) {
 		utils.Logger.Info(
 			fmt.Sprintf("<%s> LOG, Radius reply: %s",

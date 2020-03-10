@@ -74,8 +74,8 @@
 			"request_fields":[
 				{"tag": "Category", "path": "*cgreq.Category", "type": "*constant", "value": "call"},
 				{"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*constant",
-					"value": "*prepaid", "mandatory": true},	
-				{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable",
+					"value": "*prepaid", "mandatory": true},
+				{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*composed",
 					"value": "~*req.Acct-Session-Id;-;~*req.Sip-From-Tag", "mandatory": true},
 				{"tag": "Account", "path": "*cgreq.Account", "type": "*variable",
 					"value": "~*req.User-Name", "mandatory": true},
@@ -97,19 +97,17 @@
 		},
 		{
 			"id": "RadiusPAPAuth",
-			"filters": ["*string:~*vars.*radReqType:*radAuth","*exists:~*req.User-Password"],
+			"filters": ["*string:~*vars.*radReqType:*radAuth","*exists:~*req.User-Password:"],
 			"flags": ["*radauth", "*log"],
 			"request_fields":[
-				{"tag": "UserPassword", "path": "*vars.UserPassword", "type": "*composed",
+				{"tag": "UserPassword", "path": "*vars.UserPassword", "type": "*variable",
 					"value": "~*cgrep.Attributes.PasswordFromAttributes"},
-				{"tag": "PasswordFromRadius", "path": "*vars.RadiusPassword", "type": "*composed",
-					"value": "~*req.Password"}
 			],
 			"reply_fields":[
 				{"filters": ["*empty:~*cgrep.Error:"], "type": "*none", "blocker": true},
 				{"filters": ["*notempty:~*cgrep.Error:"], "type": "*removeall", "path": "*rep"},
 				{"tag": "Code", "path": "*rep.*radReplyCode", "type": "*constant", "value": "AccessReject"},
-				{"tag": "ReplyMessage", "path": "*rep.Reply-Message", "type": "*composed", "value": "~*cgrep.Error"}
+				{"tag": "ReplyMessage", "path": "*rep.Reply-Message", "type": "*variable", "value": "~*cgrep.Error"}
 			]
 		},
 		{
@@ -165,7 +163,7 @@
 				{"tag": "RemoteAddr" , "path": "*cgreq.RemoteAddr", "type": "*remote_host"},
 			],
 			"reply_fields":[],
-		},	
+		},
 	],
 },
 

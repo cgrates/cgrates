@@ -21,102 +21,39 @@ package agents
 import (
 	"fmt"
 	"net"
-	"strings"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/radigo"
 )
 
-// radAttrVendorFromPath returns AttributenName and VendorName from path
-// path should be the form attributeName or vendorName/attributeName
-func attrVendorFromPath(path string) (attrName, vendorName string) {
-	splt := strings.Split(path, utils.NestingSep)
-	if len(splt) > 2 {
-		vendorName, attrName = splt[1], splt[2]
-	} else {
-		attrName = splt[1]
-	}
-	return
-}
-
-// radComposedFieldValue extracts the field value out of RADIUS packet
-// procVars have priority over packet variables
-func radComposedFieldValue(pkt *radigo.Packet,
-	agReq *AgentRequest, outTpl config.RSRParsers) (outVal string) {
-	for _, rsrTpl := range outTpl {
-		if out, err := rsrTpl.ParseDataProvider(agReq, utils.NestingSep); err != nil {
-			utils.Logger.Warning(
-				fmt.Sprintf("<%s> %s",
-					utils.RadiusAgent, err.Error()))
-			continue
-		} else {
-			outVal += out
-			continue
-		}
-		for _, avp := range pkt.AttributesWithName(
-			attrVendorFromPath(rsrTpl.Rules)) {
-			if parsed, err := rsrTpl.ParseValue(avp.GetStringValue()); err != nil {
-				utils.Logger.Warning(
-					fmt.Sprintf("<%s> %s",
-						utils.RadiusAgent, err.Error()))
-			} else {
-				outVal += parsed
-			}
-		}
-	}
-	return outVal
-}
-
-// radFieldOutVal formats the field value retrieved from RADIUS packet
-func radFieldOutVal(pkt *radigo.Packet, agReq *AgentRequest,
-	cfgFld *config.FCTemplate) (outVal string, err error) {
-	// different output based on cgrFld.Type
-	switch cfgFld.Type {
-	case utils.META_FILLER:
-		outVal, err = cfgFld.Value.ParseValue(utils.EmptyString)
-		cfgFld.Padding = utils.MetaRight
-	case utils.META_CONSTANT:
-		outVal, err = cfgFld.Value.ParseValue(utils.EmptyString)
-	case utils.META_COMPOSED, utils.MetaVariable:
-		outVal = radComposedFieldValue(pkt, agReq, cfgFld.Value)
-	case utils.META_NONE:
-		return
-	default:
-		return utils.EmptyString, fmt.Errorf("unsupported configuration field type: <%s>", cfgFld.Type)
-	}
-	if err != nil {
-		return
-	}
-	if outVal, err = utils.FmtFieldWidth(cfgFld.Tag, outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
-		return utils.EmptyString, err
-	}
-	return
-}
-
 // radReplyAppendAttributes appends attributes to a RADIUS reply based on predefined template
-func radReplyAppendAttributes(reply *radigo.Packet, agReq *AgentRequest,
-	cfgFlds []*config.FCTemplate) (err error) {
-	for _, cfgFld := range cfgFlds {
-		fmtOut, err := radFieldOutVal(reply, agReq, cfgFld)
-		if err != nil {
-			return err
+func radReplyAppendAttributes(reply *radigo.Packet, rplNM *config.NavigableMap) (err error) {
+	for _, val := range rplNM.Values() {
+		nmItms, isNMItems := val.([]*config.NMItem)
+		if !isNMItems {
+			return fmt.Errorf("cannot encode reply value: %s, err: not NMItems", utils.ToJSON(val))
 		}
-		utils.Logger.Debug(utils.ToJSON(cfgFld))
-		if cfgFld.Path != utils.EmptyString || cfgFld.Type == utils.MetaRemoveAll {
-			if cfgFld.Path == MetaRadReplyCode { // Special case used to control the reply code of RADIUS reply
-				if err = reply.SetCodeWithName(fmtOut); err != nil {
-					return err
-				}
-				continue
-			}
-			attrName, vendorName := attrVendorFromPath(cfgFld.Path)
-			if err = reply.AddAVPWithName(attrName, fmtOut, vendorName); err != nil {
+		// find out the first itm which is not an attribute
+		var itm *config.NMItem
+		if len(nmItms) == 1 {
+			itm = nmItms[0]
+		}
+		if itm.Path[0] == MetaRadReplyCode { // Special case used to control the reply code of RADIUS reply
+			if err = reply.SetCodeWithName(utils.IfaceAsString(itm.Data)); err != nil {
 				return err
 			}
+			continue
 		}
-		if cfgFld.BreakOnSuccess {
-			break
+		var attrName, vendorName string
+		if len(itm.Path) > 2 {
+			vendorName, attrName = itm.Path[0], itm.Path[1]
+		} else {
+			attrName = itm.Path[0]
+		}
+
+		if err = reply.AddAVPWithName(attrName, utils.IfaceAsString(itm.Data), vendorName); err != nil {
+			return err
 		}
 	}
 	return
