@@ -168,7 +168,6 @@ func testDiamItInitCfg(t *testing.T) {
 		t.Fatal(err)
 	}
 	daCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
-	config.SetCgrConfig(daCfg)
 	rplyTimeout, _ = utils.ParseDurationWithSecs(*replyTimeout)
 	if isDispatcherActive {
 		daCfg.ListenCfg().RPCJSONListen = ":6012"
