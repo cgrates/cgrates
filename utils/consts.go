@@ -954,7 +954,7 @@ const (
 	ReplicatorSv1GetResource             = "ReplicatorSv1.GetResource"
 	ReplicatorSv1GetResourceProfile      = "ReplicatorSv1.GetResourceProfile"
 	ReplicatorSv1GetActionTriggers       = "ReplicatorSv1.GetActionTriggers"
-	ReplicatorSv1GetShareGroup           = "ReplicatorSv1.GetShareGroup"
+	ReplicatorSv1GetSharedGroup          = "ReplicatorSv1.GetSharedGroup"
 	ReplicatorSv1GetActions              = "ReplicatorSv1.GetActions"
 	ReplicatorSv1GetActionPlan           = "ReplicatorSv1.GetActionPlan"
 	ReplicatorSv1GetAllActionPlans       = "ReplicatorSv1.GetAllActionPlans"

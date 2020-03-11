@@ -157,8 +157,8 @@ func (rplSv1 *ReplicatorSv1) GetActionTriggers(id *utils.StringWithApiKey, reply
 	return nil
 }
 
-//GetShareGroup
-func (rplSv1 *ReplicatorSv1) GetShareGroup(id *utils.StringWithApiKey, reply *engine.SharedGroup) error {
+//GetSharedGroup
+func (rplSv1 *ReplicatorSv1) GetSharedGroup(id *utils.StringWithApiKey, reply *engine.SharedGroup) error {
 	if rcv, err := rplSv1.dm.DataDB().GetSharedGroupDrv(id.Arg); err != nil {
 		return err
 	} else {

@@ -906,9 +906,9 @@ func (dS *DispatcherReplicatorSv1) GetActionTriggers(id *utils.StringWithApiKey,
 	return dS.dS.ReplicatorSv1GetActionTriggers(id, reply)
 }
 
-// GetShareGroup
-func (dS *DispatcherReplicatorSv1) GetShareGroup(id *utils.StringWithApiKey, reply *engine.SharedGroup) error {
-	return dS.dS.ReplicatorSv1GetShareGroup(id, reply)
+// GetSharedGroup
+func (dS *DispatcherReplicatorSv1) GetSharedGroup(id *utils.StringWithApiKey, reply *engine.SharedGroup) error {
+	return dS.dS.ReplicatorSv1GetSharedGroup(id, reply)
 }
 
 // GetActions
