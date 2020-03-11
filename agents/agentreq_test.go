@@ -64,43 +64,43 @@ func TestAgReqSetFields(t *testing.T) {
 	agReq.CGRReply = &cgrRply
 
 	tplFlds := []*config.FCTemplate{
-		&config.FCTemplate{Tag: "Tenant",
+		&config.FCTemplate{Tag: "Tenant", PathSlice: []string{utils.MetaRep, utils.Tenant},
 			Path: utils.PathItems{{Field: utils.MetaRep}, {Field: utils.Tenant}}, Type: utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP)},
-		&config.FCTemplate{Tag: "Account",
+		&config.FCTemplate{Tag: "Account", PathSlice: []string{utils.MetaRep, utils.Account},
 			Path: utils.PathItems{{Field: utils.MetaRep}, {Field: utils.Account}}, Type: utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("~*cgreq.Account", true, utils.INFIELD_SEP)},
-		&config.FCTemplate{Tag: "Destination",
+		&config.FCTemplate{Tag: "Destination", PathSlice: []string{utils.MetaRep, utils.Destination},
 			Path: utils.PathItems{{Field: utils.MetaRep}, {Field: utils.Destination}}, Type: utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("~*cgreq.Destination", true, utils.INFIELD_SEP)},
 
-		&config.FCTemplate{Tag: "RequestedUsageVoice",
+		&config.FCTemplate{Tag: "RequestedUsageVoice", PathSlice: []string{utils.MetaRep, "RequestedUsage"},
 			Path: utils.PathItems{{Field: utils.MetaRep}, {Field: "RequestedUsage"}}, Type: utils.MetaVariable,
 			Filters: []string{"*string:~*cgreq.ToR:*voice"},
 			Value: config.NewRSRParsersMustCompile(
 				"~*cgreq.Usage{*duration_seconds}", true, utils.INFIELD_SEP)},
-		&config.FCTemplate{Tag: "RequestedUsageData",
+		&config.FCTemplate{Tag: "RequestedUsageData", PathSlice: []string{utils.MetaRep, "RequestedUsage"},
 			Path: utils.PathItems{{Field: utils.MetaRep}, {Field: "RequestedUsage"}}, Type: utils.MetaVariable,
 			Filters: []string{"*string:~*cgreq.ToR:*data"},
 			Value: config.NewRSRParsersMustCompile(
 				"~*cgreq.Usage{*duration_nanoseconds}", true, utils.INFIELD_SEP)},
-		&config.FCTemplate{Tag: "RequestedUsageSMS",
+		&config.FCTemplate{Tag: "RequestedUsageSMS", PathSlice: []string{utils.MetaRep, "RequestedUsage"},
 			Path: utils.PathItems{{Field: utils.MetaRep}, {Field: "RequestedUsage"}}, Type: utils.MetaVariable,
 			Filters: []string{"*string:~*cgreq.ToR:*sms"},
 			Value: config.NewRSRParsersMustCompile(
 				"~*cgreq.Usage{*duration_nanoseconds}", true, utils.INFIELD_SEP)},
 
-		&config.FCTemplate{Tag: "AttrPaypalAccount",
+		&config.FCTemplate{Tag: "AttrPaypalAccount", PathSlice: []string{utils.MetaRep, "PaypalAccount"},
 			Path: utils.PathItems{{Field: utils.MetaRep}, {Field: "PaypalAccount"}}, Type: utils.MetaVariable,
 			Filters: []string{"*empty:~*cgrep.Error:"},
 			Value: config.NewRSRParsersMustCompile(
 				"~*cgrep.Attributes.PaypalAccount", true, utils.INFIELD_SEP)},
-		&config.FCTemplate{Tag: "MaxUsage",
+		&config.FCTemplate{Tag: "MaxUsage", PathSlice: []string{utils.MetaRep, "MaxUsage"},
 			Path: utils.PathItems{{Field: utils.MetaRep}, {Field: "MaxUsage"}}, Type: utils.MetaVariable,
 			Filters: []string{"*empty:~*cgrep.Error:"},
 			Value: config.NewRSRParsersMustCompile(
 				"~*cgrep.MaxUsage{*duration_seconds}", true, utils.INFIELD_SEP)},
-		&config.FCTemplate{Tag: "Error",
+		&config.FCTemplate{Tag: "Error", PathSlice: []string{utils.MetaRep, "Error"},
 			Path: utils.PathItems{{Field: utils.MetaRep}, {Field: "Error"}}, Type: utils.MetaVariable,
 			Filters: []string{"*notempty:~*cgrep.Error:"},
 			Value: config.NewRSRParsersMustCompile(
@@ -162,10 +162,11 @@ func TestAgentRequestSetFields(t *testing.T) {
 	// case utils.MetaVars
 	input = []*config.FCTemplate{
 		&config.FCTemplate{
-			Path:  utils.PathItems{{Field: utils.MetaVars}, {Field: "Account"}},
-			Tag:   fmt.Sprintf("%s.Account", utils.MetaVars),
-			Type:  utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~"+utils.MetaReq+".Account", false, ";"),
+			Path:      utils.PathItems{{Field: utils.MetaVars}, {Field: "Account"}},
+			PathSlice: []string{utils.MetaVars, utils.Account},
+			Tag:       fmt.Sprintf("%s.Account", utils.MetaVars),
+			Type:      utils.MetaVariable,
+			Value:     config.NewRSRParsersMustCompile("~"+utils.MetaReq+".Account", false, ";"),
 		},
 	}
 	if err := ar.SetFields(input); err != nil {
@@ -183,10 +184,11 @@ func TestAgentRequestSetFields(t *testing.T) {
 	// case utils.MetaCgreq
 	input = []*config.FCTemplate{
 		&config.FCTemplate{
-			Path:  utils.PathItems{{Field: utils.MetaCgreq}, {Field: "Account"}},
-			Tag:   fmt.Sprintf("%s.Account", utils.MetaCgreq),
-			Type:  utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~"+utils.MetaReq+".Account", false, ";"),
+			Path:      utils.PathItems{{Field: utils.MetaCgreq}, {Field: "Account"}},
+			PathSlice: []string{utils.MetaCgreq, utils.Account},
+			Tag:       fmt.Sprintf("%s.Account", utils.MetaCgreq),
+			Type:      utils.MetaVariable,
+			Value:     config.NewRSRParsersMustCompile("~"+utils.MetaReq+".Account", false, ";"),
 		},
 	}
 	if err := ar.SetFields(input); err != nil {
@@ -204,10 +206,11 @@ func TestAgentRequestSetFields(t *testing.T) {
 	// case utils.MetaCgrep
 	input = []*config.FCTemplate{
 		&config.FCTemplate{
-			Path:  utils.PathItems{{Field: utils.MetaCgrep}, {Field: "Account"}},
-			Tag:   fmt.Sprintf("%s.Account", utils.MetaCgrep),
-			Type:  utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~"+utils.MetaReq+".Account", false, ";"),
+			Path:      utils.PathItems{{Field: utils.MetaCgrep}, {Field: "Account"}},
+			PathSlice: []string{utils.MetaCgrep, utils.Account},
+			Tag:       fmt.Sprintf("%s.Account", utils.MetaCgrep),
+			Type:      utils.MetaVariable,
+			Value:     config.NewRSRParsersMustCompile("~"+utils.MetaReq+".Account", false, ";"),
 		},
 	}
 	if err := ar.SetFields(input); err != nil {
@@ -225,10 +228,11 @@ func TestAgentRequestSetFields(t *testing.T) {
 	// case utils.MetaRep
 	input = []*config.FCTemplate{
 		&config.FCTemplate{
-			Path:  utils.PathItems{{Field: utils.MetaRep}, {Field: "Account"}},
-			Tag:   fmt.Sprintf("%s.Account", utils.MetaRep),
-			Type:  utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~"+utils.MetaReq+".Account", false, ";"),
+			Path:      utils.PathItems{{Field: utils.MetaRep}, {Field: "Account"}},
+			PathSlice: []string{utils.MetaRep, utils.Account},
+			Tag:       fmt.Sprintf("%s.Account", utils.MetaRep),
+			Type:      utils.MetaVariable,
+			Value:     config.NewRSRParsersMustCompile("~"+utils.MetaReq+".Account", false, ";"),
 		},
 	}
 	if err := ar.SetFields(input); err != nil {
@@ -246,10 +250,11 @@ func TestAgentRequestSetFields(t *testing.T) {
 	// case utils.MetaDiamreq
 	input = []*config.FCTemplate{
 		&config.FCTemplate{
-			Path:  utils.PathItems{{Field: utils.MetaDiamreq}, {Field: "Account"}},
-			Tag:   fmt.Sprintf("%s.Account", utils.MetaDiamreq),
-			Type:  utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~"+utils.MetaReq+".Account", false, ";"),
+			Path:      utils.PathItems{{Field: utils.MetaDiamreq}, {Field: "Account"}},
+			PathSlice: []string{utils.MetaDiamreq, utils.Account},
+			Tag:       fmt.Sprintf("%s.Account", utils.MetaDiamreq),
+			Type:      utils.MetaVariable,
+			Value:     config.NewRSRParsersMustCompile("~"+utils.MetaReq+".Account", false, ";"),
 		},
 	}
 	if err := ar.SetFields(input); err != nil {
@@ -267,22 +272,25 @@ func TestAgentRequestSetFields(t *testing.T) {
 	//META_COMPOSED
 	input = []*config.FCTemplate{
 		&config.FCTemplate{
-			Path:  utils.PathItems{{Field: utils.MetaVars}, {Field: "AccountID"}},
-			Tag:   fmt.Sprintf("%s.AccountID", utils.MetaVars),
-			Type:  utils.META_COMPOSED,
-			Value: config.NewRSRParsersMustCompile("~"+utils.MetaReq+".Tenant", false, ";"),
+			Path:      utils.PathItems{{Field: utils.MetaVars}, {Field: "AccountID"}},
+			PathSlice: []string{utils.MetaVars, utils.Account},
+			Tag:       fmt.Sprintf("%s.AccountID", utils.MetaVars),
+			Type:      utils.META_COMPOSED,
+			Value:     config.NewRSRParsersMustCompile("~"+utils.MetaReq+".Tenant", false, ";"),
 		},
 		&config.FCTemplate{
-			Path:  utils.PathItems{{Field: utils.MetaVars}, {Field: "AccountID"}},
-			Tag:   fmt.Sprintf("%s.AccountID", utils.MetaVars),
-			Type:  utils.META_COMPOSED,
-			Value: config.NewRSRParsersMustCompile(":", false, ";"),
+			Path:      utils.PathItems{{Field: utils.MetaVars}, {Field: "AccountID"}},
+			PathSlice: []string{utils.MetaVars, "AccountID"},
+			Tag:       fmt.Sprintf("%s.AccountID", utils.MetaVars),
+			Type:      utils.META_COMPOSED,
+			Value:     config.NewRSRParsersMustCompile(":", false, ";"),
 		},
 		&config.FCTemplate{
-			Path:  utils.PathItems{{Field: utils.MetaVars}, {Field: "AccountID"}},
-			Tag:   fmt.Sprintf("%s.AccountID", utils.MetaVars),
-			Type:  utils.META_COMPOSED,
-			Value: config.NewRSRParsersMustCompile("~"+utils.MetaReq+".Account", false, ";"),
+			Path:      utils.PathItems{{Field: utils.MetaVars}, {Field: "AccountID"}},
+			PathSlice: []string{utils.MetaVars, "AccountID"},
+			Tag:       fmt.Sprintf("%s.AccountID", utils.MetaVars),
+			Type:      utils.META_COMPOSED,
+			Value:     config.NewRSRParsersMustCompile("~"+utils.MetaReq+".Account", false, ";"),
 		},
 	}
 	if err := ar.SetFields(input); err != nil {
@@ -300,10 +308,11 @@ func TestAgentRequestSetFields(t *testing.T) {
 	// META_CONSTANT
 	input = []*config.FCTemplate{
 		&config.FCTemplate{
-			Path:  utils.PathItems{{Field: utils.MetaVars}, {Field: "Account"}},
-			Tag:   fmt.Sprintf("%s.Account", utils.MetaVars),
-			Type:  utils.META_CONSTANT,
-			Value: config.NewRSRParsersMustCompile("2020", false, ";"),
+			Path:      utils.PathItems{{Field: utils.MetaVars}, {Field: "Account"}},
+			PathSlice: []string{utils.MetaVars, utils.Account},
+			Tag:       fmt.Sprintf("%s.Account", utils.MetaVars),
+			Type:      utils.META_CONSTANT,
+			Value:     config.NewRSRParsersMustCompile("2020", false, ";"),
 		},
 	}
 	if err := ar.SetFields(input); err != nil {
@@ -323,11 +332,12 @@ func TestAgentRequestSetFields(t *testing.T) {
 	// Filters
 	input = []*config.FCTemplate{
 		&config.FCTemplate{
-			Path:    utils.PathItems{{Field: utils.MetaVars}, {Field: "AccountID"}},
-			Tag:     fmt.Sprintf("%s.AccountID", utils.MetaVars),
-			Filters: []string{utils.MetaString + ":~" + utils.MetaVars + ".Account:1003"},
-			Type:    utils.META_CONSTANT,
-			Value:   config.NewRSRParsersMustCompile("2021", false, ";"),
+			Path:      utils.PathItems{{Field: utils.MetaVars}, {Field: "AccountID"}},
+			PathSlice: []string{utils.MetaVars, "AccountID"},
+			Tag:       fmt.Sprintf("%s.AccountID", utils.MetaVars),
+			Filters:   []string{utils.MetaString + ":~" + utils.MetaVars + ".Account:1003"},
+			Type:      utils.META_CONSTANT,
+			Value:     config.NewRSRParsersMustCompile("2021", false, ";"),
 		},
 	}
 	if err := ar.SetFields(input); err != nil {
@@ -344,11 +354,12 @@ func TestAgentRequestSetFields(t *testing.T) {
 
 	input = []*config.FCTemplate{
 		&config.FCTemplate{
-			Path:    utils.PathItems{{Field: utils.MetaVars}, {Field: "Account"}},
-			Tag:     fmt.Sprintf("%s.Account", utils.MetaVars),
-			Filters: []string{"Not really a filter"},
-			Type:    utils.META_CONSTANT,
-			Value:   config.NewRSRParsersMustCompile("2021", false, ";"),
+			Path:      utils.PathItems{{Field: utils.MetaVars}, {Field: "Account"}},
+			PathSlice: []string{utils.MetaVars, utils.Account},
+			Tag:       fmt.Sprintf("%s.Account", utils.MetaVars),
+			Filters:   []string{"Not really a filter"},
+			Type:      utils.META_CONSTANT,
+			Value:     config.NewRSRParsersMustCompile("2021", false, ";"),
 		},
 	}
 	if err := ar.SetFields(input); err == nil || err.Error() != "NOT_FOUND:Not really a filter" {
@@ -358,17 +369,19 @@ func TestAgentRequestSetFields(t *testing.T) {
 	// Blocker: true
 	input = []*config.FCTemplate{
 		&config.FCTemplate{
-			Path:    utils.PathItems{{Field: utils.MetaVars}, {Field: "Name"}},
-			Tag:     fmt.Sprintf("%s.Name", utils.MetaVars),
-			Type:    utils.MetaVariable,
-			Value:   config.NewRSRParsersMustCompile("~"+utils.MetaReq+".Account", false, ";"),
-			Blocker: true,
+			Path:      utils.PathItems{{Field: utils.MetaVars}, {Field: "Name"}},
+			PathSlice: []string{utils.MetaVars, "Name"},
+			Tag:       fmt.Sprintf("%s.Name", utils.MetaVars),
+			Type:      utils.MetaVariable,
+			Value:     config.NewRSRParsersMustCompile("~"+utils.MetaReq+".Account", false, ";"),
+			Blocker:   true,
 		},
 		&config.FCTemplate{
-			Path:  utils.PathItems{{Field: utils.MetaVars}, {Field: "Name"}},
-			Tag:   fmt.Sprintf("%s.Name", utils.MetaVars),
-			Type:  utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("1005", false, ";"),
+			Path:      utils.PathItems{{Field: utils.MetaVars}, {Field: "Name"}},
+			PathSlice: []string{utils.MetaVars, "Name"},
+			Tag:       fmt.Sprintf("%s.Name", utils.MetaVars),
+			Type:      utils.MetaVariable,
+			Value:     config.NewRSRParsersMustCompile("1005", false, ";"),
 		},
 	}
 	if err := ar.SetFields(input); err != nil {
@@ -386,10 +399,11 @@ func TestAgentRequestSetFields(t *testing.T) {
 	// ErrNotFound
 	input = []*config.FCTemplate{
 		&config.FCTemplate{
-			Path:  utils.PathItems{{Field: utils.MetaVars}, {Field: "Test"}},
-			Tag:   fmt.Sprintf("%s.Test", utils.MetaVars),
-			Type:  utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~"+utils.MetaReq+".Test", false, ";"),
+			Path:      utils.PathItems{{Field: utils.MetaVars}, {Field: "Test"}},
+			PathSlice: []string{utils.MetaVars, "Test"},
+			Tag:       fmt.Sprintf("%s.Test", utils.MetaVars),
+			Type:      utils.MetaVariable,
+			Value:     config.NewRSRParsersMustCompile("~"+utils.MetaReq+".Test", false, ";"),
 		},
 	}
 	if err := ar.SetFields(input); err != nil {
@@ -400,6 +414,7 @@ func TestAgentRequestSetFields(t *testing.T) {
 	input = []*config.FCTemplate{
 		&config.FCTemplate{
 			Path:      utils.PathItems{{Field: utils.MetaVars}, {Field: "Test"}},
+			PathSlice: []string{utils.MetaVars, "Test"},
 			Tag:       fmt.Sprintf("%s.Test", utils.MetaVars),
 			Type:      utils.MetaVariable,
 			Value:     config.NewRSRParsersMustCompile("~"+utils.MetaReq+".Test", false, ";"),
@@ -414,6 +429,7 @@ func TestAgentRequestSetFields(t *testing.T) {
 	input = []*config.FCTemplate{
 		&config.FCTemplate{
 			Path:      utils.PathItems{{Field: "wrong"}},
+			PathSlice: []string{"wrong"},
 			Tag:       "wrong",
 			Type:      utils.MetaVariable,
 			Value:     config.NewRSRParsersMustCompile("~*req.Account", false, ";"),
@@ -427,10 +443,11 @@ func TestAgentRequestSetFields(t *testing.T) {
 	// MetaHdr/MetaTrl
 	input = []*config.FCTemplate{
 		&config.FCTemplate{
-			Path:  utils.PathItems{{Field: utils.MetaVars}, {Field: "Account4"}},
-			Tag:   fmt.Sprintf("%s.Account4", utils.MetaVars),
-			Type:  utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~"+utils.MetaHdr+".Account", false, ";"),
+			Path:      utils.PathItems{{Field: utils.MetaVars}, {Field: "Account4"}},
+			PathSlice: []string{utils.MetaVars, utils.Account + "4"},
+			Tag:       fmt.Sprintf("%s.Account4", utils.MetaVars),
+			Type:      utils.MetaVariable,
+			Value:     config.NewRSRParsersMustCompile("~"+utils.MetaHdr+".Account", false, ";"),
 		},
 	}
 	if err := ar.SetFields(input); err != nil {
@@ -447,10 +464,11 @@ func TestAgentRequestSetFields(t *testing.T) {
 
 	input = []*config.FCTemplate{
 		&config.FCTemplate{
-			Path:  utils.PathItems{{Field: utils.MetaVars}, {Field: "Account5"}},
-			Tag:   fmt.Sprintf("%s.Account5", utils.MetaVars),
-			Type:  utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~"+utils.MetaTrl+".Account", false, ";"),
+			Path:      utils.PathItems{{Field: utils.MetaVars}, {Field: "Account5"}},
+			PathSlice: []string{utils.MetaVars, utils.Account + "5"},
+			Tag:       fmt.Sprintf("%s.Account5", utils.MetaVars),
+			Type:      utils.MetaVariable,
+			Value:     config.NewRSRParsersMustCompile("~"+utils.MetaTrl+".Account", false, ";"),
 		},
 	}
 	if err := ar.SetFields(input); err != nil {
@@ -483,7 +501,8 @@ func TestAgReqMaxCost(t *testing.T) {
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "MaxUsage",
 			Path: utils.PathItems{{Field: utils.MetaRep}, {Field: "MaxUsage"}}, Type: utils.MetaVariable,
-			Filters: []string{"*rsr::~*cgrep.MaxUsage(>0s)"},
+			PathSlice: []string{utils.MetaRep, "MaxUsage"},
+			Filters:   []string{"*rsr::~*cgrep.MaxUsage(>0s)"},
 			Value: config.NewRSRParsersMustCompile(
 				"~*cgrep.MaxUsage{*duration_seconds}", true, utils.INFIELD_SEP)},
 	}
@@ -522,14 +541,17 @@ func TestAgReqParseFieldDiameter(t *testing.T) {
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "MandatoryFalse",
 			Path: utils.PathItems{{Field: "MandatoryFalse"}}, Type: utils.META_COMPOSED,
+			PathSlice: []string{"MandatoryFalse"},
 			Value:     config.NewRSRParsersMustCompile("~*req.MandatoryFalse", true, utils.INFIELD_SEP),
 			Mandatory: false},
 		&config.FCTemplate{Tag: "MandatoryTrue",
 			Path: utils.PathItems{{Field: "MandatoryTrue"}}, Type: utils.META_COMPOSED,
+			PathSlice: []string{"MandatoryTrue"},
 			Value:     config.NewRSRParsersMustCompile("~*req.MandatoryTrue", true, utils.INFIELD_SEP),
 			Mandatory: true},
 		&config.FCTemplate{Tag: "Session-Id", Filters: []string{},
 			Path: utils.PathItems{{Field: "Session-Id"}}, Type: utils.META_COMPOSED,
+			PathSlice: []string{"Session-Id"},
 			Value:     config.NewRSRParsersMustCompile("~*req.Session-Id", true, utils.INFIELD_SEP),
 			Mandatory: true},
 	}
@@ -571,10 +593,12 @@ func TestAgReqParseFieldRadius(t *testing.T) {
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "MandatoryFalse",
 			Path: utils.PathItems{{Field: "MandatoryFalse"}}, Type: utils.META_COMPOSED,
+			PathSlice: []string{"MandatoryFalse"},
 			Value:     config.NewRSRParsersMustCompile("~*req.MandatoryFalse", true, utils.INFIELD_SEP),
 			Mandatory: false},
 		&config.FCTemplate{Tag: "MandatoryTrue",
 			Path: utils.PathItems{{Field: "MandatoryTrue"}}, Type: utils.META_COMPOSED,
+			PathSlice: []string{"MandatoryTrue"},
 			Value:     config.NewRSRParsersMustCompile("~*req.MandatoryTrue", true, utils.INFIELD_SEP),
 			Mandatory: true},
 	}
@@ -611,10 +635,12 @@ Host: api.cgrates.org
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "MandatoryFalse",
 			Path: utils.PathItems{{Field: "MandatoryFalse"}}, Type: utils.META_COMPOSED,
+			PathSlice: []string{"MandatoryFalse"},
 			Value:     config.NewRSRParsersMustCompile("~*req.MandatoryFalse", true, utils.INFIELD_SEP),
 			Mandatory: false},
 		&config.FCTemplate{Tag: "MandatoryTrue",
 			Path: utils.PathItems{{Field: "MandatoryTrue"}}, Type: utils.META_COMPOSED,
+			PathSlice: []string{"MandatoryTrue"},
 			Value:     config.NewRSRParsersMustCompile("~*req.MandatoryTrue", true, utils.INFIELD_SEP),
 			Mandatory: true},
 	}
@@ -683,10 +709,12 @@ func TestAgReqParseFieldHttpXml(t *testing.T) {
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "MandatoryFalse",
 			Path: utils.PathItems{{Field: "MandatoryFalse"}}, Type: utils.META_COMPOSED,
+			PathSlice: []string{"MandatoryFalse"},
 			Value:     config.NewRSRParsersMustCompile("~*req.MandatoryFalse", true, utils.INFIELD_SEP),
 			Mandatory: false},
 		&config.FCTemplate{Tag: "MandatoryTrue",
 			Path: utils.PathItems{{Field: "MandatoryTrue"}}, Type: utils.META_COMPOSED,
+			PathSlice: []string{"MandatoryTrue"},
 			Value:     config.NewRSRParsersMustCompile("~*req.MandatoryTrue", true, utils.INFIELD_SEP),
 			Mandatory: true},
 	}
@@ -716,14 +744,17 @@ func TestAgReqEmptyFilter(t *testing.T) {
 
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Tenant", Filters: []string{},
-			Path: utils.PathItems{{Field: utils.MetaCgrep}, {Field: utils.Tenant}}, Type: utils.MetaVariable,
+			PathSlice: []string{utils.MetaCgrep, "Tenant"},
+			Path:      utils.PathItems{{Field: utils.MetaCgrep}, {Field: utils.Tenant}}, Type: utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP)},
 
 		&config.FCTemplate{Tag: "Account", Filters: []string{},
-			Path: utils.PathItems{{Field: utils.MetaCgrep}, {Field: utils.Account}}, Type: utils.MetaVariable,
+			PathSlice: []string{utils.MetaCgrep, utils.Account},
+			Path:      utils.PathItems{{Field: utils.MetaCgrep}, {Field: utils.Account}}, Type: utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("~*cgreq.Account", true, utils.INFIELD_SEP)},
 		&config.FCTemplate{Tag: "Destination", Filters: []string{},
-			Path: utils.PathItems{{Field: utils.MetaCgrep}, {Field: utils.Destination}}, Type: utils.MetaVariable,
+			PathSlice: []string{utils.MetaCgrep, "Destination"},
+			Path:      utils.PathItems{{Field: utils.MetaCgrep}, {Field: utils.Destination}}, Type: utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("~*cgreq.Destination", true, utils.INFIELD_SEP)},
 	}
 	eMp := &utils.NavigableMap2{}
@@ -756,7 +787,8 @@ func TestAgReqMetaExponent(t *testing.T) {
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "TestExpo", Filters: []string{},
 			Path: utils.PathItems{{Field: utils.MetaCgrep}, {Field: "TestExpo"}}, Type: utils.MetaValueExponent,
-			Value: config.NewRSRParsersMustCompile("~*cgreq.Value;~*cgreq.Exponent", true, utils.INFIELD_SEP)},
+			PathSlice: []string{utils.MetaCgrep, "TestExpo"},
+			Value:     config.NewRSRParsersMustCompile("~*cgreq.Value;~*cgreq.Exponent", true, utils.INFIELD_SEP)},
 	}
 	eMp := &utils.NavigableMap2{}
 	eMp.Set([]*utils.PathItem{{Field: "TestExpo"}}, &utils.NMSlice{
@@ -784,14 +816,17 @@ func TestAgReqFieldAsNone(t *testing.T) {
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Tenant",
 			Path: utils.PathItems{{Field: utils.MetaCgrep}, {Field: utils.Tenant}}, Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP)},
+			PathSlice: []string{utils.MetaCgrep, utils.Tenant},
+			Value:     config.NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP)},
 		&config.FCTemplate{Tag: "Account",
 			Path: utils.PathItems{{Field: utils.MetaCgrep}, {Field: utils.Account}}, Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*cgreq.Account", true, utils.INFIELD_SEP)},
+			PathSlice: []string{utils.MetaCgrep, utils.Account},
+			Value:     config.NewRSRParsersMustCompile("~*cgreq.Account", true, utils.INFIELD_SEP)},
 		&config.FCTemplate{Type: utils.META_NONE, Blocker: true},
 		&config.FCTemplate{Tag: "Destination",
 			Path: utils.PathItems{{Field: utils.MetaCgrep}, {Field: utils.Destination}}, Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*cgreq.Destination", true, utils.INFIELD_SEP)},
+			PathSlice: []string{utils.MetaCgrep, utils.Destination},
+			Value:     config.NewRSRParsersMustCompile("~*cgreq.Destination", true, utils.INFIELD_SEP)},
 	}
 	eMp := &utils.NavigableMap2{}
 	eMp.Set([]*utils.PathItem{{Field: utils.Tenant}}, &utils.NMSlice{
@@ -821,14 +856,17 @@ func TestAgReqFieldAsNone2(t *testing.T) {
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Tenant",
 			Path: utils.PathItems{{Field: utils.MetaCgrep}, {Field: utils.Tenant}}, Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP)},
+			PathSlice: []string{utils.MetaCgrep, utils.Tenant},
+			Value:     config.NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP)},
 		&config.FCTemplate{Tag: "Account",
 			Path: utils.PathItems{{Field: utils.MetaCgrep}, {Field: utils.Account}}, Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*cgreq.Account", true, utils.INFIELD_SEP)},
+			PathSlice: []string{utils.MetaCgrep, utils.Account},
+			Value:     config.NewRSRParsersMustCompile("~*cgreq.Account", true, utils.INFIELD_SEP)},
 		&config.FCTemplate{Type: utils.META_NONE},
 		&config.FCTemplate{Tag: "Destination",
 			Path: utils.PathItems{{Field: utils.MetaCgrep}, {Field: utils.Destination}}, Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*cgreq.Destination", true, utils.INFIELD_SEP)},
+			PathSlice: []string{utils.MetaCgrep, utils.Destination},
+			Value:     config.NewRSRParsersMustCompile("~*cgreq.Destination", true, utils.INFIELD_SEP)},
 	}
 	eMp := &utils.NavigableMap2{}
 	eMp.Set([]*utils.PathItem{{Field: utils.Tenant}}, &utils.NMSlice{
@@ -866,19 +904,24 @@ func TestAgReqSetField2(t *testing.T) {
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Tenant",
 			Path: utils.PathItems{{Field: utils.MetaCgrep}, {Field: utils.Tenant}}, Type: utils.META_COMPOSED,
-			Value: config.NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP)},
+			PathSlice: []string{utils.MetaCgrep, utils.Tenant},
+			Value:     config.NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP)},
 		&config.FCTemplate{Tag: "Account",
 			Path: utils.PathItems{{Field: utils.MetaCgrep}, {Field: utils.Account}}, Type: utils.META_COMPOSED,
-			Value: config.NewRSRParsersMustCompile("~*cgreq.Account", true, utils.INFIELD_SEP)},
+			PathSlice: []string{utils.MetaCgrep, utils.Account},
+			Value:     config.NewRSRParsersMustCompile("~*cgreq.Account", true, utils.INFIELD_SEP)},
 		&config.FCTemplate{Tag: "Destination",
 			Path: utils.PathItems{{Field: utils.MetaCgrep}, {Field: utils.Destination}}, Type: utils.META_COMPOSED,
-			Value: config.NewRSRParsersMustCompile("~*cgreq.Destination", true, utils.INFIELD_SEP)},
+			PathSlice: []string{utils.MetaCgrep, utils.Destination},
+			Value:     config.NewRSRParsersMustCompile("~*cgreq.Destination", true, utils.INFIELD_SEP)},
 		&config.FCTemplate{Tag: "Usage",
 			Path: utils.PathItems{{Field: utils.MetaCgrep}, {Field: utils.Usage}}, Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("30s", true, utils.INFIELD_SEP)},
+			PathSlice: []string{utils.MetaCgrep, utils.Usage},
+			Value:     config.NewRSRParsersMustCompile("30s", true, utils.INFIELD_SEP)},
 		&config.FCTemplate{Tag: "CalculatedUsage",
-			Path: utils.PathItems{{Field: utils.MetaCgrep}, {Field: "CalculatedUsage"}},
-			Type: "*difference", Value: config.NewRSRParsersMustCompile("~*cgreq.AnswerTime;~*cgrep.Usage", true, utils.INFIELD_SEP),
+			Path:      utils.PathItems{{Field: utils.MetaCgrep}, {Field: "CalculatedUsage"}},
+			PathSlice: []string{utils.MetaCgrep, "CalculatedUsage"},
+			Type:      "*difference", Value: config.NewRSRParsersMustCompile("~*cgreq.AnswerTime;~*cgrep.Usage", true, utils.INFIELD_SEP),
 		},
 	}
 	eMp := &utils.NavigableMap2{}
@@ -978,10 +1021,12 @@ func TestAgReqNewARWithCGRRplyAndRply(t *testing.T) {
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Fld1",
 			Path: utils.PathItems{{Field: utils.MetaCgreq}, {Field: "Fld1"}}, Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*rep.FirstLevel.SecondLevel.Fld1", true, utils.INFIELD_SEP)},
+			PathSlice: []string{utils.MetaCgrep, "Fld1"},
+			Value:     config.NewRSRParsersMustCompile("~*rep.FirstLevel.SecondLevel.Fld1", true, utils.INFIELD_SEP)},
 		&config.FCTemplate{Tag: "Fld2",
 			Path: utils.PathItems{{Field: utils.MetaCgreq}, {Field: "Fld2"}}, Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*cgrep.Attributes.PaypalAccount", true, utils.INFIELD_SEP)},
+			PathSlice: []string{utils.MetaCgrep, "Fld2"},
+			Value:     config.NewRSRParsersMustCompile("~*cgrep.Attributes.PaypalAccount", true, utils.INFIELD_SEP)},
 	}
 
 	eMp := utils.NewOrderedNavigableMap()
@@ -1014,9 +1059,11 @@ func TestAgReqSetCGRReplyWithError(t *testing.T) {
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Fld1",
 			Path: utils.PathItems{{Field: utils.MetaCgreq}, {Field: "Fld1"}}, Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*rep.FirstLevel.SecondLevel.Fld1", true, utils.INFIELD_SEP)},
+			PathSlice: []string{utils.MetaCgrep, "Fld1"},
+			Value:     config.NewRSRParsersMustCompile("~*rep.FirstLevel.SecondLevel.Fld1", true, utils.INFIELD_SEP)},
 		&config.FCTemplate{Tag: "Fld2",
 			Path: utils.PathItems{{Field: utils.MetaCgreq}, {Field: "Fld2"}}, Type: utils.MetaVariable,
+			PathSlice: []string{utils.MetaCgrep, "Fld2"},
 			Value:     config.NewRSRParsersMustCompile("~*cgrep.Attributes.PaypalAccount", true, utils.INFIELD_SEP),
 			Mandatory: true},
 	}
@@ -1058,10 +1105,12 @@ func TestAgReqSetCGRReplyWithoutError(t *testing.T) {
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Fld1",
 			Path: utils.PathItems{{Field: utils.MetaCgreq}, {Field: "Fld1"}}, Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*rep.FirstLevel.SecondLevel.Fld1", true, utils.INFIELD_SEP)},
+			PathSlice: []string{utils.MetaCgrep, "Fld1"},
+			Value:     config.NewRSRParsersMustCompile("~*rep.FirstLevel.SecondLevel.Fld1", true, utils.INFIELD_SEP)},
 		&config.FCTemplate{Tag: "Fld2",
 			Path: utils.PathItems{{Field: utils.MetaCgreq}, {Field: "Fld2"}}, Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*cgrep.Attributes.PaypalAccount", true, utils.INFIELD_SEP)},
+			PathSlice: []string{utils.MetaCgrep, "Fld2"},
+			Value:     config.NewRSRParsersMustCompile("~*cgrep.Attributes.PaypalAccount", true, utils.INFIELD_SEP)},
 	}
 
 	eMp := utils.NewOrderedNavigableMap()
@@ -1101,6 +1150,7 @@ func TestAgReqParseFieldMetaCCUsage(t *testing.T) {
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "CCUsage", Filters: []string{},
 			Path: utils.PathItems{{Field: "CCUsage"}}, Type: utils.MetaCCUsage,
+			PathSlice: []string{"CCUsage"},
 			Value:     config.NewRSRParsersMustCompile("~*req.Session-Id", true, utils.INFIELD_SEP),
 			Mandatory: true},
 	}
@@ -1112,6 +1162,7 @@ func TestAgReqParseFieldMetaCCUsage(t *testing.T) {
 	tplFlds = []*config.FCTemplate{
 		&config.FCTemplate{Tag: "CCUsage", Filters: []string{},
 			Path: utils.PathItems{{Field: "CCUsage"}}, Type: utils.MetaCCUsage,
+			PathSlice: []string{"CCUsage"},
 			Value:     config.NewRSRParsersMustCompile("~*req.Session-Id;12s;12s", true, utils.INFIELD_SEP),
 			Mandatory: true},
 	}
@@ -1123,6 +1174,7 @@ func TestAgReqParseFieldMetaCCUsage(t *testing.T) {
 	tplFlds = []*config.FCTemplate{
 		&config.FCTemplate{Tag: "CCUsage", Filters: []string{},
 			Path: utils.PathItems{{Field: "CCUsage"}}, Type: utils.MetaCCUsage,
+			PathSlice: []string{"CCUsage"},
 			Value:     config.NewRSRParsersMustCompile("10;~*req.Session-Id;12s", true, utils.INFIELD_SEP),
 			Mandatory: true},
 	}
@@ -1134,6 +1186,7 @@ func TestAgReqParseFieldMetaCCUsage(t *testing.T) {
 	tplFlds = []*config.FCTemplate{
 		&config.FCTemplate{Tag: "CCUsage", Filters: []string{},
 			Path: utils.PathItems{{Field: "CCUsage"}}, Type: utils.MetaCCUsage,
+			PathSlice: []string{"CCUsage"},
 			Value:     config.NewRSRParsersMustCompile("10;12s;~*req.Session-Id", true, utils.INFIELD_SEP),
 			Mandatory: true},
 	}
@@ -1145,6 +1198,7 @@ func TestAgReqParseFieldMetaCCUsage(t *testing.T) {
 	tplFlds = []*config.FCTemplate{
 		&config.FCTemplate{Tag: "CCUsage", Filters: []string{},
 			Path: utils.PathItems{{Field: "CCUsage"}}, Type: utils.MetaCCUsage,
+			PathSlice: []string{"CCUsage"},
 			Value:     config.NewRSRParsersMustCompile("3;10s;5s", true, utils.INFIELD_SEP),
 			Mandatory: true},
 	}
@@ -1179,6 +1233,7 @@ func TestAgReqParseFieldMetaUsageDifference(t *testing.T) {
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Usage", Filters: []string{},
 			Path: utils.PathItems{{Field: "Usage"}}, Type: utils.META_USAGE_DIFFERENCE,
+			PathSlice: []string{"Usage"},
 			Value:     config.NewRSRParsersMustCompile("~*req.Session-Id", true, utils.INFIELD_SEP),
 			Mandatory: true},
 	}
@@ -1190,6 +1245,7 @@ func TestAgReqParseFieldMetaUsageDifference(t *testing.T) {
 	tplFlds = []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Usage", Filters: []string{},
 			Path: utils.PathItems{{Field: "Usage"}}, Type: utils.META_USAGE_DIFFERENCE,
+			PathSlice: []string{"Usage"},
 			Value:     config.NewRSRParsersMustCompile("1560325161;~*req.Session-Id", true, utils.INFIELD_SEP),
 			Mandatory: true},
 	}
@@ -1201,6 +1257,7 @@ func TestAgReqParseFieldMetaUsageDifference(t *testing.T) {
 	tplFlds = []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Usage", Filters: []string{},
 			Path: utils.PathItems{{Field: "Usage"}}, Type: utils.META_USAGE_DIFFERENCE,
+			PathSlice: []string{"Usage"},
 			Value:     config.NewRSRParsersMustCompile("~*req.Session-Id;1560325161", true, utils.INFIELD_SEP),
 			Mandatory: true},
 	}
@@ -1212,6 +1269,7 @@ func TestAgReqParseFieldMetaUsageDifference(t *testing.T) {
 	tplFlds = []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Usage", Filters: []string{},
 			Path: utils.PathItems{{Field: "Usage"}}, Type: utils.META_USAGE_DIFFERENCE,
+			PathSlice: []string{"Usage"},
 			Value:     config.NewRSRParsersMustCompile("1560325161;1560325151", true, utils.INFIELD_SEP),
 			Mandatory: true},
 	}
@@ -1245,6 +1303,7 @@ func TestAgReqParseFieldMetaSum(t *testing.T) {
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Sum", Filters: []string{},
 			Path: utils.PathItems{{Field: "Sum"}}, Type: utils.MetaSum,
+			PathSlice: []string{"Sum"},
 			Value:     config.NewRSRParsersMustCompile("15;~*req.Session-Id", true, utils.INFIELD_SEP),
 			Mandatory: true},
 	}
@@ -1256,6 +1315,7 @@ func TestAgReqParseFieldMetaSum(t *testing.T) {
 	tplFlds = []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Sum", Filters: []string{},
 			Path: utils.PathItems{{Field: "Sum"}}, Type: utils.MetaSum,
+			PathSlice: []string{"Sum"},
 			Value:     config.NewRSRParsersMustCompile("15;15", true, utils.INFIELD_SEP),
 			Mandatory: true},
 	}
@@ -1289,6 +1349,7 @@ func TestAgReqParseFieldMetaDifference(t *testing.T) {
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Diff", Filters: []string{},
 			Path: utils.PathItems{{Field: "Diff"}}, Type: utils.MetaDifference,
+			PathSlice: []string{"Diff"},
 			Value:     config.NewRSRParsersMustCompile("15;~*req.Session-Id", true, utils.INFIELD_SEP),
 			Mandatory: true},
 	}
@@ -1300,6 +1361,7 @@ func TestAgReqParseFieldMetaDifference(t *testing.T) {
 	tplFlds = []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Diff", Filters: []string{},
 			Path: utils.PathItems{{Field: "Diff"}}, Type: utils.MetaDifference,
+			PathSlice: []string{"Diff"},
 			Value:     config.NewRSRParsersMustCompile("15;12;2", true, utils.INFIELD_SEP),
 			Mandatory: true},
 	}
@@ -1333,6 +1395,7 @@ func TestAgReqParseFieldMetaMultiply(t *testing.T) {
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Multiply", Filters: []string{},
 			Path: utils.PathItems{{Field: "Multiply"}}, Type: utils.MetaMultiply,
+			PathSlice: []string{"Multiply"},
 			Value:     config.NewRSRParsersMustCompile("15;~*req.Session-Id", true, utils.INFIELD_SEP),
 			Mandatory: true},
 	}
@@ -1344,6 +1407,7 @@ func TestAgReqParseFieldMetaMultiply(t *testing.T) {
 	tplFlds = []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Multiply", Filters: []string{},
 			Path: utils.PathItems{{Field: "Multiply"}}, Type: utils.MetaMultiply,
+			PathSlice: []string{"Multiply"},
 			Value:     config.NewRSRParsersMustCompile("15;15", true, utils.INFIELD_SEP),
 			Mandatory: true},
 	}
@@ -1377,6 +1441,7 @@ func TestAgReqParseFieldMetaDivide(t *testing.T) {
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Divide", Filters: []string{},
 			Path: utils.PathItems{{Field: "Divide"}}, Type: utils.MetaDivide,
+			PathSlice: []string{"Divide"},
 			Value:     config.NewRSRParsersMustCompile("15;~*req.Session-Id", true, utils.INFIELD_SEP),
 			Mandatory: true},
 	}
@@ -1388,6 +1453,7 @@ func TestAgReqParseFieldMetaDivide(t *testing.T) {
 	tplFlds = []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Divide", Filters: []string{},
 			Path: utils.PathItems{{Field: "Divide"}}, Type: utils.MetaDivide,
+			PathSlice: []string{"Divide"},
 			Value:     config.NewRSRParsersMustCompile("15;3", true, utils.INFIELD_SEP),
 			Mandatory: true},
 	}
@@ -1421,6 +1487,7 @@ func TestAgReqParseFieldMetaValueExponent(t *testing.T) {
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "ValExp", Filters: []string{},
 			Path: utils.PathItems{{Field: "ValExp"}}, Type: utils.MetaValueExponent,
+			PathSlice: []string{"ValExp"},
 			Value:     config.NewRSRParsersMustCompile("~*req.Session-Id", true, utils.INFIELD_SEP),
 			Mandatory: true},
 	}
@@ -1432,6 +1499,7 @@ func TestAgReqParseFieldMetaValueExponent(t *testing.T) {
 	tplFlds = []*config.FCTemplate{
 		&config.FCTemplate{Tag: "ValExp", Filters: []string{},
 			Path: utils.PathItems{{Field: "ValExp"}}, Type: utils.MetaValueExponent,
+			PathSlice: []string{"ValExp"},
 			Value:     config.NewRSRParsersMustCompile("15;~*req.Session-Id", true, utils.INFIELD_SEP),
 			Mandatory: true},
 	}
@@ -1443,6 +1511,7 @@ func TestAgReqParseFieldMetaValueExponent(t *testing.T) {
 	tplFlds = []*config.FCTemplate{
 		&config.FCTemplate{Tag: "ValExp", Filters: []string{},
 			Path: utils.PathItems{{Field: "ValExp"}}, Type: utils.MetaValueExponent,
+			PathSlice: []string{"ValExp"},
 			Value:     config.NewRSRParsersMustCompile("~*req.Session-Id;15", true, utils.INFIELD_SEP),
 			Mandatory: true},
 	}
@@ -1453,6 +1522,7 @@ func TestAgReqParseFieldMetaValueExponent(t *testing.T) {
 	tplFlds = []*config.FCTemplate{
 		&config.FCTemplate{Tag: "ValExp", Filters: []string{},
 			Path: utils.PathItems{{Field: "ValExp"}}, Type: utils.MetaValueExponent,
+			PathSlice: []string{"ValExp"},
 			Value:     config.NewRSRParsersMustCompile("2;3", true, utils.INFIELD_SEP),
 			Mandatory: true},
 	}
@@ -1483,19 +1553,24 @@ func TestAgReqOverwrite(t *testing.T) {
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Account",
 			Path: utils.PathItems{{Field: utils.MetaCgrep}, {Field: utils.Account}}, Type: utils.META_COMPOSED,
-			Value: config.NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP)},
+			PathSlice: []string{utils.MetaCgrep, utils.Account},
+			Value:     config.NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP)},
 		&config.FCTemplate{Tag: "Account",
 			Path: utils.PathItems{{Field: utils.MetaCgrep}, {Field: utils.Account}}, Type: utils.META_COMPOSED,
-			Value: config.NewRSRParsersMustCompile(":", true, utils.INFIELD_SEP)},
+			PathSlice: []string{utils.MetaCgrep, utils.Account},
+			Value:     config.NewRSRParsersMustCompile(":", true, utils.INFIELD_SEP)},
 		&config.FCTemplate{Tag: "Account",
 			Path: utils.PathItems{{Field: utils.MetaCgrep}, {Field: utils.Account}}, Type: utils.META_COMPOSED,
-			Value: config.NewRSRParsersMustCompile("~*cgreq.Account", true, utils.INFIELD_SEP)},
+			PathSlice: []string{utils.MetaCgrep, utils.Account},
+			Value:     config.NewRSRParsersMustCompile("~*cgreq.Account", true, utils.INFIELD_SEP)},
 		&config.FCTemplate{Tag: "Account",
 			Path: utils.PathItems{{Field: utils.MetaCgrep}, {Field: utils.Account}}, Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("OverwrittenAccount", true, utils.INFIELD_SEP)},
+			PathSlice: []string{utils.MetaCgrep, utils.Account},
+			Value:     config.NewRSRParsersMustCompile("OverwrittenAccount", true, utils.INFIELD_SEP)},
 		&config.FCTemplate{Tag: "Account",
 			Path: utils.PathItems{{Field: utils.MetaCgrep}, {Field: utils.Account}}, Type: utils.META_COMPOSED,
-			Value: config.NewRSRParsersMustCompile("WithComposed", true, utils.INFIELD_SEP)},
+			PathSlice: []string{utils.MetaCgrep, utils.Account},
+			Value:     config.NewRSRParsersMustCompile("WithComposed", true, utils.INFIELD_SEP)},
 	}
 
 	if err := agReq.SetFields(tplFlds); err != nil {
@@ -1535,10 +1610,12 @@ func TestAgReqGroupType(t *testing.T) {
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Account",
 			Path: utils.PathItems{{Field: utils.MetaCgrep}, {Field: utils.Account}}, Type: utils.MetaGroup,
-			Value: config.NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP)},
+			PathSlice: []string{utils.MetaCgrep, utils.Account},
+			Value:     config.NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP)},
 		&config.FCTemplate{Tag: "Account",
 			Path: utils.PathItems{{Field: utils.MetaCgrep}, {Field: utils.Account}}, Type: utils.MetaGroup,
-			Value: config.NewRSRParsersMustCompile("test", true, utils.INFIELD_SEP)},
+			PathSlice: []string{utils.MetaCgrep, utils.Account},
+			Value:     config.NewRSRParsersMustCompile("test", true, utils.INFIELD_SEP)},
 	}
 
 	if err := agReq.SetFields(tplFlds); err != nil {
@@ -1573,10 +1650,12 @@ func TestAgReqSetFieldsInTmp(t *testing.T) {
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Tenant",
 			Path: utils.PathItems{{Field: utils.MetaTmp}, {Field: utils.Tenant}}, Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP)},
+			PathSlice: []string{utils.MetaTmp, utils.Tenant},
+			Value:     config.NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP)},
 		&config.FCTemplate{Tag: "Account",
 			Path: utils.PathItems{{Field: utils.MetaTmp}, {Field: utils.Account}}, Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*cgreq.Account", true, utils.INFIELD_SEP)},
+			PathSlice: []string{utils.MetaTmp, utils.Account},
+			Value:     config.NewRSRParsersMustCompile("~*cgreq.Account", true, utils.INFIELD_SEP)},
 	}
 	eMp := utils.NavigableMap2{}
 	eMp.Set([]*utils.PathItem{{Field: utils.Tenant}}, &utils.NMSlice{

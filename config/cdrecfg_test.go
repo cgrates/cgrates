@@ -29,13 +29,15 @@ func TestCdreCfgClone(t *testing.T) {
 	runIDRsrs := NewRSRParsersMustCompile("runid", true, utils.INFIELD_SEP)
 	initContentFlds := []*FCTemplate{
 		{Tag: "CgrId",
-			Type:  utils.META_COMPOSED,
-			Path:  utils.PathItems{{Field: "cgrid"}},
-			Value: cgrIDRsrs},
+			Type:      utils.META_COMPOSED,
+			Path:      utils.PathItems{{Field: "cgrid"}},
+			PathSlice: []string{"cgrid"},
+			Value:     cgrIDRsrs},
 		{Tag: "RunId",
-			Type:  utils.META_COMPOSED,
-			Path:  utils.PathItems{{Field: "runid"}},
-			Value: runIDRsrs},
+			Type:      utils.META_COMPOSED,
+			Path:      utils.PathItems{{Field: "runid"}},
+			PathSlice: []string{"runid"},
+			Value:     runIDRsrs},
 	}
 	initCdreCfg := &CdreCfg{
 		ExportFormat:   utils.MetaFileCSV,
@@ -47,13 +49,15 @@ func TestCdreCfgClone(t *testing.T) {
 	}
 	eClnContentFlds := []*FCTemplate{
 		{Tag: "CgrId",
-			Type:  utils.META_COMPOSED,
-			Path:  utils.PathItems{{Field: "cgrid"}},
-			Value: cgrIDRsrs},
+			Type:      utils.META_COMPOSED,
+			Path:      utils.PathItems{{Field: "cgrid"}},
+			PathSlice: []string{"cgrid"},
+			Value:     cgrIDRsrs},
 		{Tag: "RunId",
-			Type:  utils.META_COMPOSED,
-			Path:  utils.PathItems{{Field: "runid"}},
-			Value: runIDRsrs},
+			Type:      utils.META_COMPOSED,
+			Path:      utils.PathItems{{Field: "runid"}},
+			PathSlice: []string{"runid"},
+			Value:     runIDRsrs},
 	}
 	eClnCdreCfg := &CdreCfg{
 		ExportFormat:   utils.MetaFileCSV,
@@ -119,10 +123,11 @@ func TestCdreCfgloadFromJsonCfg(t *testing.T) {
 		Attempts:       1,
 		FieldSeparator: utils.CSV_SEP,
 		Fields: []*FCTemplate{{
-			Path:  utils.PathItems{{Field: utils.MetaExp}, {Field: "CGRID"}},
-			Tag:   "*exp.CGRID",
-			Type:  "*composed",
-			Value: val,
+			Path:      utils.PathItems{{Field: utils.MetaExp}, {Field: "CGRID"}},
+			PathSlice: []string{utils.MetaExp, "CGRID"},
+			Tag:       "*exp.CGRID",
+			Type:      "*composed",
+			Value:     val,
 		}},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {

@@ -84,6 +84,7 @@ func TestLoaderSCfgloadFromJsonCfg(t *testing.T) {
 					{
 						Tag:       "TenantID",
 						Path:      utils.PathItems{{Field: "Tenant"}},
+						PathSlice: []string{"Tenant"},
 						Type:      "*composed",
 						Value:     val,
 						Mandatory: true,
