@@ -184,7 +184,7 @@ type ReplicatorSv1Interface interface {
 	GetResource(tntID *utils.TenantIDWithArgDispatcher, reply *engine.Resource) error
 	GetResourceProfile(tntID *utils.TenantIDWithArgDispatcher, reply *engine.ResourceProfile) error
 	GetActionTriggers(id *utils.StringWithApiKey, reply *engine.ActionTriggers) error
-	GetShareGroup(id *utils.StringWithApiKey, reply *engine.SharedGroup) error
+	GetSharedGroup(id *utils.StringWithApiKey, reply *engine.SharedGroup) error
 	GetActions(id *utils.StringWithApiKey, reply *engine.Actions) error
 	GetActionPlan(id *utils.StringWithApiKey, reply *engine.ActionPlan) error
 	GetAllActionPlans(_ *utils.StringWithApiKey, reply *map[string]*engine.ActionPlan) error

@@ -44,6 +44,10 @@ var sTestsDspRpl = []func(t *testing.T){
 	testDspRplResourceProfile,
 	testDspRplTiming,
 	testDspRplActionTriggers,
+	testDspRplSharedGroup,
+	// testDspRplActions,
+	testDspRplActionPlan,
+	// testDspRplAccountActionPlans,
 }
 
 //Test start here
@@ -179,7 +183,6 @@ func testDspRplAccount(t *testing.T) {
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetAccount, argsGetAccount, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
 	}
-
 }
 
 func testDspRplSupplierProfile(t *testing.T) {
@@ -978,6 +981,219 @@ func testDspRplActionTriggers(t *testing.T) {
 
 	// Get ActionTriggers
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetActionTriggers, argsActionTriggers, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
+	}
+}
+
+func testDspRplSharedGroup(t *testing.T) {
+	// Set SharedGroup
+	var replyStr string
+	setSharedGroup := &engine.SharedGroupWithArgDispatcher{
+		SharedGroup: &engine.SharedGroup{
+			Id: "IDSharedGroup",
+		},
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("repl12345")},
+	}
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetSharedGroup, setSharedGroup, &replyStr); err != nil {
+		t.Error("Unexpected error when calling ReplicatorSv1.SetSharedGroup: ", err)
+	} else if replyStr != utils.OK {
+		t.Error("Unexpected reply returned", replyStr)
+	}
+	// Get SharedGroup
+	var reply engine.SharedGroup
+	argsSharedGroup := &utils.StringWithApiKey{
+		Arg: "IDSharedGroup",
+		TenantArg: utils.TenantArg{
+			Tenant: "cgrates.org",
+		},
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("repl12345")},
+	}
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetSharedGroup, argsSharedGroup, &reply); err != nil {
+		t.Error("Unexpected error when calling ReplicatorSv1.GetSharedGroup: ", err)
+	} else if reply.Id != setSharedGroup.Id {
+		t.Errorf("Expecting: %+v, received: %+v", setSharedGroup.Id, reply.Id)
+	}
+	// Stop engine 1
+	allEngine.stopEngine(t)
+
+	// Get SharedGroup
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetSharedGroup, argsSharedGroup, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
+	}
+
+	// Start engine 1
+	allEngine.startEngine(t)
+
+	// Remove SharedGroup
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1RemoveSharedGroup, argsSharedGroup, &replyStr); err != nil {
+		t.Error(err)
+	} else if replyStr != utils.OK {
+		t.Error("Unexpected reply returned", replyStr)
+	}
+
+	// Get SharedGroup
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetSharedGroup, argsSharedGroup, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
+	}
+}
+
+func testDspRplActions(t *testing.T) {
+	// Set Actions
+	var replyStr string
+	setActions := &engine.SetActionsArgsWithArgDispatcher{
+		Key:       "KeyActions",
+		TenantArg: utils.TenantArg{Tenant: "cgrates.org"},
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("repl12345")},
+	}
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetActions, setActions, &replyStr); err != nil {
+		t.Error("Unexpected error when calling ReplicatorSv1.SetActions: ", err)
+	} else if replyStr != utils.OK {
+		t.Error("Unexpected reply returned", replyStr)
+	}
+	// Get Actions
+	var reply engine.Actions
+	argsActions := &utils.StringWithApiKey{
+		Arg: "KeyActions",
+		TenantArg: utils.TenantArg{
+			Tenant: "cgrates.org",
+		},
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("repl12345")},
+	}
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetActions, argsActions, &reply); err != nil {
+		t.Error("Unexpected error when calling ReplicatorSv1.GetActions: ", err)
+	} else if reply[0].Id != setActions.Key {
+		t.Errorf("Expecting: %+v, received: %+v", setActions.Key, reply[0].Id)
+	}
+	// Stop engine 1
+	allEngine.stopEngine(t)
+
+	// Get Actions
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetActions, argsActions, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
+	}
+
+	// Start engine 1
+	allEngine.startEngine(t)
+
+	// Remove Actions
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1RemoveActions, argsActions, &replyStr); err != nil {
+		t.Error(err)
+	} else if replyStr != utils.OK {
+		t.Error("Unexpected reply returned", replyStr)
+	}
+
+	// Get Actions
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetActions, argsActions, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
+	}
+}
+
+func testDspRplActionPlan(t *testing.T) {
+	// Set ActionPlan
+	var replyStr string
+	setActionPlan := &engine.SetActionPlanArgWithArgDispatcher{
+		Key:       "KeyActionPlan",
+		TenantArg: utils.TenantArg{Tenant: "cgrates.org"},
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("repl12345")},
+	}
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetActionPlan, setActionPlan, &replyStr); err != nil {
+		t.Error("Unexpected error when calling ReplicatorSv1.SetActionPlan: ", err)
+	} else if replyStr != utils.OK {
+		t.Error("Unexpected reply returned", replyStr)
+	}
+	// Get ActionPlan
+	var reply engine.ActionPlan
+	argsActionPlan := &utils.StringWithApiKey{
+		Arg: "KeyActionPlan",
+		TenantArg: utils.TenantArg{
+			Tenant: "cgrates.org",
+		},
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("repl12345")},
+	}
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetActionPlan, argsActionPlan, &reply); err != nil {
+		t.Error("Unexpected error when calling ReplicatorSv1.GetActionPlan: ", err)
+	} else if reply.Id != setActionPlan.Key {
+		t.Errorf("Expecting: %+v, received: %+v", setActionPlan.Key, reply.Id)
+	}
+	// Stop engine 1
+	allEngine.stopEngine(t)
+
+	// Get ActionPlan
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetActionPlan, argsActionPlan, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
+	}
+
+	// Start engine 1
+	allEngine.startEngine(t)
+
+	// Remove ActionPlan
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1RemoveActionPlan, argsActionPlan, &replyStr); err != nil {
+		t.Error(err)
+	} else if replyStr != utils.OK {
+		t.Error("Unexpected reply returned", replyStr)
+	}
+
+	// Get ActionPlan
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetActionPlan, argsActionPlan, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
+	}
+}
+
+func testDspRplAccountActionPlans(t *testing.T) {
+	// Set AccountActionPlans
+	var replyStr string
+	setAccountActionPlans := &engine.SetAccountActionPlansArgWithArgDispatcher{
+		AcntID:    "KeyAccountActionPlans",
+		TenantArg: utils.TenantArg{Tenant: "cgrates.org"},
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("repl12345")},
+	}
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetAccountActionPlans, setAccountActionPlans, &replyStr); err != nil {
+		t.Error("Unexpected error when calling ReplicatorSv1.SetAccountActionPlans: ", err)
+	} else if replyStr != utils.OK {
+		t.Error("Unexpected reply returned", replyStr)
+	}
+	// Get AccountActionPlans
+	var reply []string
+	argsAccountActionPlans := &utils.StringWithApiKey{
+		Arg: "KeyAccountActionPlans",
+		TenantArg: utils.TenantArg{
+			Tenant: "cgrates.org",
+		},
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("repl12345")},
+	}
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetAccountActionPlans, argsAccountActionPlans, &reply); err != nil {
+		t.Error("Unexpected error when calling ReplicatorSv1.GetAccountActionPlans: ", err)
+	} else if reply[0] != setAccountActionPlans.AcntID {
+		t.Errorf("Expecting: %+v, received: %+v", setAccountActionPlans.AcntID, reply[0])
+	}
+	// Stop engine 1
+	allEngine.stopEngine(t)
+
+	// Get AccountActionPlans
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetAccountActionPlans, argsAccountActionPlans, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
+	}
+
+	// Start engine 1
+	allEngine.startEngine(t)
+
+	// Remove AccountActionPlans
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1RemAccountActionPlans, argsAccountActionPlans, &replyStr); err != nil {
+		t.Error(err)
+	} else if replyStr != utils.OK {
+		t.Error("Unexpected reply returned", replyStr)
+	}
+
+	// Get AccountActionPlans
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetAccountActionPlans, argsAccountActionPlans, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
 	}
 }

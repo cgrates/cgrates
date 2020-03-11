@@ -1376,7 +1376,7 @@ func (dm *DataManager) GetSharedGroup(key string, skipCache bool,
 	if err != nil {
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaSharedGroups]; err == utils.ErrNotFound && itm.Remote {
 			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
-				utils.ReplicatorSv1GetShareGroup, &utils.StringWithApiKey{
+				utils.ReplicatorSv1GetSharedGroup, &utils.StringWithApiKey{
 					Arg:       key,
 					TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 					ArgDispatcher: &utils.ArgDispatcher{

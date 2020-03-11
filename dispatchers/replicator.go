@@ -304,7 +304,7 @@ func (dS *DispatcherService) ReplicatorSv1GetActionTriggers(args *utils.StringWi
 		utils.ReplicatorSv1GetActionTriggers, args, rpl)
 }
 
-func (dS *DispatcherService) ReplicatorSv1GetShareGroup(args *utils.StringWithApiKey, rpl *engine.SharedGroup) (err error) {
+func (dS *DispatcherService) ReplicatorSv1GetSharedGroup(args *utils.StringWithApiKey, rpl *engine.SharedGroup) (err error) {
 	if args == nil {
 		args = &utils.StringWithApiKey{}
 	}
@@ -313,7 +313,7 @@ func (dS *DispatcherService) ReplicatorSv1GetShareGroup(args *utils.StringWithAp
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
-		if err = dS.authorize(utils.ReplicatorSv1GetShareGroup, args.TenantArg.Tenant,
+		if err = dS.authorize(utils.ReplicatorSv1GetSharedGroup, args.TenantArg.Tenant,
 			args.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
@@ -323,7 +323,7 @@ func (dS *DispatcherService) ReplicatorSv1GetShareGroup(args *utils.StringWithAp
 		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaReplicator, routeID,
-		utils.ReplicatorSv1GetShareGroup, args, rpl)
+		utils.ReplicatorSv1GetSharedGroup, args, rpl)
 }
 
 func (dS *DispatcherService) ReplicatorSv1GetActions(args *utils.StringWithApiKey, rpl *engine.Actions) (err error) {
