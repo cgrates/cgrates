@@ -132,6 +132,7 @@ func TestMfHttpAgentMultipleFields(t *testing.T) {
 					ReplyFields: []*FCTemplate{{
 						Tag:       "Allow",
 						Path:      utils.PathItems{{Field: "response"}, {Field: "Allow"}},
+						PathSlice: []string{"response", "Allow"},
 						Type:      "*constant",
 						Value:     NewRSRParsersMustCompile("1", true, utils.INFIELD_SEP),
 						Mandatory: true,
@@ -147,6 +148,7 @@ func TestMfHttpAgentMultipleFields(t *testing.T) {
 						{
 							Tag:       "RequestType",
 							Path:      utils.PathItems{{Field: "RequestType"}},
+							PathSlice: []string{"RequestType"},
 							Type:      "*constant",
 							Value:     NewRSRParsersMustCompile("*pseudoprepaid", true, utils.INFIELD_SEP),
 							Mandatory: true,
@@ -156,6 +158,7 @@ func TestMfHttpAgentMultipleFields(t *testing.T) {
 						{
 							Tag:       "Allow",
 							Path:      utils.PathItems{{Field: "response"}, {Field: "Allow"}},
+							PathSlice: []string{"response", "Allow"},
 							Type:      "*constant",
 							Value:     NewRSRParsersMustCompile("1", true, utils.INFIELD_SEP),
 							Mandatory: true,
@@ -170,6 +173,7 @@ func TestMfHttpAgentMultipleFields(t *testing.T) {
 					RequestFields: []*FCTemplate{{
 						Tag:       "RequestType",
 						Path:      utils.PathItems{{Field: "RequestType"}},
+						PathSlice: []string{"RequestType"},
 						Type:      "*constant",
 						Value:     NewRSRParsersMustCompile("*pseudoprepaid", true, utils.INFIELD_SEP),
 						Mandatory: true,
@@ -177,6 +181,7 @@ func TestMfHttpAgentMultipleFields(t *testing.T) {
 					ReplyFields: []*FCTemplate{{
 						Tag:       "CDR_ID",
 						Path:      utils.PathItems{{Field: "CDR_RESPONSE"}, {Field: "CDR_ID"}},
+						PathSlice: []string{"CDR_RESPONSE", "CDR_ID"},
 						Type:      "*composed",
 						Value:     NewRSRParsersMustCompile("~*req.CDR_ID", true, utils.INFIELD_SEP),
 						Mandatory: true,
@@ -198,6 +203,7 @@ func TestMfHttpAgentMultipleFields(t *testing.T) {
 					{
 						Tag:       "ToR",
 						Path:      utils.PathItems{{Field: "ToR"}},
+						PathSlice: []string{"ToR"},
 						Type:      "*constant",
 						Value:     NewRSRParsersMustCompile("*data", true, utils.INFIELD_SEP),
 						Mandatory: true,

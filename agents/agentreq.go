@@ -127,6 +127,27 @@ func (ar *AgentRequest) FieldAsInterface(fldPath []string) (val interface{}, err
 	return
 }
 
+// Field implements utils.NM
+func (ar *AgentRequest) Field(fldPath utils.PathItems) (val utils.NM, err error) {
+	switch fldPath[0].Field {
+	default:
+		return nil, fmt.Errorf("unsupported field prefix: <%s>", fldPath[0])
+	case utils.MetaVars:
+		val, err = ar.Vars.Field(fldPath[1:])
+	case utils.MetaCgreq:
+		val, err = ar.CGRRequest.Field(fldPath[1:])
+	case utils.MetaCgrep:
+		val, err = ar.CGRReply.Field(fldPath[1:])
+	case utils.MetaDiamreq:
+		val, err = ar.diamreq.Field(fldPath[1:])
+	case utils.MetaRep:
+		val, err = ar.Reply.Field(fldPath[1:])
+	case utils.MetaTmp:
+		val, err = ar.tmp.Field(fldPath[1:])
+	}
+	return
+}
+
 // FieldAsString implements utils.DataProvider
 func (ar *AgentRequest) FieldAsString(fldPath []string) (val string, err error) {
 	var iface interface{}
@@ -150,7 +171,8 @@ func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 			continue
 		}
 		if tplFld.Type != utils.META_NONE {
-			out, err := ar.ParseField(tplFld)
+			var out interface{}
+			out, err = ar.ParseField(tplFld)
 			if err != nil {
 				if err == utils.ErrNotFound {
 					if !tplFld.Mandatory {
@@ -159,23 +181,23 @@ func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 					}
 					err = utils.ErrPrefixNotFound(tplFld.Tag)
 				}
-				return err
+				return
 			}
-			fldPath := tplFld.Path.StringSlice()
 			path := tplFld.Path.Clone() // need to clone so me do not modify the template
 			valIndx := 0
 
-			nMItm := &config.NMItem{Data: out, Path: fldPath[1:], Config: tplFld}
-			if nMFields, err := ar.FieldAsInterface(fldPath); err != nil {
+			nMItm := &config.NMItem{Data: out, Path: tplFld.PathSlice[1:], Config: tplFld}
+			var nMFields utils.NM
+			if nMFields, err = ar.Field(path); err != nil {
 				if err != utils.ErrNotFound {
-					return err
+					return
 				}
 			} else {
 				valSet := *(nMFields.(*utils.NMSlice)) // start from previous stored fields
 				switch tplFld.Type {
 				case utils.META_COMPOSED:
 					valIndx = valSet.Len() - 1
-					prevNMItem := valSet[valIndx] // could be we need nil protection here
+					prevNMItem := valSet[valIndx]
 					nMItm.Data = utils.IfaceAsString(prevNMItem.Interface()) + utils.IfaceAsString(out)
 				case utils.MetaGroup: // in case of *group type simply append to valSet
 					valIndx = valSet.Len()
@@ -189,21 +211,8 @@ func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 			} else {
 				path[len(path)-1].Index = &valIndx
 			}
-			switch path[0].Field {
-			default:
-				return fmt.Errorf("unsupported field prefix: <%s> when set fields", path[0])
-			case utils.MetaVars:
-				ar.Vars.Set(path[1:], nm)
-			case utils.MetaCgreq:
-				ar.CGRRequest.Set(path[1:], nm)
-			case utils.MetaCgrep:
-				ar.CGRReply.Set(path[1:], nm)
-			case utils.MetaRep:
-				ar.Reply.Set(path[1:], nm)
-			case utils.MetaDiamreq:
-				ar.diamreq.Set(path[1:], nm)
-			case utils.MetaTmp:
-				ar.tmp.Set(path[1:], nm)
+			if err = ar.Set(path, nm); err != nil {
+				return
 			}
 		}
 		if tplFld.Blocker { // useful in case of processing errors first
@@ -211,6 +220,26 @@ func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 		}
 	}
 	return
+}
+
+// Set implements utils.NM
+func (ar *AgentRequest) Set(path utils.PathItems, nm utils.NM) (err error) {
+	switch path[0].Field {
+	default:
+		return fmt.Errorf("unsupported field prefix: <%s> when set fields", path[0])
+	case utils.MetaVars:
+		return ar.Vars.Set(path[1:], nm)
+	case utils.MetaCgreq:
+		return ar.CGRRequest.Set(path[1:], nm)
+	case utils.MetaCgrep:
+		return ar.CGRReply.Set(path[1:], nm)
+	case utils.MetaRep:
+		return ar.Reply.Set(path[1:], nm)
+	case utils.MetaDiamreq:
+		return ar.diamreq.Set(path[1:], nm)
+	case utils.MetaTmp:
+		return ar.tmp.Set(path[1:], nm)
+	}
 }
 
 // ParseField outputs the value based on the template item

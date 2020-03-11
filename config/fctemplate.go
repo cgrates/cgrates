@@ -20,6 +20,7 @@ package config
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -31,7 +32,8 @@ func NewFCTemplateFromFCTemplateJsonCfg(jsnCfg *FcTemplateJsonCfg, separator str
 		fcTmp.Type = *jsnCfg.Type
 	}
 	if jsnCfg.Path != nil {
-		fcTmp.Path = utils.NewPathToItem(*jsnCfg.Path)
+		fcTmp.PathSlice = strings.Split(*jsnCfg.Path, utils.NestingSep)
+		fcTmp.Path = utils.NewPathToItemFromSlice(fcTmp.PathSlice)
 		fcTmp.Tag = *jsnCfg.Path
 	}
 	if jsnCfg.Tag != nil {
@@ -97,6 +99,7 @@ type FCTemplate struct {
 	Tag              string
 	Type             string          // Type of field
 	Path             utils.PathItems // Field identifier
+	PathSlice        []string        // Used when we set a NMItem to not recreate this slice for every item
 	Filters          []string        // list of filter profiles
 	Value            RSRParsers
 	Width            int
@@ -163,6 +166,10 @@ func (self *FCTemplate) Clone() *FCTemplate {
 	cln.Tag = self.Tag
 	cln.Type = self.Type
 	cln.Path = self.Path.Clone()
+	cln.PathSlice = make([]string, len(self.PathSlice))
+	for i, v := range self.PathSlice {
+		cln.PathSlice[i] = v
+	}
 	if len(self.Filters) != 0 {
 		cln.Filters = make([]string, len(self.Filters))
 		for idx, val := range self.Filters {
