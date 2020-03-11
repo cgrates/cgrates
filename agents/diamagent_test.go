@@ -74,44 +74,41 @@ func TestProcessRequest(t *testing.T) {
 		Filters: []string{},
 		RequestFields: []*config.FCTemplate{
 			&config.FCTemplate{Tag: utils.ToR,
-				Type: utils.META_CONSTANT, Path: utils.PathItems{{Field: utils.MetaCgreq}, {Field: utils.ToR}},
-				PathSlice: []string{utils.MetaCgreq, utils.ToR},
-				Value:     config.NewRSRParsersMustCompile(utils.VOICE, true, utils.INFIELD_SEP)},
+				Type: utils.META_CONSTANT, Path: utils.MetaCgreq + utils.NestingSep + utils.ToR,
+				Value: config.NewRSRParsersMustCompile(utils.VOICE, true, utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: utils.OriginID,
-				Type: utils.META_COMPOSED, Path: utils.PathItems{{Field: utils.MetaCgreq}, {Field: utils.OriginID}},
-				PathSlice: []string{utils.MetaCgreq, utils.OriginID},
-				Value:     config.NewRSRParsersMustCompile("~*req.SessionId", true, utils.INFIELD_SEP), Mandatory: true},
+				Type: utils.META_COMPOSED, Path: utils.MetaCgreq + utils.NestingSep + utils.OriginID,
+				Value: config.NewRSRParsersMustCompile("~*req.SessionId", true, utils.INFIELD_SEP), Mandatory: true},
 			&config.FCTemplate{Tag: utils.OriginHost,
-				Type: utils.MetaRemoteHost, Path: utils.PathItems{{Field: utils.MetaCgreq}, {Field: utils.OriginHost}},
-				PathSlice: []string{utils.MetaCgreq, utils.OriginHost}, Mandatory: true},
+				Type: utils.MetaRemoteHost, Path: utils.MetaCgreq + utils.NestingSep + utils.OriginHost},
 			&config.FCTemplate{Tag: utils.Category,
-				Type: utils.META_CONSTANT, Path: utils.PathItems{{Field: utils.MetaCgreq}, {Field: utils.Category}},
-				PathSlice: []string{utils.MetaCgreq, utils.Category},
-				Value:     config.NewRSRParsersMustCompile(utils.CALL, true, utils.INFIELD_SEP)},
+				Type: utils.META_CONSTANT, Path: utils.MetaCgreq + utils.NestingSep + utils.Category,
+				Value: config.NewRSRParsersMustCompile(utils.CALL, true, utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: utils.Account,
-				Type: utils.META_COMPOSED, Path: utils.PathItems{{Field: utils.MetaCgreq}, {Field: utils.Account}},
-				PathSlice: []string{utils.MetaCgreq, utils.Account},
-				Value:     config.NewRSRParsersMustCompile("~*req.Account", true, utils.INFIELD_SEP), Mandatory: true},
+				Type: utils.META_COMPOSED, Path: utils.MetaCgreq + utils.NestingSep + utils.Account,
+				Value: config.NewRSRParsersMustCompile("~*req.Account", true, utils.INFIELD_SEP), Mandatory: true},
 			&config.FCTemplate{Tag: utils.Destination,
-				Type: utils.META_COMPOSED, Path: utils.PathItems{{Field: utils.MetaCgreq}, {Field: utils.Destination}},
-				PathSlice: []string{utils.MetaCgreq, utils.Destination},
-				Value:     config.NewRSRParsersMustCompile("~*req.Destination", true, utils.INFIELD_SEP), Mandatory: true},
+				Type: utils.META_COMPOSED, Path: utils.MetaCgreq + utils.NestingSep + utils.Destination,
+				Value: config.NewRSRParsersMustCompile("~*req.Destination", true, utils.INFIELD_SEP), Mandatory: true},
 			&config.FCTemplate{Tag: utils.Usage,
-				Type: utils.META_COMPOSED, Path: utils.PathItems{{Field: utils.MetaCgreq}, {Field: utils.Usage}},
-				PathSlice: []string{utils.MetaCgreq, utils.Usage},
-				Value:     config.NewRSRParsersMustCompile("~*req.Usage", true, utils.INFIELD_SEP), Mandatory: true},
+				Type: utils.META_COMPOSED, Path: utils.MetaCgreq + utils.NestingSep + utils.Usage,
+				Value: config.NewRSRParsersMustCompile("~*req.Usage", true, utils.INFIELD_SEP), Mandatory: true},
 		},
 		ReplyFields: []*config.FCTemplate{
 			&config.FCTemplate{Tag: "ResultCode",
-				Type: utils.META_CONSTANT, Path: utils.PathItems{{Field: utils.MetaRep}, {Field: "ResultCode"}},
-				PathSlice: []string{utils.MetaRep, "ResultCode"},
-				Value:     config.NewRSRParsersMustCompile("2001", true, utils.INFIELD_SEP)},
+				Type: utils.META_CONSTANT, Path: utils.MetaRep + utils.NestingSep + "ResultCode",
+				Value: config.NewRSRParsersMustCompile("2001", true, utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "GrantedUnits",
-				Type: utils.MetaVariable, Path: utils.PathItems{{Field: utils.MetaRep}, {Field: "Granted-Service-Unit.CC-Time"}},
-				PathSlice: []string{utils.MetaRep, "Granted-Service-Unit.CC-Time"},
+				Type: utils.MetaVariable, Path: utils.MetaRep + utils.NestingSep + "Granted-Service-Unit.CC-Time",
 				Value:     config.NewRSRParsersMustCompile("~*cgrep.MaxUsage{*duration_seconds}", true, utils.INFIELD_SEP),
 				Mandatory: true},
 		},
+	}
+	for _, v := range reqProcessor.RequestFields {
+		v.ComputePath()
+	}
+	for _, v := range reqProcessor.ReplyFields {
+		v.ComputePath()
 	}
 	reqVars := utils.NavigableMap2{
 		utils.OriginHost:  utils.NewNMInterface(config.CgrConfig().DiameterAgentCfg().OriginHost),
@@ -497,9 +494,14 @@ func TestProcessRequest(t *testing.T) {
 
 	reqProcessor.Flags, _ = utils.FlagsWithParamsFromSlice([]string{utils.MetaTerminate, utils.MetaAccounts, utils.MetaAttributes, utils.MetaCDRs})
 	reqProcessor.ReplyFields = []*config.FCTemplate{&config.FCTemplate{Tag: "ResultCode",
-		PathSlice: []string{utils.MetaRep, "ResultCode"},
-		Type:      utils.META_CONSTANT, Path: utils.PathItems{{Field: utils.MetaRep}, {Field: "ResultCode"}},
+		Type: utils.META_CONSTANT, Path: utils.MetaRep + utils.NestingSep + "ResultCode",
 		Value: config.NewRSRParsersMustCompile("2001", true, utils.INFIELD_SEP)}}
+	for _, v := range reqProcessor.RequestFields {
+		v.ComputePath()
+	}
+	for _, v := range reqProcessor.ReplyFields {
+		v.ComputePath()
+	}
 	cgrRplyNM = &utils.NavigableMap2{}
 	rply = utils.NewOrderedNavigableMap()
 

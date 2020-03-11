@@ -64,7 +64,7 @@ func (ld LoaderData) UpdateFromCSV(fileName string, record []string,
 		if err != nil {
 			return err
 		}
-		path := cfgFld.Path.String()
+		path := cfgFld.Path
 		switch cfgFld.Type {
 		case utils.META_COMPOSED:
 			if _, has := ld[path]; !has {

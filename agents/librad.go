@@ -21,6 +21,7 @@ package agents
 import (
 	"fmt"
 	"net"
+	"strings"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -29,11 +30,11 @@ import (
 
 // radAttrVendorFromPath returns AttributenName and VendorName from path
 // path should be the form attributeName or vendorName/attributeName
-func attrVendorFromPath(path utils.PathItems) (attrName, vendorName string) {
+func attrVendorFromPath(path []string) (attrName, vendorName string) {
 	if len(path) > 2 {
-		vendorName, attrName = path[1].Field, path[2].Field
+		vendorName, attrName = path[1], path[2]
 	} else {
-		attrName = path[1].Field
+		attrName = path[1]
 	}
 	return
 }
@@ -53,7 +54,7 @@ func radComposedFieldValue(pkt *radigo.Packet,
 			continue
 		}
 		for _, avp := range pkt.AttributesWithName(
-			attrVendorFromPath(utils.NewPathToItem(rsrTpl.Rules))) {
+			attrVendorFromPath(strings.Split(rsrTpl.Rules, utils.NestingSep))) {
 			if parsed, err := rsrTpl.ParseValue(avp.GetStringValue()); err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> %s",
@@ -98,13 +99,13 @@ func radReplyAppendAttributes(reply *radigo.Packet, agReq *AgentRequest,
 		if err != nil {
 			return err
 		}
-		if cfgFld.Path[0].Field == MetaRadReplyCode { // Special case used to control the reply code of RADIUS reply
+		if cfgFld.GetPathSlice()[0] == MetaRadReplyCode { // Special case used to control the reply code of RADIUS reply
 			if err = reply.SetCodeWithName(fmtOut); err != nil {
 				return err
 			}
 			continue
 		}
-		attrName, vendorName := attrVendorFromPath(cfgFld.Path)
+		attrName, vendorName := attrVendorFromPath(cfgFld.GetPathSlice())
 		if err = reply.AddAVPWithName(attrName, fmtOut, vendorName); err != nil {
 			return err
 		}
