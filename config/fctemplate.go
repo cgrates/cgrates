@@ -32,9 +32,10 @@ func NewFCTemplateFromFCTemplateJsonCfg(jsnCfg *FcTemplateJsonCfg, separator str
 		fcTmp.Type = *jsnCfg.Type
 	}
 	if jsnCfg.Path != nil {
-		fcTmp.PathSlice = strings.Split(*jsnCfg.Path, utils.NestingSep)
-		fcTmp.Path = utils.NewPathToItemFromSlice(fcTmp.PathSlice)
-		fcTmp.Tag = *jsnCfg.Path
+		fcTmp.Path = *jsnCfg.Path
+		fcTmp.pathSlice = strings.Split(*jsnCfg.Path, utils.NestingSep)
+		fcTmp.pathItems = utils.NewPathToItemFromSlice(fcTmp.pathSlice)
+		fcTmp.Tag = fcTmp.Path
 	}
 	if jsnCfg.Tag != nil {
 		fcTmp.Tag = *jsnCfg.Tag
@@ -97,10 +98,9 @@ func NewFCTemplateFromFCTemplateJsonCfg(jsnCfg *FcTemplateJsonCfg, separator str
 
 type FCTemplate struct {
 	Tag              string
-	Type             string          // Type of field
-	Path             utils.PathItems // Field identifier
-	PathSlice        []string        // Used when we set a NMItem to not recreate this slice for every item
-	Filters          []string        // list of filter profiles
+	Type             string // Type of field
+	Path             string
+	Filters          []string // list of filter profiles
 	Value            RSRParsers
 	Width            int
 	Strip            string
@@ -116,6 +116,8 @@ type FCTemplate struct {
 	RoundingDecimals int
 	MaskDestID       string
 	MaskLen          int
+	pathItems        utils.PathItems // Field identifier
+	pathSlice        []string        // Used when we set a NMItem to not recreate this slice for every itemsc
 }
 
 func FCTemplatesFromFCTemplatesJsonCfg(jsnCfgFlds []*FcTemplateJsonCfg, separator string) ([]*FCTemplate, error) {
@@ -161,39 +163,56 @@ func InflateTemplates(fcts []*FCTemplate, msgTpls map[string][]*FCTemplate) ([]*
 	return fcts, nil
 }
 
-func (self *FCTemplate) Clone() *FCTemplate {
+func (fc *FCTemplate) Clone() *FCTemplate {
 	cln := new(FCTemplate)
-	cln.Tag = self.Tag
-	cln.Type = self.Type
-	cln.Path = self.Path.Clone()
-	cln.PathSlice = make([]string, len(self.PathSlice))
-	for i, v := range self.PathSlice {
-		cln.PathSlice[i] = v
+	cln.Tag = fc.Tag
+	cln.Type = fc.Type
+	cln.Path = fc.Path
+	cln.pathItems = fc.pathItems.Clone()
+	cln.pathSlice = make([]string, len(fc.pathSlice))
+	for i, v := range fc.pathSlice {
+		cln.pathSlice[i] = v
 	}
-	if len(self.Filters) != 0 {
-		cln.Filters = make([]string, len(self.Filters))
-		for idx, val := range self.Filters {
+	if len(fc.Filters) != 0 {
+		cln.Filters = make([]string, len(fc.Filters))
+		for idx, val := range fc.Filters {
 			cln.Filters[idx] = val
 		}
 	}
-	cln.Value = make(RSRParsers, len(self.Value))
-	for idx, val := range self.Value {
+	cln.Value = make(RSRParsers, len(fc.Value))
+	for idx, val := range fc.Value {
 		clnVal := *val
 		cln.Value[idx] = &clnVal
 	}
-	cln.Width = self.Width
-	cln.Strip = self.Strip
-	cln.Padding = self.Padding
-	cln.Mandatory = self.Mandatory
-	cln.AttributeID = self.AttributeID
-	cln.NewBranch = self.NewBranch
-	cln.Timezone = self.Timezone
-	cln.Blocker = self.Blocker
-	cln.BreakOnSuccess = self.BreakOnSuccess
-	cln.Layout = self.Layout
-	cln.CostShiftDigits = self.CostShiftDigits
-	cln.RoundingDecimals = self.RoundingDecimals
-	cln.MaskDestID = self.MaskDestID
-	cln.MaskLen = self.MaskLen
+	cln.Width = fc.Width
+	cln.Strip = fc.Strip
+	cln.Padding = fc.Padding
+	cln.Mandatory = fc.Mandatory
+	cln.AttributeID = fc.AttributeID
+	cln.NewBranch = fc.NewBranch
+	cln.Timezone = fc.Timezone
+	cln.Blocker = fc.Blocker
+	cln.BreakOnSuccess = fc.BreakOnSuccess
+	cln.Layout = fc.Layout
+	cln.CostShiftDigits = fc.CostShiftDigits
+	cln.RoundingDecimals = fc.RoundingDecimals
+	cln.MaskDestID = fc.MaskDestID
+	cln.MaskLen = fc.MaskLen
 	return cln
+}
+
+// GetPathSlice returns the cached split of the path
+func (fc *FCTemplate) GetPathSlice() []string {
+	return fc.pathSlice
+}
+
+// GetPathItems returns the cached path as PathItems
+func (fc *FCTemplate) GetPathItems() utils.PathItems {
+	return fc.pathItems
+}
+
+// ComputePath used in test to populate private fields used to store the path
+func (fc *FCTemplate) ComputePath() {
+	fc.pathSlice = strings.Split(fc.Path, utils.NestingSep)
+	fc.pathItems = utils.NewPathToItemFromSlice(fc.pathSlice)
 }

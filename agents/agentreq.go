@@ -183,10 +183,10 @@ func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 				}
 				return
 			}
-			path := tplFld.Path.Clone() // need to clone so me do not modify the template
+			path := tplFld.GetPathItems().Clone() // need to clone so me do not modify the template
 			valIndx := 0
 
-			nMItm := &config.NMItem{Data: out, Path: tplFld.PathSlice[1:], Config: tplFld}
+			nMItm := &config.NMItem{Data: out, Path: tplFld.GetPathSlice()[1:], Config: tplFld}
 			var nMFields utils.NM
 			if nMFields, err = ar.Field(path); err != nil {
 				if err != utils.ErrNotFound {

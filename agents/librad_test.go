@@ -78,11 +78,11 @@ func init() {
 }
 
 func TestAttrVendorFromPath(t *testing.T) {
-	if attrName, vendorName := attrVendorFromPath(utils.NewPathToItem("*rep.User-Name")); attrName != "User-Name" ||
+	if attrName, vendorName := attrVendorFromPath([]string{"*rep", "User-Name"}); attrName != "User-Name" ||
 		vendorName != "" {
 		t.Error("failed")
 	}
-	if attrName, vendorName := attrVendorFromPath(utils.NewPathToItem("*rep.Cisco.Cisco-NAS-Port")); attrName != "Cisco-NAS-Port" ||
+	if attrName, vendorName := attrVendorFromPath([]string{"*rep", "Cisco", "Cisco-NAS-Port"}); attrName != "Cisco-NAS-Port" ||
 		vendorName != "Cisco" {
 		t.Error("failed")
 	}
@@ -120,9 +120,9 @@ func TestRadFieldOutVal(t *testing.T) {
 	agReq.Vars.Set(utils.PathItems{{Field: MetaRadReqType}}, utils.NewNMInterface(MetaRadAcctStart))
 	agReq.Vars.Set(utils.PathItems{{Field: "Cisco"}}, utils.NewNMInterface("CGR1"))
 	agReq.Vars.Set(utils.PathItems{{Field: "User-Name"}}, utils.NewNMInterface("flopsy"))
-	cfgFld := &config.FCTemplate{Tag: "ComposedTest", Type: utils.META_COMPOSED, Path: utils.PathItems{{Field: utils.Destination}},
-		PathSlice: []string{utils.Destination},
-		Value:     config.NewRSRParsersMustCompile("~*vars.*radReqType;|;~*vars.User-Name;|;~*vars.Cisco", true, utils.INFIELD_SEP), Mandatory: true}
+	cfgFld := &config.FCTemplate{Tag: "ComposedTest", Type: utils.META_COMPOSED, Path: utils.Destination,
+		Value: config.NewRSRParsersMustCompile("~*vars.*radReqType;|;~*vars.User-Name;|;~*vars.Cisco", true, utils.INFIELD_SEP), Mandatory: true}
+	cfgFld.ComputePath()
 	if outVal, err := radFieldOutVal(pkt, agReq, cfgFld); err != nil {
 		t.Error(err)
 	} else if outVal != eOut {
@@ -133,12 +133,13 @@ func TestRadFieldOutVal(t *testing.T) {
 func TestRadReplyAppendAttributes(t *testing.T) {
 	rply := radigo.NewPacket(radigo.AccessRequest, 2, dictRad, coder, "CGRateS.org").Reply()
 	rplyFlds := []*config.FCTemplate{
-		&config.FCTemplate{Tag: "ReplyCode", Path: utils.PathItems{{Field: MetaRadReplyCode}}, Type: utils.META_COMPOSED,
-			PathSlice: []string{MetaRadReplyCode},
-			Value:     config.NewRSRParsersMustCompile("~*cgrep.Attributes.RadReply", true, utils.INFIELD_SEP)},
-		&config.FCTemplate{Tag: "Acct-Session-Time", Path: utils.PathItems{{Field: utils.MetaRep}, {Field: "Acct-Session-Time"}}, Type: utils.META_COMPOSED,
-			PathSlice: []string{utils.MetaRep, "Acct-Session-Time"},
-			Value:     config.NewRSRParsersMustCompile("~*cgrep.MaxUsage{*duration_seconds}", true, utils.INFIELD_SEP)},
+		&config.FCTemplate{Tag: "ReplyCode", Path: MetaRadReplyCode, Type: utils.META_COMPOSED,
+			Value: config.NewRSRParsersMustCompile("~*cgrep.Attributes.RadReply", true, utils.INFIELD_SEP)},
+		&config.FCTemplate{Tag: "Acct-Session-Time", Path: utils.MetaRep + utils.NestingSep + "Acct-Session-Time", Type: utils.META_COMPOSED,
+			Value: config.NewRSRParsersMustCompile("~*cgrep.MaxUsage{*duration_seconds}", true, utils.INFIELD_SEP)},
+	}
+	for _, v := range rplyFlds {
+		v.ComputePath()
 	}
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", nil, nil, nil)
 	agReq.CGRReply.Set(utils.PathItems{{Field: utils.CapMaxUsage}}, utils.NewNMInterface(time.Duration(time.Hour)))

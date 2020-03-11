@@ -182,7 +182,7 @@ func (rdr *FlatstoreER) processFile(fPath, fName string) (err error) {
 
 		// build Usage from Fields based on record lenght
 		for i, cntFld := range rdr.Config().Fields {
-			if cntFld.Path.String() == utils.MetaCgreq+utils.NestingSep+utils.Usage {
+			if cntFld.Path == utils.MetaCgreq+utils.NestingSep+utils.Usage {
 				rdr.Config().Fields[i].Value = config.NewRSRParsersMustCompile("~*req."+strconv.Itoa(len(record)-1), true, utils.INFIELD_SEP) // in case of flatstore, last element will be the duration computed by us
 			}
 		}

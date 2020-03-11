@@ -131,8 +131,7 @@ func TestMfHttpAgentMultipleFields(t *testing.T) {
 					RequestFields: []*FCTemplate{},
 					ReplyFields: []*FCTemplate{{
 						Tag:       "Allow",
-						Path:      utils.PathItems{{Field: "response"}, {Field: "Allow"}},
-						PathSlice: []string{"response", "Allow"},
+						Path:      "response.Allow",
 						Type:      "*constant",
 						Value:     NewRSRParsersMustCompile("1", true, utils.INFIELD_SEP),
 						Mandatory: true,
@@ -147,8 +146,7 @@ func TestMfHttpAgentMultipleFields(t *testing.T) {
 					RequestFields: []*FCTemplate{
 						{
 							Tag:       "RequestType",
-							Path:      utils.PathItems{{Field: "RequestType"}},
-							PathSlice: []string{"RequestType"},
+							Path:      "RequestType",
 							Type:      "*constant",
 							Value:     NewRSRParsersMustCompile("*pseudoprepaid", true, utils.INFIELD_SEP),
 							Mandatory: true,
@@ -157,8 +155,7 @@ func TestMfHttpAgentMultipleFields(t *testing.T) {
 					ReplyFields: []*FCTemplate{
 						{
 							Tag:       "Allow",
-							Path:      utils.PathItems{{Field: "response"}, {Field: "Allow"}},
-							PathSlice: []string{"response", "Allow"},
+							Path:      "response.Allow",
 							Type:      "*constant",
 							Value:     NewRSRParsersMustCompile("1", true, utils.INFIELD_SEP),
 							Mandatory: true,
@@ -172,16 +169,14 @@ func TestMfHttpAgentMultipleFields(t *testing.T) {
 					Flags:   utils.FlagsWithParams{"*cdrs": []string{}},
 					RequestFields: []*FCTemplate{{
 						Tag:       "RequestType",
-						Path:      utils.PathItems{{Field: "RequestType"}},
-						PathSlice: []string{"RequestType"},
+						Path:      "RequestType",
 						Type:      "*constant",
 						Value:     NewRSRParsersMustCompile("*pseudoprepaid", true, utils.INFIELD_SEP),
 						Mandatory: true,
 					}},
 					ReplyFields: []*FCTemplate{{
 						Tag:       "CDR_ID",
-						Path:      utils.PathItems{{Field: "CDR_RESPONSE"}, {Field: "CDR_ID"}},
-						PathSlice: []string{"CDR_RESPONSE", "CDR_ID"},
+						Path:      "CDR_RESPONSE.CDR_ID",
 						Type:      "*composed",
 						Value:     NewRSRParsersMustCompile("~*req.CDR_ID", true, utils.INFIELD_SEP),
 						Mandatory: true,
@@ -202,8 +197,7 @@ func TestMfHttpAgentMultipleFields(t *testing.T) {
 				RequestFields: []*FCTemplate{
 					{
 						Tag:       "ToR",
-						Path:      utils.PathItems{{Field: "ToR"}},
-						PathSlice: []string{"ToR"},
+						Path:      "ToR",
 						Type:      "*constant",
 						Value:     NewRSRParsersMustCompile("*data", true, utils.INFIELD_SEP),
 						Mandatory: true,
@@ -211,6 +205,16 @@ func TestMfHttpAgentMultipleFields(t *testing.T) {
 				},
 				ReplyFields: []*FCTemplate{},
 			}}},
+	}
+	for _, ha := range expected {
+		for _, req := range ha.RequestProcessors {
+			for _, v := range req.ReplyFields {
+				v.ComputePath()
+			}
+			for _, v := range req.RequestFields {
+				v.ComputePath()
+			}
+		}
 	}
 
 	if !reflect.DeepEqual(mfCgrCfg.HttpAgentCfg(), expected) {

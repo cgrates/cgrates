@@ -313,7 +313,7 @@ func (cdr *CDR) combimedCdrFieldVal(cfgCdrFld *config.FCTemplate, groupCDRs []*C
 func (cdr *CDR) exportFieldValue(cfgCdrFld *config.FCTemplate, filterS *FilterS) (retVal string, err error) {
 	for _, rsrFld := range cfgCdrFld.Value {
 		var cdrVal string
-		switch cfgCdrFld.Path[1].Field {
+		switch cfgCdrFld.GetPathSlice()[1] {
 		case utils.COST:
 			cdrVal = cdr.FormatCost(cfgCdrFld.CostShiftDigits,
 				cfgCdrFld.RoundingDecimals)
@@ -413,7 +413,7 @@ func (cdr *CDR) AsExportRecord(exportFields []*config.FCTemplate,
 		utils.MetaEC:  cdr.CostDetails,
 	}
 	for _, cfgFld := range exportFields {
-		if cfgFld.Path[0].Field != utils.MetaExp {
+		if cfgFld.GetPathSlice()[0] != utils.MetaExp {
 			continue
 		}
 		if pass, err := filterS.Pass(cdr.Tenant,
@@ -443,7 +443,7 @@ func (cdr *CDR) AsExportMap(exportFields []*config.FCTemplate, httpSkipTLSCheck 
 		utils.MetaEC:  cdr.CostDetails,
 	}
 	for _, cfgFld := range exportFields {
-		if cfgFld.Path[0].Field != utils.MetaExp {
+		if cfgFld.GetPathSlice()[0] != utils.MetaExp {
 			continue
 		}
 		if pass, err := filterS.Pass(cdr.Tenant,
@@ -458,7 +458,7 @@ func (cdr *CDR) AsExportMap(exportFields []*config.FCTemplate, httpSkipTLSCheck 
 				err.Error(), utils.ToJSON(cfgFld), utils.ToJSON(cdr)))
 			return nil, err
 		}
-		expMap[cfgFld.Path[1:].String()] += fmtOut
+		expMap[strings.TrimPrefix(cfgFld.Path, utils.MetaExp+utils.NestingSep)] += fmtOut
 	}
 	return
 }

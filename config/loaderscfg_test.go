@@ -83,8 +83,7 @@ func TestLoaderSCfgloadFromJsonCfg(t *testing.T) {
 				Fields: []*FCTemplate{
 					{
 						Tag:       "TenantID",
-						Path:      utils.PathItems{{Field: "Tenant"}},
-						PathSlice: []string{"Tenant"},
+						Path:      "Tenant",
 						Type:      "*composed",
 						Value:     val,
 						Mandatory: true,
@@ -93,6 +92,7 @@ func TestLoaderSCfgloadFromJsonCfg(t *testing.T) {
 			},
 		},
 	}
+	expected.Data[0].Fields[0].ComputePath()
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if jsnLoadersCfg, err := jsnCfg.LoaderJsonCfg(); err != nil {
