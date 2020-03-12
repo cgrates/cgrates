@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package dispatchers
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/cgrates/cgrates/engine"
@@ -1391,4 +1392,51 @@ func testDspRplDestination(t *testing.T) {
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetDestination, argsDestination, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
 	}
+}
+
+func testDspRplLoadIDs(t *testing.T) {
+	// Set LoadIDs
+	var replyStr string
+	setLoadIDs := &utils.LoadIDsWithArgDispatcher{
+		LoadIDs: map[string]int64{
+			"LoadID1": 1,
+			"LoadID2": 2},
+		TenantArg: utils.TenantArg{
+			Tenant: "cgrates.org",
+		},
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("repl12345")},
+	}
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetLoadIDs, setLoadIDs, &replyStr); err != nil {
+		t.Error("Unexpected error when calling ReplicatorSv1.SetLoadIDs: ", err)
+	} else if replyStr != utils.OK {
+		t.Error("Unexpected reply returned", replyStr)
+	}
+	// Get LoadIDs
+	var reply map[string]int64
+	argsLoadIDs := &utils.StringWithApiKey{
+		Arg:       "idLoadIDs",
+		TenantArg: utils.TenantArg{Tenant: "cgrates.org"},
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("repl12345")},
+	}
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetItemLoadIDs, argsLoadIDs, &reply); err != nil {
+		t.Error("Unexpected error when calling ReplicatorSv1.GetItemLoadIDs: ", err)
+	} else if reflect.DeepEqual(reply, setLoadIDs) {
+		t.Errorf("Expecting: %+v, received: %+v", setLoadIDs, reply)
+	} else if len(reply) != len(setLoadIDs.LoadIDs) {
+		t.Errorf("Expecting: %+v, received: %+v, ", len(setLoadIDs.LoadIDs), len(reply))
+	} else if reply["LoadID1"] != setLoadIDs.LoadIDs["LoadID1"] {
+		t.Errorf("Expecting: %+v, received: %+v, ", setLoadIDs.LoadIDs["LoadID1"], reply["LoadID1"])
+	}
+	// Stop engine 1
+	allEngine.stopEngine(t)
+
+	// Get LoadIDs
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetItemLoadIDs, argsLoadIDs, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
+	}
+
+	// Start engine 1
+	allEngine.startEngine(t)
 }
