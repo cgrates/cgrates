@@ -180,14 +180,14 @@ func TestUpdateDNSMsgFromNM(t *testing.T) {
 		Path: []string{},
 		Data: "Val1",
 	}
-	nM.Set(utils.NewPathToItemFromSlice([]string{"Path"}), &utils.NMSlice{itm})
+	nM.Set(utils.NewPathToItem([]string{"Path"}), &utils.NMSlice{itm})
 	if err := updateDNSMsgFromNM(m, nM); err == nil ||
 		err.Error() != "empty path in config item" {
 		t.Error(err)
 	}
 
 	nM = utils.NewOrderedNavigableMap()
-	nM.Set(utils.NewPathToItemFromSlice([]string{"Path"}), utils.NewNMInterface("test"))
+	nM.Set(utils.NewPathToItem([]string{"Path"}), utils.NewNMInterface("test"))
 	if err := updateDNSMsgFromNM(m, nM); err == nil ||
 		err.Error() != `cannot cast val: test into *config.NMItem` {
 		t.Error(err)
@@ -198,7 +198,7 @@ func TestUpdateDNSMsgFromNM(t *testing.T) {
 		Path: []string{utils.Rcode},
 		Data: 10,
 	}
-	nM.Set(utils.NewPathToItemFromSlice(itm.Path), &utils.NMSlice{itm})
+	nM.Set(utils.NewPathToItem(itm.Path), &utils.NMSlice{itm})
 	if err := updateDNSMsgFromNM(m, nM); err != nil {
 		t.Error(err)
 	}
@@ -211,7 +211,7 @@ func TestUpdateDNSMsgFromNM(t *testing.T) {
 		Path: []string{utils.Rcode},
 		Data: "RandomValue",
 	}
-	nM.Set(utils.NewPathToItemFromSlice(itm.Path), &utils.NMSlice{itm})
+	nM.Set(utils.NewPathToItem(itm.Path), &utils.NMSlice{itm})
 	if err := updateDNSMsgFromNM(m, nM); err == nil ||
 		err.Error() != `item: <Rcode>, err: strconv.ParseInt: parsing "RandomValue": invalid syntax` {
 		t.Error(err)
@@ -222,7 +222,7 @@ func TestUpdateDNSMsgFromNM(t *testing.T) {
 		Path: []string{utils.Order},
 		Data: "RandomValue",
 	}
-	nM.Set(utils.NewPathToItemFromSlice(itm.Path), &utils.NMSlice{itm})
+	nM.Set(utils.NewPathToItem(itm.Path), &utils.NMSlice{itm})
 	if err := updateDNSMsgFromNM(m, nM); err == nil ||
 		err.Error() != `item: <Order>, err: strconv.ParseInt: parsing "RandomValue": invalid syntax` {
 		t.Error(err)
@@ -233,7 +233,7 @@ func TestUpdateDNSMsgFromNM(t *testing.T) {
 		Path: []string{utils.Preference},
 		Data: "RandomValue",
 	}
-	nM.Set(utils.NewPathToItemFromSlice(itm.Path), &utils.NMSlice{itm})
+	nM.Set(utils.NewPathToItem(itm.Path), &utils.NMSlice{itm})
 	if err := updateDNSMsgFromNM(m, nM); err == nil ||
 		err.Error() != `item: <Preference>, err: strconv.ParseInt: parsing "RandomValue": invalid syntax` {
 		t.Error(err)
@@ -246,7 +246,7 @@ func TestUpdateDNSMsgFromNM(t *testing.T) {
 		Path: []string{utils.Order},
 		Data: 10,
 	}
-	nM.Set(utils.NewPathToItemFromSlice(itm.Path), &utils.NMSlice{itm})
+	nM.Set(utils.NewPathToItem(itm.Path), &utils.NMSlice{itm})
 	if err := updateDNSMsgFromNM(m, nM); err == nil ||
 		err.Error() != `field <Order> only works with NAPTR` {
 		t.Error(err)
@@ -257,7 +257,7 @@ func TestUpdateDNSMsgFromNM(t *testing.T) {
 		Path: []string{utils.Preference},
 		Data: 10,
 	}
-	nM.Set(utils.NewPathToItemFromSlice(itm.Path), &utils.NMSlice{itm})
+	nM.Set(utils.NewPathToItem(itm.Path), &utils.NMSlice{itm})
 	if err := updateDNSMsgFromNM(m, nM); err == nil ||
 		err.Error() != `field <Preference> only works with NAPTR` {
 		t.Error(err)
@@ -268,7 +268,7 @@ func TestUpdateDNSMsgFromNM(t *testing.T) {
 		Path: []string{utils.Flags},
 		Data: 10,
 	}
-	nM.Set(utils.NewPathToItemFromSlice(itm.Path), &utils.NMSlice{itm})
+	nM.Set(utils.NewPathToItem(itm.Path), &utils.NMSlice{itm})
 	if err := updateDNSMsgFromNM(m, nM); err == nil ||
 		err.Error() != `field <Flags> only works with NAPTR` {
 		t.Error(err)
@@ -279,7 +279,7 @@ func TestUpdateDNSMsgFromNM(t *testing.T) {
 		Path: []string{utils.Service},
 		Data: 10,
 	}
-	nM.Set(utils.NewPathToItemFromSlice(itm.Path), &utils.NMSlice{itm})
+	nM.Set(utils.NewPathToItem(itm.Path), &utils.NMSlice{itm})
 	if err := updateDNSMsgFromNM(m, nM); err == nil ||
 		err.Error() != `field <Service> only works with NAPTR` {
 		t.Error(err)
@@ -290,7 +290,7 @@ func TestUpdateDNSMsgFromNM(t *testing.T) {
 		Path: []string{utils.Regexp},
 		Data: 10,
 	}
-	nM.Set(utils.NewPathToItemFromSlice(itm.Path), &utils.NMSlice{itm})
+	nM.Set(utils.NewPathToItem(itm.Path), &utils.NMSlice{itm})
 	if err := updateDNSMsgFromNM(m, nM); err == nil ||
 		err.Error() != `field <Regexp> only works with NAPTR` {
 		t.Error(err)
@@ -301,7 +301,7 @@ func TestUpdateDNSMsgFromNM(t *testing.T) {
 		Path: []string{utils.Replacement},
 		Data: 10,
 	}
-	nM.Set(utils.NewPathToItemFromSlice(itm.Path), &utils.NMSlice{itm})
+	nM.Set(utils.NewPathToItem(itm.Path), &utils.NMSlice{itm})
 	if err := updateDNSMsgFromNM(m, nM); err == nil ||
 		err.Error() != `field <Replacement> only works with NAPTR` {
 		t.Error(err)
