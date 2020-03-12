@@ -40,7 +40,7 @@ func TestNewNMInterface(t *testing.T) {
 	if _, err := nm.Field(nil); err != ErrNotImplemented {
 		t.Error(err)
 	}
-	if err := nm.Set(nil, nil); err != ErrNotImplemented {
+	if err := nm.Set(PathItems{{}}, nil); err == nil || err.Error() != "Wrong path" {
 		t.Error(err)
 	}
 	if err := nm.Remove(nil); err != ErrNotImplemented {

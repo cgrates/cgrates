@@ -164,3 +164,47 @@ func (path PathItems) Clone() (c PathItems) {
 	}
 	return
 }
+
+// navMap subset of function for NM interface
+type navMap interface {
+	Field(path PathItems) (val NM, err error)
+	Set(path PathItems, val NM) (err error)
+}
+
+// AppendNavMapVal appends value to the map
+func AppendNavMapVal(nm navMap, fldPath PathItems, val NM) (err error) {
+	var prevItm NM
+	var indx int
+	if prevItm, err = nm.Field(fldPath); err != nil {
+		if err != ErrNotFound {
+			return
+		}
+	} else {
+		indx = prevItm.Len()
+	}
+	fldPath[len(fldPath)-1].Index = &indx
+	return nm.Set(fldPath, val)
+}
+
+// ComposeNavMapVal compose adds value to prevision item
+func ComposeNavMapVal(nm navMap, fldPath PathItems, val NM) (err error) {
+	var prevItmSlice NM
+	var indx int
+	if prevItmSlice, err = nm.Field(fldPath); err != nil {
+		if err != ErrNotFound {
+			return
+		}
+	} else {
+		indx = prevItmSlice.Len() - 1
+		var prevItm NM
+		if prevItm, err = prevItmSlice.GetField(&PathItem{Index: &indx}); err != nil {
+			if err != ErrNotFound {
+				return
+			}
+		} else if err = val.Set(nil, NewNMInterface(IfaceAsString(prevItm.Interface())+IfaceAsString(val.Interface()))); err != nil {
+			return
+		}
+	}
+	fldPath[len(fldPath)-1].Index = &indx
+	return nm.Set(fldPath, val)
+}

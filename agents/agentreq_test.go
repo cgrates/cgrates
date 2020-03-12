@@ -439,8 +439,8 @@ func TestAgentRequestSetFields(t *testing.T) {
 		},
 	}
 	input[0].ComputePath()
-	if err := ar.SetFields(input); err == nil || err.Error() != "unsupported field prefix: <wrong>" {
-		t.Errorf("Expecting: %+v, received: %+v", "unsupported field prefix: <wrong>", err)
+	if err := ar.SetFields(input); err == nil || err.Error() != "unsupported field prefix: <wrong> when set field" {
+		t.Errorf("Expecting: %+v, received: <%+v>", "unsupported field prefix: <wrong> when set field", err)
 	}
 
 	// MetaHdr/MetaTrl
