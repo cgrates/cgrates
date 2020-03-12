@@ -7,18 +7,19 @@ cgrates (0.10.1~dev) UNRELEASED; urgency=medium
     ToJSON for request String method
   * [DiameterAgent] Updated 3gp_vendor dictionary
   * [Templates] Added new dataconvertor: *ip2hex
-  * [AgentRequest] Add support for *group type and correctly overwrite
+  * [AgentRequest] Added support for *group type and correctly overwrite
     the values in case of *variable
   * [EventReader] Correctly populate ConcurrentRequest from config in
     EventReader
   * [SupplierS] In case of missing usage from Event use 1 minute as
     default value
   * [DataDB] Mongo support different marshaler than msgpack
-  * [General] Fix rpc_conns handling id with two connections and one of
+  * [ConnManager] Fixed rpc_conns handling id with two connections and one of
     it *internal
-  * [Replicator] Add Limit and StaticTTL otions for Items from
+  * [Replicator] Added Limit and StaticTTL otions for Items from
     DataDB/StorDB
-  * Migrator discover tenant from key instead of taking it from config
+  * [Migrator] Auto discover tenant from key instead of taking it from config
+  * [Templates] Fixed missing "*" for strip and padding strategy
 
  -- Alexandru Tripon <alexandru.tripon@itsyscom.com>  Wed, 19 Feb 2020 15:22:59 +0200
 
