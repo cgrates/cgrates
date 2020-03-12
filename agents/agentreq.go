@@ -184,34 +184,17 @@ func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 				return
 			}
 			path := tplFld.GetPathItems().Clone() // need to clone so me do not modify the template
-			valIndx := 0
 
 			nMItm := &config.NMItem{Data: out, Path: tplFld.GetPathSlice()[1:], Config: tplFld}
-			var nMFields utils.NM
-			if nMFields, err = ar.Field(path); err != nil {
-				if err != utils.ErrNotFound {
-					return
-				}
-			} else {
-				valSet := *(nMFields.(*utils.NMSlice)) // start from previous stored fields
-				switch tplFld.Type {
-				case utils.META_COMPOSED:
-					valIndx = valSet.Len() - 1
-					prevNMItem := valSet[valIndx]
-					nMItm.Data = utils.IfaceAsString(prevNMItem.Interface()) + utils.IfaceAsString(out)
-				case utils.MetaGroup: // in case of *group type simply append to valSet
-					valIndx = valSet.Len()
-				default:
-					valIndx = -1
-				}
+			switch tplFld.Type {
+			case utils.META_COMPOSED:
+				err = utils.ComposeNavMapVal(ar, path, nMItm)
+			case utils.MetaGroup: // in case of *group type simply append to valSet
+				err = utils.AppendNavMapVal(ar, path, nMItm)
+			default:
+				err = ar.Set(path, &utils.NMSlice{nMItm})
 			}
-			var nm utils.NM = nMItm
-			if valIndx == -1 {
-				nm = &utils.NMSlice{nm}
-			} else {
-				path[len(path)-1].Index = &valIndx
-			}
-			if err = ar.Set(path, nm); err != nil {
+			if err != nil {
 				return
 			}
 		}
@@ -226,7 +209,7 @@ func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 func (ar *AgentRequest) Set(path utils.PathItems, nm utils.NM) (err error) {
 	switch path[0].Field {
 	default:
-		return fmt.Errorf("unsupported field prefix: <%s> when set fields", path[0])
+		return fmt.Errorf("unsupported field prefix: <%s> when set field", path[0])
 	case utils.MetaVars:
 		return ar.Vars.Set(path[1:], nm)
 	case utils.MetaCgreq:

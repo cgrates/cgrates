@@ -18,6 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package utils
 
+import "fmt"
+
 func NewNMInterface(val interface{}) *NMInterface { return &NMInterface{data: val} }
 
 type NMInterface struct{ data interface{} }
@@ -28,7 +30,11 @@ func (nmi *NMInterface) Field(path PathItems) (val NM, err error) {
 	return nil, ErrNotImplemented
 }
 func (nmi *NMInterface) Set(path PathItems, val NM) (err error) {
-	return ErrNotImplemented
+	if len(path) != 0 {
+		return fmt.Errorf("Wrong path")
+	}
+	nmi.data = val.Interface()
+	return
 }
 func (nmi *NMInterface) Remove(path PathItems) (err error) {
 	return ErrNotImplemented
