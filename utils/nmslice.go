@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package utils
 
+// NMSlice is the basic slice of NM interface
 type NMSlice []NM
 
 func (nms *NMSlice) String() (out string) {
@@ -30,7 +31,14 @@ func (nms *NMSlice) String() (out string) {
 	out = out[1:]
 	return "[" + out + "]"
 }
-func (nms *NMSlice) Interface() interface{} { return nms }
+
+// Interface returns itself
+func (nms *NMSlice) Interface() interface{} {
+	return nms
+}
+
+// Field returns the item on the given path
+// for NMSlice only the Index field is considered
 func (nms *NMSlice) Field(path PathItems) (val NM, err error) {
 	if len(path) == 0 {
 		return nil, ErrWrongPath
@@ -50,6 +58,8 @@ func (nms *NMSlice) Field(path PathItems) (val NM, err error) {
 	}
 	return (*nms)[idx].Field(path[1:])
 }
+
+// Set sets the value for the given index
 func (nms *NMSlice) Set(path PathItems, val NM) (err error) {
 	if len(path) == 0 || path[0].Index == nil {
 		return ErrWrongPath
@@ -82,6 +92,8 @@ func (nms *NMSlice) Set(path PathItems, val NM) (err error) {
 	}
 	return (*nms)[idx].Set(path[1:], val)
 }
+
+// Remove removes the item for the given index
 func (nms *NMSlice) Remove(path PathItems) (err error) {
 	if len(path) == 0 || path[0].Index == nil {
 		return ErrWrongPath
@@ -117,10 +129,23 @@ func (nms *NMSlice) Remove(path PathItems) (err error) {
 	}
 	panic("BUG")
 }
-func (nms NMSlice) Type() NMType { return NMSliceType }
-func (nms NMSlice) Empty() bool  { return nms == nil || len(nms) == 0 }
 
+// Type returns the type of the NM slice
+func (nms NMSlice) Type() NMType {
+	return NMSliceType
+}
+
+// Empty returns true if the NM is empty(no data)
+func (nms NMSlice) Empty() bool {
+	return nms == nil || len(nms) == 0
+}
+
+// GetField the same as Field but for one level deep
+// used for OrderedNavigableMap parsing
 func (nms *NMSlice) GetField(path *PathItem) (val NM, err error) {
+	if path == nil {
+		return nil, ErrWrongPath
+	}
 	if nms.Empty() || path.Index == nil {
 		return nil, ErrNotFound
 	}
@@ -134,6 +159,8 @@ func (nms *NMSlice) GetField(path *PathItem) (val NM, err error) {
 	return (*nms)[idx], nil
 }
 
+// SetField the same as Set but for one level deep
+// used for OrderedNavigableMap parsing
 func (nms *NMSlice) SetField(path *PathItem, val NM) (err error) {
 	if path.Index == nil {
 		return ErrWrongPath
@@ -152,4 +179,8 @@ func (nms *NMSlice) SetField(path *PathItem, val NM) (err error) {
 	(*nms)[idx] = val
 	return
 }
-func (nms *NMSlice) Len() int { return len(*nms) }
+
+// Len returns the lenght of the slice
+func (nms *NMSlice) Len() int {
+	return len(*nms)
+}
