@@ -216,12 +216,12 @@ func (ar *AgentRequest) ParseField(
 	var isString bool
 	switch cfgFld.Type {
 	default:
-		return "", fmt.Errorf("unsupported type: <%s>", cfgFld.Type)
+		return utils.EmptyString, fmt.Errorf("unsupported type: <%s>", cfgFld.Type)
 	case utils.META_NONE:
 		return
 	case utils.META_FILLER:
 		out, err = cfgFld.Value.ParseValue(utils.EmptyString)
-		cfgFld.Padding = "right"
+		cfgFld.Padding = utils.MetaRight
 		isString = true
 	case utils.META_CONSTANT:
 		out, err = cfgFld.Value.ParseValue(utils.EmptyString)
