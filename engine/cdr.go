@@ -352,7 +352,7 @@ func (cdr *CDR) formatField(cfgFld *config.FCTemplate, httpSkipTLSCheck bool,
 	switch cfgFld.Type {
 	case utils.META_FILLER:
 		outVal, err = cfgFld.Value.ParseValue(utils.EmptyString)
-		cfgFld.Padding = "right"
+		cfgFld.Padding = utils.MetaRight
 	case utils.META_CONSTANT:
 		outVal, err = cfgFld.Value.ParseValue(utils.EmptyString)
 	case utils.MetaDateTime: // Convert the requested field value into datetime with layout

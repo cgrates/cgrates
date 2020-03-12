@@ -1610,6 +1610,18 @@ var (
 	PostgressSSLModeVerifyFull = "verify-full"
 )
 
+// Strip/Padding strategy
+var (
+	// common
+	MetaRight = "*right"
+	MetaLeft  = "*left"
+	// only for strip
+	MetaXRight = "*xright"
+	MetaXLeft  = "*xleft"
+	// only for padding
+	MetaZeroLeft = "*zeroleft"
+)
+
 func buildCacheInstRevPrefixes() {
 	CachePrefixToInstance = make(map[string]string)
 	for k, v := range CacheInstanceToPrefix {

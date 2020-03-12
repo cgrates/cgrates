@@ -3,7 +3,7 @@ cgrates (0.11.0~dev) UNRELEASED; urgency=medium
   * [FilterS] Updated *destination filter to get ReverseDestination form
     API
   * [SessionS] Added check for missing CGRevent
-  * [SessionS] Add *cost flag for SessionSv1.ProcessEvent to calculate
+  * [SessionS] Added *cost flag for SessionSv1.ProcessEvent to calculate
     the rater cost
   * [ConnManager] Added ApierSv2 as internal connection channel instead
     of ApierSv1
@@ -11,15 +11,15 @@ cgrates (0.11.0~dev) UNRELEASED; urgency=medium
     ToJSON for request String method
   * [DiameterAgent] Updated 3gp_vendor dictionary
   * [Templates] Added new dataconvertor: *ip2hex
-  * [AgentRequest] Add support for *group type and correctly overwrite
+  * [AgentRequest] Added support for *group type and correctly overwrite
     the values in case of *variable
   * [EventReader] Correctly populate ConcurrentRequest from config
   * [FilterS] Updated *exists to dynamically compute the path if the
     path
-  * [AgentRequest] Add support for *tmp path
-  * [SessionS] Add new API SessionSv1.GetCost
-  * [SessionS] Update MaxUsage field from API replies
-  * [SessionS] Add support for *cdrs flag in SessionSv1.ProcessEvent
+  * [AgentRequest] Added support for *tmp path
+  * [SessionS] Added new API SessionSv1.GetCost
+  * [SessionS] Updateed MaxUsage field from API replies
+  * [SessionS] Added support for *cdrs flag in SessionSv1.ProcessEvent
   * [StatS] Update metric definition to include path for example:
     *sum:~*req.Field1
   * [SupplierS] SupplierS require a connection to rals when give
@@ -27,11 +27,12 @@ cgrates (0.11.0~dev) UNRELEASED; urgency=medium
   * [SupplierS] In case of missing usage from Event use 1 minute as
     default value
   * [DataDB] Mongo support different marshaler than msgpack
-  * [General] Fix rpc_conns handling id with two connections and one of
+  * [ConnManager] Fixed rpc_conns handling id with two connections and one of
     it *internal
-  * [Replicator] Add Limit and StaticTTL otions for Items from
+  * [Replicator] Added Limit and StaticTTL otions for Items from
     DataDB/StorDB
-  * Migrator discover tenant from key instead of taking it from config
+  * [Migrator] Auto discover tenant from key instead of taking it from config
+  * [Templates] Fixed missing "*" for strip and pading strategy
 
  -- Alexandru Tripon <alexandru.tripon@itsyscom.com>  Wed, 19 Feb 2020 13:25:52 +0200
 
