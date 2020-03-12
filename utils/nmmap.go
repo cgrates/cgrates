@@ -213,7 +213,7 @@ func (nmm NavigableMap2) Len() int { return len(nmm) }
 // FieldAsString returns thevalue from path as string
 func (nmm NavigableMap2) FieldAsString(fldPath []string) (str string, err error) {
 	var val interface{}
-	val, err = nmm.Field(NewPathToItemFromSlice(fldPath))
+	val, err = nmm.Field(NewPathToItem(fldPath))
 	if err != nil {
 		return
 	}
@@ -222,7 +222,7 @@ func (nmm NavigableMap2) FieldAsString(fldPath []string) (str string, err error)
 
 func (nmm NavigableMap2) FieldAsInterface(fldPath []string) (str interface{}, err error) {
 	var nm NM
-	if nm, err = nmm.Field(NewPathToItemFromSlice(fldPath)); err != nil {
+	if nm, err = nmm.Field(NewPathToItem(fldPath)); err != nil {
 		return
 	}
 	return nm.Interface(), nil

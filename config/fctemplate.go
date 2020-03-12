@@ -34,7 +34,7 @@ func NewFCTemplateFromFCTemplateJsonCfg(jsnCfg *FcTemplateJsonCfg, separator str
 	if jsnCfg.Path != nil {
 		fcTmp.Path = *jsnCfg.Path
 		fcTmp.pathSlice = strings.Split(*jsnCfg.Path, utils.NestingSep)
-		fcTmp.pathItems = utils.NewPathToItemFromSlice(fcTmp.pathSlice)
+		fcTmp.pathItems = utils.NewPathToItem(fcTmp.pathSlice)
 		fcTmp.Tag = fcTmp.Path
 	}
 	if jsnCfg.Tag != nil {
@@ -214,5 +214,5 @@ func (fc *FCTemplate) GetPathItems() utils.PathItems {
 // ComputePath used in test to populate private fields used to store the path
 func (fc *FCTemplate) ComputePath() {
 	fc.pathSlice = strings.Split(fc.Path, utils.NestingSep)
-	fc.pathItems = utils.NewPathToItemFromSlice(fc.pathSlice)
+	fc.pathItems = utils.NewPathToItem(fc.pathSlice)
 }

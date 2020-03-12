@@ -20,7 +20,6 @@ package utils
 
 import (
 	"net"
-	"strconv"
 	"strings"
 )
 
@@ -58,17 +57,12 @@ func DPDynamicString(dnVal string, dP DataProvider) (string, error) {
 // NMType the type used for navigable Map
 type NMType byte
 
+// posible NMType
 const (
 	NMInterfaceType NMType = iota
 	NMMapType
 	NMSliceType
 )
-
-// PathItem used by the NM interface to store the path information
-type PathItem struct {
-	Field string
-	Index *int
-}
 
 // NM the basic interface
 type NM interface {
@@ -82,87 +76,6 @@ type NM interface {
 	Type() NMType
 	Empty() bool
 	Len() int
-}
-
-func NewPathToItemFromSlice(path []string) (pItms PathItems) {
-	pItms = make(PathItems, len(path))
-	for i, v := range path {
-		field, indx := GetPathIndex(v)
-		pItms[i] = &PathItem{
-			Field: field,
-			Index: indx,
-		}
-	}
-	return
-}
-
-func NewPathToItem(path string) PathItems {
-	return NewPathToItemFromSlice(strings.Split(path, NestingSep))
-}
-
-func (p *PathItem) String() (out string) {
-	out = p.Field
-	if p.Index != nil {
-		out += IdxStart + strconv.Itoa(*p.Index) + IdxEnd
-	}
-	return
-}
-
-func (p *PathItem) Equal(p2 *PathItem) bool {
-	if p.Field != p2.Field {
-		return false
-	}
-	if p.Index == nil && p2.Index == nil {
-		return true
-	}
-	if p.Index != nil && p2.Index != nil {
-		return *p.Index == *p2.Index
-	}
-	return false
-}
-
-func (p *PathItem) Clone() (c *PathItem) {
-	if p == nil {
-		return
-	}
-	c = new(PathItem)
-	c.Field = p.Field
-	if p.Index != nil {
-		c.Index = IntPointer(*p.Index)
-	}
-	return
-}
-
-type PathItems []*PathItem
-
-func (path PathItems) String() (out string) {
-	for _, v := range path {
-		out += NestingSep + v.String()
-	}
-	if out == "" {
-		return
-	}
-	return out[1:]
-
-}
-
-func (path PathItems) StringSlice() (out []string) {
-	out = make([]string, len(path))
-	for i, v := range path {
-		out[i] = v.String()
-	}
-	return
-}
-
-func (path PathItems) Clone() (c PathItems) {
-	if path == nil {
-		return
-	}
-	c = make(PathItems, len(path))
-	for i, v := range path {
-		c[i] = v.Clone()
-	}
-	return
 }
 
 // navMap subset of function for NM interface

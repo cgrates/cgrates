@@ -168,7 +168,7 @@ func (onm *OrderedNavigableMap) removePath(path PathItems) {
 // FieldAsString returns thevalue from path as string
 func (onm *OrderedNavigableMap) FieldAsString(fldPath []string) (str string, err error) {
 	var val interface{}
-	val, err = onm.nm.Field(NewPathToItemFromSlice(fldPath))
+	val, err = onm.nm.Field(NewPathToItem(fldPath))
 	if err != nil {
 		return
 	}
@@ -176,5 +176,5 @@ func (onm *OrderedNavigableMap) FieldAsString(fldPath []string) (str string, err
 }
 
 func (onm *OrderedNavigableMap) FieldAsInterface(fldPath []string) (str interface{}, err error) {
-	return onm.Field(NewPathToItemFromSlice(fldPath))
+	return onm.Field(NewPathToItem(fldPath))
 }
