@@ -283,7 +283,7 @@ asr_template
 templates
 	Group fields based on their usability. Can be used in both processor templates as well as hardcoded within CGRateS functionality (ie *\*err* or *\*asr*). The IDs are unique, defining the same id in multiple configuration places/files will result into overwrite.
 
-	**\*err***
+	**\*err**
 		Is a hardcoded template used when *DiameterAgent* cannot parse the incoming message. Aside from logging the error via internal logger the message defined via *\*err* template will be sent out.
 
 	**\*asr**
@@ -456,3 +456,59 @@ type
 	**\*template**
 		Specifies a template of fields to be injected here. Value should be one of the template ids defined.
 
+value
+	The captured value. Possible prefixes for dynamic values are:
+
+		**\*req**
+			Take data from current request coming from diameter client.
+
+		**\*vars**
+			Take data from internal container labeled *\*vars*. This is valid for the duration of the request.
+
+		**\*cgreq**
+			Take data from the request being sent to :ref:`SessionS`. This is valid for one active request.
+
+		**\*cgrep**
+			Take data from the reply coming from :ref:`SessionS`. This is valid for one active reply.
+
+		**\*diamreq**
+			Take data from the diameter request being sent to the client (ie: *ASR*). This is valid for one active reply.
+
+		**\*rep**
+			Take data from the diameter reply being sent to the client.
+
+mandatory
+	Makes sure that the field cannot have empty value (errors otherwise).
+
+tag
+	Used for debug purposes in logs.
+
+width
+	Used to control the formatting, enforcing the final value to a specific number of characters.
+
+strip
+	Used when the value is higher than *width* allows it, specifying the strip strategy. Possible values are:
+
+	**\*right**
+		Strip the suffix.
+
+	**\*xright**
+		Strip the suffix, postpending one *x* character to mark the stripping.
+
+	**\*left**
+		Strip the prefix.
+
+	**\*xleft**
+		Strip the prefix, prepending one *x* character to mark the stripping.
+
+padding
+	Used to control the formatting. Applied when the data is smaller than the *width*. Possible values are:
+
+	**\*right**
+		Suffix with spaces.
+
+	**\*left**
+		Prefix with spaces.
+
+	**\*zeroleft**
+		Prefix with *0* chars.

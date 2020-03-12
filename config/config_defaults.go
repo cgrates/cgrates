@@ -279,7 +279,7 @@ const CGRATES_CFG_JSON = `
 		"attempts": 1,									// export attempts
 		"field_separator": ",",							// used field separator in some export formats, eg: *file_csv
 		"attributes_context": "",						// attributes context - empty disables attributes processing
-		"fields": [								// template of the exported content fields
+		"fields": [										// template of the exported content fields
 			{"path": "*exp.CGRID", "type": "*composed", "value": "~*req.CGRID"},
 			{"path": "*exp.RunID", "type": "*composed", "value": "~*req.RunID"},
 			{"path": "*exp.ToR", "type": "*composed", "value": "~*req.ToR"},

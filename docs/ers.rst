@@ -178,6 +178,9 @@ filters
 	**\*vars**
 		Request related shared variables between processors, populated especially by core functions. The data put inthere is not automatically transfered into requests sent to CGRateS, unless instructed inside templates.
 
+	**\*tmp**
+		Temporary container to be used when exchanging information between fields.
+
 	**\*req**
 		Request read from the source. In case of file content without field name, the index will be passed instead of field source path.
 
@@ -291,6 +294,58 @@ type
 
 	**\*template**
 		Specifies a template of fields to be injected here. Value should be one of the template ids defined.
+
+
+value
+	The captured value. Possible prefixes for dynamic values are:
+
+		**\*req**
+			Take data from current request coming from the reader.
+
+		**\*vars**
+			Take data from internal container labeled *\*vars*. This is valid for the duration of the request.
+
+		**\*cgreq**
+			Take data from the request being sent to :ref:`SessionS`. This is valid for one active request.
+
+		**\*cgrep**
+			Take data from the reply coming from :ref:`SessionS`. This is valid for one active reply.
+
+mandatory
+	Makes sure that the field cannot have empty value (errors otherwise).
+
+tag
+	Used for debug purposes in logs.
+
+width
+	Used to control the formatting, enforcing the final value to a specific number of characters.
+
+strip
+	Used when the value is higher than *width* allows it, specifying the strip strategy. Possible values are:
+
+	**\*right**
+		Strip the suffix.
+
+	**\*xright**
+		Strip the suffix, postpending one *x* character to mark the stripping.
+
+	**\*left**
+		Strip the prefix.
+
+	**\*xleft**
+		Strip the prefix, prepending one *x* character to mark the stripping.
+
+padding
+	Used to control the formatting. Applied when the data is smaller than the *width*. Possible values are:
+
+	**\*right**
+		Suffix with spaces.
+
+	**\*left**
+		Prefix with spaces.
+
+	**\*zeroleft**
+		Prefix with *0* chars.
 
 
 
