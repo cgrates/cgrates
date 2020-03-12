@@ -18,10 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package utils
 
-import (
-	"fmt"
-)
-
 type NMSlice []NM
 
 func (nms *NMSlice) String() (out string) {
@@ -37,7 +33,7 @@ func (nms *NMSlice) String() (out string) {
 func (nms *NMSlice) Interface() interface{} { return nms }
 func (nms *NMSlice) Field(path PathItems) (val NM, err error) {
 	if len(path) == 0 {
-		return nil, fmt.Errorf("Wrong path")
+		return nil, ErrWrongPath
 	}
 	if nms.Empty() || path[0].Index == nil {
 		return nil, ErrNotFound
@@ -56,7 +52,7 @@ func (nms *NMSlice) Field(path PathItems) (val NM, err error) {
 }
 func (nms *NMSlice) Set(path PathItems, val NM) (err error) {
 	if len(path) == 0 || path[0].Index == nil {
-		return fmt.Errorf("Wrong path")
+		return ErrWrongPath
 	}
 	idx := *path[0].Index
 	if idx == len(*nms) { // append element
@@ -75,20 +71,20 @@ func (nms *NMSlice) Set(path PathItems, val NM) (err error) {
 		idx = len(*nms) + idx
 	}
 	if idx < 0 || idx >= len(*nms) {
-		return fmt.Errorf("Wrong path")
+		return ErrWrongPath
 	}
 	if len(path) == 1 {
 		(*nms)[idx] = val
 		return
 	}
 	if (*nms)[idx].Type() == NMSliceType {
-		return fmt.Errorf("Wrong path")
+		return ErrWrongPath
 	}
 	return (*nms)[idx].Set(path[1:], val)
 }
 func (nms *NMSlice) Remove(path PathItems) (err error) {
 	if len(path) == 0 || path[0].Index == nil {
-		return fmt.Errorf("Wrong path")
+		return ErrWrongPath
 	}
 	idx := *path[0].Index
 	if idx < 0 {
@@ -99,10 +95,10 @@ func (nms *NMSlice) Remove(path PathItems) (err error) {
 	}
 	switch (*nms)[idx].Type() {
 	case NMSliceType:
-		return fmt.Errorf("Wrong path")
+		return ErrWrongPath
 	case NMInterfaceType:
 		if len(path) != 1 {
-			return fmt.Errorf("Wrong path")
+			return ErrWrongPath
 		}
 		*nms = append((*nms)[:idx], (*nms)[idx+1:]...)
 		return
@@ -140,7 +136,7 @@ func (nms *NMSlice) GetField(path *PathItem) (val NM, err error) {
 
 func (nms *NMSlice) SetField(path *PathItem, val NM) (err error) {
 	if path.Index == nil {
-		return fmt.Errorf("Wrong path")
+		return ErrWrongPath
 	}
 	idx := *path.Index
 	if idx == len(*nms) { // append element
@@ -151,7 +147,7 @@ func (nms *NMSlice) SetField(path *PathItem, val NM) (err error) {
 		idx = len(*nms) + idx
 	}
 	if idx < 0 || idx >= len(*nms) {
-		return fmt.Errorf("Wrong path")
+		return ErrWrongPath
 	}
 	(*nms)[idx] = val
 	return

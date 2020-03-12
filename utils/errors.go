@@ -72,6 +72,7 @@ var (
 	ErrNoDatabaseConn           = errors.New("NO_DATA_BASE_CONNECTION")
 	ErrMaxIncrementsExceeded    = errors.New("MAX_INCREMENTS_EXCEEDED")
 	ErrIndexOutOfBounds         = errors.New("INDEX_OUT_OF_BOUNDS")
+	ErrWrongPath                = errors.New("WRONG_PATH")
 
 	ErrMap = map[string]error{
 		ErrNoMoreData.Error():              ErrNoMoreData,

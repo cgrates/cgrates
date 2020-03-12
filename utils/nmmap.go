@@ -18,10 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package utils
 
-import (
-	"fmt"
-)
-
 type NavigableMap2 map[string]NM
 
 func (nmm NavigableMap2) String() (out string) {
@@ -37,7 +33,7 @@ func (nmm NavigableMap2) String() (out string) {
 func (nmm NavigableMap2) Interface() interface{} { return nmm }
 func (nmm NavigableMap2) Field(path PathItems) (val NM, err error) {
 	if len(path) == 0 {
-		return nil, fmt.Errorf("Wrong path")
+		return nil, ErrWrongPath
 	}
 	el, has := nmm[path[0].Field]
 	if !has {
@@ -67,7 +63,7 @@ func (nmm NavigableMap2) Field(path PathItems) (val NM, err error) {
 }
 func (nmm NavigableMap2) Set(path PathItems, val NM) (err error) {
 	if len(path) == 0 {
-		return fmt.Errorf("Wrong path")
+		return ErrWrongPath
 	}
 	el, has := nmm[path[0].Field]
 	if len(path) == 1 {
@@ -85,7 +81,7 @@ func (nmm NavigableMap2) Set(path PathItems, val NM) (err error) {
 		}
 		if path[0].Index != nil {
 			if el.Type() != NMSliceType {
-				return fmt.Errorf("Wrong path")
+				return ErrWrongPath
 			}
 			return el.Set(path, val)
 		}
@@ -110,7 +106,7 @@ func (nmm NavigableMap2) Set(path PathItems, val NM) (err error) {
 	}
 	if path[0].Index != nil {
 		if el.Type() != NMSliceType {
-			return fmt.Errorf("Wrong path")
+			return ErrWrongPath
 		}
 		return el.Set(path, val)
 	}
@@ -121,7 +117,7 @@ func (nmm NavigableMap2) Set(path PathItems, val NM) (err error) {
 }
 func (nmm NavigableMap2) Remove(path PathItems) (err error) {
 	if len(path) == 0 {
-		return fmt.Errorf("Wrong path")
+		return ErrWrongPath
 	}
 	el, has := nmm[path[0].Field]
 	if !has {
@@ -130,7 +126,7 @@ func (nmm NavigableMap2) Remove(path PathItems) (err error) {
 	if len(path) == 1 {
 		if path[0].Index != nil {
 			if el.Type() != NMSliceType {
-				return fmt.Errorf("Wrong path")
+				return ErrWrongPath
 			}
 			return el.Remove(path)
 		}
@@ -139,7 +135,7 @@ func (nmm NavigableMap2) Remove(path PathItems) (err error) {
 	}
 	if path[0].Index != nil {
 		if el.Type() != NMSliceType {
-			return fmt.Errorf("Wrong path")
+			return ErrWrongPath
 		}
 		if err = el.Remove(path); err != nil {
 			return
@@ -150,7 +146,7 @@ func (nmm NavigableMap2) Remove(path PathItems) (err error) {
 		return
 	}
 	if el.Type() != NMMapType {
-		return fmt.Errorf("Wrong path")
+		return ErrWrongPath
 	}
 	if err = el.Remove(path[1:]); err != nil {
 		return
@@ -204,7 +200,7 @@ func (nmm NavigableMap2) SetField(path *PathItem, val NM) (err error) {
 	}
 	if path.Index != nil {
 		if el.Type() != NMSliceType {
-			return fmt.Errorf("Wrong path")
+			return ErrWrongPath
 		}
 		return el.SetField(path, val)
 	}

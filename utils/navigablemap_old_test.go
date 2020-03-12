@@ -18,7 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
-	"fmt"
 	"reflect"
 	"sort"
 	"strings"
@@ -429,7 +428,7 @@ func TestNavMapFieldAsInterface(t *testing.T) {
 	}
 
 	path = []string{"AnotherFirstLevel", "SecondLevel", "Count"}
-	expErr = fmt.Errorf("Wrong path")
+	expErr = ErrWrongPath
 	if _, err := nM.FieldAsInterface(path); err != nil && err.Error() != expErr.Error() {
 		t.Errorf("Expected error: %s, received error: %v", expErr.Error(), err)
 	}

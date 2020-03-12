@@ -97,7 +97,7 @@ func (ms NavigableMap) FieldAsInterface(fldPath []string) (val interface{}, err 
 		case map[string]interface{}:
 			return NavigableMap(dp).FieldAsInterface(fldPath[1:])
 		default:
-			err = fmt.Errorf("Wrong path")
+			err = ErrWrongPath
 
 			return
 		}
@@ -150,7 +150,7 @@ func (ms NavigableMap) FieldAsString(fldPath []string) (str string, err error) {
 // Set sets the value at the given path
 func (ms NavigableMap) Set(fldPath []string, val interface{}) (err error) {
 	if len(fldPath) == 0 {
-		return fmt.Errorf("Wrong path")
+		return ErrWrongPath
 	}
 	if len(fldPath) == 1 {
 		ms[fldPath[0]] = val
@@ -170,7 +170,7 @@ func (ms NavigableMap) Set(fldPath []string, val interface{}) (err error) {
 		return NavigableMap(dp).Set(fldPath[1:], val)
 	default:
 
-		return fmt.Errorf("Wrong path")
+		return ErrWrongPath
 	}
 
 }
@@ -243,7 +243,7 @@ func (ms NavigableMap) GetKeys(nesteed bool) (keys []string) {
 // Remove removes the item at path
 func (ms NavigableMap) Remove(fldPath []string) (err error) {
 	if len(fldPath) == 0 {
-		return fmt.Errorf("Wrong path")
+		return ErrWrongPath
 	}
 	var val interface{}
 	var has bool
@@ -261,7 +261,7 @@ func (ms NavigableMap) Remove(fldPath []string) (err error) {
 	case map[string]interface{}:
 		return NavigableMap(dp).Remove(fldPath[1:])
 	default:
-		return fmt.Errorf("Wrong path")
+		return ErrWrongPath
 
 	}
 
