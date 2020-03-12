@@ -41,7 +41,7 @@ func (nmi *NMItem) Field(path utils.PathItems) (val utils.NM, err error) {
 }
 func (nmi *NMItem) Set(path utils.PathItems, val utils.NM) (err error) {
 	if len(path) != 0 {
-		return fmt.Errorf("Wrong path")
+		return utils.ErrWrongPath
 	}
 	nmi.Data = val.Interface()
 	return
