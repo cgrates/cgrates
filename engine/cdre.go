@@ -159,7 +159,7 @@ func (cdre *CDRExporter) composeHeader() (err error) {
 				return err
 			}
 			outVal = out
-			cfgFld.Padding = "right"
+			cfgFld.Padding = utils.MetaRight
 		case utils.META_CONSTANT:
 			out, err := cfgFld.Value.ParseValue(utils.EmptyString)
 			if err != nil {
@@ -208,7 +208,7 @@ func (cdre *CDRExporter) composeTrailer() (err error) {
 				return err
 			}
 			outVal = out
-			cfgFld.Padding = "right"
+			cfgFld.Padding = utils.MetaRight
 		case utils.META_CONSTANT:
 			out, err := cfgFld.Value.ParseValue(utils.EmptyString)
 			if err != nil {

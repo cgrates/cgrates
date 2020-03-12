@@ -666,56 +666,56 @@ func TestFmtFieldWidth(t *testing.T) {
 		t.Errorf("Expected \"test\" received: \"%s\"", result)
 	}
 	//RPadding
-	if result, err := FmtFieldWidth("", "test", 8, "", "right", false); err != nil {
+	if result, err := FmtFieldWidth("", "test", 8, "", "*right", false); err != nil {
 		t.Error(err)
 	} else if result != "test    " {
 		t.Errorf("Expected <\"test    \"> \" received: \"%s\"", result)
 	}
 	//PaddingFiller
 	expected := "        "
-	if result, err := FmtFieldWidth("", "", 8, "", "right", false); err != nil {
+	if result, err := FmtFieldWidth("", "", 8, "", "*right", false); err != nil {
 		t.Error(err)
 	} else if result != expected {
 		t.Errorf("Expected \"%s \" received: \"%s\"", expected, result)
 	}
 	//LPadding
 	expected = "    test"
-	if result, err := FmtFieldWidth("", "test", 8, "", "left", false); err != nil {
+	if result, err := FmtFieldWidth("", "test", 8, "", "*left", false); err != nil {
 		t.Error(err)
 	} else if result != expected {
 		t.Errorf("Expected \"%s \" received: \"%s\"", expected, result)
 	}
 	//ZeroLPadding
 	expected = "0000test"
-	if result, err := FmtFieldWidth("", "test", 8, "", "zeroleft", false); err != nil {
+	if result, err := FmtFieldWidth("", "test", 8, "", "*zeroleft", false); err != nil {
 		t.Error(err)
 	} else if result != expected {
 		t.Errorf("Expected \"%s \" received: \"%s\"", expected, result)
 	}
 	//RStrip
 	expected = "te"
-	if result, err := FmtFieldWidth("", "test", 2, "right", "", false); err != nil {
+	if result, err := FmtFieldWidth("", "test", 2, "*right", "", false); err != nil {
 		t.Error(err)
 	} else if result != expected {
 		t.Errorf("Expected \"%s \" received: \"%s\"", expected, result)
 	}
 	//XRStrip
 	expected = "tex"
-	if result, err := FmtFieldWidth("", "test", 3, "xright", "", false); err != nil {
+	if result, err := FmtFieldWidth("", "test", 3, "*xright", "", false); err != nil {
 		t.Error(err)
 	} else if result != expected {
 		t.Errorf("Expected \"%s \" received: \"%s\"", expected, result)
 	}
 	//LStrip
 	expected = "st"
-	if result, err := FmtFieldWidth("", "test", 2, "left", "", false); err != nil {
+	if result, err := FmtFieldWidth("", "test", 2, "*left", "", false); err != nil {
 		t.Error(err)
 	} else if result != expected {
 		t.Errorf("Expected \"%s \" received: \"%s\"", expected, result)
 	}
 	//XLStrip
 	expected = "xst"
-	if result, err := FmtFieldWidth("", "test", 3, "xleft", "", false); err != nil {
+	if result, err := FmtFieldWidth("", "test", 3, "*xleft", "", false); err != nil {
 		t.Error(err)
 	} else if result != expected {
 		t.Errorf("Expected \"%s \" received: \"%s\"", expected, result)

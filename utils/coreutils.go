@@ -499,14 +499,14 @@ func FmtFieldWidth(fieldID, source string, width int, strip, padding string, man
 		if len(strip) == 0 {
 			return "", fmt.Errorf("Source %s is bigger than the width %d, no strip defied, fieldID: <%s>", source, width, fieldID)
 		}
-		if strip == "right" {
+		if strip == MetaRight {
 			return source[:width], nil
-		} else if strip == "xright" {
+		} else if strip == MetaXRight {
 			return source[:width-1] + "x", nil // Suffix with x to mark prefix
-		} else if strip == "left" {
+		} else if strip == MetaLeft {
 			diffIndx := len(source) - width
 			return source[diffIndx:], nil
-		} else if strip == "xleft" { // Prefix one x to mark stripping
+		} else if strip == MetaXLeft { // Prefix one x to mark stripping
 			diffIndx := len(source) - width
 			return "x" + source[diffIndx+1:], nil
 		}
@@ -516,11 +516,11 @@ func FmtFieldWidth(fieldID, source string, width int, strip, padding string, man
 		}
 		var paddingFmt string
 		switch padding {
-		case "right":
+		case MetaRight:
 			paddingFmt = fmt.Sprintf("%%-%ds", width)
-		case "left":
+		case MetaLeft:
 			paddingFmt = fmt.Sprintf("%%%ds", width)
-		case "zeroleft":
+		case MetaZeroLeft:
 			paddingFmt = fmt.Sprintf("%%0%ds", width)
 		}
 		if len(paddingFmt) != 0 {

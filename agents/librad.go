@@ -75,19 +75,19 @@ func radFieldOutVal(pkt *radigo.Packet, agReq *AgentRequest,
 	switch cfgFld.Type {
 	case utils.META_FILLER:
 		outVal, err = cfgFld.Value.ParseValue(utils.EmptyString)
-		cfgFld.Padding = "right"
+		cfgFld.Padding = utils.MetaRight
 	case utils.META_CONSTANT:
 		outVal, err = cfgFld.Value.ParseValue(utils.EmptyString)
 	case utils.META_COMPOSED:
 		outVal = radComposedFieldValue(pkt, agReq, cfgFld.Value)
 	default:
-		return "", fmt.Errorf("unsupported configuration field type: <%s>", cfgFld.Type)
+		return utils.EmptyString, fmt.Errorf("unsupported configuration field type: <%s>", cfgFld.Type)
 	}
 	if err != nil {
 		return
 	}
 	if outVal, err = utils.FmtFieldWidth(cfgFld.Tag, outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
-		return "", err
+		return utils.EmptyString, err
 	}
 	return
 }
