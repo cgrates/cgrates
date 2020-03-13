@@ -346,17 +346,17 @@ func (alS *AttributeService) V1ProcessEvent(args *AttrArgsProcessEvent,
 	}
 	// Make sure the requested fields were populated
 	if err == utils.ErrNotFound {
-		for _, valIface := range args.CGREvent.Event {
+		for val, valIface := range args.CGREvent.Event {
 			if valIface == interface{}(utils.MetaAttributes) {
-				err = utils.ErrMandatoryIeMissing
+				err = utils.NewErrMandatoryIeMissing(val)
 				break
 			}
 		}
 	} else if err == nil {
-		for _, valIface := range apiRply.CGREvent.Event {
+		for val, valIface := range apiRply.CGREvent.Event {
 			if valIface == interface{}(utils.MetaAttributes) {
 				// mandatory IE missing
-				err = utils.ErrMandatoryIeMissing
+				err = utils.NewErrMandatoryIeMissing(val)
 				break
 			}
 		}
