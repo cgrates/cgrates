@@ -168,3 +168,110 @@ func TestNMSliceGetField(t *testing.T) {
 		t.Errorf("Expected %q ,received: %q", "Val", val.Interface())
 	}
 }
+
+func TestNMSliceSetField(t *testing.T) {
+	nm := &NMSlice{}
+	if err := nm.SetField(&PathItem{}, nil); err != ErrWrongPath {
+		t.Error(err)
+	}
+	if err := nm.SetField(nil, nil); err != ErrWrongPath {
+		t.Error(err)
+	}
+	expected := &NMSlice{NewNMInterface(10)}
+	if err := nm.SetField(&PathItem{Index: IntPointer(0)}, NewNMInterface(10)); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(nm, expected) {
+		t.Errorf("Expected %s ,received: %s", expected, nm)
+	}
+
+	expected = &NMSlice{NewNMInterface(10), NewNMInterface(11)}
+	if err := nm.SetField(&PathItem{Index: IntPointer(1)}, NewNMInterface(11)); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(nm, expected) {
+		t.Errorf("Expected %s ,received: %s", expected, nm)
+	}
+
+	expected = &NMSlice{NewNMInterface(10), NewNMInterface(20)}
+	if err := nm.SetField(&PathItem{Index: IntPointer(-1)}, NewNMInterface(20)); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(nm, expected) {
+		t.Errorf("Expected %s ,received: %s", expected, nm)
+	}
+
+	expected = &NMSlice{NewNMInterface(0), NewNMInterface(20)}
+	if err := nm.SetField(&PathItem{Index: IntPointer(0)}, NewNMInterface(0)); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(nm, expected) {
+		t.Errorf("Expected %s ,received: %s", expected, nm)
+	}
+
+	if err := nm.SetField(&PathItem{Index: IntPointer(5)}, NewNMInterface(0)); err != ErrWrongPath {
+		t.Error(err)
+	}
+}
+
+func TestNMSliceRemove(t *testing.T) {
+	nm := &NMSlice{
+		NewNMInterface("1001"),
+		NewNMInterface("1003"),
+		&NavigableMap2{"Field1": NewNMInterface("Val")},
+		&NMSlice{},
+	}
+	if err := nm.Remove(nil); err != ErrWrongPath {
+		t.Error(err)
+	}
+	if err := nm.Remove(PathItems{}); err != ErrWrongPath {
+		t.Error(err)
+	}
+	if err := nm.Remove(PathItems{{Field: "field"}}); err != ErrWrongPath {
+		t.Error(err)
+	}
+
+	if err := nm.Remove(PathItems{{Index: IntPointer(-1)}, {}}); err != ErrWrongPath {
+		t.Error(err)
+	}
+	expected := &NMSlice{
+		NewNMInterface("1001"),
+		NewNMInterface("1003"),
+		&NavigableMap2{"Field1": NewNMInterface("Val")},
+	}
+
+	if err := nm.Remove(PathItems{{Index: IntPointer(-1)}}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(nm, expected) {
+		t.Errorf("Expected %s ,received: %s", expected, nm)
+	}
+
+	if err := nm.Remove(PathItems{{Index: IntPointer(1)}, {}}); err != ErrWrongPath {
+		t.Error(err)
+	}
+
+	expected = &NMSlice{
+		NewNMInterface("1001"),
+		&NavigableMap2{"Field1": NewNMInterface("Val")},
+	}
+	if err := nm.Remove(PathItems{{Index: IntPointer(1)}}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(nm, expected) {
+		t.Errorf("Expected %s ,received: %s", expected, nm)
+	}
+
+	if err := nm.Remove(PathItems{{Index: IntPointer(10)}}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(nm, expected) {
+		t.Errorf("Expected %s ,received: %s", expected, nm)
+	}
+
+	if err := nm.Remove(PathItems{{Index: IntPointer(1)}, {Field: "Field1", Index: IntPointer(1)}}); err != ErrWrongPath {
+		t.Error(err)
+	}
+	expected = &NMSlice{
+		NewNMInterface("1001"),
+	}
+	if err := nm.Remove(PathItems{{Index: IntPointer(1)}, {Field: "Field1"}}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(nm, expected) {
+		t.Errorf("Expected %s ,received: %s", expected, nm)
+	}
+
+}
