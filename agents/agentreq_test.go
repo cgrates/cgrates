@@ -984,20 +984,16 @@ func TestAgReqFieldAsInterface(t *testing.T) {
 	expVal = "1001"
 	if rply, err := agReq.FieldAsInterface(path); err != nil {
 		t.Error(err)
-	} else if nm, canCast := rply.(utils.NM); !canCast {
-		t.Errorf("Cant cast %T to NM interface", rply)
-	} else if !reflect.DeepEqual(nm.Interface(), expVal) {
-		t.Errorf("Expected %v , received: %v", utils.ToJSON(expVal), utils.ToJSON(nm.Interface()))
+	} else if !reflect.DeepEqual(rply, expVal) {
+		t.Errorf("Expected %v , received: %v", utils.ToJSON(expVal), utils.ToJSON(rply))
 	}
 
 	path = []string{utils.MetaCgreq, utils.Destination}
 	expVal = "1002"
 	if rply, err := agReq.FieldAsInterface(path); err != nil {
 		t.Error(err)
-	} else if nm, canCast := rply.(utils.NM); !canCast {
-		t.Errorf("Cant cast %T to NM interface", rply)
-	} else if !reflect.DeepEqual(nm.Interface(), expVal) {
-		t.Errorf("Expected %v , received: %v", utils.ToJSON(expVal), utils.ToJSON(nm.Interface()))
+	} else if !reflect.DeepEqual(rply, expVal) {
+		t.Errorf("Expected %v , received: %v", utils.ToJSON(expVal), utils.ToJSON(rply))
 	}
 }
 

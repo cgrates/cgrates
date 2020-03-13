@@ -226,7 +226,7 @@ func (nmm NavigableMap2) SetField(path *PathItem, val NM) (err error) {
 
 }
 
-// Len returns the lenght of the slice
+// Len returns the lenght of the map
 func (nmm NavigableMap2) Len() int {
 	return len(nmm)
 }
