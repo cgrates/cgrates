@@ -105,29 +105,20 @@ func (nms *NMSlice) Remove(path PathItems) (err error) {
 	if idx < 0 || idx >= len(*nms) { // already removed
 		return
 	}
-	switch (*nms)[idx].Type() {
-	case NMSliceType:
-		return ErrWrongPath
-	case NMInterfaceType:
-		if len(path) != 1 {
-			return ErrWrongPath
-		}
+	if len(path) == 1 {
 		*nms = append((*nms)[:idx], (*nms)[idx+1:]...)
 		return
-	case NMMapType:
-		if len(path) == 1 {
-			*nms = append((*nms)[:idx], (*nms)[idx+1:]...)
-			return
-		}
-		if err = (*nms)[idx].Remove(path[1:]); err != nil {
-			return
-		}
-		if (*nms)[idx].Empty() {
-			*nms = append((*nms)[:idx], (*nms)[idx+1:]...)
-		}
+	}
+	if (*nms)[idx].Type() != NMMapType {
+		return ErrWrongPath
+	}
+	if err = (*nms)[idx].Remove(path[1:]); err != nil {
 		return
 	}
-	panic("BUG")
+	if (*nms)[idx].Empty() {
+		*nms = append((*nms)[:idx], (*nms)[idx+1:]...)
+	}
+	return
 }
 
 // Type returns the type of the NM slice
@@ -162,7 +153,7 @@ func (nms *NMSlice) GetField(path *PathItem) (val NM, err error) {
 // SetField the same as Set but for one level deep
 // used for OrderedNavigableMap parsing
 func (nms *NMSlice) SetField(path *PathItem, val NM) (err error) {
-	if path.Index == nil {
+	if path == nil || path.Index == nil {
 		return ErrWrongPath
 	}
 	idx := *path.Index
