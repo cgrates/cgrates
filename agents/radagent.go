@@ -330,13 +330,13 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RequestProcessor,
 func (ra *RadiusAgent) ListenAndServe() (err error) {
 	var errListen chan error
 	go func() {
-		utils.Logger.Info(fmt.Sprintf("<RadiusAgent> Start listening for auth requests on <%s>", ra.cgrCfg.RadiusAgentCfg().ListenAuth))
+		utils.Logger.Info(fmt.Sprintf("<%s> Start listening for auth requests on <%s>", utils.RadiusAgent, ra.cgrCfg.RadiusAgentCfg().ListenAuth))
 		if err := ra.rsAuth.ListenAndServe(); err != nil {
 			errListen <- err
 		}
 	}()
 	go func() {
-		utils.Logger.Info(fmt.Sprintf("<RadiusAgent> Start listening for acct req on <%s>", ra.cgrCfg.RadiusAgentCfg().ListenAcct))
+		utils.Logger.Info(fmt.Sprintf("<%s> Start listening for acct req on <%s>", utils.RadiusAgent, ra.cgrCfg.RadiusAgentCfg().ListenAcct))
 		if err := ra.rsAcct.ListenAndServe(); err != nil {
 			errListen <- err
 		}
