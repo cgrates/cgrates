@@ -413,7 +413,7 @@ func testAttributeSProcessEventMissing(t *testing.T) {
 	var rplyEv engine.AttrSProcessEventReply
 	if err := attrSRPC.Call(utils.AttributeSv1ProcessEvent,
 		ev, &rplyEv); err == nil ||
-		err.Error() != utils.ErrMandatoryIeMissing.Error() {
+		err.Error() != "MANDATORY_IE_MISSING: [Category]" {
 		t.Error(err)
 	}
 }
