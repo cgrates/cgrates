@@ -69,6 +69,7 @@ type DiameterAgent struct {
 
 // ListenAndServe is called when DiameterAgent is started, usually from within cmd/cgr-engine
 func (da *DiameterAgent) ListenAndServe() error {
+	utils.Logger.Info(fmt.Sprintf("<%s> Start listening on <%s>", utils.DiameterAgent, da.cgrCfg.DiameterAgentCfg().Listen))
 	return diam.ListenAndServeNetwork(da.cgrCfg.DiameterAgentCfg().ListenNet, da.cgrCfg.DiameterAgentCfg().Listen, da.handlers(), nil)
 }
 
