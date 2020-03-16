@@ -177,7 +177,7 @@ func TestMfHttpAgentMultipleFields(t *testing.T) {
 					ReplyFields: []*FCTemplate{{
 						Tag:       "CDR_ID",
 						Path:      "CDR_RESPONSE.CDR_ID",
-						Type:      "*composed",
+						Type:      "*variable",
 						Value:     NewRSRParsersMustCompile("~*req.CDR_ID", true, utils.INFIELD_SEP),
 						Mandatory: true,
 					}},
