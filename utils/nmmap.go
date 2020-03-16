@@ -18,6 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package utils
 
+import "net"
+
 // NavigableMap2 is the basic map of NM interface
 type NavigableMap2 map[string]NM
 
@@ -239,4 +241,20 @@ func (nmm NavigableMap2) FieldAsInterface(fldPath []string) (str interface{}, er
 		return
 	}
 	return nm.Interface(), nil
+}
+
+// FieldAsString returns the string at the path
+// only to implement the DataProvider interface
+func (nmm NavigableMap2) FieldAsString(fldPath []string) (str string, err error) {
+	var val interface{}
+	val, err = nmm.FieldAsInterface(fldPath)
+	if err != nil {
+		return
+	}
+	return IfaceAsString(val), nil
+}
+
+// RemoteHost is part of dataStorage interface
+func (NavigableMap2) RemoteHost() net.Addr {
+	return LocalAddr()
 }

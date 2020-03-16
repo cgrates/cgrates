@@ -3285,5 +3285,4 @@ func TestEventCostRemoteHost(t *testing.T) {
 	if rcv := eventCost.RemoteHost(); !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
 	}
-
 }
