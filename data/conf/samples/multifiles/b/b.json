@@ -31,7 +31,7 @@
 						"value": "*pseudoprepaid", "mandatory": true},	
 				],
 				"reply_fields":[
-					{"tag": "CDR_ID", "path": "CDR_RESPONSE.CDR_ID", "type": "*composed", 
+					{"tag": "CDR_ID", "path": "CDR_RESPONSE.CDR_ID", "type": "*variable", 
 						"value": "~*req.CDR_ID", "mandatory": true},
 				],
 			}
