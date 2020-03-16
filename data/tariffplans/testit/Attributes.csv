@@ -7,3 +7,4 @@ cgrates.org,ATTR_SUBJECT_CASE2,*sessions,*string:~*req.OriginID:testSSv1ItProces
 cgrates.org,ATTR_SUBJECT_CASE3,*sessions,*string:~*req.OriginID:testSSv1ItProcessEventWithGetCost3,,,*req.Subject,*constant,RP_RETAIL,false,10
 cgrates.org,ATTR_SUBJECT_CASE4,*sessions,*string:~*req.OriginID:testSSv1ItProcessEventWithGetCost4,,,*req.Subject,*constant,InvalidSubject,false,10
 cgrates.org,ATTR_SUBJECT_CASE4,,,,,*req.Category,*constant,Standard,false,10
+cgrates.org,ATTR_VARIABLE,*any,*string:~*req.EventName:VariableTest,,,*req.Category,*variable,~*req.ToR,false,20
