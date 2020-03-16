@@ -215,7 +215,7 @@
 				{
 					"tag": "OriginID",
 					"path": "OriginID",
-					"type": "*composed", 
+					"type": "*variable", 
 					"value": "~*req.Session-Id",
 					"mandatory": true
 				},

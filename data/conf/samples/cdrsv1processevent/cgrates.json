@@ -34,7 +34,7 @@
 		"attempts": 1,									// export attempts
 		"synchronous": true,							// block processing until export has a result
 		"fields": [
-			{"path": "*exp.CGRID", "type": "*composed", "value": "~*req.CGRID"},
+			{"path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"},
 		],
 	},
 },

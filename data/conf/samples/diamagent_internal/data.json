@@ -111,14 +111,14 @@
 				{
 					"tag": "OriginID",
 					"path": "*cgreq.OriginID",
-					"type": "*composed", 
+					"type": "*variable", 
 					"value": "~*req.Session-Id",
 					"mandatory": true
 				},
 				{
 					"tag": "OriginID",
 					"path": "*cgreq.OriginID",
-					"type": "*composed",
+					"type": "*variable",
 					"value": "_grp1"
 				},
 				{
@@ -215,7 +215,7 @@
 				{
 					"tag": "OriginID",
 					"path": "OriginID",
-					"type": "*composed", 
+					"type": "*variable", 
 					"value": "~*req.Session-Id",
 					"mandatory": true
 				},
