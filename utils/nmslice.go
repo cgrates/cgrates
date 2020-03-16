@@ -83,6 +83,7 @@ func (nms *NMSlice) Set(path PathItems, val NM) (err error) {
 	if idx < 0 || idx >= len(*nms) {
 		return ErrWrongPath
 	}
+	path[0].Index = &idx
 	if len(path) == 1 {
 		(*nms)[idx] = val
 		return
@@ -105,6 +106,7 @@ func (nms *NMSlice) Remove(path PathItems) (err error) {
 	if idx < 0 || idx >= len(*nms) { // already removed
 		return
 	}
+	path[0].Index = &idx
 	if len(path) == 1 {
 		*nms = append((*nms)[:idx], (*nms)[idx+1:]...)
 		return
@@ -167,6 +169,7 @@ func (nms *NMSlice) SetField(path *PathItem, val NM) (err error) {
 	if idx < 0 || idx >= len(*nms) {
 		return ErrWrongPath
 	}
+	path.Index = &idx
 	(*nms)[idx] = val
 	return
 }

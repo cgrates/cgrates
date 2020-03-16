@@ -18,6 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package utils
 
+import "net"
+
 // NewOrderedNavigableMap initializates a structure of OrderedNavigableMap2 with a NavigableMap2
 func NewOrderedNavigableMap() *OrderedNavigableMap {
 	return &OrderedNavigableMap{
@@ -68,6 +70,11 @@ func (onm *OrderedNavigableMap) Remove(path PathItems) (err error) {
 		return
 	}
 	onm.removePath(path)
+	if path[len(path)-1].Index != nil {
+		if idx := *path[len(path)-1].Index; idx >= 0 {
+			onm.updateOrderBasedOnIndex(path, idx)
+		}
+	}
 	return
 }
 
@@ -93,11 +100,10 @@ func (onm *OrderedNavigableMap) Set(fldPath PathItems, val NM) (err error) {
 				return
 			}
 			if i == len(fldPath)-1 { // last path
-				onm.removePath(fldPath)
-				if err = dataMap.SetField(spath, val); err != nil {
-					return
+				if err = dataMap.SetField(spath, val); err == nil {
+					onm.removePath(fldPath)
+					onm.order = append(onm.order, fldPath)
 				}
-				onm.order = append(onm.order, fldPath)
 				return
 			}
 			dataMap = newData
@@ -127,19 +133,18 @@ func (onm *OrderedNavigableMap) Set(fldPath PathItems, val NM) (err error) {
 				return
 			}
 			if i == len(fldPath)-1 { // last path
-				onm.removePath(fldPath)
-				if err = dataMap.SetField(spath, val); err != nil {
-					return
-				}
-				l := val.Len()
-				for j := 0; j < l; j++ {
-					newpath := make(PathItems, len(fldPath))
-					copy(newpath, fldPath)
-					newpath[len(newpath)-1] = &PathItem{
-						Field: newpath[len(newpath)-1].Field,
-						Index: IntPointer(j),
+				if err = dataMap.SetField(spath, val); err == nil {
+					onm.removePath(fldPath)
+					l := val.Len()
+					for j := 0; j < l; j++ {
+						newpath := make(PathItems, len(fldPath))
+						copy(newpath, fldPath)
+						newpath[len(newpath)-1] = &PathItem{
+							Field: newpath[len(newpath)-1].Field,
+							Index: IntPointer(j),
+						}
+						onm.order = append(onm.order, newpath)
 					}
-					onm.order = append(onm.order, newpath)
 				}
 				return
 			}
@@ -167,9 +172,6 @@ func (onm *OrderedNavigableMap) removePath(path PathItems) {
 					break
 				}
 				if match = field.Index == nil; match {
-					break
-				}
-				if match = p[j].Index != nil; !match {
 					break
 				}
 				match = p[j].Index != nil && *p[j].Index == *field.Index
@@ -204,50 +206,50 @@ func (onm *OrderedNavigableMap) SetField(path *PathItem, val NM) (err error) {
 	switch val.Type() {
 	case NMInterfaceType:
 		_, err = onm.nm.GetField(path)
-		if err == ErrNotFound {
-			if err = onm.nm.SetField(path, val); err != nil {
-				return
-			}
-			onm.order = append(onm.order, PathItems{path})
-			return
-		}
 		if err != nil {
+			if err == ErrNotFound {
+				if err = onm.nm.SetField(path, val); err != nil {
+					return
+				}
+				onm.order = append(onm.order, PathItems{path})
+			}
 			return
 		}
 		onm.removePath(PathItems{path})
-		if err = onm.nm.SetField(path, val); err != nil {
-			return
+		if err = onm.nm.SetField(path, val); err == nil {
+			onm.order = append(onm.order, PathItems{path})
 		}
-		onm.order = append(onm.order, PathItems{path})
 		return
 	case NMSliceType:
 		_, err = onm.nm.GetField(path)
-		if err == ErrNotFound {
-			if err = onm.nm.SetField(path, val); err != nil {
-				return
-			}
-			l := val.Len()
-			for j := 0; j < l; j++ {
-				newpath := PathItems{path.Clone()}
-				onm.order = append(onm.order, newpath)
-			}
-			return
-		}
 		if err != nil {
+			if err == ErrNotFound {
+				if err = onm.nm.SetField(path, val); err != nil {
+					return
+				}
+				l := val.Len()
+				for j := 0; j < l; j++ {
+					newpath := make(PathItems, 1)
+					newpath[0] = &PathItem{
+						Field: path.Field,
+						Index: IntPointer(j),
+					}
+					onm.order = append(onm.order, newpath)
+				}
+			}
 			return
 		}
 		onm.removePath(PathItems{path})
-		if err = onm.nm.SetField(path, val); err != nil {
-			return
-		}
-		l := val.Len()
-		for j := 0; j < l; j++ {
-			newpath := make(PathItems, 1)
-			newpath[0] = &PathItem{
-				Field: path.Field,
-				Index: IntPointer(j),
+		if err = onm.nm.SetField(path, val); err == nil {
+			l := val.Len()
+			for j := 0; j < l; j++ {
+				newpath := make(PathItems, 1)
+				newpath[0] = &PathItem{
+					Field: path.Field,
+					Index: IntPointer(j),
+				}
+				onm.order = append(onm.order, newpath)
 			}
-			onm.order = append(onm.order, newpath)
 		}
 		return
 	default:
@@ -278,4 +280,33 @@ func (onm *OrderedNavigableMap) FieldAsInterface(fldPath []string) (str interfac
 		return
 	}
 	return val.Interface(), nil
+}
+
+// updateOrderBasedOnIndex updates the index of the slice elements that are bigger that the removed element
+func (onm *OrderedNavigableMap) updateOrderBasedOnIndex(path PathItems, idx int) {
+	lenpath := len(path)
+	for _, p := range onm.order {
+		if len(p) < lenpath {
+			continue
+		}
+		for j, field := range path {
+			if lenpath-1 == j {
+				if field.Field != p[j].Field {
+					break
+				}
+				if p[j].Index != nil && *p[j].Index > idx {
+					(*p[j].Index)--
+				}
+				break
+			}
+			if !field.Equal(p[j]) {
+				break
+			}
+		}
+	}
+}
+
+// RemoteHost is part of dataStorage interface
+func (OrderedNavigableMap) RemoteHost() net.Addr {
+	return LocalAddr()
 }

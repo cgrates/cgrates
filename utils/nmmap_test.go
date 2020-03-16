@@ -488,3 +488,35 @@ func TestNavigableMap2FieldAsInterface(t *testing.T) {
 		t.Errorf("Expected %q ,received: %q", 10, val)
 	}
 }
+
+func TestNavigableMap2FieldAsString(t *testing.T) {
+	nm := NavigableMap2{
+		"Field1": NewNMInterface("1001"),
+		"Field2": NewNMInterface("1003"),
+		"Field3": NavigableMap2{"Field4": NewNMInterface("Val")},
+		"Field5": &NMSlice{NewNMInterface(10), NewNMInterface(101)},
+	}
+	if _, err := nm.FieldAsString(nil); err != ErrWrongPath {
+		t.Error(err)
+	}
+
+	if val, err := nm.FieldAsString([]string{"Field3", "Field4"}); err != nil {
+		t.Error(err)
+	} else if val != "Val" {
+		t.Errorf("Expected %q ,received: %q", "Val", val)
+	}
+
+	if val, err := nm.FieldAsString([]string{"Field5[0]"}); err != nil {
+		t.Error(err)
+	} else if val != "10" {
+		t.Errorf("Expected %q ,received: %q", "10", val)
+	}
+}
+
+func TestNavigableMapRemote(t *testing.T) {
+	nm := NavigableMap2{"Field1": NewNMInterface("1001")}
+	eOut := LocalAddr()
+	if rcv := nm.RemoteHost(); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+}
