@@ -995,6 +995,69 @@ func TestAgReqFieldAsInterface(t *testing.T) {
 	} else if !reflect.DeepEqual(rply, expVal) {
 		t.Errorf("Expected %v , received: %v", utils.ToJSON(expVal), utils.ToJSON(rply))
 	}
+
+	path = []string{"*miss", utils.Destination}
+	experr := fmt.Errorf("unsupported field prefix: <*miss>")
+	if _, err := agReq.FieldAsInterface(path); err == nil || err.Error() != experr.Error() {
+		t.Error(err)
+	}
+	agReq.tmp = utils.NavigableMap2{utils.Destination: utils.NewNMInterface("1001")}
+	path = []string{utils.MetaTmp, utils.Destination}
+	expVal = "1001"
+	if rply, err := agReq.FieldAsInterface(path); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rply, expVal) {
+		t.Errorf("Expected %v , received: %v", utils.ToJSON(expVal), utils.ToJSON(rply))
+	}
+	agReq.diamreq = utils.NewOrderedNavigableMap()
+	agReq.diamreq.SetField(&utils.PathItem{Field: utils.Destination}, utils.NewNMInterface("1001"))
+	path = []string{utils.MetaDiamreq, utils.Destination}
+	expVal = "1001"
+	if rply, err := agReq.FieldAsInterface(path); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rply, expVal) {
+		t.Errorf("Expected %v , received: %v", utils.ToJSON(expVal), utils.ToJSON(rply))
+	}
+}
+
+func TestAgReqField(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items),
+		config.CgrConfig().CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, dm)
+	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
+	// populate request, emulating the way will be done in HTTPAgent
+	agReq.CGRRequest = utils.NewOrderedNavigableMap()
+	path := utils.PathItems{{Field: "*miss"}, {Field: utils.Destination}}
+	experr := fmt.Errorf("unsupported field prefix: <*miss>")
+	if _, err := agReq.Field(path); err == nil || err.Error() != experr.Error() {
+		t.Error(err)
+	}
+	agReq.tmp = utils.NavigableMap2{utils.Destination: utils.NewNMInterface("1001")}
+	path = utils.PathItems{{Field: utils.MetaTmp}, {Field: utils.Destination}}
+	expVal := utils.NewNMInterface("1001")
+	if rply, err := agReq.Field(path); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rply, expVal) {
+		t.Errorf("Expected %v , received: %v", utils.ToJSON(expVal), utils.ToJSON(rply))
+	}
+	agReq.diamreq = utils.NewOrderedNavigableMap()
+	agReq.diamreq.SetField(&utils.PathItem{Field: utils.Destination}, utils.NewNMInterface("1001"))
+	path = utils.PathItems{{Field: utils.MetaDiamreq}, {Field: utils.Destination}}
+	if rply, err := agReq.Field(path); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rply, expVal) {
+		t.Errorf("Expected %v , received: %v", utils.ToJSON(expVal), utils.ToJSON(rply))
+	}
+
+	agReq.Reply = utils.NewOrderedNavigableMap()
+	agReq.Reply.SetField(&utils.PathItem{Field: utils.Destination}, utils.NewNMInterface("1001"))
+	path = utils.PathItems{{Field: utils.MetaRep}, {Field: utils.Destination}}
+	if rply, err := agReq.Field(path); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rply, expVal) {
+		t.Errorf("Expected %v , received: %v", utils.ToJSON(expVal), utils.ToJSON(rply))
+	}
 }
 
 func TestAgReqNewARWithCGRRplyAndRply(t *testing.T) {
@@ -1665,5 +1728,13 @@ func TestAgReqSetFieldsInTmp(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(agReq.tmp, eMp) {
 		t.Errorf("expecting: %+v,\n received: %+v", eMp, agReq.tmp)
+	}
+}
+
+func TestAgentRequestString(t *testing.T) {
+	ag := NewAgentRequest(nil, nil, nil, nil, nil, "", "", nil, nil, nil)
+	expected := utils.ToIJSON(ag)
+	if rply := ag.String(); expected != rply {
+		t.Errorf("Expecting: %q,\n received: %q", expected, rply)
 	}
 }

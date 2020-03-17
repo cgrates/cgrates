@@ -34,11 +34,23 @@ type NMItem struct {
 	Config *FCTemplate // so we can store additional configuration
 }
 
-func (nmi *NMItem) String() string         { return utils.ToJSON(nmi) }
-func (nmi *NMItem) Interface() interface{} { return nmi.Data }
+func (nmi *NMItem) String() string {
+	return utils.ToJSON(nmi)
+}
+
+// Interface returns the wraped interface
+func (nmi *NMItem) Interface() interface{} {
+	return nmi.Data
+}
+
+// Field not implemented only used in order to implement the NM interface
 func (nmi *NMItem) Field(path utils.PathItems) (val utils.NM, err error) {
 	return nil, utils.ErrNotImplemented
 }
+
+// Set not implemented only used in order to implement the NM interface
+// special case when the path is empty the interface should be seted
+// this is in order to modify the wraped interface
 func (nmi *NMItem) Set(path utils.PathItems, val utils.NM) (err error) {
 	if len(path) != 0 {
 		return utils.ErrWrongPath
@@ -46,21 +58,36 @@ func (nmi *NMItem) Set(path utils.PathItems, val utils.NM) (err error) {
 	nmi.Data = val.Interface()
 	return
 }
+
+// Remove not implemented only used in order to implement the NM interface
 func (nmi *NMItem) Remove(path utils.PathItems) (err error) {
 	return utils.ErrNotImplemented
 }
-func (nmi *NMItem) Type() utils.NMType { return utils.NMInterfaceType }
-func (nmi *NMItem) Empty() bool        { return nmi == nil || nmi.Data == nil }
 
+// Type returns the type of the NM interface
+func (nmi *NMItem) Type() utils.NMType {
+	return utils.NMInterfaceType
+}
+
+// Empty returns true if the NM is empty(no data)
+func (nmi *NMItem) Empty() bool {
+	return nmi == nil || nmi.Data == nil
+}
+
+// GetField not implemented only used in order to implement the NM interface
 func (nmi *NMItem) GetField(path *utils.PathItem) (val utils.NM, err error) {
 	return nil, utils.ErrNotImplemented
 }
 
+// SetField not implemented only used in order to implement the NM interface
 func (nmi *NMItem) SetField(path *utils.PathItem, val utils.NM) (err error) {
 	return utils.ErrNotImplemented
 }
 
-func (nmi *NMItem) Len() int { return 0 }
+// Len not implemented only used in order to implement the NM interface
+func (nmi *NMItem) Len() int {
+	return 0
+}
 
 // XMLElement is specially crafted to be automatically marshalled by encoding/xml
 type XMLElement struct {
@@ -173,23 +200,19 @@ func NMAsCGREvent(nM *utils.OrderedNavigableMap, tnt string, pathSep string) (cg
 		Tenant: tnt,
 		ID:     utils.UUIDSha1Prefix(),
 		Time:   utils.TimePointer(time.Now()),
-		Event:  make(map[string]interface{})}
+		Event:  make(map[string]interface{}),
+	}
 	for _, branchPath := range order {
-		var val interface{}
-		val, _ = nM.Field(branchPath)
+		val, _ := nM.Field(branchPath) // this should never return error cause we get the path from the order
 		opath := utils.GetPathWithoutIndex(branchPath.String())
 		if nmItm, isNMItem := val.(*NMItem); isNMItem { // special case when we have added multiple items inside a key, used in agents
-			if nmItm.Config == nil ||
-				nmItm.Config.AttributeID == "" {
-				val = nmItm.Data // first item which is not an attribute will become the value
-				if _, has := cgrEv.Event[opath]; !has {
-					cgrEv.Event[opath] = nmItm.Data
-				}
+			if nmItm.Config != nil &&
+				nmItm.Config.AttributeID != "" {
+				continue
 			}
-			continue
 		}
 		if _, has := cgrEv.Event[opath]; !has {
-			cgrEv.Event[opath] = val
+			cgrEv.Event[opath] = val.Interface() // first item which is not an attribute will become the value
 		}
 	}
 	return
