@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"math/rand"
 	"reflect"
 	"testing"
 )
@@ -98,58 +99,6 @@ func TestOrderedNavigableMap(t *testing.T) {
 	} else if val.Interface() != "500" {
 		t.Errorf("Expected %q ,received: %q", "500", val.Interface())
 	}
-
-	// path = []string{"Field2[0]"}
-	// if err := onm.Set(path, NewNMInterface("1002")); err != nil {
-	// 	t.Error(err)
-	// }
-	// if val, err := onm.Field(path); err != nil {
-	// 	t.Error(err)
-	// } else if val.Interface() != "1002" {
-	// 	t.Errorf("Expected %q ,received: %q", "1002", val.Interface())
-	// }
-	// fmt.Println(onm.order)
-	/*
-		path = []string{"Field1"}
-		if val, err := onm.Field(path); err != nil {
-			t.Error(err)
-		} else if val.Interface() != 10 {
-			t.Errorf("Expected %q ,received: %q", 10, val.Interface())
-		}
-
-		path = []string{"Field3", "Field4", "Field5"}
-		if val, err := onm.Field(path); err != nil {
-			t.Error(err)
-		} else if val.Interface() != 5 {
-			t.Errorf("Expected %q ,received: %q", 5, val.Interface())
-		}
-		/*
-			path = []string{"Field2[2]"}
-			if err := nm.Set(path, NewNMInterface("500")); err != nil {
-				t.Error(err)
-			}
-			if val, err := nm.Field(path); err != nil {
-				t.Error(err)
-			} else if val.Interface() != "500" {
-				t.Errorf("Expected %q ,received: %q", "500", val.Interface())
-			}
-
-			path = []string{"Field2[1]", "Account"}
-			if err := nm.Set(path, NewNMInterface("5")); err != nil {
-				t.Error(err)
-			}
-			path = []string{"Field2[1]", "Account[0]"}
-			if val, err := nm.Field(path); err != nil {
-				t.Error(err)
-			} else if val.Interface() != "5" {
-				t.Errorf("Expected %q ,received: %q", "5", val.Interface())
-			}
-			path = []string{"Field2[1]", "Account[1]"}
-			if _, err := nm.Field(path); err != ErrNotFound {
-				t.Error(err)
-			}
-
-			fmt.Println(nm)*/
 }
 
 func TestOrderedNavigableMapString(t *testing.T) {
@@ -756,5 +705,168 @@ func TestOrderedNavigableRemote(t *testing.T) {
 	eOut := LocalAddr()
 	if rcv := nm.RemoteHost(); !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+}
+
+var generator = rand.New(rand.NewSource(42))
+var gen = generateRandomTemplate(1_000)
+
+type benchData struct {
+	path      []string
+	pathItems PathItems
+	data      string
+}
+
+func generateRandomPath() (out []string) {
+	size := generator.Intn(16) + 1
+	out = make([]string, size)
+	for i := 0; i < size; i++ {
+		out[i] = Sha1(GenUUID())
+	}
+	return
+}
+func generateRandomTemplate(size int) (out []benchData) {
+	out = make([]benchData, size)
+	for i := 0; i < size; i++ {
+		out[i].path = generateRandomPath()
+		out[i].data = UUIDSha1Prefix()
+		out[i].pathItems = NewPathToItem(out[i].path)
+	}
+	return
+}
+
+func BenchmarkOrderdNavigableMapSet(b *testing.B) {
+	nm := NewOrderedNavigableMap()
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		for _, data := range gen {
+			if err := nm.Set(data.pathItems, NewNMInterface(data.data)); err != nil {
+				b.Log(err, data.path)
+			}
+		}
+	}
+}
+
+func BenchmarkNavigableMapSet(b *testing.B) {
+	nm := NavigableMap2{}
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		for _, data := range gen {
+			if err := nm.Set(data.pathItems, NewNMInterface(data.data)); err != nil {
+				b.Log(err, data.path)
+			}
+		}
+	}
+}
+
+func BenchmarkNavigableMapOldSet(b *testing.B) {
+	nm := NavigableMap{}
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		for _, data := range gen {
+			if err := nm.Set(data.path, data.data); err != nil {
+				b.Log(err, data.path)
+			}
+		}
+	}
+}
+
+func BenchmarkOrderdNavigableMapFieldAsInterface(b *testing.B) {
+	nm := NewOrderedNavigableMap()
+	for _, data := range gen {
+		if err := nm.Set(data.pathItems, NewNMInterface(data.data)); err != nil {
+			b.Log(err, data.path)
+		}
+	}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		for _, data := range gen {
+			if val, err := nm.FieldAsInterface(data.path); err != nil {
+				b.Log(err)
+			} else if val != data.data {
+				b.Errorf("Expected %q ,received: %q", data.data, val)
+			}
+		}
+	}
+}
+
+func BenchmarkNavigableMapFieldAsInterface(b *testing.B) {
+	nm := NavigableMap2{}
+	for _, data := range gen {
+		if err := nm.Set(data.pathItems, NewNMInterface(data.data)); err != nil {
+			b.Log(err, data.path)
+		}
+	}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		for _, data := range gen {
+			if val, err := nm.FieldAsInterface(data.path); err != nil {
+				b.Log(err)
+			} else if val != data.data {
+				b.Errorf("Expected %q ,received: %q", data.data, val)
+			}
+		}
+	}
+}
+
+func BenchmarkNavigableMapOldFieldAsInterface(b *testing.B) {
+	nm := NavigableMap{}
+	for _, data := range gen {
+		if err := nm.Set(data.path, data.data); err != nil {
+			b.Log(err, data.path)
+		}
+	}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		for _, data := range gen {
+			if val, err := nm.FieldAsInterface(data.path); err != nil {
+				b.Log(err)
+			} else if val != data.data {
+				b.Errorf("Expected %q ,received: %q", data.data, val)
+			}
+		}
+	}
+}
+
+func BenchmarkOrderdNavigableMapField(b *testing.B) {
+	nm := NewOrderedNavigableMap()
+	for _, data := range gen {
+		if err := nm.Set(data.pathItems, NewNMInterface(data.data)); err != nil {
+			b.Log(err, data.path)
+		}
+	}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		for _, data := range gen {
+			if val, err := nm.Field(data.pathItems); err != nil {
+				b.Log(err)
+			} else if val.Interface() != data.data {
+				b.Errorf("Expected %q ,received: %q", data.data, val.Interface())
+			}
+		}
+	}
+}
+
+func BenchmarkNavigableMapField(b *testing.B) {
+	nm := NavigableMap2{}
+	for _, data := range gen {
+		if err := nm.Set(data.pathItems, NewNMInterface(data.data)); err != nil {
+			b.Log(err, data.path)
+		}
+	}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		for _, data := range gen {
+			if val, err := nm.Field(data.pathItems); err != nil {
+				b.Log(err)
+			} else if val.Interface() != data.data {
+				b.Errorf("Expected %q ,received: %q", data.data, val.Interface())
+			}
+		}
 	}
 }
