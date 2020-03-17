@@ -145,7 +145,7 @@ func (rdr *FlatstoreER) processFile(fPath, fName string) (err error) {
 	rowNr := 0 // This counts the rows in the file, not really number of CDRs
 	evsPosted := 0
 	timeStart := time.Now()
-	reqVars := make(map[string]interface{})
+	reqVars := map[string]interface{}{utils.FileName: fName}
 	for {
 		var record []string
 		if record, err = csvReader.Read(); err != nil {
@@ -159,8 +159,9 @@ func (rdr *FlatstoreER) processFile(fPath, fName string) (err error) {
 		} else {
 			pr, err := NewUnpairedRecord(record, rdr.Config().Timezone, fName)
 			if err != nil {
-				fmt.Sprintf("<%s> Converting row : <%s> to unpairedRecord , ignoring due to error: <%s>",
-					utils.ERs, record, err.Error())
+				utils.Logger.Warning(
+					fmt.Sprintf("<%s> Converting row : <%s> to unpairedRecord , ignoring due to error: <%s>",
+						utils.ERs, record, err.Error()))
 				continue
 			}
 			if val, has := rdr.cache.Get(pr.OriginID); !has {
@@ -170,8 +171,9 @@ func (rdr *FlatstoreER) processFile(fPath, fName string) (err error) {
 				pair := val.(*UnpairedRecord)
 				record, err = pairToRecord(pair, pr)
 				if err != nil {
-					fmt.Sprintf("<%s> Merging unpairedRecords : <%s> and <%s> to record , ignoring due to error: <%s>",
-						utils.ERs, utils.ToJSON(pair), utils.ToJSON(pr), err.Error())
+					utils.Logger.Warning(
+						fmt.Sprintf("<%s> Merging unpairedRecords : <%s> and <%s> to record , ignoring due to error: <%s>",
+							utils.ERs, utils.ToJSON(pair), utils.ToJSON(pr), err.Error()))
 					continue
 				}
 				rdr.cache.Remove(pr.OriginID)
@@ -234,7 +236,7 @@ func NewUnpairedRecord(record []string, timezone string, fileName string) (*Unpa
 	return pr, nil
 }
 
-// This is a partial record received from Flatstore, can be INVITE or BYE and it needs to be paired in order to produce duration
+// UnpairedRecord is a partial record received from Flatstore, can be INVITE or BYE and it needs to be paired in order to produce duration
 type UnpairedRecord struct {
 	Method    string    // INVITE or BYE
 	OriginID  string    // Copute here the OriginID

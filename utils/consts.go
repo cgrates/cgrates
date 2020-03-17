@@ -705,6 +705,7 @@ const (
 	MetaCost                  = "*cost"
 	MetaGroup                 = "*group"
 	InternalRPCSet            = "InternalRPCSet"
+	FileName                  = "FileName"
 )
 
 // Migrator Action

@@ -138,7 +138,7 @@ func (rdr *CSVFileER) processFile(fPath, fName string) (err error) {
 	rowNr := 0 // This counts the rows in the file, not really number of CDRs
 	evsPosted := 0
 	timeStart := time.Now()
-	reqVars := make(map[string]interface{})
+	reqVars := map[string]interface{}{utils.FileName: fName}
 	for {
 		var record []string
 		if record, err = csvReader.Read(); err != nil {

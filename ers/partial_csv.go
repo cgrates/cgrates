@@ -152,7 +152,7 @@ func (rdr *PartialCSVFileER) processFile(fPath, fName string) (err error) {
 	rowNr := 0 // This counts the rows in the file, not really number of CDRs
 	evsPosted := 0
 	timeStart := time.Now()
-	reqVars := make(map[string]interface{})
+	reqVars := map[string]interface{}{utils.FileName: fName}
 	for {
 		var record []string
 		if record, err = csvReader.Read(); err != nil {
@@ -181,7 +181,7 @@ func (rdr *PartialCSVFileER) processFile(fPath, fName string) (err error) {
 		}
 
 		// take OriginID and OriginHost to compose CGRID
-		orgId, err := agReq.CGRRequest.FieldAsString([]string{utils.OriginID})
+		orgID, err := agReq.CGRRequest.FieldAsString([]string{utils.OriginID})
 		if err == utils.ErrNotFound {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> Missing <OriginID> field for row <%d> , <%s>",
@@ -195,7 +195,7 @@ func (rdr *PartialCSVFileER) processFile(fPath, fName string) (err error) {
 					utils.ERs, rowNr, record))
 			continue
 		}
-		cgrID := utils.Sha1(orgId, orgHost)
+		cgrID := utils.Sha1(orgID, orgHost)
 		// take Partial field from NavigableMap
 		partial, _ := agReq.CGRRequest.FieldAsString([]string{utils.Partial})
 		if val, has := rdr.cache.Get(cgrID); !has {
@@ -218,10 +218,9 @@ func (rdr *PartialCSVFileER) processFile(fPath, fName string) (err error) {
 						sTime, _ := origCgrEvs[i].FieldAsTime(utils.SetupTime, agReq.Timezone)
 						sTime2, _ := origCgrEvs[j].FieldAsTime(utils.SetupTime, agReq.Timezone)
 						return sTime.Before(sTime2)
-					} else {
-						aTime2, _ := origCgrEvs[j].FieldAsTime(utils.AnswerTime, agReq.Timezone)
-						return aTime.Before(aTime2)
 					}
+					aTime2, _ := origCgrEvs[j].FieldAsTime(utils.AnswerTime, agReq.Timezone)
+					return aTime.Before(aTime2)
 				})
 				// compose the CGREvent from slice
 				cgrEv := new(utils.CGREvent)
@@ -260,10 +259,6 @@ func (rdr *PartialCSVFileER) processFile(fPath, fName string) (err error) {
 			utils.ERs, absPath, rowNr, evsPosted, time.Now().Sub(timeStart)))
 	return
 }
-
-const (
-	PartialRecordsSuffix = "partial"
-)
 
 func (rdr *PartialCSVFileER) dumpToFile(itmID string, value interface{}) {
 	origCgrEvs := value.([]*utils.CGREvent)
@@ -348,10 +343,9 @@ func (rdr *PartialCSVFileER) postCDR(itmID string, value interface{}) {
 			sTime, _ := origCgrEvs[i].FieldAsTime(utils.SetupTime, rdr.Config().Timezone)
 			sTime2, _ := origCgrEvs[j].FieldAsTime(utils.SetupTime, rdr.Config().Timezone)
 			return sTime.Before(sTime2)
-		} else {
-			aTime2, _ := origCgrEvs[j].FieldAsTime(utils.AnswerTime, rdr.Config().Timezone)
-			return aTime.Before(aTime2)
 		}
+		aTime2, _ := origCgrEvs[j].FieldAsTime(utils.AnswerTime, rdr.Config().Timezone)
+		return aTime.Before(aTime2)
 	})
 	// compose the CGREvent from slice
 	cgrEv := &utils.CGREvent{
