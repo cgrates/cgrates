@@ -175,12 +175,12 @@ func (nmi *mockNMInterface) Empty() bool {
 }
 
 // GetField not implemented only used in order to implement the NM interface
-func (nmi *mockNMInterface) GetField(path *PathItem) (val NM, err error) {
+func (nmi *mockNMInterface) GetField(path PathItem) (val NM, err error) {
 	return nil, ErrNotImplemented
 }
 
 // SetField not implemented
-func (nmi *mockNMInterface) SetField(path *PathItem, val NM) (err error) {
+func (nmi *mockNMInterface) SetField(path PathItem, val NM) (err error) {
 	return ErrNotImplemented
 }
 

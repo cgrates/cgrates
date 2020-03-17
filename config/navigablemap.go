@@ -75,12 +75,12 @@ func (nmi *NMItem) Empty() bool {
 }
 
 // GetField not implemented only used in order to implement the NM interface
-func (nmi *NMItem) GetField(path *utils.PathItem) (val utils.NM, err error) {
+func (nmi *NMItem) GetField(path utils.PathItem) (val utils.NM, err error) {
 	return nil, utils.ErrNotImplemented
 }
 
 // SetField not implemented only used in order to implement the NM interface
-func (nmi *NMItem) SetField(path *utils.PathItem, val utils.NM) (err error) {
+func (nmi *NMItem) SetField(path utils.PathItem, val utils.NM) (err error) {
 	return utils.ErrNotImplemented
 }
 

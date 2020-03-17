@@ -80,7 +80,8 @@ func (onm *OrderedNavigableMap) Remove(path PathItems) (err error) {
 
 // Set sets the value at the given path
 func (onm *OrderedNavigableMap) Set(fldPath PathItems, val NM) (err error) {
-	if len(fldPath) == 0 {
+	lpath := len(fldPath)
+	if lpath == 0 {
 		return ErrWrongPath
 	}
 	switch val.Type() {
@@ -99,7 +100,7 @@ func (onm *OrderedNavigableMap) Set(fldPath PathItems, val NM) (err error) {
 			if err != nil {
 				return
 			}
-			if i == len(fldPath)-1 { // last path
+			if i == lpath-1 { // last path
 				if err = dataMap.SetField(spath, val); err == nil {
 					onm.removePath(fldPath)
 					onm.order = append(onm.order, fldPath)
@@ -119,9 +120,9 @@ func (onm *OrderedNavigableMap) Set(fldPath PathItems, val NM) (err error) {
 				}
 				l := val.Len()
 				for j := 0; j < l; j++ {
-					newpath := make(PathItems, len(fldPath))
+					newpath := make(PathItems, lpath)
 					copy(newpath, fldPath)
-					newpath[len(newpath)-1] = &PathItem{
+					newpath[len(newpath)-1] = PathItem{
 						Field: newpath[len(newpath)-1].Field,
 						Index: IntPointer(j),
 					}
@@ -132,14 +133,14 @@ func (onm *OrderedNavigableMap) Set(fldPath PathItems, val NM) (err error) {
 			if err != nil {
 				return
 			}
-			if i == len(fldPath)-1 { // last path
+			if i == lpath-1 { // last path
 				if err = dataMap.SetField(spath, val); err == nil {
 					onm.removePath(fldPath)
 					l := val.Len()
 					for j := 0; j < l; j++ {
-						newpath := make(PathItems, len(fldPath))
+						newpath := make(PathItems, lpath)
 						copy(newpath, fldPath)
-						newpath[len(newpath)-1] = &PathItem{
+						newpath[len(newpath)-1] = PathItem{
 							Field: newpath[len(newpath)-1].Field,
 							Index: IntPointer(j),
 						}
@@ -193,16 +194,16 @@ func (onm *OrderedNavigableMap) removePath(path PathItems) {
 
 // GetField the same as Field but for one level deep
 // used to implement NM interface
-func (onm *OrderedNavigableMap) GetField(path *PathItem) (val NM, err error) {
+func (onm *OrderedNavigableMap) GetField(path PathItem) (val NM, err error) {
 	return onm.nm.GetField(path)
 }
 
 // SetField the same as Set but for one level deep
 // used to implement NM interface
-func (onm *OrderedNavigableMap) SetField(path *PathItem, val NM) (err error) {
-	if path == nil {
-		return ErrWrongPath
-	}
+func (onm *OrderedNavigableMap) SetField(path PathItem, val NM) (err error) {
+	// if path == nil {
+	// 	return ErrWrongPath
+	// }
 	switch val.Type() {
 	case NMInterfaceType:
 		_, err = onm.nm.GetField(path)
@@ -230,7 +231,7 @@ func (onm *OrderedNavigableMap) SetField(path *PathItem, val NM) (err error) {
 				l := val.Len()
 				for j := 0; j < l; j++ {
 					newpath := make(PathItems, 1)
-					newpath[0] = &PathItem{
+					newpath[0] = PathItem{
 						Field: path.Field,
 						Index: IntPointer(j),
 					}
@@ -244,7 +245,7 @@ func (onm *OrderedNavigableMap) SetField(path *PathItem, val NM) (err error) {
 			l := val.Len()
 			for j := 0; j < l; j++ {
 				newpath := make(PathItems, 1)
-				newpath[0] = &PathItem{
+				newpath[0] = PathItem{
 					Field: path.Field,
 					Index: IntPointer(j),
 				}

@@ -135,10 +135,10 @@ func (nms NMSlice) Empty() bool {
 
 // GetField the same as Field but for one level deep
 // used for OrderedNavigableMap parsing
-func (nms *NMSlice) GetField(path *PathItem) (val NM, err error) {
-	if path == nil {
-		return nil, ErrWrongPath
-	}
+func (nms *NMSlice) GetField(path PathItem) (val NM, err error) {
+	// if path == nil {
+	// 	return nil, ErrWrongPath
+	// }
 	if nms.Empty() || path.Index == nil {
 		return nil, ErrNotFound
 	}
@@ -154,8 +154,8 @@ func (nms *NMSlice) GetField(path *PathItem) (val NM, err error) {
 
 // SetField the same as Set but for one level deep
 // used for OrderedNavigableMap parsing
-func (nms *NMSlice) SetField(path *PathItem, val NM) (err error) {
-	if path == nil || path.Index == nil {
+func (nms *NMSlice) SetField(path PathItem, val NM) (err error) {
+	if path.Index == nil {
 		return ErrWrongPath
 	}
 	idx := *path.Index
@@ -169,7 +169,7 @@ func (nms *NMSlice) SetField(path *PathItem, val NM) (err error) {
 	if idx < 0 || idx >= len(*nms) {
 		return ErrWrongPath
 	}
-	path.Index = &idx
+	*path.Index = idx
 	(*nms)[idx] = val
 	return
 }

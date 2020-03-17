@@ -71,7 +71,7 @@ func TestNMInterfaceField(t *testing.T) {
 
 func TestNMInterfaceGetField(t *testing.T) {
 	var nm NM = NewNMInterface("1001")
-	if _, err := nm.GetField(nil); err != ErrNotImplemented {
+	if _, err := nm.GetField(PathItem{}); err != ErrNotImplemented {
 		t.Error(err)
 	}
 }
@@ -117,12 +117,12 @@ func TestNMInterfaceSet(t *testing.T) {
 
 func TestNMInterfaceSetField(t *testing.T) {
 	var nm NM = NewNMInterface("1001")
-	if err := nm.SetField(&PathItem{}, nil); err != ErrWrongPath {
+	if err := nm.SetField(PathItem{}, NewNMInterface("1002")); err != nil {
 		t.Error(err)
 	}
-	if err := nm.SetField(nil, NewNMInterface("1002")); err != nil {
-		t.Error(err)
-	}
+	// if err := nm.SetField(nil, NewNMInterface("1002")); err != nil {
+	// 	t.Error(err)
+	// }
 	expected := "1002"
 	if rply := nm.Interface(); rply != expected {
 		t.Errorf("Expected %q ,received: %q", expected, rply)

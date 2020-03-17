@@ -69,8 +69,8 @@ type NM interface {
 	String() string
 	Interface() interface{}
 	Field(path PathItems) (val NM, err error)
-	GetField(path *PathItem) (val NM, err error)
-	SetField(path *PathItem, val NM) (err error)
+	GetField(path PathItem) (val NM, err error)
+	SetField(path PathItem, val NM) (err error)
 	Set(path PathItems, val NM) (err error)
 	Remove(path PathItems) (err error)
 	Type() NMType
@@ -110,7 +110,7 @@ func ComposeNavMapVal(nm navMap, fldPath PathItems, val NM) (err error) {
 	} else {
 		indx = prevItmSlice.Len() - 1
 		var prevItm NM
-		if prevItm, err = prevItmSlice.GetField(&PathItem{Index: &indx}); err != nil {
+		if prevItm, err = prevItmSlice.GetField(PathItem{Index: &indx}); err != nil {
 			if err != ErrNotFound {
 				return
 			}

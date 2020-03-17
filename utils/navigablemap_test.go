@@ -195,7 +195,7 @@ func TestOrderedNavigableMapLen(t *testing.T) {
 
 func TestOrderedNavigableMapGetField(t *testing.T) {
 	nm := &OrderedNavigableMap{nm: NavigableMap2{}}
-	if _, err := nm.GetField(&PathItem{}); err != ErrNotFound {
+	if _, err := nm.GetField(PathItem{}); err != ErrNotFound {
 		t.Error(err)
 	}
 	nm = &OrderedNavigableMap{nm: NavigableMap2{
@@ -204,24 +204,24 @@ func TestOrderedNavigableMapGetField(t *testing.T) {
 		"Field3": NavigableMap2{"Field4": NewNMInterface("Val")},
 		"Field5": &NMSlice{NewNMInterface(10), NewNMInterface(101)},
 	}}
-	if _, err := nm.GetField(&PathItem{}); err != ErrNotFound {
+	if _, err := nm.GetField(PathItem{}); err != ErrNotFound {
 		t.Error(err)
 	}
-	if _, err := nm.GetField(&PathItem{Field: "NaN"}); err != ErrNotFound {
+	if _, err := nm.GetField(PathItem{Field: "NaN"}); err != ErrNotFound {
 		t.Error(err)
 	}
-	if _, err := nm.GetField(nil); err != ErrWrongPath {
-		t.Error(err)
-	}
-	if val, err := nm.GetField(&PathItem{Field: "Field1"}); err != nil {
+	// if _, err := nm.GetField(nil); err != ErrWrongPath {
+	// 	t.Error(err)
+	// }
+	if val, err := nm.GetField(PathItem{Field: "Field1"}); err != nil {
 		t.Error(err)
 	} else if val.Interface() != "1001" {
 		t.Errorf("Expected %q ,received: %q", "1001", val.Interface())
 	}
-	if _, err := nm.GetField(&PathItem{Field: "Field1", Index: IntPointer(0)}); err != ErrNotFound {
+	if _, err := nm.GetField(PathItem{Field: "Field1", Index: IntPointer(0)}); err != ErrNotFound {
 		t.Error(err)
 	}
-	if val, err := nm.GetField(&PathItem{Field: "Field5", Index: IntPointer(0)}); err != nil {
+	if val, err := nm.GetField(PathItem{Field: "Field5", Index: IntPointer(0)}); err != nil {
 		t.Error(err)
 	} else if val.Interface() != 10 {
 		t.Errorf("Expected %q ,received: %q", 10, val.Interface())
@@ -483,23 +483,23 @@ func TestOrderedNavigableMapSet(t *testing.T) {
 
 func TestOrderedNavigableMapSetField(t *testing.T) {
 	nm := &OrderedNavigableMap{nm: NavigableMap2{}}
-	if err := nm.SetField(nil, nil); err != ErrWrongPath {
+	// if err := nm.SetField(nil, nil); err != ErrWrongPath {
+	// 	t.Error(err)
+	// }
+	if err := nm.SetField(PathItem{Field: "1"}, &NavigableMap2{}); err != ErrNotImplemented {
 		t.Error(err)
 	}
-	if err := nm.SetField(&PathItem{Field: "1"}, &NavigableMap2{}); err != ErrNotImplemented {
+	if err := nm.SetField(PathItem{Field: "Field1", Index: IntPointer(10)}, NewNMInterface("1001")); err != ErrWrongPath {
 		t.Error(err)
 	}
-	if err := nm.SetField(&PathItem{Field: "Field1", Index: IntPointer(10)}, NewNMInterface("1001")); err != ErrWrongPath {
-		t.Error(err)
-	}
-	if err := nm.SetField(&PathItem{Field: "Field1", Index: IntPointer(10)}, &NMSlice{}); err != ErrWrongPath {
+	if err := nm.SetField(PathItem{Field: "Field1", Index: IntPointer(10)}, &NMSlice{}); err != ErrWrongPath {
 		t.Error(err)
 	}
 	expected := &OrderedNavigableMap{
 		nm:    NavigableMap2{"Field1": NewNMInterface(10)},
 		order: []PathItems{{{Field: "Field1"}}},
 	}
-	if err := nm.SetField(&PathItem{Field: "Field1"}, NewNMInterface(10)); err != nil {
+	if err := nm.SetField(PathItem{Field: "Field1"}, NewNMInterface(10)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(nm, expected) {
 		t.Errorf("Expected %s ,received: %s", expected, nm)
@@ -509,7 +509,7 @@ func TestOrderedNavigableMapSetField(t *testing.T) {
 		nm:    NavigableMap2{"Field1": NewNMInterface(11)},
 		order: []PathItems{{{Field: "Field1"}}},
 	}
-	if err := nm.SetField(&PathItem{Field: "Field1"}, NewNMInterface(11)); err != nil {
+	if err := nm.SetField(PathItem{Field: "Field1"}, NewNMInterface(11)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(nm, expected) {
 		t.Errorf("Expected %s ,received: %s", expected, nm)
@@ -521,7 +521,7 @@ func TestOrderedNavigableMapSetField(t *testing.T) {
 		},
 		order: []PathItems{{{Field: "Field1"}}, {{Field: "Field2", Index: IntPointer(0)}}, {{Field: "Field2", Index: IntPointer(1)}}},
 	}
-	if err := nm.SetField(&PathItem{Field: "Field2"}, &NMSlice{NewNMInterface("1005"), NewNMInterface("1006")}); err != nil {
+	if err := nm.SetField(PathItem{Field: "Field2"}, &NMSlice{NewNMInterface("1005"), NewNMInterface("1006")}); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(nm, expected) {
 		t.Errorf("Expected %s ,received: %s", expected, nm)
@@ -533,7 +533,7 @@ func TestOrderedNavigableMapSetField(t *testing.T) {
 		},
 		order: []PathItems{{{Field: "Field1"}}, {{Field: "Field2", Index: IntPointer(0)}}},
 	}
-	if err := nm.SetField(&PathItem{Field: "Field2"}, &NMSlice{NewNMInterface("1007")}); err != nil {
+	if err := nm.SetField(PathItem{Field: "Field2"}, &NMSlice{NewNMInterface("1007")}); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(nm, expected) {
 		t.Errorf("Expected %s ,received: %s", expected, nm)

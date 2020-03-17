@@ -51,15 +51,15 @@ func TestPathItemString(t *testing.T) {
 
 func TestPathItemEqual(t *testing.T) {
 	path := PathItem{Field: MetaReq}
-	p1 := &PathItem{Field: MetaReq}
+	p1 := PathItem{Field: MetaReq}
 	if !path.Equal(p1) {
 		t.Errorf("Expected %s to be equal to %s", ToJSON(path), ToJSON(p1))
 	}
-	p1 = &PathItem{Field: MetaRep}
+	p1 = PathItem{Field: MetaRep}
 	if path.Equal(p1) {
 		t.Errorf("Expected %s to not be equal to %s", ToJSON(path), ToJSON(p1))
 	}
-	p1 = &PathItem{Field: MetaReq, Index: IntPointer(0)}
+	p1 = PathItem{Field: MetaReq, Index: IntPointer(0)}
 	if path.Equal(p1) {
 		t.Errorf("Expected %s to not be equal to %s", ToJSON(path), ToJSON(p1))
 	}
@@ -71,15 +71,15 @@ func TestPathItemEqual(t *testing.T) {
 
 func TestPathItemClone(t *testing.T) {
 	path := PathItem{Field: MetaReq, Index: IntPointer(0)}
-	expected := &PathItem{Field: MetaReq, Index: IntPointer(0)}
+	expected := PathItem{Field: MetaReq, Index: IntPointer(0)}
 	rply := path.Clone()
 	*path.Index = 1
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expected: %s, received: %s", ToJSON(expected), ToJSON(rply))
 	}
 
-	var path2 *PathItem
-	expected = nil
+	var path2 PathItem
+	expected = PathItem{}
 	rply = path2.Clone()
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expected: %s, received: %s", ToJSON(expected), ToJSON(rply))
@@ -103,7 +103,7 @@ func TestPathItemsClone(t *testing.T) {
 	path := NewPathToItem(strings.Split("*req.Field1[0].Account", NestingSep))
 	expected := NewPathToItem(strings.Split("*req.Field1[0].Account", NestingSep))
 	rply := path.Clone()
-	path[0] = nil
+	path[0] = PathItem{}
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expected: %s, received: %s", ToJSON(expected), ToJSON(rply))
 	}

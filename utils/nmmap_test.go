@@ -223,7 +223,7 @@ func TestNavigableMap2Len(t *testing.T) {
 
 func TestNavigableMap2GetField(t *testing.T) {
 	nm := NavigableMap2{}
-	if _, err := nm.GetField(&PathItem{}); err != ErrNotFound {
+	if _, err := nm.GetField(PathItem{}); err != ErrNotFound {
 		t.Error(err)
 	}
 	nm = NavigableMap2{
@@ -232,24 +232,24 @@ func TestNavigableMap2GetField(t *testing.T) {
 		"Field3": NavigableMap2{"Field4": NewNMInterface("Val")},
 		"Field5": &NMSlice{NewNMInterface(10), NewNMInterface(101)},
 	}
-	if _, err := nm.GetField(&PathItem{}); err != ErrNotFound {
+	if _, err := nm.GetField(PathItem{}); err != ErrNotFound {
 		t.Error(err)
 	}
-	if _, err := nm.GetField(&PathItem{Field: "NaN"}); err != ErrNotFound {
+	if _, err := nm.GetField(PathItem{Field: "NaN"}); err != ErrNotFound {
 		t.Error(err)
 	}
-	if _, err := nm.GetField(nil); err != ErrWrongPath {
-		t.Error(err)
-	}
-	if val, err := nm.GetField(&PathItem{Field: "Field1"}); err != nil {
+	// if _, err := nm.GetField(nil); err != ErrWrongPath {
+	// 	t.Error(err)
+	// }
+	if val, err := nm.GetField(PathItem{Field: "Field1"}); err != nil {
 		t.Error(err)
 	} else if val.Interface() != "1001" {
 		t.Errorf("Expected %q ,received: %q", "1001", val.Interface())
 	}
-	if _, err := nm.GetField(&PathItem{Field: "Field1", Index: IntPointer(0)}); err != ErrNotFound {
+	if _, err := nm.GetField(PathItem{Field: "Field1", Index: IntPointer(0)}); err != ErrNotFound {
 		t.Error(err)
 	}
-	if val, err := nm.GetField(&PathItem{Field: "Field5", Index: IntPointer(0)}); err != nil {
+	if val, err := nm.GetField(PathItem{Field: "Field5", Index: IntPointer(0)}); err != nil {
 		t.Error(err)
 	} else if val.Interface() != 10 {
 		t.Errorf("Expected %q ,received: %q", 10, val.Interface())
@@ -258,12 +258,12 @@ func TestNavigableMap2GetField(t *testing.T) {
 
 func TestNavigableMap2SetField(t *testing.T) {
 	nm := NavigableMap2{}
-	if err := nm.SetField(nil, nil); err != ErrWrongPath {
-		t.Error(err)
-	}
+	// if err := nm.SetField(nil, nil); err != ErrWrongPath {
+	// 	t.Error(err)
+	// }
 
 	expected := NavigableMap2{"Field1": NewNMInterface(10)}
-	if err := nm.SetField(&PathItem{Field: "Field1"}, NewNMInterface(10)); err != nil {
+	if err := nm.SetField(PathItem{Field: "Field1"}, NewNMInterface(10)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(nm, expected) {
 		t.Errorf("Expected %s ,received: %s", expected, nm)
@@ -272,22 +272,22 @@ func TestNavigableMap2SetField(t *testing.T) {
 		"Field1": NewNMInterface(10),
 		"Field2": &NMSlice{NewNMInterface("1002")},
 	}
-	if err := nm.SetField(&PathItem{Field: "Field2", Index: IntPointer(10)}, NewNMInterface("1002")); err != ErrWrongPath {
+	if err := nm.SetField(PathItem{Field: "Field2", Index: IntPointer(10)}, NewNMInterface("1002")); err != ErrWrongPath {
 		t.Error(err)
 	}
-	if err := nm.SetField(&PathItem{Field: "Field2", Index: IntPointer(0)}, NewNMInterface("1002")); err != nil {
+	if err := nm.SetField(PathItem{Field: "Field2", Index: IntPointer(0)}, NewNMInterface("1002")); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(nm, expected) {
 		t.Errorf("Expected %s ,received: %s", expected, nm)
 	}
-	if err := nm.SetField(&PathItem{Field: "Field1", Index: IntPointer(0)}, NewNMInterface(10)); err != ErrWrongPath {
+	if err := nm.SetField(PathItem{Field: "Field1", Index: IntPointer(0)}, NewNMInterface(10)); err != ErrWrongPath {
 		t.Error(err)
 	}
 	expected = NavigableMap2{
 		"Field1": NewNMInterface("1001"),
 		"Field2": &NMSlice{NewNMInterface("1002")},
 	}
-	if err := nm.SetField(&PathItem{Field: "Field1"}, NewNMInterface("1001")); err != nil {
+	if err := nm.SetField(PathItem{Field: "Field1"}, NewNMInterface("1001")); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(nm, expected) {
 		t.Errorf("Expected %s ,received: %s", expected, nm)
@@ -296,7 +296,7 @@ func TestNavigableMap2SetField(t *testing.T) {
 		"Field1": NewNMInterface("1001"),
 		"Field2": &NMSlice{NewNMInterface("1003")},
 	}
-	if err := nm.SetField(&PathItem{Field: "Field2", Index: IntPointer(0)}, NewNMInterface("1003")); err != nil {
+	if err := nm.SetField(PathItem{Field: "Field2", Index: IntPointer(0)}, NewNMInterface("1003")); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(nm, expected) {
 		t.Errorf("Expected %s ,received: %s", expected, nm)

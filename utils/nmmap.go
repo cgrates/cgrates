@@ -181,10 +181,10 @@ func (nmm NavigableMap2) Empty() bool {
 
 // GetField the same as Field but for one level deep
 // used for OrderedNavigableMap parsing
-func (nmm NavigableMap2) GetField(path *PathItem) (val NM, err error) {
-	if path == nil {
-		return nil, ErrWrongPath
-	}
+func (nmm NavigableMap2) GetField(path PathItem) (val NM, err error) {
+	// if path == nil {
+	// 	return nil, ErrWrongPath
+	// }
 	el, has := nmm[path.Field]
 	if !has {
 		return nil, ErrNotFound
@@ -200,10 +200,10 @@ func (nmm NavigableMap2) GetField(path *PathItem) (val NM, err error) {
 
 // SetField the same as Set but for one level deep
 // used for OrderedNavigableMap parsing
-func (nmm NavigableMap2) SetField(path *PathItem, val NM) (err error) {
-	if path == nil {
-		return ErrWrongPath
-	}
+func (nmm NavigableMap2) SetField(path PathItem, val NM) (err error) {
+	// if path == nil {
+	// 	return ErrWrongPath
+	// }
 	el, has := nmm[path.Field]
 	if !has {
 		if path.Index != nil {
