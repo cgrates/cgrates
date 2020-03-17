@@ -319,7 +319,7 @@ func TestNMItemField(t *testing.T) {
 
 func TestNMItemGetField(t *testing.T) {
 	var nm utils.NM = &NMItem{Data: "1001"}
-	if _, err := nm.GetField(nil); err != utils.ErrNotImplemented {
+	if _, err := nm.GetField(utils.PathItem{}); err != utils.ErrNotImplemented {
 		t.Error(err)
 	}
 }
@@ -365,7 +365,7 @@ func TestNMItemSet(t *testing.T) {
 
 func TestNMItemSetField(t *testing.T) {
 	var nm utils.NM = &NMItem{Data: "1001"}
-	if err := nm.SetField(&utils.PathItem{}, nil); err != utils.ErrNotImplemented {
+	if err := nm.SetField(utils.PathItem{}, nil); err != utils.ErrNotImplemented {
 		t.Error(err)
 	}
 	// if err := nm.SetField(nil, &NMItem{Data: "1002"}); err != nil {

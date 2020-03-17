@@ -169,7 +169,6 @@ func (ms NavigableMap) Set(fldPath []string, val interface{}) (err error) {
 	case map[string]interface{}:
 		return NavigableMap(dp).Set(fldPath[1:], val)
 	default:
-
 		return ErrWrongPath
 	}
 

@@ -27,7 +27,7 @@ func NewPathToItem(path []string) (pItms PathItems) {
 	pItms = make(PathItems, len(path))
 	for i, v := range path {
 		field, indx := GetPathIndex(v)
-		pItms[i] = &PathItem{
+		pItms[i] = PathItem{
 			Field: field,
 			Index: indx,
 		}
@@ -42,9 +42,9 @@ type PathItem struct {
 }
 
 // PathItems a list of PathItem used to describe the path to an item from a NavigableMap
-type PathItems []*PathItem
+type PathItems []PathItem
 
-func (p *PathItem) String() (out string) {
+func (p PathItem) String() (out string) {
 	out = p.Field
 	if p.Index != nil {
 		out += IdxStart + strconv.Itoa(*p.Index) + IdxEnd
@@ -53,7 +53,7 @@ func (p *PathItem) String() (out string) {
 }
 
 // Equal returns true if p==p2
-func (p *PathItem) Equal(p2 *PathItem) bool {
+func (p PathItem) Equal(p2 PathItem) bool {
 	if p.Field != p2.Field {
 		return false
 	}
@@ -67,11 +67,10 @@ func (p *PathItem) Equal(p2 *PathItem) bool {
 }
 
 // Clone creates a copy
-func (p *PathItem) Clone() (c *PathItem) {
-	if p == nil {
-		return
-	}
-	c = new(PathItem)
+func (p PathItem) Clone() (c PathItem) {
+	// if p == nil {
+	// 	return
+	// }
 	c.Field = p.Field
 	if p.Index != nil {
 		c.Index = IntPointer(*p.Index)
