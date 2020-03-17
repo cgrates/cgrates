@@ -58,7 +58,7 @@ func NewFWVFileERER(cfg *config.CGRConfig, cfgIdx int,
 	return fwvER, nil
 }
 
-// XMLFileER implements EventReader interface for .xml files
+// FWVFileER implements EventReader interface for .fwv files
 type FWVFileER struct {
 	sync.RWMutex
 	cgrCfg        *config.CGRConfig
@@ -139,7 +139,7 @@ func (rdr *FWVFileER) processFile(fPath, fName string) (err error) {
 	rowNr := 0 // This counts the rows in the file, not really number of CDRs
 	evsPosted := 0
 	timeStart := time.Now()
-	reqVars := make(map[string]interface{})
+	reqVars := map[string]interface{}{utils.FileName: fName}
 
 	for {
 		var hasHeader, hasTrailer bool
@@ -255,13 +255,13 @@ func (rdr *FWVFileER) setLineLen(file *os.File, hasHeader, hasTrailer bool) erro
 		lastLineSize = len(readBytes)
 	}
 	if hasTrailer {
-		if fi, err := file.Stat(); err != nil {
+		fi, err := file.Stat()
+		if err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> Row 0, error: cannot get file stats: %s", utils.ERs, err.Error()))
 			return err
-		} else {
-			rdr.trailerOffset = fi.Size() - int64(lastLineSize)
-			rdr.trailerLenght = int64(lastLineSize)
 		}
+		rdr.trailerOffset = fi.Size() - int64(lastLineSize)
+		rdr.trailerLenght = int64(lastLineSize)
 	}
 
 	if _, err := file.Seek(0, 0); err != nil {
