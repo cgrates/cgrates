@@ -116,6 +116,31 @@ func (m *Migrator) migrateV1Attributes() (err error) {
 	return
 }
 
+func (m *Migrator) migrateV1ToV2Attributes() (v2Attr []*v2AttributeProfile, err error) {
+	var v1Attr *v1AttributeProfile
+	for {
+		v1Attr, err = m.dmIN.getV1AttributeProfile()
+		if err != nil && err != utils.ErrNoMoreData {
+			return nil, err
+		}
+		if err == utils.ErrNoMoreData {
+			break
+		}
+		if v1Attr == nil {
+			continue
+		}
+		v2Attr[m.stats[utils.Attributes]], err = v1Attr.AsAttributeProfileV2()
+		if err != nil {
+			return nil, err
+		}
+		if m.dryRun {
+			continue
+		}
+		m.stats[utils.Attributes]++
+	}
+	return v2Attr, nil
+}
+
 func (m *Migrator) migrateV2Attributes() (err error) {
 	var v2Attr *v2AttributeProfile
 	for {
@@ -153,6 +178,41 @@ func (m *Migrator) migrateV2Attributes() (err error) {
 			fmt.Sprintf("error: <%s> when updating Thresholds version into dataDB", err.Error()))
 	}
 	return
+}
+
+func (m *Migrator) migrateV2ToV3Attributes(v2Attr []*v2AttributeProfile) (v3Attr []*v3AttributeProfile, err error) {
+	var itmV2Attr *v2AttributeProfile
+	for {
+		if v2Attr == nil {
+			// read data from DataDB
+			itmV2Attr, err = m.dmIN.getV2AttributeProfile()
+			if err != nil && err != utils.ErrNoMoreData {
+				return nil, err
+			}
+			if err == utils.ErrNoMoreData {
+				break
+			}
+		} else if len(v2Attr) == 0 {
+			return nil, err
+		} else {
+			//read data from "memory"
+			itmV2Attr = v2Attr[m.stats[utils.Attributes]]
+		}
+		if itmV2Attr == nil {
+			continue
+		}
+
+		v3Attr[m.stats[utils.Attributes]], err = itmV2Attr.AsAttributeProfileV3()
+		if err != nil {
+			return nil, err
+		}
+		if m.dryRun {
+			continue
+		}
+		m.stats[utils.Attributes]++
+	}
+	//all works fine
+	return v3Attr, nil
 }
 
 func (m *Migrator) migrateV3Attributes() (err error) {
@@ -194,6 +254,41 @@ func (m *Migrator) migrateV3Attributes() (err error) {
 	return
 }
 
+func (m *Migrator) migrateV3ToV4Attributes(v3Attr []*v3AttributeProfile) (v4Attr []*v4AttributeProfile, err error) {
+	var itmV3Attr *v3AttributeProfile
+	for {
+		if v3Attr == nil {
+			// read data from DataDB
+			itmV3Attr, err = m.dmIN.getV3AttributeProfile()
+			if err != nil && err != utils.ErrNoMoreData {
+				return nil, err
+			}
+			if err == utils.ErrNoMoreData {
+				break
+			}
+		} else if len(v3Attr) == 0 {
+			// empty but don't know really what it means
+		} else {
+			//read data from "memory"
+			itmV3Attr = v3Attr[m.stats[utils.Attributes]]
+		}
+		if itmV3Attr == nil {
+			continue
+		}
+
+		v4Attr[m.stats[utils.Attributes]], err = itmV3Attr.AsAttributeProfileV4()
+		if err != nil {
+			return nil, err
+		}
+		if m.dryRun {
+			continue
+		}
+		m.stats[utils.Attributes]++
+	}
+	//all works fine
+	return v4Attr, nil
+}
+
 func (m *Migrator) migrateV4Attributes() (err error) {
 	var v4Attr *v4AttributeProfile
 	for {
@@ -231,6 +326,41 @@ func (m *Migrator) migrateV4Attributes() (err error) {
 			fmt.Sprintf("error: <%s> when updating Thresholds version into dataDB", err.Error()))
 	}
 	return
+}
+
+func (m *Migrator) migrateV4ToV5Attributes(v4Attr []*v4AttributeProfile) (v5Attr []*engine.AttributeProfile, err error) {
+	var itmV4Attr *v4AttributeProfile
+	for {
+		if v4Attr == nil {
+			// read data from DataDB
+			itmV4Attr, err = m.dmIN.getV4AttributeProfile()
+			if err != nil && err != utils.ErrNoMoreData {
+				return nil, err
+			}
+			if err == utils.ErrNoMoreData {
+				break
+			}
+		} else if len(v4Attr) == 0 {
+			// empty but don't know really what it means
+		} else {
+			//read data from "memory"
+			itmV4Attr = v4Attr[m.stats[utils.Attributes]]
+		}
+		if itmV4Attr == nil {
+			continue
+		}
+
+		v5Attr[m.stats[utils.Attributes]], err = itmV4Attr.AsAttributeProfileV5()
+		if err != nil {
+			return nil, err
+		}
+		if m.dryRun {
+			continue
+		}
+		m.stats[utils.Attributes]++
+	}
+	//all works fine
+	return v5Attr, nil
 }
 
 func (m *Migrator) migrateAttributeProfile() (err error) {
@@ -276,6 +406,65 @@ func (m *Migrator) migrateAttributeProfile() (err error) {
 	return m.ensureIndexesDataDB(engine.ColAttr)
 }
 
+//migrateAttrProfile step-by-step
+func (m *Migrator) migrateAttributeProfileV2() (err error) {
+	var vrs engine.Versions
+
+	// current := engine.CurrentDataDBVersions()
+	vrs, err = m.dmIN.DataManager().DataDB().GetVersions(utils.EmptyString)
+	if err != nil {
+		//error getting the current verions
+		return utils.NewCGRError(utils.Migrator, utils.ServerErrorCaps,
+			err.Error(), fmt.Sprintf("error: <%s> when querying oldDataDB for versions", err.Error()))
+	} else if len(vrs) == 0 {
+		return utils.NewCGRError(utils.Migrator, utils.MandatoryIEMissingCaps,
+			utils.UndefinedVersion, "version number is not defined for ActionTriggers model")
+	}
+	var v2Attr []*v2AttributeProfile
+	var v3Attr []*v3AttributeProfile
+	var v4Attr []*v4AttributeProfile
+	var v5Attr []*engine.AttributeProfile
+
+	switch vrs[utils.Attributes] {
+	// case versionAttr[utils.Attributes]: //if migrate the current version is atually reached
+	// 	break
+	case 1: // Migrate from V1 to V2
+		if v2Attr, err = m.migrateV1ToV2Attributes(); err != nil {
+			return err
+		}
+		fallthrough
+	case 2: // Migrate from V2 to V3
+		if v3Attr, err = m.migrateV2ToV3Attributes(v2Attr); err != nil {
+			return err
+		}
+		fallthrough
+	case 3: // Migrate from V3 to V4
+		if v4Attr, err = m.migrateV3ToV4Attributes(v3Attr); err != nil {
+			return err
+		}
+		fallthrough
+	case 4: // Migrate from V4 to V5
+		if v5Attr, err = m.migrateV4ToV5Attributes(v4Attr); err != nil {
+			return err
+		}
+	}
+	for _, attr := range v5Attr {
+		if err := m.dmOut.DataManager().SetAttributeProfile(attr, true); err != nil {
+			return err
+		}
+		//stats++
+		m.stats[utils.Attributes]++
+	}
+
+	// All done, update version wtih current one
+	vrs = engine.Versions{utils.Attributes: engine.CurrentDataDBVersions()[utils.Attributes]}
+	if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
+		return utils.NewCGRError(utils.Migrator, utils.ServerErrorCaps, err.Error(),
+			fmt.Sprintf("error: <%s> when updating Thresholds version into dataDB", err.Error()))
+	}
+	return m.ensureIndexesDataDB(engine.ColAttr)
+}
+
 func (v1AttrPrf v1AttributeProfile) AsAttributeProfile() (attrPrf *engine.AttributeProfile, err error) {
 	attrPrf = &engine.AttributeProfile{
 		Tenant:             v1AttrPrf.Tenant,
@@ -309,6 +498,30 @@ func (v1AttrPrf v1AttributeProfile) AsAttributeProfile() (attrPrf *engine.Attrib
 		}
 	}
 	return
+}
+
+func (v1AttrPrf v1AttributeProfile) AsAttributeProfileV2() (attrPrf *v2AttributeProfile, err error) {
+
+	//return v2Attribute
+	return attrPrf, nil
+}
+
+func (v2AttrPrf v2AttributeProfile) AsAttributeProfileV3() (attrPrf *v3AttributeProfile, err error) {
+
+	//return v2Attribute
+	return attrPrf, nil
+}
+
+func (v3AttrPrf v3AttributeProfile) AsAttributeProfileV4() (attrPrf *v4AttributeProfile, err error) {
+
+	//return v2Attribute
+	return attrPrf, nil
+}
+
+func (v4AttrPrf v4AttributeProfile) AsAttributeProfileV5() (attrPrf *engine.AttributeProfile, err error) {
+
+	//return v2Attribute
+	return attrPrf, nil
 }
 
 type v2Attribute struct {
