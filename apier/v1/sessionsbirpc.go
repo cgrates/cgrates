@@ -52,6 +52,8 @@ func (ssv1 *SessionSv1) Handlers() map[string]interface{} {
 		utils.SessionSv1SetPassiveSession:  ssv1.BiRPCv1SetPassiveSession,
 		utils.SessionSv1ActivateSessions:   ssv1.BiRPCv1ActivateSessions,
 		utils.SessionSv1DeactivateSessions: ssv1.BiRPCv1DeactivateSessions,
+
+		utils.SessionSv1SendRAR: ssv1.BiRPCV1SendRAR,
 	}
 }
 
@@ -161,4 +163,10 @@ func (ssv1 *SessionSv1) BiRPCv1ActivateSessions(clnt *rpc2.Client,
 func (ssv1 *SessionSv1) BiRPCv1DeactivateSessions(clnt *rpc2.Client,
 	args *utils.SessionIDsWithArgsDispatcher, reply *string) error {
 	return ssv1.Ss.BiRPCv1DeactivateSessions(clnt, args, reply)
+}
+
+// BiRPCV1SendRAR sends the RAR for filterd sessions
+func (ssv1 *SessionSv1) BiRPCV1SendRAR(clnt *rpc2.Client,
+	args *utils.SessionFilter, reply *string) error {
+	return ssv1.Ss.BiRPCv1SendRAR(clnt, args, reply)
 }

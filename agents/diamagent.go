@@ -168,7 +168,8 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 		return
 	}
 	// cache message for ASR
-	if da.cgrCfg.DiameterAgentCfg().ASRTemplate != "" {
+	if da.cgrCfg.DiameterAgentCfg().ASRTemplate != "" ||
+		da.cgrCfg.DiameterAgentCfg().RARTemplate != "" {
 		sessID, err := diamDP.FieldAsString([]string{"Session-Id"})
 		if err != nil {
 			utils.Logger.Warning(
@@ -419,7 +420,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 	return true, nil
 }
 
-// rpcclient.ClientConnector interface
+// Call implements rpcclient.ClientConnector interface
 func (da *DiameterAgent) Call(serviceMethod string, args interface{}, reply interface{}) error {
 	return utils.RPCCall(da, serviceMethod, args, reply)
 }
@@ -475,4 +476,50 @@ func (da *DiameterAgent) V1DisconnectSession(args utils.AttrDisconnectSession, r
 func (da *DiameterAgent) V1GetActiveSessionIDs(ignParam string,
 	sessionIDs *[]*sessions.SessionID) error {
 	return utils.ErrNotImplemented
+}
+
+// V1SendRAR  sends a rar meseage to diameter client
+func (da *DiameterAgent) V1SendRAR(originID string, reply *string) (err error) {
+	if originID == "" {
+		utils.Logger.Info(
+			fmt.Sprintf("<%s> cannot send RAR, missing session ID",
+				utils.DiameterAgent))
+		return utils.ErrMandatoryIeMissing
+	}
+	msg, has := engine.Cache.Get(utils.CacheDiameterMessages, originID)
+	if !has {
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s> cannot retrieve message from cache with OriginID: <%s>",
+				utils.DiameterAgent, originID))
+		return utils.ErrMandatoryIeMissing
+	}
+	dmd := msg.(*diamMsgData)
+	aReq := NewAgentRequest(
+		newDADataProvider(dmd.c, dmd.m),
+		dmd.vars,
+		config.NewNavigableMap(nil),
+		config.NewNavigableMap(nil),
+		nil,
+		da.cgrCfg.GeneralCfg().DefaultTenant,
+		da.cgrCfg.GeneralCfg().DefaultTimezone, da.filterS, nil, nil)
+	if err = aReq.SetFields(da.cgrCfg.DiameterAgentCfg().Templates[da.cgrCfg.DiameterAgentCfg().RARTemplate]); err != nil {
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s> cannot send RAR with OriginID: <%s>, err: %s",
+				utils.DiameterAgent, originID, err.Error()))
+		return utils.ErrServerError
+	}
+	m := diam.NewRequest(dmd.m.Header.CommandCode,
+		dmd.m.Header.ApplicationID, dmd.m.Dictionary())
+	if err = updateDiamMsgFromNavMap(m, aReq.diamreq,
+		da.cgrCfg.GeneralCfg().DefaultTimezone); err != nil {
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s> cannot send RAR with OriginID: <%s>, err: %s",
+				utils.DiameterAgent, originID, err.Error()))
+		return utils.ErrServerError
+	}
+	if err = writeOnConn(dmd.c, m); err != nil {
+		return utils.ErrServerError
+	}
+	*reply = utils.OK
+	return
 }

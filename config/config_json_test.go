@@ -756,6 +756,7 @@ func TestDiameterAgentJsonCfg(t *testing.T) {
 		Concurrent_requests:  utils.IntPointer(-1),
 		Synced_conn_requests: utils.BoolPointer(false),
 		Asr_template:         utils.StringPointer(""),
+		Rar_template:         utils.StringPointer(""),
 		Templates: map[string][]*FcTemplateJsonCfg{
 			utils.MetaErr: {
 				{
@@ -869,13 +870,67 @@ func TestDiameterAgentJsonCfg(t *testing.T) {
 					Type:  utils.StringPointer(utils.META_CONSTANT),
 					Value: utils.StringPointer("1")},
 			},
+			utils.MetaRAR: {
+				{
+					Tag:       utils.StringPointer("SessionId"),
+					Path:      utils.StringPointer(fmt.Sprintf("%s.Session-Id", utils.MetaDiamreq)),
+					Type:      utils.StringPointer(utils.MetaVariable),
+					Value:     utils.StringPointer("~*req.Session-Id"),
+					Mandatory: utils.BoolPointer(true)},
+				{
+					Tag:       utils.StringPointer("OriginHost"),
+					Path:      utils.StringPointer(fmt.Sprintf("%s.Origin-Host", utils.MetaDiamreq)),
+					Type:      utils.StringPointer(utils.MetaVariable),
+					Value:     utils.StringPointer("~*req.Destination-Host"),
+					Mandatory: utils.BoolPointer(true)},
+				{
+					Tag:       utils.StringPointer("OriginRealm"),
+					Path:      utils.StringPointer(fmt.Sprintf("%s.Origin-Realm", utils.MetaDiamreq)),
+					Type:      utils.StringPointer(utils.MetaVariable),
+					Value:     utils.StringPointer("~*req.Destination-Realm"),
+					Mandatory: utils.BoolPointer(true)},
+				{
+					Tag:       utils.StringPointer("DestinationRealm"),
+					Path:      utils.StringPointer(fmt.Sprintf("%s.Destination-Realm", utils.MetaDiamreq)),
+					Type:      utils.StringPointer(utils.MetaVariable),
+					Value:     utils.StringPointer("~*req.Origin-Realm"),
+					Mandatory: utils.BoolPointer(true)},
+				{
+					Tag:       utils.StringPointer("DestinationHost"),
+					Path:      utils.StringPointer(fmt.Sprintf("%s.Destination-Host", utils.MetaDiamreq)),
+					Type:      utils.StringPointer(utils.MetaVariable),
+					Value:     utils.StringPointer("~*req.Origin-Host"),
+					Mandatory: utils.BoolPointer(true)},
+				{
+					Tag:       utils.StringPointer("AuthApplicationId"),
+					Path:      utils.StringPointer(fmt.Sprintf("%s.Auth-Application-Id", utils.MetaDiamreq)),
+					Type:      utils.StringPointer(utils.MetaVariable),
+					Value:     utils.StringPointer("~*vars.*appid"),
+					Mandatory: utils.BoolPointer(true)},
+				{
+					Tag:       utils.StringPointer("UserName"),
+					Path:      utils.StringPointer(fmt.Sprintf("%s.User-Name", utils.MetaDiamreq)),
+					Type:      utils.StringPointer(utils.MetaVariable),
+					Value:     utils.StringPointer("~*req.User-Name"),
+					Mandatory: utils.BoolPointer(true)},
+				{
+					Tag:   utils.StringPointer("OriginStateID"),
+					Path:  utils.StringPointer(fmt.Sprintf("%s.Origin-State-Id", utils.MetaDiamreq)),
+					Type:  utils.StringPointer(utils.META_CONSTANT),
+					Value: utils.StringPointer("1")},
+				{
+					Tag:   utils.StringPointer("ReAuthRequestType"),
+					Path:  utils.StringPointer(fmt.Sprintf("%s.Re-Auth-Request-Type", utils.MetaDiamreq)),
+					Type:  utils.StringPointer(utils.META_CONSTANT),
+					Value: utils.StringPointer("0")},
+			},
 		},
 		Request_processors: &[]*ReqProcessorJsnCfg{},
 	}
 	if cfg, err := dfCgrJsonCfg.DiameterAgentJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
-		t.Errorf("expecting: %s, \n\nreceived: %s", utils.ToIJSON(eCfg), utils.ToIJSON(cfg))
+		t.Errorf("expecting: %s, \n\nreceived: %s", utils.ToJSON(eCfg), utils.ToJSON(cfg))
 	}
 }
 

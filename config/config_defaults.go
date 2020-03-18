@@ -415,6 +415,7 @@ const CGRATES_CFG_JSON = `
 	"concurrent_requests": -1,									// limit the number of active requests processed by the server <-1|0-n>
 	"synced_conn_requests": false,								// process one request at the time per connection
 	"asr_template": "",											// enable AbortSession message being sent to client on DisconnectSession
+	"rar_template": "",											// for building the RAR 
 	"templates":{												// default message templates
 		"*err": [
 				{"tag": "SessionId", "path": "*rep.Session-Id", "type": "*variable",
@@ -457,6 +458,26 @@ const CGRATES_CFG_JSON = `
 					"value": "~*req.User-Name", "mandatory": true},
 				{"tag": "OriginStateID", "path": "*diamreq.Origin-State-Id", "type": "*constant",
 					"value": "1"},
+		],
+		"*rar": [
+			{"tag": "SessionId", "path": "*diamreq.Session-Id", "type": "*variable",
+				"value": "~*req.Session-Id", "mandatory": true},
+			{"tag": "OriginHost", "path": "*diamreq.Origin-Host", "type": "*variable",
+				"value": "~*req.Destination-Host", "mandatory": true},
+			{"tag": "OriginRealm", "path": "*diamreq.Origin-Realm", "type": "*variable",
+				"value": "~*req.Destination-Realm", "mandatory": true},
+			{"tag": "DestinationRealm", "path": "*diamreq.Destination-Realm", "type": "*variable",
+				"value": "~*req.Origin-Realm", "mandatory": true},
+			{"tag": "DestinationHost", "path": "*diamreq.Destination-Host", "type": "*variable",
+				"value": "~*req.Origin-Host", "mandatory": true},
+			{"tag": "AuthApplicationId", "path": "*diamreq.Auth-Application-Id", "type": "*variable",
+				 "value": "~*vars.*appid", "mandatory": true},
+			{"tag": "UserName", "path": "*diamreq.User-Name", "type": "*variable",
+				"value": "~*req.User-Name", "mandatory": true},
+			{"tag": "OriginStateID", "path": "*diamreq.Origin-State-Id", "type": "*constant",
+				"value": "1"},
+			{"tag": "ReAuthRequestType", "path": "*diamreq.Re-Auth-Request-Type", "type": "*constant",
+				"value": "0"},
 		]
 	},
 	"request_processors": [				// list of processors to be applied to diameter messages

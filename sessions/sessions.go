@@ -3613,3 +3613,50 @@ func (sS *SessionS) BiRPCV1ProcessCDR(clnt rpcclient.ClientConnector,
 				Event: ev}},
 		rply)
 }
+
+func (sS *SessionS) sendRar(s *Session) (err error) {
+	clnt := sS.biJClnt(s.ClientConnID)
+	if clnt == nil {
+		return fmt.Errorf("calling %s requires bidirectional JSON connection, connID: <%s>",
+			utils.SessionSv1SendRAR, s.ClientConnID)
+	}
+	var originID string
+	if originID, err = s.EventStart.GetString(utils.OriginID); err != nil {
+		return
+	}
+	var rply string
+	if err = clnt.conn.Call(utils.SessionSv1SendRAR, originID, &rply); err == utils.ErrNotImplemented {
+		err = nil
+	}
+	return
+}
+
+// BiRPCv1SendRAR sends a RAR for sessions matching sessions
+func (sS *SessionS) BiRPCv1SendRAR(clnt rpcclient.ClientConnector,
+	args *utils.SessionFilter, reply *string) (err error) {
+	if args == nil { //protection in case on nil
+		args = &utils.SessionFilter{}
+	}
+	aSs := sS.filterSessions(args, false)
+	if len(aSs) == 0 {
+		return utils.ErrNotFound
+	}
+	for _, as := range aSs {
+		ss := sS.getSessions(as.CGRID, false)
+		if len(ss) == 0 {
+			continue
+		}
+		if errTerm := sS.sendRar(ss[0]); errTerm != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf(
+					"<%s> failed sending RAR for session with id: <%s>, err: <%s>",
+					utils.SessionS, ss[0].cgrID(), errTerm.Error()))
+			err = utils.ErrPartiallyExecuted
+		}
+	}
+	if err != nil {
+		return
+	}
+	*reply = utils.OK
+	return
+}
