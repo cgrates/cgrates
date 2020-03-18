@@ -1112,4 +1112,10 @@ func TestEventCostFilter(t *testing.T) {
 	} else if !pass {
 		t.Errorf("Expecting: true , received: %+v", pass)
 	}
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*lt:~*ec.AccountSummary.BalanceSummaries.MONETARY_POSTPAID.Value:60"}, cgrDp); err != nil {
+		t.Errorf(err.Error())
+	} else if !pass {
+		t.Errorf("Expecting: true , received: %+v", pass)
+	}
 }
