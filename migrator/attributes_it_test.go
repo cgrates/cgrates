@@ -53,6 +53,8 @@ var sTestsAttrIT = []func(t *testing.T){
 	testAttrITMigrateV3,
 	testAttrITFlush,
 	testAttrITMigrateV4,
+	// testAttrITFlush,
+	// testAttrITV1ToV2,
 }
 
 func TestAttributeITRedis(t *testing.T) {
@@ -664,4 +666,84 @@ func testAttrITMigrateV4(t *testing.T) {
 	if !reflect.DeepEqual(result, attrPrf) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(attrPrf), utils.ToJSON(result))
 	}
+}
+
+func testAttrITV1ToV2(t *testing.T) {
+	dataDBIn, err := NewMigratorDataDB(config.CgrConfig().DataDbCfg().DataDbType,
+		config.CgrConfig().DataDbCfg().DataDbHost, config.CgrConfig().DataDbCfg().DataDbPort,
+		config.CgrConfig().DataDbCfg().DataDbName, config.CgrConfig().DataDbCfg().DataDbUser,
+		config.CgrConfig().DataDbCfg().DataDbPass, config.CgrConfig().GeneralCfg().DBDataEncoding,
+		config.CgrConfig().CacheCfg(), utils.EmptyString, config.CgrConfig().DataDbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
+	dataDBOut, err := NewMigratorDataDB(config.CgrConfig().DataDbCfg().DataDbType,
+		config.CgrConfig().DataDbCfg().DataDbHost, config.CgrConfig().DataDbCfg().DataDbPort,
+		config.CgrConfig().DataDbCfg().DataDbName, config.CgrConfig().DataDbCfg().DataDbUser,
+		config.CgrConfig().DataDbCfg().DataDbPass, config.CgrConfig().GeneralCfg().DBDataEncoding,
+		config.CgrConfig().CacheCfg(), utils.EmptyString, config.CgrConfig().DataDbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
+	migrator, err := NewMigrator(dataDBIn, dataDBOut, nil, nil, false, false, false, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	mapSubstitutes := make(map[string]map[string]*v1Attribute)
+	mapSubstitutes["FL1"] = make(map[string]*v1Attribute)
+	mapSubstitutes["FL1"]["In1"] = &v1Attribute{
+		FieldName:  "FL1",
+		Initial:    "In1",
+		Substitute: "Al1",
+		Append:     true,
+	}
+	v1Attribute := &v1AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "attributeprofile1",
+		Contexts:  []string{utils.MetaSessionS},
+		FilterIDs: []string{"filter1"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2020, 4, 18, 14, 25, 0, 0, time.UTC),
+		},
+		Attributes: mapSubstitutes,
+		Weight:     20,
+	}
+
+	//set attribute into inDB
+
+	migrator.dmIN.setV1AttributeProfile(v1Attribute)
+
+	sbstPrsr, err := config.NewRSRParsers("Al1", true, config.CgrConfig().GeneralCfg().RSRSep)
+	if err != nil {
+		t.Error("Error converting Substitute from string to RSRParser: ", err)
+	}
+	eOut := []*v2AttributeProfile{
+		&v2AttributeProfile{
+			Tenant:    "cgrates.org",
+			ID:        "attributeprofile1",
+			Contexts:  []string{utils.MetaSessionS},
+			FilterIDs: []string{"filter1"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2020, 4, 18, 14, 25, 0, 0, time.UTC),
+			},
+			Attributes: []*v2Attribute{
+				&v2Attribute{
+					FieldName:  "FL1",
+					Initial:    "In1",
+					Substitute: sbstPrsr,
+					Append:     true,
+				},
+			},
+			Weight: 20,
+		},
+	}
+
+	if v2, err := migrator.migrateV1ToV2Attributes(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eOut, v2) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(v2))
+	}
+
 }
