@@ -868,7 +868,7 @@ func (apiv1 *APIerSv1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder
 
 	// create the TpReader
 	loader, err := engine.NewTpReader(apiv1.DataManager.DataDB(),
-		engine.NewFileCSVStorage(utils.CSV_SEP, attrs.FolderPath, attrs.Recursive),
+		engine.NewFileCSVStorage(utils.CSV_SEP, attrs.FolderPath),
 		"", apiv1.Config.GeneralCfg().DefaultTimezone,
 		apiv1.Config.ApierCfg().CachesConns, apiv1.Config.ApierCfg().SchedulerConns)
 	if err != nil {
@@ -934,7 +934,7 @@ func (apiv1 *APIerSv1) RemoveTPFromFolder(attrs utils.AttrLoadTpFromFolder, repl
 
 	// create the TpReader
 	loader, err := engine.NewTpReader(apiv1.DataManager.DataDB(),
-		engine.NewFileCSVStorage(utils.CSV_SEP, attrs.FolderPath, attrs.Recursive), "", apiv1.Config.GeneralCfg().DefaultTimezone,
+		engine.NewFileCSVStorage(utils.CSV_SEP, attrs.FolderPath), "", apiv1.Config.GeneralCfg().DefaultTimezone,
 		apiv1.Config.ApierCfg().CachesConns, apiv1.Config.ApierCfg().SchedulerConns)
 	if err != nil {
 		return utils.NewErrServerError(err)

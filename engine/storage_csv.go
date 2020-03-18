@@ -97,54 +97,31 @@ func NewCSVStorage(sep rune,
 	}
 }
 
-func NewFileCSVStorage(sep rune, dataPath string, recursive bool) *CSVStorage {
-	destinations_paths := []string{path.Join(dataPath, utils.DestinationsCsv)}
-	timings_paths := []string{path.Join(dataPath, utils.TimingsCsv)}
-	rates_paths := []string{path.Join(dataPath, utils.RatesCsv)}
-	destination_rates_paths := []string{path.Join(dataPath, utils.DestinationRatesCsv)}
-	rating_plans_paths := []string{path.Join(dataPath, utils.RatingPlansCsv)}
-	rating_profiles_paths := []string{path.Join(dataPath, utils.RatingProfilesCsv)}
-	shared_groups_paths := []string{path.Join(dataPath, utils.SharedGroupsCsv)}
-	actions_paths := []string{path.Join(dataPath, utils.ActionsCsv)}
-	action_plans_paths := []string{path.Join(dataPath, utils.ActionPlansCsv)}
-	action_triggers_paths := []string{path.Join(dataPath, utils.ActionTriggersCsv)}
-	account_actions_paths := []string{path.Join(dataPath, utils.AccountActionsCsv)}
-	resources_paths := []string{path.Join(dataPath, utils.ResourcesCsv)}
-	stats_paths := []string{path.Join(dataPath, utils.StatsCsv)}
-	thresholds_paths := []string{path.Join(dataPath, utils.ThresholdsCsv)}
-	filters_paths := []string{path.Join(dataPath, utils.FiltersCsv)}
-	suppliers_paths := []string{path.Join(dataPath, utils.SuppliersCsv)}
-	attributes_paths := []string{path.Join(dataPath, utils.AttributesCsv)}
-	chargers_paths := []string{path.Join(dataPath, utils.ChargersCsv)}
-	dispatcherprofiles_paths := []string{path.Join(dataPath, utils.DispatcherProfilesCsv)}
-	dispatcherhosts_paths := []string{path.Join(dataPath, utils.DispatcherHostsCsv)}
-
-	if recursive {
-		allFoldersPath, err := getAllFolders(dataPath)
-		if err != nil {
-			log.Fatal(err)
-		}
-		destinations_paths = appendName(allFoldersPath, utils.DestinationsCsv)
-		timings_paths = appendName(allFoldersPath, utils.TimingsCsv)
-		rates_paths = appendName(allFoldersPath, utils.RatesCsv)
-		destination_rates_paths = appendName(allFoldersPath, utils.DestinationRatesCsv)
-		rating_plans_paths = appendName(allFoldersPath, utils.RatingPlansCsv)
-		rating_profiles_paths = appendName(allFoldersPath, utils.RatingProfilesCsv)
-		shared_groups_paths = appendName(allFoldersPath, utils.SharedGroupsCsv)
-		actions_paths = appendName(allFoldersPath, utils.ActionsCsv)
-		action_plans_paths = appendName(allFoldersPath, utils.ActionPlansCsv)
-		action_triggers_paths = appendName(allFoldersPath, utils.ActionTriggersCsv)
-		account_actions_paths = appendName(allFoldersPath, utils.AccountActionsCsv)
-		resources_paths = appendName(allFoldersPath, utils.ResourcesCsv)
-		stats_paths = appendName(allFoldersPath, utils.StatsCsv)
-		thresholds_paths = appendName(allFoldersPath, utils.ThresholdsCsv)
-		filters_paths = appendName(allFoldersPath, utils.FiltersCsv)
-		suppliers_paths = appendName(allFoldersPath, utils.SuppliersCsv)
-		attributes_paths = appendName(allFoldersPath, utils.AttributesCsv)
-		chargers_paths = appendName(allFoldersPath, utils.ChargersCsv)
-		dispatcherprofiles_paths = appendName(allFoldersPath, utils.DispatcherProfilesCsv)
-		dispatcherhosts_paths = appendName(allFoldersPath, utils.DispatcherHostsCsv)
+func NewFileCSVStorage(sep rune, dataPath string) *CSVStorage {
+	allFoldersPath, err := getAllFolders(dataPath)
+	if err != nil {
+		log.Fatal(err)
 	}
+	destinations_paths := appendName(allFoldersPath, utils.DestinationsCsv)
+	timings_paths := appendName(allFoldersPath, utils.TimingsCsv)
+	rates_paths := appendName(allFoldersPath, utils.RatesCsv)
+	destination_rates_paths := appendName(allFoldersPath, utils.DestinationRatesCsv)
+	rating_plans_paths := appendName(allFoldersPath, utils.RatingPlansCsv)
+	rating_profiles_paths := appendName(allFoldersPath, utils.RatingProfilesCsv)
+	shared_groups_paths := appendName(allFoldersPath, utils.SharedGroupsCsv)
+	actions_paths := appendName(allFoldersPath, utils.ActionsCsv)
+	action_plans_paths := appendName(allFoldersPath, utils.ActionPlansCsv)
+	action_triggers_paths := appendName(allFoldersPath, utils.ActionTriggersCsv)
+	account_actions_paths := appendName(allFoldersPath, utils.AccountActionsCsv)
+	resources_paths := appendName(allFoldersPath, utils.ResourcesCsv)
+	stats_paths := appendName(allFoldersPath, utils.StatsCsv)
+	thresholds_paths := appendName(allFoldersPath, utils.ThresholdsCsv)
+	filters_paths := appendName(allFoldersPath, utils.FiltersCsv)
+	suppliers_paths := appendName(allFoldersPath, utils.SuppliersCsv)
+	attributes_paths := appendName(allFoldersPath, utils.AttributesCsv)
+	chargers_paths := appendName(allFoldersPath, utils.ChargersCsv)
+	dispatcherprofiles_paths := appendName(allFoldersPath, utils.DispatcherProfilesCsv)
+	dispatcherhosts_paths := appendName(allFoldersPath, utils.DispatcherHostsCsv)
 	return NewCSVStorage(sep,
 		destinations_paths,
 		timings_paths,

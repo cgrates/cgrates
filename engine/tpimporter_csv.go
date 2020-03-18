@@ -63,7 +63,7 @@ var fileHandlers = map[string]func(*TPCSVImporter, string) error{
 }
 
 func (self *TPCSVImporter) Run() error {
-	self.csvr = NewFileCSVStorage(self.Sep, self.DirPath, false)
+	self.csvr = NewFileCSVStorage(self.Sep, self.DirPath)
 	files, _ := ioutil.ReadDir(self.DirPath)
 	var withErrors bool
 	for _, f := range files {
