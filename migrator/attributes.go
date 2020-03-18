@@ -118,6 +118,7 @@ func (m *Migrator) migrateV1Attributes() (err error) {
 
 func (m *Migrator) migrateV1ToV2Attributes() (v2Attr []*v2AttributeProfile, err error) {
 	var v1Attr *v1AttributeProfile
+	var attr *v2AttributeProfile
 	for {
 		v1Attr, err = m.dmIN.getV1AttributeProfile()
 		if err != nil && err != utils.ErrNoMoreData {
@@ -129,16 +130,16 @@ func (m *Migrator) migrateV1ToV2Attributes() (v2Attr []*v2AttributeProfile, err 
 		if v1Attr == nil {
 			continue
 		}
-		v2Attr[m.stats[utils.Attributes]], err = v1Attr.AsAttributeProfileV2()
+		attr, err = v1Attr.AsAttributeProfileV2()
 		if err != nil {
 			return nil, err
 		}
+		v2Attr = append(v2Attr, attr)
 		if m.dryRun {
 			continue
 		}
-		m.stats[utils.Attributes]++
 	}
-	return v2Attr, nil
+	return
 }
 
 func (m *Migrator) migrateV2Attributes() (err error) {
@@ -182,6 +183,7 @@ func (m *Migrator) migrateV2Attributes() (err error) {
 
 func (m *Migrator) migrateV2ToV3Attributes(v2Attr []*v2AttributeProfile) (v3Attr []*v3AttributeProfile, err error) {
 	var itmV2Attr *v2AttributeProfile
+	var attr *v3AttributeProfile
 	for {
 		if v2Attr == nil {
 			// read data from DataDB
@@ -195,23 +197,21 @@ func (m *Migrator) migrateV2ToV3Attributes(v2Attr []*v2AttributeProfile) (v3Attr
 		} else if len(v2Attr) == 0 {
 			return nil, err
 		} else {
-			//read data from "memory"
 			itmV2Attr = v2Attr[m.stats[utils.Attributes]]
 		}
 		if itmV2Attr == nil {
 			continue
 		}
 
-		v3Attr[m.stats[utils.Attributes]], err = itmV2Attr.AsAttributeProfileV3()
+		attr, err = itmV2Attr.AsAttributeProfileV3()
 		if err != nil {
 			return nil, err
 		}
+		v3Attr = append(v3Attr, attr)
 		if m.dryRun {
 			continue
 		}
-		m.stats[utils.Attributes]++
 	}
-	//all works fine
 	return v3Attr, nil
 }
 
@@ -256,6 +256,7 @@ func (m *Migrator) migrateV3Attributes() (err error) {
 
 func (m *Migrator) migrateV3ToV4Attributes(v3Attr []*v3AttributeProfile) (v4Attr []*v4AttributeProfile, err error) {
 	var itmV3Attr *v3AttributeProfile
+	var attr *v4AttributeProfile
 	for {
 		if v3Attr == nil {
 			// read data from DataDB
@@ -267,25 +268,23 @@ func (m *Migrator) migrateV3ToV4Attributes(v3Attr []*v3AttributeProfile) (v4Attr
 				break
 			}
 		} else if len(v3Attr) == 0 {
-			// empty but don't know really what it means
+			return nil, err
 		} else {
-			//read data from "memory"
 			itmV3Attr = v3Attr[m.stats[utils.Attributes]]
 		}
 		if itmV3Attr == nil {
 			continue
 		}
 
-		v4Attr[m.stats[utils.Attributes]], err = itmV3Attr.AsAttributeProfileV4()
+		attr, err = itmV3Attr.AsAttributeProfileV4()
 		if err != nil {
 			return nil, err
 		}
+		v4Attr = append(v4Attr, attr)
 		if m.dryRun {
 			continue
 		}
-		m.stats[utils.Attributes]++
 	}
-	//all works fine
 	return v4Attr, nil
 }
 
@@ -330,6 +329,7 @@ func (m *Migrator) migrateV4Attributes() (err error) {
 
 func (m *Migrator) migrateV4ToV5Attributes(v4Attr []*v4AttributeProfile) (v5Attr []*engine.AttributeProfile, err error) {
 	var itmV4Attr *v4AttributeProfile
+	var attr *engine.AttributeProfile
 	for {
 		if v4Attr == nil {
 			// read data from DataDB
@@ -341,25 +341,23 @@ func (m *Migrator) migrateV4ToV5Attributes(v4Attr []*v4AttributeProfile) (v5Attr
 				break
 			}
 		} else if len(v4Attr) == 0 {
-			// empty but don't know really what it means
+			return nil, err
 		} else {
-			//read data from "memory"
 			itmV4Attr = v4Attr[m.stats[utils.Attributes]]
 		}
 		if itmV4Attr == nil {
 			continue
 		}
 
-		v5Attr[m.stats[utils.Attributes]], err = itmV4Attr.AsAttributeProfileV5()
+		attr, err = itmV4Attr.AsAttributeProfileV5()
 		if err != nil {
 			return nil, err
 		}
+		v5Attr = append(v5Attr, attr)
 		if m.dryRun {
 			continue
 		}
-		m.stats[utils.Attributes]++
 	}
-	//all works fine
 	return v5Attr, nil
 }
 
@@ -409,8 +407,6 @@ func (m *Migrator) migrateAttributeProfile() (err error) {
 //migrateAttrProfile step-by-step
 func (m *Migrator) migrateAttributeProfileV2() (err error) {
 	var vrs engine.Versions
-
-	// current := engine.CurrentDataDBVersions()
 	vrs, err = m.dmIN.DataManager().DataDB().GetVersions(utils.EmptyString)
 	if err != nil {
 		//error getting the current verions
@@ -426,8 +422,6 @@ func (m *Migrator) migrateAttributeProfileV2() (err error) {
 	var v5Attr []*engine.AttributeProfile
 
 	switch vrs[utils.Attributes] {
-	// case versionAttr[utils.Attributes]: //if migrate the current version is atually reached
-	// 	break
 	case 1: // Migrate from V1 to V2
 		if v2Attr, err = m.migrateV1ToV2Attributes(); err != nil {
 			return err
@@ -452,7 +446,6 @@ func (m *Migrator) migrateAttributeProfileV2() (err error) {
 		if err := m.dmOut.DataManager().SetAttributeProfile(attr, true); err != nil {
 			return err
 		}
-		//stats++
 		m.stats[utils.Attributes]++
 	}
 
@@ -501,27 +494,112 @@ func (v1AttrPrf v1AttributeProfile) AsAttributeProfile() (attrPrf *engine.Attrib
 }
 
 func (v1AttrPrf v1AttributeProfile) AsAttributeProfileV2() (attrPrf *v2AttributeProfile, err error) {
+	attrPrf = &v2AttributeProfile{
+		Tenant:             v1AttrPrf.Tenant,
+		ID:                 v1AttrPrf.ID,
+		Contexts:           v1AttrPrf.Contexts,
+		FilterIDs:          v1AttrPrf.FilterIDs,
+		ActivationInterval: v1AttrPrf.ActivationInterval,
+		Weight:             v1AttrPrf.Weight,
+	}
+	for _, mp := range v1AttrPrf.Attributes {
+		for _, attr := range mp {
 
-	//return v2Attribute
-	return attrPrf, nil
+			sbstPrsr, err := config.NewRSRParsers(attr.Substitute, true, config.CgrConfig().GeneralCfg().RSRSep)
+			if err != nil {
+				return nil, err
+			}
+			attrPrf.Attributes = append(attrPrf.Attributes, &v2Attribute{
+				FieldName:  attr.FieldName,
+				Initial:    attr.Initial,
+				Substitute: sbstPrsr,
+				Append:     attr.Append,
+			})
+		}
+	}
+	return
 }
 
 func (v2AttrPrf v2AttributeProfile) AsAttributeProfileV3() (attrPrf *v3AttributeProfile, err error) {
+	attrPrf = &v3AttributeProfile{
+		Tenant:             v2AttrPrf.Tenant,
+		ID:                 v2AttrPrf.ID,
+		Contexts:           v2AttrPrf.Contexts,
+		FilterIDs:          v2AttrPrf.FilterIDs,
+		ActivationInterval: v2AttrPrf.ActivationInterval,
+		Weight:             v2AttrPrf.Weight,
+	}
+	for _, attr := range v2AttrPrf.Attributes {
+		filterIDs := make([]string, 0)
+		//append false translate to  if FieldName exist do stuff
+		if attr.Append == false {
+			filterIDs = append(filterIDs, utils.MetaExists+":"+attr.FieldName+":")
+		}
+		//Initial not *any translate to if value of fieldName = initial do stuff
+		initial := utils.IfaceAsString(attr.Initial)
+		if initial != utils.META_ANY {
+			filterIDs = append(filterIDs, utils.MetaString+":"+attr.FieldName+":"+initial)
+		}
 
-	//return v2Attribute
-	return attrPrf, nil
+		attrPrf.Attributes = append(attrPrf.Attributes, &v3Attribute{
+			FilterIDs:  filterIDs,
+			FieldName:  attr.FieldName,
+			Substitute: attr.Substitute,
+		})
+	}
+	return
 }
 
 func (v3AttrPrf v3AttributeProfile) AsAttributeProfileV4() (attrPrf *v4AttributeProfile, err error) {
-
-	//return v2Attribute
-	return attrPrf, nil
+	attrPrf = &v4AttributeProfile{
+		Tenant:             v3AttrPrf.Tenant,
+		ID:                 v3AttrPrf.ID,
+		Contexts:           v3AttrPrf.Contexts,
+		FilterIDs:          v3AttrPrf.FilterIDs,
+		ActivationInterval: v3AttrPrf.ActivationInterval,
+		Weight:             v3AttrPrf.Weight,
+		Blocker:            false,
+	}
+	for _, attr := range v3AttrPrf.Attributes {
+		attrPrf.Attributes = append(attrPrf.Attributes, &v4Attribute{
+			FilterIDs: attr.FilterIDs,
+			FieldName: attr.FieldName,
+			Type:      utils.MetaVariable,
+			Value:     attr.Substitute,
+		})
+	}
+	return
 }
 
 func (v4AttrPrf v4AttributeProfile) AsAttributeProfileV5() (attrPrf *engine.AttributeProfile, err error) {
+	attrPrf = &engine.AttributeProfile{
+		Tenant:             v4AttrPrf.Tenant,
+		ID:                 v4AttrPrf.ID,
+		Contexts:           v4AttrPrf.Contexts,
+		FilterIDs:          v4AttrPrf.FilterIDs,
+		Weight:             v4AttrPrf.Weight,
+		ActivationInterval: v4AttrPrf.ActivationInterval,
+	}
+	for _, attr := range v4AttrPrf.Attributes {
+		val := attr.Value.GetRule()
+		rsrVal := attr.Value
+		if strings.HasPrefix(val, utils.DynamicDataPrefix) {
+			val = val[1:] // remove the DynamicDataPrefix
+			val = utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + val
+			rsrVal, err = config.NewRSRParsers(val, true, config.CgrConfig().GeneralCfg().RSRSep)
+			if err != nil {
+				return nil, err
+			}
+		}
 
-	//return v2Attribute
-	return attrPrf, nil
+		attrPrf.Attributes = append(attrPrf.Attributes, &engine.Attribute{
+			FilterIDs: attr.FilterIDs,
+			Path:      utils.MetaReq + utils.NestingSep + attr.FieldName,
+			Value:     rsrVal,
+			Type:      attr.Type,
+		})
+	}
+	return
 }
 
 type v2Attribute struct {

@@ -259,3 +259,196 @@ func TestV4AttributeProfileAsAttributeProfile(t *testing.T) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(attrPrf), utils.ToJSON(ap))
 	}
 }
+
+func TestAsAttributeProfileV2(t *testing.T) {
+	// contruct the v1 attribute with all fields filled up
+	mapSubstitutes := make(map[string]map[string]*v1Attribute)
+	mapSubstitutes["FL1"] = make(map[string]*v1Attribute)
+	mapSubstitutes["FL1"]["In1"] = &v1Attribute{
+		FieldName:  "FL1",
+		Initial:    "In1",
+		Substitute: "Al1",
+		Append:     true,
+	}
+	v1Attribute := &v1AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "attributeprofile1",
+		Contexts:  []string{utils.MetaSessionS},
+		FilterIDs: []string{"filter1"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2020, 4, 18, 14, 25, 0, 0, time.UTC),
+		},
+		Attributes: mapSubstitutes,
+		Weight:     20,
+	}
+	sbstPrsr, err := config.NewRSRParsers("Al1", true, config.CgrConfig().GeneralCfg().RSRSep)
+	if err != nil {
+		t.Error("Error converting Substitute from string to RSRParser: ", err)
+	}
+	eOut := &v2AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "attributeprofile1",
+		Contexts:  []string{utils.MetaSessionS},
+		FilterIDs: []string{"filter1"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2020, 4, 18, 14, 25, 0, 0, time.UTC),
+		},
+		Attributes: []*v2Attribute{
+			&v2Attribute{
+				FieldName:  "FL1",
+				Initial:    "In1",
+				Substitute: sbstPrsr,
+				Append:     true,
+			},
+		},
+		Weight: 20,
+	}
+
+	if v2Attribute, err := v1Attribute.AsAttributeProfileV2(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eOut, v2Attribute) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToIJSON(v2Attribute))
+	}
+
+}
+
+func TestAsAttributeProfileV3(t *testing.T) {
+	v2Attribute := v2AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "attributeprofile1",
+		Contexts:  []string{utils.MetaSessionS},
+		FilterIDs: []string{"filter1"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2020, 4, 18, 14, 25, 0, 0, time.UTC),
+		},
+		Attributes: []*v2Attribute{
+			&v2Attribute{
+				FieldName:  "FL1",
+				Initial:    "In1",
+				Substitute: config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
+				Append:     true,
+			},
+		},
+		Weight: 20,
+	}
+	eOut := &v3AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "attributeprofile1",
+		Contexts:  []string{utils.MetaSessionS},
+		FilterIDs: []string{"filter1"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2020, 4, 18, 14, 25, 0, 0, time.UTC),
+		},
+		Attributes: []*v3Attribute{
+			&v3Attribute{
+				FilterIDs:  []string{"*string:FL1:In1"}, //here
+				FieldName:  "FL1",
+				Substitute: config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
+			}},
+		Weight: 20,
+	}
+	if v3Attribute, err := v2Attribute.AsAttributeProfileV3(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eOut, v3Attribute) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToIJSON(v3Attribute))
+	}
+}
+
+func TestAsAttributeProfileV4(t *testing.T) {
+	v3Attribute := v3AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "attributeprofile1",
+		Contexts:  []string{utils.MetaSessionS},
+		FilterIDs: []string{"filter1"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2020, 4, 18, 14, 25, 0, 0, time.UTC),
+		},
+		Attributes: []*v3Attribute{
+			&v3Attribute{
+				FilterIDs:  []string{"*string:FL1:In1"},
+				FieldName:  "FL1",
+				Substitute: config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
+			},
+		},
+		Weight: 20,
+	}
+	eOut := &v4AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "attributeprofile1",
+		Contexts:  []string{utils.MetaSessionS},
+		FilterIDs: []string{"filter1"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2020, 4, 18, 14, 25, 0, 0, time.UTC),
+		},
+		Attributes: []*v4Attribute{
+			&v4Attribute{
+				FilterIDs: []string{"*string:FL1:In1"},
+				FieldName: "FL1",
+				Type:      utils.MetaVariable,
+				Value:     config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
+			}},
+
+		Blocker: false,
+		Weight:  20,
+	}
+
+	if v4Attribute, err := v3Attribute.AsAttributeProfileV4(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eOut, v4Attribute) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToIJSON(v4Attribute))
+	}
+}
+
+func TestAsAttributeProfileV5(t *testing.T) {
+	v4Attribute := v4AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "attributeprofile1",
+		Contexts:  []string{utils.MetaSessionS},
+		FilterIDs: []string{"filter1"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2020, 4, 18, 14, 25, 0, 0, time.UTC),
+		},
+		Attributes: []*v4Attribute{
+			&v4Attribute{
+				FilterIDs: []string{"*string:FL1:In1"},
+				FieldName: "FL1",
+				Type:      utils.MetaVariable,
+				Value:     config.NewRSRParsersMustCompile("~Al1", true, utils.INFIELD_SEP),
+			},
+		},
+		Weight: 20,
+	}
+
+	eOut := &engine.AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "attributeprofile1",
+		Contexts:  []string{utils.MetaSessionS},
+		FilterIDs: []string{"filter1"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2020, 4, 18, 14, 25, 0, 0, time.UTC),
+		},
+		Attributes: []*engine.Attribute{
+			&engine.Attribute{
+				FilterIDs: []string{"*string:FL1:In1"},
+				Path:      utils.MetaReq + utils.NestingSep + "FL1",
+				Type:      utils.MetaVariable,
+				Value:     config.NewRSRParsersMustCompile("~*req.Al1", true, utils.INFIELD_SEP),
+			},
+		},
+		Weight: 20,
+	}
+
+	if v5Attribute, err := v4Attribute.AsAttributeProfileV5(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eOut, v5Attribute) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(v5Attribute))
+	}
+}
