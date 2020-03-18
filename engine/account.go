@@ -1237,10 +1237,18 @@ func (as *AccountSummary) FieldAsInterface(fldPath []string) (val interface{}, e
 		}
 		return as.ID, nil
 	case utils.BalanceSummaries:
-		if len(fldPath) != 1 {
-			return nil, utils.ErrNotFound
+		if len(fldPath) == 1 {
+			return as.BalanceSummaries, nil
 		}
-		return as.BalanceSummaries, nil
+		for _, bs := range as.BalanceSummaries {
+			if bs.ID == fldPath[1] {
+				if len(fldPath) == 2 {
+					return bs, nil
+				}
+				return bs.FieldAsInterface(fldPath[2:])
+			}
+		}
+		return nil, utils.ErrNotFound
 	case utils.AllowNegative:
 		if len(fldPath) != 1 {
 			return nil, utils.ErrNotFound
