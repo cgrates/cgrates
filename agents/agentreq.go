@@ -178,17 +178,17 @@ func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 			default:
 				return fmt.Errorf("unsupported field prefix: <%s> when set fields", fldPath[0])
 			case utils.MetaVars:
-				ar.Vars = config.NewNavigableMap(nil)
+				ar.Vars.RemoveAll()
 			case utils.MetaCgreq:
-				ar.CGRRequest = config.NewNavigableMap(nil)
+				ar.CGRRequest.RemoveAll()
 			case utils.MetaCgrep:
-				ar.CGRReply = config.NewNavigableMap(nil)
+				ar.CGRReply.RemoveAll()
 			case utils.MetaRep:
-				ar.Reply = config.NewNavigableMap(nil)
+				ar.Reply.RemoveAll()
 			case utils.MetaDiamreq:
-				ar.diamreq = config.NewNavigableMap(nil)
+				ar.diamreq.RemoveAll()
 			case utils.MetaTmp:
-				ar.tmp = config.NewNavigableMap(nil)
+				ar.tmp.RemoveAll()
 			}
 		default:
 			out, err := ar.ParseField(tplFld)

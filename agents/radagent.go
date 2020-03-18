@@ -87,13 +87,14 @@ func (ra *RadiusAgent) handleAuth(req *radigo.Packet) (rpl *radigo.Packet, err e
 			ra.filterS, nil, nil)
 		agReq.Vars.Set([]string{MetaRadReqType}, utils.StringToInterface(MetaRadAuth), false, true)
 		var lclProcessed bool
-		if lclProcessed, err = ra.processRequest(reqProcessor, agReq, rpl); lclProcessed {
+		if lclProcessed, err = ra.processRequest(req, reqProcessor, agReq); lclProcessed {
 			processed = lclProcessed
 		}
 		if err != nil || (lclProcessed && !reqProcessor.Flags.GetBool(utils.MetaContinue)) {
 			break
 		}
 	}
+
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s> ignoring request: %s",
 			utils.RadiusAgent, err.Error(), utils.ToJSON(req)))
@@ -130,7 +131,7 @@ func (ra *RadiusAgent) handleAcct(req *radigo.Packet) (rpl *radigo.Packet, err e
 				config.CgrConfig().GeneralCfg().DefaultTimezone),
 			ra.filterS, nil, nil)
 		var lclProcessed bool
-		if lclProcessed, err = ra.processRequest(reqProcessor, agReq, rpl); lclProcessed {
+		if lclProcessed, err = ra.processRequest(req, reqProcessor, agReq); lclProcessed {
 			processed = lclProcessed
 		}
 		if err != nil || (lclProcessed && !reqProcessor.Flags.GetBool(utils.MetaContinue)) {
@@ -155,8 +156,8 @@ func (ra *RadiusAgent) handleAcct(req *radigo.Packet) (rpl *radigo.Packet, err e
 }
 
 // processRequest represents one processor processing the request
-func (ra *RadiusAgent) processRequest(reqProcessor *config.RequestProcessor,
-	agReq *AgentRequest, rply *radigo.Packet) (processed bool, err error) {
+func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.RequestProcessor,
+	agReq *AgentRequest) (processed bool, err error) {
 	if pass, err := ra.filterS.Pass(agReq.Tenant,
 		reqProcessor.Filters, agReq); err != nil || !pass {
 		return pass, err
@@ -303,16 +304,18 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RequestProcessor,
 		}
 	case utils.MetaCDRs: // allow this method
 	case utils.MetaRadauth:
-		// To be implemented
-		//// radius pass will be taken from request directly
-		//radiusPass := "CGRateS.org"
-		//userPass, err := agReq.Vars.FieldAsString([]string{utils.UserPassword})
-		//if err != nil {
-		//	return false, err
-		//}
-		//if radiusPass != userPass {
-		//	agReq.CGRReply.Set([]string{utils.Error}, "Failed to authenticate request", false, false)
-		//}
+		// try to get UserPassword from Vars as slice of NMItems
+		nmItems, err := agReq.Vars.FieldAsInterface([]string{utils.UserPassword})
+		if err != nil {
+			return false, err
+		}
+		avps := req.AttributesWithName("User-Password", utils.EmptyString)
+		if len(avps) == 0 {
+			return false, fmt.Errorf("cannot find User-Password  AVP in request")
+		}
+		if string(avps[0].RawValue) != nmItems.([]*config.NMItem)[0].Data {
+			agReq.CGRReply.Set([]string{utils.Error}, "Failed to authenticate request", false, false)
+		}
 	}
 	// separate request so we can capture the Terminate/Event also here
 	if reqProcessor.Flags.HasKey(utils.MetaCDRs) {
@@ -324,6 +327,7 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RequestProcessor,
 			agReq.CGRReply.Set([]string{utils.Error}, err.Error(), false, false)
 		}
 	}
+
 	if err := agReq.SetFields(reqProcessor.ReplyFields); err != nil {
 		return false, err
 	}
@@ -331,12 +335,12 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RequestProcessor,
 	if reqProcessor.Flags.HasKey(utils.MetaLog) {
 		utils.Logger.Info(
 			fmt.Sprintf("<%s> LOG, Radius reply: %s",
-				utils.RadiusAgent, utils.ToIJSON(rply)))
+				utils.RadiusAgent, utils.ToIJSON(agReq.Reply)))
 	}
 	if reqType == utils.MetaDryRun {
 		utils.Logger.Info(
 			fmt.Sprintf("<%s> DRY_RUN, Radius reply: %s",
-				utils.RadiusAgent, utils.ToJSON(rply)))
+				utils.RadiusAgent, utils.ToJSON(agReq.Reply)))
 	}
 	return true, nil
 }

@@ -665,3 +665,9 @@ func (nM *NavigableMap) Remove(path []string) {
 		mp = oData.(map[string]interface{}) // so we can check further down
 	}
 }
+
+// RemoveAll will clean the data and the odrder from NavigableMap
+func (nM *NavigableMap) RemoveAll() {
+	nM.data = make(map[string]interface{})
+	nM.order = make([][]string, 0)
+}

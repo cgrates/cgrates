@@ -709,8 +709,6 @@ const (
 	FileName                  = "FileName"
 	MetaRadauth               = "*radauth"
 	UserPassword              = "UserPassword"
-	RadiusPassword            = "RadiusPassword"
-	CHAPPassword              = "CHAP-Password"
 )
 
 // Migrator Action
