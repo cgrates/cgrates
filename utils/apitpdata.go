@@ -650,7 +650,6 @@ type AttrLoadTpFromFolder struct {
 	FolderPath    string // Take files from folder absolute path
 	DryRun        bool   // Do not write to database but parse only
 	Validate      bool   // Run structural checks on data
-	Recursive     bool   // load data recursive
 	ArgDispatcher *ArgDispatcher
 	Caching       *string
 }

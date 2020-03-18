@@ -86,7 +86,6 @@ var (
 		"When true will not save loaded data to dataDb but just parse it for consistency and errors.")
 	fieldSep = cgrLoaderFlags.String("field_sep", ",",
 		`Separator for csv file (by default "," is used)`)
-	recursive = cgrLoaderFlags.Bool("recursive", false, "Loads data from folder recursive.")
 
 	importID       = cgrLoaderFlags.String("import_id", "", "Uniquely identify an import/load, postpended to some automatic fields")
 	timezone       = cgrLoaderFlags.String("timezone", "", `Timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>`)
@@ -304,7 +303,7 @@ func main() {
 			log.Fatal(err)
 		}
 	} else {
-		loader = engine.NewFileCSVStorage(ldrCfg.LoaderCgrCfg().FieldSeparator, *dataPath, *recursive)
+		loader = engine.NewFileCSVStorage(ldrCfg.LoaderCgrCfg().FieldSeparator, *dataPath)
 	}
 
 	tpReader, err := engine.NewTpReader(dm.DataDB(), loader, ldrCfg.LoaderCgrCfg().TpID,

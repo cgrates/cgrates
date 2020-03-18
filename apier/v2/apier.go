@@ -112,7 +112,7 @@ func (apiv2 *APIerSv2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder
 		return utils.ErrInvalidPath
 	}
 	loader, err := engine.NewTpReader(apiv2.DataManager.DataDB(),
-		engine.NewFileCSVStorage(utils.CSV_SEP, attrs.FolderPath, attrs.Recursive), "", apiv2.Config.GeneralCfg().DefaultTimezone,
+		engine.NewFileCSVStorage(utils.CSV_SEP, attrs.FolderPath), "", apiv2.Config.GeneralCfg().DefaultTimezone,
 		apiv2.Config.ApierCfg().CachesConns, apiv2.Config.ApierCfg().SchedulerConns)
 	if err != nil {
 		return utils.NewErrServerError(err)
