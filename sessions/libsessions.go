@@ -44,6 +44,7 @@ type BiRPClient interface {
 	Call(serviceMethod string, args interface{}, reply interface{}) error
 	V1DisconnectSession(args utils.AttrDisconnectSession, reply *string) (err error)
 	V1GetActiveSessionIDs(ignParam string, sessionIDs *[]*SessionID) (err error)
+	V1SendRAR(originID string, reply *string) (err error)
 }
 
 // getSessionTTL retrieves SessionTTL setting out of ev

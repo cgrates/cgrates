@@ -33,6 +33,7 @@ type DiameterAgentCfg struct {
 	ConcurrentReqs    int // limit the maximum number of requests processed
 	SyncedConnReqs    bool
 	ASRTemplate       string
+	RARTemplate       string
 	Templates         map[string][]*FCTemplate
 	RequestProcessors []*RequestProcessor
 }
@@ -84,6 +85,9 @@ func (da *DiameterAgentCfg) loadFromJsonCfg(jsnCfg *DiameterAgentJsonCfg, separa
 	}
 	if jsnCfg.Asr_template != nil {
 		da.ASRTemplate = *jsnCfg.Asr_template
+	}
+	if jsnCfg.Rar_template != nil {
+		da.RARTemplate = *jsnCfg.Rar_template
 	}
 	if jsnCfg.Templates != nil {
 		if da.Templates == nil {

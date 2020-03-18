@@ -439,3 +439,8 @@ func (sm *FSsessions) Reload() {
 	sm.conns = make([]*fsock.FSock, len(sm.cfg.EventSocketConns))
 	sm.senderPools = make([]*fsock.FSockPool, len(sm.cfg.EventSocketConns))
 }
+
+// V1SendRAR is used to implement the sessions.BiRPClient interface
+func (*FSsessions) V1SendRAR(originID string, reply *string) (err error) {
+	return utils.ErrNotImplemented
+}

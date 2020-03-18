@@ -750,6 +750,7 @@ const (
 	MetaSum      = "*sum"
 	MetaAverage  = "*average"
 	MetaDistinct = "*distinct"
+	MetaRAR      = "*rar"
 )
 
 // Services
@@ -1355,6 +1356,7 @@ const (
 	SessionSv1ActivateSessions           = "SessionSv1.ActivateSessions"
 	SessionSv1DeactivateSessions         = "SessionSv1.DeactivateSessions"
 	SMGenericV1InitiateSession           = "SMGenericV1.InitiateSession"
+	SessionSv1SendRAR                    = "SessionSv1.SendRAR"
 )
 
 // Responder APIs

@@ -364,3 +364,8 @@ func (sma *AsteriskAgent) V1GetActiveSessionIDs(ignParam string,
 	return nil
 
 }
+
+// V1SendRAR is used to implement the sessions.BiRPClient interface
+func (*AsteriskAgent) V1SendRAR(originID string, reply *string) (err error) {
+	return utils.ErrNotImplemented
+}

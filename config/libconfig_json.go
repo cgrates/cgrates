@@ -313,6 +313,7 @@ type DiameterAgentJsonCfg struct {
 	Concurrent_requests  *int
 	Synced_conn_requests *bool
 	Asr_template         *string
+	Rar_template         *string
 	Templates            map[string][]*FcTemplateJsonCfg
 	Request_processors   *[]*ReqProcessorJsnCfg
 }
