@@ -73,6 +73,8 @@ github.com/cgrates/radigo v0.0.0-20200306160903-17b28bb0e1bb h1:LnoYQFohxLduxNFZ
 github.com/cgrates/radigo v0.0.0-20200306160903-17b28bb0e1bb/go.mod h1:mTCzHAYfgZlRe0HorDz+jy2JTrNvNuKkHBAUjDZBWq8=
 github.com/cgrates/radigo v0.0.0-20200309151443-bb470a5a5c8d h1:4dDI8QG+rkQTNWwsRmeAQWLaofRvVRd3JgG/h4o9VG0=
 github.com/cgrates/radigo v0.0.0-20200309151443-bb470a5a5c8d/go.mod h1:mTCzHAYfgZlRe0HorDz+jy2JTrNvNuKkHBAUjDZBWq8=
+github.com/cgrates/radigo v0.0.0-20200318092814-07da25249ae6 h1:NLRfnSh1TGtCrgxVnpaSOEiwprmf/sQ+aOTM1kiEvaE=
+github.com/cgrates/radigo v0.0.0-20200318092814-07da25249ae6/go.mod h1:mTCzHAYfgZlRe0HorDz+jy2JTrNvNuKkHBAUjDZBWq8=
 github.com/cgrates/rpcclient v0.0.0-20190505150825-8fcc68b2c38b h1:GC+/hEDN/2Frh8Tjkf7u1XFxj0Z2XtwjBxj0OH6Mzhw=
 github.com/cgrates/rpcclient v0.0.0-20190505150825-8fcc68b2c38b/go.mod h1:Jy5Lv0y57OlxlNATKrkyAxgftYLHqXuxONgd4qsAC1U=
 github.com/cgrates/rpcclient v0.0.0-20191115092211-732f09b356e3 h1:Hr038ZfPZz87OKLV4pRSzf3U06lZ8zjl/cXpwrv7hCM=

@@ -58,13 +58,12 @@
 		{
 			"id": "KamailioAuth",
 			"filters": ["*string:~*vars.*radReqType:*radAuth"],
-			"flags": ["*auth", "*accounts","*dispatchers"],
+			"flags": ["*auth", "*attributes", "*accounts", "*continue"],
 			"request_fields":[
 				{"tag": "Category", "path": "*cgreq.Category", "type": "*constant", "value": "call"},
-				// {"tag": "*api_key", "path": "*api_key", "type": "*constant", "value": "ses12345"},
 				{"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*constant",
-					"value": "*prepaid", "mandatory": true},	
-				{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable",
+					"value": "*prepaid", "mandatory": true},
+				{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*composed",
 					"value": "~*req.Acct-Session-Id;-;~*req.Sip-From-Tag", "mandatory": true},
 				{"tag": "Account", "path": "*cgreq.Account", "type": "*variable",
 					"value": "~*req.User-Name", "mandatory": true},
@@ -76,6 +75,8 @@
 					"value": "~*req.Event-Timestamp", "mandatory": true},
 				{"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*variable",
 					"value": "~*req.Event-Timestamp", "mandatory": true},
+				{"tag": "PasswordFromAttributes", "path": "*cgreq.PasswordFromAttributes", "type": "*constant",
+					"value": "*attributes"}
 			],
 			"reply_fields":[
 				{"tag": "MaxUsage", "path": "*rep.SIP-AVP", "type": "*variable",
@@ -83,21 +84,35 @@
 			],
 		},
 		{
+			"id": "RadiusPAPAuth",
+			"filters": ["*string:~*vars.*radReqType:*radAuth","*exists:~*req.User-Password:"],
+			"flags": ["*radauth", "*log"],
+			"request_fields":[
+				{"tag": "UserPassword", "path": "*vars.UserPassword", "type": "*variable",
+					"value": "~*cgrep.Attributes.PasswordFromAttributes"},
+			],
+			"reply_fields":[
+				{"filters": ["*empty:~*cgrep.Error:"], "type": "*none", "blocker": true},
+				{"filters": ["*notempty:~*cgrep.Error:"], "type": "*removeall", "path": "*rep"},
+				{"tag": "Code", "path": "*rep.*radReplyCode", "type": "*constant", "value": "AccessReject"},
+				{"tag": "ReplyMessage", "path": "*rep.Reply-Message", "type": "*variable", "value": "~*cgrep.Error"}
+			]
+		},
+		{
 			"id": "KamailioAccountingStart",
 			"filters": ["*string:~*req.Acct-Status-Type:Start"],
-			"flags": ["*initiate", "*attributes", "*resources", "*accounts","*dispatchers"],
-			"request_fields":[	
+			"flags": ["*initiate", "*attributes", "*resources", "*accounts"],
+			"request_fields":[
 				{"tag": "Category", "path": "*cgreq.Category", "type": "*constant", "value": "call"},
-				// {"tag": "*api_key", "path": "*api_key", "type": "*constant", "value": "ses12345"},
 				{"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*constant",
-					"value": "*prepaid", "mandatory": true},	
-				{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable",
+					"value": "*prepaid", "mandatory": true},
+				{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*composed",
 					"value": "~*req.Acct-Session-Id;-;~*req.Sip-From-Tag;-;~*req.Sip-To-Tag", "mandatory": true},
 				{"tag": "OriginHost", "path": "*cgreq.OriginHost", "type": "*variable",
 					"value": "~*req.NAS-IP-Address", "mandatory": true},
 				{"tag": "Account", "path": "*cgreq.Account", "type": "*variable",
 					"value": "~*req.User-Name", "mandatory": true},
-				{"tag": "Subject", "path": "*cgreq.Subject", "type": "*variable",
+				{"tag": "Subject", "path": "*cgreq.Subject", "type": "*composed",
 					"value": "~*req.User-Name", "mandatory": true},
 				{"tag": "Destination", "path": "*cgreq.Destination", "type": "*variable",
 					"value": "~*req.Called-Station-Id", "mandatory": true},
@@ -112,19 +127,18 @@
 		{
 			"id": "KamailioAccountingStop",
 			"filters": ["*string:~*req.Acct-Status-Type:Stop"],
-			"flags": ["*terminate", "*resources", "*accounts", "*cdrs","*dispatchers"],
-			"request_fields":[	
+			"flags": ["*terminate", "*resources", "*accounts", "*cdrs"],
+			"request_fields":[
 				{"tag": "Category", "path": "*cgreq.Category", "type": "*constant", "value": "call"},
-				// {"tag": "*api_key", "path": "*api_key", "type": "*constant", "value": "ses12345"},
 				{"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*constant",
-					"value": "*prepaid", "mandatory": true},	
-				{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable",
+					"value": "*prepaid", "mandatory": true},
+				{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*composed",
 					"value": "~*req.Acct-Session-Id;-;~*req.Sip-From-Tag;-;~*req.Sip-To-Tag", "mandatory": true},
 				{"tag": "OriginHost", "path": "*cgreq.OriginHost", "type": "*variable",
 					"value": "~*req.NAS-IP-Address", "mandatory": true},
 				{"tag": "Account", "path": "*cgreq.Account", "type": "*variable",
 					"value": "~*req.User-Name", "mandatory": true},
-				{"tag": "Subject", "path": "*cgreq.Subject", "type": "*variable",
+				{"tag": "Subject", "path": "*cgreq.Subject", "type": "*composed",
 					"value": "~*req.User-Name", "mandatory": true},
 				{"tag": "Destination", "path": "*cgreq.Destination", "type": "*variable",
 					"value": "~*req.Called-Station-Id", "mandatory": true},
@@ -138,7 +152,6 @@
 			],
 			"reply_fields":[],
 		},
-		
 	],
 
 },

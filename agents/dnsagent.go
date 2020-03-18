@@ -158,7 +158,6 @@ func (da *DNSAgent) handleMessage(w dns.ResponseWriter, req *dns.Msg) {
 		dnsWriteMsg(w, rply)
 		return
 	}
-	fmt.Println(utils.ToJSON(rply))
 	if err = dnsWriteMsg(w, rply); err != nil { // failed sending, most probably content issue
 		rply = new(dns.Msg)
 		rply.SetReply(req)

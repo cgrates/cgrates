@@ -50,7 +50,8 @@ var (
 		testRAitStartEngine,
 		testRAitApierRpcConn,
 		testRAitTPFromFolder,
-		testRAitAuth,
+		testRAitAuthSuccess,
+		testRAitAuthFail,
 		testRAitAcctStart,
 		testRAitAcctStop,
 		testRAitStopCgrEngine,
@@ -80,7 +81,6 @@ func TestRAit(t *testing.T) {
 	}
 }
 
-/*
 func TestRAitDispatcher(t *testing.T) {
 	if *encoding == utils.MetaGOB {
 		t.SkipNow()
@@ -97,7 +97,7 @@ func TestRAitDispatcher(t *testing.T) {
 	engine.KillEngine(100)
 	isDispatcherActive = false
 }
-*/
+
 func testRAitInitCfg(t *testing.T) {
 	raCfgPath = path.Join(*dataDir, "conf", "samples", raonfigDIR)
 	// Init config first
@@ -192,7 +192,7 @@ func testRadiusitTPLoadData(t *testing.T) {
 	}
 }
 
-func testRAitAuth(t *testing.T) {
+func testRAitAuthSuccess(t *testing.T) {
 	if raAuthClnt, err = radigo.NewClient("udp", "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil); err != nil {
 		t.Fatal(err)
 	}
@@ -200,9 +200,9 @@ func testRAitAuth(t *testing.T) {
 	if err := authReq.AddAVPWithName("User-Name", "1001", ""); err != nil {
 		t.Error(err)
 	}
-	//if err := authReq.AddAVPWithName("User-Password", "CGRateS.org", ""); err != nil {
-	//	t.Error(err)
-	//}
+	if err := authReq.AddAVPWithName("User-Password", "CGRateSPassword1", ""); err != nil {
+		t.Error(err)
+	}
 	if err := authReq.AddAVPWithName("Service-Type", "SIP-Caller-AVPs", ""); err != nil {
 		t.Error(err)
 	}
@@ -231,6 +231,49 @@ func testRAitAuth(t *testing.T) {
 	if len(reply.AVPs) != 1 { // make sure max duration is received
 		t.Errorf("Received AVPs: %+v", reply.AVPs)
 	} else if !reflect.DeepEqual([]byte("session_max_time#10800"), reply.AVPs[0].RawValue) {
+		t.Errorf("Received: %s", string(reply.AVPs[0].RawValue))
+	}
+}
+
+func testRAitAuthFail(t *testing.T) {
+	if raAuthClnt, err = radigo.NewClient("udp", "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil); err != nil {
+		t.Fatal(err)
+	}
+	authReq := raAuthClnt.NewRequest(radigo.AccessRequest, 1) // emulates Kamailio packet out of radius_load_caller_avps()
+	if err := authReq.AddAVPWithName("User-Name", "1001", ""); err != nil {
+		t.Error(err)
+	}
+	if err := authReq.AddAVPWithName("User-Password", "CGRateSPassword2", ""); err != nil {
+		t.Error(err)
+	}
+	if err := authReq.AddAVPWithName("Service-Type", "SIP-Caller-AVPs", ""); err != nil {
+		t.Error(err)
+	}
+	if err := authReq.AddAVPWithName("Called-Station-Id", "1002", ""); err != nil {
+		t.Error(err)
+	}
+	if err := authReq.AddAVPWithName("Acct-Session-Id", "e4921177ab0e3586c37f6a185864b71a@0:0:0:0:0:0:0:0", ""); err != nil {
+		t.Error(err)
+	}
+	if err := authReq.AddAVPWithName("Sip-From-Tag", "51585361", ""); err != nil {
+		t.Error(err)
+	}
+	if err := authReq.AddAVPWithName("NAS-IP-Address", "127.0.0.1", ""); err != nil {
+		t.Error(err)
+	}
+	if err := authReq.AddAVPWithName("Event-Timestamp", "1497106115", ""); err != nil {
+		t.Error(err)
+	}
+	reply, err := raAuthClnt.SendRequest(authReq)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if reply.Code != radigo.AccessReject {
+		t.Errorf("Received reply: %+v", reply)
+	}
+	if len(reply.AVPs) != 1 { // make sure max duration is received
+		t.Errorf("Received AVPs: %+v", reply.AVPs)
+	} else if !reflect.DeepEqual([]byte("Failed to authenticate request"), reply.AVPs[0].RawValue) {
 		t.Errorf("Received: %s", string(reply.AVPs[0].RawValue))
 	}
 }
@@ -273,7 +316,7 @@ func testRAitAcctStart(t *testing.T) {
 	if err := req.AddAVPWithName("Ascend-User-Acct-Time", "1497106115", ""); err != nil {
 		t.Error(err)
 	}
-	if err := req.AddAVPWithName("NAS-Port-Id", "5060", ""); err != nil {
+	if err := req.AddAVPWithName("NAS-Port", "5060", ""); err != nil {
 		t.Error(err)
 	}
 	if err := req.AddAVPWithName("Acct-Delay-Time", "0", ""); err != nil {
@@ -349,7 +392,7 @@ func testRAitAcctStop(t *testing.T) {
 	if err := req.AddAVPWithName("Ascend-User-Acct-Time", "1497106115", ""); err != nil {
 		t.Error(err)
 	}
-	if err := req.AddAVPWithName("NAS-Port-Id", "5060", ""); err != nil {
+	if err := req.AddAVPWithName("NAS-Port", "5060", ""); err != nil {
 		t.Error(err)
 	}
 	if err := req.AddAVPWithName("Acct-Delay-Time", "0", ""); err != nil {

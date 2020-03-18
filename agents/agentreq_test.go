@@ -1734,7 +1734,7 @@ func TestAgReqSetFieldsWithRemove(t *testing.T) {
 	eMpRemove = config.NewNavigableMap(nil)
 	if err := agReq.SetFields(tplFldsRemove); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(agReq.Reply, eMpRemove) {
+	} else if !reflect.DeepEqual(agReq.Reply.Values(), eMpRemove.Values()) {
 		t.Errorf("expecting: %+v,\n received: %+v", eMpRemove, agReq.Reply)
 	}
 }

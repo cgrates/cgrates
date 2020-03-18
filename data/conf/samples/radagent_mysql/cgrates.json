@@ -69,7 +69,7 @@
 		{
 			"id": "KamailioAuth",
 			"filters": ["*string:~*vars.*radReqType:*radAuth"],
-			"flags": ["*auth", "*accounts"],
+			"flags": ["*auth", "*attributes", "*accounts", "*continue"],
 			"request_fields":[
 				{"tag": "Category", "path": "*cgreq.Category", "type": "*constant", "value": "call"},
 				{"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*constant",
@@ -86,11 +86,28 @@
 					"value": "~*req.Event-Timestamp", "mandatory": true},
 				{"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*variable",
 					"value": "~*req.Event-Timestamp", "mandatory": true},
+				{"tag": "PasswordFromAttributes", "path": "*cgreq.PasswordFromAttributes", "type": "*constant",
+					"value": "*attributes"}
 			],
 			"reply_fields":[
 				{"tag": "MaxUsage", "path": "*rep.SIP-AVP", "type": "*variable",
 					"value": "session_max_time#;~*cgrep.MaxUsage{*duration_seconds}", "mandatory": true},
 			],
+		},
+		{
+			"id": "RadiusPAPAuth",
+			"filters": ["*string:~*vars.*radReqType:*radAuth","*exists:~*req.User-Password:"],
+			"flags": ["*radauth", "*log"],
+			"request_fields":[
+				{"tag": "UserPassword", "path": "*vars.UserPassword", "type": "*variable",
+					"value": "~*cgrep.Attributes.PasswordFromAttributes"},
+			],
+			"reply_fields":[
+				{"filters": ["*empty:~*cgrep.Error:"], "type": "*none", "blocker": true},
+				{"filters": ["*notempty:~*cgrep.Error:"], "type": "*removeall", "path": "*rep"},
+				{"tag": "Code", "path": "*rep.*radReplyCode", "type": "*constant", "value": "AccessReject"},
+				{"tag": "ReplyMessage", "path": "*rep.Reply-Message", "type": "*variable", "value": "~*cgrep.Error"}
+			]
 		},
 		{
 			"id": "KamailioAccountingStart",
@@ -145,7 +162,7 @@
 				{"tag": "RemoteAddr" , "path": "*cgreq.RemoteAddr", "type": "*remote_host"},
 			],
 			"reply_fields":[],
-		},
+		}
 	]
 },
 
