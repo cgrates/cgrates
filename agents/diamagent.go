@@ -23,19 +23,22 @@ import (
 	"net"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/fiorix/go-diameter/diam"
+	"github.com/fiorix/go-diameter/diam/avp"
 	"github.com/fiorix/go-diameter/diam/datatype"
+	"github.com/fiorix/go-diameter/diam/dict"
 	"github.com/fiorix/go-diameter/diam/sm"
 )
 
 func NewDiameterAgent(cgrCfg *config.CGRConfig, filterS *engine.FilterS,
 	connMgr *engine.ConnManager) (*DiameterAgent, error) {
-	da := &DiameterAgent{cgrCfg: cgrCfg, filterS: filterS, connMgr: connMgr}
+	da := &DiameterAgent{cgrCfg: cgrCfg, filterS: filterS, connMgr: connMgr, raa: make(map[string]chan *diam.Message)}
 	dictsPath := cgrCfg.DiameterAgentCfg().DictionariesPath
 	if len(dictsPath) != 0 {
 		if err := loadDictionaries(dictsPath, utils.DiameterAgent); err != nil {
@@ -65,6 +68,8 @@ type DiameterAgent struct {
 	connMgr  *engine.ConnManager
 	aReqs    int
 	aReqsLck sync.RWMutex
+	raa      map[string]chan *diam.Message
+	raaLck   sync.RWMutex
 }
 
 // ListenAndServe is called when DiameterAgent is started, usually from within cmd/cgr-engine
@@ -108,8 +113,10 @@ func (da *DiameterAgent) handlers() diam.Handler {
 	dSM := sm.New(settings)
 	if da.cgrCfg.DiameterAgentCfg().SyncedConnReqs {
 		dSM.HandleFunc("ALL", da.handleMessage)
+		dSM.HandleFunc("RA", da.handleRAA)
 	} else {
 		dSM.HandleFunc("ALL", da.handleMessageAsync)
+		dSM.HandleFunc("RAA", func(c diam.Conn, m *diam.Message) { go da.handleRAA(c, m) })
 	}
 
 	go func() {
@@ -508,7 +515,7 @@ func (da *DiameterAgent) V1SendRAR(originID string, reply *string) (err error) {
 				utils.DiameterAgent, originID, err.Error()))
 		return utils.ErrServerError
 	}
-	m := diam.NewRequest(dmd.m.Header.CommandCode,
+	m := diam.NewRequest(diam.ReAuth,
 		dmd.m.Header.ApplicationID, dmd.m.Dictionary())
 	if err = updateDiamMsgFromNavMap(m, aReq.diamreq,
 		da.cgrCfg.GeneralCfg().DefaultTimezone); err != nil {
@@ -517,9 +524,55 @@ func (da *DiameterAgent) V1SendRAR(originID string, reply *string) (err error) {
 				utils.DiameterAgent, originID, err.Error()))
 		return utils.ErrServerError
 	}
+	raaCh := make(chan *diam.Message, 1)
+	da.raaLck.Lock()
+	da.raa[originID] = raaCh
+	da.raaLck.Unlock()
+	defer func() {
+		da.raaLck.Lock()
+		delete(da.raa, originID)
+		da.raaLck.Unlock()
+	}()
 	if err = writeOnConn(dmd.c, m); err != nil {
 		return utils.ErrServerError
 	}
+	select {
+	case raa := <-raaCh:
+		var avps []*diam.AVP
+		if avps, err = raa.FindAVPsWithPath([]interface{}{"Result-Code"}, dict.UndefinedVendorID); err != nil {
+			return
+		}
+		if len(avps) == 0 {
+			return fmt.Errorf("Missing AVP")
+		}
+		var resCode string
+		if resCode, err = diamAVPAsString(avps[0]); err != nil {
+			return
+		}
+		if resCode != "2001" {
+			return fmt.Errorf("Wrong result code: <%s>", resCode)
+		}
+	case <-time.After(10 * time.Second):
+		return utils.ErrTimedOut
+	}
 	*reply = utils.OK
 	return
+}
+
+func (da *DiameterAgent) handleRAA(c diam.Conn, m *diam.Message) {
+	avp, err := m.FindAVP(avp.SessionID, dict.UndefinedVendorID)
+	if err != nil {
+		return
+	}
+	originID, err := diamAVPAsString(avp)
+	if err != nil {
+		return
+	}
+	da.raaLck.Lock()
+	ch, has := da.raa[originID]
+	da.raaLck.Unlock()
+	if !has {
+		return
+	}
+	ch <- m
 }

@@ -3641,7 +3641,12 @@ func (sS *SessionS) BiRPCv1SendRAR(clnt rpcclient.ClientConnector,
 	if len(aSs) == 0 {
 		return utils.ErrNotFound
 	}
+	cache := utils.NewStringSet(nil)
 	for _, as := range aSs {
+		if cache.Has(as.CGRID) {
+			continue
+		}
+		cache.Add(as.CGRID)
 		ss := sS.getSessions(as.CGRID, false)
 		if len(ss) == 0 {
 			continue

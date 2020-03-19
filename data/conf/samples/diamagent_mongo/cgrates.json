@@ -62,6 +62,7 @@
 "diameter_agent": {
 	"enabled": true,
 	"asr_template": "*asr",
+	"rar_template": "*rar",
 },
 
 "apiers": {
