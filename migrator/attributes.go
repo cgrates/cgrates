@@ -142,6 +142,32 @@ func (m *Migrator) migrateV1ToV2Attributes() (v2Attr []*v2AttributeProfile, err 
 	return
 }
 
+func (m *Migrator) migrateV1ToV4Attributes() (v4Attr []*v4AttributeProfile, err error) {
+	var v1Attr *v1AttributeProfile
+	var attr *v4AttributeProfile
+	for {
+		v1Attr, err = m.dmIN.getV1AttributeProfile()
+		if err != nil && err != utils.ErrNoMoreData {
+			return nil, err
+		}
+		if err == utils.ErrNoMoreData {
+			break
+		}
+		if v1Attr == nil {
+			continue
+		}
+		attr, err = v1Attr.AsAttributeProfileV1To4()
+		if err != nil {
+			return nil, err
+		}
+		v4Attr = append(v4Attr, attr)
+		if m.dryRun {
+			continue
+		}
+	}
+	return
+}
+
 func (m *Migrator) migrateV2Attributes() (err error) {
 	var v2Attr *v2AttributeProfile
 	for {
@@ -421,26 +447,32 @@ func (m *Migrator) migrateAttributeProfileV2() (err error) {
 	var v4Attr []*v4AttributeProfile
 	var v5Attr []*engine.AttributeProfile
 
-	switch vrs[utils.Attributes] {
-	case 1: // Migrate from V1 to V2
-		if v2Attr, err = m.migrateV1ToV2Attributes(); err != nil {
-			return err
+	for {
+		switch vrs[utils.Attributes] {
+		case 1: // Migrate from V1 to V4
+			if v4Attr, err = m.migrateV1ToV4Attributes(); err != nil {
+				return err
+			}
+			vrs[utils.Attributes] = 4
+		case 2: // Migrate from V2 to V3 (fallthrough untill latest version)
+			if v3Attr, err = m.migrateV2ToV3Attributes(v2Attr); err != nil {
+				return err
+			}
+			fallthrough
+		case 3: // Migrate from V3 to V4
+			if v4Attr, err = m.migrateV3ToV4Attributes(v3Attr); err != nil {
+				return err
+			}
+			fallthrough
+		case 4: // Migrate from V4 to V5
+			if v5Attr, err = m.migrateV4ToV5Attributes(v4Attr); err != nil {
+				return err
+			}
+			fallthrough
+		default:
+			break
 		}
-		fallthrough
-	case 2: // Migrate from V2 to V3
-		if v3Attr, err = m.migrateV2ToV3Attributes(v2Attr); err != nil {
-			return err
-		}
-		fallthrough
-	case 3: // Migrate from V3 to V4
-		if v4Attr, err = m.migrateV3ToV4Attributes(v3Attr); err != nil {
-			return err
-		}
-		fallthrough
-	case 4: // Migrate from V4 to V5
-		if v5Attr, err = m.migrateV4ToV5Attributes(v4Attr); err != nil {
-			return err
-		}
+
 	}
 	for _, attr := range v5Attr {
 		if err := m.dmOut.DataManager().SetAttributeProfile(attr, true); err != nil {
@@ -546,6 +578,45 @@ func (v2AttrPrf v2AttributeProfile) AsAttributeProfileV3() (attrPrf *v3Attribute
 			FieldName:  attr.FieldName,
 			Substitute: attr.Substitute,
 		})
+	}
+	return
+}
+
+func (v1AttrPrf v1AttributeProfile) AsAttributeProfileV1To4() (attrPrf *v4AttributeProfile, err error) {
+	attrPrf = &v4AttributeProfile{
+		Tenant:             v1AttrPrf.Tenant,
+		ID:                 v1AttrPrf.ID,
+		Contexts:           v1AttrPrf.Contexts,
+		FilterIDs:          v1AttrPrf.FilterIDs,
+		ActivationInterval: v1AttrPrf.ActivationInterval,
+		Weight:             v1AttrPrf.Weight,
+		Blocker:            false,
+	}
+	for _, mp := range v1AttrPrf.Attributes {
+		for _, attr := range mp {
+			// Create FilterIDs []string
+			filterIDs := make([]string, 0)
+			//append false translate to  if FieldName exist do stuff
+			if attr.Append == false {
+				filterIDs = append(filterIDs, utils.MetaExists+":"+attr.FieldName+":")
+			}
+			//Initial not *any translate to if value of fieldName = initial do stuff
+			if attr.Initial != utils.META_ANY {
+				filterIDs = append(filterIDs, utils.MetaString+":"+attr.FieldName+":"+attr.Initial)
+			}
+			// create RSRParser
+			sbstPrsr, err := config.NewRSRParsers(attr.Substitute, true, config.CgrConfig().GeneralCfg().RSRSep)
+			if err != nil {
+				return nil, err
+			}
+
+			attrPrf.Attributes = append(attrPrf.Attributes, &v4Attribute{
+				FilterIDs: filterIDs,
+				FieldName: attr.FieldName,
+				Type:      utils.MetaVariable,
+				Value:     sbstPrsr,
+			})
+		}
 	}
 	return
 }
