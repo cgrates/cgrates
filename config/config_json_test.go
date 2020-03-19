@@ -757,6 +757,7 @@ func TestDiameterAgentJsonCfg(t *testing.T) {
 		Synced_conn_requests: utils.BoolPointer(false),
 		Asr_template:         utils.StringPointer(""),
 		Rar_template:         utils.StringPointer(""),
+		Disconnect_method:    utils.StringPointer(utils.MetaASR),
 		Templates: map[string][]*FcTemplateJsonCfg{
 			utils.MetaErr: {
 				{

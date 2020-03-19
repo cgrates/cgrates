@@ -415,7 +415,8 @@ const CGRATES_CFG_JSON = `
 	"concurrent_requests": -1,									// limit the number of active requests processed by the server <-1|0-n>
 	"synced_conn_requests": false,								// process one request at the time per connection
 	"asr_template": "",											// enable AbortSession message being sent to client on DisconnectSession
-	"rar_template": "",											// for building the RAR 
+	"rar_template": "",											// template used to build the Re-Auth-Request
+	"disconnect_method": "*asr",								// the request to send to diameter on DisconnectSession <*asr|*rar>
 	"templates":{												// default message templates
 		"*err": [
 				{"tag": "SessionId", "path": "*rep.Session-Id", "type": "*variable",

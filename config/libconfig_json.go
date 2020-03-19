@@ -314,6 +314,7 @@ type DiameterAgentJsonCfg struct {
 	Synced_conn_requests *bool
 	Asr_template         *string
 	Rar_template         *string
+	Disconnect_method    *string
 	Templates            map[string][]*FcTemplateJsonCfg
 	Request_processors   *[]*ReqProcessorJsnCfg
 }

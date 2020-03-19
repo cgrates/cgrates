@@ -441,11 +441,29 @@ func (da *DiameterAgent) V1DisconnectSession(args utils.AttrDisconnectSession, r
 				utils.DiameterAgent, utils.ToJSON(args.EventStart)))
 		return utils.ErrMandatoryIeMissing
 	}
-	msg, has := engine.Cache.Get(utils.CacheDiameterMessages, ssID.(string))
+	originID := ssID.(string)
+	switch da.cgrCfg.DiameterAgentCfg().DisconnectMethod {
+	case utils.MetaASR:
+		return da.sendASR(originID, reply)
+	case utils.MetaRAR:
+		return da.V1SendRAR(originID, reply)
+	default:
+		return fmt.Errorf("Unsupported request type <%s>", da.cgrCfg.DiameterAgentCfg().DisconnectMethod)
+	}
+}
+
+// V1GetActiveSessionIDs is part of the sessions.BiRPClient
+func (da *DiameterAgent) V1GetActiveSessionIDs(ignParam string,
+	sessionIDs *[]*sessions.SessionID) error {
+	return utils.ErrNotImplemented
+}
+
+func (da *DiameterAgent) sendASR(originID string, reply *string) (err error) {
+	msg, has := engine.Cache.Get(utils.CacheDiameterMessages, originID)
 	if !has {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> cannot retrieve message from cache with OriginID: <%s>",
-				utils.DiameterAgent, ssID))
+				utils.DiameterAgent, originID))
 		return utils.ErrMandatoryIeMissing
 	}
 	dmd := msg.(*diamMsgData)
@@ -460,7 +478,7 @@ func (da *DiameterAgent) V1DisconnectSession(args utils.AttrDisconnectSession, r
 	if err = aReq.SetFields(da.cgrCfg.DiameterAgentCfg().Templates[da.cgrCfg.DiameterAgentCfg().ASRTemplate]); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> cannot disconnect session with OriginID: <%s>, err: %s",
-				utils.DiameterAgent, ssID, err.Error()))
+				utils.DiameterAgent, originID, err.Error()))
 		return utils.ErrServerError
 	}
 	m := diam.NewRequest(dmd.m.Header.CommandCode,
@@ -469,7 +487,7 @@ func (da *DiameterAgent) V1DisconnectSession(args utils.AttrDisconnectSession, r
 		da.cgrCfg.GeneralCfg().DefaultTimezone); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> cannot disconnect session with OriginID: <%s>, err: %s",
-				utils.DiameterAgent, ssID, err.Error()))
+				utils.DiameterAgent, originID, err.Error()))
 		return utils.ErrServerError
 	}
 	if err = writeOnConn(dmd.c, m); err != nil {
@@ -477,12 +495,6 @@ func (da *DiameterAgent) V1DisconnectSession(args utils.AttrDisconnectSession, r
 	}
 	*reply = utils.OK
 	return
-}
-
-// V1GetActiveSessionIDs is part of the sessions.BiRPClient
-func (da *DiameterAgent) V1GetActiveSessionIDs(ignParam string,
-	sessionIDs *[]*sessions.SessionID) error {
-	return utils.ErrNotImplemented
 }
 
 // V1SendRAR  sends a rar meseage to diameter client
