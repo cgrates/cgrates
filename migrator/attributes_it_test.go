@@ -744,7 +744,7 @@ func testAttrITV1ToV4(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "attributeprofile1",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"filter1"},
+		FilterIDs: []string{"*string:test:test"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			ExpiryTime:     time.Date(2020, 4, 18, 14, 25, 0, 0, time.UTC),
@@ -752,19 +752,23 @@ func testAttrITV1ToV4(t *testing.T) {
 		Attributes: mapSubstitutes,
 		Weight:     20,
 	}
+
+	//set attribute into inDB
+	attrMigrator.dmIN.setV1AttributeProfile(v1Attribute)
+	//set attributes version into DB
+	if err := attrMigrator.dmIN.DataManager().DataDB().SetVersions(engine.Versions{utils.Attributes: 1}, true); err != nil {
+		t.Errorf("error: <%s> when updating Attributes version into dataDB", err.Error())
+	}
+
 	sbstPrsr, err := config.NewRSRParsers("Al1", true, config.CgrConfig().GeneralCfg().RSRSep)
 	if err != nil {
 		t.Error("Error converting Substitute from string to RSRParser: ", err)
 	}
-
-	//set attribute into inDB
-	attrMigrator.dmIN.setV1AttributeProfile(v1Attribute)
-
 	eOut := &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "attributeprofile1",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"filter1"},
+		FilterIDs: []string{"*string:test:test"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			ExpiryTime:     time.Date(2020, 4, 18, 14, 25, 0, 0, time.UTC),
@@ -772,7 +776,7 @@ func testAttrITV1ToV4(t *testing.T) {
 		Attributes: []*engine.Attribute{
 			&engine.Attribute{
 				FilterIDs: []string{"*string:FL1:In1"},
-				Path:      "test",
+				Path:      utils.MetaReq + utils.NestingSep + "FL1",
 				Type:      utils.MetaVariable,
 				Value:     sbstPrsr,
 			}},
