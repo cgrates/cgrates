@@ -18,6 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
+import "encoding/json"
+
 // General config section
 type GeneralJsonCfg struct {
 	Node_id              *string
@@ -497,12 +499,13 @@ type DispatcherSJsonCfg struct {
 }
 
 type LoaderCfgJson struct {
-	Tpid            *string
-	Data_path       *string
-	Disable_reverse *bool
-	Field_separator *string
-	Caches_conns    *[]string
-	Scheduler_conns *[]string
+	Tpid             *string
+	Data_path        *string
+	Disable_reverse  *bool
+	Field_separator  *string
+	Caches_conns     *[]string
+	Scheduler_conns  *[]string
+	Gapi_credentials *json.RawMessage
 }
 
 type MigratorCfgJson struct {

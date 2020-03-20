@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"encoding/json"
 	"path"
 	"reflect"
 	"testing"
@@ -1501,12 +1502,13 @@ func TestCgrCfgJSONDefaultDispatcherSCfg(t *testing.T) {
 
 func TestCgrLoaderCfgDefault(t *testing.T) {
 	eLdrCfg := &LoaderCgrCfg{
-		TpID:           "",
-		DataPath:       "./",
-		DisableReverse: false,
-		FieldSeparator: rune(utils.CSV_SEP),
-		CachesConns:    []string{utils.MetaLocalHost},
-		SchedulerConns: []string{utils.MetaLocalHost},
+		TpID:            "",
+		DataPath:        "./",
+		DisableReverse:  false,
+		FieldSeparator:  rune(utils.CSV_SEP),
+		CachesConns:     []string{utils.MetaLocalHost},
+		SchedulerConns:  []string{utils.MetaLocalHost},
+		GapiCredentials: json.RawMessage(`".gapi/credentials.json"`),
 	}
 	if !reflect.DeepEqual(cgrCfg.LoaderCgrCfg(), eLdrCfg) {
 		t.Errorf("received: %+v, expecting: %+v", utils.ToJSON(cgrCfg.LoaderCgrCfg()), utils.ToJSON(eLdrCfg))

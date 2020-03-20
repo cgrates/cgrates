@@ -788,13 +788,14 @@ const CGRATES_CFG_JSON = `
 },
 
 
-"loader": {									// loader for tariff plans out of .csv files
-	"tpid": "",								// tariff plan identificator
-	"data_path": "./",						// path towards tariff plan files
-	"disable_reverse": false,				// disable reverse computing
-	"field_separator": ",",					// separator used in case of csv files
+"loader": {											// loader for tariff plans out of .csv files
+	"tpid": "",										// tariff plan identificator
+	"data_path": "./",								// path towards tariff plan files
+	"disable_reverse": false,						// disable reverse computing
+	"field_separator": ",",							// separator used in case of csv files
 	"caches_conns":["*localhost"],
 	"scheduler_conns": ["*localhost"],
+	"gapi_credentials": ".gapi/credentials.json" 	// the path to the credentials for google API or the credentials.json file content
 },
 
 
