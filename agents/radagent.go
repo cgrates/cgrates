@@ -304,16 +304,9 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 		}
 	case utils.MetaCDRs: // allow this method
 	case utils.MetaRadauth:
-		// try to get UserPassword from Vars as slice of NMItems
-		nmItems, err := agReq.Vars.FieldAsInterface([]string{utils.UserPassword})
-		if err != nil {
+		if ok, err := authReq(req, agReq); err != nil {
 			return false, err
-		}
-		avps := req.AttributesWithName("User-Password", utils.EmptyString)
-		if len(avps) == 0 {
-			return false, fmt.Errorf("cannot find User-Password  AVP in request")
-		}
-		if string(avps[0].RawValue) != nmItems.([]*config.NMItem)[0].Data {
+		} else if !ok {
 			agReq.CGRReply.Set([]string{utils.Error}, "Failed to authenticate request", false, false)
 		}
 	}
