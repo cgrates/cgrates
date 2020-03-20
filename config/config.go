@@ -1237,7 +1237,7 @@ func (*CGRConfig) loadConfigFromReader(rdr io.Reader, loadFuncs []func(jsnCfg *C
 
 // Reads all .json files out of a folder/subfolders and loads them up in lexical order
 func (cfg *CGRConfig) loadConfigFromPath(path string, loadFuncs []func(jsnCfg *CgrJsonCfg) error) (err error) {
-	if isUrl(path) {
+	if utils.IsURL(path) {
 		return cfg.loadConfigFromHTTP(path, loadFuncs) // prefix protocol
 	}
 	var fi os.FileInfo

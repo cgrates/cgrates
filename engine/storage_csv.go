@@ -26,11 +26,13 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"path"
 	"path/filepath"
 	"strings"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"golang.org/x/net/context"
 	"golang.org/x/oauth2"
@@ -38,6 +40,7 @@ import (
 	"google.golang.org/api/sheets/v4"
 )
 
+// CSVStorage the basic csv storage
 type CSVStorage struct {
 	sep       rune
 	generator func() csvReaderCloser
@@ -64,6 +67,7 @@ type CSVStorage struct {
 	dispatcherHostsFn        []string
 }
 
+// NewCSVStorage creates a CSV storege that takes the data from the paths specified
 func NewCSVStorage(sep rune,
 	destinationsFn, timingsFn, ratesFn, destinationratesFn,
 	destinationratetimingsFn, ratingprofilesFn, sharedgroupsFn,
@@ -97,55 +101,57 @@ func NewCSVStorage(sep rune,
 	}
 }
 
+// NewFileCSVStorage returns a csv storage that uses all files from the folder
 func NewFileCSVStorage(sep rune, dataPath string) *CSVStorage {
 	allFoldersPath, err := getAllFolders(dataPath)
 	if err != nil {
 		log.Fatal(err)
 	}
-	destinations_paths := appendName(allFoldersPath, utils.DestinationsCsv)
-	timings_paths := appendName(allFoldersPath, utils.TimingsCsv)
-	rates_paths := appendName(allFoldersPath, utils.RatesCsv)
-	destination_rates_paths := appendName(allFoldersPath, utils.DestinationRatesCsv)
-	rating_plans_paths := appendName(allFoldersPath, utils.RatingPlansCsv)
-	rating_profiles_paths := appendName(allFoldersPath, utils.RatingProfilesCsv)
-	shared_groups_paths := appendName(allFoldersPath, utils.SharedGroupsCsv)
-	actions_paths := appendName(allFoldersPath, utils.ActionsCsv)
-	action_plans_paths := appendName(allFoldersPath, utils.ActionPlansCsv)
-	action_triggers_paths := appendName(allFoldersPath, utils.ActionTriggersCsv)
-	account_actions_paths := appendName(allFoldersPath, utils.AccountActionsCsv)
-	resources_paths := appendName(allFoldersPath, utils.ResourcesCsv)
-	stats_paths := appendName(allFoldersPath, utils.StatsCsv)
-	thresholds_paths := appendName(allFoldersPath, utils.ThresholdsCsv)
-	filters_paths := appendName(allFoldersPath, utils.FiltersCsv)
-	suppliers_paths := appendName(allFoldersPath, utils.SuppliersCsv)
-	attributes_paths := appendName(allFoldersPath, utils.AttributesCsv)
-	chargers_paths := appendName(allFoldersPath, utils.ChargersCsv)
-	dispatcherprofiles_paths := appendName(allFoldersPath, utils.DispatcherProfilesCsv)
-	dispatcherhosts_paths := appendName(allFoldersPath, utils.DispatcherHostsCsv)
+	destinationsPaths := appendName(allFoldersPath, utils.DestinationsCsv)
+	timingsPaths := appendName(allFoldersPath, utils.TimingsCsv)
+	ratesPaths := appendName(allFoldersPath, utils.RatesCsv)
+	destinationRatesPaths := appendName(allFoldersPath, utils.DestinationRatesCsv)
+	ratingPlansPaths := appendName(allFoldersPath, utils.RatingPlansCsv)
+	ratingProfilesPaths := appendName(allFoldersPath, utils.RatingProfilesCsv)
+	sharedGroupsPaths := appendName(allFoldersPath, utils.SharedGroupsCsv)
+	actionsPaths := appendName(allFoldersPath, utils.ActionsCsv)
+	actionPlansPaths := appendName(allFoldersPath, utils.ActionPlansCsv)
+	actionTriggersPaths := appendName(allFoldersPath, utils.ActionTriggersCsv)
+	accountActionsPaths := appendName(allFoldersPath, utils.AccountActionsCsv)
+	resourcesPaths := appendName(allFoldersPath, utils.ResourcesCsv)
+	statsPaths := appendName(allFoldersPath, utils.StatsCsv)
+	thresholdsPaths := appendName(allFoldersPath, utils.ThresholdsCsv)
+	filtersPaths := appendName(allFoldersPath, utils.FiltersCsv)
+	suppliersPaths := appendName(allFoldersPath, utils.SuppliersCsv)
+	attributesPaths := appendName(allFoldersPath, utils.AttributesCsv)
+	chargersPaths := appendName(allFoldersPath, utils.ChargersCsv)
+	dispatcherprofilesPaths := appendName(allFoldersPath, utils.DispatcherProfilesCsv)
+	dispatcherhostsPaths := appendName(allFoldersPath, utils.DispatcherHostsCsv)
 	return NewCSVStorage(sep,
-		destinations_paths,
-		timings_paths,
-		rates_paths,
-		destination_rates_paths,
-		rating_plans_paths,
-		rating_profiles_paths,
-		shared_groups_paths,
-		actions_paths,
-		action_plans_paths,
-		action_triggers_paths,
-		account_actions_paths,
-		resources_paths,
-		stats_paths,
-		thresholds_paths,
-		filters_paths,
-		suppliers_paths,
-		attributes_paths,
-		chargers_paths,
-		dispatcherprofiles_paths,
-		dispatcherhosts_paths,
+		destinationsPaths,
+		timingsPaths,
+		ratesPaths,
+		destinationRatesPaths,
+		ratingPlansPaths,
+		ratingProfilesPaths,
+		sharedGroupsPaths,
+		actionsPaths,
+		actionPlansPaths,
+		actionTriggersPaths,
+		accountActionsPaths,
+		resourcesPaths,
+		statsPaths,
+		thresholdsPaths,
+		filtersPaths,
+		suppliersPaths,
+		attributesPaths,
+		chargersPaths,
+		dispatcherprofilesPaths,
+		dispatcherhostsPaths,
 	)
 }
 
+// NewStringCSVStorage creates a csv storage from strings
 func NewStringCSVStorage(sep rune,
 	destinationsFn, timingsFn, ratesFn, destinationratesFn,
 	destinationratetimingsFn, ratingprofilesFn, sharedgroupsFn,
@@ -165,12 +171,13 @@ func NewStringCSVStorage(sep rune,
 	return c
 }
 
-func NewGoogleCSVStorage(sep rune, spreadsheetId, cfgPath string) (*CSVStorage, error) {
+// NewGoogleCSVStorage creates a csv storege from google sheets
+func NewGoogleCSVStorage(sep rune, spreadsheetID, cfgPath string) (*CSVStorage, error) {
 	sht, err := newSheet(cfgPath)
 	if err != nil {
 		return nil, err
 	}
-	sheetNames, err := getSpreatsheetTabs(spreadsheetId, sht)
+	sheetNames, err := getSpreatsheetTabs(spreadsheetID, sht)
 	if err != nil {
 		return nil, err
 	}
@@ -203,11 +210,139 @@ func NewGoogleCSVStorage(sep rune, spreadsheetId, cfgPath string) (*CSVStorage, 
 		getIfExist(utils.DispatcherHosts))
 	c.generator = func() csvReaderCloser {
 		return &csvGoogle{
-			spreadsheetId: spreadsheetId,
+			spreadsheetID: spreadsheetID,
 			srv:           sht,
 		}
 	}
 	return c, nil
+}
+
+// NewURLCSVStorage returns a CSVStorage that can parse URLs
+func NewURLCSVStorage(sep rune, dataPath string) *CSVStorage {
+	var destinationsPaths []string
+	var timingsPaths []string
+	var ratesPaths []string
+	var destinationRatesPaths []string
+	var ratingPlansPaths []string
+	var ratingProfilesPaths []string
+	var sharedGroupsPaths []string
+	var actionsPaths []string
+	var actionPlansPaths []string
+	var actionTriggersPaths []string
+	var accountActionsPaths []string
+	var resourcesPaths []string
+	var statsPaths []string
+	var thresholdsPaths []string
+	var filtersPaths []string
+	var suppliersPaths []string
+	var attributesPaths []string
+	var chargersPaths []string
+	var dispatcherprofilesPaths []string
+	var dispatcherhostsPaths []string
+
+	for _, baseURL := range strings.Split(dataPath, utils.INFIELD_SEP) {
+		if !strings.HasSuffix(baseURL, utils.CSVSuffix) {
+			destinationsPaths = append(destinationsPaths, joinURL(baseURL, utils.DestinationsCsv))
+			timingsPaths = append(timingsPaths, joinURL(baseURL, utils.TimingsCsv))
+			ratesPaths = append(ratesPaths, joinURL(baseURL, utils.RatesCsv))
+			destinationRatesPaths = append(destinationRatesPaths, joinURL(baseURL, utils.DestinationRatesCsv))
+			ratingPlansPaths = append(ratingPlansPaths, joinURL(baseURL, utils.RatingPlansCsv))
+			ratingProfilesPaths = append(ratingProfilesPaths, joinURL(baseURL, utils.RatingProfilesCsv))
+			sharedGroupsPaths = append(sharedGroupsPaths, joinURL(baseURL, utils.SharedGroupsCsv))
+			actionsPaths = append(actionsPaths, joinURL(baseURL, utils.ActionsCsv))
+			actionPlansPaths = append(actionPlansPaths, joinURL(baseURL, utils.ActionPlansCsv))
+			actionTriggersPaths = append(actionTriggersPaths, joinURL(baseURL, utils.ActionTriggersCsv))
+			accountActionsPaths = append(accountActionsPaths, joinURL(baseURL, utils.AccountActionsCsv))
+			resourcesPaths = append(resourcesPaths, joinURL(baseURL, utils.ResourcesCsv))
+			statsPaths = append(statsPaths, joinURL(baseURL, utils.StatsCsv))
+			thresholdsPaths = append(thresholdsPaths, joinURL(baseURL, utils.ThresholdsCsv))
+			filtersPaths = append(filtersPaths, joinURL(baseURL, utils.FiltersCsv))
+			suppliersPaths = append(suppliersPaths, joinURL(baseURL, utils.SuppliersCsv))
+			attributesPaths = append(attributesPaths, joinURL(baseURL, utils.AttributesCsv))
+			chargersPaths = append(chargersPaths, joinURL(baseURL, utils.ChargersCsv))
+			dispatcherprofilesPaths = append(dispatcherprofilesPaths, joinURL(baseURL, utils.DispatcherProfilesCsv))
+			dispatcherhostsPaths = append(dispatcherhostsPaths, joinURL(baseURL, utils.DispatcherHostsCsv))
+			continue
+		}
+		switch {
+		case strings.HasSuffix(baseURL, utils.DestinationsCsv):
+			destinationsPaths = append(destinationsPaths, baseURL)
+		case strings.HasSuffix(baseURL, utils.TimingsCsv):
+			timingsPaths = append(timingsPaths, baseURL)
+		case strings.HasSuffix(baseURL, utils.RatesCsv):
+			ratesPaths = append(ratesPaths, baseURL)
+		case strings.HasSuffix(baseURL, utils.DestinationRatesCsv):
+			destinationRatesPaths = append(destinationRatesPaths, baseURL)
+		case strings.HasSuffix(baseURL, utils.RatingPlansCsv):
+			ratingPlansPaths = append(ratingPlansPaths, baseURL)
+		case strings.HasSuffix(baseURL, utils.RatingProfilesCsv):
+			ratingProfilesPaths = append(ratingProfilesPaths, baseURL)
+		case strings.HasSuffix(baseURL, utils.SharedGroupsCsv):
+			sharedGroupsPaths = append(sharedGroupsPaths, baseURL)
+		case strings.HasSuffix(baseURL, utils.ActionsCsv):
+			actionsPaths = append(actionsPaths, baseURL)
+		case strings.HasSuffix(baseURL, utils.ActionPlansCsv):
+			actionPlansPaths = append(actionPlansPaths, baseURL)
+		case strings.HasSuffix(baseURL, utils.ActionTriggersCsv):
+			actionTriggersPaths = append(actionTriggersPaths, baseURL)
+		case strings.HasSuffix(baseURL, utils.AccountActionsCsv):
+			accountActionsPaths = append(accountActionsPaths, baseURL)
+		case strings.HasSuffix(baseURL, utils.ResourcesCsv):
+			resourcesPaths = append(resourcesPaths, baseURL)
+		case strings.HasSuffix(baseURL, utils.StatsCsv):
+			statsPaths = append(statsPaths, baseURL)
+		case strings.HasSuffix(baseURL, utils.ThresholdsCsv):
+			thresholdsPaths = append(thresholdsPaths, baseURL)
+		case strings.HasSuffix(baseURL, utils.FiltersCsv):
+			filtersPaths = append(filtersPaths, baseURL)
+		case strings.HasSuffix(baseURL, utils.SuppliersCsv):
+			suppliersPaths = append(suppliersPaths, baseURL)
+		case strings.HasSuffix(baseURL, utils.AttributesCsv):
+			attributesPaths = append(attributesPaths, baseURL)
+		case strings.HasSuffix(baseURL, utils.ChargersCsv):
+			chargersPaths = append(chargersPaths, baseURL)
+		case strings.HasSuffix(baseURL, utils.DispatcherProfilesCsv):
+			dispatcherprofilesPaths = append(dispatcherprofilesPaths, baseURL)
+		case strings.HasSuffix(baseURL, utils.DispatcherHostsCsv):
+			dispatcherhostsPaths = append(dispatcherhostsPaths, baseURL)
+		}
+	}
+
+	c := NewCSVStorage(sep,
+		destinationsPaths,
+		timingsPaths,
+		ratesPaths,
+		destinationRatesPaths,
+		ratingPlansPaths,
+		ratingProfilesPaths,
+		sharedGroupsPaths,
+		actionsPaths,
+		actionPlansPaths,
+		actionTriggersPaths,
+		accountActionsPaths,
+		resourcesPaths,
+		statsPaths,
+		thresholdsPaths,
+		filtersPaths,
+		suppliersPaths,
+		attributesPaths,
+		chargersPaths,
+		dispatcherprofilesPaths,
+		dispatcherhostsPaths,
+	)
+	c.generator = func() csvReaderCloser {
+		return &csvURL{}
+	}
+	return c
+}
+
+func joinURL(baseURL, fn string) string {
+	u, err := url.Parse(baseURL)
+	if err != nil {
+		return baseURL + fn
+	}
+	u.Path = path.Join(u.Path, fn)
+	return u.String()
 }
 
 func getAllFolders(inPath string) (paths []string, err error) {
@@ -225,8 +360,8 @@ func getAllFolders(inPath string) (paths []string, err error) {
 
 func appendName(paths []string, fileName string) (out []string) {
 	out = make([]string, len(paths))
-	for i, path_ := range paths {
-		out[i] = path.Join(path_, fileName)
+	for i, basePath := range paths {
+		out[i] = path.Join(basePath, fileName)
 	}
 	return
 }
@@ -665,9 +800,9 @@ func newSheet(configPath string) (sht *sheets.Service, err error) { //*google_ap
 	return
 }
 
-func getSpreatsheetTabs(spreadsheetId string, srv *sheets.Service) (sheetsName map[string]struct{}, err error) {
+func getSpreatsheetTabs(spreadsheetID string, srv *sheets.Service) (sheetsName map[string]struct{}, err error) {
 	sheetsName = make(map[string]struct{})
-	sht, err := srv.Spreadsheets.Get(spreadsheetId).Do()
+	sht, err := srv.Spreadsheets.Get(spreadsheetID).Do()
 	if err != nil {
 		err = fmt.Errorf("Unable get the information about spreadsheet because: %v", err)
 		return
@@ -679,7 +814,7 @@ func getSpreatsheetTabs(spreadsheetId string, srv *sheets.Service) (sheetsName m
 }
 
 type csvGoogle struct {
-	spreadsheetId string
+	spreadsheetID string
 	srv           *sheets.Service
 	response      *sheets.ValueRange
 	indx          int
@@ -687,7 +822,7 @@ type csvGoogle struct {
 }
 
 func (c *csvGoogle) Open(data string, sep rune, nrFields int) (err error) {
-	c.response, err = c.srv.Spreadsheets.Values.Get(c.spreadsheetId, data).Do()
+	c.response, err = c.srv.Spreadsheets.Values.Get(c.spreadsheetID, data).Do()
 	if err != nil {
 		return
 	}
@@ -731,4 +866,44 @@ func (c *csvGoogle) Read() (record []string, err error) {
 }
 
 func (c *csvGoogle) Close() { // no need for close
+}
+
+type csvURL struct {
+	csvReader *csv.Reader
+	page      io.ReadCloser
+}
+
+func (c *csvURL) Open(fn string, sep rune, nrFields int) (err error) {
+	if _, err = url.ParseRequestURI(fn); err != nil {
+		return
+	}
+	var myClient = &http.Client{
+		Timeout: config.CgrConfig().GeneralCfg().ReplyTimeout,
+	}
+	var req *http.Response
+	req, err = myClient.Get(fn)
+	if err != nil {
+		return utils.ErrPathNotReachable(fn)
+	}
+	if req.StatusCode != http.StatusOK {
+		return utils.ErrNotFound
+	}
+	c.page = req.Body
+
+	c.csvReader = csv.NewReader(c.page)
+	c.csvReader.Comma = sep
+	c.csvReader.Comment = utils.COMMENT_CHAR
+	c.csvReader.FieldsPerRecord = nrFields
+	c.csvReader.TrailingComma = true
+	return
+}
+
+func (c *csvURL) Read() (record []string, err error) {
+	return c.csvReader.Read()
+}
+
+func (c *csvURL) Close() {
+	if c.page != nil {
+		c.page.Close()
+	}
 }
