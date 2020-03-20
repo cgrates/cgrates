@@ -942,3 +942,9 @@ type LoadIDsWithArgDispatcher struct {
 	TenantArg
 	*ArgDispatcher
 }
+
+// IsURL returns if the path is an URL
+func IsURL(path string) bool {
+	return strings.HasPrefix(path, "https://") ||
+		strings.HasPrefix(path, "http://")
+}
