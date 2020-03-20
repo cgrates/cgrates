@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package migrator
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -142,29 +143,23 @@ func (m *Migrator) migrateV1ToV2Attributes() (v2Attr []*v2AttributeProfile, err 
 	return
 }
 
-func (m *Migrator) migrateV1ToV4Attributes() (v4Attr []*v4AttributeProfile, err error) {
+func (m *Migrator) migrateV1ToV4AttributeProfile() (v4Attr *v4AttributeProfile, err error) {
 	var v1Attr *v1AttributeProfile
-	var attr *v4AttributeProfile
-	for {
-		v1Attr, err = m.dmIN.getV1AttributeProfile()
-		if err != nil && err != utils.ErrNoMoreData {
-			return nil, err
-		}
-		if err == utils.ErrNoMoreData {
-			break
-		}
-		if v1Attr == nil {
-			continue
-		}
-		attr, err = v1Attr.AsAttributeProfileV1To4()
-		if err != nil {
-			return nil, err
-		}
-		v4Attr = append(v4Attr, attr)
-		if m.dryRun {
-			continue
-		}
+
+	v1Attr, err = m.dmIN.getV1AttributeProfile()
+	if err != nil {
+		return nil, err
+	} else if v1Attr == nil {
+		return nil, errors.New("Attribute NIL")
 	}
+
+	v4Attr, err = v1Attr.AsAttributeProfileV1To4()
+	if err != nil {
+		return nil, err
+	}
+	// if m.dryRun {
+	// 	continue
+	// }
 	return
 }
 
@@ -207,37 +202,26 @@ func (m *Migrator) migrateV2Attributes() (err error) {
 	return
 }
 
-func (m *Migrator) migrateV2ToV3Attributes(v2Attr []*v2AttributeProfile) (v3Attr []*v3AttributeProfile, err error) {
-	var itmV2Attr *v2AttributeProfile
-	var attr *v3AttributeProfile
-	for {
-		if v2Attr == nil {
-			// read data from DataDB
-			itmV2Attr, err = m.dmIN.getV2AttributeProfile()
-			if err != nil && err != utils.ErrNoMoreData {
-				return nil, err
-			}
-			if err == utils.ErrNoMoreData {
-				break
-			}
-		} else if len(v2Attr) == 0 {
-			return nil, err
-		} else {
-			itmV2Attr = v2Attr[m.stats[utils.Attributes]]
-		}
-		if itmV2Attr == nil {
-			continue
-		}
-
-		attr, err = itmV2Attr.AsAttributeProfileV3()
+func (m *Migrator) migrateV2ToV3AttributeProfile(v2Attr *v2AttributeProfile) (v3Attr *v3AttributeProfile, err error) {
+	if v2Attr == nil {
+		// read data from DataDB
+		v2Attr, err = m.dmIN.getV2AttributeProfile()
 		if err != nil {
 			return nil, err
 		}
-		v3Attr = append(v3Attr, attr)
-		if m.dryRun {
-			continue
-		}
 	}
+	//Migrate the AttributeProfile to next version (from v2 to v3)
+	v3Attr, err = v2Attr.AsAttributeProfileV3()
+	if err != nil {
+		return nil, err
+	}
+	// remove the AttributeProfile after it was migrated
+	m.dmIN.remV2AttributeProfile(v2Attr.Tenant, v2Attr.ID)
+	// if m.dryRun {
+	// 	continue
+	// }
+
+	// Return the migrated attributeProfile
 	return v3Attr, nil
 }
 
@@ -280,37 +264,24 @@ func (m *Migrator) migrateV3Attributes() (err error) {
 	return
 }
 
-func (m *Migrator) migrateV3ToV4Attributes(v3Attr []*v3AttributeProfile) (v4Attr []*v4AttributeProfile, err error) {
-	var itmV3Attr *v3AttributeProfile
-	var attr *v4AttributeProfile
-	for {
-		if v3Attr == nil {
-			// read data from DataDB
-			itmV3Attr, err = m.dmIN.getV3AttributeProfile()
-			if err != nil && err != utils.ErrNoMoreData {
-				return nil, err
-			}
-			if err == utils.ErrNoMoreData {
-				break
-			}
-		} else if len(v3Attr) == 0 {
-			return nil, err
-		} else {
-			itmV3Attr = v3Attr[m.stats[utils.Attributes]]
-		}
-		if itmV3Attr == nil {
-			continue
-		}
-
-		attr, err = itmV3Attr.AsAttributeProfileV4()
+func (m *Migrator) migrateV3ToV4AttributeProfile(v3Attr *v3AttributeProfile) (v4Attr *v4AttributeProfile, err error) {
+	if v3Attr == nil {
+		// read data from DataDB
+		v3Attr, err = m.dmIN.getV3AttributeProfile()
 		if err != nil {
 			return nil, err
 		}
-		v4Attr = append(v4Attr, attr)
-		if m.dryRun {
-			continue
-		}
 	}
+	//migrate
+	v4Attr, err = v3Attr.AsAttributeProfileV4()
+	if err != nil {
+		return nil, err
+	}
+	//remove the migrated attribute
+	m.dmIN.remV2AttributeProfile(v3Attr.Tenant, v3Attr.ID)
+	// if m.dryRun {
+	// 	continue
+	// }
 	return v4Attr, nil
 }
 
@@ -353,37 +324,25 @@ func (m *Migrator) migrateV4Attributes() (err error) {
 	return
 }
 
-func (m *Migrator) migrateV4ToV5Attributes(v4Attr []*v4AttributeProfile) (v5Attr []*engine.AttributeProfile, err error) {
-	var itmV4Attr *v4AttributeProfile
-	var attr *engine.AttributeProfile
-	for {
-		if v4Attr == nil {
-			// read data from DataDB
-			itmV4Attr, err = m.dmIN.getV4AttributeProfile()
-			if err != nil && err != utils.ErrNoMoreData {
-				return nil, err
-			}
-			if err == utils.ErrNoMoreData {
-				break
-			}
-		} else if len(v4Attr) == 0 {
-			return nil, err
-		} else {
-			itmV4Attr = v4Attr[m.stats[utils.Attributes]]
-		}
-		if itmV4Attr == nil {
-			continue
-		}
-
-		attr, err = itmV4Attr.AsAttributeProfileV5()
+func (m *Migrator) migrateV4ToV5AttributeProfile(v4Attr *v4AttributeProfile) (v5Attr *engine.AttributeProfile, err error) {
+	if v4Attr == nil {
+		// read data from DataDB
+		v4Attr, err = m.dmIN.getV4AttributeProfile()
 		if err != nil {
 			return nil, err
 		}
-		v5Attr = append(v5Attr, attr)
-		if m.dryRun {
-			continue
-		}
 	}
+
+	v5Attr, err = v4Attr.AsAttributeProfileV5()
+	if err != nil {
+		return nil, err
+	}
+	//remove the migrated attribute
+	m.dmIN.remV2AttributeProfile(v4Attr.Tenant, v4Attr.ID)
+	// if m.dryRun {
+	// 	continue
+	// }
+
 	return v5Attr, nil
 }
 
@@ -442,50 +401,73 @@ func (m *Migrator) migrateAttributeProfileV2() (err error) {
 		return utils.NewCGRError(utils.Migrator, utils.MandatoryIEMissingCaps,
 			utils.UndefinedVersion, "version number is not defined for ActionTriggers model")
 	}
-	var v2Attr []*v2AttributeProfile
-	var v3Attr []*v3AttributeProfile
-	var v4Attr []*v4AttributeProfile
-	var v5Attr []*engine.AttributeProfile
 
+	var v2Attr *v2AttributeProfile
+	var v3Attr *v3AttributeProfile
+	var v4Attr *v4AttributeProfile
+	var v5Attr *engine.AttributeProfile
+
+	fmt.Println("BEFORE vrs[utils.Attributes]: ", vrs[utils.Attributes])
 	for {
-		switch vrs[utils.Attributes] {
-		case 1: // Migrate from V1 to V4
-			if v4Attr, err = m.migrateV1ToV4Attributes(); err != nil {
-				return err
+		// One attribute profile at a time
+		for {
+			//Keep migrating until Attribute Profile reaches latest version
+			switch vrs[utils.Attributes] {
+			case 1: // Migrate from V1 to V4
+				if v4Attr, err = m.migrateV1ToV4AttributeProfile(); err != nil && err != utils.ErrNoMoreData {
+					return err
+				} else if err == utils.ErrNoMoreData {
+					continue
+				}
+				//Update to version to 4 (shortcut)
+				vrs[utils.Attributes] = 4
+			case 2: // Migrate from V2 to V3 (fallthrough untill latest version)
+				if v3Attr, err = m.migrateV2ToV3AttributeProfile(v2Attr); err != nil && err != utils.ErrNoMoreData {
+					return err
+				} else if err == utils.ErrNoMoreData {
+					continue
+				}
+				vrs[utils.Attributes] = 3
+				fallthrough
+			case 3: // Migrate from V3 to V4
+				if v4Attr, err = m.migrateV3ToV4AttributeProfile(v3Attr); err != nil && err != utils.ErrNoMoreData {
+					return err
+				} else if err == utils.ErrNoMoreData {
+					continue
+				}
+				vrs[utils.Attributes] = 4
+				fmt.Println("V3toV4")
+				fallthrough
+			case 4: // Migrate from V4 to V5
+				if v5Attr, err = m.migrateV4ToV5AttributeProfile(v4Attr); err != nil && err != utils.ErrNoMoreData {
+					return err
+				} else if err == utils.ErrNoMoreData {
+					continue
+				}
+				vrs[utils.Attributes] = 5
+				fmt.Println("V4toV5")
 			}
-			vrs[utils.Attributes] = 4
-		case 2: // Migrate from V2 to V3 (fallthrough untill latest version)
-			if v3Attr, err = m.migrateV2ToV3Attributes(v2Attr); err != nil {
-				return err
+			//update the encoded string 5 with current verison
+			if vrs[utils.Attributes] == 5 {
+				break
 			}
-			fallthrough
-		case 3: // Migrate from V3 to V4
-			if v4Attr, err = m.migrateV3ToV4Attributes(v3Attr); err != nil {
-				return err
-			}
-			fallthrough
-		case 4: // Migrate from V4 to V5
-			if v5Attr, err = m.migrateV4ToV5Attributes(v4Attr); err != nil {
-				return err
-			}
-			fallthrough
-		default:
-			break
 		}
 
-	}
-	for _, attr := range v5Attr {
-		if err := m.dmOut.DataManager().SetAttributeProfile(attr, true); err != nil {
+		fmt.Println("v5Attr: ", utils.ToIJSON(v5Attr))
+		//Set the fresh-migrated AttributeProfile into DB
+		if err := m.dmOut.DataManager().SetAttributeProfile(v5Attr, true); err != nil {
+			fmt.Println("Exit HERE <<<<<")
 			return err
 		}
-		m.stats[utils.Attributes]++
-	}
 
+		m.stats[utils.Attributes]++
+		break
+	}
 	// All done, update version wtih current one
 	vrs = engine.Versions{utils.Attributes: engine.CurrentDataDBVersions()[utils.Attributes]}
 	if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
 		return utils.NewCGRError(utils.Migrator, utils.ServerErrorCaps, err.Error(),
-			fmt.Sprintf("error: <%s> when updating Thresholds version into dataDB", err.Error()))
+			fmt.Sprintf("error: <%s> when updating Attributes version into dataDB", err.Error()))
 	}
 	return m.ensureIndexesDataDB(engine.ColAttr)
 }
