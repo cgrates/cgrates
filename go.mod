@@ -2,7 +2,8 @@ module github.com/cgrates/cgrates
 
 go 1.14
 
-// replace github.com/cgrates/radigo => /home/dan/go/src/github.com/cgrates/radigo
+replace github.com/cgrates/radigo => ../radigo
+
 // replace github.com/cgrates/rpcclient => ../rpcclient
 
 require (
