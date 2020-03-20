@@ -18,15 +18,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
-import "github.com/cgrates/cgrates/utils"
+import (
+	"encoding/json"
+
+	"github.com/cgrates/cgrates/utils"
+)
 
 type LoaderCgrCfg struct {
-	TpID           string
-	DataPath       string
-	DisableReverse bool
-	FieldSeparator rune // The separator to use when reading csvs
-	CachesConns    []string
-	SchedulerConns []string
+	TpID            string
+	DataPath        string
+	DisableReverse  bool
+	FieldSeparator  rune // The separator to use when reading csvs
+	CachesConns     []string
+	SchedulerConns  []string
+	GapiCredentials json.RawMessage
 }
 
 func (ld *LoaderCgrCfg) loadFromJsonCfg(jsnCfg *LoaderCfgJson) (err error) {
@@ -67,6 +72,9 @@ func (ld *LoaderCgrCfg) loadFromJsonCfg(jsnCfg *LoaderCfgJson) (err error) {
 				ld.SchedulerConns[idx] = conn
 			}
 		}
+	}
+	if jsnCfg.Gapi_credentials != nil {
+		ld.GapiCredentials = *jsnCfg.Gapi_credentials
 	}
 	return nil
 }

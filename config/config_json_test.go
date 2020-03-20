@@ -1713,18 +1713,20 @@ func TestDfDispatcherSJsonCfg(t *testing.T) {
 }
 
 func TestDfLoaderCfg(t *testing.T) {
+	cred := json.RawMessage(`".gapi/credentials.json"`)
 	eCfg := &LoaderCfgJson{
-		Tpid:            utils.StringPointer(""),
-		Data_path:       utils.StringPointer("./"),
-		Disable_reverse: utils.BoolPointer(false),
-		Field_separator: utils.StringPointer(","),
-		Caches_conns:    &[]string{utils.MetaLocalHost},
-		Scheduler_conns: &[]string{utils.MetaLocalHost},
+		Tpid:             utils.StringPointer(""),
+		Data_path:        utils.StringPointer("./"),
+		Disable_reverse:  utils.BoolPointer(false),
+		Field_separator:  utils.StringPointer(","),
+		Caches_conns:     &[]string{utils.MetaLocalHost},
+		Scheduler_conns:  &[]string{utils.MetaLocalHost},
+		Gapi_credentials: &cred,
 	}
 	if cfg, err := dfCgrJsonCfg.LoaderCfgJson(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
-		t.Errorf("Expected: %+v, received: %+v", utils.ToJSON(eCfg), utils.ToJSON(cfg))
+		t.Errorf("Expected1: %s, received: %+v", utils.ToJSON(*eCfg), utils.ToJSON(cfg))
 	}
 }
 
