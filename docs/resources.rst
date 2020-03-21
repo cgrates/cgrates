@@ -11,34 +11,6 @@ Both receiving of *Events* as well as operational commands on the virtual resour
 Due it's real-time nature, **ResourceS** are designed towards high throughput being able to process thousands of *Events* per second. This is doable since each *Resource* is a very light object, held in memory and eventually backed up in *DataDB*.
 
 
-Processing logic
-----------------
-
-When a new *Event* is received, **ResourceS** will pass it to :ref:`FilterS` in order to find all *Resource* objects matching the *Event*. 
-
-As a result of the selection process we will further get an ordered list of *Resource* which are matching the *Event* and are active at the request time. 
-
-Depending of the *RPC API* used, we will have the following behavior further:
-
-ResourcesForEvent
-	Will simply return the list of *Resources* matching so far.
-
-AuthorizeResources
-	Out of *Resources* matching, ordered based on *Weight*, it will use the first one with available units to authorize the request. Returns *RESOURCE_UNAVAILABLE* error back in case of no available units found. No actual allocation is performed.
-
-AllocateResource
-	All of the *Resources* matching the event will be operated and requested units will be deducted, independent of being available or going on negative. The first one with value higher or equal to zero will be responsible of allocation and it's message will be returned as allocation message. If no allocation message is defined for the allocated resource, it's ID will be returned instead. 
-
-	If no resources are allocated *RESOURCE_UNAVAILABLE* will be returned as error.
-
-ReleaseResource
-	Will release all the previously allocated resources for an *UsageID*. If *UsageID* is not found (which can be the case of restart), will perform a standard search via *FilterS* and try to dealocate the resources matching there.
-
-Depending on configuration each *Resource* can be backed up regularly and asynchronously to DataDB so it can survive process restarts.
-
-After each resource modification (allocation or release) the :ref:`ThresholdS` will be notified with the *Resource* itself where mechanisms like notifications or fraud-detection can be triggered.
-
-
 Parameters
 ----------
 
@@ -126,6 +98,34 @@ ExpiryTime
 
 Units
 	Number of units allocated by this *ResourceUsage*.
+
+
+Processing logic
+----------------
+
+When a new *Event* is received, **ResourceS** will pass it to :ref:`FilterS` in order to find all *Resource* objects matching the *Event*. 
+
+As a result of the selection process we will further get an ordered list of *Resource* which are matching the *Event* and are active at the request time. 
+
+Depending of the *RPC API* used, we will have the following behavior further:
+
+ResourcesForEvent
+	Will simply return the list of *Resources* matching so far.
+
+AuthorizeResources
+	Out of *Resources* matching, ordered based on *Weight*, it will use the first one with available units to authorize the request. Returns *RESOURCE_UNAVAILABLE* error back in case of no available units found. No actual allocation is performed.
+
+AllocateResource
+	All of the *Resources* matching the event will be operated and requested units will be deducted, independent of being available or going on negative. The first one with value higher or equal to zero will be responsible of allocation and it's message will be returned as allocation message. If no allocation message is defined for the allocated resource, it's ID will be returned instead. 
+
+	If no resources are allocated *RESOURCE_UNAVAILABLE* will be returned as error.
+
+ReleaseResource
+	Will release all the previously allocated resources for an *UsageID*. If *UsageID* is not found (which can be the case of restart), will perform a standard search via *FilterS* and try to dealocate the resources matching there.
+
+Depending on configuration each *Resource* can be backed up regularly and asynchronously to DataDB so it can survive process restarts.
+
+After each resource modification (allocation or release) the :ref:`ThresholdS` will be notified with the *Resource* itself where mechanisms like notifications or fraud-detection can be triggered.
 
 
 Use cases
