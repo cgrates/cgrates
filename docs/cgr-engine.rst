@@ -61,6 +61,7 @@ The components from the diagram can be found documented in the links bellow:
    sessions
    rals
    cdrs
+   cdre
    attributes
    chargers
    resources
@@ -70,11 +71,9 @@ The components from the diagram can be found documented in the links bellow:
    filters
    dispatchers
    schedulers
-   cdre
    apiers
    loaders
+   caches
    datadb
    stordb
-   caches
    
-
