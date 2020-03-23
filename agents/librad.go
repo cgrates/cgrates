@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package agents
 
 import (
-	"crypto/md5"
 	"fmt"
 	"net"
 
@@ -120,10 +119,10 @@ func (pk *radiusDP) RemoteHost() net.Addr {
 	return utils.NewNetAddr(pk.req.RemoteAddr().Network(), pk.req.RemoteAddr().String())
 }
 
-//authReq is used to authorize a request
+//radauthReq is used to authorize a request
 //if User-Password avp is present use PAP auth
 //if CHAP-Password is presented use CHAP auth
-func authReq(req *radigo.Packet, aReq *AgentRequest) (bool, error) {
+func radauthReq(req *radigo.Packet, aReq *AgentRequest) (bool, error) {
 	// try to get UserPassword from Vars as slice of NMItems
 	nmItems, err := aReq.Vars.FieldAsInterface([]string{utils.UserPassword})
 	if err != nil {
@@ -139,35 +138,8 @@ func authReq(req *radigo.Packet, aReq *AgentRequest) (bool, error) {
 			return false, nil
 		}
 	} else {
-		return checkAgainstCHAP([]byte(utils.IfaceAsString(nmItems.([]*config.NMItem)[0].Data)),
+		return radigo.AuthenticateCHAP([]byte(utils.IfaceAsString(nmItems.([]*config.NMItem)[0].Data)),
 			req.Authenticator[:], chapAVPs[0].RawValue), nil
 	}
 	return true, nil
-}
-
-//checkAgainstCHAP receive the password as plaintext and verify against the chap challenge
-func checkAgainstCHAP(password, authenticator, chapChallenge []byte) bool {
-	h := md5.New()
-	h.Write(chapChallenge[:1])
-	h.Write(password)
-	h.Write(authenticator)
-	answer := h.Sum(nil)
-	if len(answer) != len(chapChallenge[1:]) {
-		return false
-	}
-	for i := range answer {
-		if answer[i] != chapChallenge[i+1] {
-			return false
-		}
-	}
-	return true
-}
-
-//encodeChap is used in test to encode CHAP-Password raw value
-func encodeChap(password, authenticator, chapIdent []byte) []byte {
-	h := md5.New()
-	h.Write(chapIdent)
-	h.Write(password)
-	h.Write(authenticator)
-	return h.Sum(nil)
 }

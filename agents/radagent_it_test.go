@@ -21,7 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package agents
 
 import (
-	"crypto/rand"
 	"fmt"
 	"net/rpc"
 	"os/exec"
@@ -207,7 +206,7 @@ func testRAitAuthPAPSuccess(t *testing.T) {
 		t.Error(err)
 	}
 	// encode the password as required so we can decode it properly
-	authReq.AVPs[1].RawValue = radigo.EncodePass([]byte("CGRateSPassword1"), []byte("CGRateS.org"), authReq.Authenticator[:])
+	authReq.AVPs[1].RawValue = radigo.EncodeUserPassWord([]byte("CGRateSPassword1"), []byte("CGRateS.org"), authReq.Authenticator[:])
 	if err := authReq.AddAVPWithName("Service-Type", "SIP-Caller-AVPs", ""); err != nil {
 		t.Error(err)
 	}
@@ -252,7 +251,7 @@ func testRAitAuthPAPFail(t *testing.T) {
 		t.Error(err)
 	}
 	// encode the password as required so we can decode it properly
-	authReq.AVPs[1].RawValue = radigo.EncodePass([]byte("CGRateSPassword2"), []byte("CGRateS.org"), authReq.Authenticator[:])
+	authReq.AVPs[1].RawValue = radigo.EncodeUserPassWord([]byte("CGRateSPassword2"), []byte("CGRateS.org"), authReq.Authenticator[:])
 	if err := authReq.AddAVPWithName("Service-Type", "SIP-Caller-AVPs", ""); err != nil {
 		t.Error(err)
 	}
@@ -280,7 +279,7 @@ func testRAitAuthPAPFail(t *testing.T) {
 	}
 	if len(reply.AVPs) != 1 { // make sure max duration is received
 		t.Errorf("Received AVPs: %+v", reply.AVPs)
-	} else if !reflect.DeepEqual("Failed to authenticate request", string(reply.AVPs[0].RawValue)) {
+	} else if !reflect.DeepEqual(utils.RadauthFailed, string(reply.AVPs[0].RawValue)) {
 		t.Errorf("Received: %s", string(reply.AVPs[0].RawValue))
 	}
 }
@@ -296,14 +295,7 @@ func testRAitAuthCHAPSuccess(t *testing.T) {
 	if err := authReq.AddAVPWithName("CHAP-Password", "CGRateSPassword1", ""); err != nil {
 		t.Error(err)
 	}
-	// simulate encoding for CHAP-Password
-	chapIdent := make([]byte, 1)
-	rand.Read(chapIdent)
-	chapChallange := encodeChap([]byte("CGRateSPassword1"), authReq.Authenticator[:], chapIdent)
-	chapRawVal := make([]byte, 17)
-	copy(chapRawVal[:1], chapIdent)     // copy the Ident
-	copy(chapRawVal[1:], chapChallange) // copy the challange that needs to be verify
-	authReq.AVPs[1].RawValue = chapRawVal
+	authReq.AVPs[1].RawValue = radigo.EncodeCHAPPassword([]byte("CGRateSPassword1"), authReq.Authenticator[:])
 	if err := authReq.AddAVPWithName("Service-Type", "SIP-Caller-AVPs", ""); err != nil {
 		t.Error(err)
 	}
@@ -347,13 +339,8 @@ func testRAitAuthCHAPFail(t *testing.T) {
 	if err := authReq.AddAVPWithName("CHAP-Password", "CGRateSPassword2", ""); err != nil {
 		t.Error(err)
 	}
-	chapIdent := make([]byte, 1)
-	rand.Read(chapIdent)
-	chapChallange := encodeChap([]byte("CGRateSPassword2"), authReq.Authenticator[:], chapIdent)
-	chapRawVal := make([]byte, 17)
-	copy(chapRawVal[:1], chapIdent)
-	copy(chapRawVal[1:], chapChallange)
-	authReq.AVPs[1].RawValue = chapRawVal
+
+	authReq.AVPs[1].RawValue = radigo.EncodeCHAPPassword([]byte("CGRateSPassword2"), authReq.Authenticator[:])
 	if err := authReq.AddAVPWithName("Service-Type", "SIP-Caller-AVPs", ""); err != nil {
 		t.Error(err)
 	}
@@ -381,7 +368,7 @@ func testRAitAuthCHAPFail(t *testing.T) {
 	}
 	if len(reply.AVPs) != 1 { // make sure max duration is received
 		t.Errorf("Received AVPs: %+v", reply.AVPs)
-	} else if !reflect.DeepEqual("Failed to authenticate request", string(reply.AVPs[0].RawValue)) {
+	} else if !reflect.DeepEqual(utils.RadauthFailed, string(reply.AVPs[0].RawValue)) {
 		t.Errorf("Received: %s", string(reply.AVPs[0].RawValue))
 	}
 }
