@@ -20,294 +20,241 @@ package utils
 
 import "net"
 
-// NewOrderedNavigableMap initializates a structure of OrderedNavigableMap2 with a NavigableMap2
-func NewOrderedNavigableMap() *OrderedNavigableMap {
-	return &OrderedNavigableMap{
-		nm:    NavigableMap2{},
-		order: []PathItems{},
+// NavigableMap2 is the basic map of NM interface
+type NavigableMap2 map[string]NMInterface
+
+func (nmm NavigableMap2) String() (out string) {
+	for k, v := range nmm {
+		out += ",\"" + k + "\":" + v.String()
 	}
+	if len(out) == 0 {
+		return "{}"
+	}
+	out = out[1:]
+	return "{" + out + "}"
 }
 
-// OrderedNavigableMap is the same as NavigableMap2 but keeps the order of fields
-type OrderedNavigableMap struct {
-	nm    NM
-	order []PathItems
-}
-
-// String returns the map as json string
-func (onm *OrderedNavigableMap) String() string {
-	return onm.nm.String()
-}
-
-// GetOrder returns the order the fields were set in NavigableMap2
-func (onm *OrderedNavigableMap) GetOrder() []PathItems {
-	return onm.order
-}
-
-// Interface returns navigble map that's inside
-func (onm *OrderedNavigableMap) Interface() interface{} {
-	return onm.nm
+// Interface returns itself
+func (nmm NavigableMap2) Interface() interface{} {
+	return nmm
 }
 
 // Field returns the item on the given path
-func (onm *OrderedNavigableMap) Field(fldPath PathItems) (val NM, err error) {
-	return onm.nm.Field(fldPath)
+func (nmm NavigableMap2) Field(path PathItems) (val NMInterface, err error) {
+	if len(path) == 0 {
+		return nil, ErrWrongPath
+	}
+	el, has := nmm[path[0].Field]
+	if !has {
+		return nil, ErrNotFound
+	}
+	if len(path) == 1 && path[0].Index == nil {
+		return el, nil
+	}
+	switch el.Type() {
+	default:
+		return nil, ErrNotFound
+	case NMMapType:
+		if path[0].Index != nil {
+			return nil, ErrNotFound
+		}
+		return el.Field(path[1:])
+	case NMSliceType:
+		return el.Field(path)
+	}
 }
 
-// Type returns the type of the NM map
-func (onm *OrderedNavigableMap) Type() NMType {
-	return onm.nm.Type()
-}
-
-// Empty returns true if the NM is empty(no data)
-func (onm *OrderedNavigableMap) Empty() bool {
-	return onm.nm.Empty()
-}
-
-// Remove removes the item for the given path and updates the order
-func (onm *OrderedNavigableMap) Remove(path PathItems) (err error) {
-	if err = onm.nm.Remove(path); err != nil {
+// Set sets the value for the given path
+func (nmm NavigableMap2) Set(path PathItems, val NMInterface) (err error) {
+	if len(path) == 0 {
+		return ErrWrongPath
+	}
+	el, has := nmm[path[0].Field]
+	if len(path) == 1 {
+		if !has {
+			if path[0].Index != nil {
+				nel := &NMSlice{}
+				if err = nel.Set(path, val); err != nil {
+					return
+				}
+				nmm[path[0].Field] = nel
+				return
+			}
+			nmm[path[0].Field] = val
+			return
+		}
+		if path[0].Index != nil {
+			if el.Type() != NMSliceType {
+				return ErrWrongPath
+			}
+			return el.Set(path, val)
+		}
+		nmm[path[0].Field] = val
 		return
 	}
-	onm.removePath(path)
-	if path[len(path)-1].Index != nil {
-		if idx := *path[len(path)-1].Index; idx >= 0 {
-			onm.updateOrderBasedOnIndex(path, idx)
+	if !has {
+		if path[0].Index != nil {
+			nel := &NMSlice{}
+			if err = nel.Set(path, val); err != nil {
+				return
+			}
+			nmm[path[0].Field] = nel
+			return
 		}
+		nel := NavigableMap2{}
+		if err = nel.Set(path[1:], val); err != nil {
+			return
+		}
+		nmm[path[0].Field] = nel
+		return
+	}
+	if path[0].Index != nil {
+		if el.Type() != NMSliceType {
+			return ErrWrongPath
+		}
+		return el.Set(path, val)
+	}
+	if el.Type() != NMMapType { // do not try to overwrite an interface
+		return ErrWrongPath
+	}
+	return el.Set(path[1:], val)
+}
+
+// Remove removes the item for the given path
+func (nmm NavigableMap2) Remove(path PathItems) (err error) {
+	if len(path) == 0 {
+		return ErrWrongPath
+	}
+	el, has := nmm[path[0].Field]
+	if !has {
+		return // already removed
+	}
+	if len(path) == 1 {
+		if path[0].Index != nil {
+			if el.Type() != NMSliceType {
+				return ErrWrongPath
+			}
+			// this should not return error
+			// but in case it does we propagate it further
+			err = el.Remove(path)
+			if el.Empty() {
+				delete(nmm, path[0].Field)
+			}
+			return
+		}
+		delete(nmm, path[0].Field)
+		return
+	}
+	if path[0].Index != nil {
+		if el.Type() != NMSliceType {
+			return ErrWrongPath
+		}
+		if err = el.Remove(path); err != nil {
+			return
+		}
+		if el.Empty() {
+			delete(nmm, path[0].Field)
+		}
+		return
+	}
+	if el.Type() != NMMapType {
+		return ErrWrongPath
+	}
+	if err = el.Remove(path[1:]); err != nil {
+		return
+	}
+	if el.Empty() {
+		delete(nmm, path[0].Field)
 	}
 	return
 }
 
-// Set sets the value at the given path
-func (onm *OrderedNavigableMap) Set(fldPath PathItems, val NM) (err error) {
-	lpath := len(fldPath)
-	if lpath == 0 {
-		return ErrWrongPath
-	}
-	switch val.Type() {
-	case NMInterfaceType:
-		var dataMap NM = onm.nm
-		for i, spath := range fldPath {
-			var newData NM
-			newData, err = dataMap.GetField(spath)
-			if err == ErrNotFound {
-				if err = dataMap.Set(fldPath[i:], val); err != nil {
-					return
-				}
-				onm.order = append(onm.order, fldPath)
-				return
-			}
-			if err != nil {
-				return
-			}
-			if i == lpath-1 { // last path
-				if err = dataMap.SetField(spath, val); err == nil {
-					onm.removePath(fldPath)
-					onm.order = append(onm.order, fldPath)
-				}
-				return
-			}
-			dataMap = newData
-		}
-	case NMSliceType:
-		var dataMap NM = onm.nm
-		for i, spath := range fldPath {
-			var newData NM
-			newData, err = dataMap.GetField(spath)
-			if err == ErrNotFound {
-				if err = dataMap.Set(fldPath[i:], val); err != nil {
-					return
-				}
-				l := val.Len()
-				for j := 0; j < l; j++ {
-					newpath := make(PathItems, lpath)
-					copy(newpath, fldPath)
-					newpath[len(newpath)-1] = PathItem{
-						Field: newpath[len(newpath)-1].Field,
-						Index: IntPointer(j),
-					}
-					onm.order = append(onm.order, newpath)
-				}
-				return
-			}
-			if err != nil {
-				return
-			}
-			if i == lpath-1 { // last path
-				if err = dataMap.SetField(spath, val); err == nil {
-					onm.removePath(fldPath)
-					l := val.Len()
-					for j := 0; j < l; j++ {
-						newpath := make(PathItems, lpath)
-						copy(newpath, fldPath)
-						newpath[len(newpath)-1] = PathItem{
-							Field: newpath[len(newpath)-1].Field,
-							Index: IntPointer(j),
-						}
-						onm.order = append(onm.order, newpath)
-					}
-				}
-				return
-			}
-			dataMap = newData
-		}
-	default:
-	}
-	return ErrNotImplemented
+// Type returns the type of the NM map
+func (nmm NavigableMap2) Type() NMType {
+	return NMMapType
 }
 
-// removePath removes any reference to the given path from order
-// extremly slow method
-func (onm *OrderedNavigableMap) removePath(path PathItems) {
-	lenpath := len(path)
-	for i := 0; i < len(onm.order); {
-		p := onm.order[i]
-		if len(p) < lenpath {
-			i++
-			continue
-		}
-		match := true
-		for j, field := range path {
-			if lenpath-1 == j {
-				if match = field.Field == p[j].Field; !match {
-					break
-				}
-				if match = field.Index == nil; match {
-					break
-				}
-				match = p[j].Index != nil && *p[j].Index == *field.Index
-				break
-			}
-			if match = field.Equal(p[j]); !match {
-				break
-			}
-		}
-		if !match {
-			i++
-			continue
-		}
-		copy(onm.order[i:], onm.order[i+1:]) // Shift a[i+1:] left one index.
-		onm.order[len(onm.order)-1] = nil    // Erase last element (write zero value).
-		onm.order = onm.order[:len(onm.order)-1]
-	}
+// Empty returns true if the NM is empty(no data)
+func (nmm NavigableMap2) Empty() bool {
+	return nmm == nil || len(nmm) == 0
 }
 
 // GetField the same as Field but for one level deep
-// used to implement NM interface
-func (onm *OrderedNavigableMap) GetField(path PathItem) (val NM, err error) {
-	return onm.nm.GetField(path)
+// used for OrderedNavigableMap parsing
+func (nmm NavigableMap2) GetField(path PathItem) (val NMInterface, err error) {
+	// if path == nil {
+	// 	return nil, ErrWrongPath
+	// }
+	el, has := nmm[path.Field]
+	if !has {
+		return nil, ErrNotFound
+	}
+	if path.Index == nil {
+		return el, nil
+	}
+	if el.Type() == NMSliceType {
+		return el.GetField(path)
+	}
+	return nil, ErrNotFound
 }
 
 // SetField the same as Set but for one level deep
-// used to implement NM interface
-func (onm *OrderedNavigableMap) SetField(path PathItem, val NM) (err error) {
+// used for OrderedNavigableMap parsing
+func (nmm NavigableMap2) SetField(path PathItem, val NMInterface) (err error) {
 	// if path == nil {
 	// 	return ErrWrongPath
 	// }
-	switch val.Type() {
-	case NMInterfaceType:
-		_, err = onm.nm.GetField(path)
-		if err != nil {
-			if err == ErrNotFound {
-				if err = onm.nm.SetField(path, val); err != nil {
-					return
-				}
-				onm.order = append(onm.order, PathItems{path})
+	el, has := nmm[path.Field]
+	if !has {
+		if path.Index != nil {
+			nel := &NMSlice{}
+			if err = nel.SetField(path, val); err != nil {
+				return
 			}
+			nmm[path.Field] = nel
 			return
 		}
-		onm.removePath(PathItems{path})
-		if err = onm.nm.SetField(path, val); err == nil {
-			onm.order = append(onm.order, PathItems{path})
-		}
+		nmm[path.Field] = val
 		return
-	case NMSliceType:
-		_, err = onm.nm.GetField(path)
-		if err != nil {
-			if err == ErrNotFound {
-				if err = onm.nm.SetField(path, val); err != nil {
-					return
-				}
-				l := val.Len()
-				for j := 0; j < l; j++ {
-					newpath := make(PathItems, 1)
-					newpath[0] = PathItem{
-						Field: path.Field,
-						Index: IntPointer(j),
-					}
-					onm.order = append(onm.order, newpath)
-				}
-			}
-			return
-		}
-		onm.removePath(PathItems{path})
-		if err = onm.nm.SetField(path, val); err == nil {
-			l := val.Len()
-			for j := 0; j < l; j++ {
-				newpath := make(PathItems, 1)
-				newpath[0] = PathItem{
-					Field: path.Field,
-					Index: IntPointer(j),
-				}
-				onm.order = append(onm.order, newpath)
-			}
-		}
-		return
-	default:
-		return ErrNotImplemented
 	}
+	if path.Index != nil {
+		if el.Type() != NMSliceType {
+			return ErrWrongPath
+		}
+		return el.SetField(path, val)
+	}
+	nmm[path.Field] = val
+	return
+
 }
 
 // Len returns the lenght of the map
-func (onm OrderedNavigableMap) Len() int {
-	return onm.nm.Len()
-}
-
-// FieldAsString returns thevalue from path as string
-func (onm *OrderedNavigableMap) FieldAsString(fldPath []string) (str string, err error) {
-	var val NM
-	val, err = onm.nm.Field(NewPathToItem(fldPath))
-	if err != nil {
-		return
-	}
-	return IfaceAsString(val.Interface()), nil
+func (nmm NavigableMap2) Len() int {
+	return len(nmm)
 }
 
 // FieldAsInterface returns the interface at the path
-func (onm *OrderedNavigableMap) FieldAsInterface(fldPath []string) (str interface{}, err error) {
-	var val NM
-	val, err = onm.nm.Field(NewPathToItem(fldPath))
+// used by AgentRequest FieldAsInterface
+func (nmm NavigableMap2) FieldAsInterface(fldPath []string) (str interface{}, err error) {
+	var nm NMInterface
+	if nm, err = nmm.Field(NewPathToItem(fldPath)); err != nil {
+		return
+	}
+	return nm.Interface(), nil
+}
+
+// FieldAsString returns the string at the path
+// only to implement the DataProvider interface
+func (nmm NavigableMap2) FieldAsString(fldPath []string) (str string, err error) {
+	var val interface{}
+	val, err = nmm.FieldAsInterface(fldPath)
 	if err != nil {
 		return
 	}
-	return val.Interface(), nil
-}
-
-// updateOrderBasedOnIndex updates the index of the slice elements that are bigger that the removed element
-func (onm *OrderedNavigableMap) updateOrderBasedOnIndex(path PathItems, idx int) {
-	lenpath := len(path)
-	for _, p := range onm.order {
-		if len(p) < lenpath {
-			continue
-		}
-		for j, field := range path {
-			if lenpath-1 == j {
-				if field.Field != p[j].Field {
-					break
-				}
-				if p[j].Index != nil && *p[j].Index > idx {
-					(*p[j].Index)--
-				}
-				break
-			}
-			if !field.Equal(p[j]) {
-				break
-			}
-		}
-	}
+	return IfaceAsString(val), nil
 }
 
 // RemoteHost is part of dataStorage interface
-func (OrderedNavigableMap) RemoteHost() net.Addr {
+func (NavigableMap2) RemoteHost() net.Addr {
 	return LocalAddr()
 }

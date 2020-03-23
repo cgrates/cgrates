@@ -24,10 +24,10 @@ import (
 
 func TestDPDynamicInterface(t *testing.T) {
 	nm := NavigableMap2{
-		"Field1": NewNMInterface("1001"),
-		"Field2": NewNMInterface("1003"),
-		"Field3": NavigableMap2{"Field4": NewNMInterface("Val")},
-		"Field5": &NMSlice{NewNMInterface(10), NewNMInterface(101)},
+		"Field1": NewNMData("1001"),
+		"Field2": NewNMData("1003"),
+		"Field3": NavigableMap2{"Field4": NewNMData("Val")},
+		"Field5": &NMSlice{NewNMData(10), NewNMData(101)},
 	}
 	var expected interface{} = "Field5[1]"
 	if rply, err := DPDynamicInterface("Field5[1]", nm); err != nil {
@@ -47,10 +47,10 @@ func TestDPDynamicInterface(t *testing.T) {
 
 func TestDPDynamicString(t *testing.T) {
 	nm := NavigableMap2{
-		"Field1": NewNMInterface("1001"),
-		"Field2": NewNMInterface("1003"),
-		"Field3": NavigableMap2{"Field4": NewNMInterface("Val")},
-		"Field5": &NMSlice{NewNMInterface(10), NewNMInterface(101)},
+		"Field1": NewNMData("1001"),
+		"Field2": NewNMData("1003"),
+		"Field3": NavigableMap2{"Field4": NewNMData("Val")},
+		"Field5": &NMSlice{NewNMData(10), NewNMData(101)},
 	}
 	var expected interface{} = "Field5[1]"
 	if rply, err := DPDynamicString("Field5[1]", nm); err != nil {
@@ -70,23 +70,23 @@ func TestDPDynamicString(t *testing.T) {
 
 func TestAppendNavMapVal(t *testing.T) {
 	nm := NavigableMap2{
-		"Field1": NewNMInterface("1001"),
-		"Field2": NewNMInterface("1003"),
-		"Field3": NavigableMap2{"Field4": NewNMInterface("Val")},
-		"Field5": &NMSlice{NewNMInterface(10), NewNMInterface(101)},
+		"Field1": NewNMData("1001"),
+		"Field2": NewNMData("1003"),
+		"Field3": NavigableMap2{"Field4": NewNMData("Val")},
+		"Field5": &NMSlice{NewNMData(10), NewNMData(101)},
 	}
 	expected := NavigableMap2{
-		"Field1": NewNMInterface("1001"),
-		"Field2": NewNMInterface("1003"),
-		"Field3": NavigableMap2{"Field4": NewNMInterface("Val")},
-		"Field5": &NMSlice{NewNMInterface(10), NewNMInterface(101), NewNMInterface(18)},
+		"Field1": NewNMData("1001"),
+		"Field2": NewNMData("1003"),
+		"Field3": NavigableMap2{"Field4": NewNMData("Val")},
+		"Field5": &NMSlice{NewNMData(10), NewNMData(101), NewNMData(18)},
 	}
-	if err := AppendNavMapVal(nm, PathItems{{Field: "Field5"}}, NewNMInterface(18)); err != nil {
+	if err := AppendNavMapVal(nm, PathItems{{Field: "Field5"}}, NewNMData(18)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, nm) {
 		t.Errorf("Expected %v ,received: %v", expected, nm)
 	}
-	if err := AppendNavMapVal(nm, nil, NewNMInterface(18)); err != ErrWrongPath {
+	if err := AppendNavMapVal(nm, nil, NewNMData(18)); err != ErrWrongPath {
 		t.Error(err)
 	}
 }
@@ -94,19 +94,19 @@ func TestAppendNavMapVal(t *testing.T) {
 func TestComposeNavMapVal(t *testing.T) {
 	nm := NavigableMap2{
 		"Field4": &NMSlice{},
-		"Field5": &NMSlice{NewNMInterface(10), NewNMInterface(101)},
+		"Field5": &NMSlice{NewNMData(10), NewNMData(101)},
 	}
-	if err := ComposeNavMapVal(nm, nil, NewNMInterface(18)); err != ErrWrongPath {
+	if err := ComposeNavMapVal(nm, nil, NewNMData(18)); err != ErrWrongPath {
 		t.Error(err)
 	}
-	if err := ComposeNavMapVal(nm, PathItems{{Field: "Field4"}}, NewNMInterface(18)); err != ErrWrongPath {
+	if err := ComposeNavMapVal(nm, PathItems{{Field: "Field4"}}, NewNMData(18)); err != ErrWrongPath {
 		t.Error(err)
 	}
 	expected := NavigableMap2{
 		"Field4": &NMSlice{},
-		"Field5": &NMSlice{NewNMInterface(10), NewNMInterface("10118")},
+		"Field5": &NMSlice{NewNMData(10), NewNMData("10118")},
 	}
-	if err := ComposeNavMapVal(nm, PathItems{{Field: "Field5"}}, NewNMInterface(18)); err != nil {
+	if err := ComposeNavMapVal(nm, PathItems{{Field: "Field5"}}, NewNMData(18)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, nm) {
 		t.Errorf("Expected %v ,received: %v", expected, nm)
@@ -114,20 +114,20 @@ func TestComposeNavMapVal(t *testing.T) {
 
 	expected = NavigableMap2{
 		"Field4": &NMSlice{},
-		"Field5": &NMSlice{NewNMInterface(10), NewNMInterface("10118")},
-		"Field6": &NMSlice{NewNMInterface(10)},
+		"Field5": &NMSlice{NewNMData(10), NewNMData("10118")},
+		"Field6": &NMSlice{NewNMData(10)},
 	}
-	if err := ComposeNavMapVal(nm, PathItems{{Field: "Field6"}}, NewNMInterface(10)); err != nil {
+	if err := ComposeNavMapVal(nm, PathItems{{Field: "Field6"}}, NewNMData(10)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, nm) {
 		t.Errorf("Expected %v ,received: %v", expected, nm)
 	}
 
 	nm = NavigableMap2{
-		"Field4": NewNMInterface(1),
-		"Field5": &NMSlice{NewNMInterface(10), NewNMInterface(101)},
+		"Field4": NewNMData(1),
+		"Field5": &NMSlice{NewNMData(10), NewNMData(101)},
 	}
-	if err := ComposeNavMapVal(nm, PathItems{{Field: "Field4"}}, NewNMInterface(10)); err != ErrNotImplemented {
+	if err := ComposeNavMapVal(nm, PathItems{{Field: "Field4"}}, NewNMData(10)); err != ErrNotImplemented {
 		t.Error(err)
 	}
 
@@ -150,12 +150,12 @@ func (nmi *mockNMInterface) Interface() interface{} {
 }
 
 // Field not implemented only used in order to implement the NM interface
-func (nmi *mockNMInterface) Field(path PathItems) (val NM, err error) {
+func (nmi *mockNMInterface) Field(path PathItems) (val NMInterface, err error) {
 	return nil, ErrNotImplemented
 }
 
 // Set not implemented
-func (nmi *mockNMInterface) Set(path PathItems, val NM) (err error) {
+func (nmi *mockNMInterface) Set(path PathItems, val NMInterface) (err error) {
 	return ErrNotImplemented
 }
 
@@ -166,7 +166,7 @@ func (nmi *mockNMInterface) Remove(path PathItems) (err error) {
 
 // Type returns the type of the NM interface
 func (nmi *mockNMInterface) Type() NMType {
-	return NMInterfaceType
+	return NMDataType
 }
 
 // Empty returns true if the NM is empty(no data)
@@ -175,12 +175,12 @@ func (nmi *mockNMInterface) Empty() bool {
 }
 
 // GetField not implemented only used in order to implement the NM interface
-func (nmi *mockNMInterface) GetField(path PathItem) (val NM, err error) {
+func (nmi *mockNMInterface) GetField(path PathItem) (val NMInterface, err error) {
 	return nil, ErrNotImplemented
 }
 
 // SetField not implemented
-func (nmi *mockNMInterface) SetField(path PathItem, val NM) (err error) {
+func (nmi *mockNMInterface) SetField(path PathItem, val NMInterface) (err error) {
 	return ErrNotImplemented
 }
 

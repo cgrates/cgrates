@@ -24,12 +24,12 @@ import (
 )
 
 func TestNewNMInterface(t *testing.T) {
-	nm2 := NewNMInterface("1001")
-	expectednm := &NMInterface{data: "1001"}
+	nm2 := NewNMData("1001")
+	expectednm := &NMData{data: "1001"}
 	if !reflect.DeepEqual(expectednm, nm2) {
 		t.Errorf("Expected %v ,received: %v", ToJSON(expectednm), ToJSON(nm2))
 	}
-	var nm NM = nm2
+	var nm NMInterface = nm2
 	expected := "1001"
 	if rply := nm.Interface(); rply != expected {
 		t.Errorf("Expected %q ,received: %q", expected, rply)
@@ -39,74 +39,74 @@ func TestNewNMInterface(t *testing.T) {
 	}
 }
 
-func TestNMInterfaceLen(t *testing.T) {
-	var nm NM = NewNMInterface("1001")
+func TestNMDataLen(t *testing.T) {
+	var nm NMInterface = NewNMData("1001")
 	if rply := nm.Len(); rply != 0 {
 		t.Errorf("Expected 0 ,received: %v", rply)
 	}
 }
 
-func TestNMInterfaceString(t *testing.T) {
-	var nm NM = NewNMInterface("1001")
+func TestNMDataString(t *testing.T) {
+	var nm NMInterface = NewNMData("1001")
 	expected := "1001"
 	if rply := nm.String(); rply != expected {
 		t.Errorf("Expected %q ,received: %q", expected, rply)
 	}
 }
 
-func TestNMInterfaceInterface(t *testing.T) {
-	var nm NM = NewNMInterface("1001")
+func TestNMDataInterface(t *testing.T) {
+	var nm NMInterface = NewNMData("1001")
 	expected := "1001"
 	if rply := nm.Interface(); rply != expected {
 		t.Errorf("Expected %q ,received: %q", expected, rply)
 	}
 }
 
-func TestNMInterfaceField(t *testing.T) {
-	var nm NM = NewNMInterface("1001")
+func TestNMDataField(t *testing.T) {
+	var nm NMInterface = NewNMData("1001")
 	if _, err := nm.Field(nil); err != ErrNotImplemented {
 		t.Error(err)
 	}
 }
 
-func TestNMInterfaceGetField(t *testing.T) {
-	var nm NM = NewNMInterface("1001")
+func TestNMDataGetField(t *testing.T) {
+	var nm NMInterface = NewNMData("1001")
 	if _, err := nm.GetField(PathItem{}); err != ErrNotImplemented {
 		t.Error(err)
 	}
 }
 
-func TestNMInterfaceRemove(t *testing.T) {
-	var nm NM = NewNMInterface("1001")
+func TestNMDataRemove(t *testing.T) {
+	var nm NMInterface = NewNMData("1001")
 	if err := nm.Remove(nil); err != ErrNotImplemented {
 		t.Error(err)
 	}
 }
 
-func TestNMInterfaceEmpty(t *testing.T) {
-	var nm NM = NewNMInterface("1001")
+func TestNMDataEmpty(t *testing.T) {
+	var nm NMInterface = NewNMData("1001")
 	if nm.Empty() {
 		t.Error("Expected not empty type")
 	}
-	nm = NewNMInterface(nil)
+	nm = NewNMData(nil)
 	if !nm.Empty() {
 		t.Error("Expected empty type")
 	}
 }
 
-func TestNMInterfaceType(t *testing.T) {
-	var nm NM = NewNMInterface("1001")
-	if nm.Type() != NMInterfaceType {
-		t.Errorf("Expected %v ,received: %v", NMInterfaceType, nm.Type())
+func TestNMDataType(t *testing.T) {
+	var nm NMInterface = NewNMData("1001")
+	if nm.Type() != NMDataType {
+		t.Errorf("Expected %v ,received: %v", NMDataType, nm.Type())
 	}
 }
 
-func TestNMInterfaceSet(t *testing.T) {
-	var nm NM = NewNMInterface("1001")
+func TestNMDataSet(t *testing.T) {
+	var nm NMInterface = NewNMData("1001")
 	if err := nm.Set(PathItems{{}}, nil); err != ErrWrongPath {
 		t.Error(err)
 	}
-	if err := nm.Set(nil, NewNMInterface("1002")); err != nil {
+	if err := nm.Set(nil, NewNMData("1002")); err != nil {
 		t.Error(err)
 	}
 	expected := "1002"
@@ -115,12 +115,12 @@ func TestNMInterfaceSet(t *testing.T) {
 	}
 }
 
-func TestNMInterfaceSetField(t *testing.T) {
-	var nm NM = NewNMInterface("1001")
-	if err := nm.SetField(PathItem{}, NewNMInterface("1002")); err != nil {
+func TestNMDataSetField(t *testing.T) {
+	var nm NMInterface = NewNMData("1001")
+	if err := nm.SetField(PathItem{}, NewNMData("1002")); err != nil {
 		t.Error(err)
 	}
-	// if err := nm.SetField(nil, NewNMInterface("1002")); err != nil {
+	// if err := nm.SetField(nil, NewNMData("1002")); err != nil {
 	// 	t.Error(err)
 	// }
 	expected := "1002"

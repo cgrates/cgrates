@@ -69,7 +69,7 @@ func NewAgentRequest(req utils.DataProvider,
 	} else {
 		ar.Tenant = dfltTenant
 	}
-	ar.Vars.Set(utils.PathItems{{Field: utils.NodeID}}, utils.NewNMInterface(config.CgrConfig().GeneralCfg().NodeID))
+	ar.Vars.Set(utils.PathItems{{Field: utils.NodeID}}, utils.NewNMData(config.CgrConfig().GeneralCfg().NodeID))
 	return
 }
 
@@ -127,8 +127,8 @@ func (ar *AgentRequest) FieldAsInterface(fldPath []string) (val interface{}, err
 	return
 }
 
-// Field implements utils.NM
-func (ar *AgentRequest) Field(fldPath utils.PathItems) (val utils.NM, err error) {
+// Field implements utils.NMInterface
+func (ar *AgentRequest) Field(fldPath utils.PathItems) (val utils.NMInterface, err error) {
 	switch fldPath[0].Field {
 	default:
 		return nil, fmt.Errorf("unsupported field prefix: <%s>", fldPath[0])
@@ -205,8 +205,8 @@ func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 	return
 }
 
-// Set implements utils.NM
-func (ar *AgentRequest) Set(path utils.PathItems, nm utils.NM) (err error) {
+// Set implements utils.NMInterface
+func (ar *AgentRequest) Set(path utils.PathItems, nm utils.NMInterface) (err error) {
 	switch path[0].Field {
 	default:
 		return fmt.Errorf("unsupported field prefix: <%s> when set field", path[0])
@@ -399,13 +399,13 @@ func (ar *AgentRequest) ParseField(
 func (ar *AgentRequest) setCGRReply(rply utils.NavigableMapper, errRply error) (err error) {
 	var nm utils.NavigableMap2
 	if errRply != nil {
-		nm = utils.NavigableMap2{utils.Error: utils.NewNMInterface(errRply.Error())}
+		nm = utils.NavigableMap2{utils.Error: utils.NewNMData(errRply.Error())}
 	} else {
 		nm = utils.NavigableMap2{}
 		if rply != nil {
 			nm = rply.AsNavigableMap()
 		}
-		nm.Set(utils.PathItems{{Field: utils.Error}}, utils.NewNMInterface("")) // enforce empty error
+		nm.Set(utils.PathItems{{Field: utils.Error}}, utils.NewNMData("")) // enforce empty error
 	}
 	*ar.CGRReply = nm // update value so we can share CGRReply
 	return

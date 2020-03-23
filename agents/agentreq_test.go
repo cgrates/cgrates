@@ -45,21 +45,21 @@ func TestAgReqSetFields(t *testing.T) {
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	// populate request, emulating the way will be done in HTTPAgent
 	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.CGRID}},
-		utils.NewNMInterface(utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String())))
-	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.ToR}}, utils.NewNMInterface(utils.VOICE))
-	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.Account}}, utils.NewNMInterface("1001"))
-	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.Destination}}, utils.NewNMInterface("1002"))
+		utils.NewNMData(utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String())))
+	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.ToR}}, utils.NewNMData(utils.VOICE))
+	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.Account}}, utils.NewNMData("1001"))
+	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.Destination}}, utils.NewNMData("1002"))
 	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.AnswerTime}},
-		utils.NewNMInterface(time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC)))
-	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.RequestType}}, utils.NewNMInterface(utils.META_PREPAID))
-	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.Usage}}, utils.NewNMInterface(time.Duration(3*time.Minute)))
+		utils.NewNMData(time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC)))
+	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.RequestType}}, utils.NewNMData(utils.META_PREPAID))
+	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.Usage}}, utils.NewNMData(time.Duration(3*time.Minute)))
 
 	cgrRply := utils.NavigableMap2{
 		utils.CapAttributes: utils.NavigableMap2{
-			"PaypalAccount": utils.NewNMInterface("cgrates@paypal.com"),
+			"PaypalAccount": utils.NewNMData("cgrates@paypal.com"),
 		},
-		utils.CapMaxUsage: utils.NewNMInterface(time.Duration(120 * time.Second)),
-		utils.Error:       utils.NewNMInterface(""),
+		utils.CapMaxUsage: utils.NewNMData(time.Duration(120 * time.Second)),
+		utils.Error:       utils.NewNMData(""),
 	}
 	agReq.CGRReply = &cgrRply
 
@@ -494,10 +494,10 @@ func TestAgReqMaxCost(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	// populate request, emulating the way will be done in HTTPAgent
-	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.CapMaxUsage}}, utils.NewNMInterface("120s"))
+	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.CapMaxUsage}}, utils.NewNMData("120s"))
 
 	cgrRply := utils.NavigableMap2{
-		utils.CapMaxUsage: utils.NewNMInterface(time.Duration(120 * time.Second)),
+		utils.CapMaxUsage: utils.NewNMData(time.Duration(120 * time.Second)),
 	}
 	agReq.CGRReply = &cgrRply
 
@@ -742,9 +742,9 @@ func TestAgReqEmptyFilter(t *testing.T) {
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	// populate request, emulating the way will be done in HTTPAgent
 	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.CGRID}},
-		utils.NewNMInterface(utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String())))
-	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.Account}}, utils.NewNMInterface("1001"))
-	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.Destination}}, utils.NewNMInterface("1002"))
+		utils.NewNMData(utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String())))
+	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.Account}}, utils.NewNMData("1001"))
+	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.Destination}}, utils.NewNMData("1002"))
 
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Tenant", Filters: []string{},
@@ -785,8 +785,8 @@ func TestAgReqMetaExponent(t *testing.T) {
 		config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
-	agReq.CGRRequest.Set(utils.PathItems{{Field: "Value"}}, utils.NewNMInterface("2"))
-	agReq.CGRRequest.Set(utils.PathItems{{Field: "Exponent"}}, utils.NewNMInterface("2"))
+	agReq.CGRRequest.Set(utils.PathItems{{Field: "Value"}}, utils.NewNMData("2"))
+	agReq.CGRRequest.Set(utils.PathItems{{Field: "Exponent"}}, utils.NewNMData("2"))
 
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "TestExpo", Filters: []string{},
@@ -813,9 +813,9 @@ func TestAgReqFieldAsNone(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	// populate request, emulating the way will be done in HTTPAgent
-	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.ToR}}, utils.NewNMInterface(utils.VOICE))
-	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.Account}}, utils.NewNMInterface("1001"))
-	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.Destination}}, utils.NewNMInterface("1002"))
+	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.ToR}}, utils.NewNMData(utils.VOICE))
+	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.Account}}, utils.NewNMData("1001"))
+	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.Destination}}, utils.NewNMData("1002"))
 
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Tenant",
@@ -853,9 +853,9 @@ func TestAgReqFieldAsNone2(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	// populate request, emulating the way will be done in HTTPAgent
-	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.ToR}}, utils.NewNMInterface(utils.VOICE))
-	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.Account}}, utils.NewNMInterface("1001"))
-	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.Destination}}, utils.NewNMInterface("1002"))
+	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.ToR}}, utils.NewNMData(utils.VOICE))
+	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.Account}}, utils.NewNMData("1001"))
+	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.Destination}}, utils.NewNMData("1002"))
 
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Tenant",
@@ -896,12 +896,12 @@ func TestAgReqSetField2(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	// populate request, emulating the way will be done in HTTPAgent
-	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.ToR}}, utils.NewNMInterface(utils.VOICE))
-	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.Account}}, utils.NewNMInterface("1001"))
-	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.Destination}}, utils.NewNMInterface("1002"))
+	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.ToR}}, utils.NewNMData(utils.VOICE))
+	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.Account}}, utils.NewNMData("1001"))
+	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.Destination}}, utils.NewNMData("1002"))
 	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.AnswerTime}},
-		utils.NewNMInterface(time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC)))
-	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.RequestType}}, utils.NewNMInterface(utils.META_PREPAID))
+		utils.NewNMData(time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC)))
+	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.RequestType}}, utils.NewNMData(utils.META_PREPAID))
 
 	agReq.CGRReply = &utils.NavigableMap2{}
 
@@ -960,8 +960,8 @@ func TestAgReqFieldAsInterface(t *testing.T) {
 	agReq.CGRRequest = utils.NewOrderedNavigableMap()
 	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.Usage}}, &utils.NMSlice{&config.NMItem{Data: 3 * time.Minute}})
 	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.ToR}}, &utils.NMSlice{&config.NMItem{Data: utils.VOICE}})
-	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.Account}}, utils.NewNMInterface("1001"))
-	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.Destination}}, utils.NewNMInterface("1002"))
+	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.Account}}, utils.NewNMData("1001"))
+	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.Destination}}, utils.NewNMData("1002"))
 
 	path := []string{utils.MetaCgreq, utils.Usage}
 	var expVal interface{}
@@ -1001,7 +1001,7 @@ func TestAgReqFieldAsInterface(t *testing.T) {
 	if _, err := agReq.FieldAsInterface(path); err == nil || err.Error() != experr.Error() {
 		t.Error(err)
 	}
-	agReq.tmp = utils.NavigableMap2{utils.Destination: utils.NewNMInterface("1001")}
+	agReq.tmp = utils.NavigableMap2{utils.Destination: utils.NewNMData("1001")}
 	path = []string{utils.MetaTmp, utils.Destination}
 	expVal = "1001"
 	if rply, err := agReq.FieldAsInterface(path); err != nil {
@@ -1010,7 +1010,7 @@ func TestAgReqFieldAsInterface(t *testing.T) {
 		t.Errorf("Expected %v , received: %v", utils.ToJSON(expVal), utils.ToJSON(rply))
 	}
 	agReq.diamreq = utils.NewOrderedNavigableMap()
-	agReq.diamreq.SetField(utils.PathItem{Field: utils.Destination}, utils.NewNMInterface("1001"))
+	agReq.diamreq.SetField(utils.PathItem{Field: utils.Destination}, utils.NewNMData("1001"))
 	path = []string{utils.MetaDiamreq, utils.Destination}
 	expVal = "1001"
 	if rply, err := agReq.FieldAsInterface(path); err != nil {
@@ -1033,16 +1033,16 @@ func TestAgReqField(t *testing.T) {
 	if _, err := agReq.Field(path); err == nil || err.Error() != experr.Error() {
 		t.Error(err)
 	}
-	agReq.tmp = utils.NavigableMap2{utils.Destination: utils.NewNMInterface("1001")}
+	agReq.tmp = utils.NavigableMap2{utils.Destination: utils.NewNMData("1001")}
 	path = utils.PathItems{{Field: utils.MetaTmp}, {Field: utils.Destination}}
-	expVal := utils.NewNMInterface("1001")
+	expVal := utils.NewNMData("1001")
 	if rply, err := agReq.Field(path); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rply, expVal) {
 		t.Errorf("Expected %v , received: %v", utils.ToJSON(expVal), utils.ToJSON(rply))
 	}
 	agReq.diamreq = utils.NewOrderedNavigableMap()
-	agReq.diamreq.SetField(utils.PathItem{Field: utils.Destination}, utils.NewNMInterface("1001"))
+	agReq.diamreq.SetField(utils.PathItem{Field: utils.Destination}, utils.NewNMData("1001"))
 	path = utils.PathItems{{Field: utils.MetaDiamreq}, {Field: utils.Destination}}
 	if rply, err := agReq.Field(path); err != nil {
 		t.Error(err)
@@ -1051,7 +1051,7 @@ func TestAgReqField(t *testing.T) {
 	}
 
 	agReq.Reply = utils.NewOrderedNavigableMap()
-	agReq.Reply.SetField(utils.PathItem{Field: utils.Destination}, utils.NewNMInterface("1001"))
+	agReq.Reply.SetField(utils.PathItem{Field: utils.Destination}, utils.NewNMData("1001"))
 	path = utils.PathItems{{Field: utils.MetaRep}, {Field: utils.Destination}}
 	if rply, err := agReq.Field(path); err != nil {
 		t.Error(err)
@@ -1067,14 +1067,14 @@ func TestAgReqNewARWithCGRRplyAndRply(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, nil, dm)
 
 	rply := utils.NewOrderedNavigableMap()
-	rply.Set(utils.PathItems{{Field: "FirstLevel"}, {Field: "SecondLevel"}, {Field: "Fld1"}}, utils.NewNMInterface("Val1"))
+	rply.Set(utils.PathItems{{Field: "FirstLevel"}, {Field: "SecondLevel"}, {Field: "Fld1"}}, utils.NewNMData("Val1"))
 
 	cgrRply := &utils.NavigableMap2{
 		utils.CapAttributes: utils.NavigableMap2{
-			"PaypalAccount": utils.NewNMInterface("cgrates@paypal.com"),
+			"PaypalAccount": utils.NewNMData("cgrates@paypal.com"),
 		},
-		utils.CapMaxUsage: utils.NewNMInterface(time.Duration(120 * time.Second)),
-		utils.Error:       utils.NewNMInterface(""),
+		utils.CapMaxUsage: utils.NewNMData(time.Duration(120 * time.Second)),
+		utils.Error:       utils.NewNMData(""),
 	}
 
 	agReq := NewAgentRequest(nil, nil, cgrRply, rply, nil, "cgrates.org", "", filterS, nil, nil)
@@ -1112,7 +1112,7 @@ func TestAgReqSetCGRReplyWithError(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, nil, dm)
 
 	rply := utils.NewOrderedNavigableMap()
-	rply.Set(utils.PathItems{{Field: "FirstLevel"}, {Field: "SecondLevel"}, {Field: "Fld1"}}, utils.NewNMInterface("Val1"))
+	rply.Set(utils.PathItems{{Field: "FirstLevel"}, {Field: "SecondLevel"}, {Field: "Fld1"}}, utils.NewNMData("Val1"))
 	agReq := NewAgentRequest(nil, nil, nil, rply, nil, "cgrates.org", "", filterS, nil, nil)
 
 	agReq.setCGRReply(nil, utils.ErrNotFound)
@@ -1135,7 +1135,7 @@ func TestAgReqSetCGRReplyWithError(t *testing.T) {
 	}
 }
 
-type myEv map[string]utils.NM
+type myEv map[string]utils.NMInterface
 
 func (ev myEv) AsNavigableMap() utils.NavigableMap2 {
 	return utils.NavigableMap2(ev)
@@ -1148,14 +1148,14 @@ func TestAgReqSetCGRReplyWithoutError(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, nil, dm)
 
 	rply := utils.NewOrderedNavigableMap()
-	rply.Set(utils.PathItems{{Field: "FirstLevel"}, {Field: "SecondLevel"}, {Field: "Fld1"}}, utils.NewNMInterface("Val1"))
+	rply.Set(utils.PathItems{{Field: "FirstLevel"}, {Field: "SecondLevel"}, {Field: "Fld1"}}, utils.NewNMData("Val1"))
 
 	myEv := myEv{
 		utils.CapAttributes: utils.NavigableMap2{
-			"PaypalAccount": utils.NewNMInterface("cgrates@paypal.com"),
+			"PaypalAccount": utils.NewNMData("cgrates@paypal.com"),
 		},
-		utils.CapMaxUsage: utils.NewNMInterface(time.Duration(120 * time.Second)),
-		utils.Error:       utils.NewNMInterface(""),
+		utils.CapMaxUsage: utils.NewNMData(time.Duration(120 * time.Second)),
+		utils.Error:       utils.NewNMData(""),
 	}
 
 	agReq := NewAgentRequest(nil, nil, nil, rply,
@@ -1602,12 +1602,12 @@ func TestAgReqOverwrite(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	// populate request, emulating the way will be done in HTTPAgent
-	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.ToR}}, utils.NewNMInterface(utils.VOICE))
-	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.Account}}, utils.NewNMInterface("1001"))
-	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.Destination}}, utils.NewNMInterface("1002"))
+	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.ToR}}, utils.NewNMData(utils.VOICE))
+	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.Account}}, utils.NewNMData("1001"))
+	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.Destination}}, utils.NewNMData("1002"))
 	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.AnswerTime}},
-		utils.NewNMInterface(time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC)))
-	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.RequestType}}, utils.NewNMInterface(utils.META_PREPAID))
+		utils.NewNMData(time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC)))
+	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.RequestType}}, utils.NewNMData(utils.META_PREPAID))
 
 	agReq.CGRReply = &utils.NavigableMap2{}
 
@@ -1656,12 +1656,12 @@ func TestAgReqGroupType(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	// populate request, emulating the way will be done in HTTPAgent
-	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.ToR}}, utils.NewNMInterface(utils.VOICE))
-	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.Account}}, utils.NewNMInterface("1001"))
-	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.Destination}}, utils.NewNMInterface("1002"))
+	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.ToR}}, utils.NewNMData(utils.VOICE))
+	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.Account}}, utils.NewNMData("1001"))
+	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.Destination}}, utils.NewNMData("1002"))
 	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.AnswerTime}},
-		utils.NewNMInterface(time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC)))
-	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.RequestType}}, utils.NewNMInterface(utils.META_PREPAID))
+		utils.NewNMData(time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC)))
+	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.RequestType}}, utils.NewNMData(utils.META_PREPAID))
 
 	agReq.CGRReply = &utils.NavigableMap2{}
 
@@ -1703,7 +1703,7 @@ func TestAgReqSetFieldsInTmp(t *testing.T) {
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
-	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.Account}}, utils.NewNMInterface("1001"))
+	agReq.CGRRequest.Set(utils.PathItems{{Field: utils.Account}}, utils.NewNMData("1001"))
 
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Tenant",

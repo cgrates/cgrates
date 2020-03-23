@@ -288,14 +288,14 @@ func TestNavMapAsCGREvent(t *testing.T) {
 }
 
 func TestNMItemLen(t *testing.T) {
-	var nm utils.NM = &NMItem{Data: "1001"}
+	var nm utils.NMInterface = &NMItem{Data: "1001"}
 	if rply := nm.Len(); rply != 0 {
 		t.Errorf("Expected 0 ,received: %v", rply)
 	}
 }
 
 func TestNMItemString(t *testing.T) {
-	var nm utils.NM = &NMItem{Data: "1001"}
+	var nm utils.NMInterface = &NMItem{Data: "1001"}
 	expected := "{\"Path\":null,\"Data\":\"1001\",\"Config\":null}"
 	if rply := nm.String(); rply != expected {
 		t.Errorf("Expected %q ,received: %q", expected, rply)
@@ -303,7 +303,7 @@ func TestNMItemString(t *testing.T) {
 }
 
 func TestNMItemInterface(t *testing.T) {
-	var nm utils.NM = &NMItem{Data: "1001"}
+	var nm utils.NMInterface = &NMItem{Data: "1001"}
 	expected := "1001"
 	if rply := nm.Interface(); rply != expected {
 		t.Errorf("Expected %q ,received: %q", expected, rply)
@@ -311,28 +311,28 @@ func TestNMItemInterface(t *testing.T) {
 }
 
 func TestNMItemField(t *testing.T) {
-	var nm utils.NM = &NMItem{Data: "1001"}
+	var nm utils.NMInterface = &NMItem{Data: "1001"}
 	if _, err := nm.Field(nil); err != utils.ErrNotImplemented {
 		t.Error(err)
 	}
 }
 
 func TestNMItemGetField(t *testing.T) {
-	var nm utils.NM = &NMItem{Data: "1001"}
+	var nm utils.NMInterface = &NMItem{Data: "1001"}
 	if _, err := nm.GetField(utils.PathItem{}); err != utils.ErrNotImplemented {
 		t.Error(err)
 	}
 }
 
 func TestNMItemRemove(t *testing.T) {
-	var nm utils.NM = &NMItem{Data: "1001"}
+	var nm utils.NMInterface = &NMItem{Data: "1001"}
 	if err := nm.Remove(nil); err != utils.ErrNotImplemented {
 		t.Error(err)
 	}
 }
 
 func TestNMItemEmpty(t *testing.T) {
-	var nm utils.NM = &NMItem{Data: "1001"}
+	var nm utils.NMInterface = &NMItem{Data: "1001"}
 	if nm.Empty() {
 		t.Error("Expected not empty type")
 	}
@@ -343,14 +343,14 @@ func TestNMItemEmpty(t *testing.T) {
 }
 
 func TestNMItemType(t *testing.T) {
-	var nm utils.NM = &NMItem{Data: "1001"}
-	if nm.Type() != utils.NMInterfaceType {
-		t.Errorf("Expected %v ,received: %v", utils.NMInterfaceType, nm.Type())
+	var nm utils.NMInterface = &NMItem{Data: "1001"}
+	if nm.Type() != utils.NMDataType {
+		t.Errorf("Expected %v ,received: %v", utils.NMDataType, nm.Type())
 	}
 }
 
 func TestNMItemSet(t *testing.T) {
-	var nm utils.NM = &NMItem{Data: "1001"}
+	var nm utils.NMInterface = &NMItem{Data: "1001"}
 	if err := nm.Set(utils.PathItems{{}}, nil); err != utils.ErrWrongPath {
 		t.Error(err)
 	}
@@ -364,7 +364,7 @@ func TestNMItemSet(t *testing.T) {
 }
 
 func TestNMItemSetField(t *testing.T) {
-	var nm utils.NM = &NMItem{Data: "1001"}
+	var nm utils.NMInterface = &NMItem{Data: "1001"}
 	if err := nm.SetField(utils.PathItem{}, nil); err != utils.ErrNotImplemented {
 		t.Error(err)
 	}

@@ -66,7 +66,7 @@ func (ha *HTTPAgent) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 	rplyNM := utils.NewOrderedNavigableMap()
 	cgrRplyNM := &utils.NavigableMap2{}
-	reqVars[utils.RemoteHost] = utils.NewNMInterface(req.RemoteAddr)
+	reqVars[utils.RemoteHost] = utils.NewNMData(req.RemoteAddr)
 	for _, reqProcessor := range ha.reqProcessors {
 		agReq := NewAgentRequest(dcdr, reqVars, cgrRplyNM, rplyNM,
 			reqProcessor.Tenant, ha.dfltTenant,
@@ -260,7 +260,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 			&utils.CGREventWithArgDispatcher{CGREvent: cgrEv,
 				ArgDispatcher: cgrArgs.ArgDispatcher},
 			rplyCDRs); err != nil {
-			agReq.CGRReply.Set(utils.PathItems{{Field: utils.Error}}, utils.NewNMInterface(err.Error()))
+			agReq.CGRReply.Set(utils.PathItems{{Field: utils.Error}}, utils.NewNMData(err.Error()))
 		}
 	}
 	if err := agReq.SetFields(reqProcessor.ReplyFields); err != nil {

@@ -18,30 +18,30 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package utils
 
-// NewNMInterface returns the interface wraped in NMInterface struture
-func NewNMInterface(val interface{}) *NMInterface { return &NMInterface{data: val} }
+// NewNMData returns the interface wraped in NMInterface struture
+func NewNMData(val interface{}) *NMData { return &NMData{data: val} }
 
-// NMInterface most basic NM structure
-type NMInterface struct{ data interface{} }
+// NMData most basic NM structure
+type NMData struct{ data interface{} }
 
-func (nmi *NMInterface) String() string {
+func (nmi *NMData) String() string {
 	return IfaceAsString(nmi.data)
 }
 
 // Interface returns the wraped interface
-func (nmi *NMInterface) Interface() interface{} {
+func (nmi *NMData) Interface() interface{} {
 	return nmi.data
 }
 
 // Field not implemented only used in order to implement the NM interface
-func (nmi *NMInterface) Field(path PathItems) (val NM, err error) {
+func (nmi *NMData) Field(path PathItems) (val NMInterface, err error) {
 	return nil, ErrNotImplemented
 }
 
 // Set not implemented only used in order to implement the NM interface
 // special case when the path is empty the interface should be seted
 // this is in order to modify the wraped interface
-func (nmi *NMInterface) Set(path PathItems, val NM) (err error) {
+func (nmi *NMData) Set(path PathItems, val NMInterface) (err error) {
 	if len(path) != 0 {
 		return ErrWrongPath
 	}
@@ -50,29 +50,29 @@ func (nmi *NMInterface) Set(path PathItems, val NM) (err error) {
 }
 
 // Remove not implemented only used in order to implement the NM interface
-func (nmi *NMInterface) Remove(path PathItems) (err error) {
+func (nmi *NMData) Remove(path PathItems) (err error) {
 	return ErrNotImplemented
 }
 
 // Type returns the type of the NM interface
-func (nmi *NMInterface) Type() NMType {
-	return NMInterfaceType
+func (nmi *NMData) Type() NMType {
+	return NMDataType
 }
 
 // Empty returns true if the NM is empty(no data)
-func (nmi *NMInterface) Empty() bool {
+func (nmi *NMData) Empty() bool {
 	return nmi == nil || nmi.data == nil
 }
 
 // GetField not implemented only used in order to implement the NM interface
-func (nmi *NMInterface) GetField(path PathItem) (val NM, err error) {
+func (nmi *NMData) GetField(path PathItem) (val NMInterface, err error) {
 	return nil, ErrNotImplemented
 }
 
 // SetField not implemented only used in order to implement the NM interface
 // special case when the path is empty the interface should be seted
 // this is in order to modify the wraped interface
-func (nmi *NMInterface) SetField(path PathItem, val NM) (err error) {
+func (nmi *NMData) SetField(path PathItem, val NMInterface) (err error) {
 	// if path != nil {
 	// 	return ErrWrongPath
 	// }
@@ -81,6 +81,6 @@ func (nmi *NMInterface) SetField(path PathItem, val NM) (err error) {
 }
 
 // Len not implemented only used in order to implement the NM interface
-func (nmi *NMInterface) Len() int {
+func (nmi *NMData) Len() int {
 	return 0
 }
