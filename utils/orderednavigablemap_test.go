@@ -19,10 +19,10 @@ package utils
 
 import (
 	"math/rand"
-	"reflect"
 	"testing"
 )
 
+/*
 func TestOrderedNavigableMap(t *testing.T) {
 	// var err error
 	onm := NewOrderedNavigableMap()
@@ -707,13 +707,14 @@ func TestOrderedNavigableRemote(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
 	}
 }
-
+*/
 var generator = rand.New(rand.NewSource(42))
 var gen = generateRandomTemplate(1_000)
 
 type benchData struct {
 	path      []string
 	pathItems PathItems
+	strPath   string
 	data      string
 }
 
@@ -731,6 +732,8 @@ func generateRandomTemplate(size int) (out []benchData) {
 		out[i].path = generateRandomPath()
 		out[i].data = UUIDSha1Prefix()
 		out[i].pathItems = NewPathToItem(out[i].path)
+		out[i].strPath = out[i].pathItems.String()
+		out[i].pathItems[len(out[i].pathItems)-1].Index = IntPointer(0)
 	}
 	return
 }
@@ -747,6 +750,17 @@ func BenchmarkOrderdNavigableMapSet(b *testing.B) {
 	}
 }
 
+func BenchmarkOrderdNavigableMapSet2(b *testing.B) {
+	nm := NewOrderedNavigableMap()
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		for _, data := range gen {
+			if err := nm.Set2(&FullPath{PathItems: data.pathItems, Path: data.strPath}, NewNMData(data.data)); err != nil {
+				b.Log(err, data.path)
+			}
+		}
+	}
+}
 func BenchmarkNavigableMapSet(b *testing.B) {
 	nm := NavigableMap2{}
 	b.ResetTimer()

@@ -155,7 +155,8 @@ func appendDNSAnswer(msg *dns.Msg) (err error) {
 // updateDNSMsgFromNM will update DNS message with values from NavigableMap
 func updateDNSMsgFromNM(msg *dns.Msg, nm *utils.OrderedNavigableMap) (err error) {
 	msgFields := make(map[string]struct{}) // work around to NMap issue
-	for _, val := range nm.GetOrder() {
+	for el := nm.GetFirstElement(); el != nil; el = el.Next() {
+		val := el.Value
 		var nmIt utils.NMInterface
 		if nmIt, err = nm.Field(val); err != nil {
 			return

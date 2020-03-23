@@ -22,6 +22,13 @@ import (
 	"strconv"
 )
 
+// FullPath is the path to the item with all the needed fields
+type FullPath struct {
+	PathItems PathItems
+	Path      string
+	// PathSlice []string
+}
+
 // NewPathToItem returns the prelucrated path to the item
 func NewPathToItem(path []string) (pItms PathItems) {
 	pItms = make(PathItems, len(path))
