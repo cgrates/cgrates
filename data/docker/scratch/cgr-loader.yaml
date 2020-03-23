@@ -3,15 +3,14 @@ services:
   cgr-loader:
     image: dkr.cgrates.org/nightly/cgr-loader
     container_name: cgr-loader
-    volumes:
-      - ../../conf/samples/docker/:/etc/cgrates/:ro
-      - ../../tariffplans/tutorial/:/data/:ro
     environment:
       - DOCKER_IP=cgr-engine
-    command: /cgr-loader -config_path=/etc/cgrates/ -path=/data/ -caches_address="conn1" -scheduler_address="conn1" -verbose
+    stdin_open: true
+    tty: true
+    command: /cgr-loader -config_path=https://raw.githubusercontent.com/cgrates/cgrates/master/data/conf/samples/docker/cgrates.json -path=https://raw.githubusercontent.com/cgrates/cgrates/master/data/tariffplans/tutorial/ -caches_address="conn1" -scheduler_address="conn1" -verbose
 networks:
   default:
     external:
       name: cgrates-net
 
-# sudo docker-compose -f cgr-loader.yaml up
+# sudo docker-compose -f cgr-loader.yaml run --rm cgr-loader

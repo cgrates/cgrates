@@ -34,6 +34,8 @@ cgrates (0.11.0~dev) UNRELEASED; urgency=medium
   * [Migrator] Auto discover tenant from key instead of taking it from config
   * [Templates] Fixed missing "*" for strip and pading strategy
   * [DiameterAgent] Added RAR support
+  * [Loader] Added support to load CSV files from URL
+  * [Loader] Added configurable gapi_credentials
 
  -- Alexandru Tripon <alexandru.tripon@itsyscom.com>  Wed, 19 Feb 2020 13:25:52 +0200
 
