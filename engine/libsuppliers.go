@@ -162,21 +162,21 @@ func (sSpls *SortedSuppliers) Digest() string {
 }
 func (ss *SortedSupplier) AsNavigableMap() (nm utils.NavigableMap2) {
 	nm = utils.NavigableMap2{
-		"SupplierID":         utils.NewNMInterface(ss.SupplierID),
-		"SupplierParameters": utils.NewNMInterface(ss.SupplierParameters),
+		"SupplierID":         utils.NewNMData(ss.SupplierID),
+		"SupplierParameters": utils.NewNMData(ss.SupplierParameters),
 	}
 	sd := utils.NavigableMap2{}
 	for k, d := range ss.SortingData {
-		sd[k] = utils.NewNMInterface(d)
+		sd[k] = utils.NewNMData(d)
 	}
 	nm["SortingData"] = sd
 	return
 }
 func (sSpls *SortedSuppliers) AsNavigableMap() (nm utils.NavigableMap2) {
 	nm = utils.NavigableMap2{
-		"ProfileID": utils.NewNMInterface(sSpls.ProfileID),
-		"Sorting":   utils.NewNMInterface(sSpls.Sorting),
-		"Count":     utils.NewNMInterface(sSpls.Count),
+		"ProfileID": utils.NewNMData(sSpls.ProfileID),
+		"Sorting":   utils.NewNMData(sSpls.Sorting),
+		"Count":     utils.NewNMData(sSpls.Count),
 	}
 	sm := make(utils.NMSlice, len(sSpls.SortedSuppliers))
 	for i, ss := range sSpls.SortedSuppliers {

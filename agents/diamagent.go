@@ -145,13 +145,13 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 	}
 	diamDP := newDADataProvider(c, m)
 	reqVars := utils.NavigableMap2{
-		utils.OriginHost:  utils.NewNMInterface(da.cgrCfg.DiameterAgentCfg().OriginHost), // used in templates
-		utils.OriginRealm: utils.NewNMInterface(da.cgrCfg.DiameterAgentCfg().OriginRealm),
-		utils.ProductName: utils.NewNMInterface(da.cgrCfg.DiameterAgentCfg().ProductName),
-		utils.MetaApp:     utils.NewNMInterface(dApp.Name),
-		utils.MetaAppID:   utils.NewNMInterface(dApp.ID),
-		utils.MetaCmd:     utils.NewNMInterface(dCmd.Short + "R"),
-		utils.RemoteHost:  utils.NewNMInterface(c.RemoteAddr().String()),
+		utils.OriginHost:  utils.NewNMData(da.cgrCfg.DiameterAgentCfg().OriginHost), // used in templates
+		utils.OriginRealm: utils.NewNMData(da.cgrCfg.DiameterAgentCfg().OriginRealm),
+		utils.ProductName: utils.NewNMData(da.cgrCfg.DiameterAgentCfg().ProductName),
+		utils.MetaApp:     utils.NewNMData(dApp.Name),
+		utils.MetaAppID:   utils.NewNMData(dApp.ID),
+		utils.MetaCmd:     utils.NewNMData(dCmd.Short + "R"),
+		utils.RemoteHost:  utils.NewNMData(c.RemoteAddr().String()),
 	}
 	// build the negative error answer
 	diamErr, err := diamErr(
@@ -400,7 +400,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 		if err = da.connMgr.Call(da.cgrCfg.DiameterAgentCfg().SessionSConns, da, utils.SessionSv1ProcessCDR,
 			&utils.CGREventWithArgDispatcher{CGREvent: cgrEv,
 				ArgDispatcher: cgrArgs.ArgDispatcher}, rplyCDRs); err != nil {
-			agReq.CGRReply.Set(utils.PathItems{{Field: utils.Error}}, utils.NewNMInterface(err.Error()))
+			agReq.CGRReply.Set(utils.PathItems{{Field: utils.Error}}, utils.NewNMData(err.Error()))
 		}
 	}
 	if err = agReq.SetFields(reqProcessor.ReplyFields); err != nil {

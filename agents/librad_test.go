@@ -97,9 +97,9 @@ func TestRadComposedFieldValue(t *testing.T) {
 		t.Error(err)
 	}
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", nil, nil, nil)
-	agReq.Vars.Set(utils.PathItems{{Field: MetaRadReqType}}, utils.NewNMInterface(MetaRadAcctStart))
-	agReq.Vars.Set(utils.PathItems{{Field: "Cisco"}}, utils.NewNMInterface("CGR1"))
-	agReq.Vars.Set(utils.PathItems{{Field: "User-Name"}}, utils.NewNMInterface("flopsy"))
+	agReq.Vars.Set(utils.PathItems{{Field: MetaRadReqType}}, utils.NewNMData(MetaRadAcctStart))
+	agReq.Vars.Set(utils.PathItems{{Field: "Cisco"}}, utils.NewNMData("CGR1"))
+	agReq.Vars.Set(utils.PathItems{{Field: "User-Name"}}, utils.NewNMData("flopsy"))
 	eOut := "*radAcctStart|flopsy|CGR1"
 	if out := radComposedFieldValue(pkt, agReq,
 		config.NewRSRParsersMustCompile("~*vars.*radReqType;|;~*vars.User-Name;|;~*vars.Cisco", true, utils.INFIELD_SEP)); out != eOut {
@@ -117,9 +117,9 @@ func TestRadFieldOutVal(t *testing.T) {
 	}
 	eOut := fmt.Sprintf("%s|flopsy|CGR1", MetaRadAcctStart)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", nil, nil, nil)
-	agReq.Vars.Set(utils.PathItems{{Field: MetaRadReqType}}, utils.NewNMInterface(MetaRadAcctStart))
-	agReq.Vars.Set(utils.PathItems{{Field: "Cisco"}}, utils.NewNMInterface("CGR1"))
-	agReq.Vars.Set(utils.PathItems{{Field: "User-Name"}}, utils.NewNMInterface("flopsy"))
+	agReq.Vars.Set(utils.PathItems{{Field: MetaRadReqType}}, utils.NewNMData(MetaRadAcctStart))
+	agReq.Vars.Set(utils.PathItems{{Field: "Cisco"}}, utils.NewNMData("CGR1"))
+	agReq.Vars.Set(utils.PathItems{{Field: "User-Name"}}, utils.NewNMData("flopsy"))
 	cfgFld := &config.FCTemplate{Tag: "ComposedTest", Type: utils.META_COMPOSED, Path: utils.Destination,
 		Value: config.NewRSRParsersMustCompile("~*vars.*radReqType;|;~*vars.User-Name;|;~*vars.Cisco", true, utils.INFIELD_SEP), Mandatory: true}
 	cfgFld.ComputePath()
@@ -142,9 +142,9 @@ func TestRadReplyAppendAttributes(t *testing.T) {
 		v.ComputePath()
 	}
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", nil, nil, nil)
-	agReq.CGRReply.Set(utils.PathItems{{Field: utils.CapMaxUsage}}, utils.NewNMInterface(time.Duration(time.Hour)))
-	agReq.CGRReply.Set(utils.PathItems{{Field: utils.CapAttributes}, {Field: "RadReply"}}, utils.NewNMInterface("AccessAccept"))
-	agReq.CGRReply.Set(utils.PathItems{{Field: utils.CapAttributes}, {Field: utils.Account}}, utils.NewNMInterface("1001"))
+	agReq.CGRReply.Set(utils.PathItems{{Field: utils.CapMaxUsage}}, utils.NewNMData(time.Duration(time.Hour)))
+	agReq.CGRReply.Set(utils.PathItems{{Field: utils.CapAttributes}, {Field: "RadReply"}}, utils.NewNMData("AccessAccept"))
+	agReq.CGRReply.Set(utils.PathItems{{Field: utils.CapAttributes}, {Field: utils.Account}}, utils.NewNMData("1001"))
 	if err := radReplyAppendAttributes(rply, agReq, rplyFlds); err != nil {
 		t.Error(err)
 	}

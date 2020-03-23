@@ -44,14 +44,14 @@ func (nmi *NMItem) Interface() interface{} {
 }
 
 // Field not implemented only used in order to implement the NM interface
-func (nmi *NMItem) Field(path utils.PathItems) (val utils.NM, err error) {
+func (nmi *NMItem) Field(path utils.PathItems) (val utils.NMInterface, err error) {
 	return nil, utils.ErrNotImplemented
 }
 
 // Set not implemented only used in order to implement the NM interface
 // special case when the path is empty the interface should be seted
 // this is in order to modify the wraped interface
-func (nmi *NMItem) Set(path utils.PathItems, val utils.NM) (err error) {
+func (nmi *NMItem) Set(path utils.PathItems, val utils.NMInterface) (err error) {
 	if len(path) != 0 {
 		return utils.ErrWrongPath
 	}
@@ -66,7 +66,7 @@ func (nmi *NMItem) Remove(path utils.PathItems) (err error) {
 
 // Type returns the type of the NM interface
 func (nmi *NMItem) Type() utils.NMType {
-	return utils.NMInterfaceType
+	return utils.NMDataType
 }
 
 // Empty returns true if the NM is empty(no data)
@@ -75,12 +75,12 @@ func (nmi *NMItem) Empty() bool {
 }
 
 // GetField not implemented only used in order to implement the NM interface
-func (nmi *NMItem) GetField(path utils.PathItem) (val utils.NM, err error) {
+func (nmi *NMItem) GetField(path utils.PathItem) (val utils.NMInterface, err error) {
 	return nil, utils.ErrNotImplemented
 }
 
 // SetField not implemented only used in order to implement the NM interface
-func (nmi *NMItem) SetField(path utils.PathItem, val utils.NM) (err error) {
+func (nmi *NMItem) SetField(path utils.PathItem, val utils.NMInterface) (err error) {
 	return utils.ErrNotImplemented
 }
 
@@ -102,7 +102,7 @@ type XMLElement struct {
 func NMAsXMLElements(nm *utils.OrderedNavigableMap) (ents []*XMLElement, err error) {
 	pathIdx := make(map[string]*XMLElement) // Keep the index of elements based on path
 	for _, val := range nm.GetOrder() {
-		var nmIt utils.NM
+		var nmIt utils.NMInterface
 		if nmIt, err = nm.Field(val); err != nil {
 			return
 		}

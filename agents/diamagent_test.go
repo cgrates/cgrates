@@ -111,12 +111,12 @@ func TestProcessRequest(t *testing.T) {
 		v.ComputePath()
 	}
 	reqVars := utils.NavigableMap2{
-		utils.OriginHost:  utils.NewNMInterface(config.CgrConfig().DiameterAgentCfg().OriginHost),
-		utils.OriginRealm: utils.NewNMInterface(config.CgrConfig().DiameterAgentCfg().OriginRealm),
-		utils.ProductName: utils.NewNMInterface(config.CgrConfig().DiameterAgentCfg().ProductName),
-		utils.MetaApp:     utils.NewNMInterface("appName"),
-		utils.MetaAppID:   utils.NewNMInterface("appID"),
-		utils.MetaCmd:     utils.NewNMInterface("cmdR"),
+		utils.OriginHost:  utils.NewNMData(config.CgrConfig().DiameterAgentCfg().OriginHost),
+		utils.OriginRealm: utils.NewNMData(config.CgrConfig().DiameterAgentCfg().OriginRealm),
+		utils.ProductName: utils.NewNMData(config.CgrConfig().DiameterAgentCfg().ProductName),
+		utils.MetaApp:     utils.NewNMData("appName"),
+		utils.MetaAppID:   utils.NewNMData("appID"),
+		utils.MetaCmd:     utils.NewNMData("cmdR"),
 	}
 
 	sS := &testMockSessionConn{calls: map[string]func(arg interface{}, rply interface{}) error{

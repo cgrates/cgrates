@@ -59,19 +59,19 @@ type NMType byte
 
 // posible NMType
 const (
-	NMInterfaceType NMType = iota
+	NMDataType NMType = iota
 	NMMapType
 	NMSliceType
 )
 
-// NM the basic interface
-type NM interface {
+// NMInterface the basic interface
+type NMInterface interface {
 	String() string
 	Interface() interface{}
-	Field(path PathItems) (val NM, err error)
-	GetField(path PathItem) (val NM, err error)
-	SetField(path PathItem, val NM) (err error)
-	Set(path PathItems, val NM) (err error)
+	Field(path PathItems) (val NMInterface, err error)
+	GetField(path PathItem) (val NMInterface, err error)
+	SetField(path PathItem, val NMInterface) (err error)
+	Set(path PathItems, val NMInterface) (err error)
 	Remove(path PathItems) (err error)
 	Type() NMType
 	Empty() bool
@@ -80,13 +80,13 @@ type NM interface {
 
 // navMap subset of function for NM interface
 type navMap interface {
-	Field(path PathItems) (val NM, err error)
-	Set(path PathItems, val NM) (err error)
+	Field(path PathItems) (val NMInterface, err error)
+	Set(path PathItems, val NMInterface) (err error)
 }
 
 // AppendNavMapVal appends value to the map
-func AppendNavMapVal(nm navMap, fldPath PathItems, val NM) (err error) {
-	var prevItm NM
+func AppendNavMapVal(nm navMap, fldPath PathItems, val NMInterface) (err error) {
+	var prevItm NMInterface
 	var indx int
 	if prevItm, err = nm.Field(fldPath); err != nil {
 		if err != ErrNotFound {
@@ -100,8 +100,8 @@ func AppendNavMapVal(nm navMap, fldPath PathItems, val NM) (err error) {
 }
 
 // ComposeNavMapVal compose adds value to prevision item
-func ComposeNavMapVal(nm navMap, fldPath PathItems, val NM) (err error) {
-	var prevItmSlice NM
+func ComposeNavMapVal(nm navMap, fldPath PathItems, val NMInterface) (err error) {
+	var prevItmSlice NMInterface
 	var indx int
 	if prevItmSlice, err = nm.Field(fldPath); err != nil {
 		if err != ErrNotFound {
@@ -109,12 +109,12 @@ func ComposeNavMapVal(nm navMap, fldPath PathItems, val NM) (err error) {
 		}
 	} else {
 		indx = prevItmSlice.Len() - 1
-		var prevItm NM
+		var prevItm NMInterface
 		if prevItm, err = prevItmSlice.GetField(PathItem{Index: &indx}); err != nil {
 			if err != ErrNotFound {
 				return
 			}
-		} else if err = val.Set(nil, NewNMInterface(IfaceAsString(prevItm.Interface())+IfaceAsString(val.Interface()))); err != nil {
+		} else if err = val.Set(nil, NewNMData(IfaceAsString(prevItm.Interface())+IfaceAsString(val.Interface()))); err != nil {
 			return
 		}
 	}

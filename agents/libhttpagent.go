@@ -247,7 +247,7 @@ func (xE *haTextPlainEncoder) Encode(nM *utils.OrderedNavigableMap) (err error) 
 	var str, nmPath string
 	msgFields := make(map[string]string) // work around to NMap issue
 	for _, val := range nM.GetOrder() {
-		var nmIt utils.NM
+		var nmIt utils.NMInterface
 		if nmIt, err = nM.Field(val); err != nil {
 			return
 		}
