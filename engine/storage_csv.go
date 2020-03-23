@@ -721,7 +721,7 @@ func getClient(config *oauth2.Config, configPath string) (*http.Client, error) {
 	// The file token.json stores the user's access and refresh tokens, and is
 	// created automatically when the authorization flow completes for the first
 	// time.
-	tokFile := path.Join(configPath, utils.GoogleConfigDirName, utils.GoogleTokenFileName)
+	tokFile := path.Join(configPath, utils.GoogleTokenFileName)
 	tok, err := tokenFromFile(tokFile)
 	if err != nil {
 		tok, err = getTokenFromWeb(config)
@@ -776,20 +776,42 @@ func saveToken(path string, token *oauth2.Token) {
 	json.NewEncoder(f).Encode(token)
 }
 
-func newSheet(configPath string) (sht *sheets.Service, err error) { //*google_api
-	b, err := ioutil.ReadFile(path.Join(configPath, utils.GoogleConfigDirName, utils.GoogleCredentialsFileName))
-	if err != nil {
-		err = fmt.Errorf("Unable to read client secret file: %v", err)
-		return
+func newSheet(cfgPath string) (sht *sheets.Service, err error) { //*google_api
+	var cred []byte
+	var cfgPathDir string
+	raw := config.CgrConfig().LoaderCgrCfg().GapiCredentials
+	if len(raw) != 0 {
+		if raw[0] == '{' && raw[len(raw)-1] == '}' {
+			cred = raw
+			if utils.IsURL(cfgPath) {
+				cfgPath = "."
+			}
+			if strings.HasSuffix(cfgPath, utils.JSNSuffix) {
+				cfgPathDir = filepath.Dir(cfgPath)
+			}
+			cfgPathDir = path.Join(cfgPathDir, utils.GoogleConfigDirName)
+			if err = os.MkdirAll(cfgPathDir, 744); err != nil {
+				return
+			}
+		} else {
+			credPath := string(raw[1 : len(raw)-1])
+			if !strings.HasSuffix(credPath, utils.JSNSuffix) {
+				credPath = path.Join(credPath, utils.GoogleCredentialsFileName)
+			}
+			if cred, err = ioutil.ReadFile(credPath); err != nil {
+				err = fmt.Errorf("Unable to read client secret file: %v", err)
+				return
+			}
+			cfgPathDir = filepath.Dir(credPath)
+		}
 	}
-
 	// If modifying these scopes, delete your previously saved token.json.
-	config, err := google.ConfigFromJSON(b, "https://www.googleapis.com/auth/spreadsheets.readonly")
+	config, err := google.ConfigFromJSON(cred, "https://www.googleapis.com/auth/spreadsheets.readonly")
 	if err != nil {
 		err = fmt.Errorf("Unable to parse client secret file to config: %v", err)
 		return
 	}
-	client, err := getClient(config, configPath)
+	client, err := getClient(config, cfgPathDir)
 	if err != nil {
 		return nil, err
 	}
