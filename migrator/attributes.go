@@ -157,9 +157,6 @@ func (m *Migrator) migrateV1ToV4AttributeProfile() (v4Attr *v4AttributeProfile, 
 	if err != nil {
 		return nil, err
 	}
-	// if m.dryRun {
-	// 	continue
-	// }
 	return
 }
 
@@ -215,13 +212,6 @@ func (m *Migrator) migrateV2ToV3AttributeProfile(v2Attr *v2AttributeProfile) (v3
 	if err != nil {
 		return nil, err
 	}
-	// remove the AttributeProfile after it was migrated
-	m.dmIN.remV2AttributeProfile(v2Attr.Tenant, v2Attr.ID)
-	// if m.dryRun {
-	// 	continue
-	// }
-
-	// Return the migrated attributeProfile
 	return v3Attr, nil
 }
 
@@ -277,11 +267,6 @@ func (m *Migrator) migrateV3ToV4AttributeProfile(v3Attr *v3AttributeProfile) (v4
 	if err != nil {
 		return nil, err
 	}
-	//remove the migrated attribute
-	m.dmIN.remV2AttributeProfile(v3Attr.Tenant, v3Attr.ID)
-	// if m.dryRun {
-	// 	continue
-	// }
 	return v4Attr, nil
 }
 
@@ -337,12 +322,6 @@ func (m *Migrator) migrateV4ToV5AttributeProfile(v4Attr *v4AttributeProfile) (v5
 	if err != nil {
 		return nil, err
 	}
-	//remove the migrated attribute
-	m.dmIN.remV2AttributeProfile(v4Attr.Tenant, v4Attr.ID)
-	// if m.dryRun {
-	// 	continue
-	// }
-
 	return v5Attr, nil
 }
 
@@ -407,61 +386,69 @@ func (m *Migrator) migrateAttributeProfileV2() (err error) {
 	var v4Attr *v4AttributeProfile
 	var v5Attr *engine.AttributeProfile
 
-	fmt.Println("BEFORE vrs[utils.Attributes]: ", vrs[utils.Attributes])
 	for {
 		// One attribute profile at a time
+		version := vrs[utils.Attributes]
 		for {
 			//Keep migrating until Attribute Profile reaches latest version
-			switch vrs[utils.Attributes] {
+			switch version {
 			case 1: // Migrate from V1 to V4
 				if v4Attr, err = m.migrateV1ToV4AttributeProfile(); err != nil && err != utils.ErrNoMoreData {
 					return err
 				} else if err == utils.ErrNoMoreData {
-					continue
+					break
 				}
 				//Update to version to 4 (shortcut)
-				vrs[utils.Attributes] = 4
+				version = 4
 			case 2: // Migrate from V2 to V3 (fallthrough untill latest version)
 				if v3Attr, err = m.migrateV2ToV3AttributeProfile(v2Attr); err != nil && err != utils.ErrNoMoreData {
 					return err
 				} else if err == utils.ErrNoMoreData {
-					continue
+					break
 				}
-				vrs[utils.Attributes] = 3
+				version = 3
 				fallthrough
 			case 3: // Migrate from V3 to V4
 				if v4Attr, err = m.migrateV3ToV4AttributeProfile(v3Attr); err != nil && err != utils.ErrNoMoreData {
 					return err
 				} else if err == utils.ErrNoMoreData {
-					continue
+					break
 				}
-				vrs[utils.Attributes] = 4
-				fmt.Println("V3toV4")
+				version = 4
 				fallthrough
 			case 4: // Migrate from V4 to V5
 				if v5Attr, err = m.migrateV4ToV5AttributeProfile(v4Attr); err != nil && err != utils.ErrNoMoreData {
 					return err
 				} else if err == utils.ErrNoMoreData {
-					continue
+
+					break
 				}
-				vrs[utils.Attributes] = 5
-				fmt.Println("V4toV5")
+				version = 5
 			}
-			//update the encoded string 5 with current verison
-			if vrs[utils.Attributes] == 5 {
+			if version == 5 || err == utils.ErrNoMoreData {
 				break
 			}
 		}
-
-		fmt.Println("v5Attr: ", utils.ToIJSON(v5Attr))
-		//Set the fresh-migrated AttributeProfile into DB
-		if err := m.dmOut.DataManager().SetAttributeProfile(v5Attr, true); err != nil {
-			fmt.Println("Exit HERE <<<<<")
-			return err
+		if err == utils.ErrNoMoreData {
+			break
 		}
 
+		if !m.dryRun {
+			if vrs[utils.Attributes] == 1 {
+				if err := m.dmOut.DataManager().DataDB().SetAttributeProfileDrv(v5Attr); err != nil {
+					return err
+				}
+			}
+			//Set the fresh-migrated AttributeProfile into DB
+			if err := m.dmOut.DataManager().SetAttributeProfile(v5Attr, true); err != nil {
+				return err
+			}
+		}
 		m.stats[utils.Attributes]++
-		break
+
+	}
+	if m.dryRun {
+		return nil
 	}
 	// All done, update version wtih current one
 	vrs = engine.Versions{utils.Attributes: engine.CurrentDataDBVersions()[utils.Attributes]}
@@ -470,6 +457,7 @@ func (m *Migrator) migrateAttributeProfileV2() (err error) {
 			fmt.Sprintf("error: <%s> when updating Attributes version into dataDB", err.Error()))
 	}
 	return m.ensureIndexesDataDB(engine.ColAttr)
+
 }
 
 func (v1AttrPrf v1AttributeProfile) AsAttributeProfile() (attrPrf *engine.AttributeProfile, err error) {

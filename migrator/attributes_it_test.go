@@ -55,8 +55,10 @@ var sTestsAttrIT = []func(t *testing.T){
 	testAttrITMigrateV4,
 	// testAttrITFlush,
 	// testAttrITV1ToV2,
-	// testAttrITFlush,
-	// testAttrITV1ToV4,
+	testAttrITFlush,
+	testAttrITV1ToV5,
+	testAttrITFlush,
+	testAttrITV2ToV5,
 }
 
 func TestAttributeITRedis(t *testing.T) {
@@ -730,7 +732,7 @@ func testAttrITV1ToV2(t *testing.T) {
 
 }
 
-func testAttrITV1ToV4(t *testing.T) {
+func testAttrITV1ToV5(t *testing.T) {
 	// contruct the v1 attribute with all fields filled up
 	mapSubstitutes := make(map[string]map[string]*v1Attribute)
 	mapSubstitutes["FL1"] = make(map[string]*v1Attribute)
@@ -740,7 +742,7 @@ func testAttrITV1ToV4(t *testing.T) {
 		Substitute: "Al1",
 		Append:     true,
 	}
-	v1Attribute := &v1AttributeProfile{
+	v1AttributeProfile1 := &v1AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "attributeprofile1",
 		Contexts:  []string{utils.MetaSessionS},
@@ -752,9 +754,25 @@ func testAttrITV1ToV4(t *testing.T) {
 		Attributes: mapSubstitutes,
 		Weight:     20,
 	}
+	//second attribute profile
+	v1AttributeProfile2 := &v1AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "attributeprofile2",
+		Contexts:  []string{utils.MetaSessionS},
+		FilterIDs: []string{"*string:test:test"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2020, 4, 18, 14, 25, 0, 0, time.UTC),
+		},
+		Attributes: mapSubstitutes,
+		Weight:     20,
+	}
 
 	//set attribute into inDB
-	attrMigrator.dmIN.setV1AttributeProfile(v1Attribute)
+	attrMigrator.dmIN.setV1AttributeProfile(v1AttributeProfile1)
+	//set the second attr profile
+	attrMigrator.dmIN.setV1AttributeProfile(v1AttributeProfile2)
+
 	//set attributes version into DB
 	if err := attrMigrator.dmIN.DataManager().DataDB().SetVersions(engine.Versions{utils.Attributes: 1}, true); err != nil {
 		t.Errorf("error: <%s> when updating Attributes version into dataDB", err.Error())
@@ -764,9 +782,27 @@ func testAttrITV1ToV4(t *testing.T) {
 	if err != nil {
 		t.Error("Error converting Substitute from string to RSRParser: ", err)
 	}
-	eOut := &engine.AttributeProfile{
+	eOut1 := &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "attributeprofile1",
+		Contexts:  []string{utils.MetaSessionS},
+		FilterIDs: []string{"*string:test:test"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2020, 4, 18, 14, 25, 0, 0, time.UTC),
+		},
+		Attributes: []*engine.Attribute{
+			&engine.Attribute{
+				FilterIDs: []string{"*string:FL1:In1"},
+				Path:      utils.MetaReq + utils.NestingSep + "FL1",
+				Type:      utils.MetaVariable,
+				Value:     sbstPrsr,
+			}},
+		Weight: 20,
+	}
+	eOut2 := &engine.AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "attributeprofile2",
 		Contexts:  []string{utils.MetaSessionS},
 		FilterIDs: []string{"*string:test:test"},
 		ActivationInterval: &utils.ActivationInterval{
@@ -793,15 +829,159 @@ func testAttrITV1ToV4(t *testing.T) {
 	} else if vrs[utils.Attributes] != 5 {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.Attributes])
 	}
-	//check the content
-	result, err := attrMigrator.dmOut.DataManager().GetAttributeProfile("cgrates.com",
+
+	//check the first AttributeProfile
+	result, err := attrMigrator.dmOut.DataManager().GetAttributeProfile("cgrates.org",
 		"attributeprofile1", false, false, utils.NonTransactional)
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err) //only encoded map or array can be decoded into a struct
+
+	} else {
+		result.Compile()
+		eOut1.Compile()
+		if !reflect.DeepEqual(result, eOut1) {
+			t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut1), utils.ToJSON(result))
+		}
 	}
-	result.Compile()
-	eOut.Compile()
-	if !reflect.DeepEqual(result, eOut) {
-		t.Errorf("Expecting: %+v, received: %+v", eOut, result)
+	//check the second AttributeProfile
+	result, err = attrMigrator.dmOut.DataManager().GetAttributeProfile("cgrates.org",
+		"attributeprofile2", false, false, utils.NonTransactional)
+	if err != nil {
+		t.Error(err)
+	} else {
+		result.Compile()
+		eOut2.Compile()
+		if !reflect.DeepEqual(result, eOut2) {
+			t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut2), utils.ToJSON(result))
+		}
+	}
+}
+
+func testAttrITV2ToV5(t *testing.T) {
+	// contruct the v1 attribute profile with all fields filled up
+	sbstPrsr, err := config.NewRSRParsers("Al1", true, config.CgrConfig().GeneralCfg().RSRSep)
+	if err != nil {
+		t.Error("Error converting Substitute from string to RSRParser: ", err)
+	}
+	v2AttributeProfile1 := &v2AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "attributeprofile1",
+		Contexts:  []string{utils.MetaSessionS},
+		FilterIDs: []string{"*string:test:test"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2020, 4, 18, 14, 25, 0, 0, time.UTC),
+		},
+		Attributes: []*v2Attribute{
+			&v2Attribute{
+				FieldName:  "FL1",
+				Initial:    "In1",
+				Substitute: sbstPrsr,
+				Append:     true,
+			}},
+		Weight: 20,
+	}
+	//second attribute profile
+	v2AttributeProfile2 := &v2AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "attributeprofile2",
+		Contexts:  []string{utils.MetaSessionS},
+		FilterIDs: []string{"*string:test:test"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2020, 4, 18, 14, 25, 0, 0, time.UTC),
+		},
+		Attributes: []*v2Attribute{
+			&v2Attribute{
+				FieldName:  "FL1",
+				Initial:    "In1",
+				Substitute: sbstPrsr,
+				Append:     true,
+			}},
+		Weight: 20,
+	}
+
+	//set attribute into inDB
+	attrMigrator.dmIN.setV2AttributeProfile(v2AttributeProfile1)
+	//set the second attr profile
+	attrMigrator.dmIN.setV2AttributeProfile(v2AttributeProfile2)
+
+	//set attributes version into DB
+	if err := attrMigrator.dmIN.DataManager().DataDB().SetVersions(engine.Versions{utils.Attributes: 2}, true); err != nil {
+		t.Errorf("error: <%s> when updating Attributes version into dataDB", err.Error())
+	}
+
+	eOut1 := &engine.AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "attributeprofile1",
+		Contexts:  []string{utils.MetaSessionS},
+		FilterIDs: []string{"*string:test:test"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2020, 4, 18, 14, 25, 0, 0, time.UTC),
+		},
+		Attributes: []*engine.Attribute{
+			&engine.Attribute{
+				FilterIDs: []string{"*string:FL1:In1"},
+				Path:      utils.MetaReq + utils.NestingSep + "FL1",
+				Type:      utils.MetaVariable,
+				Value:     sbstPrsr,
+			}},
+		Weight: 20,
+	}
+	eOut2 := &engine.AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "attributeprofile2",
+		Contexts:  []string{utils.MetaSessionS},
+		FilterIDs: []string{"*string:test:test"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2020, 4, 18, 14, 25, 0, 0, time.UTC),
+		},
+		Attributes: []*engine.Attribute{
+			&engine.Attribute{
+				FilterIDs: []string{"*string:FL1:In1"},
+				Path:      utils.MetaReq + utils.NestingSep + "FL1",
+				Type:      utils.MetaVariable,
+				Value:     sbstPrsr,
+			}},
+		Weight: 20,
+	}
+
+	//Migrate to latest version
+	if err := attrMigrator.migrateAttributeProfileV2(); err != nil {
+		t.Error(err)
+	}
+	//check the version
+	if vrs, err := attrMigrator.dmOut.DataManager().DataDB().GetVersions(""); err != nil {
+		t.Error(err)
+	} else if vrs[utils.Attributes] != 5 {
+		t.Errorf("Unexpected version returned: %d", vrs[utils.Attributes])
+	}
+
+	//check the first AttributeProfile
+	result, err := attrMigrator.dmOut.DataManager().GetAttributeProfile("cgrates.org",
+		"attributeprofile1", false, false, utils.NonTransactional)
+	if err != nil {
+		t.Error(err) //only encoded map or array can be decoded into a struct
+
+	} else {
+		result.Compile()
+		eOut1.Compile()
+		if !reflect.DeepEqual(result, eOut1) {
+			t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut1), utils.ToJSON(result))
+		}
+	}
+	//check the second AttributeProfile
+	result, err = attrMigrator.dmOut.DataManager().GetAttributeProfile("cgrates.org",
+		"attributeprofile2", false, false, utils.NonTransactional)
+	if err != nil {
+		t.Error(err)
+	} else {
+		result.Compile()
+		eOut2.Compile()
+		if !reflect.DeepEqual(result, eOut2) {
+			t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut2), utils.ToJSON(result))
+		}
 	}
 }
