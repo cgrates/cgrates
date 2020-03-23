@@ -101,14 +101,15 @@ type XMLElement struct {
 // considers each value returned by .Values() in the form of []*NMItem, otherwise errors
 func NMAsXMLElements(nm *utils.OrderedNavigableMap) (ents []*XMLElement, err error) {
 	pathIdx := make(map[string]*XMLElement) // Keep the index of elements based on path
-	for _, val := range nm.GetOrder() {
+	for el := nm.GetFirstElement(); el != nil; el = el.Next() {
+		path := el.Value
 		var nmIt utils.NMInterface
-		if nmIt, err = nm.Field(val); err != nil {
+		if nmIt, err = nm.Field(path); err != nil {
 			return
 		}
 		nmItm, isNMItem := nmIt.(*NMItem)
 		if !isNMItem {
-			return nil, fmt.Errorf("value: %+v is not []*NMItem", val)
+			return nil, fmt.Errorf("value: %+v is not []*NMItem", path)
 		}
 		if nmItm.Config != nil && nmItm.Config.NewBranch {
 			pathIdx = make(map[string]*XMLElement) // reset cache so we can start having other elements with same path
@@ -192,8 +193,8 @@ func NMAsCGREvent(nM *utils.OrderedNavigableMap, tnt string, pathSep string) (cg
 	if nM == nil {
 		return
 	}
-	order := nM.GetOrder()
-	if len(order) == 0 {
+	el := nM.GetFirstElement()
+	if el == nil {
 		return
 	}
 	cgrEv = &utils.CGREvent{
@@ -202,7 +203,8 @@ func NMAsCGREvent(nM *utils.OrderedNavigableMap, tnt string, pathSep string) (cg
 		Time:   utils.TimePointer(time.Now()),
 		Event:  make(map[string]interface{}),
 	}
-	for _, branchPath := range order {
+	for ; el != nil; el = el.Next() {
+		branchPath := el.Value
 		val, _ := nM.Field(branchPath) // this should never return error cause we get the path from the order
 		opath := utils.GetPathWithoutIndex(branchPath.String())
 		if nmItm, isNMItem := val.(*NMItem); isNMItem { // special case when we have added multiple items inside a key, used in agents

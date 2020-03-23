@@ -416,7 +416,8 @@ func (dP *diameterDP) FieldAsInterface(fldPath []string) (data interface{}, err 
 // updateDiamMsgFromNavMap will update the diameter message with items from navigable map
 func updateDiamMsgFromNavMap(m *diam.Message, navMp *utils.OrderedNavigableMap, tmz string) (err error) {
 	// write reply into message
-	for _, val := range navMp.GetOrder() {
+	for el := navMp.GetFirstElement(); el != nil; el = el.Next() {
+		val := el.Value
 		var nmIt utils.NMInterface
 		if nmIt, err = navMp.Field(val); err != nil {
 			return
