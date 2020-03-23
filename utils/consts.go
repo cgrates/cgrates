@@ -709,6 +709,7 @@ const (
 	FileName                  = "FileName"
 	MetaRadauth               = "*radauth"
 	UserPassword              = "UserPassword"
+	RadauthFailed             = "RADAUTH_FAILED"
 )
 
 // Migrator Action

@@ -304,10 +304,10 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 		}
 	case utils.MetaCDRs: // allow this method
 	case utils.MetaRadauth:
-		if ok, err := authReq(req, agReq); err != nil {
+		if ok, err := radauthReq(req, agReq); err != nil {
 			return false, err
 		} else if !ok {
-			agReq.CGRReply.Set([]string{utils.Error}, "Failed to authenticate request", false, false)
+			agReq.CGRReply.Set([]string{utils.Error}, utils.RadauthFailed, false, false)
 		}
 	}
 	// separate request so we can capture the Terminate/Event also here

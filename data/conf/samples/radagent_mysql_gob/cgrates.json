@@ -102,18 +102,19 @@
 			],
 		},
 		{
-			"id": "RadiusPAPAuth",
-			"filters": ["*string:~*vars.*radReqType:*radAuth","*exists:~*req.User-Password:"],
+			"id": "RadiusAuthProcessor",
+			"filters": ["*string:~*vars.*radReqType:*radAuth"],
 			"flags": ["*radauth", "*log"],
 			"request_fields":[
 				{"tag": "UserPassword", "path": "*vars.UserPassword", "type": "*variable",
 					"value": "~*cgrep.Attributes.PasswordFromAttributes"},
 			],
 			"reply_fields":[
-				{"filters": ["*empty:~*cgrep.Error:"], "type": "*none", "blocker": true},
-				{"filters": ["*notempty:~*cgrep.Error:"], "type": "*removeall", "path": "*rep"},
-				{"tag": "Code", "path": "*rep.*radReplyCode", "type": "*constant", "value": "AccessReject"},
-				{"tag": "ReplyMessage", "path": "*rep.Reply-Message", "type": "*variable", "value": "~*cgrep.Error"}
+				{"tag":"RemoveAddedFields", "filters": ["*notempty:~*cgrep.Error:"], "type": "*removeall", "path": "*rep"},
+				{"tag": "Code", "path": "*rep.*radReplyCode", "filters": ["*notempty:~*cgrep.Error:"],
+					"type": "*constant", "value": "AccessReject"},
+				{"tag": "ReplyMessage", "path": "*rep.Reply-Message", "filters": ["*notempty:~*cgrep.Error:"],
+					"type": "*variable", "value": "~*cgrep.Error"}
 			]
 		},
 		{

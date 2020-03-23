@@ -8,7 +8,6 @@ a.out
 *workspace
 docs/_*
 bin
-.idea
 dean*
 data/vagrant/.vagrant
 data/vagrant/vagrant_ansible_inventory_default
