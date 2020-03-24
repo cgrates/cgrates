@@ -859,17 +859,6 @@ func TestDiameterAgentJsonCfg(t *testing.T) {
 					Type:      utils.StringPointer(utils.MetaVariable),
 					Value:     utils.StringPointer("~*vars.*appid"),
 					Mandatory: utils.BoolPointer(true)},
-				{
-					Tag:       utils.StringPointer("UserName"),
-					Path:      utils.StringPointer(fmt.Sprintf("%s.User-Name", utils.MetaDiamreq)),
-					Type:      utils.StringPointer(utils.MetaVariable),
-					Value:     utils.StringPointer("~*req.User-Name"),
-					Mandatory: utils.BoolPointer(true)},
-				{
-					Tag:   utils.StringPointer("OriginStateID"),
-					Path:  utils.StringPointer(fmt.Sprintf("%s.Origin-State-Id", utils.MetaDiamreq)),
-					Type:  utils.StringPointer(utils.META_CONSTANT),
-					Value: utils.StringPointer("1")},
 			},
 			utils.MetaRAR: {
 				{
@@ -908,17 +897,6 @@ func TestDiameterAgentJsonCfg(t *testing.T) {
 					Type:      utils.StringPointer(utils.MetaVariable),
 					Value:     utils.StringPointer("~*vars.*appid"),
 					Mandatory: utils.BoolPointer(true)},
-				{
-					Tag:       utils.StringPointer("UserName"),
-					Path:      utils.StringPointer(fmt.Sprintf("%s.User-Name", utils.MetaDiamreq)),
-					Type:      utils.StringPointer(utils.MetaVariable),
-					Value:     utils.StringPointer("~*req.User-Name"),
-					Mandatory: utils.BoolPointer(true)},
-				{
-					Tag:   utils.StringPointer("OriginStateID"),
-					Path:  utils.StringPointer(fmt.Sprintf("%s.Origin-State-Id", utils.MetaDiamreq)),
-					Type:  utils.StringPointer(utils.META_CONSTANT),
-					Value: utils.StringPointer("1")},
 				{
 					Tag:   utils.StringPointer("ReAuthRequestType"),
 					Path:  utils.StringPointer(fmt.Sprintf("%s.Re-Auth-Request-Type", utils.MetaDiamreq)),
