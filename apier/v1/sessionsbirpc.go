@@ -53,7 +53,7 @@ func (ssv1 *SessionSv1) Handlers() map[string]interface{} {
 		utils.SessionSv1ActivateSessions:   ssv1.BiRPCv1ActivateSessions,
 		utils.SessionSv1DeactivateSessions: ssv1.BiRPCv1DeactivateSessions,
 
-		utils.SessionSv1SendRAR: ssv1.BiRPCV1SendRAR,
+		utils.SessionSv1ReAuthorize: ssv1.BiRPCV1ReAuthorize,
 	}
 }
 
@@ -165,8 +165,8 @@ func (ssv1 *SessionSv1) BiRPCv1DeactivateSessions(clnt *rpc2.Client,
 	return ssv1.Ss.BiRPCv1DeactivateSessions(clnt, args, reply)
 }
 
-// BiRPCV1SendRAR sends the RAR for filterd sessions
-func (ssv1 *SessionSv1) BiRPCV1SendRAR(clnt *rpc2.Client,
+// BiRPCV1ReAuthorize sends the RAR for filterd sessions
+func (ssv1 *SessionSv1) BiRPCV1ReAuthorize(clnt *rpc2.Client,
 	args *utils.SessionFilter, reply *string) error {
-	return ssv1.Ss.BiRPCv1SendRAR(clnt, args, reply)
+	return ssv1.Ss.BiRPCv1ReAuthorize(clnt, args, reply)
 }

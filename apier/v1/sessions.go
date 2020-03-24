@@ -142,7 +142,7 @@ func (ssv1 *SessionSv1) Call(serviceMethod string,
 	return utils.APIerRPCCall(ssv1, serviceMethod, args, reply)
 }
 
-// SendRAR sends the RAR for filterd sessions
-func (smgv1 *SessionSv1) SendRAR(args *utils.SessionFilter, reply *string) error {
-	return smgv1.Ss.BiRPCv1SendRAR(nil, args, reply)
+// ReAuthorize sends the RAR for filterd sessions
+func (ssv1 *SessionSv1) ReAuthorize(args *utils.SessionFilter, reply *string) error {
+	return ssv1.Ss.BiRPCv1ReAuthorize(nil, args, reply)
 }

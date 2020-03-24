@@ -416,7 +416,7 @@ const CGRATES_CFG_JSON = `
 	"synced_conn_requests": false,								// process one request at the time per connection
 	"asr_template": "",											// enable AbortSession message being sent to client on DisconnectSession
 	"rar_template": "",											// template used to build the Re-Auth-Request
-	"disconnect_method": "*asr",								// the request to send to diameter on DisconnectSession <*asr|*rar>
+	"forced_disconnect": "*none",								// the request to send to diameter on DisconnectSession <*none|*asr|*rar>
 	"templates":{												// default message templates
 		"*err": [
 				{"tag": "SessionId", "path": "*rep.Session-Id", "type": "*variable",

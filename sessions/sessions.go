@@ -3618,21 +3618,21 @@ func (sS *SessionS) sendRar(s *Session) (err error) {
 	clnt := sS.biJClnt(s.ClientConnID)
 	if clnt == nil {
 		return fmt.Errorf("calling %s requires bidirectional JSON connection, connID: <%s>",
-			utils.SessionSv1SendRAR, s.ClientConnID)
+			utils.SessionSv1ReAuthorize, s.ClientConnID)
 	}
 	var originID string
 	if originID, err = s.EventStart.GetString(utils.OriginID); err != nil {
 		return
 	}
 	var rply string
-	if err = clnt.conn.Call(utils.SessionSv1SendRAR, originID, &rply); err == utils.ErrNotImplemented {
+	if err = clnt.conn.Call(utils.SessionSv1ReAuthorize, originID, &rply); err == utils.ErrNotImplemented {
 		err = nil
 	}
 	return
 }
 
-// BiRPCv1SendRAR sends a RAR for sessions matching sessions
-func (sS *SessionS) BiRPCv1SendRAR(clnt rpcclient.ClientConnector,
+// BiRPCv1ReAuthorize sends a RAR for sessions matching sessions
+func (sS *SessionS) BiRPCv1ReAuthorize(clnt rpcclient.ClientConnector,
 	args *utils.SessionFilter, reply *string) (err error) {
 	if args == nil { //protection in case on nil
 		args = &utils.SessionFilter{}
