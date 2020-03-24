@@ -97,61 +97,66 @@ func (onm *OrderedNavigableMap) Set2(fullPath *FullPath, val NMInterface) (err e
 	}
 	switch val.Type() {
 	case NMDataType:
-		var dataMap NMInterface = onm.nm
-		for i, spath := range fldPath {
-			var newData NMInterface
-			newData, err = dataMap.GetField(spath)
-			if err == ErrNotFound {
-				if err = dataMap.Set(fldPath[i:], val); err != nil {
-					return
-				}
-				onm.appendPath(path, fldPath)
-				return
-			}
-			if err != nil {
-				return
-			}
-			if i == lpath-1 { // last path
-				if err = dataMap.SetField(spath, val); err == nil {
-					for _, el := range onm.orderRef[path] {
-						if *el.Value[len(el.Value)-1].Index == *spath.Index {
-							onm.orderIdx.Remove(el)
-						}
+		if err = onm.nm.Set(fullPath.PathItems, val); err != nil {
+			return
+		}
+		onm.removePath(fullPath.Path)
+		onm.appendPath(fullPath.Path, fullPath.PathItems)
+		return
+		/*
+			var dataMap NMInterface = onm.nm
+			for i, spath := range fldPath {
+				var newData NMInterface
+				newData, err = dataMap.GetField(spath)
+				if err == ErrNotFound {
+					if err = dataMap.Set(fldPath[i:], val); err != nil {
+						return
 					}
 					onm.appendPath(path, fldPath)
-				}
-				return
-			}
-			dataMap = newData
-		}
-	case NMSliceType:
-		var dataMap NMInterface = onm.nm
-		for i, spath := range fldPath {
-			var newData NMInterface
-			newData, err = dataMap.GetField(spath)
-			if err == ErrNotFound {
-				if err = dataMap.Set(fldPath[i:], val); err != nil {
 					return
 				}
-				l := val.Len()
-				onm.orderRef[path] = make([]*PathItemElement, l)
-				for j := 0; j < l; j++ {
-					newpath := make(PathItems, lpath)
-					copy(newpath, fldPath)
-					newpath[len(newpath)-1] = PathItem{
-						Field: newpath[len(newpath)-1].Field,
-						Index: IntPointer(j),
-					}
-					onm.orderRef[path][j] = onm.orderIdx.PushBack(fldPath)
+				if err != nil {
+					return
 				}
-				return
+				if i == lpath-1 { // last path
+					if err = dataMap.SetField(spath, val); err == nil {
+						for _, el := range onm.orderRef[path] {
+							if *el.Value[len(el.Value)-1].Index == *spath.Index {
+								onm.orderIdx.Remove(el)
+							}
+						}
+						onm.appendPath(path, fldPath)
+					}
+					return
+				}
+				dataMap = newData
 			}
-			if err != nil {
-				return
+		*/
+	case NMSliceType:
+		if err = onm.nm.Set(fullPath.PathItems, val); err != nil {
+			return
+		}
+		l := val.Len()
+		onm.orderRef[path] = make([]*PathItemElement, l)
+		for j := 0; j < l; j++ {
+			newpath := make(PathItems, lpath)
+			copy(newpath, fldPath)
+			newpath[len(newpath)-1] = PathItem{
+				Field: newpath[len(newpath)-1].Field,
+				Index: IntPointer(j),
 			}
-			if i == lpath-1 { // last path
-				if err = dataMap.SetField(spath, val); err == nil {
-					onm.removePath(path)
+			onm.orderRef[path][j] = onm.orderIdx.PushBack(fldPath)
+		}
+		return
+		/*
+			var dataMap NMInterface = onm.nm
+			for i, spath := range fldPath {
+				var newData NMInterface
+				newData, err = dataMap.GetField(spath)
+				if err == ErrNotFound {
+					if err = dataMap.Set(fldPath[i:], val); err != nil {
+						return
+					}
 					l := val.Len()
 					onm.orderRef[path] = make([]*PathItemElement, l)
 					for j := 0; j < l; j++ {
@@ -163,11 +168,31 @@ func (onm *OrderedNavigableMap) Set2(fullPath *FullPath, val NMInterface) (err e
 						}
 						onm.orderRef[path][j] = onm.orderIdx.PushBack(fldPath)
 					}
+					return
 				}
-				return
+				if err != nil {
+					return
+				}
+				if i == lpath-1 { // last path
+					if err = dataMap.SetField(spath, val); err == nil {
+						onm.removePath(path)
+						l := val.Len()
+						onm.orderRef[path] = make([]*PathItemElement, l)
+						for j := 0; j < l; j++ {
+							newpath := make(PathItems, lpath)
+							copy(newpath, fldPath)
+							newpath[len(newpath)-1] = PathItem{
+								Field: newpath[len(newpath)-1].Field,
+								Index: IntPointer(j),
+							}
+							onm.orderRef[path][j] = onm.orderIdx.PushBack(fldPath)
+						}
+					}
+					return
+				}
+				dataMap = newData
 			}
-			dataMap = newData
-		}
+		*/
 	default:
 	}
 	return ErrNotImplemented

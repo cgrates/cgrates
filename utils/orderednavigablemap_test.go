@@ -709,7 +709,7 @@ func TestOrderedNavigableRemote(t *testing.T) {
 }
 */
 var generator = rand.New(rand.NewSource(42))
-var gen = generateRandomTemplate(1_000)
+var gen = generateRandomTemplate(10_000)
 
 type benchData struct {
 	path      []string
@@ -733,21 +733,9 @@ func generateRandomTemplate(size int) (out []benchData) {
 		out[i].data = UUIDSha1Prefix()
 		out[i].pathItems = NewPathToItem(out[i].path)
 		out[i].strPath = out[i].pathItems.String()
-		out[i].pathItems[len(out[i].pathItems)-1].Index = IntPointer(0)
+		// out[i].pathItems[len(out[i].pathItems)-1].Index = IntPointer(0)
 	}
 	return
-}
-
-func BenchmarkOrderdNavigableMapSet(b *testing.B) {
-	nm := NewOrderedNavigableMap()
-	b.ResetTimer()
-	for n := 0; n < b.N; n++ {
-		for _, data := range gen {
-			if err := nm.Set(data.pathItems, NewNMData(data.data)); err != nil {
-				b.Log(err, data.path)
-			}
-		}
-	}
 }
 
 func BenchmarkOrderdNavigableMapSet2(b *testing.B) {
@@ -761,6 +749,30 @@ func BenchmarkOrderdNavigableMapSet2(b *testing.B) {
 		}
 	}
 }
+
+func BenchmarkNavigableMapOld1Set(b *testing.B) {
+	nm := NewNavigableMapOld1(nil)
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		for _, data := range gen {
+			nm.Set(data.path, data.data, false)
+		}
+	}
+}
+
+/*
+func BenchmarkOrderdNavigableMapSet(b *testing.B) {
+	nm := NewOrderedNavigableMap()
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		for _, data := range gen {
+			if err := nm.Set(data.pathItems, NewNMData(data.data)); err != nil {
+				b.Log(err, data.path)
+			}
+		}
+	}
+}
+
 func BenchmarkNavigableMapSet(b *testing.B) {
 	nm := NavigableMap2{}
 	b.ResetTimer()
@@ -772,7 +784,6 @@ func BenchmarkNavigableMapSet(b *testing.B) {
 		}
 	}
 }
-
 func BenchmarkNavigableMapOldSet(b *testing.B) {
 	nm := NavigableMap{}
 	b.ResetTimer()
@@ -845,6 +856,24 @@ func BenchmarkNavigableMapOldFieldAsInterface(b *testing.B) {
 	}
 }
 
+func BenchmarkNavigableMapOld1FieldAsInterface(b *testing.B) {
+	nm := NewNavigableMapOld1(nil)
+	for _, data := range gen {
+		nm.Set(data.path, data.data, true)
+	}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		for _, data := range gen {
+			if val, err := nm.FieldAsInterface(data.path); err != nil {
+				b.Log(err)
+			} else if val != data.data {
+				b.Errorf("Expected %q ,received: %q", data.data, val)
+			}
+		}
+	}
+}
+
 func BenchmarkOrderdNavigableMapField(b *testing.B) {
 	nm := NewOrderedNavigableMap()
 	for _, data := range gen {
@@ -884,3 +913,4 @@ func BenchmarkNavigableMapField(b *testing.B) {
 		}
 	}
 }
+//*/
