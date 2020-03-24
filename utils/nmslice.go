@@ -134,7 +134,7 @@ func (nms NMSlice) Empty() bool {
 }
 
 // GetField the same as Field but for one level deep
-// used for OrderedNavigableMap parsing
+// Is used for OrderedNavigableMap parsing when seting the data
 func (nms *NMSlice) GetField(path PathItem) (val NMInterface, err error) {
 	// if path == nil {
 	// 	return nil, ErrWrongPath
@@ -153,7 +153,7 @@ func (nms *NMSlice) GetField(path PathItem) (val NMInterface, err error) {
 }
 
 // SetField the same as Set but for one level deep
-// used for OrderedNavigableMap parsing
+// Is used for OrderedNavigableMap parsing when seting the data
 func (nms *NMSlice) SetField(path PathItem, val NMInterface) (err error) {
 	if path.Index == nil {
 		return ErrWrongPath

@@ -179,8 +179,8 @@ func (nm NavigableMap2) Empty() bool {
 	return nm == nil || len(nm) == 0
 }
 
-// GetField the same as Field but for one level deep
-// used for OrderedNavigableMap parsing
+// GetField is the same as Field but for one level deep
+// Is used for OrderedNavigableMap parsing when setting a value
 func (nm NavigableMap2) GetField(path PathItem) (val NMInterface, err error) {
 	// if path == nil {
 	// 	return nil, ErrWrongPath
@@ -198,8 +198,8 @@ func (nm NavigableMap2) GetField(path PathItem) (val NMInterface, err error) {
 	return nil, ErrNotFound
 }
 
-// SetField the same as Set but for one level deep
-// used for OrderedNavigableMap parsing
+// SetField is the same as Set but for one level deep
+// Is used for OrderedNavigableMap parsing when setting a value
 func (nm NavigableMap2) SetField(path PathItem, val NMInterface) (err error) {
 	// if path == nil {
 	// 	return ErrWrongPath
@@ -234,7 +234,7 @@ func (nm NavigableMap2) Len() int {
 }
 
 // FieldAsInterface returns the interface at the path
-// used by AgentRequest FieldAsInterface
+// Is used by AgentRequest FieldAsInterface
 func (nm NavigableMap2) FieldAsInterface(fldPath []string) (str interface{}, err error) {
 	var nmi NMInterface
 	if nmi, err = nm.Field(NewPathToItem(fldPath)); err != nil {
@@ -244,7 +244,7 @@ func (nm NavigableMap2) FieldAsInterface(fldPath []string) (str interface{}, err
 }
 
 // FieldAsString returns the string at the path
-// only to implement the DataProvider interface
+// Used only to implement the DataProvider interface
 func (nm NavigableMap2) FieldAsString(fldPath []string) (str string, err error) {
 	var val interface{}
 	val, err = nm.FieldAsInterface(fldPath)
