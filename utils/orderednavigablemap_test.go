@@ -798,7 +798,7 @@ func BenchmarkOrderdNavigableMapFieldAsInterface(b *testing.B) {
 		for _, data := range gen {
 			if val, err := nm.FieldAsInterface(data.path); err != nil {
 				b.Log(err)
-			} else if val != data.data {
+			} else if (*(val.(*NMSlice)))[0].Interface() != data.data {
 				b.Errorf("Expected %q ,received: %q", data.data, val)
 			}
 		}
@@ -818,7 +818,7 @@ func BenchmarkNavigableMapFieldAsInterface(b *testing.B) {
 		for _, data := range gen {
 			if val, err := nm.FieldAsInterface(data.path); err != nil {
 				b.Log(err)
-			} else if val != data.data {
+			} else if (*(val.(*NMSlice)))[0].Interface() != data.data {
 				b.Errorf("Expected %q ,received: %q", data.data, val)
 			}
 		}
