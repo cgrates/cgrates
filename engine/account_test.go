@@ -2157,6 +2157,7 @@ func TestAccountAsAccountDigest(t *testing.T) {
 		AllowNegative: true,
 		BalanceMap: map[string]Balances{
 			utils.SMS:  Balances{&Balance{ID: "sms1", Value: 14}},
+			utils.MMS:  Balances{&Balance{ID: "mms1", Value: 140}},
 			utils.DATA: Balances{&Balance{ID: "data1", Value: 1204}},
 			utils.VOICE: Balances{
 				&Balance{ID: "voice1", Weight: 20, DestinationIDs: utils.StringMap{"NAT": true}, Value: 3600},
@@ -2169,6 +2170,7 @@ func TestAccountAsAccountDigest(t *testing.T) {
 		ID:     "account1",
 		BalanceSummaries: []*BalanceSummary{
 			&BalanceSummary{ID: "sms1", Type: utils.SMS, Value: 14, Disabled: false},
+			&BalanceSummary{ID: "mms1", Type: utils.SMS, Value: 140, Disabled: false},
 			&BalanceSummary{ID: "data1", Type: utils.DATA, Value: 1204, Disabled: false},
 			&BalanceSummary{ID: "voice1", Type: utils.VOICE, Value: 1204, Disabled: false},
 			&BalanceSummary{ID: "voice2", Type: utils.VOICE, Value: 1200, Disabled: false},
