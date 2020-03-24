@@ -241,16 +241,13 @@ const CGRATES_CFG_JSON = `
 		"*any": "189h",
 		"*voice": "72h",
 		"*data": "107374182400",
-		"*sms": "10000"
+		"*sms": "10000",
+		"*mms": "10000"
 	},
 	"max_increments": 1000000,
 	"balance_rating_subject":{				// default rating subject in case that balance rating subject is empty
 		"*any": "*zero1ns",
-		"*voice": "*zero1s",
-		"*data": "*zero1ns",
-		"*sms": "*zero1ns",
-		"*monetary":"*zero1ns",
-		"*generic":"*zero1ns",
+		"*voice": "*zero1s"
 	},
 },
 

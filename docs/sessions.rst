@@ -338,7 +338,7 @@ Instead of arguments, the options for enabling various functionaity will come in
 	**\*update**
 		Update a sesssion (or initialize + update) out of event.
 
-	**\*terminate
+	**\*terminate**
 		Terminate a session (or initialize + terminate) out of event.
 
 \*suppliers

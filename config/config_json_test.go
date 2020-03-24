@@ -495,15 +495,13 @@ func TestDfRalsJsonCfg(t *testing.T) {
 			utils.ANY:   "189h",
 			utils.VOICE: "72h",
 			utils.DATA:  "107374182400",
-			utils.SMS:   "10000"},
+			utils.SMS:   "10000",
+			utils.MMS:   "10000",
+		},
 		Max_increments: utils.IntPointer(1000000),
 		Balance_rating_subject: &map[string]string{
-			utils.ANY:      "*zero1ns",
-			utils.VOICE:    "*zero1s",
-			utils.DATA:     "*zero1ns",
-			utils.SMS:      "*zero1ns",
-			utils.MONETARY: "*zero1ns",
-			utils.GENERIC:  "*zero1ns",
+			utils.ANY:   "*zero1ns",
+			utils.VOICE: "*zero1s",
 		},
 	}
 	if cfg, err := dfCgrJsonCfg.RalsJsonCfg(); err != nil {
