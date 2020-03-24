@@ -1690,6 +1690,7 @@ func TestDfDispatcherSJsonCfg(t *testing.T) {
 
 func TestDfLoaderCfg(t *testing.T) {
 	cred := json.RawMessage(`".gapi/credentials.json"`)
+	tok := json.RawMessage(`".gapi/token.json"`)
 	eCfg := &LoaderCfgJson{
 		Tpid:             utils.StringPointer(""),
 		Data_path:        utils.StringPointer("./"),
@@ -1698,6 +1699,7 @@ func TestDfLoaderCfg(t *testing.T) {
 		Caches_conns:     &[]string{utils.MetaLocalHost},
 		Scheduler_conns:  &[]string{utils.MetaLocalHost},
 		Gapi_credentials: &cred,
+		Gapi_token:       &tok,
 	}
 	if cfg, err := dfCgrJsonCfg.LoaderCfgJson(); err != nil {
 		t.Error(err)

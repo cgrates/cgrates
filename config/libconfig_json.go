@@ -506,6 +506,7 @@ type LoaderCfgJson struct {
 	Caches_conns     *[]string
 	Scheduler_conns  *[]string
 	Gapi_credentials *json.RawMessage
+	Gapi_token       *json.RawMessage
 }
 
 type MigratorCfgJson struct {

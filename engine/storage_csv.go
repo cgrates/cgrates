@@ -172,8 +172,8 @@ func NewStringCSVStorage(sep rune,
 }
 
 // NewGoogleCSVStorage creates a csv storege from google sheets
-func NewGoogleCSVStorage(sep rune, spreadsheetID, cfgPath string) (*CSVStorage, error) {
-	sht, err := newSheet(cfgPath)
+func NewGoogleCSVStorage(sep rune, spreadsheetID string) (*CSVStorage, error) {
+	sht, err := newSheet()
 	if err != nil {
 		return nil, err
 	}
@@ -717,20 +717,22 @@ func (c *csvString) Close() { // no need for close
 // Google
 
 // Retrieve a token, saves the token, then returns the generated client.
-func getClient(config *oauth2.Config, configPath string) (*http.Client, error) {
+func getClient(cfg *oauth2.Config, configPath string) (*http.Client, error) {
 	// The file token.json stores the user's access and refresh tokens, and is
 	// created automatically when the authorization flow completes for the first
 	// time.
-	tokFile := path.Join(configPath, utils.GoogleTokenFileName)
-	tok, err := tokenFromFile(tokFile)
+	tok := &oauth2.Token{}
+	raw, err := getCfgJSONData(config.CgrConfig().LoaderCgrCfg().GapiToken)
 	if err != nil {
-		tok, err = getTokenFromWeb(config)
+		tok, err = getTokenFromWeb(cfg)
 		if err != nil {
 			return nil, err
 		}
-		saveToken(tokFile, tok)
+		saveToken(string(config.CgrConfig().LoaderCgrCfg().GapiToken[1:len(config.CgrConfig().LoaderCgrCfg().GapiToken)-1]), tok)
+	} else if err = json.Unmarshal(raw, tok); err != nil {
+		return nil, err
 	}
-	return config.Client(context.Background(), tok), nil
+	return cfg.Client(context.Background(), tok), nil
 }
 
 // Request a token from the web, then returns the retrieved token.
@@ -752,18 +754,6 @@ func getTokenFromWeb(config *oauth2.Config) (*oauth2.Token, error) {
 	return tok, err
 }
 
-// Retrieves a token from a local file.
-func tokenFromFile(file string) (*oauth2.Token, error) {
-	f, err := os.Open(file)
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-	tok := &oauth2.Token{}
-	err = json.NewDecoder(f).Decode(tok)
-	return tok, err
-}
-
 // Saves a token to a file path.
 func saveToken(path string, token *oauth2.Token) {
 	fmt.Printf("Saving credential file to: %s\n", path)
@@ -776,34 +766,27 @@ func saveToken(path string, token *oauth2.Token) {
 	json.NewEncoder(f).Encode(token)
 }
 
-func newSheet(cfgPath string) (sht *sheets.Service, err error) { //*google_api
+func getCfgJSONData(raw json.RawMessage) (data []byte, err error) {
+	if len(raw) == 0 {
+		return
+	}
+	if raw[0] == '{' && raw[len(raw)-1] == '}' {
+		data = raw
+		return
+	}
+	dataPath := string(raw[1 : len(raw)-1])
+	if !strings.HasSuffix(dataPath, utils.JSNSuffix) {
+		dataPath = path.Join(dataPath, utils.GoogleCredentialsFileName)
+	}
+	return ioutil.ReadFile(dataPath)
+}
+
+func newSheet() (sht *sheets.Service, err error) { //*google_api
 	var cred []byte
 	var cfgPathDir string
-	raw := config.CgrConfig().LoaderCgrCfg().GapiCredentials
-	if len(raw) != 0 {
-		if raw[0] == '{' && raw[len(raw)-1] == '}' {
-			cred = raw
-			if utils.IsURL(cfgPath) {
-				cfgPath = "."
-			}
-			if strings.HasSuffix(cfgPath, utils.JSNSuffix) {
-				cfgPathDir = filepath.Dir(cfgPath)
-			}
-			cfgPathDir = path.Join(cfgPathDir, utils.GoogleConfigDirName)
-			if err = os.MkdirAll(cfgPathDir, 744); err != nil {
-				return
-			}
-		} else {
-			credPath := string(raw[1 : len(raw)-1])
-			if !strings.HasSuffix(credPath, utils.JSNSuffix) {
-				credPath = path.Join(credPath, utils.GoogleCredentialsFileName)
-			}
-			if cred, err = ioutil.ReadFile(credPath); err != nil {
-				err = fmt.Errorf("Unable to read client secret file: %v", err)
-				return
-			}
-			cfgPathDir = filepath.Dir(credPath)
-		}
+	if cred, err = getCfgJSONData(config.CgrConfig().LoaderCgrCfg().GapiCredentials); err != nil {
+		err = fmt.Errorf("Unable to read client secret file: %v", err)
+		return
 	}
 	// If modifying these scopes, delete your previously saved token.json.
 	config, err := google.ConfigFromJSON(cred, "https://www.googleapis.com/auth/spreadsheets.readonly")

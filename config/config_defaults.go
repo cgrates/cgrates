@@ -784,7 +784,8 @@ const CGRATES_CFG_JSON = `
 	"field_separator": ",",							// separator used in case of csv files
 	"caches_conns":["*localhost"],
 	"scheduler_conns": ["*localhost"],
-	"gapi_credentials": ".gapi/credentials.json" 	// the path to the credentials for google API or the credentials.json file content
+	"gapi_credentials": ".gapi/credentials.json", 	// the path to the credentials for google API or the credentials.json file content
+	"gapi_token": ".gapi/token.json" 				// the path to the token for google API or the token.json file content
 },
 
 
