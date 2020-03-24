@@ -54,6 +54,8 @@ var (
 		testRAitAuthPAPFail,
 		testRAitAuthCHAPSuccess,
 		testRAitAuthCHAPFail,
+		testRAitAuthMSCHAPV2Success,
+		testRAitAuthMSCHAPV2Fail,
 		testRAitAcctStart,
 		testRAitAcctStop,
 		testRAitStopCgrEngine,
@@ -62,7 +64,7 @@ var (
 
 // Test start here
 func TestRAit(t *testing.T) {
-	engine.KillEngine(0)
+	//engine.KillEngine(0)
 	switch *dbType {
 	case utils.MetaInternal:
 		raonfigDIR = "radagent_internal"
@@ -83,6 +85,7 @@ func TestRAit(t *testing.T) {
 	}
 }
 
+/*
 func TestRAitDispatcher(t *testing.T) {
 	if *encoding == utils.MetaGOB {
 		t.SkipNow()
@@ -99,6 +102,7 @@ func TestRAitDispatcher(t *testing.T) {
 	engine.KillEngine(100)
 	isDispatcherActive = false
 }
+*/
 
 func testRAitInitCfg(t *testing.T) {
 	raCfgPath = path.Join(*dataDir, "conf", "samples", raonfigDIR)
@@ -339,8 +343,126 @@ func testRAitAuthCHAPFail(t *testing.T) {
 	if err := authReq.AddAVPWithName("CHAP-Password", "CGRateSPassword2", ""); err != nil {
 		t.Error(err)
 	}
-
 	authReq.AVPs[1].RawValue = radigo.EncodeCHAPPassword([]byte("CGRateSPassword2"), authReq.Authenticator[:])
+	if err := authReq.AddAVPWithName("Service-Type", "SIP-Caller-AVPs", ""); err != nil {
+		t.Error(err)
+	}
+	if err := authReq.AddAVPWithName("Called-Station-Id", "1002", ""); err != nil {
+		t.Error(err)
+	}
+	if err := authReq.AddAVPWithName("Acct-Session-Id", "e4921177ab0e3586c37f6a185864b71a@0:0:0:0:0:0:0:0", ""); err != nil {
+		t.Error(err)
+	}
+	if err := authReq.AddAVPWithName("Sip-From-Tag", "51585361", ""); err != nil {
+		t.Error(err)
+	}
+	if err := authReq.AddAVPWithName("NAS-IP-Address", "127.0.0.1", ""); err != nil {
+		t.Error(err)
+	}
+	if err := authReq.AddAVPWithName("Event-Timestamp", "1497106115", ""); err != nil {
+		t.Error(err)
+	}
+	reply, err := raAuthClnt.SendRequest(authReq)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if reply.Code != radigo.AccessReject {
+		t.Errorf("Received reply: %+v", reply)
+	}
+	if len(reply.AVPs) != 1 { // make sure max duration is received
+		t.Errorf("Received AVPs: %+v", reply.AVPs)
+	} else if !reflect.DeepEqual(utils.RadauthFailed, string(reply.AVPs[0].RawValue)) {
+		t.Errorf("Received: %s", string(reply.AVPs[0].RawValue))
+	}
+}
+
+func testRAitAuthMSCHAPV2Success(t *testing.T) {
+	for _, dictPath := range raCfg.RadiusAgentCfg().ClientDictionaries {
+		if dictRad, err = radigo.NewDictionaryFromFolderWithRFC2865(dictPath); err != nil {
+			return
+		}
+	}
+	if raAuthClnt, err = radigo.NewClient("udp", "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil); err != nil {
+		t.Fatal(err)
+	}
+	authReq := raAuthClnt.NewRequest(radigo.AccessRequest, 1) // emulates Kamailio packet out of radius_load_caller_avps()
+	if err := authReq.AddAVPWithName("User-Name", "1001", ""); err != nil {
+		t.Error(err)
+	}
+	if err := authReq.AddAVPWithName("MS-CHAP-Challenge", string(authReq.Authenticator[:]), "Microsoft"); err != nil {
+		t.Error(err)
+	}
+
+	respVal, err := radigo.GenerateClientMSCHAPResponse(authReq.Authenticator, "1001", "CGRateSPassword1")
+	if err != nil {
+		t.Error(err)
+	}
+	if err := authReq.AddAVPWithName("MS-CHAP-Response", string(respVal), "Microsoft"); err != nil {
+		t.Error(err)
+	}
+	if err := authReq.AddAVPWithName("Service-Type", "SIP-Caller-AVPs", ""); err != nil {
+		t.Error(err)
+	}
+	if err := authReq.AddAVPWithName("Called-Station-Id", "1002", ""); err != nil {
+		t.Error(err)
+	}
+	if err := authReq.AddAVPWithName("Acct-Session-Id", "e4921177ab0e3586c37f6a185864b71a@0:0:0:0:0:0:0:0", ""); err != nil {
+		t.Error(err)
+	}
+	if err := authReq.AddAVPWithName("Sip-From-Tag", "51585361", ""); err != nil {
+		t.Error(err)
+	}
+	if err := authReq.AddAVPWithName("NAS-IP-Address", "127.0.0.1", ""); err != nil {
+		t.Error(err)
+	}
+	if err := authReq.AddAVPWithName("Event-Timestamp", "1497106115", ""); err != nil {
+		t.Error(err)
+	}
+	reply, err := raAuthClnt.SendRequest(authReq)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if reply.Code != radigo.AccessAccept {
+		t.Errorf("Received reply: %+v", utils.ToJSON(reply))
+	}
+	if len(reply.AVPs) != 2 { // make sure max duration is received
+		t.Errorf("Received AVPs: %+v", utils.ToJSON(reply.AVPs))
+	} else {
+		for _, avp := range reply.AVPs {
+			if avp.Number == 26 && len(avp.RawValue) != 49 {
+				t.Errorf("Unexpected lenght of MS-CHAP2-Success AVP: %+v", len(avp.RawValue))
+			}
+			if avp.Number == 225 && !reflect.DeepEqual([]byte("session_max_time#10800"), reply.AVPs[1].RawValue) {
+				t.Errorf("Received: %s", string(reply.AVPs[0].RawValue))
+			}
+		}
+	}
+
+}
+
+func testRAitAuthMSCHAPV2Fail(t *testing.T) {
+	for _, dictPath := range raCfg.RadiusAgentCfg().ClientDictionaries {
+		if dictRad, err = radigo.NewDictionaryFromFolderWithRFC2865(dictPath); err != nil {
+			return
+		}
+	}
+	if raAuthClnt, err = radigo.NewClient("udp", "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil); err != nil {
+		t.Fatal(err)
+	}
+	authReq := raAuthClnt.NewRequest(radigo.AccessRequest, 1) // emulates Kamailio packet out of radius_load_caller_avps()
+	if err := authReq.AddAVPWithName("User-Name", "1001", ""); err != nil {
+		t.Error(err)
+	}
+	if err := authReq.AddAVPWithName("MS-CHAP-Challenge", string(authReq.Authenticator[:]), "Microsoft"); err != nil {
+		t.Error(err)
+	}
+	respVal, err := radigo.GenerateClientMSCHAPResponse(authReq.Authenticator, "1001", "CGRateSPassword2")
+	if err != nil {
+		t.Error(err)
+	}
+	if err := authReq.AddAVPWithName("MS-CHAP-Response", string(respVal), "Microsoft"); err != nil {
+		t.Error(err)
+	}
 	if err := authReq.AddAVPWithName("Service-Type", "SIP-Caller-AVPs", ""); err != nil {
 		t.Error(err)
 	}

@@ -122,7 +122,7 @@ func (pk *radiusDP) RemoteHost() net.Addr {
 //radauthReq is used to authorize a request
 //if User-Password avp is present use PAP auth
 //if CHAP-Password is presented use CHAP auth
-func radauthReq(req *radigo.Packet, aReq *AgentRequest) (bool, error) {
+func radauthReq(req *radigo.Packet, aReq *AgentRequest, rpl *radigo.Packet) (bool, error) {
 	// try to get UserPassword from Vars as slice of NMItems
 	nmItems, err := aReq.Vars.FieldAsInterface([]string{utils.UserPassword})
 	if err != nil {
@@ -130,16 +130,57 @@ func radauthReq(req *radigo.Packet, aReq *AgentRequest) (bool, error) {
 	}
 	userPassAvps := req.AttributesWithName("User-Password", utils.EmptyString)
 	chapAVPs := req.AttributesWithName("CHAP-Password", utils.EmptyString)
-	if len(userPassAvps) == 0 && len(chapAVPs) == 0 {
+	msChallenge := req.AttributesWithName("MS-CHAP-Challenge", "Microsoft")
+	msResponse := req.AttributesWithName("MS-CHAP-Response", "Microsoft")
+	if len(userPassAvps) == 0 && len(chapAVPs) == 0 && len(msChallenge) == 0 && len(msResponse) == 0 {
 		return false, fmt.Errorf("cannot find User-Password or CHAP-Password AVP in request")
 	}
-	if len(userPassAvps) != 0 {
+	switch {
+	case len(userPassAvps) != 0:
 		if userPassAvps[0].StringValue != nmItems.([]*config.NMItem)[0].Data {
 			return false, nil
 		}
-	} else {
+	case len(chapAVPs) != 0:
 		return radigo.AuthenticateCHAP([]byte(utils.IfaceAsString(nmItems.([]*config.NMItem)[0].Data)),
 			req.Authenticator[:], chapAVPs[0].RawValue), nil
+	case len(msChallenge) != 0 && len(msResponse) != 0:
+		vsaMSResponde := msResponse[0].Value.(*radigo.VSA)
+		vsaMSChallange := msChallenge[0].Value.(*radigo.VSA)
+
+		userName := req.AttributesWithName("User-Name", utils.EmptyString)[0].StringValue
+		passwordFromAttributes := utils.IfaceAsString(nmItems.([]*config.NMItem)[0].Data)
+
+		if len(vsaMSChallange.RawValue) != 16 || len(vsaMSResponde.RawValue) != 50 {
+			return false, nil
+		}
+		ident := vsaMSResponde.RawValue[0]
+		peerChallenge := vsaMSResponde.RawValue[2:18]
+		peerResponse := vsaMSResponde.RawValue[26:50]
+		ntResponse, err := radigo.GenerateNTResponse(vsaMSChallange.RawValue,
+			peerChallenge, userName, passwordFromAttributes)
+		if err != nil {
+			return false, err
+		}
+		if len(ntResponse) != len(peerResponse) {
+			return false, nil
+		}
+		for i := range ntResponse {
+			if ntResponse[i] != peerResponse[i] {
+				return false, nil
+			}
+		}
+
+		authenticatorResponse, err := radigo.GenerateAuthenticatorResponse(vsaMSChallange.RawValue, peerChallenge,
+			ntResponse, userName, passwordFromAttributes)
+		if err != nil {
+			return false, err
+		}
+		success := make([]byte, 43)
+		success[0] = ident
+		copy(success[1:], authenticatorResponse)
+		// this AVP need to be added to be verified on the client side
+		rpl.AddAVPWithName("MS-CHAP2-Success", string(success), "Microsoft")
 	}
+
 	return true, nil
 }
