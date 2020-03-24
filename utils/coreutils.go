@@ -337,7 +337,10 @@ func MinDuration(d1, d2 time.Duration) time.Duration {
 func ParseZeroRatingSubject(tor, rateSubj string, defaultRateSubj map[string]string) (time.Duration, error) {
 	rateSubj = strings.TrimSpace(rateSubj)
 	if rateSubj == "" || rateSubj == ANY {
-		rateSubj = defaultRateSubj[tor]
+		var hasToR bool
+		if rateSubj, hasToR = defaultRateSubj[tor]; !hasToR {
+			rateSubj = defaultRateSubj[META_ANY]
+		}
 	}
 	if !strings.HasPrefix(rateSubj, ZERO_RATING_SUBJECT_PREFIX) {
 		return 0, errors.New("malformed rating subject: " + rateSubj)

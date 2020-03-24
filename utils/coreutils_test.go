@@ -578,12 +578,8 @@ func TestParseZeroRatingSubject(t *testing.T) {
 	dur := []time.Duration{time.Second, time.Duration(1024),
 		time.Second, 5 * time.Minute, 10 * time.Hour}
 	dfltRatingSubject := map[string]string{
-		ANY:      "*zero1ns",
-		VOICE:    "*zero1s",
-		DATA:     "*zero1ns",
-		SMS:      "*zero1ns",
-		MONETARY: "*zero1ns",
-		GENERIC:  "*zero1ns",
+		ANY:   "*zero1ns",
+		VOICE: "*zero1s",
 	}
 	for i, s := range subj {
 		if d, err := ParseZeroRatingSubject(VOICE, s, dfltRatingSubject); err != nil || d != dur[i] {
@@ -591,6 +587,12 @@ func TestParseZeroRatingSubject(t *testing.T) {
 		}
 	}
 	if d, err := ParseZeroRatingSubject(DATA, EmptyString, dfltRatingSubject); err != nil || d != time.Nanosecond {
+		t.Error("Error parsing rating subject: ", EmptyString, d, err)
+	}
+	if d, err := ParseZeroRatingSubject(SMS, EmptyString, dfltRatingSubject); err != nil || d != time.Nanosecond {
+		t.Error("Error parsing rating subject: ", EmptyString, d, err)
+	}
+	if d, err := ParseZeroRatingSubject(MMS, EmptyString, dfltRatingSubject); err != nil || d != time.Nanosecond {
 		t.Error("Error parsing rating subject: ", EmptyString, d, err)
 	}
 	if d, err := ParseZeroRatingSubject(MONETARY, EmptyString, dfltRatingSubject); err != nil || d != time.Nanosecond {
