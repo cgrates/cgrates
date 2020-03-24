@@ -2169,28 +2169,19 @@ func TestAccountAsAccountDigest(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "account1",
 		BalanceSummaries: []*BalanceSummary{
-			&BalanceSummary{ID: "sms1", Type: utils.SMS, Value: 14, Disabled: false},
-			&BalanceSummary{ID: "mms1", Type: utils.SMS, Value: 140, Disabled: false},
 			&BalanceSummary{ID: "data1", Type: utils.DATA, Value: 1204, Disabled: false},
-			&BalanceSummary{ID: "voice1", Type: utils.VOICE, Value: 1204, Disabled: false},
+			&BalanceSummary{ID: "sms1", Type: utils.SMS, Value: 14, Disabled: false},
+			&BalanceSummary{ID: "mms1", Type: utils.MMS, Value: 140, Disabled: false},
+			&BalanceSummary{ID: "voice1", Type: utils.VOICE, Value: 3600, Disabled: false},
 			&BalanceSummary{ID: "voice2", Type: utils.VOICE, Value: 1200, Disabled: false},
 		},
 		AllowNegative: true,
 		Disabled:      false,
 	}
 	acntSummary := acnt1.AsAccountSummary()
-	if expectacntSummary.Tenant != acntSummary.Tenant ||
-		expectacntSummary.ID != acntSummary.ID ||
-		expectacntSummary.AllowNegative != acntSummary.AllowNegative ||
-		expectacntSummary.Disabled != acntSummary.Disabled ||
-		len(expectacntSummary.BalanceSummaries) != len(acntSummary.BalanceSummaries) {
-		t.Errorf("Expecting: %+v, received: %+v", expectacntSummary, acntSummary)
-	}
 	// Since maps are unordered, slices will be too so we need to find element to compare
-	for _, bd := range acntSummary.BalanceSummaries {
-		if bd.ID == "sms1" && !reflect.DeepEqual(expectacntSummary.BalanceSummaries[0], bd) {
-			t.Errorf("Expecting: %+v, received: %+v", expectacntSummary, acntSummary)
-		}
+	if !reflect.DeepEqual(expectacntSummary, acntSummary) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectacntSummary), utils.ToJSON(acntSummary))
 	}
 }
 
