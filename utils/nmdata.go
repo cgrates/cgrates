@@ -33,14 +33,14 @@ func (nmi *NMData) Interface() interface{} {
 	return nmi.data
 }
 
-// Field not implemented only used in order to implement the NM interface
+// Field is not implemented only used in order to implement the NM interface
 func (nmi *NMData) Field(path PathItems) (val NMInterface, err error) {
 	return nil, ErrNotImplemented
 }
 
-// Set not implemented only used in order to implement the NM interface
-// special case when the path is empty the interface should be seted
-// this is in order to modify the wraped interface
+// Set sets the wraped interface when the path is empty
+// This behaivior is in order to modify the wraped interface
+// witout aserting the type of the NMInterface
 func (nmi *NMData) Set(path PathItems, val NMInterface) (err error) {
 	if len(path) != 0 {
 		return ErrWrongPath
@@ -49,7 +49,7 @@ func (nmi *NMData) Set(path PathItems, val NMInterface) (err error) {
 	return
 }
 
-// Remove not implemented only used in order to implement the NM interface
+// Remove is not implemented only used in order to implement the NM interface
 func (nmi *NMData) Remove(path PathItems) (err error) {
 	return ErrNotImplemented
 }
@@ -64,14 +64,14 @@ func (nmi *NMData) Empty() bool {
 	return nmi == nil || nmi.data == nil
 }
 
-// GetField not implemented only used in order to implement the NM interface
+// GetField is not implemented only used in order to implement the NM interface
 func (nmi *NMData) GetField(path PathItem) (val NMInterface, err error) {
 	return nil, ErrNotImplemented
 }
 
-// SetField not implemented only used in order to implement the NM interface
-// special case when the path is empty the interface should be seted
-// this is in order to modify the wraped interface
+// SetField sets the wraped interface when the path is empty
+// This behaivior is in order to modify the wraped interface
+// witout aserting the type of the NMInterface
 func (nmi *NMData) SetField(path PathItem, val NMInterface) (err error) {
 	// if path != nil {
 	// 	return ErrWrongPath
@@ -80,7 +80,7 @@ func (nmi *NMData) SetField(path PathItem, val NMInterface) (err error) {
 	return
 }
 
-// Len not implemented only used in order to implement the NM interface
+// Len is not implemented only used in order to implement the NM interface
 func (nmi *NMData) Len() int {
 	return 0
 }

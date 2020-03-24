@@ -22,7 +22,7 @@ import (
 	"net"
 )
 
-// NewOrderedNavigableMap initializates a structure of OrderedNavigableMap2 with a NavigableMap2
+// NewOrderedNavigableMap initializates a structure of OrderedNavigableMap with a NavigableMap2
 func NewOrderedNavigableMap() *OrderedNavigableMap {
 	return &OrderedNavigableMap{
 		nm:       NavigableMap2{},
@@ -75,7 +75,7 @@ func (onm *OrderedNavigableMap) Remove(path FullPath) (err error) {
 	}
 	onm.removePath(path.Path)
 	if path.PathItems[len(path.PathItems)-1].Index != nil {
-		return ErrNotImplemented
+		return ErrNotImplemented // for the momment we can't remove only a specific element
 		// if idx := *path[len(path)-1].Index; idx >= 0 {
 		// onm.updateOrderBasedOnIndex(path, idx)
 		// }
@@ -84,10 +84,14 @@ func (onm *OrderedNavigableMap) Remove(path FullPath) (err error) {
 }
 
 // Set sets the value at the given path
+// this is the old to be capable of  building the code without updating all the code
+// will be replaced with Set2 after we decide that is the optimal solution
 func (onm *OrderedNavigableMap) Set(fldPath PathItems, val NMInterface) (err error) {
 	return onm.Set2(&FullPath{PathItems: fldPath, Path: fldPath.String()}, val)
 }
 
+// Set2 sets the value at the given path
+// this used with full path and the processed path to not calculate them for every set
 func (onm *OrderedNavigableMap) Set2(fullPath *FullPath, val NMInterface) (err error) {
 	fldPath := fullPath.PathItems
 	path := fullPath.Path
@@ -103,6 +107,7 @@ func (onm *OrderedNavigableMap) Set2(fullPath *FullPath, val NMInterface) (err e
 		onm.removePath(fullPath.Path)
 		onm.appendPath(fullPath.Path, fullPath.PathItems)
 		return
+		// this is the old code. Keep this here to not rewrite it if this is the wanted behavior
 		/*
 			var dataMap NMInterface = onm.nm
 			for i, spath := range fldPath {
@@ -148,6 +153,7 @@ func (onm *OrderedNavigableMap) Set2(fullPath *FullPath, val NMInterface) (err e
 			onm.orderRef[path][j] = onm.orderIdx.PushBack(fldPath)
 		}
 		return
+		// this is the old code. Keep this here to not rewrite it if this is the wanted behavior
 		/*
 			var dataMap NMInterface = onm.nm
 			for i, spath := range fldPath {
@@ -208,6 +214,7 @@ func (onm *OrderedNavigableMap) removePath(path string) {
 	for _, el := range onm.orderRef[path] {
 		onm.orderIdx.Remove(el)
 	}
+	// faster to only overwrite the value than deleting it
 	onm.orderRef[path] = nil
 	// delete(onm.orderRef, path)
 }
@@ -218,9 +225,11 @@ func (onm *OrderedNavigableMap) GetField(path PathItem) (val NMInterface, err er
 	return onm.nm.GetField(path)
 }
 
+/*
+// This functione are not needed for the curent implementation
+// will decomment them after all are done
 // SetField the same as Set but for one level deep
 // used to implement NM interface
-/*
 func (onm *OrderedNavigableMap) SetField(path PathItem, val NMInterface) (err error) {
 	// if path == nil {
 	// 	return ErrWrongPath
@@ -279,6 +288,7 @@ func (onm *OrderedNavigableMap) SetField(path PathItem, val NMInterface) (err er
 	}
 }
 */
+
 // Len returns the lenght of the map
 func (onm OrderedNavigableMap) Len() int {
 	return onm.nm.Len()
@@ -304,8 +314,8 @@ func (onm *OrderedNavigableMap) FieldAsInterface(fldPath []string) (str interfac
 	return val.Interface(), nil
 }
 
-// updateOrderBasedOnIndex updates the index of the slice elements that are bigger that the removed element
 /*
+// updateOrderBasedOnIndex updates the index of the slice elements that are bigger that the removed element
 func (onm *OrderedNavigableMap) updateOrderBasedOnIndex(path PathItems, idx int) {
 	lenpath := len(path)
 	for el := onm.GetFirstElement(); el != nil; el = el.Next() {
