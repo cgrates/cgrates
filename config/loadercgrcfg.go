@@ -32,6 +32,7 @@ type LoaderCgrCfg struct {
 	CachesConns     []string
 	SchedulerConns  []string
 	GapiCredentials json.RawMessage
+	GapiToken       json.RawMessage
 }
 
 func (ld *LoaderCgrCfg) loadFromJsonCfg(jsnCfg *LoaderCfgJson) (err error) {
@@ -75,6 +76,9 @@ func (ld *LoaderCgrCfg) loadFromJsonCfg(jsnCfg *LoaderCfgJson) (err error) {
 	}
 	if jsnCfg.Gapi_credentials != nil {
 		ld.GapiCredentials = *jsnCfg.Gapi_credentials
+	}
+	if jsnCfg.Gapi_token != nil {
+		ld.GapiToken = *jsnCfg.Gapi_token
 	}
 	return nil
 }
