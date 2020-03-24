@@ -454,7 +454,7 @@ func TestProcessRequest(t *testing.T) {
 		t.Error(err)
 	} else if !pr {
 		t.Errorf("Expected the request to be processed")
-	} else if len(rply.GetOrder()) != 2 {
+	} else if rply.Len() != 2 {
 		t.Errorf("Expected the reply to have 2 values received: %s", rply.String())
 	}
 
@@ -471,7 +471,7 @@ func TestProcessRequest(t *testing.T) {
 		t.Error(err)
 	} else if !pr {
 		t.Errorf("Expected the request to be processed")
-	} else if len(rply.GetOrder()) != 2 {
+	} else if rply.Len() != 2 {
 		t.Errorf("Expected the reply to have 2 values received: %s", rply.String())
 	}
 
@@ -488,7 +488,7 @@ func TestProcessRequest(t *testing.T) {
 		t.Error(err)
 	} else if !pr {
 		t.Errorf("Expected the request to be processed")
-	} else if len(rply.GetOrder()) != 2 {
+	} else if rply.Len() != 2 {
 		t.Errorf("Expected the reply to have 2 values received: %s", rply.String())
 	}
 
@@ -514,7 +514,7 @@ func TestProcessRequest(t *testing.T) {
 		t.Error(err)
 	} else if !pr {
 		t.Errorf("Expected the request to be processed")
-	} else if len(rply.GetOrder()) != 1 {
+	} else if rply.Len() != 1 {
 		t.Errorf("Expected the reply to have one value received: %s", rply.String())
 	}
 
@@ -531,7 +531,7 @@ func TestProcessRequest(t *testing.T) {
 		t.Error(err)
 	} else if !pr {
 		t.Errorf("Expected the request to be processed")
-	} else if len(rply.GetOrder()) != 1 {
+	} else if rply.Len() != 1 {
 		t.Errorf("Expected the reply to have one value received: %s", rply.String())
 	}
 
