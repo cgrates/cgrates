@@ -684,7 +684,6 @@ func testDiamItCCRUpdate(t *testing.T) {
 				},
 			}),
 		}})
-	m.NewAVP(avp.UserName, avp.Mbit, 0, datatype.UTF8String("User1"))
 	// ============================================
 	// prevent nil pointer dereference
 	// ============================================

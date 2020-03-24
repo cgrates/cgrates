@@ -455,10 +455,6 @@ const CGRATES_CFG_JSON = `
 					"value": "~*req.Origin-Host", "mandatory": true},
 				{"tag": "AuthApplicationId", "path": "*diamreq.Auth-Application-Id", "type": "*variable",
 					 "value": "~*vars.*appid", "mandatory": true},
-				{"tag": "UserName", "path": "*diamreq.User-Name", "type": "*variable",
-					"value": "~*req.User-Name", "mandatory": true},
-				{"tag": "OriginStateID", "path": "*diamreq.Origin-State-Id", "type": "*constant",
-					"value": "1"},
 		],
 		"*rar": [
 			{"tag": "SessionId", "path": "*diamreq.Session-Id", "type": "*variable",
@@ -473,10 +469,6 @@ const CGRATES_CFG_JSON = `
 				"value": "~*req.Origin-Host", "mandatory": true},
 			{"tag": "AuthApplicationId", "path": "*diamreq.Auth-Application-Id", "type": "*variable",
 				 "value": "~*vars.*appid", "mandatory": true},
-			{"tag": "UserName", "path": "*diamreq.User-Name", "type": "*variable",
-				"value": "~*req.User-Name", "mandatory": true},
-			{"tag": "OriginStateID", "path": "*diamreq.Origin-State-Id", "type": "*constant",
-				"value": "1"},
 			{"tag": "ReAuthRequestType", "path": "*diamreq.Re-Auth-Request-Type", "type": "*constant",
 				"value": "0"},
 		]

@@ -36,6 +36,11 @@ import (
 	"github.com/fiorix/go-diameter/diam/sm"
 )
 
+const (
+	all = "ALL"
+	raa = "RAA"
+)
+
 func NewDiameterAgent(cgrCfg *config.CGRConfig, filterS *engine.FilterS,
 	connMgr *engine.ConnManager) (*DiameterAgent, error) {
 	da := &DiameterAgent{cgrCfg: cgrCfg, filterS: filterS, connMgr: connMgr, raa: make(map[string]chan *diam.Message)}
@@ -112,11 +117,11 @@ func (da *DiameterAgent) handlers() diam.Handler {
 
 	dSM := sm.New(settings)
 	if da.cgrCfg.DiameterAgentCfg().SyncedConnReqs {
-		dSM.HandleFunc("ALL", da.handleMessage)
-		dSM.HandleFunc("RA", da.handleRAA)
+		dSM.HandleFunc(all, da.handleMessage)
+		dSM.HandleFunc(raa, da.handleRAA)
 	} else {
-		dSM.HandleFunc("ALL", da.handleMessageAsync)
-		dSM.HandleFunc("RAA", func(c diam.Conn, m *diam.Message) { go da.handleRAA(c, m) })
+		dSM.HandleFunc(all, da.handleMessageAsync)
+		dSM.HandleFunc(raa, func(c diam.Conn, m *diam.Message) { go da.handleRAA(c, m) })
 	}
 
 	go func() {
