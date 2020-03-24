@@ -447,13 +447,16 @@ func (da *DiameterAgent) V1DisconnectSession(args utils.AttrDisconnectSession, r
 		return utils.ErrMandatoryIeMissing
 	}
 	originID := ssID.(string)
-	switch da.cgrCfg.DiameterAgentCfg().DisconnectMethod {
+	switch da.cgrCfg.DiameterAgentCfg().ForcedDisconnect {
+	case utils.META_NONE:
+		*reply = utils.OK
+		return
 	case utils.MetaASR:
 		return da.sendASR(originID, reply)
 	case utils.MetaRAR:
-		return da.V1SendRAR(originID, reply)
+		return da.V1ReAuthorize(originID, reply)
 	default:
-		return fmt.Errorf("Unsupported request type <%s>", da.cgrCfg.DiameterAgentCfg().DisconnectMethod)
+		return fmt.Errorf("Unsupported request type <%s>", da.cgrCfg.DiameterAgentCfg().ForcedDisconnect)
 	}
 }
 
@@ -502,8 +505,8 @@ func (da *DiameterAgent) sendASR(originID string, reply *string) (err error) {
 	return
 }
 
-// V1SendRAR  sends a rar meseage to diameter client
-func (da *DiameterAgent) V1SendRAR(originID string, reply *string) (err error) {
+// V1ReAuthorize  sends a rar meseage to diameter client
+func (da *DiameterAgent) V1ReAuthorize(originID string, reply *string) (err error) {
 	if originID == "" {
 		utils.Logger.Info(
 			fmt.Sprintf("<%s> cannot send RAR, missing session ID",

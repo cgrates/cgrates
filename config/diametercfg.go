@@ -34,7 +34,7 @@ type DiameterAgentCfg struct {
 	SyncedConnReqs    bool
 	ASRTemplate       string
 	RARTemplate       string
-	DisconnectMethod  string
+	ForcedDisconnect  string
 	Templates         map[string][]*FCTemplate
 	RequestProcessors []*RequestProcessor
 }
@@ -90,8 +90,8 @@ func (da *DiameterAgentCfg) loadFromJsonCfg(jsnCfg *DiameterAgentJsonCfg, separa
 	if jsnCfg.Rar_template != nil {
 		da.RARTemplate = *jsnCfg.Rar_template
 	}
-	if jsnCfg.Disconnect_method != nil {
-		da.DisconnectMethod = *jsnCfg.Disconnect_method
+	if jsnCfg.Forced_disconnect != nil {
+		da.ForcedDisconnect = *jsnCfg.Forced_disconnect
 	}
 	if jsnCfg.Templates != nil {
 		if da.Templates == nil {

@@ -1356,7 +1356,7 @@ const (
 	SessionSv1ActivateSessions           = "SessionSv1.ActivateSessions"
 	SessionSv1DeactivateSessions         = "SessionSv1.DeactivateSessions"
 	SMGenericV1InitiateSession           = "SMGenericV1.InitiateSession"
-	SessionSv1SendRAR                    = "SessionSv1.SendRAR"
+	SessionSv1ReAuthorize                = "SessionSv1.ReAuthorize"
 )
 
 // Responder APIs

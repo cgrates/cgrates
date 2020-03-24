@@ -365,7 +365,7 @@ func (sma *AsteriskAgent) V1GetActiveSessionIDs(ignParam string,
 
 }
 
-// V1SendRAR is used to implement the sessions.BiRPClient interface
-func (*AsteriskAgent) V1SendRAR(originID string, reply *string) (err error) {
+// V1ReAuthorize is used to implement the sessions.BiRPClient interface
+func (*AsteriskAgent) V1ReAuthorize(originID string, reply *string) (err error) {
 	return utils.ErrNotImplemented
 }
