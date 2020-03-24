@@ -87,7 +87,7 @@ func (ra *RadiusAgent) handleAuth(req *radigo.Packet) (rpl *radigo.Packet, err e
 			ra.filterS, nil, nil)
 		agReq.Vars.Set([]string{MetaRadReqType}, utils.StringToInterface(MetaRadAuth), false, true)
 		var lclProcessed bool
-		if lclProcessed, err = ra.processRequest(req, reqProcessor, agReq); lclProcessed {
+		if lclProcessed, err = ra.processRequest(req, reqProcessor, agReq, rpl); lclProcessed {
 			processed = lclProcessed
 		}
 		if err != nil || (lclProcessed && !reqProcessor.Flags.GetBool(utils.MetaContinue)) {
@@ -131,7 +131,7 @@ func (ra *RadiusAgent) handleAcct(req *radigo.Packet) (rpl *radigo.Packet, err e
 				config.CgrConfig().GeneralCfg().DefaultTimezone),
 			ra.filterS, nil, nil)
 		var lclProcessed bool
-		if lclProcessed, err = ra.processRequest(req, reqProcessor, agReq); lclProcessed {
+		if lclProcessed, err = ra.processRequest(req, reqProcessor, agReq, rpl); lclProcessed {
 			processed = lclProcessed
 		}
 		if err != nil || (lclProcessed && !reqProcessor.Flags.GetBool(utils.MetaContinue)) {
@@ -157,7 +157,7 @@ func (ra *RadiusAgent) handleAcct(req *radigo.Packet) (rpl *radigo.Packet, err e
 
 // processRequest represents one processor processing the request
 func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.RequestProcessor,
-	agReq *AgentRequest) (processed bool, err error) {
+	agReq *AgentRequest, rpl *radigo.Packet) (processed bool, err error) {
 	if pass, err := ra.filterS.Pass(agReq.Tenant,
 		reqProcessor.Filters, agReq); err != nil || !pass {
 		return pass, err
@@ -304,9 +304,9 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 		}
 	case utils.MetaCDRs: // allow this method
 	case utils.MetaRadauth:
-		if ok, err := radauthReq(req, agReq); err != nil {
+		if pass, err := radauthReq(req, agReq, rpl); err != nil {
 			return false, err
-		} else if !ok {
+		} else if !pass {
 			agReq.CGRReply.Set([]string{utils.Error}, utils.RadauthFailed, false, false)
 		}
 	}
