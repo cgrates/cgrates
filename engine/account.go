@@ -1084,7 +1084,7 @@ func (acc *Account) AsAccountSummary() *AccountSummary {
 		ad.ID = idSplt[1]
 	}
 
-	for _, balanceType := range []string{utils.DATA, utils.SMS, utils.VOICE, utils.GENERIC, utils.MONETARY} {
+	for _, balanceType := range []string{utils.DATA, utils.SMS, utils.MMS, utils.VOICE, utils.GENERIC, utils.MONETARY} {
 		balances, has := acc.BalanceMap[balanceType]
 		if !has {
 			continue
