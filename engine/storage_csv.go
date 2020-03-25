@@ -728,7 +728,12 @@ func getClient(cfg *oauth2.Config, configPath string) (*http.Client, error) {
 		if err != nil {
 			return nil, err
 		}
-		saveToken(string(config.CgrConfig().LoaderCgrCfg().GapiToken[1:len(config.CgrConfig().LoaderCgrCfg().GapiToken)-1]), tok)
+		path2TokFileb := config.CgrConfig().LoaderCgrCfg().GapiToken
+		path2TokFile := string(path2TokFileb[1 : len(path2TokFileb)-1])
+		if err := os.MkdirAll(filepath.Dir(path2TokFile), os.FileMode(0777)); err != nil { // create the directory if not exists
+			return nil, err
+		}
+		saveToken(path2TokFile, tok)
 	} else if err = json.Unmarshal(raw, tok); err != nil {
 		return nil, err
 	}
