@@ -1411,6 +1411,7 @@ func (cfg *CGRConfig) reloadSections(sections ...string) (err error) {
 			return fmt.Errorf("Invalid section: <%s>", section)
 		case GENERAL_JSN: // nothing to reload
 		case RPCConnsJsonName: // nothing to reload
+			cfg.rldChans[RPCConnsJsonName] <- struct{}{}
 		case DATADB_JSN: // reloaded before
 		case STORDB_JSN: // reloaded before
 		case LISTEN_JSN:

@@ -26,6 +26,7 @@ import (
 	"sync"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
@@ -307,6 +308,8 @@ func (srvMngr *ServiceManager) handleReload() {
 			if err = srvMngr.reloadService(utils.StorDB); err != nil {
 				return
 			}
+		case <-srvMngr.GetConfig().GetReloadChan(config.RPCConnsJsonName):
+			engine.Cache.Clear([]string{utils.CacheRPCConnections})
 		}
 		// handle RPC server
 	}
