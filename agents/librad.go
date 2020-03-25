@@ -119,31 +119,38 @@ func (pk *radiusDP) RemoteHost() net.Addr {
 	return utils.NewNetAddr(pk.req.RemoteAddr().Network(), pk.req.RemoteAddr().String())
 }
 
-//radauthReq is used to authorize a request
-//if User-Password avp is present use PAP auth
-//if CHAP-Password is presented use CHAP auth
-func radauthReq(req *radigo.Packet, aReq *AgentRequest, rpl *radigo.Packet) (bool, error) {
+//radauthReq is used to authorize a request based on flags
+func radauthReq(flags utils.FlagsWithParams, req *radigo.Packet, aReq *AgentRequest, rpl *radigo.Packet) (bool, error) {
 	// try to get UserPassword from Vars as slice of NMItems
 	nmItems, err := aReq.Vars.FieldAsInterface([]string{utils.UserPassword})
 	if err != nil {
 		return false, err
 	}
-	userPassAvps := req.AttributesWithName("User-Password", utils.EmptyString)
-	chapAVPs := req.AttributesWithName("CHAP-Password", utils.EmptyString)
-	msChallenge := req.AttributesWithName("MS-CHAP-Challenge", "Microsoft")
-	msResponse := req.AttributesWithName("MS-CHAP-Response", "Microsoft")
-	if len(userPassAvps) == 0 && len(chapAVPs) == 0 && len(msChallenge) == 0 && len(msResponse) == 0 {
-		return false, fmt.Errorf("cannot find User-Password or CHAP-Password AVP in request")
-	}
 	switch {
-	case len(userPassAvps) != 0:
+	case flags.HasKey(utils.MetaPAP):
+		userPassAvps := req.AttributesWithName(UserPasswordAVP, utils.EmptyString)
+		if len(userPassAvps) == 0 {
+			return false, utils.NewErrMandatoryIeMissing(UserPasswordAVP)
+		}
 		if userPassAvps[0].StringValue != nmItems.([]*config.NMItem)[0].Data {
 			return false, nil
 		}
-	case len(chapAVPs) != 0:
+	case flags.HasKey(utils.MetaCHAP):
+		chapAVPs := req.AttributesWithName(CHAPPasswordAVP, utils.EmptyString)
+		if len(chapAVPs) == 0 {
+			return false, utils.NewErrMandatoryIeMissing(CHAPPasswordAVP)
+		}
 		return radigo.AuthenticateCHAP([]byte(utils.IfaceAsString(nmItems.([]*config.NMItem)[0].Data)),
 			req.Authenticator[:], chapAVPs[0].RawValue), nil
-	case len(msChallenge) != 0 && len(msResponse) != 0:
+	case flags.HasKey(utils.MetaMSCHAPV2):
+		msChallenge := req.AttributesWithName(MSCHAPChallengeAVP, MicrosoftVendor)
+		if len(msChallenge) == 0 {
+			return false, utils.NewErrMandatoryIeMissing(MSCHAPChallengeAVP)
+		}
+		msResponse := req.AttributesWithName(MSCHAPResponseAVP, MicrosoftVendor)
+		if len(msResponse) == 0 {
+			return false, utils.NewErrMandatoryIeMissing(MSCHAPResponseAVP)
+		}
 		vsaMSResponde := msResponse[0].Value.(*radigo.VSA)
 		vsaMSChallange := msChallenge[0].Value.(*radigo.VSA)
 
@@ -179,7 +186,9 @@ func radauthReq(req *radigo.Packet, aReq *AgentRequest, rpl *radigo.Packet) (boo
 		success[0] = ident
 		copy(success[1:], authenticatorResponse)
 		// this AVP need to be added to be verified on the client side
-		rpl.AddAVPWithName("MS-CHAP2-Success", string(success), "Microsoft")
+		rpl.AddAVPWithName(MSCHAP2SuccessAVP, string(success), MicrosoftVendor)
+	default:
+		return false, utils.NewErrMandatoryIeMissing(utils.Flags)
 	}
 
 	return true, nil
