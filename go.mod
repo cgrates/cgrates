@@ -23,7 +23,7 @@ require (
 	github.com/cgrates/fsock v0.0.0-20190623100231-317895b42f1a
 	github.com/cgrates/kamevapi v0.0.0-20191001125829-7dbc3ad58817
 	github.com/cgrates/ltcache v0.0.0-20181016092649-92fb7fa77cca
-	github.com/cgrates/radigo v0.0.0-20200321121249-9e416fdf1479
+	github.com/cgrates/radigo v0.0.0-20200324152710-35e651804ad1
 	github.com/cgrates/rpcclient v0.0.0-20200107134035-188454eb71b3
 	github.com/creack/pty v1.1.7
 	github.com/fiorix/go-diameter v3.0.3-0.20190716165154-f4823472d0e0+incompatible

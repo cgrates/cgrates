@@ -29,10 +29,16 @@ import (
 )
 
 const (
-	MetaRadReqType   = "*radReqType"
-	MetaRadAuth      = "*radAuth"
-	MetaRadAcctStart = "*radAcctStart"
-	MetaRadReplyCode = "*radReplyCode"
+	MetaRadReqType     = "*radReqType"
+	MetaRadAuth        = "*radAuth"
+	MetaRadAcctStart   = "*radAcctStart"
+	MetaRadReplyCode   = "*radReplyCode"
+	UserPasswordAVP    = "User-Password"
+	CHAPPasswordAVP    = "CHAP-Password"
+	MSCHAPChallengeAVP = "MS-CHAP-Challenge"
+	MSCHAPResponseAVP  = "MS-CHAP-Response"
+	MicrosoftVendor    = "Microsoft"
+	MSCHAP2SuccessAVP  = "MS-CHAP2-Success"
 )
 
 func NewRadiusAgent(cgrCfg *config.CGRConfig, filterS *engine.FilterS,
@@ -304,8 +310,8 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 		}
 	case utils.MetaCDRs: // allow this method
 	case utils.MetaRadauth:
-		if pass, err := radauthReq(req, agReq, rpl); err != nil {
-			return false, err
+		if pass, err := radauthReq(reqProcessor.Flags, req, agReq, rpl); err != nil {
+			agReq.CGRReply.Set([]string{utils.Error}, err.Error(), false, false)
 		} else if !pass {
 			agReq.CGRReply.Set([]string{utils.Error}, utils.RadauthFailed, false, false)
 		}

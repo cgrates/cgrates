@@ -1,0 +1,51 @@
+{
+
+  "radius_agent": {
+    "request_processors": [
+      {
+        "id": "CGRPAPAuth",
+        "filters": ["*string:~*vars.*radReqType:*radAuth", "*string:~*req.Sip-From-Tag:51585361"],
+        "flags": ["*auth", "*attributes", "*accounts", "*continue"],
+        "request_fields":[
+          {"tag": "Category", "path": "*cgreq.Category", "type": "*constant", "value": "call"},
+          {"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*constant",
+            "value": "*prepaid", "mandatory": true},
+          {"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*composed",
+            "value": "~*req.Acct-Session-Id;-;~*req.Sip-From-Tag", "mandatory": true},
+          {"tag": "Account", "path": "*cgreq.Account", "type": "*composed",
+            "value": "~*req.User-Name", "mandatory": true},
+          {"tag": "Subject", "path": "*cgreq.Subject", "type": "*composed",
+            "value": "~*req.User-Name", "mandatory": true},
+          {"tag": "Destination", "path": "*cgreq.Destination", "type": "*composed",
+            "value": "~*req.Called-Station-Id", "mandatory": true},
+          {"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*composed",
+            "value": "~*req.Event-Timestamp", "mandatory": true},
+          {"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*composed",
+            "value": "~*req.Event-Timestamp", "mandatory": true},
+          {"tag": "PasswordFromAttributes", "path": "*cgreq.PasswordFromAttributes", "type": "*constant",
+            "value": "*attributes"}
+        ],
+        "reply_fields":[
+          {"tag": "MaxUsage", "path": "*rep.SIP-AVP", "type": "*composed",
+            "value": "session_max_time#;~*cgrep.MaxUsage{*duration_seconds}", "mandatory": true},
+        ],
+      },
+      {
+        "id": "RadiusPAPAuthProcessor",
+        "filters": ["*string:~*vars.*radReqType:*radAuth", "*string:~*req.Sip-From-Tag:51585361"],
+        "flags": ["*radauth", "*pap", "*log"],
+        "request_fields":[
+          {"tag": "UserPassword", "path": "*vars.UserPassword", "type": "*variable",
+            "value": "~*cgrep.Attributes.PasswordFromAttributes"},
+        ],
+        "reply_fields":[
+          {"tag":"RemoveAddedFields", "filters": ["*notempty:~*cgrep.Error:"], "type": "*removeall", "path": "*rep"},
+          {"tag": "Code", "path": "*rep.*radReplyCode", "filters": ["*notempty:~*cgrep.Error:"],
+            "type": "*constant", "value": "AccessReject"},
+          {"tag": "ReplyMessage", "path": "*rep.Reply-Message", "filters": ["*notempty:~*cgrep.Error:"],
+            "type": "*variable", "value": "~*cgrep.Error"}
+        ]
+      },
+    ],
+  }
+}

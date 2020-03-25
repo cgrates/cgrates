@@ -59,8 +59,8 @@ github.com/cgrates/kamevapi v0.0.0-20191001125829-7dbc3ad58817 h1:1Tdv6H/usqmkQV
 github.com/cgrates/kamevapi v0.0.0-20191001125829-7dbc3ad58817/go.mod h1:pgHqPlPcEDIQbbs9wyBk7YZTcaVdxMqf3v04XU+mngI=
 github.com/cgrates/ltcache v0.0.0-20181016092649-92fb7fa77cca h1:Ejj4m0Ccl8dMMVnoHk4nQMlbR3w24llqQDy66DO9E0A=
 github.com/cgrates/ltcache v0.0.0-20181016092649-92fb7fa77cca/go.mod h1:q7c996DUu8OrJRnewVSQzM+y/bRcxZAHoo+zCD8bFBo=
-github.com/cgrates/radigo v0.0.0-20200321121249-9e416fdf1479 h1:UNareDs0BcycjiSy2ltRlsiaeoohDdt9OQOg55ak5Jc=
-github.com/cgrates/radigo v0.0.0-20200321121249-9e416fdf1479/go.mod h1:mTCzHAYfgZlRe0HorDz+jy2JTrNvNuKkHBAUjDZBWq8=
+github.com/cgrates/radigo v0.0.0-20200324152710-35e651804ad1 h1:QvA6Nbwq9kTd7hsvu1xo5kwia68cLwnp0sYCq1u40TU=
+github.com/cgrates/radigo v0.0.0-20200324152710-35e651804ad1/go.mod h1:HZbsg3Y+xw4lsfCqX9rzj429wrg0XOug6pFT3B6VHZY=
 github.com/cgrates/rpcclient v0.0.0-20200107134035-188454eb71b3 h1:esWCSaLD2j+zfK9JpyPXFSe3c97MQFhfKp9jDiss1mU=
 github.com/cgrates/rpcclient v0.0.0-20200107134035-188454eb71b3/go.mod h1:xXLqAKVvcdWeDYwHJYwDgAI3ZOg5LZYxzb72kLjsLZU=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
@@ -221,6 +221,8 @@ golang.org/x/crypto v0.0.0-20190506204251-e1dfcc566284/go.mod h1:yigFU9vqHzYiE8U
 golang.org/x/crypto v0.0.0-20190605123033-f99c8df09eb5/go.mod h1:yigFU9vqHzYiE8UmvKecakEJjdnWj3jj499lnFckfCI=
 golang.org/x/crypto v0.0.0-20190829043050-9756ffdc2472 h1:Gv7RPwsi3eZ2Fgewe3CBsuOebPwO27PoXzRpJPsvSSM=
 golang.org/x/crypto v0.0.0-20190829043050-9756ffdc2472/go.mod h1:yigFU9vqHzYiE8UmvKecakEJjdnWj3jj499lnFckfCI=
+golang.org/x/crypto v0.0.0-20200320181102-891825fb96df h1:lDWgvUvNnaTnNBc/dwOty86cFeKoKWbwy2wQj0gIxbU=
+golang.org/x/crypto v0.0.0-20200320181102-891825fb96df/go.mod h1:LzIPMQfyMNhhGPhUkYOs5KpL4U8rLKemX1yGLhDgUto=
 golang.org/x/exp v0.0.0-20190121172915-509febef88a4/go.mod h1:CJ0aWSM057203Lf6IL+f9T1iT9GByDxfZKAQTCR3kQA=
 golang.org/x/exp v0.0.0-20190510132918-efd6b22b2522/go.mod h1:ZjyILWgesfNpC6sMxTJOJm9Kp84zZh5NQWvqDGG3Qr8=
 golang.org/x/image v0.0.0-20190227222117-0694c2d4d067/go.mod h1:kZ7UVZpmo3dzQBMxlp+ypCbDeSB+sBbTgSJuh5dn5js=

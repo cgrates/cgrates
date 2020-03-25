@@ -710,6 +710,9 @@ const (
 	MetaRadauth               = "*radauth"
 	UserPassword              = "UserPassword"
 	RadauthFailed             = "RADAUTH_FAILED"
+	MetaPAP                   = "*pap"
+	MetaCHAP                  = "*chap"
+	MetaMSCHAPV2              = "*mschapv2"
 )
 
 // Migrator Action
