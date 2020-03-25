@@ -1506,7 +1506,7 @@ func TestCgrLoaderCfgDefault(t *testing.T) {
 		CachesConns:     []string{utils.MetaLocalHost},
 		SchedulerConns:  []string{utils.MetaLocalHost},
 		GapiCredentials: json.RawMessage(`".gapi/credentials.json"`),
-		GapiToken:       json.RawMessage(`".gapi/credentials.json"`),
+		GapiToken:       json.RawMessage(`".gapi/token.json"`),
 	}
 	if !reflect.DeepEqual(cgrCfg.LoaderCgrCfg(), eLdrCfg) {
 		t.Errorf("received: %+v, expecting: %+v", utils.ToJSON(cgrCfg.LoaderCgrCfg()), utils.ToJSON(eLdrCfg))
