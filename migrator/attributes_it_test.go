@@ -53,12 +53,12 @@ var sTestsAttrIT = []func(t *testing.T){
 	testAttrITMigrateV3,
 	testAttrITFlush,
 	testAttrITMigrateV4,
-	// testAttrITFlush,
-	// testAttrITV1ToV2,
 	testAttrITFlush,
 	testAttrITV1ToV5,
 	testAttrITFlush,
 	testAttrITV2ToV5,
+	testAttrITFlush,
+	testAttrITdryRunV2ToV5,
 }
 
 func TestAttributeITRedis(t *testing.T) {
@@ -672,68 +672,8 @@ func testAttrITMigrateV4(t *testing.T) {
 	}
 }
 
-func testAttrITV1ToV2(t *testing.T) {
-	mapSubstitutes := make(map[string]map[string]*v1Attribute)
-	mapSubstitutes["FL1"] = make(map[string]*v1Attribute)
-	mapSubstitutes["FL1"]["In1"] = &v1Attribute{
-		FieldName:  "FL1",
-		Initial:    "In1",
-		Substitute: "Al1",
-		Append:     true,
-	}
-	v1Attribute := &v1AttributeProfile{
-		Tenant:    "cgrates.org",
-		ID:        "attributeprofile1",
-		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"filter1"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2020, 4, 18, 14, 25, 0, 0, time.UTC),
-		},
-		Attributes: mapSubstitutes,
-		Weight:     20,
-	}
-
-	//set attribute into inDB
-
-	attrMigrator.dmIN.setV1AttributeProfile(v1Attribute)
-
-	sbstPrsr, err := config.NewRSRParsers("Al1", true, config.CgrConfig().GeneralCfg().RSRSep)
-	if err != nil {
-		t.Error("Error converting Substitute from string to RSRParser: ", err)
-	}
-	eOut := []*v2AttributeProfile{
-		&v2AttributeProfile{
-			Tenant:    "cgrates.org",
-			ID:        "attributeprofile1",
-			Contexts:  []string{utils.MetaSessionS},
-			FilterIDs: []string{"filter1"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     time.Date(2020, 4, 18, 14, 25, 0, 0, time.UTC),
-			},
-			Attributes: []*v2Attribute{
-				&v2Attribute{
-					FieldName:  "FL1",
-					Initial:    "In1",
-					Substitute: sbstPrsr,
-					Append:     true,
-				},
-			},
-			Weight: 20,
-		},
-	}
-
-	if v2, err := attrMigrator.migrateV1ToV2Attributes(); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eOut, v2) {
-		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(v2))
-	}
-
-}
-
 func testAttrITV1ToV5(t *testing.T) {
-	// contruct the v1 attribute with all fields filled up
+	// contruct the first v1 attributeProfile with all fields filled up
 	mapSubstitutes := make(map[string]map[string]*v1Attribute)
 	mapSubstitutes["FL1"] = make(map[string]*v1Attribute)
 	mapSubstitutes["FL1"]["In1"] = &v1Attribute{
@@ -754,7 +694,7 @@ func testAttrITV1ToV5(t *testing.T) {
 		Attributes: mapSubstitutes,
 		Weight:     20,
 	}
-	//second attribute profile
+	// contruct the second v1 attributeProfile with all fields filled up
 	v1AttributeProfile2 := &v1AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "attributeprofile2",
@@ -768,16 +708,17 @@ func testAttrITV1ToV5(t *testing.T) {
 		Weight:     20,
 	}
 
-	//set attribute into inDB
+	// set the first attributeProfile into DB
 	attrMigrator.dmIN.setV1AttributeProfile(v1AttributeProfile1)
-	//set the second attr profile
+	// set the second attributeProfile into DB
 	attrMigrator.dmIN.setV1AttributeProfile(v1AttributeProfile2)
 
-	//set attributes version into DB
+	// set attributes version into DB
 	if err := attrMigrator.dmIN.DataManager().DataDB().SetVersions(engine.Versions{utils.Attributes: 1}, true); err != nil {
 		t.Errorf("error: <%s> when updating Attributes version into dataDB", err.Error())
 	}
 
+	// Construct the exepected output
 	sbstPrsr, err := config.NewRSRParsers("Al1", true, config.CgrConfig().GeneralCfg().RSRSep)
 	if err != nil {
 		t.Error("Error converting Substitute from string to RSRParser: ", err)
@@ -819,22 +760,22 @@ func testAttrITV1ToV5(t *testing.T) {
 		Weight: 20,
 	}
 
-	//Migrate to latest version
-	if err := attrMigrator.migrateAttributeProfileV2(); err != nil {
+	// Migrate to latest version
+	if err := attrMigrator.migrateAttributeProfile(); err != nil {
 		t.Error(err)
 	}
-	//check the version
+	// check the version
 	if vrs, err := attrMigrator.dmOut.DataManager().DataDB().GetVersions(""); err != nil {
 		t.Error(err)
 	} else if vrs[utils.Attributes] != 5 {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.Attributes])
 	}
 
-	//check the first AttributeProfile
+	// check the first AttributeProfile
 	result, err := attrMigrator.dmOut.DataManager().GetAttributeProfile("cgrates.org",
 		"attributeprofile1", false, false, utils.NonTransactional)
 	if err != nil {
-		t.Error(err) //only encoded map or array can be decoded into a struct
+		t.Error(err)
 
 	} else {
 		result.Compile()
@@ -843,7 +784,7 @@ func testAttrITV1ToV5(t *testing.T) {
 			t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut1), utils.ToJSON(result))
 		}
 	}
-	//check the second AttributeProfile
+	// check the second AttributeProfile
 	result, err = attrMigrator.dmOut.DataManager().GetAttributeProfile("cgrates.org",
 		"attributeprofile2", false, false, utils.NonTransactional)
 	if err != nil {
@@ -858,7 +799,7 @@ func testAttrITV1ToV5(t *testing.T) {
 }
 
 func testAttrITV2ToV5(t *testing.T) {
-	// contruct the v1 attribute profile with all fields filled up
+	// contruct the first v2 attributeProfile with all fields filled up
 	sbstPrsr, err := config.NewRSRParsers("Al1", true, config.CgrConfig().GeneralCfg().RSRSep)
 	if err != nil {
 		t.Error("Error converting Substitute from string to RSRParser: ", err)
@@ -881,7 +822,7 @@ func testAttrITV2ToV5(t *testing.T) {
 			}},
 		Weight: 20,
 	}
-	//second attribute profile
+	// contruct the second v2 attributeProfile with all fields filled up
 	v2AttributeProfile2 := &v2AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "attributeprofile2",
@@ -901,9 +842,9 @@ func testAttrITV2ToV5(t *testing.T) {
 		Weight: 20,
 	}
 
-	//set attribute into inDB
+	// set the first attributeProfile into inDB
 	attrMigrator.dmIN.setV2AttributeProfile(v2AttributeProfile1)
-	//set the second attr profile
+	// set the second attributeProfile into inDB
 	attrMigrator.dmIN.setV2AttributeProfile(v2AttributeProfile2)
 
 	//set attributes version into DB
@@ -911,6 +852,7 @@ func testAttrITV2ToV5(t *testing.T) {
 		t.Errorf("error: <%s> when updating Attributes version into dataDB", err.Error())
 	}
 
+	// Construct the expected output
 	eOut1 := &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "attributeprofile1",
@@ -949,7 +891,7 @@ func testAttrITV2ToV5(t *testing.T) {
 	}
 
 	//Migrate to latest version
-	if err := attrMigrator.migrateAttributeProfileV2(); err != nil {
+	if err := attrMigrator.migrateAttributeProfile(); err != nil {
 		t.Error(err)
 	}
 	//check the version
@@ -983,5 +925,54 @@ func testAttrITV2ToV5(t *testing.T) {
 		if !reflect.DeepEqual(result, eOut2) {
 			t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut2), utils.ToJSON(result))
 		}
+	}
+}
+
+func testAttrITdryRunV2ToV5(t *testing.T) {
+	// Test with dryRun on true
+	// contruct the v2 attributeProfile with all fields filled up
+	sbstPrsr, err := config.NewRSRParsers("Al1", true, config.CgrConfig().GeneralCfg().RSRSep)
+	if err != nil {
+		t.Error("Error converting Substitute from string to RSRParser: ", err)
+	}
+	v2AttributeProfile := &v2AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "attributeprofile1",
+		Contexts:  []string{utils.MetaSessionS},
+		FilterIDs: []string{"*string:test:test"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2020, 4, 18, 14, 25, 0, 0, time.UTC),
+		},
+		Attributes: []*v2Attribute{
+			&v2Attribute{
+				FieldName:  "FL1",
+				Initial:    "In1",
+				Substitute: sbstPrsr,
+				Append:     true,
+			}},
+		Weight: 20,
+	}
+	//set dryRun on true
+	attrMigrator.dryRun = true
+	//set attributeProfile into inDB
+	attrMigrator.dmIN.setV2AttributeProfile(v2AttributeProfile)
+
+	//set attributes version into DB
+	if err := attrMigrator.dmIN.DataManager().DataDB().SetVersions(engine.Versions{utils.Attributes: 2}, true); err != nil {
+		t.Errorf("error: <%s> when updating Attributes version into dataDB", err.Error())
+	}
+
+	// Should migrate with no errors and no data modified
+	if err := attrMigrator.migrateAttributeProfile(); err != nil {
+		t.Error(err)
+	}
+
+	// Check if the attribute profile was set into DB
+	// Expecting NOT_FOUND as it was a dryRun migration
+	_, err = attrMigrator.dmOut.DataManager().GetAttributeProfile("cgrates.org",
+		"attributeprofile1", false, false, utils.NonTransactional)
+	if err != nil && err != utils.ErrNotFound {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ErrNotFound, err)
 	}
 }
