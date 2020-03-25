@@ -19,6 +19,7 @@ package utils
 
 import (
 	"math/rand"
+	"reflect"
 	"testing"
 )
 
@@ -227,61 +228,88 @@ func TestOrderedNavigableMapGetField(t *testing.T) {
 		t.Errorf("Expected %q ,received: %q", 10, val.Interface())
 	}
 }
-
+*/
 func TestOrderedNavigableMapGetSet(t *testing.T) {
-	var nm NMInterface = &OrderedNavigableMap{nm: NavigableMap2{
-		"Field1": NewNMData(10),
-		"Field2": &NMSlice{
-			NewNMData("1001"),
-			NavigableMap2{
-				"Account": &NMSlice{NewNMData(10), NewNMData(11)},
+	nm := NewOrderedNavigableMap()
+	nm.Set2(&FullPath{
+		PathItems: PathItems{{Field: "Account", Index: IntPointer(0)}},
+		Path:      "Account",
+	}, NewNMData(1001))
+	nm.Set2(&FullPath{
+		PathItems: PathItems{{Field: "Account", Index: IntPointer(1)}},
+		Path:      "Account",
+	}, NewNMData("account_on_new_branch"))
+
+	expectedOrder := []PathItems{
+		{{Field: "Account", Index: IntPointer(0)}},
+		{{Field: "Account", Index: IntPointer(1)}},
+	}
+
+	recivedOrder := []PathItems{}
+
+	for el := nm.GetFirstElement(); el != nil; el = el.Next() {
+		recivedOrder = append(recivedOrder, el.Value)
+	}
+
+	if !reflect.DeepEqual(expectedOrder, recivedOrder) {
+		t.Errorf("Expected %s ,received: %s", expectedOrder, recivedOrder)
+	}
+	/*
+		var nm NMInterface = &OrderedNavigableMap{nm: NavigableMap2{
+			"Field1": NewNMData(10),
+			"Field2": &NMSlice{
+				NewNMData("1001"),
+				NavigableMap2{
+					"Account": &NMSlice{NewNMData(10), NewNMData(11)},
+				},
 			},
-		},
-		"Field3": NavigableMap2{
-			"Field4": NavigableMap2{
-				"Field5": NewNMData(5),
+			"Field3": NavigableMap2{
+				"Field4": NavigableMap2{
+					"Field5": NewNMData(5),
+				},
 			},
-		},
-	}}
-	path := PathItems{{Field: "Field1"}}
-	if val, err := nm.Field(path); err != nil {
-		t.Error(err)
-	} else if val.Interface() != 10 {
-		t.Errorf("Expected %q ,received: %q", 10, val.Interface())
-	}
+		}}
+		path := PathItems{{Field: "Field1"}}
+		if val, err := nm.Field(path); err != nil {
+			t.Error(err)
+		} else if val.Interface() != 10 {
+			t.Errorf("Expected %q ,received: %q", 10, val.Interface())
+		}
 
-	path = PathItems{{Field: "Field3"}, {Field: "Field4"}, {Field: "Field5"}}
-	if val, err := nm.Field(path); err != nil {
-		t.Error(err)
-	} else if val.Interface() != 5 {
-		t.Errorf("Expected %q ,received: %q", 5, val.Interface())
-	}
+		path = PathItems{{Field: "Field3"}, {Field: "Field4"}, {Field: "Field5"}}
+		if val, err := nm.Field(path); err != nil {
+			t.Error(err)
+		} else if val.Interface() != 5 {
+			t.Errorf("Expected %q ,received: %q", 5, val.Interface())
+		}
 
-	path = PathItems{{Field: "Field2", Index: IntPointer(2)}}
-	if err := nm.Set(path, NewNMData("500")); err != nil {
-		t.Error(err)
-	}
-	if val, err := nm.Field(path); err != nil {
-		t.Error(err)
-	} else if val.Interface() != "500" {
-		t.Errorf("Expected %q ,received: %q", "500", val.Interface())
-	}
+		path = PathItems{{Field: "Field2", Index: IntPointer(2)}}
+		if err := nm.Set(path, NewNMData("500")); err != nil {
+			t.Error(err)
+		}
+		if val, err := nm.Field(path); err != nil {
+			t.Error(err)
+		} else if val.Interface() != "500" {
+			t.Errorf("Expected %q ,received: %q", "500", val.Interface())
+		}
 
-	path = PathItems{{Field: "Field2", Index: IntPointer(1)}, {Field: "Account"}}
-	if err := nm.Set(path, NewNMData("5")); err != nil {
-		t.Error(err)
-	}
-	path = PathItems{{Field: "Field2", Index: IntPointer(1)}, {Field: "Account"}}
-	if val, err := nm.Field(path); err != nil {
-		t.Error(err)
-	} else if val.Interface() != "5" {
-		t.Errorf("Expected %q ,received: %q", "5", val.Interface())
-	}
-	path = PathItems{{Field: "Field2", Index: IntPointer(1)}, {Field: "Account", Index: IntPointer(0)}}
-	if _, err := nm.Field(path); err != ErrNotFound {
-		t.Error(err)
-	}
+		path = PathItems{{Field: "Field2", Index: IntPointer(1)}, {Field: "Account"}}
+		if err := nm.Set(path, NewNMData("5")); err != nil {
+			t.Error(err)
+		}
+		path = PathItems{{Field: "Field2", Index: IntPointer(1)}, {Field: "Account"}}
+		if val, err := nm.Field(path); err != nil {
+			t.Error(err)
+		} else if val.Interface() != "5" {
+			t.Errorf("Expected %q ,received: %q", "5", val.Interface())
+		}
+		path = PathItems{{Field: "Field2", Index: IntPointer(1)}, {Field: "Account", Index: IntPointer(0)}}
+		if _, err := nm.Field(path); err != ErrNotFound {
+			t.Error(err)
+		}*/
 }
+
+/*
 
 func TestOrderedNavigableMapFieldAsInterface(t *testing.T) {
 	nm := &OrderedNavigableMap{nm: NavigableMap2{
