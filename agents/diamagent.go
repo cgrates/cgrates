@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package agents
 
 import (
+	"errors"
 	"fmt"
 	"net"
 	"strings"
@@ -34,16 +35,25 @@ import (
 	"github.com/fiorix/go-diameter/diam/datatype"
 	"github.com/fiorix/go-diameter/diam/dict"
 	"github.com/fiorix/go-diameter/diam/sm"
+	"github.com/fiorix/go-diameter/diam/sm/smpeer"
 )
 
 const (
 	all = "ALL"
 	raa = "RAA"
+	dpa = "DPA"
 )
 
 func NewDiameterAgent(cgrCfg *config.CGRConfig, filterS *engine.FilterS,
 	connMgr *engine.ConnManager) (*DiameterAgent, error) {
-	da := &DiameterAgent{cgrCfg: cgrCfg, filterS: filterS, connMgr: connMgr, raa: make(map[string]chan *diam.Message)}
+	da := &DiameterAgent{
+		cgrCfg:  cgrCfg,
+		filterS: filterS,
+		connMgr: connMgr,
+		raa:     make(map[string]chan *diam.Message),
+		dra:     make(map[string]chan *diam.Message),
+		peers:   make(map[string]diam.Conn),
+	}
 	dictsPath := cgrCfg.DiameterAgentCfg().DictionariesPath
 	if len(dictsPath) != 0 {
 		if err := loadDictionaries(dictsPath, utils.DiameterAgent); err != nil {
@@ -75,6 +85,11 @@ type DiameterAgent struct {
 	aReqsLck sync.RWMutex
 	raa      map[string]chan *diam.Message
 	raaLck   sync.RWMutex
+
+	peersLck sync.Mutex
+	peers    map[string]diam.Conn // peer index by OriginHost;OriginRealm
+	dra      map[string]chan *diam.Message
+	draLck   sync.RWMutex
 }
 
 // ListenAndServe is called when DiameterAgent is started, usually from within cmd/cgr-engine
@@ -119,11 +134,13 @@ func (da *DiameterAgent) handlers() diam.Handler {
 	if da.cgrCfg.DiameterAgentCfg().SyncedConnReqs {
 		dSM.HandleFunc(all, da.handleMessage)
 		dSM.HandleFunc(raa, da.handleRAA)
+		dSM.HandleFunc(dpa, da.handleDRA)
 	} else {
 		dSM.HandleFunc(all, da.handleMessageAsync)
 		dSM.HandleFunc(raa, func(c diam.Conn, m *diam.Message) { go da.handleRAA(c, m) })
+		dSM.HandleFunc(dpa, func(c diam.Conn, m *diam.Message) { go da.handleDRA(c, m) })
 	}
-
+	go da.handleConns(dSM.HandshakeNotify())
 	go func() {
 		for err := range dSM.ErrorReports() {
 			utils.Logger.Err(fmt.Sprintf("<%s> sm error: %v", utils.DiameterAgent, err))
@@ -559,20 +576,19 @@ func (da *DiameterAgent) V1ReAuthorize(originID string, reply *string) (err erro
 	select {
 	case raa := <-raaCh:
 		var avps []*diam.AVP
-		if avps, err = raa.FindAVPsWithPath([]interface{}{"Result-Code"}, dict.UndefinedVendorID); err != nil {
+		if avps, err = raa.FindAVPsWithPath([]interface{}{avp.ResultCode}, dict.UndefinedVendorID); err != nil {
 			return
 		}
 		if len(avps) == 0 {
 			return fmt.Errorf("Missing AVP")
 		}
-		var resCode string
-		if resCode, err = diamAVPAsString(avps[0]); err != nil {
+		var data interface{}
+		if data, err = diamAVPAsIface(avps[0]); err != nil {
 			return
+		} else if data != uint32(diam.Success) {
+			return fmt.Errorf("Wrong result code: <%v>", data)
 		}
-		if resCode != "2001" {
-			return fmt.Errorf("Wrong result code: <%s>", resCode)
-		}
-	case <-time.After(10 * time.Second):
+	case <-time.After(time.Second):
 		return utils.ErrTimedOut
 	}
 	*reply = utils.OK
@@ -595,4 +611,95 @@ func (da *DiameterAgent) handleRAA(c diam.Conn, m *diam.Message) {
 		return
 	}
 	ch <- m
+}
+
+func (da *DiameterAgent) handleConns(peers <-chan diam.Conn) {
+	for c := range peers {
+		meta, _ := smpeer.FromContext(c.Context())
+		key := string(meta.OriginHost + utils.CONCATENATED_KEY_SEP + meta.OriginRealm)
+		da.peersLck.Lock()
+		da.peers[key] = c // store in peers table
+		da.peersLck.Unlock()
+		go func(c diam.Conn, key string) {
+			// wait for disconnect notification
+			<-c.(diam.CloseNotifier).CloseNotify()
+			da.peersLck.Lock()
+			delete(da.peers, key) // remove from peers table
+			da.peersLck.Unlock()
+		}(c, key)
+	}
+}
+
+func (da *DiameterAgent) handleDRA(c diam.Conn, m *diam.Message) {
+	meta, _ := smpeer.FromContext(c.Context())
+	key := string(meta.OriginHost + utils.CONCATENATED_KEY_SEP + meta.OriginRealm)
+
+	da.raaLck.Lock()
+	ch, has := da.dra[key]
+	da.raaLck.Unlock()
+	if !has {
+		return
+	}
+	ch <- m
+	c.Close()
+}
+
+// V1DisconnectPeer  sends a DPR meseage to diameter client
+func (da *DiameterAgent) V1DisconnectPeer(args *utils.DPRArgs, reply *string) (err error) {
+	if args == nil {
+		utils.Logger.Info(
+			fmt.Sprintf("<%s> cannot send DPR, missing arrguments",
+				utils.DiameterAgent))
+		return utils.ErrMandatoryIeMissing
+	}
+
+	if args.DisconnectCause < 0 || args.DisconnectCause > 2 {
+		return errors.New("WRONG_DISCONNECT_CAUSE")
+	}
+	m := diam.NewRequest(diam.DisconnectPeer,
+		diam.CHARGING_CONTROL_APP_ID, dict.Default)
+	m.NewAVP(avp.OriginHost, avp.Mbit, 0, datatype.DiameterIdentity(args.OriginHost))
+	m.NewAVP(avp.OriginRealm, avp.Mbit, 0, datatype.DiameterIdentity(args.OriginRealm))
+	m.NewAVP(avp.DisconnectCause, avp.Mbit, 0, datatype.Enumerated(args.DisconnectCause))
+
+	key := args.OriginHost + utils.CONCATENATED_KEY_SEP + args.OriginRealm
+
+	draCh := make(chan *diam.Message, 1)
+	da.draLck.Lock()
+	da.dra[key] = draCh
+	da.draLck.Unlock()
+	defer func() {
+		da.draLck.Lock()
+		delete(da.dra, key)
+		da.draLck.Unlock()
+	}()
+	da.peersLck.Lock()
+	conn, has := da.peers[key]
+	da.peersLck.Unlock()
+	if !has {
+		return utils.ErrNotFound
+	}
+	if err = writeOnConn(conn, m); err != nil {
+		return utils.ErrServerError
+	}
+	select {
+	case dra := <-draCh:
+		var avps []*diam.AVP
+		if avps, err = dra.FindAVPsWithPath([]interface{}{avp.ResultCode}, dict.UndefinedVendorID); err != nil {
+			return
+		}
+		if len(avps) == 0 {
+			return fmt.Errorf("Missing AVP")
+		}
+		var data interface{}
+		if data, err = diamAVPAsIface(avps[0]); err != nil {
+			return
+		} else if data != uint32(diam.Success) {
+			return fmt.Errorf("Wrong result code: <%v>", data)
+		}
+	case <-time.After(10 * time.Second):
+		return utils.ErrTimedOut
+	}
+	*reply = utils.OK
+	return
 }

@@ -66,6 +66,7 @@ var (
 		testDiamItCCRTerminate,
 		testDiamItCCRSMS,
 		testDiamItCCRMMS,
+		testDiamItDRR,
 		testDiamItKillEngine,
 	}
 )
@@ -1194,6 +1195,60 @@ func testDiamItRAR(t *testing.T) {
 	eVal = "301" // 5 mins of session
 	if avps, err := msg.FindAVPsWithPath([]interface{}{"Granted-Service-Unit", "CC-Time"},
 		dict.UndefinedVendorID); err != nil {
+		t.Error(err)
+	} else if len(avps) == 0 {
+		t.Error("Missing AVP")
+	} else if val, err := diamAVPAsString(avps[0]); err != nil {
+		t.Error(err)
+	} else if val != eVal {
+		t.Errorf("expecting: %s, received: <%s>", eVal, val)
+	}
+}
+
+func testDiamItDRR(t *testing.T) {
+	if diamConfigDIR == "dispatchers/diamagent" {
+		t.SkipNow()
+	}
+	// ============================================
+	// prevent nil pointer dereference
+	// ============================================
+	if diamClnt == nil {
+		t.Fatal("Diameter client should not be nil")
+	}
+	if diamClnt.conn == nil {
+		t.Fatal("Diameter connection should not be nil")
+	}
+	// ============================================
+	var wait sync.WaitGroup
+	wait.Add(1)
+	go func() {
+		var reply string
+		if err := apierRpc.Call(utils.SessionSv1DisconnectPeer, &utils.DPRArgs{
+			OriginHost:      "INTEGRATION_TESTS",
+			OriginRealm:     "cgrates.org",
+			DisconnectCause: 1, // BUSY
+		}, &reply); err != nil {
+			t.Error(err)
+		}
+		wait.Done()
+	}()
+	drr := diamClnt.ReceivedMessage(rplyTimeout)
+	if drr == nil {
+		t.Fatal("No message returned")
+	}
+
+	dra := drr.Answer(2001)
+	// dra.NewAVP(avp.OriginHost, avp.Mbit, 0, datatype.DiameterIdentity("INTEGRATION_TESTS"))
+	// dra.NewAVP(avp.OriginRealm, avp.Mbit, 0, datatype.DiameterIdentity("cgrates.org"))
+
+	if err := diamClnt.SendMessage(dra); err != nil {
+		t.Error(err)
+	}
+
+	wait.Wait()
+
+	eVal := "1"
+	if avps, err := drr.FindAVPsWithPath([]interface{}{avp.DisconnectCause}, dict.UndefinedVendorID); err != nil {
 		t.Error(err)
 	} else if len(avps) == 0 {
 		t.Error("Missing AVP")

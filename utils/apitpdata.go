@@ -1422,3 +1422,10 @@ type ArgExportToFolder struct {
 	Path  string
 	Items []string
 }
+
+// DPRArgs are the arguments used by dispatcher to send a Disconnect-Peer-Request
+type DPRArgs struct {
+	OriginHost      string
+	OriginRealm     string
+	DisconnectCause int
+}

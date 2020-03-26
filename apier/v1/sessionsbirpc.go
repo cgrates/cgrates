@@ -53,7 +53,8 @@ func (ssv1 *SessionSv1) Handlers() map[string]interface{} {
 		utils.SessionSv1ActivateSessions:   ssv1.BiRPCv1ActivateSessions,
 		utils.SessionSv1DeactivateSessions: ssv1.BiRPCv1DeactivateSessions,
 
-		utils.SessionSv1ReAuthorize: ssv1.BiRPCV1ReAuthorize,
+		utils.SessionSv1ReAuthorize:    ssv1.BiRPCV1ReAuthorize,
+		utils.SessionSv1DisconnectPeer: ssv1.BiRPCV1DisconnectPeer,
 	}
 }
 
@@ -169,4 +170,10 @@ func (ssv1 *SessionSv1) BiRPCv1DeactivateSessions(clnt *rpc2.Client,
 func (ssv1 *SessionSv1) BiRPCV1ReAuthorize(clnt *rpc2.Client,
 	args *utils.SessionFilter, reply *string) error {
 	return ssv1.Ss.BiRPCv1ReAuthorize(clnt, args, reply)
+}
+
+// BiRPCV1DisconnectPeer sends the DPR for the OriginHost and OriginRealm
+func (ssv1 *SessionSv1) BiRPCV1DisconnectPeer(clnt *rpc2.Client,
+	args *utils.DPRArgs, reply *string) error {
+	return ssv1.Ss.BiRPCv1DisconnectPeer(clnt, args, reply)
 }
