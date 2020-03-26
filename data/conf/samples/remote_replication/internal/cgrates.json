@@ -45,7 +45,7 @@
 		"*destinations": {"remote":true,"replicate":true},
 		"*rating_plans": {"remote":true,"replicate":true},
 		"*rating_profiles":{"remote":true,"replicate":true},
-		"*actions":{"remote":false,"replicate":true},
+		"*actions":{"remote":true,"replicate":true},
 		"*action_plans": {"remote":true,"replicate":true},
 		"*account_action_plans":{"remote":true,"replicate":true},
 		"*action_triggers":{"remote":true,"replicate":true},
