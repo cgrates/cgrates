@@ -16,7 +16,7 @@
       {
         "id": "CGRAuth",
         "filters": ["*string:~*vars.*radReqType:*radAuth", "*string:~*req.Sip-From-Tag:12345678"],
-        "flags": ["*auth", "*attributes", "*accounts", "*continue"],
+        "flags": ["*authorize", "*attributes", "*accounts", "*continue"],
         "request_fields":[
           {"tag": "Category", "path": "*cgreq.Category", "type": "*constant", "value": "call"},
           {"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*constant",

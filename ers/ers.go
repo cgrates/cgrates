@@ -154,7 +154,7 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent, rdrCfg *config.EventRe
 	// find out reqType
 	var reqType string
 	for _, typ := range []string{
-		utils.MetaDryRun, utils.MetaAuth,
+		utils.MetaDryRun, utils.MetaAuthorize,
 		utils.MetaInitiate, utils.MetaUpdate,
 		utils.MetaTerminate, utils.MetaMessage,
 		utils.MetaCDRs, utils.MetaEvent, utils.META_NONE} {
@@ -166,7 +166,7 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent, rdrCfg *config.EventRe
 	// execute the action based on reqType
 	cgrArgs := cgrEv.ExtractArgs(
 		rdrCfg.Flags.HasKey(utils.MetaDispatchers),
-		reqType == utils.MetaAuth ||
+		reqType == utils.MetaAuthorize ||
 			reqType == utils.MetaMessage ||
 			reqType == utils.MetaEvent)
 	switch reqType {
@@ -177,7 +177,7 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent, rdrCfg *config.EventRe
 		utils.Logger.Info(
 			fmt.Sprintf("<%s> DRYRUN, reader: <%s>, CGREvent: <%s>",
 				utils.ERs, rdrCfg.ID, utils.ToJSON(cgrEv)))
-	case utils.MetaAuth:
+	case utils.MetaAuthorize:
 		authArgs := sessions.NewV1AuthorizeArgs(
 			rdrCfg.Flags.HasKey(utils.MetaAttributes),
 			rdrCfg.Flags.ParamsSlice(utils.MetaAttributes),
