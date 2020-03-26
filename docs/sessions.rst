@@ -329,10 +329,10 @@ Instead of arguments, the options for enabling various functionaity will come in
 \*rals
 	Process the event with :ref:`RALs`. Auxiliary flags available:
 
-	**\*auth**
+	**\*authorize**
 		Authorize the event.
 
-	**\*init**
+	**\*initiate**
 		Initialize a session out of event.
 
 	**\*update**

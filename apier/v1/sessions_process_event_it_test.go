@@ -150,7 +150,7 @@ func testSSv1ItProcessEventAuth(t *testing.T) {
 	authUsage := 5 * time.Minute
 	args := &sessions.V1ProcessEventArgs{
 		Flags: []string{utils.ConcatenatedKey(utils.MetaResources, utils.MetaAuthorize),
-			utils.ConcatenatedKey(utils.MetaRALs, utils.MetaAuth),
+			utils.ConcatenatedKey(utils.MetaRALs, utils.MetaAuthorize),
 			utils.MetaSuppliers, utils.MetaAttributes},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -229,7 +229,7 @@ func testSSv1ItProcessEventAuth(t *testing.T) {
 func testSSv1ItProcessEventInitiateSession(t *testing.T) {
 	initUsage := 5 * time.Minute
 	args := &sessions.V1ProcessEventArgs{
-		Flags: []string{utils.ConcatenatedKey(utils.MetaRALs, utils.MetaInit),
+		Flags: []string{utils.ConcatenatedKey(utils.MetaRALs, utils.MetaInitiate),
 			utils.ConcatenatedKey(utils.MetaResources, utils.MetaAllocate), utils.MetaAttributes},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
