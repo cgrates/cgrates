@@ -1,0 +1,144 @@
+{
+// CGRateS Configuration file
+
+
+"general": {
+	"log_level": 7,
+	"reply_timeout": "30s",
+},
+
+
+"listen": {
+	"rpc_json": ":2012",
+	"rpc_gob": ":2013",
+	"http": ":2080",
+},
+
+
+"data_db": {
+	"db_type": "mongo",
+	"db_name": "10",
+	"db_port": 27017,
+},
+
+
+"stor_db": {
+	"db_type": "mongo",
+	"db_name": "cgrates",
+	"db_port": 27017,
+},
+
+
+"rals": {
+	"enabled": true,
+	"thresholds_conns": ["*internal"],
+	"max_increments":3000000,
+},
+
+
+"schedulers": {
+	"enabled": true,
+	"cdrs_conns": ["*localhost"],
+},
+
+
+"cdrs": {
+	"enabled": true,
+},
+
+
+"cdre": {
+	"TestTutITExportCDR": {
+		"fields": [
+			{"path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"},
+			{"path": "*exp.RunID", "type": "*variable", "value": "~*req.RunID"},
+			{"path": "*exp.OriginID", "type": "*variable", "value": "~*req.OriginID"},
+			{"path": "*exp.RequestType", "type": "*variable", "value": "~*req.RequestType"},
+			{"path": "*exp.Tenant", "type": "*variable", "value": "~*req.Tenant"},
+			{"path": "*exp.Category", "type": "*variable", "value": "~*req.Category"},
+			{"path": "*exp.Account", "type": "*variable", "value": "~*req.Account"},
+			{"path": "*exp.Destination", "type": "*variable", "value": "~*req.Destination"},
+			{"path": "*exp.AnswerTime", "type": "*variable", "value": "~*req.AnswerTime", "layout": "2006-01-02T15:04:05Z07:00"},
+			{"path": "*exp.Usage", "type": "*variable", "value": "~*req.Usage"},
+			{"path": "*exp.Cost", "type": "*variable", "value": "~*req.Cost", "rounding_decimals": 4},
+			{"path": "*exp.MatchedDestinationID", "type": "*variable", "value": "~*req.CostDetails:s/\"MatchedDestId\":.*_(\\w{4})/${1}/:s/\"MatchedDestId\":\"INTERNAL\"/ON010/"},
+		],
+	},
+},
+
+
+"chargers": {
+	"enabled": true,
+	"attributes_conns": ["*internal"],
+},
+
+
+"resources": {
+	"enabled": true,
+	"store_interval": "1s",
+	"thresholds_conns": ["*internal"]
+},
+
+
+"stats": {
+	"enabled": true,
+	"store_interval": "1s",
+	"thresholds_conns": ["*internal"],
+},
+
+
+"thresholds": {
+	"enabled": true,
+	"store_interval": "1s",
+},
+
+
+"suppliers": {
+	"enabled": true,
+	"stats_conns": ["*localhost"],
+	"resources_conns": ["*localhost"],
+	"rals_conns": ["*internal"],
+},
+
+
+"attributes": {							// Attribute service
+	"enabled": true,				// starts Attribute service: <true|false>.
+},
+
+
+"sessions": {
+	"enabled": true,
+	"rals_conns": ["*internal"],
+	"cdrs_conns": ["*internal"],
+	"chargers_conns": ["*internal"],
+},
+
+
+"migrator": {
+	"out_datadb_type": "mongo",
+	"out_datadb_port": "27017",
+	"out_datadb_name": "10",
+	"out_stordb_type": "mongo",
+	"out_stordb_port": "27017",
+	"out_stordb_name": "cgrates",
+	"users_filters":["Account"],
+},
+
+
+"apiers": {
+	"enabled": true,
+	"scheduler_conns": ["*internal"],
+},
+
+
+"filters": {								
+	"apiers_conns": ["*internal"],
+},
+
+
+"loader": {											// loader for tariff plans out of .csv files
+	"gapi_credentials": {"installed":{"client_id":"569705934960-g3a0st3vt1ukjuar095g8lcj20uoghd4.apps.googleusercontent.com","project_id":"quickstart-1585222428976","auth_uri":"https://accounts.google.com/o/oauth2/auth","token_uri":"https://oauth2.googleapis.com/token","auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs","client_secret":"GEt2tOQs9PEbEUE0jil7Mdi1","redirect_uris":["urn:ietf:wg:oauth:2.0:oob","http://localhost"]}}, 	
+	"gapi_token": {"access_token":"ya29.a0Adw1xeWSyini7Tn2SB7hJz6JdWAGfH5cPOOJwt4wipWimI9Bu8yiGhr_aa0aSxyB99bO3_MotqdIuQZtXIZ9zm-POh75RpFbUaw_WagdQGqlI0ku7RCfbMnKWYjbOCCEaIpXaxQrFSc9T0WknnunT-t0wRnwKlNR_yQ","token_type":"Bearer","refresh_token":"1//09RLNyZhMSBPICgYIARAAGAkSNwF-L9Irw03FPhwWY2fjGErCQV33V2KCcAwhw-d9l0Imarlg8x05Xo9sDWL9k3sWm-c0WSYVjFU","expiry":"2020-03-26T14:58:26.741727156+02:00"} 			
+},
+
+}
