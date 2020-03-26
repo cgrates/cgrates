@@ -20,6 +20,7 @@ cgrates (0.10.1~dev) UNRELEASED; urgency=medium
     DataDB/StorDB
   * [Migrator] Auto discover tenant from key instead of taking it from config
   * [Templates] Fixed missing "*" for strip and padding strategy
+  * [SessionS] Update subflags for *rals ( *authorize and *initiate )
 
  -- Alexandru Tripon <alexandru.tripon@itsyscom.com>  Wed, 19 Feb 2020 15:22:59 +0200
 

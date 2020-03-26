@@ -3037,7 +3037,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 			//for the moment only the the flag will be executed
 			switch {
 			//check for auth session
-			case ralsFlagsWithParams.HasKey(utils.MetaAuth):
+			case ralsFlagsWithParams.HasKey(utils.MetaAuthorize):
 				maxUsage, err := sS.authEvent(args.CGREvent.Tenant,
 					engine.MapEvent(args.CGREvent.Event))
 				if err != nil {
@@ -3045,7 +3045,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 				}
 				rply.MaxUsage = maxUsage
 			// check for init session
-			case ralsFlagsWithParams.HasKey(utils.MetaInit):
+			case ralsFlagsWithParams.HasKey(utils.MetaInitiate):
 				if ev.HasField(utils.CGRDebitInterval) { // dynamic DebitInterval via CGRDebitInterval
 					if dbtItvl, err = ev.GetDuration(utils.CGRDebitInterval); err != nil {
 						return utils.NewErrRALs(err)
