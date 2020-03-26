@@ -94,7 +94,7 @@ func (cdrSv1 *CDRsV1) ProcessCDR(cdr *engine.CDRWithArgDispatcher, reply *string
 	return cdrSv1.CDRs.V1ProcessCDR(cdr, reply)
 }
 
-// ProcessCDR will process a CDR in CGRateS internal format
+// ProcessEvent will process an Event based on the flags attached
 func (cdrSv1 *CDRsV1) ProcessEvent(arg *engine.ArgV1ProcessEvent, reply *string) error {
 	return cdrSv1.CDRs.V1ProcessEvent(arg, reply)
 }

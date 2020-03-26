@@ -246,3 +246,9 @@ func (ev *CGREventWithArgDispatcher) Clone() (clned *CGREventWithArgDispatcher) 
 	}
 	return
 }
+
+// EventWithFlags is used where flags are needed to mark processing
+type EventWithFlags struct {
+	Flags []string
+	Event map[string]interface{}
+}
