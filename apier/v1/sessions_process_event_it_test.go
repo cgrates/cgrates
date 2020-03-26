@@ -157,7 +157,7 @@ func testSSv1ItProcessEventAuth(t *testing.T) {
 	authUsage := 5 * time.Minute
 	args := &sessions.V1ProcessEventArgs{
 		Flags: []string{utils.ConcatenatedKey(utils.MetaResources, utils.MetaAuthorize),
-			utils.ConcatenatedKey(utils.MetaRALs, utils.MetaAuth),
+			utils.ConcatenatedKey(utils.MetaRALs, utils.MetaAuthorize),
 			utils.MetaSuppliers, utils.MetaAttributes},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -236,7 +236,7 @@ func testSSv1ItProcessEventAuth(t *testing.T) {
 func testSSv1ItProcessEventInitiateSession(t *testing.T) {
 	initUsage := 5 * time.Minute
 	args := &sessions.V1ProcessEventArgs{
-		Flags: []string{utils.ConcatenatedKey(utils.MetaRALs, utils.MetaInit),
+		Flags: []string{utils.ConcatenatedKey(utils.MetaRALs, utils.MetaInitiate),
 			utils.ConcatenatedKey(utils.MetaResources, utils.MetaAllocate), utils.MetaAttributes},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -689,7 +689,8 @@ func testSSv1ItProcessEventWithCDR(t *testing.T) {
 
 func testSSv1ItGetCDRsFromProcessEvent(t *testing.T) {
 	var cdrCnt int64
-	req := &utils.RPCCDRsFilterWithArgDispatcher{RPCCDRsFilter: &utils.RPCCDRsFilter{OriginIDs: []string{"testSSv1ItProcessEventWithCDR"}}}
+	req := &utils.RPCCDRsFilterWithArgDispatcher{RPCCDRsFilter: &utils.RPCCDRsFilter{
+		OriginIDs: []string{"testSSv1ItProcessEventWithCDR"}}}
 	if err := sSApierRpc.Call(utils.CDRsV1GetCDRsCount, req, &cdrCnt); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if cdrCnt != 3 { // 3 for each CDR
