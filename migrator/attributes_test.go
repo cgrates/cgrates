@@ -49,7 +49,7 @@ func TestV1AttributeProfileAsAttributeProfile(t *testing.T) {
 		Attributes: mapSubstitutes,
 		Weight:     20,
 	}
-	attrPrf := &engine.AttributeProfile{
+	eOut := &v2AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "attributeprofile1",
 		Contexts:  []string{utils.MetaSessionS},
@@ -58,20 +58,20 @@ func TestV1AttributeProfileAsAttributeProfile(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			ExpiryTime:     cloneExpTime,
 		},
-		Attributes: []*engine.Attribute{
-			&engine.Attribute{
-				FilterIDs: []string{"*string:FL1:In1"},
-				Path:      utils.MetaReq + utils.NestingSep + "FL1",
-				Type:      utils.MetaVariable,
-				Value:     config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
+		Attributes: []*v2Attribute{
+			&v2Attribute{
+				FieldName:  "FL1",
+				Initial:    "In1",
+				Substitute: config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
+				Append:     true,
 			},
 		},
 		Weight: 20,
 	}
 	if ap, err := v1Attribute.AsAttributeProfile(); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(attrPrf, ap) {
-		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(attrPrf), utils.ToJSON(ap))
+	} else if !reflect.DeepEqual(eOut, ap) {
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(ap))
 	}
 }
 
@@ -96,7 +96,7 @@ func TestV2AttributeProfileAsAttributeProfile(t *testing.T) {
 		},
 		Weight: 20,
 	}
-	attrPrf := &engine.AttributeProfile{
+	eOut := &v3AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "attributeprofile1",
 		Contexts:  []string{utils.MetaSessionS},
@@ -105,20 +105,19 @@ func TestV2AttributeProfileAsAttributeProfile(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			ExpiryTime:     cloneExpTime,
 		},
-		Attributes: []*engine.Attribute{
-			&engine.Attribute{
-				FilterIDs: []string{"*string:FL1:In1"},
-				Path:      utils.MetaReq + utils.NestingSep + "FL1",
-				Type:      utils.MetaVariable,
-				Value:     config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
+		Attributes: []*v3Attribute{
+			&v3Attribute{
+				FilterIDs:  []string{"*string:FL1:In1"},
+				FieldName:  "FL1",
+				Substitute: config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 20,
 	}
 	if ap, err := v2Attribute.AsAttributeProfile(); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(attrPrf, ap) {
-		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(attrPrf), utils.ToJSON(ap))
+	} else if !reflect.DeepEqual(eOut, ap) {
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(ap))
 	}
 }
 
@@ -143,7 +142,7 @@ func TestV2AttributeProfileAsAttributeProfile2(t *testing.T) {
 		},
 		Weight: 20,
 	}
-	attrPrf := &engine.AttributeProfile{
+	eOut := &v3AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "attributeprofile1",
 		Contexts:  []string{utils.MetaSessionS},
@@ -152,20 +151,19 @@ func TestV2AttributeProfileAsAttributeProfile2(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			ExpiryTime:     cloneExpTime,
 		},
-		Attributes: []*engine.Attribute{
-			&engine.Attribute{
-				FilterIDs: []string{},
-				Path:      utils.MetaReq + utils.NestingSep + "FL1",
-				Type:      utils.MetaVariable,
-				Value:     config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
+		Attributes: []*v3Attribute{
+			&v3Attribute{
+				FilterIDs:  []string{"*string:FL1:"},
+				FieldName:  "FL1",
+				Substitute: config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 20,
 	}
 	if ap, err := v2Attribute.AsAttributeProfile(); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(attrPrf, ap) {
-		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(attrPrf), utils.ToJSON(ap))
+	} else if !reflect.DeepEqual(eOut, ap) {
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(ap))
 	}
 }
 
@@ -189,7 +187,7 @@ func TestV3AttributeProfileAsAttributeProfile(t *testing.T) {
 		},
 		Weight: 20,
 	}
-	attrPrf := &engine.AttributeProfile{
+	attrPrf := &v4AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "attributeprofile1",
 		Contexts:  []string{utils.MetaSessionS},
@@ -198,10 +196,10 @@ func TestV3AttributeProfileAsAttributeProfile(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			ExpiryTime:     cloneExpTime,
 		},
-		Attributes: []*engine.Attribute{
-			&engine.Attribute{
+		Attributes: []*v4Attribute{
+			&v4Attribute{
 				FilterIDs: []string{"*string:FL1:In1"},
-				Path:      utils.MetaReq + utils.NestingSep + "FL1",
+				FieldName: "FL1",
 				Type:      utils.MetaVariable,
 				Value:     config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
 			},
@@ -306,7 +304,7 @@ func TestAsAttributeProfileV2(t *testing.T) {
 		Weight: 20,
 	}
 
-	if v2Attribute, err := v1Attribute.AsAttributeProfileV2(); err != nil {
+	if v2Attribute, err := v1Attribute.AsAttributeProfile(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eOut, v2Attribute) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(v2Attribute))
@@ -351,7 +349,7 @@ func TestAsAttributeProfileV3(t *testing.T) {
 			}},
 		Weight: 20,
 	}
-	if v3Attribute, err := v2Attribute.AsAttributeProfileV3(); err != nil {
+	if v3Attribute, err := v2Attribute.AsAttributeProfile(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eOut, v3Attribute) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(v3Attribute))
@@ -398,7 +396,7 @@ func TestAsAttributeProfileV4(t *testing.T) {
 		Weight:  20,
 	}
 
-	if v4Attribute, err := v3Attribute.AsAttributeProfileV4(); err != nil {
+	if v4Attribute, err := v3Attribute.AsAttributeProfile(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eOut, v4Attribute) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(v4Attribute))
@@ -446,7 +444,7 @@ func TestAsAttributeProfileV5(t *testing.T) {
 		Weight: 20,
 	}
 
-	if v5Attribute, err := v4Attribute.AsAttributeProfileV5(); err != nil {
+	if v5Attribute, err := v4Attribute.AsAttributeProfile(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eOut, v5Attribute) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(v5Attribute))
