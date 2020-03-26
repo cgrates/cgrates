@@ -3629,7 +3629,7 @@ func (sS *SessionS) sendRar(s *Session) (err error) {
 	return
 }
 
-// BiRPCv1ReAuthorize sends a RAR for sessions matching sessions
+// BiRPCv1ReAuthorize sends a RAR for the matching sessions
 func (sS *SessionS) BiRPCv1ReAuthorize(clnt rpcclient.ClientConnector,
 	args *utils.SessionFilter, reply *string) (err error) {
 	if args == nil { //protection in case on nil
@@ -3662,4 +3662,30 @@ func (sS *SessionS) BiRPCv1ReAuthorize(clnt rpcclient.ClientConnector,
 	}
 	*reply = utils.OK
 	return
+}
+
+// BiRPCv1DisconnectPeer sends a DPR for the given OriginHost and OriginRealm
+func (sS *SessionS) BiRPCv1DisconnectPeer(clnt rpcclient.ClientConnector,
+	args *utils.DPRArgs, reply *string) (err error) {
+	hasErrors := false
+	clients := make(map[string]*biJClient)
+	sS.biJMux.RLock()
+	for ID, clnt := range sS.biJIDs {
+		clients[ID] = clnt
+	}
+	sS.biJMux.RUnlock()
+	for ID, clnt := range clients {
+		if err = clnt.conn.Call(utils.SessionSv1DisconnectPeer, args, reply); err != nil && err != utils.ErrNotImplemented {
+			utils.Logger.Warning(
+				fmt.Sprintf(
+					"<%s> failed sending DPR for connection with id: <%s>, err: <%s>",
+					utils.SessionS, ID, err))
+			hasErrors = true
+		}
+	}
+	if hasErrors {
+		return utils.ErrPartiallyExecuted
+	}
+	*reply = utils.OK
+	return nil
 }

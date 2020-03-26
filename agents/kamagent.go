@@ -428,3 +428,8 @@ func (ka *KamailioAgent) Reload() {
 func (*KamailioAgent) V1ReAuthorize(originID string, reply *string) (err error) {
 	return utils.ErrNotImplemented
 }
+
+// V1DisconnectPeer is used to implement the sessions.BiRPClient interface
+func (*KamailioAgent) V1DisconnectPeer(args *utils.DPRArgs, reply *string) (err error) {
+	return utils.ErrNotImplemented
+}

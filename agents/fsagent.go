@@ -444,3 +444,8 @@ func (sm *FSsessions) Reload() {
 func (*FSsessions) V1ReAuthorize(originID string, reply *string) (err error) {
 	return utils.ErrNotImplemented
 }
+
+// V1DisconnectPeer is used to implement the sessions.BiRPClient interface
+func (*FSsessions) V1DisconnectPeer(args *utils.DPRArgs, reply *string) (err error) {
+	return utils.ErrNotImplemented
+}

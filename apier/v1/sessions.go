@@ -146,3 +146,8 @@ func (ssv1 *SessionSv1) Call(serviceMethod string,
 func (ssv1 *SessionSv1) ReAuthorize(args *utils.SessionFilter, reply *string) error {
 	return ssv1.Ss.BiRPCv1ReAuthorize(nil, args, reply)
 }
+
+// DisconnectPeer sends the DPR for the OriginHost and OriginRealm
+func (ssv1 *SessionSv1) DisconnectPeer(args *utils.DPRArgs, reply *string) error {
+	return ssv1.Ss.BiRPCv1DisconnectPeer(nil, args, reply)
+}
