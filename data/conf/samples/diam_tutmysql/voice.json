@@ -9,7 +9,7 @@
 				"*string:~*req.CC-Request-Type:1",
 				"*string:~*req.Service-Context-Id:voice"
 			],
-			"flags": ["*auth", "*accounts"],
+			"flags": ["*authorize", "*accounts"],
 			"request_fields":[
 				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*voice"},
 				{

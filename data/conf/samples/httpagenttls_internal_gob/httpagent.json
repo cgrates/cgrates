@@ -33,7 +33,7 @@
 				"id": "OutboundAUTH",
 				"filters": ["*string:~*req.request_type:OutboundAUTH"],
 				"tenant": "cgrates.org",
-				"flags": [ "*auth", "*accounts", "*attributes"],
+				"flags": [ "*authorize", "*accounts", "*attributes"],
 				"request_fields":[
 					{"tag": "Category", "path": "*cgreq.Category", "type": "*constant", "value": "call"},
 					{"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*constant",

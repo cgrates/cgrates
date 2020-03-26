@@ -5,7 +5,7 @@
 		{
 			"id": "NAPTRAttributes",
 			"filters": ["*string:~*vars.QueryType:NAPTR", "*string:~*vars.E164Address:4986517174964"],
-			"flags": ["*auth", "*attributes","*log"],
+			"flags": ["*authorize", "*attributes","*log"],
 			"request_fields":[
 				{"tag": "E164Address", "path": "*cgreq.E164Address", 
 					"type": "*constant", "value": "4986517174964"},

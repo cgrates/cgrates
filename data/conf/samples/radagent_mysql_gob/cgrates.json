@@ -76,7 +76,7 @@
 		{
 			"id": "KamailioAuth",
 			"filters": ["*string:~*vars.*radReqType:*radAuth"],
-			"flags": ["*auth", "*attributes", "*accounts", "*continue"],
+			"flags": ["*authorize", "*attributes", "*accounts", "*continue"],
 			"request_fields":[
 				{"tag": "Category", "path": "*cgreq.Category", "type": "*constant", "value": "call"},
 				{"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*constant",

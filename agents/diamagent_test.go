@@ -428,7 +428,7 @@ func TestProcessRequest(t *testing.T) {
 			return nil
 		},
 	}}
-	reqProcessor.Flags, _ = utils.FlagsWithParamsFromSlice([]string{utils.MetaAuth, utils.MetaAccounts})
+	reqProcessor.Flags, _ = utils.FlagsWithParamsFromSlice([]string{utils.MetaAuthorize, utils.MetaAccounts})
 	agReq := NewAgentRequest(diamDP, reqVars, cgrRplyNM, rply,
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
 		config.CgrConfig().GeneralCfg().DefaultTimezone, filters, nil, nil)

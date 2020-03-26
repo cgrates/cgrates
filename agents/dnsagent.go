@@ -179,7 +179,7 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 	cgrEv := agReq.CGRRequest.AsCGREvent(agReq.Tenant, utils.NestingSep)
 	var reqType string
 	for _, typ := range []string{
-		utils.MetaDryRun, utils.MetaAuth,
+		utils.MetaDryRun, utils.MetaAuthorize,
 		utils.MetaInitiate, utils.MetaUpdate,
 		utils.MetaTerminate, utils.MetaMessage,
 		utils.MetaCDRs, utils.MetaEvent, utils.META_NONE} {
@@ -189,7 +189,7 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 		}
 	}
 	cgrArgs := cgrEv.ExtractArgs(reqProcessor.Flags.HasKey(utils.MetaDispatchers),
-		reqType == utils.MetaAuth || reqType == utils.MetaMessage || reqType == utils.MetaEvent)
+		reqType == utils.MetaAuthorize || reqType == utils.MetaMessage || reqType == utils.MetaEvent)
 	if reqProcessor.Flags.HasKey(utils.MetaLog) {
 		utils.Logger.Info(
 			fmt.Sprintf("<%s> LOG, processorID: <%s>, message: %s",
@@ -203,7 +203,7 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 		utils.Logger.Info(
 			fmt.Sprintf("<%s> DRY_RUN, processorID: %s, CGREvent: %s",
 				utils.DNSAgent, reqProcessor.ID, utils.ToJSON(cgrEv)))
-	case utils.MetaAuth:
+	case utils.MetaAuthorize:
 		authArgs := sessions.NewV1AuthorizeArgs(
 			reqProcessor.Flags.HasKey(utils.MetaAttributes),
 			reqProcessor.Flags.ParamsSlice(utils.MetaAttributes),
