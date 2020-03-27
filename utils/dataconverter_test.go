@@ -614,7 +614,7 @@ func TestPhoneNumberConverter(t *testing.T) {
 }
 
 func TestHexConvertor(t *testing.T) {
-	hx := IP2HexConvertor{}
+	hx := IP2HexConverter{}
 	val := "127.0.0.1"
 	expected := "0x7f000001"
 	if rpl, err := hx.Convert(val); err != nil {
