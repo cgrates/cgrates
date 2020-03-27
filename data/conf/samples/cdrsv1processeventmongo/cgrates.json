@@ -79,4 +79,8 @@
 	"scheduler_conns": ["*internal"],
 },
 
+"caches":{
+	"*rpc_responses": {"limit": -1, "ttl": "2s", "static_ttl": false},
+},
+
 }

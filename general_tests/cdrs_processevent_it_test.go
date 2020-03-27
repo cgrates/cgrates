@@ -58,6 +58,9 @@ var (
 		testV1CDRsProcessEventStore,
 		testV1CDRsProcessEventThreshold,
 		testV1CDRsProcessEventExportCheck,
+
+		testV1CDRsV2ProcessEventRalS,
+
 		testV1CDRsKillEngine,
 	}
 )
@@ -597,6 +600,98 @@ func testV1CDRsProcessEventExportCheck(t *testing.T) {
 		t.Fatal("Could not find the file in folder")
 	}
 }
+
+func testV1CDRsV2ProcessEventRalS(t *testing.T) {
+	argsEv := &engine.ArgV1ProcessEvent{
+		Flags: []string{utils.MetaRALs, "*attributes:false", "*chargers:false", "*export:false"},
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "test101",
+			Event: map[string]interface{}{
+				utils.RunID:       "testv1",
+				utils.OriginID:    "test3_v2processEvent",
+				utils.OriginHost:  "OriginHost101",
+				utils.RequestType: utils.META_PSEUDOPREPAID,
+				utils.Account:     "1001",
+				utils.Destination: "+4986517174963",
+				utils.AnswerTime:  time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC),
+				utils.Usage:       2 * time.Minute,
+			},
+		},
+	}
+	expRply := []*utils.EventWithFlags{
+		{
+			Flags: []string{},
+			Event: map[string]interface{}{
+				"Account":     "1001",
+				"AnswerTime":  "2019-11-27T12:21:26Z",
+				"CGRID":       "d13c705aa38164aaf297fb77d7700565a3cea04b",
+				"Category":    "call",
+				"Cost":        0.0204,
+				"CostDetails": nil,
+				"CostSource":  "*cdrs",
+				"Destination": "+4986517174963",
+				"ExtraInfo":   "",
+				"OrderID":     0.,
+				"OriginHost":  "OriginHost101",
+				"OriginID":    "test3_v2processEvent",
+				"Partial":     false,
+				"PreRated":    false,
+				"RequestType": "*pseudoprepaid",
+				"RunID":       "testv1",
+				"SetupTime":   "0001-01-01T00:00:00Z",
+				"Source":      "",
+				"Subject":     "1001",
+				"Tenant":      "cgrates.org",
+				"ToR":         "*voice",
+				"Usage":       120000000000.,
+			},
+		},
+	}
+	var reply []*utils.EventWithFlags
+	if err := pecdrsRpc.Call(utils.CDRsV2ProcessEvent, argsEv, &reply); err != nil {
+		t.Error(err)
+	}
+	reply[0].Event["CostDetails"] = nil
+	expRply[0].Event["CGRID"] = reply[0].Event["CGRID"]
+	if !reflect.DeepEqual(reply[0], expRply[0]) {
+		t.Errorf("Expected %s, received: %s ", utils.ToJSON(expRply), utils.ToJSON(reply))
+	}
+	var cdrs []*engine.CDR
+	if err := pecdrsRpc.Call(utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithArgDispatcher{
+		RPCCDRsFilter: &utils.RPCCDRsFilter{OriginHosts: []string{"OriginHost101"}}}, &cdrs); err != nil {
+		t.Fatal("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 1 {
+		t.Errorf("Expecting: 1, received: %+v", len(cdrs))
+	} else if !reflect.DeepEqual(cdrs[0].Cost, 0.0204) {
+		t.Errorf("\nExpected: %+v,\nreceived: %+v", 0.0204, utils.ToJSON(cdrs[0]))
+	}
+
+	argsEv.Flags = append(argsEv.Flags, utils.MetaRerate)
+	argsEv.CGREvent.ID = "test1002"
+	argsEv.CGREvent.Event[utils.Usage] = time.Minute
+
+	if err := pecdrsRpc.Call(utils.CDRsV2ProcessEvent, argsEv, &reply); err != nil {
+		t.Error(err)
+	}
+	expRply[0].Flags = []string{utils.MetaRefund}
+	expRply[0].Event["Usage"] = 60000000000.
+	expRply[0].Event["Cost"] = 0.0102
+	reply[0].Event["CostDetails"] = nil
+	if !reflect.DeepEqual(reply[0], expRply[0]) {
+		t.Errorf("Expected %s, received: %s ", utils.ToJSON(expRply), utils.ToJSON(reply))
+	}
+
+	argsEv.CGREvent.Event[utils.Usage] = 30 * time.Second
+	if err := pecdrsRpc.Call(utils.CDRsV2ProcessEvent, argsEv, &reply); err != nil {
+		t.Error(err)
+	}
+	reply[0].Event["CostDetails"] = nil
+	if !reflect.DeepEqual(reply[0], expRply[0]) {
+		t.Errorf("Expected %s, received: %s ", utils.ToJSON(expRply), utils.ToJSON(reply))
+	}
+}
+
 func testV1CDRsKillEngine(t *testing.T) {
 	if err := engine.KillEngine(*waitRater); err != nil {
 		t.Error(err)
