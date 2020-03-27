@@ -67,7 +67,7 @@ RPC method that provides the external RPC interface for getting the rating infor
 */
 func (rs *Responder) GetCost(arg *CallDescriptorWithArgDispatcher, reply *CallCost) (err error) {
 	// RPC caching
-	if config.CgrConfig().CacheCfg()[utils.CacheRPCResponses].Limit != 0 {
+	if arg.CgrID != utils.EmptyString && config.CgrConfig().CacheCfg()[utils.CacheRPCResponses].Limit != 0 {
 		cacheKey := utils.ConcatenatedKey(utils.ResponderGetCost, arg.CgrID)
 		refID := guardian.Guardian.GuardIDs("",
 			config.CgrConfig().GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
@@ -112,26 +112,6 @@ func (rs *Responder) GetCost(arg *CallDescriptorWithArgDispatcher, reply *CallCo
 //GetCostOnRatingPlans is used by SupplierS to calculate the cost
 // Receive a list of RatingPlans and pick the first without error
 func (rs *Responder) GetCostOnRatingPlans(arg *utils.GetCostOnRatingPlansArgs, reply *map[string]interface{}) (err error) {
-	// RPC caching
-	if config.CgrConfig().CacheCfg()[utils.CacheRPCResponses].Limit != 0 {
-		cacheKey := utils.ConcatenatedKey(utils.ResponderGetCostOnRatingPlans, utils.UUIDSha1Prefix())
-		refID := guardian.Guardian.GuardIDs("",
-			config.CgrConfig().GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
-		defer guardian.Guardian.UnguardIDs(refID)
-
-		if itm, has := Cache.Get(utils.CacheRPCResponses, cacheKey); has {
-			cachedResp := itm.(*utils.CachedRPCResponse)
-			if cachedResp.Error == nil {
-				*reply = *cachedResp.Result.(*map[string]interface{})
-			}
-			return cachedResp.Error
-		}
-		defer Cache.Set(utils.CacheRPCResponses, cacheKey,
-			&utils.CachedRPCResponse{Result: reply, Error: err},
-			nil, true, utils.NonTransactional)
-	}
-	// end of RPC caching
-
 	for _, rp := range arg.RatingPlanIDs { // loop through RatingPlans until we find one without errors
 		rPrfl := &RatingProfile{
 			Id: utils.ConcatenatedKey(utils.META_OUT,
@@ -176,7 +156,7 @@ func (rs *Responder) GetCostOnRatingPlans(arg *utils.GetCostOnRatingPlansArgs, r
 
 func (rs *Responder) Debit(arg *CallDescriptorWithArgDispatcher, reply *CallCost) (err error) {
 	// RPC caching
-	if config.CgrConfig().CacheCfg()[utils.CacheRPCResponses].Limit != 0 {
+	if arg.CgrID != utils.EmptyString && config.CgrConfig().CacheCfg()[utils.CacheRPCResponses].Limit != 0 {
 		cacheKey := utils.ConcatenatedKey(utils.ResponderDebit, arg.CgrID)
 		refID := guardian.Guardian.GuardIDs("",
 			config.CgrConfig().GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
@@ -214,7 +194,7 @@ func (rs *Responder) Debit(arg *CallDescriptorWithArgDispatcher, reply *CallCost
 
 func (rs *Responder) MaxDebit(arg *CallDescriptorWithArgDispatcher, reply *CallCost) (err error) {
 	// RPC caching
-	if config.CgrConfig().CacheCfg()[utils.CacheRPCResponses].Limit != 0 {
+	if arg.CgrID != utils.EmptyString && config.CgrConfig().CacheCfg()[utils.CacheRPCResponses].Limit != 0 {
 		cacheKey := utils.ConcatenatedKey(utils.ResponderMaxDebit, arg.CgrID)
 		refID := guardian.Guardian.GuardIDs("",
 			config.CgrConfig().GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
@@ -251,7 +231,7 @@ func (rs *Responder) MaxDebit(arg *CallDescriptorWithArgDispatcher, reply *CallC
 
 func (rs *Responder) RefundIncrements(arg *CallDescriptorWithArgDispatcher, reply *Account) (err error) {
 	// RPC caching
-	if config.CgrConfig().CacheCfg()[utils.CacheRPCResponses].Limit != 0 {
+	if arg.CgrID != utils.EmptyString && config.CgrConfig().CacheCfg()[utils.CacheRPCResponses].Limit != 0 {
 		cacheKey := utils.ConcatenatedKey(utils.ResponderRefundIncrements, arg.CgrID)
 		refID := guardian.Guardian.GuardIDs("",
 			config.CgrConfig().GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
@@ -289,7 +269,7 @@ func (rs *Responder) RefundIncrements(arg *CallDescriptorWithArgDispatcher, repl
 
 func (rs *Responder) RefundRounding(arg *CallDescriptorWithArgDispatcher, reply *float64) (err error) {
 	// RPC caching
-	if config.CgrConfig().CacheCfg()[utils.CacheRPCResponses].Limit != 0 {
+	if arg.CgrID != utils.EmptyString && config.CgrConfig().CacheCfg()[utils.CacheRPCResponses].Limit != 0 {
 		cacheKey := utils.ConcatenatedKey(utils.ResponderRefundRounding, arg.CgrID)
 		refID := guardian.Guardian.GuardIDs("",
 			config.CgrConfig().GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
