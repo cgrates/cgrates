@@ -41,6 +41,9 @@ cgrates (0.11.0~dev) UNRELEASED; urgency=medium
     MSCHAPV2)
   * [SessionS] Update subflags for *rals ( *authorize and *initiate )
   * [AgentS] Uniformize flags (*auth -> *authorize)
+  * [SessionS] Move *cost as subflag in *rals for
+    SessionSv1.ProcessEvent
+  * [SessionS] Remove *cost flag from SessionSv1.GetCost
 
  -- Alexandru Tripon <alexandru.tripon@itsyscom.com>  Wed, 19 Feb 2020 13:25:52 +0200
 

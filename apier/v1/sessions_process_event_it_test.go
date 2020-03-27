@@ -475,7 +475,7 @@ func testSSv1ItGetCDRs(t *testing.T) {
 func testSSv1ItProcessEventWithGetCost(t *testing.T) {
 	// GetCost for ANY2CNT Subject
 	args := &sessions.V1ProcessEventArgs{
-		Flags: []string{utils.MetaAttributes, utils.MetaCost},
+		Flags: []string{utils.MetaAttributes, utils.ConcatenatedKey(utils.MetaRALs, utils.MetaCost)},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSSv1ItProcessEventWithGetCost",
@@ -514,7 +514,7 @@ func testSSv1ItProcessEventWithGetCost(t *testing.T) {
 func testSSv1ItProcessEventWithGetCost2(t *testing.T) {
 	// GetCost for SPECIAL_1002 Subject
 	args := &sessions.V1ProcessEventArgs{
-		Flags: []string{utils.MetaAttributes, utils.MetaCost},
+		Flags: []string{utils.MetaAttributes, utils.ConcatenatedKey(utils.MetaRALs, utils.MetaCost)},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSSv1ItProcessEventWithGetCost2",
@@ -555,7 +555,7 @@ func testSSv1ItProcessEventWithGetCost3(t *testing.T) {
 	// 0.8 connect fee + 0.4 for first minute
 	// for the 9 minutes remaining apply
 	args := &sessions.V1ProcessEventArgs{
-		Flags: []string{utils.MetaAttributes, utils.MetaCost},
+		Flags: []string{utils.MetaAttributes, utils.ConcatenatedKey(utils.MetaRALs, utils.MetaCost)},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSSv1ItProcessEventWithGetCost3",
@@ -593,7 +593,7 @@ func testSSv1ItProcessEventWithGetCost3(t *testing.T) {
 
 func testSSv1ItProcessEventWithGetCost4(t *testing.T) {
 	args := &sessions.V1ProcessEventArgs{
-		Flags: []string{utils.MetaAttributes, utils.MetaCost},
+		Flags: []string{utils.MetaAttributes, utils.ConcatenatedKey(utils.MetaRALs, utils.MetaCost)},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSSv1ItProcessEventWithGetCost4",
@@ -621,7 +621,7 @@ func testSSv1ItProcessEventWithGetCost4(t *testing.T) {
 func testSSv1ItGetCost(t *testing.T) {
 	// GetCost for ANY2CNT Subject
 	args := &sessions.V1ProcessEventArgs{
-		Flags: []string{utils.MetaAttributes, utils.MetaCost},
+		Flags: []string{utils.MetaAttributes},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSSv1ItGetCost",
