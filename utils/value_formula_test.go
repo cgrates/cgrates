@@ -76,3 +76,17 @@ func TestValueFormulaParseBalanceFilterValue(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eVF, vf)
 	}
 }
+
+func TestValueFormulaString(t *testing.T) {
+	vf := &ValueFormula{}
+	eOut := `{"Method":"","Params":null,"Static":0}`
+	if rcv := vf.String(); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+
+	vf = &ValueFormula{Static: 10000000000.0}
+	eOut = `{"Method":"","Params":null,"Static":10000000000}`
+	if rcv := vf.String(); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+}
