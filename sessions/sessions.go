@@ -2939,64 +2939,6 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 			return utils.NewErrAttributeS(err)
 		}
 	}
-	// check for *cost
-	if argsFlagsWithParams.HasKey(utils.MetaCost) {
-		//compose the CallDescriptor with Args
-		me := engine.MapEvent(args.CGREvent.Event).Clone()
-		startTime := me.GetTimeIgnoreErrors(utils.AnswerTime,
-			sS.cgrCfg.GeneralCfg().DefaultTimezone)
-		if startTime.IsZero() { // AnswerTime not parsable, try SetupTime
-			startTime = me.GetTimeIgnoreErrors(utils.SetupTime,
-				sS.cgrCfg.GeneralCfg().DefaultTimezone)
-		}
-		category := me.GetStringIgnoreErrors(utils.Category)
-		if len(category) == 0 {
-			category = sS.cgrCfg.GeneralCfg().DefaultCategory
-		}
-		subject := me.GetStringIgnoreErrors(utils.Subject)
-		if len(subject) == 0 {
-			subject = me.GetStringIgnoreErrors(utils.Account)
-		}
-
-		cd := &engine.CallDescriptor{
-			RunID:       me.GetStringIgnoreErrors(utils.RunID),
-			ToR:         me.GetStringIgnoreErrors(utils.ToR),
-			Tenant:      args.CGREvent.Tenant,
-			Category:    category,
-			Subject:     subject,
-			Account:     me.GetStringIgnoreErrors(utils.Account),
-			Destination: me.GetStringIgnoreErrors(utils.Destination),
-			TimeStart:   startTime,
-			TimeEnd:     startTime.Add(me.GetDurationIgnoreErrors(utils.Usage)),
-		}
-		var argDsp *utils.ArgDispatcher
-		//check if we have APIKey in event and in case it has add it in ArgDispatcher
-		apiKey, errAPIKey := me.GetString(utils.MetaApiKey)
-		if errAPIKey == nil {
-			argDsp = &utils.ArgDispatcher{
-				APIKey: utils.StringPointer(apiKey),
-			}
-		}
-		//check if we have RouteID in event and in case it has add it in ArgDispatcher
-		if routeID, err := me.GetString(utils.MetaRouteID); err == nil {
-			if errAPIKey == utils.ErrNotFound { //in case we don't have APIKey, but we have RouteID we need to initialize the struct
-				argDsp = &utils.ArgDispatcher{
-					RouteID: utils.StringPointer(routeID),
-				}
-			} else {
-				argDsp.RouteID = utils.StringPointer(routeID)
-			}
-		}
-
-		var cc engine.CallCost
-		if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().RALsConns, nil,
-			utils.ResponderGetCost,
-			&engine.CallDescriptorWithArgDispatcher{CallDescriptor: cd,
-				ArgDispatcher: argDsp}, &cc); err != nil {
-			return
-		}
-		rply.Cost = utils.Float64Pointer(cc.Cost)
-	}
 	// check for *resources
 	if argsFlagsWithParams.HasKey(utils.MetaResources) {
 		if len(sS.cgrCfg.SessionSCfg().ResSConns) == 0 {
@@ -3047,7 +2989,65 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 		if ralsOpts := argsFlagsWithParams.ParamsSlice(utils.MetaRALs); len(ralsOpts) != 0 {
 			//check for subflags and convert them into utils.FlagsWithParams
 			ralsFlagsWithParams, err := utils.FlagsWithParamsFromSlice(ralsOpts)
-			//for the moment only the the flag will be executed
+			// check for *cost
+			if ralsFlagsWithParams.HasKey(utils.MetaCost) {
+				//compose the CallDescriptor with Args
+				me := engine.MapEvent(args.CGREvent.Event).Clone()
+				startTime := me.GetTimeIgnoreErrors(utils.AnswerTime,
+					sS.cgrCfg.GeneralCfg().DefaultTimezone)
+				if startTime.IsZero() { // AnswerTime not parsable, try SetupTime
+					startTime = me.GetTimeIgnoreErrors(utils.SetupTime,
+						sS.cgrCfg.GeneralCfg().DefaultTimezone)
+				}
+				category := me.GetStringIgnoreErrors(utils.Category)
+				if len(category) == 0 {
+					category = sS.cgrCfg.GeneralCfg().DefaultCategory
+				}
+				subject := me.GetStringIgnoreErrors(utils.Subject)
+				if len(subject) == 0 {
+					subject = me.GetStringIgnoreErrors(utils.Account)
+				}
+
+				cd := &engine.CallDescriptor{
+					CgrID:       args.CGREvent.ID,
+					RunID:       me.GetStringIgnoreErrors(utils.RunID),
+					ToR:         me.GetStringIgnoreErrors(utils.ToR),
+					Tenant:      args.CGREvent.Tenant,
+					Category:    category,
+					Subject:     subject,
+					Account:     me.GetStringIgnoreErrors(utils.Account),
+					Destination: me.GetStringIgnoreErrors(utils.Destination),
+					TimeStart:   startTime,
+					TimeEnd:     startTime.Add(me.GetDurationIgnoreErrors(utils.Usage)),
+				}
+				var argDsp *utils.ArgDispatcher
+				//check if we have APIKey in event and in case it has add it in ArgDispatcher
+				apiKey, errAPIKey := me.GetString(utils.MetaApiKey)
+				if errAPIKey == nil {
+					argDsp = &utils.ArgDispatcher{
+						APIKey: utils.StringPointer(apiKey),
+					}
+				}
+				//check if we have RouteID in event and in case it has add it in ArgDispatcher
+				if routeID, err := me.GetString(utils.MetaRouteID); err == nil {
+					if errAPIKey == utils.ErrNotFound { //in case we don't have APIKey, but we have RouteID we need to initialize the struct
+						argDsp = &utils.ArgDispatcher{
+							RouteID: utils.StringPointer(routeID),
+						}
+					} else {
+						argDsp.RouteID = utils.StringPointer(routeID)
+					}
+				}
+
+				var cc engine.CallCost
+				if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().RALsConns, nil,
+					utils.ResponderGetCost,
+					&engine.CallDescriptorWithArgDispatcher{CallDescriptor: cd,
+						ArgDispatcher: argDsp}, &cc); err != nil {
+					return err
+				}
+				rply.Cost = utils.Float64Pointer(cc.Cost)
+			}
 			switch {
 			//check for auth session
 			case ralsFlagsWithParams.HasKey(utils.MetaAuthorize):
@@ -3258,66 +3258,64 @@ func (sS *SessionS) BiRPCv1GetCost(clnt rpcclient.ClientConnector,
 			return utils.NewErrAttributeS(err)
 		}
 	}
-	// check for *cost
-	if argsFlagsWithParams.HasKey(utils.MetaCost) {
-		//compose the CallDescriptor with Args
-		me := engine.MapEvent(args.CGREvent.Event).Clone()
-		startTime := me.GetTimeIgnoreErrors(utils.AnswerTime,
+	//compose the CallDescriptor with Args
+	me := engine.MapEvent(args.CGREvent.Event).Clone()
+	startTime := me.GetTimeIgnoreErrors(utils.AnswerTime,
+		sS.cgrCfg.GeneralCfg().DefaultTimezone)
+	if startTime.IsZero() { // AnswerTime not parsable, try SetupTime
+		startTime = me.GetTimeIgnoreErrors(utils.SetupTime,
 			sS.cgrCfg.GeneralCfg().DefaultTimezone)
-		if startTime.IsZero() { // AnswerTime not parsable, try SetupTime
-			startTime = me.GetTimeIgnoreErrors(utils.SetupTime,
-				sS.cgrCfg.GeneralCfg().DefaultTimezone)
-		}
-		category := me.GetStringIgnoreErrors(utils.Category)
-		if len(category) == 0 {
-			category = sS.cgrCfg.GeneralCfg().DefaultCategory
-		}
-		subject := me.GetStringIgnoreErrors(utils.Subject)
-		if len(subject) == 0 {
-			subject = me.GetStringIgnoreErrors(utils.Account)
-		}
-
-		cd := &engine.CallDescriptor{
-			RunID:       me.GetStringIgnoreErrors(utils.RunID),
-			ToR:         me.GetStringIgnoreErrors(utils.ToR),
-			Tenant:      args.CGREvent.Tenant,
-			Category:    category,
-			Subject:     subject,
-			Account:     me.GetStringIgnoreErrors(utils.Account),
-			Destination: me.GetStringIgnoreErrors(utils.Destination),
-			TimeStart:   startTime,
-			TimeEnd:     startTime.Add(me.GetDurationIgnoreErrors(utils.Usage)),
-		}
-		var argDsp *utils.ArgDispatcher
-		//check if we have APIKey in event and in case it has add it in ArgDispatcher
-		apiKey, errAPIKey := me.GetString(utils.MetaApiKey)
-		if errAPIKey == nil {
-			argDsp = &utils.ArgDispatcher{
-				APIKey: utils.StringPointer(apiKey),
-			}
-		}
-		//check if we have RouteID in event and in case it has add it in ArgDispatcher
-		if routeID, err := me.GetString(utils.MetaRouteID); err == nil {
-			if errAPIKey == utils.ErrNotFound { //in case we don't have APIKey, but we have RouteID we need to initialize the struct
-				argDsp = &utils.ArgDispatcher{
-					RouteID: utils.StringPointer(routeID),
-				}
-			} else {
-				argDsp.RouteID = utils.StringPointer(routeID)
-			}
-		}
-
-		var cc engine.CallCost
-		if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().RALsConns, nil,
-			utils.ResponderGetCost,
-			&engine.CallDescriptorWithArgDispatcher{CallDescriptor: cd,
-				ArgDispatcher: argDsp}, &cc); err != nil {
-			return
-		}
-		ec := engine.NewEventCostFromCallCost(&cc, args.CGREvent.ID, me.GetStringIgnoreErrors(utils.RunID))
-		ec.Compute()
-		rply.EventCost = ec
 	}
+	category := me.GetStringIgnoreErrors(utils.Category)
+	if len(category) == 0 {
+		category = sS.cgrCfg.GeneralCfg().DefaultCategory
+	}
+	subject := me.GetStringIgnoreErrors(utils.Subject)
+	if len(subject) == 0 {
+		subject = me.GetStringIgnoreErrors(utils.Account)
+	}
+
+	cd := &engine.CallDescriptor{
+		CgrID:       args.CGREvent.ID,
+		RunID:       me.GetStringIgnoreErrors(utils.RunID),
+		ToR:         me.GetStringIgnoreErrors(utils.ToR),
+		Tenant:      args.CGREvent.Tenant,
+		Category:    category,
+		Subject:     subject,
+		Account:     me.GetStringIgnoreErrors(utils.Account),
+		Destination: me.GetStringIgnoreErrors(utils.Destination),
+		TimeStart:   startTime,
+		TimeEnd:     startTime.Add(me.GetDurationIgnoreErrors(utils.Usage)),
+	}
+	var argDsp *utils.ArgDispatcher
+	//check if we have APIKey in event and in case it has add it in ArgDispatcher
+	apiKey, errAPIKey := me.GetString(utils.MetaApiKey)
+	if errAPIKey == nil {
+		argDsp = &utils.ArgDispatcher{
+			APIKey: utils.StringPointer(apiKey),
+		}
+	}
+	//check if we have RouteID in event and in case it has add it in ArgDispatcher
+	if routeID, err := me.GetString(utils.MetaRouteID); err == nil {
+		if errAPIKey == utils.ErrNotFound { //in case we don't have APIKey, but we have RouteID we need to initialize the struct
+			argDsp = &utils.ArgDispatcher{
+				RouteID: utils.StringPointer(routeID),
+			}
+		} else {
+			argDsp.RouteID = utils.StringPointer(routeID)
+		}
+	}
+
+	var cc engine.CallCost
+	if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().RALsConns, nil,
+		utils.ResponderGetCost,
+		&engine.CallDescriptorWithArgDispatcher{CallDescriptor: cd,
+			ArgDispatcher: argDsp}, &cc); err != nil {
+		return
+	}
+	ec := engine.NewEventCostFromCallCost(&cc, args.CGREvent.ID, me.GetStringIgnoreErrors(utils.RunID))
+	ec.Compute()
+	rply.EventCost = ec
 	if withErrors {
 		err = utils.ErrPartiallyExecuted
 	}

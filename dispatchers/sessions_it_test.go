@@ -937,7 +937,6 @@ func testDspSessionProcessEvent3(t *testing.T) {
 func testDspSessionGetCost(t *testing.T) {
 
 	args := &sessions.V1ProcessEventArgs{
-		Flags: []string{utils.MetaCost},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSSv1ItGetCost",
