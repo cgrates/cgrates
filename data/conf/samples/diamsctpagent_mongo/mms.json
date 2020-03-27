@@ -1,0 +1,91 @@
+{
+
+    "diameter_agent": {
+        "request_processors": [
+    
+            {
+                "id": "mms",
+                "filters": [
+                    "*string:~*vars.*cmd:CCR",
+                    "*prefix:~*req.Service-Context-Id:mms",
+                    "*string:~*req.CC-Request-Type:4"
+                ],
+                "flags": ["*message", "*accounts", "*cdrs","*attributes"],
+                "request_fields":[
+                    {
+                        "tag": "ToR",
+                        "path": "*cgreq.ToR",
+                        "type": "*constant",
+                        "value": "*mms"
+                    },
+                    {
+                        "tag": "OriginID",
+                        "path": "*cgreq.OriginID",
+                        "type": "*variable", 
+                        "value": "~*req.Session-Id",
+                        "mandatory": true
+                    },
+                    {
+                        "tag": "Category",
+                        "path": "*cgreq.Category",
+                        "type": "*constant",
+                        "value": "mms"
+                    },
+                    {
+                        "tag": "RequestType",
+                        "path": "*cgreq.RequestType",
+                        "type": "*constant",
+                        "value": "*prepaid"
+                    },
+                    {
+                        "tag": "Account",
+                        "path": "*cgreq.Account",
+                        "type": "*variable",
+                        "mandatory": true, 
+                        "value": "~*req.Subscription-Id.Subscription-Id-Data[~Subscription-Id-Type(0)]"
+                    },
+                    {
+                        "tag": "Destination",
+                        "path": "*cgreq.Destination",
+                        "type": "*variable",
+                        "mandatory": true, 
+                        "value": "~*req.Service-Information.SMS-Information.Recipient-Address.Address-Data"
+                    },
+                    {
+                        "tag": "SetupTime",
+                        "path": "*cgreq.SetupTime",
+                        "type": "*variable", 
+                        "value": "~*req.Event-Timestamp",
+                        "mandatory": true
+                    },
+                    {
+                        "tag": "AnswerTime",
+                        "path": "*cgreq.AnswerTime",
+                        "type": "*variable", 
+                        "value": "~*req.Event-Timestamp",
+                        "mandatory": true
+                    },
+                    {
+                        "tag": "Usage",
+                        "path": "*cgreq.Usage",
+                        "type": "*variable", 
+                        "value": "~*req.Requested-Service-Unit.CC-Time",
+                        "mandatory": true
+                    },
+                ],
+                "reply_fields":[
+                    {
+                        "tag": "ResultCode", 
+                        "filters": ["*notempty:~*cgrep.Error:"], 
+                        "path": "*rep.Result-Code",
+                        "type": "*constant",
+                        "value": "5030",
+                        "blocker": true
+                    },
+                ],
+            },
+            
+        ],
+    },
+    
+    }
