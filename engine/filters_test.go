@@ -1119,3 +1119,90 @@ func TestEventCostFilter(t *testing.T) {
 		t.Errorf("Expecting: true , received: %+v", pass)
 	}
 }
+
+func TestVerifyPrefixes(t *testing.T) {
+	rf, err := NewFilterRule(utils.MetaString, "~*req.Account", []string{"1001"})
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	prefixes := []string{utils.DynamicDataPrefix + utils.MetaReq}
+	if check := verifyPrefixes(rf, prefixes); !check {
+		t.Errorf("Expecting: true , received: %+v", check)
+	}
+
+	rf, err = NewFilterRule(utils.MetaString, "~*req.Account", []string{"~*req.Field1"})
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	if check := verifyPrefixes(rf, prefixes); !check {
+		t.Errorf("Expecting: true , received: %+v", check)
+	}
+
+	rf, err = NewFilterRule(utils.MetaString, "~*req.Account", []string{"~*req.Field1", "~*req.Field2"})
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	if check := verifyPrefixes(rf, prefixes); !check {
+		t.Errorf("Expecting: true , received: %+v", check)
+	}
+
+	rf, err = NewFilterRule(utils.MetaString, "~*vars.Account", []string{"1001"})
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	if check := verifyPrefixes(rf, prefixes); check {
+		t.Errorf("Expecting: false , received: %+v", check)
+	}
+
+	rf, err = NewFilterRule(utils.MetaString, "~*req.Account", []string{"~*req.Field1", "~*vars.Field2"})
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	if check := verifyPrefixes(rf, prefixes); check {
+		t.Errorf("Expecting: false , received: %+v", check)
+	}
+
+	rf, err = NewFilterRule(utils.MetaString, "~*req.Account", []string{"~*req.Field1", "~*vars.Field2"})
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	prefixes = []string{utils.DynamicDataPrefix + utils.MetaReq, utils.DynamicDataPrefix + utils.MetaVars}
+	if check := verifyPrefixes(rf, prefixes); !check {
+		t.Errorf("Expecting: true , received: %+v", check)
+	}
+}
+
+func TestPassPartial(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dmFilterPass := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	filterS := FilterS{
+		cfg: cfg,
+		dm:  dmFilterPass,
+	}
+	passEvent := map[string]interface{}{
+		"Account": "1007",
+	}
+	fEv := config.NewNavigableMap(nil)
+	fEv.Set([]string{utils.MetaReq}, passEvent, false, false)
+	prefixes := []string{utils.DynamicDataPrefix + utils.MetaReq}
+	if pass, err := filterS.PartialPass("cgrates.org",
+		[]string{"*string:~*req.Account:1007"}, fEv, prefixes); err != nil {
+		t.Errorf(err.Error())
+	} else if !pass {
+		t.Errorf("Expecting: %+v, received: %+v", true, pass)
+	}
+	// in PartialPass we verify the filters matching the prefixes
+	if pass, err := filterS.PartialPass("cgrates.org",
+		[]string{"*string:~*req.Account:1007", "*string:~*vars.Field1:Val1"}, fEv, prefixes); err != nil {
+		t.Errorf(err.Error())
+	} else if !pass {
+		t.Errorf("Expecting: %+v, received: %+v", true, pass)
+	}
+	if pass, err := filterS.PartialPass("cgrates.org",
+		[]string{"*string:~*req.Account:1010", "*string:~*vars.Field1:Val1"}, fEv, prefixes); err != nil {
+		t.Errorf(err.Error())
+	} else if pass {
+		t.Errorf("Expecting: %+v, received: %+v", false, pass)
+	}
+}

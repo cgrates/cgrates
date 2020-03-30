@@ -91,6 +91,7 @@ func verifyPrefixes(rule *FilterRule, prefixes []string) (hasPrefix bool) {
 		}
 	}
 	for _, value := range rule.Values {
+		hasPrefix = false // reset hasPrefix
 		if strings.HasPrefix(value, utils.DynamicDataPrefix) {
 			for _, prefix := range prefixes {
 				if strings.HasPrefix(value, prefix) {
