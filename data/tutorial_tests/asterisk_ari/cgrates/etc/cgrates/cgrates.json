@@ -59,7 +59,6 @@
 	"stats_conns": ["*localhost"],
 	"thresholds_conns": ["*localhost"],
 	"chargers_conns": ["*internal"],
-	"store_session_costs": true,
 	"debit_interval": "5s",
 	"channel_sync_interval":"7s",
 },
