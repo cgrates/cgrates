@@ -185,7 +185,7 @@ func (fltr *Filter) TenantID() string {
 	return utils.ConcatenatedKey(fltr.Tenant, fltr.ID)
 }
 
-// Compile will compile the underlying request filters where necessary (ie. regexp rules)
+// Compile will compile the underlaying request filters where necessary (ie. regexp rules)
 func (fltr *Filter) Compile() (err error) {
 	for _, rf := range fltr.Rules {
 		if err = rf.CompileValues(); err != nil {
