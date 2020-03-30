@@ -74,7 +74,7 @@ func NewDataConverter(params string) (conv DataConverter, err error) {
 	case params == MetaDuration:
 		return NewDurationConverter("")
 	case params == MetaIP2Hex:
-		return &IP2HexConverter{}, nil
+		return new(IP2HexConverter), nil
 	case strings.HasPrefix(params, MetaLibPhoneNumber):
 		if len(params) == len(MetaLibPhoneNumber) {
 			return NewPhoneNumberConverter("")
