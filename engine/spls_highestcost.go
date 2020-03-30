@@ -53,9 +53,6 @@ func (hcs *HightCostSorter) SortSuppliers(prflID string, suppls []*Supplier,
 			sortedSuppls.SortedSuppliers = append(sortedSuppls.SortedSuppliers, srtSpl)
 		}
 	}
-	if len(sortedSuppls.SortedSuppliers) == 0 {
-		return nil, utils.ErrNotFound
-	}
 	sortedSuppls.SortHighestCost()
 	return
 }

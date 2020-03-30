@@ -77,6 +77,70 @@ func (fS *FilterS) Pass(tenant string, filterIDs []string,
 	return
 }
 
+//verifyPrefixes verify the Element and the Values if has as prefix one of the prefixes
+func verifyPrefixes(rule *FilterRule, prefixes []string) (hasPrefix bool) {
+	if strings.HasPrefix(rule.Element, utils.DynamicDataPrefix) {
+		for _, prefix := range prefixes {
+			if strings.HasPrefix(rule.Element, prefix) {
+				hasPrefix = true
+				break
+			}
+		}
+		if !hasPrefix {
+			return false
+		}
+	}
+	for _, value := range rule.Values {
+		if strings.HasPrefix(value, utils.DynamicDataPrefix) {
+			for _, prefix := range prefixes {
+				if strings.HasPrefix(value, prefix) {
+					hasPrefix = true
+					break
+				}
+			}
+			if !hasPrefix {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+//PartialPass is almost the same as Pass except that it verify if the
+//Element of the Values from FilterRules has as prefix one of the pathPrfxs
+func (fS *FilterS) PartialPass(tenant string, filterIDs []string,
+	ev config.DataProvider, pathPrfxs []string) (pass bool, err error) {
+	if len(filterIDs) == 0 {
+		return true, nil
+	}
+	pass = true
+	for _, fltrID := range filterIDs {
+		f, err := GetFilter(fS.dm, tenant, fltrID,
+			true, true, utils.NonTransactional)
+		if err != nil {
+			if err == utils.ErrNotFound {
+				err = utils.ErrPrefixNotFound(fltrID)
+			}
+			return false, err
+		}
+		if f.ActivationInterval != nil &&
+			!f.ActivationInterval.IsActiveAtTime(time.Now()) { // not active
+			continue
+		}
+
+		for _, rule := range f.Rules {
+			if !verifyPrefixes(rule, pathPrfxs) {
+				continue
+			}
+			dDP := newDynamicDP(fS.cfg, fS.connMgr, tenant, ev)
+			if pass, err = rule.Pass(dDP); err != nil || !pass {
+				return pass, err
+			}
+		}
+	}
+	return
+}
+
 // NewFilterFromInline parses an inline rule into a compiled Filter
 func NewFilterFromInline(tenant, inlnRule string) (f *Filter, err error) {
 	ruleSplt := strings.SplitN(inlnRule, utils.InInFieldSep, 3)
@@ -120,7 +184,7 @@ func (fltr *Filter) TenantID() string {
 	return utils.ConcatenatedKey(fltr.Tenant, fltr.ID)
 }
 
-// Compile will compile the underlaying request filters where necessary (ie. regexp rules)
+// Compile will compile the underlying request filters where necessary (ie. regexp rules)
 func (fltr *Filter) Compile() (err error) {
 	for _, rf := range fltr.Rules {
 		if err = rf.CompileValues(); err != nil {
@@ -174,7 +238,7 @@ func NewFilterRule(rfType, fieldName string, vals []string) (*FilterRule, error)
 }
 
 // FilterRule filters requests coming into various places
-// Pass rule: default negative, one mathing rule should pass the filter
+// Pass rule: default negative, one matching rule should pass the filter
 type FilterRule struct {
 	Type      string            // Filter type (*string, *timing, *rsr_filters, *stats, *lt, *lte, *gt, *gte)
 	Element   string            // Name of the field providing us the Values to check (used in case of some )
