@@ -108,7 +108,7 @@ func (sSpls *SortedSuppliers) SortQOS(params []string) {
 					return true
 				}
 				return false
-			case utils.MetaPDD: //in case of pdd the smalles value if the best
+			case utils.MetaPDD: //in case of pdd the smallest value if the best
 				if sSpls.SortedSuppliers[i].SortingData[param].(float64) < sSpls.SortedSuppliers[j].SortingData[param].(float64) {
 					return true
 				}
@@ -213,5 +213,11 @@ func (ssd SupplierSortDispatcher) SortSuppliers(prflID, strategy string,
 	if !has {
 		return nil, fmt.Errorf("unsupported sorting strategy: %s", strategy)
 	}
-	return sd.SortSuppliers(prflID, suppls, suplEv, extraOpts)
+	if sortedSuppls, err = sd.SortSuppliers(prflID, suppls, suplEv, extraOpts); err != nil {
+		return
+	}
+	if len(sortedSuppls.SortedSuppliers) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	return
 }

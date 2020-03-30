@@ -44,6 +44,8 @@ cgrates (0.11.0~dev) UNRELEASED; urgency=medium
   * [SessionS] Move *cost as subflag in *rals for
     SessionSv1.ProcessEvent
   * [DiameterAgent] Added DPR support
+  * [SupplierS] Add verification for event filters before populating
+    data
 
  -- Alexandru Tripon <alexandru.tripon@itsyscom.com>  Wed, 19 Feb 2020 13:25:52 +0200
 

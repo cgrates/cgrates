@@ -491,8 +491,24 @@ func (spS *SupplierService) sortedSuppliersForEvent(args *ArgsGetSuppliers) (sor
 	}
 	extraOpts.sortingParameters = splPrfl.SortingParameters // populate sortingParameters in extraOpts
 	extraOpts.sortingStragety = splPrfl.Sorting             // populate sortinStrategy in extraOpts
+
+	//construct the DP and pass it to filterS
+	nM := config.NewNavigableMap(nil)
+	nM.Set([]string{utils.MetaReq}, args.CGREvent.Event, false, false)
+	supplNew := make([]*Supplier, 0)
+	// apply filters for event
+	for _, suppl := range splPrfl.Suppliers {
+		if pass, err := spS.filterS.PartialPass(args.CGREvent.Tenant, suppl.FilterIDs,
+			nM, []string{utils.DynamicDataPrefix + utils.MetaReq}); err != nil {
+			return nil, err
+		} else if !pass {
+			continue
+		}
+		supplNew = append(supplNew, suppl)
+	}
+
 	sortedSuppliers, err := spS.sorter.SortSuppliers(splPrfl.ID, splPrfl.Sorting,
-		splPrfl.Suppliers, args.CGREvent, extraOpts)
+		supplNew, args.CGREvent, extraOpts)
 	if err != nil {
 		return nil, err
 	}

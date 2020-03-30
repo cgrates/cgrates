@@ -67,10 +67,9 @@ var (
 		testV1SplSRemSupplierProfiles,
 		testV1SplSGetSupplierForEvent,
 		// reset the database and load the TP again
-		// testV1SplSInitDataDb,
-		// testV1SplSFromFolder,
-		// for the moment we decide to comment the tests
-		// testV1SplsOneSupplierWithoutDestination,
+		testV1SplSInitDataDb,
+		testV1SplSFromFolder,
+		testV1SplsOneSupplierWithoutDestination,
 		testV1SplSupplierPing,
 		testV1SplSStopEngine,
 	}
@@ -1085,7 +1084,6 @@ func testV1SplsOneSupplierWithoutDestination(t *testing.T) {
 				utils.Usage:       "2m",
 			},
 		},
-		IgnoreErrors: true,
 	}
 	eSpls := engine.SortedSuppliers{
 		ProfileID: "SPL_DESTINATION",
@@ -1109,14 +1107,6 @@ func testV1SplsOneSupplierWithoutDestination(t *testing.T) {
 	} else if !reflect.DeepEqual(eSpls, suplsReply) {
 		t.Errorf("Expecting: %s, received: %s",
 			utils.ToJSON(eSpls), utils.ToJSON(suplsReply))
-	}
-
-	//in case that we don't use ignore errors
-	//we get an error for the second supplier
-	ev.IgnoreErrors = false
-	if err := splSv1Rpc.Call(utils.SupplierSv1GetSuppliers,
-		ev, &suplsReply); err != nil {
-		t.Error(err)
 	}
 }
 

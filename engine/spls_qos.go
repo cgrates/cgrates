@@ -45,9 +45,6 @@ func (qos *QOSSupplierSorter) SortSuppliers(prflID string, suppls []*Supplier,
 			sortedSuppls.SortedSuppliers = append(sortedSuppls.SortedSuppliers, srtSpl)
 		}
 	}
-	if len(sortedSuppls.SortedSuppliers) == 0 {
-		return nil, utils.ErrNotFound
-	}
 	sortedSuppls.SortQOS(extraOpts.sortingParameters)
 	return
 }
