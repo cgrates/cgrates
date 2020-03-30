@@ -91,7 +91,6 @@
 
   "sessions": {
     "enabled": true,
-    "store_session_costs": true,
     "listen_bijson": ":4014",
     "rals_conns": ["*internal"],
     "cdrs_conns": ["*internal"],

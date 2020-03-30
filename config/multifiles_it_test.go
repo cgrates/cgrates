@@ -142,7 +142,7 @@ func TestMfHttpAgentMultipleFields(t *testing.T) {
 					Filters: []string{"*string:~*req.request_type:OutboundAUTH"},
 					Tenant:  NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
 					Flags: utils.FlagsWithParams{"*accounts": []string{},
-						"*attributes": []string{}, "*auth": []string{}},
+						"*attributes": []string{}, "*authorize": []string{}},
 					RequestFields: []*FCTemplate{
 						{
 							Tag:       "RequestType",
