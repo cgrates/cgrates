@@ -51,7 +51,7 @@ func NewDiameterAgent(cgrCfg *config.CGRConfig, filterS *engine.FilterS,
 		filterS: filterS,
 		connMgr: connMgr,
 		raa:     make(map[string]chan *diam.Message),
-		dra:     make(map[string]chan *diam.Message),
+		dpa:     make(map[string]chan *diam.Message),
 		peers:   make(map[string]diam.Conn),
 	}
 	dictsPath := cgrCfg.DiameterAgentCfg().DictionariesPath
@@ -88,8 +88,8 @@ type DiameterAgent struct {
 
 	peersLck sync.Mutex
 	peers    map[string]diam.Conn // peer index by OriginHost;OriginRealm
-	dra      map[string]chan *diam.Message
-	draLck   sync.RWMutex
+	dpa      map[string]chan *diam.Message
+	dpaLck   sync.RWMutex
 }
 
 // ListenAndServe is called when DiameterAgent is started, usually from within cmd/cgr-engine
@@ -134,11 +134,11 @@ func (da *DiameterAgent) handlers() diam.Handler {
 	if da.cgrCfg.DiameterAgentCfg().SyncedConnReqs {
 		dSM.HandleFunc(all, da.handleMessage)
 		dSM.HandleFunc(raa, da.handleRAA)
-		dSM.HandleFunc(dpa, da.handleDRA)
+		dSM.HandleFunc(dpa, da.handleDPA)
 	} else {
 		dSM.HandleFunc(all, da.handleMessageAsync)
 		dSM.HandleFunc(raa, func(c diam.Conn, m *diam.Message) { go da.handleRAA(c, m) })
-		dSM.HandleFunc(dpa, func(c diam.Conn, m *diam.Message) { go da.handleDRA(c, m) })
+		dSM.HandleFunc(dpa, func(c diam.Conn, m *diam.Message) { go da.handleDPA(c, m) })
 	}
 	go da.handleConns(dSM.HandshakeNotify())
 	go func() {
@@ -595,6 +595,7 @@ func (da *DiameterAgent) V1ReAuthorize(originID string, reply *string) (err erro
 	return
 }
 
+// handleRAA is used to handle all Re-Authorize Answers that are received
 func (da *DiameterAgent) handleRAA(c diam.Conn, m *diam.Message) {
 	avp, err := m.FindAVP(avp.SessionID, dict.UndefinedVendorID)
 	if err != nil {
@@ -613,6 +614,8 @@ func (da *DiameterAgent) handleRAA(c diam.Conn, m *diam.Message) {
 	ch <- m
 }
 
+// handleConns is used to handle all conns that are connected to the agent
+// it register the connection so it can be used to send a DPR
 func (da *DiameterAgent) handleConns(peers <-chan diam.Conn) {
 	for c := range peers {
 		meta, _ := smpeer.FromContext(c.Context())
@@ -630,12 +633,13 @@ func (da *DiameterAgent) handleConns(peers <-chan diam.Conn) {
 	}
 }
 
-func (da *DiameterAgent) handleDRA(c diam.Conn, m *diam.Message) {
+// handleDPA is used to handle all DisconnectPeer Answers that are received
+func (da *DiameterAgent) handleDPA(c diam.Conn, m *diam.Message) {
 	meta, _ := smpeer.FromContext(c.Context())
 	key := string(meta.OriginHost + utils.CONCATENATED_KEY_SEP + meta.OriginRealm)
 
 	da.raaLck.Lock()
-	ch, has := da.dra[key]
+	ch, has := da.dpa[key]
 	da.raaLck.Unlock()
 	if !has {
 		return
@@ -664,14 +668,14 @@ func (da *DiameterAgent) V1DisconnectPeer(args *utils.DPRArgs, reply *string) (e
 
 	key := args.OriginHost + utils.CONCATENATED_KEY_SEP + args.OriginRealm
 
-	draCh := make(chan *diam.Message, 1)
-	da.draLck.Lock()
-	da.dra[key] = draCh
-	da.draLck.Unlock()
+	dpaCh := make(chan *diam.Message, 1)
+	da.dpaLck.Lock()
+	da.dpa[key] = dpaCh
+	da.dpaLck.Unlock()
 	defer func() {
-		da.draLck.Lock()
-		delete(da.dra, key)
-		da.draLck.Unlock()
+		da.dpaLck.Lock()
+		delete(da.dpa, key)
+		da.dpaLck.Unlock()
 	}()
 	da.peersLck.Lock()
 	conn, has := da.peers[key]
@@ -683,9 +687,9 @@ func (da *DiameterAgent) V1DisconnectPeer(args *utils.DPRArgs, reply *string) (e
 		return utils.ErrServerError
 	}
 	select {
-	case dra := <-draCh:
+	case dpa := <-dpaCh:
 		var avps []*diam.AVP
-		if avps, err = dra.FindAVPsWithPath([]interface{}{avp.ResultCode}, dict.UndefinedVendorID); err != nil {
+		if avps, err = dpa.FindAVPsWithPath([]interface{}{avp.ResultCode}, dict.UndefinedVendorID); err != nil {
 			return
 		}
 		if len(avps) == 0 {
