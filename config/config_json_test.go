@@ -680,6 +680,7 @@ func TestFsAgentJsonCfg(t *testing.T) {
 		Subscribe_park:         utils.BoolPointer(true),
 		Create_cdr:             utils.BoolPointer(false),
 		Extra_fields:           &[]string{},
+		Low_balance_ann_file:   utils.StringPointer(""),
 		Empty_balance_context:  utils.StringPointer(""),
 		Empty_balance_ann_file: utils.StringPointer(""),
 		Max_wait_connection:    utils.StringPointer("2s"),

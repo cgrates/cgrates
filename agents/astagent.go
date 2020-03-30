@@ -374,3 +374,8 @@ func (*AsteriskAgent) V1ReAuthorize(originID string, reply *string) (err error) 
 func (*AsteriskAgent) V1DisconnectPeer(args *utils.DPRArgs, reply *string) (err error) {
 	return utils.ErrNotImplemented
 }
+
+// DisconnectWarning is used to implement the sessions.BiRPClient interface
+func (*AsteriskAgent) DisconnectWarning(args map[string]interface{}, reply *string) (err error) {
+	return utils.ErrNotImplemented
+}
