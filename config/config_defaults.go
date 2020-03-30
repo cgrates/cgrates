@@ -358,6 +358,7 @@ const CGRATES_CFG_JSON = `
 	"channel_sync_interval": "0",			// sync channels to detect stale sessions (0 to disable)
 	"terminate_attempts": 5,				// attempts to get the session before terminating it
 	"alterable_fields": [],					// the session fields that can be updated
+	//"min_dur_low_balance": "5s",			// threshold which will trigger low balance warnings for prepaid calls (needs to be lower than debit_interval)
 },
 
 
@@ -377,8 +378,7 @@ const CGRATES_CFG_JSON = `
 	"subscribe_park": true,					// subscribe via fsock to receive park events
 	"create_cdr": false,					// creates CDR out of events and sends them to CDRS component
 	"extra_fields": [],						// extra fields to store in auth/CDRs when creating them
-	//"min_dur_low_balance": "5s",			// threshold which will trigger low balance warnings for prepaid calls (needs to be lower than debit_interval)
-	//"low_balance_ann_file": "",			// file to be played when low balance is reached for prepaid calls
+	"low_balance_ann_file": "",				// file to be played when low balance is reached for prepaid calls
 	"empty_balance_context": "",			// if defined, prepaid calls will be transferred to this context on empty balance
 	"empty_balance_ann_file": "",			// file to be played before disconnecting prepaid calls on empty balance (applies only if no context defined)
 	"max_wait_connection": "2s",			// maximum duration to wait for a connection to be retrieved from the pool

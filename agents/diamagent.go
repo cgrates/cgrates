@@ -703,3 +703,8 @@ func (da *DiameterAgent) V1DisconnectPeer(args *utils.DPRArgs, reply *string) (e
 	*reply = utils.OK
 	return
 }
+
+// DisconnectWarning is used to implement the sessions.BiRPClient interface
+func (*DiameterAgent) DisconnectWarning(args map[string]interface{}, reply *string) (err error) {
+	return utils.ErrNotImplemented
+}

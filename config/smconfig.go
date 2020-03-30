@@ -88,6 +88,7 @@ type SessionSCfg struct {
 	ChannelSyncInterval time.Duration
 	TerminateAttempts   int
 	AlterableFields     *utils.StringSet
+	MinDurLowBalance    time.Duration
 }
 
 func (scfg *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) (err error) {
@@ -194,9 +195,8 @@ func (scfg *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) (err error) {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
 			if connID == utils.MetaInternal {
 				return fmt.Errorf("Replication connection ID needs to be different than *internal")
-			} else {
-				scfg.ReplicationConns[idx] = connID
 			}
+			scfg.ReplicationConns[idx] = connID
 		}
 	}
 	if jsnCfg.Debit_interval != nil {
@@ -260,70 +260,77 @@ func (scfg *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) (err error) {
 	if jsnCfg.Alterable_fields != nil {
 		scfg.AlterableFields = utils.NewStringSet(*jsnCfg.Alterable_fields)
 	}
+	if jsnCfg.Min_dur_low_balance != nil {
+		if scfg.MinDurLowBalance, err = utils.ParseDurationWithNanosecs(*jsnCfg.Min_dur_low_balance); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
 type FsAgentCfg struct {
-	Enabled       bool
-	SessionSConns []string
-	SubscribePark bool
-	CreateCdr     bool
-	ExtraFields   RSRParsers
-	//MinDurLowBalance    time.Duration
-	//LowBalanceAnnFile   string
+	Enabled             bool
+	SessionSConns       []string
+	SubscribePark       bool
+	CreateCdr           bool
+	ExtraFields         RSRParsers
+	LowBalanceAnnFile   string
 	EmptyBalanceContext string
 	EmptyBalanceAnnFile string
 	MaxWaitConnection   time.Duration
 	EventSocketConns    []*FsConnCfg
 }
 
-func (self *FsAgentCfg) loadFromJsonCfg(jsnCfg *FreeswitchAgentJsonCfg) error {
+func (fscfg *FsAgentCfg) loadFromJsonCfg(jsnCfg *FreeswitchAgentJsonCfg) error {
 	if jsnCfg == nil {
 		return nil
 	}
 	var err error
 	if jsnCfg.Enabled != nil {
-		self.Enabled = *jsnCfg.Enabled
+		fscfg.Enabled = *jsnCfg.Enabled
 	}
 	if jsnCfg.Sessions_conns != nil {
-		self.SessionSConns = make([]string, len(*jsnCfg.Sessions_conns))
+		fscfg.SessionSConns = make([]string, len(*jsnCfg.Sessions_conns))
 		for idx, connID := range *jsnCfg.Sessions_conns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
 			if connID == utils.MetaInternal {
-				self.SessionSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
+				fscfg.SessionSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
 			} else {
-				self.SessionSConns[idx] = connID
+				fscfg.SessionSConns[idx] = connID
 			}
 		}
 	}
 	if jsnCfg.Subscribe_park != nil {
-		self.SubscribePark = *jsnCfg.Subscribe_park
+		fscfg.SubscribePark = *jsnCfg.Subscribe_park
 	}
 	if jsnCfg.Create_cdr != nil {
-		self.CreateCdr = *jsnCfg.Create_cdr
+		fscfg.CreateCdr = *jsnCfg.Create_cdr
 	}
 	if jsnCfg.Extra_fields != nil {
-		if self.ExtraFields, err = NewRSRParsersFromSlice(*jsnCfg.Extra_fields, true); err != nil {
+		if fscfg.ExtraFields, err = NewRSRParsersFromSlice(*jsnCfg.Extra_fields, true); err != nil {
 			return err
 		}
 	}
+	if jsnCfg.Low_balance_ann_file != nil {
+		fscfg.LowBalanceAnnFile = *jsnCfg.Low_balance_ann_file
+	}
 	if jsnCfg.Empty_balance_context != nil {
-		self.EmptyBalanceContext = *jsnCfg.Empty_balance_context
+		fscfg.EmptyBalanceContext = *jsnCfg.Empty_balance_context
 	}
 
 	if jsnCfg.Empty_balance_ann_file != nil {
-		self.EmptyBalanceAnnFile = *jsnCfg.Empty_balance_ann_file
+		fscfg.EmptyBalanceAnnFile = *jsnCfg.Empty_balance_ann_file
 	}
 	if jsnCfg.Max_wait_connection != nil {
-		if self.MaxWaitConnection, err = utils.ParseDurationWithNanosecs(*jsnCfg.Max_wait_connection); err != nil {
+		if fscfg.MaxWaitConnection, err = utils.ParseDurationWithNanosecs(*jsnCfg.Max_wait_connection); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.Event_socket_conns != nil {
-		self.EventSocketConns = make([]*FsConnCfg, len(*jsnCfg.Event_socket_conns))
+		fscfg.EventSocketConns = make([]*FsConnCfg, len(*jsnCfg.Event_socket_conns))
 		for idx, jsnConnCfg := range *jsnCfg.Event_socket_conns {
-			self.EventSocketConns[idx] = NewDfltFsConnConfig()
-			self.EventSocketConns[idx].loadFromJsonCfg(jsnConnCfg)
+			fscfg.EventSocketConns[idx] = NewDfltFsConnConfig()
+			fscfg.EventSocketConns[idx].loadFromJsonCfg(jsnConnCfg)
 		}
 	}
 	return nil

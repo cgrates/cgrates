@@ -221,16 +221,13 @@
 // 		"*any": "189h",
 // 		"*voice": "72h",
 // 		"*data": "107374182400",
-// 		"*sms": "10000"
+// 		"*sms": "10000",
+// 		"*mms": "10000"
 // 	},
 // 	"max_increments": 1000000,
 // 	"balance_rating_subject":{				// default rating subject in case that balance rating subject is empty
 // 		"*any": "*zero1ns",
-// 		"*voice": "*zero1s",
-// 		"*data": "*zero1ns",
-// 		"*sms": "*zero1ns",
-// 		"*monetary":"*zero1ns",
-// 		"*generic":"*zero1ns",
+// 		"*voice": "*zero1s"
 // 	},
 // },
 
@@ -340,6 +337,7 @@
 // 	"channel_sync_interval": "0",			// sync channels to detect stale sessions (0 to disable)
 // 	"terminate_attempts": 5,				// attempts to get the session before terminating it
 // 	"alterable_fields": [],					// the session fields that can be updated
+// 	//"min_dur_low_balance": "5s",			// threshold which will trigger low balance warnings for prepaid calls (needs to be lower than debit_interval)
 // },
 
 
@@ -359,8 +357,7 @@
 // 	"subscribe_park": true,					// subscribe via fsock to receive park events
 // 	"create_cdr": false,					// creates CDR out of events and sends them to CDRS component
 // 	"extra_fields": [],						// extra fields to store in auth/CDRs when creating them
-// 	//"min_dur_low_balance": "5s",			// threshold which will trigger low balance warnings for prepaid calls (needs to be lower than debit_interval)
-// 	//"low_balance_ann_file": "",			// file to be played when low balance is reached for prepaid calls
+// 	"low_balance_ann_file": "",				// file to be played when low balance is reached for prepaid calls
 // 	"empty_balance_context": "",			// if defined, prepaid calls will be transferred to this context on empty balance
 // 	"empty_balance_ann_file": "",			// file to be played before disconnecting prepaid calls on empty balance (applies only if no context defined)
 // 	"max_wait_connection": "2s",			// maximum duration to wait for a connection to be retrieved from the pool
@@ -395,7 +392,7 @@
 // 	"synced_conn_requests": false,								// process one request at the time per connection
 // 	"asr_template": "",											// enable AbortSession message being sent to client on DisconnectSession
 // 	"rar_template": "",											// template used to build the Re-Auth-Request
-// 	"disconnect_method": "*asr",								// the request to send to diameter on DisconnectSession <*asr|*rar>
+// 	"forced_disconnect": "*none",								// the request to send to diameter on DisconnectSession <*none|*asr|*rar>
 // 	"templates":{												// default message templates
 // 		"*err": [
 // 				{"tag": "SessionId", "path": "*rep.Session-Id", "type": "*variable",
@@ -434,10 +431,6 @@
 // 					"value": "~*req.Origin-Host", "mandatory": true},
 // 				{"tag": "AuthApplicationId", "path": "*diamreq.Auth-Application-Id", "type": "*variable",
 // 					 "value": "~*vars.*appid", "mandatory": true},
-// 				{"tag": "UserName", "path": "*diamreq.User-Name", "type": "*variable",
-// 					"value": "~*req.User-Name", "mandatory": true},
-// 				{"tag": "OriginStateID", "path": "*diamreq.Origin-State-Id", "type": "*constant",
-// 					"value": "1"},
 // 		],
 // 		"*rar": [
 // 			{"tag": "SessionId", "path": "*diamreq.Session-Id", "type": "*variable",
@@ -452,10 +445,6 @@
 // 				"value": "~*req.Origin-Host", "mandatory": true},
 // 			{"tag": "AuthApplicationId", "path": "*diamreq.Auth-Application-Id", "type": "*variable",
 // 				 "value": "~*vars.*appid", "mandatory": true},
-// 			{"tag": "UserName", "path": "*diamreq.User-Name", "type": "*variable",
-// 				"value": "~*req.User-Name", "mandatory": true},
-// 			{"tag": "OriginStateID", "path": "*diamreq.Origin-State-Id", "type": "*constant",
-// 				"value": "1"},
 // 			{"tag": "ReAuthRequestType", "path": "*diamreq.Re-Auth-Request-Type", "type": "*constant",
 // 				"value": "0"},
 // 		]
@@ -774,7 +763,8 @@
 // 	"field_separator": ",",							// separator used in case of csv files
 // 	"caches_conns":["*localhost"],
 // 	"scheduler_conns": ["*localhost"],
-// 	"gapi_credentials": ".gapi/credentials.json" 	// the path to the credentials for google API or the credentials.json file content
+// 	"gapi_credentials": ".gapi/credentials.json", 	// the path to the credentials for google API or the credentials.json file content
+// 	"gapi_token": ".gapi/token.json" 				// the path to the token for google API or the token.json file content
 // },
 
 

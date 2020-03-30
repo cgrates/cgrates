@@ -218,6 +218,7 @@ type SessionSJsonCfg struct {
 	Channel_sync_interval *string
 	Terminate_attempts    *int
 	Alterable_fields      *[]string
+	Min_dur_low_balance   *string
 }
 
 // FreeSWITCHAgent config section
@@ -227,6 +228,7 @@ type FreeswitchAgentJsonCfg struct {
 	Subscribe_park         *bool
 	Create_cdr             *bool
 	Extra_fields           *[]string
+	Low_balance_ann_file   *string
 	Empty_balance_context  *string
 	Empty_balance_ann_file *string
 	Max_wait_connection    *string

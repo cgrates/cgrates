@@ -485,6 +485,14 @@ func (sS *SessionS) debitLoopSession(s *Session, sRunIdx int,
 		}
 		debitStop := s.debitStop // avoid concurrency with endSession
 		s.SRuns[sRunIdx].NextAutoDebit = utils.TimePointer(time.Now().Add(dbtIvl))
+		if maxDebit < dbtIvl && sS.cgrCfg.SessionSCfg().MinDurLowBalance != time.Duration(0) { // warn client for low balance
+			if sS.cgrCfg.SessionSCfg().MinDurLowBalance >= dbtIvl {
+				utils.Logger.Warning(fmt.Sprintf("<%s> can not run warning for the session: <%s> since the remaining time:<%s> is higher than the debit interval:<%s>.",
+					utils.SessionS, s.cgrID(), sS.cgrCfg.SessionSCfg().MinDurLowBalance, dbtIvl))
+			} else if maxDebit <= sS.cgrCfg.SessionSCfg().MinDurLowBalance {
+				go sS.warnSession(s.ClientConnID, s.EventStart.Clone())
+			}
+		}
 		s.Unlock()
 		sS.replicateSessions(s.CGRID, false, sS.cgrCfg.SessionSCfg().ReplicationConns)
 		if maxDebit < dbtIvl { // disconnect faster
@@ -641,6 +649,27 @@ func (sS *SessionS) disconnectSession(s *Session, rsn string) (err error) {
 			Reason:     rsn}, &rply); err != nil {
 		if err != utils.ErrNotImplemented {
 			return err
+		}
+		err = nil
+	}
+	return
+}
+
+// warnSession will send warning from SessionS to clients
+// regarding low balance
+func (sS *SessionS) warnSession(connID string, ev map[string]interface{}) (err error) {
+	clnt := sS.biJClnt(connID)
+	if clnt == nil {
+		return fmt.Errorf("calling %s requires bidirectional JSON connection, connID: <%s>",
+			utils.SessionSv1DisconnectWarning, connID)
+	}
+	var rply string
+	if err = clnt.conn.Call(utils.SessionSv1DisconnectWarning,
+		ev, &rply); err != nil {
+		if err != utils.ErrNotImplemented {
+			utils.Logger.Warning(fmt.Sprintf("<%s> failed to warn session: <%s>, err: <%s>",
+				utils.SessionS, ev[utils.CGRID], err))
+			return
 		}
 		err = nil
 	}
