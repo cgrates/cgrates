@@ -60,7 +60,7 @@ INVITE|324cb497|d4af7023|8deaadf2ae9a17809a391f05af31afb0@0:0:0:0:0:0:0:0|486|Bu
 INVITE|2daec40c|548625ac|dd0c4c617a9919d29a6175cdff223a9p@0:0:0:0:0:0:0:0|200|OK|1436454408|*prepaid|1001|1002||3401:2069362475`
 
 	flatstoreTests = []func(t *testing.T){
-		testFlatstoreITCreateCdrDirs,
+		testCreateDirs,
 		testFlatstoreITInitConfig,
 		testFlatstoreITInitCdrDb,
 		testFlatstoreITResetDataDb,
@@ -69,7 +69,7 @@ INVITE|2daec40c|548625ac|dd0c4c617a9919d29a6175cdff223a9p@0:0:0:0:0:0:0:0|200|OK
 		testFlatstoreITLoadTPFromFolder,
 		testFlatstoreITHandleCdr1File,
 		testFlatstoreITAnalyseCDRs,
-		testFlatstoreITCleanupFiles,
+		testCleanupFiles,
 		testFlatstoreITKillEngine,
 	}
 )
@@ -89,23 +89,6 @@ func TestFlatstoreFile(t *testing.T) {
 	}
 	for _, test := range flatstoreTests {
 		t.Run(flatstoreCfgDIR, test)
-	}
-}
-
-func testFlatstoreITCreateCdrDirs(t *testing.T) {
-	for _, dir := range []string{"/tmp/ers/in", "/tmp/ers/out",
-		"/tmp/ers2/in", "/tmp/ers2/out", "/tmp/init_session/in", "/tmp/init_session/out",
-		"/tmp/terminate_session/in", "/tmp/terminate_session/out", "/tmp/cdrs/in",
-		"/tmp/cdrs/out", "/tmp/ers_with_filters/in", "/tmp/ers_with_filters/out",
-		"/tmp/xmlErs/in", "/tmp/xmlErs/out", "/tmp/fwvErs/in", "/tmp/fwvErs/out",
-		"/tmp/partErs1/in", "/tmp/partErs1/out", "/tmp/partErs2/in", "/tmp/partErs2/out",
-		"/tmp/flatstoreErs/in", "/tmp/flatstoreErs/out"} {
-		if err := os.RemoveAll(dir); err != nil {
-			t.Fatal("Error removing folder: ", dir, err)
-		}
-		if err := os.MkdirAll(dir, 0755); err != nil {
-			t.Fatal("Error creating folder: ", dir, err)
-		}
 	}
 }
 
@@ -214,17 +197,6 @@ func testFlatstoreITAnalyseCDRs(t *testing.T) {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 5 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
-	}
-}
-
-func testFlatstoreITCleanupFiles(t *testing.T) {
-	for _, dir := range []string{"/tmp/ers",
-		"/tmp/ers2", "/tmp/init_session", "/tmp/terminate_session",
-		"/tmp/cdrs", "/tmp/ers_with_filters", "/tmp/xmlErs", "/tmp/fwvErs",
-		"/tmp/partErs1", "/tmp/partErs2", "tmp/flatstoreErs"} {
-		if err := os.RemoveAll(dir); err != nil {
-			t.Fatal("Error removing folder: ", dir, err)
-		}
 	}
 }
 

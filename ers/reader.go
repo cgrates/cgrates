@@ -52,6 +52,8 @@ func NewEventReader(cfg *config.CGRConfig, cfgIdx int,
 		return NewSQLEventReader(cfg, cfgIdx, rdrEvents, rdrErr, fltrS, rdrExit)
 	case utils.MetaFlatstore:
 		return NewFlatstoreER(cfg, cfgIdx, rdrEvents, rdrErr, fltrS, rdrExit)
+	case utils.MetaJSON:
+		return NewJSONFileER(cfg, cfgIdx, rdrEvents, rdrErr, fltrS, rdrExit)
 	}
 	return
 }
