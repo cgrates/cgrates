@@ -1149,3 +1149,80 @@ func TestCDRexportFieldValue(t *testing.T) {
 	}
 
 }
+
+func TestCDReRoundingDecimals(t *testing.T) {
+	cdr := &CDR{
+		CGRID:       utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
+		OrderID:     123,
+		ToR:         utils.VOICE,
+		OriginID:    "dsafdsaf",
+		OriginHost:  "192.168.1.1",
+		Source:      utils.UNIT_TEST,
+		RequestType: utils.META_RATED,
+		Tenant:      "cgrates.org",
+		Category:    "call",
+		Account:     "1001",
+		Subject:     "1001",
+		Destination: "+4986517174963",
+		SetupTime:   time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
+		AnswerTime:  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
+		RunID:       utils.MetaDefault,
+		Usage:       time.Duration(10) * time.Second,
+		Cost:        1.32165,
+		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+	}
+
+	cfgCdrFld := &config.FCTemplate{
+		Path:             "*exp.Cost",
+		Type:             utils.META_COMPOSED,
+		Value:            config.NewRSRParsersMustCompile("~SetupTime", true, utils.INFIELD_SEP),
+		RoundingDecimals: 0,
+	}
+
+	//5 is the default value for rounding decimals
+	eVal := "1.32165"
+	if val, err := cdr.exportFieldValue(cfgCdrFld, nil); err != nil {
+		t.Error(err)
+	} else if val != eVal {
+		t.Errorf("Expecting: %+v, received: %+v", eVal, val)
+	}
+
+	cfgCdrFld.RoundingDecimals = 0
+	config.CgrConfig().GeneralCfg().RoundingDecimals = 4
+	eVal = "1.3216"
+	if val, err := cdr.exportFieldValue(cfgCdrFld, nil); err != nil {
+		t.Error(err)
+	} else if val != eVal {
+		t.Errorf("Expecting: %+v, received: %+v", eVal, val)
+	}
+
+	cfgCdrFld.RoundingDecimals = 0
+	config.CgrConfig().GeneralCfg().RoundingDecimals = 3
+	eVal = "1.322"
+	if val, err := cdr.exportFieldValue(cfgCdrFld, nil); err != nil {
+		t.Error(err)
+	} else if val != eVal {
+		t.Errorf("Expecting: %+v, received: %+v", eVal, val)
+	}
+
+	cfgCdrFld.RoundingDecimals = 0
+	config.CgrConfig().GeneralCfg().RoundingDecimals = 2
+	eVal = "1.32"
+	if val, err := cdr.exportFieldValue(cfgCdrFld, nil); err != nil {
+		t.Error(err)
+	} else if val != eVal {
+		t.Errorf("Expecting: %+v, received: %+v", eVal, val)
+	}
+
+	cfgCdrFld.RoundingDecimals = 0
+	config.CgrConfig().GeneralCfg().RoundingDecimals = 1
+	eVal = "1.3"
+	if val, err := cdr.exportFieldValue(cfgCdrFld, nil); err != nil {
+		t.Error(err)
+	} else if val != eVal {
+		t.Errorf("Expecting: %+v, received: %+v", eVal, val)
+	}
+
+	//resetore roundingdecimals value
+	config.CgrConfig().GeneralCfg().RoundingDecimals = 5
+}
