@@ -66,6 +66,10 @@ var (
 
 		testv2CDRsGetCDRsDest,
 
+		testV2CDRsInitDataDb,
+		testV2CDRsInitCdrDb,
+		testV2CDRsRerate,
+
 		testV2CDRsKillEngine,
 	}
 )
@@ -706,6 +710,7 @@ func testV2CDRsGetCdrsWithRattingPlan(t *testing.T) {
 		}
 	}
 }
+
 func testV2CDRsSetThreshold(t *testing.T) {
 	var reply string
 	if err := cdrsRpc.Call(utils.APIerSv2SetActions, &utils.AttrSetActions{
@@ -833,6 +838,122 @@ func testv2CDRsGetCDRsDest(t *testing.T) {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 3 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
+	}
+}
+
+func testV2CDRsRerate(t *testing.T) {
+	var reply string
+	//add a charger
+	chargerProfile := &v1.ChargerWithCache{
+		ChargerProfile: &engine.ChargerProfile{
+			Tenant: "cgrates.org",
+			ID:     "Default",
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			},
+			RunID:        utils.MetaDefault,
+			AttributeIDs: []string{"*none"},
+			Weight:       20,
+		},
+		Cache: utils.StringPointer(utils.MetaReload),
+	}
+	if err := cdrsRpc.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+
+	attrSetAcnt := AttrSetAccount{
+		Tenant:  "cgrates.org",
+		Account: "voiceAccount",
+	}
+	if err := cdrsRpc.Call(utils.APIerSv2SetAccount, attrSetAcnt, &reply); err != nil {
+		t.Fatal(err)
+	}
+	attrs := &utils.AttrSetBalance{
+		Tenant:      "cgrates.org",
+		Account:     "voiceAccount",
+		BalanceType: utils.VOICE,
+		Value:       600000000000,
+		Balance: map[string]interface{}{
+			utils.ID:        utils.MetaDefault,
+			"RatingSubject": "*zero1m",
+			utils.Weight:    10.0,
+		},
+	}
+	if err := cdrsRpc.Call(utils.APIerSv2SetBalance, attrs, &reply); err != nil {
+		t.Fatal(err)
+	}
+
+	var acnt *engine.Account
+	if err := cdrsRpc.Call(utils.APIerSv2GetAccount,
+		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "voiceAccount"}, &acnt); err != nil {
+		t.Error(err)
+	} else if len(acnt.BalanceMap) != 1 || acnt.BalanceMap[utils.VOICE][0].Value != 600000000000 {
+		t.Errorf("Unexpected balance received: %+v", acnt.BalanceMap[utils.VOICE][0])
+	}
+
+	args := &engine.ArgV1ProcessEvent{
+		Flags: []string{utils.MetaRerate},
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				utils.OriginID:    "testV2CDRsRerate",
+				utils.OriginHost:  "192.168.1.1",
+				utils.Source:      "testV2CDRsRerate",
+				utils.RequestType: utils.META_PSEUDOPREPAID,
+				utils.Account:     "voiceAccount",
+				utils.Subject:     "ANY2CNT",
+				utils.Destination: "+4986517174963",
+				utils.AnswerTime:  time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+				utils.Usage:       2 * time.Minute,
+				"field_extr1":     "val_extr1",
+				"fieldextr2":      "valextr2",
+			},
+		},
+	}
+
+	var rplProcEv []*utils.EventWithFlags
+	if err := cdrsRpc.Call(utils.CDRsV2ProcessEvent, args, &rplProcEv); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	}
+
+	if err := cdrsRpc.Call(utils.APIerSv2GetAccount,
+		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "voiceAccount"}, &acnt); err != nil {
+		t.Error(err)
+	} else if len(acnt.BalanceMap) != 1 || acnt.BalanceMap[utils.VOICE][0].Value != 480000000000 {
+		t.Errorf("Unexpected balance received: %+v", acnt.BalanceMap[utils.VOICE][0])
+	}
+
+	args2 := &engine.ArgV1ProcessEvent{
+		Flags: []string{utils.MetaRerate},
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				utils.OriginID:    "testV2CDRsRerate",
+				utils.OriginHost:  "192.168.1.1",
+				utils.Source:      "testV2CDRsRerate",
+				utils.RequestType: utils.META_PSEUDOPREPAID,
+				utils.Account:     "voiceAccount",
+				utils.Subject:     "ANY2CNT",
+				utils.Destination: "+4986517174963",
+				utils.AnswerTime:  time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+				utils.Usage:       1 * time.Minute,
+				"field_extr1":     "val_extr1",
+				"fieldextr2":      "valextr2",
+			},
+		},
+	}
+
+	if err := cdrsRpc.Call(utils.CDRsV2ProcessEvent, args2, &rplProcEv); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	}
+
+	if err := cdrsRpc.Call(utils.APIerSv2GetAccount,
+		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "voiceAccount"}, &acnt); err != nil {
+		t.Error(err)
+	} else if len(acnt.BalanceMap) != 1 || acnt.BalanceMap[utils.VOICE][0].Value != 540000000000 {
+		t.Errorf("Unexpected balance received: %+v", acnt.BalanceMap[utils.VOICE][0])
 	}
 }
 

@@ -350,6 +350,27 @@
 				{"tag": "DisconnectCause", "path": "*cgreq.DisconnectCause", "type": "*variable", "value": "~*req.4; ;~*req.5", "mandatory": true},
 				{"tag": "DialogId", "path": "*cgreq.DialogId", "type": "*variable", "value": "~*req.11"}
 			],
+		},
+		{
+			"id": "JSONReader",
+			"run_delay":  "-1",
+			"type": "*json",
+			"source_path": "/tmp/ErsJSON/in",
+			"flags": ["*cdrs"],
+			"processed_path": "/tmp/ErsJSON/out",
+			"fields":[
+				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*voice", "mandatory": true},
+				{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable", "value": "~*req.OriginID", "mandatory": true},
+				{"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*variable", "value": "~*req.RequestType", "mandatory": true},
+				{"tag": "Tenant", "path": "*cgreq.Tenant", "type": "*variable", "value": "~*req.Tenant", "mandatory": true},
+				{"tag": "Category", "path": "*cgreq.Category", "type": "*constant", "value": "call", "mandatory": true},
+				{"tag": "Account", "path": "*cgreq.Account", "type": "*variable", "value": "~*req.Account", "mandatory": true},
+				{"tag": "Subject", "path": "*cgreq.Subject", "type": "*variable", "value": "~*req.Account", "mandatory": true},
+				{"tag": "Destination", "path": "*cgreq.Destination", "type": "*variable", "value": "~*req.Destination:s/0([1-9]\\d+)/+49${1}/", "mandatory": true},
+				{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*variable", "value": "~*req.SetupTime", "mandatory": true},
+				{"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*variable", "value": "~*req.AnswerTime", "mandatory": true},
+				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable", "value": "~*req.Usage", "mandatory": true},
+			],
 		}
 	]
 },
