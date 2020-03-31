@@ -300,6 +300,7 @@ const CGRATES_CFG_JSON = `
 "ers": {									// EventReaderService
 	"enabled": false,						// starts the EventReader service: <true|false>
 	"sessions_conns":["*internal"],			// RPC Connections IDs
+	"row_length" : 0, 						// Number of fields from csv file
 	"readers": [
 		{
 			"id": "*default",									// identifier of the EventReader profile

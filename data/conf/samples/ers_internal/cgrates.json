@@ -77,6 +77,7 @@
 "ers": {
 	"enabled": true,
 	"sessions_conns": ["*internal"],
+	"row_length" : 0,
 	"readers": [
 		{
 			"id": "file_reader1",
