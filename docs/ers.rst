@@ -33,6 +33,7 @@ With explanations in the comments:
  "ers": {
 	"enabled": true,					// enable the service
 	"sessions_conns": ["*internal"],	// connection towards SessionS
+	"row_length" : 0,					// Number of fields from csv file
 	"readers": [						// list of active readers
 		{
 			"id": "file_reader2",		// file_reader2 reader

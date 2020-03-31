@@ -183,6 +183,7 @@ func TestEventReaderLoadFromJSON(t *testing.T) {
 "ers": {
 	"enabled": true,
 	"sessions_conns":["conn1","conn3"],
+	"row_length" : 0,
 	"readers": [
 		{
 			"id": "file_reader1",
@@ -208,6 +209,7 @@ func TestEventReaderSanitization(t *testing.T) {
 	cfgJSONStr := `{
 "ers": {
 	"enabled": true,
+	"row_length" : 0,
 	"readers": [
 		{
 			"id": "file_reader1",
@@ -295,6 +297,7 @@ func TestEventReaderSameID(t *testing.T) {
 "ers": {
 	"enabled": true,
 	"sessions_conns":["conn1"],
+	"row_length" : 0,
 	"readers": [
 		{
 			"id": "file_reader1",

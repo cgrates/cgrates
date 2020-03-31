@@ -27,6 +27,7 @@ import (
 type ERsCfg struct {
 	Enabled       bool
 	SessionSConns []string
+	RowLength     int
 	Readers       []*EventReaderCfg
 }
 

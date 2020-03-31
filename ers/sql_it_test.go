@@ -73,6 +73,7 @@ func testSQLInitConfig(t *testing.T) {
 		},
 		"ers": {									// EventReaderService
 			"enabled": true,						// starts the EventReader service: <true|false>
+			"row_length" : 0,
 			"readers": [
 				{
 					"id": "mysql",										// identifier of the EventReader profile
