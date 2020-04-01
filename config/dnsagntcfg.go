@@ -31,7 +31,7 @@ type DNSAgentCfg struct {
 	RequestProcessors []*RequestProcessor
 }
 
-func (da *DNSAgentCfg) loadFromJsonCfg(jsnCfg *DNSAgentJsonCfg, sep string) (err error) {
+func (da *DNSAgentCfg) loadFromJsonCfg(jsnCfg *DNSAgentJsonCfg, sep string, rounding int) (err error) {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -69,7 +69,7 @@ func (da *DNSAgentCfg) loadFromJsonCfg(jsnCfg *DNSAgentJsonCfg, sep string) (err
 					break
 				}
 			}
-			if err := rp.loadFromJsonCfg(reqProcJsn, sep); err != nil {
+			if err := rp.loadFromJsonCfg(reqProcJsn, sep, rounding); err != nil {
 				return nil
 			}
 			if !haveID {
@@ -91,7 +91,7 @@ type RequestProcessor struct {
 	ReplyFields   []*FCTemplate
 }
 
-func (rp *RequestProcessor) loadFromJsonCfg(jsnCfg *ReqProcessorJsnCfg, sep string) (err error) {
+func (rp *RequestProcessor) loadFromJsonCfg(jsnCfg *ReqProcessorJsnCfg, sep string, rounding int) (err error) {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -118,12 +118,12 @@ func (rp *RequestProcessor) loadFromJsonCfg(jsnCfg *ReqProcessorJsnCfg, sep stri
 		}
 	}
 	if jsnCfg.Request_fields != nil {
-		if rp.RequestFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Request_fields, sep); err != nil {
+		if rp.RequestFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Request_fields, sep, rounding); err != nil {
 			return
 		}
 	}
 	if jsnCfg.Reply_fields != nil {
-		if rp.ReplyFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Reply_fields, sep); err != nil {
+		if rp.ReplyFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Reply_fields, sep, rounding); err != nil {
 			return
 		}
 	}

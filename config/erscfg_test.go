@@ -183,7 +183,6 @@ func TestEventReaderLoadFromJSON(t *testing.T) {
 "ers": {
 	"enabled": true,
 	"sessions_conns":["conn1","conn3"],
-	"row_length" : 0,
 	"readers": [
 		{
 			"id": "file_reader1",
@@ -209,7 +208,6 @@ func TestEventReaderSanitization(t *testing.T) {
 	cfgJSONStr := `{
 "ers": {
 	"enabled": true,
-	"row_length" : 0,
 	"readers": [
 		{
 			"id": "file_reader1",
@@ -274,6 +272,7 @@ func TestEventReaderSameID(t *testing.T) {
 			&EventReaderCfg{
 				ID:             "file_reader1",
 				Type:           utils.MetaFileCSV,
+				RowLength:      5,
 				FieldSep:       ",",
 				RunDelay:       time.Duration(-1),
 				ConcurrentReqs: 1024,
@@ -297,12 +296,12 @@ func TestEventReaderSameID(t *testing.T) {
 "ers": {
 	"enabled": true,
 	"sessions_conns":["conn1"],
-	"row_length" : 0,
 	"readers": [
 		{
 			"id": "file_reader1",
 			"run_delay":  "-1",
 			"type": "*file_csv",
+			"row_length" : 5,
 			"source_path": "/tmp/ers/in",
 			"processed_path": "/tmp/ers/out",
 			"fields":[

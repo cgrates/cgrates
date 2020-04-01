@@ -22,7 +22,7 @@ import "github.com/cgrates/cgrates/utils"
 
 type HttpAgentCfgs []*HttpAgentCfg
 
-func (hcfgs *HttpAgentCfgs) loadFromJsonCfg(jsnHttpAgntCfg *[]*HttpAgentJsonCfg, separator string) (err error) {
+func (hcfgs *HttpAgentCfgs) loadFromJsonCfg(jsnHttpAgntCfg *[]*HttpAgentJsonCfg, separator string, rounding int) (err error) {
 	if jsnHttpAgntCfg == nil {
 		return nil
 	}
@@ -39,7 +39,7 @@ func (hcfgs *HttpAgentCfgs) loadFromJsonCfg(jsnHttpAgntCfg *[]*HttpAgentJsonCfg,
 			}
 		}
 
-		if err := hac.loadFromJsonCfg(jsnCfg, separator); err != nil {
+		if err := hac.loadFromJsonCfg(jsnCfg, separator, rounding); err != nil {
 			return err
 		}
 		if !haveID {
@@ -59,7 +59,7 @@ type HttpAgentCfg struct {
 	RequestProcessors []*RequestProcessor
 }
 
-func (ca *HttpAgentCfg) appendHttpAgntProcCfgs(hps *[]*ReqProcessorJsnCfg, separator string) (err error) {
+func (ca *HttpAgentCfg) appendHttpAgntProcCfgs(hps *[]*ReqProcessorJsnCfg, separator string, rounding int) (err error) {
 	if hps == nil {
 		return
 	}
@@ -75,7 +75,7 @@ func (ca *HttpAgentCfg) appendHttpAgntProcCfgs(hps *[]*ReqProcessorJsnCfg, separ
 				}
 			}
 		}
-		if err := rp.loadFromJsonCfg(reqProcJsn, separator); err != nil {
+		if err := rp.loadFromJsonCfg(reqProcJsn, separator, rounding); err != nil {
 			return err
 		}
 		if !haveID {
@@ -85,7 +85,7 @@ func (ca *HttpAgentCfg) appendHttpAgntProcCfgs(hps *[]*ReqProcessorJsnCfg, separ
 	return nil
 }
 
-func (ca *HttpAgentCfg) loadFromJsonCfg(jsnCfg *HttpAgentJsonCfg, separator string) (err error) {
+func (ca *HttpAgentCfg) loadFromJsonCfg(jsnCfg *HttpAgentJsonCfg, separator string, rounding int) (err error) {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -112,7 +112,7 @@ func (ca *HttpAgentCfg) loadFromJsonCfg(jsnCfg *HttpAgentJsonCfg, separator stri
 	if jsnCfg.Reply_payload != nil {
 		ca.ReplyPayload = *jsnCfg.Reply_payload
 	}
-	if err = ca.appendHttpAgntProcCfgs(jsnCfg.Request_processors, separator); err != nil {
+	if err = ca.appendHttpAgntProcCfgs(jsnCfg.Request_processors, separator, rounding); err != nil {
 		return err
 	}
 	return nil

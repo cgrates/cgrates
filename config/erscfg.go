@@ -27,11 +27,10 @@ import (
 type ERsCfg struct {
 	Enabled       bool
 	SessionSConns []string
-	RowLength     int
 	Readers       []*EventReaderCfg
 }
 
-func (erS *ERsCfg) loadFromJsonCfg(jsnCfg *ERsJsonCfg, sep string, dfltRdrCfg *EventReaderCfg) (err error) {
+func (erS *ERsCfg) loadFromJsonCfg(jsnCfg *ERsJsonCfg, sep string, dfltRdrCfg *EventReaderCfg, rounding int) (err error) {
 	if jsnCfg == nil {
 		return
 	}
@@ -49,11 +48,11 @@ func (erS *ERsCfg) loadFromJsonCfg(jsnCfg *ERsJsonCfg, sep string, dfltRdrCfg *E
 			}
 		}
 	}
-	return erS.appendERsReaders(jsnCfg.Readers, sep, dfltRdrCfg)
+	return erS.appendERsReaders(jsnCfg.Readers, sep, dfltRdrCfg, rounding)
 }
 
 func (ers *ERsCfg) appendERsReaders(jsnReaders *[]*EventReaderJsonCfg, sep string,
-	dfltRdrCfg *EventReaderCfg) (err error) {
+	dfltRdrCfg *EventReaderCfg, rounding int) (err error) {
 	if jsnReaders == nil {
 		return
 	}
@@ -73,7 +72,7 @@ func (ers *ERsCfg) appendERsReaders(jsnReaders *[]*EventReaderJsonCfg, sep strin
 			}
 		}
 
-		if err := rdr.loadFromJsonCfg(jsnReader, sep); err != nil {
+		if err := rdr.loadFromJsonCfg(jsnReader, sep, rounding); err != nil {
 			return err
 		}
 		if !haveID {
@@ -102,6 +101,7 @@ func (erS *ERsCfg) Clone() (cln *ERsCfg) {
 type EventReaderCfg struct {
 	ID                       string
 	Type                     string
+	RowLength                int
 	FieldSep                 string
 	RunDelay                 time.Duration
 	ConcurrentReqs           int
@@ -119,7 +119,7 @@ type EventReaderCfg struct {
 	CacheDumpFields          []*FCTemplate
 }
 
-func (er *EventReaderCfg) loadFromJsonCfg(jsnCfg *EventReaderJsonCfg, sep string) (err error) {
+func (er *EventReaderCfg) loadFromJsonCfg(jsnCfg *EventReaderJsonCfg, sep string, rounding int) (err error) {
 	if jsnCfg == nil {
 		return
 	}
@@ -128,6 +128,9 @@ func (er *EventReaderCfg) loadFromJsonCfg(jsnCfg *EventReaderJsonCfg, sep string
 	}
 	if jsnCfg.Type != nil {
 		er.Type = *jsnCfg.Type
+	}
+	if jsnCfg.Row_length != nil {
+		er.RowLength = *jsnCfg.Row_length
 	}
 	if jsnCfg.Field_separator != nil {
 		er.FieldSep = *jsnCfg.Field_separator
@@ -180,12 +183,12 @@ func (er *EventReaderCfg) loadFromJsonCfg(jsnCfg *EventReaderJsonCfg, sep string
 		er.PartialCacheExpiryAction = *jsnCfg.Partial_cache_expiry_action
 	}
 	if jsnCfg.Fields != nil {
-		if er.Fields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Fields, sep); err != nil {
+		if er.Fields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Fields, sep, rounding); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.Cache_dump_fields != nil {
-		if er.CacheDumpFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Cache_dump_fields, sep); err != nil {
+		if er.CacheDumpFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Cache_dump_fields, sep, rounding); err != nil {
 			return err
 		}
 	}

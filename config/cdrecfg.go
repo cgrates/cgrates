@@ -31,7 +31,7 @@ type CdreCfg struct {
 	Fields            []*FCTemplate
 }
 
-func (self *CdreCfg) loadFromJsonCfg(jsnCfg *CdreJsonCfg, separator string) (err error) {
+func (self *CdreCfg) loadFromJsonCfg(jsnCfg *CdreJsonCfg, separator string, rounding int) (err error) {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -64,7 +64,7 @@ func (self *CdreCfg) loadFromJsonCfg(jsnCfg *CdreJsonCfg, separator string) (err
 		self.FieldSeparator = rune(sepStr[0])
 	}
 	if jsnCfg.Fields != nil {
-		if self.Fields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Fields, separator); err != nil {
+		if self.Fields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Fields, separator, rounding); err != nil {
 			return err
 		}
 	}

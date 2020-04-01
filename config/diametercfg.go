@@ -39,7 +39,7 @@ type DiameterAgentCfg struct {
 	RequestProcessors []*RequestProcessor
 }
 
-func (da *DiameterAgentCfg) loadFromJsonCfg(jsnCfg *DiameterAgentJsonCfg, separator string) (err error) {
+func (da *DiameterAgentCfg) loadFromJsonCfg(jsnCfg *DiameterAgentJsonCfg, separator string, rounding int) (err error) {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -98,7 +98,7 @@ func (da *DiameterAgentCfg) loadFromJsonCfg(jsnCfg *DiameterAgentJsonCfg, separa
 			da.Templates = make(map[string][]*FCTemplate)
 		}
 		for k, jsnTpls := range jsnCfg.Templates {
-			if da.Templates[k], err = FCTemplatesFromFCTemplatesJsonCfg(jsnTpls, separator); err != nil {
+			if da.Templates[k], err = FCTemplatesFromFCTemplatesJsonCfg(jsnTpls, separator, rounding); err != nil {
 				return
 			}
 		}
@@ -114,7 +114,7 @@ func (da *DiameterAgentCfg) loadFromJsonCfg(jsnCfg *DiameterAgentJsonCfg, separa
 					break
 				}
 			}
-			if err := rp.loadFromJsonCfg(reqProcJsn, separator); err != nil {
+			if err := rp.loadFromJsonCfg(reqProcJsn, separator, rounding); err != nil {
 				return nil
 			}
 			if !haveID {
