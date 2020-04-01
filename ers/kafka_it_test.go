@@ -44,7 +44,6 @@ func TestKafkaER(t *testing.T) {
 	cfg, err := config.NewCGRConfigFromJsonStringWithDefaults(`{
 "ers": {									// EventReaderService
 	"enabled": true,						// starts the EventReader service: <true|false>
-	"row_length" : 0,
 	"readers": [
 		{
 			"id": "kafka",										// identifier of the EventReader profile

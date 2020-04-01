@@ -24,7 +24,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewFCTemplateFromFCTemplateJsonCfg(jsnCfg *FcTemplateJsonCfg, separator string) (*FCTemplate, error) {
+func NewFCTemplateFromFCTemplateJsonCfg(jsnCfg *FcTemplateJsonCfg, separator string, roundingDecimals int) (*FCTemplate, error) {
 	fcTmp := new(FCTemplate)
 	var err error
 	if jsnCfg.Type != nil {
@@ -81,6 +81,7 @@ func NewFCTemplateFromFCTemplateJsonCfg(jsnCfg *FcTemplateJsonCfg, separator str
 	if jsnCfg.Cost_shift_digits != nil {
 		fcTmp.CostShiftDigits = *jsnCfg.Cost_shift_digits
 	}
+	fcTmp.RoundingDecimals = roundingDecimals
 	if jsnCfg.Rounding_decimals != nil {
 		fcTmp.RoundingDecimals = *jsnCfg.Rounding_decimals
 	}
@@ -115,11 +116,11 @@ type FCTemplate struct {
 	MaskLen          int
 }
 
-func FCTemplatesFromFCTemplatesJsonCfg(jsnCfgFlds []*FcTemplateJsonCfg, separator string) ([]*FCTemplate, error) {
+func FCTemplatesFromFCTemplatesJsonCfg(jsnCfgFlds []*FcTemplateJsonCfg, separator string, rounding int) ([]*FCTemplate, error) {
 	retFields := make([]*FCTemplate, len(jsnCfgFlds))
 	var err error
 	for i, jsnFld := range jsnCfgFlds {
-		if retFields[i], err = NewFCTemplateFromFCTemplateJsonCfg(jsnFld, separator); err != nil {
+		if retFields[i], err = NewFCTemplateFromFCTemplateJsonCfg(jsnFld, separator, rounding); err != nil {
 			return nil, err
 		}
 	}

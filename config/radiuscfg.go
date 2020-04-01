@@ -31,7 +31,7 @@ type RadiusAgentCfg struct {
 	RequestProcessors  []*RequestProcessor
 }
 
-func (self *RadiusAgentCfg) loadFromJsonCfg(jsnCfg *RadiusAgentJsonCfg, separator string) (err error) {
+func (self *RadiusAgentCfg) loadFromJsonCfg(jsnCfg *RadiusAgentJsonCfg, separator string, rounding int) (err error) {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -85,7 +85,7 @@ func (self *RadiusAgentCfg) loadFromJsonCfg(jsnCfg *RadiusAgentJsonCfg, separato
 					break
 				}
 			}
-			if err := rp.loadFromJsonCfg(reqProcJsn, separator); err != nil {
+			if err := rp.loadFromJsonCfg(reqProcJsn, separator, rounding); err != nil {
 				return nil
 			}
 			if !haveID {

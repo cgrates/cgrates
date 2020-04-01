@@ -130,7 +130,7 @@ func (rdr *CSVFileER) processFile(fPath, fName string) (err error) {
 	}
 	defer file.Close()
 	csvReader := csv.NewReader(bufio.NewReader(file))
-	csvReader.FieldsPerRecord = rdr.cgrCfg.ERsCfg().RowLength
+	csvReader.FieldsPerRecord = rdr.cgrCfg.ERsCfg().Readers[rdr.cfgIdx].RowLength
 	csvReader.Comma = utils.CSV_SEP
 	if len(rdr.Config().FieldSep) > 0 {
 		csvReader.Comma = rune(rdr.Config().FieldSep[0])

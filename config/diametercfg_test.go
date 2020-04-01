@@ -26,12 +26,12 @@ import (
 
 func TestDiameterAgentCfgloadFromJsonCfg(t *testing.T) {
 	var dacfg, expected DiameterAgentCfg
-	if err := dacfg.loadFromJsonCfg(nil, utils.INFIELD_SEP); err != nil {
+	if err := dacfg.loadFromJsonCfg(nil, utils.INFIELD_SEP, 5); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(dacfg, expected) {
 		t.Errorf("Expected: %+v ,recived: %+v", expected, dacfg)
 	}
-	if err := dacfg.loadFromJsonCfg(new(DiameterAgentJsonCfg), utils.INFIELD_SEP); err != nil {
+	if err := dacfg.loadFromJsonCfg(new(DiameterAgentJsonCfg), utils.INFIELD_SEP, 5); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(dacfg, expected) {
 		t.Errorf("Expected: %+v ,recived: %+v", expected, dacfg)
@@ -66,7 +66,7 @@ func TestDiameterAgentCfgloadFromJsonCfg(t *testing.T) {
 		t.Error(err)
 	} else if jsnDaCfg, err := jsnCfg.DiameterAgentJsonCfg(); err != nil {
 		t.Error(err)
-	} else if err = dacfg.loadFromJsonCfg(jsnDaCfg, utils.INFIELD_SEP); err != nil {
+	} else if err = dacfg.loadFromJsonCfg(jsnDaCfg, utils.INFIELD_SEP, 5); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, dacfg) {
 		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(dacfg))

@@ -286,7 +286,7 @@ func TestWriteCdr(t *testing.T) {
 	var err error
 	wrBuf := &bytes.Buffer{}
 	cfg, _ := config.NewDefaultCGRConfig()
-	if contentCfgFlds, err = config.FCTemplatesFromFCTemplatesJsonCfg(contentJsnCfgFlds, utils.INFIELD_SEP); err != nil {
+	if contentCfgFlds, err = config.FCTemplatesFromFCTemplatesJsonCfg(contentJsnCfgFlds, utils.INFIELD_SEP, 5); err != nil {
 		t.Error(err)
 	}
 	cdreCfg := &config.CdreCfg{

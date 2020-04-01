@@ -175,6 +175,7 @@ type ERsJsonCfg struct {
 type EventReaderJsonCfg struct {
 	Id                          *string
 	Type                        *string
+	Row_length                  *int
 	Field_separator             *string
 	Run_delay                   *string
 	Concurrent_requests         *int

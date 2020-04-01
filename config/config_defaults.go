@@ -300,11 +300,11 @@ const CGRATES_CFG_JSON = `
 "ers": {									// EventReaderService
 	"enabled": false,						// starts the EventReader service: <true|false>
 	"sessions_conns":["*internal"],			// RPC Connections IDs
-	"row_length" : 0, 						// Number of fields from csv file
 	"readers": [
 		{
 			"id": "*default",									// identifier of the EventReader profile
 			"type": "*file_csv",								// reader type <*file_csv>
+			"row_length" : 0, 									// Number of fields from csv file
 			"field_separator": ",",								// separator used in case of csv files
 			"run_delay": "0",										// sleep interval in seconds between consecutive runs, -1 to use automation via inotify or 0 to disable running all together
 			"concurrent_requests": 1024,						// maximum simultaneous requests/files to process, 0 for unlimited
