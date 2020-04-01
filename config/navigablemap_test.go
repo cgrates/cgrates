@@ -36,7 +36,7 @@ func TestNavMapAsXMLElements(t *testing.T) {
 		{{Field: "Field4"}},
 		{{Field: "FirstLevel2"}, {Field: "Field6"}},
 	}
-	if err := nM.Set(order[0], &utils.NMSlice{
+	if _, err := nM.Set(order[0], &utils.NMSlice{
 		&NMItem{Path: strings.Split(order[0].String(), utils.NestingSep),
 			Data:   "attrVal1",
 			Config: &FCTemplate{Tag: "AttributeTest", AttributeID: "attribute1"}},
@@ -44,17 +44,17 @@ func TestNavMapAsXMLElements(t *testing.T) {
 			Data: "Value2"}}); err != nil {
 		t.Error(err)
 	}
-	if err := nM.Set(order[1], &utils.NMSlice{
+	if _, err := nM.Set(order[1], &utils.NMSlice{
 		&NMItem{Path: strings.Split(order[1].String(), utils.NestingSep),
 			Data: "Val1"}}); err != nil {
 		t.Error(err)
 	}
-	if err := nM.Set(order[2], &utils.NMSlice{
+	if _, err := nM.Set(order[2], &utils.NMSlice{
 		&NMItem{Path: strings.Split(order[2].String(), utils.NestingSep),
 			Data: "Value3"}}); err != nil {
 		t.Error(err)
 	}
-	if err := nM.Set(order[3], &utils.NMSlice{
+	if _, err := nM.Set(order[3], &utils.NMSlice{
 		&NMItem{Path: strings.Split(order[3].String(), utils.NestingSep),
 			Data: "Value5"},
 		&NMItem{Path: strings.Split(order[3].String(), utils.NestingSep),
@@ -62,7 +62,7 @@ func TestNavMapAsXMLElements(t *testing.T) {
 			Config: &FCTemplate{Tag: "AttributeTest", AttributeID: "attribute5"}}}); err != nil {
 		t.Error(err)
 	}
-	if err := nM.Set(order[4], &utils.NMSlice{
+	if _, err := nM.Set(order[4], &utils.NMSlice{
 		&NMItem{Path: strings.Split(order[4].String(), utils.NestingSep),
 			Data: "Val4"},
 		&NMItem{Path: strings.Split(order[4].String(), utils.NestingSep),
@@ -70,7 +70,7 @@ func TestNavMapAsXMLElements(t *testing.T) {
 			Config: &FCTemplate{Tag: "AttributeTest", AttributeID: "attribute2"}}}); err != nil {
 		t.Error(err)
 	}
-	if err := nM.Set(order[5], &utils.NMSlice{
+	if _, err := nM.Set(order[5], &utils.NMSlice{
 		&NMItem{Path: strings.Split(order[5].String(), utils.NestingSep),
 			Data:   "Value6",
 			Config: &FCTemplate{Tag: "NewBranchTest", NewBranch: true}},
@@ -99,7 +99,7 @@ func TestNavMapAsXMLElements(t *testing.T) {
 					},
 				},
 				&XMLElement{
-					XMLName: xml.Name{Local: order[2][1].String()},
+					XMLName: xml.Name{Local: "Field3"},
 					Value:   "Value3",
 				},
 				&XMLElement{
@@ -124,7 +124,7 @@ func TestNavMapAsXMLElements(t *testing.T) {
 							XMLName: xml.Name{Local: order[1][2].String()},
 							Elements: []*XMLElement{
 								&XMLElement{
-									XMLName: xml.Name{Local: order[1][3].String()},
+									XMLName: xml.Name{Local: "Fld1"},
 									Value:   "Val1",
 								},
 							},
@@ -203,7 +203,7 @@ func TestNavMapAsCGREvent(t *testing.T) {
 	}
 
 	path := utils.PathItems{{Field: "FirstLevel"}, {Field: "SecondLevel"}, {Field: "ThirdLevel"}, {Field: "Fld1"}}
-	if err := nM.Set(path, &utils.NMSlice{&NMItem{
+	if _, err := nM.Set(path, &utils.NMSlice{&NMItem{
 		Path: strings.Split(path.String(), utils.NestingSep),
 		Data: "Val1",
 	}}); err != nil {
@@ -211,7 +211,7 @@ func TestNavMapAsCGREvent(t *testing.T) {
 	}
 
 	path = utils.PathItems{{Field: "FirstLevel2"}, {Field: "SecondLevel2"}, {Field: "Field2"}}
-	if err := nM.Set(path, &utils.NMSlice{&NMItem{
+	if _, err := nM.Set(path, &utils.NMSlice{&NMItem{
 		Path: strings.Split(path.String(), utils.NestingSep),
 		Data: "attrVal1",
 		Config: &FCTemplate{Tag: "AttributeTest",
@@ -224,7 +224,7 @@ func TestNavMapAsCGREvent(t *testing.T) {
 	}
 
 	path = utils.PathItems{{Field: "FirstLevel2"}, {Field: "Field3"}}
-	if err := nM.Set(path, &utils.NMSlice{&NMItem{
+	if _, err := nM.Set(path, &utils.NMSlice{&NMItem{
 		Path: strings.Split(path.String(), utils.NestingSep),
 		Data: "Value3",
 	}}); err != nil {
@@ -232,7 +232,7 @@ func TestNavMapAsCGREvent(t *testing.T) {
 	}
 
 	path = utils.PathItems{{Field: "FirstLevel2"}, {Field: "Field5"}}
-	if err := nM.Set(path, &utils.NMSlice{&NMItem{
+	if _, err := nM.Set(path, &utils.NMSlice{&NMItem{
 		Path: strings.Split(path.String(), utils.NestingSep),
 		Data: "Value5",
 	}, &NMItem{
@@ -245,7 +245,7 @@ func TestNavMapAsCGREvent(t *testing.T) {
 	}
 
 	path = utils.PathItems{{Field: "FirstLevel2"}, {Field: "Field6"}}
-	if err := nM.Set(path, &utils.NMSlice{&NMItem{
+	if _, err := nM.Set(path, &utils.NMSlice{&NMItem{
 		Path: strings.Split(path.String(), utils.NestingSep),
 		Data: "Value6",
 		Config: &FCTemplate{Tag: "NewBranchTest",
@@ -260,7 +260,7 @@ func TestNavMapAsCGREvent(t *testing.T) {
 	}
 
 	path = utils.PathItems{{Field: "Field4"}}
-	if err := nM.Set(path, &utils.NMSlice{&NMItem{
+	if _, err := nM.Set(path, &utils.NMSlice{&NMItem{
 		Path: strings.Split(path.String(), utils.NestingSep),
 		Data: "Val4",
 	}, &NMItem{
@@ -351,10 +351,10 @@ func TestNMItemType(t *testing.T) {
 
 func TestNMItemSet(t *testing.T) {
 	var nm utils.NMInterface = &NMItem{Data: "1001"}
-	if err := nm.Set(utils.PathItems{{}}, nil); err != utils.ErrWrongPath {
+	if _, err := nm.Set(utils.PathItems{{}}, nil); err != utils.ErrWrongPath {
 		t.Error(err)
 	}
-	if err := nm.Set(nil, &NMItem{Data: "1002"}); err != nil {
+	if _, err := nm.Set(nil, &NMItem{Data: "1002"}); err != nil {
 		t.Error(err)
 	}
 	expected := "1002"

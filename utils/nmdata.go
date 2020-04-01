@@ -41,9 +41,9 @@ func (nmi *NMData) Field(path PathItems) (val NMInterface, err error) {
 // Set sets the wraped interface when the path is empty
 // This behaivior is in order to modify the wraped interface
 // witout aserting the type of the NMInterface
-func (nmi *NMData) Set(path PathItems, val NMInterface) (err error) {
+func (nmi *NMData) Set(path PathItems, val NMInterface) (addedNew bool, err error) {
 	if len(path) != 0 {
-		return ErrWrongPath
+		return false, ErrWrongPath
 	}
 	nmi.data = val.Interface()
 	return

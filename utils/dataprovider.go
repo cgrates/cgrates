@@ -71,7 +71,7 @@ type NMInterface interface {
 	Field(path PathItems) (val NMInterface, err error)
 	GetField(path PathItem) (val NMInterface, err error)
 	SetField(path PathItem, val NMInterface) (err error)
-	Set(path PathItems, val NMInterface) (err error)
+	Set(path PathItems, val NMInterface) (addedNew bool, err error)
 	Remove(path PathItems) (err error)
 	Type() NMType
 	Empty() bool
@@ -81,7 +81,7 @@ type NMInterface interface {
 // navMap subset of function for NM interface
 type navMap interface {
 	Field(path PathItems) (val NMInterface, err error)
-	Set(path PathItems, val NMInterface) (err error)
+	Set(path PathItems, val NMInterface) (addedNew bool, err error)
 }
 
 // AppendNavMapVal appends value to the map
@@ -96,7 +96,8 @@ func AppendNavMapVal(nm navMap, fldPath PathItems, val NMInterface) (err error) 
 		indx = prevItm.Len()
 	}
 	fldPath[len(fldPath)-1].Index = &indx
-	return nm.Set(fldPath, val)
+	_, err = nm.Set(fldPath, val)
+	return
 }
 
 // ComposeNavMapVal compose adds value to prevision item
@@ -114,10 +115,11 @@ func ComposeNavMapVal(nm navMap, fldPath PathItems, val NMInterface) (err error)
 			if err != ErrNotFound {
 				return
 			}
-		} else if err = val.Set(nil, NewNMData(IfaceAsString(prevItm.Interface())+IfaceAsString(val.Interface()))); err != nil {
+		} else if _, err = val.Set(nil, NewNMData(IfaceAsString(prevItm.Interface())+IfaceAsString(val.Interface()))); err != nil {
 			return
 		}
 	}
 	fldPath[len(fldPath)-1].Index = &indx
-	return nm.Set(fldPath, val)
+	_, err = nm.Set(fldPath, val)
+	return
 }

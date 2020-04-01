@@ -245,13 +245,7 @@ func TestOrderedNavigableMapGetSet(t *testing.T) {
 		{{Field: "Account", Index: IntPointer(1)}},
 	}
 
-	recivedOrder := []PathItems{}
-
-	for el := nm.GetFirstElement(); el != nil; el = el.Next() {
-		recivedOrder = append(recivedOrder, el.Value)
-	}
-
-	if !reflect.DeepEqual(expectedOrder, recivedOrder) {
+	if recivedOrder := nm.GetOrder(); !reflect.DeepEqual(expectedOrder, recivedOrder) {
 		t.Errorf("Expected %s ,received: %s", expectedOrder, recivedOrder)
 	}
 	/*
@@ -771,7 +765,7 @@ func BenchmarkOrderdNavigableMapSet2(b *testing.B) {
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
 		for _, data := range gen {
-			if err := nm.Set2(&FullPath{PathItems: data.pathItems, Path: data.strPath}, NewNMData(data.data)); err != nil {
+			if _, err := nm.Set2(&FullPath{PathItems: data.pathItems, Path: data.strPath}, NewNMData(data.data)); err != nil {
 				b.Log(err, data.path)
 			}
 		}

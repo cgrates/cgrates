@@ -60,18 +60,19 @@ func (nms *NMSlice) Field(path PathItems) (val NMInterface, err error) {
 }
 
 // Set sets the value for the given index
-func (nms *NMSlice) Set(path PathItems, val NMInterface) (err error) {
+func (nms *NMSlice) Set(path PathItems, val NMInterface) (addedNew bool, err error) {
 	if len(path) == 0 || path[0].Index == nil {
-		return ErrWrongPath
+		return false, ErrWrongPath
 	}
 	idx := *path[0].Index
 	if idx == len(*nms) { // append element
+		addedNew = true
 		if len(path) == 1 {
 			*nms = append(*nms, val)
 			return
 		}
 		nel := NavigableMap2{}
-		if err = nel.Set(path[1:], val); err != nil {
+		if _, err = nel.Set(path[1:], val); err != nil {
 			return
 		}
 		*nms = append(*nms, nel)
@@ -81,7 +82,7 @@ func (nms *NMSlice) Set(path PathItems, val NMInterface) (err error) {
 		idx = len(*nms) + idx
 	}
 	if idx < 0 || idx >= len(*nms) {
-		return ErrWrongPath
+		return false, ErrWrongPath
 	}
 	path[0].Index = &idx
 	if len(path) == 1 {
@@ -89,7 +90,7 @@ func (nms *NMSlice) Set(path PathItems, val NMInterface) (err error) {
 		return
 	}
 	if (*nms)[idx].Type() == NMSliceType {
-		return ErrWrongPath
+		return false, ErrWrongPath
 	}
 	return (*nms)[idx].Set(path[1:], val)
 }

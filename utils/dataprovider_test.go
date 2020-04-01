@@ -155,8 +155,8 @@ func (nmi *mockNMInterface) Field(path PathItems) (val NMInterface, err error) {
 }
 
 // Set not implemented
-func (nmi *mockNMInterface) Set(path PathItems, val NMInterface) (err error) {
-	return ErrNotImplemented
+func (nmi *mockNMInterface) Set(path PathItems, val NMInterface) (a bool, err error) {
+	return false, ErrNotImplemented
 }
 
 // Remove not implemented only used in order to implement the NM interface

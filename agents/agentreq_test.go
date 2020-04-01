@@ -1009,15 +1009,15 @@ func TestAgReqFieldAsInterface(t *testing.T) {
 	} else if !reflect.DeepEqual(rply, expVal) {
 		t.Errorf("Expected %v , received: %v", utils.ToJSON(expVal), utils.ToJSON(rply))
 	}
-	// agReq.diamreq = utils.NewOrderedNavigableMap()
-	// agReq.diamreq.SetField(utils.PathItem{Field: utils.Destination}, utils.NewNMData("1001"))
-	// path = []string{utils.MetaDiamreq, utils.Destination}
-	// expVal = "1001"
-	// if rply, err := agReq.FieldAsInterface(path); err != nil {
-	// 	t.Error(err)
-	// } else if !reflect.DeepEqual(rply, expVal) {
-	// 	t.Errorf("Expected %v , received: %v", utils.ToJSON(expVal), utils.ToJSON(rply))
-	// }
+	agReq.diamreq = utils.NewOrderedNavigableMap()
+	agReq.diamreq.Set(utils.PathItems{{Field: utils.Destination}}, utils.NewNMData("1001"))
+	path = []string{utils.MetaDiamreq, utils.Destination}
+	expVal = "1001"
+	if rply, err := agReq.FieldAsInterface(path); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rply, expVal) {
+		t.Errorf("Expected %v , received: %v", utils.ToJSON(expVal), utils.ToJSON(rply))
+	}
 }
 
 func TestAgReqField(t *testing.T) {

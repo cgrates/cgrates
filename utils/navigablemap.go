@@ -65,16 +65,17 @@ func (nm NavigableMap2) Field(path PathItems) (val NMInterface, err error) {
 }
 
 // Set sets the value for the given path
-func (nm NavigableMap2) Set(path PathItems, val NMInterface) (err error) {
+func (nm NavigableMap2) Set(path PathItems, val NMInterface) (addedNew bool, err error) {
 	if len(path) == 0 {
-		return ErrWrongPath
+		return false, ErrWrongPath
 	}
 	el, has := nm[path[0].Field]
 	if len(path) == 1 {
 		if !has {
+			addedNew = true
 			if path[0].Index != nil {
 				nel := &NMSlice{}
-				if err = nel.Set(path, val); err != nil {
+				if _, err = nel.Set(path, val); err != nil {
 					return
 				}
 				nm[path[0].Field] = nel
@@ -85,7 +86,7 @@ func (nm NavigableMap2) Set(path PathItems, val NMInterface) (err error) {
 		}
 		if path[0].Index != nil {
 			if el.Type() != NMSliceType {
-				return ErrWrongPath
+				return false, ErrWrongPath
 			}
 			return el.Set(path, val)
 		}
@@ -93,16 +94,17 @@ func (nm NavigableMap2) Set(path PathItems, val NMInterface) (err error) {
 		return
 	}
 	if !has {
+		addedNew = true
 		if path[0].Index != nil {
 			nel := &NMSlice{}
-			if err = nel.Set(path, val); err != nil {
+			if _, err = nel.Set(path, val); err != nil {
 				return
 			}
 			nm[path[0].Field] = nel
 			return
 		}
 		nel := NavigableMap2{}
-		if err = nel.Set(path[1:], val); err != nil {
+		if _, err = nel.Set(path[1:], val); err != nil {
 			return
 		}
 		nm[path[0].Field] = nel
@@ -110,12 +112,12 @@ func (nm NavigableMap2) Set(path PathItems, val NMInterface) (err error) {
 	}
 	if path[0].Index != nil {
 		if el.Type() != NMSliceType {
-			return ErrWrongPath
+			return false, ErrWrongPath
 		}
 		return el.Set(path, val)
 	}
 	if el.Type() != NMMapType { // do not try to overwrite an interface
-		return ErrWrongPath
+		return false, ErrWrongPath
 	}
 	return el.Set(path[1:], val)
 }

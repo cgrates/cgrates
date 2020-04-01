@@ -192,7 +192,7 @@ func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 			case utils.MetaGroup: // in case of *group type simply append to valSet
 				err = utils.AppendNavMapVal(ar, path, nMItm)
 			default:
-				err = ar.Set(path, &utils.NMSlice{nMItm})
+				_, err = ar.Set(path, &utils.NMSlice{nMItm})
 			}
 			if err != nil {
 				return
@@ -206,10 +206,10 @@ func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 }
 
 // Set implements utils.NMInterface
-func (ar *AgentRequest) Set(path utils.PathItems, nm utils.NMInterface) (err error) {
+func (ar *AgentRequest) Set(path utils.PathItems, nm utils.NMInterface) (added bool, err error) {
 	switch path[0].Field {
 	default:
-		return fmt.Errorf("unsupported field prefix: <%s> when set field", path[0])
+		return false, fmt.Errorf("unsupported field prefix: <%s> when set field", path[0])
 	case utils.MetaVars:
 		return ar.Vars.Set(path[1:], nm)
 	case utils.MetaCgreq:

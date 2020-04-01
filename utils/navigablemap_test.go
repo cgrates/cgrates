@@ -88,14 +88,14 @@ func TestNavigableMap2Field(t *testing.T) {
 
 func TestNavigableMap2Set(t *testing.T) {
 	nm := NavigableMap2{}
-	if err := nm.Set(nil, nil); err != ErrWrongPath {
+	if _, err := nm.Set(nil, nil); err != ErrWrongPath {
 		t.Error(err)
 	}
-	if err := nm.Set(PathItems{{Field: "Field1", Index: IntPointer(10)}}, NewNMData("1001")); err != ErrWrongPath {
+	if _, err := nm.Set(PathItems{{Field: "Field1", Index: IntPointer(10)}}, NewNMData("1001")); err != ErrWrongPath {
 		t.Error(err)
 	}
 	expected := NavigableMap2{"Field1": &NMSlice{NewNMData("1001")}}
-	if err := nm.Set(PathItems{{Field: "Field1", Index: IntPointer(0)}}, NewNMData("1001")); err != nil {
+	if _, err := nm.Set(PathItems{{Field: "Field1", Index: IntPointer(0)}}, NewNMData("1001")); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(nm, expected) {
 		t.Errorf("Expected %s ,received: %s", expected, nm)
@@ -104,19 +104,19 @@ func TestNavigableMap2Set(t *testing.T) {
 		"Field1": &NMSlice{NewNMData("1001")},
 		"Field2": NewNMData("1002"),
 	}
-	if err := nm.Set(PathItems{{Field: "Field2"}}, NewNMData("1002")); err != nil {
+	if _, err := nm.Set(PathItems{{Field: "Field2"}}, NewNMData("1002")); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(nm, expected) {
 		t.Errorf("Expected %s ,received: %s", expected, nm)
 	}
-	if err := nm.Set(PathItems{{Field: "Field2", Index: IntPointer(1)}}, NewNMData("1003")); err != ErrWrongPath {
+	if _, err := nm.Set(PathItems{{Field: "Field2", Index: IntPointer(1)}}, NewNMData("1003")); err != ErrWrongPath {
 		t.Error(err)
 	}
 	expected = NavigableMap2{
 		"Field1": &NMSlice{NewNMData("1001"), NewNMData("1003")},
 		"Field2": NewNMData("1002"),
 	}
-	if err := nm.Set(PathItems{{Field: "Field1", Index: IntPointer(1)}}, NewNMData("1003")); err != nil {
+	if _, err := nm.Set(PathItems{{Field: "Field1", Index: IntPointer(1)}}, NewNMData("1003")); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(nm, expected) {
 		t.Errorf("Expected %s ,received: %s", expected, nm)
@@ -125,13 +125,13 @@ func TestNavigableMap2Set(t *testing.T) {
 		"Field1": &NMSlice{NewNMData("1001"), NewNMData("1003")},
 		"Field2": NewNMData("1004"),
 	}
-	if err := nm.Set(PathItems{{Field: "Field2"}}, NewNMData("1004")); err != nil {
+	if _, err := nm.Set(PathItems{{Field: "Field2"}}, NewNMData("1004")); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(nm, expected) {
 		t.Errorf("Expected %s ,received: %s", expected, nm)
 	}
 
-	if err := nm.Set(PathItems{{Field: "Field3", Index: IntPointer(10)}, {}}, NewNMData("1001")); err != ErrWrongPath {
+	if _, err := nm.Set(PathItems{{Field: "Field3", Index: IntPointer(10)}, {}}, NewNMData("1001")); err != ErrWrongPath {
 		t.Error(err)
 	}
 	expected = NavigableMap2{
@@ -139,13 +139,13 @@ func TestNavigableMap2Set(t *testing.T) {
 		"Field2": NewNMData("1004"),
 		"Field3": &NMSlice{NavigableMap2{"Field4": NewNMData("1005")}},
 	}
-	if err := nm.Set(PathItems{{Field: "Field3", Index: IntPointer(0)}, {Field: "Field4"}}, NewNMData("1005")); err != nil {
+	if _, err := nm.Set(PathItems{{Field: "Field3", Index: IntPointer(0)}, {Field: "Field4"}}, NewNMData("1005")); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(nm, expected) {
 		t.Errorf("Expected %s ,received: %s", expected, nm)
 	}
 
-	if err := nm.Set(PathItems{{Field: "Field5"}, {Field: "Field6", Index: IntPointer(10)}}, NewNMData("1006")); err != ErrWrongPath {
+	if _, err := nm.Set(PathItems{{Field: "Field5"}, {Field: "Field6", Index: IntPointer(10)}}, NewNMData("1006")); err != ErrWrongPath {
 		t.Error(err)
 	}
 
@@ -155,13 +155,13 @@ func TestNavigableMap2Set(t *testing.T) {
 		"Field3": &NMSlice{NavigableMap2{"Field4": NewNMData("1005")}},
 		"Field5": NavigableMap2{"Field6": NewNMData("1006")},
 	}
-	if err := nm.Set(PathItems{{Field: "Field5"}, {Field: "Field6"}}, NewNMData("1006")); err != nil {
+	if _, err := nm.Set(PathItems{{Field: "Field5"}, {Field: "Field6"}}, NewNMData("1006")); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(nm, expected) {
 		t.Errorf("Expected %s ,received: %s", expected, nm)
 	}
 
-	if err := nm.Set(PathItems{{Field: "Field2", Index: IntPointer(0)}, {}}, NewNMData("1006")); err != ErrWrongPath {
+	if _, err := nm.Set(PathItems{{Field: "Field2", Index: IntPointer(0)}, {}}, NewNMData("1006")); err != ErrWrongPath {
 		t.Error(err)
 	}
 	expected = NavigableMap2{
@@ -170,12 +170,12 @@ func TestNavigableMap2Set(t *testing.T) {
 		"Field3": &NMSlice{NavigableMap2{"Field4": NewNMData("1005")}},
 		"Field5": NavigableMap2{"Field6": NewNMData("1006")},
 	}
-	if err := nm.Set(PathItems{{Field: "Field1", Index: IntPointer(2)}, {Field: "Field6"}}, NewNMData("1006")); err != nil {
+	if _, err := nm.Set(PathItems{{Field: "Field1", Index: IntPointer(2)}, {Field: "Field6"}}, NewNMData("1006")); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(nm, expected) {
 		t.Errorf("Expected %s ,received: %s", expected, nm)
 	}
-	if err := nm.Set(PathItems{{Field: "Field2"}, {}}, NewNMData("1006")); err != ErrWrongPath {
+	if _, err := nm.Set(PathItems{{Field: "Field2"}, {}}, NewNMData("1006")); err != ErrWrongPath {
 		t.Error(err)
 	}
 
@@ -185,7 +185,7 @@ func TestNavigableMap2Set(t *testing.T) {
 		"Field3": &NMSlice{NavigableMap2{"Field4": NewNMData("1005")}},
 		"Field5": NavigableMap2{"Field6": NewNMData("1007")},
 	}
-	if err := nm.Set(PathItems{{Field: "Field5"}, {Field: "Field6"}}, NewNMData("1007")); err != nil {
+	if _, err := nm.Set(PathItems{{Field: "Field5"}, {Field: "Field6"}}, NewNMData("1007")); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(nm, expected) {
 		t.Errorf("Expected %s ,received: %s", expected, nm)
@@ -258,7 +258,7 @@ func TestNavigableMap2GetField(t *testing.T) {
 
 func TestNavigableMap2SetField(t *testing.T) {
 	nm := NavigableMap2{}
-	// if err := nm.SetField(nil, nil); err != ErrWrongPath {
+	// if _,err := nm.SetField(nil, nil); err != ErrWrongPath {
 	// 	t.Error(err)
 	// }
 
@@ -440,7 +440,7 @@ func TestNavigableMap2GetSet(t *testing.T) {
 	}
 
 	path = PathItems{{Field: "Field2", Index: IntPointer(2)}}
-	if err := nm.Set(path, NewNMData("500")); err != nil {
+	if _, err := nm.Set(path, NewNMData("500")); err != nil {
 		t.Error(err)
 	}
 	if val, err := nm.Field(path); err != nil {
@@ -450,7 +450,7 @@ func TestNavigableMap2GetSet(t *testing.T) {
 	}
 
 	path = PathItems{{Field: "Field2", Index: IntPointer(1)}, {Field: "Account"}}
-	if err := nm.Set(path, NewNMData("5")); err != nil {
+	if _, err := nm.Set(path, NewNMData("5")); err != nil {
 		t.Error(err)
 	}
 	path = PathItems{{Field: "Field2", Index: IntPointer(1)}, {Field: "Account"}}

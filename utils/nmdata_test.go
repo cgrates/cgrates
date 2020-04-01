@@ -103,10 +103,10 @@ func TestNMDataType(t *testing.T) {
 
 func TestNMDataSet(t *testing.T) {
 	var nm NMInterface = NewNMData("1001")
-	if err := nm.Set(PathItems{{}}, nil); err != ErrWrongPath {
+	if _, err := nm.Set(PathItems{{}}, nil); err != ErrWrongPath {
 		t.Error(err)
 	}
-	if err := nm.Set(nil, NewNMData("1002")); err != nil {
+	if _, err := nm.Set(nil, NewNMData("1002")); err != nil {
 		t.Error(err)
 	}
 	expected := "1002"

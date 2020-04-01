@@ -77,35 +77,35 @@ func TestNMSliceField(t *testing.T) {
 
 func TestNMSliceSet(t *testing.T) {
 	nm := &NMSlice{}
-	if err := nm.Set(nil, nil); err != ErrWrongPath {
+	if _, err := nm.Set(nil, nil); err != ErrWrongPath {
 		t.Error(err)
 	}
 	expected := &NMSlice{NewNMData("1001")}
-	if err := nm.Set(PathItems{{Field: "1234", Index: IntPointer(0)}}, NewNMData("1001")); err != nil {
+	if _, err := nm.Set(PathItems{{Field: "1234", Index: IntPointer(0)}}, NewNMData("1001")); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(nm, expected) {
 		t.Errorf("Expected %s ,received: %s", expected, nm)
 	}
-	if err := nm.Set(PathItems{{Field: "1234", Index: IntPointer(1)}, {Field: "Field1", Index: IntPointer(1)}},
+	if _, err := nm.Set(PathItems{{Field: "1234", Index: IntPointer(1)}, {Field: "Field1", Index: IntPointer(1)}},
 		NewNMData("1001")); err != ErrWrongPath {
 		t.Error(err)
 	}
 	expected = &NMSlice{NewNMData("1001"), NavigableMap2{"Field1": NewNMData("1001")}}
-	if err := nm.Set(PathItems{{Field: "1234", Index: IntPointer(1)}, {Field: "Field1"}},
+	if _, err := nm.Set(PathItems{{Field: "1234", Index: IntPointer(1)}, {Field: "Field1"}},
 		NewNMData("1001")); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(nm, expected) {
 		t.Errorf("Expected %s ,received: %s", expected, nm)
 	}
 	expected = &NMSlice{NewNMData("1001"), NewNMData("1001")}
-	if err := nm.Set(PathItems{{Field: "1234", Index: IntPointer(-1)}}, NewNMData("1001")); err != nil {
+	if _, err := nm.Set(PathItems{{Field: "1234", Index: IntPointer(-1)}}, NewNMData("1001")); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(nm, expected) {
 		t.Errorf("Expected %s ,received: %s", expected, nm)
 	}
 
 	nm = &NMSlice{&NMSlice{}}
-	if err := nm.Set(PathItems{{Field: "1234", Index: IntPointer(0)}, {}}, NewNMData("1001")); err != ErrWrongPath {
+	if _, err := nm.Set(PathItems{{Field: "1234", Index: IntPointer(0)}, {}}, NewNMData("1001")); err != ErrWrongPath {
 		t.Error(err)
 	}
 }

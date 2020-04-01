@@ -51,9 +51,9 @@ func (nmi *NMItem) Field(path utils.PathItems) (val utils.NMInterface, err error
 // Set not implemented only used in order to implement the NM interface
 // special case when the path is empty the interface should be seted
 // this is in order to modify the wraped interface
-func (nmi *NMItem) Set(path utils.PathItems, val utils.NMInterface) (err error) {
+func (nmi *NMItem) Set(path utils.PathItems, val utils.NMInterface) (added bool, err error) {
 	if len(path) != 0 {
-		return utils.ErrWrongPath
+		return false, utils.ErrWrongPath
 	}
 	nmi.Data = val.Interface()
 	return
