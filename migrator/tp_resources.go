@@ -43,20 +43,19 @@ func (m *Migrator) migrateCurrentTPresources() (err error) {
 			if err != nil {
 				return err
 			}
-			if resources != nil {
-				if m.dryRun != true {
-					if err := m.storDBOut.StorDB().SetTPResources(resources); err != nil {
-						return err
-					}
-					for _, resource := range resources {
-						if err := m.storDBIn.StorDB().RemTpData(utils.TBLTPResources, resource.TPid,
-							map[string]string{"id": resource.ID}); err != nil {
-							return err
-						}
-					}
-					m.stats[utils.TpResources] += 1
+			if resources == nil || m.dryRun {
+				continue
+			}
+			if err := m.storDBOut.StorDB().SetTPResources(resources); err != nil {
+				return err
+			}
+			for _, resource := range resources {
+				if err := m.storDBIn.StorDB().RemTpData(utils.TBLTPResources, resource.TPid,
+					map[string]string{"id": resource.ID}); err != nil {
+					return err
 				}
 			}
+			m.stats[utils.TpResources]++
 		}
 	}
 	return

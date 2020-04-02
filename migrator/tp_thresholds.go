@@ -38,25 +38,23 @@ func (m *Migrator) migrateCurrentTPthresholds() (err error) {
 			return err
 		}
 		for _, id := range ids {
-
 			thresholds, err := m.storDBIn.StorDB().GetTPThresholds(tpid, "", id)
 			if err != nil {
 				return err
 			}
-			if thresholds != nil {
-				if m.dryRun != true {
-					if err := m.storDBOut.StorDB().SetTPThresholds(thresholds); err != nil {
-						return err
-					}
-					for _, threshold := range thresholds {
-						if err := m.storDBIn.StorDB().RemTpData(utils.TBLTPThresholds, threshold.TPid,
-							map[string]string{"tenant": threshold.Tenant, "id": threshold.ID}); err != nil {
-							return err
-						}
-					}
-					m.stats[utils.TpThresholds] += 1
+			if thresholds == nil || m.dryRun {
+				continue
+			}
+			if err := m.storDBOut.StorDB().SetTPThresholds(thresholds); err != nil {
+				return err
+			}
+			for _, threshold := range thresholds {
+				if err := m.storDBIn.StorDB().RemTpData(utils.TBLTPThresholds, threshold.TPid,
+					map[string]string{"tenant": threshold.Tenant, "id": threshold.ID}); err != nil {
+					return err
 				}
 			}
+			m.stats[utils.TpThresholds]++
 		}
 	}
 	return

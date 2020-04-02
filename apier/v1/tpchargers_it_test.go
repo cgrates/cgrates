@@ -163,7 +163,7 @@ func testTPChrgsGetTPChrgsAfterSet(t *testing.T) {
 
 func testTPChrgsGetTPChrgsIDs(t *testing.T) {
 	var result []string
-	expectedTPID := []string{"Chrgs"}
+	expectedTPID := []string{"cgrates.org:Chrgs"}
 	if err := tpChrgsRPC.Call(utils.APIerSv1GetTPChargerIDs,
 		&AttrGetTPAttributeProfileIds{TPid: "TP1"}, &result); err != nil {
 		t.Error(err)
