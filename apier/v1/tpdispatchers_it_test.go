@@ -50,7 +50,7 @@ var sTestsTPDispatchers = []func(t *testing.T){
 	ttestTPDispatcherGetTPDispatcherBeforeSet,
 	testTPDispatcherSetTPDispatcher,
 	testTPDispatcherGetTPDispatcherAfterSet,
-	testTPDispatcherGetFilterIds,
+	testTPDispatcherGetTPDispatcherIds,
 	testTPDispatcherUpdateTPDispatcher,
 	testTPDispatcherGetTPDispatcherAfterUpdate,
 	testTPDispatcherRemTPDispatcher,
@@ -154,9 +154,9 @@ func testTPDispatcherGetTPDispatcherAfterSet(t *testing.T) {
 	}
 }
 
-func testTPDispatcherGetFilterIds(t *testing.T) {
+func testTPDispatcherGetTPDispatcherIds(t *testing.T) {
 	var result []string
-	expectedTPID := []string{"Dsp1"}
+	expectedTPID := []string{"cgrates.org:Dsp1"}
 	if err := tpDispatcherRPC.Call(utils.APIerSv1GetTPDispatcherProfileIDs,
 		&AttrGetTPDispatcherIds{TPid: "TP1"}, &result); err != nil {
 		t.Error(err)

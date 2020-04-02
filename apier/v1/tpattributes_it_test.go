@@ -165,7 +165,7 @@ func testTPAlsPrfGetTPAlsPrfAfterSet(t *testing.T) {
 
 func testTPAlsPrfGetTPAlsPrfIDs(t *testing.T) {
 	var result []string
-	expectedTPID := []string{"Attr1"}
+	expectedTPID := []string{"cgrates.org:Attr1"}
 	if err := tpAlsPrfRPC.Call(utils.APIerSv1GetTPAttributeProfileIds,
 		&AttrGetTPAttributeProfileIds{TPid: "TP1"}, &result); err != nil {
 		t.Error(err)

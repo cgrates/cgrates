@@ -164,7 +164,7 @@ func testTPThreholdGetTPThreholdAfterSet(t *testing.T) {
 
 func testTPThreholdGetTPThreholdIds(t *testing.T) {
 	var result []string
-	expectedTPID := []string{"Threshold"}
+	expectedTPID := []string{"cgrates.org:Threshold"}
 	if err := tpThresholdRPC.Call(utils.APIerSv1GetTPThresholdIDs,
 		&AttrGetTPThresholdIds{TPid: tpThreshold.TPid}, &result); err != nil {
 		t.Fatal(err)

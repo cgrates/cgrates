@@ -166,7 +166,7 @@ func testTPFilterGetTPFilterAfterSet(t *testing.T) {
 
 func testTPFilterGetFilterIds(t *testing.T) {
 	var result []string
-	expectedTPID := []string{"Filter"}
+	expectedTPID := []string{"cgrates.org:Filter"}
 	if err := tpFilterRPC.Call(utils.APIerSv1GetTPFilterProfileIds,
 		&AttrGetTPFilterProfileIds{TPid: "TP1"}, &result); err != nil {
 		t.Error(err)

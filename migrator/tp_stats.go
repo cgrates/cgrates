@@ -38,25 +38,23 @@ func (m *Migrator) migrateCurrentTPstats() (err error) {
 			return err
 		}
 		for _, id := range ids {
-
 			stats, err := m.storDBIn.StorDB().GetTPStats(tpid, "", id)
 			if err != nil {
 				return err
 			}
-			if stats != nil {
-				if m.dryRun != true {
-					if err := m.storDBOut.StorDB().SetTPStats(stats); err != nil {
-						return err
-					}
-					for _, stat := range stats {
-						if err := m.storDBIn.StorDB().RemTpData(utils.TBLTPStats, stat.TPid,
-							map[string]string{"id": stat.ID}); err != nil {
-							return err
-						}
-					}
-					m.stats[utils.TpStats] += 1
+			if stats == nil || m.dryRun {
+				continue
+			}
+			if err := m.storDBOut.StorDB().SetTPStats(stats); err != nil {
+				return err
+			}
+			for _, stat := range stats {
+				if err := m.storDBIn.StorDB().RemTpData(utils.TBLTPStats, stat.TPid,
+					map[string]string{"id": stat.ID}); err != nil {
+					return err
 				}
 			}
+			m.stats[utils.TpStats]++
 		}
 	}
 	return

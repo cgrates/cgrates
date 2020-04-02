@@ -22,31 +22,31 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-//SetTPDispatcher creates a new DispatcherProfile within a tariff plan
-func (self *APIerSv1) SetTPDispatcherProfile(attr *utils.TPDispatcherProfile, reply *string) error {
+// SetTPDispatcherProfile creates a new DispatcherProfile within a tariff plan
+func (api *APIerSv1) SetTPDispatcherProfile(attr *utils.TPDispatcherProfile, reply *string) error {
 	if missing := utils.MissingStructFields(attr, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.StorDb.SetTPDispatcherProfiles([]*utils.TPDispatcherProfile{attr}); err != nil {
+	if err := api.StorDb.SetTPDispatcherProfiles([]*utils.TPDispatcherProfile{attr}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
 	return nil
 }
 
-//GetTPCharger queries specific DispatcherProfile on Tariff plan
-func (self *APIerSv1) GetTPDispatcherProfile(attr *utils.TPTntID, reply *utils.TPDispatcherProfile) error {
+// GetTPDispatcherProfile queries specific DispatcherProfile on Tariff plan
+func (api *APIerSv1) GetTPDispatcherProfile(attr *utils.TPTntID, reply *utils.TPDispatcherProfile) error {
 	if missing := utils.MissingStructFields(attr, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if rls, err := self.StorDb.GetTPDispatcherProfiles(attr.TPid, attr.Tenant, attr.ID); err != nil {
+	rls, err := api.StorDb.GetTPDispatcherProfiles(attr.TPid, attr.Tenant, attr.ID)
+	if err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}
 		return err
-	} else {
-		*reply = *rls[0]
 	}
+	*reply = *rls[0]
 	return nil
 }
 
@@ -55,92 +55,90 @@ type AttrGetTPDispatcherIds struct {
 	utils.PaginatorWithSearch
 }
 
-//GetTPDispatcherIDs queries dispatcher identities on specific tariff plan.
-func (self *APIerSv1) GetTPDispatcherProfileIDs(attrs *AttrGetTPDispatcherIds, reply *[]string) error {
+// GetTPDispatcherProfileIDs queries dispatcher identities on specific tariff plan.
+func (api *APIerSv1) GetTPDispatcherProfileIDs(attrs *AttrGetTPDispatcherIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPDispatchers, utils.TPDistinctIds{"id"},
-		nil, &attrs.PaginatorWithSearch); err != nil {
+	ids, err := api.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPDispatchers, utils.TPDistinctIds{"tenant", "id"},
+		nil, &attrs.PaginatorWithSearch)
+	if err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}
 		return err
-	} else {
-		*reply = ids
 	}
+	*reply = ids
 	return nil
 }
 
-//RemoveTPCharger removes specific DispatcherProfile on Tariff plan
-func (self *APIerSv1) RemoveTPDispatcherProfile(attrs *utils.TPTntID, reply *string) error {
+// RemoveTPDispatcherProfile removes specific DispatcherProfile on Tariff plan
+func (api *APIerSv1) RemoveTPDispatcherProfile(attrs *utils.TPTntID, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.StorDb.RemTpData(utils.TBLTPDispatchers, attrs.TPid,
+	if err := api.StorDb.RemTpData(utils.TBLTPDispatchers, attrs.TPid,
 		map[string]string{"tenant": attrs.Tenant, "id": attrs.ID}); err != nil {
 		return utils.NewErrServerError(err)
-	} else {
-		*reply = utils.OK
 	}
+	*reply = utils.OK
 	return nil
 }
 
-//SetTPDispatcherHost creates a new DispatcherHost within a tariff plan
-func (self *APIerSv1) SetTPDispatcherHost(attr *utils.TPDispatcherHost, reply *string) error {
+// SetTPDispatcherHost creates a new DispatcherHost within a tariff plan
+func (api *APIerSv1) SetTPDispatcherHost(attr *utils.TPDispatcherHost, reply *string) error {
 	if missing := utils.MissingStructFields(attr, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.StorDb.SetTPDispatcherHosts([]*utils.TPDispatcherHost{attr}); err != nil {
+	if err := api.StorDb.SetTPDispatcherHosts([]*utils.TPDispatcherHost{attr}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
 	return nil
 }
 
-//GetTPDispatcherHost queries specific DispatcherHosts on Tariff plan
-func (self *APIerSv1) GetTPDispatcherHost(attr *utils.TPTntID, reply *utils.TPDispatcherHost) error {
+// GetTPDispatcherHost queries specific DispatcherHosts on Tariff plan
+func (api *APIerSv1) GetTPDispatcherHost(attr *utils.TPTntID, reply *utils.TPDispatcherHost) error {
 	if missing := utils.MissingStructFields(attr, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if rls, err := self.StorDb.GetTPDispatcherHosts(attr.TPid, attr.Tenant, attr.ID); err != nil {
+	rls, err := api.StorDb.GetTPDispatcherHosts(attr.TPid, attr.Tenant, attr.ID)
+	if err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}
 		return err
-	} else {
-		*reply = *rls[0]
 	}
+	*reply = *rls[0]
 	return nil
 }
 
-//GetTPDispatcherHostIDs queries dispatcher host identities on specific tariff plan.
-func (self *APIerSv1) GetTPDispatcherHostIDs(attrs *AttrGetTPDispatcherIds, reply *[]string) error {
+// GetTPDispatcherHostIDs queries dispatcher host identities on specific tariff plan.
+func (api *APIerSv1) GetTPDispatcherHostIDs(attrs *AttrGetTPDispatcherIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPDispatcherHosts, utils.TPDistinctIds{"id"},
-		nil, &attrs.PaginatorWithSearch); err != nil {
+	ids, err := api.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPDispatcherHosts, utils.TPDistinctIds{"tenant", "id"},
+		nil, &attrs.PaginatorWithSearch)
+	if err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}
 		return err
-	} else {
-		*reply = ids
 	}
+	*reply = ids
 	return nil
 }
 
-//RemoveTPDispatcherHost removes specific DispatcherHost on Tariff plan
-func (self *APIerSv1) RemoveTPDispatcherHost(attrs *utils.TPTntID, reply *string) error {
+// RemoveTPDispatcherHost removes specific DispatcherHost on Tariff plan
+func (api *APIerSv1) RemoveTPDispatcherHost(attrs *utils.TPTntID, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.StorDb.RemTpData(utils.TBLTPDispatcherHosts, attrs.TPid,
+	if err := api.StorDb.RemTpData(utils.TBLTPDispatcherHosts, attrs.TPid,
 		map[string]string{"tenant": attrs.Tenant, "id": attrs.ID}); err != nil {
 		return utils.NewErrServerError(err)
-	} else {
-		*reply = utils.OK
 	}
+	*reply = utils.OK
 	return nil
 }

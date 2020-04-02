@@ -38,26 +38,24 @@ func (m *Migrator) migrateCurrentTPSuppliers() (err error) {
 			return err
 		}
 		for _, id := range ids {
-
 			suppliers, err := m.storDBIn.StorDB().GetTPSuppliers(tpid, "", id)
 			if err != nil {
 				return err
 			}
-			if suppliers != nil {
-				if m.dryRun != true {
-					if err := m.storDBOut.StorDB().SetTPSuppliers(suppliers); err != nil {
-						return err
-					}
-					for _, supplier := range suppliers {
-						if err := m.storDBIn.StorDB().RemTpData(utils.TBLTPSuppliers, supplier.TPid,
-							map[string]string{"tenant": supplier.Tenant, "id": supplier.ID}); err != nil {
-							return err
-						}
-					}
-
-					m.stats[utils.TpSuppliers] += 1
+			if suppliers == nil || m.dryRun {
+				continue
+			}
+			if err := m.storDBOut.StorDB().SetTPSuppliers(suppliers); err != nil {
+				return err
+			}
+			for _, supplier := range suppliers {
+				if err := m.storDBIn.StorDB().RemTpData(utils.TBLTPSuppliers, supplier.TPid,
+					map[string]string{"tenant": supplier.Tenant, "id": supplier.ID}); err != nil {
+					return err
 				}
 			}
+
+			m.stats[utils.TpSuppliers]++
 		}
 	}
 	return

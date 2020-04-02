@@ -22,31 +22,31 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// Creates a new ChargerProfile within a tariff plan
-func (self *APIerSv1) SetTPCharger(attr *utils.TPChargerProfile, reply *string) error {
+// SetTPCharger creates a new ChargerProfile within a tariff plan
+func (api *APIerSv1) SetTPCharger(attr *utils.TPChargerProfile, reply *string) error {
 	if missing := utils.MissingStructFields(attr, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.StorDb.SetTPChargers([]*utils.TPChargerProfile{attr}); err != nil {
+	if err := api.StorDb.SetTPChargers([]*utils.TPChargerProfile{attr}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
 	return nil
 }
 
-// Queries specific ChargerProfile on Tariff plan
-func (self *APIerSv1) GetTPCharger(attr *utils.TPTntID, reply *utils.TPChargerProfile) error {
+// GetTPCharger queries specific ChargerProfile on Tariff plan
+func (api *APIerSv1) GetTPCharger(attr *utils.TPTntID, reply *utils.TPChargerProfile) error {
 	if missing := utils.MissingStructFields(attr, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if rls, err := self.StorDb.GetTPChargers(attr.TPid, attr.Tenant, attr.ID); err != nil {
+	rls, err := api.StorDb.GetTPChargers(attr.TPid, attr.Tenant, attr.ID)
+	if err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}
 		return err
-	} else {
-		*reply = *rls[0]
 	}
+	*reply = *rls[0]
 	return nil
 }
 
@@ -55,33 +55,32 @@ type AttrGetTPChargerIds struct {
 	utils.PaginatorWithSearch
 }
 
-// Queries Charger identities on specific tariff plan.
-func (self *APIerSv1) GetTPChargerIDs(attrs *AttrGetTPChargerIds, reply *[]string) error {
+// GetTPChargerIDs queries Charger identities on specific tariff plan.
+func (api *APIerSv1) GetTPChargerIDs(attrs *AttrGetTPChargerIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPChargers, utils.TPDistinctIds{"id"},
-		nil, &attrs.PaginatorWithSearch); err != nil {
+	ids, err := api.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPChargers, utils.TPDistinctIds{"tenant", "id"},
+		nil, &attrs.PaginatorWithSearch)
+	if err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}
 		return err
-	} else {
-		*reply = ids
 	}
+	*reply = ids
 	return nil
 }
 
-// Removes specific ChargerProfile on Tariff plan
-func (self *APIerSv1) RemoveTPCharger(attrs *utils.TPTntID, reply *string) error {
+// RemoveTPCharger removes specific ChargerProfile on Tariff plan
+func (api *APIerSv1) RemoveTPCharger(attrs *utils.TPTntID, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.StorDb.RemTpData(utils.TBLTPChargers, attrs.TPid,
+	if err := api.StorDb.RemTpData(utils.TBLTPChargers, attrs.TPid,
 		map[string]string{"tenant": attrs.Tenant, "id": attrs.ID}); err != nil {
 		return utils.NewErrServerError(err)
-	} else {
-		*reply = utils.OK
 	}
+	*reply = utils.OK
 	return nil
 }

@@ -42,20 +42,19 @@ func (m *Migrator) migrateCurrentTPChargers() (err error) {
 			if err != nil {
 				return err
 			}
-			if chargers != nil {
-				if m.dryRun != true {
-					if err := m.storDBOut.StorDB().SetTPChargers(chargers); err != nil {
-						return err
-					}
-					for _, charger := range chargers {
-						if err := m.storDBIn.StorDB().RemTpData(utils.TBLTPChargers, charger.TPid,
-							map[string]string{"id": charger.ID}); err != nil {
-							return err
-						}
-					}
-					m.stats[utils.TpChargers] += 1
+			if chargers == nil || m.dryRun {
+				continue
+			}
+			if err := m.storDBOut.StorDB().SetTPChargers(chargers); err != nil {
+				return err
+			}
+			for _, charger := range chargers {
+				if err := m.storDBIn.StorDB().RemTpData(utils.TBLTPChargers, charger.TPid,
+					map[string]string{"id": charger.ID}); err != nil {
+					return err
 				}
 			}
+			m.stats[utils.TpChargers] ++
 		}
 	}
 	return

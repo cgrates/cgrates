@@ -42,20 +42,19 @@ func (m *Migrator) migrateCurrentTPDispatchers() (err error) {
 			if err != nil {
 				return err
 			}
-			if dispatchers != nil {
-				if m.dryRun != true {
-					if err := m.storDBOut.StorDB().SetTPDispatcherProfiles(dispatchers); err != nil {
-						return err
-					}
-					for _, dispatcher := range dispatchers {
-						if err := m.storDBIn.StorDB().RemTpData(utils.TBLTPDispatchers, dispatcher.TPid,
-							map[string]string{"id": dispatcher.ID}); err != nil {
-							return err
-						}
-					}
-					m.stats[utils.TpDispatchers] += 1
+			if dispatchers == nil || m.dryRun {
+				continue
+			}
+			if err := m.storDBOut.StorDB().SetTPDispatcherProfiles(dispatchers); err != nil {
+				return err
+			}
+			for _, dispatcher := range dispatchers {
+				if err := m.storDBIn.StorDB().RemTpData(utils.TBLTPDispatchers, dispatcher.TPid,
+					map[string]string{"id": dispatcher.ID}); err != nil {
+					return err
 				}
 			}
+			m.stats[utils.TpDispatchers]++
 		}
 	}
 	return

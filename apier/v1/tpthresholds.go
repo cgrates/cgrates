@@ -22,31 +22,31 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// Creates a new threshold within a tariff plan
-func (self *APIerSv1) SetTPThreshold(attr *utils.TPThresholdProfile, reply *string) error {
+// SetTPThreshold creates a new threshold within a tariff plan
+func (api *APIerSv1) SetTPThreshold(attr *utils.TPThresholdProfile, reply *string) error {
 	if missing := utils.MissingStructFields(attr, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.StorDb.SetTPThresholds([]*utils.TPThresholdProfile{attr}); err != nil {
+	if err := api.StorDb.SetTPThresholds([]*utils.TPThresholdProfile{attr}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
 	return nil
 }
 
-// Queries specific Threshold on Tariff plan
-func (self *APIerSv1) GetTPThreshold(attr *utils.TPTntID, reply *utils.TPThresholdProfile) error {
+// GetTPThreshold queries specific Threshold on Tariff plan
+func (api *APIerSv1) GetTPThreshold(attr *utils.TPTntID, reply *utils.TPThresholdProfile) error {
 	if missing := utils.MissingStructFields(attr, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if rls, err := self.StorDb.GetTPThresholds(attr.TPid, attr.Tenant, attr.ID); err != nil {
+	rls, err := api.StorDb.GetTPThresholds(attr.TPid, attr.Tenant, attr.ID)
+	if err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}
 		return err
-	} else {
-		*reply = *rls[0]
 	}
+	*reply = *rls[0]
 	return nil
 }
 
@@ -56,34 +56,33 @@ type AttrGetTPThresholdIds struct {
 	utils.PaginatorWithSearch
 }
 
-// Queries Threshold identities on specific tariff plan.
-func (self *APIerSv1) GetTPThresholdIDs(attrs *AttrGetTPThresholdIds, reply *[]string) error {
+// GetTPThresholdIDs queries Threshold identities on specific tariff plan.
+func (api *APIerSv1) GetTPThresholdIDs(attrs *AttrGetTPThresholdIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPThresholds,
-		utils.TPDistinctIds{"id"}, nil, &attrs.PaginatorWithSearch); err != nil {
+	ids, err := api.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPThresholds,
+		utils.TPDistinctIds{"tenant", "id"}, nil, &attrs.PaginatorWithSearch)
+	if err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}
 		return err
-	} else {
-		*reply = ids
 	}
+	*reply = ids
 	return nil
 }
 
-// Removes specific Threshold on Tariff plan
-func (self *APIerSv1) RemoveTPThreshold(attrs *utils.TPTntID, reply *string) error {
+// RemoveTPThreshold removes specific Threshold on Tariff plan
+func (api *APIerSv1) RemoveTPThreshold(attrs *utils.TPTntID, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.StorDb.RemTpData(utils.TBLTPThresholds, attrs.TPid,
+	if err := api.StorDb.RemTpData(utils.TBLTPThresholds, attrs.TPid,
 		map[string]string{"tenant": attrs.Tenant, "id": attrs.ID}); err != nil {
 		return utils.NewErrServerError(err)
-	} else {
-		*reply = utils.OK
 	}
+	*reply = utils.OK
 	return nil
 
 }
