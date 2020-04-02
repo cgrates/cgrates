@@ -97,23 +97,6 @@ type TpRatingProfile struct {
 	CreatedAt        time.Time
 }
 
-func (rpf *TpRatingProfile) SetRatingProfileId(id string) error {
-	ids := strings.Split(id, utils.CONCATENATED_KEY_SEP)
-	if len(ids) != 5 {
-		return fmt.Errorf("Wrong TP Rating Profile Id: %s", id)
-	}
-	rpf.Loadid = ids[0]
-	rpf.Tenant = ids[2]
-	rpf.Category = ids[3]
-	rpf.Subject = ids[4]
-	return nil
-}
-
-func (rpf *TpRatingProfile) GetRatingProfileId() string {
-	return utils.ConcatenatedKey(rpf.Loadid, utils.META_OUT,
-		rpf.Tenant, rpf.Category, rpf.Subject)
-}
-
 type TpAction struct {
 	Id              int64
 	Tpid            string

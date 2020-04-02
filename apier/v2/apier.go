@@ -54,14 +54,13 @@ func (apiv2 *APIerSv2) LoadRatingProfile(attrs AttrLoadRatingProfile, reply *str
 	if len(attrs.TPid) == 0 {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
-	tpRpf := &utils.TPRatingProfile{TPid: attrs.TPid}
 	dbReader, err := engine.NewTpReader(apiv2.DataManager.DataDB(), apiv2.StorDb,
 		attrs.TPid, apiv2.Config.GeneralCfg().DefaultTimezone,
 		apiv2.Config.ApierCfg().CachesConns, apiv2.Config.ApierCfg().SchedulerConns)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if err := dbReader.LoadRatingProfilesFiltered(tpRpf); err != nil {
+	if err := dbReader.LoadRatingProfilesFiltered(&utils.TPRatingProfile{TPid: attrs.TPid}); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK

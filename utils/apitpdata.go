@@ -233,15 +233,15 @@ func (rpf *TPRatingProfile) GetId() string {
 		rpf.Tenant, rpf.Category, rpf.Subject)
 }
 
-func (rpf *TPRatingProfile) SetRatingProfilesId(id string) error {
+func (rpf *TPRatingProfile) SetRatingProfileID(id string) error {
 	ids := strings.Split(id, CONCATENATED_KEY_SEP)
-	if len(ids) != 5 {
+	if len(ids) != 4 {
 		return fmt.Errorf("Wrong TPRatingProfileId: %s", id)
 	}
 	rpf.LoadId = ids[0]
-	rpf.Tenant = ids[2]
-	rpf.Category = ids[3]
-	rpf.Subject = ids[4]
+	rpf.Tenant = ids[1]
+	rpf.Category = ids[2]
+	rpf.Subject = ids[3]
 	return nil
 }
 

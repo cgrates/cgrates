@@ -21,7 +21,6 @@ package v1
 // This file deals with tp_rate_profiles management over APIs
 
 import (
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -91,7 +90,7 @@ func (api *APIerSv1) GetTPRatingProfile(attrs AttrGetTPRatingProfile, reply *uti
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	tmpRpf := &utils.TPRatingProfile{TPid: attrs.TPid}
-	if err := tmpRpf.SetRatingProfilesId(attrs.RatingProfileID); err != nil {
+	if err := tmpRpf.SetRatingProfileID(attrs.RatingProfileID); err != nil {
 		return err
 	}
 	rpfs, err := api.StorDb.GetTPRatingProfiles(tmpRpf)
@@ -134,13 +133,13 @@ func (api *APIerSv1) RemoveTPRatingProfile(attrs AttrGetTPRatingProfile, reply *
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "RatingProfileID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	tmpRpf := engine.TpRatingProfile{}
-	if err = tmpRpf.SetRatingProfileId(attrs.RatingProfileID); err != nil {
+	tmpRpf := new(utils.TPRatingProfile)
+	if err = tmpRpf.SetRatingProfileID(attrs.RatingProfileID); err != nil {
 		return
 	}
 	err = api.StorDb.RemTpData(utils.TBLTPRateProfiles,
 		attrs.TPid, map[string]string{
-			"loadid":   tmpRpf.Loadid,
+			"loadid":   tmpRpf.LoadId,
 			"tenant":   tmpRpf.Tenant,
 			"category": tmpRpf.Category,
 			"subject":  tmpRpf.Subject,

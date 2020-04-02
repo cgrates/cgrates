@@ -405,17 +405,16 @@ func (apiv1 *APIerSv1) SetRatingProfile(attrs utils.AttrSetRatingProfile, reply 
 			return fmt.Errorf("%s:RatingPlanActivation:%v", utils.ErrMandatoryIeMissing.Error(), missing)
 		}
 	}
-	tpRpf := utils.TPRatingProfile{Tenant: attrs.Tenant,
-		Category: attrs.Category, Subject: attrs.Subject}
-	keyId := tpRpf.KeyId()
+	keyID := utils.ConcatenatedKey(utils.META_OUT,
+		attrs.Tenant, attrs.Category, attrs.Subject)
 	var rpfl *engine.RatingProfile
 	if !attrs.Overwrite {
-		if rpfl, err = apiv1.DataManager.GetRatingProfile(keyId, false, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
+		if rpfl, err = apiv1.DataManager.GetRatingProfile(keyID, false, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
 			return utils.NewErrServerError(err)
 		}
 	}
 	if rpfl == nil {
-		rpfl = &engine.RatingProfile{Id: keyId, RatingPlanActivations: make(engine.RatingPlanActivations, 0)}
+		rpfl = &engine.RatingProfile{Id: keyID, RatingPlanActivations: make(engine.RatingPlanActivations, 0)}
 	}
 	for _, ra := range attrs.RatingPlanActivations {
 		at, err := utils.ParseTimeDetectLayout(ra.ActivationTime,
@@ -433,8 +432,8 @@ func (apiv1 *APIerSv1) SetRatingProfile(attrs utils.AttrSetRatingProfile, reply 
 			&engine.RatingPlanActivation{
 				ActivationTime: at,
 				RatingPlanId:   ra.RatingPlanId,
-				FallbackKeys: utils.FallbackSubjKeys(tpRpf.Tenant,
-					tpRpf.Category, ra.FallbackSubjects)})
+				FallbackKeys: utils.FallbackSubjKeys(attrs.Tenant,
+					attrs.Category, ra.FallbackSubjects)})
 	}
 	if err := apiv1.DataManager.SetRatingProfile(rpfl, utils.NonTransactional); err != nil {
 		return utils.NewErrServerError(err)
