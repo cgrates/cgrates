@@ -189,10 +189,10 @@ func testSessionsItTerminatUnexist(t *testing.T) {
 		t.Errorf("Unexpected number of CDRs returned: %v \n cdrs=%s", len(cdrs), utils.ToJSON(cdrs))
 	} else {
 		if cdrs[0].Usage != "2m0s" {
-			t.Errorf("Unexpected CDR Usage received, cdr: %v %+v ", cdrs[0].Usage, cdrs[0])
+			t.Errorf("Unexpected CDR Usage received, cdr: %v %+v ", cdrs[0].Usage, utils.ToJSON(cdrs[0]))
 		}
 		if cdrs[0].Cost != 0.7002 {
-			t.Errorf("Unexpected CDR Usage received, cdr: %v %+v ", cdrs[0].Cost, cdrs[0])
+			t.Errorf("Unexpected CDR Usage received, cdr: %v %+v ", cdrs[0].Cost, utils.ToJSON(cdrs[0]))
 		}
 	}
 

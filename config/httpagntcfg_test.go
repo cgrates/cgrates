@@ -26,12 +26,12 @@ import (
 
 func TestHttpAgentCfgsloadFromJsonCfg(t *testing.T) {
 	var httpcfg, expected HttpAgentCfgs
-	if err := httpcfg.loadFromJsonCfg(nil, utils.INFIELD_SEP, 5); err != nil {
+	if err := httpcfg.loadFromJsonCfg(nil, utils.INFIELD_SEP, 0); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(httpcfg, expected) {
 		t.Errorf("Expected: %+v ,recived: %+v", expected, httpcfg)
 	}
-	if err := httpcfg.loadFromJsonCfg(new([]*HttpAgentJsonCfg), utils.INFIELD_SEP, 5); err != nil {
+	if err := httpcfg.loadFromJsonCfg(new([]*HttpAgentJsonCfg), utils.INFIELD_SEP, 0); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(httpcfg, expected) {
 		t.Errorf("Expected: %+v ,recived: %+v", expected, httpcfg)
@@ -86,7 +86,7 @@ func TestHttpAgentCfgsloadFromJsonCfg(t *testing.T) {
 		t.Error(err)
 	} else if jsnhttpCfg, err := jsnCfg.HttpAgentJsonCfg(); err != nil {
 		t.Error(err)
-	} else if err = httpcfg.loadFromJsonCfg(jsnhttpCfg, utils.INFIELD_SEP, 5); err != nil {
+	} else if err = httpcfg.loadFromJsonCfg(jsnhttpCfg, utils.INFIELD_SEP, 0); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, httpcfg) {
 		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(httpcfg))
@@ -193,7 +193,7 @@ func TestHttpAgentCfgsloadFromJsonCfg(t *testing.T) {
 		t.Error(err)
 	} else if jsnhttpCfg, err := jsnCfg.HttpAgentJsonCfg(); err != nil {
 		t.Error(err)
-	} else if err = httpcfg.loadFromJsonCfg(jsnhttpCfg, utils.INFIELD_SEP, 5); err != nil {
+	} else if err = httpcfg.loadFromJsonCfg(jsnhttpCfg, utils.INFIELD_SEP, 0); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, httpcfg) {
 		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(httpcfg))
@@ -338,7 +338,7 @@ func TestHttpAgentCfgappendHttpAgntProcCfgs(t *testing.T) {
 		}},
 	}
 
-	if err = initial.appendHttpAgntProcCfgs(proceses, utils.INFIELD_SEP, 5); err != nil {
+	if err = initial.appendHttpAgntProcCfgs(proceses, utils.INFIELD_SEP, 0); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, initial) {
 		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(initial))
