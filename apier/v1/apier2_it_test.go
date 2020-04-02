@@ -300,20 +300,17 @@ func testAPIerGetActionPlanIDs(t *testing.T) {
 
 func testAPIerGetRatingPlanIDs(t *testing.T) {
 	var reply []string
-	expected := []string{"RP_1002_LOW", "RP_1003", "RP_1001", "RP_SMS", "RP_1002"}
+	expected := []string{"RP_1002_LOW", "RP_1003", "RP_1001", "RP_MMS", "RP_SMS", "RP_1002"}
 	if err := apierRPC.Call(utils.APIerSv1GetRatingPlanIDs,
 		utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{Tenant: "cgrates.org"}},
 		&reply); err != nil {
 		t.Error(err)
-	} else if len(reply) != 5 {
-		t.Errorf("Expected: 5 , received: <%+v>", len(reply))
-	} else {
-		sort.Strings(reply)
-		sort.Strings(expected)
-		if !reflect.DeepEqual(reply, expected) {
-			t.Errorf("Expected: <%+v> , received: <%+v>", expected, reply)
+	}
+	sort.Strings(reply)
+	sort.Strings(expected)
+	if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("Expected: <%+v> , received: <%+v>", utils.ToJSON(expected), utils.ToJSON(reply))
 
-		}
 	}
 }
 

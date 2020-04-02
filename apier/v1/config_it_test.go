@@ -141,6 +141,7 @@ func testConfigSReloadConfigFromJSONSessionS(t *testing.T) {
 
 		"ReplicationConns":    []interface{}{},
 		"MaxCallDuration":     float64(3 * time.Hour),
+		"MinDurLowBalance":    0.,
 		"SessionIndexes":      map[string]interface{}{"OriginID": true},
 		"ClientProtocol":      1.,
 		"TerminateAttempts":   5.,
@@ -161,7 +162,7 @@ func testConfigSReloadConfigFromJSONSessionS(t *testing.T) {
 	}, &rpl); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exp, rpl) {
-		t.Errorf("Expected %+v , received: %+v ", exp, rpl)
+		t.Errorf("Expected %+v , received: %+v ", utils.ToJSON(exp), utils.ToJSON(rpl))
 	}
 }
 

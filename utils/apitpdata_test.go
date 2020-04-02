@@ -251,13 +251,13 @@ func TestTPRatingProfileKeys(t *testing.T) {
 func TestTPRatingProfileSetRatingProfilesId(t *testing.T) {
 	//empty check
 	tpRatingProfile := new(TPRatingProfile)
-	tpRatingProfile.SetRatingProfilesId("")
+	tpRatingProfile.SetRatingProfileID("")
 	eOut := new(TPRatingProfile)
 	if !reflect.DeepEqual(eOut, tpRatingProfile) {
 		t.Errorf("Expected %+v, received %+v", eOut, tpRatingProfile)
 	}
 	//test check
-	tpRatingProfile.SetRatingProfilesId("1:2:3:4:5")
+	tpRatingProfile.SetRatingProfileID("1:3:4:5")
 	eOut.LoadId = "1"
 	eOut.Tenant = "3"
 	eOut.Category = "4"
@@ -266,7 +266,7 @@ func TestTPRatingProfileSetRatingProfilesId(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", eOut, tpRatingProfile)
 	}
 	//wrong TPRatingProfile sent
-	err := tpRatingProfile.SetRatingProfilesId("1:2:3:4:5:6")
+	err := tpRatingProfile.SetRatingProfileID("1:2:3:4:5:6")
 	if err == nil {
 		t.Error("Wrong TPRatingProfileId sent and no error received")
 	}

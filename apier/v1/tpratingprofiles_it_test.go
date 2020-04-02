@@ -41,7 +41,7 @@ var (
 	tpRatingProfile          *utils.TPRatingProfile
 	tpRatingProfileDelay     int
 	tpRatingProfileConfigDIR string //run tests for specific configuration
-	tpRatingProfileID        = "RPrf:*out:Tenant1:Category:Subject"
+	tpRatingProfileID        = "RPrf:Tenant1:Category:Subject"
 )
 
 var sTestsTPRatingProfiles = []func(t *testing.T){
@@ -269,7 +269,7 @@ func testTPRatingProfilesGetTPRatingProfileIds(t *testing.T) {
 func testTPRatingProfilesRemoveTPRatingProfile(t *testing.T) {
 	var resp string
 	if err := tpRatingProfileRPC.Call(utils.APIerSv1RemoveTPRatingProfile,
-		&AttrGetTPRatingProfile{TPid: "TPRProf1", RatingProfileID: tpRatingProfile.GetId()}, &resp); err != nil {
+		&AttrGetTPRatingProfile{TPid: "TPRProf1", RatingProfileID: utils.ConcatenatedKey(tpRatingProfile.LoadId, tpRatingProfile.Tenant, tpRatingProfile.Category, tpRatingProfile.Subject)}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)

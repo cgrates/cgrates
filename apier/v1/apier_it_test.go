@@ -526,13 +526,13 @@ func testApierTPRatingProfile(t *testing.T) {
 	}
 	// Test get
 	var rplyRpf *utils.TPRatingProfile
-	if err := rater.Call(utils.APIerSv1GetTPRatingProfile, AttrGetTPRatingProfile{TPid: rpfTst.TPid, RatingProfileID: rpfTst.GetId()}, &rplyRpf); err != nil {
+	if err := rater.Call(utils.APIerSv1GetTPRatingProfile, AttrGetTPRatingProfile{TPid: rpfTst.TPid, RatingProfileID: utils.ConcatenatedKey(rpfTst.LoadId, rpfTst.Tenant, rpfTst.Category, rpfTst.Subject)}, &rplyRpf); err != nil {
 		t.Error("Calling APIerSv1.GetTPRatingProfiles, got error: ", err.Error())
 	} else if !reflect.DeepEqual(rpfTst, rplyRpf) {
 		t.Errorf("Calling APIerSv1.GetTPRatingProfiles expected: %v, received: %v", rpfTst, rplyRpf)
 	}
 	// Test remove
-	if err := rater.Call(utils.APIerSv1RemoveTPRatingProfile, AttrGetTPRatingProfile{TPid: rpfTst.TPid, RatingProfileID: rpfTst.GetId()}, &reply); err != nil {
+	if err := rater.Call(utils.APIerSv1RemoveTPRatingProfile, AttrGetTPRatingProfile{TPid: rpfTst.TPid, RatingProfileID: utils.ConcatenatedKey(rpfTst.LoadId, rpfTst.Tenant, rpfTst.Category, rpfTst.Subject)}, &reply); err != nil {
 		t.Error("Calling APIerSv1.RemoveTPRatingProfile, got error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling APIerSv1.RemoveTPRatingProfile received: ", reply)
