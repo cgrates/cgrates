@@ -30,7 +30,7 @@ type ERsCfg struct {
 	Readers       []*EventReaderCfg
 }
 
-func (erS *ERsCfg) loadFromJsonCfg(jsnCfg *ERsJsonCfg, sep string, dfltRdrCfg *EventReaderCfg, rounding int) (err error) {
+func (erS *ERsCfg) loadFromJsonCfg(jsnCfg *ERsJsonCfg, sep string, dfltRdrCfg *EventReaderCfg) (err error) {
 	if jsnCfg == nil {
 		return
 	}
@@ -48,11 +48,11 @@ func (erS *ERsCfg) loadFromJsonCfg(jsnCfg *ERsJsonCfg, sep string, dfltRdrCfg *E
 			}
 		}
 	}
-	return erS.appendERsReaders(jsnCfg.Readers, sep, dfltRdrCfg, rounding)
+	return erS.appendERsReaders(jsnCfg.Readers, sep, dfltRdrCfg)
 }
 
 func (ers *ERsCfg) appendERsReaders(jsnReaders *[]*EventReaderJsonCfg, sep string,
-	dfltRdrCfg *EventReaderCfg, rounding int) (err error) {
+	dfltRdrCfg *EventReaderCfg) (err error) {
 	if jsnReaders == nil {
 		return
 	}
@@ -72,7 +72,7 @@ func (ers *ERsCfg) appendERsReaders(jsnReaders *[]*EventReaderJsonCfg, sep strin
 			}
 		}
 
-		if err := rdr.loadFromJsonCfg(jsnReader, sep, rounding); err != nil {
+		if err := rdr.loadFromJsonCfg(jsnReader, sep); err != nil {
 			return err
 		}
 		if !haveID {
@@ -119,7 +119,7 @@ type EventReaderCfg struct {
 	CacheDumpFields          []*FCTemplate
 }
 
-func (er *EventReaderCfg) loadFromJsonCfg(jsnCfg *EventReaderJsonCfg, sep string, rounding int) (err error) {
+func (er *EventReaderCfg) loadFromJsonCfg(jsnCfg *EventReaderJsonCfg, sep string) (err error) {
 	if jsnCfg == nil {
 		return
 	}
@@ -183,12 +183,12 @@ func (er *EventReaderCfg) loadFromJsonCfg(jsnCfg *EventReaderJsonCfg, sep string
 		er.PartialCacheExpiryAction = *jsnCfg.Partial_cache_expiry_action
 	}
 	if jsnCfg.Fields != nil {
-		if er.Fields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Fields, sep, rounding); err != nil {
+		if er.Fields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Fields, sep); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.Cache_dump_fields != nil {
-		if er.CacheDumpFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Cache_dump_fields, sep, rounding); err != nil {
+		if er.CacheDumpFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Cache_dump_fields, sep); err != nil {
 			return err
 		}
 	}

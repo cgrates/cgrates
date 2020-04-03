@@ -26,12 +26,12 @@ import (
 
 func TestLoaderSCfgloadFromJsonCfg(t *testing.T) {
 	var loadscfg, expected LoaderSCfg
-	if err := loadscfg.loadFromJsonCfg(nil, utils.INFIELD_SEP, 0); err != nil {
+	if err := loadscfg.loadFromJsonCfg(nil, utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(loadscfg, expected) {
 		t.Errorf("Expected: %+v ,recived: %+v", expected, loadscfg)
 	}
-	if err := loadscfg.loadFromJsonCfg(new(LoaderJsonCfg), utils.INFIELD_SEP, 0); err != nil {
+	if err := loadscfg.loadFromJsonCfg(new(LoaderJsonCfg), utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(loadscfg, expected) {
 		t.Errorf("Expected: %+v ,recived: %+v", expected, loadscfg)
@@ -96,7 +96,7 @@ func TestLoaderSCfgloadFromJsonCfg(t *testing.T) {
 		t.Error(err)
 	} else if jsnLoadersCfg, err := jsnCfg.LoaderJsonCfg(); err != nil {
 		t.Error(err)
-	} else if err = loadscfg.loadFromJsonCfg(jsnLoadersCfg[0], utils.INFIELD_SEP, 0); err != nil {
+	} else if err = loadscfg.loadFromJsonCfg(jsnLoadersCfg[0], utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, loadscfg) {
 		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(loadscfg))
