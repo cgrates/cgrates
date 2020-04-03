@@ -41,8 +41,8 @@ type Supplier struct {
 	Blocker            bool // do not process further supplier after this one
 	SupplierParameters string
 
-	cacheSupplier map[string]interface{} // cache["*ratio"]=ratio
-	ruleList      []*FilterRule
+	cacheSupplier  map[string]interface{} // cache["*ratio"]=ratio
+	lazyCheckRules []*FilterRule
 }
 
 // SupplierProfile represents the configuration of a Supplier profile
@@ -459,13 +459,13 @@ func (spS *SupplierService) populateSortingData(ev *utils.CGREvent, spl *Supplie
 		sortedSpl.SortingData[utils.ResourceUsage] = resTotalUsage
 	}
 	//filter the supplier
-	if len(spl.ruleList) != 0 {
+	if len(spl.lazyCheckRules) != 0 {
 		//construct the DP and pass it to filterS
 		nM := config.NewNavigableMap(nil)
 		nM.Set([]string{utils.MetaReq}, ev.Event, false, false)
 		nM.Set([]string{utils.MetaVars}, sortedSpl.SortingData, false, false)
 
-		for _, rule := range spl.ruleList { // verify the rules remaining from PartialPass
+		for _, rule := range spl.lazyCheckRules { // verify the rules remaining from PartialPass
 			if pass, err = rule.Pass(newDynamicDP(spS.cgrcfg, spS.connMgr, ev.Tenant, nM)); err != nil {
 				return nil, false, err
 			} else if !pass {
@@ -501,15 +501,15 @@ func (spS *SupplierService) sortedSuppliersForEvent(args *ArgsGetSuppliers) (sor
 	// apply filters for event
 
 	for _, suppl := range splPrfl.Suppliers {
-		pass, ruleList, err := spS.filterS.PartialPass(args.CGREvent.Tenant, suppl.FilterIDs,
-			nM, utils.NewStringSet([]string{utils.DynamicDataPrefix + utils.MetaReq, utils.DynamicDataPrefix + utils.MetaAccounts,
-				utils.DynamicDataPrefix + utils.MetaResources, utils.DynamicDataPrefix + utils.MetaStats}))
+		pass, lazyCheckRules, err := spS.filterS.LazyPass(args.CGREvent.Tenant, suppl.FilterIDs,
+			nM, []string{utils.DynamicDataPrefix + utils.MetaReq, utils.DynamicDataPrefix + utils.MetaAccounts,
+				utils.DynamicDataPrefix + utils.MetaResources, utils.DynamicDataPrefix + utils.MetaStats})
 		if err != nil {
 			return nil, err
 		} else if !pass {
 			continue
 		}
-		suppl.ruleList = ruleList
+		suppl.lazyCheckRules = lazyCheckRules
 		supplNew = append(supplNew, suppl)
 	}
 
