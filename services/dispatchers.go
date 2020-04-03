@@ -22,6 +22,8 @@ import (
 	"fmt"
 	"sync"
 
+	v2 "github.com/cgrates/cgrates/apier/v2"
+
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/dispatchers"
@@ -137,6 +139,9 @@ func (dspS *DispatcherService) Start() (err error) {
 
 	dspS.server.RpcRegisterName(utils.ReplicatorSv1,
 		v1.NewDispatcherReplicatorSv1(dspS.dspS))
+
+	dspS.server.RpcRegisterName(utils.CDRsV2,
+		v2.NewDispatcherSCDRsV2(dspS.dspS))
 
 	dspS.connChan <- dspS.dspS
 
