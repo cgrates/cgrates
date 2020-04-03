@@ -78,9 +78,9 @@ func (fS *FilterS) Pass(tenant string, filterIDs []string,
 }
 
 //verifyPrefixes verify the Element and the Values if has as prefix one of the prefixes
-func verifyPrefixes(rule *FilterRule, prefixes []string) (hasPrefix bool) {
+func verifyPrefixes(rule *FilterRule, prefixes *utils.StringSet) (hasPrefix bool) {
 	if strings.HasPrefix(rule.Element, utils.DynamicDataPrefix) {
-		for _, prefix := range prefixes {
+		for prefix := range prefixes.Data() {
 			if strings.HasPrefix(rule.Element, prefix) {
 				hasPrefix = true
 				break
@@ -93,7 +93,7 @@ func verifyPrefixes(rule *FilterRule, prefixes []string) (hasPrefix bool) {
 	for _, value := range rule.Values {
 		hasPrefix = false // reset hasPrefix
 		if strings.HasPrefix(value, utils.DynamicDataPrefix) {
-			for _, prefix := range prefixes {
+			for prefix := range prefixes.Data() {
 				if strings.HasPrefix(value, prefix) {
 					hasPrefix = true
 					break
@@ -110,19 +110,20 @@ func verifyPrefixes(rule *FilterRule, prefixes []string) (hasPrefix bool) {
 //PartialPass is almost the same as Pass except that it verify if the
 //Element of the Values from FilterRules has as prefix one of the pathPrfxs
 func (fS *FilterS) PartialPass(tenant string, filterIDs []string,
-	ev config.DataProvider, pathPrfxs []string) (pass bool, err error) {
+	ev config.DataProvider, pathPrfxs *utils.StringSet) (pass bool, ruleList []*FilterRule, err error) {
 	if len(filterIDs) == 0 {
-		return true, nil
+		return true, nil, nil
 	}
 	pass = true
 	for _, fltrID := range filterIDs {
-		f, err := GetFilter(fS.dm, tenant, fltrID,
+		var f *Filter
+		f, err = GetFilter(fS.dm, tenant, fltrID,
 			true, true, utils.NonTransactional)
 		if err != nil {
 			if err == utils.ErrNotFound {
 				err = utils.ErrPrefixNotFound(fltrID)
 			}
-			return false, err
+			return
 		}
 		if f.ActivationInterval != nil &&
 			!f.ActivationInterval.IsActiveAtTime(time.Now()) { // not active
@@ -131,11 +132,12 @@ func (fS *FilterS) PartialPass(tenant string, filterIDs []string,
 
 		for _, rule := range f.Rules {
 			if !verifyPrefixes(rule, pathPrfxs) {
+				ruleList = append(ruleList, rule)
 				continue
 			}
 			dDP := newDynamicDP(fS.cfg, fS.connMgr, tenant, ev)
 			if pass, err = rule.Pass(dDP); err != nil || !pass {
-				return pass, err
+				return
 			}
 		}
 	}

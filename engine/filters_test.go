@@ -1125,7 +1125,7 @@ func TestVerifyPrefixes(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	prefixes := []string{utils.DynamicDataPrefix + utils.MetaReq}
+	prefixes := utils.NewStringSet([]string{utils.DynamicDataPrefix + utils.MetaReq})
 	if check := verifyPrefixes(rf, prefixes); !check {
 		t.Errorf("Expecting: true , received: %+v", check)
 	}
@@ -1166,7 +1166,7 @@ func TestVerifyPrefixes(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	prefixes = []string{utils.DynamicDataPrefix + utils.MetaReq, utils.DynamicDataPrefix + utils.MetaVars}
+	prefixes = utils.NewStringSet([]string{utils.DynamicDataPrefix + utils.MetaReq, utils.DynamicDataPrefix + utils.MetaVars})
 	if check := verifyPrefixes(rf, prefixes); !check {
 		t.Errorf("Expecting: true , received: %+v", check)
 	}
@@ -1185,24 +1185,30 @@ func TestPassPartial(t *testing.T) {
 	}
 	fEv := config.NewNavigableMap(nil)
 	fEv.Set([]string{utils.MetaReq}, passEvent, false, false)
-	prefixes := []string{utils.DynamicDataPrefix + utils.MetaReq}
-	if pass, err := filterS.PartialPass("cgrates.org",
+	prefixes := utils.NewStringSet([]string{utils.DynamicDataPrefix + utils.MetaReq})
+	if pass, ruleList, err := filterS.PartialPass("cgrates.org",
 		[]string{"*string:~*req.Account:1007"}, fEv, prefixes); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
+	} else if len(ruleList) != 0 {
+		t.Errorf("Expecting: %+v, received: %+v", 0, len(ruleList))
 	}
 	// in PartialPass we verify the filters matching the prefixes
-	if pass, err := filterS.PartialPass("cgrates.org",
+	if pass, ruleList, err := filterS.PartialPass("cgrates.org",
 		[]string{"*string:~*req.Account:1007", "*string:~*vars.Field1:Val1"}, fEv, prefixes); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
+	} else if len(ruleList) != 1 {
+		t.Errorf("Expecting: %+v, received: %+v", 1, len(ruleList))
 	}
-	if pass, err := filterS.PartialPass("cgrates.org",
+	if pass, ruleList, err := filterS.PartialPass("cgrates.org",
 		[]string{"*string:~*req.Account:1010", "*string:~*vars.Field1:Val1"}, fEv, prefixes); err != nil {
 		t.Errorf(err.Error())
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
+	} else if len(ruleList) != 0 {
+		t.Errorf("Expecting: %+v, received: %+v", 0, len(ruleList))
 	}
 }

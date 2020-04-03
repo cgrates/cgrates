@@ -42,6 +42,7 @@ type Supplier struct {
 	SupplierParameters string
 
 	cacheSupplier map[string]interface{} // cache["*ratio"]=ratio
+	ruleList      []*FilterRule
 }
 
 // SupplierProfile represents the configuration of a Supplier profile
@@ -458,17 +459,18 @@ func (spS *SupplierService) populateSortingData(ev *utils.CGREvent, spl *Supplie
 		sortedSpl.SortingData[utils.ResourceUsage] = resTotalUsage
 	}
 	//filter the supplier
-	if len(spl.FilterIDs) != 0 {
+	if len(spl.ruleList) != 0 {
 		//construct the DP and pass it to filterS
 		nM := config.NewNavigableMap(nil)
 		nM.Set([]string{utils.MetaReq}, ev.Event, false, false)
 		nM.Set([]string{utils.MetaVars}, sortedSpl.SortingData, false, false)
 
-		if pass, err = spS.filterS.Pass(ev.Tenant, spl.FilterIDs,
-			nM); err != nil {
-			return nil, false, err
-		} else if !pass {
-			return nil, false, nil
+		for _, rule := range spl.ruleList { // verify the rules remaining from PartialPass
+			if pass, err = rule.Pass(newDynamicDP(spS.cgrcfg, spS.connMgr, ev.Tenant, nM)); err != nil {
+				return nil, false, err
+			} else if !pass {
+				return nil, false, nil
+			}
 		}
 	}
 	return sortedSpl, true, nil
@@ -497,13 +499,17 @@ func (spS *SupplierService) sortedSuppliersForEvent(args *ArgsGetSuppliers) (sor
 	nM.Set([]string{utils.MetaReq}, args.CGREvent.Event, false, false)
 	supplNew := make([]*Supplier, 0)
 	// apply filters for event
+
 	for _, suppl := range splPrfl.Suppliers {
-		if pass, err := spS.filterS.PartialPass(args.CGREvent.Tenant, suppl.FilterIDs,
-			nM, []string{utils.DynamicDataPrefix + utils.MetaReq}); err != nil {
+		pass, ruleList, err := spS.filterS.PartialPass(args.CGREvent.Tenant, suppl.FilterIDs,
+			nM, utils.NewStringSet([]string{utils.DynamicDataPrefix + utils.MetaReq, utils.DynamicDataPrefix + utils.MetaAccounts,
+				utils.DynamicDataPrefix + utils.MetaResources, utils.DynamicDataPrefix + utils.MetaStats}))
+		if err != nil {
 			return nil, err
 		} else if !pass {
 			continue
 		}
+		suppl.ruleList = ruleList
 		supplNew = append(supplNew, suppl)
 	}
 
