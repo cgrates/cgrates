@@ -77,40 +77,42 @@ func (fS *FilterS) Pass(tenant string, filterIDs []string,
 	return
 }
 
-//verifyPrefixes verify the Element and the Values if has as prefix one of the prefixes
-func verifyPrefixes(rule *FilterRule, prefixes *utils.StringSet) (hasPrefix bool) {
-	if strings.HasPrefix(rule.Element, utils.DynamicDataPrefix) {
-		for prefix := range prefixes.Data() {
-			if strings.HasPrefix(rule.Element, prefix) {
-				hasPrefix = true
-				break
-			}
+//checkPrefix verify if the value has as prefix one of the prefixes
+func checkPrefix(value string, prefixes []string) (hasPrefix bool) {
+	for _, prefix := range prefixes {
+		if strings.HasPrefix(value, prefix) {
+			hasPrefix = true
+			break
 		}
-		if !hasPrefix {
-			return false
+	}
+	if !hasPrefix {
+		return false
+	}
+	return
+}
+
+//verifyPrefixes verify the Element and the Values from FilterRule if has as prefix one of the prefixes
+func verifyPrefixes(rule *FilterRule, prefixes []string) (hasPrefix bool) {
+	if strings.HasPrefix(rule.Element, utils.DynamicDataPrefix) {
+		if hasPrefix = checkPrefix(rule.Element, prefixes); !hasPrefix {
+			return
 		}
 	}
 	for _, value := range rule.Values {
 		hasPrefix = false // reset hasPrefix
 		if strings.HasPrefix(value, utils.DynamicDataPrefix) {
-			for prefix := range prefixes.Data() {
-				if strings.HasPrefix(value, prefix) {
-					hasPrefix = true
-					break
-				}
-			}
-			if !hasPrefix {
-				return false
+			if hasPrefix = checkPrefix(value, prefixes); !hasPrefix {
+				return
 			}
 		}
 	}
 	return true
 }
 
-//PartialPass is almost the same as Pass except that it verify if the
+//LazyPass is almost the same as Pass except that it verify if the
 //Element of the Values from FilterRules has as prefix one of the pathPrfxs
-func (fS *FilterS) PartialPass(tenant string, filterIDs []string,
-	ev config.DataProvider, pathPrfxs *utils.StringSet) (pass bool, ruleList []*FilterRule, err error) {
+func (fS *FilterS) LazyPass(tenant string, filterIDs []string,
+	ev config.DataProvider, pathPrfxs []string) (pass bool, lazyCheckRules []*FilterRule, err error) {
 	if len(filterIDs) == 0 {
 		return true, nil, nil
 	}
@@ -132,7 +134,7 @@ func (fS *FilterS) PartialPass(tenant string, filterIDs []string,
 
 		for _, rule := range f.Rules {
 			if !verifyPrefixes(rule, pathPrfxs) {
-				ruleList = append(ruleList, rule)
+				lazyCheckRules = append(lazyCheckRules, rule)
 				continue
 			}
 			dDP := newDynamicDP(fS.cfg, fS.connMgr, tenant, ev)
