@@ -39,7 +39,7 @@ With explanations in the comments:
 			"run_delay":  "-1",			// reading of events it is triggered outside of ERs
 			"field_separator": ";",		// field separator definition
 			"type": "*file_csv",		// type of reader, *file_csv can read .csv files
-			"row_length" : 0,					// Number of fields from csv file
+			"row_length" : 0,			// Number of fields from csv file
 			"flags": [					// influence processing logic within CGRateS workflow
 				"*cdrs",				//   *cdrs will create CDRs
 				"*log"					//   *log will log the events to syslog

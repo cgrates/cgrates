@@ -26,12 +26,12 @@ import (
 
 func TestDNSAgentCfgloadFromJsonCfg(t *testing.T) {
 	var dnsCfg, expected DNSAgentCfg
-	if err := dnsCfg.loadFromJsonCfg(nil, utils.INFIELD_SEP, 5); err != nil {
+	if err := dnsCfg.loadFromJsonCfg(nil, utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(dnsCfg, expected) {
 		t.Errorf("Expected: %+v ,recived: %+v", expected, dnsCfg)
 	}
-	if err := dnsCfg.loadFromJsonCfg(new(DNSAgentJsonCfg), utils.INFIELD_SEP, 5); err != nil {
+	if err := dnsCfg.loadFromJsonCfg(new(DNSAgentJsonCfg), utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(dnsCfg, expected) {
 		t.Errorf("Expected: %+v ,recived: %+v", expected, dnsCfg)
@@ -57,7 +57,7 @@ func TestDNSAgentCfgloadFromJsonCfg(t *testing.T) {
 		t.Error(err)
 	} else if jsnDaCfg, err := jsnCfg.DNSAgentJsonCfg(); err != nil {
 		t.Error(err)
-	} else if err = dnsCfg.loadFromJsonCfg(jsnDaCfg, utils.INFIELD_SEP, 5); err != nil {
+	} else if err = dnsCfg.loadFromJsonCfg(jsnDaCfg, utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, dnsCfg) {
 		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(dnsCfg))
@@ -66,12 +66,12 @@ func TestDNSAgentCfgloadFromJsonCfg(t *testing.T) {
 
 func TestRequestProcessorloadFromJsonCfg(t *testing.T) {
 	var dareq, expected RequestProcessor
-	if err := dareq.loadFromJsonCfg(nil, utils.INFIELD_SEP, 5); err != nil {
+	if err := dareq.loadFromJsonCfg(nil, utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(dareq, expected) {
 		t.Errorf("Expected: %+v ,recived: %+v", expected, dareq)
 	}
-	if err := dareq.loadFromJsonCfg(new(ReqProcessorJsnCfg), utils.INFIELD_SEP, 5); err != nil {
+	if err := dareq.loadFromJsonCfg(new(ReqProcessorJsnCfg), utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(dareq, expected) {
 		t.Errorf("Expected: %+v ,recived: %+v", expected, dareq)
@@ -88,7 +88,7 @@ func TestRequestProcessorloadFromJsonCfg(t *testing.T) {
 		Filters: []string{"filter1", "filter2"},
 		Flags:   utils.FlagsWithParams{"flag1": []string{}, "flag2": []string{}},
 	}
-	if err = dareq.loadFromJsonCfg(json, utils.INFIELD_SEP, 5); err != nil {
+	if err = dareq.loadFromJsonCfg(json, utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, dareq) {
 		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(dareq))

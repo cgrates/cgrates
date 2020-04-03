@@ -523,7 +523,7 @@ func (cfg *CGRConfig) loadCdreCfg(jsnCfg *CgrJsonCfg) (err error) {
 					cfg.CdreProfiles[profileName] = cfg.dfltCdreProfile.Clone() // Clone default so we do not inherit pointers
 				}
 			}
-			if err = cfg.CdreProfiles[profileName].loadFromJsonCfg(jsnCdre1Cfg, cfg.generalCfg.RSRSep, cfg.generalCfg.RoundingDecimals); err != nil { // Update the existing profile with content from json config
+			if err = cfg.CdreProfiles[profileName].loadFromJsonCfg(jsnCdre1Cfg, cfg.generalCfg.RSRSep); err != nil { // Update the existing profile with content from json config
 				return
 			}
 		}
@@ -573,7 +573,7 @@ func (cfg *CGRConfig) loadDiameterAgentCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnDACfg, err = jsnCfg.DiameterAgentJsonCfg(); err != nil {
 		return
 	}
-	return cfg.diameterAgentCfg.loadFromJsonCfg(jsnDACfg, cfg.generalCfg.RSRSep, cfg.generalCfg.RoundingDecimals)
+	return cfg.diameterAgentCfg.loadFromJsonCfg(jsnDACfg, cfg.generalCfg.RSRSep)
 }
 
 // loadRadiusAgentCfg loads the RadiusAgent section of the configuration
@@ -582,7 +582,7 @@ func (cfg *CGRConfig) loadRadiusAgentCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnRACfg, err = jsnCfg.RadiusAgentJsonCfg(); err != nil {
 		return
 	}
-	return cfg.radiusAgentCfg.loadFromJsonCfg(jsnRACfg, cfg.generalCfg.RSRSep, cfg.generalCfg.RoundingDecimals)
+	return cfg.radiusAgentCfg.loadFromJsonCfg(jsnRACfg, cfg.generalCfg.RSRSep)
 }
 
 // loadDNSAgentCfg loads the DNSAgent section of the configuration
@@ -591,7 +591,7 @@ func (cfg *CGRConfig) loadDNSAgentCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnDNSCfg, err = jsnCfg.DNSAgentJsonCfg(); err != nil {
 		return
 	}
-	return cfg.dnsAgentCfg.loadFromJsonCfg(jsnDNSCfg, cfg.generalCfg.RSRSep, cfg.generalCfg.RoundingDecimals)
+	return cfg.dnsAgentCfg.loadFromJsonCfg(jsnDNSCfg, cfg.generalCfg.RSRSep)
 }
 
 // loadHttpAgentCfg loads the HttpAgent section of the configuration
@@ -600,7 +600,7 @@ func (cfg *CGRConfig) loadHttpAgentCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnHttpAgntCfg, err = jsnCfg.HttpAgentJsonCfg(); err != nil {
 		return
 	}
-	return cfg.httpAgentCfg.loadFromJsonCfg(jsnHttpAgntCfg, cfg.generalCfg.RSRSep, cfg.generalCfg.RoundingDecimals)
+	return cfg.httpAgentCfg.loadFromJsonCfg(jsnHttpAgntCfg, cfg.generalCfg.RSRSep)
 }
 
 // loadAttributeSCfg loads the AttributeS section of the configuration
@@ -667,7 +667,7 @@ func (cfg *CGRConfig) loadLoaderSCfg(jsnCfg *CgrJsonCfg) (err error) {
 		// cfg.loaderCfg = make(LoaderSCfgs, len(jsnLoaderCfg))
 		for _, profile := range jsnLoaderCfg {
 			loadSCfgp := NewDfltLoaderSCfg()
-			loadSCfgp.loadFromJsonCfg(profile, cfg.generalCfg.RSRSep, cfg.generalCfg.RoundingDecimals)
+			loadSCfgp.loadFromJsonCfg(profile, cfg.generalCfg.RSRSep)
 			cfg.loaderCfg = append(cfg.loaderCfg, loadSCfgp) // use apend so the loaderS profile to be loaded from multiple files
 		}
 	}
@@ -752,7 +752,7 @@ func (cfg *CGRConfig) loadErsCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnERsCfg, err = jsnCfg.ERsJsonCfg(); err != nil {
 		return
 	}
-	return cfg.ersCfg.loadFromJsonCfg(jsnERsCfg, cfg.generalCfg.RSRSep, cfg.dfltEvRdr, cfg.generalCfg.RoundingDecimals)
+	return cfg.ersCfg.loadFromJsonCfg(jsnERsCfg, cfg.generalCfg.RSRSep, cfg.dfltEvRdr)
 }
 
 // SureTaxCfg use locking to retrieve the configuration, possibility later for runtime reload
