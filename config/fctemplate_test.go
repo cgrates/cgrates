@@ -315,3 +315,69 @@ func TestFCTemplateClone(t *testing.T) {
 		t.Errorf("expected: %s ,received: %s", utils.ToJSON(initialSmpl), utils.ToJSON(cloned))
 	}
 }
+
+func TestRoundingDecimals(t *testing.T) {
+	jsonCfg := &FcTemplateJsonCfg{
+		Tag:     utils.StringPointer("Tenant"),
+		Type:    utils.StringPointer("*composed"),
+		Path:    utils.StringPointer("Tenant"),
+		Filters: &[]string{"Filter1", "Filter2"},
+		Value:   utils.StringPointer("cgrates.org"),
+	}
+	expected := &FCTemplate{
+		Tag:              "Tenant",
+		Type:             "*composed",
+		Path:             "Tenant",
+		Filters:          []string{"Filter1", "Filter2"},
+		Value:            NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
+		RoundingDecimals: 5,
+	}
+	if rcv, err := NewFCTemplateFromFCTemplateJsonCfg(jsonCfg, utils.INFIELD_SEP, 5); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("expected: %s\n ,received: %s", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+
+	jsonCfg = &FcTemplateJsonCfg{
+		Tag:               utils.StringPointer("Tenant"),
+		Type:              utils.StringPointer("*composed"),
+		Path:              utils.StringPointer("Tenant"),
+		Filters:           &[]string{"Filter1", "Filter2"},
+		Value:             utils.StringPointer("cgrates.org"),
+		Rounding_decimals: utils.IntPointer(3),
+	}
+	expected = &FCTemplate{
+		Tag:              "Tenant",
+		Type:             "*composed",
+		Path:             "Tenant",
+		Filters:          []string{"Filter1", "Filter2"},
+		Value:            NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
+		RoundingDecimals: 3,
+	}
+	if rcv, err := NewFCTemplateFromFCTemplateJsonCfg(jsonCfg, utils.INFIELD_SEP, 5); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("expected: %s\n ,received: %s", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+
+	jsonCfg = &FcTemplateJsonCfg{
+		Tag:     utils.StringPointer("Tenant"),
+		Type:    utils.StringPointer("*composed"),
+		Path:    utils.StringPointer("Tenant"),
+		Filters: &[]string{"Filter1", "Filter2"},
+		Value:   utils.StringPointer("cgrates.org"),
+	}
+	expected = &FCTemplate{
+		Tag:              "Tenant",
+		Type:             "*composed",
+		Path:             "Tenant",
+		Filters:          []string{"Filter1", "Filter2"},
+		Value:            NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
+		RoundingDecimals: 0,
+	}
+	if rcv, err := NewFCTemplateFromFCTemplateJsonCfg(jsonCfg, utils.INFIELD_SEP, 0); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("expected: %s\n ,received: %s", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
