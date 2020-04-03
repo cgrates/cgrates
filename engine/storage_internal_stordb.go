@@ -34,15 +34,15 @@ func (iDB *InternalDB) GetTpIds(colName string) (ids []string, err error) {
 
 func (iDB *InternalDB) GetTpTableIds(tpid, table string, distinct utils.TPDistinctIds,
 	filters map[string]string, paginator *utils.PaginatorWithSearch) (ids []string, err error) {
-	key := tpid
-	fullIDs := iDB.db.GetItemIDs(table, key)
+	fullIDs := iDB.db.GetItemIDs(table, tpid)
+	idSet := utils.NewStringSet(nil)
 	switch table {
 	// in case of account action we have the id the following form : loadid:tenant:account
 	// so we need to treat it as a special case
 	case utils.TBLTPAccountActions:
 		for _, fullID := range fullIDs {
 			var buildedID string
-			sliceID := strings.Split(fullID[len(key)+1:], utils.CONCATENATED_KEY_SEP)
+			sliceID := strings.Split(fullID[len(tpid)+1:], utils.CONCATENATED_KEY_SEP)
 			for _, key := range distinct {
 				switch key {
 				case "loadid":
@@ -58,14 +58,14 @@ func (iDB *InternalDB) GetTpTableIds(tpid, table string, distinct utils.TPDistin
 
 				}
 			}
-			ids = append(ids, buildedID)
+			idSet.Add(buildedID)
 		}
-		// in case of rating profile we have the id in the following form : loadid:tenant:category:subject
+	// in case of rating profile we have the id in the following form : loadid:tenant:category:subject
 	// so we need to treat it as a special case
 	case utils.TBLTPRateProfiles:
 		for _, fullID := range fullIDs {
 			var buildedID string
-			sliceID := strings.Split(fullID[len(key)+1:], utils.CONCATENATED_KEY_SEP)
+			sliceID := strings.Split(fullID[len(tpid)+1:], utils.CONCATENATED_KEY_SEP)
 			for _, key := range distinct {
 				switch key {
 				case "loadid":
@@ -83,23 +83,30 @@ func (iDB *InternalDB) GetTpTableIds(tpid, table string, distinct utils.TPDistin
 
 				}
 			}
-			ids = append(ids, buildedID)
+			idSet.Add(buildedID)
 		}
+	// by default the order of the keys is unknown
+	// so we construct the id based on the lenght of the distict slice
 	default:
+		ldist := len(distinct)
 		for _, fullID := range fullIDs {
-			var buildedID string
-			sliceID := strings.Split(fullID[len(key)+1:], utils.CONCATENATED_KEY_SEP)
-			for i := 0; i < len(distinct); i++ {
-				if len(buildedID) == 0 {
-					buildedID += sliceID[len(sliceID)-i-1]
-				} else {
-					buildedID += utils.CONCATENATED_KEY_SEP + sliceID[len(sliceID)-i+1]
-				}
+			ID := fullID[len(tpid)+1:]
+			sliceID := strings.Split(ID, utils.CONCATENATED_KEY_SEP)
+			lIDs := len(sliceID)
+			if ldist > lIDs {
+				err = fmt.Errorf("the lenght of disticts<%v> is greater than the lenght of the ids<%v>", ldist, lIDs)
+				return
 			}
-			ids = append(ids, buildedID)
+			if ldist == lIDs { // no need to process the obtained ID
+				idSet.Add(ID)
+				continue
+			}
+			// keep the order
+			buildedID := utils.ConcatenatedKey(sliceID[lIDs-ldist:]...)
+			idSet.Add(buildedID)
 		}
 	}
-	ids = utils.NewStringSet(ids).AsSlice()
+	ids = idSet.AsSlice()
 	return
 }
 
