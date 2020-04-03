@@ -449,6 +449,7 @@ func testCGRConfigReloadERs(t *testing.T) {
 			&EventReaderCfg{
 				ID:              utils.MetaDefault,
 				Type:            utils.MetaFileCSV,
+				RowLength:       0,
 				FieldSep:        ",",
 				RunDelay:        0,
 				ConcurrentReqs:  1024,
@@ -844,6 +845,7 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 				"FailedCallsPrefix":        "",
 				"ID":                       "*default",
 				"ProcessedPath":            "/var/spool/cgrates/cdrc/out",
+				"RowLength":                0,
 				"RunDelay":                 0,
 				"SourcePath":               "/var/spool/cgrates/cdrc/in",
 				"Tenant":                   nil,
@@ -864,6 +866,7 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 				"PartialRecordCache":       0,
 				"ID":                       "file_reader1",
 				"ProcessedPath":            "/tmp/ers/out",
+				"RowLength":                0,
 				"RunDelay":                 -1.,
 				"SourcePath":               "/tmp/ers/in",
 				"Tenant":                   nil,
