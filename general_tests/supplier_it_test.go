@@ -141,7 +141,6 @@ func testV1SplSSetSupplierProfilesWithoutRatingPlanIDs(t *testing.T) {
 			Suppliers: []*engine.Supplier{
 				{
 					ID:         "SPL1",
-					FilterIDs:  []string{"FLTR_1"},
 					AccountIDs: []string{"accc"},
 					Weight:     20,
 					Blocker:    false,
