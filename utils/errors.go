@@ -182,6 +182,10 @@ func NewErrAttributeS(err error) error {
 	return fmt.Errorf("ATTRIBUTES_ERROR:%s", err)
 }
 
+func NewErrChargerS(err error) error {
+	return fmt.Errorf("CHARGERS_ERROR:%s", err)
+}
+
 func NewErrDispatcherS(err error) error {
 	return fmt.Errorf("%s:%s", DispatcherErrorPrefix, err.Error())
 }
