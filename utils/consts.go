@@ -1445,8 +1445,6 @@ const (
 	CDRsV1Ping               = "CDRsV1.Ping"
 	CDRsV2                   = "CDRsV2"
 	CDRsV2StoreSessionCost   = "CDRsV2.StoreSessionCost"
-	CdrsV2ProcessExternalCdr = "CdrsV2.ProcessExternalCdr"
-	CdrsV2ProcessCdr         = "CdrsV2.ProcessCdr"
 	CDRsV2ProcessEvent       = "CDRsV2.ProcessEvent"
 )
 
