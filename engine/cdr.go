@@ -313,10 +313,15 @@ func (cdr *CDR) combimedCdrFieldVal(cfgCdrFld *config.FCTemplate, groupCDRs []*C
 func (cdr *CDR) exportFieldValue(cfgCdrFld *config.FCTemplate, filterS *FilterS) (retVal string, err error) {
 	for _, rsrFld := range cfgCdrFld.Value {
 		var cdrVal string
+		var roundDec int
 		switch cfgCdrFld.Path {
 		case utils.MetaExp + utils.NestingSep + utils.COST:
-			cdrVal = cdr.FormatCost(cfgCdrFld.CostShiftDigits,
-				cfgCdrFld.RoundingDecimals)
+			if cfgCdrFld.RoundingDecimals == nil {
+				roundDec = config.CgrConfig().GeneralCfg().RoundingDecimals
+			} else {
+				roundDec = *cfgCdrFld.RoundingDecimals
+			}
+			cdrVal = cdr.FormatCost(cfgCdrFld.CostShiftDigits, roundDec)
 		case utils.MetaExp + utils.NestingSep + utils.SetupTime:
 			if cfgCdrFld.Layout == "" {
 				cfgCdrFld.Layout = time.RFC3339
