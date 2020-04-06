@@ -82,7 +82,8 @@ func NewFCTemplateFromFCTemplateJsonCfg(jsnCfg *FcTemplateJsonCfg, separator str
 		fcTmp.CostShiftDigits = *jsnCfg.Cost_shift_digits
 	}
 	if jsnCfg.Rounding_decimals != nil {
-		fcTmp.RoundingDecimals = *jsnCfg.Rounding_decimals
+		fcTmp.RoundingDecimals = new(int)
+		*fcTmp.RoundingDecimals = *jsnCfg.Rounding_decimals
 	}
 	if jsnCfg.Mask_destinationd_id != nil {
 		fcTmp.MaskDestID = *jsnCfg.Mask_destinationd_id
@@ -110,7 +111,7 @@ type FCTemplate struct {
 	BreakOnSuccess   bool
 	Layout           string // time format
 	CostShiftDigits  int    // Used for CDR
-	RoundingDecimals int
+	RoundingDecimals *int
 	MaskDestID       string
 	MaskLen          int
 }
