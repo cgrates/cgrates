@@ -62,6 +62,8 @@ var (
 		testSSv1ItForceUpdateSession,
 		testSSv1ItDynamicDebit,
 		testSSv1ItDeactivateSessions,
+		testSSv1ItAuthNotFoundCharger,
+		testSSv1ItInitiateSessionNotFoundCharger,
 
 		testSSv1ItInitiateSessionWithDigest, // no need for session terminate because is the last test
 
@@ -1038,6 +1040,61 @@ func testSSv1ItDeactivateSessions(t *testing.T) {
 		t.Error(err)
 	} else if len(pSessions) != 3 {
 		t.Errorf("Expecting: 2, received: %+v", len(pSessions))
+	}
+}
+
+func testSSv1ItAuthNotFoundCharger(t *testing.T) {
+	authUsage := 5 * time.Minute
+	args := &sessions.V1AuthorizeArgs{
+		GetMaxUsage: true,
+		CGREvent: &utils.CGREvent{
+			Tenant: "Unexist",
+			ID:     "testSSv1ItAuthNotFoundCharger",
+			Event: map[string]interface{}{
+				utils.Tenant:      "Unexist",
+				utils.ToR:         utils.VOICE,
+				utils.OriginID:    "testSSv1ItAuthNotFoundCharger",
+				utils.RequestType: sSV1RequestType,
+				utils.Account:     "1001",
+				utils.Subject:     "ANY2CNT",
+				utils.Destination: "1002",
+				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.Usage:       authUsage,
+			},
+		},
+	}
+	var rply sessions.V1AuthorizeReply
+	if err := sSv1BiRpc.Call(utils.SessionSv1AuthorizeEvent, args,
+		&rply); err == nil || err.Error() != utils.NewErrChargerS(utils.ErrNotFound).Error() {
+		t.Errorf("Expecting: %+v, received: %+v", utils.NewErrChargerS(utils.ErrNotFound), err)
+	}
+}
+
+func testSSv1ItInitiateSessionNotFoundCharger(t *testing.T) {
+	initUsage := 5 * time.Minute
+	args := &sessions.V1InitSessionArgs{
+		InitSession: true,
+		CGREvent: &utils.CGREvent{
+			Tenant: "Unexist",
+			ID:     "testSSv1ItInitiateSessionNotFoundCharger",
+			Event: map[string]interface{}{
+				utils.Tenant:      "Unexist",
+				utils.ToR:         utils.VOICE,
+				utils.OriginID:    "testSSv1ItInitiateSessionNotFoundCharger",
+				utils.RequestType: sSV1RequestType,
+				utils.Account:     "1001",
+				utils.Subject:     "ANY2CNT",
+				utils.Destination: "1002",
+				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+				utils.Usage:       initUsage,
+			},
+		},
+	}
+	var rply sessions.V1InitSessionReply
+	if err := sSv1BiRpc.Call(utils.SessionSv1InitiateSession,
+		args, &rply); err == nil || err.Error() != utils.NewErrChargerS(utils.ErrNotFound).Error() {
+		t.Errorf("Expecting: %+v, received: %+v", utils.NewErrChargerS(utils.ErrNotFound), err)
 	}
 }
 
