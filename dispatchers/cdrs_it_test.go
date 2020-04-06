@@ -39,6 +39,8 @@ var (
 		testDspCDRsGetCDR2,
 		testDspCDRsProcessExternalCDR,
 		testDspCDRsGetCDR3,
+		testDspCDRsV2ProcessEvent,
+		testDspCDRsV2StoreSessionCost,
 	}
 
 	sTestsDspCDRsWithoutAuth = []func(t *testing.T){
@@ -51,6 +53,8 @@ var (
 		testDspCDRsGetCDR2NoAuth,
 		testDspCDRsProcessExternalCDRNoAuth,
 		testDspCDRsGetCDR3NoAuth,
+		testDspCDRsV2ProcessEventNoAuth,
+		testDspCDRsV2StoreSessionCostNoAuth,
 	}
 )
 
@@ -320,6 +324,79 @@ func testDspCDRsGetCDR3(t *testing.T) {
 	}
 }
 
+func testDspCDRsV2ProcessEvent(t *testing.T) {
+	var reply []*utils.EventWithFlags
+	args := &engine.ArgV1ProcessEvent{
+		Flags: []string{utils.MetaRALs},
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				utils.OriginID:    "testDspCDRsV2ProcessEvent",
+				utils.OriginHost:  "192.168.1.1",
+				utils.Source:      "testDspCDRsV2ProcessEvent",
+				utils.RequestType: utils.META_RATED,
+				utils.Account:     "1001",
+				utils.Subject:     "1001",
+				utils.Destination: "1002",
+				utils.AnswerTime:  time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+				utils.Usage:       time.Duration(1) * time.Minute,
+			},
+		},
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("cdrsv212345"),
+		},
+	}
+
+	if err := dispEngine.RPC.Call(utils.CDRsV2ProcessEvent, args, &reply); err != nil {
+		t.Error(err)
+	} else if len(reply) != 2 {
+		for _, procEv := range reply {
+			if procEv.Event[utils.RequestType] == utils.META_RATED && procEv.Event[utils.Cost] != 0.6 {
+				t.Errorf("Expected: %+v , received: %v", 0.6, procEv.Event[utils.Cost])
+			}
+		}
+	}
+}
+
+func testDspCDRsV2StoreSessionCost(t *testing.T) {
+	var reply string
+	cc := &engine.CallCost{
+		Category:    "generic",
+		Tenant:      "cgrates.org",
+		Subject:     "1001",
+		Account:     "1001",
+		Destination: "data",
+		ToR:         "*data",
+		Cost:        0,
+	}
+	args := &engine.ArgsV2CDRSStoreSMCost{
+		CheckDuplicate: true,
+		Cost: &engine.V2SMCost{
+			CGRID:       "testDspCDRsV2StoreSessionCost",
+			RunID:       utils.MetaDefault,
+			OriginHost:  "",
+			OriginID:    "testdatagrp_grp1",
+			CostSource:  "SMR",
+			Usage:       1536,
+			CostDetails: engine.NewEventCostFromCallCost(cc, "testDspCDRsV2StoreSessionCost", utils.MetaDefault),
+		},
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("cdrsv212345"),
+		},
+	}
+
+	if err := dispEngine.RPC.Call(utils.CDRsV2StoreSessionCost, args, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply received: ", reply)
+	}
+	time.Sleep(time.Duration(150) * time.Millisecond)
+	if err := dispEngine.RPC.Call(utils.CDRsV2StoreSessionCost, args,
+		&reply); err == nil || err.Error() != "SERVER_ERROR: EXISTS" {
+		t.Error("Unexpected error: ", err)
+	}
+}
+
 func testDspCDRsPingNoAuth(t *testing.T) {
 	var reply string
 	if err := allEngine.RPC.Call(utils.CDRsV1Ping, new(utils.CGREvent), &reply); err != nil {
@@ -518,5 +595,72 @@ func testDspCDRsGetCDR3NoAuth(t *testing.T) {
 		t.Errorf("Received: %+v", reply)
 	} else if reply[0].CGRID != "8ae63781b39f3265d014d2ba6a70437172fba46d" {
 		t.Errorf("Expected: 8ae63781b39f3265d014d2ba6a70437172fba46d , received:%v", reply[0].CGRID)
+	}
+}
+
+func testDspCDRsV2ProcessEventNoAuth(t *testing.T) {
+	var reply []*utils.EventWithFlags
+	args := &engine.ArgV1ProcessEvent{
+		Flags: []string{utils.MetaRALs},
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				utils.OriginID:    "testDspCDRsV2ProcessEventNoAuth",
+				utils.OriginHost:  "192.168.1.1",
+				utils.Source:      "testDspCDRsV2ProcessEventNoAuth",
+				utils.RequestType: utils.META_RATED,
+				utils.Account:     "1001",
+				utils.Subject:     "1001",
+				utils.Destination: "1002",
+				utils.AnswerTime:  time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+				utils.Usage:       time.Duration(1) * time.Minute,
+			},
+		},
+	}
+
+	if err := dispEngine.RPC.Call(utils.CDRsV2ProcessEvent, args, &reply); err != nil {
+		t.Error(err)
+	} else if len(reply) != 2 {
+		for _, procEv := range reply {
+			if procEv.Event[utils.RequestType] == utils.META_RATED && procEv.Event[utils.Cost] != 0.6 {
+				t.Errorf("Expected: %+v , received: %v", 0.6, procEv.Event[utils.Cost])
+			}
+		}
+	}
+}
+
+func testDspCDRsV2StoreSessionCostNoAuth(t *testing.T) {
+	var reply string
+	cc := &engine.CallCost{
+		Category:    "generic",
+		Tenant:      "cgrates.org",
+		Subject:     "1001",
+		Account:     "1001",
+		Destination: "data",
+		ToR:         "*data",
+		Cost:        0,
+	}
+	args := &engine.ArgsV2CDRSStoreSMCost{
+		CheckDuplicate: true,
+		Cost: &engine.V2SMCost{
+			CGRID:       "testDspCDRsV2StoreSessionCostNoAuth",
+			RunID:       utils.MetaDefault,
+			OriginHost:  "",
+			OriginID:    "testdatagrp_grp1",
+			CostSource:  "SMR",
+			Usage:       1536,
+			CostDetails: engine.NewEventCostFromCallCost(cc, "testDspCDRsV2StoreSessionCostNoAuth", utils.MetaDefault),
+		},
+	}
+
+	if err := dispEngine.RPC.Call(utils.CDRsV2StoreSessionCost, args, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply received: ", reply)
+	}
+	time.Sleep(time.Duration(150) * time.Millisecond)
+	if err := dispEngine.RPC.Call(utils.CDRsV2StoreSessionCost, args,
+		&reply); err == nil || err.Error() != "SERVER_ERROR: EXISTS" {
+		t.Error("Unexpected error: ", err)
 	}
 }
