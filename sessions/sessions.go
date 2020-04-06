@@ -1049,10 +1049,7 @@ func (sS *SessionS) forkSession(s *Session) (err error) {
 	var chrgrs []*engine.ChrgSProcessEventReply
 	if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().ChargerSConns, nil,
 		utils.ChargerSv1ProcessEvent, cgrEv, &chrgrs); err != nil {
-		if err.Error() == utils.ErrNotFound.Error() {
-			return utils.ErrNoActiveSession
-		}
-		return
+		return utils.NewErrChargerS(err)
 	}
 	s.SRuns = make([]*SRun, len(chrgrs))
 	for i, chrgr := range chrgrs {
@@ -1324,6 +1321,7 @@ func (sS *SessionS) authEvent(tnt string, evStart engine.MapEvent) (maxUsage tim
 			utils.ResponderGetMaxSessionTime,
 			&engine.CallDescriptorWithArgDispatcher{CallDescriptor: sr.CD,
 				ArgDispatcher: s.ArgDispatcher}, &rplyMaxUsage); err != nil {
+			err = utils.NewErrRALs(err)
 			return
 		}
 		if rplyMaxUsage > eventUsage {
@@ -1512,8 +1510,9 @@ func (sS *SessionS) chargeEvent(tnt string, ev engine.MapEvent,
 			utils.DurationPointer(time.Duration(0)), nil, nil, true); errEnd != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error when force-ending charged event: <%s>, err: <%s>",
-					utils.SessionS, cgrID, err.Error()))
+					utils.SessionS, cgrID, errEnd.Error()))
 		}
+		err = utils.NewErrRALs(err)
 		return
 	}
 	usage := maxUsage
@@ -1524,7 +1523,7 @@ func (sS *SessionS) chargeEvent(tnt string, ev engine.MapEvent,
 	if errEnd := sS.terminateSession(s, utils.DurationPointer(usage), nil, nil, true); errEnd != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> error when ending charged event: <%s>, err: <%s>",
-				utils.SessionS, cgrID, err.Error()))
+				utils.SessionS, cgrID, errEnd.Error()))
 	}
 	return // returns here the maxUsage from update
 }
@@ -1845,7 +1844,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.ClientConnector,
 		var maxUsage time.Duration
 		if maxUsage, err = sS.authEvent(args.CGREvent.Tenant,
 			args.CGREvent.Event); err != nil {
-			return utils.NewErrRALs(err)
+			return err
 		}
 		authReply.MaxUsage = &maxUsage
 	}
@@ -2136,7 +2135,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.ClientConnector,
 		s, err := sS.initSession(args.CGREvent.Tenant, ev,
 			sS.biJClntID(clnt), originID, dbtItvl, args.ArgDispatcher, false)
 		if err != nil {
-			return utils.NewErrRALs(err)
+			return err
 		}
 		if s.debitStop != nil { //active debit
 			rply.MaxUsage = &sS.cgrCfg.SessionSCfg().MaxCallDuration
@@ -2335,7 +2334,7 @@ func (sS *SessionS) BiRPCv1UpdateSession(clnt rpcclient.ClientConnector,
 				ev, sS.biJClntID(clnt),
 				ev.GetStringIgnoreErrors(utils.OriginID),
 				dbtItvl, args.ArgDispatcher, false); err != nil {
-				return utils.NewErrRALs(err)
+				return err
 			}
 		}
 		var maxUsage time.Duration
@@ -2470,7 +2469,7 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.ClientConnector,
 				ev, sS.biJClntID(clnt),
 				ev.GetStringIgnoreErrors(utils.OriginID), dbtItvl,
 				args.ArgDispatcher, false); err != nil {
-				return utils.NewErrRALs(err)
+				return err
 			}
 
 		}
@@ -2824,7 +2823,7 @@ func (sS *SessionS) BiRPCv1ProcessMessage(clnt rpcclient.ClientConnector,
 		var maxUsage time.Duration
 		if maxUsage, err = sS.chargeEvent(args.CGREvent.Tenant,
 			engine.MapEvent(args.CGREvent.Event), args.ArgDispatcher); err != nil {
-			return utils.NewErrRALs(err)
+			return err
 		}
 		rply.MaxUsage = &maxUsage
 	}
@@ -3083,7 +3082,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 				maxUsage, err := sS.authEvent(args.CGREvent.Tenant,
 					engine.MapEvent(args.CGREvent.Event))
 				if err != nil {
-					return utils.NewErrRALs(err)
+					return err
 				}
 				rply.MaxUsage = &maxUsage
 			// check for init session
@@ -3096,7 +3095,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 				s, err := sS.initSession(args.CGREvent.Tenant, ev,
 					sS.biJClntID(clnt), originID, dbtItvl, args.ArgDispatcher, false)
 				if err != nil {
-					return utils.NewErrRALs(err)
+					return err
 				}
 				if s.debitStop != nil { //active debit
 					rply.MaxUsage = &sS.cgrCfg.SessionSCfg().MaxCallDuration
@@ -3124,7 +3123,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 					if s, err = sS.initSession(args.CGREvent.Tenant,
 						ev, sS.biJClntID(clnt),
 						ev.GetStringIgnoreErrors(utils.OriginID), dbtItvl, args.ArgDispatcher, false); err != nil {
-						return utils.NewErrRALs(err)
+						return err
 					}
 				}
 				var maxUsage time.Duration
@@ -3149,7 +3148,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 						ev, sS.biJClntID(clnt),
 						ev.GetStringIgnoreErrors(utils.OriginID), dbtItvl,
 						args.ArgDispatcher, false); err != nil {
-						return utils.NewErrRALs(err)
+						return err
 					}
 				}
 				if err = sS.terminateSession(s,
