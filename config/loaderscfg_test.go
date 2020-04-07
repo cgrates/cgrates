@@ -20,6 +20,7 @@ package config
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -87,6 +88,7 @@ func TestLoaderSCfgloadFromJsonCfg(t *testing.T) {
 						Type:      "*composed",
 						Value:     val,
 						Mandatory: true,
+						Layout:    time.RFC3339,
 					},
 				},
 			},

@@ -323,14 +323,8 @@ func (cdr *CDR) exportFieldValue(cfgCdrFld *config.FCTemplate, filterS *FilterS)
 			}
 			cdrVal = cdr.FormatCost(cfgCdrFld.CostShiftDigits, roundDec)
 		case utils.MetaExp + utils.NestingSep + utils.SetupTime:
-			if cfgCdrFld.Layout == "" {
-				cfgCdrFld.Layout = time.RFC3339
-			}
 			cdrVal = cdr.SetupTime.Format(cfgCdrFld.Layout)
 		case utils.MetaExp + utils.NestingSep + utils.AnswerTime: // Format time based on layout
-			if cfgCdrFld.Layout == "" {
-				cfgCdrFld.Layout = time.RFC3339
-			}
 			cdrVal = cdr.AnswerTime.Format(cfgCdrFld.Layout)
 		case utils.MetaExp + utils.NestingSep + utils.Destination:
 			cdrVal, err = cdr.FieldAsString(rsrFld)
@@ -368,9 +362,6 @@ func (cdr *CDR) formatField(cfgFld *config.FCTemplate, httpSkipTLSCheck bool,
 		dtFld, err := utils.ParseTimeDetectLayout(rawVal, cfgFld.Timezone)
 		if err != nil { // Only one rule makes sense here
 			return "", err
-		}
-		if cfgFld.Layout == "" {
-			cfgFld.Layout = time.RFC3339
 		}
 		outVal = dtFld.Format(cfgFld.Layout)
 	case utils.MetaHTTPPost:

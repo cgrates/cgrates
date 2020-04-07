@@ -20,6 +20,7 @@ package config
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -38,6 +39,7 @@ func TestNewFCTemplateFromFCTemplateJsonCfg(t *testing.T) {
 		Path:    "Tenant",
 		Filters: []string{"Filter1", "Filter2"},
 		Value:   NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
+		Layout:  time.RFC3339,
 	}
 	if rcv, err := NewFCTemplateFromFCTemplateJsonCfg(jsonCfg, utils.INFIELD_SEP); err != nil {
 		t.Error(err)
@@ -70,6 +72,7 @@ func TestFCTemplatesFromFCTemplatesJsonCfg(t *testing.T) {
 			Path:    "Tenant",
 			Filters: []string{"Filter1", "Filter2"},
 			Value:   NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
+			Layout:  time.RFC3339,
 		},
 		&FCTemplate{
 			Tag:     "RunID",
@@ -77,6 +80,7 @@ func TestFCTemplatesFromFCTemplatesJsonCfg(t *testing.T) {
 			Path:    "RunID",
 			Filters: []string{"Filter1_1", "Filter2_2"},
 			Value:   NewRSRParsersMustCompile("SampleValue", true, utils.INFIELD_SEP),
+			Layout:  time.RFC3339,
 		},
 	}
 	if rcv, err := FCTemplatesFromFCTemplatesJsonCfg(jsnCfgs, utils.INFIELD_SEP); err != nil {
@@ -176,7 +180,7 @@ func TestFCTemplateInflate1(t *testing.T) {
 	if rcv, err := InflateTemplates(fcTmp1, fcTmpMp); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expFC, rcv) {
-		t.Errorf("expected: %s ,received: %s", utils.ToJSON(expFC), utils.ToJSON(rcv))
+		t.Errorf("expected: %s\n ,received: %s", utils.ToJSON(expFC), utils.ToJSON(rcv))
 	}
 }
 

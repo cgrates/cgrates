@@ -20,6 +20,7 @@ package config
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -75,6 +76,7 @@ func NewFCTemplateFromFCTemplateJsonCfg(jsnCfg *FcTemplateJsonCfg, separator str
 	if jsnCfg.Break_on_success != nil {
 		fcTmp.BreakOnSuccess = *jsnCfg.Break_on_success
 	}
+	fcTmp.Layout = time.RFC3339
 	if jsnCfg.Layout != nil {
 		fcTmp.Layout = *jsnCfg.Layout
 	}

@@ -20,6 +20,7 @@ package config
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -119,10 +120,11 @@ func TestCdreCfgloadFromJsonCfg(t *testing.T) {
 		Attempts:       1,
 		FieldSeparator: utils.CSV_SEP,
 		Fields: []*FCTemplate{{
-			Path:  "*exp.CGRID",
-			Tag:   "*exp.CGRID",
-			Type:  "*composed",
-			Value: val,
+			Path:   "*exp.CGRID",
+			Tag:    "*exp.CGRID",
+			Type:   "*composed",
+			Value:  val,
+			Layout: time.RFC3339,
 		}},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
