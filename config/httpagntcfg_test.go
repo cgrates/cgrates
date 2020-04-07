@@ -20,6 +20,7 @@ package config
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -79,6 +80,7 @@ func TestHttpAgentCfgsloadFromJsonCfg(t *testing.T) {
 				Type:      "*constant",
 				Value:     NewRSRParsersMustCompile("1", true, utils.INFIELD_SEP),
 				Mandatory: true,
+				Layout:    time.RFC3339,
 			}},
 		}},
 	}}
@@ -154,6 +156,7 @@ func TestHttpAgentCfgsloadFromJsonCfg(t *testing.T) {
 					Type:      "*constant",
 					Value:     NewRSRParsersMustCompile("1", true, utils.INFIELD_SEP),
 					Mandatory: true,
+					Layout:    time.RFC3339,
 				}}},
 				{
 					ID:      "mtcall_cdr",
@@ -166,6 +169,7 @@ func TestHttpAgentCfgsloadFromJsonCfg(t *testing.T) {
 						Type:      "*constant",
 						Value:     NewRSRParsersMustCompile("*pseudoprepaid", true, utils.INFIELD_SEP),
 						Mandatory: true,
+						Layout:    time.RFC3339,
 					}},
 					ReplyFields: []*FCTemplate{{
 						Tag:       "CDR_ID",
@@ -173,6 +177,7 @@ func TestHttpAgentCfgsloadFromJsonCfg(t *testing.T) {
 						Type:      "*composed",
 						Value:     NewRSRParsersMustCompile("~*req.CDR_ID", true, utils.INFIELD_SEP),
 						Mandatory: true,
+						Layout:    time.RFC3339,
 					}},
 				}},
 		}, &HttpAgentCfg{
@@ -321,6 +326,7 @@ func TestHttpAgentCfgappendHttpAgntProcCfgs(t *testing.T) {
 				Type:      "*constant",
 				Value:     NewRSRParsersMustCompile("1", true, utils.INFIELD_SEP),
 				Mandatory: false,
+				Layout:    time.RFC3339,
 			}},
 		}, {
 			ID:            "OutboundAUTHDryRun1",
@@ -334,6 +340,7 @@ func TestHttpAgentCfgappendHttpAgntProcCfgs(t *testing.T) {
 				Type:      "*constant",
 				Value:     NewRSRParsersMustCompile("1", true, utils.INFIELD_SEP),
 				Mandatory: true,
+				Layout:    time.RFC3339,
 			}},
 		}},
 	}

@@ -1139,13 +1139,13 @@ func TestCDRexportFieldValue(t *testing.T) {
 	}
 
 	cfgCdrFld := &config.FCTemplate{Path: "*exp.SetupTime", Type: utils.META_COMPOSED,
-		Value: config.NewRSRParsersMustCompile("~SetupTime", true, utils.INFIELD_SEP)}
+		Value: config.NewRSRParsersMustCompile("~SetupTime", true, utils.INFIELD_SEP),Layout: time.RFC3339}
 
 	eVal := "2013-11-07T08:42:20Z"
 	if val, err := cdr.exportFieldValue(cfgCdrFld, nil); err != nil {
 		t.Error(err)
 	} else if val != eVal {
-		t.Errorf("Expecting: %+v, received: %+v", eVal, val)
+		t.Errorf("Expecting: %+v, received: %+v", eVal, utils.ToJSON(val))
 	}
 
 }
