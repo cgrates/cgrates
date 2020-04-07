@@ -101,6 +101,7 @@ func (erS *ERsCfg) Clone() (cln *ERsCfg) {
 type EventReaderCfg struct {
 	ID                       string
 	Type                     string
+	RowLength                int
 	FieldSep                 string
 	RunDelay                 time.Duration
 	ConcurrentReqs           int
@@ -127,6 +128,9 @@ func (er *EventReaderCfg) loadFromJsonCfg(jsnCfg *EventReaderJsonCfg, sep string
 	}
 	if jsnCfg.Type != nil {
 		er.Type = *jsnCfg.Type
+	}
+	if jsnCfg.Row_length != nil {
+		er.RowLength = *jsnCfg.Row_length
 	}
 	if jsnCfg.Field_separator != nil {
 		er.FieldSep = *jsnCfg.Field_separator
