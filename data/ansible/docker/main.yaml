@@ -118,6 +118,26 @@
       become: yes
       become_user: "{{ gouser }}"
 
+    - name: clean go cache
+      become: yes
+      shell: "go clean --cache"
+      environment:
+        PATH: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
+
+    - name: clean go modcache
+      become: yes
+      shell: "go clean --modcache"
+      environment:
+        PATH: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
+
+    - name: sync the go mod with vendor
+      become: yes
+      shell: "go mod vendor"
+      environment:
+        PATH: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
+      args:
+        chdir: '{{ cgrates_dir }}'
+
     - name:  build cgrates for docker
       shell: "sh {{ cgrates_dir }}/data/docker/scratch/build.sh"
       environment:
