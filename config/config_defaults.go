@@ -178,7 +178,7 @@ const CGRATES_CFG_JSON = `
 
 "schedulers": {
 	"enabled": false,				// start Scheduler service: <true|false>
-	"cdrs_conns": [],				// connections to CDRs for *cdrlog actions <*internal|x.y.z.y:1234>
+	"cdrs_conns": [],				// connections to CDRs for *cdrlog actions <""|*internal|$rpc_conns_id>
 	"filters": [],					// only execute actions matching these filters
 },
 
@@ -225,15 +225,15 @@ const CGRATES_CFG_JSON = `
 
 
 "filters": {								// Filters configuration (*new)
-	"stats_conns": [],						// connections to StatS for <*stats> filters, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
-	"resources_conns": [],					// connections to ResourceS for <*resources> filters, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
+	"stats_conns": [],						// connections to StatS for <*stats> filters, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
+	"resources_conns": [],					// connections to ResourceS for <*resources> filters, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
 },
 
 
 "rals": {
 	"enabled": false,						// enable Rating/Accounting service: <true|false>
-	"thresholds_conns": [],					// connections to ThresholdS for account/balance updates, empty to disable thresholds functionality: <""|*internal|x.y.z.y:1234>
-	"stats_conns": [],						// connections to StatS for account/balance updates, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
+	"thresholds_conns": [],					// connections to ThresholdS for account/balance updates, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
+	"stats_conns": [],						// connections to StatS for account/balance updates, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
 	"caches_conns":["*internal"],			// connections to CacheS for account/balance updates
 	"rp_subject_prefix_matching": false,	// enables prefix matching for the rating profile subject
 	"remove_expired":true,					// enables automatic removal of expired balances
@@ -257,11 +257,11 @@ const CGRATES_CFG_JSON = `
 	"extra_fields": [],						// extra fields to store in CDRs for non-generic CDRs (ie: FreeSWITCH JSON)
 	"store_cdrs": true,						// store cdrs in StorDB
 	"session_cost_retries": 5,				// number of queries to session_costs before recalculating CDR
-	"chargers_conns": [],					// connection to ChargerS for CDR forking, empty to disable billing for CDRs: <""|*internal|x.y.z.y:1234>
-	"rals_conns": [],						// connections to RALs for cost calculation: <""|*internal|x.y.z.y:1234>
-	"attributes_conns": [],					// connection to AttributeS for altering *raw CDRs, empty to disable attributes functionality: <""|*internal|x.y.z.y:1234>
-	"thresholds_conns": [],					// connection to ThresholdS for CDR reporting, empty to disable thresholds functionality: <""|*internal|x.y.z.y:1234>
-	"stats_conns": [],						// connections to StatS for CDR reporting, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
+	"chargers_conns": [],					// connection to ChargerS for CDR forking, empty to disable billing for CDRs: <""|*internal|$rpc_conns_id>
+	"rals_conns": [],						// connections to RALs for cost calculation: <""|*internal|$rpc_conns_id>
+	"attributes_conns": [],					// connection to AttributeS for altering *raw CDRs, empty to disable attributes functionality: <""|*internal|$rpc_conns_id>
+	"thresholds_conns": [],					// connection to ThresholdS for CDR reporting, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
+	"stats_conns": [],						// connections to StatS for CDR reporting, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
 	"online_cdr_exports":[],				// list of CDRE profiles to use for real-time CDR exports
 },
 
@@ -336,14 +336,14 @@ const CGRATES_CFG_JSON = `
 "sessions": {
 	"enabled": false,						// starts the session service: <true|false>
 	"listen_bijson": "127.0.0.1:2014",		// address where to listen for bidirectional JSON-RPC requests
-	"chargers_conns": [],					// connections to ChargerS for session forking <*internal|x.y.z.y:1234>
-	"rals_conns": [],						// connections to RALs for rating/accounting <""|*internal|127.0.0.1:2013>
-	"cdrs_conns": [],						// connections to CDRs for CDR posting <*internal|x.y.z.y:1234>
-	"resources_conns": [],					// connections to ResourceS for resources monitoring <""|*internal|127.0.0.1:2013>
-	"thresholds_conns": [],					// connections to ThresholdS for reporting session events <""|*internal|127.0.0.1:2013>
-	"stats_conns": [],						// connections to StatS for reporting session events <""|*internal|127.0.0.1:2013>
-	"suppliers_conns": [],					// connections to SupplierS for querying suppliers for event <""|*internal|127.0.0.1:2013>
-	"attributes_conns": [],					// connections to AttributeS for altering event fields <""|*internal|127.0.0.1:2013>
+	"chargers_conns": [],					// connections to ChargerS for session forking <""|*internal|$rpc_conns_id>
+	"rals_conns": [],						// connections to RALs for rating/accounting <""|*internal|$rpc_conns_id>
+	"cdrs_conns": [],						// connections to CDRs for CDR posting <""|*internal|$rpc_conns_id>
+	"resources_conns": [],					// connections to ResourceS for resources monitoring <""|*internal|$rpc_conns_id>
+	"thresholds_conns": [],					// connections to ThresholdS for reporting session events <""|*internal|$rpc_conns_id>
+	"stats_conns": [],						// connections to StatS for reporting session events <""|*internal|$rpc_conns_id>
+	"suppliers_conns": [],					// connections to SupplierS for querying suppliers for event <""|*internal|$rpc_conns_id>
+	"attributes_conns": [],					// connections to AttributeS for altering event fields <""|*internal|$rpc_conns_id>
 	"replication_conns": [],				// replicate sessions towards these session services
 	"debit_interval": "0s",					// interval to perform debits on.
 	"store_session_costs": false,			// enable storing of the session costs within CDRs
@@ -516,7 +516,7 @@ const CGRATES_CFG_JSON = `
 "resources": {								// ResourceS config
 	"enabled": false,						// starts ResourceLimiter service: <true|false>.
 	"store_interval": "",					// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
-	"thresholds_conns": [],					// connections to ThresholdS for resource reporting, empty to disable thresholds functionality: <""|*internal|x.y.z.y:1234>
+	"thresholds_conns": [],					// connections to ThresholdS for resource reporting, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
 	"indexed_selects":true,					// enable profile matching exclusively on indexes
 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
@@ -528,7 +528,7 @@ const CGRATES_CFG_JSON = `
 	"enabled": false,						// starts Stat service: <true|false>.
 	"store_interval": "",					// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
 	"store_uncompressed_limit": 0,					// used to compress data
-	"thresholds_conns": [],					// connections to ThresholdS for StatUpdates, empty to disable thresholds functionality: <""|*internal|x.y.z.y:1234>
+	"thresholds_conns": [],					// connections to ThresholdS for StatUpdates, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
 	"indexed_selects":true,					// enable profile matching exclusively on indexes
 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
@@ -552,9 +552,16 @@ const CGRATES_CFG_JSON = `
 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
+<<<<<<< HEAD
 	"attributes_conns": [],					// connections to AttributeS for altering events before supplier queries: <""|*internal|127.0.0.1:2013>
 	"resources_conns": [],					// connections to ResourceS for *res sorting, empty to disable functionality: <""|*internal|x.y.z.y:1234>
 	"stats_conns": [],						// connections to StatS for *stats sorting, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
+=======
+	"attributes_conns": [],					// connections to AttributeS for altering events before supplier queries: <""|*internal|$rpc_conns_id>
+	"resources_conns": [],					// connections to ResourceS for *res sorting, empty to disable functionality: <""|*internal|$rpc_conns_id>
+	"stats_conns": [],						// connections to StatS for *stats sorting, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
+	"rals_conns": [],						// connections to Rater for calculating cost, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
+>>>>>>> fc52ff5ad... [Docs] RALs documentation
 	"default_ratio":1						// default ratio used in case of *load strategy
 },
 
@@ -796,7 +803,7 @@ const CGRATES_CFG_JSON = `
 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
-	"attributes_conns": [],					// connections to AttributeS for API authorization, empty to disable auth functionality: <""|*internal|x.y.z.y:1234>
+	"attributes_conns": [],					// connections to AttributeS for API authorization, empty to disable auth functionality: <""|*internal|$rpc_conns_id>
 },
 
 
