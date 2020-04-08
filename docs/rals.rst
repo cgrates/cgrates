@@ -179,7 +179,7 @@ Time
 
 
 
-.. Accounting:
+.. _Accounting:
 
 Accounting
 ----------
@@ -299,7 +299,7 @@ Blocker
 
 
 
-.. ActionTrigger:
+.. _ActionTrigger:
 
 ActionTrigger
 -------------
@@ -372,7 +372,7 @@ LastExecutionTime
 	Time when the *ActionTrigger* was executed last.
 
 
-.. Action:
+.. _Action:
 
 Action
 ------
@@ -520,4 +520,4 @@ Use cases
 * Classic rater calculating costs for events using :ref:`Rating`.
 * Account bundles for fixed and mobile networks (xG) using :ref:`Accounting`.
 * Volume discounts in real-time using :ref:`Accounting`.
-* Fraud detection with automatic mitigation using :ref:`ActionTriggers <ActionTrigger`.
+* Fraud detection with automatic mitigation using :ref:`ActionTriggers <ActionTrigger>`.
