@@ -54,7 +54,7 @@ func (m *Migrator) migrateCurrentTPChargers() (err error) {
 					return err
 				}
 			}
-			m.stats[utils.TpChargers] ++
+			m.stats[utils.TpChargers]++
 		}
 	}
 	return

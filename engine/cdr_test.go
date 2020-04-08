@@ -1139,7 +1139,7 @@ func TestCDRexportFieldValue(t *testing.T) {
 	}
 
 	cfgCdrFld := &config.FCTemplate{Path: "*exp.SetupTime", Type: utils.META_COMPOSED,
-		Value: config.NewRSRParsersMustCompile("~SetupTime", true, utils.INFIELD_SEP),Layout: time.RFC3339}
+		Value: config.NewRSRParsersMustCompile("~SetupTime", true, utils.INFIELD_SEP), Layout: time.RFC3339}
 
 	eVal := "2013-11-07T08:42:20Z"
 	if val, err := cdr.exportFieldValue(cfgCdrFld, nil); err != nil {
@@ -1176,7 +1176,6 @@ func TestCDReRoundingDecimals(t *testing.T) {
 		Path:  "*exp.Cost",
 		Type:  utils.META_COMPOSED,
 		Value: config.NewRSRParsersMustCompile("~SetupTime", true, utils.INFIELD_SEP),
-		// RoundingDecimals: utils.IntPointer(0),
 	}
 
 	//5 is the default value for rounding decimals

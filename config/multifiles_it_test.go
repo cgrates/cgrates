@@ -135,6 +135,7 @@ func TestMfHttpAgentMultipleFields(t *testing.T) {
 						Type:      "*constant",
 						Value:     NewRSRParsersMustCompile("1", true, utils.INFIELD_SEP),
 						Mandatory: true,
+						Layout:    time.RFC3339,
 					}},
 				},
 				{
@@ -150,6 +151,7 @@ func TestMfHttpAgentMultipleFields(t *testing.T) {
 							Type:      "*constant",
 							Value:     NewRSRParsersMustCompile("*pseudoprepaid", true, utils.INFIELD_SEP),
 							Mandatory: true,
+							Layout:    time.RFC3339,
 						},
 					},
 					ReplyFields: []*FCTemplate{
@@ -159,6 +161,7 @@ func TestMfHttpAgentMultipleFields(t *testing.T) {
 							Type:      "*constant",
 							Value:     NewRSRParsersMustCompile("1", true, utils.INFIELD_SEP),
 							Mandatory: true,
+							Layout:    time.RFC3339,
 						},
 					},
 				},
@@ -173,6 +176,7 @@ func TestMfHttpAgentMultipleFields(t *testing.T) {
 						Type:      "*constant",
 						Value:     NewRSRParsersMustCompile("*pseudoprepaid", true, utils.INFIELD_SEP),
 						Mandatory: true,
+						Layout:    time.RFC3339,
 					}},
 					ReplyFields: []*FCTemplate{{
 						Tag:       "CDR_ID",
@@ -180,6 +184,7 @@ func TestMfHttpAgentMultipleFields(t *testing.T) {
 						Type:      "*variable",
 						Value:     NewRSRParsersMustCompile("~*req.CDR_ID", true, utils.INFIELD_SEP),
 						Mandatory: true,
+						Layout:    time.RFC3339,
 					}},
 				},
 			},
@@ -201,6 +206,7 @@ func TestMfHttpAgentMultipleFields(t *testing.T) {
 						Type:      "*constant",
 						Value:     NewRSRParsersMustCompile("*data", true, utils.INFIELD_SEP),
 						Mandatory: true,
+						Layout:    time.RFC3339,
 					},
 				},
 				ReplyFields: []*FCTemplate{},
