@@ -988,10 +988,12 @@ func removeExpired(acc *Account, action *Action, _ Actions, extraData interface{
 	if acc == nil {
 		return fmt.Errorf("nil account for %s action", utils.ToJSON(action))
 	}
-	if _, exists := acc.BalanceMap[action.Balance.GetType()]; !exists {
+
+	bChain, exists := acc.BalanceMap[action.Balance.GetType()]
+	if !exists {
 		return utils.ErrNotFound
 	}
-	bChain := acc.BalanceMap[action.Balance.GetType()]
+
 	found := false
 	for i := 0; i < len(bChain); i++ {
 		if bChain[i].IsExpiredAt(time.Now()) {
