@@ -218,3 +218,39 @@ func TestDataDBRemoteReplication(t *testing.T) {
 		t.Errorf("Expected: %+v ,\n recived: %+v", utils.ToJSON(expected), utils.ToJSON(dbcfg))
 	}
 }
+
+func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
+	var dbcfg, expected DataDbCfg
+	cfgJSONStr := `{
+"data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
+	"db_type": "*redis",					// data_db type: <*redis|*mongo|*internal>
+	"db_host": "127.0.0.1",					// data_db host address
+	"db_port": -1,	 						// data_db port to reach the database
+	"db_name": "10", 						// data_db database name to connect to
+	"db_user": "cgrates", 					// username to use when connecting to data_db
+	"db_password": "password",				// password to use when connecting to data_db
+	"redis_sentinel":"sentinel",			// redis_sentinel is the name of sentinel
+	"remote_conns":["Conn1"],
+	}
+}`
+
+	expected = DataDbCfg{
+		DataDbType:         "redis",
+		DataDbHost:         "127.0.0.1",
+		DataDbPort:         "6379",
+		DataDbName:         "10",
+		DataDbUser:         "cgrates",
+		DataDbPass:         "password",
+		DataDbSentinelName: "sentinel",
+		RmtConns:           []string{"Conn1"},
+	}
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+		t.Error(err)
+	} else if jsnDataDbCfg, err := jsnCfg.DbJsonCfg(DATADB_JSN); err != nil {
+		t.Error(err)
+	} else if err = dbcfg.loadFromJsonCfg(jsnDataDbCfg); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, dbcfg) {
+		t.Errorf("Expected: %+v ,\n recived: %+v", utils.ToJSON(expected), utils.ToJSON(dbcfg))
+	}
+}
