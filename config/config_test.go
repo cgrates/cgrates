@@ -704,6 +704,8 @@ func TestCgrCfgJSONDefaultsCacheCFG(t *testing.T) {
 			TTL: time.Duration(0), StaticTTL: false, Precache: false},
 		utils.CacheRPCConnections: &CacheParamCfg{Limit: -1,
 			TTL: time.Duration(0), StaticTTL: false},
+		utils.CacheUCH: &CacheParamCfg{Limit: -1,
+			TTL: time.Duration(3 * time.Hour), StaticTTL: false},
 	}
 
 	if !reflect.DeepEqual(eCacheCfg, cgrCfg.CacheCfg()) {

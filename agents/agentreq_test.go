@@ -1738,3 +1738,91 @@ func TestAgReqSetFieldsWithRemove(t *testing.T) {
 		t.Errorf("expecting: %+v,\n received: %+v", eMpRemove, agReq.Reply)
 	}
 }
+
+func TestAgReqSetFieldsInCache(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, dm)
+	engine.InitCache(cfg.CacheCfg())
+	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
+	agReq.CGRRequest.Set([]string{utils.Account}, "1001", false, false)
+
+	tplFlds := []*config.FCTemplate{
+		&config.FCTemplate{Tag: "Tenant",
+			Path: utils.MetaCache + utils.NestingSep + utils.Tenant, Type: utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP)},
+		&config.FCTemplate{Tag: "Account",
+			Path: utils.MetaCache + utils.NestingSep + utils.Account, Type: utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("~*cgreq.Account", true, utils.INFIELD_SEP)},
+	}
+
+	if err := agReq.SetFields(tplFlds); err != nil {
+		t.Error(err)
+	}
+
+	if val, err := agReq.FieldAsInterface([]string{utils.MetaCache, utils.Tenant}); err != nil {
+		t.Error(err)
+	} else if val.([]*config.NMItem)[0].Data != "cgrates.org" {
+		t.Errorf("expecting: %+v, \n received: %+v ", "cgrates.org", utils.ToJSON(val))
+	}
+
+	if val, err := agReq.FieldAsInterface([]string{utils.MetaCache, utils.Account}); err != nil {
+		t.Error(err)
+	} else if val.([]*config.NMItem)[0].Data != "1001" {
+		t.Errorf("expecting: %+v, \n received: %+v ", "1001", utils.ToJSON(val))
+	}
+
+	if _, err := agReq.FieldAsInterface([]string{utils.MetaCache, "Unexist"}); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	}
+}
+
+func TestAgReqSetFieldsInCacheWithTimeOut(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, dm)
+
+	cfg.CacheCfg()[utils.CacheUCH].TTL = 1 * time.Second
+	engine.InitCache(cfg.CacheCfg())
+	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
+	agReq.CGRRequest.Set([]string{utils.Account}, "1001", false, false)
+
+	tplFlds := []*config.FCTemplate{
+		&config.FCTemplate{Tag: "Tenant",
+			Path: utils.MetaCache + utils.NestingSep + utils.Tenant, Type: utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP)},
+		&config.FCTemplate{Tag: "Account",
+			Path: utils.MetaCache + utils.NestingSep + utils.Account, Type: utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("~*cgreq.Account", true, utils.INFIELD_SEP)},
+	}
+
+	if err := agReq.SetFields(tplFlds); err != nil {
+		t.Error(err)
+	}
+
+	if val, err := agReq.FieldAsInterface([]string{utils.MetaCache, utils.Tenant}); err != nil {
+		t.Error(err)
+	} else if val.([]*config.NMItem)[0].Data != "cgrates.org" {
+		t.Errorf("expecting: %+v, \n received: %+v ", "cgrates.org", utils.ToJSON(val))
+	}
+
+	if val, err := agReq.FieldAsInterface([]string{utils.MetaCache, utils.Account}); err != nil {
+		t.Error(err)
+	} else if val.([]*config.NMItem)[0].Data != "1001" {
+		t.Errorf("expecting: %+v, \n received: %+v ", "1001", utils.ToJSON(val))
+	}
+
+	if _, err := agReq.FieldAsInterface([]string{utils.MetaCache, "Unexist"}); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	}
+	// give enough time to Cache to remove ttl the *uch
+	time.Sleep(2 * time.Second)
+	if _, err := agReq.FieldAsInterface([]string{utils.MetaCache, utils.Tenant}); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	}
+	if _, err := agReq.FieldAsInterface([]string{utils.MetaCache, utils.Account}); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	}
+}

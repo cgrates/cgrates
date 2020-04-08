@@ -85,7 +85,7 @@ func (cCfg CacheCfg) AsTransCacheConfig() (tcCfg map[string]*ltcache.CacheConfig
 	return
 }
 
-// AddTmpCaches adds all the temotrary caches configuration needed
+// AddTmpCaches adds all the temporary caches configuration needed
 func (cCfg CacheCfg) AddTmpCaches() {
 	cCfg[utils.CacheRatingProfilesTmp] = &CacheParamCfg{
 		Limit: -1,

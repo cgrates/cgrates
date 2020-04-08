@@ -218,9 +218,11 @@ const CGRATES_CFG_JSON = `
 	"*diameter_messages": {"limit": -1, "ttl": "3h", "static_ttl": false},						// diameter messages caching
 	"*rpc_responses": {"limit": 0, "ttl": "2s", "static_ttl": false},							// RPC responses caching
 	"*closed_sessions": {"limit": -1, "ttl": "10s", "static_ttl": false},						// closed sessions cached for CDRs
-	"*cdr_ids": {"limit": -1, "ttl": "10m", "static_ttl": false},									// protects CDRs against double-charging
+	"*cdr_ids": {"limit": -1, "ttl": "10m", "static_ttl": false},								// protects CDRs against double-charging
 	"*load_ids": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},				// control the load_ids for items
 	"*rpc_connections": {"limit": -1, "ttl": "", "static_ttl": false},							// RPC connections caching
+	"*uch": {"limit": -1, "ttl": "3h", "static_ttl": false},									// User cache
+	
 },
 
 
@@ -306,7 +308,7 @@ const CGRATES_CFG_JSON = `
 			"type": "*file_csv",								// reader type <*file_csv>
 			"row_length" : 0, 									// Number of fields from csv file
 			"field_separator": ",",								// separator used in case of csv files
-			"run_delay": "0",									// sleep interval in seconds between consecutive runs, -1 to use automation via inotify or 0 to disable running all together
+			"run_delay": "0",										// sleep interval in seconds between consecutive runs, -1 to use automation via inotify or 0 to disable running all together
 			"concurrent_requests": 1024,						// maximum simultaneous requests/files to process, 0 for unlimited
 			"source_path": "/var/spool/cgrates/cdrc/in",		// read data from this path
 			"processed_path": "/var/spool/cgrates/cdrc/out",	// move processed data here
