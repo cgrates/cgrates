@@ -120,6 +120,12 @@ func (ar *AgentRequest) FieldAsInterface(fldPath []string) (val interface{}, err
 		val, err = ar.Trailer.FieldAsInterface(fldPath[1:])
 	case utils.MetaTmp:
 		val, err = ar.tmp.FieldAsInterface(fldPath[1:])
+	case utils.MetaCache:
+		if cacheVal, ok := engine.Cache.Get(utils.CacheUCH, strings.Join(fldPath[1:], utils.NestingSep)); !ok {
+			return nil, utils.ErrNotFound
+		} else {
+			val = cacheVal
+		}
 	}
 	return
 }
@@ -171,6 +177,8 @@ func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 				ar.diamreq.Remove(fldPath[1:])
 			case utils.MetaTmp:
 				ar.tmp.Remove(fldPath[1:])
+			case utils.MetaCache:
+				engine.Cache.Remove(utils.CacheUCH, strings.Join(fldPath[1:], utils.NestingSep), true, utils.NonTransactional)
 			}
 		case utils.MetaRemoveAll:
 			fldPath := strings.Split(tplFld.Path, utils.NestingSep)
@@ -189,6 +197,8 @@ func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 				ar.diamreq.RemoveAll()
 			case utils.MetaTmp:
 				ar.tmp.RemoveAll()
+			case utils.MetaCache:
+				engine.Cache.Clear([]string{utils.CacheUCH})
 			}
 		default:
 			out, err := ar.ParseField(tplFld)
@@ -239,6 +249,8 @@ func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 				ar.diamreq.Set(fldPath[1:], valSet, false, true)
 			case utils.MetaTmp:
 				ar.tmp.Set(fldPath[1:], valSet, false, true)
+			case utils.MetaCache:
+				engine.Cache.Set(utils.CacheUCH, strings.Join(fldPath[1:], utils.NestingSep), valSet, nil, true, utils.NonTransactional)
 			}
 		}
 		if tplFld.Blocker { // useful in case of processing errors first
