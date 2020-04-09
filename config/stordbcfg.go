@@ -125,3 +125,27 @@ func (dbcfg *StorDbCfg) Clone() *StorDbCfg {
 		Items:               dbcfg.Items,
 	}
 }
+
+func (dbcfg *StorDbCfg) AsMapInterface() map[string]interface{} {
+	items := make(map[string]interface{})
+	for key, item := range dbcfg.Items {
+		items[key] = item.AsMapInterface()
+	}
+
+	return map[string]interface{}{
+		utils.TypeCfg:                dbcfg.Type,
+		utils.HostCfg:                dbcfg.Host,
+		utils.PortCfg:                dbcfg.Port,
+		utils.NameCfg:                dbcfg.Name,
+		utils.UserCfg:                dbcfg.User,
+		utils.PasswordCfg:            dbcfg.Password,
+		utils.MaxOpenConnsCfg:        dbcfg.MaxOpenConns,
+		utils.MaxIdleConnsCfg:        dbcfg.MaxIdleConns,
+		utils.ConnMaxLifetimeCfg:     dbcfg.ConnMaxLifetime,
+		utils.StringIndexedFieldsCfg: dbcfg.StringIndexedFields,
+		utils.PrefixIndexedFieldsCfg: dbcfg.PrefixIndexedFields,
+		utils.QueryTimeoutCfg:        dbcfg.QueryTimeout,
+		utils.SSLModeCfg:             dbcfg.SSLMode,
+		utils.ItemsCfg:               items,
+	}
+}

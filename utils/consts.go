@@ -1623,6 +1623,74 @@ var (
 	PostgressSSLModeVerifyFull = "verify-full"
 )
 
+// GeneralCfg
+const (
+	NodeIDCfg            = "node_id"
+	LoggerCfg            = "logger"
+	LogLevelCfg          = "log_level"
+	HttpSkipTlsVerifyCfg = "http_skip_tls_verify"
+	RoundingDecimalsCfg  = "rounding_decimals"
+	DBDataEncodingCfg    = "dbdata_encoding"
+	TpExportPathCfg      = "tpexport_dir"
+	PosterAttemptsCfg    = "poster_attempts"
+	FailedPostsDirCfg    = "failed_posts_dir"
+	FailedPostsTTLCfg    = "failed_posts_ttl"
+	DefaultReqTypeCfg    = "default_request_type"
+	DefaultCategoryCfg   = "default_category"
+	DefaultTenantCfg     = "default_tenant"
+	DefaultTimezoneCfg   = "default_timezone"
+	DefaultCachingCfg    = "default_caching"
+	ConnectAttemptsCfg   = "connect_attempts"
+	ReconnectsCfg        = "reconnects"
+	ConnectTimeoutCfg    = "connect_timeout"
+	ReplyTimeoutCfg      = "reply_timeout"
+	LockingTimeoutCfg    = "locking_timeout"
+	DigestSeparatorCfg   = "digest_separator"
+	DigestEqualCfg       = "digest_equal"
+	RSRSepCfg            = "rsr_separator"
+	MaxParralelConnsCfg  = "max_parralel_conns"
+)
+
+// StorDbCfg
+const (
+	TypeCfg                = "db_type"
+	HostCfg                = "db_host"
+	PortCfg                = "db_port"
+	NameCfg                = "db_name"
+	UserCfg                = "db_user"
+	PasswordCfg            = "db_password"
+	MaxOpenConnsCfg        = "max_open_conns"
+	MaxIdleConnsCfg        = "max_idle_conns"
+	ConnMaxLifetimeCfg     = "conn_max_lifetime"
+	StringIndexedFieldsCfg = "string_indexed_fields"
+	PrefixIndexedFieldsCfg = "prefix_indexed_fields"
+	QueryTimeoutCfg        = "query_timeout"
+	SSLModeCfg             = "sslmode"
+	ItemsCfg               = "items"
+)
+
+// DataDbCfg
+const (
+	DataDbTypeCfg         = "db_type"
+	DataDbHostCfg         = "db_host"
+	DataDbPortCfg         = "db_port"
+	DataDbNameCfg         = "db_name"
+	DataDbUserCfg         = "db_user"
+	DataDbPassCfg         = "db_password"
+	DataDbSentinelNameCfg = "redis_sentinel"
+	RmtConnsCfg           = "remote_conns"
+	RplConnsCfg           = "replication_conns"
+)
+
+// ItemOpt
+const (
+	RemoteCfg    = "remote"
+	ReplicateCfg = "replicate"
+	TTLCfg       = "ttl"
+	LimitCfg     = "limit"
+	StaticTTLCfg = "static_ttl"
+)
+
 // Strip/Padding strategy
 var (
 	// common
