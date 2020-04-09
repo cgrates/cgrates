@@ -522,7 +522,7 @@ func (da *DiameterAgent) sendASR(originID string, reply *string) (err error) {
 	return
 }
 
-// V1ReAuthorize  sends a rar meseage to diameter client
+// V1ReAuthorize  sends a rar message to diameter client
 func (da *DiameterAgent) V1ReAuthorize(originID string, reply *string) (err error) {
 	if originID == "" {
 		utils.Logger.Info(
