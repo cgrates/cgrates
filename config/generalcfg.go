@@ -142,3 +142,32 @@ func (gencfg *GeneralCfg) loadFromJsonCfg(jsnGeneralCfg *GeneralJsonCfg) (err er
 
 	return nil
 }
+
+func (gencfg *GeneralCfg) AsMapInterface() map[string]interface{} {
+	return map[string]interface{}{
+		utils.NodeIDCfg:            gencfg.NodeID,
+		utils.LoggerCfg:            gencfg.Logger,
+		utils.LogLevelCfg:          gencfg.LogLevel,
+		utils.HttpSkipTlsVerifyCfg: gencfg.HttpSkipTlsVerify,
+		utils.RoundingDecimalsCfg:  gencfg.RoundingDecimals,
+		utils.DBDataEncodingCfg:    gencfg.DBDataEncoding,
+		utils.TpExportPathCfg:      gencfg.TpExportPath,
+		utils.PosterAttemptsCfg:    gencfg.PosterAttempts,
+		utils.FailedPostsDirCfg:    gencfg.FailedPostsDir,
+		utils.FailedPostsTTLCfg:    gencfg.FailedPostsTTL,
+		utils.DefaultReqTypeCfg:    gencfg.DefaultReqType,
+		utils.DefaultCategoryCfg:   gencfg.DefaultCategory,
+		utils.DefaultTenantCfg:     gencfg.DefaultTenant,
+		utils.DefaultTimezoneCfg:   gencfg.DefaultTimezone,
+		utils.DefaultCachingCfg:    gencfg.DefaultCaching,
+		utils.ConnectAttemptsCfg:   gencfg.ConnectAttempts,
+		utils.ReconnectsCfg:        gencfg.Reconnects,
+		utils.ConnectTimeoutCfg:    gencfg.ConnectTimeout,
+		utils.ReplyTimeoutCfg:      gencfg.ReplyTimeout,
+		utils.LockingTimeoutCfg:    gencfg.LockingTimeout,
+		utils.DigestSeparatorCfg:   gencfg.DigestSeparator,
+		utils.DigestEqualCfg:       gencfg.DigestEqual,
+		utils.RSRSepCfg:            gencfg.RSRSep,
+		utils.MaxParralelConnsCfg:  gencfg.MaxParralelConns,
+	}
+}
