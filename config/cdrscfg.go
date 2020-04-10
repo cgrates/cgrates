@@ -117,3 +117,23 @@ func (cdrscfg *CdrsCfg) loadFromJsonCfg(jsnCdrsCfg *CdrsJsonCfg) (err error) {
 
 	return nil
 }
+
+func (cdrscfg *CdrsCfg) AsMapInterface() map[string]interface{} {
+	extraFields := make([]string, len(cdrscfg.ExtraFields))
+	for i, item := range cdrscfg.ExtraFields {
+		extraFields[i] = item.Rules
+	}
+
+	return map[string]interface{}{
+		utils.EnabledCfg:          cdrscfg.Enabled,
+		utils.ExtraFieldsCfg:      extraFields,
+		utils.StoreCdrsCfg:        cdrscfg.StoreCdrs,
+		utils.SMCostRetriesCfg:    cdrscfg.SMCostRetries,
+		utils.ChargerSConnsCfg:    cdrscfg.ChargerSConns,
+		utils.RaterConnsCfg:       cdrscfg.RaterConns,
+		utils.AttributeSConnsCfg:  cdrscfg.AttributeSConns,
+		utils.ThresholdSConnsCfg:  cdrscfg.ThresholdSConns,
+		utils.StatSConnsCfg:       cdrscfg.StatSConns,
+		utils.OnlineCDRExportsCfg: cdrscfg.OnlineCDRExports,
+	}
+}

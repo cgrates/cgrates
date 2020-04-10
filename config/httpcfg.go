@@ -18,6 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
+import "github.com/cgrates/cgrates/utils"
+
 // HTTP config section
 type HTTPCfg struct {
 	HTTPJsonRPCURL        string            // JSON RPC relative URL ("" to disable)
@@ -53,4 +55,15 @@ func (httpcfg *HTTPCfg) loadFromJsonCfg(jsnHttpCfg *HTTPJsonCfg) (err error) {
 	}
 
 	return nil
+}
+
+func (httpcfg *HTTPCfg) AsMapInterface() map[string]interface{} {
+	return map[string]interface{}{
+		utils.HTTPJsonRPCURLCfg:        httpcfg.HTTPJsonRPCURL,
+		utils.HTTPWSURLCfg:             httpcfg.HTTPWSURL,
+		utils.HTTPFreeswitchCDRsURLCfg: httpcfg.HTTPFreeswitchCDRsURL,
+		utils.HTTPCDRsURLCfg:           httpcfg.HTTPCDRsURL,
+		utils.HTTPUseBasicAuthCfg:      httpcfg.HTTPUseBasicAuth,
+		utils.HTTPAuthUsersCfg:         httpcfg.HTTPAuthUsers,
+	}
 }
