@@ -282,8 +282,8 @@ type CacheParamJsonCfg struct {
 }
 
 type CacheJsonCfg struct {
-	Replication_conns *[]string
 	Partitions        *map[string]*CacheParamJsonCfg
+	Replication_conns *[]string
 }
 
 // SM-Kamailio config section

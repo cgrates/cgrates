@@ -58,22 +58,13 @@ func (cParam *CacheParamCfg) loadFromJsonCfg(jsnCfg *CacheParamJsonCfg) error {
 
 // CacheCfg used to store the cache config
 type CacheCfg struct {
-	ReplicationConns []string
 	Partitions       map[string]*CacheParamCfg
+	ReplicationConns []string
 }
 
 func (cCfg *CacheCfg) loadFromJsonCfg(jsnCfg *CacheJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return
-	}
-	if jsnCfg.Replication_conns != nil {
-		cCfg.ReplicationConns = make([]string, len(*jsnCfg.Replication_conns))
-		for idx, connID := range *jsnCfg.Replication_conns {
-			if connID == utils.MetaInternal {
-				return fmt.Errorf("replication connection ID needs to be different than *internal")
-			}
-			cCfg.ReplicationConns[idx] = connID
-		}
 	}
 	if jsnCfg.Partitions != nil {
 		for kJsn, vJsn := range *jsnCfg.Partitions {
@@ -82,6 +73,15 @@ func (cCfg *CacheCfg) loadFromJsonCfg(jsnCfg *CacheJsonCfg) (err error) {
 				return err
 			}
 			cCfg.Partitions[kJsn] = val
+		}
+	}
+	if jsnCfg.Replication_conns != nil {
+		cCfg.ReplicationConns = make([]string, len(*jsnCfg.Replication_conns))
+		for idx, connID := range *jsnCfg.Replication_conns {
+			if connID == utils.MetaInternal {
+				return fmt.Errorf("replication connection ID needs to be different than *internal")
+			}
+			cCfg.ReplicationConns[idx] = connID
 		}
 	}
 

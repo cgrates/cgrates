@@ -72,7 +72,6 @@ func TestDfGeneralJsonCfg(t *testing.T) {
 
 func TestCacheJsonCfg(t *testing.T) {
 	eCfg := &CacheJsonCfg{
-		Replication_conns: &[]string{},
 		Partitions: &map[string]*CacheParamJsonCfg{
 			utils.CacheDestinations: &CacheParamJsonCfg{Limit: utils.IntPointer(-1),
 				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
@@ -174,6 +173,7 @@ func TestCacheJsonCfg(t *testing.T) {
 			utils.CacheUCH: &CacheParamJsonCfg{Limit: utils.IntPointer(-1),
 				Ttl: utils.StringPointer("3h"), Static_ttl: utils.BoolPointer(false)},
 		},
+		Replication_conns: &[]string{},
 	}
 
 	if gCfg, err := dfCgrJsonCfg.CacheJsonCfg(); err != nil {

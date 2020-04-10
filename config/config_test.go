@@ -630,7 +630,6 @@ func TestCgrCfgJSONDefaultsSMGenericCfg(t *testing.T) {
 
 func TestCgrCfgJSONDefaultsCacheCFG(t *testing.T) {
 	eCacheCfg := &CacheCfg{
-		ReplicationConns: []string{},
 		Partitions: map[string]*CacheParamCfg{
 			utils.CacheDestinations: &CacheParamCfg{Limit: -1,
 				TTL: time.Duration(0), StaticTTL: false, Precache: false},
@@ -709,6 +708,7 @@ func TestCgrCfgJSONDefaultsCacheCFG(t *testing.T) {
 			utils.CacheUCH: &CacheParamCfg{Limit: -1,
 				TTL: time.Duration(3 * time.Hour), StaticTTL: false},
 		},
+		ReplicationConns: []string{},
 	}
 
 	if !reflect.DeepEqual(eCacheCfg, cgrCfg.CacheCfg()) {
