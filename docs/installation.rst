@@ -1,28 +1,34 @@
+.. _Redis: http://redis.io
+.. _MySQL: http://www.mysql.org
+.. _PostgreSQL: http://www.postgresql.org
+.. _MongoDB: http://www.mongodb.org
+
+
+
+
 .. _installation:
 
-3. Installation
-===============
+Installation
+============
 
 CGRateS can be installed via packages as well as Go automated source install.
 We recommend using source installs for advanced users familiar with Go programming and packages for users not willing to be involved in the code building process.
 
 
-3.1. Using packages
-~~~~~~~~~~~~~~~~~~~
+Using packages
+--------------
 
-Depending on the packaged distribution, following methods are available:
+Depending on the packaged distribution, the following methods are available:
 
 
-3.1.1. Debian 
--------------
-
-This is for the moment the only packaged and the most recommended to use method to install CGRateS. CGRateS development team maintains official debian packages out of master branch, released under nightly tag in aptitude. 
+Debian 
+^^^^^^
 
 There are two main ways of installing the maintained packages:
 
 
-3.1.1.1. Aptitude repository 
-++++++++++++++++++++++++++++
+Aptitude repository 
+~~~~~~~~~~~~~~~~~~~
 
 
 Add the gpg key:
@@ -49,8 +55,8 @@ Once the installation is completed, one should perform the :ref:`post-install` s
 After *post-install* actions are performed, CGRateS will be configured in **/etc/cgrates/cgrates.json** and enabled in **/etc/default/cgrates**.
 
 
-3.1.1.2. Manual installation of .deb package out of archive server
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Manual installation of .deb package out of archive server
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 Run the following commands:
@@ -60,17 +66,17 @@ Run the following commands:
     wget http://pkg.cgrates.org/deb/nightly/cgrates_current_amd64.deb
     dpkg -i cgrates_current_amd64.deb
 
-As a side note on http://pkg.cgrates.org one can find an entire archive of CGRateS packages.
+As a side note on http://pkg.cgrates.org/deb/ one can find an entire archive of CGRateS packages.
 
 
-3.1.2. Redhat/Fedora/CentOS
--------------
+Redhat/Fedora/CentOS
+^^^^^^^^^^^^^^^^^^^^
 
 There are two main ways of installing the maintained packages:
 
 
-3.1.2.1. YUM repository
-++++++++++++++++++++++++++++
+YUM repository
+~~~~~~~~~~~~~~
 
 
 To install CGRateS out of YUM execute the following commands
@@ -92,58 +98,58 @@ Once the installation is completed, one should perform the :ref:`post-install` s
 After *post-install* actions are performed, CGRateS will be configured in **/etc/cgrates/cgrates.json** and enabled in **/etc/default/cgrates**.
 
 
-3.1.2.2. Manual installation of .rpm package out of archive server
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Manual installation of .rpm package out of archive server
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-Run the following commands:
+Run the following command:
 
 ::
 
     sudo rpm -i http://pkg.cgrates.org/rpm/nightly/cgrates_current.rpm
 
-As a side note on http://pkg.cgrates.org one can find an entire archive of CGRateS packages.
+As a side note on http://pkg.cgrates.org/rpm/ one can find an entire archive of CGRateS packages.
 
 
-3.2. Using source
-~~~~~~~~~~~~~~~~~
+Using source
+------------
 
-For developing CGRateS and switching between its versions, we are using the **new go mods feature** introduced in go 1.14.
+For developing CGRateS and switching between its versions, we are using the **go mods feature** introduced in go 1.14.
 
 
-3.2.1 Install GO Lang
----------------------
+Install GO Lang
+^^^^^^^^^^^^^^^
 
 First we have to setup the GO Lang to our OS. Feel free to download 
 the latest GO binary release from https://golang.org/dl/
-In this Tutorial we are going to install Go 1.14
+In this Tutorial we are going to install Go 1.13
 
 ::
 
-   rm -rf /usr/local/go
+   sudo rm -rf /usr/local/go
    cd /tmp
-   wget https://dl.google.com/go/go1.13.1.linux-amd64.tar.gz
-   sudo tar -xvf go1.13.1.linux-amd64.tar.gz -C /usr/local/
-   export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
+   wget https://dl.google.com/go/go1.14.2.linux-amd64.tar.gz
+   sudo tar -xvf go1.14.2.linux-amd64.tar.gz -C /usr/loca~l/
+   export PATH=$PATH:/usr/local/go/bin:$HOME/go/bin
 
 
-3.2.2 Build CGRateS from Source
--------------------------------
+Build CGRateS from Source
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Configure the project with the following commands:
 
 ::
 
    go get github.com/cgrates/cgrates
-   cd $GOPATH/src/github.com/cgrates/cgrates
+   cd $HOME/go/src/github.com/cgrates/cgrates
    ./build.sh
 
 
-3.2.3 Create Debian / Ubuntu Packages from Source
--------------------------------------------------
+Create Debian / Ubuntu Packages from Source
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 After compiling the source code you are ready to create the .deb packages
-for your Debian like OS. But First lets install some dependencies. 
+for your Debian like OS. First lets install some dependencies: 
 
 ::
 
@@ -154,77 +160,73 @@ sure that we delete the old one first.
 
 ::
 
-   cd $GOPATH/src/github.com/cgrates/cgrates/packages
-   rm -rf $GOPATH/src/github.com/cgrates/*.deb
+   cd $HOME/go/src/github.com/cgrates/cgrates/packages
+   rm -rf $HOME/go/src/github.com/cgrates/*.deb
    make deb
 
 After some time and maybe some console warnings, your CGRateS package will be ready.
 
 
-3.2.4 Install Custom Debian / Ubuntu Package
---------------------------------------------
+Install Custom Debian / Ubuntu Package
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ::
 
-   cd $GOPATH/src/github.com/cgrates
+   cd $HOME/go/src/github.com/cgrates
    sudo dpkg -i cgrates_*.deb
 
 
 .. _post-install:
-3.3. Post-install
-~~~~~~~~~~~~~~~~~
+Post-install
+------------
 
-3.3.1. Database setup
----------------------
+
+Database setup
+^^^^^^^^^^^^^^
 
 For its operation CGRateS uses **one or more** database types, depending on its nature, install and configuration being further necessary.
 
 At present we support the following databases:
 
-- `Redis`_
-Can be used as ``data_db`` .
-Optimized for real-time information access.
-Once installed there should be no special requirements in terms of setup since no schema is necessary.
+`Redis`_
+  Can be used as :ref:`DataDB`.
+  Optimized for real-time information access.
+  Once installed there should be no special requirements in terms of setup since no schema is necessary.
 
-- `MySQL`_
-Can be used as ``stor_db`` .
-Optimized for CDR archiving and offline Tariff Plan versioning.
-Once MySQL is installed, CGRateS database needs to be set-up out of provided scripts. (example for the paths set-up by debian package)
+`MySQL`_
+  Can be used as :ref:`StorDB`.
+  Optimized for CDR archiving and offline Tariff Plan versioning.
+  Once MySQL is installed, CGRateS database needs to be set-up out of provided scripts. (example for the paths set-up by debian package)
 
-::
+  ::
 
-   cd /usr/share/cgrates/storage/mysql/
-   ./setup_cgr_db.sh root CGRateS.org localhost
+    cd /usr/share/cgrates/storage/mysql/
+    ./setup_cgr_db.sh root CGRateS.org localhost
 
-- `PostgreSQL`_
-Can be used as ``stor_db`` .
-Optimized for CDR archiving and offline Tariff Plan versioning.
-Once PostgreSQL is installed, CGRateS database needs to be set-up out of provided scripts (example for the paths set-up by debian package)
+`PostgreSQL`_
+  Can be used as :ref:`StorDB`.
+  Optimized for CDR archiving and offline Tariff Plan versioning.
+  Once PostgreSQL is installed, CGRateS database needs to be set-up out of provided scripts (example for the paths set-up by debian package).
 
-::
+  ::
 
-   cd /usr/share/cgrates/storage/postgres/
-   ./setup_cgr_db.sh
+    cd /usr/share/cgrates/storage/postgres/
+    ./setup_cgr_db.sh
 
-- `MongoDB`_
-Can be used as ``data_db`` - ``stor_db`` .
-It is the first database that can be used to store all kinds of data stored from CGRateS from accounts, tariff plans to cdrs and logs.
-This is provided as an alternative to Redis and/or MySQL/PostgreSQL and right now there are NO plans to drop support for any of them soon.
+`MongoDB`_
+  Can be used as :ref:`DataDB` as well as :ref:`StorDB`.
+  It is the first database that can be used to store all kinds of data stored from CGRateS from accounts, tariff plans to cdrs and logs.
+  Once MongoDB is installed, CGRateS database needs to be set-up out of provided scripts (example for the paths set-up by debian package)
 
-Once MongoDB is installed, CGRateS database needs to be set-up out of provided scripts (example for the paths set-up by debian package)
+  ::
 
-::
+    cd /usr/share/cgrates/storage/mongo/
+    ./setup_cgr_db.sh
 
-   cd /usr/share/cgrates/storage/mongo/
-   ./setup_cgr_db.sh
 
-.. _Redis: http://redis.io
-.. _MySQL: http://www.mysql.org
-.. _PostgreSQL: http://www.postgresql.org
-.. _MongoDB: http://www.mongodb.org
+Set versions data
+^^^^^^^^^^^^^^^^^
 
-3.3.2 Set versions data
-------------------------
 Once database setup is completed, we need to write the versions data. To do this, run migrator tool with the parameters specific to your database. 
 
 Sample usage for MySQL: 
