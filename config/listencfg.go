@@ -18,6 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
+import "github.com/cgrates/cgrates/utils"
+
 // Listen config section
 type ListenCfg struct {
 	RPCJSONListen    string // RPC JSON listening address
@@ -52,4 +54,15 @@ func (lstcfg *ListenCfg) loadFromJsonCfg(jsnListenCfg *ListenJsonCfg) (err error
 		lstcfg.HTTPTLSListen = *jsnListenCfg.Http_tls
 	}
 	return nil
+}
+
+func (lstcfg *ListenCfg) AsMapInterface() map[string]interface{} {
+	return map[string]interface{}{
+		utils.RPCJSONListenCfg:    lstcfg.RPCJSONListen,
+		utils.RPCGOBListenCfg:     lstcfg.RPCGOBListen,
+		utils.HTTPListenCfg:       lstcfg.HTTPListen,
+		utils.RPCJSONTLSListenCfg: lstcfg.RPCJSONTLSListen,
+		utils.RPCGOBTLSListenCfg:  lstcfg.RPCGOBTLSListen,
+		utils.HTTPTLSListenCfg:    lstcfg.HTTPTLSListen,
+	}
 }

@@ -1691,6 +1691,117 @@ const (
 	StaticTTLCfg = "static_ttl"
 )
 
+// Tls
+const (
+	ServerCerificateCfg = "server_certificate"
+	ServerKeyCfg        = "server_key"
+	ServerPolicyCfg     = "server_policy"
+	ServerNameCfg       = "server_name"
+	ClientCerificateCfg = "client_certificate"
+	ClientKeyCfg        = "client_key"
+	CaCertificateCfg    = "ca_certificate"
+)
+
+// ListenCfg
+const (
+	RPCJSONListenCfg    = "rpc_json"
+	RPCGOBListenCfg     = "rpc_gob"
+	HTTPListenCfg       = "http"
+	RPCJSONTLSListenCfg = "rpc_json_tls"
+	RPCGOBTLSListenCfg  = "rpc_gob_tls"
+	HTTPTLSListenCfg    = "http_tls"
+)
+
+// HTTPCfg
+const (
+	HTTPJsonRPCURLCfg        = "json_rpc_url"
+	HTTPWSURLCfg             = "ws_url"
+	HTTPFreeswitchCDRsURLCfg = "freeswitch_cdrs_url"
+	HTTPCDRsURLCfg           = "http_cdrs"
+	HTTPUseBasicAuthCfg      = "use_basic_auth"
+	HTTPAuthUsersCfg         = "auth_users"
+)
+
+// FilterSCfg
+const (
+	StatSConnsCfg     = "stats_conns"
+	ResourceSConnsCfg = "resources_conns"
+	ApierSConnsCfg    = "apiers_conns"
+)
+
+// RalsCfg
+const (
+	EnabledCfg                 = "enabled"
+	ThresholdSConnsCfg         = "thresholds_conns"
+	CacheSConnsCfg             = "caches_conns"
+	RpSubjectPrefixMatchingCfg = "rp_subject_prefix_matching"
+	RemoveExpiredCfg           = "remove_expired"
+	MaxComputedUsageCfg        = "max_computed_usage"
+	BalanceRatingSubjectCfg    = "balance_rating_subject"
+	MaxIncrementsCfg           = "max_increments"
+)
+
+// SchedulerCfg
+const (
+	CDRsConnsCfg = "cdrs_conns"
+	FiltersCfg   = "filters"
+)
+
+// CdrsCfg
+const (
+	ExtraFieldsCfg      = "extra_fields"
+	StoreCdrsCfg        = "store_cdrs"
+	SMCostRetriesCfg    = "session_cost_retries"
+	ChargerSConnsCfg    = "chargers_conns"
+	RaterConnsCfg       = "rals_conns"
+	AttributeSConnsCfg  = "attributes_conns"
+	OnlineCDRExportsCfg = "online_cdr_exports"
+)
+
+// SessionSCfg
+const (
+	ListenBijsonCfg        = "listen_bijson"
+	RALsConnsCfg           = "rals_conns"
+	ResSConnsCfg           = "resources_conns"
+	ThreshSConnsCfg        = "thresholds_conns"
+	SupplSConnsCfg         = "suppliers_conns"
+	AttrSConnsCfg          = "attributes_conns"
+	ReplicationConnsCfg    = "replication_conns"
+	DebitIntervalCfg       = "debit_interval"
+	StoreSCostsCfg         = "store_session_costs"
+	MinCallDurationCfg     = "min_call_duration"
+	MaxCallDurationCfg     = "max_call_duration"
+	SessionTTLCfg          = "session_ttl"
+	SessionTTLMaxDelayCfg  = "session_ttl_max_delay"
+	SessionTTLLastUsedCfg  = "session_ttl_last_used"
+	SessionTTLUsageCfg     = "session_ttl_usage"
+	SessionIndexesCfg      = "session_indexes"
+	ClientProtocolCfg      = "client_protocol"
+	ChannelSyncIntervalCfg = "channel_sync_interval"
+	TerminateAttemptsCfg   = "terminate_attempts"
+	AlterableFieldsCfg     = "alterable_fields"
+	MinDurLowBalanceCfg    = "min_dur_low_balance"
+)
+
+// FsAgentCfg
+const (
+	SessionSConnsCfg       = "sessions_conns"
+	SubscribeParkCfg       = "subscribe_park"
+	CreateCdrCfg           = "create_cdr"
+	LowBalanceAnnFileCfg   = "low_balance_ann_file"
+	EmptyBalanceContextCfg = "empty_balance_context"
+	EmptyBalanceAnnFileCfg = "empty_balance_ann_file"
+	MaxWaitConnectionCfg   = "max_wait_connection"
+	EventSocketConnsCfg    = "event_socket_conns"
+)
+
+// From Config
+const (
+	AddressCfg = "address"
+	Password   = "password"
+	AliasCfg   = "alias"
+)
+
 // Strip/Padding strategy
 var (
 	// common
