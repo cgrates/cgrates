@@ -184,7 +184,6 @@ const CGRATES_CFG_JSON = `
 
 
 "caches":{
-	"replication_conns": [],
 	"partitions": {
 		"*destinations": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},			// destination caching
 		"*reverse_destinations": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},	// reverse destinations index caching
@@ -225,6 +224,7 @@ const CGRATES_CFG_JSON = `
 		"*rpc_connections": {"limit": -1, "ttl": "", "static_ttl": false},							// RPC connections caching
 		"*uch": {"limit": -1, "ttl": "3h", "static_ttl": false},									// User cache
 	},
+	"replication_conns": [],
 },
 
 
