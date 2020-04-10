@@ -1,8 +1,7 @@
 .. _configuration:
 
-*************
 Configuration
-*************
+=============
 
 Has a *JSON* format with commented lines starting with *//*.
 
@@ -19,7 +18,7 @@ The configuration can be loaded at start and reloaded at run time using APIs des
 
 .. hint:: You can reload from remote HTTP server as well.
 
-Below is the default configuration file which comes hardcoded into :ref:cgr-engine:
+Below is the default configuration file which comes hardcoded into :ref:`cgr-engine`:
 
 .. literalinclude:: ../data/conf/cgrates/cgrates.json
    :language: javascript
