@@ -1784,7 +1784,7 @@ func TestAgReqSetFieldsInCacheWithTimeOut(t *testing.T) {
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 
-	cfg.CacheCfg()[utils.CacheUCH].TTL = 1 * time.Second
+	cfg.CacheCfg().Partitions[utils.CacheUCH].TTL = 1 * time.Second
 	engine.Cache = engine.NewCacheS(cfg, dm)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	agReq.CGRRequest.Set([]string{utils.Account}, "1001", false, false)

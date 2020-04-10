@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -56,26 +57,41 @@ func (cParam *CacheParamCfg) loadFromJsonCfg(jsnCfg *CacheParamJsonCfg) error {
 }
 
 // CacheCfg used to store the cache config
-type CacheCfg map[string]*CacheParamCfg
+type CacheCfg struct {
+	ReplicationConns []string
+	Partitions       map[string]*CacheParamCfg
+}
 
-func (cCfg CacheCfg) loadFromJsonCfg(jsnCfg *CacheJsonCfg) (err error) {
+func (cCfg *CacheCfg) loadFromJsonCfg(jsnCfg *CacheJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return
 	}
-	for kJsn, vJsn := range *jsnCfg {
-		val := new(CacheParamCfg)
-		if err := val.loadFromJsonCfg(vJsn); err != nil {
-			return err
+	if jsnCfg.Replication_conns != nil {
+		cCfg.ReplicationConns = make([]string, len(*jsnCfg.Replication_conns))
+		for idx, connID := range *jsnCfg.Replication_conns {
+			if connID == utils.MetaInternal {
+				return fmt.Errorf("replication connection ID needs to be different than *internal")
+			}
+			cCfg.ReplicationConns[idx] = connID
 		}
-		cCfg[kJsn] = val
 	}
+	if jsnCfg.Partitions != nil {
+		for kJsn, vJsn := range *jsnCfg.Partitions {
+			val := new(CacheParamCfg)
+			if err := val.loadFromJsonCfg(vJsn); err != nil {
+				return err
+			}
+			cCfg.Partitions[kJsn] = val
+		}
+	}
+
 	return nil
 }
 
 // AsTransCacheConfig transforms the cache config in ltcache config
 func (cCfg CacheCfg) AsTransCacheConfig() (tcCfg map[string]*ltcache.CacheConfig) {
-	tcCfg = make(map[string]*ltcache.CacheConfig, len(cCfg))
-	for k, cPcfg := range cCfg {
+	tcCfg = make(map[string]*ltcache.CacheConfig, len(cCfg.Partitions))
+	for k, cPcfg := range cCfg.Partitions {
 		tcCfg[k] = &ltcache.CacheConfig{
 			MaxItems:  cPcfg.Limit,
 			TTL:       cPcfg.TTL,
@@ -86,8 +102,8 @@ func (cCfg CacheCfg) AsTransCacheConfig() (tcCfg map[string]*ltcache.CacheConfig
 }
 
 // AddTmpCaches adds all the temporary caches configuration needed
-func (cCfg CacheCfg) AddTmpCaches() {
-	cCfg[utils.CacheRatingProfilesTmp] = &CacheParamCfg{
+func (cCfg *CacheCfg) AddTmpCaches() {
+	cCfg.Partitions[utils.CacheRatingProfilesTmp] = &CacheParamCfg{
 		Limit: -1,
 		TTL:   time.Minute,
 	}

@@ -145,7 +145,8 @@ func NewDefaultCGRConfig() (cfg *CGRConfig, err error) {
 	cfg.storDbCfg = new(StorDbCfg)
 	cfg.storDbCfg.Items = make(map[string]*ItemOpt)
 	cfg.tlsCfg = new(TlsCfg)
-	cfg.cacheCfg = make(CacheCfg)
+	cfg.cacheCfg = new(CacheCfg)
+	cfg.cacheCfg.Partitions = make(map[string]*CacheParamCfg)
 	cfg.listenCfg = new(ListenCfg)
 	cfg.httpCfg = new(HTTPCfg)
 	cfg.filterSCfg = new(FilterSCfg)
@@ -262,7 +263,7 @@ type CGRConfig struct {
 	dataDbCfg        *DataDbCfg        // Database config
 	storDbCfg        *StorDbCfg        // StroreDb config
 	tlsCfg           *TlsCfg           // TLS config
-	cacheCfg         CacheCfg          // Cache config
+	cacheCfg         *CacheCfg         // Cache config
 	listenCfg        *ListenCfg        // Listen config
 	httpCfg          *HTTPCfg          // HTTP config
 	filterSCfg       *FilterSCfg       // FilterS config
@@ -417,8 +418,8 @@ func (cfg *CGRConfig) loadDataDBCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if cfg.dataDbCfg.DataDbType == utils.INTERNAL {
 		// overwrite only DataDBPartitions and leave other unmodified ( e.g. *diameter_messages, *closed_sessions, etc... )
 		for key := range utils.CacheDataDBPartitions.Data() {
-			if _, has := cfg.cacheCfg[key]; has {
-				cfg.cacheCfg[key] = &CacheParamCfg{Limit: 0,
+			if _, has := cfg.cacheCfg.Partitions[key]; has {
+				cfg.cacheCfg.Partitions[key] = &CacheParamCfg{Limit: 0,
 					TTL: time.Duration(0), StaticTTL: false, Precache: false}
 			}
 		}
@@ -831,7 +832,7 @@ func (cfg *CGRConfig) FilterSCfg() *FilterSCfg {
 }
 
 // CacheCfg returns the config for Cache
-func (cfg *CGRConfig) CacheCfg() CacheCfg {
+func (cfg *CGRConfig) CacheCfg() *CacheCfg {
 	cfg.lks[CACHE_JSN].Lock()
 	defer cfg.lks[CACHE_JSN].Unlock()
 	return cfg.cacheCfg

@@ -28,11 +28,13 @@ import (
 
 func TestAsTransCacheConfig(t *testing.T) {
 	a := &CacheCfg{
-		"test": &CacheParamCfg{
-			Limit:     50,
-			TTL:       time.Duration(60 * time.Second),
-			StaticTTL: true,
-			Precache:  true,
+		Partitions: map[string]*CacheParamCfg{
+			"test": &CacheParamCfg{
+				Limit:     50,
+				TTL:       time.Duration(60 * time.Second),
+				StaticTTL: true,
+				Precache:  true,
+			},
 		},
 	}
 	expected := map[string]*ltcache.CacheConfig{
@@ -49,7 +51,9 @@ func TestAsTransCacheConfig(t *testing.T) {
 }
 
 func TestCacheCfgloadFromJsonCfg(t *testing.T) {
-	var cachecfg, expected CacheCfg
+	var cachecfg, expected *CacheCfg
+	cachecfg = new(CacheCfg)
+	expected = new(CacheCfg)
 	if err := cachecfg.loadFromJsonCfg(nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(cachecfg, expected) {
@@ -62,17 +66,22 @@ func TestCacheCfgloadFromJsonCfg(t *testing.T) {
 	}
 	cfgJSONStr := `{
 "caches":{
-	"*destinations": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},			
-	"*reverse_destinations": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},	
-	"*rating_plans": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},
-	}		
+	"partitions": {
+		"*destinations": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},			
+		"*reverse_destinations": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},	
+		"*rating_plans": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},
+		},
+	},
 }`
-	expected = CacheCfg{
-		"*destinations":         &CacheParamCfg{Limit: -1, TTL: time.Duration(0), StaticTTL: false, Precache: false},
-		"*reverse_destinations": &CacheParamCfg{Limit: -1, TTL: time.Duration(0), StaticTTL: false, Precache: false},
-		"*rating_plans":         &CacheParamCfg{Limit: -1, TTL: time.Duration(0), StaticTTL: false, Precache: false},
+	expected = &CacheCfg{
+		Partitions: map[string]*CacheParamCfg{
+			"*destinations":         &CacheParamCfg{Limit: -1, TTL: time.Duration(0), StaticTTL: false, Precache: false},
+			"*reverse_destinations": &CacheParamCfg{Limit: -1, TTL: time.Duration(0), StaticTTL: false, Precache: false},
+			"*rating_plans":         &CacheParamCfg{Limit: -1, TTL: time.Duration(0), StaticTTL: false, Precache: false},
+		},
 	}
-	cachecfg = CacheCfg{}
+	cachecfg = new(CacheCfg)
+	cachecfg.Partitions = make(map[string]*CacheParamCfg)
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if jsnCacheCfg, err := jsnCfg.CacheJsonCfg(); err != nil {

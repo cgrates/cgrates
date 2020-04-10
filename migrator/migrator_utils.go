@@ -28,7 +28,7 @@ import (
 )
 
 func NewMigratorDataDB(db_type, host, port, name, user, pass,
-	marshaler string, cacheCfg config.CacheCfg, sentinelName string,
+	marshaler string, cacheCfg *config.CacheCfg, sentinelName string,
 	itemsCacheCfg map[string]*config.ItemOpt) (db MigratorDataDB, err error) {
 	dbCon, err := engine.NewDataDBConn(db_type,
 		host, port, name, user, pass, marshaler,

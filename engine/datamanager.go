@@ -89,7 +89,7 @@ var (
 )
 
 // NewDataManager returns a new DataManager
-func NewDataManager(dataDB DataDB, cacheCfg config.CacheCfg, connMgr *ConnManager) *DataManager {
+func NewDataManager(dataDB DataDB, cacheCfg *config.CacheCfg, connMgr *ConnManager) *DataManager {
 	ms, _ := NewMarshaler(config.CgrConfig().GeneralCfg().DBDataEncoding)
 	return &DataManager{
 		dataDB:   dataDB,
@@ -103,7 +103,7 @@ func NewDataManager(dataDB DataDB, cacheCfg config.CacheCfg, connMgr *ConnManage
 // transparently manages data retrieval, further serialization and caching
 type DataManager struct {
 	dataDB   DataDB
-	cacheCfg config.CacheCfg
+	cacheCfg *config.CacheCfg
 	connMgr  *ConnManager
 	ms       Marshaler
 }
@@ -123,7 +123,7 @@ func (dm *DataManager) LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs,
 		if dm.cacheCfg == nil {
 			return
 		}
-		for k, cacheCfg := range dm.cacheCfg {
+		for k, cacheCfg := range dm.cacheCfg.Partitions {
 			k = utils.CacheInstanceToPrefix[k] // alias into prefixes understood by storage
 			if loadCachePrefixMap.HasKey(k) && cacheCfg.Precache {
 				if err := dm.PreloadCacheForPrefix(k); err != nil && err != utils.ErrInvalidKey {
@@ -214,7 +214,7 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 			ids = append(ids, keyID[len(prfx):])
 		}
 		var nrItems int
-		if cCfg, has := dm.cacheCfg[utils.CachePrefixToInstance[prfx]]; has {
+		if cCfg, has := dm.cacheCfg.Partitions[utils.CachePrefixToInstance[prfx]]; has {
 			nrItems = cCfg.Limit
 		}
 		if nrItems > 0 && nrItems < len(ids) { // More ids than cache config allows it, limit here
