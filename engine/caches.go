@@ -45,7 +45,7 @@ func NewCacheS(cfg *config.CGRConfig, dm *DataManager) (c *CacheS) {
 	c = &CacheS{cfg: cfg, dm: dm,
 		pcItems: make(map[string]chan struct{}),
 		tCache:  ltcache.NewTransCache(cfg.CacheCfg().AsTransCacheConfig())}
-	for cacheID := range cfg.CacheCfg() {
+	for cacheID := range cfg.CacheCfg().Partitions {
 		c.pcItems[cacheID] = make(chan struct{})
 	}
 	return
@@ -120,7 +120,7 @@ func (chS *CacheS) Precache() (err error) {
 	var wg sync.WaitGroup // wait for precache to finish
 	errChan := make(chan error)
 	doneChan := make(chan struct{})
-	for cacheID, cacheCfg := range chS.cfg.CacheCfg() {
+	for cacheID, cacheCfg := range chS.cfg.CacheCfg().Partitions {
 		if !cacheCfg.Precache {
 			close(chS.pcItems[cacheID]) // no need of precache
 			continue

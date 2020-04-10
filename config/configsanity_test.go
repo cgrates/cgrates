@@ -308,12 +308,12 @@ func TestConfigSanitySessionS(t *testing.T) {
 	}
 	cfg.sessionSCfg.ReplicationConns = []string{}
 
-	cfg.cacheCfg[utils.CacheClosedSessions].Limit = 0
+	cfg.cacheCfg.Partitions[utils.CacheClosedSessions].Limit = 0
 	expected = "<CacheS> *closed_sessions needs to be != 0, received: 0"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.cacheCfg[utils.CacheClosedSessions].Limit = 1
+	cfg.cacheCfg.Partitions[utils.CacheClosedSessions].Limit = 1
 	expected = "<SessionS> the following protected field can't be altered by session: <CGRID>"
 	cfg.sessionSCfg.AlterableFields = utils.NewStringSet([]string{utils.CGRID})
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
@@ -727,25 +727,29 @@ func TestConfigSanityDataDB(t *testing.T) {
 	cfg, _ = NewDefaultCGRConfig()
 	cfg.dataDbCfg.DataDbType = utils.INTERNAL
 
-	cfg.cacheCfg = CacheCfg{
-		utils.CacheTimings: &CacheParamCfg{
-			Limit: 0,
+	cfg.cacheCfg = &CacheCfg{
+		Partitions: map[string]*CacheParamCfg{
+			utils.CacheTimings: &CacheParamCfg{
+				Limit: 0,
+			},
 		},
 	}
 	if err := cfg.checkConfigSanity(); err != nil {
 		t.Error(err)
 	}
 
-	cfg.cacheCfg = CacheCfg{
-		utils.CacheAccounts: &CacheParamCfg{
-			Limit: 1,
+	cfg.cacheCfg = &CacheCfg{
+		Partitions: map[string]*CacheParamCfg{
+			utils.CacheAccounts: &CacheParamCfg{
+				Limit: 1,
+			},
 		},
 	}
 	expected := "<CacheS> *accounts needs to be 0 when DataBD is *internal, received : 1"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.cacheCfg[utils.CacheAccounts].Limit = 0
+	cfg.cacheCfg.Partitions[utils.CacheAccounts].Limit = 0
 	cfg.resourceSCfg.Enabled = true
 	expected = "<ResourceS> the StoreInterval field needs to be -1 when DataBD is *internal, received : 0"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
@@ -835,12 +839,12 @@ func TestConfigSanityDispatcher(t *testing.T) {
 func TestConfigSanityCacheS(t *testing.T) {
 	cfg, _ = NewDefaultCGRConfig()
 
-	cfg.cacheCfg = map[string]*CacheParamCfg{"wrong_partition_name": &CacheParamCfg{Limit: 10}}
+	cfg.cacheCfg.Partitions = map[string]*CacheParamCfg{"wrong_partition_name": &CacheParamCfg{Limit: 10}}
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != "<CacheS> partition <wrong_partition_name> not defined" {
 		t.Error(err)
 	}
 
-	cfg.cacheCfg = map[string]*CacheParamCfg{utils.CacheLoadIDs: &CacheParamCfg{Limit: 9}}
+	cfg.cacheCfg.Partitions = map[string]*CacheParamCfg{utils.CacheLoadIDs: &CacheParamCfg{Limit: 9}}
 	if err := cfg.checkConfigSanity(); err != nil {
 		t.Error(err)
 	}

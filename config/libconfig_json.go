@@ -281,7 +281,10 @@ type CacheParamJsonCfg struct {
 	Precache   *bool
 }
 
-type CacheJsonCfg map[string]*CacheParamJsonCfg
+type CacheJsonCfg struct {
+	Replication_conns *[]string
+	Partitions        *map[string]*CacheParamJsonCfg
+}
 
 // SM-Kamailio config section
 type KamAgentJsonCfg struct {

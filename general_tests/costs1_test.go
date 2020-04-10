@@ -26,7 +26,7 @@ import (
 )
 
 func TestCosts1SetStorage(t *testing.T) {
-	config.CgrConfig().CacheCfg()[utils.CacheRatingPlans].Precache = true // precache rating plan
+	config.CgrConfig().CacheCfg().Partitions[utils.CacheRatingPlans].Precache = true // precache rating plan
 	dataDBInt := engine.NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
 	dataDB = engine.NewDataManager(dataDBInt, config.CgrConfig().CacheCfg(), nil)
 	engine.SetDataStorage(dataDB)

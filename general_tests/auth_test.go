@@ -30,7 +30,7 @@ var dbAuth *engine.DataManager
 var rsponder *engine.Responder
 
 func TestAuthSetStorage(t *testing.T) {
-	config.CgrConfig().CacheCfg()[utils.CacheRatingPlans].Precache = true // precache rating plan
+	config.CgrConfig().CacheCfg().Partitions[utils.CacheRatingPlans].Precache = true // precache rating plan
 	dataDB := engine.NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
 	dbAuth = engine.NewDataManager(dataDB, config.CgrConfig().CacheCfg(), nil)
 	engine.SetDataStorage(dbAuth)

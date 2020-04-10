@@ -195,8 +195,9 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.SessionS, connID)
 			}
 		}
-		if cfg.cacheCfg[utils.CacheClosedSessions].Limit == 0 {
-			return fmt.Errorf("<%s> %s needs to be != 0, received: %d", utils.CacheS, utils.CacheClosedSessions, cfg.cacheCfg[utils.CacheClosedSessions].Limit)
+		if cfg.cacheCfg.Partitions[utils.CacheClosedSessions].Limit == 0 {
+			return fmt.Errorf("<%s> %s needs to be != 0, received: %d", utils.CacheS, utils.CacheClosedSessions,
+				cfg.cacheCfg.Partitions[utils.CacheClosedSessions].Limit)
 		}
 		for alfld := range cfg.sessionSCfg.AlterableFields.Data() {
 			if utils.ProtectedSFlds.Has(alfld) {
@@ -436,7 +437,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 	}
 	// DataDB sanity checks
 	if cfg.dataDbCfg.DataDbType == utils.INTERNAL {
-		for key, config := range cfg.cacheCfg {
+		for key, config := range cfg.cacheCfg.Partitions {
 			if utils.CacheDataDBPartitions.Has(key) && config.Limit != 0 {
 				return fmt.Errorf("<%s> %s needs to be 0 when DataBD is *internal, received : %d", utils.CacheS, key, config.Limit)
 			}
@@ -487,8 +488,13 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			}
 		}
 	}
-	// Cache partitions check
-	for cacheID := range cfg.cacheCfg {
+	// Cache check
+	for _, connID := range cfg.cacheCfg.ReplicationConns {
+		if _, has := cfg.rpcConns[connID]; !has {
+			return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.CacheS, connID)
+		}
+	}
+	for cacheID := range cfg.cacheCfg.Partitions {
 		if !utils.CachePartitions.Has(cacheID) {
 			return fmt.Errorf("<%s> partition <%s> not defined", utils.CacheS, cacheID)
 		}
