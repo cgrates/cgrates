@@ -415,50 +415,13 @@ func (cfg *CGRConfig) loadDataDBCfg(jsnCfg *CgrJsonCfg) (err error) {
 	// in case of internalDB we need to disable the cache
 	// so we enforce it here
 	if cfg.dataDbCfg.DataDbType == utils.INTERNAL {
-		zeroLimit := &CacheParamCfg{Limit: 0,
-			TTL: time.Duration(0), StaticTTL: false, Precache: false}
-		disabledCache := CacheCfg{
-			utils.CacheDestinations:            zeroLimit,
-			utils.CacheReverseDestinations:     zeroLimit,
-			utils.CacheRatingPlans:             zeroLimit,
-			utils.CacheRatingProfiles:          zeroLimit,
-			utils.CacheActions:                 zeroLimit,
-			utils.CacheActionPlans:             zeroLimit,
-			utils.CacheAccountActionPlans:      zeroLimit,
-			utils.CacheActionTriggers:          zeroLimit,
-			utils.CacheSharedGroups:            zeroLimit,
-			utils.CacheTimings:                 zeroLimit,
-			utils.CacheResourceProfiles:        zeroLimit,
-			utils.CacheResources:               zeroLimit,
-			utils.CacheEventResources:          zeroLimit,
-			utils.CacheStatQueueProfiles:       zeroLimit,
-			utils.CacheStatQueues:              zeroLimit,
-			utils.CacheThresholdProfiles:       zeroLimit,
-			utils.CacheThresholds:              zeroLimit,
-			utils.CacheFilters:                 zeroLimit,
-			utils.CacheSupplierProfiles:        zeroLimit,
-			utils.CacheAttributeProfiles:       zeroLimit,
-			utils.CacheChargerProfiles:         zeroLimit,
-			utils.CacheDispatcherProfiles:      zeroLimit,
-			utils.CacheDispatcherHosts:         zeroLimit,
-			utils.CacheResourceFilterIndexes:   zeroLimit,
-			utils.CacheStatFilterIndexes:       zeroLimit,
-			utils.CacheThresholdFilterIndexes:  zeroLimit,
-			utils.CacheSupplierFilterIndexes:   zeroLimit,
-			utils.CacheAttributeFilterIndexes:  zeroLimit,
-			utils.CacheChargerFilterIndexes:    zeroLimit,
-			utils.CacheDispatcherFilterIndexes: zeroLimit,
-			utils.CacheDispatcherRoutes:        zeroLimit,
-			utils.CacheRPCResponses:            zeroLimit,
-			utils.CacheLoadIDs:                 zeroLimit,
-			utils.CacheDiameterMessages: &CacheParamCfg{Limit: -1,
-				TTL: time.Duration(3 * time.Hour), StaticTTL: false},
-			utils.CacheClosedSessions: &CacheParamCfg{Limit: -1,
-				TTL: time.Duration(10 * time.Second), StaticTTL: false},
-			utils.CacheRPCConnections: &CacheParamCfg{Limit: -1,
-				TTL: time.Duration(0), StaticTTL: false},
+		// overwrite only DataDBPartitions and leave other unmodified ( e.g. *diameter_messages, *closed_sessions, etc... )
+		for key := range utils.CacheDataDBPartitions.Data() {
+			if _, has := cfg.cacheCfg[key]; has {
+				cfg.cacheCfg[key] = &CacheParamCfg{Limit: 0,
+					TTL: time.Duration(0), StaticTTL: false, Precache: false}
+			}
 		}
-		cfg.cacheCfg = disabledCache
 	}
 	return
 
