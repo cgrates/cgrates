@@ -69,3 +69,26 @@ func TestCdrsCfgloadFromJsonCfg(t *testing.T) {
 		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(cdrscfg))
 	}
 }
+
+func TestExtraFieldsinAsMapInterface(t *testing.T) {
+	var cdrscfg CdrsCfg
+	cfgJSONStr := `{
+	"cdrs": {
+		"enabled": true,
+		"extra_fields": ["PayPalAccount", "LCRProfile", "ResourceID"],
+		"chargers_conns":["*localhost"],
+		"store_cdrs": true,
+		"online_cdr_exports": []
+	},
+	}`
+	expectedExtra := []string{"PayPalAccount", "LCRProfile", "ResourceID"}
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+		t.Error(err)
+	} else if jsnCdrsCfg, err := jsnCfg.CdrsJsonCfg(); err != nil {
+		t.Error(err)
+	} else if err = cdrscfg.loadFromJsonCfg(jsnCdrsCfg); err != nil {
+		t.Error(err)
+	} else if rcv := cdrscfg.AsMapInterface(); !reflect.DeepEqual(rcv[utils.ExtraFieldsCfg], expectedExtra) {
+		t.Errorf("Expecting: '%+v', received: '%+v' ", expectedExtra, rcv[utils.ExtraFieldsCfg])
+	}
+}
