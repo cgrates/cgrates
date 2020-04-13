@@ -98,9 +98,9 @@ func TestEventReaderLoadFromJSON(t *testing.T) {
 		Enabled:       true,
 		SessionSConns: []string{"conn1", "conn3"},
 		Readers: []*EventReaderCfg{
-			&EventReaderCfg{
+			{
 				ID:             utils.MetaDefault,
-				Type:           utils.MetaFileCSV,
+				Type:           utils.META_NONE,
 				FieldSep:       ",",
 				RunDelay:       time.Duration(0),
 				ConcurrentReqs: 1024,
@@ -137,7 +137,7 @@ func TestEventReaderLoadFromJSON(t *testing.T) {
 				},
 				CacheDumpFields: make([]*FCTemplate, 0),
 			},
-			&EventReaderCfg{
+			{
 				ID:             "file_reader1",
 				Type:           utils.MetaFileCSV,
 				FieldSep:       ",",
@@ -230,9 +230,9 @@ func TestEventReaderSameID(t *testing.T) {
 		Enabled:       true,
 		SessionSConns: []string{"conn1"},
 		Readers: []*EventReaderCfg{
-			&EventReaderCfg{
+			{
 				ID:             utils.MetaDefault,
-				Type:           utils.MetaFileCSV,
+				Type:           utils.META_NONE,
 				FieldSep:       ",",
 				RunDelay:       time.Duration(0),
 				ConcurrentReqs: 1024,
@@ -269,7 +269,7 @@ func TestEventReaderSameID(t *testing.T) {
 				},
 				CacheDumpFields: make([]*FCTemplate, 0),
 			},
-			&EventReaderCfg{
+			{
 				ID:             "file_reader1",
 				Type:           utils.MetaFileCSV,
 				RowLength:      5,
