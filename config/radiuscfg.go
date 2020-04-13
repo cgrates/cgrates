@@ -95,3 +95,23 @@ func (self *RadiusAgentCfg) loadFromJsonCfg(jsnCfg *RadiusAgentJsonCfg, separato
 	}
 	return nil
 }
+
+func (ra *RadiusAgentCfg) AsMapInterface() map[string]interface{} {
+
+	requestProcessors := make([]map[string]interface{}, len(ra.RequestProcessors))
+	for i, item := range ra.RequestProcessors {
+		requestProcessors[i] = item.AsMapInterface()
+	}
+
+	return map[string]interface{}{
+		utils.EnabledCfg:            ra.Enabled,
+		utils.ListenNetCfg:          ra.ListenNet,
+		utils.ListenAuthCfg:         ra.ListenAuth,
+		utils.ListenAcctCfg:         ra.ListenAcct,
+		utils.ClientSecretsCfg:      ra.ClientSecrets,
+		utils.ClientDictionariesCfg: ra.ClientDictionaries,
+		utils.SessionSConnsCfg:      ra.SessionSConns,
+		utils.RequestProcessorsCfg:  requestProcessors,
+	}
+
+}

@@ -1831,6 +1831,12 @@ const (
 	// RequestProcessor
 	RequestFieldsCfg = "Request_fields"
 	ReplyFieldsCfg   = "Reply_fields"
+
+	// RadiusAgentCfg
+	ListenAuthCfg         = "listen_auth"
+	ListenAcctCfg         = "listen_acct"
+	ClientSecretsCfg      = "client_secrets"
+	ClientDictionariesCfg = "client_dictionaries"
 )
 
 // FC Template
