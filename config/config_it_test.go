@@ -446,9 +446,9 @@ func testCGRConfigReloadERs(t *testing.T) {
 		Enabled:       true,
 		SessionSConns: []string{utils.MetaLocalHost},
 		Readers: []*EventReaderCfg{
-			&EventReaderCfg{
+			{
 				ID:              utils.MetaDefault,
-				Type:            utils.MetaFileCSV,
+				Type:            utils.META_NONE,
 				RowLength:       0,
 				FieldSep:        ",",
 				RunDelay:        0,
@@ -461,7 +461,7 @@ func testCGRConfigReloadERs(t *testing.T) {
 				CacheDumpFields: []*FCTemplate{},
 				XmlRootPath:     utils.HierarchyPath{utils.EmptyString},
 			},
-			&EventReaderCfg{
+			{
 				ID:              "file_reader1",
 				Type:            utils.MetaFileCSV,
 				FieldSep:        ",",
@@ -850,7 +850,7 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 				"SourcePath":               "/var/spool/cgrates/cdrc/in",
 				"Tenant":                   nil,
 				"Timezone":                 "",
-				"Type":                     "*file_csv",
+				"Type":                     utils.META_NONE,
 				"XmlRootPath":              []interface{}{utils.EmptyString},
 			},
 			map[string]interface{}{

@@ -35,7 +35,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewFWVFileERER(cfg *config.CGRConfig, cfgIdx int,
+func NewFWVFileER(cfg *config.CGRConfig, cfgIdx int,
 	rdrEvents chan *erEvent, rdrErr chan error,
 	fltrS *engine.FilterS, rdrExit chan struct{}) (er EventReader, err error) {
 	srcPath := cfg.ERsCfg().Readers[cfgIdx].SourcePath

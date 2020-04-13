@@ -1811,7 +1811,7 @@ func TestDfEventReaderCfg(t *testing.T) {
 		Readers: &[]*EventReaderJsonCfg{
 			&EventReaderJsonCfg{
 				Id:                  utils.StringPointer(utils.MetaDefault),
-				Type:                utils.StringPointer(utils.MetaFileCSV),
+				Type:                utils.StringPointer(utils.META_NONE),
 				Row_length:          utils.IntPointer(0),
 				Field_separator:     utils.StringPointer(","),
 				Run_delay:           utils.StringPointer("0"),

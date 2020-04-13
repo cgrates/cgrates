@@ -1796,7 +1796,7 @@ func TestCgrCdfEventReader(t *testing.T) {
 		Readers: []*EventReaderCfg{
 			&EventReaderCfg{
 				ID:             utils.MetaDefault,
-				Type:           utils.MetaFileCSV,
+				Type:           utils.META_NONE,
 				FieldSep:       ",",
 				RunDelay:       time.Duration(0),
 				ConcurrentReqs: 1024,
@@ -1843,7 +1843,7 @@ func TestCgrCdfEventReader(t *testing.T) {
 func TestCgrCfgEventReaderDefault(t *testing.T) {
 	eCfg := &EventReaderCfg{
 		ID:             utils.MetaDefault,
-		Type:           utils.MetaFileCSV,
+		Type:           utils.META_NONE,
 		FieldSep:       ",",
 		RunDelay:       time.Duration(0),
 		ConcurrentReqs: 1024,

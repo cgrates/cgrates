@@ -157,63 +157,67 @@
 
 // "schedulers": {
 // 	"enabled": false,				// start Scheduler service: <true|false>
-// 	"cdrs_conns": [],				// connections to CDRs for *cdrlog actions <*internal|x.y.z.y:1234>
+// 	"cdrs_conns": [],				// connections to CDRs for *cdrlog actions <""|*internal|$rpc_conns_id>
 // 	"filters": [],					// only execute actions matching these filters
 // },
 
 
 // "caches":{
-// 	"*destinations": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},			// destination caching
-// 	"*reverse_destinations": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},	// reverse destinations index caching
-// 	"*rating_plans": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},			// rating plans caching
-// 	"*rating_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// rating profiles caching
-// 	"*actions": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},				// actions caching
-// 	"*action_plans": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},			// action plans caching
-// 	"*account_action_plans": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},	// account action plans index caching
-// 	"*action_triggers": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// action triggers caching
-// 	"*shared_groups": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},			// shared groups caching
-// 	"*timings": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},				// timings caching
-// 	"*resource_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// control resource profiles caching
-// 	"*resources": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},				// control resources caching
-// 	"*event_resources": {"limit": -1, "ttl": "", "static_ttl": false},							// matching resources to events
-// 	"*statqueue_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},	// statqueue profiles
-// 	"*statqueues": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},			// statqueues with metrics
-// 	"*threshold_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},	// control threshold profiles caching
-// 	"*thresholds": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},			// control thresholds caching
-// 	"*filters": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},				// control filters caching
-// 	"*supplier_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// control supplier profile caching
-// 	"*attribute_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},	// control attribute profile caching
-// 	"*charger_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// control charger profile caching
-// 	"*dispatcher_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},	// control dispatcher profile caching
-// 	"*dispatcher_hosts": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// control dispatcher hosts caching
-// 	"*resource_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 				// control resource filter indexes caching
-// 	"*stat_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 					// control stat filter indexes caching
-// 	"*threshold_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 				// control threshold filter indexes caching
-// 	"*supplier_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 				// control supplier filter indexes caching
-// 	"*attribute_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 				// control attribute filter indexes caching
-// 	"*charger_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 					// control charger filter indexes caching
-// 	"*dispatcher_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 				// control dispatcher filter indexes caching
-// 	"*dispatcher_routes": {"limit": -1, "ttl": "", "static_ttl": false}, 						// control dispatcher routes caching
-// 	"*diameter_messages": {"limit": -1, "ttl": "3h", "static_ttl": false},						// diameter messages caching
-// 	"*rpc_responses": {"limit": 0, "ttl": "2s", "static_ttl": false},							// RPC responses caching
-// 	"*closed_sessions": {"limit": -1, "ttl": "10s", "static_ttl": false},						// closed sessions cached for CDRs
-// 	"*cdr_ids": {"limit": -1, "ttl": "10m", "static_ttl": false},									// protects CDRs against double-charging
-// 	"*load_ids": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},				// control the load_ids for items
-// 	"*rpc_connections": {"limit": -1, "ttl": "", "static_ttl": false},							// RPC connections caching
+// 	"partitions": {
+// 		"*destinations": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},			// destination caching
+// 		"*reverse_destinations": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},	// reverse destinations index caching
+// 		"*rating_plans": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},			// rating plans caching
+// 		"*rating_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// rating profiles caching
+// 		"*actions": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},				// actions caching
+// 		"*action_plans": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},			// action plans caching
+// 		"*account_action_plans": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},	// account action plans index caching
+// 		"*action_triggers": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// action triggers caching
+// 		"*shared_groups": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},			// shared groups caching
+// 		"*timings": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},				// timings caching
+// 		"*resource_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// control resource profiles caching
+// 		"*resources": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},				// control resources caching
+// 		"*event_resources": {"limit": -1, "ttl": "", "static_ttl": false},							// matching resources to events
+// 		"*statqueue_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},	// statqueue profiles
+// 		"*statqueues": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},			// statqueues with metrics
+// 		"*threshold_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},	// control threshold profiles caching
+// 		"*thresholds": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},			// control thresholds caching
+// 		"*filters": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},				// control filters caching
+// 		"*supplier_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// control supplier profile caching
+// 		"*attribute_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},	// control attribute profile caching
+// 		"*charger_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// control charger profile caching
+// 		"*dispatcher_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},	// control dispatcher profile caching
+// 		"*dispatcher_hosts": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// control dispatcher hosts caching
+// 		"*resource_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 				// control resource filter indexes caching
+// 		"*stat_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 					// control stat filter indexes caching
+// 		"*threshold_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 				// control threshold filter indexes caching
+// 		"*supplier_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 				// control supplier filter indexes caching
+// 		"*attribute_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 				// control attribute filter indexes caching
+// 		"*charger_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 					// control charger filter indexes caching
+// 		"*dispatcher_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 				// control dispatcher filter indexes caching
+// 		"*dispatcher_routes": {"limit": -1, "ttl": "", "static_ttl": false}, 						// control dispatcher routes caching
+// 		"*diameter_messages": {"limit": -1, "ttl": "3h", "static_ttl": false},						// diameter messages caching
+// 		"*rpc_responses": {"limit": 0, "ttl": "2s", "static_ttl": false},							// RPC responses caching
+// 		"*closed_sessions": {"limit": -1, "ttl": "10s", "static_ttl": false},						// closed sessions cached for CDRs
+// 		"*cdr_ids": {"limit": -1, "ttl": "10m", "static_ttl": false},								// protects CDRs against double-charging
+// 		"*load_ids": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},				// control the load_ids for items
+// 		"*rpc_connections": {"limit": -1, "ttl": "", "static_ttl": false},							// RPC connections caching
+// 		"*uch": {"limit": -1, "ttl": "3h", "static_ttl": false},									// User cache
+// 	},
+// 	"replication_conns": [],
 // },
 
 
 // "filters": {								// Filters configuration (*new)
-// 	"stats_conns": [],						// connections to StatS for <*stats> filters, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
-// 	"resources_conns": [],					// connections to ResourceS for <*resources> filters, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
-// 	"apiers_conns": [],						// connections to RALs for <*accounts> filters, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
+// 	"stats_conns": [],						// connections to StatS for <*stats> filters, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
+// 	"resources_conns": [],					// connections to ResourceS for <*resources> filters, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
+// 	"apiers_conns": [],						// connections to RALs for <*accounts> filters, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
 // },
 
 
 // "rals": {
 // 	"enabled": false,						// enable Rating/Accounting service: <true|false>
-// 	"thresholds_conns": [],					// connections to ThresholdS for account/balance updates, empty to disable thresholds functionality: <""|*internal|x.y.z.y:1234>
-// 	"stats_conns": [],						// connections to StatS for account/balance updates, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
+// 	"thresholds_conns": [],					// connections to ThresholdS for account/balance updates, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
+// 	"stats_conns": [],						// connections to StatS for account/balance updates, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
 // 	"caches_conns":["*internal"],			// connections to CacheS for account/balance updates
 // 	"rp_subject_prefix_matching": false,	// enables prefix matching for the rating profile subject
 // 	"remove_expired":true,					// enables automatic removal of expired balances
@@ -237,11 +241,11 @@
 // 	"extra_fields": [],						// extra fields to store in CDRs for non-generic CDRs (ie: FreeSWITCH JSON)
 // 	"store_cdrs": true,						// store cdrs in StorDB
 // 	"session_cost_retries": 5,				// number of queries to session_costs before recalculating CDR
-// 	"chargers_conns": [],					// connection to ChargerS for CDR forking, empty to disable billing for CDRs: <""|*internal|x.y.z.y:1234>
-// 	"rals_conns": [],						// connections to RALs for cost calculation: <""|*internal|x.y.z.y:1234>
-// 	"attributes_conns": [],					// connection to AttributeS for altering *raw CDRs, empty to disable attributes functionality: <""|*internal|x.y.z.y:1234>
-// 	"thresholds_conns": [],					// connection to ThresholdS for CDR reporting, empty to disable thresholds functionality: <""|*internal|x.y.z.y:1234>
-// 	"stats_conns": [],						// connections to StatS for CDR reporting, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
+// 	"chargers_conns": [],					// connection to ChargerS for CDR forking, empty to disable billing for CDRs: <""|*internal|$rpc_conns_id>
+// 	"rals_conns": [],						// connections to RALs for cost calculation: <""|*internal|$rpc_conns_id>
+// 	"attributes_conns": [],					// connection to AttributeS for altering *raw CDRs, empty to disable attributes functionality: <""|*internal|$rpc_conns_id>
+// 	"thresholds_conns": [],					// connection to ThresholdS for CDR reporting, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
+// 	"stats_conns": [],						// connections to StatS for CDR reporting, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
 // 	"online_cdr_exports":[],				// list of CDRE profiles to use for real-time CDR exports
 // },
 
@@ -282,9 +286,10 @@
 // 	"readers": [
 // 		{
 // 			"id": "*default",									// identifier of the EventReader profile
-// 			"type": "*file_csv",								// reader type <*file_csv>
+// 			"type": "*none",									// reader type <*file_csv>
+// 			"row_length" : 0, 									// Number of fields from csv file
 // 			"field_separator": ",",								// separator used in case of csv files
-// 			"run_delay": "0",										// sleep interval in seconds between consecutive runs, -1 to use automation via inotify or 0 to disable running all together
+// 			"run_delay": "0",									// sleep interval in seconds between consecutive runs, -1 to use automation via inotify or 0 to disable running all together
 // 			"concurrent_requests": 1024,						// maximum simultaneous requests/files to process, 0 for unlimited
 // 			"source_path": "/var/spool/cgrates/cdrc/in",		// read data from this path
 // 			"processed_path": "/var/spool/cgrates/cdrc/out",	// move processed data here
@@ -315,14 +320,14 @@
 // "sessions": {
 // 	"enabled": false,						// starts the session service: <true|false>
 // 	"listen_bijson": "127.0.0.1:2014",		// address where to listen for bidirectional JSON-RPC requests
-// 	"chargers_conns": [],					// connections to ChargerS for session forking <*internal|x.y.z.y:1234>
-// 	"rals_conns": [],						// connections to RALs for rating/accounting <""|*internal|127.0.0.1:2013>
-// 	"cdrs_conns": [],						// connections to CDRs for CDR posting <*internal|x.y.z.y:1234>
-// 	"resources_conns": [],					// connections to ResourceS for resources monitoring <""|*internal|127.0.0.1:2013>
-// 	"thresholds_conns": [],					// connections to ThresholdS for reporting session events <""|*internal|127.0.0.1:2013>
-// 	"stats_conns": [],						// connections to StatS for reporting session events <""|*internal|127.0.0.1:2013>
-// 	"suppliers_conns": [],					// connections to SupplierS for querying suppliers for event <""|*internal|127.0.0.1:2013>
-// 	"attributes_conns": [],					// connections to AttributeS for altering event fields <""|*internal|127.0.0.1:2013>
+// 	"chargers_conns": [],					// connections to ChargerS for session forking <""|*internal|$rpc_conns_id>
+// 	"rals_conns": [],						// connections to RALs for rating/accounting <""|*internal|$rpc_conns_id>
+// 	"cdrs_conns": [],						// connections to CDRs for CDR posting <""|*internal|$rpc_conns_id>
+// 	"resources_conns": [],					// connections to ResourceS for resources monitoring <""|*internal|$rpc_conns_id>
+// 	"thresholds_conns": [],					// connections to ThresholdS for reporting session events <""|*internal|$rpc_conns_id>
+// 	"stats_conns": [],						// connections to StatS for reporting session events <""|*internal|$rpc_conns_id>
+// 	"suppliers_conns": [],					// connections to SupplierS for querying suppliers for event <""|*internal|$rpc_conns_id>
+// 	"attributes_conns": [],					// connections to AttributeS for altering event fields <""|*internal|$rpc_conns_id>
 // 	"replication_conns": [],				// replicate sessions towards these session services
 // 	"debit_interval": "0s",					// interval to perform debits on.
 // 	"store_session_costs": false,			// enable storing of the session costs within CDRs
@@ -509,7 +514,7 @@
 // "resources": {								// ResourceS config
 // 	"enabled": false,						// starts ResourceLimiter service: <true|false>.
 // 	"store_interval": "",					// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
-// 	"thresholds_conns": [],					// connections to ThresholdS for resource reporting, empty to disable thresholds functionality: <""|*internal|x.y.z.y:1234>
+// 	"thresholds_conns": [],					// connections to ThresholdS for resource reporting, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
 // 	"indexed_selects":true,					// enable profile matching exclusively on indexes
 // 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
@@ -521,7 +526,7 @@
 // 	"enabled": false,						// starts Stat service: <true|false>.
 // 	"store_interval": "",					// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
 // 	"store_uncompressed_limit": 0,					// used to compress data
-// 	"thresholds_conns": [],					// connections to ThresholdS for StatUpdates, empty to disable thresholds functionality: <""|*internal|x.y.z.y:1234>
+// 	"thresholds_conns": [],					// connections to ThresholdS for StatUpdates, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
 // 	"indexed_selects":true,					// enable profile matching exclusively on indexes
 // 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
@@ -545,10 +550,10 @@
 // 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
-// 	"attributes_conns": [],					// connections to AttributeS for altering events before supplier queries: <""|*internal|127.0.0.1:2013>
-// 	"resources_conns": [],					// connections to ResourceS for *res sorting, empty to disable functionality: <""|*internal|x.y.z.y:1234>
-// 	"stats_conns": [],						// connections to StatS for *stats sorting, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
-// 	"rals_conns": [],						// connections to Rater for calculating cost, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
+// 	"attributes_conns": [],					// connections to AttributeS for altering events before supplier queries: <""|*internal|$rpc_conns_id>
+// 	"resources_conns": [],					// connections to ResourceS for *res sorting, empty to disable functionality: <""|*internal|$rpc_conns_id>
+// 	"stats_conns": [],						// connections to StatS for *stats sorting, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
+// 	"rals_conns": [],						// connections to Rater for calculating cost, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
 // 	"default_ratio":1						// default ratio used in case of *load strategy
 // },
 
@@ -792,7 +797,7 @@
 // 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
-// 	"attributes_conns": [],					// connections to AttributeS for API authorization, empty to disable auth functionality: <""|*internal|x.y.z.y:1234>
+// 	"attributes_conns": [],					// connections to AttributeS for API authorization, empty to disable auth functionality: <""|*internal|$rpc_conns_id>
 // },
 
 
