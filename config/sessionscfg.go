@@ -449,6 +449,17 @@ func (aConnCfg *AsteriskConnCfg) loadFromJsonCfg(jsnCfg *AstConnJsonCfg) error {
 	return nil
 }
 
+func (aConnCfg *AsteriskConnCfg) AsMapInterface() map[string]interface{} {
+	return map[string]interface{}{
+		utils.AliasCfg:           aConnCfg.Alias,
+		utils.AddressCfg:         aConnCfg.Address,
+		utils.UserCf:             aConnCfg.User,
+		utils.Password:           aConnCfg.Password,
+		utils.ConnectAttemptsCfg: aConnCfg.ConnectAttempts,
+		utils.ReconnectsCfg:      aConnCfg.Reconnects,
+	}
+}
+
 type AsteriskAgentCfg struct {
 	Enabled       bool
 	SessionSConns []string
@@ -485,4 +496,18 @@ func (aCfg *AsteriskAgentCfg) loadFromJsonCfg(jsnCfg *AsteriskAgentJsonCfg) (err
 		}
 	}
 	return nil
+}
+
+func (aCfg *AsteriskAgentCfg) AsMapInterface() map[string]interface{} {
+	conns := make([]map[string]interface{}, len(aCfg.AsteriskConns))
+	for i, item := range aCfg.AsteriskConns {
+		conns[i] = item.AsMapInterface()
+	}
+
+	return map[string]interface{}{
+		utils.EnabledCfg:       aCfg.Enabled,
+		utils.SessionSConnsCfg: aCfg.SessionSConns,
+		utils.CreateCDRCfg:     aCfg.CreateCDR,
+		utils.AsteriskConnsCfg: conns,
+	}
 }
