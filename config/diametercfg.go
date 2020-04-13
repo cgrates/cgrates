@@ -124,3 +124,39 @@ func (da *DiameterAgentCfg) loadFromJsonCfg(jsnCfg *DiameterAgentJsonCfg, separa
 	}
 	return nil
 }
+
+func (ds *DiameterAgentCfg) AsMapInterface() map[string]interface{} {
+	templates := make(map[string][]map[string]interface{})
+	for key, value := range ds.Templates {
+		fcTemplate := make([]map[string]interface{}, len(value))
+		for i, val := range value {
+			fcTemplate[i] = val.AsMapInterface()
+
+		}
+		templates[key] = fcTemplate
+	}
+
+	requestProcessors := make([]map[string]interface{}, len(ds.RequestProcessors))
+	for i, item := range ds.RequestProcessors {
+		requestProcessors[i] = item.AsMapInterface()
+	}
+
+	return map[string]interface{}{
+		utils.EnabledCfg:           ds.Enabled,
+		utils.ListenNetCfg:         ds.ListenNet,
+		utils.ListenCfg:            ds.Listen,
+		utils.DictionariesPathCfg:  ds.DictionariesPath,
+		utils.SessionSConnsCfg:     ds.SessionSConns,
+		utils.OriginHostCfg:        ds.OriginHost,
+		utils.OriginRealmCfg:       ds.OriginRealm,
+		utils.VendorIdCfg:          ds.VendorId,
+		utils.ProductNameCfg:       ds.ProductName,
+		utils.ConcurrentReqsCfg:    ds.ConcurrentReqs,
+		utils.SyncedConnReqsCfg:    ds.SyncedConnReqs,
+		utils.ASRTemplateCfg:       ds.ASRTemplate,
+		utils.RARTemplateCfg:       ds.RARTemplate,
+		utils.ForcedDisconnectCfg:  ds.ForcedDisconnect,
+		utils.TemplatesCfg:         templates,
+		utils.RequestProcessorsCfg: requestProcessors,
+	}
+}

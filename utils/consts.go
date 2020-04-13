@@ -1800,6 +1800,58 @@ const (
 	AddressCfg = "address"
 	Password   = "password"
 	AliasCfg   = "alias"
+
+	// KamAgentCfg
+	EvapiConnsCfg = "evapi_conns"
+	TimezoneCfg   = "timezone"
+
+	// AsteriskConnCfg
+	UserCf = "user"
+
+	// AsteriskAgentCfg
+	CreateCDRCfg     = "create_cdr"
+	AsteriskConnsCfg = "asterisk_conns"
+
+	// DiameterAgentCfg
+	ListenNetCfg         = "listen_net"
+	ListenCfg            = "listen"
+	DictionariesPathCfg  = "dictionaries_path"
+	OriginHostCfg        = "origin_host"
+	OriginRealmCfg       = "origin_realm"
+	VendorIdCfg          = "vendor_id"
+	ProductNameCfg       = "product_name"
+	ConcurrentReqsCfg    = "concurrent_requests"
+	SyncedConnReqsCfg    = "synced_conn_requests"
+	ASRTemplateCfg       = "asr_template"
+	RARTemplateCfg       = "rar_template"
+	ForcedDisconnectCfg  = "forced_disconnect"
+	TemplatesCfg         = "templates"
+	RequestProcessorsCfg = "request_processors"
+
+	// RequestProcessor
+	RequestFieldsCfg = "Request_fields"
+	ReplyFieldsCfg   = "Reply_fields"
+)
+
+// FC Template
+const (
+	TagCfg             = "tag"
+	TypeCf             = "type"
+	PathCfg            = "path"
+	ValueCfg           = "value"
+	WidthCfg           = "width"
+	StripCfg           = "strip"
+	PaddingCfg         = "padding"
+	MandatoryCfg       = "mandatory"
+	AttributeIDCfg     = "attribute_id"
+	NewBranchCfg       = "new_branch"
+	BlockerCfg         = "blocker"
+	BreakOnSuccessCfg  = "break_on_success"
+	Handler_id         = "handler_id"
+	LayoutCfg          = "layout"
+	CostShiftDigitsCfg = "cost_shift_digits"
+	MaskDestIDCfg      = "mask_destinationd_id"
+	MaskLenCfg         = "mask_length"
 )
 
 // Strip/Padding strategy

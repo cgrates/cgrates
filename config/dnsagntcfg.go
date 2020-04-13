@@ -129,3 +129,26 @@ func (rp *RequestProcessor) loadFromJsonCfg(jsnCfg *ReqProcessorJsnCfg, sep stri
 	}
 	return nil
 }
+
+func (rp *RequestProcessor) AsMapInterface() map[string]interface{} {
+	replyFields := make([]map[string]interface{}, len(rp.ReplyFields))
+	for i, item := range rp.ReplyFields {
+		replyFields[i] = item.AsMapInterface()
+	}
+
+	requestFields := make([]map[string]interface{}, len(rp.RequestFields))
+	for i, item := range rp.RequestFields {
+		requestFields[i] = item.AsMapInterface()
+	}
+
+	return map[string]interface{}{
+		utils.ID:               rp.ID,
+		utils.Tenant:           rp.Tenant,
+		utils.Filters:          rp.Filters,
+		utils.Flags:            rp.Flags,
+		utils.TimezoneCfg:      rp.Timezone,
+		utils.RequestFieldsCfg: requestFields,
+		utils.ReplyFieldsCfg:   replyFields,
+	}
+
+}

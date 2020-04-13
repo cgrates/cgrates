@@ -548,7 +548,6 @@ type FcTemplateJsonCfg struct {
 	Timezone             *string
 	Blocker              *bool
 	Break_on_success     *bool
-	Handler_id           *string
 	Layout               *string
 	Cost_shift_digits    *int
 	Rounding_decimals    *int
