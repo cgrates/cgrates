@@ -109,10 +109,20 @@ func (chSv1 *CacheSv1) LoadCache(args utils.AttrReloadCacheWithArgDispatcher, re
 	return chSv1.cacheS.V1LoadCache(args, reply)
 }
 
-// Ping used to detreminate if component is active
+// Ping used to determinate if component is active
 func (chSv1 *CacheSv1) Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error {
 	*reply = utils.Pong
 	return nil
+}
+
+// V1ReplicateSet replicate an item
+func (chSv1 *CacheSv1) V1ReplicateSet(args *utils.ArgCacheReplicateSet, reply *string) (err error) {
+	return chSv1.cacheS.V1ReplicateSet(args, reply)
+}
+
+// V1ReplicateSet replicate an item
+func (chSv1 *CacheSv1) V1ReplicateRemove(args *utils.ArgCacheReplicateRemove, reply *string) (err error) {
+	return chSv1.cacheS.V1ReplicateRemove(args, reply)
 }
 
 // Call implements rpcclient.ClientConnector interface for internal RPC
