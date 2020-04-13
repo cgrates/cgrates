@@ -279,6 +279,7 @@ type CacheParamJsonCfg struct {
 	Ttl        *string
 	Static_ttl *bool
 	Precache   *bool
+	Replicate  *bool
 }
 
 type CacheJsonCfg struct {

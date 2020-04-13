@@ -32,6 +32,7 @@ type CacheParamCfg struct {
 	TTL       time.Duration
 	StaticTTL bool
 	Precache  bool
+	Replicate bool
 }
 
 func (cParam *CacheParamCfg) loadFromJsonCfg(jsnCfg *CacheParamJsonCfg) error {
@@ -52,6 +53,9 @@ func (cParam *CacheParamCfg) loadFromJsonCfg(jsnCfg *CacheParamJsonCfg) error {
 	}
 	if jsnCfg.Precache != nil {
 		cParam.Precache = *jsnCfg.Precache
+	}
+	if jsnCfg.Replicate != nil {
+		cParam.Replicate = *jsnCfg.Replicate
 	}
 	return nil
 }

@@ -68,7 +68,7 @@ var (
 		CacheDispatcherProfiles, CacheDispatcherHosts, CacheResourceFilterIndexes,
 		CacheStatFilterIndexes, CacheThresholdFilterIndexes, CacheSupplierFilterIndexes,
 		CacheAttributeFilterIndexes, CacheChargerFilterIndexes, CacheDispatcherFilterIndexes,
-		CacheDispatcherRoutes, CacheDiameterMessages, CacheRPCResponses, CacheClosedSessions,
+		CacheDispatcherRoutes, CacheDispatcherLoads, CacheDiameterMessages, CacheRPCResponses, CacheClosedSessions,
 		CacheCDRIDs, CacheLoadIDs, CacheRPCConnections, CacheRatingProfilesTmp, CacheUCH})
 	CacheInstanceToPrefix = map[string]string{
 		CacheDestinations:            DESTINATION_PREFIX,
@@ -1423,6 +1423,8 @@ const (
 	CacheSv1LoadCache         = "CacheSv1.LoadCache"
 	CacheSv1FlushCache        = "CacheSv1.FlushCache"
 	CacheSv1Ping              = "CacheSv1.Ping"
+	CacheSv1ReplicateSet      = "CacheSv1.ReplicateSet"
+	CacheSv1ReplicateRemove   = "CacheSv1.ReplicateRemove"
 )
 
 // GuardianS APIs
@@ -1551,6 +1553,7 @@ const (
 	CacheDispatcherHosts         = "*dispatcher_hosts"
 	CacheDispatchers             = "*dispatchers"
 	CacheDispatcherRoutes        = "*dispatcher_routes"
+	CacheDispatcherLoads         = "*dispatcher_loads"
 	CacheResourceFilterIndexes   = "*resource_filter_indexes"
 	CacheStatFilterIndexes       = "*stat_filter_indexes"
 	CacheThresholdFilterIndexes  = "*threshold_filter_indexes"

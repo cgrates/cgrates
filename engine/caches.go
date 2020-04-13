@@ -42,9 +42,28 @@ func SetCache(chS *CacheS) {
 // NewCacheS initializes the Cache service and executes the precaching
 func NewCacheS(cfg *config.CGRConfig, dm *DataManager) (c *CacheS) {
 	cfg.CacheCfg().AddTmpCaches()
+	tCache := cfg.CacheCfg().AsTransCacheConfig()
+	if len(cfg.CacheCfg().ReplicationConns) != 0 {
+		var reply string
+		for k, val := range tCache {
+			if !cfg.CacheCfg().Partitions[k].Replicate {
+				continue
+			}
+			val.OnEvicted = func(itmID string, value interface{}) {
+				if err := connMgr.Call(cfg.CacheCfg().ReplicationConns, nil, utils.CacheSv1ReplicateRemove,
+					&utils.ArgCacheReplicateRemove{
+						CacheID: k,
+						ItemID:  itmID,
+					}, &reply); err != nil {
+					utils.Logger.Warning(fmt.Sprintf("error: %+v when autoexpired item: %+v from: %+v", err, itmID, k))
+				}
+			}
+		}
+	}
+
 	c = &CacheS{cfg: cfg, dm: dm,
 		pcItems: make(map[string]chan struct{}),
-		tCache:  ltcache.NewTransCache(cfg.CacheCfg().AsTransCacheConfig())}
+		tCache:  ltcache.NewTransCache(tCache)}
 	for cacheID := range cfg.CacheCfg().Partitions {
 		c.pcItems[cacheID] = make(chan struct{})
 	}
@@ -60,9 +79,11 @@ type CacheS struct {
 }
 
 // Set is an exported method from TransCache
+// handled Replicate functionality
 func (chS *CacheS) Set(chID, itmID string, value interface{},
-	groupIDs []string, commit bool, transID string) {
+	groupIDs []string, commit bool, transID string) (err error) {
 	chS.tCache.Set(chID, itmID, value, groupIDs, commit, transID)
+	return chS.ReplicateSet(chID, itmID, value)
 }
 
 // HasItem is an exported method from TransCache
@@ -81,8 +102,9 @@ func (chS *CacheS) GetItemIDs(chID, prfx string) (itmIDs []string) {
 }
 
 // Remove is an exported method from TransCache
-func (chS *CacheS) Remove(chID, itmID string, commit bool, transID string) {
+func (chS *CacheS) Remove(chID, itmID string, commit bool, transID string) (err error) {
 	chS.tCache.Remove(chID, itmID, commit, transID)
+	return chS.ReplicateRemove(chID, itmID)
 }
 
 // Clear is an exported method from TransCache
@@ -531,5 +553,48 @@ func populateCacheLoadIDs(loadIDs map[string]int64, attrs utils.AttrReloadCache)
 	if attrs.DispatcherProfileIDs == nil || len(*attrs.DispatcherProfileIDs) != 0 {
 		cacheLoadIDs[utils.CacheDispatcherProfiles] = loadIDs[utils.CacheDispatcherProfiles]
 	}
+	return
+}
+
+// Replicate replicate an item to ReplicationConns
+func (chS *CacheS) ReplicateSet(chID, itmID string, value interface{}) (err error) {
+	if len(chS.cfg.CacheCfg().ReplicationConns) == 0 ||
+		!chS.cfg.CacheCfg().Partitions[chID].Replicate {
+		return
+	}
+	var reply string
+	return connMgr.Call(chS.cfg.CacheCfg().ReplicationConns, nil, utils.CacheSv1ReplicateSet,
+		&utils.ArgCacheReplicateSet{
+			CacheID: chID,
+			ItemID:  itmID,
+			Value:   value,
+		}, &reply)
+}
+
+// V1ReplicateSet replicate an item
+func (chS *CacheS) V1ReplicateSet(args *utils.ArgCacheReplicateSet, reply *string) (err error) {
+	chS.tCache.Set(args.CacheID, args.ItemID, args.Value, nil, true, utils.EmptyString)
+	*reply = utils.OK
+	return
+}
+
+// Replicate replicate an item to ReplicationConns
+func (chS *CacheS) ReplicateRemove(chID, itmID string) (err error) {
+	if len(chS.cfg.CacheCfg().ReplicationConns) == 0 ||
+		!chS.cfg.CacheCfg().Partitions[chID].Replicate {
+		return
+	}
+	var reply string
+	return connMgr.Call(chS.cfg.CacheCfg().ReplicationConns, nil, utils.CacheSv1ReplicateRemove,
+		&utils.ArgCacheReplicateRemove{
+			CacheID: chID,
+			ItemID:  itmID,
+		}, &reply)
+}
+
+// V1ReplicateRemove replicate an item
+func (chS *CacheS) V1ReplicateRemove(args *utils.ArgCacheReplicateRemove, reply *string) (err error) {
+	chS.tCache.Remove(args.CacheID, args.ItemID, true, utils.EmptyString)
+	*reply = utils.OK
 	return
 }

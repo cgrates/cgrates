@@ -118,8 +118,10 @@ func (cM *ConnManager) getConn(connID string, biRPCClient rpcclient.ClientConnec
 		conn = conPool
 	}
 
-	Cache.Set(utils.CacheRPCConnections, connID, conn, nil,
-		true, utils.NonTransactional)
+	if err = Cache.Set(utils.CacheRPCConnections, connID, conn, nil,
+		true, utils.NonTransactional); err != nil {
+		return
+	}
 	return
 }
 

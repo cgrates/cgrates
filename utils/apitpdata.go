@@ -1429,3 +1429,12 @@ type DPRArgs struct {
 	OriginRealm     string
 	DisconnectCause int
 }
+
+type ArgCacheReplicateSet struct {
+	CacheID, ItemID string
+	Value           interface{}
+}
+
+type ArgCacheReplicateRemove struct {
+	CacheID, ItemID string
+}

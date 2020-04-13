@@ -84,7 +84,7 @@ func newDispatcher(dm *engine.DataManager, pfl *engine.DispatcherProfile) (d Dis
 		}
 	case utils.MetaLoad:
 		hosts := pfl.Hosts.Clone()
-		ls, err := newLoadStrattegyDispatcher(hosts)
+		ls, err := newLoadStrategyDispatcher(hosts, pfl.TenantID())
 		if err != nil {
 			return nil, err
 		}
@@ -287,36 +287,60 @@ func (_ *brodcastStrategyDispatcher) dispatch(dm *engine.DataManager, routeID *s
 	return
 }
 
-func newLoadStrattegyDispatcher(hosts engine.DispatcherHostProfiles) (ls *loadStrategyDispatcher, err error) {
+func newLoadStrategyDispatcher(hosts engine.DispatcherHostProfiles, tntID string) (ls *loadStrategyDispatcher, err error) {
 	ls = &loadStrategyDispatcher{
-		hostsLoad:  make(map[string]int64),
-		hostsRatio: make(map[string]int64),
-		sumRatio:   0,
+		tntID: tntID,
+		hosts: hosts,
 	}
-	for _, host := range hosts {
-		if strRatio, has := host.Params[utils.MetaRatio]; !has {
-			ls.hostsRatio[host.ID] = 1
-			ls.sumRatio += 1
-		} else if ratio, err := strconv.ParseInt(utils.IfaceAsString(strRatio), 10, 64); err != nil {
-			return nil, err
-		} else {
-			ls.hostsRatio[host.ID] = ratio
-			ls.sumRatio += ratio
-		}
-	}
+
 	return
 }
 
 type loadStrategyDispatcher struct {
+	tntID string
+	hosts engine.DispatcherHostProfiles
+}
+
+func newLoadMetrics(hosts engine.DispatcherHostProfiles) (*LoadMetrics, error) {
+	lM := &LoadMetrics{
+		HostsLoad:  make(map[string]int64),
+		HostsRatio: make(map[string]int64),
+		SumRatio:   0,
+	}
+	for _, host := range hosts {
+		if strRatio, has := host.Params[utils.MetaRatio]; !has {
+			lM.HostsRatio[host.ID] = 1
+			lM.SumRatio += 1
+		} else if ratio, err := strconv.ParseInt(utils.IfaceAsString(strRatio), 10, 64); err != nil {
+			return nil, err
+		} else {
+			lM.HostsRatio[host.ID] = ratio
+			lM.SumRatio += ratio
+		}
+	}
+	return lM, nil
+}
+
+type LoadMetrics struct {
 	sync.RWMutex
-	hostsLoad  map[string]int64
-	hostsRatio map[string]int64
-	sumRatio   int64
+	HostsLoad  map[string]int64
+	HostsRatio map[string]int64
+	SumRatio   int64
 }
 
 func (ld *loadStrategyDispatcher) dispatch(dm *engine.DataManager, routeID *string, subsystem, tnt string, hostIDs []string,
 	serviceMethod string, args interface{}, reply interface{}) (err error) {
 	var dH *engine.DispatcherHost
+	var lM *LoadMetrics
+	if x, ok := engine.Cache.Get(utils.CacheDispatcherLoads, ld.tntID); ok && x != nil {
+		var canCast bool
+		if lM, canCast = x.(*LoadMetrics); !canCast {
+			return fmt.Errorf("cannot cast %+v to *LoadMetrics", x)
+		}
+	} else if lM, err = newLoadMetrics(ld.hosts); err != nil {
+		return
+	}
+
 	if routeID != nil && *routeID != "" {
 		// overwrite routeID with RouteID:Subsystem
 		*routeID = utils.ConcatenatedKey(*routeID, subsystem)
@@ -324,22 +348,26 @@ func (ld *loadStrategyDispatcher) dispatch(dm *engine.DataManager, routeID *stri
 		if x, ok := engine.Cache.Get(utils.CacheDispatcherRoutes,
 			*routeID); ok && x != nil {
 			dH = x.(*engine.DispatcherHost)
-			ld.incrementLoad(dH.ID)
+			lM.incrementLoad(dH.ID)
+			engine.Cache.ReplicateSet(utils.CacheDispatcherLoads, ld.tntID, lM)
 			err = dH.Call(serviceMethod, args, reply)
-			ld.decrementLoad(dH.ID) // call ended
+			lM.decrementLoad(dH.ID) // call ended
+			engine.Cache.ReplicateSet(utils.CacheDispatcherLoads, ld.tntID, lM)
 			if !utils.IsNetworkError(err) {
 				return
 			}
 		}
 	}
-	for _, hostID := range ld.getHosts(hostIDs) {
+	for _, hostID := range lM.getHosts(hostIDs) {
 		if dH, err = dm.GetDispatcherHost(tnt, hostID, true, true, utils.NonTransactional); err != nil {
 			err = utils.NewErrDispatcherS(err)
 			return
 		}
-		ld.incrementLoad(hostID)
+		lM.incrementLoad(hostID)
+		engine.Cache.ReplicateSet(utils.CacheDispatcherLoads, ld.tntID, lM)
 		err = dH.Call(serviceMethod, args, reply)
-		ld.decrementLoad(hostID) // call ended
+		lM.decrementLoad(hostID) // call ended
+		engine.Cache.ReplicateSet(utils.CacheDispatcherLoads, ld.tntID, lM)
 		if utils.IsNetworkError(err) {
 			continue
 		}
@@ -352,30 +380,30 @@ func (ld *loadStrategyDispatcher) dispatch(dm *engine.DataManager, routeID *stri
 	return
 }
 
-func (ld *loadStrategyDispatcher) getHosts(hostIDs []string) []string {
+func (lM *LoadMetrics) getHosts(hostIDs []string) []string {
 	costs := make([]int64, len(hostIDs))
-	ld.RLock()
+	lM.RLock()
 	for i, id := range hostIDs {
-		costs[i] = ld.hostsLoad[id]
-		if costs[i] >= ld.hostsRatio[id] {
-			costs[i] += ld.sumRatio
+		costs[i] = lM.HostsLoad[id]
+		if costs[i] >= lM.HostsRatio[id] {
+			costs[i] += lM.SumRatio
 		}
 	}
-	ld.RUnlock()
+	lM.RUnlock()
 	sort.Slice(hostIDs, func(i, j int) bool {
 		return costs[i] < costs[j]
 	})
 	return hostIDs
 }
 
-func (ld *loadStrategyDispatcher) incrementLoad(hostID string) {
-	ld.Lock()
-	ld.hostsLoad[hostID] += 1
-	ld.Unlock()
+func (lM *LoadMetrics) incrementLoad(hostID string) {
+	lM.Lock()
+	lM.HostsLoad[hostID] += 1
+	lM.Unlock()
 }
 
-func (ld *loadStrategyDispatcher) decrementLoad(hostID string) {
-	ld.Lock()
-	ld.hostsLoad[hostID] -= 1
-	ld.Unlock()
+func (lM *LoadMetrics) decrementLoad(hostID string) {
+	lM.Lock()
+	lM.HostsLoad[hostID] -= 1
+	lM.Unlock()
 }
