@@ -1,0 +1,103 @@
+{
+
+
+"diameter_agent": {
+	"request_processors": [
+		{   // this request proccessor is only used to test that an error message
+			// is sent if one is raised when proccesing the request
+			"id": "ErrorProcessing",
+			"filters": [
+				"*string:~*vars.*cmd:CCR",
+				"*string:~*req.CC-Request-Type:4",
+				"*prefix:~*req.Service-Context-Id:error"
+			],
+			"flags": ["*event", "*accounts"],
+			"request_fields":[
+				{
+					"tag": "ToR",
+					"path": "*cgreq.ToR",
+					"type": "*constant",
+					"value": "*sms"
+				},
+				{
+					"tag": "OriginID",
+					"path": "*cgreq.OriginID",
+					"type": "*variable", 
+					"value": "~*req.Session-Id",
+					"mandatory": true
+				},
+				{
+					"tag": "Category",
+					"path": "*cgreq.Category",
+					"type": "*constant",
+					"value": "sms"
+				},
+				{
+					"tag": "RequestType",
+					"path": "*cgreq.RequestType",
+					"type": "*constant",
+					"value": "*prepaid"
+				},
+				{
+					"tag": "Account",
+					"path": "*cgreq.Account",
+					"type": "*variable",
+					"mandatory": true, 
+					"value": "~*req.Subscription-Id.Subscription-Id-Data[~Subscription-Id-Type(0)]"
+				},
+				{
+					"tag": "Destination",
+					"path": "*cgreq.Destination",
+					"type": "*variable",
+					"mandatory": true, 
+					"value": "~*req.Service-Information.SMS-Information.Recipient-Address.Address-Data"
+				},
+				{
+					"tag": "SetupTime",
+					"path": "*cgreq.SetupTime",
+					"type": "*variable", 
+					"value": "~*req.Event-Timestamp",
+					"mandatory": true
+				},
+				{
+					"tag": "AnswerTime",
+					"path": "*cgreq.AnswerTime",
+					"type": "*variable", 
+					"value": "~*req.Event-Timestamp",
+					"mandatory": true
+				},
+				{
+					"tag": "Usage",
+					"path": "*cgreq.Usage",
+					"type": "*variable", 
+					"value": "~*req.Requested-Service-Unit.CC-Time",
+					"mandatory": true
+				},
+			],
+			"reply_fields":[
+				{"tag": "CCATemplate", "type": "*template", "value": "*cca"},
+				{
+					"tag": "GrantedUnitsError",  
+					"path": "*rep.Granted-Service-Unit.CC-Total", // this should return a error because it expect an unsigned integer
+					"type": "*constant", "blocker": true,
+					"value": "-10" 
+				},
+				{
+					"tag": "ResultCode","path": "*rep.Result-Code",
+					"filters": ["*eq:~*cgrep.MaxUsage:0"],
+					"type": "*constant", "value": "4012",
+					"blocker": true
+				},
+				{
+					"tag": "ResultCode", "path": "*rep.Result-Code",
+					"filters": ["*notempty:~*cgrep.Error:"],
+					"type": "*constant", "value": "5030",
+					"blocker": true
+				}
+			]
+		}
+
+	]
+}
+
+}
