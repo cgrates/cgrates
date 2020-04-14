@@ -226,7 +226,8 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 				utils.DiameterAgent, err.Error(), m))
 		writeOnConn(c, diamErr)
 		return
-	} else if !processed {
+	}
+	if !processed {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> no request processor enabled, ignoring message %s from %s",
 				utils.DiameterAgent, m, c.RemoteAddr()))
@@ -239,7 +240,8 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> err: %s, replying to message: %+v",
 				utils.DiameterAgent, err.Error(), m))
-
+		writeOnConn(c, diamErr)
+		return
 	}
 	writeOnConn(c, a)
 }
