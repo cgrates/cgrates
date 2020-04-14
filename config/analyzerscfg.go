@@ -18,6 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
+import "github.com/cgrates/cgrates/utils"
+
 // AttributeSCfg is the configuration of attribute service
 type AnalyzerSCfg struct {
 	Enabled bool
@@ -31,4 +33,10 @@ func (alS *AnalyzerSCfg) loadFromJsonCfg(jsnCfg *AnalyzerSJsonCfg) (err error) {
 		alS.Enabled = *jsnCfg.Enabled
 	}
 	return nil
+}
+
+func (alS *AnalyzerSCfg) AsMapInterface() map[string]interface{} {
+	return map[string]interface{}{
+		utils.EnabledCfg: alS.Enabled,
+	}
 }

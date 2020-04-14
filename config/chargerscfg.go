@@ -70,3 +70,14 @@ func (cS *ChargerSCfg) loadFromJsonCfg(jsnCfg *ChargerSJsonCfg) (err error) {
 	}
 	return
 }
+
+func (cS *ChargerSCfg) AsMapInterface() map[string]interface{} {
+	return map[string]interface{}{
+		utils.EnabledCfg:             cS.Enabled,
+		utils.IndexedSelectsCfg:      cS.IndexedSelects,
+		utils.AttributeSConnsCfg:     cS.AttributeSConns,
+		utils.StringIndexedFieldsCfg: cS.StringIndexedFields,
+		utils.PrefixIndexedFieldsCfg: cS.PrefixIndexedFields,
+		utils.NestedFieldsCfg:        cS.NestedFields,
+	}
+}
