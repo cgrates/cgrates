@@ -18,6 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
+import "github.com/cgrates/cgrates/utils"
+
 // AttributeSCfg is the configuration of attribute service
 type AttributeSCfg struct {
 	Enabled             bool
@@ -59,4 +61,17 @@ func (alS *AttributeSCfg) loadFromJsonCfg(jsnCfg *AttributeSJsonCfg) (err error)
 		alS.NestedFields = *jsnCfg.Nested_fields
 	}
 	return
+}
+
+func (alS *AttributeSCfg) AsMapInterface() map[string]interface{} {
+
+	return map[string]interface{}{
+		utils.EnabledCfg:             alS.Enabled,
+		utils.IndexedSelectsCfg:      alS.IndexedSelects,
+		utils.StringIndexedFieldsCfg: alS.StringIndexedFields,
+		utils.PrefixIndexedFieldsCfg: alS.PrefixIndexedFields,
+		utils.ProcessRunsCfg:         alS.ProcessRuns,
+		utils.NestedFieldsCfg:        alS.NestedFields,
+	}
+
 }

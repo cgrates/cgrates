@@ -80,6 +80,23 @@ func (da *DNSAgentCfg) loadFromJsonCfg(jsnCfg *DNSAgentJsonCfg, sep string) (err
 	return nil
 }
 
+func (da *DNSAgentCfg) AsMapInterface() map[string]interface{} {
+	requestProcessors := make([]map[string]interface{}, len(da.RequestProcessors))
+	for i, item := range da.RequestProcessors {
+		requestProcessors[i] = item.AsMapInterface()
+	}
+
+	return map[string]interface{}{
+		utils.EnabledCfg:           da.Enabled,
+		utils.ListenCfg:            da.Listen,
+		utils.ListenNetCfg:         da.ListenNet,
+		utils.SessionSConnsCfg:     da.SessionSConns,
+		utils.TimezoneCfg:          da.Timezone,
+		utils.RequestProcessorsCfg: requestProcessors,
+	}
+
+}
+
 // RequestProcessor is the request processor configuration
 type RequestProcessor struct {
 	ID            string

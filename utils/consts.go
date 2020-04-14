@@ -1753,7 +1753,6 @@ const (
 	StoreCdrsCfg        = "store_cdrs"
 	SMCostRetriesCfg    = "session_cost_retries"
 	ChargerSConnsCfg    = "chargers_conns"
-	RaterConnsCfg       = "rals_conns"
 	AttributeSConnsCfg  = "attributes_conns"
 	OnlineCDRExportsCfg = "online_cdr_exports"
 )
@@ -1837,6 +1836,20 @@ const (
 	ListenAcctCfg         = "listen_acct"
 	ClientSecretsCfg      = "client_secrets"
 	ClientDictionariesCfg = "client_dictionaries"
+
+	// AttributeSCfg
+	IndexedSelectsCfg = "indexed_selects"
+	ProcessRunsCfg    = "process_runs"
+	NestedFieldsCfg   = "nested_fields"
+
+	// ChargerSCfg
+	StoreIntervalCfg = "store_interval"
+
+	// StatSCfg
+	StoreUncompressedLimitCfg = "store_uncompressed_limit"
+
+	DefaultRatioCfg = "default_ratio"
+	ReadersCfg      = "readers"
 )
 
 // FC Template
@@ -1858,6 +1871,92 @@ const (
 	CostShiftDigitsCfg = "cost_shift_digits"
 	MaskDestIDCfg      = "mask_destinationd_id"
 	MaskLenCfg         = "mask_length"
+)
+
+// SureTax
+const (
+	UrlCfg                  = "url"
+	ClientNumberCfg         = "client_number"
+	ValidationKeyCfg        = "validation_key"
+	BusinessUnitCfg         = "business_unit"
+	IncludeLocalCostCfg     = "include_local_cost"
+	ReturnFileCodeCfg       = "return_file_code"
+	ResponseGroupCfg        = "response_group"
+	ResponseTypeCfg         = "response_type"
+	RegulatoryCodeCfg       = "regulatory_code"
+	ClientTrackingCfg       = "client_tracking"
+	CustomerNumberCfg       = "customer_number"
+	OrigNumberCfg           = "orig_number"
+	TermNumberCfg           = "term_number"
+	BillToNumberCfg         = "bill_to_number"
+	ZipcodeCfg              = "zipcode"
+	Plus4Cfg                = "plus4"
+	P2PZipcodeCfg           = "p2PZipcode"
+	P2PPlus4Cfg             = "p2PPlus4"
+	UnitsCfg                = "units"
+	UnitTypeCfg             = "unit_type"
+	TaxIncludedCfg          = "tax_included"
+	TaxSitusRuleCfg         = "tax_situs_rule"
+	TransTypeCodeCfg        = "trans_type_code"
+	SalesTypeCodeCfg        = "sales_type_code"
+	TaxExemptionCodeListCfg = "tax_exemption_code_list"
+)
+
+// LoaderCgrCfg
+const (
+	TpIDCfg            = "tpid"
+	DataPathCfg        = "data_path"
+	DisableReverseCfg  = "disable_reverse"
+	FieldSeparatorCfg  = "field_separator"
+	CachesConnsCfg     = "caches_conns"
+	SchedulerConnsCfg  = "scheduler_conns"
+	GapiCredentialsCfg = "gapi_credentials"
+	GapiTokenCfg       = "gapi_token"
+)
+
+// MigratorCgrCfg
+const (
+	OutDataDBTypeCfg          = "Out_dataDB_type"
+	OutDataDBHostCfg          = "Out_dataDB_host"
+	OutDataDBPortCfg          = "Out_dataDB_port"
+	OutDataDBNameCfg          = "Out_dataDB_name"
+	OutDataDBUserCfg          = "Out_dataDB_user"
+	OutDataDBPasswordCfg      = "Out_dataDB_password"
+	OutDataDBEncodingCfg      = "Out_dataDB_encoding"
+	OutDataDBRedisSentinelCfg = "Out_dataDB_redis_sentinel"
+	OutStorDBTypeCfg          = "Out_storDB_type"
+	OutStorDBHostCfg          = "Out_storDB_host"
+	OutStorDBPortCfg          = "Out_storDB_port"
+	OutStorDBNameCfg          = "Out_storDB_name"
+	OutStorDBUserCfg          = "Out_storDB_user"
+	OutStorDBPasswordCfg      = "Out_storDB_password"
+	UsersFiltersCfg           = "Users_filters"
+)
+
+// MailerCfg
+const (
+	MailerServerCfg   = "Server"
+	MailerAuthUserCfg = "Auth_user"
+	MailerAuthPassCfg = "Auth_password"
+	MailerFromAddrCfg = "From_address"
+)
+
+// EventReaderCfg
+const (
+	IDCfg                       = "id"
+	RowLengthCfg                = "row_length"
+	FieldSepCfg                 = "field_separator"
+	RunDelayCfg                 = "run_delay"
+	SourcePathCfg               = "source_path"
+	ProcessedPathCfg            = "processed_path"
+	XmlRootPathCfg              = "xml_root_path"
+	TenantCfg                   = "tenant"
+	FlagsCfg                    = "flags"
+	FailedCallsPrefixCfg        = "failed_calls_prefix"
+	PartialRecordCacheCfg       = "partial_record_cache"
+	PartialCacheExpiryActionCfg = "soome"
+	FieldsCfg                   = "fields"
+	CacheDumpFieldsCfg          = "cache_dump_fields"
 )
 
 // Strip/Padding strategy

@@ -70,3 +70,15 @@ func (dps *DispatcherSCfg) loadFromJsonCfg(jsnCfg *DispatcherSJsonCfg) (err erro
 	}
 	return nil
 }
+
+func (dps *DispatcherSCfg) AsMapInterface() map[string]interface{} {
+	return map[string]interface{}{
+		utils.EnabledCfg:             dps.Enabled,
+		utils.IndexedSelectsCfg:      dps.IndexedSelects,
+		utils.StringIndexedFieldsCfg: dps.StringIndexedFields,
+		utils.PrefixIndexedFieldsCfg: dps.PrefixIndexedFields,
+		utils.AttributeSConnsCfg:     dps.AttributeSConns,
+		utils.NestedFieldsCfg:        dps.NestedFields,
+	}
+
+}

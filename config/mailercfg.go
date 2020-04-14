@@ -18,6 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
+import "github.com/cgrates/cgrates/utils"
+
 // Mailer config section
 type MailerCfg struct {
 	MailerServer   string // The server to use when sending emails out
@@ -45,4 +47,14 @@ func (mailcfg *MailerCfg) loadFromJsonCfg(jsnMailerCfg *MailerJsonCfg) (err erro
 	}
 
 	return nil
+}
+
+func (mailcfg *MailerCfg) AsMapInterface() map[string]interface{} {
+	return map[string]interface{}{
+		utils.MailerServerCfg:   mailcfg.MailerServer,
+		utils.MailerAuthUserCfg: mailcfg.MailerAuthUser,
+		utils.MailerAuthPassCfg: mailcfg.MailerAuthPass,
+		utils.MailerFromAddrCfg: mailcfg.MailerFromAddr,
+	}
+
 }
