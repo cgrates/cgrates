@@ -645,7 +645,17 @@ func (dS *DispatcherCacheSv1) LoadCache(args utils.AttrReloadCacheWithArgDispatc
 	return dS.dS.CacheSv1LoadCache(args, reply)
 }
 
-// Ping used to detreminate if component is active
+// ReplicateSet replicate an item
+func (dS *DispatcherCacheSv1) ReplicateSet(args *utils.ArgCacheReplicateSet, reply *string) (err error) {
+	return dS.dS.CacheSv1ReplicateSet(args, reply)
+}
+
+// ReplicateRemove remove an item
+func (dS *DispatcherCacheSv1) ReplicateRemove(args *utils.ArgCacheReplicateRemove, reply *string) (err error) {
+	return dS.dS.CacheSv1ReplicateRemove(args, reply)
+}
+
+// Ping used to determinate if component is active
 func (dS *DispatcherCacheSv1) Ping(args *utils.CGREventWithArgDispatcher, reply *string) error {
 	return dS.dS.CacheSv1Ping(args, reply)
 }

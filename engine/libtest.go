@@ -521,6 +521,10 @@ func GetDefaultEmptyCacheStats() map[string]*ltcache.CacheStats {
 			Items:  0,
 			Groups: 0,
 		},
+		utils.CacheDispatchers: {
+			Items:  0,
+			Groups: 0,
+		},
 		utils.CacheDestinations: {
 			Items:  0,
 			Groups: 0,

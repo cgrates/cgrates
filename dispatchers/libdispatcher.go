@@ -252,8 +252,10 @@ func (_ *singleResultstrategyDispatcher) dispatch(dm *engine.DataManager, routeI
 			continue
 		}
 		if routeID != nil && *routeID != "" { // cache the discovered route
-			engine.Cache.Set(utils.CacheDispatcherRoutes, *routeID, dH,
-				nil, true, utils.EmptyString)
+			if err = engine.Cache.Set(utils.CacheDispatcherRoutes, *routeID, dH,
+				nil, true, utils.EmptyString); err != nil {
+				return
+			}
 		}
 		break
 	}
@@ -348,11 +350,9 @@ func (ld *loadStrategyDispatcher) dispatch(dm *engine.DataManager, routeID *stri
 		if x, ok := engine.Cache.Get(utils.CacheDispatcherRoutes,
 			*routeID); ok && x != nil {
 			dH = x.(*engine.DispatcherHost)
-			lM.incrementLoad(dH.ID)
-			engine.Cache.ReplicateSet(utils.CacheDispatcherLoads, ld.tntID, lM)
+			lM.incrementLoad(dH.ID, ld.tntID)
 			err = dH.Call(serviceMethod, args, reply)
-			lM.decrementLoad(dH.ID) // call ended
-			engine.Cache.ReplicateSet(utils.CacheDispatcherLoads, ld.tntID, lM)
+			lM.decrementLoad(dH.ID, ld.tntID) // call ended
 			if !utils.IsNetworkError(err) {
 				return
 			}
@@ -363,11 +363,9 @@ func (ld *loadStrategyDispatcher) dispatch(dm *engine.DataManager, routeID *stri
 			err = utils.NewErrDispatcherS(err)
 			return
 		}
-		lM.incrementLoad(hostID)
-		engine.Cache.ReplicateSet(utils.CacheDispatcherLoads, ld.tntID, lM)
+		lM.incrementLoad(hostID, ld.tntID)
 		err = dH.Call(serviceMethod, args, reply)
-		lM.decrementLoad(hostID) // call ended
-		engine.Cache.ReplicateSet(utils.CacheDispatcherLoads, ld.tntID, lM)
+		lM.decrementLoad(hostID, ld.tntID) // call ended
 		if utils.IsNetworkError(err) {
 			continue
 		}
@@ -396,14 +394,16 @@ func (lM *LoadMetrics) getHosts(hostIDs []string) []string {
 	return hostIDs
 }
 
-func (lM *LoadMetrics) incrementLoad(hostID string) {
+func (lM *LoadMetrics) incrementLoad(hostID, tntID string) {
 	lM.Lock()
 	lM.HostsLoad[hostID] += 1
+	engine.Cache.ReplicateSet(utils.CacheDispatcherLoads, tntID, lM)
 	lM.Unlock()
 }
 
-func (lM *LoadMetrics) decrementLoad(hostID string) {
+func (lM *LoadMetrics) decrementLoad(hostID, tntID string) {
 	lM.Lock()
 	lM.HostsLoad[hostID] -= 1
+	engine.Cache.ReplicateSet(utils.CacheDispatcherLoads, tntID, lM)
 	lM.Unlock()
 }

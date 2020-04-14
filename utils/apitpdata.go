@@ -1433,8 +1433,12 @@ type DPRArgs struct {
 type ArgCacheReplicateSet struct {
 	CacheID, ItemID string
 	Value           interface{}
+	*ArgDispatcher
+	TenantArg
 }
 
 type ArgCacheReplicateRemove struct {
 	CacheID, ItemID string
+	*ArgDispatcher
+	TenantArg
 }

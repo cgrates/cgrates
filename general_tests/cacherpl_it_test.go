@@ -1,0 +1,257 @@
+// +build integration
+
+/*
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>
+*/
+package general_tests
+
+import (
+	"net/rpc"
+	"os/exec"
+	"path"
+	"reflect"
+	"testing"
+	"time"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
+)
+
+var (
+	dspEngine1Cfg     *config.CGRConfig
+	dspEngine1CfgPath string
+	dspEngine1RPC     *rpc.Client
+	dspEngine2Cfg     *config.CGRConfig
+	dspEngine2CfgPath string
+	dspEngine2RPC     *rpc.Client
+	engine1Cfg        *config.CGRConfig
+	engine1CfgPath    string
+	engine1RPC        *rpc.Client
+
+	sTestsCacheRpl = []func(t *testing.T){
+		testCacheRplInitCfg,
+		testCacheRplInitDataDb,
+		testCacheRplStartEngine,
+		testCacheRplRpcConn,
+		testCacheRplAddData,
+		testCacheRplPing,
+		testCacheRplCheckReplication,
+
+		testCacheRplStopEngine,
+	}
+)
+
+func TestCacheReplications(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		t.SkipNow()
+	case utils.MetaMySQL:
+		for _, stest := range sTestsCacheRpl {
+			t.Run("TestCacheReplications", stest)
+		}
+	case utils.MetaMongo:
+		t.SkipNow()
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
+	}
+
+}
+
+func testCacheRplInitCfg(t *testing.T) {
+	var err error
+	dspEngine1CfgPath = path.Join(*dataDir, "conf", "samples", "cache_replicate", "dispatcher_engine")
+	dspEngine1Cfg, err = config.NewCGRConfigFromPath(dspEngine1CfgPath)
+	if err != nil {
+		t.Error(err)
+	}
+
+	dspEngine2CfgPath = path.Join(*dataDir, "conf", "samples", "cache_replicate", "dispatcher_engine2")
+	dspEngine2Cfg, err = config.NewCGRConfigFromPath(dspEngine2CfgPath)
+	if err != nil {
+		t.Error(err)
+	}
+
+	engine1CfgPath = path.Join(*dataDir, "conf", "samples", "cache_replicate", "engine1")
+	engine1Cfg, err = config.NewCGRConfigFromPath(engine1CfgPath)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func testCacheRplInitDataDb(t *testing.T) {
+	if err := engine.InitDataDb(dspEngine1Cfg); err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitDataDb(dspEngine2Cfg); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func testCacheRplStartEngine(t *testing.T) {
+	if _, err := engine.StopStartEngine(dspEngine1CfgPath, *waitRater); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := engine.StartEngine(dspEngine2CfgPath, *waitRater); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := engine.StartEngine(engine1CfgPath, *waitRater); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func testCacheRplRpcConn(t *testing.T) {
+	var err error
+	dspEngine1RPC, err = newRPCClient(dspEngine1Cfg.ListenCfg())
+	if err != nil {
+		t.Fatal(err)
+	}
+	dspEngine2RPC, err = rpc.Dial(utils.TCP, dspEngine2Cfg.ListenCfg().RPCGOBListen)
+	if err != nil {
+		t.Fatal(err)
+	}
+	engine1RPC, err = newRPCClient(engine1Cfg.ListenCfg())
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func testCacheRplAddData(t *testing.T) {
+	wchan := make(chan struct{}, 1)
+	go func() {
+		loaderPath, err := exec.LookPath("cgr-loader")
+		if err != nil {
+			t.Error(err)
+		}
+		loader := exec.Command(loaderPath, "-config_path", dspEngine1CfgPath, "-path",
+			path.Join(*dataDir, "tariffplans", "cache_replications", "dispatcher_engine"))
+
+		if err := loader.Start(); err != nil {
+			t.Error(err)
+		}
+		loader.Wait()
+		wchan <- struct{}{}
+	}()
+	select {
+	case <-wchan:
+	case <-time.After(2 * time.Second):
+		t.Errorf("cgr-loader failed: ")
+	}
+
+	go func() {
+		loaderPath, err := exec.LookPath("cgr-loader")
+		if err != nil {
+			t.Error(err)
+		}
+		loader := exec.Command(loaderPath, "-config_path", dspEngine2CfgPath, "-path",
+			path.Join(*dataDir, "tariffplans", "cache_replications", "dispatcher_engine2"))
+
+		if err := loader.Start(); err != nil {
+			t.Error(err)
+		}
+		loader.Wait()
+		wchan <- struct{}{}
+	}()
+	select {
+	case <-wchan:
+	case <-time.After(2 * time.Second):
+		t.Errorf("cgr-loader failed: ")
+	}
+}
+
+func testCacheRplPing(t *testing.T) {
+	var reply map[string]interface{}
+	ev := utils.TenantWithArgDispatcher{
+		TenantArg: &utils.TenantArg{
+			Tenant: "cgrates.org",
+		},
+		ArgDispatcher: &utils.ArgDispatcher{
+			RouteID: utils.StringPointer("testRoute123"),
+		},
+	}
+	if err := dspEngine1RPC.Call(utils.CoreSv1Status, &ev, &reply); err != nil {
+		t.Error(err)
+	} else if reply[utils.NodeID] != "Engine1" {
+		t.Errorf("Received: %s", utils.ToJSON(reply))
+	}
+
+	var rpl string
+	if err := dspEngine1RPC.Call(utils.AttributeSv1Ping, &utils.CGREventWithArgDispatcher{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+		},
+		ArgDispatcher: &utils.ArgDispatcher{
+			RouteID: utils.StringPointer("testRoute123"),
+		},
+	}, &rpl); err != nil {
+		t.Error(err)
+	} else if rpl != utils.Pong {
+		t.Errorf("Received: %s", rpl)
+	}
+}
+
+func testCacheRplCheckReplication(t *testing.T) {
+	var reply map[string]interface{}
+	ev := utils.TenantWithArgDispatcher{
+		TenantArg: &utils.TenantArg{
+			Tenant: "cgrates.org",
+		},
+	}
+	if err := dspEngine2RPC.Call(utils.CoreSv1Status, &ev, &reply); err != nil {
+		t.Error(err)
+	} else if reply[utils.NodeID] != "DispatcherEngine2" {
+		t.Errorf("Received: %s", utils.ToJSON(reply))
+	}
+	var rcvKeys []string
+	expKeys := []string{"testRoute123:*core", "testRoute123:*attributes"}
+	argsAPI := utils.ArgsGetCacheItemIDsWithArgDispatcher{
+		TenantArg: utils.TenantArg{
+			Tenant: "cgrates.org",
+		},
+		ArgsGetCacheItemIDs: utils.ArgsGetCacheItemIDs{
+			CacheID: utils.CacheDispatcherRoutes,
+		},
+	}
+	if err := dspEngine2RPC.Call(utils.CacheSv1GetItemIDs, argsAPI, &rcvKeys); err != nil {
+		t.Error(err.Error())
+	}
+	if !reflect.DeepEqual(expKeys, rcvKeys) {
+		t.Errorf("Expected: %+v, received: %+v", expKeys, rcvKeys)
+	}
+
+	var rpl string
+	if err := dspEngine2RPC.Call(utils.AttributeSv1Ping, &utils.CGREventWithArgDispatcher{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+		},
+		ArgDispatcher: &utils.ArgDispatcher{
+			RouteID: utils.StringPointer("testRoute123"),
+		},
+	}, &rpl); err != nil {
+		t.Error(err)
+	} else if rpl != utils.Pong {
+		t.Errorf("Received: %s", rpl)
+	}
+}
+
+func testCacheRplStopEngine(t *testing.T) {
+	if err := engine.KillEngine(*waitRater); err != nil {
+		t.Error(err)
+	}
+}

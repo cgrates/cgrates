@@ -58,7 +58,7 @@ func newRPCClient(cfg *config.ListenCfg) (c *rpc.Client, err error) {
 }
 
 type testDispatcher struct {
-	CfgParh string
+	CfgPath string
 	Cfg     *config.CGRConfig
 	RPC     *rpc.Client
 	cmd     *exec.Cmd
@@ -66,9 +66,9 @@ type testDispatcher struct {
 
 func newTestEngine(t *testing.T, cfgPath string, initDataDB, intitStoreDB bool) (d *testDispatcher) {
 	d = new(testDispatcher)
-	d.CfgParh = cfgPath
+	d.CfgPath = cfgPath
 	var err error
-	d.Cfg, err = config.NewCGRConfigFromPath(d.CfgParh)
+	d.Cfg, err = config.NewCGRConfigFromPath(d.CfgPath)
 	if err != nil {
 		t.Fatalf("Error at config init :%v\n", err)
 	}
@@ -87,7 +87,7 @@ func newTestEngine(t *testing.T, cfgPath string, initDataDB, intitStoreDB bool) 
 
 func (d *testDispatcher) startEngine(t *testing.T) {
 	var err error
-	if d.cmd, err = engine.StartEngine(d.CfgParh, dspDelay); err != nil {
+	if d.cmd, err = engine.StartEngine(d.CfgPath, dspDelay); err != nil {
 		t.Fatalf("Error at engine start:%v\n", err)
 	}
 
@@ -122,7 +122,7 @@ func (d *testDispatcher) loadData(t *testing.T, path string) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path}
 	if err := d.RPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
-		t.Errorf("<%s>Error at loading data from folder :%v", d.CfgParh, err)
+		t.Errorf("<%s>Error at loading data from folder :%v", d.CfgPath, err)
 	}
 }
 
@@ -133,7 +133,7 @@ func (d *testDispatcher) loadData2(t *testing.T, path string) {
 		if err != nil {
 			t.Error(err)
 		}
-		loader := exec.Command(loaderPath, "-config_path", d.CfgParh, "-path", path)
+		loader := exec.Command(loaderPath, "-config_path", d.CfgPath, "-path", path)
 
 		if err := loader.Start(); err != nil {
 			t.Error(err)

@@ -216,7 +216,8 @@ const CGRATES_CFG_JSON = `
 		"*charger_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 					// control charger filter indexes caching
 		"*dispatcher_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 				// control dispatcher filter indexes caching
 		"*dispatcher_routes": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 						// control dispatcher routes caching
-		"*dispatcher_loads": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},
+		"*dispatcher_loads": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},							// control dispatcher load ( in case of *load strategy )
+		"*dispatchers": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 								// control dispatcher interface
 		"*diameter_messages": {"limit": -1, "ttl": "3h", "static_ttl": false, "replicate": false},						// diameter messages caching
 		"*rpc_responses": {"limit": 0, "ttl": "2s", "static_ttl": false, "replicate": false},							// RPC responses caching
 		"*closed_sessions": {"limit": -1, "ttl": "10s", "static_ttl": false, "replicate": false},						// closed sessions cached for CDRs

@@ -152,7 +152,19 @@ func (dH *DispatcherHost) TenantID() string {
 // GetRPCConnection builds or returns the cached connection
 func (dH *DispatcherHost) Call(serviceMethod string, args interface{}, reply interface{}) error {
 	if dH.rpcConn == nil {
-		return utils.ErrNotConnected
+		var err error
+		// connect the rpcConn
+		cfg := config.CgrConfig()
+		if dH.rpcConn, err = NewRPCPool(
+			rpcclient.PoolFirst,
+			cfg.TlsCfg().ClientKey,
+			cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
+			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
+			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
+			dH.Conns, IntRPC.GetInternalChanel(), false); err != nil {
+			return err
+		}
+
 	}
 	return dH.rpcConn.Call(serviceMethod, args, reply)
 }
