@@ -54,7 +54,7 @@ func (fS *FilterS) Pass(tenant string, filterIDs []string,
 		return true, nil
 	}
 	for _, fltrID := range filterIDs {
-		f, err := GetFilter(fS.dm, tenant, fltrID,
+		f, err := fS.dm.GetFilter(tenant, fltrID,
 			true, true, utils.NonTransactional)
 		if err != nil {
 			if err == utils.ErrNotFound {
@@ -119,7 +119,7 @@ func (fS *FilterS) LazyPass(tenant string, filterIDs []string,
 	pass = true
 	for _, fltrID := range filterIDs {
 		var f *Filter
-		f, err = GetFilter(fS.dm, tenant, fltrID,
+		f, err = fS.dm.GetFilter(tenant, fltrID,
 			true, true, utils.NonTransactional)
 		if err != nil {
 			if err == utils.ErrNotFound {

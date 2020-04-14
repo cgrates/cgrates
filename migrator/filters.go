@@ -38,7 +38,7 @@ func (m *Migrator) migrateCurrentRequestFilter() (err error) {
 		if len(tntID) < 2 {
 			return fmt.Errorf("Invalid key <%s> when migrating filters", id)
 		}
-		fl, err := engine.GetFilter(m.dmIN.DataManager(), tntID[0], tntID[1], false, false, utils.NonTransactional)
+		fl, err := m.dmIN.DataManager().GetFilter(tntID[0], tntID[1], false, false, utils.NonTransactional)
 		if err != nil {
 			return err
 		}

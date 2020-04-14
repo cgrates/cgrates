@@ -59,7 +59,7 @@ func (APIerSv1 *APIerSv1) GetFilter(arg utils.TenantID, reply *engine.Filter) er
 	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if fltr, err := engine.GetFilter(APIerSv1.DataManager, arg.Tenant, arg.ID, true, true, utils.NonTransactional); err != nil {
+	if fltr, err := APIerSv1.DataManager.GetFilter(arg.Tenant, arg.ID, true, true, utils.NonTransactional); err != nil {
 		return utils.APIErrorHandler(err)
 	} else {
 		*reply = *fltr

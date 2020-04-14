@@ -429,14 +429,14 @@ func TestLoaderProcessFilters(t *testing.T) {
 	if len(ldr.bufLoaderData) != 0 {
 		t.Errorf("wrong buffer content: %+v", ldr.bufLoaderData)
 	}
-	if fltr, err := engine.GetFilter(ldr.dm, "cgrates.org", "FLTR_1",
+	if fltr, err := ldr.dm.GetFilter("cgrates.org", "FLTR_1",
 		true, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eFltr1, fltr) {
 		t.Errorf("expecting: %s, received: %s",
 			utils.ToJSON(eFltr1), utils.ToJSON(fltr))
 	}
-	if fltr, err := engine.GetFilter(ldr.dm, "cgrates.org", "FLTR_DST_DE",
+	if fltr, err := ldr.dm.GetFilter("cgrates.org", "FLTR_DST_DE",
 		true, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eFltr2, fltr) {

@@ -498,7 +498,7 @@ func (api *APIerSv1) computeThresholdIndexes(tenant string, thIDs *[]string,
 						},
 					},
 				}
-			} else if fltr, err = engine.GetFilter(api.DataManager, th.Tenant, fltrID,
+			} else if fltr, err = api.DataManager.GetFilter(th.Tenant, fltrID,
 				true, false, utils.NonTransactional); err != nil {
 				if err == utils.ErrNotFound {
 					err = fmt.Errorf("broken reference to filter: %+v for threshold: %+v",
@@ -568,7 +568,7 @@ func (api *APIerSv1) computeAttributeIndexes(tenant, context string, attrIDs *[]
 						},
 					},
 				}
-			} else if fltr, err = engine.GetFilter(api.DataManager, ap.Tenant, fltrID,
+			} else if fltr, err = api.DataManager.GetFilter(ap.Tenant, fltrID,
 				true, false, utils.NonTransactional); err != nil {
 				if err == utils.ErrNotFound {
 					err = fmt.Errorf("broken reference to filter: %+v for attribute: %+v",
@@ -634,7 +634,7 @@ func (api *APIerSv1) computeResourceIndexes(tenant string, rsIDs *[]string,
 						},
 					},
 				}
-			} else if fltr, err = engine.GetFilter(api.DataManager, rp.Tenant, fltrID,
+			} else if fltr, err = api.DataManager.GetFilter(rp.Tenant, fltrID,
 				true, false, utils.NonTransactional); err != nil {
 				if err == utils.ErrNotFound {
 					err = fmt.Errorf("broken reference to filter: %+v for resource: %+v",
@@ -700,7 +700,7 @@ func (api *APIerSv1) computeStatIndexes(tenant string, stIDs *[]string,
 						},
 					},
 				}
-			} else if fltr, err = engine.GetFilter(api.DataManager, sqp.Tenant, fltrID,
+			} else if fltr, err = api.DataManager.GetFilter(sqp.Tenant, fltrID,
 				true, false, utils.NonTransactional); err != nil {
 				if err == utils.ErrNotFound {
 					err = fmt.Errorf("broken reference to filter: %+v for statqueue: %+v",
@@ -766,7 +766,7 @@ func (api *APIerSv1) computeSupplierIndexes(tenant string, sppIDs *[]string,
 						},
 					},
 				}
-			} else if fltr, err = engine.GetFilter(api.DataManager, spp.Tenant, fltrID,
+			} else if fltr, err = api.DataManager.GetFilter(spp.Tenant, fltrID,
 				true, false, utils.NonTransactional); err != nil {
 				if err == utils.ErrNotFound {
 					err = fmt.Errorf("broken reference to filter: %+v for suppliers: %+v",
@@ -832,7 +832,7 @@ func (api *APIerSv1) computeChargerIndexes(tenant string, cppIDs *[]string,
 						},
 					},
 				}
-			} else if fltr, err = engine.GetFilter(api.DataManager, cpp.Tenant, fltrID,
+			} else if fltr, err = api.DataManager.GetFilter(cpp.Tenant, fltrID,
 				true, false, utils.NonTransactional); err != nil {
 				if err == utils.ErrNotFound {
 					err = fmt.Errorf("broken reference to filter: %+v for charger: %+v",
@@ -902,7 +902,7 @@ func (api *APIerSv1) computeDispatcherIndexes(tenant, context string, dspIDs *[]
 						},
 					},
 				}
-			} else if fltr, err = engine.GetFilter(api.DataManager, dsp.Tenant, fltrID,
+			} else if fltr, err = api.DataManager.GetFilter(dsp.Tenant, fltrID,
 				true, false, utils.NonTransactional); err != nil {
 				if err == utils.ErrNotFound {
 					err = fmt.Errorf("broken reference to filter: %+v for dispatcher: %+v",
