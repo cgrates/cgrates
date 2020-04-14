@@ -65,7 +65,7 @@ var (
 		CacheResourceProfiles, CacheResources, CacheEventResources, CacheStatQueueProfiles,
 		CacheStatQueues, CacheThresholdProfiles, CacheThresholds, CacheFilters,
 		CacheSupplierProfiles, CacheAttributeProfiles, CacheChargerProfiles,
-		CacheDispatcherProfiles, CacheDispatcherHosts, CacheResourceFilterIndexes,
+		CacheDispatcherProfiles, CacheDispatcherHosts, CacheDispatchers, CacheResourceFilterIndexes,
 		CacheStatFilterIndexes, CacheThresholdFilterIndexes, CacheSupplierFilterIndexes,
 		CacheAttributeFilterIndexes, CacheChargerFilterIndexes, CacheDispatcherFilterIndexes,
 		CacheDispatcherRoutes, CacheDispatcherLoads, CacheDiameterMessages, CacheRPCResponses, CacheClosedSessions,

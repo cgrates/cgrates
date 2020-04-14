@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"encoding/gob"
 	"fmt"
 	"sync"
 	"time"
@@ -32,6 +33,32 @@ var Cache *CacheS
 
 func init() {
 	Cache = NewCacheS(config.CgrConfig(), nil)
+	//Threshold
+	gob.Register(new(Threshold))
+	gob.Register(new(ThresholdProfile))
+	gob.Register(new(ThresholdProfileWithArgDispatcher))
+	gob.Register(new(ThresholdWithArgDispatcher))
+	//Resource
+	gob.Register(new(Resource))
+	gob.Register(new(ResourceProfile))
+	gob.Register(new(ResourceProfileWithArgDispatcher))
+	gob.Register(new(ResourceWithArgDispatcher))
+	//Stats
+	gob.Register(new(StatQueue))
+	gob.Register(new(StatQueueProfile))
+	gob.Register(new(StatQueueProfileWithArgDispatcher))
+	gob.Register(new(StoredStatQueue))
+	gob.Register(new(StatQueueProfileWithArgDispatcher))
+	//Suppliers
+	gob.Register(new(SupplierProfile))
+	gob.Register(new(SupplierProfileWithArgDispatcher))
+	//Filters
+	gob.Register(new(Filter))
+	gob.Register(new(FilterWithArgDispatcher))
+	//Dispatcher
+	gob.Register(new(DispatcherHost))
+	gob.Register(new(DispatcherHostProfile))
+	gob.Register(new(DispatcherHostWithArgDispatcher))
 }
 
 //SetCache shared the cache from other subsystems

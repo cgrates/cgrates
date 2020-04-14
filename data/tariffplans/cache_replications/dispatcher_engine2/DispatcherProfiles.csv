@@ -1,0 +1,3 @@
+#Tenant,ID,Subsystems,FilterIDs,ActivationInterval,Strategy,StrategyParameters,ConnID,ConnFilterIDs,ConnWeight,ConnBlocker,ConnParameters,Weight
+cgrates.org,InternalDispatcher,*caches;*core,,,*weight,,Self,,20,false,,30
+cgrates.org,ExternalDispatcher,*attributes,,,*weight,,Engine1,,20,false,,10

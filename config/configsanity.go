@@ -490,8 +490,14 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 	}
 	// Cache check
 	for _, connID := range cfg.cacheCfg.ReplicationConns {
-		if _, has := cfg.rpcConns[connID]; !has {
+		if conn, has := cfg.rpcConns[connID]; !has {
 			return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.CacheS, connID)
+		} else {
+			for _, rpc := range conn.Conns {
+				if rpc.Transport != utils.MetaGOB {
+					return fmt.Errorf("<%s> unsuported transport <%s> for connection with ID: <%s>", utils.CacheS, rpc.Transport, connID)
+				}
+			}
 		}
 	}
 	for cacheID := range cfg.cacheCfg.Partitions {

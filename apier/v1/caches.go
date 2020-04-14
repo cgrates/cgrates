@@ -115,13 +115,13 @@ func (chSv1 *CacheSv1) Ping(ign *utils.CGREventWithArgDispatcher, reply *string)
 	return nil
 }
 
-// V1ReplicateSet replicate an item
-func (chSv1 *CacheSv1) V1ReplicateSet(args *utils.ArgCacheReplicateSet, reply *string) (err error) {
+// ReplicateSet replicate an item
+func (chSv1 *CacheSv1) ReplicateSet(args *utils.ArgCacheReplicateSet, reply *string) (err error) {
 	return chSv1.cacheS.V1ReplicateSet(args, reply)
 }
 
-// V1ReplicateSet replicate an item
-func (chSv1 *CacheSv1) V1ReplicateRemove(args *utils.ArgCacheReplicateRemove, reply *string) (err error) {
+// ReplicateRemove remove an item
+func (chSv1 *CacheSv1) ReplicateRemove(args *utils.ArgCacheReplicateRemove, reply *string) (err error) {
 	return chSv1.cacheS.V1ReplicateRemove(args, reply)
 }
 

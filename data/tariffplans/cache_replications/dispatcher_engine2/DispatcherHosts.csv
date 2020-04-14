@@ -1,0 +1,3 @@
+#Tenant[0],ID[1],Address[2],Transport[3],TLS[4]
+cgrates.org,Self,*internal,,
+cgrates.org,Engine1,127.0.0.1:6012,*json,false

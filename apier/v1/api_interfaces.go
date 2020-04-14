@@ -122,6 +122,8 @@ type CacheSv1Interface interface {
 	RemoveGroup(args *utils.ArgsGetGroupWithArgDispatcher, rply *string) error
 	ReloadCache(attrs utils.AttrReloadCacheWithArgDispatcher, reply *string) error
 	LoadCache(args utils.AttrReloadCacheWithArgDispatcher, reply *string) error
+	ReplicateSet(args *utils.ArgCacheReplicateSet, reply *string) (err error)
+	ReplicateRemove(args *utils.ArgCacheReplicateRemove, reply *string) (err error)
 	Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error
 }
 
