@@ -76,7 +76,9 @@
 },
 
 "caches":{
-	"*rpc_responses": {"limit": -1, "ttl": "2s", "static_ttl": false},
+	"partitions": {
+		"*rpc_responses": {"limit": -1, "ttl": "2s", "static_ttl": false}
+	},
 },
 
 }
