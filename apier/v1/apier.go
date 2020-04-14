@@ -1548,7 +1548,7 @@ func (apiV1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *strin
 			}
 			for _, key := range keys {
 				tntID := strings.SplitN(key[len(prfx):], utils.InInFieldSep, 2)
-				fltr, err := engine.GetFilter(apiV1.DataManager, tntID[0], tntID[1],
+				fltr, err := apiV1.DataManager.GetFilter(tntID[0], tntID[1],
 					true, false, utils.NonTransactional)
 				if err != nil {
 					return err

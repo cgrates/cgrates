@@ -968,7 +968,7 @@ func removeSessionCosts(_ *Account, action *Action, _ Actions, _ interface{}) er
 		if len(fltrID) == 0 {
 			continue
 		}
-		fltr, err := GetFilter(dm, tenant, fltrID, true, true, utils.NonTransactional)
+		fltr, err := dm.GetFilter(tenant, fltrID, true, true, utils.NonTransactional)
 		if err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<%s>  Error: %s for filter: %s in action: <%s>",
 				utils.Actions, err.Error(), fltrID, utils.MetaRemoveSessionCosts))

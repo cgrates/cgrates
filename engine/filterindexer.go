@@ -238,7 +238,7 @@ func (rfi *FilterIndexer) RemoveItemFromIndex(tenant, itemID string, oldFilters 
 					},
 				},
 			}
-		} else if fltr, err = GetFilter(rfi.dm, tenant, fltrID,
+		} else if fltr, err = rfi.dm.GetFilter(tenant, fltrID,
 			true, false, utils.NonTransactional); err != nil {
 			if err == utils.ErrNotFound {
 				err = fmt.Errorf("broken reference to filter: %+v for itemType: %+v and ID: %+v",
@@ -299,7 +299,7 @@ func createAndIndex(itemPrefix, tenant, context, itemID string, filterIDs []stri
 					},
 				},
 			}
-		} else if fltr, err = GetFilter(dm, tenant, fltrID,
+		} else if fltr, err = dm.GetFilter(tenant, fltrID,
 			true, false, utils.NonTransactional); err != nil {
 			if err == utils.ErrNotFound {
 				err = fmt.Errorf("broken reference to filter: %+v for itemType: %+v and ID: %+v",
