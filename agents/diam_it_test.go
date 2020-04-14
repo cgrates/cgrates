@@ -66,6 +66,9 @@ var (
 		testDiamItCCRTerminate,
 		testDiamItCCRSMS,
 		testDiamItCCRMMS,
+
+		testDiamItTemplateErr,
+
 		testDiamItDRR,
 		testDiamItKillEngine,
 	}
@@ -1249,6 +1252,90 @@ func testDiamItDRR(t *testing.T) {
 
 	eVal := "1"
 	if avps, err := drr.FindAVPsWithPath([]interface{}{avp.DisconnectCause}, dict.UndefinedVendorID); err != nil {
+		t.Error(err)
+	} else if len(avps) == 0 {
+		t.Error("Missing AVP")
+	} else if val, err := diamAVPAsString(avps[0]); err != nil {
+		t.Error(err)
+	} else if val != eVal {
+		t.Errorf("expecting: %s, received: <%s>", eVal, val)
+	}
+}
+
+func testDiamItTemplateErr(t *testing.T) {
+	ccr := diam.NewRequest(diam.CreditControl, 4, nil)
+	ccr.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String("TestDmtAgentSendCCRError"))
+	ccr.NewAVP(avp.OriginHost, avp.Mbit, 0, datatype.DiameterIdentity("CGR-DA"))
+	ccr.NewAVP(avp.OriginRealm, avp.Mbit, 0, datatype.DiameterIdentity("cgrates.org"))
+	ccr.NewAVP(avp.AuthApplicationID, avp.Mbit, 0, datatype.Unsigned32(4))
+	ccr.NewAVP(avp.ServiceContextID, avp.Mbit, 0, datatype.UTF8String("error@DiamItError"))
+	ccr.NewAVP(avp.CCRequestType, avp.Mbit, 0, datatype.Enumerated(4))
+	ccr.NewAVP(avp.CCRequestNumber, avp.Mbit, 0, datatype.Unsigned32(0))
+	ccr.NewAVP(avp.EventTimestamp, avp.Mbit, 0, datatype.Time(time.Date(2018, 10, 5, 11, 43, 10, 0, time.UTC)))
+	ccr.NewAVP(avp.SubscriptionID, avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(avp.SubscriptionIDType, avp.Mbit, 0, datatype.Enumerated(0)),
+			diam.NewAVP(avp.SubscriptionIDData, avp.Mbit, 0, datatype.UTF8String("1001")), // Subscription-Id-Data
+		}})
+	ccr.NewAVP(avp.SubscriptionID, avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(avp.SubscriptionIDType, avp.Mbit, 0, datatype.Enumerated(1)),
+			diam.NewAVP(avp.SubscriptionIDData, avp.Mbit, 0, datatype.UTF8String("104502200011")), // Subscription-Id-Data
+		}})
+	ccr.NewAVP(avp.ServiceIdentifier, avp.Mbit, 0, datatype.Unsigned32(0))
+	ccr.NewAVP(avp.RequestedAction, avp.Mbit, 0, datatype.Enumerated(0))
+	ccr.NewAVP(avp.RequestedServiceUnit, avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(avp.CCTime, avp.Mbit, 0, datatype.Unsigned32(1))}})
+	ccr.NewAVP(873, avp.Mbit, 10415, &diam.GroupedAVP{ //
+		AVP: []*diam.AVP{
+			diam.NewAVP(20300, avp.Mbit, 2011, &diam.GroupedAVP{ // IN-Information
+				AVP: []*diam.AVP{
+					diam.NewAVP(20302, avp.Mbit, 2011, datatype.UTF8String("22509")), // Calling-Vlr-Number
+					diam.NewAVP(20385, avp.Mbit, 2011, datatype.UTF8String("4002")),  // Called-Party-NP
+				},
+			}),
+			diam.NewAVP(2000, avp.Mbit, 10415, &diam.GroupedAVP{ // SMS-Information
+				AVP: []*diam.AVP{
+					diam.NewAVP(886, avp.Mbit, 10415, &diam.GroupedAVP{ // Originator-Address
+						AVP: []*diam.AVP{
+							diam.NewAVP(899, avp.Mbit, 10415, datatype.Enumerated(1)),      // Address-Type
+							diam.NewAVP(897, avp.Mbit, 10415, datatype.UTF8String("1001")), // Address-Data
+						}}),
+					diam.NewAVP(1201, avp.Mbit, 10415, &diam.GroupedAVP{ // Recipient-Address
+						AVP: []*diam.AVP{
+							diam.NewAVP(899, avp.Mbit, 10415, datatype.Enumerated(1)),      // Address-Type
+							diam.NewAVP(897, avp.Mbit, 10415, datatype.UTF8String("1003")), // Address-Data
+						}}),
+				},
+			}),
+		}})
+	// ============================================
+	// prevent nil pointer dereference
+	// ============================================
+	if diamClnt == nil {
+		t.Fatal("Diameter client should not be nil")
+	}
+	if diamClnt.conn == nil {
+		t.Fatal("Diameter connection should not be nil")
+	}
+	if ccr == nil {
+		t.Fatal("The mesage to diameter should not be nil")
+	}
+	// ============================================
+	if err := diamClnt.SendMessage(ccr); err != nil {
+		t.Error(err)
+	}
+
+	time.Sleep(time.Duration(100) * time.Millisecond)
+	msg := diamClnt.ReceivedMessage(rplyTimeout)
+
+	if msg == nil {
+		t.Fatal("Message should not be nil")
+	}
+	// Result-Code
+	eVal := "5012" // error code diam.UnableToComply
+	if avps, err := msg.FindAVPsWithPath([]interface{}{"Result-Code"}, dict.UndefinedVendorID); err != nil {
 		t.Error(err)
 	} else if len(avps) == 0 {
 		t.Error("Missing AVP")
