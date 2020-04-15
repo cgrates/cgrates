@@ -60,6 +60,15 @@ func (cParam *CacheParamCfg) loadFromJsonCfg(jsnCfg *CacheParamJsonCfg) error {
 	return nil
 }
 
+func (cParam *CacheParamCfg) AsMapInterface() map[string]interface{} {
+	return map[string]interface{}{
+		utils.Limit:     cParam.Limit,
+		utils.TTL:       cParam.TTL,
+		utils.StaticTTL: cParam.StaticTTL,
+		utils.Precache:  cParam.Precache,
+	}
+}
+
 // CacheCfg used to store the cache config
 type CacheCfg struct {
 	Partitions       map[string]*CacheParamCfg
@@ -111,4 +120,17 @@ func (cCfg *CacheCfg) AddTmpCaches() {
 		Limit: -1,
 		TTL:   time.Minute,
 	}
+}
+
+func (cCfg *CacheCfg) AsMapInterface() map[string]interface{} {
+	partitions := make(map[string]interface{}, len(cCfg.Partitions))
+	for key, value := range cCfg.Partitions {
+		partitions[key] = value.AsMapInterface()
+	}
+
+	return map[string]interface{}{
+		utils.PartitionsCfg: partitions,
+		utils.RplConnsCfg:   cCfg.ReplicationConns,
+	}
+
 }

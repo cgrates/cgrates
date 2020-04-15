@@ -181,3 +181,42 @@ func (self *LoaderSCfg) Clone() *LoaderSCfg {
 	}
 	return clnLoader
 }
+
+func (lData *LoaderDataType) AsMapInterface() map[string]interface{} {
+	fields := make([]map[string]interface{}, len(lData.Fields))
+	for i, item := range lData.Fields {
+		fields[i] = item.AsMapInterface()
+	}
+
+	return map[string]interface{}{
+		utils.TypeCf:      lData.Type,
+		utils.FilenameCfg: lData.Filename,
+		utils.FieldsCfg:   fields,
+	}
+}
+
+func (l *LoaderSCfg) AsMapInterface() map[string]interface{} {
+	tenant := make([]string, len(l.Tenant))
+	for i, item := range l.Tenant {
+		tenant[i] = item.Rules
+	}
+
+	data := make([]map[string]interface{}, len(l.Data))
+	for i, item := range l.Data {
+		data[i] = item.AsMapInterface()
+	}
+
+	return map[string]interface{}{
+		utils.IdCfg:             l.Id,
+		utils.EnabledCfg:        l.Enabled,
+		utils.TenantCfg:         tenant,
+		utils.DryRunCfg:         l.DryRun,
+		utils.RunDelayCfg:       l.RunDelay,
+		utils.LockFileNameCfg:   l.LockFileName,
+		utils.CacheSConnsCfg:    l.CacheSConns,
+		utils.FieldSeparatorCfg: l.FieldSeparator,
+		utils.TpInDirCfg:        l.TpInDir,
+		utils.TpOutDirCfg:       l.TpOutDir,
+		utils.DataCfg:           data,
+	}
+}
