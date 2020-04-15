@@ -2956,6 +2956,21 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 	if argsFlagsWithParams, err = utils.FlagsWithParamsFromSlice(args.Flags); err != nil {
 		return
 	}
+	if argsFlagsWithParams.HasKey("*stir_authorize") {
+		var attest *utils.StringSet
+		if uattest := ev.GetStringIgnoreErrors("STIRATest"); uattest != utils.EmptyString {
+			attest = utils.NewStringSet(strings.Split(uattest, utils.INFIELD_SEP))
+		}
+		if err = authStirShaken(ev.GetStringIgnoreErrors("STIRIdentity"),
+			utils.FirstNonEmpty(ev.GetStringIgnoreErrors("STIROriginatorTn"), ev.GetStringIgnoreErrors(utils.Account)),
+			ev.GetStringIgnoreErrors("STIROriginatorURI"),
+			utils.FirstNonEmpty(ev.GetStringIgnoreErrors("STIRDestinationTn"), ev.GetStringIgnoreErrors(utils.Destination)),
+			ev.GetStringIgnoreErrors("STIRDestinationURI"),
+			attest,
+			-1); err != nil { // configurabil stir_payload_maxduration //nonempty STIRPayloadMaxDuration
+			return
+		}
+	}
 	// check for *attribute
 	if argsFlagsWithParams.HasKey(utils.MetaAttributes) {
 		rplyAttr, err := sS.processAttributes(args.CGREvent, args.ArgDispatcher,
@@ -3235,7 +3250,7 @@ type V1GetCostReply struct {
 	EventCost  *engine.EventCost
 }
 
-// BiRPCv1ProcessEvent processes one event with the right subsystems based on arguments received
+// BiRPCv1GetCost processes one event with the right subsystems based on arguments received
 func (sS *SessionS) BiRPCv1GetCost(clnt rpcclient.ClientConnector,
 	args *V1ProcessEventArgs, rply *V1GetCostReply) (err error) {
 	if args.CGREvent == nil {

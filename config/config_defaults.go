@@ -225,6 +225,7 @@ const CGRATES_CFG_JSON = `
 		"*load_ids": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},				// control the load_ids for items
 		"*rpc_connections": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},							// RPC connections caching
 		"*uch": {"limit": -1, "ttl": "3h", "static_ttl": false, "replicate": false},									// User cache
+		"*stir": {"limit": -1, "ttl": "3h", "static_ttl": false, "replicate": false},									// stirShaken cache keys
 	},
 	"replication_conns": [],
 },

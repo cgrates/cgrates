@@ -19,12 +19,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package sessions
 
 import (
+	"errors"
+	"fmt"
 	"math/rand"
 	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/dgrijalva/jwt-go"
 )
 
 var unratedReqs = engine.MapEvent{
@@ -101,4 +104,172 @@ func getFlagIDs(flag string) []string {
 		return nil
 	}
 	return strings.Split(flagWithIDs[1], utils.INFIELD_SEP)
+}
+
+// ProcessedStirIdentity the structure that keeps all the header information
+type ProcessedStirIdentity struct {
+	Tokens     []string
+	SigningStr string
+	Signature  string
+	Header     *utils.PASSporTHeader
+	Payload    *utils.PASSporTPayload
+}
+
+// NewProcessedIdentity creates a proccessed header
+func NewProcessedIdentity(identity string) (pi *ProcessedStirIdentity, err error) {
+	pi = new(ProcessedStirIdentity)
+	hdrtoken := strings.Split(utils.RemoveWhiteSpaces(identity), utils.INFIELD_SEP)
+
+	if len(hdrtoken) == 1 {
+		err = fmt.Errorf("missing parts of the message header")
+		return
+	}
+	pi.Tokens = hdrtoken[1:]
+	btoken := strings.Split(hdrtoken[0], utils.NestingSep)
+	if len(btoken) != 3 {
+		err = fmt.Errorf("wrong header")
+		return
+	}
+	pi.SigningStr = btoken[0] + utils.NestingSep + btoken[1]
+	pi.Signature = btoken[2]
+
+	pi.Header = new(utils.PASSporTHeader)
+	if err = utils.DecodeBase64JSON(btoken[0], pi.Header); err != nil {
+		return
+	}
+	pi.Payload = new(utils.PASSporTPayload)
+	err = utils.DecodeBase64JSON(btoken[1], pi.Payload)
+	return
+}
+
+// VerifyHeader returns if the header is corectly populated
+func (pi *ProcessedStirIdentity) VerifyHeader() (isValid bool) {
+	var x5u string
+	for _, pair := range pi.Tokens {
+		ptoken := strings.Split(pair, utils.AttrValueSep)
+		if len(ptoken) != 2 {
+			continue
+		}
+		switch ptoken[0] {
+		case "alg":
+			if ptoken[1] != "ES256" {
+				return false
+			}
+		case "ppt":
+			if ptoken[1] != "shaken" && ptoken[1] != "\"shaken\"" {
+				return false
+			}
+		case "info":
+			lenParamInfo := len(ptoken[1])
+			if lenParamInfo <= 2 {
+				return false
+			}
+			x5u = ptoken[1]
+			if x5u[0] == '<' && x5u[lenParamInfo-1] == '>' {
+				x5u = x5u[1 : lenParamInfo-1]
+			}
+		}
+	}
+
+	return pi.Header.Alg == "ES256" &&
+		pi.Header.Ppt == "shaken" &&
+		pi.Header.Typ == "passport" &&
+		pi.Header.X5u == x5u
+}
+
+// VerifySignature returns if the signature is valid
+func (pi *ProcessedStirIdentity) VerifySignature(timeoutVal time.Duration) (err error) {
+	var pubkey interface{}
+	var ok bool
+	if pubkey, ok = engine.Cache.Get(utils.CacheSTIR, pi.Header.X5u); !ok {
+		fmt.Printf("%q\n", pi.Header.X5u)
+		if pubkey, err = utils.NewECDSAPubKey(pi.Header.X5u, timeoutVal); err != nil {
+			engine.Cache.Set(utils.CacheSTIR, pi.Header.X5u, nil,
+				nil, false, utils.NonTransactional)
+			return
+		}
+		engine.Cache.Set(utils.CacheSTIR, pi.Header.X5u, pubkey,
+			nil, false, utils.NonTransactional)
+	}
+
+	sigMethod := jwt.GetSigningMethod(pi.Header.Alg)
+	return sigMethod.Verify(pi.SigningStr, pi.Signature, pubkey)
+
+}
+
+// VerifyPayload returns if the payload is corectly populated
+func (pi *ProcessedStirIdentity) VerifyPayload(originatorTn, originatorURI, destinationTn, destinationURI string,
+	hdrMaxDur time.Duration, attest *utils.StringSet) (err error) {
+	if !attest.Has(utils.META_ANY) && !attest.Has(pi.Payload.ATTest) {
+		return errors.New("wrong attest level")
+	}
+	if hdrMaxDur >= 0 && time.Now().After(time.Unix(pi.Payload.IAT, 0).Add(hdrMaxDur)) {
+		return errors.New("expired payload")
+	}
+	if originatorTn != utils.EmptyString {
+		if originatorTn != pi.Payload.Orig.Tn {
+			return errors.New("wrong originatorTn")
+		}
+	} else {
+		if originatorURI != pi.Payload.Orig.URI {
+			return errors.New("wrong originatorURI")
+		}
+	}
+	if destinationTn != utils.EmptyString {
+		if !utils.SliceHasMember(pi.Payload.Dest.Tn, destinationTn) {
+			return errors.New("wrong destinationTn")
+		}
+	} else {
+		if !utils.SliceHasMember(pi.Payload.Dest.URI, destinationURI) {
+			return errors.New("wrong destinationURI")
+		}
+	}
+	return
+}
+
+// NewIdentity returns the identiy for stir header
+func NewIdentity(header *utils.PASSporTHeader, payload *utils.PASSporTPayload, prvkeyPath string, timeout time.Duration) (identity string, err error) {
+	var prvKey interface{}
+	var ok bool
+	if prvKey, ok = engine.Cache.Get(utils.CacheSTIR, prvkeyPath); !ok {
+		if prvKey, err = utils.NewECDSAPrvKey(prvkeyPath, timeout); err != nil {
+			engine.Cache.Set(utils.CacheSTIR, prvkeyPath, nil,
+				nil, false, utils.NonTransactional)
+			return
+		}
+		engine.Cache.Set(utils.CacheSTIR, prvkeyPath, prvKey,
+			nil, false, utils.NonTransactional)
+	}
+	var headerStr, payloadStr string
+	if headerStr, err = utils.EncodeBase64JSON(header); err != nil {
+		return
+	}
+	if payloadStr, err = utils.EncodeBase64JSON(payload); err != nil {
+		return
+	}
+	identity = headerStr + utils.NestingSep + payloadStr
+
+	sigMethod := jwt.GetSigningMethod(header.Alg)
+	var signature string
+	if signature, err = sigMethod.Sign(identity, prvKey); err != nil {
+		return
+	}
+	identity += utils.NestingSep + signature
+	identity += ";info=<" + header.X5u + ">;>alg=ES256;ppt=shaken"
+	return
+}
+
+func authStirShaken(identity, originatorTn, originatorURI, destinationTn, destinationURI string,
+	attest *utils.StringSet, hdrMaxDur time.Duration) (err error) {
+	var pi *ProcessedStirIdentity
+	if pi, err = NewProcessedIdentity(identity); err != nil {
+		return
+	}
+	if !pi.VerifyHeader() {
+		return errors.New("wrong header")
+	}
+	if err = pi.VerifySignature(time.Second); err != nil {
+		return
+	}
+	return pi.VerifyPayload(originatorTn, originatorURI, destinationTn, destinationURI, hdrMaxDur, attest) // verificare in lista
 }

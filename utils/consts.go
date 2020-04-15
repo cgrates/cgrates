@@ -68,8 +68,9 @@ var (
 		CacheDispatcherProfiles, CacheDispatcherHosts, CacheDispatchers, CacheResourceFilterIndexes,
 		CacheStatFilterIndexes, CacheThresholdFilterIndexes, CacheSupplierFilterIndexes,
 		CacheAttributeFilterIndexes, CacheChargerFilterIndexes, CacheDispatcherFilterIndexes,
-		CacheDispatcherRoutes, CacheDispatcherLoads, CacheDiameterMessages, CacheRPCResponses, CacheClosedSessions,
-		CacheCDRIDs, CacheLoadIDs, CacheRPCConnections, CacheRatingProfilesTmp, CacheUCH})
+		CacheDispatcherRoutes, CacheDispatcherLoads, CacheDiameterMessages, CacheRPCResponses,
+		CacheClosedSessions, CacheCDRIDs, CacheLoadIDs, CacheRPCConnections, CacheRatingProfilesTmp,
+		CacheUCH, CacheSTIR})
 	CacheInstanceToPrefix = map[string]string{
 		CacheDestinations:            DESTINATION_PREFIX,
 		CacheReverseDestinations:     REVERSE_DESTINATION_PREFIX,
@@ -1573,6 +1574,7 @@ const (
 	CacheCDRIDs                  = "*cdr_ids"
 	CacheRatingProfilesTmp       = "*tmp_rating_profiles"
 	CacheUCH                     = "*uch"
+	CacheSTIR                    = "*stir"
 )
 
 // Prefix for indexing
