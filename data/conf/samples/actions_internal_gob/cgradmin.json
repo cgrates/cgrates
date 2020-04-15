@@ -32,16 +32,17 @@
 },
 
 "rals": {
-	"enabled": true,						// enable Rater service: <true|false>
+	"enabled": true,
+	"stats_conns": ["*internal"],
 },
 
 "schedulers": {
-	"enabled": true,						// start Scheduler service: <true|false>
+	"enabled": true,
 	"cdrs_conns": ["conn1"],
 },
 
 "cdrs": {
-	"enabled": true,						// start the CDR Server service:  <true|false>
+	"enabled": true,
 	"chargers_conns":["conn1"],
 },
 
@@ -49,14 +50,19 @@
 	"enabled": true,
 },
 
-"users": {
-	"enabled": true,							// starts users service: <true|false>.
-},
 
 "thresholds": {
 	"enabled": true,
 	"store_interval": "-1",
 },
+
+
+
+"stats": {
+	"enabled": true,
+	"store_interval": "-1",
+},
+
 
 "apiers": {
 	"enabled": true,
