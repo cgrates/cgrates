@@ -543,9 +543,14 @@ func setddestinations(ub *Account, a *Action, acs Actions, extraData interface{}
 			if statID == utils.EmptyString {
 				continue
 			}
-			var sts *StatQueue
-			if sts, err = dm.GetStatQueue(config.CgrConfig().GeneralCfg().DefaultTenant, statID,
-				true, false, utils.NonTransactional); err != nil {
+			var sts StatQueue
+			if err = connMgr.Call(config.CgrConfig().RalsCfg().StatSConns, nil, utils.StatSv1GetStatQueue,
+				&utils.TenantIDWithArgDispatcher{
+					TenantID: &utils.TenantID{
+						Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+						ID:     statID,
+					},
+				}, &sts); err != nil {
 				return
 			}
 			ddcIface, has := sts.SQMetrics[utils.MetaDDC]
