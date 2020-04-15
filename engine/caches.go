@@ -88,9 +88,12 @@ func NewCacheS(cfg *config.CGRConfig, dm *DataManager) (c *CacheS) {
 		}
 	}
 
-	c = &CacheS{cfg: cfg, dm: dm,
+	c = &CacheS{
+		cfg:     cfg,
+		dm:      dm,
 		pcItems: make(map[string]chan struct{}),
-		tCache:  ltcache.NewTransCache(tCache)}
+		tCache:  ltcache.NewTransCache(tCache),
+	}
 	for cacheID := range cfg.CacheCfg().Partitions {
 		c.pcItems[cacheID] = make(chan struct{})
 	}
