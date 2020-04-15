@@ -25,6 +25,7 @@
 
 "rals": {
 	"enabled": true,						// enable Rater service: <true|false>
+	"stats_conns": ["*internal"],
 },
 
 "schedulers": {
@@ -41,14 +42,18 @@
 	"enabled": true,
 },
 
-"users": {
-	"enabled": true,							// starts users service: <true|false>.
-},
 
 "thresholds": {
 	"enabled": true,
 	"store_interval": "-1",
 },
+
+
+"stats": {
+	"enabled": true,
+	"store_interval": "-1",
+},
+
 
 "apiers": {
 	"enabled": true,

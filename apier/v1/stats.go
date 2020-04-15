@@ -183,6 +183,11 @@ func (stsv1 *StatSv1) GetStatQueuesForEvent(args *engine.StatsArgsProcessEvent, 
 	return stsv1.sS.V1GetStatQueuesForEvent(args, reply)
 }
 
+// GetStatQueue returns a StatQueue object
+func (stsv1 *StatSv1) GetStatQueue(args *utils.TenantIDWithArgDispatcher, reply *engine.StatQueue) (err error) {
+	return stsv1.sS.V1GetStatQueue(args, reply)
+}
+
 // GetStringMetrics returns the string metrics for a Queue
 func (stsv1 *StatSv1) GetQueueStringMetrics(args *utils.TenantIDWithArgDispatcher, reply *map[string]string) (err error) {
 	return stsv1.sS.V1GetQueueStringMetrics(args.TenantID, reply)

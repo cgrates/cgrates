@@ -28,12 +28,10 @@
 	"db_port": 27017,
 },
 
-"stor_db": {
-	"db_password": "CGRateS.org",
-},
 
 "rals": {
-	"enabled": true,						// enable Rater service: <true|false>
+	"enabled": true,
+	"stats_conns": ["*internal"],
 },
 
 "schedulers": {
@@ -50,14 +48,18 @@
 	"enabled": true,
 },
 
-"users": {
-	"enabled": true,							// starts users service: <true|false>.
-},
 
 "thresholds": {
 	"enabled": true,
 	"store_interval": "1s",
 },
+
+
+"stats": {
+	"enabled": true,
+	"store_interval": "1s",
+},
+
 
 "apiers": {
 	"enabled": true,
