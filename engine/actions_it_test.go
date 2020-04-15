@@ -50,6 +50,7 @@ var (
 		testActionsitCDRAccount,
 		testActionsitThresholdCgrRpcAction,
 		testActionsitThresholdPostEvent,
+		testActionsitSetSDestinations,
 		testActionsitStopCgrEngine,
 	}
 )
@@ -635,6 +636,139 @@ func testActionsitThresholdPostEvent(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ids, eIDs) {
 		t.Errorf("Expecting ids: %s, received: %s", eIDs, ids)
+	}
+
+}
+
+func testActionsitSetSDestinations(t *testing.T) {
+	var reply string
+	attrsSetAccount := &utils.AttrSetAccount{
+		Tenant:  "cgrates.org",
+		Account: "testAccSetDDestination",
+	}
+	if err := actsLclRpc.Call(utils.APIerSv1SetAccount, attrsSetAccount, &reply); err != nil {
+		t.Error("Got error on APIerSv1.SetAccount: ", err.Error())
+	} else if reply != utils.OK {
+		t.Errorf("Calling APIerSv1.SetAccount received: %s", reply)
+	}
+	attrsAA := &utils.AttrSetActions{ActionsId: "ACT_AddBalance", Actions: []*utils.TPAction{
+		{Identifier: utils.TOPUP, BalanceType: utils.MONETARY, DestinationIds: "*ddc_test",
+			Units: "5", ExpiryTime: utils.UNLIMITED, Weight: 20.0},
+	}}
+	if err := actsLclRpc.Call(utils.APIerSv2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+		t.Error("Got error on APIerSv2.SetActions: ", err.Error())
+	} else if reply != utils.OK {
+		t.Errorf("Calling APIerSv2.SetActions received: %s", reply)
+	}
+
+	attrsEA := &utils.AttrExecuteAction{Tenant: attrsSetAccount.Tenant, Account: attrsSetAccount.Account, ActionsId: attrsAA.ActionsId}
+	if err := actsLclRpc.Call(utils.APIerSv1ExecuteAction, attrsEA, &reply); err != nil {
+		t.Error("Got error on APIerSv1.ExecuteAction: ", err.Error())
+	} else if reply != utils.OK {
+		t.Errorf("Calling APIerSv1.ExecuteAction received: %s", reply)
+	}
+
+	var acc Account
+	attrs2 := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "testAccSetDDestination"}
+	if err := actsLclRpc.Call(utils.APIerSv2GetAccount, attrs2, &acc); err != nil {
+		t.Error(err.Error())
+	} else if _, has := acc.BalanceMap[utils.MONETARY][0].DestinationIDs["*ddc_test"]; !has {
+		t.Errorf("Unexpected destinationIDs: %+v", acc.BalanceMap[utils.MONETARY][0].DestinationIDs)
+	}
+
+	if err := actsLclRpc.Call(utils.APIerSv1SetDestination,
+		&utils.AttrSetDestination{Id: "*ddc_test", Prefixes: []string{"111", "222"}}, &reply); err != nil {
+		t.Error("Got error on APIerSv1.ExecuteAction: ", err.Error())
+	} else if reply != utils.OK {
+		t.Errorf("Calling APIerSv1.ExecuteAction received: %s", reply)
+	}
+	//verify destinations
+	var dest Destination
+	if err := actsLclRpc.Call(utils.APIerSv1GetDestination,
+		"*ddc_test", &dest); err != nil {
+		t.Error(err.Error())
+	} else {
+		if len(dest.Prefixes) != 2 || !utils.IsSliceMember(dest.Prefixes, "111") || !utils.IsSliceMember(dest.Prefixes, "222") {
+			t.Errorf("Unexpected destination : %+v", dest)
+		}
+	}
+
+	// set a StatQueueProfile and simulate process event
+	statConfig := &StatQueueProfile{
+		Tenant:      "cgrates.org",
+		ID:          "DistinctMetricProfile",
+		QueueLength: 10,
+		TTL:         time.Duration(10) * time.Second,
+		Metrics: []*MetricWithFilters{
+			&MetricWithFilters{
+				MetricID: utils.MetaDDC,
+			},
+		},
+		ThresholdIDs: []string{utils.META_NONE},
+		Stored:       true,
+		Weight:       20,
+	}
+
+	if err := actsLclRpc.Call(utils.APIerSv1SetStatQueueProfile, statConfig, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+
+	var reply2 []string
+	expected := []string{"DistinctMetricProfile"}
+	args := StatsArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				utils.Destination: "333",
+				utils.Usage:       time.Duration(6 * time.Second)}}}
+	if err := actsLclRpc.Call(utils.StatSv1ProcessEvent, &args, &reply2); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply2, expected) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, reply2)
+	}
+
+	args = StatsArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event2",
+			Event: map[string]interface{}{
+				utils.Destination: "777",
+				utils.Usage:       time.Duration(6 * time.Second)}}}
+	if err := actsLclRpc.Call(utils.StatSv1ProcessEvent, &args, &reply2); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply2, expected) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, reply2)
+	}
+
+	//Execute setDDestinations
+	attrSetDDest := &utils.AttrSetActions{ActionsId: "ACT_setDDestination", Actions: []*utils.TPAction{
+		{Identifier: utils.SET_DDESTINATIONS, ExtraParameters: "DistinctMetricProfile"},
+	}}
+	if err := actsLclRpc.Call(utils.APIerSv2SetActions, attrSetDDest, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+		t.Error("Got error on APIerSv2.SetActions: ", err.Error())
+	} else if reply != utils.OK {
+		t.Errorf("Calling APIerSv2.SetActions received: %s", reply)
+	}
+
+	attrsetDDest := &utils.AttrExecuteAction{Tenant: attrsSetAccount.Tenant,
+		Account: attrsSetAccount.Account, ActionsId: attrSetDDest.ActionsId}
+	if err := actsLclRpc.Call(utils.APIerSv1ExecuteAction, attrsetDDest, &reply); err != nil {
+		t.Error("Got error on APIerSv1.ExecuteAction: ", err.Error())
+	} else if reply != utils.OK {
+		t.Errorf("Calling APIerSv1.ExecuteAction received: %s", reply)
+	}
+
+	//verify destinations
+	if err := actsLclRpc.Call(utils.APIerSv1GetDestination,
+		"*ddc_test", &dest); err != nil {
+		t.Error(err.Error())
+	} else {
+		if len(dest.Prefixes) != 2 || !utils.IsSliceMember(dest.Prefixes, "333") || !utils.IsSliceMember(dest.Prefixes, "777") {
+			t.Errorf("Unexpected destination : %+v", dest)
+		}
 	}
 
 }

@@ -356,6 +356,16 @@ func (sS *StatService) V1GetStatQueuesForEvent(args *StatsArgsProcessEvent, repl
 	return
 }
 
+// V1GetStatQueue returns a StatQueue object
+func (sS *StatService) V1GetStatQueue(args *utils.TenantIDWithArgDispatcher, reply *StatQueue) (err error) {
+	if sq, err := sS.dm.GetStatQueue(args.Tenant, args.ID, true, true, ""); err != nil {
+		return err
+	} else {
+		*reply = *sq
+	}
+	return
+}
+
 // V1GetQueueStringMetrics returns the metrics of a Queue as string values
 func (sS *StatService) V1GetQueueStringMetrics(args *utils.TenantID, reply *map[string]string) (err error) {
 	if missing := utils.MissingStructFields(args, []string{utils.Tenant, utils.ID}); len(missing) != 0 { //Params missing
