@@ -1479,8 +1479,6 @@ func TestTopupActionLoaded(t *testing.T) {
 	}
 }
 
-/*
-Need to be reviewed with extra data instead of cdrstats
 func TestActionSetDDestination(t *testing.T) {
 	acc := &Account{BalanceMap: map[string]Balances{
 		utils.MONETARY: Balances{&Balance{DestinationIDs: utils.NewStringMap("*ddc_test")}}}}
@@ -1501,7 +1499,20 @@ func TestActionSetDDestination(t *testing.T) {
 	if !found || len(x1.([]string)) != 1 {
 		t.Error("Error cacheing destination: ", x1)
 	}
-	setddestinations(acc, &CDRStatsQueueTriggered{Metrics: map[string]float64{"333": 1, "666": 1}}, nil, nil)
+
+	if err := dm.SetStatQueue(&StatQueue{Tenant: "cgrates.org", ID: "StatDestination",
+		SQMetrics: map[string]StatMetric{
+			utils.MetaDDC: &StatDDC{FieldValues: map[string]map[string]struct{}{
+				"333": {"Ev1": struct{}{}},
+				"666": {"Ev2": struct{}{}},
+			}},
+		}}); err != nil {
+		t.Error(err)
+	}
+
+	if err := setddestinations(acc, &Action{ExtraParameters: "StatDestination"}, nil, nil); err != nil {
+		t.Error(err)
+	}
 	d, err := dm.GetDestination("*ddc_test", false, utils.NonTransactional)
 	if err != nil ||
 		d.Id != origD.Id ||
@@ -1531,7 +1542,6 @@ func TestActionSetDDestination(t *testing.T) {
 		t.Error("Error cacheing destination: ", x1)
 	}
 }
-*/
 
 func TestActionTransactionFuncType(t *testing.T) {
 	err := dm.SetAccount(&Account{

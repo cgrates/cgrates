@@ -524,7 +524,7 @@ func setddestinations(ub *Account, a *Action, acs Actions, extraData interface{}
 	for _, bchain := range ub.BalanceMap {
 		for _, b := range bchain {
 			for destID := range b.DestinationIDs {
-				if strings.HasPrefix(destID, "*ddc") {
+				if strings.HasPrefix(destID, utils.MetaDDC) {
 					ddcDestID = destID
 					break
 				}
@@ -538,15 +538,30 @@ func setddestinations(ub *Account, a *Action, acs Actions, extraData interface{}
 		}
 	}
 	if ddcDestID != "" {
-		// make slice from prefixes
-		// Review here prefixes
-		// prefixes := make([]string, len(sq.Metrics))
-		// i := 0
-		// for p := range sq.Metrics {
-		// 	prefixes[i] = p
-		// 	i++
-		// }
-		newDest := &Destination{Id: ddcDestID}
+		destinations := utils.NewStringSet(nil)
+		for _, statID := range strings.Split(a.ExtraParameters, utils.INFIELD_SEP) {
+			if statID == utils.EmptyString {
+				continue
+			}
+			var sts *StatQueue
+			if sts, err = dm.GetStatQueue(config.CgrConfig().GeneralCfg().DefaultTenant, statID,
+				true, false, utils.NonTransactional); err != nil {
+				return
+			}
+			ddcIface, has := sts.SQMetrics[utils.MetaDDC]
+			if !has {
+				continue
+			}
+			ddcMetric := ddcIface.(*StatDDC)
+
+			// make slice from prefixes
+			// Review here prefixes
+			for p := range ddcMetric.FieldValues {
+				destinations.Add(p)
+			}
+		}
+
+		newDest := &Destination{Id: ddcDestID, Prefixes: destinations.AsSlice()}
 		oldDest, err := dm.GetDestination(ddcDestID, false, utils.NonTransactional)
 		if err != nil {
 			return err
