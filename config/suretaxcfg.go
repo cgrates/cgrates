@@ -261,7 +261,7 @@ func (st *SureTaxCfg) AsMapInterface() map[string]interface{} {
 		utils.ClientNumberCfg:         st.ClientNumber,
 		utils.ValidationKeyCfg:        st.ValidationKey,
 		utils.BusinessUnitCfg:         st.BusinessUnit,
-		utils.TimezoneCfg:             st.Timezone,
+		utils.TimezoneCfg:             st.Timezone.String(),
 		utils.IncludeLocalCostCfg:     st.IncludeLocalCost,
 		utils.ReturnFileCodeCfg:       st.ReturnFileCode,
 		utils.ResponseGroupCfg:        st.ResponseGroup,

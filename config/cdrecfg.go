@@ -18,6 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
+import "github.com/cgrates/cgrates/utils"
+
 // One instance of CdrExporter
 type CdreCfg struct {
 	ExportFormat      string
@@ -89,4 +91,23 @@ func (self *CdreCfg) Clone() *CdreCfg {
 		clnCdre.Fields[idx] = fld.Clone()
 	}
 	return clnCdre
+}
+
+func (cdre *CdreCfg) AsMapInterface() map[string]interface{} {
+	fields := make([]map[string]interface{}, len(cdre.Fields))
+	for i, item := range cdre.Fields {
+		fields[i] = item.AsMapInterface()
+	}
+
+	return map[string]interface{}{
+		utils.ExportFormatCfg:      cdre.ExportFormat,
+		utils.ExportPathCfg:        cdre.ExportPath,
+		utils.FiltersCfg:           cdre.Filters,
+		utils.TenantCfg:            cdre.Tenant,
+		utils.AttributeSContextCfg: cdre.AttributeSContext,
+		utils.SynchronousCfg:       cdre.Synchronous,
+		utils.AttemptsCfg:          cdre.Attempts,
+		utils.FieldSeparatorCfg:    cdre.FieldSeparator,
+		utils.FieldsCfg:            fields,
+	}
 }

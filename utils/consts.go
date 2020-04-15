@@ -1858,8 +1858,33 @@ const (
 	// StatSCfg
 	StoreUncompressedLimitCfg = "store_uncompressed_limit"
 
-	DefaultRatioCfg = "default_ratio"
-	ReadersCfg      = "readers"
+	// Cache
+	PartitionsCfg = "partitions"
+	StaticTTL     = "StaticTTL"
+	Precache      = "Precache"
+
+	// CdreCfg
+	ExportFormatCfg      = "export_format"
+	ExportPathCfg        = "export_path"
+	AttributeSContextCfg = "attributes_context"
+	SynchronousCfg       = "synchronous"
+	AttemptsCfg          = "attempts"
+
+	//LoaderSCfg
+	IdCfg           = "id"
+	DryRunCfg       = "dry_run"
+	LockFileNameCfg = "lock_filename"
+	TpInDirCfg      = "tp_in_dir"
+	TpOutDirCfg     = "tp_out_dir"
+	DataCfg         = "data"
+
+	DefaultRatioCfg   = "default_ratio"
+	ReadersCfg        = "readers"
+	PoolSize          = "PoolSize"
+	Conns             = "Conns"
+	FilenameCfg       = "file_name"
+	RequestPayloadCfg = "Request_payload"
+	ReplyPayloadCfg   = "Reply_payload"
 )
 
 // FC Template
@@ -1967,6 +1992,46 @@ const (
 	PartialCacheExpiryActionCfg = "soome"
 	FieldsCfg                   = "fields"
 	CacheDumpFieldsCfg          = "cache_dump_fields"
+)
+
+// CGRConfig
+const (
+	CdreProfiles     = "cdre"             // from JSON
+	LoaderCfg        = "loaders"          // from JSON
+	HttpAgentCfg     = "http_agent"       // from JSON
+	RpcConns         = "rpc_conns"        // from JSON
+	GeneralCfg       = "general"          // from JSON
+	DataDbCfg        = "data_db"          // from JSON
+	StorDbCfg        = "stor_db"          // from JSON
+	TlsCfg           = "tls"              // from JSON
+	CacheCfg         = "caches"           // from JSON
+	HttpCfg          = "http"             // from JSON
+	FilterSCfg       = "filters"          // from JSON
+	RalsCfg          = "rals"             // from JSON
+	SchedulerCfg     = "schedulers"       // from JSON
+	CdrsCfg          = "cdrs"             // from JSON
+	SessionSCfg      = "sessions"         // from JSON
+	FsAgentCfg       = "freeswitch_agent" // from JSON
+	KamAgentCfg      = "kamailio_agent"   // from JSON
+	AsteriskAgentCfg = "asterisk_agent"   // from JSON
+	DiameterAgentCfg = "diameter_agent"   // from JSON
+	RadiusAgentCfg   = "radius_agent"     // from JSON
+	DnsAgentCfg      = "dns_agent"        // from JSON
+	AttributeSCfg    = "attributes"       // from JSON
+	ChargerSCfg      = "chargers"         // from JSON
+	ResourceSCfg     = "resources"        // from JSON
+	StatsCfg         = "stats"            // from JSON
+	ThresholdSCfg    = "thresholds"       // from JSON
+	SupplierSCfg     = "suppliers"        // from JSON
+	SureTaxCfg       = "suretax"          // from JSON
+	DispatcherSCfg   = "dispatchers"      // from JSON
+	LoaderCgrCfg     = "loader"           // from JSON
+	MigratorCgrCfg   = "migrator"         // from JSON
+	MailerCfg        = "mailer"           // from JSON
+	AnalyzerSCfg     = "analyzers"        // from JSON
+	Apier            = "apiers"           // from JSON
+	ErsCfg           = "ers"              // from JSON
+
 )
 
 // STIR/SHAKEN
