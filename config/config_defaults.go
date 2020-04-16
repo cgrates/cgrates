@@ -367,6 +367,8 @@ const CGRATES_CFG_JSON = `
 	"terminate_attempts": 5,				// attempts to get the session before terminating it
 	"alterable_fields": [],					// the session fields that can be updated
 	//"min_dur_low_balance": "5s",			// threshold which will trigger low balance warnings for prepaid calls (needs to be lower than debit_interval)
+	"stir_attest": "*any",					// the default attest for stir/shaken authentification <*any|A|B|C>
+	"stir_payload_maxduration": "-1", 		// the duration that stir header is valid after it was created
 },
 
 

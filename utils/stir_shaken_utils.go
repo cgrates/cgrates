@@ -94,8 +94,7 @@ func DecodeBase64JSON(data string, val interface{}) (err error) {
 	if b, err = jwt.DecodeSegment(data); err != nil {
 		return
 	}
-	err = json.Unmarshal(b, val)
-	return
+	return json.Unmarshal(b, val)
 }
 
 func RemoveWhiteSpaces(str string) string {
