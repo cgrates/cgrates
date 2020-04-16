@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package dispatchers
 
 import (
+	"encoding/gob"
 	"fmt"
 	"sort"
 	"strconv"
@@ -27,6 +28,11 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
+
+func init() {
+	gob.Register(new(LoadMetrics))
+
+}
 
 // Dispatcher is responsible for routing requests to pool of connections
 // there will be different implementations based on strategy
@@ -324,7 +330,7 @@ func newLoadMetrics(hosts engine.DispatcherHostProfiles) (*LoadMetrics, error) {
 }
 
 type LoadMetrics struct {
-	sync.RWMutex
+	mutex      sync.RWMutex
 	HostsLoad  map[string]int64
 	HostsRatio map[string]int64
 	SumRatio   int64
@@ -370,8 +376,10 @@ func (ld *loadStrategyDispatcher) dispatch(dm *engine.DataManager, routeID *stri
 			continue
 		}
 		if routeID != nil && *routeID != "" { // cache the discovered route
-			engine.Cache.Set(utils.CacheDispatcherRoutes, *routeID, dH,
-				nil, true, utils.EmptyString)
+			if err = engine.Cache.Set(utils.CacheDispatcherRoutes, *routeID, dH,
+				nil, true, utils.EmptyString); err != nil {
+				return
+			}
 		}
 		break
 	}
@@ -380,14 +388,14 @@ func (ld *loadStrategyDispatcher) dispatch(dm *engine.DataManager, routeID *stri
 
 func (lM *LoadMetrics) getHosts(hostIDs []string) []string {
 	costs := make([]int64, len(hostIDs))
-	lM.RLock()
+	lM.mutex.RLock()
 	for i, id := range hostIDs {
 		costs[i] = lM.HostsLoad[id]
 		if costs[i] >= lM.HostsRatio[id] {
 			costs[i] += lM.SumRatio
 		}
 	}
-	lM.RUnlock()
+	lM.mutex.RUnlock()
 	sort.Slice(hostIDs, func(i, j int) bool {
 		return costs[i] < costs[j]
 	})
@@ -395,15 +403,15 @@ func (lM *LoadMetrics) getHosts(hostIDs []string) []string {
 }
 
 func (lM *LoadMetrics) incrementLoad(hostID, tntID string) {
-	lM.Lock()
+	lM.mutex.Lock()
 	lM.HostsLoad[hostID] += 1
 	engine.Cache.ReplicateSet(utils.CacheDispatcherLoads, tntID, lM)
-	lM.Unlock()
+	lM.mutex.Unlock()
 }
 
 func (lM *LoadMetrics) decrementLoad(hostID, tntID string) {
-	lM.Lock()
+	lM.mutex.Lock()
 	lM.HostsLoad[hostID] -= 1
 	engine.Cache.ReplicateSet(utils.CacheDispatcherLoads, tntID, lM)
-	lM.Unlock()
+	lM.mutex.Unlock()
 }

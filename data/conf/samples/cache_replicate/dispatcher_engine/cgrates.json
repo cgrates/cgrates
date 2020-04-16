@@ -20,7 +20,8 @@
 
 "caches":{
 	"partitions": {
-		"*dispatcher_routes": {"limit": -1, "ttl": "1h", "replicate": true}
+		"*dispatcher_routes": {"limit": -1, "ttl": "1h", "replicate": true},
+		"*dispatcher_loads": {"limit": -1, "replicate": true}
 	},
 	"replication_conns": ["cacheReplication"],
 },
