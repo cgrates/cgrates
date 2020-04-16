@@ -44,6 +44,12 @@
 },
 
 
+"chargers": {
+	"enabled": true,
+	"attributes_conns": ["*internal"],
+},
+
+
 "apiers": {
 	"enabled": true,
 	"caches_conns":["conn1"],

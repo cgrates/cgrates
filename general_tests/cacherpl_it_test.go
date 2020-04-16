@@ -24,8 +24,12 @@ import (
 	"os/exec"
 	"path"
 	"reflect"
+	"sort"
+	"sync"
 	"testing"
 	"time"
+
+	v1 "github.com/cgrates/cgrates/apier/v1"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -51,6 +55,7 @@ var (
 		testCacheRplAddData,
 		testCacheRplPing,
 		testCacheRplCheckReplication,
+		testCacheRplCheckLoadReplication,
 
 		testCacheRplStopEngine,
 	}
@@ -173,6 +178,22 @@ func testCacheRplAddData(t *testing.T) {
 	case <-time.After(2 * time.Second):
 		t.Errorf("cgr-loader failed: ")
 	}
+
+	chargerProfile := &v1.ChargerWithCache{
+		ChargerProfile: &engine.ChargerProfile{
+			Tenant:       "cgrates.org",
+			ID:           "DefaultCharger",
+			RunID:        utils.MetaDefault,
+			AttributeIDs: []string{utils.META_NONE},
+			Weight:       20,
+		},
+	}
+	var result string
+	if err := engine1RPC.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
 }
 
 func testCacheRplPing(t *testing.T) {
@@ -231,6 +252,8 @@ func testCacheRplCheckReplication(t *testing.T) {
 	if err := dspEngine2RPC.Call(utils.CacheSv1GetItemIDs, argsAPI, &rcvKeys); err != nil {
 		t.Error(err.Error())
 	}
+	sort.Strings(rcvKeys)
+	sort.Strings(expKeys)
 	if !reflect.DeepEqual(expKeys, rcvKeys) {
 		t.Errorf("Expected: %+v, received: %+v", expKeys, rcvKeys)
 	}
@@ -248,6 +271,85 @@ func testCacheRplCheckReplication(t *testing.T) {
 	} else if rpl != utils.Pong {
 		t.Errorf("Received: %s", rpl)
 	}
+}
+
+func testCacheRplCheckLoadReplication(t *testing.T) {
+	var rcvKeys []string
+	argsAPI := utils.ArgsGetCacheItemIDsWithArgDispatcher{
+		TenantArg: utils.TenantArg{
+			Tenant: "cgrates.org",
+		},
+		ArgsGetCacheItemIDs: utils.ArgsGetCacheItemIDs{
+			CacheID: utils.CacheDispatcherLoads,
+		},
+	}
+	if err := dspEngine2RPC.Call(utils.CacheSv1GetItemIDs, argsAPI, &rcvKeys); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+
+	var rpl []*engine.ChrgSProcessEventReply
+	var wg sync.WaitGroup
+	for i := 0; i < 10; i++ {
+		wg.Add(1)
+		go func() {
+			if err := dspEngine1RPC.Call(utils.ChargerSv1ProcessEvent, &utils.CGREventWithArgDispatcher{
+				CGREvent: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "testCacheRplCheckLoadReplication",
+					Event: map[string]interface{}{
+						utils.Account:     "1007",
+						utils.Destination: "+491511231234",
+						"EventName":       "TestLoad",
+					},
+				},
+				ArgDispatcher: &utils.ArgDispatcher{
+					RouteID: utils.StringPointer("testRoute123"),
+				},
+			}, &rpl); err != nil {
+				t.Error(err)
+			} else if rpl[0].ChargerSProfile != "DefaultCharger" {
+				t.Errorf("Received: %+v", utils.ToJSON(rpl))
+			}
+			wg.Done()
+		}()
+	}
+	wg.Wait()
+	expKeys := []string{"testRoute123:*core", "testRoute123:*attributes", "testRoute123:*chargers"}
+	argsAPI = utils.ArgsGetCacheItemIDsWithArgDispatcher{
+		TenantArg: utils.TenantArg{
+			Tenant: "cgrates.org",
+		},
+		ArgsGetCacheItemIDs: utils.ArgsGetCacheItemIDs{
+			CacheID: utils.CacheDispatcherRoutes,
+		},
+	}
+	if err := dspEngine2RPC.Call(utils.CacheSv1GetItemIDs, argsAPI, &rcvKeys); err != nil {
+		t.Error(err.Error())
+	}
+	sort.Strings(rcvKeys)
+	sort.Strings(expKeys)
+	if !reflect.DeepEqual(expKeys, rcvKeys) {
+		t.Errorf("Expected: %+v, received: %+v", expKeys, rcvKeys)
+	}
+
+	expKeys = []string{"cgrates.org:Engine2"}
+	argsAPI = utils.ArgsGetCacheItemIDsWithArgDispatcher{
+		TenantArg: utils.TenantArg{
+			Tenant: "cgrates.org",
+		},
+		ArgsGetCacheItemIDs: utils.ArgsGetCacheItemIDs{
+			CacheID: utils.CacheDispatcherLoads,
+		},
+	}
+	if err := dspEngine2RPC.Call(utils.CacheSv1GetItemIDs, argsAPI, &rcvKeys); err != nil {
+		t.Error(err.Error())
+	}
+	sort.Strings(rcvKeys)
+	sort.Strings(expKeys)
+	if !reflect.DeepEqual(expKeys, rcvKeys) {
+		t.Errorf("Expected: %+v, received: %+v", expKeys, rcvKeys)
+	}
+
 }
 
 func testCacheRplStopEngine(t *testing.T) {
