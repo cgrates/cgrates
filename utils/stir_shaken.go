@@ -70,8 +70,8 @@ type PASSporTOriginsIdentity struct {
 }
 
 // NewPASSporTPayload returns an new PASSporTPayload with the given origin and destination
-func NewPASSporTPayload(attest, originID string, dest PASSporTDestinationsIdentity, orig PASSporTOriginsIdentity) PASSporTPayload {
-	return PASSporTPayload{
+func NewPASSporTPayload(attest, originID string, dest PASSporTDestinationsIdentity, orig PASSporTOriginsIdentity) *PASSporTPayload {
+	return &PASSporTPayload{
 		ATTest: attest,
 		Dest:   dest,
 		IAT:    time.Now().Unix(),

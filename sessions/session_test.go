@@ -361,12 +361,10 @@ func TestSessionAsCGREvents(t *testing.T) {
 		CGRID:      "RandomCGRID",
 		Tenant:     "cgrates.org",
 		EventStart: engine.NewMapEvent(startEv),
-		SRuns: []*SRun{
-			&SRun{
-				Event:      engine.NewMapEvent(ev),
-				TotalUsage: time.Duration(2 * time.Second),
-			},
-		},
+		SRuns: []*SRun{{
+			Event:      engine.NewMapEvent(ev),
+			TotalUsage: time.Duration(2 * time.Second),
+		}},
 	}
 	//check for some fields if populated correct
 	cgrEvs, err := s.asCGREvents()
@@ -420,44 +418,40 @@ func TestSessionAsExternalSessions(t *testing.T) {
 		Tenant:        "cgrates.org",
 		EventStart:    engine.NewMapEvent(startEv),
 		DebitInterval: time.Second,
-		SRuns: []*SRun{
-			&SRun{
-				Event:         engine.NewMapEvent(ev),
-				TotalUsage:    time.Duration(2 * time.Second),
-				NextAutoDebit: &tTime,
-			},
-		},
+		SRuns: []*SRun{{
+			Event:         engine.NewMapEvent(ev),
+			TotalUsage:    time.Duration(2 * time.Second),
+			NextAutoDebit: &tTime,
+		}},
 	}
-	exp := []*ExternalSession{
-		&ExternalSession{
-			CGRID:    "RandomCGRID",
-			RunID:    utils.MetaDefault,
-			ToR:      utils.VOICE,
-			OriginID: "123451",
-			// OriginHost:  s.EventStart.GetStringIgnoreErrors(utils.OriginHost),
-			Source:      utils.SessionS + "_" + "TEST_EVENT",
-			RequestType: utils.META_PREPAID,
-			Tenant:      "cgrates.org",
-			Category:    "call",
-			Account:     "1001",
-			Subject:     "1001",
-			Destination: "1004",
-			SetupTime:   time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
-			AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-			Usage:       time.Duration(2 * time.Second),
-			ExtraFields: map[string]string{
-				utils.EVENT_NAME: "TEST_EVENT2",
-			},
-			NodeID:        "ALL",
-			DebitInterval: time.Second,
-			NextAutoDebit: tTime,
-			// aSs[i].LoopIndex:     sr.CD.LoopIndex,
-			// aSs[i].DurationIndex: sr.CD.DurationIndex,
-			// aSs[i].MaxRate:       sr.CD.MaxRate,
-			// aSs[i].MaxRateUnit:   sr.CD.MaxRateUnit,
-			// aSs[i].MaxCostSoFar:  sr.CD.MaxCostSoFar,
+	exp := []*ExternalSession{{
+		CGRID:    "RandomCGRID",
+		RunID:    utils.MetaDefault,
+		ToR:      utils.VOICE,
+		OriginID: "123451",
+		// OriginHost:  s.EventStart.GetStringIgnoreErrors(utils.OriginHost),
+		Source:      utils.SessionS + "_" + "TEST_EVENT",
+		RequestType: utils.META_PREPAID,
+		Tenant:      "cgrates.org",
+		Category:    "call",
+		Account:     "1001",
+		Subject:     "1001",
+		Destination: "1004",
+		SetupTime:   time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
+		AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
+		Usage:       time.Duration(2 * time.Second),
+		ExtraFields: map[string]string{
+			utils.EVENT_NAME: "TEST_EVENT2",
 		},
-	}
+		NodeID:        "ALL",
+		DebitInterval: time.Second,
+		NextAutoDebit: tTime,
+		// aSs[i].LoopIndex:     sr.CD.LoopIndex,
+		// aSs[i].DurationIndex: sr.CD.DurationIndex,
+		// aSs[i].MaxRate:       sr.CD.MaxRate,
+		// aSs[i].MaxRateUnit:   sr.CD.MaxRateUnit,
+		// aSs[i].MaxCostSoFar:  sr.CD.MaxCostSoFar,
+	}}
 	//check for some fields if populated correct
 	rply := s.AsExternalSessions("", "ALL")
 	if !reflect.DeepEqual(exp, rply) {
@@ -503,49 +497,45 @@ func TestSessionAsExternalSessions2(t *testing.T) {
 		Tenant:        "cgrates.org",
 		EventStart:    engine.NewMapEvent(startEv),
 		DebitInterval: time.Second,
-		SRuns: []*SRun{
-			&SRun{
-				Event:      engine.NewMapEvent(ev),
-				TotalUsage: time.Duration(2 * time.Second),
-				CD: &engine.CallDescriptor{
-					LoopIndex:     10,
-					DurationIndex: 3 * time.Second,
-					MaxRate:       11,
-					MaxRateUnit:   30 * time.Second,
-					MaxCostSoFar:  20,
-				},
-			},
+		SRuns: []*SRun{{
+			Event:      engine.NewMapEvent(ev),
+			TotalUsage: time.Duration(2 * time.Second),
+			CD: &engine.CallDescriptor{
+				LoopIndex:     10,
+				DurationIndex: 3 * time.Second,
+				MaxRate:       11,
+				MaxRateUnit:   30 * time.Second,
+				MaxCostSoFar:  20,
+			}},
 		},
 	}
-	exp := []*ExternalSession{
-		&ExternalSession{
-			CGRID:    "RandomCGRID",
-			RunID:    utils.MetaDefault,
-			ToR:      utils.VOICE,
-			OriginID: "123451",
-			// OriginHost:  s.EventStart.GetStringIgnoreErrors(utils.OriginHost),
-			Source:      utils.SessionS + "_" + "TEST_EVENT",
-			RequestType: utils.META_PREPAID,
-			Tenant:      "cgrates.org",
-			Category:    "call",
-			Account:     "1001",
-			Subject:     "1001",
-			Destination: "1004",
-			SetupTime:   time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
-			AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-			Usage:       time.Duration(2 * time.Second),
-			ExtraFields: map[string]string{
-				utils.EVENT_NAME: "TEST_EVENT2",
-			},
-			NodeID:        "ALL",
-			DebitInterval: time.Second,
-			LoopIndex:     10,
-			DurationIndex: 3 * time.Second,
-			MaxRate:       11,
-			MaxRateUnit:   30 * time.Second,
-			MaxCostSoFar:  20,
+	exp := []*ExternalSession{{
+		CGRID:    "RandomCGRID",
+		RunID:    utils.MetaDefault,
+		ToR:      utils.VOICE,
+		OriginID: "123451",
+		// OriginHost:  s.EventStart.GetStringIgnoreErrors(utils.OriginHost),
+		Source:      utils.SessionS + "_" + "TEST_EVENT",
+		RequestType: utils.META_PREPAID,
+		Tenant:      "cgrates.org",
+		Category:    "call",
+		Account:     "1001",
+		Subject:     "1001",
+		Destination: "1004",
+		SetupTime:   time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
+		AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
+		Usage:       time.Duration(2 * time.Second),
+		ExtraFields: map[string]string{
+			utils.EVENT_NAME: "TEST_EVENT2",
 		},
-	}
+		NodeID:        "ALL",
+		DebitInterval: time.Second,
+		LoopIndex:     10,
+		DurationIndex: 3 * time.Second,
+		MaxRate:       11,
+		MaxRateUnit:   30 * time.Second,
+		MaxCostSoFar:  20,
+	}}
 	//check for some fields if populated correct
 	rply := s.AsExternalSessions("", "ALL")
 	if !reflect.DeepEqual(exp, rply) {
@@ -593,20 +583,18 @@ func TestSessionAsExternalSessions3(t *testing.T) {
 		Tenant:        "cgrates.org",
 		EventStart:    engine.NewMapEvent(startEv),
 		DebitInterval: time.Second,
-		SRuns: []*SRun{
-			&SRun{
-				Event:      engine.NewMapEvent(ev),
-				TotalUsage: time.Duration(2 * time.Second),
-				CD: &engine.CallDescriptor{
-					LoopIndex:     10,
-					DurationIndex: 3 * time.Second,
-					MaxRate:       11,
-					MaxRateUnit:   30 * time.Second,
-					MaxCostSoFar:  20,
-				},
-				NextAutoDebit: &tTime,
+		SRuns: []*SRun{{
+			Event:      engine.NewMapEvent(ev),
+			TotalUsage: time.Duration(2 * time.Second),
+			CD: &engine.CallDescriptor{
+				LoopIndex:     10,
+				DurationIndex: 3 * time.Second,
+				MaxRate:       11,
+				MaxRateUnit:   30 * time.Second,
+				MaxCostSoFar:  20,
 			},
-		},
+			NextAutoDebit: &tTime,
+		}},
 	}
 	exp := &ExternalSession{
 		CGRID:    "RandomCGRID",
@@ -663,7 +651,8 @@ func TestSessiontotalUsage(t *testing.T) {
 		EventStart:    engine.NewMapEvent(nil),
 		DebitInterval: time.Duration(18),
 		SRuns: []*SRun{
-			{Event: engine.NewMapEvent(nil),
+			{
+				Event:         engine.NewMapEvent(nil),
 				CD:            &engine.CallDescriptor{Category: "test"},
 				EventCost:     &engine.EventCost{CGRID: "testCGRID"},
 				ExtraDuration: time.Duration(1),
@@ -671,7 +660,8 @@ func TestSessiontotalUsage(t *testing.T) {
 				TotalUsage:    time.Duration(5),
 				NextAutoDebit: &tTime,
 			},
-			{Event: engine.NewMapEvent(nil),
+			{
+				Event:         engine.NewMapEvent(nil),
 				CD:            &engine.CallDescriptor{Category: "test2"},
 				EventCost:     &engine.EventCost{CGRID: "testCGRID2"},
 				ExtraDuration: time.Duration(4),
@@ -714,5 +704,73 @@ func TestSessionstopDebitLoops(t *testing.T) {
 	if session.debitStop != nil {
 		t.Errorf("Expecting: nil, received: %s", utils.ToJSON(session.debitStop))
 	}
+}
 
+func TestUpdateSRuns(t *testing.T) {
+	startEv := map[string]interface{}{
+		utils.EVENT_NAME:  "TEST_EVENT",
+		utils.ToR:         utils.VOICE,
+		utils.OriginID:    "123451",
+		utils.Account:     "1001",
+		utils.Subject:     "1001",
+		utils.Destination: "1004",
+		utils.Category:    "call",
+		utils.Tenant:      "cgrates.org",
+		utils.RequestType: utils.META_PREPAID,
+		utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
+		utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
+		utils.Usage:       time.Duration(2 * time.Second),
+		utils.Cost:        12.12,
+	}
+	ev := map[string]interface{}{
+		utils.EVENT_NAME:  "TEST_EVENT2",
+		utils.ToR:         utils.VOICE,
+		utils.OriginID:    "123451",
+		utils.Account:     "1001",
+		utils.Subject:     "1001",
+		utils.Destination: "1004",
+		utils.Category:    "call",
+		utils.RunID:       utils.MetaDefault,
+		utils.Tenant:      "cgrates.org",
+		utils.RequestType: utils.META_PREPAID,
+		utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
+		utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
+		utils.Usage:       time.Duration(2 * time.Second),
+		utils.Cost:        12.13,
+	}
+	s := &Session{
+		CGRID:         "RandomCGRID",
+		Tenant:        "cgrates.org",
+		EventStart:    engine.NewMapEvent(startEv),
+		DebitInterval: time.Second,
+		SRuns: []*SRun{{
+			Event:      engine.NewMapEvent(ev),
+			TotalUsage: time.Duration(2 * time.Second),
+			CD: &engine.CallDescriptor{
+				LoopIndex:     10,
+				DurationIndex: 3 * time.Second,
+				MaxRate:       11,
+				MaxRateUnit:   30 * time.Second,
+				MaxCostSoFar:  20,
+			},
+		}},
+	}
+	updEv := map[string]interface{}{
+		utils.EVENT_NAME:  "TEST_EVENT2",
+		utils.Tenant:      "cgrates.org",
+		utils.RequestType: utils.META_POSTPAID,
+	}
+	s.updateSRuns(updEv, utils.NewStringSet(nil))
+	if s.SRuns[0].Event[utils.RequestType] != utils.META_PREPAID {
+		t.Errorf("Expected session to not change")
+	}
+	s.UpdateSRuns(updEv, utils.NewStringSet(nil))
+	if s.SRuns[0].Event[utils.RequestType] != utils.META_PREPAID {
+		t.Errorf("Expected session to not change")
+	}
+	s.UpdateSRuns(updEv, utils.NewStringSet([]string{utils.RequestType}))
+	if s.SRuns[0].Event[utils.RequestType] != utils.META_POSTPAID {
+		t.Errorf("Expected request type to be: %q, received: %q",
+			utils.META_POSTPAID, s.SRuns[0].Event[utils.RequestType])
+	}
 }

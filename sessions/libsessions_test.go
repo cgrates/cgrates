@@ -25,6 +25,7 @@ import (
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/dgrijalva/jwt-go"
 )
 
 func TestLibSessionSGetSetCGRID(t *testing.T) {
@@ -144,5 +145,167 @@ func TestGetFlagIDs(t *testing.T) {
 	eOut = []string{"ATTR1", "ATTR2"}
 	if !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expected %s , received: %s", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+}
+
+func TestNewProcessedIdentity(t *testing.T) {
+	if _, err := NewProcessedIdentity(""); err == nil ||
+		err.Error() != "missing parts of the message header" {
+		t.Errorf("Expected %q received: %v", "missing parts of the message header", err)
+	}
+	if _, err := NewProcessedIdentity(";"); err == nil ||
+		err.Error() != "wrong header format" {
+		t.Errorf("Expected %q received: %v", "wrong header format", err)
+	}
+
+	if _, err := NewProcessedIdentity("eyJhbGciOiJFUzI1NiIsInBwdCI6InNoYWtlbiIsInR,5cCI6InBhc3Nwb3J0IiwieDV1IjoiaHR0cHM6Ly93d3cuZXhhbXBsZS5vcmcvY2VydC5jZXIifQ.eyJhdHRlc3QiOiJBIiwiZGVzdCI6eyJ0biI6WyIxMDAyIl19LCJpYXQiOjE1ODcwMTk4MjIsIm9yaWc,iOnsidG4iOiIxMDAxIn0sIm9yaWdpZCI6IjEyMzQ1NiJ9.4ybtWmgqdkNyJLS9Iv3PuJV8ZxR7yZ_NEBhCpKCEu2WBiTchqwoqoWpI17Q_ALm38tbnpay32t95ZY_LhSgwJg;info=<https://www.example.org/cert.cer>;ppt=shaken"); err == nil {
+		t.Errorf("Expected error")
+	}
+
+	if _, err := NewProcessedIdentity("eyJhbGciOiJFUzI1NiIsInBwdCI6InNoYWtlbiIsInR5cCI6InBhc3Nwb3J0IiwieDV1IjoiaHR0cHM6Ly93d3cuZXhhbXBsZS5vcmcvY2VydC5jZXIifQ.eyJhdHRlc3QiOiJBIiwiZGVzdCI6eyJ0biI6WyIxMDAyIl19LCJpYXQiOjE1ODcwMTk4MjIsIm9yaWc,iOnsidG4iOiIxMDAxIn0sIm9yaWdpZCI6IjEyMzQ1NiJ9.4ybtWmgqdkNyJLS9Iv3PuJV8ZxR7yZ_NEBhCpKCEu2WBiTchqwoqoWpI17Q_ALm38tbnpay32t95ZY_LhSgwJg;info=<https://www.example.org/cert.cer>;ppt=shaken"); err == nil {
+		t.Errorf("Expected error")
+	}
+
+	expected := &ProcessedStirIdentity{
+		Tokens:     []string{"info=<https://www.example.org/cert.cer>", "ppt=shaken"},
+		SigningStr: "eyJhbGciOiJFUzI1NiIsInBwdCI6InNoYWtlbiIsInR5cCI6InBhc3Nwb3J0IiwieDV1IjoiaHR0cHM6Ly93d3cuZXhhbXBsZS5vcmcvY2VydC5jZXIifQ.eyJhdHRlc3QiOiJBIiwiZGVzdCI6eyJ0biI6WyIxMDAyIl19LCJpYXQiOjE1ODcwMTk4MjIsIm9yaWciOnsidG4iOiIxMDAxIn0sIm9yaWdpZCI6IjEyMzQ1NiJ9",
+		Signature:  "4ybtWmgqdkNyJLS9Iv3PuJV8ZxR7yZ_NEBhCpKCEu2WBiTchqwoqoWpI17Q_ALm38tbnpay32t95ZY_LhSgwJg",
+		Header: &utils.PASSporTHeader{
+			Typ: utils.STIRTyp,
+			Alg: utils.STIRAlg,
+			Ppt: utils.STIRPpt,
+			X5u: "https://www.example.org/cert.cer",
+		},
+		Payload: &utils.PASSporTPayload{
+			ATTest: "A",
+			Dest: utils.PASSporTDestinationsIdentity{
+				Tn: []string{"1002"},
+			},
+			IAT: 1587019822,
+			Orig: utils.PASSporTOriginsIdentity{
+				Tn: "1001",
+			},
+			OrigID: "123456",
+		},
+	}
+	if rply, err := NewProcessedIdentity("eyJhbGciOiJFUzI1NiIsInBwdCI6InNoYWtlbiIsInR5cCI6InBhc3Nwb3J0IiwieDV1IjoiaHR0cHM6Ly93d3cuZXhhbXBsZS5vcmcvY2VydC5jZXIifQ.eyJhdHRlc3QiOiJBIiwiZGVzdCI6eyJ0biI6WyIxMDAyIl19LCJpYXQiOjE1ODcwMTk4MjIsIm9yaWciOnsidG4iOiIxMDAxIn0sIm9yaWdpZCI6IjEyMzQ1NiJ9.4ybtWmgqdkNyJLS9Iv3PuJV8ZxR7yZ_NEBhCpKCEu2WBiTchqwoqoWpI17Q_ALm38tbnpay32t95ZY_LhSgwJg;info=<https://www.example.org/cert.cer>;ppt=shaken"); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expected: %s, received:%s", utils.ToJSON(expected), utils.ToJSON(rply))
+	}
+}
+
+func TestProcessedIdentityVerifyHeader(t *testing.T) {
+	args := &ProcessedStirIdentity{
+		Tokens: []string{"info=<https://www.example.org/cert.cer>", "ppt=shaken", "extra", "alg=ES256"},
+		Header: &utils.PASSporTHeader{
+			Typ: utils.STIRTyp,
+			Alg: utils.STIRAlg,
+			Ppt: utils.STIRPpt,
+			X5u: "https://www.example.org/cert.cer",
+		},
+	}
+	if !args.VerifyHeader() {
+		t.Errorf("Expected the header to be valid")
+	}
+	args.Header.Typ = "1"
+	if args.VerifyHeader() {
+		t.Errorf("Expected the header to not be valid")
+	}
+
+	args.Tokens = []string{"info=<https://www.example.org/cert.cer>", "ppt=shaken", "alg=wrongArg"}
+	if args.VerifyHeader() {
+		t.Errorf("Expected the header to not be valid")
+	}
+
+	args.Tokens = []string{"info=<https://www.example.org/cert.cer>", "ppt=wrongExtension"}
+	if args.VerifyHeader() {
+		t.Errorf("Expected the header to not be valid")
+	}
+	args.Tokens = []string{"info=<", "ppt=shaken"}
+	if args.VerifyHeader() {
+		t.Errorf("Expected the header to not be valid")
+	}
+}
+
+func TestProcessedIdentityVerifyPayload(t *testing.T) {
+	args := &ProcessedStirIdentity{
+		Payload: &utils.PASSporTPayload{
+			ATTest: "C",
+			Dest: utils.PASSporTDestinationsIdentity{
+				Tn: []string{"1002"},
+			},
+			IAT: 1587019822,
+			Orig: utils.PASSporTOriginsIdentity{
+				Tn: "1001",
+			},
+			OrigID: "123456",
+		},
+	}
+	if err := args.VerifyPayload("1001", "", "1002", "", -1, utils.NewStringSet([]string{utils.META_ANY})); err != nil {
+		t.Error(err)
+	}
+	if err := args.VerifyPayload("1001", "", "1003", "", -1, utils.NewStringSet([]string{utils.META_ANY})); err == nil ||
+		err.Error() != "wrong destinationTn" {
+		t.Errorf("Expected error: %s,receved %v", "wrong destinationTn", err)
+	}
+	if err := args.VerifyPayload("1001", "", "1003", "1002", -1, utils.NewStringSet([]string{utils.META_ANY})); err == nil ||
+		err.Error() != "wrong destinationURI" {
+		t.Errorf("Expected error: %s,receved %v", "wrong destinationURI", err)
+	}
+	if err := args.VerifyPayload("1002", "", "1003", "1002", -1, utils.NewStringSet([]string{utils.META_ANY})); err == nil ||
+		err.Error() != "wrong originatorTn" {
+		t.Errorf("Expected error: %s,receved %v", "wrong originatorTn", err)
+	}
+	if err := args.VerifyPayload("1002", "1001", "1003", "1002", -1, utils.NewStringSet([]string{utils.META_ANY})); err == nil ||
+		err.Error() != "wrong originatorURI" {
+		t.Errorf("Expected error: %s,receved %v", "wrong originatorURI", err)
+	}
+	if err := args.VerifyPayload("1001", "", "1002", "", time.Second, utils.NewStringSet([]string{utils.META_ANY})); err == nil ||
+		err.Error() != "expired payload" {
+		t.Errorf("Expected error: %s,receved %v", "expired payload", err)
+	}
+	if err := args.VerifyPayload("1001", "", "1002", "", time.Second, utils.NewStringSet([]string{"A"})); err == nil ||
+		err.Error() != "wrong attest level" {
+		t.Errorf("Expected error: %s,receved %v", "wrong attest level", err)
+	}
+}
+
+func TestAuthStirShaken(t *testing.T) {
+	if err := AuthStirShaken("", "1001", "", "1002", "", utils.NewStringSet([]string{utils.META_ANY}), -1); err == nil {
+		t.Error("Expected invalid identity")
+	}
+	if err := AuthStirShaken(
+		"eyJhbGciOiJFUzI1NiIsInBwdCI6InNoYWtlbiIsInR5cCI6InBhc3Nwb3J0IiwieDV1IjoiaHR0cHM6Ly93d3cuZXhhbXBsZS5vcmcvY2VydC5jZXIifQ.eyJhdHRlc3QiOiJBIiwiZGVzdCI6eyJ0biI6WyIxMDAyIl19LCJpYXQiOjE1ODcwMTk4MjIsIm9yaWciOnsidG4iOiIxMDAxIn0sIm9yaWdpZCI6IjEyMzQ1NiJ9.4ybtWmgqdkNyJLS9Iv3PuJV8ZxR7yZ_NEBhCpKCEu2WBiTchqwoqoWpI17Q_ALm38tbnpay32t95ZY_LhSgwJg;info=<https://www.example.org/cert.cer2>;ppt=shaken",
+		"1001", "", "1002", "", utils.NewStringSet([]string{utils.META_ANY}), -1); err == nil {
+		t.Error("Expected invalid identity")
+	}
+	engine.Cache.Set(utils.CacheSTIR, "https://www.example.org/cert.cer", nil,
+		nil, true, utils.NonTransactional)
+	if err := AuthStirShaken(
+		"eyJhbGciOiJFUzI1NiIsInBwdCI6InNoYWtlbiIsInR5cCI6InBhc3Nwb3J0IiwieDV1IjoiaHR0cHM6Ly93d3cuZXhhbXBsZS5vcmcvY2VydC5jZXIifQ.eyJhdHRlc3QiOiJBIiwiZGVzdCI6eyJ0biI6WyIxMDAyIl19LCJpYXQiOjE1ODcwMTk4MjIsIm9yaWciOnsidG4iOiIxMDAxIn0sIm9yaWdpZCI6IjEyMzQ1NiJ9.4ybtWmgqdkNyJLS9Iv3PuJV8ZxR7yZ_NEBhCpKCEu2WBiTchqwoqoWpI17Q_ALm38tbnpay32t95ZY_LhSgwJg;info=<https://www.example.org/cert.cer>;ppt=shaken", "1001", "", "1002", "", utils.NewStringSet([]string{utils.META_ANY}), -1); err == nil {
+		t.Error("Expected invalid identity")
+	}
+
+	pubkeyBuf := []byte(`-----BEGIN PUBLIC KEY-----
+MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAESt8sEh55Yc579vLHjFRWVQO27p4Y
+aa+jqv4dwkr/FLEcN1zC76Y/IniI65fId55hVJvN3ORuzUqYEtzD3irmsw==
+-----END PUBLIC KEY-----
+`)
+	pubKey, err := jwt.ParseECPublicKeyFromPEM(pubkeyBuf)
+	if err != nil {
+		t.Fatal(err)
+	}
+	engine.Cache.Set(utils.CacheSTIR, "https://www.example.org/cert.cer", pubKey,
+		nil, true, utils.NonTransactional)
+
+	if err := AuthStirShaken(
+		"eyJhbGciOiJFUzI1NiIsInBwdCI6InNoYWtlbiIsInR5cCI6InBhc3Nwb3J0IiwieDV1IjoiaHR0cHM6Ly93d3cuZXhhbXBsZS5vcmcvY2VydC5jZXIifQ.eyJhdHRlc3QiOiJBIiwiZGVzdCI6eyJ0biI6WyIxMDAyIl19LCJpYXQiOjE1ODcwMTk4MjIsIm9yaWciOnsidG4iOiIxMDAxIn0sIm9yaWdpZCI6IjEyMzQ1NiJ9.4ybtWmgqdkNyJLS9Iv3PuJV8ZxR7yZ_NEBhCpKCEu2WBiTchqwoqoWpI17Q_ALm38tbnpay32t95ZY_LhSgwJg;info=<https://www.example.org/cert.cer>;ppt=shaken", "1001", "", "1003", "", utils.NewStringSet([]string{utils.META_ANY}), -1); err == nil {
+		t.Error("Expected invalid identity")
+	}
+
+	if err := AuthStirShaken(
+		"eyJhbGciOiJFUzI1NiIsInBwdCI6InNoYWtlbiIsInR5cCI6InBhc3Nwb3J0IiwieDV1IjoiaHR0cHM6Ly93d3cuZXhhbXBsZS5vcmcvY2VydC5jZXIifQ.eyJhdHRlc3QiOiJBIiwiZGVzdCI6eyJ0biI6WyIxMDAyIl19LCJpYXQiOjE1ODcwMTk4MjIsIm9yaWciOnsidG4iOiIxMDAxIn0sIm9yaWdpZCI6IjEyMzQ1NiJ9.4ybtWmgqdkNyJLS9Iv3PuJV8ZxR7yZ_NEBhCpKCEu2WBiTchqwoqoWpI17Q_ALm38tbnpay32t95ZY_LhSgwJg;info=<https://www.example.org/cert.cer>;ppt=shaken", "1001", "", "1002", "", utils.NewStringSet([]string{utils.META_ANY}), -1); err != nil {
+		t.Fatal(err)
 	}
 }
