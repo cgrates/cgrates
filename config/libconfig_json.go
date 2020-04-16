@@ -220,8 +220,11 @@ type SessionSJsonCfg struct {
 	Terminate_attempts       *int
 	Alterable_fields         *[]string
 	Min_dur_low_balance      *string
-	Stir_attest              *string
+	Stir_allowed_attest      *[]string
 	Stir_payload_maxduration *string
+	Stir_default_attest      *string
+	Stir_publickey_path      *string
+	Stir_privatekey_path     *string
 }
 
 // FreeSWITCHAgent config section
