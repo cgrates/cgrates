@@ -20,6 +20,7 @@ package config
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -199,13 +200,14 @@ func (fc *FCTemplate) AsMapInterface() map[string]interface{} {
 	for i, item := range fc.Value {
 		values[i] = item.Rules
 	}
+	asInitial := strings.Join(values, "")
 
 	return map[string]interface{}{
 		utils.TagCfg:              fc.Tag,
 		utils.TypeCf:              fc.Type,
 		utils.PathCfg:             fc.Path,
 		utils.FiltersCfg:          fc.Filters,
-		utils.ValueCfg:            values,
+		utils.ValueCfg:            asInitial,
 		utils.WidthCfg:            fc.Width,
 		utils.StripCfg:            fc.Strip,
 		utils.PaddingCfg:          fc.Padding,

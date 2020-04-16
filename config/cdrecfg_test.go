@@ -137,3 +137,69 @@ func TestCdreCfgloadFromJsonCfg(t *testing.T) {
 		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(lstcfg))
 	}
 }
+
+func testCdre(t *testing.T) {
+	var cdre CdreCfg
+	cfgJSONStr := `{
+		"cdre": {												
+		"*default": {
+			"export_format": "*file_csv",					
+			"export_path": "/var/spool/cgrates/cdre",		
+			"filters" :[],									
+			"tenant": "",									
+			"synchronous": false,							
+			"attempts": 1,									
+			"field_separator": ",",							
+			"attributes_context": "",						
+			"fields": [										
+				{"path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"},
+			],
+		},
+	},
+}`
+
+	eMap := map[string]interface{}{
+		"export_format":      "*file_csv",
+		"export_path":        "/var/spool/cgrates/cdre",
+		"filters":            []string{},
+		"tenant":             "",
+		"synchronous":        false,
+		"attempts":           1,
+		"field_separator":    ",",
+		"attributes_context": "",
+		"fields": []map[string]interface{}{
+			{
+				"attribute_id":         "",
+				"blocker":              false,
+				"break_on_success":     false,
+				"cost_shift_digits":    0,
+				"filters":              nil,
+				"layout":               "2006-01-02T15:04:05Z07:00",
+				"mandatory":            false,
+				"mask_destinationd_id": "",
+				"mask_length":          0,
+				"new_branch":           false,
+				"padding":              "",
+				"path":                 "*exp.CGRID",
+				"rounding_decimals":    nil,
+				"strip":                "",
+				"tag":                  "*exp.CGRID",
+				"timezone":             "",
+				"type":                 "*variable",
+				"value":                "~*req.CGRID",
+				"width":                0,
+			},
+		},
+	}
+
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+		t.Error(err)
+	} else if cdreCfg, err := jsnCfg.CdreJsonCfgs(); err != nil {
+		t.Error(err)
+	} else if err = cdre.loadFromJsonCfg(cdreCfg["*default"], utils.EmptyString); err != nil {
+		t.Error(err)
+	} else if rcv := cdre.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
+		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	}
+
+}

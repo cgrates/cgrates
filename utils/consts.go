@@ -1880,11 +1880,13 @@ const (
 
 	DefaultRatioCfg   = "default_ratio"
 	ReadersCfg        = "readers"
-	PoolSize          = "PoolSize"
-	Conns             = "Conns"
+	PoolSize          = "poolSize"
+	Conns             = "conns"
 	FilenameCfg       = "file_name"
-	RequestPayloadCfg = "Request_payload"
-	ReplyPayloadCfg   = "Reply_payload"
+	RequestPayloadCfg = "request_payload"
+	ReplyPayloadCfg   = "reply_payload"
+	TransportCfg      = "transport"
+	StrategyCfg       = "strategy"
 )
 
 // FC Template
