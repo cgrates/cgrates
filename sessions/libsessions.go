@@ -20,7 +20,6 @@ package sessions
 
 import (
 	"errors"
-	"fmt"
 	"math/rand"
 	"strings"
 	"time"
@@ -121,13 +120,13 @@ func NewProcessedIdentity(identity string) (pi *ProcessedStirIdentity, err error
 	hdrtoken := strings.Split(utils.RemoveWhiteSpaces(identity), utils.INFIELD_SEP)
 
 	if len(hdrtoken) == 1 {
-		err = fmt.Errorf("missing parts of the message header")
+		err = errors.New("missing parts of the message header")
 		return
 	}
 	pi.Tokens = hdrtoken[1:]
 	btoken := strings.Split(hdrtoken[0], utils.NestingSep)
 	if len(btoken) != 3 {
-		err = fmt.Errorf("wrong header")
+		err = errors.New("wrong header format")
 		return
 	}
 	pi.SigningStr = btoken[0] + utils.NestingSep + btoken[1]
@@ -151,15 +150,16 @@ func (pi *ProcessedStirIdentity) VerifyHeader() (isValid bool) {
 			continue
 		}
 		switch ptoken[0] {
-		case "alg":
-			if ptoken[1] != "ES256" {
+		case utils.STIRAlgField:
+			if ptoken[1] != utils.STIRAlg {
 				return false
 			}
-		case "ppt":
-			if ptoken[1] != "shaken" && ptoken[1] != "\"shaken\"" {
+		case utils.STIRPptField:
+			if ptoken[1] != utils.STIRPpt &&
+				ptoken[1] != "\""+utils.STIRPpt+"\"" {
 				return false
 			}
-		case "info":
+		case utils.STIRInfoField:
 			lenParamInfo := len(ptoken[1])
 			if lenParamInfo <= 2 {
 				return false
@@ -171,9 +171,9 @@ func (pi *ProcessedStirIdentity) VerifyHeader() (isValid bool) {
 		}
 	}
 
-	return pi.Header.Alg == "ES256" &&
-		pi.Header.Ppt == "shaken" &&
-		pi.Header.Typ == "passport" &&
+	return pi.Header.Alg == utils.STIRAlg &&
+		pi.Header.Ppt == utils.STIRPpt &&
+		pi.Header.Typ == utils.STIRTyp &&
 		pi.Header.X5u == x5u
 }
 
@@ -182,7 +182,6 @@ func (pi *ProcessedStirIdentity) VerifySignature(timeoutVal time.Duration) (err 
 	var pubkey interface{}
 	var ok bool
 	if pubkey, ok = engine.Cache.Get(utils.CacheSTIR, pi.Header.X5u); !ok {
-		fmt.Printf("%q\n", pi.Header.X5u)
 		if pubkey, err = utils.NewECDSAPubKey(pi.Header.X5u, timeoutVal); err != nil {
 			engine.Cache.Set(utils.CacheSTIR, pi.Header.X5u, nil,
 				nil, false, utils.NonTransactional)
@@ -255,7 +254,7 @@ func NewIdentity(header *utils.PASSporTHeader, payload *utils.PASSporTPayload, p
 		return
 	}
 	identity += utils.NestingSep + signature
-	identity += ";info=<" + header.X5u + ">;>alg=ES256;ppt=shaken"
+	identity += utils.STIRExtraInfoPrefix + header.X5u + utils.STIRExtraInfoSuffix
 	return
 }
 

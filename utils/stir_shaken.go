@@ -26,9 +26,9 @@ import (
 // extension shaken, ES256 algorithm and the given x5u
 func NewPASSporTHeader(x5uVal string) *PASSporTHeader {
 	return &PASSporTHeader{
-		Alg: "ES256",
-		Ppt: "shaken",
-		Typ: "passport",
+		Alg: STIRAlg,
+		Ppt: STIRPpt,
+		Typ: STIRTyp,
 		X5u: x5uVal,
 	}
 }
@@ -88,5 +88,3 @@ type PASSporTPayload struct {
 	Orig   PASSporTOriginsIdentity      `json:"orig"`   // the originator identity
 	OrigID string                       `json:"origid"` // is an opaque unique identifier representing an element on the path of a given SIP request. Not used for verification
 }
-
-// atestare cu set cu `,` si support pt `*any`

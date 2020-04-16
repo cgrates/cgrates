@@ -20,6 +20,7 @@ package config
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -73,31 +74,33 @@ func (fs *FsConnCfg) AsMapInterface() map[string]interface{} {
 }
 
 type SessionSCfg struct {
-	Enabled             bool
-	ListenBijson        string
-	ChargerSConns       []string
-	RALsConns           []string
-	ResSConns           []string
-	ThreshSConns        []string
-	StatSConns          []string
-	SupplSConns         []string
-	AttrSConns          []string
-	CDRsConns           []string
-	ReplicationConns    []string
-	DebitInterval       time.Duration
-	StoreSCosts         bool
-	MinCallDuration     time.Duration
-	MaxCallDuration     time.Duration
-	SessionTTL          time.Duration
-	SessionTTLMaxDelay  *time.Duration
-	SessionTTLLastUsed  *time.Duration
-	SessionTTLUsage     *time.Duration
-	SessionIndexes      utils.StringMap
-	ClientProtocol      float64
-	ChannelSyncInterval time.Duration
-	TerminateAttempts   int
-	AlterableFields     *utils.StringSet
-	MinDurLowBalance    time.Duration
+	Enabled                bool
+	ListenBijson           string
+	ChargerSConns          []string
+	RALsConns              []string
+	ResSConns              []string
+	ThreshSConns           []string
+	StatSConns             []string
+	SupplSConns            []string
+	AttrSConns             []string
+	CDRsConns              []string
+	ReplicationConns       []string
+	DebitInterval          time.Duration
+	StoreSCosts            bool
+	MinCallDuration        time.Duration
+	MaxCallDuration        time.Duration
+	SessionTTL             time.Duration
+	SessionTTLMaxDelay     *time.Duration
+	SessionTTLLastUsed     *time.Duration
+	SessionTTLUsage        *time.Duration
+	SessionIndexes         utils.StringMap
+	ClientProtocol         float64
+	ChannelSyncInterval    time.Duration
+	TerminateAttempts      int
+	AlterableFields        *utils.StringSet
+	MinDurLowBalance       time.Duration
+	STIRAttest             *utils.StringSet
+	STIRPayloadMaxduration time.Duration
 }
 
 func (scfg *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) (err error) {
@@ -274,37 +277,47 @@ func (scfg *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) (err error) {
 			return err
 		}
 	}
+	if jsnCfg.Stir_attest != nil {
+		scfg.STIRAttest = utils.NewStringSet(strings.Split(*jsnCfg.Stir_attest, utils.NestingSep))
+	}
+	if jsnCfg.Stir_payload_maxduration != nil {
+		if scfg.STIRPayloadMaxduration, err = utils.ParseDurationWithNanosecs(*jsnCfg.Stir_payload_maxduration); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
 func (scfg *SessionSCfg) AsMapInterface() map[string]interface{} {
 
 	return map[string]interface{}{
-		utils.EnabledCfg:             scfg.Enabled,
-		utils.ListenBijsonCfg:        scfg.ListenBijson,
-		utils.ChargerSConnsCfg:       scfg.ChargerSConns,
-		utils.RALsConnsCfg:           scfg.RALsConns,
-		utils.ResSConnsCfg:           scfg.ResSConns,
-		utils.ThreshSConnsCfg:        scfg.ThreshSConns,
-		utils.StatSConnsCfg:          scfg.StatSConns,
-		utils.SupplSConnsCfg:         scfg.SupplSConns,
-		utils.AttrSConnsCfg:          scfg.AttrSConns,
-		utils.CDRsConnsCfg:           scfg.CDRsConns,
-		utils.ReplicationConnsCfg:    scfg.ReplicationConns,
-		utils.DebitIntervalCfg:       scfg.DebitInterval,
-		utils.StoreSCostsCfg:         scfg.StoreSCosts,
-		utils.MinCallDurationCfg:     scfg.MinCallDuration,
-		utils.MaxCallDurationCfg:     scfg.MaxCallDuration,
-		utils.SessionTTLCfg:          scfg.SessionTTL,
-		utils.SessionTTLMaxDelayCfg:  scfg.SessionTTLMaxDelay,
-		utils.SessionTTLLastUsedCfg:  scfg.SessionTTLLastUsed,
-		utils.SessionTTLUsageCfg:     scfg.SessionTTLUsage,
-		utils.SessionIndexesCfg:      scfg.SessionIndexes.GetSlice(),
-		utils.ClientProtocolCfg:      scfg.ClientProtocol,
-		utils.ChannelSyncIntervalCfg: scfg.ChannelSyncInterval,
-		utils.TerminateAttemptsCfg:   scfg.TerminateAttempts,
-		utils.AlterableFieldsCfg:     scfg.AlterableFields.AsSlice(),
-		utils.MinDurLowBalanceCfg:    scfg.MinDurLowBalance,
+		utils.EnabledCfg:                scfg.Enabled,
+		utils.ListenBijsonCfg:           scfg.ListenBijson,
+		utils.ChargerSConnsCfg:          scfg.ChargerSConns,
+		utils.RALsConnsCfg:              scfg.RALsConns,
+		utils.ResSConnsCfg:              scfg.ResSConns,
+		utils.ThreshSConnsCfg:           scfg.ThreshSConns,
+		utils.StatSConnsCfg:             scfg.StatSConns,
+		utils.SupplSConnsCfg:            scfg.SupplSConns,
+		utils.AttrSConnsCfg:             scfg.AttrSConns,
+		utils.CDRsConnsCfg:              scfg.CDRsConns,
+		utils.ReplicationConnsCfg:       scfg.ReplicationConns,
+		utils.DebitIntervalCfg:          scfg.DebitInterval,
+		utils.StoreSCostsCfg:            scfg.StoreSCosts,
+		utils.MinCallDurationCfg:        scfg.MinCallDuration,
+		utils.MaxCallDurationCfg:        scfg.MaxCallDuration,
+		utils.SessionTTLCfg:             scfg.SessionTTL,
+		utils.SessionTTLMaxDelayCfg:     scfg.SessionTTLMaxDelay,
+		utils.SessionTTLLastUsedCfg:     scfg.SessionTTLLastUsed,
+		utils.SessionTTLUsageCfg:        scfg.SessionTTLUsage,
+		utils.SessionIndexesCfg:         scfg.SessionIndexes.GetSlice(),
+		utils.ClientProtocolCfg:         scfg.ClientProtocol,
+		utils.ChannelSyncIntervalCfg:    scfg.ChannelSyncInterval,
+		utils.TerminateAttemptsCfg:      scfg.TerminateAttempts,
+		utils.AlterableFieldsCfg:        scfg.AlterableFields.AsSlice(),
+		utils.MinDurLowBalanceCfg:       scfg.MinDurLowBalance,
+		utils.STIRAtestCfg:              strings.Join(scfg.STIRAttest.AsSlice(), utils.NestingSep),
+		utils.STIRPayloadMaxdurationCfg: scfg.STIRPayloadMaxduration,
 	}
 }
 

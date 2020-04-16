@@ -669,6 +669,7 @@ const (
 	MetaRelease               = "*release"
 	MetaAllocate              = "*allocate"
 	MetaAuthorize             = "*authorize"
+	MetaSTIRAuthorize         = "*stir_authorize"
 	MetaInit                  = "*init"
 	MetaRatingPlanCost        = "*rating_plan_cost"
 	RatingPlanIDs             = "RatingPlanIDs"
@@ -1765,27 +1766,29 @@ const (
 
 // SessionSCfg
 const (
-	ListenBijsonCfg        = "listen_bijson"
-	RALsConnsCfg           = "rals_conns"
-	ResSConnsCfg           = "resources_conns"
-	ThreshSConnsCfg        = "thresholds_conns"
-	SupplSConnsCfg         = "suppliers_conns"
-	AttrSConnsCfg          = "attributes_conns"
-	ReplicationConnsCfg    = "replication_conns"
-	DebitIntervalCfg       = "debit_interval"
-	StoreSCostsCfg         = "store_session_costs"
-	MinCallDurationCfg     = "min_call_duration"
-	MaxCallDurationCfg     = "max_call_duration"
-	SessionTTLCfg          = "session_ttl"
-	SessionTTLMaxDelayCfg  = "session_ttl_max_delay"
-	SessionTTLLastUsedCfg  = "session_ttl_last_used"
-	SessionTTLUsageCfg     = "session_ttl_usage"
-	SessionIndexesCfg      = "session_indexes"
-	ClientProtocolCfg      = "client_protocol"
-	ChannelSyncIntervalCfg = "channel_sync_interval"
-	TerminateAttemptsCfg   = "terminate_attempts"
-	AlterableFieldsCfg     = "alterable_fields"
-	MinDurLowBalanceCfg    = "min_dur_low_balance"
+	ListenBijsonCfg           = "listen_bijson"
+	RALsConnsCfg              = "rals_conns"
+	ResSConnsCfg              = "resources_conns"
+	ThreshSConnsCfg           = "thresholds_conns"
+	SupplSConnsCfg            = "suppliers_conns"
+	AttrSConnsCfg             = "attributes_conns"
+	ReplicationConnsCfg       = "replication_conns"
+	DebitIntervalCfg          = "debit_interval"
+	StoreSCostsCfg            = "store_session_costs"
+	MinCallDurationCfg        = "min_call_duration"
+	MaxCallDurationCfg        = "max_call_duration"
+	SessionTTLCfg             = "session_ttl"
+	SessionTTLMaxDelayCfg     = "session_ttl_max_delay"
+	SessionTTLLastUsedCfg     = "session_ttl_last_used"
+	SessionTTLUsageCfg        = "session_ttl_usage"
+	SessionIndexesCfg         = "session_indexes"
+	ClientProtocolCfg         = "client_protocol"
+	ChannelSyncIntervalCfg    = "channel_sync_interval"
+	TerminateAttemptsCfg      = "terminate_attempts"
+	AlterableFieldsCfg        = "alterable_fields"
+	MinDurLowBalanceCfg       = "min_dur_low_balance"
+	STIRAtestCfg              = "stir_attest"
+	STIRPayloadMaxdurationCfg = "stir_payload_maxduration"
 )
 
 // FsAgentCfg
@@ -1963,6 +1966,28 @@ const (
 	PartialCacheExpiryActionCfg = "soome"
 	FieldsCfg                   = "fields"
 	CacheDumpFieldsCfg          = "cache_dump_fields"
+)
+
+// STIR/SHAKEN
+const (
+	STIRAlg = "ES256"
+	STIRPpt = "shaken"
+	STIRTyp = "passport"
+
+	STIRAlgField  = "alg"
+	STIRPptField  = "ppt"
+	STIRInfoField = "info"
+
+	STIRATest              = "STIRATest"
+	STIRPayloadMaxDuration = "STIRPayloadMaxDuration"
+	STIRIdentity           = "STIRIdentity"
+	STIROriginatorTn       = "STIROriginatorTn"
+	STIROriginatorURI      = "STIROriginatorURI"
+	STIRDestinationTn      = "STIRDestinationTn"
+	STIRDestinationURI     = "STIRDestinationURI"
+
+	STIRExtraInfoPrefix = ";info=<"
+	STIRExtraInfoSuffix = ">;alg=ES256;ppt=shaken"
 )
 
 // Strip/Padding strategy

@@ -261,3 +261,8 @@ func ErrPathNotReachable(path string) error {
 func ErrNotConvertibleTF(from, to string) error {
 	return fmt.Errorf("%s : from: %s to:%s", ErrNotConvertibleNoCaps.Error(), from, to)
 }
+
+// NewSTIRError returns a error with a *stir_authorize prefix
+func NewSTIRError(reason string) error {
+	return fmt.Errorf("<%s> %s", MetaSTIRAuthorize, reason)
+}

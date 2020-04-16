@@ -2956,19 +2956,22 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 	if argsFlagsWithParams, err = utils.FlagsWithParamsFromSlice(args.Flags); err != nil {
 		return
 	}
-	if argsFlagsWithParams.HasKey("*stir_authorize") {
-		var attest *utils.StringSet
-		if uattest := ev.GetStringIgnoreErrors("STIRATest"); uattest != utils.EmptyString {
+	if argsFlagsWithParams.HasKey(utils.MetaSTIRAuthorize) {
+		attest := sS.cgrCfg.SessionSCfg().STIRAttest
+		if uattest := ev.GetStringIgnoreErrors(utils.STIRATest); uattest != utils.EmptyString {
 			attest = utils.NewStringSet(strings.Split(uattest, utils.INFIELD_SEP))
 		}
-		if err = authStirShaken(ev.GetStringIgnoreErrors("STIRIdentity"),
-			utils.FirstNonEmpty(ev.GetStringIgnoreErrors("STIROriginatorTn"), ev.GetStringIgnoreErrors(utils.Account)),
-			ev.GetStringIgnoreErrors("STIROriginatorURI"),
-			utils.FirstNonEmpty(ev.GetStringIgnoreErrors("STIRDestinationTn"), ev.GetStringIgnoreErrors(utils.Destination)),
-			ev.GetStringIgnoreErrors("STIRDestinationURI"),
-			attest,
-			-1); err != nil { // configurabil stir_payload_maxduration //nonempty STIRPayloadMaxDuration
-			return
+		var stirMaxDur time.Duration
+		if stirMaxDur, err = ev.GetDuration(utils.STIRPayloadMaxDuration); err != nil {
+			stirMaxDur = sS.cgrCfg.SessionSCfg().STIRPayloadMaxduration
+		}
+		if err = authStirShaken(ev.GetStringIgnoreErrors(utils.STIRIdentity),
+			utils.FirstNonEmpty(ev.GetStringIgnoreErrors(utils.STIROriginatorTn), ev.GetStringIgnoreErrors(utils.Account)),
+			ev.GetStringIgnoreErrors(utils.STIROriginatorURI),
+			utils.FirstNonEmpty(ev.GetStringIgnoreErrors(utils.STIRDestinationTn), ev.GetStringIgnoreErrors(utils.Destination)),
+			ev.GetStringIgnoreErrors(utils.STIRDestinationURI),
+			attest, stirMaxDur); err != nil {
+			return utils.NewSTIRError(err.Error())
 		}
 	}
 	// check for *attribute

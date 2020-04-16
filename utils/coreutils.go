@@ -475,10 +475,7 @@ func Clone(a, b interface{}) error {
 	if err := enc.Encode(a); err != nil {
 		return err
 	}
-	if err := dec.Decode(b); err != nil {
-		return err
-	}
-	return nil
+	return dec.Decode(b)
 }
 
 // Used as generic function logic for various fields
