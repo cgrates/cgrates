@@ -1,7 +1,7 @@
-%global version 0.9.1
-%global git_commit c284710623aef128f97369833d3fa4cb29943613
+%global version 0.10.1~dev
+%global git_commit %(echo $gitLastCommit)
+%global releaseTag %(echo $rpmTag)
 
-%global git_short_commit %(c=%{git_commit}; echo ${c:0:7})
 %define debug_package  %{nil}
 %global _logdir	       /var/log/%name
 %global _spooldir      /var/spool/%name
@@ -9,7 +9,7 @@
 
 Name:           cgrates
 Version:        %{version}
-Release:        0.1.rc8.20180816git%{git_short_commit}%{dist}
+Release:        %{releaseTag}
 Summary:        Carrier Grade Real-time Charging System
 License:        GPLv3
 URL:            https://github.com/cgrates/cgrates
@@ -68,7 +68,6 @@ fi
 %endif
 
 %build
-export GO15VENDOREXPERIMENT=1
 export GOPATH=$RPM_BUILD_DIR/%{name}-%{version}
 cd $RPM_BUILD_DIR/%{name}-%{version}/src/github.com/cgrates/cgrates
 ./build.sh
@@ -83,12 +82,8 @@ install -D -m 0755 -p bin/cgr-engine $RPM_BUILD_ROOT%{_bindir}/cgr-engine
 install -D -m 0755 -p bin/cgr-loader $RPM_BUILD_ROOT%{_bindir}/cgr-loader
 install -D -m 0755 -p bin/cgr-tester $RPM_BUILD_ROOT%{_bindir}/cgr-tester
 install -D -m 0755 -p bin/cgr-migrator $RPM_BUILD_ROOT%{_bindir}/cgr-migrator
-mkdir -p $RPM_BUILD_ROOT%{_logdir}/cdrc/in
-mkdir -p $RPM_BUILD_ROOT%{_logdir}/cdrc/out
 mkdir -p $RPM_BUILD_ROOT%{_logdir}/cdre/csv
 mkdir -p $RPM_BUILD_ROOT%{_logdir}/cdre/fwv
-mkdir -p $RPM_BUILD_ROOT%{_spooldir}/cdrc/in
-mkdir -p $RPM_BUILD_ROOT%{_spooldir}/cdrc/out
 mkdir -p $RPM_BUILD_ROOT%{_spooldir}/cdre/csv
 mkdir -p $RPM_BUILD_ROOT%{_spooldir}/cdre/fwv
 mkdir -p $RPM_BUILD_ROOT%{_spooldir}/tpe
@@ -118,13 +113,5 @@ install -D -m 0644 -p src/github.com/cgrates/cgrates/packages/redhat_fedora/%{na
 %endif
 
 %clean
-rm -rf $RPM_BUILD_DIR/%{name}-%{version}
-rm -rf $RPM_BUILD_ROOT
-
-%changelog
-* Sun Aug 19 2018 Sergei Lavrov <ccppprogrammer@gmail.com> 0.9.1-0.1.rc8.20180816gitc284710
-- Update version according to Guidelines for Versioning Fedora Packages
-- Add cgr-migrator
-
-* Mon Sep 28 2015 Nick Altmann <nick.altmann@gmail.com> 0.9.1rc7-1
-- Initial rhel/fedora specification
+sudo rm -rf $RPM_BUILD_DIR/%{name}-%{version}
+sudo rm -rf $RPM_BUILD_ROOT

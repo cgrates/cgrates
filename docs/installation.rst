@@ -114,22 +114,23 @@ As a side note on http://pkg.cgrates.org/rpm/ one can find an entire archive of 
 Using source
 ------------
 
-For developing CGRateS and switching between its versions, we are using the **go mods feature** introduced in go 1.14.
+For developing CGRateS and switching between its versions, we are using the **go mods feature** introduced in go 1.13.
 
+.. _InstallGO:
 
 Install GO Lang
 ^^^^^^^^^^^^^^^
 
 First we have to setup the GO Lang to our OS. Feel free to download 
 the latest GO binary release from https://golang.org/dl/
-In this Tutorial we are going to install Go 1.13
+In this Tutorial we are going to install Go 1.14.2
 
 ::
 
    sudo rm -rf /usr/local/go
    cd /tmp
    wget https://dl.google.com/go/go1.14.2.linux-amd64.tar.gz
-   sudo tar -xvf go1.14.2.linux-amd64.tar.gz -C /usr/loca~l/
+   sudo tar -xvf go1.14.2.linux-amd64.tar.gz -C /usr/local/
    export PATH=$PATH:/usr/local/go/bin:$HOME/go/bin
 
 
@@ -174,6 +175,38 @@ Install Custom Debian / Ubuntu Package
 
    cd $HOME/go/src/github.com/cgrates
    sudo dpkg -i cgrates_*.deb
+
+
+Generate RPM Packages from Source
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Prerequisites
+ * :ref:`Install Golang <InstallGO>`
+ * Git
+
+   ::
+
+    sudo apt-get install git
+
+
+ * RPM
+
+   ::
+
+    sudo apt-get install rpm
+
+Execute the following commands
+
+::
+
+    cd $HOME/go/src/github.com/cgrates/cgrates
+    export gitLastCommit=$(git rev-parse HEAD)
+    export rpmTag=$(git log -1 --format=%ci | date +%Y%m%d%H%M%S)+$(git rev-parse --short HEAD)
+    mkdir -p $HOME/cgr_build/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
+    wget -P $HOME/cgr_build/SOURCES https://github.com/cgrates/cgrates/archive/$gitLastCommit.tar.gz
+    cp $HOME/go/src/github.com/cgrates/cgrates/packages/redhat_fedora/cgrates.spec $HOME/cgr_build/SPECS
+    cd $HOME/cgr_build
+    rpmbuild -bb --define "_topdir $HOME/cgr_build" SPECS/cgrates.spec
 
 
 .. _post-install:
