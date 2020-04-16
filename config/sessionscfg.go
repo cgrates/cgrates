@@ -99,8 +99,11 @@ type SessionSCfg struct {
 	TerminateAttempts      int
 	AlterableFields        *utils.StringSet
 	MinDurLowBalance       time.Duration
-	STIRAttest             *utils.StringSet
+	STIRAllowedAttest      *utils.StringSet
 	STIRPayloadMaxduration time.Duration
+	STIRDefaultAttest      string
+	STIRPublicKeyPath      string
+	STIRPrivateKeyPath     string
 }
 
 func (scfg *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) (err error) {
@@ -277,13 +280,22 @@ func (scfg *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) (err error) {
 			return err
 		}
 	}
-	if jsnCfg.Stir_attest != nil {
-		scfg.STIRAttest = utils.NewStringSet(strings.Split(*jsnCfg.Stir_attest, utils.NestingSep))
+	if jsnCfg.Stir_allowed_attest != nil {
+		scfg.STIRAllowedAttest = utils.NewStringSet(*jsnCfg.Stir_allowed_attest)
 	}
 	if jsnCfg.Stir_payload_maxduration != nil {
 		if scfg.STIRPayloadMaxduration, err = utils.ParseDurationWithNanosecs(*jsnCfg.Stir_payload_maxduration); err != nil {
 			return err
 		}
+	}
+	if jsnCfg.Stir_default_attest != nil {
+		scfg.STIRDefaultAttest = *jsnCfg.Stir_default_attest
+	}
+	if jsnCfg.Stir_publickey_path != nil {
+		scfg.STIRPublicKeyPath = *jsnCfg.Stir_publickey_path
+	}
+	if jsnCfg.Stir_privatekey_path != nil {
+		scfg.STIRPrivateKeyPath = *jsnCfg.Stir_privatekey_path
 	}
 	return nil
 }
@@ -316,7 +328,7 @@ func (scfg *SessionSCfg) AsMapInterface() map[string]interface{} {
 		utils.TerminateAttemptsCfg:      scfg.TerminateAttempts,
 		utils.AlterableFieldsCfg:        scfg.AlterableFields.AsSlice(),
 		utils.MinDurLowBalanceCfg:       scfg.MinDurLowBalance,
-		utils.STIRAtestCfg:              strings.Join(scfg.STIRAttest.AsSlice(), utils.NestingSep),
+		utils.STIRAtestCfg:              strings.Join(scfg.STIRAllowedAttest.AsSlice(), utils.NestingSep),
 		utils.STIRPayloadMaxdurationCfg: scfg.STIRPayloadMaxduration,
 	}
 }

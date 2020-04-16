@@ -621,8 +621,9 @@ func TestCgrCfgJSONDefaultsSMGenericCfg(t *testing.T) {
 		ChannelSyncInterval:    0,
 		TerminateAttempts:      5,
 		AlterableFields:        utils.NewStringSet([]string{}),
-		STIRAttest:             utils.NewStringSet([]string{utils.META_ANY}),
+		STIRAllowedAttest:      utils.NewStringSet([]string{utils.META_ANY}),
 		STIRPayloadMaxduration: -1,
+		STIRDefaultAttest:      "A",
 	}
 	if !reflect.DeepEqual(eSessionSCfg, cgrCfg.sessionSCfg) {
 		t.Errorf("expecting: %s, received: %s",

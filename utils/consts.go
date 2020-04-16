@@ -669,7 +669,8 @@ const (
 	MetaRelease               = "*release"
 	MetaAllocate              = "*allocate"
 	MetaAuthorize             = "*authorize"
-	MetaSTIRAuthorize         = "*stir_authorize"
+	MetaSTIRAuthenticate      = "*stir_authenticate"
+	MetaSTIRInitiate          = "*stir_initiate"
 	MetaInit                  = "*init"
 	MetaRatingPlanCost        = "*rating_plan_cost"
 	RatingPlanIDs             = "RatingPlanIDs"
@@ -1985,6 +1986,8 @@ const (
 	STIROriginatorURI      = "STIROriginatorURI"
 	STIRDestinationTn      = "STIRDestinationTn"
 	STIRDestinationURI     = "STIRDestinationURI"
+	STIRPublicKeyPath      = "STIRPublicKeyPath"
+	STIRPrivateKeyPath     = "STIRPrivateKeyPath"
 
 	STIRExtraInfoPrefix = ";info=<"
 	STIRExtraInfoSuffix = ">;alg=ES256;ppt=shaken"

@@ -2874,6 +2874,7 @@ type V1ProcessEventReply struct {
 	Suppliers       *engine.SortedSuppliers
 	ThresholdIDs    *[]string
 	StatQueueIDs    *[]string
+	STIRIdentity    string
 }
 
 // AsNavigableMap is part of engine.NavigableMapper interface
@@ -2956,8 +2957,8 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 	if argsFlagsWithParams, err = utils.FlagsWithParamsFromSlice(args.Flags); err != nil {
 		return
 	}
-	if argsFlagsWithParams.HasKey(utils.MetaSTIRAuthorize) {
-		attest := sS.cgrCfg.SessionSCfg().STIRAttest
+	if argsFlagsWithParams.HasKey(utils.MetaSTIRAuthenticate) {
+		attest := sS.cgrCfg.SessionSCfg().STIRAllowedAttest
 		if uattest := ev.GetStringIgnoreErrors(utils.STIRATest); uattest != utils.EmptyString {
 			attest = utils.NewStringSet(strings.Split(uattest, utils.INFIELD_SEP))
 		}
@@ -2971,6 +2972,34 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 			utils.FirstNonEmpty(ev.GetStringIgnoreErrors(utils.STIRDestinationTn), ev.GetStringIgnoreErrors(utils.Destination)),
 			ev.GetStringIgnoreErrors(utils.STIRDestinationURI),
 			attest, stirMaxDur); err != nil {
+			return utils.NewSTIRError(err.Error())
+		}
+	} else if argsFlagsWithParams.HasKey(utils.MetaSTIRInitiate) {
+		attest := sS.cgrCfg.SessionSCfg().STIRDefaultAttest
+		if uattest := ev.GetStringIgnoreErrors(utils.STIRATest); uattest != utils.EmptyString {
+			attest = uattest
+		}
+
+		destURI := ev.GetStringIgnoreErrors(utils.STIRDestinationTn)
+		destTn := utils.FirstNonEmpty(ev.GetStringIgnoreErrors(utils.STIRDestinationTn), ev.GetStringIgnoreErrors(utils.Destination))
+
+		dest := utils.NewPASSporTDestinationsIdentity(strings.Split(destTn, utils.INFIELD_SEP), strings.Split(destURI, utils.INFIELD_SEP))
+
+		var orig *utils.PASSporTOriginsIdentity
+		if origURI := ev.GetStringIgnoreErrors(utils.STIROriginatorURI); origURI != utils.EmptyString {
+			orig = utils.NewPASSporTOriginsIdentity(utils.EmptyString, origURI)
+		} else {
+			orig = utils.NewPASSporTOriginsIdentity(
+				utils.FirstNonEmpty(ev.GetStringIgnoreErrors(utils.STIROriginatorTn),
+					ev.GetStringIgnoreErrors(utils.Account)),
+				utils.EmptyString)
+		}
+		pubkeyPath := utils.FirstNonEmpty(ev.GetStringIgnoreErrors(utils.STIRPublicKeyPath), sS.cgrCfg.SessionSCfg().STIRPublicKeyPath)
+		prvkeyPath := utils.FirstNonEmpty(ev.GetStringIgnoreErrors(utils.STIRPrivateKeyPath), sS.cgrCfg.SessionSCfg().STIRPrivateKeyPath)
+
+		payload := utils.NewPASSporTPayload(attest, args.CGREvent.ID, *dest, *orig)
+		header := utils.NewPASSporTHeader(pubkeyPath)
+		if rply.STIRIdentity, err = NewIdentity(header, payload, prvkeyPath, sS.cgrCfg.GeneralCfg().ReplyTimeout); err != nil {
 			return utils.NewSTIRError(err.Error())
 		}
 	}

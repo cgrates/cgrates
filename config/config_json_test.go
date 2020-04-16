@@ -694,8 +694,11 @@ func TestSmgJsonCfg(t *testing.T) {
 		Channel_sync_interval:    utils.StringPointer("0"),
 		Terminate_attempts:       utils.IntPointer(5),
 		Alterable_fields:         &[]string{},
-		Stir_attest:              utils.StringPointer(utils.META_ANY),
+		Stir_allowed_attest:      &[]string{utils.META_ANY},
 		Stir_payload_maxduration: utils.StringPointer("-1"),
+		Stir_default_attest:      utils.StringPointer("A"),
+		Stir_privatekey_path:     utils.StringPointer(""),
+		Stir_publickey_path:      utils.StringPointer(""),
 	}
 	if cfg, err := dfCgrJsonCfg.SessionSJsonCfg(); err != nil {
 		t.Error(err)
