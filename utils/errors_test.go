@@ -230,3 +230,17 @@ func TestErrNotConvertibleTF(t *testing.T) {
 		t.Errorf("Expecting: not convertible : from: test_type1 to:test_type2, received: %+v", rcv)
 	}
 }
+
+func TestNewErrChargerS(t *testing.T) {
+	expected := `CHARGERS_ERROR:NOT_FOUND`
+	if rcv := NewErrChargerS(ErrNotFound); rcv.Error() != expected {
+		t.Errorf("Expecting: %q, received: %q", expected, rcv.Error())
+	}
+}
+
+func TestNewSTIRError(t *testing.T) {
+	expected := `*stir_authorize: wrong header`
+	if rcv := NewSTIRError("wrong header"); rcv.Error() != expected {
+		t.Errorf("Expecting: %q, received: %q", expected, rcv.Error())
+	}
+}

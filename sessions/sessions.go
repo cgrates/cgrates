@@ -2965,7 +2965,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 		if stirMaxDur, err = ev.GetDuration(utils.STIRPayloadMaxDuration); err != nil {
 			stirMaxDur = sS.cgrCfg.SessionSCfg().STIRPayloadMaxduration
 		}
-		if err = authStirShaken(ev.GetStringIgnoreErrors(utils.STIRIdentity),
+		if err = AuthStirShaken(ev.GetStringIgnoreErrors(utils.STIRIdentity),
 			utils.FirstNonEmpty(ev.GetStringIgnoreErrors(utils.STIROriginatorTn), ev.GetStringIgnoreErrors(utils.Account)),
 			ev.GetStringIgnoreErrors(utils.STIROriginatorURI),
 			utils.FirstNonEmpty(ev.GetStringIgnoreErrors(utils.STIRDestinationTn), ev.GetStringIgnoreErrors(utils.Destination)),

@@ -264,5 +264,5 @@ func ErrNotConvertibleTF(from, to string) error {
 
 // NewSTIRError returns a error with a *stir_authorize prefix
 func NewSTIRError(reason string) error {
-	return fmt.Errorf("<%s> %s", MetaSTIRAuthorize, reason)
+	return fmt.Errorf("%s: %s", MetaSTIRAuthorize, reason)
 }

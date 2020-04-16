@@ -47,6 +47,7 @@ var (
 		testSes2ItLoadFromFolder,
 		testSes2ItInitSession,
 		testSes2ItAsActiveSessions,
+		testSes2StirAuthorize,
 		testSes2ItStopCgrEngine,
 	}
 )
@@ -177,5 +178,43 @@ func testSes2ItAsActiveSessions(t *testing.T) {
 func testSes2ItStopCgrEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
+	}
+}
+
+func testSes2StirAuthorize(t *testing.T) {
+	args := &sessions.V1ProcessEventArgs{
+		Flags: []string{"*stir_authorize"},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testSes2StirAuthorize",
+			Event: map[string]interface{}{
+				utils.ToR:          utils.VOICE,
+				utils.OriginID:     "testSes2StirAuthorize",
+				utils.RequestType:  utils.META_PREPAID,
+				utils.Account:      "1001",
+				utils.Subject:      "ANY2CNT",
+				utils.Destination:  "1002",
+				utils.Usage:        10 * time.Minute,
+				utils.STIRIdentity: "eyJhbGciOiJFUzI1NiIsInBwdCI6InNoYWtlbiIsInR5cCI6InBhc3Nwb3J0IiwieDV1IjoiL3Vzci9zaGFyZS9jZ3JhdGVzL3N0aXIvc3Rpcl9wdWJrZXkucGVtIn0.eyJhdHRlc3QiOiJBIiwiZGVzdCI6eyJ0biI6WyIxMDAyIl19LCJpYXQiOjE1ODcwMzg4MDIsIm9yaWciOnsidG4iOiIxMDAxIn0sIm9yaWdpZCI6IjEyMzQ1NiJ9.cMEMlFnfyTu8uxfeU4RoZTamA7ifFT9Ibwrvi1_LKwL2xAU6fZ_CSIxKbtyOpNhM_sV03x7CfA_v0T4sHkifzg;info=</usr/share/cgrates/stir/stir_pubkey.pem>;ppt=shaken",
+			},
+		},
+	}
+	var rply sessions.V1ProcessEventReply
+	if err := ses2RPC.Call(utils.SessionSv1ProcessEvent,
+		args, &rply); err != nil { // no error verificated with success
+		t.Error(err)
+	}
+	// altered originator
+	args.CGREvent.Event[utils.STIROriginatorTn] = "1005"
+	if err := ses2RPC.Call(utils.SessionSv1ProcessEvent,
+		args, &rply); err == nil || err.Error() != "*stir_authorize: wrong originatorTn" {
+		t.Errorf("Expected error :%q ,receved: %v", "*stir_authorize: wrong originatorTn", err)
+	}
+
+	// altered identity
+	args.CGREvent.Event[utils.STIRIdentity] = "eyJhbGciOiJFUzI1NiIsInBwdCI6InNoYWtlbiIsInR5cCI6InBhc3Nwb3J0IiwieDV1IjoiL3Vzci9zaGFyZS9jZ3JhdGVzL3N0aXIvc3Rpcl9wdWJrZXkucGVtIn0.eyJhdHRlc3QiOiJBIiwiZGVzdCI6eyJ0biI6WyIxMDAyIl19LCJpYXQiOjE1ODcwMzg4MDIsIm9yaWciOnsidG4iOiIxMDA1In0sIm9yaWdpZCI6IjEyMzQ1NiJ9.cMEMlFnfyTu8uxfeU4RoZTamA7ifFT9Ibwrvi1_LKwL2xAU6fZ_CSIxKbtyOpNhM_sV03x7CfA_v0T4sHkifzg;info=</usr/share/cgrates/stir/stir_pubkey.pem>;ppt=shaken"
+	if err := ses2RPC.Call(utils.SessionSv1ProcessEvent,
+		args, &rply); err == nil || err.Error() != "*stir_authorize: crypto/ecdsa: verification error" {
+		t.Errorf("Expected error :%q ,receved: %v", "*stir_authorize: crypto/ecdsa: verification error", err)
 	}
 }

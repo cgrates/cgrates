@@ -30,7 +30,6 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
-	"github.com/dgrijalva/jwt-go"
 )
 
 var attrs = &engine.AttrSProcessEventReply{
@@ -2207,24 +2206,5 @@ func TestSessionSfilterSessionsCount(t *testing.T) {
 	fltrs = &utils.SessionFilter{Filters: []string{fmt.Sprintf("*string:~*req.ToR:%s;%s", utils.VOICE, utils.DATA)}}
 	if noSess := sS.filterSessionsCount(fltrs, true); noSess != 2 {
 		t.Errorf("Expected %v , received: %s", 2, utils.ToJSON(noSess))
-	}
-}
-
-func TestStirShaken(t *testing.T) {
-	pubkeyBuf := []byte(`-----BEGIN PUBLIC KEY-----
-MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAESt8sEh55Yc579vLHjFRWVQO27p4Y
-aa+jqv4dwkr/FLEcN1zC76Y/IniI65fId55hVJvN3ORuzUqYEtzD3irmsw==
------END PUBLIC KEY-----
-`)
-	pubKey, err := jwt.ParseECPublicKeyFromPEM(pubkeyBuf)
-	if err != nil {
-		t.Fatal(err)
-	}
-	engine.Cache.Set(utils.CacheSTIR, "https://www.example.org/cert.cer", pubKey,
-		nil, true, utils.NonTransactional)
-
-	if err := authStirShaken(
-		"eyJhbGciOiJFUzI1NiIsInBwdCI6InNoYWtlbiIsInR5cCI6InBhc3Nwb3J0IiwieDV1IjoiaHR0cHM6Ly93d3cuZXhhbXBsZS5vcmcvY2VydC5jZXIifQ.eyJhdHRlc3QiOiJBIiwiZGVzdCI6eyJ0biI6WyIxMDAyIl19LCJpYXQiOjE1ODcwMTk4MjIsIm9yaWciOnsidG4iOiIxMDAxIn0sIm9yaWdpZCI6IjEyMzQ1NiJ9.4ybtWmgqdkNyJLS9Iv3PuJV8ZxR7yZ_NEBhCpKCEu2WBiTchqwoqoWpI17Q_ALm38tbnpay32t95ZY_LhSgwJg;info=<https://www.example.org/cert.cer>;ppt=shaken", "1001", "", "1002", "", utils.NewStringSet([]string{utils.META_ANY}), -1); err != nil {
-		t.Fatal(err)
 	}
 }

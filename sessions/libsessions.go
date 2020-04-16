@@ -24,6 +24,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/dgrijalva/jwt-go"
@@ -205,23 +206,19 @@ func (pi *ProcessedStirIdentity) VerifyPayload(originatorTn, originatorURI, dest
 	if hdrMaxDur >= 0 && time.Now().After(time.Unix(pi.Payload.IAT, 0).Add(hdrMaxDur)) {
 		return errors.New("expired payload")
 	}
-	if originatorTn != utils.EmptyString {
-		if originatorTn != pi.Payload.Orig.Tn {
-			return errors.New("wrong originatorTn")
-		}
-	} else {
+	if originatorURI != utils.EmptyString {
 		if originatorURI != pi.Payload.Orig.URI {
 			return errors.New("wrong originatorURI")
 		}
+	} else if originatorTn != pi.Payload.Orig.Tn {
+		return errors.New("wrong originatorTn")
 	}
-	if destinationTn != utils.EmptyString {
-		if !utils.SliceHasMember(pi.Payload.Dest.Tn, destinationTn) {
-			return errors.New("wrong destinationTn")
-		}
-	} else {
+	if destinationURI != utils.EmptyString {
 		if !utils.SliceHasMember(pi.Payload.Dest.URI, destinationURI) {
 			return errors.New("wrong destinationURI")
 		}
+	} else if !utils.SliceHasMember(pi.Payload.Dest.Tn, destinationTn) {
+		return errors.New("wrong destinationTn")
 	}
 	return
 }
@@ -258,7 +255,7 @@ func NewIdentity(header *utils.PASSporTHeader, payload *utils.PASSporTPayload, p
 	return
 }
 
-func authStirShaken(identity, originatorTn, originatorURI, destinationTn, destinationURI string,
+func AuthStirShaken(identity, originatorTn, originatorURI, destinationTn, destinationURI string,
 	attest *utils.StringSet, hdrMaxDur time.Duration) (err error) {
 	var pi *ProcessedStirIdentity
 	if pi, err = NewProcessedIdentity(identity); err != nil {
@@ -267,8 +264,8 @@ func authStirShaken(identity, originatorTn, originatorURI, destinationTn, destin
 	if !pi.VerifyHeader() {
 		return errors.New("wrong header")
 	}
-	if err = pi.VerifySignature(time.Second); err != nil {
+	if err = pi.VerifySignature(config.CgrConfig().GeneralCfg().ReplyTimeout); err != nil {
 		return
 	}
-	return pi.VerifyPayload(originatorTn, originatorURI, destinationTn, destinationURI, hdrMaxDur, attest) // verificare in lista
+	return pi.VerifyPayload(originatorTn, originatorURI, destinationTn, destinationURI, hdrMaxDur, attest)
 }

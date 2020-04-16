@@ -22,6 +22,7 @@ import (
 	"crypto/ecdsa"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -31,55 +32,67 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
-// NewECDSAPrvKey creates a private key from the path
-func NewECDSAPrvKey(prvKeyPath string, timeout time.Duration) (prvKey *ecdsa.PrivateKey, err error) {
+// NewECDSAPrvKeyFromReader creates a private key from io.Reader
+func NewECDSAPrvKeyFromReader(reader io.Reader) (prvKey *ecdsa.PrivateKey, err error) {
 	var prvkeyBuf []byte
-	if prvkeyBuf, err = GetDataAtPath(prvKeyPath, timeout); err != nil {
+	if prvkeyBuf, err = ioutil.ReadAll(reader); err != nil {
 		return
 	}
 	return jwt.ParseECPrivateKeyFromPEM(prvkeyBuf)
 }
 
-// NewECDSAPubKey returns a public key from the path
-func NewECDSAPubKey(pubKeyPath string, timeout time.Duration) (pubKey *ecdsa.PublicKey, err error) {
+// NewECDSAPubKeyFromReader returns a public key from io.Reader
+func NewECDSAPubKeyFromReader(reader io.Reader) (pubKey *ecdsa.PublicKey, err error) {
 	var pubkeyBuf []byte
-	if pubkeyBuf, err = GetDataAtPath(pubKeyPath, timeout); err != nil {
+	if pubkeyBuf, err = ioutil.ReadAll(reader); err != nil {
 		return
 	}
 	return jwt.ParseECPublicKeyFromPEM(pubkeyBuf)
 }
 
-// getURLFile returns the file from URL
-func getURLFile(urlVal string, timeout time.Duration) (body []byte, err error) {
+// NewECDSAPrvKey creates a private key from the path
+func NewECDSAPrvKey(prvKeyPath string, timeout time.Duration) (prvKey *ecdsa.PrivateKey, err error) {
+	var prvKeyBuf io.ReadCloser
+	if prvKeyBuf, err = GetReaderFromPath(prvKeyPath, timeout); err != nil {
+		return
+	}
+	prvKey, err = NewECDSAPrvKeyFromReader(prvKeyBuf)
+	prvKeyBuf.Close()
+	return
+}
+
+// NewECDSAPubKey returns a public key from the path
+func NewECDSAPubKey(pubKeyPath string, timeout time.Duration) (pubKey *ecdsa.PublicKey, err error) {
+	var pubKeyBuf io.ReadCloser
+	if pubKeyBuf, err = GetReaderFromPath(pubKeyPath, timeout); err != nil {
+		return
+	}
+	pubKey, err = NewECDSAPubKeyFromReader(pubKeyBuf)
+	pubKeyBuf.Close()
+	return
+}
+
+// GetReaderFromPath returns the reader at the given path
+func GetReaderFromPath(path string, timeout time.Duration) (r io.ReadCloser, err error) {
+	if !IsURL(path) {
+		return os.Open(path)
+	}
 	httpClient := http.Client{
 		Timeout: timeout,
 	}
 	var resp *http.Response
-	if resp, err = httpClient.Get(urlVal); err != nil {
+	if resp, err = httpClient.Get(path); err != nil {
 		return
 	}
-	defer resp.Body.Close()
-
 	if resp.StatusCode != http.StatusOK {
+		resp.Body.Close()
 		err = fmt.Errorf("http status error: %v", resp.StatusCode)
 		return
 	}
-	return ioutil.ReadAll(resp.Body)
+	return resp.Body, nil
 }
 
-func GetDataAtPath(path string, timeout time.Duration) (body []byte, err error) {
-	if IsURL(path) {
-		return getURLFile(path, timeout)
-	}
-	var file *os.File
-	if file, err = os.Open(path); err != nil {
-		return
-	}
-	body, err = ioutil.ReadAll(file)
-	file.Close()
-	return
-}
-
+// EncodeBase64JSON encodes the structure in json and then the string in base64
 func EncodeBase64JSON(val interface{}) (enc string, err error) {
 	var b []byte
 	if b, err = json.Marshal(val); err != nil {
@@ -89,6 +102,7 @@ func EncodeBase64JSON(val interface{}) (enc string, err error) {
 	return
 }
 
+// DecodeBase64JSON decodes the base64 json string in the given interface
 func DecodeBase64JSON(data string, val interface{}) (err error) {
 	var b []byte
 	if b, err = jwt.DecodeSegment(data); err != nil {
@@ -97,6 +111,7 @@ func DecodeBase64JSON(data string, val interface{}) (err error) {
 	return json.Unmarshal(b, val)
 }
 
+// RemoveWhiteSpaces removes white spaces from string
 func RemoveWhiteSpaces(str string) string {
 	rout := make([]rune, 0, len(str))
 	for _, r := range str {

@@ -50,6 +50,7 @@ cgrates (0.11.0~dev) UNRELEASED; urgency=medium
   * [AgentS] Add ability to inject data in cache from agents
   * [Config] Config cache format change to include partitions
   * [ERs] Add *none EventReader type
+  * [SessionS] Added support for *stir_authorize
 
  -- Alexandru Tripon <alexandru.tripon@itsyscom.com>  Wed, 19 Feb 2020 13:25:52 +0200
 
