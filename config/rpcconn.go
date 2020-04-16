@@ -69,9 +69,9 @@ func (rC *RPCConn) AsMapInterface() map[string]interface{} {
 	}
 
 	return map[string]interface{}{
-		utils.Strategy: rC.Strategy,
-		utils.PoolSize: rC.PoolSize,
-		utils.Conns:    conns,
+		utils.StrategyCfg: rC.Strategy,
+		utils.PoolSize:    rC.PoolSize,
+		utils.Conns:       conns,
 	}
 }
 
@@ -104,9 +104,9 @@ func (self *RemoteHost) loadFromJsonCfg(jsnCfg *RemoteHostJson) error {
 
 func (rh *RemoteHost) AsMapInterface() map[string]interface{} {
 	return map[string]interface{}{
-		utils.Address:     rh.Address,
-		utils.Transport:   rh.Transport,
-		utils.Synchronous: rh.Synchronous,
-		utils.TLS:         rh.TLS,
+		utils.AddressCfg:     rh.Address,
+		utils.TransportCfg:   rh.Transport,
+		utils.SynchronousCfg: rh.Synchronous,
+		utils.TLS:            rh.TLS,
 	}
 }

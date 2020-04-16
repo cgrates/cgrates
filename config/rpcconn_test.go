@@ -17,3 +17,42 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
 package config
+
+import (
+	"reflect"
+	"testing"
+
+	"github.com/cgrates/cgrates/utils"
+)
+
+func TestRPCConns(t *testing.T) {
+	var cfg RPCConn
+	cfgJSONStr := `{
+		"rpc_conns": {
+			"*localhost": {
+				"conns": [{"address": "127.0.0.1:2012", "transport":"*json"}],
+			},
+		},	
+}`
+	eMap := map[string]interface{}{
+		"poolSize": 0,
+		"strategy": "",
+		"conns": []map[string]interface{}{
+			{
+				"address":     "127.0.0.1:2012",
+				"transport":   "*json",
+				"synchronous": false,
+				"TLS":         false,
+			},
+		},
+	}
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+		t.Error(err)
+	} else if jsnRPCCfg, err := jsnCfg.RPCConnJsonCfg(); err != nil {
+		t.Error(err)
+	} else if err = cfg.loadFromJsonCfg(jsnRPCCfg["*localhost"]); err != nil {
+		t.Error(err)
+	} else if rcv := cfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
+		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	}
+}
