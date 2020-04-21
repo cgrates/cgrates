@@ -223,8 +223,8 @@ func (pi *ProcessedStirIdentity) VerifyPayload(originatorTn, originatorURI, dest
 	return
 }
 
-// NewIdentity returns the identiy for stir header
-func NewIdentity(header *utils.PASSporTHeader, payload *utils.PASSporTPayload, prvkeyPath string, timeout time.Duration) (identity string, err error) {
+// NewSTIRIdentity returns the identiy for stir header
+func NewSTIRIdentity(header *utils.PASSporTHeader, payload *utils.PASSporTPayload, prvkeyPath string, timeout time.Duration) (identity string, err error) {
 	var prvKey interface{}
 	var ok bool
 	if prvKey, ok = engine.Cache.Get(utils.CacheSTIR, prvkeyPath); !ok {
@@ -255,6 +255,7 @@ func NewIdentity(header *utils.PASSporTHeader, payload *utils.PASSporTPayload, p
 	return
 }
 
+// AuthStirShaken autentificates the given identity using STIR/SHAKEN
 func AuthStirShaken(identity, originatorTn, originatorURI, destinationTn, destinationURI string,
 	attest *utils.StringSet, hdrMaxDur time.Duration) (err error) {
 	var pi *ProcessedStirIdentity
@@ -268,4 +269,23 @@ func AuthStirShaken(identity, originatorTn, originatorURI, destinationTn, destin
 		return
 	}
 	return pi.VerifyPayload(originatorTn, originatorURI, destinationTn, destinationURI, hdrMaxDur, attest)
+}
+
+// V1STIRAuthenticateArgs are the arguments for STIRAuthenticate API
+type V1STIRAuthenticateArgs struct {
+	Attest             []string // what attest levels are allowed
+	DestinationTn      string   // the expected destination telephone number
+	DestinationURI     string   // the expected destination URI; if this is populated the DestinationTn is ignored
+	Identity           string   // the identity header
+	OriginatorTn       string   // the expected originator telephone number
+	OriginatorURI      string   // the expected originator URI; if this is populated the OriginatorTn is ignored
+	PayloadMaxDuration string   // the duration the payload is valid after it's creation
+}
+
+// V1STIRInitiateArgs are the arguments for STIRInitiate API
+type V1STIRInitiateArgs struct {
+	Payload        *utils.PASSporTPayload // the STIR payload
+	PublicKeyPath  string                 // the path to the public key used in the header
+	PrivateKeyPath string                 // the private key path
+	OverwriteIAT   bool                   // if true the IAT from payload is overwrited with the present unix timestamp
 }

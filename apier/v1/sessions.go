@@ -151,3 +151,13 @@ func (ssv1 *SessionSv1) ReAuthorize(args *utils.SessionFilter, reply *string) er
 func (ssv1 *SessionSv1) DisconnectPeer(args *utils.DPRArgs, reply *string) error {
 	return ssv1.Ss.BiRPCv1DisconnectPeer(nil, args, reply)
 }
+
+// STIRAuthenticate checks the identity using STIR/SHAKEN
+func (ssv1 *SessionSv1) STIRAuthenticate(args *sessions.V1STIRAuthenticateArgs, reply *string) error {
+	return ssv1.Ss.BiRPCv1STIRAuthenticate(nil, args, reply)
+}
+
+// STIRInitiate creates the identity for STIR/SHAKEN
+func (ssv1 *SessionSv1) STIRInitiate(args *sessions.V1STIRInitiateArgs, reply *string) error {
+	return ssv1.Ss.BiRPCv1STIRInitiate(nil, args, reply)
+}

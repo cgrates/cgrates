@@ -309,3 +309,51 @@ aa+jqv4dwkr/FLEcN1zC76Y/IniI65fId55hVJvN3ORuzUqYEtzD3irmsw==
 		t.Fatal(err)
 	}
 }
+
+func TestNewIdentity(t *testing.T) {
+	payload := &utils.PASSporTPayload{
+		ATTest: "A",
+		Dest:   utils.PASSporTDestinationsIdentity{Tn: []string{"1002"}},
+		IAT:    1587019822,
+		Orig:   utils.PASSporTOriginsIdentity{Tn: "1001"},
+		OrigID: "123456",
+	}
+	header := utils.NewPASSporTHeader("https://www.example.org/cert.cer")
+	prvkeyBuf := []byte(`-----BEGIN EC PRIVATE KEY-----
+MHcCAQEEIBIx2HW6dYy5S4wlJUY1J8VxO1un8xr4SHQlT7/UFkktoAoGCCqGSM49
+AwEHoUQDQgAESt8sEh55Yc579vLHjFRWVQO27p4Yaa+jqv4dwkr/FLEcN1zC76Y/
+IniI65fId55hVJvN3ORuzUqYEtzD3irmsw==
+-----END EC PRIVATE KEY-----
+`)
+	engine.Cache.Set(utils.CacheSTIR, "https://www.example.org/private.pem", nil,
+		nil, true, utils.NonTransactional)
+
+	if _, err := NewSTIRIdentity(header, payload, "https://www.example.org/private.pem", time.Second); err == nil {
+		t.Error("Expected error when creating new identity")
+	}
+
+	prvKey, err := jwt.ParseECPrivateKeyFromPEM(prvkeyBuf)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	pubkeyBuf := []byte(`-----BEGIN PUBLIC KEY-----
+MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAESt8sEh55Yc579vLHjFRWVQO27p4Y
+aa+jqv4dwkr/FLEcN1zC76Y/IniI65fId55hVJvN3ORuzUqYEtzD3irmsw==
+-----END PUBLIC KEY-----
+`)
+	pubKey, err := jwt.ParseECPublicKeyFromPEM(pubkeyBuf)
+	if err != nil {
+		t.Fatal(err)
+	}
+	engine.Cache.Set(utils.CacheSTIR, "https://www.example.org/cert.cer", pubKey,
+		nil, true, utils.NonTransactional)
+	engine.Cache.Set(utils.CacheSTIR, "https://www.example.org/private.pem", prvKey,
+		nil, true, utils.NonTransactional)
+
+	if rcv, err := NewSTIRIdentity(header, payload, "https://www.example.org/private.pem", time.Second); err != nil {
+		t.Error(err)
+	} else if err := AuthStirShaken(rcv, "1001", "", "1002", "", utils.NewStringSet([]string{utils.META_ANY}), -1); err != nil {
+		t.Fatal(err)
+	}
+}

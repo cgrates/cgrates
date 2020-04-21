@@ -164,44 +164,47 @@
 
 // "caches":{
 // 	"partitions": {
-// 		"*destinations": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},			// destination caching
-// 		"*reverse_destinations": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},	// reverse destinations index caching
-// 		"*rating_plans": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},			// rating plans caching
-// 		"*rating_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// rating profiles caching
-// 		"*actions": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},				// actions caching
-// 		"*action_plans": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},			// action plans caching
-// 		"*account_action_plans": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},	// account action plans index caching
-// 		"*action_triggers": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// action triggers caching
-// 		"*shared_groups": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},			// shared groups caching
-// 		"*timings": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},				// timings caching
-// 		"*resource_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// control resource profiles caching
-// 		"*resources": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},				// control resources caching
-// 		"*event_resources": {"limit": -1, "ttl": "", "static_ttl": false},							// matching resources to events
-// 		"*statqueue_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},	// statqueue profiles
-// 		"*statqueues": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},			// statqueues with metrics
-// 		"*threshold_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},	// control threshold profiles caching
-// 		"*thresholds": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},			// control thresholds caching
-// 		"*filters": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},				// control filters caching
-// 		"*supplier_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// control supplier profile caching
-// 		"*attribute_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},	// control attribute profile caching
-// 		"*charger_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// control charger profile caching
-// 		"*dispatcher_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},	// control dispatcher profile caching
-// 		"*dispatcher_hosts": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// control dispatcher hosts caching
-// 		"*resource_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 				// control resource filter indexes caching
-// 		"*stat_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 					// control stat filter indexes caching
-// 		"*threshold_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 				// control threshold filter indexes caching
-// 		"*supplier_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 				// control supplier filter indexes caching
-// 		"*attribute_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 				// control attribute filter indexes caching
-// 		"*charger_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 					// control charger filter indexes caching
-// 		"*dispatcher_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 				// control dispatcher filter indexes caching
-// 		"*dispatcher_routes": {"limit": -1, "ttl": "", "static_ttl": false}, 						// control dispatcher routes caching
-// 		"*diameter_messages": {"limit": -1, "ttl": "3h", "static_ttl": false},						// diameter messages caching
-// 		"*rpc_responses": {"limit": 0, "ttl": "2s", "static_ttl": false},							// RPC responses caching
-// 		"*closed_sessions": {"limit": -1, "ttl": "10s", "static_ttl": false},						// closed sessions cached for CDRs
-// 		"*cdr_ids": {"limit": -1, "ttl": "10m", "static_ttl": false},								// protects CDRs against double-charging
-// 		"*load_ids": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},				// control the load_ids for items
-// 		"*rpc_connections": {"limit": -1, "ttl": "", "static_ttl": false},							// RPC connections caching
-// 		"*uch": {"limit": -1, "ttl": "3h", "static_ttl": false},									// User cache
+// 		"*destinations": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},			// destination caching
+// 		"*reverse_destinations": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},	// reverse destinations index caching
+// 		"*rating_plans": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},			// rating plans caching
+// 		"*rating_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// rating profiles caching
+// 		"*actions": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},				// actions caching
+// 		"*action_plans": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},			// action plans caching
+// 		"*account_action_plans": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},	// account action plans index caching
+// 		"*action_triggers": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// action triggers caching
+// 		"*shared_groups": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},			// shared groups caching
+// 		"*timings": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},				// timings caching
+// 		"*resource_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// control resource profiles caching
+// 		"*resources": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},				// control resources caching
+// 		"*event_resources": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},							// matching resources to events
+// 		"*statqueue_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},	// statqueue profiles
+// 		"*statqueues": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},			// statqueues with metrics
+// 		"*threshold_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},	// control threshold profiles caching
+// 		"*thresholds": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},			// control thresholds caching
+// 		"*filters": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},				// control filters caching
+// 		"*supplier_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// control supplier profile caching
+// 		"*attribute_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},	// control attribute profile caching
+// 		"*charger_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// control charger profile caching
+// 		"*dispatcher_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},	// control dispatcher profile caching
+// 		"*dispatcher_hosts": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// control dispatcher hosts caching
+// 		"*resource_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 				// control resource filter indexes caching
+// 		"*stat_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 					// control stat filter indexes caching
+// 		"*threshold_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 				// control threshold filter indexes caching
+// 		"*supplier_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 				// control supplier filter indexes caching
+// 		"*attribute_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 				// control attribute filter indexes caching
+// 		"*charger_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 					// control charger filter indexes caching
+// 		"*dispatcher_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 				// control dispatcher filter indexes caching
+// 		"*dispatcher_routes": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 						// control dispatcher routes caching
+// 		"*dispatcher_loads": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},							// control dispatcher load ( in case of *load strategy )
+// 		"*dispatchers": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 								// control dispatcher interface
+// 		"*diameter_messages": {"limit": -1, "ttl": "3h", "static_ttl": false, "replicate": false},						// diameter messages caching
+// 		"*rpc_responses": {"limit": 0, "ttl": "2s", "static_ttl": false, "replicate": false},							// RPC responses caching
+// 		"*closed_sessions": {"limit": -1, "ttl": "10s", "static_ttl": false, "replicate": false},						// closed sessions cached for CDRs
+// 		"*cdr_ids": {"limit": -1, "ttl": "10m", "static_ttl": false, "replicate": false},								// protects CDRs against double-charging
+// 		"*load_ids": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},				// control the load_ids for items
+// 		"*rpc_connections": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},							// RPC connections caching
+// 		"*uch": {"limit": -1, "ttl": "3h", "static_ttl": false, "replicate": false},									// User cache
+// 		"*stir": {"limit": -1, "ttl": "3h", "static_ttl": false, "replicate": false},									// stirShaken cache keys
 // 	},
 // 	"replication_conns": [],
 // },
@@ -343,6 +346,13 @@
 // 	"terminate_attempts": 5,				// attempts to get the session before terminating it
 // 	"alterable_fields": [],					// the session fields that can be updated
 // 	//"min_dur_low_balance": "5s",			// threshold which will trigger low balance warnings for prepaid calls (needs to be lower than debit_interval)
+// 	"stir": {
+// 		"allowed_attest": ["*any"],			// the default attest for stir/shaken authentication <*any|A|B|C>
+// 		"payload_maxduration": "-1", 		// the duration that stir header is valid after it was created
+// 		"default_attest": "A",				// the default attest level if not mentioned in API
+// 		"publickey_path": "",				// the path to the public key 
+// 		"privatekey_path": "",				// the path to the private key
+// 	},
 // },
 
 

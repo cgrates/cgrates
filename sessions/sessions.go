@@ -684,9 +684,10 @@ func (sS *SessionS) replicateSessions(cgrID string, psv bool, connIDs []string) 
 	ss := sS.getSessions(cgrID, psv)
 	if len(ss) == 0 {
 		// session scheduled to be removed from remote (initiate also the EventStart to avoid the panic)
-		ss = []*Session{
-			&Session{CGRID: cgrID,
-				EventStart: make(engine.MapEvent)}}
+		ss = []*Session{{
+			CGRID:      cgrID,
+			EventStart: make(engine.MapEvent),
+		}}
 	}
 	for _, s := range ss {
 		sCln := s.Clone()
@@ -2958,13 +2959,13 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 		return
 	}
 	if argsFlagsWithParams.HasKey(utils.MetaSTIRAuthenticate) {
-		attest := sS.cgrCfg.SessionSCfg().STIRAllowedAttest
+		attest := sS.cgrCfg.SessionSCfg().STIRCfg.AllowedAttest
 		if uattest := ev.GetStringIgnoreErrors(utils.STIRATest); uattest != utils.EmptyString {
 			attest = utils.NewStringSet(strings.Split(uattest, utils.INFIELD_SEP))
 		}
 		var stirMaxDur time.Duration
 		if stirMaxDur, err = ev.GetDuration(utils.STIRPayloadMaxDuration); err != nil {
-			stirMaxDur = sS.cgrCfg.SessionSCfg().STIRPayloadMaxduration
+			stirMaxDur = sS.cgrCfg.SessionSCfg().STIRCfg.PayloadMaxduration
 		}
 		if err = AuthStirShaken(ev.GetStringIgnoreErrors(utils.STIRIdentity),
 			utils.FirstNonEmpty(ev.GetStringIgnoreErrors(utils.STIROriginatorTn), ev.GetStringIgnoreErrors(utils.Account)),
@@ -2975,7 +2976,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 			return utils.NewSTIRError(err.Error())
 		}
 	} else if argsFlagsWithParams.HasKey(utils.MetaSTIRInitiate) {
-		attest := sS.cgrCfg.SessionSCfg().STIRDefaultAttest
+		attest := sS.cgrCfg.SessionSCfg().STIRCfg.DefaultAttest
 		if uattest := ev.GetStringIgnoreErrors(utils.STIRATest); uattest != utils.EmptyString {
 			attest = uattest
 		}
@@ -2994,12 +2995,12 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 					ev.GetStringIgnoreErrors(utils.Account)),
 				utils.EmptyString)
 		}
-		pubkeyPath := utils.FirstNonEmpty(ev.GetStringIgnoreErrors(utils.STIRPublicKeyPath), sS.cgrCfg.SessionSCfg().STIRPublicKeyPath)
-		prvkeyPath := utils.FirstNonEmpty(ev.GetStringIgnoreErrors(utils.STIRPrivateKeyPath), sS.cgrCfg.SessionSCfg().STIRPrivateKeyPath)
+		pubkeyPath := utils.FirstNonEmpty(ev.GetStringIgnoreErrors(utils.STIRPublicKeyPath), sS.cgrCfg.SessionSCfg().STIRCfg.PublicKeyPath)
+		prvkeyPath := utils.FirstNonEmpty(ev.GetStringIgnoreErrors(utils.STIRPrivateKeyPath), sS.cgrCfg.SessionSCfg().STIRCfg.PrivateKeyPath)
 
 		payload := utils.NewPASSporTPayload(attest, args.CGREvent.ID, *dest, *orig)
 		header := utils.NewPASSporTHeader(pubkeyPath)
-		if rply.STIRIdentity, err = NewIdentity(header, payload, prvkeyPath, sS.cgrCfg.GeneralCfg().ReplyTimeout); err != nil {
+		if rply.STIRIdentity, err = NewSTIRIdentity(header, payload, prvkeyPath, sS.cgrCfg.GeneralCfg().ReplyTimeout); err != nil {
 			return utils.NewSTIRError(err.Error())
 		}
 	}
@@ -3763,4 +3764,45 @@ func (sS *SessionS) BiRPCv1DisconnectPeer(clnt rpcclient.ClientConnector,
 	}
 	*reply = utils.OK
 	return nil
+}
+
+// BiRPCv1STIRAuthenticate the API for STIR checking
+func (sS *SessionS) BiRPCv1STIRAuthenticate(clnt rpcclient.ClientConnector,
+	args *V1STIRAuthenticateArgs, reply *string) (err error) {
+	attest := sS.cgrCfg.SessionSCfg().STIRCfg.AllowedAttest
+	if len(args.Attest) != 0 {
+		attest = utils.NewStringSet(args.Attest)
+	}
+	stirMaxDur := sS.cgrCfg.SessionSCfg().STIRCfg.PayloadMaxduration
+	if args.PayloadMaxDuration != utils.EmptyString {
+		if stirMaxDur, err = utils.ParseDurationWithNanosecs(args.PayloadMaxDuration); err != nil {
+			return
+		}
+	}
+	if err = AuthStirShaken(args.Identity, args.OriginatorTn, args.OriginatorURI,
+		args.DestinationTn, args.DestinationURI, attest, stirMaxDur); err != nil {
+		return utils.NewSTIRError(err.Error())
+	}
+	*reply = utils.OK
+	return
+}
+
+// BiRPCv1STIRInitiate the API for STIR header creation
+func (sS *SessionS) BiRPCv1STIRInitiate(clnt rpcclient.ClientConnector,
+	args *V1STIRInitiateArgs, identity *string) (err error) {
+	if args.Payload.ATTest == utils.EmptyString {
+		args.Payload.ATTest = sS.cgrCfg.SessionSCfg().STIRCfg.DefaultAttest
+	}
+	if args.OverwriteIAT {
+		args.Payload.IAT = time.Now().Unix()
+	}
+	if *identity, err = NewSTIRIdentity(
+		utils.NewPASSporTHeader(utils.FirstNonEmpty(args.PublicKeyPath,
+			sS.cgrCfg.SessionSCfg().STIRCfg.PublicKeyPath)),
+		args.Payload, utils.FirstNonEmpty(args.PrivateKeyPath,
+			sS.cgrCfg.SessionSCfg().STIRCfg.PrivateKeyPath),
+		sS.cgrCfg.GeneralCfg().ReplyTimeout); err != nil {
+		return utils.NewSTIRError(err.Error())
+	}
+	return
 }

@@ -367,11 +367,13 @@ const CGRATES_CFG_JSON = `
 	"terminate_attempts": 5,				// attempts to get the session before terminating it
 	"alterable_fields": [],					// the session fields that can be updated
 	//"min_dur_low_balance": "5s",			// threshold which will trigger low balance warnings for prepaid calls (needs to be lower than debit_interval)
-	"stir_allowed_attest": ["*any"],		// the default attest for stir/shaken authentication <*any|A|B|C>
-	"stir_payload_maxduration": "-1", 		// the duration that stir header is valid after it was created
-	"stir_default_attest": "A",				// the default attest level if not mentioned in API
-	"stir_publickey_path": "",				// the path to the public key 
-	"stir_privatekey_path": "",				// the path to the private key
+	"stir": {
+		"allowed_attest": ["*any"],			// the default attest for stir/shaken authentication <*any|A|B|C>
+		"payload_maxduration": "-1", 		// the duration that stir header is valid after it was created
+		"default_attest": "A",				// the default attest level if not mentioned in API
+		"publickey_path": "",				// the path to the public key 
+		"privatekey_path": "",				// the path to the private key
+	},
 },
 
 
