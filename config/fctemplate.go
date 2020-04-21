@@ -195,33 +195,69 @@ func (self *FCTemplate) Clone() *FCTemplate {
 	return cln
 }
 
-func (fc *FCTemplate) AsMapInterface() map[string]interface{} {
-	values := make([]string, len(fc.Value))
-	for i, item := range fc.Value {
-		values[i] = item.Rules
+func (fc *FCTemplate) AsMapInterface() (mp map[string]interface{}) {
+	mp = make(map[string]interface{})
+	if fc.Tag != utils.EmptyString {
+		mp[utils.TagCfg] = fc.Tag
 	}
-	asInitial := strings.Join(values, "")
-
-	return map[string]interface{}{
-		utils.TagCfg:              fc.Tag,
-		utils.TypeCf:              fc.Type,
-		utils.PathCfg:             fc.Path,
-		utils.FiltersCfg:          fc.Filters,
-		utils.ValueCfg:            asInitial,
-		utils.WidthCfg:            fc.Width,
-		utils.StripCfg:            fc.Strip,
-		utils.PaddingCfg:          fc.Padding,
-		utils.MandatoryCfg:        fc.Mandatory,
-		utils.AttributeIDCfg:      fc.AttributeID,
-		utils.NewBranchCfg:        fc.NewBranch,
-		utils.TimezoneCfg:         fc.Timezone,
-		utils.BlockerCfg:          fc.Blocker,
-		utils.BreakOnSuccessCfg:   fc.BreakOnSuccess,
-		utils.LayoutCfg:           fc.Layout,
-		utils.CostShiftDigitsCfg:  fc.CostShiftDigits,
-		utils.RoundingDecimalsCfg: fc.RoundingDecimals,
-		utils.MaskDestIDCfg:       fc.MaskDestID,
-		utils.MaskLenCfg:          fc.MaskLen,
+	if fc.Type != utils.EmptyString {
+		mp[utils.TypeCf] = fc.Type
+	}
+	if fc.Path != utils.EmptyString {
+		mp[utils.PathCfg] = fc.Path
+	}
+	if fc.Filters != nil {
+		mp[utils.FiltersCfg] = fc.Filters
+	}
+	if fc.Value != nil {
+		values := make([]string, len(fc.Value))
+		for i, item := range fc.Value {
+			values[i] = item.Rules
+		}
+		mp[utils.ValueCfg] = strings.Join(values, utils.EmptyString)
+	}
+	if fc.Width != 0 {
+		mp[utils.WidthCfg] = fc.Width
+	}
+	if fc.Strip != utils.EmptyString {
+		mp[utils.StripCfg] = fc.Strip
+	}
+	if fc.Padding != utils.EmptyString {
+		mp[utils.PaddingCfg] = fc.Padding
+	}
+	if fc.Mandatory != false {
+		mp[utils.MandatoryCfg] = fc.Mandatory
+	}
+	if fc.AttributeID != utils.EmptyString {
+		mp[utils.AttributeIDCfg] = fc.AttributeID
+	}
+	if fc.NewBranch != false {
+		mp[utils.NewBranchCfg] = fc.NewBranch
+	}
+	if fc.Timezone != utils.EmptyString {
+		mp[utils.TimezoneCfg] = fc.Timezone
+	}
+	if fc.Blocker != false {
+		mp[utils.BlockerCfg] = fc.Blocker
+	}
+	if fc.BreakOnSuccess != false {
+		mp[utils.BreakOnSuccessCfg] = fc.BreakOnSuccess
+	}
+	if fc.Layout != time.RFC3339 {
+		mp[utils.LayoutCfg] = fc.Layout
+	}
+	if fc.CostShiftDigits != 0 {
+		mp[utils.CostShiftDigitsCfg] = fc.CostShiftDigits
+	}
+	if fc.RoundingDecimals != nil {
+		mp[utils.RoundingDecimalsCfg] = *fc.RoundingDecimals
+	}
+	if fc.MaskDestID != utils.EmptyString {
+		mp[utils.MaskDestIDCfg] = fc.MaskDestID
+	}
+	if fc.MaskLen != 0 {
+		mp[utils.MaskLenCfg] = fc.MaskLen
 	}
 
+	return
 }

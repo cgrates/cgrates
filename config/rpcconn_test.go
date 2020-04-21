@@ -25,7 +25,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestRPCConns(t *testing.T) {
+func TestRPCConnsAsMapInterface(t *testing.T) {
 	var cfg RPCConn
 	cfgJSONStr := `{
 		"rpc_conns": {
