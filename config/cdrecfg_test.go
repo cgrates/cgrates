@@ -138,7 +138,7 @@ func TestCdreCfgloadFromJsonCfg(t *testing.T) {
 	}
 }
 
-func testCdre(t *testing.T) {
+func TestCdreAsMapInterface(t *testing.T) {
 	var cdre CdreCfg
 	cfgJSONStr := `{
 		"cdre": {												
@@ -157,7 +157,6 @@ func testCdre(t *testing.T) {
 		},
 	},
 }`
-
 	eMap := map[string]interface{}{
 		"export_format":      "*file_csv",
 		"export_path":        "/var/spool/cgrates/cdre",
@@ -169,25 +168,10 @@ func testCdre(t *testing.T) {
 		"attributes_context": "",
 		"fields": []map[string]interface{}{
 			{
-				"attribute_id":         "",
-				"blocker":              false,
-				"break_on_success":     false,
-				"cost_shift_digits":    0,
-				"filters":              nil,
-				"layout":               "2006-01-02T15:04:05Z07:00",
-				"mandatory":            false,
-				"mask_destinationd_id": "",
-				"mask_length":          0,
-				"new_branch":           false,
-				"padding":              "",
-				"path":                 "*exp.CGRID",
-				"rounding_decimals":    nil,
-				"strip":                "",
-				"tag":                  "*exp.CGRID",
-				"timezone":             "",
-				"type":                 "*variable",
-				"value":                "~*req.CGRID",
-				"width":                0,
+				"path":  "*exp.CGRID",
+				"tag":   "*exp.CGRID",
+				"type":  "*variable",
+				"value": "~*req.CGRID",
 			},
 		},
 	}
