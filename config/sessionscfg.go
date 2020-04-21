@@ -74,36 +74,32 @@ func (fs *FsConnCfg) AsMapInterface() map[string]interface{} {
 }
 
 type SessionSCfg struct {
-	Enabled                bool
-	ListenBijson           string
-	ChargerSConns          []string
-	RALsConns              []string
-	ResSConns              []string
-	ThreshSConns           []string
-	StatSConns             []string
-	SupplSConns            []string
-	AttrSConns             []string
-	CDRsConns              []string
-	ReplicationConns       []string
-	DebitInterval          time.Duration
-	StoreSCosts            bool
-	MinCallDuration        time.Duration
-	MaxCallDuration        time.Duration
-	SessionTTL             time.Duration
-	SessionTTLMaxDelay     *time.Duration
-	SessionTTLLastUsed     *time.Duration
-	SessionTTLUsage        *time.Duration
-	SessionIndexes         utils.StringMap
-	ClientProtocol         float64
-	ChannelSyncInterval    time.Duration
-	TerminateAttempts      int
-	AlterableFields        *utils.StringSet
-	MinDurLowBalance       time.Duration
-	STIRAllowedAttest      *utils.StringSet
-	STIRPayloadMaxduration time.Duration
-	STIRDefaultAttest      string
-	STIRPublicKeyPath      string
-	STIRPrivateKeyPath     string
+	Enabled             bool
+	ListenBijson        string
+	ChargerSConns       []string
+	RALsConns           []string
+	ResSConns           []string
+	ThreshSConns        []string
+	StatSConns          []string
+	SupplSConns         []string
+	AttrSConns          []string
+	CDRsConns           []string
+	ReplicationConns    []string
+	DebitInterval       time.Duration
+	StoreSCosts         bool
+	MinCallDuration     time.Duration
+	MaxCallDuration     time.Duration
+	SessionTTL          time.Duration
+	SessionTTLMaxDelay  *time.Duration
+	SessionTTLLastUsed  *time.Duration
+	SessionTTLUsage     *time.Duration
+	SessionIndexes      utils.StringMap
+	ClientProtocol      float64
+	ChannelSyncInterval time.Duration
+	TerminateAttempts   int
+	AlterableFields     *utils.StringSet
+	MinDurLowBalance    time.Duration
+	STIRCfg             *STIRcfg
 }
 
 func (scfg *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) (err error) {
@@ -280,56 +276,38 @@ func (scfg *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) (err error) {
 			return err
 		}
 	}
-	if jsnCfg.Stir_allowed_attest != nil {
-		scfg.STIRAllowedAttest = utils.NewStringSet(*jsnCfg.Stir_allowed_attest)
-	}
-	if jsnCfg.Stir_payload_maxduration != nil {
-		if scfg.STIRPayloadMaxduration, err = utils.ParseDurationWithNanosecs(*jsnCfg.Stir_payload_maxduration); err != nil {
-			return err
-		}
-	}
-	if jsnCfg.Stir_default_attest != nil {
-		scfg.STIRDefaultAttest = *jsnCfg.Stir_default_attest
-	}
-	if jsnCfg.Stir_publickey_path != nil {
-		scfg.STIRPublicKeyPath = *jsnCfg.Stir_publickey_path
-	}
-	if jsnCfg.Stir_privatekey_path != nil {
-		scfg.STIRPrivateKeyPath = *jsnCfg.Stir_privatekey_path
-	}
-	return nil
+	return scfg.STIRCfg.loadFromJSONCfg(jsnCfg.Stir)
 }
 
 func (scfg *SessionSCfg) AsMapInterface() map[string]interface{} {
 
 	return map[string]interface{}{
-		utils.EnabledCfg:                scfg.Enabled,
-		utils.ListenBijsonCfg:           scfg.ListenBijson,
-		utils.ChargerSConnsCfg:          scfg.ChargerSConns,
-		utils.RALsConnsCfg:              scfg.RALsConns,
-		utils.ResSConnsCfg:              scfg.ResSConns,
-		utils.ThreshSConnsCfg:           scfg.ThreshSConns,
-		utils.StatSConnsCfg:             scfg.StatSConns,
-		utils.SupplSConnsCfg:            scfg.SupplSConns,
-		utils.AttrSConnsCfg:             scfg.AttrSConns,
-		utils.CDRsConnsCfg:              scfg.CDRsConns,
-		utils.ReplicationConnsCfg:       scfg.ReplicationConns,
-		utils.DebitIntervalCfg:          scfg.DebitInterval,
-		utils.StoreSCostsCfg:            scfg.StoreSCosts,
-		utils.MinCallDurationCfg:        scfg.MinCallDuration,
-		utils.MaxCallDurationCfg:        scfg.MaxCallDuration,
-		utils.SessionTTLCfg:             scfg.SessionTTL,
-		utils.SessionTTLMaxDelayCfg:     scfg.SessionTTLMaxDelay,
-		utils.SessionTTLLastUsedCfg:     scfg.SessionTTLLastUsed,
-		utils.SessionTTLUsageCfg:        scfg.SessionTTLUsage,
-		utils.SessionIndexesCfg:         scfg.SessionIndexes.GetSlice(),
-		utils.ClientProtocolCfg:         scfg.ClientProtocol,
-		utils.ChannelSyncIntervalCfg:    scfg.ChannelSyncInterval,
-		utils.TerminateAttemptsCfg:      scfg.TerminateAttempts,
-		utils.AlterableFieldsCfg:        scfg.AlterableFields.AsSlice(),
-		utils.MinDurLowBalanceCfg:       scfg.MinDurLowBalance,
-		utils.STIRAtestCfg:              strings.Join(scfg.STIRAllowedAttest.AsSlice(), utils.NestingSep),
-		utils.STIRPayloadMaxdurationCfg: scfg.STIRPayloadMaxduration,
+		utils.EnabledCfg:             scfg.Enabled,
+		utils.ListenBijsonCfg:        scfg.ListenBijson,
+		utils.ChargerSConnsCfg:       scfg.ChargerSConns,
+		utils.RALsConnsCfg:           scfg.RALsConns,
+		utils.ResSConnsCfg:           scfg.ResSConns,
+		utils.ThreshSConnsCfg:        scfg.ThreshSConns,
+		utils.StatSConnsCfg:          scfg.StatSConns,
+		utils.SupplSConnsCfg:         scfg.SupplSConns,
+		utils.AttrSConnsCfg:          scfg.AttrSConns,
+		utils.CDRsConnsCfg:           scfg.CDRsConns,
+		utils.ReplicationConnsCfg:    scfg.ReplicationConns,
+		utils.DebitIntervalCfg:       scfg.DebitInterval,
+		utils.StoreSCostsCfg:         scfg.StoreSCosts,
+		utils.MinCallDurationCfg:     scfg.MinCallDuration,
+		utils.MaxCallDurationCfg:     scfg.MaxCallDuration,
+		utils.SessionTTLCfg:          scfg.SessionTTL,
+		utils.SessionTTLMaxDelayCfg:  scfg.SessionTTLMaxDelay,
+		utils.SessionTTLLastUsedCfg:  scfg.SessionTTLLastUsed,
+		utils.SessionTTLUsageCfg:     scfg.SessionTTLUsage,
+		utils.SessionIndexesCfg:      scfg.SessionIndexes.GetSlice(),
+		utils.ClientProtocolCfg:      scfg.ClientProtocol,
+		utils.ChannelSyncIntervalCfg: scfg.ChannelSyncInterval,
+		utils.TerminateAttemptsCfg:   scfg.TerminateAttempts,
+		utils.AlterableFieldsCfg:     scfg.AlterableFields.AsSlice(),
+		utils.MinDurLowBalanceCfg:    scfg.MinDurLowBalance,
+		utils.STIRCfg:                scfg.STIRCfg.AsMapInterface(),
 	}
 }
 
@@ -534,5 +512,48 @@ func (aCfg *AsteriskAgentCfg) AsMapInterface() map[string]interface{} {
 		utils.SessionSConnsCfg: aCfg.SessionSConns,
 		utils.CreateCDRCfg:     aCfg.CreateCDR,
 		utils.AsteriskConnsCfg: conns,
+	}
+}
+
+// STIRcfg the confuguration structure for STIR
+type STIRcfg struct {
+	AllowedAttest      *utils.StringSet
+	PayloadMaxduration time.Duration
+	DefaultAttest      string
+	PublicKeyPath      string
+	PrivateKeyPath     string
+}
+
+func (stirCfg *STIRcfg) loadFromJSONCfg(jsnCfg *STIRJsonCfg) (err error) {
+	if jsnCfg == nil {
+		return nil
+	}
+	if jsnCfg.Allowed_attest != nil {
+		stirCfg.AllowedAttest = utils.NewStringSet(*jsnCfg.Allowed_attest)
+	}
+	if jsnCfg.Payload_maxduration != nil {
+		if stirCfg.PayloadMaxduration, err = utils.ParseDurationWithNanosecs(*jsnCfg.Payload_maxduration); err != nil {
+			return err
+		}
+	}
+	if jsnCfg.Default_attest != nil {
+		stirCfg.DefaultAttest = *jsnCfg.Default_attest
+	}
+	if jsnCfg.Publickey_path != nil {
+		stirCfg.PublicKeyPath = *jsnCfg.Publickey_path
+	}
+	if jsnCfg.Privatekey_path != nil {
+		stirCfg.PrivateKeyPath = *jsnCfg.Privatekey_path
+	}
+	return nil
+}
+
+func (stirCfg *STIRcfg) AsMapInterface() map[string]interface{} {
+	return map[string]interface{}{
+		utils.DefaultAttestCfg:      stirCfg.DefaultAttest,
+		utils.PublicKeyPathCfg:      stirCfg.PublicKeyPath,
+		utils.PrivateKeyPathCfg:     stirCfg.PrivateKeyPath,
+		utils.AllowedAtestCfg:       strings.Join(stirCfg.AllowedAttest.AsSlice(), utils.NestingSep),
+		utils.PayloadMaxdurationCfg: stirCfg.PayloadMaxduration,
 	}
 }

@@ -195,36 +195,32 @@ type EventReaderJsonCfg struct {
 
 // SM-Generic config section
 type SessionSJsonCfg struct {
-	Enabled                  *bool
-	Listen_bijson            *string
-	Chargers_conns           *[]string
-	Rals_conns               *[]string
-	Resources_conns          *[]string
-	Thresholds_conns         *[]string
-	Stats_conns              *[]string
-	Suppliers_conns          *[]string
-	Cdrs_conns               *[]string
-	Replication_conns        *[]string
-	Attributes_conns         *[]string
-	Debit_interval           *string
-	Store_session_costs      *bool
-	Min_call_duration        *string
-	Max_call_duration        *string
-	Session_ttl              *string
-	Session_ttl_max_delay    *string
-	Session_ttl_last_used    *string
-	Session_ttl_usage        *string
-	Session_indexes          *[]string
-	Client_protocol          *float64
-	Channel_sync_interval    *string
-	Terminate_attempts       *int
-	Alterable_fields         *[]string
-	Min_dur_low_balance      *string
-	Stir_allowed_attest      *[]string
-	Stir_payload_maxduration *string
-	Stir_default_attest      *string
-	Stir_publickey_path      *string
-	Stir_privatekey_path     *string
+	Enabled               *bool
+	Listen_bijson         *string
+	Chargers_conns        *[]string
+	Rals_conns            *[]string
+	Resources_conns       *[]string
+	Thresholds_conns      *[]string
+	Stats_conns           *[]string
+	Suppliers_conns       *[]string
+	Cdrs_conns            *[]string
+	Replication_conns     *[]string
+	Attributes_conns      *[]string
+	Debit_interval        *string
+	Store_session_costs   *bool
+	Min_call_duration     *string
+	Max_call_duration     *string
+	Session_ttl           *string
+	Session_ttl_max_delay *string
+	Session_ttl_last_used *string
+	Session_ttl_usage     *string
+	Session_indexes       *[]string
+	Client_protocol       *float64
+	Channel_sync_interval *string
+	Terminate_attempts    *int
+	Alterable_fields      *[]string
+	Min_dur_low_balance   *string
+	Stir                  *STIRJsonCfg
 }
 
 // FreeSWITCHAgent config section
@@ -571,4 +567,12 @@ type ApierJsonCfg struct {
 	Caches_conns     *[]string
 	Scheduler_conns  *[]string
 	Attributes_conns *[]string
+}
+
+type STIRJsonCfg struct {
+	Allowed_attest      *[]string
+	Payload_maxduration *string
+	Default_attest      *string
+	Publickey_path      *string
+	Privatekey_path     *string
 }
