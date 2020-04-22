@@ -1824,6 +1824,7 @@ const (
 	// KamAgentCfg
 	EvapiConnsCfg = "evapi_conns"
 	TimezoneCfg   = "timezone"
+	TimezoneCfgC  = "Timezone"
 
 	// AsteriskConnCfg
 	UserCf = "user"
@@ -1849,8 +1850,8 @@ const (
 	RequestProcessorsCfg = "request_processors"
 
 	// RequestProcessor
-	RequestFieldsCfg = "Request_fields"
-	ReplyFieldsCfg   = "Reply_fields"
+	RequestFieldsCfg = "request_fields"
+	ReplyFieldsCfg   = "reply_fields"
 
 	// RadiusAgentCfg
 	ListenAuthCfg         = "listen_auth"

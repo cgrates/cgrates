@@ -1431,7 +1431,7 @@ func (cfg *CGRConfig) reloadSections(sections ...string) (err error) {
 	return
 }
 
-func (cfg *CGRConfig) AsMapInterface() map[string]interface{} {
+func (cfg *CGRConfig) AsMapInterface(separator string) map[string]interface{} {
 	rpcConns := make(map[string]map[string]interface{}, len(cfg.rpcConns))
 	for key, val := range cfg.rpcConns {
 		rpcConns[key] = val.AsMapInterface()
@@ -1439,17 +1439,17 @@ func (cfg *CGRConfig) AsMapInterface() map[string]interface{} {
 
 	cdreProfiles := make(map[string]map[string]interface{})
 	for key, val := range cfg.CdreProfiles {
-		cdreProfiles[key] = val.AsMapInterface()
+		cdreProfiles[key] = val.AsMapInterface(separator)
 	}
 
 	loaderCfg := make([]map[string]interface{}, len(cfg.loaderCfg))
 	for i, item := range cfg.loaderCfg {
-		loaderCfg[i] = item.AsMapInterface()
+		loaderCfg[i] = item.AsMapInterface(separator)
 	}
 
 	httpAgentCfg := make([]map[string]interface{}, len(cfg.httpAgentCfg))
 	for i, item := range cfg.httpAgentCfg {
-		httpAgentCfg[i] = item.AsMapInterface()
+		httpAgentCfg[i] = item.AsMapInterface(separator)
 	}
 
 	return map[string]interface{}{
@@ -1473,9 +1473,9 @@ func (cfg *CGRConfig) AsMapInterface() map[string]interface{} {
 		utils.FsAgentCfg:       cfg.fsAgentCfg.AsMapInterface(),
 		utils.KamAgentCfg:      cfg.kamAgentCfg.AsMapInterface(),
 		utils.AsteriskAgentCfg: cfg.asteriskAgentCfg.AsMapInterface(),
-		utils.DiameterAgentCfg: cfg.diameterAgentCfg.AsMapInterface(),
-		utils.RadiusAgentCfg:   cfg.radiusAgentCfg.AsMapInterface(),
-		utils.DnsAgentCfg:      cfg.dnsAgentCfg.AsMapInterface(),
+		utils.DiameterAgentCfg: cfg.diameterAgentCfg.AsMapInterface(separator),
+		utils.RadiusAgentCfg:   cfg.radiusAgentCfg.AsMapInterface(separator),
+		utils.DnsAgentCfg:      cfg.dnsAgentCfg.AsMapInterface(separator),
 		utils.AttributeSCfg:    cfg.attributeSCfg.AsMapInterface(),
 		utils.ChargerSCfg:      cfg.chargerSCfg.AsMapInterface(),
 		utils.ResourceSCfg:     cfg.resourceSCfg.AsMapInterface(),
@@ -1489,6 +1489,6 @@ func (cfg *CGRConfig) AsMapInterface() map[string]interface{} {
 		utils.MailerCfg:        cfg.mailerCfg.AsMapInterface(),
 		utils.AnalyzerSCfg:     cfg.analyzerSCfg.AsMapInterface(),
 		utils.Apier:            cfg.apier.AsMapInterface(),
-		utils.ErsCfg:           cfg.ersCfg.AsMapInterface(),
+		utils.ErsCfg:           cfg.ersCfg.AsMapInterface(separator),
 	}
 }

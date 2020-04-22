@@ -182,7 +182,7 @@ func TestCdreAsMapInterface(t *testing.T) {
 		t.Error(err)
 	} else if err = cdre.loadFromJsonCfg(cdreCfg["*default"], utils.EmptyString); err != nil {
 		t.Error(err)
-	} else if rcv := cdre.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
+	} else if rcv := cdre.AsMapInterface(""); !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 

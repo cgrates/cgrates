@@ -50,6 +50,14 @@ func (hcfgs *HttpAgentCfgs) loadFromJsonCfg(jsnHttpAgntCfg *[]*HttpAgentJsonCfg,
 	return nil
 }
 
+func (hcfgs *HttpAgentCfgs) AsMapInterface(separator string) []map[string]interface{} {
+	mp := make([]map[string]interface{}, len(*hcfgs))
+	for i, item := range *hcfgs {
+		mp[i] = item.AsMapInterface(separator)
+	}
+	return mp
+}
+
 type HttpAgentCfg struct {
 	ID                string // identifier for the agent, so we can update it's processors
 	Url               string
@@ -118,10 +126,10 @@ func (ca *HttpAgentCfg) loadFromJsonCfg(jsnCfg *HttpAgentJsonCfg, separator stri
 	return nil
 }
 
-func (ca *HttpAgentCfg) AsMapInterface() map[string]interface{} {
+func (ca *HttpAgentCfg) AsMapInterface(separator string) map[string]interface{} {
 	requestProcessors := make([]map[string]interface{}, len(ca.RequestProcessors))
 	for i, item := range ca.RequestProcessors {
-		requestProcessors[i] = item.AsMapInterface()
+		requestProcessors[i] = item.AsMapInterface(separator)
 	}
 
 	return map[string]interface{}{
@@ -130,6 +138,6 @@ func (ca *HttpAgentCfg) AsMapInterface() map[string]interface{} {
 		utils.SessionSConnsCfg:     ca.SessionSConns,
 		utils.RequestPayloadCfg:    ca.RequestPayload,
 		utils.ReplyPayloadCfg:      ca.ReplyPayload,
-		utils.RequestProcessorsCfg: ca.RequestProcessors,
+		utils.RequestProcessorsCfg: requestProcessors,
 	}
 }
