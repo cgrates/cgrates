@@ -718,6 +718,7 @@ const (
 	MetaCHAP                  = "*chap"
 	MetaMSCHAPV2              = "*mschapv2"
 	MetaDynaprepaid           = "*dynaprepaid"
+	MetaFD                    = "*fd"
 )
 
 // Migrator Action
