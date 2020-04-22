@@ -50,7 +50,7 @@ var (
 		testSes2StirAuthenticate,
 		testSes2StirInit,
 		testSes2STIRAuthenticate,
-		testSes2STIRInitiate,
+		testSes2STIRIdentity,
 		testSes2ItStopCgrEngine,
 	}
 )
@@ -267,21 +267,21 @@ func testSes2STIRAuthenticate(t *testing.T) {
 	}
 }
 
-func testSes2STIRInitiate(t *testing.T) {
+func testSes2STIRIdentity(t *testing.T) {
 	payload := &utils.PASSporTPayload{
 		Dest:   utils.PASSporTDestinationsIdentity{Tn: []string{"1002"}},
 		IAT:    1587019822,
 		Orig:   utils.PASSporTOriginsIdentity{Tn: "1001"},
 		OrigID: "123456",
 	}
-	args := &sessions.V1STIRInitiateArgs{
+	args := &sessions.V1STIRIdentityArgs{
 		Payload:        payload,
 		PublicKeyPath:  "/usr/share/cgrates/stir/stir_pubkey.pem",
 		PrivateKeyPath: "/usr/share/cgrates/stir/stir_privatekey.pem",
 		OverwriteIAT:   true,
 	}
 	var rply string
-	if err := ses2RPC.Call(utils.SessionSv1STIRInitiate,
+	if err := ses2RPC.Call(utils.SessionSv1STIRIdentity,
 		args, &rply); err != nil {
 		t.Error(err)
 	}

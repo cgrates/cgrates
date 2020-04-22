@@ -3830,9 +3830,9 @@ func (sS *SessionS) BiRPCv1STIRAuthenticate(clnt rpcclient.ClientConnector,
 	return
 }
 
-// BiRPCv1STIRInitiate the API for STIR header creation
-func (sS *SessionS) BiRPCv1STIRInitiate(clnt rpcclient.ClientConnector,
-	args *V1STIRInitiateArgs, identity *string) (err error) {
+// BiRPCv1STIRIdentity the API for STIR header creation
+func (sS *SessionS) BiRPCv1STIRIdentity(clnt rpcclient.ClientConnector,
+	args *V1STIRIdentityArgs, identity *string) (err error) {
 	if args.Payload.ATTest == utils.EmptyString {
 		args.Payload.ATTest = sS.cgrCfg.SessionSCfg().STIRCfg.DefaultAttest
 	}

@@ -282,8 +282,8 @@ type V1STIRAuthenticateArgs struct {
 	PayloadMaxDuration string   // the duration the payload is valid after it's creation
 }
 
-// V1STIRInitiateArgs are the arguments for STIRInitiate API
-type V1STIRInitiateArgs struct {
+// V1STIRIdentityArgs are the arguments for STIRIdentity API
+type V1STIRIdentityArgs struct {
 	Payload        *utils.PASSporTPayload // the STIR payload
 	PublicKeyPath  string                 // the path to the public key used in the header
 	PrivateKeyPath string                 // the private key path

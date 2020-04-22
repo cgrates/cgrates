@@ -57,7 +57,7 @@ func (ssv1 *SessionSv1) Handlers() map[string]interface{} {
 		utils.SessionSv1DisconnectPeer: ssv1.BiRPCV1DisconnectPeer,
 
 		utils.SessionSv1STIRAuthenticate: ssv1.BiRPCV1STIRAuthenticate,
-		utils.SessionSv1STIRInitiate:     ssv1.BiRPCV1STIRInitiate,
+		utils.SessionSv1STIRIdentity:     ssv1.BiRPCV1STIRIdentity,
 	}
 }
 
@@ -187,8 +187,8 @@ func (ssv1 *SessionSv1) BiRPCV1STIRAuthenticate(clnt *rpc2.Client,
 	return ssv1.Ss.BiRPCv1STIRAuthenticate(clnt, args, reply)
 }
 
-// BiRPCV1STIRInitiate creates the identity for STIR/SHAKEN
-func (ssv1 *SessionSv1) BiRPCV1STIRInitiate(clnt *rpc2.Client,
-	args *sessions.V1STIRInitiateArgs, reply *string) error {
-	return ssv1.Ss.BiRPCv1STIRInitiate(nil, args, reply)
+// BiRPCV1STIRIdentity creates the identity for STIR/SHAKEN
+func (ssv1 *SessionSv1) BiRPCV1STIRIdentity(clnt *rpc2.Client,
+	args *sessions.V1STIRIdentityArgs, reply *string) error {
+	return ssv1.Ss.BiRPCv1STIRIdentity(nil, args, reply)
 }
