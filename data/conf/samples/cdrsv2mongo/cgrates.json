@@ -17,6 +17,7 @@
 "rals": {
 	"enabled": true,						// enable Rater service: <true|false>
 	"thresholds_conns": ["*localhost"],
+	"dynaprepaid_actionplans": ["PACKAGE_1001"],
 },
 
 "schedulers": {
@@ -30,6 +31,7 @@
 	"rals_conns": ["*localhost"],
 	"stats_conns": ["*localhost"],
 	"thresholds_conns": ["*localhost"],
+	"scheduler_conns": ["*localhost"],
 },
 
 "attributes": {

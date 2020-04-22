@@ -88,6 +88,7 @@ type SessionSCfg struct {
 	ChannelSyncInterval time.Duration
 	TerminateAttempts   int
 	AlterableFields     *utils.StringSet
+	SchedulerConns      []string
 }
 
 func (scfg *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) (err error) {
@@ -259,6 +260,17 @@ func (scfg *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) (err error) {
 	}
 	if jsnCfg.Alterable_fields != nil {
 		scfg.AlterableFields = utils.NewStringSet(*jsnCfg.Alterable_fields)
+	}
+	if jsnCfg.Scheduler_conns != nil {
+		scfg.SchedulerConns = make([]string, len(*jsnCfg.Scheduler_conns))
+		for idx, connID := range *jsnCfg.Scheduler_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			if connID == utils.MetaInternal {
+				scfg.SchedulerConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler)
+			} else {
+				scfg.SchedulerConns[idx] = connID
+			}
+		}
 	}
 	return nil
 }

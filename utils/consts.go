@@ -553,6 +553,7 @@ const (
 	MetaTrl                     = "*trl"
 	CGROriginHost               = "cgr_originhost"
 	MetaInitiate                = "*initiate"
+	MetaFD                      = "*fd"
 	MetaUpdate                  = "*update"
 	MetaTerminate               = "*terminate"
 	MetaEvent                   = "*event"
@@ -655,6 +656,7 @@ const (
 	MetaDiamreq                 = "*diamreq"
 	MetaGroup                   = "*group"
 	InternalRPCSet              = "InternalRPCSet"
+	MetaDynaprepaid             = "*dynaprepaid"
 )
 
 // Migrator Action
@@ -1128,7 +1130,6 @@ const (
 	APIerSv1GetLoadHistory              = "APIerSv1.GetLoadHistory"
 	APIerSv1GetLoadIDs                  = "APIerSv1.GetLoadIDs"
 	APIerSv1GetLoadTimes                = "APIerSv1.GetLoadTimes"
-	APIerSv1ExecuteScheduledActions     = "APIerSv1.ExecuteScheduledActions"
 	APIerSv1GetSharedGroup              = "APIerSv1.GetSharedGroup"
 	APIerSv1RemoveActionTrigger         = "APIerSv1.RemoveActionTrigger"
 	APIerSv1GetAccount                  = "APIerSv1.GetAccount"
@@ -1386,9 +1387,11 @@ const (
 
 // Scheduler
 const (
-	SchedulerSv1       = "SchedulerSv1"
-	SchedulerSv1Ping   = "SchedulerSv1.Ping"
-	SchedulerSv1Reload = "SchedulerSv1.Reload"
+	SchedulerSv1                   = "SchedulerSv1"
+	SchedulerSv1Ping               = "SchedulerSv1.Ping"
+	SchedulerSv1Reload             = "SchedulerSv1.Reload"
+	SchedulerSv1ExecuteActions     = "SchedulerSv1.ExecuteActions"
+	SchedulerSv1ExecuteActionPlans = "SchedulerSv1.ExecuteActionPlans"
 )
 
 //cgr_ variables

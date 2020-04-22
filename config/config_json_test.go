@@ -503,6 +503,7 @@ func TestDfRalsJsonCfg(t *testing.T) {
 			utils.ANY:   "*zero1ns",
 			utils.VOICE: "*zero1s",
 		},
+		Dynaprepaid_actionplans: &[]string{},
 	}
 	if cfg, err := dfCgrJsonCfg.RalsJsonCfg(); err != nil {
 		t.Error(err)
@@ -536,6 +537,7 @@ func TestDfCdrsJsonCfg(t *testing.T) {
 		Thresholds_conns:     &[]string{},
 		Stats_conns:          &[]string{},
 		Online_cdr_exports:   &[]string{},
+		Scheduler_conns:      &[]string{},
 	}
 	if cfg, err := dfCgrJsonCfg.CdrsJsonCfg(); err != nil {
 		t.Error(err)
@@ -665,6 +667,7 @@ func TestSmgJsonCfg(t *testing.T) {
 		Channel_sync_interval: utils.StringPointer("0"),
 		Terminate_attempts:    utils.IntPointer(5),
 		Alterable_fields:      &[]string{},
+		Scheduler_conns:       &[]string{},
 	}
 	if cfg, err := dfCgrJsonCfg.SessionSJsonCfg(); err != nil {
 		t.Error(err)

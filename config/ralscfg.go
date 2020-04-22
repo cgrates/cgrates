@@ -35,6 +35,7 @@ type RalsCfg struct {
 	MaxComputedUsage        map[string]time.Duration
 	BalanceRatingSubject    map[string]string
 	MaxIncrements           int
+	DynaprepaidActionPlans  []string
 }
 
 //loadFromJsonCfg loads Rals config from JsonCfg
@@ -97,6 +98,12 @@ func (ralsCfg *RalsCfg) loadFromJsonCfg(jsnRALsCfg *RalsJsonCfg) (err error) {
 	if jsnRALsCfg.Balance_rating_subject != nil {
 		for k, v := range *jsnRALsCfg.Balance_rating_subject {
 			ralsCfg.BalanceRatingSubject[k] = v
+		}
+	}
+	if jsnRALsCfg.Dynaprepaid_actionplans != nil {
+		ralsCfg.DynaprepaidActionPlans = make([]string, len(*jsnRALsCfg.Dynaprepaid_actionplans))
+		for i, val := range *jsnRALsCfg.Dynaprepaid_actionplans {
+			ralsCfg.DynaprepaidActionPlans[i] = val
 		}
 	}
 
