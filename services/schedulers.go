@@ -81,7 +81,7 @@ func (schS *SchedulerService) Start() (err error) {
 	schS.schS = scheduler.NewScheduler(datadb, schS.cfg, fltrS)
 	go schS.schS.Loop()
 
-	schS.rpc = v1.NewSchedulerSv1(schS.cfg)
+	schS.rpc = v1.NewSchedulerSv1(schS.cfg, datadb)
 	if !schS.cfg.DispatcherSCfg().Enabled {
 		schS.server.RpcRegister(schS.rpc)
 	}

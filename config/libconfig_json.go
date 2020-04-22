@@ -128,6 +128,7 @@ type RalsJsonCfg struct {
 	Max_computed_usage         *map[string]string
 	Max_increments             *int
 	Balance_rating_subject     *map[string]string
+	Dynaprepaid_actionplans    *[]string
 }
 
 // Scheduler config section
@@ -149,6 +150,7 @@ type CdrsJsonCfg struct {
 	Thresholds_conns     *[]string
 	Stats_conns          *[]string
 	Online_cdr_exports   *[]string
+	Scheduler_conns      *[]string
 }
 
 // Cdre config section
@@ -220,6 +222,7 @@ type SessionSJsonCfg struct {
 	Terminate_attempts    *int
 	Alterable_fields      *[]string
 	Min_dur_low_balance   *string
+	Scheduler_conns       *[]string
 	Stir                  *STIRJsonCfg
 }
 

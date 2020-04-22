@@ -70,6 +70,9 @@ var (
 		testV2CDRsInitCdrDb,
 		testV2CDRsRerate,
 
+		testV2CDRsLoadTariffPlanFromFolder,
+		testv2CDRsDynaPrepaid,
+
 		testV2CDRsKillEngine,
 	}
 )
@@ -954,6 +957,47 @@ func testV2CDRsRerate(t *testing.T) {
 		t.Error(err)
 	} else if len(acnt.BalanceMap) != 1 || acnt.BalanceMap[utils.VOICE][0].Value != 540000000000 {
 		t.Errorf("Unexpected balance received: %+v", acnt.BalanceMap[utils.VOICE][0])
+	}
+}
+
+func testv2CDRsDynaPrepaid(t *testing.T) {
+	var acnt engine.Account
+	if err := cdrsRpc.Call(utils.APIerSv2GetAccount,
+		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "CreatedAccount"}, &acnt); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+
+	args := &engine.ArgV1ProcessEvent{
+		Flags: []string{utils.MetaRALs},
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				utils.OriginID:    "testv2CDRsDynaPrepaid",
+				utils.OriginHost:  "192.168.1.1",
+				utils.Source:      "testv2CDRsDynaPrepaid",
+				utils.RequestType: utils.MetaDynaprepaid,
+				utils.Account:     "CreatedAccount",
+				utils.Subject:     "NoSubject",
+				utils.Destination: "+1234567",
+				utils.AnswerTime:  time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+				utils.Usage:       time.Minute,
+			},
+		},
+	}
+
+	var reply string
+	if err := cdrsRpc.Call(utils.CDRsV1ProcessEvent, args, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply received: ", reply)
+	}
+
+	if err := cdrsRpc.Call(utils.APIerSv2GetAccount,
+		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "CreatedAccount"}, &acnt); err != nil {
+		t.Error(err)
+	} else if acnt.BalanceMap[utils.MONETARY][0].Value != 9.9694 {
+		t.Errorf("Unexpected balance received: %+v", acnt.BalanceMap[utils.MONETARY][0])
 	}
 }
 

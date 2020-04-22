@@ -1442,3 +1442,13 @@ type ArgCacheReplicateRemove struct {
 	*ArgDispatcher
 	TenantArg
 }
+
+type AttrsExecuteActions struct {
+	ActionPlanID       string
+	TimeStart, TimeEnd time.Time // replay the action timings between the two dates
+}
+
+type AttrsExecuteActionPlans struct {
+	ActionPlanIDs     []string
+	Tenant, AccountID string
+}

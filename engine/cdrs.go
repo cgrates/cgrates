@@ -229,7 +229,7 @@ func (cdrS *CDRServer) rateCDR(cdr *CDRWithArgDispatcher) ([]*CDR, error) {
 }
 
 var reqTypes = utils.NewStringSet([]string{utils.META_PSEUDOPREPAID, utils.META_POSTPAID, utils.META_PREPAID,
-	utils.PSEUDOPREPAID, utils.POSTPAID, utils.PREPAID})
+	utils.PSEUDOPREPAID, utils.POSTPAID, utils.PREPAID, utils.MetaDynaprepaid})
 
 // getCostFromRater will retrieve the cost from RALs
 func (cdrS *CDRServer) getCostFromRater(cdr *CDRWithArgDispatcher) (*CallCost, error) {
@@ -259,6 +259,23 @@ func (cdrS *CDRServer) getCostFromRater(cdr *CDRWithArgDispatcher) (*CallCost, e
 			utils.ResponderDebit,
 			&CallDescriptorWithArgDispatcher{CallDescriptor: cd,
 				ArgDispatcher: cdr.ArgDispatcher}, cc)
+		if err != nil && err.Error() == utils.ErrAccountNotFound.Error() &&
+			cdr.RequestType == utils.MetaDynaprepaid {
+			var reply string
+			// execute the actionPlan configured in RalS
+			if err = cdrS.connMgr.Call(cdrS.cgrCfg.CdrsCfg().SchedulerConns, nil,
+				utils.SchedulerSv1ExecuteActionPlans, &utils.AttrsExecuteActionPlans{
+					ActionPlanIDs: cdrS.cgrCfg.RalsCfg().DynaprepaidActionPlans,
+					AccountID:     cdr.Account, Tenant: cdr.Tenant},
+				&reply); err != nil {
+				return cc, err
+			}
+			// execute again the Debit operation
+			err = cdrS.connMgr.Call(cdrS.cgrCfg.CdrsCfg().RaterConns, nil,
+				utils.ResponderDebit,
+				&CallDescriptorWithArgDispatcher{CallDescriptor: cd,
+					ArgDispatcher: cdr.ArgDispatcher}, cc)
+		}
 	} else {
 		err = cdrS.connMgr.Call(cdrS.cgrCfg.CdrsCfg().RaterConns, nil,
 			utils.ResponderGetCost,

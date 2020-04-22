@@ -99,6 +99,7 @@ type SessionSCfg struct {
 	TerminateAttempts   int
 	AlterableFields     *utils.StringSet
 	MinDurLowBalance    time.Duration
+	SchedulerConns      []string
 	STIRCfg             *STIRcfg
 }
 
@@ -274,6 +275,17 @@ func (scfg *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) (err error) {
 	if jsnCfg.Min_dur_low_balance != nil {
 		if scfg.MinDurLowBalance, err = utils.ParseDurationWithNanosecs(*jsnCfg.Min_dur_low_balance); err != nil {
 			return err
+		}
+	}
+	if jsnCfg.Scheduler_conns != nil {
+		scfg.SchedulerConns = make([]string, len(*jsnCfg.Scheduler_conns))
+		for idx, connID := range *jsnCfg.Scheduler_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			if connID == utils.MetaInternal {
+				scfg.SchedulerConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler)
+			} else {
+				scfg.SchedulerConns[idx] = connID
+			}
 		}
 	}
 	return scfg.STIRCfg.loadFromJSONCfg(jsnCfg.Stir)

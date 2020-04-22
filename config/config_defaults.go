@@ -257,6 +257,7 @@ const CGRATES_CFG_JSON = `
 		"*any": "*zero1ns",
 		"*voice": "*zero1s"
 	},
+	"dynaprepaid_actionplans": [],			// actionPlans to be executed in case of *dynaprepaid request type
 },
 
 
@@ -271,6 +272,7 @@ const CGRATES_CFG_JSON = `
 	"thresholds_conns": [],					// connection to ThresholdS for CDR reporting, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
 	"stats_conns": [],						// connections to StatS for CDR reporting, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
 	"online_cdr_exports":[],				// list of CDRE profiles to use for real-time CDR exports
+	"scheduler_conns": [],					// connections to SchedulerS in case of *dynaprepaid request
 },
 
 
@@ -374,6 +376,7 @@ const CGRATES_CFG_JSON = `
 		"publickey_path": "",				// the path to the public key 
 		"privatekey_path": "",				// the path to the private key
 	},
+	"scheduler_conns": [],					// connections to SchedulerS in case of *dynaprepaid request
 },
 
 
