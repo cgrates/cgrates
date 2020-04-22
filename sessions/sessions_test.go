@@ -827,7 +827,7 @@ func TestSessionSNewV1AuthorizeArgs(t *testing.T) {
 		GetAttributes:      true,
 		CGREvent:           cgrEv,
 	}
-	rply := NewV1AuthorizeArgs(true, nil, false, nil, false, nil, true, false, false, false, false, cgrEv, nil, utils.Paginator{})
+	rply := NewV1AuthorizeArgs(true, nil, false, nil, false, nil, true, false, false, false, false, cgrEv, nil, utils.Paginator{}, false)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
@@ -841,8 +841,9 @@ func TestSessionSNewV1AuthorizeArgs(t *testing.T) {
 		SuppliersIgnoreErrors: true,
 		SuppliersMaxCost:      utils.MetaSuppliersEventCost,
 		CGREvent:              cgrEv,
+		ForceDuration:         true,
 	}
-	rply = NewV1AuthorizeArgs(true, nil, false, nil, true, nil, false, true, false, true, true, cgrEv, nil, utils.Paginator{})
+	rply = NewV1AuthorizeArgs(true, nil, false, nil, true, nil, false, true, false, true, true, cgrEv, nil, utils.Paginator{}, true)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v,\n received: %+v", expected, rply)
 	}
@@ -864,7 +865,8 @@ func TestSessionSNewV1AuthorizeArgs(t *testing.T) {
 		ThresholdIDs:          []string{"ID1", "ID2"},
 		StatIDs:               []string{"test3", "test4"},
 	}
-	rply = NewV1AuthorizeArgs(true, attributeIDs, false, thresholdIDs, true, statIDs, false, true, false, true, true, cgrEv, nil, utils.Paginator{})
+	rply = NewV1AuthorizeArgs(true, attributeIDs, false, thresholdIDs, true, statIDs,
+		false, true, false, true, true, cgrEv, nil, utils.Paginator{}, false)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v,\n received: %+v", expected, rply)
 	}
@@ -918,9 +920,10 @@ func TestV1AuthorizeArgsParseFlags(t *testing.T) {
 		StatIDs:               []string{"st1", "st2", "st3"},
 		ArgDispatcher:         cgrArgs.ArgDispatcher,
 		Paginator:             *cgrArgs.SupplierPaginator,
+		ForceDuration:         true,
 	}
 
-	strArg = "*accounts,*resources,,*dispatchers,*suppliers,*suppliers_ignore_errors,*suppliers_event_cost,*attributes:Attr1;Attr2,*thresholds:tr1;tr2;tr3,*stats:st1;st2;st3"
+	strArg = "*accounts,*fd,*resources,,*dispatchers,*suppliers,*suppliers_ignore_errors,*suppliers_event_cost,*attributes:Attr1;Attr2,*thresholds:tr1;tr2;tr3,*stats:st1;st2;st3"
 	v1authArgs.ParseFlags(strArg)
 	if !reflect.DeepEqual(eOut, v1authArgs) {
 		t.Errorf("Expecting %+v,\n received: %+v\n", utils.ToJSON(eOut), utils.ToJSON(v1authArgs))
@@ -940,8 +943,9 @@ func TestSessionSNewV1UpdateSessionArgs(t *testing.T) {
 		GetAttributes: true,
 		UpdateSession: true,
 		CGREvent:      cgrEv,
+		ForceDuration: true,
 	}
-	rply := NewV1UpdateSessionArgs(true, nil, true, cgrEv, nil)
+	rply := NewV1UpdateSessionArgs(true, nil, true, cgrEv, nil, true)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
@@ -949,14 +953,15 @@ func TestSessionSNewV1UpdateSessionArgs(t *testing.T) {
 		GetAttributes: false,
 		UpdateSession: true,
 		CGREvent:      cgrEv,
+		ForceDuration: false,
 	}
-	rply = NewV1UpdateSessionArgs(false, nil, true, cgrEv, nil)
+	rply = NewV1UpdateSessionArgs(false, nil, true, cgrEv, nil, false)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
 	//test with len(AttributeIDs) != 0
 	attributeIDs := []string{"ATTR1", "ATTR2"}
-	rply = NewV1UpdateSessionArgs(false, attributeIDs, true, cgrEv, nil)
+	rply = NewV1UpdateSessionArgs(false, attributeIDs, true, cgrEv, nil, false)
 	expected.AttributeIDs = []string{"ATTR1", "ATTR2"}
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
@@ -977,14 +982,14 @@ func TestSessionSNewV1TerminateSessionArgs(t *testing.T) {
 		ProcessThresholds: true,
 		CGREvent:          cgrEv,
 	}
-	rply := NewV1TerminateSessionArgs(true, false, true, nil, false, nil, cgrEv, nil)
+	rply := NewV1TerminateSessionArgs(true, false, true, nil, false, nil, cgrEv, nil, false)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
 	expected = &V1TerminateSessionArgs{
 		CGREvent: cgrEv,
 	}
-	rply = NewV1TerminateSessionArgs(false, false, false, nil, false, nil, cgrEv, nil)
+	rply = NewV1TerminateSessionArgs(false, false, false, nil, false, nil, cgrEv, nil, false)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
@@ -996,7 +1001,8 @@ func TestSessionSNewV1TerminateSessionArgs(t *testing.T) {
 		ThresholdIDs: []string{"ID1", "ID2"},
 		StatIDs:      []string{"test1", "test2"},
 	}
-	rply = NewV1TerminateSessionArgs(false, false, false, thresholdIDs, false, statIDs, cgrEv, nil)
+	rply = NewV1TerminateSessionArgs(false, false, false,
+		thresholdIDs, false, statIDs, cgrEv, nil, false)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
@@ -1019,7 +1025,8 @@ func TestSessionSNewV1ProcessMessageArgs(t *testing.T) {
 		CGREvent:          cgrEv,
 		GetSuppliers:      true,
 	}
-	rply := NewV1ProcessMessageArgs(true, nil, false, nil, false, nil, true, true, true, false, false, cgrEv, nil, utils.Paginator{})
+	rply := NewV1ProcessMessageArgs(true, nil, false, nil, false, nil,
+		true, true, true, false, false, cgrEv, nil, utils.Paginator{}, false)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
@@ -1031,7 +1038,8 @@ func TestSessionSNewV1ProcessMessageArgs(t *testing.T) {
 		SuppliersMaxCost:      utils.MetaSuppliersEventCost,
 		SuppliersIgnoreErrors: true,
 	}
-	rply = NewV1ProcessMessageArgs(true, nil, false, nil, false, nil, true, false, true, true, true, cgrEv, nil, utils.Paginator{})
+	rply = NewV1ProcessMessageArgs(true, nil, false, nil, false, nil, true,
+		false, true, true, true, cgrEv, nil, utils.Paginator{}, false)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
@@ -1051,7 +1059,8 @@ func TestSessionSNewV1ProcessMessageArgs(t *testing.T) {
 		ThresholdIDs:          []string{"ID1", "ID2"},
 		StatIDs:               []string{"test3", "test4"},
 	}
-	rply = NewV1ProcessMessageArgs(true, attributeIDs, false, thresholdIDs, false, statIDs, true, false, true, true, true, cgrEv, nil, utils.Paginator{})
+	rply = NewV1ProcessMessageArgs(true, attributeIDs, false, thresholdIDs, false, statIDs, true,
+		false, true, true, true, cgrEv, nil, utils.Paginator{}, false)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
@@ -1082,7 +1091,8 @@ func TestSessionSNewV1InitSessionArgs(t *testing.T) {
 		StatIDs:           []string{"test3", "test4"},
 		CGREvent:          cgrEv,
 	}
-	rply := NewV1InitSessionArgs(true, attributeIDs, true, thresholdIDs, true, statIDs, true, true, cgrEv, nil)
+	rply := NewV1InitSessionArgs(true, attributeIDs, true, thresholdIDs,
+		true, statIDs, true, true, cgrEv, nil, false)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
@@ -1104,7 +1114,8 @@ func TestSessionSNewV1InitSessionArgs(t *testing.T) {
 		ProcessStats:      true,
 		CGREvent:          cgrEv,
 	}
-	rply = NewV1InitSessionArgs(true, nil, true, nil, true, nil, true, true, cgrEv, nil)
+	rply = NewV1InitSessionArgs(true, nil, true, nil,
+		true, nil, true, true, cgrEv, nil, false)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
@@ -1116,7 +1127,8 @@ func TestSessionSNewV1InitSessionArgs(t *testing.T) {
 		ProcessStats:      true,
 		CGREvent:          cgrEv,
 	}
-	rply = NewV1InitSessionArgs(true, nil, false, nil, true, nil, false, true, cgrEv, nil)
+	rply = NewV1InitSessionArgs(true, nil, false, nil, true,
+		nil, false, true, cgrEv, nil, false)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
@@ -1489,7 +1501,8 @@ func TestSessionSNewV1AuthorizeArgsWithArgDispatcher(t *testing.T) {
 		},
 	}
 	cgrArgs := cgrEv.ExtractArgs(true, true)
-	rply := NewV1AuthorizeArgs(true, nil, false, nil, false, nil, true, false, false, false, false, cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator)
+	rply := NewV1AuthorizeArgs(true, nil, false, nil, false, nil, true, false, false, false,
+		false, cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator, false)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rply))
 	}
@@ -1508,7 +1521,8 @@ func TestSessionSNewV1AuthorizeArgsWithArgDispatcher(t *testing.T) {
 			RouteID: utils.StringPointer("testrouteid"),
 		},
 	}
-	rply = NewV1AuthorizeArgs(true, nil, false, nil, true, nil, false, true, false, true, true, cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator)
+	rply = NewV1AuthorizeArgs(true, nil, false, nil, true, nil, false,
+		true, false, true, true, cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator, false)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rply))
 	}
@@ -1533,7 +1547,8 @@ func TestSessionSNewV1AuthorizeArgsWithArgDispatcher2(t *testing.T) {
 		},
 	}
 	cgrArgs := cgrEv.ExtractArgs(true, true)
-	rply := NewV1AuthorizeArgs(true, nil, false, nil, false, nil, true, false, false, false, false, cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator)
+	rply := NewV1AuthorizeArgs(true, nil, false, nil, false, nil, true, false,
+		false, false, false, cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator, false)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rply))
 	}
@@ -1551,7 +1566,8 @@ func TestSessionSNewV1AuthorizeArgsWithArgDispatcher2(t *testing.T) {
 			RouteID: utils.StringPointer("testrouteid"),
 		},
 	}
-	rply = NewV1AuthorizeArgs(true, nil, false, nil, true, nil, false, true, false, true, true, cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator)
+	rply = NewV1AuthorizeArgs(true, nil, false, nil, true, nil, false,
+		true, false, true, true, cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator, false)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rply))
 	}
