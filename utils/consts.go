@@ -717,6 +717,7 @@ const (
 	MetaPAP                   = "*pap"
 	MetaCHAP                  = "*chap"
 	MetaMSCHAPV2              = "*mschapv2"
+	MetaDynaprepaid           = "*dynaprepaid"
 )
 
 // Migrator Action
@@ -1459,9 +1460,11 @@ const (
 
 // Scheduler
 const (
-	SchedulerSv1       = "SchedulerSv1"
-	SchedulerSv1Ping   = "SchedulerSv1.Ping"
-	SchedulerSv1Reload = "SchedulerSv1.Reload"
+	SchedulerSv1                   = "SchedulerSv1"
+	SchedulerSv1Ping               = "SchedulerSv1.Ping"
+	SchedulerSv1Reload             = "SchedulerSv1.Reload"
+	SchedulerSv1ExecuteActions     = "SchedulerSv1.ExecuteActions"
+	SchedulerSv1ExecuteActionPlans = "SchedulerSv1.ExecuteActionPlans"
 )
 
 //cgr_ variables

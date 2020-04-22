@@ -19,15 +19,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	"github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/utils"
 )
 
 func init() {
 	c := &CmdExecuteScheduledActions{
 		name:      "scheduler_execute",
-		rpcMethod: utils.APIerSv1ExecuteScheduledActions,
-		rpcParams: &v1.AttrsExecuteScheduledActions{},
+		rpcMethod: utils.SchedulerSv1ExecuteActions,
+		rpcParams: &utils.AttrsExecuteActions{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -37,7 +36,7 @@ func init() {
 type CmdExecuteScheduledActions struct {
 	name      string
 	rpcMethod string
-	rpcParams *v1.AttrsExecuteScheduledActions
+	rpcParams *utils.AttrsExecuteActions
 	*CommandExecuter
 }
 
@@ -51,7 +50,7 @@ func (self *CmdExecuteScheduledActions) RpcMethod() string {
 
 func (self *CmdExecuteScheduledActions) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &v1.AttrsExecuteScheduledActions{}
+		self.rpcParams = &utils.AttrsExecuteActions{}
 	}
 	return self.rpcParams
 }

@@ -25,6 +25,7 @@
 "rals": {
 	"enabled": true,
 	"thresholds_conns": ["conn1"],
+	"dynaprepaid_actionplans": ["PACKAGE_1001"],
 },
 
 "schedulers": {
@@ -38,6 +39,7 @@
 	"rals_conns": ["conn1"],
 	"stats_conns": ["conn1"],
 	"thresholds_conns": ["conn1"],
+	"scheduler_conns": ["*localhost"],
 },
 
 "attributes": {

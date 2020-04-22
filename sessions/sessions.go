@@ -409,13 +409,35 @@ func (sS *SessionS) debitSession(s *Session, sRunIdx int, dur time.Duration,
 	cd := sr.CD.Clone()
 	argDsp := s.ArgDispatcher
 	cc := new(engine.CallCost)
-	if err := sS.connMgr.Call(sS.cgrCfg.SessionSCfg().RALsConns, nil,
+	err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().RALsConns, nil,
 		utils.ResponderMaxDebit,
 		&engine.CallDescriptorWithArgDispatcher{
 			CallDescriptor: cd,
-			ArgDispatcher:  argDsp}, cc); err != nil {
-		sr.ExtraDuration += dbtRsrv
-		return 0, err
+			ArgDispatcher:  argDsp}, cc)
+	if err != nil {
+		// verify in case of *dynaprepaid RequestType
+		if err.Error() == utils.ErrAccountNotFound.Error() &&
+			sr.Event.GetStringIgnoreErrors(utils.RequestType) == utils.MetaDynaprepaid {
+			var reply string
+			// execute the actionPlan configured in RalS
+			if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().SchedulerConns, nil,
+				utils.SchedulerSv1ExecuteActionPlans, &utils.AttrsExecuteActionPlans{
+					ActionPlanIDs: sS.cgrCfg.RalsCfg().DynaprepaidActionPlans,
+					Tenant:        cd.Tenant, AccountID: cd.Account},
+				&reply); err != nil {
+				return
+			}
+			// execute again the MaxDebit operation
+			err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().RALsConns, nil,
+				utils.ResponderMaxDebit,
+				&engine.CallDescriptorWithArgDispatcher{
+					CallDescriptor: cd,
+					ArgDispatcher:  argDsp}, cc)
+		}
+		if err != nil {
+			sr.ExtraDuration += dbtRsrv
+			return 0, err
+		}
 	}
 	sr.CD.TimeEnd = cc.GetEndTime() // set debited timeEnd
 	ccDuration := cc.GetDuration()

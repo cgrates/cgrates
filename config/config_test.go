@@ -418,37 +418,19 @@ func TestCgrCfgJSONDefaultsScheduler(t *testing.T) {
 }
 
 func TestCgrCfgJSONDefaultsCDRS(t *testing.T) {
-	emptySlice := []string{}
-	var eCdrExtr []*utils.RSRField
-	if cgrCfg.CdrsCfg().Enabled != false {
-		t.Errorf("Expecting: false , received: %+v", cgrCfg.CdrsCfg().Enabled)
+	eCdrsCfg := &CdrsCfg{
+		Enabled:         false,
+		StoreCdrs:       true,
+		SMCostRetries:   5,
+		ChargerSConns:   []string{},
+		RaterConns:      []string{},
+		AttributeSConns: []string{},
+		ThresholdSConns: []string{},
+		StatSConns:      []string{},
+		SchedulerConns:  []string{},
 	}
-	if !reflect.DeepEqual(eCdrExtr, cgrCfg.CdrsCfg().ExtraFields) {
-		t.Errorf("Expecting: %+v , received: %+v", eCdrExtr, cgrCfg.CdrsCfg().ExtraFields)
-	}
-	if cgrCfg.CdrsCfg().StoreCdrs != true {
-		t.Errorf("Expecting: true , received: %+v", cgrCfg.CdrsCfg().StoreCdrs)
-	}
-	if cgrCfg.CdrsCfg().SMCostRetries != 5 {
-		t.Errorf("Expecting: 5 , received: %+v", cgrCfg.CdrsCfg().SMCostRetries)
-	}
-	if !reflect.DeepEqual(cgrCfg.CdrsCfg().RaterConns, emptySlice) {
-		t.Errorf("Expecting: %+v , received: %+v", emptySlice, cgrCfg.CdrsCfg().RaterConns)
-	}
-	if !reflect.DeepEqual(cgrCfg.CdrsCfg().ChargerSConns, emptySlice) {
-		t.Errorf("Expecting: %+v , received: %+v", emptySlice, cgrCfg.CdrsCfg().ChargerSConns)
-	}
-	if !reflect.DeepEqual(cgrCfg.CdrsCfg().AttributeSConns, emptySlice) {
-		t.Errorf("Expecting: %+v , received: %+v", emptySlice, cgrCfg.CdrsCfg().AttributeSConns)
-	}
-	if !reflect.DeepEqual(cgrCfg.CdrsCfg().ThresholdSConns, emptySlice) {
-		t.Errorf("Expecting: %+v , received: %+v", emptySlice, cgrCfg.CdrsCfg().ThresholdSConns)
-	}
-	if !reflect.DeepEqual(cgrCfg.CdrsCfg().StatSConns, emptySlice) {
-		t.Errorf("Expecting: %+v , received: %+v", emptySlice, cgrCfg.CdrsCfg().StatSConns)
-	}
-	if cgrCfg.CdrsCfg().OnlineCDRExports != nil {
-		t.Errorf("Expecting: nil , received: %+v", cgrCfg.CdrsCfg().OnlineCDRExports)
+	if !reflect.DeepEqual(eCdrsCfg, cgrCfg.cdrsCfg) {
+		t.Errorf("Expecting: %+v , received: %+v", eCdrsCfg, cgrCfg.cdrsCfg)
 	}
 }
 
@@ -626,6 +608,7 @@ func TestCgrCfgJSONDefaultsSMGenericCfg(t *testing.T) {
 			PayloadMaxduration: -1,
 			DefaultAttest:      "A",
 		},
+		SchedulerConns: []string{},
 	}
 	if !reflect.DeepEqual(eSessionSCfg, cgrCfg.sessionSCfg) {
 		t.Errorf("expecting: %s, received: %s",

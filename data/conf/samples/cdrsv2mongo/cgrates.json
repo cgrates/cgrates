@@ -9,14 +9,15 @@
 },
 
 "stor_db": {
-	"db_type": "mongo",					// stor database type to use: <mysql|postgres>
-	"db_port": 27017, 						// the port to reach the stordb
+	"db_type": "mongo",
+	"db_port": 27017,
 },
 
 
 "rals": {
-	"enabled": true,						// enable Rater service: <true|false>
+	"enabled": true,
 	"thresholds_conns": ["*localhost"],
+	"dynaprepaid_actionplans": ["PACKAGE_1001"],
 },
 
 "schedulers": {
@@ -30,6 +31,7 @@
 	"rals_conns": ["*localhost"],
 	"stats_conns": ["*localhost"],
 	"thresholds_conns": ["*localhost"],
+	"scheduler_conns": ["*localhost"],
 },
 
 "attributes": {
