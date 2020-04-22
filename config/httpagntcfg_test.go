@@ -351,3 +351,78 @@ func TestHttpAgentCfgappendHttpAgntProcCfgs(t *testing.T) {
 		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(initial))
 	}
 }
+
+func testHttpAgentCfgAsMapInterface(t *testing.T) {
+	var httpcfg HttpAgentCfgs
+	cfgJSONStr := `{
+		
+"http_agent": [
+	{
+		"id": "conecto1",
+		"url": "/conecto",
+		"sessions_conns": ["*localhost"],
+		"request_payload":	"*url",
+		"reply_payload":	"*xml",
+		"request_processors": [
+			{
+				"id": "OutboundAUTHDryRun",
+				"filters": ["*string:~*req.request_type:OutboundAUTH","*string:~*req.Msisdn:497700056231"],
+				"tenant": "cgrates.org",
+				"flags": ["*dryrun"],
+				"request_fields":[
+				],
+				"reply_fields":[
+					{"tag": "Allow", "path": "*rep.response.Allow", "type": "*constant",
+						"value": "1", "mandatory": true},
+					{"tag": "Concatenated1", "path": "*rep.response.Concatenated", "type": "*composed",
+                    	"value": "~*req.MCC;/", "mandatory": true},
+                    {"tag": "Concatenated2", "path": "*rep.response.Concatenated", "type": "*composed",
+                    	"value": "Val1"},
+					{"tag": "MaxDuration", "path": "*rep.response.MaxDuration", "type": "*constant",
+						"value": "1200", "blocker": true},
+					{"tag": "Unused", "path": "*rep.response.Unused", "type": "*constant",
+						"value": "0"},
+					],
+				},
+			],
+		},
+	],	
+}`
+	request_fields := []string{}
+	eMap := []map[string]interface{}{
+		{
+			"id":              "conecto1",
+			"url":             "/conecto",
+			"sessions_conns":  []string{"*localhost"},
+			"request_payload": "*url",
+			"reply_payload":   "*xml",
+			"request_processors": []map[string]interface{}{
+				{
+					"id":             "OutboundAUTHDryRun",
+					"filters":        []string{"*string:~*req.request_type:OutboundAUTH", "*string:~*req.Msisdn:497700056231"},
+					"tenant":         "cgrates.org",
+					"flags":          map[string][]string{"*dryrun": request_fields},
+					"Timezone":       "",
+					"request_fields": request_fields,
+					"reply_fields": []map[string]interface{}{
+						{"tag": "Allow", "path": "*rep.response.Allow", "type": "*constant", "value": "1", "mandatory": true},
+						{"tag": "Concatenated1", "path": "*rep.response.Concatenated", "type": "*composed", "value": "~*req.MCC;/", "mandatory": true},
+						{"tag": "Concatenated2", "path": "*rep.response.Concatenated", "type": "*composed", "value": "Val1"},
+						{"tag": "MaxDuration", "path": "*rep.response.MaxDuration", "type": "*constant", "value": "1200", "blocker": true},
+						{"tag": "Unused", "path": "*rep.response.Unused", "type": "*constant", "value": "0"},
+					},
+				},
+			},
+		},
+	}
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+		t.Error(err)
+	} else if jsnhttpCfg, err := jsnCfg.HttpAgentJsonCfg(); err != nil {
+		t.Error(err)
+	} else if err = httpcfg.loadFromJsonCfg(jsnhttpCfg, utils.INFIELD_SEP); err != nil {
+		t.Error(err)
+	} else if rcv := httpcfg.AsMapInterface(";"); !reflect.DeepEqual(eMap, rcv) {
+		t.Errorf("Expected: %+v,\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	}
+
+}

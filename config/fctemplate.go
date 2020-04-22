@@ -20,7 +20,6 @@ package config
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -195,7 +194,7 @@ func (self *FCTemplate) Clone() *FCTemplate {
 	return cln
 }
 
-func (fc *FCTemplate) AsMapInterface() (mp map[string]interface{}) {
+func (fc *FCTemplate) AsMapInterface(separator string) (mp map[string]interface{}) {
 	mp = make(map[string]interface{})
 	if fc.Tag != utils.EmptyString {
 		mp[utils.TagCfg] = fc.Tag
@@ -210,11 +209,16 @@ func (fc *FCTemplate) AsMapInterface() (mp map[string]interface{}) {
 		mp[utils.FiltersCfg] = fc.Filters
 	}
 	if fc.Value != nil {
-		values := make([]string, len(fc.Value))
 		for i, item := range fc.Value {
-			values[i] = item.Rules
+			if i != 0 {
+				mp[utils.ValueCfg] = mp[utils.ValueCfg].(string) + separator
+			}
+			if mp[utils.ValueCfg] == nil {
+				mp[utils.ValueCfg] = item.Rules
+			} else {
+				mp[utils.ValueCfg] = mp[utils.ValueCfg].(string) + item.Rules
+			}
 		}
-		mp[utils.ValueCfg] = strings.Join(values, utils.EmptyString)
 	}
 	if fc.Width != 0 {
 		mp[utils.WidthCfg] = fc.Width

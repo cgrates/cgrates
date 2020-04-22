@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -182,10 +183,10 @@ func (self *LoaderSCfg) Clone() *LoaderSCfg {
 	return clnLoader
 }
 
-func (lData *LoaderDataType) AsMapInterface() map[string]interface{} {
+func (lData *LoaderDataType) AsMapInterface(separator string) map[string]interface{} {
 	fields := make([]map[string]interface{}, len(lData.Fields))
 	for i, item := range lData.Fields {
-		fields[i] = item.AsMapInterface()
+		fields[i] = item.AsMapInterface(separator)
 	}
 
 	return map[string]interface{}{
@@ -195,23 +196,28 @@ func (lData *LoaderDataType) AsMapInterface() map[string]interface{} {
 	}
 }
 
-func (l *LoaderSCfg) AsMapInterface() map[string]interface{} {
+func (l *LoaderSCfg) AsMapInterface(separator string) map[string]interface{} {
 	tenant := make([]string, len(l.Tenant))
 	for i, item := range l.Tenant {
 		tenant[i] = item.Rules
 	}
+	strings.Join(tenant, utils.EmptyString)
 
 	data := make([]map[string]interface{}, len(l.Data))
 	for i, item := range l.Data {
-		data[i] = item.AsMapInterface()
+		data[i] = item.AsMapInterface(separator)
+	}
+	var runDelay string = "0"
+	if l.RunDelay != 0 {
+		runDelay = l.RunDelay.String()
 	}
 
 	return map[string]interface{}{
 		utils.IdCfg:             l.Id,
 		utils.EnabledCfg:        l.Enabled,
-		utils.TenantCfg:         tenant,
+		utils.TenantCfg:         strings.Join(tenant, utils.EmptyString),
 		utils.DryRunCfg:         l.DryRun,
-		utils.RunDelayCfg:       l.RunDelay,
+		utils.RunDelayCfg:       runDelay,
 		utils.LockFileNameCfg:   l.LockFileName,
 		utils.CacheSConnsCfg:    l.CacheSConns,
 		utils.FieldSeparatorCfg: l.FieldSeparator,

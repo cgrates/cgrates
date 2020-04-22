@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"strings"
+
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -80,10 +82,10 @@ func (da *DNSAgentCfg) loadFromJsonCfg(jsnCfg *DNSAgentJsonCfg, sep string) (err
 	return nil
 }
 
-func (da *DNSAgentCfg) AsMapInterface() map[string]interface{} {
+func (da *DNSAgentCfg) AsMapInterface(separator string) map[string]interface{} {
 	requestProcessors := make([]map[string]interface{}, len(da.RequestProcessors))
 	for i, item := range da.RequestProcessors {
-		requestProcessors[i] = item.AsMapInterface()
+		requestProcessors[i] = item.AsMapInterface(separator)
 	}
 
 	return map[string]interface{}{
@@ -147,23 +149,36 @@ func (rp *RequestProcessor) loadFromJsonCfg(jsnCfg *ReqProcessorJsnCfg, sep stri
 	return nil
 }
 
-func (rp *RequestProcessor) AsMapInterface() map[string]interface{} {
+func (rp *RequestProcessor) AsMapInterface(separator string) map[string]interface{} {
 	replyFields := make([]map[string]interface{}, len(rp.ReplyFields))
 	for i, item := range rp.ReplyFields {
-		replyFields[i] = item.AsMapInterface()
+		replyFields[i] = item.AsMapInterface(separator)
 	}
 
 	requestFields := make([]map[string]interface{}, len(rp.RequestFields))
 	for i, item := range rp.RequestFields {
-		requestFields[i] = item.AsMapInterface()
+		requestFields[i] = item.AsMapInterface(separator)
+	}
+	var tenant string
+	if rp.Tenant != nil {
+		values := make([]string, len(rp.Tenant))
+		for i, item := range rp.Tenant {
+			values[i] = item.Rules
+		}
+		tenant = strings.Join(values, utils.EmptyString)
+	}
+
+	flags := make(map[string][]string, len(rp.Flags))
+	for key, item := range rp.Flags {
+		flags[key] = item
 	}
 
 	return map[string]interface{}{
-		utils.ID:               rp.ID,
-		utils.Tenant:           rp.Tenant,
-		utils.Filters:          rp.Filters,
-		utils.Flags:            rp.Flags,
-		utils.TimezoneCfg:      rp.Timezone,
+		utils.IDCfg:            rp.ID,
+		utils.TenantCfg:        tenant,
+		utils.FiltersCfg:       rp.Filters,
+		utils.FlagsCfg:         flags,
+		utils.TimezoneCfgC:     rp.Timezone,
 		utils.RequestFieldsCfg: requestFields,
 		utils.ReplyFieldsCfg:   replyFields,
 	}

@@ -98,11 +98,11 @@ func (erS *ERsCfg) Clone() (cln *ERsCfg) {
 	return
 }
 
-func (erS *ERsCfg) AsMapInterface() map[string]interface{} {
+func (erS *ERsCfg) AsMapInterface(separator string) map[string]interface{} {
 
 	readers := make([]map[string]interface{}, len(erS.Readers))
 	for i, item := range erS.Readers {
-		readers[i] = item.AsMapInterface()
+		readers[i] = item.AsMapInterface(separator)
 	}
 
 	return map[string]interface{}{
@@ -247,7 +247,7 @@ func (er *EventReaderCfg) Clone() (cln *EventReaderCfg) {
 	return
 }
 
-func (er *EventReaderCfg) AsMapInterface() map[string]interface{} {
+func (er *EventReaderCfg) AsMapInterface(separator string) map[string]interface{} {
 	xmlRootPath := make([]string, len(er.XmlRootPath))
 	for i, item := range er.XmlRootPath {
 		xmlRootPath[i] = item
@@ -262,11 +262,11 @@ func (er *EventReaderCfg) AsMapInterface() map[string]interface{} {
 	}
 	fields := make([]map[string]interface{}, len(er.Fields))
 	for i, item := range er.Fields {
-		fields[i] = item.AsMapInterface()
+		fields[i] = item.AsMapInterface(separator)
 	}
 	cacheDumpFields := make([]map[string]interface{}, len(er.CacheDumpFields))
 	for i, item := range er.CacheDumpFields {
-		cacheDumpFields[i] = item.AsMapInterface()
+		cacheDumpFields[i] = item.AsMapInterface(separator)
 	}
 
 	return map[string]interface{}{

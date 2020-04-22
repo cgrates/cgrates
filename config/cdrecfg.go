@@ -95,10 +95,10 @@ func (self *CdreCfg) Clone() *CdreCfg {
 	return clnCdre
 }
 
-func (cdre *CdreCfg) AsMapInterface() map[string]interface{} {
+func (cdre *CdreCfg) AsMapInterface(separator string) map[string]interface{} {
 	fields := make([]map[string]interface{}, len(cdre.Fields))
 	for i, item := range cdre.Fields {
-		fields[i] = item.AsMapInterface()
+		fields[i] = item.AsMapInterface(separator)
 	}
 
 	return map[string]interface{}{
