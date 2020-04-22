@@ -2276,7 +2276,7 @@ aa+jqv4dwkr/FLEcN1zC76Y/IniI65fId55hVJvN3ORuzUqYEtzD3irmsw==
 	}
 }
 
-func TestBiRPCv1STIRInitiate(t *testing.T) {
+func TestBiRPCv1STIRIdentity(t *testing.T) {
 	sS := new(SessionS)
 	sS.cgrCfg = config.CgrConfig()
 	payload := &utils.PASSporTPayload{
@@ -2311,7 +2311,7 @@ aa+jqv4dwkr/FLEcN1zC76Y/IniI65fId55hVJvN3ORuzUqYEtzD3irmsw==
 		nil, true, utils.NonTransactional)
 
 	var rcv string
-	if err := sS.BiRPCv1STIRInitiate(nil, &V1STIRInitiateArgs{
+	if err := sS.BiRPCv1STIRIdentity(nil, &V1STIRIdentityArgs{
 		Payload:        payload,
 		PublicKeyPath:  "https://www.example.org/cert.cer",
 		PrivateKeyPath: "https://www.example.org/private.pem",
@@ -2321,7 +2321,7 @@ aa+jqv4dwkr/FLEcN1zC76Y/IniI65fId55hVJvN3ORuzUqYEtzD3irmsw==
 	}
 	engine.Cache.Set(utils.CacheSTIR, "https://www.example.org/private.pem", prvKey,
 		nil, true, utils.NonTransactional)
-	if err := sS.BiRPCv1STIRInitiate(nil, &V1STIRInitiateArgs{
+	if err := sS.BiRPCv1STIRIdentity(nil, &V1STIRIdentityArgs{
 		Payload:        payload,
 		PublicKeyPath:  "https://www.example.org/cert.cer",
 		PrivateKeyPath: "https://www.example.org/private.pem",

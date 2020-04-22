@@ -157,7 +157,7 @@ func (ssv1 *SessionSv1) STIRAuthenticate(args *sessions.V1STIRAuthenticateArgs, 
 	return ssv1.Ss.BiRPCv1STIRAuthenticate(nil, args, reply)
 }
 
-// STIRInitiate creates the identity for STIR/SHAKEN
-func (ssv1 *SessionSv1) STIRInitiate(args *sessions.V1STIRInitiateArgs, reply *string) error {
-	return ssv1.Ss.BiRPCv1STIRInitiate(nil, args, reply)
+// STIRIdentity creates the identity for STIR/SHAKEN
+func (ssv1 *SessionSv1) STIRIdentity(args *sessions.V1STIRIdentityArgs, reply *string) error {
+	return ssv1.Ss.BiRPCv1STIRIdentity(nil, args, reply)
 }

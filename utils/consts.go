@@ -1374,7 +1374,7 @@ const (
 	SessionSv1DisconnectPeer             = "SessionSv1.DisconnectPeer"
 	SessionSv1DisconnectWarning          = "SessionSv1.DisconnectWarning"
 	SessionSv1STIRAuthenticate           = "SessionSv1.STIRAuthenticate"
-	SessionSv1STIRInitiate               = "SessionSv1.STIRInitiate"
+	SessionSv1STIRIdentity               = "SessionSv1.STIRIdentity"
 )
 
 // Responder APIs
