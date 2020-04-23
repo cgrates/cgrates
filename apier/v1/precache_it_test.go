@@ -124,7 +124,7 @@ func testPrecacheGetCacheStatsBeforeLoad(t *testing.T) {
 	if err := precacheRPC.Call(utils.CacheSv1GetCacheStats, args, &reply); err != nil {
 		t.Error(err.Error())
 	} else if !reflect.DeepEqual(reply, expectedStats) {
-		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(expectedStats), utils.ToJSON(reply))
+		t.Errorf("Expecting : %+v,\n received: %+v", utils.ToJSON(expectedStats), utils.ToJSON(reply))
 	}
 }
 
@@ -270,6 +270,10 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 			Items:  1,
 			Groups: 0,
 		},
+		utils.CacheSTIR: {
+			Items:  0,
+			Groups: 0,
+		},
 		utils.CacheSupplierFilterIndexes: {
 			Items:  6,
 			Groups: 0,
@@ -326,7 +330,7 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 	if err := precacheRPC.Call(utils.CacheSv1GetCacheStats, args, &reply); err != nil {
 		t.Error(err.Error())
 	} else if !reflect.DeepEqual(reply, expectedStats) {
-		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(expectedStats), utils.ToJSON(reply))
+		t.Errorf("Expecting : %+v, \n received: %+v", utils.ToJSON(expectedStats), utils.ToJSON(reply))
 	}
 }
 
