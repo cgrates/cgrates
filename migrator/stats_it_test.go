@@ -264,7 +264,7 @@ func testStsITMigrateAndMove(t *testing.T) {
 			t.Errorf("Expecting: %+v, received: %+v", sqp, result)
 		}
 
-		result1, err := engine.GetFilter(stsMigrator.dmOut.DataManager(), "cgrates.org", v1Sts.Id, false, false, utils.NonTransactional)
+		result1, err := stsMigrator.dmOut.DataManager().GetFilter("cgrates.org", v1Sts.Id, false, false, utils.NonTransactional)
 		if err != nil {
 			t.Error("Error when getting Stats ", err.Error())
 		}
