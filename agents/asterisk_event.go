@@ -38,6 +38,7 @@ type SMAsteriskEvent struct { // Standalone struct so we can cache the fields wh
 	asteriskIP    string
 	asteriskAlias string
 	cachedFields  map[string]string // Cache replies here
+	opts          map[string]interface{}
 }
 
 // parseStasisArgs will convert the args passed to Stasis into CGRateS attribute/value pairs understood by CGRateS and store them in cachedFields
@@ -46,7 +47,11 @@ func (smaEv *SMAsteriskEvent) parseStasisArgs() {
 	args, _ := smaEv.ariEv["args"].([]interface{})
 	for _, arg := range args {
 		if splt := strings.Split(arg.(string), "="); len(splt) > 1 {
-			smaEv.cachedFields[splt[0]] = splt[1]
+			if !utils.CGROptionsSet.Has(splt[0]) {
+				smaEv.cachedFields[splt[0]] = splt[1]
+			} else {
+				smaEv.opts[splt[0]] = splt[1]
+			}
 		}
 	}
 }
@@ -218,16 +223,14 @@ func (smaEv *SMAsteriskEvent) UpdateCGREvent(cgrEv *utils.CGREvent) error {
 
 func (smaEv *SMAsteriskEvent) AsMapStringInterface() (mp map[string]interface{}) {
 	mp = make(map[string]interface{})
-	var evName string
 	switch smaEv.EventType() {
 	case ARIStasisStart:
-		evName = SMAAuthorization
+		mp[utils.EVENT_NAME] = SMAAuthorization
 	case ARIChannelStateChange:
-		evName = SMASessionStart
+		mp[utils.EVENT_NAME] = SMASessionStart
 	case ARIChannelDestroyed:
-		evName = SMASessionTerminate
+		mp[utils.EVENT_NAME] = SMASessionTerminate
 	}
-	mp[utils.EVENT_NAME] = evName
 	mp[utils.OriginID] = smaEv.ChannelID()
 	if smaEv.RequestType() != "" {
 		mp[utils.RequestType] = smaEv.RequestType()
@@ -279,6 +282,7 @@ func (smaEv *SMAsteriskEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs)
 	}
 	args = &sessions.V1AuthorizeArgs{
 		CGREvent: cgrEv,
+		Opts:     smaEv.opts,
 	}
 	if smaEv.Subsystems() == utils.EmptyString {
 		utils.Logger.Err(fmt.Sprintf("<%s> cgr_flags variable is not set",
@@ -290,9 +294,10 @@ func (smaEv *SMAsteriskEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs)
 	return
 }
 
-func (smaEv *SMAsteriskEvent) V1InitSessionArgs(cgrEvDisp utils.CGREventWithArgDispatcher) (args *sessions.V1InitSessionArgs) {
+func (smaEv *SMAsteriskEvent) V1InitSessionArgs(cgrEvDisp utils.CGREventWithOpts) (args *sessions.V1InitSessionArgs) {
 	args = &sessions.V1InitSessionArgs{ // defaults
 		CGREvent: cgrEvDisp.CGREvent,
+		Opts:     cgrEvDisp.Opts,
 	}
 	subsystems, err := cgrEvDisp.CGREvent.FieldAsString(utils.CGRFlags)
 	if err != nil {
@@ -305,9 +310,10 @@ func (smaEv *SMAsteriskEvent) V1InitSessionArgs(cgrEvDisp utils.CGREventWithArgD
 	return
 }
 
-func (smaEv *SMAsteriskEvent) V1TerminateSessionArgs(cgrEvDisp utils.CGREventWithArgDispatcher) (args *sessions.V1TerminateSessionArgs) {
+func (smaEv *SMAsteriskEvent) V1TerminateSessionArgs(cgrEvDisp utils.CGREventWithOpts) (args *sessions.V1TerminateSessionArgs) {
 	args = &sessions.V1TerminateSessionArgs{ // defaults
 		CGREvent: cgrEvDisp.CGREvent,
+		Opts:     cgrEvDisp.Opts,
 	}
 	subsystems, err := cgrEvDisp.CGREvent.FieldAsString(utils.CGRFlags)
 	if err != nil {

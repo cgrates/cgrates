@@ -106,16 +106,18 @@ type ChrgSProcessEventReply struct {
 	AttributeSProfiles []string
 	AlteredFields      []string
 	CGREvent           *utils.CGREvent
+	Opts               map[string]interface{}
 }
 
-func (cS *ChargerService) processEvent(cgrEv *utils.CGREventWithArgDispatcher) (rply []*ChrgSProcessEventReply, err error) {
+func (cS *ChargerService) processEvent(cgrEv *utils.CGREventWithOpts) (rply []*ChrgSProcessEventReply, err error) {
 	var cPs ChargerProfiles
-	if cPs, err = cS.matchingChargerProfilesForEvent(cgrEv); err != nil {
+	if cPs, err = cS.matchingChargerProfilesForEvent(cgrEv.CGREventWithArgDispatcher); err != nil {
 		return nil, err
 	}
 	rply = make([]*ChrgSProcessEventReply, len(cPs))
 	for i, cP := range cPs {
 		clonedEv := cgrEv.Clone()
+		opts := MapEvent(cgrEv.Opts).Clone()
 		clonedEv.Event[utils.RunID] = cP.RunID
 		rply[i] = &ChrgSProcessEventReply{
 			ChargerSProfile: cP.ID,
@@ -129,11 +131,12 @@ func (cS *ChargerService) processEvent(cgrEv *utils.CGREventWithArgDispatcher) (
 		args := &AttrArgsProcessEvent{
 			AttributeIDs: cP.AttributeIDs,
 			Context: utils.StringPointer(utils.FirstNonEmpty(
-				utils.IfaceAsString(clonedEv.CGREvent.Event[utils.Context]),
+				utils.IfaceAsString(opts[utils.Context]),
 				utils.MetaChargers)),
 			ProcessRuns:   nil,
 			CGREvent:      clonedEv.CGREvent,
 			ArgDispatcher: clonedEv.ArgDispatcher,
+			Opts:          opts,
 		}
 		var evReply AttrSProcessEventReply
 		if err = cS.connMgr.Call(cS.cfg.ChargerSCfg().AttributeSConns, nil,
@@ -143,18 +146,19 @@ func (cS *ChargerService) processEvent(cgrEv *utils.CGREventWithArgDispatcher) (
 		rply[i].AttributeSProfiles = evReply.MatchedProfiles
 		if len(evReply.AlteredFields) != 0 {
 			rply[i].AlteredFields = append(rply[i].AlteredFields, evReply.AlteredFields...)
-		}
-		if len(evReply.AlteredFields) != 0 {
 			rply[i].CGREvent = evReply.CGREvent
+			rply[i].Opts = opts
 		}
 	}
 	return
 }
 
 // V1ProcessEvent will process the event received via API and return list of events forked
-func (cS *ChargerService) V1ProcessEvent(args *utils.CGREventWithArgDispatcher,
+func (cS *ChargerService) V1ProcessEvent(args *utils.CGREventWithOpts,
 	reply *[]*ChrgSProcessEventReply) (err error) {
-	if args.CGREvent == nil || args.Event == nil {
+	if args.CGREventWithArgDispatcher == nil ||
+		args.CGREvent == nil ||
+		args.Event == nil {
 		return utils.NewErrMandatoryIeMissing("Event")
 	}
 	rply, err := cS.processEvent(args)

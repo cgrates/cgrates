@@ -143,7 +143,8 @@ func (rdr *JSONFileER) processFile(fPath, fName string) (err error) {
 	reqVars := map[string]interface{}{utils.FileName: fName}
 
 	agReq := agents.NewAgentRequest(
-		config.NewNavigableMap(data), reqVars, nil, nil, rdr.Config().Tenant,
+		config.NewNavigableMap(data), reqVars,
+		nil, nil, nil, rdr.Config().Tenant,
 		rdr.cgrCfg.GeneralCfg().DefaultTenant,
 		utils.FirstNonEmpty(rdr.Config().Timezone,
 			rdr.cgrCfg.GeneralCfg().DefaultTimezone),
@@ -158,9 +159,11 @@ func (rdr *JSONFileER) processFile(fPath, fName string) (err error) {
 				utils.ERs, absPath, err.Error()))
 		return
 	}
-	rdr.rdrEvents <- &erEvent{cgrEvent: agReq.CGRRequest.AsCGREvent(
-		agReq.Tenant, utils.NestingSep),
-		rdrCfg: rdr.Config()}
+	rdr.rdrEvents <- &erEvent{
+		cgrEvent: agReq.CGRRequest.AsCGREvent(agReq.Tenant, utils.NestingSep),
+		rdrCfg:   rdr.Config(),
+		opts:     agReq.Opts.GetData(),
+	}
 	evsPosted++
 
 	if rdr.Config().ProcessedPath != "" {

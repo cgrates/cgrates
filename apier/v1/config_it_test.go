@@ -154,6 +154,13 @@ func testConfigSReloadConfigFromJSONSessionS(t *testing.T) {
 		"SessionTTLUsage":     nil,
 		"StoreSCosts":         false,
 		"AlterableFields":     map[string]interface{}{},
+		"STIRCfg": map[string]interface{}{
+			"AllowedAttest":      map[string]interface{}{},
+			"DefaultAttest":      "A",
+			"PayloadMaxduration": -1.,
+			"PrivateKeyPath":     "",
+			"PublicKeyPath":      "",
+		},
 	}
 
 	var rpl map[string]interface{}

@@ -250,7 +250,7 @@ func testHAitAuth1001(t *testing.T) {
 		httpConst, addr, haCfg.HttpAgentCfg()[0].Url, acnt)
 	rply, err := httpC.Get(reqUrl)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	eXml := []byte(fmt.Sprintf(`<?xml version="1.0" encoding="UTF-8"?>
 <response>
@@ -277,7 +277,7 @@ func testHAitCDRmtcall(t *testing.T) {
 		httpConst, addr, haCfg.HttpAgentCfg()[0].Url)
 	rply, err := httpC.Get(reqUrl)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	eXml := []byte(`<?xml version="1.0" encoding="UTF-8"?>
 <CDR_RESPONSE>
@@ -327,7 +327,7 @@ func testHAitCDRmtcall2(t *testing.T) {
 	req.Header.Add("Content-Type", "application/xml; charset=utf-8")
 	resp, err := httpC.Do(req)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	resp.Body.Close()
 

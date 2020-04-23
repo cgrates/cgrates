@@ -140,7 +140,7 @@ func (cSv1 *ChargerSv1) GetChargersForEvent(cgrEv *utils.CGREventWithArgDispatch
 }
 
 // ProcessEvent
-func (cSv1 *ChargerSv1) ProcessEvent(args *utils.CGREventWithArgDispatcher,
+func (cSv1 *ChargerSv1) ProcessEvent(args *utils.CGREventWithOpts,
 	reply *[]*engine.ChrgSProcessEventReply) error {
 	return cSv1.cS.V1ProcessEvent(args, reply)
 }

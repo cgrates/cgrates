@@ -66,9 +66,8 @@ type KamSessionDisconnect struct {
 	Reason    string
 }
 
-func (self *KamSessionDisconnect) String() string {
-	mrsh, _ := json.Marshal(self)
-	return string(mrsh)
+func (ksd *KamSessionDisconnect) String() string {
+	return utils.ToJSON(ksd)
 }
 
 // NewKamEvent parses bytes received over the wire from Kamailio into KamEvent
@@ -133,7 +132,7 @@ func (kev KamEvent) MissingParameter() bool {
 
 }
 
-// AsMapStringIface converts KamEvent into event used by other subsystems
+// AsMapStringInterface converts KamEvent into event used by other subsystems
 func (kev KamEvent) AsMapStringInterface() (mp map[string]interface{}) {
 	mp = make(map[string]interface{})
 	for k, v := range kev {
@@ -150,7 +149,7 @@ func (kev KamEvent) AsMapStringInterface() (mp map[string]interface{}) {
 	return
 }
 
-// AsCDR converts KamEvent into CGREvent
+// AsCGREvent converts KamEvent into CGREvent
 func (kev KamEvent) AsCGREvent(timezone string) (cgrEv *utils.CGREvent, err error) {
 	var sTime time.Time
 	switch kev[EVENT] {
@@ -199,6 +198,7 @@ func (kev KamEvent) String() string {
 	return string(mrsh)
 }
 
+// V1AuthorizeArgs returns the arguments used in SessionSv1.AuthorizeEvent
 func (kev KamEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs) {
 	cgrEv, err := kev.AsCGREvent(config.CgrConfig().GeneralCfg().DefaultTimezone)
 	if err != nil {
@@ -206,6 +206,7 @@ func (kev KamEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs) {
 	}
 	args = &sessions.V1AuthorizeArgs{
 		CGREvent: cgrEv,
+		Opts:     kev.GetOptions(),
 	}
 	subsystems, has := kev[utils.CGRFlags]
 	if !has {
@@ -261,6 +262,7 @@ func (kev KamEvent) V1InitSessionArgs() (args *sessions.V1InitSessionArgs) {
 	}
 	args = &sessions.V1InitSessionArgs{ // defaults
 		CGREvent: cgrEv,
+		Opts:     kev.GetOptions(),
 	}
 	subsystems, has := kev[utils.CGRFlags]
 	if !has {
@@ -279,6 +281,7 @@ func (kev KamEvent) V1ProcessMessageArgs() (args *sessions.V1ProcessMessageArgs)
 	}
 	args = &sessions.V1ProcessMessageArgs{ // defaults
 		CGREvent: cgrEv,
+		Opts:     kev.GetOptions(),
 	}
 	subsystems, has := kev[utils.CGRFlags]
 	if !has {
@@ -306,7 +309,7 @@ func (kev KamEvent) V1ProcessCDRArgs() (args *utils.CGREventWithArgDispatcher) {
 	return
 }
 
-// AsKamProcessEventReply builds up a Kamailio ProcessEvent based on arguments and reply from SessionS
+// AsKamProcessMessageReply builds up a Kamailio ProcessEvent based on arguments and reply from SessionS
 func (kev KamEvent) AsKamProcessMessageReply(procEvArgs *sessions.V1ProcessMessageArgs,
 	procEvReply *sessions.V1ProcessMessageReply, rplyErr error) (kar *KamReply, err error) {
 	evName := CGR_PROCESS_MESSAGE
@@ -343,7 +346,7 @@ func (kev KamEvent) AsKamProcessMessageReply(procEvArgs *sessions.V1ProcessMessa
 	return
 }
 
-// AsKamProcessEventReply builds up a Kamailio ProcessEvent based on arguments and reply from SessionS
+// AsKamProcessCDRReply builds up a Kamailio ProcessEvent based on arguments and reply from SessionS
 func (kev KamEvent) AsKamProcessCDRReply(cgrEvWithArgDisp *utils.CGREventWithArgDispatcher,
 	rply *string, rplyErr error) (kar *KamReply, err error) {
 	evName := CGR_PROCESS_CDR
@@ -360,7 +363,7 @@ func (kev KamEvent) AsKamProcessCDRReply(cgrEvWithArgDisp *utils.CGREventWithArg
 	return
 }
 
-// AsKamProcessEventEmptyReply builds up a Kamailio ProcessEventEmpty
+// AsKamProcessMessageEmptyReply builds up a Kamailio ProcessEventEmpty
 func (kev KamEvent) AsKamProcessMessageEmptyReply() (kar *KamReply) {
 	evName := CGR_PROCESS_MESSAGE
 	if kamRouReply, has := kev[KamReplyRoute]; has {
@@ -382,6 +385,7 @@ func (kev KamEvent) V1TerminateSessionArgs() (args *sessions.V1TerminateSessionA
 	args = &sessions.V1TerminateSessionArgs{ // defaults
 		TerminateSession: true,
 		CGREvent:         cgrEv,
+		Opts:             kev.GetOptions(),
 	}
 	subsystems, has := kev[utils.CGRFlags]
 	if !has {
@@ -406,9 +410,8 @@ type KamReply struct {
 	Error              string // Reply in case of error
 }
 
-func (self *KamReply) String() string {
-	mrsh, _ := json.Marshal(self)
-	return string(mrsh)
+func (krply *KamReply) String() string {
+	return utils.ToJSON(krply)
 }
 
 type KamDlgReply struct {
@@ -439,7 +442,17 @@ func NewKamDlgReply(kamEvData []byte) (rpl KamDlgReply, err error) {
 	return
 }
 
-func (self *KamDlgReply) String() string {
-	mrsh, _ := json.Marshal(self)
-	return string(mrsh)
+func (kdr *KamDlgReply) String() string {
+	return utils.ToJSON(kdr)
+}
+
+// GetOptions returns the posible options
+func (kev KamEvent) GetOptions() (mp map[string]interface{}) {
+	mp = make(map[string]interface{})
+	for k := range utils.CGROptionsSet.Data() {
+		if val, has := kev[k]; has {
+			mp[k] = val
+		}
+	}
+	return
 }

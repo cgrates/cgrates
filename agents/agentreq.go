@@ -34,8 +34,7 @@ import (
 // NewAgentRequest returns a new AgentRequest
 func NewAgentRequest(req config.DataProvider,
 	vars map[string]interface{},
-	cgrRply *config.NavigableMap,
-	rply *config.NavigableMap,
+	cgrRply, rply, opts *config.NavigableMap,
 	tntTpl config.RSRParsers,
 	dfltTenant, timezone string,
 	filterS *engine.FilterS,
@@ -45,6 +44,9 @@ func NewAgentRequest(req config.DataProvider,
 	}
 	if rply == nil {
 		rply = config.NewNavigableMap(nil)
+	}
+	if opts == nil {
+		opts = config.NewNavigableMap(nil)
 	}
 	ar = &AgentRequest{
 		Request:    req,
@@ -57,6 +59,7 @@ func NewAgentRequest(req config.DataProvider,
 		filterS:    filterS,
 		Header:     header,
 		Trailer:    trailer,
+		Opts:       opts,
 	}
 	// populate tenant
 	if tntIf, err := ar.ParseField(
@@ -85,6 +88,7 @@ type AgentRequest struct {
 	Trailer config.DataProvider
 	diamreq *config.NavigableMap // used in case of building requests (ie. DisconnectSession)
 	tmp     *config.NavigableMap // used in case you want to store temporary items and access them later
+	Opts    *config.NavigableMap
 }
 
 // String implements engine.DataProvider
@@ -122,10 +126,12 @@ func (ar *AgentRequest) FieldAsInterface(fldPath []string) (val interface{}, err
 		val, err = ar.tmp.FieldAsInterface(fldPath[1:])
 	case utils.MetaCache:
 		if cacheVal, ok := engine.Cache.Get(utils.CacheUCH, strings.Join(fldPath[1:], utils.NestingSep)); !ok {
-			return nil, utils.ErrNotFound
+			err = utils.ErrNotFound
 		} else {
 			val = cacheVal
 		}
+	case utils.MetaOpts:
+		val, err = ar.Opts.FieldAsInterface(fldPath[1:])
 	}
 	return
 }
@@ -179,6 +185,8 @@ func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 				ar.tmp.Remove(fldPath[1:])
 			case utils.MetaCache:
 				engine.Cache.Remove(utils.CacheUCH, strings.Join(fldPath[1:], utils.NestingSep), true, utils.NonTransactional)
+			case utils.MetaOpts:
+				ar.Opts.Remove(fldPath[1:])
 			}
 		case utils.MetaRemoveAll:
 			fldPath := strings.Split(tplFld.Path, utils.NestingSep)
@@ -199,6 +207,8 @@ func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 				ar.tmp.RemoveAll()
 			case utils.MetaCache:
 				engine.Cache.Clear([]string{utils.CacheUCH})
+			case utils.MetaOpts:
+				ar.Opts.RemoveAll()
 			}
 		default:
 			out, err := ar.ParseField(tplFld)
@@ -251,6 +261,8 @@ func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 				ar.tmp.Set(fldPath[1:], valSet, false, true)
 			case utils.MetaCache:
 				engine.Cache.Set(utils.CacheUCH, strings.Join(fldPath[1:], utils.NestingSep), valSet, nil, true, utils.NonTransactional)
+			case utils.MetaOpts:
+				ar.Opts.Set(fldPath[1:], valSet, false, true)
 			}
 		}
 		if tplFld.Blocker { // useful in case of processing errors first

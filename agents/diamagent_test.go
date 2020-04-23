@@ -130,6 +130,7 @@ func TestProcessRequest(t *testing.T) {
 			}
 			expargs := &sessions.V1AuthorizeArgs{
 				GetMaxUsage: true,
+				Opts:        map[string]interface{}{},
 				CGREvent: &utils.CGREvent{
 					Tenant: "cgrates.org",
 					ID:     id,
@@ -172,6 +173,7 @@ func TestProcessRequest(t *testing.T) {
 			expargs := &sessions.V1InitSessionArgs{
 				GetAttributes: true,
 				InitSession:   true,
+				Opts:          map[string]interface{}{},
 				CGREvent: &utils.CGREvent{
 					Tenant: "cgrates.org",
 					ID:     id,
@@ -236,6 +238,7 @@ func TestProcessRequest(t *testing.T) {
 			expargs := &sessions.V1UpdateSessionArgs{
 				GetAttributes: true,
 				UpdateSession: true,
+				Opts:          map[string]interface{}{},
 				CGREvent: &utils.CGREvent{
 					Tenant: "cgrates.org",
 					ID:     id,
@@ -337,6 +340,7 @@ func TestProcessRequest(t *testing.T) {
 			}
 			expargs := &sessions.V1TerminateSessionArgs{
 				TerminateSession: true,
+				Opts:             map[string]interface{}{},
 				CGREvent: &utils.CGREvent{
 					Tenant: "cgrates.org",
 					ID:     id,
@@ -377,6 +381,7 @@ func TestProcessRequest(t *testing.T) {
 			expargs := &sessions.V1ProcessMessageArgs{
 				GetAttributes: true,
 				Debit:         true,
+				Opts:          map[string]interface{}{},
 				CGREvent: &utils.CGREvent{
 					Tenant: "cgrates.org",
 					ID:     id,
@@ -429,7 +434,7 @@ func TestProcessRequest(t *testing.T) {
 		},
 	}}
 	reqProcessor.Flags, _ = utils.FlagsWithParamsFromSlice([]string{utils.MetaAuthorize, utils.MetaAccounts})
-	agReq := NewAgentRequest(diamDP, reqVars, cgrRplyNM, rply,
+	agReq := NewAgentRequest(diamDP, reqVars, cgrRplyNM, rply, nil,
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
 		config.CgrConfig().GeneralCfg().DefaultTimezone, filters, nil, nil)
 
@@ -456,7 +461,7 @@ func TestProcessRequest(t *testing.T) {
 	cgrRplyNM = config.NewNavigableMap(nil)
 	rply = config.NewNavigableMap(nil)
 
-	agReq = NewAgentRequest(diamDP, reqVars, cgrRplyNM, rply,
+	agReq = NewAgentRequest(diamDP, reqVars, cgrRplyNM, rply, nil,
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
 		config.CgrConfig().GeneralCfg().DefaultTimezone, filters, nil, nil)
 
@@ -473,7 +478,7 @@ func TestProcessRequest(t *testing.T) {
 	cgrRplyNM = config.NewNavigableMap(nil)
 	rply = config.NewNavigableMap(nil)
 
-	agReq = NewAgentRequest(diamDP, reqVars, cgrRplyNM, rply,
+	agReq = NewAgentRequest(diamDP, reqVars, cgrRplyNM, rply, nil,
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
 		config.CgrConfig().GeneralCfg().DefaultTimezone, filters, nil, nil)
 
@@ -493,7 +498,7 @@ func TestProcessRequest(t *testing.T) {
 	cgrRplyNM = config.NewNavigableMap(nil)
 	rply = config.NewNavigableMap(nil)
 
-	agReq = NewAgentRequest(diamDP, reqVars, cgrRplyNM, rply,
+	agReq = NewAgentRequest(diamDP, reqVars, cgrRplyNM, rply, nil,
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
 		config.CgrConfig().GeneralCfg().DefaultTimezone, filters, nil, nil)
 
@@ -510,7 +515,7 @@ func TestProcessRequest(t *testing.T) {
 	cgrRplyNM = config.NewNavigableMap(nil)
 	rply = config.NewNavigableMap(nil)
 
-	agReq = NewAgentRequest(diamDP, reqVars, cgrRplyNM, rply,
+	agReq = NewAgentRequest(diamDP, reqVars, cgrRplyNM, rply, nil,
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
 		config.CgrConfig().GeneralCfg().DefaultTimezone, filters, nil, nil)
 

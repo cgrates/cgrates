@@ -130,6 +130,7 @@ type AttrSProcessEventReply struct {
 	MatchedProfiles []string
 	AlteredFields   []string
 	CGREvent        *utils.CGREvent
+	Opts            map[string]interface{}
 	blocker         bool // internally used to stop further processRuns
 }
 
@@ -155,6 +156,7 @@ type AttrArgsProcessEvent struct {
 	AttributeIDs []string
 	Context      *string // attach the event to a context
 	ProcessRuns  *int    // number of loops for ProcessEvent
+	Opts         map[string]interface{}
 	*utils.CGREvent
 	*utils.ArgDispatcher
 }
@@ -169,8 +171,13 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent) (
 	rply = &AttrSProcessEventReply{
 		MatchedProfiles: []string{attrPrf.ID},
 		CGREvent:        args.CGREvent,
-		blocker:         attrPrf.Blocker}
-	evNm := config.NewNavigableMap(map[string]interface{}{utils.MetaReq: rply.CGREvent.Event})
+		Opts:            args.Opts,
+		blocker:         attrPrf.Blocker,
+	}
+	evNm := config.NewNavigableMap(map[string]interface{}{
+		utils.MetaReq:  rply.CGREvent.Event,
+		utils.MetaOpts: rply.Opts,
+	})
 	for _, attribute := range attrPrf.Attributes {
 		//in case that we have filter for attribute send them to FilterS to be processed
 		if len(attribute.FilterIDs) != 0 {
@@ -387,6 +394,7 @@ func (alS *AttributeService) V1ProcessEvent(args *AttrArgsProcessEvent,
 		}
 		apiRply.MatchedProfiles = append(apiRply.MatchedProfiles, evRply.MatchedProfiles[0])
 		apiRply.CGREvent = evRply.CGREvent
+		apiRply.Opts = evRply.Opts
 		for _, fldName := range evRply.AlteredFields {
 			if !utils.IsSliceMember(apiRply.AlteredFields, fldName) {
 				apiRply.AlteredFields = append(apiRply.AlteredFields, fldName) // only add processed fieldName once

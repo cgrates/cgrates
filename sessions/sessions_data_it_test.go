@@ -571,23 +571,25 @@ func testSessionsDataTTLExpired(t *testing.T) {
 	usage := int64(1024)
 	initArgs := &V1InitSessionArgs{
 		InitSession: true,
+		Opts: map[string]interface{}{
+			utils.SessionTTLUsage: "2048", // will be charged on TTL
+		},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsDataTTLExpired",
 			Event: map[string]interface{}{
-				utils.EVENT_NAME:      "TEST_EVENT",
-				utils.ToR:             utils.DATA,
-				utils.OriginID:        "TestSessionsDataTTLExpired",
-				utils.Account:         acntAttrs.Account,
-				utils.Subject:         acntAttrs.Account,
-				utils.Destination:     utils.DATA,
-				utils.Category:        "data",
-				utils.Tenant:          "cgrates.org",
-				utils.RequestType:     utils.META_PREPAID,
-				utils.SetupTime:       time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
-				utils.AnswerTime:      time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-				utils.Usage:           "1024",
-				utils.SessionTTLUsage: "2048", // will be charged on TTL
+				utils.EVENT_NAME:  "TEST_EVENT",
+				utils.ToR:         utils.DATA,
+				utils.OriginID:    "TestSessionsDataTTLExpired",
+				utils.Account:     acntAttrs.Account,
+				utils.Subject:     acntAttrs.Account,
+				utils.Destination: utils.DATA,
+				utils.Category:    "data",
+				utils.Tenant:      "cgrates.org",
+				utils.RequestType: utils.META_PREPAID,
+				utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
+				utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
+				utils.Usage:       "1024",
 			},
 		},
 	}
@@ -695,25 +697,27 @@ func testSessionsDataTTLExpMultiUpdates(t *testing.T) {
 	usage = int64(4096)
 	updateArgs := &V1UpdateSessionArgs{
 		UpdateSession: true,
+		Opts: map[string]interface{}{
+			utils.SessionTTLUsage:    "2048", // will be charged on TTL
+			utils.SessionTTLLastUsed: "1024",
+		},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsDataTTLExpMultiUpdates",
 			Event: map[string]interface{}{
-				utils.EVENT_NAME:         "TEST_EVENT",
-				utils.ToR:                utils.DATA,
-				utils.OriginID:           "123495",
-				utils.Account:            acntAttrs.Account,
-				utils.Subject:            acntAttrs.Account,
-				utils.Destination:        utils.DATA,
-				utils.Category:           "data",
-				utils.Tenant:             "cgrates.org",
-				utils.RequestType:        utils.META_PREPAID,
-				utils.SetupTime:          time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
-				utils.AnswerTime:         time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-				utils.LastUsed:           "1024",
-				utils.Usage:              "4096",
-				utils.SessionTTLUsage:    "2048", // will be charged on TTL
-				utils.SessionTTLLastUsed: "1024",
+				utils.EVENT_NAME:  "TEST_EVENT",
+				utils.ToR:         utils.DATA,
+				utils.OriginID:    "123495",
+				utils.Account:     acntAttrs.Account,
+				utils.Subject:     acntAttrs.Account,
+				utils.Destination: utils.DATA,
+				utils.Category:    "data",
+				utils.Tenant:      "cgrates.org",
+				utils.RequestType: utils.META_PREPAID,
+				utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
+				utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
+				utils.LastUsed:    "1024",
+				utils.Usage:       "4096",
 			},
 		},
 	}
@@ -820,6 +824,9 @@ func testSessionsDataMultipleDataNoUsage(t *testing.T) {
 	usage = int64(1024)
 	updateArgs := &V1UpdateSessionArgs{
 		UpdateSession: true,
+		Opts: map[string]interface{}{
+			utils.SessionTTL: "0", // cancel timeout since usage 0 will not update it
+		},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsDataMultipleDataNoUsage",
@@ -835,7 +842,6 @@ func testSessionsDataMultipleDataNoUsage(t *testing.T) {
 				utils.RequestType: utils.META_PREPAID,
 				utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
 				utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-				utils.SessionTTL:  "1h", // cancel timeout since usage 0 will not update it
 				utils.Usage:       "1024",
 				utils.LastUsed:    "1024",
 			},
@@ -844,7 +850,7 @@ func testSessionsDataMultipleDataNoUsage(t *testing.T) {
 
 	var updateRpl *V1UpdateSessionReply
 	if err := sDataRPC.Call(utils.SessionSv1UpdateSession, updateArgs, &updateRpl); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	if updateRpl.MaxUsage.Nanoseconds() != usage {
 		t.Errorf("Expected: %+v, received: %+v", usage, updateRpl.MaxUsage.Nanoseconds())
@@ -867,6 +873,9 @@ func testSessionsDataMultipleDataNoUsage(t *testing.T) {
 	usage = int64(0)
 	updateArgs = &V1UpdateSessionArgs{
 		UpdateSession: true,
+		Opts: map[string]interface{}{
+			utils.SessionTTL: "1h", // cancel timeout since usage 0 will not update it
+		},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsDataMultipleDataNoUsage",
@@ -882,7 +891,6 @@ func testSessionsDataMultipleDataNoUsage(t *testing.T) {
 				utils.RequestType: utils.META_PREPAID,
 				utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
 				utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-				utils.SessionTTL:  "1h", // cancel timeout since usage 0 will not update it
 				utils.Usage:       "0",
 				utils.LastUsed:    "0",
 			},
@@ -1005,7 +1013,7 @@ func testSessionsDataTTLUsageProtection(t *testing.T) {
 	var initRpl *V1InitSessionReply
 	if err := sDataRPC.Call(utils.SessionSv1InitiateSession,
 		initArgs, &initRpl); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	if initRpl.MaxUsage.Nanoseconds() != usage {
 		t.Errorf("Expecting : %+v, received: %+v", usage, initRpl.MaxUsage.Nanoseconds())

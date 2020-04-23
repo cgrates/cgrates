@@ -190,7 +190,7 @@ func (rdr *FlatstoreER) processFile(fPath, fName string) (err error) {
 		rowNr++ // increment the rowNr after checking if it's not the end of file
 		agReq := agents.NewAgentRequest(
 			config.NewSliceDP(record), reqVars,
-			nil, nil, rdr.Config().Tenant,
+			nil, nil, nil, rdr.Config().Tenant,
 			rdr.cgrCfg.GeneralCfg().DefaultTenant,
 			utils.FirstNonEmpty(rdr.Config().Timezone,
 				rdr.cgrCfg.GeneralCfg().DefaultTimezone),
@@ -206,9 +206,11 @@ func (rdr *FlatstoreER) processFile(fPath, fName string) (err error) {
 			continue
 		}
 
-		rdr.rdrEvents <- &erEvent{cgrEvent: agReq.CGRRequest.AsCGREvent(
-			agReq.Tenant, utils.NestingSep),
-			rdrCfg: rdr.Config()}
+		rdr.rdrEvents <- &erEvent{
+			cgrEvent: agReq.CGRRequest.AsCGREvent(agReq.Tenant, utils.NestingSep),
+			rdrCfg:   rdr.Config(),
+			opts:     agReq.Opts.GetData(),
+		}
 		evsPosted++
 	}
 	if rdr.Config().ProcessedPath != "" {

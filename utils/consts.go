@@ -195,7 +195,6 @@ const (
 	Direction                    = "Direction"
 	Tenant                       = "Tenant"
 	Category                     = "Category"
-	Context                      = "Context"
 	Contexts                     = "Contexts"
 	Account                      = "Account"
 	Subject                      = "Subject"
@@ -336,10 +335,6 @@ const (
 	MemoryUsage                 = "MemoryUsage"
 	RunningSince                = "RunningSince"
 	GoVersion                   = "GoVersion"
-	SessionTTL                  = "SessionTTL"
-	SessionTTLMaxDelay          = "SessionTTLMaxDelay"
-	SessionTTLLastUsed          = "SessionTTLLastUsed"
-	SessionTTLUsage             = "SessionTTLUsage"
 	HandlerSubstractUsage       = "*substract_usage"
 	XML                         = "xml"
 	MetaGOB                     = "*gob"
@@ -602,6 +597,7 @@ const (
 	MetaHdr                   = "*hdr"
 	MetaTrl                   = "*trl"
 	MetaTmp                   = "*tmp"
+	MetaOpts                  = "*opts"
 	CGROriginHost             = "cgr_originhost"
 	MetaInitiate              = "*initiate"
 	MetaUpdate                = "*update"
@@ -631,7 +627,6 @@ const (
 	RemoteHost                = "RemoteHost"
 	Local                     = "local"
 	TCP                       = "tcp"
-	CGRDebitInterval          = "CGRDebitInterval"
 	Version                   = "Version"
 	MetaTenant                = "*tenant"
 	ResourceUsage             = "ResourceUsage"
@@ -2059,16 +2054,6 @@ const (
 	STIRPptField  = "ppt"
 	STIRInfoField = "info"
 
-	STIRATest              = "STIRATest"
-	STIRPayloadMaxDuration = "STIRPayloadMaxDuration"
-	STIRIdentity           = "STIRIdentity"
-	STIROriginatorTn       = "STIROriginatorTn"
-	STIROriginatorURI      = "STIROriginatorURI"
-	STIRDestinationTn      = "STIRDestinationTn"
-	STIRDestinationURI     = "STIRDestinationURI"
-	STIRPublicKeyPath      = "STIRPublicKeyPath"
-	STIRPrivateKeyPath     = "STIRPrivateKeyPath"
-
 	STIRExtraInfoPrefix = ";info=<"
 	STIRExtraInfoSuffix = ">;alg=ES256;ppt=shaken"
 )
@@ -2083,6 +2068,36 @@ var (
 	MetaXLeft  = "*xleft"
 	// only for padding
 	MetaZeroLeft = "*zeroleft"
+)
+
+// CGROptionsSet the posible cgr options
+var CGROptionsSet = NewStringSet([]string{STIRATest, STIRPayloadMaxDuration,
+	STIRIdentity, STIROriginatorTn, STIROriginatorURI, STIRDestinationTn,
+	STIRDestinationURI, STIRPublicKeyPath, STIRPrivateKeyPath,
+	DebitInterval, Context, SessionTTL, SessionTTLMaxDelay,
+	SessionTTLLastUsed, SessionTTLUsage})
+
+// SessionS ProccessEvent posible options
+const (
+	// STIR
+	STIRATest              = "STIRATest"
+	STIRPayloadMaxDuration = "STIRPayloadMaxDuration"
+	STIRIdentity           = "STIRIdentity"
+	STIROriginatorTn       = "STIROriginatorTn"
+	STIROriginatorURI      = "STIROriginatorURI"
+	STIRDestinationTn      = "STIRDestinationTn"
+	STIRDestinationURI     = "STIRDestinationURI"
+	STIRPublicKeyPath      = "STIRPublicKeyPath"
+	STIRPrivateKeyPath     = "STIRPrivateKeyPath"
+
+	DebitInterval = "DebitInterval"
+	Context       = "Context"
+
+	// terminator
+	SessionTTL         = "SessionTTL"
+	SessionTTLMaxDelay = "SessionTTLMaxDelay"
+	SessionTTLLastUsed = "SessionTTLLastUsed"
+	SessionTTLUsage    = "SessionTTLUsage"
 )
 
 func buildCacheInstRevPrefixes() {

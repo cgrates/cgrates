@@ -20,7 +20,6 @@ package config
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -565,7 +564,7 @@ func (stirCfg *STIRcfg) AsMapInterface() map[string]interface{} {
 		utils.DefaultAttestCfg:      stirCfg.DefaultAttest,
 		utils.PublicKeyPathCfg:      stirCfg.PublicKeyPath,
 		utils.PrivateKeyPathCfg:     stirCfg.PrivateKeyPath,
-		utils.AllowedAtestCfg:       strings.Join(stirCfg.AllowedAttest.AsSlice(), utils.NestingSep),
+		utils.AllowedAtestCfg:       stirCfg.AllowedAttest.AsSlice(),
 		utils.PayloadMaxdurationCfg: stirCfg.PayloadMaxduration,
 	}
 }

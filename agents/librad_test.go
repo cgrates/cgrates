@@ -86,7 +86,7 @@ func TestRadReplyAppendAttributes(t *testing.T) {
 			Type:  utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("~*cgrep.MaxUsage{*duration_seconds}", true, utils.INFIELD_SEP)},
 	}
-	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", nil, nil, nil)
+	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", nil, nil, nil)
 	agReq.CGRReply.Set([]string{utils.CapMaxUsage}, time.Duration(time.Hour), false, false)
 	agReq.CGRReply.Set([]string{utils.CapAttributes, "RadReply"}, "AccessAccept", false, false)
 	agReq.CGRReply.Set([]string{utils.CapAttributes, utils.Account}, "1001", false, false)

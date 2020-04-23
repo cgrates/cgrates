@@ -70,7 +70,7 @@ type AttributeSv1Interface interface {
 type ChargerSv1Interface interface {
 	Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error
 	GetChargersForEvent(cgrEv *utils.CGREventWithArgDispatcher, reply *engine.ChargerProfiles) error
-	ProcessEvent(args *utils.CGREventWithArgDispatcher, reply *[]*engine.ChrgSProcessEventReply) error
+	ProcessEvent(args *utils.CGREventWithOpts, reply *[]*engine.ChrgSProcessEventReply) error
 }
 
 type SessionSv1Interface interface {
@@ -139,7 +139,7 @@ type SchedulerSv1Interface interface {
 }
 
 type CDRsV1Interface interface {
-	ProcessCDR(cdr *engine.CDRWithArgDispatcher, reply *string) error
+	ProcessCDR(cdr *engine.CDRWithOpts, reply *string) error
 	ProcessEvent(arg *engine.ArgV1ProcessEvent, reply *string) error
 	ProcessExternalCDR(cdr *engine.ExternalCDRWithArgDispatcher, reply *string) error
 	RateCDRs(arg *engine.ArgRateCDRs, reply *string) error

@@ -704,9 +704,16 @@ type CDRWithArgDispatcher struct {
 type ExternalCDRWithArgDispatcher struct {
 	*ExternalCDR
 	*utils.ArgDispatcher
+	Opts map[string]interface{}
 }
 
 type UsageRecordWithArgDispatcher struct {
 	*UsageRecord
 	*utils.ArgDispatcher
+}
+
+type CDRWithOpts struct {
+	*CDR
+	*utils.ArgDispatcher
+	Opts map[string]interface{}
 }

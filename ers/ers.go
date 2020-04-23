@@ -32,6 +32,7 @@ import (
 type erEvent struct {
 	cgrEvent *utils.CGREvent
 	rdrCfg   *config.EventReaderCfg
+	opts     map[string]interface{}
 }
 
 // NewERService instantiates the ERService
@@ -84,7 +85,7 @@ func (erS *ERService) ListenAndServe(cfgRldChan chan struct{}) (err error) {
 		case <-erS.stopChan:
 			return
 		case erEv := <-erS.rdrEvents:
-			if err := erS.processEvent(erEv.cgrEvent, erEv.rdrCfg); err != nil {
+			if err := erS.processEvent(erEv.cgrEvent, erEv.rdrCfg, erEv.opts); err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> reading event: <%s> got error: <%s>",
 						utils.ERs, utils.ToIJSON(erEv.cgrEvent), err.Error()))
@@ -144,7 +145,8 @@ func (erS *ERService) addReader(rdrID string, cfgIdx int) (err error) {
 }
 
 // processEvent will be called each time a new event is received from readers
-func (erS *ERService) processEvent(cgrEv *utils.CGREvent, rdrCfg *config.EventReaderCfg) (err error) {
+func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
+	rdrCfg *config.EventReaderCfg, opts map[string]interface{}) (err error) {
 	// log the event created if requested by flags
 	if rdrCfg.Flags.HasKey(utils.MetaLog) {
 		utils.Logger.Info(
@@ -192,6 +194,7 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent, rdrCfg *config.EventRe
 			rdrCfg.Flags.HasKey(utils.MetaSuppliersEventCost),
 			cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator,
 			rdrCfg.Flags.HasKey(utils.MetaFD),
+			opts,
 		)
 		rply := new(sessions.V1AuthorizeReply)
 		err = erS.connMgr.Call(erS.cfg.ERsCfg().SessionSConns, nil, utils.SessionSv1AuthorizeEvent,
@@ -207,7 +210,8 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent, rdrCfg *config.EventRe
 			rdrCfg.Flags.HasKey(utils.MetaResources),
 			rdrCfg.Flags.HasKey(utils.MetaAccounts),
 			cgrEv, cgrArgs.ArgDispatcher,
-			rdrCfg.Flags.HasKey(utils.MetaFD))
+			rdrCfg.Flags.HasKey(utils.MetaFD),
+			opts)
 		rply := new(sessions.V1InitSessionReply)
 		err = erS.connMgr.Call(erS.cfg.ERsCfg().SessionSConns, nil, utils.SessionSv1InitiateSession,
 			initArgs, rply)
@@ -217,7 +221,8 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent, rdrCfg *config.EventRe
 			rdrCfg.Flags.ParamsSlice(utils.MetaAttributes),
 			rdrCfg.Flags.HasKey(utils.MetaAccounts),
 			cgrEv, cgrArgs.ArgDispatcher,
-			rdrCfg.Flags.HasKey(utils.MetaFD))
+			rdrCfg.Flags.HasKey(utils.MetaFD),
+			opts)
 		rply := new(sessions.V1UpdateSessionReply)
 		err = erS.connMgr.Call(erS.cfg.ERsCfg().SessionSConns, nil, utils.SessionSv1UpdateSession,
 			updateArgs, rply)
@@ -230,7 +235,8 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent, rdrCfg *config.EventRe
 			rdrCfg.Flags.HasKey(utils.MetaStats),
 			rdrCfg.Flags.ParamsSlice(utils.MetaStats),
 			cgrEv, cgrArgs.ArgDispatcher,
-			rdrCfg.Flags.HasKey(utils.MetaFD))
+			rdrCfg.Flags.HasKey(utils.MetaFD),
+			opts)
 		rply := utils.StringPointer("")
 		err = erS.connMgr.Call(erS.cfg.ERsCfg().SessionSConns, nil, utils.SessionSv1TerminateSession,
 			terminateArgs, rply)
@@ -248,7 +254,8 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent, rdrCfg *config.EventRe
 			rdrCfg.Flags.HasKey(utils.MetaSuppliersIgnoreErrors),
 			rdrCfg.Flags.HasKey(utils.MetaSuppliersEventCost),
 			cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator,
-			rdrCfg.Flags.HasKey(utils.MetaFD))
+			rdrCfg.Flags.HasKey(utils.MetaFD),
+			opts)
 		rply := new(sessions.V1ProcessMessageReply) // need it so rpcclient can clone
 		err = erS.connMgr.Call(erS.cfg.ERsCfg().SessionSConns, nil, utils.SessionSv1ProcessMessage,
 			evArgs, rply)
@@ -263,6 +270,7 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent, rdrCfg *config.EventRe
 			CGREvent:      cgrEv,
 			ArgDispatcher: cgrArgs.ArgDispatcher,
 			Paginator:     *cgrArgs.SupplierPaginator,
+			Opts:          opts,
 		}
 		rply := new(sessions.V1ProcessEventReply)
 		err = erS.connMgr.Call(erS.cfg.ERsCfg().SessionSConns, nil, utils.SessionSv1ProcessEvent,

@@ -90,7 +90,7 @@ type CDRsV1 struct {
 }
 
 // ProcessCDR will process a CDR in CGRateS internal format
-func (cdrSv1 *CDRsV1) ProcessCDR(cdr *engine.CDRWithArgDispatcher, reply *string) error {
+func (cdrSv1 *CDRsV1) ProcessCDR(cdr *engine.CDRWithOpts, reply *string) error {
 	return cdrSv1.CDRs.V1ProcessCDR(cdr, reply)
 }
 

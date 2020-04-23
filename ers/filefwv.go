@@ -192,8 +192,9 @@ func (rdr *FWVFileER) processFile(fPath, fName string) (err error) {
 		rowNr++ // increment the rowNr after checking if it's not the end of file
 		record := string(buf)
 		agReq := agents.NewAgentRequest(
-			config.NewFWVProvider(record), reqVars,
-			nil, nil, rdr.Config().Tenant,
+			config.NewFWVProvider(record),
+			reqVars, nil, nil, nil,
+			rdr.Config().Tenant,
 			rdr.cgrCfg.GeneralCfg().DefaultTenant,
 			utils.FirstNonEmpty(rdr.Config().Timezone,
 				rdr.cgrCfg.GeneralCfg().DefaultTimezone),
@@ -210,9 +211,11 @@ func (rdr *FWVFileER) processFile(fPath, fName string) (err error) {
 			continue
 		}
 		rdr.offset += rdr.lineLen // increase the offset
-		rdr.rdrEvents <- &erEvent{cgrEvent: agReq.CGRRequest.AsCGREvent(
-			agReq.Tenant, utils.NestingSep),
-			rdrCfg: rdr.Config()}
+		rdr.rdrEvents <- &erEvent{
+			cgrEvent: agReq.CGRRequest.AsCGREvent(agReq.Tenant, utils.NestingSep),
+			rdrCfg:   rdr.Config(),
+			opts:     agReq.Opts.GetData(),
+		}
 		evsPosted++
 
 	}
@@ -281,8 +284,8 @@ func (rdr *FWVFileER) processTrailer(file *os.File, rowNr, evsPosted int, absPat
 	reqVars := make(map[string]interface{})
 	rdr.trailerDP = config.NewFWVProvider(record)
 	agReq := agents.NewAgentRequest(
-		nil, reqVars,
-		nil, nil, rdr.Config().Tenant,
+		nil, reqVars, nil, nil, nil,
+		rdr.Config().Tenant,
 		rdr.cgrCfg.GeneralCfg().DefaultTenant,
 		utils.FirstNonEmpty(rdr.Config().Timezone,
 			rdr.cgrCfg.GeneralCfg().DefaultTimezone),
@@ -297,9 +300,11 @@ func (rdr *FWVFileER) processTrailer(file *os.File, rowNr, evsPosted int, absPat
 				utils.ERs, absPath, rowNr, err.Error()))
 		return err
 	}
-	rdr.rdrEvents <- &erEvent{cgrEvent: agReq.CGRRequest.AsCGREvent(
-		agReq.Tenant, utils.NestingSep),
-		rdrCfg: rdr.Config()}
+	rdr.rdrEvents <- &erEvent{
+		cgrEvent: agReq.CGRRequest.AsCGREvent(agReq.Tenant, utils.NestingSep),
+		rdrCfg:   rdr.Config(),
+		opts:     agReq.Opts.GetData(),
+	}
 	evsPosted++
 	// reset the cursor after process the trailer
 	_, err = file.Seek(0, 0)
@@ -320,8 +325,8 @@ func (rdr *FWVFileER) createHeaderMap(record string, rowNr, evsPosted int, absPa
 	reqVars := make(map[string]interface{})
 	rdr.headerDP = config.NewFWVProvider(record)
 	agReq := agents.NewAgentRequest(
-		nil, reqVars,
-		nil, nil, rdr.Config().Tenant,
+		nil, reqVars, nil, nil, nil,
+		rdr.Config().Tenant,
 		rdr.cgrCfg.GeneralCfg().DefaultTenant,
 		utils.FirstNonEmpty(rdr.Config().Timezone,
 			rdr.cgrCfg.GeneralCfg().DefaultTimezone),
@@ -338,9 +343,11 @@ func (rdr *FWVFileER) createHeaderMap(record string, rowNr, evsPosted int, absPa
 		return err
 	}
 	rdr.offset += rdr.headerOffset // increase the offset
-	rdr.rdrEvents <- &erEvent{cgrEvent: agReq.CGRRequest.AsCGREvent(
-		agReq.Tenant, utils.NestingSep),
-		rdrCfg: rdr.Config()}
+	rdr.rdrEvents <- &erEvent{
+		cgrEvent: agReq.CGRRequest.AsCGREvent(agReq.Tenant, utils.NestingSep),
+		rdrCfg:   rdr.Config(),
+		opts:     agReq.Opts.GetData(),
+	}
 	evsPosted++
 	return
 }

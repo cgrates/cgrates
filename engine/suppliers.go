@@ -535,6 +535,7 @@ func (spS *SupplierService) sortedSuppliersForEvent(args *ArgsGetSuppliers) (sor
 type ArgsGetSuppliers struct {
 	IgnoreErrors bool
 	MaxCost      string // toDo: try with interface{} here
+	Opts         map[string]interface{}
 	*utils.CGREvent
 	utils.Paginator
 	*utils.ArgDispatcher
@@ -586,7 +587,7 @@ func (spS *SupplierService) V1GetSuppliers(args *ArgsGetSuppliers, reply *Sorted
 	if len(spS.cgrcfg.SupplierSCfg().AttributeSConns) != 0 {
 		attrArgs := &AttrArgsProcessEvent{
 			Context: utils.StringPointer(utils.FirstNonEmpty(
-				utils.IfaceAsString(args.CGREvent.Event[utils.Context]),
+				utils.IfaceAsString(args.Opts[utils.Context]),
 				utils.MetaSuppliers)),
 			CGREvent:      args.CGREvent,
 			ArgDispatcher: args.ArgDispatcher,
@@ -595,6 +596,7 @@ func (spS *SupplierService) V1GetSuppliers(args *ArgsGetSuppliers, reply *Sorted
 		if err := spS.connMgr.Call(spS.cgrcfg.SupplierSCfg().AttributeSConns, nil,
 			utils.AttributeSv1ProcessEvent, attrArgs, &rplyEv); err == nil && len(rplyEv.AlteredFields) != 0 {
 			args.CGREvent = rplyEv.CGREvent
+			args.Opts = rplyEv.Opts
 		} else if err.Error() != utils.ErrNotFound.Error() {
 			return utils.NewErrAttributeS(err)
 		}

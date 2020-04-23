@@ -76,6 +76,7 @@ type Session struct {
 	EventStart    engine.MapEvent // Event which started the session
 	DebitInterval time.Duration   // execute debits for *prepaid runs
 	SRuns         []*SRun         // forked based on ChargerS
+	OptsStart     engine.MapEvent
 
 	debitStop   chan struct{}
 	sTerminator *sTerminator // automatic timeout for the session

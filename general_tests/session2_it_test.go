@@ -187,18 +187,20 @@ func testSes2ItStopCgrEngine(t *testing.T) {
 func testSes2StirAuthenticate(t *testing.T) {
 	args := &sessions.V1ProcessEventArgs{
 		Flags: []string{utils.MetaSTIRAuthenticate},
+		Opts: map[string]interface{}{
+			utils.STIRIdentity: "eyJhbGciOiJFUzI1NiIsInBwdCI6InNoYWtlbiIsInR5cCI6InBhc3Nwb3J0IiwieDV1IjoiL3Vzci9zaGFyZS9jZ3JhdGVzL3N0aXIvc3Rpcl9wdWJrZXkucGVtIn0.eyJhdHRlc3QiOiJBIiwiZGVzdCI6eyJ0biI6WyIxMDAyIl19LCJpYXQiOjE1ODcwMzg4MDIsIm9yaWciOnsidG4iOiIxMDAxIn0sIm9yaWdpZCI6IjEyMzQ1NiJ9.cMEMlFnfyTu8uxfeU4RoZTamA7ifFT9Ibwrvi1_LKwL2xAU6fZ_CSIxKbtyOpNhM_sV03x7CfA_v0T4sHkifzg;info=</usr/share/cgrates/stir/stir_pubkey.pem>;ppt=shaken",
+		},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSes2StirAuthorize",
 			Event: map[string]interface{}{
-				utils.ToR:          utils.VOICE,
-				utils.OriginID:     "testSes2StirAuthorize",
-				utils.RequestType:  utils.META_PREPAID,
-				utils.Account:      "1001",
-				utils.Subject:      "ANY2CNT",
-				utils.Destination:  "1002",
-				utils.Usage:        10 * time.Minute,
-				utils.STIRIdentity: "eyJhbGciOiJFUzI1NiIsInBwdCI6InNoYWtlbiIsInR5cCI6InBhc3Nwb3J0IiwieDV1IjoiL3Vzci9zaGFyZS9jZ3JhdGVzL3N0aXIvc3Rpcl9wdWJrZXkucGVtIn0.eyJhdHRlc3QiOiJBIiwiZGVzdCI6eyJ0biI6WyIxMDAyIl19LCJpYXQiOjE1ODcwMzg4MDIsIm9yaWciOnsidG4iOiIxMDAxIn0sIm9yaWdpZCI6IjEyMzQ1NiJ9.cMEMlFnfyTu8uxfeU4RoZTamA7ifFT9Ibwrvi1_LKwL2xAU6fZ_CSIxKbtyOpNhM_sV03x7CfA_v0T4sHkifzg;info=</usr/share/cgrates/stir/stir_pubkey.pem>;ppt=shaken",
+				utils.ToR:         utils.VOICE,
+				utils.OriginID:    "testSes2StirAuthorize",
+				utils.RequestType: utils.META_PREPAID,
+				utils.Account:     "1001",
+				utils.Subject:     "ANY2CNT",
+				utils.Destination: "1002",
+				utils.Usage:       10 * time.Minute,
 			},
 		},
 	}
@@ -208,14 +210,14 @@ func testSes2StirAuthenticate(t *testing.T) {
 		t.Error(err)
 	}
 	// altered originator
-	args.CGREvent.Event[utils.STIROriginatorTn] = "1005"
+	args.Opts[utils.STIROriginatorTn] = "1005"
 	if err := ses2RPC.Call(utils.SessionSv1ProcessEvent,
 		args, &rply); err == nil || err.Error() != "*stir_authenticate: wrong originatorTn" {
 		t.Errorf("Expected error :%q ,receved: %v", "*stir_authenticate: wrong originatorTn", err)
 	}
 
 	// altered identity
-	args.CGREvent.Event[utils.STIRIdentity] = "eyJhbGciOiJFUzI1NiIsInBwdCI6InNoYWtlbiIsInR5cCI6InBhc3Nwb3J0IiwieDV1IjoiL3Vzci9zaGFyZS9jZ3JhdGVzL3N0aXIvc3Rpcl9wdWJrZXkucGVtIn0.eyJhdHRlc3QiOiJBIiwiZGVzdCI6eyJ0biI6WyIxMDAyIl19LCJpYXQiOjE1ODcwMzg4MDIsIm9yaWciOnsidG4iOiIxMDA1In0sIm9yaWdpZCI6IjEyMzQ1NiJ9.cMEMlFnfyTu8uxfeU4RoZTamA7ifFT9Ibwrvi1_LKwL2xAU6fZ_CSIxKbtyOpNhM_sV03x7CfA_v0T4sHkifzg;info=</usr/share/cgrates/stir/stir_pubkey.pem>;ppt=shaken"
+	args.Opts[utils.STIRIdentity] = "eyJhbGciOiJFUzI1NiIsInBwdCI6InNoYWtlbiIsInR5cCI6InBhc3Nwb3J0IiwieDV1IjoiL3Vzci9zaGFyZS9jZ3JhdGVzL3N0aXIvc3Rpcl9wdWJrZXkucGVtIn0.eyJhdHRlc3QiOiJBIiwiZGVzdCI6eyJ0biI6WyIxMDAyIl19LCJpYXQiOjE1ODcwMzg4MDIsIm9yaWciOnsidG4iOiIxMDA1In0sIm9yaWdpZCI6IjEyMzQ1NiJ9.cMEMlFnfyTu8uxfeU4RoZTamA7ifFT9Ibwrvi1_LKwL2xAU6fZ_CSIxKbtyOpNhM_sV03x7CfA_v0T4sHkifzg;info=</usr/share/cgrates/stir/stir_pubkey.pem>;ppt=shaken"
 	if err := ses2RPC.Call(utils.SessionSv1ProcessEvent,
 		args, &rply); err == nil || err.Error() != "*stir_authenticate: crypto/ecdsa: verification error" {
 		t.Errorf("Expected error :%q ,receved: %v", "*stir_authenticate: crypto/ecdsa: verification error", err)
@@ -225,19 +227,21 @@ func testSes2StirAuthenticate(t *testing.T) {
 func testSes2StirInit(t *testing.T) {
 	args := &sessions.V1ProcessEventArgs{
 		Flags: []string{utils.MetaSTIRInitiate},
+		Opts: map[string]interface{}{
+			utils.STIRPublicKeyPath:  "/usr/share/cgrates/stir/stir_pubkey.pem",
+			utils.STIRPrivateKeyPath: "/usr/share/cgrates/stir/stir_privatekey.pem",
+		},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSes2StirInit",
 			Event: map[string]interface{}{
-				utils.ToR:                utils.VOICE,
-				utils.OriginID:           "testSes2StirInit",
-				utils.RequestType:        utils.META_PREPAID,
-				utils.Account:            "1001",
-				utils.Subject:            "ANY2CNT",
-				utils.Destination:        "1002",
-				utils.Usage:              10 * time.Minute,
-				utils.STIRPublicKeyPath:  "/usr/share/cgrates/stir/stir_pubkey.pem",
-				utils.STIRPrivateKeyPath: "/usr/share/cgrates/stir/stir_privatekey.pem",
+				utils.ToR:         utils.VOICE,
+				utils.OriginID:    "testSes2StirInit",
+				utils.RequestType: utils.META_PREPAID,
+				utils.Account:     "1001",
+				utils.Subject:     "ANY2CNT",
+				utils.Destination: "1002",
+				utils.Usage:       10 * time.Minute,
 			},
 		},
 	}

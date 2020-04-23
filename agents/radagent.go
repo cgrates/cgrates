@@ -82,10 +82,11 @@ func (ra *RadiusAgent) handleAuth(req *radigo.Packet) (rpl *radigo.Packet, err e
 	rpl.Code = radigo.AccessAccept
 	cgrRplyNM := config.NewNavigableMap(nil)
 	rplyNM := config.NewNavigableMap(nil)
+	opts := config.NewNavigableMap(nil)
 	var processed bool
 	reqVars[utils.RemoteHost] = req.RemoteAddr().String()
 	for _, reqProcessor := range ra.cgrCfg.RadiusAgentCfg().RequestProcessors {
-		agReq := NewAgentRequest(dcdr, reqVars, cgrRplyNM, rplyNM,
+		agReq := NewAgentRequest(dcdr, reqVars, cgrRplyNM, rplyNM, opts,
 			reqProcessor.Tenant, ra.cgrCfg.GeneralCfg().DefaultTenant,
 			utils.FirstNonEmpty(reqProcessor.Timezone,
 				config.CgrConfig().GeneralCfg().DefaultTimezone),
@@ -127,10 +128,11 @@ func (ra *RadiusAgent) handleAcct(req *radigo.Packet) (rpl *radigo.Packet, err e
 	rpl.Code = radigo.AccountingResponse
 	cgrRplyNM := config.NewNavigableMap(nil)
 	rplyNM := config.NewNavigableMap(nil)
+	opts := config.NewNavigableMap(nil)
 	var processed bool
 	reqVars[utils.RemoteHost] = req.RemoteAddr().String()
 	for _, reqProcessor := range ra.cgrCfg.RadiusAgentCfg().RequestProcessors {
-		agReq := NewAgentRequest(dcdr, reqVars, cgrRplyNM, rplyNM,
+		agReq := NewAgentRequest(dcdr, reqVars, cgrRplyNM, rplyNM, opts,
 			reqProcessor.Tenant, ra.cgrCfg.GeneralCfg().DefaultTenant,
 			utils.FirstNonEmpty(reqProcessor.Timezone,
 				config.CgrConfig().GeneralCfg().DefaultTimezone),
@@ -212,6 +214,7 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersEventCost),
 			cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator,
 			reqProcessor.Flags.HasKey(utils.MetaFD),
+			agReq.Opts.GetData(),
 		)
 		rply := new(sessions.V1AuthorizeReply)
 		err = ra.connMgr.Call(ra.cgrCfg.RadiusAgentCfg().SessionSConns, nil, utils.SessionSv1AuthorizeEvent,
@@ -230,7 +233,8 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 			reqProcessor.Flags.HasKey(utils.MetaResources),
 			reqProcessor.Flags.HasKey(utils.MetaAccounts),
 			cgrEv, cgrArgs.ArgDispatcher,
-			reqProcessor.Flags.HasKey(utils.MetaFD))
+			reqProcessor.Flags.HasKey(utils.MetaFD),
+			agReq.Opts.GetData())
 		rply := new(sessions.V1InitSessionReply)
 		err = ra.connMgr.Call(ra.cgrCfg.RadiusAgentCfg().SessionSConns, nil, utils.SessionSv1InitiateSession,
 			initArgs, rply)
@@ -243,7 +247,8 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 			reqProcessor.Flags.ParamsSlice(utils.MetaAttributes),
 			reqProcessor.Flags.HasKey(utils.MetaAccounts),
 			cgrEv, cgrArgs.ArgDispatcher,
-			reqProcessor.Flags.HasKey(utils.MetaFD))
+			reqProcessor.Flags.HasKey(utils.MetaFD),
+			agReq.Opts.GetData())
 		rply := new(sessions.V1UpdateSessionReply)
 		err = ra.connMgr.Call(ra.cgrCfg.RadiusAgentCfg().SessionSConns, nil, utils.SessionSv1UpdateSession,
 			updateArgs, rply)
@@ -259,7 +264,8 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 			reqProcessor.Flags.HasKey(utils.MetaStats),
 			reqProcessor.Flags.ParamsSlice(utils.MetaStats),
 			cgrEv, cgrArgs.ArgDispatcher,
-			reqProcessor.Flags.HasKey(utils.MetaFD))
+			reqProcessor.Flags.HasKey(utils.MetaFD),
+			agReq.Opts.GetData())
 		rply := utils.StringPointer("")
 		err = ra.connMgr.Call(ra.cgrCfg.RadiusAgentCfg().SessionSConns, nil, utils.SessionSv1TerminateSession,
 			terminateArgs, rply)
@@ -280,7 +286,8 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersIgnoreErrors),
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersEventCost),
 			cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator,
-			reqProcessor.Flags.HasKey(utils.MetaFD))
+			reqProcessor.Flags.HasKey(utils.MetaFD),
+			agReq.Opts.GetData())
 		rply := new(sessions.V1ProcessMessageReply)
 		err = ra.connMgr.Call(ra.cgrCfg.RadiusAgentCfg().SessionSConns, nil, utils.SessionSv1ProcessMessage, evArgs, rply)
 		if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
@@ -297,6 +304,7 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 			CGREvent:      cgrEv,
 			ArgDispatcher: cgrArgs.ArgDispatcher,
 			Paginator:     *cgrArgs.SupplierPaginator,
+			Opts:          agReq.Opts.GetData(),
 		}
 		needMaxUsage := reqProcessor.Flags.HasKey(utils.MetaAuth) ||
 			reqProcessor.Flags.HasKey(utils.MetaInit) ||
