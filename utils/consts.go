@@ -1890,15 +1890,16 @@ const (
 	TpOutDirCfg     = "tp_out_dir"
 	DataCfg         = "data"
 
-	DefaultRatioCfg   = "default_ratio"
-	ReadersCfg        = "readers"
-	PoolSize          = "poolSize"
-	Conns             = "conns"
-	FilenameCfg       = "file_name"
-	RequestPayloadCfg = "request_payload"
-	ReplyPayloadCfg   = "reply_payload"
-	TransportCfg      = "transport"
-	StrategyCfg       = "strategy"
+	DefaultRatioCfg            = "default_ratio"
+	ReadersCfg                 = "readers"
+	PoolSize                   = "poolSize"
+	Conns                      = "conns"
+	FilenameCfg                = "file_name"
+	RequestPayloadCfg          = "request_payload"
+	ReplyPayloadCfg            = "reply_payload"
+	TransportCfg               = "transport"
+	StrategyCfg                = "strategy"
+	Dynaprepaid_actionplansCfg = "dynaprepaid_actionplans"
 )
 
 // FC Template

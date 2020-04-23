@@ -141,7 +141,7 @@ func TestLoaderCfgAsMapInterface(t *testing.T) {
 		"dry_run":         false,
 		"run_delay":       "0",
 		"lock_filename":   ".cgr.lck",
-		"caches_conns":    []string{"*internal:*caches"},
+		"caches_conns":    []string{"*internal"},
 		"field_separator": ",",
 		"tp_in_dir":       "/var/spool/cgrates/loader/in",
 		"tp_out_dir":      "/var/spool/cgrates/loader/out",

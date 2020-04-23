@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -86,6 +88,7 @@ func (ralsCfg *RalsCfg) loadFromJsonCfg(jsnRALsCfg *RalsJsonCfg) (err error) {
 		ralsCfg.RemoveExpired = *jsnRALsCfg.Remove_expired
 	}
 	if jsnRALsCfg.Max_computed_usage != nil {
+		ralsCfg.MaxComputedUsage = make(map[string]time.Duration, len(*jsnRALsCfg.Max_computed_usage))
 		for k, v := range *jsnRALsCfg.Max_computed_usage {
 			if ralsCfg.MaxComputedUsage[k], err = utils.ParseDurationWithNanosecs(v); err != nil {
 				return
@@ -96,6 +99,7 @@ func (ralsCfg *RalsCfg) loadFromJsonCfg(jsnRALsCfg *RalsJsonCfg) (err error) {
 		ralsCfg.MaxIncrements = *jsnRALsCfg.Max_increments
 	}
 	if jsnRALsCfg.Balance_rating_subject != nil {
+		ralsCfg.BalanceRatingSubject = make(map[string]string, len(*jsnRALsCfg.Balance_rating_subject))
 		for k, v := range *jsnRALsCfg.Balance_rating_subject {
 			ralsCfg.BalanceRatingSubject[k] = v
 		}
@@ -113,7 +117,21 @@ func (ralsCfg *RalsCfg) loadFromJsonCfg(jsnRALsCfg *RalsJsonCfg) (err error) {
 func (ralsCfg *RalsCfg) AsMapInterface() map[string]interface{} {
 	maxComputed := make(map[string]interface{})
 	for key, item := range ralsCfg.MaxComputedUsage {
-		maxComputed[key] = item
+		if key == utils.ANY || key == utils.VOICE {
+			maxComputed[key] = item.String()
+		} else {
+			maxComputed[key] = strconv.Itoa(int(item))
+		}
+	}
+
+	cacheSConns := make([]string, len(ralsCfg.CacheSConns))
+	for i, item := range ralsCfg.CacheSConns {
+		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)
+		if item == buf {
+			cacheSConns[i] = strings.ReplaceAll(item, ":*caches", utils.EmptyString)
+		} else {
+			cacheSConns[i] = item
+		}
 	}
 
 	balanceRating := make(map[string]interface{})
@@ -125,11 +143,12 @@ func (ralsCfg *RalsCfg) AsMapInterface() map[string]interface{} {
 		utils.EnabledCfg:                 ralsCfg.Enabled,
 		utils.ThresholdSConnsCfg:         ralsCfg.ThresholdSConns,
 		utils.StatSConnsCfg:              ralsCfg.StatSConns,
-		utils.CacheSConnsCfg:             ralsCfg.CacheSConns,
+		utils.CacheSConnsCfg:             cacheSConns,
 		utils.RpSubjectPrefixMatchingCfg: ralsCfg.RpSubjectPrefixMatching,
 		utils.RemoveExpiredCfg:           ralsCfg.RemoveExpired,
 		utils.MaxComputedUsageCfg:        maxComputed,
 		utils.BalanceRatingSubjectCfg:    balanceRating,
 		utils.MaxIncrementsCfg:           ralsCfg.MaxIncrements,
+		utils.Dynaprepaid_actionplansCfg: ralsCfg.DynaprepaidActionPlans,
 	}
 }

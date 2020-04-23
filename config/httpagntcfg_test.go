@@ -352,7 +352,7 @@ func TestHttpAgentCfgappendHttpAgntProcCfgs(t *testing.T) {
 	}
 }
 
-func testHttpAgentCfgAsMapInterface(t *testing.T) {
+func TestHttpAgentCfgAsMapInterface(t *testing.T) {
 	var httpcfg HttpAgentCfgs
 	cfgJSONStr := `{
 		
@@ -388,7 +388,6 @@ func testHttpAgentCfgAsMapInterface(t *testing.T) {
 		},
 	],	
 }`
-	request_fields := []string{}
 	eMap := []map[string]interface{}{
 		{
 			"id":              "conecto1",
@@ -401,9 +400,9 @@ func testHttpAgentCfgAsMapInterface(t *testing.T) {
 					"id":             "OutboundAUTHDryRun",
 					"filters":        []string{"*string:~*req.request_type:OutboundAUTH", "*string:~*req.Msisdn:497700056231"},
 					"tenant":         "cgrates.org",
-					"flags":          map[string][]string{"*dryrun": request_fields},
+					"flags":          map[string][]string{"*dryrun": {}},
 					"Timezone":       "",
-					"request_fields": request_fields,
+					"request_fields": []map[string]interface{}{},
 					"reply_fields": []map[string]interface{}{
 						{"tag": "Allow", "path": "*rep.response.Allow", "type": "*constant", "value": "1", "mandatory": true},
 						{"tag": "Concatenated1", "path": "*rep.response.Concatenated", "type": "*composed", "value": "~*req.MCC;/", "mandatory": true},
@@ -424,5 +423,4 @@ func testHttpAgentCfgAsMapInterface(t *testing.T) {
 	} else if rcv := httpcfg.AsMapInterface(";"); !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("Expected: %+v,\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
-
 }

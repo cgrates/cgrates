@@ -100,6 +100,7 @@ func (dbcfg *DataDbCfg) loadFromJsonCfg(jsnDbCfg *DbJsonCfg) (err error) {
 		}
 	}
 	if jsnDbCfg.Items != nil {
+		dbcfg.Items = make(map[string]*ItemOpt)
 		for kJsn, vJsn := range *jsnDbCfg.Items {
 			val, has := dbcfg.Items[kJsn]
 			if val == nil || !has {
@@ -134,16 +135,21 @@ func (dbcfg *DataDbCfg) AsMapInterface() map[string]interface{} {
 	for key, item := range dbcfg.Items {
 		items[key] = item.AsMapInterface()
 	}
+	var queryTimeout string = "0"
+	if dbcfg.QueryTimeout != 0 {
+		queryTimeout = dbcfg.QueryTimeout.String()
+	}
+	dbPort, _ := strconv.Atoi(dbcfg.DataDbPort)
 
 	return map[string]interface{}{
-		utils.DataDbTypeCfg:         dbcfg.DataDbType,
+		utils.DataDbTypeCfg:         utils.Meta + dbcfg.DataDbType,
 		utils.DataDbHostCfg:         dbcfg.DataDbHost,
-		utils.DataDbPortCfg:         dbcfg.DataDbPort,
+		utils.DataDbPortCfg:         dbPort,
 		utils.DataDbNameCfg:         dbcfg.DataDbName,
 		utils.DataDbUserCfg:         dbcfg.DataDbUser,
 		utils.DataDbPassCfg:         dbcfg.DataDbPass,
 		utils.DataDbSentinelNameCfg: dbcfg.DataDbSentinelName,
-		utils.QueryTimeoutCfg:       dbcfg.QueryTimeout,
+		utils.QueryTimeoutCfg:       queryTimeout,
 		utils.RmtConnsCfg:           dbcfg.RmtConns,
 		utils.RplConnsCfg:           dbcfg.RplConns,
 		utils.ItemsCfg:              items,
@@ -162,11 +168,16 @@ type ItemOpt struct {
 }
 
 func (itm *ItemOpt) AsMapInterface() map[string]interface{} {
+	var ttl string = ""
+	if itm.TTL != 0 {
+		ttl = itm.TTL.String()
+	}
+
 	return map[string]interface{}{
 		utils.RemoteCfg:    itm.Remote,
 		utils.ReplicateCfg: itm.Replicate,
 		utils.LimitCfg:     itm.Limit,
-		utils.TTLCfg:       itm.TTL,
+		utils.TTLCfg:       ttl,
 		utils.StaticTTLCfg: itm.StaticTTL,
 	}
 }

@@ -395,3 +395,50 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 		t.Errorf("Expected: %+v ,\n recived: %+v", utils.ToJSON(expected), utils.ToJSON(dbcfg))
 	}
 }
+
+func TestDataDbCfgAsMapInterface(t *testing.T) {
+	var dbcfg DataDbCfg
+	cfgJSONStr := `{
+	"data_db": {								
+		"db_type": "*redis",					
+		"db_host": "127.0.0.1",					
+		"db_port": 6379, 						
+		"db_name": "10", 						
+		"db_user": "cgrates", 					
+		"db_password": "", 						
+		"redis_sentinel":"",					
+		"query_timeout":"10s",
+		"remote_conns":[],
+		"replication_conns":[],
+		"items":{
+			"*accounts":{"remote":true, "replicate":false, "limit": -1, "ttl": "", "static_ttl": false}, 					
+			"*reverse_destinations": {"remote":false, "replicate":false, "limit": 7, "ttl": "", "static_ttl": true},
+		},
+	},		
+}`
+	eMap := map[string]interface{}{
+		"db_type":           "*redis",
+		"db_host":           "127.0.0.1",
+		"db_port":           6379,
+		"db_name":           "10",
+		"db_user":           "cgrates",
+		"db_password":       "",
+		"redis_sentinel":    "",
+		"query_timeout":     "10s",
+		"remote_conns":      []string{},
+		"replication_conns": []string{},
+		"items": map[string]interface{}{
+			"*accounts":             map[string]interface{}{"remote": true, "replicate": false, "limit": -1, "ttl": "", "static_ttl": false},
+			"*reverse_destinations": map[string]interface{}{"remote": false, "replicate": false, "limit": 7, "ttl": "", "static_ttl": true},
+		},
+	}
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+		t.Error(err)
+	} else if jsnDataDbCfg, err := jsnCfg.DbJsonCfg(DATADB_JSN); err != nil {
+		t.Error(err)
+	} else if err = dbcfg.loadFromJsonCfg(jsnDataDbCfg); err != nil {
+		t.Error(err)
+	} else if rcv := dbcfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
+		t.Errorf("Expected: %+v ,\n recived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	}
+}
