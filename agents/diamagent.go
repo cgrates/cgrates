@@ -231,13 +231,14 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 	}
 	cgrRplyNM := config.NewNavigableMap(nil)
 	rply := config.NewNavigableMap(nil) // share it among different processors
+	opts := config.NewNavigableMap(nil)
 	var processed bool
 	for _, reqProcessor := range da.cgrCfg.DiameterAgentCfg().RequestProcessors {
 		var lclProcessed bool
 		lclProcessed, err = da.processRequest(
 			reqProcessor,
 			NewAgentRequest(
-				diamDP, reqVars, cgrRplyNM, rply,
+				diamDP, reqVars, cgrRplyNM, rply, opts,
 				reqProcessor.Tenant, da.cgrCfg.GeneralCfg().DefaultTenant,
 				utils.FirstNonEmpty(reqProcessor.Timezone,
 					da.cgrCfg.GeneralCfg().DefaultTimezone),
@@ -327,6 +328,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersEventCost),
 			cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator,
 			reqProcessor.Flags.HasKey(utils.MetaFD),
+			agReq.Opts.GetData(),
 		)
 		rply := new(sessions.V1AuthorizeReply)
 		err = da.connMgr.Call(da.cgrCfg.DiameterAgentCfg().SessionSConns, da, utils.SessionSv1AuthorizeEvent,
@@ -345,7 +347,8 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaResources),
 			reqProcessor.Flags.HasKey(utils.MetaAccounts),
 			cgrEv, cgrArgs.ArgDispatcher,
-			reqProcessor.Flags.HasKey(utils.MetaFD))
+			reqProcessor.Flags.HasKey(utils.MetaFD),
+			agReq.Opts.GetData())
 		rply := new(sessions.V1InitSessionReply)
 		err = da.connMgr.Call(da.cgrCfg.DiameterAgentCfg().SessionSConns, da, utils.SessionSv1InitiateSession,
 			initArgs, rply)
@@ -358,7 +361,8 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.ParamsSlice(utils.MetaAttributes),
 			reqProcessor.Flags.HasKey(utils.MetaAccounts),
 			cgrEv, cgrArgs.ArgDispatcher,
-			reqProcessor.Flags.HasKey(utils.MetaFD))
+			reqProcessor.Flags.HasKey(utils.MetaFD),
+			agReq.Opts.GetData())
 		rply := new(sessions.V1UpdateSessionReply)
 		err = da.connMgr.Call(da.cgrCfg.DiameterAgentCfg().SessionSConns, da, utils.SessionSv1UpdateSession,
 			updateArgs, rply)
@@ -374,7 +378,8 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaStats),
 			reqProcessor.Flags.ParamsSlice(utils.MetaStats),
 			cgrEv, cgrArgs.ArgDispatcher,
-			reqProcessor.Flags.HasKey(utils.MetaFD))
+			reqProcessor.Flags.HasKey(utils.MetaFD),
+			agReq.Opts.GetData())
 		rply := utils.StringPointer("")
 		err = da.connMgr.Call(da.cgrCfg.DiameterAgentCfg().SessionSConns, da, utils.SessionSv1TerminateSession,
 			terminateArgs, rply)
@@ -395,7 +400,8 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersIgnoreErrors),
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersEventCost),
 			cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator,
-			reqProcessor.Flags.HasKey(utils.MetaFD))
+			reqProcessor.Flags.HasKey(utils.MetaFD),
+			agReq.Opts.GetData())
 		rply := new(sessions.V1ProcessMessageReply)
 		err = da.connMgr.Call(da.cgrCfg.DiameterAgentCfg().SessionSConns, da, utils.SessionSv1ProcessMessage,
 			msgArgs, rply)
@@ -413,6 +419,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 			CGREvent:      cgrEv,
 			ArgDispatcher: cgrArgs.ArgDispatcher,
 			Paginator:     *cgrArgs.SupplierPaginator,
+			Opts:          agReq.Opts.GetData(),
 		}
 		needMaxUsage := reqProcessor.Flags.HasKey(utils.MetaAuth) ||
 			reqProcessor.Flags.HasKey(utils.MetaInit) ||
@@ -504,6 +511,7 @@ func (da *DiameterAgent) sendASR(originID string, reply *string) (err error) {
 		dmd.vars,
 		config.NewNavigableMap(nil),
 		config.NewNavigableMap(nil),
+		config.NewNavigableMap(nil),
 		nil,
 		da.cgrCfg.GeneralCfg().DefaultTenant,
 		da.cgrCfg.GeneralCfg().DefaultTimezone, da.filterS, nil, nil)
@@ -548,6 +556,7 @@ func (da *DiameterAgent) V1ReAuthorize(originID string, reply *string) (err erro
 	aReq := NewAgentRequest(
 		newDADataProvider(dmd.c, dmd.m),
 		dmd.vars,
+		config.NewNavigableMap(nil),
 		config.NewNavigableMap(nil),
 		config.NewNavigableMap(nil),
 		nil,

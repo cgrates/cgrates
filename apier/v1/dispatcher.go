@@ -395,7 +395,7 @@ func (dC *DispatcherChargerSv1) GetChargersForEvent(args *utils.CGREventWithArgD
 }
 
 // ProcessEvent implements ChargerSv1ProcessEvent
-func (dC *DispatcherChargerSv1) ProcessEvent(args *utils.CGREventWithArgDispatcher,
+func (dC *DispatcherChargerSv1) ProcessEvent(args *utils.CGREventWithOpts,
 	reply *[]*engine.ChrgSProcessEventReply) (err error) {
 	return dC.dC.ChargerSv1ProcessEvent(args, reply)
 }
@@ -759,7 +759,7 @@ func (dS *DispatcherSCDRsV1) ProcessEvent(args *engine.ArgV1ProcessEvent, reply 
 	return dS.dS.CDRsV1ProcessEvent(args, reply)
 }
 
-func (dS *DispatcherSCDRsV1) ProcessCDR(args *engine.CDRWithArgDispatcher, reply *string) error {
+func (dS *DispatcherSCDRsV1) ProcessCDR(args *engine.CDRWithOpts, reply *string) error {
 	return dS.dS.CDRsV1ProcessCDR(args, reply)
 }
 

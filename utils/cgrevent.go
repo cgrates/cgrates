@@ -252,3 +252,8 @@ type EventWithFlags struct {
 	Flags []string
 	Event map[string]interface{}
 }
+
+type CGREventWithOpts struct {
+	Opts map[string]interface{}
+	*CGREventWithArgDispatcher
+}

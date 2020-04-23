@@ -20,7 +20,6 @@ package sessions
 
 import (
 	"errors"
-	"math/rand"
 	"strings"
 	"time"
 
@@ -50,41 +49,6 @@ type BiRPClient interface {
 	V1ReAuthorize(originID string, reply *string) (err error)
 	V1DisconnectPeer(args *utils.DPRArgs, reply *string) (err error)
 	DisconnectWarning(args map[string]interface{}, reply *string) (err error)
-}
-
-// getSessionTTL retrieves SessionTTL setting out of ev
-// if SessionTTLMaxDelay is present in ev, the return is randomized
-// ToDo: remove if not needed
-func getSessionTTL(ev *engine.MapEvent, cfgSessionTTL time.Duration,
-	cfgSessionTTLMaxDelay *time.Duration) (ttl time.Duration, err error) {
-	if ttl, err = ev.GetDuration(utils.SessionTTL); err != nil {
-		if err != utils.ErrNotFound {
-			return
-		}
-		err = nil
-		ttl = cfgSessionTTL
-	}
-	if ttl == 0 {
-		return
-	}
-	// random delay computation
-	var sessionTTLMaxDelay int64
-	maxDelay, err := ev.GetDuration(utils.SessionTTLMaxDelay)
-	if err != nil {
-		if err != utils.ErrNotFound {
-			return
-		}
-		err = nil // clear the error for return
-		if cfgSessionTTLMaxDelay != nil {
-			maxDelay = *cfgSessionTTLMaxDelay
-		}
-	}
-	sessionTTLMaxDelay = maxDelay.Nanoseconds() / 1000000 // Milliseconds precision for randomness
-	if sessionTTLMaxDelay != 0 {
-		rand.Seed(time.Now().Unix())
-		ttl += time.Duration(rand.Int63n(sessionTTLMaxDelay) * 1000000)
-	}
-	return
 }
 
 // GetSetCGRID will populate the CGRID key if not present and return it

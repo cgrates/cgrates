@@ -1153,7 +1153,7 @@ func testDiamInitWithSessionDisconnect(t *testing.T) {
 	} else if val != eVal {
 		t.Errorf("expecting: %s, received: <%s>", eVal, val)
 	}
-	time.Sleep(time.Duration(2000 * time.Millisecond))
+	time.Sleep(2 * time.Second)
 	msg = diamClnt.ReceivedMessage(rplyTimeout)
 	if msg == nil {
 		t.Fatal("No message returned")

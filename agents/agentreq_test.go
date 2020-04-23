@@ -42,7 +42,7 @@ func TestAgReqSetFields(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
+	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	// populate request, emulating the way will be done in HTTPAgent
 	agReq.CGRRequest.Set([]string{utils.CGRID},
 		utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
@@ -144,7 +144,7 @@ func TestAgentRequestSetFields(t *testing.T) {
 		config.CgrConfig().CacheCfg(), nil)
 	vars := map[string]interface{}{}
 	ar := NewAgentRequest(config.NewNavigableMap(req), vars,
-		nil, nil, config.NewRSRParsersMustCompile("", false, utils.NestingSep),
+		nil, nil, nil, config.NewRSRParsersMustCompile("", false, utils.NestingSep),
 		"cgrates.org", "", engine.NewFilterS(cfg, nil, dm),
 		config.NewNavigableMap(req), config.NewNavigableMap(req))
 	input := []*config.FCTemplate{}
@@ -471,7 +471,7 @@ func TestAgReqMaxCost(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
+	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	// populate request, emulating the way will be done in HTTPAgent
 	agReq.CGRRequest.Set([]string{utils.CapMaxUsage}, "120s", false, false)
 
@@ -517,7 +517,7 @@ func TestAgReqParseFieldDiameter(t *testing.T) {
 		config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	//pass the data provider to agent request
-	agReq := NewAgentRequest(dP, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
+	agReq := NewAgentRequest(dP, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "MandatoryFalse",
@@ -567,7 +567,7 @@ func TestAgReqParseFieldRadius(t *testing.T) {
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	//pass the data provider to agent request
-	agReq := NewAgentRequest(dP, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
+	agReq := NewAgentRequest(dP, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "MandatoryFalse",
 			Path: "MandatoryFalse", Type: utils.META_COMPOSED,
@@ -607,7 +607,7 @@ Host: api.cgrates.org
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	//pass the data provider to agent request
-	agReq := NewAgentRequest(dP, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
+	agReq := NewAgentRequest(dP, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "MandatoryFalse",
 			Path: "MandatoryFalse", Type: utils.META_COMPOSED,
@@ -679,7 +679,7 @@ func TestAgReqParseFieldHttpXml(t *testing.T) {
 
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	//pass the data provider to agent request
-	agReq := NewAgentRequest(dP, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
+	agReq := NewAgentRequest(dP, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "MandatoryFalse",
 			Path: "MandatoryFalse", Type: utils.META_COMPOSED,
@@ -707,7 +707,7 @@ func TestAgReqEmptyFilter(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
+	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	// populate request, emulating the way will be done in HTTPAgent
 	agReq.CGRRequest.Set([]string{utils.CGRID},
 		utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
@@ -750,7 +750,7 @@ func TestAgReqMetaExponent(t *testing.T) {
 	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items),
 		config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
+	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	agReq.CGRRequest.Set([]string{"Value"}, "2", false, false)
 	agReq.CGRRequest.Set([]string{"Exponent"}, "2", false, false)
 
@@ -776,7 +776,7 @@ func TestAgReqFieldAsNone(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
+	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	// populate request, emulating the way will be done in HTTPAgent
 	agReq.CGRRequest.Set([]string{utils.ToR}, utils.VOICE, false, false)
 	agReq.CGRRequest.Set([]string{utils.Account}, "1001", false, false)
@@ -813,7 +813,7 @@ func TestAgReqFieldAsNone2(t *testing.T) {
 	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items),
 		config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
+	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	// populate request, emulating the way will be done in HTTPAgent
 	agReq.CGRRequest.Set([]string{utils.ToR}, utils.VOICE, false, false)
 	agReq.CGRRequest.Set([]string{utils.Account}, "1001", false, false)
@@ -853,7 +853,7 @@ func TestAgReqSetField2(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
+	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	// populate request, emulating the way will be done in HTTPAgent
 	agReq.CGRRequest.Set([]string{utils.ToR}, utils.VOICE, false, false)
 	agReq.CGRRequest.Set([]string{utils.Account}, "1001", false, false)
@@ -911,7 +911,7 @@ func TestAgReqFieldAsInterface(t *testing.T) {
 	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items),
 		config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
+	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	// populate request, emulating the way will be done in HTTPAgent
 	agReq.CGRRequest = config.NewNavigableMap(nil)
 	agReq.CGRRequest.Set([]string{utils.Usage}, []*config.NMItem{{Data: 3 * time.Minute}}, false, false)
@@ -977,7 +977,7 @@ func TestAgReqNewARWithCGRRplyAndRply(t *testing.T) {
 	}
 	cgrRply := config.NewNavigableMap(ev2)
 
-	agReq := NewAgentRequest(nil, nil, cgrRply, rply, nil, "cgrates.org", "", filterS, nil, nil)
+	agReq := NewAgentRequest(nil, nil, cgrRply, rply, nil, nil, "cgrates.org", "", filterS, nil, nil)
 
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Fld1",
@@ -1018,7 +1018,7 @@ func TestAgReqSetCGRReplyWithError(t *testing.T) {
 	}
 	rply := config.NewNavigableMap(ev)
 
-	agReq := NewAgentRequest(nil, nil, nil, rply, nil, "cgrates.org", "", filterS, nil, nil)
+	agReq := NewAgentRequest(nil, nil, nil, rply, nil, nil, "cgrates.org", "", filterS, nil, nil)
 
 	agReq.setCGRReply(nil, utils.ErrNotFound)
 
@@ -1067,7 +1067,7 @@ func TestAgReqSetCGRReplyWithoutError(t *testing.T) {
 		utils.Error:       "",
 	}
 
-	agReq := NewAgentRequest(nil, nil, nil, rply,
+	agReq := NewAgentRequest(nil, nil, nil, rply, nil,
 		nil, "cgrates.org", "", filterS, nil, nil)
 
 	agReq.setCGRReply(myEv, nil)
@@ -1113,7 +1113,7 @@ func TestAgReqParseFieldMetaCCUsage(t *testing.T) {
 		config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	//pass the data provider to agent request
-	agReq := NewAgentRequest(dP, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
+	agReq := NewAgentRequest(dP, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "CCUsage", Filters: []string{},
@@ -1191,7 +1191,7 @@ func TestAgReqParseFieldMetaUsageDifference(t *testing.T) {
 		config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	//pass the data provider to agent request
-	agReq := NewAgentRequest(dP, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
+	agReq := NewAgentRequest(dP, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Usage", Filters: []string{},
@@ -1257,7 +1257,7 @@ func TestAgReqParseFieldMetaSum(t *testing.T) {
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	//pass the data provider to agent request
-	agReq := NewAgentRequest(dP, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
+	agReq := NewAgentRequest(dP, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Sum", Filters: []string{},
@@ -1301,7 +1301,7 @@ func TestAgReqParseFieldMetaDifference(t *testing.T) {
 		config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	//pass the data provider to agent request
-	agReq := NewAgentRequest(dP, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
+	agReq := NewAgentRequest(dP, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Diff", Filters: []string{},
@@ -1345,7 +1345,7 @@ func TestAgReqParseFieldMetaMultiply(t *testing.T) {
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	//pass the data provider to agent request
-	agReq := NewAgentRequest(dP, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
+	agReq := NewAgentRequest(dP, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Multiply", Filters: []string{},
@@ -1389,7 +1389,7 @@ func TestAgReqParseFieldMetaDivide(t *testing.T) {
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	//pass the data provider to agent request
-	agReq := NewAgentRequest(dP, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
+	agReq := NewAgentRequest(dP, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Divide", Filters: []string{},
@@ -1433,7 +1433,7 @@ func TestAgReqParseFieldMetaValueExponent(t *testing.T) {
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	//pass the data provider to agent request
-	agReq := NewAgentRequest(dP, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
+	agReq := NewAgentRequest(dP, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "ValExp", Filters: []string{},
@@ -1486,7 +1486,7 @@ func TestAgReqOverwrite(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
+	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	// populate request, emulating the way will be done in HTTPAgent
 	agReq.CGRRequest.Set([]string{utils.ToR}, utils.VOICE, false, false)
 	agReq.CGRRequest.Set([]string{utils.Account}, "1001", false, false)
@@ -1536,7 +1536,7 @@ func TestAgReqGroupType(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
+	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	// populate request, emulating the way will be done in HTTPAgent
 	agReq.CGRRequest.Set([]string{utils.ToR}, utils.VOICE, false, false)
 	agReq.CGRRequest.Set([]string{utils.Account}, "1001", false, false)
@@ -1578,7 +1578,7 @@ func TestAgReqSetFieldsInTmp(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
+	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	agReq.CGRRequest.Set([]string{utils.Account}, "1001", false, false)
 
 	tplFlds := []*config.FCTemplate{
@@ -1609,7 +1609,7 @@ func TestAgReqSetFieldsWithRemove(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
+	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	// populate request, emulating the way will be done in HTTPAgent
 	agReq.CGRRequest.Set([]string{utils.CGRID},
 		utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
@@ -1745,7 +1745,7 @@ func TestAgReqSetFieldsInCache(t *testing.T) {
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	engine.NewCacheS(cfg, dm)
-	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
+	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	agReq.CGRRequest.Set([]string{utils.Account}, "1001", false, false)
 
 	tplFlds := []*config.FCTemplate{
@@ -1786,7 +1786,7 @@ func TestAgReqSetFieldsInCacheWithTimeOut(t *testing.T) {
 
 	cfg.CacheCfg().Partitions[utils.CacheUCH].TTL = 1 * time.Second
 	engine.Cache = engine.NewCacheS(cfg, dm)
-	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
+	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	agReq.CGRRequest.Set([]string{utils.Account}, "1001", false, false)
 
 	tplFlds := []*config.FCTemplate{
@@ -1877,7 +1877,7 @@ func TestAgReqFiltersInsideField(t *testing.T) {
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	//pass the data provider to agent request
-	agReq := NewAgentRequest(newDADataProvider(nil, m), nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
+	agReq := NewAgentRequest(newDADataProvider(nil, m), nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Usage",

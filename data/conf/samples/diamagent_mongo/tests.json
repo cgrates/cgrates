@@ -81,7 +81,7 @@
 				},
 				{
 					"tag": "DebitInterval",
-					"path": "*cgreq.CGRDebitInterval", 
+					"path": "*opts.DebitInterval", 
 					"type": "*constant",
 					"value": "1s"
 				},

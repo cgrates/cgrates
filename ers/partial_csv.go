@@ -40,6 +40,11 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+type cgrEventWithOpts struct {
+	*utils.CGREvent
+	Opts map[string]interface{}
+}
+
 func NewPartialCSVFileER(cfg *config.CGRConfig, cfgIdx int,
 	rdrEvents chan *erEvent, rdrErr chan error,
 	fltrS *engine.FilterS, rdrExit chan struct{}) (er EventReader, err error) {
@@ -165,7 +170,7 @@ func (rdr *PartialCSVFileER) processFile(fPath, fName string) (err error) {
 		rowNr++ // increment the rowNr after checking if it's not the end of file
 		agReq := agents.NewAgentRequest(
 			config.NewSliceDP(record), reqVars,
-			nil, nil, rdr.Config().Tenant,
+			nil, nil, nil, rdr.Config().Tenant,
 			rdr.cgrCfg.GeneralCfg().DefaultTenant,
 			utils.FirstNonEmpty(rdr.Config().Timezone,
 				rdr.cgrCfg.GeneralCfg().DefaultTimezone),
@@ -201,16 +206,25 @@ func (rdr *PartialCSVFileER) processFile(fPath, fName string) (err error) {
 		partial, _ := agReq.CGRRequest.FieldAsString([]string{utils.Partial})
 		if val, has := rdr.cache.Get(cgrID); !has {
 			if utils.IsSliceMember([]string{"false", utils.EmptyString}, partial) { // complete CDR
-				rdr.rdrEvents <- &erEvent{cgrEvent: agReq.CGRRequest.AsCGREvent(agReq.Tenant, utils.NestingSep),
-					rdrCfg: rdr.Config()}
+				rdr.rdrEvents <- &erEvent{
+					cgrEvent: agReq.CGRRequest.AsCGREvent(agReq.Tenant, utils.NestingSep),
+					rdrCfg:   rdr.Config(),
+					opts:     agReq.Opts.GetData(),
+				}
 				evsPosted++
 			} else {
 				rdr.cache.Set(cgrID,
-					[]*utils.CGREvent{agReq.CGRRequest.AsCGREvent(agReq.Tenant, utils.NestingSep)}, nil)
+					[]*cgrEventWithOpts{{
+						CGREvent: agReq.CGRRequest.AsCGREvent(agReq.Tenant, utils.NestingSep),
+						Opts:     agReq.Opts.GetData(),
+					}}, nil)
 			}
 		} else {
-			origCgrEvs := val.([]*utils.CGREvent)
-			origCgrEvs = append(origCgrEvs, agReq.CGRRequest.AsCGREvent(agReq.Tenant, utils.NestingSep))
+			origCgrEvs := val.([]*cgrEventWithOpts)
+			origCgrEvs = append(origCgrEvs, &cgrEventWithOpts{
+				CGREvent: agReq.CGRRequest.AsCGREvent(agReq.Tenant, utils.NestingSep),
+				Opts:     agReq.Opts.GetData(),
+			})
 			if utils.IsSliceMember([]string{"false", utils.EmptyString}, partial) { // complete CDR
 				//sort CGREvents based on AnswertTime and SetupTime
 				sort.Slice(origCgrEvs, func(i, j int) bool {
@@ -227,6 +241,7 @@ func (rdr *PartialCSVFileER) processFile(fPath, fName string) (err error) {
 				cgrEv := new(utils.CGREvent)
 				cgrEv.ID = utils.UUIDSha1Prefix()
 				cgrEv.Time = utils.TimePointer(time.Now())
+				opts := map[string]interface{}{}
 				for i, origCgrEv := range origCgrEvs {
 					if i == 0 {
 						cgrEv.Tenant = origCgrEv.Tenant
@@ -234,13 +249,18 @@ func (rdr *PartialCSVFileER) processFile(fPath, fName string) (err error) {
 					for key, value := range origCgrEv.Event {
 						cgrEv.Event[key] = value
 					}
+					for key, val := range origCgrEv.Opts {
+						opts[key] = val
+					}
 				}
-				rdr.rdrEvents <- &erEvent{cgrEvent: cgrEv,
-					rdrCfg: rdr.Config()}
+				rdr.rdrEvents <- &erEvent{
+					cgrEvent: cgrEv,
+					rdrCfg:   rdr.Config(),
+					opts:     opts,
+				}
 				evsPosted++
 				rdr.cache.Remove(cgrID)
 			} else {
-
 				// overwrite the cache value with merged NavigableMap
 				rdr.cache.Set(cgrID, origCgrEvs, nil)
 			}
@@ -262,7 +282,7 @@ func (rdr *PartialCSVFileER) processFile(fPath, fName string) (err error) {
 }
 
 func (rdr *PartialCSVFileER) dumpToFile(itmID string, value interface{}) {
-	origCgrEvs := value.([]*utils.CGREvent)
+	origCgrEvs := value.([]*cgrEventWithOpts)
 	for _, origCgrEv := range origCgrEvs {
 		// complete CDR are handling in processFile function
 		if partial, _ := origCgrEv.FieldAsString(utils.Partial); utils.IsSliceMember([]string{"false", utils.EmptyString}, partial) {
@@ -328,7 +348,7 @@ func (rdr *PartialCSVFileER) dumpToFile(itmID string, value interface{}) {
 }
 
 func (rdr *PartialCSVFileER) postCDR(itmID string, value interface{}) {
-	origCgrEvs := value.([]*utils.CGREvent)
+	origCgrEvs := value.([]*cgrEventWithOpts)
 	for _, origCgrEv := range origCgrEvs {
 		// complete CDR are handling in processFile function
 		if partial, _ := origCgrEv.FieldAsString(utils.Partial); utils.IsSliceMember([]string{"false", utils.EmptyString}, partial) {
@@ -354,6 +374,7 @@ func (rdr *PartialCSVFileER) postCDR(itmID string, value interface{}) {
 		Time:  utils.TimePointer(time.Now()),
 		Event: make(map[string]interface{}),
 	}
+	opts := map[string]interface{}{}
 	for i, origCgrEv := range origCgrEvs {
 		if i == 0 {
 			cgrEv.Tenant = origCgrEv.Tenant
@@ -361,6 +382,13 @@ func (rdr *PartialCSVFileER) postCDR(itmID string, value interface{}) {
 		for key, value := range origCgrEv.Event {
 			cgrEv.Event[key] = value
 		}
+		for key, val := range origCgrEv.Opts {
+			opts[key] = val
+		}
 	}
-	rdr.rdrEvents <- &erEvent{cgrEvent: cgrEv, rdrCfg: rdr.Config()}
+	rdr.rdrEvents <- &erEvent{
+		cgrEvent: cgrEv,
+		rdrCfg:   rdr.Config(),
+		opts:     opts,
+	}
 }

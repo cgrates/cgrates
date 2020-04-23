@@ -397,6 +397,11 @@ func testCGRConfigReloadSessionS(t *testing.T) {
 		ClientProtocol:    1,
 		TerminateAttempts: 5,
 		AlterableFields:   utils.NewStringSet([]string{}),
+		STIRCfg: &STIRcfg{
+			AllowedAttest:      utils.NewStringSet([]string{utils.META_ANY}),
+			PayloadMaxduration: -1,
+			DefaultAttest:      "A",
+		},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.SessionSCfg()) {
 		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.SessionSCfg()))
@@ -951,6 +956,11 @@ func testCGRConfigReloadConfigFromJSONSessionS(t *testing.T) {
 		ClientProtocol:    1,
 		TerminateAttempts: 5,
 		AlterableFields:   utils.NewStringSet([]string{}),
+		STIRCfg: &STIRcfg{
+			AllowedAttest:      utils.NewStringSet([]string{utils.META_ANY}),
+			PayloadMaxduration: -1,
+			DefaultAttest:      "A",
+		},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.SessionSCfg()) {
 		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.SessionSCfg()))
@@ -992,6 +1002,11 @@ func testCGRConfigReloadAll(t *testing.T) {
 		ClientProtocol:    1,
 		TerminateAttempts: 5,
 		AlterableFields:   utils.NewStringSet([]string{}),
+		STIRCfg: &STIRcfg{
+			AllowedAttest:      utils.NewStringSet([]string{utils.META_ANY}),
+			PayloadMaxduration: -1,
+			DefaultAttest:      "A",
+		},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.SessionSCfg()) {
 		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.SessionSCfg()))

@@ -60,7 +60,7 @@ func NewAsteriskAgent(cgrCfg *config.CGRConfig, astConnIdx int,
 		cgrCfg:      cgrCfg,
 		astConnIdx:  astConnIdx,
 		connMgr:     connMgr,
-		eventsCache: make(map[string]*utils.CGREventWithArgDispatcher),
+		eventsCache: make(map[string]*utils.CGREventWithOpts),
 	}
 	return sma, nil
 }
@@ -73,8 +73,8 @@ type AsteriskAgent struct {
 	astConn     *aringo.ARInGO
 	astEvChan   chan map[string]interface{}
 	astErrChan  chan error
-	eventsCache map[string]*utils.CGREventWithArgDispatcher // used to gather information about events during various phases
-	evCacheMux  sync.RWMutex                                // Protect eventsCache
+	eventsCache map[string]*utils.CGREventWithOpts // used to gather information about events during various phases
+	evCacheMux  sync.RWMutex                       // Protect eventsCache
 }
 
 func (sma *AsteriskAgent) connectAsterisk() (err error) {
@@ -229,9 +229,12 @@ func (sma *AsteriskAgent) handleStasisStart(ev *SMAsteriskEvent) {
 	}
 	// Done with processing event, cache it for later use
 	sma.evCacheMux.Lock()
-	sma.eventsCache[ev.ChannelID()] = &utils.CGREventWithArgDispatcher{
-		CGREvent:      authArgs.CGREvent,
-		ArgDispatcher: authArgs.ArgDispatcher,
+	sma.eventsCache[ev.ChannelID()] = &utils.CGREventWithOpts{
+		CGREventWithArgDispatcher: &utils.CGREventWithArgDispatcher{
+			CGREvent:      authArgs.CGREvent,
+			ArgDispatcher: authArgs.ArgDispatcher,
+		},
+		Opts: authArgs.Opts,
 	}
 	sma.evCacheMux.Unlock()
 }
@@ -249,6 +252,9 @@ func (sma *AsteriskAgent) handleChannelStateChange(ev *SMAsteriskEvent) {
 	}
 	sma.evCacheMux.Lock()
 	err := ev.UpdateCGREvent(cgrEvDisp.CGREvent) // Updates the event directly in the cache
+	for k, v := range ev.opts {
+		cgrEvDisp.Opts[k] = v
+	}
 	sma.evCacheMux.Unlock()
 	if err != nil {
 		sma.hangupChannel(ev.ChannelID(),
@@ -289,6 +295,9 @@ func (sma *AsteriskAgent) handleChannelDestroyed(ev *SMAsteriskEvent) {
 	}
 	sma.evCacheMux.Lock()
 	err := ev.UpdateCGREvent(cgrEvDisp.CGREvent) // Updates the event directly in the cache
+	for k, v := range ev.opts {
+		cgrEvDisp.Opts[k] = v
+	}
 	sma.evCacheMux.Unlock()
 	if err != nil {
 		utils.Logger.Warning(

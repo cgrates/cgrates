@@ -66,7 +66,7 @@ var (
 
 // Test start here
 func TestRAit(t *testing.T) {
-	engine.KillEngine(0)
+	// engine.KillEngine(0)
 	switch *dbType {
 	case utils.MetaInternal:
 		raonfigDIR = "radagent_internal"

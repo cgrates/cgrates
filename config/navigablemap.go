@@ -671,3 +671,25 @@ func (nM *NavigableMap) RemoveAll() {
 	nM.data = make(map[string]interface{})
 	nM.order = make([][]string, 0)
 }
+
+// GetData returns the map from inside the NavMap without modifying it
+func (nM *NavigableMap) GetData() (mp map[string]interface{}) {
+	mp = make(map[string]interface{})
+	if len(nM.order) == 0 {
+		indexMapPaths(nM.data, nil, &nM.order)
+	}
+	for _, branchPath := range nM.order {
+		val, _ := nM.FieldAsInterface(branchPath)
+		if nmItms, isNMItems := val.([]*NMItem); isNMItems { // special case when we have added multiple items inside a key, used in agents
+			for _, nmItm := range nmItms {
+				if nmItm.Config == nil ||
+					nmItm.Config.AttributeID == "" {
+					val = nmItm.Data // first item which is not an attribute will become the value
+					break
+				}
+			}
+		}
+		mp[strings.Join(branchPath, utils.NestingSep)] = val
+	}
+	return
+}

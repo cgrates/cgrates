@@ -215,7 +215,7 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 			Groups: 0,
 		},
 		utils.CacheDispatchers: {
-			Items:  5,
+			Items:  0,
 			Groups: 0,
 		},
 		utils.CacheEventResources: {
@@ -323,6 +323,10 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 			Groups: 0,
 		},
 		utils.CacheUCH: {
+			Items:  0,
+			Groups: 0,
+		},
+		utils.CacheSTIR: {
 			Items:  0,
 			Groups: 0,
 		},

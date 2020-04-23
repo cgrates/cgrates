@@ -188,7 +188,7 @@ func (rdr *SQLEventReader) processMessage(msg map[string]interface{}) (err error
 	reqVars := make(map[string]interface{})
 	agReq := agents.NewAgentRequest(
 		config.NewNavigableMap(msg), reqVars,
-		nil, nil, rdr.Config().Tenant,
+		nil, nil, nil, rdr.Config().Tenant,
 		rdr.cgrCfg.GeneralCfg().DefaultTenant,
 		utils.FirstNonEmpty(rdr.Config().Timezone,
 			rdr.cgrCfg.GeneralCfg().DefaultTimezone),
@@ -204,6 +204,7 @@ func (rdr *SQLEventReader) processMessage(msg map[string]interface{}) (err error
 	rdr.rdrEvents <- &erEvent{
 		cgrEvent: agReq.CGRRequest.AsCGREvent(agReq.Tenant, utils.NestingSep),
 		rdrCfg:   rdr.Config(),
+		opts:     agReq.Opts.GetData(),
 	}
 	return
 }

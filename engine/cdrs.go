@@ -43,7 +43,7 @@ func cgrCdrHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	cdr := cgrCdr.AsCDR(cdrServer.cgrCfg.GeneralCfg().DefaultTimezone)
 	var ignored string
-	if err := cdrServer.V1ProcessCDR(&CDRWithArgDispatcher{CDR: cdr}, &ignored); err != nil {
+	if err := cdrServer.V1ProcessCDR(&CDRWithOpts{CDR: cdr}, &ignored); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> processing CDR: %s, err: <%s>",
 				utils.CDRs, cdr, err.Error()))
@@ -60,7 +60,7 @@ func fsCdrHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	cdr := fsCdr.AsCDR(cdrServer.cgrCfg.GeneralCfg().DefaultTimezone)
 	var ignored string
-	if err := cdrServer.V1ProcessCDR(&CDRWithArgDispatcher{CDR: cdr}, &ignored); err != nil {
+	if err := cdrServer.V1ProcessCDR(&CDRWithOpts{CDR: cdr}, &ignored); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> processing CDR: %s, err: <%s>",
 				utils.CDRs, cdr, err.Error()))
@@ -323,7 +323,7 @@ func (cdrS *CDRServer) refundEventCost(ec *EventCost, reqType, tor string) (rfnd
 }
 
 // chrgrSProcessEvent forks CGREventWithArgDispatcher into multiples based on matching ChargerS profiles
-func (cdrS *CDRServer) chrgrSProcessEvent(cgrEv *utils.CGREventWithArgDispatcher) (cgrEvs []*utils.CGREventWithArgDispatcher, err error) {
+func (cdrS *CDRServer) chrgrSProcessEvent(cgrEv *utils.CGREventWithOpts) (cgrEvs []*utils.CGREventWithArgDispatcher, err error) {
 	var chrgrs []*ChrgSProcessEventReply
 	if err = cdrS.connMgr.Call(cdrS.cgrCfg.CdrsCfg().ChargerSConns, nil,
 		utils.ChargerSv1ProcessEvent,
@@ -344,20 +344,20 @@ func (cdrS *CDRServer) chrgrSProcessEvent(cgrEv *utils.CGREventWithArgDispatcher
 }
 
 // attrSProcessEvent will send the event to StatS if the connection is configured
-func (cdrS *CDRServer) attrSProcessEvent(cgrEv *utils.CGREventWithArgDispatcher) (err error) {
+func (cdrS *CDRServer) attrSProcessEvent(cgrEv *utils.CGREventWithOpts) (err error) {
 	var rplyEv AttrSProcessEventReply
 	attrArgs := &AttrArgsProcessEvent{
 		Context: utils.StringPointer(utils.FirstNonEmpty(
-			utils.IfaceAsString(cgrEv.CGREvent.Event[utils.Context]),
+			utils.IfaceAsString(cgrEv.Opts[utils.Context]),
 			utils.MetaCDRs)),
-		CGREvent: cgrEv.CGREvent}
-	if cgrEv.ArgDispatcher != nil {
-		attrArgs.ArgDispatcher = cgrEv.ArgDispatcher
+		CGREvent:      cgrEv.CGREvent,
+		ArgDispatcher: cgrEv.ArgDispatcher,
 	}
 	if err = cdrS.connMgr.Call(cdrS.cgrCfg.CdrsCfg().AttributeSConns, nil,
 		utils.AttributeSv1ProcessEvent,
 		attrArgs, &rplyEv); err == nil && len(rplyEv.AlteredFields) != 0 {
 		cgrEv.CGREvent = rplyEv.CGREvent
+		cgrEv.Opts = rplyEv.Opts
 	} else if err.Error() == utils.ErrNotFound.Error() {
 		err = nil // cancel ErrNotFound
 	}
@@ -421,7 +421,7 @@ func (cdrS *CDRServer) exportCDRs(cdrs []*CDR) (err error) {
 
 // processEvent processes a CGREvent based on arguments
 // in case of partially executed, both error and evs will be returned
-func (cdrS *CDRServer) processEvent(ev *utils.CGREventWithArgDispatcher,
+func (cdrS *CDRServer) processEvent(ev *utils.CGREventWithOpts,
 	chrgS, attrS, refund, ralS, store, reRate, export, thdS, stS bool) (evs []*utils.EventWithFlags, err error) {
 	if attrS {
 		if err = cdrS.attrSProcessEvent(ev); err != nil {
@@ -442,7 +442,7 @@ func (cdrS *CDRServer) processEvent(ev *utils.CGREventWithArgDispatcher,
 			return
 		}
 	} else { // ChargerS not requested, charge the original event
-		cgrEvs = []*utils.CGREventWithArgDispatcher{ev}
+		cgrEvs = []*utils.CGREventWithArgDispatcher{ev.CGREventWithArgDispatcher}
 	}
 	// Check if the unique ID was not already processed
 	if !refund {
@@ -633,7 +633,7 @@ func (cdrS *CDRServer) Call(serviceMethod string, args interface{}, reply interf
 }
 
 // V1ProcessCDR processes a CDR
-func (cdrS *CDRServer) V1ProcessCDR(cdr *CDRWithArgDispatcher, reply *string) (err error) {
+func (cdrS *CDRServer) V1ProcessCDR(cdr *CDRWithOpts, reply *string) (err error) {
 	if cdr.CGRID == utils.EmptyString { // Populate CGRID if not present
 		cdr.ComputeCGRID()
 	}
@@ -671,9 +671,12 @@ func (cdrS *CDRServer) V1ProcessCDR(cdr *CDRWithArgDispatcher, reply *string) (e
 	if cdr.RunID == utils.EmptyString {
 		cdr.RunID = utils.MetaDefault
 	}
-	cgrEv := &utils.CGREventWithArgDispatcher{
-		CGREvent:      cdr.AsCGREvent(),
-		ArgDispatcher: cdr.ArgDispatcher,
+	cgrEv := &utils.CGREventWithOpts{
+		CGREventWithArgDispatcher: &utils.CGREventWithArgDispatcher{
+			CGREvent:      cdr.AsCGREvent(),
+			ArgDispatcher: cdr.ArgDispatcher,
+		},
+		Opts: cdr.Opts,
 	}
 
 	if _, err = cdrS.processEvent(cgrEv,
@@ -697,6 +700,7 @@ type ArgV1ProcessEvent struct {
 	Flags []string
 	utils.CGREvent
 	*utils.ArgDispatcher
+	Opts map[string]interface{}
 }
 
 // V1ProcessEvent will process the CGREvent
@@ -770,9 +774,12 @@ func (cdrS *CDRServer) V1ProcessEvent(arg *ArgV1ProcessEvent, reply *string) (er
 	}
 	// end of processing options
 
-	cgrEv := &utils.CGREventWithArgDispatcher{
-		CGREvent:      &arg.CGREvent,
-		ArgDispatcher: arg.ArgDispatcher,
+	cgrEv := &utils.CGREventWithOpts{
+		CGREventWithArgDispatcher: &utils.CGREventWithArgDispatcher{
+			CGREvent:      &arg.CGREvent,
+			ArgDispatcher: arg.ArgDispatcher,
+		},
+		Opts: arg.Opts,
 	}
 	if _, err = cdrS.processEvent(cgrEv, chrgS, attrS, refund,
 		ralS, store, reRate, export, thdS, stS); err != nil {
@@ -853,9 +860,12 @@ func (cdrS *CDRServer) V2ProcessEvent(arg *ArgV1ProcessEvent, evs *[]*utils.Even
 	}
 	// end of processing options
 
-	cgrEv := &utils.CGREventWithArgDispatcher{
-		CGREvent:      &arg.CGREvent,
-		ArgDispatcher: arg.ArgDispatcher,
+	cgrEv := &utils.CGREventWithOpts{
+		CGREventWithArgDispatcher: &utils.CGREventWithArgDispatcher{
+			CGREvent:      &arg.CGREvent,
+			ArgDispatcher: arg.ArgDispatcher,
+		},
+		Opts: arg.Opts,
 	}
 	var procEvs []*utils.EventWithFlags
 	if procEvs, err = cdrS.processEvent(cgrEv, chrgS, attrS, refund,
@@ -968,6 +978,7 @@ type ArgRateCDRs struct {
 	utils.RPCCDRsFilter
 	*utils.ArgDispatcher
 	*utils.TenantArg
+	Opts map[string]interface{}
 }
 
 // V1RateCDRs is used for re-/rate CDRs which are already stored within StorDB
@@ -1015,9 +1026,12 @@ func (cdrS *CDRServer) V1RateCDRs(arg *ArgRateCDRs, reply *string) (err error) {
 	}
 	for _, cdr := range cdrs {
 		cdr.Cost = -1 // the cost will be recalculated
-		cgrEv := &utils.CGREventWithArgDispatcher{
-			CGREvent:      cdr.AsCGREvent(),
-			ArgDispatcher: arg.ArgDispatcher,
+		cgrEv := &utils.CGREventWithOpts{
+			CGREventWithArgDispatcher: &utils.CGREventWithArgDispatcher{
+				CGREvent:      cdr.AsCGREvent(),
+				ArgDispatcher: arg.ArgDispatcher,
+			},
+			Opts: arg.Opts,
 		}
 		if _, err = cdrS.processEvent(cgrEv, chrgS, attrS, false,
 			true, store, true, export, thdS, statS); err != nil {
@@ -1035,8 +1049,11 @@ func (cdrS *CDRServer) V1ProcessExternalCDR(eCDR *ExternalCDRWithArgDispatcher, 
 	if err != nil {
 		return err
 	}
-	return cdrS.V1ProcessCDR(&CDRWithArgDispatcher{CDR: cdr,
-		ArgDispatcher: eCDR.ArgDispatcher}, reply)
+	return cdrS.V1ProcessCDR(&CDRWithOpts{
+		CDR:           cdr,
+		ArgDispatcher: eCDR.ArgDispatcher,
+		Opts:          eCDR.Opts,
+	}, reply)
 }
 
 // V1GetCDRs returns CDRs from DB

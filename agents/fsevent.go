@@ -398,6 +398,7 @@ func (fsev FSEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs) {
 	cgrEv.Event[utils.Usage] = config.CgrConfig().SessionSCfg().MaxCallDuration // no billsec available in auth
 	args = &sessions.V1AuthorizeArgs{                                           // defaults
 		CGREvent: cgrEv,
+		Opts:     fsev.GetOptions(),
 	}
 	subsystems, has := fsev[VarCGRFlags]
 	if !has {
@@ -416,6 +417,7 @@ func (fsev FSEvent) V1InitSessionArgs() (args *sessions.V1InitSessionArgs) {
 	}
 	args = &sessions.V1InitSessionArgs{ // defaults
 		CGREvent: cgrEv,
+		Opts:     fsev.GetOptions(),
 	}
 	subsystems, has := fsev[VarCGRFlags]
 	if !has {
@@ -434,6 +436,7 @@ func (fsev FSEvent) V1TerminateSessionArgs() (args *sessions.V1TerminateSessionA
 	}
 	args = &sessions.V1TerminateSessionArgs{ // defaults
 		CGREvent: cgrEv,
+		Opts:     fsev.GetOptions(),
 	}
 	subsystems, has := fsev[VarCGRFlags]
 	if !has {
@@ -444,18 +447,25 @@ func (fsev FSEvent) V1TerminateSessionArgs() (args *sessions.V1TerminateSessionA
 	return
 }
 
-// Converts a slice of strings into a FS array string, contains len(array) at first index since FS does not support len(ARRAY::) for now
-func SliceAsFsArray(slc []string) string {
-	arry := ""
+// SliceAsFsArray Converts a slice of strings into a FS array string, contains len(array) at first index since FS does not support len(ARRAY::) for now
+func SliceAsFsArray(slc []string) (arry string) {
 	if len(slc) == 0 {
-		return arry
+		return
 	}
-	for idx, itm := range slc {
-		if idx == 0 {
-			arry = fmt.Sprintf("ARRAY::%d|:%s", len(slc), itm)
-		} else {
-			arry += "|:" + itm
+	arry = fmt.Sprintf("ARRAY::%d", len(slc))
+	for _, itm := range slc {
+		arry += "|:" + itm
+	}
+	return
+}
+
+// GetOptions returns the posible options
+func (fsev FSEvent) GetOptions() (mp map[string]interface{}) {
+	mp = make(map[string]interface{})
+	for k := range utils.CGROptionsSet.Data() {
+		if val, has := fsev[k]; has {
+			mp[k] = val
 		}
 	}
-	return arry
+	return
 }

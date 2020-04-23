@@ -66,10 +66,11 @@ func (ha *HTTPAgent) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 	cgrRplyNM := config.NewNavigableMap(nil)
 	rplyNM := config.NewNavigableMap(nil)
+	opts := config.NewNavigableMap(nil)
 	reqVars[utils.RemoteHost] = req.RemoteAddr
 	for _, reqProcessor := range ha.reqProcessors {
 		agReq := NewAgentRequest(dcdr, reqVars, cgrRplyNM, rplyNM,
-			reqProcessor.Tenant, ha.dfltTenant,
+			opts, reqProcessor.Tenant, ha.dfltTenant,
 			utils.FirstNonEmpty(reqProcessor.Timezone,
 				config.CgrConfig().GeneralCfg().DefaultTimezone),
 			ha.filterS, nil, nil)
@@ -154,6 +155,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersEventCost),
 			cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator,
 			reqProcessor.Flags.HasKey(utils.MetaFD),
+			agReq.Opts.GetData(),
 		)
 		rply := new(sessions.V1AuthorizeReply)
 		err = ha.connMgr.Call(ha.sessionConns, nil, utils.SessionSv1AuthorizeEvent,
@@ -172,7 +174,8 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaResources),
 			reqProcessor.Flags.HasKey(utils.MetaAccounts),
 			cgrEv, cgrArgs.ArgDispatcher,
-			reqProcessor.Flags.HasKey(utils.MetaFD))
+			reqProcessor.Flags.HasKey(utils.MetaFD),
+			agReq.Opts.GetData())
 		rply := new(sessions.V1InitSessionReply)
 		err = ha.connMgr.Call(ha.sessionConns, nil, utils.SessionSv1InitiateSession,
 			initArgs, rply)
@@ -185,7 +188,8 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.ParamsSlice(utils.MetaAttributes),
 			reqProcessor.Flags.HasKey(utils.MetaAccounts),
 			cgrEv, cgrArgs.ArgDispatcher,
-			reqProcessor.Flags.HasKey(utils.MetaFD))
+			reqProcessor.Flags.HasKey(utils.MetaFD),
+			agReq.Opts.GetData())
 		rply := new(sessions.V1UpdateSessionReply)
 		err = ha.connMgr.Call(ha.sessionConns, nil, utils.SessionSv1UpdateSession,
 			updateArgs, rply)
@@ -201,7 +205,8 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaStats),
 			reqProcessor.Flags.ParamsSlice(utils.MetaStats),
 			cgrEv, cgrArgs.ArgDispatcher,
-			reqProcessor.Flags.HasKey(utils.MetaFD))
+			reqProcessor.Flags.HasKey(utils.MetaFD),
+			agReq.Opts.GetData())
 		rply := utils.StringPointer("")
 		err = ha.connMgr.Call(ha.sessionConns, nil, utils.SessionSv1TerminateSession,
 			terminateArgs, rply)
@@ -222,7 +227,8 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersIgnoreErrors),
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersEventCost),
 			cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator,
-			reqProcessor.Flags.HasKey(utils.MetaFD))
+			reqProcessor.Flags.HasKey(utils.MetaFD),
+			agReq.Opts.GetData())
 		rply := new(sessions.V1ProcessMessageReply)
 		err = ha.connMgr.Call(ha.sessionConns, nil, utils.SessionSv1ProcessMessage,
 			evArgs, rply)
@@ -240,6 +246,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 			CGREvent:      cgrEv,
 			ArgDispatcher: cgrArgs.ArgDispatcher,
 			Paginator:     *cgrArgs.SupplierPaginator,
+			Opts:          agReq.Opts.GetData(),
 		}
 		needMaxUsage := reqProcessor.Flags.HasKey(utils.MetaAuth) ||
 			reqProcessor.Flags.HasKey(utils.MetaInit) ||
