@@ -1,0 +1,53 @@
+{
+
+"general": {
+	"node_id": "DispatcherEngine",
+	"log_level": 7,
+	"reconnects": 1,
+},
+
+
+"listen": {
+	"rpc_json": ":2012",
+	"rpc_gob": ":2013",
+	"http": ":2080",
+},
+
+"stor_db": {
+	"db_type": "*internal",
+},
+
+
+"caches":{
+	"partitions": {
+		"*dispatcher_routes": {"limit": -1, "ttl": "1h", "replicate": true},
+		"*dispatcher_loads": {"limit": -1, "replicate": true}
+	},
+	"replication_conns": ["cacheReplication"],
+},
+
+
+"rpc_conns": {
+	"cacheReplication": {
+		"conns": [{"address": "127.0.0.1:3013", "transport":"*gob"}],
+	},
+},
+
+
+"schedulers": {
+	"enabled": true,
+},
+	
+	
+"dispatchers":{
+	 "enabled": true,
+},
+	
+	
+"apiers": {
+	"enabled": true,
+	"scheduler_conns": ["*internal"],
+},
+
+	
+}
