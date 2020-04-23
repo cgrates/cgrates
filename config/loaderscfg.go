@@ -211,6 +211,15 @@ func (l *LoaderSCfg) AsMapInterface(separator string) map[string]interface{} {
 	if l.RunDelay != 0 {
 		runDelay = l.RunDelay.String()
 	}
+	cacheSConns := make([]string, len(l.CacheSConns))
+	for i, item := range l.CacheSConns {
+		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)
+		if item == buf {
+			cacheSConns[i] = strings.ReplaceAll(item, ":*caches", utils.EmptyString)
+		} else {
+			cacheSConns[i] = item
+		}
+	}
 
 	return map[string]interface{}{
 		utils.IdCfg:             l.Id,
@@ -219,7 +228,7 @@ func (l *LoaderSCfg) AsMapInterface(separator string) map[string]interface{} {
 		utils.DryRunCfg:         l.DryRun,
 		utils.RunDelayCfg:       runDelay,
 		utils.LockFileNameCfg:   l.LockFileName,
-		utils.CacheSConnsCfg:    l.CacheSConns,
+		utils.CacheSConnsCfg:    cacheSConns,
 		utils.FieldSeparatorCfg: l.FieldSeparator,
 		utils.TpInDirCfg:        l.TpInDir,
 		utils.TpOutDirCfg:       l.TpOutDir,

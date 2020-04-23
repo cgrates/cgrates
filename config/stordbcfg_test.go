@@ -20,6 +20,8 @@ package config
 import (
 	"reflect"
 	"testing"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 func TestStoreDbCfgloadFromJsonCfg(t *testing.T) {
@@ -128,5 +130,59 @@ func TestStoreDbCfgloadFromJsonCfgPort(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, dbcfg) {
 		t.Errorf("Expected: %+v , recived: %+v", expected, dbcfg)
+	}
+}
+
+func TestStorDbCfgAsMapInterface(t *testing.T) {
+	var dbcfg StorDbCfg
+	cfgJSONStr := `{
+		"stor_db": {								
+			"db_type": "*mysql",					
+			"db_host": "127.0.0.1",					
+			"db_port": -1,						
+			"db_name": "cgrates",					
+			"db_user": "cgrates",					
+			"db_password": "",						
+			"max_open_conns": 100,					
+			"max_idle_conns": 10,					
+			"conn_max_lifetime": 0, 				
+			"string_indexed_fields": [],			
+			"prefix_indexed_fields":[],				
+			"query_timeout":"10s",
+			"sslmode":"disable",					
+			"items":{
+				"session_costs": {"limit": -1, "ttl": "", "static_ttl": false}, 
+				"cdrs": {"limit": -1, "ttl": "", "static_ttl": false}, 		
+			},
+		},
+}`
+
+	eMap := map[string]interface{}{
+		"db_type":               "*mysql",
+		"db_host":               "127.0.0.1",
+		"db_port":               3306,
+		"db_name":               "cgrates",
+		"db_user":               "cgrates",
+		"db_password":           "",
+		"max_open_conns":        100,
+		"max_idle_conns":        10,
+		"conn_max_lifetime":     0,
+		"string_indexed_fields": []string{},
+		"prefix_indexed_fields": []string{},
+		"query_timeout":         "10s",
+		"sslmode":               "disable",
+		"items": map[string]interface{}{
+			"session_costs": map[string]interface{}{"limit": -1, "ttl": "", "static_ttl": false, "remote": false, "replicate": false},
+			"cdrs":          map[string]interface{}{"limit": -1, "ttl": "", "static_ttl": false, "remote": false, "replicate": false},
+		},
+	}
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+		t.Error(err)
+	} else if jsnStoreDbCfg, err := jsnCfg.DbJsonCfg(STORDB_JSN); err != nil {
+		t.Error(err)
+	} else if err = dbcfg.loadFromJsonCfg(jsnStoreDbCfg); err != nil {
+		t.Error(err)
+	} else if rcv := dbcfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
+		t.Errorf("Expected: %+v ,\n recived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }

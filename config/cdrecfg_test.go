@@ -138,7 +138,7 @@ func TestCdreCfgloadFromJsonCfg(t *testing.T) {
 	}
 }
 
-func TestCdreAsMapInterface(t *testing.T) {
+func TestCdreCfgAsMapInterface(t *testing.T) {
 	var cdre CdreCfg
 	cfgJSONStr := `{
 		"cdre": {												
