@@ -1,0 +1,59 @@
+{
+// CGRateS Configuration file
+//
+
+
+"general": {
+	"node_id": "Engine1",
+	"log_level": 7
+},
+
+
+"listen": {
+ 	"rpc_json": ":6012",
+	"rpc_gob": ":6013",
+	"http": ":6080",
+},
+
+"data_db": {
+	"db_type": "*internal",
+},
+
+"stor_db": {
+	"db_type": "*internal"
+},
+
+
+"rpc_conns": {
+	"conn1": {
+		"strategy": "*first",
+		"conns": [{"address": "127.0.0.1:6012", "transport":"*json"}],
+	},
+},
+
+"attributes": {
+	"enabled": true
+},
+
+"rals": {
+	"enabled": true,
+},
+
+"schedulers": {
+	"enabled": true,				
+},
+
+
+"chargers": {
+	"enabled": true,
+	"attributes_conns": ["*internal"],
+},
+
+
+"apiers": {
+	"enabled": true,
+	"caches_conns":["conn1"],
+	"scheduler_conns": ["*internal"],
+},
+
+}
