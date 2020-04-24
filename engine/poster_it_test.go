@@ -21,13 +21,30 @@ package engine
 
 import (
 	"encoding/json"
+	"flag"
+	"fmt"
 	"path/filepath"
 	"reflect"
 	"testing"
 	"time"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/sqs"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+)
+
+var (
+	/*
+		README
+		run test for sqs poster with following command:
+			go test -tags=integration -run=TestSQSPoster -sqs
+		also configure the credentials from test function
+	*/
+	itTestSQS = flag.Bool("sqs", false, "Run the test for SQSPoster")
 )
 
 type TestContent struct {
@@ -96,5 +113,85 @@ func TestHttpBytesPoster(t *testing.T) {
 	}
 	if !reflect.DeepEqual(content, ev.Events[0]) {
 		t.Errorf("Expecting: %q, received: %q", string(content), ev.Events[0])
+	}
+}
+
+func TestSQSPoster(t *testing.T) {
+	if !*itTestSQS {
+		return
+	}
+	cfg1, err := config.NewDefaultCGRConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	utils.Newlogger(utils.MetaSysLog, cfg1.GeneralCfg().NodeID)
+	utils.Logger.SetLogLevel(7)
+
+	//#####################################
+	// update this variables
+	endpoint := "https://sqs.us-east-2.amazonaws.com"
+	region := "us-east-2"
+	awsKey := "replace-this-with-your-secret-key"
+	awsSecret := "replace-this-with-your-secret"
+	qname := "cgrates-cdrs"
+	//#####################################
+
+	// export_path for sqs:  "endpoint?aws_region=region&aws_key=IDkey&aws_secret=secret&aws_token=sessionToken&queue_id=cgrates-cdrs"
+	dialURL := fmt.Sprintf("%s?aws_region=%s&aws_key=%s&aws_secret=%s&queue_id=%s", endpoint, region, awsKey, awsSecret, qname)
+
+	body := "testString"
+
+	pstr, err := PostersCache.GetSQSPoster(dialURL, 5)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := pstr.Post([]byte(body), ""); err != nil {
+		t.Fatal(err)
+	}
+
+	var sess *session.Session
+	cfg := aws.Config{Endpoint: aws.String(endpoint)}
+	cfg.Region = aws.String(region)
+
+	cfg.Credentials = credentials.NewStaticCredentials(awsKey, awsSecret, "")
+	sess, err = session.NewSessionWithOptions(
+		session.Options{
+			Config: cfg,
+		},
+	)
+
+	// Create a SQS service client.
+	svc := sqs.New(sess)
+
+	resultURL, err := svc.GetQueueUrl(&sqs.GetQueueUrlInput{
+		QueueName: aws.String(qname),
+	})
+	if err != nil {
+		if aerr, ok := err.(awserr.Error); ok && aerr.Code() == sqs.ErrCodeQueueDoesNotExist {
+			t.Fatalf("Unable to find queue %q.", qname)
+		}
+		t.Fatalf("Unable to queue %q, %v.", qname, err)
+	}
+
+	result, err := svc.ReceiveMessage(&sqs.ReceiveMessageInput{
+		QueueUrl:            resultURL.QueueUrl,
+		MaxNumberOfMessages: aws.Int64(1),
+		VisibilityTimeout:   aws.Int64(30), // 20 seconds
+		WaitTimeSeconds:     aws.Int64(0),
+	})
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if len(result.Messages) != 1 {
+		t.Fatalf("Expected 1 message received: %d", len(result.Messages))
+	}
+	if result.Messages[0].Body == nil {
+		t.Fatal("No Msg Body")
+	}
+	if *result.Messages[0].Body != body {
+		t.Errorf("Expected: %q, received: %q", body, *result.Messages[0].Body)
 	}
 }
