@@ -33,32 +33,47 @@ var Cache *CacheS
 
 func init() {
 	Cache = NewCacheS(config.CgrConfig(), nil)
-	//Threshold
+	// Threshold
 	gob.Register(new(Threshold))
 	gob.Register(new(ThresholdProfile))
 	gob.Register(new(ThresholdProfileWithArgDispatcher))
 	gob.Register(new(ThresholdWithArgDispatcher))
-	//Resource
+	// Resource
 	gob.Register(new(Resource))
 	gob.Register(new(ResourceProfile))
 	gob.Register(new(ResourceProfileWithArgDispatcher))
 	gob.Register(new(ResourceWithArgDispatcher))
-	//Stats
+	// Stats
 	gob.Register(new(StatQueue))
 	gob.Register(new(StatQueueProfile))
 	gob.Register(new(StatQueueProfileWithArgDispatcher))
 	gob.Register(new(StoredStatQueue))
 	gob.Register(new(StatQueueProfileWithArgDispatcher))
-	//Suppliers
+	// Suppliers
 	gob.Register(new(SupplierProfile))
 	gob.Register(new(SupplierProfileWithArgDispatcher))
-	//Filters
+	// Filters
 	gob.Register(new(Filter))
 	gob.Register(new(FilterWithArgDispatcher))
-	//Dispatcher
+	// Dispatcher
 	gob.Register(new(DispatcherHost))
 	gob.Register(new(DispatcherHostProfile))
 	gob.Register(new(DispatcherHostWithArgDispatcher))
+
+	// CDRs
+	gob.Register(new(EventCost))
+
+	// StatMetrics
+	gob.Register(new(StatASR))
+	gob.Register(new(StatACD))
+	gob.Register(new(StatTCD))
+	gob.Register(new(StatACC))
+	gob.Register(new(StatTCC))
+	gob.Register(new(StatPDD))
+	gob.Register(new(StatDDC))
+	gob.Register(new(StatSum))
+	gob.Register(new(StatAverage))
+	gob.Register(new(StatDistinct))
 }
 
 //SetCache shared the cache from other subsystems
