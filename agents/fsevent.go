@@ -33,15 +33,16 @@ import (
 // ToDo: Introduce support for RSRFields
 
 const (
+	varPrefix = "variable_"
 	// Freswitch event proprities names
-	SUBJECT                  = "variable_" + utils.CGR_SUBJECT
-	ACCOUNT                  = "variable_" + utils.CGR_ACCOUNT
-	DESTINATION              = "variable_" + utils.CGR_DESTINATION
-	REQTYPE                  = "variable_" + utils.CGR_REQTYPE //prepaid or postpaid
-	CATEGORY                 = "variable_" + utils.CGR_CATEGORY
-	VAR_CGR_SUPPLIER         = "variable_" + utils.CGR_SUPPLIER
+	SUBJECT                  = varPrefix + utils.CGR_SUBJECT
+	ACCOUNT                  = varPrefix + utils.CGR_ACCOUNT
+	DESTINATION              = varPrefix + utils.CGR_DESTINATION
+	REQTYPE                  = varPrefix + utils.CGR_REQTYPE //prepaid or postpaid
+	CATEGORY                 = varPrefix + utils.CGR_CATEGORY
+	VAR_CGR_SUPPLIER         = varPrefix + utils.CGR_SUPPLIER
 	UUID                     = "Unique-ID" // -Unique ID for this call leg
-	CSTMID                   = "variable_" + utils.CGR_TENANT
+	CSTMID                   = varPrefix + utils.CGR_TENANT
 	CALL_DEST_NR             = "Caller-Destination-Number"
 	SIP_REQ_USER             = "variable_sip_req_user"
 	PARK_TIME                = "Caller-Profile-Created-Time"
@@ -64,14 +65,15 @@ const (
 	PDD_NOMEDIA_MS           = "variable_progressmsec"
 	IGNOREPARK               = "variable_cgr_ignorepark"
 	FS_VARPREFIX             = "variable_"
-	VarCGRFlags              = "variable_" + utils.CGRFlags
+	VarCGRFlags              = varPrefix + utils.CGRFlags
+	VarCGROpts               = varPrefix + utils.CGROpts
 	CGRResourceAllocation    = "cgr_resource_allocation"
-	VAR_CGR_DISCONNECT_CAUSE = "variable_" + utils.CGR_DISCONNECT_CAUSE
-	VAR_CGR_CMPUTELCR        = "variable_" + utils.CGR_COMPUTELCR
+	VAR_CGR_DISCONNECT_CAUSE = varPrefix + utils.CGR_DISCONNECT_CAUSE
+	VAR_CGR_CMPUTELCR        = varPrefix + utils.CGR_COMPUTELCR
 	FsConnID                 = "FsConnID" // used to share connID info in event for remote disconnects
 	VarAnswerEpoch           = "variable_answer_epoch"
-	VarCGRACD                = "variable_" + utils.CGR_ACD
-	VarCGROriginHost         = "variable_" + utils.CGROriginHost
+	VarCGRACD                = varPrefix + utils.CGR_ACD
+	VarCGROriginHost         = varPrefix + utils.CGROriginHost
 )
 
 func NewFSEvent(strEv string) (fsev FSEvent) {
@@ -462,10 +464,16 @@ func SliceAsFsArray(slc []string) (arry string) {
 // GetOptions returns the posible options
 func (fsev FSEvent) GetOptions() (mp map[string]interface{}) {
 	mp = make(map[string]interface{})
-	for k := range utils.CGROptionsSet.Data() {
-		if val, has := fsev[k]; has {
-			mp[k] = val
+	opts, has := fsev[VarCGROpts]
+	if !has {
+		return
+	}
+	for _, opt := range strings.Split(opts, utils.FIELDS_SEP) {
+		spltOpt := strings.SplitN(opt, utils.InInFieldSep, 2)
+		if len(spltOpt) != 2 {
+			continue
 		}
+		mp[spltOpt[0]] = spltOpt[1]
 	}
 	return
 }

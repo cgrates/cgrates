@@ -59,7 +59,6 @@ var (
 		testDiamItTPFromFolder,
 		testDiamItDryRun,
 		testDiamItCCRInit,
-		testDiamItCCRInitWithForceDuration,
 		testDiamItCCRUpdate,
 
 		testDiamItRAR,
@@ -69,6 +68,7 @@ var (
 		testDiamItCCRMMS,
 
 		testDiamItTemplateErr,
+		testDiamItCCRInitWithForceDuration,
 
 		testDiamItDRR,
 		testDiamItKillEngine,

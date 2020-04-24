@@ -128,90 +128,10 @@ func (ev *CGREvent) Clone() (clned *CGREvent) {
 	return
 }
 
-func (ev *CGREvent) consumeArgDispatcher() (arg *ArgDispatcher) {
-	if ev == nil {
-		return
-	}
-	//check if we have APIKey in event and in case it has add it in ArgDispatcher
-	apiKeyIface, hasApiKey := ev.Event[MetaApiKey]
-	if hasApiKey {
-		delete(ev.Event, MetaApiKey)
-		arg = &ArgDispatcher{
-			APIKey: StringPointer(apiKeyIface.(string)),
-		}
-	}
-	//check if we have RouteID in event and in case it has add it in ArgDispatcher
-	routeIDIface, hasRouteID := ev.Event[MetaRouteID]
-	if !hasRouteID {
-		return
-	}
-	delete(ev.Event, MetaRouteID)
-	if !hasApiKey { //in case we don't have APIKey, but we have RouteID we need to initialize the struct
-		return &ArgDispatcher{
-			RouteID: StringPointer(routeIDIface.(string)),
-		}
-	}
-	arg.RouteID = StringPointer(routeIDIface.(string))
-	return
-}
-
-// ConsumeSupplierPaginator will consume supplierPaginator if presented
-func (ev *CGREvent) consumeSupplierPaginator() (args *Paginator) {
-	args = new(Paginator)
-	if ev == nil {
-		return
-	}
-	//check if we have suppliersLimit in event and in case it has add it in args
-	limitIface, hasSuppliersLimit := ev.Event[MetaSuppliersLimit]
-	if hasSuppliersLimit {
-		delete(ev.Event, MetaSuppliersLimit)
-		limit, err := IfaceAsInt64(limitIface)
-		if err != nil {
-			Logger.Err(err.Error())
-			return
-		}
-		args = &Paginator{
-			Limit: IntPointer(int(limit)),
-		}
-	}
-	//check if we have offset in event and in case it has add it in args
-	offsetIface, hasSuppliersOffset := ev.Event[MetaSuppliersOffset]
-	if hasSuppliersOffset {
-		delete(ev.Event, MetaSuppliersOffset)
-		offset, err := IfaceAsInt64(offsetIface)
-		if err != nil {
-			Logger.Err(err.Error())
-			return
-		}
-		if !hasSuppliersLimit { //in case we don't have limit, but we have offset we need to initialize the struct
-			args = &Paginator{
-				Offset: IntPointer(int(offset)),
-			}
-		} else {
-			args.Offset = IntPointer(int(offset))
-		}
-	}
-	return
-}
-
 // ExtractedArgs stores the extracted arguments from CGREvent
 type ExtractedArgs struct {
 	ArgDispatcher     *ArgDispatcher
 	SupplierPaginator *Paginator
-}
-
-// ExtractArgs extracts the ArgDispatcher and SupplierPaginator from the received event
-func (ev *CGREvent) ExtractArgs(dispatcherFlag, consumeSupplierPaginator bool) (ca ExtractedArgs) {
-	ca = ExtractedArgs{
-		ArgDispatcher: ev.consumeArgDispatcher(),
-	}
-	if dispatcherFlag && ca.ArgDispatcher == nil {
-		ca.ArgDispatcher = new(ArgDispatcher)
-	}
-	if consumeSupplierPaginator {
-		ca.SupplierPaginator = ev.consumeSupplierPaginator()
-	}
-	return
 }
 
 // CGREvents is a group of generic events processed by CGR services
@@ -253,7 +173,87 @@ type EventWithFlags struct {
 	Event map[string]interface{}
 }
 
+// CGREventWithOpts is the event with Opts needed for ChargerSv1.ProccesEvent
 type CGREventWithOpts struct {
 	Opts map[string]interface{}
 	*CGREventWithArgDispatcher
+}
+
+func getArgDispatcherFromOpts(ev map[string]interface{}) (arg *ArgDispatcher) {
+	if ev == nil {
+		return
+	}
+	//check if we have APIKey in event and in case it has add it in ArgDispatcher
+	apiKeyIface, hasAPIKey := ev[APIKey]
+	if hasAPIKey {
+		delete(ev, APIKey)
+		arg = &ArgDispatcher{
+			APIKey: StringPointer(apiKeyIface.(string)),
+		}
+	}
+	//check if we have RouteID in event and in case it has add it in ArgDispatcher
+	routeIDIface, hasRouteID := ev[RouteID]
+	if !hasRouteID {
+		return
+	}
+	delete(ev, RouteID)
+	if !hasAPIKey { //in case we don't have APIKey, but we have RouteID we need to initialize the struct
+		return &ArgDispatcher{
+			RouteID: StringPointer(routeIDIface.(string)),
+		}
+	}
+	arg.RouteID = StringPointer(routeIDIface.(string))
+	return
+}
+
+// getSupplierPaginatorFromOpts will consume supplierPaginator if present
+func getSupplierPaginatorFromOpts(ev map[string]interface{}) (args *Paginator, err error) {
+	args = new(Paginator)
+	if ev == nil {
+		return
+	}
+	//check if we have suppliersLimit in event and in case it has add it in args
+	limitIface, hasSuppliersLimit := ev[SuppliersLimit]
+	if hasSuppliersLimit {
+		delete(ev, SuppliersLimit)
+		var limit int64
+		if limit, err = IfaceAsInt64(limitIface); err != nil {
+			return
+		}
+		args = &Paginator{
+			Limit: IntPointer(int(limit)),
+		}
+	}
+	//check if we have offset in event and in case it has add it in args
+	offsetIface, hasSuppliersOffset := ev[SuppliersOffset]
+	if !hasSuppliersOffset {
+		return
+	}
+	delete(ev, SuppliersOffset)
+	var offset int64
+	if offset, err = IfaceAsInt64(offsetIface); err != nil {
+		return
+	}
+	if !hasSuppliersLimit { //in case we don't have limit, but we have offset we need to initialize the struct
+		args = &Paginator{
+			Offset: IntPointer(int(offset)),
+		}
+		return
+	}
+	args.Offset = IntPointer(int(offset))
+	return
+}
+
+// ExtractArgsFromOpts extracts the posible arguments(ArgDispatcher and SupplierPaginator) from options
+func ExtractArgsFromOpts(ev map[string]interface{}, dispatcherFlag, consumeSupplierPaginator bool) (ca ExtractedArgs, err error) {
+	ca = ExtractedArgs{
+		ArgDispatcher: getArgDispatcherFromOpts(ev),
+	}
+	if dispatcherFlag && ca.ArgDispatcher == nil {
+		ca.ArgDispatcher = new(ArgDispatcher)
+	}
+	if consumeSupplierPaginator {
+		ca.SupplierPaginator, err = getSupplierPaginatorFromOpts(ev)
+	}
+	return
 }

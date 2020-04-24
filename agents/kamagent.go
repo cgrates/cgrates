@@ -233,9 +233,8 @@ func (ka *KamailioAgent) onCallEnd(evData []byte, connIdx int) {
 		if err != nil {
 			return
 		}
-		cgrArgs := cgrEv.ExtractArgs(strings.Index(kev[utils.CGRFlags], utils.MetaDispatchers) != -1, false)
 		if err := ka.connMgr.Call(ka.cfg.SessionSConns, ka, utils.SessionSv1ProcessCDR,
-			&utils.CGREventWithArgDispatcher{CGREvent: cgrEv, ArgDispatcher: cgrArgs.ArgDispatcher}, &reply); err != nil {
+			&utils.CGREventWithArgDispatcher{CGREvent: cgrEv, ArgDispatcher: tsArgs.ArgDispatcher}, &reply); err != nil {
 			utils.Logger.Err(fmt.Sprintf("%s> failed processing CGREvent: %s, error: %s",
 				utils.KamailioAgent, utils.ToJSON(cgrEv), err.Error()))
 		}

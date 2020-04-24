@@ -161,6 +161,7 @@ func testConfigSReloadConfigFromJSONSessionS(t *testing.T) {
 			"PrivateKeyPath":     "",
 			"PublicKeyPath":      "",
 		},
+		"SchedulerConns": []interface{}{},
 	}
 
 	var rpl map[string]interface{}

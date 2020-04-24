@@ -844,13 +844,12 @@ func testInternalReplicateITActions(t *testing.T) {
 	// set
 	attrs1 := &V1AttrSetActions{
 		ActionsId: "ACTS_1",
-		Actions: []*V1TPAction{
-			&V1TPAction{
-				Identifier:  utils.TOPUP_RESET,
-				BalanceType: utils.MONETARY,
-				Units:       75.0,
-				ExpiryTime:  utils.UNLIMITED,
-				Weight:      20.0}}}
+		Actions: []*V1TPAction{{
+			Identifier:  utils.TOPUP_RESET,
+			BalanceType: utils.MONETARY,
+			Units:       75.0,
+			ExpiryTime:  utils.UNLIMITED,
+			Weight:      20.0}}}
 	var reply string
 	if err := internalRPC.Call(utils.APIerSv1SetActions, attrs1, &reply); err != nil {
 		t.Error(err)
@@ -858,20 +857,19 @@ func testInternalReplicateITActions(t *testing.T) {
 		t.Errorf("Unexpected reply returned: %s", reply)
 	}
 	if err := internalRPC.Call(utils.APIerSv1SetActions, attrs1, &reply); err == nil || err.Error() != "EXISTS" {
-		t.Error("Unexpected result on duplication: ", err.Error())
+		t.Error("Unexpected result on duplication: ", err)
 	}
 	// check
-	eOut := []*utils.TPAction{
-		&utils.TPAction{
-			Identifier:      utils.TOPUP_RESET,
-			BalanceType:     utils.MONETARY,
-			Units:           "75",
-			BalanceWeight:   "0",
-			BalanceBlocker:  "false",
-			BalanceDisabled: "false",
-			ExpiryTime:      utils.UNLIMITED,
-			Weight:          20.0,
-		}}
+	eOut := []*utils.TPAction{{
+		Identifier:      utils.TOPUP_RESET,
+		BalanceType:     utils.MONETARY,
+		Units:           "75",
+		BalanceWeight:   "0",
+		BalanceBlocker:  "false",
+		BalanceDisabled: "false",
+		ExpiryTime:      utils.UNLIMITED,
+		Weight:          20.0,
+	}}
 	if err := internalRPC.Call(utils.APIerSv1GetActions, "ACTS_1", &reply1); err != nil {
 		t.Error("Got error on APIerSv1.GetActions: ", err.Error())
 	} else if !reflect.DeepEqual(eOut, reply1) {

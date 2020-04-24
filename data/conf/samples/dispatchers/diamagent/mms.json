@@ -18,8 +18,8 @@
                         "type": "*constant",
                         "value": "*mms"
                     },
-                    {   "tag": "*api_key",
-                        "path": "*cgreq.*api_key",
+                    {   "tag": "APIKey",
+                        "path": "*opts.APIKey",
                         "type": "*constant",
                         "value": "ses12345"
                     },

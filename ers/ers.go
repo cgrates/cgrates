@@ -165,12 +165,17 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 			break
 		}
 	}
-	// execute the action based on reqType
-	cgrArgs := cgrEv.ExtractArgs(
+	var cgrArgs utils.ExtractedArgs
+	if cgrArgs, err = utils.ExtractArgsFromOpts(opts,
 		rdrCfg.Flags.HasKey(utils.MetaDispatchers),
 		reqType == utils.MetaAuthorize ||
 			reqType == utils.MetaMessage ||
-			reqType == utils.MetaEvent)
+			reqType == utils.MetaEvent); err != nil {
+		utils.Logger.Warning(fmt.Sprintf("<%s> args extraction for reader <%s> failed because <%s>",
+			utils.ERs, rdrCfg.ID, err.Error()))
+		err = nil // reset the error and continue the processing
+	}
+	// execute the action based on reqType
 	switch reqType {
 	default:
 		return fmt.Errorf("unsupported reqType: <%s>", reqType)
