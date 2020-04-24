@@ -21,6 +21,8 @@ import (
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 func TestResourceSConfigloadFromJsonCfg(t *testing.T) {
@@ -58,5 +60,67 @@ func TestResourceSConfigloadFromJsonCfg(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rlcfg) {
 		t.Errorf("Expected: %+v , recived: %+v", expected, rlcfg)
+	}
+}
+
+func TestResourceSConfigAsMapInterface(t *testing.T) {
+	var rlcfg ResourceSConfig
+
+	cfgJSONStr := `{
+	"resources": {								
+		"enabled": false,						
+		"store_interval": "",					
+		"thresholds_conns": [],					
+		"indexed_selects":true,					
+		"prefix_indexed_fields": [],			
+		"nested_fields": false,					
+	},	
+}`
+	eMap := map[string]interface{}{
+		"enabled":               false,
+		"store_interval":        "",
+		"thresholds_conns":      []string{},
+		"indexed_selects":       true,
+		"string_indexed_fields": []string{},
+		"prefix_indexed_fields": []string{},
+		"nested_fields":         false,
+	}
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+		t.Error(err)
+	} else if jsnRlcCfg, err := jsnCfg.ResourceSJsonCfg(); err != nil {
+		t.Error(err)
+	} else if err = rlcfg.loadFromJsonCfg(jsnRlcCfg); err != nil {
+		t.Error(err)
+	} else if rcv := rlcfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
+		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	}
+
+	cfgJSONStr = `{
+		"resources": {								
+			"enabled": false,						
+			"store_interval": "7m",					
+			"thresholds_conns": ["*internal"],					
+			"indexed_selects":true,					
+			"prefix_indexed_fields": ["prefix_indexed_fields1","prefix_indexed_fields2"],			
+			"nested_fields": false,					
+		},	
+	}`
+	eMap = map[string]interface{}{
+		"enabled":               false,
+		"store_interval":        "7m0s",
+		"thresholds_conns":      []string{"*internal"},
+		"indexed_selects":       true,
+		"string_indexed_fields": []string{},
+		"prefix_indexed_fields": []string{"prefix_indexed_fields1", "prefix_indexed_fields2"},
+		"nested_fields":         false,
+	}
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+		t.Error(err)
+	} else if jsnRlcCfg, err := jsnCfg.ResourceSJsonCfg(); err != nil {
+		t.Error(err)
+	} else if err = rlcfg.loadFromJsonCfg(jsnRlcCfg); err != nil {
+		t.Error(err)
+	} else if rcv := rlcfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
+		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }

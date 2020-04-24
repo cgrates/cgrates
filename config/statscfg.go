@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -85,15 +86,42 @@ func (st *StatSCfg) loadFromJsonCfg(jsnCfg *StatServJsonCfg) (err error) {
 }
 
 func (st *StatSCfg) AsMapInterface() map[string]interface{} {
+	var storeInterval string = ""
+	if st.StoreInterval != 0 {
+		storeInterval = st.StoreInterval.String()
+	}
+	stringIndexedFields := []string{}
+	if st.StringIndexedFields != nil {
+		stringIndexedFields = make([]string, len(*st.StringIndexedFields))
+		for i, item := range *st.StringIndexedFields {
+			stringIndexedFields[i] = item
+		}
+	}
+	prefixIndexedFields := []string{}
+	if st.PrefixIndexedFields != nil {
+		prefixIndexedFields = make([]string, len(*st.PrefixIndexedFields))
+		for i, item := range *st.PrefixIndexedFields {
+			prefixIndexedFields[i] = item
+		}
+	}
+	thresholdSConns := make([]string, len(st.ThresholdSConns))
+	for i, item := range st.ThresholdSConns {
+		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)
+		if item == buf {
+			thresholdSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaThresholds, utils.EmptyString)
+		} else {
+			thresholdSConns[i] = item
+		}
+	}
 
 	return map[string]interface{}{
 		utils.EnabledCfg:                st.Enabled,
 		utils.IndexedSelectsCfg:         st.IndexedSelects,
-		utils.StoreIntervalCfg:          st.StoreInterval,
+		utils.StoreIntervalCfg:          storeInterval,
 		utils.StoreUncompressedLimitCfg: st.StoreUncompressedLimit,
-		utils.ThresholdSConnsCfg:        st.ThresholdSConns,
-		utils.StringIndexedFieldsCfg:    st.StringIndexedFields,
-		utils.PrefixIndexedFieldsCfg:    st.PrefixIndexedFields,
+		utils.ThresholdSConnsCfg:        thresholdSConns,
+		utils.StringIndexedFieldsCfg:    stringIndexedFields,
+		utils.PrefixIndexedFieldsCfg:    prefixIndexedFields,
 		utils.NestedFieldsCfg:           st.NestedFields,
 	}
 
