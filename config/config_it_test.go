@@ -324,6 +324,7 @@ func testCGRConfigReloadCDRs(t *testing.T) {
 		StatSConns:      []string{},
 		SMCostRetries:   5,
 		StoreCdrs:       true,
+		SchedulerConns:  []string{},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.CdrsCfg()) {
 		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.CdrsCfg()))
@@ -356,6 +357,7 @@ func testCGRConfigReloadRALs(t *testing.T) {
 		ThresholdSConns:         []string{utils.MetaLocalHost},
 		StatSConns:              []string{utils.MetaLocalHost},
 		MaxIncrements:           1000000,
+		DynaprepaidActionPlans:  []string{},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.RalsCfg()) {
 		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.RalsCfg()))
@@ -402,6 +404,7 @@ func testCGRConfigReloadSessionS(t *testing.T) {
 			PayloadMaxduration: -1,
 			DefaultAttest:      "A",
 		},
+		SchedulerConns: []string{},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.SessionSCfg()) {
 		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.SessionSCfg()))
@@ -961,6 +964,7 @@ func testCGRConfigReloadConfigFromJSONSessionS(t *testing.T) {
 			PayloadMaxduration: -1,
 			DefaultAttest:      "A",
 		},
+		SchedulerConns: []string{},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.SessionSCfg()) {
 		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.SessionSCfg()))
@@ -1007,6 +1011,7 @@ func testCGRConfigReloadAll(t *testing.T) {
 			PayloadMaxduration: -1,
 			DefaultAttest:      "A",
 		},
+		SchedulerConns: []string{},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.SessionSCfg()) {
 		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.SessionSCfg()))

@@ -284,125 +284,134 @@ func TestCGREventClone(t *testing.T) {
 
 func TestCGREventconsumeArgDispatcher(t *testing.T) {
 	//empty check
-	cgrEvent := new(CGREvent)
-	rcv := cgrEvent.consumeArgDispatcher()
+	var opts map[string]interface{}
+	rcv := getArgDispatcherFromOpts(opts)
 	if rcv != nil {
 		t.Errorf("Expecting: nil, received: %+v", rcv)
 	}
 	//nil check
-	cgrEvent = nil
-	rcv = cgrEvent.consumeArgDispatcher()
+	opts = nil
+	rcv = getArgDispatcherFromOpts(opts)
 	if rcv != nil {
 		t.Errorf("Expecting: nil, received: %+v", rcv)
 	}
 	//normal check without APIkey
 	routeID := "route"
-	cgrEvent = &CGREvent{
-		Event: map[string]interface{}{
-			MetaRouteID: routeID,
-		},
+	opts = map[string]interface{}{
+		RouteID: routeID,
 	}
 	eOut := &ArgDispatcher{
 		RouteID: &routeID,
 	}
-	rcv = cgrEvent.consumeArgDispatcher()
+	rcv = getArgDispatcherFromOpts(opts)
 	if !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting:  %+v, received: %+v", eOut, rcv)
 	}
 	//check if *route_id was deleted
-	if _, has := cgrEvent.Event[MetaRouteID]; has {
+	if _, has := opts[RouteID]; has {
 		t.Errorf("*route_id wasn't deleted")
 	}
 	//normal check with routeID and APIKey
 	apiKey := "key"
-	cgrEvent.Event = map[string]interface{}{MetaRouteID: routeID, MetaApiKey: apiKey}
+	opts = map[string]interface{}{RouteID: routeID, APIKey: apiKey}
 	eOut.APIKey = &apiKey
 
-	rcv = cgrEvent.consumeArgDispatcher()
+	rcv = getArgDispatcherFromOpts(opts)
 	//check if *api_key and *route_id was deleted
-	if _, has := cgrEvent.Event[MetaApiKey]; has {
+	if _, has := opts[APIKey]; has {
 		t.Errorf("*api_key wasn't deleted")
-	} else if _, has := cgrEvent.Event[MetaRouteID]; has {
+	} else if _, has := opts[RouteID]; has {
 		t.Errorf("*route_id wasn't deleted")
 	}
 	if !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting:  %+v, received: %+v", eOut, rcv)
 	}
-
 }
 
 func TestCGREventconsumeSupplierPaginator(t *testing.T) {
 	//empty check
-	cgrEvent := new(CGREvent)
-	rcv := cgrEvent.consumeSupplierPaginator()
+	var opts map[string]interface{}
+	rcv, err := getSupplierPaginatorFromOpts(opts)
+	if err != nil {
+		t.Error(err)
+	}
 	eOut := new(Paginator)
 	if !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting:  %+v, received: %+v", eOut, rcv)
 	}
-	cgrEvent = nil
-	rcv = cgrEvent.consumeSupplierPaginator()
+	opts = nil
+	rcv, err = getSupplierPaginatorFromOpts(opts)
+	if err != nil {
+		t.Error(err)
+	}
 	if !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting:  %+v, received: %+v", eOut, rcv)
 	}
 	//normal check
-	cgrEvent = &CGREvent{
-		Event: map[string]interface{}{
-			MetaSuppliersLimit:  18,
-			MetaSuppliersOffset: 20,
-		},
+	opts = map[string]interface{}{
+		SuppliersLimit:  18,
+		SuppliersOffset: 20,
 	}
 
 	eOut = &Paginator{
 		Limit:  IntPointer(18),
 		Offset: IntPointer(20),
 	}
-	rcv = cgrEvent.consumeSupplierPaginator()
+	rcv, err = getSupplierPaginatorFromOpts(opts)
+	if err != nil {
+		t.Error(err)
+	}
 	//check if *suppliers_limit and *suppliers_offset was deleted
-	if _, has := cgrEvent.Event[MetaSuppliersLimit]; has {
+	if _, has := opts[SuppliersLimit]; has {
 		t.Errorf("*suppliers_limit wasn't deleted")
-	} else if _, has := cgrEvent.Event[MetaSuppliersOffset]; has {
+	} else if _, has := opts[SuppliersOffset]; has {
 		t.Errorf("*suppliers_offset wasn't deleted")
 	}
 	if !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting:  %+v, received: %+v", eOut, rcv)
 	}
 	//check without *suppliers_limit, but with *suppliers_offset
-	cgrEvent = &CGREvent{
-		Event: map[string]interface{}{
-			MetaSuppliersOffset: 20,
-		},
+	opts = map[string]interface{}{
+		SuppliersOffset: 20,
 	}
 
 	eOut = &Paginator{
 		Offset: IntPointer(20),
 	}
-	rcv = cgrEvent.consumeSupplierPaginator()
+	rcv, err = getSupplierPaginatorFromOpts(opts)
+	if err != nil {
+		t.Error(err)
+	}
 	//check if *suppliers_limit and *suppliers_offset was deleted
-	if _, has := cgrEvent.Event[MetaSuppliersLimit]; has {
+	if _, has := opts[SuppliersLimit]; has {
 		t.Errorf("*suppliers_limit wasn't deleted")
-	} else if _, has := cgrEvent.Event[MetaSuppliersOffset]; has {
+	} else if _, has := opts[SuppliersOffset]; has {
 		t.Errorf("*suppliers_offset wasn't deleted")
 	}
 	if !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting:  %+v, received: %+v", eOut, rcv)
 	}
 	//check with notAnInt at *suppliers_limit
-	cgrEvent = &CGREvent{Event: map[string]interface{}{
-		MetaSuppliersLimit: "Not an int",
-	},
+	opts = map[string]interface{}{
+		SuppliersLimit: "Not an int",
 	}
 	eOut = new(Paginator)
-	rcv = cgrEvent.consumeSupplierPaginator()
+	rcv, err = getSupplierPaginatorFromOpts(opts)
+	if err == nil {
+		t.Error("Expected error")
+	}
 	if !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting:  %+v, received: %+v", eOut, rcv)
 	}
 	//check with notAnInt at and *suppliers_offset
-	cgrEvent = &CGREvent{Event: map[string]interface{}{
-		MetaSuppliersOffset: "Not an int",
-	},
+	opts = map[string]interface{}{
+		SuppliersOffset: "Not an int",
 	}
 	eOut = new(Paginator)
-	rcv = cgrEvent.consumeSupplierPaginator()
+	rcv, err = getSupplierPaginatorFromOpts(opts)
+	if err == nil {
+		t.Error("Expected error")
+	}
 	if !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting:  %+v, received: %+v", eOut, rcv)
 	}
@@ -410,18 +419,22 @@ func TestCGREventconsumeSupplierPaginator(t *testing.T) {
 
 func TestCGREventConsumeArgs(t *testing.T) {
 	//empty check
-	ev := new(CGREvent)
-	eOut := ExtractedArgs{
-		ArgDispatcher: ev.consumeArgDispatcher(),
-	}
+	opts := map[string]interface{}{}
+	eOut := ExtractedArgs{}
 	// false false
-	rcv := ev.ExtractArgs(false, false)
+	rcv, err := ExtractArgsFromOpts(opts, false, false)
+	if err != nil {
+		t.Error(err)
+	}
 	if !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
 	}
 	// false true
-	rcv = ev.ExtractArgs(false, true)
-	eOut.SupplierPaginator = ev.consumeSupplierPaginator()
+	rcv, err = ExtractArgsFromOpts(opts, false, true)
+	if err != nil {
+		t.Error(err)
+	}
+	eOut.SupplierPaginator = new(Paginator)
 	if !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
 	}
@@ -430,14 +443,20 @@ func TestCGREventConsumeArgs(t *testing.T) {
 		ArgDispatcher:     new(ArgDispatcher),
 		SupplierPaginator: nil,
 	}
-	rcv = ev.ExtractArgs(true, false)
+	rcv, err = ExtractArgsFromOpts(opts, true, false)
+	if err != nil {
+		t.Error(err)
+	}
 	if !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
 	}
 	//true true
-	rcv = ev.ExtractArgs(true, true)
+	rcv, err = ExtractArgsFromOpts(opts, true, true)
+	if err != nil {
+		t.Error(err)
+	}
 	eOut = ExtractedArgs{
-		SupplierPaginator: ev.consumeSupplierPaginator(),
+		SupplierPaginator: new(Paginator),
 		ArgDispatcher:     new(ArgDispatcher),
 	}
 	if !reflect.DeepEqual(eOut, rcv) {

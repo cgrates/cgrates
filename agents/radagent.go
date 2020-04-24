@@ -173,6 +173,7 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 		return
 	}
 	cgrEv := agReq.CGRRequest.AsCGREvent(agReq.Tenant, utils.NestingSep)
+	opts := agReq.Opts.GetData()
 	var reqType string
 	for _, typ := range []string{
 		utils.MetaDryRun, utils.MetaAuthorize,
@@ -184,8 +185,13 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 			break
 		}
 	}
-	cgrArgs := cgrEv.ExtractArgs(reqProcessor.Flags.HasKey(utils.MetaDispatchers),
-		reqType == utils.MetaAuthorize || reqType == utils.MetaMessage || reqType == utils.MetaEvent)
+	var cgrArgs utils.ExtractedArgs
+	if cgrArgs, err = utils.ExtractArgsFromOpts(opts, reqProcessor.Flags.HasKey(utils.MetaDispatchers),
+		reqType == utils.MetaAuthorize || reqType == utils.MetaMessage || reqType == utils.MetaEvent); err != nil {
+		utils.Logger.Warning(fmt.Sprintf("<%s> args extraction failed because <%s>",
+			utils.RadiusAgent, err.Error()))
+		err = nil // reset the error and continue the processing
+	}
 	if reqProcessor.Flags.HasKey(utils.MetaLog) {
 		utils.Logger.Info(
 			fmt.Sprintf("<%s> LOG, processorID: %s, radius message: %s",
@@ -214,7 +220,7 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersEventCost),
 			cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator,
 			reqProcessor.Flags.HasKey(utils.MetaFD),
-			agReq.Opts.GetData(),
+			opts,
 		)
 		rply := new(sessions.V1AuthorizeReply)
 		err = ra.connMgr.Call(ra.cgrCfg.RadiusAgentCfg().SessionSConns, nil, utils.SessionSv1AuthorizeEvent,
@@ -234,7 +240,7 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 			reqProcessor.Flags.HasKey(utils.MetaAccounts),
 			cgrEv, cgrArgs.ArgDispatcher,
 			reqProcessor.Flags.HasKey(utils.MetaFD),
-			agReq.Opts.GetData())
+			opts)
 		rply := new(sessions.V1InitSessionReply)
 		err = ra.connMgr.Call(ra.cgrCfg.RadiusAgentCfg().SessionSConns, nil, utils.SessionSv1InitiateSession,
 			initArgs, rply)
@@ -248,7 +254,7 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 			reqProcessor.Flags.HasKey(utils.MetaAccounts),
 			cgrEv, cgrArgs.ArgDispatcher,
 			reqProcessor.Flags.HasKey(utils.MetaFD),
-			agReq.Opts.GetData())
+			opts)
 		rply := new(sessions.V1UpdateSessionReply)
 		err = ra.connMgr.Call(ra.cgrCfg.RadiusAgentCfg().SessionSConns, nil, utils.SessionSv1UpdateSession,
 			updateArgs, rply)
@@ -265,7 +271,7 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 			reqProcessor.Flags.ParamsSlice(utils.MetaStats),
 			cgrEv, cgrArgs.ArgDispatcher,
 			reqProcessor.Flags.HasKey(utils.MetaFD),
-			agReq.Opts.GetData())
+			opts)
 		rply := utils.StringPointer("")
 		err = ra.connMgr.Call(ra.cgrCfg.RadiusAgentCfg().SessionSConns, nil, utils.SessionSv1TerminateSession,
 			terminateArgs, rply)
@@ -287,7 +293,7 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersEventCost),
 			cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator,
 			reqProcessor.Flags.HasKey(utils.MetaFD),
-			agReq.Opts.GetData())
+			opts)
 		rply := new(sessions.V1ProcessMessageReply)
 		err = ra.connMgr.Call(ra.cgrCfg.RadiusAgentCfg().SessionSConns, nil, utils.SessionSv1ProcessMessage, evArgs, rply)
 		if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
@@ -304,7 +310,7 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 			CGREvent:      cgrEv,
 			ArgDispatcher: cgrArgs.ArgDispatcher,
 			Paginator:     *cgrArgs.SupplierPaginator,
-			Opts:          agReq.Opts.GetData(),
+			Opts:          opts,
 		}
 		needMaxUsage := reqProcessor.Flags.HasKey(utils.MetaAuth) ||
 			reqProcessor.Flags.HasKey(utils.MetaInit) ||

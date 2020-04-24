@@ -178,6 +178,7 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 		return
 	}
 	cgrEv := agReq.CGRRequest.AsCGREvent(agReq.Tenant, utils.NestingSep)
+	opts := agReq.Opts.GetData()
 	var reqType string
 	for _, typ := range []string{
 		utils.MetaDryRun, utils.MetaAuthorize,
@@ -189,8 +190,13 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 			break
 		}
 	}
-	cgrArgs := cgrEv.ExtractArgs(reqProcessor.Flags.HasKey(utils.MetaDispatchers),
-		reqType == utils.MetaAuthorize || reqType == utils.MetaMessage || reqType == utils.MetaEvent)
+	var cgrArgs utils.ExtractedArgs
+	if cgrArgs, err = utils.ExtractArgsFromOpts(opts, reqProcessor.Flags.HasKey(utils.MetaDispatchers),
+		reqType == utils.MetaAuthorize || reqType == utils.MetaMessage || reqType == utils.MetaEvent); err != nil {
+		utils.Logger.Warning(fmt.Sprintf("<%s> args extraction failed because <%s>",
+			utils.DNSAgent, err.Error()))
+		err = nil // reset the error and continue the processing
+	}
 	if reqProcessor.Flags.HasKey(utils.MetaLog) {
 		utils.Logger.Info(
 			fmt.Sprintf("<%s> LOG, processorID: <%s>, message: %s",
@@ -219,7 +225,7 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersEventCost),
 			cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator,
 			reqProcessor.Flags.HasKey(utils.MetaFD),
-			agReq.Opts.GetData(),
+			opts,
 		)
 		rply := new(sessions.V1AuthorizeReply)
 		err = da.connMgr.Call(da.cgrCfg.DNSAgentCfg().SessionSConns, nil,
@@ -240,7 +246,7 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaAccounts),
 			cgrEv, cgrArgs.ArgDispatcher,
 			reqProcessor.Flags.HasKey(utils.MetaFD),
-			agReq.Opts.GetData())
+			opts)
 		rply := new(sessions.V1InitSessionReply)
 		err = da.connMgr.Call(da.cgrCfg.DNSAgentCfg().SessionSConns, nil,
 			utils.SessionSv1InitiateSession,
@@ -255,7 +261,7 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaAccounts),
 			cgrEv, cgrArgs.ArgDispatcher,
 			reqProcessor.Flags.HasKey(utils.MetaFD),
-			agReq.Opts.GetData())
+			opts)
 		rply := new(sessions.V1UpdateSessionReply)
 		err = da.connMgr.Call(da.cgrCfg.DNSAgentCfg().SessionSConns, nil,
 			utils.SessionSv1UpdateSession,
@@ -273,7 +279,7 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.ParamsSlice(utils.MetaStats),
 			cgrEv, cgrArgs.ArgDispatcher,
 			reqProcessor.Flags.HasKey(utils.MetaFD),
-			agReq.Opts.GetData())
+			opts)
 		rply := utils.StringPointer("")
 		err = da.connMgr.Call(da.cgrCfg.DNSAgentCfg().SessionSConns, nil,
 			utils.SessionSv1TerminateSession,
@@ -296,7 +302,7 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersEventCost),
 			cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator,
 			reqProcessor.Flags.HasKey(utils.MetaFD),
-			agReq.Opts.GetData())
+			opts)
 		rply := new(sessions.V1ProcessMessageReply) // need it so rpcclient can clone
 		err = da.connMgr.Call(da.cgrCfg.DNSAgentCfg().SessionSConns, nil,
 			utils.SessionSv1ProcessMessage,
@@ -315,7 +321,7 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 			CGREvent:      cgrEv,
 			ArgDispatcher: cgrArgs.ArgDispatcher,
 			Paginator:     *cgrArgs.SupplierPaginator,
-			Opts:          agReq.Opts.GetData(),
+			Opts:          opts,
 		}
 		needMaxUsage := reqProcessor.Flags.HasKey(utils.MetaAuth) ||
 			reqProcessor.Flags.HasKey(utils.MetaInit) ||

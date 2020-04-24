@@ -1780,9 +1780,10 @@ func (args *V1AuthorizeArgs) ParseFlags(flags string) {
 			args.ForceDuration = true
 		}
 	}
-	cgrArgs := args.CGREvent.ExtractArgs(dispatcherFlag, true)
+	cgrArgs, _ := utils.ExtractArgsFromOpts(args.Opts, dispatcherFlag, true)
 	args.ArgDispatcher = cgrArgs.ArgDispatcher
 	args.Paginator = *cgrArgs.SupplierPaginator
+	return
 }
 
 // V1AuthorizeReply are options available in auth reply
@@ -2056,7 +2057,7 @@ func (args *V1InitSessionArgs) ParseFlags(flags string) {
 			args.ForceDuration = true
 		}
 	}
-	cgrArgs := args.CGREvent.ExtractArgs(dispatcherFlag, false)
+	cgrArgs, _ := utils.ExtractArgsFromOpts(args.Opts, dispatcherFlag, false)
 	args.ArgDispatcher = cgrArgs.ArgDispatcher
 }
 
@@ -2460,7 +2461,7 @@ func (args *V1TerminateSessionArgs) ParseFlags(flags string) {
 			args.ForceDuration = true
 		}
 	}
-	cgrArgs := args.CGREvent.ExtractArgs(dispatcherFlag, false)
+	cgrArgs, _ := utils.ExtractArgsFromOpts(args.Opts, dispatcherFlag, false)
 	args.ArgDispatcher = cgrArgs.ArgDispatcher
 }
 
@@ -2762,9 +2763,11 @@ func (args *V1ProcessMessageArgs) ParseFlags(flags string) {
 			args.ForceDuration = true
 		}
 	}
-	cgrArgs := args.CGREvent.ExtractArgs(dispatcherFlag, true)
+	cgrArgs, _ := utils.ExtractArgsFromOpts(args.Opts, dispatcherFlag, true)
+
 	args.ArgDispatcher = cgrArgs.ArgDispatcher
 	args.Paginator = *cgrArgs.SupplierPaginator
+	return
 }
 
 // V1ProcessMessageReply is the reply for the ProcessMessage API

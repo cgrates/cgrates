@@ -139,7 +139,8 @@ func (kev KamEvent) AsMapStringInterface() (mp map[string]interface{}) {
 		if k == utils.Usage {
 			v += "s" // mark the Usage as seconds
 		}
-		if !kamReservedEventFields.Has(k) { // reserved attributes not getting into event
+		if !kamReservedEventFields.Has(k) && // reserved attributes not getting into event
+			!utils.CGROptionsSet.Has(k) { // also omit the options
 			mp[k] = v
 		}
 	}
@@ -194,8 +195,7 @@ func (kev KamEvent) AsCGREvent(timezone string) (cgrEv *utils.CGREvent, err erro
 
 // String is used for pretty printing event in logs
 func (kev KamEvent) String() string {
-	mrsh, _ := json.Marshal(kev)
-	return string(mrsh)
+	return utils.ToJSON(kev)
 }
 
 // V1AuthorizeArgs returns the arguments used in SessionSv1.AuthorizeEvent
@@ -304,7 +304,8 @@ func (kev KamEvent) V1ProcessCDRArgs() (args *utils.CGREventWithArgDispatcher) {
 	if !has {
 		return
 	}
-	cgrArgs := cgrEv.ExtractArgs(strings.Index(subsystems, utils.MetaDispatchers) != -1, true)
+	opts := kev.GetOptions()
+	cgrArgs, _ := utils.ExtractArgsFromOpts(opts, strings.Index(subsystems, utils.MetaDispatchers) != -1, false)
 	args.ArgDispatcher = cgrArgs.ArgDispatcher
 	return
 }

@@ -913,7 +913,7 @@ func TestV1AuthorizeArgsParseFlags(t *testing.T) {
 		t.Errorf("Expecting %+v,\n received: %+v", eOut, v1authArgs)
 	}
 	//normal check -> without *dispatchers
-	cgrArgs := v1authArgs.CGREvent.ExtractArgs(false, true)
+	cgrArgs, _ := utils.ExtractArgsFromOpts(v1authArgs.Opts, false, true)
 	eOut = &V1AuthorizeArgs{
 		GetMaxUsage:           true,
 		AuthorizeResources:    true,
@@ -937,7 +937,7 @@ func TestV1AuthorizeArgsParseFlags(t *testing.T) {
 		t.Errorf("Expecting %+v,\n received: %+v\n", utils.ToJSON(eOut), utils.ToJSON(v1authArgs))
 	}
 	// //normal check -> with *dispatchers
-	cgrArgs = v1authArgs.CGREvent.ExtractArgs(true, true)
+	cgrArgs, _ = utils.ExtractArgsFromOpts(v1authArgs.Opts, true, true)
 	eOut = &V1AuthorizeArgs{
 		GetMaxUsage:           true,
 		AuthorizeResources:    true,
@@ -1486,14 +1486,16 @@ func TestSessionSrelocateSessionS(t *testing.T) {
 }
 
 func TestSessionSNewV1AuthorizeArgsWithArgDispatcher(t *testing.T) {
+	opts := map[string]interface{}{
+		utils.APIKey:  "testkey",
+		utils.RouteID: "testrouteid",
+	}
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "Event",
 		Event: map[string]interface{}{
 			utils.Account:     "1001",
 			utils.Destination: "1002",
-			utils.MetaApiKey:  "testkey",
-			utils.MetaRouteID: "testrouteid",
 		},
 	}
 	expected := &V1AuthorizeArgs{
@@ -1505,10 +1507,11 @@ func TestSessionSNewV1AuthorizeArgsWithArgDispatcher(t *testing.T) {
 			RouteID: utils.StringPointer("testrouteid"),
 		},
 		ForceDuration: true,
+		Opts:          opts,
 	}
-	cgrArgs := cgrEv.ExtractArgs(true, true)
+	cgrArgs, _ := utils.ExtractArgsFromOpts(opts, true, true)
 	rply := NewV1AuthorizeArgs(true, nil, false, nil, false, nil, true, false,
-		false, false, false, cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator, true, nil)
+		false, false, false, cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator, true, opts)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rply))
 	}
@@ -1527,22 +1530,25 @@ func TestSessionSNewV1AuthorizeArgsWithArgDispatcher(t *testing.T) {
 			RouteID: utils.StringPointer("testrouteid"),
 		},
 		ForceDuration: true,
+		Opts:          opts,
 	}
 	rply = NewV1AuthorizeArgs(true, nil, false, nil, true, nil, false, true,
-		false, true, true, cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator, true, nil)
+		false, true, true, cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator, true, opts)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rply))
 	}
 }
 
 func TestSessionSNewV1AuthorizeArgsWithArgDispatcher2(t *testing.T) {
+	opts := map[string]interface{}{
+		utils.RouteID: "testrouteid",
+	}
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "Event",
 		Event: map[string]interface{}{
 			utils.Account:     "1001",
 			utils.Destination: "1002",
-			utils.MetaRouteID: "testrouteid",
 		},
 	}
 	expected := &V1AuthorizeArgs{
@@ -1553,10 +1559,11 @@ func TestSessionSNewV1AuthorizeArgsWithArgDispatcher2(t *testing.T) {
 			RouteID: utils.StringPointer("testrouteid"),
 		},
 		ForceDuration: true,
+		Opts:          opts,
 	}
-	cgrArgs := cgrEv.ExtractArgs(true, true)
+	cgrArgs, _ := utils.ExtractArgsFromOpts(opts, true, true)
 	rply := NewV1AuthorizeArgs(true, nil, false, nil, false, nil, true, false, false,
-		false, false, cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator, true, nil)
+		false, false, cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator, true, opts)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rply))
 	}
@@ -1574,9 +1581,10 @@ func TestSessionSNewV1AuthorizeArgsWithArgDispatcher2(t *testing.T) {
 			RouteID: utils.StringPointer("testrouteid"),
 		},
 		ForceDuration: true,
+		Opts:          opts,
 	}
 	rply = NewV1AuthorizeArgs(true, nil, false, nil, true, nil, false, true, false,
-		true, true, cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator, true, nil)
+		true, true, cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator, true, opts)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rply))
 	}
@@ -1776,7 +1784,7 @@ func TestV1InitSessionArgsParseFlags(t *testing.T) {
 		t.Errorf("Expecting %+v,\n received: %+v", eOut, v1InitSsArgs)
 	}
 	//normal check -> without *dispatchers
-	cgrArgs := v1InitSsArgs.CGREvent.ExtractArgs(false, true)
+	cgrArgs, _ := utils.ExtractArgsFromOpts(v1InitSsArgs.Opts, false, true)
 	eOut = &V1InitSessionArgs{
 		InitSession:       true,
 		AllocateResources: true,
@@ -1795,7 +1803,7 @@ func TestV1InitSessionArgsParseFlags(t *testing.T) {
 		t.Errorf("Expecting %+v,\n received: %+v\n", utils.ToJSON(eOut), utils.ToJSON(v1InitSsArgs))
 	}
 	// //normal check -> with *dispatchers
-	cgrArgs = v1InitSsArgs.CGREvent.ExtractArgs(true, true)
+	cgrArgs, _ = utils.ExtractArgsFromOpts(v1InitSsArgs.Opts, true, true)
 	eOut = &V1InitSessionArgs{
 		InitSession:       true,
 		AllocateResources: true,
@@ -1826,7 +1834,7 @@ func TestV1TerminateSessionArgsParseFlags(t *testing.T) {
 		t.Errorf("Expecting %+v,\n received: %+v", eOut, v1TerminateSsArgs)
 	}
 	//normal check -> without *dispatchers
-	cgrArgs := v1TerminateSsArgs.CGREvent.ExtractArgs(false, true)
+	cgrArgs, _ := utils.ExtractArgsFromOpts(v1TerminateSsArgs.Opts, false, true)
 	eOut = &V1TerminateSessionArgs{
 		TerminateSession:  true,
 		ReleaseResources:  true,
@@ -1843,7 +1851,7 @@ func TestV1TerminateSessionArgsParseFlags(t *testing.T) {
 		t.Errorf("Expecting %+v,\n received: %+v\n", utils.ToJSON(eOut), utils.ToJSON(v1TerminateSsArgs))
 	}
 	// //normal check -> with *dispatchers
-	cgrArgs = v1TerminateSsArgs.CGREvent.ExtractArgs(true, true)
+	cgrArgs, _ = utils.ExtractArgsFromOpts(v1TerminateSsArgs.Opts, true, true)
 	eOut = &V1TerminateSessionArgs{
 		TerminateSession:  true,
 		ReleaseResources:  true,
@@ -1872,7 +1880,7 @@ func TestV1ProcessMessageArgsParseFlags(t *testing.T) {
 		t.Errorf("Expecting %+v,\n received: %+v", eOut, v1ProcessMsgArgs)
 	}
 	//normal check -> without *dispatchers
-	cgrArgs := v1ProcessMsgArgs.CGREvent.ExtractArgs(false, true)
+	cgrArgs, _ := utils.ExtractArgsFromOpts(v1ProcessMsgArgs.Opts, false, true)
 	eOut = &V1ProcessMessageArgs{
 		Debit:                 true,
 		AllocateResources:     true,
@@ -1895,7 +1903,7 @@ func TestV1ProcessMessageArgsParseFlags(t *testing.T) {
 	}
 
 	//normal check -> with *dispatchers
-	cgrArgs = v1ProcessMsgArgs.CGREvent.ExtractArgs(true, true)
+	cgrArgs, _ = utils.ExtractArgsFromOpts(v1ProcessMsgArgs.Opts, true, true)
 	eOut = &V1ProcessMessageArgs{
 		Debit:                 true,
 		AllocateResources:     true,

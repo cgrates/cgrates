@@ -287,6 +287,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 		return
 	}
 	cgrEv := agReq.CGRRequest.AsCGREvent(agReq.Tenant, utils.NestingSep)
+	opts := agReq.Opts.GetData()
 	var reqType string
 	for _, typ := range []string{
 		utils.MetaDryRun, utils.MetaAuthorize,
@@ -298,8 +299,14 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 			break
 		}
 	}
-	cgrArgs := cgrEv.ExtractArgs(reqProcessor.Flags.HasKey(utils.MetaDispatchers),
-		reqType == utils.MetaAuthorize || reqType == utils.MetaMessage || reqType == utils.MetaEvent)
+	var cgrArgs utils.ExtractedArgs
+	if cgrArgs, err = utils.ExtractArgsFromOpts(opts, reqProcessor.Flags.HasKey(utils.MetaDispatchers),
+		reqType == utils.MetaAuthorize || reqType == utils.MetaMessage || reqType == utils.MetaEvent); err != nil {
+		utils.Logger.Warning(fmt.Sprintf("<%s> args extraction failed because <%s>",
+			utils.DiameterAgent, err.Error()))
+		err = nil // reset the error and continue the processing
+	}
+
 	if reqProcessor.Flags.HasKey(utils.MetaLog) {
 		utils.Logger.Info(
 			fmt.Sprintf("<%s> LOG, processorID: %s, diameter message: %s",
@@ -328,7 +335,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersEventCost),
 			cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator,
 			reqProcessor.Flags.HasKey(utils.MetaFD),
-			agReq.Opts.GetData(),
+			opts,
 		)
 		rply := new(sessions.V1AuthorizeReply)
 		err = da.connMgr.Call(da.cgrCfg.DiameterAgentCfg().SessionSConns, da, utils.SessionSv1AuthorizeEvent,
@@ -348,7 +355,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaAccounts),
 			cgrEv, cgrArgs.ArgDispatcher,
 			reqProcessor.Flags.HasKey(utils.MetaFD),
-			agReq.Opts.GetData())
+			opts)
 		rply := new(sessions.V1InitSessionReply)
 		err = da.connMgr.Call(da.cgrCfg.DiameterAgentCfg().SessionSConns, da, utils.SessionSv1InitiateSession,
 			initArgs, rply)
@@ -362,7 +369,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaAccounts),
 			cgrEv, cgrArgs.ArgDispatcher,
 			reqProcessor.Flags.HasKey(utils.MetaFD),
-			agReq.Opts.GetData())
+			opts)
 		rply := new(sessions.V1UpdateSessionReply)
 		err = da.connMgr.Call(da.cgrCfg.DiameterAgentCfg().SessionSConns, da, utils.SessionSv1UpdateSession,
 			updateArgs, rply)
@@ -379,7 +386,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.ParamsSlice(utils.MetaStats),
 			cgrEv, cgrArgs.ArgDispatcher,
 			reqProcessor.Flags.HasKey(utils.MetaFD),
-			agReq.Opts.GetData())
+			opts)
 		rply := utils.StringPointer("")
 		err = da.connMgr.Call(da.cgrCfg.DiameterAgentCfg().SessionSConns, da, utils.SessionSv1TerminateSession,
 			terminateArgs, rply)
@@ -401,7 +408,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersEventCost),
 			cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator,
 			reqProcessor.Flags.HasKey(utils.MetaFD),
-			agReq.Opts.GetData())
+			opts)
 		rply := new(sessions.V1ProcessMessageReply)
 		err = da.connMgr.Call(da.cgrCfg.DiameterAgentCfg().SessionSConns, da, utils.SessionSv1ProcessMessage,
 			msgArgs, rply)
@@ -419,7 +426,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 			CGREvent:      cgrEv,
 			ArgDispatcher: cgrArgs.ArgDispatcher,
 			Paginator:     *cgrArgs.SupplierPaginator,
-			Opts:          agReq.Opts.GetData(),
+			Opts:          opts,
 		}
 		needMaxUsage := reqProcessor.Flags.HasKey(utils.MetaAuth) ||
 			reqProcessor.Flags.HasKey(utils.MetaInit) ||
@@ -654,9 +661,9 @@ func (da *DiameterAgent) handleDPA(c diam.Conn, m *diam.Message) {
 	meta, _ := smpeer.FromContext(c.Context())
 	key := string(meta.OriginHost + utils.CONCATENATED_KEY_SEP + meta.OriginRealm)
 
-	da.raaLck.Lock()
+	da.dpaLck.Lock()
 	ch, has := da.dpa[key]
-	da.raaLck.Unlock()
+	da.dpaLck.Unlock()
 	if !has {
 		return
 	}

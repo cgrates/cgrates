@@ -114,6 +114,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 		return
 	}
 	cgrEv := agReq.CGRRequest.AsCGREvent(agReq.Tenant, utils.NestingSep)
+	opts := agReq.Opts.GetData()
 	var reqType string
 	for _, typ := range []string{
 		utils.MetaDryRun, utils.MetaAuthorize,
@@ -125,8 +126,13 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 			break
 		}
 	}
-	cgrArgs := cgrEv.ExtractArgs(reqProcessor.Flags.HasKey(utils.MetaDispatchers),
-		reqType == utils.MetaAuthorize || reqType == utils.MetaMessage || reqType == utils.MetaEvent)
+	var cgrArgs utils.ExtractedArgs
+	if cgrArgs, err = utils.ExtractArgsFromOpts(opts, reqProcessor.Flags.HasKey(utils.MetaDispatchers),
+		reqType == utils.MetaAuthorize || reqType == utils.MetaMessage || reqType == utils.MetaEvent); err != nil {
+		utils.Logger.Warning(fmt.Sprintf("<%s> args extraction failed because <%s>",
+			utils.HTTPAgent, err.Error()))
+		err = nil // reset the error and continue the processing
+	}
 	if reqProcessor.Flags.HasKey(utils.MetaLog) {
 		utils.Logger.Info(
 			fmt.Sprintf("<%s> LOG, processorID: %s, http message: %s",
@@ -155,7 +161,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersEventCost),
 			cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator,
 			reqProcessor.Flags.HasKey(utils.MetaFD),
-			agReq.Opts.GetData(),
+			opts,
 		)
 		rply := new(sessions.V1AuthorizeReply)
 		err = ha.connMgr.Call(ha.sessionConns, nil, utils.SessionSv1AuthorizeEvent,
@@ -175,7 +181,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaAccounts),
 			cgrEv, cgrArgs.ArgDispatcher,
 			reqProcessor.Flags.HasKey(utils.MetaFD),
-			agReq.Opts.GetData())
+			opts)
 		rply := new(sessions.V1InitSessionReply)
 		err = ha.connMgr.Call(ha.sessionConns, nil, utils.SessionSv1InitiateSession,
 			initArgs, rply)
@@ -189,7 +195,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaAccounts),
 			cgrEv, cgrArgs.ArgDispatcher,
 			reqProcessor.Flags.HasKey(utils.MetaFD),
-			agReq.Opts.GetData())
+			opts)
 		rply := new(sessions.V1UpdateSessionReply)
 		err = ha.connMgr.Call(ha.sessionConns, nil, utils.SessionSv1UpdateSession,
 			updateArgs, rply)
@@ -206,7 +212,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.ParamsSlice(utils.MetaStats),
 			cgrEv, cgrArgs.ArgDispatcher,
 			reqProcessor.Flags.HasKey(utils.MetaFD),
-			agReq.Opts.GetData())
+			opts)
 		rply := utils.StringPointer("")
 		err = ha.connMgr.Call(ha.sessionConns, nil, utils.SessionSv1TerminateSession,
 			terminateArgs, rply)
@@ -228,7 +234,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersEventCost),
 			cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator,
 			reqProcessor.Flags.HasKey(utils.MetaFD),
-			agReq.Opts.GetData())
+			opts)
 		rply := new(sessions.V1ProcessMessageReply)
 		err = ha.connMgr.Call(ha.sessionConns, nil, utils.SessionSv1ProcessMessage,
 			evArgs, rply)
@@ -246,7 +252,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 			CGREvent:      cgrEv,
 			ArgDispatcher: cgrArgs.ArgDispatcher,
 			Paginator:     *cgrArgs.SupplierPaginator,
-			Opts:          agReq.Opts.GetData(),
+			Opts:          opts,
 		}
 		needMaxUsage := reqProcessor.Flags.HasKey(utils.MetaAuth) ||
 			reqProcessor.Flags.HasKey(utils.MetaInit) ||

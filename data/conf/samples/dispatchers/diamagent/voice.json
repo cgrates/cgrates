@@ -109,7 +109,7 @@
 			"flags": ["*initiate", "*accounts", "*attributes"],
 			"request_fields":[
 				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*voice"},
-				{"tag": "*api_key", "path": "*cgreq.*api_key", "type": "*constant", "value": "ses12345"},
+				{"tag": "APIKey", "path": "*opts.APIKey", "type": "*constant", "value": "ses12345"},
 				{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable",
 					"value": "~*req.Session-Id", "mandatory": true},
 				{"tag": "OriginHost", "path": "*cgreq.OriginHost", "type": "*remote_host",
@@ -141,7 +141,7 @@
 			"flags": ["*update", "*accounts", "*attributes"],
 			"request_fields":[
 				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*voice"},
-				{"tag": "*api_key", "path": "*cgreq.*api_key", "type": "*constant", "value": "ses12345"},
+				{"tag": "APIKey", "path": "*opts.APIKey", "type": "*constant", "value": "ses12345"},
 				{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable",
 					"value": "~*req.Session-Id", "mandatory": true},
 				{"tag": "OriginHost", "path": "*cgreq.OriginHost", "type": "*remote_host",
@@ -175,7 +175,7 @@
 			"flags": ["*terminate", "*accounts", "*attributes", "*cdrs"],
 			"request_fields":[
 				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*voice"},
-				{"tag": "*api_key", "path": "*cgreq.*api_key", "type": "*constant", "value": "ses12345"},
+				{"tag": "APIKey", "path": "*opts.APIKey", "type": "*constant", "value": "ses12345"},
 				{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable",
 					"value": "~*req.Session-Id", "mandatory": true},
 				{"tag": "OriginHost", "path": "*cgreq.OriginHost", "type": "*remote_host",

@@ -643,8 +643,6 @@ const (
 	LoadIDs                   = "load_ids"
 	DNSAgent                  = "DNSAgent"
 	TLSNoCaps                 = "tls"
-	MetaRouteID               = "*route_id"
-	MetaApiKey                = "*api_key"
 	UsageID                   = "UsageID"
 	Rcode                     = "Rcode"
 	Replacement               = "Replacement"
@@ -653,8 +651,6 @@ const (
 	Preference                = "Preference"
 	Flags                     = "Flags"
 	Service                   = "Service"
-	MetaSuppliersLimit        = "*suppliers_limit"
-	MetaSuppliersOffset       = "*suppliers_offset"
 	ApierV                    = "ApierV"
 	MetaApier                 = "*apier"
 	MetaAnalyzer              = "*analyzer"
@@ -907,8 +903,6 @@ const (
 	SessionSv1         = "SessionSv1"
 	ChargerSv1         = "ChargerSv1"
 	MetaAuth           = "*auth"
-	APIKey             = "APIKey"
-	RouteID            = "RouteID"
 	APIMethods         = "APIMethods"
 	NestingSep         = "."
 	ArgDispatcherField = "ArgDispatcher"
@@ -1477,6 +1471,7 @@ const (
 	CGR_COMPUTELCR       = "cgr_computelcr"
 	CGR_SUPPLIERS        = "cgr_suppliers"
 	CGRFlags             = "cgr_flags"
+	CGROpts              = "cgr_opts"
 )
 
 //CSV file name
@@ -2075,7 +2070,7 @@ var CGROptionsSet = NewStringSet([]string{STIRATest, STIRPayloadMaxDuration,
 	STIRIdentity, STIROriginatorTn, STIROriginatorURI, STIRDestinationTn,
 	STIRDestinationURI, STIRPublicKeyPath, STIRPrivateKeyPath,
 	DebitInterval, Context, SessionTTL, SessionTTLMaxDelay,
-	SessionTTLLastUsed, SessionTTLUsage})
+	SessionTTLLastUsed, SessionTTLUsage, APIKey, RouteID})
 
 // SessionS ProccessEvent posible options
 const (
@@ -2093,11 +2088,19 @@ const (
 	DebitInterval = "DebitInterval"
 	Context       = "Context"
 
-	// terminator
+	// SessionS terminator
 	SessionTTL         = "SessionTTL"
 	SessionTTLMaxDelay = "SessionTTLMaxDelay"
 	SessionTTLLastUsed = "SessionTTLLastUsed"
 	SessionTTLUsage    = "SessionTTLUsage"
+
+	// DispatcherS
+	APIKey  = "APIKey"
+	RouteID = "RouteID"
+
+	// SupplierS
+	SuppliersLimit  = "SuppliersLimit"
+	SuppliersOffset = "SuppliersOffset"
 )
 
 func buildCacheInstRevPrefixes() {
