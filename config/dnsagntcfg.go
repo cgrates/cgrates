@@ -165,7 +165,7 @@ func (rp *RequestProcessor) AsMapInterface(separator string) map[string]interfac
 		for i, item := range rp.Tenant {
 			values[i] = item.Rules
 		}
-		tenant = strings.Join(values, utils.EmptyString)
+		tenant = strings.Join(values, separator)
 	}
 
 	flags := make(map[string][]string, len(rp.Flags))

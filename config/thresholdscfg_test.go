@@ -21,6 +21,8 @@ import (
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 func TestThresholdSCfgloadFromJsonCfg(t *testing.T) {
@@ -55,5 +57,64 @@ func TestThresholdSCfgloadFromJsonCfg(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, thscfg) {
 		t.Errorf("Expected: %+v , recived: %+v", expected, thscfg)
+	}
+}
+
+func TestThresholdSCfgAsMapInterface(t *testing.T) {
+	var thscfg ThresholdSCfg
+
+	cfgJSONStr := `{
+		"thresholds": {								
+			"enabled": false,						
+			"store_interval": "",					
+			"indexed_selects":true,					
+			"prefix_indexed_fields": [],			
+			"nested_fields": false,					
+		},		
+}`
+	eMap := map[string]interface{}{
+		"enabled":               false,
+		"store_interval":        "",
+		"indexed_selects":       true,
+		"string_indexed_fields": []string{},
+		"prefix_indexed_fields": []string{},
+		"nested_fields":         false,
+	}
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+		t.Error(err)
+	} else if jsnThSCfg, err := jsnCfg.ThresholdSJsonCfg(); err != nil {
+		t.Error(err)
+	} else if err = thscfg.loadFromJsonCfg(jsnThSCfg); err != nil {
+		t.Error(err)
+	} else if rcv := thscfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
+		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	}
+
+	cfgJSONStr = `{
+		"thresholds": {								
+			"enabled": true,						
+			"store_interval": "96h",					
+			"indexed_selects":true,
+			"string_indexed_fields": ["string","indexed","fields"],					
+			"prefix_indexed_fields": ["prefix_indexed_fields1","prefix_indexed_fields2"],			
+			"nested_fields": true,					
+		},		
+}`
+	eMap = map[string]interface{}{
+		"enabled":               true,
+		"store_interval":        "96h0m0s",
+		"indexed_selects":       true,
+		"string_indexed_fields": []string{"string", "indexed", "fields"},
+		"prefix_indexed_fields": []string{"prefix_indexed_fields1", "prefix_indexed_fields2"},
+		"nested_fields":         true,
+	}
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+		t.Error(err)
+	} else if jsnThSCfg, err := jsnCfg.ThresholdSJsonCfg(); err != nil {
+		t.Error(err)
+	} else if err = thscfg.loadFromJsonCfg(jsnThSCfg); err != nil {
+		t.Error(err)
+	} else if rcv := thscfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
+		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
