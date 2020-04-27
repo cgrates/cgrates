@@ -67,9 +67,6 @@ func TestSessionsData(t *testing.T) {
 	default:
 		t.Fatal("Unknown Database type")
 	}
-	if *encoding == utils.MetaGOB {
-		dataCfgDIR += "_gob"
-	}
 	for _, stest := range SessionsDataTests {
 		t.Run(dataCfgDIR, stest)
 	}
@@ -673,7 +670,7 @@ func testSessionsDataTTLExpMultiUpdates(t *testing.T) {
 	var initRpl *V1InitSessionReply
 	if err := sDataRPC.Call(utils.SessionSv1InitiateSession,
 		initArgs, &initRpl); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	time.Sleep(10 * time.Millisecond) // give some time to allow the session to be created
 	if initRpl.MaxUsage.Nanoseconds() != usage {
@@ -801,7 +798,7 @@ func testSessionsDataMultipleDataNoUsage(t *testing.T) {
 	var initRpl *V1InitSessionReply
 	if err := sDataRPC.Call(utils.SessionSv1InitiateSession,
 		initArgs, &initRpl); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	if initRpl.MaxUsage.Nanoseconds() != usage {
 		t.Errorf("Expecting : %+v, received: %+v", usage, initRpl.MaxUsage.Nanoseconds())
@@ -899,10 +896,16 @@ func testSessionsDataMultipleDataNoUsage(t *testing.T) {
 
 	updateRpl = new(V1UpdateSessionReply) // because gob doesn't overwrite 0 value fields
 	if err := sDataRPC.Call(utils.SessionSv1UpdateSession, updateArgs, &updateRpl); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
-	if updateRpl.MaxUsage.Nanoseconds() != usage {
-		t.Errorf("Expected: %+v, received: %+v", usage, updateRpl.MaxUsage.Nanoseconds())
+	if *encoding != utils.MetaGOB {
+		if updateRpl.MaxUsage.Nanoseconds() != usage {
+			t.Errorf("Expected: %+v, received: %+v", usage, updateRpl.MaxUsage.Nanoseconds())
+		}
+	} else {
+		if updateRpl.MaxUsage != nil { // gob returns 0 values as nil
+			t.Errorf("Expected: nil, received: %+v", updateRpl.MaxUsage)
+		}
 	}
 
 	eAcntVal = 100352.000000

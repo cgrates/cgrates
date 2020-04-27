@@ -110,7 +110,7 @@ func testdoubleRemoveStatQueueProfile(t *testing.T) {
 		t.Error(err)
 	}
 	// set
-	statConfig := &v1.StatQueueWithCache{
+	statConfig := &engine.StatQueueWithCache{
 		StatQueueProfile: &engine.StatQueueProfile{
 			Tenant: doubleRemoveTenant,
 			ID:     "TEST_PROFILE1",

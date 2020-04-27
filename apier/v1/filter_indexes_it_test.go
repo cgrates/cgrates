@@ -438,7 +438,7 @@ func testV1FIdxSetStatQueueProfileIndexes(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	statConfig = &StatQueueWithCache{
+	statConfig = &engine.StatQueueWithCache{
 		StatQueueProfile: &engine.StatQueueProfile{
 			Tenant:    tenant,
 			ID:        "TEST_PROFILE1",
@@ -541,7 +541,7 @@ func testV1FIdxSetSecondStatQueueProfileIndexes(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	statConfig = &StatQueueWithCache{
+	statConfig = &engine.StatQueueWithCache{
 		StatQueueProfile: &engine.StatQueueProfile{
 			Tenant:    tenant,
 			ID:        "TEST_PROFILE2",

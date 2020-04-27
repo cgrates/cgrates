@@ -78,9 +78,6 @@ func TestAccITWithRemove(t *testing.T) {
 	default:
 		t.Fatal("Unknown Database type")
 	}
-	if *encoding == utils.MetaGOB {
-		accTestsConfig += "_gob"
-	}
 	accCfgPath = path.Join(*dataDir, "conf", "samples", accTestsConfig)
 
 	for _, stest := range accTests {

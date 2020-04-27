@@ -612,6 +612,9 @@ func testInternalRemoteITGetChargerProfile(t *testing.T) {
 		AttributeIDs: []string{utils.META_NONE},
 		Weight:       0,
 	}
+	if *encoding == utils.MetaGOB {
+		chargerProfile.FilterIDs = nil
+	}
 	var reply *engine.ChargerProfile
 	if err := internalRPC.Call(utils.APIerSv1GetChargerProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "DEFAULT"}, &reply); err != nil {
@@ -1032,7 +1035,7 @@ func testInternalSetAccount(t *testing.T) {
 func testInternalReplicateStats(t *testing.T) {
 	var reply string
 
-	statConfig = &StatQueueWithCache{
+	statConfig = &engine.StatQueueWithCache{
 		StatQueueProfile: &engine.StatQueueProfile{
 			Tenant:    "cgrates.org",
 			ID:        "StatsToReplicate",

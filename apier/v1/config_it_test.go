@@ -163,7 +163,13 @@ func testConfigSReloadConfigFromJSONSessionS(t *testing.T) {
 		},
 		"SchedulerConns": []interface{}{},
 	}
-
+	if *encoding == utils.MetaGOB {
+		var empty []interface{}
+		exp["ReplicationConns"] = empty
+		exp["SchedulerConns"] = empty
+		exp["StatSConns"] = empty
+		exp["ThreshSConns"] = empty
+	}
 	var rpl map[string]interface{}
 	if err := configRPC.Call(utils.ConfigSv1GetJSONSection, &config.StringWithArgDispatcher{
 		Section: config.SessionSJson,

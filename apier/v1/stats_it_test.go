@@ -36,7 +36,7 @@ var (
 	stsV1CfgPath string
 	stsV1Cfg     *config.CGRConfig
 	stsV1Rpc     *rpc.Client
-	statConfig   *StatQueueWithCache
+	statConfig   *engine.StatQueueWithCache
 	stsV1ConfDIR string //run tests for specific configuration
 
 	evs = []*utils.CGREvent{
@@ -362,7 +362,7 @@ func testV1STSSetStatQueueProfile(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	statConfig = &StatQueueWithCache{
+	statConfig = &engine.StatQueueWithCache{
 		StatQueueProfile: &engine.StatQueueProfile{
 			Tenant:    "cgrates.org",
 			ID:        "TEST_PROFILE1",
@@ -471,7 +471,7 @@ func testV1STSRemoveStatQueueProfile(t *testing.T) {
 }
 
 func testV1STSProcessMetricsWithFilter(t *testing.T) {
-	statConfig = &StatQueueWithCache{
+	statConfig = &engine.StatQueueWithCache{
 		StatQueueProfile: &engine.StatQueueProfile{
 			Tenant:    "cgrates.org",
 			ID:        "CustomStatProfile",
@@ -590,7 +590,7 @@ func testV1STSProcessMetricsWithFilter(t *testing.T) {
 }
 
 func testV1STSProcessStaticMetrics(t *testing.T) {
-	statConfig = &StatQueueWithCache{
+	statConfig = &engine.StatQueueWithCache{
 		StatQueueProfile: &engine.StatQueueProfile{
 			Tenant:    "cgrates.org",
 			ID:        "StaticStatQueue",
@@ -695,7 +695,7 @@ func testV1STSStatsPing(t *testing.T) {
 }
 
 func testV1STSProcessStatWithThreshold(t *testing.T) {
-	stTh := &StatQueueWithCache{
+	stTh := &engine.StatQueueWithCache{
 		StatQueueProfile: &engine.StatQueueProfile{
 			Tenant:    "cgrates.org",
 			ID:        "StatWithThreshold",

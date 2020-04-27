@@ -188,6 +188,11 @@ func testExpVerifyAttributes(t *testing.T) {
 		t.Fatal(err)
 	}
 	reply.Compile()
+	if *encoding == utils.MetaGOB {
+		for _, v := range exp.Attributes {
+			v.FilterIDs = nil
+		}
+	}
 	if !reflect.DeepEqual(exp, reply) {
 		t.Errorf("Expecting : %+v, \n received: %+v", utils.ToJSON(exp), utils.ToJSON(reply))
 	}
@@ -397,8 +402,13 @@ func testExpVerifySuppliers(t *testing.T) {
 	}
 	if err := expRpc.Call(utils.APIerSv1GetSupplierProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "SPL_ACNT_1002"}, &reply); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(splPrf, reply) && !reflect.DeepEqual(splPrf2, reply) {
+		t.Fatal(err)
+	}
+	if *encoding == utils.MetaGOB {
+		splPrf.SortingParameters = nil
+		splPrf2.SortingParameters = nil
+	}
+	if !reflect.DeepEqual(splPrf, reply) && !reflect.DeepEqual(splPrf2, reply) {
 		t.Errorf("Expecting: %+v \n or %+v \n,\n received: %+v",
 			utils.ToJSON(splPrf), utils.ToJSON(splPrf2), utils.ToJSON(reply))
 	}

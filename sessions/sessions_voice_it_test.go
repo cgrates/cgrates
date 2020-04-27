@@ -70,9 +70,6 @@ func TestSessionsVoice(t *testing.T) {
 	default:
 		t.Fatal("Unknown Database type")
 	}
-	if *encoding == utils.MetaGOB {
-		voiceCfgDIR += "_gob"
-	}
 	for _, stest := range sessionsVoiceTests {
 		t.Run(voiceCfgDIR, stest)
 	}
