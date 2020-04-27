@@ -18,7 +18,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
-import "github.com/cgrates/cgrates/utils"
+import (
+	"strings"
+
+	"github.com/cgrates/cgrates/utils"
+)
 
 // DispatcherSCfg is the configuration of dispatcher service
 type DispatcherSCfg struct {
@@ -72,12 +76,36 @@ func (dps *DispatcherSCfg) loadFromJsonCfg(jsnCfg *DispatcherSJsonCfg) (err erro
 }
 
 func (dps *DispatcherSCfg) AsMapInterface() map[string]interface{} {
+	stringIndexedFields := []string{}
+	if dps.StringIndexedFields != nil {
+		stringIndexedFields = make([]string, len(*dps.StringIndexedFields))
+		for i, item := range *dps.StringIndexedFields {
+			stringIndexedFields[i] = item
+		}
+	}
+	prefixIndexedFields := []string{}
+	if dps.PrefixIndexedFields != nil {
+		prefixIndexedFields = make([]string, len(*dps.PrefixIndexedFields))
+		for i, item := range *dps.PrefixIndexedFields {
+			prefixIndexedFields[i] = item
+		}
+	}
+	attributeSConns := make([]string, len(dps.AttributeSConns))
+	for i, item := range dps.AttributeSConns {
+		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)
+		if item == buf {
+			attributeSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaAttributes, utils.EmptyString)
+		} else {
+			attributeSConns[i] = item
+		}
+	}
+
 	return map[string]interface{}{
 		utils.EnabledCfg:             dps.Enabled,
 		utils.IndexedSelectsCfg:      dps.IndexedSelects,
-		utils.StringIndexedFieldsCfg: dps.StringIndexedFields,
-		utils.PrefixIndexedFieldsCfg: dps.PrefixIndexedFields,
-		utils.AttributeSConnsCfg:     dps.AttributeSConns,
+		utils.StringIndexedFieldsCfg: stringIndexedFields,
+		utils.PrefixIndexedFieldsCfg: prefixIndexedFields,
+		utils.AttributeSConnsCfg:     attributeSConns,
 		utils.NestedFieldsCfg:        dps.NestedFields,
 	}
 
