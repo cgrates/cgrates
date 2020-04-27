@@ -703,6 +703,16 @@ func (dS *DispatcherSchedulerSv1) Ping(args *utils.CGREventWithArgDispatcher, re
 	return dS.dS.SchedulerSv1Ping(args, reply)
 }
 
+// ExecuteActions execute an actionPlan or multiple actionsPlans between a time interval
+func (dS *DispatcherSchedulerSv1) ExecuteActions(args *utils.AttrsExecuteActions, reply *string) error {
+	return dS.dS.SchedulerSv1ExecuteActions(args, reply)
+}
+
+// ExecuteActionPlans execute multiple actionPlans one by one
+func (dS *DispatcherSchedulerSv1) ExecuteActionPlans(args *utils.AttrsExecuteActionPlans, reply *string) (err error) {
+	return dS.dS.SchedulerSv1ExecuteActionPlans(args, reply)
+}
+
 func NewDispatcherSv1(dS *dispatchers.DispatcherService) *DispatcherSv1 {
 	return &DispatcherSv1{dS: dS}
 }

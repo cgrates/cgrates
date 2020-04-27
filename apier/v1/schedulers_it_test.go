@@ -38,6 +38,7 @@ var (
 	schedRpc     *rpc.Client
 	schedConfDIR string //run tests for specific configuration
 )
+
 var sTestsSchedFiltered = []func(t *testing.T){
 	testSchedLoadConfig,
 	testSchedInitDataDb,
@@ -48,6 +49,7 @@ var sTestsSchedFiltered = []func(t *testing.T){
 	testSchedVeifyAllAccounts,
 	testSchedVeifyAccount1001,
 	testSchedVeifyAccount1002and1003,
+	testSchedExecuteAction,
 	testSchedStopEngine,
 }
 
@@ -268,7 +270,59 @@ func testSchedVeifyAccount1002and1003(t *testing.T) {
 		t.Errorf("Expecting: %v, received: %v",
 			10, rply)
 	}
+}
 
+func testSchedExecuteAction(t *testing.T) {
+	if !(schedConfDIR == "tutinternal" || schedConfDIR == "tutmysql" || schedConfDIR == "tutmongo") {
+		t.SkipNow()
+	}
+	// set a new ActionPlan
+	var reply1 string
+	if err := schedRpc.Call(utils.APIerSv1SetActionPlan, &AttrSetActionPlan{
+		Id: "CustomAP",
+		ActionPlan: []*AttrActionPlan{
+			&AttrActionPlan{
+				ActionsId: "ACT_TOPUP_RST_10",
+				Time:      utils.MetaHourly,
+				Weight:    20.0},
+		},
+	}, &reply1); err != nil {
+		t.Error("Got error on APIerSv1.SetActionPlan: ", err.Error())
+	} else if reply1 != utils.OK {
+		t.Errorf("Unexpected reply returned: %s", reply1)
+	}
+	var reply string
+	if err := schedRpc.Call(utils.APIerSv1SetAccount, utils.AttrSetAccount{
+		Tenant:       "cgrates.org",
+		Account:      "CustomAccount",
+		ActionPlanID: "CustomAP",
+	}, &reply); err != nil {
+		t.Fatal(err)
+	}
+
+	var acnt *engine.Account
+	attrs := &utils.AttrGetAccount{
+		Tenant:  "cgrates.org",
+		Account: "CustomAccount",
+	}
+	expected := 0.0
+	if err := schedRpc.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
+		t.Error(err)
+	} else if rply := acnt.BalanceMap[utils.MONETARY].GetTotalValue(); rply != expected {
+		t.Errorf("Expecting: %v, received: %v",
+			expected, rply)
+	}
+
+	if err := schedRpc.Call(utils.SchedulerSv1ExecuteActions, &utils.AttrsExecuteActions{ActionPlanID: "CustomAP"}, &reply); err != nil {
+		t.Error(err)
+	}
+	expected = 10.0
+	if err := schedRpc.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
+		t.Error(err)
+	} else if rply := acnt.BalanceMap[utils.MONETARY].GetTotalValue(); rply != expected {
+		t.Errorf("Expecting: %v, received: %v",
+			expected, rply)
+	}
 }
 
 func testSchedStopEngine(t *testing.T) {

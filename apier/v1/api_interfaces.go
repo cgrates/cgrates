@@ -136,6 +136,8 @@ type GuardianSv1Interface interface {
 type SchedulerSv1Interface interface {
 	Reload(arg *utils.CGREventWithArgDispatcher, reply *string) error
 	Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error
+	ExecuteActions(attr *utils.AttrsExecuteActions, reply *string) error
+	ExecuteActionPlans(attr *utils.AttrsExecuteActionPlans, reply *string) error
 }
 
 type CDRsV1Interface interface {

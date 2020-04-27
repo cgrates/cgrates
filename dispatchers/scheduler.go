@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package dispatchers
 
 import (
+	"time"
+
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -63,4 +65,44 @@ func (dS *DispatcherService) SchedulerSv1Reload(args *utils.CGREventWithArgDispa
 	}
 	return dS.Dispatch(args.CGREvent, utils.MetaScheduler, routeID,
 		utils.SchedulerSv1Reload, args, reply)
+}
+
+func (dS *DispatcherService) SchedulerSv1ExecuteActions(args *utils.AttrsExecuteActions, reply *string) (err error) {
+	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if args.ArgDispatcher == nil {
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
+		}
+		if err = dS.authorize(utils.SchedulerSv1ExecuteActions,
+			args.Tenant,
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	var routeID *string
+	if args.ArgDispatcher != nil {
+		routeID = args.ArgDispatcher.RouteID
+	}
+	return dS.Dispatch(&utils.CGREvent{Tenant: args.Tenant}, utils.MetaScheduler, routeID,
+		utils.SchedulerSv1ExecuteActions, args, reply)
+}
+
+func (dS *DispatcherService) SchedulerSv1ExecuteActionPlans(args *utils.AttrsExecuteActionPlans, reply *string) (err error) {
+	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if args.ArgDispatcher == nil {
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
+		}
+		if err = dS.authorize(utils.SchedulerSv1ExecuteActionPlans,
+			args.Tenant,
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	var routeID *string
+	if args.ArgDispatcher != nil {
+		routeID = args.ArgDispatcher.RouteID
+	}
+	return dS.Dispatch(&utils.CGREvent{Tenant: args.Tenant}, utils.MetaScheduler, routeID,
+		utils.SchedulerSv1ExecuteActionPlans, args, reply)
 }
