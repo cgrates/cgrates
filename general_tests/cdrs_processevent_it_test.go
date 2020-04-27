@@ -654,8 +654,15 @@ func testV1CDRsV2ProcessEventRalS(t *testing.T) {
 	}
 	reply[0].Event["CostDetails"] = nil
 	expRply[0].Event["CGRID"] = reply[0].Event["CGRID"]
-	if !reflect.DeepEqual(reply[0], expRply[0]) {
-		t.Errorf("Expected %s, received: %s ", utils.ToJSON(expRply), utils.ToJSON(reply))
+	if *encoding == utils.MetaGOB { // gob encoding encodes 0 values of pointers to nil
+		expRply[0].Flags = nil
+		if utils.ToJSON(expRply) != utils.ToJSON(reply) {
+			t.Errorf("Expected %s, received: %s ", utils.ToJSON(expRply), utils.ToJSON(reply))
+		}
+	} else {
+		if !reflect.DeepEqual(reply[0], expRply[0]) {
+			t.Errorf("Expected %s, received: %s ", utils.ToJSON(expRply), utils.ToJSON(reply))
+		}
 	}
 	var cdrs []*engine.CDR
 	if err := pecdrsRpc.Call(utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithArgDispatcher{
@@ -678,8 +685,14 @@ func testV1CDRsV2ProcessEventRalS(t *testing.T) {
 	expRply[0].Event["Usage"] = 60000000000.
 	expRply[0].Event["Cost"] = 0.0102
 	reply[0].Event["CostDetails"] = nil
-	if !reflect.DeepEqual(reply[0], expRply[0]) {
-		t.Errorf("Expected %s, received: %s ", utils.ToJSON(expRply), utils.ToJSON(reply))
+	if *encoding == utils.MetaGOB { // gob encoding encodes 0 values of pointers to nil
+		if utils.ToJSON(expRply) != utils.ToJSON(reply) {
+			t.Errorf("Expected %s, received: %s ", utils.ToJSON(expRply), utils.ToJSON(reply))
+		}
+	} else {
+		if !reflect.DeepEqual(reply[0], expRply[0]) {
+			t.Errorf("Expected %s, received: %s ", utils.ToJSON(expRply), utils.ToJSON(reply))
+		}
 	}
 
 	argsEv.CGREvent.Event[utils.Usage] = 30 * time.Second
@@ -687,8 +700,14 @@ func testV1CDRsV2ProcessEventRalS(t *testing.T) {
 		t.Error(err)
 	}
 	reply[0].Event["CostDetails"] = nil
-	if !reflect.DeepEqual(reply[0], expRply[0]) {
-		t.Errorf("Expected %s, received: %s ", utils.ToJSON(expRply), utils.ToJSON(reply))
+	if *encoding == utils.MetaGOB { // gob encoding encodes 0 values of pointers to nil
+		if utils.ToJSON(expRply) != utils.ToJSON(reply) {
+			t.Errorf("Expected %s, received: %s ", utils.ToJSON(expRply), utils.ToJSON(reply))
+		}
+	} else {
+		if !reflect.DeepEqual(reply[0], expRply[0]) {
+			t.Errorf("Expected %s, received: %s ", utils.ToJSON(expRply), utils.ToJSON(reply))
+		}
 	}
 }
 

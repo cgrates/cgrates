@@ -78,6 +78,8 @@ func TestRalsCfgFromJsonCfg(t *testing.T) {
 
 func TestRalsCfgAsMapInterface(t *testing.T) {
 	var ralscfg RalsCfg
+	ralscfg.MaxComputedUsage = make(map[string]time.Duration)
+	ralscfg.BalanceRatingSubject = make(map[string]string)
 	cfgJSONStr := `{
 	"rals": {
 		"enabled": false,						

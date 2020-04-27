@@ -128,14 +128,14 @@ echo 'go test github.com/cgrates/cgrates/apier/v1 -tags=offline -dbtype=*postgre
 go test github.com/cgrates/cgrates/apier/v1 -tags=offline -dbtype=*postgres -rpc=*gob
 offline_postgres=$?
 
-echo 'go test github.com/cgrates/cgrates/config -tags=integration -rpc=*gob'
-go test github.com/cgrates/cgrates/config -tags=integration -rpc=*gob
+echo 'go test github.com/cgrates/cgrates/config -tags=integration'
+go test github.com/cgrates/cgrates/config -tags=integration
 cfg=$?
-echo 'go test github.com/cgrates/cgrates/migrator -tags=integration -rpc=*gob'
-go test github.com/cgrates/cgrates/migrator -tags=integration -rpc=*gob
+echo 'go test github.com/cgrates/cgrates/migrator -tags=integration'
+go test github.com/cgrates/cgrates/migrator -tags=integration
 mgr=$?
-echo 'go test github.com/cgrates/cgrates/services -tags=integration -rpc=*gob'
-go test github.com/cgrates/cgrates/services -tags=integration -rpc=*gob
+echo 'go test github.com/cgrates/cgrates/services -tags=integration'
+go test github.com/cgrates/cgrates/services -tags=integration
 srv=$?
 
 exit $gen && $ap1_internal && $ap2_internal && $en_internal && $ers_internal && $lds_internal && 

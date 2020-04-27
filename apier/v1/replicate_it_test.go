@@ -430,7 +430,7 @@ func testInternalReplicateITStatQueueProfile(t *testing.T) {
 		t.Error(err)
 	}
 	// set
-	statConfig = &StatQueueWithCache{
+	statConfig = &engine.StatQueueWithCache{
 		StatQueueProfile: &engine.StatQueueProfile{
 			Tenant: tenant,
 			ID:     "TEST_PROFILE1",
@@ -441,10 +441,10 @@ func testInternalReplicateITStatQueueProfile(t *testing.T) {
 			QueueLength: 10,
 			TTL:         time.Duration(10) * time.Second,
 			Metrics: []*engine.MetricWithFilters{
-				&engine.MetricWithFilters{
+				{
 					MetricID: "*sum",
 				},
-				&engine.MetricWithFilters{
+				{
 					MetricID: "*acd",
 				},
 			},
@@ -1073,6 +1073,12 @@ func testInternalReplicateITThresholdProfile(t *testing.T) {
 }
 
 func testInternalReplicateITSetAccount(t *testing.T) {
+	if *encoding == utils.MetaGOB {
+		t.SkipNow() // skip this function because
+		// APIerSv1GetAccount returns the old format of Account
+		// and it can not register that interface because is duplicate
+		// of the real Account
+	}
 	//check
 	var reply string
 	if err := engineOneRPC.Call(utils.APIerSv1GetAccount,

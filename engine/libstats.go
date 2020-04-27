@@ -50,6 +50,11 @@ type StatQueueProfileWithArgDispatcher struct {
 	*utils.ArgDispatcher
 }
 
+type StatQueueWithCache struct {
+	*StatQueueProfile
+	Cache *string
+}
+
 func (sqp *StatQueueProfile) TenantID() string {
 	return utils.ConcatenatedKey(sqp.Tenant, sqp.ID)
 }

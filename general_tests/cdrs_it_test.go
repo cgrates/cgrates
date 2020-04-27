@@ -27,8 +27,6 @@ import (
 	"testing"
 	"time"
 
-	v1 "github.com/cgrates/cgrates/apier/v1"
-
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -473,17 +471,15 @@ func testV2CDRsSetStats(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	statConfig := &v1.StatQueueWithCache{
+	statConfig := &engine.StatQueueWithCache{
 		StatQueueProfile: &engine.StatQueueProfile{
 			Tenant:    "cgrates.org",
 			ID:        "STS_PoccessCDR",
 			FilterIDs: []string{"*string:~*req.OriginID:testV2CDRsProcessCDR5"},
 			// QueueLength: 10,
-			Metrics: []*engine.MetricWithFilters{
-				&engine.MetricWithFilters{
-					MetricID: "*sum:~*req.Usage",
-				},
-			},
+			Metrics: []*engine.MetricWithFilters{{
+				MetricID: "*sum:~*req.Usage",
+			}},
 			ThresholdIDs: []string{utils.META_NONE},
 			Blocker:      true,
 			Stored:       true,

@@ -65,9 +65,6 @@ func TestSessionsIt(t *testing.T) {
 	default:
 		t.Fatal("Unknown Database type")
 	}
-	if *encoding == utils.MetaGOB {
-		sItCfgDIR += "_gob"
-	}
 	for _, stest := range sessionsITtests {
 		t.Run(sItCfgDIR, stest)
 	}
