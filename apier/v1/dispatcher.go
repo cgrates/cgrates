@@ -520,6 +520,13 @@ func (dS *DispatcherSessionSv1) SyncSessions(args *utils.TenantWithArgDispatcher
 	return dS.dS.SessionSv1SyncSessions(args, rply)
 }
 
+func (dS *DispatcherSessionSv1) STIRAuthenticate(args *sessions.V1STIRAuthenticateArgs, reply *string) error {
+	return dS.dS.SessionSv1STIRAuthenticate(args, reply)
+}
+func (dS *DispatcherSessionSv1) STIRIdentity(args *sessions.V1STIRIdentityArgs, reply *string) error {
+	return dS.dS.SessionSv1STIRIdentity(args, reply)
+}
+
 func NewDispatcherResponder(dps *dispatchers.DispatcherService) *DispatcherResponder {
 	return &DispatcherResponder{dS: dps}
 }
