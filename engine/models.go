@@ -348,26 +348,26 @@ func (t TBLVersion) TableName() string {
 	return utils.TBLVersions
 }
 
-type TpSupplier struct {
-	PK                    uint `gorm:"primary_key"`
-	Tpid                  string
-	Tenant                string  `index:"0" re:""`
-	ID                    string  `index:"1" re:""`
-	FilterIDs             string  `index:"2" re:""`
-	ActivationInterval    string  `index:"3" re:""`
-	Sorting               string  `index:"4" re:""`
-	SortingParameters     string  `index:"5" re:""`
-	SupplierID            string  `index:"6" re:""`
-	SupplierFilterIDs     string  `index:"7" re:""`
-	SupplierAccountIDs    string  `index:"8" re:""`
-	SupplierRatingplanIDs string  `index:"9" re:""`
-	SupplierResourceIDs   string  `index:"10" re:""`
-	SupplierStatIDs       string  `index:"11" re:""`
-	SupplierWeight        float64 `index:"12" re:"\d+\.?\d*"`
-	SupplierBlocker       bool    `index:"13" re:""`
-	SupplierParameters    string  `index:"14" re:""`
-	Weight                float64 `index:"15" re:"\d+\.?\d*"`
-	CreatedAt             time.Time
+type TpRoute struct {
+	PK                 uint `gorm:"primary_key"`
+	Tpid               string
+	Tenant             string  `index:"0" re:""`
+	ID                 string  `index:"1" re:""`
+	FilterIDs          string  `index:"2" re:""`
+	ActivationInterval string  `index:"3" re:""`
+	Sorting            string  `index:"4" re:""`
+	SortingParameters  string  `index:"5" re:""`
+	RouteID            string  `index:"6" re:""`
+	RouteFilterIDs     string  `index:"7" re:""`
+	RouteAccountIDs    string  `index:"8" re:""`
+	RouteRatingplanIDs string  `index:"9" re:""`
+	RouteResourceIDs   string  `index:"10" re:""`
+	RouteStatIDs       string  `index:"11" re:""`
+	RouteWeight        float64 `index:"12" re:"\d+\.?\d*"`
+	RouteBlocker       bool    `index:"13" re:""`
+	RouteParameters    string  `index:"14" re:""`
+	Weight             float64 `index:"15" re:"\d+\.?\d*"`
+	CreatedAt          time.Time
 }
 
 type TPAttribute struct {

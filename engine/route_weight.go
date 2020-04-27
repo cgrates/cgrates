@@ -22,24 +22,24 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewWeightSorter(spS *SupplierService) *WeightSorter {
-	return &WeightSorter{spS: spS,
+func NewWeightSorter(rS *RouteService) *WeightSorter {
+	return &WeightSorter{rS: rS,
 		sorting: utils.MetaWeight}
 }
 
 // WeightSorter orders suppliers based on their weight, no cost involved
 type WeightSorter struct {
 	sorting string
-	spS     *SupplierService
+	rS      *RouteService
 }
 
 func (ws *WeightSorter) SortSuppliers(prflID string,
-	suppls []*Supplier, suplEv *utils.CGREvent, extraOpts *optsGetSuppliers) (sortedSuppls *SortedSuppliers, err error) {
+	suppls []*Route, suplEv *utils.CGREvent, extraOpts *optsGetSuppliers) (sortedSuppls *SortedSuppliers, err error) {
 	sortedSuppls = &SortedSuppliers{ProfileID: prflID,
 		Sorting:         ws.sorting,
 		SortedSuppliers: make([]*SortedSupplier, 0)}
 	for _, s := range suppls {
-		if srtSpl, pass, err := ws.spS.populateSortingData(suplEv, s, extraOpts); err != nil {
+		if srtSpl, pass, err := ws.rS.populateSortingData(suplEv, s, extraOpts); err != nil {
 			return nil, err
 		} else if pass && srtSpl != nil {
 			sortedSuppls.SortedSuppliers = append(sortedSuppls.SortedSuppliers, srtSpl)

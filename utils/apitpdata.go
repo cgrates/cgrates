@@ -1089,21 +1089,21 @@ type TPFilter struct {
 	Values  []string // Filter definition
 }
 
-// TPSupplier is used in TPSupplierProfile
-type TPSupplier struct {
-	ID                 string // SupplierID
-	FilterIDs          []string
-	AccountIDs         []string
-	RatingPlanIDs      []string // used when computing price
-	ResourceIDs        []string // queried in some strategies
-	StatIDs            []string // queried in some strategies
-	Weight             float64
-	Blocker            bool
-	SupplierParameters string
+// TPRoute is used in TPRouteProfile
+type TPRoute struct {
+	ID              string // RouteID
+	FilterIDs       []string
+	AccountIDs      []string
+	RatingPlanIDs   []string // used when computing price
+	ResourceIDs     []string // queried in some strategies
+	StatIDs         []string // queried in some strategies
+	Weight          float64
+	Blocker         bool
+	RouteParameters string
 }
 
-// TPSupplierProfile is used in APIs to manage remotely offline SupplierProfile
-type TPSupplierProfile struct {
+// TPRouteProfile is used in APIs to manage remotely offline RouteProfile
+type TPRouteProfile struct {
 	TPid               string
 	Tenant             string
 	ID                 string
@@ -1111,7 +1111,7 @@ type TPSupplierProfile struct {
 	ActivationInterval *TPActivationInterval // Time when this limit becomes active and expires
 	Sorting            string
 	SortingParameters  []string
-	Suppliers          []*TPSupplier
+	Routes             []*TPRoute
 	Weight             float64
 }
 
