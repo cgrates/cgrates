@@ -1893,28 +1893,28 @@ func FilterToTPFilter(f *Filter) (tpFltr *utils.TPFilterProfile) {
 	return
 }
 
-type TpSuppliers []*TpSupplier
+type TPRoutes []*TpRoute
 
 // CSVHeader return the header for csv fields as a slice of string
-func (tps TpSuppliers) CSVHeader() (result []string) {
+func (tps TPRoutes) CSVHeader() (result []string) {
 	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.ActivationIntervalString,
-		utils.Sorting, utils.SortingParameters, utils.SupplierID, utils.SupplierFilterIDs,
-		utils.SupplierAccountIDs, utils.SupplierRatingplanIDs, utils.SupplierResourceIDs,
-		utils.SupplierStatIDs, utils.SupplierWeight, utils.SupplierBlocker,
-		utils.SupplierParameters, utils.Weight,
+		utils.Sorting, utils.SortingParameters, utils.RouteID, utils.RouteFilterIDs,
+		utils.RouteAccountIDs, utils.RouteRatingplanIDs, utils.RouteResourceIDs,
+		utils.RouteStatIDs, utils.RouteWeight, utils.RouteBlocker,
+		utils.RouteParameters, utils.Weight,
 	}
 }
 
-func (tps TpSuppliers) AsTPSuppliers() (result []*utils.TPSupplierProfile) {
+func (tps TPRoutes) AsTPRouteProfile() (result []*utils.TPRouteProfile) {
 	filtermap := make(map[string]utils.StringMap)
-	mst := make(map[string]*utils.TPSupplierProfile)
-	suppliersMap := make(map[string]map[string]*utils.TPSupplier)
+	mst := make(map[string]*utils.TPRouteProfile)
+	suppliersMap := make(map[string]map[string]*utils.TPRoute)
 	sortingParameterMap := make(map[string]utils.StringMap)
 	for _, tp := range tps {
 		tenID := (&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()
 		th, found := mst[tenID]
 		if !found {
-			th = &utils.TPSupplierProfile{
+			th = &utils.TPRouteProfile{
 				TPid:              tp.Tpid,
 				Tenant:            tp.Tenant,
 				ID:                tp.ID,
@@ -1922,42 +1922,42 @@ func (tps TpSuppliers) AsTPSuppliers() (result []*utils.TPSupplierProfile) {
 				SortingParameters: []string{},
 			}
 		}
-		if tp.SupplierID != "" {
+		if tp.RouteID != "" {
 			if _, has := suppliersMap[tenID]; !has {
-				suppliersMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()] = make(map[string]*utils.TPSupplier)
+				suppliersMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()] = make(map[string]*utils.TPRoute)
 			}
-			sup, found := suppliersMap[tenID][tp.SupplierID]
+			sup, found := suppliersMap[tenID][tp.RouteID]
 			if !found {
-				sup = &utils.TPSupplier{
-					ID:      tp.SupplierID,
-					Weight:  tp.SupplierWeight,
-					Blocker: tp.SupplierBlocker,
+				sup = &utils.TPRoute{
+					ID:      tp.RouteID,
+					Weight:  tp.RouteWeight,
+					Blocker: tp.RouteBlocker,
 				}
 			}
-			if tp.SupplierParameters != "" {
-				sup.SupplierParameters = tp.SupplierParameters
+			if tp.RouteParameters != "" {
+				sup.RouteParameters = tp.RouteParameters
 			}
-			if tp.SupplierFilterIDs != "" {
-				supFilterSplit := strings.Split(tp.SupplierFilterIDs, utils.INFIELD_SEP)
+			if tp.RouteFilterIDs != "" {
+				supFilterSplit := strings.Split(tp.RouteFilterIDs, utils.INFIELD_SEP)
 				sup.FilterIDs = append(sup.FilterIDs, supFilterSplit...)
 			}
-			if tp.SupplierRatingplanIDs != "" {
-				ratingPlanSplit := strings.Split(tp.SupplierRatingplanIDs, utils.INFIELD_SEP)
+			if tp.RouteRatingplanIDs != "" {
+				ratingPlanSplit := strings.Split(tp.RouteRatingplanIDs, utils.INFIELD_SEP)
 				sup.RatingPlanIDs = append(sup.RatingPlanIDs, ratingPlanSplit...)
 			}
-			if tp.SupplierResourceIDs != "" {
-				resSplit := strings.Split(tp.SupplierResourceIDs, utils.INFIELD_SEP)
+			if tp.RouteResourceIDs != "" {
+				resSplit := strings.Split(tp.RouteResourceIDs, utils.INFIELD_SEP)
 				sup.ResourceIDs = append(sup.ResourceIDs, resSplit...)
 			}
-			if tp.SupplierStatIDs != "" {
-				statSplit := strings.Split(tp.SupplierStatIDs, utils.INFIELD_SEP)
+			if tp.RouteStatIDs != "" {
+				statSplit := strings.Split(tp.RouteStatIDs, utils.INFIELD_SEP)
 				sup.StatIDs = append(sup.StatIDs, statSplit...)
 			}
-			if tp.SupplierAccountIDs != "" {
-				accSplit := strings.Split(tp.SupplierAccountIDs, utils.INFIELD_SEP)
+			if tp.RouteAccountIDs != "" {
+				accSplit := strings.Split(tp.RouteAccountIDs, utils.INFIELD_SEP)
 				sup.AccountIDs = append(sup.AccountIDs, accSplit...)
 			}
-			suppliersMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()][tp.SupplierID] = sup
+			suppliersMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()][tp.RouteID] = sup
 		}
 		if tp.SortingParameters != "" {
 			if _, has := sortingParameterMap[tenID]; !has {
@@ -1992,12 +1992,12 @@ func (tps TpSuppliers) AsTPSuppliers() (result []*utils.TPSupplierProfile) {
 		}
 		mst[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()] = th
 	}
-	result = make([]*utils.TPSupplierProfile, len(mst))
+	result = make([]*utils.TPRouteProfile, len(mst))
 	i := 0
 	for tntID, th := range mst {
 		result[i] = th
 		for _, supdata := range suppliersMap[tntID] {
-			result[i].Suppliers = append(result[i].Suppliers, supdata)
+			result[i].Routes = append(result[i].Routes, supdata)
 		}
 		for filterdata := range filtermap[tntID] {
 			result[i].FilterIDs = append(result[i].FilterIDs, filterdata)
@@ -2010,12 +2010,12 @@ func (tps TpSuppliers) AsTPSuppliers() (result []*utils.TPSupplierProfile) {
 	return
 }
 
-func APItoModelTPSuppliers(st *utils.TPSupplierProfile) (mdls TpSuppliers) {
-	if len(st.Suppliers) == 0 {
+func APItoModelTPRoutes(st *utils.TPRouteProfile) (mdls TPRoutes) {
+	if len(st.Routes) == 0 {
 		return
 	}
-	for i, supl := range st.Suppliers {
-		mdl := &TpSupplier{
+	for i, supl := range st.Routes {
+		mdl := &TpRoute{
 			Tenant: st.Tenant,
 			Tpid:   st.TPid,
 			ID:     st.ID,
@@ -2044,119 +2044,119 @@ func APItoModelTPSuppliers(st *utils.TPSupplierProfile) (mdls TpSuppliers) {
 				}
 			}
 		}
-		mdl.SupplierID = supl.ID
+		mdl.RouteID = supl.ID
 		for i, val := range supl.AccountIDs {
 			if i != 0 {
-				mdl.SupplierAccountIDs += utils.INFIELD_SEP
+				mdl.RouteAccountIDs += utils.INFIELD_SEP
 			}
-			mdl.SupplierAccountIDs += val
+			mdl.RouteAccountIDs += val
 		}
 		for i, val := range supl.RatingPlanIDs {
 			if i != 0 {
-				mdl.SupplierRatingplanIDs += utils.INFIELD_SEP
+				mdl.RouteRatingplanIDs += utils.INFIELD_SEP
 			}
-			mdl.SupplierRatingplanIDs += val
+			mdl.RouteRatingplanIDs += val
 		}
 		for i, val := range supl.FilterIDs {
 			if i != 0 {
-				mdl.SupplierFilterIDs += utils.INFIELD_SEP
+				mdl.RouteFilterIDs += utils.INFIELD_SEP
 			}
-			mdl.SupplierFilterIDs += val
+			mdl.RouteFilterIDs += val
 		}
 		for i, val := range supl.ResourceIDs {
 			if i != 0 {
-				mdl.SupplierResourceIDs += utils.INFIELD_SEP
+				mdl.RouteResourceIDs += utils.INFIELD_SEP
 			}
-			mdl.SupplierResourceIDs += val
+			mdl.RouteResourceIDs += val
 		}
 		for i, val := range supl.StatIDs {
 			if i != 0 {
-				mdl.SupplierStatIDs += utils.INFIELD_SEP
+				mdl.RouteStatIDs += utils.INFIELD_SEP
 			}
-			mdl.SupplierStatIDs += val
+			mdl.RouteStatIDs += val
 		}
-		mdl.SupplierWeight = supl.Weight
-		mdl.SupplierParameters = supl.SupplierParameters
-		mdl.SupplierBlocker = supl.Blocker
+		mdl.RouteWeight = supl.Weight
+		mdl.RouteParameters = supl.RouteParameters
+		mdl.RouteBlocker = supl.Blocker
 		mdls = append(mdls, mdl)
 	}
 	return
 }
 
-func APItoSupplierProfile(tpSPP *utils.TPSupplierProfile, timezone string) (spp *SupplierProfile, err error) {
-	spp = &SupplierProfile{
-		Tenant:            tpSPP.Tenant,
-		ID:                tpSPP.ID,
-		Sorting:           tpSPP.Sorting,
-		Weight:            tpSPP.Weight,
-		Suppliers:         make([]*Supplier, len(tpSPP.Suppliers)),
-		SortingParameters: make([]string, len(tpSPP.SortingParameters)),
-		FilterIDs:         make([]string, len(tpSPP.FilterIDs)),
+func APItoRouteProfile(tpRp *utils.TPRouteProfile, timezone string) (rp *RouteProfile, err error) {
+	rp = &RouteProfile{
+		Tenant:            tpRp.Tenant,
+		ID:                tpRp.ID,
+		Sorting:           tpRp.Sorting,
+		Weight:            tpRp.Weight,
+		Routes:            make([]*Route, len(tpRp.Routes)),
+		SortingParameters: make([]string, len(tpRp.SortingParameters)),
+		FilterIDs:         make([]string, len(tpRp.FilterIDs)),
 	}
-	for i, stp := range tpSPP.SortingParameters {
-		spp.SortingParameters[i] = stp
+	for i, stp := range tpRp.SortingParameters {
+		rp.SortingParameters[i] = stp
 	}
-	for i, fli := range tpSPP.FilterIDs {
-		spp.FilterIDs[i] = fli
+	for i, fli := range tpRp.FilterIDs {
+		rp.FilterIDs[i] = fli
 	}
-	if tpSPP.ActivationInterval != nil {
-		if spp.ActivationInterval, err = tpSPP.ActivationInterval.AsActivationInterval(timezone); err != nil {
+	if tpRp.ActivationInterval != nil {
+		if rp.ActivationInterval, err = tpRp.ActivationInterval.AsActivationInterval(timezone); err != nil {
 			return nil, err
 		}
 	}
-	for i, suplier := range tpSPP.Suppliers {
-		spp.Suppliers[i] = &Supplier{
-			ID:                 suplier.ID,
-			Weight:             suplier.Weight,
-			Blocker:            suplier.Blocker,
-			RatingPlanIDs:      suplier.RatingPlanIDs,
-			AccountIDs:         suplier.AccountIDs,
-			FilterIDs:          suplier.FilterIDs,
-			ResourceIDs:        suplier.ResourceIDs,
-			StatIDs:            suplier.StatIDs,
-			SupplierParameters: suplier.SupplierParameters,
+	for i, route := range tpRp.Routes {
+		rp.Routes[i] = &Route{
+			ID:              route.ID,
+			Weight:          route.Weight,
+			Blocker:         route.Blocker,
+			RatingPlanIDs:   route.RatingPlanIDs,
+			AccountIDs:      route.AccountIDs,
+			FilterIDs:       route.FilterIDs,
+			ResourceIDs:     route.ResourceIDs,
+			StatIDs:         route.StatIDs,
+			RouteParameters: route.RouteParameters,
 		}
 	}
-	return spp, nil
+	return rp, nil
 }
 
-func SupplierProfileToAPI(spp *SupplierProfile) (tpSPP *utils.TPSupplierProfile) {
-	tpSPP = &utils.TPSupplierProfile{
-		Tenant:             spp.Tenant,
-		ID:                 spp.ID,
-		FilterIDs:          make([]string, len(spp.FilterIDs)),
+func RouteProfileToAPI(rp *RouteProfile) (tpRp *utils.TPRouteProfile) {
+	tpRp = &utils.TPRouteProfile{
+		Tenant:             rp.Tenant,
+		ID:                 rp.ID,
+		FilterIDs:          make([]string, len(rp.FilterIDs)),
 		ActivationInterval: new(utils.TPActivationInterval),
-		Sorting:            spp.Sorting,
-		SortingParameters:  make([]string, len(spp.SortingParameters)),
-		Suppliers:          make([]*utils.TPSupplier, len(spp.Suppliers)),
-		Weight:             spp.Weight,
+		Sorting:            rp.Sorting,
+		SortingParameters:  make([]string, len(rp.SortingParameters)),
+		Routes:             make([]*utils.TPRoute, len(rp.Routes)),
+		Weight:             rp.Weight,
 	}
 
-	for i, supp := range spp.Suppliers {
-		tpSPP.Suppliers[i] = &utils.TPSupplier{
-			ID:                 supp.ID,
-			FilterIDs:          supp.FilterIDs,
-			AccountIDs:         supp.AccountIDs,
-			RatingPlanIDs:      supp.RatingPlanIDs,
-			ResourceIDs:        supp.ResourceIDs,
-			StatIDs:            supp.StatIDs,
-			Weight:             supp.Weight,
-			Blocker:            supp.Blocker,
-			SupplierParameters: supp.SupplierParameters,
+	for i, route := range rp.Routes {
+		tpRp.Routes[i] = &utils.TPRoute{
+			ID:              route.ID,
+			FilterIDs:       route.FilterIDs,
+			AccountIDs:      route.AccountIDs,
+			RatingPlanIDs:   route.RatingPlanIDs,
+			ResourceIDs:     route.ResourceIDs,
+			StatIDs:         route.StatIDs,
+			Weight:          route.Weight,
+			Blocker:         route.Blocker,
+			RouteParameters: route.RouteParameters,
 		}
 	}
-	for i, fli := range spp.FilterIDs {
-		tpSPP.FilterIDs[i] = fli
+	for i, fli := range rp.FilterIDs {
+		tpRp.FilterIDs[i] = fli
 	}
-	for i, fli := range spp.SortingParameters {
-		tpSPP.SortingParameters[i] = fli
+	for i, fli := range rp.SortingParameters {
+		tpRp.SortingParameters[i] = fli
 	}
-	if spp.ActivationInterval != nil {
-		if !spp.ActivationInterval.ActivationTime.IsZero() {
-			tpSPP.ActivationInterval.ActivationTime = spp.ActivationInterval.ActivationTime.Format(time.RFC3339)
+	if rp.ActivationInterval != nil {
+		if !rp.ActivationInterval.ActivationTime.IsZero() {
+			tpRp.ActivationInterval.ActivationTime = rp.ActivationInterval.ActivationTime.Format(time.RFC3339)
 		}
-		if !spp.ActivationInterval.ExpiryTime.IsZero() {
-			tpSPP.ActivationInterval.ExpiryTime = spp.ActivationInterval.ExpiryTime.Format(time.RFC3339)
+		if !rp.ActivationInterval.ExpiryTime.IsZero() {
+			tpRp.ActivationInterval.ExpiryTime = rp.ActivationInterval.ExpiryTime.Format(time.RFC3339)
 		}
 	}
 	return

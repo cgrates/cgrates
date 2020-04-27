@@ -29,48 +29,48 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// Supplier defines supplier related information used within a SupplierProfile
-type Supplier struct {
-	ID                 string // SupplierID
-	FilterIDs          []string
-	AccountIDs         []string
-	RatingPlanIDs      []string // used when computing price
-	ResourceIDs        []string // queried in some strategies
-	StatIDs            []string // queried in some strategies
-	Weight             float64
-	Blocker            bool // do not process further supplier after this one
-	SupplierParameters string
+// Route defines routes related information used within a RouteProfile
+type Route struct {
+	ID              string // SupplierID
+	FilterIDs       []string
+	AccountIDs      []string
+	RatingPlanIDs   []string // used when computing price
+	ResourceIDs     []string // queried in some strategies
+	StatIDs         []string // queried in some strategies
+	Weight          float64
+	Blocker         bool // do not process further supplier after this one
+	RouteParameters string
 
-	cacheSupplier  map[string]interface{} // cache["*ratio"]=ratio
+	cacheRoute     map[string]interface{} // cache["*ratio"]=ratio
 	lazyCheckRules []*FilterRule
 }
 
-// SupplierProfile represents the configuration of a Supplier profile
-type SupplierProfile struct {
+// RouteProfile represents the configuration of a Supplier profile
+type RouteProfile struct {
 	Tenant             string
 	ID                 string // LCR Profile ID
 	FilterIDs          []string
 	ActivationInterval *utils.ActivationInterval // Activation interval
 	Sorting            string                    // Sorting strategy
 	SortingParameters  []string
-	Suppliers          []*Supplier
+	Routes             []*Route
 	Weight             float64
 
 	cache map[string]interface{}
 }
 
 // SupplierProfileWithArgDispatcher is used in replicatorV1 for dispatcher
-type SupplierProfileWithArgDispatcher struct {
-	*SupplierProfile
+type RouteProfileWithArgDispatcher struct {
+	*RouteProfile
 	*utils.ArgDispatcher
 }
 
-func (sp *SupplierProfile) compileCacheParameters() error {
-	if sp.Sorting == utils.MetaLoad {
+func (rp *RouteProfile) compileCacheParameters() error {
+	if rp.Sorting == utils.MetaLoad {
 		// construct the map for ratio
 		ratioMap := make(map[string]int)
 		// []string{"supplierID:Ratio"}
-		for _, splIDWithRatio := range sp.SortingParameters {
+		for _, splIDWithRatio := range rp.SortingParameters {
 			splitted := strings.Split(splIDWithRatio, utils.CONCATENATED_KEY_SEP)
 			ratioVal, err := strconv.Atoi(splitted[1])
 			if err != nil {
@@ -78,58 +78,58 @@ func (sp *SupplierProfile) compileCacheParameters() error {
 			}
 			ratioMap[splitted[0]] = ratioVal
 		}
-		// add the ratio for each supplier
-		for _, supplier := range sp.Suppliers {
-			supplier.cacheSupplier = make(map[string]interface{})
-			if ratioSupplier, has := ratioMap[supplier.ID]; !has { // in case that ratio isn't defined for specific suppliers check for default
+		// add the ratio for each route
+		for _, route := range rp.Routes {
+			route.cacheRoute = make(map[string]interface{})
+			if ratioSupplier, has := ratioMap[route.ID]; !has { // in case that ratio isn't defined for specific suppliers check for default
 				if ratioDefault, has := ratioMap[utils.MetaDefault]; !has { // in case that *default ratio isn't defined take it from config
-					supplier.cacheSupplier[utils.MetaRatio] = config.CgrConfig().SupplierSCfg().DefaultRatio
+					route.cacheRoute[utils.MetaRatio] = config.CgrConfig().SupplierSCfg().DefaultRatio
 				} else {
-					supplier.cacheSupplier[utils.MetaRatio] = ratioDefault
+					route.cacheRoute[utils.MetaRatio] = ratioDefault
 				}
 			} else {
-				supplier.cacheSupplier[utils.MetaRatio] = ratioSupplier
+				route.cacheRoute[utils.MetaRatio] = ratioSupplier
 			}
 		}
 	}
 	return nil
 }
 
-// Compile is a wrapper for convenience setting up the SupplierProfile
-func (sp *SupplierProfile) Compile() error {
-	return sp.compileCacheParameters()
+// Compile is a wrapper for convenience setting up the RouteProfile
+func (rp *RouteProfile) Compile() error {
+	return rp.compileCacheParameters()
 }
 
 // TenantID returns unique identifier of the LCRProfile in a multi-tenant environment
-func (rp *SupplierProfile) TenantID() string {
+func (rp *RouteProfile) TenantID() string {
 	return utils.ConcatenatedKey(rp.Tenant, rp.ID)
 }
 
-// SupplierProfiles is a sortable list of SupplierProfile
-type SupplierProfiles []*SupplierProfile
+// RouteProfiles is a sortable list of RouteProfile
+type RouteProfiles []*RouteProfile
 
 // Sort is part of sort interface, sort based on Weight
-func (lps SupplierProfiles) Sort() {
+func (lps RouteProfiles) Sort() {
 	sort.Slice(lps, func(i, j int) bool { return lps[i].Weight > lps[j].Weight })
 }
 
-// NewSupplierService initializes the Supplier Service
-func NewSupplierService(dm *DataManager,
-	filterS *FilterS, cgrcfg *config.CGRConfig, connMgr *ConnManager) (spS *SupplierService, err error) {
-	spS = &SupplierService{
+// NewRouteService initializes the Route Service
+func NewRouteService(dm *DataManager,
+	filterS *FilterS, cgrcfg *config.CGRConfig, connMgr *ConnManager) (rS *RouteService, err error) {
+	rS = &RouteService{
 		dm:      dm,
 		filterS: filterS,
 		cgrcfg:  cgrcfg,
 		connMgr: connMgr,
 	}
-	if spS.sorter, err = NewSupplierSortDispatcher(spS); err != nil {
+	if rS.sorter, err = NewRouteSortDispatcher(rS); err != nil {
 		return nil, err
 	}
 	return
 }
 
-// SupplierService is the service computing Supplier queries
-type SupplierService struct {
+// RouteService is the service computing route queries
+type RouteService struct {
 	dm      *DataManager
 	filterS *FilterS
 	cgrcfg  *config.CGRConfig
@@ -138,17 +138,17 @@ type SupplierService struct {
 }
 
 // ListenAndServe will initialize the service
-func (spS *SupplierService) ListenAndServe(exitChan chan bool) error {
-	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.SupplierS))
+func (rpS *RouteService) ListenAndServe(exitChan chan bool) error {
+	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.RouteS))
 	e := <-exitChan
 	exitChan <- e // put back for the others listening for shutdown request
 	return nil
 }
 
 // Shutdown is called to shutdown the service
-func (spS *SupplierService) Shutdown() error {
-	utils.Logger.Info(fmt.Sprintf("<%s> service shutdown initialized", utils.SupplierS))
-	utils.Logger.Info(fmt.Sprintf("<%s> service shutdown complete", utils.SupplierS))
+func (rpS *RouteService) Shutdown() error {
+	utils.Logger.Info(fmt.Sprintf("<%s> service shutdown initialized", utils.RouteS))
+	utils.Logger.Info(fmt.Sprintf("<%s> service shutdown complete", utils.RouteS))
 	return nil
 }
 
