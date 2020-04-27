@@ -482,3 +482,41 @@ func (dS *DispatcherService) SessionSv1DeactivateSessions(args *utils.SessionIDs
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaSessionS, routeID,
 		utils.SessionSv1DeactivateSessions, args, reply)
 }
+
+func (dS *DispatcherService) SessionSv1STIRAuthenticate(args *sessions.V1STIRAuthenticateArgs, reply *string) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if args.ArgDispatcher == nil {
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
+		}
+		if err = dS.authorize(utils.SessionSv1STIRAuthenticate,
+			tnt, args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	var routeID *string
+	if args.ArgDispatcher != nil {
+		routeID = args.ArgDispatcher.RouteID
+	}
+	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaSessionS, routeID,
+		utils.SessionSv1STIRAuthenticate, args, reply)
+}
+
+func (dS *DispatcherService) SessionSv1STIRIdentity(args *sessions.V1STIRIdentityArgs, reply *string) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if args.ArgDispatcher == nil {
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
+		}
+		if err = dS.authorize(utils.SessionSv1STIRIdentity,
+			tnt, args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	var routeID *string
+	if args.ArgDispatcher != nil {
+		routeID = args.ArgDispatcher.RouteID
+	}
+	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaSessionS, routeID,
+		utils.SessionSv1STIRIdentity, args, reply)
+}

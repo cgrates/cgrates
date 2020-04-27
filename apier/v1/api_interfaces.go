@@ -95,6 +95,9 @@ type SessionSv1Interface interface {
 	SetPassiveSession(args *sessions.Session, reply *string) error
 	ActivateSessions(args *utils.SessionIDsWithArgsDispatcher, reply *string) error
 	DeactivateSessions(args *utils.SessionIDsWithArgsDispatcher, reply *string) error
+
+	STIRAuthenticate(args *sessions.V1STIRAuthenticateArgs, reply *string) error
+	STIRIdentity(args *sessions.V1STIRIdentityArgs, reply *string) error
 }
 
 type ResponderInterface interface {

@@ -54,6 +54,9 @@ var sTestsDspSession = []func(t *testing.T){
 	testDspSessionGetCost,
 	testDspSessionReplicate,
 	testDspSessionPassive,
+
+	testDspSessionSTIRAuthenticate,
+	testDspSessionSTIRIdentity,
 	testDspSessionForceDisconect,
 }
 
@@ -971,4 +974,49 @@ func testDspSessionGetCost(t *testing.T) {
 		t.Errorf("Expected: %+v,received: %+v", 10*time.Minute, *rply.EventCost.Usage)
 	}
 
+}
+
+func testDspSessionSTIRAuthenticate(t *testing.T) {
+	var rply string
+	if err := dispEngine.RPC.Call(utils.SessionSv1STIRAuthenticate,
+		&sessions.V1STIRAuthenticateArgs{
+			Attest:             []string{"A"},
+			PayloadMaxDuration: "-1",
+			DestinationTn:      "1002",
+			Identity:           "eyJhbGciOiJFUzI1NiIsInBwdCI6InNoYWtlbiIsInR5cCI6InBhc3Nwb3J0IiwieDV1IjoiL3Vzci9zaGFyZS9jZ3JhdGVzL3N0aXIvc3Rpcl9wdWJrZXkucGVtIn0.eyJhdHRlc3QiOiJBIiwiZGVzdCI6eyJ0biI6WyIxMDAyIl19LCJpYXQiOjE1ODcwMzg4MDIsIm9yaWciOnsidG4iOiIxMDAxIn0sIm9yaWdpZCI6IjEyMzQ1NiJ9.cMEMlFnfyTu8uxfeU4RoZTamA7ifFT9Ibwrvi1_LKwL2xAU6fZ_CSIxKbtyOpNhM_sV03x7CfA_v0T4sHkifzg;info=</usr/share/cgrates/stir/stir_pubkey.pem>;ppt=shaken",
+			OriginatorTn:       "1001",
+			ArgDispatcher: &utils.ArgDispatcher{
+				APIKey: utils.StringPointer("ses12345"),
+			},
+		}, &rply); err != nil {
+		t.Fatal(err)
+	} else if rply != utils.OK {
+		t.Errorf("Expected: %s ,received: %s", utils.OK, rply)
+	}
+}
+
+func testDspSessionSTIRIdentity(t *testing.T) {
+	payload := &utils.PASSporTPayload{
+		Dest:   utils.PASSporTDestinationsIdentity{Tn: []string{"1002"}},
+		IAT:    1587019822,
+		Orig:   utils.PASSporTOriginsIdentity{Tn: "1001"},
+		OrigID: "123456",
+	}
+	args := &sessions.V1STIRIdentityArgs{
+		Payload:        payload,
+		PublicKeyPath:  "/usr/share/cgrates/stir/stir_pubkey.pem",
+		PrivateKeyPath: "/usr/share/cgrates/stir/stir_privatekey.pem",
+		OverwriteIAT:   true,
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("ses12345"),
+		},
+	}
+	var rply string
+	if err := dispEngine.RPC.Call(utils.SessionSv1STIRIdentity,
+		args, &rply); err != nil {
+		t.Error(err)
+	}
+	if err := sessions.AuthStirShaken(rply, "1001", "", "1002", "", utils.NewStringSet([]string{"A"}), 10*time.Minute); err != nil {
+		t.Fatal(err)
+	}
 }
