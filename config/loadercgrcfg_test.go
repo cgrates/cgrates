@@ -61,3 +61,48 @@ func TestLoaderCgrCfgloadFromJsonCfg(t *testing.T) {
 		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(loadscfg))
 	}
 }
+
+func TestLoaderCgrCfgAsMapInterface(t *testing.T) {
+	var loadscfg LoaderCgrCfg
+	cfgJSONStr := `{
+	"loader": {
+		"tpid": "",
+		"data_path": "./",
+		"disable_reverse": false,
+		"field_separator": ",",
+		"caches_conns":["*localhost"],
+		"scheduler_conns": ["*localhost"],
+		"gapi_credentials": ".gapi/credentials.json",
+		"gapi_token": ".gapi/token.json"
+	},
+}`
+	eMap := map[string]interface{}{
+		"tpid":             "",
+		"data_path":        "./",
+		"disable_reverse":  false,
+		"field_separator":  ",",
+		"caches_conns":     []string{"*localhost"},
+		"scheduler_conns":  []string{"*localhost"},
+		"gapi_credentials": ".gapi/credentials.json",
+		"gapi_token":       ".gapi/token.json",
+	}
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+		t.Error(err)
+	} else if jsnLoadersCfg, err := jsnCfg.LoaderCfgJson(); err != nil {
+		t.Error(err)
+	} else if err = loadscfg.loadFromJsonCfg(jsnLoadersCfg); err != nil {
+		t.Error(err)
+	} else if rcv := loadscfg.AsMapInterface(); !reflect.DeepEqual(eMap["tpid"], rcv["tpid"]) {
+		t.Errorf("Expected: %+v, Recived: %+v, at field: '%s'", utils.ToJSON(eMap["tpid"]), utils.ToJSON(rcv["tpid"]), "tpid")
+	} else if !reflect.DeepEqual(eMap["data_path"], rcv["data_path"]) {
+		t.Errorf("Expected: %+v, Recived: %+v, at field: %s", utils.ToJSON(eMap["data_path"]), utils.ToJSON(rcv["data_path"]), "data_path")
+	} else if !reflect.DeepEqual(eMap["disable_reverse"], rcv["disable_reverse"]) {
+		t.Errorf("Expected: %+v, Recived: %+v, at field: %s", utils.ToJSON(eMap["disable_reverse"]), utils.ToJSON(rcv["disable_reverse"]), "disable_reverse")
+	} else if !reflect.DeepEqual(eMap["field_separator"], rcv["field_separator"]) {
+		t.Errorf("Expected: %+v, Recived: %+v, at field: %s", utils.ToJSON(eMap["field_separator"]), utils.ToJSON(rcv["field_separator"]), "field_separator")
+	} else if !reflect.DeepEqual(eMap["caches_conns"], rcv["caches_conns"]) {
+		t.Errorf("Expected: %+v, Recived: %+v, at field: %s", utils.ToJSON(eMap["caches_conns"]), utils.ToJSON(rcv["caches_conns"]), "caches_conns")
+	} else if !reflect.DeepEqual(eMap["scheduler_conns"], rcv["scheduler_conns"]) {
+		t.Errorf("Expected: %+v, Recived: %+v, at field: %s", utils.ToJSON(eMap["scheduler_conns"]), utils.ToJSON(rcv["scheduler_conns"]), "scheduler_conns")
+	}
+}

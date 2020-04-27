@@ -98,7 +98,7 @@ func (ld *LoaderCgrCfg) AsMapInterface() map[string]interface{} {
 		utils.TpIDCfg:            ld.TpID,
 		utils.DataPathCfg:        ld.DataPath,
 		utils.DisableReverseCfg:  ld.DisableReverse,
-		utils.FieldSeparatorCfg:  ld.FieldSeparator,
+		utils.FieldSeparatorCfg:  string(ld.FieldSeparator),
 		utils.CachesConnsCfg:     ld.CachesConns,
 		utils.SchedulerConnsCfg:  ld.SchedulerConns,
 		utils.GapiCredentialsCfg: gapiCredentials,

@@ -1956,29 +1956,29 @@ const (
 
 // MigratorCgrCfg
 const (
-	OutDataDBTypeCfg          = "Out_dataDB_type"
-	OutDataDBHostCfg          = "Out_dataDB_host"
-	OutDataDBPortCfg          = "Out_dataDB_port"
-	OutDataDBNameCfg          = "Out_dataDB_name"
-	OutDataDBUserCfg          = "Out_dataDB_user"
-	OutDataDBPasswordCfg      = "Out_dataDB_password"
-	OutDataDBEncodingCfg      = "Out_dataDB_encoding"
-	OutDataDBRedisSentinelCfg = "Out_dataDB_redis_sentinel"
-	OutStorDBTypeCfg          = "Out_storDB_type"
-	OutStorDBHostCfg          = "Out_storDB_host"
-	OutStorDBPortCfg          = "Out_storDB_port"
-	OutStorDBNameCfg          = "Out_storDB_name"
-	OutStorDBUserCfg          = "Out_storDB_user"
-	OutStorDBPasswordCfg      = "Out_storDB_password"
-	UsersFiltersCfg           = "Users_filters"
+	OutDataDBTypeCfg          = "out_datadb_type"
+	OutDataDBHostCfg          = "out_datadb_host"
+	OutDataDBPortCfg          = "out_datadb_port"
+	OutDataDBNameCfg          = "out_datadb_name"
+	OutDataDBUserCfg          = "out_datadb_user"
+	OutDataDBPasswordCfg      = "out_datadb_password"
+	OutDataDBEncodingCfg      = "out_datadb_encoding"
+	OutDataDBRedisSentinelCfg = "out_datadb_redis_sentinel"
+	OutStorDBTypeCfg          = "out_stordb_type"
+	OutStorDBHostCfg          = "out_stordb_host"
+	OutStorDBPortCfg          = "out_stordb_port"
+	OutStorDBNameCfg          = "out_stordb_name"
+	OutStorDBUserCfg          = "out_stordb_user"
+	OutStorDBPasswordCfg      = "out_stordb_password"
+	UsersFiltersCfg           = "users_filters"
 )
 
 // MailerCfg
 const (
-	MailerServerCfg   = "Server"
-	MailerAuthUserCfg = "Auth_user"
-	MailerAuthPassCfg = "Auth_password"
-	MailerFromAddrCfg = "From_address"
+	MailerServerCfg   = "server"
+	MailerAuthUserCfg = "auth_user"
+	MailerAuthPassCfg = "auth_password"
+	MailerFromAddrCfg = "from_address"
 )
 
 // EventReaderCfg
