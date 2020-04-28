@@ -175,6 +175,50 @@ func TestFsAgentCfgloadFromJsonCfg2(t *testing.T) {
 	}
 }
 
+func TestFsAgentCfgAsMapInterface(t *testing.T) {
+	var fsagcfg FsAgentCfg
+	cfgJSONStr := `{
+	"freeswitch_agent": {
+		"enabled": false,
+		"sessions_conns": ["*internal"],
+		"subscribe_park": true,
+		"create_cdr": false,
+		"extra_fields": [],
+		//"min_dur_low_balance": "5s",
+		//"low_balance_ann_file": "",
+		"empty_balance_context": "",
+		"empty_balance_ann_file": "",
+		"max_wait_connection": "2s",
+		"event_socket_conns":[
+			{"address": "127.0.0.1:8021", "password": "ClueCon", "reconnects": 5,"alias":""}
+		],
+	},
+}`
+	eMap := map[string]interface{}{
+		"enabled":                false,
+		"sessions_conns":         []string{"*internal"},
+		"subscribe_park":         true,
+		"create_cdr":             false,
+		"extra_fields":           "",
+		"low_balance_ann_file":   "",
+		"empty_balance_context":  "",
+		"empty_balance_ann_file": "",
+		"max_wait_connection":    "2s",
+		"event_socket_conns": []map[string]interface{}{
+			{"address": "127.0.0.1:8021", "password": "ClueCon", "reconnects": 5, "alias": "127.0.0.1:8021"},
+		},
+	}
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+		t.Error(err)
+	} else if jsnFsAgCfg, err := jsnCfg.FreeswitchAgentJsonCfg(); err != nil {
+		t.Error(err)
+	} else if err = fsagcfg.loadFromJsonCfg(jsnFsAgCfg); err != nil {
+		t.Error(err)
+	} else if rcv := fsagcfg.AsMapInterface(""); !reflect.DeepEqual(eMap, rcv) {
+		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	}
+}
+
 func TestFsConnCfgloadFromJsonCfg(t *testing.T) {
 	var fscocfg, expected FsConnCfg
 	if err := fscocfg.loadFromJsonCfg(nil); err != nil {
@@ -273,6 +317,37 @@ func TestAsteriskAgentCfgloadFromJsonCfg(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, asagcfg) {
 		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(asagcfg))
+	}
+}
+
+func TestAsteriskAgentCfgAsMapInterface(t *testing.T) {
+	var asagcfg AsteriskAgentCfg
+	cfgJSONStr := `{
+	"asterisk_agent": {
+		"enabled": true,
+		"sessions_conns": ["*internal"],
+		"create_cdr": false,
+		"asterisk_conns":[
+			{"address": "127.0.0.1:8088", "user": "cgrates", "password": "CGRateS.org", "connect_attempts": 3,"reconnects": 5}
+		],
+	},
+}`
+	eMap := map[string]interface{}{
+		"enabled":        true,
+		"sessions_conns": []string{"*internal"},
+		"create_cdr":     false,
+		"asterisk_conns": []map[string]interface{}{
+			{"alias": "", "address": "127.0.0.1:8088", "user": "cgrates", "password": "CGRateS.org", "connect_attempts": 3, "reconnects": 5},
+		},
+	}
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+		t.Error(err)
+	} else if jsnAsAgCfg, err := jsnCfg.AsteriskAgentJsonCfg(); err != nil {
+		t.Error(err)
+	} else if err = asagcfg.loadFromJsonCfg(jsnAsAgCfg); err != nil {
+		t.Error(err)
+	} else if rcv := asagcfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
+		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
 
