@@ -59,7 +59,7 @@ func NewStatMetric(metricID string, minItems int, filterIDs []string) (sm StatMe
 		utils.MetaDistinct: NewStatDistinct,
 	}
 	// split the metricID
-	// in case of *sum we have *sum:~FieldName
+	// in case of *sum we have *sum:~*req.FieldName
 	metricSplit := utils.SplitConcatenatedKey(metricID)
 	if _, has := metrics[metricSplit[0]]; !has {
 		return nil, fmt.Errorf("unsupported metric type <%s>", metricSplit[0])
@@ -1037,16 +1037,17 @@ func (sum *StatSum) GetFloat64Value() (v float64) {
 
 func (sum *StatSum) AddEvent(ev *utils.CGREvent) (err error) {
 	var val float64
-	if strings.HasPrefix(sum.FieldName, utils.DynamicDataPrefix) {
+	switch {
+	case strings.HasPrefix(sum.FieldName, utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep): // ~*req.
 		//Remove the dynamic prefix and check in event for field
-		field := sum.FieldName[1:]
+		field := sum.FieldName[6:]
 		if val, err = ev.FieldAsFloat64(field); err != nil {
 			if err == utils.ErrNotFound {
 				err = utils.ErrPrefix(err, field)
 			}
 			return
 		}
-	} else { // in case we don't receive FieldName we consider that we receive a number
+	default:
 		val, err = utils.IfaceAsFloat64(sum.FieldName)
 		if err != nil {
 			return
@@ -1174,16 +1175,17 @@ func (avg *StatAverage) GetFloat64Value() (v float64) {
 
 func (avg *StatAverage) AddEvent(ev *utils.CGREvent) (err error) {
 	var val float64
-	if strings.HasPrefix(avg.FieldName, utils.DynamicDataPrefix) {
+	switch {
+	case strings.HasPrefix(avg.FieldName, utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep): // ~*req.
 		//Remove the dynamic prefix and check in event for field
-		field := avg.FieldName[1:]
+		field := avg.FieldName[6:]
 		if val, err = ev.FieldAsFloat64(field); err != nil {
 			if err == utils.ErrNotFound {
 				err = utils.ErrPrefix(err, field)
 			}
 			return
 		}
-	} else { // in case we don't receive FieldName we consider that we receive a number
+	default:
 		val, err = utils.IfaceAsFloat64(avg.FieldName)
 		if err != nil {
 			return
@@ -1303,8 +1305,11 @@ func (dst *StatDistinct) GetFloat64Value() (v float64) {
 
 func (dst *StatDistinct) AddEvent(ev *utils.CGREvent) (err error) {
 	var fieldValue string
-	// simply remove the Dynamic prefix and do normal process
-	field := dst.FieldName[1:]
+	// simply remove the ~*req. prefix and do normal process
+	if !strings.HasPrefix(dst.FieldName, utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep) {
+		return fmt.Errorf("Invalid format for field <%s>", dst.FieldName)
+	}
+	field := dst.FieldName[6:]
 	if fieldValue, err = ev.FieldAsString(field); err != nil {
 		return err
 	}

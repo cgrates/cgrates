@@ -31,6 +31,9 @@ smg_internal=$?
 echo 'go test github.com/cgrates/cgrates/dispatchers -tags=integration -dbtype=*internal'
 go test github.com/cgrates/cgrates/dispatchers -tags=integration -dbtype=*internal
 dis_internal=$?
+echo 'go test github.com/cgrates/cgrates/apier/v1 -tags=offline -dbtype=*internal'
+go test github.com/cgrates/cgrates/apier/v1 -tags=offline -dbtype=*internal
+offline_internal=$?
 # SQL
 echo 'go test github.com/cgrates/cgrates/apier/v1 -tags=integration -dbtype=*mysql'
 go test github.com/cgrates/cgrates/apier/v1 -tags=integration -dbtype=*mysql
@@ -59,6 +62,9 @@ smg_mysql=$?
 echo 'go test github.com/cgrates/cgrates/dispatchers -tags=integration -dbtype=*mysql'
 go test github.com/cgrates/cgrates/dispatchers -tags=integration -dbtype=*mysql
 dis_mysql=$?
+echo 'go test github.com/cgrates/cgrates/apier/v1 -tags=offline -dbtype=*mysql'
+go test github.com/cgrates/cgrates/apier/v1 -tags=offline -dbtype=*mysql
+offline_mysql=$?
 # Mongo
 echo 'go test github.com/cgrates/cgrates/apier/v1 -tags=integration -dbtype=*mongo'
 go test github.com/cgrates/cgrates/apier/v1 -tags=integration -dbtype=*mongo
@@ -87,6 +93,9 @@ smg_mongo=$?
 echo 'go test github.com/cgrates/cgrates/dispatchers -tags=integration -dbtype=*mongo'
 go test github.com/cgrates/cgrates/dispatchers -tags=integration -dbtype=*mongo
 dis_mongo=$?
+echo 'go test github.com/cgrates/cgrates/apier/v1 -tags=offline -dbtype=*mongo'
+go test github.com/cgrates/cgrates/apier/v1 -tags=offline -dbtype=*mongo
+offline_mongo=$?
 # Postgres
 echo 'go test github.com/cgrates/cgrates/apier/v1 -tags=integration -dbtype=*postgres'
 go test github.com/cgrates/cgrates/apier/v1 -tags=integration -dbtype=*postgres
@@ -115,6 +124,9 @@ smg_postgres=$?
 echo 'go test github.com/cgrates/cgrates/dispatchers -tags=integration -dbtype=*postgres'
 go test github.com/cgrates/cgrates/dispatchers -tags=integration -dbtype=*postgres
 dis_postgres=$?
+echo 'go test github.com/cgrates/cgrates/apier/v1 -tags=offline -dbtype=*postgres'
+go test github.com/cgrates/cgrates/apier/v1 -tags=offline -dbtype=*postgres
+offline_postgres=$?
 
 echo 'go test github.com/cgrates/cgrates/config -tags=integration'
 go test github.com/cgrates/cgrates/config -tags=integration
@@ -125,10 +137,11 @@ mgr=$?
 echo 'go test github.com/cgrates/cgrates/services -tags=integration'
 go test github.com/cgrates/cgrates/services -tags=integration
 srv=$?
-#All
 
-echo 'go test github.com/cgrates/cgrates/apier/v1 -tags=offline'
-go test github.com/cgrates/cgrates/apier/v1 -tags=offline
-offline=$?
-# to do: add '&& $ap1_internal' 
-exit $gen && $ap1_sql && $ap1_mongo && $ap2 && $en && $cfg && $utl && $gnr && $agts && $smg && $mgr && $dis && $lds && $ers && $srv && $offline
+exit $gen && $ap1_internal && $ap2_internal && $en_internal && $ers_internal && $lds_internal && 
+$gnr_internal && $agts_internal && $smg_internal && $dis_internal && $offline_internal && $ap1_mysql && 
+$ap2_mysql && $en_mysql && $ers_mysql && $lds_mysql && $gnr_mysql && $agts_mysql && $smg_mysql && 
+$dis_mysql && $offline_mysql && $ap1_mongo && $ap2_mongo && $en_mongo && $ers_mongo && $lds_mongo && 
+$gnr_mongo && $agts_mongo && $smg_mongo && $dis_mongo && $offline_mongo && $ap1_postgres && 
+$ap2_postgres && $en_postgres && $ers_postgres && $lds_postgres && $gnr_postgres && $agts_postgres && 
+$smg_postgres && $dis_postgres && $offline_postgres && $cfg && $mgr && $srv

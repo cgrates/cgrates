@@ -60,22 +60,19 @@ var sTestsTPChrgs = []func(t *testing.T){
 }
 
 //Test start here
-func TestTPChrgsITMySql(t *testing.T) {
-	tpChrgsConfigDIR = "tutmysql"
-	for _, stest := range sTestsTPChrgs {
-		t.Run(tpChrgsConfigDIR, stest)
+func TestTPChrgsIT(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		tpChrgsConfigDIR = "tutinternal"
+	case utils.MetaMySQL:
+		tpChrgsConfigDIR = "tutmysql"
+	case utils.MetaMongo:
+		tpChrgsConfigDIR = "tutmongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
 	}
-}
-
-func TestTPChrgsITMongo(t *testing.T) {
-	tpChrgsConfigDIR = "tutmongo"
-	for _, stest := range sTestsTPChrgs {
-		t.Run(tpChrgsConfigDIR, stest)
-	}
-}
-
-func TestTPChrgsITInternal(t *testing.T) {
-	tpChrgsConfigDIR = "tutinternal"
 	for _, stest := range sTestsTPChrgs {
 		t.Run(tpChrgsConfigDIR, stest)
 	}
@@ -165,7 +162,7 @@ func testTPChrgsGetTPChrgsAfterSet(t *testing.T) {
 
 func testTPChrgsGetTPChrgsIDs(t *testing.T) {
 	var result []string
-	expectedTPID := []string{"Chrgs"}
+	expectedTPID := []string{"cgrates.org:Chrgs"}
 	if err := tpChrgsRPC.Call(utils.APIerSv1GetTPChargerIDs,
 		&AttrGetTPAttributeProfileIds{TPid: "TP1"}, &result); err != nil {
 		t.Error(err)

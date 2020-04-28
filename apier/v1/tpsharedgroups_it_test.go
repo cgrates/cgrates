@@ -59,29 +59,19 @@ var sTestsTPSharedGroups = []func(t *testing.T){
 }
 
 //Test start here
-func TestTPSharedGroupsITMySql(t *testing.T) {
-	tpSharedGroupConfigDIR = "tutmysql"
-	for _, stest := range sTestsTPSharedGroups {
-		t.Run(tpSharedGroupConfigDIR, stest)
+func TestTPSharedGroupsIT(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		tpSharedGroupConfigDIR = "tutinternal"
+	case utils.MetaMySQL:
+		tpSharedGroupConfigDIR = "tutmysql"
+	case utils.MetaMongo:
+		tpSharedGroupConfigDIR = "tutmongo"
+	case utils.MetaPostgres:
+		tpSharedGroupConfigDIR = "tutpostgres"
+	default:
+		t.Fatal("Unknown Database type")
 	}
-}
-
-func TestTPSharedGroupsITMongo(t *testing.T) {
-	tpSharedGroupConfigDIR = "tutmongo"
-	for _, stest := range sTestsTPSharedGroups {
-		t.Run(tpSharedGroupConfigDIR, stest)
-	}
-}
-
-func TestTPSharedGroupsITPG(t *testing.T) {
-	tpSharedGroupConfigDIR = "tutpostgres"
-	for _, stest := range sTestsTPSharedGroups {
-		t.Run(tpSharedGroupConfigDIR, stest)
-	}
-}
-
-func TestTPSharedGroupsITInternal(t *testing.T) {
-	tpSharedGroupConfigDIR = "tutinternal"
 	for _, stest := range sTestsTPSharedGroups {
 		t.Run(tpSharedGroupConfigDIR, stest)
 	}

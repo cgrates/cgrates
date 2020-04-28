@@ -59,29 +59,19 @@ var sTestsTPTiming = []func(t *testing.T){
 }
 
 //Test start here
-func TestTPTimingITMySql(t *testing.T) {
-	tpTimingConfigDIR = "tutmysql"
-	for _, stest := range sTestsTPTiming {
-		t.Run(tpTimingConfigDIR, stest)
+func TestTPTimingIT(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		tpTimingConfigDIR = "tutinternal"
+	case utils.MetaMySQL:
+		tpTimingConfigDIR = "tutmysql"
+	case utils.MetaMongo:
+		tpTimingConfigDIR = "tutmongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
 	}
-}
-
-func TestTPTimingITMongo(t *testing.T) {
-	tpTimingConfigDIR = "tutmongo"
-	for _, stest := range sTestsTPTiming {
-		t.Run(tpTimingConfigDIR, stest)
-	}
-}
-
-func TestTPTimingITPG(t *testing.T) {
-	tpTimingConfigDIR = "tutpostgres"
-	for _, stest := range sTestsTPTiming {
-		t.Run(tpTimingConfigDIR, stest)
-	}
-}
-
-func TestTPTimingITInternal(t *testing.T) {
-	tpTimingConfigDIR = "tutinternal"
 	for _, stest := range sTestsTPTiming {
 		t.Run(tpTimingConfigDIR, stest)
 	}

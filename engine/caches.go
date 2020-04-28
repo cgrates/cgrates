@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"encoding/gob"
 	"fmt"
 	"sync"
 	"time"
@@ -33,6 +34,20 @@ var Cache *ltcache.TransCache
 
 func init() {
 	InitCache(nil)
+
+	gob.Register(new(EventCost))
+
+	// StatMetrics
+	gob.Register(new(StatASR))
+	gob.Register(new(StatACD))
+	gob.Register(new(StatTCD))
+	gob.Register(new(StatACC))
+	gob.Register(new(StatTCC))
+	gob.Register(new(StatPDD))
+	gob.Register(new(StatDDC))
+	gob.Register(new(StatSum))
+	gob.Register(new(StatAverage))
+	gob.Register(new(StatDistinct))
 }
 
 // InitCache will instantiate the cache with specific or default configuraiton

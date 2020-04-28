@@ -930,7 +930,7 @@ func testInternalSetAccount(t *testing.T) {
 func testInternalReplicateStats(t *testing.T) {
 	var reply string
 
-	statConfig = &StatQueueWithCache{
+	statConfig = &engine.StatQueueWithCache{
 		StatQueueProfile: &engine.StatQueueProfile{
 			Tenant:    "cgrates.org",
 			ID:        "StatsToReplicate",

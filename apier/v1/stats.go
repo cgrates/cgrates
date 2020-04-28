@@ -60,13 +60,8 @@ func (APIerSv1 *APIerSv1) GetStatQueueProfileIDs(args utils.TenantArgWithPaginat
 	return nil
 }
 
-type StatQueueWithCache struct {
-	*engine.StatQueueProfile
-	Cache *string
-}
-
 // SetStatQueueProfile alters/creates a StatQueueProfile
-func (APIerSv1 *APIerSv1) SetStatQueueProfile(arg *StatQueueWithCache, reply *string) error {
+func (APIerSv1 *APIerSv1) SetStatQueueProfile(arg *engine.StatQueueWithCache, reply *string) error {
 	if missing := utils.MissingStructFields(arg.StatQueueProfile, []string{"Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

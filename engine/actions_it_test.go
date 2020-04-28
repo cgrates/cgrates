@@ -694,19 +694,21 @@ func testActionsitSetSDestinations(t *testing.T) {
 	}
 
 	// set a StatQueueProfile and simulate process event
-	statConfig := &StatQueueProfile{
-		Tenant:      "cgrates.org",
-		ID:          "DistinctMetricProfile",
-		QueueLength: 10,
-		TTL:         time.Duration(10) * time.Second,
-		Metrics: []*MetricWithFilters{
-			&MetricWithFilters{
-				MetricID: utils.MetaDDC,
+	statConfig := &StatQueueWithCache{
+		StatQueueProfile: &StatQueueProfile{
+			Tenant:      "cgrates.org",
+			ID:          "DistinctMetricProfile",
+			QueueLength: 10,
+			TTL:         time.Duration(10) * time.Second,
+			Metrics: []*MetricWithFilters{
+				&MetricWithFilters{
+					MetricID: utils.MetaDDC,
+				},
 			},
+			ThresholdIDs: []string{utils.META_NONE},
+			Stored:       true,
+			Weight:       20,
 		},
-		ThresholdIDs: []string{utils.META_NONE},
-		Stored:       true,
-		Weight:       20,
 	}
 
 	if err := actsLclRpc.Call(utils.APIerSv1SetStatQueueProfile, statConfig, &reply); err != nil {

@@ -154,7 +154,12 @@ func testConfigSReloadConfigFromJSONSessionS(t *testing.T) {
 		"StoreSCosts":         false,
 		"AlterableFields":     map[string]interface{}{},
 	}
-
+	if *encoding == utils.MetaGOB {
+		var empty []interface{}
+		exp["ThreshSConns"] = empty
+		exp["StatSConns"] = empty
+		exp["ReplicationConns"] = empty
+	}
 	var rpl map[string]interface{}
 	if err := configRPC.Call(utils.ConfigSv1GetJSONSection, &config.StringWithArgDispatcher{
 		Section: config.SessionSJson,

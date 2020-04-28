@@ -63,29 +63,19 @@ var sTestsTPRatingProfiles = []func(t *testing.T){
 }
 
 //Test start here
-func TestTPRatingProfilesITMySql(t *testing.T) {
-	tpRatingProfileConfigDIR = "tutmysql"
-	for _, stest := range sTestsTPRatingProfiles {
-		t.Run(tpRatingProfileConfigDIR, stest)
+func TestTPRatingProfilesIT(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		tpRatingProfileConfigDIR = "tutinternal"
+	case utils.MetaMySQL:
+		tpRatingProfileConfigDIR = "tutmysql"
+	case utils.MetaMongo:
+		tpRatingProfileConfigDIR = "tutmongo"
+	case utils.MetaPostgres:
+		tpRatingProfileConfigDIR = "tutpostgres"
+	default:
+		t.Fatal("Unknown Database type")
 	}
-}
-
-func TestTPRatingProfilesITMongo(t *testing.T) {
-	tpRatingProfileConfigDIR = "tutmongo"
-	for _, stest := range sTestsTPRatingProfiles {
-		t.Run(tpRatingProfileConfigDIR, stest)
-	}
-}
-
-func TestTPRatingProfilesITPG(t *testing.T) {
-	tpRatingProfileConfigDIR = "tutpostgres"
-	for _, stest := range sTestsTPRatingProfiles {
-		t.Run(tpRatingProfileConfigDIR, stest)
-	}
-}
-
-func TestTPRatingProfilesITInternal(t *testing.T) {
-	tpRatingProfileConfigDIR = "tutinternal"
 	for _, stest := range sTestsTPRatingProfiles {
 		t.Run(tpRatingProfileConfigDIR, stest)
 	}
