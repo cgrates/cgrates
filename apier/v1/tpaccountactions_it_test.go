@@ -63,29 +63,19 @@ var sTestsTPAccActions = []func(t *testing.T){
 }
 
 //Test start here
-func TestTPAccActionsITMySql(t *testing.T) {
-	tpAccActionsConfigDIR = "tutmysql"
-	for _, stest := range sTestsTPAccActions {
-		t.Run(tpAccActionsConfigDIR, stest)
+func TestTPAccActionsIT(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		tpAccActionsConfigDIR = "tutinternal"
+	case utils.MetaMySQL:
+		tpAccActionsConfigDIR = "tutmysql"
+	case utils.MetaMongo:
+		tpAccActionsConfigDIR = "tutmongo"
+	case utils.MetaPostgres:
+		tpAccActionsConfigDIR = "tutpostgres"
+	default:
+		t.Fatal("Unknown Database type")
 	}
-}
-
-func TestTPAccActionsITMongo(t *testing.T) {
-	tpAccActionsConfigDIR = "tutmongo"
-	for _, stest := range sTestsTPAccActions {
-		t.Run(tpAccActionsConfigDIR, stest)
-	}
-}
-
-func TestTPAccActionsITPG(t *testing.T) {
-	tpAccActionsConfigDIR = "tutpostgres"
-	for _, stest := range sTestsTPAccActions {
-		t.Run(tpAccActionsConfigDIR, stest)
-	}
-}
-
-func TestTPAccActionsITInternal(t *testing.T) {
-	tpAccActionsConfigDIR = "tutinternal"
 	for _, stest := range sTestsTPAccActions {
 		t.Run(tpAccActionsConfigDIR, stest)
 	}

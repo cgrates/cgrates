@@ -36,7 +36,7 @@ var (
 	stsV1CfgPath string
 	stsV1Cfg     *config.CGRConfig
 	stsV1Rpc     *rpc.Client
-	statConfig   *StatQueueWithCache
+	statConfig   *engine.StatQueueWithCache
 	stsV1ConfDIR string //run tests for specific configuration
 
 	evs = []*utils.CGREvent{
@@ -150,7 +150,7 @@ func testV1STSGetStats(t *testing.T) {
 	var reply []string
 	expectedIDs := []string{"Stats1"}
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueIDs,
-		&utils.TenantWithArgDispatcher{TenantArg: &utils.TenantArg{"cgrates.org"}}, &reply); err != nil {
+		&utils.TenantWithArgDispatcher{TenantArg: &utils.TenantArg{Tenant: "cgrates.org"}}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedIDs, reply) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedIDs, reply)
@@ -362,7 +362,7 @@ func testV1STSSetStatQueueProfile(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	statConfig = &StatQueueWithCache{
+	statConfig = &engine.StatQueueWithCache{
 		StatQueueProfile: &engine.StatQueueProfile{
 			Tenant:    "cgrates.org",
 			ID:        "TEST_PROFILE1",
@@ -374,10 +374,10 @@ func testV1STSSetStatQueueProfile(t *testing.T) {
 			QueueLength: 10,
 			TTL:         time.Duration(10) * time.Second,
 			Metrics: []*engine.MetricWithFilters{
-				&engine.MetricWithFilters{
+				{
 					MetricID: utils.MetaACD,
 				},
-				&engine.MetricWithFilters{
+				{
 					MetricID: utils.MetaTCD,
 				},
 			},
@@ -471,7 +471,7 @@ func testV1STSRemoveStatQueueProfile(t *testing.T) {
 }
 
 func testV1STSProcessMetricsWithFilter(t *testing.T) {
-	statConfig = &StatQueueWithCache{
+	statConfig = &engine.StatQueueWithCache{
 		StatQueueProfile: &engine.StatQueueProfile{
 			Tenant:    "cgrates.org",
 			ID:        "CustomStatProfile",
@@ -482,15 +482,15 @@ func testV1STSProcessMetricsWithFilter(t *testing.T) {
 			QueueLength: 100,
 			TTL:         time.Duration(1) * time.Second,
 			Metrics: []*engine.MetricWithFilters{
-				&engine.MetricWithFilters{
+				{
 					MetricID:  utils.MetaACD,
 					FilterIDs: []string{"*rsr::~*req.Usage{*duration}(>10s)"},
 				},
-				&engine.MetricWithFilters{
+				{
 					MetricID:  utils.MetaTCD,
 					FilterIDs: []string{"*gt:~*req.Usage:5s"},
 				},
-				&engine.MetricWithFilters{
+				{
 					MetricID:  utils.ConcatenatedKey(utils.MetaSum, utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+"CustomValue"),
 					FilterIDs: []string{"*exists:~*req.CustomValue:", "*gte:~*req.CustomValue:10.0"},
 				},
@@ -590,7 +590,7 @@ func testV1STSProcessMetricsWithFilter(t *testing.T) {
 }
 
 func testV1STSProcessStaticMetrics(t *testing.T) {
-	statConfig = &StatQueueWithCache{
+	statConfig = &engine.StatQueueWithCache{
 		StatQueueProfile: &engine.StatQueueProfile{
 			Tenant:    "cgrates.org",
 			ID:        "StaticStatQueue",
@@ -601,10 +601,10 @@ func testV1STSProcessStaticMetrics(t *testing.T) {
 			QueueLength: 100,
 			TTL:         time.Duration(1) * time.Second,
 			Metrics: []*engine.MetricWithFilters{
-				&engine.MetricWithFilters{
+				{
 					MetricID: utils.ConcatenatedKey(utils.MetaSum, "1"),
 				},
-				&engine.MetricWithFilters{
+				{
 					MetricID: utils.ConcatenatedKey(utils.MetaAverage, "2"),
 				},
 			},
@@ -695,7 +695,7 @@ func testV1STSStatsPing(t *testing.T) {
 }
 
 func testV1STSProcessStatWithThreshold(t *testing.T) {
-	stTh := &StatQueueWithCache{
+	stTh := &engine.StatQueueWithCache{
 		StatQueueProfile: &engine.StatQueueProfile{
 			Tenant:    "cgrates.org",
 			ID:        "StatWithThreshold",
@@ -706,10 +706,10 @@ func testV1STSProcessStatWithThreshold(t *testing.T) {
 			QueueLength: 100,
 			TTL:         time.Duration(1) * time.Second,
 			Metrics: []*engine.MetricWithFilters{
-				&engine.MetricWithFilters{
+				{
 					MetricID: utils.MetaTCD,
 				},
-				&engine.MetricWithFilters{
+				{
 					MetricID: utils.ConcatenatedKey(utils.MetaSum, "2"),
 				},
 			},

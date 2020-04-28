@@ -22,31 +22,31 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// Creates a new SupplierProfile within a tariff plan
-func (self *APIerSv1) SetTPSupplierProfile(attrs *utils.TPSupplierProfile, reply *string) error {
+// SetTPSupplierProfile creates a new SupplierProfile within a tariff plan
+func (api *APIerSv1) SetTPSupplierProfile(attrs *utils.TPSupplierProfile, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.StorDb.SetTPSuppliers([]*utils.TPSupplierProfile{attrs}); err != nil {
+	if err := api.StorDb.SetTPSuppliers([]*utils.TPSupplierProfile{attrs}); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
 	return nil
 }
 
-// Queries specific SupplierProfile on tariff plan
-func (self *APIerSv1) GetTPSupplierProfile(attr *utils.TPTntID, reply *utils.TPSupplierProfile) error {
+// GetTPSupplierProfile queries specific SupplierProfile on tariff plan
+func (api *APIerSv1) GetTPSupplierProfile(attr *utils.TPTntID, reply *utils.TPSupplierProfile) error {
 	if missing := utils.MissingStructFields(attr, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if spp, err := self.StorDb.GetTPSuppliers(attr.TPid, attr.Tenant, attr.ID); err != nil {
+	spp, err := api.StorDb.GetTPSuppliers(attr.TPid, attr.Tenant, attr.ID)
+	if err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}
 		return err
-	} else {
-		*reply = *spp[0]
 	}
+	*reply = *spp[0]
 	return nil
 }
 
@@ -55,33 +55,32 @@ type AttrGetTPSupplierProfileIDs struct {
 	utils.PaginatorWithSearch
 }
 
-// Queries SupplierProfile identities on specific tariff plan.
-func (self *APIerSv1) GetTPSupplierProfileIDs(attrs *AttrGetTPSupplierProfileIDs, reply *[]string) error {
+// GetTPSupplierProfileIDs queries SupplierProfile identities on specific tariff plan.
+func (api *APIerSv1) GetTPSupplierProfileIDs(attrs *AttrGetTPSupplierProfileIDs, reply *[]string) error {
 	if missing := utils.MissingStructFields(attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPSuppliers,
-		utils.TPDistinctIds{"id"}, nil, &attrs.PaginatorWithSearch); err != nil {
+	ids, err := api.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPSuppliers,
+		utils.TPDistinctIds{"tenant", "id"}, nil, &attrs.PaginatorWithSearch)
+	if err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}
 		return err
-	} else {
-		*reply = ids
 	}
+	*reply = ids
 	return nil
 }
 
-// Removes specific SupplierProfile on Tariff plan
-func (self *APIerSv1) RemoveTPSupplierProfile(attrs *utils.TPTntID, reply *string) error {
+// RemoveTPSupplierProfile removes specific SupplierProfile on Tariff plan
+func (api *APIerSv1) RemoveTPSupplierProfile(attrs *utils.TPTntID, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.StorDb.RemTpData(utils.TBLTPSuppliers, attrs.TPid,
+	if err := api.StorDb.RemTpData(utils.TBLTPSuppliers, attrs.TPid,
 		map[string]string{"tenant": attrs.Tenant, "id": attrs.ID}); err != nil {
 		return utils.NewErrServerError(err)
-	} else {
-		*reply = utils.OK
 	}
+	*reply = utils.OK
 	return nil
 }

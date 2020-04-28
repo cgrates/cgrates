@@ -60,29 +60,19 @@ var sTestsTPActionTriggers = []func(t *testing.T){
 }
 
 //Test start here
-func TestTPActionTriggersITMySql(t *testing.T) {
-	tpActionTriggerConfigDIR = "tutmysql"
-	for _, stest := range sTestsTPActionTriggers {
-		t.Run(tpActionTriggerConfigDIR, stest)
+func TestTPActionTriggersIT(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		tpActionTriggerConfigDIR = "tutinternal"
+	case utils.MetaMySQL:
+		tpActionTriggerConfigDIR = "tutmysql"
+	case utils.MetaMongo:
+		tpActionTriggerConfigDIR = "tutmongo"
+	case utils.MetaPostgres:
+		tpActionTriggerConfigDIR = "tutpostgres"
+	default:
+		t.Fatal("Unknown Database type")
 	}
-}
-
-func TestTPActionTriggersITMongo(t *testing.T) {
-	tpActionTriggerConfigDIR = "tutmongo"
-	for _, stest := range sTestsTPActionTriggers {
-		t.Run(tpActionTriggerConfigDIR, stest)
-	}
-}
-
-func TestTPActionTriggersITPG(t *testing.T) {
-	tpActionTriggerConfigDIR = "tutpostgres"
-	for _, stest := range sTestsTPActionTriggers {
-		t.Run(tpActionTriggerConfigDIR, stest)
-	}
-}
-
-func TestTPActionTriggersITInternal(t *testing.T) {
-	tpActionTriggerConfigDIR = "tutinternal"
 	for _, stest := range sTestsTPActionTriggers {
 		t.Run(tpActionTriggerConfigDIR, stest)
 	}

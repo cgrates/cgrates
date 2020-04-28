@@ -61,22 +61,19 @@ var sTestsTPAlsPrf = []func(t *testing.T){
 }
 
 //Test start here
-func TestTPAlsPrfITMySql(t *testing.T) {
-	tpAlsPrfConfigDIR = "tutmysql"
-	for _, stest := range sTestsTPAlsPrf {
-		t.Run(tpAlsPrfConfigDIR, stest)
+func TestTPAlsPrfIT(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		tpAlsPrfConfigDIR = "tutinternal"
+	case utils.MetaMySQL:
+		tpAlsPrfConfigDIR = "tutmysql"
+	case utils.MetaMongo:
+		tpAlsPrfConfigDIR = "tutmongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
 	}
-}
-
-func TestTPAlsPrfITMongo(t *testing.T) {
-	tpAlsPrfConfigDIR = "tutmongo"
-	for _, stest := range sTestsTPAlsPrf {
-		t.Run(tpAlsPrfConfigDIR, stest)
-	}
-}
-
-func TestTPAlsPrfITInternal(t *testing.T) {
-	tpAlsPrfConfigDIR = "tutinternal"
 	for _, stest := range sTestsTPAlsPrf {
 		t.Run(tpAlsPrfConfigDIR, stest)
 	}
@@ -168,7 +165,7 @@ func testTPAlsPrfGetTPAlsPrfAfterSet(t *testing.T) {
 
 func testTPAlsPrfGetTPAlsPrfIDs(t *testing.T) {
 	var result []string
-	expectedTPID := []string{"Attr1"}
+	expectedTPID := []string{"cgrates.org:Attr1"}
 	if err := tpAlsPrfRPC.Call(utils.APIerSv1GetTPAttributeProfileIds,
 		&AttrGetTPAttributeProfileIds{TPid: "TP1"}, &result); err != nil {
 		t.Error(err)

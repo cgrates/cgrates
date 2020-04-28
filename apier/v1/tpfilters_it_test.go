@@ -62,28 +62,18 @@ var sTestsTPFilters = []func(t *testing.T){
 
 //Test start here
 func TestTPFilterITMySql(t *testing.T) {
-	tpFilterConfigDIR = "tutmysql"
-	for _, stest := range sTestsTPFilters {
-		t.Run(tpFilterConfigDIR, stest)
+	switch *dbType {
+	case utils.MetaInternal:
+		tpFilterConfigDIR = "tutinternal"
+	case utils.MetaMySQL:
+		tpFilterConfigDIR = "tutmysql"
+	case utils.MetaMongo:
+		tpFilterConfigDIR = "tutmongo"
+	case utils.MetaPostgres:
+		tpFilterConfigDIR = "tutpostgres"
+	default:
+		t.Fatal("Unknown Database type")
 	}
-}
-
-func TestTPFilterITMongo(t *testing.T) {
-	tpFilterConfigDIR = "tutmongo"
-	for _, stest := range sTestsTPFilters {
-		t.Run(tpFilterConfigDIR, stest)
-	}
-}
-
-func TestTPFilterITPG(t *testing.T) {
-	tpFilterConfigDIR = "tutpostgres"
-	for _, stest := range sTestsTPFilters {
-		t.Run(tpFilterConfigDIR, stest)
-	}
-}
-
-func TestTPFilterITInternal(t *testing.T) {
-	tpFilterConfigDIR = "tutinternal"
 	for _, stest := range sTestsTPFilters {
 		t.Run(tpFilterConfigDIR, stest)
 	}
@@ -175,7 +165,7 @@ func testTPFilterGetTPFilterAfterSet(t *testing.T) {
 
 func testTPFilterGetFilterIds(t *testing.T) {
 	var result []string
-	expectedTPID := []string{"Filter"}
+	expectedTPID := []string{"cgrates.org:Filter"}
 	if err := tpFilterRPC.Call(utils.APIerSv1GetTPFilterProfileIds,
 		&AttrGetTPFilterProfileIds{TPid: "TP1"}, &result); err != nil {
 		t.Error(err)

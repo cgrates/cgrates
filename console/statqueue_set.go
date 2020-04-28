@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -28,7 +27,7 @@ func init() {
 	c := &CmdSetStatQueue{
 		name:      "statqueue_set",
 		rpcMethod: utils.APIerSv1SetStatQueueProfile,
-		rpcParams: &v1.StatQueueWithCache{},
+		rpcParams: &engine.StatQueueWithCache{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -38,7 +37,7 @@ func init() {
 type CmdSetStatQueue struct {
 	name      string
 	rpcMethod string
-	rpcParams *v1.StatQueueWithCache
+	rpcParams *engine.StatQueueWithCache
 	*CommandExecuter
 }
 
@@ -52,7 +51,7 @@ func (self *CmdSetStatQueue) RpcMethod() string {
 
 func (self *CmdSetStatQueue) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &v1.StatQueueWithCache{StatQueueProfile: new(engine.StatQueueProfile)}
+		self.rpcParams = &engine.StatQueueWithCache{StatQueueProfile: new(engine.StatQueueProfile)}
 	}
 	return self.rpcParams
 }

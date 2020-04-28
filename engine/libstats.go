@@ -48,6 +48,11 @@ func (sqp *StatQueueProfile) TenantID() string {
 	return utils.ConcatenatedKey(sqp.Tenant, sqp.ID)
 }
 
+type StatQueueWithCache struct {
+	*StatQueueProfile
+	Cache *string
+}
+
 type MetricWithFilters struct {
 	FilterIDs []string
 	MetricID  string
@@ -128,18 +133,30 @@ type SQItem struct {
 
 // StatQueue represents an individual stats instance
 type StatQueue struct {
-	sync.RWMutex // protect the elements from within
-	Tenant       string
-	ID           string
-	SQItems      []SQItem
-	SQMetrics    map[string]StatMetric
-	MinItems     int
-	sqPrfl       *StatQueueProfile
-	dirty        *bool          // needs save
-	ttl          *time.Duration // timeToLeave, picked on each init
+	lk        sync.RWMutex // protect the elements from within
+	Tenant    string
+	ID        string
+	SQItems   []SQItem
+	SQMetrics map[string]StatMetric
+	MinItems  int
+	sqPrfl    *StatQueueProfile
+	dirty     *bool          // needs save
+	ttl       *time.Duration // timeToLeave, picked on each init
 }
 
-// SqID will compose the unique identifier for the StatQueue out of Tenant and ID
+// RLock only to implement sync.RWMutex methods
+func (sq *StatQueue) RLock() { sq.lk.RLock() }
+
+// RUnlock only to implement sync.RWMutex methods
+func (sq *StatQueue) RUnlock() { sq.lk.RUnlock() }
+
+// Lock only to implement sync.RWMutex methods
+func (sq *StatQueue) Lock() { sq.lk.Lock() }
+
+// Unlock only to implement sync.RWMutex methods
+func (sq *StatQueue) Unlock() { sq.lk.Unlock() }
+
+// TenantID will compose the unique identifier for the StatQueue out of Tenant and ID
 func (sq *StatQueue) TenantID() string {
 	return utils.ConcatenatedKey(sq.Tenant, sq.ID)
 }
