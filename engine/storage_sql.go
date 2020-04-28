@@ -104,7 +104,7 @@ func (self *SQLStorage) IsDBEmpty() (resp bool, err error) {
 		utils.TBLTPSharedGroups, utils.TBLTPActions, utils.TBLTPActionTriggers,
 		utils.TBLTPAccountActions, utils.TBLTPResources, utils.TBLTPStats, utils.TBLTPThresholds,
 		utils.TBLTPFilters, utils.SessionCostsTBL, utils.CDRsTBL, utils.TBLTPActionPlans,
-		utils.TBLVersions, utils.TBLTPSuppliers, utils.TBLTPAttributes, utils.TBLTPChargers,
+		utils.TBLVersions, utils.TBLTPRoutes, utils.TBLTPAttributes, utils.TBLTPChargers,
 		utils.TBLTPDispatchers, utils.TBLTPDispatcherHosts,
 	}
 	for _, tbl := range tbls {
@@ -140,7 +140,7 @@ func (self *SQLStorage) GetTpIds(colName string) ([]string, error) {
 			utils.TBLTPThresholds,
 			utils.TBLTPFilters,
 			utils.TBLTPActionPlans,
-			utils.TBLTPSuppliers,
+			utils.TBLTPRoutes,
 			utils.TBLTPAttributes,
 			utils.TBLTPChargers,
 			utils.TBLTPDispatchers,
@@ -238,7 +238,7 @@ func (self *SQLStorage) RemTpData(table, tpid string, args map[string]string) er
 			utils.TBLTPSharedGroups, utils.TBLTPActions, utils.TBLTPActionPlans,
 			utils.TBLTPActionTriggers, utils.TBLTPAccountActions,
 			utils.TBLTPResources, utils.TBLTPStats, utils.TBLTPFilters,
-			utils.TBLTPSuppliers, utils.TBLTPAttributes,
+			utils.TBLTPRoutes, utils.TBLTPAttributes,
 			utils.TBLTPChargers, utils.TBLTPDispatchers, utils.TBLTPDispatcherHosts} {
 			if err := tx.Table(tblName).Where("tpid = ?", tpid).Delete(nil).Error; err != nil {
 				tx.Rollback()
@@ -618,18 +618,18 @@ func (self *SQLStorage) SetTPFilters(ths []*utils.TPFilterProfile) error {
 	return nil
 }
 
-func (self *SQLStorage) SetTPSuppliers(tpSPs []*utils.TPSupplierProfile) error {
-	if len(tpSPs) == 0 {
+func (self *SQLStorage) SetTPRoutes(tpRoutes []*utils.TPRouteProfile) error {
+	if len(tpRoutes) == 0 {
 		return nil
 	}
 	tx := self.db.Begin()
-	for _, stq := range tpSPs {
+	for _, tpRoute := range tpRoutes {
 		// Remove previous
-		if err := tx.Where(&TpSupplier{Tpid: stq.TPid, ID: stq.ID}).Delete(TpSupplier{}).Error; err != nil {
+		if err := tx.Where(&TpRoute{Tpid: tpRoute.TPid, ID: tpRoute.ID}).Delete(TpRoute{}).Error; err != nil {
 			tx.Rollback()
 			return err
 		}
-		for _, mst := range APItoModelTPSuppliers(stq) {
+		for _, mst := range APItoModelTPRoutes(tpRoute) {
 			if err := tx.Save(&mst).Error; err != nil {
 				tx.Rollback()
 				return err
@@ -1478,8 +1478,8 @@ func (self *SQLStorage) GetTPFilters(tpid, tenant, id string) ([]*utils.TPFilter
 	return aths, nil
 }
 
-func (self *SQLStorage) GetTPSuppliers(tpid, tenant, id string) ([]*utils.TPSupplierProfile, error) {
-	var sps TpSuppliers
+func (self *SQLStorage) GetTPRoutes(tpid, tenant, id string) ([]*utils.TPRouteProfile, error) {
+	var tpRoutes TPRoutes
 	q := self.db.Where("tpid = ?", tpid)
 	if len(id) != 0 {
 		q = q.Where("id = ?", id)
@@ -1487,14 +1487,14 @@ func (self *SQLStorage) GetTPSuppliers(tpid, tenant, id string) ([]*utils.TPSupp
 	if len(tenant) != 0 {
 		q = q.Where("tenant = ?", tenant)
 	}
-	if err := q.Find(&sps).Error; err != nil {
+	if err := q.Find(&tpRoutes).Error; err != nil {
 		return nil, err
 	}
-	arls := sps.AsTPSuppliers()
-	if len(arls) == 0 {
-		return arls, utils.ErrNotFound
+	aTpRoutes := tpRoutes.AsTPRouteProfile()
+	if len(aTpRoutes) == 0 {
+		return aTpRoutes, utils.ErrNotFound
 	}
-	return arls, nil
+	return aTpRoutes, nil
 }
 
 func (self *SQLStorage) GetTPAttributes(tpid, tenant, id string) ([]*utils.TPAttributeProfile, error) {

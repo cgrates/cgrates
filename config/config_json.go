@@ -45,7 +45,7 @@ const (
 	RESOURCES_JSON     = "resources"
 	STATS_JSON         = "stats"
 	THRESHOLDS_JSON    = "thresholds"
-	SupplierSJson      = "suppliers"
+	RouteSJson         = "routes"
 	LoaderJson         = "loaders"
 	MAILER_JSN         = "mailer"
 	SURETAX_JSON       = "suretax"
@@ -65,7 +65,7 @@ var (
 	sortedCfgSections = []string{GENERAL_JSN, RPCConnsJsonName, DATADB_JSN, STORDB_JSN, LISTEN_JSN, TlsCfgJson, HTTP_JSN, SCHEDULER_JSN, CACHE_JSN, FilterSjsn, RALS_JSN,
 		CDRS_JSN, CDRE_JSN, ERsJson, SessionSJson, AsteriskAgentJSN, FreeSWITCHAgentJSN, KamailioAgentJSN,
 		DA_JSN, RA_JSN, HttpAgentJson, DNSAgentJson, ATTRIBUTE_JSN, ChargerSCfgJson, RESOURCES_JSON, STATS_JSON, THRESHOLDS_JSON,
-		SupplierSJson, LoaderJson, MAILER_JSN, SURETAX_JSON, CgrLoaderCfgJson, CgrMigratorCfgJson, DispatcherSJson, AnalyzerCfgJson, ApierS}
+		RouteSJson, LoaderJson, MAILER_JSN, SURETAX_JSON, CgrLoaderCfgJson, CgrMigratorCfgJson, DispatcherSJson, AnalyzerCfgJson, ApierS}
 )
 
 // Loads the json config out of io.Reader, eg other sources than file, maybe over http
@@ -374,12 +374,12 @@ func (self CgrJsonCfg) ThresholdSJsonCfg() (*ThresholdSJsonCfg, error) {
 	return cfg, nil
 }
 
-func (self CgrJsonCfg) SupplierSJsonCfg() (*SupplierSJsonCfg, error) {
-	rawCfg, hasKey := self[SupplierSJson]
+func (self CgrJsonCfg) RouteSJsonCfg() (*RouteSJsonCfg, error) {
+	rawCfg, hasKey := self[RouteSJson]
 	if !hasKey {
 		return nil, nil
 	}
-	cfg := new(SupplierSJsonCfg)
+	cfg := new(RouteSJsonCfg)
 	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
 		return nil, err
 	}

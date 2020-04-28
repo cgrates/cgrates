@@ -24,35 +24,35 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewHighestCostSorter(spS *SupplierService) *HightCostSorter {
-	return &HightCostSorter{spS: spS,
+func NewHighestCostSorter(rS *RouteService) *HightCostSorter {
+	return &HightCostSorter{rS: rS,
 		sorting: utils.MetaHC}
 }
 
-// HightCostSorter sorts suppliers based on their cost
+// HightCostSorter sorts routes based on their cost
 type HightCostSorter struct {
 	sorting string
-	spS     *SupplierService
+	rS      *RouteService
 }
 
-func (hcs *HightCostSorter) SortSuppliers(prflID string, suppls []*Supplier,
-	ev *utils.CGREvent, extraOpts *optsGetSuppliers) (sortedSuppls *SortedSuppliers, err error) {
-	sortedSuppls = &SortedSuppliers{ProfileID: prflID,
-		Sorting:         hcs.sorting,
-		SortedSuppliers: make([]*SortedSupplier, 0)}
-	for _, s := range suppls {
-		if len(s.RatingPlanIDs) == 0 {
+func (hcs *HightCostSorter) SortRoutes(prflID string, routes []*Route,
+	ev *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
+	sortedRoutes = &SortedRoutes{ProfileID: prflID,
+		Sorting:      hcs.sorting,
+		SortedRoutes: make([]*SortedRoute, 0)}
+	for _, route := range routes {
+		if len(route.RatingPlanIDs) == 0 {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> supplier: <%s> - empty RatingPlanIDs",
-					utils.SupplierS, s.ID))
+					utils.RouteS, route.ID))
 			return nil, utils.NewErrMandatoryIeMissing("RatingPlanIDs")
 		}
-		if srtSpl, pass, err := hcs.spS.populateSortingData(ev, s, extraOpts); err != nil {
+		if srtSpl, pass, err := hcs.rS.populateSortingData(ev, route, extraOpts); err != nil {
 			return nil, err
 		} else if pass && srtSpl != nil {
-			sortedSuppls.SortedSuppliers = append(sortedSuppls.SortedSuppliers, srtSpl)
+			sortedRoutes.SortedRoutes = append(sortedRoutes.SortedRoutes, srtSpl)
 		}
 	}
-	sortedSuppls.SortHighestCost()
+	sortedRoutes.SortHighestCost()
 	return
 }

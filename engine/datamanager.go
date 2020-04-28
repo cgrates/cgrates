@@ -31,7 +31,7 @@ var (
 		utils.ResourceFilterIndexes:   true,
 		utils.StatFilterIndexes:       true,
 		utils.ThresholdFilterIndexes:  true,
-		utils.SupplierFilterIndexes:   true,
+		utils.RouteFilterIndexes:      true,
 		utils.ChargerFilterIndexes:    true,
 		utils.DispatcherFilterIndexes: true,
 	}
@@ -49,7 +49,7 @@ var (
 		utils.ThresholdPrefix:            true,
 		utils.ThresholdProfilePrefix:     true,
 		utils.FilterPrefix:               true,
-		utils.SupplierProfilePrefix:      true,
+		utils.RouteProfilePrefix:         true,
 		utils.AttributeProfilePrefix:     true,
 		utils.ChargerProfilePrefix:       true,
 		utils.DispatcherProfilePrefix:    true,
@@ -73,7 +73,7 @@ var (
 		utils.ThresholdPrefix:            true,
 		utils.ThresholdProfilePrefix:     true,
 		utils.FilterPrefix:               true,
-		utils.SupplierProfilePrefix:      true,
+		utils.RouteProfilePrefix:         true,
 		utils.AttributeProfilePrefix:     true,
 		utils.ChargerProfilePrefix:       true,
 		utils.DispatcherProfilePrefix:    true,
@@ -82,7 +82,7 @@ var (
 		utils.ResourceFilterIndexes:      true,
 		utils.StatFilterIndexes:          true,
 		utils.ThresholdFilterIndexes:     true,
-		utils.SupplierFilterIndexes:      true,
+		utils.RouteFilterIndexes:         true,
 		utils.ChargerFilterIndexes:       true,
 		utils.DispatcherFilterIndexes:    true,
 	}
@@ -118,7 +118,7 @@ func (dm *DataManager) DataDB() DataDB {
 
 func (dm *DataManager) LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs,
 	aaPlIDs, atrgIDs, sgIDs, rpIDs, resIDs, stqIDs, stqpIDs, thIDs, thpIDs, fltrIDs,
-	splPrflIDs, alsPrfIDs, cppIDs, dppIDs, dphIDs []string) (err error) {
+	rPrflIDs, alsPrfIDs, cppIDs, dppIDs, dphIDs []string) (err error) {
 	if dm == nil {
 		err = utils.ErrNoDatabaseConn
 		return
@@ -154,7 +154,7 @@ func (dm *DataManager) LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs,
 			utils.ThresholdPrefix:            thIDs,
 			utils.ThresholdProfilePrefix:     thpIDs,
 			utils.FilterPrefix:               fltrIDs,
-			utils.SupplierProfilePrefix:      splPrflIDs,
+			utils.RouteProfilePrefix:         rPrflIDs,
 			utils.AttributeProfilePrefix:     alsPrfIDs,
 			utils.ChargerProfilePrefix:       cppIDs,
 			utils.DispatcherProfilePrefix:    dppIDs,
@@ -279,9 +279,9 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 		case utils.FilterPrefix:
 			tntID := utils.NewTenantID(dataID)
 			_, err = dm.GetFilter(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
-		case utils.SupplierProfilePrefix:
+		case utils.RouteProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
-			_, err = dm.GetSupplierProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
+			_, err = dm.GetRouteProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.AttributeProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
 			_, err = dm.GetAttributeProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
@@ -302,8 +302,8 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 			err = dm.MatchFilterIndexFromKey(utils.CacheStatFilterIndexes, dataID)
 		case utils.ThresholdFilterIndexes:
 			err = dm.MatchFilterIndexFromKey(utils.CacheThresholdFilterIndexes, dataID)
-		case utils.SupplierFilterIndexes:
-			err = dm.MatchFilterIndexFromKey(utils.CacheSupplierFilterIndexes, dataID)
+		case utils.RouteFilterIndexes:
+			err = dm.MatchFilterIndexFromKey(utils.CacheRouteFilterIndexes, dataID)
 		case utils.ChargerFilterIndexes:
 			err = dm.MatchFilterIndexFromKey(utils.CacheChargerFilterIndexes, dataID)
 		case utils.DispatcherFilterIndexes:
@@ -2269,38 +2269,38 @@ func (dm *DataManager) MatchFilterIndex(cacheID, itemIDPrefix,
 	return
 }
 
-func (dm *DataManager) GetSupplierProfile(tenant, id string, cacheRead, cacheWrite bool,
-	transactionID string) (supp *SupplierProfile, err error) {
+func (dm *DataManager) GetRouteProfile(tenant, id string, cacheRead, cacheWrite bool,
+	transactionID string) (rpp *RouteProfile, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
 	if cacheRead {
-		if x, ok := Cache.Get(utils.CacheSupplierProfiles, tntID); ok {
+		if x, ok := Cache.Get(utils.CacheRouteProfiles, tntID); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
 			}
-			return x.(*SupplierProfile), nil
+			return x.(*RouteProfile), nil
 		}
 	}
 	if dm == nil {
 		err = utils.ErrNoDatabaseConn
 		return
 	}
-	supp, err = dm.dataDB.GetSupplierProfileDrv(tenant, id)
+	rpp, err = dm.dataDB.GetRouteProfileDrv(tenant, id)
 	if err != nil {
-		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaSupplierProfiles]; err == utils.ErrNotFound && itm.Remote {
+		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRouteProfiles]; err == utils.ErrNotFound && itm.Remote {
 			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil, utils.ReplicatorSv1GetSupplierProfile,
 				&utils.TenantIDWithArgDispatcher{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 					ArgDispatcher: &utils.ArgDispatcher{
 						APIKey:  utils.StringPointer(itm.APIKey),
 						RouteID: utils.StringPointer(itm.RouteID),
-					}}, &supp); err == nil {
-				err = dm.dataDB.SetSupplierProfileDrv(supp)
+					}}, &rpp); err == nil {
+				err = dm.dataDB.SetRouteProfileDrv(rpp)
 			}
 		}
 		if err != nil {
 			err = utils.CastRPCErr(err)
 			if err == utils.ErrNotFound && cacheWrite {
-				Cache.Set(utils.CacheSupplierProfiles, tntID, nil, nil,
+				Cache.Set(utils.CacheRouteProfiles, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID)
 
 			}
@@ -2308,54 +2308,54 @@ func (dm *DataManager) GetSupplierProfile(tenant, id string, cacheRead, cacheWri
 		}
 	}
 	// populate cache will compute specific config parameters
-	if err = supp.Compile(); err != nil {
+	if err = rpp.Compile(); err != nil {
 		return nil, err
 	}
 	if cacheWrite {
-		Cache.Set(utils.CacheSupplierProfiles, tntID, supp, nil,
+		Cache.Set(utils.CacheRouteProfiles, tntID, rpp, nil,
 			cacheCommit(transactionID), transactionID)
 	}
 	return
 }
 
-func (dm *DataManager) SetSupplierProfile(supp *SupplierProfile, withIndex bool) (err error) {
+func (dm *DataManager) SetRouteProfile(rpp *RouteProfile, withIndex bool) (err error) {
 	if dm == nil {
 		err = utils.ErrNoDatabaseConn
 		return
 	}
-	oldSup, err := dm.GetSupplierProfile(supp.Tenant, supp.ID, true, false, utils.NonTransactional)
+	oldRpp, err := dm.GetRouteProfile(rpp.Tenant, rpp.ID, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
-	if err = dm.DataDB().SetSupplierProfileDrv(supp); err != nil {
+	if err = dm.DataDB().SetRouteProfileDrv(rpp); err != nil {
 		return err
 	}
 	if withIndex {
-		if oldSup != nil {
+		if oldRpp != nil {
 			var needsRemove bool
-			for _, fltrID := range oldSup.FilterIDs {
-				if !utils.IsSliceMember(supp.FilterIDs, fltrID) {
+			for _, fltrID := range oldRpp.FilterIDs {
+				if !utils.IsSliceMember(rpp.FilterIDs, fltrID) {
 					needsRemove = true
 				}
 			}
 			if needsRemove {
-				if err = NewFilterIndexer(dm, utils.SupplierProfilePrefix,
-					supp.Tenant).RemoveItemFromIndex(supp.Tenant, supp.ID, oldSup.FilterIDs); err != nil {
+				if err = NewFilterIndexer(dm, utils.RouteProfilePrefix,
+					rpp.Tenant).RemoveItemFromIndex(rpp.Tenant, rpp.ID, oldRpp.FilterIDs); err != nil {
 					return
 				}
 			}
 		}
-		if err = createAndIndex(utils.SupplierProfilePrefix, supp.Tenant,
-			utils.EmptyString, supp.ID, supp.FilterIDs, dm); err != nil {
+		if err = createAndIndex(utils.RouteProfilePrefix, rpp.Tenant,
+			utils.EmptyString, rpp.ID, rpp.FilterIDs, dm); err != nil {
 			return
 		}
 	}
-	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaSupplierProfiles]; itm.Replicate {
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRouteProfiles]; itm.Replicate {
 		var reply string
 		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
 			utils.ReplicatorSv1SetSupplierProfile,
-			&SupplierProfileWithArgDispatcher{
-				SupplierProfile: supp,
+			&RouteProfileWithArgDispatcher{
+				RouteProfile: rpp,
 				ArgDispatcher: &utils.ArgDispatcher{
 					APIKey:  utils.StringPointer(itm.APIKey),
 					RouteID: utils.StringPointer(itm.RouteID),
@@ -2367,28 +2367,28 @@ func (dm *DataManager) SetSupplierProfile(supp *SupplierProfile, withIndex bool)
 	return
 }
 
-func (dm *DataManager) RemoveSupplierProfile(tenant, id, transactionID string, withIndex bool) (err error) {
+func (dm *DataManager) RemoveRouteProfile(tenant, id, transactionID string, withIndex bool) (err error) {
 	if dm == nil {
 		err = utils.ErrNoDatabaseConn
 		return
 	}
-	oldSupp, err := dm.GetSupplierProfile(tenant, id, true, false, utils.NonTransactional)
+	oldRpp, err := dm.GetRouteProfile(tenant, id, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
-	if err = dm.DataDB().RemoveSupplierProfileDrv(tenant, id); err != nil {
+	if err = dm.DataDB().RemoveRouteProfileDrv(tenant, id); err != nil {
 		return
 	}
-	if oldSupp == nil {
+	if oldRpp == nil {
 		return utils.ErrNotFound
 	}
 	if withIndex {
-		if err = NewFilterIndexer(dm, utils.SupplierProfilePrefix,
-			tenant).RemoveItemFromIndex(tenant, id, oldSupp.FilterIDs); err != nil {
+		if err = NewFilterIndexer(dm, utils.RouteProfilePrefix,
+			tenant).RemoveItemFromIndex(tenant, id, oldRpp.FilterIDs); err != nil {
 			return
 		}
 	}
-	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaSupplierProfiles]; itm.Replicate {
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRouteProfiles]; itm.Replicate {
 		var reply string
 		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
 			utils.ReplicatorSv1RemoveSupplierProfile,

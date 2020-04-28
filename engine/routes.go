@@ -83,7 +83,7 @@ func (rp *RouteProfile) compileCacheParameters() error {
 			route.cacheRoute = make(map[string]interface{})
 			if ratioSupplier, has := ratioMap[route.ID]; !has { // in case that ratio isn't defined for specific suppliers check for default
 				if ratioDefault, has := ratioMap[utils.MetaDefault]; !has { // in case that *default ratio isn't defined take it from config
-					route.cacheRoute[utils.MetaRatio] = config.CgrConfig().SupplierSCfg().DefaultRatio
+					route.cacheRoute[utils.MetaRatio] = config.CgrConfig().RouteCfg().DefaultRatio
 				} else {
 					route.cacheRoute[utils.MetaRatio] = ratioDefault
 				}
@@ -133,7 +133,7 @@ type RouteService struct {
 	dm      *DataManager
 	filterS *FilterS
 	cgrcfg  *config.CGRConfig
-	sorter  SupplierSortDispatcher
+	sorter  RouteSortDispatcher
 	connMgr *ConnManager
 }
 
@@ -152,64 +152,64 @@ func (rpS *RouteService) Shutdown() error {
 	return nil
 }
 
-// matchingSupplierProfilesForEvent returns ordered list of matching resources which are active by the time of the call
-func (spS *SupplierService) matchingSupplierProfilesForEvent(ev *utils.CGREvent, singleResult bool) (matchingSLP []*SupplierProfile, err error) {
-	sPrflIDs, err := MatchingItemIDsForEvent(ev.Event,
-		spS.cgrcfg.SupplierSCfg().StringIndexedFields,
-		spS.cgrcfg.SupplierSCfg().PrefixIndexedFields,
-		spS.dm, utils.CacheSupplierFilterIndexes, ev.Tenant,
-		spS.cgrcfg.SupplierSCfg().IndexedSelects,
-		spS.cgrcfg.SupplierSCfg().NestedFields,
+// matchingRouteProfilesForEvent returns ordered list of matching resources which are active by the time of the call
+func (rpS *RouteService) matchingRouteProfilesForEvent(ev *utils.CGREvent, singleResult bool) (matchingRPrf []*RouteProfile, err error) {
+	rPrfIDs, err := MatchingItemIDsForEvent(ev.Event,
+		rpS.cgrcfg.RouteCfg().StringIndexedFields,
+		rpS.cgrcfg.RouteCfg().PrefixIndexedFields,
+		rpS.dm, utils.CacheRouteFilterIndexes, ev.Tenant,
+		rpS.cgrcfg.RouteCfg().IndexedSelects,
+		rpS.cgrcfg.RouteCfg().NestedFields,
 	)
 	if err != nil {
 		return nil, err
 	}
 	if singleResult {
-		matchingSLP = make([]*SupplierProfile, 1)
+		matchingRPrf = make([]*RouteProfile, 1)
 	}
 	evNm := config.NewNavigableMap(map[string]interface{}{utils.MetaReq: ev.Event})
-	for lpID := range sPrflIDs {
-		splPrfl, err := spS.dm.GetSupplierProfile(ev.Tenant, lpID, true, true, utils.NonTransactional)
+	for lpID := range rPrfIDs {
+		rPrf, err := rpS.dm.GetRouteProfile(ev.Tenant, lpID, true, true, utils.NonTransactional)
 		if err != nil {
 			if err == utils.ErrNotFound {
 				continue
 			}
 			return nil, err
 		}
-		if splPrfl.ActivationInterval != nil && ev.Time != nil &&
-			!splPrfl.ActivationInterval.IsActiveAtTime(*ev.Time) { // not active
+		if rPrf.ActivationInterval != nil && ev.Time != nil &&
+			!rPrf.ActivationInterval.IsActiveAtTime(*ev.Time) { // not active
 			continue
 		}
-		if pass, err := spS.filterS.Pass(ev.Tenant, splPrfl.FilterIDs,
+		if pass, err := rpS.filterS.Pass(ev.Tenant, rPrf.FilterIDs,
 			evNm); err != nil {
 			return nil, err
 		} else if !pass {
 			continue
 		}
 		if singleResult {
-			if matchingSLP[0] == nil || matchingSLP[0].Weight < splPrfl.Weight {
-				matchingSLP[0] = splPrfl
+			if matchingRPrf[0] == nil || matchingRPrf[0].Weight < rPrf.Weight {
+				matchingRPrf[0] = rPrf
 			}
 		} else {
-			matchingSLP = append(matchingSLP, splPrfl)
+			matchingRPrf = append(matchingRPrf, rPrf)
 		}
 	}
 	if singleResult {
-		if matchingSLP[0] == nil {
+		if matchingRPrf[0] == nil {
 			return nil, utils.ErrNotFound
 		}
 	} else {
-		if len(matchingSLP) == 0 {
+		if len(matchingRPrf) == 0 {
 			return nil, utils.ErrNotFound
 		}
-		sort.Slice(matchingSLP, func(i, j int) bool { return matchingSLP[i].Weight > matchingSLP[j].Weight })
+		sort.Slice(matchingRPrf, func(i, j int) bool { return matchingRPrf[i].Weight > matchingRPrf[j].Weight })
 	}
 	return
 }
 
 // costForEvent will compute cost out of accounts and rating plans for event
 // returns map[string]interface{} with cost and relevant matching information inside
-func (spS *SupplierService) costForEvent(ev *utils.CGREvent,
+func (rpS *RouteService) costForEvent(ev *utils.CGREvent,
 	acntIDs, rpIDs []string) (costData map[string]interface{}, err error) {
 	if err = ev.CheckMandatoryFields([]string{utils.Account,
 		utils.Destination, utils.SetupTime}); err != nil {
@@ -229,7 +229,7 @@ func (spS *SupplierService) costForEvent(ev *utils.CGREvent,
 		return
 	}
 	var sTime time.Time
-	if sTime, err = ev.FieldAsTime(utils.SetupTime, spS.cgrcfg.GeneralCfg().DefaultTimezone); err != nil {
+	if sTime, err = ev.FieldAsTime(utils.SetupTime, rpS.cgrcfg.GeneralCfg().DefaultTimezone); err != nil {
 		return
 	}
 	var usage time.Duration
@@ -241,7 +241,7 @@ func (spS *SupplierService) costForEvent(ev *utils.CGREvent,
 		usage = time.Duration(1 * time.Minute)
 		err = nil
 	}
-	if err := spS.connMgr.Call(spS.cgrcfg.SupplierSCfg().ResponderSConns, nil, utils.ResponderGetMaxSessionTimeOnAccounts,
+	if err := rpS.connMgr.Call(rpS.cgrcfg.RouteCfg().ResponderSConns, nil, utils.ResponderGetMaxSessionTimeOnAccounts,
 		&utils.GetMaxSessionTimeOnAccountsArgs{
 			Tenant:      ev.Tenant,
 			Subject:     subj,
@@ -252,7 +252,7 @@ func (spS *SupplierService) costForEvent(ev *utils.CGREvent,
 		}, &costData); err != nil {
 		return nil, err
 	}
-	if err := spS.connMgr.Call(spS.cgrcfg.SupplierSCfg().ResponderSConns, nil, utils.ResponderGetCostOnRatingPlans,
+	if err := rpS.connMgr.Call(rpS.cgrcfg.RouteCfg().ResponderSConns, nil, utils.ResponderGetCostOnRatingPlans,
 		&utils.GetCostOnRatingPlansArgs{
 			Tenant:        ev.Tenant,
 			Account:       acnt,
@@ -269,13 +269,13 @@ func (spS *SupplierService) costForEvent(ev *utils.CGREvent,
 
 // statMetrics will query a list of statIDs and return composed metric values
 // first metric found is always returned
-func (spS *SupplierService) statMetrics(statIDs []string, tenant string) (stsMetric map[string]float64, err error) {
+func (rpS *RouteService) statMetrics(statIDs []string, tenant string) (stsMetric map[string]float64, err error) {
 	stsMetric = make(map[string]float64)
 	provStsMetrics := make(map[string][]float64)
-	if len(spS.cgrcfg.SupplierSCfg().StatSConns) != 0 {
+	if len(rpS.cgrcfg.RouteCfg().StatSConns) != 0 {
 		for _, statID := range statIDs {
 			var metrics map[string]float64
-			if err = spS.connMgr.Call(spS.cgrcfg.SupplierSCfg().StatSConns, nil, utils.StatSv1GetQueueFloatMetrics,
+			if err = rpS.connMgr.Call(rpS.cgrcfg.RouteCfg().StatSConns, nil, utils.StatSv1GetQueueFloatMetrics,
 				&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: tenant, ID: statID}}, &metrics); err != nil &&
 				err.Error() != utils.ErrNotFound.Error() {
 				utils.Logger.Warning(
@@ -299,15 +299,15 @@ func (spS *SupplierService) statMetrics(statIDs []string, tenant string) (stsMet
 
 // statMetricsForLoadDistribution will query a list of statIDs and return the sum of metrics
 // first metric found is always returned
-func (spS *SupplierService) statMetricsForLoadDistribution(statIDs []string, tenant string) (result float64, err error) {
+func (rpS *RouteService) statMetricsForLoadDistribution(statIDs []string, tenant string) (result float64, err error) {
 	provStsMetrics := make(map[string][]float64)
-	if len(spS.cgrcfg.SupplierSCfg().StatSConns) != 0 {
+	if len(rpS.cgrcfg.RouteCfg().StatSConns) != 0 {
 		for _, statID := range statIDs {
 			// check if we get an ID in the following form (StatID:MetricID)
 			statWithMetric := strings.Split(statID, utils.InInFieldSep)
 			var metrics map[string]float64
-			if err = spS.connMgr.Call(
-				spS.cgrcfg.SupplierSCfg().StatSConns, nil,
+			if err = rpS.connMgr.Call(
+				rpS.cgrcfg.RouteCfg().StatSConns, nil,
 				utils.StatSv1GetQueueFloatMetrics,
 				&utils.TenantIDWithArgDispatcher{
 					TenantID: &utils.TenantID{
@@ -322,7 +322,7 @@ func (spS *SupplierService) statMetricsForLoadDistribution(statIDs []string, ten
 				// check if statQueue have metric defined
 				if metricVal, has := metrics[statWithMetric[1]]; !has {
 					return 0, fmt.Errorf("<%s> error: %s metric %s for statID: %s",
-						utils.SupplierS, utils.ErrNotFound, statWithMetric[1], statWithMetric[0])
+						utils.RouteS, utils.ErrNotFound, statWithMetric[1], statWithMetric[0])
 				} else {
 					provStsMetrics[statWithMetric[1]] = append(provStsMetrics[statWithMetric[1]], metricVal)
 				}
@@ -345,11 +345,11 @@ func (spS *SupplierService) statMetricsForLoadDistribution(statIDs []string, ten
 }
 
 // resourceUsage returns sum of all resource usages out of list
-func (spS *SupplierService) resourceUsage(resIDs []string, tenant string) (tUsage float64, err error) {
-	if len(spS.cgrcfg.SupplierSCfg().ResourceSConns) != 0 {
+func (rpS *RouteService) resourceUsage(resIDs []string, tenant string) (tUsage float64, err error) {
+	if len(rpS.cgrcfg.RouteCfg().ResourceSConns) != 0 {
 		for _, resID := range resIDs {
 			var res Resource
-			if err = spS.connMgr.Call(spS.cgrcfg.SupplierSCfg().ResourceSConns, nil, utils.ResourceSv1GetResource,
+			if err = rpS.connMgr.Call(rpS.cgrcfg.RouteCfg().ResourceSConns, nil, utils.ResourceSv1GetResource,
 				&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: tenant, ID: resID}}, &res); err != nil && err.Error() != utils.ErrNotFound.Error() {
 				utils.Logger.Warning(
 					fmt.Sprintf("<SupplierS> error: %s getting resource for ID : %s", err.Error(), resID))
@@ -361,31 +361,31 @@ func (spS *SupplierService) resourceUsage(resIDs []string, tenant string) (tUsag
 	return
 }
 
-func (spS *SupplierService) populateSortingData(ev *utils.CGREvent, spl *Supplier,
-	extraOpts *optsGetSuppliers) (srtSpl *SortedSupplier, pass bool, err error) {
-	sortedSpl := &SortedSupplier{
-		SupplierID: spl.ID,
+func (rpS *RouteService) populateSortingData(ev *utils.CGREvent, route *Route,
+	extraOpts *optsGetRoutes) (srtRoute *SortedRoute, pass bool, err error) {
+	sortedSpl := &SortedRoute{
+		RouteID: route.ID,
 		SortingData: map[string]interface{}{
-			utils.Weight: spl.Weight,
+			utils.Weight: route.Weight,
 		},
-		SupplierParameters: spl.SupplierParameters,
+		RouteParameters: route.RouteParameters,
 	}
 	//calculate costData if we have fields
-	if len(spl.AccountIDs) != 0 || len(spl.RatingPlanIDs) != 0 {
-		costData, err := spS.costForEvent(ev, spl.AccountIDs, spl.RatingPlanIDs)
+	if len(route.AccountIDs) != 0 || len(route.RatingPlanIDs) != 0 {
+		costData, err := rpS.costForEvent(ev, route.AccountIDs, route.RatingPlanIDs)
 		if err != nil {
 			if extraOpts.ignoreErrors {
 				utils.Logger.Warning(
-					fmt.Sprintf("<%s> ignoring supplier with ID: %s, err: %s",
-						utils.SupplierS, spl.ID, err.Error()))
+					fmt.Sprintf("<%s> ignoring route with ID: %s, err: %s",
+						utils.RouteS, route.ID, err.Error()))
 				return nil, false, nil
 			} else {
 				return nil, false, err
 			}
 		} else if len(costData) == 0 {
 			utils.Logger.Warning(
-				fmt.Sprintf("<%s> ignoring supplier with ID: %s, missing cost information",
-					utils.SupplierS, spl.ID))
+				fmt.Sprintf("<%s> ignoring route with ID: %s, missing cost information",
+					utils.RouteS, route.ID))
 		} else {
 			if extraOpts.maxCost != 0 &&
 				costData[utils.Cost].(float64) > extraOpts.maxCost {
@@ -398,14 +398,14 @@ func (spS *SupplierService) populateSortingData(ev *utils.CGREvent, spl *Supplie
 	}
 	//calculate metrics
 	//in case we have *load strategy we use statMetricsForLoadDistribution function to calculate the result
-	if len(spl.StatIDs) != 0 {
+	if len(route.StatIDs) != 0 {
 		if extraOpts.sortingStragety == utils.MetaLoad {
-			metricSum, err := spS.statMetricsForLoadDistribution(spl.StatIDs, ev.Tenant) //create metric map for suppier
+			metricSum, err := rpS.statMetricsForLoadDistribution(route.StatIDs, ev.Tenant) //create metric map for route
 			if err != nil {
 				if extraOpts.ignoreErrors {
 					utils.Logger.Warning(
 						fmt.Sprintf("<%s> ignoring supplier with ID: %s, err: %s",
-							utils.SupplierS, spl.ID, err.Error()))
+							utils.RouteS, route.ID, err.Error()))
 					return nil, false, nil
 				} else {
 					return nil, false, err
@@ -413,12 +413,12 @@ func (spS *SupplierService) populateSortingData(ev *utils.CGREvent, spl *Supplie
 			}
 			sortedSpl.SortingData[utils.Load] = metricSum
 		} else {
-			metricSupp, err := spS.statMetrics(spl.StatIDs, ev.Tenant) //create metric map for suppier
+			metricSupp, err := rpS.statMetrics(route.StatIDs, ev.Tenant) //create metric map for route
 			if err != nil {
 				if extraOpts.ignoreErrors {
 					utils.Logger.Warning(
 						fmt.Sprintf("<%s> ignoring supplier with ID: %s, err: %s",
-							utils.SupplierS, spl.ID, err.Error()))
+							utils.RouteS, route.ID, err.Error()))
 					return nil, false, nil
 				} else {
 					return nil, false, err
@@ -444,13 +444,13 @@ func (spS *SupplierService) populateSortingData(ev *utils.CGREvent, spl *Supplie
 		}
 	}
 	//calculate resourceUsage
-	if len(spl.ResourceIDs) != 0 {
-		resTotalUsage, err := spS.resourceUsage(spl.ResourceIDs, ev.Tenant)
+	if len(route.ResourceIDs) != 0 {
+		resTotalUsage, err := rpS.resourceUsage(route.ResourceIDs, ev.Tenant)
 		if err != nil {
 			if extraOpts.ignoreErrors {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> ignoring supplier with ID: %s, err: %s",
-						utils.SupplierS, spl.ID, err.Error()))
+						utils.RouteS, route.ID, err.Error()))
 				return nil, false, nil
 			} else {
 				return nil, false, err
@@ -459,14 +459,14 @@ func (spS *SupplierService) populateSortingData(ev *utils.CGREvent, spl *Supplie
 		sortedSpl.SortingData[utils.ResourceUsage] = resTotalUsage
 	}
 	//filter the supplier
-	if len(spl.lazyCheckRules) != 0 {
+	if len(route.lazyCheckRules) != 0 {
 		//construct the DP and pass it to filterS
 		nM := config.NewNavigableMap(nil)
 		nM.Set([]string{utils.MetaReq}, ev.Event, false, false)
 		nM.Set([]string{utils.MetaVars}, sortedSpl.SortingData, false, false)
 
-		for _, rule := range spl.lazyCheckRules { // verify the rules remaining from PartialPass
-			if pass, err = rule.Pass(newDynamicDP(spS.cgrcfg, spS.connMgr, ev.Tenant, nM)); err != nil {
+		for _, rule := range route.lazyCheckRules { // verify the rules remaining from PartialPass
+			if pass, err = rule.Pass(newDynamicDP(rpS.cgrcfg, rpS.connMgr, ev.Tenant, nM)); err != nil {
 				return nil, false, err
 			} else if !pass {
 				return nil, false, nil
@@ -476,32 +476,32 @@ func (spS *SupplierService) populateSortingData(ev *utils.CGREvent, spl *Supplie
 	return sortedSpl, true, nil
 }
 
-// supliersForEvent will return the list of valid supplier IDs
+// sortedRoutesForEvent will return the list of valid route IDs
 // for event based on filters and sorting algorithms
-func (spS *SupplierService) sortedSuppliersForEvent(args *ArgsGetSuppliers) (sortedSuppls *SortedSuppliers, err error) {
+func (rpS *RouteService) sortedRoutesForEvent(args *ArgsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
 	if _, has := args.CGREvent.Event[utils.Usage]; !has {
 		args.CGREvent.Event[utils.Usage] = time.Duration(time.Minute) // make sure we have default set for Usage
 	}
-	var splPrfls []*SupplierProfile
-	if splPrfls, err = spS.matchingSupplierProfilesForEvent(args.CGREvent, true); err != nil {
+	var rPrfs []*RouteProfile
+	if rPrfs, err = rpS.matchingRouteProfilesForEvent(args.CGREvent, true); err != nil {
 		return
 	}
-	splPrfl := splPrfls[0]
+	rPrfl := rPrfs[0]
 	extraOpts, err := args.asOptsGetSuppliers() // convert suppliers arguments into internal options used to limit data
 	if err != nil {
 		return nil, err
 	}
-	extraOpts.sortingParameters = splPrfl.SortingParameters // populate sortingParameters in extraOpts
-	extraOpts.sortingStragety = splPrfl.Sorting             // populate sortinStrategy in extraOpts
+	extraOpts.sortingParameters = rPrfl.SortingParameters // populate sortingParameters in extraOpts
+	extraOpts.sortingStragety = rPrfl.Sorting             // populate sortingStrategy in extraOpts
 
 	//construct the DP and pass it to filterS
 	nM := config.NewNavigableMap(nil)
 	nM.Set([]string{utils.MetaReq}, args.CGREvent.Event, false, false)
-	supplNew := make([]*Supplier, 0)
+	routeNew := make([]*Route, 0)
 	// apply filters for event
 
-	for _, suppl := range splPrfl.Suppliers {
-		pass, lazyCheckRules, err := spS.filterS.LazyPass(args.CGREvent.Tenant, suppl.FilterIDs,
+	for _, route := range rPrfl.Routes {
+		pass, lazyCheckRules, err := rpS.filterS.LazyPass(args.CGREvent.Tenant, route.FilterIDs,
 			nM, []string{utils.DynamicDataPrefix + utils.MetaReq, utils.DynamicDataPrefix + utils.MetaAccounts,
 				utils.DynamicDataPrefix + utils.MetaResources, utils.DynamicDataPrefix + utils.MetaStats})
 		if err != nil {
@@ -509,30 +509,30 @@ func (spS *SupplierService) sortedSuppliersForEvent(args *ArgsGetSuppliers) (sor
 		} else if !pass {
 			continue
 		}
-		suppl.lazyCheckRules = lazyCheckRules
-		supplNew = append(supplNew, suppl)
+		route.lazyCheckRules = lazyCheckRules
+		routeNew = append(routeNew, route)
 	}
 
-	sortedSuppliers, err := spS.sorter.SortSuppliers(splPrfl.ID, splPrfl.Sorting,
-		supplNew, args.CGREvent, extraOpts)
+	sortedRoutes, err = rpS.sorter.SortSuppliers(rPrfl.ID, rPrfl.Sorting,
+		routeNew, args.CGREvent, extraOpts)
 	if err != nil {
 		return nil, err
 	}
 	if args.Paginator.Offset != nil {
-		if *args.Paginator.Offset <= len(sortedSuppliers.SortedSuppliers) {
-			sortedSuppliers.SortedSuppliers = sortedSuppliers.SortedSuppliers[*args.Paginator.Offset:]
+		if *args.Paginator.Offset <= len(sortedRoutes.SortedRoutes) {
+			sortedRoutes.SortedRoutes = sortedRoutes.SortedRoutes[*args.Paginator.Offset:]
 		}
 	}
 	if args.Paginator.Limit != nil {
-		if *args.Paginator.Limit <= len(sortedSuppliers.SortedSuppliers) {
-			sortedSuppliers.SortedSuppliers = sortedSuppliers.SortedSuppliers[:*args.Paginator.Limit]
+		if *args.Paginator.Limit <= len(sortedRoutes.SortedRoutes) {
+			sortedRoutes.SortedRoutes = sortedRoutes.SortedRoutes[:*args.Paginator.Limit]
 		}
 	}
-	sortedSuppliers.Count = len(sortedSuppliers.SortedSuppliers)
-	return sortedSuppliers, nil
+	sortedRoutes.Count = len(sortedRoutes.SortedRoutes)
+	return
 }
 
-type ArgsGetSuppliers struct {
+type ArgsGetRoutes struct {
 	IgnoreErrors bool
 	MaxCost      string // toDo: try with interface{} here
 	Opts         map[string]interface{}
@@ -541,8 +541,8 @@ type ArgsGetSuppliers struct {
 	*utils.ArgDispatcher
 }
 
-func (args *ArgsGetSuppliers) asOptsGetSuppliers() (opts *optsGetSuppliers, err error) {
-	opts = &optsGetSuppliers{ignoreErrors: args.IgnoreErrors}
+func (args *ArgsGetRoutes) asOptsGetSuppliers() (opts *optsGetRoutes, err error) {
+	opts = &optsGetRoutes{ignoreErrors: args.IgnoreErrors}
 	if args.MaxCost == utils.MetaEventCost { // dynamic cost needs to be calculated from event
 		if err = args.CGREvent.CheckMandatoryFields([]string{utils.Account,
 			utils.Destination, utils.SetupTime, utils.Usage}); err != nil {
@@ -567,7 +567,7 @@ func (args *ArgsGetSuppliers) asOptsGetSuppliers() (opts *optsGetSuppliers, err 
 	return
 }
 
-type optsGetSuppliers struct {
+type optsGetRoutes struct {
 	ignoreErrors      bool
 	maxCost           float64
 	sortingParameters []string //used for QOS strategy
@@ -575,7 +575,7 @@ type optsGetSuppliers struct {
 }
 
 // V1GetSupplierProfilesForEvent returns the list of valid supplier IDs
-func (spS *SupplierService) V1GetSuppliers(args *ArgsGetSuppliers, reply *SortedSuppliers) (err error) {
+func (rpS *RouteService) V1GetSuppliers(args *ArgsGetRoutes, reply *SortedRoutes) (err error) {
 	if args.CGREvent == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
@@ -584,16 +584,16 @@ func (spS *SupplierService) V1GetSuppliers(args *ArgsGetSuppliers, reply *Sorted
 	} else if args.CGREvent.Event == nil {
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
-	if len(spS.cgrcfg.SupplierSCfg().AttributeSConns) != 0 {
+	if len(rpS.cgrcfg.RouteCfg().AttributeSConns) != 0 {
 		attrArgs := &AttrArgsProcessEvent{
 			Context: utils.StringPointer(utils.FirstNonEmpty(
-				utils.IfaceAsString(args.Opts[utils.Context]),
-				utils.MetaSuppliers)),
+				utils.IfaceAsString(args.CGREvent.Event[utils.Context]),
+				utils.MetaRoutes)),
 			CGREvent:      args.CGREvent,
 			ArgDispatcher: args.ArgDispatcher,
 		}
 		var rplyEv AttrSProcessEventReply
-		if err := spS.connMgr.Call(spS.cgrcfg.SupplierSCfg().AttributeSConns, nil,
+		if err := rpS.connMgr.Call(rpS.cgrcfg.RouteCfg().AttributeSConns, nil,
 			utils.AttributeSv1ProcessEvent, attrArgs, &rplyEv); err == nil && len(rplyEv.AlteredFields) != 0 {
 			args.CGREvent = rplyEv.CGREvent
 			args.Opts = rplyEv.Opts
@@ -601,7 +601,7 @@ func (spS *SupplierService) V1GetSuppliers(args *ArgsGetSuppliers, reply *Sorted
 			return utils.NewErrAttributeS(err)
 		}
 	}
-	sSps, err := spS.sortedSuppliersForEvent(args)
+	sSps, err := rpS.sortedRoutesForEvent(args)
 	if err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
@@ -613,13 +613,13 @@ func (spS *SupplierService) V1GetSuppliers(args *ArgsGetSuppliers, reply *Sorted
 }
 
 // V1GetSupplierProfilesForEvent returns the list of valid supplier profiles
-func (spS *SupplierService) V1GetSupplierProfilesForEvent(args *utils.CGREventWithArgDispatcher, reply *[]*SupplierProfile) (err error) {
+func (rpS *RouteService) V1GetSupplierProfilesForEvent(args *utils.CGREventWithArgDispatcher, reply *[]*RouteProfile) (err error) {
 	if missing := utils.MissingStructFields(args.CGREvent, []string{utils.Tenant, utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	} else if args.CGREvent.Event == nil {
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
-	sPs, err := spS.matchingSupplierProfilesForEvent(args.CGREvent, false)
+	sPs, err := rpS.matchingRouteProfilesForEvent(args.CGREvent, false)
 	if err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)

@@ -24,35 +24,35 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewResourceAscendetSorter(spS *SupplierService) *ResourceAscendentSorter {
-	return &ResourceAscendentSorter{spS: spS,
+func NewResourceAscendetSorter(rS *RouteService) *ResourceAscendentSorter {
+	return &ResourceAscendentSorter{rS: rS,
 		sorting: utils.MetaReas}
 }
 
-// ResourceAscendentSorter orders suppliers based on their Resource Usage
+// ResourceAscendentSorter orders ascendent routes based on their Resource Usage
 type ResourceAscendentSorter struct {
 	sorting string
-	spS     *SupplierService
+	rS      *RouteService
 }
 
-func (ws *ResourceAscendentSorter) SortSuppliers(prflID string,
-	suppls []*Supplier, suplEv *utils.CGREvent, extraOpts *optsGetSuppliers) (sortedSuppls *SortedSuppliers, err error) {
-	sortedSuppls = &SortedSuppliers{ProfileID: prflID,
-		Sorting:         ws.sorting,
-		SortedSuppliers: make([]*SortedSupplier, 0)}
-	for _, s := range suppls {
-		if len(s.ResourceIDs) == 0 {
+func (ws *ResourceAscendentSorter) SortRoutes(prflID string,
+	routes []*Route, suplEv *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
+	sortedRoutes = &SortedRoutes{ProfileID: prflID,
+		Sorting:      ws.sorting,
+		SortedRoutes: make([]*SortedRoute, 0)}
+	for _, route := range routes {
+		if len(route.ResourceIDs) == 0 {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> supplier: <%s> - empty ResourceIDs",
-					utils.SupplierS, s.ID))
+					utils.RouteS, route.ID))
 			return nil, utils.NewErrMandatoryIeMissing("ResourceIDs")
 		}
-		if srtSpl, pass, err := ws.spS.populateSortingData(suplEv, s, extraOpts); err != nil {
+		if srtSpl, pass, err := ws.rS.populateSortingData(suplEv, route, extraOpts); err != nil {
 			return nil, err
 		} else if pass && srtSpl != nil {
-			sortedSuppls.SortedSuppliers = append(sortedSuppls.SortedSuppliers, srtSpl)
+			sortedRoutes.SortedRoutes = append(sortedRoutes.SortedRoutes, srtSpl)
 		}
 	}
-	sortedSuppls.SortResourceAscendent()
+	sortedRoutes.SortResourceAscendent()
 	return
 }

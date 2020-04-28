@@ -251,14 +251,14 @@ func (self *TPExporter) Run() error {
 		}
 	}
 
-	storDataSuppliers, err := self.storDb.GetTPSuppliers(self.tpID, "", "")
+	storDataRoutes, err := self.storDb.GetTPRoutes(self.tpID, "", "")
 	if err != nil && err.Error() != utils.ErrNotFound.Error() {
 		return err
 	}
-	for _, sd := range storDataSuppliers {
-		sdModels := APItoModelTPSuppliers(sd)
+	for _, sd := range storDataRoutes {
+		sdModels := APItoModelTPRoutes(sd)
 		for _, sdModel := range sdModels {
-			toExportMap[utils.SuppliersCsv] = append(toExportMap[utils.SuppliersCsv], sdModel)
+			toExportMap[utils.RoutesCsv] = append(toExportMap[utils.RoutesCsv], sdModel)
 		}
 	}
 

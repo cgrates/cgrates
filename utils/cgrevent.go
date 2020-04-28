@@ -206,18 +206,19 @@ func getArgDispatcherFromOpts(ev map[string]interface{}) (arg *ArgDispatcher) {
 	return
 }
 
-// getSupplierPaginatorFromOpts will consume supplierPaginator if present
-func getSupplierPaginatorFromOpts(ev map[string]interface{}) (args *Paginator, err error) {
+// consumeRoutePaginator will consume routePaginator if presented
+func (ev *CGREvent) consumeRoutePaginator() (args *Paginator) {
 	args = new(Paginator)
 	if ev == nil {
 		return
 	}
 	//check if we have suppliersLimit in event and in case it has add it in args
-	limitIface, hasSuppliersLimit := ev[SuppliersLimit]
-	if hasSuppliersLimit {
-		delete(ev, SuppliersLimit)
-		var limit int64
-		if limit, err = IfaceAsInt64(limitIface); err != nil {
+	limitIface, hasRoutesLimit := ev.Event[MetaRoutesLimit]
+	if hasRoutesLimit {
+		delete(ev.Event, MetaRoutesLimit)
+		limit, err := IfaceAsInt64(limitIface)
+		if err != nil {
+			Logger.Err(err.Error())
 			return
 		}
 		args = &Paginator{
@@ -225,18 +226,20 @@ func getSupplierPaginatorFromOpts(ev map[string]interface{}) (args *Paginator, e
 		}
 	}
 	//check if we have offset in event and in case it has add it in args
-	offsetIface, hasSuppliersOffset := ev[SuppliersOffset]
-	if !hasSuppliersOffset {
-		return
-	}
-	delete(ev, SuppliersOffset)
-	var offset int64
-	if offset, err = IfaceAsInt64(offsetIface); err != nil {
-		return
-	}
-	if !hasSuppliersLimit { //in case we don't have limit, but we have offset we need to initialize the struct
-		args = &Paginator{
-			Offset: IntPointer(int(offset)),
+	offsetIface, hasRoutesOffset := ev.Event[MetaRoutesOffset]
+	if hasRoutesOffset {
+		delete(ev.Event, MetaRoutesOffset)
+		offset, err := IfaceAsInt64(offsetIface)
+		if err != nil {
+			Logger.Err(err.Error())
+			return
+		}
+		if !hasRoutesLimit { //in case we don't have limit, but we have offset we need to initialize the struct
+			args = &Paginator{
+				Offset: IntPointer(int(offset)),
+			}
+		} else {
+			args.Offset = IntPointer(int(offset))
 		}
 		return
 	}
@@ -244,16 +247,55 @@ func getSupplierPaginatorFromOpts(ev map[string]interface{}) (args *Paginator, e
 	return
 }
 
-// ExtractArgsFromOpts extracts the posible arguments(ArgDispatcher and SupplierPaginator) from options
-func ExtractArgsFromOpts(ev map[string]interface{}, dispatcherFlag, consumeSupplierPaginator bool) (ca ExtractedArgs, err error) {
+// ExtractedArgs stores the extracted arguments from CGREvent
+type ExtractedArgs struct {
+	ArgDispatcher  *ArgDispatcher
+	RoutePaginator *Paginator
+}
+
+// ExtractArgs extracts the ArgDispatcher and RoutePaginator from the received event
+func (ev *CGREvent) ExtractArgs(dispatcherFlag, consumeRoutePaginator bool) (ca ExtractedArgs) {
 	ca = ExtractedArgs{
 		ArgDispatcher: getArgDispatcherFromOpts(ev),
 	}
 	if dispatcherFlag && ca.ArgDispatcher == nil {
 		ca.ArgDispatcher = new(ArgDispatcher)
 	}
-	if consumeSupplierPaginator {
-		ca.SupplierPaginator, err = getSupplierPaginatorFromOpts(ev)
+	if consumeRoutePaginator {
+		ca.RoutePaginator = ev.consumeRoutePaginator()
+	}
+	return
+}
+
+// CGREvents is a group of generic events processed by CGR services
+// ie: derived CDRs
+type CGREvents struct {
+	Tenant string
+	ID     string
+	Time   *time.Time // event time
+	Events []map[string]interface{}
+}
+
+func NewCGREventWithArgDispatcher() *CGREventWithArgDispatcher {
+	return new(CGREventWithArgDispatcher)
+}
+
+type CGREventWithArgDispatcher struct {
+	*CGREvent
+	*ArgDispatcher
+}
+
+func (ev *CGREventWithArgDispatcher) Clone() (clned *CGREventWithArgDispatcher) {
+	if ev == nil {
+		return
+	}
+	clned = new(CGREventWithArgDispatcher)
+	if ev.CGREvent != nil {
+		clned.CGREvent = ev.CGREvent.Clone()
+	}
+	if ev.ArgDispatcher != nil {
+		clned.ArgDispatcher = new(ArgDispatcher)
+		*clned.ArgDispatcher = *ev.ArgDispatcher
 	}
 	return
 }

@@ -31,7 +31,7 @@ func TestSupplierSCfgloadFromJsonCfg(t *testing.T) {
 	} else if !reflect.DeepEqual(supscfg, expected) {
 		t.Errorf("Expected: %+v ,recived: %+v", expected, supscfg)
 	}
-	if err := supscfg.loadFromJsonCfg(new(SupplierSJsonCfg)); err != nil {
+	if err := supscfg.loadFromJsonCfg(new(RouteSJsonCfg)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(supscfg, expected) {
 		t.Errorf("Expected: %+v ,recived: %+v", expected, supscfg)
@@ -56,7 +56,7 @@ func TestSupplierSCfgloadFromJsonCfg(t *testing.T) {
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if jsnSupSCfg, err := jsnCfg.SupplierSJsonCfg(); err != nil {
+	} else if jsnSupSCfg, err := jsnCfg.RouteSJsonCfg(); err != nil {
 		t.Error(err)
 	} else if err = supscfg.loadFromJsonCfg(jsnSupSCfg); err != nil {
 		t.Error(err)

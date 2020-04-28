@@ -89,8 +89,8 @@ func (rfi *FilterIndexer) cacheRemItemType() { // ToDo: tune here by removing pe
 	case utils.StatQueueProfilePrefix:
 		Cache.Clear([]string{utils.CacheStatFilterIndexes})
 
-	case utils.SupplierProfilePrefix:
-		Cache.Clear([]string{utils.CacheSupplierFilterIndexes})
+	case utils.RouteProfilePrefix:
+		Cache.Clear([]string{utils.CacheRouteFilterIndexes})
 
 	case utils.AttributeProfilePrefix:
 		Cache.Clear([]string{utils.CacheAttributeFilterIndexes})
@@ -183,8 +183,8 @@ func (rfi *FilterIndexer) RemoveItemFromIndex(tenant, itemID string, oldFilters 
 				filterIDs[i] = fltrID
 			}
 		}
-	case utils.SupplierProfilePrefix:
-		spp, err := rfi.dm.GetSupplierProfile(tenant, itemID, true, false, utils.NonTransactional)
+	case utils.RouteProfilePrefix:
+		spp, err := rfi.dm.GetRouteProfile(tenant, itemID, true, false, utils.NonTransactional)
 		if err != nil && err != utils.ErrNotFound {
 			return err
 		}

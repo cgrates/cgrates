@@ -451,7 +451,7 @@ type ArgsCache struct {
 	ThresholdIDs          *[]string
 	ThresholdProfileIDs   *[]string
 	FilterIDs             *[]string
-	SupplierProfileIDs    *[]string
+	RouteProfileIDs       *[]string
 	AttributeProfileIDs   *[]string
 	ChargerProfileIDs     *[]string
 	DispatcherProfileIDs  *[]string
@@ -488,7 +488,7 @@ func InitAttrReloadCache() (rpl AttrReloadCache) {
 	rpl.ThresholdIDs = &[]string{}
 	rpl.ThresholdProfileIDs = &[]string{}
 	rpl.FilterIDs = &[]string{}
-	rpl.SupplierProfileIDs = &[]string{}
+	rpl.RouteProfileIDs = &[]string{}
 	rpl.AttributeProfileIDs = &[]string{}
 	rpl.ChargerProfileIDs = &[]string{}
 	rpl.DispatcherProfileIDs = &[]string{}

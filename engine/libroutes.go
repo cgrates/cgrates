@@ -156,38 +156,33 @@ func (sSpls *SortedRoutes) SortLoadDistribution() {
 	})
 }
 
-// Digest returns list of supplierIDs + parameters for easier outside access
-// format suppl1:suppl1params,suppl2:suppl2params
+// Digest returns list of routeIDs + parameters for easier outside access
+// format route1:route1params,route2:route2params
 func (sSpls *SortedRoutes) Digest() string {
 	return strings.Join(sSpls.RoutesWithParams(), utils.FIELDS_SEP)
 }
 
 func (sSpls *SortedRoutes) AsNavigableMap() (nm *config.NavigableMap) {
 	mp := map[string]interface{}{
-		"ProfileID": sSpls.ProfileID,
-		"Sorting":   sSpls.Sorting,
-		"Count":     sSpls.Count,
+		utils.ProfileID: sSpls.ProfileID,
+		utils.Sorting:   sSpls.Sorting,
+		utils.Count:     sSpls.Count,
 	}
-	sm := make([]map[string]interface{}, len(sSpls.SortedRoutes))
+	sr := make([]map[string]interface{}, len(sSpls.SortedRoutes))
 	for i, ss := range sSpls.SortedRoutes {
-		sm[i] = map[string]interface{}{
-			"SupplierID":         ss.RouteID,
-			"SupplierParameters": ss.RouteParameters,
-			"SortingData":        ss.SortingData,
+		sr[i] = map[string]interface{}{
+			utils.RouteID:         ss.RouteID,
+			utils.RouteParameters: ss.RouteParameters,
+			utils.SortingData:     ss.SortingData,
 		}
 	}
-	mp["SortedSuppliers"] = sm
+	mp[utils.SortedRoutes] = sr
 	return config.NewNavigableMap(mp)
 }
 
-type SupplierWithParams struct {
-	SupplierName   string
-	SupplierParams string
-}
-
-// SuppliersSorter is the interface which needs to be implemented by supplier sorters
+// RoutesSorter is the interface which needs to be implemented by routes sorters
 type RoutesSorter interface {
-	SortRoutes(string, []*Route, *utils.CGREvent, *optsGetSuppliers) (*SortedRoutes, error)
+	SortRoutes(string, []*Route, *utils.CGREvent, *optsGetRoutes) (*SortedRoutes, error)
 }
 
 // NewRouteSortDispatcher constructs RouteSortDispatcher
@@ -196,7 +191,7 @@ func NewRouteSortDispatcher(lcrS *RouteService) (rsd RouteSortDispatcher, err er
 	rsd[utils.MetaWeight] = NewWeightSorter(lcrS)
 	rsd[utils.MetaLC] = NewLeastCostSorter(lcrS)
 	rsd[utils.MetaHC] = NewHighestCostSorter(lcrS)
-	rsd[utils.MetaQOS] = NewQOSSupplierSorter(lcrS)
+	rsd[utils.MetaQOS] = NewQOSRouteSorter(lcrS)
 	rsd[utils.MetaReas] = NewResourceAscendetSorter(lcrS)
 	rsd[utils.MetaReds] = NewResourceDescendentSorter(lcrS)
 	rsd[utils.MetaLoad] = NewLoadDistributionSorter(lcrS)
@@ -208,7 +203,7 @@ func NewRouteSortDispatcher(lcrS *RouteService) (rsd RouteSortDispatcher, err er
 type RouteSortDispatcher map[string]RoutesSorter
 
 func (ssd RouteSortDispatcher) SortSuppliers(prflID, strategy string,
-	suppls []*Route, suplEv *utils.CGREvent, extraOpts *optsGetSuppliers) (sortedRoutes *SortedRoutes, err error) {
+	suppls []*Route, suplEv *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
 	sd, has := ssd[strategy]
 	if !has {
 		return nil, fmt.Errorf("unsupported sorting strategy: %s", strategy)

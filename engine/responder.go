@@ -313,7 +313,7 @@ func (rs *Responder) GetMaxSessionTimeOnAccounts(arg *utils.GetMaxSessionTimeOnA
 	reply *map[string]interface{}) (err error) {
 	for _, anctID := range arg.AccountIDs {
 		cd := &CallDescriptor{
-			Category:      utils.MetaSuppliers,
+			Category:      utils.MetaRoutes,
 			Tenant:        arg.Tenant,
 			Subject:       arg.Subject,
 			Account:       anctID,

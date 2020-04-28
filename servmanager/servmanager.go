@@ -156,7 +156,7 @@ func (srvMngr *ServiceManager) StartServices() (err error) {
 		utils.ThresholdS:      srvMngr.GetConfig().ThresholdSCfg().Enabled,
 		utils.StatS:           srvMngr.GetConfig().StatSCfg().Enabled,
 		utils.ResourceS:       srvMngr.GetConfig().ResourceSCfg().Enabled,
-		utils.SupplierS:       srvMngr.GetConfig().SupplierSCfg().Enabled,
+		utils.RouteS:          srvMngr.GetConfig().RouteCfg().Enabled,
 		utils.SchedulerS:      srvMngr.GetConfig().SchedulerCfg().Enabled,
 		utils.RALService:      srvMngr.GetConfig().RalsCfg().Enabled,
 		utils.CDRServer:       srvMngr.GetConfig().CdrsCfg().Enabled,
@@ -229,8 +229,8 @@ func (srvMngr *ServiceManager) handleReload() {
 			if err = srvMngr.reloadService(utils.ResourceS); err != nil {
 				return
 			}
-		case <-srvMngr.GetConfig().GetReloadChan(config.SupplierSJson):
-			if err = srvMngr.reloadService(utils.SupplierS); err != nil {
+		case <-srvMngr.GetConfig().GetReloadChan(config.RouteSJson):
+			if err = srvMngr.reloadService(utils.RouteS); err != nil {
 				return
 			}
 		case <-srvMngr.GetConfig().GetReloadChan(config.SCHEDULER_JSN):

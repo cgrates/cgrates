@@ -1096,7 +1096,7 @@ func TestDfThresholdSJsonCfg(t *testing.T) {
 }
 
 func TestDfSupplierSJsonCfg(t *testing.T) {
-	eCfg := &SupplierSJsonCfg{
+	eCfg := &RouteSJsonCfg{
 		Enabled:               utils.BoolPointer(false),
 		Indexed_selects:       utils.BoolPointer(true),
 		String_indexed_fields: nil,
@@ -1108,7 +1108,7 @@ func TestDfSupplierSJsonCfg(t *testing.T) {
 		Default_ratio:         utils.IntPointer(1),
 		Nested_fields:         utils.BoolPointer(false),
 	}
-	if cfg, err := dfCgrJsonCfg.SupplierSJsonCfg(); err != nil {
+	if cfg, err := dfCgrJsonCfg.RouteSJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Errorf("expecting: %+v, received: %+v", utils.ToJSON(eCfg), utils.ToJSON(cfg))
