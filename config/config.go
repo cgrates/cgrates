@@ -1470,7 +1470,7 @@ func (cfg *CGRConfig) AsMapInterface(separator string) map[string]interface{} {
 		utils.SchedulerCfg:     cfg.schedulerCfg.AsMapInterface(),
 		utils.CdrsCfg:          cfg.cdrsCfg.AsMapInterface(),
 		utils.SessionSCfg:      cfg.sessionSCfg.AsMapInterface(),
-		utils.FsAgentCfg:       cfg.fsAgentCfg.AsMapInterface(),
+		utils.FsAgentCfg:       cfg.fsAgentCfg.AsMapInterface(separator),
 		utils.KamAgentCfg:      cfg.kamAgentCfg.AsMapInterface(),
 		utils.AsteriskAgentCfg: cfg.asteriskAgentCfg.AsMapInterface(),
 		utils.DiameterAgentCfg: cfg.diameterAgentCfg.AsMapInterface(separator),
