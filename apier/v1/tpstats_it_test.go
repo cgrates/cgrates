@@ -73,7 +73,6 @@ func TestTPStatIT(t *testing.T) {
 	default:
 		t.Fatal("Unknown Database type")
 	}
-	tpStatConfigDIR = "tutmysql"
 	for _, stest := range sTestsTPStats {
 		t.Run(tpStatConfigDIR, stest)
 	}
