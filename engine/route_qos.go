@@ -22,29 +22,29 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewQOSSupplierSorter(spS *SupplierService) *QOSSupplierSorter {
-	return &QOSSupplierSorter{spS: spS,
+func NewQOSRouteSorter(rS *RouteService) *QOSRouteSorter {
+	return &QOSRouteSorter{rS: rS,
 		sorting: utils.MetaQOS}
 }
 
-// QOSSorter sorts suppliers based on stats
-type QOSSupplierSorter struct {
+// QOSSorter sorts route based on stats
+type QOSRouteSorter struct {
 	sorting string
-	spS     *SupplierService
+	rS      *RouteService
 }
 
-func (qos *QOSSupplierSorter) SortSuppliers(prflID string, suppls []*Supplier,
-	ev *utils.CGREvent, extraOpts *optsGetSuppliers) (sortedSuppls *SortedSuppliers, err error) {
-	sortedSuppls = &SortedSuppliers{ProfileID: prflID,
-		Sorting:         qos.sorting,
-		SortedSuppliers: make([]*SortedSupplier, 0)}
-	for _, s := range suppls {
-		if srtSpl, pass, err := qos.spS.populateSortingData(ev, s, extraOpts); err != nil {
+func (qos *QOSRouteSorter) SortRoutes(prflID string, routes []*Route,
+	ev *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
+	sortedRoutes = &SortedRoutes{ProfileID: prflID,
+		Sorting:      qos.sorting,
+		SortedRoutes: make([]*SortedRoute, 0)}
+	for _, route := range routes {
+		if srtSpl, pass, err := qos.rS.populateSortingData(ev, route, extraOpts); err != nil {
 			return nil, err
 		} else if pass && srtSpl != nil {
-			sortedSuppls.SortedSuppliers = append(sortedSuppls.SortedSuppliers, srtSpl)
+			sortedRoutes.SortedRoutes = append(sortedRoutes.SortedRoutes, srtSpl)
 		}
 	}
-	sortedSuppls.SortQOS(extraOpts.sortingParameters)
+	sortedRoutes.SortQOS(extraOpts.sortingParameters)
 	return
 }

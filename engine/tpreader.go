@@ -51,7 +51,7 @@ type TpReader struct {
 	sqProfiles         map[utils.TenantID]*utils.TPStatProfile
 	thProfiles         map[utils.TenantID]*utils.TPThresholdProfile
 	filters            map[utils.TenantID]*utils.TPFilterProfile
-	sppProfiles        map[utils.TenantID]*utils.TPSupplierProfile
+	routeProfiles      map[utils.TenantID]*utils.TPRouteProfile
 	attributeProfiles  map[utils.TenantID]*utils.TPAttributeProfile
 	chargerProfiles    map[utils.TenantID]*utils.TPChargerProfile
 	dispatcherProfiles map[utils.TenantID]*utils.TPDispatcherProfile
@@ -132,7 +132,7 @@ func (tpr *TpReader) Init() {
 	tpr.resProfiles = make(map[utils.TenantID]*utils.TPResourceProfile)
 	tpr.sqProfiles = make(map[utils.TenantID]*utils.TPStatProfile)
 	tpr.thProfiles = make(map[utils.TenantID]*utils.TPThresholdProfile)
-	tpr.sppProfiles = make(map[utils.TenantID]*utils.TPSupplierProfile)
+	tpr.routeProfiles = make(map[utils.TenantID]*utils.TPRouteProfile)
 	tpr.attributeProfiles = make(map[utils.TenantID]*utils.TPAttributeProfile)
 	tpr.chargerProfiles = make(map[utils.TenantID]*utils.TPChargerProfile)
 	tpr.dispatcherProfiles = make(map[utils.TenantID]*utils.TPDispatcherProfile)
@@ -1197,21 +1197,21 @@ func (tpr *TpReader) LoadFilters() error {
 	return tpr.LoadFiltersFiltered("")
 }
 
-func (tpr *TpReader) LoadSupplierProfilesFiltered(tag string) (err error) {
-	rls, err := tpr.lr.GetTPSuppliers(tpr.tpid, "", tag)
+func (tpr *TpReader) LoadRouteProfilesFiltered(tag string) (err error) {
+	rls, err := tpr.lr.GetTPRoutes(tpr.tpid, "", tag)
 	if err != nil {
 		return err
 	}
-	mapRsPfls := make(map[utils.TenantID]*utils.TPSupplierProfile)
+	mapRsPfls := make(map[utils.TenantID]*utils.TPRouteProfile)
 	for _, rl := range rls {
 		mapRsPfls[utils.TenantID{Tenant: rl.Tenant, ID: rl.ID}] = rl
 	}
-	tpr.sppProfiles = mapRsPfls
+	tpr.routeProfiles = mapRsPfls
 	return nil
 }
 
-func (tpr *TpReader) LoadSupplierProfiles() error {
-	return tpr.LoadSupplierProfilesFiltered("")
+func (tpr *TpReader) LoadRouteProfiles() error {
+	return tpr.LoadRouteProfilesFiltered("")
 }
 
 func (tpr *TpReader) LoadAttributeProfilesFiltered(tag string) (err error) {
@@ -1328,7 +1328,7 @@ func (tpr *TpReader) LoadAll() (err error) {
 	if err = tpr.LoadThresholds(); err != nil && err.Error() != utils.NotFoundCaps {
 		return
 	}
-	if err = tpr.LoadSupplierProfiles(); err != nil && err.Error() != utils.NotFoundCaps {
+	if err = tpr.LoadRouteProfiles(); err != nil && err.Error() != utils.NotFoundCaps {
 		return
 	}
 	if err = tpr.LoadAttributeProfiles(); err != nil && err.Error() != utils.NotFoundCaps {
@@ -1660,22 +1660,22 @@ func (tpr *TpReader) WriteToDatabase(verbose, disable_reverse bool) (err error) 
 		loadIDs[utils.CacheThresholds] = loadID
 	}
 	if verbose {
-		log.Print("SupplierProfiles:")
+		log.Print("RouteProfiles:")
 	}
-	for _, tpTH := range tpr.sppProfiles {
-		th, err := APItoSupplierProfile(tpTH, tpr.timezone)
+	for _, tpTH := range tpr.routeProfiles {
+		th, err := APItoRouteProfile(tpTH, tpr.timezone)
 		if err != nil {
 			return err
 		}
-		if err = tpr.dm.SetSupplierProfile(th, true); err != nil {
+		if err = tpr.dm.SetRouteProfile(th, true); err != nil {
 			return err
 		}
 		if verbose {
 			log.Print("\t", th.TenantID())
 		}
 	}
-	if len(tpr.sppProfiles) != 0 {
-		loadIDs[utils.CacheSupplierProfiles] = loadID
+	if len(tpr.routeProfiles) != 0 {
+		loadIDs[utils.CacheRouteProfiles] = loadID
 	}
 	if verbose {
 		log.Print("AttributeProfiles:")
@@ -1845,8 +1845,8 @@ func (tpr *TpReader) ShowStatistics() {
 	log.Print("Thresholds: ", len(tpr.thProfiles))
 	// filters
 	log.Print("Filters: ", len(tpr.filters))
-	// Supplier profiles
-	log.Print("SupplierProfiles: ", len(tpr.sppProfiles))
+	// Route profiles
+	log.Print("RouteProfiles: ", len(tpr.routeProfiles))
 	// Attribute profiles
 	log.Print("AttributeProfiles: ", len(tpr.attributeProfiles))
 	// Charger profiles
@@ -1964,10 +1964,10 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 			i++
 		}
 		return keys, nil
-	case utils.SupplierProfilePrefix:
-		keys := make([]string, len(tpr.sppProfiles))
+	case utils.RouteProfilePrefix:
+		keys := make([]string, len(tpr.routeProfiles))
 		i := 0
-		for k := range tpr.sppProfiles {
+		for k := range tpr.routeProfiles {
 			keys[i] = k.TenantID()
 			i++
 		}
@@ -2185,10 +2185,10 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disable_reverse bool) (err erro
 	}
 
 	if verbose {
-		log.Print("SupplierProfiles:")
+		log.Print("RouteProfiles:")
 	}
-	for _, tpSpl := range tpr.sppProfiles {
-		if err = tpr.dm.RemoveSupplierProfile(tpSpl.Tenant, tpSpl.ID, utils.NonTransactional, true); err != nil {
+	for _, tpSpl := range tpr.routeProfiles {
+		if err = tpr.dm.RemoveRouteProfile(tpSpl.Tenant, tpSpl.ID, utils.NonTransactional, true); err != nil {
 			return err
 		}
 		if verbose {
@@ -2337,8 +2337,8 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disable_reverse bool) (err erro
 	if len(tpr.thresholds) != 0 {
 		loadIDs[utils.CacheThresholds] = loadID
 	}
-	if len(tpr.sppProfiles) != 0 {
-		loadIDs[utils.CacheSupplierProfiles] = loadID
+	if len(tpr.routeProfiles) != 0 {
+		loadIDs[utils.CacheRouteProfiles] = loadID
 	}
 	if len(tpr.attributeProfiles) != 0 {
 		loadIDs[utils.CacheAttributeProfiles] = loadID
@@ -2382,7 +2382,7 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, argDispatcher *ut
 	trsIDs, _ := tpr.GetLoadedIds(utils.ThresholdPrefix)
 	trspfIDs, _ := tpr.GetLoadedIds(utils.ThresholdProfilePrefix)
 	flrIDs, _ := tpr.GetLoadedIds(utils.FilterPrefix)
-	spfIDs, _ := tpr.GetLoadedIds(utils.SupplierProfilePrefix)
+	routeIDs, _ := tpr.GetLoadedIds(utils.RouteProfilePrefix)
 	apfIDs, _ := tpr.GetLoadedIds(utils.AttributeProfilePrefix)
 	chargerIDs, _ := tpr.GetLoadedIds(utils.ChargerProfilePrefix)
 	dppIDs, _ := tpr.GetLoadedIds(utils.DispatcherProfilePrefix)
@@ -2410,7 +2410,7 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, argDispatcher *ut
 				ThresholdIDs:          &trsIDs,
 				ThresholdProfileIDs:   &trspfIDs,
 				FilterIDs:             &flrIDs,
-				SupplierProfileIDs:    &spfIDs,
+				RouteProfileIDs:       &routeIDs,
 				AttributeProfileIDs:   &apfIDs,
 				ChargerProfileIDs:     &chargerIDs,
 				DispatcherProfileIDs:  &dppIDs,
@@ -2450,8 +2450,8 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, argDispatcher *ut
 	if len(apfIDs) != 0 {
 		cacheIDs = append(cacheIDs, utils.CacheAttributeFilterIndexes)
 	}
-	if len(spfIDs) != 0 {
-		cacheIDs = append(cacheIDs, utils.CacheSupplierFilterIndexes)
+	if len(routeIDs) != 0 {
+		cacheIDs = append(cacheIDs, utils.CacheRouteFilterIndexes)
 	}
 	if len(trspfIDs) != 0 {
 		cacheIDs = append(cacheIDs, utils.CacheThresholdFilterIndexes)

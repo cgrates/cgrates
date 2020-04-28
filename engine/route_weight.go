@@ -27,24 +27,24 @@ func NewWeightSorter(rS *RouteService) *WeightSorter {
 		sorting: utils.MetaWeight}
 }
 
-// WeightSorter orders suppliers based on their weight, no cost involved
+// WeightSorter orders routes based on their weight, no cost involved
 type WeightSorter struct {
 	sorting string
 	rS      *RouteService
 }
 
-func (ws *WeightSorter) SortSuppliers(prflID string,
-	suppls []*Route, suplEv *utils.CGREvent, extraOpts *optsGetSuppliers) (sortedSuppls *SortedSuppliers, err error) {
-	sortedSuppls = &SortedSuppliers{ProfileID: prflID,
-		Sorting:         ws.sorting,
-		SortedSuppliers: make([]*SortedSupplier, 0)}
-	for _, s := range suppls {
-		if srtSpl, pass, err := ws.rS.populateSortingData(suplEv, s, extraOpts); err != nil {
+func (ws *WeightSorter) SortRoutes(prflID string,
+	routes []*Route, suplEv *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
+	sortedRoutes = &SortedRoutes{ProfileID: prflID,
+		Sorting:      ws.sorting,
+		SortedRoutes: make([]*SortedRoute, 0)}
+	for _, route := range routes {
+		if srtRoute, pass, err := ws.rS.populateSortingData(suplEv, route, extraOpts); err != nil {
 			return nil, err
-		} else if pass && srtSpl != nil {
-			sortedSuppls.SortedSuppliers = append(sortedSuppls.SortedSuppliers, srtSpl)
+		} else if pass && srtRoute != nil {
+			sortedRoutes.SortedRoutes = append(sortedRoutes.SortedRoutes, srtRoute)
 		}
 	}
-	sortedSuppls.SortWeight()
+	sortedRoutes.SortWeight()
 	return
 }

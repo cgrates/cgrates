@@ -68,7 +68,7 @@ const (
 	ColTps  = "threshold_profiles"
 	ColThs  = "thresholds"
 	ColFlt  = "filters"
-	ColSpp  = "supplier_profiles"
+	ColRts  = "route_profiles"
 	ColAttr = "attribute_profiles"
 	ColCDRs = "cdrs"
 	ColCpp  = "charger_profiles"
@@ -286,7 +286,7 @@ func (ms *MongoStorage) ensureIndexesForCol(col string) (err error) { // exporte
 		if err = ms.enusureIndex(col, true, "key"); err != nil {
 			return
 		}
-	case ColRsP, ColRes, ColSqs, ColSqp, ColTps, ColThs, ColSpp, ColAttr, ColFlt, ColCpp, ColDpp, ColDph:
+	case ColRsP, ColRes, ColSqs, ColSqp, ColTps, ColThs, ColRts, ColAttr, ColFlt, ColCpp, ColDpp, ColDph:
 		if err = ms.enusureIndex(col, true, "tenant", "id"); err != nil {
 			return
 		}
@@ -301,7 +301,7 @@ func (ms *MongoStorage) ensureIndexesForCol(col string) (err error) { // exporte
 		utils.TBLTPActionPlans, utils.TBLTPActionTriggers,
 		utils.TBLTPStats, utils.TBLTPResources, utils.TBLTPDispatchers,
 		utils.TBLTPDispatcherHosts, utils.TBLTPChargers,
-		utils.TBLTPSuppliers, utils.TBLTPThresholds:
+		utils.TBLTPRoutes, utils.TBLTPThresholds:
 		if err = ms.enusureIndex(col, true, "tpid", "id"); err != nil {
 			return
 		}
@@ -350,7 +350,7 @@ func (ms *MongoStorage) EnsureIndexes(cols ...string) (err error) {
 	if ms.storageType == utils.DataDB {
 		for _, col := range []string{ColAct, ColApl, ColAAp, ColAtr,
 			ColRpl, ColDst, ColRds, ColLht, ColRFI, ColRsP, ColRes, ColSqs, ColSqp,
-			ColTps, ColThs, ColSpp, ColAttr, ColFlt, ColCpp, ColDpp,
+			ColTps, ColThs, ColRts, ColAttr, ColFlt, ColCpp, ColDpp,
 			ColRpf, ColShg, ColAcc} {
 			if err = ms.ensureIndexesForCol(col); err != nil {
 				return
@@ -394,7 +394,7 @@ func (ms *MongoStorage) getColNameForPrefix(prefix string) (string, bool) {
 		utils.StatQueueProfilePrefix:     ColSqp,
 		utils.ThresholdPrefix:            ColThs,
 		utils.FilterPrefix:               ColFlt,
-		utils.SupplierProfilePrefix:      ColSpp,
+		utils.RouteProfilePrefix:         ColRts,
 		utils.AttributeProfilePrefix:     ColAttr,
 	}[prefix]
 	return res, ok
@@ -673,8 +673,8 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 			result, err = ms.getField2(sctx, ColThs, utils.ThresholdPrefix, subject, tntID)
 		case utils.ThresholdProfilePrefix:
 			result, err = ms.getField2(sctx, ColTps, utils.ThresholdProfilePrefix, subject, tntID)
-		case utils.SupplierProfilePrefix:
-			result, err = ms.getField2(sctx, ColSpp, utils.SupplierProfilePrefix, subject, tntID)
+		case utils.RouteProfilePrefix:
+			result, err = ms.getField2(sctx, ColRts, utils.RouteProfilePrefix, subject, tntID)
 		case utils.AttributeProfilePrefix:
 			result, err = ms.getField2(sctx, ColAttr, utils.AttributeProfilePrefix, subject, tntID)
 		case utils.ChargerProfilePrefix:
@@ -691,8 +691,8 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 			result, err = ms.getField3(sctx, ColRFI, utils.StatFilterIndexes, "key")
 		case utils.ThresholdFilterIndexes:
 			result, err = ms.getField3(sctx, ColRFI, utils.ThresholdFilterIndexes, "key")
-		case utils.SupplierFilterIndexes:
-			result, err = ms.getField3(sctx, ColRFI, utils.SupplierFilterIndexes, "key")
+		case utils.RouteFilterIndexes:
+			result, err = ms.getField3(sctx, ColRFI, utils.RouteFilterIndexes, "key")
 		case utils.ChargerFilterIndexes:
 			result, err = ms.getField3(sctx, ColRFI, utils.ChargerFilterIndexes, "key")
 		case utils.DispatcherFilterIndexes:
@@ -735,8 +735,8 @@ func (ms *MongoStorage) HasDataDrv(category, subject, tenant string) (has bool, 
 			count, err = ms.getCol(ColTps).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
 		case utils.FilterPrefix:
 			count, err = ms.getCol(ColFlt).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
-		case utils.SupplierProfilePrefix:
-			count, err = ms.getCol(ColSpp).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
+		case utils.RouteProfilePrefix:
+			count, err = ms.getCol(ColRts).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
 		case utils.AttributeProfilePrefix:
 			count, err = ms.getCol(ColAttr).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
 		case utils.ChargerProfilePrefix:
@@ -2076,10 +2076,10 @@ func (ms *MongoStorage) RemoveFilterDrv(tenant, id string) (err error) {
 	})
 }
 
-func (ms *MongoStorage) GetSupplierProfileDrv(tenant, id string) (r *SupplierProfile, err error) {
-	r = new(SupplierProfile)
+func (ms *MongoStorage) GetRouteProfileDrv(tenant, id string) (r *RouteProfile, err error) {
+	r = new(RouteProfile)
 	err = ms.query(func(sctx mongo.SessionContext) (err error) {
-		cur := ms.getCol(ColSpp).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
+		cur := ms.getCol(ColRts).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
 		if err := cur.Decode(r); err != nil {
 			r = nil
 			if err == mongo.ErrNoDocuments {
@@ -2092,9 +2092,9 @@ func (ms *MongoStorage) GetSupplierProfileDrv(tenant, id string) (r *SupplierPro
 	return
 }
 
-func (ms *MongoStorage) SetSupplierProfileDrv(r *SupplierProfile) (err error) {
+func (ms *MongoStorage) SetRouteProfileDrv(r *RouteProfile) (err error) {
 	return ms.query(func(sctx mongo.SessionContext) (err error) {
-		_, err = ms.getCol(ColSpp).UpdateOne(sctx, bson.M{"tenant": r.Tenant, "id": r.ID},
+		_, err = ms.getCol(ColRts).UpdateOne(sctx, bson.M{"tenant": r.Tenant, "id": r.ID},
 			bson.M{"$set": r},
 			options.Update().SetUpsert(true),
 		)
@@ -2102,9 +2102,9 @@ func (ms *MongoStorage) SetSupplierProfileDrv(r *SupplierProfile) (err error) {
 	})
 }
 
-func (ms *MongoStorage) RemoveSupplierProfileDrv(tenant, id string) (err error) {
+func (ms *MongoStorage) RemoveRouteProfileDrv(tenant, id string) (err error) {
 	return ms.query(func(sctx mongo.SessionContext) (err error) {
-		dr, err := ms.getCol(ColSpp).DeleteOne(sctx, bson.M{"tenant": tenant, "id": id})
+		dr, err := ms.getCol(ColRts).DeleteOne(sctx, bson.M{"tenant": tenant, "id": id})
 		if dr.DeletedCount == 0 {
 			return utils.ErrNotFound
 		}

@@ -50,8 +50,8 @@ func init() {
 	gob.Register(new(StoredStatQueue))
 	gob.Register(new(StatQueueProfileWithArgDispatcher))
 	// Suppliers
-	gob.Register(new(SupplierProfile))
-	gob.Register(new(SupplierProfileWithArgDispatcher))
+	gob.Register(new(RouteProfile))
+	gob.Register(new(RouteProfileWithArgDispatcher))
 	// Filters
 	gob.Register(new(Filter))
 	gob.Register(new(FilterWithArgDispatcher))
@@ -388,8 +388,8 @@ func (chS *CacheS) V1ReloadCache(attrs utils.AttrReloadCacheWithArgDispatcher, r
 	if err = chS.reloadCache(utils.FilterPrefix, attrs.FilterIDs); err != nil {
 		return
 	}
-	// SupplierProfile
-	if err = chS.reloadCache(utils.SupplierProfilePrefix, attrs.SupplierProfileIDs); err != nil {
+	// RouteProfiles
+	if err = chS.reloadCache(utils.RouteProfilePrefix, attrs.RouteProfileIDs); err != nil {
 		return
 	}
 	// AttributeProfile
@@ -456,7 +456,7 @@ func (chS *CacheS) V1LoadCache(args utils.AttrReloadCacheWithArgDispatcher, repl
 		toStringSlice(args.ThresholdIDs),
 		toStringSlice(args.ThresholdProfileIDs),
 		toStringSlice(args.FilterIDs),
-		toStringSlice(args.SupplierProfileIDs),
+		toStringSlice(args.RouteProfileIDs),
 		toStringSlice(args.AttributeProfileIDs),
 		toStringSlice(args.ChargerProfileIDs),
 		toStringSlice(args.DispatcherProfileIDs),
@@ -514,7 +514,7 @@ func (chS *CacheS) V1FlushCache(args utils.AttrReloadCacheWithArgDispatcher, rep
 	chS.flushCache(utils.CacheThresholds, args.ThresholdIDs)
 	chS.flushCache(utils.CacheThresholdProfiles, args.ThresholdProfileIDs)
 	chS.flushCache(utils.CacheFilters, args.FilterIDs)
-	chS.flushCache(utils.CacheSupplierProfiles, args.SupplierProfileIDs)
+	chS.flushCache(utils.CacheRouteProfiles, args.RouteProfileIDs)
 	chS.flushCache(utils.CacheAttributeProfiles, args.AttributeProfileIDs)
 	chS.flushCache(utils.CacheChargerProfiles, args.ChargerProfileIDs)
 	chS.flushCache(utils.CacheDispatcherProfiles, args.DispatcherProfileIDs)
@@ -586,8 +586,8 @@ func populateCacheLoadIDs(loadIDs map[string]int64, attrs utils.AttrReloadCache)
 	if attrs.FilterIDs == nil || len(*attrs.FilterIDs) != 0 {
 		cacheLoadIDs[utils.CacheFilters] = loadIDs[utils.CacheFilters]
 	}
-	if attrs.SupplierProfileIDs == nil || len(*attrs.SupplierProfileIDs) != 0 {
-		cacheLoadIDs[utils.CacheSupplierProfiles] = loadIDs[utils.CacheSupplierProfiles]
+	if attrs.RouteProfileIDs == nil || len(*attrs.RouteProfileIDs) != 0 {
+		cacheLoadIDs[utils.CacheRouteProfiles] = loadIDs[utils.CacheRouteProfiles]
 	}
 	if attrs.AttributeProfileIDs == nil || len(*attrs.AttributeProfileIDs) != 0 {
 		cacheLoadIDs[utils.CacheAttributeProfiles] = loadIDs[utils.CacheAttributeProfiles]

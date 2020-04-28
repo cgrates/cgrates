@@ -140,15 +140,15 @@ func newInternalDBCfg(itemsCacheCfg map[string]*config.ItemOpt, isDataDB bool) m
 				TTL:       itemsCacheCfg[utils.CacheThresholds].TTL,
 				StaticTTL: itemsCacheCfg[utils.CacheThresholds].StaticTTL,
 			},
-			utils.CacheSupplierFilterIndexes: &ltcache.CacheConfig{
+			utils.CacheRouteFilterIndexes: &ltcache.CacheConfig{
 				MaxItems:  itemsCacheCfg[utils.MetaFilterIndexes].Limit,
 				TTL:       itemsCacheCfg[utils.MetaFilterIndexes].TTL,
 				StaticTTL: itemsCacheCfg[utils.MetaFilterIndexes].StaticTTL,
 			},
-			utils.CacheSupplierProfiles: &ltcache.CacheConfig{
-				MaxItems:  itemsCacheCfg[utils.CacheSupplierProfiles].Limit,
-				TTL:       itemsCacheCfg[utils.CacheSupplierProfiles].TTL,
-				StaticTTL: itemsCacheCfg[utils.CacheSupplierProfiles].StaticTTL,
+			utils.CacheRouteProfiles: &ltcache.CacheConfig{
+				MaxItems:  itemsCacheCfg[utils.CacheRouteProfiles].Limit,
+				TTL:       itemsCacheCfg[utils.CacheRouteProfiles].TTL,
+				StaticTTL: itemsCacheCfg[utils.CacheRouteProfiles].StaticTTL,
 			},
 			utils.CacheChargerFilterIndexes: &ltcache.CacheConfig{
 				MaxItems:  itemsCacheCfg[utils.MetaFilterIndexes].Limit,
@@ -278,10 +278,10 @@ func newInternalDBCfg(itemsCacheCfg map[string]*config.ItemOpt, isDataDB bool) m
 				TTL:       itemsCacheCfg[utils.TBLTPActionPlans].TTL,
 				StaticTTL: itemsCacheCfg[utils.TBLTPActionPlans].StaticTTL,
 			},
-			utils.TBLTPSuppliers: &ltcache.CacheConfig{
-				MaxItems:  itemsCacheCfg[utils.TBLTPSuppliers].Limit,
-				TTL:       itemsCacheCfg[utils.TBLTPSuppliers].TTL,
-				StaticTTL: itemsCacheCfg[utils.TBLTPSuppliers].StaticTTL,
+			utils.TBLTPRoutes: &ltcache.CacheConfig{
+				MaxItems:  itemsCacheCfg[utils.TBLTPRoutes].Limit,
+				TTL:       itemsCacheCfg[utils.TBLTPRoutes].TTL,
+				StaticTTL: itemsCacheCfg[utils.TBLTPRoutes].StaticTTL,
 			},
 			utils.TBLTPAttributes: &ltcache.CacheConfig{
 				MaxItems:  itemsCacheCfg[utils.TBLTPAttributes].Limit,
@@ -516,7 +516,7 @@ func (iDB *InternalDB) HasDataDrv(category, subject, tenant string) (bool, error
 		return iDB.db.HasItem(utils.CachePrefixToInstance[category], subject), nil
 	case utils.ResourcesPrefix, utils.ResourceProfilesPrefix, utils.StatQueuePrefix,
 		utils.StatQueueProfilePrefix, utils.ThresholdPrefix, utils.ThresholdProfilePrefix,
-		utils.FilterPrefix, utils.SupplierProfilePrefix, utils.AttributeProfilePrefix,
+		utils.FilterPrefix, utils.RouteProfilePrefix, utils.AttributeProfilePrefix,
 		utils.ChargerProfilePrefix, utils.DispatcherProfilePrefix, utils.DispatcherHostPrefix:
 		return iDB.db.HasItem(utils.CachePrefixToInstance[category], utils.ConcatenatedKey(tenant, subject)), nil
 	}
@@ -1258,24 +1258,26 @@ func (iDB *InternalDB) RemoveFilterDrv(tenant, id string) (err error) {
 	return
 }
 
-func (iDB *InternalDB) GetSupplierProfileDrv(tenant, id string) (spp *SupplierProfile, err error) {
-	x, ok := iDB.db.Get(utils.CacheSupplierProfiles, utils.ConcatenatedKey(tenant, id))
+func (iDB *InternalDB) GetRouteProfileDrv(tenant, id string) (spp *RouteProfile, err error) {
+	x, ok := iDB.db.Get(utils.CacheRouteProfiles, utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
 	}
-	return x.(*SupplierProfile), nil
+	return x.(*RouteProfile), nil
+}
 
-}
-func (iDB *InternalDB) SetSupplierProfileDrv(spp *SupplierProfile) (err error) {
-	iDB.db.Set(utils.CacheSupplierProfiles, spp.TenantID(), spp, nil,
+func (iDB *InternalDB) SetRouteProfileDrv(spp *RouteProfile) (err error) {
+	iDB.db.Set(utils.CacheRouteProfiles, spp.TenantID(), spp, nil,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }
-func (iDB *InternalDB) RemoveSupplierProfileDrv(tenant, id string) (err error) {
-	iDB.db.Remove(utils.CacheSupplierProfiles, utils.ConcatenatedKey(tenant, id),
+
+func (iDB *InternalDB) RemoveRouteProfileDrv(tenant, id string) (err error) {
+	iDB.db.Remove(utils.CacheRouteProfiles, utils.ConcatenatedKey(tenant, id),
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }
+
 func (iDB *InternalDB) GetAttributeProfileDrv(tenant, id string) (attr *AttributeProfile, err error) {
 	x, ok := iDB.db.Get(utils.CacheAttributeProfiles, utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
@@ -1283,16 +1285,19 @@ func (iDB *InternalDB) GetAttributeProfileDrv(tenant, id string) (attr *Attribut
 	}
 	return x.(*AttributeProfile), nil
 }
+
 func (iDB *InternalDB) SetAttributeProfileDrv(attr *AttributeProfile) (err error) {
 	iDB.db.Set(utils.CacheAttributeProfiles, attr.TenantID(), attr, nil,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }
+
 func (iDB *InternalDB) RemoveAttributeProfileDrv(tenant, id string) (err error) {
 	iDB.db.Remove(utils.CacheAttributeProfiles, utils.ConcatenatedKey(tenant, id),
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }
+
 func (iDB *InternalDB) GetChargerProfileDrv(tenant, id string) (ch *ChargerProfile, err error) {
 	x, ok := iDB.db.Get(utils.CacheChargerProfiles, utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
@@ -1300,16 +1305,19 @@ func (iDB *InternalDB) GetChargerProfileDrv(tenant, id string) (ch *ChargerProfi
 	}
 	return x.(*ChargerProfile), nil
 }
+
 func (iDB *InternalDB) SetChargerProfileDrv(chr *ChargerProfile) (err error) {
 	iDB.db.Set(utils.CacheChargerProfiles, chr.TenantID(), chr, nil,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }
+
 func (iDB *InternalDB) RemoveChargerProfileDrv(tenant, id string) (err error) {
 	iDB.db.Remove(utils.CacheChargerProfiles, utils.ConcatenatedKey(tenant, id),
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }
+
 func (iDB *InternalDB) GetDispatcherProfileDrv(tenant, id string) (dpp *DispatcherProfile, err error) {
 	x, ok := iDB.db.Get(utils.CacheDispatcherProfiles, utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
@@ -1317,16 +1325,19 @@ func (iDB *InternalDB) GetDispatcherProfileDrv(tenant, id string) (dpp *Dispatch
 	}
 	return x.(*DispatcherProfile), nil
 }
+
 func (iDB *InternalDB) SetDispatcherProfileDrv(dpp *DispatcherProfile) (err error) {
 	iDB.db.Set(utils.CacheDispatcherProfiles, dpp.TenantID(), dpp, nil,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }
+
 func (iDB *InternalDB) RemoveDispatcherProfileDrv(tenant, id string) (err error) {
 	iDB.db.Remove(utils.CacheDispatcherProfiles, utils.ConcatenatedKey(tenant, id),
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }
+
 func (iDB *InternalDB) GetItemLoadIDsDrv(itemIDPrefix string) (loadIDs map[string]int64, err error) {
 	x, ok := iDB.db.Get(utils.CacheLoadIDs, utils.LoadIDs)
 	if !ok || x == nil {
@@ -1337,13 +1348,14 @@ func (iDB *InternalDB) GetItemLoadIDsDrv(itemIDPrefix string) (loadIDs map[strin
 		return map[string]int64{itemIDPrefix: loadIDs[itemIDPrefix]}, nil
 	}
 	return
-
 }
+
 func (iDB *InternalDB) SetLoadIDsDrv(loadIDs map[string]int64) (err error) {
 	iDB.db.Set(utils.CacheLoadIDs, utils.LoadIDs, loadIDs, nil,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }
+
 func (iDB *InternalDB) GetDispatcherHostDrv(tenant, id string) (dpp *DispatcherHost, err error) {
 	x, ok := iDB.db.Get(utils.CacheDispatcherHosts, utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
@@ -1351,11 +1363,13 @@ func (iDB *InternalDB) GetDispatcherHostDrv(tenant, id string) (dpp *DispatcherH
 	}
 	return x.(*DispatcherHost), nil
 }
+
 func (iDB *InternalDB) SetDispatcherHostDrv(dpp *DispatcherHost) (err error) {
 	iDB.db.Set(utils.CacheDispatcherHosts, dpp.TenantID(), dpp, nil,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }
+
 func (iDB *InternalDB) RemoveDispatcherHostDrv(tenant, id string) (err error) {
 	iDB.db.Remove(utils.CacheDispatcherHosts, utils.ConcatenatedKey(tenant, id),
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)

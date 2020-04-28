@@ -81,7 +81,7 @@ type SessionSCfg struct {
 	ResSConns           []string
 	ThreshSConns        []string
 	StatSConns          []string
-	SupplSConns         []string
+	RouteSConns         []string
 	AttrSConns          []string
 	CDRsConns           []string
 	ReplicationConns    []string
@@ -168,14 +168,14 @@ func (scfg *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) (err error) {
 			}
 		}
 	}
-	if jsnCfg.Suppliers_conns != nil {
-		scfg.SupplSConns = make([]string, len(*jsnCfg.Suppliers_conns))
-		for idx, connID := range *jsnCfg.Suppliers_conns {
+	if jsnCfg.Routes_conns != nil {
+		scfg.RouteSConns = make([]string, len(*jsnCfg.Routes_conns))
+		for idx, connID := range *jsnCfg.Routes_conns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
 			if connID == utils.MetaInternal {
-				scfg.SupplSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSuppliers)
+				scfg.RouteSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRoutes)
 			} else {
-				scfg.SupplSConns[idx] = connID
+				scfg.RouteSConns[idx] = connID
 			}
 		}
 	}
@@ -414,14 +414,14 @@ func (scfg *SessionSCfg) AsMapInterface() map[string]interface{} {
 	return map[string]interface{}{
 		utils.EnabledCfg:             scfg.Enabled,
 		utils.ListenBijsonCfg:        scfg.ListenBijson,
-		utils.ChargerSConnsCfg:       chargerSConns,
-		utils.RALsConnsCfg:           RALsConns,
-		utils.ResSConnsCfg:           resSConns,
-		utils.ThreshSConnsCfg:        threshSConns,
-		utils.StatSConnsCfg:          statSConns,
-		utils.SupplSConnsCfg:         supplSConns,
-		utils.AttrSConnsCfg:          attrSConns,
-		utils.CDRsConnsCfg:           CDRsConns,
+		utils.ChargerSConnsCfg:       scfg.ChargerSConns,
+		utils.RALsConnsCfg:           scfg.RALsConns,
+		utils.ResSConnsCfg:           scfg.ResSConns,
+		utils.ThreshSConnsCfg:        scfg.ThreshSConns,
+		utils.StatSConnsCfg:          scfg.StatSConns,
+		utils.RouteSConnsCfg:         scfg.RouteSConns,
+		utils.AttrSConnsCfg:          scfg.AttrSConns,
+		utils.CDRsConnsCfg:           scfg.CDRsConns,
 		utils.ReplicationConnsCfg:    scfg.ReplicationConns,
 		utils.DebitIntervalCfg:       debitInterval,
 		utils.StoreSCostsCfg:         scfg.StoreSCosts,

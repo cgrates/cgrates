@@ -204,7 +204,7 @@ type SessionSJsonCfg struct {
 	Resources_conns       *[]string
 	Thresholds_conns      *[]string
 	Stats_conns           *[]string
-	Suppliers_conns       *[]string
+	Routes_conns          *[]string
 	Cdrs_conns            *[]string
 	Replication_conns     *[]string
 	Attributes_conns      *[]string
@@ -428,8 +428,8 @@ type ThresholdSJsonCfg struct {
 	Nested_fields         *bool // applies when indexed fields is not defined
 }
 
-// Supplier service config section
-type SupplierSJsonCfg struct {
+// Rounte service config section
+type RouteSJsonCfg struct {
 	Enabled               *bool
 	Indexed_selects       *bool
 	String_indexed_fields *[]string

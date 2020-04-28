@@ -1291,7 +1291,7 @@ func (ms *MongoStorage) SetTPFilters(tpTHs []*utils.TPFilterProfile) (err error)
 	})
 }
 
-func (ms *MongoStorage) GetTPSuppliers(tpid, tenant, id string) ([]*utils.TPSupplierProfile, error) {
+func (ms *MongoStorage) GetTPRoutes(tpid, tenant, id string) ([]*utils.TPRouteProfile, error) {
 	filter := bson.M{"tpid": tpid}
 	if id != "" {
 		filter["id"] = id
@@ -1299,14 +1299,14 @@ func (ms *MongoStorage) GetTPSuppliers(tpid, tenant, id string) ([]*utils.TPSupp
 	if tenant != "" {
 		filter["tenant"] = tenant
 	}
-	var results []*utils.TPSupplierProfile
+	var results []*utils.TPRouteProfile
 	err := ms.query(func(sctx mongo.SessionContext) (err error) {
-		cur, err := ms.getCol(utils.TBLTPSuppliers).Find(sctx, filter)
+		cur, err := ms.getCol(utils.TBLTPRoutes).Find(sctx, filter)
 		if err != nil {
 			return err
 		}
 		for cur.Next(sctx) {
-			var tp utils.TPSupplierProfile
+			var tp utils.TPRouteProfile
 			err := cur.Decode(&tp)
 			if err != nil {
 				return err
@@ -1321,13 +1321,13 @@ func (ms *MongoStorage) GetTPSuppliers(tpid, tenant, id string) ([]*utils.TPSupp
 	return results, err
 }
 
-func (ms *MongoStorage) SetTPSuppliers(tpSPs []*utils.TPSupplierProfile) (err error) {
-	if len(tpSPs) == 0 {
+func (ms *MongoStorage) SetTPRoutes(tpRoutes []*utils.TPRouteProfile) (err error) {
+	if len(tpRoutes) == 0 {
 		return
 	}
 	return ms.query(func(sctx mongo.SessionContext) (err error) {
-		for _, tp := range tpSPs {
-			_, err = ms.getCol(utils.TBLTPSuppliers).UpdateOne(sctx, bson.M{"tpid": tp.TPid, "id": tp.ID},
+		for _, tp := range tpRoutes {
+			_, err = ms.getCol(utils.TBLTPRoutes).UpdateOne(sctx, bson.M{"tpid": tp.TPid, "id": tp.ID},
 				bson.M{"$set": tp},
 				options.Update().SetUpsert(true),
 			)
@@ -1369,12 +1369,12 @@ func (ms *MongoStorage) GetTPAttributes(tpid, tenant, id string) ([]*utils.TPAtt
 	return results, err
 }
 
-func (ms *MongoStorage) SetTPAttributes(tpSPs []*utils.TPAttributeProfile) (err error) {
-	if len(tpSPs) == 0 {
+func (ms *MongoStorage) SetTPAttributes(tpRoutes []*utils.TPAttributeProfile) (err error) {
+	if len(tpRoutes) == 0 {
 		return
 	}
 	return ms.query(func(sctx mongo.SessionContext) (err error) {
-		for _, tp := range tpSPs {
+		for _, tp := range tpRoutes {
 			_, err = ms.getCol(utils.TBLTPAttributes).UpdateOne(sctx, bson.M{"tpid": tp.TPid, "id": tp.ID},
 				bson.M{"$set": tp},
 				options.Update().SetUpsert(true),

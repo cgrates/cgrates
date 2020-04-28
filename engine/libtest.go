@@ -581,11 +581,15 @@ func GetDefaultEmptyCacheStats() map[string]*ltcache.CacheStats {
 			Items:  0,
 			Groups: 0,
 		},
-		utils.CacheSupplierFilterIndexes: {
+		utils.CacheSTIR: {
 			Items:  0,
 			Groups: 0,
 		},
-		utils.CacheSupplierProfiles: {
+		utils.CacheRouteFilterIndexes: {
+			Items:  0,
+			Groups: 0,
+		},
+		utils.CacheRouteProfiles: {
 			Items:  0,
 			Groups: 0,
 		},

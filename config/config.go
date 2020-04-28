@@ -170,7 +170,7 @@ func NewDefaultCGRConfig() (cfg *CGRConfig, err error) {
 	cfg.resourceSCfg = new(ResourceSConfig)
 	cfg.statsCfg = new(StatSCfg)
 	cfg.thresholdSCfg = new(ThresholdSCfg)
-	cfg.supplierSCfg = new(SupplierSCfg)
+	cfg.routeSCfg = new(RouteSCfg)
 	cfg.sureTaxCfg = new(SureTaxCfg)
 	cfg.dispatcherSCfg = new(DispatcherSCfg)
 	cfg.loaderCgrCfg = new(LoaderCgrCfg)
@@ -283,7 +283,7 @@ type CGRConfig struct {
 	resourceSCfg     *ResourceSConfig  // ResourceS config
 	statsCfg         *StatSCfg         // StatS config
 	thresholdSCfg    *ThresholdSCfg    // ThresholdS config
-	supplierSCfg     *SupplierSCfg     // SupplierS config
+	routeSCfg        *RouteSCfg        // RouteS config
 	sureTaxCfg       *SureTaxCfg       // SureTax config
 	dispatcherSCfg   *DispatcherSCfg   // DispatcherS config
 	loaderCgrCfg     *LoaderCgrCfg     // LoaderCgr config
@@ -296,7 +296,7 @@ type CGRConfig struct {
 
 var posibleLoaderTypes = utils.NewStringSet([]string{utils.MetaAttributes,
 	utils.MetaResources, utils.MetaFilters, utils.MetaStats,
-	utils.MetaSuppliers, utils.MetaThresholds, utils.MetaChargers,
+	utils.MetaRoutes, utils.MetaThresholds, utils.MetaChargers,
 	utils.MetaDispatchers, utils.MetaDispatcherHosts})
 
 var possibleReaderTypes = utils.NewStringSet([]string{utils.MetaFileCSV,
@@ -333,7 +333,7 @@ func (cfg *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		cfg.loadAsteriskAgentCfg, cfg.loadDiameterAgentCfg, cfg.loadRadiusAgentCfg,
 		cfg.loadDNSAgentCfg, cfg.loadHttpAgentCfg, cfg.loadAttributeSCfg,
 		cfg.loadChargerSCfg, cfg.loadResourceSCfg, cfg.loadStatSCfg,
-		cfg.loadThresholdSCfg, cfg.loadSupplierSCfg, cfg.loadLoaderSCfg,
+		cfg.loadThresholdSCfg, cfg.loadRouteSCfg, cfg.loadLoaderSCfg,
 		cfg.loadMailerCfg, cfg.loadSureTaxCfg, cfg.loadDispatcherSCfg,
 		cfg.loadLoaderCgrCfg, cfg.loadMigratorCgrCfg, cfg.loadTlsCgrCfg,
 		cfg.loadAnalyzerCgrCfg, cfg.loadApierCfg, cfg.loadErsCfg} {
@@ -613,13 +613,13 @@ func (cfg *CGRConfig) loadThresholdSCfg(jsnCfg *CgrJsonCfg) (err error) {
 	return cfg.thresholdSCfg.loadFromJsonCfg(jsnThresholdSCfg)
 }
 
-// loadSupplierSCfg loads the SupplierS section of the configuration
-func (cfg *CGRConfig) loadSupplierSCfg(jsnCfg *CgrJsonCfg) (err error) {
-	var jsnSupplierSCfg *SupplierSJsonCfg
-	if jsnSupplierSCfg, err = jsnCfg.SupplierSJsonCfg(); err != nil {
+// loadRouteSCfg loads the RouteS section of the configuration
+func (cfg *CGRConfig) loadRouteSCfg(jsnCfg *CgrJsonCfg) (err error) {
+	var jsnRouteSCfg *RouteSJsonCfg
+	if jsnRouteSCfg, err = jsnCfg.RouteSJsonCfg(); err != nil {
 		return
 	}
-	return cfg.supplierSCfg.loadFromJsonCfg(jsnSupplierSCfg)
+	return cfg.routeSCfg.loadFromJsonCfg(jsnRouteSCfg)
 }
 
 // loadLoaderSCfg loads the LoaderS section of the configuration
@@ -784,10 +784,10 @@ func (cfg *CGRConfig) ThresholdSCfg() *ThresholdSCfg {
 }
 
 // SupplierSCfg returns the config for SupplierS
-func (cfg *CGRConfig) SupplierSCfg() *SupplierSCfg {
-	cfg.lks[SupplierSJson].Lock()
-	defer cfg.lks[SupplierSJson].Unlock()
-	return cfg.supplierSCfg
+func (cfg *CGRConfig) RouteCfg() *RouteSCfg {
+	cfg.lks[RouteSJson].Lock()
+	defer cfg.lks[RouteSJson].Unlock()
+	return cfg.routeSCfg
 }
 
 // SessionSCfg returns the config for SessionS
@@ -1033,8 +1033,8 @@ func (cfg *CGRConfig) V1GetConfigSection(args *StringWithArgDispatcher, reply *m
 		jsonString = utils.ToJSON(cfg.StatSCfg())
 	case THRESHOLDS_JSON:
 		jsonString = utils.ToJSON(cfg.ThresholdSCfg())
-	case SupplierSJson:
-		jsonString = utils.ToJSON(cfg.SupplierSCfg())
+	case RouteSJson:
+		jsonString = utils.ToJSON(cfg.RouteCfg())
 	case SURETAX_JSON:
 		jsonString = utils.ToJSON(cfg.SureTaxCfg())
 	case DispatcherSJson:
@@ -1150,7 +1150,7 @@ func (cfg *CGRConfig) getLoadFunctions() map[string]func(*CgrJsonCfg) error {
 		RESOURCES_JSON:     cfg.loadResourceSCfg,
 		STATS_JSON:         cfg.loadStatSCfg,
 		THRESHOLDS_JSON:    cfg.loadThresholdSCfg,
-		SupplierSJson:      cfg.loadSupplierSCfg,
+		RouteSJson:         cfg.loadRouteSCfg,
 		LoaderJson:         cfg.loadLoaderSCfg,
 		MAILER_JSN:         cfg.loadMailerCfg,
 		SURETAX_JSON:       cfg.loadSureTaxCfg,
@@ -1352,7 +1352,7 @@ func (cfg *CGRConfig) reloadSections(sections ...string) (err error) {
 	subsystemsThatNeedDataDB := utils.NewStringSet([]string{DATADB_JSN, SCHEDULER_JSN,
 		RALS_JSN, CDRS_JSN, SessionSJson, ATTRIBUTE_JSN,
 		ChargerSCfgJson, RESOURCES_JSON, STATS_JSON, THRESHOLDS_JSON,
-		SupplierSJson, LoaderJson, DispatcherSJson})
+		RouteSJson, LoaderJson, DispatcherSJson})
 	subsystemsThatNeedStorDB := utils.NewStringSet([]string{STORDB_JSN, RALS_JSN, CDRS_JSN, ApierS})
 	needsDataDB := false
 	needsStorDB := false
@@ -1416,8 +1416,8 @@ func (cfg *CGRConfig) reloadSections(sections ...string) (err error) {
 			cfg.rldChans[STATS_JSON] <- struct{}{}
 		case THRESHOLDS_JSON:
 			cfg.rldChans[THRESHOLDS_JSON] <- struct{}{}
-		case SupplierSJson:
-			cfg.rldChans[SupplierSJson] <- struct{}{}
+		case RouteSJson:
+			cfg.rldChans[RouteSJson] <- struct{}{}
 		case LoaderJson:
 			cfg.rldChans[LoaderJson] <- struct{}{}
 		case DispatcherSJson:
@@ -1481,8 +1481,8 @@ func (cfg *CGRConfig) AsMapInterface(separator string) map[string]interface{} {
 		utils.ResourceSCfg:     cfg.resourceSCfg.AsMapInterface(),
 		utils.StatsCfg:         cfg.statsCfg.AsMapInterface(),
 		utils.ThresholdSCfg:    cfg.thresholdSCfg.AsMapInterface(),
-		utils.SupplierSCfg:     cfg.supplierSCfg.AsMapInterface(),
-		utils.SureTaxCfg:       cfg.sureTaxCfg.AsMapInterface(separator),
+		utils.RouteSCfg:        cfg.routeSCfg.AsMapInterface(),
+		utils.SureTaxCfg:       cfg.sureTaxCfg.AsMapInterface(),
 		utils.DispatcherSCfg:   cfg.dispatcherSCfg.AsMapInterface(),
 		utils.LoaderCgrCfg:     cfg.loaderCgrCfg.AsMapInterface(),
 		utils.MigratorCgrCfg:   cfg.migratorCgrCfg.AsMapInterface(),

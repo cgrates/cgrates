@@ -413,7 +413,7 @@ func (rs *RedisStorage) HasDataDrv(category, subject, tenant string) (bool, erro
 		return i == 1, err
 	case utils.ResourcesPrefix, utils.ResourceProfilesPrefix, utils.StatQueuePrefix,
 		utils.StatQueueProfilePrefix, utils.ThresholdPrefix, utils.ThresholdProfilePrefix,
-		utils.FilterPrefix, utils.SupplierProfilePrefix, utils.AttributeProfilePrefix,
+		utils.FilterPrefix, utils.RouteProfilePrefix, utils.AttributeProfilePrefix,
 		utils.ChargerProfilePrefix, utils.DispatcherProfilePrefix, utils.DispatcherHostPrefix:
 		i, err := rs.Cmd(redis_EXISTS, category+utils.ConcatenatedKey(tenant, subject)).Int()
 		return i == 1, err
@@ -1489,8 +1489,8 @@ func (rs *RedisStorage) RemoveFilterDrv(tenant, id string) (err error) {
 	return
 }
 
-func (rs *RedisStorage) GetSupplierProfileDrv(tenant, id string) (r *SupplierProfile, err error) {
-	key := utils.SupplierProfilePrefix + utils.ConcatenatedKey(tenant, id)
+func (rs *RedisStorage) GetRouteProfileDrv(tenant, id string) (r *RouteProfile, err error) {
+	key := utils.RouteProfilePrefix + utils.ConcatenatedKey(tenant, id)
 	var values []byte
 	if values, err = rs.Cmd(redis_GET, key).Bytes(); err != nil {
 		if err == redis.ErrRespNil { // did not find the destination
@@ -1504,16 +1504,16 @@ func (rs *RedisStorage) GetSupplierProfileDrv(tenant, id string) (r *SupplierPro
 	return
 }
 
-func (rs *RedisStorage) SetSupplierProfileDrv(r *SupplierProfile) (err error) {
+func (rs *RedisStorage) SetRouteProfileDrv(r *RouteProfile) (err error) {
 	result, err := rs.ms.Marshal(r)
 	if err != nil {
 		return err
 	}
-	return rs.Cmd(redis_SET, utils.SupplierProfilePrefix+utils.ConcatenatedKey(r.Tenant, r.ID), result).Err
+	return rs.Cmd(redis_SET, utils.RouteProfilePrefix+utils.ConcatenatedKey(r.Tenant, r.ID), result).Err
 }
 
-func (rs *RedisStorage) RemoveSupplierProfileDrv(tenant, id string) (err error) {
-	key := utils.SupplierProfilePrefix + utils.ConcatenatedKey(tenant, id)
+func (rs *RedisStorage) RemoveRouteProfileDrv(tenant, id string) (err error) {
+	key := utils.RouteProfilePrefix + utils.ConcatenatedKey(tenant, id)
 	if err = rs.Cmd(redis_DEL, key).Err; err != nil {
 		return
 	}

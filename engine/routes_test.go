@@ -376,8 +376,8 @@ func TestSuppliersCache(t *testing.T) {
 	}
 }
 
-func TestSuppliersmatchingSupplierProfilesForEvent(t *testing.T) {
-	sprf, err := splService.matchingSupplierProfilesForEvent(argsGetSuppliers[0].CGREvent, true)
+func TestSuppliersmatchingRouteProfilesForEvent(t *testing.T) {
+	sprf, err := splService.matchingRouteProfilesForEvent(argsGetSuppliers[0].CGREvent, true)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -385,7 +385,7 @@ func TestSuppliersmatchingSupplierProfilesForEvent(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", sppTest[0], sprf[0])
 	}
 
-	sprf, err = splService.matchingSupplierProfilesForEvent(argsGetSuppliers[1].CGREvent, true)
+	sprf, err = splService.matchingRouteProfilesForEvent(argsGetSuppliers[1].CGREvent, true)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -393,7 +393,7 @@ func TestSuppliersmatchingSupplierProfilesForEvent(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", sppTest[1], sprf[0])
 	}
 
-	sprf, err = splService.matchingSupplierProfilesForEvent(argsGetSuppliers[2].CGREvent, true)
+	sprf, err = splService.matchingRouteProfilesForEvent(argsGetSuppliers[2].CGREvent, true)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -627,7 +627,7 @@ func TestSuppliersAsOptsGetSuppliersMaxCost(t *testing.T) {
 
 func TestSuppliersMatchWithIndexFalse(t *testing.T) {
 	splService.cgrcfg.SupplierSCfg().IndexedSelects = false
-	sprf, err := splService.matchingSupplierProfilesForEvent(argsGetSuppliers[0].CGREvent, true)
+	sprf, err := splService.matchingRouteProfilesForEvent(argsGetSuppliers[0].CGREvent, true)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -635,7 +635,7 @@ func TestSuppliersMatchWithIndexFalse(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", sppTest[0], sprf[0])
 	}
 
-	sprf, err = splService.matchingSupplierProfilesForEvent(argsGetSuppliers[1].CGREvent, true)
+	sprf, err = splService.matchingRouteProfilesForEvent(argsGetSuppliers[1].CGREvent, true)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -643,7 +643,7 @@ func TestSuppliersMatchWithIndexFalse(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", sppTest[1], sprf[0])
 	}
 
-	sprf, err = splService.matchingSupplierProfilesForEvent(argsGetSuppliers[2].CGREvent, true)
+	sprf, err = splService.matchingRouteProfilesForEvent(argsGetSuppliers[2].CGREvent, true)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}

@@ -24,44 +24,44 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewLoadDistributionSorter(spS *SupplierService) *LoadDistributionSorter {
-	return &LoadDistributionSorter{spS: spS,
+func NewLoadDistributionSorter(rS *RouteService) *LoadDistributionSorter {
+	return &LoadDistributionSorter{rS: rS,
 		sorting: utils.MetaLoad}
 }
 
 // ResourceAscendentSorter orders suppliers based on their Resource Usage
 type LoadDistributionSorter struct {
 	sorting string
-	spS     *SupplierService
+	rS      *RouteService
 }
 
-func (ws *LoadDistributionSorter) SortSuppliers(prflID string,
-	suppls []*Supplier, suplEv *utils.CGREvent, extraOpts *optsGetSuppliers) (sortedSuppls *SortedSuppliers, err error) {
-	sortedSuppls = &SortedSuppliers{ProfileID: prflID,
-		Sorting:         ws.sorting,
-		SortedSuppliers: make([]*SortedSupplier, 0)}
-	for _, s := range suppls {
+func (ws *LoadDistributionSorter) SortRoutes(prflID string,
+	routes []*Route, suplEv *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
+	sortedRoutes = &SortedRoutes{ProfileID: prflID,
+		Sorting:      ws.sorting,
+		SortedRoutes: make([]*SortedRoute, 0)}
+	for _, route := range routes {
 		// we should have at least 1 statID defined for counting CDR (a.k.a *sum:1)
-		if len(s.StatIDs) == 0 {
+		if len(route.StatIDs) == 0 {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> supplier: <%s> - empty StatIDs",
-					utils.SupplierS, s.ID))
+					utils.RouteS, route.ID))
 			return nil, utils.NewErrMandatoryIeMissing("StatIDs")
 		}
-		if srtSpl, pass, err := ws.spS.populateSortingData(suplEv, s, extraOpts); err != nil {
+		if srtSpl, pass, err := ws.rS.populateSortingData(suplEv, route, extraOpts); err != nil {
 			return nil, err
 		} else if pass && srtSpl != nil {
 			// Add the ratio in SortingData so we can used it later in SortLoadDistribution
-			floatRatio, err := utils.IfaceAsFloat64(s.cacheSupplier[utils.MetaRatio])
+			floatRatio, err := utils.IfaceAsFloat64(route.cacheRoute[utils.MetaRatio])
 			if err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> cannot convert ratio <%s> to float64 supplier: <%s>",
-						utils.SupplierS, s.cacheSupplier[utils.MetaRatio], s.ID))
+						utils.RouteS, route.cacheRoute[utils.MetaRatio], route.ID))
 			}
 			srtSpl.SortingData[utils.Ratio] = floatRatio
-			sortedSuppls.SortedSuppliers = append(sortedSuppls.SortedSuppliers, srtSpl)
+			sortedRoutes.SortedRoutes = append(sortedRoutes.SortedRoutes, srtSpl)
 		}
 	}
-	sortedSuppls.SortLoadDistribution()
+	sortedRoutes.SortLoadDistribution()
 	return
 }

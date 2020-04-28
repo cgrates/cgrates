@@ -451,7 +451,7 @@ func (iDB *InternalDB) GetTPFilters(tpid, tenant, id string) (fltrs []*utils.TPF
 	return
 }
 
-func (iDB *InternalDB) GetTPSuppliers(tpid, tenant, id string) (supps []*utils.TPSupplierProfile, err error) {
+func (iDB *InternalDB) GetTPRoutes(tpid, tenant, id string) (supps []*utils.TPRouteProfile, err error) {
 	key := tpid
 	if tenant != utils.EmptyString {
 		key += utils.CONCATENATED_KEY_SEP + tenant
@@ -459,13 +459,13 @@ func (iDB *InternalDB) GetTPSuppliers(tpid, tenant, id string) (supps []*utils.T
 	if id != utils.EmptyString {
 		key += utils.CONCATENATED_KEY_SEP + id
 	}
-	ids := iDB.db.GetItemIDs(utils.TBLTPSuppliers, key)
+	ids := iDB.db.GetItemIDs(utils.TBLTPRoutes, key)
 	for _, id := range ids {
-		x, ok := iDB.db.Get(utils.TBLTPSuppliers, id)
+		x, ok := iDB.db.Get(utils.TBLTPRoutes, id)
 		if !ok || x == nil {
 			return nil, utils.ErrNotFound
 		}
-		supps = append(supps, x.(*utils.TPSupplierProfile))
+		supps = append(supps, x.(*utils.TPRouteProfile))
 
 	}
 	if len(supps) == 0 {
@@ -750,12 +750,12 @@ func (iDB *InternalDB) SetTPFilters(filters []*utils.TPFilterProfile) (err error
 	return
 }
 
-func (iDB *InternalDB) SetTPSuppliers(suppliers []*utils.TPSupplierProfile) (err error) {
-	if len(suppliers) == 0 {
+func (iDB *InternalDB) SetTPRoutes(routes []*utils.TPRouteProfile) (err error) {
+	if len(routes) == 0 {
 		return nil
 	}
-	for _, supplier := range suppliers {
-		iDB.db.Set(utils.TBLTPSuppliers, utils.ConcatenatedKey(supplier.TPid, supplier.Tenant, supplier.ID), supplier, nil,
+	for _, route := range routes {
+		iDB.db.Set(utils.TBLTPRoutes, utils.ConcatenatedKey(route.TPid, route.Tenant, route.ID), route, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	}
 	return

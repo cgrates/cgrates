@@ -115,9 +115,9 @@ type DataDB interface {
 	GetFilterDrv(string, string) (*Filter, error)
 	SetFilterDrv(*Filter) error
 	RemoveFilterDrv(string, string) error
-	GetSupplierProfileDrv(string, string) (*SupplierProfile, error)
-	SetSupplierProfileDrv(*SupplierProfile) error
-	RemoveSupplierProfileDrv(string, string) error
+	GetRouteProfileDrv(string, string) (*RouteProfile, error)
+	SetRouteProfileDrv(*RouteProfile) error
+	RemoveRouteProfileDrv(string, string) error
 	GetAttributeProfileDrv(string, string) (*AttributeProfile, error)
 	SetAttributeProfileDrv(*AttributeProfile) error
 	RemoveAttributeProfileDrv(string, string) error
@@ -177,7 +177,7 @@ type LoadReader interface {
 	GetTPStats(string, string, string) ([]*utils.TPStatProfile, error)
 	GetTPThresholds(string, string, string) ([]*utils.TPThresholdProfile, error)
 	GetTPFilters(string, string, string) ([]*utils.TPFilterProfile, error)
-	GetTPSuppliers(string, string, string) ([]*utils.TPSupplierProfile, error)
+	GetTPRoutes(string, string, string) ([]*utils.TPRouteProfile, error)
 	GetTPAttributes(string, string, string) ([]*utils.TPAttributeProfile, error)
 	GetTPChargers(string, string, string) ([]*utils.TPChargerProfile, error)
 	GetTPDispatcherProfiles(string, string, string) ([]*utils.TPDispatcherProfile, error)
@@ -201,7 +201,7 @@ type LoadWriter interface {
 	SetTPStats([]*utils.TPStatProfile) error
 	SetTPThresholds([]*utils.TPThresholdProfile) error
 	SetTPFilters([]*utils.TPFilterProfile) error
-	SetTPSuppliers([]*utils.TPSupplierProfile) error
+	SetTPRoutes([]*utils.TPRouteProfile) error
 	SetTPAttributes([]*utils.TPAttributeProfile) error
 	SetTPChargers([]*utils.TPChargerProfile) error
 	SetTPDispatcherProfiles([]*utils.TPDispatcherProfile) error

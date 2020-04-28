@@ -27,7 +27,7 @@ var (
 		PreRated, CostSource, CostDetails, ExtraInfo, OrderID})
 	PostPaidRatedSlice = []string{META_POSTPAID, META_RATED}
 	ItemList           = NewStringSet([]string{MetaAccounts, MetaAttributes, MetaChargers, MetaDispatchers, MetaDispatcherHosts,
-		MetaFilters, MetaResources, MetaStats, MetaThresholds, MetaSuppliers,
+		MetaFilters, MetaResources, MetaStats, MetaThresholds, MetaRoutes,
 	})
 	AttrInlineTypes = NewStringSet([]string{META_CONSTANT, MetaVariable, META_COMPOSED, META_USAGE_DIFFERENCE,
 		MetaSum, MetaValueExponent})
@@ -64,9 +64,9 @@ var (
 		CacheAccountActionPlans, CacheActionTriggers, CacheSharedGroups, CacheTimings,
 		CacheResourceProfiles, CacheResources, CacheEventResources, CacheStatQueueProfiles,
 		CacheStatQueues, CacheThresholdProfiles, CacheThresholds, CacheFilters,
-		CacheSupplierProfiles, CacheAttributeProfiles, CacheChargerProfiles,
+		CacheRouteProfiles, CacheAttributeProfiles, CacheChargerProfiles,
 		CacheDispatcherProfiles, CacheDispatcherHosts, CacheDispatchers, CacheResourceFilterIndexes,
-		CacheStatFilterIndexes, CacheThresholdFilterIndexes, CacheSupplierFilterIndexes,
+		CacheStatFilterIndexes, CacheThresholdFilterIndexes, CacheRouteFilterIndexes,
 		CacheAttributeFilterIndexes, CacheChargerFilterIndexes, CacheDispatcherFilterIndexes,
 		CacheDispatcherRoutes, CacheDispatcherLoads, CacheDiameterMessages, CacheRPCResponses,
 		CacheClosedSessions, CacheCDRIDs, CacheLoadIDs, CacheRPCConnections, CacheRatingProfilesTmp,
@@ -89,7 +89,7 @@ var (
 		CacheThresholdProfiles:       ThresholdProfilePrefix,
 		CacheThresholds:              ThresholdPrefix,
 		CacheFilters:                 FilterPrefix,
-		CacheSupplierProfiles:        SupplierProfilePrefix,
+		CacheRouteProfiles:           RouteProfilePrefix,
 		CacheAttributeProfiles:       AttributeProfilePrefix,
 		CacheChargerProfiles:         ChargerProfilePrefix,
 		CacheDispatcherProfiles:      DispatcherProfilePrefix,
@@ -97,7 +97,7 @@ var (
 		CacheResourceFilterIndexes:   ResourceFilterIndexes,
 		CacheStatFilterIndexes:       StatFilterIndexes,
 		CacheThresholdFilterIndexes:  ThresholdFilterIndexes,
-		CacheSupplierFilterIndexes:   SupplierFilterIndexes,
+		CacheRouteFilterIndexes:      RouteFilterIndexes,
 		CacheAttributeFilterIndexes:  AttributeFilterIndexes,
 		CacheChargerFilterIndexes:    ChargerFilterIndexes,
 		CacheDispatcherFilterIndexes: DispatcherFilterIndexes,
@@ -109,7 +109,7 @@ var (
 		ThresholdProfilePrefix:  CacheThresholdFilterIndexes,
 		ResourceProfilesPrefix:  CacheResourceFilterIndexes,
 		StatQueueProfilePrefix:  CacheStatFilterIndexes,
-		SupplierProfilePrefix:   CacheSupplierFilterIndexes,
+		RouteProfilePrefix:      CacheRouteFilterIndexes,
 		AttributeProfilePrefix:  CacheAttributeFilterIndexes,
 		ChargerProfilePrefix:    CacheChargerFilterIndexes,
 		DispatcherProfilePrefix: CacheDispatcherFilterIndexes,
@@ -126,16 +126,16 @@ var (
 		CacheRatingPlans, CacheRatingProfiles, CacheActions,
 		CacheActionPlans, CacheAccountActionPlans, CacheActionTriggers, CacheSharedGroups, CacheResourceProfiles, CacheResources,
 		CacheTimings, CacheStatQueueProfiles, CacheStatQueues, CacheThresholdProfiles, CacheThresholds,
-		CacheFilters, CacheSupplierProfiles, CacheAttributeProfiles, CacheChargerProfiles,
+		CacheFilters, CacheRouteProfiles, CacheAttributeProfiles, CacheChargerProfiles,
 		CacheDispatcherProfiles, CacheDispatcherHosts, CacheResourceFilterIndexes, CacheStatFilterIndexes,
-		CacheThresholdFilterIndexes, CacheSupplierFilterIndexes, CacheAttributeFilterIndexes,
+		CacheThresholdFilterIndexes, CacheRouteFilterIndexes, CacheAttributeFilterIndexes,
 		CacheChargerFilterIndexes, CacheDispatcherFilterIndexes, CacheLoadIDs, CacheAccounts})
 
 	CacheStorDBPartitions = NewStringSet([]string{TBLTPTimings, TBLTPDestinations, TBLTPRates,
 		TBLTPDestinationRates, TBLTPRatingPlans, TBLTPRateProfiles, TBLTPSharedGroups,
 		TBLTPActions, TBLTPActionPlans, TBLTPActionTriggers, TBLTPAccountActions, TBLTPResources, TBLTPStats,
 		TBLTPThresholds, TBLTPFilters, SessionCostsTBL, CDRsTBL,
-		TBLTPSuppliers, TBLTPAttributes, TBLTPChargers, TBLTPDispatchers, TBLTPDispatcherHosts})
+		TBLTPRoutes, TBLTPAttributes, TBLTPChargers, TBLTPDispatchers, TBLTPDispatcherHosts})
 	// ProtectedSFlds are the fields that sessions should not alter
 	ProtectedSFlds = NewStringSet([]string{CGRID, OriginHost, OriginID, Usage})
 )
@@ -266,7 +266,7 @@ const (
 	CDR_STATS_PREFIX             = "cst_"
 	VERSION_PREFIX               = "ver_"
 	StatQueueProfilePrefix       = "sqp_"
-	SupplierProfilePrefix        = "spp_"
+	RouteProfilePrefix           = "rpp_"
 	AttributeProfilePrefix       = "alp_"
 	ChargerProfilePrefix         = "cpp_"
 	DispatcherProfilePrefix      = "dpp_"
@@ -650,6 +650,8 @@ const (
 	Preference                = "Preference"
 	Flags                     = "Flags"
 	Service                   = "Service"
+	MetaRoutesLimit          = "*routes_limit"
+	MetaRoutesOffset         = "*routes_offset"
 	ApierV                    = "ApierV"
 	MetaApier                 = "*apier"
 	MetaAnalyzer              = "*analyzer"
@@ -709,6 +711,10 @@ const (
 	MetaMSCHAPV2              = "*mschapv2"
 	MetaDynaprepaid           = "*dynaprepaid"
 	MetaFD                    = "*fd"
+	SortingData              = "SortingData"
+	Count                    = "Count"
+	ProfileID                = "ProfileID"
+	SortedRoutes             = "SortedRoutes"
 )
 
 // Migrator Action
@@ -729,14 +735,14 @@ const (
 	MetaStatQueueProfiles   = "*statqueue_profiles"
 	MetaStatQueues          = "*statqueues"
 	MetaThresholdProfiles   = "*threshold_profiles"
-	MetaSupplierProfiles    = "*supplier_profiles"
+	MetaRouteProfiles       = "*route_profiles"
 	MetaAttributeProfiles   = "*attribute_profiles"
 	MetaFilterIndexes       = "*filter_indexes"
 	MetaDispatcherProfiles  = "*dispatcher_profiles"
 	MetaChargerProfiles     = "*charger_profiles"
 	MetaSharedGroups        = "*shared_groups"
 	MetaThresholds          = "*thresholds"
-	MetaSuppliers           = "*suppliers"
+	MetaRoutes              = "*routes"
 	MetaAttributes          = "*attributes"
 	MetaLoadIDs             = "*load_ids"
 )
@@ -781,7 +787,7 @@ const (
 	SessionsLow    = "sessions"
 	AttributesLow  = "attributes"
 	ChargerSLow    = "chargers"
-	SuppliersLow   = "suppliers"
+	RoutesLow      = "suppliers"
 	ResourcesLow   = "resources"
 	StatServiceLow = "stats"
 	ThresholdsLow  = "thresholds"
@@ -842,7 +848,7 @@ const (
 	MetaTpActionPlans       = "*tp_action_plans"
 	MetaTpActions           = "*tp_actions"
 	MetaTpThresholds        = "*tp_thresholds"
-	MetaTpSuppliers         = "*tp_suppliers"
+	MetaTpRoutes            = "*tp_Routes"
 	MetaTpStats             = "*tp_stats"
 	MetaTpSharedGroups      = "*tp_shared_groups"
 	MetaTpRatingProfiles    = "*tp_rating_profiles"
@@ -858,7 +864,7 @@ const (
 	CapResourceMessage      = "ResourceMessage"
 	CapResourceAllocation   = "ResourceAllocation"
 	CapMaxUsage             = "MaxUsage"
-	CapSuppliers            = "Suppliers"
+	CapRoutes               = "Routes"
 	CapThresholds           = "Thresholds"
 	CapStatQueues           = "StatQueues"
 )
@@ -872,7 +878,7 @@ const (
 	TpActionPlans      = "TpActionPlans"
 	TpActions          = "TpActions"
 	TpThresholds       = "TpThresholds"
-	TpSuppliers        = "TpSuppliers"
+	TpRoutes           = "TpRoutes"
 	TpStats            = "TpStats"
 	TpSharedGroups     = "TpSharedGroups"
 	TpRatingProfiles   = "TpRatingProfiles"
@@ -897,7 +903,7 @@ const (
 	ThresholdSv1       = "ThresholdSv1"
 	StatSv1            = "StatSv1"
 	ResourceSv1        = "ResourceSv1"
-	SupplierSv1        = "SupplierSv1"
+	RouteSv1           = "RouteSv1"
 	AttributeSv1       = "AttributeSv1"
 	SessionSv1         = "SessionSv1"
 	ChargerSv1         = "ChargerSv1"
@@ -1257,13 +1263,13 @@ const (
 
 // SupplierS APIs
 const (
-	SupplierSv1GetSuppliers                = "SupplierSv1.GetSuppliers"
-	SupplierSv1GetSupplierProfilesForEvent = "SupplierSv1.GetSupplierProfilesForEvent"
-	SupplierSv1Ping                        = "SupplierSv1.Ping"
-	APIerSv1GetSupplierProfile             = "APIerSv1.GetSupplierProfile"
-	APIerSv1GetSupplierProfileIDs          = "APIerSv1.GetSupplierProfileIDs"
-	APIerSv1RemoveSupplierProfile          = "APIerSv1.RemoveSupplierProfile"
-	APIerSv1SetSupplierProfile             = "APIerSv1.SetSupplierProfile"
+	RouteSv1GetRoutes                = "RouteSv1.GetRoutes"
+	RouteSv1GetRouteProfilesForEvent = "RouteSv1.GetRouteProfilesForEvent"
+	RouteSv1Ping                     = "RouteSv1.Ping"
+	APIerSv1GetRouteProfile          = "APIerSv1.GetRouteProfile"
+	APIerSv1GetRouteProfileIDs       = "APIerSv1.GetRouteProfileIDs"
+	APIerSv1RemoveRouteProfile       = "APIerSv1.RemoveRouteProfile"
+	APIerSv1SetRouteProfile          = "APIerSv1.SetRouteProfile"
 )
 
 // AttributeS APIs
@@ -1490,7 +1496,7 @@ const (
 	StatsCsv              = "Stats.csv"
 	ThresholdsCsv         = "Thresholds.csv"
 	FiltersCsv            = "Filters.csv"
-	SuppliersCsv          = "Suppliers.csv"
+	RoutesCsv             = "Routes.csv"
 	AttributesCsv         = "Attributes.csv"
 	ChargersCsv           = "Chargers.csv"
 	DispatcherProfilesCsv = "DispatcherProfiles.csv"
@@ -1516,7 +1522,7 @@ const (
 	TBLTPFilters          = "tp_filters"
 	SessionCostsTBL       = "session_costs"
 	CDRsTBL               = "cdrs"
-	TBLTPSuppliers        = "tp_suppliers"
+	TBLTPRoutes           = "tp_routes"
 	TBLTPAttributes       = "tp_attributes"
 	TBLTPChargers         = "tp_chargers"
 	TBLVersions           = "versions"
@@ -1545,7 +1551,7 @@ const (
 	CacheThresholdProfiles       = "*threshold_profiles"
 	CacheThresholds              = "*thresholds"
 	CacheFilters                 = "*filters"
-	CacheSupplierProfiles        = "*supplier_profiles"
+	CacheRouteProfiles           = "*route_profiles"
 	CacheAttributeProfiles       = "*attribute_profiles"
 	CacheChargerProfiles         = "*charger_profiles"
 	CacheDispatcherProfiles      = "*dispatcher_profiles"
@@ -1556,7 +1562,7 @@ const (
 	CacheResourceFilterIndexes   = "*resource_filter_indexes"
 	CacheStatFilterIndexes       = "*stat_filter_indexes"
 	CacheThresholdFilterIndexes  = "*threshold_filter_indexes"
-	CacheSupplierFilterIndexes   = "*supplier_filter_indexes"
+	CacheRouteFilterIndexes      = "*route_filter_indexes"
 	CacheAttributeFilterIndexes  = "*attribute_filter_indexes"
 	CacheChargerFilterIndexes    = "*charger_filter_indexes"
 	CacheDispatcherFilterIndexes = "*dispatcher_filter_indexes"
@@ -1579,11 +1585,11 @@ const (
 	ResourceFilterIndexes   = "rfi_"
 	StatFilterIndexes       = "sfi_"
 	ThresholdFilterIndexes  = "tfi_"
-	SupplierFilterIndexes   = "spi_"
 	AttributeFilterIndexes  = "afi_"
 	ChargerFilterIndexes    = "cfi_"
 	DispatcherFilterIndexes = "dfi_"
 	ActionPlanIndexes       = "api_"
+	RouteFilterIndexes      = "rti_"
 )
 
 // Agents
@@ -1766,7 +1772,7 @@ const (
 	RALsConnsCfg           = "rals_conns"
 	ResSConnsCfg           = "resources_conns"
 	ThreshSConnsCfg        = "thresholds_conns"
-	SupplSConnsCfg         = "suppliers_conns"
+	RouteSConnsCfg         = "routes_conns"
 	AttrSConnsCfg          = "attributes_conns"
 	ReplicationConnsCfg    = "replication_conns"
 	DebitIntervalCfg       = "debit_interval"
@@ -2025,7 +2031,7 @@ const (
 	ResourceSCfg     = "resources"        // from JSON
 	StatsCfg         = "stats"            // from JSON
 	ThresholdSCfg    = "thresholds"       // from JSON
-	SupplierSCfg     = "suppliers"        // from JSON
+	RouteSCfg        = "routes"           // from JSON
 	SureTaxCfg       = "suretax"          // from JSON
 	DispatcherSCfg   = "dispatchers"      // from JSON
 	LoaderCgrCfg     = "loader"           // from JSON
