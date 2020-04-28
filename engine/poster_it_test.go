@@ -32,6 +32,8 @@ import (
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/aws/aws-sdk-go/service/sqs"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -40,11 +42,15 @@ import (
 var (
 	/*
 		README
-		run test for sqs poster with following command:
+		run test for poster with following commands:
+		- sqs
 			go test -tags=integration -run=TestSQSPoster -sqs
+		- s3
+			go test -tags=integration -run=TestS3Poster -s3
 		also configure the credentials from test function
 	*/
 	itTestSQS = flag.Bool("sqs", false, "Run the test for SQSPoster")
+	itTestS3  = flag.Bool("s3", false, "Run the test for SQSPoster")
 )
 
 type TestContent struct {
@@ -193,5 +199,65 @@ func TestSQSPoster(t *testing.T) {
 	}
 	if *result.Messages[0].Body != body {
 		t.Errorf("Expected: %q, received: %q", body, *result.Messages[0].Body)
+	}
+}
+
+func TestS3Poster(t *testing.T) {
+	if !*itTestS3 {
+		return
+	}
+	cfg1, err := config.NewDefaultCGRConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	utils.Newlogger(utils.MetaSysLog, cfg1.GeneralCfg().NodeID)
+	utils.Logger.SetLogLevel(7)
+
+	//#####################################
+	// update this variables
+	endpoint := "http://s3.us-east-2.amazonaws.com"
+	region := "us-east-2"
+	awsKey := "replace-this-with-your-secret-key"
+	awsSecret := "replace-this-with-your-secret"
+	qname := "cgrates-cdrs"
+	//#####################################
+
+	// export_path for sqs:  "endpoint?aws_region=region&aws_key=IDkey&aws_secret=secret&aws_token=sessionToken&queue_id=cgrates-cdrs"
+	dialURL := fmt.Sprintf("%s?aws_region=%s&aws_key=%s&aws_secret=%s&queue_id=%s", endpoint, region, awsKey, awsSecret, qname)
+
+	body := "testString"
+	key := "key1234"
+	pstr, err := PostersCache.GetS3Poster(dialURL, 5)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := pstr.Post([]byte(body), key); err != nil {
+		t.Fatal(err)
+	}
+	key += ".json"
+	var sess *session.Session
+	cfg := aws.Config{Endpoint: aws.String(endpoint)}
+	cfg.Region = aws.String(region)
+
+	cfg.Credentials = credentials.NewStaticCredentials(awsKey, awsSecret, "")
+	sess, err = session.NewSessionWithOptions(
+		session.Options{
+			Config: cfg,
+		},
+	)
+	file := aws.NewWriteAtBuffer([]byte{})
+	// Create a SQS service client.
+	svc := s3manager.NewDownloader(sess)
+
+	if _, err = svc.Download(file,
+		&s3.GetObjectInput{
+			Bucket: aws.String(qname),
+			Key:    aws.String(key),
+		}); err != nil {
+		t.Fatalf("Unable to download item %v", err)
+	}
+
+	if rply := string(file.Bytes()); rply != body {
+		t.Errorf("Expected: %q, received: %q", body, rply)
 	}
 }
