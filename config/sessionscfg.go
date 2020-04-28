@@ -20,6 +20,7 @@ package config
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -390,23 +391,46 @@ func (fscfg *FsAgentCfg) loadFromJsonCfg(jsnCfg *FreeswitchAgentJsonCfg) error {
 	return nil
 }
 
-func (fscfg *FsAgentCfg) AsMapInterface() map[string]interface{} {
-	var eventSocketConns []map[string]interface{}
-	// eventSocketConns := make(map[string]interface{}, len(fscfg.EventSocketConns))
-	for _, item := range fscfg.EventSocketConns {
-		eventSocketConns = append(eventSocketConns, item.AsMapInterface())
+func (fscfg *FsAgentCfg) AsMapInterface(separator string) map[string]interface{} {
+	sessionSConns := make([]string, len(fscfg.SessionSConns))
+	for i, item := range fscfg.SessionSConns {
+		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
+		if item == buf {
+			sessionSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaSessionS, utils.EmptyString)
+		} else {
+			sessionSConns[i] = item
+		}
+	}
+
+	var extraFields string
+	if fscfg.ExtraFields != nil {
+		values := make([]string, len(fscfg.ExtraFields))
+		for i, item := range fscfg.ExtraFields {
+			values[i] = item.Rules
+		}
+		extraFields = strings.Join(values, separator)
+	}
+
+	var maxWaitConnection string = ""
+	if fscfg.MaxWaitConnection != 0 {
+		maxWaitConnection = fscfg.MaxWaitConnection.String()
+	}
+
+	eventSocketConns := make([]map[string]interface{}, len(fscfg.EventSocketConns))
+	for key, item := range fscfg.EventSocketConns {
+		eventSocketConns[key] = item.AsMapInterface()
 	}
 
 	return map[string]interface{}{
 		utils.EnabledCfg:             fscfg.Enabled,
-		utils.SessionSConnsCfg:       fscfg.SessionSConns,
+		utils.SessionSConnsCfg:       sessionSConns,
 		utils.SubscribeParkCfg:       fscfg.SubscribePark,
 		utils.CreateCdrCfg:           fscfg.CreateCdr,
-		utils.ExtraFieldsCfg:         fscfg.ExtraFields,
+		utils.ExtraFieldsCfg:         extraFields,
 		utils.LowBalanceAnnFileCfg:   fscfg.LowBalanceAnnFile,
 		utils.EmptyBalanceContextCfg: fscfg.EmptyBalanceContext,
 		utils.EmptyBalanceAnnFileCfg: fscfg.EmptyBalanceAnnFile,
-		utils.MaxWaitConnectionCfg:   fscfg.MaxWaitConnection,
+		utils.MaxWaitConnectionCfg:   maxWaitConnection,
 		utils.EventSocketConnsCfg:    eventSocketConns,
 	}
 }
@@ -518,9 +542,19 @@ func (aCfg *AsteriskAgentCfg) AsMapInterface() map[string]interface{} {
 		conns[i] = item.AsMapInterface()
 	}
 
+	sessionSConns := make([]string, len(aCfg.SessionSConns))
+	for i, item := range aCfg.SessionSConns {
+		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
+		if item == buf {
+			sessionSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaSessionS, utils.EmptyString)
+		} else {
+			sessionSConns[i] = item
+		}
+	}
+
 	return map[string]interface{}{
 		utils.EnabledCfg:       aCfg.Enabled,
-		utils.SessionSConnsCfg: aCfg.SessionSConns,
+		utils.SessionSConnsCfg: sessionSConns,
 		utils.CreateCDRCfg:     aCfg.CreateCDR,
 		utils.AsteriskConnsCfg: conns,
 	}
