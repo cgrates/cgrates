@@ -332,7 +332,7 @@ func TestEventReaderSameID(t *testing.T) {
 
 }
 
-func testERsCfgAsMapInterface(t *testing.T) {
+func TestERsCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
 	"ers": {
 		"enabled": true,
@@ -349,24 +349,25 @@ func testERsCfgAsMapInterface(t *testing.T) {
 		],
 	}
 }`
+	var filters []string
 	eMap := map[string]interface{}{
 		"enabled":        true,
 		"sessions_conns": []string{"conn1", "conn3"},
 		"readers": []map[string]interface{}{
 			{
 				"filters":              []string{},
-				"flags":                map[string]interface{}{},
+				"flags":                map[string][]interface{}{},
 				"id":                   "*default",
-				"partial_record_cache": 0,
+				"partial_record_cache": "0",
 				"processed_path":       "/var/spool/cgrates/cdrc/out",
 				"row_length":           0,
-				"run_delay":            0,
+				"run_delay":            "0",
 				"soome":                "",
 				"source_path":          "/var/spool/cgrates/cdrc/in",
-				"tenant":               []string{},
+				"tenant":               "",
 				"timezone":             "",
 				"xml_root_path":        []string{""},
-				"cache_dump_fields":    []string{},
+				"cache_dump_fields":    []map[string]interface{}{},
 				"concurrent_requests":  1024,
 				"db_type":              "*none",
 				"failed_calls_prefix":  "",
@@ -386,7 +387,7 @@ func testERsCfgAsMapInterface(t *testing.T) {
 				},
 			},
 			{
-				"cache_dump_fields":   []string{},
+				"cache_dump_fields":   []map[string]interface{}{},
 				"concurrent_requests": 1024,
 				"db_type":             "*file_csv",
 				"failed_calls_prefix": "",
@@ -404,16 +405,16 @@ func testERsCfgAsMapInterface(t *testing.T) {
 					{"mandatory": true, "path": "*cgreq.AnswerTime", "tag": "AnswerTime", "type": "*variable", "value": "~*req.12"},
 					{"mandatory": true, "path": "*cgreq.Usage", "tag": "Usage", "type": "*variable", "value": "~*req.13"},
 				},
-				"filters":              nil,
-				"flags":                map[string]interface{}{},
+				"filters":              filters,
+				"flags":                map[string][]interface{}{},
 				"id":                   "file_reader1",
-				"partial_record_cache": 0,
+				"partial_record_cache": "0",
 				"processed_path":       "/tmp/ers/out",
 				"row_length":           0,
-				"run_delay":            -1,
+				"run_delay":            "-1",
 				"soome":                "",
 				"source_path":          "/tmp/ers/in",
-				"tenant":               []string{},
+				"tenant":               "",
 				"timezone":             "",
 				"xml_root_path":        []string{""},
 			},
