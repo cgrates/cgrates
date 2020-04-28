@@ -18,7 +18,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
-import "github.com/cgrates/cgrates/utils"
+import (
+	"strings"
+
+	"github.com/cgrates/cgrates/utils"
+)
 
 type DiameterAgentCfg struct {
 	Enabled           bool   // enables the diameter agent: <true|false>
@@ -141,12 +145,22 @@ func (ds *DiameterAgentCfg) AsMapInterface(separator string) map[string]interfac
 		requestProcessors[i] = item.AsMapInterface(separator)
 	}
 
+	sessionSConns := make([]string, len(ds.SessionSConns))
+	for i, item := range ds.SessionSConns {
+		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
+		if item == buf {
+			sessionSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaSessionS, utils.EmptyString)
+		} else {
+			sessionSConns[i] = item
+		}
+	}
+
 	return map[string]interface{}{
 		utils.EnabledCfg:           ds.Enabled,
 		utils.ListenNetCfg:         ds.ListenNet,
 		utils.ListenCfg:            ds.Listen,
 		utils.DictionariesPathCfg:  ds.DictionariesPath,
-		utils.SessionSConnsCfg:     ds.SessionSConns,
+		utils.SessionSConnsCfg:     sessionSConns,
 		utils.OriginHostCfg:        ds.OriginHost,
 		utils.OriginRealmCfg:       ds.OriginRealm,
 		utils.VendorIdCfg:          ds.VendorId,
