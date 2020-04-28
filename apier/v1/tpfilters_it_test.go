@@ -74,7 +74,6 @@ func TestTPFilterITMySql(t *testing.T) {
 	default:
 		t.Fatal("Unknown Database type")
 	}
-	tpFilterConfigDIR = "tutmysql"
 	for _, stest := range sTestsTPFilters {
 		t.Run(tpFilterConfigDIR, stest)
 	}

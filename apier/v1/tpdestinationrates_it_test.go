@@ -72,7 +72,6 @@ func TestTPDstRateIT(t *testing.T) {
 	default:
 		t.Fatal("Unknown Database type")
 	}
-	tpDstRateConfigDIR = "tutmysql"
 	for _, stest := range sTestsTPDstRates {
 		t.Run(tpDstRateConfigDIR, stest)
 	}

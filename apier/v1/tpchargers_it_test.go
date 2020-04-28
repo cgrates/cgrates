@@ -73,7 +73,6 @@ func TestTPChrgsIT(t *testing.T) {
 	default:
 		t.Fatal("Unknown Database type")
 	}
-	tpChrgsConfigDIR = "tutmysql"
 	for _, stest := range sTestsTPChrgs {
 		t.Run(tpChrgsConfigDIR, stest)
 	}
