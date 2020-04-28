@@ -2077,7 +2077,7 @@ func TestDDCGetCompressFactor(t *testing.T) {
 }
 
 func TestStatSumGetFloat64Value(t *testing.T) {
-	statSum, _ := NewStatSum(2, "~Cost", []string{})
+	statSum, _ := NewStatSum(2, "~*req.Cost", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"Cost":            "20",
@@ -2140,7 +2140,7 @@ func TestStatSumGetFloat64Value(t *testing.T) {
 }
 
 func TestStatSumGetStringValue(t *testing.T) {
-	statSum, _ := NewStatSum(2, "~Cost", []string{})
+	statSum, _ := NewStatSum(2, "~*req.Cost", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"Cost":            "20",
@@ -2185,7 +2185,7 @@ func TestStatSumGetStringValue(t *testing.T) {
 }
 
 func TestStatSumGetStringValue2(t *testing.T) {
-	statSum, _ := NewStatSum(2, "~Cost", []string{})
+	statSum, _ := NewStatSum(2, "~*req.Cost", []string{})
 	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{"Cost": 12.3}}
 	if err := statSum.AddEvent(ev1); err != nil {
@@ -2209,7 +2209,7 @@ func TestStatSumGetStringValue2(t *testing.T) {
 }
 
 func TestStatSumGetStringValue3(t *testing.T) {
-	statSum := &StatSum{Events: make(map[string]*StatWithCompress), MinItems: 2, FilterIDs: []string{}, FieldName: "~Cost"}
+	statSum := &StatSum{Events: make(map[string]*StatWithCompress), MinItems: 2, FilterIDs: []string{}, FieldName: "~*req.Cost"}
 	expected := &StatSum{
 		Events: map[string]*StatWithCompress{
 			"EVENT_1": &StatWithCompress{Stat: 12.2, CompressFactor: 2},
@@ -2217,7 +2217,7 @@ func TestStatSumGetStringValue3(t *testing.T) {
 		},
 		MinItems:  2,
 		FilterIDs: []string{},
-		FieldName: "~Cost",
+		FieldName: "~*req.Cost",
 		Count:     3,
 		Sum:       42.7,
 	}
@@ -2255,7 +2255,7 @@ func TestStatSumGetStringValue3(t *testing.T) {
 }
 
 func TestStatSumCompress(t *testing.T) {
-	sum := &StatSum{Events: make(map[string]*StatWithCompress), FieldName: "~Cost",
+	sum := &StatSum{Events: make(map[string]*StatWithCompress), FieldName: "~*req.Cost",
 		MinItems: 2, FilterIDs: []string{}}
 	expected := &StatSum{
 		Events: map[string]*StatWithCompress{
@@ -2265,7 +2265,7 @@ func TestStatSumCompress(t *testing.T) {
 		MinItems:  2,
 		FilterIDs: []string{},
 		Sum:       24.4,
-		FieldName: "~Cost",
+		FieldName: "~*req.Cost",
 		Count:     2,
 	}
 	expected.GetStringValue("")
@@ -2293,7 +2293,7 @@ func TestStatSumCompress(t *testing.T) {
 		},
 		MinItems:  2,
 		FilterIDs: []string{},
-		FieldName: "~Cost",
+		FieldName: "~*req.Cost",
 		Sum:       24.4,
 		Count:     2,
 	}
@@ -2330,7 +2330,7 @@ func TestStatSumGetCompressFactor(t *testing.T) {
 		"EVENT_1": 1,
 		"EVENT_2": 1,
 	}
-	sum, _ := NewStatSum(2, "~Cost", []string{})
+	sum, _ := NewStatSum(2, "~*req.Cost", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{"Cost": 18.2}}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
@@ -2357,7 +2357,7 @@ func TestStatSumGetCompressFactor(t *testing.T) {
 }
 
 func TestStatAverageGetFloat64Value(t *testing.T) {
-	statAvg, _ := NewStatAverage(2, "~Cost", []string{})
+	statAvg, _ := NewStatAverage(2, "~*req.Cost", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"Cost":            "20",
@@ -2418,7 +2418,7 @@ func TestStatAverageGetFloat64Value(t *testing.T) {
 }
 
 func TestStatAverageGetStringValue(t *testing.T) {
-	statAvg, _ := NewStatAverage(2, "~Cost", []string{})
+	statAvg, _ := NewStatAverage(2, "~*req.Cost", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"Cost":            "20",
@@ -2463,7 +2463,7 @@ func TestStatAverageGetStringValue(t *testing.T) {
 }
 
 func TestStatAverageGetStringValue2(t *testing.T) {
-	statAvg, _ := NewStatAverage(2, "~Cost", []string{})
+	statAvg, _ := NewStatAverage(2, "~*req.Cost", []string{})
 	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{"Cost": 12.3}}
 	if err := statAvg.AddEvent(ev1); err != nil {
@@ -2487,7 +2487,8 @@ func TestStatAverageGetStringValue2(t *testing.T) {
 }
 
 func TestStatAverageGetStringValue3(t *testing.T) {
-	statAvg := &StatAverage{Events: make(map[string]*StatWithCompress), MinItems: 2, FilterIDs: []string{}, FieldName: "~Cost"}
+	statAvg := &StatAverage{Events: make(map[string]*StatWithCompress),
+		MinItems: 2, FilterIDs: []string{}, FieldName: "~*req.Cost"}
 	expected := &StatAverage{
 		Events: map[string]*StatWithCompress{
 			"EVENT_1": &StatWithCompress{Stat: 12.2, CompressFactor: 2},
@@ -2495,7 +2496,7 @@ func TestStatAverageGetStringValue3(t *testing.T) {
 		},
 		MinItems:  2,
 		FilterIDs: []string{},
-		FieldName: "~Cost",
+		FieldName: "~*req.Cost",
 		Count:     3,
 		Sum:       42.7,
 	}
@@ -2533,7 +2534,7 @@ func TestStatAverageGetStringValue3(t *testing.T) {
 }
 
 func TestStatAverageCompress(t *testing.T) {
-	avg := &StatAverage{Events: make(map[string]*StatWithCompress), FieldName: "~Cost",
+	avg := &StatAverage{Events: make(map[string]*StatWithCompress), FieldName: "~*req.Cost",
 		MinItems: 2, FilterIDs: []string{}}
 	expected := &StatAverage{
 		Events: map[string]*StatWithCompress{
@@ -2543,7 +2544,7 @@ func TestStatAverageCompress(t *testing.T) {
 		MinItems:  2,
 		FilterIDs: []string{},
 		Sum:       24.4,
-		FieldName: "~Cost",
+		FieldName: "~*req.Cost",
 		Count:     2,
 	}
 	expected.GetStringValue("")
@@ -2571,7 +2572,7 @@ func TestStatAverageCompress(t *testing.T) {
 		},
 		MinItems:  2,
 		FilterIDs: []string{},
-		FieldName: "~Cost",
+		FieldName: "~*req.Cost",
 		Sum:       24.4,
 		Count:     2,
 	}
@@ -2608,7 +2609,7 @@ func TestStatAverageGetCompressFactor(t *testing.T) {
 		"EVENT_1": 1,
 		"EVENT_2": 1,
 	}
-	avg, _ := NewStatAverage(2, "~Cost", []string{})
+	avg, _ := NewStatAverage(2, "~*req.Cost", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{"Cost": 18.2}}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
@@ -2635,7 +2636,7 @@ func TestStatAverageGetCompressFactor(t *testing.T) {
 }
 
 func TestStatDistinctGetFloat64Value(t *testing.T) {
-	statDistinct, _ := NewStatDistinct(2, "~Usage", []string{})
+	statDistinct, _ := NewStatDistinct(2, "~*req.Usage", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{"Usage": time.Duration(10 * time.Second)}}
 	statDistinct.AddEvent(ev)
@@ -2686,7 +2687,7 @@ func TestStatDistinctGetFloat64Value(t *testing.T) {
 }
 
 func TestStatDistinctGetStringValue(t *testing.T) {
-	statDistinct, _ := NewStatDistinct(2, "~Cost", []string{})
+	statDistinct, _ := NewStatDistinct(2, "~*req.Cost", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{"Cost": "20"}}
 	if strVal := statDistinct.GetStringValue(""); strVal != utils.NOT_AVAILABLE {
@@ -2721,7 +2722,7 @@ func TestStatDistinctGetStringValue(t *testing.T) {
 }
 
 func TestStatDistinctGetStringValue2(t *testing.T) {
-	statDistinct, _ := NewStatDistinct(2, "~Cost", []string{})
+	statDistinct, _ := NewStatDistinct(2, "~*req.Cost", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{"Cost": "20"}}
 	if strVal := statDistinct.GetStringValue(""); strVal != utils.NOT_AVAILABLE {
@@ -2750,7 +2751,7 @@ func TestStatDistinctCompress(t *testing.T) {
 		FieldValues: make(map[string]map[string]struct{}),
 		MinItems:    2,
 		FilterIDs:   []string{},
-		FieldName:   utils.DynamicDataPrefix + utils.Destination,
+		FieldName:   utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Destination,
 	}
 	expected := &StatDistinct{
 		Events: map[string]map[string]int64{
@@ -2771,7 +2772,7 @@ func TestStatDistinctCompress(t *testing.T) {
 		},
 		MinItems:  2,
 		FilterIDs: []string{},
-		FieldName: utils.DynamicDataPrefix + utils.Destination,
+		FieldName: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Destination,
 		Count:     3,
 	}
 	expected.GetStringValue("")
@@ -2811,7 +2812,7 @@ func TestStatDistinctGetCompressFactor(t *testing.T) {
 		"EVENT_1": 1,
 		"EVENT_2": 1,
 	}
-	ddc, _ := NewStatDistinct(2, utils.DynamicDataPrefix+utils.Destination, []string{})
+	ddc, _ := NewStatDistinct(2, utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+utils.Destination, []string{})
 
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{utils.Destination: "1002"}}
@@ -2983,7 +2984,7 @@ func TestDCCMarshal(t *testing.T) {
 }
 
 func TestStatSumMarshal(t *testing.T) {
-	statSum, _ := NewStatSum(2, "~Cost", []string{})
+	statSum, _ := NewStatSum(2, "~*req.Cost", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"Cost":            "20",
@@ -2993,7 +2994,7 @@ func TestStatSumMarshal(t *testing.T) {
 			utils.Destination: "1002"}}
 	statSum.AddEvent(ev)
 	var nstatSum StatSum
-	expected := []byte(`{"FilterIDs":[],"Sum":20,"Count":1,"Events":{"EVENT_1":{"Stat":20,"CompressFactor":1}},"MinItems":2,"FieldName":"~Cost"}`)
+	expected := []byte(`{"FilterIDs":[],"Sum":20,"Count":1,"Events":{"EVENT_1":{"Stat":20,"CompressFactor":1}},"MinItems":2,"FieldName":"~*req.Cost"}`)
 	if b, err := statSum.Marshal(&jMarshaler); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, b) {
@@ -3006,7 +3007,7 @@ func TestStatSumMarshal(t *testing.T) {
 }
 
 func TestStatAverageMarshal(t *testing.T) {
-	statAvg, _ := NewStatAverage(2, "~Cost", []string{})
+	statAvg, _ := NewStatAverage(2, "~*req.Cost", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"Cost":            "20",
@@ -3016,7 +3017,7 @@ func TestStatAverageMarshal(t *testing.T) {
 			utils.Destination: "1002"}}
 	statAvg.AddEvent(ev)
 	var nstatAvg StatAverage
-	expected := []byte(`{"FilterIDs":[],"Sum":20,"Count":1,"Events":{"EVENT_1":{"Stat":20,"CompressFactor":1}},"MinItems":2,"FieldName":"~Cost"}`)
+	expected := []byte(`{"FilterIDs":[],"Sum":20,"Count":1,"Events":{"EVENT_1":{"Stat":20,"CompressFactor":1}},"MinItems":2,"FieldName":"~*req.Cost"}`)
 	if b, err := statAvg.Marshal(&jMarshaler); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, b) {
@@ -3029,7 +3030,7 @@ func TestStatAverageMarshal(t *testing.T) {
 }
 
 func TestStatDistrictMarshal(t *testing.T) {
-	statDistinct, _ := NewStatDistinct(2, "~Usage", []string{})
+	statDistinct, _ := NewStatDistinct(2, "~*req.Usage", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"Cost":            "20",
@@ -3039,7 +3040,7 @@ func TestStatDistrictMarshal(t *testing.T) {
 			utils.Destination: "1002"}}
 	statDistinct.AddEvent(ev)
 	var nStatDistinct StatDistinct
-	expected := []byte(`{"FilterIDs":[],"FieldValues":{"10s":{"EVENT_1":{}}},"Events":{"EVENT_1":{"10s":1}},"MinItems":2,"FieldName":"~Usage","Count":1}`)
+	expected := []byte(`{"FilterIDs":[],"FieldValues":{"10s":{"EVENT_1":{}}},"Events":{"EVENT_1":{"10s":1}},"MinItems":2,"FieldName":"~*req.Usage","Count":1}`)
 	if b, err := statDistinct.Marshal(&jMarshaler); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, b) {
