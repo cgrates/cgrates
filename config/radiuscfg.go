@@ -18,7 +18,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
-import "github.com/cgrates/cgrates/utils"
+import (
+	"strings"
+
+	"github.com/cgrates/cgrates/utils"
+)
 
 type RadiusAgentCfg struct {
 	Enabled            bool
@@ -112,6 +116,16 @@ func (ra *RadiusAgentCfg) AsMapInterface(separator string) map[string]interface{
 		requestProcessors[i] = item.AsMapInterface(separator)
 	}
 
+	sessionSConns := make([]string, len(ra.SessionSConns))
+	for i, item := range ra.SessionSConns {
+		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
+		if item == buf {
+			sessionSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaSessionS, utils.EmptyString)
+		} else {
+			sessionSConns[i] = item
+		}
+	}
+
 	return map[string]interface{}{
 		utils.EnabledCfg:            ra.Enabled,
 		utils.ListenNetCfg:          ra.ListenNet,
@@ -119,7 +133,7 @@ func (ra *RadiusAgentCfg) AsMapInterface(separator string) map[string]interface{
 		utils.ListenAcctCfg:         ra.ListenAcct,
 		utils.ClientSecretsCfg:      clientSecrets,
 		utils.ClientDictionariesCfg: clientDictionaries,
-		utils.SessionSConnsCfg:      ra.SessionSConns,
+		utils.SessionSConnsCfg:      sessionSConns,
 		utils.RequestProcessorsCfg:  requestProcessors,
 	}
 
