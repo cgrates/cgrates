@@ -18,7 +18,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
-import "github.com/cgrates/cgrates/utils"
+import (
+	"strings"
+
+	"github.com/cgrates/cgrates/utils"
+)
 
 // Represents one connection instance towards Kamailio
 type KamConnCfg struct {
@@ -97,9 +101,19 @@ func (ka *KamAgentCfg) AsMapInterface() map[string]interface{} {
 		evapiConns[i] = item.AsMapInterface()
 	}
 
+	sessionSConns := make([]string, len(ka.SessionSConns))
+	for i, item := range ka.SessionSConns {
+		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
+		if item == buf {
+			sessionSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaSessionS, utils.EmptyString)
+		} else {
+			sessionSConns[i] = item
+		}
+	}
+
 	return map[string]interface{}{
 		utils.EnabledCfg:       ka.Enabled,
-		utils.SessionSConnsCfg: ka.SessionSConns,
+		utils.SessionSConnsCfg: sessionSConns,
 		utils.CreateCdrCfg:     ka.CreateCdr,
 		utils.EvapiConnsCfg:    evapiConns,
 		utils.TimezoneCfg:      ka.Timezone,
