@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -252,13 +253,22 @@ func (er *EventReaderCfg) AsMapInterface(separator string) map[string]interface{
 	for i, item := range er.XmlRootPath {
 		xmlRootPath[i] = item
 	}
-	tenant := make([]string, len(er.Tenant))
-	for i, item := range er.Tenant {
-		tenant[i] = item.Rules
+	var tenant string
+	if er.Tenant != nil {
+		values := make([]string, len(er.Tenant))
+		for i, item := range er.Tenant {
+			values[i] = item.Rules
+		}
+		tenant = strings.Join(values, separator)
 	}
-	flags := make(map[string][]string, len(er.Flags))
+
+	flags := make(map[string][]interface{}, len(er.Flags))
 	for key, val := range er.Flags {
-		flags[key] = val
+		buf := make([]interface{}, len(val))
+		for i, item := range val {
+			buf[i] = item
+		}
+		flags[key] = buf
 	}
 	fields := make([]map[string]interface{}, len(er.Fields))
 	for i, item := range er.Fields {
@@ -268,13 +278,26 @@ func (er *EventReaderCfg) AsMapInterface(separator string) map[string]interface{
 	for i, item := range er.CacheDumpFields {
 		cacheDumpFields[i] = item.AsMapInterface(separator)
 	}
+	var runDelay string
+	if er.RunDelay > 0 {
+		runDelay = er.RunDelay.String()
+	} else if er.RunDelay == 0 {
+		runDelay = "0"
+	} else {
+		runDelay = "-1"
+	}
+
+	var partialRecordCache string = "0"
+	if er.PartialRecordCache != 0 {
+		partialRecordCache = er.PartialRecordCache.String()
+	}
 
 	return map[string]interface{}{
 		utils.IDCfg:                       er.ID,
 		utils.TypeCfg:                     er.Type,
 		utils.RowLengthCfg:                er.RowLength,
 		utils.FieldSepCfg:                 er.FieldSep,
-		utils.RunDelayCfg:                 er.RunDelay,
+		utils.RunDelayCfg:                 runDelay,
 		utils.ConcurrentReqsCfg:           er.ConcurrentReqs,
 		utils.SourcePathCfg:               er.SourcePath,
 		utils.ProcessedPathCfg:            er.ProcessedPath,
@@ -284,7 +307,7 @@ func (er *EventReaderCfg) AsMapInterface(separator string) map[string]interface{
 		utils.FiltersCfg:                  er.Filters,
 		utils.FlagsCfg:                    flags,
 		utils.FailedCallsPrefixCfg:        er.FailedCallsPrefix,
-		utils.PartialRecordCacheCfg:       er.PartialRecordCache,
+		utils.PartialRecordCacheCfg:       partialRecordCache,
 		utils.PartialCacheExpiryActionCfg: er.PartialCacheExpiryAction,
 		utils.FieldsCfg:                   fields,
 		utils.CacheDumpFieldsCfg:          cacheDumpFields,
