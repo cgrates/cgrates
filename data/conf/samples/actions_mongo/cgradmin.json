@@ -5,7 +5,9 @@
 // Starts rater, scheduler
 
 "general": {
-    "log_level": 7,
+	"log_level": 7,
+	"poster_attempts": 1,
+	"failed_posts_ttl": "1",
 },
 
 "listen": {
