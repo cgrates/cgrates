@@ -298,33 +298,152 @@ func (scfg *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) (err error) {
 }
 
 func (scfg *SessionSCfg) AsMapInterface() map[string]interface{} {
+	var debitInterval string = "0"
+	if scfg.DebitInterval != 0 {
+		debitInterval = scfg.DebitInterval.String()
+	}
+	var minCallDuration string = "0"
+	if scfg.MinCallDuration != 0 {
+		minCallDuration = scfg.MinCallDuration.String()
+	}
+	var maxCallDuration string = "0"
+	if scfg.MaxCallDuration != 0 {
+		maxCallDuration = scfg.MaxCallDuration.String()
+	}
+	var sessionTTL string = "0"
+	if scfg.SessionTTL != 0 {
+		sessionTTL = scfg.SessionTTL.String()
+	}
+	var sessionTTLMaxDelay string = "0"
+	if scfg.SessionTTLMaxDelay != nil {
+		sessionTTLMaxDelay = scfg.SessionTTLMaxDelay.String()
+	}
+	var sessionTTLLastUsed string = "0"
+	if scfg.SessionTTLLastUsed != nil {
+		sessionTTLLastUsed = scfg.SessionTTLLastUsed.String()
+	}
+	var sessionTTLUsage string = "0"
+	if scfg.SessionTTLUsage != nil {
+		sessionTTLUsage = scfg.SessionTTLUsage.String()
+	}
+	var channelSyncInterval string = "0"
+	if scfg.ChannelSyncInterval != 0 {
+		channelSyncInterval = scfg.ChannelSyncInterval.String()
+	}
+	var minDurLowBalance string = "0"
+	if scfg.MinDurLowBalance != 0 {
+		minDurLowBalance = scfg.MinDurLowBalance.String()
+	}
 
+	chargerSConns := make([]string, len(scfg.ChargerSConns))
+	for i, item := range scfg.ChargerSConns {
+		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)
+		if item == buf {
+			chargerSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaChargers, utils.EmptyString)
+		} else {
+			chargerSConns[i] = item
+		}
+	}
+	RALsConns := make([]string, len(scfg.RALsConns))
+	for i, item := range scfg.RALsConns {
+		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder)
+
+		if item == buf {
+			RALsConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaResponder, utils.EmptyString)
+		} else {
+			RALsConns[i] = item
+		}
+	}
+	resSConns := make([]string, len(scfg.ResSConns))
+	for i, item := range scfg.ResSConns {
+		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)
+		if item == buf {
+			resSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaResources, utils.EmptyString)
+		} else {
+			resSConns[i] = item
+		}
+	}
+	threshSConns := make([]string, len(scfg.ThreshSConns))
+	for i, item := range scfg.ThreshSConns {
+		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)
+		if item == buf {
+			threshSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaThresholds, utils.EmptyString)
+		} else {
+			threshSConns[i] = item
+		}
+	}
+	statSConns := make([]string, len(scfg.StatSConns))
+	for i, item := range scfg.StatSConns {
+		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS)
+		if item == buf {
+			statSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaStatS, utils.EmptyString)
+		} else {
+			statSConns[i] = item
+		}
+	}
+	supplSConns := make([]string, len(scfg.SupplSConns))
+	for i, item := range scfg.SupplSConns {
+		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSuppliers)
+		if item == buf {
+			supplSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaSuppliers, utils.EmptyString)
+		} else {
+			supplSConns[i] = item
+		}
+	}
+	attrSConns := make([]string, len(scfg.AttrSConns))
+	for i, item := range scfg.AttrSConns {
+		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)
+		if item == buf {
+			attrSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaAttributes, utils.EmptyString)
+		} else {
+			attrSConns[i] = item
+		}
+	}
+	CDRsConns := make([]string, len(scfg.CDRsConns))
+	for i, item := range scfg.CDRsConns {
+		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)
+		if item == buf {
+			CDRsConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaCDRs, utils.EmptyString)
+		} else {
+			CDRsConns[i] = item
+		}
+	}
+	schedulerConns := make([]string, len(scfg.SchedulerConns))
+	for i, item := range scfg.SchedulerConns {
+		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler)
+		if item == buf {
+			schedulerConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaScheduler, utils.EmptyString)
+		} else {
+			schedulerConns[i] = item
+		}
+	}
 	return map[string]interface{}{
 		utils.EnabledCfg:             scfg.Enabled,
 		utils.ListenBijsonCfg:        scfg.ListenBijson,
-		utils.ChargerSConnsCfg:       scfg.ChargerSConns,
-		utils.RALsConnsCfg:           scfg.RALsConns,
-		utils.ResSConnsCfg:           scfg.ResSConns,
-		utils.ThreshSConnsCfg:        scfg.ThreshSConns,
-		utils.StatSConnsCfg:          scfg.StatSConns,
-		utils.SupplSConnsCfg:         scfg.SupplSConns,
-		utils.AttrSConnsCfg:          scfg.AttrSConns,
-		utils.CDRsConnsCfg:           scfg.CDRsConns,
+		utils.ChargerSConnsCfg:       chargerSConns,
+		utils.RALsConnsCfg:           RALsConns,
+		utils.ResSConnsCfg:           resSConns,
+		utils.ThreshSConnsCfg:        threshSConns,
+		utils.StatSConnsCfg:          statSConns,
+		utils.SupplSConnsCfg:         supplSConns,
+		utils.AttrSConnsCfg:          attrSConns,
+		utils.CDRsConnsCfg:           CDRsConns,
 		utils.ReplicationConnsCfg:    scfg.ReplicationConns,
-		utils.DebitIntervalCfg:       scfg.DebitInterval,
+		utils.DebitIntervalCfg:       debitInterval,
 		utils.StoreSCostsCfg:         scfg.StoreSCosts,
-		utils.MinCallDurationCfg:     scfg.MinCallDuration,
-		utils.MaxCallDurationCfg:     scfg.MaxCallDuration,
-		utils.SessionTTLCfg:          scfg.SessionTTL,
-		utils.SessionTTLMaxDelayCfg:  scfg.SessionTTLMaxDelay,
-		utils.SessionTTLLastUsedCfg:  scfg.SessionTTLLastUsed,
-		utils.SessionTTLUsageCfg:     scfg.SessionTTLUsage,
-		utils.SessionIndexesCfg:      scfg.SessionIndexes.GetSlice(),
+		utils.MinCallDurationCfg:     minCallDuration,
+		utils.MaxCallDurationCfg:     maxCallDuration,
+		utils.SessionTTLCfg:          sessionTTL,
+		utils.SessionTTLMaxDelayCfg:  sessionTTLMaxDelay,
+		utils.SessionTTLLastUsedCfg:  sessionTTLLastUsed,
+		utils.SessionTTLUsageCfg:     sessionTTLUsage,
+		utils.SessionIndexesCfg:      scfg.SessionIndexes.Slice(),
 		utils.ClientProtocolCfg:      scfg.ClientProtocol,
-		utils.ChannelSyncIntervalCfg: scfg.ChannelSyncInterval,
+		utils.ChannelSyncIntervalCfg: channelSyncInterval,
 		utils.TerminateAttemptsCfg:   scfg.TerminateAttempts,
 		utils.AlterableFieldsCfg:     scfg.AlterableFields.AsSlice(),
-		utils.MinDurLowBalanceCfg:    scfg.MinDurLowBalance,
+		utils.MinDurLowBalanceCfg:    minDurLowBalance,
+		utils.SchedulerConnsCfg:      schedulerConns,
 		utils.STIRCfg:                scfg.STIRCfg.AsMapInterface(),
 	}
 }
