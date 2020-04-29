@@ -30,13 +30,13 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-// NewSupplierService returns the Supplier Service
-func NewSupplierService(cfg *config.CGRConfig, dm *DataDBService,
+// NewRouteService returns the Route Service
+func NewRouteService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
-	server *utils.Server, internalSupplierSChan chan rpcclient.ClientConnector,
+	server *utils.Server, internalRouteSChan chan rpcclient.ClientConnector,
 	connMgr *engine.ConnManager) servmanager.Service {
-	return &SupplierService{
-		connChan:    internalSupplierSChan,
+	return &RouteService{
+		connChan:    internalRouteSChan,
 		cfg:         cfg,
 		dm:          dm,
 		cacheS:      cacheS,
@@ -46,8 +46,8 @@ func NewSupplierService(cfg *config.CGRConfig, dm *DataDBService,
 	}
 }
 
-// SupplierService implements Service interface
-type SupplierService struct {
+// RouteService implements Service interface
+type RouteService struct {
 	sync.RWMutex
 	cfg         *config.CGRConfig
 	dm          *DataDBService
@@ -56,81 +56,81 @@ type SupplierService struct {
 	server      *utils.Server
 	connMgr     *engine.ConnManager
 
-	splS     *engine.SupplierService
-	rpc      *v1.SupplierSv1
+	routeS   *engine.RouteService
+	rpc      *v1.RouteSv1
 	connChan chan rpcclient.ClientConnector
 }
 
 // Start should handle the sercive start
-func (splS *SupplierService) Start() (err error) {
-	if splS.IsRunning() {
+func (routeS *RouteService) Start() (err error) {
+	if routeS.IsRunning() {
 		return fmt.Errorf("service aleady running")
 	}
 
-	<-splS.cacheS.GetPrecacheChannel(utils.CacheSupplierProfiles)
-	<-splS.cacheS.GetPrecacheChannel(utils.CacheSupplierFilterIndexes)
+	<-routeS.cacheS.GetPrecacheChannel(utils.CacheRouteProfiles)
+	<-routeS.cacheS.GetPrecacheChannel(utils.CacheRouteFilterIndexes)
 
-	filterS := <-splS.filterSChan
-	splS.filterSChan <- filterS
-	dbchan := splS.dm.GetDMChan()
+	filterS := <-routeS.filterSChan
+	routeS.filterSChan <- filterS
+	dbchan := routeS.dm.GetDMChan()
 	datadb := <-dbchan
 	dbchan <- datadb
 
-	splS.Lock()
-	defer splS.Unlock()
-	splS.splS, err = engine.NewSupplierService(datadb, filterS, splS.cfg,
-		splS.connMgr)
+	routeS.Lock()
+	defer routeS.Unlock()
+	routeS.routeS, err = engine.NewRouteService(datadb, filterS, routeS.cfg,
+		routeS.connMgr)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not init, error: %s",
-			utils.SupplierS, err.Error()))
+			utils.RouteS, err.Error()))
 		return
 	}
 
-	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.SupplierS))
-	splS.rpc = v1.NewSupplierSv1(splS.splS)
-	if !splS.cfg.DispatcherSCfg().Enabled {
-		splS.server.RpcRegister(splS.rpc)
+	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.RouteS))
+	routeS.rpc = v1.NewRouteSv1(routeS.routeS)
+	if !routeS.cfg.DispatcherSCfg().Enabled {
+		routeS.server.RpcRegister(routeS.rpc)
 	}
-	splS.connChan <- splS.rpc
+	routeS.connChan <- routeS.rpc
 	return
 }
 
 // GetIntenternalChan returns the internal connection chanel
-func (splS *SupplierService) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
-	return splS.connChan
+func (routeS *RouteService) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
+	return routeS.connChan
 }
 
 // Reload handles the change of config
-func (splS *SupplierService) Reload() (err error) {
+func (routeS *RouteService) Reload() (err error) {
 	return
 }
 
 // Shutdown stops the service
-func (splS *SupplierService) Shutdown() (err error) {
-	splS.Lock()
-	defer splS.Unlock()
-	if err = splS.splS.Shutdown(); err != nil {
+func (routeS *RouteService) Shutdown() (err error) {
+	routeS.Lock()
+	defer routeS.Unlock()
+	if err = routeS.routeS.Shutdown(); err != nil {
 		return
 	}
-	splS.splS = nil
-	splS.rpc = nil
-	<-splS.connChan
+	routeS.routeS = nil
+	routeS.rpc = nil
+	<-routeS.connChan
 	return
 }
 
 // IsRunning returns if the service is running
-func (splS *SupplierService) IsRunning() bool {
-	splS.RLock()
-	defer splS.RUnlock()
-	return splS != nil && splS.splS != nil
+func (routeS *RouteService) IsRunning() bool {
+	routeS.RLock()
+	defer routeS.RUnlock()
+	return routeS != nil && routeS.routeS != nil
 }
 
 // ServiceName returns the service name
-func (splS *SupplierService) ServiceName() string {
-	return utils.SupplierS
+func (routeS *RouteService) ServiceName() string {
+	return utils.RouteS
 }
 
 // ShouldRun returns if the service should be running
-func (splS *SupplierService) ShouldRun() bool {
-	return splS.cfg.SupplierSCfg().Enabled
+func (routeS *RouteService) ShouldRun() bool {
+	return routeS.cfg.RouteCfg().Enabled
 }

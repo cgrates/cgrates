@@ -55,9 +55,9 @@ type ResourceSv1Interface interface {
 	Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error
 }
 
-type SupplierSv1Interface interface {
-	GetSuppliers(args *engine.ArgsGetSuppliers, reply *engine.SortedSuppliers) error
-	GetSupplierProfilesForEvent(args *utils.CGREventWithArgDispatcher, reply *[]*engine.SupplierProfile) error
+type RouteSv1Interface interface {
+	GetRoutes(args *engine.ArgsGetRoutes, reply *engine.SortedRoutes) error
+	GetRouteProfilesForEvent(args *utils.CGREventWithArgDispatcher, reply *[]*engine.RouteProfile) error
 	Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error
 }
 
@@ -198,7 +198,7 @@ type ReplicatorSv1Interface interface {
 	GetAccountActionPlans(id *utils.StringWithApiKey, reply *[]string) error
 	GetRatingPlan(id *utils.StringWithApiKey, reply *engine.RatingPlan) error
 	GetRatingProfile(id *utils.StringWithApiKey, reply *engine.RatingProfile) error
-	GetSupplierProfile(tntID *utils.TenantIDWithArgDispatcher, reply *engine.SupplierProfile) error
+	GetRouteProfile(tntID *utils.TenantIDWithArgDispatcher, reply *engine.RouteProfile) error
 	GetAttributeProfile(tntID *utils.TenantIDWithArgDispatcher, reply *engine.AttributeProfile) error
 	GetChargerProfile(tntID *utils.TenantIDWithArgDispatcher, reply *engine.ChargerProfile) error
 	GetDispatcherProfile(tntID *utils.TenantIDWithArgDispatcher, reply *engine.DispatcherProfile) error
@@ -223,7 +223,7 @@ type ReplicatorSv1Interface interface {
 	SetActions(args *engine.SetActionsArgsWithArgDispatcher, reply *string) error
 	SetRatingPlan(rp *engine.RatingPlanWithArgDispatcher, reply *string) error
 	SetRatingProfile(rp *engine.RatingProfileWithArgDispatcher, reply *string) error
-	SetSupplierProfile(sp *engine.SupplierProfileWithArgDispatcher, reply *string) error
+	SetRouteProfile(sp *engine.RouteProfileWithArgDispatcher, reply *string) error
 	SetAttributeProfile(ap *engine.AttributeProfileWithArgDispatcher, reply *string) error
 	SetChargerProfile(cp *engine.ChargerProfileWithArgDispatcher, reply *string) error
 	SetDispatcherProfile(dpp *engine.DispatcherProfileWithArgDispatcher, reply *string) error

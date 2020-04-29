@@ -20,45 +20,51 @@ package migrator
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (m *Migrator) migrateCurrentSupplierProfile() (err error) {
-	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.SupplierProfilePrefix)
+func (m *Migrator) migrateCurrentTPRoutes() (err error) {
+	tpids, err := m.storDBIn.StorDB().GetTpIds(utils.TBLTPRoutes)
 	if err != nil {
 		return err
 	}
-	for _, id := range ids {
-		tntID := strings.SplitN(strings.TrimPrefix(id, utils.SupplierProfilePrefix), utils.InInFieldSep, 2)
-		if len(tntID) < 2 {
-			return fmt.Errorf("Invalid key <%s> when migrating supplier profiles", id)
-		}
-		splp, err := m.dmIN.DataManager().GetSupplierProfile(tntID[0], tntID[1], false, false, utils.NonTransactional)
+
+	for _, tpid := range tpids {
+		ids, err := m.storDBIn.StorDB().GetTpTableIds(tpid, utils.TBLTPRoutes,
+			utils.TPDistinctIds{"id"}, map[string]string{}, nil)
 		if err != nil {
 			return err
 		}
-		if splp == nil || m.dryRun {
-			continue
+		for _, id := range ids {
+			routes, err := m.storDBIn.StorDB().GetTPRoutes(tpid, "", id)
+			if err != nil {
+				return err
+			}
+			if routes == nil || m.dryRun {
+				continue
+			}
+			if err := m.storDBOut.StorDB().SetTPRoutes(routes); err != nil {
+				return err
+			}
+			for _, route := range routes {
+				if err := m.storDBIn.StorDB().RemTpData(utils.TBLTPRoutes, route.TPid,
+					map[string]string{"tenant": route.Tenant, "id": route.ID}); err != nil {
+					return err
+				}
+			}
+
+			m.stats[utils.TpRoutes]++
 		}
-		if err := m.dmOut.DataManager().SetSupplierProfile(splp, true); err != nil {
-			return err
-		}
-		if err := m.dmIN.DataManager().RemoveSupplierProfile(tntID[0], tntID[1], utils.NonTransactional, true); err != nil {
-			return err
-		}
-		m.stats[utils.Suppliers] += 1
 	}
 	return
 }
 
-func (m *Migrator) migrateSupplierProfiles() (err error) {
+func (m *Migrator) migrateTPRoutes() (err error) {
 	var vrs engine.Versions
-	current := engine.CurrentDataDBVersions()
-	vrs, err = m.dmIN.DataManager().DataDB().GetVersions("")
+	current := engine.CurrentStorDBVersions()
+	vrs, err = m.storDBOut.StorDB().GetVersions("")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,
@@ -68,16 +74,16 @@ func (m *Migrator) migrateSupplierProfiles() (err error) {
 		return utils.NewCGRError(utils.Migrator,
 			utils.MandatoryIEMissingCaps,
 			utils.UndefinedVersion,
-			"version number is not defined for SupplierProfiles model")
+			"version number is not defined for ActionTriggers model")
 	}
-	switch vrs[utils.Suppliers] {
-	case current[utils.Suppliers]:
-		if m.sameDataDB {
+	switch vrs[utils.TpRoutes] {
+	case current[utils.TpRoutes]:
+		if m.sameStorDB {
 			break
 		}
-		if err = m.migrateCurrentSupplierProfile(); err != nil {
+		if err := m.migrateCurrentTPRoutes(); err != nil {
 			return err
 		}
 	}
-	return m.ensureIndexesDataDB(engine.ColSpp)
+	return m.ensureIndexesStorDB(utils.TBLTPRoutes)
 }

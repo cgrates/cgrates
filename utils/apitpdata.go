@@ -988,7 +988,7 @@ type ArgsComputeFilterIndexIDs struct {
 	AttributeIDs  []string
 	ResourceIDs   []string
 	StatIDs       []string
-	SupplierIDs   []string
+	RouteIDs      []string
 	ThresholdIDs  []string
 	ChargerIDs    []string
 	DispatcherIDs []string
@@ -1000,7 +1000,7 @@ type ArgsComputeFilterIndexes struct {
 	AttributeS  bool
 	ResourceS   bool
 	StatS       bool
-	SupplierS   bool
+	RouteS      bool
 	ThresholdS  bool
 	ChargerS    bool
 	DispatcherS bool

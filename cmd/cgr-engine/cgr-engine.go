@@ -405,7 +405,7 @@ func main() {
 	internalThresholdSChan := make(chan rpcclient.ClientConnector, 1)
 	internalStatSChan := make(chan rpcclient.ClientConnector, 1)
 	internalResourceSChan := make(chan rpcclient.ClientConnector, 1)
-	internalSupplierSChan := make(chan rpcclient.ClientConnector, 1)
+	internalRouteSChan := make(chan rpcclient.ClientConnector, 1)
 	internalSchedulerSChan := make(chan rpcclient.ClientConnector, 1)
 	internalRALsChan := make(chan rpcclient.ClientConnector, 1)
 	internalResponderChan := make(chan rpcclient.ClientConnector, 1)
@@ -429,7 +429,7 @@ func main() {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler):      internalSchedulerSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS):       internalSessionSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS):          internalStatSChan,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSuppliers):      internalSupplierSChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRoutes):         internalRouteSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds):     internalThresholdSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaServiceManager): internalServeManagerChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaConfig):         internalConfigChan,
@@ -481,8 +481,8 @@ func main() {
 		internalStatSChan, connManager)
 	reS := services.NewResourceService(cfg, dmService, cacheS, filterSChan, server,
 		internalResourceSChan, connManager)
-	supS := services.NewSupplierService(cfg, dmService, cacheS, filterSChan, server,
-		internalSupplierSChan, connManager)
+	routeS := services.NewRouteService(cfg, dmService, cacheS, filterSChan, server,
+		internalRouteSChan, connManager)
 
 	schS := services.NewSchedulerService(cfg, dmService, cacheS, filterSChan,
 		server, internalSchedulerSChan, connManager)
@@ -505,7 +505,7 @@ func main() {
 		internalLoaderSChan, connManager)
 	anz := services.NewAnalyzerService(cfg, server, exitChan, internalAnalyzerSChan)
 
-	srvManager.AddServices(attrS, chrS, tS, stS, reS, supS, schS, rals,
+	srvManager.AddServices(attrS, chrS, tS, stS, reS, routeS, schS, rals,
 		rals.GetResponder(), APIerSv1, APIerSv2, cdrS, smg,
 		services.NewEventReaderService(cfg, filterSChan, exitChan, connManager),
 		services.NewDNSAgent(cfg, filterSChan, exitChan, connManager),
@@ -541,7 +541,7 @@ func main() {
 	engine.IntRPC.AddInternalRPCClient(utils.SchedulerSv1, schS.GetIntenternalChan())
 	engine.IntRPC.AddInternalRPCClient(utils.SessionSv1, smg.GetIntenternalChan())
 	engine.IntRPC.AddInternalRPCClient(utils.StatSv1, stS.GetIntenternalChan())
-	engine.IntRPC.AddInternalRPCClient(utils.SupplierSv1, supS.GetIntenternalChan())
+	engine.IntRPC.AddInternalRPCClient(utils.RouteSv1, routeS.GetIntenternalChan())
 	engine.IntRPC.AddInternalRPCClient(utils.ThresholdSv1, tS.GetIntenternalChan())
 	engine.IntRPC.AddInternalRPCClient(utils.ServiceManagerV1, internalServeManagerChan)
 	engine.IntRPC.AddInternalRPCClient(utils.ConfigSv1, internalConfigChan)
@@ -554,7 +554,7 @@ func main() {
 	go startRpc(server, rals.GetResponder().GetIntenternalChan(), cdrS.GetIntenternalChan(),
 		reS.GetIntenternalChan(), stS.GetIntenternalChan(),
 		attrS.GetIntenternalChan(), chrS.GetIntenternalChan(), tS.GetIntenternalChan(),
-		supS.GetIntenternalChan(), smg.GetIntenternalChan(), anz.GetIntenternalChan(),
+		routeS.GetIntenternalChan(), smg.GetIntenternalChan(), anz.GetIntenternalChan(),
 		dspS.GetIntenternalChan(), ldrs.GetIntenternalChan(), rals.GetIntenternalChan(), internalCacheSChan, exitChan)
 	<-exitChan
 

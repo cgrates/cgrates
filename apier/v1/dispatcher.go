@@ -322,30 +322,30 @@ func (dRs *DispatcherResourceSv1) ReleaseResources(args utils.ArgRSv1ResourceUsa
 	return dRs.dRs.ResourceSv1ReleaseResources(args, reply)
 }
 
-func NewDispatcherSupplierSv1(dps *dispatchers.DispatcherService) *DispatcherSupplierSv1 {
-	return &DispatcherSupplierSv1{dSup: dps}
+func NewDispatcherRouteSv1(dps *dispatchers.DispatcherService) *DispatcherRouteSv1 {
+	return &DispatcherRouteSv1{dRoute: dps}
 }
 
-// Exports RPC from RLs
-type DispatcherSupplierSv1 struct {
-	dSup *dispatchers.DispatcherService
+// Exports RPC from RouteS
+type DispatcherRouteSv1 struct {
+	dRoute *dispatchers.DispatcherService
 }
 
 // Ping implements SupplierSv1Ping
-func (dSup *DispatcherSupplierSv1) Ping(args *utils.CGREventWithArgDispatcher, reply *string) error {
-	return dSup.dSup.SupplierSv1Ping(args, reply)
+func (dRoute *DispatcherRouteSv1) Ping(args *utils.CGREventWithArgDispatcher, reply *string) error {
+	return dRoute.dRoute.RouteSv1Ping(args, reply)
 }
 
 // GetSuppliers implements SupplierSv1GetSuppliers
-func (dSup *DispatcherSupplierSv1) GetSuppliers(args *engine.ArgsGetSuppliers,
-	reply *engine.SortedSuppliers) error {
-	return dSup.dSup.SupplierSv1GetSuppliers(args, reply)
+func (dRoute *DispatcherRouteSv1) GetSuppliers(args *engine.ArgsGetRoutes,
+	reply *engine.SortedRoutes) error {
+	return dRoute.dRoute.RouteSv1GetRoutes(args, reply)
 }
 
 // GetSuppliersProfiles returns a list of suppliers profiles that match for Event
-func (dSup *DispatcherSupplierSv1) GetSupplierProfilesForEvent(args *utils.CGREventWithArgDispatcher,
-	reply *[]*engine.SupplierProfile) error {
-	return dSup.dSup.SupplierSv1GetSupplierProfilesForEvent(args, reply)
+func (dRoute *DispatcherRouteSv1) GetSupplierProfilesForEvent(args *utils.CGREventWithArgDispatcher,
+	reply *[]*engine.RouteProfile) error {
+	return dRoute.dRoute.RouteSv1GetRouteProfilesForEvent(args, reply)
 }
 
 func NewDispatcherAttributeSv1(dps *dispatchers.DispatcherService) *DispatcherAttributeSv1 {
@@ -968,9 +968,9 @@ func (dS *DispatcherReplicatorSv1) GetRatingProfile(id *utils.StringWithApiKey, 
 	return dS.dS.ReplicatorSv1GetRatingProfile(id, reply)
 }
 
-// GetSupplierProfile
-func (dS *DispatcherReplicatorSv1) GetSupplierProfile(tntID *utils.TenantIDWithArgDispatcher, reply *engine.SupplierProfile) error {
-	return dS.dS.ReplicatorSv1GetSupplierProfile(tntID, reply)
+// GetRouteProfile
+func (dS *DispatcherReplicatorSv1) GetRouteProfile(tntID *utils.TenantIDWithArgDispatcher, reply *engine.RouteProfile) error {
+	return dS.dS.ReplicatorSv1GetRouteProfile(tntID, reply)
 }
 
 // GetAttributeProfile
@@ -1095,9 +1095,9 @@ func (dS *DispatcherReplicatorSv1) SetRatingProfile(args *engine.RatingProfileWi
 	return dS.dS.ReplicatorSv1SetRatingProfile(args, reply)
 }
 
-// SetSupplierProfile
-func (dS *DispatcherReplicatorSv1) SetSupplierProfile(args *engine.SupplierProfileWithArgDispatcher, reply *string) error {
-	return dS.dS.ReplicatorSv1SetSupplierProfile(args, reply)
+// SetRouteProfile
+func (dS *DispatcherReplicatorSv1) SetRouteProfile(args *engine.RouteProfileWithArgDispatcher, reply *string) error {
+	return dS.dS.ReplicatorSv1SetRouteProfile(args, reply)
 }
 
 // SetAttributeProfile
@@ -1220,9 +1220,9 @@ func (dS *DispatcherReplicatorSv1) RemoveRatingProfile(args *utils.StringWithApi
 	return dS.dS.ReplicatorSv1RemoveRatingProfile(args, reply)
 }
 
-// RemoveSupplierProfile
-func (dS *DispatcherReplicatorSv1) RemoveSupplierProfile(args *utils.TenantIDWithArgDispatcher, reply *string) error {
-	return dS.dS.ReplicatorSv1RemoveSupplierProfile(args, reply)
+// RemoveRouteProfile
+func (dS *DispatcherReplicatorSv1) RemoveRouteProfile(args *utils.TenantIDWithArgDispatcher, reply *string) error {
+	return dS.dS.ReplicatorSv1RemoveRouteProfile(args, reply)
 }
 
 // RemoveAttributeProfile

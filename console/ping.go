@@ -51,8 +51,8 @@ func (self *CmdApierPing) Name() string {
 
 func (self *CmdApierPing) RpcMethod() string {
 	switch strings.ToLower(self.item) {
-	case utils.SuppliersLow:
-		return utils.SupplierSv1Ping
+	case utils.RoutesLow:
+		return utils.RouteSv1Ping
 	case utils.AttributesLow:
 		return utils.AttributeSv1Ping
 	case utils.ChargerSLow:

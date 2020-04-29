@@ -429,33 +429,33 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 				cacheArgs.ThresholdIDs = &ids
 			}
 		}
-	case utils.MetaSuppliers:
+	case utils.MetaRoutes:
 		for _, lDataSet := range lds {
-			sppModels := make(engine.TpSuppliers, len(lDataSet))
+			sppModels := make(engine.TPRoutes, len(lDataSet))
 			for i, ld := range lDataSet {
-				sppModels[i] = new(engine.TpSupplier)
+				sppModels[i] = new(engine.TpRoute)
 				if err = utils.UpdateStructWithIfaceMap(sppModels[i], ld); err != nil {
 					return
 				}
 			}
 
-			for _, tpSpp := range sppModels.AsTPSuppliers() {
-				spPrf, err := engine.APItoSupplierProfile(tpSpp, ldr.timezone)
+			for _, tpSpp := range sppModels.AsTPRouteProfile() {
+				spPrf, err := engine.APItoRouteProfile(tpSpp, ldr.timezone)
 				if err != nil {
 					return err
 				}
 				if ldr.dryRun {
 					utils.Logger.Info(
-						fmt.Sprintf("<%s-%s> DRY_RUN: SupplierProfile: %s",
+						fmt.Sprintf("<%s-%s> DRY_RUN: RouteProfile: %s",
 							utils.LoaderS, ldr.ldrID, utils.ToJSON(spPrf)))
 					continue
 				}
 				// get IDs so we can reload in cache
 				ids = append(ids, spPrf.TenantID())
-				if err := ldr.dm.SetSupplierProfile(spPrf, true); err != nil {
+				if err := ldr.dm.SetRouteProfile(spPrf, true); err != nil {
 					return err
 				}
-				cacheArgs.SupplierProfileIDs = &ids
+				cacheArgs.RouteProfileIDs = &ids
 			}
 		}
 	case utils.MetaChargers:
@@ -736,20 +736,20 @@ func (ldr *Loader) removeLoadedData(loaderType, tntID, caching string) (err erro
 			cacheArgs.ThresholdProfileIDs = &ids
 			cacheArgs.ThresholdIDs = &ids
 		}
-	case utils.MetaSuppliers:
+	case utils.MetaRoutes:
 		if ldr.dryRun {
 			utils.Logger.Info(
-				fmt.Sprintf("<%s-%s> DRY_RUN: SupplierProfileID: %s",
+				fmt.Sprintf("<%s-%s> DRY_RUN: RouteProfileID: %s",
 					utils.LoaderS, ldr.ldrID, tntID))
 		} else {
 			tntIDStruct := utils.NewTenantID(tntID)
 			// get IDs so we can reload in cache
 			ids = append(ids, tntID)
-			if err := ldr.dm.RemoveSupplierProfile(tntIDStruct.Tenant,
+			if err := ldr.dm.RemoveRouteProfile(tntIDStruct.Tenant,
 				tntIDStruct.ID, utils.NonTransactional, true); err != nil {
 				return err
 			}
-			cacheArgs.SupplierProfileIDs = &ids
+			cacheArgs.RouteProfileIDs = &ids
 		}
 	case utils.MetaChargers:
 		if ldr.dryRun {

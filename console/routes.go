@@ -26,38 +26,38 @@ import (
 )
 
 func init() {
-	c := &CmdSuppliersSort{
-		name:      "suppliers",
-		rpcMethod: utils.SupplierSv1GetSuppliers,
-		rpcParams: &engine.ArgsGetSuppliers{},
+	c := &CmdRoutesSort{
+		name:      "routes",
+		rpcMethod: utils.RouteSv1GetRoutes,
+		rpcParams: &engine.ArgsGetRoutes{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
-type CmdSuppliersSort struct {
+type CmdRoutesSort struct {
 	name      string
 	rpcMethod string
-	rpcParams *engine.ArgsGetSuppliers
+	rpcParams *engine.ArgsGetRoutes
 	*CommandExecuter
 }
 
-func (self *CmdSuppliersSort) Name() string {
+func (self *CmdRoutesSort) Name() string {
 	return self.name
 }
 
-func (self *CmdSuppliersSort) RpcMethod() string {
+func (self *CmdRoutesSort) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdSuppliersSort) RpcParams(reset bool) interface{} {
+func (self *CmdRoutesSort) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &engine.ArgsGetSuppliers{ArgDispatcher: new(utils.ArgDispatcher)}
+		self.rpcParams = &engine.ArgsGetRoutes{ArgDispatcher: new(utils.ArgDispatcher)}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdSuppliersSort) PostprocessRpcParams() error {
+func (self *CmdRoutesSort) PostprocessRpcParams() error {
 	if self.rpcParams != nil && self.rpcParams.CGREvent != nil &&
 		self.rpcParams.CGREvent.Time == nil {
 		self.rpcParams.CGREvent.Time = utils.TimePointer(time.Now())
@@ -65,7 +65,7 @@ func (self *CmdSuppliersSort) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdSuppliersSort) RpcResult() interface{} {
-	var atr *engine.SortedSuppliers
+func (self *CmdRoutesSort) RpcResult() interface{} {
+	var atr *engine.SortedRoutes
 	return &atr
 }

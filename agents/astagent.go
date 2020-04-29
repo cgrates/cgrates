@@ -212,10 +212,10 @@ func (sma *AsteriskAgent) handleStasisStart(ev *SMAsteriskEvent) {
 			return
 		}
 	}
-	if authReply.Suppliers != nil {
-		for i, spl := range authReply.Suppliers.SortedSuppliers {
+	if authReply.Routes != nil {
+		for i, route := range authReply.Routes.SortedRoutes {
 			if !sma.setChannelVar(ev.ChannelID(),
-				CGRSupplier+strconv.Itoa(i+1), spl.SupplierID) {
+				CGRSupplier+strconv.Itoa(i+1), route.RouteID) {
 				return
 			}
 		}

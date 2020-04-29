@@ -215,10 +215,10 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 			reqProcessor.Flags.ParamsSlice(utils.MetaStats),
 			reqProcessor.Flags.HasKey(utils.MetaResources),
 			reqProcessor.Flags.HasKey(utils.MetaAccounts),
-			reqProcessor.Flags.HasKey(utils.MetaSuppliers),
-			reqProcessor.Flags.HasKey(utils.MetaSuppliersIgnoreErrors),
-			reqProcessor.Flags.HasKey(utils.MetaSuppliersEventCost),
-			cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator,
+			reqProcessor.Flags.HasKey(utils.MetaRoutes),
+			reqProcessor.Flags.HasKey(utils.MetaRoutesIgnoreErrors),
+			reqProcessor.Flags.HasKey(utils.MetaRoutesEventCost),
+			cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.RoutePaginator,
 			reqProcessor.Flags.HasKey(utils.MetaFD),
 			opts,
 		)
@@ -288,10 +288,10 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 			reqProcessor.Flags.ParamsSlice(utils.MetaStats),
 			reqProcessor.Flags.HasKey(utils.MetaResources),
 			reqProcessor.Flags.HasKey(utils.MetaAccounts),
-			reqProcessor.Flags.HasKey(utils.MetaSuppliers),
-			reqProcessor.Flags.HasKey(utils.MetaSuppliersIgnoreErrors),
-			reqProcessor.Flags.HasKey(utils.MetaSuppliersEventCost),
-			cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator,
+			reqProcessor.Flags.HasKey(utils.MetaRoutes),
+			reqProcessor.Flags.HasKey(utils.MetaRoutesIgnoreErrors),
+			reqProcessor.Flags.HasKey(utils.MetaRoutesEventCost),
+			cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.RoutePaginator,
 			reqProcessor.Flags.HasKey(utils.MetaFD),
 			opts)
 		rply := new(sessions.V1ProcessMessageReply)
@@ -309,8 +309,7 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 			Flags:         reqProcessor.Flags.SliceFlags(),
 			CGREvent:      cgrEv,
 			ArgDispatcher: cgrArgs.ArgDispatcher,
-			Paginator:     *cgrArgs.SupplierPaginator,
-			Opts:          opts,
+
 		}
 		needMaxUsage := reqProcessor.Flags.HasKey(utils.MetaAuth) ||
 			reqProcessor.Flags.HasKey(utils.MetaInit) ||

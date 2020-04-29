@@ -2287,7 +2287,7 @@ func (dm *DataManager) GetRouteProfile(tenant, id string, cacheRead, cacheWrite 
 	rpp, err = dm.dataDB.GetRouteProfileDrv(tenant, id)
 	if err != nil {
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRouteProfiles]; err == utils.ErrNotFound && itm.Remote {
-			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil, utils.ReplicatorSv1GetSupplierProfile,
+			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil, utils.ReplicatorSv1GetRouteProfile,
 				&utils.TenantIDWithArgDispatcher{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 					ArgDispatcher: &utils.ArgDispatcher{
@@ -2353,7 +2353,7 @@ func (dm *DataManager) SetRouteProfile(rpp *RouteProfile, withIndex bool) (err e
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRouteProfiles]; itm.Replicate {
 		var reply string
 		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
-			utils.ReplicatorSv1SetSupplierProfile,
+			utils.ReplicatorSv1SetRouteProfile,
 			&RouteProfileWithArgDispatcher{
 				RouteProfile: rpp,
 				ArgDispatcher: &utils.ArgDispatcher{
@@ -2391,7 +2391,7 @@ func (dm *DataManager) RemoveRouteProfile(tenant, id, transactionID string, with
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRouteProfiles]; itm.Replicate {
 		var reply string
 		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
-			utils.ReplicatorSv1RemoveSupplierProfile,
+			utils.ReplicatorSv1RemoveRouteProfile,
 			&utils.TenantIDWithArgDispatcher{
 				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 				ArgDispatcher: &utils.ArgDispatcher{

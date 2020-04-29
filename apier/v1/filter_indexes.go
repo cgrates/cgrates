@@ -50,8 +50,8 @@ func (api *APIerSv1) RemoveFilterIndexes(arg AttrRemFilterIndexes, reply *string
 	switch arg.ItemType {
 	case utils.MetaThresholds:
 		arg.ItemType = utils.ThresholdProfilePrefix
-	case utils.MetaSuppliers:
-		arg.ItemType = utils.SupplierProfilePrefix
+	case utils.MetaRoutes:
+		arg.ItemType = utils.RouteProfilePrefix
 	case utils.MetaStats:
 		arg.ItemType = utils.StatQueueProfilePrefix
 	case utils.MetaResources:
@@ -89,8 +89,8 @@ func (api *APIerSv1) GetFilterIndexes(arg AttrGetFilterIndexes, reply *[]string)
 	switch arg.ItemType {
 	case utils.MetaThresholds:
 		arg.ItemType = utils.ThresholdProfilePrefix
-	case utils.MetaSuppliers:
-		arg.ItemType = utils.SupplierProfilePrefix
+	case utils.MetaRoutes:
+		arg.ItemType = utils.RouteProfilePrefix
 	case utils.MetaStats:
 		arg.ItemType = utils.StatQueueProfilePrefix
 	case utils.MetaResources:
@@ -228,9 +228,9 @@ func (api *APIerSv1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, r
 		}
 	}
 	//SupplierProfile Indexes
-	var sppIndexes *engine.FilterIndexer
-	if args.SupplierS {
-		sppIndexes, err = api.computeSupplierIndexes(args.Tenant, nil, transactionID)
+	var routeIndexes *engine.FilterIndexer
+	if args.RouteS {
+		routeIndexes, err = api.computeRouteIndexes(args.Tenant, nil, transactionID)
 		if err != nil && err != utils.ErrNotFound {
 			return utils.APIErrorHandler(err)
 		}
@@ -279,9 +279,9 @@ func (api *APIerSv1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, r
 			return
 		}
 	}
-	//SupplierProfile Indexes
-	if sppIndexes != nil {
-		if err = sppIndexes.StoreIndexes(true, transactionID); err != nil {
+	//RouteProfile Indexes
+	if routeIndexes != nil {
+		if err = routeIndexes.StoreIndexes(true, transactionID); err != nil {
 			return
 		}
 	}
@@ -325,8 +325,8 @@ func (api *APIerSv1) ComputeFilterIndexIDs(args utils.ArgsComputeFilterIndexIDs,
 	if err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
 	}
-	//SupplierProfile Indexes
-	sppIndexes, err := api.computeSupplierIndexes(args.Tenant, &args.SupplierIDs, transactionID)
+	//RouteProfile Indexes
+	routeIndexes, err := api.computeRouteIndexes(args.Tenant, &args.RouteIDs, transactionID)
 	if err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
 	}
@@ -393,14 +393,14 @@ func (api *APIerSv1) ComputeFilterIndexIDs(args utils.ArgsComputeFilterIndexIDs,
 		}
 	}
 	//SupplierProfile Indexes
-	if sppIndexes != nil {
-		if err = sppIndexes.StoreIndexes(true, transactionID); err != nil {
-			for _, id := range args.SupplierIDs {
-				var spp *engine.SupplierProfile
-				if spp, err = api.DataManager.GetSupplierProfile(args.Tenant, id, true, false, utils.NonTransactional); err != nil {
+	if routeIndexes != nil {
+		if err = routeIndexes.StoreIndexes(true, transactionID); err != nil {
+			for _, id := range args.RouteIDs {
+				var rPrf *engine.RouteProfile
+				if rPrf, err = api.DataManager.GetRouteProfile(args.Tenant, id, true, false, utils.NonTransactional); err != nil {
 					return
 				}
-				if err = sppIndexes.RemoveItemFromIndex(args.Tenant, id, spp.FilterIDs); err != nil {
+				if err = routeIndexes.RemoveItemFromIndex(args.Tenant, id, rPrf.FilterIDs); err != nil {
 					return
 				}
 			}
@@ -724,12 +724,12 @@ func (api *APIerSv1) computeStatIndexes(tenant string, stIDs *[]string,
 	return sqpIndexers, nil
 }
 
-func (api *APIerSv1) computeSupplierIndexes(tenant string, sppIDs *[]string,
+func (api *APIerSv1) computeRouteIndexes(tenant string, rPrfIDs *[]string,
 	transactionID string) (filterIndexer *engine.FilterIndexer, err error) {
 	var supplierIDs []string
-	sppIndexers := engine.NewFilterIndexer(api.DataManager, utils.SupplierProfilePrefix, tenant)
-	if sppIDs == nil {
-		ids, err := api.DataManager.DataDB().GetKeysForPrefix(utils.SupplierProfilePrefix)
+	rPrfIndexers := engine.NewFilterIndexer(api.DataManager, utils.RouteProfilePrefix, tenant)
+	if rPrfIDs == nil {
+		ids, err := api.DataManager.DataDB().GetKeysForPrefix(utils.RouteProfilePrefix)
 		if err != nil {
 			return nil, err
 		}
@@ -737,16 +737,16 @@ func (api *APIerSv1) computeSupplierIndexes(tenant string, sppIDs *[]string,
 			supplierIDs = append(supplierIDs, strings.Split(id, utils.CONCATENATED_KEY_SEP)[1])
 		}
 	} else {
-		supplierIDs = *sppIDs
+		supplierIDs = *rPrfIDs
 		transactionID = utils.NonTransactional
 	}
 	for _, id := range supplierIDs {
-		spp, err := api.DataManager.GetSupplierProfile(tenant, id, true, false, utils.NonTransactional)
+		rPrf, err := api.DataManager.GetRouteProfile(tenant, id, true, false, utils.NonTransactional)
 		if err != nil {
 			return nil, err
 		}
-		fltrIDs := make([]string, len(spp.FilterIDs))
-		for i, fltrID := range spp.FilterIDs {
+		fltrIDs := make([]string, len(rPrf.FilterIDs))
+		for i, fltrID := range rPrf.FilterIDs {
 			fltrIDs[i] = fltrID
 		}
 		if len(fltrIDs) == 0 {
@@ -756,8 +756,8 @@ func (api *APIerSv1) computeSupplierIndexes(tenant string, sppIDs *[]string,
 			var fltr *engine.Filter
 			if fltrID == utils.META_NONE {
 				fltr = &engine.Filter{
-					Tenant: spp.Tenant,
-					ID:     spp.ID,
+					Tenant: rPrf.Tenant,
+					ID:     rPrf.ID,
 					Rules: []*engine.FilterRule{
 						{
 							Type:    utils.META_NONE,
@@ -766,28 +766,28 @@ func (api *APIerSv1) computeSupplierIndexes(tenant string, sppIDs *[]string,
 						},
 					},
 				}
-			} else if fltr, err = api.DataManager.GetFilter(spp.Tenant, fltrID,
+			} else if fltr, err = api.DataManager.GetFilter(rPrf.Tenant, fltrID,
 				true, false, utils.NonTransactional); err != nil {
 				if err == utils.ErrNotFound {
 					err = fmt.Errorf("broken reference to filter: %+v for suppliers: %+v",
-						fltrID, spp)
+						fltrID, rPrf)
 				}
 				return nil, err
 			}
-			sppIndexers.IndexTPFilter(engine.FilterToTPFilter(fltr), spp.ID)
+			rPrfIndexers.IndexTPFilter(engine.FilterToTPFilter(fltr), rPrf.ID)
 		}
 	}
 	if transactionID == utils.NonTransactional {
-		if err := sppIndexers.StoreIndexes(true, transactionID); err != nil {
+		if err := rPrfIndexers.StoreIndexes(true, transactionID); err != nil {
 			return nil, err
 		}
 		return nil, nil
 	} else {
-		if err := sppIndexers.StoreIndexes(false, transactionID); err != nil {
+		if err := rPrfIndexers.StoreIndexes(false, transactionID); err != nil {
 			return nil, err
 		}
 	}
-	return sppIndexers, nil
+	return rPrfIndexers, nil
 }
 
 func (api *APIerSv1) computeChargerIndexes(tenant string, cppIDs *[]string,

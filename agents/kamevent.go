@@ -241,8 +241,8 @@ func (kev KamEvent) AsKamAuthReply(authArgs *sessions.V1AuthorizeArgs,
 	if authArgs.GetMaxUsage {
 		kar.MaxUsage = int(utils.Round(authReply.MaxUsage.Seconds(), 0, utils.ROUNDING_MIDDLE))
 	}
-	if authArgs.GetSuppliers && authReply.Suppliers != nil {
-		kar.Suppliers = authReply.Suppliers.Digest()
+	if authArgs.GetRoutes && authReply.Routes != nil {
+		kar.Suppliers = authReply.Routes.Digest()
 	}
 
 	if authArgs.ProcessThresholds && authReply.ThresholdIDs != nil {
@@ -334,8 +334,8 @@ func (kev KamEvent) AsKamProcessMessageReply(procEvArgs *sessions.V1ProcessMessa
 	if procEvArgs.Debit {
 		kar.MaxUsage = int(utils.Round(procEvReply.MaxUsage.Seconds(), 0, utils.ROUNDING_MIDDLE))
 	}
-	if procEvArgs.GetSuppliers && procEvReply.Suppliers != nil {
-		kar.Suppliers = procEvReply.Suppliers.Digest()
+	if procEvArgs.GetRoutes && procEvReply.Routes != nil {
+		kar.Suppliers = procEvReply.Routes.Digest()
 	}
 
 	if procEvArgs.ProcessThresholds {

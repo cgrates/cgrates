@@ -449,27 +449,22 @@ func (m *Migrator) migrateThresholdsProfileFiltersV1() (err error) {
 }
 
 func (m *Migrator) migrateSupplierProfileFiltersV1() (err error) {
-	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.SupplierProfilePrefix)
-	if err != nil {
-		return err
-	}
-	for _, id := range ids {
-		tntID := strings.SplitN(strings.TrimPrefix(id, utils.SupplierProfilePrefix), utils.InInFieldSep, 2)
-		if len(tntID) < 2 {
-			return fmt.Errorf("Invalid key <%s> when migrating filter for supplierProfile", id)
+	for {
+		var spp *SupplierProfile
+		spp, err = m.dmIN.getSupplier()
+		if err == utils.ErrNoMoreData {
+			break
 		}
-		splp, err := m.dmIN.DataManager().GetSupplierProfile(tntID[0], tntID[1], false, false, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
-		if splp == nil || m.dryRun {
+		if spp == nil || m.dryRun {
 			continue
 		}
-		for i, fl := range splp.FilterIDs {
-			splp.FilterIDs[i] = migrateInlineFilter(fl)
+		for i, fl := range spp.FilterIDs {
+			spp.FilterIDs[i] = migrateInlineFilter(fl)
 		}
-		if err := m.dmOut.DataManager().SetSupplierProfile(splp, true); err != nil {
+		if err := m.dmOut.setSupplier(spp); err != nil {
 			return err
 		}
 		m.stats[utils.RQF]++
@@ -664,30 +659,24 @@ func (m *Migrator) migrateThresholdsProfileFiltersV2() (err error) {
 }
 
 func (m *Migrator) migrateSupplierProfileFiltersV2() (err error) {
-	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.SupplierProfilePrefix)
-	if err != nil {
-		return fmt.Errorf("error: <%s> when getting supplier profile IDs", err)
-	}
-	for _, id := range ids {
-		tntID := strings.SplitN(strings.TrimPrefix(id, utils.SupplierProfilePrefix), utils.InInFieldSep, 2)
-		if len(tntID) < 2 {
-			return fmt.Errorf("Invalid key <%s> when migrating filter for supplierProfile", id)
+	for {
+		var spp *SupplierProfile
+		spp, err = m.dmIN.getSupplier()
+		if err == utils.ErrNoMoreData {
+			break
 		}
-		splp, err := m.dmIN.DataManager().GetSupplierProfile(tntID[0], tntID[1], false, false, utils.NonTransactional)
 		if err != nil {
-			return fmt.Errorf("error: <%s> when getting supplier profile with tenant: <%s> and id: <%s>",
-				err.Error(), tntID[0], tntID[1])
+			return err
 		}
-		if splp == nil || m.dryRun {
+		if spp == nil || m.dryRun {
 			continue
 		}
-		for i, fl := range splp.FilterIDs {
-			splp.FilterIDs[i] = migrateInlineFilterV2(fl)
+		for i, fl := range spp.FilterIDs {
+			spp.FilterIDs[i] = migrateInlineFilterV2(fl)
 		}
-		if err := m.dmOut.DataManager().SetSupplierProfile(splp, true); err != nil {
+		if err := m.dmOut.setSupplier(spp); err != nil {
 			return fmt.Errorf("error: <%s> when setting supplier profile with tenant: <%s> and id: <%s>",
-				err.Error(), tntID[0], tntID[1])
+				err.Error(), spp.Tenant, spp.ID)
 		}
 		m.stats[utils.RQF]++
 	}

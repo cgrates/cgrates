@@ -19,49 +19,48 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
+	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 func init() {
-	c := &CmdGetSupplierForEvent{
-		name:      "supplier_profiles_for_event",
-		rpcMethod: utils.SupplierSv1GetSupplierProfilesForEvent,
-		rpcParams: &utils.CGREventWithArgDispatcher{},
+	c := &CmdSetRoute{
+		name:      "route_set",
+		rpcMethod: utils.APIerSv1SetRouteProfile,
+		rpcParams: &v1.RouteWithCache{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
-type CmdGetSupplierForEvent struct {
+type CmdSetRoute struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.CGREventWithArgDispatcher
+	rpcParams *v1.RouteWithCache
 	*CommandExecuter
 }
 
-func (self *CmdGetSupplierForEvent) Name() string {
+func (self *CmdSetRoute) Name() string {
 	return self.name
 }
 
-func (self *CmdGetSupplierForEvent) RpcMethod() string {
+func (self *CmdSetRoute) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetSupplierForEvent) RpcParams(reset bool) interface{} {
+func (self *CmdSetRoute) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.CGREventWithArgDispatcher{
-			CGREvent:      new(utils.CGREvent),
-			ArgDispatcher: new(utils.ArgDispatcher)}
+		self.rpcParams = &v1.RouteWithCache{RouteProfile: new(engine.RouteProfile)}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdGetSupplierForEvent) PostprocessRpcParams() error {
+func (self *CmdSetRoute) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetSupplierForEvent) RpcResult() interface{} {
-	var atr []*engine.SupplierProfile
-	return &atr
+func (self *CmdSetRoute) RpcResult() interface{} {
+	var s string
+	return &s
 }

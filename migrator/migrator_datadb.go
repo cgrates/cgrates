@@ -70,6 +70,10 @@ type MigratorDataDB interface {
 	setV1Filter(x *v1Filter) (err error)
 	remV1Filter(tenant, id string) (err error)
 
+	getSupplier() (spl *SupplierProfile, err error)
+	setSupplier(spl *SupplierProfile) (err error)
+	remSupplier(tenant, id string) (err error)
+
 	DataManager() *engine.DataManager
 	close()
 }

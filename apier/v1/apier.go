@@ -1366,7 +1366,7 @@ func (apiV1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *strin
 	// if items is empy we need to export all items
 	if len(arg.Items) == 0 {
 		arg.Items = []string{utils.MetaAttributes, utils.MetaChargers, utils.MetaDispatchers, utils.MetaDispatcherHosts,
-			utils.MetaFilters, utils.MetaResources, utils.MetaStats, utils.MetaSuppliers, utils.MetaThresholds}
+			utils.MetaFilters, utils.MetaResources, utils.MetaStats, utils.MetaRoutes, utils.MetaThresholds}
 	}
 	if _, err := os.Stat(arg.Path); os.IsNotExist(err) {
 		os.Mkdir(arg.Path, os.ModeDir)
@@ -1639,8 +1639,8 @@ func (apiV1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *strin
 				}
 			}
 			csvWriter.Flush()
-		case utils.MetaSuppliers:
-			prfx := utils.SupplierProfilePrefix
+		case utils.MetaRoutes:
+			prfx := utils.RouteProfilePrefix
 			keys, err := apiV1.DataManager.DataDB().GetKeysForPrefix(prfx)
 			if err != nil {
 				return err
@@ -1648,7 +1648,7 @@ func (apiV1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *strin
 			if len(keys) == 0 { // if we don't find items we skip
 				continue
 			}
-			f, err := os.Create(path.Join(arg.Path, utils.SuppliersCsv))
+			f, err := os.Create(path.Join(arg.Path, utils.RoutesCsv))
 			if err != nil {
 				return err
 			}
@@ -1657,18 +1657,18 @@ func (apiV1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *strin
 			csvWriter := csv.NewWriter(f)
 			csvWriter.Comma = utils.CSV_SEP
 			//write the header of the file
-			if err := csvWriter.Write(engine.TpSuppliers{}.CSVHeader()); err != nil {
+			if err := csvWriter.Write(engine.TPRoutes{}.CSVHeader()); err != nil {
 				return err
 			}
 			for _, key := range keys {
 				tntID := strings.SplitN(key[len(prfx):], utils.InInFieldSep, 2)
-				spp, err := apiV1.DataManager.GetSupplierProfile(tntID[0], tntID[1],
+				spp, err := apiV1.DataManager.GetRouteProfile(tntID[0], tntID[1],
 					true, false, utils.NonTransactional)
 				if err != nil {
 					return err
 				}
-				for _, model := range engine.APItoModelTPSuppliers(
-					engine.SupplierProfileToAPI(spp)) {
+				for _, model := range engine.APItoModelTPRoutes(
+					engine.RouteProfileToAPI(spp)) {
 					if record, err := engine.CsvDump(model); err != nil {
 						return err
 					} else if err := csvWriter.Write(record); err != nil {
