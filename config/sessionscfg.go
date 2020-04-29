@@ -719,11 +719,20 @@ func (stirCfg *STIRcfg) loadFromJSONCfg(jsnCfg *STIRJsonCfg) (err error) {
 }
 
 func (stirCfg *STIRcfg) AsMapInterface() map[string]interface{} {
+	var payloadMaxduration string = "0"
+	if stirCfg.PayloadMaxduration == 0 {
+		payloadMaxduration = "0"
+	} else if stirCfg.PayloadMaxduration == -1 {
+		payloadMaxduration = "-1"
+	} else {
+		payloadMaxduration = stirCfg.PayloadMaxduration.String()
+	}
+
 	return map[string]interface{}{
 		utils.DefaultAttestCfg:      stirCfg.DefaultAttest,
 		utils.PublicKeyPathCfg:      stirCfg.PublicKeyPath,
 		utils.PrivateKeyPathCfg:     stirCfg.PrivateKeyPath,
 		utils.AllowedAtestCfg:       stirCfg.AllowedAttest.AsSlice(),
-		utils.PayloadMaxdurationCfg: stirCfg.PayloadMaxduration,
+		utils.PayloadMaxdurationCfg: payloadMaxduration,
 	}
 }
