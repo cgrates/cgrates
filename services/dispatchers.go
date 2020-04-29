@@ -101,8 +101,8 @@ func (dspS *DispatcherService) Start() (err error) {
 	dspS.server.RpcRegisterName(utils.ResourceSv1,
 		v1.NewDispatcherResourceSv1(dspS.dspS))
 
-	dspS.server.RpcRegisterName(utils.SupplierSv1,
-		v1.NewDispatcherSupplierSv1(dspS.dspS))
+	dspS.server.RpcRegisterName(utils.RouteSv1,
+		v1.NewDispatcherRouteSv1(dspS.dspS))
 
 	dspS.server.RpcRegisterName(utils.AttributeSv1,
 		v1.NewDispatcherAttributeSv1(dspS.dspS))

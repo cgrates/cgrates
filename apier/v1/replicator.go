@@ -228,8 +228,8 @@ func (rplSv1 *ReplicatorSv1) GetRatingProfile(id *utils.StringWithApiKey, reply 
 }
 
 //GetResourceProfile
-func (rplSv1 *ReplicatorSv1) GetSupplierProfile(tntID *utils.TenantIDWithArgDispatcher, reply *engine.SupplierProfile) error {
-	if rcv, err := rplSv1.dm.DataDB().GetSupplierProfileDrv(tntID.Tenant, tntID.ID); err != nil {
+func (rplSv1 *ReplicatorSv1) GetRouteProfile(tntID *utils.TenantIDWithArgDispatcher, reply *engine.RouteProfile) error {
+	if rcv, err := rplSv1.dm.DataDB().GetRouteProfileDrv(tntID.Tenant, tntID.ID); err != nil {
 		return err
 	} else {
 		*reply = *rcv
@@ -463,9 +463,9 @@ func (rplSv1 *ReplicatorSv1) SetRatingProfile(rp *engine.RatingProfileWithArgDis
 	return nil
 }
 
-// SetSupplierProfile
-func (rplSv1 *ReplicatorSv1) SetSupplierProfile(sp *engine.SupplierProfileWithArgDispatcher, reply *string) error {
-	if err := rplSv1.dm.DataDB().SetSupplierProfileDrv(sp.SupplierProfile); err != nil {
+// SetRouteProfile
+func (rplSv1 *ReplicatorSv1) SetRouteProfile(sp *engine.RouteProfileWithArgDispatcher, reply *string) error {
+	if err := rplSv1.dm.DataDB().SetRouteProfileDrv(sp.RouteProfile); err != nil {
 		return err
 	}
 	*reply = utils.OK
@@ -681,8 +681,8 @@ func (rplSv1 *ReplicatorSv1) RemoveRatingProfile(id *utils.StringWithApiKey, rep
 	return nil
 }
 
-func (rplSv1 *ReplicatorSv1) RemoveSupplierProfile(args *utils.TenantIDWithArgDispatcher, reply *string) error {
-	if err := rplSv1.dm.DataDB().RemoveSupplierProfileDrv(args.Tenant, args.ID); err != nil {
+func (rplSv1 *ReplicatorSv1) RemoveRouteProfile(args *utils.TenantIDWithArgDispatcher, reply *string) error {
+	if err := rplSv1.dm.DataDB().RemoveRouteProfileDrv(args.Tenant, args.ID); err != nil {
 		return err
 	}
 	*reply = utils.OK

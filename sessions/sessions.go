@@ -1697,7 +1697,7 @@ func (sS *SessionS) BiRPCv1ReplicateSessions(clnt rpcclient.ClientConnector,
 // NewV1AuthorizeArgs is a constructor for V1AuthorizeArgs
 func NewV1AuthorizeArgs(attrs bool, attributeIDs []string,
 	thrslds bool, thresholdIDs []string, statQueues bool, statIDs []string,
-	res, maxUsage, suppls, supplsIgnoreErrs, supplsEventCost bool,
+	res, maxUsage, routes, routesIgnoreErrs, routesEventCost bool,
 	cgrEv *utils.CGREvent, argDisp *utils.ArgDispatcher,
 	supplierPaginator utils.Paginator, forceDuration bool, opts map[string]interface{}) (args *V1AuthorizeArgs) {
 	args = &V1AuthorizeArgs{
@@ -1706,17 +1706,17 @@ func NewV1AuthorizeArgs(attrs bool, attributeIDs []string,
 		GetMaxUsage:           maxUsage,
 		ProcessThresholds:     thrslds,
 		ProcessStats:          statQueues,
-		SuppliersIgnoreErrors: supplsIgnoreErrs,
-		GetSuppliers:          suppls,
+		RoutesIgnoreErrors: routesIgnoreErrs,
+		GetRoutes:          routes,
 		CGREvent:              cgrEv,
 		ForceDuration:         forceDuration,
 		Opts:                  opts,
 	}
-	if supplsEventCost {
-		args.SuppliersMaxCost = utils.MetaSuppliersEventCost
+	if routesEventCost {
+		args.RoutesMaxCost = utils.MetaRoutesEventCost
 	}
 	args.ArgDispatcher = argDisp
-	args.Paginator = supplierPaginator
+	args.Paginator = routePaginator
 	if len(attributeIDs) != 0 {
 		args.AttributeIDs = attributeIDs
 	}
@@ -1738,9 +1738,9 @@ type V1AuthorizeArgs struct {
 	ForceDuration         bool
 	ProcessThresholds     bool
 	ProcessStats          bool
-	GetSuppliers          bool
-	SuppliersMaxCost      string
-	SuppliersIgnoreErrors bool
+	GetRoutes          bool
+	RoutesMaxCost      string
+	RoutesIgnoreErrors bool
 	AttributeIDs          []string
 	ThresholdIDs          []string
 	StatIDs               []string
@@ -1761,12 +1761,12 @@ func (args *V1AuthorizeArgs) ParseFlags(flags string) {
 			args.AuthorizeResources = true
 		case subsystem == utils.MetaDispatchers:
 			dispatcherFlag = true
-		case subsystem == utils.MetaSuppliers:
-			args.GetSuppliers = true
-		case subsystem == utils.MetaSuppliersIgnoreErrors:
-			args.SuppliersIgnoreErrors = true
-		case subsystem == utils.MetaSuppliersEventCost:
-			args.SuppliersMaxCost = utils.MetaEventCost
+		case subsystem == utils.MetaRoutes:
+			args.GetRoutes = true
+		case subsystem == utils.MetaRoutesIgnoreErrors:
+			args.RoutesIgnoreErrors = true
+		case subsystem == utils.MetaRoutesEventCost:
+			args.RoutesMaxCost = utils.MetaEventCost
 		case strings.HasPrefix(subsystem, utils.MetaAttributes):
 			args.GetAttributes = true
 			args.AttributeIDs = getFlagIDs(subsystem)
@@ -1782,7 +1782,7 @@ func (args *V1AuthorizeArgs) ParseFlags(flags string) {
 	}
 	cgrArgs, _ := utils.ExtractArgsFromOpts(args.Opts, dispatcherFlag, true)
 	args.ArgDispatcher = cgrArgs.ArgDispatcher
-	args.Paginator = *cgrArgs.SupplierPaginator
+	args.Paginator = *cgrArgs.RoutePaginator
 	return
 }
 
@@ -1791,7 +1791,7 @@ type V1AuthorizeReply struct {
 	Attributes         *engine.AttrSProcessEventReply
 	ResourceAllocation *string
 	MaxUsage           *time.Duration
-	Suppliers          *engine.SortedSuppliers
+	Routes             *engine.SortedRoutes
 	ThresholdIDs       *[]string
 	StatQueueIDs       *[]string
 }
@@ -1817,8 +1817,8 @@ func (v1AuthReply *V1AuthorizeReply) AsNavigableMap(
 		if v1AuthReply.MaxUsage != nil {
 			cgrReply[utils.CapMaxUsage] = *v1AuthReply.MaxUsage
 		}
-		if v1AuthReply.Suppliers != nil {
-			cgrReply[utils.CapSuppliers] = v1AuthReply.Suppliers.AsNavigableMap()
+		if v1AuthReply.Routes != nil {
+			cgrReply[utils.CapRoutes] = v1AuthReply.Routes.AsNavigableMap()
 		}
 		if v1AuthReply.ThresholdIDs != nil {
 			cgrReply[utils.CapThresholds] = *v1AuthReply.ThresholdIDs
@@ -1861,7 +1861,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.ClientConnector,
 	// end of RPC caching
 
 	if !args.GetAttributes && !args.AuthorizeResources &&
-		!args.GetMaxUsage && !args.GetSuppliers {
+		!args.GetMaxUsage && !args.GetRoutes {
 		return utils.NewErrMandatoryIeMissing("subsystems")
 	}
 	if args.CGREvent.Tenant == "" {
@@ -1908,14 +1908,14 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.ClientConnector,
 		}
 		authReply.ResourceAllocation = &allocMsg
 	}
-	if args.GetSuppliers {
-		splsReply, err := sS.getSuppliers(args.CGREvent.Clone(), args.ArgDispatcher,
-			args.Paginator, args.SuppliersIgnoreErrors, args.SuppliersMaxCost, args.Opts)
+	if args.GetRoutes {
+		routesReply, err := sS.getRoutes(args.CGREvent.Clone(), args.ArgDispatcher,
+			args.Paginator, args.RoutesIgnoreErrors, args.RoutesMaxCost)
 		if err != nil {
 			return err
 		}
-		if splsReply.SortedSuppliers != nil {
-			authReply.Suppliers = &splsReply
+		if routesReply.SortedRoutes != nil {
+			authReply.Routes = &routesReply
 		}
 	}
 	if args.ProcessThresholds {
@@ -1952,7 +1952,7 @@ type V1AuthorizeReplyWithDigest struct {
 	AttributesDigest   *string
 	ResourceAllocation *string
 	MaxUsage           float64 // special treat returning time.Duration.Seconds()
-	SuppliersDigest    *string
+	RoutesDigest       *string
 	Thresholds         *string
 	StatQueues         *string
 }
@@ -1974,8 +1974,8 @@ func (sS *SessionS) BiRPCv1AuthorizeEventWithDigest(clnt rpcclient.ClientConnect
 	if args.GetMaxUsage {
 		authReply.MaxUsage = initAuthRply.MaxUsage.Seconds()
 	}
-	if args.GetSuppliers {
-		authReply.SuppliersDigest = utils.StringPointer(initAuthRply.Suppliers.Digest())
+	if args.GetRoutes {
+		authReply.RoutesDigest = utils.StringPointer(initAuthRply.Routes.Digest())
 	}
 	if args.ProcessThresholds {
 		authReply.Thresholds = utils.StringPointer(
@@ -2680,9 +2680,9 @@ func (sS *SessionS) BiRPCv1ProcessCDR(clnt rpcclient.ClientConnector,
 // NewV1ProcessMessageArgs is a constructor for MessageArgs used by ProcessMessage
 func NewV1ProcessMessageArgs(attrs bool, attributeIDs []string,
 	thds bool, thresholdIDs []string, stats bool, statIDs []string, resrc, acnts,
-	suppls, supplsIgnoreErrs, supplsEventCost bool,
+	routes, routesIgnoreErrs, routesEventCost bool,
 	cgrEv *utils.CGREvent, argDisp *utils.ArgDispatcher,
-	supplierPaginator utils.Paginator, forceDuration bool,
+	routePaginator utils.Paginator, forceDuration bool,
 	opts map[string]interface{}) (args *V1ProcessMessageArgs) {
 	args = &V1ProcessMessageArgs{
 		AllocateResources:     resrc,
@@ -2690,17 +2690,17 @@ func NewV1ProcessMessageArgs(attrs bool, attributeIDs []string,
 		GetAttributes:         attrs,
 		ProcessThresholds:     thds,
 		ProcessStats:          stats,
-		SuppliersIgnoreErrors: supplsIgnoreErrs,
-		GetSuppliers:          suppls,
+		RoutesIgnoreErrors: routesIgnoreErrs,
+		GetRoutes:          routes,
 		CGREvent:              cgrEv,
 		ArgDispatcher:         argDisp,
 		ForceDuration:         forceDuration,
 		Opts:                  opts,
 	}
-	if supplsEventCost {
-		args.SuppliersMaxCost = utils.MetaSuppliersEventCost
+	if routesEventCost {
+		args.RoutesMaxCost = utils.MetaRoutesEventCost
 	}
-	args.Paginator = supplierPaginator
+	args.Paginator = routePaginator
 	if len(attributeIDs) != 0 {
 		args.AttributeIDs = attributeIDs
 	}
@@ -2721,9 +2721,9 @@ type V1ProcessMessageArgs struct {
 	ForceDuration         bool
 	ProcessThresholds     bool
 	ProcessStats          bool
-	GetSuppliers          bool
-	SuppliersMaxCost      string
-	SuppliersIgnoreErrors bool
+	GetRoutes          bool
+	RoutesMaxCost      string
+	RoutesIgnoreErrors bool
 	AttributeIDs          []string
 	ThresholdIDs          []string
 	StatIDs               []string
@@ -2744,12 +2744,12 @@ func (args *V1ProcessMessageArgs) ParseFlags(flags string) {
 			args.AllocateResources = true
 		case subsystem == utils.MetaDispatchers:
 			dispatcherFlag = true
-		case subsystem == utils.MetaSuppliers:
-			args.GetSuppliers = true
-		case subsystem == utils.MetaSuppliersIgnoreErrors:
-			args.SuppliersIgnoreErrors = true
-		case subsystem == utils.MetaSuppliersEventCost:
-			args.SuppliersMaxCost = utils.MetaEventCost
+		case subsystem == utils.MetaRoutes:
+			args.GetRoutes = true
+		case subsystem == utils.MetaRoutesIgnoreErrors:
+			args.RoutesIgnoreErrors = true
+		case subsystem == utils.MetaRoutesEventCost:
+			args.RoutesMaxCost = utils.MetaEventCost
 		case strings.Index(subsystem, utils.MetaAttributes) != -1:
 			args.GetAttributes = true
 			args.AttributeIDs = getFlagIDs(subsystem)
@@ -2766,7 +2766,7 @@ func (args *V1ProcessMessageArgs) ParseFlags(flags string) {
 	cgrArgs, _ := utils.ExtractArgsFromOpts(args.Opts, dispatcherFlag, true)
 
 	args.ArgDispatcher = cgrArgs.ArgDispatcher
-	args.Paginator = *cgrArgs.SupplierPaginator
+	args.Paginator = *cgrArgs.RoutePaginator
 	return
 }
 
@@ -2775,7 +2775,7 @@ type V1ProcessMessageReply struct {
 	MaxUsage           *time.Duration
 	ResourceAllocation *string
 	Attributes         *engine.AttrSProcessEventReply
-	Suppliers          *engine.SortedSuppliers
+	Routes             *engine.SortedRoutes
 	ThresholdIDs       *[]string
 	StatQueueIDs       *[]string
 }
@@ -2801,8 +2801,8 @@ func (v1Rply *V1ProcessMessageReply) AsNavigableMap(
 			}
 			cgrReply[utils.CapAttributes] = attrs
 		}
-		if v1Rply.Suppliers != nil {
-			cgrReply[utils.CapSuppliers] = v1Rply.Suppliers.AsNavigableMap()
+		if v1Rply.Routes != nil {
+			cgrReply[utils.CapRoutes] = v1Rply.Routes.AsNavigableMap()
 		}
 		if v1Rply.ThresholdIDs != nil {
 			cgrReply[utils.CapThresholds] = *v1Rply.ThresholdIDs
@@ -2882,14 +2882,14 @@ func (sS *SessionS) BiRPCv1ProcessMessage(clnt rpcclient.ClientConnector,
 		}
 		rply.ResourceAllocation = &allocMessage
 	}
-	if args.GetSuppliers {
-		splsReply, err := sS.getSuppliers(args.CGREvent.Clone(), args.ArgDispatcher,
-			args.Paginator, args.SuppliersIgnoreErrors, args.SuppliersMaxCost, args.Opts)
+	if args.GetRoutes {
+		routesReply, err := sS.getRoutes(args.CGREvent.Clone(), args.ArgDispatcher,
+			args.Paginator, args.RoutesIgnoreErrors, args.RoutesMaxCost)
 		if err != nil {
 			return err
 		}
-		if splsReply.SortedSuppliers != nil {
-			rply.Suppliers = &splsReply
+		if routesReply.SortedRoutes != nil {
+			rply.Routes = &routesReply
 		}
 	}
 	if args.Debit {
@@ -2945,7 +2945,7 @@ type V1ProcessEventReply struct {
 	Cost            *float64 // Cost is the cost received from Rater, ignoring accounting part
 	ResourceMessage *string
 	Attributes      *engine.AttrSProcessEventReply
-	Suppliers       *engine.SortedSuppliers
+	Routes          *engine.SortedRoutes
 	ThresholdIDs    *[]string
 	StatQueueIDs    *[]string
 	STIRIdentity    string
@@ -2972,8 +2972,8 @@ func (v1Rply *V1ProcessEventReply) AsNavigableMap(
 			}
 			cgrReply[utils.CapAttributes] = attrs
 		}
-		if v1Rply.Suppliers != nil {
-			cgrReply[utils.CapSuppliers] = v1Rply.Suppliers.AsNavigableMap()
+		if v1Rply.Routes != nil {
+			cgrReply[utils.CapRoutes] = v1Rply.Routes.AsNavigableMap()
 		}
 		if v1Rply.ThresholdIDs != nil {
 			cgrReply[utils.CapThresholds] = *v1Rply.ThresholdIDs
@@ -3269,11 +3269,11 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 		}
 	}
 	// get suppliers if required
-	if argsFlagsWithParams.HasKey(utils.MetaSuppliers) {
+	if argsFlagsWithParams.HasKey(utils.MetaRoutes) {
 		var ignoreErrors bool
 		var maxCost string
 		// check in case we have options for suppliers
-		if splOpts := argsFlagsWithParams.ParamsSlice(utils.MetaSuppliers); len(splOpts) != 0 {
+		if splOpts := argsFlagsWithParams.ParamsSlice(utils.MetaRoutes); len(splOpts) != 0 {
 			//check for subflags and convert them into utils.FlagsWithParams
 			splsFlagsWithParams, err := utils.FlagsWithParamsFromSlice(splOpts)
 			if err != nil {
@@ -3283,16 +3283,16 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 				ignoreErrors = true
 			}
 			if splsFlagsWithParams.HasKey(utils.MetaEventCost) {
-				maxCost = utils.MetaSuppliersEventCost
+				maxCost = utils.MetaRoutesEventCost
 			}
 		}
-		splsReply, err := sS.getSuppliers(args.CGREvent.Clone(), args.ArgDispatcher,
+		routesReply, err := sS.getRoutes(args.CGREvent.Clone(), args.ArgDispatcher,
 			args.Paginator, ignoreErrors, maxCost, args.Opts)
 		if err != nil {
 			return err
 		}
-		if splsReply.SortedSuppliers != nil {
-			rply.Suppliers = &splsReply
+		if routesReply.SortedRoutes != nil {
+			rply.Routes = &routesReply
 		}
 	}
 	// process thresholds if required
@@ -3580,8 +3580,8 @@ func (sS *SessionS) processStats(cgrEv *utils.CGREvent, argDisp *utils.ArgDispat
 	return
 }
 
-// getSuppliers will receive the event and send it to SupplierS to find the suppliers
-func (sS *SessionS) getSuppliers(cgrEv *utils.CGREvent, argDisp *utils.ArgDispatcher, pag utils.Paginator,
+// getRoutes will receive the event and send it to SupplierS to find the suppliers
+func (sS *SessionS) getRoutes(cgrEv *utils.CGREvent, argDisp *utils.ArgDispatcher, pag utils.Paginator,
 	ignoreErrors bool, maxCost string, opts map[string]interface{}) (splsReply engine.SortedSuppliers, err error) {
 	if len(sS.cgrCfg.SessionSCfg().SupplSConns) == 0 {
 		return splsReply, utils.NewErrNotConnected(utils.SupplierS)
@@ -3589,7 +3589,7 @@ func (sS *SessionS) getSuppliers(cgrEv *utils.CGREvent, argDisp *utils.ArgDispat
 	if acd, has := cgrEv.Event[utils.ACD]; has {
 		cgrEv.Event[utils.Usage] = acd
 	}
-	sArgs := &engine.ArgsGetSuppliers{
+	sArgs := &engine.ArgsGetRoutes{
 		CGREvent:      cgrEv,
 		Paginator:     pag,
 		ArgDispatcher: argDisp,
@@ -3597,9 +3597,9 @@ func (sS *SessionS) getSuppliers(cgrEv *utils.CGREvent, argDisp *utils.ArgDispat
 		MaxCost:       maxCost,
 		Opts:          opts,
 	}
-	if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().SupplSConns, nil, utils.SupplierSv1GetSuppliers,
-		sArgs, &splsReply); err != nil {
-		return splsReply, utils.NewErrSupplierS(err)
+	if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().RouteSConns, nil, utils.RouteSv1GetRoutes,
+		sArgs, &routesReply); err != nil {
+		return routesReply, utils.NewErrSupplierS(err)
 	}
 	return
 }

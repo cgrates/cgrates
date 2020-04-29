@@ -340,12 +340,12 @@ CREATE TABLE tp_filters (
 );
 
 --
--- Table structure for table `tp_suppliers`
+-- Table structure for table `tp_routes`
 --
 
 
-DROP TABLE IF EXISTS tp_suppliers;
-CREATE TABLE tp_suppliers (
+DROP TABLE IF EXISTS tp_routes;
+CREATE TABLE tp_routes (
   `pk` int(11) NOT NULL AUTO_INCREMENT,
   `tpid` varchar(64) NOT NULL,
   `tenant` varchar(64) NOT NULL,
@@ -354,22 +354,22 @@ CREATE TABLE tp_suppliers (
   `activation_interval` varchar(64) NOT NULL,
   `sorting` varchar(32) NOT NULL,
   `sorting_parameters` varchar(64) NOT NULL,
-  `supplier_id` varchar(32) NOT NULL,
-  `supplier_filter_ids` varchar(64) NOT NULL,
-  `supplier_account_ids` varchar(64) NOT NULL,
-  `supplier_ratingplan_ids` varchar(64) NOT NULL,
-  `supplier_resource_ids` varchar(64) NOT NULL,
-  `supplier_stat_ids` varchar(64) NOT NULL,
-  `supplier_weight` decimal(8,2) NOT NULL,
-  `supplier_blocker` BOOLEAN NOT NULL,
-  `supplier_parameters` varchar(64) NOT NULL,
+  `route_id` varchar(32) NOT NULL,
+  `route_filter_ids` varchar(64) NOT NULL,
+  `route_account_ids` varchar(64) NOT NULL,
+  `route_ratingplan_ids` varchar(64) NOT NULL,
+  `route_resource_ids` varchar(64) NOT NULL,
+  `route_stat_ids` varchar(64) NOT NULL,
+  `route_weight` decimal(8,2) NOT NULL,
+  `route_blocker` BOOLEAN NOT NULL,
+  `route_parameters` varchar(64) NOT NULL,
   `weight` decimal(8,2) NOT NULL,
   `created_at` TIMESTAMP,
   PRIMARY KEY (`pk`),
   KEY `tpid` (`tpid`),
-  UNIQUE KEY `unique_tp_suppliers` (`tpid`,`tenant`,
-    `id`,`filter_ids`,`supplier_id`,`supplier_filter_ids`,`supplier_account_ids`,
-    `supplier_ratingplan_ids`,`supplier_resource_ids`,`supplier_stat_ids` )
+  UNIQUE KEY `unique_tp_routes` (`tpid`,`tenant`,
+    `id`,`filter_ids`,`route_id`,`route_filter_ids`,`route_account_ids`,
+    `route_ratingplan_ids`,`route_resource_ids`,`route_stat_ids` )
 );
 
 --

@@ -53,8 +53,8 @@ func composeArgsReload(args utils.ArgsGetCacheItem) (rpl utils.AttrReloadCache) 
 		rpl.ThresholdProfileIDs = &[]string{args.ItemID}
 	case utils.CacheFilters:
 		rpl.FilterIDs = &[]string{args.ItemID}
-	case utils.CacheSupplierProfiles:
-		rpl.SupplierProfileIDs = &[]string{args.ItemID}
+	case utils.CacheRouteProfiles:
+		rpl.RouteProfileIDs = &[]string{args.ItemID}
 	case utils.CacheAttributeProfiles:
 		rpl.AttributeProfileIDs = &[]string{args.ItemID}
 	case utils.CacheChargerProfiles:

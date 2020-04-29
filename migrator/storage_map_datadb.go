@@ -279,4 +279,20 @@ func (iDBMig *internalMigrator) remV1Filter(tenant, id string) (err error) {
 	return utils.ErrNotImplemented
 }
 
+// Supplier Methods
+//get
+func (iDBMig *internalMigrator) getSupplier() (spl *SupplierProfile, err error) {
+	return nil, utils.ErrNotImplemented
+}
+
+//set
+func (iDBMig *internalMigrator) setSupplier(spl *SupplierProfile) (err error) {
+	return utils.ErrNotImplemented
+}
+
+//rem
+func (iDBMig *internalMigrator) remSupplier(tenant, id string) (err error) {
+	return utils.ErrNotImplemented
+}
+
 func (iDBMig *internalMigrator) close() {}

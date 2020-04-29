@@ -574,8 +574,8 @@ type optsGetRoutes struct {
 	sortingStragety   string
 }
 
-// V1GetSupplierProfilesForEvent returns the list of valid supplier IDs
-func (rpS *RouteService) V1GetSuppliers(args *ArgsGetRoutes, reply *SortedRoutes) (err error) {
+// V1GetRoutes returns the list of valid routes
+func (rpS *RouteService) V1GetRoutes(args *ArgsGetRoutes, reply *SortedRoutes) (err error) {
 	if args.CGREvent == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
@@ -612,8 +612,8 @@ func (rpS *RouteService) V1GetSuppliers(args *ArgsGetRoutes, reply *SortedRoutes
 	return
 }
 
-// V1GetSupplierProfilesForEvent returns the list of valid supplier profiles
-func (rpS *RouteService) V1GetSupplierProfilesForEvent(args *utils.CGREventWithArgDispatcher, reply *[]*RouteProfile) (err error) {
+// V1GetRouteProfilesForEvent returns the list of valid route profiles
+func (rpS *RouteService) V1GetRouteProfilesForEvent(args *utils.CGREventWithArgDispatcher, reply *[]*RouteProfile) (err error) {
 	if missing := utils.MissingStructFields(args.CGREvent, []string{utils.Tenant, utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	} else if args.CGREvent.Event == nil {

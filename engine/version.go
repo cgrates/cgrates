@@ -35,6 +35,7 @@ var (
 		utils.Thresholds:     "cgr-migrator -exec=*thresholds",
 		utils.LoadIDsVrs:     "cgr-migrator -exec=*load_ids",
 		utils.RQF:            "cgr-migrator -exec=*filters",
+		utils.Routes:         "cgr-migrator -exec=*routes",
 	}
 	storDBVers = map[string]string{
 		utils.CostDetails:   "cgr-migrator -exec=*cost_details",

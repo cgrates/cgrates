@@ -22,24 +22,24 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// SetTPSupplierProfile creates a new SupplierProfile within a tariff plan
-func (api *APIerSv1) SetTPSupplierProfile(attrs *utils.TPSupplierProfile, reply *string) error {
+// SetTPRouteProfile creates a new RouteProfile within a tariff plan
+func (api *APIerSv1) SetTPRouteProfile(attrs *utils.TPRouteProfile, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := api.StorDb.SetTPSuppliers([]*utils.TPSupplierProfile{attrs}); err != nil {
+	if err := api.StorDb.SetTPRoutes([]*utils.TPRouteProfile{attrs}); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
 	return nil
 }
 
-// GetTPSupplierProfile queries specific SupplierProfile on tariff plan
-func (api *APIerSv1) GetTPSupplierProfile(attr *utils.TPTntID, reply *utils.TPSupplierProfile) error {
+// GetTPRouteProfile queries specific RouteProfile on tariff plan
+func (api *APIerSv1) GetTPRouteProfile(attr *utils.TPTntID, reply *utils.TPRouteProfile) error {
 	if missing := utils.MissingStructFields(attr, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	spp, err := api.StorDb.GetTPSuppliers(attr.TPid, attr.Tenant, attr.ID)
+	spp, err := api.StorDb.GetTPRoutes(attr.TPid, attr.Tenant, attr.ID)
 	if err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
@@ -50,17 +50,17 @@ func (api *APIerSv1) GetTPSupplierProfile(attr *utils.TPTntID, reply *utils.TPSu
 	return nil
 }
 
-type AttrGetTPSupplierProfileIDs struct {
+type AttrGetTPRouteProfileIDs struct {
 	TPid string // Tariff plan id
 	utils.PaginatorWithSearch
 }
 
-// GetTPSupplierProfileIDs queries SupplierProfile identities on specific tariff plan.
-func (api *APIerSv1) GetTPSupplierProfileIDs(attrs *AttrGetTPSupplierProfileIDs, reply *[]string) error {
+// GetTPRouteProfileIDs queries RouteProfile identities on specific tariff plan.
+func (api *APIerSv1) GetTPRouteProfileIDs(attrs *AttrGetTPRouteProfileIDs, reply *[]string) error {
 	if missing := utils.MissingStructFields(attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	ids, err := api.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPSuppliers,
+	ids, err := api.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPRoutes,
 		utils.TPDistinctIds{"tenant", "id"}, nil, &attrs.PaginatorWithSearch)
 	if err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
@@ -72,12 +72,12 @@ func (api *APIerSv1) GetTPSupplierProfileIDs(attrs *AttrGetTPSupplierProfileIDs,
 	return nil
 }
 
-// RemoveTPSupplierProfile removes specific SupplierProfile on Tariff plan
-func (api *APIerSv1) RemoveTPSupplierProfile(attrs *utils.TPTntID, reply *string) error {
+// RemoveTPRouteProfile removes specific RouteProfile on Tariff plan
+func (api *APIerSv1) RemoveTPRouteProfile(attrs *utils.TPTntID, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := api.StorDb.RemTpData(utils.TBLTPSuppliers, attrs.TPid,
+	if err := api.StorDb.RemTpData(utils.TBLTPRoutes, attrs.TPid,
 		map[string]string{"tenant": attrs.Tenant, "id": attrs.ID}); err != nil {
 		return utils.NewErrServerError(err)
 	}

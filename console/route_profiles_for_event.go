@@ -19,48 +19,49 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 func init() {
-	c := &CmdSetSupplier{
-		name:      "supplier_set",
-		rpcMethod: utils.APIerSv1SetSupplierProfile,
-		rpcParams: &v1.SupplierWithCache{},
+	c := &CmdGetRouteForEvent{
+		name:      "route_profiles_for_event",
+		rpcMethod: utils.RouteSv1GetRouteProfilesForEvent,
+		rpcParams: &utils.CGREventWithArgDispatcher{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
-type CmdSetSupplier struct {
+type CmdGetRouteForEvent struct {
 	name      string
 	rpcMethod string
-	rpcParams *v1.SupplierWithCache
+	rpcParams *utils.CGREventWithArgDispatcher
 	*CommandExecuter
 }
 
-func (self *CmdSetSupplier) Name() string {
+func (self *CmdGetRouteForEvent) Name() string {
 	return self.name
 }
 
-func (self *CmdSetSupplier) RpcMethod() string {
+func (self *CmdGetRouteForEvent) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdSetSupplier) RpcParams(reset bool) interface{} {
+func (self *CmdGetRouteForEvent) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &v1.SupplierWithCache{SupplierProfile: new(engine.SupplierProfile)}
+		self.rpcParams = &utils.CGREventWithArgDispatcher{
+			CGREvent:      new(utils.CGREvent),
+			ArgDispatcher: new(utils.ArgDispatcher)}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdSetSupplier) PostprocessRpcParams() error {
+func (self *CmdGetRouteForEvent) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdSetSupplier) RpcResult() interface{} {
-	var s string
-	return &s
+func (self *CmdGetRouteForEvent) RpcResult() interface{} {
+	var atr []*engine.RouteProfile
+	return &atr
 }

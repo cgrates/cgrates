@@ -250,7 +250,7 @@ func (m *Migrator) migrateAttributeProfile() (err error) {
 	if m.dryRun || !migrated {
 		return nil
 	}
-	// All done, update version wtih current one
+	// All done, update version with current one
 	vrs = engine.Versions{utils.Attributes: engine.CurrentDataDBVersions()[utils.Attributes]}
 	if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
 		return utils.NewCGRError(utils.Migrator, utils.ServerErrorCaps, err.Error(),

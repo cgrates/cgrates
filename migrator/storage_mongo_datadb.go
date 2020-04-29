@@ -654,3 +654,36 @@ func (v1ms *mongoMigrator) remV1Filter(tenant, id string) (err error) {
 	_, err = v1ms.mgoDB.DB().Collection(engine.ColFlt).DeleteOne(v1ms.mgoDB.GetContext(), bson.M{"tenant": tenant, "id": id})
 	return
 }
+
+// Supplier Methods
+//get
+func (v1ms *mongoMigrator) getSupplier() (spl *SupplierProfile, err error) {
+	if v1ms.cursor == nil {
+		v1ms.cursor, err = v1ms.mgoDB.DB().Collection(ColSpp).Find(v1ms.mgoDB.GetContext(), bson.D{})
+		if err != nil {
+			return nil, err
+		}
+	}
+	if !(*v1ms.cursor).Next(v1ms.mgoDB.GetContext()) {
+		(*v1ms.cursor).Close(v1ms.mgoDB.GetContext())
+		v1ms.cursor = nil
+		return nil, utils.ErrNoMoreData
+	}
+	spl = new(SupplierProfile)
+	if err := (*v1ms.cursor).Decode(spl); err != nil {
+		return nil, err
+	}
+	return
+}
+
+//set
+func (v1ms *mongoMigrator) setSupplier(spl *SupplierProfile) (err error) {
+	_, err = v1ms.mgoDB.DB().Collection(ColSpp).InsertOne(v1ms.mgoDB.GetContext(), spl)
+	return
+}
+
+//rem
+func (v1ms *mongoMigrator) remSupplier(tenant, id string) (err error) {
+	_, err = v1ms.mgoDB.DB().Collection(ColSpp).DeleteOne(v1ms.mgoDB.GetContext(), bson.M{"tenant": tenant, "id": id})
+	return
+}

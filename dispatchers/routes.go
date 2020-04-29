@@ -23,7 +23,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (dS *DispatcherService) SupplierSv1Ping(args *utils.CGREventWithArgDispatcher, reply *string) (err error) {
+func (dS *DispatcherService) RouteSv1Ping(args *utils.CGREventWithArgDispatcher, reply *string) (err error) {
 	if args == nil {
 		args = utils.NewCGREventWithArgDispatcher()
 	}
@@ -32,7 +32,7 @@ func (dS *DispatcherService) SupplierSv1Ping(args *utils.CGREventWithArgDispatch
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
-		if err = dS.authorize(utils.SupplierSv1Ping,
+		if err = dS.authorize(utils.RouteSv1Ping,
 			args.CGREvent.Tenant,
 			args.APIKey, args.CGREvent.Time); err != nil {
 			return
@@ -42,18 +42,18 @@ func (dS *DispatcherService) SupplierSv1Ping(args *utils.CGREventWithArgDispatch
 	if args.ArgDispatcher != nil {
 		routeID = args.ArgDispatcher.RouteID
 	}
-	return dS.Dispatch(args.CGREvent, utils.MetaSuppliers, routeID,
-		utils.SupplierSv1Ping, args, reply)
+	return dS.Dispatch(args.CGREvent, utils.MetaRoutes, routeID,
+		utils.RouteSv1Ping, args, reply)
 }
 
-func (dS *DispatcherService) SupplierSv1GetSuppliers(args *engine.ArgsGetSuppliers,
-	reply *engine.SortedSuppliers) (err error) {
+func (dS *DispatcherService) RouteSv1GetRoutes(args *engine.ArgsGetRoutes,
+	reply *engine.SortedRoutes) (err error) {
 	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
-		if err = dS.authorize(utils.SupplierSv1GetSuppliers,
+		if err = dS.authorize(utils.RouteSv1GetRoutes,
 			args.CGREvent.Tenant,
 			args.APIKey, args.CGREvent.Time); err != nil {
 			return
@@ -63,18 +63,18 @@ func (dS *DispatcherService) SupplierSv1GetSuppliers(args *engine.ArgsGetSupplie
 	if args.ArgDispatcher != nil {
 		routeID = args.ArgDispatcher.RouteID
 	}
-	return dS.Dispatch(args.CGREvent, utils.MetaSuppliers, routeID,
-		utils.SupplierSv1GetSuppliers, args, reply)
+	return dS.Dispatch(args.CGREvent, utils.MetaRoutes, routeID,
+		utils.RouteSv1GetRoutes, args, reply)
 }
 
-func (dS *DispatcherService) SupplierSv1GetSupplierProfilesForEvent(args *utils.CGREventWithArgDispatcher,
-	reply *[]*engine.SupplierProfile) (err error) {
+func (dS *DispatcherService) RouteSv1GetRouteProfilesForEvent(args *utils.CGREventWithArgDispatcher,
+	reply *[]*engine.RouteProfile) (err error) {
 	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
-		if err = dS.authorize(utils.SupplierSv1GetSupplierProfilesForEvent,
+		if err = dS.authorize(utils.RouteSv1GetRouteProfilesForEvent,
 			args.CGREvent.Tenant,
 			args.APIKey, args.CGREvent.Time); err != nil {
 			return
@@ -84,6 +84,6 @@ func (dS *DispatcherService) SupplierSv1GetSupplierProfilesForEvent(args *utils.
 	if args.ArgDispatcher != nil {
 		routeID = args.ArgDispatcher.RouteID
 	}
-	return dS.Dispatch(args.CGREvent, utils.MetaSuppliers, routeID,
-		utils.SupplierSv1GetSupplierProfilesForEvent, args, reply)
+	return dS.Dispatch(args.CGREvent, utils.MetaRoutes, routeID,
+		utils.RouteSv1GetRouteProfilesForEvent, args, reply)
 }

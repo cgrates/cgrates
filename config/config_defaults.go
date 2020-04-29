@@ -92,7 +92,7 @@ const CGRATES_CFG_JSON = `
 		"*threshold_profiles": {"remote":false, "replicate":false, "limit": -1, "ttl": "", "static_ttl": false}, 
 		"*thresholds": {"remote":false, "replicate":false, "limit": -1, "ttl": "", "static_ttl": false}, 
 		"*filters": {"remote":false, "replicate":false, "limit": -1, "ttl": "", "static_ttl": false}, 
-		"*supplier_profiles":{"remote":false, "replicate":false, "limit": -1, "ttl": "", "static_ttl": false}, 
+		"*route_profiles":{"remote":false, "replicate":false, "limit": -1, "ttl": "", "static_ttl": false}, 
 		"*attribute_profiles":{"remote":false, "replicate":false, "limit": -1, "ttl": "", "static_ttl": false}, 
 		"*charger_profiles": {"remote":false, "replicate":false, "limit": -1, "ttl": "", "static_ttl": false}, 
 		"*dispatcher_profiles":{"remote":false, "replicate":false, "limit": -1, "ttl": "", "static_ttl": false}, 
@@ -135,7 +135,7 @@ const CGRATES_CFG_JSON = `
 		"tp_stats":{"limit": -1, "ttl": "", "static_ttl": false}, 
 		"tp_thresholds": {"limit": -1, "ttl": "", "static_ttl": false}, 
 		"tp_filters": {"limit": -1, "ttl": "", "static_ttl": false},
-		"tp_suppliers": {"limit": -1, "ttl": "", "static_ttl": false}, 
+		"tp_routes": {"limit": -1, "ttl": "", "static_ttl": false}, 
 		"tp_attributes":{"limit": -1, "ttl": "", "static_ttl": false}, 
 		"tp_chargers":{"limit": -1, "ttl": "", "static_ttl": false}, 
 		"versions": {"limit": -1, "ttl": "", "static_ttl": false}, 
@@ -203,7 +203,7 @@ const CGRATES_CFG_JSON = `
 		"*threshold_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},	// control threshold profiles caching
 		"*thresholds": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},			// control thresholds caching
 		"*filters": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},				// control filters caching
-		"*supplier_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// control supplier profile caching
+		"*route_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// control route profile caching
 		"*attribute_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},	// control attribute profile caching
 		"*charger_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// control charger profile caching
 		"*dispatcher_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},	// control dispatcher profile caching
@@ -211,7 +211,7 @@ const CGRATES_CFG_JSON = `
 		"*resource_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 				// control resource filter indexes caching
 		"*stat_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 					// control stat filter indexes caching
 		"*threshold_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 				// control threshold filter indexes caching
-		"*supplier_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 				// control supplier filter indexes caching
+		"*route_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 				// control route filter indexes caching
 		"*attribute_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 				// control attribute filter indexes caching
 		"*charger_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 					// control charger filter indexes caching
 		"*dispatcher_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 				// control dispatcher filter indexes caching
@@ -352,7 +352,7 @@ const CGRATES_CFG_JSON = `
 	"resources_conns": [],					// connections to ResourceS for resources monitoring <""|*internal|$rpc_conns_id>
 	"thresholds_conns": [],					// connections to ThresholdS for reporting session events <""|*internal|$rpc_conns_id>
 	"stats_conns": [],						// connections to StatS for reporting session events <""|*internal|$rpc_conns_id>
-	"suppliers_conns": [],					// connections to SupplierS for querying suppliers for event <""|*internal|$rpc_conns_id>
+	"routes_conns": [],						// connections to RouteS for querying routes for event <""|*internal|$rpc_conns_id>
 	"attributes_conns": [],					// connections to AttributeS for altering event fields <""|*internal|$rpc_conns_id>
 	"replication_conns": [],				// replicate sessions towards these session services
 	"debit_interval": "0s",					// interval to perform debits on.
@@ -578,13 +578,13 @@ const CGRATES_CFG_JSON = `
 },
 
 
-"suppliers": {								// SupplierS config
-	"enabled": false,						// starts SupplierS service: <true|false>.
+"routes": {									// RouteS config
+	"enabled": false,						// starts RouteS service: <true|false>.
 	"indexed_selects":true,					// enable profile matching exclusively on indexes
 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
-	"attributes_conns": [],					// connections to AttributeS for altering events before supplier queries: <""|*internal|$rpc_conns_id>
+	"attributes_conns": [],					// connections to AttributeS for altering events before route queries: <""|*internal|$rpc_conns_id>
 	"resources_conns": [],					// connections to ResourceS for *res sorting, empty to disable functionality: <""|*internal|$rpc_conns_id>
 	"stats_conns": [],						// connections to StatS for *stats sorting, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
 	"rals_conns": [],						// connections to Rater for calculating cost, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
@@ -688,24 +688,24 @@ const CGRATES_CFG_JSON = `
 				],
 			},
 			{
-				"type": "*suppliers",						// data source type
-				"file_name": "Suppliers.csv",				// file name in the tp_in_dir
+				"type": "*routes",						// data source type
+				"file_name": "Routes.csv",				// file name in the tp_in_dir
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~1", "mandatory": true},
 					{"tag": "FilterIDs", "path": "FilterIDs", "type": "*variable", "value": "~2"},
 					{"tag": "ActivationInterval", "path": "ActivationInterval", "type": "*variable", "value": "~3"},
 					{"tag": "Sorting", "path": "Sorting", "type": "*variable", "value": "~4"},
-					{"tag": "SortingParamameters", "path": "SortingParamameters", "type": "*variable", "value": "~5"},
-					{"tag": "SupplierID", "path": "SupplierID", "type": "*variable", "value": "~6"},
-					{"tag": "SupplierFilterIDs", "path": "SupplierFilterIDs", "type": "*variable", "value": "~7"},
-					{"tag": "SupplierAccountIDs", "path": "SupplierAccountIDs", "type": "*variable", "value": "~8"},
-					{"tag": "SupplierRatingPlanIDs", "path": "SupplierRatingPlanIDs", "type": "*variable", "value": "~9"},
-					{"tag": "SupplierResourceIDs", "path": "SupplierResourceIDs", "type": "*variable", "value": "~10"},
-					{"tag": "SupplierStatIDs", "path": "SupplierStatIDs", "type": "*variable", "value": "~11"},
-					{"tag": "SupplierWeight", "path": "SupplierWeight", "type": "*variable", "value": "~12"},
-					{"tag": "SupplierBlocker", "path": "SupplierBlocker", "type": "*variable", "value": "~13"},
-					{"tag": "SupplierParameters", "path": "SupplierParameters", "type": "*variable", "value": "~14"},
+					{"tag": "SortingParameters", "path": "SortingParameters", "type": "*variable", "value": "~5"},
+					{"tag": "RouteID", "path": "RouteID", "type": "*variable", "value": "~6"},
+					{"tag": "RouteFilterIDs", "path": "RouteFilterIDs", "type": "*variable", "value": "~7"},
+					{"tag": "RouteAccountIDs", "path": "RouteAccountIDs", "type": "*variable", "value": "~8"},
+					{"tag": "RouteRatingPlanIDs", "path": "RouteRatingPlanIDs", "type": "*variable", "value": "~9"},
+					{"tag": "RouteResourceIDs", "path": "RouteResourceIDs", "type": "*variable", "value": "~10"},
+					{"tag": "RouteStatIDs", "path": "RouteStatIDs", "type": "*variable", "value": "~11"},
+					{"tag": "RouteWeight", "path": "RouteWeight", "type": "*variable", "value": "~12"},
+					{"tag": "RouteBlocker", "path": "RouteBlocker", "type": "*variable", "value": "~13"},
+					{"tag": "RouteParameters", "path": "RouteParameters", "type": "*variable", "value": "~14"},
 					{"tag": "Weight", "path": "Weight", "type": "*variable", "value": "~15"},
 				],
 			},
