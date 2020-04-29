@@ -182,16 +182,6 @@ func (sm StringMap) HasKey(key string) (has bool) {
 	return
 }
 
-func (sm StringMap) GetSlice() (result []string) {
-	result = make([]string, len(sm))
-	i := 0
-	for k := range sm {
-		result[i] = k
-		i += 1
-	}
-	return
-}
-
 // Used to merge multiple maps (eg: output of struct having ExtraFields)
 func MergeMapsStringIface(mps ...map[string]interface{}) (outMp map[string]interface{}) {
 	outMp = make(map[string]interface{})
