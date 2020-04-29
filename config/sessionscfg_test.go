@@ -82,7 +82,7 @@ func TestSessionSCfgloadFromJsonCfg(t *testing.T) {
 	"resources_conns": [],					// address where to reach the ResourceS <""|*internal|127.0.0.1:2013>
 	"thresholds_conns": [],					// address where to reach the ThresholdS <""|*internal|127.0.0.1:2013>
 	"stats_conns": [],						// address where to reach the StatS <""|*internal|127.0.0.1:2013>
-	"suppliers_conns": [],					// address where to reach the SupplierS <""|*internal|127.0.0.1:2013>
+	"routes_conns": [],						// address where to reach the RouteS <""|*internal|127.0.0.1:2013>
 	"attributes_conns": [],					// address where to reach the AttributeS <""|*internal|127.0.0.1:2013>
 	"replication_conns": [],				// replicate sessions towards these session services
 	"debit_interval": "0s",					// interval to perform debits on.
@@ -104,7 +104,7 @@ func TestSessionSCfgloadFromJsonCfg(t *testing.T) {
 		ResSConns:        []string{},
 		ThreshSConns:     []string{},
 		StatSConns:       []string{},
-		SupplSConns:      []string{},
+		RouteSConns:      []string{},
 		AttrSConns:       []string{},
 		CDRsConns:        []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
 		ReplicationConns: []string{},

@@ -151,7 +151,7 @@ func TestKamEvV1AuthorizeArgs(t *testing.T) {
 		"cgr_duration": "3", "cgr_pdd": "4",
 		utils.CGR_SUPPLIER:         "supplier2",
 		utils.CGR_DISCONNECT_CAUSE: "200",
-		utils.CGRFlags:             "*accounts,*suppliers,*suppliers_event_cost,*suppliers_ignore_errors"}
+		utils.CGRFlags:             "*accounts,*routes,*routes_event_cost,*routes_ignore_errors"}
 	sTime, err := utils.ParseTimeDetectLayout(kamEv[utils.AnswerTime], timezone)
 	if err != nil {
 		return
@@ -165,9 +165,9 @@ func TestKamEvV1AuthorizeArgs(t *testing.T) {
 			Time:  &sTime,
 			Event: kamEv.AsMapStringInterface(),
 		},
-		GetSuppliers:          true,
-		SuppliersIgnoreErrors: true,
-		SuppliersMaxCost:      utils.MetaEventCost,
+		GetRoutes:          true,
+		RoutesIgnoreErrors: true,
+		RoutesMaxCost:      utils.MetaEventCost,
 	}
 	rcv := kamEv.V1AuthorizeArgs()
 	if !reflect.DeepEqual(expected.CGREvent.Tenant, rcv.CGREvent.Tenant) {
@@ -180,14 +180,14 @@ func TestKamEvV1AuthorizeArgs(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", expected.CGREvent.Event, rcv.CGREvent.Event)
 	} else if !reflect.DeepEqual(expected.GetMaxUsage, rcv.GetMaxUsage) {
 		t.Errorf("Expecting: %+v, received: %+v", expected.GetMaxUsage, rcv.GetMaxUsage)
-	} else if !reflect.DeepEqual(expected.GetSuppliers, rcv.GetSuppliers) {
-		t.Errorf("Expecting: %+v, received: %+v", expected.GetSuppliers, rcv.GetSuppliers)
+	} else if !reflect.DeepEqual(expected.GetRoutes, rcv.GetRoutes) {
+		t.Errorf("Expecting: %+v, received: %+v", expected.GetRoutes, rcv.GetRoutes)
 	} else if !reflect.DeepEqual(expected.GetAttributes, rcv.GetAttributes) {
 		t.Errorf("Expecting: %+v, received: %+v", expected.GetAttributes, rcv.GetAttributes)
-	} else if !reflect.DeepEqual(expected.SuppliersMaxCost, rcv.SuppliersMaxCost) {
-		t.Errorf("Expecting: %+v, received: %+v", expected.SuppliersMaxCost, rcv.SuppliersMaxCost)
-	} else if !reflect.DeepEqual(expected.SuppliersIgnoreErrors, rcv.SuppliersIgnoreErrors) {
-		t.Errorf("Expecting: %+v, received: %+v", expected.SuppliersIgnoreErrors, rcv.SuppliersIgnoreErrors)
+	} else if !reflect.DeepEqual(expected.RoutesMaxCost, rcv.RoutesMaxCost) {
+		t.Errorf("Expecting: %+v, received: %+v", expected.RoutesMaxCost, rcv.RoutesMaxCost)
+	} else if !reflect.DeepEqual(expected.RoutesIgnoreErrors, rcv.RoutesIgnoreErrors) {
+		t.Errorf("Expecting: %+v, received: %+v", expected.RoutesIgnoreErrors, rcv.RoutesIgnoreErrors)
 	}
 }
 

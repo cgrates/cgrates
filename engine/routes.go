@@ -487,7 +487,7 @@ func (rpS *RouteService) sortedRoutesForEvent(args *ArgsGetRoutes) (sortedRoutes
 		return
 	}
 	rPrfl := rPrfs[0]
-	extraOpts, err := args.asOptsGetSuppliers() // convert suppliers arguments into internal options used to limit data
+	extraOpts, err := args.asOptsGetRoutes() // convert suppliers arguments into internal options used to limit data
 	if err != nil {
 		return nil, err
 	}
@@ -541,7 +541,7 @@ type ArgsGetRoutes struct {
 	*utils.ArgDispatcher
 }
 
-func (args *ArgsGetRoutes) asOptsGetSuppliers() (opts *optsGetRoutes, err error) {
+func (args *ArgsGetRoutes) asOptsGetRoutes() (opts *optsGetRoutes, err error) {
 	opts = &optsGetRoutes{ignoreErrors: args.IgnoreErrors}
 	if args.MaxCost == utils.MetaEventCost { // dynamic cost needs to be calculated from event
 		if err = args.CGREvent.CheckMandatoryFields([]string{utils.Account,

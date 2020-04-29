@@ -25,7 +25,7 @@ import (
 )
 
 func TestSupplierSCfgloadFromJsonCfg(t *testing.T) {
-	var supscfg, expected SupplierSCfg
+	var supscfg, expected RouteSCfg
 	if err := supscfg.loadFromJsonCfg(nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(supscfg, expected) {
@@ -37,8 +37,8 @@ func TestSupplierSCfgloadFromJsonCfg(t *testing.T) {
 		t.Errorf("Expected: %+v ,recived: %+v", expected, supscfg)
 	}
 	cfgJSONStr := `{
-"suppliers": {								// Supplier service (*new)
-	"enabled": false,						// starts SupplierS service: <true|false>.
+"routes": {								// Route service 
+	"enabled": false,						// starts RouteS service: <true|false>.
 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"prefix_indexed_fields": ["index1", "index2"],			// query indexes based on these fields for faster processing
 	"attributes_conns": [],					// address where to reach the AttributeS <""|127.0.0.1:2013>
@@ -47,7 +47,7 @@ func TestSupplierSCfgloadFromJsonCfg(t *testing.T) {
 	"default_ratio":1,
 },
 }`
-	expected = SupplierSCfg{
+	expected = RouteSCfg{
 		PrefixIndexedFields: &[]string{"index1", "index2"},
 		AttributeSConns:     []string{},
 		ResourceSConns:      []string{},

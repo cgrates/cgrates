@@ -263,18 +263,18 @@ func TestConfigSanitySessionS(t *testing.T) {
 	cfg.sessionSCfg.StatSConns = []string{}
 	cfg.statsCfg.Enabled = true
 
-	cfg.sessionSCfg.SupplSConns = []string{utils.MetaInternal}
-	expected = "<SupplierS> not enabled but requested by <SessionS> component."
+	cfg.sessionSCfg.RouteSConns = []string{utils.MetaInternal}
+	expected = "<RouteS> not enabled but requested by <SessionS> component."
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.sessionSCfg.SupplSConns = []string{"test"}
+	cfg.sessionSCfg.RouteSConns = []string{"test"}
 	expected = "<SessionS> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.sessionSCfg.SupplSConns = []string{}
-	cfg.supplierSCfg.Enabled = true
+	cfg.sessionSCfg.RouteSConns = []string{}
+	cfg.routeSCfg.Enabled = true
 
 	cfg.sessionSCfg.AttrSConns = []string{utils.MetaInternal}
 	expected = "<AttributeS> not enabled but requested by <SessionS> component."
@@ -561,44 +561,44 @@ func TestConfigSanityStatS(t *testing.T) {
 	}
 }
 
-func TestConfigSanitySupplierS(t *testing.T) {
+func TestConfigSanityRouteS(t *testing.T) {
 	cfg, _ = NewDefaultCGRConfig()
-	cfg.supplierSCfg.Enabled = true
+	cfg.routeSCfg.Enabled = true
 
-	cfg.supplierSCfg.ResourceSConns = []string{utils.MetaInternal}
+	cfg.routeSCfg.ResourceSConns = []string{utils.MetaInternal}
 
-	expected := "<ResourceS> not enabled but requested by <SupplierS> component."
+	expected := "<ResourceS> not enabled but requested by <RouteS> component."
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.supplierSCfg.ResourceSConns = []string{"test"}
-	expected = "<SupplierS> connection with id: <test> not defined"
+	cfg.routeSCfg.ResourceSConns = []string{"test"}
+	expected = "<RouteS> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.supplierSCfg.ResourceSConns = []string{utils.MetaInternal}
+	cfg.routeSCfg.ResourceSConns = []string{utils.MetaInternal}
 	cfg.resourceSCfg.Enabled = true
 
-	cfg.supplierSCfg.StatSConns = []string{utils.MetaInternal}
-	expected = "<StatS> not enabled but requested by <SupplierS> component."
+	cfg.routeSCfg.StatSConns = []string{utils.MetaInternal}
+	expected = "<StatS> not enabled but requested by <RouteS> component."
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.supplierSCfg.StatSConns = []string{"test"}
-	expected = "<SupplierS> connection with id: <test> not defined"
+	cfg.routeSCfg.StatSConns = []string{"test"}
+	expected = "<RouteS> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.supplierSCfg.StatSConns = []string{utils.MetaInternal}
+	cfg.routeSCfg.StatSConns = []string{utils.MetaInternal}
 	cfg.statsCfg.Enabled = true
 
-	cfg.supplierSCfg.AttributeSConns = []string{utils.MetaInternal}
-	expected = "<AttributeS> not enabled but requested by <SupplierS> component."
+	cfg.routeSCfg.AttributeSConns = []string{utils.MetaInternal}
+	expected = "<AttributeS> not enabled but requested by <RouteS> component."
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.supplierSCfg.AttributeSConns = []string{"test"}
-	expected = "<SupplierS> connection with id: <test> not defined"
+	cfg.routeSCfg.AttributeSConns = []string{"test"}
+	expected = "<RouteS> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}

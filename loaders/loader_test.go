@@ -665,7 +665,7 @@ func TestLoaderProcessStats(t *testing.T) {
 	}
 }
 
-func TestLoaderProcessSuppliers(t *testing.T) {
+func TestLoaderProcessRoutes(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
 	ldr := &Loader{
 		ldrID:         "TestLoaderProcessContent",
@@ -674,7 +674,7 @@ func TestLoaderProcessSuppliers(t *testing.T) {
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaSuppliers: []*config.FCTemplate{
+		utils.MetaRoutes: []*config.FCTemplate{
 			&config.FCTemplate{Tag: "TenantID",
 				Path:      "Tenant",
 				Type:      utils.META_COMPOSED,
@@ -697,44 +697,44 @@ func TestLoaderProcessSuppliers(t *testing.T) {
 				Path:  "Sorting",
 				Type:  utils.META_COMPOSED,
 				Value: config.NewRSRParsersMustCompile("~4", true, utils.INFIELD_SEP)},
-			&config.FCTemplate{Tag: "SortingParamameters",
-				Path:  "SortingParamameters",
+			&config.FCTemplate{Tag: "SortingParameters",
+				Path:  "SortingParameters",
 				Type:  utils.META_COMPOSED,
 				Value: config.NewRSRParsersMustCompile("~5", true, utils.INFIELD_SEP)},
-			&config.FCTemplate{Tag: "SupplierID",
-				Path:  "SupplierID",
+			&config.FCTemplate{Tag: "RouteID",
+				Path:  "RouteID",
 				Type:  utils.META_COMPOSED,
 				Value: config.NewRSRParsersMustCompile("~6", true, utils.INFIELD_SEP)},
-			&config.FCTemplate{Tag: "SupplierFilterIDs",
-				Path:  "SupplierFilterIDs",
+			&config.FCTemplate{Tag: "RouteFilterIDs",
+				Path:  "RouteFilterIDs",
 				Type:  utils.META_COMPOSED,
 				Value: config.NewRSRParsersMustCompile("~7", true, utils.INFIELD_SEP)},
-			&config.FCTemplate{Tag: "SupplierAccountIDs",
-				Path:  "SupplierAccountIDs",
+			&config.FCTemplate{Tag: "RouteAccountIDs",
+				Path:  "RouteAccountIDs",
 				Type:  utils.META_COMPOSED,
 				Value: config.NewRSRParsersMustCompile("~8", true, utils.INFIELD_SEP)},
-			&config.FCTemplate{Tag: "SupplierRatingPlanIDs",
-				Path:  "SupplierRatingplanIDs",
+			&config.FCTemplate{Tag: "RouteRatingPlanIDs",
+				Path:  "RouteRatingplanIDs",
 				Type:  utils.META_COMPOSED,
 				Value: config.NewRSRParsersMustCompile("~9", true, utils.INFIELD_SEP)},
-			&config.FCTemplate{Tag: "SupplierResourceIDs",
-				Path:  "SupplierResourceIDs",
+			&config.FCTemplate{Tag: "RouteResourceIDs",
+				Path:  "RouteResourceIDs",
 				Type:  utils.META_COMPOSED,
 				Value: config.NewRSRParsersMustCompile("~10", true, utils.INFIELD_SEP)},
-			&config.FCTemplate{Tag: "SupplierStatIDs",
-				Path:  "SupplierStatIDs",
+			&config.FCTemplate{Tag: "RouteStatIDs",
+				Path:  "RouteStatIDs",
 				Type:  utils.META_COMPOSED,
 				Value: config.NewRSRParsersMustCompile("~11", true, utils.INFIELD_SEP)},
-			&config.FCTemplate{Tag: "SupplierWeight",
-				Path:  "SupplierWeight",
+			&config.FCTemplate{Tag: "RouteWeight",
+				Path:  "RouteWeight",
 				Type:  utils.META_COMPOSED,
 				Value: config.NewRSRParsersMustCompile("~12", true, utils.INFIELD_SEP)},
-			&config.FCTemplate{Tag: "SupplierBlocker",
-				Path:  "SupplierBlocker",
+			&config.FCTemplate{Tag: "RouteBlocker",
+				Path:  "RouteBlocker",
 				Type:  utils.META_COMPOSED,
 				Value: config.NewRSRParsersMustCompile("~13", true, utils.INFIELD_SEP)},
-			&config.FCTemplate{Tag: "SupplierParameters",
-				Path:  "SupplierParameters",
+			&config.FCTemplate{Tag: "RouteParameters",
+				Path:  "RouteParameters",
 				Type:  utils.META_COMPOSED,
 				Value: config.NewRSRParsersMustCompile("~14", true, utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "Weight",
@@ -743,22 +743,22 @@ func TestLoaderProcessSuppliers(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("~15", true, utils.INFIELD_SEP)},
 		},
 	}
-	rdr := ioutil.NopCloser(strings.NewReader(engine.SuppliersCSVContent))
+	rdr := ioutil.NopCloser(strings.NewReader(engine.RoutesCSVContent))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaSuppliers: map[string]*openedCSVFile{
-			"Suppliers.csv": &openedCSVFile{fileName: "Suppliers.csv",
+		utils.MetaRoutes: map[string]*openedCSVFile{
+			utils.RoutesCsv: &openedCSVFile{fileName: utils.RoutesCsv,
 				rdr: rdr, csvRdr: csvRdr}},
 	}
-	if err := ldr.processContent(utils.MetaSuppliers, utils.EmptyString); err != nil {
+	if err := ldr.processContent(utils.MetaRoutes, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 	if len(ldr.bufLoaderData) != 0 {
 		t.Errorf("wrong buffer content: %+v", ldr.bufLoaderData)
 	}
 
-	eSp3 := &engine.SupplierProfile{
+	eSp3 := &engine.RouteProfile{
 		Tenant:    "cgrates.org",
 		ID:        "SPP_1",
 		FilterIDs: []string{"*string:~*req.Account:dan"},
@@ -767,23 +767,23 @@ func TestLoaderProcessSuppliers(t *testing.T) {
 		},
 		Sorting:           "*least_cost",
 		SortingParameters: []string{},
-		Suppliers: []*engine.Supplier{
-			&engine.Supplier{
-				ID:                 "supplier1",
-				FilterIDs:          []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
-				AccountIDs:         []string{"Account1", "Account1_1", "Account2"},
-				RatingPlanIDs:      []string{"RPL_1", "RPL_2", "RPL_3"},
-				ResourceIDs:        []string{"ResGroup1", "ResGroup2", "ResGroup3", "ResGroup4"},
-				StatIDs:            []string{"Stat1", "Stat2", "Stat3"},
-				Weight:             10,
-				Blocker:            true,
-				SupplierParameters: "param1",
+		Routes: []*engine.Route{
+			&engine.Route{
+				ID:              "supplier1",
+				FilterIDs:       []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
+				AccountIDs:      []string{"Account1", "Account1_1", "Account2"},
+				RatingPlanIDs:   []string{"RPL_1", "RPL_2", "RPL_3"},
+				ResourceIDs:     []string{"ResGroup1", "ResGroup2", "ResGroup3", "ResGroup4"},
+				StatIDs:         []string{"Stat1", "Stat2", "Stat3"},
+				Weight:          10,
+				Blocker:         true,
+				RouteParameters: "param1",
 			},
 		},
 		Weight: 20,
 	}
 
-	if aps, err := ldr.dm.GetSupplierProfile("cgrates.org", "SPP_1",
+	if aps, err := ldr.dm.GetRouteProfile("cgrates.org", "SPP_1",
 		true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eSp3, aps) {
