@@ -101,7 +101,7 @@ func TestCGREventFielAsString(t *testing.T) {
 
 }
 
-func TestLibSuppliersUsage(t *testing.T) {
+func TestLibRoutesUsage(t *testing.T) {
 	se := &CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "supplierEvent1",
@@ -328,7 +328,7 @@ func TestCGREventconsumeArgDispatcher(t *testing.T) {
 	}
 }
 
-func TestCGREventconsumeSupplierPaginator(t *testing.T) {
+func TestCGREventconsumeRoutePaginator(t *testing.T) {
 	//empty check
 	var opts map[string]interface{}
 	rcv, err := getSupplierPaginatorFromOpts(opts)
@@ -440,8 +440,8 @@ func TestCGREventConsumeArgs(t *testing.T) {
 	}
 	//true false
 	eOut = ExtractedArgs{
-		ArgDispatcher:     new(ArgDispatcher),
-		SupplierPaginator: nil,
+		ArgDispatcher:  new(ArgDispatcher),
+		RoutePaginator: nil,
 	}
 	rcv, err = ExtractArgsFromOpts(opts, true, false)
 	if err != nil {

@@ -992,7 +992,7 @@ func TestInitAttrReloadCache(t *testing.T) {
 	expected.ThresholdIDs = &[]string{}
 	expected.ThresholdProfileIDs = &[]string{}
 	expected.FilterIDs = &[]string{}
-	expected.SupplierProfileIDs = &[]string{}
+	expected.RouteProfileIDs = &[]string{}
 	expected.AttributeProfileIDs = &[]string{}
 	expected.ChargerProfileIDs = &[]string{}
 	expected.DispatcherProfileIDs = &[]string{}

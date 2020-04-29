@@ -39,9 +39,9 @@ func TestResourceSv1Interface(t *testing.T) {
 	_ = ResourceSv1Interface(NewResourceSv1(nil))
 }
 
-func TestSupplierSv1Interface(t *testing.T) {
-	_ = SupplierSv1Interface(NewDispatcherSupplierSv1(nil))
-	_ = SupplierSv1Interface(NewSupplierSv1(nil))
+func TestRouteSv1Interface(t *testing.T) {
+	_ = RouteSv1Interface(NewDispatcherRouteSv1(nil))
+	_ = RouteSv1Interface(NewRouteSv1(nil))
 }
 
 func TestAttributeSv1Interface(t *testing.T) {

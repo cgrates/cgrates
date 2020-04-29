@@ -27,113 +27,113 @@ import (
 )
 
 var (
-	expTimeSuppliers = time.Now().Add(time.Duration(20 * time.Minute))
-	splService       *SupplierService
-	dmSPP            *DataManager
-	sppTest          = SupplierProfiles{
-		&SupplierProfile{
+	expTimeRoutes = time.Now().Add(time.Duration(20 * time.Minute))
+	splService    *RouteService
+	dmSPP         *DataManager
+	sppTest       = RouteProfiles{
+		&RouteProfile{
 			Tenant:    "cgrates.org",
-			ID:        "SupplierProfile1",
+			ID:        "RouteProfile1",
 			FilterIDs: []string{"FLTR_SUPP_1"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     expTimeSuppliers,
+				ExpiryTime:     expTimeRoutes,
 			},
 			Sorting:           utils.MetaWeight,
 			SortingParameters: []string{},
-			Suppliers: []*Supplier{
+			Routes: []*Route{
 				{
-					ID:                 "supplier1",
-					FilterIDs:          []string{},
-					AccountIDs:         []string{},
-					RatingPlanIDs:      []string{},
-					ResourceIDs:        []string{},
-					StatIDs:            []string{},
-					Weight:             10.0,
-					Blocker:            false,
-					SupplierParameters: "param1",
+					ID:              "supplier1",
+					FilterIDs:       []string{},
+					AccountIDs:      []string{},
+					RatingPlanIDs:   []string{},
+					ResourceIDs:     []string{},
+					StatIDs:         []string{},
+					Weight:          10.0,
+					Blocker:         false,
+					RouteParameters: "param1",
 				},
 			},
 			Weight: 10,
 		},
-		&SupplierProfile{
+		&RouteProfile{
 			Tenant:    "cgrates.org",
-			ID:        "SupplierProfile2",
+			ID:        "RouteProfile2",
 			FilterIDs: []string{"FLTR_SUPP_2"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     expTimeSuppliers,
+				ExpiryTime:     expTimeRoutes,
 			},
 			Sorting:           utils.MetaWeight,
 			SortingParameters: []string{},
-			Suppliers: []*Supplier{
+			Routes: []*Route{
 				{
-					ID:                 "supplier2",
-					FilterIDs:          []string{},
-					AccountIDs:         []string{},
-					RatingPlanIDs:      []string{},
-					ResourceIDs:        []string{},
-					StatIDs:            []string{},
-					Weight:             20.0,
-					SupplierParameters: "param2",
+					ID:              "supplier2",
+					FilterIDs:       []string{},
+					AccountIDs:      []string{},
+					RatingPlanIDs:   []string{},
+					ResourceIDs:     []string{},
+					StatIDs:         []string{},
+					Weight:          20.0,
+					RouteParameters: "param2",
 				},
 				{
-					ID:                 "supplier3",
-					FilterIDs:          []string{},
-					AccountIDs:         []string{},
-					RatingPlanIDs:      []string{},
-					ResourceIDs:        []string{},
-					StatIDs:            []string{},
-					Weight:             10.0,
-					SupplierParameters: "param3",
+					ID:              "supplier3",
+					FilterIDs:       []string{},
+					AccountIDs:      []string{},
+					RatingPlanIDs:   []string{},
+					ResourceIDs:     []string{},
+					StatIDs:         []string{},
+					Weight:          10.0,
+					RouteParameters: "param3",
 				},
 				{
-					ID:                 "supplier1",
-					FilterIDs:          []string{},
-					AccountIDs:         []string{},
-					RatingPlanIDs:      []string{},
-					ResourceIDs:        []string{},
-					StatIDs:            []string{},
-					Weight:             30.0,
-					Blocker:            false,
-					SupplierParameters: "param1",
+					ID:              "supplier1",
+					FilterIDs:       []string{},
+					AccountIDs:      []string{},
+					RatingPlanIDs:   []string{},
+					ResourceIDs:     []string{},
+					StatIDs:         []string{},
+					Weight:          30.0,
+					Blocker:         false,
+					RouteParameters: "param1",
 				},
 			},
 			Weight: 20.0,
 		},
-		&SupplierProfile{
+		&RouteProfile{
 			Tenant:    "cgrates.org",
-			ID:        "SupplierProfilePrefix",
+			ID:        "RouteProfilePrefix",
 			FilterIDs: []string{"FLTR_SUPP_3"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     expTimeSuppliers,
+				ExpiryTime:     expTimeRoutes,
 			},
 			Sorting:           utils.MetaWeight,
 			SortingParameters: []string{},
-			Suppliers: []*Supplier{
+			Routes: []*Route{
 				{
-					ID:                 "supplier1",
-					FilterIDs:          []string{},
-					AccountIDs:         []string{},
-					RatingPlanIDs:      []string{},
-					ResourceIDs:        []string{},
-					StatIDs:            []string{},
-					Weight:             10.0,
-					Blocker:            false,
-					SupplierParameters: "param1",
+					ID:              "supplier1",
+					FilterIDs:       []string{},
+					AccountIDs:      []string{},
+					RatingPlanIDs:   []string{},
+					ResourceIDs:     []string{},
+					StatIDs:         []string{},
+					Weight:          10.0,
+					Blocker:         false,
+					RouteParameters: "param1",
 				},
 			},
 			Weight: 10,
 		},
 	}
-	argsGetSuppliers = []*ArgsGetSuppliers{
-		{ //matching SupplierProfile1
+	argsGetRoutes = []*ArgsGetRoutes{
+		{ //matching RouteProfile1
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "utils.CGREvent1",
 				Event: map[string]interface{}{
-					"Supplier":       "SupplierProfile1",
+					"Route":          "RouteProfile1",
 					utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 					"UsageInterval":  "1s",
 					"PddInterval":    "1s",
@@ -141,12 +141,12 @@ var (
 				},
 			},
 		},
-		{ //matching SupplierProfile2
+		{ //matching RouteProfile2
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "utils.CGREvent1",
 				Event: map[string]interface{}{
-					"Supplier":       "SupplierProfile2",
+					"Route":          "RouteProfile2",
 					utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 					"UsageInterval":  "1s",
 					"PddInterval":    "1s",
@@ -154,12 +154,12 @@ var (
 				},
 			},
 		},
-		{ //matching SupplierProfilePrefix
+		{ //matching RouteProfilePrefix
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "utils.CGREvent1",
 				Event: map[string]interface{}{
-					"Supplier": "SupplierProfilePrefix",
+					"Route": "RouteProfilePrefix",
 				},
 			},
 		},
@@ -176,9 +176,9 @@ var (
 	}
 )
 
-func TestSuppliersSort(t *testing.T) {
-	sprs := SupplierProfiles{
-		&SupplierProfile{
+func TestRoutesSort(t *testing.T) {
+	sprs := RouteProfiles{
+		&RouteProfile{
 			Tenant:    "cgrates.org",
 			ID:        "supplierprofile1",
 			FilterIDs: []string{},
@@ -188,22 +188,22 @@ func TestSuppliersSort(t *testing.T) {
 			},
 			Sorting:           "",
 			SortingParameters: []string{},
-			Suppliers: []*Supplier{
+			Routes: []*Route{
 				{
-					ID:                 "supplier1",
-					FilterIDs:          []string{},
-					AccountIDs:         []string{},
-					RatingPlanIDs:      []string{},
-					ResourceIDs:        []string{},
-					StatIDs:            []string{},
-					Weight:             10.0,
-					Blocker:            false,
-					SupplierParameters: "param1",
+					ID:              "supplier1",
+					FilterIDs:       []string{},
+					AccountIDs:      []string{},
+					RatingPlanIDs:   []string{},
+					ResourceIDs:     []string{},
+					StatIDs:         []string{},
+					Weight:          10.0,
+					Blocker:         false,
+					RouteParameters: "param1",
 				},
 			},
 			Weight: 10,
 		},
-		&SupplierProfile{
+		&RouteProfile{
 			Tenant:    "cgrates.org",
 			ID:        "supplierprofile2",
 			FilterIDs: []string{},
@@ -213,24 +213,24 @@ func TestSuppliersSort(t *testing.T) {
 			},
 			Sorting:           "",
 			SortingParameters: []string{},
-			Suppliers: []*Supplier{
+			Routes: []*Route{
 				{
-					ID:                 "supplier1",
-					FilterIDs:          []string{},
-					AccountIDs:         []string{},
-					RatingPlanIDs:      []string{},
-					ResourceIDs:        []string{},
-					StatIDs:            []string{},
-					Weight:             20.0,
-					Blocker:            false,
-					SupplierParameters: "param1",
+					ID:              "supplier1",
+					FilterIDs:       []string{},
+					AccountIDs:      []string{},
+					RatingPlanIDs:   []string{},
+					ResourceIDs:     []string{},
+					StatIDs:         []string{},
+					Weight:          20.0,
+					Blocker:         false,
+					RouteParameters: "param1",
 				},
 			},
 			Weight: 20.0,
 		},
 	}
-	eSupplierProfile := SupplierProfiles{
-		&SupplierProfile{
+	eRouteProfile := RouteProfiles{
+		&RouteProfile{
 			Tenant:    "cgrates.org",
 			ID:        "supplierprofile2",
 			FilterIDs: []string{},
@@ -240,22 +240,22 @@ func TestSuppliersSort(t *testing.T) {
 			},
 			Sorting:           "",
 			SortingParameters: []string{},
-			Suppliers: []*Supplier{
+			Routes: []*Route{
 				{
-					ID:                 "supplier1",
-					FilterIDs:          []string{},
-					AccountIDs:         []string{},
-					RatingPlanIDs:      []string{},
-					ResourceIDs:        []string{},
-					StatIDs:            []string{},
-					Weight:             20.0,
-					Blocker:            false,
-					SupplierParameters: "param1",
+					ID:              "supplier1",
+					FilterIDs:       []string{},
+					AccountIDs:      []string{},
+					RatingPlanIDs:   []string{},
+					ResourceIDs:     []string{},
+					StatIDs:         []string{},
+					Weight:          20.0,
+					Blocker:         false,
+					RouteParameters: "param1",
 				},
 			},
 			Weight: 20.0,
 		},
-		&SupplierProfile{
+		&RouteProfile{
 			Tenant:    "cgrates.org",
 			ID:        "supplierprofile1",
 			FilterIDs: []string{},
@@ -265,50 +265,50 @@ func TestSuppliersSort(t *testing.T) {
 			},
 			Sorting:           "",
 			SortingParameters: []string{},
-			Suppliers: []*Supplier{
+			Routes: []*Route{
 				{
-					ID:                 "supplier1",
-					FilterIDs:          []string{},
-					AccountIDs:         []string{},
-					RatingPlanIDs:      []string{},
-					ResourceIDs:        []string{},
-					StatIDs:            []string{},
-					Weight:             10.0,
-					Blocker:            false,
-					SupplierParameters: "param1",
+					ID:              "supplier1",
+					FilterIDs:       []string{},
+					AccountIDs:      []string{},
+					RatingPlanIDs:   []string{},
+					ResourceIDs:     []string{},
+					StatIDs:         []string{},
+					Weight:          10.0,
+					Blocker:         false,
+					RouteParameters: "param1",
 				},
 			},
 			Weight: 10.0,
 		},
 	}
 	sprs.Sort()
-	if !reflect.DeepEqual(eSupplierProfile, sprs) {
-		t.Errorf("Expecting: %+v, received: %+v", eSupplierProfile, sprs)
+	if !reflect.DeepEqual(eRouteProfile, sprs) {
+		t.Errorf("Expecting: %+v, received: %+v", eRouteProfile, sprs)
 	}
 }
 
-func TestSuppliersPopulateSupplierService(t *testing.T) {
+func TestRoutesPopulateRouteService(t *testing.T) {
 	defaultCfg, _ := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, true, defaultCfg.DataDbCfg().Items)
 	dmSPP = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
-	defaultCfg.SupplierSCfg().StringIndexedFields = nil
-	defaultCfg.SupplierSCfg().PrefixIndexedFields = nil
-	splService, err = NewSupplierService(dmSPP, &FilterS{
+	defaultCfg.RouteCfg().StringIndexedFields = nil
+	defaultCfg.RouteCfg().PrefixIndexedFields = nil
+	splService, err = NewRouteService(dmSPP, &FilterS{
 		dm: dmSPP, cfg: defaultCfg}, defaultCfg, nil)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 }
 
-func TestSuppliersAddFilters(t *testing.T) {
+func TestRoutesAddFilters(t *testing.T) {
 	fltrSupp1 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_SUPP_1",
 		Rules: []*FilterRule{
 			{
 				Type:    utils.MetaString,
-				Element: "~*req.Supplier",
-				Values:  []string{"SupplierProfile1"},
+				Element: "~*req.Route",
+				Values:  []string{"RouteProfile1"},
 			},
 			{
 				Type:    utils.MetaGreaterOrEqual,
@@ -329,8 +329,8 @@ func TestSuppliersAddFilters(t *testing.T) {
 		Rules: []*FilterRule{
 			{
 				Type:    utils.MetaString,
-				Element: "~*req.Supplier",
-				Values:  []string{"SupplierProfile2"},
+				Element: "~*req.Route",
+				Values:  []string{"RouteProfile2"},
 			},
 			{
 				Type:    utils.MetaGreaterOrEqual,
@@ -351,23 +351,23 @@ func TestSuppliersAddFilters(t *testing.T) {
 		Rules: []*FilterRule{
 			{
 				Type:    utils.MetaPrefix,
-				Element: "~*req.Supplier",
-				Values:  []string{"SupplierProfilePrefix"},
+				Element: "~*req.Route",
+				Values:  []string{"RouteProfilePrefix"},
 			},
 		},
 	}
 	dmSPP.SetFilter(fltrSupp3)
 }
 
-func TestSuppliersCache(t *testing.T) {
+func TestRoutesCache(t *testing.T) {
 	for _, spp := range sppTest {
-		if err = dmSPP.SetSupplierProfile(spp, true); err != nil {
+		if err = dmSPP.SetRouteProfile(spp, true); err != nil {
 			t.Errorf("Error: %+v", err)
 		}
 	}
 	//Test each supplier profile from cache
 	for _, spp := range sppTest {
-		if tempSpp, err := dmSPP.GetSupplierProfile(spp.Tenant,
+		if tempSpp, err := dmSPP.GetRouteProfile(spp.Tenant,
 			spp.ID, true, true, utils.NonTransactional); err != nil {
 			t.Errorf("Error: %+v", err)
 		} else if !reflect.DeepEqual(spp, tempSpp) {
@@ -376,8 +376,8 @@ func TestSuppliersCache(t *testing.T) {
 	}
 }
 
-func TestSuppliersmatchingRouteProfilesForEvent(t *testing.T) {
-	sprf, err := splService.matchingRouteProfilesForEvent(argsGetSuppliers[0].CGREvent, true)
+func TestRoutesmatchingRouteProfilesForEvent(t *testing.T) {
+	sprf, err := splService.matchingRouteProfilesForEvent(argsGetRoutes[0].CGREvent, true)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -385,7 +385,7 @@ func TestSuppliersmatchingRouteProfilesForEvent(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", sppTest[0], sprf[0])
 	}
 
-	sprf, err = splService.matchingRouteProfilesForEvent(argsGetSuppliers[1].CGREvent, true)
+	sprf, err = splService.matchingRouteProfilesForEvent(argsGetRoutes[1].CGREvent, true)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -393,7 +393,7 @@ func TestSuppliersmatchingRouteProfilesForEvent(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", sppTest[1], sprf[0])
 	}
 
-	sprf, err = splService.matchingRouteProfilesForEvent(argsGetSuppliers[2].CGREvent, true)
+	sprf, err = splService.matchingRouteProfilesForEvent(argsGetRoutes[2].CGREvent, true)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -402,189 +402,189 @@ func TestSuppliersmatchingRouteProfilesForEvent(t *testing.T) {
 	}
 }
 
-func TestSuppliersSortedForEvent(t *testing.T) {
-	eFirstSupplierProfile := &SortedSuppliers{
-		ProfileID: "SupplierProfile1",
+func TestRoutesSortedForEvent(t *testing.T) {
+	eFirstRouteProfile := &SortedRoutes{
+		ProfileID: "RouteProfile1",
 		Sorting:   utils.MetaWeight,
 		Count:     1,
-		SortedSuppliers: []*SortedSupplier{
+		SortedRoutes: []*SortedRoute{
 			{
-				SupplierID: "supplier1",
+				RouteID: "supplier1",
 				SortingData: map[string]interface{}{
 					"Weight": 10.0,
 				},
-				SupplierParameters: "param1",
+				RouteParameters: "param1",
 			},
 		},
 	}
-	sprf, err := splService.sortedSuppliersForEvent(argsGetSuppliers[0])
+	sprf, err := splService.sortedRoutesForEvent(argsGetRoutes[0])
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	if !reflect.DeepEqual(eFirstSupplierProfile, sprf) {
-		t.Errorf("Expecting: %+v, received: %+v", eFirstSupplierProfile, sprf)
+	if !reflect.DeepEqual(eFirstRouteProfile, sprf) {
+		t.Errorf("Expecting: %+v, received: %+v", eFirstRouteProfile, sprf)
 	}
 
-	eFirstSupplierProfile = &SortedSuppliers{
-		ProfileID: "SupplierProfile2",
+	eFirstRouteProfile = &SortedRoutes{
+		ProfileID: "RouteProfile2",
 		Sorting:   utils.MetaWeight,
 		Count:     3,
-		SortedSuppliers: []*SortedSupplier{
+		SortedRoutes: []*SortedRoute{
 			{
-				SupplierID: "supplier1",
+				RouteID: "supplier1",
 				SortingData: map[string]interface{}{
 					"Weight": 30.0,
 				},
-				SupplierParameters: "param1",
+				RouteParameters: "param1",
 			},
 			{
-				SupplierID: "supplier2",
+				RouteID: "supplier2",
 				SortingData: map[string]interface{}{
 					"Weight": 20.0,
 				},
-				SupplierParameters: "param2",
+				RouteParameters: "param2",
 			},
 			{
-				SupplierID: "supplier3",
+				RouteID: "supplier3",
 				SortingData: map[string]interface{}{
 					"Weight": 10.0,
 				},
-				SupplierParameters: "param3",
+				RouteParameters: "param3",
 			},
 		},
 	}
 
-	sprf, err = splService.sortedSuppliersForEvent(argsGetSuppliers[1])
+	sprf, err = splService.sortedRoutesForEvent(argsGetRoutes[1])
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	if !reflect.DeepEqual(eFirstSupplierProfile, sprf) {
-		t.Errorf("Expecting: %+v, received: %+v", eFirstSupplierProfile, sprf)
+	if !reflect.DeepEqual(eFirstRouteProfile, sprf) {
+		t.Errorf("Expecting: %+v, received: %+v", eFirstRouteProfile, sprf)
 	}
 
-	eFirstSupplierProfile = &SortedSuppliers{
-		ProfileID: "SupplierProfilePrefix",
+	eFirstRouteProfile = &SortedRoutes{
+		ProfileID: "RouteProfilePrefix",
 		Sorting:   utils.MetaWeight,
 		Count:     1,
-		SortedSuppliers: []*SortedSupplier{
+		SortedRoutes: []*SortedRoute{
 			{
-				SupplierID: "supplier1",
+				RouteID: "supplier1",
 				SortingData: map[string]interface{}{
 					"Weight": 10.0,
 				},
-				SupplierParameters: "param1",
+				RouteParameters: "param1",
 			},
 		},
 	}
 
-	sprf, err = splService.sortedSuppliersForEvent(argsGetSuppliers[2])
+	sprf, err = splService.sortedRoutesForEvent(argsGetRoutes[2])
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	if !reflect.DeepEqual(eFirstSupplierProfile, sprf) {
-		t.Errorf("Expecting: %+v, received: %+v", eFirstSupplierProfile, sprf)
+	if !reflect.DeepEqual(eFirstRouteProfile, sprf) {
+		t.Errorf("Expecting: %+v, received: %+v", eFirstRouteProfile, sprf)
 	}
 }
 
-func TestSuppliersSortedForEventWithLimit(t *testing.T) {
-	eFirstSupplierProfile := &SortedSuppliers{
-		ProfileID: "SupplierProfile2",
+func TestRoutesSortedForEventWithLimit(t *testing.T) {
+	eFirstRouteProfile := &SortedRoutes{
+		ProfileID: "RouteProfile2",
 		Sorting:   utils.MetaWeight,
 		Count:     2,
-		SortedSuppliers: []*SortedSupplier{
+		SortedRoutes: []*SortedRoute{
 			{
-				SupplierID: "supplier1",
+				RouteID: "supplier1",
 				SortingData: map[string]interface{}{
 					"Weight": 30.0,
 				},
-				SupplierParameters: "param1",
+				RouteParameters: "param1",
 			},
 			{
-				SupplierID: "supplier2",
+				RouteID: "supplier2",
 				SortingData: map[string]interface{}{
 					"Weight": 20.0,
 				},
-				SupplierParameters: "param2",
+				RouteParameters: "param2",
 			},
 		},
 	}
-	argsGetSuppliers[1].Paginator = utils.Paginator{
+	argsGetRoutes[1].Paginator = utils.Paginator{
 		Limit: utils.IntPointer(2),
 	}
-	sprf, err := splService.sortedSuppliersForEvent(argsGetSuppliers[1])
+	sprf, err := splService.sortedRoutesForEvent(argsGetRoutes[1])
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	if !reflect.DeepEqual(eFirstSupplierProfile, sprf) {
-		t.Errorf("Expecting: %+v, received: %+v", eFirstSupplierProfile, sprf)
+	if !reflect.DeepEqual(eFirstRouteProfile, sprf) {
+		t.Errorf("Expecting: %+v, received: %+v", eFirstRouteProfile, sprf)
 	}
 }
 
-func TestSuppliersSortedForEventWithOffset(t *testing.T) {
-	eFirstSupplierProfile := &SortedSuppliers{
-		ProfileID: "SupplierProfile2",
+func TestRoutesSortedForEventWithOffset(t *testing.T) {
+	eFirstRouteProfile := &SortedRoutes{
+		ProfileID: "RouteProfile2",
 		Sorting:   utils.MetaWeight,
 		Count:     1,
-		SortedSuppliers: []*SortedSupplier{
+		SortedRoutes: []*SortedRoute{
 			{
-				SupplierID: "supplier3",
+				RouteID: "supplier3",
 				SortingData: map[string]interface{}{
 					"Weight": 10.0,
 				},
-				SupplierParameters: "param3",
+				RouteParameters: "param3",
 			},
 		},
 	}
-	argsGetSuppliers[1].Paginator = utils.Paginator{
+	argsGetRoutes[1].Paginator = utils.Paginator{
 		Offset: utils.IntPointer(2),
 	}
-	sprf, err := splService.sortedSuppliersForEvent(argsGetSuppliers[1])
+	sprf, err := splService.sortedRoutesForEvent(argsGetRoutes[1])
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	if !reflect.DeepEqual(eFirstSupplierProfile, sprf) {
-		t.Errorf("Expecting: %+v,received: %+v", utils.ToJSON(eFirstSupplierProfile), utils.ToJSON(sprf))
+	if !reflect.DeepEqual(eFirstRouteProfile, sprf) {
+		t.Errorf("Expecting: %+v,received: %+v", utils.ToJSON(eFirstRouteProfile), utils.ToJSON(sprf))
 	}
 }
 
-func TestSuppliersSortedForEventWithLimitAndOffset(t *testing.T) {
-	eFirstSupplierProfile := &SortedSuppliers{
-		ProfileID: "SupplierProfile2",
+func TestRoutesSortedForEventWithLimitAndOffset(t *testing.T) {
+	eFirstRouteProfile := &SortedRoutes{
+		ProfileID: "RouteProfile2",
 		Sorting:   utils.MetaWeight,
 		Count:     1,
-		SortedSuppliers: []*SortedSupplier{
+		SortedRoutes: []*SortedRoute{
 			{
-				SupplierID: "supplier2",
+				RouteID: "supplier2",
 				SortingData: map[string]interface{}{
 					"Weight": 20.0,
 				},
-				SupplierParameters: "param2",
+				RouteParameters: "param2",
 			},
 		},
 	}
-	argsGetSuppliers[1].Paginator = utils.Paginator{
+	argsGetRoutes[1].Paginator = utils.Paginator{
 		Limit:  utils.IntPointer(1),
 		Offset: utils.IntPointer(1),
 	}
-	sprf, err := splService.sortedSuppliersForEvent(argsGetSuppliers[1])
+	sprf, err := splService.sortedRoutesForEvent(argsGetRoutes[1])
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	if !reflect.DeepEqual(eFirstSupplierProfile, sprf) {
-		t.Errorf("Expecting: %+v,received: %+v", utils.ToJSON(eFirstSupplierProfile), utils.ToJSON(sprf))
+	if !reflect.DeepEqual(eFirstRouteProfile, sprf) {
+		t.Errorf("Expecting: %+v,received: %+v", utils.ToJSON(eFirstRouteProfile), utils.ToJSON(sprf))
 	}
 }
 
-func TestSuppliersAsOptsGetSuppliers(t *testing.T) {
-	s := &ArgsGetSuppliers{
+func TestRoutesAsOptsGetRoutes(t *testing.T) {
+	s := &ArgsGetRoutes{
 		IgnoreErrors: true,
 		MaxCost:      "10.0",
 	}
-	spl := &optsGetSuppliers{
+	spl := &optsGetRoutes{
 		ignoreErrors: true,
 		maxCost:      10.0,
 	}
-	sprf, err := s.asOptsGetSuppliers()
+	sprf, err := s.asOptsGetRoutes()
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -593,14 +593,14 @@ func TestSuppliersAsOptsGetSuppliers(t *testing.T) {
 	}
 }
 
-func TestSuppliersAsOptsGetSuppliersIgnoreErrors(t *testing.T) {
-	s := &ArgsGetSuppliers{
+func TestRoutesAsOptsGetRoutesIgnoreErrors(t *testing.T) {
+	s := &ArgsGetRoutes{
 		IgnoreErrors: true,
 	}
-	spl := &optsGetSuppliers{
+	spl := &optsGetRoutes{
 		ignoreErrors: true,
 	}
-	sprf, err := s.asOptsGetSuppliers()
+	sprf, err := s.asOptsGetRoutes()
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -609,14 +609,14 @@ func TestSuppliersAsOptsGetSuppliersIgnoreErrors(t *testing.T) {
 	}
 }
 
-func TestSuppliersAsOptsGetSuppliersMaxCost(t *testing.T) {
-	s := &ArgsGetSuppliers{
+func TestRoutesAsOptsGetRoutesMaxCost(t *testing.T) {
+	s := &ArgsGetRoutes{
 		MaxCost: "10.0",
 	}
-	spl := &optsGetSuppliers{
+	spl := &optsGetRoutes{
 		maxCost: 10.0,
 	}
-	sprf, err := s.asOptsGetSuppliers()
+	sprf, err := s.asOptsGetRoutes()
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -625,9 +625,9 @@ func TestSuppliersAsOptsGetSuppliersMaxCost(t *testing.T) {
 	}
 }
 
-func TestSuppliersMatchWithIndexFalse(t *testing.T) {
-	splService.cgrcfg.SupplierSCfg().IndexedSelects = false
-	sprf, err := splService.matchingRouteProfilesForEvent(argsGetSuppliers[0].CGREvent, true)
+func TestRoutesMatchWithIndexFalse(t *testing.T) {
+	splService.cgrcfg.RouteCfg().IndexedSelects = false
+	sprf, err := splService.matchingRouteProfilesForEvent(argsGetRoutes[0].CGREvent, true)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -635,7 +635,7 @@ func TestSuppliersMatchWithIndexFalse(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", sppTest[0], sprf[0])
 	}
 
-	sprf, err = splService.matchingRouteProfilesForEvent(argsGetSuppliers[1].CGREvent, true)
+	sprf, err = splService.matchingRouteProfilesForEvent(argsGetRoutes[1].CGREvent, true)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -643,7 +643,7 @@ func TestSuppliersMatchWithIndexFalse(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", sppTest[1], sprf[0])
 	}
 
-	sprf, err = splService.matchingRouteProfilesForEvent(argsGetSuppliers[2].CGREvent, true)
+	sprf, err = splService.matchingRouteProfilesForEvent(argsGetRoutes[2].CGREvent, true)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}

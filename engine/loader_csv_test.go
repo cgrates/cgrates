@@ -41,7 +41,7 @@ func init() {
 		RatingPlansCSVContent, RatingProfilesCSVContent, SharedGroupsCSVContent,
 		ActionsCSVContent, ActionPlansCSVContent, ActionTriggersCSVContent, AccountActionsCSVContent,
 		ResourcesCSVContent, StatsCSVContent, ThresholdsCSVContent, FiltersCSVContent,
-		SuppliersCSVContent, AttributesCSVContent, ChargersCSVContent, DispatcherCSVContent,
+		RoutesCSVContent, AttributesCSVContent, ChargersCSVContent, DispatcherCSVContent,
 		DispatcherHostCSVContent), testTPID, "", nil, nil)
 	if err != nil {
 		log.Print("error when creating TpReader:", err)
@@ -91,7 +91,7 @@ func init() {
 	if err := csvr.LoadThresholds(); err != nil {
 		log.Print("error in LoadThresholds:", err)
 	}
-	if err := csvr.LoadSupplierProfiles(); err != nil {
+	if err := csvr.LoadRouteProfiles(); err != nil {
 		log.Print("error in LoadSupplierProfiles:", err)
 	}
 	if err := csvr.LoadAttributeProfiles(); err != nil {
@@ -1224,9 +1224,9 @@ func TestLoadFilters(t *testing.T) {
 	}
 }
 
-func TestLoadSupplierProfiles(t *testing.T) {
-	eSppProfiles := map[utils.TenantID]*utils.TPSupplierProfile{
-		utils.TenantID{Tenant: "cgrates.org", ID: "SPP_1"}: &utils.TPSupplierProfile{
+func TestLoadRouteProfiles(t *testing.T) {
+	eSppProfiles := map[utils.TenantID]*utils.TPRouteProfile{
+		utils.TenantID{Tenant: "cgrates.org", ID: "SPP_1"}: &utils.TPRouteProfile{
 			TPid:      testTPID,
 			Tenant:    "cgrates.org",
 			ID:        "SPP_1",
@@ -1236,27 +1236,27 @@ func TestLoadSupplierProfiles(t *testing.T) {
 			},
 			Sorting:           "*least_cost",
 			SortingParameters: []string{},
-			Suppliers: []*utils.TPSupplier{
-				&utils.TPSupplier{
-					ID:                 "supplier1",
-					FilterIDs:          []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
-					AccountIDs:         []string{"Account1", "Account1_1", "Account2"},
-					RatingPlanIDs:      []string{"RPL_1", "RPL_2", "RPL_3"},
-					ResourceIDs:        []string{"ResGroup1", "ResGroup2", "ResGroup3", "ResGroup4"},
-					StatIDs:            []string{"Stat1", "Stat2", "Stat3"},
-					Weight:             10,
-					Blocker:            true,
-					SupplierParameters: "param1",
+			Routes: []*utils.TPRoute{
+				&utils.TPRoute{
+					ID:              "supplier1",
+					FilterIDs:       []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
+					AccountIDs:      []string{"Account1", "Account1_1", "Account2"},
+					RatingPlanIDs:   []string{"RPL_1", "RPL_2", "RPL_3"},
+					ResourceIDs:     []string{"ResGroup1", "ResGroup2", "ResGroup3", "ResGroup4"},
+					StatIDs:         []string{"Stat1", "Stat2", "Stat3"},
+					Weight:          10,
+					Blocker:         true,
+					RouteParameters: "param1",
 				},
 			},
 			Weight: 20,
 		},
 	}
 	resKey := utils.TenantID{Tenant: "cgrates.org", ID: "SPP_1"}
-	if len(csvr.sppProfiles) != len(eSppProfiles) {
-		t.Errorf("Failed to load SupplierProfiles: %s", utils.ToIJSON(csvr.sppProfiles))
-	} else if !reflect.DeepEqual(eSppProfiles[resKey], csvr.sppProfiles[resKey]) {
-		t.Errorf("Expecting: %+v, received: %+v", eSppProfiles[resKey], csvr.sppProfiles[resKey])
+	if len(csvr.routeProfiles) != len(eSppProfiles) {
+		t.Errorf("Failed to load SupplierProfiles: %s", utils.ToIJSON(csvr.routeProfiles))
+	} else if !reflect.DeepEqual(eSppProfiles[resKey], csvr.routeProfiles[resKey]) {
+		t.Errorf("Expecting: %+v, received: %+v", eSppProfiles[resKey], csvr.routeProfiles[resKey])
 	}
 }
 

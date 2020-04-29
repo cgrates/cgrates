@@ -254,8 +254,8 @@ cgrates.org,FLTR_ACNT_dan,*string,~*req.Account,dan,2014-07-29T15:00:00Z
 cgrates.org,FLTR_DST_DE,*destinations,~*req.Destination,DST_DE,2014-07-29T15:00:00Z
 cgrates.org,FLTR_DST_NL,*destinations,~*req.Destination,DST_NL,2014-07-29T15:00:00Z
 `
-	SuppliersCSVContent = `
-#Tenant[0],ID[1],FilterIDs[2],ActivationInterval[3],Sorting[4],SortingParameters[5],SupplierID[6],SupplierFilterIDs[7],SupplierAccountIDs[8],SupplierRatingPlanIDs[9],SupplierResourceIDs[10],SupplierStatIDs[11],SupplierWeight[12],SupplierBlocker[13],SupplierParameters[14],Weight[15]
+	RoutesCSVContent = `
+#Tenant[0],ID[1],FilterIDs[2],ActivationInterval[3],Sorting[4],SortingParameters[5],RouteID[6],RouteFilterIDs[7],RouteAccountIDs[8],RouteRatingPlanIDs[9],RouteResourceIDs[10],RouteStatIDs[11],RouteWeight[12],RouteBlocker[13],RouteParameters[14],Weight[15]
 cgrates.org,SPP_1,*string:~*req.Account:dan,2014-07-29T15:00:00Z,*least_cost,,supplier1,FLTR_ACNT_dan,Account1;Account1_1,RPL_1,ResGroup1,Stat1,10,true,param1,20
 cgrates.org,SPP_1,,,,,supplier1,,,RPL_2,ResGroup2,,10,,,
 cgrates.org,SPP_1,,,,,supplier1,FLTR_DST_DE,Account2,RPL_3,ResGroup3,Stat2,10,,,

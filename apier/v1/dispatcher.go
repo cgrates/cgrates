@@ -331,19 +331,19 @@ type DispatcherRouteSv1 struct {
 	dRoute *dispatchers.DispatcherService
 }
 
-// Ping implements SupplierSv1Ping
+// Ping implements RouteSv1Ping
 func (dRoute *DispatcherRouteSv1) Ping(args *utils.CGREventWithArgDispatcher, reply *string) error {
 	return dRoute.dRoute.RouteSv1Ping(args, reply)
 }
 
-// GetSuppliers implements SupplierSv1GetSuppliers
-func (dRoute *DispatcherRouteSv1) GetSuppliers(args *engine.ArgsGetRoutes,
+// GetRoutes implements RouteSv1GetRoutes
+func (dRoute *DispatcherRouteSv1) GetRoutes(args *engine.ArgsGetRoutes,
 	reply *engine.SortedRoutes) error {
 	return dRoute.dRoute.RouteSv1GetRoutes(args, reply)
 }
 
-// GetSuppliersProfiles returns a list of suppliers profiles that match for Event
-func (dRoute *DispatcherRouteSv1) GetSupplierProfilesForEvent(args *utils.CGREventWithArgDispatcher,
+// GetRouteProfilesForEvent returns a list of route profiles that match for Event
+func (dRoute *DispatcherRouteSv1) GetRouteProfilesForEvent(args *utils.CGREventWithArgDispatcher,
 	reply *[]*engine.RouteProfile) error {
 	return dRoute.dRoute.RouteSv1GetRouteProfilesForEvent(args, reply)
 }

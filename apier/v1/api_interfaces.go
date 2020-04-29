@@ -248,7 +248,7 @@ type ReplicatorSv1Interface interface {
 	RemAccountActionPlans(args *engine.RemAccountActionPlansArgsWithArgDispatcher, reply *string) error
 	RemoveRatingPlan(id *utils.StringWithApiKey, reply *string) error
 	RemoveRatingProfile(id *utils.StringWithApiKey, reply *string) error
-	RemoveSupplierProfile(args *utils.TenantIDWithArgDispatcher, reply *string) error
+	RemoveRouteProfile(args *utils.TenantIDWithArgDispatcher, reply *string) error
 	RemoveAttributeProfile(args *utils.TenantIDWithArgDispatcher, reply *string) error
 	RemoveChargerProfile(args *utils.TenantIDWithArgDispatcher, reply *string) error
 	RemoveDispatcherProfile(args *utils.TenantIDWithArgDispatcher, reply *string) error
