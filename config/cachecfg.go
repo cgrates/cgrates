@@ -61,11 +61,16 @@ func (cParam *CacheParamCfg) loadFromJsonCfg(jsnCfg *CacheParamJsonCfg) error {
 }
 
 func (cParam *CacheParamCfg) AsMapInterface() map[string]interface{} {
+	var TTL string = ""
+	if cParam.TTL != 0 {
+		TTL = cParam.TTL.String()
+	}
+
 	return map[string]interface{}{
-		utils.Limit:     cParam.Limit,
-		utils.TTL:       cParam.TTL,
-		utils.StaticTTL: cParam.StaticTTL,
-		utils.Precache:  cParam.Precache,
+		utils.LimitCfg:     cParam.Limit,
+		utils.TTLCfg:       TTL,
+		utils.StaticTTLCfg: cParam.StaticTTL,
+		utils.PrecacheCfg:  cParam.Precache,
 	}
 }
 
@@ -127,10 +132,14 @@ func (cCfg *CacheCfg) AsMapInterface() map[string]interface{} {
 	for key, value := range cCfg.Partitions {
 		partitions[key] = value.AsMapInterface()
 	}
+	replicationConns := make([]string, len(cCfg.ReplicationConns))
+	for i, item := range cCfg.ReplicationConns {
+		replicationConns[i] = item
+	}
 
 	return map[string]interface{}{
 		utils.PartitionsCfg: partitions,
-		utils.RplConnsCfg:   cCfg.ReplicationConns,
+		utils.RplConnsCfg:   replicationConns,
 	}
 
 }
