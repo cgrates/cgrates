@@ -1862,8 +1862,7 @@ const (
 
 	// Cache
 	PartitionsCfg = "partitions"
-	StaticTTL     = "StaticTTL"
-	Precache      = "Precache"
+	PrecacheCfg   = "precache"
 
 	// CdreCfg
 	ExportFormatCfg      = "export_format"
