@@ -79,3 +79,17 @@ func (rlcfg *ResourceSConfig) loadFromJsonCfg(jsnCfg *ResourceSJsonCfg) (err err
 	}
 	return nil
 }
+
+func (rlcfg *ResourceSConfig) AsMapInterface() map[string]interface{} {
+
+	return map[string]interface{}{
+		utils.EnabledCfg:             rlcfg.Enabled,
+		utils.IndexedSelectsCfg:      rlcfg.IndexedSelects,
+		utils.ThresholdSConnsCfg:     rlcfg.ThresholdSConns,
+		utils.StoreIntervalCfg:       rlcfg.StoreInterval,
+		utils.StringIndexedFieldsCfg: rlcfg.StringIndexedFields,
+		utils.PrefixIndexedFieldsCfg: rlcfg.PrefixIndexedFields,
+		utils.NestedFieldsCfg:        rlcfg.NestedFields,
+	}
+
+}

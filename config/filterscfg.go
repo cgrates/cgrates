@@ -53,3 +53,11 @@ func (fSCfg *FilterSCfg) loadFromJsonCfg(jsnCfg *FilterSJsonCfg) (err error) {
 	}
 	return
 }
+
+func (fSCfg *FilterSCfg) AsMapInterface() map[string]interface{} {
+	return map[string]interface{}{
+		utils.StatSConnsCfg:     fSCfg.StatSConns,
+		utils.ResourceSConnsCfg: fSCfg.ResourceSConns,
+		utils.ApierSConnsCfg:    fSCfg.ApierSConns,
+	}
+}

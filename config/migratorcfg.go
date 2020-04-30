@@ -20,6 +20,8 @@ package config
 
 import (
 	"strings"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 type MigratorCgrCfg struct {
@@ -93,4 +95,25 @@ func (mg *MigratorCgrCfg) loadFromJsonCfg(jsnCfg *MigratorCfgJson) (err error) {
 		}
 	}
 	return nil
+}
+
+func (mg *MigratorCgrCfg) AsMapInterface() map[string]interface{} {
+	return map[string]interface{}{
+		utils.OutDataDBTypeCfg:          mg.OutDataDBType,
+		utils.OutDataDBHostCfg:          mg.OutDataDBHost,
+		utils.OutDataDBPortCfg:          mg.OutDataDBPort,
+		utils.OutDataDBNameCfg:          mg.OutDataDBName,
+		utils.OutDataDBUserCfg:          mg.OutDataDBUser,
+		utils.OutDataDBPasswordCfg:      mg.OutDataDBPassword,
+		utils.OutDataDBEncodingCfg:      mg.OutDataDBEncoding,
+		utils.OutDataDBRedisSentinelCfg: mg.OutDataDBRedisSentinel,
+		utils.OutStorDBTypeCfg:          mg.OutStorDBType,
+		utils.OutStorDBHostCfg:          mg.OutStorDBHost,
+		utils.OutStorDBPortCfg:          mg.OutStorDBPort,
+		utils.OutStorDBNameCfg:          mg.OutStorDBName,
+		utils.OutStorDBUserCfg:          mg.OutStorDBUser,
+		utils.OutStorDBPasswordCfg:      mg.OutStorDBPassword,
+		utils.UsersFiltersCfg:           mg.UsersFilters,
+	}
+
 }

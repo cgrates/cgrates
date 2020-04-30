@@ -67,3 +67,14 @@ func (t *ThresholdSCfg) loadFromJsonCfg(jsnCfg *ThresholdSJsonCfg) (err error) {
 	}
 	return nil
 }
+
+func (t *ThresholdSCfg) AsMapInterface() map[string]interface{} {
+	return map[string]interface{}{
+		utils.EnabledCfg:             t.Enabled,
+		utils.IndexedSelectsCfg:      t.IndexedSelects,
+		utils.StoreIntervalCfg:       t.StoreInterval,
+		utils.StringIndexedFieldsCfg: t.StringIndexedFields,
+		utils.PrefixIndexedFieldsCfg: t.PrefixIndexedFields,
+		utils.NestedFieldsCfg:        t.NestedFields,
+	}
+}

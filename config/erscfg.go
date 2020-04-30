@@ -98,6 +98,20 @@ func (erS *ERsCfg) Clone() (cln *ERsCfg) {
 	return
 }
 
+func (erS *ERsCfg) AsMapInterface() map[string]interface{} {
+
+	readers := make([]map[string]interface{}, len(erS.Readers))
+	for i, item := range erS.Readers {
+		readers[i] = item.AsMapInterface()
+	}
+
+	return map[string]interface{}{
+		utils.EnabledCfg:       erS.Enabled,
+		utils.SessionSConnsCfg: erS.SessionSConns,
+		utils.ReadersCfg:       readers,
+	}
+}
+
 type EventReaderCfg struct {
 	ID                       string
 	Type                     string
@@ -231,4 +245,48 @@ func (er *EventReaderCfg) Clone() (cln *EventReaderCfg) {
 		cln.CacheDumpFields[idx] = fld.Clone()
 	}
 	return
+}
+
+func (er *EventReaderCfg) AsMapInterface() map[string]interface{} {
+	xmlRootPath := make([]string, len(er.XmlRootPath))
+	for i, item := range er.XmlRootPath {
+		xmlRootPath[i] = item
+	}
+	tenant := make([]string, len(er.Tenant))
+	for i, item := range er.Tenant {
+		tenant[i] = item.Rules
+	}
+	flags := make(map[string][]string, len(er.Flags))
+	for key, val := range er.Flags {
+		flags[key] = val
+	}
+	fields := make([]map[string]interface{}, len(er.Fields))
+	for i, item := range er.Fields {
+		fields[i] = item.AsMapInterface()
+	}
+	cacheDumpFields := make([]map[string]interface{}, len(er.CacheDumpFields))
+	for i, item := range er.CacheDumpFields {
+		cacheDumpFields[i] = item.AsMapInterface()
+	}
+
+	return map[string]interface{}{
+		utils.IDCfg:                       er.ID,
+		utils.TypeCfg:                     er.Type,
+		utils.RowLengthCfg:                er.RowLength,
+		utils.FieldSepCfg:                 er.FieldSep,
+		utils.RunDelayCfg:                 er.RunDelay,
+		utils.ConcurrentReqsCfg:           er.ConcurrentReqs,
+		utils.SourcePathCfg:               er.SourcePath,
+		utils.ProcessedPathCfg:            er.ProcessedPath,
+		utils.XmlRootPathCfg:              xmlRootPath,
+		utils.TenantCfg:                   tenant,
+		utils.TimezoneCfg:                 er.Timezone,
+		utils.FiltersCfg:                  er.Filters,
+		utils.FlagsCfg:                    flags,
+		utils.FailedCallsPrefixCfg:        er.FailedCallsPrefix,
+		utils.PartialRecordCacheCfg:       er.PartialRecordCache,
+		utils.PartialCacheExpiryActionCfg: er.PartialCacheExpiryAction,
+		utils.FieldsCfg:                   fields,
+		utils.CacheDumpFieldsCfg:          cacheDumpFields,
+	}
 }

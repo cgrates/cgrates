@@ -173,3 +173,116 @@ func (self *SureTaxCfg) loadFromJsonCfg(jsnCfg *SureTaxJsonCfg) (err error) {
 	}
 	return nil
 }
+
+func (st *SureTaxCfg) AsMapInterface() map[string]interface{} {
+
+	clientTracking := make([]string, len(st.ClientTracking))
+	for i, item := range st.ClientTracking {
+		clientTracking[i] = item.Rules
+	}
+
+	customerNumber := make([]string, len(st.CustomerNumber))
+	for i, item := range st.CustomerNumber {
+		customerNumber[i] = item.Rules
+	}
+
+	origNumber := make([]string, len(st.OrigNumber))
+	for i, item := range st.OrigNumber {
+		origNumber[i] = item.Rules
+	}
+
+	termNumber := make([]string, len(st.TermNumber))
+	for i, item := range st.TermNumber {
+		termNumber[i] = item.Rules
+	}
+
+	billToNumber := make([]string, len(st.BillToNumber))
+	for i, item := range st.BillToNumber {
+		billToNumber[i] = item.Rules
+	}
+
+	zipcode := make([]string, len(st.Zipcode))
+	for i, item := range st.Zipcode {
+		zipcode[i] = item.Rules
+	}
+
+	plus4 := make([]string, len(st.Plus4))
+	for i, item := range st.Plus4 {
+		plus4[i] = item.Rules
+	}
+
+	p2PZipcode := make([]string, len(st.P2PZipcode))
+	for i, item := range st.P2PZipcode {
+		p2PZipcode[i] = item.Rules
+	}
+
+	p2PPlus4 := make([]string, len(st.P2PPlus4))
+	for i, item := range st.P2PPlus4 {
+		p2PPlus4[i] = item.Rules
+	}
+
+	units := make([]string, len(st.Units))
+	for i, item := range st.Units {
+		units[i] = item.Rules
+	}
+
+	unitType := make([]string, len(st.UnitType))
+	for i, item := range st.UnitType {
+		unitType[i] = item.Rules
+	}
+
+	taxIncluded := make([]string, len(st.TaxIncluded))
+	for i, item := range st.TaxIncluded {
+		taxIncluded[i] = item.Rules
+	}
+
+	taxSitusRule := make([]string, len(st.TaxSitusRule))
+	for i, item := range st.TaxSitusRule {
+		taxSitusRule[i] = item.Rules
+	}
+
+	transTypeCode := make([]string, len(st.TransTypeCode))
+	for i, item := range st.TransTypeCode {
+		transTypeCode[i] = item.Rules
+	}
+
+	salesTypeCode := make([]string, len(st.SalesTypeCode))
+	for i, item := range st.SalesTypeCode {
+		salesTypeCode[i] = item.Rules
+	}
+
+	taxExemptionCodeList := make([]string, len(st.TaxExemptionCodeList))
+	for i, item := range st.TaxExemptionCodeList {
+		taxExemptionCodeList[i] = item.Rules
+	}
+
+	return map[string]interface{}{
+		utils.UrlCfg:                  st.Url,
+		utils.ClientNumberCfg:         st.ClientNumber,
+		utils.ValidationKeyCfg:        st.ValidationKey,
+		utils.BusinessUnitCfg:         st.BusinessUnit,
+		utils.TimezoneCfg:             st.Timezone.String(),
+		utils.IncludeLocalCostCfg:     st.IncludeLocalCost,
+		utils.ReturnFileCodeCfg:       st.ReturnFileCode,
+		utils.ResponseGroupCfg:        st.ResponseGroup,
+		utils.ResponseTypeCfg:         st.ResponseType,
+		utils.RegulatoryCodeCfg:       st.RegulatoryCode,
+		utils.ClientTrackingCfg:       st.ClientTracking,
+		utils.CustomerNumberCfg:       st.CustomerNumber,
+		utils.OrigNumberCfg:           st.OrigNumber,
+		utils.TermNumberCfg:           st.TermNumber,
+		utils.BillToNumberCfg:         st.BillToNumber,
+		utils.ZipcodeCfg:              st.Zipcode,
+		utils.Plus4Cfg:                st.Plus4,
+		utils.P2PZipcodeCfg:           st.P2PZipcode,
+		utils.P2PPlus4Cfg:             st.P2PPlus4,
+		utils.UnitsCfg:                st.Units,
+		utils.UnitTypeCfg:             st.UnitType,
+		utils.TaxIncludedCfg:          st.TaxIncluded,
+		utils.TaxSitusRuleCfg:         st.TaxSitusRule,
+		utils.TransTypeCodeCfg:        st.TransTypeCode,
+		utils.SalesTypeCodeCfg:        st.SalesTypeCode,
+		utils.TaxExemptionCodeListCfg: st.TaxExemptionCodeList,
+	}
+
+}

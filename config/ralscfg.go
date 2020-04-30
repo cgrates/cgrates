@@ -102,3 +102,27 @@ func (ralsCfg *RalsCfg) loadFromJsonCfg(jsnRALsCfg *RalsJsonCfg) (err error) {
 
 	return nil
 }
+
+func (ralsCfg *RalsCfg) AsMapInterface() map[string]interface{} {
+	maxComputed := make(map[string]interface{})
+	for key, item := range ralsCfg.MaxComputedUsage {
+		maxComputed[key] = item
+	}
+
+	balanceRating := make(map[string]interface{})
+	for key, item := range ralsCfg.BalanceRatingSubject {
+		balanceRating[key] = item
+	}
+
+	return map[string]interface{}{
+		utils.EnabledCfg:                 ralsCfg.Enabled,
+		utils.ThresholdSConnsCfg:         ralsCfg.ThresholdSConns,
+		utils.StatSConnsCfg:              ralsCfg.StatSConns,
+		utils.CacheSConnsCfg:             ralsCfg.CacheSConns,
+		utils.RpSubjectPrefixMatchingCfg: ralsCfg.RpSubjectPrefixMatching,
+		utils.RemoveExpiredCfg:           ralsCfg.RemoveExpired,
+		utils.MaxComputedUsageCfg:        maxComputed,
+		utils.BalanceRatingSubjectCfg:    balanceRating,
+		utils.MaxIncrementsCfg:           ralsCfg.MaxIncrements,
+	}
+}

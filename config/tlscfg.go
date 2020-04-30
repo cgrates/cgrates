@@ -18,6 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
+import "github.com/cgrates/cgrates/utils"
+
 // AttributeSCfg is the configuration of attribute service
 type TlsCfg struct {
 	ServerCerificate string
@@ -55,4 +57,17 @@ func (tls *TlsCfg) loadFromJsonCfg(jsnCfg *TlsJsonCfg) (err error) {
 		tls.ServerPolicy = *jsnCfg.Server_policy
 	}
 	return
+}
+
+func (tls *TlsCfg) AsMapInterface() map[string]interface{} {
+	return map[string]interface{}{
+		utils.ServerCerificateCfg: tls.ServerCerificate,
+		utils.ServerKeyCfg:        tls.ServerKey,
+		utils.ServerPolicyCfg:     tls.ServerPolicy,
+		utils.ServerNameCfg:       tls.ServerName,
+		utils.ClientCerificateCfg: tls.ClientCerificate,
+		utils.ClientKeyCfg:        tls.ClientKey,
+		utils.CaCertificateCfg:    tls.CaCertificate,
+	}
+
 }
