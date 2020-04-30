@@ -73,7 +73,7 @@
 },
 
 
-"suppliers": {
+"routes": {
 	"enabled": true,
 },
 
@@ -87,7 +87,7 @@
 	"resources_conns": ["*internal"],
 	"thresholds_conns": ["*internal"],
 	"stats_conns": ["*internal"],
-	"suppliers_conns": ["*internal"],
+	"routes_conns": ["*internal"],
 	"attributes_conns": ["*internal"],
 	"alterable_fields": ["Extra1"]
 },

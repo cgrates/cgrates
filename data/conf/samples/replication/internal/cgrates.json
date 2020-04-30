@@ -58,7 +58,7 @@
 		"*threshold_profiles": {"remote":false,"replicate":true},
 		"*thresholds": {"remote":false,"replicate":true},
 		"*filters": {"remote":false,"replicate":true},
-		"*supplier_profiles":{"remote":false,"replicate":true},
+		"*route_profiles":{"remote":false,"replicate":true},
 		"*attribute_profiles":{"remote":false,"replicate":true},
 		"*charger_profiles": {"remote":false,"replicate":true},
 		"*dispatcher_profiles":{"remote":false,"replicate":true},

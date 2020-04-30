@@ -66,11 +66,11 @@ var (
 		testV1FIdxSecondComputeResourceProfileIndexes,
 		testV1FIdxRemoveResourceProfile,
 
-		testV1FIdxSetSupplierProfileIndexes,
-		testV1FIdxComputeSupplierProfileIndexes,
-		testV1FIdxSetSecondSupplierProfileIndexes,
-		testV1FIdxSecondComputeSupplierProfileIndexes,
-		testV1FIdxRemoveSupplierProfile,
+		testV1FIdxSetRouteProfileIndexes,
+		testV1FIdxComputeRouteProfileIndexes,
+		testV1FIdxSetSecondRouteProfileIndexes,
+		testV1FIdxSecondComputeRouteProfileIndexes,
+		testV1FIdxRemoveRouteProfile,
 
 		testV1FIdxSetAttributeProfileIndexes,
 		testV1FIdxComputeAttributeProfileIndexes,
@@ -886,9 +886,9 @@ func testV1FIdxRemoveResourceProfile(t *testing.T) {
 	}
 }
 
-//SupplierProfile
-func testV1FIdxSetSupplierProfileIndexes(t *testing.T) {
-	var reply *engine.SupplierProfile
+//RouteProfile
+func testV1FIdxSetRouteProfileIndexes(t *testing.T) {
+	var reply *engine.RouteProfile
 	filter = &FilterWithCache{
 		Filter: &engine.Filter{
 			Tenant: tenant,
@@ -912,19 +912,19 @@ func testV1FIdxSetSupplierProfileIndexes(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1GetSupplierProfile,
+	if err := tFIdxRpc.Call(utils.APIerSv1GetRouteProfile,
 		&utils.TenantID{Tenant: tenant, ID: "TEST_PROFILE1"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	splPrf = &SupplierWithCache{
-		SupplierProfile: &engine.SupplierProfile{
+	rPrf := &RouteWithCache{
+		RouteProfile: &engine.RouteProfile{
 			Tenant:            tenant,
 			ID:                "TEST_PROFILE1",
 			FilterIDs:         []string{"FLTR_1"},
 			Sorting:           "Sort1",
 			SortingParameters: []string{"Param1", "Param2"},
-			Suppliers: []*engine.Supplier{{
+			Routes: []*engine.Route{{
 				ID:            "SPL1",
 				RatingPlanIDs: []string{"RP1"},
 				FilterIDs:     []string{"FLTR_1"},
@@ -938,36 +938,36 @@ func testV1FIdxSetSupplierProfileIndexes(t *testing.T) {
 		},
 	}
 
-	if err := tFIdxRpc.Call(utils.APIerSv1SetSupplierProfile, splPrf, &result); err != nil {
+	if err := tFIdxRpc.Call(utils.APIerSv1SetRouteProfile, rPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1GetSupplierProfile,
+	if err := tFIdxRpc.Call(utils.APIerSv1GetRouteProfile,
 		&utils.TenantID{Tenant: tenant, ID: "TEST_PROFILE1"}, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(splPrf.SupplierProfile, reply) {
-		t.Errorf("Expecting: %+v, received: %+v", splPrf.SupplierProfile, reply)
+	} else if !reflect.DeepEqual(rPrf.RouteProfile, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", rPrf.RouteProfile, reply)
 	}
 	if err := tFIdxRpc.Call(utils.APIerSv1RemoveFilterIndexes, &AttrRemFilterIndexes{
-		ItemType: utils.MetaSuppliers, Tenant: tenant}, &result); err != nil {
+		ItemType: utils.MetaRoutes, Tenant: tenant}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 	var indexes []string
 	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
-		ItemType: utils.MetaSuppliers, Tenant: tenant, FilterType: utils.MetaString},
+		ItemType: utils.MetaRoutes, Tenant: tenant, FilterType: utils.MetaString},
 		&indexes); err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
 
-func testV1FIdxComputeSupplierProfileIndexes(t *testing.T) {
+func testV1FIdxComputeRouteProfileIndexes(t *testing.T) {
 	var reply2 string
 	if err := tFIdxRpc.Call(utils.APIerSv1ComputeFilterIndexes, utils.ArgsComputeFilterIndexes{
-		Tenant:    tenant,
-		SupplierS: true,
+		Tenant: tenant,
+		RouteS: true,
 	}, &reply2); err != nil {
 		t.Error(err)
 	}
@@ -977,7 +977,7 @@ func testV1FIdxComputeSupplierProfileIndexes(t *testing.T) {
 	expectedIDX := []string{"*string:~*req.Account:1001:TEST_PROFILE1"}
 	var indexes []string
 	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
-		ItemType: utils.MetaSuppliers, Tenant: tenant, FilterType: utils.MetaString},
+		ItemType: utils.MetaRoutes, Tenant: tenant, FilterType: utils.MetaString},
 		&indexes); err != nil {
 		t.Error(err)
 	}
@@ -987,8 +987,8 @@ func testV1FIdxComputeSupplierProfileIndexes(t *testing.T) {
 	}
 }
 
-func testV1FIdxSetSecondSupplierProfileIndexes(t *testing.T) {
-	var reply *engine.SupplierProfile
+func testV1FIdxSetSecondRouteProfileIndexes(t *testing.T) {
+	var reply *engine.RouteProfile
 	filter = &FilterWithCache{
 		Filter: &engine.Filter{
 			Tenant: tenant,
@@ -1010,19 +1010,19 @@ func testV1FIdxSetSecondSupplierProfileIndexes(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1GetSupplierProfile,
+	if err := tFIdxRpc.Call(utils.APIerSv1GetRouteProfile,
 		&utils.TenantID{Tenant: tenant, ID: "TEST_PROFILE2"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	splPrf = &SupplierWithCache{
-		SupplierProfile: &engine.SupplierProfile{
+	rPrf := &RouteWithCache{
+		RouteProfile: &engine.RouteProfile{
 			Tenant:            tenant,
 			ID:                "TEST_PROFILE2",
 			FilterIDs:         []string{"FLTR_2"},
 			Sorting:           "Sort1",
 			SortingParameters: []string{"Param1", "Param2"},
-			Suppliers: []*engine.Supplier{{
+			Routes: []*engine.Route{{
 				ID:            "SPL1",
 				RatingPlanIDs: []string{"RP1"},
 				FilterIDs:     []string{"FLTR_2"},
@@ -1035,38 +1035,38 @@ func testV1FIdxSetSecondSupplierProfileIndexes(t *testing.T) {
 			Weight: 10,
 		},
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1SetSupplierProfile, splPrf, &result); err != nil {
+	if err := tFIdxRpc.Call(utils.APIerSv1SetRouteProfile, rPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1GetSupplierProfile,
+	if err := tFIdxRpc.Call(utils.APIerSv1GetRouteProfile,
 		&utils.TenantID{Tenant: tenant, ID: "TEST_PROFILE2"}, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(splPrf.SupplierProfile, reply) {
-		t.Errorf("Expecting: %+v, received: %+v", splPrf.SupplierProfile, reply)
+	} else if !reflect.DeepEqual(rPrf.RouteProfile, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", rPrf.RouteProfile, reply)
 	}
 	if err := tFIdxRpc.Call(utils.APIerSv1RemoveFilterIndexes, &AttrRemFilterIndexes{
-		ItemType: utils.MetaSuppliers, Tenant: tenant}, &result); err != nil {
+		ItemType: utils.MetaRoutes, Tenant: tenant}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 	var indexes []string
 	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
-		ItemType: utils.MetaSuppliers, Tenant: tenant, FilterType: utils.MetaString},
+		ItemType: utils.MetaRoutes, Tenant: tenant, FilterType: utils.MetaString},
 		&indexes); err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
 
-func testV1FIdxSecondComputeSupplierProfileIndexes(t *testing.T) {
+func testV1FIdxSecondComputeRouteProfileIndexes(t *testing.T) {
 	spid := []string{"TEST_PROFILE2"}
 	var reply2 string
 	if err := tFIdxRpc.Call(utils.APIerSv1ComputeFilterIndexIDs,
 		utils.ArgsComputeFilterIndexIDs{
-			Tenant:      tenant,
-			SupplierIDs: spid,
+			Tenant:   tenant,
+			RouteIDs: spid,
 		}, &reply2); err != nil {
 		t.Error(err)
 	}
@@ -1076,7 +1076,7 @@ func testV1FIdxSecondComputeSupplierProfileIndexes(t *testing.T) {
 	expectedIDX := []string{"*string:~*req.Account:1001:TEST_PROFILE2"}
 	var indexes []string
 	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
-		ItemType: utils.MetaSuppliers, Tenant: tenant, FilterType: utils.MetaString},
+		ItemType: utils.MetaRoutes, Tenant: tenant, FilterType: utils.MetaString},
 		&indexes); err != nil {
 		t.Error(err)
 	}
@@ -1086,43 +1086,43 @@ func testV1FIdxSecondComputeSupplierProfileIndexes(t *testing.T) {
 	}
 }
 
-func testV1FIdxRemoveSupplierProfile(t *testing.T) {
+func testV1FIdxRemoveRouteProfile(t *testing.T) {
 	var resp string
 	var reply2 string
 	if err := tFIdxRpc.Call(utils.APIerSv1ComputeFilterIndexes, utils.ArgsComputeFilterIndexes{
-		Tenant:    tenant,
-		SupplierS: true,
+		Tenant: tenant,
+		RouteS: true,
 	}, &reply2); err != nil {
 		t.Error(err)
 	}
 	if reply2 != utils.OK {
 		t.Errorf("Error: %+v", reply2)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1RemoveSupplierProfile,
+	if err := tFIdxRpc.Call(utils.APIerSv1RemoveRouteProfile,
 		&utils.TenantID{Tenant: tenant, ID: "TEST_PROFILE1"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1RemoveSupplierProfile,
+	if err := tFIdxRpc.Call(utils.APIerSv1RemoveRouteProfile,
 		&utils.TenantID{Tenant: tenant, ID: "TEST_PROFILE2"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1GetSupplierProfile,
+	if err := tFIdxRpc.Call(utils.APIerSv1GetRouteProfile,
 		&utils.TenantID{Tenant: tenant, ID: "TEST_PROFILE1"}, &reply2); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1GetSupplierProfile,
+	if err := tFIdxRpc.Call(utils.APIerSv1GetRouteProfile,
 		&utils.TenantID{Tenant: tenant, ID: "TEST_PROFILE2"}, &reply2); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 	var indexes []string
 	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
-		ItemType: utils.MetaSuppliers, Tenant: tenant, FilterType: utils.MetaString},
+		ItemType: utils.MetaRoutes, Tenant: tenant, FilterType: utils.MetaString},
 		&indexes); err != nil &&
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)

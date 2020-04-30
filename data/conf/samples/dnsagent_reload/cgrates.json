@@ -29,7 +29,7 @@
         "rals_conns": ["*internal"],
         "cdrs_conns": ["*internal"],
         "chargers_conns": ["*internal"],
-        "suppliers_conns": ["*localhost"],
+        "routes_conns": ["*localhost"],
     },
     
     
@@ -54,7 +54,7 @@
     },
     
     
-    "suppliers": {
+    "routes": {
         "enabled": true,
     },
     

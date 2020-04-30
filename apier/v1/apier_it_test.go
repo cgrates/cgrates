@@ -1485,7 +1485,7 @@ func testApierResetDataAfterLoadFromFolder(t *testing.T) {
 	expStats[utils.CacheReverseDestinations].Items = 5
 	expStats[utils.CacheStatQueueProfiles].Items = 1
 	expStats[utils.CacheStatQueues].Items = 1
-	expStats[utils.CacheSupplierProfiles].Items = 2
+	expStats[utils.CacheRouteProfiles].Items = 2
 	expStats[utils.CacheThresholdProfiles].Items = 1
 	expStats[utils.CacheThresholds].Items = 1
 	expStats[utils.CacheLoadIDs].Items = 20

@@ -69,7 +69,7 @@ var (
 		testOnStorITThresholdProfile,
 		testOnStorITThreshold,
 		testOnStorITFilter,
-		testOnStorITSupplierProfile,
+		testOnStorITRouteProfile,
 		testOnStorITAttributeProfile,
 		testOnStorITFlush,
 		testOnStorITIsDBEmpty,
@@ -1749,8 +1749,8 @@ func testOnStorITFilter(t *testing.T) {
 	}
 }
 
-func testOnStorITSupplierProfile(t *testing.T) {
-	splProfile := &SupplierProfile{
+func testOnStorITRouteProfile(t *testing.T) {
+	splProfile := &RouteProfile{
 		Tenant:    "cgrates.org",
 		ID:        "SPRF_1",
 		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
@@ -1759,99 +1759,99 @@ func testOnStorITSupplierProfile(t *testing.T) {
 		},
 		Sorting:           "*lowest_cost",
 		SortingParameters: []string{},
-		Suppliers: []*Supplier{
+		Routes: []*Route{
 			{
-				ID:                 "supplier1",
-				FilterIDs:          []string{"FLTR_DST_DE"},
-				AccountIDs:         []string{"Account1"},
-				RatingPlanIDs:      []string{"RPL_1"},
-				ResourceIDs:        []string{"ResGR1"},
-				StatIDs:            []string{"Stat1"},
-				Weight:             10,
-				SupplierParameters: "param1",
+				ID:              "supplier1",
+				FilterIDs:       []string{"FLTR_DST_DE"},
+				AccountIDs:      []string{"Account1"},
+				RatingPlanIDs:   []string{"RPL_1"},
+				ResourceIDs:     []string{"ResGR1"},
+				StatIDs:         []string{"Stat1"},
+				Weight:          10,
+				RouteParameters: "param1",
 			},
 		},
 		Weight: 20,
 	}
-	if _, rcvErr := onStor.GetSupplierProfile("cgrates.org", "SPRF_1",
+	if _, rcvErr := onStor.GetRouteProfile("cgrates.org", "SPRF_1",
 		true, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.SetSupplierProfile(splProfile, false); err != nil {
+	if err := onStor.SetRouteProfile(splProfile, false); err != nil {
 		t.Error(err)
 	}
 	//get from cache
-	if rcv, err := onStor.GetSupplierProfile("cgrates.org", "SPRF_1",
+	if rcv, err := onStor.GetRouteProfile("cgrates.org", "SPRF_1",
 		true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(splProfile, rcv)) {
 		t.Errorf("Expecting: %v, received: %v", splProfile, rcv)
 	}
 	//get from database
-	if rcv, err := onStor.GetSupplierProfile("cgrates.org", "SPRF_1",
+	if rcv, err := onStor.GetRouteProfile("cgrates.org", "SPRF_1",
 		false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(splProfile, rcv)) {
 		t.Errorf("Expecting: %v, received: %v", splProfile, rcv)
 	}
-	expectedT := []string{"spp_cgrates.org:SPRF_1"}
-	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.SupplierProfilePrefix); err != nil {
+	expectedT := []string{"rpp_cgrates.org:SPRF_1"}
+	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.RouteProfilePrefix); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedT, itm) {
 		t.Errorf("Expected : %+v, but received %+v", expectedT, itm)
 	}
 	//update
-	splProfile.Suppliers = []*Supplier{
+	splProfile.Routes = []*Route{
 		{
-			ID:                 "supplier1",
-			FilterIDs:          []string{"FLTR_DST_DE"},
-			AccountIDs:         []string{"Account1"},
-			RatingPlanIDs:      []string{"RPL_1"},
-			ResourceIDs:        []string{"ResGR1"},
-			StatIDs:            []string{"Stat1"},
-			Weight:             10,
-			SupplierParameters: "param1",
+			ID:              "supplier1",
+			FilterIDs:       []string{"FLTR_DST_DE"},
+			AccountIDs:      []string{"Account1"},
+			RatingPlanIDs:   []string{"RPL_1"},
+			ResourceIDs:     []string{"ResGR1"},
+			StatIDs:         []string{"Stat1"},
+			Weight:          10,
+			RouteParameters: "param1",
 		},
 		{
-			ID:                 "supplier2",
-			FilterIDs:          []string{"FLTR_DST_DE"},
-			AccountIDs:         []string{"Account2"},
-			RatingPlanIDs:      []string{"RPL_2"},
-			ResourceIDs:        []string{"ResGR2"},
-			StatIDs:            []string{"Stat2"},
-			Weight:             20,
-			SupplierParameters: "param2",
+			ID:              "supplier2",
+			FilterIDs:       []string{"FLTR_DST_DE"},
+			AccountIDs:      []string{"Account2"},
+			RatingPlanIDs:   []string{"RPL_2"},
+			ResourceIDs:     []string{"ResGR2"},
+			StatIDs:         []string{"Stat2"},
+			Weight:          20,
+			RouteParameters: "param2",
 		},
 	}
-	if err := onStor.SetSupplierProfile(splProfile, false); err != nil {
+	if err := onStor.SetRouteProfile(splProfile, false); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(sleepDelay)
 	//get from cache
-	if rcv, err := onStor.GetSupplierProfile("cgrates.org", "SPRF_1",
+	if rcv, err := onStor.GetRouteProfile("cgrates.org", "SPRF_1",
 		true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(splProfile, rcv)) {
 		t.Errorf("Expecting: %v, received: %v", splProfile, rcv)
 	}
 	//get from database
-	if rcv, err := onStor.GetSupplierProfile("cgrates.org", "SPRF_1",
+	if rcv, err := onStor.GetRouteProfile("cgrates.org", "SPRF_1",
 		false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(splProfile, rcv)) {
 		t.Errorf("Expecting: %v, received: %v", splProfile, rcv)
 	}
-	if err := onStor.RemoveSupplierProfile(splProfile.Tenant, splProfile.ID,
+	if err := onStor.RemoveRouteProfile(splProfile.Tenant, splProfile.ID,
 		utils.NonTransactional, false); err != nil {
 		t.Error(err)
 	}
 	//check cache if removed
-	if _, rcvErr := onStor.GetSupplierProfile("cgrates.org", "SPRF_1",
+	if _, rcvErr := onStor.GetRouteProfile("cgrates.org", "SPRF_1",
 		true, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 	//check database if removed
-	if _, rcvErr := onStor.GetSupplierProfile("cgrates.org", "SPRF_1",
+	if _, rcvErr := onStor.GetRouteProfile("cgrates.org", "SPRF_1",
 		false, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}

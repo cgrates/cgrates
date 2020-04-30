@@ -158,7 +158,7 @@ func testSSv1ItProcessEventAuth(t *testing.T) {
 	args := &sessions.V1ProcessEventArgs{
 		Flags: []string{utils.ConcatenatedKey(utils.MetaResources, utils.MetaAuthorize),
 			utils.ConcatenatedKey(utils.MetaRALs, utils.MetaAuthorize),
-			utils.MetaSuppliers, utils.MetaAttributes},
+			utils.MetaRoutes, utils.MetaAttributes},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSSv1ItProcessEventAuth",
@@ -185,27 +185,27 @@ func testSSv1ItProcessEventAuth(t *testing.T) {
 	if *rply.ResourceMessage == utils.EmptyString {
 		t.Errorf("Unexpected ResourceMessage: %s", *rply.ResourceMessage)
 	}
-	eSplrs := &engine.SortedSuppliers{
+	eSplrs := &engine.SortedRoutes{
 		ProfileID: "SPL_ACNT_1001",
 		Sorting:   utils.MetaWeight,
 		Count:     2,
-		SortedSuppliers: []*engine.SortedSupplier{
+		SortedRoutes: []*engine.SortedRoute{
 			{
-				SupplierID: "supplier1",
+				RouteID: "supplier1",
 				SortingData: map[string]interface{}{
 					"Weight": 20.0,
 				},
 			},
 			{
-				SupplierID: "supplier2",
+				RouteID: "supplier2",
 				SortingData: map[string]interface{}{
 					"Weight": 10.0,
 				},
 			},
 		},
 	}
-	if !reflect.DeepEqual(eSplrs, rply.Suppliers) {
-		t.Errorf("expecting: %+v,\n received: %+v", utils.ToJSON(eSplrs), utils.ToJSON(rply.Suppliers))
+	if !reflect.DeepEqual(eSplrs, rply.Routes) {
+		t.Errorf("expecting: %+v,\n received: %+v", utils.ToJSON(eSplrs), utils.ToJSON(rply.Routes))
 	}
 	eAttrs := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_ACNT_1001"},

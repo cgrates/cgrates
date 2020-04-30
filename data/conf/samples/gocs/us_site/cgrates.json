@@ -50,7 +50,7 @@
       "*threshold_profiles": {"replicate":false},
       "*thresholds": {"replicate":false},
       "*filters": {"replicate":false},
-      "*supplier_profiles":{"replicate":false},
+      "*route_profiles":{"replicate":false},
       "*attribute_profiles":{"replicate":false},
       "*charger_profiles": {"replicate":false},
       "*dispatcher_profiles":{"replicate":false},

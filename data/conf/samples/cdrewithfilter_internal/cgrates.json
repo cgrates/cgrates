@@ -92,7 +92,7 @@
 },
 
 
-"suppliers": {
+"routes": {
 	"enabled": true,
 	"stats_conns": ["*localhost"],
 },
@@ -100,7 +100,7 @@
 
 "sessions": {
 	"enabled": true,
-	"suppliers_conns": ["*internal"],
+	"routes_conns": ["*internal"],
 	"resources_conns": ["*internal"],
 	"attributes_conns": ["*internal"],
 	"rals_conns": ["*internal"],

@@ -85,7 +85,7 @@
 },
 
 
-"suppliers": {
+"routes": {
 	"enabled": true,
 	"prefix_indexed_fields":["Destination"],
 	"stats_conns": ["broadcast_conn"],
@@ -96,7 +96,7 @@
 "sessions": {
 	"enabled": true,
 	"listen_bijson": "127.0.0.1:3014",		// address where to listen for bidirectional JSON-RPC requests
-	"suppliers_conns": ["broadcast_conn"],
+	"routes_conns": ["broadcast_conn"],
 	"resources_conns": ["broadcast_conn"],
 	"attributes_conns": ["broadcast_conn"],
 	"rals_conns": ["broadcast_conn"],

@@ -929,7 +929,7 @@ func testCGRConfigReloadConfigFromJSONSessionS(t *testing.T) {
 			"sessions": map[string]interface{}{
 				"enabled":          true,
 				"resources_conns":  []string{"*localhost"},
-				"suppliers_conns":  []string{"*localhost"},
+				"routes_conns":     []string{"*localhost"},
 				"attributes_conns": []string{"*localhost"},
 				"rals_conns":       []string{"*internal"},
 				"cdrs_conns":       []string{"*internal"},

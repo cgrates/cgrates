@@ -750,7 +750,7 @@ func testITTestIndexingWithEmptyFltrID(t *testing.T) {
 }
 
 func testITTestIndexingWithEmptyFltrID2(t *testing.T) {
-	splProfile := &SupplierProfile{
+	splProfile := &RouteProfile{
 		Tenant:    "cgrates.org",
 		ID:        "SPL_Weight",
 		FilterIDs: []string{},
@@ -759,21 +759,21 @@ func testITTestIndexingWithEmptyFltrID2(t *testing.T) {
 		},
 		Sorting:           "*weight",
 		SortingParameters: []string{},
-		Suppliers: []*Supplier{
+		Routes: []*Route{
 			{
-				ID:                 "supplier1",
-				FilterIDs:          []string{""},
-				AccountIDs:         []string{""},
-				RatingPlanIDs:      []string{""},
-				ResourceIDs:        []string{""},
-				StatIDs:            []string{""},
-				Weight:             10,
-				SupplierParameters: "",
+				ID:              "supplier1",
+				FilterIDs:       []string{""},
+				AccountIDs:      []string{""},
+				RatingPlanIDs:   []string{""},
+				ResourceIDs:     []string{""},
+				StatIDs:         []string{""},
+				Weight:          10,
+				RouteParameters: "",
 			},
 		},
 		Weight: 20,
 	}
-	splProfile2 := &SupplierProfile{
+	splProfile2 := &RouteProfile{
 		Tenant:    "cgrates.org",
 		ID:        "SPL_Weight2",
 		FilterIDs: []string{},
@@ -782,25 +782,25 @@ func testITTestIndexingWithEmptyFltrID2(t *testing.T) {
 		},
 		Sorting:           "*weight",
 		SortingParameters: []string{},
-		Suppliers: []*Supplier{
+		Routes: []*Route{
 			{
-				ID:                 "supplier1",
-				FilterIDs:          []string{""},
-				AccountIDs:         []string{""},
-				RatingPlanIDs:      []string{""},
-				ResourceIDs:        []string{""},
-				StatIDs:            []string{""},
-				Weight:             10,
-				SupplierParameters: "",
+				ID:              "supplier1",
+				FilterIDs:       []string{""},
+				AccountIDs:      []string{""},
+				RatingPlanIDs:   []string{""},
+				ResourceIDs:     []string{""},
+				StatIDs:         []string{""},
+				Weight:          10,
+				RouteParameters: "",
 			},
 		},
 		Weight: 20,
 	}
 
-	if err := dataManager.SetSupplierProfile(splProfile, true); err != nil {
+	if err := dataManager.SetRouteProfile(splProfile, true); err != nil {
 		t.Error(err)
 	}
-	if err := dataManager.SetSupplierProfile(splProfile2, true); err != nil {
+	if err := dataManager.SetRouteProfile(splProfile2, true); err != nil {
 		t.Error(err)
 	}
 	eIdxes := map[string]utils.StringMap{
@@ -809,7 +809,7 @@ func testITTestIndexingWithEmptyFltrID2(t *testing.T) {
 			"SPL_Weight2": true,
 		},
 	}
-	rfi := NewFilterIndexer(onStor, utils.SupplierProfilePrefix, splProfile.Tenant)
+	rfi := NewFilterIndexer(onStor, utils.RouteProfilePrefix, splProfile.Tenant)
 	if rcvIdx, err := dataManager.GetFilterIndexes(
 		utils.PrefixToIndexCache[rfi.itemType], rfi.dbKeySuffix,
 		utils.EmptyString, nil); err != nil {
@@ -823,7 +823,7 @@ func testITTestIndexingWithEmptyFltrID2(t *testing.T) {
 		"SPL_Weight":  true,
 		"SPL_Weight2": true,
 	}
-	if rcvMp, err := dataManager.MatchFilterIndex(utils.CacheSupplierFilterIndexes,
+	if rcvMp, err := dataManager.MatchFilterIndex(utils.CacheRouteFilterIndexes,
 		splProfile.Tenant, utils.META_NONE, utils.META_ANY, utils.META_ANY); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eMp, rcvMp) {
