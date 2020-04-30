@@ -157,8 +157,8 @@ func (apiv1 *APIerSv1) SetDestination(attrs utils.AttrSetDestination, reply *str
 	if err := apiv1.ConnMgr.Call(apiv1.Config.ApierCfg().CachesConns, nil,
 		utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
 			AttrReloadCache: utils.AttrReloadCache{
-				ArgsCache: utils.ArgsCache{ReverseDestinationIDs: &dest.Prefixes,
-					DestinationIDs: &[]string{attrs.Id}},
+				ArgsCache: utils.ArgsCache{ReverseDestinationIDs: dest.Prefixes,
+					DestinationIDs: []string{attrs.Id}},
 			},
 		}, reply); err != nil {
 		return err
@@ -234,7 +234,7 @@ func (apiv1 *APIerSv1) LoadDestination(attrs AttrLoadDestination, reply *string)
 	if err := apiv1.ConnMgr.Call(apiv1.Config.ApierCfg().CachesConns, nil,
 		utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
 			AttrReloadCache: utils.AttrReloadCache{
-				ArgsCache: utils.ArgsCache{DestinationIDs: &[]string{attrs.ID}},
+				ArgsCache: utils.ArgsCache{DestinationIDs: []string{attrs.ID}},
 			},
 		}, reply); err != nil {
 		return err
@@ -694,7 +694,7 @@ func (apiv1 *APIerSv1) SetActionPlan(attrs AttrSetActionPlan, reply *string) (er
 		if err := apiv1.ConnMgr.Call(apiv1.Config.ApierCfg().CachesConns, nil,
 			utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
 				AttrReloadCache: utils.AttrReloadCache{
-					ArgsCache: utils.ArgsCache{ActionPlanIDs: &[]string{ap.Id}},
+					ArgsCache: utils.ArgsCache{ActionPlanIDs: []string{ap.Id}},
 				},
 			}, reply); err != nil {
 			return 0, err
@@ -709,7 +709,7 @@ func (apiv1 *APIerSv1) SetActionPlan(attrs AttrSetActionPlan, reply *string) (er
 			if err := apiv1.ConnMgr.Call(apiv1.Config.ApierCfg().CachesConns, nil,
 				utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
 					AttrReloadCache: utils.AttrReloadCache{
-						ArgsCache: utils.ArgsCache{AccountActionPlanIDs: &sl},
+						ArgsCache: utils.ArgsCache{AccountActionPlanIDs: sl},
 					},
 				}, reply); err != nil {
 				return 0, err
@@ -810,7 +810,7 @@ func (apiv1 *APIerSv1) RemoveActionPlan(attr AttrGetActionPlan, reply *string) (
 			if err := apiv1.ConnMgr.Call(apiv1.Config.ApierCfg().CachesConns, nil,
 				utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
 					AttrReloadCache: utils.AttrReloadCache{
-						ArgsCache: utils.ArgsCache{AccountActionPlanIDs: &sl},
+						ArgsCache: utils.ArgsCache{AccountActionPlanIDs: sl},
 					},
 				}, reply); err != nil {
 				return 0, err
