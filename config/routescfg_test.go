@@ -24,7 +24,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestSupplierSCfgloadFromJsonCfg(t *testing.T) {
+func TestRouteSCfgloadFromJsonCfg(t *testing.T) {
 	var supscfg, expected RouteSCfg
 	if err := supscfg.loadFromJsonCfg(nil); err != nil {
 		t.Error(err)
@@ -65,10 +65,10 @@ func TestSupplierSCfgloadFromJsonCfg(t *testing.T) {
 	}
 }
 
-func TestSupplierSCfgAsMapInterface(t *testing.T) {
-	var supscfg SupplierSCfg
+func TestRouteSCfgAsMapInterface(t *testing.T) {
+	var supscfg RouteSCfg
 	cfgJSONStr := `{
-	"suppliers": {
+	"routes": {
 		"enabled": false,
 		"indexed_selects":true,
 		"prefix_indexed_fields": [],
@@ -94,7 +94,7 @@ func TestSupplierSCfgAsMapInterface(t *testing.T) {
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if jsnSupSCfg, err := jsnCfg.SupplierSJsonCfg(); err != nil {
+	} else if jsnSupSCfg, err := jsnCfg.RouteSJsonCfg(); err != nil {
 		t.Error(err)
 	} else if err = supscfg.loadFromJsonCfg(jsnSupSCfg); err != nil {
 		t.Error(err)
@@ -103,7 +103,7 @@ func TestSupplierSCfgAsMapInterface(t *testing.T) {
 	}
 
 	cfgJSONStr = `{
-		"suppliers": {
+		"routes": {
 			"enabled": false,
 			"indexed_selects":true,
 			"prefix_indexed_fields": ["prefix","indexed","fields"],
@@ -129,7 +129,7 @@ func TestSupplierSCfgAsMapInterface(t *testing.T) {
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if jsnSupSCfg, err := jsnCfg.SupplierSJsonCfg(); err != nil {
+	} else if jsnSupSCfg, err := jsnCfg.RouteSJsonCfg(); err != nil {
 		t.Error(err)
 	} else if err = supscfg.loadFromJsonCfg(jsnSupSCfg); err != nil {
 		t.Error(err)

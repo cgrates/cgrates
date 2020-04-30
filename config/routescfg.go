@@ -117,15 +117,67 @@ func (rts *RouteSCfg) loadFromJsonCfg(jsnCfg *RouteSJsonCfg) (err error) {
 
 func (rts *RouteSCfg) AsMapInterface() map[string]interface{} {
 
+	stringIndexedFields := []string{}
+	if rts.StringIndexedFields != nil {
+		stringIndexedFields = make([]string, len(*rts.StringIndexedFields))
+		for i, item := range *rts.StringIndexedFields {
+			stringIndexedFields[i] = item
+		}
+	}
+	prefixIndexedFields := []string{}
+	if rts.PrefixIndexedFields != nil {
+		prefixIndexedFields = make([]string, len(*rts.PrefixIndexedFields))
+		for i, item := range *rts.PrefixIndexedFields {
+			prefixIndexedFields[i] = item
+		}
+	}
+	attributeSConns := make([]string, len(rts.AttributeSConns))
+	for i, item := range rts.AttributeSConns {
+		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)
+		if item == buf {
+			attributeSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaAttributes, utils.EmptyString)
+		} else {
+			attributeSConns[i] = item
+		}
+	}
+	responderSConns := make([]string, len(rts.ResponderSConns))
+	for i, item := range rts.ResponderSConns {
+		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder)
+
+		if item == buf {
+			responderSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaResponder, utils.EmptyString)
+		} else {
+			responderSConns[i] = item
+		}
+	}
+	resourceSConns := make([]string, len(rts.ResourceSConns))
+	for i, item := range rts.ResourceSConns {
+		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)
+		if item == buf {
+			resourceSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaResources, utils.EmptyString)
+		} else {
+			resourceSConns[i] = item
+		}
+	}
+	statSConns := make([]string, len(rts.StatSConns))
+	for i, item := range rts.StatSConns {
+		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS)
+		if item == buf {
+			statSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaStatS, utils.EmptyString)
+		} else {
+			statSConns[i] = item
+		}
+	}
+
 	return map[string]interface{}{
 		utils.EnabledCfg:             rts.Enabled,
 		utils.IndexedSelectsCfg:      rts.IndexedSelects,
-		utils.StringIndexedFieldsCfg: rts.StringIndexedFields,
-		utils.PrefixIndexedFieldsCfg: rts.PrefixIndexedFields,
-		utils.AttributeSConnsCfg:     rts.AttributeSConns,
-		utils.ResourceSConnsCfg:      rts.ResourceSConns,
-		utils.StatSConnsCfg:          rts.StatSConns,
-		utils.RALsConnsCfg:           rts.ResponderSConns,
+		utils.StringIndexedFieldsCfg: stringIndexedFields,
+		utils.PrefixIndexedFieldsCfg: prefixIndexedFields,
+		utils.AttributeSConnsCfg:     attributeSConns,
+		utils.ResourceSConnsCfg:      resourceSConns,
+		utils.StatSConnsCfg:          statSConns,
+		utils.RALsConnsCfg:           responderSConns,
 		utils.DefaultRatioCfg:        rts.DefaultRatio,
 		utils.NestedFieldsCfg:        rts.NestedFields,
 	}

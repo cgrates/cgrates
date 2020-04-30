@@ -70,12 +70,12 @@ func TestDspSupplierS(t *testing.T) {
 
 func testDspSupPing(t *testing.T) {
 	var reply string
-	if err := allEngine.RPC.Call(utils.SupplierSv1Ping, new(utils.CGREvent), &reply); err != nil {
+	if err := allEngine.RPC.Call(utils.RouteSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	if err := dispEngine.RPC.Call(utils.SupplierSv1Ping, &utils.CGREventWithArgDispatcher{
+	if err := dispEngine.RPC.Call(utils.RouteSv1Ping, &utils.CGREventWithArgDispatcher{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 		},
@@ -91,7 +91,7 @@ func testDspSupPing(t *testing.T) {
 
 func testDspSupPingFailover(t *testing.T) {
 	var reply string
-	if err := allEngine.RPC.Call(utils.SupplierSv1Ping, new(utils.CGREvent), &reply); err != nil {
+	if err := allEngine.RPC.Call(utils.RouteSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
@@ -104,19 +104,19 @@ func testDspSupPingFailover(t *testing.T) {
 			APIKey: utils.StringPointer("sup12345"),
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.SupplierSv1Ping, &ev, &reply); err != nil {
+	if err := dispEngine.RPC.Call(utils.RouteSv1Ping, &ev, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
 	allEngine.stopEngine(t)
-	if err := dispEngine.RPC.Call(utils.SupplierSv1Ping, &ev, &reply); err != nil {
+	if err := dispEngine.RPC.Call(utils.RouteSv1Ping, &ev, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
 	allEngine2.stopEngine(t)
-	if err := dispEngine.RPC.Call(utils.SupplierSv1Ping, &ev, &reply); err == nil {
+	if err := dispEngine.RPC.Call(utils.RouteSv1Ping, &ev, &reply); err == nil {
 		t.Errorf("Expected error but recived %v and reply %v\n", err, reply)
 	}
 	allEngine.startEngine(t)
@@ -124,29 +124,29 @@ func testDspSupPingFailover(t *testing.T) {
 }
 
 func testDspSupGetSupFailover(t *testing.T) {
-	var rpl *engine.SortedSuppliers
-	eRpl1 := &engine.SortedSuppliers{
+	var rpl *engine.SortedRoutes
+	eRpl1 := &engine.SortedRoutes{
 		ProfileID: "SPL_WEIGHT_2",
 		Sorting:   utils.MetaWeight,
 		Count:     1,
-		SortedSuppliers: []*engine.SortedSupplier{
+		SortedRoutes: []*engine.SortedRoute{
 			{
-				SupplierID:         "supplier1",
-				SupplierParameters: "",
+				RouteID:         "supplier1",
+				RouteParameters: "",
 				SortingData: map[string]interface{}{
 					utils.Weight: 10.0,
 				},
 			},
 		},
 	}
-	eRpl := &engine.SortedSuppliers{
+	eRpl := &engine.SortedRoutes{
 		ProfileID: "SPL_ACNT_1002",
 		Sorting:   utils.MetaLC,
 		Count:     2,
-		SortedSuppliers: []*engine.SortedSupplier{
+		SortedRoutes: []*engine.SortedRoute{
 			{
-				SupplierID:         "supplier1",
-				SupplierParameters: "",
+				RouteID:         "supplier1",
+				RouteParameters: "",
 				SortingData: map[string]interface{}{
 					utils.Cost:         0.3166,
 					utils.RatingPlanID: "RP_1002_LOW",
@@ -154,8 +154,8 @@ func testDspSupGetSupFailover(t *testing.T) {
 				},
 			},
 			{
-				SupplierID:         "supplier2",
-				SupplierParameters: "",
+				RouteID:         "supplier2",
+				RouteParameters: "",
 				SortingData: map[string]interface{}{
 					utils.Cost:         0.6334,
 					utils.RatingPlanID: "RP_1002",
@@ -164,7 +164,7 @@ func testDspSupGetSupFailover(t *testing.T) {
 			},
 		},
 	}
-	args := &engine.ArgsGetSuppliers{
+	args := &engine.ArgsGetRoutes{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
@@ -182,14 +182,14 @@ func testDspSupGetSupFailover(t *testing.T) {
 			APIKey: utils.StringPointer("sup12345"),
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.SupplierSv1GetSuppliers,
+	if err := dispEngine.RPC.Call(utils.RouteSv1GetRoutes,
 		args, &rpl); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eRpl1, rpl) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(eRpl1), utils.ToJSON(rpl))
 	}
 	allEngine2.stopEngine(t)
-	if err := dispEngine.RPC.Call(utils.SupplierSv1GetSuppliers,
+	if err := dispEngine.RPC.Call(utils.RouteSv1GetRoutes,
 		args, &rpl); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eRpl, rpl) {
@@ -199,8 +199,8 @@ func testDspSupGetSupFailover(t *testing.T) {
 }
 
 func testDspSupTestAuthKey(t *testing.T) {
-	var rpl *engine.SortedSuppliers
-	args := &engine.ArgsGetSuppliers{
+	var rpl *engine.SortedRoutes
+	args := &engine.ArgsGetRoutes{
 		CGREvent: &utils.CGREvent{
 			ID:   utils.UUIDSha1Prefix(),
 			Time: &nowTime,
@@ -216,22 +216,22 @@ func testDspSupTestAuthKey(t *testing.T) {
 			APIKey: utils.StringPointer("12345"),
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.SupplierSv1GetSuppliers,
+	if err := dispEngine.RPC.Call(utils.RouteSv1GetRoutes,
 		args, &rpl); err == nil || err.Error() != utils.ErrUnauthorizedApi.Error() {
 		t.Error(err)
 	}
 }
 
 func testDspSupTestAuthKey2(t *testing.T) {
-	var rpl *engine.SortedSuppliers
-	eRpl := &engine.SortedSuppliers{
+	var rpl *engine.SortedRoutes
+	eRpl := &engine.SortedRoutes{
 		ProfileID: "SPL_ACNT_1002",
 		Sorting:   utils.MetaLC,
 		Count:     2,
-		SortedSuppliers: []*engine.SortedSupplier{
+		SortedRoutes: []*engine.SortedRoute{
 			{
-				SupplierID:         "supplier1",
-				SupplierParameters: "",
+				RouteID:         "supplier1",
+				RouteParameters: "",
 				SortingData: map[string]interface{}{
 					utils.Cost:         0.3166,
 					utils.RatingPlanID: "RP_1002_LOW",
@@ -239,8 +239,8 @@ func testDspSupTestAuthKey2(t *testing.T) {
 				},
 			},
 			{
-				SupplierID:         "supplier2",
-				SupplierParameters: "",
+				RouteID:         "supplier2",
+				RouteParameters: "",
 				SortingData: map[string]interface{}{
 					utils.Cost:         0.6334,
 					utils.RatingPlanID: "RP_1002",
@@ -249,7 +249,7 @@ func testDspSupTestAuthKey2(t *testing.T) {
 			},
 		},
 	}
-	args := &engine.ArgsGetSuppliers{
+	args := &engine.ArgsGetRoutes{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
@@ -266,7 +266,7 @@ func testDspSupTestAuthKey2(t *testing.T) {
 			APIKey: utils.StringPointer("sup12345"),
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.SupplierSv1GetSuppliers,
+	if err := dispEngine.RPC.Call(utils.RouteSv1GetRoutes,
 		args, &rpl); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eRpl, rpl) {
@@ -275,29 +275,29 @@ func testDspSupTestAuthKey2(t *testing.T) {
 }
 
 func testDspSupGetSupRoundRobin(t *testing.T) {
-	var rpl *engine.SortedSuppliers
-	eRpl1 := &engine.SortedSuppliers{
+	var rpl *engine.SortedRoutes
+	eRpl1 := &engine.SortedRoutes{
 		ProfileID: "SPL_WEIGHT_2",
 		Sorting:   utils.MetaWeight,
 		Count:     1,
-		SortedSuppliers: []*engine.SortedSupplier{
+		SortedRoutes: []*engine.SortedRoute{
 			{
-				SupplierID:         "supplier1",
-				SupplierParameters: "",
+				RouteID:         "supplier1",
+				RouteParameters: "",
 				SortingData: map[string]interface{}{
 					utils.Weight: 10.0,
 				},
 			},
 		},
 	}
-	eRpl := &engine.SortedSuppliers{
+	eRpl := &engine.SortedRoutes{
 		ProfileID: "SPL_ACNT_1002",
 		Sorting:   utils.MetaLC,
 		Count:     2,
-		SortedSuppliers: []*engine.SortedSupplier{
+		SortedRoutes: []*engine.SortedRoute{
 			{
-				SupplierID:         "supplier1",
-				SupplierParameters: "",
+				RouteID:         "supplier1",
+				RouteParameters: "",
 				SortingData: map[string]interface{}{
 					utils.Cost:         0.3166,
 					utils.RatingPlanID: "RP_1002_LOW",
@@ -305,8 +305,8 @@ func testDspSupGetSupRoundRobin(t *testing.T) {
 				},
 			},
 			{
-				SupplierID:         "supplier2",
-				SupplierParameters: "",
+				RouteID:         "supplier2",
+				RouteParameters: "",
 				SortingData: map[string]interface{}{
 					utils.Cost:         0.6334,
 					utils.RatingPlanID: "RP_1002",
@@ -315,7 +315,7 @@ func testDspSupGetSupRoundRobin(t *testing.T) {
 			},
 		},
 	}
-	args := &engine.ArgsGetSuppliers{
+	args := &engine.ArgsGetRoutes{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
@@ -333,13 +333,13 @@ func testDspSupGetSupRoundRobin(t *testing.T) {
 			APIKey: utils.StringPointer("sup12345"),
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.SupplierSv1GetSuppliers,
+	if err := dispEngine.RPC.Call(utils.RouteSv1GetRoutes,
 		args, &rpl); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eRpl1, rpl) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(eRpl1), utils.ToJSON(rpl))
 	}
-	if err := dispEngine.RPC.Call(utils.SupplierSv1GetSuppliers,
+	if err := dispEngine.RPC.Call(utils.RouteSv1GetRoutes,
 		args, &rpl); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eRpl, rpl) {
@@ -364,7 +364,7 @@ func testDspSupGetSupplierForEvent(t *testing.T) {
 			APIKey: utils.StringPointer("sup12345"),
 		},
 	}
-	expected := engine.SupplierProfile{
+	expected := engine.RouteProfile{
 		Tenant:    "cgrates.org",
 		ID:        "SPL_ACNT_1002",
 		FilterIDs: []string{"FLTR_ACNT_1002"},
@@ -373,28 +373,28 @@ func testDspSupGetSupplierForEvent(t *testing.T) {
 		},
 		Sorting:           utils.MetaLC,
 		SortingParameters: []string{},
-		Suppliers: []*engine.Supplier{
-			&engine.Supplier{
-				ID:                 "supplier1",
-				FilterIDs:          nil,
-				AccountIDs:         nil,
-				RatingPlanIDs:      []string{"RP_1002_LOW"},
-				ResourceIDs:        nil,
-				StatIDs:            nil,
-				Weight:             10,
-				Blocker:            false,
-				SupplierParameters: "",
+		Routes: []*engine.Route{
+			&engine.Route{
+				ID:              "supplier1",
+				FilterIDs:       nil,
+				AccountIDs:      nil,
+				RatingPlanIDs:   []string{"RP_1002_LOW"},
+				ResourceIDs:     nil,
+				StatIDs:         nil,
+				Weight:          10,
+				Blocker:         false,
+				RouteParameters: "",
 			},
-			&engine.Supplier{
-				ID:                 "supplier2",
-				FilterIDs:          nil,
-				AccountIDs:         nil,
-				RatingPlanIDs:      []string{"RP_1002"},
-				ResourceIDs:        nil,
-				StatIDs:            nil,
-				Weight:             20,
-				Blocker:            false,
-				SupplierParameters: "",
+			&engine.Route{
+				ID:              "supplier2",
+				FilterIDs:       nil,
+				AccountIDs:      nil,
+				RatingPlanIDs:   []string{"RP_1002"},
+				ResourceIDs:     nil,
+				StatIDs:         nil,
+				Weight:          20,
+				Blocker:         false,
+				RouteParameters: "",
 			},
 		},
 		Weight: 10,
@@ -402,16 +402,16 @@ func testDspSupGetSupplierForEvent(t *testing.T) {
 	if *encoding == utils.MetaGOB {
 		expected.SortingParameters = nil // empty slices are nil in gob
 	}
-	var supProf []*engine.SupplierProfile
-	if err := dispEngine.RPC.Call(utils.SupplierSv1GetSupplierProfilesForEvent,
+	var supProf []*engine.RouteProfile
+	if err := dispEngine.RPC.Call(utils.RouteSv1GetRouteProfilesForEvent,
 		ev, &supProf); err != nil {
 		t.Fatal(err)
 	}
-	sort.Slice(expected.Suppliers, func(i, j int) bool {
-		return expected.Suppliers[i].Weight < expected.Suppliers[j].Weight
+	sort.Slice(expected.Routes, func(i, j int) bool {
+		return expected.Routes[i].Weight < expected.Routes[j].Weight
 	})
-	sort.Slice(supProf[0].Suppliers, func(i, j int) bool {
-		return supProf[0].Suppliers[i].Weight < supProf[0].Suppliers[j].Weight
+	sort.Slice(supProf[0].Routes, func(i, j int) bool {
+		return supProf[0].Routes[i].Weight < supProf[0].Routes[j].Weight
 	})
 	if !reflect.DeepEqual(expected, *supProf[0]) {
 		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(expected), utils.ToJSON(supProf))

@@ -381,13 +381,13 @@ func (scfg *SessionSCfg) AsMapInterface() map[string]interface{} {
 			statSConns[i] = item
 		}
 	}
-	supplSConns := make([]string, len(scfg.SupplSConns))
-	for i, item := range scfg.SupplSConns {
-		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSuppliers)
+	routesConns := make([]string, len(scfg.RouteSConns))
+	for i, item := range scfg.RouteSConns {
+		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRoutes)
 		if item == buf {
-			supplSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaSuppliers, utils.EmptyString)
+			routesConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaRoutes, utils.EmptyString)
 		} else {
-			supplSConns[i] = item
+			routesConns[i] = item
 		}
 	}
 	attrSConns := make([]string, len(scfg.AttrSConns))
@@ -420,14 +420,14 @@ func (scfg *SessionSCfg) AsMapInterface() map[string]interface{} {
 	return map[string]interface{}{
 		utils.EnabledCfg:             scfg.Enabled,
 		utils.ListenBijsonCfg:        scfg.ListenBijson,
-		utils.ChargerSConnsCfg:       scfg.ChargerSConns,
-		utils.RALsConnsCfg:           scfg.RALsConns,
-		utils.ResSConnsCfg:           scfg.ResSConns,
-		utils.ThreshSConnsCfg:        scfg.ThreshSConns,
-		utils.StatSConnsCfg:          scfg.StatSConns,
-		utils.RouteSConnsCfg:         scfg.RouteSConns,
-		utils.AttrSConnsCfg:          scfg.AttrSConns,
-		utils.CDRsConnsCfg:           scfg.CDRsConns,
+		utils.ChargerSConnsCfg:       chargerSConns,
+		utils.RALsConnsCfg:           RALsConns,
+		utils.ResSConnsCfg:           resSConns,
+		utils.ThreshSConnsCfg:        threshSConns,
+		utils.StatSConnsCfg:          statSConns,
+		utils.RouteSConnsCfg:         routesConns,
+		utils.AttrSConnsCfg:          attrSConns,
+		utils.CDRsConnsCfg:           CDRsConns,
 		utils.ReplicationConnsCfg:    scfg.ReplicationConns,
 		utils.DebitIntervalCfg:       debitInterval,
 		utils.StoreSCostsCfg:         scfg.StoreSCosts,

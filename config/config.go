@@ -1482,7 +1482,7 @@ func (cfg *CGRConfig) AsMapInterface(separator string) map[string]interface{} {
 		utils.StatsCfg:         cfg.statsCfg.AsMapInterface(),
 		utils.ThresholdSCfg:    cfg.thresholdSCfg.AsMapInterface(),
 		utils.RouteSCfg:        cfg.routeSCfg.AsMapInterface(),
-		utils.SureTaxCfg:       cfg.sureTaxCfg.AsMapInterface(),
+		utils.SureTaxCfg:       cfg.sureTaxCfg.AsMapInterface(separator),
 		utils.DispatcherSCfg:   cfg.dispatcherSCfg.AsMapInterface(),
 		utils.LoaderCgrCfg:     cfg.loaderCgrCfg.AsMapInterface(),
 		utils.MigratorCgrCfg:   cfg.migratorCgrCfg.AsMapInterface(),
