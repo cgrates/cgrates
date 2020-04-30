@@ -125,6 +125,7 @@ func TestSessionSCfgloadFromJsonCfg(t *testing.T) {
 
 func TestSessionSCfgAsMapInterface(t *testing.T) {
 	var sescfg SessionSCfg
+	sescfg.STIRCfg = new(STIRcfg)
 	cfgJSONStr := `{
 	"sessions": {
 		"enabled": false,
