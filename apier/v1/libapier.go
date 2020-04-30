@@ -40,29 +40,29 @@ func composeArgsReload(args utils.ArgsGetCacheItem) (rpl utils.AttrReloadCache) 
 	rpl = utils.InitAttrReloadCache()
 	switch args.CacheID {
 	case utils.CacheResourceProfiles:
-		rpl.ResourceProfileIDs = &[]string{args.ItemID}
+		rpl.ResourceProfileIDs = []string{args.ItemID}
 	case utils.CacheResources:
-		rpl.ResourceIDs = &[]string{args.ItemID}
+		rpl.ResourceIDs = []string{args.ItemID}
 	case utils.CacheStatQueues:
-		rpl.StatsQueueIDs = &[]string{args.ItemID}
+		rpl.StatsQueueIDs = []string{args.ItemID}
 	case utils.CacheStatQueueProfiles:
-		rpl.StatsQueueProfileIDs = &[]string{args.ItemID}
+		rpl.StatsQueueProfileIDs = []string{args.ItemID}
 	case utils.CacheThresholds:
-		rpl.ThresholdIDs = &[]string{args.ItemID}
+		rpl.ThresholdIDs = []string{args.ItemID}
 	case utils.CacheThresholdProfiles:
-		rpl.ThresholdProfileIDs = &[]string{args.ItemID}
+		rpl.ThresholdProfileIDs = []string{args.ItemID}
 	case utils.CacheFilters:
-		rpl.FilterIDs = &[]string{args.ItemID}
+		rpl.FilterIDs = []string{args.ItemID}
 	case utils.CacheSupplierProfiles:
-		rpl.SupplierProfileIDs = &[]string{args.ItemID}
+		rpl.SupplierProfileIDs = []string{args.ItemID}
 	case utils.CacheAttributeProfiles:
-		rpl.AttributeProfileIDs = &[]string{args.ItemID}
+		rpl.AttributeProfileIDs = []string{args.ItemID}
 	case utils.CacheChargerProfiles:
-		rpl.ChargerProfileIDs = &[]string{args.ItemID}
+		rpl.ChargerProfileIDs = []string{args.ItemID}
 	case utils.CacheDispatcherProfiles:
-		rpl.DispatcherProfileIDs = &[]string{args.ItemID}
+		rpl.DispatcherProfileIDs = []string{args.ItemID}
 	case utils.CacheDispatcherHosts:
-		rpl.DispatcherHostIDs = &[]string{args.ItemID}
+		rpl.DispatcherHostIDs = []string{args.ItemID}
 	}
 	return
 }
