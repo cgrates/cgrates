@@ -428,28 +428,28 @@ type AttrGetAccounts struct {
 }
 
 type ArgsCache struct {
-	DestinationIDs        *[]string
-	ReverseDestinationIDs *[]string
-	RatingPlanIDs         *[]string
-	RatingProfileIDs      *[]string
-	ActionIDs             *[]string
-	ActionPlanIDs         *[]string
-	AccountActionPlanIDs  *[]string
-	ActionTriggerIDs      *[]string
-	SharedGroupIDs        *[]string
-	ResourceProfileIDs    *[]string
-	ResourceIDs           *[]string
-	StatsQueueIDs         *[]string
-	StatsQueueProfileIDs  *[]string
-	ThresholdIDs          *[]string
-	ThresholdProfileIDs   *[]string
-	FilterIDs             *[]string
-	SupplierProfileIDs    *[]string
-	AttributeProfileIDs   *[]string
-	ChargerProfileIDs     *[]string
-	DispatcherProfileIDs  *[]string
-	DispatcherHostIDs     *[]string
-	DispatcherRoutesIDs   *[]string
+	DestinationIDs        []string
+	ReverseDestinationIDs []string
+	RatingPlanIDs         []string
+	RatingProfileIDs      []string
+	ActionIDs             []string
+	ActionPlanIDs         []string
+	AccountActionPlanIDs  []string
+	ActionTriggerIDs      []string
+	SharedGroupIDs        []string
+	ResourceProfileIDs    []string
+	ResourceIDs           []string
+	StatsQueueIDs         []string
+	StatsQueueProfileIDs  []string
+	ThresholdIDs          []string
+	ThresholdProfileIDs   []string
+	FilterIDs             []string
+	SupplierProfileIDs    []string
+	AttributeProfileIDs   []string
+	ChargerProfileIDs     []string
+	DispatcherProfileIDs  []string
+	DispatcherHostIDs     []string
+	DispatcherRoutesIDs   []string
 }
 
 // Data used to do remote cache reloads via api
@@ -458,35 +458,30 @@ type AttrReloadCache struct {
 	FlushAll bool // If provided, cache flush will be executed before any action
 }
 
-type ArgsCacheKeys struct {
-	ArgsCache
-	Paginator
-}
-
 // InitAttrReloadCache initialize AttrReloadCache with empty string slice
 func InitAttrReloadCache() (rpl AttrReloadCache) {
-	rpl.DestinationIDs = &[]string{}
-	rpl.ReverseDestinationIDs = &[]string{}
-	rpl.RatingPlanIDs = &[]string{}
-	rpl.RatingProfileIDs = &[]string{}
-	rpl.ActionIDs = &[]string{}
-	rpl.ActionPlanIDs = &[]string{}
-	rpl.AccountActionPlanIDs = &[]string{}
-	rpl.ActionTriggerIDs = &[]string{}
-	rpl.SharedGroupIDs = &[]string{}
-	rpl.ResourceProfileIDs = &[]string{}
-	rpl.ResourceIDs = &[]string{}
-	rpl.StatsQueueIDs = &[]string{}
-	rpl.StatsQueueProfileIDs = &[]string{}
-	rpl.ThresholdIDs = &[]string{}
-	rpl.ThresholdProfileIDs = &[]string{}
-	rpl.FilterIDs = &[]string{}
-	rpl.SupplierProfileIDs = &[]string{}
-	rpl.AttributeProfileIDs = &[]string{}
-	rpl.ChargerProfileIDs = &[]string{}
-	rpl.DispatcherProfileIDs = &[]string{}
-	rpl.DispatcherHostIDs = &[]string{}
-	rpl.DispatcherRoutesIDs = &[]string{}
+	rpl.DestinationIDs = []string{}
+	rpl.ReverseDestinationIDs = []string{}
+	rpl.RatingPlanIDs = []string{}
+	rpl.RatingProfileIDs = []string{}
+	rpl.ActionIDs = []string{}
+	rpl.ActionPlanIDs = []string{}
+	rpl.AccountActionPlanIDs = []string{}
+	rpl.ActionTriggerIDs = []string{}
+	rpl.SharedGroupIDs = []string{}
+	rpl.ResourceProfileIDs = []string{}
+	rpl.ResourceIDs = []string{}
+	rpl.StatsQueueIDs = []string{}
+	rpl.StatsQueueProfileIDs = []string{}
+	rpl.ThresholdIDs = []string{}
+	rpl.ThresholdProfileIDs = []string{}
+	rpl.FilterIDs = []string{}
+	rpl.SupplierProfileIDs = []string{}
+	rpl.AttributeProfileIDs = []string{}
+	rpl.ChargerProfileIDs = []string{}
+	rpl.DispatcherProfileIDs = []string{}
+	rpl.DispatcherHostIDs = []string{}
+	rpl.DispatcherRoutesIDs = []string{}
 	return
 }
 
