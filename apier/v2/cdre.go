@@ -118,7 +118,7 @@ func (apiv2 *APIerSv2) ExportCdrsToFile(attr AttrExportCdrsToFile, reply *utils.
 	}
 	*reply = utils.ExportedFileCdrs{ExportedFilePath: filePath, TotalRecords: len(cdrs),
 		TotalCost: cdrexp.TotalCost(), FirstOrderId: cdrexp.FirstOrderID(), LastOrderId: cdrexp.LastOrderID()}
-	if !attr.Verbose {
+	if attr.Verbose {
 		reply.ExportedCgrIds = cdrexp.PositiveExports()
 		reply.UnexportedCgrIds = cdrexp.NegativeExports()
 	}
