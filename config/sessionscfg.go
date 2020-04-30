@@ -288,13 +288,7 @@ func (scfg *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) (err error) {
 			}
 		}
 	}
-	if jsnCfg.Stir != nil {
-		scfg.STIRCfg = new(STIRcfg)
-		if err := scfg.STIRCfg.loadFromJSONCfg(jsnCfg.Stir); err != nil {
-			return err
-		}
-	}
-	return nil
+	return scfg.STIRCfg.loadFromJSONCfg(jsnCfg.Stir)
 }
 
 func (scfg *SessionSCfg) AsMapInterface() map[string]interface{} {
