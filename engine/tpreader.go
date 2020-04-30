@@ -832,9 +832,17 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 			if err = tpr.dm.SetAccountActionPlans(id, []string{accountAction.ActionPlanId}, false); err != nil {
 				return err
 			}
-			if err = tpr.dm.CacheDataFromDB(utils.AccountActionPlansPrefix, []string{id}, true); err != nil {
+			var reply string
+			if err := connMgr.Call(tpr.cacheConns, nil,
+				utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
+					AttrReloadCache: utils.AttrReloadCache{
+						ArgsCache: utils.ArgsCache{AccountActionPlanIDs: []string{id},
+							ActionPlanIDs: []string{accountAction.ActionPlanId}},
+					},
+				}, &reply); err != nil {
 				return err
 			}
+
 		}
 		// action triggers
 		var actionTriggers ActionTriggers
