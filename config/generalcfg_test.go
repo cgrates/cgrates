@@ -21,6 +21,8 @@ import (
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 func TestGeneralCfgloadFromJsonCfg(t *testing.T) {
@@ -89,5 +91,72 @@ func TestGeneralCfgloadFromJsonCfg(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, gencfg) {
 		t.Errorf("Expected: %+v , recived: %+v", expected, gencfg)
+	}
+}
+
+func TestGeneralCfgAsMapInterface(t *testing.T) {
+	var gencfg GeneralCfg
+	cfgJSONStr := `{
+		"general": {
+			"node_id": "",											
+			"logger":"*syslog",										
+			"log_level": 6,											
+			"http_skip_tls_verify": false,							
+			"rounding_decimals": 5,									
+			"dbdata_encoding": "*msgpack",							
+			"tpexport_dir": "/var/spool/cgrates/tpe",				
+			"poster_attempts": 3,									
+			"failed_posts_dir": "/var/spool/cgrates/failed_posts",	
+			"failed_posts_ttl": "5s",								
+			"default_request_type": "*rated",						
+			"default_category": "call",								
+			"default_tenant": "cgrates.org",						
+			"default_timezone": "Local",							
+			"default_caching":"*reload",							
+			"connect_attempts": 5,									
+			"reconnects": -1,										
+			"connect_timeout": "1s",								
+			"reply_timeout": "2s",									
+			"locking_timeout": "0",									
+			"digest_separator": ",",								
+			"digest_equal": ":",									
+			"rsr_separator": ";",									
+			"max_parralel_conns": 100,								
+		},
+	}`
+	eMap := map[string]interface{}{
+		"node_id":              "",
+		"logger":               "*syslog",
+		"log_level":            6,
+		"http_skip_tls_verify": false,
+		"rounding_decimals":    5,
+		"dbdata_encoding":      "*msgpack",
+		"tpexport_dir":         "/var/spool/cgrates/tpe",
+		"poster_attempts":      3,
+		"failed_posts_dir":     "/var/spool/cgrates/failed_posts",
+		"failed_posts_ttl":     "5s",
+		"default_request_type": "*rated",
+		"default_category":     "call",
+		"default_tenant":       "cgrates.org",
+		"default_timezone":     "Local",
+		"default_caching":      "*reload",
+		"connect_attempts":     5,
+		"reconnects":           -1,
+		"connect_timeout":      "1s",
+		"reply_timeout":        "2s",
+		"locking_timeout":      "0",
+		"digest_separator":     ",",
+		"digest_equal":         ":",
+		"rsr_separator":        ";",
+		"max_parralel_conns":   100,
+	}
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+		t.Error(err)
+	} else if jsnGenCfg, err := jsnCfg.GeneralJsonCfg(); err != nil {
+		t.Error(err)
+	} else if err = gencfg.loadFromJsonCfg(jsnGenCfg); err != nil {
+		t.Error(err)
+	} else if rcv := gencfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
+		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
