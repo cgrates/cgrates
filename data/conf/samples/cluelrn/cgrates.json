@@ -49,7 +49,7 @@
 },
 
 
-"suppliers": {
+"routes": {
 	"enabled": true,
 	"attributes_conns": ["*localhost"],
 },

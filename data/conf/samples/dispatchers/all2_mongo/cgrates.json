@@ -57,7 +57,7 @@
 	"enabled": true,
 },
 
-"suppliers": {
+"routes": {
 	"enabled": true,
 	"rals_conns": ["*internal"],
 },
@@ -79,7 +79,7 @@
 "sessions": {
 	"enabled": true,
 	"listen_bijson": ":7014",
-	"suppliers_conns": ["*internal"],
+	"routes_conns": ["*internal"],
 	"resources_conns": ["*internal"],
 	"attributes_conns": ["*internal"],
 	"rals_conns": ["*internal"],

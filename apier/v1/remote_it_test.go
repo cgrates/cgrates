@@ -62,7 +62,7 @@ var (
 		testInternalRemoteITGetResource,
 		testInternalRemoteITGetResourceProfile,
 		testInternalRemoteITGetStatQueueProfile,
-		testInternalRemoteITGetSupplier,
+		testInternalRemoteITGetRoute,
 		testInternalRemoteITGetFilter,
 		testInternalRemoteITGetRatingPlan,
 		testInternalRemoteITGetRatingProfile,
@@ -405,9 +405,9 @@ func testInternalRemoteITGetStatQueueProfile(t *testing.T) {
 	}
 }
 
-func testInternalRemoteITGetSupplier(t *testing.T) {
-	var reply *engine.SupplierProfile
-	splPrf := &engine.SupplierProfile{
+func testInternalRemoteITGetRoute(t *testing.T) {
+	var reply *engine.RouteProfile
+	splPrf := &engine.RouteProfile{
 		Tenant:    "cgrates.org",
 		ID:        "SPL_ACNT_1001",
 		FilterIDs: []string{"FLTR_ACNT_1001"},
@@ -416,7 +416,7 @@ func testInternalRemoteITGetSupplier(t *testing.T) {
 		},
 		Sorting:           utils.MetaWeight,
 		SortingParameters: []string{},
-		Suppliers: []*engine.Supplier{
+		Routes: []*engine.Route{
 			{
 				ID:     "supplier1",
 				Weight: 10,
@@ -429,7 +429,7 @@ func testInternalRemoteITGetSupplier(t *testing.T) {
 		Weight: 20,
 	}
 	// supplier in reverse order
-	splPrf2 := &engine.SupplierProfile{
+	splPrf2 := &engine.RouteProfile{
 		Tenant:    "cgrates.org",
 		ID:        "SPL_ACNT_1001",
 		FilterIDs: []string{"FLTR_ACNT_1001"},
@@ -438,7 +438,7 @@ func testInternalRemoteITGetSupplier(t *testing.T) {
 		},
 		Sorting:           utils.MetaWeight,
 		SortingParameters: []string{},
-		Suppliers: []*engine.Supplier{
+		Routes: []*engine.Route{
 			{
 				ID:     "supplier2",
 				Weight: 20,
@@ -455,7 +455,7 @@ func testInternalRemoteITGetSupplier(t *testing.T) {
 		splPrf2.SortingParameters = nil
 	}
 
-	if err := internalRPC.Call(utils.APIerSv1GetSupplierProfile,
+	if err := internalRPC.Call(utils.APIerSv1GetRouteProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "SPL_ACNT_1001"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(splPrf, reply) && !reflect.DeepEqual(splPrf2, reply) {

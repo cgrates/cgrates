@@ -115,7 +115,7 @@ func testConfigSReloadConfigFromJSONSessionS(t *testing.T) {
 			"sessions": map[string]interface{}{
 				"enabled":          true,
 				"resources_conns":  []string{"*localhost"},
-				"suppliers_conns":  []string{"*localhost"},
+				"routes_conns":     []string{"*localhost"},
 				"attributes_conns": []string{"*localhost"},
 				"rals_conns":       []string{"*internal"},
 				"cdrs_conns":       []string{"*internal"},
@@ -128,16 +128,25 @@ func testConfigSReloadConfigFromJSONSessionS(t *testing.T) {
 		t.Errorf("Expected OK received: %s", reply)
 	}
 	exp := map[string]interface{}{
-		"Enabled":       true,
-		"ListenBijson":  "127.0.0.1:2014",
-		"ChargerSConns": []interface{}{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)},
-		"RALsConns":     []interface{}{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder)},
-		"ResSConns":     []interface{}{utils.MetaLocalHost},
-		"ThreshSConns":  []interface{}{},
-		"StatSConns":    []interface{}{},
-		"SupplSConns":   []interface{}{utils.MetaLocalHost},
-		"AttrSConns":    []interface{}{utils.MetaLocalHost},
-		"CDRsConns":     []interface{}{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
+		"Enabled":        true,
+		"ListenBijson":   "127.0.0.1:2014",
+		"ChargerSConns":  []interface{}{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)},
+		"RALsConns":      []interface{}{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder)},
+		"ResSConns":      []interface{}{utils.MetaLocalHost},
+		"ThreshSConns":   []interface{}{},
+		"StatSConns":     []interface{}{},
+		"RouteSConns":    []interface{}{utils.MetaLocalHost},
+		"AttrSConns":     []interface{}{utils.MetaLocalHost},
+		"CDRsConns":      []interface{}{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
+		"SchedulerConns": []interface{}{},
+
+		"STIRCfg": map[string]interface{}{
+			"AllowedAttest":      map[string]interface{}{},
+			"DefaultAttest":      "A",
+			"PayloadMaxduration": -1.,
+			"PrivateKeyPath":     "",
+			"PublicKeyPath":      "",
+		},
 
 		"ReplicationConns":    []interface{}{},
 		"MaxCallDuration":     float64(3 * time.Hour),
@@ -176,7 +185,7 @@ func testConfigSReloadConfigFromJSONSessionS(t *testing.T) {
 	}, &rpl); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exp, rpl) {
-		t.Errorf("Expected %+v , received: %+v ", utils.ToJSON(exp), utils.ToJSON(rpl))
+		t.Errorf("Expected %+v , received: %+v ", exp, rpl)
 	}
 }
 

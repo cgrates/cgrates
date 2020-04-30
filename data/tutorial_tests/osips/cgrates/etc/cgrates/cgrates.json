@@ -52,7 +52,7 @@
 	"rals_conns": ["*internal"],
 	"cdrs_conns": ["*internal"],
 	"resources_conns": ["*internal"],
-	"suppliers_conns": ["*internal"],
+	"routes_conns": ["*internal"],
 	"attributes_conns": ["*internal"],
 	"stats_conns": ["*internal"],
 	"thresholds_conns": ["*internal"],
@@ -89,7 +89,7 @@
 },
 
 
-"suppliers": {
+"routes": {
 	"enabled": true,
 	"resources_conns": ["*internal"],
 	"stats_conns": ["*internal"],

@@ -44,8 +44,8 @@ func TestSupplierSReload(t *testing.T) {
 	filterSChan <- nil
 	engineShutdown := make(chan bool, 1)
 	chS := engine.NewCacheS(cfg, nil)
-	close(chS.GetPrecacheChannel(utils.CacheSupplierProfiles))
-	close(chS.GetPrecacheChannel(utils.CacheSupplierFilterIndexes))
+	close(chS.GetPrecacheChannel(utils.CacheRouteProfiles))
+	close(chS.GetPrecacheChannel(utils.CacheRouteFilterIndexes))
 	close(chS.GetPrecacheChannel(utils.CacheStatQueueProfiles))
 	close(chS.GetPrecacheChannel(utils.CacheStatQueues))
 	close(chS.GetPrecacheChannel(utils.CacheStatFilterIndexes))

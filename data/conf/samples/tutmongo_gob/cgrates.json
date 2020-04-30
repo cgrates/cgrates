@@ -100,7 +100,7 @@
 },
 
 
-"suppliers": {
+"routes": {
 	"enabled": true,
 	"stats_conns": ["conn1"],
 	"resources_conns": ["conn1"],

@@ -97,7 +97,7 @@
 },
 
 
-"suppliers": {
+"route": {
 	"enabled": true,
 	"stats_conns": ["*internal"],
 },

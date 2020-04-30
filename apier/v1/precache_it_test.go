@@ -270,11 +270,15 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 			Items:  1,
 			Groups: 0,
 		},
-		utils.CacheSupplierFilterIndexes: {
+		utils.CacheSTIR: {
+			Items:  0,
+			Groups: 0,
+		},
+		utils.CacheRouteFilterIndexes: {
 			Items:  6,
 			Groups: 0,
 		},
-		utils.CacheSupplierProfiles: {
+		utils.CacheRouteProfiles: {
 			Items:  3,
 			Groups: 0,
 		},

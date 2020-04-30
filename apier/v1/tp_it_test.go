@@ -124,7 +124,7 @@ func testTPExportTPToFolder(t *testing.T) {
 		ExportPath: "/tmp/",
 		ExportedFiles: []string{utils.RatingProfilesCsv, utils.RatingPlansCsv, utils.ActionsCsv, utils.AccountActionsCsv,
 			utils.ChargersCsv, utils.TimingsCsv, utils.ActionPlansCsv, utils.ResourcesCsv, utils.StatsCsv, utils.ThresholdsCsv,
-			utils.DestinationsCsv, utils.RatesCsv, utils.DestinationRatesCsv, utils.FiltersCsv, utils.SuppliersCsv, utils.AttributesCsv},
+			utils.DestinationsCsv, utils.RatesCsv, utils.DestinationRatesCsv, utils.FiltersCsv, utils.RoutesCsv, utils.AttributesCsv},
 	}
 	sort.Strings(expectedTPStas.ExportedFiles)
 	tpid := "TEST_TPID2"

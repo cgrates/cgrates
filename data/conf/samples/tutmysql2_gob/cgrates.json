@@ -55,7 +55,7 @@
 "sessions": {
 	"enabled": true,
 	"resources_conns": ["conn1"],
-	"suppliers_conns": ["conn1"],
+	"routes_conns": ["conn1"],
 	"attributes_conns": ["conn1"],
 	"rals_conns": ["*internal"],
 	"cdrs_conns": ["*internal"],
@@ -96,7 +96,7 @@
 },
 
 
-"suppliers": {
+"routes": {
 	"enabled": true,
 	"string_indexed_fields": ["LCRProfile"],
 	"prefix_indexed_fields":["Destination"],

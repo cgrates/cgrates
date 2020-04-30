@@ -41,7 +41,7 @@ var (
 		testInternalReplicateITDestination,
 		testInternalReplicateITAttributeProfile,
 		testInternalReplicateITRatingProfile,
-		testInternalReplicateITSupplierProfile,
+		testInternalReplicateITRouteProfile,
 		testInternalReplicateITStatQueueProfile,
 		testInternalReplicateITDispatcherProfile,
 		testInternalReplicateITChargerProfile,
@@ -341,35 +341,35 @@ func testInternalReplicateITRatingProfile(t *testing.T) {
 	}
 }
 
-func testInternalReplicateITSupplierProfile(t *testing.T) {
+func testInternalReplicateITRouteProfile(t *testing.T) {
 	// check
-	var reply *engine.SupplierProfile
-	if err := engineOneRPC.Call(utils.APIerSv1GetSupplierProfile,
+	var reply *engine.RouteProfile
+	if err := engineOneRPC.Call(utils.APIerSv1GetRouteProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	if err := engineTwoRPC.Call(utils.APIerSv1GetSupplierProfile,
+	if err := engineTwoRPC.Call(utils.APIerSv1GetRouteProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	splPrf = &SupplierWithCache{
-		SupplierProfile: &engine.SupplierProfile{
+	rPrf := &RouteWithCache{
+		RouteProfile: &engine.RouteProfile{
 			Tenant:            "cgrates.org",
 			ID:                "TEST_PROFILE1",
 			Sorting:           "Sort1",
 			SortingParameters: []string{"Param1", "Param2"},
-			Suppliers: []*engine.Supplier{
+			Routes: []*engine.Route{
 				{
-					ID:                 "SPL1",
-					RatingPlanIDs:      []string{"RP1"},
-					AccountIDs:         []string{"Acc"},
-					ResourceIDs:        []string{"Res1", "ResGroup2"},
-					StatIDs:            []string{"Stat1"},
-					Weight:             20,
-					Blocker:            false,
-					SupplierParameters: "SortingParameter1",
+					ID:              "SPL1",
+					RatingPlanIDs:   []string{"RP1"},
+					AccountIDs:      []string{"Acc"},
+					ResourceIDs:     []string{"Res1", "ResGroup2"},
+					StatIDs:         []string{"Stat1"},
+					Weight:          20,
+					Blocker:         false,
+					RouteParameters: "SortingParameter1",
 				},
 			},
 			Weight: 10,
@@ -377,39 +377,39 @@ func testInternalReplicateITSupplierProfile(t *testing.T) {
 	}
 	// set
 	var result string
-	if err := internalRPC.Call(utils.APIerSv1SetSupplierProfile, splPrf, &result); err != nil {
+	if err := internalRPC.Call(utils.APIerSv1SetRouteProfile, rPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 	// check
-	if err := engineOneRPC.Call(utils.APIerSv1GetSupplierProfile,
+	if err := engineOneRPC.Call(utils.APIerSv1GetRouteProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(splPrf.SupplierProfile, reply) {
-		t.Errorf("Expecting: %+v, received: %+v", splPrf.SupplierProfile, reply)
+	} else if !reflect.DeepEqual(rPrf.RouteProfile, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", rPrf.RouteProfile, reply)
 	}
-	if err := engineTwoRPC.Call(utils.APIerSv1GetSupplierProfile,
+	if err := engineTwoRPC.Call(utils.APIerSv1GetRouteProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(splPrf.SupplierProfile, reply) {
-		t.Errorf("Expecting: %+v, received: %+v", splPrf.SupplierProfile, reply)
+	} else if !reflect.DeepEqual(rPrf.RouteProfile, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", rPrf.RouteProfile, reply)
 	}
 	// remove
 	var resp string
-	if err := internalRPC.Call(utils.APIerSv1RemoveSupplierProfile,
+	if err := internalRPC.Call(utils.APIerSv1RemoveRouteProfile,
 		&utils.TenantIDWithCache{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
 	}
 	// check
-	if err := engineOneRPC.Call(utils.APIerSv1GetSupplierProfile,
+	if err := engineOneRPC.Call(utils.APIerSv1GetRouteProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	if err := engineTwoRPC.Call(utils.APIerSv1GetSupplierProfile,
+	if err := engineTwoRPC.Call(utils.APIerSv1GetRouteProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -1448,8 +1448,8 @@ func testInternalReplicateITLoadIds(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", rcv1e1[utils.CacheReverseDestinations], rcv2e1[utils.CacheReverseDestinations])
 	} else if rcv1e1[utils.CacheStatQueueProfiles] != rcv2e1[utils.CacheStatQueueProfiles] {
 		t.Errorf("Expecting: %+v, received: %+v", rcv1e1[utils.CacheStatQueueProfiles], rcv2e1[utils.CacheStatQueueProfiles])
-	} else if rcv1e1[utils.CacheSupplierProfiles] != rcv2e1[utils.CacheSupplierProfiles] {
-		t.Errorf("Expecting: %+v, received: %+v", rcv1e1[utils.CacheSupplierProfiles], rcv2e1[utils.CacheSupplierProfiles])
+	} else if rcv1e1[utils.CacheRouteProfiles] != rcv2e1[utils.CacheRouteProfiles] {
+		t.Errorf("Expecting: %+v, received: %+v", rcv1e1[utils.CacheRouteProfiles], rcv2e1[utils.CacheRouteProfiles])
 	} else if rcv1e1[utils.CacheThresholdProfiles] != rcv2e1[utils.CacheThresholdProfiles] {
 		t.Errorf("Expecting: %+v, received: %+v", rcv1e1[utils.CacheThresholdProfiles], rcv2e1[utils.CacheThresholdProfiles])
 	} else if rcv1e1[utils.CacheThresholds] != rcv2e1[utils.CacheThresholds] {

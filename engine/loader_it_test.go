@@ -176,8 +176,8 @@ func testLoaderITRemoveLoad(t *testing.T) {
 	if err = loader.LoadThresholds(); err != nil {
 		t.Error("Failed loading thresholds: ", err.Error())
 	}
-	if err = loader.LoadSupplierProfiles(); err != nil {
-		t.Error("Failed loading Supplier profiles: ", err.Error())
+	if err = loader.LoadRouteProfiles(); err != nil {
+		t.Error("Failed loading Route profiles: ", err.Error())
 	}
 	if err = loader.LoadAttributeProfiles(); err != nil {
 		t.Error("Failed loading Attribute profiles: ", err.Error())
@@ -253,8 +253,8 @@ func testLoaderITLoadFromCSV(t *testing.T) {
 	if err = loader.LoadThresholds(); err != nil {
 		t.Error("Failed loading thresholds: ", err.Error())
 	}
-	if err = loader.LoadSupplierProfiles(); err != nil {
-		t.Error("Failed loading Supplier profiles: ", err.Error())
+	if err = loader.LoadRouteProfiles(); err != nil {
+		t.Error("Failed loading Route profiles: ", err.Error())
 	}
 	if err = loader.LoadAttributeProfiles(); err != nil {
 		t.Error("Failed loading Attribute profiles: ", err.Error())
@@ -419,12 +419,12 @@ func testLoaderITWriteToDatabase(t *testing.T) {
 		}
 	}
 
-	for tenatid, th := range loader.sppProfiles {
-		rcv, err := loader.dm.GetSupplierProfile(tenatid.Tenant, tenatid.ID, false, false, utils.NonTransactional)
+	for tenatid, th := range loader.routeProfiles {
+		rcv, err := loader.dm.GetRouteProfile(tenatid.Tenant, tenatid.ID, false, false, utils.NonTransactional)
 		if err != nil {
-			t.Errorf("Failed GetSupplierProfile, tenant: %s, id: %s,  error: %s ", th.Tenant, th.ID, err.Error())
+			t.Errorf("Failed GetRouteProfile, tenant: %s, id: %s,  error: %s ", th.Tenant, th.ID, err.Error())
 		}
-		sts, err := APItoSupplierProfile(th, "UTC")
+		sts, err := APItoRouteProfile(th, "UTC")
 		if err != nil {
 			t.Error(err)
 		}

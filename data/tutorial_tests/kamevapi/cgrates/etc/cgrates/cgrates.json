@@ -53,7 +53,7 @@
 	"rals_conns": ["*localhost"],
 	"cdrs_conns": ["*localhost"],
 	"resources_conns": ["*localhost"],
-	"suppliers_conns": ["*localhost"],
+	"routes_conns": ["*localhost"],
 	"attributes_conns": ["*localhost"],
 	"stats_conns": ["*localhost"],
 	"thresholds_conns": ["*localhost"],
@@ -97,7 +97,7 @@
 },
 
 
-"suppliers": {
+"routes": {
 	"enabled": true,
 	"resources_conns": ["*internal"],
 	"stats_conns": ["*internal"],
