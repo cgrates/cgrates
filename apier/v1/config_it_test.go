@@ -128,26 +128,16 @@ func testConfigSReloadConfigFromJSONSessionS(t *testing.T) {
 		t.Errorf("Expected OK received: %s", reply)
 	}
 	exp := map[string]interface{}{
-		"Enabled":        true,
-		"ListenBijson":   "127.0.0.1:2014",
-		"ChargerSConns":  []interface{}{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)},
-		"RALsConns":      []interface{}{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder)},
-		"ResSConns":      []interface{}{utils.MetaLocalHost},
-		"ThreshSConns":   []interface{}{},
-		"StatSConns":     []interface{}{},
-		"RouteSConns":    []interface{}{utils.MetaLocalHost},
-		"AttrSConns":     []interface{}{utils.MetaLocalHost},
-		"CDRsConns":      []interface{}{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
-		"SchedulerConns": []interface{}{},
-
-		"STIRCfg": map[string]interface{}{
-			"AllowedAttest":      map[string]interface{}{},
-			"DefaultAttest":      "A",
-			"PayloadMaxduration": -1.,
-			"PrivateKeyPath":     "",
-			"PublicKeyPath":      "",
-		},
-
+		"Enabled":             true,
+		"ListenBijson":        "127.0.0.1:2014",
+		"ChargerSConns":       []interface{}{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)},
+		"RALsConns":           []interface{}{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder)},
+		"ResSConns":           []interface{}{utils.MetaLocalHost},
+		"ThreshSConns":        []interface{}{},
+		"StatSConns":          []interface{}{},
+		"RouteSConns":         []interface{}{utils.MetaLocalHost},
+		"AttrSConns":          []interface{}{utils.MetaLocalHost},
+		"CDRsConns":           []interface{}{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
 		"ReplicationConns":    []interface{}{},
 		"MaxCallDuration":     float64(3 * time.Hour),
 		"MinDurLowBalance":    0.,

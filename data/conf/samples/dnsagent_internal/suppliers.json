@@ -3,10 +3,10 @@
 "dns_agent": {
 	"request_processors": [
 		{
-			"id": "NAPTRSuppliersQuery",
+			"id": "NAPTRRoutesQuery",
 			"filters": ["*string:~*vars.QueryType:NAPTR", 
 				"*string:~*vars.E164Address:4986517174965"],
-			"flags": ["*message", "*suppliers","*continue"],
+			"flags": ["*message", "*routes","*continue"],
 			"request_fields":[
 				{"tag": "ToR", "path": "*cgreq.Account", "type": "*constant", "value": "1001"}, // so we can match the supplier profile
 			],
@@ -19,7 +19,7 @@
 			"id": "NAPTRSuppliersOneSupplier",
 			"filters": ["*string:~*vars.QueryType:NAPTR", 
 				"*string:~*vars.E164Address:4986517174965", 
-				"*gte:~*cgrep.Suppliers.Count:1"],
+				"*gte:~*cgrep.Routes.Count:1"],
 			"flags": ["*none","*continue"], // do not send request to CGRateS
 			"reply_fields":[
 				{"tag": "NAPTROrder", "path": "*rep.Order",
@@ -31,7 +31,7 @@
 				{"tag": "NAPTRService", "path": "*rep.Service",
 					"type": "*group", "value": "E2U+SIP"},
 				{"tag": "NAPTRRegexp", "path": "*rep.Regexp", "type": "*group",
-					"value": "~*cgrep.Suppliers.SortedSuppliers[0].SupplierParameters"},
+					"value": "~*cgrep.Routes.SortedRoutes[0].RouteParameters"},
 				{"tag": "NAPTRReplacement", "path": "*rep.Replacement",
 					"type": "*group", "value": "."},
 			],
@@ -40,7 +40,7 @@
 			"id": "NAPTRSuppliersTwoSuppliers",
 			"filters": ["*string:~*vars.QueryType:NAPTR", 
 				"*string:~*vars.E164Address:4986517174965", 
-				"*gte:~*cgrep.Suppliers.Count:2"],
+				"*gte:~*cgrep.Routes.Count:2"],
 			"flags": ["*none","*continue"],
 			"reply_fields":[
 				{"tag": "NAPTROrder", "type": "*group", "new_branch": true,
@@ -52,7 +52,7 @@
 				{"tag": "NAPTRService", "path": "*rep.Service",
 					"type": "*group", "value": "E2U+SIP"},
 				{"tag": "NAPTRRegexp", "path": "*rep.Regexp", "type": "*group",
-					"value": "~*cgrep.Suppliers.SortedSuppliers[1].SupplierParameters"},
+					"value": "~*cgrep.Routes.SortedRoutes[1].RouteParameters"},
 				{"tag": "NAPTRReplacement", "path": "*rep.Replacement",
 					"type": "*group", "value": "."},
 			],

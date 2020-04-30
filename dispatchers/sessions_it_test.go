@@ -191,7 +191,7 @@ func testDspSessionTestAuthKey(t *testing.T) {
 	args := sessions.V1AuthorizeArgs{
 		GetMaxUsage:        true,
 		AuthorizeResources: true,
-		GetSuppliers:       true,
+		GetRoutes:          true,
 		GetAttributes:      true,
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -224,7 +224,7 @@ func testDspSessionAuthorize(t *testing.T) {
 	argsAuth := &sessions.V1AuthorizeArgs{
 		GetMaxUsage:        true,
 		AuthorizeResources: true,
-		GetSuppliers:       true,
+		GetRoutes:          true,
 		GetAttributes:      true,
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -259,11 +259,11 @@ func testDspSessionAuthorize(t *testing.T) {
 		t.Errorf("Unexpected ResourceAllocation: %s", *rply.ResourceAllocation)
 	}
 	eSplrs := "supplier1,supplier2"
-	tp := strings.Split(*rply.SuppliersDigest, ",")
+	tp := strings.Split(*rply.RoutesDigest, ",")
 	sort.Strings(tp)
-	*rply.SuppliersDigest = strings.Join(tp, ",")
-	if eSplrs != *rply.SuppliersDigest {
-		t.Errorf("expecting: %v, received: %v", eSplrs, *rply.SuppliersDigest)
+	*rply.RoutesDigest = strings.Join(tp, ",")
+	if eSplrs != *rply.RoutesDigest {
+		t.Errorf("expecting: %v, received: %v", eSplrs, *rply.RoutesDigest)
 	}
 	eAttrs := "OfficeGroup:Marketing"
 	if eAttrs != *rply.AttributesDigest {

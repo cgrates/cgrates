@@ -190,10 +190,10 @@ func testDspRplAccount(t *testing.T) {
 }
 
 func testDspRplSupplierProfile(t *testing.T) {
-	// Set SupplierProfile
+	// Set RouteProfile
 	var replyStr string
-	argSetSupplierProfile := &engine.SupplierProfileWithArgDispatcher{
-		SupplierProfile: &engine.SupplierProfile{
+	argSetSupplierProfile := &engine.RouteProfileWithArgDispatcher{
+		RouteProfile: &engine.RouteProfile{
 			Tenant: "cgrates.org",
 			ID:     "ID",
 		},
@@ -201,15 +201,15 @@ func testDspRplSupplierProfile(t *testing.T) {
 			APIKey: utils.StringPointer("repl12345")},
 	}
 
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetSupplierProfile, argSetSupplierProfile, &replyStr); err != nil {
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetRouteProfile, argSetSupplierProfile, &replyStr); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.SetSupplierProfile: ", err)
 	} else if replyStr != utils.OK {
 		t.Error("Unexpected reply returned", replyStr)
 	}
 
-	// Get SupplierProfile
-	var reply *engine.SupplierProfile
-	argSupplierProfile := &utils.TenantIDWithArgDispatcher{
+	// Get RouteProfile
+	var reply *engine.RouteProfile
+	argRouteProfile := &utils.TenantIDWithArgDispatcher{
 		TenantID: &utils.TenantID{
 			Tenant: "cgrates.org",
 			ID:     "ID",
@@ -217,7 +217,7 @@ func testDspRplSupplierProfile(t *testing.T) {
 		ArgDispatcher: &utils.ArgDispatcher{
 			APIKey: utils.StringPointer("repl12345")},
 	}
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetSupplierProfile, argSupplierProfile, &reply); err != nil {
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetRouteProfile, argRouteProfile, &reply); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.GetSupplierProfile: ", err)
 	} else if reply.ID != argSetSupplierProfile.ID {
 		t.Errorf("Expecting: %+v, received: %+v", argSetSupplierProfile.ID, reply.ID)
@@ -228,8 +228,8 @@ func testDspRplSupplierProfile(t *testing.T) {
 	// Stop engine 1
 	allEngine.stopEngine(t)
 
-	// Get SupplierProfile
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetSupplierProfile, argSupplierProfile, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	// Get RouteProfile
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetRouteProfile, argRouteProfile, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
 	}
 
@@ -237,13 +237,13 @@ func testDspRplSupplierProfile(t *testing.T) {
 	allEngine.startEngine(t)
 
 	// Remove SupplierProfile
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1RemoveSupplierProfile, argSupplierProfile, &replyStr); err != nil {
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1RemoveRouteProfile, argRouteProfile, &replyStr); err != nil {
 		t.Error(err)
 	} else if replyStr != utils.OK {
 		t.Error("Unexpected reply returned", replyStr)
 	}
-	// Get SupplierProfile
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetSupplierProfile, argSupplierProfile, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	// Get RouteProfile
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetRouteProfile, argRouteProfile, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
 	}
 }

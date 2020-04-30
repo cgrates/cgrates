@@ -124,7 +124,7 @@ func testVrsDataDB(t *testing.T) {
 		"Actions": 2, "RQF": 4, "ReverseDestinations": 1, "Attributes": 5, "RatingPlan": 1,
 		"RatingProfile": 1, "User": 1, "Accounts": 3, "ActionPlans": 3, "Chargers": 1,
 		"Destinations": 1, "LoadIDs": 1, "SharedGroups": 2, "Stats": 2, "Resource": 1,
-		"Subscribers": 1, "Suppliers": 1, "Thresholds": 3, "Timing": 1}
+		"Subscribers": 1, "Routes": 1, "Thresholds": 3, "Timing": 1}
 	if err := vrsRPC.Call(utils.APIerSv1GetDataDBVersions, "", &result); err != nil {
 		t.Error(err)
 	} else if expectedVrs.Compare(result, vrsStorageType, true) != "" {
@@ -136,7 +136,7 @@ func testVrsStorDB(t *testing.T) {
 	var result engine.Versions
 	expectedVrs := engine.Versions{"TpDestinations": 1, "TpResource": 1, "TpThresholds": 1,
 		"TpActions": 1, "TpDestinationRates": 1, "TpFilters": 1, "TpRates": 1, "CDRs": 2, "TpActionTriggers": 1, "TpRatingPlans": 1,
-		"TpSharedGroups": 1, "TpSuppliers": 1, "SessionSCosts": 3, "TpRatingProfiles": 1, "TpStats": 1, "TpTiming": 1,
+		"TpSharedGroups": 1, "TpRoutes": 1, "SessionSCosts": 3, "TpRatingProfiles": 1, "TpStats": 1, "TpTiming": 1,
 		"CostDetails": 2, "TpAccountActions": 1, "TpActionPlans": 1, "TpChargers": 1, "TpRatingProfile": 1,
 		"TpRatingPlan": 1, "TpResources": 1}
 	if err := vrsRPC.Call(utils.APIerSv1GetStorDBVersions, "", &result); err != nil {
@@ -164,7 +164,7 @@ func testVrsSetDataDBVrs(t *testing.T) {
 		"Actions": 2, "RQF": 4, "ReverseDestinations": 1, "Attributes": 3, "RatingPlan": 1,
 		"RatingProfile": 1, "User": 1, "Accounts": 3, "ActionPlans": 3, "Chargers": 1,
 		"Destinations": 1, "LoadIDs": 1, "SharedGroups": 2, "Stats": 2, "Resource": 1,
-		"Subscribers": 1, "Suppliers": 1, "Thresholds": 3, "Timing": 1}
+		"Subscribers": 1, "Routes": 1, "Thresholds": 3, "Timing": 1}
 	if err := vrsRPC.Call(utils.APIerSv1GetDataDBVersions, "", &result); err != nil {
 		t.Error(err)
 	} else if expectedVrs.Compare(result, vrsStorageType, true) != "" {
@@ -197,7 +197,7 @@ func testVrsSetStorDBVrs(t *testing.T) {
 	var result engine.Versions
 	expectedVrs := engine.Versions{"TpDestinations": 1, "TpResource": 1, "TpThresholds": 1,
 		"TpActions": 1, "TpDestinationRates": 1, "TpFilters": 1, "TpRates": 1, "CDRs": 2, "TpActionTriggers": 1, "TpRatingPlans": 1,
-		"TpSharedGroups": 1, "TpSuppliers": 1, "SessionSCosts": 3, "TpRatingProfiles": 1, "TpStats": 1, "TpTiming": 1,
+		"TpSharedGroups": 1, "TpRoutes": 1, "SessionSCosts": 3, "TpRatingProfiles": 1, "TpStats": 1, "TpTiming": 1,
 		"CostDetails": 2, "TpAccountActions": 1, "TpActionPlans": 1, "TpChargers": 1, "TpRatingProfile": 1,
 		"TpRatingPlan": 1, "TpResources": 2}
 	if err := vrsRPC.Call(utils.APIerSv1GetStorDBVersions, "", &result); err != nil {

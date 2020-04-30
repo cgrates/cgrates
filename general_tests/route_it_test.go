@@ -37,7 +37,7 @@ var (
 	splSv1CfgPath string
 	splSv1Cfg     *config.CGRConfig
 	splSv1Rpc     *rpc.Client
-	splPrf        *v1.SupplierWithCache
+	splPrf        *v1.RouteWithCache
 	splSv1ConfDIR string //run tests for specific configuration
 
 	sTestsSupplierSV1 = []func(t *testing.T){
@@ -127,18 +127,18 @@ func testV1SplSFromFolder(t *testing.T) {
 }
 
 func testV1SplSSetSupplierProfilesWithoutRatingPlanIDs(t *testing.T) {
-	var reply *engine.SupplierProfile
-	if err := splSv1Rpc.Call(utils.APIerSv1GetSupplierProfile,
+	var reply *engine.RouteProfile
+	if err := splSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE2"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	splPrf = &v1.SupplierWithCache{
-		SupplierProfile: &engine.SupplierProfile{
+	splPrf = &v1.RouteWithCache{
+		RouteProfile: &engine.RouteProfile{
 			Tenant:  "cgrates.org",
 			ID:      "TEST_PROFILE2",
 			Sorting: utils.MetaLC,
-			Suppliers: []*engine.Supplier{
+			Routes: []*engine.Route{
 				{
 					ID:         "SPL1",
 					AccountIDs: []string{"accc"},
@@ -150,18 +150,18 @@ func testV1SplSSetSupplierProfilesWithoutRatingPlanIDs(t *testing.T) {
 		},
 	}
 	var result string
-	if err := splSv1Rpc.Call(utils.APIerSv1SetSupplierProfile, splPrf, &result); err != nil {
+	if err := splSv1Rpc.Call(utils.APIerSv1SetRouteProfile, splPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := splSv1Rpc.Call(utils.APIerSv1GetSupplierProfile,
+	if err := splSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE2"}, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(splPrf.SupplierProfile, reply) {
-		t.Errorf("Expecting: %+v, received: %+v", splPrf.SupplierProfile, reply)
+	} else if !reflect.DeepEqual(splPrf.RouteProfile, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", splPrf.RouteProfile, reply)
 	}
-	ev := &engine.ArgsGetSuppliers{
+	ev := &engine.ArgsGetRoutes{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testV1SplSGetLeastCostSuppliers",
@@ -174,12 +174,12 @@ func testV1SplSSetSupplierProfilesWithoutRatingPlanIDs(t *testing.T) {
 			},
 		},
 	}
-	var suplsReply engine.SortedSuppliers
-	if err := splSv1Rpc.Call(utils.SupplierSv1GetSuppliers,
+	var suplsReply engine.SortedRoutes
+	if err := splSv1Rpc.Call(utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err.Error() != utils.NewErrServerError(utils.NewErrMandatoryIeMissing("RatingPlanIDs")).Error() {
 		t.Errorf("Expected error MANDATORY_IE_MISSING: [RatingPlanIDs] recieved:%v\n", err)
 	}
-	if err := splSv1Rpc.Call(utils.APIerSv1RemoveSupplierProfile, utils.TenantID{
+	if err := splSv1Rpc.Call(utils.APIerSv1RemoveRouteProfile, utils.TenantID{
 		Tenant: splPrf.Tenant,
 		ID:     splPrf.ID,
 	}, &result); err != nil {
@@ -190,20 +190,20 @@ func testV1SplSSetSupplierProfilesWithoutRatingPlanIDs(t *testing.T) {
 }
 
 func testV1SplSAddNewSplPrf(t *testing.T) {
-	var reply *engine.SupplierProfile
-	if err := splSv1Rpc.Call(utils.APIerSv1GetSupplierProfile,
+	var reply *engine.RouteProfile
+	if err := splSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "SPL_ResourceTest"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 	//create a new Supplier Profile to test *reas and *reds sorting strategy
-	splPrf = &v1.SupplierWithCache{
-		SupplierProfile: &engine.SupplierProfile{
+	splPrf = &v1.RouteWithCache{
+		RouteProfile: &engine.RouteProfile{
 			Tenant:    "cgrates.org",
 			ID:        "SPL_ResourceTest",
 			Sorting:   utils.MetaReas,
 			FilterIDs: []string{"*string:~*req.CustomField:ResourceTest"},
-			Suppliers: []*engine.Supplier{
+			Routes: []*engine.Route{
 				//supplier1 will have ResourceUsage = 11
 				{
 					ID:          "supplier1",
@@ -229,16 +229,16 @@ func testV1SplSAddNewSplPrf(t *testing.T) {
 		},
 	}
 	var result string
-	if err := splSv1Rpc.Call(utils.APIerSv1SetSupplierProfile, splPrf, &result); err != nil {
+	if err := splSv1Rpc.Call(utils.APIerSv1SetRouteProfile, splPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := splSv1Rpc.Call(utils.APIerSv1GetSupplierProfile,
+	if err := splSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "SPL_ResourceTest"}, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(splPrf.SupplierProfile, reply) {
-		t.Errorf("Expecting: %+v, received: %+v", splPrf.SupplierProfile, reply)
+	} else if !reflect.DeepEqual(splPrf.RouteProfile, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", splPrf.RouteProfile, reply)
 	}
 }
 
@@ -432,24 +432,24 @@ func testV1SplSPopulateResUsage(t *testing.T) {
 }
 
 func testV1SplSGetSortedSuppliers(t *testing.T) {
-	ev := &engine.ArgsGetSuppliers{
+	ev := &engine.ArgsGetRoutes{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
-			ID:     "testV1SplSGetSortedSuppliers",
+			ID:     "testV1SplSGetSortedRoutes",
 			Event: map[string]interface{}{
 				"CustomField": "ResourceTest",
 			},
 		},
 	}
 	expSupplierIDs := []string{"supplier3", "supplier2", "supplier1"}
-	var suplsReply engine.SortedSuppliers
-	if err := splSv1Rpc.Call(utils.SupplierSv1GetSuppliers,
+	var suplsReply engine.SortedRoutes
+	if err := splSv1Rpc.Call(utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err != nil {
 		t.Error(err)
 	} else {
-		rcvSupl := make([]string, len(suplsReply.SortedSuppliers))
-		for i, supl := range suplsReply.SortedSuppliers {
-			rcvSupl[i] = supl.SupplierID
+		rcvSupl := make([]string, len(suplsReply.SortedRoutes))
+		for i, supl := range suplsReply.SortedRoutes {
+			rcvSupl[i] = supl.RouteID
 		}
 		if suplsReply.ProfileID != "SPL_ResourceTest" {
 			t.Errorf("Expecting: SPL_ResourceTest, received: %s",
@@ -463,20 +463,20 @@ func testV1SplSGetSortedSuppliers(t *testing.T) {
 }
 
 func testV1SplSAddNewSplPrf2(t *testing.T) {
-	var reply *engine.SupplierProfile
-	if err := splSv1Rpc.Call(utils.APIerSv1GetSupplierProfile,
+	var reply *engine.RouteProfile
+	if err := splSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "SPL_ResourceDescendent"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 	//create a new Supplier Profile to test *reas and *reds sorting strategy
-	splPrf = &v1.SupplierWithCache{
-		SupplierProfile: &engine.SupplierProfile{
+	splPrf = &v1.RouteWithCache{
+		RouteProfile: &engine.RouteProfile{
 			Tenant:    "cgrates.org",
 			ID:        "SPL_ResourceDescendent",
 			Sorting:   utils.MetaReds,
 			FilterIDs: []string{"*string:~*req.CustomField:ResourceDescendent"},
-			Suppliers: []*engine.Supplier{
+			Routes: []*engine.Route{
 				//supplier1 will have ResourceUsage = 11
 				{
 					ID:          "supplier1",
@@ -502,21 +502,21 @@ func testV1SplSAddNewSplPrf2(t *testing.T) {
 		},
 	}
 	var result string
-	if err := splSv1Rpc.Call(utils.APIerSv1SetSupplierProfile, splPrf, &result); err != nil {
+	if err := splSv1Rpc.Call(utils.APIerSv1SetRouteProfile, splPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := splSv1Rpc.Call(utils.APIerSv1GetSupplierProfile,
+	if err := splSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "SPL_ResourceDescendent"}, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(splPrf.SupplierProfile, reply) {
-		t.Errorf("Expecting: %+v, received: %+v", splPrf.SupplierProfile, reply)
+	} else if !reflect.DeepEqual(splPrf.RouteProfile, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", splPrf.RouteProfile, reply)
 	}
 }
 
 func testV1SplSGetSortedSuppliers2(t *testing.T) {
-	ev := &engine.ArgsGetSuppliers{
+	ev := &engine.ArgsGetRoutes{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testV1SplSGetSortedSuppliers2",
@@ -526,14 +526,14 @@ func testV1SplSGetSortedSuppliers2(t *testing.T) {
 		},
 	}
 	expSupplierIDs := []string{"supplier1", "supplier3", "supplier2"}
-	var suplsReply engine.SortedSuppliers
-	if err := splSv1Rpc.Call(utils.SupplierSv1GetSuppliers,
+	var suplsReply engine.SortedRoutes
+	if err := splSv1Rpc.Call(utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err != nil {
 		t.Error(err)
 	} else {
-		rcvSupl := make([]string, len(suplsReply.SortedSuppliers))
-		for i, supl := range suplsReply.SortedSuppliers {
-			rcvSupl[i] = supl.SupplierID
+		rcvSupl := make([]string, len(suplsReply.SortedRoutes))
+		for i, supl := range suplsReply.SortedRoutes {
+			rcvSupl[i] = supl.RouteID
 		}
 		if suplsReply.ProfileID != "SPL_ResourceDescendent" {
 			t.Errorf("Expecting: SPL_ResourceDescendent, received: %s",
@@ -703,7 +703,7 @@ func testV1SplSPopulateStats(t *testing.T) {
 }
 
 func testV1SplSGetSoredSuppliersWithLoad(t *testing.T) {
-	ev := &engine.ArgsGetSuppliers{
+	ev := &engine.ArgsGetRoutes{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testV1SplSGetSoredSuppliersWithLoad",
@@ -712,26 +712,26 @@ func testV1SplSGetSoredSuppliersWithLoad(t *testing.T) {
 			},
 		},
 	}
-	expSuppliers := []*engine.SortedSupplier{
-		&engine.SortedSupplier{
-			SupplierID:         "supplier2",
-			SupplierParameters: "",
+	expSuppliers := []*engine.SortedRoute{
+		&engine.SortedRoute{
+			RouteID:         "supplier2",
+			RouteParameters: "",
 			SortingData: map[string]interface{}{
 				"Load":   2.0,
 				"Ratio":  7.0,
 				"Weight": 20.0},
 		},
-		&engine.SortedSupplier{
-			SupplierID:         "supplier3",
-			SupplierParameters: "",
+		&engine.SortedRoute{
+			RouteID:         "supplier3",
+			RouteParameters: "",
 			SortingData: map[string]interface{}{
 				"Load":   3.0,
 				"Ratio":  5.0,
 				"Weight": 35.0},
 		},
-		&engine.SortedSupplier{
-			SupplierID:         "supplier1",
-			SupplierParameters: "",
+		&engine.SortedRoute{
+			RouteID:         "supplier1",
+			RouteParameters: "",
 			SortingData: map[string]interface{}{
 				"Load":   2.0,
 				"Ratio":  2.0,
@@ -739,8 +739,8 @@ func testV1SplSGetSoredSuppliersWithLoad(t *testing.T) {
 		},
 	}
 
-	var suplsReply engine.SortedSuppliers
-	if err := splSv1Rpc.Call(utils.SupplierSv1GetSuppliers,
+	var suplsReply engine.SortedRoutes
+	if err := splSv1Rpc.Call(utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err != nil {
 		t.Error(err)
 	} else {
@@ -748,9 +748,9 @@ func testV1SplSGetSoredSuppliersWithLoad(t *testing.T) {
 			t.Errorf("Expecting: SPL_LOAD_DIST, received: %s",
 				suplsReply.ProfileID)
 		}
-		if !reflect.DeepEqual(suplsReply.SortedSuppliers, expSuppliers) {
+		if !reflect.DeepEqual(suplsReply.SortedRoutes, expSuppliers) {
 			t.Errorf("Expecting: %+v, \n received: %+v",
-				utils.ToJSON(expSuppliers), utils.ToJSON(suplsReply.SortedSuppliers))
+				utils.ToJSON(expSuppliers), utils.ToJSON(suplsReply.SortedRoutes))
 		}
 	}
 }

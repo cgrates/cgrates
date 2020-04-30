@@ -1699,18 +1699,18 @@ func NewV1AuthorizeArgs(attrs bool, attributeIDs []string,
 	thrslds bool, thresholdIDs []string, statQueues bool, statIDs []string,
 	res, maxUsage, routes, routesIgnoreErrs, routesEventCost bool,
 	cgrEv *utils.CGREvent, argDisp *utils.ArgDispatcher,
-	supplierPaginator utils.Paginator, forceDuration bool, opts map[string]interface{}) (args *V1AuthorizeArgs) {
+	routePaginator utils.Paginator, forceDuration bool, opts map[string]interface{}) (args *V1AuthorizeArgs) {
 	args = &V1AuthorizeArgs{
-		GetAttributes:         attrs,
-		AuthorizeResources:    res,
-		GetMaxUsage:           maxUsage,
-		ProcessThresholds:     thrslds,
-		ProcessStats:          statQueues,
+		GetAttributes:      attrs,
+		AuthorizeResources: res,
+		GetMaxUsage:        maxUsage,
+		ProcessThresholds:  thrslds,
+		ProcessStats:       statQueues,
 		RoutesIgnoreErrors: routesIgnoreErrs,
 		GetRoutes:          routes,
-		CGREvent:              cgrEv,
-		ForceDuration:         forceDuration,
-		Opts:                  opts,
+		CGREvent:           cgrEv,
+		ForceDuration:      forceDuration,
+		Opts:               opts,
 	}
 	if routesEventCost {
 		args.RoutesMaxCost = utils.MetaRoutesEventCost
@@ -1732,19 +1732,19 @@ func NewV1AuthorizeArgs(attrs bool, attributeIDs []string,
 
 // V1AuthorizeArgs are options available in auth request
 type V1AuthorizeArgs struct {
-	GetAttributes         bool
-	AuthorizeResources    bool
-	GetMaxUsage           bool
-	ForceDuration         bool
-	ProcessThresholds     bool
-	ProcessStats          bool
+	GetAttributes      bool
+	AuthorizeResources bool
+	GetMaxUsage        bool
+	ForceDuration      bool
+	ProcessThresholds  bool
+	ProcessStats       bool
 	GetRoutes          bool
 	RoutesMaxCost      string
 	RoutesIgnoreErrors bool
-	AttributeIDs          []string
-	ThresholdIDs          []string
-	StatIDs               []string
-	Opts                  map[string]interface{}
+	AttributeIDs       []string
+	ThresholdIDs       []string
+	StatIDs            []string
+	Opts               map[string]interface{}
 	*utils.CGREvent
 	utils.Paginator
 	*utils.ArgDispatcher
@@ -1910,7 +1910,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.ClientConnector,
 	}
 	if args.GetRoutes {
 		routesReply, err := sS.getRoutes(args.CGREvent.Clone(), args.ArgDispatcher,
-			args.Paginator, args.RoutesIgnoreErrors, args.RoutesMaxCost)
+			args.Paginator, args.RoutesIgnoreErrors, args.RoutesMaxCost, args.Opts)
 		if err != nil {
 			return err
 		}
@@ -2685,17 +2685,17 @@ func NewV1ProcessMessageArgs(attrs bool, attributeIDs []string,
 	routePaginator utils.Paginator, forceDuration bool,
 	opts map[string]interface{}) (args *V1ProcessMessageArgs) {
 	args = &V1ProcessMessageArgs{
-		AllocateResources:     resrc,
-		Debit:                 acnts,
-		GetAttributes:         attrs,
-		ProcessThresholds:     thds,
-		ProcessStats:          stats,
+		AllocateResources:  resrc,
+		Debit:              acnts,
+		GetAttributes:      attrs,
+		ProcessThresholds:  thds,
+		ProcessStats:       stats,
 		RoutesIgnoreErrors: routesIgnoreErrs,
 		GetRoutes:          routes,
-		CGREvent:              cgrEv,
-		ArgDispatcher:         argDisp,
-		ForceDuration:         forceDuration,
-		Opts:                  opts,
+		CGREvent:           cgrEv,
+		ArgDispatcher:      argDisp,
+		ForceDuration:      forceDuration,
+		Opts:               opts,
 	}
 	if routesEventCost {
 		args.RoutesMaxCost = utils.MetaRoutesEventCost
@@ -2715,19 +2715,19 @@ func NewV1ProcessMessageArgs(attrs bool, attributeIDs []string,
 
 // V1ProcessMessageArgs are the options passed to ProcessMessage API
 type V1ProcessMessageArgs struct {
-	GetAttributes         bool
-	AllocateResources     bool
-	Debit                 bool
-	ForceDuration         bool
-	ProcessThresholds     bool
-	ProcessStats          bool
+	GetAttributes      bool
+	AllocateResources  bool
+	Debit              bool
+	ForceDuration      bool
+	ProcessThresholds  bool
+	ProcessStats       bool
 	GetRoutes          bool
 	RoutesMaxCost      string
 	RoutesIgnoreErrors bool
-	AttributeIDs          []string
-	ThresholdIDs          []string
-	StatIDs               []string
-	Opts                  map[string]interface{}
+	AttributeIDs       []string
+	ThresholdIDs       []string
+	StatIDs            []string
+	Opts               map[string]interface{}
 	*utils.CGREvent
 	utils.Paginator
 	*utils.ArgDispatcher
@@ -2884,7 +2884,7 @@ func (sS *SessionS) BiRPCv1ProcessMessage(clnt rpcclient.ClientConnector,
 	}
 	if args.GetRoutes {
 		routesReply, err := sS.getRoutes(args.CGREvent.Clone(), args.ArgDispatcher,
-			args.Paginator, args.RoutesIgnoreErrors, args.RoutesMaxCost)
+			args.Paginator, args.RoutesIgnoreErrors, args.RoutesMaxCost, args.Opts)
 		if err != nil {
 			return err
 		}
@@ -3582,9 +3582,9 @@ func (sS *SessionS) processStats(cgrEv *utils.CGREvent, argDisp *utils.ArgDispat
 
 // getRoutes will receive the event and send it to SupplierS to find the suppliers
 func (sS *SessionS) getRoutes(cgrEv *utils.CGREvent, argDisp *utils.ArgDispatcher, pag utils.Paginator,
-	ignoreErrors bool, maxCost string, opts map[string]interface{}) (splsReply engine.SortedSuppliers, err error) {
-	if len(sS.cgrCfg.SessionSCfg().SupplSConns) == 0 {
-		return splsReply, utils.NewErrNotConnected(utils.SupplierS)
+	ignoreErrors bool, maxCost string, opts map[string]interface{}) (routesReply engine.SortedRoutes, err error) {
+	if len(sS.cgrCfg.SessionSCfg().RouteSConns) == 0 {
+		return routesReply, utils.NewErrNotConnected(utils.RouteS)
 	}
 	if acd, has := cgrEv.Event[utils.ACD]; has {
 		cgrEv.Event[utils.Usage] = acd

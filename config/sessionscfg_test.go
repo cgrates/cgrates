@@ -168,7 +168,7 @@ func TestSessionSCfgAsMapInterface(t *testing.T) {
 		"resources_conns":       []string{},
 		"thresholds_conns":      []string{},
 		"stats_conns":           []string{},
-		"suppliers_conns":       []string{},
+		"routes_conns":          []string{},
 		"attributes_conns":      []string{},
 		"replication_conns":     []string{},
 		"debit_interval":        "0",
@@ -213,7 +213,7 @@ func TestSessionSCfgAsMapInterface(t *testing.T) {
 			"resources_conns": ["*internal"],
 			"thresholds_conns": ["*internal"],
 			"stats_conns": ["*internal"],
-			"suppliers_conns": ["*internal"],
+			"routes_conns": ["*internal"],
 			"attributes_conns": ["*internal"],
 			"replication_conns": ["*localhost"],
 			"debit_interval": "0s",
@@ -245,7 +245,7 @@ func TestSessionSCfgAsMapInterface(t *testing.T) {
 		"resources_conns":       []string{"*internal"},
 		"thresholds_conns":      []string{"*internal"},
 		"stats_conns":           []string{"*internal"},
-		"suppliers_conns":       []string{"*internal"},
+		"routes_conns":          []string{"*internal"},
 		"attributes_conns":      []string{"*internal"},
 		"replication_conns":     []string{"*localhost"},
 		"debit_interval":        "0",
@@ -278,7 +278,7 @@ func TestSessionSCfgAsMapInterface(t *testing.T) {
 	} else if err = sescfg.loadFromJsonCfg(jsnSesCfg); err != nil {
 		t.Error(err)
 	} else if rcv := sescfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("\nExpected: %+v\nRecived: %+v", eMap, rcv)
 	}
 }
 

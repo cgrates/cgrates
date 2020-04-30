@@ -57,7 +57,7 @@ var (
 		testExpVerifyThresholds,
 		testExpVerifyResources,
 		testExpVerifyStats,
-		testExpVerifySuppliers,
+		testExpVerifyRoutes,
 		testExpCleanFiles,
 		testExpStopCgrEngine,
 	}
@@ -343,9 +343,9 @@ func testExpVerifyStats(t *testing.T) {
 	}
 }
 
-func testExpVerifySuppliers(t *testing.T) {
-	var reply *engine.SupplierProfile
-	splPrf := &engine.SupplierProfile{
+func testExpVerifyRoutes(t *testing.T) {
+	var reply *engine.RouteProfile
+	splPrf := &engine.RouteProfile{
 		Tenant:    "cgrates.org",
 		ID:        "SPL_ACNT_1002",
 		FilterIDs: []string{"FLTR_ACNT_1002"},
@@ -354,26 +354,26 @@ func testExpVerifySuppliers(t *testing.T) {
 		},
 		Sorting:           utils.MetaLC,
 		SortingParameters: []string{},
-		Suppliers: []*engine.Supplier{
+		Routes: []*engine.Route{
 			{
-				ID:                 "supplier1",
-				RatingPlanIDs:      []string{"RP_1002_LOW"},
-				Weight:             10,
-				Blocker:            false,
-				SupplierParameters: utils.EmptyString,
+				ID:              "supplier1",
+				RatingPlanIDs:   []string{"RP_1002_LOW"},
+				Weight:          10,
+				Blocker:         false,
+				RouteParameters: utils.EmptyString,
 			},
 			{
-				ID:                 "supplier2",
-				RatingPlanIDs:      []string{"RP_1002"},
-				Weight:             20,
-				Blocker:            false,
-				SupplierParameters: utils.EmptyString,
+				ID:              "supplier2",
+				RatingPlanIDs:   []string{"RP_1002"},
+				Weight:          20,
+				Blocker:         false,
+				RouteParameters: utils.EmptyString,
 			},
 		},
 		Weight: 10,
 	}
 
-	splPrf2 := &engine.SupplierProfile{
+	splPrf2 := &engine.RouteProfile{
 		Tenant:    "cgrates.org",
 		ID:        "SPL_ACNT_1002",
 		FilterIDs: []string{"FLTR_ACNT_1002"},
@@ -382,25 +382,25 @@ func testExpVerifySuppliers(t *testing.T) {
 		},
 		Sorting:           utils.MetaLC,
 		SortingParameters: []string{},
-		Suppliers: []*engine.Supplier{
+		Routes: []*engine.Route{
 			{
-				ID:                 "supplier2",
-				RatingPlanIDs:      []string{"RP_1002"},
-				Weight:             20,
-				Blocker:            false,
-				SupplierParameters: utils.EmptyString,
+				ID:              "supplier2",
+				RatingPlanIDs:   []string{"RP_1002"},
+				Weight:          20,
+				Blocker:         false,
+				RouteParameters: utils.EmptyString,
 			},
 			{
-				ID:                 "supplier1",
-				RatingPlanIDs:      []string{"RP_1002_LOW"},
-				Weight:             10,
-				Blocker:            false,
-				SupplierParameters: utils.EmptyString,
+				ID:              "supplier1",
+				RatingPlanIDs:   []string{"RP_1002_LOW"},
+				Weight:          10,
+				Blocker:         false,
+				RouteParameters: utils.EmptyString,
 			},
 		},
 		Weight: 10,
 	}
-	if err := expRpc.Call(utils.APIerSv1GetSupplierProfile,
+	if err := expRpc.Call(utils.APIerSv1GetRouteProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "SPL_ACNT_1002"}, &reply); err != nil {
 		t.Fatal(err)
 	}
