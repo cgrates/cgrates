@@ -43,6 +43,14 @@ func (self *KamConnCfg) loadFromJsonCfg(jsnCfg *KamConnJsonCfg) error {
 	return nil
 }
 
+func (kamCfg *KamConnCfg) AsMapInterface() map[string]interface{} {
+	return map[string]interface{}{
+		utils.AliasCfg:      kamCfg.Alias,
+		utils.AddressCfg:    kamCfg.Address,
+		utils.ReconnectsCfg: kamCfg.Reconnects,
+	}
+}
+
 // SM-Kamailio config section
 type KamAgentCfg struct {
 	Enabled       bool
@@ -81,4 +89,20 @@ func (ka *KamAgentCfg) loadFromJsonCfg(jsnCfg *KamAgentJsonCfg) error {
 		}
 	}
 	return nil
+}
+
+func (ka *KamAgentCfg) AsMapInterface() map[string]interface{} {
+	evapiConns := make([]map[string]interface{}, len(ka.EvapiConns))
+	for i, item := range ka.EvapiConns {
+		evapiConns[i] = item.AsMapInterface()
+	}
+
+	return map[string]interface{}{
+		utils.EnabledCfg:       ka.Enabled,
+		utils.SessionSConnsCfg: ka.SessionSConns,
+		utils.CreateCdrCfg:     ka.CreateCdr,
+		utils.EvapiConnsCfg:    evapiConns,
+		utils.TimezoneCfg:      ka.Timezone,
+	}
+
 }

@@ -1465,3 +1465,65 @@ func (cfg *CGRConfig) reloadSections(sections ...string) (err error) {
 	}
 	return
 }
+
+func (cfg *CGRConfig) AsMapInterface() map[string]interface{} {
+	rpcConns := make(map[string]map[string]interface{}, len(cfg.rpcConns))
+	for key, val := range cfg.rpcConns {
+		rpcConns[key] = val.AsMapInterface()
+	}
+
+	cdreProfiles := make(map[string]map[string]interface{})
+	for key, val := range cfg.CdreProfiles {
+		cdreProfiles[key] = val.AsMapInterface()
+	}
+
+	loaderCfg := make([]map[string]interface{}, len(cfg.loaderCfg))
+	for i, item := range cfg.loaderCfg {
+		loaderCfg[i] = item.AsMapInterface()
+	}
+
+	httpAgentCfg := make([]map[string]interface{}, len(cfg.httpAgentCfg))
+	for i, item := range cfg.httpAgentCfg {
+		httpAgentCfg[i] = item.AsMapInterface()
+	}
+
+	return map[string]interface{}{
+
+		utils.CdreProfiles:     cdreProfiles,
+		utils.LoaderCfg:        loaderCfg,
+		utils.HttpAgentCfg:     httpAgentCfg,
+		utils.RpcConns:         rpcConns,
+		utils.GeneralCfg:       cfg.generalCfg.AsMapInterface(),
+		utils.DataDbCfg:        cfg.dataDbCfg.AsMapInterface(),
+		utils.StorDbCfg:        cfg.storDbCfg.AsMapInterface(),
+		utils.TlsCfg:           cfg.tlsCfg.AsMapInterface(),
+		utils.CacheCfg:         cfg.cacheCfg.AsMapInterface(),
+		utils.ListenCfg:        cfg.listenCfg.AsMapInterface(),
+		utils.HttpCfg:          cfg.httpCfg.AsMapInterface(),
+		utils.FilterSCfg:       cfg.filterSCfg.AsMapInterface(),
+		utils.RalsCfg:          cfg.ralsCfg.AsMapInterface(),
+		utils.SchedulerCfg:     cfg.schedulerCfg.AsMapInterface(),
+		utils.CdrsCfg:          cfg.cdrsCfg.AsMapInterface(),
+		utils.SessionSCfg:      cfg.sessionSCfg.AsMapInterface(),
+		utils.FsAgentCfg:       cfg.fsAgentCfg.AsMapInterface(),
+		utils.KamAgentCfg:      cfg.kamAgentCfg.AsMapInterface(),
+		utils.AsteriskAgentCfg: cfg.asteriskAgentCfg.AsMapInterface(),
+		utils.DiameterAgentCfg: cfg.diameterAgentCfg.AsMapInterface(),
+		utils.RadiusAgentCfg:   cfg.radiusAgentCfg.AsMapInterface(),
+		utils.DnsAgentCfg:      cfg.dnsAgentCfg.AsMapInterface(),
+		utils.AttributeSCfg:    cfg.attributeSCfg.AsMapInterface(),
+		utils.ChargerSCfg:      cfg.chargerSCfg.AsMapInterface(),
+		utils.ResourceSCfg:     cfg.resourceSCfg.AsMapInterface(),
+		utils.StatsCfg:         cfg.statsCfg.AsMapInterface(),
+		utils.ThresholdSCfg:    cfg.thresholdSCfg.AsMapInterface(),
+		utils.SupplierSCfg:     cfg.supplierSCfg.AsMapInterface(),
+		utils.SureTaxCfg:       cfg.sureTaxCfg.AsMapInterface(),
+		utils.DispatcherSCfg:   cfg.dispatcherSCfg.AsMapInterface(),
+		utils.LoaderCgrCfg:     cfg.loaderCgrCfg.AsMapInterface(),
+		utils.MigratorCgrCfg:   cfg.migratorCgrCfg.AsMapInterface(),
+		utils.MailerCfg:        cfg.mailerCfg.AsMapInterface(),
+		utils.AnalyzerSCfg:     cfg.analyzerSCfg.AsMapInterface(),
+		utils.Apier:            cfg.apier.AsMapInterface(),
+		utils.ErsCfg:           cfg.ersCfg.AsMapInterface(),
+	}
+}

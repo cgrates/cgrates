@@ -18,7 +18,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
-import "github.com/cgrates/rpcclient"
+import (
+	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
+)
 
 // Returns the first cached default value for a RemoteHost connection
 func NewDfltRemoteHost() *RemoteHost {
@@ -59,6 +62,19 @@ func (rC *RPCConn) loadFromJsonCfg(jsnCfg *RPCConnsJson) (err error) {
 	return
 }
 
+func (rC *RPCConn) AsMapInterface() map[string]interface{} {
+	conns := make([]map[string]interface{}, len(rC.Conns))
+	for i, item := range rC.Conns {
+		conns[i] = item.AsMapInterface()
+	}
+
+	return map[string]interface{}{
+		utils.Strategy: rC.Strategy,
+		utils.PoolSize: rC.PoolSize,
+		utils.Conns:    conns,
+	}
+}
+
 // One connection to Rater
 type RemoteHost struct {
 	Address     string
@@ -84,4 +100,13 @@ func (self *RemoteHost) loadFromJsonCfg(jsnCfg *RemoteHostJson) error {
 		self.TLS = *jsnCfg.Tls
 	}
 	return nil
+}
+
+func (rh *RemoteHost) AsMapInterface() map[string]interface{} {
+	return map[string]interface{}{
+		utils.Address:     rh.Address,
+		utils.Transport:   rh.Transport,
+		utils.Synchronous: rh.Synchronous,
+		utils.TLS:         rh.TLS,
+	}
 }

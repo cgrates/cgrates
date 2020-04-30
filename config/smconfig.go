@@ -63,6 +63,15 @@ func (self *FsConnCfg) loadFromJsonCfg(jsnCfg *FsConnJsonCfg) error {
 	return nil
 }
 
+func (fs *FsConnCfg) AsMapInterface() map[string]interface{} {
+	return map[string]interface{}{
+		utils.AddressCfg:    fs.Address,
+		utils.Password:      fs.Password,
+		utils.ReconnectsCfg: fs.Reconnects,
+		utils.AliasCfg:      fs.Alias,
+	}
+}
+
 type SessionSCfg struct {
 	Enabled             bool
 	ListenBijson        string
@@ -263,6 +272,37 @@ func (scfg *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) (err error) {
 	return nil
 }
 
+func (scfg *SessionSCfg) AsMapInterface() map[string]interface{} {
+
+	return map[string]interface{}{
+		utils.EnabledCfg:             scfg.Enabled,
+		utils.ListenBijsonCfg:        scfg.ListenBijson,
+		utils.ChargerSConnsCfg:       scfg.ChargerSConns,
+		utils.RALsConnsCfg:           scfg.RALsConns,
+		utils.ResSConnsCfg:           scfg.ResSConns,
+		utils.ThreshSConnsCfg:        scfg.ThreshSConns,
+		utils.StatSConnsCfg:          scfg.StatSConns,
+		utils.SupplSConnsCfg:         scfg.SupplSConns,
+		utils.AttrSConnsCfg:          scfg.AttrSConns,
+		utils.CDRsConnsCfg:           scfg.CDRsConns,
+		utils.ReplicationConnsCfg:    scfg.ReplicationConns,
+		utils.DebitIntervalCfg:       scfg.DebitInterval,
+		utils.StoreSCostsCfg:         scfg.StoreSCosts,
+		utils.MinCallDurationCfg:     scfg.MinCallDuration,
+		utils.MaxCallDurationCfg:     scfg.MaxCallDuration,
+		utils.SessionTTLCfg:          scfg.SessionTTL,
+		utils.SessionTTLMaxDelayCfg:  scfg.SessionTTLMaxDelay,
+		utils.SessionTTLLastUsedCfg:  scfg.SessionTTLLastUsed,
+		utils.SessionTTLUsageCfg:     scfg.SessionTTLUsage,
+		utils.SessionIndexesCfg:      scfg.SessionIndexes.GetSlice(),
+		utils.ClientProtocolCfg:      scfg.ClientProtocol,
+		utils.ChannelSyncIntervalCfg: scfg.ChannelSyncInterval,
+		utils.TerminateAttemptsCfg:   scfg.TerminateAttempts,
+		utils.AlterableFieldsCfg:     scfg.AlterableFields.AsSlice(),
+		utils.MinDurLowBalanceCfg:    scfg.MinDurLowBalance,
+	}
+}
+
 type FsAgentCfg struct {
 	Enabled       bool
 	SessionSConns []string
@@ -329,6 +369,27 @@ func (self *FsAgentCfg) loadFromJsonCfg(jsnCfg *FreeswitchAgentJsonCfg) error {
 	return nil
 }
 
+func (fscfg *FsAgentCfg) AsMapInterface() map[string]interface{} {
+	var eventSocketConns []map[string]interface{}
+	// eventSocketConns := make(map[string]interface{}, len(fscfg.EventSocketConns))
+	for _, item := range fscfg.EventSocketConns {
+		eventSocketConns = append(eventSocketConns, item.AsMapInterface())
+	}
+
+	return map[string]interface{}{
+		utils.EnabledCfg:             fscfg.Enabled,
+		utils.SessionSConnsCfg:       fscfg.SessionSConns,
+		utils.SubscribeParkCfg:       fscfg.SubscribePark,
+		utils.CreateCdrCfg:           fscfg.CreateCdr,
+		utils.ExtraFieldsCfg:         fscfg.ExtraFields,
+		utils.LowBalanceAnnFileCfg:   fscfg.LowBalanceAnnFile,
+		utils.EmptyBalanceContextCfg: fscfg.EmptyBalanceContext,
+		utils.EmptyBalanceAnnFileCfg: fscfg.EmptyBalanceAnnFile,
+		utils.MaxWaitConnectionCfg:   fscfg.MaxWaitConnection,
+		utils.EventSocketConnsCfg:    eventSocketConns,
+	}
+}
+
 // Returns the first cached default value for a FreeSWITCHAgent connection
 func NewDfltKamConnConfig() *KamConnCfg {
 	if dfltKamConnConfig == nil {
@@ -381,6 +442,17 @@ func (aConnCfg *AsteriskConnCfg) loadFromJsonCfg(jsnCfg *AstConnJsonCfg) error {
 	return nil
 }
 
+func (aConnCfg *AsteriskConnCfg) AsMapInterface() map[string]interface{} {
+	return map[string]interface{}{
+		utils.AliasCfg:           aConnCfg.Alias,
+		utils.AddressCfg:         aConnCfg.Address,
+		utils.UserCf:             aConnCfg.User,
+		utils.Password:           aConnCfg.Password,
+		utils.ConnectAttemptsCfg: aConnCfg.ConnectAttempts,
+		utils.ReconnectsCfg:      aConnCfg.Reconnects,
+	}
+}
+
 type AsteriskAgentCfg struct {
 	Enabled       bool
 	SessionSConns []string
@@ -417,4 +489,18 @@ func (aCfg *AsteriskAgentCfg) loadFromJsonCfg(jsnCfg *AsteriskAgentJsonCfg) (err
 		}
 	}
 	return nil
+}
+
+func (aCfg *AsteriskAgentCfg) AsMapInterface() map[string]interface{} {
+	conns := make([]map[string]interface{}, len(aCfg.AsteriskConns))
+	for i, item := range aCfg.AsteriskConns {
+		conns[i] = item.AsMapInterface()
+	}
+
+	return map[string]interface{}{
+		utils.EnabledCfg:       aCfg.Enabled,
+		utils.SessionSConnsCfg: aCfg.SessionSConns,
+		utils.CreateCDRCfg:     aCfg.CreateCDR,
+		utils.AsteriskConnsCfg: conns,
+	}
 }

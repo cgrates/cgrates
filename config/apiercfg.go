@@ -71,3 +71,13 @@ func (aCfg *ApierCfg) loadFromJsonCfg(jsnCfg *ApierJsonCfg) (err error) {
 
 	return nil
 }
+
+func (aCfg *ApierCfg) AsMapInterface() map[string]interface{} {
+	return map[string]interface{}{
+		utils.EnabledCfg:         aCfg.Enabled,
+		utils.CachesConnsCfg:     aCfg.CachesConns,
+		utils.SchedulerConnsCfg:  aCfg.SchedulerConns,
+		utils.AttributeSConnsCfg: aCfg.AttributeSConns,
+	}
+
+}

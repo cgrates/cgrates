@@ -98,3 +98,20 @@ func (spl *SupplierSCfg) loadFromJsonCfg(jsnCfg *SupplierSJsonCfg) (err error) {
 	}
 	return nil
 }
+
+func (spl *SupplierSCfg) AsMapInterface() map[string]interface{} {
+
+	return map[string]interface{}{
+		utils.EnabledCfg:             spl.Enabled,
+		utils.IndexedSelectsCfg:      spl.IndexedSelects,
+		utils.StringIndexedFieldsCfg: spl.StringIndexedFields,
+		utils.PrefixIndexedFieldsCfg: spl.PrefixIndexedFields,
+		utils.AttributeSConnsCfg:     spl.AttributeSConns,
+		utils.ResourceSConnsCfg:      spl.ResourceSConns,
+		utils.StatSConnsCfg:          spl.StatSConns,
+		utils.RALsConnsCfg:           spl.ResponderSConns,
+		utils.DefaultRatioCfg:        spl.DefaultRatio,
+		utils.NestedFieldsCfg:        spl.NestedFields,
+	}
+
+}

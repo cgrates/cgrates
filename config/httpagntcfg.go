@@ -117,3 +117,19 @@ func (ca *HttpAgentCfg) loadFromJsonCfg(jsnCfg *HttpAgentJsonCfg, separator stri
 	}
 	return nil
 }
+
+func (ca *HttpAgentCfg) AsMapInterface() map[string]interface{} {
+	requestProcessors := make([]map[string]interface{}, len(ca.RequestProcessors))
+	for i, item := range ca.RequestProcessors {
+		requestProcessors[i] = item.AsMapInterface()
+	}
+
+	return map[string]interface{}{
+		utils.IDCfg:                ca.ID,
+		utils.UrlCfg:               ca.Url,
+		utils.SessionSConnsCfg:     ca.SessionSConns,
+		utils.RequestPayloadCfg:    ca.RequestPayload,
+		utils.ReplyPayloadCfg:      ca.ReplyPayload,
+		utils.RequestProcessorsCfg: ca.RequestProcessors,
+	}
+}

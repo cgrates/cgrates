@@ -129,6 +129,27 @@ func (dbcfg *DataDbCfg) Clone() *DataDbCfg {
 	}
 }
 
+func (dbcfg *DataDbCfg) AsMapInterface() map[string]interface{} {
+	items := make(map[string]interface{})
+	for key, item := range dbcfg.Items {
+		items[key] = item.AsMapInterface()
+	}
+
+	return map[string]interface{}{
+		utils.DataDbTypeCfg:         dbcfg.DataDbType,
+		utils.DataDbHostCfg:         dbcfg.DataDbHost,
+		utils.DataDbPortCfg:         dbcfg.DataDbPort,
+		utils.DataDbNameCfg:         dbcfg.DataDbName,
+		utils.DataDbUserCfg:         dbcfg.DataDbUser,
+		utils.DataDbPassCfg:         dbcfg.DataDbPass,
+		utils.DataDbSentinelNameCfg: dbcfg.DataDbSentinelName,
+		utils.QueryTimeoutCfg:       dbcfg.QueryTimeout,
+		utils.RmtConnsCfg:           dbcfg.RmtConns,
+		utils.RplConnsCfg:           dbcfg.RplConns,
+		utils.ItemsCfg:              items,
+	}
+}
+
 type ItemOpt struct {
 	Remote    bool
 	Replicate bool
@@ -138,6 +159,16 @@ type ItemOpt struct {
 	// used for ArgDispatcher in case we send this to a dispatcher engine
 	RouteID string
 	APIKey  string
+}
+
+func (itm *ItemOpt) AsMapInterface() map[string]interface{} {
+	return map[string]interface{}{
+		utils.RemoteCfg:    itm.Remote,
+		utils.ReplicateCfg: itm.Replicate,
+		utils.LimitCfg:     itm.Limit,
+		utils.TTLCfg:       itm.TTL,
+		utils.StaticTTLCfg: itm.StaticTTL,
+	}
 }
 
 func (itm *ItemOpt) loadFromJsonCfg(jsonItm *ItemOptJson) (err error) {

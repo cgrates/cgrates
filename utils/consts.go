@@ -1558,6 +1558,408 @@ var (
 	PostgressSSLModeVerifyFull = "verify-full"
 )
 
+// GeneralCfg
+const (
+	NodeIDCfg            = "node_id"
+	LoggerCfg            = "logger"
+	LogLevelCfg          = "log_level"
+	HttpSkipTlsVerifyCfg = "http_skip_tls_verify"
+	RoundingDecimalsCfg  = "rounding_decimals"
+	DBDataEncodingCfg    = "dbdata_encoding"
+	TpExportPathCfg      = "tpexport_dir"
+	PosterAttemptsCfg    = "poster_attempts"
+	FailedPostsDirCfg    = "failed_posts_dir"
+	FailedPostsTTLCfg    = "failed_posts_ttl"
+	DefaultReqTypeCfg    = "default_request_type"
+	DefaultCategoryCfg   = "default_category"
+	DefaultTenantCfg     = "default_tenant"
+	DefaultTimezoneCfg   = "default_timezone"
+	DefaultCachingCfg    = "default_caching"
+	ConnectAttemptsCfg   = "connect_attempts"
+	ReconnectsCfg        = "reconnects"
+	ConnectTimeoutCfg    = "connect_timeout"
+	ReplyTimeoutCfg      = "reply_timeout"
+	LockingTimeoutCfg    = "locking_timeout"
+	DigestSeparatorCfg   = "digest_separator"
+	DigestEqualCfg       = "digest_equal"
+	RSRSepCfg            = "rsr_separator"
+	MaxParralelConnsCfg  = "max_parralel_conns"
+)
+
+// StorDbCfg
+const (
+	TypeCfg                = "db_type"
+	HostCfg                = "db_host"
+	PortCfg                = "db_port"
+	NameCfg                = "db_name"
+	UserCfg                = "db_user"
+	PasswordCfg            = "db_password"
+	MaxOpenConnsCfg        = "max_open_conns"
+	MaxIdleConnsCfg        = "max_idle_conns"
+	ConnMaxLifetimeCfg     = "conn_max_lifetime"
+	StringIndexedFieldsCfg = "string_indexed_fields"
+	PrefixIndexedFieldsCfg = "prefix_indexed_fields"
+	QueryTimeoutCfg        = "query_timeout"
+	SSLModeCfg             = "sslmode"
+	ItemsCfg               = "items"
+)
+
+// DataDbCfg
+const (
+	DataDbTypeCfg         = "db_type"
+	DataDbHostCfg         = "db_host"
+	DataDbPortCfg         = "db_port"
+	DataDbNameCfg         = "db_name"
+	DataDbUserCfg         = "db_user"
+	DataDbPassCfg         = "db_password"
+	DataDbSentinelNameCfg = "redis_sentinel"
+	RmtConnsCfg           = "remote_conns"
+	RplConnsCfg           = "replication_conns"
+)
+
+// ItemOpt
+const (
+	RemoteCfg    = "remote"
+	ReplicateCfg = "replicate"
+	TTLCfg       = "ttl"
+	LimitCfg     = "limit"
+	StaticTTLCfg = "static_ttl"
+)
+
+// Tls
+const (
+	ServerCerificateCfg = "server_certificate"
+	ServerKeyCfg        = "server_key"
+	ServerPolicyCfg     = "server_policy"
+	ServerNameCfg       = "server_name"
+	ClientCerificateCfg = "client_certificate"
+	ClientKeyCfg        = "client_key"
+	CaCertificateCfg    = "ca_certificate"
+)
+
+// ListenCfg
+const (
+	RPCJSONListenCfg    = "rpc_json"
+	RPCGOBListenCfg     = "rpc_gob"
+	HTTPListenCfg       = "http"
+	RPCJSONTLSListenCfg = "rpc_json_tls"
+	RPCGOBTLSListenCfg  = "rpc_gob_tls"
+	HTTPTLSListenCfg    = "http_tls"
+)
+
+// HTTPCfg
+const (
+	HTTPJsonRPCURLCfg        = "json_rpc_url"
+	HTTPWSURLCfg             = "ws_url"
+	HTTPFreeswitchCDRsURLCfg = "freeswitch_cdrs_url"
+	HTTPCDRsURLCfg           = "http_cdrs"
+	HTTPUseBasicAuthCfg      = "use_basic_auth"
+	HTTPAuthUsersCfg         = "auth_users"
+)
+
+// FilterSCfg
+const (
+	StatSConnsCfg     = "stats_conns"
+	ResourceSConnsCfg = "resources_conns"
+	ApierSConnsCfg    = "apiers_conns"
+)
+
+// RalsCfg
+const (
+	EnabledCfg                 = "enabled"
+	ThresholdSConnsCfg         = "thresholds_conns"
+	CacheSConnsCfg             = "caches_conns"
+	RpSubjectPrefixMatchingCfg = "rp_subject_prefix_matching"
+	RemoveExpiredCfg           = "remove_expired"
+	MaxComputedUsageCfg        = "max_computed_usage"
+	BalanceRatingSubjectCfg    = "balance_rating_subject"
+	MaxIncrementsCfg           = "max_increments"
+)
+
+// SchedulerCfg
+const (
+	CDRsConnsCfg = "cdrs_conns"
+	FiltersCfg   = "filters"
+)
+
+// CdrsCfg
+const (
+	ExtraFieldsCfg      = "extra_fields"
+	StoreCdrsCfg        = "store_cdrs"
+	SMCostRetriesCfg    = "session_cost_retries"
+	ChargerSConnsCfg    = "chargers_conns"
+	AttributeSConnsCfg  = "attributes_conns"
+	OnlineCDRExportsCfg = "online_cdr_exports"
+)
+
+// SessionSCfg
+const (
+	ListenBijsonCfg        = "listen_bijson"
+	RALsConnsCfg           = "rals_conns"
+	ResSConnsCfg           = "resources_conns"
+	ThreshSConnsCfg        = "thresholds_conns"
+	SupplSConnsCfg         = "suppliers_conns"
+	AttrSConnsCfg          = "attributes_conns"
+	ReplicationConnsCfg    = "replication_conns"
+	DebitIntervalCfg       = "debit_interval"
+	StoreSCostsCfg         = "store_session_costs"
+	MinCallDurationCfg     = "min_call_duration"
+	MaxCallDurationCfg     = "max_call_duration"
+	SessionTTLCfg          = "session_ttl"
+	SessionTTLMaxDelayCfg  = "session_ttl_max_delay"
+	SessionTTLLastUsedCfg  = "session_ttl_last_used"
+	SessionTTLUsageCfg     = "session_ttl_usage"
+	SessionIndexesCfg      = "session_indexes"
+	ClientProtocolCfg      = "client_protocol"
+	ChannelSyncIntervalCfg = "channel_sync_interval"
+	TerminateAttemptsCfg   = "terminate_attempts"
+	AlterableFieldsCfg     = "alterable_fields"
+	MinDurLowBalanceCfg    = "min_dur_low_balance"
+)
+
+// FsAgentCfg
+const (
+	SessionSConnsCfg       = "sessions_conns"
+	SubscribeParkCfg       = "subscribe_park"
+	CreateCdrCfg           = "create_cdr"
+	LowBalanceAnnFileCfg   = "low_balance_ann_file"
+	EmptyBalanceContextCfg = "empty_balance_context"
+	EmptyBalanceAnnFileCfg = "empty_balance_ann_file"
+	MaxWaitConnectionCfg   = "max_wait_connection"
+	EventSocketConnsCfg    = "event_socket_conns"
+)
+
+// From Config
+const (
+	AddressCfg = "address"
+	Password   = "password"
+	AliasCfg   = "alias"
+
+	// KamAgentCfg
+	EvapiConnsCfg = "evapi_conns"
+	TimezoneCfg   = "timezone"
+
+	// AsteriskConnCfg
+	UserCf = "user"
+
+	// AsteriskAgentCfg
+	CreateCDRCfg     = "create_cdr"
+	AsteriskConnsCfg = "asterisk_conns"
+
+	// DiameterAgentCfg
+	ListenNetCfg         = "listen_net"
+	ListenCfg            = "listen"
+	DictionariesPathCfg  = "dictionaries_path"
+	OriginHostCfg        = "origin_host"
+	OriginRealmCfg       = "origin_realm"
+	VendorIdCfg          = "vendor_id"
+	ProductNameCfg       = "product_name"
+	ConcurrentReqsCfg    = "concurrent_requests"
+	SyncedConnReqsCfg    = "synced_conn_requests"
+	ASRTemplateCfg       = "asr_template"
+	RARTemplateCfg       = "rar_template"
+	ForcedDisconnectCfg  = "forced_disconnect"
+	TemplatesCfg         = "templates"
+	RequestProcessorsCfg = "request_processors"
+
+	// RequestProcessor
+	RequestFieldsCfg = "Request_fields"
+	ReplyFieldsCfg   = "Reply_fields"
+
+	// RadiusAgentCfg
+	ListenAuthCfg         = "listen_auth"
+	ListenAcctCfg         = "listen_acct"
+	ClientSecretsCfg      = "client_secrets"
+	ClientDictionariesCfg = "client_dictionaries"
+
+	// AttributeSCfg
+	IndexedSelectsCfg = "indexed_selects"
+	ProcessRunsCfg    = "process_runs"
+	NestedFieldsCfg   = "nested_fields"
+
+	// ChargerSCfg
+	StoreIntervalCfg = "store_interval"
+
+	// StatSCfg
+	StoreUncompressedLimitCfg = "store_uncompressed_limit"
+
+	// Cache
+	PartitionsCfg = "partitions"
+	StaticTTL     = "StaticTTL"
+	Precache      = "Precache"
+
+	// CdreCfg
+	ExportFormatCfg      = "export_format"
+	ExportPathCfg        = "export_path"
+	AttributeSContextCfg = "attributes_context"
+	SynchronousCfg       = "synchronous"
+	AttemptsCfg          = "attempts"
+
+	//LoaderSCfg
+	IdCfg           = "id"
+	DryRunCfg       = "dry_run"
+	LockFileNameCfg = "lock_filename"
+	TpInDirCfg      = "tp_in_dir"
+	TpOutDirCfg     = "tp_out_dir"
+	DataCfg         = "data"
+
+	DefaultRatioCfg   = "default_ratio"
+	ReadersCfg        = "readers"
+	PoolSize          = "PoolSize"
+	Conns             = "Conns"
+	FilenameCfg       = "file_name"
+	RequestPayloadCfg = "Request_payload"
+	ReplyPayloadCfg   = "Reply_payload"
+)
+
+// FC Template
+const (
+	TagCfg             = "tag"
+	TypeCf             = "type"
+	PathCfg            = "path"
+	ValueCfg           = "value"
+	WidthCfg           = "width"
+	StripCfg           = "strip"
+	PaddingCfg         = "padding"
+	MandatoryCfg       = "mandatory"
+	AttributeIDCfg     = "attribute_id"
+	NewBranchCfg       = "new_branch"
+	BlockerCfg         = "blocker"
+	BreakOnSuccessCfg  = "break_on_success"
+	Handler_id         = "handler_id"
+	LayoutCfg          = "layout"
+	CostShiftDigitsCfg = "cost_shift_digits"
+	MaskDestIDCfg      = "mask_destinationd_id"
+	MaskLenCfg         = "mask_length"
+)
+
+// SureTax
+const (
+	UrlCfg                  = "url"
+	ClientNumberCfg         = "client_number"
+	ValidationKeyCfg        = "validation_key"
+	BusinessUnitCfg         = "business_unit"
+	IncludeLocalCostCfg     = "include_local_cost"
+	ReturnFileCodeCfg       = "return_file_code"
+	ResponseGroupCfg        = "response_group"
+	ResponseTypeCfg         = "response_type"
+	RegulatoryCodeCfg       = "regulatory_code"
+	ClientTrackingCfg       = "client_tracking"
+	CustomerNumberCfg       = "customer_number"
+	OrigNumberCfg           = "orig_number"
+	TermNumberCfg           = "term_number"
+	BillToNumberCfg         = "bill_to_number"
+	ZipcodeCfg              = "zipcode"
+	Plus4Cfg                = "plus4"
+	P2PZipcodeCfg           = "p2PZipcode"
+	P2PPlus4Cfg             = "p2PPlus4"
+	UnitsCfg                = "units"
+	UnitTypeCfg             = "unit_type"
+	TaxIncludedCfg          = "tax_included"
+	TaxSitusRuleCfg         = "tax_situs_rule"
+	TransTypeCodeCfg        = "trans_type_code"
+	SalesTypeCodeCfg        = "sales_type_code"
+	TaxExemptionCodeListCfg = "tax_exemption_code_list"
+)
+
+// LoaderCgrCfg
+const (
+	TpIDCfg            = "tpid"
+	DataPathCfg        = "data_path"
+	DisableReverseCfg  = "disable_reverse"
+	FieldSeparatorCfg  = "field_separator"
+	CachesConnsCfg     = "caches_conns"
+	SchedulerConnsCfg  = "scheduler_conns"
+	GapiCredentialsCfg = "gapi_credentials"
+	GapiTokenCfg       = "gapi_token"
+)
+
+// MigratorCgrCfg
+const (
+	OutDataDBTypeCfg          = "Out_dataDB_type"
+	OutDataDBHostCfg          = "Out_dataDB_host"
+	OutDataDBPortCfg          = "Out_dataDB_port"
+	OutDataDBNameCfg          = "Out_dataDB_name"
+	OutDataDBUserCfg          = "Out_dataDB_user"
+	OutDataDBPasswordCfg      = "Out_dataDB_password"
+	OutDataDBEncodingCfg      = "Out_dataDB_encoding"
+	OutDataDBRedisSentinelCfg = "Out_dataDB_redis_sentinel"
+	OutStorDBTypeCfg          = "Out_storDB_type"
+	OutStorDBHostCfg          = "Out_storDB_host"
+	OutStorDBPortCfg          = "Out_storDB_port"
+	OutStorDBNameCfg          = "Out_storDB_name"
+	OutStorDBUserCfg          = "Out_storDB_user"
+	OutStorDBPasswordCfg      = "Out_storDB_password"
+	UsersFiltersCfg           = "Users_filters"
+)
+
+// MailerCfg
+const (
+	MailerServerCfg   = "Server"
+	MailerAuthUserCfg = "Auth_user"
+	MailerAuthPassCfg = "Auth_password"
+	MailerFromAddrCfg = "From_address"
+)
+
+// EventReaderCfg
+const (
+	IDCfg                       = "id"
+	RowLengthCfg                = "row_length"
+	FieldSepCfg                 = "field_separator"
+	RunDelayCfg                 = "run_delay"
+	SourcePathCfg               = "source_path"
+	ProcessedPathCfg            = "processed_path"
+	XmlRootPathCfg              = "xml_root_path"
+	TenantCfg                   = "tenant"
+	FlagsCfg                    = "flags"
+	FailedCallsPrefixCfg        = "failed_calls_prefix"
+	PartialRecordCacheCfg       = "partial_record_cache"
+	PartialCacheExpiryActionCfg = "soome"
+	FieldsCfg                   = "fields"
+	CacheDumpFieldsCfg          = "cache_dump_fields"
+)
+
+// CGRConfig
+const (
+	CdreProfiles     = "cdre"             // from JSON
+	LoaderCfg        = "loaders"          // from JSON
+	HttpAgentCfg     = "http_agent"       // from JSON
+	RpcConns         = "rpc_conns"        // from JSON
+	GeneralCfg       = "general"          // from JSON
+	DataDbCfg        = "data_db"          // from JSON
+	StorDbCfg        = "stor_db"          // from JSON
+	TlsCfg           = "tls"              // from JSON
+	CacheCfg         = "caches"           // from JSON
+	HttpCfg          = "http"             // from JSON
+	FilterSCfg       = "filters"          // from JSON
+	RalsCfg          = "rals"             // from JSON
+	SchedulerCfg     = "schedulers"       // from JSON
+	CdrsCfg          = "cdrs"             // from JSON
+	SessionSCfg      = "sessions"         // from JSON
+	FsAgentCfg       = "freeswitch_agent" // from JSON
+	KamAgentCfg      = "kamailio_agent"   // from JSON
+	AsteriskAgentCfg = "asterisk_agent"   // from JSON
+	DiameterAgentCfg = "diameter_agent"   // from JSON
+	RadiusAgentCfg   = "radius_agent"     // from JSON
+	DnsAgentCfg      = "dns_agent"        // from JSON
+	AttributeSCfg    = "attributes"       // from JSON
+	ChargerSCfg      = "chargers"         // from JSON
+	ResourceSCfg     = "resources"        // from JSON
+	StatsCfg         = "stats"            // from JSON
+	ThresholdSCfg    = "thresholds"       // from JSON
+	SupplierSCfg     = "suppliers"        // from JSON
+	SureTaxCfg       = "suretax"          // from JSON
+	DispatcherSCfg   = "dispatchers"      // from JSON
+	LoaderCgrCfg     = "loader"           // from JSON
+	MigratorCgrCfg   = "migrator"         // from JSON
+	MailerCfg        = "mailer"           // from JSON
+	AnalyzerSCfg     = "analyzers"        // from JSON
+	Apier            = "apiers"           // from JSON
+	ErsCfg           = "ers"              // from JSON
+
+)
+
+
 // Strip/Padding strategy
 var (
 	// common

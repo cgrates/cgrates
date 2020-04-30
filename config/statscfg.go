@@ -83,3 +83,18 @@ func (st *StatSCfg) loadFromJsonCfg(jsnCfg *StatServJsonCfg) (err error) {
 	}
 	return nil
 }
+
+func (st *StatSCfg) AsMapInterface() map[string]interface{} {
+
+	return map[string]interface{}{
+		utils.EnabledCfg:                st.Enabled,
+		utils.IndexedSelectsCfg:         st.IndexedSelects,
+		utils.StoreIntervalCfg:          st.StoreInterval,
+		utils.StoreUncompressedLimitCfg: st.StoreUncompressedLimit,
+		utils.ThresholdSConnsCfg:        st.ThresholdSConns,
+		utils.StringIndexedFieldsCfg:    st.StringIndexedFields,
+		utils.PrefixIndexedFieldsCfg:    st.PrefixIndexedFields,
+		utils.NestedFieldsCfg:           st.NestedFields,
+	}
+
+}

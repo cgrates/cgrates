@@ -80,6 +80,23 @@ func (da *DNSAgentCfg) loadFromJsonCfg(jsnCfg *DNSAgentJsonCfg, sep string) (err
 	return nil
 }
 
+func (da *DNSAgentCfg) AsMapInterface() map[string]interface{} {
+	requestProcessors := make([]map[string]interface{}, len(da.RequestProcessors))
+	for i, item := range da.RequestProcessors {
+		requestProcessors[i] = item.AsMapInterface()
+	}
+
+	return map[string]interface{}{
+		utils.EnabledCfg:           da.Enabled,
+		utils.ListenCfg:            da.Listen,
+		utils.ListenNetCfg:         da.ListenNet,
+		utils.SessionSConnsCfg:     da.SessionSConns,
+		utils.TimezoneCfg:          da.Timezone,
+		utils.RequestProcessorsCfg: requestProcessors,
+	}
+
+}
+
 // RequestProcessor is the request processor configuration
 type RequestProcessor struct {
 	ID            string
@@ -128,4 +145,27 @@ func (rp *RequestProcessor) loadFromJsonCfg(jsnCfg *ReqProcessorJsnCfg, sep stri
 		}
 	}
 	return nil
+}
+
+func (rp *RequestProcessor) AsMapInterface() map[string]interface{} {
+	replyFields := make([]map[string]interface{}, len(rp.ReplyFields))
+	for i, item := range rp.ReplyFields {
+		replyFields[i] = item.AsMapInterface()
+	}
+
+	requestFields := make([]map[string]interface{}, len(rp.RequestFields))
+	for i, item := range rp.RequestFields {
+		requestFields[i] = item.AsMapInterface()
+	}
+
+	return map[string]interface{}{
+		utils.ID:               rp.ID,
+		utils.Tenant:           rp.Tenant,
+		utils.Filters:          rp.Filters,
+		utils.Flags:            rp.Flags,
+		utils.TimezoneCfg:      rp.Timezone,
+		utils.RequestFieldsCfg: requestFields,
+		utils.ReplyFieldsCfg:   replyFields,
+	}
+
 }

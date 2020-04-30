@@ -190,3 +190,33 @@ func (self *FCTemplate) Clone() *FCTemplate {
 	cln.MaskLen = self.MaskLen
 	return cln
 }
+
+func (fc *FCTemplate) AsMapInterface() map[string]interface{} {
+	values := make([]string, len(fc.Value))
+	for i, item := range fc.Value {
+		values[i] = item.Rules
+	}
+
+	return map[string]interface{}{
+		utils.TagCfg:              fc.Tag,
+		utils.TypeCf:              fc.Type,
+		utils.PathCfg:             fc.Path,
+		utils.FiltersCfg:          fc.Filters,
+		utils.ValueCfg:            values,
+		utils.WidthCfg:            fc.Width,
+		utils.StripCfg:            fc.Strip,
+		utils.PaddingCfg:          fc.Padding,
+		utils.MandatoryCfg:        fc.Mandatory,
+		utils.AttributeIDCfg:      fc.AttributeID,
+		utils.NewBranchCfg:        fc.NewBranch,
+		utils.TimezoneCfg:         fc.Timezone,
+		utils.BlockerCfg:          fc.Blocker,
+		utils.BreakOnSuccessCfg:   fc.BreakOnSuccess,
+		utils.LayoutCfg:           fc.Layout,
+		utils.CostShiftDigitsCfg:  fc.CostShiftDigits,
+		utils.RoundingDecimalsCfg: fc.RoundingDecimals,
+		utils.MaskDestIDCfg:       fc.MaskDestID,
+		utils.MaskLenCfg:          fc.MaskLen,
+	}
+
+}

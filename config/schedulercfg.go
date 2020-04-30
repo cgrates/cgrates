@@ -52,3 +52,11 @@ func (schdcfg *SchedulerCfg) loadFromJsonCfg(jsnCfg *SchedulerJsonCfg) error {
 	}
 	return nil
 }
+
+func (schdcfg *SchedulerCfg) AsMapInterface() map[string]interface{} {
+	return map[string]interface{}{
+		utils.EnabledCfg:   schdcfg.Enabled,
+		utils.CDRsConnsCfg: schdcfg.CDRsConns,
+		utils.FiltersCfg:   schdcfg.Filters,
+	}
+}
