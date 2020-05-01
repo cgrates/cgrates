@@ -46,6 +46,7 @@ var (
 		testActionsitSetCdrlogTopup,
 		testActionsitCdrlogEmpty,
 		testActionsitCdrlogWithParams,
+		testActionsitCdrlogWithParams2,
 		testActionsitThresholdCDrLog,
 		testActionsitCDRAccount,
 		testActionsitThresholdCgrRpcAction,
@@ -272,6 +273,41 @@ func testActionsitCdrlogWithParams(t *testing.T) {
 	} else if len(rcvedCdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(rcvedCdrs))
 	}
+}
+
+func testActionsitCdrlogWithParams2(t *testing.T) {
+	var reply string
+	attrsSetAccount := &utils.AttrSetAccount{Tenant: "cgrates.org", Account: "dan2904"}
+	attrsAA := &utils.AttrSetActions{
+		ActionsId: "CustomAction",
+		Actions: []*utils.TPAction{
+			{Identifier: utils.DEBIT, BalanceType: utils.MONETARY,
+				DestinationIds: "RET", Units: "25", ExpiryTime: utils.UNLIMITED, Weight: 20.0},
+			{Identifier: utils.CDRLOG,
+				ExtraParameters: `{"RequestType":"*pseudoprepaid", "Usage":"10", "Subject":"testActionsitCdrlogWithParams2", "ToR":"~ActionType:s/^\\*(.*)$/did_$1/"}`},
+		},
+	}
+	if err := actsLclRpc.Call(utils.APIerSv2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+		t.Error("Got error on APIerSv2.SetActions: ", err.Error())
+	} else if reply != utils.OK {
+		t.Errorf("Calling APIerSv2.SetActions received: %s", reply)
+	}
+	attrsEA := &utils.AttrExecuteAction{Tenant: attrsSetAccount.Tenant, Account: attrsSetAccount.Account, ActionsId: attrsAA.ActionsId}
+	if err := actsLclRpc.Call(utils.APIerSv1ExecuteAction, attrsEA, &reply); err != nil {
+		t.Error("Got error on APIerSv1.ExecuteAction: ", err.Error())
+	} else if reply != utils.OK {
+		t.Errorf("Calling APIerSv1.ExecuteAction received: %s", reply)
+	}
+	var rcvedCdrs []*ExternalCDR
+	if err := actsLclRpc.Call(utils.APIerSv2GetCDRs, utils.RPCCDRsFilter{Sources: []string{utils.CDRLOG},
+		Accounts: []string{attrsSetAccount.Account}, Subjects: []string{"testActionsitCdrlogWithParams2"}}, &rcvedCdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(rcvedCdrs) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(rcvedCdrs))
+	} else if rcvedCdrs[0].Usage != "10" {
+		t.Error("Unexpected usege of CDRs returned: ", rcvedCdrs[0].Usage)
+	}
+
 }
 
 func testActionsitThresholdCDrLog(t *testing.T) {

@@ -167,6 +167,7 @@ func cdrLogAction(acc *Account, a *Action, acs Actions, extraData interface{}) (
 			action.Balance == nil {
 			continue // Only log specific actions
 		}
+		cdrLogProvider := newCdrLogProvider(acc, action)
 		cdr := &CDR{
 			RunID:     action.ActionType,
 			Source:    utils.CDRLOG,
@@ -174,12 +175,12 @@ func cdrLogAction(acc *Account, a *Action, acs Actions, extraData interface{}) (
 			OriginID:    utils.GenUUID(),
 			ExtraFields: make(map[string]string),
 			PreRated:    true,
+			Usage:       time.Duration(1),
 		}
 		cdr.CGRID = utils.Sha1(cdr.OriginID, cdr.OriginHost)
-		cdr.Usage = time.Duration(1)
 		elem := reflect.ValueOf(cdr).Elem()
 		for key, rsrFlds := range defaultTemplate {
-			parsedValue, err := rsrFlds.ParseDataProvider(newCdrLogProvider(acc, action), utils.NestingSep)
+			parsedValue, err := rsrFlds.ParseDataProvider(cdrLogProvider, utils.NestingSep)
 			if err != nil {
 				return err
 			}
@@ -194,6 +195,12 @@ func cdrLogAction(acc *Account, a *Action, acs Actions, extraData interface{}) (
 					field.SetFloat(value)
 				case reflect.String:
 					field.SetString(parsedValue)
+				case reflect.Int64:
+					value, err := strconv.ParseInt(parsedValue, 10, 64)
+					if err != nil {
+						continue
+					}
+					field.SetInt(value)
 				}
 			} else { // invalid fields go in extraFields of CDR
 				cdr.ExtraFields[key] = parsedValue
