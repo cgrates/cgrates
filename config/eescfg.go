@@ -1,5 +1,5 @@
 /*
-Real-time Online/Offline Charging System (OerS) for Telecom & ISP environments
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
@@ -16,18 +16,29 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package ees
+package config
 
 import (
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
-type EventExporter interface {
-	ExportEvent(cgrEv *utils.CGREvent) (err error)
+type EEsCfg struct {
+	Enabled         bool
+	AttributeSConns []string
+	Exporters       []*EventExporterCfg
 }
 
-// NewEventExporter produces exporters
-func NewEventExporter(eeCfg *config.EventExporterCfg) (ee EventExporter, err error) {
-	return
+type EventExporterCfg struct {
+	ID            string
+	Type          string
+	ExportPath    string
+	Tenant        RSRParsers
+	Timezone      string
+	Filters       []string
+	Flags         utils.FlagsWithParams
+	AttributeSCtx string // context to use when querying AttributeS
+	Synchronous   bool
+	Attempts      int
+	FieldSep      rune
+	Fields        []*FCTemplate
 }

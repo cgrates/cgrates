@@ -58,6 +58,7 @@ const (
 	ApierS             = "apiers"
 	DNSAgentJson       = "dns_agent"
 	ERsJson            = "ers"
+	EEsJson            = "ees"
 	RPCConnsJsonName   = "rpc_conns"
 )
 

@@ -179,6 +179,7 @@ func NewDefaultCGRConfig() (cfg *CGRConfig, err error) {
 	cfg.loaderCfg = make(LoaderSCfgs, 0)
 	cfg.apier = new(ApierCfg)
 	cfg.ersCfg = new(ERsCfg)
+	cfg.eesCfg = new(EEsCfg)
 
 	cfg.ConfigReloads = make(map[string]chan struct{})
 	cfg.ConfigReloads[utils.CDRE] = make(chan struct{}, 1)
@@ -290,8 +291,9 @@ type CGRConfig struct {
 	migratorCgrCfg   *MigratorCgrCfg   // MigratorCgr config
 	mailerCfg        *MailerCfg        // Mailer config
 	analyzerSCfg     *AnalyzerSCfg     // AnalyzerS config
-	apier            *ApierCfg
-	ersCfg           *ERsCfg
+	apier            *ApierCfg         // APIer config
+	ersCfg           *ERsCfg           // EventReader config
+	eesCfg           *EEsCfg           // EventExporter config
 }
 
 var posibleLoaderTypes = utils.NewStringSet([]string{utils.MetaAttributes,
@@ -956,6 +958,13 @@ func (cfg *CGRConfig) ERsCfg() *ERsCfg {
 	cfg.lks[ERsJson].RLock()
 	defer cfg.lks[ERsJson].RUnlock()
 	return cfg.ersCfg
+}
+
+// EEsCfg reads the EventExporter configuration
+func (cfg *CGRConfig) EEsCfg() *EEsCfg {
+	cfg.lks[EEsJson].RLock()
+	defer cfg.lks[EEsJson].RUnlock()
+	return cfg.eesCfg
 }
 
 // RPCConns reads the RPCConns configuration
