@@ -249,13 +249,13 @@ func testCGRConfigReloadSupplierS(t *testing.T) {
 	var reply string
 	if err = cfg.V1ReloadConfigFromPath(&ConfigReloadWithArgDispatcher{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo2"),
-		Section: SupplierSJson,
+		Section: RouteSJson,
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %s", reply)
 	}
-	expAttr := &SupplierSCfg{
+	expAttr := &RouteSCfg{
 		Enabled:             true,
 		StringIndexedFields: &[]string{"LCRProfile"},
 		PrefixIndexedFields: &[]string{utils.Destination},
@@ -266,8 +266,8 @@ func testCGRConfigReloadSupplierS(t *testing.T) {
 		IndexedSelects:      true,
 		DefaultRatio:        1,
 	}
-	if !reflect.DeepEqual(expAttr, cfg.SupplierSCfg()) {
-		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.SupplierSCfg()))
+	if !reflect.DeepEqual(expAttr, cfg.RouteSCfg()) {
+		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.RouteSCfg()))
 	}
 }
 
@@ -389,7 +389,7 @@ func testCGRConfigReloadSessionS(t *testing.T) {
 		ResSConns:     []string{utils.MetaLocalHost},
 		ThreshSConns:  []string{},
 		StatSConns:    []string{},
-		SupplSConns:   []string{utils.MetaLocalHost},
+		RouteSConns:   []string{utils.MetaLocalHost},
 		AttrSConns:    []string{utils.MetaLocalHost},
 		CDRsConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
 
@@ -949,7 +949,7 @@ func testCGRConfigReloadConfigFromJSONSessionS(t *testing.T) {
 		ResSConns:     []string{utils.MetaLocalHost},
 		ThreshSConns:  []string{},
 		StatSConns:    []string{},
-		SupplSConns:   []string{utils.MetaLocalHost},
+		RouteSConns:   []string{utils.MetaLocalHost},
 		AttrSConns:    []string{utils.MetaLocalHost},
 		CDRsConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
 
@@ -996,7 +996,7 @@ func testCGRConfigReloadAll(t *testing.T) {
 		ResSConns:     []string{utils.MetaLocalHost},
 		ThreshSConns:  []string{},
 		StatSConns:    []string{},
-		SupplSConns:   []string{utils.MetaLocalHost},
+		RouteSConns:   []string{utils.MetaLocalHost},
 		AttrSConns:    []string{utils.MetaLocalHost},
 		CDRsConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
 

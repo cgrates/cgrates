@@ -821,6 +821,8 @@ func testApierLoadAccountActions(t *testing.T) {
 	expectedStats[utils.CacheAccountActionPlans].Items = 1
 	expectedStats[utils.CacheActionPlans].Items = 1
 	expectedStats[utils.CacheActions].Items = 1
+	expectedStats[utils.CacheLoadIDs].Items = 20
+	expectedStats[utils.CacheRPCConnections].Items = 1
 	if err := rater.Call(utils.CacheSv1GetCacheStats, new(utils.AttrCacheIDsWithArgDispatcher), &rcvStats); err != nil {
 		t.Error("Got error on CacheSv1.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
@@ -856,10 +858,12 @@ func testApierSetRatingProfile(t *testing.T) {
 	expectedStats[utils.CacheActionPlans].Items = 1
 	expectedStats[utils.CacheActions].Items = 1
 	expectedStats[utils.CacheRatingProfiles].Items = 1
+	expectedStats[utils.CacheRPCConnections].Items = 1
+	expectedStats[utils.CacheLoadIDs].Items = 20
 	if err := rater.Call(utils.CacheSv1GetCacheStats, new(utils.AttrCacheIDsWithArgDispatcher), &rcvStats); err != nil {
 		t.Error("Got error on CacheSv1.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
-		t.Errorf("Calling CacheSv1.GetCacheStats expected: %+v, received: %+v", expectedStats, rcvStats)
+		t.Errorf("Calling CacheSv1.GetCacheStats expected: %+v, received: %+v", utils.ToJSON(expectedStats), utils.ToJSON(rcvStats))
 	}
 	// Calling the second time should not raise EXISTS
 	if err := rater.Call(utils.APIerSv1SetRatingProfile, rpf, &reply); err != nil {
@@ -963,6 +967,7 @@ func testApierReloadCache(t *testing.T) {
 	expectedStats[utils.CacheRatingPlans].Items = 1
 	expectedStats[utils.CacheReverseDestinations].Items = 10
 	expectedStats[utils.CacheLoadIDs].Items = 20
+	expectedStats[utils.CacheRPCConnections].Items = 1
 	if err := rater.Call(utils.CacheSv1GetCacheStats, new(utils.AttrCacheIDsWithArgDispatcher), &rcvStats); err != nil {
 		t.Error("Got error on CacheSv1.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {

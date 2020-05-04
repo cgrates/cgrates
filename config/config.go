@@ -366,11 +366,9 @@ func (cfg *CGRConfig) loadRPCConns(jsnCfg *CgrJsonCfg) (err error) {
 	cfg.rpcConns[utils.MetaInternal] = &RPCConn{
 		Strategy: rpcclient.PoolFirst,
 		PoolSize: 0,
-		Conns: []*RemoteHost{
-			&RemoteHost{
-				Address: utils.MetaInternal,
-			},
-		},
+		Conns: []*RemoteHost{{
+			Address: utils.MetaInternal,
+		}},
 	}
 	for key, val := range jsnRPCConns {
 		cfg.rpcConns[key] = NewDfltRPCConn()
@@ -804,8 +802,8 @@ func (cfg *CGRConfig) ThresholdSCfg() *ThresholdSCfg {
 	return cfg.thresholdSCfg
 }
 
-// SupplierSCfg returns the config for SupplierS
-func (cfg *CGRConfig) RouteCfg() *RouteSCfg {
+// RouteSCfg returns the config for RouteS
+func (cfg *CGRConfig) RouteSCfg() *RouteSCfg {
 	cfg.lks[RouteSJson].Lock()
 	defer cfg.lks[RouteSJson].Unlock()
 	return cfg.routeSCfg
@@ -1062,7 +1060,7 @@ func (cfg *CGRConfig) V1GetConfigSection(args *StringWithArgDispatcher, reply *m
 	case THRESHOLDS_JSON:
 		jsonString = utils.ToJSON(cfg.ThresholdSCfg())
 	case RouteSJson:
-		jsonString = utils.ToJSON(cfg.RouteCfg())
+		jsonString = utils.ToJSON(cfg.RouteSCfg())
 	case SURETAX_JSON:
 		jsonString = utils.ToJSON(cfg.SureTaxCfg())
 	case DispatcherSJson:

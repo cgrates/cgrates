@@ -132,5 +132,5 @@ func (routeS *RouteService) ServiceName() string {
 
 // ShouldRun returns if the service should be running
 func (routeS *RouteService) ShouldRun() bool {
-	return routeS.cfg.RouteCfg().Enabled
+	return routeS.cfg.RouteSCfg().Enabled
 }

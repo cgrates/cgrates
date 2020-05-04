@@ -453,6 +453,7 @@ func (m *Migrator) migrateSupplierProfileFiltersV1() (err error) {
 		var spp *SupplierProfile
 		spp, err = m.dmIN.getSupplier()
 		if err == utils.ErrNoMoreData {
+			err = nil
 			break
 		}
 		if err != nil {
@@ -663,6 +664,7 @@ func (m *Migrator) migrateSupplierProfileFiltersV2() (err error) {
 		var spp *SupplierProfile
 		spp, err = m.dmIN.getSupplier()
 		if err == utils.ErrNoMoreData {
+			err = nil
 			break
 		}
 		if err != nil {

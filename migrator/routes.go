@@ -113,7 +113,7 @@ func (m *Migrator) migrateCurrentRouteProfile() (err error) {
 		if err := m.dmIN.DataManager().RemoveRouteProfile(tntID[0], tntID[1], utils.NonTransactional, true); err != nil {
 			return err
 		}
-		m.stats[utils.Routes] += 1
+		m.stats[utils.Routes]++
 	}
 	return
 }
@@ -128,7 +128,7 @@ func (m *Migrator) migrateRouteProfiles() (err error) {
 			err.Error(),
 			fmt.Sprintf("error: <%s> when querying oldDataDB for versions", err.Error()))
 	}
-	if routeVersion, has := vrs[utils.RouteProfilePrefix]; !has {
+	if routeVersion, has := vrs[utils.Routes]; !has {
 		if vrs[utils.RQF] != current[utils.RQF] {
 			return fmt.Errorf("please migrate the filters before migrating the routes")
 		}

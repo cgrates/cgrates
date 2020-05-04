@@ -291,8 +291,8 @@ func TestRoutesPopulateRouteService(t *testing.T) {
 	defaultCfg, _ := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, true, defaultCfg.DataDbCfg().Items)
 	dmSPP = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
-	defaultCfg.RouteCfg().StringIndexedFields = nil
-	defaultCfg.RouteCfg().PrefixIndexedFields = nil
+	defaultCfg.RouteSCfg().StringIndexedFields = nil
+	defaultCfg.RouteSCfg().PrefixIndexedFields = nil
 	splService, err = NewRouteService(dmSPP, &FilterS{
 		dm: dmSPP, cfg: defaultCfg}, defaultCfg, nil)
 	if err != nil {
@@ -626,7 +626,7 @@ func TestRoutesAsOptsGetRoutesMaxCost(t *testing.T) {
 }
 
 func TestRoutesMatchWithIndexFalse(t *testing.T) {
-	splService.cgrcfg.RouteCfg().IndexedSelects = false
+	splService.cgrcfg.RouteSCfg().IndexedSelects = false
 	sprf, err := splService.matchingRouteProfilesForEvent(argsGetRoutes[0].CGREvent, true)
 	if err != nil {
 		t.Errorf("Error: %+v", err)

@@ -82,127 +82,127 @@ func TestDataDBReload(t *testing.T) {
 		DataDbUser:   "cgrates",
 		QueryTimeout: 10 * time.Second,
 		Items: map[string]*config.ItemOpt{
-			utils.MetaAccounts: &config.ItemOpt{
+			utils.MetaAccounts: {
 				Replicate: false,
 				Remote:    false,
 				TTL:       time.Duration(0),
 				Limit:     -1},
-			utils.MetaReverseDestinations: &config.ItemOpt{
+			utils.MetaReverseDestinations: {
 				Replicate: false,
 				Remote:    false,
 				TTL:       time.Duration(0),
 				Limit:     -1},
-			utils.MetaDestinations: &config.ItemOpt{
+			utils.MetaDestinations: {
 				Replicate: false,
 				Remote:    false,
 				TTL:       time.Duration(0),
 				Limit:     -1},
-			utils.MetaRatingPlans: &config.ItemOpt{
+			utils.MetaRatingPlans: {
 				Replicate: false,
 				Remote:    false,
 				TTL:       time.Duration(0),
 				Limit:     -1},
-			utils.MetaRatingProfiles: &config.ItemOpt{
+			utils.MetaRatingProfiles: {
 				Replicate: false,
 				Remote:    false,
 				TTL:       time.Duration(0),
 				Limit:     -1},
-			utils.MetaActions: &config.ItemOpt{
+			utils.MetaActions: {
 				Replicate: false,
 				Remote:    false,
 				TTL:       time.Duration(0),
 				Limit:     -1},
-			utils.MetaActionPlans: &config.ItemOpt{
+			utils.MetaActionPlans: {
 				Replicate: false,
 				Remote:    false,
 				TTL:       time.Duration(0),
 				Limit:     -1},
-			utils.MetaAccountActionPlans: &config.ItemOpt{
+			utils.MetaAccountActionPlans: {
 				Replicate: false,
 				Remote:    false,
 				TTL:       time.Duration(0),
 				Limit:     -1},
-			utils.MetaActionTriggers: &config.ItemOpt{
+			utils.MetaActionTriggers: {
 				Replicate: false,
 				Remote:    false,
 				TTL:       time.Duration(0),
 				Limit:     -1},
-			utils.MetaSharedGroups: &config.ItemOpt{
+			utils.MetaSharedGroups: {
 				Replicate: false,
 				Remote:    false,
 				TTL:       time.Duration(0),
 				Limit:     -1},
-			utils.MetaTimings: &config.ItemOpt{
+			utils.MetaTimings: {
 				Replicate: false,
 				Remote:    false,
 				TTL:       time.Duration(0),
 				Limit:     -1},
-			utils.MetaResourceProfile: &config.ItemOpt{
+			utils.MetaResourceProfile: {
 				Replicate: false,
 				Remote:    false,
 				TTL:       time.Duration(0),
 				Limit:     -1},
-			utils.MetaStatQueues: &config.ItemOpt{
+			utils.MetaStatQueues: {
 				Replicate: false,
 				Remote:    false,
 				TTL:       time.Duration(0),
 				Limit:     -1},
-			utils.MetaResources: &config.ItemOpt{
+			utils.MetaResources: {
 				Replicate: false,
 				Remote:    false,
 				TTL:       time.Duration(0),
 				Limit:     -1},
-			utils.MetaStatQueueProfiles: &config.ItemOpt{
+			utils.MetaStatQueueProfiles: {
 				Replicate: false,
 				Remote:    false,
 				TTL:       time.Duration(0),
 				Limit:     -1},
-			utils.MetaThresholds: &config.ItemOpt{
+			utils.MetaThresholds: {
 				Replicate: false,
 				Remote:    false,
 				TTL:       time.Duration(0),
 				Limit:     -1},
-			utils.MetaThresholdProfiles: &config.ItemOpt{
+			utils.MetaThresholdProfiles: {
 				Replicate: false,
 				Remote:    false,
 				TTL:       time.Duration(0),
 				Limit:     -1},
-			utils.MetaFilters: &config.ItemOpt{
+			utils.MetaFilters: {
 				Replicate: false,
 				Remote:    false,
 				TTL:       time.Duration(0),
 				Limit:     -1},
-			utils.MetaSupplierProfiles: &config.ItemOpt{
+			utils.MetaRouteProfiles: {
 				Replicate: false,
 				Remote:    false,
 				TTL:       time.Duration(0),
 				Limit:     -1},
-			utils.MetaAttributeProfiles: &config.ItemOpt{
+			utils.MetaAttributeProfiles: {
 				Replicate: false,
 				Remote:    false,
 				TTL:       time.Duration(0),
 				Limit:     -1},
-			utils.MetaDispatcherHosts: &config.ItemOpt{
+			utils.MetaDispatcherHosts: {
 				Replicate: false,
 				Remote:    false,
 				TTL:       time.Duration(0),
 				Limit:     -1},
-			utils.MetaChargerProfiles: &config.ItemOpt{
+			utils.MetaChargerProfiles: {
 				Replicate: false,
 				Remote:    false,
 				TTL:       time.Duration(0),
 				Limit:     -1},
-			utils.MetaDispatcherProfiles: &config.ItemOpt{
+			utils.MetaDispatcherProfiles: {
 				Replicate: false,
 				Remote:    false,
 				TTL:       time.Duration(0),
 				Limit:     -1},
-			utils.MetaFilterIndexes: &config.ItemOpt{
+			utils.MetaFilterIndexes: {
 				Replicate: false,
 				Remote:    false,
 				TTL:       time.Duration(0),
 				Limit:     -1},
-			utils.MetaLoadIDs: &config.ItemOpt{
+			utils.MetaLoadIDs: {
 				Replicate: false,
 				Remote:    false,
 				TTL:       time.Duration(0),

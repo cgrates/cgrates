@@ -136,24 +136,20 @@ func testFltrITMigrateAndMove(t *testing.T) {
 	Filters := &v1Filter{
 		Tenant: "cgrates.org",
 		ID:     "FLTR_2",
-		Rules: []*v1FilterRule{
-			&v1FilterRule{
-				Type:      utils.MetaPrefix,
-				FieldName: "Account",
-				Values:    []string{"1001"},
-			},
-		},
+		Rules: []*v1FilterRule{{
+			Type:      utils.MetaPrefix,
+			FieldName: "Account",
+			Values:    []string{"1001"},
+		}},
 	}
 	expFilters := &engine.Filter{
 		Tenant: "cgrates.org",
 		ID:     "FLTR_2",
-		Rules: []*engine.FilterRule{
-			&engine.FilterRule{
-				Type:    utils.MetaPrefix,
-				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
-				Values:  []string{"1001"},
-			},
-		},
+		Rules: []*engine.FilterRule{{
+			Type:    utils.MetaPrefix,
+			Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
+			Values:  []string{"1001"},
+		}},
 	}
 	expFilters.Compile()
 	attrProf := &engine.AttributeProfile{
@@ -237,8 +233,8 @@ func testFltrITMigrateAndMove(t *testing.T) {
 			t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expAttrProf), utils.ToJSON(resultattr))
 		}
 		expFltrIdx := map[string]utils.StringMap{
-			"*prefix:~*req.Account:1001": utils.StringMap{"ATTR_1": true},
-			"*string:~*req.Account:1001": utils.StringMap{"ATTR_1": true}}
+			"*prefix:~*req.Account:1001": {"ATTR_1": true},
+			"*string:~*req.Account:1001": {"ATTR_1": true}}
 
 		if fltridx, err := fltrMigrator.dmOut.DataManager().GetFilterIndexes(utils.PrefixToIndexCache[utils.AttributeProfilePrefix], utils.ConcatenatedKey(attrProf.Tenant, utils.META_ANY), utils.MetaString, nil); err != nil {
 			t.Error(err)
@@ -284,17 +280,17 @@ func testFltrITMigratev2(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "FLTR_2",
 		Rules: []*v1FilterRule{
-			&v1FilterRule{
+			{
 				Type:      utils.MetaString,
 				FieldName: "~Account",
 				Values:    []string{"1001"},
 			},
-			&v1FilterRule{
+			{
 				Type:      utils.MetaString,
 				FieldName: "~*req.Subject",
 				Values:    []string{"1001"},
 			},
-			&v1FilterRule{
+			{
 				Type:      utils.MetaRSR,
 				FieldName: utils.EmptyString,
 				Values:    []string{"~Tenant(~^cgr.*\\.org$)"},
@@ -305,17 +301,17 @@ func testFltrITMigratev2(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "FLTR_2",
 		Rules: []*engine.FilterRule{
-			&engine.FilterRule{
+			{
 				Type:    utils.MetaString,
 				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
 				Values:  []string{"1001"},
 			},
-			&engine.FilterRule{
+			{
 				Type:    utils.MetaString,
 				Element: "~*req.Subject",
 				Values:  []string{"1001"},
 			},
-			&engine.FilterRule{
+			{
 				Type:    utils.MetaRSR,
 				Element: utils.EmptyString,
 				Values:  []string{"~*req.Tenant(~^cgr.*\\.org$)"},
