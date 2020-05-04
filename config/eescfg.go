@@ -28,6 +28,73 @@ type EEsCfg struct {
 	Exporters       []*EventExporterCfg
 }
 
+func (eeS *EEsCfg) loadFromJsonCfg(jsnCfg *EEsJsonCfg, sep string, dfltExpCfg *EventExporterCfg) (err error) {
+	if jsnCfg == nil {
+		return
+	}
+	if jsnCfg.Enabled != nil {
+		eeS.Enabled = *jsnCfg.Enabled
+	}
+	if jsnCfg.Attributes_conns != nil {
+		eeS.AttributeSConns = make([]string, len(*jsnCfg.Attributes_conns))
+		for i, fID := range *jsnCfg.Attributes_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			if fID == utils.MetaInternal {
+				eeS.AttributeSConns[i] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)
+			} else {
+				eeS.AttributeSConns[i] = fID
+			}
+		}
+	}
+	return eeS.appendEEsExporters(jsnCfg.Exporters, sep, dfltExpCfg)
+}
+
+func (eeS *EEsCfg) appendEEsExporters(exporters *[]*EventExporterJsonCfg, separator string, dfltExpCfg *EventExporterCfg) (err error) {
+	if exporters == nil {
+		return
+	}
+	for _, jsnExp := range *exporters {
+		exp := new(EventExporterCfg)
+		if dfltExpCfg != nil {
+			exp = dfltExpCfg.Clone()
+		}
+		var haveID bool
+		if jsnExp.Id != nil {
+			for _, exporter := range eeS.Exporters {
+				if exporter.ID == *jsnExp.Id {
+					exp = exporter
+					haveID = true
+					break
+				}
+			}
+		}
+
+		if err := exp.loadFromJsonCfg(jsnExp, separator); err != nil {
+			return err
+		}
+		if !haveID {
+			eeS.Exporters = append(eeS.Exporters, exp)
+		}
+
+	}
+	return
+}
+
+// Clone itself into a new EEsCfg
+func (eeS *EEsCfg) Clone() (cln *EEsCfg) {
+	cln = new(EEsCfg)
+	cln.Enabled = eeS.Enabled
+	cln.AttributeSConns = make([]string, len(eeS.AttributeSConns))
+	for idx, sConn := range eeS.AttributeSConns {
+		cln.AttributeSConns[idx] = sConn
+	}
+	cln.Exporters = make([]*EventExporterCfg, len(eeS.Exporters))
+	for idx, exp := range eeS.Exporters {
+		cln.Exporters[idx] = exp.Clone()
+	}
+	return
+}
+
 type EventExporterCfg struct {
 	ID            string
 	Type          string
@@ -40,6 +107,101 @@ type EventExporterCfg struct {
 	AttributeSIDs []string // selective AttributeS profiles
 	Synchronous   bool
 	Attempts      int
-	FieldSep      rune
+	FieldSep      string
 	Fields        []*FCTemplate
+}
+
+func (eeC *EventExporterCfg) loadFromJsonCfg(jsnEec *EventExporterJsonCfg, separator string) (err error) {
+	if jsnEec == nil {
+		return
+	}
+	if jsnEec.Id != nil {
+		eeC.ID = *jsnEec.Id
+	}
+	if jsnEec.Type != nil {
+		eeC.Type = *jsnEec.Type
+	}
+	if jsnEec.Export_path != nil {
+		eeC.ExportPath = *jsnEec.Export_path
+	}
+	if jsnEec.Tenant != nil {
+		if eeC.Tenant, err = NewRSRParsers(*jsnEec.Tenant, true, separator); err != nil {
+			return err
+		}
+	}
+	if jsnEec.Timezone != nil {
+		eeC.Timezone = *jsnEec.Timezone
+	}
+	if jsnEec.Filters != nil {
+		eeC.Filters = make([]string, len(*jsnEec.Filters))
+		for i, fltr := range *jsnEec.Filters {
+			eeC.Filters[i] = fltr
+		}
+	}
+	if jsnEec.Flags != nil {
+		if eeC.Flags, err = utils.FlagsWithParamsFromSlice(*jsnEec.Flags); err != nil {
+			return
+		}
+	}
+	if jsnEec.Attribute_context != nil {
+		eeC.AttributeSCtx = *jsnEec.Attribute_context
+	}
+	if jsnEec.Attribute_ids != nil {
+		eeC.AttributeSIDs = make([]string, len(*jsnEec.Attribute_ids))
+		for i, fltr := range *jsnEec.Attribute_ids {
+			eeC.AttributeSIDs[i] = fltr
+		}
+	}
+	if jsnEec.Synchronous != nil {
+		eeC.Synchronous = *jsnEec.Synchronous
+	}
+	if jsnEec.Attempts != nil {
+		eeC.Attempts = *jsnEec.Attempts
+	}
+	if jsnEec.Field_separator != nil {
+		eeC.FieldSep = *jsnEec.Field_separator
+	}
+	if jsnEec.Fields != nil {
+		if eeC.Fields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnEec.Fields, separator); err != nil {
+			return err
+		}
+	}
+	return
+}
+
+func (eeC *EventExporterCfg) Clone() (cln *EventExporterCfg) {
+	cln = new(EventExporterCfg)
+	cln.ID = eeC.ID
+	cln.Type = eeC.Type
+	cln.ExportPath = eeC.ExportPath
+	if len(eeC.Tenant) != 0 {
+		cln.Tenant = make(RSRParsers, len(eeC.Tenant))
+		for idx, val := range eeC.Tenant {
+			clnVal := *val
+			cln.Tenant[idx] = &clnVal
+		}
+	}
+	cln.Timezone = eeC.Timezone
+	if len(eeC.Filters) != 0 {
+		cln.Filters = make([]string, len(eeC.Filters))
+		for idx, val := range eeC.Filters {
+			cln.Filters[idx] = val
+		}
+	}
+	cln.Flags = eeC.Flags
+	cln.AttributeSCtx = eeC.AttributeSCtx
+	if len(eeC.AttributeSIDs) != 0 {
+		cln.AttributeSIDs = make([]string, len(eeC.AttributeSIDs))
+		for idx, val := range eeC.AttributeSIDs {
+			cln.AttributeSIDs[idx] = val
+		}
+	}
+	cln.Synchronous = eeC.Synchronous
+	cln.Attempts = eeC.Attempts
+	cln.FieldSep = eeC.FieldSep
+	cln.Fields = make([]*FCTemplate, len(eeC.Fields))
+	for idx, fld := range eeC.Fields {
+		cln.Fields[idx] = fld.Clone()
+	}
+	return
 }

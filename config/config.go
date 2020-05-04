@@ -201,6 +201,13 @@ func NewDefaultCGRConfig() (cfg *CGRConfig, err error) {
 			break
 		}
 	}
+	// populate default EEs exporter
+	for _, ersExp := range cfg.eesCfg.Exporters {
+		if ersExp.ID == utils.MetaDefault {
+			cfg.dfltEvExp = ersExp.Clone()
+			break
+		}
+	}
 	dfltFsConnConfig = cfg.fsAgentCfg.EventSocketConns[0] // We leave it crashing here on purpose if no Connection defaults defined
 	dfltKamConnConfig = cfg.kamAgentCfg.EvapiConns[0]
 	dfltAstConnCfg = cfg.asteriskAgentCfg.AsteriskConns[0]
@@ -249,8 +256,9 @@ type CGRConfig struct {
 	ConfigPath      string        // Path towards config
 
 	// Cache defaults loaded from json and needing clones
-	dfltCdreProfile *CdreCfg        // Default cdreConfig profile
-	dfltEvRdr       *EventReaderCfg // default event reader
+	dfltCdreProfile *CdreCfg          // Default cdreConfig profile
+	dfltEvRdr       *EventReaderCfg   // default event reader
+	dfltEvExp       *EventExporterCfg // default event exporter
 
 	CdreProfiles map[string]*CdreCfg // Cdre config profiles
 	loaderCfg    LoaderSCfgs         // LoaderS configs
@@ -305,6 +313,8 @@ var possibleReaderTypes = utils.NewStringSet([]string{utils.MetaFileCSV,
 	utils.MetaKafkajsonMap, utils.MetaFileXML, utils.MetaSQL, utils.MetaFileFWV,
 	utils.MetaPartialCSV, utils.MetaFlatstore, utils.MetaJSON, utils.META_NONE})
 
+var possibleExporterTypes = utils.NewStringSet([]string{utils.MetaFileCSV, utils.META_NONE})
+
 func (cfg *CGRConfig) LazySanityCheck() {
 	for _, cdrePrfl := range cfg.cdrsCfg.OnlineCDRExports {
 		if cdreProfile, hasIt := cfg.CdreProfiles[cdrePrfl]; hasIt && (cdreProfile.ExportFormat == utils.MetaS3jsonMap || cdreProfile.ExportFormat == utils.MetaSQSjsonMap) {
@@ -338,7 +348,7 @@ func (cfg *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		cfg.loadThresholdSCfg, cfg.loadRouteSCfg, cfg.loadLoaderSCfg,
 		cfg.loadMailerCfg, cfg.loadSureTaxCfg, cfg.loadDispatcherSCfg,
 		cfg.loadLoaderCgrCfg, cfg.loadMigratorCgrCfg, cfg.loadTlsCgrCfg,
-		cfg.loadAnalyzerCgrCfg, cfg.loadApierCfg, cfg.loadErsCfg} {
+		cfg.loadAnalyzerCgrCfg, cfg.loadApierCfg, cfg.loadErsCfg, cfg.loadEesCfg} {
 		if err = loadFunc(jsnCfg); err != nil {
 			return
 		}
@@ -720,6 +730,15 @@ func (cfg *CGRConfig) loadErsCfg(jsnCfg *CgrJsonCfg) (err error) {
 		return
 	}
 	return cfg.ersCfg.loadFromJsonCfg(jsnERsCfg, cfg.generalCfg.RSRSep, cfg.dfltEvRdr)
+}
+
+// loadEesCfg loads the Ees section of the configuration
+func (cfg *CGRConfig) loadEesCfg(jsnCfg *CgrJsonCfg) (err error) {
+	var jsnEEsCfg *EEsJsonCfg
+	if jsnEEsCfg, err = jsnCfg.EEsJsonCfg(); err != nil {
+		return
+	}
+	return cfg.eesCfg.loadFromJsonCfg(jsnEEsCfg, cfg.generalCfg.RSRSep, cfg.dfltEvExp)
 }
 
 // SureTaxCfg use locking to retrieve the configuration, possibility later for runtime reload
@@ -1146,6 +1165,7 @@ func (cfg *CGRConfig) getLoadFunctions() map[string]func(*CgrJsonCfg) error {
 		CDRS_JSN:           cfg.loadCdrsCfg,
 		CDRE_JSN:           cfg.loadCdreCfg,
 		ERsJson:            cfg.loadErsCfg,
+		EEsJson:            cfg.loadEesCfg,
 		SessionSJson:       cfg.loadSessionSCfg,
 		AsteriskAgentJSN:   cfg.loadAsteriskAgentCfg,
 		FreeSWITCHAgentJSN: cfg.loadFreeswitchAgentCfg,

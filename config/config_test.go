@@ -1834,6 +1834,131 @@ func TestCgrCdfEventReader(t *testing.T) {
 	}
 }
 
+func TestCgrCdfEventExporter(t *testing.T) {
+	eCfg := &EEsCfg{
+		Enabled:         false,
+		AttributeSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)},
+		Exporters: []*EventExporterCfg{
+			&EventExporterCfg{
+				ID:            utils.MetaDefault,
+				Type:          utils.META_NONE,
+				FieldSep:      ",",
+				Tenant:        nil,
+				ExportPath:    "/var/spool/cgrates/ees",
+				Attempts:      1,
+				Timezone:      utils.EmptyString,
+				Filters:       []string{},
+				AttributeSIDs: []string{},
+				Flags:         utils.FlagsWithParams{},
+				Fields: []*FCTemplate{
+					{
+						Tag:    utils.CGRID,
+						Path:   "*exp.CGRID",
+						Type:   "*variable",
+						Value:  NewRSRParsersMustCompile("~*req.CGRID", true, utils.INFIELD_SEP),
+						Layout: time.RFC3339,
+					},
+					{
+						Tag:    utils.RunID,
+						Path:   "*exp.RunID",
+						Type:   "*variable",
+						Value:  NewRSRParsersMustCompile("~*req.RunID", true, utils.INFIELD_SEP),
+						Layout: time.RFC3339,
+					},
+					{
+						Tag:    utils.ToR,
+						Path:   "*exp.ToR",
+						Type:   "*variable",
+						Value:  NewRSRParsersMustCompile("~*req.ToR", true, utils.INFIELD_SEP),
+						Layout: time.RFC3339,
+					},
+					{
+						Tag:    utils.OriginID,
+						Path:   "*exp.OriginID",
+						Type:   "*variable",
+						Value:  NewRSRParsersMustCompile("~*req.OriginID", true, utils.INFIELD_SEP),
+						Layout: time.RFC3339,
+					},
+					{
+						Tag:    utils.RequestType,
+						Path:   "*exp.RequestType",
+						Type:   "*variable",
+						Value:  NewRSRParsersMustCompile("~*req.RequestType", true, utils.INFIELD_SEP),
+						Layout: time.RFC3339,
+					},
+					{
+						Tag:    utils.Tenant,
+						Path:   "*exp.Tenant",
+						Type:   "*variable",
+						Value:  NewRSRParsersMustCompile("~*req.Tenant", true, utils.INFIELD_SEP),
+						Layout: time.RFC3339,
+					},
+					{
+						Tag:    utils.Category,
+						Path:   "*exp.Category",
+						Type:   "*variable",
+						Value:  NewRSRParsersMustCompile("~*req.Category", true, utils.INFIELD_SEP),
+						Layout: time.RFC3339,
+					},
+					{
+						Tag:    utils.Account,
+						Path:   "*exp.Account",
+						Type:   "*variable",
+						Value:  NewRSRParsersMustCompile("~*req.Account", true, utils.INFIELD_SEP),
+						Layout: time.RFC3339,
+					},
+					{
+						Tag:    utils.Subject,
+						Path:   "*exp.Subject",
+						Type:   "*variable",
+						Value:  NewRSRParsersMustCompile("~*req.Subject", true, utils.INFIELD_SEP),
+						Layout: time.RFC3339,
+					},
+					{
+						Tag:    utils.Destination,
+						Path:   "*exp.Destination",
+						Type:   "*variable",
+						Value:  NewRSRParsersMustCompile("~*req.Destination", true, utils.INFIELD_SEP),
+						Layout: time.RFC3339,
+					},
+					{
+						Tag:    utils.SetupTime,
+						Path:   "*exp.SetupTime",
+						Type:   "*variable",
+						Value:  NewRSRParsersMustCompile("~*req.SetupTime", true, utils.INFIELD_SEP),
+						Layout: "2006-01-02T15:04:05Z07:00",
+					},
+					{
+						Tag:    utils.AnswerTime,
+						Path:   "*exp.AnswerTime",
+						Type:   "*variable",
+						Value:  NewRSRParsersMustCompile("~*req.AnswerTime", true, utils.INFIELD_SEP),
+						Layout: "2006-01-02T15:04:05Z07:00",
+					},
+					{
+						Tag:    utils.Usage,
+						Path:   "*exp.Usage",
+						Type:   "*variable",
+						Value:  NewRSRParsersMustCompile("~*req.Usage", true, utils.INFIELD_SEP),
+						Layout: time.RFC3339,
+					},
+					{
+						Tag:              utils.Cost,
+						Path:             "*exp.Cost",
+						Type:             "*variable",
+						Value:            NewRSRParsersMustCompile("~*req.Cost", true, utils.INFIELD_SEP),
+						Layout:           time.RFC3339,
+						RoundingDecimals: utils.IntPointer(4),
+					},
+				},
+			},
+		},
+	}
+	if !reflect.DeepEqual(cgrCfg.eesCfg, eCfg) {
+		t.Errorf("received: %+v,\n expecting: %+v", utils.ToJSON(cgrCfg.eesCfg), utils.ToJSON(eCfg))
+	}
+}
+
 func TestCgrCfgEventReaderDefault(t *testing.T) {
 	eCfg := &EventReaderCfg{
 		ID:             utils.MetaDefault,
@@ -1876,6 +2001,125 @@ func TestCgrCfgEventReaderDefault(t *testing.T) {
 	}
 	if !reflect.DeepEqual(cgrCfg.dfltEvRdr, eCfg) {
 		t.Errorf("received: %+v,\n expecting: %+v", utils.ToJSON(cgrCfg.dfltEvRdr), utils.ToJSON(eCfg))
+	}
+
+}
+
+func TestCgrCfgEventExporterDefault(t *testing.T) {
+	eCfg := &EventExporterCfg{
+		ID:         utils.MetaDefault,
+		Type:       utils.META_NONE,
+		FieldSep:   ",",
+		Tenant:     nil,
+		ExportPath: "/var/spool/cgrates/ees",
+		Attempts:   1,
+		Timezone:   utils.EmptyString,
+		Filters:    nil,
+		Flags:      utils.FlagsWithParams{},
+		Fields: []*FCTemplate{
+			{
+				Tag:    utils.CGRID,
+				Path:   "*exp.CGRID",
+				Type:   "*variable",
+				Value:  NewRSRParsersMustCompile("~*req.CGRID", true, utils.INFIELD_SEP),
+				Layout: time.RFC3339,
+			},
+			{
+				Tag:    utils.RunID,
+				Path:   "*exp.RunID",
+				Type:   "*variable",
+				Value:  NewRSRParsersMustCompile("~*req.RunID", true, utils.INFIELD_SEP),
+				Layout: time.RFC3339,
+			},
+			{
+				Tag:    utils.ToR,
+				Path:   "*exp.ToR",
+				Type:   "*variable",
+				Value:  NewRSRParsersMustCompile("~*req.ToR", true, utils.INFIELD_SEP),
+				Layout: time.RFC3339,
+			},
+			{
+				Tag:    utils.OriginID,
+				Path:   "*exp.OriginID",
+				Type:   "*variable",
+				Value:  NewRSRParsersMustCompile("~*req.OriginID", true, utils.INFIELD_SEP),
+				Layout: time.RFC3339,
+			},
+			{
+				Tag:    utils.RequestType,
+				Path:   "*exp.RequestType",
+				Type:   "*variable",
+				Value:  NewRSRParsersMustCompile("~*req.RequestType", true, utils.INFIELD_SEP),
+				Layout: time.RFC3339,
+			},
+			{
+				Tag:    utils.Tenant,
+				Path:   "*exp.Tenant",
+				Type:   "*variable",
+				Value:  NewRSRParsersMustCompile("~*req.Tenant", true, utils.INFIELD_SEP),
+				Layout: time.RFC3339,
+			},
+			{
+				Tag:    utils.Category,
+				Path:   "*exp.Category",
+				Type:   "*variable",
+				Value:  NewRSRParsersMustCompile("~*req.Category", true, utils.INFIELD_SEP),
+				Layout: time.RFC3339,
+			},
+			{
+				Tag:    utils.Account,
+				Path:   "*exp.Account",
+				Type:   "*variable",
+				Value:  NewRSRParsersMustCompile("~*req.Account", true, utils.INFIELD_SEP),
+				Layout: time.RFC3339,
+			},
+			{
+				Tag:    utils.Subject,
+				Path:   "*exp.Subject",
+				Type:   "*variable",
+				Value:  NewRSRParsersMustCompile("~*req.Subject", true, utils.INFIELD_SEP),
+				Layout: time.RFC3339,
+			},
+			{
+				Tag:    utils.Destination,
+				Path:   "*exp.Destination",
+				Type:   "*variable",
+				Value:  NewRSRParsersMustCompile("~*req.Destination", true, utils.INFIELD_SEP),
+				Layout: time.RFC3339,
+			},
+			{
+				Tag:    utils.SetupTime,
+				Path:   "*exp.SetupTime",
+				Type:   "*variable",
+				Value:  NewRSRParsersMustCompile("~*req.SetupTime", true, utils.INFIELD_SEP),
+				Layout: "2006-01-02T15:04:05Z07:00",
+			},
+			{
+				Tag:    utils.AnswerTime,
+				Path:   "*exp.AnswerTime",
+				Type:   "*variable",
+				Value:  NewRSRParsersMustCompile("~*req.AnswerTime", true, utils.INFIELD_SEP),
+				Layout: "2006-01-02T15:04:05Z07:00",
+			},
+			{
+				Tag:    utils.Usage,
+				Path:   "*exp.Usage",
+				Type:   "*variable",
+				Value:  NewRSRParsersMustCompile("~*req.Usage", true, utils.INFIELD_SEP),
+				Layout: time.RFC3339,
+			},
+			{
+				Tag:              utils.Cost,
+				Path:             "*exp.Cost",
+				Type:             "*variable",
+				Value:            NewRSRParsersMustCompile("~*req.Cost", true, utils.INFIELD_SEP),
+				Layout:           time.RFC3339,
+				RoundingDecimals: utils.IntPointer(4),
+			},
+		},
+	}
+	if !reflect.DeepEqual(cgrCfg.dfltEvExp, eCfg) {
+		t.Errorf("received: %+v,\n expecting: %+v", utils.ToJSON(cgrCfg.dfltEvExp), utils.ToJSON(eCfg))
 	}
 
 }
