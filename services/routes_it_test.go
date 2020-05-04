@@ -53,7 +53,7 @@ func TestSupplierSReload(t *testing.T) {
 	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
 	db := NewDataDBService(cfg, nil)
 	sts := NewStatService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil)
-	supS := NewSupplierService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil)
+	supS := NewRouteService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil)
 	engine.NewConnManager(cfg, nil)
 	srvMngr.AddServices(supS, sts,
 		NewLoaderService(cfg, db, filterSChan, server, engineShutdown, make(chan rpcclient.ClientConnector, 1), nil), db)
@@ -69,7 +69,7 @@ func TestSupplierSReload(t *testing.T) {
 	var reply string
 	if err := cfg.V1ReloadConfigFromPath(&config.ConfigReloadWithArgDispatcher{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongonew"),
-		Section: config.SupplierSJson,
+		Section: config.RouteSJson,
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -82,8 +82,8 @@ func TestSupplierSReload(t *testing.T) {
 	if !db.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
-	cfg.SupplierSCfg().Enabled = false
-	cfg.GetReloadChan(config.SupplierSJson) <- struct{}{}
+	cfg.RouteSCfg().Enabled = false
+	cfg.GetReloadChan(config.RouteSJson) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)
 	if supS.IsRunning() {
 		t.Errorf("Expected service to be down")

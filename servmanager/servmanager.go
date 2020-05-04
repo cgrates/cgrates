@@ -156,7 +156,7 @@ func (srvMngr *ServiceManager) StartServices() (err error) {
 		utils.ThresholdS:      srvMngr.GetConfig().ThresholdSCfg().Enabled,
 		utils.StatS:           srvMngr.GetConfig().StatSCfg().Enabled,
 		utils.ResourceS:       srvMngr.GetConfig().ResourceSCfg().Enabled,
-		utils.RouteS:          srvMngr.GetConfig().RouteCfg().Enabled,
+		utils.RouteS:          srvMngr.GetConfig().RouteSCfg().Enabled,
 		utils.SchedulerS:      srvMngr.GetConfig().SchedulerCfg().Enabled,
 		utils.RALService:      srvMngr.GetConfig().RalsCfg().Enabled,
 		utils.CDRServer:       srvMngr.GetConfig().CdrsCfg().Enabled,

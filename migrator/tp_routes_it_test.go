@@ -38,7 +38,7 @@ var (
 	tpSplCfgIn    *config.CGRConfig
 	tpSplCfgOut   *config.CGRConfig
 	tpSplMigrator *Migrator
-	tpSuppliers   []*utils.TPSupplierProfile
+	tpSuppliers   []*utils.TPRouteProfile
 )
 
 var sTestsTpSplIT = []func(t *testing.T){
@@ -107,7 +107,7 @@ func testTpSplITFlush(t *testing.T) {
 }
 
 func testTpSplITPopulate(t *testing.T) {
-	tpSuppliers = []*utils.TPSupplierProfile{
+	tpSuppliers = []*utils.TPRouteProfile{
 		{
 			TPid:      "TP1",
 			Tenant:    "cgrates.org",
@@ -119,23 +119,23 @@ func testTpSplITPopulate(t *testing.T) {
 			},
 			Sorting:           "*lowest_cost",
 			SortingParameters: []string{},
-			Suppliers: []*utils.TPSupplier{
+			Routes: []*utils.TPRoute{
 				{
-					ID:                 "supplier1",
-					FilterIDs:          []string{"FLTR_1"},
-					AccountIDs:         []string{"Acc1", "Acc2"},
-					RatingPlanIDs:      []string{"RPL_1"},
-					ResourceIDs:        []string{"ResGroup1"},
-					StatIDs:            []string{"Stat1"},
-					Weight:             10,
-					Blocker:            false,
-					SupplierParameters: "SortingParam1",
+					ID:              "supplier1",
+					FilterIDs:       []string{"FLTR_1"},
+					AccountIDs:      []string{"Acc1", "Acc2"},
+					RatingPlanIDs:   []string{"RPL_1"},
+					ResourceIDs:     []string{"ResGroup1"},
+					StatIDs:         []string{"Stat1"},
+					Weight:          10,
+					Blocker:         false,
+					RouteParameters: "SortingParam1",
 				},
 			},
 			Weight: 20,
 		},
 	}
-	if err := tpSplMigrator.storDBIn.StorDB().SetTPSuppliers(tpSuppliers); err != nil {
+	if err := tpSplMigrator.storDBIn.StorDB().SetTPRoutes(tpSuppliers); err != nil {
 		t.Error("Error when setting TpSuppliers ", err.Error())
 	}
 	currentVersion := engine.CurrentStorDBVersions()
@@ -146,14 +146,14 @@ func testTpSplITPopulate(t *testing.T) {
 }
 
 func testTpSplITMove(t *testing.T) {
-	err, _ := tpSplMigrator.Migrate([]string{utils.MetaTpSuppliers})
+	err, _ := tpSplMigrator.Migrate([]string{utils.MetaTpRoutes})
 	if err != nil {
 		t.Error("Error when migrating TpSuppliers ", err.Error())
 	}
 }
 
 func testTpSplITCheckData(t *testing.T) {
-	result, err := tpSplMigrator.storDBOut.StorDB().GetTPSuppliers(
+	result, err := tpSplMigrator.storDBOut.StorDB().GetTPRoutes(
 		tpSuppliers[0].TPid, "", tpSuppliers[0].ID)
 	if err != nil {
 		t.Error("Error when getting TpSuppliers ", err.Error())
@@ -162,7 +162,7 @@ func testTpSplITCheckData(t *testing.T) {
 	if !reflect.DeepEqual(tpSuppliers[0], result[0]) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(tpSuppliers[0]), utils.ToJSON(result[0]))
 	}
-	result, err = tpSplMigrator.storDBIn.StorDB().GetTPSuppliers(
+	result, err = tpSplMigrator.storDBIn.StorDB().GetTPRoutes(
 		tpSuppliers[0].TPid, "", tpSuppliers[0].ID)
 	if err != utils.ErrNotFound {
 		t.Error(err)

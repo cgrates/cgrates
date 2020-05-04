@@ -83,7 +83,7 @@ func (rp *RouteProfile) compileCacheParameters() error {
 			route.cacheRoute = make(map[string]interface{})
 			if ratioSupplier, has := ratioMap[route.ID]; !has { // in case that ratio isn't defined for specific suppliers check for default
 				if ratioDefault, has := ratioMap[utils.MetaDefault]; !has { // in case that *default ratio isn't defined take it from config
-					route.cacheRoute[utils.MetaRatio] = config.CgrConfig().RouteCfg().DefaultRatio
+					route.cacheRoute[utils.MetaRatio] = config.CgrConfig().RouteSCfg().DefaultRatio
 				} else {
 					route.cacheRoute[utils.MetaRatio] = ratioDefault
 				}
@@ -155,11 +155,11 @@ func (rpS *RouteService) Shutdown() error {
 // matchingRouteProfilesForEvent returns ordered list of matching resources which are active by the time of the call
 func (rpS *RouteService) matchingRouteProfilesForEvent(ev *utils.CGREvent, singleResult bool) (matchingRPrf []*RouteProfile, err error) {
 	rPrfIDs, err := MatchingItemIDsForEvent(ev.Event,
-		rpS.cgrcfg.RouteCfg().StringIndexedFields,
-		rpS.cgrcfg.RouteCfg().PrefixIndexedFields,
+		rpS.cgrcfg.RouteSCfg().StringIndexedFields,
+		rpS.cgrcfg.RouteSCfg().PrefixIndexedFields,
 		rpS.dm, utils.CacheRouteFilterIndexes, ev.Tenant,
-		rpS.cgrcfg.RouteCfg().IndexedSelects,
-		rpS.cgrcfg.RouteCfg().NestedFields,
+		rpS.cgrcfg.RouteSCfg().IndexedSelects,
+		rpS.cgrcfg.RouteSCfg().NestedFields,
 	)
 	if err != nil {
 		return nil, err
@@ -241,7 +241,7 @@ func (rpS *RouteService) costForEvent(ev *utils.CGREvent,
 		usage = time.Duration(1 * time.Minute)
 		err = nil
 	}
-	if err := rpS.connMgr.Call(rpS.cgrcfg.RouteCfg().ResponderSConns, nil, utils.ResponderGetMaxSessionTimeOnAccounts,
+	if err := rpS.connMgr.Call(rpS.cgrcfg.RouteSCfg().ResponderSConns, nil, utils.ResponderGetMaxSessionTimeOnAccounts,
 		&utils.GetMaxSessionTimeOnAccountsArgs{
 			Tenant:      ev.Tenant,
 			Subject:     subj,
@@ -252,7 +252,7 @@ func (rpS *RouteService) costForEvent(ev *utils.CGREvent,
 		}, &costData); err != nil {
 		return nil, err
 	}
-	if err := rpS.connMgr.Call(rpS.cgrcfg.RouteCfg().ResponderSConns, nil, utils.ResponderGetCostOnRatingPlans,
+	if err := rpS.connMgr.Call(rpS.cgrcfg.RouteSCfg().ResponderSConns, nil, utils.ResponderGetCostOnRatingPlans,
 		&utils.GetCostOnRatingPlansArgs{
 			Tenant:        ev.Tenant,
 			Account:       acnt,
@@ -272,10 +272,10 @@ func (rpS *RouteService) costForEvent(ev *utils.CGREvent,
 func (rpS *RouteService) statMetrics(statIDs []string, tenant string) (stsMetric map[string]float64, err error) {
 	stsMetric = make(map[string]float64)
 	provStsMetrics := make(map[string][]float64)
-	if len(rpS.cgrcfg.RouteCfg().StatSConns) != 0 {
+	if len(rpS.cgrcfg.RouteSCfg().StatSConns) != 0 {
 		for _, statID := range statIDs {
 			var metrics map[string]float64
-			if err = rpS.connMgr.Call(rpS.cgrcfg.RouteCfg().StatSConns, nil, utils.StatSv1GetQueueFloatMetrics,
+			if err = rpS.connMgr.Call(rpS.cgrcfg.RouteSCfg().StatSConns, nil, utils.StatSv1GetQueueFloatMetrics,
 				&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: tenant, ID: statID}}, &metrics); err != nil &&
 				err.Error() != utils.ErrNotFound.Error() {
 				utils.Logger.Warning(
@@ -301,13 +301,13 @@ func (rpS *RouteService) statMetrics(statIDs []string, tenant string) (stsMetric
 // first metric found is always returned
 func (rpS *RouteService) statMetricsForLoadDistribution(statIDs []string, tenant string) (result float64, err error) {
 	provStsMetrics := make(map[string][]float64)
-	if len(rpS.cgrcfg.RouteCfg().StatSConns) != 0 {
+	if len(rpS.cgrcfg.RouteSCfg().StatSConns) != 0 {
 		for _, statID := range statIDs {
 			// check if we get an ID in the following form (StatID:MetricID)
 			statWithMetric := strings.Split(statID, utils.InInFieldSep)
 			var metrics map[string]float64
 			if err = rpS.connMgr.Call(
-				rpS.cgrcfg.RouteCfg().StatSConns, nil,
+				rpS.cgrcfg.RouteSCfg().StatSConns, nil,
 				utils.StatSv1GetQueueFloatMetrics,
 				&utils.TenantIDWithArgDispatcher{
 					TenantID: &utils.TenantID{
@@ -346,10 +346,10 @@ func (rpS *RouteService) statMetricsForLoadDistribution(statIDs []string, tenant
 
 // resourceUsage returns sum of all resource usages out of list
 func (rpS *RouteService) resourceUsage(resIDs []string, tenant string) (tUsage float64, err error) {
-	if len(rpS.cgrcfg.RouteCfg().ResourceSConns) != 0 {
+	if len(rpS.cgrcfg.RouteSCfg().ResourceSConns) != 0 {
 		for _, resID := range resIDs {
 			var res Resource
-			if err = rpS.connMgr.Call(rpS.cgrcfg.RouteCfg().ResourceSConns, nil, utils.ResourceSv1GetResource,
+			if err = rpS.connMgr.Call(rpS.cgrcfg.RouteSCfg().ResourceSConns, nil, utils.ResourceSv1GetResource,
 				&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: tenant, ID: resID}}, &res); err != nil && err.Error() != utils.ErrNotFound.Error() {
 				utils.Logger.Warning(
 					fmt.Sprintf("<SupplierS> error: %s getting resource for ID : %s", err.Error(), resID))
@@ -584,7 +584,7 @@ func (rpS *RouteService) V1GetRoutes(args *ArgsGetRoutes, reply *SortedRoutes) (
 	} else if args.CGREvent.Event == nil {
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
-	if len(rpS.cgrcfg.RouteCfg().AttributeSConns) != 0 {
+	if len(rpS.cgrcfg.RouteSCfg().AttributeSConns) != 0 {
 		attrArgs := &AttrArgsProcessEvent{
 			Context: utils.StringPointer(utils.FirstNonEmpty(
 				utils.IfaceAsString(args.CGREvent.Event[utils.Context]),
@@ -593,7 +593,7 @@ func (rpS *RouteService) V1GetRoutes(args *ArgsGetRoutes, reply *SortedRoutes) (
 			ArgDispatcher: args.ArgDispatcher,
 		}
 		var rplyEv AttrSProcessEventReply
-		if err := rpS.connMgr.Call(rpS.cgrcfg.RouteCfg().AttributeSConns, nil,
+		if err := rpS.connMgr.Call(rpS.cgrcfg.RouteSCfg().AttributeSConns, nil,
 			utils.AttributeSv1ProcessEvent, attrArgs, &rplyEv); err == nil && len(rplyEv.AlteredFields) != 0 {
 			args.CGREvent = rplyEv.CGREvent
 			args.Opts = rplyEv.Opts

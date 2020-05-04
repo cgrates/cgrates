@@ -173,31 +173,29 @@ func testSupITFlush(t *testing.T) {
 }
 
 func testSupITMigrateAndMove(t *testing.T) {
-	supPrfl := &engine.SupplierProfile{
+	supPrfl := &engine.RouteProfile{
 		Tenant:            "cgrates.org",
 		ID:                "SUP1",
 		FilterIDs:         []string{"*string:~Account:1001"},
 		Weight:            10,
 		Sorting:           utils.MetaQOS,
 		SortingParameters: []string{},
-		Suppliers: []*engine.Supplier{
-			&engine.Supplier{
-				ID:            "Sup",
-				FilterIDs:     []string{},
-				AccountIDs:    []string{"1001"},
-				RatingPlanIDs: []string{"RT_PLAN1"},
-				ResourceIDs:   []string{"RES1"},
-				Weight:        10,
-			},
-		},
+		Routes: []*engine.Route{{
+			ID:            "Sup",
+			FilterIDs:     []string{},
+			AccountIDs:    []string{"1001"},
+			RatingPlanIDs: []string{"RT_PLAN1"},
+			ResourceIDs:   []string{"RES1"},
+			Weight:        10,
+		}},
 	}
 	switch supAction {
 	case utils.Migrate: // for the momment only one version of rating plans exists
 	case utils.Move:
-		if err := supMigrator.dmIN.DataManager().SetSupplierProfile(supPrfl, true); err != nil {
+		if err := supMigrator.dmIN.DataManager().SetRouteProfile(supPrfl, true); err != nil {
 			t.Error(err)
 		}
-		if _, err := supMigrator.dmIN.DataManager().GetSupplierProfile("cgrates.org", "SUP1", false, false, utils.NonTransactional); err != nil {
+		if _, err := supMigrator.dmIN.DataManager().GetRouteProfile("cgrates.org", "SUP1", false, false, utils.NonTransactional); err != nil {
 			t.Error(err)
 		}
 		currentVersion := engine.CurrentDataDBVersions()
@@ -206,23 +204,23 @@ func testSupITMigrateAndMove(t *testing.T) {
 			t.Error("Error when setting version for Suppliers ", err.Error())
 		}
 
-		_, err = supMigrator.dmOut.DataManager().GetSupplierProfile("cgrates.org", "SUP1", false, false, utils.NonTransactional)
+		_, err = supMigrator.dmOut.DataManager().GetRouteProfile("cgrates.org", "SUP1", false, false, utils.NonTransactional)
 		if err != utils.ErrNotFound {
 			t.Error(err)
 		}
 
-		err, _ = supMigrator.Migrate([]string{utils.MetaSuppliers})
+		err, _ = supMigrator.Migrate([]string{utils.MetaRoutes})
 		if err != nil {
 			t.Error("Error when migrating Suppliers ", err.Error())
 		}
-		result, err := supMigrator.dmOut.DataManager().GetSupplierProfile("cgrates.org", "SUP1", false, false, utils.NonTransactional)
+		result, err := supMigrator.dmOut.DataManager().GetRouteProfile("cgrates.org", "SUP1", false, false, utils.NonTransactional)
 		if err != nil {
 			t.Fatal(err)
 		}
 		if !reflect.DeepEqual(result, supPrfl) {
 			t.Errorf("Expecting: %+v, received: %+v", supPrfl, result)
 		}
-		result, err = supMigrator.dmIN.DataManager().GetSupplierProfile("cgrates.org", "SUP1", false, false, utils.NonTransactional)
+		result, err = supMigrator.dmIN.DataManager().GetRouteProfile("cgrates.org", "SUP1", false, false, utils.NonTransactional)
 		if err != utils.ErrNotFound {
 			t.Error(err)
 		}
