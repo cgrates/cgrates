@@ -670,6 +670,7 @@ const (
 	MetaRatingPlanCost       = "*rating_plan_cost"
 	RatingPlanIDs            = "RatingPlanIDs"
 	ERs                      = "ERs"
+	EEs                      = "EEs"
 	Ratio                    = "Ratio"
 	Load                     = "Load"
 	Slash                    = "/"

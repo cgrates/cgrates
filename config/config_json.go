@@ -221,6 +221,16 @@ func (self CgrJsonCfg) ERsJsonCfg() (erSCfg *ERsJsonCfg, err error) {
 	return
 }
 
+func (self CgrJsonCfg) EEsJsonCfg() (erSCfg *EEsJsonCfg, err error) {
+	rawCfg, hasKey := self[EEsJson]
+	if !hasKey {
+		return
+	}
+	erSCfg = new(EEsJsonCfg)
+	err = json.Unmarshal(*rawCfg, &erSCfg)
+	return
+}
+
 func (self CgrJsonCfg) SessionSJsonCfg() (*SessionSJsonCfg, error) {
 	rawCfg, hasKey := self[SessionSJson]
 	if !hasKey {

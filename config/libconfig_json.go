@@ -195,7 +195,31 @@ type EventReaderJsonCfg struct {
 	Cache_dump_fields           *[]*FcTemplateJsonCfg
 }
 
-// SM-Generic config section
+// EEsJsonCfg contains the configuration of EventExporterService
+type EEsJsonCfg struct {
+	Enabled          *bool
+	Attributes_conns *[]string
+	Exporters        *[]*EventExporterJsonCfg
+}
+
+// EventExporterJsonCfg is the configuration of a single EventExporter
+type EventExporterJsonCfg struct {
+	Id                *string
+	Type              *string
+	Export_path       *string
+	Tenant            *string
+	Timezone          *string
+	Filters           *[]string
+	Flags             *[]string
+	Attribute_context *string
+	Attribute_ids     *[]string
+	Synchronous       *bool
+	Attempts          *int
+	Field_separator   *string
+	Fields            *[]*FcTemplateJsonCfg
+}
+
+// SessionSJsonCfg config section
 type SessionSJsonCfg struct {
 	Enabled               *bool
 	Listen_bijson         *string

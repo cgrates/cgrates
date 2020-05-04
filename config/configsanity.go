@@ -427,6 +427,34 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			}
 		}
 	}
+	// EventExporter sanity checks
+	if cfg.eesCfg.Enabled {
+		for _, connID := range cfg.eesCfg.AttributeSConns {
+			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.attributeSCfg.Enabled {
+				return fmt.Errorf("<%s> not enabled but requested by <%s> component.", utils.AttributeS, utils.EEs)
+			}
+			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
+				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.EEs, connID)
+			}
+		}
+		for _, exp := range cfg.eesCfg.Exporters {
+			if !possibleExporterTypes.Has(exp.Type) {
+				return fmt.Errorf("<%s> unsupported data type: %s for exporter with ID: %s", utils.EEs, exp.Type, exp.ID)
+			}
+
+			switch exp.Type {
+			case utils.MetaFileCSV:
+				for _, dir := range []string{exp.ExportPath} {
+					if _, err := os.Stat(dir); err != nil && os.IsNotExist(err) {
+						return fmt.Errorf("<%s> nonexistent folder: %s for reader with ID: %s", utils.EEs, dir, exp.ID)
+					}
+				}
+				if exp.FieldSep == utils.EmptyString {
+					return fmt.Errorf("<%s> empty FieldSep for exporter with ID: %s", utils.EEs, exp.ID)
+				}
+			}
+		}
+	}
 	// StorDB sanity checks
 	if cfg.storDbCfg.Type == utils.POSTGRES {
 		if !utils.IsSliceMember([]string{utils.PostgressSSLModeDisable, utils.PostgressSSLModeAllow,

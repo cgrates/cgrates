@@ -343,6 +343,44 @@ const CGRATES_CFG_JSON = `
 },
 
 
+"ees": {									// EventExporterService
+	"enabled": false,						// starts the EventReader service: <true|false>
+	"attributes_conns":["*internal"],		// RPC Connections IDs
+	"exporters": [
+		{
+			"id": "*default",									// identifier of the EventReader profile
+			"type": "*none",									// exporter type 
+			"export_path": "/var/spool/cgrates/ees",			// path where the exported events will be placed
+			"tenant": "",										// tenant used in filterS.Pass
+			"timezone": "",										// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
+			"filters": [],										// limit parsing based on the filters
+			"flags": [],										// flags to influence the event processing
+			"attribute_context": "",							// context used to process request with AttributeS
+			"attribute_ids": [],								// ids of attributes used to avoid searching 
+			"synchronous": false,								// block processing until export has a result
+			"attempts": 1,										// export attempts
+			"field_separator": ",",								// separator used in case of csv files
+			"fields":[											// import fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
+				{"tag": "CGRID", "path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"},
+				{"tag": "RunID", "path": "*exp.RunID", "type": "*variable", "value": "~*req.RunID"},
+				{"tag": "ToR", "path": "*exp.ToR", "type": "*variable", "value": "~*req.ToR"},
+				{"tag": "OriginID", "path": "*exp.OriginID", "type": "*variable", "value": "~*req.OriginID"},
+				{"tag": "RequestType", "path": "*exp.RequestType", "type": "*variable", "value": "~*req.RequestType"},
+				{"tag": "Tenant", "path": "*exp.Tenant", "type": "*variable", "value": "~*req.Tenant"},
+				{"tag": "Category", "path": "*exp.Category", "type": "*variable", "value": "~*req.Category"},
+				{"tag": "Account", "path": "*exp.Account", "type": "*variable", "value": "~*req.Account"},
+				{"tag": "Subject", "path": "*exp.Subject", "type": "*variable", "value": "~*req.Subject"},
+				{"tag": "Destination", "path": "*exp.Destination", "type": "*variable", "value": "~*req.Destination"},
+				{"tag": "SetupTime", "path": "*exp.SetupTime", "type": "*variable", "value": "~*req.SetupTime", "layout": "2006-01-02T15:04:05Z07:00"},
+				{"tag": "AnswerTime", "path": "*exp.AnswerTime", "type": "*variable", "value": "~*req.AnswerTime", "layout": "2006-01-02T15:04:05Z07:00"},
+				{"tag": "Usage", "path": "*exp.Usage", "type": "*variable", "value": "~*req.Usage"},
+				{"tag": "Cost", "path": "*exp.Cost", "type": "*variable", "value": "~*req.Cost", "rounding_decimals": 4},
+			],
+		},
+	],
+},
+
+
 "sessions": {
 	"enabled": false,						// starts the session service: <true|false>
 	"listen_bijson": "127.0.0.1:2014",		// address where to listen for bidirectional JSON-RPC requests
