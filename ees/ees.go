@@ -84,7 +84,7 @@ func (eeS *EEService) V1ProcessEvent(cgrEv *utils.CGREventWithOpts) (err error) 
 
 	for _, eeCfg := range eeS.cfg.EEsCfg().Exporters {
 
-		if eeCfg.AttributeSCtx != utils.META_NONE {
+		if eeCfg.Flags.GetBool(utils.MetaAttributes) {
 			var rplyEv engine.AttrSProcessEventReply
 			attrArgs := &engine.AttrArgsProcessEvent{
 				AttributeIDs: eeCfg.AttributeSIDs,

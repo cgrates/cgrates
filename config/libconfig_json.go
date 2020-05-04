@@ -211,8 +211,8 @@ type EventExporterJsonCfg struct {
 	Timezone          *string
 	Filters           *[]string
 	Flags             *[]string
-	Attribute_context *string
 	Attribute_ids     *[]string
+	Attribute_context *string
 	Synchronous       *bool
 	Attempts          *int
 	Field_separator   *string

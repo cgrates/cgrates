@@ -355,8 +355,8 @@ const CGRATES_CFG_JSON = `
 			"timezone": "",										// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
 			"filters": [],										// limit parsing based on the filters
 			"flags": [],										// flags to influence the event processing
-			"attribute_context": "",							// context used to process request with AttributeS
-			"attribute_ids": [],								// ids of attributes used to avoid searching 
+			"attribute_ids": [],								// select Attribute profiles instead of discovering them
+			"attribute_context": "",							// context used to discover matching Attribute profiles
 			"synchronous": false,								// block processing until export has a result
 			"attempts": 1,										// export attempts
 			"field_separator": ",",								// separator used in case of csv files

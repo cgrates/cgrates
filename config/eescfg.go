@@ -103,8 +103,8 @@ type EventExporterCfg struct {
 	Timezone      string
 	Filters       []string
 	Flags         utils.FlagsWithParams
-	AttributeSCtx string   // context to use when querying AttributeS
 	AttributeSIDs []string // selective AttributeS profiles
+	AttributeSCtx string   // context to use when querying AttributeS
 	Synchronous   bool
 	Attempts      int
 	FieldSep      string
