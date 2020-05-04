@@ -102,3 +102,78 @@ func TestLoaderSCfgloadFromJsonCfg(t *testing.T) {
 		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(loadscfg))
 	}
 }
+
+func TestLoaderCfgAsMapInterface(t *testing.T) {
+	var loadscfg LoaderSCfg
+	cfgJSONStr := `{
+			"loaders": [												
+	{
+		"id": "*default",									
+		"enabled": false,									
+		"tenant": "",										
+		"dry_run": false,									
+		"run_delay": 0,										
+		"lock_filename": ".cgr.lck",						
+		"caches_conns": ["*internal"],
+		"field_separator": ",",								
+		"tp_in_dir": "/var/spool/cgrates/loader/in",		
+		"tp_out_dir": "/var/spool/cgrates/loader/out",		
+		"data":[											
+			{
+				"type": "*attributes",						
+				"file_name": "Attributes.csv",				
+				"fields": [
+					{"tag": "TenantID", "path": "Tenant", "type": "*variable", "value": "~0", "mandatory": true},
+					{"tag": "ProfileID", "path": "ID", "type": "*variable", "value": "~1", "mandatory": true},
+					],
+				},
+			],
+		},
+	],
+	
+}`
+	eMap := map[string]interface{}{
+		"id":              "*default",
+		"enabled":         false,
+		"tenant":          "",
+		"dry_run":         false,
+		"run_delay":       "0",
+		"lock_filename":   ".cgr.lck",
+		"caches_conns":    []string{"*internal"},
+		"field_separator": ",",
+		"tp_in_dir":       "/var/spool/cgrates/loader/in",
+		"tp_out_dir":      "/var/spool/cgrates/loader/out",
+		"data": []map[string]interface{}{
+			{
+				"type":      "*attributes",
+				"file_name": "Attributes.csv",
+				"fields": []map[string]interface{}{
+					{
+						"tag":       "TenantID",
+						"path":      "Tenant",
+						"type":      "*variable",
+						"value":     "~0",
+						"mandatory": true,
+					}, {
+						"tag":       "ProfileID",
+						"path":      "ID",
+						"type":      "*variable",
+						"value":     "~1",
+						"mandatory": true,
+					},
+				},
+			},
+		},
+	}
+
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+		t.Error(err)
+	} else if jsnLoadersCfg, err := jsnCfg.LoaderJsonCfg(); err != nil {
+		t.Error(err)
+	} else if err = loadscfg.loadFromJsonCfg(jsnLoadersCfg[0], utils.INFIELD_SEP); err != nil {
+		t.Error(err)
+	} else if rcv := loadscfg.AsMapInterface(""); !reflect.DeepEqual(eMap, rcv) {
+		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	}
+
+}

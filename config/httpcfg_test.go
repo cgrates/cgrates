@@ -20,6 +20,8 @@ package config
 import (
 	"reflect"
 	"testing"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 func TestHTTPCfgloadFromJsonCfg(t *testing.T) {
@@ -60,5 +62,38 @@ func TestHTTPCfgloadFromJsonCfg(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, httpcfg) {
 		t.Errorf("Expected: %+v , recived: %+v", expected, httpcfg)
+	}
+}
+
+func TestHTTPCfgAsMapInterface(t *testing.T) {
+	var httpcfg HTTPCfg
+	cfgJSONStr := `{
+	"http": {										
+		"json_rpc_url": "/jsonrpc",					
+		"ws_url": "/ws",							
+		"freeswitch_cdrs_url": "/freeswitch_json",	
+		"http_cdrs": "/cdr_http",					
+		"use_basic_auth": false,					
+		"auth_users": {},							
+	},
+}`
+
+	eMap := map[string]interface{}{
+		"json_rpc_url":        "/jsonrpc",
+		"ws_url":              "/ws",
+		"freeswitch_cdrs_url": "/freeswitch_json",
+		"http_cdrs":           "/cdr_http",
+		"use_basic_auth":      false,
+		"auth_users":          map[string]interface{}{},
+	}
+
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+		t.Error(err)
+	} else if jsnhttpCfg, err := jsnCfg.HttpJsonCfg(); err != nil {
+		t.Error(err)
+	} else if err = httpcfg.loadFromJsonCfg(jsnhttpCfg); err != nil {
+		t.Error(err)
+	} else if rcv := httpcfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
+		t.Errorf("Expected: %+v ,\n recived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }

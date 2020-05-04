@@ -117,12 +117,12 @@ func (da *DiameterAgentCfg) loadFromJsonCfg(jsnCfg *DiameterAgentJsonCfg, separa
 	return nil
 }
 
-func (ds *DiameterAgentCfg) AsMapInterface() map[string]interface{} {
+func (ds *DiameterAgentCfg) AsMapInterface(separator string) map[string]interface{} {
 	templates := make(map[string][]map[string]interface{})
 	for key, value := range ds.Templates {
 		fcTemplate := make([]map[string]interface{}, len(value))
 		for i, val := range value {
-			fcTemplate[i] = val.AsMapInterface()
+			fcTemplate[i] = val.AsMapInterface(separator)
 
 		}
 		templates[key] = fcTemplate
@@ -130,7 +130,7 @@ func (ds *DiameterAgentCfg) AsMapInterface() map[string]interface{} {
 
 	requestProcessors := make([]map[string]interface{}, len(ds.RequestProcessors))
 	for i, item := range ds.RequestProcessors {
-		requestProcessors[i] = item.AsMapInterface()
+		requestProcessors[i] = item.AsMapInterface(separator)
 	}
 
 	return map[string]interface{}{

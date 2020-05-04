@@ -96,7 +96,7 @@ func (self *RadiusAgentCfg) loadFromJsonCfg(jsnCfg *RadiusAgentJsonCfg, separato
 	return nil
 }
 
-func (ra *RadiusAgentCfg) AsMapInterface() map[string]interface{} {
+func (ra *RadiusAgentCfg) AsMapInterface(separator string) map[string]interface{} {
 	clientSecrets := make(map[string]interface{}, len(ra.ClientSecrets))
 	for key, val := range ra.ClientSecrets {
 		clientSecrets[key] = val
@@ -109,7 +109,7 @@ func (ra *RadiusAgentCfg) AsMapInterface() map[string]interface{} {
 
 	requestProcessors := make([]map[string]interface{}, len(ra.RequestProcessors))
 	for i, item := range ra.RequestProcessors {
-		requestProcessors[i] = item.AsMapInterface()
+		requestProcessors[i] = item.AsMapInterface(separator)
 	}
 
 	return map[string]interface{}{
