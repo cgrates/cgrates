@@ -36,7 +36,8 @@ type EventExporterCfg struct {
 	Timezone      string
 	Filters       []string
 	Flags         utils.FlagsWithParams
-	AttributeSCtx string // context to use when querying AttributeS
+	AttributeSCtx string   // context to use when querying AttributeS
+	AttributeSIDs []string // selective AttributeS profiles
 	Synchronous   bool
 	Attempts      int
 	FieldSep      rune

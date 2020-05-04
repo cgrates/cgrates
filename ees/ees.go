@@ -97,10 +97,10 @@ func (eeS *EEService) V1ProcessEvent(cgrEv *utils.CGREvent) (err error) {
 			err = nil // cancel ErrNotFound
 		}
 	*/
-	eeS.eesMux.RLock()
-	defer eeS.eesMux.RUnlock()
 	for _, eeCfg := range eeS.cfg.EEsCfg().Exporters {
+		eeS.eesMux.RLock()
 		ee, has := eeS.ees[eeCfg.ID]
+		eeS.eesMux.RUnlock()
 		if !has {
 			if ee, err = NewEventExporter(eeCfg); err != nil {
 				return
