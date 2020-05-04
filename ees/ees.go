@@ -78,26 +78,38 @@ func (eeS *EEService) Shutdown() (err error) {
 }
 
 // ProcessEvent will be called each time a new event is received from readers
-func (eeS *EEService) V1ProcessEvent(cgrEv *utils.CGREvent) (err error) {
-	/*
-		var rplyEv AttrSProcessEventReply
-		attrArgs := &engine.AttrArgsProcessEvent{
-			Context: utils.StringPointer(utils.FirstNonEmpty(
-				utils.IfaceAsString(cgrEv.Opts[utils.Context]),
-				utils.MetaCDRs)),
-			CGREvent:      cgrEv.CGREvent,
-			ArgDispatcher: cgrEv.ArgDispatcher,
-		}
-		if err = cdrS.connMgr.Call(cdrS.cgrCfg.CdrsCfg().AttributeSConns, nil,
-			utils.AttributeSv1ProcessEvent,
-			attrArgs, &rplyEv); err == nil && len(rplyEv.AlteredFields) != 0 {
-			cgrEv.CGREvent = rplyEv.CGREvent
-			cgrEv.Opts = rplyEv.Opts
-		} else if err.Error() == utils.ErrNotFound.Error() {
-			err = nil // cancel ErrNotFound
-		}
-	*/
+func (eeS *EEService) V1ProcessEvent(cgrEv *utils.CGREventWithOpts) (err error) {
+	eeS.cfg.RLocks(config.EEsJson)
+	defer eeS.cfg.RUnlocks(config.EEsJson)
+
 	for _, eeCfg := range eeS.cfg.EEsCfg().Exporters {
+
+		if eeCfg.AttributeSCtx != utils.META_NONE {
+			var rplyEv engine.AttrSProcessEventReply
+			attrArgs := &engine.AttrArgsProcessEvent{
+				AttributeIDs: eeCfg.AttributeSIDs,
+				Context: utils.StringPointer(
+					utils.FirstNonEmpty(
+						eeCfg.AttributeSCtx,
+						utils.IfaceAsString(cgrEv.Opts[utils.Context]),
+						utils.MetaEEs)),
+				CGREvent:      cgrEv.CGREvent,
+				ArgDispatcher: cgrEv.ArgDispatcher,
+			}
+			if err = eeS.connMgr.Call(
+				eeS.cfg.EEsCfg().AttributeSConns, nil,
+				utils.AttributeSv1ProcessEvent,
+				attrArgs, &rplyEv); err == nil && len(rplyEv.AlteredFields) != 0 {
+				cgrEv.CGREvent = rplyEv.CGREvent
+				cgrEv.Opts = rplyEv.Opts
+			} else if err != nil {
+				if err.Error() != utils.ErrNotFound.Error() {
+					return
+				}
+				err = nil // cancel ErrNotFound
+			}
+		}
+
 		eeS.eesMux.RLock()
 		ee, has := eeS.ees[eeCfg.ID]
 		eeS.eesMux.RUnlock()
@@ -107,7 +119,7 @@ func (eeS *EEService) V1ProcessEvent(cgrEv *utils.CGREvent) (err error) {
 			}
 			eeS.ees[eeCfg.ID] = ee
 		}
-		if err = ee.ExportEvent(cgrEv); err != nil {
+		if err = ee.ExportEvent(cgrEv.CGREvent); err != nil {
 			return
 		}
 	}

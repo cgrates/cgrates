@@ -379,6 +379,7 @@ const (
 	MetaCaches                  = "*caches"
 	MetaCache                   = "*cache"
 	MetaGuardian                = "*guardians"
+	MetaEEs                     = "*ees"
 	MetaContinue                = "*continue"
 	Migrator                    = "migrator"
 	UnsupportedMigrationTask    = "unsupported migration task"

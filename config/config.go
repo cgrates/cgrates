@@ -979,8 +979,6 @@ func (cfg *CGRConfig) ERsCfg() *ERsCfg {
 
 // EEsCfg reads the EventExporter configuration
 func (cfg *CGRConfig) EEsCfg() *EEsCfg {
-	cfg.lks[EEsJson].RLock()
-	defer cfg.lks[EEsJson].RUnlock()
 	return cfg.eesCfg
 }
 
@@ -1114,6 +1112,22 @@ func (cfg *CGRConfig) lockSections() {
 func (cfg *CGRConfig) unlockSections() {
 	for _, lk := range cfg.lks {
 		lk.Unlock()
+	}
+}
+
+// RLocks will read-lock locks with IDs.
+// User needs to know what he is doing since this can panic
+func (cfg *CGRConfig) RLocks(lkIDs ...string) {
+	for _, lkID := range lkIDs {
+		cfg.lks[lkID].RLock()
+	}
+}
+
+// RLocks will read-lock locks with IDs.
+// User needs to know what he is doing since this can panic
+func (cfg *CGRConfig) RUnlocks(lkIDs ...string) {
+	for _, lkID := range lkIDs {
+		cfg.lks[lkID].RUnlock()
 	}
 }
 
