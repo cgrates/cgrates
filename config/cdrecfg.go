@@ -18,7 +18,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
-import "github.com/cgrates/cgrates/utils"
+import (
+	"github.com/cgrates/cgrates/utils"
+)
 
 // One instance of CdrExporter
 type CdreCfg struct {
@@ -93,10 +95,10 @@ func (self *CdreCfg) Clone() *CdreCfg {
 	return clnCdre
 }
 
-func (cdre *CdreCfg) AsMapInterface() map[string]interface{} {
+func (cdre *CdreCfg) AsMapInterface(separator string) map[string]interface{} {
 	fields := make([]map[string]interface{}, len(cdre.Fields))
 	for i, item := range cdre.Fields {
-		fields[i] = item.AsMapInterface()
+		fields[i] = item.AsMapInterface(separator)
 	}
 
 	return map[string]interface{}{
@@ -107,7 +109,7 @@ func (cdre *CdreCfg) AsMapInterface() map[string]interface{} {
 		utils.AttributeSContextCfg: cdre.AttributeSContext,
 		utils.SynchronousCfg:       cdre.Synchronous,
 		utils.AttemptsCfg:          cdre.Attempts,
-		utils.FieldSeparatorCfg:    cdre.FieldSeparator,
+		utils.FieldSeparatorCfg:    string(cdre.FieldSeparator),
 		utils.FieldsCfg:            fields,
 	}
 }

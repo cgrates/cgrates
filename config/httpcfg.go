@@ -58,12 +58,17 @@ func (httpcfg *HTTPCfg) loadFromJsonCfg(jsnHttpCfg *HTTPJsonCfg) (err error) {
 }
 
 func (httpcfg *HTTPCfg) AsMapInterface() map[string]interface{} {
+	httpUsers := map[string]interface{}{}
+	for key, item := range httpcfg.HTTPAuthUsers {
+		httpUsers[key] = item
+	}
+
 	return map[string]interface{}{
 		utils.HTTPJsonRPCURLCfg:        httpcfg.HTTPJsonRPCURL,
 		utils.HTTPWSURLCfg:             httpcfg.HTTPWSURL,
 		utils.HTTPFreeswitchCDRsURLCfg: httpcfg.HTTPFreeswitchCDRsURL,
 		utils.HTTPCDRsURLCfg:           httpcfg.HTTPCDRsURL,
 		utils.HTTPUseBasicAuthCfg:      httpcfg.HTTPUseBasicAuth,
-		utils.HTTPAuthUsersCfg:         httpcfg.HTTPAuthUsers,
+		utils.HTTPAuthUsersCfg:         httpUsers,
 	}
 }

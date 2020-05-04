@@ -144,17 +144,34 @@ func (gencfg *GeneralCfg) loadFromJsonCfg(jsnGeneralCfg *GeneralJsonCfg) (err er
 }
 
 func (gencfg *GeneralCfg) AsMapInterface() map[string]interface{} {
+	var lockingTimeout string = "0"
+	var failedPostsTTL string = "0"
+	var connectTimeout string = "0"
+	var replyTimeout string = "0"
+	if gencfg.LockingTimeout != 0 {
+		lockingTimeout = gencfg.LockingTimeout.String()
+	}
+	if gencfg.FailedPostsTTL != 0 {
+		failedPostsTTL = gencfg.FailedPostsTTL.String()
+	}
+	if gencfg.ConnectTimeout != 0 {
+		connectTimeout = gencfg.ConnectTimeout.String()
+	}
+	if gencfg.ReplyTimeout != 0 {
+		replyTimeout = gencfg.ReplyTimeout.String()
+	}
+
 	return map[string]interface{}{
 		utils.NodeIDCfg:            gencfg.NodeID,
 		utils.LoggerCfg:            gencfg.Logger,
 		utils.LogLevelCfg:          gencfg.LogLevel,
 		utils.HttpSkipTlsVerifyCfg: gencfg.HttpSkipTlsVerify,
 		utils.RoundingDecimalsCfg:  gencfg.RoundingDecimals,
-		utils.DBDataEncodingCfg:    gencfg.DBDataEncoding,
+		utils.DBDataEncodingCfg:    utils.Meta + gencfg.DBDataEncoding,
 		utils.TpExportPathCfg:      gencfg.TpExportPath,
 		utils.PosterAttemptsCfg:    gencfg.PosterAttempts,
 		utils.FailedPostsDirCfg:    gencfg.FailedPostsDir,
-		utils.FailedPostsTTLCfg:    gencfg.FailedPostsTTL,
+		utils.FailedPostsTTLCfg:    failedPostsTTL,
 		utils.DefaultReqTypeCfg:    gencfg.DefaultReqType,
 		utils.DefaultCategoryCfg:   gencfg.DefaultCategory,
 		utils.DefaultTenantCfg:     gencfg.DefaultTenant,
@@ -162,9 +179,9 @@ func (gencfg *GeneralCfg) AsMapInterface() map[string]interface{} {
 		utils.DefaultCachingCfg:    gencfg.DefaultCaching,
 		utils.ConnectAttemptsCfg:   gencfg.ConnectAttempts,
 		utils.ReconnectsCfg:        gencfg.Reconnects,
-		utils.ConnectTimeoutCfg:    gencfg.ConnectTimeout,
-		utils.ReplyTimeoutCfg:      gencfg.ReplyTimeout,
-		utils.LockingTimeoutCfg:    gencfg.LockingTimeout,
+		utils.ConnectTimeoutCfg:    connectTimeout,
+		utils.ReplyTimeoutCfg:      replyTimeout,
+		utils.LockingTimeoutCfg:    lockingTimeout,
 		utils.DigestSeparatorCfg:   gencfg.DigestSeparator,
 		utils.DigestEqualCfg:       gencfg.DigestEqual,
 		utils.RSRSepCfg:            gencfg.RSRSep,

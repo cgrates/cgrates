@@ -1738,6 +1738,7 @@ const (
 	// KamAgentCfg
 	EvapiConnsCfg = "evapi_conns"
 	TimezoneCfg   = "timezone"
+	TimezoneCfgC  = "Timezone"
 
 	// AsteriskConnCfg
 	UserCf = "user"
@@ -1763,8 +1764,8 @@ const (
 	RequestProcessorsCfg = "request_processors"
 
 	// RequestProcessor
-	RequestFieldsCfg = "Request_fields"
-	ReplyFieldsCfg   = "Reply_fields"
+	RequestFieldsCfg = "request_fields"
+	ReplyFieldsCfg   = "reply_fields"
 
 	// RadiusAgentCfg
 	ListenAuthCfg         = "listen_auth"
@@ -1803,13 +1804,16 @@ const (
 	TpOutDirCfg     = "tp_out_dir"
 	DataCfg         = "data"
 
-	DefaultRatioCfg   = "default_ratio"
-	ReadersCfg        = "readers"
-	PoolSize          = "PoolSize"
-	Conns             = "Conns"
-	FilenameCfg       = "file_name"
-	RequestPayloadCfg = "Request_payload"
-	ReplyPayloadCfg   = "Reply_payload"
+	DefaultRatioCfg            = "default_ratio"
+	ReadersCfg                 = "readers"
+	PoolSize                   = "poolSize"
+	Conns                      = "conns"
+	FilenameCfg                = "file_name"
+	RequestPayloadCfg          = "request_payload"
+	ReplyPayloadCfg            = "reply_payload"
+	TransportCfg               = "transport"
+	StrategyCfg                = "strategy"
+	Dynaprepaid_actionplansCfg = "dynaprepaid_actionplans"
 )
 
 // FC Template

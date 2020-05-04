@@ -75,3 +75,61 @@ func TestRalsCfgFromJsonCfg(t *testing.T) {
 		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(ralscfg))
 	}
 }
+
+func TestRalsCfgAsMapInterface(t *testing.T) {
+	var ralscfg RalsCfg
+	cfgJSONStr := `{
+	"rals": {
+		"enabled": false,						
+		"thresholds_conns": [],					
+		"stats_conns": [],						
+		"caches_conns":["*internal"],			
+		"rp_subject_prefix_matching": false,	
+		"remove_expired":true,					
+		"max_computed_usage": {					
+			"*any": "189h",
+			"*voice": "72h",
+			"*data": "107374182400",
+			"*sms": "10000",
+			"*mms": "10000"
+		},
+		"max_increments": 1000000,
+		"balance_rating_subject":{				
+			"*any": "*zero1ns",
+			"*voice": "*zero1s"
+		},
+		"dynaprepaid_actionplans": [],			
+	},
+}`
+	eMap := map[string]interface{}{
+		"enabled":                    false,
+		"thresholds_conns":           []string{},
+		"stats_conns":                []string{},
+		"caches_conns":               []string{"*internal"},
+		"rp_subject_prefix_matching": false,
+		"remove_expired":             true,
+		"max_computed_usage": map[string]interface{}{
+			"*any":   "189h0m0s",
+			"*voice": "72h0m0s",
+			"*data":  "107374182400",
+			"*sms":   "10000",
+			"*mms":   "10000",
+		},
+		"max_increments": 1000000,
+		"balance_rating_subject": map[string]interface{}{
+			"*any":   "*zero1ns",
+			"*voice": "*zero1s",
+		},
+		"dynaprepaid_actionplans": []string{},
+	}
+
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+		t.Error(err)
+	} else if jsnRalsCfg, err := jsnCfg.RalsJsonCfg(); err != nil {
+		t.Error(err)
+	} else if err = ralscfg.loadFromJsonCfg(jsnRalsCfg); err != nil {
+		t.Error(err)
+	} else if rcv := ralscfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
+		t.Errorf("Expected: %+v ,\n recived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	}
+}

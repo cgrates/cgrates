@@ -95,6 +95,7 @@ func (dbcfg *StorDbCfg) loadFromJsonCfg(jsnDbCfg *DbJsonCfg) (err error) {
 		dbcfg.SSLMode = *jsnDbCfg.Sslmode
 	}
 	if jsnDbCfg.Items != nil {
+		dbcfg.Items = make(map[string]*ItemOpt)
 		for kJsn, vJsn := range *jsnDbCfg.Items {
 			val := new(ItemOpt)
 			if err := val.loadFromJsonCfg(vJsn); err != nil {
@@ -131,11 +132,16 @@ func (dbcfg *StorDbCfg) AsMapInterface() map[string]interface{} {
 	for key, item := range dbcfg.Items {
 		items[key] = item.AsMapInterface()
 	}
+	var queryTimeout string = "0"
+	if dbcfg.QueryTimeout != 0 {
+		queryTimeout = dbcfg.QueryTimeout.String()
+	}
+	dbPort, _ := strconv.Atoi(dbcfg.Port)
 
 	return map[string]interface{}{
-		utils.TypeCfg:                dbcfg.Type,
+		utils.TypeCfg:                utils.Meta + dbcfg.Type,
 		utils.HostCfg:                dbcfg.Host,
-		utils.PortCfg:                dbcfg.Port,
+		utils.PortCfg:                dbPort,
 		utils.NameCfg:                dbcfg.Name,
 		utils.UserCfg:                dbcfg.User,
 		utils.PasswordCfg:            dbcfg.Password,
@@ -144,7 +150,7 @@ func (dbcfg *StorDbCfg) AsMapInterface() map[string]interface{} {
 		utils.ConnMaxLifetimeCfg:     dbcfg.ConnMaxLifetime,
 		utils.StringIndexedFieldsCfg: dbcfg.StringIndexedFields,
 		utils.PrefixIndexedFieldsCfg: dbcfg.PrefixIndexedFields,
-		utils.QueryTimeoutCfg:        dbcfg.QueryTimeout,
+		utils.QueryTimeoutCfg:        queryTimeout,
 		utils.SSLModeCfg:             dbcfg.SSLMode,
 		utils.ItemsCfg:               items,
 	}
