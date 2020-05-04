@@ -464,12 +464,12 @@ func (rS *ResourceService) matchingResourcesForEvent(ev *utils.CGREvent,
 			rS.cgrcfg.ResourceSCfg().IndexedSelects,
 			rS.cgrcfg.ResourceSCfg().NestedFields,
 		)
-	}
-	if err != nil {
-		if err == utils.ErrNotFound {
-			Cache.Set(utils.CacheEventResources, evUUID, nil, nil, true, "") // cache negative match
+		if err != nil {
+			if err == utils.ErrNotFound {
+				Cache.Set(utils.CacheEventResources, evUUID, nil, nil, true, "") // cache negative match
+			}
+			return
 		}
-		return
 	}
 	evNm := config.NewNavigableMap(nil)
 	evNm.Set([]string{utils.MetaReq}, ev.Event, false, false)

@@ -898,7 +898,7 @@ func testDspSessionProcessEvent3(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.Tenant:      "cgrates.org",
 				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "testSSv1ItProcessEvent",
+				utils.OriginID:    "TestSSv1It2",
 				utils.RequestType: utils.META_PREPAID,
 				utils.Account:     "1001",
 				utils.Subject:     "ANY2CNT",
@@ -909,7 +909,7 @@ func testDspSessionProcessEvent3(t *testing.T) {
 			},
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("ses12345"),
+			APIKey: utils.StringPointer("pse12345"),
 		},
 	}
 	var rply sessions.V1ProcessEventReply
