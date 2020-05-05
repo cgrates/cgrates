@@ -19,23 +19,27 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ees
 
 import (
-	"fmt"
-
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
-type EventExporter interface {
-	ExportEvent(cgrEv *utils.CGREvent) (err error) // called on each event to be exported
-	OnEvicted(itmID string, value interface{})     // called when the exporter needs to terminate
+func NewFileCSVee(cgrCfg *config.CGRConfig, cfgIdx int) (fCsv *FileCSVee, err error) {
+	fCsv = &FileCSVee{cgrCfg: cgrCfg, cfgIdx: cfgIdx}
+	return
 }
 
-// NewEventExporter produces exporters
-func NewEventExporter(cgrCfg *config.CGRConfig, cfgIdx int) (ee EventExporter, err error) {
-	switch cgrCfg.EEsCfg().Exporters[cfgIdx].Type {
-	case utils.MetaFileCSV:
-		return NewFileCSVee(cgrCfg, cfgIdx)
-	default:
-		return nil, fmt.Errorf("unsupported exporter type: <%s>", cgrCfg.EEsCfg().Exporters[cfgIdx].Type)
-	}
+// FileCSVee implements EventExporter interface for .csv files
+type FileCSVee struct {
+	cgrCfg *config.CGRConfig
+	cfgIdx int // index of config instance within ERsCfg.Readers
+}
+
+// OnEvicted implements EventExporter
+func (fCsv *FileCSVee) OnEvicted(itmID string, value interface{}) {
+	return
+}
+
+// ExportEvent implements EventExporter
+func (fCsv *FileCSVee) ExportEvent(cgrEv *utils.CGREvent) (err error) {
+	return
 }

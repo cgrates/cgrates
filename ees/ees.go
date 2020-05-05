@@ -82,7 +82,7 @@ func (eeS *EEService) V1ProcessEvent(cgrEv *utils.CGREventWithOpts) (err error) 
 	eeS.cfg.RLocks(config.EEsJson)
 	defer eeS.cfg.RUnlocks(config.EEsJson)
 
-	for _, eeCfg := range eeS.cfg.EEsCfg().Exporters {
+	for cfgIdx, eeCfg := range eeS.cfg.EEsCfg().Exporters {
 
 		if eeCfg.Flags.GetBool(utils.MetaAttributes) {
 			var rplyEv engine.AttrSProcessEventReply
@@ -114,7 +114,7 @@ func (eeS *EEService) V1ProcessEvent(cgrEv *utils.CGREventWithOpts) (err error) 
 		ee, has := eeS.ees[eeCfg.ID]
 		eeS.eesMux.RUnlock()
 		if !has {
-			if ee, err = NewEventExporter(eeCfg); err != nil {
+			if ee, err = NewEventExporter(eeS.cfg, cfgIdx); err != nil {
 				return
 			}
 			eeS.ees[eeCfg.ID] = ee
