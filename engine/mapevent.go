@@ -181,7 +181,7 @@ func (me MapEvent) Clone() (mp MapEvent) {
 
 // AsMapString returns a map[string]string out of mp, ignoring specific fields if needed
 // most used when needing to export extraFields
-func (me MapEvent) AsMapString(ignoredFlds *utils.StringSet) (mp map[string]string) {
+func (me MapEvent) AsMapString(ignoredFlds utils.StringSet) (mp map[string]string) {
 	mp = make(map[string]string)
 	if ignoredFlds == nil {
 		ignoredFlds = utils.NewStringSet(nil)

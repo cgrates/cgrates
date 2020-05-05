@@ -198,7 +198,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		if cfg.cacheCfg[utils.CacheClosedSessions].Limit == 0 {
 			return fmt.Errorf("<%s> %s needs to be != 0, received: %d", utils.CacheS, utils.CacheClosedSessions, cfg.cacheCfg[utils.CacheClosedSessions].Limit)
 		}
-		for alfld := range cfg.sessionSCfg.AlterableFields.Data() {
+		for alfld := range cfg.sessionSCfg.AlterableFields {
 			if utils.ProtectedSFlds.Has(alfld) {
 				return fmt.Errorf("<%s> the following protected field can't be altered by session: <%s>", utils.SessionS, alfld)
 			}

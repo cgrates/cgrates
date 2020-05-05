@@ -1081,7 +1081,7 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 	}
 
 	// find indexed fields
-	var cdrMpIDs *utils.StringSet
+	var cdrMpIDs utils.StringSet
 	// Apply string filter
 	for _, fltrSlc := range pairSlice {
 		if len(fltrSlc.ids) == 0 {
@@ -1158,7 +1158,7 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 	}
 
 	paginatorOffsetCounter := 0
-	for key := range cdrMpIDs.Data() {
+	for key := range cdrMpIDs {
 		x, ok := iDB.db.Get(utils.CDRsTBL, key)
 		if !ok || x == nil {
 			return nil, 0, utils.ErrNotFound
