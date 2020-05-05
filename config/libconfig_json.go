@@ -199,6 +199,7 @@ type EventReaderJsonCfg struct {
 type EEsJsonCfg struct {
 	Enabled          *bool
 	Attributes_conns *[]string
+	Cache            *map[string]*CacheParamJsonCfg
 	Exporters        *[]*EventExporterJsonCfg
 }
 

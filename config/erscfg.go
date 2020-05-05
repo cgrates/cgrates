@@ -100,12 +100,10 @@ func (erS *ERsCfg) Clone() (cln *ERsCfg) {
 }
 
 func (erS *ERsCfg) AsMapInterface(separator string) map[string]interface{} {
-
 	readers := make([]map[string]interface{}, len(erS.Readers))
 	for i, item := range erS.Readers {
 		readers[i] = item.AsMapInterface(separator)
 	}
-
 	return map[string]interface{}{
 		utils.EnabledCfg:       erS.Enabled,
 		utils.SessionSConnsCfg: erS.SessionSConns,

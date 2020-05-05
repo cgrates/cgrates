@@ -1881,6 +1881,8 @@ const (
 	AttributeSContextCfg = "attributes_context"
 	SynchronousCfg       = "synchronous"
 	AttemptsCfg          = "attempts"
+	AttributeContextCfg  = "attribute_context"
+	AttributeIDsCfg      = "attribute_ids"
 
 	//LoaderSCfg
 	IdCfg           = "id"
@@ -1892,6 +1894,7 @@ const (
 
 	DefaultRatioCfg            = "default_ratio"
 	ReadersCfg                 = "readers"
+	ExportersCfg               = "exporters"
 	PoolSize                   = "poolSize"
 	Conns                      = "conns"
 	FilenameCfg                = "file_name"

@@ -1962,6 +1962,13 @@ func TestDfEventExporterCfg(t *testing.T) {
 	eCfg := &EEsJsonCfg{
 		Enabled:          utils.BoolPointer(false),
 		Attributes_conns: &[]string{utils.MetaInternal},
+		Cache: &map[string]*CacheParamJsonCfg{
+			utils.MetaFileCSV: &CacheParamJsonCfg{
+				Limit:      utils.IntPointer(-1),
+				Ttl:        utils.StringPointer(utils.EmptyString),
+				Static_ttl: utils.BoolPointer(false),
+			},
+		},
 		Exporters: &[]*EventExporterJsonCfg{
 			&EventExporterJsonCfg{
 				Id:                utils.StringPointer(utils.MetaDefault),
