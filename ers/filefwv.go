@@ -74,8 +74,8 @@ type FWVFileER struct {
 	headerOffset  int64
 	trailerOffset int64 // Index where trailer starts, to be used as boundary when reading cdrs
 	trailerLenght int64
-	headerDP      config.DataProvider
-	trailerDP     config.DataProvider
+	headerDP      utils.DataProvider
+	trailerDP     utils.DataProvider
 }
 
 func (rdr *FWVFileER) Config() *config.EventReaderCfg {
