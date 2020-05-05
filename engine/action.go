@@ -893,7 +893,7 @@ func (apl Actions) Clone() (interface{}, error) {
 }
 
 // newCdrLogProvider constructs a DataProvider
-func newCdrLogProvider(acnt *Account, action *Action) (dP config.DataProvider) {
+func newCdrLogProvider(acnt *Account, action *Action) (dP utils.DataProvider) {
 	dP = &cdrLogProvider{acnt: acnt, action: action, cache: config.NewNavigableMap(nil)}
 	return
 }

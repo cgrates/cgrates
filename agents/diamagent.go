@@ -144,14 +144,14 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 		return
 	}
 	diamDP := newDADataProvider(c, m)
-	reqVars := map[string]interface{}{
-		utils.OriginHost:  da.cgrCfg.DiameterAgentCfg().OriginHost, // used in templates
-		utils.OriginRealm: da.cgrCfg.DiameterAgentCfg().OriginRealm,
-		utils.ProductName: da.cgrCfg.DiameterAgentCfg().ProductName,
-		utils.MetaApp:     dApp.Name,
-		utils.MetaAppID:   dApp.ID,
-		utils.MetaCmd:     dCmd.Short + "R",
-		utils.RemoteHost:  c.RemoteAddr().String(),
+	reqVars := utils.NavigableMap2{
+		utils.OriginHost:  utils.NewNMData(da.cgrCfg.DiameterAgentCfg().OriginHost), // used in templates
+		utils.OriginRealm: utils.NewNMData(da.cgrCfg.DiameterAgentCfg().OriginRealm),
+		utils.ProductName: utils.NewNMData(da.cgrCfg.DiameterAgentCfg().ProductName),
+		utils.MetaApp:     utils.NewNMData(dApp.Name),
+		utils.MetaAppID:   utils.NewNMData(dApp.ID),
+		utils.MetaCmd:     utils.NewNMData(dCmd.Short + "R"),
+		utils.RemoteHost:  utils.NewNMData(c.RemoteAddr().String()),
 	}
 	// build the negative error answer
 	diamErr, err := diamErr(

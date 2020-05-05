@@ -288,7 +288,7 @@ func writeOnConn(c diam.Conn, m *diam.Message) (err error) {
 }
 
 // newDADataProvider constructs a DataProvider for a diameter message
-func newDADataProvider(c diam.Conn, m *diam.Message) config.DataProvider {
+func newDADataProvider(c diam.Conn, m *diam.Message) utils.DataProvider {
 	return &diameterDP{c: c, m: m, cache: config.NewNavigableMap(nil)}
 
 }
@@ -419,7 +419,7 @@ func (dP *diameterDP) FieldAsInterface(fldPath []string) (data interface{}, err 
 }
 
 // updateDiamMsgFromNavMap will update the diameter message with items from navigable map
-func updateDiamMsgFromNavMap(m *diam.Message, navMp *config.NavigableMap, tmz string) (err error) {
+func updateDiamMsgFromNavMap(m *diam.Message, navMp *utils.OrderedNavigableMap, tmz string) (err error) {
 	// write reply into message
 	pathIdx := make(map[string]int) // group items for same path
 	for _, val := range navMp.Values() {
@@ -461,7 +461,7 @@ func updateDiamMsgFromNavMap(m *diam.Message, navMp *config.NavigableMap, tmz st
 
 // diamAnswer builds up the answer to be sent back to the client
 func diamAnswer(m *diam.Message, resCode uint32, errFlag bool,
-	rply *config.NavigableMap, tmz string) (a *diam.Message, err error) {
+	rply *utils.OrderedNavigableMap, tmz string) (a *diam.Message, err error) {
 	a = m.Answer(resCode)
 	if errFlag {
 		a.Header.CommandFlags = diam.ErrorFlag
@@ -474,14 +474,12 @@ func diamAnswer(m *diam.Message, resCode uint32, errFlag bool,
 
 // negDiamAnswer is used to return the negative answer we need previous to
 func diamErr(m *diam.Message, resCode uint32,
-	reqVars map[string]interface{},
+	reqVars utils.NavigableMap2,
 	tpl []*config.FCTemplate, tnt, tmz string,
 	filterS *engine.FilterS) (a *diam.Message, err error) {
 	aReq := NewAgentRequest(
 		newDADataProvider(nil, m), reqVars,
-		config.NewNavigableMap(nil),
-		config.NewNavigableMap(nil),
-		nil, tnt, tmz, filterS, nil, nil)
+		nil, nil, nil, tnt, tmz, filterS, nil, nil)
 	if err = aReq.SetFields(tpl); err != nil {
 		return
 	}

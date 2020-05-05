@@ -118,7 +118,7 @@ func radReplyAppendAttributes(reply *radigo.Packet, agReq *AgentRequest,
 }
 
 // newRADataProvider constructs a DataProvider
-func newRADataProvider(req *radigo.Packet) (dP config.DataProvider) {
+func newRADataProvider(req *radigo.Packet) (dP utils.DataProvider) {
 	dP = &radiusDP{req: req, cache: config.NewNavigableMap(nil)}
 	return
 }

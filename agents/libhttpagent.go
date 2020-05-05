@@ -35,7 +35,7 @@ import (
 
 // newHADataProvider constructs a DataProvider
 func newHADataProvider(reqPayload string,
-	req *http.Request) (dP config.DataProvider, err error) {
+	req *http.Request) (dP utils.DataProvider, err error) {
 	switch reqPayload {
 	default:
 		return nil, fmt.Errorf("unsupported decoder type <%s>", reqPayload)
@@ -47,7 +47,7 @@ func newHADataProvider(reqPayload string,
 	}
 }
 
-func newHTTPUrlDP(req *http.Request) (dP config.DataProvider, err error) {
+func newHTTPUrlDP(req *http.Request) (dP utils.DataProvider, err error) {
 	dP = &httpUrlDP{req: req, cache: config.NewNavigableMap(nil)}
 	return
 }
@@ -105,7 +105,7 @@ func (hU *httpUrlDP) RemoteHost() net.Addr {
 	return utils.NewNetAddr("TCP", hU.req.RemoteAddr)
 }
 
-func newHTTPXmlDP(req *http.Request) (dP config.DataProvider, err error) {
+func newHTTPXmlDP(req *http.Request) (dP utils.DataProvider, err error) {
 	byteData, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return nil, err

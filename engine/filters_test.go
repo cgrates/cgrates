@@ -36,14 +36,14 @@ func TestFilterPassString(t *testing.T) {
 	}
 	rf := &FilterRule{Type: utils.MetaString,
 		Element: "~Category", Values: []string{"call"}}
-	if passes, err := rf.passString(cd, []config.DataProvider{cd}); err != nil {
+	if passes, err := rf.passString(cd, []utils.DataProvider{cd}); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("Not passes filter")
 	}
 	rf = &FilterRule{Type: utils.MetaString,
 		Element: "~Category", Values: []string{"cal"}}
-	if passes, err := rf.passString(cd, []config.DataProvider{cd}); err != nil {
+	if passes, err := rf.passString(cd, []utils.DataProvider{cd}); err != nil {
 		t.Error(err)
 	} else if passes {
 		t.Error("Filter passes")
@@ -51,14 +51,14 @@ func TestFilterPassString(t *testing.T) {
 	//not
 	rf = &FilterRule{Type: utils.MetaNotString,
 		Element: "~Category", Values: []string{"call"}}
-	if passes, err := rf.Pass(cd, []config.DataProvider{cd}); err != nil {
+	if passes, err := rf.Pass(cd, []utils.DataProvider{cd}); err != nil {
 		t.Error(err)
 	} else if passes {
 		t.Error("Filter passes")
 	}
 	rf = &FilterRule{Type: utils.MetaNotString,
 		Element: "~Category", Values: []string{"cal"}}
-	if passes, err := rf.Pass(cd, []config.DataProvider{cd}); err != nil {
+	if passes, err := rf.Pass(cd, []utils.DataProvider{cd}); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("Not passes filter")
@@ -97,7 +97,7 @@ func TestFilterPassEmpty(t *testing.T) {
 	}
 	//not
 	rf = &FilterRule{Type: utils.MetaNotEmpty, Element: "~Category", Values: []string{}}
-	if passes, err := rf.Pass(cd, []config.DataProvider{}); err != nil {
+	if passes, err := rf.Pass(cd, []utils.DataProvider{}); err != nil {
 		t.Error(err)
 	} else if passes {
 		t.Error("Filter passes")
@@ -136,7 +136,7 @@ func TestFilterPassExists(t *testing.T) {
 	}
 	//not
 	rf = &FilterRule{Type: utils.MetaNotExists, Element: "~Category1", Values: []string{}}
-	if passes, err := rf.Pass(cd, []config.DataProvider{}); err != nil {
+	if passes, err := rf.Pass(cd, []utils.DataProvider{}); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("Not passes filter")
@@ -155,44 +155,44 @@ func TestFilterPassStringPrefix(t *testing.T) {
 		ExtraFields:   map[string]string{"navigation": "off"},
 	}
 	rf := &FilterRule{Type: utils.MetaPrefix, Element: "~Category", Values: []string{"call"}}
-	if passes, err := rf.passStringPrefix(cd, []config.DataProvider{cd}); err != nil {
+	if passes, err := rf.passStringPrefix(cd, []utils.DataProvider{cd}); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("Not passes filter")
 	}
 	rf = &FilterRule{Type: utils.MetaPrefix, Element: "~Category", Values: []string{"premium"}}
-	if passes, err := rf.passStringPrefix(cd, []config.DataProvider{cd}); err != nil {
+	if passes, err := rf.passStringPrefix(cd, []utils.DataProvider{cd}); err != nil {
 		t.Error(err)
 	} else if passes {
 		t.Error("Passes filter")
 	}
 	rf = &FilterRule{Type: utils.MetaPrefix, Element: "~Destination", Values: []string{"+49"}}
-	if passes, err := rf.passStringPrefix(cd, []config.DataProvider{cd}); err != nil {
+	if passes, err := rf.passStringPrefix(cd, []utils.DataProvider{cd}); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("Not passes filter")
 	}
 	rf = &FilterRule{Type: utils.MetaPrefix, Element: "~Destination", Values: []string{"+499"}}
-	if passes, err := rf.passStringPrefix(cd, []config.DataProvider{cd}); err != nil {
+	if passes, err := rf.passStringPrefix(cd, []utils.DataProvider{cd}); err != nil {
 		t.Error(err)
 	} else if passes {
 		t.Error("Passes filter")
 	}
 	rf = &FilterRule{Type: utils.MetaPrefix, Element: "~navigation", Values: []string{"off"}}
-	if passes, err := rf.passStringPrefix(cd, []config.DataProvider{cd}); err != nil {
+	if passes, err := rf.passStringPrefix(cd, []utils.DataProvider{cd}); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("Not passes filter")
 	}
 	rf = &FilterRule{Type: utils.MetaPrefix, Element: "~nonexisting", Values: []string{"off"}}
-	if passing, err := rf.passStringPrefix(cd, []config.DataProvider{cd}); err != nil {
+	if passing, err := rf.passStringPrefix(cd, []utils.DataProvider{cd}); err != nil {
 		t.Error(err)
 	} else if passing {
 		t.Error("Passes filter")
 	}
 	//not
 	rf = &FilterRule{Type: utils.MetaNotPrefix, Element: "~Category", Values: []string{"premium"}}
-	if passes, err := rf.Pass(cd, []config.DataProvider{cd}); err != nil {
+	if passes, err := rf.Pass(cd, []utils.DataProvider{cd}); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("Not passes filter")
@@ -211,44 +211,44 @@ func TestFilterPassStringSuffix(t *testing.T) {
 		ExtraFields:   map[string]string{"navigation": "off"},
 	}
 	rf := &FilterRule{Type: utils.MetaSuffix, Element: "~Category", Values: []string{"call"}}
-	if passes, err := rf.passStringSuffix(cd, []config.DataProvider{cd}); err != nil {
+	if passes, err := rf.passStringSuffix(cd, []utils.DataProvider{cd}); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("Not passes filter")
 	}
 	rf = &FilterRule{Type: utils.MetaSuffix, Element: "~Category", Values: []string{"premium"}}
-	if passes, err := rf.passStringSuffix(cd, []config.DataProvider{cd}); err != nil {
+	if passes, err := rf.passStringSuffix(cd, []utils.DataProvider{cd}); err != nil {
 		t.Error(err)
 	} else if passes {
 		t.Error("Passes filter")
 	}
 	rf = &FilterRule{Type: utils.MetaSuffix, Element: "~Destination", Values: []string{"963"}}
-	if passes, err := rf.passStringSuffix(cd, []config.DataProvider{cd}); err != nil {
+	if passes, err := rf.passStringSuffix(cd, []utils.DataProvider{cd}); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("Not passes filter")
 	}
 	rf = &FilterRule{Type: utils.MetaSuffix, Element: "~Destination", Values: []string{"4966"}}
-	if passes, err := rf.passStringSuffix(cd, []config.DataProvider{cd}); err != nil {
+	if passes, err := rf.passStringSuffix(cd, []utils.DataProvider{cd}); err != nil {
 		t.Error(err)
 	} else if passes {
 		t.Error("Passes filter")
 	}
 	rf = &FilterRule{Type: utils.MetaSuffix, Element: "~navigation", Values: []string{"off"}}
-	if passes, err := rf.passStringSuffix(cd, []config.DataProvider{cd}); err != nil {
+	if passes, err := rf.passStringSuffix(cd, []utils.DataProvider{cd}); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("Not passes filter")
 	}
 	rf = &FilterRule{Type: utils.MetaSuffix, Element: "~nonexisting", Values: []string{"off"}}
-	if passing, err := rf.passStringSuffix(cd, []config.DataProvider{cd}); err != nil {
+	if passing, err := rf.passStringSuffix(cd, []utils.DataProvider{cd}); err != nil {
 		t.Error(err)
 	} else if passing {
 		t.Error("Passes filter")
 	}
 	//not
 	rf = &FilterRule{Type: utils.MetaNotSuffix, Element: "~Destination", Values: []string{"963"}}
-	if passes, err := rf.Pass(cd, []config.DataProvider{cd}); err != nil {
+	if passes, err := rf.Pass(cd, []utils.DataProvider{cd}); err != nil {
 		t.Error(err)
 	} else if passes {
 		t.Error("Passes filter")
@@ -270,7 +270,7 @@ func TestFilterPassRSRFields(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if passes, err := rf.passRSR([]config.DataProvider{cd}); err != nil {
+	if passes, err := rf.passRSR([]utils.DataProvider{cd}); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("Not passing")
@@ -279,7 +279,7 @@ func TestFilterPassRSRFields(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if passes, err := rf.passRSR([]config.DataProvider{cd}); err != nil {
+	if passes, err := rf.passRSR([]utils.DataProvider{cd}); err != nil {
 		t.Error(err)
 	} else if passes {
 		t.Error("Passing")
@@ -288,7 +288,7 @@ func TestFilterPassRSRFields(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if passes, err := rf.passRSR([]config.DataProvider{cd}); err != nil {
+	if passes, err := rf.passRSR([]utils.DataProvider{cd}); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("Not passing")
@@ -298,7 +298,7 @@ func TestFilterPassRSRFields(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if passes, err := rf.Pass(cd, []config.DataProvider{cd}); err != nil {
+	if passes, err := rf.Pass(cd, []utils.DataProvider{cd}); err != nil {
 		t.Error(err)
 	} else if passes {
 		t.Error("Passing")
@@ -322,7 +322,7 @@ func TestFilterPassDestinations(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if passes, err := rf.passDestinations(cd, []config.DataProvider{cd}); err != nil {
+	if passes, err := rf.passDestinations(cd, []utils.DataProvider{cd}); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("Not passing")
@@ -331,7 +331,7 @@ func TestFilterPassDestinations(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if passes, err := rf.passDestinations(cd, []config.DataProvider{cd}); err != nil {
+	if passes, err := rf.passDestinations(cd, []utils.DataProvider{cd}); err != nil {
 		t.Error(err)
 	} else if passes {
 		t.Error("Passing")
@@ -341,7 +341,7 @@ func TestFilterPassDestinations(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if passes, err := rf.Pass(cd, []config.DataProvider{cd}); err != nil {
+	if passes, err := rf.Pass(cd, []utils.DataProvider{cd}); err != nil {
 		t.Error(err)
 	} else if passes {
 		t.Error("Passing")
@@ -355,14 +355,14 @@ func TestFilterPassGreaterThan(t *testing.T) {
 	}
 	ev := config.NewNavigableMap(nil)
 	ev.Set([]string{"ASR"}, 20, false, true)
-	if passes, err := rf.passGreaterThan(ev, []config.DataProvider{ev}); err != nil {
+	if passes, err := rf.passGreaterThan(ev, []utils.DataProvider{ev}); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("not passing")
 	}
 	ev = config.NewNavigableMap(nil)
 	ev.Set([]string{"ASR"}, 40, false, true)
-	if passes, err := rf.passGreaterThan(ev, []config.DataProvider{ev}); err != nil {
+	if passes, err := rf.passGreaterThan(ev, []utils.DataProvider{ev}); err != nil {
 		t.Error(err)
 	} else if passes {
 		t.Error("equal should not be passing")
@@ -371,7 +371,7 @@ func TestFilterPassGreaterThan(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if passes, err := rf.passGreaterThan(ev, []config.DataProvider{ev}); err != nil {
+	if passes, err := rf.passGreaterThan(ev, []utils.DataProvider{ev}); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("not passing")
@@ -380,7 +380,7 @@ func TestFilterPassGreaterThan(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if passes, err := rf.passGreaterThan(ev, []config.DataProvider{ev}); err != nil {
+	if passes, err := rf.passGreaterThan(ev, []utils.DataProvider{ev}); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("not passing")
@@ -389,14 +389,14 @@ func TestFilterPassGreaterThan(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if passes, err := rf.passGreaterThan(ev, []config.DataProvider{ev}); err != nil {
+	if passes, err := rf.passGreaterThan(ev, []utils.DataProvider{ev}); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("not passing")
 	}
 	ev = config.NewNavigableMap(nil)
 	ev.Set([]string{"ASR"}, 20, false, true)
-	if passes, err := rf.passGreaterThan(ev, []config.DataProvider{ev}); err != nil {
+	if passes, err := rf.passGreaterThan(ev, []utils.DataProvider{ev}); err != nil {
 		t.Error(err)
 	} else if passes {
 		t.Error("should not pass")
@@ -407,7 +407,7 @@ func TestFilterPassGreaterThan(t *testing.T) {
 	}
 	ev = config.NewNavigableMap(nil)
 	ev.Set([]string{"ACD"}, time.Duration(2*time.Minute), false, true)
-	if passes, err := rf.passGreaterThan(ev, []config.DataProvider{ev}); err != nil {
+	if passes, err := rf.passGreaterThan(ev, []utils.DataProvider{ev}); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("not pass")
@@ -419,7 +419,7 @@ func TestFilterPassGreaterThan(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if passes, err := rf.passGreaterThan(ev, []config.DataProvider{ev}); err != nil {
+	if passes, err := rf.passGreaterThan(ev, []utils.DataProvider{ev}); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("passing")
@@ -429,7 +429,7 @@ func TestFilterPassGreaterThan(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if passes, err := rf.passGreaterThan(ev, []config.DataProvider{ev}); err != nil {
+	if passes, err := rf.passGreaterThan(ev, []utils.DataProvider{ev}); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("passing")
@@ -440,7 +440,7 @@ func TestFilterPassGreaterThan(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if passes, err := rf.passGreaterThan(ev, []config.DataProvider{ev}); err != nil {
+	if passes, err := rf.passGreaterThan(ev, []utils.DataProvider{ev}); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("passing")
@@ -452,7 +452,7 @@ func TestFilterPassGreaterThan(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if passes, err := rf.passGreaterThan(ev, []config.DataProvider{ev}); err != nil {
+	if passes, err := rf.passGreaterThan(ev, []utils.DataProvider{ev}); err != nil {
 		t.Error(err)
 	} else if passes {
 		t.Error("passing")
@@ -464,7 +464,7 @@ func TestFilterPassGreaterThan(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if passes, err := rf.passGreaterThan(ev, []config.DataProvider{ev}); err != nil {
+	if passes, err := rf.passGreaterThan(ev, []utils.DataProvider{ev}); err != nil {
 		t.Error(err)
 	} else if passes {
 		t.Error("passing")
@@ -478,14 +478,14 @@ func TestFilterpassEqualTo(t *testing.T) {
 	}
 	ev := config.NewNavigableMap(nil)
 	ev.Set([]string{"ASR"}, 40.0, false, true)
-	if passes, err := rf.passEqualTo(ev, []config.DataProvider{ev}); err != nil {
+	if passes, err := rf.passEqualTo(ev, []utils.DataProvider{ev}); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("not passing")
 	}
 	ev = config.NewNavigableMap(nil)
 	ev.Set([]string{"ASR"}, 39, false, true)
-	if passes, err := rf.passEqualTo(ev, []config.DataProvider{ev}); err != nil {
+	if passes, err := rf.passEqualTo(ev, []utils.DataProvider{ev}); err != nil {
 		t.Error(err)
 	} else if passes {
 		t.Error("equal should not be passing")
@@ -494,7 +494,7 @@ func TestFilterpassEqualTo(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if passes, err := rf.Pass(ev, []config.DataProvider{ev}); err != nil {
+	if passes, err := rf.Pass(ev, []utils.DataProvider{ev}); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("not passing", passes)
@@ -505,7 +505,7 @@ func TestFilterpassEqualTo(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if passes, err := rf.passEqualTo(ev, []config.DataProvider{ev}); err != nil {
+	if passes, err := rf.passEqualTo(ev, []utils.DataProvider{ev}); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("not passing")

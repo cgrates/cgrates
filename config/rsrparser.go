@@ -107,7 +107,7 @@ func (prsrs RSRParsers) ParseEvent(ev map[string]interface{}) (out string, err e
 	return
 }
 
-func (prsrs RSRParsers) ParseDataProvider(dP DataProvider, separator string) (out string, err error) {
+func (prsrs RSRParsers) ParseDataProvider(dP utils.DataProvider, separator string) (out string, err error) {
 	for _, prsr := range prsrs {
 		if outPrsr, err := prsr.ParseDataProvider(dP, separator); err != nil {
 			return "", err
@@ -118,7 +118,7 @@ func (prsrs RSRParsers) ParseDataProvider(dP DataProvider, separator string) (ou
 	return
 }
 
-func (prsrs RSRParsers) ParseDataProviderWithInterfaces(dP DataProvider, separator string) (out string, err error) {
+func (prsrs RSRParsers) ParseDataProviderWithInterfaces(dP utils.DataProvider, separator string) (out string, err error) {
 	for _, prsr := range prsrs {
 		if outPrsr, err := prsr.ParseDataProviderWithInterfaces(dP, separator); err != nil {
 			return "", err
@@ -280,7 +280,7 @@ func (prsr *RSRParser) ParseEvent(ev map[string]interface{}) (out string, err er
 	return prsr.ParseValue(val)
 }
 
-func (prsr *RSRParser) ParseDataProvider(dP DataProvider, separator string) (out string, err error) {
+func (prsr *RSRParser) ParseDataProvider(dP utils.DataProvider, separator string) (out string, err error) {
 	var outStr string
 	if prsr.attrValue == "" {
 		if outStr, err = dP.FieldAsString(
@@ -292,7 +292,7 @@ func (prsr *RSRParser) ParseDataProvider(dP DataProvider, separator string) (out
 	return prsr.ParseValue(outStr)
 }
 
-func (prsr *RSRParser) ParseDataProviderWithInterfaces(dP DataProvider, separator string) (out string, err error) {
+func (prsr *RSRParser) ParseDataProviderWithInterfaces(dP utils.DataProvider, separator string) (out string, err error) {
 	var outIface interface{}
 	if prsr.attrValue == "" {
 		if outIface, err = dP.FieldAsInterface(
