@@ -20,6 +20,8 @@ package config
 import (
 	"reflect"
 	"testing"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 func TestSchedulerCfgloadFromJsonCfg(t *testing.T) {
@@ -52,5 +54,30 @@ func TestSchedulerCfgloadFromJsonCfg(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, schdcfg) {
 		t.Errorf("Expected: %+v , recived: %+v", expected, schdcfg)
+	}
+}
+
+func TestSchedulerCfgAsMapInterface(t *testing.T) {
+	var schdcfg SchedulerCfg
+	cfgJSONStr := `{
+	"schedulers": {
+		"enabled": true,				
+		"cdrs_conns": [],				
+		"filters": [],
+	},
+}`
+	eMap := map[string]interface{}{
+		"enabled":    true,
+		"cdrs_conns": []string{},
+		"filters":    []string{},
+	}
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+		t.Error(err)
+	} else if jsnSchCfg, err := jsnCfg.SchedulerJsonCfg(); err != nil {
+		t.Error(err)
+	} else if err = schdcfg.loadFromJsonCfg(jsnSchCfg); err != nil {
+		t.Error(err)
+	} else if rcv := schdcfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
+		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }

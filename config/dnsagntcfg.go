@@ -87,12 +87,21 @@ func (da *DNSAgentCfg) AsMapInterface(separator string) map[string]interface{} {
 	for i, item := range da.RequestProcessors {
 		requestProcessors[i] = item.AsMapInterface(separator)
 	}
+	sessionSConns := make([]string, len(da.SessionSConns))
+	for i, item := range da.SessionSConns {
+		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
+		if item == buf {
+			sessionSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaSessionS, utils.EmptyString)
+		} else {
+			sessionSConns[i] = item
+		}
+	}
 
 	return map[string]interface{}{
 		utils.EnabledCfg:           da.Enabled,
 		utils.ListenCfg:            da.Listen,
 		utils.ListenNetCfg:         da.ListenNet,
-		utils.SessionSConnsCfg:     da.SessionSConns,
+		utils.SessionSConnsCfg:     sessionSConns,
 		utils.TimezoneCfg:          da.Timezone,
 		utils.RequestProcessorsCfg: requestProcessors,
 	}
@@ -165,7 +174,7 @@ func (rp *RequestProcessor) AsMapInterface(separator string) map[string]interfac
 		for i, item := range rp.Tenant {
 			values[i] = item.Rules
 		}
-		tenant = strings.Join(values, utils.EmptyString)
+		tenant = strings.Join(values, separator)
 	}
 
 	flags := make(map[string][]string, len(rp.Flags))

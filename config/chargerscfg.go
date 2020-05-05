@@ -18,7 +18,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
-import "github.com/cgrates/cgrates/utils"
+import (
+	"strings"
+
+	"github.com/cgrates/cgrates/utils"
+)
 
 // SupplierSCfg is the configuration of supplier service
 type ChargerSCfg struct {
@@ -72,12 +76,35 @@ func (cS *ChargerSCfg) loadFromJsonCfg(jsnCfg *ChargerSJsonCfg) (err error) {
 }
 
 func (cS *ChargerSCfg) AsMapInterface() map[string]interface{} {
+	attributeSConns := make([]string, len(cS.AttributeSConns))
+	for i, item := range cS.AttributeSConns {
+		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)
+		if item == buf {
+			attributeSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaAttributes, utils.EmptyString)
+		} else {
+			attributeSConns[i] = item
+		}
+	}
+	stringIndexedFields := []string{}
+	if cS.StringIndexedFields != nil {
+		stringIndexedFields = make([]string, len(*cS.StringIndexedFields))
+		for i, item := range *cS.StringIndexedFields {
+			stringIndexedFields[i] = item
+		}
+	}
+	prefixIndexedFields := []string{}
+	if cS.PrefixIndexedFields != nil {
+		prefixIndexedFields = make([]string, len(*cS.PrefixIndexedFields))
+		for i, item := range *cS.PrefixIndexedFields {
+			prefixIndexedFields[i] = item
+		}
+	}
 	return map[string]interface{}{
 		utils.EnabledCfg:             cS.Enabled,
 		utils.IndexedSelectsCfg:      cS.IndexedSelects,
-		utils.AttributeSConnsCfg:     cS.AttributeSConns,
-		utils.StringIndexedFieldsCfg: cS.StringIndexedFields,
-		utils.PrefixIndexedFieldsCfg: cS.PrefixIndexedFields,
+		utils.AttributeSConnsCfg:     attributeSConns,
+		utils.StringIndexedFieldsCfg: stringIndexedFields,
+		utils.PrefixIndexedFieldsCfg: prefixIndexedFields,
 		utils.NestedFieldsCfg:        cS.NestedFields,
 	}
 }

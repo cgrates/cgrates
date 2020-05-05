@@ -72,3 +72,47 @@ func TestDiameterAgentCfgloadFromJsonCfg(t *testing.T) {
 		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(dacfg))
 	}
 }
+
+func TestDiameterAgentCfgAsMapInterface(t *testing.T) {
+	var dacfg DiameterAgentCfg
+	cfgJSONStr := `{
+	"diameter_agent": {
+		"enabled": false,											
+		"listen": "127.0.0.1:3868",									
+		"dictionaries_path": "/usr/share/cgrates/diameter/dict/",	
+		"sessions_conns": ["*internal"],
+		"origin_host": "CGR-DA",									
+		"origin_realm": "cgrates.org",								
+		"vendor_id": 0,												
+		"product_name": "CGRateS",									
+		"synced_conn_requests": true,
+		"templates":{},
+		"request_processors": [],
+	},
+}`
+	eMap := map[string]interface{}{
+		"asr_template":         "",
+		"concurrent_requests":  0,
+		"dictionaries_path":    "/usr/share/cgrates/diameter/dict/",
+		"enabled":              false,
+		"listen":               "127.0.0.1:3868",
+		"listen_net":           "",
+		"origin_host":          "CGR-DA",
+		"origin_realm":         "cgrates.org",
+		"product_name":         "CGRateS",
+		"sessions_conns":       []string{"*internal"},
+		"synced_conn_requests": true,
+		"vendor_id":            0,
+		"templates":            map[string][]map[string]interface{}{},
+		"request_processors":   []map[string]interface{}{},
+	}
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+		t.Error(err)
+	} else if jsnDaCfg, err := jsnCfg.DiameterAgentJsonCfg(); err != nil {
+		t.Error(err)
+	} else if err = dacfg.loadFromJsonCfg(jsnDaCfg, utils.INFIELD_SEP); err != nil {
+		t.Error(err)
+	} else if rcv := dacfg.AsMapInterface(utils.EmptyString); !reflect.DeepEqual(eMap, rcv) {
+		t.Errorf("Expected: %+v,\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	}
+}

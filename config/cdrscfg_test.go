@@ -69,3 +69,103 @@ func TestCdrsCfgloadFromJsonCfg(t *testing.T) {
 		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(cdrscfg))
 	}
 }
+
+func TestExtraFieldsinAsMapInterface(t *testing.T) {
+	var cdrscfg CdrsCfg
+	cfgJSONStr := `{
+	"cdrs": {
+		"enabled": true,
+		"extra_fields": ["PayPalAccount", "LCRProfile", "ResourceID"],
+		"chargers_conns":["*localhost"],
+		"store_cdrs": true,
+		"online_cdr_exports": []
+	},
+	}`
+	expectedExtra := []string{"PayPalAccount", "LCRProfile", "ResourceID"}
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+		t.Error(err)
+	} else if jsnCdrsCfg, err := jsnCfg.CdrsJsonCfg(); err != nil {
+		t.Error(err)
+	} else if err = cdrscfg.loadFromJsonCfg(jsnCdrsCfg); err != nil {
+		t.Error(err)
+	} else if rcv := cdrscfg.AsMapInterface(); !reflect.DeepEqual(rcv[utils.ExtraFieldsCfg], expectedExtra) {
+		t.Errorf("Expecting: '%+v', received: '%+v' ", expectedExtra, rcv[utils.ExtraFieldsCfg])
+	}
+}
+
+func TestCdrsCfgAsMapInterface(t *testing.T) {
+	var cdrscfg CdrsCfg
+	cfgJSONStr := `{
+	"cdrs": {
+		"enabled": false,						
+		"extra_fields": [],
+		"store_cdrs": true,						
+		"session_cost_retries": 5,				
+		"chargers_conns":["*localhost"],				
+		"rals_conns": ["*internal"],
+		"attributes_conns": [],					
+		"thresholds_conns": [],					
+		"stats_conns": [],						
+		"online_cdr_exports":[],
+		"scheduler_conns": [],				
+	},
+}`
+	eMap := map[string]interface{}{
+		"enabled":              false,
+		"extra_fields":         []string{},
+		"store_cdrs":           true,
+		"session_cost_retries": 5,
+		"chargers_conns":       []string{"*localhost"},
+		"rals_conns":           []string{"*internal"},
+		"attributes_conns":     []string{},
+		"thresholds_conns":     []string{},
+		"stats_conns":          []string{},
+		"online_cdr_exports":   []string{},
+	}
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+		t.Error(err)
+	} else if jsnCdrsCfg, err := jsnCfg.CdrsJsonCfg(); err != nil {
+		t.Error(err)
+	} else if err = cdrscfg.loadFromJsonCfg(jsnCdrsCfg); err != nil {
+		t.Error(err)
+	} else if rcv := cdrscfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
+		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	}
+
+	cfgJSONStr = `{
+		"cdrs": {
+			"enabled": true,						
+			"extra_fields": ["PayPalAccount", "LCRProfile", "ResourceID"],
+			"store_cdrs": true,						
+			"session_cost_retries": 9,				
+			"chargers_conns":["*internal"],				
+			"rals_conns": ["*internal"],
+			"attributes_conns": ["*internal"],					
+			"thresholds_conns": ["*internal"],					
+			"stats_conns": ["*internal"],						
+			"online_cdr_exports":["http_localhost", "amqp_localhost", "http_test_file", "amqp_test_file","aws_test_file","sqs_test_file","kafka_localhost","s3_test_file"],
+			"scheduler_conns": ["*internal"],				
+		},
+	}`
+	eMap = map[string]interface{}{
+		"enabled":              true,
+		"extra_fields":         []string{"PayPalAccount", "LCRProfile", "ResourceID"},
+		"store_cdrs":           true,
+		"session_cost_retries": 9,
+		"chargers_conns":       []string{"*internal"},
+		"rals_conns":           []string{"*internal"},
+		"attributes_conns":     []string{"*internal"},
+		"thresholds_conns":     []string{"*internal"},
+		"stats_conns":          []string{"*internal"},
+		"online_cdr_exports":   []string{"http_localhost", "amqp_localhost", "http_test_file", "amqp_test_file", "aws_test_file", "sqs_test_file", "kafka_localhost", "s3_test_file"},
+	}
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+		t.Error(err)
+	} else if jsnCdrsCfg, err := jsnCfg.CdrsJsonCfg(); err != nil {
+		t.Error(err)
+	} else if err = cdrscfg.loadFromJsonCfg(jsnCdrsCfg); err != nil {
+		t.Error(err)
+	} else if rcv := cdrscfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
+		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	}
+}

@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"strings"
+
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -123,17 +125,70 @@ func (cdrscfg *CdrsCfg) AsMapInterface() map[string]interface{} {
 	for i, item := range cdrscfg.ExtraFields {
 		extraFields[i] = item.Rules
 	}
+	onlineCDRExports := make([]string, len(cdrscfg.OnlineCDRExports))
+	for i, item := range cdrscfg.OnlineCDRExports {
+		onlineCDRExports[i] = item
+	}
+
+	chargerSConns := make([]string, len(cdrscfg.ChargerSConns))
+	for i, item := range cdrscfg.ChargerSConns {
+		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)
+		if item == buf {
+			chargerSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaChargers, utils.EmptyString)
+		} else {
+			chargerSConns[i] = item
+		}
+	}
+	RALsConns := make([]string, len(cdrscfg.RaterConns))
+	for i, item := range cdrscfg.RaterConns {
+		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder)
+
+		if item == buf {
+			RALsConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaResponder, utils.EmptyString)
+		} else {
+			RALsConns[i] = item
+		}
+	}
+
+	attributeSConns := make([]string, len(cdrscfg.AttributeSConns))
+	for i, item := range cdrscfg.AttributeSConns {
+		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)
+		if item == buf {
+			attributeSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaAttributes, utils.EmptyString)
+		} else {
+			attributeSConns[i] = item
+		}
+	}
+
+	thresholdSConns := make([]string, len(cdrscfg.ThresholdSConns))
+	for i, item := range cdrscfg.ThresholdSConns {
+		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)
+		if item == buf {
+			thresholdSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaThresholds, utils.EmptyString)
+		} else {
+			thresholdSConns[i] = item
+		}
+	}
+	statSConns := make([]string, len(cdrscfg.StatSConns))
+	for i, item := range cdrscfg.StatSConns {
+		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS)
+		if item == buf {
+			statSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaStatS, utils.EmptyString)
+		} else {
+			statSConns[i] = item
+		}
+	}
 
 	return map[string]interface{}{
 		utils.EnabledCfg:          cdrscfg.Enabled,
 		utils.ExtraFieldsCfg:      extraFields,
 		utils.StoreCdrsCfg:        cdrscfg.StoreCdrs,
 		utils.SMCostRetriesCfg:    cdrscfg.SMCostRetries,
-		utils.ChargerSConnsCfg:    cdrscfg.ChargerSConns,
-		utils.RALsConnsCfg:        cdrscfg.RaterConns,
-		utils.AttributeSConnsCfg:  cdrscfg.AttributeSConns,
-		utils.ThresholdSConnsCfg:  cdrscfg.ThresholdSConns,
-		utils.StatSConnsCfg:       cdrscfg.StatSConns,
-		utils.OnlineCDRExportsCfg: cdrscfg.OnlineCDRExports,
+		utils.ChargerSConnsCfg:    chargerSConns,
+		utils.RALsConnsCfg:        RALsConns,
+		utils.AttributeSConnsCfg:  attributeSConns,
+		utils.ThresholdSConnsCfg:  thresholdSConns,
+		utils.StatSConnsCfg:       statSConns,
+		utils.OnlineCDRExportsCfg: onlineCDRExports,
 	}
 }

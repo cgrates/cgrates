@@ -72,24 +72,12 @@ func (ld *LoaderCgrCfg) loadFromJsonCfg(jsnCfg *LoaderCfgJson) (err error) {
 }
 
 func (ld *LoaderCgrCfg) AsMapInterface() map[string]interface{} {
-	gapiCredentials := make([]byte, len(ld.GapiCredentials))
-	for i, item := range ld.GapiCredentials {
-		gapiCredentials[i] = item
-	}
-
-	gapiToken := make([]byte, len(ld.GapiToken))
-	for i, item := range ld.GapiToken {
-		gapiToken[i] = item
-	}
-
 	return map[string]interface{}{
-		utils.TpIDCfg:            ld.TpID,
-		utils.DataPathCfg:        ld.DataPath,
-		utils.DisableReverseCfg:  ld.DisableReverse,
-		utils.FieldSeparatorCfg:  ld.FieldSeparator,
-		utils.CachesConnsCfg:     ld.CachesConns,
-		utils.SchedulerConnsCfg:  ld.SchedulerConns,
-		utils.GapiCredentialsCfg: gapiCredentials,
-		utils.GapiTokenCfg:       gapiToken,
+		utils.TpIDCfg:           ld.TpID,
+		utils.DataPathCfg:       ld.DataPath,
+		utils.DisableReverseCfg: ld.DisableReverse,
+		utils.FieldSeparatorCfg: string(ld.FieldSeparator),
+		utils.CachesConnsCfg:    ld.CachesConns,
+		utils.SchedulerConnsCfg: ld.SchedulerConns,
 	}
 }

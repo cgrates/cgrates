@@ -64,12 +64,25 @@ func (alS *AttributeSCfg) loadFromJsonCfg(jsnCfg *AttributeSJsonCfg) (err error)
 }
 
 func (alS *AttributeSCfg) AsMapInterface() map[string]interface{} {
-
+	stringIndexedFields := []string{}
+	if alS.StringIndexedFields != nil {
+		stringIndexedFields = make([]string, len(*alS.StringIndexedFields))
+		for i, item := range *alS.StringIndexedFields {
+			stringIndexedFields[i] = item
+		}
+	}
+	prefixIndexedFields := []string{}
+	if alS.PrefixIndexedFields != nil {
+		prefixIndexedFields = make([]string, len(*alS.PrefixIndexedFields))
+		for i, item := range *alS.PrefixIndexedFields {
+			prefixIndexedFields[i] = item
+		}
+	}
 	return map[string]interface{}{
 		utils.EnabledCfg:             alS.Enabled,
 		utils.IndexedSelectsCfg:      alS.IndexedSelects,
-		utils.StringIndexedFieldsCfg: alS.StringIndexedFields,
-		utils.PrefixIndexedFieldsCfg: alS.PrefixIndexedFields,
+		utils.StringIndexedFieldsCfg: stringIndexedFields,
+		utils.PrefixIndexedFieldsCfg: prefixIndexedFields,
 		utils.ProcessRunsCfg:         alS.ProcessRuns,
 		utils.NestedFieldsCfg:        alS.NestedFields,
 	}

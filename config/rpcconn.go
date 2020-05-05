@@ -107,6 +107,6 @@ func (rh *RemoteHost) AsMapInterface() map[string]interface{} {
 		utils.AddressCfg:     rh.Address,
 		utils.TransportCfg:   rh.Transport,
 		utils.SynchronousCfg: rh.Synchronous,
-		utils.TLS:            rh.TLS,
+		utils.TlsCfg:         rh.TLS,
 	}
 }

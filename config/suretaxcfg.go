@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -174,86 +175,134 @@ func (self *SureTaxCfg) loadFromJsonCfg(jsnCfg *SureTaxJsonCfg) (err error) {
 	return nil
 }
 
-func (st *SureTaxCfg) AsMapInterface() map[string]interface{} {
-
-	clientTracking := make([]string, len(st.ClientTracking))
-	for i, item := range st.ClientTracking {
-		clientTracking[i] = item.Rules
+func (st *SureTaxCfg) AsMapInterface(separator string) map[string]interface{} {
+	var clientTracking string
+	if st.ClientTracking != nil {
+		values := make([]string, len(st.ClientTracking))
+		for i, item := range st.ClientTracking {
+			values[i] = item.Rules
+		}
+		clientTracking = strings.Join(values, separator)
 	}
-
-	customerNumber := make([]string, len(st.CustomerNumber))
-	for i, item := range st.CustomerNumber {
-		customerNumber[i] = item.Rules
+	var customerNumber string
+	if st.CustomerNumber != nil {
+		values := make([]string, len(st.CustomerNumber))
+		for i, item := range st.CustomerNumber {
+			values[i] = item.Rules
+		}
+		customerNumber = strings.Join(values, separator)
 	}
-
-	origNumber := make([]string, len(st.OrigNumber))
-	for i, item := range st.OrigNumber {
-		origNumber[i] = item.Rules
+	var origNumber string
+	if st.OrigNumber != nil {
+		values := make([]string, len(st.OrigNumber))
+		for i, item := range st.OrigNumber {
+			values[i] = item.Rules
+		}
+		origNumber = strings.Join(values, separator)
 	}
-
-	termNumber := make([]string, len(st.TermNumber))
-	for i, item := range st.TermNumber {
-		termNumber[i] = item.Rules
+	var termNumber string
+	if st.TermNumber != nil {
+		values := make([]string, len(st.TermNumber))
+		for i, item := range st.TermNumber {
+			values[i] = item.Rules
+		}
+		termNumber = strings.Join(values, separator)
 	}
-
-	billToNumber := make([]string, len(st.BillToNumber))
-	for i, item := range st.BillToNumber {
-		billToNumber[i] = item.Rules
+	var billToNumber string
+	if st.BillToNumber != nil {
+		values := make([]string, len(st.BillToNumber))
+		for i, item := range st.BillToNumber {
+			values[i] = item.Rules
+		}
+		billToNumber = strings.Join(values, separator)
 	}
-
-	zipcode := make([]string, len(st.Zipcode))
-	for i, item := range st.Zipcode {
-		zipcode[i] = item.Rules
+	var zipcode string
+	if st.Zipcode != nil {
+		values := make([]string, len(st.Zipcode))
+		for i, item := range st.Zipcode {
+			values[i] = item.Rules
+		}
+		zipcode = strings.Join(values, separator)
 	}
-
-	plus4 := make([]string, len(st.Plus4))
-	for i, item := range st.Plus4 {
-		plus4[i] = item.Rules
+	var plus4 string
+	if st.Plus4 != nil {
+		values := make([]string, len(st.Plus4))
+		for i, item := range st.Plus4 {
+			values[i] = item.Rules
+		}
+		plus4 = strings.Join(values, separator)
 	}
-
-	p2PZipcode := make([]string, len(st.P2PZipcode))
-	for i, item := range st.P2PZipcode {
-		p2PZipcode[i] = item.Rules
+	var p2PZipcode string
+	if st.P2PZipcode != nil {
+		values := make([]string, len(st.P2PZipcode))
+		for i, item := range st.P2PZipcode {
+			values[i] = item.Rules
+		}
+		p2PZipcode = strings.Join(values, separator)
 	}
-
-	p2PPlus4 := make([]string, len(st.P2PPlus4))
-	for i, item := range st.P2PPlus4 {
-		p2PPlus4[i] = item.Rules
+	var p2PPlus4 string
+	if st.P2PPlus4 != nil {
+		values := make([]string, len(st.P2PPlus4))
+		for i, item := range st.P2PPlus4 {
+			values[i] = item.Rules
+		}
+		p2PPlus4 = strings.Join(values, separator)
 	}
-
-	units := make([]string, len(st.Units))
-	for i, item := range st.Units {
-		units[i] = item.Rules
+	var units string
+	if st.Units != nil {
+		values := make([]string, len(st.Units))
+		for i, item := range st.Units {
+			values[i] = item.Rules
+		}
+		units = strings.Join(values, separator)
 	}
-
-	unitType := make([]string, len(st.UnitType))
-	for i, item := range st.UnitType {
-		unitType[i] = item.Rules
+	var unitType string
+	if st.UnitType != nil {
+		values := make([]string, len(st.UnitType))
+		for i, item := range st.UnitType {
+			values[i] = item.Rules
+		}
+		unitType = strings.Join(values, separator)
 	}
-
-	taxIncluded := make([]string, len(st.TaxIncluded))
-	for i, item := range st.TaxIncluded {
-		taxIncluded[i] = item.Rules
+	var taxIncluded string
+	if st.TaxIncluded != nil {
+		values := make([]string, len(st.TaxIncluded))
+		for i, item := range st.TaxIncluded {
+			values[i] = item.Rules
+		}
+		taxIncluded = strings.Join(values, separator)
 	}
-
-	taxSitusRule := make([]string, len(st.TaxSitusRule))
-	for i, item := range st.TaxSitusRule {
-		taxSitusRule[i] = item.Rules
+	var taxSitusRule string
+	if st.TaxSitusRule != nil {
+		values := make([]string, len(st.TaxSitusRule))
+		for i, item := range st.TaxSitusRule {
+			values[i] = item.Rules
+		}
+		taxSitusRule = strings.Join(values, separator)
 	}
-
-	transTypeCode := make([]string, len(st.TransTypeCode))
-	for i, item := range st.TransTypeCode {
-		transTypeCode[i] = item.Rules
+	var transTypeCode string
+	if st.TransTypeCode != nil {
+		values := make([]string, len(st.TransTypeCode))
+		for i, item := range st.TransTypeCode {
+			values[i] = item.Rules
+		}
+		transTypeCode = strings.Join(values, separator)
 	}
-
-	salesTypeCode := make([]string, len(st.SalesTypeCode))
-	for i, item := range st.SalesTypeCode {
-		salesTypeCode[i] = item.Rules
+	var salesTypeCode string
+	if st.SalesTypeCode != nil {
+		values := make([]string, len(st.SalesTypeCode))
+		for i, item := range st.SalesTypeCode {
+			values[i] = item.Rules
+		}
+		salesTypeCode = strings.Join(values, separator)
 	}
-
-	taxExemptionCodeList := make([]string, len(st.TaxExemptionCodeList))
-	for i, item := range st.TaxExemptionCodeList {
-		taxExemptionCodeList[i] = item.Rules
+	var taxExemptionCodeList string
+	if st.TaxExemptionCodeList != nil {
+		values := make([]string, len(st.TaxExemptionCodeList))
+		for i, item := range st.TaxExemptionCodeList {
+			values[i] = item.Rules
+		}
+		taxExemptionCodeList = strings.Join(values, separator)
 	}
 
 	return map[string]interface{}{
@@ -267,22 +316,22 @@ func (st *SureTaxCfg) AsMapInterface() map[string]interface{} {
 		utils.ResponseGroupCfg:        st.ResponseGroup,
 		utils.ResponseTypeCfg:         st.ResponseType,
 		utils.RegulatoryCodeCfg:       st.RegulatoryCode,
-		utils.ClientTrackingCfg:       st.ClientTracking,
-		utils.CustomerNumberCfg:       st.CustomerNumber,
-		utils.OrigNumberCfg:           st.OrigNumber,
-		utils.TermNumberCfg:           st.TermNumber,
-		utils.BillToNumberCfg:         st.BillToNumber,
-		utils.ZipcodeCfg:              st.Zipcode,
-		utils.Plus4Cfg:                st.Plus4,
-		utils.P2PZipcodeCfg:           st.P2PZipcode,
-		utils.P2PPlus4Cfg:             st.P2PPlus4,
-		utils.UnitsCfg:                st.Units,
-		utils.UnitTypeCfg:             st.UnitType,
-		utils.TaxIncludedCfg:          st.TaxIncluded,
-		utils.TaxSitusRuleCfg:         st.TaxSitusRule,
-		utils.TransTypeCodeCfg:        st.TransTypeCode,
-		utils.SalesTypeCodeCfg:        st.SalesTypeCode,
-		utils.TaxExemptionCodeListCfg: st.TaxExemptionCodeList,
+		utils.ClientTrackingCfg:       clientTracking,
+		utils.CustomerNumberCfg:       customerNumber,
+		utils.OrigNumberCfg:           origNumber,
+		utils.TermNumberCfg:           termNumber,
+		utils.BillToNumberCfg:         billToNumber,
+		utils.ZipcodeCfg:              zipcode,
+		utils.Plus4Cfg:                plus4,
+		utils.P2PZipcodeCfg:           p2PZipcode,
+		utils.P2PPlus4Cfg:             p2PPlus4,
+		utils.UnitsCfg:                units,
+		utils.UnitTypeCfg:             unitType,
+		utils.TaxIncludedCfg:          taxIncluded,
+		utils.TaxSitusRuleCfg:         taxSitusRule,
+		utils.TransTypeCodeCfg:        transTypeCode,
+		utils.SalesTypeCodeCfg:        salesTypeCode,
+		utils.TaxExemptionCodeListCfg: taxExemptionCodeList,
 	}
 
 }

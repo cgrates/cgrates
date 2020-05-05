@@ -120,7 +120,6 @@ func TestRalsCfgAsMapInterface(t *testing.T) {
 			"*any":   "*zero1ns",
 			"*voice": "*zero1s",
 		},
-		"dynaprepaid_actionplans": []string{},
 	}
 
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
