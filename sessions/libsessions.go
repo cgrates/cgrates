@@ -163,7 +163,7 @@ func (pi *ProcessedStirIdentity) VerifySignature(timeoutVal time.Duration) (err 
 
 // VerifyPayload returns if the payload is corectly populated
 func (pi *ProcessedStirIdentity) VerifyPayload(originatorTn, originatorURI, destinationTn, destinationURI string,
-	hdrMaxDur time.Duration, attest *utils.StringSet) (err error) {
+	hdrMaxDur time.Duration, attest utils.StringSet) (err error) {
 	if !attest.Has(utils.META_ANY) && !attest.Has(pi.Payload.ATTest) {
 		return errors.New("wrong attest level")
 	}
@@ -221,7 +221,7 @@ func NewSTIRIdentity(header *utils.PASSporTHeader, payload *utils.PASSporTPayloa
 
 // AuthStirShaken autentificates the given identity using STIR/SHAKEN
 func AuthStirShaken(identity, originatorTn, originatorURI, destinationTn, destinationURI string,
-	attest *utils.StringSet, hdrMaxDur time.Duration) (err error) {
+	attest utils.StringSet, hdrMaxDur time.Duration) (err error) {
 	var pi *ProcessedStirIdentity
 	if pi, err = NewProcessedIdentity(identity); err != nil {
 		return

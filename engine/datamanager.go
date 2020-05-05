@@ -2415,7 +2415,7 @@ func (dm *DataManager) GetAttributeProfile(tenant, id string, cacheRead, cacheWr
 		}
 	}
 	isInline := false
-	for typeAttr := range utils.AttrInlineTypes.Data() {
+	for typeAttr := range utils.AttrInlineTypes {
 		if strings.HasPrefix(id, typeAttr) {
 			isInline = true
 			break
