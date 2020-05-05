@@ -450,7 +450,7 @@ func (kdr *KamDlgReply) String() string {
 // GetOptions returns the posible options
 func (kev KamEvent) GetOptions() (mp map[string]interface{}) {
 	mp = make(map[string]interface{})
-	for k := range utils.CGROptionsSet.Data() {
+	for k := range utils.CGROptionsSet {
 		if val, has := kev[k]; has {
 			mp[k] = val
 		}

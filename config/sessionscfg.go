@@ -97,7 +97,7 @@ type SessionSCfg struct {
 	ClientProtocol      float64
 	ChannelSyncInterval time.Duration
 	TerminateAttempts   int
-	AlterableFields     *utils.StringSet
+	AlterableFields     utils.StringSet
 	MinDurLowBalance    time.Duration
 	SchedulerConns      []string
 	STIRCfg             *STIRcfg
@@ -681,7 +681,7 @@ func (aCfg *AsteriskAgentCfg) AsMapInterface() map[string]interface{} {
 
 // STIRcfg the confuguration structure for STIR
 type STIRcfg struct {
-	AllowedAttest      *utils.StringSet
+	AllowedAttest      utils.StringSet
 	PayloadMaxduration time.Duration
 	DefaultAttest      string
 	PublicKeyPath      string

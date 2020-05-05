@@ -19,254 +19,181 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
-	"fmt"
-	"strings"
+	"net"
 )
 
-// DataStorage is the new DataProvider
-type DataStorage interface {
-	String() string // printable version of data
-	Get(fldPath []string) (interface{}, error)
-	GetString(fldPath []string) (string, error)
-	Set(fldPath []string, val interface{}) error
-	Remove(fldPath []string) error
-	GetKeys(nesteed bool) []string
-	// RemoteHost() net.Addr
+// NavigableMap2 is the basic map of NM interface
+type NavigableMap2 map[string]NMInterface
+
+func (nm NavigableMap2) String() (out string) {
+	for k, v := range nm {
+		out += ",\"" + k + "\":" + v.String()
+	}
+	if len(out) == 0 {
+		return "{}"
+	}
+	out = out[1:]
+	return "{" + out + "}"
 }
 
-// MapStorage is the basic DataStorage
-type MapStorage map[string]interface{}
-
-// String returns the map as json string
-func (ms *MapStorage) String() string { return ToJSON(ms) }
-
-// Get returns the value from the path
-func (ms *MapStorage) Get(fldPath []string) (val interface{}, err error) {
-	if len(fldPath) == 0 {
-		err = ErrNotFound
-		return
-	}
-	var has bool
-	if val, has = (*ms)[fldPath[0]]; !has {
-		err = ErrNotFound
-		return
-	}
-	if len(fldPath) == 1 {
-		return
-	}
-	ds, ok := val.(DataStorage)
-	if !ok {
-		err = fmt.Errorf("Wrong type")
-		return
-	}
-	return ds.Get(fldPath[1:])
+// Interface returns itself
+func (nm NavigableMap2) Interface() interface{} {
+	return nm
 }
 
-// GetString returns thevalue from path as string
-func (ms *MapStorage) GetString(fldPath []string) (str string, err error) {
-	var val interface{}
-	if val, err = ms.Get(fldPath); err != nil {
-		return
+// Field returns the item on the given path
+func (nm NavigableMap2) Field(path PathItems) (val NMInterface, err error) {
+	if len(path) == 0 {
+		return nil, ErrWrongPath
 	}
-	return IfaceAsString(val), nil
-}
-
-// Set sets the value at the given path
-func (ms *MapStorage) Set(fldPath []string, val interface{}) (err error) {
-	if len(fldPath) == 0 {
-		return fmt.Errorf("Wrong path")
-	}
-	if len(fldPath) == 1 {
-		(*ms)[fldPath[0]] = val
-		return
-	}
-	nMap := &MapStorage{}
-	(*ms)[fldPath[0]] = nMap
-	return nMap.Set(fldPath[1:], val)
-}
-
-// GetKeys returns all the keys from map
-func (ms *MapStorage) GetKeys(nesteed bool) (keys []string) {
-	for k, v := range *ms {
-		keys = append(keys, k)
-		if !nesteed {
-			continue
-		}
-		ds, ok := v.(DataStorage)
-		if !ok {
-			continue
-		}
-		for _, dsKey := range ds.GetKeys(nesteed) {
-			keys = append(keys, k+NestingSep+dsKey)
-		}
-	}
-	return
-}
-
-// Remove removes the item at path
-func (ms *MapStorage) Remove(fldPath []string) (err error) {
-	if len(fldPath) == 0 {
-		return fmt.Errorf("Wrong path")
-	}
-	var val interface{}
-	var has bool
-	if val, has = (*ms)[fldPath[0]]; !has {
-		return // ignore (already removed)
-	}
-	if len(fldPath) == 1 {
-		delete(*ms, fldPath[0])
-		return
-	}
-	ds, ok := val.(DataStorage)
-	if !ok {
-		err = fmt.Errorf("Wrong type")
-		return
-	}
-	return ds.Remove(fldPath[1:])
-}
-
-// NavigableMap is a DataStorage
-type NavigableMap map[string]DataStorage
-
-// String returns the map as json string
-func (nm *NavigableMap) String() string { return ToJSON(nm) }
-
-// Get returns the value from the path
-func (nm *NavigableMap) Get(fldPath []string) (val interface{}, err error) {
-	if len(fldPath) == 0 {
-		err = ErrNotFound
-		return
-	}
-	ds, has := (*nm)[fldPath[0]]
+	el, has := nm[path[0].Field]
 	if !has {
-		err = ErrNotFound
-		return
+		return nil, ErrNotFound
 	}
-	if len(fldPath) == 1 {
-		val = ds
-		return
+	if len(path) == 1 && path[0].Index == nil {
+		return el, nil
 	}
-	return ds.Get(fldPath[1:])
+	switch el.Type() {
+	default:
+		return nil, ErrNotFound
+	case NMMapType:
+		if path[0].Index != nil {
+			return nil, ErrNotFound
+		}
+		return el.Field(path[1:])
+	case NMSliceType:
+		return el.Field(path)
+	}
 }
 
-// GetString returns thevalue from path as string
-func (nm *NavigableMap) GetString(fldPath []string) (str string, err error) {
+// Set sets the value for the given path
+func (nm NavigableMap2) Set(path PathItems, val NMInterface) (added bool, err error) {
+	if len(path) == 0 {
+		return false, ErrWrongPath
+	}
+	nmItm, has := nm[path[0].Field]
+
+	if path[0].Index != nil { // has index, should be a slice which is kinda part of our map, hence separate handling
+		if !has {
+			nmItm = &NMSlice{}
+			if _, err = nmItm.Set(path, val); err != nil {
+				return
+			}
+			nm[path[0].Field] = nmItm
+			added = true
+			return
+		}
+		if nmItm.Type() != NMSliceType {
+			return false, ErrWrongPath
+		}
+		return nmItm.Set(path, val)
+	}
+
+	// standard handling
+	if len(path) == 1 { // always overwrite for single path
+		nm[path[0].Field] = val
+		if !has {
+			added = true
+		}
+		return
+	}
+	// from here we should deal only with navmaps due to multiple path
+	if !has {
+		nmItm = NavigableMap2{}
+		nm[path[0].Field] = nmItm
+	}
+	if nmItm.Type() != NMMapType { // do not try to overwrite an interface
+		return false, ErrWrongPath
+	}
+	return nmItm.Set(path[1:], val)
+}
+
+// Remove removes the item for the given path
+func (nm NavigableMap2) Remove(path PathItems) (err error) {
+	if len(path) == 0 {
+		return ErrWrongPath
+	}
+	el, has := nm[path[0].Field]
+	if !has {
+		return // already removed
+	}
+	if len(path) == 1 {
+		if path[0].Index != nil {
+			if el.Type() != NMSliceType {
+				return ErrWrongPath
+			}
+			// this should not return error
+			// but in case it does we propagate it further
+			err = el.Remove(path)
+			if el.Empty() {
+				delete(nm, path[0].Field)
+			}
+			return
+		}
+		delete(nm, path[0].Field)
+		return
+	}
+	if path[0].Index != nil {
+		if el.Type() != NMSliceType {
+			return ErrWrongPath
+		}
+		if err = el.Remove(path); err != nil {
+			return
+		}
+		if el.Empty() {
+			delete(nm, path[0].Field)
+		}
+		return
+	}
+	if el.Type() != NMMapType {
+		return ErrWrongPath
+	}
+	if err = el.Remove(path[1:]); err != nil {
+		return
+	}
+	if el.Empty() {
+		delete(nm, path[0].Field)
+	}
+	return
+}
+
+// Type returns the type of the NM map
+func (nm NavigableMap2) Type() NMType {
+	return NMMapType
+}
+
+// Empty returns true if the NM is empty(no data)
+func (nm NavigableMap2) Empty() bool {
+	return nm == nil || len(nm) == 0
+}
+
+// Len returns the lenght of the map
+func (nm NavigableMap2) Len() int {
+	return len(nm)
+}
+
+// FieldAsInterface returns the interface at the path
+// Is used by AgentRequest FieldAsInterface
+func (nm NavigableMap2) FieldAsInterface(fldPath []string) (str interface{}, err error) {
+	var nmi NMInterface
+	if nmi, err = nm.Field(NewPathToItem(fldPath)); err != nil {
+		return
+	}
+	return nmi.Interface(), nil
+}
+
+// FieldAsString returns the string at the path
+// Used only to implement the DataProvider interface
+func (nm NavigableMap2) FieldAsString(fldPath []string) (str string, err error) {
 	var val interface{}
-	if val, err = nm.Get(fldPath); err != nil {
+	val, err = nm.FieldAsInterface(fldPath)
+	if err != nil {
 		return
 	}
 	return IfaceAsString(val), nil
 }
 
-// Set sets the value at the given path
-func (nm *NavigableMap) Set(fldPath []string, val interface{}) (err error) {
-	if len(fldPath) == 0 {
-		return fmt.Errorf("Wrong path")
-	}
-	if len(fldPath) == 1 {
-		ds, ok := val.(DataStorage)
-		if !ok {
-			return fmt.Errorf("Wrong type")
-		}
-		(*nm)[fldPath[0]] = ds
-		return
-	}
-	if _, has := (*nm)[fldPath[0]]; !has {
-		(*nm)[fldPath[0]] = &MapStorage{}
-	}
-	return (*nm)[fldPath[0]].Set(fldPath[1:], val)
-}
-
-// GetKeys returns all the keys from map
-func (nm *NavigableMap) GetKeys(nesteed bool) (keys []string) {
-	for k, v := range *nm {
-		keys = append(keys, k)
-		if !nesteed {
-			continue
-		}
-		for _, dsKey := range v.GetKeys(nesteed) {
-			keys = append(keys, k+NestingSep+dsKey)
-		}
-	}
-	return
-}
-
-// Remove removes the item at path
-func (nm *NavigableMap) Remove(fldPath []string) (err error) {
-	if len(fldPath) == 0 {
-		return fmt.Errorf("Wrong path")
-	}
-	var val DataStorage
-	var has bool
-	if val, has = (*nm)[fldPath[0]]; !has {
-		return // ignore (already removed)
-	}
-	if len(fldPath) == 1 {
-		delete(*nm, fldPath[0])
-		return
-	}
-	return val.Remove(fldPath[1:])
-}
-
-// NewOrderedNavigableMap initializates a structure of OrderedNavigableMap with a NavigableMap
-func NewOrderedNavigableMap(nm *NavigableMap) *OrderedNavigableMap {
-	if nm == nil {
-		return &OrderedNavigableMap{
-			nm:    &NavigableMap{},
-			order: [][]string{},
-		}
-	}
-	keys := nm.GetKeys(true)
-	order := make([][]string, len(keys))
-	for i, k := range keys {
-		order[i] = strings.Split(k, NestingSep)
-	}
-	return &OrderedNavigableMap{
-		nm:    nm,
-		order: order,
-	}
-}
-
-// OrderedNavigableMap is the same as NavigableMap but keeps the order of fields
-type OrderedNavigableMap struct {
-	nm    *NavigableMap
-	order [][]string
-}
-
-// String returns the map as json string
-func (onm *OrderedNavigableMap) String() string { return ToJSON(onm.nm) }
-
-// Get returns the value from the path
-func (onm *OrderedNavigableMap) Get(fldPath []string) (val interface{}, err error) {
-	return onm.nm.Get(fldPath)
-}
-
-// GetString returns thevalue from path as string
-func (onm *OrderedNavigableMap) GetString(fldPath []string) (str string, err error) {
-	return onm.nm.GetString(fldPath)
-}
-
-// Set sets the value at the given path
-func (onm *OrderedNavigableMap) Set(fldPath []string, val interface{}) (err error) {
-	if err = onm.nm.Set(fldPath, val); err == nil {
-		onm.order = append(onm.order, fldPath)
-	}
-	return
-}
-
-// GetKeys returns all the keys from map
-func (onm *OrderedNavigableMap) GetKeys(nesteed bool) (keys []string) {
-	keys = make([]string, len(onm.order))
-	for i, k := range onm.order {
-		keys[i] = strings.Join(k, NestingSep)
-	}
-	return
-}
-
-// Remove removes the item at path
-func (onm *OrderedNavigableMap) Remove(fldPath []string) (err error) {
-	if len(fldPath) == 0 {
-		return fmt.Errorf("Wrong path")
-	}
-	return onm.nm.Remove(fldPath)
+// RemoteHost is part of dataStorage interface
+func (NavigableMap2) RemoteHost() net.Addr {
+	return LocalAddr()
 }

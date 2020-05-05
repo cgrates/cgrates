@@ -22,6 +22,15 @@ import (
 	"testing"
 )
 
+func TestProcessReSearchReplaceNil(t *testing.T) {
+	rsr := &ReSearchReplace{SearchRegexp: nil, ReplaceTemplate: "0$1@$2"}
+	source := "<sip:+4986517174963@127.0.0.1;transport=tcp>"
+	expectOut := ""
+	if outStr := rsr.Process(source); outStr != expectOut {
+		t.Error("Unexpected output from SearchReplace: ", outStr)
+	}
+}
+
 func TestProcessReSearchReplace(t *testing.T) {
 	rsr := &ReSearchReplace{SearchRegexp: regexp.MustCompile(`sip:\+49(\d+)@(\d*\.\d*\.\d*\.\d*)`), ReplaceTemplate: "0$1@$2"}
 	source := "<sip:+4986517174963@127.0.0.1;transport=tcp>"

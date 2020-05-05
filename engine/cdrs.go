@@ -483,7 +483,7 @@ func (cdrS *CDRServer) processEvent(ev *utils.CGREventWithOpts,
 			}
 		}
 	}
-	procFlgs := make([]*utils.StringSet, len(cgrEvs)) // will save the flags for the reply here
+	procFlgs := make([]utils.StringSet, len(cgrEvs)) // will save the flags for the reply here
 	for i := range cgrEvs {
 		procFlgs[i] = utils.NewStringSet(nil)
 	}
