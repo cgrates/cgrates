@@ -921,7 +921,7 @@ func (sS *SessionS) filterSessions(sf *utils.SessionFilter, psv bool) (aSs []*Ex
 		ev := config.NewNavigableMap(map[string]interface{}{utils.MetaReq: me.Data()})
 		for _, fltr := range filterRules {
 			// we don't know how many values we have so we need to build the fieldValues DataProvider
-			fieldValuesDP := make([]config.DataProvider, len(fltr.Values))
+			fieldValuesDP := make([]utils.DataProvider, len(fltr.Values))
 			for i := range fltr.Values {
 				fieldValuesDP[i] = ev
 			}
@@ -981,7 +981,7 @@ func (sS *SessionS) filterSessionsCount(sf *utils.SessionFilter, psv bool) (coun
 		ev := config.NewNavigableMap(map[string]interface{}{utils.MetaReq: me.Data()})
 		for _, fltr := range filterRules {
 			// we don't know how many values we have so we need to build the fieldValues DataProvider
-			fieldValuesDP := make([]config.DataProvider, len(fltr.Values))
+			fieldValuesDP := make([]utils.DataProvider, len(fltr.Values))
 			for i := range fltr.Values {
 				fieldValuesDP[i] = ev
 			}

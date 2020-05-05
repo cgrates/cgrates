@@ -32,25 +32,28 @@ import (
 )
 
 // NewAgentRequest returns a new AgentRequest
-func NewAgentRequest(req config.DataProvider,
-	vars map[string]interface{},
-	cgrRply *config.NavigableMap,
-	rply *config.NavigableMap,
+func NewAgentRequest(req utils.DataProvider,
+	vars utils.NavigableMap2,
+	cgrRply *utils.NavigableMap2,
+	rply *utils.OrderedNavigableMap,
 	tntTpl config.RSRParsers,
 	dfltTenant, timezone string,
 	filterS *engine.FilterS,
-	header, trailer config.DataProvider) (ar *AgentRequest) {
+	header, trailer utils.DataProvider) (ar *AgentRequest) {
 	if cgrRply == nil {
-		cgrRply = config.NewNavigableMap(nil)
+		cgrRply = &utils.NavigableMap2{}
+	}
+	if vars == nil {
+		vars = make(utils.NavigableMap2)
 	}
 	if rply == nil {
-		rply = config.NewNavigableMap(nil)
+		rply = utils.NewOrderedNavigableMap()
 	}
 	ar = &AgentRequest{
 		Request:    req,
-		Vars:       config.NewNavigableMap(vars),
-		CGRRequest: config.NewNavigableMap(nil),
-		diamreq:    config.NewNavigableMap(nil), // special case when CGRateS is building the request
+		Vars:       vars,
+		CGRRequest: utils.NewOrderedNavigableMap(),
+		diamreq:    utils.NewOrderedNavigableMap(), // special case when CGRateS is building the request
 		CGRReply:   cgrRply,
 		Reply:      rply,
 		Timezone:   timezone,
@@ -66,37 +69,37 @@ func NewAgentRequest(req config.DataProvider,
 	} else {
 		ar.Tenant = dfltTenant
 	}
-	ar.Vars.Set([]string{utils.NodeID}, config.CgrConfig().GeneralCfg().NodeID, false, true)
+	ar.Vars.Set(utils.PathItems{{Field: utils.NodeID}}, utils.NewNMData(config.CgrConfig().GeneralCfg().NodeID))
 	return
 }
 
 // AgentRequest represents data related to one request towards agent
-// implements engine.DataProvider so we can pass it to filters
+// implements utils.DataProvider so we can pass it to filters
 type AgentRequest struct {
-	Request    config.DataProvider  // request
-	Vars       *config.NavigableMap // shared data
-	CGRRequest *config.NavigableMap // Used in reply to access the request that was send
-	CGRReply   *config.NavigableMap
-	Reply      *config.NavigableMap
-	Tenant,
-	Timezone string
-	filterS *engine.FilterS
-	Header  config.DataProvider
-	Trailer config.DataProvider
-	diamreq *config.NavigableMap // used in case of building requests (ie. DisconnectSession)
+	Request    utils.DataProvider         // request
+	Vars       utils.NavigableMap2        // shared data
+	CGRRequest *utils.OrderedNavigableMap // Used in reply to access the request that was send
+	CGRReply   *utils.NavigableMap2
+	Reply      *utils.OrderedNavigableMap
+	Tenant     string
+	Timezone   string
+	filterS    *engine.FilterS
+	Header     utils.DataProvider
+	Trailer    utils.DataProvider
+	diamreq    *utils.OrderedNavigableMap // used in case of building requests (ie. DisconnectSession)
 }
 
-// String implements engine.DataProvider
+// String implements utils.DataProvider
 func (ar *AgentRequest) String() string {
 	return utils.ToIJSON(ar)
 }
 
-// RemoteHost implements engine.DataProvider
+// RemoteHost implements utils.DataProvider
 func (ar *AgentRequest) RemoteHost() net.Addr {
 	return ar.Request.RemoteHost()
 }
 
-// FieldAsInterface implements engine.DataProvider
+// FieldAsInterface implements utils.DataProvider
 func (ar *AgentRequest) FieldAsInterface(fldPath []string) (val interface{}, err error) {
 	switch fldPath[0] {
 	default:
@@ -104,15 +107,15 @@ func (ar *AgentRequest) FieldAsInterface(fldPath []string) (val interface{}, err
 	case utils.MetaReq:
 		val, err = ar.Request.FieldAsInterface(fldPath[1:])
 	case utils.MetaVars:
-		val, err = ar.Vars.GetField(fldPath[1:])
+		val, err = ar.Vars.FieldAsInterface(fldPath[1:])
 	case utils.MetaCgreq:
-		val, err = ar.CGRRequest.GetField(fldPath[1:])
+		val, err = ar.CGRRequest.FieldAsInterface(fldPath[1:])
 	case utils.MetaCgrep:
-		val, err = ar.CGRReply.GetField(fldPath[1:])
+		val, err = ar.CGRReply.FieldAsInterface(fldPath[1:])
 	case utils.MetaDiamreq:
 		val, err = ar.diamreq.FieldAsInterface(fldPath[1:])
 	case utils.MetaRep:
-		val, err = ar.Reply.GetField(fldPath[1:])
+		val, err = ar.Reply.FieldAsInterface(fldPath[1:])
 	case utils.MetaHdr:
 		val, err = ar.Header.FieldAsInterface(fldPath[1:])
 	case utils.MetaTrl:
@@ -121,22 +124,35 @@ func (ar *AgentRequest) FieldAsInterface(fldPath []string) (val interface{}, err
 	return
 }
 
-// FieldAsString implements engine.DataProvider
+// Field implements utils.NMInterface
+func (ar *AgentRequest) Field(fldPath utils.PathItems) (val utils.NMInterface, err error) {
+	switch fldPath[0].Field {
+	default:
+		return nil, fmt.Errorf("unsupported field prefix: <%s>", fldPath[0])
+	case utils.MetaVars:
+		val, err = ar.Vars.Field(fldPath[1:])
+	case utils.MetaCgreq:
+		val, err = ar.CGRRequest.Field(fldPath[1:])
+	case utils.MetaCgrep:
+		val, err = ar.CGRReply.Field(fldPath[1:])
+	case utils.MetaDiamreq:
+		val, err = ar.diamreq.Field(fldPath[1:])
+	case utils.MetaRep:
+		val, err = ar.Reply.Field(fldPath[1:])
+	}
+	return
+}
+
+// FieldAsString implements utils.DataProvider
 func (ar *AgentRequest) FieldAsString(fldPath []string) (val string, err error) {
 	var iface interface{}
 	if iface, err = ar.FieldAsInterface(fldPath); err != nil {
 		return
 	}
-	if nmItems, isNMItems := iface.([]*config.NMItem); isNMItems { // special handling of NMItems, take the last value out of it
-		iface = nmItems[len(nmItems)-1].Data // could be we need nil protection here
+	if nmItems, isNMItems := iface.(*utils.NMSlice); isNMItems { // special handling of NMItems, take the last value out of it
+		iface = (*nmItems)[len(*nmItems)-1].Interface()
 	}
 	return utils.IfaceAsString(iface), nil
-}
-
-// AsNavigableMap implements engine.DataProvider
-func (ar *AgentRequest) AsNavigableMap(tplFlds []*config.FCTemplate) (
-	nM *config.NavigableMap, err error) {
-	return nil, utils.ErrNotImplemented
 }
 
 //SetFields will populate fields of AgentRequest out of templates
@@ -148,8 +164,22 @@ func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 		} else if !pass {
 			continue
 		}
-		if tplFld.Type != utils.META_NONE {
-			out, err := ar.ParseField(tplFld)
+		switch tplFld.Type {
+		case utils.META_NONE:
+		case utils.MetaRemove:
+			if err = ar.Remove(&utils.FullPath{
+				PathItems: tplFld.GetPathItems(),
+				Path:      tplFld.Path,
+			}); err != nil {
+				return
+			}
+		case utils.MetaRemoveAll:
+			if err = ar.RemoveAll(tplFld.GetPathSlice()[0]); err != nil {
+				return
+			}
+		default:
+			var out interface{}
+			out, err = ar.ParseField(tplFld)
 			if err != nil {
 				if err == utils.ErrNotFound {
 					if !tplFld.Mandatory {
@@ -158,43 +188,24 @@ func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 					}
 					err = utils.ErrPrefixNotFound(tplFld.Tag)
 				}
-				return err
+				return
 			}
-			var valSet []*config.NMItem
-			fldPath := strings.Split(tplFld.Path, utils.NestingSep)
+			fullPath := &utils.FullPath{
+				PathItems: tplFld.GetPathItems().Clone(), // need to clone so me do not modify the template
+				Path:      tplFld.Path,
+			}
 
-			nMItm := &config.NMItem{Data: out, Path: fldPath[1:], Config: tplFld}
-			if nMFields, err := ar.FieldAsInterface(fldPath); err != nil {
-				if err != utils.ErrNotFound {
-					return err
-				}
-			} else {
-				valSet = nMFields.([]*config.NMItem) // start from previous stored fields
-				switch tplFld.Type {
-				case utils.META_COMPOSED:
-					prevNMItem := valSet[len(valSet)-1] // could be we need nil protection here
-					*nMItm = *prevNMItem                // inherit the particularities, ie AttributeName
-					nMItm.Data = utils.IfaceAsString(prevNMItem.Data) + utils.IfaceAsString(out)
-					valSet = valSet[:len(valSet)-1] // discard the last item since we have captured it in nmItem
-				case utils.MetaGroup: // in case of *group type simply append to valSet
-				default:
-					valSet = nil
-				}
-			}
-			valSet = append(valSet, nMItm)
-			switch fldPath[0] {
+			nMItm := &config.NMItem{Data: out, Path: tplFld.GetPathSlice()[1:], Config: tplFld}
+			switch tplFld.Type {
+			case utils.META_COMPOSED:
+				err = utils.ComposeNavMapVal(ar, fullPath, nMItm)
+			case utils.MetaGroup: // in case of *group type simply append to valSet
+				err = utils.AppendNavMapVal(ar, fullPath, nMItm)
 			default:
-				return fmt.Errorf("unsupported field prefix: <%s> when set fields", fldPath[0])
-			case utils.MetaVars:
-				ar.Vars.Set(fldPath[1:], valSet, false, true)
-			case utils.MetaCgreq:
-				ar.CGRRequest.Set(fldPath[1:], valSet, false, true)
-			case utils.MetaCgrep:
-				ar.CGRReply.Set(fldPath[1:], valSet, false, true)
-			case utils.MetaRep:
-				ar.Reply.Set(fldPath[1:], valSet, false, true)
-			case utils.MetaDiamreq:
-				ar.diamreq.Set(fldPath[1:], valSet, false, true)
+				_, err = ar.Set(fullPath, &utils.NMSlice{nMItm})
+			}
+			if err != nil {
+				return
 			}
 		}
 		if tplFld.Blocker { // useful in case of processing errors first
@@ -202,6 +213,80 @@ func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 		}
 	}
 	return
+}
+
+// Set implements utils.NMInterface
+func (ar *AgentRequest) Set(fullPath *utils.FullPath, nm utils.NMInterface) (added bool, err error) {
+	switch fullPath.PathItems[0].Field {
+	default:
+		return false, fmt.Errorf("unsupported field prefix: <%s> when set field", fullPath.PathItems[0].Field)
+	case utils.MetaVars:
+		return ar.Vars.Set(fullPath.PathItems[1:], nm)
+	case utils.MetaCgreq:
+		return ar.CGRRequest.Set(&utils.FullPath{
+			PathItems: fullPath.PathItems[1:],
+			Path:      fullPath.Path[7:],
+		}, nm)
+	case utils.MetaCgrep:
+		return ar.CGRReply.Set(fullPath.PathItems[1:], nm)
+	case utils.MetaRep:
+		return ar.Reply.Set(&utils.FullPath{
+			PathItems: fullPath.PathItems[1:],
+			Path:      fullPath.Path[5:],
+		}, nm)
+	case utils.MetaDiamreq:
+		return ar.diamreq.Set(&utils.FullPath{
+			PathItems: fullPath.PathItems[1:],
+			Path:      fullPath.Path[9:],
+		}, nm)
+	}
+	return false, err
+}
+
+// RemoveAll deletes all fields at given prefix
+func (ar *AgentRequest) RemoveAll(prefix string) error {
+	switch prefix {
+	default:
+		return fmt.Errorf("unsupported field prefix: <%s> when set fields", prefix)
+	case utils.MetaVars:
+		ar.Vars = utils.NavigableMap2{}
+	case utils.MetaCgreq:
+		ar.CGRRequest.RemoveAll()
+	case utils.MetaCgrep:
+		ar.CGRReply = &utils.NavigableMap2{}
+	case utils.MetaRep:
+		ar.Reply.RemoveAll()
+	case utils.MetaDiamreq:
+		ar.diamreq.RemoveAll()
+	}
+	return nil
+}
+
+// Remove deletes the fields found at path with the given prefix
+func (ar *AgentRequest) Remove(fullPath *utils.FullPath) error {
+	switch fullPath.PathItems[0].Field {
+	default:
+		return fmt.Errorf("unsupported field prefix: <%s> when set fields", fullPath.PathItems[0].Field)
+	case utils.MetaVars:
+		return ar.Vars.Remove(fullPath.PathItems[1:])
+	case utils.MetaCgreq:
+		return ar.CGRRequest.Remove(&utils.FullPath{
+			PathItems: fullPath.PathItems[1:].Clone(),
+			Path:      fullPath.Path[7:],
+		})
+	case utils.MetaCgrep:
+		return ar.CGRReply.Remove(fullPath.PathItems[1:])
+	case utils.MetaRep:
+		return ar.Reply.Remove(&utils.FullPath{
+			PathItems: fullPath.PathItems[1:].Clone(),
+			Path:      fullPath.Path[5:],
+		})
+	case utils.MetaDiamreq:
+		return ar.diamreq.Remove(&utils.FullPath{
+			PathItems: fullPath.PathItems[1:].Clone(),
+			Path:      fullPath.Path[9:],
+		})
+	}
 }
 
 // ParseField outputs the value based on the template item
@@ -355,20 +440,17 @@ func (ar *AgentRequest) ParseField(
 
 // setCGRReply will set the aReq.cgrReply based on reply coming from upstream or error
 // returns error in case of reply not converting to NavigableMap
-func (ar *AgentRequest) setCGRReply(rply config.NavigableMapper, errRply error) (err error) {
-	var nm *config.NavigableMap
+func (ar *AgentRequest) setCGRReply(rply utils.NavigableMapper, errRply error) (err error) {
+	var nm utils.NavigableMap2
 	if errRply != nil {
-		nm = config.NewNavigableMap(map[string]interface{}{
-			utils.Error: errRply.Error()})
+		nm = utils.NavigableMap2{utils.Error: utils.NewNMData(errRply.Error())}
 	} else {
-		nm = config.NewNavigableMap(nil)
+		nm = utils.NavigableMap2{}
 		if rply != nil {
-			if nm, err = rply.AsNavigableMap(nil); err != nil {
-				return
-			}
+			nm = rply.AsNavigableMap()
 		}
-		nm.Set([]string{utils.Error}, "", false, false) // enforce empty error
+		nm.Set(utils.PathItems{{Field: utils.Error}}, utils.NewNMData("")) // enforce empty error
 	}
-	*ar.CGRReply = *nm // update value so we can share CGRReply
+	*ar.CGRReply = nm // update value so we can share CGRReply
 	return
 }

@@ -60,7 +60,7 @@ func domainNameFromNAPTR(name string) (dName string) {
 
 // newDADataProvider constructs a DataProvider for a diameter message
 func newDNSDataProvider(req *dns.Msg,
-	w dns.ResponseWriter) config.DataProvider {
+	w dns.ResponseWriter) utils.DataProvider {
 	return &dnsDP{req: req, w: w,
 		cache: config.NewNavigableMap(nil)}
 }

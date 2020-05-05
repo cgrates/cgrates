@@ -27,25 +27,25 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// NewfwvProvider constructs a DataProvider
-func NewFWVProvider(record string) (dP DataProvider) {
+// NewfwvProvider constructs a utils.DataProvider
+func NewFWVProvider(record string) (dP utils.DataProvider) {
 	dP = &FWVProvider{req: record, cache: NewNavigableMap(nil)}
 	return
 }
 
-// fwvProvider implements engine.DataProvider so we can pass it to filters
+// fwvProvider implements engine.utils.DataProvider so we can pass it to filters
 type FWVProvider struct {
 	req   string
 	cache *NavigableMap
 }
 
-// String is part of engine.DataProvider interface
+// String is part of engine.utils.DataProvider interface
 // when called, it will display the already parsed values out of cache
 func (fP *FWVProvider) String() string {
 	return utils.ToJSON(fP)
 }
 
-// FieldAsInterface is part of engine.DataProvider interface
+// FieldAsInterface is part of engine.utils.DataProvider interface
 func (fP *FWVProvider) FieldAsInterface(fldPath []string) (data interface{}, err error) {
 	if len(fldPath) == 0 {
 		return
@@ -79,7 +79,7 @@ func (fP *FWVProvider) FieldAsInterface(fldPath []string) (data interface{}, err
 	return
 }
 
-// FieldAsString is part of engine.DataProvider interface
+// FieldAsString is part of engine.utils.DataProvider interface
 func (fP *FWVProvider) FieldAsString(fldPath []string) (data string, err error) {
 	var valIface interface{}
 	valIface, err = fP.FieldAsInterface(fldPath)
@@ -89,13 +89,13 @@ func (fP *FWVProvider) FieldAsString(fldPath []string) (data string, err error) 
 	return utils.IfaceAsString(valIface), nil
 }
 
-// AsNavigableMap is part of engine.DataProvider interface
+// AsNavigableMap is part of engine.utils.DataProvider interface
 func (fP *FWVProvider) AsNavigableMap([]*FCTemplate) (
 	nm *NavigableMap, err error) {
 	return nil, utils.ErrNotImplemented
 }
 
-// RemoteHost is part of engine.DataProvider interface
+// RemoteHost is part of engine.utils.DataProvider interface
 func (fP *FWVProvider) RemoteHost() net.Addr {
 	return utils.LocalAddr()
 }
