@@ -244,14 +244,14 @@ func (fc *FCTemplate) AsMapInterface(separator string) (mp map[string]interface{
 	if fc.BreakOnSuccess != false {
 		mp[utils.BreakOnSuccessCfg] = fc.BreakOnSuccess
 	}
-	if fc.Layout != time.RFC3339 {
+	if fc.Layout != utils.EmptyString {
 		mp[utils.LayoutCfg] = fc.Layout
 	}
 	if fc.CostShiftDigits != 0 {
 		mp[utils.CostShiftDigitsCfg] = fc.CostShiftDigits
 	}
-	if fc.RoundingDecimals != nil {
-		mp[utils.RoundingDecimalsCfg] = *fc.RoundingDecimals
+	if fc.RoundingDecimals != 0 {
+		mp[utils.RoundingDecimalsCfg] = fc.RoundingDecimals
 	}
 	if fc.MaskDestID != utils.EmptyString {
 		mp[utils.MaskDestIDCfg] = fc.MaskDestID

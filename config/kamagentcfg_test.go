@@ -88,3 +88,66 @@ func TestKamConnCfgloadFromJsonCfg(t *testing.T) {
 		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(kamcocfg))
 	}
 }
+
+func TestKamAgentCfgAsMapInterface(t *testing.T) {
+	var kamagcfg KamAgentCfg
+	cfgJSONStr := `{
+		"kamailio_agent": {
+			"enabled": false,
+			"sessions_conns": [""],
+			"create_cdr": false,
+			"timezone": "",
+			"evapi_conns":[
+				{"address": "127.0.0.1:8448", "reconnects": 5}
+			],
+		},
+	}`
+	eMap := map[string]interface{}{
+		"enabled":        false,
+		"sessions_conns": []string{""},
+		"create_cdr":     false,
+		"timezone":       "",
+		"evapi_conns": []map[string]interface{}{
+			{"address": "127.0.0.1:8448", "reconnects": 5, "alias": ""},
+		},
+	}
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+		t.Error(err)
+	} else if jsnKamAgCfg, err := jsnCfg.KamAgentJsonCfg(); err != nil {
+		t.Error(err)
+	} else if err = kamagcfg.loadFromJsonCfg(jsnKamAgCfg); err != nil {
+		t.Error(err)
+	} else if rcv := kamagcfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
+		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	}
+
+	cfgJSONStr = `{
+	"kamailio_agent": {
+		"enabled": false,
+		"sessions_conns": ["*internal"],
+		"create_cdr": false,
+		"timezone": "",
+		"evapi_conns":[
+			{"address": "127.0.0.1:8448", "reconnects": 5}
+		],
+	},
+}`
+	eMap = map[string]interface{}{
+		"enabled":        false,
+		"sessions_conns": []string{"*internal"},
+		"create_cdr":     false,
+		"timezone":       "",
+		"evapi_conns": []map[string]interface{}{
+			{"address": "127.0.0.1:8448", "reconnects": 5, "alias": ""},
+		},
+	}
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+		t.Error(err)
+	} else if jsnKamAgCfg, err := jsnCfg.KamAgentJsonCfg(); err != nil {
+		t.Error(err)
+	} else if err = kamagcfg.loadFromJsonCfg(jsnKamAgCfg); err != nil {
+		t.Error(err)
+	} else if rcv := kamagcfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
+		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	}
+}

@@ -18,7 +18,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
-import "github.com/cgrates/cgrates/utils"
+import (
+	"strings"
+
+	"github.com/cgrates/cgrates/utils"
+)
 
 // SupplierSCfg is the configuration of supplier service
 type SupplierSCfg struct {
@@ -100,16 +104,56 @@ func (spl *SupplierSCfg) loadFromJsonCfg(jsnCfg *SupplierSJsonCfg) (err error) {
 }
 
 func (spl *SupplierSCfg) AsMapInterface() map[string]interface{} {
+	stringIndexedFields := []string{}
+	if spl.StringIndexedFields != nil {
+		stringIndexedFields = make([]string, len(*spl.StringIndexedFields))
+		for i, item := range *spl.StringIndexedFields {
+			stringIndexedFields[i] = item
+		}
+	}
+	prefixIndexedFields := []string{}
+	if spl.PrefixIndexedFields != nil {
+		prefixIndexedFields = make([]string, len(*spl.PrefixIndexedFields))
+		for i, item := range *spl.PrefixIndexedFields {
+			prefixIndexedFields[i] = item
+		}
+	}
+	attributeSConns := make([]string, len(spl.AttributeSConns))
+	for i, item := range spl.AttributeSConns {
+		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)
+		if item == buf {
+			attributeSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaAttributes, utils.EmptyString)
+		} else {
+			attributeSConns[i] = item
+		}
+	}
+	resourceSConns := make([]string, len(spl.ResourceSConns))
+	for i, item := range spl.ResourceSConns {
+		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)
+		if item == buf {
+			resourceSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaResources, utils.EmptyString)
+		} else {
+			resourceSConns[i] = item
+		}
+	}
+	statSConns := make([]string, len(spl.StatSConns))
+	for i, item := range spl.StatSConns {
+		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS)
+		if item == buf {
+			statSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaStatS, utils.EmptyString)
+		} else {
+			statSConns[i] = item
+		}
+	}
 
 	return map[string]interface{}{
 		utils.EnabledCfg:             spl.Enabled,
 		utils.IndexedSelectsCfg:      spl.IndexedSelects,
-		utils.StringIndexedFieldsCfg: spl.StringIndexedFields,
-		utils.PrefixIndexedFieldsCfg: spl.PrefixIndexedFields,
-		utils.AttributeSConnsCfg:     spl.AttributeSConns,
-		utils.ResourceSConnsCfg:      spl.ResourceSConns,
-		utils.StatSConnsCfg:          spl.StatSConns,
-		utils.RALsConnsCfg:           spl.ResponderSConns,
+		utils.StringIndexedFieldsCfg: stringIndexedFields,
+		utils.PrefixIndexedFieldsCfg: prefixIndexedFields,
+		utils.AttributeSConnsCfg:     attributeSConns,
+		utils.ResourceSConnsCfg:      resourceSConns,
+		utils.StatSConnsCfg:          statSConns,
 		utils.DefaultRatioCfg:        spl.DefaultRatio,
 		utils.NestedFieldsCfg:        spl.NestedFields,
 	}

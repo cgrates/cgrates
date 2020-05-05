@@ -58,7 +58,7 @@ func (httpcfg *HTTPCfg) loadFromJsonCfg(jsnHttpCfg *HTTPJsonCfg) (err error) {
 }
 
 func (httpcfg *HTTPCfg) AsMapInterface() map[string]interface{} {
-	httpUsers := map[string]interface{}{}
+	httpUsers := make(map[string]interface{}, len(httpcfg.HTTPAuthUsers))
 	for key, item := range httpcfg.HTTPAuthUsers {
 		httpUsers[key] = item
 	}

@@ -20,6 +20,8 @@ package config
 import (
 	"reflect"
 	"testing"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 func TestSupplierSCfgloadFromJsonCfg(t *testing.T) {
@@ -60,5 +62,76 @@ func TestSupplierSCfgloadFromJsonCfg(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, supscfg) {
 		t.Errorf("Expected: %+v , recived: %+v", expected, supscfg)
+	}
+}
+
+func TestSupplierSCfgAsMapInterface(t *testing.T) {
+	var supscfg SupplierSCfg
+	cfgJSONStr := `{
+	"suppliers": {
+		"enabled": false,
+		"indexed_selects":true,
+		"prefix_indexed_fields": [],
+		"nested_fields": false,
+		"attributes_conns": [],
+		"resources_conns": [],
+		"stats_conns": [],
+		"rals_conns": [],
+		"default_ratio":1
+	},
+}`
+	eMap := map[string]interface{}{
+		"enabled":               false,
+		"indexed_selects":       true,
+		"prefix_indexed_fields": []string{},
+		"string_indexed_fields": []string{},
+		"nested_fields":         false,
+		"attributes_conns":      []string{},
+		"resources_conns":       []string{},
+		"stats_conns":           []string{},
+		"default_ratio":         1,
+	}
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+		t.Error(err)
+	} else if jsnSupSCfg, err := jsnCfg.SupplierSJsonCfg(); err != nil {
+		t.Error(err)
+	} else if err = supscfg.loadFromJsonCfg(jsnSupSCfg); err != nil {
+		t.Error(err)
+	} else if rcv := supscfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
+		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	}
+
+	cfgJSONStr = `{
+		"suppliers": {
+			"enabled": false,
+			"indexed_selects":true,
+			"prefix_indexed_fields": ["prefix","indexed","fields"],
+			"nested_fields": false,
+			"attributes_conns": ["*internal"],
+			"resources_conns": ["*internal"],
+			"stats_conns": ["*internal"],
+			"rals_conns": ["*internal"],
+			"default_ratio":1
+		},
+	}`
+	eMap = map[string]interface{}{
+		"enabled":               false,
+		"indexed_selects":       true,
+		"prefix_indexed_fields": []string{"prefix", "indexed", "fields"},
+		"string_indexed_fields": []string{},
+		"nested_fields":         false,
+		"attributes_conns":      []string{"*internal"},
+		"resources_conns":       []string{"*internal"},
+		"stats_conns":           []string{"*internal"},
+		"default_ratio":         1,
+	}
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+		t.Error(err)
+	} else if jsnSupSCfg, err := jsnCfg.SupplierSJsonCfg(); err != nil {
+		t.Error(err)
+	} else if err = supscfg.loadFromJsonCfg(jsnSupSCfg); err != nil {
+		t.Error(err)
+	} else if rcv := supscfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
+		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }

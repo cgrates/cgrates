@@ -114,3 +114,65 @@ func TestCacheParamCfgloadFromJsonCfg(t *testing.T) {
 		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(fscocfg))
 	}
 }
+
+/*
+func TestCacheCfgAsMapInterface(t *testing.T) {
+	var cachecfg *CacheCfg
+	cfgJSONStr := `{
+		"caches":{
+			"partitions": {
+				"*destinations": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},
+				"*reverse_destinations": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},
+				"*rating_plans": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},
+				},
+			},
+		}`
+	eMap := map[string]interface{}{
+		"partitions": map[string]interface{}{
+			"*destinations":         map[string]interface{}{"limit": -1, "ttl": "", "static_ttl": false, "precache": false},
+			"*reverse_destinations": map[string]interface{}{"limit": -1, "ttl": "", "static_ttl": false, "precache": false},
+			"*rating_plans":         map[string]interface{}{"limit": -1, "ttl": "", "static_ttl": false, "precache": false},
+		},
+		"replication_conns": []string{},
+	}
+	cachecfg = new(CacheCfg)
+	cachecfg.Partitions = make(map[string]*CacheParamCfg)
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+		t.Error(err)
+	} else if jsnCacheCfg, err := jsnCfg.CacheJsonCfg(); err != nil {
+		t.Error(err)
+	} else if err = cachecfg.loadFromJsonCfg(jsnCacheCfg); err != nil {
+		t.Error(err)
+	} else if rcv := cachecfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
+		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	}
+	cfgJSONStr = `{
+"caches":{
+	"partitions": {
+		"*destinations": {"limit": -1, "ttl": "8m", "static_ttl": false, "precache": false},
+		"*reverse_destinations": {"limit": -1, "ttl": "1m", "static_ttl": false, "precache": false},
+		"*rating_plans": {"limit": 10, "ttl": "", "static_ttl": true, "precache": true},
+		},
+	},
+}`
+	eMap = map[string]interface{}{
+		"partitions": map[string]interface{}{
+			"*destinations":         map[string]interface{}{"limit": -1, "ttl": "8m0s", "static_ttl": false, "precache": false},
+			"*reverse_destinations": map[string]interface{}{"limit": -1, "ttl": "1m0s", "static_ttl": false, "precache": false},
+			"*rating_plans":         map[string]interface{}{"limit": 10, "ttl": "", "static_ttl": true, "precache": true},
+		},
+		"replication_conns": []string{},
+	}
+	cachecfg = new(CacheCfg)
+	cachecfg.Partitions = make(map[string]*CacheParamCfg)
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+		t.Error(err)
+	} else if jsnCacheCfg, err := jsnCfg.CacheJsonCfg(); err != nil {
+		t.Error(err)
+	} else if err = cachecfg.loadFromJsonCfg(jsnCacheCfg); err != nil {
+		t.Error(err)
+	} else if rcv := cachecfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
+		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	}
+}
+*/

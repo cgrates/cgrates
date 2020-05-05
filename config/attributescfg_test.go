@@ -20,6 +20,8 @@ package config
 import (
 	"reflect"
 	"testing"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 func TestAttributeSCfgloadFromJsonCfg(t *testing.T) {
@@ -55,5 +57,33 @@ func TestAttributeSCfgloadFromJsonCfg(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, attscfg) {
 		t.Errorf("Expected: %+v , recived: %+v", expected, attscfg)
+	}
+}
+
+func TestAttributeSCfgAsMapInterface(t *testing.T) {
+	var attscfg AttributeSCfg
+	cfgJSONStr := `{
+"attributes": {								
+	"enabled": true,									
+	"prefix_indexed_fields": ["index1","index2"],			
+	"process_runs": 3,						
+	},		
+}`
+	eMap := map[string]interface{}{
+		"enabled":               true,
+		"prefix_indexed_fields": []string{"index1", "index2"},
+		"process_runs":          3,
+		"indexed_selects":       false,
+		"nested_fields":         false,
+		"string_indexed_fields": []string{},
+	}
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+		t.Error(err)
+	} else if jsnAttSCfg, err := jsnCfg.AttributeServJsonCfg(); err != nil {
+		t.Error(err)
+	} else if err = attscfg.loadFromJsonCfg(jsnAttSCfg); err != nil {
+		t.Error(err)
+	} else if rcv := attscfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
+		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }

@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -81,14 +82,40 @@ func (rlcfg *ResourceSConfig) loadFromJsonCfg(jsnCfg *ResourceSJsonCfg) (err err
 }
 
 func (rlcfg *ResourceSConfig) AsMapInterface() map[string]interface{} {
-
+	thresholdSConns := make([]string, len(rlcfg.ThresholdSConns))
+	for i, item := range rlcfg.ThresholdSConns {
+		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)
+		if item == buf {
+			thresholdSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaThresholds, utils.EmptyString)
+		} else {
+			thresholdSConns[i] = item
+		}
+	}
+	stringIndexedFields := []string{}
+	if rlcfg.StringIndexedFields != nil {
+		stringIndexedFields = make([]string, len(*rlcfg.StringIndexedFields))
+		for i, item := range *rlcfg.StringIndexedFields {
+			stringIndexedFields[i] = item
+		}
+	}
+	prefixIndexedFields := []string{}
+	if rlcfg.PrefixIndexedFields != nil {
+		prefixIndexedFields = make([]string, len(*rlcfg.PrefixIndexedFields))
+		for i, item := range *rlcfg.PrefixIndexedFields {
+			prefixIndexedFields[i] = item
+		}
+	}
+	var storeInterval string = ""
+	if rlcfg.StoreInterval != 0 {
+		storeInterval = rlcfg.StoreInterval.String()
+	}
 	return map[string]interface{}{
 		utils.EnabledCfg:             rlcfg.Enabled,
 		utils.IndexedSelectsCfg:      rlcfg.IndexedSelects,
-		utils.ThresholdSConnsCfg:     rlcfg.ThresholdSConns,
-		utils.StoreIntervalCfg:       rlcfg.StoreInterval,
-		utils.StringIndexedFieldsCfg: rlcfg.StringIndexedFields,
-		utils.PrefixIndexedFieldsCfg: rlcfg.PrefixIndexedFields,
+		utils.ThresholdSConnsCfg:     thresholdSConns,
+		utils.StoreIntervalCfg:       storeInterval,
+		utils.StringIndexedFieldsCfg: stringIndexedFields,
+		utils.PrefixIndexedFieldsCfg: prefixIndexedFields,
 		utils.NestedFieldsCfg:        rlcfg.NestedFields,
 	}
 

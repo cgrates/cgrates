@@ -20,6 +20,8 @@ package config
 import (
 	"reflect"
 	"testing"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 func TestChargerSCfgloadFromJsonCfg(t *testing.T) {
@@ -55,5 +57,62 @@ func TestChargerSCfgloadFromJsonCfg(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, chgscfg) {
 		t.Errorf("Expected: %+v , recived: %+v", expected, chgscfg)
+	}
+}
+
+func TestChargerSCfgAsMapInterface(t *testing.T) {
+	var chgscfg ChargerSCfg
+	cfgJSONStr := `{
+	"chargers": {								
+		"enabled": false,						
+		"attributes_conns": [],					
+		"indexed_selects":true,					
+		"prefix_indexed_fields": [],			
+		"nested_fields": false,					
+	},	
+}`
+	eMap := map[string]interface{}{
+		"enabled":               false,
+		"attributes_conns":      []string{},
+		"indexed_selects":       true,
+		"prefix_indexed_fields": []string{},
+		"nested_fields":         false,
+		"string_indexed_fields": []string{},
+	}
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+		t.Error(err)
+	} else if jsnChgCfg, err := jsnCfg.ChargerServJsonCfg(); err != nil {
+		t.Error(err)
+	} else if err = chgscfg.loadFromJsonCfg(jsnChgCfg); err != nil {
+		t.Error(err)
+	} else if rcv := chgscfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
+		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	}
+
+	cfgJSONStr = `{
+		"chargers": {								
+			"enabled": false,						
+			"attributes_conns": ["*internal"],					
+			"indexed_selects":true,					
+			"prefix_indexed_fields": [],			
+			"nested_fields": false,					
+		},	
+	}`
+	eMap = map[string]interface{}{
+		"enabled":               false,
+		"attributes_conns":      []string{"*internal"},
+		"indexed_selects":       true,
+		"prefix_indexed_fields": []string{},
+		"nested_fields":         false,
+		"string_indexed_fields": []string{},
+	}
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+		t.Error(err)
+	} else if jsnChgCfg, err := jsnCfg.ChargerServJsonCfg(); err != nil {
+		t.Error(err)
+	} else if err = chgscfg.loadFromJsonCfg(jsnChgCfg); err != nil {
+		t.Error(err)
+	} else if rcv := chgscfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
+		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }

@@ -142,6 +142,5 @@ func (ralsCfg *RalsCfg) AsMapInterface() map[string]interface{} {
 		utils.MaxComputedUsageCfg:        maxComputed,
 		utils.BalanceRatingSubjectCfg:    balanceRating,
 		utils.MaxIncrementsCfg:           ralsCfg.MaxIncrements,
-		utils.Dynaprepaid_actionplansCfg: ralsCfg.DynaprepaidActionPlans,
 	}
 }

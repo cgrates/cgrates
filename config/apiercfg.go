@@ -18,7 +18,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
-import "github.com/cgrates/cgrates/utils"
+import (
+	"strings"
+
+	"github.com/cgrates/cgrates/utils"
+)
 
 // ApierCfg is the configuration of Apier service
 type ApierCfg struct {
@@ -73,11 +77,39 @@ func (aCfg *ApierCfg) loadFromJsonCfg(jsnCfg *ApierJsonCfg) (err error) {
 }
 
 func (aCfg *ApierCfg) AsMapInterface() map[string]interface{} {
+	cachesConns := make([]string, len(aCfg.CachesConns))
+	for i, item := range aCfg.CachesConns {
+		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)
+		if item == buf {
+			cachesConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaCaches, utils.EmptyString)
+		} else {
+			cachesConns[i] = item
+		}
+	}
+	schedulerConns := make([]string, len(aCfg.SchedulerConns))
+	for i, item := range aCfg.SchedulerConns {
+		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler)
+		if item == buf {
+			schedulerConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaScheduler, utils.EmptyString)
+		} else {
+			schedulerConns[i] = item
+		}
+	}
+	attributeSConns := make([]string, len(aCfg.AttributeSConns))
+	for i, item := range aCfg.AttributeSConns {
+		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)
+		if item == buf {
+			attributeSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaAttributes, utils.EmptyString)
+		} else {
+			attributeSConns[i] = item
+		}
+	}
+
 	return map[string]interface{}{
 		utils.EnabledCfg:         aCfg.Enabled,
-		utils.CachesConnsCfg:     aCfg.CachesConns,
-		utils.SchedulerConnsCfg:  aCfg.SchedulerConns,
-		utils.AttributeSConnsCfg: aCfg.AttributeSConns,
+		utils.CachesConnsCfg:     cachesConns,
+		utils.SchedulerConnsCfg:  schedulerConns,
+		utils.AttributeSConnsCfg: attributeSConns,
 	}
 
 }

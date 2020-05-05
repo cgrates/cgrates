@@ -224,3 +224,98 @@ func TestEventReaderSanitisation(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestERsCfgAsMapInterface(t *testing.T) {
+	cfgJSONStr := `{
+	"ers": {
+		"enabled": true,
+		"sessions_conns":["conn1","conn3"],
+		"readers": [
+			{
+				"id": "file_reader1",
+				"run_delay":  "-1",
+				"type": "*file_csv",
+				"source_path": "/tmp/ers/in",
+				"processed_path": "/tmp/ers/out",
+				"cache_dump_fields": [],
+			},
+		],
+	}
+}`
+	var filters []string
+	eMap := map[string]interface{}{
+		"enabled":        true,
+		"sessions_conns": []string{"conn1", "conn3"},
+		"readers": []map[string]interface{}{
+			{
+				"filters":              []string{},
+				"flags":                map[string][]interface{}{},
+				"id":                   "*default",
+				"partial_record_cache": "0",
+				"processed_path":       "/var/spool/cgrates/cdrc/out",
+				"row_length":           0,
+				"run_delay":            "0",
+				"soome":                "",
+				"source_path":          "/var/spool/cgrates/cdrc/in",
+				"tenant":               "",
+				"timezone":             "",
+				"xml_root_path":        []string{""},
+				"cache_dump_fields":    []map[string]interface{}{},
+				"concurrent_requests":  1024,
+				"db_type":              "*file_csv",
+				"failed_calls_prefix":  "",
+				"field_separator":      ",",
+				"fields": []map[string]interface{}{
+					{"mandatory": true, "path": "*cgreq.ToR", "tag": "ToR", "type": "*variable", "value": "~*req.2"},
+					{"mandatory": true, "path": "*cgreq.OriginID", "tag": "OriginID", "type": "*variable", "value": "~*req.3"},
+					{"mandatory": true, "path": "*cgreq.RequestType", "tag": "RequestType", "type": "*variable", "value": "~*req.4"},
+					{"mandatory": true, "path": "*cgreq.Tenant", "tag": "Tenant", "type": "*variable", "value": "~*req.6"},
+					{"mandatory": true, "path": "*cgreq.Category", "tag": "Category", "type": "*variable", "value": "~*req.7"},
+					{"mandatory": true, "path": "*cgreq.Account", "tag": "Account", "type": "*variable", "value": "~*req.8"},
+					{"mandatory": true, "path": "*cgreq.Subject", "tag": "Subject", "type": "*variable", "value": "~*req.9"},
+					{"mandatory": true, "path": "*cgreq.Destination", "tag": "Destination", "type": "*variable", "value": "~*req.10"},
+					{"mandatory": true, "path": "*cgreq.SetupTime", "tag": "SetupTime", "type": "*variable", "value": "~*req.11"},
+					{"mandatory": true, "path": "*cgreq.AnswerTime", "tag": "AnswerTime", "type": "*variable", "value": "~*req.12"},
+					{"mandatory": true, "path": "*cgreq.Usage", "tag": "Usage", "type": "*variable", "value": "~*req.13"},
+				},
+			},
+			{
+				"cache_dump_fields":   []map[string]interface{}{},
+				"concurrent_requests": 1024,
+				"db_type":             "*file_csv",
+				"failed_calls_prefix": "",
+				"field_separator":     ",",
+				"fields": []map[string]interface{}{
+					{"mandatory": true, "path": "*cgreq.ToR", "tag": "ToR", "type": "*variable", "value": "~*req.2"},
+					{"mandatory": true, "path": "*cgreq.OriginID", "tag": "OriginID", "type": "*variable", "value": "~*req.3"},
+					{"mandatory": true, "path": "*cgreq.RequestType", "tag": "RequestType", "type": "*variable", "value": "~*req.4"},
+					{"mandatory": true, "path": "*cgreq.Tenant", "tag": "Tenant", "type": "*variable", "value": "~*req.6"},
+					{"mandatory": true, "path": "*cgreq.Category", "tag": "Category", "type": "*variable", "value": "~*req.7"},
+					{"mandatory": true, "path": "*cgreq.Account", "tag": "Account", "type": "*variable", "value": "~*req.8"},
+					{"mandatory": true, "path": "*cgreq.Subject", "tag": "Subject", "type": "*variable", "value": "~*req.9"},
+					{"mandatory": true, "path": "*cgreq.Destination", "tag": "Destination", "type": "*variable", "value": "~*req.10"},
+					{"mandatory": true, "path": "*cgreq.SetupTime", "tag": "SetupTime", "type": "*variable", "value": "~*req.11"},
+					{"mandatory": true, "path": "*cgreq.AnswerTime", "tag": "AnswerTime", "type": "*variable", "value": "~*req.12"},
+					{"mandatory": true, "path": "*cgreq.Usage", "tag": "Usage", "type": "*variable", "value": "~*req.13"},
+				},
+				"filters":              filters,
+				"flags":                map[string][]interface{}{},
+				"id":                   "file_reader1",
+				"partial_record_cache": "0",
+				"processed_path":       "/tmp/ers/out",
+				"row_length":           0,
+				"run_delay":            "-1",
+				"soome":                "",
+				"source_path":          "/tmp/ers/in",
+				"tenant":               "",
+				"timezone":             "",
+				"xml_root_path":        []string{""},
+			},
+		},
+	}
+	if cfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+		t.Error(err)
+	} else if rcv := cfg.ersCfg.AsMapInterface(utils.EmptyString); !reflect.DeepEqual(eMap, rcv) {
+		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	}
+}

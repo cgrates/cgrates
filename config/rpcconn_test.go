@@ -42,7 +42,7 @@ func TestRPCConnsAsMapInterface(t *testing.T) {
 				"address":     "127.0.0.1:2012",
 				"transport":   "*json",
 				"synchronous": false,
-				"TLS":         false,
+				"tls":         false,
 			},
 		},
 	}
