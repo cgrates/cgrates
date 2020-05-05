@@ -99,6 +99,7 @@ func TestEventExporterSameID(t *testing.T) {
 		Cache: map[string]*CacheParamCfg{
 			utils.MetaFileCSV: &CacheParamCfg{
 				Limit:     -1,
+				TTL:       time.Duration(5 * time.Second),
 				StaticTTL: false,
 			},
 		},
