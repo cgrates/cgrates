@@ -439,7 +439,6 @@ func NewKamDlgReply(kamEvData []byte) (rpl KamDlgReply, err error) {
 	return
 }
 
-func (self *KamDlgReply) String() string {
-	mrsh, _ := json.Marshal(self)
-	return string(mrsh)
+func (kdr *KamDlgReply) String() string {
+	return utils.ToJSON(kdr)
 }

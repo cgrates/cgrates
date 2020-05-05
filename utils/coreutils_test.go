@@ -1307,7 +1307,7 @@ func TestRandomInteger(t *testing.T) {
 		t.Errorf("same result over 3 attempts")
 	}
 	if a >= 100 || b >= 100 || c >= 100 {
-		t.Errorf("one of the numbers equals the (/are above) max limit")
+		t.Errorf("one of the numbers equals or it's above the max limit")
 	}
 	if a < 0 || b < 0 || c < 0 {
 		t.Errorf("one of the numbers are below min limit")
