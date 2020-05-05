@@ -1838,6 +1838,12 @@ func TestCgrCdfEventExporter(t *testing.T) {
 	eCfg := &EEsCfg{
 		Enabled:         false,
 		AttributeSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)},
+		Cache: map[string]*CacheParamCfg{
+			utils.MetaFileCSV: &CacheParamCfg{
+				Limit:     -1,
+				StaticTTL: false,
+			},
+		},
 		Exporters: []*EventExporterCfg{
 			&EventExporterCfg{
 				ID:            utils.MetaDefault,

@@ -19,12 +19,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"strings"
+
 	"github.com/cgrates/cgrates/utils"
 )
 
 type EEsCfg struct {
 	Enabled         bool
 	AttributeSConns []string
+	Cache           map[string]*CacheParamCfg
 	Exporters       []*EventExporterCfg
 }
 
@@ -34,6 +37,15 @@ func (eeS *EEsCfg) loadFromJsonCfg(jsnCfg *EEsJsonCfg, sep string, dfltExpCfg *E
 	}
 	if jsnCfg.Enabled != nil {
 		eeS.Enabled = *jsnCfg.Enabled
+	}
+	if jsnCfg.Cache != nil {
+		for kJsn, vJsn := range *jsnCfg.Cache {
+			val := new(CacheParamCfg)
+			if err := val.loadFromJsonCfg(vJsn); err != nil {
+				return err
+			}
+			eeS.Cache[kJsn] = val
+		}
 	}
 	if jsnCfg.Attributes_conns != nil {
 		eeS.AttributeSConns = make([]string, len(*jsnCfg.Attributes_conns))
@@ -93,6 +105,18 @@ func (eeS *EEsCfg) Clone() (cln *EEsCfg) {
 		cln.Exporters[idx] = exp.Clone()
 	}
 	return
+}
+
+func (eeS *EEsCfg) AsMapInterface(separator string) map[string]interface{} {
+	exporters := make([]map[string]interface{}, len(eeS.Exporters))
+	for i, item := range eeS.Exporters {
+		exporters[i] = item.AsMapInterface(separator)
+	}
+	return map[string]interface{}{
+		utils.EnabledCfg:         eeS.Enabled,
+		utils.AttributeSConnsCfg: eeS.AttributeSConns,
+		utils.ExportersCfg:       exporters,
+	}
 }
 
 type EventExporterCfg struct {
@@ -204,4 +228,45 @@ func (eeC *EventExporterCfg) Clone() (cln *EventExporterCfg) {
 		cln.Fields[idx] = fld.Clone()
 	}
 	return
+}
+
+func (eeC *EventExporterCfg) AsMapInterface(separator string) map[string]interface{} {
+	var tenant string
+	if eeC.Tenant != nil {
+		values := make([]string, len(eeC.Tenant))
+		for i, item := range eeC.Tenant {
+			values[i] = item.Rules
+		}
+		tenant = strings.Join(values, separator)
+	}
+
+	flags := make(map[string][]interface{}, len(eeC.Flags))
+	for key, val := range eeC.Flags {
+		buf := make([]interface{}, len(val))
+		for i, item := range val {
+			buf[i] = item
+		}
+		flags[key] = buf
+	}
+	fields := make([]map[string]interface{}, len(eeC.Fields))
+	for i, item := range eeC.Fields {
+		fields[i] = item.AsMapInterface(separator)
+	}
+
+	return map[string]interface{}{
+		utils.IDCfg:               eeC.ID,
+		utils.TypeCfg:             eeC.Type,
+		utils.ExportPath:          eeC.ExportPath,
+		utils.ExportPathCfg:       eeC.FieldSep,
+		utils.TenantCfg:           tenant,
+		utils.TimezoneCfg:         eeC.Timezone,
+		utils.FiltersCfg:          eeC.Filters,
+		utils.FlagsCfg:            flags,
+		utils.AttributeContextCfg: eeC.AttributeSCtx,
+		utils.AttributeIDsCfg:     eeC.AttributeSIDs,
+		utils.SynchronousCfg:      eeC.Synchronous,
+		utils.AttemptsCfg:         eeC.Attempts,
+		utils.FieldSeparatorCfg:   eeC.FieldSep,
+		utils.FieldsCfg:           fields,
+	}
 }

@@ -180,6 +180,7 @@ func NewDefaultCGRConfig() (cfg *CGRConfig, err error) {
 	cfg.apier = new(ApierCfg)
 	cfg.ersCfg = new(ERsCfg)
 	cfg.eesCfg = new(EEsCfg)
+	cfg.eesCfg.Cache = make(map[string]*CacheParamCfg)
 
 	cfg.ConfigReloads = make(map[string]chan struct{})
 	cfg.ConfigReloads[utils.CDRE] = make(chan struct{}, 1)

@@ -346,6 +346,9 @@ const CGRATES_CFG_JSON = `
 "ees": {									// EventExporterService
 	"enabled": false,						// starts the EventReader service: <true|false>
 	"attributes_conns":["*internal"],		// RPC Connections IDs
+	"cache": {
+		"*file_csv": {"limit": -1, "ttl": "", "static_ttl": false},
+	},
 	"exporters": [
 		{
 			"id": "*default",									// identifier of the EventReader profile
