@@ -84,7 +84,7 @@ func (ld LoaderData) UpdateFromCSV(fileName string, record []string,
 }
 
 // newCsvProvider constructs a DataProvider
-func newCsvProvider(record []string, fileName string) (dP config.DataProvider) {
+func newCsvProvider(record []string, fileName string) (dP utils.DataProvider) {
 	dP = &csvProvider{req: record, fileName: fileName, cache: config.NewNavigableMap(nil)}
 	return
 }

@@ -26,8 +26,8 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-//NewObjectDP constructs a DataProvider
-func NewObjectDP(obj interface{}) (dP DataProvider) {
+//NewObjectDP constructs a utils.DataProvider
+func NewObjectDP(obj interface{}) (dP utils.DataProvider) {
 	dP = &ObjectDP{obj: obj, cache: make(map[string]interface{})}
 	return
 }
@@ -46,13 +46,13 @@ func (objDP *ObjectDP) getCache(path string) (val interface{}, has bool) {
 	return
 }
 
-// String is part of engine.DataProvider interface
+// String is part of engine.utils.DataProvider interface
 // when called, it will display the already parsed values out of cache
 func (objDP *ObjectDP) String() string {
 	return utils.ToJSON(objDP.obj)
 }
 
-// FieldAsInterface is part of engine.DataProvider interface
+// FieldAsInterface is part of engine.utils.DataProvider interface
 func (objDP *ObjectDP) FieldAsInterface(fldPath []string) (data interface{}, err error) {
 	obj := objDP.obj
 	// []string{ BalanceMap *monetary[0] Value }
@@ -109,7 +109,7 @@ func (objDP *ObjectDP) FieldAsInterface(fldPath []string) (data interface{}, err
 	return
 }
 
-// FieldAsString is part of engine.DataProvider interface
+// FieldAsString is part of engine.utils.DataProvider interface
 func (objDP *ObjectDP) FieldAsString(fldPath []string) (data string, err error) {
 	var valIface interface{}
 	valIface, err = objDP.FieldAsInterface(fldPath)
@@ -119,13 +119,13 @@ func (objDP *ObjectDP) FieldAsString(fldPath []string) (data string, err error) 
 	return utils.IfaceAsString(valIface), nil
 }
 
-// AsNavigableMap is part of engine.DataProvider interface
+// AsNavigableMap is part of engine.utils.DataProvider interface
 func (objDP *ObjectDP) AsNavigableMap([]*FCTemplate) (
 	nm *NavigableMap, err error) {
 	return nil, utils.ErrNotImplemented
 }
 
-// RemoteHost is part of engine.DataProvider interface
+// RemoteHost is part of engine.utils.DataProvider interface
 func (objDP *ObjectDP) RemoteHost() net.Addr {
 	return utils.LocalAddr()
 }

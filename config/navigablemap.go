@@ -31,9 +31,56 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// CGRReplier is the interface supported by replies convertible to CGRReply
-type NavigableMapper interface {
-	AsNavigableMap([]*FCTemplate) (*NavigableMap, error)
+// NMItem is an item in the NavigableMap
+type NMItem struct {
+	Path   []string    // path in map
+	Data   interface{} // value of the element
+	Config *FCTemplate // so we can store additional configuration
+}
+
+func (nmi *NMItem) String() string {
+	return utils.ToJSON(nmi)
+}
+
+// Interface returns the wraped interface
+func (nmi *NMItem) Interface() interface{} {
+	return nmi.Data
+}
+
+// Field not implemented only used in order to implement the NM interface
+func (nmi *NMItem) Field(path utils.PathItems) (val utils.NMInterface, err error) {
+	return nil, utils.ErrNotImplemented
+}
+
+// Set not implemented only used in order to implement the NM interface
+// special case when the path is empty the interface should be seted
+// this is in order to modify the wraped interface
+func (nmi *NMItem) Set(path utils.PathItems, val utils.NMInterface) (added bool, err error) {
+	if len(path) != 0 {
+		return false, utils.ErrWrongPath
+	}
+	nmi.Data = val.Interface()
+	return
+}
+
+// Remove not implemented only used in order to implement the NM interface
+func (nmi *NMItem) Remove(path utils.PathItems) (err error) {
+	return utils.ErrNotImplemented
+}
+
+// Type returns the type of the NM interface
+func (nmi *NMItem) Type() utils.NMType {
+	return utils.NMDataType
+}
+
+// Empty returns true if the NM is empty(no data)
+func (nmi *NMItem) Empty() bool {
+	return nmi == nil || nmi.Data == nil
+}
+
+// Len not implemented only used in order to implement the NM interface
+func (nmi *NMItem) Len() int {
+	return 0
 }
 
 // NewNavigableMap constructs a NavigableMap
@@ -42,13 +89,6 @@ func NewNavigableMap(data map[string]interface{}) *NavigableMap {
 		data = make(map[string]interface{})
 	}
 	return &NavigableMap{data: data}
-}
-
-// NMItem is an item in the NavigableMap
-type NMItem struct {
-	Path   []string    // path in map
-	Data   interface{} // value of the element
-	Config *FCTemplate // so we can store additional configuration
 }
 
 // NavigableMap is a map who's values can be navigated via path
@@ -111,7 +151,7 @@ func (nM *NavigableMap) GetField(path []string) (fldVal interface{}, err error) 
 		switch mv := dp.(type) { // used for cdr when populating eventCost whitin
 		case map[string]interface{}:
 			lastMp = mv
-		case DataProvider:
+		case utils.DataProvider:
 			return mv.FieldAsInterface(path[i+1:])
 		default:
 			return nil, fmt.Errorf("cannot cast field: <%+v> type: %T with path: <%s> to map[string]interface{}",
@@ -157,7 +197,7 @@ func (nM *NavigableMap) getLastRealItem(mp map[string]interface{}, spath string)
 }
 
 // FieldAsInterface returns the field value as interface{} for the path specified
-// implements DataProvider
+// implements utils.DataProvider
 // supports spath with selective elements in case of []*NMItem
 func (nM *NavigableMap) FieldAsInterface(fldPath []string) (fldVal interface{}, err error) {
 	lenPath := len(fldPath)
@@ -176,7 +216,7 @@ func (nM *NavigableMap) FieldAsInterface(fldPath []string) (fldVal interface{}, 
 		switch mv := dp.(type) { // used for cdr when populating eventCost whitin
 		case map[string]interface{}:
 			lastMp = mv
-		case DataProvider:
+		case utils.DataProvider:
 			return mv.FieldAsInterface(fldPath[i+1:])
 		default:
 			return nil, fmt.Errorf("cannot cast field: <%+v> type: %T with path: <%s> to map[string]interface{}",
@@ -250,7 +290,7 @@ func (nM *NavigableMap) getNextMap(mp map[string]interface{}, spath string) (int
 			return mv.data, nil
 		case *NavigableMap:
 			return mv.data, nil
-		case DataProvider: // used for cdr when populating eventCost whitin
+		case utils.DataProvider: // used for cdr when populating eventCost whitin
 			return mv, nil
 		default:
 		}
@@ -286,7 +326,7 @@ func (nM *NavigableMap) getNextMap(mp map[string]interface{}, spath string) (int
 			if *idx < len(mv) {
 				return mv[*idx].data, nil
 			}
-		case []DataProvider: // used for cdr when populating eventCost whitin
+		case []utils.DataProvider: // used for cdr when populating eventCost whitin
 			if *idx < len(mv) {
 				return mv[*idx], nil
 			}
@@ -319,7 +359,7 @@ func (nM *NavigableMap) getIndex(spath string) (opath string, idx *int) {
 }
 
 // FieldAsString returns the field value as string for the path specified
-// implements DataProvider
+// implements utils.DataProvider
 func (nM *NavigableMap) FieldAsString(fldPath []string) (fldVal string, err error) {
 	var valIface interface{}
 	valIface, err = nM.FieldAsInterface(fldPath)
@@ -329,12 +369,12 @@ func (nM *NavigableMap) FieldAsString(fldPath []string) (fldVal string, err erro
 	return utils.IfaceAsString(valIface), nil
 }
 
-// String is part of engine.DataProvider interface
+// String is part of engine.utils.DataProvider interface
 func (nM *NavigableMap) String() string {
 	return utils.ToJSON(nM.data)
 }
 
-// RemoteHost is part of engine.DataProvider interface
+// RemoteHost is part of engine.utils.DataProvider interface
 func (nM *NavigableMap) RemoteHost() net.Addr {
 	return utils.LocalAddr()
 }
@@ -369,7 +409,7 @@ func (nM *NavigableMap) Values() (vals []interface{}) {
 	return
 }
 
-// AsNavigableMap implements both NavigableMapper as well as DataProvider interfaces
+// AsNavigableMap implements both NavigableMapper as well as utils.DataProvider interfaces
 func (nM *NavigableMap) AsNavigableMap(
 	tpl []*FCTemplate) (oNM *NavigableMap, err error) {
 	return nil, utils.ErrNotImplemented

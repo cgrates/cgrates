@@ -49,7 +49,7 @@ type FilterS struct {
 // there should be at least one filter passing, ie: if filters are not active event will fail to pass
 // receives the event as DataProvider so we can accept undecoded data (ie: HttpRequest)
 func (fS *FilterS) Pass(tenant string, filterIDs []string,
-	ev config.DataProvider) (pass bool, err error) {
+	ev utils.DataProvider) (pass bool, err error) {
 	if len(filterIDs) == 0 {
 		return true, nil
 	}
@@ -112,7 +112,7 @@ func verifyPrefixes(rule *FilterRule, prefixes []string) (hasPrefix bool) {
 //LazyPass is almost the same as Pass except that it verify if the
 //Element of the Values from FilterRules has as prefix one of the pathPrfxs
 func (fS *FilterS) LazyPass(tenant string, filterIDs []string,
-	ev config.DataProvider, pathPrfxs []string) (pass bool, lazyCheckRules []*FilterRule, err error) {
+	ev utils.DataProvider, pathPrfxs []string) (pass bool, lazyCheckRules []*FilterRule, err error) {
 	if len(filterIDs) == 0 {
 		return true, nil, nil
 	}
@@ -270,7 +270,7 @@ func (fltr *FilterRule) CompileValues() (err error) {
 }
 
 // Pass is the method which should be used from outside.
-func (fltr *FilterRule) Pass(dDP config.DataProvider) (result bool, err error) {
+func (fltr *FilterRule) Pass(dDP utils.DataProvider) (result bool, err error) {
 	if fltr.negative == nil {
 		fltr.negative = utils.BoolPointer(strings.HasPrefix(fltr.Type, utils.MetaNot))
 	}
@@ -305,8 +305,8 @@ func (fltr *FilterRule) Pass(dDP config.DataProvider) (result bool, err error) {
 	return result != *(fltr.negative), nil
 }
 
-func (fltr *FilterRule) passString(dDP config.DataProvider) (bool, error) {
-	strVal, err := config.DPDynamicString(fltr.Element, dDP)
+func (fltr *FilterRule) passString(dDP utils.DataProvider) (bool, error) {
+	strVal, err := utils.DPDynamicString(fltr.Element, dDP)
 	if err != nil {
 		if err == utils.ErrNotFound {
 			return false, nil
@@ -314,7 +314,7 @@ func (fltr *FilterRule) passString(dDP config.DataProvider) (bool, error) {
 		return false, err
 	}
 	for _, val := range fltr.Values {
-		sval, err := config.DPDynamicString(val, dDP)
+		sval, err := utils.DPDynamicString(val, dDP)
 		if err != nil {
 			continue
 		}
@@ -325,7 +325,7 @@ func (fltr *FilterRule) passString(dDP config.DataProvider) (bool, error) {
 	return false, nil
 }
 
-func (fltr *FilterRule) passExists(dDP config.DataProvider) (bool, error) {
+func (fltr *FilterRule) passExists(dDP utils.DataProvider) (bool, error) {
 	var err error
 	path := fltr.Element
 	if fltr.rsrFields != nil {
@@ -333,7 +333,7 @@ func (fltr *FilterRule) passExists(dDP config.DataProvider) (bool, error) {
 			return false, err
 		}
 	}
-	if _, err = config.DPDynamicInterface(path, dDP); err != nil {
+	if _, err = utils.DPDynamicInterface(path, dDP); err != nil {
 		if err == utils.ErrNotFound {
 			return false, nil
 		}
@@ -342,8 +342,8 @@ func (fltr *FilterRule) passExists(dDP config.DataProvider) (bool, error) {
 	return true, nil
 }
 
-func (fltr *FilterRule) passEmpty(fielNameDP config.DataProvider) (bool, error) {
-	val, err := config.DPDynamicInterface(fltr.Element, fielNameDP)
+func (fltr *FilterRule) passEmpty(fielNameDP utils.DataProvider) (bool, error) {
+	val, err := utils.DPDynamicInterface(fltr.Element, fielNameDP)
 	if err != nil {
 		if err == utils.ErrNotFound {
 			return true, nil
@@ -372,8 +372,8 @@ func (fltr *FilterRule) passEmpty(fielNameDP config.DataProvider) (bool, error) 
 	}
 }
 
-func (fltr *FilterRule) passStringPrefix(dDP config.DataProvider) (bool, error) {
-	strVal, err := config.DPDynamicString(fltr.Element, dDP)
+func (fltr *FilterRule) passStringPrefix(dDP utils.DataProvider) (bool, error) {
+	strVal, err := utils.DPDynamicString(fltr.Element, dDP)
 	if err != nil {
 		if err == utils.ErrNotFound {
 			return false, nil
@@ -381,7 +381,7 @@ func (fltr *FilterRule) passStringPrefix(dDP config.DataProvider) (bool, error) 
 		return false, err
 	}
 	for _, prfx := range fltr.Values {
-		prfx, err := config.DPDynamicString(prfx, dDP)
+		prfx, err := utils.DPDynamicString(prfx, dDP)
 		if err != nil {
 			continue
 		}
@@ -392,8 +392,8 @@ func (fltr *FilterRule) passStringPrefix(dDP config.DataProvider) (bool, error) 
 	return false, nil
 }
 
-func (fltr *FilterRule) passStringSuffix(dDP config.DataProvider) (bool, error) {
-	strVal, err := config.DPDynamicString(fltr.Element, dDP)
+func (fltr *FilterRule) passStringSuffix(dDP utils.DataProvider) (bool, error) {
+	strVal, err := utils.DPDynamicString(fltr.Element, dDP)
 	if err != nil {
 		if err == utils.ErrNotFound {
 			return false, nil
@@ -401,7 +401,7 @@ func (fltr *FilterRule) passStringSuffix(dDP config.DataProvider) (bool, error) 
 		return false, err
 	}
 	for _, prfx := range fltr.Values {
-		prfx, err := config.DPDynamicString(prfx, dDP)
+		prfx, err := utils.DPDynamicString(prfx, dDP)
 		if err != nil {
 			continue
 		}
@@ -413,12 +413,12 @@ func (fltr *FilterRule) passStringSuffix(dDP config.DataProvider) (bool, error) 
 }
 
 // ToDo when Timings will be available in DataDb
-func (fltr *FilterRule) passTimings(dDP config.DataProvider) (bool, error) {
+func (fltr *FilterRule) passTimings(dDP utils.DataProvider) (bool, error) {
 	return false, utils.ErrNotImplemented
 }
 
-func (fltr *FilterRule) passDestinations(dDP config.DataProvider) (bool, error) {
-	dst, err := config.DPDynamicString(fltr.Element, dDP)
+func (fltr *FilterRule) passDestinations(dDP utils.DataProvider) (bool, error) {
+	dst, err := utils.DPDynamicString(fltr.Element, dDP)
 	if err != nil {
 		if err == utils.ErrNotFound {
 			return false, nil
@@ -433,7 +433,7 @@ func (fltr *FilterRule) passDestinations(dDP config.DataProvider) (bool, error) 
 		}
 		for _, dID := range destIDs {
 			for _, valDstID := range fltr.Values {
-				valDstID, err := config.DPDynamicString(valDstID, dDP)
+				valDstID, err := utils.DPDynamicString(valDstID, dDP)
 				if err != nil {
 					continue
 				}
@@ -446,7 +446,7 @@ func (fltr *FilterRule) passDestinations(dDP config.DataProvider) (bool, error) 
 	return false, nil
 }
 
-func (fltr *FilterRule) passRSR(dDP config.DataProvider) (bool, error) {
+func (fltr *FilterRule) passRSR(dDP utils.DataProvider) (bool, error) {
 	_, err := fltr.rsrFields.ParseDataProviderWithInterfaces(dDP, utils.NestingSep)
 	if err != nil {
 		if err == utils.ErrNotFound || err == utils.ErrFilterNotPassingNoCaps {
@@ -457,8 +457,8 @@ func (fltr *FilterRule) passRSR(dDP config.DataProvider) (bool, error) {
 	return true, nil
 }
 
-func (fltr *FilterRule) passGreaterThan(dDP config.DataProvider) (bool, error) {
-	fldIf, err := config.DPDynamicInterface(fltr.Element, dDP)
+func (fltr *FilterRule) passGreaterThan(dDP utils.DataProvider) (bool, error) {
+	fldIf, err := utils.DPDynamicInterface(fltr.Element, dDP)
 	if err != nil {
 		if err == utils.ErrNotFound {
 			return false, nil
@@ -474,7 +474,7 @@ func (fltr *FilterRule) passGreaterThan(dDP config.DataProvider) (bool, error) {
 		orEqual = true
 	}
 	for _, val := range fltr.Values {
-		sval, err := config.DPDynamicInterface(val, dDP)
+		sval, err := utils.DPDynamicInterface(val, dDP)
 		if err != nil {
 			continue
 		}
@@ -489,8 +489,8 @@ func (fltr *FilterRule) passGreaterThan(dDP config.DataProvider) (bool, error) {
 	return false, nil
 }
 
-func (fltr *FilterRule) passEqualTo(dDP config.DataProvider) (bool, error) {
-	fldIf, err := config.DPDynamicInterface(fltr.Element, dDP)
+func (fltr *FilterRule) passEqualTo(dDP utils.DataProvider) (bool, error) {
+	fldIf, err := utils.DPDynamicInterface(fltr.Element, dDP)
 	if err != nil {
 		if err == utils.ErrNotFound {
 			return false, nil
@@ -501,7 +501,7 @@ func (fltr *FilterRule) passEqualTo(dDP config.DataProvider) (bool, error) {
 		fldIf = utils.StringToInterface(fldStr)
 	}
 	for _, val := range fltr.Values {
-		sval, err := config.DPDynamicInterface(val, dDP)
+		sval, err := utils.DPDynamicInterface(val, dDP)
 		if err != nil {
 			continue
 		}
@@ -515,7 +515,7 @@ func (fltr *FilterRule) passEqualTo(dDP config.DataProvider) (bool, error) {
 }
 
 func newDynamicDP(cfg *config.CGRConfig, connMgr *ConnManager,
-	tenant string, initialDP config.DataProvider) *dynamicDP {
+	tenant string, initialDP utils.DataProvider) *dynamicDP {
 	return &dynamicDP{
 		cfg:       cfg,
 		connMgr:   connMgr,
@@ -529,7 +529,7 @@ type dynamicDP struct {
 	cfg       *config.CGRConfig
 	connMgr   *ConnManager
 	tenant    string
-	initialDP config.DataProvider
+	initialDP utils.DataProvider
 
 	cache *config.NavigableMap
 }

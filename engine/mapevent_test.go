@@ -56,7 +56,7 @@ func TestMapEventNewMapEvent(t *testing.T) {
 }
 
 func TestMapEventFieldAsInterface(t *testing.T) {
-	data := config.DataProvider(mapEv)
+	data := utils.DataProvider(mapEv)
 	if _, err := data.FieldAsInterface([]string{"first", "second"}); err != utils.ErrNotFound {
 		t.Error(err)
 	}
@@ -76,7 +76,7 @@ func TestMapEventFieldAsInterface(t *testing.T) {
 }
 
 func TestMapEventFieldAsString(t *testing.T) {
-	data := config.DataProvider(mapEv)
+	data := utils.DataProvider(mapEv)
 	if _, err := data.FieldAsString([]string{"first", "second"}); err != utils.ErrNotFound {
 		t.Error(err)
 	}
@@ -96,8 +96,7 @@ func TestMapEventFieldAsString(t *testing.T) {
 }
 
 func TestMapEventAsNavigableMap(t *testing.T) {
-	data := config.DataProvider(mapEv)
-	if rply, err := data.AsNavigableMap(nil); err != nil {
+	if rply, err := mapEv.AsNavigableMap(nil); err != nil {
 		t.Error(err)
 	} else if expected := config.NewNavigableMap(mapEv); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
@@ -105,7 +104,7 @@ func TestMapEventAsNavigableMap(t *testing.T) {
 }
 
 func TestMapEventRemoteHost(t *testing.T) {
-	data := config.DataProvider(mapEv)
+	data := utils.DataProvider(mapEv)
 	if rply, expected := data.RemoteHost(), utils.LocalAddr(); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}

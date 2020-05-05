@@ -288,7 +288,7 @@ func writeOnConn(c diam.Conn, m *diam.Message) (err error) {
 }
 
 // newDADataProvider constructs a DataProvider for a diameter message
-func newDADataProvider(c diam.Conn, m *diam.Message) config.DataProvider {
+func newDADataProvider(c diam.Conn, m *diam.Message) utils.DataProvider {
 	return &diameterDP{c: c, m: m, cache: config.NewNavigableMap(nil)}
 
 }
