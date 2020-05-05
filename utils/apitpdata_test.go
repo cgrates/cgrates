@@ -973,33 +973,3 @@ func TestAppendToSMCostFilter(t *testing.T) {
 		t.Errorf("Expected: %s ,received: %s ", ToJSON(expected), ToJSON(smfltr))
 	}
 }
-
-func TestInitAttrReloadCache(t *testing.T) {
-	var expected AttrReloadCache
-	expected.DestinationIDs = []string{}
-	expected.ReverseDestinationIDs = []string{}
-	expected.RatingPlanIDs = []string{}
-	expected.RatingProfileIDs = []string{}
-	expected.ActionIDs = []string{}
-	expected.ActionPlanIDs = []string{}
-	expected.AccountActionPlanIDs = []string{}
-	expected.ActionTriggerIDs = []string{}
-	expected.SharedGroupIDs = []string{}
-	expected.ResourceProfileIDs = []string{}
-	expected.ResourceIDs = []string{}
-	expected.StatsQueueIDs = []string{}
-	expected.StatsQueueProfileIDs = []string{}
-	expected.ThresholdIDs = []string{}
-	expected.ThresholdProfileIDs = []string{}
-	expected.FilterIDs = []string{}
-	expected.RouteProfileIDs = []string{}
-	expected.AttributeProfileIDs = []string{}
-	expected.ChargerProfileIDs = []string{}
-	expected.DispatcherProfileIDs = []string{}
-	expected.DispatcherHostIDs = []string{}
-	expected.DispatcherRoutesIDs = []string{}
-
-	if rcv := InitAttrReloadCache(); !reflect.DeepEqual(rcv, expected) {
-		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
-	}
-}

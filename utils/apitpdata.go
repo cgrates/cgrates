@@ -465,36 +465,6 @@ type AttrReloadCache struct {
 	FlushAll bool // If provided, cache flush will be executed before any action
 }
 
-// InitAttrReloadCache initialize AttrReloadCache with empty string slice
-func InitAttrReloadCache() (rpl AttrReloadCache) {
-	rpl.DestinationIDs = []string{}
-	rpl.ReverseDestinationIDs = []string{}
-	rpl.RatingPlanIDs = []string{}
-	rpl.RatingProfileIDs = []string{}
-	rpl.ActionIDs = []string{}
-	rpl.ActionPlanIDs = []string{}
-	rpl.AccountActionPlanIDs = []string{}
-	rpl.ActionTriggerIDs = []string{}
-	rpl.SharedGroupIDs = []string{}
-	rpl.ResourceProfileIDs = []string{}
-	rpl.ResourceIDs = []string{}
-	rpl.StatsQueueIDs = []string{}
-	rpl.StatsQueueProfileIDs = []string{}
-	rpl.ThresholdIDs = []string{}
-	rpl.ThresholdProfileIDs = []string{}
-	rpl.FilterIDs = []string{}
-	rpl.RouteProfileIDs = []string{}
-	rpl.AttributeProfileIDs = []string{}
-	rpl.ChargerProfileIDs = []string{}
-	rpl.DispatcherProfileIDs = []string{}
-	rpl.DispatcherHostIDs = []string{}
-	rpl.DispatcherRoutesIDs = []string{}
-	return
-}
-
-type CacheKeys struct {
-}
-
 type AttrExpFileCdrs struct {
 	CdrFormat           *string  // Cdr output file format <CdreCdrFormats>
 	FieldSeparator      *string  // Separator used between fields
