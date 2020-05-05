@@ -37,7 +37,6 @@ func GetCacheOpt(apiOpt *string) string {
 // composeArgsReload add the ItemID to AttrReloadCache
 // for a specific CacheID
 func composeArgsReload(args utils.ArgsGetCacheItem) (rpl utils.AttrReloadCache) {
-	rpl = utils.InitAttrReloadCache()
 	switch args.CacheID {
 	case utils.CacheResourceProfiles:
 		rpl.ResourceProfileIDs = []string{args.ItemID}

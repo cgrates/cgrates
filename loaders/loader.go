@@ -262,7 +262,7 @@ func (ldr *Loader) processContent(loaderType, caching string) (err error) {
 func (ldr *Loader) storeLoadedData(loaderType string,
 	lds map[string][]LoaderData, caching string) (err error) {
 	var ids []string
-	cacheArgs := utils.InitAttrReloadCache()
+	var cacheArgs utils.AttrReloadCache
 	switch loaderType {
 	case utils.MetaAttributes:
 		for _, lDataSet := range lds {
@@ -646,7 +646,7 @@ func (ldr *Loader) removeContent(loaderType, caching string) (err error) {
 //since we remove we don't need to compose the struct we only need the Tenant and the ID of the profile
 func (ldr *Loader) removeLoadedData(loaderType, tntID, caching string) (err error) {
 	var ids []string
-	cacheArgs := utils.InitAttrReloadCache()
+	var cacheArgs utils.AttrReloadCache
 	switch loaderType {
 	case utils.MetaAttributes:
 		if ldr.dryRun {
