@@ -26,6 +26,7 @@ import (
 )
 
 type EventExporter interface {
+	ID() string                                    // return the exporter identificator
 	ExportEvent(cgrEv *utils.CGREvent) (err error) // called on each event to be exported
 	OnEvicted(itmID string, value interface{})     // called when the exporter needs to terminate
 }

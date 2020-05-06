@@ -31,6 +31,7 @@ func NewFileCSVee(cgrCfg *config.CGRConfig, cfgIdx int) (fCsv *FileCSVee, err er
 
 // FileCSVee implements EventExporter interface for .csv files
 type FileCSVee struct {
+	id     string
 	cgrCfg *config.CGRConfig
 	cfgIdx int // index of config instance within ERsCfg.Readers
 }
@@ -40,8 +41,13 @@ func (fCsv *FileCSVee) init() (err error) {
 	return
 }
 
+// ID returns the identificator of this exporter
+func (fCsv *FileCSVee) ID() string {
+	return fCsv.id
+}
+
 // OnEvicted implements EventExporter, doing the cleanup before exit
-func (fCsv *FileCSVee) OnEvicted(itmID string, value interface{}) {
+func (fCsv *FileCSVee) OnEvicted(_ string, _ interface{}) {
 	return
 }
 

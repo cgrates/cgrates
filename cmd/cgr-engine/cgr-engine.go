@@ -412,6 +412,7 @@ func main() {
 	internalAPIerSv1Chan := make(chan rpcclient.ClientConnector, 1)
 	internalAPIerSv2Chan := make(chan rpcclient.ClientConnector, 1)
 	internalLoaderSChan := make(chan rpcclient.ClientConnector, 1)
+	internalEEsChan := make(chan rpcclient.ClientConnector, 1)
 
 	// initialize the connManager before creating the DMService
 	// because we need to pass the connection to it
@@ -435,6 +436,7 @@ func main() {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaConfig):         internalConfigChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCore):           internalCoreSv1Chan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs):           internalRALsChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs):            internalEEsChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaDispatchers):    internalDispatcherSChan,
 	})
 

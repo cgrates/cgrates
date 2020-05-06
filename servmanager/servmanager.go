@@ -344,21 +344,16 @@ func (srvMngr *ServiceManager) reloadService(srviceName string) (err error) {
 func (srvMngr *ServiceManager) startService(srviceName string) {
 	srv := srvMngr.GetService(srviceName)
 	if err := srv.Start(); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> Failed to start %s because: %s", utils.ServiceManager, srviceName, err))
+		utils.Logger.Err(fmt.Sprintf("<%s> failed to start %s because: %s", utils.ServiceManager, srviceName, err))
 		srvMngr.engineShutdown <- true
 	}
 }
 
 // GetService returns the named service
 func (srvMngr *ServiceManager) GetService(subsystem string) (srv Service) {
-	var has bool
 	srvMngr.RLock()
-	srv, has = srvMngr.subsystems[subsystem]
+	srv = srvMngr.subsystems[subsystem]
 	srvMngr.RUnlock()
-	if !has { // this should not happen (check the added services)
-		panic(fmt.Sprintf("<%s> Failed to find needed subsystem <%s>",
-			utils.ServiceManager, subsystem)) // because this is not dinamic this should not happen
-	}
 	return
 }
 

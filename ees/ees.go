@@ -69,7 +69,7 @@ func (eeS *EEService) ListenAndServe(exitChan chan bool, cfgRld chan struct{}) (
 			cfgRld <- rld
 			utils.Logger.Info(fmt.Sprintf("<%s> reloading configuration internals.",
 				utils.EventExporterService))
-			eeS.initCache(eeS.cfg.EEsCfg().Cache)
+			eeS.setupCache(eeS.cfg.EEsCfg().Cache)
 		}
 	}
 	return
@@ -78,18 +78,21 @@ func (eeS *EEService) ListenAndServe(exitChan chan bool, cfgRld chan struct{}) (
 // Shutdown is called to shutdown the service
 func (eeS *EEService) Shutdown() (err error) {
 	utils.Logger.Info(fmt.Sprintf("<%s> shutdown <%s>", utils.CoreS, utils.EventExporterService))
-	eeS.initCache(nil) // cleanup exporters
+	eeS.setupCache(nil) // cleanup exporters
 	return
 }
 
-// initCache deals with cleanup and initialization of the cache of EventExporters
-func (eeS *EEService) initCache(chCfgs map[string]*config.CacheParamCfg) {
+// setupCache deals with cleanup and initialization of the cache of EventExporters
+func (eeS *EEService) setupCache(chCfgs map[string]*config.CacheParamCfg) {
 	eeS.eesMux.Lock()
 	for chID, ch := range eeS.eesChs { // cleanup
 		ch.Clear()
 		delete(eeS.eesChs, chID)
 	}
 	for chID, chCfg := range chCfgs { // init
+		if chCfg.Limit == 0 { // cache is disabled, will not create
+			continue
+		}
 		eeS.eesChs[chID] = ltcache.NewCache(chCfg.Limit,
 			chCfg.TTL, chCfg.StaticTTL, onCacheEvicted)
 	}
@@ -122,7 +125,24 @@ func (eeS *EEService) V1ProcessEvent(cgrEv *utils.CGREventWithOpts) (err error) 
 	eeS.cfg.RLocks(config.EEsJson)
 	defer eeS.cfg.RUnlocks(config.EEsJson)
 
+	var wg sync.WaitGroup
+	var withErr bool
 	for cfgIdx, eeCfg := range eeS.cfg.EEsCfg().Exporters {
+
+		if len(eeCfg.Filters) != 0 {
+			cgrDp := config.NewNavigableMap(map[string]interface{}{
+				utils.MetaReq: cgrEv.Event,
+			})
+			tnt := cgrEv.Tenant
+			if eeTnt, errTnt := eeCfg.Tenant.ParseEvent(cgrEv.Event); errTnt == nil && eeTnt != utils.EmptyString {
+				tnt = eeTnt
+			}
+			if pass, errPass := eeS.filterS.Pass(tnt,
+				eeCfg.Filters, cgrDp); errPass != nil || !pass {
+				continue // does not pass the filters, ignore the exporter
+			}
+		}
+
 		if eeCfg.Flags.GetBool(utils.MetaAttributes) {
 			if err = eeS.attrSProcessEvent(
 				cgrEv,
@@ -134,6 +154,7 @@ func (eeS *EEService) V1ProcessEvent(cgrEv *utils.CGREventWithOpts) (err error) 
 				return
 			}
 		}
+
 		eeS.eesMux.RLock()
 		eeCache, hasCache := eeS.eesChs[eeCfg.Type]
 		eeS.eesMux.RUnlock()
@@ -152,9 +173,28 @@ func (eeS *EEService) V1ProcessEvent(cgrEv *utils.CGREventWithOpts) (err error) 
 				eeCache.Set(eeCfg.ID, ee, nil)
 			}
 		}
-		if err = ee.ExportEvent(cgrEv.CGREvent); err != nil {
-			return
+		if eeCfg.Synchronous {
+			wg.Add(1) // wait for synchronous or file ones since these need to be done before continuing
 		}
+		go func(evict, sync bool) {
+			if err := ee.ExportEvent(cgrEv.CGREvent); err != nil {
+				utils.Logger.Warning(
+					fmt.Sprintf("<%s> with id <%s>, error: <%s>",
+						utils.EventExporterService, ee.ID(), err.Error()))
+				withErr = true
+			}
+			if evict {
+				ee.OnEvicted("", nil) // so we can close ie the file
+			}
+			if sync {
+				wg.Done()
+			}
+		}(!isCached, eeCfg.Synchronous)
 	}
+	wg.Wait()
+	if withErr {
+		err = utils.ErrPartiallyExecuted
+	}
+
 	return
 }
