@@ -84,6 +84,7 @@ func TestHttpAgentCfgsloadFromJsonCfg(t *testing.T) {
 			}},
 		}},
 	}}
+	expected[0].RequestProcessors[0].ReplyFields[0].ComputePath()
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if jsnhttpCfg, err := jsnCfg.HttpAgentJsonCfg(); err != nil {
@@ -144,20 +145,22 @@ func TestHttpAgentCfgsloadFromJsonCfg(t *testing.T) {
 			SessionSConns:  []string{utils.MetaLocalHost},
 			RequestPayload: "*url",
 			ReplyPayload:   "*xml",
-			RequestProcessors: []*RequestProcessor{{
-				ID:            "OutboundAUTHDryRun",
-				Filters:       []string{"*string:*req.request_type:OutboundAUTH", "*string:*req.Msisdn:497700056231"},
-				Tenant:        NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
-				Flags:         utils.FlagsWithParams{"*dryrun": []string{}},
-				RequestFields: []*FCTemplate{},
-				ReplyFields: []*FCTemplate{{
-					Tag:       "Allow",
-					Path:      "response.Allow",
-					Type:      "*constant",
-					Value:     NewRSRParsersMustCompile("1", true, utils.INFIELD_SEP),
-					Mandatory: true,
-					Layout:    time.RFC3339,
-				}}},
+			RequestProcessors: []*RequestProcessor{
+				{
+					ID:            "OutboundAUTHDryRun",
+					Filters:       []string{"*string:*req.request_type:OutboundAUTH", "*string:*req.Msisdn:497700056231"},
+					Tenant:        NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
+					Flags:         utils.FlagsWithParams{"*dryrun": []string{}},
+					RequestFields: []*FCTemplate{},
+					ReplyFields: []*FCTemplate{{
+						Tag:       "Allow",
+						Path:      "response.Allow",
+						Type:      "*constant",
+						Value:     NewRSRParsersMustCompile("1", true, utils.INFIELD_SEP),
+						Mandatory: true,
+						Layout:    time.RFC3339,
+					}},
+				},
 				{
 					ID:      "mtcall_cdr",
 					Filters: []string{"*string:*req.request_type:MTCALL_CDR"},
@@ -194,6 +197,9 @@ func TestHttpAgentCfgsloadFromJsonCfg(t *testing.T) {
 				ReplyFields:   []*FCTemplate{},
 			}},
 		}}
+	expected[0].RequestProcessors[0].ReplyFields[0].ComputePath()
+	expected[0].RequestProcessors[1].ReplyFields[0].ComputePath()
+	expected[0].RequestProcessors[1].RequestFields[0].ComputePath()
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if jsnhttpCfg, err := jsnCfg.HttpAgentJsonCfg(); err != nil {
@@ -280,6 +286,7 @@ func TestHttpAgentCfgappendHttpAgntProcCfgs(t *testing.T) {
 			}},
 		}},
 	}
+	initial.RequestProcessors[0].ReplyFields[0].ComputePath()
 	proceses := &[]*ReqProcessorJsnCfg{{
 		ID:             utils.StringPointer("OutboundAUTHDryRun1"),
 		Filters:        &[]string{"*string:*req.request_type:OutboundAUTH", "*string:*req.Msisdn:497700056231"},
@@ -344,7 +351,8 @@ func TestHttpAgentCfgappendHttpAgntProcCfgs(t *testing.T) {
 			}},
 		}},
 	}
-
+	expected.RequestProcessors[0].ReplyFields[0].ComputePath()
+	expected.RequestProcessors[1].ReplyFields[0].ComputePath()
 	if err = initial.appendHttpAgntProcCfgs(proceses, utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, initial) {

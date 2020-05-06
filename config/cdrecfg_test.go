@@ -38,6 +38,9 @@ func TestCdreCfgClone(t *testing.T) {
 			Path:  "runid",
 			Value: runIDRsrs},
 	}
+	for _, v := range initContentFlds {
+		v.ComputePath()
+	}
 	initCdreCfg := &CdreCfg{
 		ExportFormat:   utils.MetaFileCSV,
 		ExportPath:     "/var/spool/cgrates/cdre",
@@ -55,6 +58,9 @@ func TestCdreCfgClone(t *testing.T) {
 			Type:  utils.META_COMPOSED,
 			Path:  "runid",
 			Value: runIDRsrs},
+	}
+	for _, v := range eClnContentFlds {
+		v.ComputePath()
 	}
 	eClnCdreCfg := &CdreCfg{
 		ExportFormat:   utils.MetaFileCSV,
@@ -127,6 +133,7 @@ func TestCdreCfgloadFromJsonCfg(t *testing.T) {
 			Layout: time.RFC3339,
 		}},
 	}
+	expected.Fields[0].ComputePath()
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if jsnCdreCfg, err := jsnCfg.CdreJsonCfgs(); err != nil {

@@ -50,6 +50,9 @@ func TestEventExporterClone(t *testing.T) {
 			},
 		},
 	}
+	for _, v := range orig.Fields {
+		v.ComputePath()
+	}
 	cloned := orig.Clone()
 	if !reflect.DeepEqual(cloned, orig) {
 		t.Errorf("expected: %s \n,received: %s", utils.ToJSON(orig), utils.ToJSON(cloned))
@@ -76,6 +79,9 @@ func TestEventExporterClone(t *testing.T) {
 				Mandatory: true,
 			},
 		},
+	}
+	for _, v := range initialOrig.Fields {
+		v.ComputePath()
 	}
 	orig.Filters = []string{"SingleFilter"}
 	orig.Fields = []*FCTemplate{
@@ -234,7 +240,11 @@ func TestEventExporterSameID(t *testing.T) {
 			},
 		},
 	}
-
+	for _, profile := range expectedEEsCfg.Exporters {
+		for _, v := range profile.Fields {
+			v.ComputePath()
+		}
+	}
 	cfgJSONStr := `{
 "ees": {
 	"enabled": true,
