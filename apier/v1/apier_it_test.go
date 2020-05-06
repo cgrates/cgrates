@@ -951,7 +951,7 @@ func testAPIerSv1GetRatingProfile(t *testing.T) {
 // Test here ReloadCache
 func testApierReloadCache(t *testing.T) {
 	var reply string
-	arc := new(utils.AttrReloadCache)
+	arc := new(utils.ArgsCache)
 	// Simple test that command is executed without errors
 	if err := rater.Call(utils.CacheSv1ReloadCache, arc, &reply); err != nil {
 		t.Error("Got error on CacheSv1.ReloadCache: ", err.Error())
@@ -1406,7 +1406,9 @@ func testApierResetDataBeforeLoadFromFolder(t *testing.T) {
 	testApierInitDataDb(t)
 	var reply string
 	// Simple test that command is executed without errors
-	if err := rater.Call(utils.CacheSv1FlushCache, utils.AttrReloadCache{FlushAll: true}, &reply); err != nil {
+	if err := rater.Call(utils.CacheSv1Clear, &utils.AttrCacheIDsWithArgDispatcher{
+		CacheIDs: nil,
+	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Reply: ", reply)
@@ -1474,7 +1476,7 @@ func testApierResetDataAfterLoadFromFolder(t *testing.T) {
 	}
 	var reply string
 	// Simple test that command is executed without errors
-	if err := rater.Call(utils.CacheSv1LoadCache, utils.AttrReloadCache{}, &reply); err != nil {
+	if err := rater.Call(utils.CacheSv1LoadCache, utils.ArgsCache{}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error(reply)
@@ -1784,7 +1786,9 @@ func testApierInitStorDb2(t *testing.T) {
 func testApierReloadCache2(t *testing.T) {
 	var reply string
 	// Simple test that command is executed without errors
-	if err := rater.Call(utils.CacheSv1FlushCache, utils.AttrReloadCache{FlushAll: true}, &reply); err != nil {
+	if err := rater.Call(utils.CacheSv1Clear, &utils.AttrCacheIDsWithArgDispatcher{
+		CacheIDs: nil,
+	}, &reply); err != nil {
 		t.Error("Got error on CacheSv1.ReloadCache: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling CacheSv1.ReloadCache got reply: ", reply)

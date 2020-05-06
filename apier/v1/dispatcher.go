@@ -608,11 +608,6 @@ func (dS *DispatcherCacheSv1) Clear(args *utils.AttrCacheIDsWithArgDispatcher,
 	return dS.dS.CacheSv1Clear(args, reply)
 }
 
-// FlushCache wipes out cache for a prefix or completely
-func (dS *DispatcherCacheSv1) FlushCache(args utils.AttrReloadCacheWithArgDispatcher, reply *string) (err error) {
-	return dS.dS.CacheSv1FlushCache(args, reply)
-}
-
 // GetCacheStats returns CacheStats filtered by cacheIDs
 func (dS *DispatcherCacheSv1) GetCacheStats(args *utils.AttrCacheIDsWithArgDispatcher,
 	reply *map[string]*ltcache.CacheStats) error {

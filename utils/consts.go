@@ -1429,7 +1429,6 @@ const (
 	CacheSv1Clear             = "CacheSv1.Clear"
 	CacheSv1ReloadCache       = "CacheSv1.ReloadCache"
 	CacheSv1LoadCache         = "CacheSv1.LoadCache"
-	CacheSv1FlushCache        = "CacheSv1.FlushCache"
 	CacheSv1Ping              = "CacheSv1.Ping"
 	CacheSv1ReplicateSet      = "CacheSv1.ReplicateSet"
 	CacheSv1ReplicateRemove   = "CacheSv1.ReplicateRemove"
