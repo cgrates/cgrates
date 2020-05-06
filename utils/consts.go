@@ -721,6 +721,7 @@ const (
 	ProfileID                = "ProfileID"
 	SortedRoutes             = "SortedRoutes"
 	EventExporterService     = "EventExporterService"
+	MetaMonthly              = "*monthly"
 )
 
 // Migrator Action
