@@ -41,6 +41,7 @@ func TestNewFCTemplateFromFCTemplateJsonCfg(t *testing.T) {
 		Value:   NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
 		Layout:  time.RFC3339,
 	}
+	expected.ComputePath()
 	if rcv, err := NewFCTemplateFromFCTemplateJsonCfg(jsonCfg, utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rcv) {
@@ -82,6 +83,9 @@ func TestFCTemplatesFromFCTemplatesJsonCfg(t *testing.T) {
 			Value:   NewRSRParsersMustCompile("SampleValue", true, utils.INFIELD_SEP),
 			Layout:  time.RFC3339,
 		},
+	}
+	for _, v := range expected {
+		v.ComputePath()
 	}
 	if rcv, err := FCTemplatesFromFCTemplatesJsonCfg(jsnCfgs, utils.INFIELD_SEP); err != nil {
 		t.Error(err)
@@ -288,6 +292,14 @@ func TestFCTemplateInflate3(t *testing.T) {
 			},
 		},
 	}
+	for _, v := range fcTmp1 {
+		v.ComputePath()
+	}
+	for _, tmpl := range fcTmpMp {
+		for _, v := range tmpl {
+			v.ComputePath()
+		}
+	}
 	if _, err := InflateTemplates(fcTmp1, fcTmpMp); err == nil ||
 		err.Error() != "empty template with id: <TmpMap>" {
 		t.Error(err)
@@ -302,6 +314,7 @@ func TestFCTemplateClone(t *testing.T) {
 		Filters: []string{"Filter1", "Filter2"},
 		Value:   NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
 	}
+	smpl.ComputePath()
 	cloned := smpl.Clone()
 	if !reflect.DeepEqual(cloned, smpl) {
 		t.Errorf("expected: %s ,received: %s", utils.ToJSON(smpl), utils.ToJSON(cloned))
@@ -313,6 +326,7 @@ func TestFCTemplateClone(t *testing.T) {
 		Filters: []string{"Filter1", "Filter2"},
 		Value:   NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
 	}
+	initialSmpl.ComputePath()
 	smpl.Filters = []string{"SingleFilter"}
 	smpl.Value = NewRSRParsersMustCompile("cgrates.com", true, utils.INFIELD_SEP)
 	if !reflect.DeepEqual(cloned, initialSmpl) {

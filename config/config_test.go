@@ -563,6 +563,9 @@ func TestCgrCfgJSONDefaultsCdreProfiles(t *testing.T) {
 			RoundingDecimals: utils.IntPointer(4),
 		},
 	}
+	for _, v := range eContentFlds {
+		v.ComputePath()
+	}
 	eCdreCfg := map[string]*CdreCfg{
 		utils.MetaDefault: {
 			ExportFormat:      utils.MetaFileCSV,
@@ -1597,6 +1600,13 @@ func TestCgrLoaderCfgITDefaults(t *testing.T) {
 			},
 		},
 	}
+	for _, profile := range eCfg {
+		for _, fields := range profile.Data {
+			for _, v := range fields.Fields {
+				v.ComputePath()
+			}
+		}
+	}
 	if !reflect.DeepEqual(eCfg, cgrCfg.loaderCfg) {
 		t.Errorf("received: %+v, \n expecting: %+v",
 			utils.ToJSON(eCfg), utils.ToJSON(cgrCfg.loaderCfg))
@@ -1829,6 +1839,11 @@ func TestCgrCdfEventReader(t *testing.T) {
 			},
 		},
 	}
+	for _, profile := range eCfg.Readers {
+		for _, v := range profile.Fields {
+			v.ComputePath()
+		}
+	}
 	if !reflect.DeepEqual(cgrCfg.ersCfg, eCfg) {
 		t.Errorf("received: %+v,\n expecting: %+v", utils.ToJSON(cgrCfg.ersCfg), utils.ToJSON(eCfg))
 	}
@@ -1961,6 +1976,11 @@ func TestCgrCdfEventExporter(t *testing.T) {
 			},
 		},
 	}
+	for _, profile := range eCfg.Exporters {
+		for _, v := range profile.Fields {
+			v.ComputePath()
+		}
+	}
 	if !reflect.DeepEqual(cgrCfg.eesCfg, eCfg) {
 		t.Errorf("received: %+v,\n expecting: %+v", utils.ToJSON(cgrCfg.eesCfg), utils.ToJSON(eCfg))
 	}
@@ -2005,6 +2025,9 @@ func TestCgrCfgEventReaderDefault(t *testing.T) {
 				Value: NewRSRParsersMustCompile("~*req.13", true, utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
 		},
 		CacheDumpFields: make([]*FCTemplate, 0),
+	}
+	for _, v := range eCfg.Fields {
+		v.ComputePath()
 	}
 	if !reflect.DeepEqual(cgrCfg.dfltEvRdr, eCfg) {
 		t.Errorf("received: %+v,\n expecting: %+v", utils.ToJSON(cgrCfg.dfltEvRdr), utils.ToJSON(eCfg))
@@ -2124,6 +2147,9 @@ func TestCgrCfgEventExporterDefault(t *testing.T) {
 				RoundingDecimals: utils.IntPointer(4),
 			},
 		},
+	}
+	for _, v := range eCfg.Fields {
+		v.ComputePath()
 	}
 	if !reflect.DeepEqual(cgrCfg.dfltEvExp, eCfg) {
 		t.Errorf("received: %+v,\n expecting: %+v", utils.ToJSON(cgrCfg.dfltEvExp), utils.ToJSON(eCfg))

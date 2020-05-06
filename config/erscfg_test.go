@@ -50,6 +50,9 @@ func TestEventRedearClone(t *testing.T) {
 		},
 		CacheDumpFields: make([]*FCTemplate, 0),
 	}
+	for _, v := range orig.Fields {
+		v.ComputePath()
+	}
 	cloned := orig.Clone()
 	if !reflect.DeepEqual(cloned, orig) {
 		t.Errorf("expected: %s \n,received: %s", utils.ToJSON(orig), utils.ToJSON(cloned))
@@ -77,6 +80,9 @@ func TestEventRedearClone(t *testing.T) {
 			},
 		},
 		CacheDumpFields: make([]*FCTemplate, 0),
+	}
+	for _, v := range initialOrig.Fields {
+		v.ComputePath()
 	}
 	orig.Filters = []string{"SingleFilter"}
 	orig.Fields = []*FCTemplate{
@@ -178,7 +184,11 @@ func TestEventReaderLoadFromJSON(t *testing.T) {
 			},
 		},
 	}
-
+	for _, profile := range expectedERsCfg.Readers {
+		for _, v := range profile.Fields {
+			v.ComputePath()
+		}
+	}
 	cfgJSONStr := `{
 "ers": {
 	"enabled": true,
@@ -291,7 +301,11 @@ func TestEventReaderSameID(t *testing.T) {
 			},
 		},
 	}
-
+	for _, profile := range expectedERsCfg.Readers {
+		for _, v := range profile.Fields {
+			v.ComputePath()
+		}
+	}
 	cfgJSONStr := `{
 "ers": {
 	"enabled": true,
