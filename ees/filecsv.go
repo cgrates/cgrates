@@ -25,6 +25,7 @@ import (
 
 func NewFileCSVee(cgrCfg *config.CGRConfig, cfgIdx int) (fCsv *FileCSVee, err error) {
 	fCsv = &FileCSVee{cgrCfg: cgrCfg, cfgIdx: cfgIdx}
+	err = fCsv.init()
 	return
 }
 
@@ -34,7 +35,12 @@ type FileCSVee struct {
 	cfgIdx int // index of config instance within ERsCfg.Readers
 }
 
-// OnEvicted implements EventExporter
+// init will create all the necessary dependencies, including opening the file
+func (fCsv *FileCSVee) init() (err error) {
+	return
+}
+
+// OnEvicted implements EventExporter, doing the cleanup before exit
 func (fCsv *FileCSVee) OnEvicted(itmID string, value interface{}) {
 	return
 }

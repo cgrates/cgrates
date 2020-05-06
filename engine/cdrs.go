@@ -358,7 +358,8 @@ func (cdrS *CDRServer) attrSProcessEvent(cgrEv *utils.CGREventWithOpts) (err err
 		attrArgs, &rplyEv); err == nil && len(rplyEv.AlteredFields) != 0 {
 		cgrEv.CGREvent = rplyEv.CGREvent
 		cgrEv.Opts = rplyEv.Opts
-	} else if err.Error() == utils.ErrNotFound.Error() {
+	} else if err != nil &&
+		err.Error() == utils.ErrNotFound.Error() {
 		err = nil // cancel ErrNotFound
 	}
 	return
