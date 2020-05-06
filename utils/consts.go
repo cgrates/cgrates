@@ -2010,7 +2010,7 @@ const (
 	FlagsCfg                    = "flags"
 	FailedCallsPrefixCfg        = "failed_calls_prefix"
 	PartialRecordCacheCfg       = "partial_record_cache"
-	PartialCacheExpiryActionCfg = "soome"
+	PartialCacheExpiryActionCfg = "partial_cache_expiry_action"
 	FieldsCfg                   = "fields"
 	CacheDumpFieldsCfg          = "cache_dump_fields"
 )
