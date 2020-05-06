@@ -141,7 +141,7 @@ func testCacheSAfterLoadFromFolder(t *testing.T) {
 	}
 	reply := ""
 	// Simple test that command is executed without errors
-	if err := chcRPC.Call(utils.CacheSv1LoadCache, utils.AttrReloadCache{}, &reply); err != nil {
+	if err := chcRPC.Call(utils.CacheSv1LoadCache, utils.ArgsCache{}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error(reply)
@@ -171,7 +171,9 @@ func testCacheSAfterLoadFromFolder(t *testing.T) {
 
 func testCacheSFlush(t *testing.T) {
 	reply := ""
-	if err := chcRPC.Call(utils.CacheSv1FlushCache, utils.AttrReloadCache{FlushAll: true}, &reply); err != nil {
+	if err := chcRPC.Call(utils.CacheSv1Clear, &utils.AttrCacheIDsWithArgDispatcher{
+		CacheIDs: nil,
+	}, &reply); err != nil {
 		t.Error("Got error on CacheSv1.ReloadCache: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling CacheSv1.ReloadCache got reply: ", reply)
@@ -190,7 +192,7 @@ func testCacheSReload(t *testing.T) {
 	expStats := engine.GetDefaultEmptyCacheStats()
 	reply := ""
 	// Simple test that command is executed without errors
-	if err := chcRPC.Call(utils.CacheSv1LoadCache, utils.AttrReloadCache{}, &reply); err != nil {
+	if err := chcRPC.Call(utils.CacheSv1LoadCache, utils.ArgsCache{}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error(reply)
@@ -295,7 +297,7 @@ func testCacheSGetItemExpiryTime(t *testing.T) {
 
 func testCacheSReloadCache(t *testing.T) {
 	reply := ""
-	arc := new(utils.AttrReloadCache)
+	arc := new(utils.ArgsCache)
 	if err := chcRPC.Call(utils.CacheSv1ReloadCache, arc, &reply); err != nil {
 		t.Error("Got error on CacheSv1.ReloadCache: ", err.Error())
 	} else if reply != utils.OK {

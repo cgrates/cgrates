@@ -1922,7 +1922,7 @@ func (tps TPRoutes) AsTPRouteProfile() (result []*utils.TPRouteProfile) {
 				SortingParameters: []string{},
 			}
 		}
-		if tp.RouteID != "" {
+		if tp.RouteID != utils.EmptyString {
 			if _, has := suppliersMap[tenID]; !has {
 				suppliersMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()] = make(map[string]*utils.TPRoute)
 			}

@@ -125,7 +125,7 @@ func testTutSMGLoadTariffPlanFromFolder(t *testing.T) {
 // Check loaded stats
 func testTutSMGCacheStats(t *testing.T) {
 	var reply string
-	if err := tutSMGRpc.Call(utils.CacheSv1LoadCache, utils.AttrReloadCache{}, &reply); err != nil {
+	if err := tutSMGRpc.Call(utils.CacheSv1LoadCache, utils.ArgsCache{}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error(reply)

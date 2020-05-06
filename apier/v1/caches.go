@@ -65,11 +65,6 @@ func (chSv1 *CacheSv1) Clear(args *utils.AttrCacheIDsWithArgDispatcher,
 	return chSv1.cacheS.V1Clear(args, reply)
 }
 
-// FlushCache wipes out cache for a prefix or completely
-func (chSv1 *CacheSv1) FlushCache(args utils.AttrReloadCacheWithArgDispatcher, reply *string) (err error) {
-	return chSv1.cacheS.V1FlushCache(args, reply)
-}
-
 // GetCacheStats returns CacheStats filtered by cacheIDs
 func (chSv1 *CacheSv1) GetCacheStats(args *utils.AttrCacheIDsWithArgDispatcher,
 	rply *map[string]*ltcache.CacheStats) error {

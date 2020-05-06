@@ -262,7 +262,8 @@ func (ldr *Loader) processContent(loaderType, caching string) (err error) {
 func (ldr *Loader) storeLoadedData(loaderType string,
 	lds map[string][]LoaderData, caching string) (err error) {
 	var ids []string
-	var cacheArgs utils.AttrReloadCache
+	var cacheArgs utils.ArgsCache
+	var cachePartition string
 	switch loaderType {
 	case utils.MetaAttributes:
 		for _, lDataSet := range lds {
@@ -291,6 +292,7 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 				}
 			}
 			cacheArgs.AttributeProfileIDs = ids
+			cachePartition = utils.CacheAttributeProfiles
 		}
 	case utils.MetaResources:
 		for _, lDataSet := range lds {
@@ -326,6 +328,7 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 				}
 				cacheArgs.ResourceProfileIDs = ids
 				cacheArgs.ResourceIDs = ids
+				cachePartition = utils.CacheResourceProfiles
 			}
 		}
 	case utils.MetaFilters:
@@ -355,6 +358,7 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 					return err
 				}
 				cacheArgs.FilterIDs = ids
+				cachePartition = utils.CacheFilters
 			}
 		}
 	case utils.MetaStats:
@@ -395,6 +399,7 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 				}
 				cacheArgs.StatsQueueProfileIDs = ids
 				cacheArgs.StatsQueueIDs = ids
+				cachePartition = utils.CacheFilters
 			}
 		}
 	case utils.MetaThresholds:
@@ -427,6 +432,7 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 				}
 				cacheArgs.ThresholdProfileIDs = ids
 				cacheArgs.ThresholdIDs = ids
+				cachePartition = utils.CacheThresholdProfiles
 			}
 		}
 	case utils.MetaRoutes:
@@ -456,6 +462,7 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 					return err
 				}
 				cacheArgs.RouteProfileIDs = ids
+				cachePartition = utils.CacheRouteProfiles
 			}
 		}
 	case utils.MetaChargers:
@@ -485,6 +492,7 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 					return err
 				}
 				cacheArgs.ChargerProfileIDs = ids
+				cachePartition = utils.CacheChargerProfiles
 			}
 		}
 	case utils.MetaDispatchers:
@@ -513,6 +521,7 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 					return err
 				}
 				cacheArgs.DispatcherProfileIDs = ids
+				cachePartition = utils.CacheDispatcherProfiles
 			}
 		}
 	case utils.MetaDispatcherHosts:
@@ -538,6 +547,7 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 					return err
 				}
 				cacheArgs.DispatcherHostIDs = ids
+				cachePartition = utils.CacheDispatcherHosts
 			}
 		}
 	}
@@ -550,26 +560,30 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 		case utils.MetaReload:
 			if err = ldr.connMgr.Call(ldr.cacheConns, nil,
 				utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
-					AttrReloadCache: cacheArgs}, &reply); err != nil {
+					ArgsCache: cacheArgs}, &reply); err != nil {
 				return
 			}
 		case utils.MetaLoad:
 			if err = ldr.connMgr.Call(ldr.cacheConns, nil,
 				utils.CacheSv1LoadCache, utils.AttrReloadCacheWithArgDispatcher{
-					AttrReloadCache: cacheArgs}, &reply); err != nil {
+					ArgsCache: cacheArgs}, &reply); err != nil {
 				return
 			}
 		case utils.MetaRemove:
-			if err = ldr.connMgr.Call(ldr.cacheConns, nil,
-				utils.CacheSv1FlushCache, utils.AttrReloadCacheWithArgDispatcher{
-					AttrReloadCache: cacheArgs}, &reply); err != nil {
-				return
+			for _, id := range ids {
+				if err = ldr.connMgr.Call(ldr.cacheConns, nil,
+					utils.CacheSv1RemoveItem, &utils.ArgsGetCacheItemWithArgDispatcher{
+						ArgsGetCacheItem: utils.ArgsGetCacheItem{
+							CacheID: cachePartition,
+							ItemID:  id,
+						},
+					}, &reply); err != nil {
+					return
+				}
 			}
 		case utils.MetaClear:
-			cacheArgs.FlushAll = true
 			if err = ldr.connMgr.Call(ldr.cacheConns, nil,
-				utils.CacheSv1FlushCache, utils.AttrReloadCacheWithArgDispatcher{
-					AttrReloadCache: cacheArgs}, &reply); err != nil {
+				utils.CacheSv1Clear, new(utils.AttrCacheIDsWithArgDispatcher), &reply); err != nil {
 				return
 			}
 		}
@@ -577,7 +591,7 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 	return
 }
 
-//removeContent will process the contect and will remove it from database
+//removeContent will process the content and will remove it from database
 func (ldr *Loader) removeContent(loaderType, caching string) (err error) {
 	// start processing lines
 	keepLooping := true // controls looping
@@ -646,7 +660,8 @@ func (ldr *Loader) removeContent(loaderType, caching string) (err error) {
 //since we remove we don't need to compose the struct we only need the Tenant and the ID of the profile
 func (ldr *Loader) removeLoadedData(loaderType, tntID, caching string) (err error) {
 	var ids []string
-	var cacheArgs utils.AttrReloadCache
+	var cacheArgs utils.ArgsCache
+	var cachePartition string
 	switch loaderType {
 	case utils.MetaAttributes:
 		if ldr.dryRun {
@@ -662,6 +677,7 @@ func (ldr *Loader) removeLoadedData(loaderType, tntID, caching string) (err erro
 				return err
 			}
 			cacheArgs.AttributeProfileIDs = ids
+			cachePartition = utils.CacheAttributeProfiles
 		}
 	case utils.MetaResources:
 		if ldr.dryRun {
@@ -682,6 +698,7 @@ func (ldr *Loader) removeLoadedData(loaderType, tntID, caching string) (err erro
 			}
 			cacheArgs.ResourceProfileIDs = ids
 			cacheArgs.ResourceIDs = ids
+			cachePartition = utils.CacheResourceProfiles
 		}
 
 	case utils.MetaFilters:
@@ -697,6 +714,7 @@ func (ldr *Loader) removeLoadedData(loaderType, tntID, caching string) (err erro
 				return err
 			}
 			cacheArgs.FilterIDs = ids
+			cachePartition = utils.CacheFilters
 		}
 	case utils.MetaStats:
 		if ldr.dryRun {
@@ -716,6 +734,7 @@ func (ldr *Loader) removeLoadedData(loaderType, tntID, caching string) (err erro
 			}
 			cacheArgs.StatsQueueProfileIDs = ids
 			cacheArgs.StatsQueueIDs = ids
+			cachePartition = utils.CacheStatQueueProfiles
 		}
 	case utils.MetaThresholds:
 		if ldr.dryRun {
@@ -735,6 +754,7 @@ func (ldr *Loader) removeLoadedData(loaderType, tntID, caching string) (err erro
 			}
 			cacheArgs.ThresholdProfileIDs = ids
 			cacheArgs.ThresholdIDs = ids
+			cachePartition = utils.CacheThresholdProfiles
 		}
 	case utils.MetaRoutes:
 		if ldr.dryRun {
@@ -750,6 +770,7 @@ func (ldr *Loader) removeLoadedData(loaderType, tntID, caching string) (err erro
 				return err
 			}
 			cacheArgs.RouteProfileIDs = ids
+			cachePartition = utils.CacheRouteProfiles
 		}
 	case utils.MetaChargers:
 		if ldr.dryRun {
@@ -765,6 +786,7 @@ func (ldr *Loader) removeLoadedData(loaderType, tntID, caching string) (err erro
 				return err
 			}
 			cacheArgs.ChargerProfileIDs = ids
+			cachePartition = utils.CacheChargerProfiles
 		}
 	case utils.MetaDispatchers:
 		if ldr.dryRun {
@@ -780,6 +802,7 @@ func (ldr *Loader) removeLoadedData(loaderType, tntID, caching string) (err erro
 				return err
 			}
 			cacheArgs.DispatcherProfileIDs = ids
+			cachePartition = utils.CacheDispatcherProfiles
 		}
 	case utils.MetaDispatcherHosts:
 		if ldr.dryRun {
@@ -795,6 +818,7 @@ func (ldr *Loader) removeLoadedData(loaderType, tntID, caching string) (err erro
 				return err
 			}
 			cacheArgs.DispatcherHostIDs = ids
+			cachePartition = utils.CacheDispatcherHosts
 		}
 	}
 
@@ -806,26 +830,28 @@ func (ldr *Loader) removeLoadedData(loaderType, tntID, caching string) (err erro
 		case utils.MetaReload:
 			if err = ldr.connMgr.Call(ldr.cacheConns, nil,
 				utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
-					AttrReloadCache: cacheArgs}, &reply); err != nil {
+					ArgsCache: cacheArgs}, &reply); err != nil {
 				return
 			}
 		case utils.MetaLoad:
 			if err = ldr.connMgr.Call(ldr.cacheConns, nil,
 				utils.CacheSv1LoadCache, utils.AttrReloadCacheWithArgDispatcher{
-					AttrReloadCache: cacheArgs}, &reply); err != nil {
+					ArgsCache: cacheArgs}, &reply); err != nil {
 				return
 			}
 		case utils.MetaRemove:
 			if err = ldr.connMgr.Call(ldr.cacheConns, nil,
-				utils.CacheSv1FlushCache, utils.AttrReloadCacheWithArgDispatcher{
-					AttrReloadCache: cacheArgs}, &reply); err != nil {
+				utils.CacheSv1RemoveItem, &utils.ArgsGetCacheItemWithArgDispatcher{
+					ArgsGetCacheItem: utils.ArgsGetCacheItem{
+						CacheID: cachePartition,
+						ItemID:  tntID,
+					},
+				}, &reply); err != nil {
 				return
 			}
 		case utils.MetaClear:
-			cacheArgs.FlushAll = true
 			if err = ldr.connMgr.Call(ldr.cacheConns, nil,
-				utils.CacheSv1FlushCache, utils.AttrReloadCacheWithArgDispatcher{
-					AttrReloadCache: cacheArgs}, &reply); err != nil {
+				utils.CacheSv1Clear, new(utils.AttrCacheIDsWithArgDispatcher), &reply); err != nil {
 				return
 			}
 		}

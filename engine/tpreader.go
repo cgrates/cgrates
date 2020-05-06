@@ -835,10 +835,8 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 			var reply string
 			if err := connMgr.Call(tpr.cacheConns, nil,
 				utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
-					AttrReloadCache: utils.AttrReloadCache{
-						ArgsCache: utils.ArgsCache{AccountActionPlanIDs: []string{id},
-							ActionPlanIDs: []string{accountAction.ActionPlanId}},
-					},
+					ArgsCache: utils.ArgsCache{AccountActionPlanIDs: []string{id},
+						ActionPlanIDs: []string{accountAction.ActionPlanId}},
 				}, &reply); err != nil {
 				return err
 			}
@@ -2400,30 +2398,28 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, argDispatcher *ut
 	//compose Reload Cache argument
 	cacheArgs := utils.AttrReloadCacheWithArgDispatcher{
 		ArgDispatcher: argDispatcher,
-		AttrReloadCache: utils.AttrReloadCache{
-			ArgsCache: utils.ArgsCache{
-				DestinationIDs:        dstIds,
-				ReverseDestinationIDs: revDstIDs,
-				RatingPlanIDs:         rplIds,
-				RatingProfileIDs:      rpfIds,
-				ActionIDs:             actIds,
-				ActionPlanIDs:         aps,
-				AccountActionPlanIDs:  aapIDs,
-				SharedGroupIDs:        shgIds,
-				ResourceProfileIDs:    rspIDs,
-				ResourceIDs:           resIDs,
-				ActionTriggerIDs:      aatIDs,
-				StatsQueueIDs:         stqIDs,
-				StatsQueueProfileIDs:  stqpIDs,
-				ThresholdIDs:          trsIDs,
-				ThresholdProfileIDs:   trspfIDs,
-				FilterIDs:             flrIDs,
-				RouteProfileIDs:       routeIDs,
-				AttributeProfileIDs:   apfIDs,
-				ChargerProfileIDs:     chargerIDs,
-				DispatcherProfileIDs:  dppIDs,
-				DispatcherHostIDs:     dphIDs,
-			},
+		ArgsCache: utils.ArgsCache{
+			DestinationIDs:        dstIds,
+			ReverseDestinationIDs: revDstIDs,
+			RatingPlanIDs:         rplIds,
+			RatingProfileIDs:      rpfIds,
+			ActionIDs:             actIds,
+			ActionPlanIDs:         aps,
+			AccountActionPlanIDs:  aapIDs,
+			SharedGroupIDs:        shgIds,
+			ResourceProfileIDs:    rspIDs,
+			ResourceIDs:           resIDs,
+			ActionTriggerIDs:      aatIDs,
+			StatsQueueIDs:         stqIDs,
+			StatsQueueProfileIDs:  stqpIDs,
+			ThresholdIDs:          trsIDs,
+			ThresholdProfileIDs:   trspfIDs,
+			FilterIDs:             flrIDs,
+			RouteProfileIDs:       routeIDs,
+			AttributeProfileIDs:   apfIDs,
+			ChargerProfileIDs:     chargerIDs,
+			DispatcherProfileIDs:  dppIDs,
+			DispatcherHostIDs:     dphIDs,
 		},
 	}
 
@@ -2443,12 +2439,11 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, argDispatcher *ut
 			return
 		}
 	case utils.MetaRemove:
-		if err = connMgr.Call(tpr.cacheConns, nil, utils.CacheSv1FlushCache, cacheArgs, &reply); err != nil {
+		if err = connMgr.Call(tpr.cacheConns, nil, utils.CacheSv1RemoveItem, cacheArgs, &reply); err != nil {
 			return
 		}
 	case utils.MetaClear:
-		cacheArgs.FlushAll = true
-		if err = connMgr.Call(tpr.cacheConns, nil, utils.CacheSv1FlushCache, cacheArgs, &reply); err != nil {
+		if err = connMgr.Call(tpr.cacheConns, nil, utils.CacheSv1Clear, new(utils.AttrCacheIDsWithArgDispatcher), &reply); err != nil {
 			return
 		}
 	}
@@ -2492,7 +2487,7 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, argDispatcher *ut
 	if err != nil {
 		return err
 	}
-	cacheLoadIDs := populateCacheLoadIDs(loadIDs, cacheArgs.AttrReloadCache)
+	cacheLoadIDs := populateCacheLoadIDs(loadIDs, cacheArgs.ArgsCache)
 	for key, val := range cacheLoadIDs {
 		Cache.Set(utils.CacheLoadIDs, key, val, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)

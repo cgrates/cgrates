@@ -317,10 +317,6 @@ func (chS *CacheS) reloadCache(chID string, IDs []string) error {
 }
 
 func (chS *CacheS) V1ReloadCache(attrs utils.AttrReloadCacheWithArgDispatcher, reply *string) (err error) {
-	if attrs.FlushAll {
-		chS.tCache.Clear(nil)
-		return
-	}
 	if len(attrs.DestinationIDs) != 0 {
 		// Reload Destinations
 		if err = chS.reloadCache(utils.DESTINATION_PREFIX, attrs.DestinationIDs); err != nil {
@@ -457,7 +453,7 @@ func (chS *CacheS) V1ReloadCache(attrs utils.AttrReloadCacheWithArgDispatcher, r
 			return err
 		}
 	}
-	cacheLoadIDs := populateCacheLoadIDs(loadIDs, attrs.AttrReloadCache)
+	cacheLoadIDs := populateCacheLoadIDs(loadIDs, attrs.ArgsCache)
 	for key, val := range cacheLoadIDs {
 		chS.tCache.Set(utils.CacheLoadIDs, key, val, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
@@ -468,9 +464,6 @@ func (chS *CacheS) V1ReloadCache(attrs utils.AttrReloadCacheWithArgDispatcher, r
 }
 
 func (chS *CacheS) V1LoadCache(args utils.AttrReloadCacheWithArgDispatcher, reply *string) (err error) {
-	if args.FlushAll {
-		chS.tCache.Clear(nil)
-	}
 	if err := chS.dm.LoadDataDBCache(
 		args.DestinationIDs,
 		args.ReverseDestinationIDs,
@@ -505,7 +498,7 @@ func (chS *CacheS) V1LoadCache(args utils.AttrReloadCacheWithArgDispatcher, repl
 			return err
 		}
 	}
-	cacheLoadIDs := populateCacheLoadIDs(loadIDs, args.AttrReloadCache)
+	cacheLoadIDs := populateCacheLoadIDs(loadIDs, args.ArgsCache)
 	for key, val := range cacheLoadIDs {
 		chS.tCache.Set(utils.CacheLoadIDs, key, val, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
@@ -514,56 +507,8 @@ func (chS *CacheS) V1LoadCache(args utils.AttrReloadCacheWithArgDispatcher, repl
 	return nil
 }
 
-func (chS *CacheS) flushCache(chID string, IDs []string) {
-	for _, key := range IDs {
-		chS.tCache.Remove(chID, key, true, utils.NonTransactional)
-	}
-}
-
-// V1FlushCache wipes out cache for a prefix or completely
-func (chS *CacheS) V1FlushCache(args utils.AttrReloadCacheWithArgDispatcher, reply *string) (err error) {
-	if args.FlushAll {
-		chS.tCache.Clear(nil)
-		*reply = utils.OK
-		return
-	}
-	chS.flushCache(utils.CacheDestinations, args.DestinationIDs)
-	chS.flushCache(utils.CacheReverseDestinations, args.ReverseDestinationIDs)
-	chS.flushCache(utils.CacheRatingPlans, args.RatingPlanIDs)
-	chS.flushCache(utils.CacheRatingProfiles, args.RatingProfileIDs)
-	chS.flushCache(utils.CacheActions, args.ActionIDs)
-	chS.flushCache(utils.CacheActionPlans, args.ActionPlanIDs)
-	chS.flushCache(utils.CacheActionTriggers, args.ActionTriggerIDs)
-	chS.flushCache(utils.CacheSharedGroups, args.SharedGroupIDs)
-	chS.flushCache(utils.CacheResourceProfiles, args.ResourceProfileIDs)
-	chS.flushCache(utils.CacheResources, args.ResourceIDs)
-	chS.flushCache(utils.CacheStatQueues, args.StatsQueueIDs)
-	chS.flushCache(utils.CacheThresholdProfiles, args.StatsQueueProfileIDs)
-	chS.flushCache(utils.CacheThresholds, args.ThresholdIDs)
-	chS.flushCache(utils.CacheThresholdProfiles, args.ThresholdProfileIDs)
-	chS.flushCache(utils.CacheFilters, args.FilterIDs)
-	chS.flushCache(utils.CacheRouteProfiles, args.RouteProfileIDs)
-	chS.flushCache(utils.CacheAttributeProfiles, args.AttributeProfileIDs)
-	chS.flushCache(utils.CacheChargerProfiles, args.ChargerProfileIDs)
-	chS.flushCache(utils.CacheDispatcherProfiles, args.DispatcherProfileIDs)
-	chS.flushCache(utils.CacheDispatcherHosts, args.DispatcherHostIDs)
-	chS.flushCache(utils.CacheDispatcherRoutes, args.DispatcherRoutesIDs)
-	//get loadIDs for all types
-	loadIDs, err := chS.dm.GetItemLoadIDs(utils.EmptyString, false)
-	if err != nil {
-		return err
-	}
-	cacheLoadIDs := populateCacheLoadIDs(loadIDs, args.AttrReloadCache)
-	for key, val := range cacheLoadIDs {
-		chS.tCache.Set(utils.CacheLoadIDs, key, val, nil,
-			cacheCommit(utils.NonTransactional), utils.NonTransactional)
-	}
-	*reply = utils.OK
-	return
-}
-
 //populateCacheLoadIDs populate cacheLoadIDs based on attrs
-func populateCacheLoadIDs(loadIDs map[string]int64, attrs utils.AttrReloadCache) (cacheLoadIDs map[string]int64) {
+func populateCacheLoadIDs(loadIDs map[string]int64, attrs utils.ArgsCache) (cacheLoadIDs map[string]int64) {
 	cacheLoadIDs = make(map[string]int64)
 	//based on IDs of each type populate cacheLoadIDs and add into cache
 	if attrs.DestinationIDs == nil || len(attrs.DestinationIDs) != 0 {

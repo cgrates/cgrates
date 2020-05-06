@@ -41,7 +41,6 @@ var sTestsDspChc = []func(t *testing.T){
 	testDspChcReloadCache,
 	testDspChcRemoveItem,
 	testDspChcClear,
-	testDspChcFlush,
 }
 
 //Test start here
@@ -340,39 +339,6 @@ func testDspChcClear(t *testing.T) {
 		},
 	}, &reply); err != nil {
 		t.Error(err)
-	} else if reply != utils.OK {
-		t.Error("Calling CacheSv1.ReloadCache got reply: ", reply)
-	}
-	var rcvStats map[string]*ltcache.CacheStats
-	expStats := engine.GetDefaultEmptyCacheStats()
-	if err := dispEngine.RPC.Call(utils.CacheSv1GetCacheStats, utils.AttrCacheIDsWithArgDispatcher{
-		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("chc12345"),
-		},
-		TenantArg: utils.TenantArg{
-			Tenant: "cgrates.org",
-		},
-	}, &rcvStats); err != nil {
-		t.Error("Got error on CacheSv1.GetCacheStats: ", err.Error())
-	} else if !reflect.DeepEqual(expStats, rcvStats) {
-		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expStats), utils.ToJSON(rcvStats))
-	}
-}
-
-func testDspChcFlush(t *testing.T) {
-	reply := ""
-	if err := dispEngine.RPC.Call(utils.CacheSv1FlushCache, utils.AttrReloadCacheWithArgDispatcher{
-		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("chc12345"),
-		},
-		TenantArg: utils.TenantArg{
-			Tenant: "cgrates.org",
-		},
-		AttrReloadCache: utils.AttrReloadCache{
-			FlushAll: true,
-		},
-	}, &reply); err != nil {
-		t.Error("Got error on CacheSv1.ReloadCache: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling CacheSv1.ReloadCache got reply: ", reply)
 	}

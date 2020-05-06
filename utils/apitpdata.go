@@ -459,12 +459,6 @@ type ArgsCache struct {
 	DispatcherRoutesIDs   []string
 }
 
-// Data used to do remote cache reloads via api
-type AttrReloadCache struct {
-	ArgsCache
-	FlushAll bool // If provided, cache flush will be executed before any action
-}
-
 type AttrExpFileCdrs struct {
 	CdrFormat           *string  // Cdr output file format <CdreCdrFormats>
 	FieldSeparator      *string  // Separator used between fields
@@ -1309,7 +1303,7 @@ type ArgsGetCacheItemWithArgDispatcher struct {
 type AttrReloadCacheWithArgDispatcher struct {
 	*ArgDispatcher
 	TenantArg
-	AttrReloadCache
+	ArgsCache
 }
 
 type AttrCacheIDsWithArgDispatcher struct {

@@ -169,29 +169,6 @@ func (dS *DispatcherService) CacheSv1Clear(args *utils.AttrCacheIDsWithArgDispat
 		utils.CacheSv1Clear, args, reply)
 }
 
-// FlushCache wipes out cache for a prefix or completely
-func (dS *DispatcherService) CacheSv1FlushCache(args utils.AttrReloadCacheWithArgDispatcher, reply *string) (err error) {
-	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args.TenantArg.Tenant != utils.EmptyString {
-		tnt = args.TenantArg.Tenant
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
-		}
-		if err = dS.authorize(utils.CacheSv1FlushCache, tnt,
-			args.APIKey, utils.TimePointer(time.Now())); err != nil {
-			return
-		}
-	}
-	var routeID *string
-	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
-	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCaches, routeID,
-		utils.CacheSv1FlushCache, args, reply)
-}
-
 // GetCacheStats returns CacheStats filtered by cacheIDs
 func (dS *DispatcherService) CacheSv1GetCacheStats(args *utils.AttrCacheIDsWithArgDispatcher,
 	reply *map[string]*ltcache.CacheStats) (err error) {
