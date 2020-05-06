@@ -69,44 +69,42 @@ func TestDPDynamicString(t *testing.T) {
 }
 
 func TestAppendNavMapVal(t *testing.T) {
+	onm := NewOrderedNavigableMap()
 	nm := NavigableMap2{
 		"Field1": NewNMData("1001"),
 		"Field2": NewNMData("1003"),
 		"Field3": NavigableMap2{"Field4": NewNMData("Val")},
 		"Field5": &NMSlice{NewNMData(10), NewNMData(101)},
 	}
+	onm.nm = nm
 	expected := NavigableMap2{
 		"Field1": NewNMData("1001"),
 		"Field2": NewNMData("1003"),
 		"Field3": NavigableMap2{"Field4": NewNMData("Val")},
 		"Field5": &NMSlice{NewNMData(10), NewNMData(101), NewNMData(18)},
 	}
-	if err := AppendNavMapVal(nm, PathItems{{Field: "Field5"}}, NewNMData(18)); err != nil {
+	if err := AppendNavMapVal(onm, &FullPath{Path: "Field5", PathItems: PathItems{{Field: "Field5"}}}, NewNMData(18)); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(expected, nm) {
-		t.Errorf("Expected %v ,received: %v", expected, nm)
-	}
-	if err := AppendNavMapVal(nm, nil, NewNMData(18)); err != ErrWrongPath {
-		t.Error(err)
+	} else if !reflect.DeepEqual(expected, onm.nm) {
+		t.Errorf("Expected %v ,received: %v", expected, onm.nm)
 	}
 }
 
 func TestComposeNavMapVal(t *testing.T) {
+	onm := NewOrderedNavigableMap()
 	nm := NavigableMap2{
 		"Field4": &NMSlice{},
 		"Field5": &NMSlice{NewNMData(10), NewNMData(101)},
 	}
-	if err := ComposeNavMapVal(nm, nil, NewNMData(18)); err != ErrWrongPath {
-		t.Error(err)
-	}
-	if err := ComposeNavMapVal(nm, PathItems{{Field: "Field4"}}, NewNMData(18)); err != ErrWrongPath {
+	onm.nm = nm
+	if err := ComposeNavMapVal(onm, &FullPath{Path: "Field4", PathItems: PathItems{{Field: "Field4"}}}, NewNMData(18)); err != ErrWrongPath {
 		t.Error(err)
 	}
 	expected := NavigableMap2{
 		"Field4": &NMSlice{},
 		"Field5": &NMSlice{NewNMData(10), NewNMData("10118")},
 	}
-	if err := ComposeNavMapVal(nm, PathItems{{Field: "Field5"}}, NewNMData(18)); err != nil {
+	if err := ComposeNavMapVal(onm, &FullPath{Path: "Field5", PathItems: PathItems{{Field: "Field5"}}}, NewNMData(18)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, nm) {
 		t.Errorf("Expected %v ,received: %v", expected, nm)
@@ -117,7 +115,7 @@ func TestComposeNavMapVal(t *testing.T) {
 		"Field5": &NMSlice{NewNMData(10), NewNMData("10118")},
 		"Field6": &NMSlice{NewNMData(10)},
 	}
-	if err := ComposeNavMapVal(nm, PathItems{{Field: "Field6"}}, NewNMData(10)); err != nil {
+	if err := ComposeNavMapVal(onm, &FullPath{Path: "Field6", PathItems: PathItems{{Field: "Field6"}}}, NewNMData(10)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, nm) {
 		t.Errorf("Expected %v ,received: %v", expected, nm)
@@ -127,11 +125,11 @@ func TestComposeNavMapVal(t *testing.T) {
 		"Field4": NewNMData(1),
 		"Field5": &NMSlice{NewNMData(10), NewNMData(101)},
 	}
-	if err := ComposeNavMapVal(nm, PathItems{{Field: "Field4"}}, NewNMData(10)); err != ErrNotImplemented {
+	if err := ComposeNavMapVal(onm, &FullPath{Path: "Field4", PathItems: PathItems{{Field: "Field4"}}}, NewNMData(10)); err != ErrWrongPath {
 		t.Error(err)
 	}
 
-	if err := ComposeNavMapVal(nm, PathItems{{Field: "Field5"}}, &mockNMInterface{data: 10}); err != ErrNotImplemented {
+	if err := ComposeNavMapVal(onm, &FullPath{Path: "Field5", PathItems: PathItems{{Field: "Field5"}}}, &mockNMInterface{data: 10}); err != ErrNotImplemented {
 		t.Error(err)
 	}
 }

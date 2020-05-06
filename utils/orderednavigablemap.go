@@ -91,17 +91,10 @@ func (onm *OrderedNavigableMap) Remove(fullPath *FullPath) (err error) {
 	return
 }
 
-// // Set sets the value at the given path
-// // this is the old to be capable of  building the code without updating all the code
-// // will be replaced with Set2 after we decide that is the optimal solution
-// func (onm *OrderedNavigableMap) Set(fldPath PathItems, val NMInterface) (addedNew bool, err error) {
-// 	return onm.Set2(&FullPath{PathItems: fldPath, Path: fldPath.String()}, val)
-// }
-
 // Set sets the value at the given path
 // this used with full path and the processed path to not calculate them for every set
 func (onm *OrderedNavigableMap) Set(fullPath *FullPath, val NMInterface) (addedNew bool, err error) {
-	if len(fullPath.PathItems) == 0 {
+	if fullPath == nil || len(fullPath.PathItems) == 0 {
 		return false, ErrWrongPath
 	}
 	if addedNew, err = onm.nm.Set(fullPath.PathItems, val); err != nil {
