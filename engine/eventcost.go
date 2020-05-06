@@ -1080,11 +1080,6 @@ func (ec *EventCost) FieldAsString(fldPath []string) (string, error) {
 	return utils.IfaceAsString(ival), nil
 }
 
-// AsNavigableMap to implement Dataprovider
-func (ec *EventCost) AsNavigableMap([]*config.FCTemplate) (*config.NavigableMap, error) {
-	return nil, utils.ErrNotImplemented
-}
-
 // RemoteHost to implement Dataprovider
 func (ec *EventCost) RemoteHost() net.Addr {
 	return utils.LocalAddr()

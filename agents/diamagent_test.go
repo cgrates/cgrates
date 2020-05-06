@@ -60,8 +60,8 @@ func TestProcessRequest(t *testing.T) {
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filters := engine.NewFilterS(config.CgrConfig(), nil, dm) // no need for filterS but still try to configure the dm :D
 
-	cgrRplyNM := config.NewNavigableMap(nil)
-	rply := config.NewNavigableMap(nil)
+	cgrRplyNM := utils.NavigableMap2{}
+	rply := utils.NewOrderedNavigableMap()
 	diamDP := config.NewNavigableMap(map[string]interface{}{
 		"SessionId":   "123456",
 		"Account":     "1001",
@@ -73,44 +73,50 @@ func TestProcessRequest(t *testing.T) {
 		Tenant:  config.NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
 		Filters: []string{},
 		RequestFields: []*config.FCTemplate{
-			&config.FCTemplate{Tag: utils.ToR,
+			{Tag: utils.ToR,
 				Type: utils.META_CONSTANT, Path: utils.MetaCgreq + utils.NestingSep + utils.ToR,
 				Value: config.NewRSRParsersMustCompile(utils.VOICE, true, utils.INFIELD_SEP)},
-			&config.FCTemplate{Tag: utils.OriginID,
+			{Tag: utils.OriginID,
 				Type: utils.META_COMPOSED, Path: utils.MetaCgreq + utils.NestingSep + utils.OriginID,
 				Value: config.NewRSRParsersMustCompile("~*req.SessionId", true, utils.INFIELD_SEP), Mandatory: true},
-			&config.FCTemplate{Tag: utils.OriginHost,
+			{Tag: utils.OriginHost,
 				Type: utils.MetaRemoteHost, Path: utils.MetaCgreq + utils.NestingSep + utils.OriginHost, Mandatory: true},
-			&config.FCTemplate{Tag: utils.Category,
+			{Tag: utils.Category,
 				Type: utils.META_CONSTANT, Path: utils.MetaCgreq + utils.NestingSep + utils.Category,
 				Value: config.NewRSRParsersMustCompile(utils.CALL, true, utils.INFIELD_SEP)},
-			&config.FCTemplate{Tag: utils.Account,
+			{Tag: utils.Account,
 				Type: utils.META_COMPOSED, Path: utils.MetaCgreq + utils.NestingSep + utils.Account,
 				Value: config.NewRSRParsersMustCompile("~*req.Account", true, utils.INFIELD_SEP), Mandatory: true},
-			&config.FCTemplate{Tag: utils.Destination,
+			{Tag: utils.Destination,
 				Type: utils.META_COMPOSED, Path: utils.MetaCgreq + utils.NestingSep + utils.Destination,
 				Value: config.NewRSRParsersMustCompile("~*req.Destination", true, utils.INFIELD_SEP), Mandatory: true},
-			&config.FCTemplate{Tag: utils.Usage,
+			{Tag: utils.Usage,
 				Type: utils.META_COMPOSED, Path: utils.MetaCgreq + utils.NestingSep + utils.Usage,
 				Value: config.NewRSRParsersMustCompile("~*req.Usage", true, utils.INFIELD_SEP), Mandatory: true},
 		},
 		ReplyFields: []*config.FCTemplate{
-			&config.FCTemplate{Tag: "ResultCode",
+			{Tag: "ResultCode",
 				Type: utils.META_CONSTANT, Path: utils.MetaRep + utils.NestingSep + "ResultCode",
 				Value: config.NewRSRParsersMustCompile("2001", true, utils.INFIELD_SEP)},
-			&config.FCTemplate{Tag: "GrantedUnits",
+			{Tag: "GrantedUnits",
 				Type: utils.MetaVariable, Path: utils.MetaRep + utils.NestingSep + "Granted-Service-Unit.CC-Time",
 				Value:     config.NewRSRParsersMustCompile("~*cgrep.MaxUsage{*duration_seconds}", true, utils.INFIELD_SEP),
 				Mandatory: true},
 		},
 	}
-	reqVars := map[string]interface{}{
-		utils.OriginHost:  config.CgrConfig().DiameterAgentCfg().OriginHost,
-		utils.OriginRealm: config.CgrConfig().DiameterAgentCfg().OriginRealm,
-		utils.ProductName: config.CgrConfig().DiameterAgentCfg().ProductName,
-		utils.MetaApp:     "appName",
-		utils.MetaAppID:   "appID",
-		utils.MetaCmd:     "cmdR",
+	for _, v := range reqProcessor.RequestFields {
+		v.ComputePath()
+	}
+	for _, v := range reqProcessor.ReplyFields {
+		v.ComputePath()
+	}
+	reqVars := utils.NavigableMap2{
+		utils.OriginHost:  utils.NewNMData(config.CgrConfig().DiameterAgentCfg().OriginHost),
+		utils.OriginRealm: utils.NewNMData(config.CgrConfig().DiameterAgentCfg().OriginRealm),
+		utils.ProductName: utils.NewNMData(config.CgrConfig().DiameterAgentCfg().ProductName),
+		utils.MetaApp:     utils.NewNMData("appName"),
+		utils.MetaAppID:   utils.NewNMData("appID"),
+		utils.MetaCmd:     utils.NewNMData("cmdR"),
 	}
 
 	sS := &testMockSessionConn{calls: map[string]func(arg interface{}, rply interface{}) error{
@@ -434,7 +440,7 @@ func TestProcessRequest(t *testing.T) {
 		},
 	}}
 	reqProcessor.Flags, _ = utils.FlagsWithParamsFromSlice([]string{utils.MetaAuthorize, utils.MetaAccounts})
-	agReq := NewAgentRequest(diamDP, reqVars, cgrRplyNM, rply, nil,
+	agReq := NewAgentRequest(diamDP, reqVars, &cgrRplyNM, rply, nil,
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
 		config.CgrConfig().GeneralCfg().DefaultTimezone, filters, nil, nil)
 
@@ -453,15 +459,15 @@ func TestProcessRequest(t *testing.T) {
 		t.Error(err)
 	} else if !pr {
 		t.Errorf("Expected the request to be processed")
-	} else if len(rply.Values()) != 2 {
+	} else if len(rply.GetOrder()) != 2 {
 		t.Errorf("Expected the reply to have 2 values received: %s", rply.String())
 	}
 
 	reqProcessor.Flags, _ = utils.FlagsWithParamsFromSlice([]string{utils.MetaInitiate, utils.MetaAccounts, utils.MetaAttributes})
-	cgrRplyNM = config.NewNavigableMap(nil)
-	rply = config.NewNavigableMap(nil)
+	cgrRplyNM = utils.NavigableMap2{}
+	rply = utils.NewOrderedNavigableMap()
 
-	agReq = NewAgentRequest(diamDP, reqVars, cgrRplyNM, rply, nil,
+	agReq = NewAgentRequest(diamDP, reqVars, &cgrRplyNM, rply, nil,
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
 		config.CgrConfig().GeneralCfg().DefaultTimezone, filters, nil, nil)
 
@@ -470,15 +476,15 @@ func TestProcessRequest(t *testing.T) {
 		t.Error(err)
 	} else if !pr {
 		t.Errorf("Expected the request to be processed")
-	} else if len(rply.Values()) != 2 {
+	} else if len(rply.GetOrder()) != 2 {
 		t.Errorf("Expected the reply to have 2 values received: %s", rply.String())
 	}
 
 	reqProcessor.Flags, _ = utils.FlagsWithParamsFromSlice([]string{utils.MetaUpdate, utils.MetaAccounts, utils.MetaAttributes})
-	cgrRplyNM = config.NewNavigableMap(nil)
-	rply = config.NewNavigableMap(nil)
+	cgrRplyNM = utils.NavigableMap2{}
+	rply = utils.NewOrderedNavigableMap()
 
-	agReq = NewAgentRequest(diamDP, reqVars, cgrRplyNM, rply, nil,
+	agReq = NewAgentRequest(diamDP, reqVars, &cgrRplyNM, rply, nil,
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
 		config.CgrConfig().GeneralCfg().DefaultTimezone, filters, nil, nil)
 
@@ -487,18 +493,21 @@ func TestProcessRequest(t *testing.T) {
 		t.Error(err)
 	} else if !pr {
 		t.Errorf("Expected the request to be processed")
-	} else if len(rply.Values()) != 2 {
+	} else if len(rply.GetOrder()) != 2 {
 		t.Errorf("Expected the reply to have 2 values received: %s", rply.String())
 	}
 
 	reqProcessor.Flags, _ = utils.FlagsWithParamsFromSlice([]string{utils.MetaTerminate, utils.MetaAccounts, utils.MetaAttributes, utils.MetaCDRs})
-	reqProcessor.ReplyFields = []*config.FCTemplate{&config.FCTemplate{Tag: "ResultCode",
+	reqProcessor.ReplyFields = []*config.FCTemplate{{Tag: "ResultCode",
 		Type: utils.META_CONSTANT, Path: utils.MetaRep + utils.NestingSep + "ResultCode",
 		Value: config.NewRSRParsersMustCompile("2001", true, utils.INFIELD_SEP)}}
-	cgrRplyNM = config.NewNavigableMap(nil)
-	rply = config.NewNavigableMap(nil)
+	for _, v := range reqProcessor.ReplyFields {
+		v.ComputePath()
+	}
+	cgrRplyNM = utils.NavigableMap2{}
+	rply = utils.NewOrderedNavigableMap()
 
-	agReq = NewAgentRequest(diamDP, reqVars, cgrRplyNM, rply, nil,
+	agReq = NewAgentRequest(diamDP, reqVars, &cgrRplyNM, rply, nil,
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
 		config.CgrConfig().GeneralCfg().DefaultTimezone, filters, nil, nil)
 
@@ -507,15 +516,15 @@ func TestProcessRequest(t *testing.T) {
 		t.Error(err)
 	} else if !pr {
 		t.Errorf("Expected the request to be processed")
-	} else if len(rply.Values()) != 1 {
+	} else if len(rply.GetOrder()) != 1 {
 		t.Errorf("Expected the reply to have one value received: %s", rply.String())
 	}
 
 	reqProcessor.Flags, _ = utils.FlagsWithParamsFromSlice([]string{utils.MetaMessage, utils.MetaAccounts, utils.MetaAttributes})
-	cgrRplyNM = config.NewNavigableMap(nil)
-	rply = config.NewNavigableMap(nil)
+	cgrRplyNM = utils.NavigableMap2{}
+	rply = utils.NewOrderedNavigableMap()
 
-	agReq = NewAgentRequest(diamDP, reqVars, cgrRplyNM, rply, nil,
+	agReq = NewAgentRequest(diamDP, reqVars, &cgrRplyNM, rply, nil,
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
 		config.CgrConfig().GeneralCfg().DefaultTimezone, filters, nil, nil)
 
@@ -524,7 +533,7 @@ func TestProcessRequest(t *testing.T) {
 		t.Error(err)
 	} else if !pr {
 		t.Errorf("Expected the request to be processed")
-	} else if len(rply.Values()) != 1 {
+	} else if len(rply.GetOrder()) != 1 {
 		t.Errorf("Expected the reply to have one value received: %s", rply.String())
 	}
 

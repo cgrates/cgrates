@@ -543,9 +543,7 @@ func (dDP *dynamicDP) FieldAsString(fldPath []string) (string, error) {
 	}
 	return utils.IfaceAsString(val), nil
 }
-func (dDP *dynamicDP) AsNavigableMap([]*config.FCTemplate) (*config.NavigableMap, error) {
-	return nil, utils.ErrNotImplemented
-}
+
 func (dDP *dynamicDP) RemoteHost() net.Addr {
 	return utils.LocalAddr()
 }

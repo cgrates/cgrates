@@ -119,12 +119,6 @@ func (objDP *ObjectDP) FieldAsString(fldPath []string) (data string, err error) 
 	return utils.IfaceAsString(valIface), nil
 }
 
-// AsNavigableMap is part of engine.utils.DataProvider interface
-func (objDP *ObjectDP) AsNavigableMap([]*FCTemplate) (
-	nm *NavigableMap, err error) {
-	return nil, utils.ErrNotImplemented
-}
-
 // RemoteHost is part of engine.utils.DataProvider interface
 func (objDP *ObjectDP) RemoteHost() net.Addr {
 	return utils.LocalAddr()

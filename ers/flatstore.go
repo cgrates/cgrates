@@ -146,7 +146,7 @@ func (rdr *FlatstoreER) processFile(fPath, fName string) (err error) {
 	rowNr := 0 // This counts the rows in the file, not really number of CDRs
 	evsPosted := 0
 	timeStart := time.Now()
-	reqVars := map[string]interface{}{utils.FileName: fName}
+	reqVars := utils.NavigableMap2{utils.FileName: utils.NewNMData(fName)}
 	for {
 		var record []string
 		if record, err = csvReader.Read(); err != nil {
@@ -207,9 +207,9 @@ func (rdr *FlatstoreER) processFile(fPath, fName string) (err error) {
 		}
 
 		rdr.rdrEvents <- &erEvent{
-			cgrEvent: agReq.CGRRequest.AsCGREvent(agReq.Tenant, utils.NestingSep),
+			cgrEvent: config.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep),
 			rdrCfg:   rdr.Config(),
-			opts:     agReq.Opts.GetData(),
+			opts:     config.NMAsMapInterface(agReq.Opts, utils.NestingSep),
 		}
 		evsPosted++
 	}

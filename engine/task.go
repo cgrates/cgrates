@@ -22,7 +22,6 @@ import (
 	"net"
 	"strings"
 
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -44,15 +43,6 @@ func (t *Task) Execute() error {
 // String implements utils.DataProvider
 func (t *Task) String() string {
 	return utils.ToJSON(t)
-}
-
-// AsNavigableMap implements utils.DataProvider
-func (t *Task) AsNavigableMap(_ []*config.FCTemplate) (nm *config.NavigableMap, err error) {
-	nm = config.NewNavigableMap(nil)
-	nm.Set([]string{utils.UUID}, t.Uuid, false, false)
-	nm.Set([]string{utils.AccountID}, t.AccountID, false, false)
-	nm.Set([]string{utils.ActionsID}, t.ActionsID, false, false)
-	return
 }
 
 // FieldAsInterface implements utils.DataProvider

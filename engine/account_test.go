@@ -2272,54 +2272,6 @@ func TestAccountGetMultipleBalancesForPrefixWithSameWeight(t *testing.T) {
 	}
 }
 
-func TestAccountAsNavigableMap(t *testing.T) {
-	acc := &Account{
-		BalanceMap: map[string]Balances{
-			utils.MONETARY: Balances{
-				&Balance{
-					ID:     "SpecialBalance1",
-					Value:  10,
-					Weight: 10.0,
-				},
-				&Balance{
-					ID:     "SpecialBalance2",
-					Value:  10,
-					Weight: 10.0,
-				},
-			},
-		},
-	}
-	nM, _ := acc.AsNavigableMap(nil)
-	eVal := "SpecialBalance1"
-	if strVal, err := nM.FieldAsString(
-		[]string{"BalanceMap", "*monetary[0]", "ID"}); err != nil {
-		t.Error(err)
-	} else if strVal != eVal {
-		t.Errorf("expecting: <%+v> received: <%+v>", eVal, strVal)
-	}
-	eVal = "10"
-	if strVal, err := nM.FieldAsString(
-		[]string{"BalanceMap", "*monetary[0]", "Value"}); err != nil {
-		t.Error(err)
-	} else if strVal != eVal {
-		t.Errorf("expecting: <%+v> received: <%+v>", eVal, strVal)
-	}
-	eVal = "10"
-	if strVal, err := nM.FieldAsString(
-		[]string{"BalanceMap", "*monetary[0]", "Weight"}); err != nil {
-		t.Error(err)
-	} else if strVal != eVal {
-		t.Errorf("expecting: <%+v> received: <%+v>", eVal, strVal)
-	}
-	eVal = "SpecialBalance2"
-	if strVal, err := nM.FieldAsString(
-		[]string{"BalanceMap", "*monetary[1]", "ID"}); err != nil {
-		t.Error(err)
-	} else if strVal != eVal {
-		t.Errorf("expecting: <%+v> received: <%+v>", eVal, strVal)
-	}
-}
-
 func TestAccountClone(t *testing.T) {
 	account := &Account{}
 	eOut := &Account{}

@@ -140,7 +140,7 @@ func (rdr *JSONFileER) processFile(fPath, fName string) (err error) {
 	}
 
 	evsPosted := 0
-	reqVars := map[string]interface{}{utils.FileName: fName}
+	reqVars := utils.NavigableMap2{utils.FileName: utils.NewNMData(fName)}
 
 	agReq := agents.NewAgentRequest(
 		config.NewNavigableMap(data), reqVars,
@@ -160,9 +160,9 @@ func (rdr *JSONFileER) processFile(fPath, fName string) (err error) {
 		return
 	}
 	rdr.rdrEvents <- &erEvent{
-		cgrEvent: agReq.CGRRequest.AsCGREvent(agReq.Tenant, utils.NestingSep),
+		cgrEvent: config.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep),
 		rdrCfg:   rdr.Config(),
-		opts:     agReq.Opts.GetData(),
+		opts:     config.NMAsMapInterface(agReq.Opts, utils.NestingSep),
 	}
 	evsPosted++
 

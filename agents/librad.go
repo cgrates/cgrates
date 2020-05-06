@@ -28,31 +28,32 @@ import (
 )
 
 // radReplyAppendAttributes appends attributes to a RADIUS reply based on predefined template
-func radReplyAppendAttributes(reply *radigo.Packet, rplNM *config.NavigableMap) (err error) {
-	for _, val := range rplNM.Values() {
-		nmItms, isNMItems := val.([]*config.NMItem)
-		if !isNMItems {
-			return fmt.Errorf("cannot encode reply value: %s, err: not NMItems", utils.ToJSON(val))
+func radReplyAppendAttributes(reply *radigo.Packet, rplNM *utils.OrderedNavigableMap) (err error) {
+	for el := rplNM.GetFirstElement(); el != nil; el = el.Next() {
+		val := el.Value
+		var nmIt utils.NMInterface
+		if nmIt, err = rplNM.Field(val); err != nil {
+			return
 		}
-		// find out the first itm which is not an attribute
-		var itm *config.NMItem
-		if len(nmItms) == 1 {
-			itm = nmItms[0]
+		cfgItm, cast := nmIt.(*config.NMItem)
+		if !cast {
+			return fmt.Errorf("cannot cast val: %s into *config.NMItem", nmIt)
 		}
-		if itm.Path[0] == MetaRadReplyCode { // Special case used to control the reply code of RADIUS reply
-			if err = reply.SetCodeWithName(utils.IfaceAsString(itm.Data)); err != nil {
+
+		if cfgItm.Path[0] == MetaRadReplyCode { // Special case used to control the reply code of RADIUS reply
+			if err = reply.SetCodeWithName(utils.IfaceAsString(cfgItm.Data)); err != nil {
 				return err
 			}
 			continue
 		}
 		var attrName, vendorName string
-		if len(itm.Path) > 2 {
-			vendorName, attrName = itm.Path[0], itm.Path[1]
+		if len(cfgItm.Path) > 2 {
+			vendorName, attrName = cfgItm.Path[0], cfgItm.Path[1]
 		} else {
-			attrName = itm.Path[0]
+			attrName = cfgItm.Path[0]
 		}
 
-		if err = reply.AddAVPWithName(attrName, utils.IfaceAsString(itm.Data), vendorName); err != nil {
+		if err = reply.AddAVPWithName(attrName, utils.IfaceAsString(cfgItm.Data), vendorName); err != nil {
 			return err
 		}
 	}
@@ -106,12 +107,6 @@ func (pk *radiusDP) FieldAsString(fldPath []string) (data string, err error) {
 		return
 	}
 	return utils.IfaceAsString(valIface), nil
-}
-
-// AsNavigableMap is part of engine.DataProvider interface
-func (pk *radiusDP) AsNavigableMap([]*config.FCTemplate) (
-	nm *config.NavigableMap, err error) {
-	return nil, utils.ErrNotImplemented
 }
 
 // RemoteHost is part of engine.DataProvider interface

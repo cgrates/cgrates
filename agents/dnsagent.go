@@ -91,14 +91,14 @@ func (da *DNSAgent) Reload() (err error) {
 // requests are reaching here asynchronously
 func (da *DNSAgent) handleMessage(w dns.ResponseWriter, req *dns.Msg) {
 	dnsDP := newDNSDataProvider(req, w)
-	reqVars := make(map[string]interface{})
-	reqVars[QueryType] = dns.TypeToString[req.Question[0].Qtype]
+	reqVars := make(utils.NavigableMap2)
+	reqVars[QueryType] = utils.NewNMData(dns.TypeToString[req.Question[0].Qtype])
 	rply := new(dns.Msg)
 	rply.SetReply(req)
 	// message preprocesing
 	switch req.Question[0].Qtype {
 	case dns.TypeNAPTR:
-		reqVars[QueryName] = req.Question[0].Name
+		reqVars[QueryName] = utils.NewNMData(req.Question[0].Name)
 		e164, err := e164FromNAPTR(req.Question[0].Name)
 		if err != nil {
 			utils.Logger.Warning(
@@ -108,13 +108,13 @@ func (da *DNSAgent) handleMessage(w dns.ResponseWriter, req *dns.Msg) {
 			dnsWriteMsg(w, rply)
 			return
 		}
-		reqVars[E164Address] = e164
-		reqVars[DomainName] = domainNameFromNAPTR(req.Question[0].Name)
+		reqVars[E164Address] = utils.NewNMData(e164)
+		reqVars[DomainName] = utils.NewNMData(domainNameFromNAPTR(req.Question[0].Name))
 	}
-	reqVars[utils.RemoteHost] = w.RemoteAddr().String()
-	cgrRplyNM := config.NewNavigableMap(nil)
-	rplyNM := config.NewNavigableMap(nil) // share it among different processors
-	opts := config.NewNavigableMap(nil)
+	reqVars[utils.RemoteHost] = utils.NewNMData(w.RemoteAddr().String())
+	cgrRplyNM := utils.NavigableMap2{}
+	rplyNM := utils.NewOrderedNavigableMap() // share it among different processors
+	opts := utils.NewOrderedNavigableMap()
 	var processed bool
 	var err error
 	for _, reqProcessor := range da.cgrCfg.DNSAgentCfg().RequestProcessors {
@@ -122,7 +122,7 @@ func (da *DNSAgent) handleMessage(w dns.ResponseWriter, req *dns.Msg) {
 		lclProcessed, err = da.processRequest(
 			reqProcessor,
 			NewAgentRequest(
-				dnsDP, reqVars, cgrRplyNM, rplyNM,
+				dnsDP, reqVars, &cgrRplyNM, rplyNM,
 				opts, reqProcessor.Tenant,
 				da.cgrCfg.GeneralCfg().DefaultTenant,
 				utils.FirstNonEmpty(da.cgrCfg.DNSAgentCfg().Timezone,
@@ -177,8 +177,8 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 	if err = agReq.SetFields(reqProcessor.RequestFields); err != nil {
 		return
 	}
-	cgrEv := agReq.CGRRequest.AsCGREvent(agReq.Tenant, utils.NestingSep)
-	opts := agReq.Opts.GetData()
+	cgrEv := config.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep)
+	opts := config.NMAsMapInterface(agReq.Opts, utils.NestingSep)
 	var reqType string
 	for _, typ := range []string{
 		utils.MetaDryRun, utils.MetaAuthorize,
@@ -348,7 +348,7 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 			utils.SessionSv1ProcessCDR,
 			&utils.CGREventWithArgDispatcher{CGREvent: cgrEv,
 				ArgDispatcher: cgrArgs.ArgDispatcher}, &rplyCDRs); err != nil {
-			agReq.CGRReply.Set([]string{utils.Error}, err.Error(), false, false)
+			agReq.CGRReply.Set(utils.PathItems{{Field: utils.Error}}, utils.NewNMData(err.Error()))
 		}
 	}
 	if err := agReq.SetFields(reqProcessor.ReplyFields); err != nil {

@@ -409,12 +409,6 @@ func (nM *NavigableMap) Values() (vals []interface{}) {
 	return
 }
 
-// AsNavigableMap implements both NavigableMapper as well as utils.DataProvider interfaces
-func (nM *NavigableMap) AsNavigableMap(
-	tpl []*FCTemplate) (oNM *NavigableMap, err error) {
-	return nil, utils.ErrNotImplemented
-}
-
 // Merge will update nM with values from a second one
 func (nM *NavigableMap) Merge(nM2 *NavigableMap) {
 	if nM2 == nil {
@@ -730,6 +724,154 @@ func (nM *NavigableMap) GetData() (mp map[string]interface{}) {
 			}
 		}
 		mp[strings.Join(branchPath, utils.NestingSep)] = val
+	}
+	return
+}
+
+// NMAsXMLElements returns the values as []*XMLElement which can be later marshaled
+// considers each value returned by .Values() in the form of []*NMItem, otherwise errors
+func NMAsXMLElements(nm *utils.OrderedNavigableMap) (ents []*XMLElement, err error) {
+	pathIdx := make(map[string]*XMLElement) // Keep the index of elements based on path
+	for el := nm.GetFirstElement(); el != nil; el = el.Next() {
+		path := el.Value
+		var nmIt utils.NMInterface
+		if nmIt, err = nm.Field(path); err != nil {
+			return
+		}
+		nmItm, isNMItem := nmIt.(*NMItem)
+		if !isNMItem {
+			return nil, fmt.Errorf("value: %+v is not []*NMItem", path)
+		}
+		if nmItm.Config != nil && nmItm.Config.NewBranch {
+			pathIdx = make(map[string]*XMLElement) // reset cache so we can start having other elements with same path
+		}
+		val := utils.IfaceAsString(nmItm.Data)
+		var pathCached bool
+		for i := len(nmItm.Path); i > 0; i-- {
+			var cachedElm *XMLElement
+			if cachedElm, pathCached = pathIdx[strings.Join(nmItm.Path[:i], "")]; !pathCached {
+				continue
+			}
+			if i == len(nmItm.Path) { // lastElmnt, overwrite value or add attribute
+				if nmItm.Config != nil &&
+					nmItm.Config.AttributeID != "" {
+					cachedElm.Attributes = append(cachedElm.Attributes,
+						&xml.Attr{
+							Name:  xml.Name{Local: nmItm.Config.AttributeID},
+							Value: val,
+						})
+				} else {
+					cachedElm.Value = val
+				}
+				break
+			}
+			// create elements in reverse order so we can append already created
+			var newElm *XMLElement
+			for j := len(nmItm.Path); j > i; j-- {
+				elm := &XMLElement{XMLName: xml.Name{Local: nmItm.Path[j-1]}}
+				pathIdx[strings.Join(nmItm.Path[:j], "")] = elm
+				if newElm == nil {
+					if nmItm.Config != nil &&
+						nmItm.Config.AttributeID != "" {
+						elm.Attributes = append(elm.Attributes,
+							&xml.Attr{
+								Name:  xml.Name{Local: nmItm.Config.AttributeID},
+								Value: val,
+							})
+					} else {
+						elm.Value = val
+					}
+					newElm = elm // last element
+				} else {
+					elm.Elements = append(elm.Elements, newElm)
+					newElm = elm
+				}
+			}
+			cachedElm.Elements = append(cachedElm.Elements, newElm)
+		}
+		if !pathCached { // not an update but new element to be created
+			var newElm *XMLElement
+			for i := len(nmItm.Path); i > 0; i-- {
+				elm := &XMLElement{XMLName: xml.Name{Local: nmItm.Path[i-1]}}
+				pathIdx[strings.Join(nmItm.Path[:i], "")] = elm
+				if newElm == nil { // last element, create data inside
+					if nmItm.Config != nil &&
+						nmItm.Config.AttributeID != "" {
+						elm.Attributes = append(elm.Attributes,
+							&xml.Attr{
+								Name:  xml.Name{Local: nmItm.Config.AttributeID},
+								Value: val,
+							})
+					} else {
+						elm.Value = val
+					}
+					newElm = elm // last element
+				} else {
+					elm.Elements = append(elm.Elements, newElm)
+					newElm = elm
+				}
+			}
+			ents = append(ents, newElm)
+		}
+	}
+	return
+}
+
+// NMAsCGREvent builds a CGREvent considering Time as time.Now()
+// and Event as linear map[string]interface{} with joined paths
+// treats particular case when the value of map is []*NMItem - used in agents/AgentRequest
+func NMAsCGREvent(nM *utils.OrderedNavigableMap, tnt string, pathSep string) (cgrEv *utils.CGREvent) {
+	if nM == nil {
+		return
+	}
+	el := nM.GetFirstElement()
+	if el == nil {
+		return
+	}
+	cgrEv = &utils.CGREvent{
+		Tenant: tnt,
+		ID:     utils.UUIDSha1Prefix(),
+		Time:   utils.TimePointer(time.Now()),
+		Event:  make(map[string]interface{}),
+	}
+	for ; el != nil; el = el.Next() {
+		branchPath := el.Value
+		val, _ := nM.Field(branchPath) // this should never return error cause we get the path from the order
+		opath := utils.GetPathWithoutIndex(branchPath.String())
+		if nmItm, isNMItem := val.(*NMItem); isNMItem { // special case when we have added multiple items inside a key, used in agents
+			if nmItm.Config != nil &&
+				nmItm.Config.AttributeID != "" {
+				continue
+			}
+		}
+		if _, has := cgrEv.Event[opath]; !has {
+			cgrEv.Event[opath] = val.Interface() // first item which is not an attribute will become the value
+		}
+	}
+	return
+}
+
+// NMAsMapInterface builds a linear map[string]interface{} with joined paths
+// treats particular case when the value of map is []*NMItem - used in agents/AgentRequest
+func NMAsMapInterface(nM *utils.OrderedNavigableMap, pathSep string) (mp map[string]interface{}) {
+	mp = make(map[string]interface{})
+	el := nM.GetFirstElement()
+	if el == nil {
+		return
+	}
+	for ; el != nil; el = el.Next() {
+		branchPath := el.Value
+		val, _ := nM.Field(branchPath) // this should never return error cause we get the path from the order
+		opath := utils.GetPathWithoutIndex(branchPath.String())
+		if nmItm, isNMItem := val.(*NMItem); isNMItem { // special case when we have added multiple items inside a key, used in agents
+			if nmItm.Config != nil &&
+				nmItm.Config.AttributeID != "" {
+				continue
+			}
+		}
+		if _, has := mp[opath]; !has {
+			mp[opath] = val.Interface() // first item which is not an attribute will become the value
+		}
 	}
 	return
 }
