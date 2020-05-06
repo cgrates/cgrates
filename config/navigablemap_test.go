@@ -64,8 +64,8 @@ func TestNavMapGetFieldAsString(t *testing.T) {
 
 type myEv map[string]interface{}
 
-func (ev myEv) AsNavigableMap() (*NavigableMap, error) {
-	return NewNavigableMap(ev), nil
+func (ev myEv) AsNavigableMap() *NavigableMap {
+	return NewNavigableMap(ev)
 }
 
 func TestNavMapAsNavigableMap(t *testing.T) {
@@ -111,7 +111,7 @@ func TestNavMapAsNavigableMap(t *testing.T) {
 		},
 	}
 
-	if rcv, err := myData.AsNavigableMap(); err != nil {
+	if rcv := myData.AsNavigableMap(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eNavMap.data, rcv.data) {
 		t.Errorf("Expecting: %+v, received: %+v", eNavMap.data, rcv.data)

@@ -23,7 +23,6 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -162,22 +161,30 @@ func (sSpls *SortedSuppliers) Digest() string {
 	return strings.Join(sSpls.SuppliersWithParams(), utils.FIELDS_SEP)
 }
 
-func (sSpls *SortedSuppliers) AsNavigableMap() (nm *config.NavigableMap) {
-	mp := map[string]interface{}{
-		"ProfileID": sSpls.ProfileID,
-		"Sorting":   sSpls.Sorting,
-		"Count":     sSpls.Count,
+func (ss *SortedSupplier) AsNavigableMap() (nm utils.NavigableMap2) {
+	nm = utils.NavigableMap2{
+		"SupplierID":         utils.NewNMData(ss.SupplierID),
+		"SupplierParameters": utils.NewNMData(ss.SupplierParameters),
 	}
-	sm := make([]map[string]interface{}, len(sSpls.SortedSuppliers))
+	sd := utils.NavigableMap2{}
+	for k, d := range ss.SortingData {
+		sd[k] = utils.NewNMData(d)
+	}
+	nm["SortingData"] = sd
+	return
+}
+func (sSpls *SortedSuppliers) AsNavigableMap() (nm utils.NavigableMap2) {
+	nm = utils.NavigableMap2{
+		"ProfileID": utils.NewNMData(sSpls.ProfileID),
+		"Sorting":   utils.NewNMData(sSpls.Sorting),
+		"Count":     utils.NewNMData(sSpls.Count),
+	}
+	sr := make(utils.NMSlice, len(sSpls.SortedSuppliers))
 	for i, ss := range sSpls.SortedSuppliers {
-		sm[i] = map[string]interface{}{
-			"SupplierID":         ss.SupplierID,
-			"SupplierParameters": ss.SupplierParameters,
-			"SortingData":        ss.SortingData,
-		}
+		sr[i] = ss.AsNavigableMap()
 	}
-	mp["SortedSuppliers"] = sm
-	return config.NewNavigableMap(mp)
+	nm["SortedSuppliers"] = &sr
+	return
 }
 
 type SupplierWithParams struct {

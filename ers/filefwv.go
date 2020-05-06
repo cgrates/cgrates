@@ -139,7 +139,7 @@ func (rdr *FWVFileER) processFile(fPath, fName string) (err error) {
 	rowNr := 0 // This counts the rows in the file, not really number of CDRs
 	evsPosted := 0
 	timeStart := time.Now()
-	reqVars := make(map[string]interface{})
+	reqVars := utils.NavigableMap2{utils.FileName: utils.NewNMData(fName)}
 
 	for {
 		var hasHeader, hasTrailer bool
@@ -210,9 +210,10 @@ func (rdr *FWVFileER) processFile(fPath, fName string) (err error) {
 			continue
 		}
 		rdr.offset += rdr.lineLen // increase the offset
-		rdr.rdrEvents <- &erEvent{cgrEvent: agReq.CGRRequest.AsCGREvent(
-			agReq.Tenant, utils.NestingSep),
-			rdrCfg: rdr.Config()}
+		rdr.rdrEvents <- &erEvent{
+			cgrEvent: config.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep),
+			rdrCfg:   rdr.Config(),
+		}
 		evsPosted++
 
 	}
@@ -278,11 +279,9 @@ func (rdr *FWVFileER) processTrailer(file *os.File, rowNr, evsPosted int, absPat
 		return fmt.Errorf("In trailer, line len: %d, have read: %d instead of: %d", rdr.trailerOffset, nRead, len(buf))
 	}
 	record := string(buf)
-	reqVars := make(map[string]interface{})
 	rdr.trailerDP = config.NewFWVProvider(record)
 	agReq := agents.NewAgentRequest(
-		nil, reqVars,
-		nil, nil, rdr.Config().Tenant,
+		nil, nil, nil, nil, rdr.Config().Tenant,
 		rdr.cgrCfg.GeneralCfg().DefaultTenant,
 		utils.FirstNonEmpty(rdr.Config().Timezone,
 			rdr.cgrCfg.GeneralCfg().DefaultTimezone),
@@ -297,9 +296,10 @@ func (rdr *FWVFileER) processTrailer(file *os.File, rowNr, evsPosted int, absPat
 				utils.ERs, absPath, rowNr, err.Error()))
 		return err
 	}
-	rdr.rdrEvents <- &erEvent{cgrEvent: agReq.CGRRequest.AsCGREvent(
-		agReq.Tenant, utils.NestingSep),
-		rdrCfg: rdr.Config()}
+	rdr.rdrEvents <- &erEvent{
+		cgrEvent: config.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep),
+		rdrCfg:   rdr.Config(),
+	}
 	evsPosted++
 	// reset the cursor after process the trailer
 	_, err = file.Seek(0, 0)
@@ -317,11 +317,10 @@ func (rdr *FWVFileER) processHeader(file *os.File, rowNr, evsPosted int, absPath
 }
 
 func (rdr *FWVFileER) createHeaderMap(record string, rowNr, evsPosted int, absPath string, hdrFields []*config.FCTemplate) (err error) {
-	reqVars := make(map[string]interface{})
 	rdr.headerDP = config.NewFWVProvider(record)
 	agReq := agents.NewAgentRequest(
-		nil, reqVars,
-		nil, nil, rdr.Config().Tenant,
+		nil, nil, nil, nil,
+		rdr.Config().Tenant,
 		rdr.cgrCfg.GeneralCfg().DefaultTenant,
 		utils.FirstNonEmpty(rdr.Config().Timezone,
 			rdr.cgrCfg.GeneralCfg().DefaultTimezone),
@@ -338,9 +337,10 @@ func (rdr *FWVFileER) createHeaderMap(record string, rowNr, evsPosted int, absPa
 		return err
 	}
 	rdr.offset += rdr.headerOffset // increase the offset
-	rdr.rdrEvents <- &erEvent{cgrEvent: agReq.CGRRequest.AsCGREvent(
-		agReq.Tenant, utils.NestingSep),
-		rdrCfg: rdr.Config()}
+	rdr.rdrEvents <- &erEvent{
+		cgrEvent: config.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep),
+		rdrCfg:   rdr.Config(),
+	}
 	evsPosted++
 	return
 }

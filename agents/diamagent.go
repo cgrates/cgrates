@@ -199,15 +199,15 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 			da.aReqsLck.Unlock()
 		}()
 	}
-	cgrRplyNM := config.NewNavigableMap(nil)
-	rply := config.NewNavigableMap(nil) // share it among different processors
+	cgrRplyNM := utils.NavigableMap2{}
+	rply := utils.NewOrderedNavigableMap() // share it among different processors
 	var processed bool
 	for _, reqProcessor := range da.cgrCfg.DiameterAgentCfg().RequestProcessors {
 		var lclProcessed bool
 		lclProcessed, err = da.processRequest(
 			reqProcessor,
 			NewAgentRequest(
-				diamDP, reqVars, cgrRplyNM, rply,
+				diamDP, reqVars, &cgrRplyNM, rply,
 				reqProcessor.Tenant, da.cgrCfg.GeneralCfg().DefaultTenant,
 				utils.FirstNonEmpty(reqProcessor.Timezone,
 					da.cgrCfg.GeneralCfg().DefaultTimezone),
@@ -255,7 +255,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 	if err = agReq.SetFields(reqProcessor.RequestFields); err != nil {
 		return
 	}
-	cgrEv := agReq.CGRRequest.AsCGREvent(agReq.Tenant, utils.NestingSep)
+	cgrEv := config.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep)
 	var reqType string
 	for _, typ := range []string{
 		utils.MetaDryRun, utils.MetaAuth,
@@ -412,7 +412,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 		if err = da.connMgr.Call(da.cgrCfg.DiameterAgentCfg().SessionSConns, da, utils.SessionSv1ProcessCDR,
 			&utils.CGREventWithArgDispatcher{CGREvent: cgrEv,
 				ArgDispatcher: cgrArgs.ArgDispatcher}, rplyCDRs); err != nil {
-			agReq.CGRReply.Set([]string{utils.Error}, err.Error(), false, false)
+			agReq.CGRReply.Set(utils.PathItems{{Field: utils.Error}}, utils.NewNMData(err.Error()))
 		}
 	}
 	if err = agReq.SetFields(reqProcessor.ReplyFields); err != nil {
@@ -455,10 +455,7 @@ func (da *DiameterAgent) V1DisconnectSession(args utils.AttrDisconnectSession, r
 	dmd := msg.(*diamMsgData)
 	aReq := NewAgentRequest(
 		newDADataProvider(dmd.c, dmd.m),
-		dmd.vars,
-		config.NewNavigableMap(nil),
-		config.NewNavigableMap(nil),
-		nil,
+		dmd.vars, nil, nil, nil,
 		da.cgrCfg.GeneralCfg().DefaultTenant,
 		da.cgrCfg.GeneralCfg().DefaultTimezone, da.filterS, nil, nil)
 	if err = aReq.SetFields(da.cgrCfg.DiameterAgentCfg().Templates[da.cgrCfg.DiameterAgentCfg().ASRTemplate]); err != nil {

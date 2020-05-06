@@ -158,9 +158,8 @@ func (rdr *KafkaER) processMessage(msg []byte) (err error) {
 		return
 	}
 
-	reqVars := make(map[string]interface{})
 	agReq := agents.NewAgentRequest(
-		config.NewNavigableMap(decodedMessage), reqVars,
+		config.NewNavigableMap(decodedMessage), nil,
 		nil, nil, rdr.Config().Tenant,
 		rdr.cgrCfg.GeneralCfg().DefaultTenant,
 		utils.FirstNonEmpty(rdr.Config().Timezone,
@@ -174,9 +173,10 @@ func (rdr *KafkaER) processMessage(msg []byte) (err error) {
 	if err = agReq.SetFields(rdr.Config().Fields); err != nil {
 		return
 	}
-	rdr.rdrEvents <- &erEvent{cgrEvent: agReq.CGRRequest.AsCGREvent(
-		agReq.Tenant, utils.NestingSep),
-		rdrCfg: rdr.Config()}
+	rdr.rdrEvents <- &erEvent{
+		cgrEvent: config.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep),
+		rdrCfg:   rdr.Config(),
+	}
 	return
 }
 

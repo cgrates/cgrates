@@ -56,7 +56,6 @@ type HTTPAgent struct {
 
 // ServeHTTP implements http.Handler interface
 func (ha *HTTPAgent) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	reqVars := make(map[string]interface{})
 	dcdr, err := newHADataProvider(ha.reqPayload, req) // dcdr will provide information from request
 	if err != nil {
 		utils.Logger.Warning(
@@ -64,11 +63,11 @@ func (ha *HTTPAgent) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 				utils.HTTPAgent, err.Error()))
 		return
 	}
-	cgrRplyNM := config.NewNavigableMap(nil)
-	rplyNM := config.NewNavigableMap(nil)
-	reqVars[utils.RemoteHost] = req.RemoteAddr
+	cgrRplyNM := utils.NavigableMap2{}
+	rplyNM := utils.NewOrderedNavigableMap()
+	reqVars := utils.NavigableMap2{utils.RemoteHost: utils.NewNMData(req.RemoteAddr)}
 	for _, reqProcessor := range ha.reqProcessors {
-		agReq := NewAgentRequest(dcdr, reqVars, cgrRplyNM, rplyNM,
+		agReq := NewAgentRequest(dcdr, reqVars, &cgrRplyNM, rplyNM,
 			reqProcessor.Tenant, ha.dfltTenant,
 			utils.FirstNonEmpty(reqProcessor.Timezone,
 				config.CgrConfig().GeneralCfg().DefaultTimezone),
@@ -112,7 +111,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 	if err = agReq.SetFields(reqProcessor.RequestFields); err != nil {
 		return
 	}
-	cgrEv := agReq.CGRRequest.AsCGREvent(agReq.Tenant, utils.NestingSep)
+	cgrEv := config.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep)
 	var reqType string
 	for _, typ := range []string{
 		utils.MetaDryRun, utils.MetaAuth,
@@ -270,7 +269,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 			&utils.CGREventWithArgDispatcher{CGREvent: cgrEv,
 				ArgDispatcher: cgrArgs.ArgDispatcher},
 			rplyCDRs); err != nil {
-			agReq.CGRReply.Set([]string{utils.Error}, err.Error(), false, false)
+			agReq.CGRReply.Set(utils.PathItems{{Field: utils.Error}}, utils.NewNMData(err.Error()))
 		}
 	}
 	if err := agReq.SetFields(reqProcessor.ReplyFields); err != nil {

@@ -153,7 +153,7 @@ func (rdr *PartialCSVFileER) processFile(fPath, fName string) (err error) {
 	rowNr := 0 // This counts the rows in the file, not really number of CDRs
 	evsPosted := 0
 	timeStart := time.Now()
-	reqVars := make(map[string]interface{})
+	reqVars := utils.NavigableMap2{utils.FileName: utils.NewNMData(fName)}
 	for {
 		var record []string
 		if record, err = csvReader.Read(); err != nil {
@@ -201,16 +201,18 @@ func (rdr *PartialCSVFileER) processFile(fPath, fName string) (err error) {
 		partial, _ := agReq.CGRRequest.FieldAsString([]string{utils.Partial})
 		if val, has := rdr.cache.Get(cgrID); !has {
 			if utils.IsSliceMember([]string{"false", utils.EmptyString}, partial) { // complete CDR
-				rdr.rdrEvents <- &erEvent{cgrEvent: agReq.CGRRequest.AsCGREvent(agReq.Tenant, utils.NestingSep),
-					rdrCfg: rdr.Config()}
+				rdr.rdrEvents <- &erEvent{
+					cgrEvent: config.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep),
+					rdrCfg:   rdr.Config(),
+				}
 				evsPosted++
 			} else {
 				rdr.cache.Set(cgrID,
-					[]*utils.CGREvent{agReq.CGRRequest.AsCGREvent(agReq.Tenant, utils.NestingSep)}, nil)
+					[]*utils.CGREvent{config.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep)}, nil)
 			}
 		} else {
 			origCgrEvs := val.([]*utils.CGREvent)
-			origCgrEvs = append(origCgrEvs, agReq.CGRRequest.AsCGREvent(agReq.Tenant, utils.NestingSep))
+			origCgrEvs = append(origCgrEvs, config.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep))
 			if utils.IsSliceMember([]string{"false", utils.EmptyString}, partial) { // complete CDR
 				//sort CGREvents based on AnswertTime and SetupTime
 				sort.Slice(origCgrEvs, func(i, j int) bool {
