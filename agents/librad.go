@@ -66,20 +66,20 @@ func newRADataProvider(req *radigo.Packet) (dP utils.DataProvider) {
 	return
 }
 
-// radiusDP implements engine.DataProvider, serving as radigo.Packet data decoder
+// radiusDP implements utils.DataProvider, serving as radigo.Packet data decoder
 // decoded data is only searched once and cached
 type radiusDP struct {
 	req   *radigo.Packet
 	cache *config.NavigableMap
 }
 
-// String is part of engine.DataProvider interface
+// String is part of utils.DataProvider interface
 // when called, it will display the already parsed values out of cache
 func (pk *radiusDP) String() string {
 	return utils.ToIJSON(pk.req) // return ToJSON because Packet don't have a string method
 }
 
-// FieldAsInterface is part of engine.DataProvider interface
+// FieldAsInterface is part of utils.DataProvider interface
 func (pk *radiusDP) FieldAsInterface(fldPath []string) (data interface{}, err error) {
 	if len(fldPath) != 1 {
 		return nil, utils.ErrNotFound
@@ -99,7 +99,7 @@ func (pk *radiusDP) FieldAsInterface(fldPath []string) (data interface{}, err er
 	return
 }
 
-// FieldAsString is part of engine.DataProvider interface
+// FieldAsString is part of utils.DataProvider interface
 func (pk *radiusDP) FieldAsString(fldPath []string) (data string, err error) {
 	var valIface interface{}
 	valIface, err = pk.FieldAsInterface(fldPath)
@@ -109,7 +109,7 @@ func (pk *radiusDP) FieldAsString(fldPath []string) (data string, err error) {
 	return utils.IfaceAsString(valIface), nil
 }
 
-// RemoteHost is part of engine.DataProvider interface
+// RemoteHost is part of utils.DataProvider interface
 func (pk *radiusDP) RemoteHost() net.Addr {
 	return utils.NewNetAddr(pk.req.RemoteAddr().Network(), pk.req.RemoteAddr().String())
 }

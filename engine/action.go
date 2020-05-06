@@ -898,20 +898,20 @@ func newCdrLogProvider(acnt *Account, action *Action) (dP utils.DataProvider) {
 	return
 }
 
-// cdrLogProvider implements engine.DataProvider so we can pass it to filters
+// cdrLogProvider implements utils.DataProvider so we can pass it to filters
 type cdrLogProvider struct {
 	acnt   *Account
 	action *Action
 	cache  *config.NavigableMap
 }
 
-// String is part of engine.DataProvider interface
+// String is part of utils.DataProvider interface
 // when called, it will display the already parsed values out of cache
 func (cdrP *cdrLogProvider) String() string {
 	return utils.ToJSON(cdrP)
 }
 
-// FieldAsInterface is part of engine.DataProvider interface
+// FieldAsInterface is part of utils.DataProvider interface
 func (cdrP *cdrLogProvider) FieldAsInterface(fldPath []string) (data interface{}, err error) {
 	if len(fldPath) != 1 {
 		return nil, utils.ErrNotFound
@@ -967,7 +967,7 @@ func (cdrP *cdrLogProvider) FieldAsInterface(fldPath []string) (data interface{}
 	return
 }
 
-// FieldAsString is part of engine.DataProvider interface
+// FieldAsString is part of utils.DataProvider interface
 func (cdrP *cdrLogProvider) FieldAsString(fldPath []string) (data string, err error) {
 	var valIface interface{}
 	valIface, err = cdrP.FieldAsInterface(fldPath)
@@ -977,7 +977,7 @@ func (cdrP *cdrLogProvider) FieldAsString(fldPath []string) (data string, err er
 	return utils.IfaceAsString(valIface), nil
 }
 
-// RemoteHost is part of engine.DataProvider interface
+// RemoteHost is part of utils.DataProvider interface
 func (cdrP *cdrLogProvider) RemoteHost() net.Addr {
 	return utils.LocalAddr()
 }
