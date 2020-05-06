@@ -77,43 +77,9 @@ func NewTpReader(db DataDB, lr LoadReader, tpid, timezone string,
 		schedulerConns: schedulerConns,
 	}
 	tpr.Init()
-	//add *any and *asap timing tag (in case of no timings file)
-	tpr.timings[utils.ANY] = &utils.TPTiming{
-		ID:        utils.ANY,
-		Years:     utils.Years{},
-		Months:    utils.Months{},
-		MonthDays: utils.MonthDays{},
-		WeekDays:  utils.WeekDays{},
-		StartTime: "00:00:00",
-		EndTime:   "",
-	}
-	tpr.timings[utils.ASAP] = &utils.TPTiming{
-		ID:        utils.ASAP,
-		Years:     utils.Years{},
-		Months:    utils.Months{},
-		MonthDays: utils.MonthDays{},
-		WeekDays:  utils.WeekDays{},
-		StartTime: utils.ASAP,
-		EndTime:   "",
-	}
-	tpr.timings[utils.MetaEveryMinute] = &utils.TPTiming{
-		ID:        utils.MetaEveryMinute,
-		Years:     utils.Years{},
-		Months:    utils.Months{},
-		MonthDays: utils.MonthDays{},
-		WeekDays:  utils.WeekDays{},
-		StartTime: utils.MetaEveryMinute,
-		EndTime:   "",
-	}
-	tpr.timings[utils.MetaHourly] = &utils.TPTiming{
-		ID:        utils.MetaHourly,
-		Years:     utils.Years{},
-		Months:    utils.Months{},
-		MonthDays: utils.MonthDays{},
-		WeekDays:  utils.WeekDays{},
-		StartTime: utils.MetaHourly,
-		EndTime:   "",
-	}
+	//add default timing tag (in case of no timings file)
+	tpr.addDefaultTimings()
+
 	return tpr, nil
 }
 
@@ -186,25 +152,15 @@ func (tpr *TpReader) LoadTimings() (err error) {
 	if err != nil {
 		return err
 	}
-	tpr.timings, err = MapTPTimings(tps)
-	// add *any timing tag
-	tpr.timings[utils.ANY] = &utils.TPTiming{
-		ID:        utils.ANY,
-		Years:     utils.Years{},
-		Months:    utils.Months{},
-		MonthDays: utils.MonthDays{},
-		WeekDays:  utils.WeekDays{},
-		StartTime: "00:00:00",
-		EndTime:   "",
+	var tpTimings map[string]*utils.TPTiming
+	if tpTimings, err = MapTPTimings(tps); err != nil {
+		return
 	}
-	tpr.timings[utils.ASAP] = &utils.TPTiming{
-		ID:        utils.ASAP,
-		Years:     utils.Years{},
-		Months:    utils.Months{},
-		MonthDays: utils.MonthDays{},
-		WeekDays:  utils.WeekDays{},
-		StartTime: utils.ASAP,
-		EndTime:   "",
+	// add default timings
+	tpr.addDefaultTimings()
+	// add timings defined by user
+	for timingID, timing := range tpTimings {
+		tpr.timings[timingID] = timing
 	}
 	return err
 }
@@ -2509,4 +2465,52 @@ func (tpr *TpReader) ReloadScheduler(verbose bool) (err error) {
 		}
 	}
 	return
+}
+
+func (tpr *TpReader) addDefaultTimings() {
+	tpr.timings[utils.ANY] = &utils.TPTiming{
+		ID:        utils.ANY,
+		Years:     utils.Years{},
+		Months:    utils.Months{},
+		MonthDays: utils.MonthDays{},
+		WeekDays:  utils.WeekDays{},
+		StartTime: "00:00:00",
+		EndTime:   "",
+	}
+	tpr.timings[utils.ASAP] = &utils.TPTiming{
+		ID:        utils.ASAP,
+		Years:     utils.Years{},
+		Months:    utils.Months{},
+		MonthDays: utils.MonthDays{},
+		WeekDays:  utils.WeekDays{},
+		StartTime: utils.ASAP,
+		EndTime:   "",
+	}
+	tpr.timings[utils.MetaEveryMinute] = &utils.TPTiming{
+		ID:        utils.MetaEveryMinute,
+		Years:     utils.Years{},
+		Months:    utils.Months{},
+		MonthDays: utils.MonthDays{},
+		WeekDays:  utils.WeekDays{},
+		StartTime: utils.MetaEveryMinute,
+		EndTime:   "",
+	}
+	tpr.timings[utils.MetaHourly] = &utils.TPTiming{
+		ID:        utils.MetaHourly,
+		Years:     utils.Years{},
+		Months:    utils.Months{},
+		MonthDays: utils.MonthDays{},
+		WeekDays:  utils.WeekDays{},
+		StartTime: utils.MetaHourly,
+		EndTime:   "",
+	}
+	tpr.timings[utils.MetaMonthly] = &utils.TPTiming{
+		ID:        utils.MetaMonthly,
+		Years:     utils.Years{},
+		Months:    utils.Months{},
+		MonthDays: utils.MonthDays{1},
+		WeekDays:  utils.WeekDays{},
+		StartTime: "00:00:00",
+		EndTime:   "",
+	}
 }

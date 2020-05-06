@@ -179,13 +179,13 @@ func TestNewTiming(t *testing.T) {
 	if !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expected %+v, received %+v", eOut, rcv)
 	}
-	//without endtime, check if .Split methong works (only one timestamp)
+	//without endtime, check if .Split method works (only one timestamp)
 	rcv = NewTiming("1", "2020", "04", "18", "06", "00:00:00")
 	eOut.EndTime = ""
 	if !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expected %+v, received %+v", eOut, rcv)
 	}
-	//check if .Split methong works (ignoring the last timestamp)
+	//check if .Split method works (ignoring the last timestamp)
 	rcv = NewTiming("1", "2020", "04", "18", "06", "00:00:00;11:11:11;22:22:22")
 	eOut.EndTime = "11:11:11"
 	if !reflect.DeepEqual(eOut, rcv) {
