@@ -722,6 +722,9 @@ const (
 	SortedRoutes             = "SortedRoutes"
 	EventExporterService     = "EventExporterService"
 	MetaMonthly              = "*monthly"
+	MetaYearly               = "*yearly"
+	MetaDaily                = "*daily"
+	MetaWeekly               = "*weekly"
 )
 
 // Migrator Action
