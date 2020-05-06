@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ers
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -27,23 +28,21 @@ import (
 	"sync"
 	"time"
 
-	"github.com/antchfx/xmlquery"
-
 	"github.com/cgrates/cgrates/agents"
+	"github.com/cgrates/cgrates/utils"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
 )
 
-func NewXMLFileER(cfg *config.CGRConfig, cfgIdx int,
+func NewJSONFileER(cfg *config.CGRConfig, cfgIdx int,
 	rdrEvents chan *erEvent, rdrErr chan error,
 	fltrS *engine.FilterS, rdrExit chan struct{}) (er EventReader, err error) {
 	srcPath := cfg.ERsCfg().Readers[cfgIdx].SourcePath
 	if strings.HasSuffix(srcPath, utils.Slash) {
 		srcPath = srcPath[:len(srcPath)-1]
 	}
-	xmlER := &XMLFileER{
+	jsonEr := &JSONFileER{
 		cgrCfg:    cfg,
 		cfgIdx:    cfgIdx,
 		fltrS:     fltrS,
@@ -54,13 +53,13 @@ func NewXMLFileER(cfg *config.CGRConfig, cfgIdx int,
 		conReqs:   make(chan struct{}, cfg.ERsCfg().Readers[cfgIdx].ConcurrentReqs)}
 	var processFile struct{}
 	for i := 0; i < cfg.ERsCfg().Readers[cfgIdx].ConcurrentReqs; i++ {
-		xmlER.conReqs <- processFile // Empty initiate so we do not need to wait later when we pop
+		jsonEr.conReqs <- processFile // Empty initiate so we do not need to wait later when we pop
 	}
-	return xmlER, nil
+	return jsonEr, nil
 }
 
-// XMLFileER implements EventReader interface for .xml files
-type XMLFileER struct {
+// JSONFileER implements EventReader interface for .json files
+type JSONFileER struct {
 	sync.RWMutex
 	cgrCfg    *config.CGRConfig
 	cfgIdx    int // index of config instance within ERsCfg.Readers
@@ -72,11 +71,11 @@ type XMLFileER struct {
 	conReqs   chan struct{} // limit number of opened files
 }
 
-func (rdr *XMLFileER) Config() *config.EventReaderCfg {
+func (rdr *JSONFileER) Config() *config.EventReaderCfg {
 	return rdr.cgrCfg.ERsCfg().Readers[rdr.cfgIdx]
 }
 
-func (rdr *XMLFileER) Serve() (err error) {
+func (rdr *JSONFileER) Serve() (err error) {
 	switch rdr.Config().RunDelay {
 	case time.Duration(0): // 0 disables the automatic read, maybe done per API
 		return
@@ -97,7 +96,7 @@ func (rdr *XMLFileER) Serve() (err error) {
 				}
 				filesInDir, _ := ioutil.ReadDir(rdr.rdrDir)
 				for _, file := range filesInDir {
-					if !strings.HasSuffix(file.Name(), utils.XMLSuffix) { // hardcoded file extension for xml event reader
+					if !strings.HasSuffix(file.Name(), utils.JSNSuffix) { // hardcoded file extension for json event reader
 						continue // used in order to filter the files from directory
 					}
 					go func(fileName string) {
@@ -116,7 +115,7 @@ func (rdr *XMLFileER) Serve() (err error) {
 }
 
 // processFile is called for each file in a directory and dispatches erEvents from it
-func (rdr *XMLFileER) processFile(fPath, fName string) (err error) {
+func (rdr *JSONFileER) processFile(fPath, fName string) (err error) {
 	if cap(rdr.conReqs) != 0 { // 0 goes for no limit
 		processFile := <-rdr.conReqs // Queue here for maxOpenFiles
 		defer func() { rdr.conReqs <- processFile }()
@@ -129,40 +128,42 @@ func (rdr *XMLFileER) processFile(fPath, fName string) (err error) {
 		return
 	}
 	defer file.Close()
-	doc, err := xmlquery.Parse(file)
-	if err != nil {
+	timeStart := time.Now()
+	var byteValue []byte
+	if byteValue, err = ioutil.ReadAll(file); err != nil {
+		return
+	}
+
+	var data map[string]interface{}
+	if err = json.Unmarshal(byteValue, &data); err != nil {
+		return
+	}
+
+	evsPosted := 0
+	reqVars := utils.NavigableMap2{utils.FileName: utils.NewNMData(fName)}
+
+	agReq := agents.NewAgentRequest(
+		config.NewNavigableMap(data), reqVars,
+		nil, nil, rdr.Config().Tenant,
+		rdr.cgrCfg.GeneralCfg().DefaultTenant,
+		utils.FirstNonEmpty(rdr.Config().Timezone,
+			rdr.cgrCfg.GeneralCfg().DefaultTimezone),
+		rdr.fltrS, nil, nil) // create an AgentRequest
+	if pass, err := rdr.fltrS.Pass(agReq.Tenant, rdr.Config().Filters,
+		agReq); err != nil || !pass {
 		return err
 	}
-	xmlElmts := xmlquery.Find(doc, rdr.Config().XmlRootPath.AsString("/", true))
-	rowNr := 0 // This counts the rows in the file, not really number of CDRs
-	evsPosted := 0
-	timeStart := time.Now()
-	reqVars := utils.NavigableMap2{utils.FileName: utils.NewNMData(fName)}
-	for _, xmlElmt := range xmlElmts {
-		rowNr++ // increment the rowNr after checking if it's not the end of file
-		agReq := agents.NewAgentRequest(
-			config.NewXmlProvider(xmlElmt, rdr.Config().XmlRootPath), reqVars,
-			nil, nil, rdr.Config().Tenant,
-			rdr.cgrCfg.GeneralCfg().DefaultTenant,
-			utils.FirstNonEmpty(rdr.Config().Timezone,
-				rdr.cgrCfg.GeneralCfg().DefaultTimezone),
-			rdr.fltrS, nil, nil) // create an AgentRequest
-		if pass, err := rdr.fltrS.Pass(agReq.Tenant, rdr.Config().Filters,
-			agReq); err != nil || !pass {
-			continue
-		}
-		if err := agReq.SetFields(rdr.Config().Fields); err != nil {
-			utils.Logger.Warning(
-				fmt.Sprintf("<%s> reading file: <%s> row <%d>, ignoring due to error: <%s>",
-					utils.ERs, absPath, rowNr, err.Error()))
-			continue
-		}
-		rdr.rdrEvents <- &erEvent{
-			cgrEvent: config.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep),
-			rdrCfg:   rdr.Config(),
-		}
-		evsPosted++
+	if err = agReq.SetFields(rdr.Config().Fields); err != nil {
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s> reading file: <%s>  ignoring due to error: <%s>",
+				utils.ERs, absPath, err.Error()))
+		return
 	}
+	rdr.rdrEvents <- &erEvent{
+		cgrEvent: config.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep),
+		rdrCfg:   rdr.Config(),
+	}
+	evsPosted++
 
 	if rdr.Config().ProcessedPath != "" {
 		// Finished with file, move it to processed folder
@@ -173,7 +174,7 @@ func (rdr *XMLFileER) processFile(fPath, fName string) (err error) {
 	}
 
 	utils.Logger.Info(
-		fmt.Sprintf("%s finished processing file <%s>. Total records processed: %d, events posted: %d, run duration: %s",
-			utils.ERs, absPath, rowNr, evsPosted, time.Now().Sub(timeStart)))
+		fmt.Sprintf("%s finished processing file <%s>. Events posted: %d, run duration: %s",
+			utils.ERs, absPath, evsPosted, time.Now().Sub(timeStart)))
 	return
 }

@@ -21,6 +21,7 @@ package agents
 import (
 	"net"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -426,24 +427,33 @@ func TestUpdateDiamMsgFromNavMap1(t *testing.T) {
 	},
 	)
 
-	nM := config.NewNavigableMap(nil)
+	nM := utils.NewOrderedNavigableMap()
 	itm := &config.NMItem{
 		Path: []string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Redirect-Server", "Redirect-Address-Type"},
 		Data: datatype.Enumerated(2),
 	}
-	nM.Set(itm.Path, []*config.NMItem{itm}, true, true)
+	nM.Set(&utils.FullPath{
+		Path:      strings.Join(itm.Path, utils.NestingSep),
+		PathItems: utils.NewPathToItem(itm.Path),
+	}, &utils.NMSlice{itm})
 
 	itm = &config.NMItem{
 		Path: []string{"Multiple-Services-Credit-Control", "Tariff-Change-Usage"},
 		Data: datatype.Enumerated(2),
 	}
-	nM.Set(itm.Path, []*config.NMItem{itm}, true, true)
+	nM.Set(&utils.FullPath{
+		Path:      strings.Join(itm.Path, utils.NestingSep),
+		PathItems: utils.NewPathToItem(itm.Path),
+	}, &utils.NMSlice{itm})
 
 	itm = &config.NMItem{
 		Path: []string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Redirect-Server", "Redirect-Server-Address"},
 		Data: "http://172.10.88.88/",
 	}
-	nM.Set(itm.Path, []*config.NMItem{itm}, true, true)
+	nM.Set(&utils.FullPath{
+		Path:      strings.Join(itm.Path, utils.NestingSep),
+		PathItems: utils.NewPathToItem(itm.Path),
+	}, &utils.NMSlice{itm})
 
 	if err := updateDiamMsgFromNavMap(m2, nM, ""); err != nil {
 		t.Error(err)
@@ -501,32 +511,44 @@ func TestUpdateDiamMsgFromNavMap2(t *testing.T) {
 	},
 	)
 
-	nM := config.NewNavigableMap(nil)
+	nM := utils.NewOrderedNavigableMap()
 	itm := &config.NMItem{
 		Path: []string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Redirect-Server", "Redirect-Address-Type"},
 		Data: datatype.Enumerated(2),
 	}
-	nM.Set(itm.Path, []*config.NMItem{itm}, true, true)
+	nM.Set(&utils.FullPath{
+		Path:      strings.Join(itm.Path, utils.NestingSep),
+		PathItems: utils.NewPathToItem(itm.Path),
+	}, &utils.NMSlice{itm})
 
 	itm = &config.NMItem{
 		Path: []string{"Multiple-Services-Credit-Control", "Tariff-Change-Usage"},
 		Data: datatype.Enumerated(2),
 	}
-	nM.Set(itm.Path, []*config.NMItem{itm}, true, true)
+	nM.Set(&utils.FullPath{
+		Path:      strings.Join(itm.Path, utils.NestingSep),
+		PathItems: utils.NewPathToItem(itm.Path),
+	}, &utils.NMSlice{itm})
 
 	itm = &config.NMItem{
 		Path:   []string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Redirect-Server", "Redirect-Server-Address"},
 		Data:   "http://172.10.88.88/",
 		Config: &config.FCTemplate{NewBranch: true},
 	}
-	nM.Set(itm.Path, []*config.NMItem{itm}, true, true)
+	nM.Set(&utils.FullPath{
+		Path:      strings.Join(itm.Path, utils.NestingSep),
+		PathItems: utils.NewPathToItem(itm.Path),
+	}, &utils.NMSlice{itm})
 
 	itm = &config.NMItem{
 		Path: []string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Redirect-Server", "Redirect-Address-Type"},
 		Data: datatype.Enumerated(2),
 	}
-	nM.Set(itm.Path, []*config.NMItem{itm}, true, true)
-
+	nM.Set(
+		&utils.FullPath{
+			Path:      strings.Join(itm.Path, utils.NestingSep),
+			PathItems: utils.NewPathToItem([]string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Redirect-Server", "Redirect-Address-Type[1]"}),
+		}, itm)
 	if err := updateDiamMsgFromNavMap(m2, nM, ""); err != nil {
 		t.Error(err)
 	}
@@ -560,31 +582,43 @@ func TestUpdateDiamMsgFromNavMap3(t *testing.T) {
 	m2 := diam.NewMessage(diam.CreditControl, diam.RequestFlag, 4,
 		eMessage.Header.HopByHopID, eMessage.Header.EndToEndID, nil)
 
-	nM := config.NewNavigableMap(nil)
+	nM := utils.NewOrderedNavigableMap()
 
 	itm := &config.NMItem{
 		Path: []string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Final-Unit-Action"},
 		Data: datatype.Enumerated(1),
 	}
-	nM.Set(itm.Path, []*config.NMItem{itm}, true, true)
+	nM.Set(&utils.FullPath{
+		Path:      strings.Join(itm.Path, utils.NestingSep),
+		PathItems: utils.NewPathToItem(itm.Path),
+	}, &utils.NMSlice{itm})
 
 	itm = &config.NMItem{
 		Path: []string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Redirect-Server", "Redirect-Address-Type"},
 		Data: datatype.Enumerated(2),
 	}
-	nM.Set(itm.Path, []*config.NMItem{itm}, true, true)
+	nM.Set(&utils.FullPath{
+		Path:      strings.Join(itm.Path, utils.NestingSep),
+		PathItems: utils.NewPathToItem(itm.Path),
+	}, &utils.NMSlice{itm})
 
 	itm = &config.NMItem{
 		Path: []string{"Multiple-Services-Credit-Control", "Tariff-Change-Usage"},
 		Data: datatype.Enumerated(2),
 	}
-	nM.Set(itm.Path, []*config.NMItem{itm}, true, true)
+	nM.Set(&utils.FullPath{
+		Path:      strings.Join(itm.Path, utils.NestingSep),
+		PathItems: utils.NewPathToItem(itm.Path),
+	}, &utils.NMSlice{itm})
 
 	itm = &config.NMItem{
 		Path: []string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Redirect-Server", "Redirect-Server-Address"},
 		Data: "http://172.10.88.88/",
 	}
-	nM.Set(itm.Path, []*config.NMItem{itm}, true, true)
+	nM.Set(&utils.FullPath{
+		Path:      strings.Join(itm.Path, utils.NestingSep),
+		PathItems: utils.NewPathToItem(itm.Path),
+	}, &utils.NMSlice{itm})
 
 	if err := updateDiamMsgFromNavMap(m2, nM, ""); err != nil {
 		t.Error(err)
@@ -641,44 +675,62 @@ func TestUpdateDiamMsgFromNavMap4(t *testing.T) {
 	m2 := diam.NewMessage(diam.CreditControl, diam.RequestFlag, 4,
 		eMessage.Header.HopByHopID, eMessage.Header.EndToEndID, nil)
 
-	nM := config.NewNavigableMap(nil)
+	nM := utils.NewOrderedNavigableMap()
 
 	itm := &config.NMItem{
 		Path: []string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Final-Unit-Action"},
 		Data: datatype.Enumerated(1),
 	}
-	nM.Set(itm.Path, []*config.NMItem{itm}, true, true)
+	nM.Set(&utils.FullPath{
+		Path:      strings.Join(itm.Path, utils.NestingSep),
+		PathItems: utils.NewPathToItem(itm.Path),
+	}, &utils.NMSlice{itm})
 
 	itm = &config.NMItem{
 		Path: []string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Redirect-Server", "Redirect-Address-Type"},
 		Data: datatype.Enumerated(2),
 	}
-	nM.Set(itm.Path, []*config.NMItem{itm}, true, true)
+	nM.Set(&utils.FullPath{
+		Path:      strings.Join(itm.Path, utils.NestingSep),
+		PathItems: utils.NewPathToItem(itm.Path),
+	}, &utils.NMSlice{itm})
 
 	itm = &config.NMItem{
 		Path: []string{"Multiple-Services-Credit-Control", "Tariff-Change-Usage"},
 		Data: datatype.Enumerated(2),
 	}
-	nM.Set(itm.Path, []*config.NMItem{itm}, true, true)
+	nM.Set(&utils.FullPath{
+		Path:      strings.Join(itm.Path, utils.NestingSep),
+		PathItems: utils.NewPathToItem(itm.Path),
+	}, &utils.NMSlice{itm})
 
 	itm = &config.NMItem{
 		Path: []string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Redirect-Server", "Redirect-Server-Address"},
 		Data: "http://172.10.88.88/",
 	}
-	nM.Set(itm.Path, []*config.NMItem{itm}, true, true)
+	nM.Set(&utils.FullPath{
+		Path:      strings.Join(itm.Path, utils.NestingSep),
+		PathItems: utils.NewPathToItem(itm.Path),
+	}, &utils.NMSlice{itm})
 
-	itm = &config.NMItem{
+	itm2 := &config.NMItem{
 		Path:   []string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Redirect-Server", "Redirect-Server-Address"},
 		Data:   "http://172.10.88.88/",
 		Config: &config.FCTemplate{NewBranch: true},
 	}
-	nM.Set(itm.Path, []*config.NMItem{itm}, true, true)
+	nM.Set(&utils.FullPath{
+		Path:      strings.Join(itm.Path, utils.NestingSep),
+		PathItems: utils.NewPathToItem(itm.Path),
+	}, &utils.NMSlice{itm, itm2})
 
 	itm = &config.NMItem{
 		Path: []string{"Granted-Service-Unit", "CC-Time"},
 		Data: datatype.Unsigned32(10),
 	}
-	nM.Set(itm.Path, []*config.NMItem{itm}, true, true)
+	nM.Set(&utils.FullPath{
+		Path:      strings.Join(itm.Path, utils.NestingSep),
+		PathItems: utils.NewPathToItem(itm.Path),
+	}, &utils.NMSlice{itm})
 
 	if err := updateDiamMsgFromNavMap(m2, nM, ""); err != nil {
 		t.Error(err)

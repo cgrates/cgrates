@@ -94,12 +94,6 @@ func (hU *httpUrlDP) FieldAsString(fldPath []string) (data string, err error) {
 	return utils.IfaceAsString(valIface), nil
 }
 
-// AsNavigableMap is part of engine.DataProvider interface
-func (hU *httpUrlDP) AsNavigableMap([]*config.FCTemplate) (
-	nm *config.NavigableMap, err error) {
-	return nil, utils.ErrNotImplemented
-}
-
 // RemoteHost is part of engine.DataProvider interface
 func (hU *httpUrlDP) RemoteHost() net.Addr {
 	return utils.NewNetAddr("TCP", hU.req.RemoteAddr)
@@ -188,12 +182,6 @@ func (hU *httpXmlDP) FieldAsString(fldPath []string) (data string, err error) {
 	return utils.IfaceAsString(valIface), nil
 }
 
-// AsNavigableMap is part of engine.DataProvider interface
-func (hU *httpXmlDP) AsNavigableMap([]*config.FCTemplate) (
-	nm *config.NavigableMap, err error) {
-	return nil, utils.ErrNotImplemented
-}
-
 // RemoteHost is part of engine.DataProvider interface
 func (hU *httpXmlDP) RemoteHost() net.Addr {
 	return utils.NewNetAddr("TCP", hU.addr)
@@ -202,7 +190,7 @@ func (hU *httpXmlDP) RemoteHost() net.Addr {
 // httpAgentReplyEncoder will encode  []*engine.NMElement
 // and write content to http writer
 type httpAgentReplyEncoder interface {
-	Encode(*config.NavigableMap) error
+	Encode(*utils.OrderedNavigableMap) error
 }
 
 // newHAReplyEncoder constructs a httpAgentReqDecoder based on encoder type
@@ -227,9 +215,9 @@ type haXMLEncoder struct {
 }
 
 // Encode implements httpAgentReplyEncoder
-func (xE *haXMLEncoder) Encode(nM *config.NavigableMap) (err error) {
+func (xE *haXMLEncoder) Encode(nM *utils.OrderedNavigableMap) (err error) {
 	var xmlElmnts []*config.XMLElement
-	if xmlElmnts, err = nM.AsXMLElements(); err != nil {
+	if xmlElmnts, err = config.NMAsXMLElements(nM); err != nil {
 		return
 	}
 	if len(xmlElmnts) == 0 {
@@ -255,23 +243,21 @@ type haTextPlainEncoder struct {
 }
 
 // Encode implements httpAgentReplyEncoder
-func (xE *haTextPlainEncoder) Encode(nM *config.NavigableMap) (err error) {
+func (xE *haTextPlainEncoder) Encode(nM *utils.OrderedNavigableMap) (err error) {
 	var str, nmPath string
 	msgFields := make(map[string]string) // work around to NMap issue
-	for _, val := range nM.Values() {
-		nmItms, isNMItems := val.([]*config.NMItem)
+	for el := nM.GetFirstElement(); el != nil; el = el.Next() {
+		val := el.Value
+		var nmIt utils.NMInterface
+		if nmIt, err = nM.Field(val); err != nil {
+			return
+		}
+		nmItem, isNMItems := nmIt.(*config.NMItem)
 		if !isNMItems {
-			return fmt.Errorf("value: %+v is not []*NMItem", val)
+			return fmt.Errorf("value: %s is not *NMItem", val)
 		}
-		if len(nmItms) == 0 {
-			continue
-		}
-		for i, nmItem := range nmItms {
-			if i == 0 { // compose the path only 1 time
-				nmPath = strings.Join(nmItem.Path, utils.NestingSep)
-			}
-			msgFields[utils.ConcatenatedKey(nmPath, utils.IfaceAsString(nmItem.Data))] = utils.IfaceAsString(nmItem.Data)
-		}
+		nmPath = strings.Join(nmItem.Path, utils.NestingSep)
+		msgFields[utils.ConcatenatedKey(nmPath, utils.IfaceAsString(nmItem.Data))] = utils.IfaceAsString(nmItem.Data)
 	}
 	for key, val := range msgFields {
 		str += fmt.Sprintf("%s=%s\n", strings.Split(key, utils.InInFieldSep)[0], val)

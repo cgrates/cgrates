@@ -79,12 +79,6 @@ func (dP *dnsDP) String() string {
 	return utils.ToJSON(dP.req)
 }
 
-// AsNavigableMap is part of engine.DataProvider interface
-func (dP *dnsDP) AsNavigableMap([]*config.FCTemplate) (
-	nm *config.NavigableMap, err error) {
-	return nil, utils.ErrNotImplemented
-}
-
 // FieldAsString is part of engine.DataProvider interface
 func (dP *dnsDP) FieldAsString(fldPath []string) (data string, err error) {
 	var valIface interface{}
@@ -159,17 +153,18 @@ func appendDNSAnswer(msg *dns.Msg) (err error) {
 }
 
 // updateDNSMsgFromNM will update DNS message with values from NavigableMap
-func updateDNSMsgFromNM(msg *dns.Msg, nm *config.NavigableMap) (err error) {
+func updateDNSMsgFromNM(msg *dns.Msg, nm *utils.OrderedNavigableMap) (err error) {
 	msgFields := make(map[string]struct{}) // work around to NMap issue
-	for _, valX := range nm.Values() {
-		nmItms, cast := valX.([]*config.NMItem)
+	for el := nm.GetFirstElement(); el != nil; el = el.Next() {
+		val := el.Value
+		var nmIt utils.NMInterface
+		if nmIt, err = nm.Field(val); err != nil {
+			return
+		}
+		cfgItm, cast := nmIt.(*config.NMItem)
 		if !cast {
-			return fmt.Errorf("cannot cast val: %s into []*config.NMItem", utils.ToJSON(valX))
+			return fmt.Errorf("cannot cast val: %s into *config.NMItem", nmIt)
 		}
-		if len(nmItms) == 0 {
-			continue
-		}
-		cfgItm := nmItms[0] // first item gives some config for the rest, cannot iterate through NMItems since they are multipled by order
 		if len(cfgItm.Path) == 0 {
 			return errors.New("empty path in config item")
 		}
@@ -183,10 +178,7 @@ func updateDNSMsgFromNM(msg *dns.Msg, nm *config.NavigableMap) (err error) {
 			}
 			msgFields = make(map[string]struct{}) // reset the fields inside since we have a new message
 		}
-		itmData := nmItms[0].Data // populate default with first item's data
-		if len(nmItms) >= len(msg.Answer) {
-			itmData = nmItms[len(msg.Answer)-1].Data // data at same index as answer
-		}
+		itmData := cfgItm.Data
 		switch cfgItm.Path[0] {
 		case utils.Rcode:
 			var itm int64
