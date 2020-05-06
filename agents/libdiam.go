@@ -307,12 +307,6 @@ func (dP *diameterDP) String() string {
 	return dP.m.String()
 }
 
-// AsNavigableMap is part of engine.DataProvider interface
-func (dP *diameterDP) AsNavigableMap([]*config.FCTemplate) (
-	nm *config.NavigableMap, err error) {
-	return nil, utils.ErrNotImplemented
-}
-
 // FieldAsString is part of engine.DataProvider interface
 func (dP *diameterDP) FieldAsString(fldPath []string) (data string, err error) {
 	var valIface interface{}
@@ -419,38 +413,22 @@ func (dP *diameterDP) FieldAsInterface(fldPath []string) (data interface{}, err 
 }
 
 // updateDiamMsgFromNavMap will update the diameter message with items from navigable map
-func updateDiamMsgFromNavMap(m *diam.Message, navMp *config.NavigableMap, tmz string) (err error) {
+func updateDiamMsgFromNavMap(m *diam.Message, navMp *utils.OrderedNavigableMap, tmz string) (err error) {
 	// write reply into message
-	pathIdx := make(map[string]int) // group items for same path
-	for _, val := range navMp.Values() {
-		nmItms, isNMItems := val.([]*config.NMItem)
-		if !isNMItems {
+	for el := navMp.GetFirstElement(); el != nil; el = el.Next() {
+		val := el.Value
+		var nmIt utils.NMInterface
+		if nmIt, err = navMp.Field(val); err != nil {
+			return
+		}
+		itm, isNMItem := nmIt.(*config.NMItem)
+		if !isNMItem {
 			return fmt.Errorf("cannot encode reply value: %s, err: not NMItems", utils.ToJSON(val))
 		}
-		// find out the first itm which is not an attribute
-		var itm *config.NMItem
-		if len(nmItms) == 1 {
-			itm = nmItms[0]
-		} else { // only for groups
-			for i, cfgItm := range nmItms {
-				itmPath := strings.Join(cfgItm.Path, utils.NestingSep)
-				if i == 0 { // path is common, increase it only once
-					pathIdx[itmPath]++
-				}
-				if i == pathIdx[itmPath]-1 { // revert from multiple items to only one per config path
-					itm = cfgItm
-					break
-				}
-			}
-		}
-
 		if itm == nil {
 			continue // all attributes, not writable to diameter packet
 		}
-		var newBranch bool
-		if itm.Config != nil && itm.Config.NewBranch {
-			newBranch = true
-		}
+		newBranch := itm.Config != nil && itm.Config.NewBranch
 		if err = messageSetAVPsWithPath(m, itm.Path,
 			utils.IfaceAsString(itm.Data), newBranch, tmz); err != nil {
 			return fmt.Errorf("setting item with path: %+v got err: %s", itm.Path, err.Error())
@@ -461,7 +439,7 @@ func updateDiamMsgFromNavMap(m *diam.Message, navMp *config.NavigableMap, tmz st
 
 // diamAnswer builds up the answer to be sent back to the client
 func diamAnswer(m *diam.Message, resCode uint32, errFlag bool,
-	rply *config.NavigableMap, tmz string) (a *diam.Message, err error) {
+	rply *utils.OrderedNavigableMap, tmz string) (a *diam.Message, err error) {
 	a = m.Answer(resCode)
 	if errFlag {
 		a.Header.CommandFlags = diam.ErrorFlag
@@ -474,15 +452,13 @@ func diamAnswer(m *diam.Message, resCode uint32, errFlag bool,
 
 // negDiamAnswer is used to return the negative answer we need previous to
 func diamErr(m *diam.Message, resCode uint32,
-	reqVars map[string]interface{},
+	reqVars utils.NavigableMap2,
 	tpl []*config.FCTemplate, tnt, tmz string,
 	filterS *engine.FilterS) (a *diam.Message, err error) {
 	aReq := NewAgentRequest(
 		newDADataProvider(nil, m), reqVars,
-		config.NewNavigableMap(nil),
-		config.NewNavigableMap(nil),
-		config.NewNavigableMap(nil),
-		nil, tnt, tmz, filterS, nil, nil)
+		nil, nil, nil, nil,
+		tnt, tmz, filterS, nil, nil)
 	if err = aReq.SetFields(tpl); err != nil {
 		return
 	}
@@ -512,5 +488,5 @@ func disectDiamListen(addrs string) (ipAddrs []net.IP) {
 type diamMsgData struct {
 	c    diam.Conn
 	m    *diam.Message
-	vars map[string]interface{}
+	vars utils.NavigableMap2
 }

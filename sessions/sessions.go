@@ -1797,37 +1797,44 @@ type V1AuthorizeReply struct {
 }
 
 // AsNavigableMap is part of engine.NavigableMapper interface
-func (v1AuthReply *V1AuthorizeReply) AsNavigableMap(
-	ignr []*config.FCTemplate) (*config.NavigableMap, error) {
-	cgrReply := make(map[string]interface{})
+func (v1AuthReply *V1AuthorizeReply) AsNavigableMap() utils.NavigableMap2 {
+	cgrReply := make(utils.NavigableMap2)
 	if v1AuthReply != nil {
 		if v1AuthReply.Attributes != nil {
-			attrs := make(map[string]interface{})
+			attrs := make(utils.NavigableMap2)
 			for _, fldName := range v1AuthReply.Attributes.AlteredFields {
 				fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
 				if v1AuthReply.Attributes.CGREvent.HasField(fldName) {
-					attrs[fldName] = v1AuthReply.Attributes.CGREvent.Event[fldName]
+					attrs[fldName] = utils.NewNMData(v1AuthReply.Attributes.CGREvent.Event[fldName])
 				}
 			}
 			cgrReply[utils.CapAttributes] = attrs
 		}
 		if v1AuthReply.ResourceAllocation != nil {
-			cgrReply[utils.CapResourceAllocation] = *v1AuthReply.ResourceAllocation
+			cgrReply[utils.CapResourceAllocation] = utils.NewNMData(*v1AuthReply.ResourceAllocation)
 		}
 		if v1AuthReply.MaxUsage != nil {
-			cgrReply[utils.CapMaxUsage] = *v1AuthReply.MaxUsage
+			cgrReply[utils.CapMaxUsage] = utils.NewNMData(*v1AuthReply.MaxUsage)
 		}
 		if v1AuthReply.Routes != nil {
 			cgrReply[utils.CapRoutes] = v1AuthReply.Routes.AsNavigableMap()
 		}
 		if v1AuthReply.ThresholdIDs != nil {
-			cgrReply[utils.CapThresholds] = *v1AuthReply.ThresholdIDs
+			thIDs := make(utils.NMSlice, len(*v1AuthReply.ThresholdIDs))
+			for i, v := range *v1AuthReply.ThresholdIDs {
+				thIDs[i] = utils.NewNMData(v)
+			}
+			cgrReply[utils.CapThresholds] = &thIDs
 		}
 		if v1AuthReply.StatQueueIDs != nil {
-			cgrReply[utils.CapStatQueues] = *v1AuthReply.StatQueueIDs
+			stIDs := make(utils.NMSlice, len(*v1AuthReply.StatQueueIDs))
+			for i, v := range *v1AuthReply.StatQueueIDs {
+				stIDs[i] = utils.NewNMData(v)
+			}
+			cgrReply[utils.CapStatQueues] = &stIDs
 		}
 	}
-	return config.NewNavigableMap(cgrReply), nil
+	return cgrReply
 }
 
 // BiRPCv1AuthorizeEvent performs authorization for CGREvent based on specific components
@@ -2071,34 +2078,42 @@ type V1InitSessionReply struct {
 }
 
 // AsNavigableMap is part of engine.NavigableMapper interface
-func (v1Rply *V1InitSessionReply) AsNavigableMap(
-	ignr []*config.FCTemplate) (*config.NavigableMap, error) {
-	cgrReply := make(map[string]interface{})
+func (v1Rply *V1InitSessionReply) AsNavigableMap() utils.NavigableMap2 {
+	cgrReply := make(utils.NavigableMap2)
 	if v1Rply != nil {
 		if v1Rply.Attributes != nil {
-			attrs := make(map[string]interface{})
+			attrs := make(utils.NavigableMap2)
 			for _, fldName := range v1Rply.Attributes.AlteredFields {
 				fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
 				if v1Rply.Attributes.CGREvent.HasField(fldName) {
-					attrs[fldName] = v1Rply.Attributes.CGREvent.Event[fldName]
+					attrs[fldName] = utils.NewNMData(v1Rply.Attributes.CGREvent.Event[fldName])
 				}
 			}
 			cgrReply[utils.CapAttributes] = attrs
 		}
 		if v1Rply.ResourceAllocation != nil {
-			cgrReply[utils.CapResourceAllocation] = *v1Rply.ResourceAllocation
+			cgrReply[utils.CapResourceAllocation] = utils.NewNMData(*v1Rply.ResourceAllocation)
 		}
 		if v1Rply.MaxUsage != nil {
-			cgrReply[utils.CapMaxUsage] = *v1Rply.MaxUsage
+			cgrReply[utils.CapMaxUsage] = utils.NewNMData(*v1Rply.MaxUsage)
 		}
+
 		if v1Rply.ThresholdIDs != nil {
-			cgrReply[utils.CapThresholds] = *v1Rply.ThresholdIDs
+			thIDs := make(utils.NMSlice, len(*v1Rply.ThresholdIDs))
+			for i, v := range *v1Rply.ThresholdIDs {
+				thIDs[i] = utils.NewNMData(v)
+			}
+			cgrReply[utils.CapThresholds] = &thIDs
 		}
 		if v1Rply.StatQueueIDs != nil {
-			cgrReply[utils.CapStatQueues] = *v1Rply.StatQueueIDs
+			stIDs := make(utils.NMSlice, len(*v1Rply.StatQueueIDs))
+			for i, v := range *v1Rply.StatQueueIDs {
+				stIDs[i] = utils.NewNMData(v)
+			}
+			cgrReply[utils.CapStatQueues] = &stIDs
 		}
 	}
-	return config.NewNavigableMap(cgrReply), nil
+	return cgrReply
 }
 
 // BiRPCv1InitiateSession initiates a new session
@@ -2302,25 +2317,24 @@ type V1UpdateSessionReply struct {
 }
 
 // AsNavigableMap is part of engine.NavigableMapper interface
-func (v1Rply *V1UpdateSessionReply) AsNavigableMap(
-	ignr []*config.FCTemplate) (*config.NavigableMap, error) {
-	cgrReply := make(map[string]interface{})
+func (v1Rply *V1UpdateSessionReply) AsNavigableMap() utils.NavigableMap2 {
+	cgrReply := make(utils.NavigableMap2)
 	if v1Rply != nil {
 		if v1Rply.Attributes != nil {
-			attrs := make(map[string]interface{})
+			attrs := make(utils.NavigableMap2)
 			for _, fldName := range v1Rply.Attributes.AlteredFields {
 				fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
 				if v1Rply.Attributes.CGREvent.HasField(fldName) {
-					attrs[fldName] = v1Rply.Attributes.CGREvent.Event[fldName]
+					attrs[fldName] = utils.NewNMData(v1Rply.Attributes.CGREvent.Event[fldName])
 				}
 			}
 			cgrReply[utils.CapAttributes] = attrs
 		}
 		if v1Rply.MaxUsage != nil {
-			cgrReply[utils.CapMaxUsage] = *v1Rply.MaxUsage
+			cgrReply[utils.CapMaxUsage] = utils.NewNMData(*v1Rply.MaxUsage)
 		}
 	}
-	return config.NewNavigableMap(cgrReply), nil
+	return cgrReply
 }
 
 // BiRPCv1UpdateSession updates an existing session, returning the duration which the session can still last
@@ -2781,22 +2795,21 @@ type V1ProcessMessageReply struct {
 }
 
 // AsNavigableMap is part of engine.NavigableMapper interface
-func (v1Rply *V1ProcessMessageReply) AsNavigableMap(
-	ignr []*config.FCTemplate) (*config.NavigableMap, error) {
-	cgrReply := make(map[string]interface{})
+func (v1Rply *V1ProcessMessageReply) AsNavigableMap() utils.NavigableMap2 {
+	cgrReply := make(utils.NavigableMap2)
 	if v1Rply != nil {
 		if v1Rply.MaxUsage != nil {
-			cgrReply[utils.CapMaxUsage] = *v1Rply.MaxUsage
+			cgrReply[utils.CapMaxUsage] = utils.NewNMData(*v1Rply.MaxUsage)
 		}
 		if v1Rply.ResourceAllocation != nil {
-			cgrReply[utils.CapResourceAllocation] = *v1Rply.ResourceAllocation
+			cgrReply[utils.CapResourceAllocation] = utils.NewNMData(*v1Rply.ResourceAllocation)
 		}
 		if v1Rply.Attributes != nil {
-			attrs := make(map[string]interface{})
+			attrs := make(utils.NavigableMap2)
 			for _, fldName := range v1Rply.Attributes.AlteredFields {
 				fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
 				if v1Rply.Attributes.CGREvent.HasField(fldName) {
-					attrs[fldName] = v1Rply.Attributes.CGREvent.Event[fldName]
+					attrs[fldName] = utils.NewNMData(v1Rply.Attributes.CGREvent.Event[fldName])
 				}
 			}
 			cgrReply[utils.CapAttributes] = attrs
@@ -2805,13 +2818,21 @@ func (v1Rply *V1ProcessMessageReply) AsNavigableMap(
 			cgrReply[utils.CapRoutes] = v1Rply.Routes.AsNavigableMap()
 		}
 		if v1Rply.ThresholdIDs != nil {
-			cgrReply[utils.CapThresholds] = *v1Rply.ThresholdIDs
+			thIDs := make(utils.NMSlice, len(*v1Rply.ThresholdIDs))
+			for i, v := range *v1Rply.ThresholdIDs {
+				thIDs[i] = utils.NewNMData(v)
+			}
+			cgrReply[utils.CapThresholds] = &thIDs
 		}
 		if v1Rply.StatQueueIDs != nil {
-			cgrReply[utils.CapStatQueues] = *v1Rply.StatQueueIDs
+			stIDs := make(utils.NMSlice, len(*v1Rply.StatQueueIDs))
+			for i, v := range *v1Rply.StatQueueIDs {
+				stIDs[i] = utils.NewNMData(v)
+			}
+			cgrReply[utils.CapStatQueues] = &stIDs
 		}
 	}
-	return config.NewNavigableMap(cgrReply), nil
+	return cgrReply
 }
 
 // BiRPCv1ProcessMessage processes one event with the right subsystems based on arguments received
@@ -2952,22 +2973,21 @@ type V1ProcessEventReply struct {
 }
 
 // AsNavigableMap is part of engine.NavigableMapper interface
-func (v1Rply *V1ProcessEventReply) AsNavigableMap(
-	ignr []*config.FCTemplate) (*config.NavigableMap, error) {
-	cgrReply := make(map[string]interface{})
+func (v1Rply *V1ProcessEventReply) AsNavigableMap() utils.NavigableMap2 {
+	cgrReply := make(utils.NavigableMap2)
 	if v1Rply != nil {
 		if v1Rply.MaxUsage != nil {
-			cgrReply[utils.CapMaxUsage] = *v1Rply.MaxUsage
+			cgrReply[utils.CapMaxUsage] = utils.NewNMData(*v1Rply.MaxUsage)
 		}
 		if v1Rply.ResourceMessage != nil {
-			cgrReply[utils.CapResourceMessage] = *v1Rply.ResourceMessage
+			cgrReply[utils.CapResourceMessage] = utils.NewNMData(*v1Rply.ResourceMessage)
 		}
 		if v1Rply.Attributes != nil {
-			attrs := make(map[string]interface{})
+			attrs := make(utils.NavigableMap2)
 			for _, fldName := range v1Rply.Attributes.AlteredFields {
 				fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
 				if v1Rply.Attributes.CGREvent.HasField(fldName) {
-					attrs[fldName] = v1Rply.Attributes.CGREvent.Event[fldName]
+					attrs[fldName] = utils.NewNMData(v1Rply.Attributes.CGREvent.Event[fldName])
 				}
 			}
 			cgrReply[utils.CapAttributes] = attrs
@@ -2976,16 +2996,24 @@ func (v1Rply *V1ProcessEventReply) AsNavigableMap(
 			cgrReply[utils.CapRoutes] = v1Rply.Routes.AsNavigableMap()
 		}
 		if v1Rply.ThresholdIDs != nil {
-			cgrReply[utils.CapThresholds] = *v1Rply.ThresholdIDs
+			thIDs := make(utils.NMSlice, len(*v1Rply.ThresholdIDs))
+			for i, v := range *v1Rply.ThresholdIDs {
+				thIDs[i] = utils.NewNMData(v)
+			}
+			cgrReply[utils.CapThresholds] = &thIDs
 		}
 		if v1Rply.StatQueueIDs != nil {
-			cgrReply[utils.CapStatQueues] = *v1Rply.StatQueueIDs
+			stIDs := make(utils.NMSlice, len(*v1Rply.StatQueueIDs))
+			for i, v := range *v1Rply.StatQueueIDs {
+				stIDs[i] = utils.NewNMData(v)
+			}
+			cgrReply[utils.CapStatQueues] = &stIDs
 		}
 		if v1Rply.Cost != nil {
-			cgrReply[utils.Cost] = *v1Rply.Cost
+			cgrReply[utils.Cost] = utils.NewNMData(*v1Rply.Cost)
 		}
 	}
-	return config.NewNavigableMap(cgrReply), nil
+	return cgrReply
 }
 
 // BiRPCv1ProcessEvent processes one event with the right subsystems based on arguments received

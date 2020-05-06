@@ -23,7 +23,6 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -162,22 +161,30 @@ func (sSpls *SortedRoutes) Digest() string {
 	return strings.Join(sSpls.RoutesWithParams(), utils.FIELDS_SEP)
 }
 
-func (sSpls *SortedRoutes) AsNavigableMap() (nm *config.NavigableMap) {
-	mp := map[string]interface{}{
-		utils.ProfileID: sSpls.ProfileID,
-		utils.Sorting:   sSpls.Sorting,
-		utils.Count:     sSpls.Count,
+func (ss *SortedRoute) AsNavigableMap() (nm utils.NavigableMap2) {
+	nm = utils.NavigableMap2{
+		utils.RouteID:         utils.NewNMData(ss.RouteID),
+		utils.RouteParameters: utils.NewNMData(ss.RouteParameters),
 	}
-	sr := make([]map[string]interface{}, len(sSpls.SortedRoutes))
+	sd := utils.NavigableMap2{}
+	for k, d := range ss.SortingData {
+		sd[k] = utils.NewNMData(d)
+	}
+	nm[utils.SortingData] = sd
+	return
+}
+func (sSpls *SortedRoutes) AsNavigableMap() (nm utils.NavigableMap2) {
+	nm = utils.NavigableMap2{
+		utils.ProfileID: utils.NewNMData(sSpls.ProfileID),
+		utils.Sorting:   utils.NewNMData(sSpls.Sorting),
+		utils.Count:     utils.NewNMData(sSpls.Count),
+	}
+	sr := make(utils.NMSlice, len(sSpls.SortedRoutes))
 	for i, ss := range sSpls.SortedRoutes {
-		sr[i] = map[string]interface{}{
-			utils.RouteID:         ss.RouteID,
-			utils.RouteParameters: ss.RouteParameters,
-			utils.SortingData:     ss.SortingData,
-		}
+		sr[i] = ss.AsNavigableMap()
 	}
-	mp[utils.SortedRoutes] = sr
-	return config.NewNavigableMap(mp)
+	nm[utils.SortedRoutes] = &sr
+	return
 }
 
 // RoutesSorter is the interface which needs to be implemented by routes sorters

@@ -185,25 +185,6 @@ func (b *Balance) Clone() *Balance {
 	return n
 }
 
-func (b *Balance) AsNavigableMap(_ []*config.FCTemplate) (*config.NavigableMap, error) {
-	return config.NewNavigableMap(map[string]interface{}{
-		"Uuid":           b.Uuid,
-		"ID":             b.ID,
-		"Value":          b.Value,
-		"ExpirationDate": b.ExpirationDate,
-		"Weight":         b.Weight,
-		"DestinationIDs": b.DestinationIDs,
-		"RatingSubject":  b.RatingSubject,
-		"Categories":     b.Categories,
-		"SharedGroups":   b.SharedGroups,
-		"Timings":        b.Timings,
-		"TimingIDs":      b.TimingIDs,
-		"Disabled":       b.Disabled,
-		"Factor":         b.Factor,
-		"Blocker":        b.Blocker,
-	}), nil
-}
-
 func (b *Balance) getMatchingPrefixAndDestID(dest string) (prefix, destId string) {
 	if len(b.DestinationIDs) != 0 && b.DestinationIDs[utils.ANY] == false {
 		for _, p := range utils.SplitPrefix(dest, MIN_PREFIX_MATCH) {

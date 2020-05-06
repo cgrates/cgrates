@@ -75,23 +75,22 @@ type RadiusAgent struct {
 
 // handleAuth handles RADIUS Authorization request
 func (ra *RadiusAgent) handleAuth(req *radigo.Packet) (rpl *radigo.Packet, err error) {
-	reqVars := make(map[string]interface{})
 	req.SetAVPValues()             // populate string values in AVPs
 	dcdr := newRADataProvider(req) // dcdr will provide information from request
 	rpl = req.Reply()
 	rpl.Code = radigo.AccessAccept
-	cgrRplyNM := config.NewNavigableMap(nil)
-	rplyNM := config.NewNavigableMap(nil)
-	opts := config.NewNavigableMap(nil)
+	cgrRplyNM := utils.NavigableMap2{}
+	rplyNM := utils.NewOrderedNavigableMap()
+	opts := utils.NewOrderedNavigableMap()
 	var processed bool
-	reqVars[utils.RemoteHost] = req.RemoteAddr().String()
+	reqVars := utils.NavigableMap2{utils.RemoteHost: utils.NewNMData(req.RemoteAddr().String())}
 	for _, reqProcessor := range ra.cgrCfg.RadiusAgentCfg().RequestProcessors {
-		agReq := NewAgentRequest(dcdr, reqVars, cgrRplyNM, rplyNM, opts,
+		agReq := NewAgentRequest(dcdr, reqVars, &cgrRplyNM, rplyNM, opts,
 			reqProcessor.Tenant, ra.cgrCfg.GeneralCfg().DefaultTenant,
 			utils.FirstNonEmpty(reqProcessor.Timezone,
 				config.CgrConfig().GeneralCfg().DefaultTimezone),
 			ra.filterS, nil, nil)
-		agReq.Vars.Set([]string{MetaRadReqType}, utils.StringToInterface(MetaRadAuth), false, true)
+		agReq.Vars.Set(utils.PathItems{{Field: MetaRadReqType}}, utils.NewNMData(MetaRadAuth))
 		var lclProcessed bool
 		if lclProcessed, err = ra.processRequest(req, reqProcessor, agReq, rpl); lclProcessed {
 			processed = lclProcessed
@@ -121,18 +120,17 @@ func (ra *RadiusAgent) handleAuth(req *radigo.Packet) (rpl *radigo.Packet, err e
 // handleAcct handles RADIUS Accounting request
 // supports: Acct-Status-Type = Start, Interim-Update, Stop
 func (ra *RadiusAgent) handleAcct(req *radigo.Packet) (rpl *radigo.Packet, err error) {
-	reqVars := make(map[string]interface{})
 	req.SetAVPValues()             // populate string values in AVPs
 	dcdr := newRADataProvider(req) // dcdr will provide information from request
 	rpl = req.Reply()
 	rpl.Code = radigo.AccountingResponse
-	cgrRplyNM := config.NewNavigableMap(nil)
-	rplyNM := config.NewNavigableMap(nil)
-	opts := config.NewNavigableMap(nil)
+	cgrRplyNM := utils.NavigableMap2{}
+	rplyNM := utils.NewOrderedNavigableMap()
+	opts := utils.NewOrderedNavigableMap()
 	var processed bool
-	reqVars[utils.RemoteHost] = req.RemoteAddr().String()
+	reqVars := utils.NavigableMap2{utils.RemoteHost: utils.NewNMData(req.RemoteAddr().String())}
 	for _, reqProcessor := range ra.cgrCfg.RadiusAgentCfg().RequestProcessors {
-		agReq := NewAgentRequest(dcdr, reqVars, cgrRplyNM, rplyNM, opts,
+		agReq := NewAgentRequest(dcdr, reqVars, &cgrRplyNM, rplyNM, opts,
 			reqProcessor.Tenant, ra.cgrCfg.GeneralCfg().DefaultTenant,
 			utils.FirstNonEmpty(reqProcessor.Timezone,
 				config.CgrConfig().GeneralCfg().DefaultTimezone),
@@ -172,8 +170,8 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 	if err = agReq.SetFields(reqProcessor.RequestFields); err != nil {
 		return
 	}
-	cgrEv := agReq.CGRRequest.AsCGREvent(agReq.Tenant, utils.NestingSep)
-	opts := agReq.Opts.GetData()
+	cgrEv := config.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep)
+	opts := config.NMAsMapInterface(agReq.Opts, utils.NestingSep)
 	var reqType string
 	for _, typ := range []string{
 		utils.MetaDryRun, utils.MetaAuthorize,
@@ -309,7 +307,6 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 			Flags:         reqProcessor.Flags.SliceFlags(),
 			CGREvent:      cgrEv,
 			ArgDispatcher: cgrArgs.ArgDispatcher,
-
 		}
 		needMaxUsage := reqProcessor.Flags.HasKey(utils.MetaAuth) ||
 			reqProcessor.Flags.HasKey(utils.MetaInit) ||
@@ -328,9 +325,9 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 	case utils.MetaCDRs: // allow this method
 	case utils.MetaRadauth:
 		if pass, err := radauthReq(reqProcessor.Flags, req, agReq, rpl); err != nil {
-			agReq.CGRReply.Set([]string{utils.Error}, err.Error(), false, false)
+			agReq.CGRReply.Set(utils.PathItems{{Field: utils.Error}}, utils.NewNMData(err.Error()))
 		} else if !pass {
-			agReq.CGRReply.Set([]string{utils.Error}, utils.RadauthFailed, false, false)
+			agReq.CGRReply.Set(utils.PathItems{{Field: utils.Error}}, utils.NewNMData(utils.RadauthFailed))
 		}
 	}
 	// separate request so we can capture the Terminate/Event also here
@@ -340,7 +337,7 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 			&utils.CGREventWithArgDispatcher{CGREvent: cgrEv,
 				ArgDispatcher: cgrArgs.ArgDispatcher},
 			rplyCDRs); err != nil {
-			agReq.CGRReply.Set([]string{utils.Error}, err.Error(), false, false)
+			agReq.CGRReply.Set(utils.PathItems{{Field: utils.Error}}, utils.NewNMData(err.Error()))
 		}
 	}
 

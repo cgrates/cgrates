@@ -79,17 +79,20 @@ func init() {
 func TestRadReplyAppendAttributes(t *testing.T) {
 	rply := radigo.NewPacket(radigo.AccessRequest, 2, dictRad, coder, "CGRateS.org").Reply()
 	rplyFlds := []*config.FCTemplate{
-		&config.FCTemplate{Tag: "ReplyCode", Path: utils.MetaRep + utils.NestingSep + MetaRadReplyCode,
+		{Tag: "ReplyCode", Path: utils.MetaRep + utils.NestingSep + MetaRadReplyCode,
 			Type:  utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("~*cgrep.Attributes.RadReply", true, utils.INFIELD_SEP)},
-		&config.FCTemplate{Tag: "Acct-Session-Time", Path: utils.MetaRep + utils.NestingSep + "Acct-Session-Time",
+		{Tag: "Acct-Session-Time", Path: utils.MetaRep + utils.NestingSep + "Acct-Session-Time",
 			Type:  utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("~*cgrep.MaxUsage{*duration_seconds}", true, utils.INFIELD_SEP)},
 	}
+	for _, v := range rplyFlds {
+		v.ComputePath()
+	}
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", nil, nil, nil)
-	agReq.CGRReply.Set([]string{utils.CapMaxUsage}, time.Duration(time.Hour), false, false)
-	agReq.CGRReply.Set([]string{utils.CapAttributes, "RadReply"}, "AccessAccept", false, false)
-	agReq.CGRReply.Set([]string{utils.CapAttributes, utils.Account}, "1001", false, false)
+	agReq.CGRReply.Set(utils.NewPathToItem([]string{utils.CapMaxUsage}), utils.NewNMData(time.Duration(time.Hour)))
+	agReq.CGRReply.Set(utils.NewPathToItem([]string{utils.CapAttributes, "RadReply"}), utils.NewNMData("AccessAccept"))
+	agReq.CGRReply.Set(utils.NewPathToItem([]string{utils.CapAttributes, utils.Account}), utils.NewNMData("1001"))
 
 	if err := agReq.SetFields(rplyFlds); err != nil {
 		t.Error(err)

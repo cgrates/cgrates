@@ -173,14 +173,14 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 		return
 	}
 	diamDP := newDADataProvider(c, m)
-	reqVars := map[string]interface{}{
-		utils.OriginHost:  da.cgrCfg.DiameterAgentCfg().OriginHost, // used in templates
-		utils.OriginRealm: da.cgrCfg.DiameterAgentCfg().OriginRealm,
-		utils.ProductName: da.cgrCfg.DiameterAgentCfg().ProductName,
-		utils.MetaApp:     dApp.Name,
-		utils.MetaAppID:   dApp.ID,
-		utils.MetaCmd:     dCmd.Short + "R",
-		utils.RemoteHost:  c.RemoteAddr().String(),
+	reqVars := utils.NavigableMap2{
+		utils.OriginHost:  utils.NewNMData(da.cgrCfg.DiameterAgentCfg().OriginHost), // used in templates
+		utils.OriginRealm: utils.NewNMData(da.cgrCfg.DiameterAgentCfg().OriginRealm),
+		utils.ProductName: utils.NewNMData(da.cgrCfg.DiameterAgentCfg().ProductName),
+		utils.MetaApp:     utils.NewNMData(dApp.Name),
+		utils.MetaAppID:   utils.NewNMData(dApp.ID),
+		utils.MetaCmd:     utils.NewNMData(dCmd.Short + "R"),
+		utils.RemoteHost:  utils.NewNMData(c.RemoteAddr().String()),
 	}
 	// build the negative error answer
 	diamErr, err := diamErr(
@@ -229,16 +229,16 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 			da.aReqsLck.Unlock()
 		}()
 	}
-	cgrRplyNM := config.NewNavigableMap(nil)
-	rply := config.NewNavigableMap(nil) // share it among different processors
-	opts := config.NewNavigableMap(nil)
+	cgrRplyNM := utils.NavigableMap2{}
+	rply := utils.NewOrderedNavigableMap() // share it among different processors
+	opts := utils.NewOrderedNavigableMap()
 	var processed bool
 	for _, reqProcessor := range da.cgrCfg.DiameterAgentCfg().RequestProcessors {
 		var lclProcessed bool
 		lclProcessed, err = da.processRequest(
 			reqProcessor,
 			NewAgentRequest(
-				diamDP, reqVars, cgrRplyNM, rply, opts,
+				diamDP, reqVars, &cgrRplyNM, rply, opts,
 				reqProcessor.Tenant, da.cgrCfg.GeneralCfg().DefaultTenant,
 				utils.FirstNonEmpty(reqProcessor.Timezone,
 					da.cgrCfg.GeneralCfg().DefaultTimezone),
@@ -286,8 +286,8 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 	if err = agReq.SetFields(reqProcessor.RequestFields); err != nil {
 		return
 	}
-	cgrEv := agReq.CGRRequest.AsCGREvent(agReq.Tenant, utils.NestingSep)
-	opts := agReq.Opts.GetData()
+	cgrEv := config.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep)
+	opts := config.NMAsMapInterface(agReq.Opts, utils.NestingSep)
 	var reqType string
 	for _, typ := range []string{
 		utils.MetaDryRun, utils.MetaAuthorize,
@@ -451,7 +451,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 		if err = da.connMgr.Call(da.cgrCfg.DiameterAgentCfg().SessionSConns, da, utils.SessionSv1ProcessCDR,
 			&utils.CGREventWithArgDispatcher{CGREvent: cgrEv,
 				ArgDispatcher: cgrArgs.ArgDispatcher}, rplyCDRs); err != nil {
-			agReq.CGRReply.Set([]string{utils.Error}, err.Error(), false, false)
+			agReq.CGRReply.Set(utils.PathItems{{Field: utils.Error}}, utils.NewNMData(err.Error()))
 		}
 	}
 	if err = agReq.SetFields(reqProcessor.ReplyFields); err != nil {
@@ -515,11 +515,7 @@ func (da *DiameterAgent) sendASR(originID string, reply *string) (err error) {
 	dmd := msg.(*diamMsgData)
 	aReq := NewAgentRequest(
 		newDADataProvider(dmd.c, dmd.m),
-		dmd.vars,
-		config.NewNavigableMap(nil),
-		config.NewNavigableMap(nil),
-		config.NewNavigableMap(nil),
-		nil,
+		dmd.vars, nil, nil, nil, nil,
 		da.cgrCfg.GeneralCfg().DefaultTenant,
 		da.cgrCfg.GeneralCfg().DefaultTimezone, da.filterS, nil, nil)
 	if err = aReq.SetFields(da.cgrCfg.DiameterAgentCfg().Templates[da.cgrCfg.DiameterAgentCfg().ASRTemplate]); err != nil {
@@ -562,11 +558,7 @@ func (da *DiameterAgent) V1ReAuthorize(originID string, reply *string) (err erro
 	dmd := msg.(*diamMsgData)
 	aReq := NewAgentRequest(
 		newDADataProvider(dmd.c, dmd.m),
-		dmd.vars,
-		config.NewNavigableMap(nil),
-		config.NewNavigableMap(nil),
-		config.NewNavigableMap(nil),
-		nil,
+		dmd.vars, nil, nil, nil, nil,
 		da.cgrCfg.GeneralCfg().DefaultTenant,
 		da.cgrCfg.GeneralCfg().DefaultTimezone, da.filterS, nil, nil)
 	if err = aReq.SetFields(da.cgrCfg.DiameterAgentCfg().Templates[da.cgrCfg.DiameterAgentCfg().RARTemplate]); err != nil {

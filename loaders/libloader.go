@@ -139,12 +139,6 @@ func (cP *csvProvider) FieldAsString(fldPath []string) (data string, err error) 
 	return utils.IfaceAsString(valIface), nil
 }
 
-// AsNavigableMap is part of engine.DataProvider interface
-func (cP *csvProvider) AsNavigableMap([]*config.FCTemplate) (
-	nm *config.NavigableMap, err error) {
-	return nil, utils.ErrNotImplemented
-}
-
 // RemoteHost is part of engine.DataProvider interface
 func (cP *csvProvider) RemoteHost() net.Addr {
 	return utils.LocalAddr()

@@ -20,6 +20,7 @@ package agents
 
 import (
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/cgrates/cgrates/config"
@@ -175,30 +176,33 @@ func TestUpdateDNSMsgFromNM(t *testing.T) {
 	m := new(dns.Msg)
 	m.SetQuestion("3.6.9.4.7.1.7.1.5.6.8.9.4.e164.arpa.", dns.TypeNAPTR)
 
-	nM := config.NewNavigableMap(nil)
+	nM := utils.NewOrderedNavigableMap()
 	itm := &config.NMItem{
 		Path: []string{},
 		Data: "Val1",
 	}
-	nM.Set([]string{"Path"}, []*config.NMItem{itm}, true, true)
+	nM.Set(&utils.FullPath{Path: "Path", PathItems: utils.PathItems{{Field: "Path"}}}, &utils.NMSlice{itm})
 	if err := updateDNSMsgFromNM(m, nM); err == nil ||
 		err.Error() != "empty path in config item" {
 		t.Error(err)
 	}
 
-	nM = config.NewNavigableMap(nil)
-	nM.Set([]string{"Path"}, "test", true, true)
+	nM = utils.NewOrderedNavigableMap()
+	nM.Set(&utils.FullPath{Path: "Path", PathItems: utils.PathItems{{Field: "Path"}}}, utils.NewNMData("test"))
 	if err := updateDNSMsgFromNM(m, nM); err == nil ||
-		err.Error() != `cannot cast val: "test" into []*config.NMItem` {
+		err.Error() != `cannot cast val: test into *config.NMItem` {
 		t.Error(err)
 	}
 
-	nM = config.NewNavigableMap(nil)
+	nM = utils.NewOrderedNavigableMap()
 	itm = &config.NMItem{
 		Path: []string{utils.Rcode},
 		Data: 10,
 	}
-	nM.Set(itm.Path, []*config.NMItem{itm}, true, true)
+	nM.Set(&utils.FullPath{
+		Path:      strings.Join(itm.Path, utils.NestingSep),
+		PathItems: utils.NewPathToItem(itm.Path),
+	}, &utils.NMSlice{itm})
 	if err := updateDNSMsgFromNM(m, nM); err != nil {
 		t.Error(err)
 	}
@@ -206,34 +210,43 @@ func TestUpdateDNSMsgFromNM(t *testing.T) {
 		t.Errorf("expecting: <10>, received: <%+v>", m.Rcode)
 	}
 
-	nM = config.NewNavigableMap(nil)
+	nM = utils.NewOrderedNavigableMap()
 	itm = &config.NMItem{
 		Path: []string{utils.Rcode},
 		Data: "RandomValue",
 	}
-	nM.Set(itm.Path, []*config.NMItem{itm}, true, true)
+	nM.Set(&utils.FullPath{
+		Path:      strings.Join(itm.Path, utils.NestingSep),
+		PathItems: utils.NewPathToItem(itm.Path),
+	}, &utils.NMSlice{itm})
 	if err := updateDNSMsgFromNM(m, nM); err == nil ||
 		err.Error() != `item: <Rcode>, err: strconv.ParseInt: parsing "RandomValue": invalid syntax` {
 		t.Error(err)
 	}
 
-	nM = config.NewNavigableMap(nil)
+	nM = utils.NewOrderedNavigableMap()
 	itm = &config.NMItem{
 		Path: []string{utils.Order},
 		Data: "RandomValue",
 	}
-	nM.Set(itm.Path, []*config.NMItem{itm}, true, true)
+	nM.Set(&utils.FullPath{
+		Path:      strings.Join(itm.Path, utils.NestingSep),
+		PathItems: utils.NewPathToItem(itm.Path),
+	}, &utils.NMSlice{itm})
 	if err := updateDNSMsgFromNM(m, nM); err == nil ||
 		err.Error() != `item: <Order>, err: strconv.ParseInt: parsing "RandomValue": invalid syntax` {
 		t.Error(err)
 	}
 
-	nM = config.NewNavigableMap(nil)
+	nM = utils.NewOrderedNavigableMap()
 	itm = &config.NMItem{
 		Path: []string{utils.Preference},
 		Data: "RandomValue",
 	}
-	nM.Set(itm.Path, []*config.NMItem{itm}, true, true)
+	nM.Set(&utils.FullPath{
+		Path:      strings.Join(itm.Path, utils.NestingSep),
+		PathItems: utils.NewPathToItem(itm.Path),
+	}, &utils.NMSlice{itm})
 	if err := updateDNSMsgFromNM(m, nM); err == nil ||
 		err.Error() != `item: <Preference>, err: strconv.ParseInt: parsing "RandomValue": invalid syntax` {
 		t.Error(err)
@@ -241,67 +254,85 @@ func TestUpdateDNSMsgFromNM(t *testing.T) {
 
 	m = new(dns.Msg)
 	m.SetQuestion("3.6.9.4.7.1.7.1.5.6.8.9.4.e164.arpa.", dns.TypeA)
-	nM = config.NewNavigableMap(nil)
+	nM = utils.NewOrderedNavigableMap()
 	itm = &config.NMItem{
 		Path: []string{utils.Order},
 		Data: 10,
 	}
-	nM.Set(itm.Path, []*config.NMItem{itm}, true, true)
+	nM.Set(&utils.FullPath{
+		Path:      strings.Join(itm.Path, utils.NestingSep),
+		PathItems: utils.NewPathToItem(itm.Path),
+	}, &utils.NMSlice{itm})
 	if err := updateDNSMsgFromNM(m, nM); err == nil ||
 		err.Error() != `field <Order> only works with NAPTR` {
 		t.Error(err)
 	}
 
-	nM = config.NewNavigableMap(nil)
+	nM = utils.NewOrderedNavigableMap()
 	itm = &config.NMItem{
 		Path: []string{utils.Preference},
 		Data: 10,
 	}
-	nM.Set(itm.Path, []*config.NMItem{itm}, true, true)
+	nM.Set(&utils.FullPath{
+		Path:      strings.Join(itm.Path, utils.NestingSep),
+		PathItems: utils.NewPathToItem(itm.Path),
+	}, &utils.NMSlice{itm})
 	if err := updateDNSMsgFromNM(m, nM); err == nil ||
 		err.Error() != `field <Preference> only works with NAPTR` {
 		t.Error(err)
 	}
 
-	nM = config.NewNavigableMap(nil)
+	nM = utils.NewOrderedNavigableMap()
 	itm = &config.NMItem{
 		Path: []string{utils.Flags},
 		Data: 10,
 	}
-	nM.Set(itm.Path, []*config.NMItem{itm}, true, true)
+	nM.Set(&utils.FullPath{
+		Path:      strings.Join(itm.Path, utils.NestingSep),
+		PathItems: utils.NewPathToItem(itm.Path),
+	}, &utils.NMSlice{itm})
 	if err := updateDNSMsgFromNM(m, nM); err == nil ||
 		err.Error() != `field <Flags> only works with NAPTR` {
 		t.Error(err)
 	}
 
-	nM = config.NewNavigableMap(nil)
+	nM = utils.NewOrderedNavigableMap()
 	itm = &config.NMItem{
 		Path: []string{utils.Service},
 		Data: 10,
 	}
-	nM.Set(itm.Path, []*config.NMItem{itm}, true, true)
+	nM.Set(&utils.FullPath{
+		Path:      strings.Join(itm.Path, utils.NestingSep),
+		PathItems: utils.NewPathToItem(itm.Path),
+	}, &utils.NMSlice{itm})
 	if err := updateDNSMsgFromNM(m, nM); err == nil ||
 		err.Error() != `field <Service> only works with NAPTR` {
 		t.Error(err)
 	}
 
-	nM = config.NewNavigableMap(nil)
+	nM = utils.NewOrderedNavigableMap()
 	itm = &config.NMItem{
 		Path: []string{utils.Regexp},
 		Data: 10,
 	}
-	nM.Set(itm.Path, []*config.NMItem{itm}, true, true)
+	nM.Set(&utils.FullPath{
+		Path:      strings.Join(itm.Path, utils.NestingSep),
+		PathItems: utils.NewPathToItem(itm.Path),
+	}, &utils.NMSlice{itm})
 	if err := updateDNSMsgFromNM(m, nM); err == nil ||
 		err.Error() != `field <Regexp> only works with NAPTR` {
 		t.Error(err)
 	}
 
-	nM = config.NewNavigableMap(nil)
+	nM = utils.NewOrderedNavigableMap()
 	itm = &config.NMItem{
 		Path: []string{utils.Replacement},
 		Data: 10,
 	}
-	nM.Set(itm.Path, []*config.NMItem{itm}, true, true)
+	nM.Set(&utils.FullPath{
+		Path:      strings.Join(itm.Path, utils.NestingSep),
+		PathItems: utils.NewPathToItem(itm.Path),
+	}, &utils.NMSlice{itm})
 	if err := updateDNSMsgFromNM(m, nM); err == nil ||
 		err.Error() != `field <Replacement> only works with NAPTR` {
 		t.Error(err)
