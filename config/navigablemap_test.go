@@ -1182,3 +1182,333 @@ func TestNavMapGetKeys(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expKeys), utils.ToJSON(keys))
 	}
 }
+
+func TestNMAsXMLElements(t *testing.T) {
+	nM := utils.NewOrderedNavigableMap()
+	order := []utils.PathItems{
+		{{Field: "FirstLevel2"}, {Field: "SecondLevel2"}, {Field: "Field2"}},
+		{{Field: "FirstLevel"}, {Field: "SecondLevel"}, {Field: "ThirdLevel"}, {Field: "Fld1"}},
+		{{Field: "FirstLevel2"}, {Field: "Field3"}},
+		{{Field: "FirstLevel2"}, {Field: "Field5"}},
+		{{Field: "Field4"}},
+		{{Field: "FirstLevel2"}, {Field: "Field6"}},
+	}
+	if _, err := nM.Set(&utils.FullPath{Path: order[0].String(), PathItems: order[0]}, &utils.NMSlice{
+		&NMItem{Path: strings.Split(order[0].String(), utils.NestingSep),
+			Data:   "attrVal1",
+			Config: &FCTemplate{Tag: "AttributeTest", AttributeID: "attribute1"}},
+		&NMItem{Path: strings.Split(order[0].String(), utils.NestingSep),
+			Data: "Value2"}}); err != nil {
+		t.Error(err)
+	}
+	if _, err := nM.Set(&utils.FullPath{Path: order[1].String(), PathItems: order[1]}, &utils.NMSlice{
+		&NMItem{Path: strings.Split(order[1].String(), utils.NestingSep),
+			Data: "Val1"}}); err != nil {
+		t.Error(err)
+	}
+	if _, err := nM.Set(&utils.FullPath{Path: order[2].String(), PathItems: order[2]}, &utils.NMSlice{
+		&NMItem{Path: strings.Split(order[2].String(), utils.NestingSep),
+			Data: "Value3"}}); err != nil {
+		t.Error(err)
+	}
+	if _, err := nM.Set(&utils.FullPath{Path: order[3].String(), PathItems: order[3]}, &utils.NMSlice{
+		&NMItem{Path: strings.Split(order[3].String(), utils.NestingSep),
+			Data: "Value5"},
+		&NMItem{Path: strings.Split(order[3].String(), utils.NestingSep),
+			Data:   "attrVal5",
+			Config: &FCTemplate{Tag: "AttributeTest", AttributeID: "attribute5"}}}); err != nil {
+		t.Error(err)
+	}
+	if _, err := nM.Set(&utils.FullPath{Path: order[4].String(), PathItems: order[4]}, &utils.NMSlice{
+		&NMItem{Path: strings.Split(order[4].String(), utils.NestingSep),
+			Data: "Val4"},
+		&NMItem{Path: strings.Split(order[4].String(), utils.NestingSep),
+			Data:   "attrVal2",
+			Config: &FCTemplate{Tag: "AttributeTest", AttributeID: "attribute2"}}}); err != nil {
+		t.Error(err)
+	}
+	if _, err := nM.Set(&utils.FullPath{Path: order[5].String(), PathItems: order[5]}, &utils.NMSlice{
+		&NMItem{Path: strings.Split(order[5].String(), utils.NestingSep),
+			Data:   "Value6",
+			Config: &FCTemplate{Tag: "NewBranchTest", NewBranch: true}},
+		&NMItem{Path: strings.Split(order[5].String(), utils.NestingSep),
+			Data:   "attrVal6",
+			Config: &FCTemplate{Tag: "AttributeTest", AttributeID: "attribute6"}}}); err != nil {
+		t.Error(err)
+	}
+	eXMLElmnts := []*XMLElement{
+		&XMLElement{
+			XMLName: xml.Name{Local: order[0][0].String()},
+			Elements: []*XMLElement{
+				&XMLElement{
+					XMLName: xml.Name{Local: order[0][1].String()},
+					Elements: []*XMLElement{
+						&XMLElement{
+							XMLName: xml.Name{Local: order[0][2].String()},
+							Attributes: []*xml.Attr{
+								&xml.Attr{
+									Name:  xml.Name{Local: "attribute1"},
+									Value: "attrVal1",
+								},
+							},
+							Value: "Value2",
+						},
+					},
+				},
+				&XMLElement{
+					XMLName: xml.Name{Local: "Field3"},
+					Value:   "Value3",
+				},
+				&XMLElement{
+					XMLName: xml.Name{Local: order[3][1].String()},
+					Attributes: []*xml.Attr{
+						&xml.Attr{
+							Name:  xml.Name{Local: "attribute5"},
+							Value: "attrVal5",
+						},
+					},
+					Value: "Value5",
+				},
+			},
+		},
+		&XMLElement{
+			XMLName: xml.Name{Local: order[1][0].String()},
+			Elements: []*XMLElement{
+				&XMLElement{
+					XMLName: xml.Name{Local: order[1][1].String()},
+					Elements: []*XMLElement{
+						&XMLElement{
+							XMLName: xml.Name{Local: order[1][2].String()},
+							Elements: []*XMLElement{
+								&XMLElement{
+									XMLName: xml.Name{Local: "Fld1"},
+									Value:   "Val1",
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		&XMLElement{
+			XMLName: xml.Name{Local: order[4][0].String()},
+			Attributes: []*xml.Attr{
+				&xml.Attr{
+					Name:  xml.Name{Local: "attribute2"},
+					Value: "attrVal2",
+				},
+			},
+			Value: "Val4",
+		},
+		&XMLElement{
+			XMLName: xml.Name{Local: order[5][0].String()},
+			Elements: []*XMLElement{
+				&XMLElement{
+					XMLName: xml.Name{Local: order[5][1].String()},
+					Attributes: []*xml.Attr{
+						&xml.Attr{
+							Name:  xml.Name{Local: "attribute6"},
+							Value: "attrVal6",
+						},
+					},
+					Value: "Value6",
+				},
+			},
+		},
+	}
+	xmlEnts, err := NMAsXMLElements(nM)
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eXMLElmnts, xmlEnts) {
+		t.Errorf("expecting: %s, received: %s", utils.ToJSON(eXMLElmnts), utils.ToJSON(xmlEnts))
+	}
+	eXML := []byte(`<FirstLevel2>
+  <SecondLevel2>
+    <Field2 attribute1="attrVal1">Value2</Field2>
+  </SecondLevel2>
+  <Field3>Value3</Field3>
+  <Field5 attribute5="attrVal5">Value5</Field5>
+</FirstLevel2>
+<FirstLevel>
+  <SecondLevel>
+    <ThirdLevel>
+      <Fld1>Val1</Fld1>
+    </ThirdLevel>
+  </SecondLevel>
+</FirstLevel>
+<Field4 attribute2="attrVal2">Val4</Field4>
+<FirstLevel2>
+  <Field6 attribute6="attrVal6">Value6</Field6>
+</FirstLevel2>`)
+	if output, err := xml.MarshalIndent(xmlEnts, "", "  "); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eXML, output) {
+		t.Errorf("expecting: \n%s, received: \n%s\n", string(eXML), string(output))
+	}
+}
+
+func TestNMAsCGREvent(t *testing.T) {
+	if cgrEv := NMAsCGREvent(nil, "cgrates.org",
+		utils.NestingSep); cgrEv != nil {
+		t.Errorf("expecting: %+v, \nreceived: %+v", utils.ToJSON(nil), utils.ToJSON(cgrEv.Event))
+	}
+
+	nM := utils.NewOrderedNavigableMap()
+	if cgrEv := NMAsCGREvent(nM, "cgrates.org",
+		utils.NestingSep); cgrEv != nil {
+		t.Errorf("expecting: %+v, \nreceived: %+v", utils.ToJSON(nil), utils.ToJSON(cgrEv.Event))
+	}
+
+	path := utils.PathItems{{Field: "FirstLevel"}, {Field: "SecondLevel"}, {Field: "ThirdLevel"}, {Field: "Fld1"}}
+	if _, err := nM.Set(&utils.FullPath{Path: path.String(), PathItems: path}, &utils.NMSlice{&NMItem{
+		Path: strings.Split(path.String(), utils.NestingSep),
+		Data: "Val1",
+	}}); err != nil {
+		t.Error(err)
+	}
+
+	path = utils.PathItems{{Field: "FirstLevel2"}, {Field: "SecondLevel2"}, {Field: "Field2"}}
+	if _, err := nM.Set(&utils.FullPath{Path: path.String(), PathItems: path}, &utils.NMSlice{&NMItem{
+		Path: strings.Split(path.String(), utils.NestingSep),
+		Data: "attrVal1",
+		Config: &FCTemplate{Tag: "AttributeTest",
+			AttributeID: "attribute1"},
+	}, &NMItem{
+		Path: strings.Split(path.String(), utils.NestingSep),
+		Data: "Value2",
+	}}); err != nil {
+		t.Error(err)
+	}
+
+	path = utils.PathItems{{Field: "FirstLevel2"}, {Field: "Field3"}}
+	if _, err := nM.Set(&utils.FullPath{Path: path.String(), PathItems: path}, &utils.NMSlice{&NMItem{
+		Path: strings.Split(path.String(), utils.NestingSep),
+		Data: "Value3",
+	}}); err != nil {
+		t.Error(err)
+	}
+
+	path = utils.PathItems{{Field: "FirstLevel2"}, {Field: "Field5"}}
+	if _, err := nM.Set(&utils.FullPath{Path: path.String(), PathItems: path}, &utils.NMSlice{&NMItem{
+		Path: strings.Split(path.String(), utils.NestingSep),
+		Data: "Value5",
+	}, &NMItem{
+		Path: strings.Split(path.String(), utils.NestingSep),
+		Data: "attrVal5",
+		Config: &FCTemplate{Tag: "AttributeTest",
+			AttributeID: "attribute5"},
+	}}); err != nil {
+		t.Error(err)
+	}
+
+	path = utils.PathItems{{Field: "FirstLevel2"}, {Field: "Field6"}}
+	if _, err := nM.Set(&utils.FullPath{Path: path.String(), PathItems: path}, &utils.NMSlice{&NMItem{
+		Path: strings.Split(path.String(), utils.NestingSep),
+		Data: "Value6",
+		Config: &FCTemplate{Tag: "NewBranchTest",
+			NewBranch: true},
+	}, &NMItem{
+		Path: strings.Split(path.String(), utils.NestingSep),
+		Data: "attrVal6",
+		Config: &FCTemplate{Tag: "AttributeTest",
+			AttributeID: "attribute6"},
+	}}); err != nil {
+		t.Error(err)
+	}
+
+	path = utils.PathItems{{Field: "Field4"}}
+	if _, err := nM.Set(&utils.FullPath{Path: path.String(), PathItems: path}, &utils.NMSlice{&NMItem{
+		Path: strings.Split(path.String(), utils.NestingSep),
+		Data: "Val4",
+	}, &NMItem{
+		Path: strings.Split(path.String(), utils.NestingSep),
+		Data: "attrVal2",
+		Config: &FCTemplate{Tag: "AttributeTest",
+			AttributeID: "attribute2"},
+	}}); err != nil {
+		t.Error(err)
+	}
+	eEv := map[string]interface{}{
+		"FirstLevel2.SecondLevel2.Field2":        "Value2",
+		"FirstLevel.SecondLevel.ThirdLevel.Fld1": "Val1",
+		"FirstLevel2.Field3":                     "Value3",
+		"FirstLevel2.Field5":                     "Value5",
+		"FirstLevel2.Field6":                     "Value6",
+		"Field4":                                 "Val4",
+	}
+	if cgrEv := NMAsCGREvent(nM, "cgrates.org",
+		utils.NestingSep); cgrEv.Tenant != "cgrates.org" ||
+		cgrEv.Time == nil ||
+		!reflect.DeepEqual(eEv, cgrEv.Event) {
+		t.Errorf("expecting: %+v, \nreceived: %+v", utils.ToJSON(eEv), utils.ToJSON(cgrEv.Event))
+	}
+}
+
+func TestNMItemLen(t *testing.T) {
+	var nm utils.NMInterface = &NMItem{Data: "1001"}
+	if rply := nm.Len(); rply != 0 {
+		t.Errorf("Expected 0 ,received: %v", rply)
+	}
+}
+
+func TestNMItemString(t *testing.T) {
+	var nm utils.NMInterface = &NMItem{Data: "1001"}
+	expected := "{\"Path\":null,\"Data\":\"1001\",\"Config\":null}"
+	if rply := nm.String(); rply != expected {
+		t.Errorf("Expected %q ,received: %q", expected, rply)
+	}
+}
+
+func TestNMItemInterface(t *testing.T) {
+	var nm utils.NMInterface = &NMItem{Data: "1001"}
+	expected := "1001"
+	if rply := nm.Interface(); rply != expected {
+		t.Errorf("Expected %q ,received: %q", expected, rply)
+	}
+}
+
+func TestNMItemField(t *testing.T) {
+	var nm utils.NMInterface = &NMItem{Data: "1001"}
+	if _, err := nm.Field(nil); err != utils.ErrNotImplemented {
+		t.Error(err)
+	}
+}
+
+func TestNMItemRemove(t *testing.T) {
+	var nm utils.NMInterface = &NMItem{Data: "1001"}
+	if err := nm.Remove(nil); err != utils.ErrNotImplemented {
+		t.Error(err)
+	}
+}
+
+func TestNMItemEmpty(t *testing.T) {
+	var nm utils.NMInterface = &NMItem{Data: "1001"}
+	if nm.Empty() {
+		t.Error("Expected not empty type")
+	}
+	nm = &NMItem{Data: nil}
+	if !nm.Empty() {
+		t.Error("Expected empty type")
+	}
+}
+
+func TestNMItemType(t *testing.T) {
+	var nm utils.NMInterface = &NMItem{Data: "1001"}
+	if nm.Type() != utils.NMDataType {
+		t.Errorf("Expected %v ,received: %v", utils.NMDataType, nm.Type())
+	}
+}
+
+func TestNMItemSet(t *testing.T) {
+	var nm utils.NMInterface = &NMItem{Data: "1001"}
+	if _, err := nm.Set(utils.PathItems{{}}, nil); err != utils.ErrWrongPath {
+		t.Error(err)
+	}
+	if _, err := nm.Set(nil, &NMItem{Data: "1002"}); err != nil {
+		t.Error(err)
+	}
+	expected := "1002"
+	if rply := nm.Interface(); rply != expected {
+		t.Errorf("Expected %q ,received: %q", expected, rply)
+	}
+}

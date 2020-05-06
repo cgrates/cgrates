@@ -52,21 +52,21 @@ func newHTTPUrlDP(req *http.Request) (dP utils.DataProvider, err error) {
 	return
 }
 
-// httpUrlDP implements engine.DataProvider, serving as url data decoder
+// httpUrlDP implements utils.DataProvider, serving as url data decoder
 // decoded data is only searched once and cached
 type httpUrlDP struct {
 	req   *http.Request
 	cache *config.NavigableMap
 }
 
-// String is part of engine.DataProvider interface
+// String is part of utils.DataProvider interface
 // when called, it will display the already parsed values out of cache
 func (hU *httpUrlDP) String() string {
 	byts, _ := httputil.DumpRequest(hU.req, true)
 	return string(byts)
 }
 
-// FieldAsInterface is part of engine.DataProvider interface
+// FieldAsInterface is part of utils.DataProvider interface
 func (hU *httpUrlDP) FieldAsInterface(fldPath []string) (data interface{}, err error) {
 	if len(fldPath) != 1 {
 		return nil, utils.ErrNotFound
@@ -84,7 +84,7 @@ func (hU *httpUrlDP) FieldAsInterface(fldPath []string) (data interface{}, err e
 	return
 }
 
-// FieldAsString is part of engine.DataProvider interface
+// FieldAsString is part of utils.DataProvider interface
 func (hU *httpUrlDP) FieldAsString(fldPath []string) (data string, err error) {
 	var valIface interface{}
 	valIface, err = hU.FieldAsInterface(fldPath)
@@ -94,7 +94,7 @@ func (hU *httpUrlDP) FieldAsString(fldPath []string) (data string, err error) {
 	return utils.IfaceAsString(valIface), nil
 }
 
-// RemoteHost is part of engine.DataProvider interface
+// RemoteHost is part of utils.DataProvider interface
 func (hU *httpUrlDP) RemoteHost() net.Addr {
 	return utils.NewNetAddr("TCP", hU.req.RemoteAddr)
 }
@@ -113,7 +113,7 @@ func newHTTPXmlDP(req *http.Request) (dP utils.DataProvider, err error) {
 	return
 }
 
-// httpXmlDP implements engine.DataProvider, serving as xml data decoder
+// httpXmlDP implements utils.DataProvider, serving as xml data decoder
 // decoded data is only searched once and cached
 type httpXmlDP struct {
 	cache  *config.NavigableMap
@@ -121,13 +121,13 @@ type httpXmlDP struct {
 	addr   string
 }
 
-// String is part of engine.DataProvider interface
+// String is part of utils.DataProvider interface
 // when called, it will display the already parsed values out of cache
 func (hU *httpXmlDP) String() string {
 	return hU.xmlDoc.OutputXML(true)
 }
 
-// FieldAsInterface is part of engine.DataProvider interface
+// FieldAsInterface is part of utils.DataProvider interface
 func (hU *httpXmlDP) FieldAsInterface(fldPath []string) (data interface{}, err error) {
 	//if path is missing return here error because if it arrived in xmlquery library will panic
 	if len(fldPath) == 0 {
@@ -172,7 +172,7 @@ func (hU *httpXmlDP) FieldAsInterface(fldPath []string) (data interface{}, err e
 	return
 }
 
-// FieldAsString is part of engine.DataProvider interface
+// FieldAsString is part of utils.DataProvider interface
 func (hU *httpXmlDP) FieldAsString(fldPath []string) (data string, err error) {
 	var valIface interface{}
 	valIface, err = hU.FieldAsInterface(fldPath)
@@ -182,7 +182,7 @@ func (hU *httpXmlDP) FieldAsString(fldPath []string) (data string, err error) {
 	return utils.IfaceAsString(valIface), nil
 }
 
-// RemoteHost is part of engine.DataProvider interface
+// RemoteHost is part of utils.DataProvider interface
 func (hU *httpXmlDP) RemoteHost() net.Addr {
 	return utils.NewNetAddr("TCP", hU.addr)
 }

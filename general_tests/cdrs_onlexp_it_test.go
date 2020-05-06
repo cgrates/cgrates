@@ -503,8 +503,8 @@ func testCDRsOnExpFileFailover(t *testing.T) {
 			t.Errorf("For file <%s> and event <%s> received %s", filePath, utils.ToJSON(ev), err)
 		}
 	}
-	if !reflect.DeepEqual(expectedFormats.Data(), rcvFormats.Data()) {
-		t.Errorf("Missing format expecting: %s received: %s", utils.ToJSON(expectedFormats.Data()), utils.ToJSON(rcvFormats.Data()))
+	if !reflect.DeepEqual(expectedFormats, rcvFormats) {
+		t.Errorf("Missing format expecting: %s received: %s", utils.ToJSON(expectedFormats), utils.ToJSON(rcvFormats))
 	}
 }
 

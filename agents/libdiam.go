@@ -293,7 +293,7 @@ func newDADataProvider(c diam.Conn, m *diam.Message) utils.DataProvider {
 
 }
 
-// diameterDP implements engine.DataProvider, serving as diam.Message data decoder
+// diameterDP implements utils.DataProvider, serving as diam.Message data decoder
 // decoded data is only searched once and cached
 type diameterDP struct {
 	c     diam.Conn
@@ -301,13 +301,13 @@ type diameterDP struct {
 	cache *config.NavigableMap
 }
 
-// String is part of engine.DataProvider interface
+// String is part of utils.DataProvider interface
 // when called, it will display the already parsed values out of cache
 func (dP *diameterDP) String() string {
 	return dP.m.String()
 }
 
-// FieldAsString is part of engine.DataProvider interface
+// FieldAsString is part of utils.DataProvider interface
 func (dP *diameterDP) FieldAsString(fldPath []string) (data string, err error) {
 	var valIface interface{}
 	valIface, err = dP.FieldAsInterface(fldPath)
@@ -317,12 +317,12 @@ func (dP *diameterDP) FieldAsString(fldPath []string) (data string, err error) {
 	return utils.IfaceAsString(valIface), nil
 }
 
-// RemoteHost is part of engine.DataProvider interface
+// RemoteHost is part of utils.DataProvider interface
 func (dP *diameterDP) RemoteHost() net.Addr {
 	return utils.NewNetAddr(dP.c.RemoteAddr().Network(), dP.c.RemoteAddr().String())
 }
 
-// FieldAsInterface is part of engine.DataProvider interface
+// FieldAsInterface is part of utils.DataProvider interface
 func (dP *diameterDP) FieldAsInterface(fldPath []string) (data interface{}, err error) {
 	if data, err = dP.cache.FieldAsInterface(fldPath); err != nil {
 		if err != utils.ErrNotFound { // item found in cache

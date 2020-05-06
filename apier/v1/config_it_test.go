@@ -154,7 +154,9 @@ func testConfigSReloadConfigFromJSONSessionS(t *testing.T) {
 		"StoreSCosts":         false,
 		"AlterableFields":     map[string]interface{}{},
 		"STIRCfg": map[string]interface{}{
-			"AllowedAttest":      map[string]interface{}{},
+			"AllowedAttest": map[string]interface{}{
+				utils.META_ANY: map[string]interface{}{},
+			},
 			"DefaultAttest":      "A",
 			"PayloadMaxduration": -1.,
 			"PrivateKeyPath":     "",
@@ -175,7 +177,7 @@ func testConfigSReloadConfigFromJSONSessionS(t *testing.T) {
 	}, &rpl); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exp, rpl) {
-		t.Errorf("Expected %+v , received: %+v ", exp, rpl)
+		t.Errorf("Expected %+v , received: %+v ", utils.ToJSON(exp), utils.ToJSON(rpl))
 	}
 }
 
