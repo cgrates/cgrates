@@ -1237,6 +1237,7 @@ const (
 	APIerSv2ExecuteAction              = "APIerSv2.ExecuteAction"
 	APIerSv2ResetAccountActionTriggers = "APIerSv2.ResetAccountActionTriggers"
 	APIerSv2RemoveActions              = "APIerSv2.RemoveActions"
+	APIerSv2ExportCdrsToFile           = "APIerSv2.ExportCdrsToFile"
 )
 
 const (
