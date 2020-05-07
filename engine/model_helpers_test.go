@@ -2107,3 +2107,195 @@ func TestAPItoModelTPDispatcher(t *testing.T) {
 		t.Errorf("Expecting : %+v, \n received: %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
 }
+
+func TestTPDispatcherHostsCSVHeader(t *testing.T) {
+	tps := &TPDispatcherHosts{}
+	eOut := []string{"#" + utils.Tenant, utils.ID, utils.Address, utils.Transport, utils.TLS}
+	if rcv := tps.CSVHeader(); !reflect.DeepEqual(rcv, eOut) {
+		t.Errorf("\nExpecting: %+v,\nReceived: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+}
+
+func TestTPDispatcherHostsAsTPDispatcherHosts(t *testing.T) {
+	tps := &TPDispatcherHosts{}
+	if rcv := tps.AsTPDispatcherHosts(); rcv != nil {
+		t.Errorf("\nExpecting: nil,\nReceived: %+v", utils.ToJSON(rcv))
+	}
+
+	tps = &TPDispatcherHosts{
+		&TPDispatcherHost{
+			ID:     "ID1",
+			Tenant: "Tenant1",
+		}}
+	if rcv := tps.AsTPDispatcherHosts(); rcv != nil {
+		t.Errorf("\nExpecting: nil,\nReceived: %+v", utils.ToJSON(rcv))
+	}
+
+	tps = &TPDispatcherHosts{
+		&TPDispatcherHost{
+			Address:   "Address1",
+			ID:        "ID1",
+			Tenant:    "Tenant1",
+			Transport: utils.EmptyString,
+		}}
+	eOut := []*utils.TPDispatcherHost{
+		&utils.TPDispatcherHost{
+			Tenant: "Tenant1",
+			ID:     "ID1",
+			Conns: []*utils.TPDispatcherHostConn{
+				&utils.TPDispatcherHostConn{
+					Address:   "Address1",
+					Transport: "*json",
+				},
+			},
+		},
+	}
+	if rcv := tps.AsTPDispatcherHosts(); !reflect.DeepEqual(rcv, eOut) {
+		t.Errorf("\nExpecting: %+v,\nReceived: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+
+	tps = &TPDispatcherHosts{
+		&TPDispatcherHost{
+			Address:   "Address2",
+			ID:        "ID2",
+			Tenant:    "Tenant2",
+			Transport: "*gob",
+		}}
+	eOut = []*utils.TPDispatcherHost{
+		&utils.TPDispatcherHost{
+			Tenant: "Tenant2",
+			ID:     "ID2",
+			Conns: []*utils.TPDispatcherHostConn{
+				&utils.TPDispatcherHostConn{
+					Address:   "Address2",
+					Transport: "*gob",
+				},
+			},
+		},
+	}
+	if rcv := tps.AsTPDispatcherHosts(); !reflect.DeepEqual(rcv, eOut) {
+		t.Errorf("\nExpecting: %+v,\nReceived: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+
+	tps = &TPDispatcherHosts{
+		&TPDispatcherHost{
+			Address:   "Address3",
+			ID:        "ID3",
+			Tenant:    "Tenant3",
+			Transport: "*gob",
+		},
+		&TPDispatcherHost{
+			Address:   "Address4",
+			ID:        "ID3",
+			Tenant:    "Tenant3",
+			Transport: utils.EmptyString,
+		},
+	}
+	eOut = []*utils.TPDispatcherHost{
+		&utils.TPDispatcherHost{
+			Tenant: "Tenant3",
+			ID:     "ID3",
+			Conns: []*utils.TPDispatcherHostConn{
+				&utils.TPDispatcherHostConn{
+					Address:   "Address3",
+					Transport: "*gob",
+				},
+				&utils.TPDispatcherHostConn{
+					Address:   "Address4",
+					Transport: "*json",
+				},
+			},
+		},
+	}
+	if rcv := tps.AsTPDispatcherHosts(); !reflect.DeepEqual(rcv, eOut) {
+		t.Errorf("\nExpecting: %+v,\nReceived: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+
+	tps = &TPDispatcherHosts{
+		&TPDispatcherHost{
+			Address:   "Address4",
+			ID:        "ID4",
+			Tenant:    "Tenant4",
+			Transport: "*gob",
+		},
+		&TPDispatcherHost{
+			Address:   "Address5",
+			ID:        "ID5",
+			Tenant:    "Tenant5",
+			Transport: utils.EmptyString,
+		},
+	}
+	eOut = []*utils.TPDispatcherHost{
+		&utils.TPDispatcherHost{
+			Tenant: "Tenant4",
+			ID:     "ID4",
+			Conns: []*utils.TPDispatcherHostConn{
+				&utils.TPDispatcherHostConn{
+					Address:   "Address4",
+					Transport: "*gob",
+				},
+			},
+		},
+		&utils.TPDispatcherHost{
+			Tenant: "Tenant5",
+			ID:     "ID5",
+			Conns: []*utils.TPDispatcherHostConn{
+				&utils.TPDispatcherHostConn{
+					Address:   "Address5",
+					Transport: "*json",
+				},
+			},
+		},
+	}
+	if rcv := tps.AsTPDispatcherHosts(); !reflect.DeepEqual(rcv, eOut) {
+		t.Errorf("\nExpecting: %+v,\nReceived: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+}
+
+func TestAPItoModelTPDispatcherHost(t *testing.T) {
+	var tpDPH *utils.TPDispatcherHost
+	if rcv := APItoModelTPDispatcherHost(tpDPH); rcv != nil {
+		t.Errorf("\nExpecting: nil,\nReceived: %+v", utils.ToJSON(rcv))
+	}
+
+	tpDPH = &utils.TPDispatcherHost{
+		ID: "ID",
+	}
+	eOut := make(TPDispatcherHosts, len(tpDPH.Conns))
+	if rcv := APItoModelTPDispatcherHost(tpDPH); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("\nExpecting: %+v,\nReceived: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+
+	tpDPH = &utils.TPDispatcherHost{
+		Tenant: "Tenant",
+		ID:     "ID",
+		Conns: []*utils.TPDispatcherHostConn{
+			&utils.TPDispatcherHostConn{
+				Address:   "Address1",
+				Transport: "*json",
+			},
+			&utils.TPDispatcherHostConn{
+				Address:   "Address2",
+				Transport: "*gob",
+			},
+		},
+	}
+	eOut = TPDispatcherHosts{
+		&TPDispatcherHost{
+			Address:   "Address1",
+			Transport: "*json",
+			Tenant:    "Tenant",
+			ID:        "ID",
+		},
+		&TPDispatcherHost{
+			Address:   "Address2",
+			Transport: "*gob",
+			Tenant:    "Tenant",
+			ID:        "ID",
+		},
+	}
+	if rcv := APItoModelTPDispatcherHost(tpDPH); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("\nExpecting: %+v,\nReceived: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+
+}
