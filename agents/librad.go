@@ -127,7 +127,7 @@ func radauthReq(flags utils.FlagsWithParams, req *radigo.Packet, aReq *AgentRequ
 		if len(userPassAvps) == 0 {
 			return false, utils.NewErrMandatoryIeMissing(UserPasswordAVP)
 		}
-		if userPassAvps[0].StringValue != nmItems.([]*config.NMItem)[0].Data {
+		if userPassAvps[0].StringValue != (*nmItems.(*utils.NMSlice))[0].Interface() {
 			return false, nil
 		}
 	case flags.HasKey(utils.MetaCHAP):
@@ -135,7 +135,7 @@ func radauthReq(flags utils.FlagsWithParams, req *radigo.Packet, aReq *AgentRequ
 		if len(chapAVPs) == 0 {
 			return false, utils.NewErrMandatoryIeMissing(CHAPPasswordAVP)
 		}
-		return radigo.AuthenticateCHAP([]byte(utils.IfaceAsString(nmItems.([]*config.NMItem)[0].Data)),
+		return radigo.AuthenticateCHAP([]byte(utils.IfaceAsString((*nmItems.(*utils.NMSlice))[0].Interface())),
 			req.Authenticator[:], chapAVPs[0].RawValue), nil
 	case flags.HasKey(utils.MetaMSCHAPV2):
 		msChallenge := req.AttributesWithName(MSCHAPChallengeAVP, MicrosoftVendor)
@@ -150,7 +150,7 @@ func radauthReq(flags utils.FlagsWithParams, req *radigo.Packet, aReq *AgentRequ
 		vsaMSChallange := msChallenge[0].Value.(*radigo.VSA)
 
 		userName := req.AttributesWithName("User-Name", utils.EmptyString)[0].StringValue
-		passwordFromAttributes := utils.IfaceAsString(nmItems.([]*config.NMItem)[0].Data)
+		passwordFromAttributes := utils.IfaceAsString((*nmItems.(*utils.NMSlice))[0].Interface())
 
 		if len(vsaMSChallange.RawValue) != 16 || len(vsaMSResponde.RawValue) != 50 {
 			return false, nil
