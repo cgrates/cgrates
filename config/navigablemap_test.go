@@ -20,6 +20,7 @@ package config
 import (
 	"encoding/xml"
 	"fmt"
+	"math/rand"
 	"reflect"
 	"sort"
 	"strings"
@@ -1510,5 +1511,70 @@ func TestNMItemSet(t *testing.T) {
 	expected := "1002"
 	if rply := nm.Interface(); rply != expected {
 		t.Errorf("Expected %q ,received: %q", expected, rply)
+	}
+}
+
+/*
+goos: linux
+goarch: amd64
+pkg: github.com/cgrates/cgrates/config
+BenchmarkOrderdNavigableMapSet2-16    	    1738	   6463443 ns/op
+BenchmarkOrderdNavigableMapSet2-16    	    1792	   6536313 ns/op
+BenchmarkOrderdNavigableMapSet2-16    	    1744	   6554331 ns/op
+BenchmarkNavigableMapOld1Set-16       	    2980	   3831743 ns/op
+BenchmarkNavigableMapOld1Set-16       	    2758	   3789885 ns/op
+BenchmarkNavigableMapOld1Set-16       	    2916	   3741273 ns/op
+PASS
+ok  	github.com/cgrates/cgrates/config	71.065s
+*/
+var generator = rand.New(rand.NewSource(42))
+var gen = generateRandomTemplate(10_000)
+
+type benchData struct {
+	path      []string
+	pathItems utils.PathItems
+	strPath   string
+	data      string
+}
+
+func generateRandomPath() (out []string) {
+	size := generator.Intn(16) + 1
+	out = make([]string, size)
+	for i := 0; i < size; i++ {
+		out[i] = utils.Sha1(utils.GenUUID())
+	}
+	return
+}
+func generateRandomTemplate(size int) (out []benchData) {
+	out = make([]benchData, size)
+	for i := 0; i < size; i++ {
+		out[i].path = generateRandomPath()
+		out[i].data = utils.UUIDSha1Prefix()
+		out[i].pathItems = utils.NewPathToItem(out[i].path)
+		out[i].strPath = out[i].pathItems.String()
+		// out[i].pathItems[len(out[i].pathItems)-1].Index = IntPointer(0)
+	}
+	return
+}
+
+func BenchmarkOrderdNavigableMapSet2(b *testing.B) {
+	nm := utils.NewOrderedNavigableMap()
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		for _, data := range gen {
+			if _, err := nm.Set(&utils.FullPath{PathItems: data.pathItems, Path: data.strPath}, utils.NewNMData(data.data)); err != nil {
+				b.Log(err, data.path)
+			}
+		}
+	}
+}
+
+func BenchmarkNavigableMapOld1Set(b *testing.B) {
+	nm := NewNavigableMap(nil)
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		for _, data := range gen {
+			nm.Set(data.path, data.data, false, true)
+		}
 	}
 }
