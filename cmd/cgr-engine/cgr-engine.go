@@ -490,10 +490,10 @@ func main() {
 		internalRALsChan, internalResponderChan,
 		exitChan, connManager)
 
-	APIerSv1 := services.NewAPIerSv1Service(cfg, dmService, storDBService, filterSChan, server, schS, rals.GetResponderService(),
+	apiSv1 := services.NewAPIerSv1Service(cfg, dmService, storDBService, filterSChan, server, schS, rals.GetResponderService(),
 		internalAPIerSv1Chan, connManager)
 
-	APIerSv2 := services.NewAPIerSv2Service(APIerSv1, cfg, server, internalAPIerSv2Chan)
+	apiSv2 := services.NewAPIerSv2Service(apiSv1, cfg, server, internalAPIerSv2Chan)
 
 	cdrS := services.NewCDRServer(cfg, dmService, storDBService, filterSChan, server, internalCDRServerChan,
 		connManager)
@@ -505,7 +505,7 @@ func main() {
 	anz := services.NewAnalyzerService(cfg, server, exitChan, internalAnalyzerSChan)
 
 	srvManager.AddServices(attrS, chrS, tS, stS, reS, supS, schS, rals,
-		rals.GetResponder(), APIerSv1, APIerSv2, cdrS, smg,
+		rals.GetResponder(), apiSv1, apiSv2, cdrS, smg,
 		services.NewEventReaderService(cfg, filterSChan, exitChan, connManager),
 		services.NewDNSAgent(cfg, filterSChan, exitChan, connManager),
 		services.NewFreeswitchAgent(cfg, exitChan, connManager),
@@ -526,8 +526,8 @@ func main() {
 	// init internalRPCSet because we can have double connections in rpc_conns and one of it could be *internal
 	engine.IntRPC = engine.NewRPCClientSet()
 	engine.IntRPC.AddInternalRPCClient(utils.AnalyzerSv1, anz.GetIntenternalChan())
-	engine.IntRPC.AddInternalRPCClient(utils.APIerSv1, APIerSv1.GetIntenternalChan())
-	engine.IntRPC.AddInternalRPCClient(utils.APIerSv2, APIerSv2.GetIntenternalChan())
+	engine.IntRPC.AddInternalRPCClient(utils.APIerSv1, apiSv1.GetIntenternalChan())
+	engine.IntRPC.AddInternalRPCClient(utils.APIerSv2, apiSv1.GetIntenternalChan())
 	engine.IntRPC.AddInternalRPCClient(utils.AttributeSv1, attrS.GetIntenternalChan())
 	engine.IntRPC.AddInternalRPCClient(utils.CacheSv1, internalCacheSChan)
 	engine.IntRPC.AddInternalRPCClient(utils.CDRsV1, cdrS.GetIntenternalChan())
