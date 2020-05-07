@@ -28,6 +28,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/scheduler"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/dispatchers"
 	"github.com/cgrates/cgrates/engine"
@@ -57,6 +59,7 @@ var (
 		testAPIerGetRatingPlanCost3,
 		testAPIerGetActionPlanIDs,
 		testAPIerGetRatingPlanIDs,
+		testAPIerSetActionPlanDfltTime,
 		testAPIerKillEngine,
 	}
 )
@@ -311,6 +314,104 @@ func testAPIerGetRatingPlanIDs(t *testing.T) {
 	if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expected: <%+v> , received: <%+v>", utils.ToJSON(expected), utils.ToJSON(reply))
 
+	}
+}
+
+func testAPIerSetActionPlanDfltTime(t *testing.T) {
+	var reply1 string
+	hourlyAP := &AttrSetActionPlan{
+		Id: "AP_HOURLY",
+		ActionPlan: []*AttrActionPlan{
+			&AttrActionPlan{
+				ActionsId: "ACT_TOPUP_RST_10",
+				Time:      utils.MetaHourly,
+				Weight:    20.0,
+			},
+		},
+		ReloadScheduler: true,
+	}
+	if err := apierRPC.Call(utils.APIerSv1SetActionPlan, hourlyAP, &reply1); err != nil {
+		t.Error("Got error on APIerSv1.SetActionPlan: ", err.Error())
+	} else if reply1 != utils.OK {
+		t.Errorf("Calling APIerSv1.SetActionPlan received: %s", reply1)
+	}
+	dailyAP := &AttrSetActionPlan{
+		Id: "AP_DAILY",
+		ActionPlan: []*AttrActionPlan{
+			&AttrActionPlan{
+				ActionsId: "ACT_TOPUP_RST_10",
+				Time:      utils.MetaDaily,
+				Weight:    20.0,
+			},
+		},
+		ReloadScheduler: true,
+	}
+	if err := apierRPC.Call(utils.APIerSv1SetActionPlan, dailyAP, &reply1); err != nil {
+		t.Error("Got error on APIerSv1.SetActionPlan: ", err.Error())
+	} else if reply1 != utils.OK {
+		t.Errorf("Calling APIerSv1.SetActionPlan received: %s", reply1)
+	}
+	weeklyAP := &AttrSetActionPlan{
+		Id: "AP_WEEKLY",
+		ActionPlan: []*AttrActionPlan{
+			&AttrActionPlan{
+				ActionsId: "ACT_TOPUP_RST_10",
+				Time:      utils.MetaWeekly,
+				Weight:    20.0,
+			},
+		},
+		ReloadScheduler: true,
+	}
+	if err := apierRPC.Call(utils.APIerSv1SetActionPlan, weeklyAP, &reply1); err != nil {
+		t.Error("Got error on APIerSv1.SetActionPlan: ", err.Error())
+	} else if reply1 != utils.OK {
+		t.Errorf("Calling APIerSv1.SetActionPlan received: %s", reply1)
+	}
+	monthlyAP := &AttrSetActionPlan{
+		Id: "AP_MONTHLY",
+		ActionPlan: []*AttrActionPlan{
+			&AttrActionPlan{
+				ActionsId: "ACT_TOPUP_RST_10",
+				Time:      utils.MetaMonthly,
+				Weight:    20.0,
+			},
+		},
+		ReloadScheduler: true,
+	}
+	if err := apierRPC.Call(utils.APIerSv1SetActionPlan, monthlyAP, &reply1); err != nil {
+		t.Error("Got error on APIerSv1.SetActionPlan: ", err.Error())
+	} else if reply1 != utils.OK {
+		t.Errorf("Calling APIerSv1.SetActionPlan received: %s", reply1)
+	}
+	var rply []*scheduler.ScheduledAction
+	if err := apierRPC.Call(utils.APIerSv1GetScheduledActions,
+		scheduler.ArgsGetScheduledActions{}, &rply); err != nil {
+		t.Error("Unexpected error: ", err)
+	} else {
+		for _, schedAct := range rply {
+			switch schedAct.ActionPlanID {
+			case "AP_WEEKLY":
+				if schedAct.NextRunTime.Before(time.Now().Add(167*time.Hour+59*time.Minute+58*time.Second)) ||
+					schedAct.NextRunTime.After(time.Now().Add(168*time.Hour+1*time.Second)) {
+					t.Errorf("Expected the nextRuntime to be after 1 week,but received: <%+v>", utils.ToJSON(schedAct))
+				}
+			case "AP_DAILY":
+				if schedAct.NextRunTime.Before(time.Now().Add(23*time.Hour+59*time.Minute+58*time.Second)) ||
+					schedAct.NextRunTime.After(time.Now().Add(24*time.Hour+1*time.Second)) {
+					t.Errorf("Expected the nextRuntime to be after 1 day,but received: <%+v>", utils.ToJSON(schedAct))
+				}
+			case "AP_HOURLY":
+				if schedAct.NextRunTime.Before(time.Now().Add(59*time.Minute+58*time.Second)) ||
+					schedAct.NextRunTime.After(time.Now().Add(1*time.Hour+1*time.Second)) {
+					t.Errorf("Expected the nextRuntime to be after 1 hour,but received: <%+v>", utils.ToJSON(schedAct))
+				}
+			case "AP_MONTHLY":
+				if schedAct.NextRunTime.Before(time.Now().AddDate(0, 1, 0).Add(-1*time.Second)) ||
+					schedAct.NextRunTime.After(time.Now().AddDate(0, 1, 0).Add(1*time.Second)) {
+					t.Errorf("Expected the nextRuntime to be after 1 month,but received: <%+v>", utils.ToJSON(schedAct))
+				}
+			}
+		}
 	}
 }
 
