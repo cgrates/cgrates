@@ -22,6 +22,7 @@ cgrates (0.10.1~dev) UNRELEASED; urgency=medium
   * [Templates] Fixed missing "*" for strip and padding strategy
   * [SessionS] Update subflags for *rals ( *authorize and *initiate )
   * [AgentRequest] Improved NavigableMap
+  * [AgentRequest] FieldAsInterface return Data instead of NMItem
 
  -- Alexandru Tripon <alexandru.tripon@itsyscom.com>  Wed, 19 Feb 2020 15:22:59 +0200
 
