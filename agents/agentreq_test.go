@@ -963,7 +963,7 @@ func TestAgReqFieldAsInterface(t *testing.T) {
 
 	path := []string{utils.MetaCgreq, utils.Usage}
 	var expVal interface{}
-	expVal = &utils.NMSlice{&config.NMItem{Data: 3 * time.Minute}}
+	expVal = 3 * time.Minute
 	if rply, err := agReq.FieldAsInterface(path); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rply, expVal) {
@@ -971,7 +971,7 @@ func TestAgReqFieldAsInterface(t *testing.T) {
 	}
 
 	path = []string{utils.MetaCgreq, utils.ToR}
-	expVal = &utils.NMSlice{&config.NMItem{Data: utils.VOICE}}
+	expVal = utils.VOICE
 	if rply, err := agReq.FieldAsInterface(path); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rply, expVal) {
@@ -1827,13 +1827,13 @@ func TestAgReqSetFieldsInCache(t *testing.T) {
 
 	if val, err := agReq.FieldAsInterface([]string{utils.MetaCache, utils.Tenant}); err != nil {
 		t.Error(err)
-	} else if (*val.(*utils.NMSlice))[0].Interface() != "cgrates.org" {
+	} else if val != "cgrates.org" {
 		t.Errorf("expecting: %+v, \n received: %+v ", "cgrates.org", utils.ToJSON(val))
 	}
 
 	if val, err := agReq.FieldAsInterface([]string{utils.MetaCache, utils.Account}); err != nil {
 		t.Error(err)
-	} else if (*val.(*utils.NMSlice))[0].Interface() != "1001" {
+	} else if val != "1001" {
 		t.Errorf("expecting: %+v, \n received: %+v ", "1001", utils.ToJSON(val))
 	}
 
@@ -1870,13 +1870,13 @@ func TestAgReqSetFieldsInCacheWithTimeOut(t *testing.T) {
 
 	if val, err := agReq.FieldAsInterface([]string{utils.MetaCache, utils.Tenant}); err != nil {
 		t.Error(err)
-	} else if (*val.(*utils.NMSlice))[0].Interface() != "cgrates.org" {
+	} else if val != "cgrates.org" {
 		t.Errorf("expecting: %+v, \n received: %+v ", "cgrates.org", utils.ToJSON(val))
 	}
 
 	if val, err := agReq.FieldAsInterface([]string{utils.MetaCache, utils.Account}); err != nil {
 		t.Error(err)
-	} else if (*val.(*utils.NMSlice))[0].Interface() != "1001" {
+	} else if val != "1001" {
 		t.Errorf("expecting: %+v, \n received: %+v ", "1001", utils.ToJSON(val))
 	}
 
@@ -1959,8 +1959,11 @@ func TestAgReqFiltersInsideField(t *testing.T) {
 		v.ComputePath()
 	}
 	if err := agReq.SetFields(tplFlds); err != nil {
-		// here we get error
-		//t.Error(err)
+		t.Error(err)
 	}
-
+	if val, err := agReq.FieldAsInterface([]string{utils.MetaCgreq, utils.AnswerTime}); err != nil {
+		t.Error(err)
+	} else if !val.(time.Time).Equal(time.Date(2018, 10, 4, 15, 3, 10, 0, time.UTC)) {
+		t.Errorf("expecting: %+v, \n received: %+v ", time.Date(2018, 10, 4, 15, 3, 10, 0, time.UTC), val)
+	}
 }
