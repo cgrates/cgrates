@@ -2492,7 +2492,7 @@ func (tpr *TpReader) addDefaultTimings() {
 		Months:    utils.Months{},
 		MonthDays: utils.MonthDays{},
 		WeekDays:  utils.WeekDays{},
-		StartTime: utils.MetaEveryMinute,
+		StartTime: utils.ConcatenatedKey(utils.Meta, utils.Meta, strconv.Itoa(time.Now().Second())),
 		EndTime:   "",
 	}
 	tpr.timings[utils.MetaHourly] = &utils.TPTiming{
@@ -2501,16 +2501,17 @@ func (tpr *TpReader) addDefaultTimings() {
 		Months:    utils.Months{},
 		MonthDays: utils.MonthDays{},
 		WeekDays:  utils.WeekDays{},
-		StartTime: utils.MetaHourly,
+		StartTime: utils.ConcatenatedKey(utils.Meta, strconv.Itoa(time.Now().Minute()), strconv.Itoa(time.Now().Second())),
 		EndTime:   "",
 	}
+	startTime := time.Now().Format("15:04:05")
 	tpr.timings[utils.MetaDaily] = &utils.TPTiming{
 		ID:        utils.MetaDaily,
 		Years:     utils.Years{},
 		Months:    utils.Months{},
 		MonthDays: utils.MonthDays{},
 		WeekDays:  utils.WeekDays{},
-		StartTime: "00:00:00",
+		StartTime: startTime,
 		EndTime:   "",
 	}
 	tpr.timings[utils.MetaWeekly] = &utils.TPTiming{
@@ -2518,26 +2519,26 @@ func (tpr *TpReader) addDefaultTimings() {
 		Years:     utils.Years{},
 		Months:    utils.Months{},
 		MonthDays: utils.MonthDays{},
-		WeekDays:  utils.WeekDays{0},
-		StartTime: "00:00:00",
+		WeekDays:  utils.WeekDays{time.Now().Weekday()},
+		StartTime: startTime,
 		EndTime:   "",
 	}
 	tpr.timings[utils.MetaMonthly] = &utils.TPTiming{
 		ID:        utils.MetaMonthly,
 		Years:     utils.Years{},
 		Months:    utils.Months{},
-		MonthDays: utils.MonthDays{1},
+		MonthDays: utils.MonthDays{time.Now().Day()},
 		WeekDays:  utils.WeekDays{},
-		StartTime: "00:00:00",
+		StartTime: startTime,
 		EndTime:   "",
 	}
 	tpr.timings[utils.MetaYearly] = &utils.TPTiming{
 		ID:        utils.MetaYearly,
 		Years:     utils.Years{},
-		Months:    utils.Months{1},
-		MonthDays: utils.MonthDays{1},
+		Months:    utils.Months{time.Now().Month()},
+		MonthDays: utils.MonthDays{time.Now().Day()},
 		WeekDays:  utils.WeekDays{},
-		StartTime: "00:00:00",
+		StartTime: startTime,
 		EndTime:   "",
 	}
 
