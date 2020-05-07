@@ -669,14 +669,19 @@ func (apiv1 *APIerSv1) SetActionPlan(attrs AttrSetActionPlan, reply *string) (er
 				return 0, fmt.Errorf("%s:%s", utils.ErrBrokenReference.Error(), apiAtm.ActionsId)
 			}
 			timing := new(engine.RITiming)
-			timing.Years.Parse(apiAtm.Years, ";")
-			timing.Months.Parse(apiAtm.Months, ";")
-			timing.MonthDays.Parse(apiAtm.MonthDays, ";")
-			timing.WeekDays.Parse(apiAtm.WeekDays, ";")
-			if !verifyFormat(apiAtm.Time) {
-				return 0, fmt.Errorf("%s:%s", utils.ErrUnsupportedFormat.Error(), apiAtm.Time)
+			if dfltTiming, isDefault := checkDefaultTiming(apiAtm.Time); isDefault {
+				timing = dfltTiming
+			} else {
+				timing.Years.Parse(apiAtm.Years, ";")
+				timing.Months.Parse(apiAtm.Months, ";")
+				timing.MonthDays.Parse(apiAtm.MonthDays, ";")
+				timing.WeekDays.Parse(apiAtm.WeekDays, ";")
+				if !verifyFormat(apiAtm.Time) {
+					return 0, fmt.Errorf("%s:%s", utils.ErrUnsupportedFormat.Error(), apiAtm.Time)
+				}
+				timing.StartTime = apiAtm.Time
 			}
-			timing.StartTime = apiAtm.Time
+
 			ap.ActionTimings = append(ap.ActionTimings, &engine.ActionTiming{
 				Uuid:      utils.GenUUID(),
 				Weight:    apiAtm.Weight,
@@ -729,8 +734,6 @@ func (apiv1 *APIerSv1) SetActionPlan(attrs AttrSetActionPlan, reply *string) (er
 
 func verifyFormat(tStr string) bool {
 	if tStr == utils.EmptyString ||
-		tStr == utils.MetaEveryMinute ||
-		tStr == utils.MetaHourly ||
 		tStr == utils.ASAP {
 		return true
 	}
@@ -750,6 +753,69 @@ func verifyFormat(tStr string) bool {
 		}
 	}
 	return true
+}
+
+// checkDefaultTiming will check the tStr if it's of the the default timings ( the same as in TPReader )
+// and will compute it properly
+func checkDefaultTiming(tStr string) (rTm *engine.RITiming, isDefault bool) {
+	startTime := time.Now().Format("15:04:05")
+	switch tStr {
+	case utils.MetaEveryMinute:
+		return &engine.RITiming{
+			Years:     utils.Years{},
+			Months:    utils.Months{},
+			MonthDays: utils.MonthDays{},
+			WeekDays:  utils.WeekDays{},
+			StartTime: utils.ConcatenatedKey(utils.Meta, utils.Meta, strconv.Itoa(time.Now().Second())),
+			EndTime:   "",
+		}, true
+	case utils.MetaHourly:
+		return &engine.RITiming{
+			Years:     utils.Years{},
+			Months:    utils.Months{},
+			MonthDays: utils.MonthDays{},
+			WeekDays:  utils.WeekDays{},
+			StartTime: utils.ConcatenatedKey(utils.Meta, strconv.Itoa(time.Now().Minute()), strconv.Itoa(time.Now().Second())),
+			EndTime:   "",
+		}, true
+	case utils.MetaDaily:
+		return &engine.RITiming{
+			Years:     utils.Years{},
+			Months:    utils.Months{},
+			MonthDays: utils.MonthDays{},
+			WeekDays:  utils.WeekDays{},
+			StartTime: startTime,
+			EndTime:   ""}, true
+	case utils.MetaWeekly:
+		return &engine.RITiming{
+			Years:     utils.Years{},
+			Months:    utils.Months{},
+			MonthDays: utils.MonthDays{},
+			WeekDays:  utils.WeekDays{time.Now().Weekday()},
+			StartTime: startTime,
+			EndTime:   "",
+		}, true
+	case utils.MetaMonthly:
+		return &engine.RITiming{
+			Years:     utils.Years{},
+			Months:    utils.Months{},
+			MonthDays: utils.MonthDays{time.Now().Day()},
+			WeekDays:  utils.WeekDays{},
+			StartTime: startTime,
+			EndTime:   "",
+		}, true
+	case utils.MetaYearly:
+		return &engine.RITiming{
+			Years:     utils.Years{},
+			Months:    utils.Months{time.Now().Month()},
+			MonthDays: utils.MonthDays{time.Now().Day()},
+			WeekDays:  utils.WeekDays{},
+			StartTime: startTime,
+			EndTime:   "",
+		}, true
+	default:
+		return nil, false
+	}
 }
 
 type AttrGetActionPlan struct {
