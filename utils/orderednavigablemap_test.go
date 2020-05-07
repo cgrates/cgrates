@@ -18,7 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
-	"math/rand"
 	"reflect"
 	"testing"
 )
@@ -748,59 +747,7 @@ func TestOrderedNavigableRemote(t *testing.T) {
 	}
 }
 
-var generator = rand.New(rand.NewSource(42))
-var gen = generateRandomTemplate(10_000)
-
-type benchData struct {
-	path      []string
-	pathItems PathItems
-	strPath   string
-	data      string
-}
-
-func generateRandomPath() (out []string) {
-	size := generator.Intn(16) + 1
-	out = make([]string, size)
-	for i := 0; i < size; i++ {
-		out[i] = Sha1(GenUUID())
-	}
-	return
-}
-func generateRandomTemplate(size int) (out []benchData) {
-	out = make([]benchData, size)
-	for i := 0; i < size; i++ {
-		out[i].path = generateRandomPath()
-		out[i].data = UUIDSha1Prefix()
-		out[i].pathItems = NewPathToItem(out[i].path)
-		out[i].strPath = out[i].pathItems.String()
-		// out[i].pathItems[len(out[i].pathItems)-1].Index = IntPointer(0)
-	}
-	return
-}
-
-func BenchmarkOrderdNavigableMapSet2(b *testing.B) {
-	nm := NewOrderedNavigableMap()
-	b.ResetTimer()
-	for n := 0; n < b.N; n++ {
-		for _, data := range gen {
-			if _, err := nm.Set(&FullPath{PathItems: data.pathItems, Path: data.strPath}, NewNMData(data.data)); err != nil {
-				b.Log(err, data.path)
-			}
-		}
-	}
-}
-
 /*
-func BenchmarkNavigableMapOld1Set(b *testing.B) {
-	nm := NewNavigableMapOld1(nil)
-	b.ResetTimer()
-	for n := 0; n < b.N; n++ {
-		for _, data := range gen {
-			nm.Set(data.path, data.data, false)
-		}
-	}
-}
-
 func BenchmarkOrderdNavigableMapSet(b *testing.B) {
 	nm := NewOrderedNavigableMap()
 	b.ResetTimer()
