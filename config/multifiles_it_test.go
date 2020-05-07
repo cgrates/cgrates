@@ -206,7 +206,16 @@ func TestMfHttpAgentMultipleFields(t *testing.T) {
 				ReplyFields: []*FCTemplate{},
 			}}},
 	}
-
+	for _, profile := range expected {
+		for _, rp := range profile.RequestProcessors {
+			for _, v := range rp.ReplyFields {
+				v.ComputePath()
+			}
+			for _, v := range rp.RequestFields {
+				v.ComputePath()
+			}
+		}
+	}
 	if !reflect.DeepEqual(mfCgrCfg.HttpAgentCfg(), expected) {
 		t.Errorf("Expected: %+v\n, recived: %+v", utils.ToJSON(expected), utils.ToJSON(mfCgrCfg.HttpAgentCfg()))
 	}

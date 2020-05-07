@@ -441,6 +441,9 @@ func testCGRConfigReloadERs(t *testing.T) {
 		{Tag: utils.AnswerTime, Path: utils.MetaCgreq + utils.NestingSep + utils.AnswerTime, Type: utils.MetaVariable, Value: NewRSRParsersMustCompile("~*req.12", true, utils.INFIELD_SEP), Mandatory: true},
 		{Tag: utils.Usage, Path: utils.MetaCgreq + utils.NestingSep + utils.Usage, Type: utils.MetaVariable, Value: NewRSRParsersMustCompile("~*req.13", true, utils.INFIELD_SEP), Mandatory: true},
 	}
+	for _, v := range content {
+		v.ComputePath()
+	}
 	expAttr := &ERsCfg{
 		Enabled:       true,
 		SessionSConns: []string{utils.MetaLocalHost},
