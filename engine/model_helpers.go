@@ -1908,7 +1908,7 @@ func (tps TPRoutes) CSVHeader() (result []string) {
 func (tps TPRoutes) AsTPRouteProfile() (result []*utils.TPRouteProfile) {
 	filtermap := make(map[string]utils.StringMap)
 	mst := make(map[string]*utils.TPRouteProfile)
-	suppliersMap := make(map[string]map[string]*utils.TPRoute)
+	routeMap := make(map[string]map[string]*utils.TPRoute)
 	sortingParameterMap := make(map[string]utils.StringMap)
 	for _, tp := range tps {
 		tenID := (&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()
@@ -1923,10 +1923,14 @@ func (tps TPRoutes) AsTPRouteProfile() (result []*utils.TPRouteProfile) {
 			}
 		}
 		if tp.RouteID != utils.EmptyString {
-			if _, has := suppliersMap[tenID]; !has {
-				suppliersMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()] = make(map[string]*utils.TPRoute)
+			if _, has := routeMap[tenID]; !has {
+				routeMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()] = make(map[string]*utils.TPRoute)
 			}
-			sup, found := suppliersMap[tenID][tp.RouteID]
+			routeID := tp.RouteID
+			if tp.RouteFilterIDs != "" {
+				routeID = utils.ConcatenatedKey(routeID, tp.RouteFilterIDs)
+			}
+			sup, found := routeMap[tenID][routeID]
 			if !found {
 				sup = &utils.TPRoute{
 					ID:      tp.RouteID,
@@ -1957,7 +1961,7 @@ func (tps TPRoutes) AsTPRouteProfile() (result []*utils.TPRouteProfile) {
 				accSplit := strings.Split(tp.RouteAccountIDs, utils.INFIELD_SEP)
 				sup.AccountIDs = append(sup.AccountIDs, accSplit...)
 			}
-			suppliersMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()][tp.RouteID] = sup
+			routeMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()][routeID] = sup
 		}
 		if tp.SortingParameters != "" {
 			if _, has := sortingParameterMap[tenID]; !has {
@@ -1996,7 +2000,7 @@ func (tps TPRoutes) AsTPRouteProfile() (result []*utils.TPRouteProfile) {
 	i := 0
 	for tntID, th := range mst {
 		result[i] = th
-		for _, supdata := range suppliersMap[tntID] {
+		for _, supdata := range routeMap[tntID] {
 			result[i].Routes = append(result[i].Routes, supdata)
 		}
 		for filterdata := range filtermap[tntID] {
