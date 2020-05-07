@@ -96,10 +96,12 @@ func TestRadComposedFieldValue(t *testing.T) {
 	if err := pkt.AddAVPWithName("Cisco-NAS-Port", "CGR1", "Cisco"); err != nil {
 		t.Error(err)
 	}
-	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", nil, nil, nil)
-	agReq.Vars.Set([]string{MetaRadReqType}, MetaRadAcctStart, false, false)
-	agReq.Vars.Set([]string{"Cisco"}, "CGR1", false, false)
-	agReq.Vars.Set([]string{"User-Name"}, "flopsy", false, false)
+	vars := utils.NavigableMap2{
+		MetaRadReqType: utils.NewNMData(MetaRadAcctStart),
+		"Cisco":        utils.NewNMData("CGR1"),
+		"User-Name":    utils.NewNMData("flopsy"),
+	}
+	agReq := NewAgentRequest(nil, vars, nil, nil, nil, "cgrates.org", "", nil, nil, nil)
 	eOut := "*radAcctStart|flopsy|CGR1"
 	if out := radComposedFieldValue(pkt, agReq,
 		config.NewRSRParsersMustCompile("~*vars.*radReqType;|;~*vars.User-Name;|;~*vars.Cisco", true, utils.INFIELD_SEP)); out != eOut {
@@ -116,10 +118,12 @@ func TestRadFieldOutVal(t *testing.T) {
 		t.Error(err)
 	}
 	eOut := fmt.Sprintf("%s|flopsy|CGR1", MetaRadAcctStart)
-	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", nil, nil, nil)
-	agReq.Vars.Set([]string{MetaRadReqType}, MetaRadAcctStart, false, false)
-	agReq.Vars.Set([]string{"Cisco"}, "CGR1", false, false)
-	agReq.Vars.Set([]string{"User-Name"}, "flopsy", false, false)
+	vars := utils.NavigableMap2{
+		MetaRadReqType: utils.NewNMData(MetaRadAcctStart),
+		"Cisco":        utils.NewNMData("CGR1"),
+		"User-Name":    utils.NewNMData("flopsy"),
+	}
+	agReq := NewAgentRequest(nil, vars, nil, nil, nil, "cgrates.org", "", nil, nil, nil)
 	cfgFld := &config.FCTemplate{Tag: "ComposedTest", Type: utils.META_COMPOSED, Path: utils.Destination,
 		Value: config.NewRSRParsersMustCompile("~*vars.*radReqType;|;~*vars.User-Name;|;~*vars.Cisco", true, utils.INFIELD_SEP), Mandatory: true}
 	if outVal, err := radFieldOutVal(pkt, agReq, cfgFld); err != nil {
