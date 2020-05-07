@@ -54,6 +54,8 @@ cgrates (0.11.0~dev) UNRELEASED; urgency=medium
   * [SessionS] Added support for *stir_initiate
   * [RouteS] Renaming from SupplierS to RouteS
   * [AgentRequest] Improved NavigableMap
+  * [General] Default timingIDs start from time.Now() (i.e. *monthly time.Now() + 1 month )
+  * [AgentS] FieldAsInterface return data instead of NMItem
 
  -- Alexandru Tripon <alexandru.tripon@itsyscom.com>  Wed, 19 Feb 2020 13:25:52 +0200
 

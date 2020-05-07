@@ -137,6 +137,12 @@ func (ar *AgentRequest) FieldAsInterface(fldPath []string) (val interface{}, err
 	case utils.MetaOpts:
 		val, err = ar.Opts.FieldAsInterface(fldPath[1:])
 	}
+	if err != nil {
+		return
+	}
+	if nmItems, isNMItems := val.(*utils.NMSlice); isNMItems { // special handling of NMItems, take the last value out of it
+		val = (*nmItems)[len(*nmItems)-1].Interface()
+	}
 	return
 }
 
@@ -168,9 +174,6 @@ func (ar *AgentRequest) FieldAsString(fldPath []string) (val string, err error) 
 	var iface interface{}
 	if iface, err = ar.FieldAsInterface(fldPath); err != nil {
 		return
-	}
-	if nmItems, isNMItems := iface.(*utils.NMSlice); isNMItems { // special handling of NMItems, take the last value out of it
-		iface = (*nmItems)[len(*nmItems)-1].Interface()
 	}
 	return utils.IfaceAsString(iface), nil
 }
