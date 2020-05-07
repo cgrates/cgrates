@@ -158,7 +158,7 @@ func (ar *AgentRequest) Field(fldPath utils.PathItems) (val utils.NMInterface, e
 	case utils.MetaTmp:
 		val, err = ar.tmp.Field(fldPath[1:])
 	case utils.MetaOpts:
-		val, err = ar.tmp.Field(fldPath[1:])
+		val, err = ar.Opts.Field(fldPath[1:])
 	}
 	return
 }
@@ -263,7 +263,7 @@ func (ar *AgentRequest) Set(fullPath *utils.FullPath, nm utils.NMInterface) (add
 	case utils.MetaTmp:
 		return ar.tmp.Set(fullPath.PathItems[1:], nm)
 	case utils.MetaOpts:
-		return ar.diamreq.Set(&utils.FullPath{
+		return ar.Opts.Set(&utils.FullPath{
 			PathItems: fullPath.PathItems[1:],
 			Path:      fullPath.Path[6:],
 		}, nm)
