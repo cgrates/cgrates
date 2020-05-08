@@ -770,25 +770,56 @@ func TestLoaderProcessSuppliers(t *testing.T) {
 		Suppliers: []*engine.Supplier{
 			&engine.Supplier{
 				ID:                 "supplier1",
-				FilterIDs:          []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
-				AccountIDs:         []string{"Account1", "Account1_1", "Account2"},
-				RatingPlanIDs:      []string{"RPL_1", "RPL_2", "RPL_3"},
-				ResourceIDs:        []string{"ResGroup1", "ResGroup2", "ResGroup3", "ResGroup4"},
-				StatIDs:            []string{"Stat1", "Stat2", "Stat3"},
+				FilterIDs:          []string{"FLTR_DST_DE"},
+				AccountIDs:         []string{"Account2"},
+				RatingPlanIDs:      []string{"RPL_3"},
+				ResourceIDs:        []string{"ResGroup3"},
+				StatIDs:            []string{"Stat2"},
+				Weight:             10,
+				Blocker:            false,
+				SupplierParameters: utils.EmptyString,
+			},
+			&engine.Supplier{
+				ID:                 "supplier1",
+				FilterIDs:          []string{"FLTR_ACNT_dan"},
+				AccountIDs:         []string{"Account1", "Account1_1"},
+				RatingPlanIDs:      []string{"RPL_1"},
+				ResourceIDs:        []string{"ResGroup1"},
+				StatIDs:            []string{"Stat1"},
 				Weight:             10,
 				Blocker:            true,
 				SupplierParameters: "param1",
 			},
+			&engine.Supplier{
+				ID:                 "supplier1",
+				RatingPlanIDs:      []string{"RPL_2"},
+				ResourceIDs:        []string{"ResGroup2", "ResGroup4"},
+				StatIDs:            []string{"Stat3"},
+				Weight:             10,
+				Blocker:            false,
+				SupplierParameters: utils.EmptyString,
+			},
 		},
 		Weight: 20,
 	}
-
+	sort.Slice(eSp3.Suppliers, func(i, j int) bool {
+		return strings.Compare(eSp3.Suppliers[i].ID+
+			strings.Join(eSp3.Suppliers[i].FilterIDs, utils.CONCATENATED_KEY_SEP),
+			eSp3.Suppliers[j].ID+strings.Join(eSp3.Suppliers[j].FilterIDs, utils.CONCATENATED_KEY_SEP)) < 0
+	})
 	if aps, err := ldr.dm.GetSupplierProfile("cgrates.org", "SPP_1",
 		true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(eSp3, aps) {
-		t.Errorf("expecting: %s, received: %s",
-			utils.ToJSON(eSp3), utils.ToJSON(aps))
+	} else {
+		sort.Slice(aps.Suppliers, func(i, j int) bool {
+			return strings.Compare(aps.Suppliers[i].ID+
+				strings.Join(aps.Suppliers[i].FilterIDs, utils.CONCATENATED_KEY_SEP),
+				aps.Suppliers[j].ID+strings.Join(aps.Suppliers[j].FilterIDs, utils.CONCATENATED_KEY_SEP)) < 0
+		})
+		if !reflect.DeepEqual(eSp3, aps) {
+			t.Errorf("expecting: %s, received: %s",
+				utils.ToJSON(eSp3), utils.ToJSON(aps))
+		}
 	}
 }
 

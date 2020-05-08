@@ -23,6 +23,7 @@ cgrates (0.10.1~dev) UNRELEASED; urgency=medium
   * [SessionS] Update subflags for *rals ( *authorize and *initiate )
   * [AgentRequest] Improved NavigableMap
   * [AgentRequest] FieldAsInterface return Data instead of NMItem
+  * [SupplierS] Allow multiple suppliers with the same ID
 
  -- Alexandru Tripon <alexandru.tripon@itsyscom.com>  Wed, 19 Feb 2020 15:22:59 +0200
 

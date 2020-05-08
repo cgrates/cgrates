@@ -67,10 +67,11 @@ var (
 		testV1SplSRemSupplierProfiles,
 		testV1SplSGetSupplierForEvent,
 		// reset the database and load the TP again
-		// testV1SplSInitDataDb,
-		// testV1SplSFromFolder,
+		testV1SplSInitDataDb,
+		testV1SplSFromFolder,
 		// for the moment we decide to comment the tests
 		// testV1SplsOneSupplierWithoutDestination,
+		testV1SplMultipleSupplierSameID,
 		testV1SplSupplierPing,
 		testV1SplSStopEngine,
 	}
@@ -1116,6 +1117,120 @@ func testV1SplsOneSupplierWithoutDestination(t *testing.T) {
 	if err := splSv1Rpc.Call(utils.SupplierSv1GetSuppliers,
 		ev, &suplsReply); err != nil {
 		t.Error(err)
+	}
+}
+
+func testV1SplMultipleSupplierSameID(t *testing.T) {
+	var reply *engine.SupplierProfile
+	if err := splSv1Rpc.Call(utils.APIerSv1GetSupplierProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "MULTIPLE_ROUTES"}, &reply); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	splPrf = &SupplierWithCache{
+		SupplierProfile: &engine.SupplierProfile{
+			Tenant:    "cgrates.org",
+			ID:        "MULTIPLE_ROUTES",
+			FilterIDs: []string{"*string:~*req.Account:SpecialCase2"},
+			Sorting:   utils.MetaLC,
+			Suppliers: []*engine.Supplier{
+				{
+					ID:            "Route1",
+					RatingPlanIDs: []string{"RP_LOCAL"},
+					FilterIDs:     []string{"*string:~*req.Month:April"},
+					Weight:        10,
+				},
+				{
+					ID:            "Route1",
+					RatingPlanIDs: []string{"RP_MOBILE"},
+					FilterIDs:     []string{"*string:~*req.Month:May"},
+					Weight:        10,
+				},
+			},
+			Weight: 100,
+		},
+	}
+
+	var result string
+	if err := splSv1Rpc.Call(utils.APIerSv1SetSupplierProfile, splPrf, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	tNow := time.Now()
+	ev := &engine.ArgsGetSuppliers{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			Time:   &tNow,
+			ID:     "testV1RouteMultipleRouteSameID",
+			Event: map[string]interface{}{
+				utils.Account:     "SpecialCase2",
+				utils.Destination: "+135876",
+				utils.SetupTime:   utils.MetaNow,
+				utils.Usage:       "2m",
+				"Month":           "April",
+			},
+		},
+	}
+	eSpls := engine.SortedSuppliers{
+		ProfileID: "MULTIPLE_ROUTES",
+		Sorting:   utils.MetaLC,
+		Count:     1,
+		SortedSuppliers: []*engine.SortedSupplier{
+			{
+				SupplierID: "Route1",
+				SortingData: map[string]interface{}{
+					utils.Cost:     0.0396,
+					"RatingPlanID": "RP_LOCAL",
+					utils.Weight:   10.0,
+				},
+			},
+		},
+	}
+	var suplsReply engine.SortedSuppliers
+	if err := splSv1Rpc.Call(utils.SupplierSv1GetSuppliers,
+		ev, &suplsReply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eSpls, suplsReply) {
+		t.Errorf("Expecting: %s, received: %s",
+			utils.ToJSON(eSpls), utils.ToJSON(suplsReply))
+	}
+
+	ev = &engine.ArgsGetSuppliers{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			Time:   &tNow,
+			ID:     "testV1RouteMultipleRouteSameID",
+			Event: map[string]interface{}{
+				utils.Account:     "SpecialCase2",
+				utils.Destination: "+135876",
+				utils.SetupTime:   utils.MetaNow,
+				utils.Usage:       "2m",
+				"Month":           "May",
+			},
+		},
+	}
+	eSpls = engine.SortedSuppliers{
+		ProfileID: "MULTIPLE_ROUTES",
+		Sorting:   utils.MetaLC,
+		Count:     1,
+		SortedSuppliers: []*engine.SortedSupplier{
+			{
+				SupplierID: "Route1",
+				SortingData: map[string]interface{}{
+					utils.Cost:     0.0204,
+					"RatingPlanID": "RP_MOBILE",
+					utils.Weight:   10.0,
+				},
+			},
+		},
+	}
+	if err := splSv1Rpc.Call(utils.SupplierSv1GetSuppliers,
+		ev, &suplsReply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eSpls, suplsReply) {
+		t.Errorf("Expecting: %s, received: %s",
+			utils.ToJSON(eSpls), utils.ToJSON(suplsReply))
 	}
 }
 
