@@ -115,6 +115,43 @@ func TestAsSlice(t *testing.T) {
 	}
 }
 
+func TestAsOrderedSlice(t *testing.T) {
+	s := StringSet{}
+	eOut := make([]string, 0)
+	if rcv := s.AsOrderedSlice(); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+	s = StringSet{
+		"test3":  struct{}{},
+		"test12": struct{}{},
+		"test2":  struct{}{}}
+	eOut = []string{"test12", "test2", "test3"}
+	rcv := s.AsOrderedSlice()
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+}
+
+func TestSetSha1(t *testing.T) {
+	s := StringSet{
+		"test3":  struct{}{},
+		"test12": struct{}{},
+		"test2":  struct{}{}}
+	eOut := "8fbb49ecf2ee4116bc492505865d2125a78f2161"
+	if rcv := s.Sha1(); rcv != eOut {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+
+	s2 := StringSet{
+		"test2":  struct{}{},
+		"test3":  struct{}{},
+		"test12": struct{}{},
+	}
+	if rcv := s2.Sha1(); rcv != eOut {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+}
+
 func TestSize(t *testing.T) {
 	s := StringSet{}
 	if rcv := s.Size(); rcv != 0 {
