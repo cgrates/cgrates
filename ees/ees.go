@@ -34,10 +34,10 @@ func onCacheEvicted(itmID string, value interface{}) {
 	ee.OnEvicted(itmID, value)
 }
 
-// NewERService instantiates the EEService
-func NewEEService(cfg *config.CGRConfig, filterS *engine.FilterS,
-	connMgr *engine.ConnManager) *EEService {
-	return &EEService{
+// NewERService instantiates the EventExporterS
+func NewEventExporterS(cfg *config.CGRConfig, filterS *engine.FilterS,
+	connMgr *engine.ConnManager) *EventExporterS {
+	return &EventExporterS{
 		cfg:     cfg,
 		filterS: filterS,
 		connMgr: connMgr,
@@ -45,8 +45,8 @@ func NewEEService(cfg *config.CGRConfig, filterS *engine.FilterS,
 	}
 }
 
-// EEService is managing the EventExporters
-type EEService struct {
+// EventExporterS is managing the EventExporters
+type EventExporterS struct {
 	cfg     *config.CGRConfig
 	filterS *engine.FilterS
 	connMgr *engine.ConnManager
@@ -56,9 +56,9 @@ type EEService struct {
 }
 
 // ListenAndServe keeps the service alive
-func (eeS *EEService) ListenAndServe(exitChan chan bool, cfgRld chan struct{}) (err error) {
+func (eeS *EventExporterS) ListenAndServe(exitChan chan bool, cfgRld chan struct{}) (err error) {
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s>",
-		utils.CoreS, utils.EventExporterService))
+		utils.CoreS, utils.EventExporterS))
 	for {
 		select {
 		case e := <-exitChan: // global exit
@@ -68,7 +68,7 @@ func (eeS *EEService) ListenAndServe(exitChan chan bool, cfgRld chan struct{}) (
 		case rld := <-cfgRld: // configuration was reloaded, destroy the cache
 			cfgRld <- rld
 			utils.Logger.Info(fmt.Sprintf("<%s> reloading configuration internals.",
-				utils.EventExporterService))
+				utils.EventExporterS))
 			eeS.setupCache(eeS.cfg.EEsCfg().Cache)
 		}
 	}
@@ -76,14 +76,19 @@ func (eeS *EEService) ListenAndServe(exitChan chan bool, cfgRld chan struct{}) (
 }
 
 // Shutdown is called to shutdown the service
-func (eeS *EEService) Shutdown() (err error) {
-	utils.Logger.Info(fmt.Sprintf("<%s> shutdown <%s>", utils.CoreS, utils.EventExporterService))
+func (eeS *EventExporterS) Shutdown() (err error) {
+	utils.Logger.Info(fmt.Sprintf("<%s> shutdown <%s>", utils.CoreS, utils.EventExporterS))
 	eeS.setupCache(nil) // cleanup exporters
 	return
 }
 
+// Call implements rpcclient.ClientConnector interface for internal RPC
+func (eeS *EventExporterS) Call(serviceMethod string, args interface{}, reply interface{}) error {
+	return utils.RPCCall(eeS, serviceMethod, args, reply)
+}
+
 // setupCache deals with cleanup and initialization of the cache of EventExporters
-func (eeS *EEService) setupCache(chCfgs map[string]*config.CacheParamCfg) {
+func (eeS *EventExporterS) setupCache(chCfgs map[string]*config.CacheParamCfg) {
 	eeS.eesMux.Lock()
 	for chID, ch := range eeS.eesChs { // cleanup
 		ch.Clear()
@@ -99,7 +104,7 @@ func (eeS *EEService) setupCache(chCfgs map[string]*config.CacheParamCfg) {
 	eeS.eesMux.Unlock()
 }
 
-func (eeS *EEService) attrSProcessEvent(cgrEv *utils.CGREventWithOpts, attrIDs []string, ctx string) (err error) {
+func (eeS *EventExporterS) attrSProcessEvent(cgrEv *utils.CGREventWithOpts, attrIDs []string, ctx string) (err error) {
 	var rplyEv engine.AttrSProcessEventReply
 	attrArgs := &engine.AttrArgsProcessEvent{
 		AttributeIDs:  attrIDs,
@@ -121,7 +126,7 @@ func (eeS *EEService) attrSProcessEvent(cgrEv *utils.CGREventWithOpts, attrIDs [
 }
 
 // ProcessEvent will be called each time a new event is received from readers
-func (eeS *EEService) V1ProcessEvent(cgrEv *utils.CGREventWithOpts) (err error) {
+func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithOpts) (err error) {
 	eeS.cfg.RLocks(config.EEsJson)
 	defer eeS.cfg.RUnlocks(config.EEsJson)
 
@@ -180,7 +185,7 @@ func (eeS *EEService) V1ProcessEvent(cgrEv *utils.CGREventWithOpts) (err error) 
 			if err := ee.ExportEvent(cgrEv.CGREvent); err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> with id <%s>, error: <%s>",
-						utils.EventExporterService, ee.ID(), err.Error()))
+						utils.EventExporterS, ee.ID(), err.Error()))
 				withErr = true
 			}
 			if evict {

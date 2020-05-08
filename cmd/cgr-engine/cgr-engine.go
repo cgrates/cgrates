@@ -114,7 +114,8 @@ func startRpc(server *utils.Server, internalRaterChan,
 	internalCdrSChan, internalRsChan, internalStatSChan,
 	internalAttrSChan, internalChargerSChan, internalThdSChan, internalSuplSChan,
 	internalSMGChan, internalAnalyzerSChan, internalDispatcherSChan,
-	internalLoaderSChan, internalRALsv1Chan, internalCacheSChan chan rpcclient.ClientConnector,
+	internalLoaderSChan, internalRALsv1Chan, internalCacheSChan,
+	internalEEsChan chan rpcclient.ClientConnector,
 	exitChan chan bool) {
 	if !cfg.DispatcherSCfg().Enabled {
 		select { // Any of the rpc methods will unlock listening to rpc requests
@@ -144,6 +145,8 @@ func startRpc(server *utils.Server, internalRaterChan,
 			internalRALsv1Chan <- ralS
 		case chS := <-internalCacheSChan: // added in order to start the RPC before precaching is done
 			internalCacheSChan <- chS
+		case eeS := <-internalEEsChan:
+			internalEEsChan <- eeS
 		}
 	} else {
 		select {
@@ -518,6 +521,8 @@ func main() {
 		services.NewDiameterAgent(cfg, filterSChan, exitChan, connManager), // partial reload
 		services.NewHTTPAgent(cfg, filterSChan, server, connManager),       // no reload
 		ldrs, anz, dspS, dmService, storDBService,
+		services.NewEventExporterService(cfg, filterSChan,
+			connManager, server, exitChan, internalEEsChan),
 	)
 	srvManager.StartServices()
 	// Start FilterS
@@ -526,7 +531,7 @@ func main() {
 
 	initServiceManagerV1(internalServeManagerChan, srvManager, server)
 
-	// init internalRPCSet because we can have double connections in rpc_conns and one of it could be *internal
+	// init internalRPCSet to share internal connections among the engine
 	engine.IntRPC = engine.NewRPCClientSet()
 	engine.IntRPC.AddInternalRPCClient(utils.AnalyzerSv1, anz.GetIntenternalChan())
 	engine.IntRPC.AddInternalRPCClient(utils.APIerSv1, apiSv1.GetIntenternalChan())
@@ -557,7 +562,8 @@ func main() {
 		reS.GetIntenternalChan(), stS.GetIntenternalChan(),
 		attrS.GetIntenternalChan(), chrS.GetIntenternalChan(), tS.GetIntenternalChan(),
 		routeS.GetIntenternalChan(), smg.GetIntenternalChan(), anz.GetIntenternalChan(),
-		dspS.GetIntenternalChan(), ldrs.GetIntenternalChan(), rals.GetIntenternalChan(), internalCacheSChan, exitChan)
+		dspS.GetIntenternalChan(), ldrs.GetIntenternalChan(), rals.GetIntenternalChan(),
+		internalCacheSChan, internalEEsChan, exitChan)
 	<-exitChan
 
 	if *cpuProfDir != "" { // wait to end cpuProfiling

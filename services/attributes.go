@@ -54,8 +54,8 @@ type AttributeService struct {
 	server      *utils.Server
 
 	attrS    *engine.AttributeService
-	rpc      *v1.AttributeSv1
-	connChan chan rpcclient.ClientConnector
+	rpc      *v1.AttributeSv1               // useful on restart
+	connChan chan rpcclient.ClientConnector // publish the internal Subsystem when available
 }
 
 // Start should handle the sercive start
