@@ -1225,203 +1225,69 @@ func TestLoadFilters(t *testing.T) {
 }
 
 func TestLoadRouteProfiles(t *testing.T) {
-	eSppProfiles := map[utils.TenantID]*utils.TPRouteProfile{
-		utils.TenantID{Tenant: "cgrates.org", ID: "SPP_1"}: &utils.TPRouteProfile{
-			TPid:      testTPID,
-			Tenant:    "cgrates.org",
-			ID:        "SPP_1",
-			FilterIDs: []string{"*string:~*req.Account:dan"},
-			ActivationInterval: &utils.TPActivationInterval{
-				ActivationTime: "2014-07-29T15:00:00Z",
-			},
-			Sorting:           "*least_cost",
-			SortingParameters: []string{},
-			Routes: []*utils.TPRoute{
-				&utils.TPRoute{
-					ID:              "supplier1",
-					FilterIDs:       []string{"FLTR_ACNT_dan"},
-					AccountIDs:      []string{"Account1", "Account1_1"},
-					RatingPlanIDs:   []string{"RPL_1"},
-					ResourceIDs:     []string{"ResGroup1"},
-					StatIDs:         []string{"Stat1"},
-					Weight:          10,
-					Blocker:         true,
-					RouteParameters: "param1",
-				},
-				&utils.TPRoute{
-					ID:              "supplier1",
-					RatingPlanIDs:   []string{"RPL_2"},
-					ResourceIDs:     []string{"ResGroup2", "ResGroup4"},
-					StatIDs:         []string{"Stat3"},
-					Weight:          10,
-					Blocker:         false,
-					RouteParameters: utils.EmptyString,
-				},
-				&utils.TPRoute{
-					ID:              "supplier1",
-					FilterIDs:       []string{"FLTR_DST_DE"},
-					AccountIDs:      []string{"Account2"},
-					RatingPlanIDs:   []string{"RPL_3"},
-					ResourceIDs:     []string{"ResGroup3"},
-					StatIDs:         []string{"Stat2"},
-					Weight:          10,
-					Blocker:         false,
-					RouteParameters: utils.EmptyString,
-				},
-			},
-			Weight: 20,
+	eSppProfile := &utils.TPRouteProfile{
+		TPid:      testTPID,
+		Tenant:    "cgrates.org",
+		ID:        "SPP_1",
+		FilterIDs: []string{"*string:~*req.Account:dan"},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-29T15:00:00Z",
 		},
-	}
-	eSppProfiles2 := map[utils.TenantID]*utils.TPRouteProfile{
-		utils.TenantID{Tenant: "cgrates.org", ID: "SPP_1"}: &utils.TPRouteProfile{
-			TPid:      testTPID,
-			Tenant:    "cgrates.org",
-			ID:        "SPP_1",
-			FilterIDs: []string{"*string:~*req.Account:dan"},
-			ActivationInterval: &utils.TPActivationInterval{
-				ActivationTime: "2014-07-29T15:00:00Z",
+		Sorting:           "*least_cost",
+		SortingParameters: []string{},
+		Routes: []*utils.TPRoute{
+			&utils.TPRoute{
+				ID:              "supplier1",
+				FilterIDs:       []string{"FLTR_ACNT_dan"},
+				AccountIDs:      []string{"Account1", "Account1_1"},
+				RatingPlanIDs:   []string{"RPL_1"},
+				ResourceIDs:     []string{"ResGroup1"},
+				StatIDs:         []string{"Stat1"},
+				Weight:          10,
+				Blocker:         true,
+				RouteParameters: "param1",
 			},
-			Sorting:           "*least_cost",
-			SortingParameters: []string{},
-			Routes: []*utils.TPRoute{
-				&utils.TPRoute{
-					ID:              "supplier1",
-					RatingPlanIDs:   []string{"RPL_2"},
-					ResourceIDs:     []string{"ResGroup2", "ResGroup4"},
-					StatIDs:         []string{"Stat3"},
-					Weight:          10,
-					Blocker:         false,
-					RouteParameters: utils.EmptyString,
-				},
-				&utils.TPRoute{
-					ID:              "supplier1",
-					FilterIDs:       []string{"FLTR_ACNT_dan"},
-					AccountIDs:      []string{"Account1", "Account1_1"},
-					RatingPlanIDs:   []string{"RPL_1"},
-					ResourceIDs:     []string{"ResGroup1"},
-					StatIDs:         []string{"Stat1"},
-					Weight:          10,
-					Blocker:         true,
-					RouteParameters: "param1",
-				},
-				&utils.TPRoute{
-					ID:              "supplier1",
-					FilterIDs:       []string{"FLTR_DST_DE"},
-					AccountIDs:      []string{"Account2"},
-					RatingPlanIDs:   []string{"RPL_3"},
-					ResourceIDs:     []string{"ResGroup3"},
-					StatIDs:         []string{"Stat2"},
-					Weight:          10,
-					Blocker:         false,
-					RouteParameters: utils.EmptyString,
-				},
+			&utils.TPRoute{
+				ID:              "supplier1",
+				RatingPlanIDs:   []string{"RPL_2"},
+				ResourceIDs:     []string{"ResGroup2", "ResGroup4"},
+				StatIDs:         []string{"Stat3"},
+				Weight:          10,
+				Blocker:         false,
+				RouteParameters: utils.EmptyString,
 			},
-			Weight: 20,
+			&utils.TPRoute{
+				ID:              "supplier1",
+				FilterIDs:       []string{"FLTR_DST_DE"},
+				AccountIDs:      []string{"Account2"},
+				RatingPlanIDs:   []string{"RPL_3"},
+				ResourceIDs:     []string{"ResGroup3"},
+				StatIDs:         []string{"Stat2"},
+				Weight:          10,
+				Blocker:         false,
+				RouteParameters: utils.EmptyString,
+			},
 		},
+		Weight: 20,
 	}
-	eSppProfiles3 := map[utils.TenantID]*utils.TPRouteProfile{
-		utils.TenantID{Tenant: "cgrates.org", ID: "SPP_1"}: &utils.TPRouteProfile{
-			TPid:      testTPID,
-			Tenant:    "cgrates.org",
-			ID:        "SPP_1",
-			FilterIDs: []string{"*string:~*req.Account:dan"},
-			ActivationInterval: &utils.TPActivationInterval{
-				ActivationTime: "2014-07-29T15:00:00Z",
-			},
-			Sorting:           "*least_cost",
-			SortingParameters: []string{},
-			Routes: []*utils.TPRoute{
-				&utils.TPRoute{
-					ID:              "supplier1",
-					FilterIDs:       []string{"FLTR_DST_DE"},
-					AccountIDs:      []string{"Account2"},
-					RatingPlanIDs:   []string{"RPL_3"},
-					ResourceIDs:     []string{"ResGroup3"},
-					StatIDs:         []string{"Stat2"},
-					Weight:          10,
-					Blocker:         false,
-					RouteParameters: utils.EmptyString,
-				},
-				&utils.TPRoute{
-					ID:              "supplier1",
-					FilterIDs:       []string{"FLTR_ACNT_dan"},
-					AccountIDs:      []string{"Account1", "Account1_1"},
-					RatingPlanIDs:   []string{"RPL_1"},
-					ResourceIDs:     []string{"ResGroup1"},
-					StatIDs:         []string{"Stat1"},
-					Weight:          10,
-					Blocker:         true,
-					RouteParameters: "param1",
-				},
-				&utils.TPRoute{
-					ID:              "supplier1",
-					RatingPlanIDs:   []string{"RPL_2"},
-					ResourceIDs:     []string{"ResGroup2", "ResGroup4"},
-					StatIDs:         []string{"Stat3"},
-					Weight:          10,
-					Blocker:         false,
-					RouteParameters: utils.EmptyString,
-				},
-			},
-			Weight: 20,
-		},
-	}
-	eSppProfiles4 := map[utils.TenantID]*utils.TPRouteProfile{
-		utils.TenantID{Tenant: "cgrates.org", ID: "SPP_1"}: &utils.TPRouteProfile{
-			TPid:      testTPID,
-			Tenant:    "cgrates.org",
-			ID:        "SPP_1",
-			FilterIDs: []string{"*string:~*req.Account:dan"},
-			ActivationInterval: &utils.TPActivationInterval{
-				ActivationTime: "2014-07-29T15:00:00Z",
-			},
-			Sorting:           "*least_cost",
-			SortingParameters: []string{},
-			Routes: []*utils.TPRoute{
-				&utils.TPRoute{
-					ID:              "supplier1",
-					FilterIDs:       []string{"FLTR_DST_DE"},
-					AccountIDs:      []string{"Account2"},
-					RatingPlanIDs:   []string{"RPL_3"},
-					ResourceIDs:     []string{"ResGroup3"},
-					StatIDs:         []string{"Stat2"},
-					Weight:          10,
-					Blocker:         false,
-					RouteParameters: utils.EmptyString,
-				},
-				&utils.TPRoute{
-					ID:              "supplier1",
-					RatingPlanIDs:   []string{"RPL_2"},
-					ResourceIDs:     []string{"ResGroup2", "ResGroup4"},
-					StatIDs:         []string{"Stat3"},
-					Weight:          10,
-					Blocker:         false,
-					RouteParameters: utils.EmptyString,
-				},
-				&utils.TPRoute{
-					ID:              "supplier1",
-					FilterIDs:       []string{"FLTR_ACNT_dan"},
-					AccountIDs:      []string{"Account1", "Account1_1"},
-					RatingPlanIDs:   []string{"RPL_1"},
-					ResourceIDs:     []string{"ResGroup1"},
-					StatIDs:         []string{"Stat1"},
-					Weight:          10,
-					Blocker:         true,
-					RouteParameters: "param1",
-				},
-			},
-			Weight: 20,
-		},
-	}
+	sort.Slice(eSppProfile.Routes, func(i, j int) bool {
+		return strings.Compare(eSppProfile.Routes[0].ID+strings.Join(eSppProfile.Routes[0].FilterIDs, utils.CONCATENATED_KEY_SEP),
+			eSppProfile.Routes[0].ID+strings.Join(eSppProfile.Routes[0].FilterIDs, utils.CONCATENATED_KEY_SEP)) < 0
+	})
 	resKey := utils.TenantID{Tenant: "cgrates.org", ID: "SPP_1"}
-	if len(csvr.routeProfiles) != len(eSppProfiles) {
+	if len(csvr.routeProfiles) != 1 {
 		t.Errorf("Failed to load SupplierProfiles: %s", utils.ToIJSON(csvr.routeProfiles))
 	} else {
-		if !reflect.DeepEqual(eSppProfiles[resKey], csvr.routeProfiles[resKey]) &&
-			!reflect.DeepEqual(eSppProfiles2[resKey], csvr.routeProfiles[resKey]) &&
-			!reflect.DeepEqual(eSppProfiles3[resKey], csvr.routeProfiles[resKey]) &&
-			!reflect.DeepEqual(eSppProfiles4[resKey], csvr.routeProfiles[resKey]) {
-			t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eSppProfiles[resKey]), utils.ToJSON(csvr.routeProfiles[resKey]))
+		rcvRoute := csvr.routeProfiles[resKey]
+		if rcvRoute == nil {
+			t.Fatal("Missing route")
+		}
+		sort.Slice(rcvRoute.Routes, func(i, j int) bool {
+			return strings.Compare(rcvRoute.Routes[0].ID+strings.Join(rcvRoute.Routes[0].FilterIDs, utils.CONCATENATED_KEY_SEP),
+				rcvRoute.Routes[0].ID+strings.Join(rcvRoute.Routes[0].FilterIDs, utils.CONCATENATED_KEY_SEP)) < 0
+		})
+		if !reflect.DeepEqual(eSppProfile, rcvRoute) {
+			t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eSppProfile), utils.ToJSON(rcvRoute))
 		}
 	}
 }

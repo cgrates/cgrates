@@ -20,6 +20,8 @@ package engine
 
 import (
 	"reflect"
+	"sort"
+	"strings"
 	"testing"
 	"time"
 
@@ -2247,7 +2249,9 @@ func TestTPDispatcherHostsAsTPDispatcherHosts(t *testing.T) {
 			},
 		},
 	}
-	if rcv := tps.AsTPDispatcherHosts(); !reflect.DeepEqual(rcv, eOut) {
+	rcv := tps.AsTPDispatcherHosts()
+	sort.Slice(rcv, func(i, j int) bool { return strings.Compare(rcv[i].ID, rcv[j].ID) < 0 })
+	if !reflect.DeepEqual(rcv, eOut) {
 		t.Errorf("\nExpecting: %+v,\nReceived: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
 	}
 }
