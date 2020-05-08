@@ -1271,8 +1271,8 @@ func TestLoadRouteProfiles(t *testing.T) {
 		Weight: 20,
 	}
 	sort.Slice(eSppProfile.Routes, func(i, j int) bool {
-		return strings.Compare(eSppProfile.Routes[0].ID+strings.Join(eSppProfile.Routes[0].FilterIDs, utils.CONCATENATED_KEY_SEP),
-			eSppProfile.Routes[0].ID+strings.Join(eSppProfile.Routes[0].FilterIDs, utils.CONCATENATED_KEY_SEP)) < 0
+		return strings.Compare(eSppProfile.Routes[i].ID+strings.Join(eSppProfile.Routes[i].FilterIDs, utils.CONCATENATED_KEY_SEP),
+			eSppProfile.Routes[j].ID+strings.Join(eSppProfile.Routes[j].FilterIDs, utils.CONCATENATED_KEY_SEP)) < 0
 	})
 	resKey := utils.TenantID{Tenant: "cgrates.org", ID: "SPP_1"}
 	if len(csvr.routeProfiles) != 1 {
@@ -1283,8 +1283,8 @@ func TestLoadRouteProfiles(t *testing.T) {
 			t.Fatal("Missing route")
 		}
 		sort.Slice(rcvRoute.Routes, func(i, j int) bool {
-			return strings.Compare(rcvRoute.Routes[0].ID+strings.Join(rcvRoute.Routes[0].FilterIDs, utils.CONCATENATED_KEY_SEP),
-				rcvRoute.Routes[0].ID+strings.Join(rcvRoute.Routes[0].FilterIDs, utils.CONCATENATED_KEY_SEP)) < 0
+			return strings.Compare(rcvRoute.Routes[i].ID+strings.Join(rcvRoute.Routes[i].FilterIDs, utils.CONCATENATED_KEY_SEP),
+				rcvRoute.Routes[j].ID+strings.Join(rcvRoute.Routes[j].FilterIDs, utils.CONCATENATED_KEY_SEP)) < 0
 		})
 		if !reflect.DeepEqual(eSppProfile, rcvRoute) {
 			t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eSppProfile), utils.ToJSON(rcvRoute))
