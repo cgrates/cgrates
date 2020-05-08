@@ -843,7 +843,7 @@ const (
 	MetaRemoveSessionCosts    = "*remove_session_costs"
 	MetaRemoveExpired         = "*remove_expired"
 	MetaPostEvent             = "*post_event"
-	MetaCDRAccount            = "*cdr_account"
+	MetaCDRAccount            = "*reset_account_cdr"
 )
 
 // Migrator Metas

@@ -52,6 +52,7 @@ var (
 		testActionsitThresholdCgrRpcAction,
 		testActionsitThresholdPostEvent,
 		testActionsitSetSDestinations,
+		testActionsitresetAccountCDR,
 		testActionsitStopCgrEngine,
 	}
 )
@@ -807,6 +808,97 @@ func testActionsitSetSDestinations(t *testing.T) {
 		}
 	}
 
+}
+
+func testActionsitresetAccountCDR(t *testing.T) {
+	var reply string
+	account := "123456789"
+
+	attrsSetAccount := &utils.AttrSetAccount{
+		Tenant:  "cgrates.org",
+		Account: "123456789",
+	}
+	if err := actsLclRpc.Call(utils.APIerSv1SetAccount, attrsSetAccount, &reply); err != nil {
+		t.Error("Got error on APIerSv1.SetAccount: ", err.Error())
+	} else if reply != utils.OK {
+		t.Errorf("Calling APIerSv1.SetAccount received: %s", reply)
+	}
+
+	attrsAA := &utils.AttrSetActions{
+		ActionsId: "resetAccountCDR",
+		Actions: []*utils.TPAction{
+			{Identifier: utils.MetaCDRAccount, ExpiryTime: utils.UNLIMITED, Weight: 20.0},
+		},
+	}
+	if err := actsLclRpc.Call(utils.APIerSv2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+		t.Error("Got error on APIerSv2.SetActions: ", err.Error())
+	} else if reply != utils.OK {
+		t.Errorf("Calling APIerSv2.SetActions received: %s", reply)
+	}
+
+	var acc Account
+	attrs2 := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: account}
+	var uuid string
+	if err := actsLclRpc.Call(utils.APIerSv2GetAccount, attrs2, &acc); err != nil {
+		t.Error("Got error on APIerSv1.GetAccount: ", err.Error())
+	} else {
+		voice := acc.BalanceMap[utils.VOICE]
+		for _, u := range voice {
+			uuid = u.Uuid
+			break
+		}
+	}
+	args := &CDRWithArgDispatcher{
+		CDR: &CDR{
+			Tenant:      "cgrates.org",
+			OriginID:    "testDsp",
+			OriginHost:  "192.168.1.1",
+			Source:      "testDsp",
+			RequestType: utils.META_RATED,
+			RunID:       utils.MetaDefault,
+			PreRated:    true,
+			Account:     account,
+			Subject:     account,
+			Destination: "1002",
+			AnswerTime:  time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+			Usage:       time.Duration(2) * time.Minute,
+			CostDetails: &EventCost{
+				CGRID: utils.UUIDSha1Prefix(),
+				RunID: utils.MetaDefault,
+				AccountSummary: &AccountSummary{
+					Tenant: "cgrates.org",
+					ID:     account,
+					BalanceSummaries: []*BalanceSummary{
+						{
+							UUID:  uuid,
+							ID:    "ID",
+							Type:  utils.VOICE,
+							Value: float64(10 * time.Second),
+						},
+					},
+				},
+			},
+		},
+	}
+	if err := actsLclRpc.Call(utils.CDRsV1ProcessCDR, args, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Received: %s", reply)
+	}
+	time.Sleep(100 * time.Millisecond)
+
+	attrsEA := &utils.AttrExecuteAction{Tenant: "cgrates.org", Account: account, ActionsId: attrsAA.ActionsId}
+	if err := actsLclRpc.Call(utils.APIerSv1ExecuteAction, attrsEA, &reply); err != nil {
+		t.Error("Got error on APIerSv1.ExecuteAction: ", err.Error())
+	} else if reply != utils.OK {
+		t.Errorf("Calling APIerSv1.ExecuteAction received: %s", reply)
+	}
+
+	if err := actsLclRpc.Call(utils.APIerSv2GetAccount, attrs2, &acc); err != nil {
+		t.Error("Got error on APIerSv1.GetAccount: ", err.Error())
+	} else if tv := acc.BalanceMap[utils.VOICE].GetTotalValue(); tv != float64(10*time.Second) {
+		t.Errorf("Calling APIerSv1.GetBalance expected: %f, received: %f", float64(10*time.Second), tv)
+	}
 }
 
 func testActionsitStopCgrEngine(t *testing.T) {

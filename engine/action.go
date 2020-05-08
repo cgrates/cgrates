@@ -107,7 +107,7 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 		utils.MetaRemoveSessionCosts:    removeSessionCosts,
 		utils.MetaRemoveExpired:         removeExpired,
 		utils.MetaPostEvent:             postEvent,
-		utils.MetaCDRAccount:            resetAccount,
+		utils.MetaCDRAccount:            resetAccountCDR,
 	}
 	f, exists := actionFuncMap[typ]
 	return f, exists
@@ -1051,7 +1051,8 @@ func postEvent(ub *Account, a *Action, acs Actions, extraData interface{}) error
 	return err
 }
 
-func resetAccount(ub *Account, action *Action, acts Actions, _ interface{}) error {
+// resetAccountCDR resets the account out of values from CDR
+func resetAccountCDR(ub *Account, action *Action, acts Actions, _ interface{}) error {
 	if ub == nil {
 		return errors.New("nil account")
 	}
