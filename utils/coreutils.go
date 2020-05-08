@@ -117,6 +117,7 @@ func FirstNonEmpty(vals ...string) string {
 }
 
 // Sha1 generate the SHA1 hash from any string
+// the order of string matters
 func Sha1(attrs ...string) string {
 	hasher := sha1.New()
 	for _, attr := range attrs {

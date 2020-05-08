@@ -74,6 +74,21 @@ func TestSha1(t *testing.T) {
 	}
 }
 
+func TestSha1ReverseOrder(t *testing.T) {
+	rcv := Sha1("test1", "test2")
+	revOrd := Sha1("test2", "test1")
+	// Sha1 consider order when generating
+	if reflect.DeepEqual(revOrd, rcv) {
+		t.Errorf("Expecting: %s, received: %s", revOrd, rcv)
+	}
+
+	rcv = Sha1("test1")
+	revOrd = Sha1("test1")
+	if !reflect.DeepEqual(revOrd, rcv) {
+		t.Errorf("Expecting: %s, received: %s", revOrd, rcv)
+	}
+}
+
 func TestUUID(t *testing.T) {
 	uuid := GenUUID()
 	if len(uuid) == 0 {
