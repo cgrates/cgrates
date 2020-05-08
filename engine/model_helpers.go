@@ -1809,7 +1809,12 @@ func (tps TpSuppliers) AsTPSuppliers() (result []*utils.TPSupplierProfile) {
 			if _, has := suppliersMap[tenID]; !has {
 				suppliersMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()] = make(map[string]*utils.TPSupplier)
 			}
-			sup, found := suppliersMap[tenID][tp.SupplierID]
+			supID := tp.SupplierID
+			if tp.SupplierFilterIDs != "" {
+				supID = utils.ConcatenatedKey(supID,
+					utils.NewStringSet(strings.Split(tp.SupplierFilterIDs, utils.INFIELD_SEP)).Sha1())
+			}
+			sup, found := suppliersMap[tenID][supID]
 			if !found {
 				sup = &utils.TPSupplier{
 					ID:      tp.SupplierID,
@@ -1840,7 +1845,7 @@ func (tps TpSuppliers) AsTPSuppliers() (result []*utils.TPSupplierProfile) {
 				accSplit := strings.Split(tp.SupplierAccountIDs, utils.INFIELD_SEP)
 				sup.AccountIDs = append(sup.AccountIDs, accSplit...)
 			}
-			suppliersMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()][tp.SupplierID] = sup
+			suppliersMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()][supID] = sup
 		}
 		if tp.SortingParameters != "" {
 			if _, has := sortingParameterMap[tenID]; !has {

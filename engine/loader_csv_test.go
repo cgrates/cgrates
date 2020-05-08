@@ -1239,24 +1239,57 @@ func TestLoadSupplierProfiles(t *testing.T) {
 			Suppliers: []*utils.TPSupplier{
 				&utils.TPSupplier{
 					ID:                 "supplier1",
-					FilterIDs:          []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
-					AccountIDs:         []string{"Account1", "Account1_1", "Account2"},
-					RatingPlanIDs:      []string{"RPL_1", "RPL_2", "RPL_3"},
-					ResourceIDs:        []string{"ResGroup1", "ResGroup2", "ResGroup3", "ResGroup4"},
-					StatIDs:            []string{"Stat1", "Stat2", "Stat3"},
+					FilterIDs:          []string{"FLTR_DST_DE"},
+					AccountIDs:         []string{"Account2"},
+					RatingPlanIDs:      []string{"RPL_3"},
+					ResourceIDs:        []string{"ResGroup3"},
+					StatIDs:            []string{"Stat2"},
+					Weight:             10,
+					Blocker:            false,
+					SupplierParameters: utils.EmptyString,
+				},
+				&utils.TPSupplier{
+					ID:                 "supplier1",
+					FilterIDs:          []string{"FLTR_ACNT_dan"},
+					AccountIDs:         []string{"Account1", "Account1_1"},
+					RatingPlanIDs:      []string{"RPL_1"},
+					ResourceIDs:        []string{"ResGroup1"},
+					StatIDs:            []string{"Stat1"},
 					Weight:             10,
 					Blocker:            true,
 					SupplierParameters: "param1",
+				},
+				&utils.TPSupplier{
+					ID:                 "supplier1",
+					RatingPlanIDs:      []string{"RPL_2"},
+					ResourceIDs:        []string{"ResGroup2", "ResGroup4"},
+					StatIDs:            []string{"Stat3"},
+					Weight:             10,
+					Blocker:            false,
+					SupplierParameters: utils.EmptyString,
 				},
 			},
 			Weight: 20,
 		},
 	}
 	resKey := utils.TenantID{Tenant: "cgrates.org", ID: "SPP_1"}
+	sort.Slice(eSppProfiles[resKey].Suppliers, func(i, j int) bool {
+		return strings.Compare(eSppProfiles[resKey].Suppliers[i].ID+
+			strings.Join(eSppProfiles[resKey].Suppliers[i].FilterIDs, utils.CONCATENATED_KEY_SEP),
+			eSppProfiles[resKey].Suppliers[j].ID+strings.Join(eSppProfiles[resKey].Suppliers[j].FilterIDs, utils.CONCATENATED_KEY_SEP)) < 0
+	})
+
 	if len(csvr.sppProfiles) != len(eSppProfiles) {
 		t.Errorf("Failed to load SupplierProfiles: %s", utils.ToIJSON(csvr.sppProfiles))
-	} else if !reflect.DeepEqual(eSppProfiles[resKey], csvr.sppProfiles[resKey]) {
-		t.Errorf("Expecting: %+v, received: %+v", eSppProfiles[resKey], csvr.sppProfiles[resKey])
+	} else {
+		sort.Slice(csvr.sppProfiles[resKey].Suppliers, func(i, j int) bool {
+			return strings.Compare(csvr.sppProfiles[resKey].Suppliers[i].ID+
+				strings.Join(csvr.sppProfiles[resKey].Suppliers[i].FilterIDs, utils.CONCATENATED_KEY_SEP),
+				csvr.sppProfiles[resKey].Suppliers[j].ID+strings.Join(csvr.sppProfiles[resKey].Suppliers[j].FilterIDs, utils.CONCATENATED_KEY_SEP)) < 0
+		})
+		if !reflect.DeepEqual(eSppProfiles[resKey], csvr.sppProfiles[resKey]) {
+			t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eSppProfiles[resKey]), utils.ToJSON(csvr.sppProfiles[resKey]))
+		}
 	}
 }
 
