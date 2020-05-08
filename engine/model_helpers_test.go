@@ -2303,3 +2303,132 @@ func TestAPItoModelTPDispatcherHost(t *testing.T) {
 	}
 
 }
+
+func TestAPItoDispatcherHost(t *testing.T) {
+	var tpDPH *utils.TPDispatcherHost
+	if rcv := APItoDispatcherHost(tpDPH); rcv != nil {
+		t.Errorf("\nExpecting: nil,\nReceived: %+v", utils.ToJSON(rcv))
+	}
+
+	tpDPH = &utils.TPDispatcherHost{
+		Tenant: "Tenant1",
+		ID:     "ID1",
+		Conns: []*utils.TPDispatcherHostConn{
+			&utils.TPDispatcherHostConn{
+				Address:   "Address1",
+				Transport: "*json",
+			},
+			&utils.TPDispatcherHostConn{
+				Address:   "Address2",
+				Transport: "*gob",
+			},
+		},
+	}
+
+	eOut := &DispatcherHost{
+		Tenant: "Tenant1",
+		ID:     "ID1",
+		Conns: []*config.RemoteHost{
+			&config.RemoteHost{
+				Address:   "Address1",
+				Transport: "*json",
+			},
+			&config.RemoteHost{
+				Address:   "Address2",
+				Transport: "*gob",
+			},
+		},
+	}
+	if rcv := APItoDispatcherHost(tpDPH); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("\nExpecting: %+v,\nReceived: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+
+	tpDPH = &utils.TPDispatcherHost{
+		Tenant: "Tenant2",
+		ID:     "ID2",
+		Conns: []*utils.TPDispatcherHostConn{
+			&utils.TPDispatcherHostConn{
+				Address:   "Address1",
+				Transport: "*json",
+				TLS:       true,
+			},
+		},
+	}
+	eOut = &DispatcherHost{
+		Tenant: "Tenant2",
+		ID:     "ID2",
+		Conns: []*config.RemoteHost{
+			&config.RemoteHost{
+				Address:   "Address1",
+				Transport: "*json",
+				TLS:       true,
+			},
+		},
+	}
+	if rcv := APItoDispatcherHost(tpDPH); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("\nExpecting: %+v,\nReceived: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+}
+
+func TestDispatcherHostToAPI(t *testing.T) {
+	dph := &DispatcherHost{
+		Tenant: "Tenant1",
+		ID:     "ID1",
+		Conns: []*config.RemoteHost{
+			&config.RemoteHost{
+				Address:   "Address1",
+				Transport: "*json",
+				TLS:       true,
+			},
+		},
+	}
+	eOut := &utils.TPDispatcherHost{
+		Tenant: "Tenant1",
+		ID:     "ID1",
+		Conns: []*utils.TPDispatcherHostConn{
+			&utils.TPDispatcherHostConn{
+				Address:   "Address1",
+				Transport: "*json",
+				TLS:       true,
+			},
+		},
+	}
+	if rcv := DispatcherHostToAPI(dph); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("\nExpecting: %+v,\nReceived: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+	dph = &DispatcherHost{
+		Tenant: "Tenant1",
+		ID:     "ID1",
+		Conns: []*config.RemoteHost{
+			&config.RemoteHost{
+				Address:   "Address1",
+				Transport: "*json",
+				TLS:       false,
+			},
+			&config.RemoteHost{
+				Address:   "Address2",
+				Transport: "*gob",
+				TLS:       true,
+			},
+		},
+	}
+	eOut = &utils.TPDispatcherHost{
+		Tenant: "Tenant1",
+		ID:     "ID1",
+		Conns: []*utils.TPDispatcherHostConn{
+			&utils.TPDispatcherHostConn{
+				Address:   "Address1",
+				Transport: "*json",
+				TLS:       false,
+			},
+			&utils.TPDispatcherHostConn{
+				Address:   "Address2",
+				Transport: "*gob",
+				TLS:       true,
+			},
+		},
+	}
+	if rcv := DispatcherHostToAPI(dph); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("\nExpecting: %+v,\nReceived: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+}
