@@ -40,38 +40,39 @@ var (
 	splSv1ConfDIR string //run tests for specific configuration
 
 	sTestsRouteSV1 = []func(t *testing.T){
-		testV1SplSLoadConfig,
-		testV1SplSInitDataDb,
-		testV1SplSResetStorDb,
-		testV1SplSStartEngine,
-		testV1SplSRpcConn,
-		testV1SplSFromFolder,
-		testV1SplSGetWeightRoutes,
-		testV1SplSGetLeastCostRoutes,
-		testV1SplSGetLeastCostRoutesWithoutUsage,
-		testV1SplSGetLeastCostRoutesWithMaxCost,
-		testV1SplSGetLeastCostRoutesWithMaxCost2,
-		testV1SplSGetLeastCostRoutesWithMaxCostNotFound,
-		testV1SplSGetHighestCostRoutes,
-		testV1SplSGetLeastCostRoutesErr,
-		testV1SplSPolulateStatsForQOS,
-		testV1SplSGetQOSRoutes,
-		testV1SplSGetQOSRoutes2,
-		testV1SplSGetQOSRoutes3,
-		testV1SplSGetQOSRoutesFiltred,
-		testV1SplSGetQOSRoutesFiltred2,
-		testV1SplSGetRouteWithoutFilter,
-		testV1SplSSetRouteProfiles,
-		testV1SplSGetRouteProfileIDs,
-		testV1SplSUpdateRouteProfiles,
-		testV1SplSRemRouteProfiles,
-		testV1SplSGetRouteForEvent,
+		testV1RouteLoadConfig,
+		testV1RouteInitDataDb,
+		testV1RouteResetStorDb,
+		testV1RouteStartEngine,
+		testV1RouteRpcConn,
+		testV1RouteFromFolder,
+		testV1RouteGetWeightRoutes,
+		testV1RouteGetLeastCostRoutes,
+		testV1RouteGetLeastCostRoutesWithoutUsage,
+		testV1RouteGetLeastCostRoutesWithMaxCost,
+		testV1RouteGetLeastCostRoutesWithMaxCost2,
+		testV1RouteGetLeastCostRoutesWithMaxCostNotFound,
+		testV1RouteGetHighestCostRoutes,
+		testV1RouteGetLeastCostRoutesErr,
+		testV1RoutePolulateStatsForQOS,
+		testV1RouteGetQOSRoutes,
+		testV1RouteGetQOSRoutes2,
+		testV1RouteGetQOSRoutes3,
+		testV1RouteGetQOSRoutesFiltred,
+		testV1RouteGetQOSRoutesFiltred2,
+		testV1RouteGetRouteWithoutFilter,
+		testV1RouteSetRouteProfiles,
+		testV1RouteGetRouteProfileIDs,
+		testV1RouteUpdateRouteProfiles,
+		testV1RouteRemRouteProfiles,
+		testV1RouteGetRouteForEvent,
 		// reset the database and load the TP again
-		testV1SplSInitDataDb,
-		testV1SplSFromFolder,
-		testV1SplsOneRouteWithoutDestination,
-		testV1SplRoutePing,
-		testV1SplSStopEngine,
+		testV1RouteInitDataDb,
+		testV1RouteFromFolder,
+		testV1RoutesOneRouteWithoutDestination,
+		testV1RouteRoutePing,
+		testV1RouteMultipleRouteSameID,
+		testV1RouteStopEngine,
 	}
 )
 
@@ -94,7 +95,7 @@ func TestSuplSV1IT(t *testing.T) {
 	}
 }
 
-func testV1SplSLoadConfig(t *testing.T) {
+func testV1RouteLoadConfig(t *testing.T) {
 	var err error
 	splSv1CfgPath = path.Join(*dataDir, "conf", "samples", splSv1ConfDIR)
 	if splSv1Cfg, err = config.NewCGRConfigFromPath(splSv1CfgPath); err != nil {
@@ -102,26 +103,26 @@ func testV1SplSLoadConfig(t *testing.T) {
 	}
 }
 
-func testV1SplSInitDataDb(t *testing.T) {
+func testV1RouteInitDataDb(t *testing.T) {
 	if err := engine.InitDataDb(splSv1Cfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Wipe out the cdr database
-func testV1SplSResetStorDb(t *testing.T) {
+func testV1RouteResetStorDb(t *testing.T) {
 	if err := engine.InitStorDb(splSv1Cfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func testV1SplSStartEngine(t *testing.T) {
+func testV1RouteStartEngine(t *testing.T) {
 	if _, err := engine.StopStartEngine(splSv1CfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func testV1SplSRpcConn(t *testing.T) {
+func testV1RouteRpcConn(t *testing.T) {
 	var err error
 	splSv1Rpc, err = newRPCClient(splSv1Cfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
@@ -129,7 +130,7 @@ func testV1SplSRpcConn(t *testing.T) {
 	}
 }
 
-func testV1SplSFromFolder(t *testing.T) {
+func testV1RouteFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testit")}
 	if err := splSv1Rpc.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
@@ -138,11 +139,11 @@ func testV1SplSFromFolder(t *testing.T) {
 	time.Sleep(500 * time.Millisecond)
 }
 
-func testV1SplSGetWeightRoutes(t *testing.T) {
+func testV1RouteGetWeightRoutes(t *testing.T) {
 	ev := &engine.ArgsGetRoutes{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
-			ID:     "testV1SplSGetWeightRoutes",
+			ID:     "testV1RouteGetWeightRoutes",
 			Event: map[string]interface{}{
 				utils.Account:     "1007",
 				utils.Destination: "+491511231234",
@@ -178,11 +179,11 @@ func testV1SplSGetWeightRoutes(t *testing.T) {
 	}
 }
 
-func testV1SplSGetLeastCostRoutes(t *testing.T) {
+func testV1RouteGetLeastCostRoutes(t *testing.T) {
 	ev := &engine.ArgsGetRoutes{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
-			ID:     "testV1SplSGetLeastCostRoutes",
+			ID:     "testV1RouteGetLeastCostRoutes",
 			Event: map[string]interface{}{
 				utils.Account:     "1003",
 				utils.Subject:     "1003",
@@ -233,11 +234,11 @@ func testV1SplSGetLeastCostRoutes(t *testing.T) {
 	}
 }
 
-func testV1SplSGetLeastCostRoutesWithoutUsage(t *testing.T) {
+func testV1RouteGetLeastCostRoutesWithoutUsage(t *testing.T) {
 	ev := &engine.ArgsGetRoutes{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
-			ID:     "testV1SplSGetLeastCostRoutes",
+			ID:     "testV1RouteGetLeastCostRoutes",
 			Event: map[string]interface{}{
 				utils.Account:     "1003",
 				utils.Subject:     "1003",
@@ -287,12 +288,12 @@ func testV1SplSGetLeastCostRoutesWithoutUsage(t *testing.T) {
 	}
 }
 
-func testV1SplSGetLeastCostRoutesWithMaxCost(t *testing.T) {
+func testV1RouteGetLeastCostRoutesWithMaxCost(t *testing.T) {
 	ev := &engine.ArgsGetRoutes{
 		MaxCost: "0.30",
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
-			ID:     "testV1SplSGetLeastCostRoutes",
+			ID:     "testV1RouteGetLeastCostRoutes",
 			Event: map[string]interface{}{
 				utils.Account:     "1003",
 				utils.Subject:     "1001",
@@ -335,12 +336,12 @@ func testV1SplSGetLeastCostRoutesWithMaxCost(t *testing.T) {
 	}
 }
 
-func testV1SplSGetLeastCostRoutesWithMaxCostNotFound(t *testing.T) {
+func testV1RouteGetLeastCostRoutesWithMaxCostNotFound(t *testing.T) {
 	ev := &engine.ArgsGetRoutes{
 		MaxCost: "0.001",
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
-			ID:     "testV1SplSGetLeastCostRoutes",
+			ID:     "testV1RouteGetLeastCostRoutes",
 			Event: map[string]interface{}{
 				utils.Account:     "1003",
 				utils.Subject:     "1001",
@@ -357,12 +358,12 @@ func testV1SplSGetLeastCostRoutesWithMaxCostNotFound(t *testing.T) {
 	}
 }
 
-func testV1SplSGetLeastCostRoutesWithMaxCost2(t *testing.T) {
+func testV1RouteGetLeastCostRoutesWithMaxCost2(t *testing.T) {
 	ev := &engine.ArgsGetRoutes{
 		MaxCost: utils.MetaEventCost,
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
-			ID:     "testV1SplSGetLeastCostRoutes",
+			ID:     "testV1RouteGetLeastCostRoutes",
 			Event: map[string]interface{}{
 				utils.Account:     "1003",
 				utils.Subject:     "SPECIAL_1002",
@@ -406,11 +407,11 @@ func testV1SplSGetLeastCostRoutesWithMaxCost2(t *testing.T) {
 	}
 }
 
-func testV1SplSGetHighestCostRoutes(t *testing.T) {
+func testV1RouteGetHighestCostRoutes(t *testing.T) {
 	ev := &engine.ArgsGetRoutes{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
-			ID:     "testV1SplSGetHighestCostRoutes",
+			ID:     "testV1RouteGetHighestCostRoutes",
 			Event: map[string]interface{}{
 				utils.Account:     "1003",
 				utils.Destination: "1002",
@@ -461,12 +462,12 @@ func testV1SplSGetHighestCostRoutes(t *testing.T) {
 	}
 }
 
-func testV1SplSGetLeastCostRoutesErr(t *testing.T) {
+func testV1RouteGetLeastCostRoutesErr(t *testing.T) {
 	ev := &engine.ArgsGetRoutes{
 		IgnoreErrors: true,
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
-			ID:     "testV1SplSGetHighestCostRoutes",
+			ID:     "testV1RouteGetHighestCostRoutes",
 			Event: map[string]interface{}{
 				utils.Account:     "1000",
 				utils.Destination: "1001",
@@ -482,7 +483,7 @@ func testV1SplSGetLeastCostRoutesErr(t *testing.T) {
 	}
 }
 
-func testV1SplSPolulateStatsForQOS(t *testing.T) {
+func testV1RoutePolulateStatsForQOS(t *testing.T) {
 	var reply []string
 	expected := []string{"Stat_1"}
 	ev1 := &engine.StatsArgsProcessEvent{
@@ -620,11 +621,11 @@ func testV1SplSPolulateStatsForQOS(t *testing.T) {
 	}
 }
 
-func testV1SplSGetQOSRoutes(t *testing.T) {
+func testV1RouteGetQOSRoutes(t *testing.T) {
 	ev := &engine.ArgsGetRoutes{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
-			ID:     "testV1SplSGetQOSRoutes",
+			ID:     "testV1RouteGetQOSRoutes",
 			Event: map[string]interface{}{
 				"DistinctMatch": "*qos",
 			},
@@ -651,11 +652,11 @@ func testV1SplSGetQOSRoutes(t *testing.T) {
 	}
 }
 
-func testV1SplSGetQOSRoutes2(t *testing.T) {
+func testV1RouteGetQOSRoutes2(t *testing.T) {
 	ev := &engine.ArgsGetRoutes{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
-			ID:     "testV1SplSGetQOSRoutes",
+			ID:     "testV1RouteGetQOSRoutes",
 			Event: map[string]interface{}{
 				"DistinctMatch": "*qos2",
 			},
@@ -682,11 +683,11 @@ func testV1SplSGetQOSRoutes2(t *testing.T) {
 	}
 }
 
-func testV1SplSGetQOSRoutes3(t *testing.T) {
+func testV1RouteGetQOSRoutes3(t *testing.T) {
 	ev := &engine.ArgsGetRoutes{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
-			ID:     "testV1SplSGetQOSRoutes",
+			ID:     "testV1RouteGetQOSRoutes",
 			Event: map[string]interface{}{
 				"DistinctMatch": "*qos3",
 			},
@@ -713,11 +714,11 @@ func testV1SplSGetQOSRoutes3(t *testing.T) {
 	}
 }
 
-func testV1SplSGetQOSRoutesFiltred(t *testing.T) {
+func testV1RouteGetQOSRoutesFiltred(t *testing.T) {
 	ev := &engine.ArgsGetRoutes{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
-			ID:     "testV1SplSGetQOSRoutes",
+			ID:     "testV1RouteGetQOSRoutes",
 			Event: map[string]interface{}{
 				"DistinctMatch": "*qos_filtred",
 			},
@@ -744,11 +745,11 @@ func testV1SplSGetQOSRoutesFiltred(t *testing.T) {
 	}
 }
 
-func testV1SplSGetQOSRoutesFiltred2(t *testing.T) {
+func testV1RouteGetQOSRoutesFiltred2(t *testing.T) {
 	ev := &engine.ArgsGetRoutes{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
-			ID:     "testV1SplSGetQOSRoutes",
+			ID:     "testV1RouteGetQOSRoutes",
 			Event: map[string]interface{}{
 				"DistinctMatch":   "*qos_filtred2",
 				utils.Account:     "1003",
@@ -779,11 +780,11 @@ func testV1SplSGetQOSRoutesFiltred2(t *testing.T) {
 	}
 }
 
-func testV1SplSGetRouteWithoutFilter(t *testing.T) {
+func testV1RouteGetRouteWithoutFilter(t *testing.T) {
 	ev := &engine.ArgsGetRoutes{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
-			ID:     "testV1SplSGetRouteWithoutFilter",
+			ID:     "testV1RouteGetRouteWithoutFilter",
 			Event: map[string]interface{}{
 				utils.Account:     "1008",
 				utils.Destination: "+49",
@@ -813,7 +814,7 @@ func testV1SplSGetRouteWithoutFilter(t *testing.T) {
 	}
 }
 
-func testV1SplSSetRouteProfiles(t *testing.T) {
+func testV1RouteSetRouteProfiles(t *testing.T) {
 	var reply *engine.RouteProfile
 	if err := splSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &reply); err == nil ||
@@ -858,7 +859,7 @@ func testV1SplSSetRouteProfiles(t *testing.T) {
 	}
 }
 
-func testV1SplSGetRouteProfileIDs(t *testing.T) {
+func testV1RouteGetRouteProfileIDs(t *testing.T) {
 	expected := []string{"SPL_HIGHESTCOST_1", "SPL_QOS_1", "SPL_QOS_2", "SPL_QOS_FILTRED", "SPL_QOS_FILTRED2",
 		"SPL_ACNT_1001", "SPL_LEASTCOST_1", "SPL_WEIGHT_2", "SPL_WEIGHT_1", "SPL_QOS_3",
 		"TEST_PROFILE1", "SPL_LOAD_DIST", "SPL_LCR"}
@@ -871,7 +872,7 @@ func testV1SplSGetRouteProfileIDs(t *testing.T) {
 	}
 }
 
-func testV1SplSUpdateRouteProfiles(t *testing.T) {
+func testV1RouteUpdateRouteProfiles(t *testing.T) {
 	splPrf.Routes = []*engine.Route{
 		{
 			ID:              "SPL1",
@@ -935,7 +936,7 @@ func testV1SplSUpdateRouteProfiles(t *testing.T) {
 	}
 }
 
-func testV1SplSRemRouteProfiles(t *testing.T) {
+func testV1RouteRemRouteProfiles(t *testing.T) {
 	var resp string
 	if err := splSv1Rpc.Call(utils.APIerSv1RemoveRouteProfile,
 		&utils.TenantIDWithCache{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &resp); err != nil {
@@ -955,7 +956,7 @@ func testV1SplSRemRouteProfiles(t *testing.T) {
 	}
 }
 
-func testV1SplRoutePing(t *testing.T) {
+func testV1RouteRoutePing(t *testing.T) {
 	var resp string
 	if err := splSv1Rpc.Call(utils.RouteSv1Ping, new(utils.CGREvent), &resp); err != nil {
 		t.Error(err)
@@ -964,11 +965,11 @@ func testV1SplRoutePing(t *testing.T) {
 	}
 }
 
-func testV1SplSGetRouteForEvent(t *testing.T) {
+func testV1RouteGetRouteForEvent(t *testing.T) {
 	ev := &utils.CGREventWithArgDispatcher{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
-			ID:     "testV1SplSGetHighestCostRoutes",
+			ID:     "testV1RouteGetHighestCostRoutes",
 			Event: map[string]interface{}{
 				utils.Account:     "1000",
 				utils.Destination: "1001",
@@ -1036,7 +1037,7 @@ func testV1SplSGetRouteForEvent(t *testing.T) {
 // and RP_MOBILE contains destinations only for mobile
 // Create a RouteProfile with *least_cost strategy with 2 suppliers
 // supplier1 have attached RP_LOCAL and supplier2 have attach RP_MOBILE
-func testV1SplsOneRouteWithoutDestination(t *testing.T) {
+func testV1RoutesOneRouteWithoutDestination(t *testing.T) {
 	var reply *engine.RouteProfile
 	if err := splSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "SPL_DESTINATION"}, &reply); err == nil ||
@@ -1076,7 +1077,7 @@ func testV1SplsOneRouteWithoutDestination(t *testing.T) {
 	ev := &engine.ArgsGetRoutes{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
-			ID:     "testV1SplsOneRouteWithoutDestination",
+			ID:     "testV1RoutesOneRouteWithoutDestination",
 			Event: map[string]interface{}{
 				utils.Account:     "SpecialCase",
 				utils.Destination: "+24680",
@@ -1110,7 +1111,121 @@ func testV1SplsOneRouteWithoutDestination(t *testing.T) {
 	}
 }
 
-func testV1SplSStopEngine(t *testing.T) {
+func testV1RouteMultipleRouteSameID(t *testing.T) {
+	var reply *engine.RouteProfile
+	if err := splSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "MULTIPLE_ROUTES"}, &reply); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	splPrf = &RouteWithCache{
+		RouteProfile: &engine.RouteProfile{
+			Tenant:    "cgrates.org",
+			ID:        "MULTIPLE_ROUTES",
+			FilterIDs: []string{"*string:~*req.Account:SpecialCase2"},
+			Sorting:   utils.MetaLC,
+			Routes: []*engine.Route{
+				{
+					ID:            "Route1",
+					RatingPlanIDs: []string{"RP_LOCAL"},
+					FilterIDs:     []string{"*string:~*req.Month:April"},
+					Weight:        10,
+				},
+				{
+					ID:            "Route1",
+					RatingPlanIDs: []string{"RP_MOBILE"},
+					FilterIDs:     []string{"*string:~*req.Month:May"},
+					Weight:        10,
+				},
+			},
+			Weight: 100,
+		},
+	}
+
+	var result string
+	if err := splSv1Rpc.Call(utils.APIerSv1SetRouteProfile, splPrf, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	tNow := time.Now()
+	ev := &engine.ArgsGetRoutes{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			Time:   &tNow,
+			ID:     "testV1RouteMultipleRouteSameID",
+			Event: map[string]interface{}{
+				utils.Account:     "SpecialCase2",
+				utils.Destination: "+135876",
+				utils.SetupTime:   utils.MetaNow,
+				utils.Usage:       "2m",
+				"Month":           "April",
+			},
+		},
+	}
+	eSpls := engine.SortedRoutes{
+		ProfileID: "MULTIPLE_ROUTES",
+		Sorting:   utils.MetaLC,
+		Count:     1,
+		SortedRoutes: []*engine.SortedRoute{
+			{
+				RouteID: "Route1",
+				SortingData: map[string]interface{}{
+					utils.Cost:     0.0396,
+					"RatingPlanID": "RP_LOCAL",
+					utils.Weight:   10.0,
+				},
+			},
+		},
+	}
+	var suplsReply engine.SortedRoutes
+	if err := splSv1Rpc.Call(utils.RouteSv1GetRoutes,
+		ev, &suplsReply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eSpls, suplsReply) {
+		t.Errorf("Expecting: %s, received: %s",
+			utils.ToJSON(eSpls), utils.ToJSON(suplsReply))
+	}
+
+	ev = &engine.ArgsGetRoutes{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			Time:   &tNow,
+			ID:     "testV1RouteMultipleRouteSameID",
+			Event: map[string]interface{}{
+				utils.Account:     "SpecialCase2",
+				utils.Destination: "+135876",
+				utils.SetupTime:   utils.MetaNow,
+				utils.Usage:       "2m",
+				"Month":           "May",
+			},
+		},
+	}
+	eSpls = engine.SortedRoutes{
+		ProfileID: "MULTIPLE_ROUTES",
+		Sorting:   utils.MetaLC,
+		Count:     1,
+		SortedRoutes: []*engine.SortedRoute{
+			{
+				RouteID: "Route1",
+				SortingData: map[string]interface{}{
+					utils.Cost:     0.0204,
+					"RatingPlanID": "RP_MOBILE",
+					utils.Weight:   10.0,
+				},
+			},
+		},
+	}
+	if err := splSv1Rpc.Call(utils.RouteSv1GetRoutes,
+		ev, &suplsReply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eSpls, suplsReply) {
+		t.Errorf("Expecting: %s, received: %s",
+			utils.ToJSON(eSpls), utils.ToJSON(suplsReply))
+	}
+}
+
+func testV1RouteStopEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
 	}
