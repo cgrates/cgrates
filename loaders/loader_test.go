@@ -781,20 +781,20 @@ func TestLoaderProcessRoutes(t *testing.T) {
 			},
 			&engine.Route{
 				ID:              "supplier1",
-				RatingPlanIDs:   []string{"RPL_2"},
-				ResourceIDs:     []string{"ResGroup2", "ResGroup4"},
-				StatIDs:         []string{"Stat3"},
+				FilterIDs:       []string{"FLTR_DST_DE"},
+				AccountIDs:      []string{"Account2"},
+				RatingPlanIDs:   []string{"RPL_3"},
+				ResourceIDs:     []string{"ResGroup3"},
+				StatIDs:         []string{"Stat2"},
 				Weight:          10,
 				Blocker:         false,
 				RouteParameters: utils.EmptyString,
 			},
 			&engine.Route{
 				ID:              "supplier1",
-				FilterIDs:       []string{"FLTR_DST_DE"},
-				AccountIDs:      []string{"Account2"},
-				RatingPlanIDs:   []string{"RPL_3"},
-				ResourceIDs:     []string{"ResGroup3"},
-				StatIDs:         []string{"Stat2"},
+				RatingPlanIDs:   []string{"RPL_2"},
+				ResourceIDs:     []string{"ResGroup2", "ResGroup4"},
+				StatIDs:         []string{"Stat3"},
 				Weight:          10,
 				Blocker:         false,
 				RouteParameters: utils.EmptyString,
@@ -814,9 +814,11 @@ func TestLoaderProcessRoutes(t *testing.T) {
 		Routes: []*engine.Route{
 			&engine.Route{
 				ID:              "supplier1",
-				RatingPlanIDs:   []string{"RPL_2"},
-				ResourceIDs:     []string{"ResGroup2", "ResGroup4"},
-				StatIDs:         []string{"Stat3"},
+				FilterIDs:       []string{"FLTR_DST_DE"},
+				AccountIDs:      []string{"Account2"},
+				RatingPlanIDs:   []string{"RPL_3"},
+				ResourceIDs:     []string{"ResGroup3"},
+				StatIDs:         []string{"Stat2"},
 				Weight:          10,
 				Blocker:         false,
 				RouteParameters: utils.EmptyString,
@@ -834,11 +836,9 @@ func TestLoaderProcessRoutes(t *testing.T) {
 			},
 			&engine.Route{
 				ID:              "supplier1",
-				FilterIDs:       []string{"FLTR_DST_DE"},
-				AccountIDs:      []string{"Account2"},
-				RatingPlanIDs:   []string{"RPL_3"},
-				ResourceIDs:     []string{"ResGroup3"},
-				StatIDs:         []string{"Stat2"},
+				RatingPlanIDs:   []string{"RPL_2"},
+				ResourceIDs:     []string{"ResGroup2", "ResGroup4"},
+				StatIDs:         []string{"Stat3"},
 				Weight:          10,
 				Blocker:         false,
 				RouteParameters: utils.EmptyString,
@@ -858,6 +858,15 @@ func TestLoaderProcessRoutes(t *testing.T) {
 		Routes: []*engine.Route{
 			&engine.Route{
 				ID:              "supplier1",
+				RatingPlanIDs:   []string{"RPL_2"},
+				ResourceIDs:     []string{"ResGroup2", "ResGroup4"},
+				StatIDs:         []string{"Stat3"},
+				Weight:          10,
+				Blocker:         false,
+				RouteParameters: utils.EmptyString,
+			},
+			&engine.Route{
+				ID:              "supplier1",
 				FilterIDs:       []string{"FLTR_DST_DE"},
 				AccountIDs:      []string{"Account2"},
 				RatingPlanIDs:   []string{"RPL_3"},
@@ -878,6 +887,19 @@ func TestLoaderProcessRoutes(t *testing.T) {
 				Blocker:         true,
 				RouteParameters: "param1",
 			},
+		},
+		Weight: 20,
+	}
+	eSp4 := &engine.RouteProfile{
+		Tenant:    "cgrates.org",
+		ID:        "SPP_1",
+		FilterIDs: []string{"*string:~*req.Account:dan"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
+		},
+		Sorting:           "*least_cost",
+		SortingParameters: []string{},
+		Routes: []*engine.Route{
 			&engine.Route{
 				ID:              "supplier1",
 				RatingPlanIDs:   []string{"RPL_2"},
@@ -887,10 +909,32 @@ func TestLoaderProcessRoutes(t *testing.T) {
 				Blocker:         false,
 				RouteParameters: utils.EmptyString,
 			},
+			&engine.Route{
+				ID:              "supplier1",
+				FilterIDs:       []string{"FLTR_ACNT_dan"},
+				AccountIDs:      []string{"Account1", "Account1_1"},
+				RatingPlanIDs:   []string{"RPL_1"},
+				ResourceIDs:     []string{"ResGroup1"},
+				StatIDs:         []string{"Stat1"},
+				Weight:          10,
+				Blocker:         true,
+				RouteParameters: "param1",
+			},
+			&engine.Route{
+				ID:              "supplier1",
+				FilterIDs:       []string{"FLTR_DST_DE"},
+				AccountIDs:      []string{"Account2"},
+				RatingPlanIDs:   []string{"RPL_3"},
+				ResourceIDs:     []string{"ResGroup3"},
+				StatIDs:         []string{"Stat2"},
+				Weight:          10,
+				Blocker:         false,
+				RouteParameters: utils.EmptyString,
+			},
 		},
 		Weight: 20,
 	}
-	eSp4 := &engine.RouteProfile{
+	eSp5 := &engine.RouteProfile{
 		Tenant:    "cgrates.org",
 		ID:        "SPP_1",
 		FilterIDs: []string{"*string:~*req.Account:dan"},
@@ -934,6 +978,50 @@ func TestLoaderProcessRoutes(t *testing.T) {
 		},
 		Weight: 20,
 	}
+	eSp6 := &engine.RouteProfile{
+		Tenant:    "cgrates.org",
+		ID:        "SPP_1",
+		FilterIDs: []string{"*string:~*req.Account:dan"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
+		},
+		Sorting:           "*least_cost",
+		SortingParameters: []string{},
+		Routes: []*engine.Route{
+			&engine.Route{
+				ID:              "supplier1",
+				FilterIDs:       []string{"FLTR_ACNT_dan"},
+				AccountIDs:      []string{"Account1", "Account1_1"},
+				RatingPlanIDs:   []string{"RPL_1"},
+				ResourceIDs:     []string{"ResGroup1"},
+				StatIDs:         []string{"Stat1"},
+				Weight:          10,
+				Blocker:         true,
+				RouteParameters: "param1",
+			},
+			&engine.Route{
+				ID:              "supplier1",
+				RatingPlanIDs:   []string{"RPL_2"},
+				ResourceIDs:     []string{"ResGroup2", "ResGroup4"},
+				StatIDs:         []string{"Stat3"},
+				Weight:          10,
+				Blocker:         false,
+				RouteParameters: utils.EmptyString,
+			},
+			&engine.Route{
+				ID:              "supplier1",
+				FilterIDs:       []string{"FLTR_DST_DE"},
+				AccountIDs:      []string{"Account2"},
+				RatingPlanIDs:   []string{"RPL_3"},
+				ResourceIDs:     []string{"ResGroup3"},
+				StatIDs:         []string{"Stat2"},
+				Weight:          10,
+				Blocker:         false,
+				RouteParameters: utils.EmptyString,
+			},
+		},
+		Weight: 20,
+	}
 
 	if aps, err := ldr.dm.GetRouteProfile("cgrates.org", "SPP_1",
 		true, false, utils.NonTransactional); err != nil {
@@ -941,7 +1029,9 @@ func TestLoaderProcessRoutes(t *testing.T) {
 	} else if !reflect.DeepEqual(eSp, aps) &&
 		!reflect.DeepEqual(eSp2, aps) &&
 		!reflect.DeepEqual(eSp3, aps) &&
-		!reflect.DeepEqual(eSp4, aps) {
+		!reflect.DeepEqual(eSp4, aps) &&
+		!reflect.DeepEqual(eSp5, aps) &&
+		!reflect.DeepEqual(eSp6, aps) {
 		t.Errorf("expecting: %s, received: %s",
 			utils.ToJSON(eSp), utils.ToJSON(aps))
 	}
