@@ -1928,7 +1928,8 @@ func (tps TPRoutes) AsTPRouteProfile() (result []*utils.TPRouteProfile) {
 			}
 			routeID := tp.RouteID
 			if tp.RouteFilterIDs != "" {
-				routeID = utils.ConcatenatedKey(routeID, tp.RouteFilterIDs)
+				routeID = utils.ConcatenatedKey(routeID,
+					utils.NewStringSet(strings.Split(tp.RouteFilterIDs, utils.INFIELD_SEP)).Sha1())
 			}
 			sup, found := routeMap[tenID][routeID]
 			if !found {

@@ -18,6 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package utils
 
+import "sort"
+
 // NewStringSet returns a new StringSet
 func NewStringSet(dataSlice []string) (s StringSet) {
 	s = make(StringSet)
@@ -60,6 +62,18 @@ func (s StringSet) AsSlice() []string {
 		i++
 	}
 	return result
+}
+
+// AsOrderedSlice returns the keys as ordered string slice
+func (s StringSet) AsOrderedSlice() (ss []string) {
+	ss = s.AsSlice()
+	sort.Strings(ss)
+	return
+}
+
+// Sha1 returns the Sha1 on top of ordered slice
+func (s StringSet) Sha1() string {
+	return Sha1(s.AsOrderedSlice()...)
 }
 
 // Size returns the size of the set
