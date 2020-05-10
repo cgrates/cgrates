@@ -808,6 +808,7 @@ const (
 	RALsLow        = "rals"
 	ReplicatorLow  = "replicator"
 	ApierSLow      = "apiers"
+	EEsLow         = "ees"
 )
 
 // Actions
@@ -1470,6 +1471,12 @@ const (
 	SchedulerSv1Reload             = "SchedulerSv1.Reload"
 	SchedulerSv1ExecuteActions     = "SchedulerSv1.ExecuteActions"
 	SchedulerSv1ExecuteActionPlans = "SchedulerSv1.ExecuteActionPlans"
+)
+
+// EEs
+const (
+	EventExporterSv1     = "EventExporterSv1"
+	EventExporterSv1Ping = "EventExporterSv1.Ping"
 )
 
 //cgr_ variables

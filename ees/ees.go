@@ -126,7 +126,7 @@ func (eeS *EventExporterS) attrSProcessEvent(cgrEv *utils.CGREventWithOpts, attr
 }
 
 // ProcessEvent will be called each time a new event is received from readers
-func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithOpts) (err error) {
+func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithOpts, rply *string) (err error) {
 	eeS.cfg.RLocks(config.EEsJson)
 	defer eeS.cfg.RUnlocks(config.EEsJson)
 

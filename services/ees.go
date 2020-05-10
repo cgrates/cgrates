@@ -27,6 +27,7 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/rpcclient"
 )
 
@@ -58,6 +59,7 @@ type EventExporterService struct {
 	rldChan     chan struct{}
 
 	eeS *ees.EventExporterS
+	rpc *v1.EventExporterSv1
 }
 
 // GetIntenternalChan is deprecated and it will be removed shortly
@@ -65,12 +67,7 @@ func (es *EventExporterService) GetIntenternalChan() (conn chan rpcclient.Client
 	panic("deprecated method")
 }
 
-// IsRunning returns if the service is running
-func (es *EventExporterService) IsRunning() bool {
-	es.RLock()
-	defer es.RUnlock()
-	return es != nil && es.eeS != nil
-}
+
 
 // ServiceName returns the service name
 func (es *EventExporterService) ServiceName() string {
@@ -79,10 +76,14 @@ func (es *EventExporterService) ServiceName() string {
 
 // ShouldRun returns if the service should be running
 func (es *EventExporterService) ShouldRun() (should bool) {
-	es.cfg.RLocks(config.EEsJson)
-	should = es.cfg.EEsCfg().Enabled
-	es.cfg.RUnlocks(config.EEsJson)
-	return
+	return es.cfg.EEsCfg().Enabled
+}
+
+// IsRunning returns if the service is running
+func (es *EventExporterService) IsRunning() bool {
+	es.RLock()
+	defer es.RUnlock()
+	return es != nil && es.eeS != nil
 }
 
 // Reload handles the change of config
@@ -115,9 +116,9 @@ func (es *EventExporterService) Start() (err error) {
 	es.Lock()
 	es.eeS = ees.NewEventExporterS(es.cfg, fltrS, es.connMgr)
 	es.Unlock()
-	if err != nil {
-
-		return
+	es.rpc = v1.NewEventExporterSv1(es.eeS)
+	if !es.cfg.DispatcherSCfg().Enabled {
+		es.server.RpcRegister(es.rpc)
 	}
 	es.intConnChan <- es.eeS
 	return es.eeS.ListenAndServe(es.exitChan, es.rldChan)
