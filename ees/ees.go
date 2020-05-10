@@ -113,7 +113,7 @@ func (eeS *EventExporterS) attrSProcessEvent(cgrEv *utils.CGREventWithOpts, attr
 		ArgDispatcher: cgrEv.ArgDispatcher,
 	}
 	if err = eeS.connMgr.Call(
-		eeS.cfg.EEsCfg().AttributeSConns, nil,
+		eeS.cfg.EEsNoLksCfg().AttributeSConns, nil,
 		utils.AttributeSv1ProcessEvent,
 		attrArgs, &rplyEv); err == nil && len(rplyEv.AlteredFields) != 0 {
 		cgrEv.CGREvent = rplyEv.CGREvent
@@ -132,7 +132,7 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithOpts, rply *s
 
 	var wg sync.WaitGroup
 	var withErr bool
-	for cfgIdx, eeCfg := range eeS.cfg.EEsCfg().Exporters {
+	for cfgIdx, eeCfg := range eeS.cfg.EEsNoLksCfg().Exporters {
 
 		if len(eeCfg.Filters) != 0 {
 			cgrDp := config.NewNavigableMap(map[string]interface{}{

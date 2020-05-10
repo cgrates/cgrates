@@ -980,6 +980,13 @@ func (cfg *CGRConfig) ERsCfg() *ERsCfg {
 
 // EEsCfg reads the EventExporter configuration
 func (cfg *CGRConfig) EEsCfg() *EEsCfg {
+	cfg.lks[EEsJson].RLock()
+	defer cfg.lks[EEsJson].RUnlock()
+	return cfg.eesCfg
+}
+
+// EEsCfg reads the EventExporter configuration
+func (cfg *CGRConfig) EEsNoLksCfg() *EEsCfg {
 	return cfg.eesCfg
 }
 
