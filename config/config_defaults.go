@@ -568,7 +568,7 @@ const CGRATES_CFG_JSON = `
 
 "attributes": {								// AttributeS config
 	"enabled": false,						// starts attribute service: <true|false>.
-	"indexed_selects":true,					// enable profile matching exclusively on indexes
+	"indexed_selects": true,				// enable profile matching exclusively on indexes
 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
@@ -579,7 +579,7 @@ const CGRATES_CFG_JSON = `
 "chargers": {								// ChargerS config
 	"enabled": false,						// starts charger service: <true|false>.
 	"attributes_conns": [],					// connections to AttributeS for event fields altering <""|127.0.0.1:2013>
-	"indexed_selects":true,					// enable profile matching exclusively on indexes
+	"indexed_selects": true,				// enable profile matching exclusively on indexes
 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
@@ -590,7 +590,7 @@ const CGRATES_CFG_JSON = `
 	"enabled": false,						// starts ResourceLimiter service: <true|false>.
 	"store_interval": "",					// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
 	"thresholds_conns": [],					// connections to ThresholdS for resource reporting, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
-	"indexed_selects":true,					// enable profile matching exclusively on indexes
+	"indexed_selects": true,				// enable profile matching exclusively on indexes
 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
@@ -600,9 +600,9 @@ const CGRATES_CFG_JSON = `
 "stats": {									// StatS config
 	"enabled": false,						// starts Stat service: <true|false>.
 	"store_interval": "",					// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
-	"store_uncompressed_limit": 0,					// used to compress data
+	"store_uncompressed_limit": 0,			// used to compress data
 	"thresholds_conns": [],					// connections to ThresholdS for StatUpdates, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
-	"indexed_selects":true,					// enable profile matching exclusively on indexes
+	"indexed_selects": true,				// enable profile matching exclusively on indexes
 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
@@ -612,7 +612,7 @@ const CGRATES_CFG_JSON = `
 "thresholds": {								// ThresholdS
 	"enabled": false,						// starts ThresholdS service: <true|false>.
 	"store_interval": "",					// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
-	"indexed_selects":true,					// enable profile matching exclusively on indexes
+	"indexed_selects": true,				// enable profile matching exclusively on indexes
 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
@@ -621,7 +621,7 @@ const CGRATES_CFG_JSON = `
 
 "routes": {									// RouteS config
 	"enabled": false,						// starts RouteS service: <true|false>.
-	"indexed_selects":true,					// enable profile matching exclusively on indexes
+	"indexed_selects": true,				// enable profile matching exclusively on indexes
 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
@@ -868,7 +868,7 @@ const CGRATES_CFG_JSON = `
 
 "dispatchers":{								// DispatcherS config
 	"enabled": false,						// starts DispatcherS service: <true|false>.
-	"indexed_selects":true,					// enable profile matching exclusively on indexes
+	"indexed_selects": true,				// enable profile matching exclusively on indexes
 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)

@@ -172,6 +172,7 @@ func (srvMngr *ServiceManager) StartServices() (err error) {
 		utils.LoaderS:         srvMngr.GetConfig().LoaderCfg().Enabled(),
 		utils.AnalyzerS:       srvMngr.GetConfig().AnalyzerSCfg().Enabled,
 		utils.DispatcherS:     srvMngr.GetConfig().DispatcherSCfg().Enabled,
+		utils.EventExporterS:  srvMngr.GetConfig().EEsCfg().Enabled,
 	} {
 		if shouldRun {
 			go srvMngr.startService(serviceName)

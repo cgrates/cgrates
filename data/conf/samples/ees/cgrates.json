@@ -1,0 +1,26 @@
+{
+// Sample CGRateS Configuration file for EEs
+//
+// Copyright (C) ITsysCOM GmbH
+
+
+
+
+"attributes": {
+	"enabled": true,
+},
+
+
+"ees": {
+	"enabled": true,
+	"attributes_conns":["*internal"],
+	"cache": {
+		"*file_csv": {"limit": -1, "ttl": "5s", "static_ttl": false},
+	},
+	"exporters": [
+	],
+},
+
+
+
+}
