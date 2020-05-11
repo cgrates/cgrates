@@ -873,8 +873,10 @@ func (ms *MongoStorage) GetDestinationDrv(key string, skipCache bool,
 		cur := ms.getCol(ColDst).FindOne(sctx, bson.M{"key": key})
 		if err := cur.Decode(&kv); err != nil {
 			if err == mongo.ErrNoDocuments {
-				Cache.Set(utils.CacheDestinations, key, nil, nil,
-					cacheCommit(transactionID), transactionID)
+				if err := Cache.Set(utils.CacheDestinations, key, nil, nil,
+					cacheCommit(transactionID), transactionID); err != nil {
+					return err
+				}
 				return utils.ErrNotFound
 			}
 			return err
@@ -897,8 +899,10 @@ func (ms *MongoStorage) GetDestinationDrv(key string, skipCache bool,
 	if err != nil {
 		return nil, err
 	}
-	Cache.Set(utils.CacheDestinations, key, result, nil,
-		cacheCommit(transactionID), transactionID)
+	if err := Cache.Set(utils.CacheDestinations, key, result, nil,
+		cacheCommit(transactionID), transactionID); err != nil {
+		return nil, err
+	}
 	return
 }
 
@@ -973,8 +977,10 @@ func (ms *MongoStorage) GetReverseDestinationDrv(prefix string, skipCache bool,
 		cur := ms.getCol(ColRds).FindOne(sctx, bson.M{"key": prefix})
 		if err := cur.Decode(&result); err != nil {
 			if err == mongo.ErrNoDocuments {
-				Cache.Set(utils.CacheReverseDestinations, prefix, nil, nil,
-					cacheCommit(transactionID), transactionID)
+				if err := Cache.Set(utils.CacheReverseDestinations, prefix, nil, nil,
+					cacheCommit(transactionID), transactionID); err != nil {
+					return err
+				}
 				return utils.ErrNotFound
 			}
 			return err
@@ -984,8 +990,10 @@ func (ms *MongoStorage) GetReverseDestinationDrv(prefix string, skipCache bool,
 		return nil, err
 	}
 	ids = result.Value
-	Cache.Set(utils.CacheReverseDestinations, prefix, ids, nil,
-		cacheCommit(transactionID), transactionID)
+	if err := Cache.Set(utils.CacheReverseDestinations, prefix, ids, nil,
+		cacheCommit(transactionID), transactionID); err != nil {
+		return nil, err
+	}
 	return
 }
 
@@ -1236,7 +1244,9 @@ func (ms *MongoStorage) GetLoadHistory(limit int, skipCache bool,
 	if err == nil {
 		loadInsts = kv.Value
 		Cache.Remove(utils.LOADINST_KEY, "", cCommit, transactionID)
-		Cache.Set(utils.LOADINST_KEY, "", loadInsts, nil, cCommit, transactionID)
+		if err := Cache.Set(utils.LOADINST_KEY, "", loadInsts, nil, cCommit, transactionID); err != nil {
+			return nil, err
+		}
 	}
 	if len(loadInsts) < limit || limit == -1 {
 		return loadInsts, nil
@@ -1371,8 +1381,10 @@ func (ms *MongoStorage) GetActionPlanDrv(key string, skipCache bool,
 		cur := ms.getCol(ColApl).FindOne(sctx, bson.M{"key": key})
 		if err := cur.Decode(&kv); err != nil {
 			if err == mongo.ErrNoDocuments {
-				Cache.Set(utils.CacheActionPlans, key, nil, nil,
-					cacheCommit(transactionID), transactionID)
+				if err := Cache.Set(utils.CacheActionPlans, key, nil, nil,
+					cacheCommit(transactionID), transactionID); err != nil {
+					return err
+				}
 				return utils.ErrNotFound
 			}
 			return err
@@ -1394,8 +1406,10 @@ func (ms *MongoStorage) GetActionPlanDrv(key string, skipCache bool,
 	if err = ms.ms.Unmarshal(out, &ats); err != nil {
 		return nil, err
 	}
-	Cache.Set(utils.CacheActionPlans, key, ats, nil,
-		cacheCommit(transactionID), transactionID)
+	if err := Cache.Set(utils.CacheActionPlans, key, ats, nil,
+		cacheCommit(transactionID), transactionID); err != nil {
+		return nil, err
+	}
 	return
 }
 
@@ -1489,8 +1503,10 @@ func (ms *MongoStorage) GetAccountActionPlansDrv(acntID string, skipCache bool, 
 		cur := ms.getCol(ColAAp).FindOne(sctx, bson.M{"key": acntID})
 		if err := cur.Decode(&kv); err != nil {
 			if err == mongo.ErrNoDocuments {
-				Cache.Set(utils.CacheAccountActionPlans, acntID, nil, nil,
-					cacheCommit(transactionID), transactionID)
+				if err := Cache.Set(utils.CacheAccountActionPlans, acntID, nil, nil,
+					cacheCommit(transactionID), transactionID); err != nil {
+					return err
+				}
 				return utils.ErrNotFound
 			}
 			return err
@@ -1500,8 +1516,10 @@ func (ms *MongoStorage) GetAccountActionPlansDrv(acntID string, skipCache bool, 
 		return nil, err
 	}
 	aPlIDs = kv.Value
-	Cache.Set(utils.CacheAccountActionPlans, acntID, aPlIDs, nil,
-		cacheCommit(transactionID), transactionID)
+	if err := Cache.Set(utils.CacheAccountActionPlans, acntID, aPlIDs, nil,
+		cacheCommit(transactionID), transactionID); err != nil {
+		return nil, err
+	}
 	return
 }
 

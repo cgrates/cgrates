@@ -124,8 +124,10 @@ func (rs *Responder) GetCostOnRatingPlans(arg *utils.GetCostOnRatingPlansArgs, r
 			},
 		}
 		// force cache set so it can be picked by calldescriptor for cost calculation
-		Cache.Set(utils.CacheRatingProfilesTmp, rPrfl.Id, rPrfl, nil,
-			true, utils.NonTransactional)
+		if err := Cache.Set(utils.CacheRatingProfilesTmp, rPrfl.Id, rPrfl, nil,
+			true, utils.NonTransactional); err != nil {
+			return err
+		}
 		cd := &CallDescriptor{
 			Category:      utils.MetaTmp,
 			Tenant:        arg.Tenant,

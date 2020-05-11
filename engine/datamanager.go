@@ -581,16 +581,20 @@ func (dm *DataManager) GetStatQueue(tenant, id string,
 		if err != nil {
 			err = utils.CastRPCErr(err)
 			if err == utils.ErrNotFound && cacheWrite {
-				Cache.Set(utils.CacheStatQueues, tntID, nil, nil,
-					cacheCommit(transactionID), transactionID)
+				if err = Cache.Set(utils.CacheStatQueues, tntID, nil, nil,
+					cacheCommit(transactionID), transactionID); err != nil {
+					return nil, err
+				}
 
 			}
 			return nil, err
 		}
 	}
 	if cacheWrite {
-		Cache.Set(utils.CacheStatQueues, tntID, sq, nil,
-			cacheCommit(transactionID), transactionID)
+		if err = Cache.Set(utils.CacheStatQueues, tntID, sq, nil,
+			cacheCommit(transactionID), transactionID); err != nil {
+			return nil, err
+		}
 	}
 	return
 }
@@ -687,15 +691,19 @@ func (dm *DataManager) GetFilter(tenant, id string, cacheRead, cacheWrite bool,
 		if err != nil {
 			err = utils.CastRPCErr(err)
 			if err == utils.ErrNotFound && cacheWrite {
-				Cache.Set(utils.CacheFilters, tntID, nil, nil,
-					cacheCommit(transactionID), transactionID)
+				if err = Cache.Set(utils.CacheFilters, tntID, nil, nil,
+					cacheCommit(transactionID), transactionID); err != nil {
+					return nil, err
+				}
 			}
 			return
 		}
 	}
 	if cacheWrite {
-		Cache.Set(utils.CacheFilters, tntID, fltr, nil,
-			cacheCommit(transactionID), transactionID)
+		if err = Cache.Set(utils.CacheFilters, tntID, fltr, nil,
+			cacheCommit(transactionID), transactionID); err != nil {
+			return nil, err
+		}
 	}
 	return
 }
@@ -779,15 +787,19 @@ func (dm *DataManager) GetThreshold(tenant, id string,
 		if err != nil {
 			err = utils.CastRPCErr(err)
 			if err == utils.ErrNotFound && cacheWrite {
-				Cache.Set(utils.CacheThresholds, tntID, nil, nil,
-					cacheCommit(transactionID), transactionID)
+				if err = Cache.Set(utils.CacheThresholds, tntID, nil, nil,
+					cacheCommit(transactionID), transactionID); err != nil {
+					return nil, err
+				}
 			}
 			return nil, err
 		}
 	}
 	if cacheWrite {
-		Cache.Set(utils.CacheThresholds, tntID, th, nil,
-			cacheCommit(transactionID), transactionID)
+		if err = Cache.Set(utils.CacheThresholds, tntID, th, nil,
+			cacheCommit(transactionID), transactionID); err != nil {
+			return nil, err
+		}
 	}
 	return
 }
@@ -870,16 +882,20 @@ func (dm *DataManager) GetThresholdProfile(tenant, id string, cacheRead, cacheWr
 		if err != nil {
 			err = utils.CastRPCErr(err)
 			if err == utils.ErrNotFound && cacheWrite {
-				Cache.Set(utils.CacheThresholdProfiles, tntID, nil, nil,
-					cacheCommit(transactionID), transactionID)
+				if err = Cache.Set(utils.CacheThresholdProfiles, tntID, nil, nil,
+					cacheCommit(transactionID), transactionID); err != nil {
+					return nil, err
+				}
 
 			}
 			return nil, err
 		}
 	}
 	if cacheWrite {
-		Cache.Set(utils.CacheThresholdProfiles, tntID, th, nil,
-			cacheCommit(transactionID), transactionID)
+		if err = Cache.Set(utils.CacheThresholdProfiles, tntID, th, nil,
+			cacheCommit(transactionID), transactionID); err != nil {
+			return nil, err
+		}
 	}
 	return
 }
@@ -1000,16 +1016,20 @@ func (dm *DataManager) GetStatQueueProfile(tenant, id string, cacheRead, cacheWr
 		if err != nil {
 			err = utils.CastRPCErr(err)
 			if err == utils.ErrNotFound && cacheWrite {
-				Cache.Set(utils.CacheStatQueueProfiles, tntID, nil, nil,
-					cacheCommit(transactionID), transactionID)
+				if err = Cache.Set(utils.CacheStatQueueProfiles, tntID, nil, nil,
+					cacheCommit(transactionID), transactionID); err != nil {
+					return nil, err
+				}
 
 			}
 			return nil, err
 		}
 	}
 	if cacheWrite {
-		Cache.Set(utils.CacheStatQueueProfiles, tntID, sqp, nil,
-			cacheCommit(transactionID), transactionID)
+		if err = Cache.Set(utils.CacheStatQueueProfiles, tntID, sqp, nil,
+			cacheCommit(transactionID), transactionID); err != nil {
+			return nil, err
+		}
 	}
 	return
 }
@@ -1130,15 +1150,19 @@ func (dm *DataManager) GetTiming(id string, skipCache bool,
 		if err != nil {
 			err = utils.CastRPCErr(err)
 			if err == utils.ErrNotFound {
-				Cache.Set(utils.CacheTimings, id, nil, nil,
-					cacheCommit(transactionID), transactionID)
+				if err = Cache.Set(utils.CacheTimings, id, nil, nil,
+					cacheCommit(transactionID), transactionID); err != nil {
+					return nil, err
+				}
 
 			}
 			return nil, err
 		}
 	}
-	Cache.Set(utils.CacheTimings, id, t, nil,
-		cacheCommit(transactionID), transactionID)
+	if err = Cache.Set(utils.CacheTimings, id, t, nil,
+		cacheCommit(transactionID), transactionID); err != nil {
+		return nil, err
+	}
 	return
 }
 
@@ -1220,16 +1244,20 @@ func (dm *DataManager) GetResource(tenant, id string, cacheRead, cacheWrite bool
 		if err != nil {
 			err = utils.CastRPCErr(err)
 			if err == utils.ErrNotFound && cacheWrite {
-				Cache.Set(utils.CacheResources, tntID, nil, nil,
-					cacheCommit(transactionID), transactionID)
+				if err = Cache.Set(utils.CacheResources, tntID, nil, nil,
+					cacheCommit(transactionID), transactionID); err != nil {
+					return nil, err
+				}
 
 			}
 			return nil, err
 		}
 	}
 	if cacheWrite {
-		Cache.Set(utils.CacheResources, tntID, rs, nil,
-			cacheCommit(transactionID), transactionID)
+		if err = Cache.Set(utils.CacheResources, tntID, rs, nil,
+			cacheCommit(transactionID), transactionID); err != nil {
+			return nil, err
+		}
 	}
 	return
 }
@@ -1312,16 +1340,20 @@ func (dm *DataManager) GetResourceProfile(tenant, id string, cacheRead, cacheWri
 		if err != nil {
 			err = utils.CastRPCErr(err)
 			if err == utils.ErrNotFound && cacheWrite {
-				Cache.Set(utils.CacheResourceProfiles, tntID, nil, nil,
-					cacheCommit(transactionID), transactionID)
+				if err = Cache.Set(utils.CacheResourceProfiles, tntID, nil, nil,
+					cacheCommit(transactionID), transactionID); err != nil {
+					return nil, err
+				}
 
 			}
 			return nil, err
 		}
 	}
 	if cacheWrite {
-		Cache.Set(utils.CacheResourceProfiles, tntID, rp, nil,
-			cacheCommit(transactionID), transactionID)
+		if err = Cache.Set(utils.CacheResourceProfiles, tntID, rp, nil,
+			cacheCommit(transactionID), transactionID); err != nil {
+			return nil, err
+		}
 	}
 	return
 }
@@ -1441,14 +1473,18 @@ func (dm *DataManager) GetActionTriggers(id string, skipCache bool,
 		if err != nil {
 			err = utils.CastRPCErr(err)
 			if err == utils.ErrNotFound {
-				Cache.Set(utils.CacheActionTriggers, id, nil, nil,
-					cacheCommit(transactionID), transactionID)
+				if err = Cache.Set(utils.CacheActionTriggers, id, nil, nil,
+					cacheCommit(transactionID), transactionID); err != nil {
+					return nil, err
+				}
 			}
 			return nil, err
 		}
 	}
-	Cache.Set(utils.CacheActionTriggers, id, attrs, nil,
-		cacheCommit(transactionID), transactionID)
+	if err = Cache.Set(utils.CacheActionTriggers, id, attrs, nil,
+		cacheCommit(transactionID), transactionID); err != nil {
+		return nil, err
+	}
 	return
 }
 
@@ -1546,14 +1582,18 @@ func (dm *DataManager) GetSharedGroup(key string, skipCache bool,
 		if err != nil {
 			err = utils.CastRPCErr(err)
 			if err == utils.ErrNotFound {
-				Cache.Set(utils.CacheSharedGroups, key, nil, nil,
-					cacheCommit(transactionID), transactionID)
+				if err = Cache.Set(utils.CacheSharedGroups, key, nil, nil,
+					cacheCommit(transactionID), transactionID); err != nil {
+					return nil, err
+				}
 			}
 			return nil, err
 		}
 	}
-	Cache.Set(utils.CacheSharedGroups, key, sg, nil,
-		cacheCommit(transactionID), transactionID)
+	if err = Cache.Set(utils.CacheSharedGroups, key, sg, nil,
+		cacheCommit(transactionID), transactionID); err != nil {
+		return nil, err
+	}
 	return
 }
 
@@ -1647,14 +1687,18 @@ func (dm *DataManager) GetActions(key string, skipCache bool, transactionID stri
 		if err != nil {
 			err = utils.CastRPCErr(err)
 			if err == utils.ErrNotFound {
-				Cache.Set(utils.CacheActions, key, nil, nil,
-					cacheCommit(transactionID), transactionID)
+				if err = Cache.Set(utils.CacheActions, key, nil, nil,
+					cacheCommit(transactionID), transactionID); err != nil {
+					return nil, err
+				}
 			}
 			return nil, err
 		}
 	}
-	Cache.Set(utils.CacheActions, key, as, nil,
-		cacheCommit(transactionID), transactionID)
+	if err = Cache.Set(utils.CacheActions, key, as, nil,
+		cacheCommit(transactionID), transactionID); err != nil {
+		return nil, err
+	}
 	return
 }
 
@@ -1956,14 +2000,18 @@ func (dm *DataManager) GetRatingPlan(key string, skipCache bool,
 		if err != nil {
 			err = utils.CastRPCErr(err)
 			if err == utils.ErrNotFound {
-				Cache.Set(utils.CacheRatingPlans, key, nil, nil,
-					cacheCommit(transactionID), transactionID)
+				if err = Cache.Set(utils.CacheRatingPlans, key, nil, nil,
+					cacheCommit(transactionID), transactionID); err != nil {
+					return nil, err
+				}
 			}
 			return nil, err
 		}
 	}
-	Cache.Set(utils.CacheRatingPlans, key, rp, nil,
-		cacheCommit(transactionID), transactionID)
+	if err = Cache.Set(utils.CacheRatingPlans, key, rp, nil,
+		cacheCommit(transactionID), transactionID); err != nil {
+		return nil, err
+	}
 	return
 }
 
@@ -2057,14 +2105,18 @@ func (dm *DataManager) GetRatingProfile(key string, skipCache bool,
 		if err != nil {
 			err = utils.CastRPCErr(err)
 			if err == utils.ErrNotFound {
-				Cache.Set(utils.CacheRatingProfiles, key, nil, nil,
-					cacheCommit(transactionID), transactionID)
+				if err = Cache.Set(utils.CacheRatingProfiles, key, nil, nil,
+					cacheCommit(transactionID), transactionID); err != nil {
+					return nil, err
+				}
 			}
 			return nil, err
 		}
 	}
-	Cache.Set(utils.CacheRatingProfiles, key, rpf, nil,
-		cacheCommit(transactionID), transactionID)
+	if err = Cache.Set(utils.CacheRatingProfiles, key, rpf, nil,
+		cacheCommit(transactionID), transactionID); err != nil {
+		return nil, err
+	}
 	return
 }
 
@@ -2260,15 +2312,19 @@ func (dm *DataManager) MatchFilterIndex(cacheID, itemIDPrefix,
 		if err != nil {
 			err = utils.CastRPCErr(err)
 			if err == utils.ErrNotFound {
-				Cache.Set(cacheID, fieldValKey, nil, nil,
-					true, utils.NonTransactional)
+				if err = Cache.Set(cacheID, fieldValKey, nil, nil,
+					true, utils.NonTransactional); err != nil {
+					return nil, err
+				}
 
 			}
 			return nil, err
 		}
 	}
-	Cache.Set(cacheID, fieldValKey, itemIDs, nil,
-		true, utils.NonTransactional)
+	if err = Cache.Set(cacheID, fieldValKey, itemIDs, nil,
+		true, utils.NonTransactional); err != nil {
+		return nil, err
+	}
 	return
 }
 
@@ -2303,8 +2359,10 @@ func (dm *DataManager) GetRouteProfile(tenant, id string, cacheRead, cacheWrite 
 		if err != nil {
 			err = utils.CastRPCErr(err)
 			if err == utils.ErrNotFound && cacheWrite {
-				Cache.Set(utils.CacheRouteProfiles, tntID, nil, nil,
-					cacheCommit(transactionID), transactionID)
+				if err = Cache.Set(utils.CacheRouteProfiles, tntID, nil, nil,
+					cacheCommit(transactionID), transactionID); err != nil {
+					return nil, err
+				}
 
 			}
 			return nil, err
@@ -2315,8 +2373,10 @@ func (dm *DataManager) GetRouteProfile(tenant, id string, cacheRead, cacheWrite 
 		return nil, err
 	}
 	if cacheWrite {
-		Cache.Set(utils.CacheRouteProfiles, tntID, rpp, nil,
-			cacheCommit(transactionID), transactionID)
+		if err = Cache.Set(utils.CacheRouteProfiles, tntID, rpp, nil,
+			cacheCommit(transactionID), transactionID); err != nil {
+			return nil, err
+		}
 	}
 	return
 }
@@ -2448,8 +2508,10 @@ func (dm *DataManager) GetAttributeProfile(tenant, id string, cacheRead, cacheWr
 		if err != nil {
 			err = utils.CastRPCErr(err)
 			if err == utils.ErrNotFound && cacheWrite {
-				Cache.Set(utils.CacheAttributeProfiles, tntID, nil, nil,
-					cacheCommit(transactionID), transactionID)
+				if err = Cache.Set(utils.CacheAttributeProfiles, tntID, nil, nil,
+					cacheCommit(transactionID), transactionID); err != nil {
+					return nil, err
+				}
 
 			}
 			return nil, err
@@ -2459,8 +2521,10 @@ func (dm *DataManager) GetAttributeProfile(tenant, id string, cacheRead, cacheWr
 		return nil, err
 	}
 	if cacheWrite {
-		Cache.Set(utils.CacheAttributeProfiles, tntID, attrPrfl, nil,
-			cacheCommit(transactionID), transactionID)
+		if err = Cache.Set(utils.CacheAttributeProfiles, tntID, attrPrfl, nil,
+			cacheCommit(transactionID), transactionID); err != nil {
+			return nil, err
+		}
 	}
 	return
 }
@@ -2591,16 +2655,20 @@ func (dm *DataManager) GetChargerProfile(tenant, id string, cacheRead, cacheWrit
 		if err != nil {
 			err = utils.CastRPCErr(err)
 			if err == utils.ErrNotFound && cacheWrite {
-				Cache.Set(utils.CacheChargerProfiles, tntID, nil, nil,
-					cacheCommit(transactionID), transactionID)
+				if err = Cache.Set(utils.CacheChargerProfiles, tntID, nil, nil,
+					cacheCommit(transactionID), transactionID); err != nil {
+					return nil, err
+				}
 
 			}
 			return nil, err
 		}
 	}
 	if cacheWrite {
-		Cache.Set(utils.CacheChargerProfiles, tntID, cpp, nil,
-			cacheCommit(transactionID), transactionID)
+		if err = Cache.Set(utils.CacheChargerProfiles, tntID, cpp, nil,
+			cacheCommit(transactionID), transactionID); err != nil {
+			return nil, err
+		}
 	}
 	return
 }
@@ -2722,16 +2790,20 @@ func (dm *DataManager) GetDispatcherProfile(tenant, id string, cacheRead, cacheW
 		if err != nil {
 			err = utils.CastRPCErr(err)
 			if err == utils.ErrNotFound && cacheWrite {
-				Cache.Set(utils.CacheDispatcherProfiles, tntID, nil, nil,
-					cacheCommit(transactionID), transactionID)
+				if err = Cache.Set(utils.CacheDispatcherProfiles, tntID, nil, nil,
+					cacheCommit(transactionID), transactionID); err != nil {
+					return nil, err
+				}
 
 			}
 			return nil, err
 		}
 	}
 	if cacheWrite {
-		Cache.Set(utils.CacheDispatcherProfiles, tntID, dpp, nil,
-			cacheCommit(transactionID), transactionID)
+		if err = Cache.Set(utils.CacheDispatcherProfiles, tntID, dpp, nil,
+			cacheCommit(transactionID), transactionID); err != nil {
+			return nil, err
+		}
 	}
 	return
 }
@@ -2862,8 +2934,10 @@ func (dm *DataManager) GetDispatcherHost(tenant, id string, cacheRead, cacheWrit
 		if err != nil {
 			err = utils.CastRPCErr(err)
 			if err == utils.ErrNotFound && cacheWrite {
-				Cache.Set(utils.CacheDispatcherHosts, tntID, nil, nil,
-					cacheCommit(transactionID), transactionID)
+				if err = Cache.Set(utils.CacheDispatcherHosts, tntID, nil, nil,
+					cacheCommit(transactionID), transactionID); err != nil {
+					return nil, err
+				}
 
 			}
 			return nil, err
@@ -2880,8 +2954,10 @@ func (dm *DataManager) GetDispatcherHost(tenant, id string, cacheRead, cacheWrit
 			dH.Conns, IntRPC.GetInternalChanel(), false); err != nil {
 			return nil, err
 		}
-		Cache.Set(utils.CacheDispatcherHosts, tntID, dH, nil,
-			cacheCommit(transactionID), transactionID)
+		if err = Cache.Set(utils.CacheDispatcherHosts, tntID, dH, nil,
+			cacheCommit(transactionID), transactionID); err != nil {
+			return nil, err
+		}
 	}
 	return
 }
@@ -2966,8 +3042,10 @@ func (dm *DataManager) GetItemLoadIDs(itemIDPrefix string, cacheWrite bool) (loa
 			err = utils.CastRPCErr(err)
 			if err == utils.ErrNotFound && cacheWrite {
 				for key, _ := range loadIDs {
-					Cache.Set(utils.CacheLoadIDs, key, nil, nil,
-						cacheCommit(utils.NonTransactional), utils.NonTransactional)
+					if err = Cache.Set(utils.CacheLoadIDs, key, nil, nil,
+						cacheCommit(utils.NonTransactional), utils.NonTransactional); err != nil {
+						return nil, err
+					}
 				}
 
 			}
@@ -2976,8 +3054,10 @@ func (dm *DataManager) GetItemLoadIDs(itemIDPrefix string, cacheWrite bool) (loa
 	}
 	if cacheWrite {
 		for key, val := range loadIDs {
-			Cache.Set(utils.CacheLoadIDs, key, val, nil,
-				cacheCommit(utils.NonTransactional), utils.NonTransactional)
+			if err = Cache.Set(utils.CacheLoadIDs, key, val, nil,
+				cacheCommit(utils.NonTransactional), utils.NonTransactional); err != nil {
+				return nil, err
+			}
 		}
 	}
 	return

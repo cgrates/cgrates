@@ -352,7 +352,9 @@ func TestRSCacheSetGet(t *testing.T) {
 		tUsage: utils.Float64Pointer(2),
 		dirty:  utils.BoolPointer(true),
 	}
-	Cache.Set(utils.CacheResources, r.TenantID(), r, nil, true, "")
+	if err := Cache.Set(utils.CacheResources, r.TenantID(), r, nil, true, ""); err != nil {
+		t.Errorf("Expecting: nil, received: %s", err)
+	}
 	if x, ok := Cache.Get(utils.CacheResources, r.TenantID()); !ok {
 		t.Error("not in cache")
 	} else if x == nil {
@@ -749,18 +751,24 @@ func TestResourceCaching(t *testing.T) {
 		ThresholdIDs:      []string{utils.META_NONE},
 	}
 
-	Cache.Set(utils.CacheResourceProfiles, "cgrates.org:ResourceProfileCached",
-		resProf, nil, cacheCommit(utils.EmptyString), utils.EmptyString)
+	if err := Cache.Set(utils.CacheResourceProfiles, "cgrates.org:ResourceProfileCached",
+		resProf, nil, cacheCommit(utils.EmptyString), utils.EmptyString); err != nil {
+		t.Errorf("Expecting: nil, received: %s", err)
+	}
 
 	res := &Resource{Tenant: resProf.Tenant,
 		ID:     resProf.ID,
 		Usages: make(map[string]*ResourceUsage)}
 
-	Cache.Set(utils.CacheResources, "cgrates.org:ResourceProfileCached",
-		res, nil, cacheCommit(utils.EmptyString), utils.EmptyString)
+	if err := Cache.Set(utils.CacheResources, "cgrates.org:ResourceProfileCached",
+		res, nil, cacheCommit(utils.EmptyString), utils.EmptyString); err != nil {
+		t.Errorf("Expecting: nil, received: %s", err)
+	}
 
 	resources := Resources{res}
-	Cache.Set(utils.CacheEventResources, "TestResourceCaching", resources.resIDsMp(), nil, true, "")
+	if err := Cache.Set(utils.CacheEventResources, "TestResourceCaching", resources.resIDsMp(), nil, true, ""); err != nil {
+		t.Errorf("Expecting: nil, received: %s", err)
+	}
 
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",

@@ -2571,7 +2571,9 @@ func TestCacheGetClonedActions(t *testing.T) {
 			Weight: float64(10),
 		},
 	}
-	Cache.Set(utils.CacheActions, "MYTEST", actions, nil, true, "")
+	if err := Cache.Set(utils.CacheActions, "MYTEST", actions, nil, true, ""); err != nil {
+		t.Errorf("Expecting: nil, received: %s", err)
+	}
 	clned, err := Cache.GetCloned(utils.CacheActions, "MYTEST")
 	if err != nil {
 		t.Error(err)

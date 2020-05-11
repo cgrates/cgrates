@@ -478,7 +478,9 @@ func (rS *ResourceService) matchingResourcesForEvent(ev *utils.CGREvent,
 		)
 		if err != nil {
 			if err == utils.ErrNotFound {
-				Cache.Set(utils.CacheEventResources, evUUID, nil, nil, true, "") // cache negative match
+				if err = Cache.Set(utils.CacheEventResources, evUUID, nil, nil, true, ""); err != nil { // cache negative match
+					return nil, err
+				}
 			}
 			return
 		}
@@ -546,7 +548,9 @@ func (rS *ResourceService) matchingResourcesForEvent(ev *utils.CGREvent,
 			break
 		}
 	}
-	Cache.Set(utils.CacheEventResources, evUUID, rs.resIDsMp(), nil, true, "")
+	if err := Cache.Set(utils.CacheEventResources, evUUID, rs.resIDsMp(), nil, true, ""); err != nil {
+		return nil, err
+	}
 	return
 }
 

@@ -2248,8 +2248,10 @@ aa+jqv4dwkr/FLEcN1zC76Y/IniI65fId55hVJvN3ORuzUqYEtzD3irmsw==
 	if err != nil {
 		t.Fatal(err)
 	}
-	engine.Cache.Set(utils.CacheSTIR, "https://www.example.org/cert.cer", pubKey,
-		nil, true, utils.NonTransactional)
+	if err := engine.Cache.Set(utils.CacheSTIR, "https://www.example.org/cert.cer", pubKey,
+		nil, true, utils.NonTransactional); err != nil {
+		t.Errorf("Expecting: nil, received: %s", err)
+	}
 	var rply string
 	if err := sS.BiRPCv1STIRAuthenticate(nil, &V1STIRAuthenticateArgs{
 		PayloadMaxDuration: "A",
@@ -2304,10 +2306,14 @@ aa+jqv4dwkr/FLEcN1zC76Y/IniI65fId55hVJvN3ORuzUqYEtzD3irmsw==
 	if err != nil {
 		t.Fatal(err)
 	}
-	engine.Cache.Set(utils.CacheSTIR, "https://www.example.org/cert.cer", pubKey,
-		nil, true, utils.NonTransactional)
-	engine.Cache.Set(utils.CacheSTIR, "https://www.example.org/private.pem", nil,
-		nil, true, utils.NonTransactional)
+	if err := engine.Cache.Set(utils.CacheSTIR, "https://www.example.org/cert.cer", pubKey,
+		nil, true, utils.NonTransactional); err != nil {
+		t.Errorf("Expecting: nil, received: %s", err)
+	}
+	if err := engine.Cache.Set(utils.CacheSTIR, "https://www.example.org/private.pem", nil,
+		nil, true, utils.NonTransactional); err != nil {
+		t.Errorf("Expecting: nil, received: %s", err)
+	}
 
 	var rcv string
 	if err := sS.BiRPCv1STIRIdentity(nil, &V1STIRIdentityArgs{
@@ -2318,8 +2324,10 @@ aa+jqv4dwkr/FLEcN1zC76Y/IniI65fId55hVJvN3ORuzUqYEtzD3irmsw==
 	}, &rcv); err == nil {
 		t.Error("Expected error")
 	}
-	engine.Cache.Set(utils.CacheSTIR, "https://www.example.org/private.pem", prvKey,
-		nil, true, utils.NonTransactional)
+	if err := engine.Cache.Set(utils.CacheSTIR, "https://www.example.org/private.pem", prvKey,
+		nil, true, utils.NonTransactional); err != nil {
+		t.Errorf("Expecting: nil, received: %s", err)
+	}
 	if err := sS.BiRPCv1STIRIdentity(nil, &V1STIRIdentityArgs{
 		Payload:        payload,
 		PublicKeyPath:  "https://www.example.org/cert.cer",

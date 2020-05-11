@@ -249,7 +249,9 @@ func TestCacheGetCloned(t *testing.T) {
 		Id:         "test",
 		AccountIDs: utils.StringMap{"one": true, "two": true, "three": true},
 	}
-	Cache.Set(utils.CacheActionPlans, "MYTESTAPL", at1, nil, true, "")
+	if err := Cache.Set(utils.CacheActionPlans, "MYTESTAPL", at1, nil, true, ""); err != nil {
+		t.Errorf("Expecting nil, received: %s", err)
+	}
 	clned, err := Cache.GetCloned(utils.CacheActionPlans, "MYTESTAPL")
 	if err != nil {
 		t.Error(err)
