@@ -197,6 +197,9 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 			utils.UnsupportedCachePrefix,
 			fmt.Sprintf("prefix <%s> is not a supported cache prefix", prfx))
 	}
+	if dm.cacheCfg[utils.CachePrefixToInstance[prfx]].Limit == 0 {
+		return
+	}
 	if ids == nil {
 		keyIDs, err := dm.DataDB().GetKeysForPrefix(prfx)
 		if err != nil {

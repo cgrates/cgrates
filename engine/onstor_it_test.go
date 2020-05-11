@@ -143,6 +143,9 @@ func testOnStorITIsDBEmpty(t *testing.T) {
 }
 
 func testOnStorITCacheDestinations(t *testing.T) {
+	if onStor.dataDB.GetStorageType() == utils.INTERNAL {
+		t.SkipNow()
+	}
 	if err := onStor.CacheDataFromDB("INVALID", nil, false); err == nil || err.Error() != utils.UnsupportedCachePrefix {
 		t.Error(err)
 	}
@@ -163,6 +166,7 @@ func testOnStorITCacheDestinations(t *testing.T) {
 	if err := onStor.CacheDataFromDB(utils.DESTINATION_PREFIX, []string{dst.Id}, false); err != nil {
 		t.Error(err)
 	}
+
 	if itm, hasIt := Cache.Get(utils.CacheDestinations, dst.Id); !hasIt {
 		t.Error("Did not cache")
 	} else if !reflect.DeepEqual(dst, itm.(*Destination)) {
@@ -171,6 +175,9 @@ func testOnStorITCacheDestinations(t *testing.T) {
 }
 
 func testOnStorITCacheReverseDestinations(t *testing.T) {
+	if onStor.dataDB.GetStorageType() == utils.INTERNAL {
+		t.SkipNow()
+	}
 	dst := &Destination{Id: "TEST_CACHE", Prefixes: []string{"+491", "+492", "+493"}}
 	if err := onStor.SetReverseDestination(dst, utils.NonTransactional); err != nil {
 		t.Error(err)
@@ -193,6 +200,9 @@ func testOnStorITCacheReverseDestinations(t *testing.T) {
 }
 
 func testOnStorITCacheActionPlan(t *testing.T) {
+	if onStor.dataDB.GetStorageType() == utils.INTERNAL {
+		t.SkipNow()
+	}
 	ap := &ActionPlan{
 		Id:         "MORE_MINUTES",
 		AccountIDs: utils.StringMap{"vdf:minitsboy": true},
@@ -256,6 +266,9 @@ func testOnStorITCacheActionPlan(t *testing.T) {
 }
 
 func testOnStorITCacheAccountActionPlans(t *testing.T) {
+	if onStor.dataDB.GetStorageType() == utils.INTERNAL {
+		t.SkipNow()
+	}
 	acntID := utils.ConcatenatedKey("cgrates.org", "1001")
 	aAPs := []string{"PACKAGE_10_SHARED_A_5", "USE_SHARED_A", "apl_PACKAGE_1001"}
 	if err := onStor.SetAccountActionPlans(acntID, aAPs, true); err != nil {

@@ -398,6 +398,7 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 
 func TestDataDbCfgAsMapInterface(t *testing.T) {
 	var dbcfg DataDbCfg
+	dbcfg.Items = make(map[string]*ItemOpt)
 	cfgJSONStr := `{
 	"data_db": {								
 		"db_type": "*redis",					

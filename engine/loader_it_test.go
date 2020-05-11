@@ -92,7 +92,7 @@ func testLoaderITInitDataDB(t *testing.T) {
 	if err != nil {
 		t.Fatal("Error on dataDb connection: ", err.Error())
 	}
-	dataDbCsv = NewDataManager(dbConn, nil, nil)
+	dataDbCsv = NewDataManager(dbConn, lCfg.CacheCfg(), nil)
 	if err = dbConn.Flush(utils.EmptyString); err != nil {
 		t.Fatal("Error when flushing datadb")
 	}

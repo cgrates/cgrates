@@ -324,6 +324,9 @@ func TestResourceAllocateResource(t *testing.T) {
 
 // TestRSCacheSetGet assurace the presence of private params in cached resource
 func TestRSCacheSetGet(t *testing.T) {
+	if *dbType == utils.MetaInternal {
+		t.SkipNow()
+	}
 	r := &Resource{
 		Tenant: "cgrates.org",
 		ID:     "RL",
@@ -719,6 +722,9 @@ func TestResourceIDs(t *testing.T) {
 }
 
 func TestResourceCaching(t *testing.T) {
+	if *dbType == utils.MetaInternal {
+		t.SkipNow()
+	}
 	//clear the cache
 	Cache.Clear(nil)
 	// start fresh with new dataManager
