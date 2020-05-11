@@ -364,7 +364,7 @@ func testCallStartPjsuaListener(t *testing.T) {
 		acnts, 5070, time.Duration(*waitRater)*time.Millisecond); err != nil {
 		t.Fatal(err)
 	}
-	time.Sleep(1 * time.Second)
+	time.Sleep(2 * time.Second)
 }
 
 // Call from 1001 (prepaid) to 1002
@@ -375,7 +375,7 @@ func testCallCall1001To1002(t *testing.T) {
 		t.Fatal(err)
 	}
 	// give time to session to start so we can check it
-	time.Sleep(time.Second)
+	time.Sleep(1 * time.Second)
 }
 
 // GetActiveSessions
@@ -395,14 +395,20 @@ func testCallGetActiveSessions(t *testing.T) {
 		nil, &reply); err != nil {
 		t.Error("Got error on SessionSv1.GetActiveSessions: ", err.Error())
 	} else {
-		// compare some fields (eg. CGRId is generated)
-		if !reflect.DeepEqual((*expected)[0].RequestType, (*reply)[0].RequestType) {
-			t.Errorf("Expected: %s, received: %s", (*expected)[0].RequestType, (*reply)[0].RequestType)
-		} else if !reflect.DeepEqual((*expected)[0].Account, (*reply)[0].Account) {
-			t.Errorf("Expected: %s, received: %s", (*expected)[0].Account, (*reply)[0].Account)
-		} else if !reflect.DeepEqual((*expected)[0].Destination, (*reply)[0].Destination) {
-			t.Errorf("Expected: %s, received: %s", (*expected)[0].Destination, (*reply)[0].Destination)
+		for _, session := range *reply {
+			if session.RunID != utils.MetaDefault {
+				continue
+			}
+			// compare some fields (eg. CGRId is generated)
+			if !reflect.DeepEqual((*expected)[0].RequestType, (*reply)[0].RequestType) {
+				t.Errorf("Expected: %s, received: %s", (*expected)[0].RequestType, (*reply)[0].RequestType)
+			} else if !reflect.DeepEqual((*expected)[0].Account, (*reply)[0].Account) {
+				t.Errorf("Expected: %s, received: %s", (*expected)[0].Account, (*reply)[0].Account)
+			} else if !reflect.DeepEqual((*expected)[0].Destination, (*reply)[0].Destination) {
+				t.Errorf("Expected: %s, received: %s", (*expected)[0].Destination, (*reply)[0].Destination)
+			}
 		}
+
 	}
 }
 
