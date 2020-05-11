@@ -30,8 +30,10 @@ import (
 )
 
 func TestFilterPassDestinations(t *testing.T) {
-	engine.Cache.Set(utils.CacheReverseDestinations, "+49",
-		[]string{"DE", "EU_LANDLINE"}, nil, true, "")
+	if err := engine.Cache.Set(utils.CacheReverseDestinations, "+49",
+		[]string{"DE", "EU_LANDLINE"}, nil, true, ""); err != nil {
+		t.Errorf("Expecting: nil, received: %s", err)
+	}
 	config.CgrConfig().FilterSCfg().ApierSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier)}
 	internalAPIerSv1Chan := make(chan rpcclient.ClientConnector, 1)
 	connMgr := engine.NewConnManager(config.CgrConfig(), map[string]chan rpcclient.ClientConnector{
@@ -91,8 +93,10 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dmFilterPass := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
 	filterS := engine.NewFilterS(cfg, connMgr, dmFilterPass)
-	engine.Cache.Set(utils.CacheReverseDestinations, "+49",
-		[]string{"DE", "EU_LANDLINE"}, nil, true, "")
+	if err := engine.Cache.Set(utils.CacheReverseDestinations, "+49",
+		[]string{"DE", "EU_LANDLINE"}, nil, true, ""); err != nil {
+		t.Errorf("Expecting: nil, received: %s", err)
+	}
 	internalAPIerSv1Chan <- &v1.APIerSv1{DataManager: dmFilterPass}
 	engine.SetConnManager(connMgr)
 	failEvent := map[string]interface{}{

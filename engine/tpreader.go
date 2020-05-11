@@ -2445,8 +2445,10 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, argDispatcher *ut
 	}
 	cacheLoadIDs := populateCacheLoadIDs(loadIDs, cacheArgs.ArgsCache)
 	for key, val := range cacheLoadIDs {
-		Cache.Set(utils.CacheLoadIDs, key, val, nil,
-			cacheCommit(utils.NonTransactional), utils.NonTransactional)
+		if err := Cache.Set(utils.CacheLoadIDs, key, val, nil,
+			cacheCommit(utils.NonTransactional), utils.NonTransactional); err != nil {
+
+		}
 	}
 	return
 }

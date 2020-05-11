@@ -1522,8 +1522,10 @@ func (sS *SessionS) endSession(s *Session, tUsage, lastUsage *time.Duration,
 		}
 
 	}
-	engine.Cache.Set(utils.CacheClosedSessions, s.CGRID, s,
-		nil, true, utils.NonTransactional)
+	if err := engine.Cache.Set(utils.CacheClosedSessions, s.CGRID, s,
+		nil, true, utils.NonTransactional); err != nil {
+		return err
+	}
 	return
 }
 

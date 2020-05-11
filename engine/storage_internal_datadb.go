@@ -577,11 +577,15 @@ func (iDB *InternalDB) GetDestinationDrv(key string, skipCache bool, transaction
 
 	x, ok := iDB.db.Get(utils.CacheDestinations, key)
 	if !ok || x == nil {
-		Cache.Set(utils.CacheDestinations, key, nil, nil, cCommit, transactionID)
+		if err := Cache.Set(utils.CacheDestinations, key, nil, nil, cCommit, transactionID); err != nil {
+			return nil, err
+		}
 		return nil, utils.ErrNotFound
 	}
 	dest = x.(*Destination)
-	Cache.Set(utils.CacheDestinations, key, dest, nil, cCommit, transactionID)
+	if err := Cache.Set(utils.CacheDestinations, key, dest, nil, cCommit, transactionID); err != nil {
+		return nil, err
+	}
 	return
 }
 
@@ -647,12 +651,16 @@ func (iDB *InternalDB) GetReverseDestinationDrv(prefix string,
 	}
 	ids = x.(utils.StringMap).Slice()
 	if len(ids) == 0 {
-		Cache.Set(utils.CacheReverseDestinations, prefix, nil, nil,
-			cacheCommit(transactionID), transactionID)
+		if err := Cache.Set(utils.CacheReverseDestinations, prefix, nil, nil,
+			cacheCommit(transactionID), transactionID); err != nil {
+			return nil, err
+		}
 		return nil, utils.ErrNotFound
 	}
-	Cache.Set(utils.CacheReverseDestinations, prefix, ids, nil,
-		cacheCommit(transactionID), transactionID)
+	if err := Cache.Set(utils.CacheReverseDestinations, prefix, ids, nil,
+		cacheCommit(transactionID), transactionID); err != nil {
+		return nil, err
+	}
 	return
 }
 
@@ -802,13 +810,17 @@ func (iDB *InternalDB) GetActionPlanDrv(key string, skipCache bool,
 	cCommit := cacheCommit(transactionID)
 	x, ok := iDB.db.Get(utils.CacheActionPlans, key)
 	if !ok || x == nil {
-		Cache.Set(utils.CacheActionPlans, key, nil, nil,
-			cCommit, transactionID)
+		if err := Cache.Set(utils.CacheActionPlans, key, nil, nil,
+			cCommit, transactionID); err != nil {
+			return nil, err
+		}
 		return nil, utils.ErrNotFound
 	}
 	ats = x.(*ActionPlan)
-	Cache.Set(utils.CacheActionPlans, key, ats, nil,
-		cCommit, transactionID)
+	if err := Cache.Set(utils.CacheActionPlans, key, ats, nil,
+		cCommit, transactionID); err != nil {
+		return nil, err
+	}
 	return
 }
 
@@ -875,13 +887,17 @@ func (iDB *InternalDB) GetAccountActionPlansDrv(acntID string,
 	}
 	x, ok := iDB.db.Get(utils.CacheAccountActionPlans, acntID)
 	if !ok || x == nil {
-		Cache.Set(utils.CacheAccountActionPlans, acntID, nil, nil,
-			cacheCommit(transactionID), transactionID)
+		if err := Cache.Set(utils.CacheAccountActionPlans, acntID, nil, nil,
+			cacheCommit(transactionID), transactionID); err != nil {
+			return nil, err
+		}
 		return nil, utils.ErrNotFound
 	}
 	apIDs = x.([]string)
-	Cache.Set(utils.CacheAccountActionPlans, acntID, apIDs, nil,
-		cacheCommit(transactionID), transactionID)
+	if err := Cache.Set(utils.CacheAccountActionPlans, acntID, apIDs, nil,
+		cacheCommit(transactionID), transactionID); err != nil {
+		return nil, err
+	}
 	return
 }
 

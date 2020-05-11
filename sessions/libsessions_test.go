@@ -208,8 +208,10 @@ func TestAuthStirShaken(t *testing.T) {
 		"1001", "", "1002", "", utils.NewStringSet([]string{utils.META_ANY}), -1); err == nil {
 		t.Error("Expected invalid identity")
 	}
-	engine.Cache.Set(utils.CacheSTIR, "https://www.example.org/cert.cer", nil,
-		nil, true, utils.NonTransactional)
+	if err := engine.Cache.Set(utils.CacheSTIR, "https://www.example.org/cert.cer", nil,
+		nil, true, utils.NonTransactional); err != nil {
+		t.Errorf("Expecting: nil, received: %s", err)
+	}
 	if err := AuthStirShaken(
 		"eyJhbGciOiJFUzI1NiIsInBwdCI6InNoYWtlbiIsInR5cCI6InBhc3Nwb3J0IiwieDV1IjoiaHR0cHM6Ly93d3cuZXhhbXBsZS5vcmcvY2VydC5jZXIifQ.eyJhdHRlc3QiOiJBIiwiZGVzdCI6eyJ0biI6WyIxMDAyIl19LCJpYXQiOjE1ODcwMTk4MjIsIm9yaWciOnsidG4iOiIxMDAxIn0sIm9yaWdpZCI6IjEyMzQ1NiJ9.4ybtWmgqdkNyJLS9Iv3PuJV8ZxR7yZ_NEBhCpKCEu2WBiTchqwoqoWpI17Q_ALm38tbnpay32t95ZY_LhSgwJg;info=<https://www.example.org/cert.cer>;ppt=shaken", "1001", "", "1002", "", utils.NewStringSet([]string{utils.META_ANY}), -1); err == nil {
 		t.Error("Expected invalid identity")
@@ -224,8 +226,10 @@ aa+jqv4dwkr/FLEcN1zC76Y/IniI65fId55hVJvN3ORuzUqYEtzD3irmsw==
 	if err != nil {
 		t.Fatal(err)
 	}
-	engine.Cache.Set(utils.CacheSTIR, "https://www.example.org/cert.cer", pubKey,
-		nil, true, utils.NonTransactional)
+	if err := engine.Cache.Set(utils.CacheSTIR, "https://www.example.org/cert.cer", pubKey,
+		nil, true, utils.NonTransactional); err != nil {
+		t.Errorf("Expecting: nil, received: %s", err)
+	}
 
 	if err := AuthStirShaken(
 		"eyJhbGciOiJFUzI1NiIsInBwdCI6InNoYWtlbiIsInR5cCI6InBhc3Nwb3J0IiwieDV1IjoiaHR0cHM6Ly93d3cuZXhhbXBsZS5vcmcvY2VydC5jZXIifQ.eyJhdHRlc3QiOiJBIiwiZGVzdCI6eyJ0biI6WyIxMDAyIl19LCJpYXQiOjE1ODcwMTk4MjIsIm9yaWciOnsidG4iOiIxMDAxIn0sIm9yaWdpZCI6IjEyMzQ1NiJ9.4ybtWmgqdkNyJLS9Iv3PuJV8ZxR7yZ_NEBhCpKCEu2WBiTchqwoqoWpI17Q_ALm38tbnpay32t95ZY_LhSgwJg;info=<https://www.example.org/cert.cer>;ppt=shaken", "1001", "", "1003", "", utils.NewStringSet([]string{utils.META_ANY}), -1); err == nil {
@@ -253,8 +257,10 @@ AwEHoUQDQgAESt8sEh55Yc579vLHjFRWVQO27p4Yaa+jqv4dwkr/FLEcN1zC76Y/
 IniI65fId55hVJvN3ORuzUqYEtzD3irmsw==
 -----END EC PRIVATE KEY-----
 `)
-	engine.Cache.Set(utils.CacheSTIR, "https://www.example.org/private.pem", nil,
-		nil, true, utils.NonTransactional)
+	if err := engine.Cache.Set(utils.CacheSTIR, "https://www.example.org/private.pem", nil,
+		nil, true, utils.NonTransactional); err != nil {
+		t.Errorf("Expecting: nil, received: %s", err)
+	}
 
 	if _, err := NewSTIRIdentity(header, payload, "https://www.example.org/private.pem", time.Second); err == nil {
 		t.Error("Expected error when creating new identity")
@@ -274,10 +280,14 @@ aa+jqv4dwkr/FLEcN1zC76Y/IniI65fId55hVJvN3ORuzUqYEtzD3irmsw==
 	if err != nil {
 		t.Fatal(err)
 	}
-	engine.Cache.Set(utils.CacheSTIR, "https://www.example.org/cert.cer", pubKey,
-		nil, true, utils.NonTransactional)
-	engine.Cache.Set(utils.CacheSTIR, "https://www.example.org/private.pem", prvKey,
-		nil, true, utils.NonTransactional)
+	if err := engine.Cache.Set(utils.CacheSTIR, "https://www.example.org/cert.cer", pubKey,
+		nil, true, utils.NonTransactional); err != nil {
+		t.Errorf("Expecting: nil, received: %s", err)
+	}
+	if err := engine.Cache.Set(utils.CacheSTIR, "https://www.example.org/private.pem", prvKey,
+		nil, true, utils.NonTransactional); err != nil {
+		t.Errorf("Expecting: nil, received: %s", err)
+	}
 
 	if rcv, err := NewSTIRIdentity(header, payload, "https://www.example.org/private.pem", time.Second); err != nil {
 		t.Error(err)
