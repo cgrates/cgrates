@@ -876,18 +876,20 @@ func (sS *SessionS) getIndexedFilters(tenant string, fltrs []string) (
 			}
 			continue
 		}
-		if f.ActivationInterval != nil &&
-			!f.ActivationInterval.IsActiveAtTime(time.Now()) { // not active
-			continue
-		}
-		for _, fltr := range f.Rules {
-			fldName := strings.TrimPrefix(fltr.Element, utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep) // remove ~req. prefix
-			if fltr.Type != utils.MetaString ||
-				!sS.cgrCfg.SessionSCfg().SessionIndexes.HasKey(fldName) {
-				unindexedFltr = append(unindexedFltr, fltr)
+		if f != nil {
+			if f.ActivationInterval != nil &&
+				!f.ActivationInterval.IsActiveAtTime(time.Now()) { // not active
 				continue
 			}
-			indexedFltr[fldName] = fltr.Values
+			for _, fltr := range f.Rules {
+				fldName := strings.TrimPrefix(fltr.Element, utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep) // remove ~req. prefix
+				if fltr.Type != utils.MetaString ||
+					!sS.cgrCfg.SessionSCfg().SessionIndexes.HasKey(fldName) {
+					unindexedFltr = append(unindexedFltr, fltr)
+					continue
+				}
+				indexedFltr[fldName] = fltr.Values
+			}
 		}
 	}
 	return
