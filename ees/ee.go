@@ -22,6 +22,7 @@ import (
 	"fmt"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -32,10 +33,10 @@ type EventExporter interface {
 }
 
 // NewEventExporter produces exporters
-func NewEventExporter(cgrCfg *config.CGRConfig, cfgIdx int) (ee EventExporter, err error) {
+func NewEventExporter(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.FilterS) (ee EventExporter, err error) {
 	switch cgrCfg.EEsCfg().Exporters[cfgIdx].Type {
 	case utils.MetaFileCSV:
-		return NewFileCSVee(cgrCfg, cfgIdx)
+		return NewFileCSVee(cgrCfg, cfgIdx, filterS)
 	default:
 		return nil, fmt.Errorf("unsupported exporter type: <%s>", cgrCfg.EEsCfg().Exporters[cfgIdx].Type)
 	}
