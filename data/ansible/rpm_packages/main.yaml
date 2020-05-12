@@ -233,6 +233,11 @@
       set_fact:
         releaseTag: ""
 
+    - name: Compose the ReleaseTag with Tag
+      set_fact:
+        releaseTag: "{{ gitTagVar.stdout_lines[0] }}"
+      when: gitTagVar.stdout_lines|length > 0
+
     - name: Compose the ReleaseTag with values
       set_fact:
         releaseTag: "{{ gitDate.stdout_lines[0] }}+{{ gitShortVersion.stdout_lines[0] }}"
@@ -346,7 +351,7 @@
       become: yes
       file:
         src: /var/packages/rpm/{{ cgrates_distribution }}/{{ item }}
-        dest: /var/packages/rpm/{{ cgrates_distribution }}/cgrates_current.rpm"
+        dest: /var/packages/rpm/{{ cgrates_distribution }}/cgrates_current.rpm
         state: link
       with_items: "{{ hostvars['yum']['rmpFileName']['stdout_lines'] }}"
       when : cgrates_distribution == "nightly" or hostvars['yum']['gitTagVar'].stdout_lines|length > 0
