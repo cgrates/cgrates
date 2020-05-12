@@ -943,8 +943,10 @@ func (ms *MongoStorage) RemoveDestinationDrv(destID string,
 	}); err != nil {
 		return err
 	}
-	Cache.Remove(utils.CacheDestinations, destID,
-		cacheCommit(transactionID), transactionID)
+	if err = Cache.Remove(utils.CacheDestinations, destID,
+		cacheCommit(transactionID), transactionID); err != nil {
+		return
+	}
 
 	for _, prefix := range d.Prefixes {
 		if err = ms.query(func(sctx mongo.SessionContext) (err error) {
@@ -1060,8 +1062,10 @@ func (ms *MongoStorage) UpdateReverseDestinationDrv(oldDest, newDest *Destinatio
 		}); err != nil {
 			return err
 		}
-		Cache.Remove(utils.CacheReverseDestinations, obsoletePrefix,
-			cCommit, transactionID)
+		if err := Cache.Remove(utils.CacheReverseDestinations, obsoletePrefix,
+			cCommit, transactionID); err != nil {
+			return err
+		}
 	}
 
 	// add the id to all new prefixes
@@ -1243,7 +1247,9 @@ func (ms *MongoStorage) GetLoadHistory(limit int, skipCache bool,
 	cCommit := cacheCommit(transactionID)
 	if err == nil {
 		loadInsts = kv.Value
-		Cache.Remove(utils.LOADINST_KEY, "", cCommit, transactionID)
+		if err := Cache.Remove(utils.LOADINST_KEY, "", cCommit, transactionID); err != nil {
+			return nil, err
+		}
 		if err := Cache.Set(utils.LOADINST_KEY, "", loadInsts, nil, cCommit, transactionID); err != nil {
 			return nil, err
 		}
@@ -1304,8 +1310,10 @@ func (ms *MongoStorage) AddLoadHistory(ldInst *utils.LoadInstance,
 		})
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.LOADINST_KEY)
 
-	Cache.Remove(utils.LOADINST_KEY, "",
-		cacheCommit(transactionID), transactionID)
+	if err := Cache.Remove(utils.LOADINST_KEY, "",
+		cacheCommit(transactionID), transactionID); err != nil {
+		return err
+	}
 	return err
 }
 
@@ -1422,8 +1430,10 @@ func (ms *MongoStorage) SetActionPlanDrv(key string, ats *ActionPlan,
 			_, err = ms.getCol(ColApl).DeleteOne(sctx, bson.M{"key": key})
 			return err
 		})
-		Cache.Remove(utils.CacheActionPlans, key,
-			cCommit, transactionID)
+		if err = Cache.Remove(utils.CacheActionPlans, key,
+			cCommit, transactionID); err != nil {
+			return
+		}
 		return
 	}
 	if !overwrite {
@@ -1459,7 +1469,9 @@ func (ms *MongoStorage) SetActionPlanDrv(key string, ats *ActionPlan,
 
 func (ms *MongoStorage) RemoveActionPlanDrv(key string, transactionID string) error {
 	cCommit := cacheCommit(transactionID)
-	Cache.Remove(utils.CacheActionPlans, key, cCommit, transactionID)
+	if err := Cache.Remove(utils.CacheActionPlans, key, cCommit, transactionID); err != nil {
+		return err
+	}
 	return ms.query(func(sctx mongo.SessionContext) (err error) {
 		_, err = ms.getCol(ColApl).DeleteOne(sctx, bson.M{"key": key})
 		return err

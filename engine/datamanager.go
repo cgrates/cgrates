@@ -316,8 +316,10 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 		}
 		if err != nil {
 			if err == utils.ErrNotFound {
-				Cache.Remove(utils.CachePrefixToInstance[prfx], dataID,
-					cacheCommit(utils.NonTransactional), utils.NonTransactional)
+				if err = Cache.Remove(utils.CachePrefixToInstance[prfx], dataID,
+					cacheCommit(utils.NonTransactional), utils.NonTransactional); err != nil {
+					return err
+				}
 				err = nil
 			} else {
 				return utils.NewCGRError(utils.DataManager,
@@ -693,7 +695,7 @@ func (dm *DataManager) GetFilter(tenant, id string, cacheRead, cacheWrite bool,
 			if err == utils.ErrNotFound && cacheWrite {
 				if err = Cache.Set(utils.CacheFilters, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID); err != nil {
-					return nil, err
+					return
 				}
 			}
 			return
@@ -702,7 +704,7 @@ func (dm *DataManager) GetFilter(tenant, id string, cacheRead, cacheWrite bool,
 	if cacheWrite {
 		if err = Cache.Set(utils.CacheFilters, tntID, fltr, nil,
 			cacheCommit(transactionID), transactionID); err != nil {
-			return nil, err
+			return
 		}
 	}
 	return
@@ -1202,8 +1204,10 @@ func (dm *DataManager) RemoveTiming(id, transactionID string) (err error) {
 	if err = dm.DataDB().RemoveTimingDrv(id); err != nil {
 		return
 	}
-	Cache.Remove(utils.CacheTimings, id,
-		cacheCommit(transactionID), transactionID)
+	if err = Cache.Remove(utils.CacheTimings, id,
+		cacheCommit(transactionID), transactionID); err != nil {
+		return
+	}
 	if config.CgrConfig().DataDbCfg().Items[utils.MetaTimings].Replicate {
 		var reply string
 		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
@@ -1496,8 +1500,10 @@ func (dm *DataManager) RemoveActionTriggers(id, transactionID string) (err error
 	if err = dm.DataDB().RemoveActionTriggersDrv(id); err != nil {
 		return
 	}
-	Cache.Remove(utils.CacheActionTriggers, id,
-		cacheCommit(transactionID), transactionID)
+	if err = Cache.Remove(utils.CacheActionTriggers, id,
+		cacheCommit(transactionID), transactionID); err != nil {
+		return
+	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaActionTriggers]; itm.Replicate {
 		var reply string
 		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
@@ -1636,8 +1642,10 @@ func (dm *DataManager) RemoveSharedGroup(id, transactionID string) (err error) {
 	if err = dm.DataDB().RemoveSharedGroupDrv(id); err != nil {
 		return
 	}
-	Cache.Remove(utils.CacheSharedGroups, id,
-		cacheCommit(transactionID), transactionID)
+	if err = Cache.Remove(utils.CacheSharedGroups, id,
+		cacheCommit(transactionID), transactionID); err != nil {
+		return
+	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaSharedGroups]; itm.Replicate {
 		var reply string
 		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
@@ -1746,8 +1754,10 @@ func (dm *DataManager) RemoveActions(key, transactionID string) (err error) {
 	if err = dm.DataDB().RemoveActionsDrv(key); err != nil {
 		return
 	}
-	Cache.Remove(utils.CacheActions, key,
-		cacheCommit(transactionID), transactionID)
+	if err = Cache.Remove(utils.CacheActions, key,
+		cacheCommit(transactionID), transactionID); err != nil {
+		return
+	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaActions]; itm.Replicate {
 		var reply string
 		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
@@ -2052,8 +2062,10 @@ func (dm *DataManager) RemoveRatingPlan(key string, transactionID string) (err e
 	if err = dm.DataDB().RemoveRatingPlanDrv(key); err != nil {
 		return
 	}
-	Cache.Remove(utils.CacheRatingPlans, key,
-		cacheCommit(transactionID), transactionID)
+	if err = Cache.Remove(utils.CacheRatingPlans, key,
+		cacheCommit(transactionID), transactionID); err != nil {
+		return
+	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRatingPlans]; itm.Replicate {
 		var reply string
 		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
@@ -2159,8 +2171,10 @@ func (dm *DataManager) RemoveRatingProfile(key string,
 	if err = dm.DataDB().RemoveRatingProfileDrv(key); err != nil {
 		return
 	}
-	Cache.Remove(utils.CacheRatingProfiles, key,
-		cacheCommit(transactionID), transactionID)
+	if err = Cache.Remove(utils.CacheRatingProfiles, key,
+		cacheCommit(transactionID), transactionID); err != nil {
+		return
+	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRatingProfiles]; itm.Replicate {
 		var reply string
 		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,

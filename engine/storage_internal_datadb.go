@@ -592,8 +592,10 @@ func (iDB *InternalDB) GetDestinationDrv(key string, skipCache bool, transaction
 func (iDB *InternalDB) SetDestinationDrv(dest *Destination, transactionID string) (err error) {
 	iDB.db.Set(utils.CacheDestinations, dest.Id, dest, nil,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
-	Cache.Remove(utils.CacheDestinations, dest.Id,
-		cacheCommit(transactionID), transactionID)
+	if err = Cache.Remove(utils.CacheDestinations, dest.Id,
+		cacheCommit(transactionID), transactionID); err != nil {
+		return
+	}
 	return
 }
 
@@ -605,8 +607,10 @@ func (iDB *InternalDB) RemoveDestinationDrv(destID string, transactionID string)
 	}
 	iDB.db.Remove(utils.CacheDestinations, destID,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
-	Cache.Remove(utils.CacheDestinations, destID,
-		cacheCommit(transactionID), transactionID)
+	if err = Cache.Remove(utils.CacheDestinations, destID,
+		cacheCommit(transactionID), transactionID); err != nil {
+		return
+	}
 	for _, prefix := range d.Prefixes {
 		iDB.db.Remove(utils.CacheReverseDestinations, prefix,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
@@ -715,8 +719,10 @@ func (iDB *InternalDB) UpdateReverseDestinationDrv(oldDest, newDest *Destination
 				cacheCommit(utils.NonTransactional), utils.NonTransactional)
 		}
 
-		Cache.Remove(utils.CacheReverseDestinations, obsoletePrefix,
-			cCommit, transactionID)
+		if err = Cache.Remove(utils.CacheReverseDestinations, obsoletePrefix,
+			cCommit, transactionID); err != nil {
+			return err
+		}
 	}
 	// add the id to all new prefixes
 	for _, addedPrefix := range addedPrefixes {
@@ -830,8 +836,10 @@ func (iDB *InternalDB) SetActionPlanDrv(key string, ats *ActionPlan,
 	if len(ats.ActionTimings) == 0 {
 		iDB.db.Remove(utils.CacheActionPlans, key,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
-		Cache.Remove(utils.CacheActionPlans, key,
-			cCommit, transactionID)
+		if err = Cache.Remove(utils.CacheActionPlans, key,
+			cCommit, transactionID); err != nil {
+			return
+		}
 		return
 	}
 	if !overwrite {
@@ -854,7 +862,9 @@ func (iDB *InternalDB) SetActionPlanDrv(key string, ats *ActionPlan,
 func (iDB *InternalDB) RemoveActionPlanDrv(key string, transactionID string) (err error) {
 	iDB.db.Remove(utils.CacheActionPlans, key,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
-	Cache.Remove(utils.CacheActionPlans, key, cacheCommit(transactionID), transactionID)
+	if err = Cache.Remove(utils.CacheActionPlans, key, cacheCommit(transactionID), transactionID); err != nil {
+		return
+	}
 	return
 }
 

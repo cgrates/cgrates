@@ -139,8 +139,10 @@ func (rs *Responder) GetCostOnRatingPlans(arg *utils.GetCostOnRatingPlansArgs, r
 			DurationIndex: arg.Usage,
 		}
 		cc, err := cd.GetCost()
-		Cache.Remove(utils.CacheRatingProfilesTmp, rPrfl.Id,
-			true, utils.NonTransactional) // Remove here so we don't overload memory
+		if err := Cache.Remove(utils.CacheRatingProfilesTmp, rPrfl.Id,
+			true, utils.NonTransactional); err != nil { // Remove here so we don't overload memory
+			return err
+		}
 		if err != nil {
 			if err != utils.ErrNotFound {
 				return err

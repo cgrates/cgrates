@@ -616,8 +616,10 @@ func (rs *RedisStorage) RemoveDestinationDrv(destID, transactionID string) (err 
 	if err != nil {
 		return err
 	}
-	Cache.Remove(utils.CacheDestinations, destID,
-		cacheCommit(transactionID), transactionID)
+	if err = Cache.Remove(utils.CacheDestinations, destID,
+		cacheCommit(transactionID), transactionID); err != nil {
+		return
+	}
 	if d == nil {
 		return utils.ErrNotFound
 	}
@@ -672,8 +674,10 @@ func (rs *RedisStorage) UpdateReverseDestinationDrv(oldDest, newDest *Destinatio
 		if err != nil {
 			return err
 		}
-		Cache.Remove(utils.CacheReverseDestinations, obsoletePrefix,
-			cCommit, transactionID)
+		if err := Cache.Remove(utils.CacheReverseDestinations, obsoletePrefix,
+			cCommit, transactionID); err != nil {
+			return err
+		}
 	}
 
 	// add the id to all new prefixes
@@ -826,7 +830,9 @@ func (rs *RedisStorage) GetLoadHistory(limit int, skipCache bool,
 		}
 		loadInsts[idx] = &lInst
 	}
-	Cache.Remove(utils.LOADINST_KEY, "", cCommit, transactionID)
+	if err := Cache.Remove(utils.LOADINST_KEY, "", cCommit, transactionID); err != nil {
+		return nil, err
+	}
 	if err := Cache.Set(utils.LOADINST_KEY, "", loadInsts, nil,
 		cCommit, transactionID); err != nil {
 		return nil, err
@@ -859,8 +865,10 @@ func (rs *RedisStorage) AddLoadHistory(ldInst *utils.LoadInstance, loadHistSize 
 		return nil, rs.Cmd(redis_LPUSH, utils.LOADINST_KEY, marshaled).Err
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.LOADINST_KEY)
 
-	Cache.Remove(utils.LOADINST_KEY, "",
-		cacheCommit(transactionID), transactionID)
+	if err := Cache.Remove(utils.LOADINST_KEY, "",
+		cacheCommit(transactionID), transactionID); err != nil {
+		return err
+	}
 	return err
 }
 
@@ -950,8 +958,10 @@ func (rs *RedisStorage) RemoveActionPlanDrv(key string,
 		return err
 	}
 	err := rs.Cmd(redis_DEL, utils.ACTION_PLAN_PREFIX+key).Err
-	Cache.Remove(utils.CacheActionPlans, key,
-		cCommit, transactionID)
+	if err := Cache.Remove(utils.CacheActionPlans, key,
+		cCommit, transactionID); err != nil {
+		return err
+	}
 	return err
 }
 
@@ -964,8 +974,10 @@ func (rs *RedisStorage) SetActionPlanDrv(key string, ats *ActionPlan,
 			return err
 		}
 		err = rs.Cmd(redis_DEL, utils.ACTION_PLAN_PREFIX+key).Err
-		Cache.Remove(utils.CacheActionPlans, key,
-			cCommit, transactionID)
+		if err = Cache.Remove(utils.CacheActionPlans, key,
+			cCommit, transactionID); err != nil {
+			return
+		}
 		return
 	}
 	if !overwrite {
