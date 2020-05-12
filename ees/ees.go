@@ -171,7 +171,7 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithOpts, rply *s
 			}
 		}
 		if !isCached {
-			if ee, err = NewEventExporter(eeS.cfg, cfgIdx); err != nil {
+			if ee, err = NewEventExporter(eeS.cfg, cfgIdx, eeS.filterS); err != nil {
 				return
 			}
 			if hasCache {
@@ -194,7 +194,7 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithOpts, rply *s
 			if sync {
 				wg.Done()
 			}
-		}(!isCached, eeCfg.Synchronous)
+		}(!hasCache, eeCfg.Synchronous)
 	}
 	wg.Wait()
 	if withErr {
