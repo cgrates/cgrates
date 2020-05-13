@@ -893,4 +893,14 @@ const CGRATES_CFG_JSON = `
 	"enabled": false,
 },
 
+"sip_agent": {							// SIP Agents, only used for redirections
+	"enabled": false,					// enables the SIP agent: <true|false>
+	"listen": "127.0.0.1:5060",			// address where to listen for SIP requests <x.y.z.y:1234>
+	"listen_net": "udp",				// network to listen on <udp|tcp|tcp-tls>
+	"sessions_conns": ["*internal"],
+	"timezone": "",						// timezone of the events if not specified  <UTC|Local|$IANA_TZ_DB>
+	"request_processors": [				// request processors to be applied to SIP messages
+	],
+},
+
 }`

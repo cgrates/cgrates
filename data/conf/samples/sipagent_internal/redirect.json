@@ -1,0 +1,40 @@
+{
+	"sip_agent": {
+	"listen_net": "tcp",				// network to listen on <udp|tcp|tcp-tls>
+	"request_processors": [
+			{
+				"id": "Register",
+				"filters": ["*prefix:~*req.Request:REGISTER"],
+				"flags": ["*none"],
+				"request_fields":[],
+				"reply_fields":[
+					{"tag": "Request", "path": "*rep.Request", "type": "*constant",
+						"value": "SIP/2.0 200 OK"},
+					{"tag": "Authorization", "path": "*rep.Authorization", "type": "*remove"}
+				]
+			},
+			{
+				"id": "InviteRedirect",
+				"filters": ["*prefix:~*req.Request:INVITE"],
+				"flags": ["*attributes","*event"],
+				"request_fields":[
+					{"tag": "Account", "path": "*cgreq.Account", "type": "*variable",
+						"value": "~*req.From", "mandatory": true},
+					{"tag": "Destination", "path": "*cgreq.Destination", "type": "*variable",
+						"value": "~*req.To", "mandatory": true}
+				],
+				"reply_fields":[
+					{"tag": "Request", "path": "*rep.Request", "type": "*constant",
+						"value": "SIP/2.0 302 Moved Temporarily"},
+					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
+						"value":"<"},
+					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
+						"value":"~*cgrep.Attributes.Destination"},
+					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
+						"value":">"}
+				]
+			}
+		]
+	}
+
+}

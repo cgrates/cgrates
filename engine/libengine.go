@@ -62,20 +62,18 @@ func NewRPCPool(dispatchStrategy string, keyPath, certPath, caPath string, connA
 }
 
 // IntRPC is the global variable that is used to comunicate with all the subsystems internally
-var IntRPC *RPCClientSet
+var IntRPC RPCClientSet
 
 // NewRPCClientSet initilalizates the map of connections
-func NewRPCClientSet() (s *RPCClientSet) {
-	return &RPCClientSet{set: make(map[string]*rpcclient.RPCClient)}
+func NewRPCClientSet() (s RPCClientSet) {
+	return make(RPCClientSet)
 }
 
 // RPCClientSet is a RPC ClientConnector for the internal subsystems
-type RPCClientSet struct {
-	set map[string]*rpcclient.RPCClient
-}
+type RPCClientSet map[string]*rpcclient.RPCClient
 
 // AddInternalRPCClient creates and adds to the set a new rpc client using the provided configuration
-func (s *RPCClientSet) AddInternalRPCClient(name string, connChan chan rpcclient.ClientConnector) {
+func (s RPCClientSet) AddInternalRPCClient(name string, connChan chan rpcclient.ClientConnector) {
 	rpc, err := rpcclient.NewRPCClient(utils.EmptyString, utils.EmptyString, false,
 		utils.EmptyString, utils.EmptyString, utils.EmptyString,
 		config.CgrConfig().GeneralCfg().ConnectAttempts, config.CgrConfig().GeneralCfg().Reconnects,
@@ -85,25 +83,33 @@ func (s *RPCClientSet) AddInternalRPCClient(name string, connChan chan rpcclient
 		utils.Logger.Err(fmt.Sprintf("<%s> Error adding %s to the set: %s", utils.InternalRPCSet, name, err.Error()))
 		return
 	}
-	s.set[name] = rpc
+	s[name] = rpc
 }
 
 // GetInternalChanel is used when RPCClientSet is passed as internal connection for RPCPool
-func (s *RPCClientSet) GetInternalChanel() chan rpcclient.ClientConnector {
+func (s RPCClientSet) GetInternalChanel() chan rpcclient.ClientConnector {
 	connChan := make(chan rpcclient.ClientConnector, 1)
 	connChan <- s
 	return connChan
 }
 
 // Call the implementation of the rpcclient.ClientConnector interface
-func (s *RPCClientSet) Call(method string, args interface{}, reply interface{}) error {
+func (s RPCClientSet) Call(method string, args interface{}, reply interface{}) error {
 	methodSplit := strings.Split(method, ".")
 	if len(methodSplit) != 2 {
 		return rpcclient.ErrUnsupporteServiceMethod
 	}
-	conn, has := s.set[methodSplit[0]]
+	conn, has := s[methodSplit[0]]
 	if !has {
 		return rpcclient.ErrUnsupporteServiceMethod
 	}
 	return conn.Call(method, args, reply)
 }
+
+// func (s RPCClientSet) ReconnectInternals(subsystems ...string) (err error) {
+// 	for _, subsystem := range subsystems {
+// 		if err = s[subsystem].Reconnect(); err != nil {
+// 			return
+// 		}
+// 	}
+// }

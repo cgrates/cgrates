@@ -636,6 +636,7 @@ const (
 	RemoteHost               = "RemoteHost"
 	Local                    = "local"
 	TCP                      = "tcp"
+	UDP                      = "udp"
 	CGRDebitInterval         = "CGRDebitInterval"
 	Version                  = "Version"
 	MetaTenant               = "*tenant"
@@ -1637,6 +1638,7 @@ const (
 	FreeSWITCHAgent = "FreeSWITCHAgent"
 	AsteriskAgent   = "AsteriskAgent"
 	HTTPAgent       = "HTTPAgent"
+	SIPAgent        = "SIPAgent"
 )
 
 // Poster

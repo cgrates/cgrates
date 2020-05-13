@@ -529,6 +529,7 @@ func main() {
 			connManager, server, exitChan, internalEEsChan),
 		services.NewRateService(cfg, filterSChan,
 			server, exitChan, internalRateSChan),
+		services.NewSIPAgent(cfg, filterSChan, exitChan, connManager),
 	)
 	srvManager.StartServices()
 	// Start FilterS

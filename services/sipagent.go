@@ -1,0 +1,134 @@
+/*
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>
+*/
+
+package services
+
+import (
+	"fmt"
+	"sync"
+
+	"github.com/cgrates/cgrates/agents"
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/servmanager"
+	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
+)
+
+// NewSIPAgent returns the sip Agent
+func NewSIPAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
+	exitChan chan bool, connMgr *engine.ConnManager) servmanager.Service {
+	return &SIPAgent{
+		cfg:         cfg,
+		filterSChan: filterSChan,
+		exitChan:    exitChan,
+		connMgr:     connMgr,
+	}
+}
+
+// SIPAgent implements Agent interface
+type SIPAgent struct {
+	sync.RWMutex
+	cfg         *config.CGRConfig
+	filterSChan chan *engine.FilterS
+	exitChan    chan bool
+
+	sip     *agents.SIPAgent
+	connMgr *engine.ConnManager
+
+	oldListen string
+}
+
+// Start should handle the sercive start
+func (sip *SIPAgent) Start() (err error) {
+	if sip.IsRunning() {
+		return fmt.Errorf("service aleady running")
+	}
+
+	filterS := <-sip.filterSChan
+	sip.filterSChan <- filterS
+
+	sip.Lock()
+	defer sip.Unlock()
+	sip.oldListen = sip.cfg.SIPAgentCfg().Listen
+	sip.sip = agents.NewSIPAgent(sip.connMgr, sip.cfg, filterS)
+	go func() {
+		if err = sip.sip.ListenAndServe(); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.SIPAgent, err.Error()))
+			sip.exitChan <- true // stop the engine here
+		}
+	}()
+	return
+}
+
+// GetIntenternalChan returns the internal connection chanel
+// no chanel for SIPAgent
+func (sip *SIPAgent) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
+	return nil
+}
+
+// Reload handles the change of config
+func (sip *SIPAgent) Reload() (err error) {
+	// if sip.oldListen == sip.cfg.SIPAgentCfg().Listen {
+	// 	return
+	// }
+	// if err = sip.Shutdown(); err != nil {
+	// 	return
+	// }
+	// sip.Lock()
+	// sip.oldListen = sip.cfg.SIPAgentCfg().Listen
+	// defer sip.Unlock()
+	// if err = sip.sip.Reload(); err != nil {
+	// 	return
+	// }
+	// go func() {
+	// 	if err := sip.sip.ListenAndServe(); err != nil {
+	// 		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.SIPAgent, err.Error()))
+	// 		sip.exitChan <- true // stop the engine here
+	// 	}
+	// }()
+	return
+}
+
+// Shutdown stops the service
+func (sip *SIPAgent) Shutdown() (err error) {
+	sip.Lock()
+	defer sip.Unlock()
+	// if err = sip.sip.Shutdown(); err != nil {
+	// 	return
+	// }
+	sip.sip = nil
+	return
+}
+
+// IsRunning returns if the service is running
+func (sip *SIPAgent) IsRunning() bool {
+	sip.RLock()
+	defer sip.RUnlock()
+	return sip != nil && sip.sip != nil
+}
+
+// ServiceName returns the service name
+func (sip *SIPAgent) ServiceName() string {
+	return utils.SIPAgent
+}
+
+// ShouldRun returns if the service should be running
+func (sip *SIPAgent) ShouldRun() bool {
+	return sip.cfg.SIPAgentCfg().Enabled
+}

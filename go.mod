@@ -25,6 +25,7 @@ require (
 	github.com/cgrates/ltcache v0.0.0-20181016092649-92fb7fa77cca
 	github.com/cgrates/radigo v0.0.0-20200324152710-35e651804ad1
 	github.com/cgrates/rpcclient v0.0.0-20200326100105-a579e2c47453
+	github.com/cgrates/sipd v1.0.0
 	github.com/creack/pty v1.1.7
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/fiorix/go-diameter v3.0.3-0.20190716165154-f4823472d0e0+incompatible
@@ -56,6 +57,7 @@ require (
 	go.opencensus.io v0.22.1-0.20190713072201-b4a14686f0a9 // indirect
 	golang.org/x/net v0.0.0-20190909003024-a7b16738d86b
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
+	golang.org/x/sys v0.0.0-20190904154756-749cb33beabd
 	google.golang.org/api v0.10.0
 	pack.ag/amqp v0.12.2
 )
