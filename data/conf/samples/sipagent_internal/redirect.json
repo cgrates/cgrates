@@ -9,8 +9,7 @@
 				"request_fields":[],
 				"reply_fields":[
 					{"tag": "Request", "path": "*rep.Request", "type": "*constant",
-						"value": "SIP/2.0 200 OK"},
-					{"tag": "Authorization", "path": "*rep.Authorization", "type": "*remove"}
+						"value": "SIP/2.0 405 Method Not Allowed"},
 				]
 			},
 			{
@@ -19,9 +18,9 @@
 				"flags": ["*attributes","*event"],
 				"request_fields":[
 					{"tag": "Account", "path": "*cgreq.Account", "type": "*variable",
-						"value": "~*req.From", "mandatory": true},
+						"value": "~*req.From{*sipuri_user}", "mandatory": true},
 					{"tag": "Destination", "path": "*cgreq.Destination", "type": "*variable",
-						"value": "~*req.To", "mandatory": true}
+						"value": "~*req.To{*sipuri_user}", "mandatory": true}
 				],
 				"reply_fields":[
 					{"tag": "Request", "path": "*rep.Request", "type": "*constant",

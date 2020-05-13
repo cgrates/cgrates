@@ -19,19 +19,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package agents
 
 import (
-	"context"
 	"fmt"
-	"net"
 	"strings"
-	"syscall"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/sipd"
-	"golang.org/x/sys/unix"
 )
 
-// updateDiamMsgFromNavMap will update the diameter message with items from navigable map
+// updateSIPMsgFromNavMap will update the diameter message with items from navigable map
 func updateSIPMsgFromNavMap(m sipd.Message, navMp *utils.OrderedNavigableMap) (err error) {
 	// write reply into message
 	for el := navMp.GetFirstElement(); el != nil; el = el.Next() {
@@ -50,28 +46,4 @@ func updateSIPMsgFromNavMap(m sipd.Message, navMp *utils.OrderedNavigableMap) (e
 		m[strings.Join(itm.Path, utils.NestingSep)] = utils.IfaceAsString(itm.Data)
 	}
 	return
-}
-
-func reuseportControl(network, address string, c syscall.RawConn) error {
-	var opErr error
-	err := c.Control(func(fd uintptr) {
-		opErr = unix.SetsockoptInt(int(fd), unix.SOL_SOCKET, unix.SO_REUSEPORT, 1)
-	})
-	if err != nil {
-		return err
-	}
-
-	return opErr
-}
-
-func listenTCPWithReuseablePort(network, addr string) (net.Listener, error) {
-	var lc net.ListenConfig
-	lc.Control = reuseportControl
-	return lc.Listen(context.Background(), network, addr)
-}
-
-func listenUDPWithReuseablePort(network, addr string) (net.PacketConn, error) {
-	var lc net.ListenConfig
-	lc.Control = reuseportControl
-	return lc.ListenPacket(context.Background(), network, addr)
 }

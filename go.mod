@@ -25,7 +25,7 @@ require (
 	github.com/cgrates/ltcache v0.0.0-20181016092649-92fb7fa77cca
 	github.com/cgrates/radigo v0.0.0-20200324152710-35e651804ad1
 	github.com/cgrates/rpcclient v0.0.0-20200326100105-a579e2c47453
-	github.com/cgrates/sipd v1.0.0
+	github.com/cgrates/sipd v1.0.1-0.20200513092040-728b130a73d6
 	github.com/creack/pty v1.1.7
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/fiorix/go-diameter v3.0.3-0.20190716165154-f4823472d0e0+incompatible

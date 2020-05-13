@@ -26,6 +26,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/sipd"
 	"github.com/nyaruka/phonenumbers"
 )
 
@@ -75,6 +76,12 @@ func NewDataConverter(params string) (conv DataConverter, err error) {
 		return NewDurationConverter("")
 	case params == MetaIP2Hex:
 		return new(IP2HexConverter), nil
+	case params == MetaSIPURIHost:
+		return new(SIPURIHostConverter), nil
+	case params == MetaSIPURIUser:
+		return new(SIPURIUserConverter), nil
+	case params == MetaSIPURIMethod:
+		return new(SIPURIMethodConverter), nil
 	case strings.HasPrefix(params, MetaLibPhoneNumber):
 		if len(params) == len(MetaLibPhoneNumber) {
 			return NewPhoneNumberConverter("")
@@ -299,4 +306,31 @@ func (*IP2HexConverter) Convert(in interface{}) (out interface{}, err error) {
 		return hx, nil
 	}
 	return "0x" + string([]byte(hx)[len(hx)-8:]), nil
+}
+
+// SIPURIHostConverter will return the
+type SIPURIHostConverter struct{}
+
+// Convert implements DataConverter interface
+func (*SIPURIHostConverter) Convert(in interface{}) (out interface{}, err error) {
+	val := IfaceAsString(in)
+	return sipd.HostFrom(val), nil
+}
+
+// SIPURIUserConverter will return the
+type SIPURIUserConverter struct{}
+
+// Convert implements DataConverter interface
+func (*SIPURIUserConverter) Convert(in interface{}) (out interface{}, err error) {
+	val := IfaceAsString(in)
+	return sipd.NameFrom(val), nil
+}
+
+// SIPURIMethodConverter will return the
+type SIPURIMethodConverter struct{}
+
+// Convert implements DataConverter interface
+func (*SIPURIMethodConverter) Convert(in interface{}) (out interface{}, err error) {
+	val := IfaceAsString(in)
+	return sipd.MethodFrom(val), nil
 }
