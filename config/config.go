@@ -182,6 +182,7 @@ func NewDefaultCGRConfig() (cfg *CGRConfig, err error) {
 	cfg.eesCfg = new(EEsCfg)
 	cfg.eesCfg.Cache = make(map[string]*CacheParamCfg)
 	cfg.rateSCfg = new(RateSCfg)
+	cfg.sipAgentCfg = new(SIPAgentCfg)
 
 	cfg.ConfigReloads = make(map[string]chan struct{})
 	cfg.ConfigReloads[utils.CDRE] = make(chan struct{}, 1)
@@ -305,6 +306,7 @@ type CGRConfig struct {
 	ersCfg           *ERsCfg           // EventReader config
 	eesCfg           *EEsCfg           // EventExporter config
 	rateSCfg         *RateSCfg         // RateS config
+	sipAgentCfg      *SIPAgentCfg      // SIPAgent config
 }
 
 var posibleLoaderTypes = utils.NewStringSet([]string{utils.MetaAttributes,
@@ -352,7 +354,7 @@ func (cfg *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		cfg.loadMailerCfg, cfg.loadSureTaxCfg, cfg.loadDispatcherSCfg,
 		cfg.loadLoaderCgrCfg, cfg.loadMigratorCgrCfg, cfg.loadTlsCgrCfg,
 		cfg.loadAnalyzerCgrCfg, cfg.loadApierCfg, cfg.loadErsCfg, cfg.loadEesCfg,
-		cfg.loadRateCfg} {
+		cfg.loadRateCfg, cfg.loadSIPAgentCfg} {
 		if err = loadFunc(jsnCfg); err != nil {
 			return
 		}
@@ -752,6 +754,15 @@ func (cfg *CGRConfig) loadRateCfg(jsnCfg *CgrJsonCfg) (err error) {
 	return cfg.rateSCfg.loadFromJsonCfg(jsnRateCfg)
 }
 
+// loadApierCfg loads the Apier section of the configuration
+func (cfg *CGRConfig) loadSIPAgentCfg(jsnCfg *CgrJsonCfg) (err error) {
+	var jsnSIPAgentCfg *SIPAgentJsonCfg
+	if jsnSIPAgentCfg, err = jsnCfg.SIPAgentJsonCfg(); err != nil {
+		return
+	}
+	return cfg.sipAgentCfg.loadFromJsonCfg(jsnSIPAgentCfg, cfg.generalCfg.RSRSep)
+}
+
 // SureTaxCfg use locking to retrieve the configuration, possibility later for runtime reload
 func (cfg *CGRConfig) SureTaxCfg() *SureTaxCfg {
 	cfg.lks[SURETAX_JSON].Lock()
@@ -997,7 +1008,7 @@ func (cfg *CGRConfig) EEsCfg() *EEsCfg {
 	return cfg.eesCfg
 }
 
-// EEsCfg reads the EventExporter configuration
+// EEsNoLksCfg reads the EventExporter configuration without locks
 func (cfg *CGRConfig) EEsNoLksCfg() *EEsCfg {
 	return cfg.eesCfg
 }
@@ -1006,6 +1017,13 @@ func (cfg *CGRConfig) RateSCfg() *RateSCfg {
 	cfg.lks[RateSJson].RLock()
 	defer cfg.lks[RateSJson].RUnlock()
 	return cfg.rateSCfg
+}
+
+// SIPAgentCfg reads the Apier configuration
+func (cfg *CGRConfig) SIPAgentCfg() *SIPAgentCfg {
+	cfg.lks[SIPAgentJson].Lock()
+	defer cfg.lks[SIPAgentJson].Unlock()
+	return cfg.sipAgentCfg
 }
 
 // RPCConns reads the RPCConns configuration
@@ -1103,6 +1121,8 @@ func (cfg *CGRConfig) V1GetConfigSection(args *StringWithArgDispatcher, reply *m
 		jsonString = utils.ToJSON(cfg.ERsCfg())
 	case RPCConnsJsonName:
 		jsonString = utils.ToJSON(cfg.RPCConns())
+	case SIPAgentJson:
+		jsonString = utils.ToJSON(cfg.SIPAgentCfg())
 	default:
 		return errors.New("Invalid section")
 	}
@@ -1228,6 +1248,7 @@ func (cfg *CGRConfig) getLoadFunctions() map[string]func(*CgrJsonCfg) error {
 		ApierS:             cfg.loadApierCfg,
 		RPCConnsJsonName:   cfg.loadRPCConns,
 		RateSJson:          cfg.loadRateCfg,
+		SIPAgentJson:       cfg.loadSIPAgentCfg,
 	}
 }
 
@@ -1493,6 +1514,7 @@ func (cfg *CGRConfig) reloadSections(sections ...string) (err error) {
 		case AnalyzerCfgJson:
 		case ApierS:
 			cfg.rldChans[ApierS] <- struct{}{}
+		case SIPAgentJson:
 		}
 		return
 	}
@@ -1521,7 +1543,6 @@ func (cfg *CGRConfig) AsMapInterface(separator string) map[string]interface{} {
 	}
 
 	return map[string]interface{}{
-
 		utils.CdreProfiles:     cdreProfiles,
 		utils.LoaderCfg:        loaderCfg,
 		utils.HttpAgentCfg:     httpAgentCfg,

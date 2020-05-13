@@ -174,6 +174,7 @@ func (srvMngr *ServiceManager) StartServices() (err error) {
 		utils.DispatcherS:     srvMngr.GetConfig().DispatcherSCfg().Enabled,
 		utils.EventExporterS:  srvMngr.GetConfig().EEsCfg().Enabled,
 		utils.RateS:           srvMngr.GetConfig().RateSCfg().Enabled,
+		utils.SIPAgent:        srvMngr.GetConfig().SIPAgentCfg().Enabled,
 	} {
 		if shouldRun {
 			go srvMngr.startService(serviceName)
@@ -320,6 +321,10 @@ func (srvMngr *ServiceManager) handleReload() {
 			}
 		case <-srvMngr.GetConfig().GetReloadChan(config.RPCConnsJsonName):
 			engine.Cache.Clear([]string{utils.CacheRPCConnections})
+		case <-srvMngr.GetConfig().GetReloadChan(config.SIPAgentJson):
+			if err = srvMngr.reloadService(utils.SIPAgent); err != nil {
+				return
+			}
 		}
 		// handle RPC server
 	}

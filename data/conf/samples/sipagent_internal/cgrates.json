@@ -1,0 +1,75 @@
+{
+
+// Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+// Copyright (C) ITsysCOM GmbH
+//
+// This file contains the default configuration hardcoded into CGRateS.
+// This is what you get when you load CGRateS with an empty configuration file.
+
+
+"general": {
+	"log_level": 7,											// control the level of messages logged (0-emerg to 7-debug)
+},
+
+
+"data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
+	"db_type": "*internal",					// stor database type to use: <mysql|postgres>
+},
+
+"stor_db": {
+	"db_type": "*internal",					// stor database type to use: <mysql|postgres>
+},
+
+"schedulers": {
+	"enabled": true,
+	"cdrs_conns": ["*internal"],
+},
+
+
+"sessions": {
+	"enabled": true,
+	"attributes_conns": ["*localhost"],
+	"rals_conns": ["*internal"],
+	"cdrs_conns": ["*internal"],
+	"chargers_conns": ["*internal"],
+	"routes_conns": ["*localhost"],
+},
+
+
+"rals": {
+	"enabled": true,
+},
+
+
+"cdrs": {
+	"enabled": true,
+	"rals_conns": ["*internal"],
+},
+
+
+"chargers": {
+	"enabled": true,
+},
+
+
+"attributes": {
+	"enabled": true,
+	"indexed_selects": false,				// enable profile matching exclusively on indexes
+},
+
+
+"routes": {
+	"enabled": true,
+},
+
+
+"sip_agent": {
+	"enabled": true,
+},
+
+
+"apiers": {
+	"enabled": true,
+	"scheduler_conns": ["*internal"],
+},
+}

@@ -61,9 +61,9 @@ func MatchingItemIDsForEvent(ev map[string]interface{}, stringFldIDs, prefixFldI
 			itemIDs = utils.StringMapFromSlice(sliceIDs)
 			return
 		}
-		stringFieldVals := map[string]string{utils.ANY: utils.ANY}                               // cache here field string values, start with default one
-		filterIndexTypes := []string{utils.MetaString, utils.MetaPrefix, utils.META_NONE}        // the META_NONE is used for all items that do not have filters
-		for i, fieldIDs := range []*[]string{stringFldIDs, prefixFldIDs, &[]string{utils.ANY}} { // same routine for both string and prefix filter types
+		stringFieldVals := map[string]string{utils.ANY: utils.ANY}                        // cache here field string values, start with default one
+		filterIndexTypes := []string{utils.MetaString, utils.MetaPrefix, utils.META_NONE} // the META_NONE is used for all items that do not have filters
+		for i, fieldIDs := range []*[]string{stringFldIDs, prefixFldIDs, {utils.ANY}} {   // same routine for both string and prefix filter types
 			if fieldIDs == nil {
 				fieldIDs = &allFieldIDs
 			}

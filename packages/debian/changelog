@@ -1,4 +1,5 @@
 cgrates (0.11.0~dev) UNRELEASED; urgency=medium
+  [ DanB ]
   * [FilterS] Renamed rals_conns to apiers_conns
   * [FilterS] Updated *destination filter to get ReverseDestination form
     API
@@ -58,8 +59,9 @@ cgrates (0.11.0~dev) UNRELEASED; urgency=medium
   * [AgentS] FieldAsInterface return data instead of NMItem
   * [RouteS] Add posibility to load routes with the sameID and different filters
   * [RouteS] Correctly populate Sorting out of models
+  * [AgentS] Added SIPAgent for SIP redirection
 
- -- Alexandru Tripon <alexandru.tripon@itsyscom.com>  Wed, 19 Feb 2020 13:25:52 +0200
+ -- DanB <danb@cgrates.org>  Wed, 19 Feb 2020 13:25:52 +0200
 
 cgrates (0.10.0) UNRELEASED; urgency=medium
 

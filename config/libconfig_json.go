@@ -608,3 +608,13 @@ type STIRJsonCfg struct {
 type RateSJsonCfg struct {
 	Enabled *bool
 }
+
+// SIPAgentJsonCfg
+type SIPAgentJsonCfg struct {
+	Enabled            *bool
+	Listen             *string
+	Listen_net         *string
+	Sessions_conns     *[]string
+	Timezone           *string
+	Request_processors *[]*ReqProcessorJsnCfg
+}

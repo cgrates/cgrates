@@ -61,15 +61,15 @@ const (
 	EEsJson            = "ees"
 	RateSJson          = "rates"
 	RPCConnsJsonName   = "rpc_conns"
+	SIPAgentJson       = "sip_agent"
 )
 
 var (
-	sortedCfgSections = []string{GENERAL_JSN, RPCConnsJsonName, DATADB_JSN, STORDB_JSN, LISTEN_JSN, TlsCfgJson, HTTP_JSN,
-		SCHEDULER_JSN, CACHE_JSN, FilterSjsn, RALS_JSN,
-		CDRS_JSN, CDRE_JSN, ERsJson, SessionSJson, AsteriskAgentJSN, FreeSWITCHAgentJSN, KamailioAgentJSN,
-		DA_JSN, RA_JSN, HttpAgentJson, DNSAgentJson, ATTRIBUTE_JSN, ChargerSCfgJson, RESOURCES_JSON, STATS_JSON, THRESHOLDS_JSON,
-		RouteSJson, LoaderJson, MAILER_JSN, SURETAX_JSON, CgrLoaderCfgJson, CgrMigratorCfgJson, DispatcherSJson,
-		AnalyzerCfgJson, ApierS, EEsJson, RateSJson}
+	sortedCfgSections = []string{GENERAL_JSN, RPCConnsJsonName, DATADB_JSN, STORDB_JSN, LISTEN_JSN, TlsCfgJson, HTTP_JSN, SCHEDULER_JSN,
+		CACHE_JSN, FilterSjsn, RALS_JSN, CDRS_JSN, CDRE_JSN, ERsJson, SessionSJson, AsteriskAgentJSN, FreeSWITCHAgentJSN,
+		KamailioAgentJSN, DA_JSN, RA_JSN, HttpAgentJson, DNSAgentJson, ATTRIBUTE_JSN, ChargerSCfgJson, RESOURCES_JSON, STATS_JSON,
+		THRESHOLDS_JSON, RouteSJson, LoaderJson, MAILER_JSN, SURETAX_JSON, CgrLoaderCfgJson, CgrMigratorCfgJson, DispatcherSJson,
+		AnalyzerCfgJson, ApierS, EEsJson, RateSJson, SIPAgentJson}
 )
 
 // Loads the json config out of io.Reader, eg other sources than file, maybe over http
@@ -518,4 +518,16 @@ func (self CgrJsonCfg) RateCfgJson() (*RateSJsonCfg, error) {
 		return nil, err
 	}
 	return cfg, nil
+}
+
+func (self CgrJsonCfg) SIPAgentJsonCfg() (*SIPAgentJsonCfg, error) {
+	rawCfg, hasKey := self[SIPAgentJson]
+	if !hasKey {
+		return nil, nil
+	}
+	sipAgnt := new(SIPAgentJsonCfg)
+	if err := json.Unmarshal(*rawCfg, sipAgnt); err != nil {
+		return nil, err
+	}
+	return sipAgnt, nil
 }

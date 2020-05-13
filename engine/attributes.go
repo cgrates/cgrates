@@ -94,8 +94,11 @@ func (alS *AttributeService) attributeProfileForEvent(args *AttrArgsProcessEvent
 		}
 		attrIDs = aPrflIDs.Slice()
 	}
-	evNm := config.NewNavigableMap(nil)
-	evNm.Set([]string{utils.MetaReq}, args.Event, false, false)
+
+	evNm := config.NewNavigableMap(map[string]interface{}{
+		utils.MetaReq:  args.Event,
+		utils.MetaOpts: args.Opts,
+	})
 	for _, apID := range attrIDs {
 		aPrfl, err := alS.dm.GetAttributeProfile(args.Tenant, apID, true, true, utils.NonTransactional)
 		if err != nil {
