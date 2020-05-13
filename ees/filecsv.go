@@ -21,7 +21,6 @@ package ees
 import (
 	"encoding/csv"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/engine"
@@ -38,16 +37,13 @@ func NewFileCSVee(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.FilterS)
 
 // FileCSVee implements EventExporter interface for .csv files
 type FileCSVee struct {
-	id         string
-	cgrCfg     *config.CGRConfig
-	cfgIdx     int // index of config instance within ERsCfg.Readers
-	filterS    *engine.FilterS
-	file       *os.File
-	csvWriter  *csv.Writer
-	csvRecords [][]string
-	//hdrFields
-	//trlFields
-	//cntFields
+	id        string
+	cgrCfg    *config.CGRConfig
+	cfgIdx    int // index of config instance within ERsCfg.Readers
+	filterS   *engine.FilterS
+	file      *os.File
+	csvWriter *csv.Writer
+
 	firstEventATime, lastEventATime time.Time
 	numberOfRecords                 int
 	totalDuration, totalDataUsage, totalSmsUsage,
@@ -81,7 +77,6 @@ func (fCsv *FileCSVee) ID() string {
 // OnEvicted implements EventExporter, doing the cleanup before exit
 func (fCsv *FileCSVee) OnEvicted(_ string, _ interface{}) {
 	// verify if we need to add the trailer
-
 	fCsv.csvWriter.Flush()
 	fCsv.file.Close()
 	return
@@ -95,10 +90,7 @@ func (fCsv *FileCSVee) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 	navMp := config.NewNavigableMap(map[string]interface{}{
 		utils.MetaReq: cgrEv.Event,
 	})
-	for _, cfgFld := range fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].Fields {
-		if !strings.HasPrefix(cfgFld.Path, utils.MetaReq) {
-			continue
-		}
+	for _, cfgFld := range fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].ContentFields {
 		if pass, err := fCsv.filterS.Pass(cgrEv.Tenant, cfgFld.Filters,
 			navMp); err != nil || !pass {
 			continue
@@ -106,12 +98,44 @@ func (fCsv *FileCSVee) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 		val, err := cfgFld.Value.ParseDataProvider(navMp, fCsv.cgrCfg.GeneralCfg().RSRSep)
 		if err != nil {
 			fCsv.negativeExports.Add(cgrEv.ID)
-			return
+			return err
 		}
 		csvRecord = append(csvRecord, val)
 	}
+	if aTime, err := cgrEv.FieldAsTime(utils.AnswerTime, fCsv.cgrCfg.GeneralCfg().DefaultTimezone); err == nil {
+		if fCsv.firstEventATime.IsZero() || fCsv.firstEventATime.Before(aTime) {
+			fCsv.firstEventATime = aTime
+		}
+		if aTime.After(fCsv.lastEventATime) {
+			fCsv.lastEventATime = aTime
+		}
+	}
+	if oID, err := cgrEv.FieldAsInt64(utils.OrderID); err == nil {
+		if fCsv.firstExpOrderID > oID || fCsv.firstExpOrderID == 0 {
+			fCsv.firstExpOrderID = oID
+		}
+		if fCsv.lastExpOrderID < oID {
+			fCsv.lastExpOrderID = oID
+		}
+	}
 	if cost, err := cgrEv.FieldAsFloat64(utils.Cost); err == nil {
 		fCsv.totalCost += cost
+	}
+	if tor, err := cgrEv.FieldAsString(utils.ToR); err == nil {
+		if usage, err := cgrEv.FieldAsDuration(utils.Usage); err == nil {
+			switch tor {
+			case utils.VOICE:
+				fCsv.totalDuration += usage
+			case utils.SMS:
+				fCsv.totalSmsUsage += usage
+			case utils.MMS:
+				fCsv.totalMmsUsage += usage
+			case utils.GENERIC:
+				fCsv.totalGenericUsage += usage
+			case utils.DATA:
+				fCsv.totalDataUsage += usage
+			}
+		}
 	}
 	fCsv.positiveExports.Add(cgrEv.ID)
 	fCsv.csvWriter.Write(csvRecord)
@@ -157,13 +181,10 @@ func (fCsv *FileCSVee) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 // Compose and cache the header
 func (fCsv *FileCSVee) composeHeader() (err error) {
 	var csvRecord []string
-	for _, cfgFld := range fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].Fields {
-		if !strings.HasPrefix(cfgFld.Path, utils.MetaHdr) {
-			continue
-		}
+	for _, cfgFld := range fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].HeaderFields {
 		val, err := cfgFld.Value.ParseValue(utils.EmptyString)
 		if err != nil {
-			return
+			return err
 		}
 		csvRecord = append(csvRecord, val)
 	}
@@ -173,46 +194,8 @@ func (fCsv *FileCSVee) composeHeader() (err error) {
 
 // Compose and cache the trailer
 func (fCsv *FileCSVee) composeTrailer() (err error) {
-	for _, cfgFld := range fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].Fields {
-		if !strings.HasPrefix(cfgFld.Path, utils.MetaTrl) {
-			continue
-		}
-		//var outVal string
-		//switch cfgFld.Type {
-		//case utils.META_FILLER:
-		//	out, err := cfgFld.Value.ParseValue(utils.EmptyString)
-		//	if err != nil {
-		//		return err
-		//	}
-		//	outVal = out
-		//	cfgFld.Padding = utils.MetaRight
-		//case utils.META_CONSTANT:
-		//	out, err := cfgFld.Value.ParseValue(utils.EmptyString)
-		//	if err != nil {
-		//		return err
-		//	}
-		//	outVal = out
-		//case utils.META_HANDLER:
-		//	out, err := cfgFld.Value.ParseValue(utils.EmptyString)
-		//	if err != nil {
-		//		return err
-		//	}
-		//	outVal, err = cdre.metaHandler(out, cfgFld.Layout)
-		//default:
-		//	return fmt.Errorf("Unsupported field type: %s", cfgFld.Type)
-		//}
-		//if err != nil {
-		//	utils.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR trailer, field: %s, error: %s", cfgFld.Tag, err.Error()))
-		//	return err
-		//}
-		//fmtOut := outVal
-		//if fmtOut, err = utils.FmtFieldWidth(cfgFld.Tag, outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
-		//	utils.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR trailer, field: %s, error: %s", cfgFld.Tag, err.Error()))
-		//	return err
-		//}
-		//cdre.Lock()
-		//cdre.trailer = append(cdre.trailer, fmtOut)
-		//cdre.Unlock()
-	}
+	//for _, cfgFld := range fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].TrailerFields {
+	//
+	//}
 	return nil
 }
