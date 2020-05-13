@@ -465,9 +465,9 @@ func (cdrS *CDRServer) processEvent(ev *utils.CGREventWithOpts,
 						utils.CDRs, utils.ErrExists, utils.ToJSON(cgrEv), utils.CacheS))
 				return nil, utils.ErrExists
 			}
-			if err := Cache.Set(utils.CacheCDRIDs, uID, true, nil,
-				cacheCommit(utils.NonTransactional), utils.NonTransactional); err != nil {
-				utils.Logger.Warning(fmt.Sprintf("<%s> failed to set Cache. Error: %s", utils.CDRs, err))
+			if errCh := Cache.Set(utils.CacheCDRIDs, uID, true, nil,
+				cacheCommit(utils.NonTransactional), utils.NonTransactional); errCh != nil {
+				return nil, errCh
 			}
 		}
 	}

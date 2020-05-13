@@ -876,20 +876,18 @@ func (sS *SessionS) getIndexedFilters(tenant string, fltrs []string) (
 			}
 			continue
 		}
-		if f != nil {
-			if f.ActivationInterval != nil &&
-				!f.ActivationInterval.IsActiveAtTime(time.Now()) { // not active
+		if f.ActivationInterval != nil &&
+			!f.ActivationInterval.IsActiveAtTime(time.Now()) { // not active
+			continue
+		}
+		for _, fltr := range f.Rules {
+			fldName := strings.TrimPrefix(fltr.Element, utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep) // remove ~req. prefix
+			if fltr.Type != utils.MetaString ||
+				!sS.cgrCfg.SessionSCfg().SessionIndexes.HasKey(fldName) {
+				unindexedFltr = append(unindexedFltr, fltr)
 				continue
 			}
-			for _, fltr := range f.Rules {
-				fldName := strings.TrimPrefix(fltr.Element, utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep) // remove ~req. prefix
-				if fltr.Type != utils.MetaString ||
-					!sS.cgrCfg.SessionSCfg().SessionIndexes.HasKey(fldName) {
-					unindexedFltr = append(unindexedFltr, fltr)
-					continue
-				}
-				indexedFltr[fldName] = fltr.Values
-			}
+			indexedFltr[fldName] = fltr.Values
 		}
 	}
 	return
@@ -1524,9 +1522,9 @@ func (sS *SessionS) endSession(s *Session, tUsage, lastUsage *time.Duration,
 		}
 
 	}
-	if err := engine.Cache.Set(utils.CacheClosedSessions, s.CGRID, s,
-		nil, true, utils.NonTransactional); err != nil {
-		return err
+	if errCh := engine.Cache.Set(utils.CacheClosedSessions, s.CGRID, s,
+		nil, true, utils.NonTransactional); errCh != nil {
+		return errCh
 	}
 	return
 }

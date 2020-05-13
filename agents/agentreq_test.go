@@ -365,10 +365,10 @@ func TestAgentRequestSetFields(t *testing.T) {
 			Value:   config.NewRSRParsersMustCompile("2021", false, ";"),
 		},
 	}
-	// input[0].ComputePath()
-	// if err := ar.SetFields(input); err == nil || err.Error() != "NOT_FOUND:Not really a filter" {
-	// 	t.Errorf("Expecting: 'NOT_FOUND:Not really a filter', received: %+v", err)
-	// }
+	input[0].ComputePath()
+	if err := ar.SetFields(input); err == nil || err.Error() != "NOT_FOUND:Not really a filter" {
+		t.Errorf("Expecting: 'NOT_FOUND:Not really a filter', received: %+v", err)
+	}
 
 	// Blocker: true
 	input = []*config.FCTemplate{

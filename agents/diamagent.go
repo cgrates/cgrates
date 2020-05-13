@@ -207,10 +207,11 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 			writeOnConn(c, diamErr)
 		}
 		// cache message data needed for building up the ASR
-		err = engine.Cache.Set(utils.CacheDiameterMessages, sessID, &diamMsgData{c, m, reqVars},
-			nil, true, utils.NonTransactional)
-		if err != nil {
-			utils.Logger.Warning(fmt.Sprintf("<%s> failed to set Cache: %s", utils.DiameterAgent, err.Error()))
+		if errCh := engine.Cache.Set(utils.CacheDiameterMessages, sessID, &diamMsgData{c, m, reqVars},
+			nil, true, utils.NonTransactional); errCh != nil {
+			utils.Logger.Warning(fmt.Sprintf("<%s> failed message: %s to set Cache: %s", utils.DiameterAgent, m, errCh.Error()))
+			writeOnConn(c, diamErr)
+			return
 		}
 	}
 	// handle MaxActiveReqs
