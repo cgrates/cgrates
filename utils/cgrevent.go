@@ -82,6 +82,15 @@ func (ev *CGREvent) FieldAsFloat64(fldName string) (f float64, err error) {
 	return IfaceAsFloat64(iface)
 }
 
+// FieldAsInt64 returns a field as int64 instance
+func (ev *CGREvent) FieldAsInt64(fldName string) (f int64, err error) {
+	iface, has := ev.Event[fldName]
+	if !has {
+		return f, ErrNotFound
+	}
+	return IfaceAsInt64(iface)
+}
+
 func (ev *CGREvent) TenantID() string {
 	return ConcatenatedKey(ev.Tenant, ev.ID)
 }
