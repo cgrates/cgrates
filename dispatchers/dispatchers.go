@@ -184,8 +184,8 @@ func (dS *DispatcherService) Dispatch(ev *utils.CGREvent, subsys string, routeID
 	} else if d, err = newDispatcher(dS.dm, dPrfl); err != nil {
 		return utils.NewErrDispatcherS(err)
 	}
-	if err = engine.Cache.Set(utils.CacheDispatchers, tntID, d, nil, true, utils.EmptyString); err != nil {
-		return utils.NewErrDispatcherS(err)
+	if errCh := engine.Cache.Set(utils.CacheDispatchers, tntID, d, nil, true, utils.EmptyString); errCh != nil {
+		return utils.NewErrDispatcherS(errCh)
 	}
 	return d.Dispatch(routeID, subsys, serviceMethod, args, reply)
 }

@@ -577,14 +577,14 @@ func (iDB *InternalDB) GetDestinationDrv(key string, skipCache bool, transaction
 
 	x, ok := iDB.db.Get(utils.CacheDestinations, key)
 	if !ok || x == nil {
-		if err := Cache.Set(utils.CacheDestinations, key, nil, nil, cCommit, transactionID); err != nil {
-			return nil, err
+		if errCh := Cache.Set(utils.CacheDestinations, key, nil, nil, cCommit, transactionID); errCh != nil {
+			return nil, errCh
 		}
 		return nil, utils.ErrNotFound
 	}
 	dest = x.(*Destination)
-	if err := Cache.Set(utils.CacheDestinations, key, dest, nil, cCommit, transactionID); err != nil {
-		return nil, err
+	if errCh := Cache.Set(utils.CacheDestinations, key, dest, nil, cCommit, transactionID); errCh != nil {
+		return nil, errCh
 	}
 	return
 }
@@ -592,9 +592,9 @@ func (iDB *InternalDB) GetDestinationDrv(key string, skipCache bool, transaction
 func (iDB *InternalDB) SetDestinationDrv(dest *Destination, transactionID string) (err error) {
 	iDB.db.Set(utils.CacheDestinations, dest.Id, dest, nil,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
-	if err = Cache.Remove(utils.CacheDestinations, dest.Id,
-		cacheCommit(transactionID), transactionID); err != nil {
-		return
+	if errCh := Cache.Remove(utils.CacheDestinations, dest.Id,
+		cacheCommit(transactionID), transactionID); errCh != nil {
+		return errCh
 	}
 	return
 }
@@ -607,9 +607,9 @@ func (iDB *InternalDB) RemoveDestinationDrv(destID string, transactionID string)
 	}
 	iDB.db.Remove(utils.CacheDestinations, destID,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
-	if err = Cache.Remove(utils.CacheDestinations, destID,
-		cacheCommit(transactionID), transactionID); err != nil {
-		return
+	if errCh := Cache.Remove(utils.CacheDestinations, destID,
+		cacheCommit(transactionID), transactionID); errCh != nil {
+		return errCh
 	}
 	for _, prefix := range d.Prefixes {
 		iDB.db.Remove(utils.CacheReverseDestinations, prefix,
@@ -655,15 +655,15 @@ func (iDB *InternalDB) GetReverseDestinationDrv(prefix string,
 	}
 	ids = x.(utils.StringMap).Slice()
 	if len(ids) == 0 {
-		if err := Cache.Set(utils.CacheReverseDestinations, prefix, nil, nil,
-			cacheCommit(transactionID), transactionID); err != nil {
-			return nil, err
+		if errCh := Cache.Set(utils.CacheReverseDestinations, prefix, nil, nil,
+			cacheCommit(transactionID), transactionID); errCh != nil {
+			return nil, errCh
 		}
 		return nil, utils.ErrNotFound
 	}
-	if err := Cache.Set(utils.CacheReverseDestinations, prefix, ids, nil,
-		cacheCommit(transactionID), transactionID); err != nil {
-		return nil, err
+	if errCh := Cache.Set(utils.CacheReverseDestinations, prefix, ids, nil,
+		cacheCommit(transactionID), transactionID); errCh != nil {
+		return nil, errCh
 	}
 	return
 }
@@ -719,9 +719,9 @@ func (iDB *InternalDB) UpdateReverseDestinationDrv(oldDest, newDest *Destination
 				cacheCommit(utils.NonTransactional), utils.NonTransactional)
 		}
 
-		if err = Cache.Remove(utils.CacheReverseDestinations, obsoletePrefix,
-			cCommit, transactionID); err != nil {
-			return err
+		if errCh := Cache.Remove(utils.CacheReverseDestinations, obsoletePrefix,
+			cCommit, transactionID); errCh != nil {
+			return errCh
 		}
 	}
 	// add the id to all new prefixes
@@ -816,16 +816,16 @@ func (iDB *InternalDB) GetActionPlanDrv(key string, skipCache bool,
 	cCommit := cacheCommit(transactionID)
 	x, ok := iDB.db.Get(utils.CacheActionPlans, key)
 	if !ok || x == nil {
-		if err := Cache.Set(utils.CacheActionPlans, key, nil, nil,
-			cCommit, transactionID); err != nil {
-			return nil, err
+		if errCh := Cache.Set(utils.CacheActionPlans, key, nil, nil,
+			cCommit, transactionID); errCh != nil {
+			return nil, errCh
 		}
 		return nil, utils.ErrNotFound
 	}
 	ats = x.(*ActionPlan)
-	if err := Cache.Set(utils.CacheActionPlans, key, ats, nil,
-		cCommit, transactionID); err != nil {
-		return nil, err
+	if errCh := Cache.Set(utils.CacheActionPlans, key, ats, nil,
+		cCommit, transactionID); errCh != nil {
+		return nil, errCh
 	}
 	return
 }
@@ -836,9 +836,9 @@ func (iDB *InternalDB) SetActionPlanDrv(key string, ats *ActionPlan,
 	if len(ats.ActionTimings) == 0 {
 		iDB.db.Remove(utils.CacheActionPlans, key,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
-		if err = Cache.Remove(utils.CacheActionPlans, key,
-			cCommit, transactionID); err != nil {
-			return
+		if errCh := Cache.Remove(utils.CacheActionPlans, key,
+			cCommit, transactionID); errCh != nil {
+			return errCh
 		}
 		return
 	}
@@ -862,8 +862,8 @@ func (iDB *InternalDB) SetActionPlanDrv(key string, ats *ActionPlan,
 func (iDB *InternalDB) RemoveActionPlanDrv(key string, transactionID string) (err error) {
 	iDB.db.Remove(utils.CacheActionPlans, key,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
-	if err = Cache.Remove(utils.CacheActionPlans, key, cacheCommit(transactionID), transactionID); err != nil {
-		return
+	if errCh := Cache.Remove(utils.CacheActionPlans, key, cacheCommit(transactionID), transactionID); errCh != nil {
+		return errCh
 	}
 	return
 }
@@ -897,16 +897,16 @@ func (iDB *InternalDB) GetAccountActionPlansDrv(acntID string,
 	}
 	x, ok := iDB.db.Get(utils.CacheAccountActionPlans, acntID)
 	if !ok || x == nil {
-		if err := Cache.Set(utils.CacheAccountActionPlans, acntID, nil, nil,
-			cacheCommit(transactionID), transactionID); err != nil {
-			return nil, err
+		if errCh := Cache.Set(utils.CacheAccountActionPlans, acntID, nil, nil,
+			cacheCommit(transactionID), transactionID); errCh != nil {
+			return nil, errCh
 		}
 		return nil, utils.ErrNotFound
 	}
 	apIDs = x.([]string)
-	if err := Cache.Set(utils.CacheAccountActionPlans, acntID, apIDs, nil,
-		cacheCommit(transactionID), transactionID); err != nil {
-		return nil, err
+	if errCh := Cache.Set(utils.CacheAccountActionPlans, acntID, apIDs, nil,
+		cacheCommit(transactionID), transactionID); errCh != nil {
+		return nil, errCh
 	}
 	return
 }

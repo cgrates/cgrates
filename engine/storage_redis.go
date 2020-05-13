@@ -524,9 +524,9 @@ func (rs *RedisStorage) GetDestinationDrv(key string, skipCache bool,
 	var values []byte
 	if values, err = rs.Cmd(redis_GET, utils.DESTINATION_PREFIX+key).Bytes(); err != nil {
 		if err == redis.ErrRespNil { // did not find the destination
-			if err := Cache.Set(utils.CacheDestinations, key, nil, nil,
-				cacheCommit(transactionID), transactionID); err != nil {
-				return nil, err
+			if errCh := Cache.Set(utils.CacheDestinations, key, nil, nil,
+				cacheCommit(transactionID), transactionID); errCh != nil {
+				return nil, errCh
 			}
 			err = utils.ErrNotFound
 		}
@@ -546,9 +546,9 @@ func (rs *RedisStorage) GetDestinationDrv(key string, skipCache bool,
 	if err != nil {
 		return nil, err
 	}
-	if err := Cache.Set(utils.CacheDestinations, key, dest, nil,
-		cacheCommit(transactionID), transactionID); err != nil {
-		return nil, err
+	if errCh := Cache.Set(utils.CacheDestinations, key, dest, nil,
+		cacheCommit(transactionID), transactionID); errCh != nil {
+		return nil, errCh
 	}
 	return
 }
@@ -582,16 +582,16 @@ func (rs *RedisStorage) GetReverseDestinationDrv(key string,
 	if ids, err = rs.Cmd(redis_SMEMBERS, utils.REVERSE_DESTINATION_PREFIX+key).List(); err != nil {
 		return
 	} else if len(ids) == 0 {
-		if err := Cache.Set(utils.CacheReverseDestinations, key, nil, nil,
-			cacheCommit(transactionID), transactionID); err != nil {
-			return nil, err
+		if errCh := Cache.Set(utils.CacheReverseDestinations, key, nil, nil,
+			cacheCommit(transactionID), transactionID); errCh != nil {
+			return nil, errCh
 		}
 		err = utils.ErrNotFound
 		return
 	}
-	if err := Cache.Set(utils.CacheReverseDestinations, key, ids, nil,
-		cacheCommit(transactionID), transactionID); err != nil {
-		return nil, err
+	if errCh := Cache.Set(utils.CacheReverseDestinations, key, ids, nil,
+		cacheCommit(transactionID), transactionID); errCh != nil {
+		return nil, errCh
 	}
 	return
 }
@@ -616,9 +616,9 @@ func (rs *RedisStorage) RemoveDestinationDrv(destID, transactionID string) (err 
 	if err != nil {
 		return err
 	}
-	if err = Cache.Remove(utils.CacheDestinations, destID,
-		cacheCommit(transactionID), transactionID); err != nil {
-		return
+	if errCh := Cache.Remove(utils.CacheDestinations, destID,
+		cacheCommit(transactionID), transactionID); errCh != nil {
+		return errCh
 	}
 	if d == nil {
 		return utils.ErrNotFound
@@ -674,9 +674,9 @@ func (rs *RedisStorage) UpdateReverseDestinationDrv(oldDest, newDest *Destinatio
 		if err != nil {
 			return err
 		}
-		if err := Cache.Remove(utils.CacheReverseDestinations, obsoletePrefix,
-			cCommit, transactionID); err != nil {
-			return err
+		if errCh := Cache.Remove(utils.CacheReverseDestinations, obsoletePrefix,
+			cCommit, transactionID); errCh != nil {
+			return errCh
 		}
 	}
 
@@ -815,9 +815,9 @@ func (rs *RedisStorage) GetLoadHistory(limit int, skipCache bool,
 		utils.LOADINST_KEY, 0, limit).ListBytes()
 	cCommit := cacheCommit(transactionID)
 	if err != nil {
-		if err := Cache.Set(utils.LOADINST_KEY, "", nil, nil,
-			cCommit, transactionID); err != nil {
-			return nil, err
+		if errCh := Cache.Set(utils.LOADINST_KEY, "", nil, nil,
+			cCommit, transactionID); errCh != nil {
+			return nil, errCh
 		}
 		return nil, err
 	}
@@ -830,12 +830,12 @@ func (rs *RedisStorage) GetLoadHistory(limit int, skipCache bool,
 		}
 		loadInsts[idx] = &lInst
 	}
-	if err := Cache.Remove(utils.LOADINST_KEY, "", cCommit, transactionID); err != nil {
-		return nil, err
+	if errCh := Cache.Remove(utils.LOADINST_KEY, "", cCommit, transactionID); errCh != nil {
+		return nil, errCh
 	}
-	if err := Cache.Set(utils.LOADINST_KEY, "", loadInsts, nil,
-		cCommit, transactionID); err != nil {
-		return nil, err
+	if errCh := Cache.Set(utils.LOADINST_KEY, "", loadInsts, nil,
+		cCommit, transactionID); errCh != nil {
+		return nil, errCh
 	}
 	if len(loadInsts) < limit || limit == -1 {
 		return loadInsts, nil
@@ -865,9 +865,9 @@ func (rs *RedisStorage) AddLoadHistory(ldInst *utils.LoadInstance, loadHistSize 
 		return nil, rs.Cmd(redis_LPUSH, utils.LOADINST_KEY, marshaled).Err
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.LOADINST_KEY)
 
-	if err := Cache.Remove(utils.LOADINST_KEY, "",
-		cacheCommit(transactionID), transactionID); err != nil {
-		return err
+	if errCh := Cache.Remove(utils.LOADINST_KEY, "",
+		cacheCommit(transactionID), transactionID); errCh != nil {
+		return errCh
 	}
 	return err
 }
@@ -924,9 +924,9 @@ func (rs *RedisStorage) GetActionPlanDrv(key string, skipCache bool,
 	var values []byte
 	if values, err = rs.Cmd(redis_GET, utils.ACTION_PLAN_PREFIX+key).Bytes(); err != nil {
 		if err == redis.ErrRespNil { // did not find the destination
-			if err := Cache.Set(utils.CacheActionPlans, key, nil, nil,
-				cacheCommit(transactionID), transactionID); err != nil {
-				return nil, err
+			if errCh := Cache.Set(utils.CacheActionPlans, key, nil, nil,
+				cacheCommit(transactionID), transactionID); errCh != nil {
+				return nil, errCh
 			}
 			err = utils.ErrNotFound
 		}
@@ -945,9 +945,9 @@ func (rs *RedisStorage) GetActionPlanDrv(key string, skipCache bool,
 	if err = rs.ms.Unmarshal(out, &ats); err != nil {
 		return
 	}
-	if err := Cache.Set(utils.CacheActionPlans, key, ats, nil,
-		cacheCommit(transactionID), transactionID); err != nil {
-		return nil, err
+	if errCh := Cache.Set(utils.CacheActionPlans, key, ats, nil,
+		cacheCommit(transactionID), transactionID); errCh != nil {
+		return nil, errCh
 	}
 	return
 }
@@ -958,9 +958,9 @@ func (rs *RedisStorage) RemoveActionPlanDrv(key string,
 		return err
 	}
 	err := rs.Cmd(redis_DEL, utils.ACTION_PLAN_PREFIX+key).Err
-	if err := Cache.Remove(utils.CacheActionPlans, key,
-		cCommit, transactionID); err != nil {
-		return err
+	if errCh := Cache.Remove(utils.CacheActionPlans, key,
+		cCommit, transactionID); errCh != nil {
+		return errCh
 	}
 	return err
 }
@@ -974,9 +974,9 @@ func (rs *RedisStorage) SetActionPlanDrv(key string, ats *ActionPlan,
 			return err
 		}
 		err = rs.Cmd(redis_DEL, utils.ACTION_PLAN_PREFIX+key).Err
-		if err = Cache.Remove(utils.CacheActionPlans, key,
-			cCommit, transactionID); err != nil {
-			return
+		if errCh := Cache.Remove(utils.CacheActionPlans, key,
+			cCommit, transactionID); errCh != nil {
+			return errCh
 		}
 		return
 	}
@@ -1039,9 +1039,9 @@ func (rs *RedisStorage) GetAccountActionPlansDrv(acntID string, skipCache bool,
 	if values, err = rs.Cmd(redis_GET,
 		utils.AccountActionPlansPrefix+acntID).Bytes(); err != nil {
 		if err == redis.ErrRespNil { // did not find the destination
-			if err := Cache.Set(utils.CacheAccountActionPlans, acntID, nil, nil,
-				cacheCommit(transactionID), transactionID); err != nil {
-				return nil, err
+			if errCh := Cache.Set(utils.CacheAccountActionPlans, acntID, nil, nil,
+				cacheCommit(transactionID), transactionID); errCh != nil {
+				return nil, errCh
 			}
 			err = utils.ErrNotFound
 		}
@@ -1050,9 +1050,9 @@ func (rs *RedisStorage) GetAccountActionPlansDrv(acntID string, skipCache bool,
 	if err = rs.ms.Unmarshal(values, &aPlIDs); err != nil {
 		return
 	}
-	if err := Cache.Set(utils.CacheAccountActionPlans, acntID, aPlIDs, nil,
-		cacheCommit(transactionID), transactionID); err != nil {
-		return nil, err
+	if errCh := Cache.Set(utils.CacheAccountActionPlans, acntID, aPlIDs, nil,
+		cacheCommit(transactionID), transactionID); errCh != nil {
+		return nil, errCh
 	}
 	return
 }

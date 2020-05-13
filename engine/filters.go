@@ -62,17 +62,14 @@ func (fS *FilterS) Pass(tenant string, filterIDs []string,
 			}
 			return false, err
 		}
-		// fmt.Println("f: ", utils.ToJSON(f))
-		if f != nil && f.ActivationInterval != nil &&
+		if f.ActivationInterval != nil &&
 			!f.ActivationInterval.IsActiveAtTime(time.Now()) { // not active
 			continue
 		}
 		dDP := newDynamicDP(fS.cfg, fS.connMgr, tenant, ev)
-		if f != nil {
-			for _, fltr := range f.Rules {
-				if pass, err = fltr.Pass(dDP); err != nil || !pass {
-					return pass, err
-				}
+		for _, fltr := range f.Rules {
+			if pass, err = fltr.Pass(dDP); err != nil || !pass {
+				return pass, err
 			}
 		}
 		pass = true

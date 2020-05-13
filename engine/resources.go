@@ -478,8 +478,8 @@ func (rS *ResourceService) matchingResourcesForEvent(ev *utils.CGREvent,
 		)
 		if err != nil {
 			if err == utils.ErrNotFound {
-				if err = Cache.Set(utils.CacheEventResources, evUUID, nil, nil, true, ""); err != nil { // cache negative match
-					return nil, err
+				if errCh := Cache.Set(utils.CacheEventResources, evUUID, nil, nil, true, ""); errCh != nil { // cache negative match
+					return nil, errCh
 				}
 			}
 			return
@@ -529,9 +529,9 @@ func (rS *ResourceService) matchingResourcesForEvent(ev *utils.CGREvent,
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, lockIDs...)
 	if err != nil {
 		if isCached {
-			if err := Cache.Remove(utils.CacheEventResources, evUUID,
-				cacheCommit(utils.NonTransactional), utils.NonTransactional); err != nil {
-				return nil, err
+			if errCh := Cache.Remove(utils.CacheEventResources, evUUID,
+				cacheCommit(utils.NonTransactional), utils.NonTransactional); errCh != nil {
+				return nil, errCh
 			}
 		}
 		return
@@ -550,8 +550,8 @@ func (rS *ResourceService) matchingResourcesForEvent(ev *utils.CGREvent,
 			break
 		}
 	}
-	if err := Cache.Set(utils.CacheEventResources, evUUID, rs.resIDsMp(), nil, true, ""); err != nil {
-		return nil, err
+	if errCh := Cache.Set(utils.CacheEventResources, evUUID, rs.resIDsMp(), nil, true, ""); errCh != nil {
+		return nil, errCh
 	}
 	return
 }

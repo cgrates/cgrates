@@ -124,9 +124,9 @@ func (rs *Responder) GetCostOnRatingPlans(arg *utils.GetCostOnRatingPlansArgs, r
 			},
 		}
 		// force cache set so it can be picked by calldescriptor for cost calculation
-		if err := Cache.Set(utils.CacheRatingProfilesTmp, rPrfl.Id, rPrfl, nil,
-			true, utils.NonTransactional); err != nil {
-			return err
+		if errCh := Cache.Set(utils.CacheRatingProfilesTmp, rPrfl.Id, rPrfl, nil,
+			true, utils.NonTransactional); errCh != nil {
+			return errCh
 		}
 		cd := &CallDescriptor{
 			Category:      utils.MetaTmp,
@@ -139,9 +139,9 @@ func (rs *Responder) GetCostOnRatingPlans(arg *utils.GetCostOnRatingPlansArgs, r
 			DurationIndex: arg.Usage,
 		}
 		cc, err := cd.GetCost()
-		if err := Cache.Remove(utils.CacheRatingProfilesTmp, rPrfl.Id,
-			true, utils.NonTransactional); err != nil { // Remove here so we don't overload memory
-			return err
+		if errCh := Cache.Remove(utils.CacheRatingProfilesTmp, rPrfl.Id,
+			true, utils.NonTransactional); errCh != nil { // Remove here so we don't overload memory
+			return errCh
 		}
 		if err != nil {
 			if err != utils.ErrNotFound {
