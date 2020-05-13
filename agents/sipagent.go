@@ -21,6 +21,8 @@ package agents
 import (
 	"fmt"
 	"net"
+	"sync"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -45,28 +47,34 @@ func NewSIPAgent(connMgr *engine.ConnManager, cfg *config.CGRConfig,
 
 // SIPAgent is a handler for HTTP requests
 type SIPAgent struct {
-	connMgr *engine.ConnManager
-	filterS *engine.FilterS
-	cfg     *config.CGRConfig
+	connMgr  *engine.ConnManager
+	filterS  *engine.FilterS
+	cfg      *config.CGRConfig
+	stopChan chan struct{}
+}
+
+// Shutdown will stop the SIPAgent server
+func (sa *SIPAgent) Shutdown() {
+	close(sa.stopChan)
 }
 
 // ListenAndServe will run the DNS handler doing also the connection to listen address
 func (sa *SIPAgent) ListenAndServe() (err error) {
+	sa.stopChan = make(chan struct{})
 	utils.Logger.Info(fmt.Sprintf("<%s> start listening on <%s:%s>",
 		utils.SIPAgent, sa.cfg.SIPAgentCfg().ListenNet, sa.cfg.SIPAgentCfg().Listen))
 	switch sa.cfg.SIPAgentCfg().ListenNet {
 	case utils.TCP:
-		sa.serveTCP()
+		return sa.serveTCP(sa.stopChan)
 	case utils.UDP:
-		sa.serveUDP()
+		return sa.serveUDP(sa.stopChan)
 	default:
 		return fmt.Errorf("Unecepected protocol %s", sa.cfg.SIPAgentCfg().ListenNet)
 	}
-	return nil //da.server.ListenAndServe()
 }
-func (sa *SIPAgent) serveUDP() {
-	conn, err := listenUDPWithReuseablePort(utils.UDP, sa.cfg.SIPAgentCfg().Listen)
-	if err != nil {
+func (sa *SIPAgent) serveUDP(stop chan struct{}) (err error) {
+	var conn net.PacketConn
+	if conn, err = net.ListenPacket(utils.UDP, sa.cfg.SIPAgentCfg().Listen); err != nil {
 		utils.Logger.Err(
 			fmt.Sprintf("<%s> error: %s unable to listen to: %s",
 				utils.SIPAgent, err.Error(), sa.cfg.SIPAgentCfg().Listen))
@@ -76,36 +84,63 @@ func (sa *SIPAgent) serveUDP() {
 	defer conn.Close()
 
 	buf := make([]byte, bufferSize)
-
+	wg := sync.WaitGroup{}
 	for {
-		n, saddr, err := conn.ReadFrom(buf)
-		if err != nil {
-			continue
+		select {
+		case <-stop:
+			wg.Wait()
+			return
+		default:
+		}
+		conn.SetDeadline(time.Now().Add(time.Second))
+		var n int
+		var saddr net.Addr
+		if n, saddr, err = conn.ReadFrom(buf); err != nil {
+			if opErr, ok := err.(*net.OpError); ok && opErr.Timeout() {
+				continue
+			}
+			utils.Logger.Err(
+				fmt.Sprintf("<%s> error: %s unable to read from: %s",
+					utils.SIPAgent, err.Error(), saddr))
+			return
 		}
 		// echo response
 		if n < 50 {
 			conn.WriteTo(buf[:n], saddr)
 			continue
 		}
-
-		sipMessage := make(sipd.Message) // recreate map SIP
-		sipMessage.Parse(string(buf[:n]))
-		var sipAnswer sipd.Message
-		if sipAnswer, err = sa.handleMessage(sipMessage, saddr.String()); err != nil {
-			continue
-		}
-		if _, err = conn.WriteTo([]byte(sipAnswer.String()), saddr); err != nil {
-			utils.Logger.Warning(
-				fmt.Sprintf("<%s> error: %s sending message: %s",
-					utils.SIPAgent, err.Error(), sipAnswer))
-			continue
-		}
+		wg.Add(1)
+		go func(message string, conn net.PacketConn) {
+			sipMessage := make(sipd.Message)
+			sipMessage.Parse(message)
+			var sipAnswer sipd.Message
+			var err error
+			if sipAnswer, err = sa.handleMessage(sipMessage, saddr.String()); err != nil {
+				wg.Done()
+				return
+			}
+			if _, err = conn.WriteTo([]byte(sipAnswer.String()), saddr); err != nil {
+				utils.Logger.Warning(
+					fmt.Sprintf("<%s> error: %s sending message: %s",
+						utils.SIPAgent, err.Error(), sipAnswer))
+				wg.Done()
+				return
+			}
+			wg.Done()
+		}(string(buf[:n]), conn)
 	}
 }
 
-func (sa *SIPAgent) serveTCP() {
-	l, err := listenTCPWithReuseablePort(utils.TCP, sa.cfg.SIPAgentCfg().Listen)
-	if err != nil {
+func (sa *SIPAgent) serveTCP(stop chan struct{}) (err error) {
+	var l *net.TCPListener
+	var addr *net.TCPAddr
+	if addr, err = net.ResolveTCPAddr("tcp", sa.cfg.SIPAgentCfg().Listen); err != nil {
+		utils.Logger.Err(
+			fmt.Sprintf("<%s> unable to rezolve TCP Address <%s> because: %s",
+				utils.SIPAgent, sa.cfg.SIPAgentCfg().Listen, err.Error()))
+		return
+	}
+	if l, err = net.ListenTCP(utils.TCP, addr); err != nil {
 		utils.Logger.Err(
 			fmt.Sprintf("<%s> error: %s unable to listen to: %s",
 				utils.SIPAgent, err.Error(), sa.cfg.SIPAgentCfg().Listen))
@@ -114,14 +149,35 @@ func (sa *SIPAgent) serveTCP() {
 
 	defer l.Close()
 
+	wg := sync.WaitGroup{}
 	for {
-		conn, err := l.Accept()
-		if err != nil {
-			continue
+		select {
+		case <-stop:
+			wg.Wait()
+			return
+		default:
+		}
+		l.SetDeadline(time.Now().Add(time.Second))
+		var conn net.Conn
+		if conn, err = l.Accept(); err != nil {
+			if opErr, ok := err.(*net.OpError); ok && opErr.Timeout() {
+				continue
+			}
+			utils.Logger.Err(
+				fmt.Sprintf("<%s> unable to accept connection because of error %s",
+					utils.SIPAgent, err.Error()))
+			return
 		}
 		go func(conn net.Conn) {
 			buf := make([]byte, bufferSize)
 			for {
+				select {
+				case <-stop:
+					conn.Close()
+					return
+				default:
+				}
+				conn.SetReadDeadline(time.Now().Add(time.Second))
 				n, err := conn.Read(buf)
 				if err != nil {
 					continue
@@ -162,7 +218,10 @@ func (sa *SIPAgent) handleMessage(sipMessage sipd.Message, remoteHost string) (s
 	cgrRplyNM := utils.NavigableMap2{}
 	rplyNM := utils.NewOrderedNavigableMap()
 	opts := utils.NewOrderedNavigableMap()
-	reqVars := utils.NavigableMap2{utils.RemoteHost: utils.NewNMData(remoteHost)}
+	reqVars := utils.NavigableMap2{
+		utils.RemoteHost: utils.NewNMData(remoteHost),
+		"Method":         utils.NewNMData(sipMessage.MethodFrom("Request")),
+	}
 	for _, reqProcessor := range sa.cfg.SIPAgentCfg().RequestProcessors {
 		agReq := NewAgentRequest(dp, reqVars, &cgrRplyNM, rplyNM,
 			opts, reqProcessor.Tenant, sa.cfg.GeneralCfg().DefaultTenant,
@@ -218,10 +277,10 @@ func (sa *SIPAgent) processRequest(reqProcessor *config.RequestProcessor,
 	opts := config.NMAsMapInterface(agReq.Opts, utils.NestingSep)
 	var reqType string
 	for _, typ := range []string{
-		utils.MetaDryRun, /* utils.MetaAuthorize,
-		utils.MetaInitiate, utils.MetaUpdate,
-		utils.MetaTerminate, utils.MetaMessage,
-		utils.MetaCDRs, */utils.MetaEvent, utils.META_NONE} {
+		utils.MetaDryRun, utils.MetaAuthorize, /*
+			utils.MetaInitiate, utils.MetaUpdate,
+			utils.MetaTerminate, utils.MetaMessage,
+			utils.MetaCDRs, */utils.MetaEvent, utils.META_NONE} {
 		if reqProcessor.Flags.HasKey(typ) { // request type is identified through flags
 			reqType = typ
 			break
@@ -247,29 +306,29 @@ func (sa *SIPAgent) processRequest(reqProcessor *config.RequestProcessor,
 		utils.Logger.Info(
 			fmt.Sprintf("<%s> DRY_RUN, processorID: %s, CGREvent: %s",
 				utils.SIPAgent, reqProcessor.ID, utils.ToJSON(cgrEv)))
-	// case utils.MetaAuthorize:
-	// 	authArgs := sessions.NewV1AuthorizeArgs(
-	// 		reqProcessor.Flags.HasKey(utils.MetaAttributes),
-	// 		reqProcessor.Flags.ParamsSlice(utils.MetaAttributes),
-	// 		reqProcessor.Flags.HasKey(utils.MetaThresholds),
-	// 		reqProcessor.Flags.ParamsSlice(utils.MetaThresholds),
-	// 		reqProcessor.Flags.HasKey(utils.MetaStats),
-	// 		reqProcessor.Flags.ParamsSlice(utils.MetaStats),
-	// 		reqProcessor.Flags.HasKey(utils.MetaResources),
-	// 		reqProcessor.Flags.HasKey(utils.MetaAccounts),
-	// 		reqProcessor.Flags.HasKey(utils.MetaRoutes),
-	// 		reqProcessor.Flags.HasKey(utils.MetaRoutesIgnoreErrors),
-	// 		reqProcessor.Flags.HasKey(utils.MetaRoutesEventCost),
-	// 		cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.RoutePaginator,
-	// 		reqProcessor.Flags.HasKey(utils.MetaFD),
-	// 		opts,
-	// 	)
-	// 	rply := new(sessions.V1AuthorizeReply)
-	// 	err = sa.connMgr.Call(sa.cfg.SIPAgentCfg().SessionSConns, nil, utils.SessionSv1AuthorizeEvent,
-	// 		authArgs, rply)
-	// 	if err = agReq.setCGRReply(rply, err); err != nil {
-	// 		return
-	// 	}
+	case utils.MetaAuthorize:
+		authArgs := sessions.NewV1AuthorizeArgs(
+			reqProcessor.Flags.HasKey(utils.MetaAttributes),
+			reqProcessor.Flags.ParamsSlice(utils.MetaAttributes),
+			reqProcessor.Flags.HasKey(utils.MetaThresholds),
+			reqProcessor.Flags.ParamsSlice(utils.MetaThresholds),
+			reqProcessor.Flags.HasKey(utils.MetaStats),
+			reqProcessor.Flags.ParamsSlice(utils.MetaStats),
+			reqProcessor.Flags.HasKey(utils.MetaResources),
+			reqProcessor.Flags.HasKey(utils.MetaAccounts),
+			reqProcessor.Flags.HasKey(utils.MetaRoutes),
+			reqProcessor.Flags.HasKey(utils.MetaRoutesIgnoreErrors),
+			reqProcessor.Flags.HasKey(utils.MetaRoutesEventCost),
+			cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.RoutePaginator,
+			reqProcessor.Flags.HasKey(utils.MetaFD),
+			opts,
+		)
+		rply := new(sessions.V1AuthorizeReply)
+		err = sa.connMgr.Call(sa.cfg.SIPAgentCfg().SessionSConns, nil, utils.SessionSv1AuthorizeEvent,
+			authArgs, rply)
+		if err = agReq.setCGRReply(rply, err); err != nil {
+			return
+		}
 	// case utils.MetaInitiate:
 	// 	initArgs := sessions.NewV1InitSessionArgs(
 	// 		reqProcessor.Flags.HasKey(utils.MetaAttributes),

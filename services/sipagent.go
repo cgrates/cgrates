@@ -84,24 +84,21 @@ func (sip *SIPAgent) GetIntenternalChan() (conn chan rpcclient.ClientConnector) 
 
 // Reload handles the change of config
 func (sip *SIPAgent) Reload() (err error) {
-	// if sip.oldListen == sip.cfg.SIPAgentCfg().Listen {
-	// 	return
-	// }
-	// if err = sip.Shutdown(); err != nil {
-	// 	return
-	// }
-	// sip.Lock()
-	// sip.oldListen = sip.cfg.SIPAgentCfg().Listen
-	// defer sip.Unlock()
-	// if err = sip.sip.Reload(); err != nil {
-	// 	return
-	// }
-	// go func() {
-	// 	if err := sip.sip.ListenAndServe(); err != nil {
-	// 		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.SIPAgent, err.Error()))
-	// 		sip.exitChan <- true // stop the engine here
-	// 	}
-	// }()
+	if sip.oldListen == sip.cfg.SIPAgentCfg().Listen {
+		return
+	}
+	if err = sip.Shutdown(); err != nil {
+		return
+	}
+	sip.Lock()
+	sip.oldListen = sip.cfg.SIPAgentCfg().Listen
+	sip.Unlock()
+	go func() {
+		if err := sip.sip.ListenAndServe(); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.SIPAgent, err.Error()))
+			sip.exitChan <- true // stop the engine here
+		}
+	}()
 	return
 }
 
@@ -109,9 +106,7 @@ func (sip *SIPAgent) Reload() (err error) {
 func (sip *SIPAgent) Shutdown() (err error) {
 	sip.Lock()
 	defer sip.Unlock()
-	// if err = sip.sip.Shutdown(); err != nil {
-	// 	return
-	// }
+	sip.sip.Shutdown()
 	sip.sip = nil
 	return
 }

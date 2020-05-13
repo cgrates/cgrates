@@ -150,7 +150,7 @@ func testSAitSetAttributeProfile(t *testing.T) {
 			Tenant:    "cgrates.org",
 			ID:        "ChangeDestination",
 			Contexts:  []string{utils.ANY},
-			FilterIDs: []string{"*prefix:~*req.Account:\"1001\""},
+			FilterIDs: []string{"*string:~*req.Account:1001"},
 			Attributes: []*engine.ExternalAttribute{{
 				Path:  utils.MetaReq + utils.NestingSep + "Destination",
 				Value: "sip:1003@192.168.53.203:5060",
@@ -184,7 +184,7 @@ func testSAitSIPRegister(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if expected := "SIP/2.0 200 OK"; recived["Request"] != expected {
+	if expected := "SIP/2.0 405 Method Not Allowed"; recived["Request"] != expected {
 		t.Errorf("Expected %q, received: %q", expected, recived["Request"])
 	}
 }
