@@ -604,3 +604,7 @@ type STIRJsonCfg struct {
 	Publickey_path      *string
 	Privatekey_path     *string
 }
+
+type RateSJsonCfg struct {
+	Enabled *bool
+}

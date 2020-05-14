@@ -181,6 +181,7 @@ func NewDefaultCGRConfig() (cfg *CGRConfig, err error) {
 	cfg.ersCfg = new(ERsCfg)
 	cfg.eesCfg = new(EEsCfg)
 	cfg.eesCfg.Cache = make(map[string]*CacheParamCfg)
+	cfg.rateSCfg = new(RateSCfg)
 
 	cfg.ConfigReloads = make(map[string]chan struct{})
 	cfg.ConfigReloads[utils.CDRE] = make(chan struct{}, 1)
@@ -350,7 +351,8 @@ func (cfg *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		cfg.loadThresholdSCfg, cfg.loadRouteSCfg, cfg.loadLoaderSCfg,
 		cfg.loadMailerCfg, cfg.loadSureTaxCfg, cfg.loadDispatcherSCfg,
 		cfg.loadLoaderCgrCfg, cfg.loadMigratorCgrCfg, cfg.loadTlsCgrCfg,
-		cfg.loadAnalyzerCgrCfg, cfg.loadApierCfg, cfg.loadErsCfg, cfg.loadEesCfg} {
+		cfg.loadAnalyzerCgrCfg, cfg.loadApierCfg, cfg.loadErsCfg, cfg.loadEesCfg,
+		cfg.loadRateCfg} {
 		if err = loadFunc(jsnCfg); err != nil {
 			return
 		}
@@ -739,6 +741,15 @@ func (cfg *CGRConfig) loadEesCfg(jsnCfg *CgrJsonCfg) (err error) {
 		return
 	}
 	return cfg.eesCfg.loadFromJsonCfg(jsnEEsCfg, cfg.generalCfg.RSRSep, cfg.dfltEvExp)
+}
+
+// loadEesCfg loads the Ees section of the configuration
+func (cfg *CGRConfig) loadRateCfg(jsnCfg *CgrJsonCfg) (err error) {
+	var jsnRateCfg *RateSJsonCfg
+	if jsnRateCfg, err = jsnCfg.RateCfgJson(); err != nil {
+		return
+	}
+	return cfg.rateSCfg.loadFromJsonCfg(jsnRateCfg)
 }
 
 // SureTaxCfg use locking to retrieve the configuration, possibility later for runtime reload

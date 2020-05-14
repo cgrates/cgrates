@@ -888,4 +888,9 @@ const CGRATES_CFG_JSON = `
 	"attributes_conns": [],					// connections to AttributeS for CDRExporter
 },
 
+
+"rates": {
+	"enabled": false,
+},
+
 }`

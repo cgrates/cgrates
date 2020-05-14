@@ -1766,6 +1766,15 @@ func TestCgrCfgJSONDefaultApierCfg(t *testing.T) {
 	}
 }
 
+func TestCgrCfgJSONDefaultRateCfg(t *testing.T) {
+	eCfg := &RateSCfg{
+		Enabled: false,
+	}
+	if !reflect.DeepEqual(cgrCfg.rateSCfg, eCfg) {
+		t.Errorf("received: %+v, expecting: %+v", cgrCfg.rateSCfg, eCfg)
+	}
+}
+
 func TestCgrCfgV1GetConfigSection(t *testing.T) {
 	JSN_CFG := `
 {
@@ -1872,7 +1881,7 @@ func TestCgrCdfEventExporter(t *testing.T) {
 				Filters:       []string{},
 				AttributeSIDs: []string{},
 				Flags:         utils.FlagsWithParams{},
-				Fields: []*FCTemplate{
+				ContentFields: []*FCTemplate{
 					{
 						Tag:    utils.CGRID,
 						Path:   "*exp.CGRID",
@@ -1973,11 +1982,13 @@ func TestCgrCdfEventExporter(t *testing.T) {
 						RoundingDecimals: utils.IntPointer(4),
 					},
 				},
+				HeaderFields:  []*FCTemplate{},
+				TrailerFields: []*FCTemplate{},
 			},
 		},
 	}
 	for _, profile := range eCfg.Exporters {
-		for _, v := range profile.Fields {
+		for _, v := range profile.ContentFields {
 			v.ComputePath()
 		}
 	}
@@ -2046,7 +2057,7 @@ func TestCgrCfgEventExporterDefault(t *testing.T) {
 		Timezone:   utils.EmptyString,
 		Filters:    nil,
 		Flags:      utils.FlagsWithParams{},
-		Fields: []*FCTemplate{
+		ContentFields: []*FCTemplate{
 			{
 				Tag:    utils.CGRID,
 				Path:   "*exp.CGRID",
@@ -2147,8 +2158,10 @@ func TestCgrCfgEventExporterDefault(t *testing.T) {
 				RoundingDecimals: utils.IntPointer(4),
 			},
 		},
+		HeaderFields:  []*FCTemplate{},
+		TrailerFields: []*FCTemplate{},
 	}
-	for _, v := range eCfg.Fields {
+	for _, v := range eCfg.ContentFields {
 		v.ComputePath()
 	}
 	if !reflect.DeepEqual(cgrCfg.dfltEvExp, eCfg) {

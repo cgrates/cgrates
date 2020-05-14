@@ -507,3 +507,15 @@ func (self CgrJsonCfg) ApierCfgJson() (*ApierJsonCfg, error) {
 	}
 	return cfg, nil
 }
+
+func (self CgrJsonCfg) RateCfgJson() (*RateSJsonCfg, error) {
+	rawCfg, hasKey := self[RateSJson]
+	if !hasKey {
+		return nil, nil
+	}
+	cfg := new(RateSJsonCfg)
+	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
+		return nil, err
+	}
+	return cfg, nil
+}
