@@ -1515,6 +1515,7 @@ func (cfg *CGRConfig) reloadSections(sections ...string) (err error) {
 		case ApierS:
 			cfg.rldChans[ApierS] <- struct{}{}
 		case SIPAgentJson:
+			cfg.rldChans[SIPAgentJson] <- struct{}{}
 		}
 		return
 	}

@@ -22,12 +22,12 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/ees"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/rpcclient"
 )
 
@@ -67,8 +67,6 @@ func (es *EventExporterService) GetIntenternalChan() (conn chan rpcclient.Client
 	panic("deprecated method")
 }
 
-
-
 // ServiceName returns the service name
 func (es *EventExporterService) ServiceName() string {
 	return utils.EventExporterS
@@ -83,7 +81,7 @@ func (es *EventExporterService) ShouldRun() (should bool) {
 func (es *EventExporterService) IsRunning() bool {
 	es.RLock()
 	defer es.RUnlock()
-	return  es.eeS != nil
+	return es.eeS != nil
 }
 
 // Reload handles the change of config
