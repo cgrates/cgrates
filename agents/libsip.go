@@ -24,11 +24,11 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/sipd"
+	"github.com/cgrates/sipingo"
 )
 
 // updateSIPMsgFromNavMap will update the diameter message with items from navigable map
-func updateSIPMsgFromNavMap(m sipd.Message, navMp *utils.OrderedNavigableMap) (err error) {
+func updateSIPMsgFromNavMap(m sipingo.Message, navMp *utils.OrderedNavigableMap) (err error) {
 	// write reply into message
 	for el := navMp.GetFirstElement(); el != nil; el = el.Next() {
 		val := el.Value

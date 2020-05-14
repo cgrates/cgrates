@@ -32,7 +32,7 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/sipd"
+	"github.com/cgrates/sipingo"
 )
 
 var (
@@ -181,7 +181,7 @@ func testSAitSetRouteProfile(t *testing.T) {
 }
 
 func testSAitSIPRegister(t *testing.T) {
-	registerMessage := "REGISTER sip:192.168.58.203 SIP/2.0\r\nCall-ID: d72a4ed6feb4167b5adb208525879db5@0:0:0:0:0:0:0:0\r\nCSeq: 1 REGISTER\r\nFrom: \"1002\" \r\n<sip:1002@192.168.58.203>;tag=d28739b9\r\nTo: \"1002\" <sip:1002@192.168.58.203>\r\nVia: SIP/2.0/UDP 192.168.58.201:5060;branch=z9hG4bK-323131-311ce8716a7bf1f6094859ae516a44eb\r\nMax-Forwards: 70\r\nUser-Agent: Jitsi2.11.20200408Linux\r\nExpires: 600\r\nContact: \"1002\" <sip:1002@192.168.58.201:5060;transport=udp;registering_acc=192_168_58_203>;expires=600\r\nContent-Length: 0\r\n"
+	registerMessage := "REGISTER sip:192.168.58.203 SIP/2.0\r\nCall-ID: d72a4ed6feb4167b5adb208525879db5@0:0:0:0:0:0:0:0\r\nCSeq: 1 REGISTER\r\nFrom: \"1002\" <sip:1002@192.168.58.203>;tag=d28739b9\r\nTo: \"1002\" <sip:1002@192.168.58.203>\r\nVia: SIP/2.0/UDP 192.168.58.201:5060;branch=z9hG4bK-323131-311ce8716a7bf1f6094859ae516a44eb\r\nMax-Forwards: 70\r\nUser-Agent: Jitsi2.11.20200408Linux\r\nExpires: 600\r\nContact: \"1002\" <sip:1002@192.168.58.201:5060;transport=udp;registering_acc=192_168_58_203>;expires=600\r\nContent-Length: 0\r\n"
 	if saConn == nil {
 		t.Fatal("connection not initialized")
 	}
@@ -193,8 +193,8 @@ func testSAitSIPRegister(t *testing.T) {
 	if _, err = saConn.Read(buffer); err != nil {
 		t.Fatal(err)
 	}
-	recived := sipd.Message{}
-	if err = recived.Parse(string(buffer)); err != nil {
+	var recived sipingo.Message
+	if recived, err = sipingo.NewMessage(string(buffer)); err != nil {
 		t.Fatal(err)
 	}
 
@@ -216,8 +216,8 @@ func testSAitSIPInvite(t *testing.T) {
 	if _, err = saConn.Read(buffer); err != nil {
 		t.Fatal(err)
 	}
-	recived := sipd.Message{}
-	if err = recived.Parse(string(buffer)); err != nil {
+	var recived sipingo.Message
+	if recived, err = sipingo.NewMessage(string(buffer)); err != nil {
 		t.Fatal(err)
 	}
 

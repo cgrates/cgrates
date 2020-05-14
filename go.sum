@@ -63,11 +63,10 @@ github.com/cgrates/radigo v0.0.0-20200324152710-35e651804ad1 h1:QvA6Nbwq9kTd7hsv
 github.com/cgrates/radigo v0.0.0-20200324152710-35e651804ad1/go.mod h1:HZbsg3Y+xw4lsfCqX9rzj429wrg0XOug6pFT3B6VHZY=
 github.com/cgrates/rpcclient v0.0.0-20200326100105-a579e2c47453 h1:kgIdi3qR/meiWILdmDRuDi1fFgd6A3lutGV6HLiTDyc=
 github.com/cgrates/rpcclient v0.0.0-20200326100105-a579e2c47453/go.mod h1:xXLqAKVvcdWeDYwHJYwDgAI3ZOg5LZYxzb72kLjsLZU=
-github.com/cgrates/sipd v1.0.0/go.mod h1:Itz4HoJHqckX9XAbGRanB1PvXfKrIO/UtMB8JwCFsT4=
-github.com/cgrates/sipd v1.0.1-0.20200513092040-728b130a73d6 h1:yKEwGpD79Pbss7/03mwPh9MvbBXmttiUX+iyA67PRA8=
-github.com/cgrates/sipd v1.0.1-0.20200513092040-728b130a73d6/go.mod h1:yAWcE5qt60PMrWME9Ijp6IWlWwL5d+/VflUYudO1Xm0=
-github.com/cgrates/sipd v1.0.1-0.20200514091151-e426e71861e8 h1:4QTOvFTqLOWHUQCUs22mGfiw3WZaZRzaEstTjYlXsgo=
-github.com/cgrates/sipd v1.0.1-0.20200514091151-e426e71861e8/go.mod h1:yAWcE5qt60PMrWME9Ijp6IWlWwL5d+/VflUYudO1Xm0=
+github.com/cgrates/sipingo v1.0.1-0.20200514110619-25b61a652a0b h1:+Wn4Kd9dmCr8kIkznLdM701aA8lrLC2+g0Li8xdcRWU=
+github.com/cgrates/sipingo v1.0.1-0.20200514110619-25b61a652a0b/go.mod h1:0f2+3dq5Iiv3VlcuY83VPJ0QzqRlzDG1Cr8okogQE3g=
+github.com/cgrates/sipingo v1.0.1-0.20200514112313-699ebc1cdb8e h1:izFjZB83/XRXInc+gMIssUxdbleGsGIuGCPj2u7RQo0=
+github.com/cgrates/sipingo v1.0.1-0.20200514112313-699ebc1cdb8e/go.mod h1:0f2+3dq5Iiv3VlcuY83VPJ0QzqRlzDG1Cr8okogQE3g=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
 github.com/creack/pty v1.1.7 h1:6pwm8kMQKCmgUg0ZHTm5+/YvRK0s3THD/28+T6/kk4A=
 github.com/creack/pty v1.1.7/go.mod h1:lj5s0c3V2DBrqTV7llrYr5NG6My20zk30Fl46Y7DoTY=
