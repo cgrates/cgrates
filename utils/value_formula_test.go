@@ -90,3 +90,44 @@ func TestValueFormulaString(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
 	}
 }
+
+func TestParseBalanceFilterValue(t *testing.T) {
+	d, err := ParseDurationWithNanosecs("18")
+	if err != nil {
+		t.Error("error parsing time: ", err)
+	}
+	eOut := &ValueFormula{
+		Static: float64(d.Nanoseconds()),
+	}
+	if rcv, err := ParseBalanceFilterValue(VOICE, "18"); err != nil {
+		t.Errorf("Expecting: nil, received: %+v", err)
+	} else if !reflect.DeepEqual(rcv, eOut) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+
+	eOut = &ValueFormula{
+		Static: float64(19),
+	}
+	if rcv, err := ParseBalanceFilterValue(EmptyString, "19"); err != nil {
+		t.Errorf("Expecting: nil, received: %+v", err)
+	} else if !reflect.DeepEqual(rcv, eOut) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+
+	eOut = &ValueFormula{}
+	if err := json.Unmarshal([]byte(`{"Units":10, "Interval":"week", "Increment":"day"}`), &eOut); err != nil {
+		t.Error("error unmarshalling params: ", err)
+	}
+
+	if rcv, err := ParseBalanceFilterValue(EmptyString, `{"Units":10, "Interval":"week", "Increment":"day"}`); err != nil {
+		t.Errorf("Expecting: nil, received: %+v", err)
+	} else if !reflect.DeepEqual(rcv, eOut) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+
+	if rcv, err := ParseBalanceFilterValue(EmptyString, `not really a json`); rcv != nil {
+		t.Errorf("Expecting: nil, received: %+v", rcv)
+	} else if err.Error() != "Invalid value: not really a json" {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+}
