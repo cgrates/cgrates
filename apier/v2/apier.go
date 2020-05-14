@@ -216,6 +216,21 @@ func (apiv2 *APIerSv2) GetActions(attr AttrGetActions, reply *map[string]engine.
 	return nil
 }
 
+type AttrGetActionsCount struct{}
+
+// GetActionsCount get
+func (apiv2 *APIerSv2) GetActionsCount(attr AttrGetActionsCount, reply *int) (err error) {
+	var actionKeys []string
+	if actionKeys, err = apiv2.DataManager.DataDB().GetKeysForPrefix(utils.ACTION_PREFIX); err != nil {
+		return err
+	}
+	*reply = len(actionKeys)
+	if len(actionKeys) == 0 {
+		return utils.ErrNotFound
+	}
+	return nil
+}
+
 type AttrGetDestinations struct {
 	DestinationIDs []string
 }
