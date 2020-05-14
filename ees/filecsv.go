@@ -20,7 +20,9 @@ package ees
 
 import (
 	"encoding/csv"
+	"fmt"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/cgrates/cgrates/engine"
@@ -45,7 +47,7 @@ type FileCSVee struct {
 	csvWriter *csv.Writer
 
 	firstEventATime, lastEventATime time.Time
-	numberOfRecords                 int
+	numberOfEvents                  int
 	totalDuration, totalDataUsage, totalSmsUsage,
 	totalMmsUsage, totalGenericUsage time.Duration
 	totalCost                       float64
@@ -66,7 +68,7 @@ func (fCsv *FileCSVee) init() (err error) {
 	}
 	fCsv.positiveExports = utils.StringSet{}
 	fCsv.negativeExports = utils.StringSet{}
-	return
+	return fCsv.composeHeader()
 }
 
 // ID returns the identificator of this exporter
@@ -77,15 +79,22 @@ func (fCsv *FileCSVee) ID() string {
 // OnEvicted implements EventExporter, doing the cleanup before exit
 func (fCsv *FileCSVee) OnEvicted(_ string, _ interface{}) {
 	// verify if we need to add the trailer
+	if err := fCsv.composeTrailer(); err != nil {
+		utils.Logger.Warning(fmt.Sprintf("<%s> Exporter with id: <%s> received error: <%s> when composed trailer",
+			utils.EventExporterS, fCsv.id, err.Error()))
+	}
 	fCsv.csvWriter.Flush()
-	fCsv.file.Close()
+	if err := fCsv.file.Close(); err != nil {
+		utils.Logger.Warning(fmt.Sprintf("<%s> Exporter with id: <%s> received error: <%s> when closing the file",
+			utils.EventExporterS, fCsv.id, err.Error()))
+	}
 	return
 }
 
 // ExportEvent implements EventExporter
 func (fCsv *FileCSVee) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 	// convert cgrEvent in export record
-	fCsv.numberOfRecords++
+	fCsv.numberOfEvents++
 	var csvRecord []string
 	navMp := config.NewNavigableMap(map[string]interface{}{
 		utils.MetaReq: cgrEv.Event,
@@ -142,44 +151,11 @@ func (fCsv *FileCSVee) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 	return
 }
 
-//// Handle various meta functions used in header/trailer
-//func (fCsv *FileCSVee) metaHandler(tag, arg string) (string, error) {
-//	switch tag {
-//	case metaExportID:
-//		return cdre.exportID, nil
-//	case metaTimeNow:
-//		return time.Now().Format(arg), nil
-//	case metaFirstCDRAtime:
-//		return cdre.firstCdrATime.Format(arg), nil
-//	case metaLastCDRAtime:
-//		return cdre.lastCdrATime.Format(arg), nil
-//	case metaNrCDRs:
-//		return strconv.Itoa(cdre.numberOfRecords), nil
-//	case metaDurCDRs:
-//		cdr := &CDR{ToR: utils.VOICE, Usage: cdre.totalDuration}
-//		return cdr.FieldAsString(&config.RSRParser{Rules: "~" + utils.Usage, AllFiltersMatch: true})
-//	case metaSMSUsage:
-//		cdr := &CDR{ToR: utils.SMS, Usage: cdre.totalDuration}
-//		return cdr.FieldAsString(&config.RSRParser{Rules: "~" + utils.Usage, AllFiltersMatch: true})
-//	case metaMMSUsage:
-//		cdr := &CDR{ToR: utils.MMS, Usage: cdre.totalDuration}
-//		return cdr.FieldAsString(&config.RSRParser{Rules: "~" + utils.Usage, AllFiltersMatch: true})
-//	case metaGenericUsage:
-//		cdr := &CDR{ToR: utils.GENERIC, Usage: cdre.totalDuration}
-//		return cdr.FieldAsString(&config.RSRParser{Rules: "~" + utils.Usage, AllFiltersMatch: true})
-//	case metaDataUsage:
-//		cdr := &CDR{ToR: utils.DATA, Usage: cdre.totalDuration}
-//		return cdr.FieldAsString(&config.RSRParser{Rules: "~" + utils.Usage, AllFiltersMatch: true})
-//	case metaCostCDRs:
-//		return strconv.FormatFloat(utils.Round(cdre.totalCost,
-//			globalRoundingDecimals, utils.ROUNDING_MIDDLE), 'f', -1, 64), nil
-//	default:
-//		return "", fmt.Errorf("Unsupported METATAG: %s", tag)
-//	}
-//}
-
 // Compose and cache the header
 func (fCsv *FileCSVee) composeHeader() (err error) {
+	if len(fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].HeaderFields) == 0 {
+		return
+	}
 	var csvRecord []string
 	for _, cfgFld := range fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].HeaderFields {
 		val, err := cfgFld.Value.ParseValue(utils.EmptyString)
@@ -188,14 +164,49 @@ func (fCsv *FileCSVee) composeHeader() (err error) {
 		}
 		csvRecord = append(csvRecord, val)
 	}
-	fCsv.csvWriter.Write(csvRecord)
-	return nil
+	return fCsv.csvWriter.Write(csvRecord)
 }
 
 // Compose and cache the trailer
 func (fCsv *FileCSVee) composeTrailer() (err error) {
-	//for _, cfgFld := range fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].TrailerFields {
-	//
-	//}
-	return nil
+	if len(fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].TrailerFields) == 0 {
+		return
+	}
+	var csvRecord []string
+	for _, cfgFld := range fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].TrailerFields {
+		switch cfgFld.Type {
+		case utils.MetaExportID:
+			csvRecord = append(csvRecord, fCsv.id)
+		case utils.MetaTimeNow:
+			csvRecord = append(csvRecord, time.Now().String())
+		case utils.MetaFirstEventATime:
+			csvRecord = append(csvRecord, fCsv.firstEventATime.Format(cfgFld.Layout))
+		case utils.MetaLastEventATime:
+			csvRecord = append(csvRecord, fCsv.lastEventATime.Format(cfgFld.Layout))
+		case utils.MetaEventNumber:
+			csvRecord = append(csvRecord, strconv.Itoa(fCsv.numberOfEvents))
+		case utils.MetaEventCost:
+			rounding := fCsv.cgrCfg.GeneralCfg().RoundingDecimals
+			if cfgFld.RoundingDecimals != nil {
+				rounding = *cfgFld.RoundingDecimals
+			}
+			csvRecord = append(csvRecord, strconv.FormatFloat(utils.Round(fCsv.totalCost,
+				rounding, utils.ROUNDING_MIDDLE), 'f', -1, 64))
+		case utils.MetaVoiceUsage:
+			csvRecord = append(csvRecord, fCsv.totalDuration.String())
+		case utils.MetaDataUsage:
+			csvRecord = append(csvRecord, strconv.Itoa(int(fCsv.totalDataUsage.Nanoseconds())))
+		case utils.MetaSMSUsage:
+			csvRecord = append(csvRecord, strconv.Itoa(int(fCsv.totalSmsUsage.Nanoseconds())))
+		case utils.MetaMMSUsage:
+			csvRecord = append(csvRecord, strconv.Itoa(int(fCsv.totalMmsUsage.Nanoseconds())))
+		case utils.MetaGenericUsage:
+			csvRecord = append(csvRecord, strconv.Itoa(int(fCsv.totalGenericUsage.Nanoseconds())))
+		case utils.MetaNegativeExports:
+			csvRecord = append(csvRecord, strconv.Itoa(len(fCsv.negativeExports.AsSlice())))
+		case utils.MetaPositiveExports:
+			csvRecord = append(csvRecord, strconv.Itoa(len(fCsv.positiveExports.AsSlice())))
+		}
+	}
+	return fCsv.csvWriter.Write(csvRecord)
 }
