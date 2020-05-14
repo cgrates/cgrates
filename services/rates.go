@@ -23,22 +23,21 @@ import (
 	"sync"
 
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/ees"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/cgrates/rates"
+	//"github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/rpcclient"
 )
 
-// NewEventExporterService constructs EventExporterService
-func NewEventExporterService(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
-	connMgr *engine.ConnManager, server *utils.Server, exitChan chan bool,
+// NewRateService constructs RateService
+func NewRateService(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
+	server *utils.Server, exitChan chan bool,
 	intConnChan chan rpcclient.ClientConnector) servmanager.Service {
-	return &EventExporterService{
+	return &RateService{
 		cfg:         cfg,
 		filterSChan: filterSChan,
-		connMgr:     connMgr,
 		server:      server,
 		exitChan:    exitChan,
 		intConnChan: intConnChan,
@@ -46,80 +45,80 @@ func NewEventExporterService(cfg *config.CGRConfig, filterSChan chan *engine.Fil
 	}
 }
 
-// EventExporterService is the service structure for EventExporterS
-type EventExporterService struct {
+// RateService is the service structure for RateS
+type RateService struct {
 	sync.RWMutex
 
 	cfg         *config.CGRConfig
 	filterSChan chan *engine.FilterS
-	connMgr     *engine.ConnManager
 	server      *utils.Server
 	exitChan    chan bool
 	intConnChan chan rpcclient.ClientConnector
 	rldChan     chan struct{}
 
-	eeS *ees.EventExporterS
-	rpc *v1.EventExporterSv1
+	rateS *rates.RateS
+	//rpc *v1.EventExporterSv1
 }
 
 // GetIntenternalChan is deprecated and it will be removed shortly
-func (es *EventExporterService) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
+func (rs *RateService) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
 	panic("deprecated method")
 }
 
 
 
 // ServiceName returns the service name
-func (es *EventExporterService) ServiceName() string {
-	return utils.EventExporterS
+func (rs *RateService) ServiceName() string {
+	return utils.RateS
 }
 
 // ShouldRun returns if the service should be running
-func (es *EventExporterService) ShouldRun() (should bool) {
-	return es.cfg.EEsCfg().Enabled
+func (rs *RateService) ShouldRun() (should bool) {
+	return rs.cfg.RateSCfg().Enabled
 }
 
 // IsRunning returns if the service is running
-func (es *EventExporterService) IsRunning() bool {
-	es.RLock()
-	defer es.RUnlock()
-	return  es.eeS != nil
+func (rs *RateService) IsRunning() bool {
+	rs.RLock()
+	defer rs.RUnlock()
+	return rs.rateS != nil
 }
 
 // Reload handles the change of config
-func (es *EventExporterService) Reload() (err error) {
-	es.rldChan <- struct{}{}
-	return // for the momment nothing to reload
+func (rs *RateService) Reload() (err error) {
+	rs.rldChan <- struct{}{}
+	return
 }
 
 // Shutdown stops the service
-func (es *EventExporterService) Shutdown() (err error) {
-	es.Lock()
-	defer es.Unlock()
-	if err = es.eeS.Shutdown(); err != nil {
+func (rs *RateService) Shutdown() (err error) {
+	rs.Lock()
+	defer rs.Unlock()
+	if err = rs.rateS.Shutdown(); err != nil {
 		return
 	}
-	es.eeS = nil
-	<-es.intConnChan
+	rs.rateS = nil
+	<-rs.intConnChan
 	return
 }
 
 // Start should handle the service start
-func (es *EventExporterService) Start() (err error) {
-	if es.IsRunning() {
+func (rs *RateService) Start() (err error) {
+	if rs.IsRunning() {
 		return fmt.Errorf("service aleady running")
 	}
 
-	fltrS := <-es.filterSChan
-	es.filterSChan <- fltrS
+	fltrS := <-rs.filterSChan
+	rs.filterSChan <- fltrS
 
-	es.Lock()
-	es.eeS = ees.NewEventExporterS(es.cfg, fltrS, es.connMgr)
-	es.Unlock()
-	es.rpc = v1.NewEventExporterSv1(es.eeS)
-	if !es.cfg.DispatcherSCfg().Enabled {
-		es.server.RpcRegister(es.rpc)
+	rs.Lock()
+	rs.rateS = rates.NewRateS(rs.cfg, fltrS)
+	rs.Unlock()
+	/*rs.rpc = v1.NewEventExporterSv1(es.eeS)
+	if !rs.cfg.DispatcherSCfg().Enabled {
+		rs.server.RpcRegister(es.rpc)
 	}
-	es.intConnChan <- es.eeS
-	return es.eeS.ListenAndServe(es.exitChan, es.rldChan)
+	*/
+	rs.intConnChan <- rs.rateS
+	return rs.rateS.ListenAndServe(rs.exitChan, rs.rldChan)
 }

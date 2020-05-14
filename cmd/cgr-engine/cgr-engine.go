@@ -115,7 +115,7 @@ func startRpc(server *utils.Server, internalRaterChan,
 	internalAttrSChan, internalChargerSChan, internalThdSChan, internalSuplSChan,
 	internalSMGChan, internalAnalyzerSChan, internalDispatcherSChan,
 	internalLoaderSChan, internalRALsv1Chan, internalCacheSChan,
-	internalEEsChan chan rpcclient.ClientConnector,
+	internalEEsChan, internalRateSChan chan rpcclient.ClientConnector,
 	exitChan chan bool) {
 	if !cfg.DispatcherSCfg().Enabled {
 		select { // Any of the rpc methods will unlock listening to rpc requests
@@ -147,6 +147,8 @@ func startRpc(server *utils.Server, internalRaterChan,
 			internalCacheSChan <- chS
 		case eeS := <-internalEEsChan:
 			internalEEsChan <- eeS
+		case rateS := <-internalRateSChan:
+			internalRateSChan <- rateS
 		}
 	} else {
 		select {
@@ -416,6 +418,7 @@ func main() {
 	internalAPIerSv2Chan := make(chan rpcclient.ClientConnector, 1)
 	internalLoaderSChan := make(chan rpcclient.ClientConnector, 1)
 	internalEEsChan := make(chan rpcclient.ClientConnector, 1)
+	internalRateSChan := make(chan rpcclient.ClientConnector, 1)
 
 	// initialize the connManager before creating the DMService
 	// because we need to pass the connection to it
@@ -440,6 +443,7 @@ func main() {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCore):           internalCoreSv1Chan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs):           internalRALsChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs):            internalEEsChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS):          internalRateSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaDispatchers):    internalDispatcherSChan,
 	})
 
@@ -523,6 +527,8 @@ func main() {
 		ldrs, anz, dspS, dmService, storDBService,
 		services.NewEventExporterService(cfg, filterSChan,
 			connManager, server, exitChan, internalEEsChan),
+		services.NewRateService(cfg, filterSChan,
+			server, exitChan, internalRateSChan),
 	)
 	srvManager.StartServices()
 	// Start FilterS
@@ -563,7 +569,7 @@ func main() {
 		attrS.GetIntenternalChan(), chrS.GetIntenternalChan(), tS.GetIntenternalChan(),
 		routeS.GetIntenternalChan(), smg.GetIntenternalChan(), anz.GetIntenternalChan(),
 		dspS.GetIntenternalChan(), ldrs.GetIntenternalChan(), rals.GetIntenternalChan(),
-		internalCacheSChan, internalEEsChan, exitChan)
+		internalCacheSChan, internalEEsChan, internalRateSChan, exitChan)
 	<-exitChan
 
 	if *cpuProfDir != "" { // wait to end cpuProfiling

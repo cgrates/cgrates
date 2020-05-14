@@ -173,6 +173,7 @@ func (srvMngr *ServiceManager) StartServices() (err error) {
 		utils.AnalyzerS:       srvMngr.GetConfig().AnalyzerSCfg().Enabled,
 		utils.DispatcherS:     srvMngr.GetConfig().DispatcherSCfg().Enabled,
 		utils.EventExporterS:  srvMngr.GetConfig().EEsCfg().Enabled,
+		utils.RateS:           srvMngr.GetConfig().RateSCfg().Enabled,
 	} {
 		if shouldRun {
 			go srvMngr.startService(serviceName)
@@ -307,6 +308,14 @@ func (srvMngr *ServiceManager) handleReload() {
 			}
 		case <-srvMngr.GetConfig().GetReloadChan(config.STORDB_JSN):
 			if err = srvMngr.reloadService(utils.StorDB); err != nil {
+				return
+			}
+		case <-srvMngr.GetConfig().GetReloadChan(config.EEsJson):
+			if err = srvMngr.reloadService(config.EEsJson); err != nil {
+				return
+			}
+		case <-srvMngr.GetConfig().GetReloadChan(config.RateSJson):
+			if err = srvMngr.reloadService(config.RateSJson); err != nil {
 				return
 			}
 		case <-srvMngr.GetConfig().GetReloadChan(config.RPCConnsJsonName):

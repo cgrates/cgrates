@@ -59,6 +59,7 @@ const (
 	DNSAgentJson       = "dns_agent"
 	ERsJson            = "ers"
 	EEsJson            = "ees"
+	RateSJson          = "rates"
 	RPCConnsJsonName   = "rpc_conns"
 )
 
@@ -68,7 +69,7 @@ var (
 		CDRS_JSN, CDRE_JSN, ERsJson, SessionSJson, AsteriskAgentJSN, FreeSWITCHAgentJSN, KamailioAgentJSN,
 		DA_JSN, RA_JSN, HttpAgentJson, DNSAgentJson, ATTRIBUTE_JSN, ChargerSCfgJson, RESOURCES_JSON, STATS_JSON, THRESHOLDS_JSON,
 		RouteSJson, LoaderJson, MAILER_JSN, SURETAX_JSON, CgrLoaderCfgJson, CgrMigratorCfgJson, DispatcherSJson,
-		AnalyzerCfgJson, ApierS, EEsJson}
+		AnalyzerCfgJson, ApierS, EEsJson, RateSJson}
 )
 
 // Loads the json config out of io.Reader, eg other sources than file, maybe over http

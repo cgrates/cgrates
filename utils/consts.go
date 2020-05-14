@@ -380,6 +380,7 @@ const (
 	MetaCache                   = "*cache"
 	MetaGuardian                = "*guardians"
 	MetaEEs                     = "*ees"
+	MetaRateS                   = "*rates"
 	MetaContinue                = "*continue"
 	Migrator                    = "migrator"
 	UnsupportedMigrationTask    = "unsupported migration task"
@@ -725,6 +726,7 @@ const (
 	MetaYearly               = "*yearly"
 	MetaDaily                = "*daily"
 	MetaWeekly               = "*weekly"
+	RateS                    = "RateS"
 )
 
 // Migrator Action

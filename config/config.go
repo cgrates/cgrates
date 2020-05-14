@@ -303,6 +303,7 @@ type CGRConfig struct {
 	apier            *ApierCfg         // APIer config
 	ersCfg           *ERsCfg           // EventReader config
 	eesCfg           *EEsCfg           // EventExporter config
+	rateSCfg         *RateSCfg         // RateS config
 }
 
 var posibleLoaderTypes = utils.NewStringSet([]string{utils.MetaAttributes,
@@ -988,6 +989,12 @@ func (cfg *CGRConfig) EEsCfg() *EEsCfg {
 // EEsCfg reads the EventExporter configuration
 func (cfg *CGRConfig) EEsNoLksCfg() *EEsCfg {
 	return cfg.eesCfg
+}
+
+func (cfg *CGRConfig) RateSCfg() *RateSCfg {
+	cfg.lks[RateSJson].RLock()
+	defer cfg.lks[RateSJson].RUnlock()
+	return cfg.rateSCfg
 }
 
 // RPCConns reads the RPCConns configuration
