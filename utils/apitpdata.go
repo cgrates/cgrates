@@ -434,6 +434,10 @@ type AttrGetAccounts struct {
 	Filter     map[string]bool
 }
 
+type AttrGetAccountsCount struct {
+	Tenant string
+}
+
 type ArgsCache struct {
 	DestinationIDs        []string
 	ReverseDestinationIDs []string
