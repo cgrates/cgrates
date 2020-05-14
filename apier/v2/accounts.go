@@ -80,6 +80,21 @@ func (apiv2 *APIerSv2) GetAccounts(attr utils.AttrGetAccounts, reply *[]*engine.
 	return nil
 }
 
+// GetAccountsCount returns the total number of accounts
+func (apiv2 *APIerSv2) GetAccountsCount(attr utils.AttrGetAccountsCount, reply *int) (err error) {
+	if len(attr.Tenant) == 0 {
+		return utils.NewErrMandatoryIeMissing("Tenant")
+	}
+	var accountKeys []string
+
+	if accountKeys, err = apiv2.DataManager.DataDB().GetKeysForPrefix(utils.ACCOUNT_PREFIX + attr.Tenant); err != nil {
+		return err
+	}
+	*reply = len(accountKeys)
+
+	return
+}
+
 // Get balance
 func (apiv2 *APIerSv2) GetAccount(attr *utils.AttrGetAccount, reply *engine.Account) error {
 	tag := utils.ConcatenatedKey(attr.Tenant, attr.Account)
