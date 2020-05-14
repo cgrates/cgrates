@@ -28,7 +28,7 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/sipd"
+	"github.com/cgrates/sipingo"
 )
 
 const (
@@ -111,9 +111,15 @@ func (sa *SIPAgent) serveUDP(stop chan struct{}) (err error) {
 		}
 		wg.Add(1)
 		go func(message string, conn net.PacketConn) {
-			sipMessage := make(sipd.Message)
-			sipMessage.Parse(message)
-			var sipAnswer sipd.Message
+			var sipMessage sipingo.Message
+			if sipMessage, err = sipingo.NewMessage(message); err != nil {
+				utils.Logger.Warning(
+					fmt.Sprintf("<%s> error: %s parsing message: %s",
+						utils.SIPAgent, err.Error(), message))
+				wg.Done()
+				return
+			}
+			var sipAnswer sipingo.Message
 			var err error
 			if sipAnswer, err = sa.handleMessage(sipMessage, saddr.String()); err != nil {
 				wg.Done()
@@ -168,12 +174,14 @@ func (sa *SIPAgent) serveTCP(stop chan struct{}) (err error) {
 					utils.SIPAgent, err.Error()))
 			return
 		}
+		wg.Add(1)
 		go func(conn net.Conn) {
 			buf := make([]byte, bufferSize)
 			for {
 				select {
 				case <-stop:
 					conn.Close()
+					wg.Done()
 					return
 				default:
 				}
@@ -188,9 +196,15 @@ func (sa *SIPAgent) serveTCP(stop chan struct{}) (err error) {
 					continue
 				}
 
-				sipMessage := make(sipd.Message) // recreate map SIP
-				sipMessage.Parse(string(buf[:n]))
-				var sipAnswer sipd.Message
+				var sipMessage sipingo.Message // recreate map SIP
+				if sipMessage, err = sipingo.NewMessage(string(buf[:n])); err != nil {
+					utils.Logger.Warning(
+						fmt.Sprintf("<%s> error: %s parsing message: %s",
+							utils.SIPAgent, err.Error(), string(buf[:n])))
+					wg.Done()
+					continue
+				}
+				var sipAnswer sipingo.Message
 				if sipAnswer, err = sa.handleMessage(sipMessage, conn.LocalAddr().String()); err != nil {
 					continue
 				}
@@ -205,7 +219,7 @@ func (sa *SIPAgent) serveTCP(stop chan struct{}) (err error) {
 	}
 }
 
-func (sa *SIPAgent) handleMessage(sipMessage sipd.Message, remoteHost string) (sipAnswer sipd.Message, err error) {
+func (sa *SIPAgent) handleMessage(sipMessage sipingo.Message, remoteHost string) (sipAnswer sipingo.Message, err error) {
 	if sipMessage["User-Agent"] != "" {
 		sipMessage["User-Agent"] = utils.CGRateS
 	}

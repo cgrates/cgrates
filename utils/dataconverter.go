@@ -26,7 +26,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cgrates/sipd"
+	"github.com/cgrates/sipingo"
 	"github.com/nyaruka/phonenumbers"
 )
 
@@ -314,7 +314,7 @@ type SIPURIHostConverter struct{}
 // Convert implements DataConverter interface
 func (*SIPURIHostConverter) Convert(in interface{}) (out interface{}, err error) {
 	val := IfaceAsString(in)
-	return sipd.HostFrom(val), nil
+	return sipingo.HostFrom(val), nil
 }
 
 // SIPURIUserConverter will return the
@@ -323,7 +323,7 @@ type SIPURIUserConverter struct{}
 // Convert implements DataConverter interface
 func (*SIPURIUserConverter) Convert(in interface{}) (out interface{}, err error) {
 	val := IfaceAsString(in)
-	return sipd.UserFrom(val), nil
+	return sipingo.UserFrom(val), nil
 }
 
 // SIPURIMethodConverter will return the
@@ -332,5 +332,5 @@ type SIPURIMethodConverter struct{}
 // Convert implements DataConverter interface
 func (*SIPURIMethodConverter) Convert(in interface{}) (out interface{}, err error) {
 	val := IfaceAsString(in)
-	return sipd.MethodFrom(val), nil
+	return sipingo.MethodFrom(val), nil
 }
