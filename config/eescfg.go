@@ -188,6 +188,9 @@ func (eeC *EventExporterCfg) loadFromJsonCfg(jsnEec *EventExporterJsonCfg, separ
 		eeC.FieldSep = *jsnEec.Field_separator
 	}
 	if jsnEec.Fields != nil {
+		eeC.HeaderFields = make([]*FCTemplate, 0)
+		eeC.ContentFields = make([]*FCTemplate, 0)
+		eeC.TrailerFields = make([]*FCTemplate, 0)
 		if fields, err := FCTemplatesFromFCTemplatesJsonCfg(*jsnEec.Fields, separator); err != nil {
 			return err
 		} else {
@@ -196,14 +199,12 @@ func (eeC *EventExporterCfg) loadFromJsonCfg(jsnEec *EventExporterJsonCfg, separ
 				case utils.MetaHdr:
 					eeC.HeaderFields = append(eeC.HeaderFields, field)
 				case utils.MetaExp:
-					eeC.ContentFields = append(eeC.HeaderFields, field)
+					eeC.ContentFields = append(eeC.ContentFields, field)
 				case utils.MetaTrl:
-					eeC.TrailerFields = append(eeC.HeaderFields, field)
+					eeC.TrailerFields = append(eeC.TrailerFields, field)
 				}
-
 			}
 		}
-
 	}
 	return
 }

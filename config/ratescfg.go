@@ -18,6 +18,26 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
+import (
+	"github.com/cgrates/cgrates/utils"
+)
+
 type RateSCfg struct {
 	Enabled bool
+}
+
+func (rCfg *RateSCfg) loadFromJsonCfg(jsnCfg *RateSJsonCfg) (err error) {
+	if jsnCfg == nil {
+		return
+	}
+	if jsnCfg.Enabled != nil {
+		rCfg.Enabled = *jsnCfg.Enabled
+	}
+	return
+}
+
+func (rCfg *RateSCfg) AsMapInterface() map[string]interface{} {
+	return map[string]interface{}{
+		utils.EnabledCfg: rCfg.Enabled,
+	}
 }

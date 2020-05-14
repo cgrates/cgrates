@@ -33,24 +33,26 @@ func TestEventExporterClone(t *testing.T) {
 		FieldSep: ",",
 		Filters:  []string{"Filter1", "Filter2"},
 		Tenant:   NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
-		Fields: []*FCTemplate{
+		ContentFields: []*FCTemplate{
 			{
 				Tag:       "ToR",
-				Path:      "ToR",
+				Path:      "*exp.ToR",
 				Type:      "*composed",
 				Value:     NewRSRParsersMustCompile("~*req.2", true, utils.INFIELD_SEP),
 				Mandatory: true,
 			},
 			{
 				Tag:       "RandomField",
-				Path:      "RandomField",
+				Path:      "*exp.RandomField",
 				Type:      "*composed",
 				Value:     NewRSRParsersMustCompile("Test", true, utils.INFIELD_SEP),
 				Mandatory: true,
 			},
 		},
+		HeaderFields:  []*FCTemplate{},
+		TrailerFields: []*FCTemplate{},
 	}
-	for _, v := range orig.Fields {
+	for _, v := range orig.ContentFields {
 		v.ComputePath()
 	}
 	cloned := orig.Clone()
@@ -63,31 +65,33 @@ func TestEventExporterClone(t *testing.T) {
 		FieldSep: ",",
 		Filters:  []string{"Filter1", "Filter2"},
 		Tenant:   NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
-		Fields: []*FCTemplate{
+		ContentFields: []*FCTemplate{
 			{
 				Tag:       "ToR",
-				Path:      "ToR",
+				Path:      "*exp.ToR",
 				Type:      "*composed",
 				Value:     NewRSRParsersMustCompile("~*req.2", true, utils.INFIELD_SEP),
 				Mandatory: true,
 			},
 			{
 				Tag:       "RandomField",
-				Path:      "RandomField",
+				Path:      "*exp.RandomField",
 				Type:      "*composed",
 				Value:     NewRSRParsersMustCompile("Test", true, utils.INFIELD_SEP),
 				Mandatory: true,
 			},
 		},
+		HeaderFields:  []*FCTemplate{},
+		TrailerFields: []*FCTemplate{},
 	}
-	for _, v := range initialOrig.Fields {
+	for _, v := range initialOrig.ContentFields {
 		v.ComputePath()
 	}
 	orig.Filters = []string{"SingleFilter"}
-	orig.Fields = []*FCTemplate{
+	orig.ContentFields = []*FCTemplate{
 		{
 			Tag:       "ToR",
-			Path:      "ToR",
+			Path:      "*exp.ToR",
 			Type:      "*composed",
 			Value:     NewRSRParsersMustCompile("~2", true, utils.INFIELD_SEP),
 			Mandatory: true,
@@ -121,7 +125,7 @@ func TestEventExporterSameID(t *testing.T) {
 				Filters:       []string{},
 				AttributeSIDs: []string{},
 				Flags:         utils.FlagsWithParams{},
-				Fields: []*FCTemplate{
+				ContentFields: []*FCTemplate{
 					{
 						Tag:    utils.CGRID,
 						Path:   "*exp.CGRID",
@@ -222,6 +226,8 @@ func TestEventExporterSameID(t *testing.T) {
 						RoundingDecimals: utils.IntPointer(4),
 					},
 				},
+				HeaderFields:  []*FCTemplate{},
+				TrailerFields: []*FCTemplate{},
 			},
 			{
 				ID:         "file_exporter1",
@@ -233,15 +239,17 @@ func TestEventExporterSameID(t *testing.T) {
 				ExportPath: "/var/spool/cgrates/ees",
 				Attempts:   1,
 				Flags:      utils.FlagsWithParams{},
-				Fields: []*FCTemplate{
-					{Tag: "CustomTag2", Path: "CustomPath2", Type: utils.MetaVariable,
+				ContentFields: []*FCTemplate{
+					{Tag: "CustomTag2", Path: "*exp.CustomPath2", Type: utils.MetaVariable,
 						Value: NewRSRParsersMustCompile("CustomValue2", true, utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
 				},
+				HeaderFields:  []*FCTemplate{},
+				TrailerFields: []*FCTemplate{},
 			},
 		},
 	}
 	for _, profile := range expectedEEsCfg.Exporters {
-		for _, v := range profile.Fields {
+		for _, v := range profile.ContentFields {
 			v.ComputePath()
 		}
 	}
@@ -254,14 +262,14 @@ func TestEventExporterSameID(t *testing.T) {
 			"id": "file_exporter1",
 			"type": "*file_csv",
 			"fields":[
-				{"tag": "CustomTag1", "path": "CustomPath1", "type": "*variable", "value": "CustomValue1", "mandatory": true},
+				{"tag": "CustomTag1", "path": "*exp.CustomPath1", "type": "*variable", "value": "CustomValue1", "mandatory": true},
 			],
 		},
 		{
 			"id": "file_exporter1",
 			"type": "*file_csv",
 			"fields":[
-				{"tag": "CustomTag2", "path": "CustomPath2", "type": "*variable", "value": "CustomValue2", "mandatory": true},
+				{"tag": "CustomTag2", "path": "*exp.CustomPath2", "type": "*variable", "value": "CustomValue2", "mandatory": true},
 			],
 		},
 	],
