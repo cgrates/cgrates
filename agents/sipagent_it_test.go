@@ -24,10 +24,11 @@ import (
 	"net"
 	"net/rpc"
 	"path"
+	"reflect"
 	"testing"
 	"time"
 
-	v2 "github.com/cgrates/cgrates/apier/v2"
+	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -47,9 +48,9 @@ var (
 		testSAitResetStorDb,
 		testSAitStartEngine,
 		testSAitApierRpcConn,
-		testSAitTPFromFolder,
+		// testSAitTPFromFolder,
 
-		testSAitSetAttributeProfile,
+		testSAitSetRouteProfile,
 		testSAitSIPRegister,
 		testSAitSIPInvite,
 
@@ -132,9 +133,6 @@ func testSAitTPFromFolder(t *testing.T) {
 	if err := saRPC.Call(utils.APIerSv2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
 		t.Error(err)
 	}
-	if isDispatcherActive {
-		testRadiusitTPLoadData(t)
-	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
@@ -144,25 +142,41 @@ func testSAitStopCgrEngine(t *testing.T) {
 	}
 }
 
-func testSAitSetAttributeProfile(t *testing.T) {
-	attrPrf := &v2.AttributeWithCache{
-		ExternalAttributeProfile: &engine.ExternalAttributeProfile{
+func testSAitSetRouteProfile(t *testing.T) {
+	var reply *engine.RouteProfile
+	splPrf := &v1.RouteWithCache{
+		RouteProfile: &engine.RouteProfile{
 			Tenant:    "cgrates.org",
-			ID:        "ChangeDestination",
-			Contexts:  []string{utils.ANY},
+			ID:        "SPL_ACNT_1001",
 			FilterIDs: []string{"*string:~*req.Account:1001"},
-			Attributes: []*engine.ExternalAttribute{{
-				Path:  utils.MetaReq + utils.NestingSep + "Destination",
-				Value: "sip:1003@192.168.53.203:5060",
-			}},
-			Weight: 20,
+			Sorting:   utils.MetaWeight,
+			Routes: []*engine.Route{
+				{
+					ID:              "supplier1",
+					Weight:          20,
+					RouteParameters: "cgrates.org",
+				},
+				{
+					ID:              "supplier2",
+					Weight:          10,
+					RouteParameters: "cgrates.net",
+				},
+			},
+			Weight: 10,
 		},
 	}
+
 	var result string
-	if err := saRPC.Call(utils.APIerSv2SetAttributeProfile, attrPrf, &result); err != nil {
+	if err := saRPC.Call(utils.APIerSv1SetRouteProfile, splPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
+	}
+	if err := saRPC.Call(utils.APIerSv1GetRouteProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "SPL_ACNT_1001"}, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(splPrf.RouteProfile, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", splPrf.RouteProfile, reply)
 	}
 }
 
@@ -210,7 +224,7 @@ func testSAitSIPInvite(t *testing.T) {
 	if expected := "SIP/2.0 302 Moved Temporarily"; recived["Request"] != expected {
 		t.Errorf("Expected %q, received: %q", expected, recived["Request"])
 	}
-	if expected := "<sip:1003@192.168.53.203:5060>"; recived["Contact"] != expected {
+	if expected := "\"1002\" <sip:1002@cgrates.org>;q=0.7; expires=3600,\"1002\" <sip:1002@cgrates.net>;q=0.1"; recived["Contact"] != expected {
 		t.Errorf("Expected %q, received: %q", expected, recived["Contact"])
 	}
 }

@@ -45,7 +45,7 @@ func NewSIPAgent(connMgr *engine.ConnManager, cfg *config.CGRConfig,
 	}
 }
 
-// SIPAgent is a handler for HTTP requests
+// SIPAgent is a handler for SIP requests
 type SIPAgent struct {
 	connMgr  *engine.ConnManager
 	filterS  *engine.FilterS
@@ -58,7 +58,7 @@ func (sa *SIPAgent) Shutdown() {
 	close(sa.stopChan)
 }
 
-// ListenAndServe will run the DNS handler doing also the connection to listen address
+// ListenAndServe will run the SIP handler doing also the connection to listen address
 func (sa *SIPAgent) ListenAndServe() (err error) {
 	sa.stopChan = make(chan struct{})
 	utils.Logger.Info(fmt.Sprintf("<%s> start listening on <%s:%s>",
@@ -295,7 +295,7 @@ func (sa *SIPAgent) processRequest(reqProcessor *config.RequestProcessor,
 	}
 	if reqProcessor.Flags.HasKey(utils.MetaLog) {
 		utils.Logger.Info(
-			fmt.Sprintf("<%s> LOG, processorID: %s, http message: %s",
+			fmt.Sprintf("<%s> LOG, processorID: %s, SIP message: %s",
 				utils.SIPAgent, reqProcessor.ID, agReq.Request.String()))
 	}
 	switch reqType {
@@ -446,12 +446,12 @@ func (sa *SIPAgent) processRequest(reqProcessor *config.RequestProcessor,
 	}
 	if reqProcessor.Flags.HasKey(utils.MetaLog) {
 		utils.Logger.Info(
-			fmt.Sprintf("<%s> LOG, HTTP reply: %s",
+			fmt.Sprintf("<%s> LOG, SIP reply: %s",
 				utils.SIPAgent, agReq.Reply))
 	}
 	if reqType == utils.MetaDryRun {
 		utils.Logger.Info(
-			fmt.Sprintf("<%s> DRY_RUN, HTTP reply: %s",
+			fmt.Sprintf("<%s> DRY_RUN, SIP reply: %s",
 				utils.SIPAgent, agReq.Reply))
 	}
 	return true, nil
