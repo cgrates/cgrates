@@ -35,6 +35,17 @@ func NewRSRParsers(parsersRules string, allFiltersMatch bool, rsrSeparator strin
 	if parsersRules == "" {
 		return
 	}
+	if strings.HasPrefix(parsersRules, utils.META_CONSTANT+utils.InInFieldSep) { // in case we do not want the rule to be processed at all
+		// for example to compose a field in the agent request that contains `=`
+		prsrs = RSRParsers{
+			{
+				Rules:           parsersRules,
+				AllFiltersMatch: allFiltersMatch,
+			},
+		}
+		err = prsrs.Compile()
+		return
+	}
 	return NewRSRParsersFromSlice(strings.Split(parsersRules, rsrSeparator), allFiltersMatch)
 }
 
@@ -229,6 +240,10 @@ func (prsr *RSRParser) AttrName() string {
 // Compile parses Rules string and repopulates other fields
 func (prsr *RSRParser) Compile() (err error) {
 	var newPrsr *RSRParser
+	if strings.HasPrefix(prsr.Rules, utils.META_CONSTANT+utils.InInFieldSep) { // in case we do not want the rule to be processed at all
+		prsr.attrValue = strings.TrimPrefix(prsr.Rules, utils.META_CONSTANT+utils.InInFieldSep)
+		return
+	}
 	if newPrsr, err = NewRSRParser(prsr.Rules, prsr.AllFiltersMatch); err != nil {
 		return
 	}

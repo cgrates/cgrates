@@ -12,12 +12,12 @@ cgrates (0.11.0~dev) UNRELEASED; urgency=medium
     ToJSON for request String method
   * [DiameterAgent] Updated 3gp_vendor dictionary
   * [Templates] Added new dataconvertor: *ip2hex
-  * [AgentRequest] Added support for *group type and correctly overwrite
+  * [AgentS] Added support for *group type and correctly overwrite
     the values in case of *variable
   * [EventReader] Correctly populate ConcurrentRequest from config
   * [FilterS] Updated *exists to dynamically compute the path if the
     path
-  * [AgentRequest] Added support for *tmp path
+  * [AgentS] Added support for *tmp path
   * [SessionS] Added new API SessionSv1.GetCost
   * [SessionS] Updateed MaxUsage field from API replies
   * [SessionS] Added support for *cdrs flag in SessionSv1.ProcessEvent
@@ -54,12 +54,14 @@ cgrates (0.11.0~dev) UNRELEASED; urgency=medium
   * [SessionS] Added support for *stir_authenticate
   * [SessionS] Added support for *stir_initiate
   * [RouteS] Renaming from SupplierS to RouteS
-  * [AgentRequest] Improved NavigableMap
+  * [AgentS] Improved NavigableMap
   * [General] Default timingIDs start from time.Now() (i.e. *monthly time.Now() + 1 month )
   * [AgentS] FieldAsInterface return data instead of NMItem
   * [RouteS] Add posibility to load routes with the sameID and different filters
   * [RouteS] Correctly populate Sorting out of models
   * [AgentS] Added SIPAgent for SIP redirection
+  * [AgentS] Added *constant: prefix to do not proccess the value
+    with RSRParsers
 
  -- DanB <danb@cgrates.org>  Wed, 19 Feb 2020 13:25:52 +0200
 

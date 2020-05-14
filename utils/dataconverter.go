@@ -323,7 +323,7 @@ type SIPURIUserConverter struct{}
 // Convert implements DataConverter interface
 func (*SIPURIUserConverter) Convert(in interface{}) (out interface{}, err error) {
 	val := IfaceAsString(in)
-	return sipd.NameFrom(val), nil
+	return sipd.UserFrom(val), nil
 }
 
 // SIPURIMethodConverter will return the

@@ -118,15 +118,15 @@ func (da *DiameterAgentCfg) loadFromJsonCfg(jsnCfg *DiameterAgentJsonCfg, separa
 					break
 				}
 			}
-			if err := rp.loadFromJsonCfg(reqProcJsn, separator); err != nil {
-				return nil
+			if err = rp.loadFromJsonCfg(reqProcJsn, separator); err != nil {
+				return
 			}
 			if !haveID {
 				da.RequestProcessors = append(da.RequestProcessors, rp)
 			}
 		}
 	}
-	return nil
+	return
 }
 
 func (ds *DiameterAgentCfg) AsMapInterface(separator string) map[string]interface{} {

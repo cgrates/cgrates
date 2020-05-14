@@ -71,15 +71,15 @@ func (da *SIPAgentCfg) loadFromJsonCfg(jsnCfg *SIPAgentJsonCfg, sep string) (err
 					break
 				}
 			}
-			if err := rp.loadFromJsonCfg(reqProcJsn, sep); err != nil {
-				return nil
+			if err = rp.loadFromJsonCfg(reqProcJsn, sep); err != nil {
+				return
 			}
 			if !haveID {
 				da.RequestProcessors = append(da.RequestProcessors, rp)
 			}
 		}
 	}
-	return nil
+	return
 }
 
 func (da *SIPAgentCfg) AsMapInterface(separator string) map[string]interface{} {

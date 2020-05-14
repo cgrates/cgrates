@@ -83,14 +83,14 @@ func (ca *HttpAgentCfg) appendHttpAgntProcCfgs(hps *[]*ReqProcessorJsnCfg, separ
 				}
 			}
 		}
-		if err := rp.loadFromJsonCfg(reqProcJsn, separator); err != nil {
-			return err
+		if err = rp.loadFromJsonCfg(reqProcJsn, separator); err != nil {
+			return
 		}
 		if !haveID {
 			ca.RequestProcessors = append(ca.RequestProcessors, rp)
 		}
 	}
-	return nil
+	return
 }
 
 func (ca *HttpAgentCfg) loadFromJsonCfg(jsnCfg *HttpAgentJsonCfg, separator string) (err error) {

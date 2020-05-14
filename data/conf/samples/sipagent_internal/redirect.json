@@ -4,33 +4,71 @@
 	"request_processors": [
 			{
 				"id": "Register",
-				"filters": ["*prefix:~*req.Request:REGISTER"],
+				"filters": ["*notstring:~*vars.Method:INVITE"],
 				"flags": ["*none"],
 				"request_fields":[],
 				"reply_fields":[
 					{"tag": "Request", "path": "*rep.Request", "type": "*constant",
-						"value": "SIP/2.0 405 Method Not Allowed"},
+						"value": "SIP/2.0 405 Method Not Allowed"}
 				]
 			},
 			{
-				"id": "InviteRedirect",
-				"filters": ["*prefix:~*req.Request:INVITE"],
-				"flags": ["*attributes","*event"],
+				"id": "NAPTRRoutesQuery",
+				"filters": ["*string:~*vars.Method:INVITE"],
+				"flags": ["*event", "*routes","*continue"],
 				"request_fields":[
 					{"tag": "Account", "path": "*cgreq.Account", "type": "*variable",
 						"value": "~*req.From{*sipuri_user}", "mandatory": true},
 					{"tag": "Destination", "path": "*cgreq.Destination", "type": "*variable",
-						"value": "~*req.To{*sipuri_user}", "mandatory": true}
+						"value": "~*req.To{*sipuri_user}", "mandatory": true},
 				],
+				"reply_fields":[
+				]
+			},
+			{
+				"id": "NAPTRSuppliersOneSupplier",
+				"filters": ["*string:~*vars.Method:INVITE",
+					],
+				"flags": ["*none","*continue","*log"], // do not send request to CGRateS
 				"reply_fields":[
 					{"tag": "Request", "path": "*rep.Request", "type": "*constant",
 						"value": "SIP/2.0 302 Moved Temporarily"},
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
-						"value":"<"},
+							"value":"\""},
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
-						"value":"~*cgrep.Attributes.Destination"},
+							"value":"~*req.To{*sipuri_user}"},
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
-						"value":">"}
+							"value":"\" <sip:"},
+					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
+							"value":"~*req.To{*sipuri_user}"},
+					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
+							"value":"@"},
+					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
+						"value": "~*cgrep.Routes.SortedRoutes[0].RouteParameters"},
+					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
+							"value":"*constant:>;q=0.7; expires=3600"}
+				]
+			},
+			{
+				"id": "NAPTRSuppliersTwoSuppliers",
+				"filters": ["*string:~*vars.Method:INVITE",
+					"*gte:~*cgrep.Routes.Count:2"],
+				"flags": ["*none","*continue"],
+				"reply_fields":[
+					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
+							"value":",\""},
+					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
+							"value":"~*req.To{*sipuri_user}"},
+					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
+							"value":"\" <sip:"},
+					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
+							"value":"~*req.To{*sipuri_user}"},
+					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
+							"value":"@"},
+					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
+						"value": "~*cgrep.Routes.SortedRoutes[1].RouteParameters"},
+					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
+							"value":"*constant:>;q=0.1"}
 				]
 			}
 		]

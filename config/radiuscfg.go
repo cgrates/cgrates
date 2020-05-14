@@ -89,15 +89,15 @@ func (self *RadiusAgentCfg) loadFromJsonCfg(jsnCfg *RadiusAgentJsonCfg, separato
 					break
 				}
 			}
-			if err := rp.loadFromJsonCfg(reqProcJsn, separator); err != nil {
-				return nil
+			if err = rp.loadFromJsonCfg(reqProcJsn, separator); err != nil {
+				return
 			}
 			if !haveID {
 				self.RequestProcessors = append(self.RequestProcessors, rp)
 			}
 		}
 	}
-	return nil
+	return
 }
 
 func (ra *RadiusAgentCfg) AsMapInterface(separator string) map[string]interface{} {
