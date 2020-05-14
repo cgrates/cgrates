@@ -322,7 +322,7 @@ func TestThresholdsVerifyIfExecuted(t *testing.T) {
 	}
 }
 
-func testThresholdsProcessEvent2(t *testing.T) {
+func TestThresholdsProcessEvent2(t *testing.T) {
 	thPrf := &ThresholdProfile{
 		Tenant:    "cgrates.org",
 		ID:        "TH_4",
