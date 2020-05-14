@@ -628,4 +628,76 @@ func TestHexConvertor(t *testing.T) {
 	} else if !reflect.DeepEqual(expected, rpl) {
 		t.Errorf("expecting: %+v, received: %+v", expected, rpl)
 	}
+
+	val3 := []byte("127.0.0.1")
+	if rpl, err := hx.Convert(val3); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rpl) {
+		t.Errorf("expecting: %+v, received: %+v", expected, rpl)
+	}
+
+	val = ""
+	expected = ""
+	if rpl, err := hx.Convert(val); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rpl) {
+		t.Errorf("expecting: %+v, received: %+v", expected, rpl)
+	}
+}
+
+type testMockConverter struct{}
+
+// Convert function to implement DataConverter
+func (*testMockConverter) Convert(interface{}) (interface{}, error) { return nil, ErrNotFound }
+func TestDataConvertersConvertString2(t *testing.T) {
+	hex, err := NewDataConverter(MetaIP2Hex)
+	if err != nil {
+		t.Error(err)
+	}
+
+	host, err := NewDataConverter(MetaSIPURIHost)
+	if err != nil {
+		t.Error(err)
+	}
+	user, err := NewDataConverter(MetaSIPURIUser)
+	if err != nil {
+		t.Error(err)
+	}
+	method, err := NewDataConverter(MetaSIPURIMethod)
+	if err != nil {
+		t.Error(err)
+	}
+
+	dc := DataConverters{new(testMockConverter), hex, host, user, method}
+	if _, err := dc.ConvertString(""); err != ErrNotFound {
+		t.Errorf("Expected error %s ,received %v", ErrNotFound, err)
+	}
+}
+
+func TestSIPURIConverter(t *testing.T) {
+	host := new(SIPURIHostConverter)
+	val := "INVITE sip:1002@192.168.58.203 SIP/2.0"
+	expected := "192.168.58.203"
+	if rply, err := host.Convert(val); err != nil {
+		t.Error(err)
+	} else if rply != expected {
+		t.Errorf("Expected %q, received: %q", rply, expected)
+	}
+
+	method := new(SIPURIMethodConverter)
+	expected = "INVITE"
+	if rply, err := method.Convert(val); err != nil {
+		t.Error(err)
+	} else if rply != expected {
+		t.Errorf("Expected %q, received: %q", rply, expected)
+	}
+
+	user := new(SIPURIUserConverter)
+	expected = "1002"
+	if rply, err := user.Convert(val); err != nil {
+		t.Error(err)
+	} else if rply != expected {
+		t.Errorf("Expected %q, received: %q", rply, expected)
+	}
+
 }

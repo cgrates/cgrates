@@ -24,9 +24,9 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/rates"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/cgrates/rates"
 	//"github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/rpcclient"
 )
@@ -64,8 +64,6 @@ type RateService struct {
 func (rs *RateService) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
 	panic("deprecated method")
 }
-
-
 
 // ServiceName returns the service name
 func (rs *RateService) ServiceName() string {
