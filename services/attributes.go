@@ -91,11 +91,6 @@ func (attrS *AttributeService) Start() (err error) {
 	return
 }
 
-// GetIntenternalChan returns the internal connection chanel
-func (attrS *AttributeService) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
-	return attrS.connChan
-}
-
 // Reload handles the change of config
 func (attrS *AttributeService) Reload() (err error) {
 	return // for the momment nothing to reload

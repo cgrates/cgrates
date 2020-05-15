@@ -29,7 +29,6 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // NewKamailioAgent returns the Kamailio Agent
@@ -74,11 +73,6 @@ func (kam *KamailioAgent) Start() (err error) {
 		}
 	}()
 	return
-}
-
-// GetIntenternalChan returns the internal connection chanel
-func (kam *KamailioAgent) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
-	return nil
 }
 
 // Reload handles the change of config

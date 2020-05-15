@@ -94,11 +94,6 @@ func (reS *ResourceService) Start() (err error) {
 	return
 }
 
-// GetIntenternalChan returns the internal connection chanel
-func (reS *ResourceService) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
-	return reS.connChan
-}
-
 // Reload handles the change of config
 func (reS *ResourceService) Reload() (err error) {
 	reS.Lock()
