@@ -48,7 +48,7 @@ func newHADataProvider(reqPayload string,
 }
 
 func newHTTPUrlDP(req *http.Request) (dP utils.DataProvider, err error) {
-	dP = &httpUrlDP{req: req, cache: config.NewNavigableMap(nil)}
+	dP = &httpUrlDP{req: req, cache: utils.MapStorage{}}
 	return
 }
 
@@ -56,7 +56,7 @@ func newHTTPUrlDP(req *http.Request) (dP utils.DataProvider, err error) {
 // decoded data is only searched once and cached
 type httpUrlDP struct {
 	req   *http.Request
-	cache *config.NavigableMap
+	cache utils.MapStorage
 }
 
 // String is part of engine.DataProvider interface
@@ -80,7 +80,7 @@ func (hU *httpUrlDP) FieldAsInterface(fldPath []string) (data interface{}, err e
 		return // data found in cache
 	}
 	data = hU.req.FormValue(fldPath[0])
-	hU.cache.Set(fldPath, data, false, false)
+	hU.cache.Set(fldPath, data)
 	return
 }
 
@@ -109,14 +109,14 @@ func newHTTPXmlDP(req *http.Request) (dP utils.DataProvider, err error) {
 	if err != nil {
 		return nil, err
 	}
-	dP = &httpXmlDP{xmlDoc: doc, cache: config.NewNavigableMap(nil), addr: req.RemoteAddr}
+	dP = &httpXmlDP{xmlDoc: doc, cache: utils.MapStorage{}, addr: req.RemoteAddr}
 	return
 }
 
 // httpXmlDP implements engine.DataProvider, serving as xml data decoder
 // decoded data is only searched once and cached
 type httpXmlDP struct {
-	cache  *config.NavigableMap
+	cache  utils.MapStorage
 	xmlDoc *xmlquery.Node
 	addr   string
 }
@@ -168,7 +168,7 @@ func (hU *httpXmlDP) FieldAsInterface(fldPath []string) (data interface{}, err e
 	}
 	//add the content in data and cache it
 	data = elmnt.InnerText()
-	hU.cache.Set(fldPath, data, false, false)
+	hU.cache.Set(fldPath, data)
 	return
 }
 

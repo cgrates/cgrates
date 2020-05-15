@@ -204,7 +204,7 @@ var testEC = &EventCost{
 			StartTime: "00:00:00",
 		},
 	},
-	cache: config.NewNavigableMap(nil),
+	cache: utils.MapStorage{},
 }
 
 func TestECClone(t *testing.T) {
@@ -2515,7 +2515,7 @@ func TestECSyncKeys(t *testing.T) {
 				StartTime: "00:00:00",
 			},
 		},
-		cache: config.NewNavigableMap(nil),
+		cache: utils.MapStorage{},
 	}
 
 	ec.SyncKeys(refEC)
