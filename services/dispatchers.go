@@ -148,11 +148,6 @@ func (dspS *DispatcherService) Start() (err error) {
 	return
 }
 
-// GetIntenternalChan returns the internal connection chanel
-func (dspS *DispatcherService) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
-	return dspS.connChan
-}
-
 // Reload handles the change of config
 func (dspS *DispatcherService) Reload() (err error) {
 	return // for the momment nothing to reload

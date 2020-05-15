@@ -27,7 +27,6 @@ import (
 	"github.com/cgrates/cgrates/ers"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // NewEventReaderService returns the EventReader Service
@@ -81,11 +80,6 @@ func (erS *EventReaderService) Start() (err error) {
 		}
 	}(erS.ers, erS.rldChan)
 	return
-}
-
-// GetIntenternalChan returns the internal connection chanel
-func (erS *EventReaderService) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
-	return nil
 }
 
 // Reload handles the change of config

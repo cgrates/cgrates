@@ -92,11 +92,6 @@ func (chrS *ChargerService) Start() (err error) {
 	return
 }
 
-// GetIntenternalChan returns the internal connection chanel
-func (chrS *ChargerService) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
-	return chrS.connChan
-}
-
 // Reload handles the change of config
 func (chrS *ChargerService) Reload() (err error) {
 	return

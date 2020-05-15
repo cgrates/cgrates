@@ -95,11 +95,6 @@ func (rals *RalService) Start() (err error) {
 	return
 }
 
-// GetIntenternalChan returns the internal connection chanel
-func (rals *RalService) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
-	return rals.connChan
-}
-
 // Reload handles the change of config
 func (rals *RalService) Reload() (err error) {
 	engine.SetRpSubjectPrefixMatching(rals.cfg.RalsCfg().RpSubjectPrefixMatching)

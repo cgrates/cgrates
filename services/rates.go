@@ -27,6 +27,7 @@ import (
 	"github.com/cgrates/cgrates/rates"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
+
 	//"github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/rpcclient"
 )
@@ -58,11 +59,6 @@ type RateService struct {
 
 	rateS *rates.RateS
 	//rpc *v1.EventExporterSv1
-}
-
-// GetIntenternalChan is deprecated and it will be removed shortly
-func (rs *RateService) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
-	panic("deprecated method")
 }
 
 // ServiceName returns the service name

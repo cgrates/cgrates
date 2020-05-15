@@ -111,11 +111,6 @@ func (cdrService *CDRServer) Start() (err error) {
 	return
 }
 
-// GetIntenternalChan returns the internal connection chanel
-func (cdrService *CDRServer) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
-	return cdrService.connChan
-}
-
 // Reload handles the change of config
 func (cdrService *CDRServer) Reload() (err error) {
 	return

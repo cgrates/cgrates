@@ -540,36 +540,36 @@ func main() {
 
 	// init internalRPCSet to share internal connections among the engine
 	engine.IntRPC = engine.NewRPCClientSet()
-	engine.IntRPC.AddInternalRPCClient(utils.AnalyzerSv1, anz.GetIntenternalChan())
-	engine.IntRPC.AddInternalRPCClient(utils.APIerSv1, apiSv1.GetIntenternalChan())
-	engine.IntRPC.AddInternalRPCClient(utils.APIerSv2, apiSv1.GetIntenternalChan())
-	engine.IntRPC.AddInternalRPCClient(utils.AttributeSv1, attrS.GetIntenternalChan())
+	engine.IntRPC.AddInternalRPCClient(utils.AnalyzerSv1, internalAnalyzerSChan)
+	engine.IntRPC.AddInternalRPCClient(utils.APIerSv1, internalAPIerSv1Chan)
+	engine.IntRPC.AddInternalRPCClient(utils.APIerSv2, internalAPIerSv2Chan)
+	engine.IntRPC.AddInternalRPCClient(utils.AttributeSv1, internalAttributeSChan)
 	engine.IntRPC.AddInternalRPCClient(utils.CacheSv1, internalCacheSChan)
-	engine.IntRPC.AddInternalRPCClient(utils.CDRsV1, cdrS.GetIntenternalChan())
-	engine.IntRPC.AddInternalRPCClient(utils.CDRsV2, cdrS.GetIntenternalChan())
-	engine.IntRPC.AddInternalRPCClient(utils.ChargerSv1, chrS.GetIntenternalChan())
+	engine.IntRPC.AddInternalRPCClient(utils.CDRsV1, internalCDRServerChan)
+	engine.IntRPC.AddInternalRPCClient(utils.CDRsV2, internalCDRServerChan)
+	engine.IntRPC.AddInternalRPCClient(utils.ChargerSv1, internalChargerSChan)
 	engine.IntRPC.AddInternalRPCClient(utils.GuardianSv1, internalGuardianSChan)
-	engine.IntRPC.AddInternalRPCClient(utils.LoaderSv1, ldrs.GetIntenternalChan())
-	engine.IntRPC.AddInternalRPCClient(utils.ResourceSv1, reS.GetIntenternalChan())
-	engine.IntRPC.AddInternalRPCClient(utils.Responder, rals.GetResponder().GetIntenternalChan())
-	engine.IntRPC.AddInternalRPCClient(utils.SchedulerSv1, schS.GetIntenternalChan())
-	engine.IntRPC.AddInternalRPCClient(utils.SessionSv1, smg.GetIntenternalChan())
-	engine.IntRPC.AddInternalRPCClient(utils.StatSv1, stS.GetIntenternalChan())
-	engine.IntRPC.AddInternalRPCClient(utils.RouteSv1, routeS.GetIntenternalChan())
-	engine.IntRPC.AddInternalRPCClient(utils.ThresholdSv1, tS.GetIntenternalChan())
+	engine.IntRPC.AddInternalRPCClient(utils.LoaderSv1, internalLoaderSChan)
+	engine.IntRPC.AddInternalRPCClient(utils.ResourceSv1, internalResourceSChan)
+	engine.IntRPC.AddInternalRPCClient(utils.Responder, internalResponderChan)
+	engine.IntRPC.AddInternalRPCClient(utils.SchedulerSv1, internalSchedulerSChan)
+	engine.IntRPC.AddInternalRPCClient(utils.SessionSv1, internalSessionSChan)
+	engine.IntRPC.AddInternalRPCClient(utils.StatSv1, internalStatSChan)
+	engine.IntRPC.AddInternalRPCClient(utils.RouteSv1, internalRouteSChan)
+	engine.IntRPC.AddInternalRPCClient(utils.ThresholdSv1, internalThresholdSChan)
 	engine.IntRPC.AddInternalRPCClient(utils.ServiceManagerV1, internalServeManagerChan)
 	engine.IntRPC.AddInternalRPCClient(utils.ConfigSv1, internalConfigChan)
 	engine.IntRPC.AddInternalRPCClient(utils.CoreSv1, internalCoreSv1Chan)
-	engine.IntRPC.AddInternalRPCClient(utils.RALsV1, rals.GetIntenternalChan())
+	engine.IntRPC.AddInternalRPCClient(utils.RALsV1, internalRALsChan)
 
 	initConfigSv1(internalConfigChan, server)
 
 	// Serve rpc connections
-	go startRpc(server, rals.GetResponder().GetIntenternalChan(), cdrS.GetIntenternalChan(),
-		reS.GetIntenternalChan(), stS.GetIntenternalChan(),
-		attrS.GetIntenternalChan(), chrS.GetIntenternalChan(), tS.GetIntenternalChan(),
-		routeS.GetIntenternalChan(), smg.GetIntenternalChan(), anz.GetIntenternalChan(),
-		dspS.GetIntenternalChan(), ldrs.GetIntenternalChan(), rals.GetIntenternalChan(),
+	go startRpc(server, internalResponderChan, internalCDRServerChan,
+		internalResourceSChan, internalStatSChan,
+		internalAttributeSChan, internalChargerSChan, internalThresholdSChan,
+		internalRouteSChan, internalSessionSChan, internalAnalyzerSChan,
+		internalDispatcherSChan, internalLoaderSChan, internalRALsChan,
 		internalCacheSChan, internalEEsChan, internalRateSChan, exitChan)
 	<-exitChan
 
