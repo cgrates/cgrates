@@ -54,15 +54,15 @@ func TestStripIdxFromLastPathElm(t *testing.T) {
 	}
 }
 
-func TestNewPathToItem(t *testing.T) {
+func TestNewPathItems(t *testing.T) {
 	pathSlice := strings.Split("*req.Field1[0].Account", NestingSep)
 	expected := PathItems{{Field: MetaReq}, {Field: "Field1", Index: IntPointer(0)}, {Field: Account}}
-	if rply := NewPathToItem(pathSlice); !reflect.DeepEqual(expected, rply) {
+	if rply := NewPathItems(pathSlice); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expected: %s, received: %s", ToJSON(expected), ToJSON(rply))
 	}
 	pathSlice = []string{}
 	expected = PathItems{}
-	if rply := NewPathToItem(pathSlice); !reflect.DeepEqual(expected, rply) {
+	if rply := NewPathItems(pathSlice); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expected: %s, received: %s", ToJSON(expected), ToJSON(rply))
 	}
 }
@@ -119,7 +119,7 @@ func TestPathItemClone(t *testing.T) {
 
 func TestPathItemsString(t *testing.T) {
 	expected := "*req.Field1[0].Account"
-	path := NewPathToItem(strings.Split(expected, NestingSep))
+	path := NewPathItems(strings.Split(expected, NestingSep))
 	if rply := path.String(); expected != rply {
 		t.Errorf("Expected: %q, received: %q", expected, rply)
 	}
@@ -131,8 +131,8 @@ func TestPathItemsString(t *testing.T) {
 }
 
 func TestPathItemsClone(t *testing.T) {
-	path := NewPathToItem(strings.Split("*req.Field1[0].Account", NestingSep))
-	expected := NewPathToItem(strings.Split("*req.Field1[0].Account", NestingSep))
+	path := NewPathItems(strings.Split("*req.Field1[0].Account", NestingSep))
+	expected := NewPathItems(strings.Split("*req.Field1[0].Account", NestingSep))
 	rply := path.Clone()
 	path[0] = PathItem{}
 	if !reflect.DeepEqual(expected, rply) {
