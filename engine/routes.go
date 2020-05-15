@@ -167,7 +167,7 @@ func (rpS *RouteService) matchingRouteProfilesForEvent(ev *utils.CGREvent, singl
 	if singleResult {
 		matchingRPrf = make([]*RouteProfile, 1)
 	}
-	evNm := config.NewNavigableMap(map[string]interface{}{utils.MetaReq: ev.Event})
+	evNm := utils.MapStorage{utils.MetaReq: ev.Event}
 	for lpID := range rPrfIDs {
 		rPrf, err := rpS.dm.GetRouteProfile(ev.Tenant, lpID, true, true, utils.NonTransactional)
 		if err != nil {
@@ -461,9 +461,10 @@ func (rpS *RouteService) populateSortingData(ev *utils.CGREvent, route *Route,
 	//filter the supplier
 	if len(route.lazyCheckRules) != 0 {
 		//construct the DP and pass it to filterS
-		nM := config.NewNavigableMap(nil)
-		nM.Set([]string{utils.MetaReq}, ev.Event, false, false)
-		nM.Set([]string{utils.MetaVars}, sortedSpl.SortingData, false, false)
+		nM := utils.MapStorage{
+			utils.MetaReq:  ev.Event,
+			utils.MetaVars: sortedSpl.SortingData,
+		}
 
 		for _, rule := range route.lazyCheckRules { // verify the rules remaining from PartialPass
 			if pass, err = rule.Pass(newDynamicDP(rpS.cgrcfg, rpS.connMgr, ev.Tenant, nM)); err != nil {
@@ -495,8 +496,7 @@ func (rpS *RouteService) sortedRoutesForEvent(args *ArgsGetRoutes) (sortedRoutes
 	extraOpts.sortingStragety = rPrfl.Sorting             // populate sortingStrategy in extraOpts
 
 	//construct the DP and pass it to filterS
-	nM := config.NewNavigableMap(nil)
-	nM.Set([]string{utils.MetaReq}, args.CGREvent.Event, false, false)
+	nM := utils.MapStorage{utils.MetaReq: args.CGREvent.Event}
 	routeNew := make([]*Route, 0)
 	// apply filters for event
 

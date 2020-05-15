@@ -143,7 +143,7 @@ func (rdr *JSONFileER) processFile(fPath, fName string) (err error) {
 	reqVars := utils.NavigableMap2{utils.FileName: utils.NewNMData(fName)}
 
 	agReq := agents.NewAgentRequest(
-		config.NewNavigableMap(data), reqVars,
+		utils.MapStorage(data), reqVars,
 		nil, nil, nil, rdr.Config().Tenant,
 		rdr.cgrCfg.GeneralCfg().DefaultTenant,
 		utils.FirstNonEmpty(rdr.Config().Timezone,

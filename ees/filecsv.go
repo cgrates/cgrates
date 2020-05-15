@@ -103,9 +103,7 @@ func (fCsv *FileCSVee) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 	defer fCsv.Unlock()
 	fCsv.numberOfEvents++
 	var csvRecord []string
-	navMp := config.NewNavigableMap(map[string]interface{}{
-		utils.MetaReq: cgrEv.Event,
-	})
+	navMp := utils.MapStorage{utils.MetaReq: cgrEv.Event}
 	for _, cfgFld := range fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].ContentFields() {
 		if pass, err := fCsv.filterS.Pass(cgrEv.Tenant, cfgFld.Filters,
 			navMp); err != nil || !pass {

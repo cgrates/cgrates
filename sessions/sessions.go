@@ -988,7 +988,7 @@ func (sS *SessionS) filterSessions(sf *utils.SessionFilter, psv bool) (aSs []*Ex
 			return
 		}
 		var err error
-		ev := config.NewNavigableMap(map[string]interface{}{utils.MetaReq: me.Data()})
+		ev := utils.MapStorage{utils.MetaReq: me.Data()}
 		for _, fltr := range filterRules {
 			// we don't know how many values we have so we need to build the fieldValues DataProvider
 			if pass, err = fltr.Pass(ev); err != nil || !pass {
@@ -1044,7 +1044,7 @@ func (sS *SessionS) filterSessionsCount(sf *utils.SessionFilter, psv bool) (coun
 			return
 		}
 		var err error
-		ev := config.NewNavigableMap(map[string]interface{}{utils.MetaReq: me.Data()})
+		ev := utils.MapStorage{utils.MetaReq: me.Data()}
 		for _, fltr := range filterRules {
 			// we don't know how many values we have so we need to build the fieldValues DataProvider
 			if pass, err = fltr.Pass(ev); err != nil || !pass {

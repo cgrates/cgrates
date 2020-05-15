@@ -85,7 +85,7 @@ func (ld LoaderData) UpdateFromCSV(fileName string, record []string,
 
 // newCsvProvider constructs a DataProvider
 func newCsvProvider(record []string, fileName string) (dP utils.DataProvider) {
-	dP = &csvProvider{req: record, fileName: fileName, cache: config.NewNavigableMap(nil)}
+	dP = &csvProvider{req: record, fileName: fileName, cache: utils.MapStorage{}}
 	return
 }
 
@@ -93,7 +93,7 @@ func newCsvProvider(record []string, fileName string) (dP utils.DataProvider) {
 type csvProvider struct {
 	req      []string
 	fileName string
-	cache    *config.NavigableMap
+	cache    utils.MapStorage
 }
 
 // String is part of utils.DataProvider interface
@@ -116,7 +116,7 @@ func (cP *csvProvider) FieldAsInterface(fldPath []string) (data interface{}, err
 		idx = fldPath[1]
 	}
 	if fileName != "" && cP.fileName != fileName {
-		cP.cache.Set(fldPath, nil, false, false)
+		cP.cache.Set(fldPath, nil)
 		return
 	}
 	if cfgFieldIdx, err := strconv.Atoi(idx); err != nil || len(cP.req) <= cfgFieldIdx {
@@ -125,7 +125,7 @@ func (cP *csvProvider) FieldAsInterface(fldPath []string) (data interface{}, err
 		data = cP.req[cfgFieldIdx]
 	}
 
-	cP.cache.Set(fldPath, data, false, false)
+	cP.cache.Set(fldPath, data)
 	return
 }
 
