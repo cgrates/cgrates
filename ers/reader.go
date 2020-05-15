@@ -54,30 +54,6 @@ func NewEventReader(cfg *config.CGRConfig, cfgIdx int,
 		return NewFlatstoreER(cfg, cfgIdx, rdrEvents, rdrErr, fltrS, rdrExit)
 	case utils.MetaJSON:
 		return NewJSONFileER(cfg, cfgIdx, rdrEvents, rdrErr, fltrS, rdrExit)
-	case utils.META_NONE:
-		return NewNoneER(cfg, cfgIdx), nil
 	}
 	return
 }
-
-// NewNoneER return a disabled EventReader
-func NewNoneER(cfg *config.CGRConfig, cfgIdx int) EventReader {
-	return &noneEventReader{
-		cfg:    cfg,
-		cfgIdx: cfgIdx,
-	}
-}
-
-// noneEventReader a reader that does nothing
-type noneEventReader struct {
-	cfg    *config.CGRConfig
-	cfgIdx int
-}
-
-// Config returns the reader config
-func (rdr *noneEventReader) Config() *config.EventReaderCfg {
-	return rdr.cfg.ERsCfg().Readers[rdr.cfgIdx]
-}
-
-// Serve used to implement EventReader interface
-func (noneEventReader) Serve() error { return nil }

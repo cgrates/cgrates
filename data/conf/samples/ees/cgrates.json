@@ -3,7 +3,50 @@
 //
 // Copyright (C) ITsysCOM GmbH
 
+"general": {
+	"log_level": 7,
+},
 
+"listen": {
+	"rpc_json": ":2012",
+	"rpc_gob": ":2013",
+	"http": ":2080",
+},
+
+"data_db": {
+	"db_type": "redis",
+	"db_port": 6379,
+	"db_name": "10",
+},
+
+
+"stor_db": {
+	"db_password": "CGRateS.org",
+},
+
+
+"rals": {
+	"enabled": true,
+},
+
+
+"schedulers": {
+	"enabled": true,
+},
+
+
+"cdrs": {
+	"enabled": true,
+	"chargers_conns": ["*localhost"],
+	"rals_conns": ["*internal"],
+	"session_cost_retries": 0,
+},
+
+
+"chargers": {
+	"enabled": true,
+	"attributes_conns": ["*internal"],
+},
 
 
 "attributes": {
@@ -15,12 +58,43 @@
 	"enabled": true,
 	"attributes_conns":["*internal"],
 	"cache": {
-		"*file_csv": {"limit": -1, "ttl": "5s", "static_ttl": false},
+		"*file_csv": {"limit": -1, "ttl": "1s", "static_ttl": false},
 	},
 	"exporters": [
-	],
+		{
+			"id": "CSVExporter",
+			"type": "*file_csv",
+			"export_path": "/tmp/testExport",
+			"tenant": "cgrates.org",
+			"flags": ["*attributes"],
+			"attribute_context": "customContext",
+			"attempts": 1,
+			"field_separator": ",",
+			"fields":[
+				{"tag": "CGRID", "path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"},
+				{"tag": "RunID", "path": "*exp.RunID", "type": "*variable", "value": "~*req.RunID"},
+				{"tag": "ToR", "path": "*exp.ToR", "type": "*variable", "value": "~*req.ToR"},
+				{"tag": "OriginID", "path": "*exp.OriginID", "type": "*variable", "value": "~*req.OriginID"},
+				{"tag": "RequestType", "path": "*exp.RequestType", "type": "*variable", "value": "~*req.RequestType"},
+				{"tag": "Tenant", "path": "*exp.Tenant", "type": "*variable", "value": "~*req.Tenant"},
+				{"tag": "Category", "path": "*exp.Category", "type": "*variable", "value": "~*req.Category"},
+				{"tag": "Account", "path": "*exp.Account", "type": "*variable", "value": "~*req.Account"},
+				{"tag": "Subject", "path": "*exp.Subject", "type": "*variable", "value": "~*req.Subject"},
+				{"tag": "Destination", "path": "*exp.Destination", "type": "*variable", "value": "~*req.Destination"},
+				{"tag": "SetupTime", "path": "*exp.SetupTime", "type": "*variable", "value": "~*req.SetupTime", "layout": "2006-01-02T15:04:05Z07:00"},
+				{"tag": "AnswerTime", "path": "*exp.AnswerTime", "type": "*variable", "value": "~*req.AnswerTime", "layout": "2006-01-02T15:04:05Z07:00"},
+				{"tag": "Usage", "path": "*exp.Usage", "type": "*variable", "value": "~*req.Usage"},
+				{"tag": "Cost", "path": "*exp.Cost", "type": "*variable", "value": "~*req.Cost", "rounding_decimals": 4},
+			],
+		},
+	]
 },
 
+
+"apiers": {
+	"enabled": true,
+	"scheduler_conns": ["*internal"],
+},
 
 
 }

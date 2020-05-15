@@ -36,13 +36,15 @@ func onCacheEvicted(itmID string, value interface{}) {
 
 // NewERService instantiates the EventExporterS
 func NewEventExporterS(cfg *config.CGRConfig, filterS *engine.FilterS,
-	connMgr *engine.ConnManager) *EventExporterS {
-	return &EventExporterS{
+	connMgr *engine.ConnManager) (eeS *EventExporterS) {
+	eeS = &EventExporterS{
 		cfg:     cfg,
 		filterS: filterS,
 		connMgr: connMgr,
 		eesChs:  make(map[string]*ltcache.Cache),
 	}
+	eeS.setupCache(cfg.EEsNoLksCfg().Cache)
+	return
 }
 
 // EventExporterS is managing the EventExporters
@@ -133,6 +135,9 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithOpts, rply *s
 	var wg sync.WaitGroup
 	var withErr bool
 	for cfgIdx, eeCfg := range eeS.cfg.EEsNoLksCfg().Exporters {
+		if eeCfg.Type == utils.META_NONE { // ignore *default exporter
+			continue
+		}
 
 		if len(eeCfg.Filters) != 0 {
 			cgrDp := config.NewNavigableMap(map[string]interface{}{
@@ -166,7 +171,11 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithOpts, rply *s
 		var isCached bool
 		var ee EventExporter
 		if hasCache {
-			if x, isCached := eeCache.Get(eeCfg.ID); isCached {
+			var x interface{}
+			//fmt.Println("Try to get exporter from cache ")
+			//fmt.Println(eeCfg.ID)
+			if x, isCached = eeCache.Get(eeCfg.ID); isCached {
+				//fmt.Println("Get FROM CACHE")
 				ee = x.(EventExporter)
 			}
 		}
@@ -200,6 +209,7 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithOpts, rply *s
 	if withErr {
 		err = utils.ErrPartiallyExecuted
 	}
+	*rply = utils.OK
 
 	return
 }

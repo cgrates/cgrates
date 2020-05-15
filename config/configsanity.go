@@ -446,7 +446,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			case utils.MetaFileCSV:
 				for _, dir := range []string{exp.ExportPath} {
 					if _, err := os.Stat(dir); err != nil && os.IsNotExist(err) {
-						return fmt.Errorf("<%s> nonexistent folder: %s for reader with ID: %s", utils.EEs, dir, exp.ID)
+						return fmt.Errorf("<%s> nonexistent folder: %s for exporter with ID: %s", utils.EEs, dir, exp.ID)
 					}
 				}
 				if exp.FieldSep == utils.EmptyString {

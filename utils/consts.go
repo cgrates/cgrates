@@ -740,6 +740,7 @@ const (
 	MetaDaily                = "*daily"
 	MetaWeekly               = "*weekly"
 	RateS                    = "RateS"
+	Underline                = "_"
 )
 
 // Migrator Action
@@ -1490,8 +1491,9 @@ const (
 
 // EEs
 const (
-	EventExporterSv1     = "EventExporterSv1"
-	EventExporterSv1Ping = "EventExporterSv1.Ping"
+	EventExporterSv1             = "EventExporterSv1"
+	EventExporterSv1Ping         = "EventExporterSv1.Ping"
+	EventExporterSv1ProcessEvent = "EventExporterSv1.ProcessEvent"
 )
 
 //cgr_ variables
