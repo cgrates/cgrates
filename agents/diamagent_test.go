@@ -62,12 +62,12 @@ func TestProcessRequest(t *testing.T) {
 
 	cgrRplyNM := utils.NavigableMap2{}
 	rply := utils.NewOrderedNavigableMap()
-	diamDP := config.NewNavigableMap(map[string]interface{}{
+	diamDP := utils.MapStorage{
 		"SessionId":   "123456",
 		"Account":     "1001",
 		"Destination": "1003",
 		"Usage":       10 * time.Second,
-	})
+	}
 	reqProcessor := &config.RequestProcessor{
 		ID:      "Default",
 		Tenant:  config.NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),

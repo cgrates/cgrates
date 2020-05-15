@@ -521,7 +521,7 @@ func newDynamicDP(cfg *config.CGRConfig, connMgr *ConnManager,
 		connMgr:   connMgr,
 		tenant:    tenant,
 		initialDP: initialDP,
-		cache:     config.NewNavigableMap(nil),
+		cache:     utils.MapStorage{},
 	}
 }
 
@@ -531,7 +531,7 @@ type dynamicDP struct {
 	tenant    string
 	initialDP utils.DataProvider
 
-	cache *config.NavigableMap
+	cache utils.MapStorage
 }
 
 func (dDP *dynamicDP) String() string { return utils.ToJSON(dDP) }
@@ -583,7 +583,7 @@ func (dDP *dynamicDP) fieldAsInterface(fldPath []string) (val interface{}, err e
 		}
 		//construct dataProvider from account and set it furthder
 		dp := config.NewObjectDP(account)
-		dDP.cache.Set(fldPath[:2], dp, false, false)
+		dDP.cache.Set(fldPath[:2], dp)
 		return dp.FieldAsInterface(fldPath[2:])
 	case utils.MetaResources:
 		// sample of fieldName : ~*resources.ResourceID.Field
@@ -593,7 +593,7 @@ func (dDP *dynamicDP) fieldAsInterface(fldPath []string) (val interface{}, err e
 			return nil, err
 		}
 		dp := config.NewObjectDP(reply)
-		dDP.cache.Set(fldPath[:2], dp, false, false)
+		dDP.cache.Set(fldPath[:2], dp)
 		return dp.FieldAsInterface(fldPath[2:])
 	case utils.MetaStats:
 		// sample of fieldName : ~*stats.StatID.*acd
@@ -605,7 +605,7 @@ func (dDP *dynamicDP) fieldAsInterface(fldPath []string) (val interface{}, err e
 			return nil, err
 		}
 		for k, v := range statValues {
-			dDP.cache.Set([]string{utils.MetaStats, fldPath[1], k}, v, false, false)
+			dDP.cache.Set([]string{utils.MetaStats, fldPath[1], k}, v)
 		}
 		return dDP.cache.FieldAsInterface(fldPath)
 	default: // in case of constant we give an empty DataProvider ( empty navigable map )

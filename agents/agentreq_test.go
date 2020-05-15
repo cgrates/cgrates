@@ -145,10 +145,10 @@ func TestAgentRequestSetFields(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
 	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items),
 		config.CgrConfig().CacheCfg(), nil)
-	ar := NewAgentRequest(config.NewNavigableMap(req), nil,
+	ar := NewAgentRequest(utils.MapStorage(req), nil,
 		nil, nil, nil, config.NewRSRParsersMustCompile("", false, utils.NestingSep),
 		"cgrates.org", "", engine.NewFilterS(cfg, nil, dm),
-		config.NewNavigableMap(req), config.NewNavigableMap(req))
+		utils.MapStorage(req), utils.MapStorage(req))
 	input := []*config.FCTemplate{}
 	if err := ar.SetFields(input); err != nil {
 		t.Error(err)

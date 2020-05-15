@@ -95,10 +95,10 @@ func (alS *AttributeService) attributeProfileForEvent(args *AttrArgsProcessEvent
 		attrIDs = aPrflIDs.Slice()
 	}
 
-	evNm := config.NewNavigableMap(map[string]interface{}{
+	evNm := utils.MapStorage{
 		utils.MetaReq:  args.Event,
 		utils.MetaOpts: args.Opts,
-	})
+	}
 	for _, apID := range attrIDs {
 		aPrfl, err := alS.dm.GetAttributeProfile(args.Tenant, apID, true, true, utils.NonTransactional)
 		if err != nil {
@@ -177,10 +177,10 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent) (
 		Opts:            args.Opts,
 		blocker:         attrPrf.Blocker,
 	}
-	evNm := config.NewNavigableMap(map[string]interface{}{
+	evNm := utils.MapStorage{
 		utils.MetaReq:  rply.CGREvent.Event,
 		utils.MetaOpts: rply.Opts,
-	})
+	}
 	for _, attribute := range attrPrf.Attributes {
 		//in case that we have filter for attribute send them to FilterS to be processed
 		if len(attribute.FilterIDs) != 0 {
@@ -337,7 +337,7 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent) (
 			val, err = evNm.FieldAsString(strings.Split(attribute.Path, utils.NestingSep))
 			substitute = val + substitute
 		}
-		evNm.Set(strings.Split(attribute.Path, utils.NestingSep), substitute, false, false)
+		evNm.Set(strings.Split(attribute.Path, utils.NestingSep), substitute)
 	}
 	return
 }

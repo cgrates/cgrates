@@ -140,9 +140,7 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithOpts, rply *s
 		}
 
 		if len(eeCfg.Filters) != 0 {
-			cgrDp := config.NewNavigableMap(map[string]interface{}{
-				utils.MetaReq: cgrEv.Event,
-			})
+			cgrDp := utils.MapStorage{utils.MetaReq: cgrEv.Event}
 			tnt := cgrEv.Tenant
 			if eeTnt, errTnt := eeCfg.Tenant.ParseEvent(cgrEv.Event); errTnt == nil && eeTnt != utils.EmptyString {
 				tnt = eeTnt

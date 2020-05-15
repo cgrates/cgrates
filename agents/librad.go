@@ -62,7 +62,7 @@ func radReplyAppendAttributes(reply *radigo.Packet, rplNM *utils.OrderedNavigabl
 
 // newRADataProvider constructs a DataProvider
 func newRADataProvider(req *radigo.Packet) (dP utils.DataProvider) {
-	dP = &radiusDP{req: req, cache: config.NewNavigableMap(nil)}
+	dP = &radiusDP{req: req, cache: utils.MapStorage{}}
 	return
 }
 
@@ -70,7 +70,7 @@ func newRADataProvider(req *radigo.Packet) (dP utils.DataProvider) {
 // decoded data is only searched once and cached
 type radiusDP struct {
 	req   *radigo.Packet
-	cache *config.NavigableMap
+	cache utils.MapStorage
 }
 
 // String is part of utils.DataProvider interface
@@ -95,7 +95,7 @@ func (pk *radiusDP) FieldAsInterface(fldPath []string) (data interface{}, err er
 	if len(pk.req.AttributesWithName(fldPath[0], "")) != 0 {
 		data = pk.req.AttributesWithName(fldPath[0], "")[0].GetStringValue()
 	}
-	pk.cache.Set(fldPath, data, false, false)
+	pk.cache.Set(fldPath, data)
 	return
 }
 

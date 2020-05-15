@@ -227,7 +227,7 @@ func (sa *SIPAgent) handleMessage(sipMessage sipingo.Message, remoteHost string)
 	for k, v := range sipMessage {
 		sipMessageIface[k] = v
 	}
-	dp := config.NewNavigableMap(sipMessageIface)
+	dp := utils.MapStorage(sipMessageIface)
 	var processed bool
 	cgrRplyNM := utils.NavigableMap2{}
 	rplyNM := utils.NewOrderedNavigableMap()
