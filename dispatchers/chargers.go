@@ -71,7 +71,7 @@ func (dS *DispatcherService) ChargerSv1GetChargersForEvent(args *utils.CGREventW
 func (dS *DispatcherService) ChargerSv1ProcessEvent(args *utils.CGREventWithOpts,
 	reply *[]*engine.ChrgSProcessEventReply) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args.CGREventWithArgDispatcher != nil && args.CGREvent != nil && args.CGREvent.Tenant != utils.EmptyString {
+	if args.CGREvent != nil && args.CGREvent.Tenant != utils.EmptyString {
 		tnt = args.CGREvent.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {

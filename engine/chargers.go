@@ -56,7 +56,7 @@ func (cS *ChargerService) Shutdown() (err error) {
 }
 
 // matchingChargingProfilesForEvent returns ordered list of matching chargers which are active by the time of the function call
-func (cS *ChargerService) matchingChargerProfilesForEvent(cgrEv *utils.CGREventWithArgDispatcher) (cPs ChargerProfiles, err error) {
+func (cS *ChargerService) matchingChargerProfilesForEvent(cgrEv *utils.CGREvent) (cPs ChargerProfiles, err error) {
 	cpIDs, err := MatchingItemIDsForEvent(cgrEv.Event,
 		cS.cfg.ChargerSCfg().StringIndexedFields,
 		cS.cfg.ChargerSCfg().PrefixIndexedFields,
@@ -111,7 +111,7 @@ type ChrgSProcessEventReply struct {
 
 func (cS *ChargerService) processEvent(cgrEv *utils.CGREventWithOpts) (rply []*ChrgSProcessEventReply, err error) {
 	var cPs ChargerProfiles
-	if cPs, err = cS.matchingChargerProfilesForEvent(cgrEv.CGREventWithArgDispatcher); err != nil {
+	if cPs, err = cS.matchingChargerProfilesForEvent(cgrEv.CGREvent); err != nil {
 		return nil, err
 	}
 	rply = make([]*ChrgSProcessEventReply, len(cPs))
@@ -156,8 +156,7 @@ func (cS *ChargerService) processEvent(cgrEv *utils.CGREventWithOpts) (rply []*C
 // V1ProcessEvent will process the event received via API and return list of events forked
 func (cS *ChargerService) V1ProcessEvent(args *utils.CGREventWithOpts,
 	reply *[]*ChrgSProcessEventReply) (err error) {
-	if args.CGREventWithArgDispatcher == nil ||
-		args.CGREvent == nil ||
+	if args.CGREvent == nil ||
 		args.Event == nil {
 		return utils.NewErrMandatoryIeMissing("Event")
 	}
@@ -175,7 +174,7 @@ func (cS *ChargerService) V1ProcessEvent(args *utils.CGREventWithOpts,
 // V1GetChargersForEvent exposes the list of ordered matching ChargingProfiles for an event
 func (cS *ChargerService) V1GetChargersForEvent(args *utils.CGREventWithArgDispatcher,
 	rply *ChargerProfiles) (err error) {
-	cPs, err := cS.matchingChargerProfilesForEvent(args)
+	cPs, err := cS.matchingChargerProfilesForEvent(args.CGREvent)
 	if err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)

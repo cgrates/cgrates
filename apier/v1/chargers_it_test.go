@@ -41,25 +41,21 @@ var (
 
 	chargerEvent = []*utils.CGREventWithOpts{
 		{
-			CGREventWithArgDispatcher: &utils.CGREventWithArgDispatcher{
-				CGREvent: &utils.CGREvent{ // matching Charger1
-					Tenant: "cgrates.org",
-					ID:     "event1",
-					Event: map[string]interface{}{
-						utils.Account: "1001",
-					},
+			CGREvent: &utils.CGREvent{ // matching Charger1
+				Tenant: "cgrates.org",
+				ID:     "event1",
+				Event: map[string]interface{}{
+					utils.Account: "1001",
 				},
 			},
 		},
 		{
-			CGREventWithArgDispatcher: &utils.CGREventWithArgDispatcher{
-				CGREvent: &utils.CGREvent{ // no matching
-					Tenant: "cgrates.org",
-					ID:     "event1",
-					Event: map[string]interface{}{
-						utils.Account:   "1010",
-						"DistinctMatch": "cgrates",
-					},
+			CGREvent: &utils.CGREvent{ // no matching
+				Tenant: "cgrates.org",
+				ID:     "event1",
+				Event: map[string]interface{}{
+					utils.Account:   "1010",
+					"DistinctMatch": "cgrates",
 				},
 			},
 		},
@@ -205,11 +201,19 @@ func testChargerSGetChargersForEvent(t *testing.T) {
 		},
 	}
 	var result *engine.ChargerProfiles
-	if err := chargerRPC.Call(utils.ChargerSv1GetChargersForEvent, chargerEvent[1].CGREventWithArgDispatcher, &result); err == nil ||
+	if err := chargerRPC.Call(utils.ChargerSv1GetChargersForEvent,
+		&utils.CGREventWithArgDispatcher{
+			CGREvent:      chargerEvent[1].CGREvent,
+			ArgDispatcher: chargerEvent[1].ArgDispatcher,
+		}, &result); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	if err := chargerRPC.Call(utils.ChargerSv1GetChargersForEvent, chargerEvent[0].CGREventWithArgDispatcher, &result); err != nil {
+	if err := chargerRPC.Call(utils.ChargerSv1GetChargersForEvent,
+		&utils.CGREventWithArgDispatcher{
+			CGREvent:      chargerEvent[0].CGREvent,
+			ArgDispatcher: chargerEvent[0].ArgDispatcher,
+		}, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(result, chargerProfiles) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(chargerProfiles), utils.ToJSON(result))

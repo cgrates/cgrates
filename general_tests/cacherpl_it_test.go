@@ -477,19 +477,17 @@ func testCacheRplAACheckLoadReplication(t *testing.T) {
 		wgDisp2.Add(1)
 		go func() {
 			if err := dspEngine1RPC.Call(utils.ChargerSv1ProcessEvent, &utils.CGREventWithOpts{
-				CGREventWithArgDispatcher: &utils.CGREventWithArgDispatcher{
-					CGREvent: &utils.CGREvent{
-						Tenant: "cgrates.org",
-						ID:     "testCacheRplAACheckLoadReplication",
-						Event: map[string]interface{}{
-							utils.Account:     "1007",
-							utils.Destination: "+491511231234",
-							"EventName":       "TestLoad",
-						},
+				CGREvent: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "testCacheRplAACheckLoadReplication",
+					Event: map[string]interface{}{
+						utils.Account:     "1007",
+						utils.Destination: "+491511231234",
+						"EventName":       "TestLoad",
 					},
-					ArgDispatcher: &utils.ArgDispatcher{
-						RouteID: utils.StringPointer("testRouteFromDispatcher1"),
-					},
+				},
+				ArgDispatcher: &utils.ArgDispatcher{
+					RouteID: utils.StringPointer("testRouteFromDispatcher1"),
 				},
 			}, &rpl); err != nil {
 				t.Error(err)
@@ -500,19 +498,17 @@ func testCacheRplAACheckLoadReplication(t *testing.T) {
 		}()
 		go func() {
 			if err := dspEngine2RPC.Call(utils.ChargerSv1ProcessEvent, &utils.CGREventWithOpts{
-				CGREventWithArgDispatcher: &utils.CGREventWithArgDispatcher{
-					CGREvent: &utils.CGREvent{
-						Tenant: "cgrates.org",
-						ID:     "testCacheRplAACheckLoadReplication",
-						Event: map[string]interface{}{
-							utils.Account:     "1007",
-							utils.Destination: "+491511231234",
-							"EventName":       "TestLoad",
-						},
+				CGREvent: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "testCacheRplAACheckLoadReplication",
+					Event: map[string]interface{}{
+						utils.Account:     "1007",
+						utils.Destination: "+491511231234",
+						"EventName":       "TestLoad",
 					},
-					ArgDispatcher: &utils.ArgDispatcher{
-						RouteID: utils.StringPointer("testRouteFromDispatcher2"),
-					},
+				},
+				ArgDispatcher: &utils.ArgDispatcher{
+					RouteID: utils.StringPointer("testRouteFromDispatcher2"),
 				},
 			}, &rpl); err != nil {
 				t.Error(err)
@@ -599,19 +595,17 @@ func testCacheRplCheckLoadReplication(t *testing.T) {
 		wg.Add(1)
 		go func() {
 			if err := dspEngine1RPC.Call(utils.ChargerSv1ProcessEvent, &utils.CGREventWithOpts{
-				CGREventWithArgDispatcher: &utils.CGREventWithArgDispatcher{
-					CGREvent: &utils.CGREvent{
-						Tenant: "cgrates.org",
-						ID:     "testCacheRplCheckLoadReplication",
-						Event: map[string]interface{}{
-							utils.Account:     "1007",
-							utils.Destination: "+491511231234",
-							"EventName":       "TestLoad",
-						},
+				CGREvent: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "testCacheRplCheckLoadReplication",
+					Event: map[string]interface{}{
+						utils.Account:     "1007",
+						utils.Destination: "+491511231234",
+						"EventName":       "TestLoad",
 					},
-					ArgDispatcher: &utils.ArgDispatcher{
-						RouteID: utils.StringPointer("testRoute123"),
-					},
+				},
+				ArgDispatcher: &utils.ArgDispatcher{
+					RouteID: utils.StringPointer("testRoute123"),
 				},
 			}, &rpl); err != nil {
 				t.Error(err)
