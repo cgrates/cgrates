@@ -132,9 +132,10 @@ type EventExporterCfg struct {
 	Synchronous   bool
 	Attempts      int
 	FieldSep      string
-	HeaderFields  []*FCTemplate
-	ContentFields []*FCTemplate
-	TrailerFields []*FCTemplate
+	Fields        []*FCTemplate
+	headerFields  []*FCTemplate
+	contentFields []*FCTemplate
+	trailerFields []*FCTemplate
 }
 
 func (eeC *EventExporterCfg) loadFromJsonCfg(jsnEec *EventExporterJsonCfg, separator string) (err error) {
@@ -188,25 +189,37 @@ func (eeC *EventExporterCfg) loadFromJsonCfg(jsnEec *EventExporterJsonCfg, separ
 		eeC.FieldSep = *jsnEec.Field_separator
 	}
 	if jsnEec.Fields != nil {
-		eeC.HeaderFields = make([]*FCTemplate, 0)
-		eeC.ContentFields = make([]*FCTemplate, 0)
-		eeC.TrailerFields = make([]*FCTemplate, 0)
-		if fields, err := FCTemplatesFromFCTemplatesJsonCfg(*jsnEec.Fields, separator); err != nil {
+		eeC.headerFields = make([]*FCTemplate, 0)
+		eeC.contentFields = make([]*FCTemplate, 0)
+		eeC.trailerFields = make([]*FCTemplate, 0)
+		if eeC.Fields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnEec.Fields, separator); err != nil {
 			return err
 		} else {
-			for _, field := range fields {
+			for _, field := range eeC.Fields {
 				switch field.GetPathSlice()[0] {
 				case utils.MetaHdr:
-					eeC.HeaderFields = append(eeC.HeaderFields, field)
+					eeC.headerFields = append(eeC.headerFields, field)
 				case utils.MetaExp:
-					eeC.ContentFields = append(eeC.ContentFields, field)
+					eeC.contentFields = append(eeC.contentFields, field)
 				case utils.MetaTrl:
-					eeC.TrailerFields = append(eeC.TrailerFields, field)
+					eeC.trailerFields = append(eeC.trailerFields, field)
 				}
 			}
 		}
 	}
 	return
+}
+
+func (eeC *EventExporterCfg) HeaderFields() []*FCTemplate {
+	return eeC.headerFields
+}
+
+func (eeC *EventExporterCfg) ContentFields() []*FCTemplate {
+	return eeC.contentFields
+}
+
+func (eeC *EventExporterCfg) TrailerFields() []*FCTemplate {
+	return eeC.trailerFields
 }
 
 func (eeC *EventExporterCfg) Clone() (cln *EventExporterCfg) {
@@ -239,17 +252,17 @@ func (eeC *EventExporterCfg) Clone() (cln *EventExporterCfg) {
 	cln.Synchronous = eeC.Synchronous
 	cln.Attempts = eeC.Attempts
 	cln.FieldSep = eeC.FieldSep
-	cln.HeaderFields = make([]*FCTemplate, len(eeC.HeaderFields))
-	for idx, fld := range eeC.HeaderFields {
-		cln.HeaderFields[idx] = fld.Clone()
+	cln.headerFields = make([]*FCTemplate, len(eeC.headerFields))
+	for idx, fld := range eeC.headerFields {
+		cln.headerFields[idx] = fld.Clone()
 	}
-	cln.ContentFields = make([]*FCTemplate, len(eeC.ContentFields))
-	for idx, fld := range eeC.ContentFields {
-		cln.ContentFields[idx] = fld.Clone()
+	cln.contentFields = make([]*FCTemplate, len(eeC.contentFields))
+	for idx, fld := range eeC.contentFields {
+		cln.contentFields[idx] = fld.Clone()
 	}
-	cln.TrailerFields = make([]*FCTemplate, len(eeC.TrailerFields))
-	for idx, fld := range eeC.TrailerFields {
-		cln.TrailerFields[idx] = fld.Clone()
+	cln.trailerFields = make([]*FCTemplate, len(eeC.trailerFields))
+	for idx, fld := range eeC.trailerFields {
+		cln.trailerFields[idx] = fld.Clone()
 	}
 	return
 }
@@ -272,14 +285,8 @@ func (eeC *EventExporterCfg) AsMapInterface(separator string) map[string]interfa
 		}
 		flags[key] = buf
 	}
-	fields := make([]map[string]interface{}, 0, len(eeC.HeaderFields)+len(eeC.ContentFields)+len(eeC.TrailerFields))
-	for _, fld := range eeC.HeaderFields {
-		fields = append(fields, fld.AsMapInterface(separator))
-	}
-	for _, fld := range eeC.ContentFields {
-		fields = append(fields, fld.AsMapInterface(separator))
-	}
-	for _, fld := range eeC.TrailerFields {
+	fields := make([]map[string]interface{}, 0, len(eeC.Fields))
+	for _, fld := range eeC.Fields {
 		fields = append(fields, fld.AsMapInterface(separator))
 	}
 

@@ -22,7 +22,9 @@ import (
 	"encoding/csv"
 	"fmt"
 	"os"
+	"path"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/cgrates/cgrates/engine"
@@ -32,7 +34,8 @@ import (
 )
 
 func NewFileCSVee(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.FilterS) (fCsv *FileCSVee, err error) {
-	fCsv = &FileCSVee{cgrCfg: cgrCfg, cfgIdx: cfgIdx, filterS: filterS}
+	fCsv = &FileCSVee{id: cgrCfg.EEsCfg().Exporters[cfgIdx].ID,
+		cgrCfg: cgrCfg, cfgIdx: cfgIdx, filterS: filterS}
 	err = fCsv.init()
 	return
 }
@@ -45,6 +48,7 @@ type FileCSVee struct {
 	filterS   *engine.FilterS
 	file      *os.File
 	csvWriter *csv.Writer
+	sync.RWMutex
 
 	firstEventATime, lastEventATime time.Time
 	numberOfEvents                  int
@@ -58,7 +62,9 @@ type FileCSVee struct {
 
 // init will create all the necessary dependencies, including opening the file
 func (fCsv *FileCSVee) init() (err error) {
-	if fCsv.file, err = os.Create(fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].ExportPath); err != nil {
+	// create the file
+	if fCsv.file, err = os.Create(path.Join(fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].ExportPath,
+		fCsv.id+utils.Underline+utils.UUIDSha1Prefix()+utils.CSVSuffix)); err != nil {
 		return
 	}
 	fCsv.csvWriter = csv.NewWriter(fCsv.file)
@@ -93,19 +99,23 @@ func (fCsv *FileCSVee) OnEvicted(_ string, _ interface{}) {
 
 // ExportEvent implements EventExporter
 func (fCsv *FileCSVee) ExportEvent(cgrEv *utils.CGREvent) (err error) {
-	// convert cgrEvent in export record
+	fCsv.Lock()
+	defer fCsv.Unlock()
 	fCsv.numberOfEvents++
 	var csvRecord []string
 	navMp := config.NewNavigableMap(map[string]interface{}{
 		utils.MetaReq: cgrEv.Event,
 	})
-	for _, cfgFld := range fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].ContentFields {
+	for _, cfgFld := range fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].ContentFields() {
 		if pass, err := fCsv.filterS.Pass(cgrEv.Tenant, cfgFld.Filters,
 			navMp); err != nil || !pass {
 			continue
 		}
-		val, err := cfgFld.Value.ParseDataProvider(navMp, fCsv.cgrCfg.GeneralCfg().RSRSep)
+		val, err := cfgFld.Value.ParseDataProvider(navMp, utils.NestingSep)
 		if err != nil {
+			if err == utils.ErrNotFound {
+				err = utils.ErrPrefix(err, cfgFld.Value.GetRule())
+			}
 			fCsv.negativeExports.Add(cgrEv.ID)
 			return err
 		}
@@ -153,13 +163,16 @@ func (fCsv *FileCSVee) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 
 // Compose and cache the header
 func (fCsv *FileCSVee) composeHeader() (err error) {
-	if len(fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].HeaderFields) == 0 {
+	if len(fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].HeaderFields()) == 0 {
 		return
 	}
 	var csvRecord []string
-	for _, cfgFld := range fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].HeaderFields {
+	for _, cfgFld := range fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].HeaderFields() {
 		val, err := cfgFld.Value.ParseValue(utils.EmptyString)
 		if err != nil {
+			if err == utils.ErrNotFound {
+				err = utils.ErrPrefix(err, cfgFld.Value.GetRule())
+			}
 			return err
 		}
 		csvRecord = append(csvRecord, val)
@@ -169,11 +182,11 @@ func (fCsv *FileCSVee) composeHeader() (err error) {
 
 // Compose and cache the trailer
 func (fCsv *FileCSVee) composeTrailer() (err error) {
-	if len(fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].TrailerFields) == 0 {
+	if len(fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].TrailerFields()) == 0 {
 		return
 	}
 	var csvRecord []string
-	for _, cfgFld := range fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].TrailerFields {
+	for _, cfgFld := range fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].TrailerFields() {
 		switch cfgFld.Type {
 		case utils.MetaExportID:
 			csvRecord = append(csvRecord, fCsv.id)

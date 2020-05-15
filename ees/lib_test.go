@@ -1,5 +1,5 @@
 /*
-Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Real-time Online/Offline Charging System (OerS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
@@ -15,7 +15,8 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-package general_tests
+
+package ees
 
 import (
 	"errors"
@@ -31,8 +32,6 @@ var (
 	dataDir   = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
 	waitRater = flag.Int("wait_rater", 100, "Number of milliseconds to wait for rater to start and cache")
 	encoding  = flag.String("rpc", utils.MetaJSON, "what encoding would be used for rpc communication")
-	dbType    = flag.String("dbtype", utils.MetaInternal, "The type of DataBase (Internal/Mongo/mySql)")
-	err       error
 )
 
 func newRPCClient(cfg *config.ListenCfg) (c *rpc.Client, err error) {
