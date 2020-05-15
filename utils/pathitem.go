@@ -40,8 +40,8 @@ type FullPath struct {
 	Path      string
 }
 
-// NewPathToItem returns the computed PathItems out of slice one
-func NewPathToItem(path []string) (pItms PathItems) {
+// NewPathItems returns the computed PathItems out of slice one
+func NewPathItems(path []string) (pItms PathItems) {
 	pItms = make(PathItems, len(path))
 	for i, v := range path {
 		field, indx := GetPathIndex(v)

@@ -42,9 +42,9 @@ func TestUpdateSIPMsgFromNavMap(t *testing.T) {
 		v.ComputePath()
 	}
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", nil, nil, nil)
-	agReq.CGRReply.Set(utils.NewPathToItem([]string{utils.CapMaxUsage}), utils.NewNMData(time.Duration(time.Hour)))
-	agReq.CGRReply.Set(utils.NewPathToItem([]string{utils.CapAttributes, "Request"}), utils.NewNMData("SIP/2.0 302 Moved Temporarily"))
-	agReq.CGRReply.Set(utils.NewPathToItem([]string{utils.CapAttributes, utils.Account}), utils.NewNMData("1001"))
+	agReq.CGRReply.Set(utils.NewPathItems([]string{utils.CapMaxUsage}), utils.NewNMData(time.Duration(time.Hour)))
+	agReq.CGRReply.Set(utils.NewPathItems([]string{utils.CapAttributes, "Request"}), utils.NewNMData("SIP/2.0 302 Moved Temporarily"))
+	agReq.CGRReply.Set(utils.NewPathItems([]string{utils.CapAttributes, utils.Account}), utils.NewNMData("1001"))
 
 	if err := agReq.SetFields(rplyFlds); err != nil {
 		t.Error(err)
@@ -65,8 +65,8 @@ func TestUpdateSIPMsgFromNavMap2(t *testing.T) {
 	m := sipingo.Message{}
 	mv := utils.NewOrderedNavigableMap()
 	var nm *config.NMItem
-	mv.Set(&utils.FullPath{PathItems: utils.NewPathToItem([]string{utils.CapAttributes, utils.Account}), Path: utils.CapAttributes + utils.NestingSep + utils.Account}, nm)
-	mv.Set(&utils.FullPath{PathItems: utils.NewPathToItem([]string{utils.CapMaxUsage}), Path: utils.CapMaxUsage}, utils.NewNMData(time.Duration(time.Hour)))
+	mv.Set(&utils.FullPath{PathItems: utils.NewPathItems([]string{utils.CapAttributes, utils.Account}), Path: utils.CapAttributes + utils.NestingSep + utils.Account}, nm)
+	mv.Set(&utils.FullPath{PathItems: utils.NewPathItems([]string{utils.CapMaxUsage}), Path: utils.CapMaxUsage}, utils.NewNMData(time.Duration(time.Hour)))
 
 	expectedErr := `cannot encode reply value: [{"Field":"MaxUsage","Index":null}], err: not NMItems`
 	if err := updateSIPMsgFromNavMap(m, mv); err == nil || err.Error() != expectedErr {

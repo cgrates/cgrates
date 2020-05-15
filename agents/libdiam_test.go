@@ -434,7 +434,7 @@ func TestUpdateDiamMsgFromNavMap1(t *testing.T) {
 	}
 	nM.Set(&utils.FullPath{
 		Path:      strings.Join(itm.Path, utils.NestingSep),
-		PathItems: utils.NewPathToItem(itm.Path),
+		PathItems: utils.NewPathItems(itm.Path),
 	}, &utils.NMSlice{itm})
 
 	itm = &config.NMItem{
@@ -443,7 +443,7 @@ func TestUpdateDiamMsgFromNavMap1(t *testing.T) {
 	}
 	nM.Set(&utils.FullPath{
 		Path:      strings.Join(itm.Path, utils.NestingSep),
-		PathItems: utils.NewPathToItem(itm.Path),
+		PathItems: utils.NewPathItems(itm.Path),
 	}, &utils.NMSlice{itm})
 
 	itm = &config.NMItem{
@@ -452,7 +452,7 @@ func TestUpdateDiamMsgFromNavMap1(t *testing.T) {
 	}
 	nM.Set(&utils.FullPath{
 		Path:      strings.Join(itm.Path, utils.NestingSep),
-		PathItems: utils.NewPathToItem(itm.Path),
+		PathItems: utils.NewPathItems(itm.Path),
 	}, &utils.NMSlice{itm})
 
 	if err := updateDiamMsgFromNavMap(m2, nM, ""); err != nil {
@@ -518,7 +518,7 @@ func TestUpdateDiamMsgFromNavMap2(t *testing.T) {
 	}
 	nM.Set(&utils.FullPath{
 		Path:      strings.Join(itm.Path, utils.NestingSep),
-		PathItems: utils.NewPathToItem(itm.Path),
+		PathItems: utils.NewPathItems(itm.Path),
 	}, &utils.NMSlice{itm})
 
 	itm = &config.NMItem{
@@ -527,7 +527,7 @@ func TestUpdateDiamMsgFromNavMap2(t *testing.T) {
 	}
 	nM.Set(&utils.FullPath{
 		Path:      strings.Join(itm.Path, utils.NestingSep),
-		PathItems: utils.NewPathToItem(itm.Path),
+		PathItems: utils.NewPathItems(itm.Path),
 	}, &utils.NMSlice{itm})
 
 	itm = &config.NMItem{
@@ -537,7 +537,7 @@ func TestUpdateDiamMsgFromNavMap2(t *testing.T) {
 	}
 	nM.Set(&utils.FullPath{
 		Path:      strings.Join(itm.Path, utils.NestingSep),
-		PathItems: utils.NewPathToItem(itm.Path),
+		PathItems: utils.NewPathItems(itm.Path),
 	}, &utils.NMSlice{itm})
 
 	itm = &config.NMItem{
@@ -547,7 +547,7 @@ func TestUpdateDiamMsgFromNavMap2(t *testing.T) {
 	nM.Set(
 		&utils.FullPath{
 			Path:      strings.Join(itm.Path, utils.NestingSep),
-			PathItems: utils.NewPathToItem([]string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Redirect-Server", "Redirect-Address-Type[1]"}),
+			PathItems: utils.NewPathItems([]string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Redirect-Server", "Redirect-Address-Type[1]"}),
 		}, itm)
 	if err := updateDiamMsgFromNavMap(m2, nM, ""); err != nil {
 		t.Error(err)
@@ -590,7 +590,7 @@ func TestUpdateDiamMsgFromNavMap3(t *testing.T) {
 	}
 	nM.Set(&utils.FullPath{
 		Path:      strings.Join(itm.Path, utils.NestingSep),
-		PathItems: utils.NewPathToItem(itm.Path),
+		PathItems: utils.NewPathItems(itm.Path),
 	}, &utils.NMSlice{itm})
 
 	itm = &config.NMItem{
@@ -599,7 +599,7 @@ func TestUpdateDiamMsgFromNavMap3(t *testing.T) {
 	}
 	nM.Set(&utils.FullPath{
 		Path:      strings.Join(itm.Path, utils.NestingSep),
-		PathItems: utils.NewPathToItem(itm.Path),
+		PathItems: utils.NewPathItems(itm.Path),
 	}, &utils.NMSlice{itm})
 
 	itm = &config.NMItem{
@@ -608,7 +608,7 @@ func TestUpdateDiamMsgFromNavMap3(t *testing.T) {
 	}
 	nM.Set(&utils.FullPath{
 		Path:      strings.Join(itm.Path, utils.NestingSep),
-		PathItems: utils.NewPathToItem(itm.Path),
+		PathItems: utils.NewPathItems(itm.Path),
 	}, &utils.NMSlice{itm})
 
 	itm = &config.NMItem{
@@ -617,7 +617,7 @@ func TestUpdateDiamMsgFromNavMap3(t *testing.T) {
 	}
 	nM.Set(&utils.FullPath{
 		Path:      strings.Join(itm.Path, utils.NestingSep),
-		PathItems: utils.NewPathToItem(itm.Path),
+		PathItems: utils.NewPathItems(itm.Path),
 	}, &utils.NMSlice{itm})
 
 	if err := updateDiamMsgFromNavMap(m2, nM, ""); err != nil {
@@ -683,7 +683,7 @@ func TestUpdateDiamMsgFromNavMap4(t *testing.T) {
 	}
 	nM.Set(&utils.FullPath{
 		Path:      strings.Join(itm.Path, utils.NestingSep),
-		PathItems: utils.NewPathToItem(itm.Path),
+		PathItems: utils.NewPathItems(itm.Path),
 	}, &utils.NMSlice{itm})
 
 	itm = &config.NMItem{
@@ -692,7 +692,7 @@ func TestUpdateDiamMsgFromNavMap4(t *testing.T) {
 	}
 	nM.Set(&utils.FullPath{
 		Path:      strings.Join(itm.Path, utils.NestingSep),
-		PathItems: utils.NewPathToItem(itm.Path),
+		PathItems: utils.NewPathItems(itm.Path),
 	}, &utils.NMSlice{itm})
 
 	itm = &config.NMItem{
@@ -701,7 +701,7 @@ func TestUpdateDiamMsgFromNavMap4(t *testing.T) {
 	}
 	nM.Set(&utils.FullPath{
 		Path:      strings.Join(itm.Path, utils.NestingSep),
-		PathItems: utils.NewPathToItem(itm.Path),
+		PathItems: utils.NewPathItems(itm.Path),
 	}, &utils.NMSlice{itm})
 
 	itm = &config.NMItem{
@@ -710,7 +710,7 @@ func TestUpdateDiamMsgFromNavMap4(t *testing.T) {
 	}
 	nM.Set(&utils.FullPath{
 		Path:      strings.Join(itm.Path, utils.NestingSep),
-		PathItems: utils.NewPathToItem(itm.Path),
+		PathItems: utils.NewPathItems(itm.Path),
 	}, &utils.NMSlice{itm})
 
 	itm2 := &config.NMItem{
@@ -720,7 +720,7 @@ func TestUpdateDiamMsgFromNavMap4(t *testing.T) {
 	}
 	nM.Set(&utils.FullPath{
 		Path:      strings.Join(itm.Path, utils.NestingSep),
-		PathItems: utils.NewPathToItem(itm.Path),
+		PathItems: utils.NewPathItems(itm.Path),
 	}, &utils.NMSlice{itm, itm2})
 
 	itm = &config.NMItem{
@@ -729,7 +729,7 @@ func TestUpdateDiamMsgFromNavMap4(t *testing.T) {
 	}
 	nM.Set(&utils.FullPath{
 		Path:      strings.Join(itm.Path, utils.NestingSep),
-		PathItems: utils.NewPathToItem(itm.Path),
+		PathItems: utils.NewPathItems(itm.Path),
 	}, &utils.NMSlice{itm})
 
 	if err := updateDiamMsgFromNavMap(m2, nM, ""); err != nil {
