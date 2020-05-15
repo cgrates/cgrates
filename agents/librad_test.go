@@ -90,9 +90,9 @@ func TestRadReplyAppendAttributes(t *testing.T) {
 		v.ComputePath()
 	}
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", nil, nil, nil)
-	agReq.CGRReply.Set(utils.NewPathToItem([]string{utils.CapMaxUsage}), utils.NewNMData(time.Duration(time.Hour)))
-	agReq.CGRReply.Set(utils.NewPathToItem([]string{utils.CapAttributes, "RadReply"}), utils.NewNMData("AccessAccept"))
-	agReq.CGRReply.Set(utils.NewPathToItem([]string{utils.CapAttributes, utils.Account}), utils.NewNMData("1001"))
+	agReq.CGRReply.Set(utils.NewPathItems([]string{utils.CapMaxUsage}), utils.NewNMData(time.Duration(time.Hour)))
+	agReq.CGRReply.Set(utils.NewPathItems([]string{utils.CapAttributes, "RadReply"}), utils.NewNMData("AccessAccept"))
+	agReq.CGRReply.Set(utils.NewPathItems([]string{utils.CapAttributes, utils.Account}), utils.NewNMData("1001"))
 
 	if err := agReq.SetFields(rplyFlds); err != nil {
 		t.Error(err)
