@@ -80,15 +80,18 @@ func (apiv2 *APIerSv2) GetAccounts(attr utils.AttrGetAccounts, reply *[]*engine.
 	return nil
 }
 
-// GetAccountsCount returns the total number of accounts
-func (apiv2 *APIerSv2) GetAccountsCount(attr utils.AttrGetAccountsCount, reply *int) (err error) {
+// GetAccountsCount sets in reply var the total number of accounts registered for the received tenant
+// returns ErrNotFound in case of 0 accounts
+func (apiv2 *APIerSv2) GetAccountsCount(attr *utils.AttrGetAccountsCount, reply *int) (err error) {
 	if len(attr.Tenant) == 0 {
 		return utils.NewErrMandatoryIeMissing("Tenant")
 	}
 	var accountKeys []string
-
 	if accountKeys, err = apiv2.DataManager.DataDB().GetKeysForPrefix(utils.ACCOUNT_PREFIX + attr.Tenant); err != nil {
 		return err
+	}
+	if len(accountKeys) == 0 {
+		return utils.ErrNotFound
 	}
 	*reply = len(accountKeys)
 

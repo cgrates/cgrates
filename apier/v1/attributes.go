@@ -62,6 +62,24 @@ func (APIerSv1 *APIerSv1) GetAttributeProfileIDs(args utils.TenantArgWithPaginat
 	return nil
 }
 
+// GetAttributeProfileIDsCount sets in reply var the total number of AttributeProfileIDs registered for a tenant
+// returns ErrNotFound in case of 0 AttributeProfileIDs
+func (APIerSv1 *APIerSv1) GetAttributeProfileIDsCount(args *utils.TenantArg, reply *int) (err error) {
+	if missing := utils.MissingStructFields(&args, []string{utils.Tenant}); len(missing) != 0 {
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	var keys []string
+	prfx := utils.AttributeProfilePrefix + args.Tenant + ":"
+	if keys, err = APIerSv1.DataManager.DataDB().GetKeysForPrefix(prfx); err != nil {
+		return err
+	}
+	if len(keys) == 0 {
+		return utils.ErrNotFound
+	}
+	*reply = len(keys)
+	return
+}
+
 type AttributeWithCache struct {
 	*engine.AttributeProfile
 	Cache *string

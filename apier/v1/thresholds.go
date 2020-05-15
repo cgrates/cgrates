@@ -94,6 +94,24 @@ func (APIerSv1 *APIerSv1) GetThresholdProfileIDs(args utils.TenantArgWithPaginat
 	return nil
 }
 
+// GetThresholdProfileIDsCount sets in reply var the total number of ThresholdProfileIDs registered for the received tenant
+// returns ErrNotFound in case of 0 ThresholdProfileIDs
+func (APIerSv1 *APIerSv1) GetThresholdProfileIDsCount(args *utils.TenantArg, reply *int) (err error) {
+	if missing := utils.MissingStructFields(&args, []string{utils.Tenant}); len(missing) != 0 {
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	var keys []string
+	prfx := utils.ThresholdProfilePrefix + args.Tenant + ":"
+	if keys, err = APIerSv1.DataManager.DataDB().GetKeysForPrefix(prfx); err != nil {
+		return err
+	}
+	if len(keys) == 0 {
+		return utils.ErrNotFound
+	}
+	*reply = len(keys)
+	return nil
+}
+
 // SetThresholdProfile alters/creates a ThresholdProfile
 func (APIerSv1 *APIerSv1) SetThresholdProfile(args *engine.ThresholdWithCache, reply *string) error {
 	if missing := utils.MissingStructFields(args.ThresholdProfile, []string{"Tenant", "ID"}); len(missing) != 0 {

@@ -55,7 +55,9 @@ var (
 		testAPIerSv2itSetActionWithCategory,
 		testAPIerSv2itSetActionPlanWithWrongTiming,
 		testAPIerSv2itSetActionPlanWithWrongTiming2,
-		testAPIerSv2BackwardsCompatible,
+		testAPIerSv2itBackwardsCompatible,
+		testAPIerSv2itGetAccountsCount,
+		testAPIerSv2itGetActionsCount,
 		testAPIerSv2itKillEngine,
 	}
 )
@@ -431,12 +433,142 @@ func testAPIerSv2itSetActionPlanWithWrongTiming2(t *testing.T) {
 	}
 }
 
-func testAPIerSv2BackwardsCompatible(t *testing.T) {
+func testAPIerSv2itBackwardsCompatible(t *testing.T) {
 	var reply string
 	if err := apierRPC.Call("ApierV2.Ping", new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Expecting : %+v, received: %+v", utils.Pong, reply)
+	}
+}
+
+func testAPIerSv2itGetAccountsCount(t *testing.T) {
+	var reply1 int
+	if err := apierRPC.Call(utils.APIerSv2GetAccountsCount, &utils.AttrGetAccountsCount{
+		Tenant: "cgrates.org"}, &reply1); err != nil {
+		t.Error(err)
+	} else if reply1 != 3 {
+		t.Errorf("Expecting: 3, received: %+v", reply1)
+	}
+	var reply string
+	if err := apierRPC.Call(utils.APIerSv1RemoveAccount, &utils.AttrRemoveAccount{
+		Account: "dan", Tenant: "cgrates.org"}, &reply); err != nil {
+		t.Errorf("Unexpected error : %+v", err)
+	}
+	if err := apierRPC.Call(utils.APIerSv1RemoveAccount, &utils.AttrRemoveAccount{
+		Account: "TestAPIerSv2itSetAccountWithAP1", Tenant: "cgrates.org"}, &reply); err != nil {
+		t.Errorf("Unexpected error : %+v", err)
+	}
+	if err := apierRPC.Call(utils.APIerSv1RemoveAccount, &utils.AttrRemoveAccount{
+		Account: "TestAPIerSv2itSetActionWithCategory", Tenant: "cgrates.org"}, &reply); err != nil {
+		t.Errorf("Unexpected error : %+v", err)
+	}
+	if err := apierRPC.Call(utils.APIerSv2GetAccountsCount, &utils.AttrGetAccountsCount{
+		Tenant: "cgrates.org"}, &reply1); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expecting %+v, received: %+v", utils.ErrNotFound, err)
+	}
+	argSetAccount := AttrSetAccount{
+		Tenant:  "cgrates.org",
+		Account: "TestAPIerSv2CountAccounts",
+	}
+	if err := apierRPC.Call(utils.APIerSv2SetAccount, argSetAccount, &reply); err != nil {
+		t.Fatal(err)
+	}
+	var acnt engine.Account
+	if err := apierRPC.Call(utils.APIerSv2GetAccount, &utils.AttrGetAccount{
+		Tenant: "cgrates.org", Account: "TestAPIerSv2CountAccounts"}, &acnt); err != nil {
+		t.Error(err)
+	}
+	if err := apierRPC.Call(utils.APIerSv2GetAccountsCount, &utils.AttrGetAccountsCount{Tenant: "cgrates.org"}, &reply1); err != nil {
+		t.Error(err)
+	} else if reply1 != 1 {
+		t.Errorf("Expecting: 1, received: %+v", reply1)
+	}
+	argSetAccount = AttrSetAccount{
+		Tenant:  "cgrates.org",
+		Account: "TestAPIerSv2CountAccounts2",
+	}
+	if err := apierRPC.Call(utils.APIerSv2SetAccount, argSetAccount, &reply); err != nil {
+		t.Fatal(err)
+	}
+	if err := apierRPC.Call(utils.APIerSv2GetAccount, &utils.AttrGetAccount{
+		Tenant: "cgrates.org", Account: "TestAPIerSv2CountAccounts2"}, &acnt); err != nil {
+		t.Error(err)
+	}
+	if err := apierRPC.Call(utils.APIerSv2GetAccountsCount, &utils.AttrGetAccountsCount{Tenant: "cgrates.org"}, &reply1); err != nil {
+		t.Error(err)
+	} else if reply1 != 2 {
+		t.Errorf("Expecting: 2, received: %+v", reply1)
+	}
+	if err := apierRPC.Call(utils.APIerSv1RemoveAccount, &utils.AttrRemoveAccount{
+		Account: "TestAPIerSv2CountAccounts2", Tenant: "cgrates.org"}, &reply); err != nil {
+		t.Errorf("Unexpected error : %+v", err)
+	}
+	if err := apierRPC.Call(utils.APIerSv2GetAccountsCount, &utils.AttrGetAccountsCount{Tenant: "cgrates.org"}, &reply1); err != nil {
+		t.Error(err)
+	} else if reply1 != 1 {
+		t.Errorf("Expecting: 1, received: %+v", reply1)
+	}
+	if err := apierRPC.Call(utils.APIerSv1RemoveAccount, &utils.AttrRemoveAccount{
+		Account: "TestAPIerSv2CountAccounts", Tenant: "cgrates.org"}, &reply); err != nil {
+		t.Errorf("Unexpected error : %+v", err)
+	}
+	if err := apierRPC.Call(utils.APIerSv2GetAccountsCount, &utils.AttrGetAccountsCount{
+		Tenant: "cgrates.org"}, &reply1); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expecting %+v, received: %+v", utils.ErrNotFound, err)
+	}
+}
+
+func testAPIerSv2itGetActionsCount(t *testing.T) {
+	var reply1 int
+	if err := apierRPC.Call(utils.APIerSv2GetActionsCount, &AttrGetActionsCount{}, &reply1); err != nil {
+		t.Error(err)
+	} else if reply1 != 3 {
+		t.Errorf("Expecting: 3, received : %+v", reply1)
+	}
+	attrs := utils.AttrSetActions{ActionsId: "DISABLE_ACCOUNT2", Actions: []*utils.TPAction{
+		{Identifier: utils.DISABLE_ACCOUNT, Weight: 0.7},
+	}}
+	var reply string
+	if err := apierRPC.Call(utils.APIerSv2SetActions, attrs, &reply); err != nil {
+		t.Error(err)
+	}
+	if err := apierRPC.Call(utils.APIerSv2GetActionsCount, &AttrGetActionsCount{}, &reply1); err != nil {
+		t.Error(err)
+	} else if reply1 != 4 {
+		t.Errorf("Expecting: 4, received : %+v", reply1)
+	}
+
+	attrRemoveActions := &v1.AttrRemoveActions{
+		ActionIDs: []string{"DISABLE_ACCOUNT", "DISABLE_ACCOUNT2", "TestAPIerSv2itSetAccountWithAP_ACT_1"},
+	}
+	if err := apierRPC.Call(utils.APIerSv2RemoveActions, &attrRemoveActions, &reply); err != nil {
+		t.Error(err)
+	}
+	if err := apierRPC.Call(utils.APIerSv2GetActionsCount, &AttrGetActionsCount{}, &reply1); err != nil {
+		t.Error(err)
+	} else if reply1 != 1 {
+		t.Errorf("Expecting: 1, received : %+v", reply1)
+	}
+	attrRemoveActions = &v1.AttrRemoveActions{
+		ActionIDs: []string{"TestAPIerSv2itSetActionWithCategory_ACT"},
+	}
+	if err := apierRPC.Call(utils.APIerSv2RemoveActions, &attrRemoveActions, &reply); err != nil {
+		t.Error(err)
+	}
+	if err := apierRPC.Call(utils.APIerSv2GetActionsCount, &AttrGetActionsCount{}, &reply1); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expecting %+v, received: %+v", utils.ErrNotFound, err)
+	}
+	attrs = utils.AttrSetActions{ActionsId: "Test", Actions: []*utils.TPAction{
+		{Identifier: utils.DISABLE_ACCOUNT, Weight: 0.7},
+	}}
+	if err := apierRPC.Call(utils.APIerSv2SetActions, attrs, &reply); err != nil {
+		t.Error(err)
+	}
+	if err := apierRPC.Call(utils.APIerSv2GetActionsCount, &AttrGetActionsCount{}, &reply1); err != nil {
+		t.Error(err)
+	} else if reply1 != 1 {
+		t.Errorf("Expecting: 1, received : %+v", reply1)
 	}
 }
 
