@@ -1550,7 +1550,7 @@ func generateRandomTemplate(size int) (out []benchData) {
 	for i := 0; i < size; i++ {
 		out[i].path = generateRandomPath()
 		out[i].data = utils.UUIDSha1Prefix()
-		out[i].pathItems = utils.NewPathToItem(out[i].path)
+		out[i].pathItems = utils.NewPathItems(out[i].path)
 		out[i].strPath = out[i].pathItems.String()
 		// out[i].pathItems[len(out[i].pathItems)-1].Index = IntPointer(0)
 	}

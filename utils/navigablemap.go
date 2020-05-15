@@ -176,7 +176,7 @@ func (nm NavigableMap2) Len() int {
 // Is used by AgentRequest FieldAsInterface
 func (nm NavigableMap2) FieldAsInterface(fldPath []string) (str interface{}, err error) {
 	var nmi NMInterface
-	if nmi, err = nm.Field(NewPathToItem(fldPath)); err != nil {
+	if nmi, err = nm.Field(NewPathItems(fldPath)); err != nil {
 		return
 	}
 	return nmi.Interface(), nil
