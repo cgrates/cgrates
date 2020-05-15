@@ -218,8 +218,9 @@ func (apiv2 *APIerSv2) GetActions(attr AttrGetActions, reply *map[string]engine.
 
 type AttrGetActionsCount struct{}
 
-// GetActionsCount get
-func (apiv2 *APIerSv2) GetActionsCount(attr AttrGetActionsCount, reply *int) (err error) {
+// GetActionsCount sets in reply var the total number of actions registered for the received tenant
+// returns ErrNotFound in case of 0 actions
+func (apiv2 *APIerSv2) GetActionsCount(attr *AttrGetActionsCount, reply *int) (err error) {
 	var actionKeys []string
 	if actionKeys, err = apiv2.DataManager.DataDB().GetKeysForPrefix(utils.ACTION_PREFIX); err != nil {
 		return err

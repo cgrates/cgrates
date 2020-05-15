@@ -1218,6 +1218,7 @@ const (
 	APIerSv1GetSharedGroup              = "APIerSv1.GetSharedGroup"
 	APIerSv1RemoveActionTrigger         = "APIerSv1.RemoveActionTrigger"
 	APIerSv1GetAccount                  = "APIerSv1.GetAccount"
+	APIerSv1GetAttributeProfileIDsCount = "APIerSv1.GetAttributeProfileIDsCount"
 )
 
 // APIerSv1 TP APIs
@@ -1258,6 +1259,8 @@ const (
 	APIerSv2ResetAccountActionTriggers = "APIerSv2.ResetAccountActionTriggers"
 	APIerSv2RemoveActions              = "APIerSv2.RemoveActions"
 	APIerSv2ExportCdrsToFile           = "APIerSv2.ExportCdrsToFile"
+	APIerSv2GetAccountsCount           = "APIerSv2.GetAccountsCount"
+	APIerSv2GetActionsCount            = "APIerSv2.GetActionsCount"
 )
 
 const (
