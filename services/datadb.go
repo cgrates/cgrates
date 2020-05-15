@@ -25,7 +25,6 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // NewDataDBService returns the DataDB Service
@@ -78,11 +77,6 @@ func (db *DataDBService) Start() (err error) {
 	}
 	db.dbchan <- db.db
 	return
-}
-
-// GetIntenternalChan returns the internal connection chanel
-func (db *DataDBService) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
-	return nil
 }
 
 // Reload handles the change of config

@@ -82,11 +82,6 @@ func (api *APIerSv2Service) Start() (err error) {
 	return
 }
 
-// GetIntenternalChan returns the internal connection chanel
-func (api *APIerSv2Service) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
-	return api.connChan
-}
-
 // Reload handles the change of config
 func (api *APIerSv2Service) Reload() (err error) {
 	return

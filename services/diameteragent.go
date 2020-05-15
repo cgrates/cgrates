@@ -27,7 +27,6 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // NewDiameterAgent returns the Diameter Agent
@@ -79,11 +78,6 @@ func (da *DiameterAgent) Start() (err error) {
 		da.exitChan <- true
 	}()
 	return
-}
-
-// GetIntenternalChan returns the internal connection chanel
-func (da *DiameterAgent) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
-	return nil
 }
 
 // Reload handles the change of config

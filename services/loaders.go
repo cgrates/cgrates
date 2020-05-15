@@ -90,11 +90,6 @@ func (ldrs *LoaderService) Start() (err error) {
 	return
 }
 
-// GetIntenternalChan returns the internal connection chanel
-func (ldrs *LoaderService) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
-	return ldrs.connChan
-}
-
 // Reload handles the change of config
 func (ldrs *LoaderService) Reload() (err error) {
 	filterS := <-ldrs.filterSChan

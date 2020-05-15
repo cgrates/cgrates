@@ -80,11 +80,6 @@ func (anz *AnalyzerService) Start() (err error) {
 	return
 }
 
-// GetIntenternalChan returns the internal connection chanel
-func (anz *AnalyzerService) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
-	return anz.connChan
-}
-
 // Reload handles the change of config
 func (anz *AnalyzerService) Reload() (err error) {
 	return // for the momment nothing to reload

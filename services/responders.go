@@ -75,11 +75,6 @@ func (resp *ResponderService) Start() (err error) {
 	return
 }
 
-// GetIntenternalChan returns the internal connection chanel
-func (resp *ResponderService) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
-	return resp.connChan
-}
-
 // Reload handles the change of config
 func (resp *ResponderService) Reload() (err error) {
 	resp.Lock()

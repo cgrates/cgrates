@@ -27,7 +27,6 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // NewRadiusAgent returns the Radius Agent
@@ -76,11 +75,6 @@ func (rad *RadiusAgent) Start() (err error) {
 		rad.exitChan <- true
 	}()
 	return
-}
-
-// GetIntenternalChan returns the internal connection chanel
-func (rad *RadiusAgent) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
-	return nil
 }
 
 // Reload handles the change of config

@@ -95,11 +95,6 @@ func (splS *SupplierService) Start() (err error) {
 	return
 }
 
-// GetIntenternalChan returns the internal connection chanel
-func (splS *SupplierService) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
-	return splS.connChan
-}
-
 // Reload handles the change of config
 func (splS *SupplierService) Reload() (err error) {
 	return

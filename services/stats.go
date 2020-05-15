@@ -93,11 +93,6 @@ func (sts *StatService) Start() (err error) {
 	return
 }
 
-// GetIntenternalChan returns the internal connection chanel
-func (sts *StatService) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
-	return sts.connChan
-}
-
 // Reload handles the change of config
 func (sts *StatService) Reload() (err error) {
 	sts.Lock()
