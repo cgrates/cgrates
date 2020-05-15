@@ -138,8 +138,7 @@ func (dS *DispatcherService) dispatcherProfileForEvent(ev *utils.CGREvent,
 			return nil, err
 		}
 	}
-	evNm := config.NewNavigableMap(nil)
-	evNm.Set([]string{utils.MetaReq}, ev.Event, false, false)
+	evNm := utils.MapStorage{utils.MetaReq: ev.Event}
 	for prflID := range prflIDs {
 		prfl, err := dS.dm.GetDispatcherProfile(ev.Tenant, prflID, true, true, utils.NonTransactional)
 		if err != nil {

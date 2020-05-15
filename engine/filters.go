@@ -472,9 +472,9 @@ func (fS *FilterS) getFieldNameDataProvider(initialDP utils.DataProvider,
 			&statValues); err != nil {
 			return nil, err
 		}
-		evNm := config.NewNavigableMap(nil)
+		evNm := utils.MapStorage{}
 		for k, v := range statValues {
-			evNm.Set([]string{utils.MetaStats, splitFldName[1], k}, v, false, false)
+			evNm.Set([]string{utils.MetaStats, splitFldName[1], k}, v)
 		}
 		dp = evNm
 	case strings.HasPrefix(fieldName, utils.DynamicDataPrefix+utils.MetaReq),
@@ -551,8 +551,8 @@ func (fS *FilterS) getFieldValueDataProvider(initialDP utils.DataProvider,
 		for k, v := range statValues {
 			ifaceMetric[k] = v
 		}
-		evNm := config.NewNavigableMap(nil)
-		evNm.Set([]string{utils.MetaStats, splitFldName[1]}, ifaceMetric, false, false)
+		evNm := utils.MapStorage{}
+		evNm.Set([]string{utils.MetaStats, splitFldName[1]}, ifaceMetric)
 		dp = evNm
 	case strings.HasPrefix(fieldValue, utils.DynamicDataPrefix+utils.MetaReq),
 		strings.HasPrefix(fieldValue, utils.DynamicDataPrefix+utils.MetaVars),
@@ -563,7 +563,7 @@ func (fS *FilterS) getFieldValueDataProvider(initialDP utils.DataProvider,
 		strings.HasPrefix(fieldValue, utils.DynamicDataPrefix+utils.MetaAct):
 		dp = initialDP
 	default: // in case of constant we give an empty DataProvider ( empty navigable map )
-		dp = config.NewNavigableMap(nil)
+		dp = utils.MapStorage{}
 	}
 
 	return
