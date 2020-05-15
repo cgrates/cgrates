@@ -117,11 +117,6 @@ func (smg *SessionService) Start() (err error) {
 	return
 }
 
-// GetIntenternalChan returns the internal connection chanel
-func (smg *SessionService) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
-	return smg.connChan
-}
-
 // Reload handles the change of config
 func (smg *SessionService) Reload() (err error) {
 	return

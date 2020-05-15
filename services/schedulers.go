@@ -90,11 +90,6 @@ func (schS *SchedulerService) Start() (err error) {
 	return
 }
 
-// GetIntenternalChan returns the internal connection chanel
-func (schS *SchedulerService) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
-	return schS.connChan
-}
-
 // Reload handles the change of config
 func (schS *SchedulerService) Reload() (err error) {
 	schS.Lock()

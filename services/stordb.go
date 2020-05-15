@@ -26,7 +26,6 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // NewStorDBService returns the StorDB Service
@@ -76,11 +75,6 @@ func (db *StorDBService) Start() (err error) {
 	}
 	db.sync()
 	return
-}
-
-// GetIntenternalChan returns the internal connection chanel
-func (db *StorDBService) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
-	return nil
 }
 
 // Reload handles the change of config

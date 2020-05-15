@@ -27,7 +27,6 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // NewSIPAgent returns the sip Agent
@@ -74,12 +73,6 @@ func (sip *SIPAgent) Start() (err error) {
 		}
 	}()
 	return
-}
-
-// GetIntenternalChan returns the internal connection chanel
-// no chanel for SIPAgent
-func (sip *SIPAgent) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
-	return nil
 }
 
 // Reload handles the change of config

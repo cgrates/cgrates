@@ -95,11 +95,6 @@ func (routeS *RouteService) Start() (err error) {
 	return
 }
 
-// GetIntenternalChan returns the internal connection chanel
-func (routeS *RouteService) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
-	return routeS.connChan
-}
-
 // Reload handles the change of config
 func (routeS *RouteService) Reload() (err error) {
 	return

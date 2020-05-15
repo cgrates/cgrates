@@ -28,7 +28,6 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // NewFreeswitchAgent returns the Freeswitch Agent
@@ -69,12 +68,6 @@ func (fS *FreeswitchAgent) Start() (err error) {
 		}
 	}()
 	return
-}
-
-// GetIntenternalChan returns the internal connection chanel
-// no chanel for FreeswitchAgent
-func (fS *FreeswitchAgent) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
-	return nil
 }
 
 // Reload handles the change of config

@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/cgrates/cgrates/apier/v1"
+	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/ees"
 	"github.com/cgrates/cgrates/engine"
@@ -60,11 +60,6 @@ type EventExporterService struct {
 
 	eeS *ees.EventExporterS
 	rpc *v1.EventExporterSv1
-}
-
-// GetIntenternalChan is deprecated and it will be removed shortly
-func (es *EventExporterService) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
-	panic("deprecated method")
 }
 
 // ServiceName returns the service name

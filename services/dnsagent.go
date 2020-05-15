@@ -27,7 +27,6 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // NewDNSAgent returns the DNS Agent
@@ -78,12 +77,6 @@ func (dns *DNSAgent) Start() (err error) {
 		}
 	}()
 	return
-}
-
-// GetIntenternalChan returns the internal connection chanel
-// no chanel for DNSAgent
-func (dns *DNSAgent) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
-	return nil
 }
 
 // Reload handles the change of config

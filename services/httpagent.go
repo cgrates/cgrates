@@ -27,7 +27,6 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // NewHTTPAgent returns the HTTP Agent
@@ -71,11 +70,6 @@ func (ha *HTTPAgent) Start() (err error) {
 				agntCfg.ReplyPayload, agntCfg.RequestProcessors))
 	}
 	return
-}
-
-// GetIntenternalChan returns the internal connection chanel
-func (ha *HTTPAgent) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
-	return nil
 }
 
 // Reload handles the change of config

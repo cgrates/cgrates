@@ -91,11 +91,6 @@ func (thrs *ThresholdService) Start() (err error) {
 	return
 }
 
-// GetIntenternalChan returns the internal connection chanel
-func (thrs *ThresholdService) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
-	return thrs.connChan
-}
-
 // Reload handles the change of config
 func (thrs *ThresholdService) Reload() (err error) {
 	thrs.Lock()
