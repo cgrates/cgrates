@@ -1080,14 +1080,12 @@ func (sS *SessionS) forkSession(s *Session, forceDuration bool) (err error) {
 		return errors.New("already forked")
 	}
 	cgrEv := &utils.CGREventWithOpts{
-		CGREventWithArgDispatcher: &utils.CGREventWithArgDispatcher{
-			CGREvent: &utils.CGREvent{
-				Tenant: s.Tenant,
-				ID:     utils.UUIDSha1Prefix(),
-				Event:  s.EventStart,
-			},
-			ArgDispatcher: s.ArgDispatcher,
+		CGREvent: &utils.CGREvent{
+			Tenant: s.Tenant,
+			ID:     utils.UUIDSha1Prefix(),
+			Event:  s.EventStart,
 		},
+		ArgDispatcher: s.ArgDispatcher,
 	}
 	var chrgrs []*engine.ChrgSProcessEventReply
 	if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().ChargerSConns, nil,

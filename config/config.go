@@ -354,7 +354,7 @@ func (cfg *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		cfg.loadMailerCfg, cfg.loadSureTaxCfg, cfg.loadDispatcherSCfg,
 		cfg.loadLoaderCgrCfg, cfg.loadMigratorCgrCfg, cfg.loadTlsCgrCfg,
 		cfg.loadAnalyzerCgrCfg, cfg.loadApierCfg, cfg.loadErsCfg, cfg.loadEesCfg,
-		cfg.loadRateCfg, cfg.loadSIPAgentCfg} {
+		cfg.loadRateSCfg, cfg.loadSIPAgentCfg} {
 		if err = loadFunc(jsnCfg); err != nil {
 			return
 		}
@@ -745,8 +745,8 @@ func (cfg *CGRConfig) loadEesCfg(jsnCfg *CgrJsonCfg) (err error) {
 	return cfg.eesCfg.loadFromJsonCfg(jsnEEsCfg, cfg.generalCfg.RSRSep, cfg.dfltEvExp)
 }
 
-// loadEesCfg loads the Ees section of the configuration
-func (cfg *CGRConfig) loadRateCfg(jsnCfg *CgrJsonCfg) (err error) {
+// loadRateSCfg loads the rates section of the configuration
+func (cfg *CGRConfig) loadRateSCfg(jsnCfg *CgrJsonCfg) (err error) {
 	var jsnRateCfg *RateSJsonCfg
 	if jsnRateCfg, err = jsnCfg.RateCfgJson(); err != nil {
 		return
@@ -754,7 +754,7 @@ func (cfg *CGRConfig) loadRateCfg(jsnCfg *CgrJsonCfg) (err error) {
 	return cfg.rateSCfg.loadFromJsonCfg(jsnRateCfg)
 }
 
-// loadApierCfg loads the Apier section of the configuration
+// loadSIPAgentCfg loads the sip_agent section of the configuration
 func (cfg *CGRConfig) loadSIPAgentCfg(jsnCfg *CgrJsonCfg) (err error) {
 	var jsnSIPAgentCfg *SIPAgentJsonCfg
 	if jsnSIPAgentCfg, err = jsnCfg.SIPAgentJsonCfg(); err != nil {
@@ -1247,7 +1247,7 @@ func (cfg *CGRConfig) getLoadFunctions() map[string]func(*CgrJsonCfg) error {
 		AnalyzerCfgJson:    cfg.loadAnalyzerCgrCfg,
 		ApierS:             cfg.loadApierCfg,
 		RPCConnsJsonName:   cfg.loadRPCConns,
-		RateSJson:          cfg.loadRateCfg,
+		RateSJson:          cfg.loadRateSCfg,
 		SIPAgentJson:       cfg.loadSIPAgentCfg,
 	}
 }

@@ -185,7 +185,8 @@ type EventWithFlags struct {
 // CGREventWithOpts is the event with Opts needed for ChargerSv1.ProccesEvent
 type CGREventWithOpts struct {
 	Opts map[string]interface{}
-	*CGREventWithArgDispatcher
+	*CGREvent
+	*ArgDispatcher
 }
 
 func getArgDispatcherFromOpts(ev map[string]interface{}) (arg *ArgDispatcher) {
@@ -263,6 +264,27 @@ func ExtractArgsFromOpts(ev map[string]interface{}, dispatcherFlag, consumeRoute
 	}
 	if consumeRoutePaginator {
 		ca.RoutePaginator, err = getRoutePaginatorFromOpts(ev)
+	}
+	return
+}
+
+func (ev *CGREventWithOpts) Clone() (clned *CGREventWithOpts) {
+	if ev == nil {
+		return
+	}
+	clned = new(CGREventWithOpts)
+	if ev.CGREvent != nil {
+		clned.CGREvent = ev.CGREvent.Clone()
+	}
+	if ev.ArgDispatcher != nil {
+		clned.ArgDispatcher = new(ArgDispatcher)
+		*clned.ArgDispatcher = *ev.ArgDispatcher
+	}
+	if ev.Opts != nil {
+		clned.Opts = make(map[string]interface{})
+		for opt, val := range ev.Opts {
+			clned.Opts[opt] = val
+		}
 	}
 	return
 }
