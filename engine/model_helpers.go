@@ -1933,13 +1933,11 @@ func (tps TPRoutes) AsTPRouteProfile() (result []*utils.TPRouteProfile) {
 			sup, found := routeMap[tenID][routeID]
 			if !found {
 				sup = &utils.TPRoute{
-					ID:      tp.RouteID,
-					Weight:  tp.RouteWeight,
-					Blocker: tp.RouteBlocker,
+					ID:              tp.RouteID,
+					Weight:          tp.RouteWeight,
+					Blocker:         tp.RouteBlocker,
+					RouteParameters: tp.RouteParameters,
 				}
-			}
-			if tp.RouteParameters != utils.EmptyString {
-				sup.RouteParameters = tp.RouteParameters
 			}
 			if tp.RouteFilterIDs != utils.EmptyString {
 				supFilterSplit := strings.Split(tp.RouteFilterIDs, utils.INFIELD_SEP)
@@ -1978,7 +1976,7 @@ func (tps TPRoutes) AsTPRouteProfile() (result []*utils.TPRouteProfile) {
 		if tp.Weight != 0 {
 			th.Weight = tp.Weight
 		}
-		if len(tp.ActivationInterval) != 0 {
+		if tp.ActivationInterval != utils.EmptyString {
 			th.ActivationInterval = new(utils.TPActivationInterval)
 			aiSplt := strings.Split(tp.ActivationInterval, utils.INFIELD_SEP)
 			if len(aiSplt) == 2 {

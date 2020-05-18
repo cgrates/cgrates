@@ -57,6 +57,7 @@ cgrates (0.11.0~dev) UNRELEASED; urgency=medium
   * [General] Default timingIDs start from time.Now() (i.e. *monthly time.Now() + 1 month )
   * [AgentS] FieldAsInterface return data instead of NMItem
   * [RouteS] Add posibility to load routes with the sameID and different filters
+  * [RouteS] Correctly populate Sorting out of models
 
  -- Alexandru Tripon <alexandru.tripon@itsyscom.com>  Wed, 19 Feb 2020 13:25:52 +0200
 
