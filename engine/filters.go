@@ -53,6 +53,7 @@ func (fS *FilterS) Pass(tenant string, filterIDs []string,
 	if len(filterIDs) == 0 {
 		return true, nil
 	}
+	dDP := newDynamicDP(fS.cfg, fS.connMgr, tenant, ev)
 	for _, fltrID := range filterIDs {
 		f, err := fS.dm.GetFilter(tenant, fltrID,
 			true, true, utils.NonTransactional)
@@ -66,7 +67,6 @@ func (fS *FilterS) Pass(tenant string, filterIDs []string,
 			!f.ActivationInterval.IsActiveAtTime(time.Now()) { // not active
 			continue
 		}
-		dDP := newDynamicDP(fS.cfg, fS.connMgr, tenant, ev)
 		for _, fltr := range f.Rules {
 			if pass, err = fltr.Pass(dDP); err != nil || !pass {
 				return pass, err
@@ -117,6 +117,7 @@ func (fS *FilterS) LazyPass(tenant string, filterIDs []string,
 		return true, nil, nil
 	}
 	pass = true
+	dDP := newDynamicDP(fS.cfg, fS.connMgr, tenant, ev)
 	for _, fltrID := range filterIDs {
 		var f *Filter
 		f, err = fS.dm.GetFilter(tenant, fltrID,
@@ -137,7 +138,6 @@ func (fS *FilterS) LazyPass(tenant string, filterIDs []string,
 				lazyCheckRules = append(lazyCheckRules, rule)
 				continue
 			}
-			dDP := newDynamicDP(fS.cfg, fS.connMgr, tenant, ev)
 			if pass, err = rule.Pass(dDP); err != nil || !pass {
 				return
 			}

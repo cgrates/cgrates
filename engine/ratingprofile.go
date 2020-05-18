@@ -167,14 +167,14 @@ func (rpf *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (err error
 			continue
 		}
 		prefix := ""
-		destinationId := ""
+		destinationID := ""
 		var rps RateIntervalList
 		if cd.Destination == utils.ANY || cd.Destination == "" {
 			cd.Destination = utils.ANY
 			if _, ok := rpl.DestinationRates[utils.ANY]; ok {
 				rps = rpl.RateIntervalList(utils.ANY)
 				prefix = utils.ANY
-				destinationId = utils.ANY
+				destinationID = utils.ANY
 			}
 		} else {
 			for _, p := range utils.SplitPrefix(cd.Destination, MIN_PREFIX_MATCH) {
@@ -198,7 +198,7 @@ func (rpf *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (err error
 								bestWeight = utils.Float64Pointer(currentWeight)
 								rps = ril
 								prefix = p
-								destinationId = dID
+								destinationID = dID
 							}
 						}
 					}
@@ -211,7 +211,7 @@ func (rpf *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (err error
 				if _, ok := rpl.DestinationRates[utils.ANY]; ok {
 					rps = rpl.RateIntervalList(utils.ANY)
 					prefix = utils.ANY
-					destinationId = utils.ANY
+					destinationID = utils.ANY
 				}
 			}
 		}
@@ -230,7 +230,7 @@ func (rpf *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (err error
 				MatchedSubject: rpf.Id,
 				RatingPlanId:   rpl.Id,
 				MatchedPrefix:  prefix,
-				MatchedDestId:  destinationId,
+				MatchedDestId:  destinationID,
 				ActivationTime: rpa.ActivationTime,
 				RateIntervals:  rps,
 				FallbackKeys:   rpa.FallbackKeys})

@@ -242,16 +242,18 @@ func (sa *SIPAgent) handleMessage(sipMessage sipingo.Message, remoteHost string)
 			utils.FirstNonEmpty(reqProcessor.Timezone,
 				config.CgrConfig().GeneralCfg().DefaultTimezone),
 			sa.filterS, nil, nil)
-		if processed, err = sa.processRequest(reqProcessor, agReq); err != nil {
+		var lclProcessed bool
+		if lclProcessed, err = sa.processRequest(reqProcessor, agReq); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s processing request: %s",
 					utils.SIPAgent, err.Error(), utils.ToJSON(agReq)))
 			continue
 		}
-		if !processed {
-			continue
+		if lclProcessed {
+			processed = lclProcessed
 		}
-		if processed && !reqProcessor.Flags.GetBool(utils.MetaContinue) {
+		if err != nil ||
+			(lclProcessed && !reqProcessor.Flags.GetBool(utils.MetaContinue)) {
 			break
 		}
 	}

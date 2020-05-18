@@ -1,0 +1,5 @@
+#Tenant,ID,FilterIDs,ActivationInterval,Sorting,SortingParameters,RouteID,RouteFilterIDs,RouteAccountIDs,RouteRatingPlanIDs,RouteResourceIDs,RouteStatIDs,RouteWeight,RouteBlocker,RouteParameters,Weight
+cgrates.org,SPL_ACNT_1001,*string:~*req.Account:1001,2017-11-27T00:00:00Z,*weight,,supplier1,,,RP_10CNT,,,20,,cgrates.org,20
+cgrates.org,SPL_ACNT_1001,,,,,supplier2,,,RP_20CNT,,,10,,cgrates.net,10
+cgrates.org,SPL_ACNT_1001,,,,,supplier3,,,RP_1CNT,,,5,,cgrates.com,5
+

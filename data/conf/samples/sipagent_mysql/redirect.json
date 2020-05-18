@@ -21,6 +21,10 @@
 						"value": "~*req.From{*sipuri_user}", "mandatory": true},
 					{"tag": "Destination", "path": "*cgreq.Destination", "type": "*variable",
 						"value": "~*req.To{*sipuri_user}", "mandatory": true},
+					{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*variable",
+						"value": "*now", "mandatory": true},
+					{"tag": "Category", "path": "*cgreq.Category", "type": "*variable",
+						"value": "call", "mandatory": true},
 				],
 				"reply_fields":[
 				]
@@ -28,8 +32,10 @@
 			{
 				"id": "NAPTRSuppliersOneSupplier",
 				"filters": ["*string:~*vars.Method:INVITE",
-					],
-				"flags": ["*none","*continue","*log"], // do not send request to CGRateS
+					"*gte:~*cgrep.Routes.Count:1",
+					"*gte:~*cgrep.Routes.SortedRoutes[0].SortingData.Cost:0.1",
+				],
+				"flags": ["*none","*continue"], // do not send request to CGRateS
 				"reply_fields":[
 					{"tag": "Request", "path": "*rep.Request", "type": "*constant",
 						"value": "SIP/2.0 302 Moved Temporarily"},
@@ -52,7 +58,9 @@
 			{
 				"id": "NAPTRSuppliersTwoSuppliers",
 				"filters": ["*string:~*vars.Method:INVITE",
-					"*gte:~*cgrep.Routes.Count:2"],
+					"*gte:~*cgrep.Routes.Count:2",
+					"*gte:~*cgrep.Routes.SortedRoutes[1].SortingData.Cost:0.1",
+				],
 				"flags": ["*none","*continue"],
 				"reply_fields":[
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
@@ -67,6 +75,30 @@
 							"value":"@"},
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
 						"value": "~*cgrep.Routes.SortedRoutes[1].RouteParameters"},
+					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
+							"value":"*constant:>;q=0.1"}
+				]
+			},
+			{
+				"id": "NAPTRSuppliersThreeSuppliers",
+				"filters": ["*string:~*vars.Method:INVITE",
+					"*gte:~*cgrep.Routes.Count:3",
+					"*gte:~*cgrep.Routes.SortedRoutes[2].SortingData.Cost:0.1",
+				],
+				"flags": ["*none","*continue"],
+				"reply_fields":[
+					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
+							"value":",\""},
+					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
+							"value":"~*req.To{*sipuri_user}"},
+					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
+							"value":"\" <sip:"},
+					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
+							"value":"~*req.To{*sipuri_user}"},
+					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
+							"value":"@"},
+					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
+						"value": "~*cgrep.Routes.SortedRoutes[2].RouteParameters"},
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
 							"value":"*constant:>;q=0.1"}
 				]
