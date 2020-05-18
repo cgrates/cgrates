@@ -1739,3 +1739,153 @@ func TestAPItoModelTPDispatcher(t *testing.T) {
 		t.Errorf("Expecting : %+v, \n received: %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
 }
+
+func TestTPSuppliersAsTPSupplierProfiles(t *testing.T) {
+	mdl := TpSuppliers{
+		&TpSupplier{
+			PK:                    1,
+			Tpid:                  "TP",
+			Tenant:                "cgrates.org",
+			ID:                    "SupplierPrf",
+			FilterIDs:             "FltrSupplier",
+			ActivationInterval:    "2017-11-27T00:00:00Z",
+			Sorting:               "*weight",
+			SortingParameters:     "srtPrm1;srtPrm2",
+			SupplierID:            "supplier1",
+			SupplierFilterIDs:     "",
+			SupplierAccountIDs:    "",
+			SupplierRatingplanIDs: "",
+			SupplierResourceIDs:   "",
+			SupplierStatIDs:       "",
+			SupplierWeight:        10.0,
+			SupplierBlocker:       false,
+			SupplierParameters:    "",
+			Weight:                10.0,
+			CreatedAt:             time.Time{},
+		},
+		&TpSupplier{
+			PK:                    2,
+			Tpid:                  "TP",
+			Tenant:                "cgrates.org",
+			ID:                    "SupplierPrf",
+			FilterIDs:             "",
+			ActivationInterval:    "",
+			Sorting:               "",
+			SortingParameters:     "",
+			SupplierID:            "supplier2",
+			SupplierFilterIDs:     "",
+			SupplierAccountIDs:    "",
+			SupplierRatingplanIDs: "",
+			SupplierResourceIDs:   "",
+			SupplierStatIDs:       "",
+			SupplierWeight:        20.0,
+			SupplierBlocker:       false,
+			SupplierParameters:    "",
+			Weight:                0,
+			CreatedAt:             time.Time{},
+		},
+	}
+	expPrf := []*utils.TPSupplierProfile{
+		&utils.TPSupplierProfile{
+			TPid:              "TP",
+			Tenant:            "cgrates.org",
+			ID:                "SupplierPrf",
+			Sorting:           "*weight",
+			SortingParameters: []string{"srtPrm1", "srtPrm2"},
+			FilterIDs:         []string{"FltrSupplier"},
+			ActivationInterval: &utils.TPActivationInterval{
+				ActivationTime: "2017-11-27T00:00:00Z",
+				ExpiryTime:     "",
+			},
+			Suppliers: []*utils.TPSupplier{
+				&utils.TPSupplier{
+					ID:     "supplier1",
+					Weight: 10.0,
+				},
+				&utils.TPSupplier{
+					ID:     "supplier2",
+					Weight: 20.0,
+				},
+			},
+			Weight: 10,
+		},
+	}
+	rcv := mdl.AsTPSuppliers()
+	if !reflect.DeepEqual(rcv, expPrf) {
+		t.Errorf("Expecting: %+v,\nReceived: %+v", utils.ToJSON(expPrf), utils.ToJSON(rcv))
+	}
+
+	mdlReverse := TpSuppliers{
+		&TpSupplier{
+			PK:                    2,
+			Tpid:                  "TP",
+			Tenant:                "cgrates.org",
+			ID:                    "SupplierPrf",
+			FilterIDs:             "",
+			ActivationInterval:    "",
+			Sorting:               "",
+			SortingParameters:     "",
+			SupplierID:            "supplier2",
+			SupplierFilterIDs:     "",
+			SupplierAccountIDs:    "",
+			SupplierRatingplanIDs: "",
+			SupplierResourceIDs:   "",
+			SupplierStatIDs:       "",
+			SupplierWeight:        20.0,
+			SupplierBlocker:       false,
+			SupplierParameters:    "",
+			Weight:                0,
+			CreatedAt:             time.Time{},
+		},
+		&TpSupplier{
+			PK:                    1,
+			Tpid:                  "TP",
+			Tenant:                "cgrates.org",
+			ID:                    "SupplierPrf",
+			FilterIDs:             "FltrSupplier",
+			ActivationInterval:    "2017-11-27T00:00:00Z",
+			Sorting:               "*weight",
+			SortingParameters:     "srtPrm1;srtPrm2",
+			SupplierID:            "supplier1",
+			SupplierFilterIDs:     "",
+			SupplierAccountIDs:    "",
+			SupplierRatingplanIDs: "",
+			SupplierResourceIDs:   "",
+			SupplierStatIDs:       "",
+			SupplierWeight:        10.0,
+			SupplierBlocker:       false,
+			SupplierParameters:    "",
+			Weight:                10.0,
+			CreatedAt:             time.Time{},
+		},
+	}
+	expPrfRev := []*utils.TPSupplierProfile{
+		&utils.TPSupplierProfile{
+			TPid:              "TP",
+			Tenant:            "cgrates.org",
+			ID:                "SupplierPrf",
+			Sorting:           "*weight",
+			SortingParameters: []string{"srtPrm1", "srtPrm2"},
+			FilterIDs:         []string{"FltrSupplier"},
+			ActivationInterval: &utils.TPActivationInterval{
+				ActivationTime: "2017-11-27T00:00:00Z",
+				ExpiryTime:     "",
+			},
+			Suppliers: []*utils.TPSupplier{
+				&utils.TPSupplier{
+					ID:     "supplier2",
+					Weight: 20.0,
+				},
+				&utils.TPSupplier{
+					ID:     "supplier1",
+					Weight: 10.0,
+				},
+			},
+			Weight: 10,
+		},
+	}
+	rcvRev := mdlReverse.AsTPSuppliers()
+	if !reflect.DeepEqual(rcvRev, expPrfRev) {
+		t.Errorf("Expecting: %+v,\nReceived: %+v", utils.ToJSON(expPrfRev), utils.ToJSON(rcvRev))
+	}
+}
