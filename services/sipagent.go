@@ -56,7 +56,7 @@ type SIPAgent struct {
 // Start should handle the sercive start
 func (sip *SIPAgent) Start() (err error) {
 	if sip.IsRunning() {
-		return fmt.Errorf("service aleady running")
+		return utils.ErrServiceAlreadyRunning
 	}
 
 	filterS := <-sip.filterSChan

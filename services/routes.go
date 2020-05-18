@@ -64,7 +64,7 @@ type RouteService struct {
 // Start should handle the sercive start
 func (routeS *RouteService) Start() (err error) {
 	if routeS.IsRunning() {
-		return fmt.Errorf("service aleady running")
+		return utils.ErrServiceAlreadyRunning
 	}
 
 	<-routeS.cacheS.GetPrecacheChannel(utils.CacheRouteProfiles)

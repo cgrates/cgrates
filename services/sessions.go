@@ -67,7 +67,7 @@ type SessionService struct {
 // Start should handle the sercive start
 func (smg *SessionService) Start() (err error) {
 	if smg.IsRunning() {
-		return fmt.Errorf("service aleady running")
+		return utils.ErrServiceAlreadyRunning
 	}
 	var datadb *engine.DataManager
 	if smg.dm.IsRunning() {

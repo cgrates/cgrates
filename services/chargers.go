@@ -63,7 +63,7 @@ type ChargerService struct {
 // Start should handle the sercive start
 func (chrS *ChargerService) Start() (err error) {
 	if chrS.IsRunning() {
-		return fmt.Errorf("service aleady running")
+		return utils.ErrServiceAlreadyRunning
 	}
 
 	<-chrS.cacheS.GetPrecacheChannel(utils.CacheChargerProfiles)

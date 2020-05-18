@@ -61,7 +61,7 @@ type ThresholdService struct {
 // Start should handle the sercive start
 func (thrs *ThresholdService) Start() (err error) {
 	if thrs.IsRunning() {
-		return fmt.Errorf("service aleady running")
+		return utils.ErrServiceAlreadyRunning
 	}
 
 	<-thrs.cacheS.GetPrecacheChannel(utils.CacheThresholdProfiles)

@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
-	"fmt"
 	"sync"
 
 	v1 "github.com/cgrates/cgrates/apier/v1"
@@ -64,7 +63,7 @@ type SchedulerService struct {
 // Start should handle the sercive start
 func (schS *SchedulerService) Start() (err error) {
 	if schS.IsRunning() {
-		return fmt.Errorf("service aleady running")
+		return utils.ErrServiceAlreadyRunning
 	}
 
 	<-schS.cacheS.GetPrecacheChannel(utils.CacheActionPlans) // wait for ActionPlans to be cached
