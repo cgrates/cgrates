@@ -1,5 +1,7 @@
 cgrates (0.10.2~dev) UNRELEASED; urgency=medium
 
+  * [SupplierS] Uniformize the logic in model_helpers.go
+
  -- DanB <danb@cgrates.org>  Tue, 12 May 2020 13:08:15 +0300
 
 cgrates (0.10.1) UNRELEASED; urgency=medium
