@@ -24,11 +24,9 @@ import (
 	"net"
 	"net/rpc"
 	"path"
-	"reflect"
 	"testing"
 	"time"
 
-	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -48,9 +46,8 @@ var (
 		testSAitResetStorDb,
 		testSAitStartEngine,
 		testSAitApierRpcConn,
-		// testSAitTPFromFolder,
+		testSAitTPFromFolder,
 
-		testSAitSetRouteProfile,
 		testSAitSIPRegister,
 		testSAitSIPInvite,
 
@@ -128,7 +125,7 @@ func testSAitApierRpcConn(t *testing.T) {
 
 // Load the tariff plan, creating accounts and their balances
 func testSAitTPFromFolder(t *testing.T) {
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "sipagent")}
 	var loadInst utils.LoadInstance
 	if err := saRPC.Call(utils.APIerSv2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
 		t.Error(err)
@@ -139,44 +136,6 @@ func testSAitTPFromFolder(t *testing.T) {
 func testSAitStopCgrEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
-	}
-}
-
-func testSAitSetRouteProfile(t *testing.T) {
-	var reply *engine.RouteProfile
-	splPrf := &v1.RouteWithCache{
-		RouteProfile: &engine.RouteProfile{
-			Tenant:    "cgrates.org",
-			ID:        "SPL_ACNT_1001",
-			FilterIDs: []string{"*string:~*req.Account:1001"},
-			Sorting:   utils.MetaWeight,
-			Routes: []*engine.Route{
-				{
-					ID:              "supplier1",
-					Weight:          20,
-					RouteParameters: "cgrates.org",
-				},
-				{
-					ID:              "supplier2",
-					Weight:          10,
-					RouteParameters: "cgrates.net",
-				},
-			},
-			Weight: 10,
-		},
-	}
-
-	var result string
-	if err := saRPC.Call(utils.APIerSv1SetRouteProfile, splPrf, &result); err != nil {
-		t.Error(err)
-	} else if result != utils.OK {
-		t.Error("Unexpected reply returned", result)
-	}
-	if err := saRPC.Call(utils.APIerSv1GetRouteProfile,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "SPL_ACNT_1001"}, &reply); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(splPrf.RouteProfile, reply) {
-		t.Errorf("Expecting: %+v, received: %+v", splPrf.RouteProfile, reply)
 	}
 }
 

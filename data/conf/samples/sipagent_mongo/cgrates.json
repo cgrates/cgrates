@@ -64,6 +64,7 @@
 
 "routes": {
 	"enabled": true,
+	"rals_conns": ["*localhost"],
 },
 
 

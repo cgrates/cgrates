@@ -59,7 +59,7 @@ type RouteProfile struct {
 	cache map[string]interface{}
 }
 
-// SupplierProfileWithArgDispatcher is used in replicatorV1 for dispatcher
+// RouteProfileWithArgDispatcher is used in replicatorV1 for dispatcher
 type RouteProfileWithArgDispatcher struct {
 	*RouteProfile
 	*utils.ArgDispatcher
@@ -211,6 +211,7 @@ func (rpS *RouteService) matchingRouteProfilesForEvent(ev *utils.CGREvent, singl
 // returns map[string]interface{} with cost and relevant matching information inside
 func (rpS *RouteService) costForEvent(ev *utils.CGREvent,
 	acntIDs, rpIDs []string) (costData map[string]interface{}, err error) {
+	costData = make(map[string]interface{})
 	if err = ev.CheckMandatoryFields([]string{utils.Account,
 		utils.Destination, utils.SetupTime}); err != nil {
 		return
@@ -241,6 +242,7 @@ func (rpS *RouteService) costForEvent(ev *utils.CGREvent,
 		usage = time.Duration(1 * time.Minute)
 		err = nil
 	}
+	var rplyVals map[string]interface{}
 	if err := rpS.connMgr.Call(rpS.cgrcfg.RouteSCfg().ResponderSConns, nil, utils.ResponderGetMaxSessionTimeOnAccounts,
 		&utils.GetMaxSessionTimeOnAccountsArgs{
 			Tenant:      ev.Tenant,
@@ -249,9 +251,13 @@ func (rpS *RouteService) costForEvent(ev *utils.CGREvent,
 			SetupTime:   sTime,
 			Usage:       usage,
 			AccountIDs:  acntIDs,
-		}, &costData); err != nil {
+		}, &rplyVals); err != nil {
 		return nil, err
 	}
+	for k, v := range rplyVals { // do not overwrite the return map
+		costData[k] = v
+	}
+	rplyVals = make(map[string]interface{}) // reset the map
 	if err := rpS.connMgr.Call(rpS.cgrcfg.RouteSCfg().ResponderSConns, nil, utils.ResponderGetCostOnRatingPlans,
 		&utils.GetCostOnRatingPlansArgs{
 			Tenant:        ev.Tenant,
@@ -261,8 +267,11 @@ func (rpS *RouteService) costForEvent(ev *utils.CGREvent,
 			SetupTime:     sTime,
 			Usage:         usage,
 			RatingPlanIDs: rpIDs,
-		}, &costData); err != nil {
+		}, &rplyVals); err != nil {
 		return nil, err
+	}
+	for k, v := range rplyVals {
+		costData[k] = v
 	}
 	return
 }
@@ -320,12 +329,12 @@ func (rpS *RouteService) statMetricsForLoadDistribution(statIDs []string, tenant
 			}
 			if len(statWithMetric) == 2 { // in case we have MetricID defined with StatID we consider only that metric
 				// check if statQueue have metric defined
-				if metricVal, has := metrics[statWithMetric[1]]; !has {
+				metricVal, has := metrics[statWithMetric[1]]
+				if !has {
 					return 0, fmt.Errorf("<%s> error: %s metric %s for statID: %s",
 						utils.RouteS, utils.ErrNotFound, statWithMetric[1], statWithMetric[0])
-				} else {
-					provStsMetrics[statWithMetric[1]] = append(provStsMetrics[statWithMetric[1]], metricVal)
 				}
+				provStsMetrics[statWithMetric[1]] = append(provStsMetrics[statWithMetric[1]], metricVal)
 			} else { // otherwise we consider all metrics
 				for key, val := range metrics {
 					//add value of metric in a slice in case that we get the same metric from different stat
@@ -379,9 +388,8 @@ func (rpS *RouteService) populateSortingData(ev *utils.CGREvent, route *Route,
 					fmt.Sprintf("<%s> ignoring route with ID: %s, err: %s",
 						utils.RouteS, route.ID, err.Error()))
 				return nil, false, nil
-			} else {
-				return nil, false, err
 			}
+			return nil, false, err
 		} else if len(costData) == 0 {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> ignoring route with ID: %s, missing cost information",
@@ -407,9 +415,8 @@ func (rpS *RouteService) populateSortingData(ev *utils.CGREvent, route *Route,
 						fmt.Sprintf("<%s> ignoring supplier with ID: %s, err: %s",
 							utils.RouteS, route.ID, err.Error()))
 					return nil, false, nil
-				} else {
-					return nil, false, err
 				}
+				return nil, false, err
 			}
 			sortedSpl.SortingData[utils.Load] = metricSum
 		} else {
@@ -420,9 +427,8 @@ func (rpS *RouteService) populateSortingData(ev *utils.CGREvent, route *Route,
 						fmt.Sprintf("<%s> ignoring supplier with ID: %s, err: %s",
 							utils.RouteS, route.ID, err.Error()))
 					return nil, false, nil
-				} else {
-					return nil, false, err
 				}
+				return nil, false, err
 			}
 			//add metrics from statIDs in SortingData
 			for key, val := range metricSupp {
@@ -452,22 +458,21 @@ func (rpS *RouteService) populateSortingData(ev *utils.CGREvent, route *Route,
 					fmt.Sprintf("<%s> ignoring supplier with ID: %s, err: %s",
 						utils.RouteS, route.ID, err.Error()))
 				return nil, false, nil
-			} else {
-				return nil, false, err
 			}
+			return nil, false, err
 		}
 		sortedSpl.SortingData[utils.ResourceUsage] = resTotalUsage
 	}
 	//filter the supplier
 	if len(route.lazyCheckRules) != 0 {
 		//construct the DP and pass it to filterS
-		nM := utils.MapStorage{
+		dynDP := newDynamicDP(rpS.cgrcfg, rpS.connMgr, ev.Tenant, utils.MapStorage{
 			utils.MetaReq:  ev.Event,
 			utils.MetaVars: sortedSpl.SortingData,
-		}
+		})
 
 		for _, rule := range route.lazyCheckRules { // verify the rules remaining from PartialPass
-			if pass, err = rule.Pass(newDynamicDP(rpS.cgrcfg, rpS.connMgr, ev.Tenant, nM)); err != nil {
+			if pass, err = rule.Pass(dynDP); err != nil {
 				return nil, false, err
 			} else if !pass {
 				return nil, false, nil
@@ -532,6 +537,7 @@ func (rpS *RouteService) sortedRoutesForEvent(args *ArgsGetRoutes) (sortedRoutes
 	return
 }
 
+// ArgsGetRoutes the argument for GetRoutes API
 type ArgsGetRoutes struct {
 	IgnoreErrors bool
 	MaxCost      string // toDo: try with interface{} here
@@ -553,11 +559,11 @@ func (args *ArgsGetRoutes) asOptsGetRoutes() (opts *optsGetRoutes, err error) {
 		if err != nil {
 			return nil, err
 		}
-		if cc, err := cd.GetCost(); err != nil {
+		cc, err := cd.GetCost()
+		if err != nil {
 			return nil, err
-		} else {
-			opts.maxCost = cc.Cost
 		}
+		opts.maxCost = cc.Cost
 	} else if args.MaxCost != "" {
 		if opts.maxCost, err = strconv.ParseFloat(args.MaxCost,
 			64); err != nil {
