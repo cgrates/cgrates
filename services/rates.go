@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/cgrates/cgrates/config"
@@ -99,7 +98,7 @@ func (rs *RateService) Shutdown() (err error) {
 // Start should handle the service start
 func (rs *RateService) Start() (err error) {
 	if rs.IsRunning() {
-		return fmt.Errorf("service aleady running")
+		return utils.ErrServiceAlreadyRunning
 	}
 
 	fltrS := <-rs.filterSChan

@@ -66,7 +66,7 @@ type DispatcherService struct {
 // Start should handle the sercive start
 func (dspS *DispatcherService) Start() (err error) {
 	if dspS.IsRunning() {
-		return fmt.Errorf("service aleady running")
+		return utils.ErrServiceAlreadyRunning
 	}
 	utils.Logger.Info("Starting CGRateS Dispatcher service.")
 	fltrS := <-dspS.filterSChan

@@ -596,7 +596,7 @@ func (chS *CacheS) V1ReplicateSet(args *utils.ArgCacheReplicateSet, reply *strin
 	return
 }
 
-// Replicate replicate an item to ReplicationConns
+// ReplicateRemove replicate an item to ReplicationConns
 func (chS *CacheS) ReplicateRemove(chID, itmID string) (err error) {
 	if len(chS.cfg.CacheCfg().ReplicationConns) == 0 ||
 		!chS.cfg.CacheCfg().Partitions[chID].Replicate {

@@ -53,7 +53,7 @@ type AsteriskAgent struct {
 // Start should handle the sercive start
 func (ast *AsteriskAgent) Start() (err error) {
 	if ast.IsRunning() {
-		return fmt.Errorf("service aleady running")
+		return utils.ErrServiceAlreadyRunning
 	}
 
 	ast.Lock()

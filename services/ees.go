@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
-	"fmt"
 	"sync"
 
 	v1 "github.com/cgrates/cgrates/apier/v1"
@@ -100,7 +99,7 @@ func (es *EventExporterService) Shutdown() (err error) {
 // Start should handle the service start
 func (es *EventExporterService) Start() (err error) {
 	if es.IsRunning() {
-		return fmt.Errorf("service aleady running")
+		return utils.ErrServiceAlreadyRunning
 	}
 
 	fltrS := <-es.filterSChan

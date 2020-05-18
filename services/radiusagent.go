@@ -54,7 +54,7 @@ type RadiusAgent struct {
 // Start should handle the sercive start
 func (rad *RadiusAgent) Start() (err error) {
 	if rad.IsRunning() {
-		return fmt.Errorf("service aleady running")
+		return utils.ErrServiceAlreadyRunning
 	}
 
 	filterS := <-rad.filterSChan

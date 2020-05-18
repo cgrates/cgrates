@@ -56,7 +56,7 @@ type AnalyzerService struct {
 // Start should handle the sercive start
 func (anz *AnalyzerService) Start() (err error) {
 	if anz.IsRunning() {
-		return fmt.Errorf("service aleady running")
+		return utils.ErrServiceAlreadyRunning
 	}
 	if anz.anz, err = analyzers.NewAnalyzerService(); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not init, error: %s", utils.AnalyzerS, err.Error()))

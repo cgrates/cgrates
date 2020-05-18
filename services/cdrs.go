@@ -70,7 +70,7 @@ type CDRServer struct {
 // Start should handle the sercive start
 func (cdrService *CDRServer) Start() (err error) {
 	if cdrService.IsRunning() {
-		return fmt.Errorf("service aleady running")
+		return utils.ErrServiceAlreadyRunning
 	}
 
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.CDRs))

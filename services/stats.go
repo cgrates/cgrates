@@ -63,7 +63,7 @@ type StatService struct {
 // Start should handle the sercive start
 func (sts *StatService) Start() (err error) {
 	if sts.IsRunning() {
-		return fmt.Errorf("service aleady running")
+		return utils.ErrServiceAlreadyRunning
 	}
 
 	<-sts.cacheS.GetPrecacheChannel(utils.CacheStatQueueProfiles)

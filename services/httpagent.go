@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/cgrates/cgrates/agents"
@@ -54,7 +53,7 @@ type HTTPAgent struct {
 // Start should handle the sercive start
 func (ha *HTTPAgent) Start() (err error) {
 	if ha.IsRunning() {
-		return fmt.Errorf("service aleady running")
+		return utils.ErrServiceAlreadyRunning
 	}
 
 	filterS := <-ha.filterSChan

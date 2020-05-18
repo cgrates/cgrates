@@ -53,7 +53,7 @@ type FreeswitchAgent struct {
 // Start should handle the sercive start
 func (fS *FreeswitchAgent) Start() (err error) {
 	if fS.IsRunning() {
-		return fmt.Errorf("service aleady running")
+		return utils.ErrServiceAlreadyRunning
 	}
 
 	fS.Lock()

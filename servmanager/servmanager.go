@@ -147,37 +147,17 @@ func (srvMngr *ServiceManager) GetConfig() *config.CGRConfig {
 // StartServices starts all enabled services
 func (srvMngr *ServiceManager) StartServices() (err error) {
 	go srvMngr.handleReload()
-	for serviceName, shouldRun := range map[string]bool{
-		utils.APIerSv1:        srvMngr.GetConfig().ApierCfg().Enabled,
-		utils.APIerSv2:        srvMngr.GetConfig().ApierCfg().Enabled,
-		utils.StorDB:          srvMngr.GetConfig().RalsCfg().Enabled || srvMngr.GetConfig().CdrsCfg().Enabled,
-		utils.AttributeS:      srvMngr.GetConfig().AttributeSCfg().Enabled,
-		utils.ChargerS:        srvMngr.GetConfig().ChargerSCfg().Enabled,
-		utils.ThresholdS:      srvMngr.GetConfig().ThresholdSCfg().Enabled,
-		utils.StatS:           srvMngr.GetConfig().StatSCfg().Enabled,
-		utils.ResourceS:       srvMngr.GetConfig().ResourceSCfg().Enabled,
-		utils.RouteS:          srvMngr.GetConfig().RouteSCfg().Enabled,
-		utils.SchedulerS:      srvMngr.GetConfig().SchedulerCfg().Enabled,
-		utils.RALService:      srvMngr.GetConfig().RalsCfg().Enabled,
-		utils.CDRServer:       srvMngr.GetConfig().CdrsCfg().Enabled,
-		utils.SessionS:        srvMngr.GetConfig().SessionSCfg().Enabled,
-		utils.ERs:             srvMngr.GetConfig().ERsCfg().Enabled,
-		utils.DNSAgent:        srvMngr.GetConfig().DNSAgentCfg().Enabled,
-		utils.FreeSWITCHAgent: srvMngr.GetConfig().FsAgentCfg().Enabled,
-		utils.KamailioAgent:   srvMngr.GetConfig().KamAgentCfg().Enabled,
-		utils.AsteriskAgent:   srvMngr.GetConfig().AsteriskAgentCfg().Enabled,
-		utils.RadiusAgent:     srvMngr.GetConfig().RadiusAgentCfg().Enabled,
-		utils.DiameterAgent:   srvMngr.GetConfig().DiameterAgentCfg().Enabled,
-		utils.HTTPAgent:       len(srvMngr.GetConfig().HttpAgentCfg()) != 0,
-		utils.LoaderS:         srvMngr.GetConfig().LoaderCfg().Enabled(),
-		utils.AnalyzerS:       srvMngr.GetConfig().AnalyzerSCfg().Enabled,
-		utils.DispatcherS:     srvMngr.GetConfig().DispatcherSCfg().Enabled,
-		utils.EventExporterS:  srvMngr.GetConfig().EEsCfg().Enabled,
-		utils.RateS:           srvMngr.GetConfig().RateSCfg().Enabled,
-		utils.SIPAgent:        srvMngr.GetConfig().SIPAgentCfg().Enabled,
-	} {
-		if shouldRun {
-			go srvMngr.startService(serviceName)
+	for _, service := range srvMngr.subsystems {
+		if service.ShouldRun() && !service.IsRunning() {
+			go func(srv Service) {
+				if err := srv.Start(); err != nil {
+					if err == utils.ErrServiceAlreadyRunning { // in case the service was started in another gorutine
+						return
+					}
+					utils.Logger.Err(fmt.Sprintf("<%s> failed to start %s because: %s", utils.ServiceManager, service.ServiceName(), err))
+					srvMngr.engineShutdown <- true
+				}
+			}(service)
 		}
 	}
 	// startServer()
@@ -354,14 +334,6 @@ func (srvMngr *ServiceManager) reloadService(srviceName string) (err error) {
 		}
 	}
 	return
-}
-
-func (srvMngr *ServiceManager) startService(srviceName string) {
-	srv := srvMngr.GetService(srviceName)
-	if err := srv.Start(); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> failed to start %s because: %s", utils.ServiceManager, srviceName, err))
-		srvMngr.engineShutdown <- true
-	}
 }
 
 // GetService returns the named service
