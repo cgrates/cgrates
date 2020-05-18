@@ -51,7 +51,7 @@ type StorDBService struct {
 // Start should handle the sercive start
 func (db *StorDBService) Start() (err error) {
 	if db.IsRunning() {
-		return fmt.Errorf("service aleady running")
+		return utils.ErrServiceAlreadyRunning
 	}
 	db.Lock()
 	defer db.Unlock()

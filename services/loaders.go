@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
-	"fmt"
 	"sync"
 
 	v1 "github.com/cgrates/cgrates/apier/v1"
@@ -65,7 +64,7 @@ type LoaderService struct {
 // Start should handle the sercive start
 func (ldrs *LoaderService) Start() (err error) {
 	if ldrs.IsRunning() {
-		return fmt.Errorf("service aleady running")
+		return utils.ErrServiceAlreadyRunning
 	}
 
 	filterS := <-ldrs.filterSChan

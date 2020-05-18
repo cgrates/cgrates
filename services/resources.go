@@ -64,7 +64,7 @@ type ResourceService struct {
 // Start should handle the sercive start
 func (reS *ResourceService) Start() (err error) {
 	if reS.IsRunning() {
-		return fmt.Errorf("service aleady running")
+		return utils.ErrServiceAlreadyRunning
 	}
 
 	<-reS.cacheS.GetPrecacheChannel(utils.CacheResourceProfiles)

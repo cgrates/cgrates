@@ -61,7 +61,7 @@ type AttributeService struct {
 // Start should handle the sercive start
 func (attrS *AttributeService) Start() (err error) {
 	if attrS.IsRunning() {
-		return fmt.Errorf("service aleady running")
+		return utils.ErrServiceAlreadyRunning
 	}
 
 	<-attrS.cacheS.GetPrecacheChannel(utils.CacheAttributeProfiles)

@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
-	"fmt"
 	"sync"
 
 	v2 "github.com/cgrates/cgrates/apier/v2"
@@ -55,7 +54,7 @@ type APIerSv2Service struct {
 // For this service the start should be called from RAL Service
 func (api *APIerSv2Service) Start() (err error) {
 	if api.IsRunning() {
-		return fmt.Errorf("service aleady running")
+		return utils.ErrServiceAlreadyRunning
 	}
 
 	apiV1Chan := api.apiv1.GetAPIerSv1Chan()

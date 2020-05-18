@@ -76,7 +76,7 @@ type APIerSv1Service struct {
 // For this service the start should be called from RAL Service
 func (apiService *APIerSv1Service) Start() (err error) {
 	if apiService.IsRunning() {
-		return fmt.Errorf("service aleady running")
+		return utils.ErrServiceAlreadyRunning
 	}
 
 	filterS := <-apiService.filterSChan

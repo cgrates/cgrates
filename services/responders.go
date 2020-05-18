@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/cgrates/cgrates/config"
@@ -55,7 +54,7 @@ type ResponderService struct {
 // For this service the start should be called from RAL Service
 func (resp *ResponderService) Start() (err error) {
 	if resp.IsRunning() {
-		return fmt.Errorf("service aleady running")
+		return utils.ErrServiceAlreadyRunning
 	}
 
 	resp.Lock()

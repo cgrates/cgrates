@@ -54,7 +54,7 @@ type KamailioAgent struct {
 // Start should handle the sercive start
 func (kam *KamailioAgent) Start() (err error) {
 	if kam.IsRunning() {
-		return fmt.Errorf("service aleady running")
+		return utils.ErrServiceAlreadyRunning
 	}
 
 	kam.Lock()
