@@ -252,6 +252,11 @@ func (eeC *EventExporterCfg) Clone() (cln *EventExporterCfg) {
 	cln.Synchronous = eeC.Synchronous
 	cln.Attempts = eeC.Attempts
 	cln.FieldSep = eeC.FieldSep
+
+	cln.Fields = make([]*FCTemplate, len(eeC.Fields))
+	for idx, fld := range eeC.Fields {
+		cln.Fields[idx] = fld.Clone()
+	}
 	cln.headerFields = make([]*FCTemplate, len(eeC.headerFields))
 	for idx, fld := range eeC.headerFields {
 		cln.headerFields[idx] = fld.Clone()

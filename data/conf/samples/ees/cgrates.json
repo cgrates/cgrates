@@ -58,7 +58,7 @@
 	"enabled": true,
 	"attributes_conns":["*internal"],
 	"cache": {
-		"*file_csv": {"limit": -1, "ttl": "1s", "static_ttl": false},
+		"*file_csv": {"limit": -1, "ttl": "500ms", "static_ttl": false},
 	},
 	"exporters": [
 		{
