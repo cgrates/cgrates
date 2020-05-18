@@ -70,6 +70,7 @@ var (
 		testAttributeSProcessEventWithSearchAndReplace,
 		testAttributeSProcessWithMultipleRuns,
 		testAttributeSProcessWithMultipleRuns2,
+		testAttributeSGetAttributeProfileIDsCount,
 		testAttributeSKillEngine,
 		//start test for cache options
 		testAttributeSInitCfg,
@@ -1194,6 +1195,120 @@ func testAttributeSProcessWithMultipleRuns2(t *testing.T) {
 		t.Errorf("Expecting %+v, received: %+v", eRply.AlteredFields, rplyEv.AlteredFields)
 	} else if !reflect.DeepEqual(eRply.CGREvent.Event, rplyEv.CGREvent.Event) {
 		t.Errorf("Expecting %+v, received: %+v", eRply.CGREvent.Event, rplyEv.CGREvent.Event)
+	}
+}
+
+func testAttributeSGetAttributeProfileIDsCount(t *testing.T) {
+	var reply int
+	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfileIDsCount,
+		&utils.TenantArg{Tenant: "cgrates.org"}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != 7 {
+		t.Errorf("Expecting: 7, received: %+v", reply)
+	}
+	var resp string
+	if err := attrSRPC.Call(utils.APIerSv1RemoveAttributeProfile,
+		&utils.TenantIDWithCache{
+			Tenant: "cgrates.org",
+			ID:     "ATTR_1",
+			Cache:  utils.StringPointer(utils.MetaRemove)}, &resp); err != nil {
+		t.Error(err)
+	} else if resp != utils.OK {
+		t.Error("Unexpected reply returned", resp)
+	}
+	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfileIDsCount,
+		&utils.TenantArg{Tenant: "cgrates.org"}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != 6 {
+		t.Errorf("Expecting: 6, received: %+v", reply)
+	}
+	if err := attrSRPC.Call(utils.APIerSv1RemoveAttributeProfile,
+		&utils.TenantIDWithCache{
+			Tenant: "cgrates.org",
+			ID:     "ATTR_2",
+			Cache:  utils.StringPointer(utils.MetaRemove)}, &resp); err != nil {
+		t.Error(err)
+	} else if resp != utils.OK {
+		t.Error("Unexpected reply returned", resp)
+	}
+	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfileIDsCount,
+		&utils.TenantArg{Tenant: "cgrates.org"}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != 5 {
+		t.Errorf("Expecting: 5, received: %+v", reply)
+	}
+	if err := attrSRPC.Call(utils.APIerSv1RemoveAttributeProfile,
+		&utils.TenantIDWithCache{
+			Tenant: "cgrates.org",
+			ID:     "ATTR_3",
+			Cache:  utils.StringPointer(utils.MetaRemove)}, &resp); err != nil {
+		t.Error(err)
+	} else if resp != utils.OK {
+		t.Error("Unexpected reply returned", resp)
+	}
+	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfileIDsCount,
+		&utils.TenantArg{Tenant: "cgrates.org"}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != 4 {
+		t.Errorf("Expecting: 4, received: %+v", reply)
+	}
+	if err := attrSRPC.Call(utils.APIerSv1RemoveAttributeProfile,
+		&utils.TenantIDWithCache{
+			Tenant: "cgrates.org",
+			ID:     "ATTR_Header",
+			Cache:  utils.StringPointer(utils.MetaRemove)}, &resp); err != nil {
+		t.Error(err)
+	} else if resp != utils.OK {
+		t.Error("Unexpected reply returned", resp)
+	}
+	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfileIDsCount,
+		&utils.TenantArg{Tenant: "cgrates.org"}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != 3 {
+		t.Errorf("Expecting: 3, received: %+v", reply)
+	}
+	if err := attrSRPC.Call(utils.APIerSv1RemoveAttributeProfile,
+		&utils.TenantIDWithCache{
+			Tenant: "cgrates.org",
+			ID:     "ATTR_PASS",
+			Cache:  utils.StringPointer(utils.MetaRemove)}, &resp); err != nil {
+		t.Error(err)
+	} else if resp != utils.OK {
+		t.Error("Unexpected reply returned", resp)
+	}
+	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfileIDsCount,
+		&utils.TenantArg{Tenant: "cgrates.org"}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != 2 {
+		t.Errorf("Expecting: 2, received: %+v", reply)
+	}
+	if err := attrSRPC.Call(utils.APIerSv1RemoveAttributeProfile,
+		&utils.TenantIDWithCache{
+			Tenant: "cgrates.org",
+			ID:     "ATTR_Search_and_replace",
+			Cache:  utils.StringPointer(utils.MetaRemove)}, &resp); err != nil {
+		t.Error(err)
+	} else if resp != utils.OK {
+		t.Error("Unexpected reply returned", resp)
+	}
+	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfileIDsCount,
+		&utils.TenantArg{Tenant: "cgrates.org"}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != 1 {
+		t.Errorf("Expecting: 1, received: %+v", reply)
+	}
+	if err := attrSRPC.Call(utils.APIerSv1RemoveAttributeProfile,
+		&utils.TenantIDWithCache{
+			Tenant: "cgrates.org",
+			ID:     "AttributeWithNonSubstitute",
+			Cache:  utils.StringPointer(utils.MetaRemove)}, &resp); err != nil {
+		t.Error(err)
+	} else if resp != utils.OK {
+		t.Error("Unexpected reply returned", resp)
+	}
+	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfileIDsCount,
+		&utils.TenantArg{Tenant: "cgrates.org"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
 	}
 }
 
