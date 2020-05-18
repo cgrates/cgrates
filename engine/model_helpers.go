@@ -1816,13 +1816,11 @@ func (tps TpSuppliers) AsTPSuppliers() (result []*utils.TPSupplierProfile) {
 			sup, found := suppliersMap[tenID][supID]
 			if !found {
 				sup = &utils.TPSupplier{
-					ID:      tp.SupplierID,
-					Weight:  tp.SupplierWeight,
-					Blocker: tp.SupplierBlocker,
+					ID:                 tp.SupplierID,
+					Weight:             tp.SupplierWeight,
+					Blocker:            tp.SupplierBlocker,
+					SupplierParameters: tp.SupplierParameters,
 				}
-			}
-			if tp.SupplierParameters != utils.EmptyString {
-				sup.SupplierParameters = tp.SupplierParameters
 			}
 			if tp.SupplierFilterIDs != utils.EmptyString {
 				supFilterSplit := strings.Split(tp.SupplierFilterIDs, utils.INFIELD_SEP)
