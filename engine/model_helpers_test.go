@@ -2432,3 +2432,153 @@ func TestDispatcherHostToAPI(t *testing.T) {
 		t.Errorf("\nExpecting: %+v,\nReceived: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
 	}
 }
+
+func TestTPRoutesAsTPRouteProfile(t *testing.T) {
+	mdl := TPRoutes{
+		&TpRoute{
+			PK:                 1,
+			Tpid:               "TP",
+			Tenant:             "cgrates.org",
+			ID:                 "RoutePrf",
+			FilterIDs:          "FltrRoute",
+			ActivationInterval: "2017-11-27T00:00:00Z",
+			Sorting:            "*weight",
+			SortingParameters:  "srtPrm1;srtPrm2",
+			RouteID:            "route1",
+			RouteFilterIDs:     "",
+			RouteAccountIDs:    "",
+			RouteRatingplanIDs: "",
+			RouteResourceIDs:   "",
+			RouteStatIDs:       "",
+			RouteWeight:        10.0,
+			RouteBlocker:       false,
+			RouteParameters:    "",
+			Weight:             10.0,
+			CreatedAt:          time.Time{},
+		},
+		&TpRoute{
+			PK:                 2,
+			Tpid:               "TP",
+			Tenant:             "cgrates.org",
+			ID:                 "RoutePrf",
+			FilterIDs:          "",
+			ActivationInterval: "",
+			Sorting:            "",
+			SortingParameters:  "",
+			RouteID:            "route2",
+			RouteFilterIDs:     "",
+			RouteAccountIDs:    "",
+			RouteRatingplanIDs: "",
+			RouteResourceIDs:   "",
+			RouteStatIDs:       "",
+			RouteWeight:        20.0,
+			RouteBlocker:       false,
+			RouteParameters:    "",
+			Weight:             0,
+			CreatedAt:          time.Time{},
+		},
+	}
+	expPrf := []*utils.TPRouteProfile{
+		&utils.TPRouteProfile{
+			TPid:              "TP",
+			Tenant:            "cgrates.org",
+			ID:                "RoutePrf",
+			Sorting:           "*weight",
+			SortingParameters: []string{"srtPrm1", "srtPrm2"},
+			FilterIDs:         []string{"FltrRoute"},
+			ActivationInterval: &utils.TPActivationInterval{
+				ActivationTime: "2017-11-27T00:00:00Z",
+				ExpiryTime:     "",
+			},
+			Routes: []*utils.TPRoute{
+				&utils.TPRoute{
+					ID:     "route1",
+					Weight: 10.0,
+				},
+				&utils.TPRoute{
+					ID:     "route2",
+					Weight: 20.0,
+				},
+			},
+			Weight: 10,
+		},
+	}
+	rcv := mdl.AsTPRouteProfile()
+	if !reflect.DeepEqual(rcv, expPrf) {
+		t.Errorf("Expecting: %+v,\nReceived: %+v", utils.ToJSON(expPrf), utils.ToJSON(rcv))
+	}
+
+	mdlReverse := TPRoutes{
+		&TpRoute{
+			PK:                 2,
+			Tpid:               "TP",
+			Tenant:             "cgrates.org",
+			ID:                 "RoutePrf",
+			FilterIDs:          "",
+			ActivationInterval: "",
+			Sorting:            "",
+			SortingParameters:  "",
+			RouteID:            "route2",
+			RouteFilterIDs:     "",
+			RouteAccountIDs:    "",
+			RouteRatingplanIDs: "",
+			RouteResourceIDs:   "",
+			RouteStatIDs:       "",
+			RouteWeight:        20.0,
+			RouteBlocker:       false,
+			RouteParameters:    "",
+			Weight:             0,
+			CreatedAt:          time.Time{},
+		},
+		&TpRoute{
+			PK:                 1,
+			Tpid:               "TP",
+			Tenant:             "cgrates.org",
+			ID:                 "RoutePrf",
+			FilterIDs:          "FltrRoute",
+			ActivationInterval: "2017-11-27T00:00:00Z",
+			Sorting:            "*weight",
+			SortingParameters:  "srtPrm1;srtPrm2",
+			RouteID:            "route1",
+			RouteFilterIDs:     "",
+			RouteAccountIDs:    "",
+			RouteRatingplanIDs: "",
+			RouteResourceIDs:   "",
+			RouteStatIDs:       "",
+			RouteWeight:        10.0,
+			RouteBlocker:       false,
+			RouteParameters:    "",
+			Weight:             10.0,
+			CreatedAt:          time.Time{},
+		},
+	}
+	expPrfRev := []*utils.TPRouteProfile{
+		&utils.TPRouteProfile{
+			TPid:              "TP",
+			Tenant:            "cgrates.org",
+			ID:                "RoutePrf",
+			Sorting:           "*weight",
+			SortingParameters: []string{"srtPrm1", "srtPrm2"},
+			FilterIDs:         []string{"FltrRoute"},
+			ActivationInterval: &utils.TPActivationInterval{
+				ActivationTime: "2017-11-27T00:00:00Z",
+				ExpiryTime:     "",
+			},
+			Routes: []*utils.TPRoute{
+				&utils.TPRoute{
+					ID:     "route2",
+					Weight: 20.0,
+				},
+				&utils.TPRoute{
+					ID:     "route1",
+					Weight: 10.0,
+				},
+			},
+			Weight: 10,
+		},
+	}
+	rcvRev := mdlReverse.AsTPRouteProfile()
+	if !reflect.DeepEqual(rcvRev, expPrfRev) {
+		t.Errorf("Expecting: %+v,\nReceived: %+v", utils.ToJSON(expPrfRev), utils.ToJSON(rcvRev))
+	}
+}
