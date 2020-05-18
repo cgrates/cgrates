@@ -1881,7 +1881,7 @@ func TestCgrCdfEventExporter(t *testing.T) {
 				Filters:       []string{},
 				AttributeSIDs: []string{},
 				Flags:         utils.FlagsWithParams{},
-				ContentFields: []*FCTemplate{
+				contentFields: []*FCTemplate{
 					{
 						Tag:    utils.CGRID,
 						Path:   "*exp.CGRID",
@@ -1982,13 +1982,117 @@ func TestCgrCdfEventExporter(t *testing.T) {
 						RoundingDecimals: utils.IntPointer(4),
 					},
 				},
-				HeaderFields:  []*FCTemplate{},
-				TrailerFields: []*FCTemplate{},
+				Fields: []*FCTemplate{
+					{
+						Tag:    utils.CGRID,
+						Path:   "*exp.CGRID",
+						Type:   utils.MetaVariable,
+						Value:  NewRSRParsersMustCompile("~*req.CGRID", true, utils.INFIELD_SEP),
+						Layout: time.RFC3339,
+					},
+					{
+						Tag:    utils.RunID,
+						Path:   "*exp.RunID",
+						Type:   utils.MetaVariable,
+						Value:  NewRSRParsersMustCompile("~*req.RunID", true, utils.INFIELD_SEP),
+						Layout: time.RFC3339,
+					},
+					{
+						Tag:    utils.ToR,
+						Path:   "*exp.ToR",
+						Type:   utils.MetaVariable,
+						Value:  NewRSRParsersMustCompile("~*req.ToR", true, utils.INFIELD_SEP),
+						Layout: time.RFC3339,
+					},
+					{
+						Tag:    utils.OriginID,
+						Path:   "*exp.OriginID",
+						Type:   utils.MetaVariable,
+						Value:  NewRSRParsersMustCompile("~*req.OriginID", true, utils.INFIELD_SEP),
+						Layout: time.RFC3339,
+					},
+					{
+						Tag:    utils.RequestType,
+						Path:   "*exp.RequestType",
+						Type:   utils.MetaVariable,
+						Value:  NewRSRParsersMustCompile("~*req.RequestType", true, utils.INFIELD_SEP),
+						Layout: time.RFC3339,
+					},
+					{
+						Tag:    utils.Tenant,
+						Path:   "*exp.Tenant",
+						Type:   utils.MetaVariable,
+						Value:  NewRSRParsersMustCompile("~*req.Tenant", true, utils.INFIELD_SEP),
+						Layout: time.RFC3339,
+					},
+					{
+						Tag:    utils.Category,
+						Path:   "*exp.Category",
+						Type:   utils.MetaVariable,
+						Value:  NewRSRParsersMustCompile("~*req.Category", true, utils.INFIELD_SEP),
+						Layout: time.RFC3339,
+					},
+					{
+						Tag:    utils.Account,
+						Path:   "*exp.Account",
+						Type:   utils.MetaVariable,
+						Value:  NewRSRParsersMustCompile("~*req.Account", true, utils.INFIELD_SEP),
+						Layout: time.RFC3339,
+					},
+					{
+						Tag:    utils.Subject,
+						Path:   "*exp.Subject",
+						Type:   utils.MetaVariable,
+						Value:  NewRSRParsersMustCompile("~*req.Subject", true, utils.INFIELD_SEP),
+						Layout: time.RFC3339,
+					},
+					{
+						Tag:    utils.Destination,
+						Path:   "*exp.Destination",
+						Type:   utils.MetaVariable,
+						Value:  NewRSRParsersMustCompile("~*req.Destination", true, utils.INFIELD_SEP),
+						Layout: time.RFC3339,
+					},
+					{
+						Tag:    utils.SetupTime,
+						Path:   "*exp.SetupTime",
+						Type:   utils.MetaVariable,
+						Value:  NewRSRParsersMustCompile("~*req.SetupTime", true, utils.INFIELD_SEP),
+						Layout: "2006-01-02T15:04:05Z07:00",
+					},
+					{
+						Tag:    utils.AnswerTime,
+						Path:   "*exp.AnswerTime",
+						Type:   utils.MetaVariable,
+						Value:  NewRSRParsersMustCompile("~*req.AnswerTime", true, utils.INFIELD_SEP),
+						Layout: "2006-01-02T15:04:05Z07:00",
+					},
+					{
+						Tag:    utils.Usage,
+						Path:   "*exp.Usage",
+						Type:   utils.MetaVariable,
+						Value:  NewRSRParsersMustCompile("~*req.Usage", true, utils.INFIELD_SEP),
+						Layout: time.RFC3339,
+					},
+					{
+						Tag:              utils.Cost,
+						Path:             "*exp.Cost",
+						Type:             utils.MetaVariable,
+						Value:            NewRSRParsersMustCompile("~*req.Cost", true, utils.INFIELD_SEP),
+						Layout:           time.RFC3339,
+						RoundingDecimals: utils.IntPointer(4),
+					},
+				},
+				headerFields:  []*FCTemplate{},
+				trailerFields: []*FCTemplate{},
 			},
 		},
 	}
 	for _, profile := range eCfg.Exporters {
-		for _, v := range profile.ContentFields {
+		for _, v := range profile.Fields {
+			v.ComputePath()
+		}
+		for _, v := range profile.contentFields {
 			v.ComputePath()
 		}
 	}
@@ -2057,7 +2161,7 @@ func TestCgrCfgEventExporterDefault(t *testing.T) {
 		Timezone:   utils.EmptyString,
 		Filters:    nil,
 		Flags:      utils.FlagsWithParams{},
-		ContentFields: []*FCTemplate{
+		contentFields: []*FCTemplate{
 			{
 				Tag:    utils.CGRID,
 				Path:   "*exp.CGRID",
@@ -2158,10 +2262,114 @@ func TestCgrCfgEventExporterDefault(t *testing.T) {
 				RoundingDecimals: utils.IntPointer(4),
 			},
 		},
-		HeaderFields:  []*FCTemplate{},
-		TrailerFields: []*FCTemplate{},
+		Fields: []*FCTemplate{
+			{
+				Tag:    utils.CGRID,
+				Path:   "*exp.CGRID",
+				Type:   utils.MetaVariable,
+				Value:  NewRSRParsersMustCompile("~*req.CGRID", true, utils.INFIELD_SEP),
+				Layout: time.RFC3339,
+			},
+			{
+				Tag:    utils.RunID,
+				Path:   "*exp.RunID",
+				Type:   utils.MetaVariable,
+				Value:  NewRSRParsersMustCompile("~*req.RunID", true, utils.INFIELD_SEP),
+				Layout: time.RFC3339,
+			},
+			{
+				Tag:    utils.ToR,
+				Path:   "*exp.ToR",
+				Type:   utils.MetaVariable,
+				Value:  NewRSRParsersMustCompile("~*req.ToR", true, utils.INFIELD_SEP),
+				Layout: time.RFC3339,
+			},
+			{
+				Tag:    utils.OriginID,
+				Path:   "*exp.OriginID",
+				Type:   utils.MetaVariable,
+				Value:  NewRSRParsersMustCompile("~*req.OriginID", true, utils.INFIELD_SEP),
+				Layout: time.RFC3339,
+			},
+			{
+				Tag:    utils.RequestType,
+				Path:   "*exp.RequestType",
+				Type:   utils.MetaVariable,
+				Value:  NewRSRParsersMustCompile("~*req.RequestType", true, utils.INFIELD_SEP),
+				Layout: time.RFC3339,
+			},
+			{
+				Tag:    utils.Tenant,
+				Path:   "*exp.Tenant",
+				Type:   utils.MetaVariable,
+				Value:  NewRSRParsersMustCompile("~*req.Tenant", true, utils.INFIELD_SEP),
+				Layout: time.RFC3339,
+			},
+			{
+				Tag:    utils.Category,
+				Path:   "*exp.Category",
+				Type:   utils.MetaVariable,
+				Value:  NewRSRParsersMustCompile("~*req.Category", true, utils.INFIELD_SEP),
+				Layout: time.RFC3339,
+			},
+			{
+				Tag:    utils.Account,
+				Path:   "*exp.Account",
+				Type:   utils.MetaVariable,
+				Value:  NewRSRParsersMustCompile("~*req.Account", true, utils.INFIELD_SEP),
+				Layout: time.RFC3339,
+			},
+			{
+				Tag:    utils.Subject,
+				Path:   "*exp.Subject",
+				Type:   utils.MetaVariable,
+				Value:  NewRSRParsersMustCompile("~*req.Subject", true, utils.INFIELD_SEP),
+				Layout: time.RFC3339,
+			},
+			{
+				Tag:    utils.Destination,
+				Path:   "*exp.Destination",
+				Type:   utils.MetaVariable,
+				Value:  NewRSRParsersMustCompile("~*req.Destination", true, utils.INFIELD_SEP),
+				Layout: time.RFC3339,
+			},
+			{
+				Tag:    utils.SetupTime,
+				Path:   "*exp.SetupTime",
+				Type:   utils.MetaVariable,
+				Value:  NewRSRParsersMustCompile("~*req.SetupTime", true, utils.INFIELD_SEP),
+				Layout: "2006-01-02T15:04:05Z07:00",
+			},
+			{
+				Tag:    utils.AnswerTime,
+				Path:   "*exp.AnswerTime",
+				Type:   utils.MetaVariable,
+				Value:  NewRSRParsersMustCompile("~*req.AnswerTime", true, utils.INFIELD_SEP),
+				Layout: "2006-01-02T15:04:05Z07:00",
+			},
+			{
+				Tag:    utils.Usage,
+				Path:   "*exp.Usage",
+				Type:   utils.MetaVariable,
+				Value:  NewRSRParsersMustCompile("~*req.Usage", true, utils.INFIELD_SEP),
+				Layout: time.RFC3339,
+			},
+			{
+				Tag:              utils.Cost,
+				Path:             "*exp.Cost",
+				Type:             utils.MetaVariable,
+				Value:            NewRSRParsersMustCompile("~*req.Cost", true, utils.INFIELD_SEP),
+				Layout:           time.RFC3339,
+				RoundingDecimals: utils.IntPointer(4),
+			},
+		},
+		headerFields:  []*FCTemplate{},
+		trailerFields: []*FCTemplate{},
 	}
-	for _, v := range eCfg.ContentFields {
+	for _, v := range eCfg.Fields {
+		v.ComputePath()
+	}
+	for _, v := range eCfg.contentFields {
 		v.ComputePath()
 	}
 	if !reflect.DeepEqual(cgrCfg.dfltEvExp, eCfg) {
