@@ -54,7 +54,7 @@ type DiameterAgent struct {
 // Start should handle the sercive start
 func (da *DiameterAgent) Start() (err error) {
 	if da.IsRunning() {
-		return fmt.Errorf("service aleady running")
+		return utils.ErrServiceAlreadyRunning
 	}
 
 	filterS := <-da.filterSChan

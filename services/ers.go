@@ -57,7 +57,7 @@ type EventReaderService struct {
 // Start should handle the sercive start
 func (erS *EventReaderService) Start() (err error) {
 	if erS.IsRunning() {
-		return fmt.Errorf("service aleady running")
+		return utils.ErrServiceAlreadyRunning
 	}
 
 	erS.Lock()

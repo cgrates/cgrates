@@ -56,7 +56,7 @@ type DNSAgent struct {
 // Start should handle the sercive start
 func (dns *DNSAgent) Start() (err error) {
 	if dns.IsRunning() {
-		return fmt.Errorf("service aleady running")
+		return utils.ErrServiceAlreadyRunning
 	}
 
 	filterS := <-dns.filterSChan

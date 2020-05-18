@@ -73,6 +73,7 @@ var (
 	ErrMaxIncrementsExceeded    = errors.New("MAX_INCREMENTS_EXCEEDED")
 	ErrIndexOutOfBounds         = errors.New("INDEX_OUT_OF_BOUNDS")
 	ErrWrongPath                = errors.New("WRONG_PATH")
+	ErrServiceAlreadyRunning    = fmt.Errorf("service already running")
 
 	ErrMap = map[string]error{
 		ErrNoMoreData.Error():              ErrNoMoreData,
