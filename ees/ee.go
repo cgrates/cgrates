@@ -37,6 +37,8 @@ func NewEventExporter(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.Filt
 	switch cgrCfg.EEsCfg().Exporters[cfgIdx].Type {
 	case utils.MetaFileCSV:
 		return NewFileCSVee(cgrCfg, cfgIdx, filterS)
+	case utils.MetaFileFWV:
+		return NewFileFWVee(cgrCfg, cfgIdx, filterS)
 	default:
 		return nil, fmt.Errorf("unsupported exporter type: <%s>", cgrCfg.EEsCfg().Exporters[cfgIdx].Type)
 	}

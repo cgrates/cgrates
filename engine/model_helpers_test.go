@@ -2443,7 +2443,7 @@ func TestTPRoutesAsTPRouteProfile(t *testing.T) {
 			FilterIDs:          "FltrRoute",
 			ActivationInterval: "2017-11-27T00:00:00Z",
 			Sorting:            "*weight",
-			SortingParameters:  "srtPrm1;srtPrm2",
+			SortingParameters:  "srtPrm1",
 			RouteID:            "route1",
 			RouteFilterIDs:     "",
 			RouteAccountIDs:    "",
@@ -2484,7 +2484,7 @@ func TestTPRoutesAsTPRouteProfile(t *testing.T) {
 			Tenant:            "cgrates.org",
 			ID:                "RoutePrf",
 			Sorting:           "*weight",
-			SortingParameters: []string{"srtPrm1", "srtPrm2"},
+			SortingParameters: []string{"srtPrm1"},
 			FilterIDs:         []string{"FltrRoute"},
 			ActivationInterval: &utils.TPActivationInterval{
 				ActivationTime: "2017-11-27T00:00:00Z",
@@ -2504,6 +2504,9 @@ func TestTPRoutesAsTPRouteProfile(t *testing.T) {
 		},
 	}
 	rcv := mdl.AsTPRouteProfile()
+	sort.Slice(rcv[0].Routes, func(i, j int) bool {
+		return strings.Compare(rcv[0].Routes[i].ID, rcv[0].Routes[j].ID) < 0
+	})
 	if !reflect.DeepEqual(rcv, expPrf) {
 		t.Errorf("Expecting: %+v,\nReceived: %+v", utils.ToJSON(expPrf), utils.ToJSON(rcv))
 	}
@@ -2538,7 +2541,7 @@ func TestTPRoutesAsTPRouteProfile(t *testing.T) {
 			FilterIDs:          "FltrRoute",
 			ActivationInterval: "2017-11-27T00:00:00Z",
 			Sorting:            "*weight",
-			SortingParameters:  "srtPrm1;srtPrm2",
+			SortingParameters:  "srtPrm1",
 			RouteID:            "route1",
 			RouteFilterIDs:     "",
 			RouteAccountIDs:    "",
@@ -2558,7 +2561,7 @@ func TestTPRoutesAsTPRouteProfile(t *testing.T) {
 			Tenant:            "cgrates.org",
 			ID:                "RoutePrf",
 			Sorting:           "*weight",
-			SortingParameters: []string{"srtPrm1", "srtPrm2"},
+			SortingParameters: []string{"srtPrm1"},
 			FilterIDs:         []string{"FltrRoute"},
 			ActivationInterval: &utils.TPActivationInterval{
 				ActivationTime: "2017-11-27T00:00:00Z",
@@ -2566,18 +2569,21 @@ func TestTPRoutesAsTPRouteProfile(t *testing.T) {
 			},
 			Routes: []*utils.TPRoute{
 				&utils.TPRoute{
-					ID:     "route2",
-					Weight: 20.0,
-				},
-				&utils.TPRoute{
 					ID:     "route1",
 					Weight: 10.0,
+				},
+				&utils.TPRoute{
+					ID:     "route2",
+					Weight: 20.0,
 				},
 			},
 			Weight: 10,
 		},
 	}
 	rcvRev := mdlReverse.AsTPRouteProfile()
+	sort.Slice(rcvRev[0].Routes, func(i, j int) bool {
+		return strings.Compare(rcvRev[0].Routes[i].ID, rcvRev[0].Routes[j].ID) < 0
+	})
 	if !reflect.DeepEqual(rcvRev, expPrfRev) {
 		t.Errorf("Expecting: %+v,\nReceived: %+v", utils.ToJSON(expPrfRev), utils.ToJSON(rcvRev))
 	}

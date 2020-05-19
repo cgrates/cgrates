@@ -1275,3 +1275,99 @@ func TestCDReRoundingDecimals(t *testing.T) {
 	//resetore roundingdecimals value
 	config.CgrConfig().GeneralCfg().RoundingDecimals = 5
 }
+
+func TestCDRcombimedCdrFieldVal(t *testing.T) {
+	cdr := &CDR{
+		CGRID:       utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
+		OrderID:     123,
+		ToR:         utils.VOICE,
+		OriginID:    "dsafdsaf",
+		OriginHost:  "192.168.1.1",
+		Source:      utils.UNIT_TEST,
+		RequestType: utils.META_RATED,
+		Tenant:      "cgrates.org",
+		Category:    "call",
+		Account:     "1001",
+		Subject:     "1001",
+		Destination: "+4986517174963",
+		SetupTime:   time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
+		AnswerTime:  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
+		RunID:       utils.MetaDefault,
+		Usage:       time.Duration(10) * time.Second,
+		Cost:        1.32165,
+		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+	}
+	groupCDRs := []*CDR{
+		&CDR{ // initialCDR
+			CGRID:       utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
+			OrderID:     123,
+			ToR:         utils.VOICE,
+			OriginID:    "dsafdsaf",
+			OriginHost:  "192.168.1.1",
+			Source:      utils.UNIT_TEST,
+			RequestType: utils.META_RATED,
+			Tenant:      "cgrates.org",
+			Category:    "call",
+			Account:     "1001",
+			Subject:     "1001",
+			Destination: "+4986517174963",
+			SetupTime:   time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
+			AnswerTime:  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
+			RunID:       utils.MetaDefault,
+			Usage:       time.Duration(10) * time.Second,
+			Cost:        1.32165,
+		},
+		&CDR{
+			CGRID:       utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
+			OrderID:     124,
+			ToR:         utils.VOICE,
+			OriginID:    "dsafdsaf",
+			OriginHost:  "192.168.1.1",
+			Source:      utils.UNIT_TEST,
+			RequestType: utils.META_RATED,
+			Tenant:      "cgrates.org",
+			Category:    "call",
+			Account:     "1001",
+			Subject:     "1001",
+			Destination: "+4986517174963",
+			SetupTime:   time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
+			AnswerTime:  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
+			RunID:       "testRun",
+			Usage:       time.Duration(10) * time.Second,
+			Cost:        1.32165,
+		},
+		&CDR{
+			CGRID:       utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
+			OrderID:     125,
+			ToR:         utils.VOICE,
+			OriginID:    "dsafdsaf",
+			OriginHost:  "192.168.1.1",
+			Source:      utils.UNIT_TEST,
+			RequestType: utils.META_RATED,
+			Tenant:      "cgrates.org",
+			Category:    "call",
+			Account:     "1001",
+			Subject:     "1001",
+			Destination: "+4986517174963",
+			SetupTime:   time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
+			AnswerTime:  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
+			RunID:       utils.MetaDefault,
+			Usage:       time.Duration(10) * time.Second,
+			Cost:        1.32165,
+		},
+	}
+
+	tpFld := &config.FCTemplate{
+		Tag:     "TestCombiMed",
+		Type:    utils.META_COMBIMED,
+		Filters: nil,
+		Value:   config.NewRSRParsersMustCompile("~*req.RunID", true, utils.INFIELD_SEP),
+	}
+
+	if out, err := cdr.combimedCdrFieldVal(tpFld, groupCDRs, nil); err != nil {
+		t.Error(err)
+	} else if out != "*default*default" {
+		t.Errorf("Expected : %+v, received: %+v", "*default*default", out)
+	}
+
+}
