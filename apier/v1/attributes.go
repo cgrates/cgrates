@@ -65,7 +65,7 @@ func (APIerSv1 *APIerSv1) GetAttributeProfileIDs(args utils.TenantArgWithPaginat
 // GetAttributeProfileIDsCount sets in reply var the total number of AttributeProfileIDs registered for a tenant
 // returns ErrNotFound in case of 0 AttributeProfileIDs
 func (APIerSv1 *APIerSv1) GetAttributeProfileIDsCount(args *utils.TenantArg, reply *int) (err error) {
-	if missing := utils.MissingStructFields(&args, []string{utils.Tenant}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(args, []string{utils.Tenant}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	var keys []string

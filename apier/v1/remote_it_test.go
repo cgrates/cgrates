@@ -566,7 +566,7 @@ func testInternalRemoteITGetActionPlan(t *testing.T) {
 func testInternalRemoteITGetAccountActionPlan(t *testing.T) {
 	var aap []*AccountActionTiming
 	if err := internalRPC.Call(utils.APIerSv1GetAccountActionPlan,
-		utils.TenantAccount{
+		&utils.TenantAccount{
 			Tenant:  "cgrates.org",
 			Account: "1001",
 		}, &aap); err != nil {

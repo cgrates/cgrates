@@ -162,12 +162,12 @@ func testDispatcherSSetDispatcherProfile(t *testing.T) {
 func testDispatcherSGetDispatcherProfileIDs(t *testing.T) {
 	var result []string
 	if err := dispatcherRPC.Call(utils.APIerSv1GetDispatcherProfileIDs,
-		utils.TenantArgWithPaginator{}, &result); err == nil {
+		&utils.TenantArgWithPaginator{}, &result); err == nil {
 		t.Errorf("Expected: %s , received: %v", utils.NewErrMandatoryIeMissing(utils.Tenant).Error(), err)
 	}
 	expected := []string{"Dsp1"}
 	if err := dispatcherRPC.Call(utils.APIerSv1GetDispatcherProfileIDs,
-		utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{Tenant: dispatcherProfile.Tenant}}, &result); err != nil {
+		&utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{Tenant: dispatcherProfile.Tenant}}, &result); err != nil {
 		t.Error(err)
 	} else if len(result) != len(expected) {
 		t.Errorf("Expecting : %+v, received: %+v", expected, result)

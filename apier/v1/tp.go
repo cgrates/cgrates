@@ -115,7 +115,7 @@ func (self *APIerSv1) RemTP(attrs AttrRemTp, reply *string) error {
 	return nil
 }
 
-func (self *APIerSv1) ExportTPToFolder(attrs utils.AttrDirExportTP, exported *utils.ExportedTPStats) error {
+func (self *APIerSv1) ExportTPToFolder(attrs *utils.AttrDirExportTP, exported *utils.ExportedTPStats) error {
 	if attrs.TPid == nil || *attrs.TPid == "" {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}

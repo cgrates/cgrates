@@ -43,8 +43,8 @@ func (APIerSv1 *APIerSv1) GetDispatcherProfile(arg *utils.TenantID, reply *engin
 }
 
 // GetDispatcherProfileIDs returns list of dispatcherProfile IDs registered for a tenant
-func (APIerSv1 *APIerSv1) GetDispatcherProfileIDs(tenantArg utils.TenantArgWithPaginator, dPrfIDs *[]string) error {
-	if missing := utils.MissingStructFields(&tenantArg, []string{utils.Tenant}); len(missing) != 0 { //Params missing
+func (APIerSv1 *APIerSv1) GetDispatcherProfileIDs(tenantArg *utils.TenantArgWithPaginator, dPrfIDs *[]string) error {
+	if missing := utils.MissingStructFields(tenantArg, []string{utils.Tenant}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	tenant := tenantArg.Tenant

@@ -363,7 +363,7 @@ func testA1itConcurrentAPs(t *testing.T) {
 		go func(acnt string) {
 			var atms []*v1.AccountActionTiming
 			if err := a1rpc.Call(utils.APIerSv1GetAccountActionPlan,
-				utils.TenantAccount{Tenant: "cgrates.org", Account: acnt}, &atms); err != nil {
+				&utils.TenantAccount{Tenant: "cgrates.org", Account: acnt}, &atms); err != nil {
 				t.Error(err)
 				//} else if len(atms) != 2 || atms[0].ActionPlanId != "PACKAGE_1" {
 				//	t.Errorf("Received: %+v", atms)
@@ -373,7 +373,7 @@ func testA1itConcurrentAPs(t *testing.T) {
 		go func(acnt string) {
 			var reply string
 			if err := a1rpc.Call(utils.APIerSv1RemoveActionTiming,
-				v1.AttrRemoveActionTiming{Tenant: "cgrates.org", Account: acnt, ActionPlanId: "PACKAGE_1"}, &reply); err != nil {
+				&v1.AttrRemoveActionTiming{Tenant: "cgrates.org", Account: acnt, ActionPlanId: "PACKAGE_1"}, &reply); err != nil {
 				t.Error(err)
 			}
 			wg.Done()

@@ -201,7 +201,7 @@ func (api *APIerSv1) GetFilterIndexes(arg AttrGetFilterIndexes, reply *[]string)
 }
 
 // ComputeFilterIndexes selects which index filters to recompute
-func (api *APIerSv1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, reply *string) (err error) {
+func (api *APIerSv1) ComputeFilterIndexes(args *utils.ArgsComputeFilterIndexes, reply *string) (err error) {
 	transactionID := utils.GenUUID()
 	//ThresholdProfile Indexes
 	var thdsIndexers *engine.FilterIndexer
@@ -308,7 +308,7 @@ func (api *APIerSv1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, r
 }
 
 // ComputeFilterIndexIDs computes specific filter indexes
-func (api *APIerSv1) ComputeFilterIndexIDs(args utils.ArgsComputeFilterIndexIDs, reply *string) (err error) {
+func (api *APIerSv1) ComputeFilterIndexIDs(args *utils.ArgsComputeFilterIndexIDs, reply *string) (err error) {
 	transactionID := utils.GenUUID()
 	//ThresholdProfile Indexes
 	thdsIndexers, err := api.computeThresholdIndexes(args.Tenant, &args.ThresholdIDs, transactionID)

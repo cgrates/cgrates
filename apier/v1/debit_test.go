@@ -146,7 +146,7 @@ func TestDebitUsageWithOptions(t *testing.T) {
 	}
 
 	var reply string
-	if err := apierDebit.DebitUsageWithOptions(AttrDebitUsageWithOptions{
+	if err := apierDebit.DebitUsageWithOptions(&AttrDebitUsageWithOptions{
 		UsageRecord:          &engine.UsageRecordWithArgDispatcher{UsageRecord: usageRecord},
 		AllowNegativeAccount: false}, &reply); err != nil {
 		t.Error(err)

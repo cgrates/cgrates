@@ -135,7 +135,7 @@ func testTPTimingsSetTPTiming(t *testing.T) {
 		Time:      "15:00:00Z",
 	}
 	var result string
-	if err := tpTimingRPC.Call(utils.APIerSv1SetTPTiming, tpTiming, &result); err != nil {
+	if err := tpTimingRPC.Call(utils.APIerSv1SetTPTiming, &tpTiming, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -164,7 +164,7 @@ func testTPTimingsGetTPTimingIds(t *testing.T) {
 func testTPTimingsUpdateTPTiming(t *testing.T) {
 	var result string
 	tpTiming.Years = "2015"
-	if err := tpTimingRPC.Call(utils.APIerSv1SetTPTiming, tpTiming, &result); err != nil {
+	if err := tpTimingRPC.Call(utils.APIerSv1SetTPTiming, &tpTiming, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)

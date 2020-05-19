@@ -37,8 +37,8 @@ type AccountActionTiming struct {
 	NextExecTime time.Time // Next execution time
 }
 
-func (api *APIerSv1) GetAccountActionPlan(attrs utils.TenantAccount, reply *[]*AccountActionTiming) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Account"}); len(missing) != 0 {
+func (api *APIerSv1) GetAccountActionPlan(attrs *utils.TenantAccount, reply *[]*AccountActionTiming) error {
+	if missing := utils.MissingStructFields(attrs, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(strings.Join(missing, ","), "")
 	}
 	acntID := utils.ConcatenatedKey(attrs.Tenant, attrs.Account)
@@ -85,13 +85,13 @@ type AttrRemoveActionTiming struct {
 }
 
 // Removes an ActionTimings or parts of it depending on filters being set
-func (api *APIerSv1) RemoveActionTiming(attrs AttrRemoveActionTiming, reply *string) (err error) {
-	if missing := utils.MissingStructFields(&attrs, []string{"ActionPlanId"}); len(missing) != 0 { // Only mandatory ActionPlanId
+func (api *APIerSv1) RemoveActionTiming(attrs *AttrRemoveActionTiming, reply *string) (err error) {
+	if missing := utils.MissingStructFields(attrs, []string{"ActionPlanId"}); len(missing) != 0 { // Only mandatory ActionPlanId
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	var accID string
 	if len(attrs.Account) != 0 { // Presence of Account requires complete account details to be provided
-		if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Account"}); len(missing) != 0 {
+		if missing := utils.MissingStructFields(attrs, []string{"Tenant", "Account"}); len(missing) != 0 {
 			return utils.NewErrMandatoryIeMissing(missing...)
 		}
 		accID = utils.ConcatenatedKey(attrs.Tenant, attrs.Account)
@@ -172,8 +172,8 @@ func (api *APIerSv1) RemoveActionTiming(attrs AttrRemoveActionTiming, reply *str
 }
 
 // Ads a new account into dataDb. If already defined, returns success.
-func (api *APIerSv1) SetAccount(attr utils.AttrSetAccount, reply *string) (err error) {
-	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Account"}); len(missing) != 0 {
+func (api *APIerSv1) SetAccount(attr *utils.AttrSetAccount, reply *string) (err error) {
+	if missing := utils.MissingStructFields(attr, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	accID := utils.ConcatenatedKey(attr.Tenant, attr.Account)
@@ -293,8 +293,8 @@ func (api *APIerSv1) SetAccount(attr utils.AttrSetAccount, reply *string) (err e
 	return nil
 }
 
-func (api *APIerSv1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) (err error) {
-	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Account"}); len(missing) != 0 {
+func (api *APIerSv1) RemoveAccount(attr *utils.AttrRemoveAccount, reply *string) (err error) {
+	if missing := utils.MissingStructFields(attr, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	dirtyActionPlans := make(map[string]*engine.ActionPlan)
@@ -351,7 +351,7 @@ func (api *APIerSv1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) 
 	return nil
 }
 
-func (api *APIerSv1) GetAccounts(attr utils.AttrGetAccounts, reply *[]interface{}) error {
+func (api *APIerSv1) GetAccounts(attr *utils.AttrGetAccounts, reply *[]interface{}) error {
 	if len(attr.Tenant) == 0 {
 		return utils.NewErrMandatoryIeMissing("Tenant")
 	}
