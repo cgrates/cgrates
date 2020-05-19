@@ -170,7 +170,7 @@ func (cdrS *CDRServer) rateCDR(cdr *CDRWithArgDispatcher) ([]*CDR, error) {
 		}
 		if len(smCosts) != 0 { // Cost retrieved from SMCost table
 			for _, smCost := range smCosts {
-				cdrClone := cdr.Clone()
+				cdrClone := cdr.CDR.Clone()
 				cdrClone.OriginID = smCost.OriginID
 				if cdr.Usage == 0 {
 					cdrClone.Usage = smCost.Usage

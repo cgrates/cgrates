@@ -1344,9 +1344,25 @@ type SessionFilter struct {
 	*ArgDispatcher
 }
 
+// ArgDispatcher the basic information for dispatcher
 type ArgDispatcher struct {
 	APIKey  *string
 	RouteID *string
+}
+
+// Clone returns a copy of the ArgDispatcher
+func (arg *ArgDispatcher) Clone() (clned *ArgDispatcher) {
+	if arg == nil {
+		return
+	}
+	clned = new(ArgDispatcher)
+	if arg.APIKey != nil {
+		clned.APIKey = StringPointer(*arg.APIKey)
+	}
+	if arg.RouteID != nil {
+		clned.RouteID = StringPointer(*arg.RouteID)
+	}
+	return
 }
 
 type RatingPlanCostArg struct {

@@ -20,6 +20,7 @@ package utils
 import (
 	"errors"
 	"fmt"
+	"math"
 	"reflect"
 	"sync"
 	"testing"
@@ -951,6 +952,10 @@ func TestClone(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ifaceC, clndIface) {
 		t.Errorf("Expecting: %+v, received: %+v", ifaceC, clndIface)
+	}
+
+	if err := Clone(math.NaN, nil); err == nil {
+		t.Error("Expected error")
 	}
 }
 

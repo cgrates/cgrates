@@ -2584,6 +2584,7 @@ func TestTPRoutesAsTPRouteProfile(t *testing.T) {
 	sort.Slice(rcvRev[0].Routes, func(i, j int) bool {
 		return strings.Compare(rcvRev[0].Routes[i].ID, rcvRev[0].Routes[j].ID) < 0
 	})
+	sort.Strings(rcvRev[0].SortingParameters)
 	if !reflect.DeepEqual(rcvRev, expPrfRev) {
 		t.Errorf("Expecting: %+v,\nReceived: %+v", utils.ToJSON(expPrfRev), utils.ToJSON(rcvRev))
 	}
