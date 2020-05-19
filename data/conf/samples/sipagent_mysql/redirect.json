@@ -13,7 +13,7 @@
 				]
 			},
 			{
-				"id": "NAPTRRoutesQuery",
+				"id": "RoutesQuery", 
 				"filters": ["*string:~*vars.Method:INVITE"],
 				"flags": ["*event", "*routes","*continue"],
 				"request_fields":[
@@ -30,10 +30,9 @@
 				]
 			},
 			{
-				"id": "NAPTRSuppliersOneSupplier",
+				"id": "RoutesQueryOneRoute",
 				"filters": ["*string:~*vars.Method:INVITE",
 					"*gte:~*cgrep.Routes.Count:1",
-					"*gte:~*cgrep.Routes.SortedRoutes[0].SortingData.Cost:0.1",
 				],
 				"flags": ["*none","*continue"], // do not send request to CGRateS
 				"reply_fields":[
@@ -52,14 +51,19 @@
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
 						"value": "~*cgrep.Routes.SortedRoutes[0].RouteParameters"},
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
-							"value":"*constant:>;q=0.7; expires=3600"}
+							"value":"*constant:>;q=0.7; expires=3600;cgr_cost="},
+					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
+						"value":"~*cgrep.Routes.SortedRoutes[0].SortingData.Cost"},
+					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
+							"value":"*constant:;cgr_maxusage="},
+					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
+						"value":"~*cgrep.Routes.SortedRoutes[0].SortingData.MaxUsage"}
 				]
 			},
 			{
-				"id": "NAPTRSuppliersTwoSuppliers",
+				"id": "RoutesQueryTwoRoutes",
 				"filters": ["*string:~*vars.Method:INVITE",
 					"*gte:~*cgrep.Routes.Count:2",
-					"*gte:~*cgrep.Routes.SortedRoutes[1].SortingData.Cost:0.1",
 				],
 				"flags": ["*none","*continue"],
 				"reply_fields":[
@@ -76,14 +80,19 @@
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
 						"value": "~*cgrep.Routes.SortedRoutes[1].RouteParameters"},
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
-							"value":"*constant:>;q=0.1"}
+							"value":"*constant:>;q=0.2;cgr_cost="},
+					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
+							"value":"~*cgrep.Routes.SortedRoutes[1].SortingData.Cost"},
+					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
+							"value":"*constant:;cgr_maxusage="},
+					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
+							"value":"~*cgrep.Routes.SortedRoutes[1].SortingData.MaxUsage"}
 				]
 			},
 			{
-				"id": "NAPTRSuppliersThreeSuppliers",
+				"id": "RoutesQueryThreeRoutes",
 				"filters": ["*string:~*vars.Method:INVITE",
 					"*gte:~*cgrep.Routes.Count:3",
-					"*gte:~*cgrep.Routes.SortedRoutes[2].SortingData.Cost:0.1",
 				],
 				"flags": ["*none","*continue"],
 				"reply_fields":[
@@ -98,9 +107,15 @@
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
 							"value":"@"},
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
-						"value": "~*cgrep.Routes.SortedRoutes[2].RouteParameters"},
+							"value": "~*cgrep.Routes.SortedRoutes[2].RouteParameters"},
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
-							"value":"*constant:>;q=0.1"}
+							"value":"*constant:>;q=0.1;cgr_cost="},
+					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
+							"value":"~*cgrep.Routes.SortedRoutes[2].SortingData.Cost"},
+					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
+							"value":"*constant:;cgr_maxusage="},
+					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
+							"value":"~*cgrep.Routes.SortedRoutes[2].SortingData.MaxUsage"}
 				]
 			}
 		]

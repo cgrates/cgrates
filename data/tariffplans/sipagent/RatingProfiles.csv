@@ -1,0 +1,4 @@
+#Tenant,Category,Subject,ActivationTime,RatingPlanId,RatesFallbackSubject
+cgrates.org,*routes,1001,2014-01-14T00:00:00Z,RP_10CNT,
+cgrates.org,*routes,1002,2014-01-14T00:00:00Z,RP_10CNT,
+
