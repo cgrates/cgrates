@@ -233,14 +233,14 @@ func testApierTPTiming(t *testing.T) {
 	}
 	var reply string
 	for _, tm := range []*utils.ApierTPTiming{tmAlways, tmAsap, tmAlways2} {
-		if err := rater.Call(utils.APIerSv1SetTPTiming, tm, &reply); err != nil {
+		if err := rater.Call(utils.APIerSv1SetTPTiming, &tm, &reply); err != nil {
 			t.Error("Got error on APIerSv1.SetTPTiming: ", err.Error())
 		} else if reply != utils.OK {
 			t.Error("Unexpected reply received when calling APIerSv1.SetTPTiming: ", reply)
 		}
 	}
 	// Check second set
-	if err := rater.Call(utils.APIerSv1SetTPTiming, tmAlways, &reply); err != nil {
+	if err := rater.Call(utils.APIerSv1SetTPTiming, &tmAlways, &reply); err != nil {
 		t.Error("Got error on second APIerSv1.SetTPTiming: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling APIerSv1.SetTPTiming got reply: ", reply)
@@ -1184,7 +1184,7 @@ func testApierAddTriggeredAction2(t *testing.T) {
 	var reply string
 	// Add balance to a previously known account
 	attrs := &AttrAddAccountActionTriggers{ActionTriggerIDs: []string{"STANDARD_TRIGGERS"}, Tenant: "cgrates.org", Account: "dan2"}
-	if err := rater.Call(utils.APIerSv1AddAccountActionTriggers, attrs, &reply); err != nil {
+	if err := rater.Call(utils.APIerSv1AddAccountActionTriggers, &attrs, &reply); err != nil {
 		t.Error("Got error on APIerSv1.AddAccountActionTriggers: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv1.AddAccountActionTriggers received: %s", reply)
@@ -1194,7 +1194,7 @@ func testApierAddTriggeredAction2(t *testing.T) {
 	*attrs2 = *attrs
 	attrs2.Account = "dan10" // Does not exist so it should error when adding triggers on it
 	// Add trigger to an account which does n exist
-	if err := rater.Call(utils.APIerSv1AddAccountActionTriggers, attrs2, &reply2); err == nil || reply2 == utils.OK {
+	if err := rater.Call(utils.APIerSv1AddAccountActionTriggers, &attrs2, &reply2); err == nil || reply2 == utils.OK {
 		t.Error("Expecting error on APIerSv1.AddAccountActionTriggers.", err, reply2)
 	}
 }
@@ -1306,7 +1306,7 @@ func testApierSetAccount(t *testing.T) {
 func testApierGetAccountActionPlan(t *testing.T) {
 	var reply []*AccountActionTiming
 	req := utils.TenantAccount{Tenant: "cgrates.org", Account: "dan7"}
-	if err := rater.Call(utils.APIerSv1GetAccountActionPlan, req, &reply); err != nil {
+	if err := rater.Call(utils.APIerSv1GetAccountActionPlan, &req, &reply); err != nil {
 		t.Error("Got error on APIerSv1.GetAccountActionPlan: ", err.Error())
 	} else if len(reply) != 1 {
 		t.Error("Unexpected action plan received: ", utils.ToJSON(reply))
@@ -1334,14 +1334,14 @@ func testApierITGetScheduledActionsForAccount(t *testing.T) {
 func testApierRemUniqueIDActionTiming(t *testing.T) {
 	var rmReply string
 	rmReq := AttrRemoveActionTiming{ActionPlanId: "ATMS_1", Tenant: "cgrates.org", Account: "dan4"}
-	if err := rater.Call(utils.APIerSv1RemoveActionTiming, rmReq, &rmReply); err != nil {
+	if err := rater.Call(utils.APIerSv1RemoveActionTiming, &rmReq, &rmReply); err != nil {
 		t.Error("Got error on APIerSv1.RemoveActionTiming: ", err.Error())
 	} else if rmReply != utils.OK {
 		t.Error("Unexpected answer received", rmReply)
 	}
 	var reply []*AccountActionTiming
 	req := utils.TenantAccount{Tenant: "cgrates.org", Account: "dan4"}
-	if err := rater.Call(utils.APIerSv1GetAccountActionPlan, req, &reply); err != nil {
+	if err := rater.Call(utils.APIerSv1GetAccountActionPlan, &req, &reply); err != nil {
 		t.Error("Got error on APIerSv1.GetAccountActionPlan: ", err.Error())
 	} else if len(reply) != 0 {
 		t.Error("Action timings was not removed")

@@ -55,8 +55,8 @@ type AttrAddAccountActionTriggers struct {
 	Executed               bool
 }
 
-func (api *APIerSv1) AddAccountActionTriggers(attr AttrAddAccountActionTriggers, reply *string) (err error) {
-	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Account"}); len(missing) != 0 {
+func (api *APIerSv1) AddAccountActionTriggers(attr *AttrAddAccountActionTriggers, reply *string) (err error) {
+	if missing := utils.MissingStructFields(attr, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	var actTime time.Time

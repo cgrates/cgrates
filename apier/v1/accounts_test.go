@@ -77,31 +77,31 @@ func TestGetAccountIds(t *testing.T) {
 func TestGetAccounts(t *testing.T) {
 	var accounts []interface{}
 	var attrs utils.AttrGetAccounts
-	if err := apierAcnts.GetAccounts(utils.AttrGetAccounts{Tenant: "cgrates.org"}, &accounts); err != nil {
+	if err := apierAcnts.GetAccounts(&utils.AttrGetAccounts{Tenant: "cgrates.org"}, &accounts); err != nil {
 		t.Error("Unexpected error", err.Error())
 	} else if len(accounts) != 3 {
 		t.Errorf("Accounts returned: %+v", accounts)
 	}
 	attrs = utils.AttrGetAccounts{Tenant: "itsyscom.com"}
-	if err := apierAcnts.GetAccounts(attrs, &accounts); err != nil {
+	if err := apierAcnts.GetAccounts(&attrs, &accounts); err != nil {
 		t.Error("Unexpected error", err.Error())
 	} else if len(accounts) != 2 {
 		t.Errorf("Accounts returned: %+v", accounts)
 	}
 	attrs = utils.AttrGetAccounts{Tenant: "cgrates.org", AccountIDs: []string{"account1"}}
-	if err := apierAcnts.GetAccounts(attrs, &accounts); err != nil {
+	if err := apierAcnts.GetAccounts(&attrs, &accounts); err != nil {
 		t.Error("Unexpected error", err.Error())
 	} else if len(accounts) != 1 {
 		t.Errorf("Accounts returned: %+v", accounts)
 	}
 	attrs = utils.AttrGetAccounts{Tenant: "itsyscom.com", AccountIDs: []string{"INVALID"}}
-	if err := apierAcnts.GetAccounts(attrs, &accounts); err != nil {
+	if err := apierAcnts.GetAccounts(&attrs, &accounts); err != nil {
 		t.Error("Unexpected error", err.Error())
 	} else if len(accounts) != 0 {
 		t.Errorf("Accounts returned: %+v", accounts)
 	}
 	attrs = utils.AttrGetAccounts{Tenant: "INVALID"}
-	if err := apierAcnts.GetAccounts(attrs, &accounts); err != nil {
+	if err := apierAcnts.GetAccounts(&attrs, &accounts); err != nil {
 		t.Error("Unexpected error", err.Error())
 	} else if len(accounts) != 0 {
 		t.Errorf("Accounts returned: %+v", accounts)

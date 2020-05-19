@@ -23,11 +23,11 @@ import (
 )
 
 // SetTPTiming creates a new timing within a tariff plan
-func (api *APIerSv1) SetTPTiming(attrs utils.ApierTPTiming, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ID", "Years", "Months", "MonthDays", "WeekDays", "Time"}); len(missing) != 0 {
+func (api *APIerSv1) SetTPTiming(attrs *utils.ApierTPTiming, reply *string) error {
+	if missing := utils.MissingStructFields(attrs, []string{"TPid", "ID", "Years", "Months", "MonthDays", "WeekDays", "Time"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := api.StorDb.SetTPTimings([]*utils.ApierTPTiming{&attrs}); err != nil {
+	if err := api.StorDb.SetTPTimings([]*utils.ApierTPTiming{attrs}); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK

@@ -107,7 +107,7 @@ func (apiv1 *APIerSv1) GetReverseDestination(prefix string, reply *[]string) (er
 }
 
 // ComputeReverseDestinations will rebuild complete reverse destinations data
-func (apiv1 *APIerSv1) ComputeReverseDestinations(ignr string, reply *string) (err error) {
+func (apiv1 *APIerSv1) ComputeReverseDestinations(ignr *string, reply *string) (err error) {
 	if err = apiv1.DataManager.DataDB().RebuildReverseForPrefix(utils.REVERSE_DESTINATION_PREFIX); err != nil {
 		return
 	}
@@ -116,7 +116,7 @@ func (apiv1 *APIerSv1) ComputeReverseDestinations(ignr string, reply *string) (e
 }
 
 // ComputeAccountActionPlans will rebuild complete reverse accountActions data
-func (apiv1 *APIerSv1) ComputeAccountActionPlans(ignr string, reply *string) (err error) {
+func (apiv1 *APIerSv1) ComputeAccountActionPlans(ignr *string, reply *string) (err error) {
 	if err = apiv1.DataManager.DataDB().RebuildReverseForPrefix(utils.AccountActionPlansPrefix); err != nil {
 		return
 	}

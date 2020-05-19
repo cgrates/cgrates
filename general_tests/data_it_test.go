@@ -177,7 +177,7 @@ func testV1DataDataDebitUsageWith10Kilo(t *testing.T) {
 	}
 	tStart := time.Now()
 	if err := dataRpc.Call(utils.APIerSv1DebitUsage,
-		engine.UsageRecordWithArgDispatcher{UsageRecord: usageRecord}, &reply); err != nil {
+		&engine.UsageRecordWithArgDispatcher{UsageRecord: usageRecord}, &reply); err != nil {
 		t.Error(err)
 	}
 	if time.Now().Sub(tStart) > time.Duration(50*time.Millisecond) {

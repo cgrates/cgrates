@@ -174,7 +174,7 @@ func testCDReExportCDRs(t *testing.T) {
 		Verbose: true,
 	}
 	var rply *RplExportedCDRs
-	if err := cdreRPC.Call(utils.APIerSv1ExportCDRs, attr, &rply); err != nil {
+	if err := cdreRPC.Call(utils.APIerSv1ExportCDRs, &attr, &rply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(rply.ExportedCGRIDs) != 2 {
 		t.Errorf("Unexpected number of CDR exported: %s ", utils.ToJSON(rply))
@@ -328,7 +328,7 @@ func testCDReExportCDRsWithAttributes(t *testing.T) {
 		Verbose: true,
 	}
 	var rply *RplExportedCDRs
-	if err := cdreRPC.Call(utils.APIerSv1ExportCDRs, attr, &rply); err != nil {
+	if err := cdreRPC.Call(utils.APIerSv1ExportCDRs, &attr, &rply); err != nil {
 		t.Fatal("Unexpected error: ", err.Error())
 	} else if len(rply.ExportedCGRIDs) != 2 {
 		t.Errorf("Unexpected number of CDR exported: %s ", utils.ToJSON(rply))
