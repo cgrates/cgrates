@@ -220,7 +220,7 @@ func (rpS *RouteService) costForEvent(ev *utils.CGREvent,
 	if acnt, err = ev.FieldAsString(utils.Account); err != nil {
 		return
 	}
-	if subj, err = ev.FieldAsString(utils.Account); err != nil {
+	if subj, err = ev.FieldAsString(utils.Subject); err != nil {
 		if err != utils.ErrNotFound {
 			return
 		}
