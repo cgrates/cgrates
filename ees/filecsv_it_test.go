@@ -44,7 +44,7 @@ var (
 	csvRpc       *rpc.Client
 
 	sTestsCsv = []func(t *testing.T){
-		testCsvCreateDirectory,
+		testCreateDirectory,
 		testCsvLoadConfig,
 		testCsvResetDataDB,
 		testCsvResetStorDb,
@@ -52,8 +52,10 @@ var (
 		testCsvRPCConn,
 		testCsvExportEvent,
 		testCsvVerifyExports,
+		testCsvExportComposedEvent,
+		//testCsvVerifyComposedExports,
 		testCsvStopCgrEngine,
-		testCsvCleanDirectory,
+		testCleanDirectory,
 	}
 )
 
@@ -61,17 +63,6 @@ func TestCsvExport(t *testing.T) {
 	csvConfigDir = "ees"
 	for _, stest := range sTestsCsv {
 		t.Run(csvConfigDir, stest)
-	}
-}
-
-func testCsvCreateDirectory(t *testing.T) {
-	for _, dir := range []string{"/tmp/testExport"} {
-		if err := os.RemoveAll(dir); err != nil {
-			t.Fatal("Error removing folder: ", dir, err)
-		}
-		if err := os.MkdirAll(dir, os.ModePerm); err != nil {
-			t.Fatal("Error creating folder: ", dir, err)
-		}
 	}
 }
 
@@ -111,88 +102,85 @@ func testCsvRPCConn(t *testing.T) {
 
 func testCsvExportEvent(t *testing.T) {
 	eventVoice := &utils.CGREventWithOpts{
-		CGREventWithArgDispatcher: &utils.CGREventWithArgDispatcher{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "voiceEvent",
-				Time:   utils.TimePointer(time.Now()),
-				Event: map[string]interface{}{
-					utils.CGRID:       utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
-					utils.ToR:         utils.VOICE,
-					utils.OriginID:    "dsafdsaf",
-					utils.OriginHost:  "192.168.1.1",
-					utils.RequestType: utils.META_RATED,
-					utils.Tenant:      "cgrates.org",
-					utils.Category:    "call",
-					utils.Account:     "1001",
-					utils.Subject:     "1001",
-					utils.Destination: "1002",
-					utils.SetupTime:   time.Unix(1383813745, 0).UTC(),
-					utils.AnswerTime:  time.Unix(1383813746, 0).UTC(),
-					utils.Usage:       time.Duration(10) * time.Second,
-					utils.RunID:       utils.MetaDefault,
-					utils.Cost:        1.01,
-					"ExtraFields": map[string]string{"extra1": "val_extra1",
-						"extra2": "val_extra2", "extra3": "val_extra3"},
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "voiceEvent",
+			Time:   utils.TimePointer(time.Now()),
+			Event: map[string]interface{}{
+				utils.CGRID:       utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
+				utils.ToR:         utils.VOICE,
+				utils.OriginID:    "dsafdsaf",
+				utils.OriginHost:  "192.168.1.1",
+				utils.RequestType: utils.META_RATED,
+				utils.Tenant:      "cgrates.org",
+				utils.Category:    "call",
+				utils.Account:     "1001",
+				utils.Subject:     "1001",
+				utils.Destination: "1002",
+				utils.SetupTime:   time.Unix(1383813745, 0).UTC(),
+				utils.AnswerTime:  time.Unix(1383813746, 0).UTC(),
+				utils.Usage:       time.Duration(10) * time.Second,
+				utils.RunID:       utils.MetaDefault,
+				utils.Cost:        1.01,
+				"ExporterUsed":    "CSVExporter",
+				"ExtraFields": map[string]string{"extra1": "val_extra1",
+					"extra2": "val_extra2", "extra3": "val_extra3"},
 			},
 		},
 	}
 
 	eventData := &utils.CGREventWithOpts{
-		CGREventWithArgDispatcher: &utils.CGREventWithArgDispatcher{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "dataEvent",
-				Time:   utils.TimePointer(time.Now()),
-				Event: map[string]interface{}{
-					utils.CGRID:       utils.Sha1("abcdef", time.Unix(1383813745, 0).UTC().String()),
-					utils.ToR:         utils.DATA,
-					utils.OriginID:    "abcdef",
-					utils.OriginHost:  "192.168.1.1",
-					utils.RequestType: utils.META_RATED,
-					utils.Tenant:      "AnotherTenant",
-					utils.Category:    "call", //for data CDR use different Tenant
-					utils.Account:     "1001",
-					utils.Subject:     "1001",
-					utils.Destination: "1002",
-					utils.SetupTime:   time.Unix(1383813745, 0).UTC(),
-					utils.AnswerTime:  time.Unix(1383813746, 0).UTC(),
-					utils.Usage:       time.Duration(10) * time.Nanosecond,
-					utils.RunID:       utils.MetaDefault,
-					utils.Cost:        0.012,
-					"ExtraFields": map[string]string{"extra1": "val_extra1",
-						"extra2": "val_extra2", "extra3": "val_extra3"},
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "dataEvent",
+			Time:   utils.TimePointer(time.Now()),
+			Event: map[string]interface{}{
+				utils.CGRID:       utils.Sha1("abcdef", time.Unix(1383813745, 0).UTC().String()),
+				utils.ToR:         utils.DATA,
+				utils.OriginID:    "abcdef",
+				utils.OriginHost:  "192.168.1.1",
+				utils.RequestType: utils.META_RATED,
+				utils.Tenant:      "AnotherTenant",
+				utils.Category:    "call", //for data CDR use different Tenant
+				utils.Account:     "1001",
+				utils.Subject:     "1001",
+				utils.Destination: "1002",
+				utils.SetupTime:   time.Unix(1383813745, 0).UTC(),
+				utils.AnswerTime:  time.Unix(1383813746, 0).UTC(),
+				utils.Usage:       time.Duration(10) * time.Nanosecond,
+				utils.RunID:       utils.MetaDefault,
+				utils.Cost:        0.012,
+				"ExporterUsed":    "CSVExporter",
+				"ExtraFields": map[string]string{"extra1": "val_extra1",
+					"extra2": "val_extra2", "extra3": "val_extra3"},
 			},
 		},
 	}
 
 	eventSMS := &utils.CGREventWithOpts{
-		CGREventWithArgDispatcher: &utils.CGREventWithArgDispatcher{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "SMSEvent",
-				Time:   utils.TimePointer(time.Now()),
-				Event: map[string]interface{}{
-					utils.CGRID:       utils.Sha1("sdfwer", time.Unix(1383813745, 0).UTC().String()),
-					utils.ToR:         utils.SMS,
-					utils.OriginID:    "sdfwer",
-					utils.OriginHost:  "192.168.1.1",
-					utils.RequestType: utils.META_RATED,
-					utils.Tenant:      "cgrates.org",
-					utils.Category:    "call",
-					utils.Account:     "1001",
-					utils.Subject:     "1001",
-					utils.Destination: "1002",
-					utils.SetupTime:   time.Unix(1383813745, 0).UTC(),
-					utils.AnswerTime:  time.Unix(1383813746, 0).UTC(),
-					utils.Usage:       time.Duration(1),
-					utils.RunID:       utils.MetaDefault,
-					utils.Cost:        0.15,
-					"ExtraFields": map[string]string{"extra1": "val_extra1",
-						"extra2": "val_extra2", "extra3": "val_extra3"},
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "SMSEvent",
+			Time:   utils.TimePointer(time.Now()),
+			Event: map[string]interface{}{
+				utils.CGRID:       utils.Sha1("sdfwer", time.Unix(1383813745, 0).UTC().String()),
+				utils.ToR:         utils.SMS,
+				utils.OriginID:    "sdfwer",
+				utils.OriginHost:  "192.168.1.1",
+				utils.RequestType: utils.META_RATED,
+				utils.Tenant:      "cgrates.org",
+				utils.Category:    "call",
+				utils.Account:     "1001",
+				utils.Subject:     "1001",
+				utils.Destination: "1002",
+				utils.SetupTime:   time.Unix(1383813745, 0).UTC(),
+				utils.AnswerTime:  time.Unix(1383813746, 0).UTC(),
+				utils.Usage:       time.Duration(1),
+				utils.RunID:       utils.MetaDefault,
+				utils.Cost:        0.15,
+				"ExporterUsed":    "CSVExporter",
+				"ExtraFields": map[string]string{"extra1": "val_extra1",
+					"extra2": "val_extra2", "extra3": "val_extra3"},
 			},
 		},
 	}
@@ -217,7 +205,7 @@ func testCsvExportEvent(t *testing.T) {
 
 func testCsvVerifyExports(t *testing.T) {
 	var files []string
-	err := filepath.Walk("/tmp/testExport/", func(path string, info os.FileInfo, err error) error {
+	err := filepath.Walk("/tmp/testCSV/", func(path string, info os.FileInfo, err error) error {
 		if strings.HasSuffix(path, utils.CSVSuffix) {
 			files = append(files, path)
 		}
@@ -229,7 +217,109 @@ func testCsvVerifyExports(t *testing.T) {
 	if len(files) != 1 {
 		t.Errorf("Expected %+v, received: %+v", 1, len(files))
 	}
-	eCnt := "dbafe9c8614c785a65aabd116dd3959c3c56f7f6,*default,*voice,dsafdsaf,*rated,cgrates.org,call,1001,1001,1002,2013-11-07T08:42:25Z,2013-11-07T08:42:26Z,10000000000,1.01\nea1f1968cc207859672c332364fc7614c86b04c5,*default,*data,abcdef,*rated,AnotherTenant,call,1001,1001,1002,2013-11-07T08:42:25Z,2013-11-07T08:42:26Z,10,0.012\n2478e9f18ebcd3c684f3c14596b8bfeab2b0d6d4,*default,*sms,sdfwer,*rated,cgrates.org,call,1001,1001,1002,2013-11-07T08:42:25Z,2013-11-07T08:42:26Z,1,0.15\n"
+	eCnt := "dbafe9c8614c785a65aabd116dd3959c3c56f7f6,*default,*voice,dsafdsaf,*rated,cgrates.org,call,1001,1001,1002,2013-11-07T08:42:25Z,2013-11-07T08:42:26Z,10000000000,1.01" +
+		"\n" +
+		"ea1f1968cc207859672c332364fc7614c86b04c5,*default,*data,abcdef,*rated,AnotherTenant,call,1001,1001,1002,2013-11-07T08:42:25Z,2013-11-07T08:42:26Z,10,0.012" +
+		"\n" +
+		"2478e9f18ebcd3c684f3c14596b8bfeab2b0d6d4,*default,*sms,sdfwer,*rated,cgrates.org,call,1001,1001,1002,2013-11-07T08:42:25Z,2013-11-07T08:42:26Z,1,0.15" +
+		"\n"
+	if outContent1, err := ioutil.ReadFile(files[0]); err != nil {
+		t.Error(err)
+	} else if eCnt != string(outContent1) {
+		t.Errorf("Expecting: \n<%q>, \nreceived: \n<%q>", eCnt, string(outContent1))
+	}
+}
+
+func testCsvExportComposedEvent(t *testing.T) {
+	eventVoice := &utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "voiceEvent",
+			Time:   utils.TimePointer(time.Now()),
+			Event: map[string]interface{}{
+				utils.CGRID:         utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
+				utils.ToR:           utils.VOICE,
+				"ComposedOriginID1": "dsaf",
+				"ComposedOriginID2": "dsaf",
+				utils.OriginHost:    "192.168.1.1",
+				utils.RequestType:   utils.META_RATED,
+				utils.Tenant:        "cgrates.org",
+				utils.Category:      "call",
+				utils.Account:       "1001",
+				utils.Subject:       "1001",
+				utils.Destination:   "1002",
+				utils.SetupTime:     time.Unix(1383813745, 0).UTC(),
+				utils.AnswerTime:    time.Unix(1383813746, 0).UTC(),
+				utils.Usage:         time.Duration(10) * time.Second,
+				utils.RunID:         utils.MetaDefault,
+				utils.Cost:          1.01,
+				"ExporterUsed":      "CSVExporterComposed",
+				"ExtraFields": map[string]string{"extra1": "val_extra1",
+					"extra2": "val_extra2", "extra3": "val_extra3"},
+			},
+		},
+	}
+
+	eventSMS := &utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "SMSEvent",
+			Time:   utils.TimePointer(time.Now()),
+			Event: map[string]interface{}{
+				utils.CGRID:         utils.Sha1("sdfwer", time.Unix(1383813745, 0).UTC().String()),
+				utils.ToR:           utils.SMS,
+				"ComposedOriginID1": "sdf",
+				"ComposedOriginID2": "wer",
+				utils.OriginHost:    "192.168.1.1",
+				utils.RequestType:   utils.META_RATED,
+				utils.Tenant:        "cgrates.org",
+				utils.Category:      "call",
+				utils.Account:       "1001",
+				utils.Subject:       "1001",
+				utils.Destination:   "1002",
+				utils.SetupTime:     time.Unix(1383813745, 0).UTC(),
+				utils.AnswerTime:    time.Unix(1383813746, 0).UTC(),
+				utils.Usage:         time.Duration(1),
+				utils.RunID:         utils.MetaDefault,
+				utils.Cost:          0.15,
+				"ExporterUsed":      "CSVExporterComposed",
+				"ExtraFields": map[string]string{"extra1": "val_extra1",
+					"extra2": "val_extra2", "extra3": "val_extra3"},
+			},
+		},
+	}
+	var reply string
+	if err := csvRpc.Call(utils.EventExporterSv1ProcessEvent, eventVoice, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected %+v, received: %+v", utils.OK, reply)
+	}
+	if err := csvRpc.Call(utils.EventExporterSv1ProcessEvent, eventSMS, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected %+v, received: %+v", utils.OK, reply)
+	}
+	time.Sleep(1 * time.Second)
+}
+
+func testCsvVerifyComposedExports(t *testing.T) {
+	var files []string
+	err := filepath.Walk("/tmp/testComposedCSV/", func(path string, info os.FileInfo, err error) error {
+		if strings.HasSuffix(path, utils.CSVSuffix) {
+			files = append(files, path)
+		}
+		return nil
+	})
+	if err != nil {
+		t.Error(err)
+	}
+	if len(files) != 1 {
+		t.Errorf("Expected %+v, received: %+v", 1, len(files))
+	}
+	eCnt := "CGRID,RunID,ToR,OriginID,RequestType,Tenant,Category,Account,Subject,Destination,SetupTime,AnswerTime,Usage,Cost" +
+		"\n" +
+		"dbafe9c8614c785a65aabd116dd3959c3c56f7f6,*default,*voice,dsafdsaf,*rated,cgrates.org,call,1001,1001,1002,2013-11-07T08:42:25Z,2013-11-07T08:42:26Z,10000000000,1.01\\n2478e9f18ebcd3c684f3c14596b8bfeab2b0d6d4,*default,*sms,sdf,wer,*rated,cgrates.org,call,1001,1001,1002,2013-11-07T08:42:25Z,2013-11-07T08:42:26Z,1,0.15" +
+		"\n"
 	if outContent1, err := ioutil.ReadFile(files[0]); err != nil {
 		t.Error(err)
 	} else if eCnt != string(outContent1) {
@@ -240,13 +330,5 @@ func testCsvVerifyExports(t *testing.T) {
 func testCsvStopCgrEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
-	}
-}
-
-func testCsvCleanDirectory(t *testing.T) {
-	for _, dir := range []string{"/tmp/testExport"} {
-		if err := os.RemoveAll(dir); err != nil {
-			t.Fatal("Error removing folder: ", dir, err)
-		}
 	}
 }

@@ -452,6 +452,12 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				if exp.FieldSep == utils.EmptyString {
 					return fmt.Errorf("<%s> empty FieldSep for exporter with ID: %s", utils.EEs, exp.ID)
 				}
+			case utils.MetaFileFWV:
+				for _, dir := range []string{exp.ExportPath} {
+					if _, err := os.Stat(dir); err != nil && os.IsNotExist(err) {
+						return fmt.Errorf("<%s> nonexistent folder: %s for exporter with ID: %s", utils.EEs, dir, exp.ID)
+					}
+				}
 			}
 		}
 	}

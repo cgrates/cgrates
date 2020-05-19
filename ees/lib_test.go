@@ -23,6 +23,8 @@ import (
 	"flag"
 	"net/rpc"
 	"net/rpc/jsonrpc"
+	"os"
+	"testing"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -42,5 +44,26 @@ func newRPCClient(cfg *config.ListenCfg) (c *rpc.Client, err error) {
 		return rpc.Dial(utils.TCP, cfg.RPCGOBListen)
 	default:
 		return nil, errors.New("UNSUPPORTED_RPC")
+	}
+}
+
+var exportPath = []string{"/tmp/testCSV", "/tmp/testComposedCSV"}
+
+func testCreateDirectory(t *testing.T) {
+	for _, dir := range exportPath {
+		if err := os.RemoveAll(dir); err != nil {
+			t.Fatal("Error removing folder: ", dir, err)
+		}
+		if err := os.MkdirAll(dir, os.ModePerm); err != nil {
+			t.Fatal("Error creating folder: ", dir, err)
+		}
+	}
+}
+
+func testCleanDirectory(t *testing.T) {
+	for _, dir := range exportPath {
+		if err := os.RemoveAll(dir); err != nil {
+			t.Fatal("Error removing folder: ", dir, err)
+		}
 	}
 }

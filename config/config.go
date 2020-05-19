@@ -318,7 +318,7 @@ var possibleReaderTypes = utils.NewStringSet([]string{utils.MetaFileCSV,
 	utils.MetaKafkajsonMap, utils.MetaFileXML, utils.MetaSQL, utils.MetaFileFWV,
 	utils.MetaPartialCSV, utils.MetaFlatstore, utils.MetaJSON, utils.META_NONE})
 
-var possibleExporterTypes = utils.NewStringSet([]string{utils.MetaFileCSV, utils.META_NONE})
+var possibleExporterTypes = utils.NewStringSet([]string{utils.MetaFileCSV, utils.META_NONE, utils.MetaFileFWV})
 
 func (cfg *CGRConfig) LazySanityCheck() {
 	for _, cdrePrfl := range cfg.cdrsCfg.OnlineCDRExports {
