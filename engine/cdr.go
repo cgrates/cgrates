@@ -288,25 +288,24 @@ func (cdr *CDR) String() string {
 
 // combimedCdrFieldVal groups together CDRs with same CGRID and combines their values matching filter field ID
 func (cdr *CDR) combimedCdrFieldVal(cfgCdrFld *config.FCTemplate, groupCDRs []*CDR, filterS *FilterS) (string, error) {
-	var combinedVal string // Will result as combination of the field values, filters must match
-	for _, filterRule := range cfgCdrFld.Value {
-		pairingVal, err := cdr.FieldAsString(filterRule)
-		if err != nil {
-			return "", err
+	var combimedVal string // Will result as combination of the field values, filters must match
+
+	for _, grpCDR := range groupCDRs {
+		if cdr.CGRID != grpCDR.CGRID {
+			continue // We only care about cdrs with same primary cdr behind
 		}
-		for _, grpCDR := range groupCDRs {
-			if cdr.CGRID != grpCDR.CGRID {
-				continue // We only care about cdrs with same primary cdr behind
-			}
-			if valStr, err := grpCDR.FieldAsString(filterRule); err != nil {
-				return "", err
-			} else if valStr != pairingVal { // First CDR with field equal with ours
-				continue
-			}
-			combinedVal += grpCDR.FieldsAsString(cfgCdrFld.Value)
+		if pass, err := filterS.Pass(grpCDR.Tenant, cfgCdrFld.Filters, utils.MapStorage{
+			utils.MetaReq: grpCDR.AsMapStringIface(),
+			utils.MetaEC:  grpCDR.CostDetails,
+		}); err != nil {
+			return utils.EmptyString, err
+		} else if !pass {
+			continue
 		}
+		combimedVal += grpCDR.FieldsAsString(cfgCdrFld.Value)
+
 	}
-	return combinedVal, nil
+	return combimedVal, nil
 }
 
 // Extracts the value specified by cfgHdr out of cdr, used for export values
