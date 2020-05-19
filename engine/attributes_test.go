@@ -1943,7 +1943,7 @@ func TestProcessAttributeVariable(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	clnEv := ev.Clone()
+	clnEv := ev.CGREvent.Clone()
 	clnEv.Event["Field2"] = "Val2"
 	eRply := &AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_VARIABLE"},
@@ -2001,7 +2001,7 @@ func TestProcessAttributeComposed(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	clnEv := ev.Clone()
+	clnEv := ev.CGREvent.Clone()
 	clnEv.Event["Field2"] = "Val2Concatenated"
 	eRply := &AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_COMPOSED"},
@@ -2054,7 +2054,7 @@ func TestProcessAttributeUsageDifference(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	clnEv := ev.Clone()
+	clnEv := ev.CGREvent.Clone()
 	clnEv.Event["Field2"] = "1h0m0s"
 	eRply := &AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_USAGE_DIFF"},
@@ -2107,7 +2107,7 @@ func TestProcessAttributeSum(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	clnEv := ev.Clone()
+	clnEv := ev.CGREvent.Clone()
 	clnEv.Event["Field2"] = "16"
 	eRply := &AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_SUM"},
@@ -2160,7 +2160,7 @@ func TestProcessAttributeDiff(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	clnEv := ev.Clone()
+	clnEv := ev.CGREvent.Clone()
 	clnEv.Event["Field2"] = "39"
 	eRply := &AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_DIFF"},
@@ -2213,7 +2213,7 @@ func TestProcessAttributeMultiply(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	clnEv := ev.Clone()
+	clnEv := ev.CGREvent.Clone()
 	clnEv.Event["Field2"] = "2750"
 	eRply := &AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_MULTIPLY"},
@@ -2266,7 +2266,7 @@ func TestProcessAttributeDivide(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	clnEv := ev.Clone()
+	clnEv := ev.CGREvent.Clone()
 	clnEv.Event["Field2"] = "2.75"
 	eRply := &AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_DIVIDE"},
@@ -2319,7 +2319,7 @@ func TestProcessAttributeValueExponent(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	clnEv := ev.Clone()
+	clnEv := ev.CGREvent.Clone()
 	clnEv.Event["Field2"] = "50000"
 	eRply := &AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_VAL_EXP"},
@@ -2372,7 +2372,7 @@ func TestProcessAttributeUnixTimeStamp(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	clnEv := ev.Clone()
+	clnEv := ev.CGREvent.Clone()
 	clnEv.Event["Field2"] = "1388415601"
 	eRply := &AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_UNIX_TIMESTAMP"},

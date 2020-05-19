@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"net"
 	"reflect"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -47,33 +48,47 @@ func (ms MapStorage) FieldAsInterface(fldPath []string) (val interface{}, err er
 	if len(fldPath) == 0 {
 		err = errors.New("empty field path")
 		return
-
 	}
-	opath, indx := GetPathIndex(fldPath[0])
+	opath, sindx := GetPathIndexString(fldPath[0])
 	var has bool
 	if val, has = ms[opath]; !has {
 		err = ErrNotFound
 		return
 	}
 	if len(fldPath) == 1 {
-		if indx == nil {
+		if sindx == nil {
 			return
-
 		}
 		switch rv := val.(type) {
 		case []string:
-			if len(rv) <= *indx {
+			var indx int
+			if indx, err = strconv.Atoi(*sindx); err != nil {
+				return
+			}
+			if len(rv) <= indx {
 				return nil, ErrNotFound
 			}
-			val = rv[*indx]
+			val = rv[indx]
 			return
 		case []interface{}:
-			if len(rv) <= *indx {
+			var indx int
+			if indx, err = strconv.Atoi(*sindx); err != nil {
+				return
+			}
+			if len(rv) <= indx {
 				return nil, ErrNotFound
 			}
-			val = rv[*indx]
+			val = rv[indx]
 			return
+		case DataProvider:
+			return rv.FieldAsInterface(append([]string{*sindx}, fldPath[1:]...))
+		case map[string]interface{}:
+			return MapStorage(rv).FieldAsInterface(append([]string{*sindx}, fldPath[1:]...))
 		default:
+		}
+		var indx int
+		if indx, err = strconv.Atoi(*sindx); err != nil {
+			return
 		}
 		// only if all above fails use reflect:
 		vr := reflect.ValueOf(val)
@@ -84,13 +99,12 @@ func (ms MapStorage) FieldAsInterface(fldPath []string) (val interface{}, err er
 			return nil, ErrNotFound
 
 		}
-		if *indx >= vr.Len() {
+		if indx >= vr.Len() {
 			return nil, ErrNotFound
 		}
-		return vr.Index(*indx).Interface(), nil
-
+		return vr.Index(indx).Interface(), nil
 	}
-	if indx == nil {
+	if sindx == nil {
 		switch dp := ms[fldPath[0]].(type) {
 		case DataProvider:
 			return dp.FieldAsInterface(fldPath[1:])
@@ -98,32 +112,51 @@ func (ms MapStorage) FieldAsInterface(fldPath []string) (val interface{}, err er
 			return MapStorage(dp).FieldAsInterface(fldPath[1:])
 		default:
 			err = ErrWrongPath
-
 			return
 		}
 	}
 	switch dp := ms[opath].(type) {
+	case DataProvider:
+		return dp.FieldAsInterface(append([]string{*sindx}, fldPath[1:]...))
+	case map[string]interface{}:
+		return MapStorage(dp).FieldAsInterface(append([]string{*sindx}, fldPath[1:]...))
 	case []DataProvider:
-		if len(dp) <= *indx {
+		var indx int
+		if indx, err = strconv.Atoi(*sindx); err != nil {
+			return
+		}
+		if len(dp) <= indx {
 			return nil, ErrNotFound
 		}
-		return dp[*indx].FieldAsInterface(fldPath[1:])
+		return dp[indx].FieldAsInterface(fldPath[1:])
 	case []MapStorage:
-		if len(dp) <= *indx {
+		var indx int
+		if indx, err = strconv.Atoi(*sindx); err != nil {
+			return
+		}
+		if len(dp) <= indx {
 			return nil, ErrNotFound
 		}
-		return dp[*indx].FieldAsInterface(fldPath[1:])
+		return dp[indx].FieldAsInterface(fldPath[1:])
 	case []map[string]interface{}:
-		if len(dp) <= *indx {
+		var indx int
+		if indx, err = strconv.Atoi(*sindx); err != nil {
+			return
+		}
+		if len(dp) <= indx {
 			return nil, ErrNotFound
 
 		}
-		return MapStorage(dp[*indx]).FieldAsInterface(fldPath[1:])
+		return MapStorage(dp[indx]).FieldAsInterface(fldPath[1:])
 	case []interface{}:
-		if len(dp) <= *indx {
+		var indx int
+		if indx, err = strconv.Atoi(*sindx); err != nil {
+			return
+		}
+		if len(dp) <= indx {
 			return nil, ErrNotFound
 		}
-		switch ds := dp[*indx].(type) {
+		switch ds := dp[indx].(type) {
 		case DataProvider:
 			return ds.FieldAsInterface(fldPath[1:])
 		case map[string]interface{}:
@@ -131,7 +164,6 @@ func (ms MapStorage) FieldAsInterface(fldPath []string) (val interface{}, err er
 		default:
 		}
 	default:
-
 	}
 	err = ErrNotFound // xml compatible
 	val = nil

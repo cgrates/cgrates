@@ -147,3 +147,13 @@ func GetPathWithoutIndex(spath string) (opath string) {
 	opath = spath[:idxStart]
 	return
 }
+
+func GetPathIndexString(spath string) (opath string, idx *string) {
+	idxStart := strings.Index(spath, IdxStart)
+	if idxStart == -1 || !strings.HasSuffix(spath, IdxEnd) {
+		return spath, nil
+	}
+	idxVal := spath[idxStart+1 : len(spath)-1]
+	opath = spath[:idxStart]
+	return opath, &idxVal
+}

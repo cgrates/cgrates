@@ -170,8 +170,7 @@ func (ev *CGREventWithArgDispatcher) Clone() (clned *CGREventWithArgDispatcher) 
 		clned.CGREvent = ev.CGREvent.Clone()
 	}
 	if ev.ArgDispatcher != nil {
-		clned.ArgDispatcher = new(ArgDispatcher)
-		*clned.ArgDispatcher = *ev.ArgDispatcher
+		clned.ArgDispatcher = ev.ArgDispatcher.Clone()
 	}
 	return
 }
@@ -268,6 +267,7 @@ func ExtractArgsFromOpts(ev map[string]interface{}, dispatcherFlag, consumeRoute
 	return
 }
 
+// Clone return a copy of the CGREventWithOpts
 func (ev *CGREventWithOpts) Clone() (clned *CGREventWithOpts) {
 	if ev == nil {
 		return
@@ -276,10 +276,7 @@ func (ev *CGREventWithOpts) Clone() (clned *CGREventWithOpts) {
 	if ev.CGREvent != nil {
 		clned.CGREvent = ev.CGREvent.Clone()
 	}
-	if ev.ArgDispatcher != nil {
-		clned.ArgDispatcher = new(ArgDispatcher)
-		*clned.ArgDispatcher = *ev.ArgDispatcher
-	}
+	clned.ArgDispatcher = ev.ArgDispatcher.Clone()
 	if ev.Opts != nil {
 		clned.Opts = make(map[string]interface{})
 		for opt, val := range ev.Opts {

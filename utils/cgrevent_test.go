@@ -517,5 +517,96 @@ func TestCGREventWithArgDispatcherClone(t *testing.T) {
 	if reflect.DeepEqual(cgrEventWithArgDispatcher.ArgDispatcher, rcv.ArgDispatcher) {
 		t.Errorf("Expected to be different")
 	}
+}
 
+func TestCGREventWithOptsClone(t *testing.T) {
+	//empty check
+	cgrEventWithOpts := new(CGREventWithOpts)
+	rcv := cgrEventWithOpts.Clone()
+	if !reflect.DeepEqual(cgrEventWithOpts, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", cgrEventWithOpts, rcv)
+	}
+	//nil check
+	cgrEventWithOpts = nil
+	rcv = cgrEventWithOpts.Clone()
+	if !reflect.DeepEqual(cgrEventWithOpts, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", cgrEventWithOpts, rcv)
+	}
+	//normal check
+	now := time.Now()
+	cgrEventWithOpts = &CGREventWithOpts{
+		CGREvent: &CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "IDtest",
+			Time:   &now,
+			Event: map[string]interface{}{
+				"test1": 1,
+				"test2": 2,
+				"test3": 3,
+			},
+		},
+		ArgDispatcher: &ArgDispatcher{
+			APIKey:  StringPointer("api1"),
+			RouteID: StringPointer("route1"),
+		},
+		Opts: map[string]interface{}{
+			"Context": MetaSessionS,
+		},
+	}
+	rcv = cgrEventWithOpts.Clone()
+	if !reflect.DeepEqual(cgrEventWithOpts, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", cgrEventWithOpts, rcv)
+	}
+	//check vars
+	rcv.ArgDispatcher = &ArgDispatcher{
+		APIKey:  StringPointer("apikey"),
+		RouteID: StringPointer("routeid"),
+	}
+	if reflect.DeepEqual(cgrEventWithOpts.ArgDispatcher, rcv.ArgDispatcher) {
+		t.Errorf("Expected to be different")
+	}
+
+}
+
+func TestCGREventFieldAsInt64(t *testing.T) {
+	se := &CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "supplierEvent1",
+		Event: map[string]interface{}{
+			AnswerTime:         time.Now(),
+			"supplierprofile1": "Supplier",
+			"UsageInterval":    "54",
+			"PddInterval":      "1s",
+			"Weight":           20,
+		},
+	}
+	answ, err := se.FieldAsInt64("UsageInterval")
+	if err != nil {
+		t.Error(err)
+	}
+	if answ != int64(54) {
+		t.Errorf("Expecting: %+v, received: %+v", se.Event["UsageInterval"], answ)
+	}
+	answ, err = se.FieldAsInt64("Weight")
+	if err != nil {
+		t.Error(err)
+	}
+	if answ != int64(20) {
+		t.Errorf("Expecting: %+v, received: %+v", se.Event["Weight"], answ)
+	}
+	answ, err = se.FieldAsInt64("PddInterval")
+	if err == nil || err.Error() != `strconv.ParseInt: parsing "1s": invalid syntax` {
+		t.Errorf("Expected %s, received %s", `strconv.ParseInt: parsing "1s": invalid syntax`, err)
+	}
+	if answ != 0 {
+		t.Errorf("Expecting: %+v, received: %+v", 0, answ)
+	}
+
+	if _, err := se.FieldAsInt64(AnswerTime); err == nil || !strings.HasPrefix(err.Error(), "cannot convert field") {
+		t.Errorf("Unexpected error : %+v", err)
+	}
+	if _, err := se.FieldAsInt64(Account); err == nil || err.Error() != ErrNotFound.Error() {
+		t.Errorf("Expected %s, received %s", ErrNotFound, err)
+	}
+	// }
 }
