@@ -65,6 +65,7 @@ func NewAgentRequest(req utils.DataProvider,
 		Trailer:    trailer,
 		Opts:       opts,
 	}
+	ar.dynamicProvider = utils.NewDynamicDataProvider(ar)
 	// populate tenant
 	if tntIf, err := ar.ParseField(
 		&config.FCTemplate{Type: utils.META_COMPOSED,
@@ -80,19 +81,20 @@ func NewAgentRequest(req utils.DataProvider,
 // AgentRequest represents data related to one request towards agent
 // implements utils.DataProvider so we can pass it to filters
 type AgentRequest struct {
-	Request    utils.DataProvider         // request
-	Vars       utils.NavigableMap2        // shared data
-	CGRRequest *utils.OrderedNavigableMap // Used in reply to access the request that was send
-	CGRReply   *utils.NavigableMap2
-	Reply      *utils.OrderedNavigableMap
-	Tenant     string
-	Timezone   string
-	filterS    *engine.FilterS
-	Header     utils.DataProvider
-	Trailer    utils.DataProvider
-	diamreq    *utils.OrderedNavigableMap // used in case of building requests (ie. DisconnectSession)
-	tmp        utils.NavigableMap2        // used in case you want to store temporary items and access them later
-	Opts       *utils.OrderedNavigableMap
+	Request         utils.DataProvider         // request
+	Vars            utils.NavigableMap2        // shared data
+	CGRRequest      *utils.OrderedNavigableMap // Used in reply to access the request that was send
+	CGRReply        *utils.NavigableMap2
+	Reply           *utils.OrderedNavigableMap
+	Tenant          string
+	Timezone        string
+	filterS         *engine.FilterS
+	Header          utils.DataProvider
+	Trailer         utils.DataProvider
+	diamreq         *utils.OrderedNavigableMap // used in case of building requests (ie. DisconnectSession)
+	tmp             utils.NavigableMap2        // used in case you want to store temporary items and access them later
+	Opts            *utils.OrderedNavigableMap
+	dynamicProvider *utils.DynamicDataProvider
 }
 
 // String implements utils.DataProvider
@@ -357,18 +359,18 @@ func (ar *AgentRequest) ParseField(
 		out = ar.RemoteHost().String()
 		isString = true
 	case utils.MetaVariable, utils.META_COMPOSED, utils.MetaGroup:
-		out, err = cfgFld.Value.ParseDataProvider(ar, utils.NestingSep)
+		out, err = cfgFld.Value.ParseDataProvider(ar.dynamicProvider, utils.NestingSep)
 		isString = true
 	case utils.META_USAGE_DIFFERENCE:
 		if len(cfgFld.Value) != 2 {
 			return nil, fmt.Errorf("invalid arguments <%s> to %s",
 				utils.ToJSON(cfgFld.Value), utils.META_USAGE_DIFFERENCE)
 		}
-		strVal1, err := cfgFld.Value[0].ParseDataProvider(ar, utils.NestingSep)
+		strVal1, err := cfgFld.Value[0].ParseDataProvider(ar.dynamicProvider, utils.NestingSep)
 		if err != nil {
 			return "", err
 		}
-		strVal2, err := cfgFld.Value[1].ParseDataProvider(ar, utils.NestingSep)
+		strVal2, err := cfgFld.Value[1].ParseDataProvider(ar.dynamicProvider, utils.NestingSep)
 		if err != nil {
 			return "", err
 		}
@@ -387,7 +389,7 @@ func (ar *AgentRequest) ParseField(
 			return nil, fmt.Errorf("invalid arguments <%s> to %s",
 				utils.ToJSON(cfgFld.Value), utils.MetaCCUsage)
 		}
-		strVal1, err := cfgFld.Value[0].ParseDataProvider(ar, utils.NestingSep) // ReqNr
+		strVal1, err := cfgFld.Value[0].ParseDataProvider(ar.dynamicProvider, utils.NestingSep) // ReqNr
 		if err != nil {
 			return "", err
 		}
@@ -396,7 +398,7 @@ func (ar *AgentRequest) ParseField(
 			return "", fmt.Errorf("invalid requestNumber <%s> to %s",
 				strVal1, utils.MetaCCUsage)
 		}
-		strVal2, err := cfgFld.Value[1].ParseDataProvider(ar, utils.NestingSep) // TotalUsage
+		strVal2, err := cfgFld.Value[1].ParseDataProvider(ar.dynamicProvider, utils.NestingSep) // TotalUsage
 		if err != nil {
 			return "", err
 		}
@@ -405,7 +407,7 @@ func (ar *AgentRequest) ParseField(
 			return "", fmt.Errorf("invalid usedCCTime <%s> to %s",
 				strVal2, utils.MetaCCUsage)
 		}
-		strVal3, err := cfgFld.Value[2].ParseDataProvider(ar, utils.NestingSep) // DebitInterval
+		strVal3, err := cfgFld.Value[2].ParseDataProvider(ar.dynamicProvider, utils.NestingSep) // DebitInterval
 		if err != nil {
 			return "", err
 		}
@@ -422,7 +424,7 @@ func (ar *AgentRequest) ParseField(
 	case utils.MetaSum:
 		iFaceVals := make([]interface{}, len(cfgFld.Value))
 		for i, val := range cfgFld.Value {
-			strVal, err := val.ParseDataProvider(ar, utils.NestingSep)
+			strVal, err := val.ParseDataProvider(ar.dynamicProvider, utils.NestingSep)
 			if err != nil {
 				return "", err
 			}
@@ -432,7 +434,7 @@ func (ar *AgentRequest) ParseField(
 	case utils.MetaDifference:
 		iFaceVals := make([]interface{}, len(cfgFld.Value))
 		for i, val := range cfgFld.Value {
-			strVal, err := val.ParseDataProvider(ar, utils.NestingSep)
+			strVal, err := val.ParseDataProvider(ar.dynamicProvider, utils.NestingSep)
 			if err != nil {
 				return "", err
 			}
@@ -442,7 +444,7 @@ func (ar *AgentRequest) ParseField(
 	case utils.MetaMultiply:
 		iFaceVals := make([]interface{}, len(cfgFld.Value))
 		for i, val := range cfgFld.Value {
-			strVal, err := val.ParseDataProvider(ar, utils.NestingSep)
+			strVal, err := val.ParseDataProvider(ar.dynamicProvider, utils.NestingSep)
 			if err != nil {
 				return "", err
 			}
@@ -452,7 +454,7 @@ func (ar *AgentRequest) ParseField(
 	case utils.MetaDivide:
 		iFaceVals := make([]interface{}, len(cfgFld.Value))
 		for i, val := range cfgFld.Value {
-			strVal, err := val.ParseDataProvider(ar, utils.NestingSep)
+			strVal, err := val.ParseDataProvider(ar.dynamicProvider, utils.NestingSep)
 			if err != nil {
 				return "", err
 			}
@@ -464,7 +466,7 @@ func (ar *AgentRequest) ParseField(
 			return nil, fmt.Errorf("invalid arguments <%s> to %s",
 				utils.ToJSON(cfgFld.Value), utils.MetaValueExponent)
 		}
-		strVal1, err := cfgFld.Value[0].ParseDataProvider(ar, utils.NestingSep) // String Value
+		strVal1, err := cfgFld.Value[0].ParseDataProvider(ar.dynamicProvider, utils.NestingSep) // String Value
 		if err != nil {
 			return "", err
 		}
@@ -473,7 +475,7 @@ func (ar *AgentRequest) ParseField(
 			return "", fmt.Errorf("invalid value <%s> to %s",
 				strVal1, utils.MetaValueExponent)
 		}
-		strVal2, err := cfgFld.Value[1].ParseDataProvider(ar, utils.NestingSep) // String Exponent
+		strVal2, err := cfgFld.Value[1].ParseDataProvider(ar.dynamicProvider, utils.NestingSep) // String Exponent
 		if err != nil {
 			return "", err
 		}
@@ -484,7 +486,7 @@ func (ar *AgentRequest) ParseField(
 		out = strconv.FormatFloat(utils.Round(val*math.Pow10(exp),
 			config.CgrConfig().GeneralCfg().RoundingDecimals, utils.ROUNDING_MIDDLE), 'f', -1, 64)
 	case utils.MetaUnixTimestamp:
-		val, err := cfgFld.Value.ParseDataProvider(ar, utils.NestingSep)
+		val, err := cfgFld.Value.ParseDataProvider(ar.dynamicProvider, utils.NestingSep)
 		if err != nil {
 			return nil, err
 		}

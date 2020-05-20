@@ -44,7 +44,7 @@ type FullPath struct {
 func NewPathItems(path []string) (pItms PathItems) {
 	pItms = make(PathItems, len(path))
 	for i, v := range path {
-		field, indx := GetPathIndex(v)
+		field, indx := GetPathIndexString(v)
 		pItms[i] = PathItem{
 			Field: field,
 			Index: indx,
@@ -82,7 +82,7 @@ func (path PathItems) String() (out string) {
 // PathItem used by the NM interface to store the path information
 type PathItem struct {
 	Field string
-	Index *int
+	Index *string
 }
 
 // Equal returns true if p==p2
@@ -102,7 +102,7 @@ func (p PathItem) Equal(p2 PathItem) bool {
 func (p PathItem) String() (out string) {
 	out = p.Field
 	if p.Index != nil {
-		out += IdxStart + strconv.Itoa(*p.Index) + IdxEnd
+		out += IdxStart + *p.Index + IdxEnd
 	}
 	return
 }
@@ -114,7 +114,7 @@ func (p PathItem) Clone() (c PathItem) {
 	// }
 	c.Field = p.Field
 	if p.Index != nil {
-		c.Index = IntPointer(*p.Index)
+		c.Index = StringPointer(*p.Index)
 	}
 	return
 }
@@ -148,6 +148,9 @@ func GetPathWithoutIndex(spath string) (opath string) {
 	return
 }
 
+// GetPathIndexString returns the path and index as string if index present
+// path[index]=>path,index
+// path=>path,nil
 func GetPathIndexString(spath string) (opath string, idx *string) {
 	idxStart := strings.Index(spath, IdxStart)
 	if idxStart == -1 || !strings.HasSuffix(spath, IdxEnd) {

@@ -58,7 +58,9 @@ func (nm NavigableMap2) Field(path PathItems) (val NMInterface, err error) {
 		return nil, ErrNotFound
 	case NMMapType:
 		if path[0].Index != nil {
-			return nil, ErrNotFound
+			path[0].Field = *path[0].Index
+			path[0].Index = nil
+			return el.Field(path)
 		}
 		return el.Field(path[1:])
 	case NMSliceType:

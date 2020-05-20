@@ -189,12 +189,12 @@ func TestNavMapFieldAsInterface(t *testing.T) {
 	nM := MapStorage{
 		"FirstLevel": map[string]interface{}{
 			"SecondLevel": []map[string]interface{}{
-				map[string]interface{}{
+				{
 					"ThirdLevel": map[string]interface{}{
 						"Fld1": "Val1",
 					},
 				},
-				map[string]interface{}{
+				{
 					"Count": 10,
 					"ThirdLevel2": map[string]interface{}{
 						"Fld2": []string{"Val1", "Val2", "Val3"},
@@ -297,9 +297,10 @@ func TestNavMapGetKeys(t *testing.T) {
 
 func TestNavMapFieldAsInterface2(t *testing.T) {
 	nM := MapStorage{
-		"Slice":          &[]struct{}{{}},
-		"SliceString":    []string{"1", "2"},
-		"SliceInterface": []interface{}{1, "2"},
+		"AnotherFirstLevel": "ValAnotherFirstLevel",
+		"Slice":             &[]struct{}{{}},
+		"SliceString":       []string{"1", "2"},
+		"SliceInterface":    []interface{}{1, "2"},
 	}
 
 	path := []string{"Slice[1]"}
@@ -379,12 +380,12 @@ func TestNavMapGetField2(t *testing.T) {
 		},
 		"FirstLevel2": MapStorage{
 			"SecondLevel2": []MapStorage{
-				MapStorage{
+				{
 					"ThirdLevel2": MapStorage{
 						"Fld1": "Val1",
 					},
 				},
-				MapStorage{
+				{
 					"Count": 10,
 					"ThirdLevel2": MapStorage{
 						"Fld2": []string{"Val1", "Val2", "Val3"},
