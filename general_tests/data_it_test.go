@@ -202,7 +202,7 @@ func testV1DataGetCostWith10Kilo(t *testing.T) {
 		Subject: "10kilo", AnswerTime: "*now", Usage: 256000000}
 	var rply *engine.DataCost
 	tStart := time.Now()
-	if err := dataRpc.Call(utils.APIerSv1GetDataCost, attrs, &rply); err != nil {
+	if err := dataRpc.Call(utils.APIerSv1GetDataCost, &attrs, &rply); err != nil {
 		t.Error("Unexpected nil error received: ", err.Error())
 	} else if rply.Cost != 25600.000000 {
 		t.Errorf("Unexpected cost received: %f", rply.Cost)
@@ -340,7 +340,7 @@ func testV1DataGetCost1G0(t *testing.T) {
 		Subject: "10kilo", AnswerTime: "*now", Usage: 1000000000}
 	var rply *engine.DataCost
 	tStart := time.Now()
-	if err := dataRpc.Call(utils.APIerSv1GetDataCost, attrs, &rply); err != nil {
+	if err := dataRpc.Call(utils.APIerSv1GetDataCost, &attrs, &rply); err != nil {
 		t.Error("Unexpected nil error received: ", err.Error())
 	} else if rply.Cost != 100000.000000 {
 		t.Errorf("Unexpected cost received: %f", rply.Cost)

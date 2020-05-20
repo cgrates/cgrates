@@ -291,7 +291,7 @@ func testAPIerGetRatingPlanCost3(t *testing.T) {
 func testAPIerGetActionPlanIDs(t *testing.T) {
 	var reply []string
 	if err := apierRPC.Call(utils.APIerSv1GetActionPlanIDs,
-		utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{Tenant: "cgrates.org"}},
+		&utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{Tenant: "cgrates.org"}},
 		&reply); err != nil {
 		t.Error(err)
 	} else if len(reply) != 1 {

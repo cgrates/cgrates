@@ -178,7 +178,7 @@ func testV1CDRsProcessEventWithRefund(t *testing.T) {
 		t.Error("Unexpected reply received: ", reply)
 	}
 	var cdrs []*engine.ExternalCDR
-	if err := cdrsRpc.Call(utils.APIerSv1GetCDRs, utils.AttrGetCdrs{}, &cdrs); err != nil {
+	if err := cdrsRpc.Call(utils.APIerSv1GetCDRs, &utils.AttrGetCdrs{}, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))

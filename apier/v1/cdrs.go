@@ -50,7 +50,7 @@ func (apier *APIerSv1) GetEventCost(attrs utils.AttrGetCallCost, reply *engine.E
 }
 
 // Retrieves CDRs based on the filters
-func (apier *APIerSv1) GetCDRs(attrs utils.AttrGetCdrs, reply *[]*engine.ExternalCDR) error {
+func (apier *APIerSv1) GetCDRs(attrs *utils.AttrGetCdrs, reply *[]*engine.ExternalCDR) error {
 	cdrsFltr, err := attrs.AsCDRsFilter(apier.Config.GeneralCfg().DefaultTimezone)
 	if err != nil {
 		return utils.NewErrServerError(err)

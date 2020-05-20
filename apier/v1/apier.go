@@ -60,8 +60,8 @@ func (apiv1 *APIerSv1) Call(serviceMethod string,
 	return utils.APIerRPCCall(apiv1, serviceMethod, args, reply)
 }
 
-func (apiv1 *APIerSv1) GetDestination(dstId string, reply *engine.Destination) error {
-	if dst, err := apiv1.DataManager.GetDestination(dstId, false, utils.NonTransactional); err != nil {
+func (apiv1 *APIerSv1) GetDestination(dstId *string, reply *engine.Destination) error {
+	if dst, err := apiv1.DataManager.GetDestination(*dstId, false, utils.NonTransactional); err != nil {
 		return utils.ErrNotFound
 	} else {
 		*reply = *dst
@@ -74,7 +74,7 @@ type AttrRemoveDestination struct {
 	Prefixes       []string
 }
 
-func (apiv1 *APIerSv1) RemoveDestination(attr AttrRemoveDestination, reply *string) (err error) {
+func (apiv1 *APIerSv1) RemoveDestination(attr *AttrRemoveDestination, reply *string) (err error) {
 	for _, dstID := range attr.DestinationIDs {
 		if len(attr.Prefixes) == 0 {
 			if err = apiv1.DataManager.RemoveDestination(dstID, utils.NonTransactional); err != nil {
@@ -94,12 +94,12 @@ func (apiv1 *APIerSv1) RemoveDestination(attr AttrRemoveDestination, reply *stri
 }
 
 // GetReverseDestination retrieves revese destination list for a prefix
-func (apiv1 *APIerSv1) GetReverseDestination(prefix string, reply *[]string) (err error) {
-	if prefix == "" {
+func (apiv1 *APIerSv1) GetReverseDestination(prefix *string, reply *[]string) (err error) {
+	if *prefix == utils.EmptyString {
 		return utils.NewErrMandatoryIeMissing("prefix")
 	}
 	var revLst []string
-	if revLst, err = apiv1.DataManager.GetReverseDestination(prefix, false, utils.NonTransactional); err != nil {
+	if revLst, err = apiv1.DataManager.GetReverseDestination(*prefix, false, utils.NonTransactional); err != nil {
 		return
 	}
 	*reply = revLst
@@ -586,12 +586,12 @@ func (apiv1 *APIerSv1) SetActions(attrs V1AttrSetActions, reply *string) (err er
 }
 
 // Retrieves actions attached to specific ActionsId within cache
-func (apiv1 *APIerSv1) GetActions(actsId string, reply *[]*utils.TPAction) error {
-	if len(actsId) == 0 {
-		return fmt.Errorf("%s ActionsId: %s", utils.ErrMandatoryIeMissing.Error(), actsId)
+func (apiv1 *APIerSv1) GetActions(actsId *string, reply *[]*utils.TPAction) error {
+	if len(*actsId) == 0 {
+		return fmt.Errorf("%s ActionsId: %s", utils.ErrMandatoryIeMissing.Error(), *actsId)
 	}
 	acts := make([]*utils.TPAction, 0)
-	engActs, err := apiv1.DataManager.GetActions(actsId, false, utils.NonTransactional)
+	engActs, err := apiv1.DataManager.GetActions(*actsId, false, utils.NonTransactional)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -822,7 +822,7 @@ type AttrGetActionPlan struct {
 	ID string
 }
 
-func (apiv1 *APIerSv1) GetActionPlan(attr AttrGetActionPlan, reply *[]*engine.ActionPlan) error {
+func (apiv1 *APIerSv1) GetActionPlan(attr *AttrGetActionPlan, reply *[]*engine.ActionPlan) error {
 	var result []*engine.ActionPlan
 	if attr.ID == "" || attr.ID == "*" {
 		result = make([]*engine.ActionPlan, 0)
@@ -1360,7 +1360,7 @@ func (apiv1 *APIerSv1) ComputeActionPlanIndexes(_ string, reply *string) (err er
 }
 
 // GetActionPlanIDs returns list of ActionPlan IDs registered for a tenant
-func (apiv1 *APIerSv1) GetActionPlanIDs(args utils.TenantArgWithPaginator, attrPrfIDs *[]string) error {
+func (apiv1 *APIerSv1) GetActionPlanIDs(args *utils.TenantArgWithPaginator, attrPrfIDs *[]string) error {
 	prfx := utils.ACTION_PLAN_PREFIX
 	keys, err := apiv1.DataManager.DataDB().GetKeysForPrefix(utils.ACTION_PLAN_PREFIX)
 	if err != nil {

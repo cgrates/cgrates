@@ -35,7 +35,7 @@ type AttrGetCost struct {
 	*utils.ArgDispatcher
 }
 
-func (apier *APIerSv1) GetCost(attrs AttrGetCost, ec *engine.EventCost) error {
+func (apier *APIerSv1) GetCost(attrs *AttrGetCost, ec *engine.EventCost) error {
 	if apier.Responder == nil {
 		return utils.NewErrNotConnected(utils.RALService)
 	}
@@ -79,7 +79,7 @@ type AttrGetDataCost struct {
 	*utils.ArgDispatcher
 }
 
-func (apier *APIerSv1) GetDataCost(attrs AttrGetDataCost, reply *engine.DataCost) error {
+func (apier *APIerSv1) GetDataCost(attrs *AttrGetDataCost, reply *engine.DataCost) error {
 	if apier.Responder == nil {
 		return utils.NewErrNotConnected(utils.RALService)
 	}

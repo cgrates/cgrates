@@ -160,7 +160,7 @@ func testTpBalanceCounter(t *testing.T) {
 
 func testTpActionTriggers(t *testing.T) {
 	var atrs engine.ActionTriggers
-	if err := tpRPC.Call(utils.APIerSv1GetActionTriggers, v1.AttrGetActionTriggers{GroupIDs: []string{}}, &atrs); err != nil {
+	if err := tpRPC.Call(utils.APIerSv1GetActionTriggers, &v1.AttrGetActionTriggers{GroupIDs: []string{}}, &atrs); err != nil {
 		t.Error("Got error on APIerSv1.GetActionTriggers: ", err.Error())
 	} else if len(atrs) != 4 {
 		t.Errorf("Calling v1.GetActionTriggers got: %v", atrs)
@@ -177,12 +177,12 @@ func testTpActionTriggers(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Calling v1.SetActionTrigger got: %v", reply)
 	}
-	if err := tpRPC.Call(utils.APIerSv1GetActionTriggers, v1.AttrGetActionTriggers{GroupIDs: []string{}}, &atrs); err != nil {
+	if err := tpRPC.Call(utils.APIerSv1GetActionTriggers, &v1.AttrGetActionTriggers{GroupIDs: []string{}}, &atrs); err != nil {
 		t.Error(err)
 	} else if len(atrs) != 5 {
 		t.Errorf("Calling v1.GetActionTriggers got: %v", atrs)
 	}
-	if err := tpRPC.Call(utils.APIerSv1GetActionTriggers, v1.AttrGetActionTriggers{GroupIDs: []string{"TestATR"}}, &atrs); err != nil {
+	if err := tpRPC.Call(utils.APIerSv1GetActionTriggers, &v1.AttrGetActionTriggers{GroupIDs: []string{"TestATR"}}, &atrs); err != nil {
 		t.Error("Got error on APIerSv1.GetActionTriggers: ", err.Error())
 	} else if len(atrs) != 1 {
 		t.Errorf("Calling v1.GetActionTriggers got: %v", atrs)

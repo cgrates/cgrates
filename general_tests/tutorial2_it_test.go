@@ -132,7 +132,7 @@ func testTutGetCost(t *testing.T) {
 		Usage:       "45s",
 	}
 	var rply *engine.EventCost
-	if err := tutRpc.Call(utils.APIerSv1GetCost, attrs, &rply); err != nil {
+	if err := tutRpc.Call(utils.APIerSv1GetCost, &attrs, &rply); err != nil {
 		t.Error("Unexpected nil error received: ", err.Error())
 	} else if *rply.Cost != 0.550000 {
 		t.Errorf("Unexpected cost received: %f", *rply.Cost)
@@ -144,7 +144,7 @@ func testTutGetCost(t *testing.T) {
 		AnswerTime:  "2019-03-11T09:00:00Z",
 		Usage:       "45s",
 	}
-	if err := tutRpc.Call(utils.APIerSv1GetCost, attrs, &rply); err != nil {
+	if err := tutRpc.Call(utils.APIerSv1GetCost, &attrs, &rply); err != nil {
 		t.Error("Unexpected nil error received: ", err.Error())
 	} else if *rply.Cost != 1.4 {
 		t.Errorf("Unexpected cost received: %f", *rply.Cost)
@@ -163,7 +163,7 @@ func testTutGetCost(t *testing.T) {
 		AnswerTime:  "*now",
 		Usage:       "45s",
 	}
-	if err := tutRpc.Call(utils.APIerSv1GetCost, attrs, &rply); err != nil {
+	if err := tutRpc.Call(utils.APIerSv1GetCost, &attrs, &rply); err != nil {
 		t.Error("Unexpected nil error received: ", err.Error())
 	} else if *rply.Cost != 1.4 {
 		t.Errorf("Unexpected cost received: %f", *rply.Cost)
@@ -175,7 +175,7 @@ func testTutGetCost(t *testing.T) {
 		AnswerTime:  "2020-01-01T21:00:00Z",
 		Usage:       "45s",
 	}
-	if err := tutRpc.Call(utils.APIerSv1GetCost, attrs, &rply); err != nil {
+	if err := tutRpc.Call(utils.APIerSv1GetCost, &attrs, &rply); err != nil {
 		t.Error("Unexpected nil error received: ", err.Error())
 	} else if *rply.Cost != 0.55 {
 		t.Errorf("Unexpected cost received: %f", *rply.Cost)
@@ -187,7 +187,7 @@ func testTutGetCost(t *testing.T) {
 		AnswerTime:  "2019-03-11T21:00:00Z",
 		Usage:       "45s",
 	}
-	if err := tutRpc.Call(utils.APIerSv1GetCost, attrs, &rply); err != nil {
+	if err := tutRpc.Call(utils.APIerSv1GetCost, &attrs, &rply); err != nil {
 		t.Error("Unexpected nil error received: ", err.Error())
 	} else if *rply.Cost != 0.55 {
 		t.Errorf("Unexpected cost received: %f", *rply.Cost)
@@ -199,7 +199,7 @@ func testTutGetCost(t *testing.T) {
 		AnswerTime:  "2019-03-11T09:00:00Z",
 		Usage:       "1m",
 	}
-	if err := tutRpc.Call(utils.APIerSv1GetCost, attrs, &rply); err == nil ||
+	if err := tutRpc.Call(utils.APIerSv1GetCost, &attrs, &rply); err == nil ||
 		err.Error() != "SERVER_ERROR: UNAUTHORIZED_DESTINATION" {
 		t.Error("Unexpected nil error received: ", err)
 	}
@@ -210,7 +210,7 @@ func testTutGetCost(t *testing.T) {
 		AnswerTime: "*now",
 		Usage:      "2048",
 	}
-	if err := tutRpc.Call(utils.APIerSv1GetCost, attrs, &rply); err != nil {
+	if err := tutRpc.Call(utils.APIerSv1GetCost, &attrs, &rply); err != nil {
 		t.Error("Unexpected nil error received: ", err.Error())
 	} else if *rply.Cost != 2.0 { // FixMe: missing ConnectFee out of Cost
 		t.Errorf("Unexpected cost received: %f", *rply.Cost)
@@ -223,7 +223,7 @@ func testTutGetCost(t *testing.T) {
 		AnswerTime:  "*now",
 		Usage:       "1",
 	}
-	if err := tutRpc.Call(utils.APIerSv1GetCost, attrs, &rply); err != nil {
+	if err := tutRpc.Call(utils.APIerSv1GetCost, &attrs, &rply); err != nil {
 		t.Error("Unexpected nil error received: ", err.Error())
 	} else if *rply.Cost != 0.1 {
 		t.Errorf("Unexpected cost received: %f", *rply.Cost)
@@ -236,7 +236,7 @@ func testTutGetCost(t *testing.T) {
 		AnswerTime:  "*now",
 		Usage:       "1",
 	}
-	if err := tutRpc.Call(utils.APIerSv1GetCost, attrs, &rply); err != nil {
+	if err := tutRpc.Call(utils.APIerSv1GetCost, &attrs, &rply); err != nil {
 		t.Error("Unexpected nil error received: ", err.Error())
 	} else if *rply.Cost != 0.2 {
 		t.Errorf("Unexpected cost received: %f", *rply.Cost)
@@ -249,7 +249,7 @@ func testTutGetCost(t *testing.T) {
 		AnswerTime:  "*now",
 		Usage:       "1",
 	}
-	if err := tutRpc.Call(utils.APIerSv1GetCost, attrs, &rply); err == nil ||
+	if err := tutRpc.Call(utils.APIerSv1GetCost, &attrs, &rply); err == nil ||
 		err.Error() != "SERVER_ERROR: UNAUTHORIZED_DESTINATION" {
 		t.Error("Unexpected nil error received: ", err)
 	}
@@ -261,7 +261,7 @@ func testTutGetCost(t *testing.T) {
 		AnswerTime:  "*now",
 		Usage:       "5m",
 	}
-	if err := tutRpc.Call(utils.APIerSv1GetCost, attrs, &rply); err != nil {
+	if err := tutRpc.Call(utils.APIerSv1GetCost, &attrs, &rply); err != nil {
 		t.Error("Unexpected nil error received: ", err.Error())
 	} else if *rply.Cost != 0.1 {
 		t.Errorf("Unexpected cost received: %f", *rply.Cost)
@@ -274,7 +274,7 @@ func testTutGetCost(t *testing.T) {
 		Usage:       "45s",
 		Category:    "reseller1",
 	}
-	if err := tutRpc.Call(utils.APIerSv1GetCost, attrs, &rply); err != nil {
+	if err := tutRpc.Call(utils.APIerSv1GetCost, &attrs, &rply); err != nil {
 		t.Error("Unexpected nil error received: ", err.Error())
 	} else if *rply.Cost != 0.1 {
 		t.Errorf("Unexpected cost received: %f", *rply.Cost)
@@ -287,7 +287,7 @@ func testTutGetCost(t *testing.T) {
 		Usage:       "10m45s",
 		Category:    "reseller1",
 	}
-	if err := tutRpc.Call(utils.APIerSv1GetCost, attrs, &rply); err != nil {
+	if err := tutRpc.Call(utils.APIerSv1GetCost, &attrs, &rply); err != nil {
 		t.Error("Unexpected nil error received: ", err.Error())
 	} else if *rply.Cost != 0.1 {
 		t.Errorf("Unexpected cost received: %f", *rply.Cost)

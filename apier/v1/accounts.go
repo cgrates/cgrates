@@ -606,7 +606,7 @@ func (api *APIerSv1) RemoveBalances(attr *utils.AttrSetBalance, reply *string) (
 	return nil
 }
 
-func (api *APIerSv1) GetAccountsCount(attr utils.TenantArg, reply *int) (err error) {
+func (api *APIerSv1) GetAccountsCount(attr *utils.TenantArg, reply *int) (err error) {
 	if len(attr.Tenant) == 0 {
 		return utils.NewErrMandatoryIeMissing("Tenant")
 	}
