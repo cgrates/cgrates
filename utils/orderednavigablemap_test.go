@@ -663,6 +663,7 @@ func TestOrderedNavigableMapRemove(t *testing.T) {
 		PathItems: PathItems{{Field: "Field5"}},
 		Path:      "Field5",
 	}, &NMSlice{NewNMData(10), NewNMData(101)})
+
 	if err := nm.Remove(&FullPath{}); err != ErrWrongPath {
 		t.Error(err)
 	}
@@ -901,3 +902,40 @@ func BenchmarkNavigableMapField(b *testing.B) {
 	}
 }
 //*/
+
+func TestOrderedNavigableMapRemoveAll(t *testing.T) {
+	nm := NewOrderedNavigableMap()
+	nm.Set(&FullPath{
+		PathItems: PathItems{{Field: "Field2"}},
+		Path:      "Field2",
+	}, NewNMData("1003"))
+	nm.Set(&FullPath{
+		PathItems: PathItems{{Field: "Field3"}, {Field: "Field4"}},
+		Path:      "Field3.Field4",
+	}, NewNMData("Val"))
+	nm.Set(&FullPath{
+		PathItems: PathItems{{Field: "Field1"}},
+		Path:      "Field1",
+	}, NewNMData("1001"))
+	nm.Set(&FullPath{
+		PathItems: PathItems{{Field: "Field5"}},
+		Path:      "Field5",
+	}, &NMSlice{NewNMData(10), NewNMData(101)})
+	expected := NewOrderedNavigableMap()
+	nm.RemoveAll()
+	if !reflect.DeepEqual(nm, expected) {
+		t.Errorf("Expected %s ,received: %s", expected, nm)
+	}
+}
+
+func TestOrderedNavigableMapRemove2(t *testing.T) {
+	nm := &OrderedNavigableMap{
+		nm: NavigableMap2{
+			"Field1": &NMSlice{},
+		},
+	}
+	expErr := `strconv.Atoi: parsing "nan": invalid syntax`
+	if err := nm.Remove(&FullPath{PathItems: PathItems{{Field: "Field1", Index: StringPointer("nan")}, {}}, Path: "Field1[nan]"}); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error: %s,received: %v", expErr, err)
+	}
+}
