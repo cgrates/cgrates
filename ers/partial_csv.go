@@ -176,14 +176,19 @@ func (rdr *PartialCSVFileER) processFile(fPath, fName string) (err error) {
 				rdr.cgrCfg.GeneralCfg().DefaultTimezone),
 			rdr.fltrS, nil, nil) // create an AgentRequest
 		if pass, err := rdr.fltrS.Pass(agReq.Tenant, rdr.Config().Filters,
-			agReq); err != nil || !pass {
+			agReq); err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> reading file: <%s> row <%d>, ignoring due to filter error: <%s>",
+					utils.ERs, absPath, rowNr, err.Error()))
+			return err
+		} else if !pass {
 			continue
 		}
-		if err := agReq.SetFields(rdr.Config().Fields); err != nil {
+		if err = agReq.SetFields(rdr.Config().Fields); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> reading file: <%s> row <%d>, ignoring due to error: <%s>",
 					utils.ERs, absPath, rowNr, err.Error()))
-			continue
+			return
 		}
 
 		// take OriginID and OriginHost to compose CGRID

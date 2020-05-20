@@ -135,7 +135,7 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithOpts, rply *s
 	var wg sync.WaitGroup
 	var withErr bool
 	for cfgIdx, eeCfg := range eeS.cfg.EEsNoLksCfg().Exporters {
-		if eeCfg.Type == utils.META_NONE { // ignore *default exporter
+		if eeCfg.Type == utils.META_NONE { // ignore *none type exporter
 			continue
 		}
 
@@ -146,7 +146,9 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithOpts, rply *s
 				tnt = eeTnt
 			}
 			if pass, errPass := eeS.filterS.Pass(tnt,
-				eeCfg.Filters, cgrDp); errPass != nil || !pass {
+				eeCfg.Filters, cgrDp); errPass != nil {
+				return errPass
+			} else if !pass {
 				continue // does not pass the filters, ignore the exporter
 			}
 		}
@@ -170,10 +172,7 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithOpts, rply *s
 		var ee EventExporter
 		if hasCache {
 			var x interface{}
-			//fmt.Println("Try to get exporter from cache ")
-			//fmt.Println(eeCfg.ID)
 			if x, isCached = eeCache.Get(eeCfg.ID); isCached {
-				//fmt.Println("Get FROM CACHE")
 				ee = x.(EventExporter)
 			}
 		}

@@ -56,7 +56,9 @@ func (ld LoaderData) UpdateFromCSV(fileName string, record []string,
 				return err
 			}
 			if pass, err := filterS.Pass(tenant,
-				cfgFld.Filters, csvProvider); err != nil || !pass {
+				cfgFld.Filters, csvProvider); err != nil {
+				return err
+			} else if !pass {
 				continue // Not passes filters, ignore this CDR
 			}
 		}

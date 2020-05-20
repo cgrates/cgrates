@@ -395,7 +395,9 @@ func (cdre *CDRExporter) processCDRs() (err error) {
 				utils.MetaEC:  cdr.CostDetails,
 			}
 			if pass, err := cdre.filterS.Pass(cdre.exportTemplate.Tenant,
-				cdre.exportTemplate.Filters, cgrDp); err != nil || !pass {
+				cdre.exportTemplate.Filters, cgrDp); err != nil {
+				return err
+			} else if !pass {
 				continue // Not passes filters, ignore this CDR
 			}
 		}

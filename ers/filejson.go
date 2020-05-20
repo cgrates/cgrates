@@ -150,8 +150,13 @@ func (rdr *JSONFileER) processFile(fPath, fName string) (err error) {
 			rdr.cgrCfg.GeneralCfg().DefaultTimezone),
 		rdr.fltrS, nil, nil) // create an AgentRequest
 	if pass, err := rdr.fltrS.Pass(agReq.Tenant, rdr.Config().Filters,
-		agReq); err != nil || !pass {
+		agReq); err != nil {
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s> reading file: <%s>  ignoring due to filter error: <%s>",
+				utils.ERs, absPath, err.Error()))
 		return err
+	} else if !pass {
+		return nil
 	}
 	if err = agReq.SetFields(rdr.Config().Fields); err != nil {
 		utils.Logger.Warning(
