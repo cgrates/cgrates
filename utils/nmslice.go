@@ -18,6 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package utils
 
+import "strconv"
+
 // NMSlice is the basic slice of NM interface
 type NMSlice []NMInterface
 
@@ -46,7 +48,10 @@ func (nms *NMSlice) Field(path PathItems) (val NMInterface, err error) {
 	if nms.Empty() || path[0].Index == nil {
 		return nil, ErrNotFound
 	}
-	idx := *path[0].Index
+	var idx int
+	if idx, err = strconv.Atoi(*path[0].Index); err != nil {
+		return
+	}
 	if idx < 0 {
 		idx = len(*nms) + idx
 	}
@@ -64,7 +69,10 @@ func (nms *NMSlice) Set(path PathItems, val NMInterface) (addedNew bool, err err
 	if len(path) == 0 || path[0].Index == nil {
 		return false, ErrWrongPath
 	}
-	idx := *path[0].Index
+	var idx int
+	if idx, err = strconv.Atoi(*path[0].Index); err != nil {
+		return
+	}
 	if idx == len(*nms) { // append element
 		addedNew = true
 		if len(path) == 1 {
@@ -84,7 +92,7 @@ func (nms *NMSlice) Set(path PathItems, val NMInterface) (addedNew bool, err err
 	if idx < 0 || idx >= len(*nms) {
 		return false, ErrWrongPath
 	}
-	path[0].Index = &idx
+	path[0].Index = StringPointer(strconv.Itoa(idx))
 	if len(path) == 1 {
 		(*nms)[idx] = val
 		return
@@ -100,14 +108,17 @@ func (nms *NMSlice) Remove(path PathItems) (err error) {
 	if len(path) == 0 || path[0].Index == nil {
 		return ErrWrongPath
 	}
-	idx := *path[0].Index
+	var idx int
+	if idx, err = strconv.Atoi(*path[0].Index); err != nil {
+		return
+	}
 	if idx < 0 {
 		idx = len(*nms) + idx
 	}
 	if idx < 0 || idx >= len(*nms) { // already removed
 		return
 	}
-	path[0].Index = &idx
+	path[0].Index = StringPointer(strconv.Itoa(idx))
 	if len(path) == 1 {
 		*nms = append((*nms)[:idx], (*nms)[idx+1:]...)
 		return

@@ -20,6 +20,7 @@ package utils
 
 import (
 	"net"
+	"strconv"
 	"strings"
 )
 
@@ -108,7 +109,7 @@ func (onm *OrderedNavigableMap) Set(fullPath *FullPath, val NMInterface) (addedN
 		pathItmsSet = make([]PathItems, len(*val.(*NMSlice)))
 		for i := 0; i < val.Len(); i++ {
 			pathItms := fullPath.PathItems.Clone()
-			pathItms[len(pathItms)-1].Index = IntPointer(i)
+			pathItms[len(pathItms)-1].Index = StringPointer(strconv.Itoa(i))
 			pathItmsSet[i] = pathItms
 		}
 	} else {

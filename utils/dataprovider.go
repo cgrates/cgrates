@@ -20,6 +20,7 @@ package utils
 
 import (
 	"net"
+	"strconv"
 	"strings"
 )
 
@@ -93,7 +94,7 @@ func AppendNavMapVal(nm navMap, fldPath *FullPath, val NMInterface) (err error) 
 	} else {
 		indx = prevItm.Len()
 	}
-	fldPath.PathItems[len(fldPath.PathItems)-1].Index = &indx
+	fldPath.PathItems[len(fldPath.PathItems)-1].Index = StringPointer(strconv.Itoa(indx))
 	_, err = nm.Set(fldPath, val)
 	return
 }
@@ -109,7 +110,7 @@ func ComposeNavMapVal(nm navMap, fldPath *FullPath, val NMInterface) (err error)
 	} else {
 		indx = prevItmSlice.Len() - 1
 		var prevItm NMInterface
-		if prevItm, err = prevItmSlice.Field(PathItems{{Index: &indx}}); err != nil {
+		if prevItm, err = prevItmSlice.Field(PathItems{{Index: StringPointer(strconv.Itoa(indx))}}); err != nil {
 			if err != ErrNotFound {
 				return
 			}
@@ -117,7 +118,7 @@ func ComposeNavMapVal(nm navMap, fldPath *FullPath, val NMInterface) (err error)
 			return
 		}
 	}
-	fldPath.PathItems[len(fldPath.PathItems)-1].Index = &indx
+	fldPath.PathItems[len(fldPath.PathItems)-1].Index = StringPointer(strconv.Itoa(indx))
 	_, err = nm.Set(fldPath, val)
 	return
 }
