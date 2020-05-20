@@ -527,7 +527,7 @@ func testInternalRemoteITGetAction(t *testing.T) {
 			BalanceDisabled: "false", ExpiryTime: utils.UNLIMITED, Weight: 10.0}}
 
 	var reply []*utils.TPAction
-	if err := internalRPC.Call(utils.APIerSv1GetActions, "ACT_TOPUP_RST_10", &reply); err != nil {
+	if err := internalRPC.Call(utils.APIerSv1GetActions, utils.StringPointer("ACT_TOPUP_RST_10"), &reply); err != nil {
 		t.Error("Got error on APIerSv1.GetActions: ", err.Error())
 	} else if !reflect.DeepEqual(expectActs, reply) {
 		t.Errorf("Expected: %v,\n received: %v", utils.ToJSON(expectActs), utils.ToJSON(reply))
@@ -542,7 +542,7 @@ func testInternalRemoteITGetActionPlan(t *testing.T) {
 		"cgrates.org:1003": true,
 	}
 	if err := internalRPC.Call(utils.APIerSv1GetActionPlan,
-		AttrGetActionPlan{ID: "AP_PACKAGE_10"}, &aps); err != nil {
+		&AttrGetActionPlan{ID: "AP_PACKAGE_10"}, &aps); err != nil {
 		t.Error(err)
 	} else if len(aps) != 1 {
 		t.Errorf("Expected: %v,\n received: %v", 1, len(aps))
@@ -552,7 +552,7 @@ func testInternalRemoteITGetActionPlan(t *testing.T) {
 		t.Errorf("Expected: %v,\n received: %v", accIDsStrMp, aps[0].AccountIDs)
 	}
 	if err := internalRPC.Call(utils.APIerSv1GetActionPlan,
-		AttrGetActionPlan{ID: utils.EmptyString}, &aps); err != nil {
+		&AttrGetActionPlan{ID: utils.EmptyString}, &aps); err != nil {
 		t.Error(err)
 	} else if len(aps) != 1 {
 		t.Errorf("Expected: %v,\n received: %v", 1, len(aps))
@@ -586,7 +586,7 @@ func testInternalRemoteITGetDestination(t *testing.T) {
 		Id:       "DST_1002",
 		Prefixes: []string{"1002"},
 	}
-	if err := internalRPC.Call(utils.APIerSv1GetDestination, "DST_1002", &dst); err != nil {
+	if err := internalRPC.Call(utils.APIerSv1GetDestination, utils.StringPointer("DST_1002"), &dst); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eDst, dst) {
 		t.Errorf("Expected: %v,\n received: %v", eDst, dst)
@@ -596,7 +596,7 @@ func testInternalRemoteITGetDestination(t *testing.T) {
 func testInternalRemoteITGetReverseDestination(t *testing.T) {
 	var ids []string
 	eIDs := []string{"DST_1002"}
-	if err := internalRPC.Call(utils.APIerSv1GetReverseDestination, "1002", &ids); err != nil {
+	if err := internalRPC.Call(utils.APIerSv1GetReverseDestination, utils.StringPointer("1002"), &ids); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eIDs, ids) {
 		t.Errorf("Expected: %v,\n received: %v", eIDs, ids)

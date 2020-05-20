@@ -205,7 +205,7 @@ func testAccITSetBalanceTimingIds(t *testing.T) {
 		Time:      "15:00:00Z",
 	}
 	var reply string
-	if err := accRPC.Call(utils.APIerSv1SetTPTiming, tpTiming, &reply); err != nil {
+	if err := accRPC.Call(utils.APIerSv1SetTPTiming, &tpTiming, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
@@ -513,7 +513,7 @@ func testAccITCountAccounts(t *testing.T) {
 	args := &utils.TenantArg{
 		Tenant: "cgrates.org",
 	}
-	if err := accRPC.Call(utils.APIerSv1GetAccountsCount, args, &reply); err != nil {
+	if err := accRPC.Call(utils.APIerSv1GetAccountsCount, &args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != 10 {
 		t.Errorf("Expecting: %v, received: %v", 10, reply)

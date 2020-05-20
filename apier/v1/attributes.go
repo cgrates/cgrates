@@ -26,8 +26,8 @@ import (
 )
 
 // GetAttributeProfile returns an Attribute Profile
-func (APIerSv1 *APIerSv1) GetAttributeProfile(arg utils.TenantIDWithArgDispatcher, reply *engine.AttributeProfile) error {
-	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
+func (APIerSv1 *APIerSv1) GetAttributeProfile(arg *utils.TenantIDWithArgDispatcher, reply *engine.AttributeProfile) error {
+	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if alsPrf, err := APIerSv1.DataManager.GetAttributeProfile(arg.Tenant, arg.ID, true, true, utils.NonTransactional); err != nil {
@@ -42,8 +42,8 @@ func (APIerSv1 *APIerSv1) GetAttributeProfile(arg utils.TenantIDWithArgDispatche
 }
 
 // GetAttributeProfileIDs returns list of attributeProfile IDs registered for a tenant
-func (APIerSv1 *APIerSv1) GetAttributeProfileIDs(args utils.TenantArgWithPaginator, attrPrfIDs *[]string) error {
-	if missing := utils.MissingStructFields(&args, []string{utils.Tenant}); len(missing) != 0 { //Params missing
+func (APIerSv1 *APIerSv1) GetAttributeProfileIDs(args *utils.TenantArgWithPaginator, attrPrfIDs *[]string) error {
+	if missing := utils.MissingStructFields(args, []string{utils.Tenant}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	prfx := utils.AttributeProfilePrefix + args.Tenant + ":"

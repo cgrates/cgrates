@@ -722,7 +722,7 @@ func testActionsitSetSDestinations(t *testing.T) {
 	//verify destinations
 	var dest Destination
 	if err := actsLclRpc.Call(utils.APIerSv1GetDestination,
-		"*ddc_test", &dest); err != nil {
+		utils.StringPointer("*ddc_test"), &dest); err != nil {
 		t.Error(err.Error())
 	} else {
 		if len(dest.Prefixes) != 2 || !utils.IsSliceMember(dest.Prefixes, "111") || !utils.IsSliceMember(dest.Prefixes, "222") {
@@ -800,7 +800,7 @@ func testActionsitSetSDestinations(t *testing.T) {
 
 	//verify destinations
 	if err := actsLclRpc.Call(utils.APIerSv1GetDestination,
-		"*ddc_test", &dest); err != nil {
+		utils.StringPointer("*ddc_test"), &dest); err != nil {
 		t.Error(err.Error())
 	} else {
 		if len(dest.Prefixes) != 2 || !utils.IsSliceMember(dest.Prefixes, "333") || !utils.IsSliceMember(dest.Prefixes, "777") {

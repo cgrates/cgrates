@@ -462,7 +462,7 @@ type AttrGetActionTriggers struct {
 	GroupIDs []string
 }
 
-func (api *APIerSv1) GetActionTriggers(attr AttrGetActionTriggers, atrs *engine.ActionTriggers) error {
+func (api *APIerSv1) GetActionTriggers(attr *AttrGetActionTriggers, atrs *engine.ActionTriggers) error {
 	var allAttrs engine.ActionTriggers
 	if len(attr.GroupIDs) > 0 {
 		for _, key := range attr.GroupIDs {

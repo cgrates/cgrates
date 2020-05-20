@@ -165,10 +165,10 @@ func testInternalReplicateLoadDataInInternalEngine(t *testing.T) {
 func testInternalReplicateITDestination(t *testing.T) {
 	//check
 	rpl := &engine.Destination{}
-	if err := engineOneRPC.Call(utils.APIerSv1GetDestination, "testDestination", &rpl); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := engineOneRPC.Call(utils.APIerSv1GetDestination, utils.StringPointer("testDestination"), &rpl); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	if err := engineTwoRPC.Call(utils.APIerSv1GetDestination, "testDestination", &rpl); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := engineTwoRPC.Call(utils.APIerSv1GetDestination, utils.StringPointer("testDestination"), &rpl); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 	//set
@@ -184,12 +184,12 @@ func testInternalReplicateITDestination(t *testing.T) {
 		Prefixes: []string{"004", "005"},
 	}
 	// check
-	if err := engineOneRPC.Call(utils.APIerSv1GetDestination, "testDestination", &rpl); err != nil {
+	if err := engineOneRPC.Call(utils.APIerSv1GetDestination, utils.StringPointer("testDestination"), &rpl); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eDst, rpl) {
 		t.Errorf("Expected: %v,\n received: %v", eDst, rpl)
 	}
-	if err := engineTwoRPC.Call(utils.APIerSv1GetDestination, "testDestination", &rpl); err != nil {
+	if err := engineTwoRPC.Call(utils.APIerSv1GetDestination, utils.StringPointer("testDestination"), &rpl); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eDst, rpl) {
 		t.Errorf("Expected: %v,\n received: %v", eDst, rpl)
@@ -197,16 +197,16 @@ func testInternalReplicateITDestination(t *testing.T) {
 
 	// remove
 	attr := &AttrRemoveDestination{DestinationIDs: []string{"testDestination"}, Prefixes: []string{"004", "005"}}
-	if err := internalRPC.Call(utils.APIerSv1RemoveDestination, attr, &reply); err != nil {
+	if err := internalRPC.Call(utils.APIerSv1RemoveDestination, &attr, &reply); err != nil {
 		t.Error("Unexpected error", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Unexpected reply returned: %+v", reply)
 	}
 	// check
-	if err := engineOneRPC.Call(utils.APIerSv1GetDestination, "testDestination", &rpl); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := engineOneRPC.Call(utils.APIerSv1GetDestination, utils.StringPointer("testDestination"), &rpl); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	if err := engineTwoRPC.Call(utils.APIerSv1GetDestination, "testDestination", &rpl); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := engineTwoRPC.Call(utils.APIerSv1GetDestination, utils.StringPointer("testDestination"), &rpl); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
@@ -835,10 +835,10 @@ func testInternalReplicateITResourceProfile(t *testing.T) {
 func testInternalReplicateITActions(t *testing.T) {
 	// check
 	var reply1 []*utils.TPAction
-	if err := engineOneRPC.Call(utils.APIerSv1GetActions, "ACTS_1", &reply1); err == nil || err.Error() != "SERVER_ERROR: NOT_FOUND" {
+	if err := engineOneRPC.Call(utils.APIerSv1GetActions, utils.StringPointer("ACTS_1"), &reply1); err == nil || err.Error() != "SERVER_ERROR: NOT_FOUND" {
 		t.Error(err)
 	}
-	if err := engineTwoRPC.Call(utils.APIerSv1GetActions, "ACTS_1", &reply1); err == nil || err.Error() != "SERVER_ERROR: NOT_FOUND" {
+	if err := engineTwoRPC.Call(utils.APIerSv1GetActions, utils.StringPointer("ACTS_1"), &reply1); err == nil || err.Error() != "SERVER_ERROR: NOT_FOUND" {
 		t.Error(err)
 	}
 	// set
@@ -870,17 +870,17 @@ func testInternalReplicateITActions(t *testing.T) {
 		ExpiryTime:      utils.UNLIMITED,
 		Weight:          20.0,
 	}}
-	if err := internalRPC.Call(utils.APIerSv1GetActions, "ACTS_1", &reply1); err != nil {
+	if err := internalRPC.Call(utils.APIerSv1GetActions, utils.StringPointer("ACTS_1"), &reply1); err != nil {
 		t.Error("Got error on APIerSv1.GetActions: ", err.Error())
 	} else if !reflect.DeepEqual(eOut, reply1) {
 		t.Errorf("Expected: %v, received: %v", utils.ToJSON(eOut), utils.ToJSON(reply1))
 	}
-	if err := engineOneRPC.Call(utils.APIerSv1GetActions, "ACTS_1", &reply1); err != nil {
+	if err := engineOneRPC.Call(utils.APIerSv1GetActions, utils.StringPointer("ACTS_1"), &reply1); err != nil {
 		t.Error("Got error on APIerSv1.GetActions: ", err.Error())
 	} else if !reflect.DeepEqual(eOut, reply1) {
 		t.Errorf("Expected: %v, received: %v", utils.ToJSON(eOut), utils.ToJSON(reply1))
 	}
-	if err := engineTwoRPC.Call(utils.APIerSv1GetActions, "ACTS_1", &reply1); err != nil {
+	if err := engineTwoRPC.Call(utils.APIerSv1GetActions, utils.StringPointer("ACTS_1"), &reply1); err != nil {
 		t.Error("Got error on APIerSv1.GetActions: ", err.Error())
 	} else if !reflect.DeepEqual(eOut, reply1) {
 		t.Errorf("Expected: %v, received: %v", utils.ToJSON(eOut), utils.ToJSON(reply1))
@@ -894,10 +894,10 @@ func testInternalReplicateITActions(t *testing.T) {
 		t.Error("Unexpected reply when calling APIerSv1.RemoveActions: ", err.Error())
 	}
 	// check again
-	if err := engineOneRPC.Call(utils.APIerSv1GetActions, "ACTS_1", &reply1); err == nil || err.Error() != "SERVER_ERROR: NOT_FOUND" {
+	if err := engineOneRPC.Call(utils.APIerSv1GetActions, utils.StringPointer("ACTS_1"), &reply1); err == nil || err.Error() != "SERVER_ERROR: NOT_FOUND" {
 		t.Error(err)
 	}
-	if err := engineTwoRPC.Call(utils.APIerSv1GetActions, "ACTS_1", &reply1); err == nil || err.Error() != "SERVER_ERROR: NOT_FOUND" {
+	if err := engineTwoRPC.Call(utils.APIerSv1GetActions, utils.StringPointer("ACTS_1"), &reply1); err == nil || err.Error() != "SERVER_ERROR: NOT_FOUND" {
 		t.Error(err)
 	}
 
@@ -916,11 +916,11 @@ func testInternalReplicateITActionPlan(t *testing.T) {
 	// check
 	var aps []*engine.ActionPlan
 	if err := engineOneRPC.Call(utils.APIerSv1GetActionPlan,
-		AttrGetActionPlan{ID: "ATMS_1"}, &aps); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		&AttrGetActionPlan{ID: "ATMS_1"}, &aps); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Error at APIerSv1.GetActionPlan: %+v", err)
 	}
 	if err := engineTwoRPC.Call(utils.APIerSv1GetActionPlan,
-		AttrGetActionPlan{ID: "ATMS_1"}, &aps); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		&AttrGetActionPlan{ID: "ATMS_1"}, &aps); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Error at APIerSv1.GetActionPlan: %+v", err)
 	}
 	// set
@@ -941,7 +941,7 @@ func testInternalReplicateITActionPlan(t *testing.T) {
 	}
 	// check
 	if err := engineOneRPC.Call(utils.APIerSv1GetActionPlan,
-		AttrGetActionPlan{ID: "ATMS_1"}, &aps); err != nil {
+		&AttrGetActionPlan{ID: "ATMS_1"}, &aps); err != nil {
 		t.Error(err)
 	} else if len(aps) != 1 {
 		t.Errorf("Expected: %v,\n received: %v", 1, len(aps))
@@ -953,7 +953,7 @@ func testInternalReplicateITActionPlan(t *testing.T) {
 		t.Errorf("Expected: 20.0,\n received: %v", aps[0].ActionTimings[0].Weight)
 	}
 	if err := engineTwoRPC.Call(utils.APIerSv1GetActionPlan,
-		AttrGetActionPlan{ID: "ATMS_1"}, &aps); err != nil {
+		&AttrGetActionPlan{ID: "ATMS_1"}, &aps); err != nil {
 		t.Error(err)
 	} else if len(aps) != 1 {
 		t.Errorf("Expected: %v,\n received: %v", 1, len(aps))
@@ -973,11 +973,11 @@ func testInternalReplicateITActionPlan(t *testing.T) {
 	}
 	//check again
 	if err := engineOneRPC.Call(utils.APIerSv1GetActionPlan,
-		AttrGetActionPlan{ID: "ATMS_1"}, &aps); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		&AttrGetActionPlan{ID: "ATMS_1"}, &aps); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Error: %+v, rcv: %+v", err, utils.ToJSON(aps))
 	}
 	if err := engineTwoRPC.Call(utils.APIerSv1GetActionPlan,
-		AttrGetActionPlan{ID: "ATMS_1"}, &aps); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		&AttrGetActionPlan{ID: "ATMS_1"}, &aps); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Error: %+v, rcv: %+v", err, utils.ToJSON(aps))
 	}
 }
@@ -1135,11 +1135,11 @@ func testInternalReplicateITActionTrigger(t *testing.T) {
 	// check
 	var atrs engine.ActionTriggers
 	if err := engineOneRPC.Call(utils.APIerSv1GetActionTriggers,
-		AttrGetActionTriggers{GroupIDs: []string{"TestATR"}}, &atrs); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		&AttrGetActionTriggers{GroupIDs: []string{"TestATR"}}, &atrs); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error("Got error on APIerSv1.GetActionTriggers: ", err)
 	}
 	if err := engineTwoRPC.Call(utils.APIerSv1GetActionTriggers,
-		AttrGetActionTriggers{GroupIDs: []string{"TestATR"}}, &atrs); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		&AttrGetActionTriggers{GroupIDs: []string{"TestATR"}}, &atrs); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error("Got error on APIerSv1.GetActionTriggers: ", err)
 	}
 	// set
@@ -1157,7 +1157,7 @@ func testInternalReplicateITActionTrigger(t *testing.T) {
 		t.Errorf("Calling v1.SetActionTrigger got: %v", reply)
 	}
 	// check
-	if err := engineOneRPC.Call(utils.APIerSv1GetActionTriggers, AttrGetActionTriggers{GroupIDs: []string{"TestATR"}}, &atrs); err != nil {
+	if err := engineOneRPC.Call(utils.APIerSv1GetActionTriggers, &AttrGetActionTriggers{GroupIDs: []string{"TestATR"}}, &atrs); err != nil {
 		t.Error("Got error on APIerSv1.GetActionTriggers: ", err)
 	} else if len(atrs) != 1 {
 		t.Errorf("Calling v1.GetActionTriggers got: %v", atrs)
@@ -1168,7 +1168,7 @@ func testInternalReplicateITActionTrigger(t *testing.T) {
 	} else if *atrs[0].Balance.ID != "BalanceIDtest1" {
 		t.Errorf("Expecting BalanceIDtest1, received: %+v", atrs[0].Balance.ID)
 	}
-	if err := engineTwoRPC.Call(utils.APIerSv1GetActionTriggers, AttrGetActionTriggers{GroupIDs: []string{"TestATR"}}, &atrs); err != nil {
+	if err := engineTwoRPC.Call(utils.APIerSv1GetActionTriggers, &AttrGetActionTriggers{GroupIDs: []string{"TestATR"}}, &atrs); err != nil {
 		t.Error("Got error on APIerSv1.GetActionTriggers: ", err)
 	} else if len(atrs) != 1 {
 		t.Errorf("Calling v1.GetActionTriggers got: %v", atrs)
@@ -1191,11 +1191,11 @@ func testInternalReplicateITActionTrigger(t *testing.T) {
 	}
 	//check
 	if err := engineOneRPC.Call(utils.APIerSv1GetActionTriggers,
-		AttrGetActionTriggers{GroupIDs: []string{"TestATR"}}, &atrs); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		&AttrGetActionTriggers{GroupIDs: []string{"TestATR"}}, &atrs); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Got error on APIerSv1.GetActionTriggers: %+v", err)
 	}
 	if err := engineTwoRPC.Call(utils.APIerSv1GetActionTriggers,
-		AttrGetActionTriggers{GroupIDs: []string{"TestATR"}}, &atrs); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		&AttrGetActionTriggers{GroupIDs: []string{"TestATR"}}, &atrs); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error("Got error on APIerSv1.GetActionTriggers: ", err)
 	}
 }

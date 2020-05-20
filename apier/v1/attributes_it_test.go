@@ -694,16 +694,16 @@ func testAttributeSProcessEventWithHeader(t *testing.T) {
 func testAttributeSGetAttPrfIDs(t *testing.T) {
 	expected := []string{"ATTR_2", "ATTR_PASS", "ATTR_1", "ATTR_3", "ATTR_Header", "AttributeWithNonSubstitute"}
 	var result []string
-	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfileIDs, utils.TenantArgWithPaginator{}, &result); err == nil ||
+	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfileIDs, &utils.TenantArgWithPaginator{}, &result); err == nil ||
 		err.Error() != utils.NewErrMandatoryIeMissing("Tenant").Error() {
 		t.Errorf("Expected error recived reply %+v with err=%v", result, err)
 	}
-	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfileIDs, utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{Tenant: "cgrates.org"}}, &result); err != nil {
+	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfileIDs, &utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{Tenant: "cgrates.org"}}, &result); err != nil {
 		t.Error(err)
 	} else if len(expected) != len(result) {
 		t.Errorf("Expecting : %+v, received: %+v", expected, result)
 	}
-	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfileIDs, utils.TenantArgWithPaginator{
+	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfileIDs, &utils.TenantArgWithPaginator{
 		TenantArg: utils.TenantArg{Tenant: "cgrates.org"},
 		Paginator: utils.Paginator{Limit: utils.IntPointer(10)},
 	}, &result); err != nil {
@@ -1371,7 +1371,7 @@ func testAttributeSCachingMetaNone(t *testing.T) {
 	//check in dataManager
 	expected := []string{"ATTR_1"}
 	var rcvIDs []string
-	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfileIDs, utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{Tenant: "cgrates.org"}}, &rcvIDs); err != nil {
+	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfileIDs, &utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{Tenant: "cgrates.org"}}, &rcvIDs); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rcvIDs) {
 		t.Errorf("Expecting : %+v, received: %+v", expected, rcvIDs)
@@ -1431,7 +1431,7 @@ func testAttributeSCachingMetaLoad(t *testing.T) {
 	//check in dataManager
 	expected := []string{"ATTR_1"}
 	var rcvIDs []string
-	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfileIDs, utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{Tenant: "cgrates.org"}}, &rcvIDs); err != nil {
+	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfileIDs, &utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{Tenant: "cgrates.org"}}, &rcvIDs); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rcvIDs) {
 		t.Errorf("Expecting : %+v, received: %+v", expected, rcvIDs)
@@ -1463,7 +1463,7 @@ func testAttributeSCachingMetaLoad(t *testing.T) {
 	}
 
 	//check in dataManager
-	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfileIDs, utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{Tenant: "cgrates.org"}}, &rcvIDs); err == nil ||
+	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfileIDs, &utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{Tenant: "cgrates.org"}}, &rcvIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Expected error: %s received error: %s and reply: %v ",
 			utils.ErrNotFound, err, rcvIDs)
@@ -1522,7 +1522,7 @@ func testAttributeSCachingMetaReload1(t *testing.T) {
 	//check in dataManager
 	expected := []string{"ATTR_1"}
 	var rcvIDs []string
-	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfileIDs, utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{Tenant: "cgrates.org"}}, &rcvIDs); err != nil {
+	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfileIDs, &utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{Tenant: "cgrates.org"}}, &rcvIDs); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rcvIDs) {
 		t.Errorf("Expecting : %+v, received: %+v", expected, rcvIDs)
@@ -1701,7 +1701,7 @@ func testAttributeSCachingMetaRemove(t *testing.T) {
 	//check in dataManager
 	expected := []string{"ATTR_1"}
 	var rcvIDs []string
-	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfileIDs, utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{Tenant: "cgrates.org"}}, &rcvIDs); err != nil {
+	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfileIDs, &utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{Tenant: "cgrates.org"}}, &rcvIDs); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rcvIDs) {
 		t.Errorf("Expecting : %+v, received: %+v", expected, rcvIDs)

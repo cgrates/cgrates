@@ -980,7 +980,7 @@ func testApierGetDestination(t *testing.T) {
 	reply := new(engine.Destination)
 	dstId := "GERMANY_MOBILE"
 	expectedReply := &engine.Destination{Id: dstId, Prefixes: []string{"+4915", "+4916", "+4917"}}
-	if err := rater.Call(utils.APIerSv1GetDestination, dstId, reply); err != nil {
+	if err := rater.Call(utils.APIerSv1GetDestination, &dstId, reply); err != nil {
 		t.Error("Got error on APIerSv1.GetDestination: ", err.Error())
 	} else if !reflect.DeepEqual(expectedReply, reply) {
 		t.Errorf("Calling APIerSv1.GetDestination expected: %v, received: %v", expectedReply, reply)
@@ -1120,7 +1120,7 @@ func testApierGetActions(t *testing.T) {
 			BalanceDisabled: "false", ExpiryTime: utils.UNLIMITED, Weight: 20.0}}
 
 	var reply []*utils.TPAction
-	if err := rater.Call(utils.APIerSv1GetActions, "ACTS_1", &reply); err != nil {
+	if err := rater.Call(utils.APIerSv1GetActions, utils.StringPointer("ACTS_1"), &reply); err != nil {
 		t.Error("Got error on APIerSv1.GetActions: ", err.Error())
 	} else if !reflect.DeepEqual(expectActs, reply) {
 		t.Errorf("Expected: %v, received: %v", utils.ToJSON(expectActs), utils.ToJSON(reply))
@@ -1603,7 +1603,7 @@ func testApierCdrServer(t *testing.T) {
 func testApierITGetCdrs(t *testing.T) {
 	var reply []*engine.ExternalCDR
 	req := utils.AttrGetCdrs{MediationRunIds: []string{utils.MetaDefault}}
-	if err := rater.Call(utils.APIerSv1GetCDRs, req, &reply); err != nil {
+	if err := rater.Call(utils.APIerSv1GetCDRs, &req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 2 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
@@ -1627,7 +1627,7 @@ func testApierITProcessCdr(t *testing.T) {
 	}
 	var cdrs []*engine.ExternalCDR
 	req := utils.AttrGetCdrs{MediationRunIds: []string{utils.MetaDefault}}
-	if err := rater.Call(utils.APIerSv1GetCDRs, req, &cdrs); err != nil {
+	if err := rater.Call(utils.APIerSv1GetCDRs, &req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 3 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -1727,14 +1727,14 @@ func testApierITSetDestination(t *testing.T) {
 	}
 	eDestination := engine.Destination{Id: attrs.Id, Prefixes: attrs.Prefixes}
 	var rcvDestination engine.Destination
-	if err := rater.Call(utils.APIerSv1GetDestination, attrs.Id, &rcvDestination); err != nil {
+	if err := rater.Call(utils.APIerSv1GetDestination, &attrs.Id, &rcvDestination); err != nil {
 		t.Error("Unexpected error", err.Error())
 	} else if !reflect.DeepEqual(eDestination, rcvDestination) {
 		t.Errorf("Expecting: %+v, received: %+v", eDestination, rcvDestination)
 	}
 	eRcvIDs := []string{attrs.Id}
 	var rcvIDs []string
-	if err := rater.Call(utils.APIerSv1GetReverseDestination, attrs.Prefixes[0], &rcvIDs); err != nil {
+	if err := rater.Call(utils.APIerSv1GetReverseDestination, &attrs.Prefixes[0], &rcvIDs); err != nil {
 		t.Error("Unexpected error", err.Error())
 	} else if !reflect.DeepEqual(eRcvIDs, rcvIDs) {
 		t.Errorf("Expecting: %+v, received: %+v", eRcvIDs, rcvIDs)
@@ -1752,7 +1752,7 @@ func testApierITGetDataCost(t *testing.T) {
 	attrs := AttrGetDataCost{Category: "data", Tenant: "cgrates.org",
 		Subject: "1001", AnswerTime: utils.MetaNow, Usage: 640113}
 	var rply *engine.DataCost
-	if err := rater.Call(utils.APIerSv1GetDataCost, attrs, &rply); err != nil {
+	if err := rater.Call(utils.APIerSv1GetDataCost, &attrs, &rply); err != nil {
 		t.Error("Unexpected nil error received: ", err.Error())
 	} else if rply.Cost != 128.0240 {
 		t.Errorf("Unexpected cost received: %f", rply.Cost)
@@ -1763,7 +1763,7 @@ func testApierITGetCost(t *testing.T) {
 	attrs := AttrGetCost{Category: "data", Tenant: "cgrates.org",
 		Subject: "1001", AnswerTime: utils.MetaNow, Usage: "640113"}
 	var rply *engine.EventCost
-	if err := rater.Call(utils.APIerSv1GetCost, attrs, &rply); err != nil {
+	if err := rater.Call(utils.APIerSv1GetCost, &attrs, &rply); err != nil {
 		t.Error("Unexpected nil error received: ", err.Error())
 	} else if *rply.Cost != 128.0240 {
 		t.Errorf("Unexpected cost received: %f", *rply.Cost)
@@ -1992,7 +1992,7 @@ func testApierReplayFldPosts(t *testing.T) {
 
 func testApierGetDataDBVesions(t *testing.T) {
 	var reply *engine.Versions
-	if err := rater.Call(utils.APIerSv1GetDataDBVersions, utils.EmptyString, &reply); err != nil {
+	if err := rater.Call(utils.APIerSv1GetDataDBVersions, utils.StringPointer(utils.EmptyString), &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(engine.CurrentDataDBVersions(), *reply) {
 		t.Errorf("Expecting : %+v, received: %+v", engine.CurrentDataDBVersions(), *reply)
@@ -2001,7 +2001,7 @@ func testApierGetDataDBVesions(t *testing.T) {
 
 func testApierGetStorDBVesions(t *testing.T) {
 	var reply *engine.Versions
-	if err := rater.Call(utils.APIerSv1GetStorDBVersions, utils.EmptyString, &reply); err != nil {
+	if err := rater.Call(utils.APIerSv1GetStorDBVersions, utils.StringPointer(utils.EmptyString), &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(engine.CurrentStorDBVersions(), *reply) {
 		t.Errorf("Expecting : %+v, received: %+v", engine.CurrentStorDBVersions(), *reply)

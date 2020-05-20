@@ -179,7 +179,7 @@ func testdoubleRemoveStatQueueProfile(t *testing.T) {
 func testdoubleRemoveActions(t *testing.T) {
 	// check
 	var reply1 []*utils.TPAction
-	if err := sesRPC.Call(utils.APIerSv1GetActions, "ACTS_1", &reply1); err == nil || err.Error() != "SERVER_ERROR: NOT_FOUND" {
+	if err := sesRPC.Call(utils.APIerSv1GetActions, utils.StringPointer("ACTS_1"), &reply1); err == nil || err.Error() != "SERVER_ERROR: NOT_FOUND" {
 		t.Error(err)
 	}
 	// set
@@ -214,7 +214,7 @@ func testdoubleRemoveActions(t *testing.T) {
 			ExpiryTime:      utils.UNLIMITED,
 			Weight:          20.0,
 		}}
-	if err := sesRPC.Call(utils.APIerSv1GetActions, "ACTS_1", &reply1); err != nil {
+	if err := sesRPC.Call(utils.APIerSv1GetActions, utils.StringPointer("ACTS_1"), &reply1); err != nil {
 		t.Error("Got error on APIerSv1.GetActions: ", err.Error())
 	} else if !reflect.DeepEqual(eOut, reply1) {
 		t.Errorf("Expected: %v, received: %v", utils.ToJSON(eOut), utils.ToJSON(reply1))
@@ -233,7 +233,7 @@ func testdoubleRemoveActions(t *testing.T) {
 	// 	t.Error(err)
 	// }
 	// check again
-	if err := sesRPC.Call(utils.APIerSv1GetActions, "ACTS_1", &reply1); err == nil || err.Error() != "SERVER_ERROR: NOT_FOUND" {
+	if err := sesRPC.Call(utils.APIerSv1GetActions, utils.StringPointer("ACTS_1"), &reply1); err == nil || err.Error() != "SERVER_ERROR: NOT_FOUND" {
 		t.Error(err)
 	}
 }
@@ -260,7 +260,7 @@ func testdoubleRemoveActionPlan(t *testing.T) {
 			BalanceDisabled: "false",
 			Weight:          0}}
 
-	if err := sesRPC.Call(utils.APIerSv1GetActions, "ACTS_1", &reply1); err != nil {
+	if err := sesRPC.Call(utils.APIerSv1GetActions, utils.StringPointer("ACTS_1"), &reply1); err != nil {
 		t.Error("Got error on APIerSv1.GetActions: ", err.Error())
 	} else if !reflect.DeepEqual(eOut, reply1) {
 		t.Errorf("Expected: %v, received: %v", utils.ToJSON(eOut), utils.ToJSON(reply1))
@@ -297,7 +297,7 @@ func testdoubleRemoveActionPlan(t *testing.T) {
 	}
 	// check
 	if err := sesRPC.Call(utils.APIerSv1GetActionPlan,
-		v1.AttrGetActionPlan{ID: "ATMS_1"}, &aps); err != nil {
+		&v1.AttrGetActionPlan{ID: "ATMS_1"}, &aps); err != nil {
 		t.Error(err)
 	} else if len(aps) != 1 {
 		t.Errorf("Expected: %v,\n received: %v", 1, len(aps))
