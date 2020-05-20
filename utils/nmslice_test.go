@@ -73,6 +73,10 @@ func TestNMSliceField(t *testing.T) {
 	} else if val.Interface() != "1003" {
 		t.Errorf("Expected %q ,received: %q", "Val", val.Interface())
 	}
+	expError := `strconv.Atoi: parsing "nan": invalid syntax`
+	if _, err := nm.Field(PathItems{{Field: "1234", Index: StringPointer("nan")}}); err == nil || err.Error() != expError {
+		t.Errorf("Expected error %s received: %v", expError, err)
+	}
 }
 
 func TestNMSliceSet(t *testing.T) {
@@ -107,6 +111,11 @@ func TestNMSliceSet(t *testing.T) {
 	nm = &NMSlice{&NMSlice{}}
 	if _, err := nm.Set(PathItems{{Field: "1234", Index: StringPointer("0")}, {}}, NewNMData("1001")); err != ErrWrongPath {
 		t.Error(err)
+	}
+
+	expError := `strconv.Atoi: parsing "nan": invalid syntax`
+	if _, err := nm.Set(PathItems{{Field: "1234", Index: StringPointer("nan")}, {}}, NewNMData("1001")); err == nil || err.Error() != expError {
+		t.Errorf("Expected error %s received: %v", expError, err)
 	}
 }
 
@@ -201,6 +210,11 @@ func TestNMSliceRemove(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(nm, expected) {
 		t.Errorf("Expected %s ,received: %s", expected, nm)
+	}
+
+	expError := `strconv.Atoi: parsing "nan": invalid syntax`
+	if err := nm.Remove(PathItems{{Field: "1234", Index: StringPointer("nan")}}); err == nil || err.Error() != expError {
+		t.Errorf("Expected error %s received: %v", expError, err)
 	}
 
 }

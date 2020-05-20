@@ -145,3 +145,13 @@ func TestPathItemsClone(t *testing.T) {
 		t.Errorf("Expected: %s, received: %s", ToJSON(expected), ToJSON(rply))
 	}
 }
+func TestGetPathWithoutIndex(t *testing.T) {
+	expected := "field"
+	if rply := GetPathWithoutIndex("field[index]"); expected != rply {
+		t.Errorf("Expected: %s, received: %s", expected, rply)
+	}
+	expected = "field[index"
+	if rply := GetPathWithoutIndex("field[index"); expected != rply {
+		t.Errorf("Expected: %s, received: %s", expected, rply)
+	}
+}
