@@ -6,13 +6,32 @@
 			"id": "NAPTRSuppliersQuery",
 			"filters": ["*string:~*vars.QueryType:NAPTR", 
 				"*string:~*vars.E164Address:4986517174965"],
-			"flags": ["*message", "*suppliers","*continue"],
+			"flags": ["*event", "*suppliers","*continue"],
 			"request_fields":[
 				{"tag": "ToR", "path": "*cgreq.Account", "type": "*constant", "value": "1001"}, // so we can match the supplier profile
 			],
-			"reply_fields":[
-				{"tag": "DispatchReply", "type": "*none", 
-					"blocker": true}, // enforces continue_on_success so we can check answer with filters
+		},
+		{
+			"id": "NAPTRRoutesQuery2", // this processor will add Account 1002 in event to test the NotFound StatQueue
+			"filters": ["*string:~*vars.QueryType:NAPTR",
+				"*string:~*vars.E164Address:5986517174965"],
+			"flags": ["*event", "*suppliers","*continue"],
+			"request_fields":[
+				{"tag": "ToR", "path": "*cgreq.Account", "type": "*constant", "value": "1002"},
+			],
+		},
+		{
+			"id": "NAPTRStatSupplierNotFound",
+			"filters": ["*string:~*vars.QueryType:NAPTR",
+				"*string:~*cgrep.Error:SUPPLIERS_ERROR:NOT_FOUND"],
+			"flags": ["*event", "*stats"],
+			"request_fields":[
+				{
+					"tag": "ErrSupplierNotFound",
+					"path": "*cgreq.ErrSupplierNotFound",
+					"type": "*constant",
+					"value": "NotFoundSuppliers",
+				}
 			],
 		},
 		{
@@ -57,6 +76,21 @@
 					"type": "*group", "value": "."},
 			],
 		},
+		{
+			"id": "NAPTRStatSupplier", // this process will pick the first supplier and will send a ProcessEvent to StatQueue
+			"filters": ["*string:~*vars.QueryType:NAPTR",
+				"*string:~*vars.E164Address:4986517174965",
+				"*gte:~*cgrep.Suppliers.Count:1"],
+			"flags": ["*event", "*stats", "*continue"],
+			"request_fields":[
+				{
+					"tag": "FirstSupplier",
+					"path": "*cgreq.FirstSupplier",
+					"type": "*variable",
+					"value": "~*cgrep.Suppliers.SortedSuppliers[0].SupplierID",
+				}
+			],
+		}
 	],
 },
 

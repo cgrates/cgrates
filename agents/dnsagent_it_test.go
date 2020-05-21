@@ -23,6 +23,7 @@ package agents
 import (
 	"net/rpc"
 	"path"
+	"reflect"
 	"testing"
 	"time"
 
@@ -49,6 +50,7 @@ var (
 		testDNSitClntNAPTRDryRun,
 		testDNSitClntNAPTRAttributes,
 		testDNSitClntNAPTRSuppliers,
+		testDNSitClntNAPTRNotFoundSuppliers,
 		testDNSitStopEngine,
 	}
 )
@@ -213,6 +215,105 @@ func testDNSitClntNAPTRSuppliers(t *testing.T) {
 	if answr2.Regexp != "!^(.*)$!sip:1@172.16.1.12!" {
 		t.Errorf("received: <%q>", answr2.Regexp)
 	}
+	//get stats metrics after restart
+	expectedMetrics := map[string]string{
+		"*sum:1": "1",
+	}
+	var metrics2 map[string]string
+	if err := dnsRPC.Call(utils.StatSv1GetQueueStringMetrics,
+		&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "StatSupplierOne"}}, &metrics2); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedMetrics, metrics2) {
+		t.Errorf("After restat expecting: %+v, received reply: %s", expectedMetrics, metrics2)
+	}
+	for i := 0; i < 5; i++ { // send again the same request to check if the stats counter it
+		if err := dnsClnt.WriteMsg(m); err != nil {
+			t.Error(err)
+		}
+		rply, err := dnsClnt.ReadMsg()
+		if err != nil {
+			t.Error(err)
+		} else if len(rply.Answer) != 2 {
+			t.Errorf("wrong number of records: %s", utils.ToIJSON(rply.Answer))
+		}
+		if rply.Rcode != dns.RcodeSuccess {
+			t.Errorf("failed to get an valid answer\n%v", rply)
+		}
+		answr := rply.Answer[0].(*dns.NAPTR)
+		if answr.Order != 100 {
+			t.Errorf("received: <%v>", answr.Order)
+		}
+		if answr.Regexp != "!^(.*)$!sip:1@172.16.1.11!" {
+			t.Errorf("received: <%q>", answr.Regexp)
+		}
+		answr2 := rply.Answer[1].(*dns.NAPTR)
+		if answr2.Regexp != "!^(.*)$!sip:1@172.16.1.12!" {
+			t.Errorf("received: <%q>", answr2.Regexp)
+		}
+	}
+	expectedMetrics = map[string]string{
+		"*sum:1": "6",
+	}
+	if err := dnsRPC.Call(utils.StatSv1GetQueueStringMetrics,
+		&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "StatSupplierOne"}}, &metrics2); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedMetrics, metrics2) {
+		t.Errorf("After restat expecting: %+v, received reply: %s", expectedMetrics, metrics2)
+	}
+
+}
+
+func testDNSitClntNAPTRNotFoundSuppliers(t *testing.T) {
+	m := new(dns.Msg)
+	m.SetQuestion("5.6.9.4.7.1.7.1.5.6.8.9.5.e164.arpa.", dns.TypeNAPTR)
+	if err := dnsClnt.WriteMsg(m); err != nil {
+		t.Error(err)
+	}
+	rply, err := dnsClnt.ReadMsg()
+	if err != nil {
+		t.Error(err)
+	} else if len(rply.Answer) != 0 {
+		t.Errorf("wrong number of records: %s", utils.ToIJSON(rply.Answer))
+	}
+	if rply.Rcode != dns.RcodeSuccess {
+		t.Errorf("failed to get an valid answer\n%v", rply)
+	}
+	//get stats metrics after restart
+	expectedMetrics := map[string]string{
+		"*sum:1": "1",
+	}
+	var metrics2 map[string]string
+	if err := dnsRPC.Call(utils.StatSv1GetQueueStringMetrics,
+		&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "StatNotFound"}}, &metrics2); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedMetrics, metrics2) {
+		t.Errorf("After restat expecting: %+v, received reply: %s", expectedMetrics, metrics2)
+	}
+	for i := 0; i < 5; i++ { // send again the same request to check if the stats counter it
+		if err := dnsClnt.WriteMsg(m); err != nil {
+			t.Error(err)
+		}
+		rply, err := dnsClnt.ReadMsg()
+		if err != nil {
+			t.Error(err)
+		} else if len(rply.Answer) != 0 {
+			t.Errorf("wrong number of records: %s", utils.ToIJSON(rply.Answer))
+		}
+		if rply.Rcode != dns.RcodeSuccess {
+			t.Errorf("failed to get an valid answer\n%v", rply)
+		}
+
+	}
+	expectedMetrics = map[string]string{
+		"*sum:1": "6",
+	}
+	if err := dnsRPC.Call(utils.StatSv1GetQueueStringMetrics,
+		&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "StatNotFound"}}, &metrics2); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedMetrics, metrics2) {
+		t.Errorf("After restat expecting: %+v, received reply: %s", expectedMetrics, metrics2)
+	}
+
 }
 
 func testDNSitStopEngine(t *testing.T) {

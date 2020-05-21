@@ -1,0 +1,4 @@
+#Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],QueueLength[4],TTL[5],MinItems[6],Metrics[7],MetricFilterIDs[8],Stored[9],Blocker[10],Weight[11],ThresholdIDs[12]
+cgrates.org,StatNotFound,*exists:~*req.ErrSupplierNotFound:,,-1,-1,0,*sum:1,,true,false,30,*none
+cgrates.org,StatSupplierOne,*string:~*req.FirstSupplier:supplier1,,-1,-1,0,*sum:1,,true,false,30,*none
+cgrates.org,StatSupplierTwo,*string:~*req.FirstSupplier:supplier2,,-1,-1,0,*sum:1,,true,false,30,*none
