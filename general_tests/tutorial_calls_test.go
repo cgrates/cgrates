@@ -610,7 +610,7 @@ func testCallStatMetrics(t *testing.T) {
 
 	if err := tutorialCallsRpc.Call(utils.StatSv1GetQueueStringMetrics,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "Stats2"}, &metrics); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	if optConf == utils.Asterisk {
 		metrics[utils.MetaTCD] = strings.Split(metrics[utils.MetaTCD], ".")[0] + "s"

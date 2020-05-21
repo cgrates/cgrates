@@ -341,14 +341,14 @@ Instead of arguments, the options for enabling various functionaity will come in
 	**\*terminate**
 		Terminate a session (or initialize + terminate) out of event.
 
-\*suppliers
+\*routes
 	Process the event with :ref:`Suppliers`. Auxiliary flags available:
 
 	**\*ignore_errors**
-		Ignore the suppliers with errors instead of failing the request completely.
+		Ignore the routes with errors instead of failing the request completely.
 
 	**\*event_cost**
-		Ignore suppliers with cost higher than the event cost.
+		Ignore routes with cost higher than the event cost.
 
 \*thresholds
 	Process the event with :ref:`ThresholdS` for monitoring.
