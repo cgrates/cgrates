@@ -1335,14 +1335,14 @@ func TestV1ProcessEventReplyAsNavigableMap(t *testing.T) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
 	//max usage check
-	v1per.MaxUsage = utils.DurationPointer(5 * time.Minute)
-	expected[utils.CapMaxUsage] = utils.NewNMData(5 * time.Minute)
+	v1per.MaxUsage = map[string]time.Duration{utils.MetaDefault: 5 * time.Minute}
+	expected[utils.CapMaxUsage] = utils.NavigableMap2{utils.MetaDefault: utils.NewNMData(5 * time.Minute)}
 	if rply := v1per.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
 	//resource message check
-	v1per.ResourceMessage = utils.StringPointer("Resource")
-	expected[utils.CapResourceMessage] = utils.NewNMData("Resource")
+	v1per.ResourceMessage = map[string]string{utils.MetaDefault: "Resource"}
+	expected[utils.CapResourceMessage] = utils.NavigableMap2{utils.MetaDefault: utils.NewNMData("Resource")}
 	if rply := v1per.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}

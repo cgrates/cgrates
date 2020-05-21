@@ -465,177 +465,49 @@ func CallScript(scriptPath string, subcommand string, waitMs int) error {
 
 func GetDefaultEmptyCacheStats() map[string]*ltcache.CacheStats {
 	return map[string]*ltcache.CacheStats{
-		utils.MetaDefault: {
-			Items:  0,
-			Groups: 0,
-		},
-		utils.CacheAccountActionPlans: {
-			Items:  0,
-			Groups: 0,
-		},
-		utils.CacheActionPlans: {
-			Items:  0,
-			Groups: 0,
-		},
-		utils.CacheActionTriggers: {
-			Items:  0,
-			Groups: 0,
-		},
-		utils.CacheActions: {
-			Items:  0,
-			Groups: 0,
-		},
-		utils.CacheAttributeFilterIndexes: {
-			Items:  0,
-			Groups: 0,
-		},
-		utils.CacheAttributeProfiles: {
-			Items:  0,
-			Groups: 0,
-		},
-		utils.CacheChargerFilterIndexes: {
-			Items:  0,
-			Groups: 0,
-		},
-		utils.CacheChargerProfiles: {
-			Items:  0,
-			Groups: 0,
-		},
-		utils.CacheDispatcherFilterIndexes: {
-			Items:  0,
-			Groups: 0,
-		},
-		utils.CacheDispatcherProfiles: {
-			Items:  0,
-			Groups: 0,
-		},
-		utils.CacheDispatcherHosts: {
-			Items:  0,
-			Groups: 0,
-		},
-		utils.CacheDispatcherRoutes: {
-			Items:  0,
-			Groups: 0,
-		},
-		utils.CacheDispatcherLoads: {
-			Items:  0,
-			Groups: 0,
-		},
-		utils.CacheDispatchers: {
-			Items:  0,
-			Groups: 0,
-		},
-		utils.CacheDestinations: {
-			Items:  0,
-			Groups: 0,
-		},
-		utils.CacheEventResources: {
-			Items:  0,
-			Groups: 0,
-		},
-		utils.CacheFilters: {
-			Items:  0,
-			Groups: 0,
-		},
-		utils.CacheRatingPlans: {
-			Items:  0,
-			Groups: 0,
-		},
-		utils.CacheRatingProfiles: {
-			Items:  0,
-			Groups: 0,
-		},
-		utils.CacheResourceFilterIndexes: {
-			Items:  0,
-			Groups: 0,
-		},
-		utils.CacheResourceProfiles: {
-			Items:  0,
-			Groups: 0,
-		},
-		utils.CacheResources: {
-			Items:  0,
-			Groups: 0,
-		},
-		utils.CacheReverseDestinations: {
-			Items:  0,
-			Groups: 0,
-		},
-		utils.CacheRPCResponses: {
-			Items:  0,
-			Groups: 0,
-		},
-		utils.CacheSharedGroups: {
-			Items:  0,
-			Groups: 0,
-		},
-		utils.CacheStatFilterIndexes: {
-			Items:  0,
-			Groups: 0,
-		},
-		utils.CacheStatQueueProfiles: {
-			Items:  0,
-			Groups: 0,
-		},
-		utils.CacheStatQueues: {
-			Items:  0,
-			Groups: 0,
-		},
-		utils.CacheSTIR: {
-			Items:  0,
-			Groups: 0,
-		},
-		utils.CacheRouteFilterIndexes: {
-			Items:  0,
-			Groups: 0,
-		},
-		utils.CacheRouteProfiles: {
-			Items:  0,
-			Groups: 0,
-		},
-		utils.CacheThresholdFilterIndexes: {
-			Items:  0,
-			Groups: 0,
-		},
-		utils.CacheThresholdProfiles: {
-			Items:  0,
-			Groups: 0,
-		},
-		utils.CacheThresholds: {
-			Items:  0,
-			Groups: 0,
-		},
-		utils.CacheTimings: {
-			Items:  0,
-			Groups: 0,
-		},
-		utils.CacheDiameterMessages: {
-			Items:  0,
-			Groups: 0,
-		},
-		utils.CacheClosedSessions: {
-			Items:  0,
-			Groups: 0,
-		},
-		utils.CacheLoadIDs: {
-			Items:  0,
-			Groups: 0,
-		},
-		utils.CacheRPCConnections: {
-			Items:  0,
-			Groups: 0,
-		},
-		utils.CacheCDRIDs: {
-			Items:  0,
-			Groups: 0,
-		},
-		utils.CacheRatingProfilesTmp: {
-			Items:  0,
-			Groups: 0,
-		},
-		utils.CacheUCH: {
-			Items:  0,
-			Groups: 0,
-		},
+		utils.MetaDefault:                  {},
+		utils.CacheAccountActionPlans:      {},
+		utils.CacheActionPlans:             {},
+		utils.CacheActionTriggers:          {},
+		utils.CacheActions:                 {},
+		utils.CacheAttributeFilterIndexes:  {},
+		utils.CacheAttributeProfiles:       {},
+		utils.CacheChargerFilterIndexes:    {},
+		utils.CacheChargerProfiles:         {},
+		utils.CacheDispatcherFilterIndexes: {},
+		utils.CacheDispatcherProfiles:      {},
+		utils.CacheDispatcherHosts:         {},
+		utils.CacheDispatcherRoutes:        {},
+		utils.CacheDispatcherLoads:         {},
+		utils.CacheDispatchers:             {},
+		utils.CacheDestinations:            {},
+		utils.CacheEventResources:          {},
+		utils.CacheFilters:                 {},
+		utils.CacheRatingPlans:             {},
+		utils.CacheRatingProfiles:          {},
+		utils.CacheResourceFilterIndexes:   {},
+		utils.CacheResourceProfiles:        {},
+		utils.CacheResources:               {},
+		utils.CacheReverseDestinations:     {},
+		utils.CacheRPCResponses:            {},
+		utils.CacheSharedGroups:            {},
+		utils.CacheStatFilterIndexes:       {},
+		utils.CacheStatQueueProfiles:       {},
+		utils.CacheStatQueues:              {},
+		utils.CacheSTIR:                    {},
+		utils.CacheRouteFilterIndexes:      {},
+		utils.CacheRouteProfiles:           {},
+		utils.CacheThresholdFilterIndexes:  {},
+		utils.CacheThresholdProfiles:       {},
+		utils.CacheThresholds:              {},
+		utils.CacheTimings:                 {},
+		utils.CacheDiameterMessages:        {},
+		utils.CacheClosedSessions:          {},
+		utils.CacheLoadIDs:                 {},
+		utils.CacheRPCConnections:          {},
+		utils.CacheCDRIDs:                  {},
+		utils.CacheRatingProfilesTmp:       {},
+		utils.CacheUCH:                     {},
+		utils.CacheEventCharges:            {},
 	}
 }

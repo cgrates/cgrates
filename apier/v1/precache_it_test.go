@@ -154,10 +154,7 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 		CacheIDs: []string{},
 	}
 	expectedStats := &map[string]*ltcache.CacheStats{
-		utils.MetaDefault: {
-			Items:  0,
-			Groups: 0,
-		},
+		utils.MetaDefault: {},
 		utils.CacheAccountActionPlans: {
 			Items:  5,
 			Groups: 0,
@@ -182,18 +179,9 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 			Items:  1,
 			Groups: 0,
 		},
-		utils.CacheChargerFilterIndexes: {
-			Items:  0,
-			Groups: 0,
-		},
-		utils.CacheChargerProfiles: {
-			Items:  0,
-			Groups: 0,
-		},
-		utils.CacheDispatcherFilterIndexes: {
-			Items:  0,
-			Groups: 0,
-		},
+		utils.CacheChargerFilterIndexes:    {},
+		utils.CacheChargerProfiles:         {},
+		utils.CacheDispatcherFilterIndexes: {},
 		utils.CacheDispatcherProfiles: {
 			Items:  6,
 			Groups: 0,
@@ -202,26 +190,14 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 			Items:  1,
 			Groups: 0,
 		},
-		utils.CacheDispatcherRoutes: {
-			Items:  0,
-			Groups: 0,
-		},
-		utils.CacheDispatcherLoads: {
-			Items:  0,
-			Groups: 0,
-		},
+		utils.CacheDispatcherRoutes: {},
+		utils.CacheDispatcherLoads:  {},
 		utils.CacheDestinations: {
 			Items:  5,
 			Groups: 0,
 		},
-		utils.CacheDispatchers: {
-			Items:  0,
-			Groups: 0,
-		},
-		utils.CacheEventResources: {
-			Items:  0,
-			Groups: 0,
-		},
+		utils.CacheDispatchers:    {},
+		utils.CacheEventResources: {},
 		utils.CacheFilters: {
 			Items:  15,
 			Groups: 0,
@@ -250,10 +226,7 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 			Items:  7,
 			Groups: 0,
 		},
-		utils.CacheRPCResponses: {
-			Items:  0,
-			Groups: 0,
-		},
+		utils.CacheRPCResponses: {},
 		utils.CacheSharedGroups: {
 			Items:  1,
 			Groups: 0,
@@ -270,10 +243,8 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 			Items:  1,
 			Groups: 0,
 		},
-		utils.CacheSTIR: {
-			Items:  0,
-			Groups: 0,
-		},
+		utils.CacheSTIR:         {},
+		utils.CacheEventCharges: {},
 		utils.CacheRouteFilterIndexes: {
 			Items:  6,
 			Groups: 0,
@@ -294,38 +265,14 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 			Items:  7,
 			Groups: 0,
 		},
-		utils.CacheTimings: {
-			Items:  0,
-			Groups: 0,
-		},
-		utils.CacheDiameterMessages: {
-			Items:  0,
-			Groups: 0,
-		},
-		utils.CacheClosedSessions: {
-			Items:  0,
-			Groups: 0,
-		},
-		utils.CacheLoadIDs: {
-			Items:  0,
-			Groups: 0,
-		},
-		utils.CacheRPCConnections: {
-			Items:  0,
-			Groups: 0,
-		},
-		utils.CacheCDRIDs: {
-			Items:  0,
-			Groups: 0,
-		},
-		utils.CacheRatingProfilesTmp: {
-			Items:  0,
-			Groups: 0,
-		},
-		utils.CacheUCH: {
-			Items:  0,
-			Groups: 0,
-		},
+		utils.CacheTimings:           {},
+		utils.CacheDiameterMessages:  {},
+		utils.CacheClosedSessions:    {},
+		utils.CacheLoadIDs:           {},
+		utils.CacheRPCConnections:    {},
+		utils.CacheCDRIDs:            {},
+		utils.CacheRatingProfilesTmp: {},
+		utils.CacheUCH:               {},
 	}
 	if err := precacheRPC.Call(utils.CacheSv1GetCacheStats, args, &reply); err != nil {
 		t.Error(err.Error())

@@ -211,7 +211,7 @@ const CGRATES_CFG_JSON = `
 		"*resource_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 				// control resource filter indexes caching
 		"*stat_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 					// control stat filter indexes caching
 		"*threshold_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 				// control threshold filter indexes caching
-		"*route_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 				// control route filter indexes caching
+		"*route_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 					// control route filter indexes caching
 		"*attribute_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 				// control attribute filter indexes caching
 		"*charger_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 					// control charger filter indexes caching
 		"*dispatcher_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 				// control dispatcher filter indexes caching
@@ -221,6 +221,7 @@ const CGRATES_CFG_JSON = `
 		"*diameter_messages": {"limit": -1, "ttl": "3h", "static_ttl": false, "replicate": false},						// diameter messages caching
 		"*rpc_responses": {"limit": 0, "ttl": "2s", "static_ttl": false, "replicate": false},							// RPC responses caching
 		"*closed_sessions": {"limit": -1, "ttl": "10s", "static_ttl": false, "replicate": false},						// closed sessions cached for CDRs
+		"*event_charges": {"limit": -1, "ttl": "10s", "static_ttl": false, "replicate": false},							// events proccessed by ChargerS
 		"*cdr_ids": {"limit": -1, "ttl": "10m", "static_ttl": false, "replicate": false},								// protects CDRs against double-charging
 		"*load_ids": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},				// control the load_ids for items
 		"*rpc_connections": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},							// RPC connections caching
