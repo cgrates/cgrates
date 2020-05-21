@@ -174,7 +174,7 @@ func testInternalReplicateITDestination(t *testing.T) {
 	//set
 	attrs := utils.AttrSetDestination{Id: "testDestination", Prefixes: []string{"004", "005"}}
 	var reply string
-	if err := internalRPC.Call(utils.APIerSv1SetDestination, attrs, &reply); err != nil {
+	if err := internalRPC.Call(utils.APIerSv1SetDestination, &attrs, &reply); err != nil {
 		t.Error("Unexpected error", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
@@ -305,13 +305,13 @@ func testInternalReplicateITRatingProfile(t *testing.T) {
 				RatingPlanId:     "RP_1001",
 				FallbackSubjects: "FallbackSubjects"},
 		}}
-	if err := internalRPC.Call(utils.APIerSv1SetRatingProfile, attrSetRatingProfile, &reply); err != nil {
+	if err := internalRPC.Call(utils.APIerSv1SetRatingProfile, &attrSetRatingProfile, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error(reply)
 	}
 	// Calling the second time should not raise EXISTS
-	if err := internalRPC.Call(utils.APIerSv1SetRatingProfile, attrSetRatingProfile, &reply); err != nil {
+	if err := internalRPC.Call(utils.APIerSv1SetRatingProfile, &attrSetRatingProfile, &reply); err != nil {
 		t.Error(err)
 	}
 	//check
@@ -851,12 +851,12 @@ func testInternalReplicateITActions(t *testing.T) {
 			ExpiryTime:  utils.UNLIMITED,
 			Weight:      20.0}}}
 	var reply string
-	if err := internalRPC.Call(utils.APIerSv1SetActions, attrs1, &reply); err != nil {
+	if err := internalRPC.Call(utils.APIerSv1SetActions, &attrs1, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Unexpected reply returned: %s", reply)
 	}
-	if err := internalRPC.Call(utils.APIerSv1SetActions, attrs1, &reply); err == nil || err.Error() != "EXISTS" {
+	if err := internalRPC.Call(utils.APIerSv1SetActions, &attrs1, &reply); err == nil || err.Error() != "EXISTS" {
 		t.Error("Unexpected result on duplication: ", err)
 	}
 	// check
@@ -934,7 +934,7 @@ func testInternalReplicateITActionPlan(t *testing.T) {
 		},
 	}
 	var reply1 string
-	if err := internalRPC.Call(utils.APIerSv1SetActionPlan, atms1, &reply1); err != nil {
+	if err := internalRPC.Call(utils.APIerSv1SetActionPlan, &atms1, &reply1); err != nil {
 		t.Error("Got error on APIerSv1.SetActionPlan: ", err.Error())
 	} else if reply1 != utils.OK {
 		t.Errorf("Unexpected reply returned: %s", reply1)
@@ -1350,11 +1350,11 @@ func testInternalReplicateITThreshold(t *testing.T) {
 func testInternalReplicateITLoadIds(t *testing.T) {
 	// get LoadIDs
 	var rcv1e1 map[string]int64
-	if err := engineOneRPC.Call(utils.APIerSv1GetLoadIDs, utils.EmptyString, &rcv1e1); err != nil {
+	if err := engineOneRPC.Call(utils.APIerSv1GetLoadIDs, utils.StringPointer(utils.EmptyString), &rcv1e1); err != nil {
 		t.Error(err)
 	}
 	var rcv1e2 map[string]int64
-	if err := engineTwoRPC.Call(utils.APIerSv1GetLoadIDs, utils.EmptyString, &rcv1e2); err != nil {
+	if err := engineTwoRPC.Call(utils.APIerSv1GetLoadIDs, utils.StringPointer(utils.EmptyString), &rcv1e2); err != nil {
 		t.Error(err)
 	}
 	if !reflect.DeepEqual(rcv1e1, rcv1e2) {
@@ -1404,11 +1404,11 @@ func testInternalReplicateITLoadIds(t *testing.T) {
 	}
 	// check again the LoadIDs
 	var rcv2e1 map[string]int64
-	if err := engineOneRPC.Call(utils.APIerSv1GetLoadIDs, utils.EmptyString, &rcv2e1); err != nil {
+	if err := engineOneRPC.Call(utils.APIerSv1GetLoadIDs, utils.StringPointer(utils.EmptyString), &rcv2e1); err != nil {
 		t.Error(err)
 	}
 	var rcv2e2 map[string]int64
-	if err := engineTwoRPC.Call(utils.APIerSv1GetLoadIDs, utils.EmptyString, &rcv2e2); err != nil {
+	if err := engineTwoRPC.Call(utils.APIerSv1GetLoadIDs, utils.StringPointer(utils.EmptyString), &rcv2e2); err != nil {
 		t.Error(err)
 	}
 

@@ -148,7 +148,7 @@ func testFilterSetFilter(t *testing.T) {
 func testFilterGetFilterIDs(t *testing.T) {
 	expected := []string{"Filter1"}
 	var result []string
-	if err := filterRPC.Call(utils.APIerSv1GetFilterIDs, utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{Tenant: "cgrates.org"}}, &result); err != nil {
+	if err := filterRPC.Call(utils.APIerSv1GetFilterIDs, &utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{Tenant: "cgrates.org"}}, &result); err != nil {
 		t.Error(err)
 	} else if len(expected) != len(result) {
 		t.Errorf("Expecting : %+v, received: %+v", expected, result)

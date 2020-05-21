@@ -212,7 +212,7 @@ func testAccITSetBalanceTimingIds(t *testing.T) {
 	}
 
 	if err := accRPC.Call(utils.APIerSv1LoadTariffPlanFromStorDb,
-		AttrLoadTpFromStorDb{TPid: "TEST_TPID1"}, &reply); err != nil {
+		&AttrLoadTpFromStorDb{TPid: "TEST_TPID1"}, &reply); err != nil {
 		t.Errorf("Got error on %s: %+v", utils.APIerSv1LoadTariffPlanFromStorDb, err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling %s got reply: %+v", utils.APIerSv1LoadTariffPlanFromStorDb, reply)

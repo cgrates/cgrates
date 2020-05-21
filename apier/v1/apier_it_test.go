@@ -781,7 +781,7 @@ func testApierTPAccountActions(t *testing.T) {
 // Test here LoadRatingPlan
 func testApierLoadRatingPlan(t *testing.T) {
 	var reply string
-	if err := rater.Call(utils.APIerSv1LoadRatingPlan, AttrLoadRatingPlan{TPid: utils.TEST_SQL, RatingPlanId: "RETAIL1"}, &reply); err != nil {
+	if err := rater.Call(utils.APIerSv1LoadRatingPlan, &AttrLoadRatingPlan{TPid: utils.TEST_SQL, RatingPlanId: "RETAIL1"}, &reply); err != nil {
 		t.Error("Got error on APIerSv1.LoadRatingPlan: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling APIerSv1.LoadRatingPlan got reply: ", reply)
@@ -794,7 +794,7 @@ func testApierLoadRatingProfile(t *testing.T) {
 	rpf := &utils.TPRatingProfile{
 		TPid: utils.TEST_SQL, LoadId: utils.TEST_SQL,
 		Tenant: "cgrates.org", Category: "call", Subject: "*any"}
-	if err := rater.Call(utils.APIerSv1LoadRatingProfile, rpf, &reply); err != nil {
+	if err := rater.Call(utils.APIerSv1LoadRatingProfile, &rpf, &reply); err != nil {
 		t.Error("Got error on APIerSv1.LoadRatingProfile: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling APIerSv1.LoadRatingProfile got reply: ", reply)
@@ -847,7 +847,7 @@ func testApierSetRatingProfile(t *testing.T) {
 	rpa := &utils.TPRatingActivation{ActivationTime: "2012-01-01T00:00:00Z", RatingPlanId: "RETAIL1", FallbackSubjects: "dan2"}
 	rpf := &utils.AttrSetRatingProfile{Tenant: "cgrates.org", Category: "call",
 		Subject: "dan", RatingPlanActivations: []*utils.TPRatingActivation{rpa}}
-	if err := rater.Call(utils.APIerSv1SetRatingProfile, rpf, &reply); err != nil {
+	if err := rater.Call(utils.APIerSv1SetRatingProfile, &rpf, &reply); err != nil {
 		t.Error("Got error on APIerSv1.SetRatingProfile: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling APIerSv1.SetRatingProfile got reply: ", reply)
@@ -866,7 +866,7 @@ func testApierSetRatingProfile(t *testing.T) {
 		t.Errorf("Calling CacheSv1.GetCacheStats expected: %+v, received: %+v", utils.ToJSON(expectedStats), utils.ToJSON(rcvStats))
 	}
 	// Calling the second time should not raise EXISTS
-	if err := rater.Call(utils.APIerSv1SetRatingProfile, rpf, &reply); err != nil {
+	if err := rater.Call(utils.APIerSv1SetRatingProfile, &rpf, &reply); err != nil {
 		t.Error("Unexpected result on duplication: ", err.Error())
 	}
 	// Make sure rates were loaded for account dan
@@ -941,7 +941,7 @@ func testAPIerSv1GetRatingProfile(t *testing.T) {
 
 	expectedIds := []string{"call:dan", "call:*any"}
 	var result []string
-	if err := rater.Call(utils.APIerSv1GetRatingProfileIDs, utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{Tenant: "cgrates.org"}}, &result); err != nil {
+	if err := rater.Call(utils.APIerSv1GetRatingProfileIDs, &utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{Tenant: "cgrates.org"}}, &result); err != nil {
 		t.Error(err)
 	} else if len(expectedIds) != len(result) {
 		t.Errorf("Expecting : %+v, received: %+v", expected, result)
@@ -991,7 +991,7 @@ func testApierGetDestination(t *testing.T) {
 func testApierGetRatingPlan(t *testing.T) {
 	reply := new(engine.RatingPlan)
 	rplnId := "RETAIL1"
-	if err := rater.Call(utils.APIerSv1GetRatingPlan, rplnId, reply); err != nil {
+	if err := rater.Call(utils.APIerSv1GetRatingPlan, &rplnId, reply); err != nil {
 		t.Error("Got error on APIerSv1.GetRatingPlan: ", err.Error())
 	}
 	// Check parts of info received since a full one is not possible due to unique map keys inside reply
@@ -1017,7 +1017,7 @@ func testApierRemoveRatingPlan(t *testing.T) {
 	rplnId := "RETAIL1"
 	var reply string
 
-	err := rater.Call(utils.APIerSv1RemoveRatingPlan, rplnId, &reply)
+	err := rater.Call(utils.APIerSv1RemoveRatingPlan, &rplnId, &reply)
 	if err != nil {
 		t.Error(err)
 	}
@@ -1026,7 +1026,7 @@ func testApierRemoveRatingPlan(t *testing.T) {
 	}
 	//get rating plan (the one that was removed. should return 'err not found')
 	var ratingPlan *engine.RatingPlan
-	err = rater.Call(utils.APIerSv1GetRatingPlan, rplnId, ratingPlan)
+	err = rater.Call(utils.APIerSv1GetRatingPlan, &rplnId, ratingPlan)
 	if err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expecting error: %s, received: %v", utils.ErrNotFound, err)
 	}
@@ -1102,13 +1102,13 @@ func testApierSetActions(t *testing.T) {
 	act1 := &V1TPAction{Identifier: utils.TOPUP_RESET, BalanceType: utils.MONETARY, Units: 75.0, ExpiryTime: utils.UNLIMITED, Weight: 20.0}
 	attrs1 := &V1AttrSetActions{ActionsId: "ACTS_1", Actions: []*V1TPAction{act1}}
 	reply1 := utils.EmptyString
-	if err := rater.Call(utils.APIerSv1SetActions, attrs1, &reply1); err != nil {
+	if err := rater.Call(utils.APIerSv1SetActions, &attrs1, &reply1); err != nil {
 		t.Error("Got error on APIerSv1.SetActions: ", err.Error())
 	} else if reply1 != utils.OK {
 		t.Errorf("Calling APIerSv1.SetActions received: %s", reply1)
 	}
 	// Calling the second time should raise EXISTS
-	if err := rater.Call(utils.APIerSv1SetActions, attrs1, &reply1); err == nil || err.Error() != "EXISTS" {
+	if err := rater.Call(utils.APIerSv1SetActions, &attrs1, &reply1); err == nil || err.Error() != "EXISTS" {
 		t.Error("Unexpected result on duplication: ", err.Error())
 	}
 }
@@ -1131,13 +1131,13 @@ func testApierSetActionPlan(t *testing.T) {
 	atm1 := &AttrActionPlan{ActionsId: "ACTS_1", MonthDays: "1", Time: "00:00:00", Weight: 20.0}
 	atms1 := &AttrSetActionPlan{Id: "ATMS_1", ActionPlan: []*AttrActionPlan{atm1}}
 	reply1 := utils.EmptyString
-	if err := rater.Call(utils.APIerSv1SetActionPlan, atms1, &reply1); err != nil {
+	if err := rater.Call(utils.APIerSv1SetActionPlan, &atms1, &reply1); err != nil {
 		t.Error("Got error on APIerSv1.SetActionPlan: ", err.Error())
 	} else if reply1 != utils.OK {
 		t.Errorf("Calling APIerSv1.SetActionPlan received: %s", reply1)
 	}
 	// Calling the second time should raise EXISTS
-	if err := rater.Call(utils.APIerSv1SetActionPlan, atms1, &reply1); err == nil || err.Error() != "EXISTS" {
+	if err := rater.Call(utils.APIerSv1SetActionPlan, &atms1, &reply1); err == nil || err.Error() != "EXISTS" {
 		t.Error("Unexpected result on duplication: ", err.Error())
 	}
 }
@@ -1173,7 +1173,7 @@ func testApierAddTriggeredAction(t *testing.T) {
 func testApierGetAccountActionTriggers(t *testing.T) {
 	var reply engine.ActionTriggers
 	req := utils.TenantAccount{Tenant: "cgrates.org", Account: "dan32"}
-	if err := rater.Call(utils.APIerSv1GetAccountActionTriggers, req, &reply); err != nil {
+	if err := rater.Call(utils.APIerSv1GetAccountActionTriggers, &req, &reply); err != nil {
 		t.Error("Got error on APIerSv1.GetAccountActionTimings: ", err.Error())
 	} else if len(reply) != 1 || reply[0].ActionsID != "WARN_VIA_HTTP" {
 		t.Errorf("Unexpected action triggers received %v", reply)
@@ -1203,7 +1203,7 @@ func testApierAddTriggeredAction2(t *testing.T) {
 func testApierGetAccountActionTriggers2(t *testing.T) {
 	var reply engine.ActionTriggers
 	req := utils.TenantAccount{Tenant: "cgrates.org", Account: "dan2"}
-	if err := rater.Call(utils.APIerSv1GetAccountActionTriggers, req, &reply); err != nil {
+	if err := rater.Call(utils.APIerSv1GetAccountActionTriggers, &req, &reply); err != nil {
 		t.Error("Got error on APIerSv1.GetAccountActionTimings: ", err.Error())
 	} else if len(reply) != 1 || reply[0].ActionsID != "LOG_BALANCE" {
 		t.Errorf("Unexpected action triggers received %v", reply)
@@ -1215,7 +1215,7 @@ func testApierSetAccountActionTriggers(t *testing.T) {
 	// Test first get so we can steal the id which we need to remove
 	var reply engine.ActionTriggers
 	req := utils.TenantAccount{Tenant: "cgrates.org", Account: "dan2"}
-	if err := rater.Call(utils.APIerSv1GetAccountActionTriggers, req, &reply); err != nil {
+	if err := rater.Call(utils.APIerSv1GetAccountActionTriggers, &req, &reply); err != nil {
 		t.Error("Got error on APIerSv1.GetAccountActionTimings: ", err.Error())
 	} else if len(reply) != 1 || reply[0].ActionsID != "LOG_BALANCE" {
 		for _, atr := range reply {
@@ -1244,7 +1244,7 @@ func testApierSetAccountActionTriggers(t *testing.T) {
 	} else if setReply != utils.OK {
 		t.Error("Unexpected answer received", setReply)
 	}
-	if err := rater.Call(utils.APIerSv1GetAccountActionTriggers, req, &reply); err != nil {
+	if err := rater.Call(utils.APIerSv1GetAccountActionTriggers, &req, &reply); err != nil {
 		t.Error("Got error on APIerSv1.GetAccountActionTriggers: ", err.Error())
 	} else if len(reply) != 1 || reply[0].ActivationDate != time.Date(2016, 2, 5, 18, 0, 0, 0, time.UTC) {
 		t.Errorf("Unexpected action triggers received %+v", reply[0])
@@ -1256,7 +1256,7 @@ func testApierRemAccountActionTriggers(t *testing.T) {
 	// Test first get so we can steal the id which we need to remove
 	var reply engine.ActionTriggers
 	req := utils.TenantAccount{Tenant: "cgrates.org", Account: "dan2"}
-	if err := rater.Call(utils.APIerSv1GetAccountActionTriggers, req, &reply); err != nil {
+	if err := rater.Call(utils.APIerSv1GetAccountActionTriggers, &req, &reply); err != nil {
 		t.Error("Got error on APIerSv1.GetAccountActionTimings: ", err.Error())
 	} else if len(reply) != 1 || reply[0].ActionsID != "LOG_BALANCE" {
 		for _, atr := range reply {
@@ -1276,7 +1276,7 @@ func testApierRemAccountActionTriggers(t *testing.T) {
 	} else if rmReply != utils.OK {
 		t.Error("Unexpected answer received", rmReply)
 	}
-	if err := rater.Call(utils.APIerSv1GetAccountActionTriggers, req, &reply); err != nil {
+	if err := rater.Call(utils.APIerSv1GetAccountActionTriggers, &req, &reply); err != nil {
 		t.Error("Got error on APIerSv1.GetAccountActionTriggers: ", err.Error())
 	} else if len(reply) != 0 {
 		t.Errorf("Unexpected action triggers received %+v", reply[0])
@@ -1711,16 +1711,16 @@ func testApierGetCallCostLog(t *testing.T) {
 func testApierITSetDestination(t *testing.T) {
 	attrs := utils.AttrSetDestination{Id: "TEST_SET_DESTINATION", Prefixes: []string{"+4986517174963", "+4986517174960"}}
 	var reply string
-	if err := rater.Call(utils.APIerSv1SetDestination, attrs, &reply); err != nil {
+	if err := rater.Call(utils.APIerSv1SetDestination, &attrs, &reply); err != nil {
 		t.Error("Unexpected error", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
 	}
-	if err := rater.Call(utils.APIerSv1SetDestination, attrs, &reply); err == nil || err.Error() != "EXISTS" { // Second time without overwrite should generate error
+	if err := rater.Call(utils.APIerSv1SetDestination, &attrs, &reply); err == nil || err.Error() != "EXISTS" { // Second time without overwrite should generate error
 		t.Error("Unexpected error", err.Error())
 	}
 	attrs = utils.AttrSetDestination{Id: "TEST_SET_DESTINATION", Prefixes: []string{"+4986517174963", "+4986517174964"}, Overwrite: true}
-	if err := rater.Call(utils.APIerSv1SetDestination, attrs, &reply); err != nil {
+	if err := rater.Call(utils.APIerSv1SetDestination, &attrs, &reply); err != nil {
 		t.Error("Unexpected error", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
@@ -1820,7 +1820,7 @@ func testApierImportTPFromFolderPath(t *testing.T) {
 func testApierLoadTariffPlanFromStorDbDryRun(t *testing.T) {
 	var reply string
 	if err := rater.Call(utils.APIerSv1LoadTariffPlanFromStorDb,
-		AttrLoadTpFromStorDb{TPid: "TEST_TPID2", DryRun: true}, &reply); err != nil {
+		&AttrLoadTpFromStorDb{TPid: "TEST_TPID2", DryRun: true}, &reply); err != nil {
 		t.Error("Got error on APIerSv1.LoadTariffPlanFromStorDb: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling APIerSv1.LoadTariffPlanFromStorDb got reply: ", reply)
@@ -1841,7 +1841,7 @@ func testApierGetCacheStats2(t *testing.T) {
 func testApierLoadTariffPlanFromStorDb(t *testing.T) {
 	var reply string
 	if err := rater.Call(utils.APIerSv1LoadTariffPlanFromStorDb,
-		AttrLoadTpFromStorDb{TPid: "TEST_TPID2"}, &reply); err != nil {
+		&AttrLoadTpFromStorDb{TPid: "TEST_TPID2"}, &reply); err != nil {
 		t.Error("Got error on APIerSv1.LoadTariffPlanFromStorDb: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling APIerSv1.LoadTariffPlanFromStorDb got reply: ", reply)

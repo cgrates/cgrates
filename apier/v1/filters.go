@@ -55,8 +55,8 @@ func (APIerSv1 *APIerSv1) SetFilter(arg *FilterWithCache, reply *string) error {
 }
 
 //GetFilter returns a Filter
-func (APIerSv1 *APIerSv1) GetFilter(arg utils.TenantID, reply *engine.Filter) error {
-	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
+func (APIerSv1 *APIerSv1) GetFilter(arg *utils.TenantID, reply *engine.Filter) error {
+	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if fltr, err := APIerSv1.DataManager.GetFilter(arg.Tenant, arg.ID, true, true, utils.NonTransactional); err != nil {
@@ -68,8 +68,8 @@ func (APIerSv1 *APIerSv1) GetFilter(arg utils.TenantID, reply *engine.Filter) er
 }
 
 // GetFilterIDs returns list of Filter IDs registered for a tenant
-func (APIerSv1 *APIerSv1) GetFilterIDs(args utils.TenantArgWithPaginator, fltrIDs *[]string) error {
-	if missing := utils.MissingStructFields(&args, []string{utils.Tenant}); len(missing) != 0 { //Params missing
+func (APIerSv1 *APIerSv1) GetFilterIDs(args *utils.TenantArgWithPaginator, fltrIDs *[]string) error {
+	if missing := utils.MissingStructFields(args, []string{utils.Tenant}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	prfx := utils.FilterPrefix + args.Tenant + ":"
@@ -89,8 +89,8 @@ func (APIerSv1 *APIerSv1) GetFilterIDs(args utils.TenantArgWithPaginator, fltrID
 }
 
 //RemoveFilter  remove a specific filter
-func (APIerSv1 *APIerSv1) RemoveFilter(arg utils.TenantIDWithCache, reply *string) error {
-	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
+func (APIerSv1 *APIerSv1) RemoveFilter(arg *utils.TenantIDWithCache, reply *string) error {
+	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if err := APIerSv1.DataManager.RemoveFilter(arg.Tenant, arg.ID, utils.NonTransactional); err != nil {

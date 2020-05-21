@@ -260,7 +260,7 @@ func testV2CDRsRateCDRs(t *testing.T) {
 		Overwrite: true,
 	}
 	var reply string
-	if err := cdrsRpc.Call(utils.APIerSv1SetRatingProfile, rpf, &reply); err != nil {
+	if err := cdrsRpc.Call(utils.APIerSv1SetRatingProfile, &rpf, &reply); err != nil {
 		t.Error("Got error on APIerSv1.SetRatingProfile: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling APIerSv1.SetRatingProfile got reply: ", reply)
@@ -633,7 +633,7 @@ func testV2CDRsRateCDRsWithRatingPlan(t *testing.T) {
 		Overwrite: true,
 	}
 	var reply string
-	if err := cdrsRpc.Call(utils.APIerSv1SetRatingProfile, rpf, &reply); err != nil {
+	if err := cdrsRpc.Call(utils.APIerSv1SetRatingProfile, &rpf, &reply); err != nil {
 		t.Error("Got error on APIerSv1.SetRatingProfile: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling APIerSv1.SetRatingProfile got reply: ", reply)
@@ -649,7 +649,7 @@ func testV2CDRsRateCDRsWithRatingPlan(t *testing.T) {
 				RatingPlanId:   "RP_TESTIT1"}},
 		Overwrite: true,
 	}
-	if err := cdrsRpc.Call(utils.APIerSv1SetRatingProfile, rpf, &reply); err != nil {
+	if err := cdrsRpc.Call(utils.APIerSv1SetRatingProfile, &rpf, &reply); err != nil {
 		t.Error("Got error on APIerSv1.SetRatingProfile: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling APIerSv1.SetRatingProfile got reply: ", reply)
