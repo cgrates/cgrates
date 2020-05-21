@@ -361,16 +361,16 @@ func TestCGREventconsumeRoutePaginator(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	//check if *suppliers_limit and *suppliers_offset was deleted
+	//check if *routes_limit and *routes_offset was deleted
 	if _, has := opts[RoutesLimit]; has {
-		t.Errorf("*suppliers_limit wasn't deleted")
+		t.Errorf("*routes_limit wasn't deleted")
 	} else if _, has := opts[RoutesOffset]; has {
-		t.Errorf("*suppliers_offset wasn't deleted")
+		t.Errorf("*routes_offset wasn't deleted")
 	}
 	if !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting:  %+v, received: %+v", eOut, rcv)
 	}
-	//check without *suppliers_limit, but with *suppliers_offset
+	//check without *routes_limit, but with *routes_offset
 	opts = map[string]interface{}{
 		RoutesOffset: 20,
 	}
@@ -382,16 +382,16 @@ func TestCGREventconsumeRoutePaginator(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	//check if *suppliers_limit and *suppliers_offset was deleted
+	//check if *routes_limit and *routes_offset was deleted
 	if _, has := opts[RoutesLimit]; has {
-		t.Errorf("*suppliers_limit wasn't deleted")
+		t.Errorf("*routes_limit wasn't deleted")
 	} else if _, has := opts[RoutesOffset]; has {
-		t.Errorf("*suppliers_offset wasn't deleted")
+		t.Errorf("*routes_offset wasn't deleted")
 	}
 	if !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting:  %+v, received: %+v", eOut, rcv)
 	}
-	//check with notAnInt at *suppliers_limit
+	//check with notAnInt at *routes_limit
 	opts = map[string]interface{}{
 		RoutesLimit: "Not an int",
 	}
@@ -403,7 +403,7 @@ func TestCGREventconsumeRoutePaginator(t *testing.T) {
 	if !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting:  %+v, received: %+v", eOut, rcv)
 	}
-	//check with notAnInt at and *suppliers_offset
+	//check with notAnInt at and *routes_offset
 	opts = map[string]interface{}{
 		RoutesOffset: "Not an int",
 	}

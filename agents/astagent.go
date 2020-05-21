@@ -321,7 +321,10 @@ func (sma *AsteriskAgent) handleChannelDestroyed(ev *SMAsteriskEvent) {
 	if sma.cgrCfg.AsteriskAgentCfg().CreateCDR {
 		if err := sma.connMgr.Call(sma.cgrCfg.AsteriskAgentCfg().SessionSConns, sma,
 			utils.SessionSv1ProcessCDR,
-			cgrEvDisp, &reply); err != nil {
+			&utils.CGREventWithArgDispatcher{
+				CGREvent:      cgrEvDisp.CGREvent,
+				ArgDispatcher: cgrEvDisp.ArgDispatcher,
+			}, &reply); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> Error: %s when attempting to process CDR for channelID: %s",
 				utils.AsteriskAgent, err.Error(), ev.ChannelID()))
 		}

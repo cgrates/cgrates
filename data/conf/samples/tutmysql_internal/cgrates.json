@@ -128,8 +128,8 @@
 				],
 			},
 			{
-				"type": "*suppliers",						// data source type
-				"file_name": "Suppliers.csv",				// file name in the tp_in_dir
+				"type": "*routes",						// data source type
+				"file_name": "Routes.csv",				// file name in the tp_in_dir
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~1", "mandatory": true},

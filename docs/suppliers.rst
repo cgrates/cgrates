@@ -52,7 +52,7 @@ SupplierS
 
 **SupplierS** is the **CGRateS** component responsible for handling the *SupplierProfiles*.
 
-It is configured within **suppliers** section from :ref:`JSON configuration <configuration>` via the following parameters:
+It is configured within **routes** section from :ref:`JSON configuration <configuration>` via the following parameters:
 
 enabled
 	Will enable starting of the service. Possible values: <true|false>.
