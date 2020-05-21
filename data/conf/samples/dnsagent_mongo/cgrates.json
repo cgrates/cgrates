@@ -37,6 +37,7 @@
 	"attributes_conns": ["*localhost"],
 	"rals_conns": ["*internal"],
 	"cdrs_conns": ["*internal"],
+	"stats_conns": ["*localhost"],
 	"chargers_conns": ["*internal"],
 	"suppliers_conns": ["*localhost"],
 },
@@ -65,6 +66,12 @@
 
 "suppliers": {
 	"enabled": true,
+},
+
+
+"stats": {
+	"enabled": true,
+	"indexed_selects": false
 },
 
 
