@@ -305,7 +305,7 @@ func testAPIerGetRatingPlanIDs(t *testing.T) {
 	var reply []string
 	expected := []string{"RP_1002_LOW", "RP_1003", "RP_1001", "RP_MMS", "RP_SMS", "RP_1002"}
 	if err := apierRPC.Call(utils.APIerSv1GetRatingPlanIDs,
-		utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{Tenant: "cgrates.org"}},
+		&utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{Tenant: "cgrates.org"}},
 		&reply); err != nil {
 		t.Error(err)
 	}
@@ -330,7 +330,7 @@ func testAPIerSetActionPlanDfltTime(t *testing.T) {
 		},
 		ReloadScheduler: true,
 	}
-	if err := apierRPC.Call(utils.APIerSv1SetActionPlan, hourlyAP, &reply1); err != nil {
+	if err := apierRPC.Call(utils.APIerSv1SetActionPlan, &hourlyAP, &reply1); err != nil {
 		t.Error("Got error on APIerSv1.SetActionPlan: ", err.Error())
 	} else if reply1 != utils.OK {
 		t.Errorf("Calling APIerSv1.SetActionPlan received: %s", reply1)
@@ -346,7 +346,7 @@ func testAPIerSetActionPlanDfltTime(t *testing.T) {
 		},
 		ReloadScheduler: true,
 	}
-	if err := apierRPC.Call(utils.APIerSv1SetActionPlan, dailyAP, &reply1); err != nil {
+	if err := apierRPC.Call(utils.APIerSv1SetActionPlan, &dailyAP, &reply1); err != nil {
 		t.Error("Got error on APIerSv1.SetActionPlan: ", err.Error())
 	} else if reply1 != utils.OK {
 		t.Errorf("Calling APIerSv1.SetActionPlan received: %s", reply1)
@@ -362,7 +362,7 @@ func testAPIerSetActionPlanDfltTime(t *testing.T) {
 		},
 		ReloadScheduler: true,
 	}
-	if err := apierRPC.Call(utils.APIerSv1SetActionPlan, weeklyAP, &reply1); err != nil {
+	if err := apierRPC.Call(utils.APIerSv1SetActionPlan, &weeklyAP, &reply1); err != nil {
 		t.Error("Got error on APIerSv1.SetActionPlan: ", err.Error())
 	} else if reply1 != utils.OK {
 		t.Errorf("Calling APIerSv1.SetActionPlan received: %s", reply1)
@@ -378,7 +378,7 @@ func testAPIerSetActionPlanDfltTime(t *testing.T) {
 		},
 		ReloadScheduler: true,
 	}
-	if err := apierRPC.Call(utils.APIerSv1SetActionPlan, monthlyAP, &reply1); err != nil {
+	if err := apierRPC.Call(utils.APIerSv1SetActionPlan, &monthlyAP, &reply1); err != nil {
 		t.Error("Got error on APIerSv1.SetActionPlan: ", err.Error())
 	} else if reply1 != utils.OK {
 		t.Errorf("Calling APIerSv1.SetActionPlan received: %s", reply1)

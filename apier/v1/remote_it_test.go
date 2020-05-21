@@ -489,7 +489,7 @@ func testInternalRemoteITGetFilter(t *testing.T) {
 
 func testInternalRemoteITGetRatingPlan(t *testing.T) {
 	var reply engine.RatingPlan
-	if err := internalRPC.Call(utils.APIerSv1GetRatingPlan, "RP_1001", &reply); err != nil {
+	if err := internalRPC.Call(utils.APIerSv1GetRatingPlan, utils.StringPointer("RP_1001"), &reply); err != nil {
 		t.Error(err.Error())
 	} else if reply.Id != "RP_1001" {
 		t.Errorf("Expected: %+v, received: %+v", "RP_1001", reply.Id)

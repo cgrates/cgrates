@@ -30,8 +30,8 @@ import (
 )
 
 // Returns a list of ActionTriggers on an account
-func (api *APIerSv1) GetAccountActionTriggers(attrs utils.TenantAccount, reply *engine.ActionTriggers) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Account"}); len(missing) != 0 {
+func (api *APIerSv1) GetAccountActionTriggers(attrs *utils.TenantAccount, reply *engine.ActionTriggers) error {
+	if missing := utils.MissingStructFields(attrs, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if account, err := api.DataManager.GetAccount(utils.ConcatenatedKey(attrs.Tenant, attrs.Account)); err != nil {

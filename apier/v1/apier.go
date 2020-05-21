@@ -124,8 +124,8 @@ func (apiv1 *APIerSv1) ComputeAccountActionPlans(ignr *string, reply *string) (e
 	return
 }
 
-func (apiv1 *APIerSv1) GetSharedGroup(sgId string, reply *engine.SharedGroup) error {
-	if sg, err := apiv1.DataManager.GetSharedGroup(sgId, false, utils.NonTransactional); err != nil && err != utils.ErrNotFound { // Not found is not an error here
+func (apiv1 *APIerSv1) GetSharedGroup(sgId *string, reply *engine.SharedGroup) error {
+	if sg, err := apiv1.DataManager.GetSharedGroup(*sgId, false, utils.NonTransactional); err != nil && err != utils.ErrNotFound { // Not found is not an error here
 		return err
 	} else {
 		if sg != nil {
@@ -135,8 +135,8 @@ func (apiv1 *APIerSv1) GetSharedGroup(sgId string, reply *engine.SharedGroup) er
 	return nil
 }
 
-func (apiv1 *APIerSv1) SetDestination(attrs utils.AttrSetDestination, reply *string) (err error) {
-	if missing := utils.MissingStructFields(&attrs, []string{"Id", "Prefixes"}); len(missing) != 0 {
+func (apiv1 *APIerSv1) SetDestination(attrs *utils.AttrSetDestination, reply *string) (err error) {
+	if missing := utils.MissingStructFields(attrs, []string{"Id", "Prefixes"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	dest := &engine.Destination{Id: attrs.Id, Prefixes: attrs.Prefixes}
@@ -165,8 +165,8 @@ func (apiv1 *APIerSv1) SetDestination(attrs utils.AttrSetDestination, reply *str
 	return nil
 }
 
-func (apiv1 *APIerSv1) GetRatingPlan(rplnId string, reply *engine.RatingPlan) error {
-	rpln, err := apiv1.DataManager.GetRatingPlan(rplnId, false, utils.NonTransactional)
+func (apiv1 *APIerSv1) GetRatingPlan(rplnId *string, reply *engine.RatingPlan) error {
+	rpln, err := apiv1.DataManager.GetRatingPlan(*rplnId, false, utils.NonTransactional)
 	if err != nil {
 		if err.Error() == utils.ErrNotFound.Error() {
 			return err
@@ -177,11 +177,11 @@ func (apiv1 *APIerSv1) GetRatingPlan(rplnId string, reply *engine.RatingPlan) er
 	return nil
 }
 
-func (apiv1 *APIerSv1) RemoveRatingPlan(ID string, reply *string) error {
-	if len(ID) == 0 {
+func (apiv1 *APIerSv1) RemoveRatingPlan(ID *string, reply *string) error {
+	if len(*ID) == 0 {
 		return utils.NewErrMandatoryIeMissing("ID")
 	}
-	err := apiv1.DataManager.RemoveRatingPlan(ID, utils.NonTransactional)
+	err := apiv1.DataManager.RemoveRatingPlan(*ID, utils.NonTransactional)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -214,7 +214,7 @@ type AttrLoadDestination struct {
 }
 
 // Load destinations from storDb into dataDb.
-func (apiv1 *APIerSv1) LoadDestination(attrs AttrLoadDestination, reply *string) error {
+func (apiv1 *APIerSv1) LoadDestination(attrs *AttrLoadDestination, reply *string) error {
 	if len(attrs.TPid) == 0 {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
@@ -245,7 +245,7 @@ type AttrLoadRatingPlan struct {
 }
 
 // Process dependencies and load a specific rating plan from storDb into dataDb.
-func (apiv1 *APIerSv1) LoadRatingPlan(attrs AttrLoadRatingPlan, reply *string) error {
+func (apiv1 *APIerSv1) LoadRatingPlan(attrs *AttrLoadRatingPlan, reply *string) error {
 	if len(attrs.TPid) == 0 {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
@@ -265,7 +265,7 @@ func (apiv1 *APIerSv1) LoadRatingPlan(attrs AttrLoadRatingPlan, reply *string) e
 }
 
 // Process dependencies and load a specific rating profile from storDb into dataDb.
-func (apiv1 *APIerSv1) LoadRatingProfile(attrs utils.TPRatingProfile, reply *string) error {
+func (apiv1 *APIerSv1) LoadRatingProfile(attrs *utils.TPRatingProfile, reply *string) error {
 	if len(attrs.TPid) == 0 {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
@@ -275,7 +275,7 @@ func (apiv1 *APIerSv1) LoadRatingProfile(attrs utils.TPRatingProfile, reply *str
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if err := dbReader.LoadRatingProfilesFiltered(&attrs); err != nil {
+	if err := dbReader.LoadRatingProfilesFiltered(attrs); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
@@ -288,7 +288,7 @@ type AttrLoadSharedGroup struct {
 }
 
 // Load destinations from storDb into dataDb.
-func (apiv1 *APIerSv1) LoadSharedGroup(attrs AttrLoadSharedGroup, reply *string) error {
+func (apiv1 *APIerSv1) LoadSharedGroup(attrs *AttrLoadSharedGroup, reply *string) error {
 	if len(attrs.TPid) == 0 {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
@@ -314,7 +314,7 @@ type AttrLoadTpFromStorDb struct {
 }
 
 // Loads complete data in a TP from storDb
-func (apiv1 *APIerSv1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply *string) error {
+func (apiv1 *APIerSv1) LoadTariffPlanFromStorDb(attrs *AttrLoadTpFromStorDb, reply *string) error {
 	if len(attrs.TPid) == 0 {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
@@ -362,8 +362,8 @@ func (apiv1 *APIerSv1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, repl
 	return nil
 }
 
-func (apiv1 *APIerSv1) ImportTariffPlanFromFolder(attrs utils.AttrImportTPFromFolder, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "FolderPath"}); len(missing) != 0 {
+func (apiv1 *APIerSv1) ImportTariffPlanFromFolder(attrs *utils.AttrImportTPFromFolder, reply *string) error {
+	if missing := utils.MissingStructFields(attrs, []string{"TPid", "FolderPath"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if len(attrs.CsvSeparator) == 0 {
@@ -393,8 +393,8 @@ func (apiv1 *APIerSv1) ImportTariffPlanFromFolder(attrs utils.AttrImportTPFromFo
 }
 
 // Sets a specific rating profile working with data directly in the DataDB without involving storDb
-func (apiv1 *APIerSv1) SetRatingProfile(attrs utils.AttrSetRatingProfile, reply *string) (err error) {
-	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "ToR", "Subject", "RatingPlanActivations"}); len(missing) != 0 {
+func (apiv1 *APIerSv1) SetRatingProfile(attrs *utils.AttrSetRatingProfile, reply *string) (err error) {
+	if missing := utils.MissingStructFields(attrs, []string{"Tenant", "ToR", "Subject", "RatingPlanActivations"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	for _, rpa := range attrs.RatingPlanActivations {
@@ -446,8 +446,8 @@ func (apiv1 *APIerSv1) SetRatingProfile(attrs utils.AttrSetRatingProfile, reply 
 }
 
 // GetRatingProfileIDs returns list of resourceProfile IDs registered for a tenant
-func (apiv1 *APIerSv1) GetRatingProfileIDs(args utils.TenantArgWithPaginator, rsPrfIDs *[]string) error {
-	if missing := utils.MissingStructFields(&args, []string{utils.Tenant}); len(missing) != 0 { //Params missing
+func (apiv1 *APIerSv1) GetRatingProfileIDs(args *utils.TenantArgWithPaginator, rsPrfIDs *[]string) error {
+	if missing := utils.MissingStructFields(args, []string{utils.Tenant}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	prfx := utils.RATING_PROFILE_PREFIX + "*out:" + args.Tenant + ":"
@@ -466,8 +466,8 @@ func (apiv1 *APIerSv1) GetRatingProfileIDs(args utils.TenantArgWithPaginator, rs
 	return nil
 }
 
-func (apiv1 *APIerSv1) GetRatingProfile(attrs utils.AttrGetRatingProfile, reply *engine.RatingProfile) (err error) {
-	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Category", "Subject"}); len(missing) != 0 {
+func (apiv1 *APIerSv1) GetRatingProfile(attrs *utils.AttrGetRatingProfile, reply *engine.RatingProfile) (err error) {
+	if missing := utils.MissingStructFields(attrs, []string{"Tenant", "Category", "Subject"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if rpPrf, err := apiv1.DataManager.GetRatingProfile(attrs.GetID(),
@@ -511,13 +511,13 @@ type V1TPAction struct {
 	Weight          float64 // Action's weight
 }
 
-func (apiv1 *APIerSv1) SetActions(attrs V1AttrSetActions, reply *string) (err error) {
-	if missing := utils.MissingStructFields(&attrs, []string{"ActionsId", "Actions"}); len(missing) != 0 {
+func (apiv1 *APIerSv1) SetActions(attrs *V1AttrSetActions, reply *string) (err error) {
+	if missing := utils.MissingStructFields(attrs, []string{"ActionsId", "Actions"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	for _, action := range attrs.Actions {
 		requiredFields := []string{"Identifier", "Weight"}
-		if action.BalanceType != "" { // Add some inter-dependent parameters - if balanceType then we are not talking about simply calling actions
+		if action.BalanceType != utils.EmptyString { // Add some inter-dependent parameters - if balanceType then we are not talking about simply calling actions
 			requiredFields = append(requiredFields, "Units")
 		}
 		if missing := utils.MissingStructFields(action, requiredFields); len(missing) != 0 {
@@ -534,7 +534,7 @@ func (apiv1 *APIerSv1) SetActions(attrs V1AttrSetActions, reply *string) (err er
 	storeActions := make(engine.Actions, len(attrs.Actions))
 	for idx, apiAct := range attrs.Actions {
 		var blocker *bool
-		if apiAct.BalanceBlocker != "" {
+		if apiAct.BalanceBlocker != utils.EmptyString {
 			if x, err := strconv.ParseBool(apiAct.BalanceBlocker); err == nil {
 				blocker = &x
 			} else {
@@ -543,7 +543,7 @@ func (apiv1 *APIerSv1) SetActions(attrs V1AttrSetActions, reply *string) (err er
 		}
 
 		var disabled *bool
-		if apiAct.BalanceDisabled != "" {
+		if apiAct.BalanceDisabled != utils.EmptyString {
 			if x, err := strconv.ParseBool(apiAct.BalanceDisabled); err == nil {
 				disabled = &x
 			} else {
@@ -640,8 +640,8 @@ type AttrActionPlan struct {
 	Weight    float64 // Binding's weight
 }
 
-func (apiv1 *APIerSv1) SetActionPlan(attrs AttrSetActionPlan, reply *string) (err error) {
-	if missing := utils.MissingStructFields(&attrs, []string{"Id", "ActionPlan"}); len(missing) != 0 {
+func (apiv1 *APIerSv1) SetActionPlan(attrs *AttrSetActionPlan, reply *string) (err error) {
+	if missing := utils.MissingStructFields(attrs, []string{"Id", "ActionPlan"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	for _, at := range attrs.ActionPlan {
@@ -844,8 +844,8 @@ func (apiv1 *APIerSv1) GetActionPlan(attr *AttrGetActionPlan, reply *[]*engine.A
 	return nil
 }
 
-func (apiv1 *APIerSv1) RemoveActionPlan(attr AttrGetActionPlan, reply *string) (err error) {
-	if missing := utils.MissingStructFields(&attr, []string{"ID"}); len(missing) != 0 {
+func (apiv1 *APIerSv1) RemoveActionPlan(attr *AttrGetActionPlan, reply *string) (err error) {
+	if missing := utils.MissingStructFields(attr, []string{"ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if _, err = guardian.Guardian.Guard(func() (interface{}, error) {
@@ -1131,7 +1131,7 @@ func (apiv1 *APIerSv1) RemoveRatingProfile(attr AttrRemoveRatingProfile, reply *
 	return nil
 }
 
-func (apiv1 *APIerSv1) GetLoadHistory(attrs utils.Paginator, reply *[]*utils.LoadInstance) error {
+func (apiv1 *APIerSv1) GetLoadHistory(attrs *utils.Paginator, reply *[]*utils.LoadInstance) error {
 	nrItems := -1
 	offset := 0
 	if attrs.Offset != nil { // For offset we need full data
@@ -1313,8 +1313,8 @@ func (apiv1 *APIerSv1) CallCache(cacheOpt string, args utils.ArgsGetCacheItem) (
 	return
 }
 
-func (apiv1 *APIerSv1) GetLoadIDs(args string, reply *map[string]int64) (err error) {
-	if loadIDs, err := apiv1.DataManager.GetItemLoadIDs(args, false); err != nil {
+func (apiv1 *APIerSv1) GetLoadIDs(args *string, reply *map[string]int64) (err error) {
+	if loadIDs, err := apiv1.DataManager.GetItemLoadIDs(*args, false); err != nil {
 		return err
 	} else {
 		*reply = loadIDs
@@ -1327,7 +1327,7 @@ type LoadTimeArgs struct {
 	Item     string
 }
 
-func (apiv1 *APIerSv1) GetLoadTimes(args LoadTimeArgs, reply *map[string]string) (err error) {
+func (apiv1 *APIerSv1) GetLoadTimes(args *LoadTimeArgs, reply *map[string]string) (err error) {
 	if loadIDs, err := apiv1.DataManager.GetItemLoadIDs(args.Item, false); err != nil {
 		return err
 	} else {
@@ -1378,7 +1378,7 @@ func (apiv1 *APIerSv1) GetActionPlanIDs(args *utils.TenantArgWithPaginator, attr
 }
 
 // GetRatingPlanIDs returns list of RatingPlan IDs registered for a tenant
-func (apiv1 *APIerSv1) GetRatingPlanIDs(args utils.TenantArgWithPaginator, attrPrfIDs *[]string) error {
+func (apiv1 *APIerSv1) GetRatingPlanIDs(args *utils.TenantArgWithPaginator, attrPrfIDs *[]string) error {
 	prfx := utils.RATING_PLAN_PREFIX
 	keys, err := apiv1.DataManager.DataDB().GetKeysForPrefix(utils.RATING_PLAN_PREFIX)
 	if err != nil {

@@ -193,13 +193,13 @@ func testdoubleRemoveActions(t *testing.T) {
 				ExpiryTime:  utils.UNLIMITED,
 				Weight:      20.0}}}
 	var reply string
-	if err := sesRPC.Call(utils.APIerSv1SetActions, attrs1, &reply); err != nil {
+	if err := sesRPC.Call(utils.APIerSv1SetActions, &attrs1, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Unexpected reply returned: %s", reply)
 	}
 	// set it again (expect EXISTS)
-	if err := sesRPC.Call(utils.APIerSv1SetActions, attrs1, &reply); err == nil || err.Error() != "EXISTS" {
+	if err := sesRPC.Call(utils.APIerSv1SetActions, &attrs1, &reply); err == nil || err.Error() != "EXISTS" {
 		t.Error(err)
 	}
 	// check
@@ -286,13 +286,13 @@ func testdoubleRemoveActionPlan(t *testing.T) {
 				Weight:    20.0},
 		},
 	}
-	if err := sesRPC.Call(utils.APIerSv1SetActionPlan, atms1, &reply); err != nil {
+	if err := sesRPC.Call(utils.APIerSv1SetActionPlan, &atms1, &reply); err != nil {
 		t.Error("Got error on APIerSv1.SetActionPlan: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Unexpected reply returned: %s", reply)
 	}
 	// set it again (expect EXISTS)
-	if err := sesRPC.Call(utils.APIerSv1SetActionPlan, atms1, &reply); err == nil || err.Error() != "EXISTS" {
+	if err := sesRPC.Call(utils.APIerSv1SetActionPlan, &atms1, &reply); err == nil || err.Error() != "EXISTS" {
 		t.Error(err)
 	}
 	// check

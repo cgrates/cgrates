@@ -232,7 +232,7 @@ func testV2CDRsOfflineExpiryBalance(t *testing.T) {
 
 	atm1 := &v1.AttrActionPlan{ActionsId: "ACT_TOPUP_TEST2", Time: "*asap", Weight: 20.0}
 	atms1 := &v1.AttrSetActionPlan{Id: "AP_TEST2", ActionPlan: []*v1.AttrActionPlan{atm1}}
-	if err := cdrsOfflineRpc.Call(utils.APIerSv1SetActionPlan, atms1, &reply); err != nil {
+	if err := cdrsOfflineRpc.Call(utils.APIerSv1SetActionPlan, &atms1, &reply); err != nil {
 		t.Error("Got error on APIerSv1.SetActionPlan: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv1.SetActionPlan received: %s", reply)

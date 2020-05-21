@@ -27,29 +27,29 @@ import (
 )
 
 // Returns MaxUsage (for calls in seconds), -1 for no limit
-func (self *APIerSv1) GetMaxUsage(usageRecord engine.UsageRecordWithArgDispatcher, maxUsage *int64) error {
+func (self *APIerSv1) GetMaxUsage(usageRecord *engine.UsageRecordWithArgDispatcher, maxUsage *int64) error {
 	if self.Responder == nil {
 		return utils.NewErrNotConnected(utils.RALService)
 	}
-	if usageRecord.ToR == "" {
+	if usageRecord.ToR == utils.EmptyString {
 		usageRecord.ToR = utils.VOICE
 	}
-	if usageRecord.RequestType == "" {
+	if usageRecord.RequestType == utils.EmptyString {
 		usageRecord.RequestType = self.Config.GeneralCfg().DefaultReqType
 	}
-	if usageRecord.Tenant == "" {
+	if usageRecord.Tenant == utils.EmptyString {
 		usageRecord.Tenant = self.Config.GeneralCfg().DefaultTenant
 	}
-	if usageRecord.Category == "" {
+	if usageRecord.Category == utils.EmptyString {
 		usageRecord.Category = self.Config.GeneralCfg().DefaultCategory
 	}
-	if usageRecord.Subject == "" {
+	if usageRecord.Subject == utils.EmptyString {
 		usageRecord.Subject = usageRecord.Account
 	}
-	if usageRecord.SetupTime == "" {
+	if usageRecord.SetupTime == utils.EmptyString {
 		usageRecord.SetupTime = utils.META_NOW
 	}
-	if usageRecord.Usage == "" {
+	if usageRecord.Usage == utils.EmptyString {
 		usageRecord.Usage = strconv.FormatFloat(
 			self.Config.MaxCallDuration.Seconds(), 'f', -1, 64)
 	}

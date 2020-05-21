@@ -265,7 +265,7 @@ func testAPIerSv2itSetAccountWithAP(t *testing.T) {
 	if _, err := dm.GetActionPlan(argAP1.Id, true, utils.NonTransactional); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
-	if err := apierRPC.Call(utils.APIerSv1SetActionPlan, argAP1, &reply); err != nil {
+	if err := apierRPC.Call(utils.APIerSv1SetActionPlan, &argAP1, &reply); err != nil {
 		t.Error("Got error on APIerSv1.SetActionPlan: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv1.SetActionPlan received: %s", reply)
@@ -409,7 +409,7 @@ func testAPIerSv2itSetActionPlanWithWrongTiming(t *testing.T) {
 		},
 	}
 
-	if err := apierRPC.Call(utils.APIerSv1SetActionPlan, argAP1, &reply); err == nil ||
+	if err := apierRPC.Call(utils.APIerSv1SetActionPlan, &argAP1, &reply); err == nil ||
 		err.Error() != fmt.Sprintf("UNSUPPORTED_FORMAT:%s", tNow) {
 		t.Error("Expecting error ", err)
 	}
@@ -427,7 +427,7 @@ func testAPIerSv2itSetActionPlanWithWrongTiming2(t *testing.T) {
 		},
 	}
 
-	if err := apierRPC.Call(utils.APIerSv1SetActionPlan, argAP1, &reply); err == nil ||
+	if err := apierRPC.Call(utils.APIerSv1SetActionPlan, &argAP1, &reply); err == nil ||
 		err.Error() != fmt.Sprintf("UNSUPPORTED_FORMAT:aa:bb:cc") {
 		t.Error("Expecting error ", err)
 	}

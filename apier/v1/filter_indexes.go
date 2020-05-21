@@ -42,8 +42,8 @@ type AttrRemFilterIndexes struct {
 	ItemType string
 }
 
-func (api *APIerSv1) RemoveFilterIndexes(arg AttrRemFilterIndexes, reply *string) (err error) {
-	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ItemType"}); len(missing) != 0 { //Params missing
+func (api *APIerSv1) RemoveFilterIndexes(arg *AttrRemFilterIndexes, reply *string) (err error) {
+	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ItemType"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	key := arg.Tenant
@@ -59,13 +59,13 @@ func (api *APIerSv1) RemoveFilterIndexes(arg AttrRemFilterIndexes, reply *string
 	case utils.MetaChargers:
 		arg.ItemType = utils.ChargerProfilePrefix
 	case utils.MetaDispatchers:
-		if missing := utils.MissingStructFields(&arg, []string{"Context"}); len(missing) != 0 { //Params missing
+		if missing := utils.MissingStructFields(arg, []string{"Context"}); len(missing) != 0 { //Params missing
 			return utils.NewErrMandatoryIeMissing(missing...)
 		}
 		arg.ItemType = utils.DispatcherProfilePrefix
 		key = utils.ConcatenatedKey(arg.Tenant, arg.Context)
 	case utils.MetaAttributes:
-		if missing := utils.MissingStructFields(&arg, []string{"Context"}); len(missing) != 0 { //Params missing
+		if missing := utils.MissingStructFields(arg, []string{"Context"}); len(missing) != 0 { //Params missing
 			return utils.NewErrMandatoryIeMissing(missing...)
 		}
 		arg.ItemType = utils.AttributeProfilePrefix
@@ -78,11 +78,11 @@ func (api *APIerSv1) RemoveFilterIndexes(arg AttrRemFilterIndexes, reply *string
 	return nil
 }
 
-func (api *APIerSv1) GetFilterIndexes(arg AttrGetFilterIndexes, reply *[]string) (err error) {
+func (api *APIerSv1) GetFilterIndexes(arg *AttrGetFilterIndexes, reply *[]string) (err error) {
 	var indexes map[string]utils.StringMap
 	var indexedSlice []string
 	indexesFilter := make(map[string]utils.StringMap)
-	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ItemType"}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ItemType"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	key := arg.Tenant
@@ -98,23 +98,23 @@ func (api *APIerSv1) GetFilterIndexes(arg AttrGetFilterIndexes, reply *[]string)
 	case utils.MetaChargers:
 		arg.ItemType = utils.ChargerProfilePrefix
 	case utils.MetaDispatchers:
-		if missing := utils.MissingStructFields(&arg, []string{"Context"}); len(missing) != 0 { //Params missing
+		if missing := utils.MissingStructFields(arg, []string{"Context"}); len(missing) != 0 { //Params missing
 			return utils.NewErrMandatoryIeMissing(missing...)
 		}
 		arg.ItemType = utils.DispatcherProfilePrefix
 		key = utils.ConcatenatedKey(arg.Tenant, arg.Context)
 	case utils.MetaAttributes:
-		if missing := utils.MissingStructFields(&arg, []string{"Context"}); len(missing) != 0 { //Params missing
+		if missing := utils.MissingStructFields(arg, []string{"Context"}); len(missing) != 0 { //Params missing
 			return utils.NewErrMandatoryIeMissing(missing...)
 		}
 		arg.ItemType = utils.AttributeProfilePrefix
 		key = utils.ConcatenatedKey(arg.Tenant, arg.Context)
 	}
 	if indexes, err = api.DataManager.GetFilterIndexes(
-		utils.PrefixToIndexCache[arg.ItemType], key, "", nil); err != nil {
+		utils.PrefixToIndexCache[arg.ItemType], key, utils.EmptyString, nil); err != nil {
 		return err
 	}
-	if arg.FilterType != "" {
+	if arg.FilterType != utils.EmptyString {
 		for val, strmap := range indexes {
 			if strings.HasPrefix(val, arg.FilterType) {
 				indexesFilter[val] = make(utils.StringMap)
@@ -128,7 +128,7 @@ func (api *APIerSv1) GetFilterIndexes(arg AttrGetFilterIndexes, reply *[]string)
 			return utils.ErrNotFound
 		}
 	}
-	if arg.FilterField != "" {
+	if arg.FilterField != utils.EmptyString {
 		if len(indexedSlice) == 0 {
 			indexesFilter = make(map[string]utils.StringMap)
 			for val, strmap := range indexes {
@@ -158,7 +158,7 @@ func (api *APIerSv1) GetFilterIndexes(arg AttrGetFilterIndexes, reply *[]string)
 			indexedSlice = cloneIndexSlice
 		}
 	}
-	if arg.FilterValue != "" {
+	if arg.FilterValue != utils.EmptyString {
 		if len(indexedSlice) == 0 {
 			for val, strmap := range indexes {
 				if strings.Index(val, arg.FilterValue) != -1 {
