@@ -127,7 +127,7 @@ func TestCacheJsonCfg(t *testing.T) {
 			utils.CacheFilters: {Limit: utils.IntPointer(-1),
 				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 				Precache: utils.BoolPointer(false), Replicate: utils.BoolPointer(false)},
-			utils.CacheRouteProfiles: &CacheParamJsonCfg{Limit: utils.IntPointer(-1),
+			utils.CacheRouteProfiles: {Limit: utils.IntPointer(-1),
 				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 				Precache: utils.BoolPointer(false), Replicate: utils.BoolPointer(false)},
 			utils.CacheAttributeProfiles: {Limit: utils.IntPointer(-1),
@@ -151,7 +151,7 @@ func TestCacheJsonCfg(t *testing.T) {
 			utils.CacheThresholdFilterIndexes: {Limit: utils.IntPointer(-1),
 				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 				Replicate: utils.BoolPointer(false)},
-			utils.CacheRouteFilterIndexes: &CacheParamJsonCfg{Limit: utils.IntPointer(-1),
+			utils.CacheRouteFilterIndexes: {Limit: utils.IntPointer(-1),
 				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 				Replicate: utils.BoolPointer(false)},
 			utils.CacheAttributeFilterIndexes: {Limit: utils.IntPointer(-1),
@@ -179,6 +179,9 @@ func TestCacheJsonCfg(t *testing.T) {
 				Ttl: utils.StringPointer("2s"), Static_ttl: utils.BoolPointer(false),
 				Replicate: utils.BoolPointer(false)},
 			utils.CacheClosedSessions: {Limit: utils.IntPointer(-1),
+				Ttl: utils.StringPointer("10s"), Static_ttl: utils.BoolPointer(false),
+				Replicate: utils.BoolPointer(false)},
+			utils.CacheEventCharges: {Limit: utils.IntPointer(-1),
 				Ttl: utils.StringPointer("10s"), Static_ttl: utils.BoolPointer(false),
 				Replicate: utils.BoolPointer(false)},
 			utils.CacheCDRIDs: {Limit: utils.IntPointer(-1),
@@ -236,151 +239,151 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 		Replication_conns: &[]string{},
 		Remote_conns:      &[]string{},
 		Items: &map[string]*ItemOptJson{
-			utils.MetaAccounts: &ItemOptJson{
+			utils.MetaAccounts: {
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Limit:      utils.IntPointer(-1),
 				Static_ttl: utils.BoolPointer(false)},
-			utils.MetaReverseDestinations: &ItemOptJson{
+			utils.MetaReverseDestinations: {
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Limit:      utils.IntPointer(-1),
 				Static_ttl: utils.BoolPointer(false)},
-			utils.MetaDestinations: &ItemOptJson{
+			utils.MetaDestinations: {
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Limit:      utils.IntPointer(-1),
 				Static_ttl: utils.BoolPointer(false)},
-			utils.MetaRatingPlans: &ItemOptJson{
+			utils.MetaRatingPlans: {
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Limit:      utils.IntPointer(-1),
 				Static_ttl: utils.BoolPointer(false)},
-			utils.MetaRatingProfiles: &ItemOptJson{
+			utils.MetaRatingProfiles: {
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Limit:      utils.IntPointer(-1),
 				Static_ttl: utils.BoolPointer(false)},
-			utils.MetaActions: &ItemOptJson{
+			utils.MetaActions: {
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Limit:      utils.IntPointer(-1),
 				Static_ttl: utils.BoolPointer(false)},
-			utils.MetaActionPlans: &ItemOptJson{
+			utils.MetaActionPlans: {
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Limit:      utils.IntPointer(-1),
 				Static_ttl: utils.BoolPointer(false)},
-			utils.MetaAccountActionPlans: &ItemOptJson{
+			utils.MetaAccountActionPlans: {
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Limit:      utils.IntPointer(-1),
 				Static_ttl: utils.BoolPointer(false)},
-			utils.MetaActionTriggers: &ItemOptJson{
+			utils.MetaActionTriggers: {
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Limit:      utils.IntPointer(-1),
 				Static_ttl: utils.BoolPointer(false)},
-			utils.MetaSharedGroups: &ItemOptJson{
+			utils.MetaSharedGroups: {
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Limit:      utils.IntPointer(-1),
 				Static_ttl: utils.BoolPointer(false)},
-			utils.MetaTimings: &ItemOptJson{
+			utils.MetaTimings: {
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Limit:      utils.IntPointer(-1),
 				Static_ttl: utils.BoolPointer(false)},
-			utils.MetaResourceProfile: &ItemOptJson{
+			utils.MetaResourceProfile: {
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Limit:      utils.IntPointer(-1),
 				Static_ttl: utils.BoolPointer(false)},
-			utils.MetaStatQueues: &ItemOptJson{
+			utils.MetaStatQueues: {
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Limit:      utils.IntPointer(-1),
 				Static_ttl: utils.BoolPointer(false)},
-			utils.MetaResources: &ItemOptJson{
+			utils.MetaResources: {
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Limit:      utils.IntPointer(-1),
 				Static_ttl: utils.BoolPointer(false)},
-			utils.MetaStatQueueProfiles: &ItemOptJson{
+			utils.MetaStatQueueProfiles: {
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Limit:      utils.IntPointer(-1),
 				Static_ttl: utils.BoolPointer(false)},
-			utils.MetaThresholds: &ItemOptJson{
+			utils.MetaThresholds: {
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Limit:      utils.IntPointer(-1),
 				Static_ttl: utils.BoolPointer(false)},
-			utils.MetaThresholdProfiles: &ItemOptJson{
+			utils.MetaThresholdProfiles: {
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Limit:      utils.IntPointer(-1),
 				Static_ttl: utils.BoolPointer(false)},
-			utils.MetaFilters: &ItemOptJson{
+			utils.MetaFilters: {
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Limit:      utils.IntPointer(-1),
 				Static_ttl: utils.BoolPointer(false)},
-			utils.MetaRouteProfiles: &ItemOptJson{
+			utils.MetaRouteProfiles: {
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Limit:      utils.IntPointer(-1),
 				Static_ttl: utils.BoolPointer(false)},
-			utils.MetaAttributeProfiles: &ItemOptJson{
+			utils.MetaAttributeProfiles: {
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Limit:      utils.IntPointer(-1),
 				Static_ttl: utils.BoolPointer(false)},
-			utils.MetaDispatcherHosts: &ItemOptJson{
+			utils.MetaDispatcherHosts: {
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Limit:      utils.IntPointer(-1),
 				Static_ttl: utils.BoolPointer(false)},
-			utils.MetaChargerProfiles: &ItemOptJson{
+			utils.MetaChargerProfiles: {
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Limit:      utils.IntPointer(-1),
 				Static_ttl: utils.BoolPointer(false)},
-			utils.MetaDispatcherProfiles: &ItemOptJson{
+			utils.MetaDispatcherProfiles: {
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Limit:      utils.IntPointer(-1),
 				Static_ttl: utils.BoolPointer(false)},
-			utils.MetaFilterIndexes: &ItemOptJson{
+			utils.MetaFilterIndexes: {
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Limit:      utils.IntPointer(-1),
 				Static_ttl: utils.BoolPointer(false)},
-			utils.MetaLoadIDs: &ItemOptJson{
+			utils.MetaLoadIDs: {
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
 				Ttl:        utils.StringPointer(utils.EmptyString),
@@ -411,95 +414,95 @@ func TestDfStorDBJsonCfg(t *testing.T) {
 		Query_timeout:         utils.StringPointer("10s"),
 		Sslmode:               utils.StringPointer(utils.PostgressSSLModeDisable),
 		Items: &map[string]*ItemOptJson{
-			utils.TBLTPTimings: &ItemOptJson{
+			utils.TBLTPTimings: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Limit:      utils.IntPointer(-1),
 				Static_ttl: utils.BoolPointer(false)},
-			utils.TBLTPDestinations: &ItemOptJson{
+			utils.TBLTPDestinations: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Limit:      utils.IntPointer(-1),
 				Static_ttl: utils.BoolPointer(false)},
-			utils.TBLTPRates: &ItemOptJson{
+			utils.TBLTPRates: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Limit:      utils.IntPointer(-1),
 				Static_ttl: utils.BoolPointer(false)},
-			utils.TBLTPDestinationRates: &ItemOptJson{
+			utils.TBLTPDestinationRates: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Limit:      utils.IntPointer(-1),
 				Static_ttl: utils.BoolPointer(false)},
-			utils.TBLTPRatingPlans: &ItemOptJson{
+			utils.TBLTPRatingPlans: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Limit:      utils.IntPointer(-1),
 				Static_ttl: utils.BoolPointer(false)},
-			utils.TBLTPRateProfiles: &ItemOptJson{
+			utils.TBLTPRateProfiles: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Limit:      utils.IntPointer(-1),
 				Static_ttl: utils.BoolPointer(false)},
-			utils.TBLTPSharedGroups: &ItemOptJson{
+			utils.TBLTPSharedGroups: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Limit:      utils.IntPointer(-1),
 				Static_ttl: utils.BoolPointer(false)},
-			utils.TBLTPActions: &ItemOptJson{
+			utils.TBLTPActions: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Limit:      utils.IntPointer(-1),
 				Static_ttl: utils.BoolPointer(false)},
-			utils.TBLTPActionTriggers: &ItemOptJson{
+			utils.TBLTPActionTriggers: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Limit:      utils.IntPointer(-1),
 				Static_ttl: utils.BoolPointer(false)},
-			utils.TBLTPAccountActions: &ItemOptJson{
+			utils.TBLTPAccountActions: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Limit:      utils.IntPointer(-1),
 				Static_ttl: utils.BoolPointer(false)},
-			utils.TBLTPResources: &ItemOptJson{
+			utils.TBLTPResources: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Limit:      utils.IntPointer(-1),
 				Static_ttl: utils.BoolPointer(false)},
-			utils.TBLTPStats: &ItemOptJson{
+			utils.TBLTPStats: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Limit:      utils.IntPointer(-1),
 				Static_ttl: utils.BoolPointer(false)},
-			utils.TBLTPThresholds: &ItemOptJson{
+			utils.TBLTPThresholds: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Limit:      utils.IntPointer(-1),
 				Static_ttl: utils.BoolPointer(false)},
-			utils.TBLTPFilters: &ItemOptJson{
+			utils.TBLTPFilters: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Limit:      utils.IntPointer(-1),
 				Static_ttl: utils.BoolPointer(false)},
-			utils.SessionCostsTBL: &ItemOptJson{
+			utils.SessionCostsTBL: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Limit:      utils.IntPointer(-1),
 				Static_ttl: utils.BoolPointer(false)},
-			utils.TBLTPActionPlans: &ItemOptJson{
+			utils.TBLTPActionPlans: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Limit:      utils.IntPointer(-1),
 				Static_ttl: utils.BoolPointer(false)},
-			utils.TBLTPRoutes: &ItemOptJson{
+			utils.TBLTPRoutes: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Limit:      utils.IntPointer(-1),
 				Static_ttl: utils.BoolPointer(false)},
-			utils.TBLTPAttributes: &ItemOptJson{
+			utils.TBLTPAttributes: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Limit:      utils.IntPointer(-1),
 				Static_ttl: utils.BoolPointer(false)},
-			utils.TBLTPChargers: &ItemOptJson{
+			utils.TBLTPChargers: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Limit:      utils.IntPointer(-1),
 				Static_ttl: utils.BoolPointer(false)},
-			utils.TBLTPDispatchers: &ItemOptJson{
+			utils.TBLTPDispatchers: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Limit:      utils.IntPointer(-1),
 				Static_ttl: utils.BoolPointer(false)},
-			utils.TBLTPDispatcherHosts: &ItemOptJson{
+			utils.TBLTPDispatcherHosts: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Limit:      utils.IntPointer(-1),
 				Static_ttl: utils.BoolPointer(false)},
-			utils.CDRsTBL: &ItemOptJson{
+			utils.CDRsTBL: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Limit:      utils.IntPointer(-1),
 				Static_ttl: utils.BoolPointer(false)},
-			utils.TBLVersions: &ItemOptJson{
+			utils.TBLVersions: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Limit:      utils.IntPointer(-1),
 				Static_ttl: utils.BoolPointer(false)},
@@ -1843,7 +1846,7 @@ func TestDfEventReaderCfg(t *testing.T) {
 		Enabled:        utils.BoolPointer(false),
 		Sessions_conns: &[]string{utils.MetaInternal},
 		Readers: &[]*EventReaderJsonCfg{
-			&EventReaderJsonCfg{
+			{
 				Id:                  utils.StringPointer(utils.MetaDefault),
 				Type:                utils.StringPointer(utils.META_NONE),
 				Row_length:          utils.IntPointer(0),
@@ -1963,14 +1966,14 @@ func TestDfEventExporterCfg(t *testing.T) {
 		Enabled:          utils.BoolPointer(false),
 		Attributes_conns: &[]string{utils.MetaInternal},
 		Cache: &map[string]*CacheParamJsonCfg{
-			utils.MetaFileCSV: &CacheParamJsonCfg{
+			utils.MetaFileCSV: {
 				Limit:      utils.IntPointer(-1),
 				Ttl:        utils.StringPointer("5s"),
 				Static_ttl: utils.BoolPointer(false),
 			},
 		},
 		Exporters: &[]*EventExporterJsonCfg{
-			&EventExporterJsonCfg{
+			{
 				Id:                utils.StringPointer(utils.MetaDefault),
 				Type:              utils.StringPointer(utils.META_NONE),
 				Field_separator:   utils.StringPointer(","),

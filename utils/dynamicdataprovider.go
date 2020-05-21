@@ -111,3 +111,16 @@ func (ddp *DynamicDataProvider) proccesFieldPath(fldPath string) (newPath string
 	}
 	return
 }
+
+// GetFullFieldPath returns the full path for the
+func (ddp *DynamicDataProvider) GetFullFieldPath(fldPath string) (fpath *FullPath, err error) {
+	var newPath string
+	if newPath, err = ddp.proccesFieldPath(fldPath); err != nil {
+		return
+	}
+	fpath = &FullPath{
+		PathItems: NewPathItems(strings.Split(newPath, NestingSep)),
+		Path:      newPath,
+	}
+	return
+}

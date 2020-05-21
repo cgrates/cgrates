@@ -79,7 +79,10 @@ func (rals *RalService) Start() (err error) {
 	<-rals.cacheS.GetPrecacheChannel(utils.CacheTimings)
 
 	if err = rals.responder.Start(); err != nil {
-		return
+		if err != utils.ErrServiceAlreadyRunning {
+			return
+		}
+		err = nil
 	}
 
 	rals.rals = v1.NewRALsV1()
@@ -137,7 +140,7 @@ func (rals *RalService) GetResponder() servmanager.Service {
 	return rals.responder
 }
 
-// GetResponder returns the responder service
+// GetResponderService returns the responder service
 func (rals *RalService) GetResponderService() *ResponderService {
 	return rals.responder
 }

@@ -907,7 +907,7 @@ func testSSv1ItDynamicDebit(t *testing.T) {
 		},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
-			ID:     "TestSSv1ItInitiateSession",
+			ID:     "TestSSv1ItInitiateSession2",
 			Event: map[string]interface{}{
 				utils.Tenant:      "cgrates.org",
 				utils.Category:    "call",

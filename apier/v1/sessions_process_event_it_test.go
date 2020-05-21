@@ -179,11 +179,11 @@ func testSSv1ItProcessEventAuth(t *testing.T) {
 	if err := sSv1BiRpc.Call(utils.SessionSv1ProcessEvent, args, &rply); err != nil {
 		t.Fatal(err)
 	}
-	if rply.MaxUsage == nil || *rply.MaxUsage != authUsage {
+	if rply.MaxUsage == nil || rply.MaxUsage["CustomerCharges"] != authUsage {
 		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
 	}
-	if *rply.ResourceMessage == utils.EmptyString {
-		t.Errorf("Unexpected ResourceMessage: %s", *rply.ResourceMessage)
+	if rply.ResourceMessage == nil || rply.ResourceMessage["CustomerCharges"] == utils.EmptyString {
+		t.Errorf("Unexpected ResourceMessage: %s", rply.ResourceMessage)
 	}
 	eSplrs := &engine.SortedRoutes{
 		ProfileID: "SPL_ACNT_1001",
@@ -263,11 +263,11 @@ func testSSv1ItProcessEventInitiateSession(t *testing.T) {
 	// in case of prepaid and pseudoprepade we expect a MaxUsage of 5min
 	// and in case of postpaid and rated we expect the value of Usage field
 	// if this was missing the MaxUsage should be equal to MaxCallDuration from config
-	if rply.MaxUsage == nil || *rply.MaxUsage != initUsage {
+	if rply.MaxUsage == nil || rply.MaxUsage["CustomerCharges"] != initUsage {
 		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
 	}
-	if *rply.ResourceMessage != "RES_ACNT_1001" {
-		t.Errorf("Unexpected ResourceMessage: %s", *rply.ResourceMessage)
+	if rply.ResourceMessage == nil || rply.ResourceMessage["CustomerCharges"] != "RES_ACNT_1001" {
+		t.Errorf("Unexpected ResourceMessage: %s", rply.ResourceMessage)
 	}
 	eAttrs := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_ACNT_1001"},
@@ -356,7 +356,7 @@ func testSSv1ItProcessEventUpdateSession(t *testing.T) {
 	// in case of prepaid and pseudoprepade we expect a MaxUsage of 5min
 	// and in case of postpaid and rated we expect the value of Usage field
 	// if this was missing the MaxUsage should be equal to MaxCallDuration from config
-	if rply.MaxUsage == nil || *rply.MaxUsage != reqUsage {
+	if rply.MaxUsage == nil || rply.MaxUsage["CustomerCharges"] != reqUsage {
 		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
 	}
 	aSessions := make([]*sessions.ExternalSession, 0)
