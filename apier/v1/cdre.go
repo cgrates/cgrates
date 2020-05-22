@@ -174,8 +174,8 @@ type ConfigPathArg struct {
 }
 
 // Reloads CDRE configuration out of folder specified
-func (apier *APIerSv1) ReloadCdreConfig(attrs ConfigPathArg, reply *string) error {
-	if attrs.ConfigPath == "" {
+func (apier *APIerSv1) ReloadCdreConfig(attrs *ConfigPathArg, reply *string) error {
+	if attrs.ConfigPath == utils.EmptyString {
 		attrs.ConfigPath = utils.CONFIG_PATH
 	}
 	newCfg, err := config.NewCGRConfigFromPath(attrs.ConfigPath)

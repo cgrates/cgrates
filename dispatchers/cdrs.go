@@ -52,7 +52,7 @@ func (dS *DispatcherService) CDRsV1Ping(args *utils.CGREventWithArgDispatcher,
 		utils.CDRsV1Ping, args, reply)
 }
 
-func (dS *DispatcherService) CDRsV1GetCDRs(args utils.RPCCDRsFilterWithArgDispatcher, reply *[]*engine.CDR) (err error) {
+func (dS *DispatcherService) CDRsV1GetCDRs(args *utils.RPCCDRsFilterWithArgDispatcher, reply *[]*engine.CDR) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.TenantArg != nil && args.TenantArg.Tenant != utils.EmptyString {
 		tnt = args.TenantArg.Tenant

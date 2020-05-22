@@ -638,13 +638,13 @@ func (dS *DispatcherCacheSv1) RemoveGroup(args *utils.ArgsGetGroupWithArgDispatc
 }
 
 // ReloadCache reloads cache from DB for a prefix or completely
-func (dS *DispatcherCacheSv1) ReloadCache(args utils.AttrReloadCacheWithArgDispatcher, reply *string) (err error) {
-	return dS.dS.CacheSv1ReloadCache(args, reply)
+func (dS *DispatcherCacheSv1) ReloadCache(args *utils.AttrReloadCacheWithArgDispatcher, reply *string) (err error) {
+	return dS.dS.CacheSv1ReloadCache(*args, reply)
 }
 
 // LoadCache loads cache from DB for a prefix or completely
-func (dS *DispatcherCacheSv1) LoadCache(args utils.AttrReloadCacheWithArgDispatcher, reply *string) (err error) {
-	return dS.dS.CacheSv1LoadCache(args, reply)
+func (dS *DispatcherCacheSv1) LoadCache(args *utils.AttrReloadCacheWithArgDispatcher, reply *string) (err error) {
+	return dS.dS.CacheSv1LoadCache(*args, reply)
 }
 
 // ReplicateSet replicate an item
@@ -747,7 +747,7 @@ func (dS *DispatcherSCDRsV1) Ping(args *utils.CGREventWithArgDispatcher, reply *
 	return dS.dS.CDRsV1Ping(args, reply)
 }
 
-func (dS *DispatcherSCDRsV1) GetCDRs(args utils.RPCCDRsFilterWithArgDispatcher, reply *[]*engine.CDR) error {
+func (dS *DispatcherSCDRsV1) GetCDRs(args *utils.RPCCDRsFilterWithArgDispatcher, reply *[]*engine.CDR) error {
 	return dS.dS.CDRsV1GetCDRs(args, reply)
 }
 

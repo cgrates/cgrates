@@ -186,7 +186,7 @@ func testDspCDRsGetCDR(t *testing.T) {
 		},
 	}
 
-	if err := dispEngine.RPC.Call(utils.CDRsV1GetCDRs, args, &reply); err != nil {
+	if err := dispEngine.RPC.Call(utils.CDRsV1GetCDRs, &args, &reply); err != nil {
 		t.Error(err)
 	} else if len(reply) != 1 {
 		t.Errorf("Received: %+v", reply)
@@ -207,7 +207,7 @@ func testDspCDRsGetCDRWithoutTenant(t *testing.T) {
 		},
 	}
 
-	if err := dispEngine.RPC.Call(utils.CDRsV1GetCDRs, args, &reply); err != nil {
+	if err := dispEngine.RPC.Call(utils.CDRsV1GetCDRs, &args, &reply); err != nil {
 		t.Error(err)
 	} else if len(reply) != 1 {
 		t.Errorf("Received: %+v", reply)
@@ -259,7 +259,7 @@ func testDspCDRsGetCDR2(t *testing.T) {
 		},
 	}
 
-	if err := dispEngine.RPC.Call(utils.CDRsV1GetCDRs, args, &reply); err != nil {
+	if err := dispEngine.RPC.Call(utils.CDRsV1GetCDRs, &args, &reply); err != nil {
 		t.Error(err)
 	} else if len(reply) != 1 {
 		t.Errorf("Received: %+v", reply)
@@ -315,7 +315,7 @@ func testDspCDRsGetCDR3(t *testing.T) {
 		},
 	}
 
-	if err := dispEngine.RPC.Call(utils.CDRsV1GetCDRs, args, &reply); err != nil {
+	if err := dispEngine.RPC.Call(utils.CDRsV1GetCDRs, &args, &reply); err != nil {
 		t.Error(err)
 	} else if len(reply) != 1 {
 		t.Errorf("Received: %+v", reply)
@@ -475,7 +475,7 @@ func testDspCDRsGetCDRNoAuth(t *testing.T) {
 		},
 	}
 
-	if err := dispEngine.RPC.Call(utils.CDRsV1GetCDRs, args, &reply); err != nil {
+	if err := dispEngine.RPC.Call(utils.CDRsV1GetCDRs, &args, &reply); err != nil {
 		t.Error(err)
 	} else if len(reply) != 1 {
 		t.Errorf("Received: %+v", reply)
@@ -493,7 +493,7 @@ func testDspCDRsGetCDRNoAuthWithoutTenant(t *testing.T) {
 		},
 	}
 
-	if err := dispEngine.RPC.Call(utils.CDRsV1GetCDRs, args, &reply); err != nil {
+	if err := dispEngine.RPC.Call(utils.CDRsV1GetCDRs, &args, &reply); err != nil {
 		t.Error(err)
 	} else if len(reply) != 1 {
 		t.Errorf("Received: %+v", reply)
@@ -539,7 +539,7 @@ func testDspCDRsGetCDR2NoAuth(t *testing.T) {
 		},
 	}
 
-	if err := dispEngine.RPC.Call(utils.CDRsV1GetCDRs, args, &reply); err != nil {
+	if err := dispEngine.RPC.Call(utils.CDRsV1GetCDRs, &args, &reply); err != nil {
 		t.Error(err)
 	} else if len(reply) != 1 {
 		t.Errorf("Received: %+v", reply)
@@ -589,7 +589,7 @@ func testDspCDRsGetCDR3NoAuth(t *testing.T) {
 		},
 	}
 
-	if err := dispEngine.RPC.Call(utils.CDRsV1GetCDRs, args, &reply); err != nil {
+	if err := dispEngine.RPC.Call(utils.CDRsV1GetCDRs, &args, &reply); err != nil {
 		t.Error(err)
 	} else if len(reply) != 1 {
 		t.Errorf("Received: %+v", reply)

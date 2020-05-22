@@ -881,7 +881,7 @@ func (apiv1 *APIerSv1) RemoveActionPlan(attr *AttrGetActionPlan, reply *string) 
 }
 
 // Process dependencies and load a specific AccountActions profile from storDb into dataDb.
-func (apiv1 *APIerSv1) LoadAccountActions(attrs utils.TPAccountActions, reply *string) error {
+func (apiv1 *APIerSv1) LoadAccountActions(attrs *utils.TPAccountActions, reply *string) error {
 	if len(attrs.TPid) == 0 {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
@@ -892,7 +892,7 @@ func (apiv1 *APIerSv1) LoadAccountActions(attrs utils.TPAccountActions, reply *s
 		return utils.NewErrServerError(err)
 	}
 	if _, err := guardian.Guardian.Guard(func() (interface{}, error) {
-		return 0, dbReader.LoadAccountActionsFiltered(&attrs)
+		return 0, dbReader.LoadAccountActionsFiltered(attrs)
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, attrs.LoadId); err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -906,7 +906,7 @@ func (apiv1 *APIerSv1) LoadAccountActions(attrs utils.TPAccountActions, reply *s
 	return nil
 }
 
-func (apiv1 *APIerSv1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, reply *string) error {
+func (apiv1 *APIerSv1) LoadTariffPlanFromFolder(attrs *utils.AttrLoadTpFromFolder, reply *string) error {
 	// verify if FolderPath is present
 	if len(attrs.FolderPath) == 0 {
 		return fmt.Errorf("%s:%s", utils.ErrMandatoryIeMissing.Error(), "FolderPath")
@@ -972,7 +972,7 @@ func (apiv1 *APIerSv1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder
 
 // RemoveTPFromFolder will load the tarrifplan from folder into TpReader object
 // and will delete if from database
-func (apiv1 *APIerSv1) RemoveTPFromFolder(attrs utils.AttrLoadTpFromFolder, reply *string) error {
+func (apiv1 *APIerSv1) RemoveTPFromFolder(attrs *utils.AttrLoadTpFromFolder, reply *string) error {
 	// verify if FolderPath is present
 	if len(attrs.FolderPath) == 0 {
 		return fmt.Errorf("%s:%s", utils.ErrMandatoryIeMissing.Error(), "FolderPath")
@@ -1037,7 +1037,7 @@ func (apiv1 *APIerSv1) RemoveTPFromFolder(attrs utils.AttrLoadTpFromFolder, repl
 
 // RemoveTPFromStorDB will load the tarrifplan from StorDB into TpReader object
 // and will delete if from database
-func (apiv1 *APIerSv1) RemoveTPFromStorDB(attrs AttrLoadTpFromStorDb, reply *string) error {
+func (apiv1 *APIerSv1) RemoveTPFromStorDB(attrs *AttrLoadTpFromStorDb, reply *string) error {
 	if len(attrs.TPid) == 0 {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
@@ -1111,7 +1111,7 @@ func (arrp *AttrRemoveRatingProfile) GetId() (result string) {
 	return
 }
 
-func (apiv1 *APIerSv1) RemoveRatingProfile(attr AttrRemoveRatingProfile, reply *string) error {
+func (apiv1 *APIerSv1) RemoveRatingProfile(attr *AttrRemoveRatingProfile, reply *string) error {
 	if (attr.Subject != "" && utils.IsSliceMember([]string{attr.Tenant, attr.Category}, "")) ||
 		(attr.Category != "" && attr.Tenant == "") {
 		return utils.ErrMandatoryIeMissing
@@ -1163,7 +1163,7 @@ type AttrRemoveActions struct {
 	ActionIDs []string
 }
 
-func (apiv1 *APIerSv1) RemoveActions(attr AttrRemoveActions, reply *string) error {
+func (apiv1 *APIerSv1) RemoveActions(attr *AttrRemoveActions, reply *string) error {
 	if attr.ActionIDs == nil {
 		err := utils.ErrNotFound
 		*reply = err.Error()
@@ -1228,7 +1228,7 @@ type ArgsReplyFailedPosts struct {
 }
 
 // ReplayFailedPosts will repost failed requests found in the FailedRequestsInDir
-func (apiv1 *APIerSv1) ReplayFailedPosts(args ArgsReplyFailedPosts, reply *string) (err error) {
+func (apiv1 *APIerSv1) ReplayFailedPosts(args *ArgsReplyFailedPosts, reply *string) (err error) {
 	failedReqsInDir := apiv1.Config.GeneralCfg().FailedPostsDir
 	if args.FailedRequestsInDir != nil && *args.FailedRequestsInDir != "" {
 		failedReqsInDir = *args.FailedRequestsInDir

@@ -1476,7 +1476,7 @@ func testApierResetDataAfterLoadFromFolder(t *testing.T) {
 	}
 	var reply string
 	// Simple test that command is executed without errors
-	if err := rater.Call(utils.CacheSv1LoadCache, utils.ArgsCache{}, &reply); err != nil {
+	if err := rater.Call(utils.CacheSv1LoadCache, &utils.ArgsCache{}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error(reply)
@@ -1639,12 +1639,12 @@ func testApierGetCallCostLog(t *testing.T) {
 	var cc engine.EventCost
 	var attrs utils.AttrGetCallCost
 	// Simple test that command is executed without errors
-	if err := rater.Call(utils.APIerSv1GetEventCost, attrs, &cc); err == nil {
+	if err := rater.Call(utils.APIerSv1GetEventCost, &attrs, &cc); err == nil {
 		t.Error("Failed to detect missing fields in APIerSv1.GetCallCostLog")
 	}
 	attrs.CgrId = "dummyid"
 	attrs.RunId = "default"
-	if err := rater.Call(utils.APIerSv1GetEventCost, attrs, &cc); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := rater.Call(utils.APIerSv1GetEventCost, &attrs, &cc); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error("APIerSv1.GetCallCostLog: should return NOT_FOUND, got:", err)
 	}
 	tm := time.Now().Truncate(time.Millisecond).UTC()
@@ -1701,7 +1701,7 @@ func testApierGetCallCostLog(t *testing.T) {
 	}
 	attrs.CgrId = "Cdr1"
 	attrs.RunId = utils.EmptyString
-	if err := rater.Call(utils.APIerSv1GetEventCost, attrs, &cc); err != nil {
+	if err := rater.Call(utils.APIerSv1GetEventCost, &attrs, &cc); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, cc) {
 		t.Errorf("Expecting %s ,recived %s", utils.ToJSON(expected), utils.ToJSON(cc))
@@ -1917,7 +1917,7 @@ func testApierReplayFldPosts(t *testing.T) {
 		t.Error(err)
 	}
 	var reply string
-	if err := rater.Call(utils.APIerSv1ReplayFailedPosts, args, &reply); err != nil {
+	if err := rater.Call(utils.APIerSv1ReplayFailedPosts, &args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply: ", reply)
@@ -1941,7 +1941,7 @@ func testApierReplayFldPosts(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if err := rater.Call(utils.APIerSv1ReplayFailedPosts, args, &reply); err != nil {
+	if err := rater.Call(utils.APIerSv1ReplayFailedPosts, &args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply: ", reply)

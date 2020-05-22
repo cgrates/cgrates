@@ -25,9 +25,9 @@ import (
 
 // DebitUsage will debit the balance for the usage cost, allowing the
 // account to go negative if the cost calculated is greater than the balance
-func (apier *APIerSv1) DebitUsage(usageRecord engine.UsageRecordWithArgDispatcher, reply *string) error {
+func (apier *APIerSv1) DebitUsage(usageRecord *engine.UsageRecordWithArgDispatcher, reply *string) error {
 	return apier.DebitUsageWithOptions(&AttrDebitUsageWithOptions{
-		UsageRecord:          &usageRecord,
+		UsageRecord:          usageRecord,
 		AllowNegativeAccount: true,
 	}, reply)
 }
