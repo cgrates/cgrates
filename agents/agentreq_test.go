@@ -1615,3 +1615,64 @@ func TestAgReqFiltersInsideField(t *testing.T) {
 		t.Errorf("expecting: %+v, \n received: %+v ", time.Date(2018, 10, 4, 15, 3, 10, 0, time.UTC), val)
 	}
 }
+
+/*
+$go test -bench=.  -run=^$ -benchtime=10s -count=3
+goos: linux
+goarch: amd64
+pkg: github.com/cgrates/cgrates/agents
+BenchmarkAgReqSetField-16    	 1000000	     11774 ns/op
+BenchmarkAgReqSetField-16    	 1047027	     11839 ns/op
+BenchmarkAgReqSetField-16    	 1000000	     11062 ns/op
+PASS
+ok  	github.com/cgrates/cgrates/agents	44.940s
+*/
+func BenchmarkAgReqSetField(b *testing.B) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, dm)
+	tplFlds := []*config.FCTemplate{
+		{Tag: "Tenant",
+			Path: utils.MetaCgrep + utils.NestingSep + utils.Tenant, Type: utils.META_COMPOSED,
+			Value: config.NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP)},
+		{Tag: "Account",
+			Path: utils.MetaCgrep + utils.NestingSep + utils.Account + "[0].ID", Type: utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("~*cgreq.Account", true, utils.INFIELD_SEP)},
+		{Tag: "Account2",
+			Path: utils.MetaCgrep + utils.NestingSep + utils.Account + "[1].ID", Type: utils.META_CONSTANT,
+			Value: config.NewRSRParsersMustCompile("1003", true, utils.INFIELD_SEP)},
+	}
+	for _, v := range tplFlds {
+		v.ComputePath()
+	}
+	eMp := &utils.NavigableMap2{}
+	eMp.Set(utils.PathItems{{Field: utils.Tenant}}, &utils.NMSlice{
+		&config.NMItem{Data: "cgrates.org", Path: []string{utils.Tenant},
+			Config: tplFlds[0]}})
+	eMp.Set(utils.PathItems{{Field: utils.Account, Index: utils.IntPointer(0)}, {Field: "ID"}}, &utils.NMSlice{
+		&config.NMItem{Data: "1001", Path: []string{utils.Account + "[0]", "ID"},
+			Config: tplFlds[1]}})
+	eMp.Set(utils.PathItems{{Field: utils.Account, Index: utils.IntPointer(1)}, {Field: "ID"}}, &utils.NMSlice{
+		&config.NMItem{Data: "1003", Path: []string{utils.Account + "[1]", "ID"},
+			Config: tplFlds[2]}})
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
+		// populate request, emulating the way will be done in HTTPAgent
+		agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathItems: utils.PathItems{{Field: utils.ToR}}}, utils.NewNMData(utils.VOICE))
+		agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Account, PathItems: utils.PathItems{{Field: utils.Account}}}, utils.NewNMData("1001"))
+		agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathItems: utils.PathItems{{Field: utils.Destination}}}, utils.NewNMData("1002"))
+		agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AnswerTime, PathItems: utils.PathItems{{Field: utils.AnswerTime}}}, utils.NewNMData(
+			time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC)))
+		agReq.CGRRequest.Set(&utils.FullPath{Path: utils.RequestType, PathItems: utils.PathItems{{Field: utils.RequestType}}}, utils.NewNMData(utils.META_PREPAID))
+		agReq.CGRReply = &utils.NavigableMap2{}
+
+		if err := agReq.SetFields(tplFlds); err != nil {
+			b.Error(err)
+		} else if !reflect.DeepEqual(agReq.CGRReply, eMp) {
+			b.Errorf("expecting: %+v,\n received: %+v", eMp, agReq.CGRReply)
+		}
+	}
+}
