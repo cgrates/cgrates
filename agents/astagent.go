@@ -85,16 +85,13 @@ func (sma *AsteriskAgent) connectAsterisk() (err error) {
 		connCfg.Address, connCfg.User, connCfg.Password, CGRAuthAPP), "http://cgrates.org",
 		connCfg.User, connCfg.Password, fmt.Sprintf("%s@%s", utils.CGRateS, utils.VERSION),
 		sma.astEvChan, sma.astErrChan, connCfg.ConnectAttempts, connCfg.Reconnects)
-	if err != nil {
-		return err
-	}
-	return nil
+	return
 }
 
 // ListenAndServe is called to start the service
 func (sma *AsteriskAgent) ListenAndServe() (err error) {
-	if err := sma.connectAsterisk(); err != nil {
-		return err
+	if err = sma.connectAsterisk(); err != nil {
+		return
 	}
 	for {
 		select {
@@ -159,7 +156,6 @@ func (sma *AsteriskAgent) handleStasisStart(ev *SMAsteriskEvent) {
 			fmt.Sprintf("<%s> error: %s subscribing for channelID: %s",
 				utils.AsteriskAgent, err.Error(), ev.ChannelID()))
 		return
-
 	}
 	//authorize Session
 	authArgs := ev.V1AuthorizeArgs()

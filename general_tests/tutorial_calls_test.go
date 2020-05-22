@@ -27,6 +27,7 @@ import (
 	"os"
 	"path"
 	"reflect"
+	"sort"
 	"strings"
 	"testing"
 	"time"
@@ -364,7 +365,7 @@ func testCallStartPjsuaListener(t *testing.T) {
 		acnts, 5070, time.Duration(*waitRater)*time.Millisecond); err != nil {
 		t.Fatal(err)
 	}
-	time.Sleep(1 * time.Second)
+	time.Sleep(3 * time.Second)
 }
 
 // Call from 1001 (prepaid) to 1002
@@ -395,6 +396,11 @@ func testCallGetActiveSessions(t *testing.T) {
 		nil, &reply); err != nil {
 		t.Error("Got error on SessionSv1.GetActiveSessions: ", err.Error())
 	} else {
+		if len(*reply) == 2 {
+			sort.Slice(*reply, func(i, j int) bool {
+				return strings.Compare((*reply)[i].RequestType, (*reply)[j].RequestType) > 0
+			})
+		}
 		// compare some fields (eg. CGRId is generated)
 		if !reflect.DeepEqual((*expected)[0].RequestType, (*reply)[0].RequestType) {
 			t.Errorf("Expected: %s, received: %s", (*expected)[0].RequestType, (*reply)[0].RequestType)
