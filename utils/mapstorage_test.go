@@ -139,12 +139,12 @@ func TestNavMapGetField(t *testing.T) {
 		},
 		"FirstLevel2": map[string]interface{}{
 			"SecondLevel2": []map[string]interface{}{
-				map[string]interface{}{
+				{
 					"ThirdLevel2": map[string]interface{}{
 						"Fld1": "Val1",
 					},
 				},
-				map[string]interface{}{
+				{
 					"Count": 10,
 					"ThirdLevel2": map[string]interface{}{
 						"Fld2": []string{"Val1", "Val2", "Val3"},
