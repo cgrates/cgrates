@@ -60,7 +60,7 @@ func (ast *AsteriskAgent) Start() (err error) {
 	defer ast.Unlock()
 
 	listenAndServe := func(sma *agents.AsteriskAgent, exitChan chan bool) {
-		if err = sma.ListenAndServe(); err != nil {
+		if err := sma.ListenAndServe(); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> runtime error: %s!", utils.AsteriskAgent, err))
 		}
 		exitChan <- true
