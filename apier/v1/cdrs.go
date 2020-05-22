@@ -24,11 +24,11 @@ import (
 )
 
 // Retrieves the callCost out of CGR logDb
-func (apier *APIerSv1) GetEventCost(attrs utils.AttrGetCallCost, reply *engine.EventCost) error {
-	if attrs.CgrId == "" {
+func (apier *APIerSv1) GetEventCost(attrs *utils.AttrGetCallCost, reply *engine.EventCost) error {
+	if attrs.CgrId == utils.EmptyString {
 		return utils.NewErrMandatoryIeMissing("CgrId")
 	}
-	if attrs.RunId == "" {
+	if attrs.RunId == utils.EmptyString {
 		attrs.RunId = utils.MetaDefault
 	}
 	cdrFltr := &utils.CDRsFilter{
@@ -68,7 +68,7 @@ func (apier *APIerSv1) GetCDRs(attrs *utils.AttrGetCdrs, reply *[]*engine.Extern
 }
 
 // New way of removing CDRs
-func (apier *APIerSv1) RemoveCDRs(attrs utils.RPCCDRsFilter, reply *string) error {
+func (apier *APIerSv1) RemoveCDRs(attrs *utils.RPCCDRsFilter, reply *string) error {
 	cdrsFilter, err := attrs.AsCDRsFilter(apier.Config.GeneralCfg().DefaultTimezone)
 	if err != nil {
 		return utils.NewErrServerError(err)
@@ -118,8 +118,8 @@ func (cdrSv1 *CDRsV1) GetCDRsCount(args *utils.RPCCDRsFilterWithArgDispatcher, r
 	return cdrSv1.CDRs.V1CountCDRs(args, reply)
 }
 
-func (cdrSv1 *CDRsV1) GetCDRs(args utils.RPCCDRsFilterWithArgDispatcher, reply *[]*engine.CDR) error {
-	return cdrSv1.CDRs.V1GetCDRs(args, reply)
+func (cdrSv1 *CDRsV1) GetCDRs(args *utils.RPCCDRsFilterWithArgDispatcher, reply *[]*engine.CDR) error {
+	return cdrSv1.CDRs.V1GetCDRs(*args, reply)
 }
 
 func (cdrSv1 *CDRsV1) Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error {

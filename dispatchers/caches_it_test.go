@@ -282,7 +282,7 @@ func testDspChcGetItemExpiryTime(t *testing.T) {
 
 func testDspChcReloadCache(t *testing.T) {
 	reply := ""
-	if err := dispEngine.RPC.Call(utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
+	if err := dispEngine.RPC.Call(utils.CacheSv1ReloadCache, &utils.AttrReloadCacheWithArgDispatcher{
 		ArgDispatcher: &utils.ArgDispatcher{
 			APIKey: utils.StringPointer("chc12345"),
 		},

@@ -122,8 +122,8 @@ type CacheSv1Interface interface {
 	HasGroup(args *utils.ArgsGetGroupWithArgDispatcher, rply *bool) error
 	GetGroupItemIDs(args *utils.ArgsGetGroupWithArgDispatcher, rply *[]string) error
 	RemoveGroup(args *utils.ArgsGetGroupWithArgDispatcher, rply *string) error
-	ReloadCache(attrs utils.AttrReloadCacheWithArgDispatcher, reply *string) error
-	LoadCache(args utils.AttrReloadCacheWithArgDispatcher, reply *string) error
+	ReloadCache(attrs *utils.AttrReloadCacheWithArgDispatcher, reply *string) error
+	LoadCache(args *utils.AttrReloadCacheWithArgDispatcher, reply *string) error
 	ReplicateSet(args *utils.ArgCacheReplicateSet, reply *string) (err error)
 	ReplicateRemove(args *utils.ArgCacheReplicateRemove, reply *string) (err error)
 	Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error
@@ -149,7 +149,7 @@ type CDRsV1Interface interface {
 	RateCDRs(arg *engine.ArgRateCDRs, reply *string) error
 	StoreSessionCost(attr *engine.AttrCDRSStoreSMCost, reply *string) error
 	GetCDRsCount(args *utils.RPCCDRsFilterWithArgDispatcher, reply *int64) error
-	GetCDRs(args utils.RPCCDRsFilterWithArgDispatcher, reply *[]*engine.CDR) error
+	GetCDRs(args *utils.RPCCDRsFilterWithArgDispatcher, reply *[]*engine.CDR) error
 	Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error
 }
 

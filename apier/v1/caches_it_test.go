@@ -141,7 +141,7 @@ func testCacheSAfterLoadFromFolder(t *testing.T) {
 	}
 	reply := ""
 	// Simple test that command is executed without errors
-	if err := chcRPC.Call(utils.CacheSv1LoadCache, utils.ArgsCache{}, &reply); err != nil {
+	if err := chcRPC.Call(utils.CacheSv1LoadCache, &utils.ArgsCache{}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error(reply)
@@ -192,7 +192,7 @@ func testCacheSReload(t *testing.T) {
 	expStats := engine.GetDefaultEmptyCacheStats()
 	reply := ""
 	// Simple test that command is executed without errors
-	if err := chcRPC.Call(utils.CacheSv1LoadCache, utils.ArgsCache{}, &reply); err != nil {
+	if err := chcRPC.Call(utils.CacheSv1LoadCache, &utils.ArgsCache{}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error(reply)

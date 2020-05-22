@@ -465,7 +465,7 @@ func testSessionsItEventCostCompressing(t *testing.T) {
 	cgrID := utils.Sha1("TestSessionsItEventCostCompressing", "")
 	var ec *engine.EventCost
 	if err := sItRPC.Call(utils.APIerSv1GetEventCost,
-		utils.AttrGetCallCost{CgrId: cgrID, RunId: utils.MetaDefault},
+		&utils.AttrGetCallCost{CgrId: cgrID, RunId: utils.MetaDefault},
 		&ec); err != nil {
 		t.Fatal(err)
 	}

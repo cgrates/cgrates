@@ -188,7 +188,7 @@ func testbrodcastItGetCDRs(t *testing.T) {
 	}
 	var cdrs []*engine.CDR
 	args := utils.RPCCDRsFilterWithArgDispatcher{RPCCDRsFilter: &utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault}}}
-	if err := brodcastRPC.Call(utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
+	if err := brodcastRPC.Call(utils.CDRsV1GetCDRs, &args, &cdrs); err != nil {
 		t.Fatal("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Fatal("Unexpected number of CDRs returned: ", len(cdrs))
@@ -198,7 +198,7 @@ func testbrodcastItGetCDRs(t *testing.T) {
 		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(eCDR), utils.ToJSON(cdrs[0]))
 	}
 
-	if err := brodcastInternalRPC.Call(utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
+	if err := brodcastInternalRPC.Call(utils.CDRsV1GetCDRs, &args, &cdrs); err != nil {
 		t.Fatal("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
