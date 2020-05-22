@@ -115,7 +115,7 @@ func (ddp *DynamicDataProvider) proccesFieldPath(fldPath string) (newPath string
 // GetFullFieldPath returns the full path for the
 func (ddp *DynamicDataProvider) GetFullFieldPath(fldPath string) (fpath *FullPath, err error) {
 	var newPath string
-	if newPath, err = ddp.proccesFieldPath(fldPath); err != nil {
+	if newPath, err = ddp.proccesFieldPath(fldPath); err != nil || newPath == EmptyString {
 		return
 	}
 	fpath = &FullPath{
@@ -123,4 +123,13 @@ func (ddp *DynamicDataProvider) GetFullFieldPath(fldPath string) (fpath *FullPat
 		Path:      newPath,
 	}
 	return
+}
+
+// FieldAsString returns the value from path as string
+func (ddp DynamicDataProvider) FieldAsString(fldPath []string) (str string, err error) {
+	var val interface{}
+	if val, err = ddp.FieldAsInterface(fldPath); err != nil {
+		return
+	}
+	return IfaceAsString(val), nil
 }

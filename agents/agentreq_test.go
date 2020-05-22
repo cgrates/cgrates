@@ -1967,3 +1967,71 @@ func TestAgReqFiltersInsideField(t *testing.T) {
 		t.Errorf("expecting: %+v, \n received: %+v ", time.Date(2018, 10, 4, 15, 3, 10, 0, time.UTC), val)
 	}
 }
+
+func TestAgReqDynamicPath(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, dm)
+	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
+	// populate request, emulating the way will be done in HTTPAgent
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathItems: utils.PathItems{{Field: utils.ToR}}}, utils.NewNMData(utils.VOICE))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Account, PathItems: utils.PathItems{{Field: utils.Account}}}, utils.NewNMData("1001"))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathItems: utils.PathItems{{Field: utils.Destination}}}, utils.NewNMData("1002"))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AnswerTime, PathItems: utils.PathItems{{Field: utils.AnswerTime}}}, utils.NewNMData(
+		time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC)))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.RequestType, PathItems: utils.PathItems{{Field: utils.RequestType}}}, utils.NewNMData(utils.META_PREPAID))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: "Routes.CGR_ROUTE1", PathItems: utils.PathItems{{Field: "Routes"}, {Field: "CGR_ROUTE1"}}}, utils.NewNMData(1001))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: "Routes.CGR_ROUTE2", PathItems: utils.PathItems{{Field: "Routes"}, {Field: "CGR_ROUTE2"}}}, utils.NewNMData(1002))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: "BestRoute", PathItems: utils.PathItems{{Field: "BestRoute"}}}, utils.NewNMData("ROUTE1"))
+
+	agReq.CGRReply = &utils.NavigableMap2{}
+
+	tplFlds := []*config.FCTemplate{
+		{Tag: "Tenant",
+			Path: utils.MetaCgrep + utils.NestingSep + utils.Tenant, Type: utils.META_COMPOSED,
+			Value: config.NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP)},
+		{Tag: "Account",
+			Path: utils.MetaCgrep + utils.NestingSep + utils.Account, Type: utils.META_COMPOSED,
+			Value: config.NewRSRParsersMustCompile("~*cgreq.Account", true, utils.INFIELD_SEP)},
+		{Tag: "Destination",
+			Path: utils.MetaCgrep + utils.NestingSep + utils.Destination, Type: utils.META_COMPOSED,
+			Value: config.NewRSRParsersMustCompile("~*cgreq.Destination", true, utils.INFIELD_SEP)},
+		{Tag: "Usage",
+			Path: utils.MetaCgrep + utils.NestingSep + utils.Usage, Type: utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("30s", true, utils.INFIELD_SEP)},
+		{Tag: "Route",
+			Path: utils.MetaCgrep + utils.NestingSep + "Route",
+			Type: utils.MetaVariable, Value: config.NewRSRParsersMustCompile("~*cgreq.Routes[CGR_|~*cgreq.BestRoute]", true, utils.INFIELD_SEP),
+		},
+		// {Tag: "Route2",
+		// 	Path: utils.MetaCgrep + utils.NestingSep + "Route2[CGR_|]",
+		// 	Type: utils.MetaVariable, Value: config.NewRSRParsersMustCompile("~*cgreq.Routes[CGR_|~*cgreq.BestRoute]", true, utils.INFIELD_SEP),
+		// },
+	}
+	for _, v := range tplFlds {
+		v.ComputePath()
+	}
+	eMp := &utils.NavigableMap2{}
+	eMp.Set(utils.PathItems{{Field: utils.Tenant}}, &utils.NMSlice{
+		&config.NMItem{Data: "cgrates.org", Path: []string{utils.Tenant},
+			Config: tplFlds[0]}})
+	eMp.Set(utils.PathItems{{Field: utils.Account}}, &utils.NMSlice{
+		&config.NMItem{Data: "1001", Path: []string{utils.Account},
+			Config: tplFlds[1]}})
+	eMp.Set(utils.PathItems{{Field: utils.Destination}}, &utils.NMSlice{
+		&config.NMItem{Data: "1002", Path: []string{utils.Destination},
+			Config: tplFlds[2]}})
+	eMp.Set(utils.PathItems{{Field: "Usage"}}, &utils.NMSlice{
+		&config.NMItem{Data: "30s", Path: []string{"Usage"},
+			Config: tplFlds[3]}})
+	eMp.Set(utils.PathItems{{Field: "Route"}}, &utils.NMSlice{
+		&config.NMItem{Data: "1001", Path: []string{"Route"},
+			Config: tplFlds[4]}})
+
+	if err := agReq.SetFields(tplFlds); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(agReq.CGRReply, eMp) {
+		t.Errorf("expecting: %+v,\n received: %+v", eMp, agReq.CGRReply)
+	}
+}
