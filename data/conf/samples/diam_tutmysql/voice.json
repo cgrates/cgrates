@@ -33,7 +33,7 @@
 				{
 					"tag": "Account", "path": "*cgreq.Account",
 					"type": "*variable", "mandatory": true,
-					"value": "~*req.Service-Information.IMS-Information.Calling-Party-Address[0]:s/tel:\\+(\\d+)/${1}/"
+					"value": "~*req.Service-Information.IMS-Information.Calling-Party-Address<0>:s/tel:\\+(\\d+)/${1}/"
 				},
 				{
 					"tag": "Account", "path": "*cgreq.Account",
@@ -125,7 +125,7 @@
 				{
 					"tag": "Account", "path": "*cgreq.Account",
 					"type": "*variable", "mandatory": true,
-					"value": "~*req.Service-Information.IMS-Information.Calling-Party-Address[0]:s/tel:\\+(\\d+)/${1}/"
+					"value": "~*req.Service-Information.IMS-Information.Calling-Party-Address<0>:s/tel:\\+(\\d+)/${1}/"
 				},
 				{
 					"tag": "Account", "path": "*cgreq.Account",
