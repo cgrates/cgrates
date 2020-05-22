@@ -84,20 +84,20 @@ func TestDPFieldAsInterface(t *testing.T) {
 	}
 	eOut = interface{}("208708000003") // with filter on second group item
 	if out, err := dP.FieldAsInterface([]string{"Subscription-Id",
-		"Subscription-Id-Data[1]"}); err != nil { // on index
+		"Subscription-Id-Data<1>"}); err != nil { // on index
 		t.Error(err)
 	} else if eOut != out {
 		t.Errorf("Expecting: %v, received: %v", eOut, out)
 	}
 	if out, err := dP.FieldAsInterface([]string{"Subscription-Id",
-		"Subscription-Id-Data[~Subscription-Id-Type(1)]"}); err != nil { // on filter
+		"Subscription-Id-Data<~Subscription-Id-Type(1)>"}); err != nil { // on filter
 		t.Error(err)
 	} else if out != eOut { // can be any result since both entries are matching single filter
 		t.Errorf("expecting: %v, received: %v", eOut, out)
 	}
 	eOut = interface{}("208708000004")
 	if out, err := dP.FieldAsInterface([]string{"Subscription-Id",
-		"Subscription-Id-Data[~Subscription-Id-Type(2)|~Value-Digits(20000)]"}); err != nil { // on multiple filter
+		"Subscription-Id-Data<~Subscription-Id-Type(2)|~Value-Digits(20000)>"}); err != nil { // on multiple filter
 		t.Error(err)
 	} else if eOut != out {
 		t.Errorf("Expecting: %v, received: %v", eOut, out)

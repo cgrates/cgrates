@@ -188,7 +188,7 @@ With explanations in the comments:
 					"path": "*cgreq.Account",
 					"type": "*variable",		// value is taken dynamically from a group AVP
 					"mandatory": true,			//   where Subscription-Id-Type is 0
-					"value": "~*req.Subscription-Id.Subscription-Id-Data[~Subscription-Id-Type(0)]" 
+					"value": "~*req.Subscription-Id.Subscription-Id-Data<~Subscription-Id-Type(0)>" 
 				},
 				{
 					"tag": "Destination",			// Destination is used for charging
@@ -324,10 +324,10 @@ filters
 	**\*req**
 		Diameter request as it comes from the *DiameterClient*. 
 
-		Special selector format defined in case of groups *\*req.Path.To.Attribute[$groupIndex]* or *\*req.Absolute.Path.To.Attribute[~AnotherAttributeRelativePath($valueAnotherAttribute)]*. 
+		Special selector format defined in case of groups *\*req.Path.To.Attribute[$groupIndex]* or *\*req.Absolute.Path.To.Attribute<~AnotherAttributeRelativePath($valueAnotherAttribute)>*. 
 
-		Example 1: *~\*req.Multiple-Services-Credit-Control.Rating-Group[1]* translates to: value of the group attribute at path Multiple-Services-Credit-Control.Rating-Group which is located in the second group (groups start at index 0).
-		Example 2: *~\*req.Multiple-Services-Credit-Control.Used-Service-Unit.CC-Input-Octets[~Rating-Group(1)]* which translates to: value of the group attribute at path: *Multiple-Services-Credit-Control.Used-Service-Unit.CC-Input-Octets* where Multiple-Services-Credit-Control.Used-Service-Unit.Rating-Group has value of "1".
+		Example 1: *~\*req.Multiple-Services-Credit-Control.Rating-Group<1>* translates to: value of the group attribute at path Multiple-Services-Credit-Control.Rating-Group which is located in the second group (groups start at index 0).
+		Example 2: *~\*req.Multiple-Services-Credit-Control.Used-Service-Unit.CC-Input-Octets<~Rating-Group(1)>* which translates to: value of the group attribute at path: *Multiple-Services-Credit-Control.Used-Service-Unit.CC-Input-Octets* where Multiple-Services-Credit-Control.Used-Service-Unit.Rating-Group has value of "1".
 
 	**\*rep**
 		Diameter reply going to *DiameterClient*. 

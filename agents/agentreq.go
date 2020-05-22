@@ -216,9 +216,14 @@ func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 				}
 				return
 			}
-			fullPath := &utils.FullPath{
-				PathItems: tplFld.GetPathItems().Clone(), // need to clone so me do not modify the template
-				Path:      tplFld.Path,
+			var fullPath *utils.FullPath
+			if fullPath, err = ar.dynamicProvider.GetFullFieldPath(tplFld.Path); err != nil {
+				return
+			} else if fullPath == nil { // no dynamic path
+				fullPath = &utils.FullPath{
+					PathItems: tplFld.GetPathItems().Clone(), // need to clone so me do not modify the template
+					Path:      tplFld.Path,
+				}
 			}
 
 			nMItm := &config.NMItem{Data: out, Path: tplFld.GetPathSlice()[1:], Config: tplFld}
