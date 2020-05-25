@@ -67,19 +67,27 @@ func TestNavMapAdd2(t *testing.T) {
 	nM := MapStorage{}
 	path := []string{"FistLever2", "SecondLevel2", "Field2"}
 	data := 123
-	nM.Set(path, data)
+	if err := nM.Set(path, data); err != nil {
+		t.Error(err)
+	}
 	path = []string{"FirstLevel", "SecondLevel", "ThirdLevel", "Fld1"}
 	data1 := 123.123
-	nM.Set(path, data1)
+	if err := nM.Set(path, data1); err != nil {
+		t.Error(err)
+	}
 	path = []string{"FistLever2", "Field3"}
 	data2 := "Value3"
-	nM.Set(path, data2)
+	if err := nM.Set(path, data2); err != nil {
+		t.Error(err)
+	}
 	path = []string{"Field4"}
 	data3 := &testStruct{
 		Item1: "Ten",
 		Item2: 10,
 	}
-	nM.Set(path, data3)
+	if err := nM.Set(path, data3); err != nil {
+		t.Error(err)
+	}
 	eNavMap := MapStorage{
 		"FirstLevel": MapStorage{
 			"SecondLevel": MapStorage{
@@ -99,6 +107,30 @@ func TestNavMapAdd2(t *testing.T) {
 			Item2: 10,
 		},
 	}
+	if !reflect.DeepEqual(nM, eNavMap) {
+		t.Errorf("Expecting: %+v, received: %+v", eNavMap, nM)
+	}
+
+	if err := nM.Set([]string{}, nil); err != ErrWrongPath {
+		t.Errorf("Expected error: %s received: %v", ErrWrongPath, err)
+	}
+
+	if err := nM.Set([]string{"Field4", "Field2"}, nil); err != ErrWrongPath {
+		t.Errorf("Expected error: %s received: %v", ErrWrongPath, err)
+	}
+
+	nM = MapStorage{"Field1": map[string]interface{}{}}
+	path = []string{"Field1", "SecondLevel2", "Field2"}
+	data = 123
+	if err := nM.Set(path, data); err != nil {
+		t.Error(err)
+	}
+
+	eNavMap = MapStorage{"Field1": map[string]interface{}{
+		"SecondLevel2": MapStorage{
+			"Field2": 123,
+		},
+	}}
 	if !reflect.DeepEqual(nM, eNavMap) {
 		t.Errorf("Expecting: %+v, received: %+v", eNavMap, nM)
 	}
@@ -293,6 +325,19 @@ func TestNavMapGetKeys(t *testing.T) {
 	if !reflect.DeepEqual(expKeys, keys) {
 		t.Errorf("Expecting: %+v, received: %+v", ToJSON(expKeys), ToJSON(keys))
 	}
+
+	expKeys = []string{
+		"FirstLevel",
+		"FistLever2",
+		"Field5",
+		"Field6",
+	}
+	keys = navMp.GetKeys(false)
+	sort.Strings(expKeys)
+	sort.Strings(keys)
+	if !reflect.DeepEqual(expKeys, keys) {
+		t.Errorf("Expecting: %+v, received: %+v", ToJSON(expKeys), ToJSON(keys))
+	}
 }
 
 func TestNavMapFieldAsInterface2(t *testing.T) {
@@ -423,5 +468,55 @@ func TestNavMapGetField2(t *testing.T) {
 	pth = []string{"FirstLevel", "SecondLevel[1]", "ThirdLevel", "Fld1[0]"}
 	if _, err := nM.FieldAsInterface(pth); err == nil || err != ErrNotFound {
 		t.Error(err)
+	}
+}
+
+func TestNavMapRemove(t *testing.T) {
+	nM := MapStorage{
+		"Field4": &testStruct{
+			Item1: "Ten",
+			Item2: 10,
+		},
+	}
+
+	if err := nM.Remove([]string{}); err != ErrWrongPath {
+		t.Errorf("Expected error: %s received: %v", ErrWrongPath, err)
+	}
+
+	if err := nM.Remove([]string{"Field4", "Field2"}); err != ErrWrongPath {
+		t.Errorf("Expected error: %s received: %v", ErrWrongPath, err)
+	}
+	nM = MapStorage{
+		"Field1": map[string]interface{}{
+			"SecondLevel2": 1,
+		},
+	}
+
+	path := []string{"Field1", "SecondLevel2"}
+	if err := nM.Remove(path); err != nil {
+		t.Error(err)
+	}
+	eNavMap := MapStorage{"Field1": map[string]interface{}{}}
+	if !reflect.DeepEqual(nM, eNavMap) {
+		t.Errorf("Expecting: %+v, received: %+v", eNavMap, nM)
+	}
+	nM = MapStorage{"Field1": MapStorage{
+		"SecondLevel2": 1,
+	}}
+	path = []string{"Field1", "SecondLevel2"}
+	if err := nM.Remove(path); err != nil {
+		t.Error(err)
+	}
+	eNavMap = MapStorage{"Field1": MapStorage{}}
+	if !reflect.DeepEqual(nM, eNavMap) {
+		t.Errorf("Expecting: %+v, received: %+v", eNavMap, nM)
+	}
+	path = []string{"Field1", "SecondLevel2"}
+	if err := nM.Remove(path); err != nil {
+		t.Error(err)
+	}
+	eNavMap = MapStorage{"Field1": MapStorage{}}
+	if !reflect.DeepEqual(nM, eNavMap) {
+		t.Errorf("Expecting: %+v, received: %+v", eNavMap, nM)
 	}
 }

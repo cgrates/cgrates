@@ -34,7 +34,7 @@ func onCacheEvicted(itmID string, value interface{}) {
 	ee.OnEvicted(itmID, value)
 }
 
-// NewERService instantiates the EventExporterS
+// NewEventExporterS instantiates the EventExporterS
 func NewEventExporterS(cfg *config.CGRConfig, filterS *engine.FilterS,
 	connMgr *engine.ConnManager) (eeS *EventExporterS) {
 	eeS = &EventExporterS{
@@ -66,7 +66,7 @@ func (eeS *EventExporterS) ListenAndServe(exitChan chan bool, cfgRld chan struct
 		case e := <-exitChan: // global exit
 			eeS.Shutdown()
 			exitChan <- e // put back for the others listening for shutdown request
-			break
+			return
 		case rld := <-cfgRld: // configuration was reloaded, destroy the cache
 			cfgRld <- rld
 			utils.Logger.Info(fmt.Sprintf("<%s> reloading configuration internals.",
@@ -74,7 +74,6 @@ func (eeS *EventExporterS) ListenAndServe(exitChan chan bool, cfgRld chan struct
 			eeS.setupCache(eeS.cfg.EEsCfg().Cache)
 		}
 	}
-	return
 }
 
 // Shutdown is called to shutdown the service
@@ -127,7 +126,7 @@ func (eeS *EventExporterS) attrSProcessEvent(cgrEv *utils.CGREventWithOpts, attr
 	return
 }
 
-// ProcessEvent will be called each time a new event is received from readers
+// V1ProcessEvent will be called each time a new event is received from readers
 func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithOpts, rply *string) (err error) {
 	eeS.cfg.RLocks(config.EEsJson)
 	defer eeS.cfg.RUnlocks(config.EEsJson)

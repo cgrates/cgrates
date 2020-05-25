@@ -701,3 +701,13 @@ func TestSIPURIConverter(t *testing.T) {
 	}
 
 }
+
+func TestNewDataConverterMustCompile2(t *testing.T) {
+	defer func() {
+		expectedMessage := "parsing: <*multiply>, error: mandatory information missing"
+		if r := recover(); r != expectedMessage {
+			t.Errorf("Expected %q, received: %q", expectedMessage, r)
+		}
+	}()
+	NewDataConverterMustCompile(MetaMultiply)
+}
