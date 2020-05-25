@@ -214,7 +214,6 @@ func (ms MapStorage) GetKeys(nesteed bool) (keys []string) {
 		for k := range ms {
 			keys[i] = k
 			i++
-
 		}
 		return
 	}
