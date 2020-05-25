@@ -217,6 +217,7 @@ func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 				return
 			}
 			var fullPath *utils.FullPath
+			var itmPath []string
 			if fullPath, err = ar.dynamicProvider.GetFullFieldPath(tplFld.Path); err != nil {
 				return
 			} else if fullPath == nil { // no dynamic path
@@ -224,9 +225,12 @@ func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 					PathItems: tplFld.GetPathItems().Clone(), // need to clone so me do not modify the template
 					Path:      tplFld.Path,
 				}
+				itmPath = tplFld.GetPathSlice()[1:]
+			} else {
+				itmPath = fullPath.PathItems.Slice()[1:]
 			}
 
-			nMItm := &config.NMItem{Data: out, Path: tplFld.GetPathSlice()[1:], Config: tplFld}
+			nMItm := &config.NMItem{Data: out, Path: itmPath, Config: tplFld}
 			switch tplFld.Type {
 			case utils.META_COMPOSED:
 				err = utils.ComposeNavMapVal(ar, fullPath, nMItm)
