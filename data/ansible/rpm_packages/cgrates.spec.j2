@@ -73,13 +73,16 @@ cd $RPM_BUILD_DIR/%{name}-%{version}/src/github.com/cgrates/cgrates
 %install
 rm -rf $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT%{_datarootdir}/%{name}
-cp -rpf {{ cgrates_dir }}/data/conf/* $RPM_BUILD_ROOT%{_datarootdir}/%{name}
-cp -rpf {{ cgrates_dir }}/data/diameter/* $RPM_BUILD_ROOT%{_datarootdir}/%{name}
-cp -rpf {{ cgrates_dir }}/data/postman/* $RPM_BUILD_ROOT%{_datarootdir}/%{name}
-cp -rpf {{ cgrates_dir }}/data/radius/* $RPM_BUILD_ROOT%{_datarootdir}/%{name}
-cp -rpf {{ cgrates_dir }}/data/tariffplans/* $RPM_BUILD_ROOT%{_datarootdir}/%{name}
-cp -rpf {{ cgrates_dir }}/data/tutorial_tests/* $RPM_BUILD_ROOT%{_datarootdir}/%{name}
-cp -rpf {{ cgrates_dir }}/data/tutorials/* $RPM_BUILD_ROOT%{_datarootdir}/%{name}
+cp -rpf {{ cgrates_dir }}/data/conf/ $RPM_BUILD_ROOT%{_datarootdir}/%{name}
+cp -rpf {{ cgrates_dir }}/data/diameter/ $RPM_BUILD_ROOT%{_datarootdir}/%{name}
+cp -rpf {{ cgrates_dir }}/data/postman/ $RPM_BUILD_ROOT%{_datarootdir}/%{name}
+cp -rpf {{ cgrates_dir }}/data/radius/ $RPM_BUILD_ROOT%{_datarootdir}/%{name}
+cp -rpf {{ cgrates_dir }}/data/tariffplans/ $RPM_BUILD_ROOT%{_datarootdir}/%{name}
+cp -rpf {{ cgrates_dir }}/data/tutorial_tests/ $RPM_BUILD_ROOT%{_datarootdir}/%{name}
+cp -rpf {{ cgrates_dir }}/data/tutorials/ $RPM_BUILD_ROOT%{_datarootdir}/%{name}
+cp -rpf {{ cgrates_dir }}/data/storage/mongo $RPM_BUILD_ROOT%{_datarootdir}/%{name}/storage
+cp -rpf {{ cgrates_dir }}/data/storage/mysql $RPM_BUILD_ROOT%{_datarootdir}/%{name}/storage
+cp -rpf {{ cgrates_dir }}/data/storage/postgres $RPM_BUILD_ROOT%{_datarootdir}/%{name}/storage
 install -D -m 0644 -p {{ cgrates_dir }}/data/conf/%{name}/%{name}.json $RPM_BUILD_ROOT%{_sysconfdir}/%{name}/%{name}.json
 install -D -m 0755 -p {{ golang_gopath }}/bin/cgr-console $RPM_BUILD_ROOT%{_bindir}/cgr-console
 install -D -m 0755 -p {{ golang_gopath }}/bin/cgr-engine $RPM_BUILD_ROOT%{_bindir}/cgr-engine
@@ -94,6 +97,8 @@ mkdir -p $RPM_BUILD_ROOT%{_spooldir}/tpe
 mkdir -p $RPM_BUILD_ROOT%{_spooldir}/failed_posts
 mkdir -p $RPM_BUILD_ROOT%{_libdir}/history
 mkdir -p $RPM_BUILD_ROOT%{_libdir}/cache_dump
+mkdir -p $RPM_BUILD_ROOT/etc/logrotate.d
+install -m 755 {{ cgrates_dir }}/data/conf/logging/deb_logrotate.conf $RPM_BUILD_ROOT/etc/logrotate.d/%{name}
 install -D -m 0644 -p src/github.com/cgrates/cgrates/packages/redhat_fedora/%{name}.options $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig/%{name}
 %if 0%{?fedora} > 16 || 0%{?rhel} > 6
 	install -D -m 0644 -p src/github.com/cgrates/cgrates/packages/redhat_fedora/%{name}.service $RPM_BUILD_ROOT%{_unitdir}/%{name}.service
