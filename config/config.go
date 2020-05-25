@@ -1335,6 +1335,7 @@ func (cfg *CGRConfig) loadConfigFromFolder(cfgDir string, loadFuncs []func(jsnCf
 			werr = cfg.loadConfigFromReader(cfgFile, loadFuncs)
 			cfgFile.Close()
 			if werr != nil {
+				werr = fmt.Errorf("file [%s]:%s", jsonFilePath, werr.Error())
 				return
 			}
 		}
@@ -1364,6 +1365,7 @@ func (cfg *CGRConfig) loadConfigFromHTTP(urlPaths string, loadFuncs []func(jsnCf
 		err = cfg.loadConfigFromReader(cfgReq.Body, loadFuncs)
 		cfgReq.Body.Close()
 		if err != nil {
+			err = fmt.Errorf("url [%s]:%s", urlPath, err.Error())
 			return
 		}
 	}
