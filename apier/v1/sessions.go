@@ -117,7 +117,7 @@ func (ssv1 *SessionSv1) Ping(ign *utils.CGREventWithArgDispatcher, reply *string
 	return nil
 }
 
-func (ssv1 *SessionSv1) ReplicateSessions(args dispatchers.ArgsReplicateSessionsWithApiKey, rply *string) error {
+func (ssv1 *SessionSv1) ReplicateSessions(args *dispatchers.ArgsReplicateSessionsWithApiKey, rply *string) error {
 	return ssv1.Ss.BiRPCv1ReplicateSessions(nil, args.ArgsReplicateSessions, rply)
 }
 

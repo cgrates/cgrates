@@ -757,13 +757,13 @@ func testApierTPAccountActions(t *testing.T) {
 	}
 	// Test get
 	var rplyaa *utils.TPAccountActions
-	if err := rater.Call(utils.APIerSv1GetTPAccountActions, AttrGetTPAccountActions{TPid: aaTst.TPid, AccountActionsId: aaTst.GetId()}, &rplyaa); err != nil {
+	if err := rater.Call(utils.APIerSv1GetTPAccountActions, &AttrGetTPAccountActions{TPid: aaTst.TPid, AccountActionsId: aaTst.GetId()}, &rplyaa); err != nil {
 		t.Error("Calling APIerSv1.GetTPAccountActions, got error: ", err.Error())
 	} else if !reflect.DeepEqual(aaTst, rplyaa) {
 		t.Errorf("Calling APIerSv1.GetTPAccountActions expected: %v, received: %v", aaTst, rplyaa)
 	}
 	// Test remove
-	if err := rater.Call(utils.APIerSv1RemoveTPAccountActions, AttrGetTPAccountActions{TPid: aaTst.TPid, AccountActionsId: aaTst.GetId()}, &reply); err != nil {
+	if err := rater.Call(utils.APIerSv1RemoveTPAccountActions, &AttrGetTPAccountActions{TPid: aaTst.TPid, AccountActionsId: aaTst.GetId()}, &reply); err != nil {
 		t.Error("Calling APIerSv1.RemoveTPAccountActions, got error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling APIerSv1.RemoveTPAccountActions received: ", reply)
@@ -771,7 +771,7 @@ func testApierTPAccountActions(t *testing.T) {
 	// Test getLoadIds
 	var rplyRpIds []string
 	expectedRpIds := []string{utils.TEST_SQL}
-	if err := rater.Call(utils.APIerSv1GetTPAccountActionLoadIds, AttrGetTPAccountActionIds{TPid: aaTst.TPid}, &rplyRpIds); err != nil {
+	if err := rater.Call(utils.APIerSv1GetTPAccountActionLoadIds, &AttrGetTPAccountActionIds{TPid: aaTst.TPid}, &rplyRpIds); err != nil {
 		t.Error("Calling APIerSv1.GetTPAccountActionLoadIds, got error: ", err.Error())
 	} else if !reflect.DeepEqual(expectedRpIds, rplyRpIds) {
 		t.Errorf("Calling APIerSv1.GetTPAccountActionLoadIds expected: %v, received: %v", expectedRpIds, rplyRpIds)
@@ -1872,7 +1872,7 @@ func testApierStartStopServiceStatus(t *testing.T) {
 	} else if reply != utils.StoppedCaps {
 		t.Errorf("Received: <%s>", reply)
 	}
-	if err := rater.Call(utils.ServiceManagerV1StartService, dispatchers.ArgStartServiceWithApiKey{ArgStartService: servmanager.ArgStartService{ServiceID: utils.MetaScheduler}},
+	if err := rater.Call(utils.ServiceManagerV1StartService, &dispatchers.ArgStartServiceWithApiKey{ArgStartService: servmanager.ArgStartService{ServiceID: utils.MetaScheduler}},
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {

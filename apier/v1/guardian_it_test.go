@@ -81,11 +81,11 @@ func TestGuardianSIT(t *testing.T) {
 		Timeout:     500 * time.Millisecond,
 	}
 	var reply string
-	if err = guardianRPC.Call(utils.GuardianSv1RemoteLock, args, &reply); err != nil {
+	if err = guardianRPC.Call(utils.GuardianSv1RemoteLock, &args, &reply); err != nil {
 		t.Error(err)
 	}
 	var unlockReply []string
-	if err = guardianRPC.Call(utils.GuardianSv1RemoteUnlock, dispatchers.AttrRemoteUnlockWithApiKey{RefID: reply}, &unlockReply); err != nil {
+	if err = guardianRPC.Call(utils.GuardianSv1RemoteUnlock, &dispatchers.AttrRemoteUnlockWithApiKey{RefID: reply}, &unlockReply); err != nil {
 		t.Error(err)
 	}
 	if !reflect.DeepEqual(args.LockIDs, unlockReply) {

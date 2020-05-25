@@ -298,28 +298,28 @@ func (dRs *DispatcherResourceSv1) Ping(args *utils.CGREventWithArgDispatcher, re
 }
 
 // GetResourcesForEvent implements ResourceSv1GetResourcesForEvent
-func (dRs *DispatcherResourceSv1) GetResourcesForEvent(args utils.ArgRSv1ResourceUsage,
+func (dRs *DispatcherResourceSv1) GetResourcesForEvent(args *utils.ArgRSv1ResourceUsage,
 	reply *engine.Resources) error {
-	return dRs.dRs.ResourceSv1GetResourcesForEvent(args, reply)
+	return dRs.dRs.ResourceSv1GetResourcesForEvent(*args, reply)
 }
 
 func (dRs *DispatcherResourceSv1) GetResource(args *utils.TenantIDWithArgDispatcher, reply *engine.Resource) error {
 	return dRs.dRs.ResourceSv1GetResource(args, reply)
 }
 
-func (dRs *DispatcherResourceSv1) AuthorizeResources(args utils.ArgRSv1ResourceUsage,
+func (dRs *DispatcherResourceSv1) AuthorizeResources(args *utils.ArgRSv1ResourceUsage,
 	reply *string) error {
-	return dRs.dRs.ResourceSv1AuthorizeResources(args, reply)
+	return dRs.dRs.ResourceSv1AuthorizeResources(*args, reply)
 }
 
-func (dRs *DispatcherResourceSv1) AllocateResources(args utils.ArgRSv1ResourceUsage,
+func (dRs *DispatcherResourceSv1) AllocateResources(args *utils.ArgRSv1ResourceUsage,
 	reply *string) error {
-	return dRs.dRs.ResourceSv1AllocateResources(args, reply)
+	return dRs.dRs.ResourceSv1AllocateResources(*args, reply)
 }
 
-func (dRs *DispatcherResourceSv1) ReleaseResources(args utils.ArgRSv1ResourceUsage,
+func (dRs *DispatcherResourceSv1) ReleaseResources(args *utils.ArgRSv1ResourceUsage,
 	reply *string) error {
-	return dRs.dRs.ResourceSv1ReleaseResources(args, reply)
+	return dRs.dRs.ResourceSv1ReleaseResources(*args, reply)
 }
 
 func NewDispatcherRouteSv1(dps *dispatchers.DispatcherService) *DispatcherRouteSv1 {
@@ -498,9 +498,9 @@ func (dS *DispatcherSessionSv1) GetPassiveSessionsCount(args *utils.SessionFilte
 	return dS.dS.SessionSv1GetPassiveSessionsCount(args, reply)
 }
 
-func (dS *DispatcherSessionSv1) ReplicateSessions(args dispatchers.ArgsReplicateSessionsWithApiKey,
+func (dS *DispatcherSessionSv1) ReplicateSessions(args *dispatchers.ArgsReplicateSessionsWithApiKey,
 	reply *string) (err error) {
-	return dS.dS.SessionSv1ReplicateSessions(args, reply)
+	return dS.dS.SessionSv1ReplicateSessions(*args, reply)
 }
 
 func (dS *DispatcherSessionSv1) SetPassiveSession(args *sessions.Session,
@@ -672,13 +672,13 @@ type DispatcherGuardianSv1 struct {
 }
 
 // RemoteLock will lock a key from remote
-func (dS *DispatcherGuardianSv1) RemoteLock(attr dispatchers.AttrRemoteLockWithApiKey, reply *string) (err error) {
-	return dS.dS.GuardianSv1RemoteLock(attr, reply)
+func (dS *DispatcherGuardianSv1) RemoteLock(attr *dispatchers.AttrRemoteLockWithApiKey, reply *string) (err error) {
+	return dS.dS.GuardianSv1RemoteLock(*attr, reply)
 }
 
 // RemoteUnlock will unlock a key from remote based on reference ID
-func (dS *DispatcherGuardianSv1) RemoteUnlock(attr dispatchers.AttrRemoteUnlockWithApiKey, reply *[]string) (err error) {
-	return dS.dS.GuardianSv1RemoteUnlock(attr, reply)
+func (dS *DispatcherGuardianSv1) RemoteUnlock(attr *dispatchers.AttrRemoteUnlockWithApiKey, reply *[]string) (err error) {
+	return dS.dS.GuardianSv1RemoteUnlock(*attr, reply)
 }
 
 // Ping used to detreminate if component is active
@@ -788,14 +788,14 @@ type DispatcherSServiceManagerV1 struct {
 func (dS *DispatcherSServiceManagerV1) Ping(args *utils.CGREventWithArgDispatcher, reply *string) error {
 	return dS.dS.ServiceManagerV1Ping(args, reply)
 }
-func (dS *DispatcherSServiceManagerV1) StartService(args dispatchers.ArgStartServiceWithApiKey, reply *string) error {
-	return dS.dS.ServiceManagerV1StartService(args, reply)
+func (dS *DispatcherSServiceManagerV1) StartService(args *dispatchers.ArgStartServiceWithApiKey, reply *string) error {
+	return dS.dS.ServiceManagerV1StartService(*args, reply)
 }
-func (dS *DispatcherSServiceManagerV1) StopService(args dispatchers.ArgStartServiceWithApiKey, reply *string) error {
-	return dS.dS.ServiceManagerV1StopService(args, reply)
+func (dS *DispatcherSServiceManagerV1) StopService(args *dispatchers.ArgStartServiceWithApiKey, reply *string) error {
+	return dS.dS.ServiceManagerV1StopService(*args, reply)
 }
-func (dS *DispatcherSServiceManagerV1) ServiceStatus(args dispatchers.ArgStartServiceWithApiKey, reply *string) error {
-	return dS.dS.ServiceManagerV1ServiceStatus(args, reply)
+func (dS *DispatcherSServiceManagerV1) ServiceStatus(args *dispatchers.ArgStartServiceWithApiKey, reply *string) error {
+	return dS.dS.ServiceManagerV1ServiceStatus(*args, reply)
 }
 
 func NewDispatcherConfigSv1(dps *dispatchers.DispatcherService) *DispatcherConfigSv1 {

@@ -709,7 +709,7 @@ func testDspSessionReplicate(t *testing.T) {
 	testDspSessionInit(t)
 
 	var reply string
-	if err := dispEngine.RPC.Call(utils.SessionSv1ReplicateSessions, ArgsReplicateSessionsWithApiKey{
+	if err := dispEngine.RPC.Call(utils.SessionSv1ReplicateSessions, &ArgsReplicateSessionsWithApiKey{
 		ArgDispatcher: &utils.ArgDispatcher{
 			APIKey: utils.StringPointer("ses12345"),
 		},

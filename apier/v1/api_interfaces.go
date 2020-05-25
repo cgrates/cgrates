@@ -47,10 +47,10 @@ type StatSv1Interface interface {
 }
 
 type ResourceSv1Interface interface {
-	GetResourcesForEvent(args utils.ArgRSv1ResourceUsage, reply *engine.Resources) error
-	AuthorizeResources(args utils.ArgRSv1ResourceUsage, reply *string) error
-	AllocateResources(args utils.ArgRSv1ResourceUsage, reply *string) error
-	ReleaseResources(args utils.ArgRSv1ResourceUsage, reply *string) error
+	GetResourcesForEvent(args *utils.ArgRSv1ResourceUsage, reply *engine.Resources) error
+	AuthorizeResources(args *utils.ArgRSv1ResourceUsage, reply *string) error
+	AllocateResources(args *utils.ArgRSv1ResourceUsage, reply *string) error
+	ReleaseResources(args *utils.ArgRSv1ResourceUsage, reply *string) error
 	GetResource(args *utils.TenantIDWithArgDispatcher, reply *engine.Resource) error
 	Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error
 }
@@ -91,7 +91,7 @@ type SessionSv1Interface interface {
 	GetPassiveSessions(args *utils.SessionFilter, rply *[]*sessions.ExternalSession) error
 	GetPassiveSessionsCount(args *utils.SessionFilter, rply *int) error
 	Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error
-	ReplicateSessions(args dispatchers.ArgsReplicateSessionsWithApiKey, rply *string) error
+	ReplicateSessions(args *dispatchers.ArgsReplicateSessionsWithApiKey, rply *string) error
 	SetPassiveSession(args *sessions.Session, reply *string) error
 	ActivateSessions(args *utils.SessionIDsWithArgsDispatcher, reply *string) error
 	DeactivateSessions(args *utils.SessionIDsWithArgsDispatcher, reply *string) error
@@ -130,8 +130,8 @@ type CacheSv1Interface interface {
 }
 
 type GuardianSv1Interface interface {
-	RemoteLock(attr dispatchers.AttrRemoteLockWithApiKey, reply *string) (err error)
-	RemoteUnlock(refID dispatchers.AttrRemoteUnlockWithApiKey, reply *[]string) (err error)
+	RemoteLock(attr *dispatchers.AttrRemoteLockWithApiKey, reply *string) (err error)
+	RemoteUnlock(refID *dispatchers.AttrRemoteUnlockWithApiKey, reply *[]string) (err error)
 	Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error
 }
 
@@ -154,9 +154,9 @@ type CDRsV1Interface interface {
 }
 
 type ServiceManagerV1Interface interface {
-	StartService(args dispatchers.ArgStartServiceWithApiKey, reply *string) error
-	StopService(args dispatchers.ArgStartServiceWithApiKey, reply *string) error
-	ServiceStatus(args dispatchers.ArgStartServiceWithApiKey, reply *string) error
+	StartService(args *dispatchers.ArgStartServiceWithApiKey, reply *string) error
+	StopService(args *dispatchers.ArgStartServiceWithApiKey, reply *string) error
+	ServiceStatus(args *dispatchers.ArgStartServiceWithApiKey, reply *string) error
 	Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error
 }
 
