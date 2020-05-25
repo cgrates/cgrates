@@ -1,16 +1,20 @@
+# Stop dance for cgrates
+# =======================
+
 [Unit]
-Description=Carrier Grade Real-time Charging System
-After=network.target mysqld.service postgresql.service redis.service
+Description=Control CGRateS - carrier grade real-time charging system
+After=network.target
 
 [Service]
 Type=simple
-User=cgrates
-Group=cgrates
 EnvironmentFile=-/etc/sysconfig/cgrates
 ExecStart=/usr/bin/cgr-engine $OPTIONS
-Restart=always
-TimeoutStopSec=30s
-RestartSec=5s
+KillMode=mixed
+User=cgrates
+Group=cgrates
+StandardOutput=journal
+StandardError=journal
+Restart=on-failure
 
 [Install]
 WantedBy=multi-user.target
