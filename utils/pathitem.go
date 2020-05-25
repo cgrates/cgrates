@@ -76,7 +76,15 @@ func (path PathItems) String() (out string) {
 		return
 	}
 	return out[1:]
+}
 
+// Slice returns the path as string slice
+func (path PathItems) Slice() (out []string) {
+	out = make([]string, len(path))
+	for i, v := range path {
+		out[i] = v.String()
+	}
+	return out
 }
 
 // PathItem used by the NM interface to store the path information

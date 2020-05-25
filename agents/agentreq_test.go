@@ -2004,10 +2004,10 @@ func TestAgReqDynamicPath(t *testing.T) {
 			Path: utils.MetaCgrep + utils.NestingSep + "Route",
 			Type: utils.MetaVariable, Value: config.NewRSRParsersMustCompile("~*cgreq.Routes[CGR_|~*cgreq.BestRoute]", true, utils.INFIELD_SEP),
 		},
-		// {Tag: "Route2",
-		// 	Path: utils.MetaCgrep + utils.NestingSep + "Route2[CGR_|]",
-		// 	Type: utils.MetaVariable, Value: config.NewRSRParsersMustCompile("~*cgreq.Routes[CGR_|~*cgreq.BestRoute]", true, utils.INFIELD_SEP),
-		// },
+		{Tag: "Route2",
+			Path: utils.MetaCgrep + utils.NestingSep + "Route2[CGR_|~*cgreq.BestRoute]",
+			Type: utils.MetaVariable, Value: config.NewRSRParsersMustCompile("~*cgreq.Routes[CGR_ROUTE2]", true, utils.INFIELD_SEP),
+		},
 	}
 	for _, v := range tplFlds {
 		v.ComputePath()
@@ -2028,6 +2028,9 @@ func TestAgReqDynamicPath(t *testing.T) {
 	eMp.Set(utils.PathItems{{Field: "Route"}}, &utils.NMSlice{
 		&config.NMItem{Data: "1001", Path: []string{"Route"},
 			Config: tplFlds[4]}})
+	eMp.Set(utils.PathItems{{Field: "Route2"}, {Field: "CGR_ROUTE1"}}, &utils.NMSlice{
+		&config.NMItem{Data: "1002", Path: []string{"Route2", "CGR_ROUTE1"},
+			Config: tplFlds[5]}})
 
 	if err := agReq.SetFields(tplFlds); err != nil {
 		t.Error(err)
