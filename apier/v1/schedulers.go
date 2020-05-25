@@ -45,7 +45,7 @@ func (schdSv1 *SchedulerSv1) Reload(arg *utils.CGREventWithArgDispatcher, reply 
 
 // ExecuteActions execute an actionPlan or multiple actionsPlans between a time interval
 func (schdSv1 *SchedulerSv1) ExecuteActions(attr *utils.AttrsExecuteActions, reply *string) error {
-	if attr.ActionPlanID != "" { // execute by ActionPlanID
+	if attr.ActionPlanID != utils.EmptyString { // execute by ActionPlanID
 		apl, err := schdSv1.dm.GetActionPlan(attr.ActionPlanID, false, utils.NonTransactional)
 		if err != nil {
 			*reply = err.Error()

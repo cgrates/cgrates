@@ -31,13 +31,13 @@ func NewGuardianSv1() *GuardianSv1 {
 type GuardianSv1 struct{}
 
 // RemoteLock will lock a key from remote
-func (self *GuardianSv1) RemoteLock(attr dispatchers.AttrRemoteLockWithApiKey, reply *string) (err error) {
+func (self *GuardianSv1) RemoteLock(attr *dispatchers.AttrRemoteLockWithApiKey, reply *string) (err error) {
 	*reply = guardian.Guardian.GuardIDs(attr.ReferenceID, attr.Timeout, attr.LockIDs...)
 	return
 }
 
 // RemoteUnlock will unlock a key from remote based on reference ID
-func (self *GuardianSv1) RemoteUnlock(refID dispatchers.AttrRemoteUnlockWithApiKey, reply *[]string) (err error) {
+func (self *GuardianSv1) RemoteUnlock(refID *dispatchers.AttrRemoteUnlockWithApiKey, reply *[]string) (err error) {
 	*reply = guardian.Guardian.UnguardIDs(refID.RefID)
 	return
 }

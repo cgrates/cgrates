@@ -435,7 +435,7 @@ func testSessionSRplManualReplicate(t *testing.T) {
 	}
 	//replicate manually the session from master to slave
 	var repply string
-	if err := smgRplcMstrRPC.Call(utils.SessionSv1ReplicateSessions, argsRepl, &repply); err != nil {
+	if err := smgRplcMstrRPC.Call(utils.SessionSv1ReplicateSessions, &argsRepl, &repply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Wait for the sessions to be populated
@@ -476,7 +476,7 @@ func testSessionSRplManualReplicate(t *testing.T) {
 		Passive: true,
 		ConnIDs: []string{"rplConn"},
 	}
-	if err := smgRplcSlvRPC.Call(utils.SessionSv1ReplicateSessions, argsRepl, &repply); err != nil {
+	if err := smgRplcSlvRPC.Call(utils.SessionSv1ReplicateSessions, &argsRepl, &repply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Wait for the sessions to be populated

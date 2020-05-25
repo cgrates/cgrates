@@ -26,8 +26,8 @@ import (
 )
 
 // GetRouteProfile returns a Route configuration
-func (APIerSv1 *APIerSv1) GetRouteProfile(arg utils.TenantID, reply *engine.RouteProfile) error {
-	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
+func (APIerSv1 *APIerSv1) GetRouteProfile(arg *utils.TenantID, reply *engine.RouteProfile) error {
+	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if rp, err := APIerSv1.DataManager.GetRouteProfile(arg.Tenant, arg.ID, true, true, utils.NonTransactional); err != nil {
@@ -39,8 +39,8 @@ func (APIerSv1 *APIerSv1) GetRouteProfile(arg utils.TenantID, reply *engine.Rout
 }
 
 // GetRouteProfileIDs returns list of routeProfile IDs registered for a tenant
-func (APIerSv1 *APIerSv1) GetRouteProfileIDs(args utils.TenantArgWithPaginator, sppPrfIDs *[]string) error {
-	if missing := utils.MissingStructFields(&args, []string{utils.Tenant}); len(missing) != 0 { //Params missing
+func (APIerSv1 *APIerSv1) GetRouteProfileIDs(args *utils.TenantArgWithPaginator, sppPrfIDs *[]string) error {
+	if missing := utils.MissingStructFields(args, []string{utils.Tenant}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	prfx := utils.RouteProfilePrefix + args.Tenant + ":"

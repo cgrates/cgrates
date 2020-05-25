@@ -74,8 +74,8 @@ func (APIerSv1 *APIerSv1) GetThresholdProfile(arg *utils.TenantID, reply *engine
 }
 
 // GetThresholdProfileIDs returns list of thresholdProfile IDs registered for a tenant
-func (APIerSv1 *APIerSv1) GetThresholdProfileIDs(args utils.TenantArgWithPaginator, thPrfIDs *[]string) error {
-	if missing := utils.MissingStructFields(&args, []string{utils.Tenant}); len(missing) != 0 { //Params missing
+func (APIerSv1 *APIerSv1) GetThresholdProfileIDs(args *utils.TenantArgWithPaginator, thPrfIDs *[]string) error {
+	if missing := utils.MissingStructFields(args, []string{utils.Tenant}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	prfx := utils.ThresholdProfilePrefix + args.Tenant + ":"

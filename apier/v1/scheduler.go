@@ -96,12 +96,12 @@ import (
 ]
 */
 
-func (self *APIerSv1) GetScheduledActions(args scheduler.ArgsGetScheduledActions, reply *[]*scheduler.ScheduledAction) error {
+func (self *APIerSv1) GetScheduledActions(args *scheduler.ArgsGetScheduledActions, reply *[]*scheduler.ScheduledAction) error {
 	sched := self.SchedulerService.GetScheduler()
 	if sched == nil {
 		return errors.New(utils.SchedulerNotRunningCaps)
 	}
-	rpl := sched.GetScheduledActions(args)
+	rpl := sched.GetScheduledActions(*args)
 	if len(rpl) == 0 {
 		return utils.ErrNotFound
 	}

@@ -405,7 +405,7 @@ func testV1STSSetStatQueueProfile(t *testing.T) {
 func testV1STSGetStatQueueProfileIDs(t *testing.T) {
 	expected := []string{"Stats1", "TEST_PROFILE1"}
 	var result []string
-	if err := stsV1Rpc.Call(utils.APIerSv1GetStatQueueProfileIDs, utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{Tenant: "cgrates.org"}}, &result); err != nil {
+	if err := stsV1Rpc.Call(utils.APIerSv1GetStatQueueProfileIDs, &utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{Tenant: "cgrates.org"}}, &result); err != nil {
 		t.Error(err)
 	} else if len(expected) != len(result) {
 		t.Errorf("Expecting : %+v, received: %+v", expected, result)

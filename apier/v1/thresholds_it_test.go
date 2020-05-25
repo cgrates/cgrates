@@ -380,7 +380,7 @@ func testV1TSGetThresholdsAfterRestart(t *testing.T) {
 func testv1TSGetThresholdProfileIDs(t *testing.T) {
 	expected := []string{"THD_STATS_1", "THD_STATS_2", "THD_STATS_3", "THD_RES_1", "THD_CDRS_1", "THD_ACNT_BALANCE_1", "THD_ACNT_EXPIRED"}
 	var result []string
-	if err := tSv1Rpc.Call(utils.APIerSv1GetThresholdProfileIDs, utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{"cgrates.org"}}, &result); err != nil {
+	if err := tSv1Rpc.Call(utils.APIerSv1GetThresholdProfileIDs, &utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{"cgrates.org"}}, &result); err != nil {
 		t.Error(err)
 	} else if len(expected) != len(result) {
 		t.Errorf("Expecting : %+v, received: %+v", expected, result)
