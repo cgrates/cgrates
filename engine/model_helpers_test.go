@@ -20,6 +20,8 @@ package engine
 
 import (
 	"reflect"
+	"sort"
+	"strings"
 	"testing"
 	"time"
 
@@ -1811,6 +1813,10 @@ func TestTPSuppliersAsTPSupplierProfiles(t *testing.T) {
 		},
 	}
 	rcv := mdl.AsTPSuppliers()
+	sort.Slice(rcv[0].Suppliers, func(i, j int) bool {
+		return strings.Compare(rcv[0].Suppliers[i].ID, rcv[0].Suppliers[j].ID) < 0
+	})
+	sort.Strings(rcv[0].SortingParameters)
 	if !reflect.DeepEqual(rcv, expPrf) {
 		t.Errorf("Expecting: %+v,\nReceived: %+v", utils.ToJSON(expPrf), utils.ToJSON(rcv))
 	}
@@ -1872,19 +1878,23 @@ func TestTPSuppliersAsTPSupplierProfiles(t *testing.T) {
 				ExpiryTime:     "",
 			},
 			Suppliers: []*utils.TPSupplier{
-				&utils.TPSupplier{
-					ID:     "supplier2",
-					Weight: 20.0,
-				},
-				&utils.TPSupplier{
+				{
 					ID:     "supplier1",
 					Weight: 10.0,
+				},
+				{
+					ID:     "supplier2",
+					Weight: 20.0,
 				},
 			},
 			Weight: 10,
 		},
 	}
 	rcvRev := mdlReverse.AsTPSuppliers()
+	sort.Slice(rcvRev[0].Suppliers, func(i, j int) bool {
+		return strings.Compare(rcvRev[0].Suppliers[i].ID, rcvRev[0].Suppliers[j].ID) < 0
+	})
+	sort.Strings(rcvRev[0].SortingParameters)
 	if !reflect.DeepEqual(rcvRev, expPrfRev) {
 		t.Errorf("Expecting: %+v,\nReceived: %+v", utils.ToJSON(expPrfRev), utils.ToJSON(rcvRev))
 	}
