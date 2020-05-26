@@ -520,3 +520,185 @@ func TestNavMapRemove(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eNavMap, nM)
 	}
 }
+
+func TestNavMapFieldAsInterface3(t *testing.T) {
+	nM := MapStorage{
+		"AnotherFirstLevel": "ValAnotherFirstLevel",
+		"Slice":             []MapStorage{{}},
+		"Slice2":            []DataProvider{MapStorage{}},
+		"SliceString":       []map[string]interface{}{{}},
+		"SliceInterface":    []interface{}{MapStorage{"A": 0}, map[string]interface{}{"B": 1}},
+	}
+
+	path := []string{"Slice[1]", "A"}
+	expErr := ErrNotFound
+	if _, err := nM.FieldAsInterface(path); err != nil && err.Error() != expErr.Error() {
+		t.Errorf("Expected error: %s, received error: %v", expErr.Error(), err)
+	}
+
+	path = []string{"Slice[nan]", "A"}
+	expErr = fmt.Errorf(`strconv.Atoi: parsing "nan": invalid syntax`)
+	if _, err := nM.FieldAsInterface(path); err != nil && err.Error() != expErr.Error() {
+		t.Errorf("Expected error: %s, received error: %v", expErr.Error(), err)
+	}
+
+	path = []string{"AnotherFirstLevel[1]", "N"}
+	expErr = ErrNotFound
+	if _, err := nM.FieldAsInterface(path); err != nil && err.Error() != expErr.Error() {
+		t.Errorf("Expected error: %s, received error: %v", expErr.Error(), err)
+	}
+
+	path = []string{"SliceString[1]", "A"}
+	if _, err := nM.FieldAsInterface(path); err != nil && err.Error() != expErr.Error() {
+		t.Errorf("Expected error: %s, received error: %v", expErr.Error(), err)
+	}
+
+	path = []string{"SliceString[nan]", "A"}
+	expErr = fmt.Errorf(`strconv.Atoi: parsing "nan": invalid syntax`)
+	if _, err := nM.FieldAsInterface(path); err != nil && err.Error() != expErr.Error() {
+		t.Errorf("Expected error: %s, received error: %v", expErr.Error(), err)
+	}
+	path = []string{"SliceInterface[nan]", "A"}
+	expErr = fmt.Errorf(`strconv.Atoi: parsing "nan": invalid syntax`)
+	if _, err := nM.FieldAsInterface(path); err != nil && err.Error() != expErr.Error() {
+		t.Errorf("Expected error: %s, received error: %v", expErr.Error(), err)
+	}
+
+	path = []string{"SliceInterface[4]", "A"}
+	expErr = ErrNotFound
+	if _, err := nM.FieldAsInterface(path); err != nil && err.Error() != expErr.Error() {
+		t.Errorf("Expected error: %s, received error: %v", expErr.Error(), err)
+	}
+
+	path = []string{"SliceInterface[0]", "A"}
+	expErr = fmt.Errorf(`strconv.Atoi: parsing "nan": invalid syntax`)
+	var eVal interface{} = 0
+	if rplyVal, err := nM.FieldAsInterface(path); err != nil && err.Error() != expErr.Error() {
+		t.Errorf("Expected error: %s, received error: %v", expErr.Error(), err)
+	} else if !reflect.DeepEqual(eVal, rplyVal) {
+		t.Errorf("Expected: %s , received: %s", ToJSON(eVal), ToJSON(rplyVal))
+	}
+
+	path = []string{"SliceInterface[1]", "B"}
+	expErr = ErrNotFound
+	eVal = 1
+	if rplyVal, err := nM.FieldAsInterface(path); err != nil && err.Error() != expErr.Error() {
+		t.Errorf("Expected error: %s, received error: %v", expErr.Error(), err)
+	} else if !reflect.DeepEqual(eVal, rplyVal) {
+		t.Errorf("Expected: %s , received: %s", ToJSON(eVal), ToJSON(rplyVal))
+	}
+
+	path = []string{"Slice2[1]", "A"}
+	expErr = ErrNotFound
+	if _, err := nM.FieldAsInterface(path); err != nil && err.Error() != expErr.Error() {
+		t.Errorf("Expected error: %s, received error: %v", expErr.Error(), err)
+	}
+
+	path = []string{"Slice2[nan]", "A"}
+	expErr = fmt.Errorf(`strconv.Atoi: parsing "nan": invalid syntax`)
+	if _, err := nM.FieldAsInterface(path); err != nil && err.Error() != expErr.Error() {
+		t.Errorf("Expected error: %s, received error: %v", expErr.Error(), err)
+	}
+
+	path = []string{"Slice2[0]", "A"}
+	expErr = ErrNotFound
+	if _, err := nM.FieldAsInterface(path); err != nil && err.Error() != expErr.Error() {
+		t.Errorf("Expected error: %s, received error: %v", expErr.Error(), err)
+	}
+}
+
+func TestNavMapGetKeys2(t *testing.T) {
+	navMp := MapStorage{
+		"FirstLevel": dataStorage(MapStorage{
+			"SecondLevel": map[string]interface{}{
+				"ThirdLevel": MapStorage{
+					"Fld1": 123.123,
+				},
+			},
+		}),
+		"FistLever2": MapStorage{
+			"SecondLevel2": map[string]interface{}{
+				"Field2": 123,
+			},
+			"Field3": "Value3",
+			"Field4": &testStruct{
+				Item1: "Ten",
+				Item2: 10,
+			},
+		},
+		"Field5": &testStruct{
+			Item1: "Ten",
+			Item2: 10,
+		},
+		"Field6":  []string{"1", "2"},
+		"Field7":  []interface{}{"1", "2"},
+		"Field8":  []dataStorage{MapStorage{"A": 1}},
+		"Field9":  []MapStorage{{"A": 1}},
+		"Field10": []map[string]interface{}{{"A": 1}},
+	}
+	expKeys := []string{
+		"FirstLevel",
+		"FirstLevel.SecondLevel",
+		"FirstLevel.SecondLevel.ThirdLevel",
+		"FirstLevel.SecondLevel.ThirdLevel.Fld1",
+		"FistLever2",
+		"FistLever2.SecondLevel2",
+		"FistLever2.SecondLevel2.Field2",
+		"FistLever2.Field3",
+		"FistLever2.Field4",
+		"FistLever2.Field4.Item1",
+		"FistLever2.Field4.Item2",
+		"Field5",
+		"Field5.Item1",
+		"Field5.Item2",
+		"Field6",
+		"Field6[0]",
+		"Field6[1]",
+		"Field7",
+		"Field7[0]",
+		"Field7[1]",
+		"Field8",
+		"Field8[0]",
+		"Field8[0].A",
+		"Field9",
+		"Field9[0]",
+		"Field9[0].A",
+		"Field10",
+		"Field10[0]",
+		"Field10[0].A",
+	}
+	keys := navMp.GetKeys(true)
+	sort.Strings(expKeys)
+	sort.Strings(keys)
+	if !reflect.DeepEqual(expKeys, keys) {
+		t.Errorf("Expecting: %+v, received: %+v", ToJSON(expKeys), ToJSON(keys))
+	}
+}
+
+func TestGetPathFromInterface(t *testing.T) {
+	var navMp interface{} = []map[string]interface{}{{
+		"A": "B",
+		"C": []string{"1"},
+		"D": []interface{}{"1"},
+		"E": []struct{}{{}},
+		"F": map[string]struct{}{"A": {}},
+	}}
+	expKeys := []string{
+		"L[0]",
+		"L[0].A",
+		"L[0].C",
+		"L[0].C[0]",
+		"L[0].D",
+		"L[0].D[0]",
+		"L[0].E",
+		"L[0].E[0]",
+		"L[0].F",
+		"L[0].F.A",
+	}
+	keys := getPathFromInterface(navMp, "L")
+	sort.Strings(expKeys)
+	sort.Strings(keys)
+	if !reflect.DeepEqual(expKeys, keys) {
+		t.Errorf("Expecting: %+v, received: %+v", ToJSON(expKeys), ToJSON(keys))
+	}
+}
