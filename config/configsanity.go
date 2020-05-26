@@ -98,6 +98,13 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				return fmt.Errorf("<%s> cannot find CDR export template with ID: <%s>", utils.CDRs, cdrePrfl)
 			}
 		}
+		for prfl, cdre := range cfg.CdreProfiles {
+			for _, field := range cdre.Fields {
+				if field.Type != utils.META_NONE && field.Path == utils.EmptyString {
+					return fmt.Errorf("<%s> %s for %s at %s", utils.CDRs, utils.NewErrMandatoryIeMissing(utils.Path), prfl, field.Tag)
+				}
+			}
+		}
 	}
 	// Loaders sanity checks
 	for _, ldrSCfg := range cfg.loaderCfg {
@@ -117,6 +124,9 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			for _, field := range data.Fields {
 				if field.Type != utils.META_COMPOSED && field.Type != utils.MetaString && field.Type != utils.MetaVariable {
 					return fmt.Errorf("<%s> invalid field type %s for %s at %s", utils.LoaderS, field.Type, data.Type, field.Tag)
+				}
+				if field.Path == utils.EmptyString {
+					return fmt.Errorf("<%s> %s for %s at %s", utils.LoaderS, utils.NewErrMandatoryIeMissing(utils.Path), data.Type, field.Tag)
 				}
 			}
 		}
@@ -264,6 +274,29 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.DiameterAgent, connID)
 			}
 		}
+		for prf, tmp := range cfg.diameterAgentCfg.Templates {
+			for _, field := range tmp {
+				if field.Type != utils.META_NONE && field.Path == utils.EmptyString {
+					return fmt.Errorf("<%s> %s for template %s at %s", utils.DiameterAgent, utils.NewErrMandatoryIeMissing(utils.Path), prf, field.Tag)
+				}
+			}
+		}
+		for _, req := range cfg.diameterAgentCfg.RequestProcessors {
+			for _, field := range req.RequestFields {
+				if field.Type != utils.META_NONE &&
+					field.Type != utils.MetaTemplate &&
+					field.Path == utils.EmptyString {
+					return fmt.Errorf("<%s> %s for %s at %s", utils.DiameterAgent, utils.NewErrMandatoryIeMissing(utils.Path), req.ID, field.Tag)
+				}
+			}
+			for _, field := range req.ReplyFields {
+				if field.Type != utils.META_NONE &&
+					field.Type != utils.MetaTemplate &&
+					field.Path == utils.EmptyString {
+					return fmt.Errorf("<%s> %s for %s at %s", utils.DiameterAgent, utils.NewErrMandatoryIeMissing(utils.Path), req.ID, field.Tag)
+				}
+			}
+		}
 	}
 	//Radius Agent
 	if cfg.radiusAgentCfg.Enabled {
@@ -279,6 +312,18 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.RadiusAgent, connID)
 			}
 		}
+		for _, req := range cfg.radiusAgentCfg.RequestProcessors {
+			for _, field := range req.RequestFields {
+				if field.Type != utils.META_NONE && field.Path == utils.EmptyString {
+					return fmt.Errorf("<%s> %s for %s at %s", utils.RadiusAgent, utils.NewErrMandatoryIeMissing(utils.Path), req.ID, field.Tag)
+				}
+			}
+			for _, field := range req.ReplyFields {
+				if field.Type != utils.META_NONE && field.Path == utils.EmptyString {
+					return fmt.Errorf("<%s> %s for %s at %s", utils.RadiusAgent, utils.NewErrMandatoryIeMissing(utils.Path), req.ID, field.Tag)
+				}
+			}
+		}
 	}
 	//DNS Agent
 	if cfg.dnsAgentCfg.Enabled {
@@ -292,6 +337,18 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			}
 			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
 				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.DNSAgent, connID)
+			}
+		}
+		for _, req := range cfg.dnsAgentCfg.RequestProcessors {
+			for _, field := range req.RequestFields {
+				if field.Type != utils.META_NONE && field.Path == utils.EmptyString {
+					return fmt.Errorf("<%s> %s for %s at %s", utils.DNSAgent, utils.NewErrMandatoryIeMissing(utils.Path), req.ID, field.Tag)
+				}
+			}
+			for _, field := range req.ReplyFields {
+				if field.Type != utils.META_NONE && field.Path == utils.EmptyString {
+					return fmt.Errorf("<%s> %s for %s at %s", utils.DNSAgent, utils.NewErrMandatoryIeMissing(utils.Path), req.ID, field.Tag)
+				}
 			}
 		}
 	}
@@ -312,7 +369,20 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		if !utils.SliceHasMember([]string{utils.MetaTextPlain, utils.MetaXml}, httpAgentCfg.ReplyPayload) {
 			return fmt.Errorf("<%s> unsupported reply payload %s", utils.HTTPAgent, httpAgentCfg.ReplyPayload)
 		}
+		for _, req := range httpAgentCfg.RequestProcessors {
+			for _, field := range req.RequestFields {
+				if field.Type != utils.META_NONE && field.Path == utils.EmptyString {
+					return fmt.Errorf("<%s> %s for %s at %s", utils.HTTPAgent, utils.NewErrMandatoryIeMissing(utils.Path), req.ID, field.Tag)
+				}
+			}
+			for _, field := range req.ReplyFields {
+				if field.Type != utils.META_NONE && field.Path == utils.EmptyString {
+					return fmt.Errorf("<%s> %s for %s at %s", utils.HTTPAgent, utils.NewErrMandatoryIeMissing(utils.Path), req.ID, field.Tag)
+				}
+			}
+		}
 	}
+
 	if cfg.attributeSCfg.Enabled {
 		if cfg.attributeSCfg.ProcessRuns < 1 {
 			return fmt.Errorf("<%s> process_runs needs to be bigger than 0", utils.AttributeS)
@@ -422,6 +492,16 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 					if _, err := os.Stat(dir); err != nil && os.IsNotExist(err) {
 						return fmt.Errorf("<%s> nonexistent folder: %s for reader with ID: %s", utils.ERs, dir, rdr.ID)
 					}
+				}
+			}
+			for _, field := range rdr.CacheDumpFields {
+				if field.Type != utils.META_NONE && field.Path == utils.EmptyString {
+					return fmt.Errorf("<%s> %s for %s at %s", utils.ERs, utils.NewErrMandatoryIeMissing(utils.Path), rdr.ID, field.Tag)
+				}
+			}
+			for _, field := range rdr.Fields {
+				if field.Type != utils.META_NONE && field.Path == utils.EmptyString {
+					return fmt.Errorf("<%s> %s for %s at %s", utils.ERs, utils.NewErrMandatoryIeMissing(utils.Path), rdr.ID, field.Tag)
 				}
 			}
 		}
