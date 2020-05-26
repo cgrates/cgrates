@@ -28,8 +28,8 @@ binary-arch: clean
 	cp -r $(CURDIR)/data/conf/cgrates $(PKGDIR)/etc/
 	mkdir -p $(PKGDIR)/etc/logrotate.d
 	mkdir -p $(PKGDIR)/etc/rsyslog.d
-	cp -r $(CURDIR)/data/conf/logging/deb_logrotate.conf $(PKGDIR)/etc/logrotate.d/cgrates
-	cp -r $(CURDIR)/data/conf/logging/deb_rsyslog.conf $(PKGDIR)/etc/rsyslog.d/25-cgrates.conf
+	cp -r $(CURDIR)/data/conf/logging/logrotate.conf $(PKGDIR)/etc/logrotate.d/cgrates
+	cp -r $(CURDIR)/data/conf/logging/rsyslog.conf $(PKGDIR)/etc/rsyslog.d/25-cgrates.conf
 	mkdir -p $(PKGDIR)/usr/share/cgrates
 	cp -r $(CURDIR)/data/* $(PKGDIR)/usr/share/cgrates/
 	tar -xzvf $(PKGDIR)/usr/share/cgrates/tutorials/fs_evsock/freeswitch/etc/freeswitch_conf.tar.gz -C $(PKGDIR)/usr/share/cgrates/tutorials/fs_evsock/freeswitch/etc/
