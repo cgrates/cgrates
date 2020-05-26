@@ -201,7 +201,7 @@ func testDspResTestAuthKey3(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eAllocationMsg, reply)
 	}
 
-	if err := dispEngine.RPC.Call(utils.ResourceSv1AuthorizeResources, argsRU, &reply); err != nil {
+	if err := dispEngine.RPC.Call(utils.ResourceSv1AuthorizeResources, &argsRU, &reply); err != nil {
 		t.Error(err)
 	} else if reply != eAllocationMsg { // already 3 usages active before allow call, we should have now more than allowed
 		t.Errorf("Expecting: %+v, received: %+v", eAllocationMsg, reply)
@@ -222,7 +222,7 @@ func testDspResTestAuthKey3(t *testing.T) {
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.ResourceSv1AuthorizeResources,
-		argsRU, &reply); err == nil || err.Error() != utils.ErrResourceUnauthorized.Error() {
+		&argsRU, &reply); err == nil || err.Error() != utils.ErrResourceUnauthorized.Error() {
 		t.Error(err)
 	}
 
@@ -262,7 +262,7 @@ func testDspResTestAuthKey3(t *testing.T) {
 			APIKey: utils.StringPointer("res12345"),
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.ResourceSv1AuthorizeResources, argsRU, &reply); err != nil {
+	if err := dispEngine.RPC.Call(utils.ResourceSv1AuthorizeResources, &argsRU, &reply); err != nil {
 		t.Error(err)
 	} else if reply != "ResGroup1" {
 		t.Error("Unexpected reply returned", reply)

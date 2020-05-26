@@ -119,7 +119,7 @@ func testTPTimingsRpcConn(t *testing.T) {
 
 func testTPTimingsGetTPTimingBeforeSet(t *testing.T) {
 	var reply *utils.ApierTPTiming
-	if err := tpTimingRPC.Call(utils.APIerSv1GetTPTiming, AttrGetTPTiming{TPid: "TPT1", ID: "Timining"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := tpTimingRPC.Call(utils.APIerSv1GetTPTiming, &AttrGetTPTiming{TPid: "TPT1", ID: "Timining"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
@@ -191,7 +191,7 @@ func testTPTimingsRemoveTPTiming(t *testing.T) {
 
 func testTPTimingsGetTPTimingAfterRemove(t *testing.T) {
 	var reply *utils.ApierTPTiming
-	if err := tpTimingRPC.Call(utils.APIerSv1GetTPTiming, AttrGetTPTiming{TPid: "TPT1", ID: "Timining"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := tpTimingRPC.Call(utils.APIerSv1GetTPTiming, &AttrGetTPTiming{TPid: "TPT1", ID: "Timining"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }

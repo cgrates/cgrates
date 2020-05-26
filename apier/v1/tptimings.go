@@ -40,8 +40,8 @@ type AttrGetTPTiming struct {
 }
 
 // GetTPTiming queries specific Timing on Tariff plan
-func (api *APIerSv1) GetTPTiming(attrs AttrGetTPTiming, reply *utils.ApierTPTiming) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ID"}); len(missing) != 0 { //Params missing
+func (api *APIerSv1) GetTPTiming(attrs *AttrGetTPTiming, reply *utils.ApierTPTiming) error {
+	if missing := utils.MissingStructFields(attrs, []string{"TPid", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	tms, err := api.StorDb.GetTPTimings(attrs.TPid, attrs.ID)
@@ -61,8 +61,8 @@ type AttrGetTPTimingIds struct {
 }
 
 // GetTPTimingIds queries timing identities on specific tariff plan.
-func (api *APIerSv1) GetTPTimingIds(attrs AttrGetTPTimingIds, reply *[]string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
+func (api *APIerSv1) GetTPTimingIds(attrs *AttrGetTPTimingIds, reply *[]string) error {
+	if missing := utils.MissingStructFields(attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	ids, err := api.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPTimings,

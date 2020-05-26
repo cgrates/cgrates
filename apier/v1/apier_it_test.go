@@ -253,7 +253,7 @@ func testApierTPTiming(t *testing.T) {
 	}
 	// Test get
 	var rplyTmAlways2 *utils.ApierTPTiming
-	if err := rater.Call(utils.APIerSv1GetTPTiming, AttrGetTPTiming{tmAlways2.TPid, tmAlways2.ID}, &rplyTmAlways2); err != nil {
+	if err := rater.Call(utils.APIerSv1GetTPTiming, &AttrGetTPTiming{tmAlways2.TPid, tmAlways2.ID}, &rplyTmAlways2); err != nil {
 		t.Error("Calling APIerSv1.GetTPTiming, got error: ", err.Error())
 	} else if !reflect.DeepEqual(tmAlways2, rplyTmAlways2) {
 		t.Errorf("Calling APIerSv1.GetTPTiming expected: %v, received: %v", tmAlways, rplyTmAlways2)
@@ -267,7 +267,7 @@ func testApierTPTiming(t *testing.T) {
 	// Test getIds
 	var rplyTmIds []string
 	expectedTmIds := []string{"ALWAYS", "ASAP"}
-	if err := rater.Call(utils.APIerSv1GetTPTimingIds, AttrGetTPTimingIds{tmAlways.TPid, utils.PaginatorWithSearch{}}, &rplyTmIds); err != nil {
+	if err := rater.Call(utils.APIerSv1GetTPTimingIds, &AttrGetTPTimingIds{tmAlways.TPid, utils.PaginatorWithSearch{}}, &rplyTmIds); err != nil {
 		t.Error("Calling APIerSv1.GetTPTimingIds, got error: ", err.Error())
 	}
 	sort.Strings(expectedTmIds)
@@ -307,13 +307,13 @@ func testApierTPDestination(t *testing.T) {
 	}
 	// Test get
 	var rplyDstDe2 *utils.TPDestination
-	if err := rater.Call(utils.APIerSv1GetTPDestination, AttrGetTPDestination{dstDe2.TPid, dstDe2.ID}, &rplyDstDe2); err != nil {
+	if err := rater.Call(utils.APIerSv1GetTPDestination, &AttrGetTPDestination{dstDe2.TPid, dstDe2.ID}, &rplyDstDe2); err != nil {
 		t.Error("Calling APIerSv1.GetTPDestination, got error: ", err.Error())
 	} else if !reflect.DeepEqual(dstDe2, rplyDstDe2) {
 		t.Errorf("Calling APIerSv1.GetTPDestination expected: %v, received: %v", dstDe2, rplyDstDe2)
 	}
 	// Test remove
-	if err := rater.Call(utils.APIerSv1RemoveTPDestination, AttrGetTPDestination{dstDe2.TPid, dstDe2.ID}, &reply); err != nil {
+	if err := rater.Call(utils.APIerSv1RemoveTPDestination, &AttrGetTPDestination{dstDe2.TPid, dstDe2.ID}, &reply); err != nil {
 		t.Error("Calling APIerSv1.RemoveTPTiming, got error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling APIerSv1.RemoveTPTiming received: ", reply)
@@ -321,7 +321,7 @@ func testApierTPDestination(t *testing.T) {
 	// Test getIds
 	var rplyDstIds []string
 	expectedDstIds := []string{"FS_USERS", "GERMANY", "GERMANY_MOBILE"}
-	if err := rater.Call(utils.APIerSv1GetTPDestinationIDs, AttrGetTPDestinationIds{TPid: dstDe.TPid}, &rplyDstIds); err != nil {
+	if err := rater.Call(utils.APIerSv1GetTPDestinationIDs, &AttrGetTPDestinationIds{TPid: dstDe.TPid}, &rplyDstIds); err != nil {
 		t.Error("Calling APIerSv1.GetTPDestinationIDs, got error: ", err.Error())
 	}
 	sort.Strings(expectedDstIds)
@@ -361,13 +361,13 @@ func testApierTPRate(t *testing.T) {
 	}
 	// Test get
 	var rplyRt2 *utils.TPRate
-	if err := rater.Call(utils.APIerSv1GetTPRate, AttrGetTPRate{rt2.TPid, rt2.ID}, &rplyRt2); err != nil {
+	if err := rater.Call(utils.APIerSv1GetTPRate, &AttrGetTPRate{rt2.TPid, rt2.ID}, &rplyRt2); err != nil {
 		t.Error("Calling APIerSv1.GetTPRate, got error: ", err.Error())
 	} else if !reflect.DeepEqual(rt2, rplyRt2) {
 		t.Errorf("Calling APIerSv1.GetTPRate expected: %+v, received: %+v", rt2, rplyRt2)
 	}
 	// Test remove
-	if err := rater.Call(utils.APIerSv1RemoveTPRate, AttrGetTPRate{rt2.TPid, rt2.ID}, &reply); err != nil {
+	if err := rater.Call(utils.APIerSv1RemoveTPRate, &AttrGetTPRate{rt2.TPid, rt2.ID}, &reply); err != nil {
 		t.Error("Calling APIerSv1.RemoveTPRate, got error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling APIerSv1.RemoveTPRate received: ", reply)
@@ -375,7 +375,7 @@ func testApierTPRate(t *testing.T) {
 	// Test getIds
 	var rplyRtIds []string
 	expectedRtIds := []string{"RT_FS_USERS"}
-	if err := rater.Call(utils.APIerSv1GetTPRateIds, AttrGetTPRateIds{rt.TPid, utils.PaginatorWithSearch{}}, &rplyRtIds); err != nil {
+	if err := rater.Call(utils.APIerSv1GetTPRateIds, &AttrGetTPRateIds{rt.TPid, utils.PaginatorWithSearch{}}, &rplyRtIds); err != nil {
 		t.Error("Calling APIerSv1.GetTPRateIds, got error: ", err.Error())
 	} else if !reflect.DeepEqual(expectedRtIds, rplyRtIds) {
 		t.Errorf("Calling APIerSv1.GetTPDestinationIDs expected: %v, received: %v", expectedRtIds, rplyRtIds)
@@ -415,13 +415,13 @@ func testApierTPDestinationRate(t *testing.T) {
 	}
 	// Test get
 	var rplyDr2 *utils.TPDestinationRate
-	if err := rater.Call(utils.APIerSv1GetTPDestinationRate, AttrGetTPDestinationRate{dr2.TPid, dr2.ID, utils.Paginator{}}, &rplyDr2); err != nil {
+	if err := rater.Call(utils.APIerSv1GetTPDestinationRate, &AttrGetTPDestinationRate{dr2.TPid, dr2.ID, utils.Paginator{}}, &rplyDr2); err != nil {
 		t.Error("Calling APIerSv1.GetTPDestinationRate, got error: ", err.Error())
 	} else if !reflect.DeepEqual(dr2, rplyDr2) {
 		t.Errorf("Calling APIerSv1.GetTPDestinationRate expected: %v, received: %v", dr2, rplyDr2)
 	}
 	// Test remove
-	if err := rater.Call(utils.APIerSv1RemoveTPDestinationRate, AttrGetTPDestinationRate{dr2.TPid, dr2.ID, utils.Paginator{}}, &reply); err != nil {
+	if err := rater.Call(utils.APIerSv1RemoveTPDestinationRate, &AttrGetTPDestinationRate{dr2.TPid, dr2.ID, utils.Paginator{}}, &reply); err != nil {
 		t.Error("Calling APIerSv1.RemoveTPRate, got error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling APIerSv1.RemoveTPRate received: ", reply)
@@ -429,7 +429,7 @@ func testApierTPDestinationRate(t *testing.T) {
 	// Test getIds
 	var rplyDrIds []string
 	expectedDrIds := []string{"DR_FREESWITCH_USERS"}
-	if err := rater.Call(utils.APIerSv1GetTPDestinationRateIds, AttrTPDestinationRateIds{dr.TPid, utils.PaginatorWithSearch{}}, &rplyDrIds); err != nil {
+	if err := rater.Call(utils.APIerSv1GetTPDestinationRateIds, &AttrTPDestinationRateIds{dr.TPid, utils.PaginatorWithSearch{}}, &rplyDrIds); err != nil {
 		t.Error("Calling APIerSv1.GetTPDestinationRateIds, got error: ", err.Error())
 	} else if !reflect.DeepEqual(expectedDrIds, rplyDrIds) {
 		t.Errorf("Calling APIerSv1.GetTPDestinationRateIds expected: %v, received: %v", expectedDrIds, rplyDrIds)
@@ -466,13 +466,13 @@ func testApierTPRatingPlan(t *testing.T) {
 	}
 	// Test get
 	var rplyRpTst *utils.TPRatingPlan
-	if err := rater.Call(utils.APIerSv1GetTPRatingPlan, AttrGetTPRatingPlan{TPid: rpTst.TPid, ID: rpTst.ID}, &rplyRpTst); err != nil {
+	if err := rater.Call(utils.APIerSv1GetTPRatingPlan, &AttrGetTPRatingPlan{TPid: rpTst.TPid, ID: rpTst.ID}, &rplyRpTst); err != nil {
 		t.Error("Calling APIerSv1.GetTPRatingPlan, got error: ", err.Error())
 	} else if !reflect.DeepEqual(rpTst, rplyRpTst) {
 		t.Errorf("Calling APIerSv1.GetTPRatingPlan expected: %v, received: %v", rpTst, rplyRpTst)
 	}
 	// Test remove
-	if err := rater.Call(utils.APIerSv1RemoveTPRatingPlan, AttrGetTPRatingPlan{TPid: rpTst.TPid, ID: rpTst.ID}, &reply); err != nil {
+	if err := rater.Call(utils.APIerSv1RemoveTPRatingPlan, &AttrGetTPRatingPlan{TPid: rpTst.TPid, ID: rpTst.ID}, &reply); err != nil {
 		t.Error("Calling APIerSv1.RemoveTPRatingPlan, got error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling APIerSv1.RemoveTPRatingPlan received: ", reply)
@@ -480,7 +480,7 @@ func testApierTPRatingPlan(t *testing.T) {
 	// Test getIds
 	var rplyRpIds []string
 	expectedRpIds := []string{"RETAIL1"}
-	if err := rater.Call(utils.APIerSv1GetTPRatingPlanIds, AttrGetTPRatingPlanIds{rp.TPid, utils.PaginatorWithSearch{}}, &rplyRpIds); err != nil {
+	if err := rater.Call(utils.APIerSv1GetTPRatingPlanIds, &AttrGetTPRatingPlanIds{rp.TPid, utils.PaginatorWithSearch{}}, &rplyRpIds); err != nil {
 		t.Error("Calling APIerSv1.GetTPRatingPlanIds, got error: ", err.Error())
 	} else if !reflect.DeepEqual(expectedRpIds, rplyRpIds) {
 		t.Errorf("Calling APIerSv1.GetTPRatingPlanIds expected: %v, received: %v", expectedRpIds, rplyRpIds)
@@ -526,13 +526,13 @@ func testApierTPRatingProfile(t *testing.T) {
 	}
 	// Test get
 	var rplyRpf *utils.TPRatingProfile
-	if err := rater.Call(utils.APIerSv1GetTPRatingProfile, AttrGetTPRatingProfile{TPid: rpfTst.TPid, RatingProfileID: utils.ConcatenatedKey(rpfTst.LoadId, rpfTst.Tenant, rpfTst.Category, rpfTst.Subject)}, &rplyRpf); err != nil {
+	if err := rater.Call(utils.APIerSv1GetTPRatingProfile, &AttrGetTPRatingProfile{TPid: rpfTst.TPid, RatingProfileID: utils.ConcatenatedKey(rpfTst.LoadId, rpfTst.Tenant, rpfTst.Category, rpfTst.Subject)}, &rplyRpf); err != nil {
 		t.Error("Calling APIerSv1.GetTPRatingProfiles, got error: ", err.Error())
 	} else if !reflect.DeepEqual(rpfTst, rplyRpf) {
 		t.Errorf("Calling APIerSv1.GetTPRatingProfiles expected: %v, received: %v", rpfTst, rplyRpf)
 	}
 	// Test remove
-	if err := rater.Call(utils.APIerSv1RemoveTPRatingProfile, AttrGetTPRatingProfile{TPid: rpfTst.TPid, RatingProfileID: utils.ConcatenatedKey(rpfTst.LoadId, rpfTst.Tenant, rpfTst.Category, rpfTst.Subject)}, &reply); err != nil {
+	if err := rater.Call(utils.APIerSv1RemoveTPRatingProfile, &AttrGetTPRatingProfile{TPid: rpfTst.TPid, RatingProfileID: utils.ConcatenatedKey(rpfTst.LoadId, rpfTst.Tenant, rpfTst.Category, rpfTst.Subject)}, &reply); err != nil {
 		t.Error("Calling APIerSv1.RemoveTPRatingProfile, got error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling APIerSv1.RemoveTPRatingProfile received: ", reply)
@@ -540,7 +540,7 @@ func testApierTPRatingProfile(t *testing.T) {
 	// Test getLoadIds
 	var rplyRpIds []string
 	expectedRpIds := []string{utils.TEST_SQL}
-	if err := rater.Call(utils.APIerSv1GetTPRatingProfileLoadIds, utils.AttrTPRatingProfileIds{TPid: rpf.TPid}, &rplyRpIds); err != nil {
+	if err := rater.Call(utils.APIerSv1GetTPRatingProfileLoadIds, &utils.AttrTPRatingProfileIds{TPid: rpf.TPid}, &rplyRpIds); err != nil {
 		t.Error("Calling APIerSv1.GetTPRatingProfileLoadIds, got error: ", err.Error())
 	} else if !reflect.DeepEqual(expectedRpIds, rplyRpIds) {
 		t.Errorf("Calling APIerSv1.GetTPRatingProfileLoadIds expected: %v, received: %v", expectedRpIds, rplyRpIds)
@@ -585,13 +585,13 @@ func testApierTPActions(t *testing.T) {
 	}
 	// Test get
 	var rplyActs *utils.TPActions
-	if err := rater.Call(utils.APIerSv1GetTPActions, AttrGetTPActions{TPid: actTst.TPid, ID: actTst.ID}, &rplyActs); err != nil {
+	if err := rater.Call(utils.APIerSv1GetTPActions, &AttrGetTPActions{TPid: actTst.TPid, ID: actTst.ID}, &rplyActs); err != nil {
 		t.Error("Calling APIerSv1.GetTPActions, got error: ", err.Error())
 	} else if !reflect.DeepEqual(actTst, rplyActs) {
 		t.Errorf("Calling APIerSv1.GetTPActions expected: %v, received: %v", actTst, rplyActs)
 	}
 	// Test remove
-	if err := rater.Call(utils.APIerSv1RemoveTPActions, AttrGetTPActions{TPid: actTst.TPid, ID: actTst.ID}, &reply); err != nil {
+	if err := rater.Call(utils.APIerSv1RemoveTPActions, &AttrGetTPActions{TPid: actTst.TPid, ID: actTst.ID}, &reply); err != nil {
 		t.Error("Calling APIerSv1.RemoveTPActions, got error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling APIerSv1.RemoveTPActions received: ", reply)
@@ -599,7 +599,7 @@ func testApierTPActions(t *testing.T) {
 	// Test getIds
 	var rplyIds []string
 	expectedIds := []string{"LOG_BALANCE", "PREPAID_10", "WARN_VIA_HTTP"}
-	if err := rater.Call(utils.APIerSv1GetTPActionIds, AttrGetTPActionIds{TPid: actTst.TPid}, &rplyIds); err != nil {
+	if err := rater.Call(utils.APIerSv1GetTPActionIds, &AttrGetTPActionIds{TPid: actTst.TPid}, &rplyIds); err != nil {
 		t.Error("Calling APIerSv1.GetTPActionIds, got error: ", err.Error())
 	}
 	sort.Strings(expectedIds)
@@ -638,13 +638,13 @@ func testApierTPActionPlan(t *testing.T) {
 	}
 	// Test get
 	var rplyActs *utils.TPActionPlan
-	if err := rater.Call(utils.APIerSv1GetTPActionPlan, AttrGetTPActionPlan{TPid: atTst.TPid, ID: atTst.ID}, &rplyActs); err != nil {
+	if err := rater.Call(utils.APIerSv1GetTPActionPlan, &AttrGetTPActionPlan{TPid: atTst.TPid, ID: atTst.ID}, &rplyActs); err != nil {
 		t.Error("Calling APIerSv1.GetTPActionPlan, got error: ", err.Error())
 	} else if !reflect.DeepEqual(atTst, rplyActs) {
 		t.Errorf("Calling APIerSv1.GetTPActionPlan expected: %v, received: %v", atTst, rplyActs)
 	}
 	// Test remove
-	if err := rater.Call(utils.APIerSv1RemoveTPActionPlan, AttrGetTPActionPlan{TPid: atTst.TPid, ID: atTst.ID}, &reply); err != nil {
+	if err := rater.Call(utils.APIerSv1RemoveTPActionPlan, &AttrGetTPActionPlan{TPid: atTst.TPid, ID: atTst.ID}, &reply); err != nil {
 		t.Error("Calling APIerSv1.RemoveTPActionPlan, got error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling APIerSv1.RemoveTPActionPlan received: ", reply)
@@ -652,7 +652,7 @@ func testApierTPActionPlan(t *testing.T) {
 	// Test getIds
 	var rplyIds []string
 	expectedIds := []string{"PREPAID_10"}
-	if err := rater.Call(utils.APIerSv1GetTPActionPlanIds, AttrGetTPActionPlanIds{TPid: atTst.TPid}, &rplyIds); err != nil {
+	if err := rater.Call(utils.APIerSv1GetTPActionPlanIds, &AttrGetTPActionPlanIds{TPid: atTst.TPid}, &rplyIds); err != nil {
 		t.Error("Calling APIerSv1.GetTPActionPlanIds, got error: ", err.Error())
 	} else if !reflect.DeepEqual(expectedIds, rplyIds) {
 		t.Errorf("Calling APIerSv1.GetTPActionPlanIds expected: %v, received: %v", expectedIds, rplyIds)
@@ -699,13 +699,13 @@ func testApierTPActionTriggers(t *testing.T) {
 	}
 	// Test get
 	var rplyActs *utils.TPActionTriggers
-	if err := rater.Call(utils.APIerSv1GetTPActionTriggers, AttrGetTPActionTriggers{TPid: atTst.TPid, ID: atTst.ID}, &rplyActs); err != nil {
+	if err := rater.Call(utils.APIerSv1GetTPActionTriggers, &AttrGetTPActionTriggers{TPid: atTst.TPid, ID: atTst.ID}, &rplyActs); err != nil {
 		t.Errorf("Calling APIerSv1.GetTPActionTriggers %s, got error: %s", atTst.ID, err.Error())
 	} else if !reflect.DeepEqual(atTst, rplyActs) {
 		t.Errorf("Calling APIerSv1.GetTPActionTriggers expected: %+v, received: %+v", utils.ToJSON(atTst), utils.ToJSON(rplyActs))
 	}
 	// Test remove
-	if err := rater.Call(utils.APIerSv1RemoveTPActionTriggers, AttrGetTPActionTriggers{TPid: atTst.TPid, ID: atTst.ID}, &reply); err != nil {
+	if err := rater.Call(utils.APIerSv1RemoveTPActionTriggers, &AttrGetTPActionTriggers{TPid: atTst.TPid, ID: atTst.ID}, &reply); err != nil {
 		t.Error("Calling APIerSv1.RemoveTPActionTriggers, got error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling APIerSv1.RemoveTPActionTriggers received: ", reply)
@@ -713,7 +713,7 @@ func testApierTPActionTriggers(t *testing.T) {
 	// Test getIds
 	var rplyIds []string
 	expectedIds := []string{"STANDARD_TRIGGERS"}
-	if err := rater.Call(utils.APIerSv1GetTPActionTriggerIds, AttrGetTPActionTriggerIds{TPid: atTst.TPid}, &rplyIds); err != nil {
+	if err := rater.Call(utils.APIerSv1GetTPActionTriggerIds, &AttrGetTPActionTriggerIds{TPid: atTst.TPid}, &rplyIds); err != nil {
 		t.Error("Calling APIerSv1.GetTPActionTriggerIds, got error: ", err.Error())
 	} else if !reflect.DeepEqual(expectedIds, rplyIds) {
 		t.Errorf("Calling APIerSv1.GetTPActionTriggerIds expected: %v, received: %v", expectedIds, rplyIds)

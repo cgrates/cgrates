@@ -23,11 +23,11 @@ import (
 )
 
 // SetTPSharedGroups creates a new SharedGroups profile within a tariff plan
-func (api *APIerSv1) SetTPSharedGroups(attrs utils.TPSharedGroups, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ID", "SharedGroups"}); len(missing) != 0 {
+func (api *APIerSv1) SetTPSharedGroups(attrs *utils.TPSharedGroups, reply *string) error {
+	if missing := utils.MissingStructFields(attrs, []string{"TPid", "ID", "SharedGroups"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := api.StorDb.SetTPSharedGroups([]*utils.TPSharedGroups{&attrs}); err != nil {
+	if err := api.StorDb.SetTPSharedGroups([]*utils.TPSharedGroups{attrs}); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
@@ -40,8 +40,8 @@ type AttrGetTPSharedGroups struct {
 }
 
 // GetTPSharedGroups queries specific SharedGroup on tariff plan
-func (api *APIerSv1) GetTPSharedGroups(attrs AttrGetTPSharedGroups, reply *utils.TPSharedGroups) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ID"}); len(missing) != 0 { //Params missing
+func (api *APIerSv1) GetTPSharedGroups(attrs *AttrGetTPSharedGroups, reply *utils.TPSharedGroups) error {
+	if missing := utils.MissingStructFields(attrs, []string{"TPid", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	sgs, err := api.StorDb.GetTPSharedGroups(attrs.TPid, attrs.ID)
@@ -61,8 +61,8 @@ type AttrGetTPSharedGroupIds struct {
 }
 
 // GetTPSharedGroupIds queries SharedGroups identities on specific tariff plan.
-func (api *APIerSv1) GetTPSharedGroupIds(attrs AttrGetTPSharedGroupIds, reply *[]string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
+func (api *APIerSv1) GetTPSharedGroupIds(attrs *AttrGetTPSharedGroupIds, reply *[]string) error {
+	if missing := utils.MissingStructFields(attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	ids, err := api.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPSharedGroups,
@@ -78,8 +78,8 @@ func (api *APIerSv1) GetTPSharedGroupIds(attrs AttrGetTPSharedGroupIds, reply *[
 }
 
 // RemoveTPSharedGroups removes specific SharedGroups on Tariff plan
-func (api *APIerSv1) RemoveTPSharedGroups(attrs AttrGetTPSharedGroups, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ID"}); len(missing) != 0 { //Params missing
+func (api *APIerSv1) RemoveTPSharedGroups(attrs *AttrGetTPSharedGroups, reply *string) error {
+	if missing := utils.MissingStructFields(attrs, []string{"TPid", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if err := api.StorDb.RemTpData(utils.TBLTPSharedGroups, attrs.TPid, map[string]string{"tag": attrs.ID}); err != nil {
