@@ -50,7 +50,7 @@ func (rS *RateS) ListenAndServe(exitChan chan bool, cfgRld chan struct{}) (err e
 			rS.Shutdown()
 			exitChan <- e // put back for the others listening for shutdown request
 			break
-		case rld := <-cfgRld: // configuration was reloaded, destroy the cache
+		case rld := <-cfgRld: // configuration was reloaded
 			cfgRld <- rld
 		}
 	}
