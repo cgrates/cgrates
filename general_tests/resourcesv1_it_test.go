@@ -217,7 +217,7 @@ func testV1RsAuthorize(t *testing.T) {
 		Units: 1,
 	}
 	if err := rlsV1Rpc.Call(utils.ResourceSv1AuthorizeResources,
-		argsRU, &reply2); err.Error() != "RESOURCE_UNAUTHORIZED" {
+		&argsRU, &reply2); err.Error() != "RESOURCE_UNAUTHORIZED" {
 		t.Error(err)
 	}
 }

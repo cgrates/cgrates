@@ -1198,7 +1198,7 @@ func testV1FIdxCaGetResourceProfileWithNotFound(t *testing.T) {
 		t.Error(err)
 	}
 	if err := tFIdxCaRpc.Call(utils.ResourceSv1AuthorizeResources,
-		argsRU, &reply); err.Error() != utils.ErrNotFound.Error() {
+		&argsRU, &reply); err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
@@ -1277,7 +1277,7 @@ func testV1FIdxCaSetResourceProfile(t *testing.T) {
 	}
 
 	if err := tFIdxCaRpc.Call(utils.ResourceSv1AuthorizeResources,
-		argsRU, &result); err != nil {
+		&argsRU, &result); err != nil {
 		t.Error(err)
 	} else if result != "Approved" {
 		t.Error("Unexpected reply returned", result)
@@ -1305,7 +1305,7 @@ func testV1FIdxCaGetResourceProfileFromTP(t *testing.T) {
 		t.Error("Unexpected reply returned", reply)
 	}
 	if err := tFIdxCaRpc.Call(utils.ResourceSv1AuthorizeResources,
-		argsRU, &reply); err != nil {
+		&argsRU, &reply); err != nil {
 		t.Error(err)
 	} else if reply != "Approved" {
 		t.Error("Unexpected reply returned", reply)
@@ -1324,7 +1324,7 @@ func testV1FIdxCaGetResourceProfileFromTP(t *testing.T) {
 		Units: 6,
 	}
 	if err := tFIdxCaRpc.Call(utils.ResourceSv1AuthorizeResources,
-		argsReU, &reply); err != nil {
+		&argsReU, &reply); err != nil {
 		t.Error(err)
 	} else if reply != "ResGroup1" {
 		t.Error("Unexpected reply returned", reply)
@@ -1400,7 +1400,7 @@ func testV1FIdxCaUpdateResourceProfile(t *testing.T) {
 		Units: 6,
 	}
 	if err := tFIdxCaRpc.Call(utils.ResourceSv1AuthorizeResources,
-		argsReU, &result); err != nil {
+		&argsReU, &result); err != nil {
 		t.Error(err)
 	} else if result != "MessageAllocation" {
 		t.Error("Unexpected reply returned", result)
@@ -1465,7 +1465,7 @@ func testV1FIdxCaUpdateResourceProfileFromTP(t *testing.T) {
 		},
 		Units: 6,
 	}
-	if err := tFIdxCaRpc.Call(utils.ResourceSv1AuthorizeResources, argsReU, &result); err != nil {
+	if err := tFIdxCaRpc.Call(utils.ResourceSv1AuthorizeResources, &argsReU, &result); err != nil {
 		t.Error(err)
 	} else if result != "ResGroup1" {
 		t.Error("Unexpected reply returned", result)
@@ -1491,7 +1491,7 @@ func testV1FIdxCaRemoveResourceProfile(t *testing.T) {
 	} else if resp != "MessageAllocation" {
 		t.Error("Unexpected reply returned", resp)
 	}
-	if err := tFIdxCaRpc.Call(utils.ResourceSv1AuthorizeResources, argsReU, &resp); err != nil {
+	if err := tFIdxCaRpc.Call(utils.ResourceSv1AuthorizeResources, &argsReU, &resp); err != nil {
 		t.Error(err)
 	} else if resp != "MessageAllocation" {
 		t.Error("Unexpected reply returned", resp)
@@ -1508,7 +1508,7 @@ func testV1FIdxCaRemoveResourceProfile(t *testing.T) {
 		},
 		Units: 6,
 	}
-	if err := tFIdxCaRpc.Call(utils.ResourceSv1AuthorizeResources, argsRU, &resp); err != nil {
+	if err := tFIdxCaRpc.Call(utils.ResourceSv1AuthorizeResources, &argsRU, &resp); err != nil {
 		t.Error(err)
 	} else if resp != "ResGroup1" {
 		t.Error("Unexpected reply returned", resp)

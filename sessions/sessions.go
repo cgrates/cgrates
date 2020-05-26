@@ -367,7 +367,7 @@ func (sS *SessionS) forceSTerminate(s *Session, extraDebit time.Duration, lastUs
 	// release the resources for the session
 	if len(sS.cgrCfg.SessionSCfg().ResSConns) != 0 && s.ResourceID != "" {
 		var reply string
-		argsRU := utils.ArgRSv1ResourceUsage{
+		argsRU := &utils.ArgRSv1ResourceUsage{
 			CGREvent: &utils.CGREvent{
 				Tenant: s.Tenant,
 				ID:     utils.GenUUID(),
@@ -1918,7 +1918,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.ClientConnector,
 			originID = utils.UUIDSha1Prefix()
 		}
 		var allocMsg string
-		attrRU := utils.ArgRSv1ResourceUsage{
+		attrRU := &utils.ArgRSv1ResourceUsage{
 			CGREvent:      args.CGREvent,
 			UsageID:       originID,
 			Units:         1,
@@ -2187,7 +2187,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.ClientConnector,
 		if originID == "" {
 			return utils.NewErrMandatoryIeMissing(utils.OriginID)
 		}
-		attrRU := utils.ArgRSv1ResourceUsage{
+		attrRU := &utils.ArgRSv1ResourceUsage{
 			CGREvent:      args.CGREvent,
 			UsageID:       originID,
 			Units:         1,
@@ -2606,7 +2606,7 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.ClientConnector,
 			return utils.NewErrMandatoryIeMissing(utils.OriginID)
 		}
 		var reply string
-		argsRU := utils.ArgRSv1ResourceUsage{
+		argsRU := &utils.ArgRSv1ResourceUsage{
 			CGREvent:      args.CGREvent,
 			UsageID:       originID, // same ID should be accepted by first group since the previous resource should be expired
 			Units:         1,
@@ -2929,7 +2929,7 @@ func (sS *SessionS) BiRPCv1ProcessMessage(clnt rpcclient.ClientConnector,
 		if originID == "" {
 			return utils.NewErrMandatoryIeMissing(utils.OriginID)
 		}
-		attrRU := utils.ArgRSv1ResourceUsage{
+		attrRU := &utils.ArgRSv1ResourceUsage{
 			CGREvent:      args.CGREvent,
 			UsageID:       originID,
 			Units:         1,
@@ -3270,7 +3270,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 		for _, chrs := range chrgrs {
 			runID := chrs.ChargerSProfile
 
-			attrRU := utils.ArgRSv1ResourceUsage{
+			attrRU := &utils.ArgRSv1ResourceUsage{
 				CGREvent:      chrs.CGREvent,
 				UsageID:       originID,
 				Units:         1,

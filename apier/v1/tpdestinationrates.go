@@ -25,11 +25,11 @@ import (
 )
 
 // SetTPDestinationRate creates a new DestinationRate profile within a tariff plan
-func (api *APIerSv1) SetTPDestinationRate(attrs utils.TPDestinationRate, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ID", "DestinationRates"}); len(missing) != 0 {
+func (api *APIerSv1) SetTPDestinationRate(attrs *utils.TPDestinationRate, reply *string) error {
+	if missing := utils.MissingStructFields(attrs, []string{"TPid", "ID", "DestinationRates"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := api.StorDb.SetTPDestinationRates([]*utils.TPDestinationRate{&attrs}); err != nil {
+	if err := api.StorDb.SetTPDestinationRates([]*utils.TPDestinationRate{attrs}); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
@@ -43,8 +43,8 @@ type AttrGetTPDestinationRate struct {
 }
 
 // GetTPDestinationRate queries specific DestinationRate profile on tariff plan
-func (api *APIerSv1) GetTPDestinationRate(attrs AttrGetTPDestinationRate, reply *utils.TPDestinationRate) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ID"}); len(missing) != 0 { //Params missing
+func (api *APIerSv1) GetTPDestinationRate(attrs *AttrGetTPDestinationRate, reply *utils.TPDestinationRate) error {
+	if missing := utils.MissingStructFields(attrs, []string{"TPid", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	drs, err := api.StorDb.GetTPDestinationRates(attrs.TPid, attrs.ID, &attrs.Paginator)
@@ -64,8 +64,8 @@ type AttrTPDestinationRateIds struct {
 }
 
 // GetTPDestinationRateIds queries DestinationRate identities on specific tariff plan.
-func (api *APIerSv1) GetTPDestinationRateIds(attrs AttrGetTPRateIds, reply *[]string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
+func (api *APIerSv1) GetTPDestinationRateIds(attrs *AttrGetTPRateIds, reply *[]string) error {
+	if missing := utils.MissingStructFields(attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	ids, err := api.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPDestinationRates,
@@ -81,8 +81,8 @@ func (api *APIerSv1) GetTPDestinationRateIds(attrs AttrGetTPRateIds, reply *[]st
 }
 
 // RemoveTPDestinationRate removes specific DestinationRate on Tariff plan
-func (api *APIerSv1) RemoveTPDestinationRate(attrs AttrGetTPDestinationRate, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ID"}); len(missing) != 0 { //Params missing
+func (api *APIerSv1) RemoveTPDestinationRate(attrs *AttrGetTPDestinationRate, reply *string) error {
+	if missing := utils.MissingStructFields(attrs, []string{"TPid", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if err := api.StorDb.RemTpData(utils.TBLTPDestinationRates, attrs.TPid, map[string]string{"tag": attrs.ID}); err != nil {
