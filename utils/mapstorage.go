@@ -315,7 +315,7 @@ func getPathFromValue(in reflect.Value, prefix string) (out []string) {
 			out = append(out, getPathFromValue(in.Index(i), pref+NestingSep)...)
 		}
 	case reflect.Map:
-		iter := reflect.ValueOf(in).MapRange()
+		iter := in.MapRange()
 		for iter.Next() {
 			pref := prefix + iter.Key().String()
 			out = append(out, pref)
