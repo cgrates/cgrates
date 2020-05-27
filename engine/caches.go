@@ -167,12 +167,12 @@ func (chS *CacheS) RollbackTransaction(transID string) {
 	chS.tCache.RollbackTransaction(transID)
 }
 
-// RollbackTransaction is an exported method from TransCache
+// CommitTransaction is an exported method from TransCache
 func (chS *CacheS) CommitTransaction(transID string) {
 	chS.tCache.CommitTransaction(transID)
 }
 
-// RollbackTransaction is an exported method from TransCache
+// GetCloned is an exported method from TransCache
 func (chS *CacheS) GetCloned(chID, itmID string) (cln interface{}, err error) {
 	return chS.tCache.GetCloned(chID, itmID)
 }

@@ -1009,7 +1009,6 @@ func (ms *MongoStorage) SetReverseDestinationDrv(dest *Destination,
 			)
 			return err
 		}); err != nil {
-
 			return err
 		}
 	}

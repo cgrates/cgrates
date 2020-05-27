@@ -192,18 +192,18 @@ func (eeC *EventExporterCfg) loadFromJsonCfg(jsnEec *EventExporterJsonCfg, separ
 		eeC.headerFields = make([]*FCTemplate, 0)
 		eeC.contentFields = make([]*FCTemplate, 0)
 		eeC.trailerFields = make([]*FCTemplate, 0)
-		if eeC.Fields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnEec.Fields, separator); err != nil {
-			return err
-		} else {
-			for _, field := range eeC.Fields {
-				switch field.GetPathSlice()[0] {
-				case utils.MetaHdr:
-					eeC.headerFields = append(eeC.headerFields, field)
-				case utils.MetaExp:
-					eeC.contentFields = append(eeC.contentFields, field)
-				case utils.MetaTrl:
-					eeC.trailerFields = append(eeC.trailerFields, field)
-				}
+		eeC.Fields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnEec.Fields, separator)
+		if err != nil {
+			return
+		}
+		for _, field := range eeC.Fields {
+			switch field.GetPathSlice()[0] {
+			case utils.MetaHdr:
+				eeC.headerFields = append(eeC.headerFields, field)
+			case utils.MetaExp:
+				eeC.contentFields = append(eeC.contentFields, field)
+			case utils.MetaTrl:
+				eeC.trailerFields = append(eeC.trailerFields, field)
 			}
 		}
 	}
