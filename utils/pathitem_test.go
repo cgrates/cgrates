@@ -155,3 +155,11 @@ func TestGetPathWithoutIndex(t *testing.T) {
 		t.Errorf("Expected: %s, received: %s", expected, rply)
 	}
 }
+
+func TestPathItemsSlice(t *testing.T) {
+	expected := []string{"*req", "Field1[0]", "Account"}
+	path := NewPathItems(expected)
+	if rply := path.Slice(); !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expected: %q, received: %q", expected, rply)
+	}
+}

@@ -92,8 +92,9 @@ func TestAccountStorageStoreRestore(t *testing.T) {
 	b2 := &Balance{Value: 100, Weight: 20,
 		DestinationIDs: utils.StringMap{"RET": true}}
 	rifsBalance := &Account{ID: "other",
-		BalanceMap: map[string]Balances{utils.VOICE: Balances{b1, b2},
-			utils.MONETARY: Balances{&Balance{Value: 21}}}}
+		BalanceMap: map[string]Balances{
+			utils.VOICE:    {b1, b2},
+			utils.MONETARY: {&Balance{Value: 21}}}}
 	dm.SetAccount(rifsBalance)
 	ub1, err := dm.GetAccount("other")
 	if err != nil ||
@@ -110,8 +111,8 @@ func TestGetSecondsForPrefix(t *testing.T) {
 		DestinationIDs: utils.StringMap{"RET": true}}
 	ub1 := &Account{ID: "CUSTOMER_1:rif",
 		BalanceMap: map[string]Balances{
-			utils.VOICE:    Balances{b1, b2},
-			utils.MONETARY: Balances{&Balance{Value: 200}}}}
+			utils.VOICE:    {b1, b2},
+			utils.MONETARY: {&Balance{Value: 200}}}}
 	cd := &CallDescriptor{
 		Category:      "0",
 		Tenant:        "vdf",
@@ -139,8 +140,8 @@ func TestGetSpecialPricedSeconds(t *testing.T) {
 	ub1 := &Account{
 		ID: "OUT:CUSTOMER_1:rif",
 		BalanceMap: map[string]Balances{
-			utils.VOICE:    Balances{b1, b2},
-			utils.MONETARY: Balances{&Balance{Value: 21}},
+			utils.VOICE:    {b1, b2},
+			utils.MONETARY: {&Balance{Value: 21}},
 		},
 	}
 	cd := &CallDescriptor{
@@ -219,7 +220,7 @@ func TestDebitCreditZeroSecond(t *testing.T) {
 	var err error
 	cc, err = rifsBalance.debitCreditBalance(cd, false, false, true)
 	if err != nil {
-		t.Error("Error debiting balance: ", err)
+		t.Fatal("Error debiting balance: ", err)
 	}
 	if cc.Timespans[0].Increments[0].BalanceInfo.Unit.UUID != "testb" {
 		t.Logf("%+v", cc.Timespans[0])
