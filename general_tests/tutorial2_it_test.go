@@ -359,7 +359,7 @@ func testTutAccounts(t *testing.T) {
 	// enable the account again
 	var rplySetAcnt string
 	if err := tutRpc.Call(utils.APIerSv2SetAccount,
-		v2.AttrSetAccount{
+		&v2.AttrSetAccount{
 			Tenant:  "cgrates.org",
 			Account: "1001",
 			ExtraOptions: map[string]bool{

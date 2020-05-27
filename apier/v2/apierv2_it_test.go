@@ -157,11 +157,11 @@ func testAPIerSv2itSetAction(t *testing.T) {
 		{Identifier: utils.DISABLE_ACCOUNT, Weight: 10.0},
 	}}
 	var reply string
-	if err := apierRPC.Call(utils.APIerSv2SetActions, attrs, &reply); err != nil {
+	if err := apierRPC.Call(utils.APIerSv2SetActions, &attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	var acts map[string]engine.Actions
-	if err := apierRPC.Call(utils.APIerSv2GetActions, AttrGetActions{ActionIDs: []string{attrs.ActionsId}}, &acts); err != nil {
+	if err := apierRPC.Call(utils.APIerSv2GetActions, &AttrGetActions{ActionIDs: []string{attrs.ActionsId}}, &acts); err != nil {
 		t.Error(err)
 	} else if len(acts) != 1 {
 		t.Errorf("Received actions: %+v", acts)
@@ -226,7 +226,7 @@ func testAPIerSv2itFraudMitigation(t *testing.T) {
 	} else if !acnt.Disabled {
 		t.Fatalf("Received account: %+v", acnt)
 	}
-	attrSetAcnt := AttrSetAccount{
+	attrSetAcnt := &AttrSetAccount{
 		Tenant:  "cgrates.org",
 		Account: "dan",
 		ExtraOptions: map[string]bool{
@@ -253,7 +253,7 @@ func testAPIerSv2itSetAccountWithAP(t *testing.T) {
 				BalanceType: utils.MONETARY, Units: "5.0", Weight: 20.0},
 		}}
 	var reply string
-	if err := apierRPC.Call(utils.APIerSv2SetActions, argActs1, &reply); err != nil {
+	if err := apierRPC.Call(utils.APIerSv2SetActions, &argActs1, &reply); err != nil {
 		t.Error(err)
 	}
 	tNow := time.Now().Add(time.Duration(time.Minute))
@@ -279,7 +279,7 @@ func testAPIerSv2itSetAccountWithAP(t *testing.T) {
 	if _, err := dm.GetAccountActionPlans(acntID, true, utils.NonTransactional); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
-	if err := apierRPC.Call(utils.APIerSv2SetAccount, argSetAcnt1, &reply); err != nil {
+	if err := apierRPC.Call(utils.APIerSv2SetAccount, &argSetAcnt1, &reply); err != nil {
 		t.Fatal(err)
 	}
 	if ap, err := dm.GetActionPlan(argAP1.Id, true, utils.NonTransactional); err != nil {
@@ -311,7 +311,7 @@ func testAPIerSv2itSetAccountWithAP(t *testing.T) {
 		Account:       "TestAPIerSv2itSetAccountWithAP1",
 		ActionPlanIDs: []string{argAP2.Id},
 	}
-	if err := apierRPC.Call(utils.APIerSv2SetAccount, argSetAcnt2, &reply); err != nil {
+	if err := apierRPC.Call(utils.APIerSv2SetAccount, &argSetAcnt2, &reply); err != nil {
 		t.Fatal(err)
 	}
 	if ap, err := dm.GetActionPlan(argAP2.Id, true, utils.NonTransactional); err != nil {
@@ -337,7 +337,7 @@ func testAPIerSv2itSetAccountWithAP(t *testing.T) {
 		ActionPlanIDs:        []string{argAP2.Id},
 		ActionPlansOverwrite: true,
 	}
-	if err := apierRPC.Call(utils.APIerSv2SetAccount, argSetAcnt2, &reply); err != nil {
+	if err := apierRPC.Call(utils.APIerSv2SetAccount, &argSetAcnt2, &reply); err != nil {
 		t.Fatal(err)
 	}
 	if ap, err := dm.GetActionPlan(argAP1.Id, true, utils.NonTransactional); err != nil {
@@ -373,7 +373,7 @@ func testAPIerSv2itSetActionWithCategory(t *testing.T) {
 				BalanceType: utils.MONETARY, Categories: "test", Units: "5.0", Weight: 20.0},
 		}}
 
-	if err := apierRPC.Call(utils.APIerSv2SetActions, argActs1, &reply); err != nil {
+	if err := apierRPC.Call(utils.APIerSv2SetActions, &argActs1, &reply); err != nil {
 		t.Error(err)
 	}
 
@@ -471,7 +471,7 @@ func testAPIerSv2itGetAccountsCount(t *testing.T) {
 		Tenant:  "cgrates.org",
 		Account: "TestAPIerSv2CountAccounts",
 	}
-	if err := apierRPC.Call(utils.APIerSv2SetAccount, argSetAccount, &reply); err != nil {
+	if err := apierRPC.Call(utils.APIerSv2SetAccount, &argSetAccount, &reply); err != nil {
 		t.Fatal(err)
 	}
 	var acnt engine.Account
@@ -488,7 +488,7 @@ func testAPIerSv2itGetAccountsCount(t *testing.T) {
 		Tenant:  "cgrates.org",
 		Account: "TestAPIerSv2CountAccounts2",
 	}
-	if err := apierRPC.Call(utils.APIerSv2SetAccount, argSetAccount, &reply); err != nil {
+	if err := apierRPC.Call(utils.APIerSv2SetAccount, &argSetAccount, &reply); err != nil {
 		t.Fatal(err)
 	}
 	if err := apierRPC.Call(utils.APIerSv2GetAccount, &utils.AttrGetAccount{
@@ -530,7 +530,7 @@ func testAPIerSv2itGetActionsCount(t *testing.T) {
 		{Identifier: utils.DISABLE_ACCOUNT, Weight: 0.7},
 	}}
 	var reply string
-	if err := apierRPC.Call(utils.APIerSv2SetActions, attrs, &reply); err != nil {
+	if err := apierRPC.Call(utils.APIerSv2SetActions, &attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	if err := apierRPC.Call(utils.APIerSv2GetActionsCount, &AttrGetActionsCount{}, &reply1); err != nil {
@@ -562,7 +562,7 @@ func testAPIerSv2itGetActionsCount(t *testing.T) {
 	attrs = utils.AttrSetActions{ActionsId: "Test", Actions: []*utils.TPAction{
 		{Identifier: utils.DISABLE_ACCOUNT, Weight: 0.7},
 	}}
-	if err := apierRPC.Call(utils.APIerSv2SetActions, attrs, &reply); err != nil {
+	if err := apierRPC.Call(utils.APIerSv2SetActions, &attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	if err := apierRPC.Call(utils.APIerSv2GetActionsCount, &AttrGetActionsCount{}, &reply1); err != nil {

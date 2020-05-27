@@ -182,7 +182,7 @@ func testSessionsItTerminatUnexist(t *testing.T) {
 		DestinationPrefixes: []string{"1002"},
 		RunIDs:              []string{utils.MetaDefault},
 	}
-	if err := sItRPC.Call(utils.APIerSv2GetCDRs, req, &cdrs); err != nil {
+	if err := sItRPC.Call(utils.APIerSv2GetCDRs, &req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Errorf("Unexpected number of CDRs returned: %v \n cdrs=%s", len(cdrs), utils.ToJSON(cdrs))

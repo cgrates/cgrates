@@ -188,12 +188,12 @@ func testFlatstoreITHandleCdr1File(t *testing.T) {
 
 func testFlatstoreITAnalyseCDRs(t *testing.T) {
 	var reply []*engine.ExternalCDR
-	if err := flatstoreRPC.Call(utils.APIerSv2GetCDRs, utils.RPCCDRsFilter{}, &reply); err != nil {
+	if err := flatstoreRPC.Call(utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 8 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	}
-	if err := flatstoreRPC.Call(utils.APIerSv2GetCDRs, utils.RPCCDRsFilter{MinUsage: "1"}, &reply); err != nil {
+	if err := flatstoreRPC.Call(utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{MinUsage: "1"}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 5 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))

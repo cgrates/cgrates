@@ -153,7 +153,7 @@ func testJSONAddData(t *testing.T) {
 		Tenant:  "cgrates.org",
 		Account: "voiceAccount",
 	}
-	if err := jsonRPC.Call(utils.APIerSv2SetAccount, attrSetAcnt, &reply); err != nil {
+	if err := jsonRPC.Call(utils.APIerSv2SetAccount, &attrSetAcnt, &reply); err != nil {
 		t.Fatal(err)
 	}
 	attrs := &utils.AttrSetBalance{

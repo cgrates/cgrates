@@ -28,8 +28,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cgrates/cgrates/apier/v1"
-	"github.com/cgrates/cgrates/apier/v2"
+	v1 "github.com/cgrates/cgrates/apier/v1"
+	v2 "github.com/cgrates/cgrates/apier/v2"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
@@ -345,7 +345,7 @@ func testRunSession(t *testing.T) {
 	time.Sleep(time.Duration(20) * time.Millisecond)
 	var cdrs []*engine.ExternalCDR
 	argCDRs := utils.RPCCDRsFilter{OriginIDs: []string{originID}}
-	if err := sCncrRPC.Call(utils.APIerSv2GetCDRs, argCDRs, &cdrs); err != nil {
+	if err := sCncrRPC.Call(utils.APIerSv2GetCDRs, &argCDRs, &cdrs); err != nil {
 		t.Error(err)
 	} else if len(cdrs) != 1 {
 		t.Errorf("unexpected number of CDRs returned: %d", len(cdrs))

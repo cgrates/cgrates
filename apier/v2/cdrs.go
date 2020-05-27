@@ -26,7 +26,7 @@ import (
 )
 
 // Retrieves CDRs based on the filters
-func (apier *APIerSv2) GetCDRs(attrs utils.RPCCDRsFilter, reply *[]*engine.ExternalCDR) error {
+func (apier *APIerSv2) GetCDRs(attrs *utils.RPCCDRsFilter, reply *[]*engine.ExternalCDR) error {
 	cdrsFltr, err := attrs.AsCDRsFilter(apier.Config.GeneralCfg().DefaultTimezone)
 	if err != nil {
 		return utils.NewErrServerError(err)
@@ -46,7 +46,7 @@ func (apier *APIerSv2) GetCDRs(attrs utils.RPCCDRsFilter, reply *[]*engine.Exter
 	return nil
 }
 
-func (apier *APIerSv2) CountCDRs(attrs utils.RPCCDRsFilter, reply *int64) error {
+func (apier *APIerSv2) CountCDRs(attrs *utils.RPCCDRsFilter, reply *int64) error {
 	cdrsFltr, err := attrs.AsCDRsFilter(apier.Config.GeneralCfg().DefaultTimezone)
 	if err != nil {
 		if err.Error() != utils.NotFoundCaps {

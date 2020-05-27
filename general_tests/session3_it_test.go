@@ -405,7 +405,7 @@ func testSes3ItCDRs(t *testing.T) {
 	var cdrs []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{RunIDs: []string{"CustomerCharges"},
 		Accounts: []string{"1002"}}
-	if err := ses3RPC.Call(utils.APIerSv2GetCDRs, req, &cdrs); err != nil {
+	if err := ses3RPC.Call(utils.APIerSv2GetCDRs, &req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))

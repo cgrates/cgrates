@@ -42,7 +42,7 @@ type AttrExportCdrsToFile struct {
 }
 
 // Deprecated, please use APIerSv1.ExportCDRs instead
-func (apiv2 *APIerSv2) ExportCdrsToFile(attr AttrExportCdrsToFile, reply *utils.ExportedFileCdrs) (err error) {
+func (apiv2 *APIerSv2) ExportCdrsToFile(attr *AttrExportCdrsToFile, reply *utils.ExportedFileCdrs) (err error) {
 	cdreReloadStruct := <-apiv2.Config.ConfigReloads[utils.CDRE]                  // Read the content of the channel, locking it
 	defer func() { apiv2.Config.ConfigReloads[utils.CDRE] <- cdreReloadStruct }() // Unlock reloads at exit
 	exportTemplate := apiv2.Config.CdreProfiles[utils.MetaDefault]

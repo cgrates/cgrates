@@ -321,7 +321,7 @@ func testTpExecuteActionCgrRpcAcc(t *testing.T) {
 
 func testTpCreateExecuteActionMatch(t *testing.T) {
 	var reply string
-	if err := tpRPC.Call(utils.APIerSv2SetActions, utils.AttrSetActions{
+	if err := tpRPC.Call(utils.APIerSv2SetActions, &utils.AttrSetActions{
 		ActionsId: "PAYMENT_2056bd2fe137082970f97102b64e42fd",
 		Actions: []*utils.TPAction{
 			{
@@ -369,7 +369,7 @@ func testTpCreateExecuteActionMatch(t *testing.T) {
 
 func testTpSetRemoveActions(t *testing.T) {
 	var reply string
-	if err := tpRPC.Call(utils.APIerSv2SetActions, utils.AttrSetActions{
+	if err := tpRPC.Call(utils.APIerSv2SetActions, &utils.AttrSetActions{
 		ActionsId: "TO_BE_DELETED",
 		Actions: []*utils.TPAction{
 			{
@@ -386,7 +386,7 @@ func testTpSetRemoveActions(t *testing.T) {
 		t.Errorf("Calling APIerSv2.SetActions got reply: %s", reply)
 	}
 	actionsMap := make(map[string]engine.Actions)
-	if err := tpRPC.Call(utils.APIerSv2GetActions, v2.AttrGetActions{
+	if err := tpRPC.Call(utils.APIerSv2GetActions, &v2.AttrGetActions{
 		ActionIDs: []string{"PAYMENT_2056bd2fe137082970f97102b64e42fd"},
 	}, &actionsMap); err != nil {
 		t.Error("Got error on APIerSv2.GetActions: ", err.Error())
@@ -400,7 +400,7 @@ func testTpSetRemoveActions(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv2.RemoveActions got reply: %s", reply)
 	}
-	if err := tpRPC.Call(utils.APIerSv2GetActions, v2.AttrGetActions{
+	if err := tpRPC.Call(utils.APIerSv2GetActions, &v2.AttrGetActions{
 		ActionIDs: []string{"PAYMENT_2056bd2fe137082970f97102b64e42fd"},
 	}, &actionsMap); err == nil {
 		t.Error("no error on APIerSv2.GetActions: ", err)
@@ -409,7 +409,7 @@ func testTpSetRemoveActions(t *testing.T) {
 
 func testTpRemoveActionsRefenced(t *testing.T) {
 	actionsMap := make(map[string]engine.Actions)
-	if err := tpRPC.Call(utils.APIerSv2GetActions, v2.AttrGetActions{
+	if err := tpRPC.Call(utils.APIerSv2GetActions, &v2.AttrGetActions{
 		ActionIDs: []string{"TOPUP_VOICE"},
 	}, &actionsMap); err != nil {
 		t.Error("Got error on APIerSv2.GetActions: ", err.Error())

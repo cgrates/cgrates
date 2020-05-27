@@ -250,7 +250,7 @@ func testSessionsBiRPCSessionAutomaticDisconnects(t *testing.T) {
 	var cdrs []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault},
 		DestinationPrefixes: []string{"1004"}}
-	if err := sessionsRPC.Call(utils.APIerSv2GetCDRs, req, &cdrs); err != nil {
+	if err := sessionsRPC.Call(utils.APIerSv2GetCDRs, &req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -368,7 +368,7 @@ func testSessionsBiRPCSessionOriginatorTerminate(t *testing.T) {
 	var cdrs []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault},
 		DestinationPrefixes: []string{"1005"}}
-	if err := sessionsRPC.Call(utils.APIerSv2GetCDRs, req, &cdrs); err != nil {
+	if err := sessionsRPC.Call(utils.APIerSv2GetCDRs, &req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
