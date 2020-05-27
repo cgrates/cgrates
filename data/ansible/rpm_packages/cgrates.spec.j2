@@ -51,6 +51,8 @@ fi
 /bin/chown -R %{name}:%{name} %{_logdir}
 /bin/chown -R %{name}:%{name} %{_spooldir}
 /bin/chown -R %{name}:%{name} %{_libdir}
+sudo systemctl restart syslog
+sudo systemctl restart rsyslog
 
 %preun
 %if 0%{?fedora} > 16 || 0%{?rhel} > 6
@@ -98,7 +100,9 @@ mkdir -p $RPM_BUILD_ROOT%{_spooldir}/failed_posts
 mkdir -p $RPM_BUILD_ROOT%{_libdir}/history
 mkdir -p $RPM_BUILD_ROOT%{_libdir}/cache_dump
 mkdir -p $RPM_BUILD_ROOT/etc/logrotate.d
+mkdir -p $RPM_BUILD_ROOT/etc/rsyslog.d
 install -m 755 {{ cgrates_dir }}/data/conf/logging/logrotate.conf $RPM_BUILD_ROOT/etc/logrotate.d/%{name}
+install -m 755 {{ cgrates_dir }}/data/conf/logging/rsyslog.conf $RPM_BUILD_ROOT/etc/rsyslog.d/%{name}.conf
 install -D -m 0644 -p src/github.com/cgrates/cgrates/packages/redhat_fedora/%{name}.options $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig/%{name}
 %if 0%{?fedora} > 16 || 0%{?rhel} > 6
 	install -D -m 0644 -p src/github.com/cgrates/cgrates/packages/redhat_fedora/%{name}.service $RPM_BUILD_ROOT%{_unitdir}/%{name}.service
@@ -115,6 +119,8 @@ install -D -m 0644 -p src/github.com/cgrates/cgrates/packages/redhat_fedora/%{na
 %{_spooldir}/*
 %{_libdir}/*
 %{_sysconfdir}/sysconfig/%{name}
+/etc/logrotate.d/%{name}
+/etc/rsyslog.d/%{name}.conf
 %if 0%{?fedora} > 16 || 0%{?rhel} > 6
 	%{_unitdir}/%{name}.service
 %else
