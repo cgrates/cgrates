@@ -143,14 +143,14 @@ func testV2CDReProcessCDR(t *testing.T) {
 func testV2CDReGetCdrs(t *testing.T) {
 	var cdrCnt int64
 	req := utils.AttrGetCdrs{}
-	if err := cdreRpc.Call(utils.APIerSv2CountCDRs, req, &cdrCnt); err != nil {
+	if err := cdreRpc.Call(utils.APIerSv2CountCDRs, &req, &cdrCnt); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if cdrCnt != 3 {
 		t.Error("Unexpected number of CDRs returned: ", cdrCnt)
 	}
 	var cdrs []*engine.ExternalCDR
 	args := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaRaw}}
-	if err := cdreRpc.Call(utils.APIerSv2GetCDRs, args, &cdrs); err != nil {
+	if err := cdreRpc.Call(utils.APIerSv2GetCDRs, &args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -164,7 +164,7 @@ func testV2CDReGetCdrs(t *testing.T) {
 		}
 	}
 	args = utils.RPCCDRsFilter{RunIDs: []string{"CustomerCharges"}}
-	if err := cdreRpc.Call(utils.APIerSv2GetCDRs, args, &cdrs); err != nil {
+	if err := cdreRpc.Call(utils.APIerSv2GetCDRs, &args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -178,7 +178,7 @@ func testV2CDReGetCdrs(t *testing.T) {
 		}
 	}
 	args = utils.RPCCDRsFilter{RunIDs: []string{"SupplierCharges"}}
-	if err := cdreRpc.Call(utils.APIerSv2GetCDRs, args, &cdrs); err != nil {
+	if err := cdreRpc.Call(utils.APIerSv2GetCDRs, &args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))

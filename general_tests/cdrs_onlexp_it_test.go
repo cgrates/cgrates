@@ -275,7 +275,7 @@ func testCDRsOnExpHttpCdrReplication(t *testing.T) {
 	time.Sleep(200 * time.Millisecond)
 	var rcvedCdrs []*engine.ExternalCDR
 	if err := cdrsSlaveRpc.Call(utils.APIerSv2GetCDRs,
-		utils.RPCCDRsFilter{CGRIDs: []string{testCdr1.CGRID}, RunIDs: []string{utils.MetaDefault}}, &rcvedCdrs); err != nil {
+		&utils.RPCCDRsFilter{CGRIDs: []string{testCdr1.CGRID}, RunIDs: []string{utils.MetaDefault}}, &rcvedCdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(rcvedCdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(rcvedCdrs))

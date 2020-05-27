@@ -296,7 +296,7 @@ func testA1itDataSession1(t *testing.T) {
 
 	var cdrs []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault}}
-	if err := a1rpc.Call(utils.APIerSv2GetCDRs, req, &cdrs); err != nil {
+	if err := a1rpc.Call(utils.APIerSv2GetCDRs, &req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -343,7 +343,7 @@ func testA1itConcurrentAPs(t *testing.T) {
 				ActionPlanIDs: []string{"PACKAGE_1"},
 			}
 			var reply string
-			if err := a1rpc.Call(utils.APIerSv2SetAccount, attrSetAcnt, &reply); err != nil {
+			if err := a1rpc.Call(utils.APIerSv2SetAccount, &attrSetAcnt, &reply); err != nil {
 				t.Error(err)
 			}
 			wg.Done()
@@ -385,7 +385,7 @@ func testA1itConcurrentAPs(t *testing.T) {
 				ActionPlanIDs: []string{"PACKAGE_2"},
 			}
 			var reply string
-			if err := a1rpc.Call(utils.APIerSv2SetAccount, attrSetAcnt, &reply); err != nil {
+			if err := a1rpc.Call(utils.APIerSv2SetAccount, &attrSetAcnt, &reply); err != nil {
 				t.Error(err)
 			}
 			wg.Done()

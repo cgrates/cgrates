@@ -478,7 +478,7 @@ func testV1CDRsProcessEventThreshold(t *testing.T) {
 			utils.AllowNegative: true,
 		},
 	}
-	if err := pecdrsRpc.Call(utils.APIerSv2SetAccount, attrSetAcnt, &reply); err != nil {
+	if err := pecdrsRpc.Call(utils.APIerSv2SetAccount, &attrSetAcnt, &reply); err != nil {
 		t.Fatal(err)
 	}
 	attrs := &utils.AttrSetBalance{

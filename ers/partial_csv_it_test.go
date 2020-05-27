@@ -205,17 +205,17 @@ func testPartITVerifyFiles(t *testing.T) {
 
 func testPartITAnalyseCDRs(t *testing.T) {
 	var reply []*engine.ExternalCDR
-	if err := partRPC.Call(utils.APIerSv2GetCDRs, utils.RPCCDRsFilter{}, &reply); err != nil {
+	if err := partRPC.Call(utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 2 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	}
-	if err := partRPC.Call(utils.APIerSv2GetCDRs, utils.RPCCDRsFilter{DestinationPrefixes: []string{"+4986517174963"}}, &reply); err != nil {
+	if err := partRPC.Call(utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{DestinationPrefixes: []string{"+4986517174963"}}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	}
-	if err := partRPC.Call(utils.APIerSv2GetCDRs, utils.RPCCDRsFilter{DestinationPrefixes: []string{"+4986517174960"}}, &reply); err != nil {
+	if err := partRPC.Call(utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{DestinationPrefixes: []string{"+4986517174960"}}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))

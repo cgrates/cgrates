@@ -233,13 +233,13 @@ func testTPitDestinations(t *testing.T) {
 	}
 	// Test get
 	var rplyDst *utils.TPDestination
-	if err := tpRPC.Call(utils.APIerSv2GetTPDestination, AttrGetTPDestination{testTPid, dstDEMobile.ID}, &rplyDst); err != nil {
+	if err := tpRPC.Call(utils.APIerSv2GetTPDestination, &AttrGetTPDestination{testTPid, dstDEMobile.ID}, &rplyDst); err != nil {
 		t.Error("Calling APIerSv2.GetTPDestination, got error: ", err.Error())
 	} else if len(dstDEMobile.Prefixes) != len(rplyDst.Prefixes) {
 		t.Errorf("Calling APIerSv2.GetTPDestination expected: %v, received: %v", dstDEMobile, rplyDst)
 	}
 	// Test remove
-	if err := tpRPC.Call(utils.APIerSv2RemoveTPDestination, AttrGetTPDestination{testTPid, dstDUMMY.ID}, &reply); err != nil {
+	if err := tpRPC.Call(utils.APIerSv2RemoveTPDestination, &AttrGetTPDestination{testTPid, dstDUMMY.ID}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Received: ", reply)

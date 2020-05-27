@@ -268,12 +268,12 @@ func testXMLITHandleCdr1File(t *testing.T) {
 
 func testXmlITAnalyseCDRs(t *testing.T) {
 	var reply []*engine.ExternalCDR
-	if err := xmlRPC.Call(utils.APIerSv2GetCDRs, utils.RPCCDRsFilter{}, &reply); err != nil {
+	if err := xmlRPC.Call(utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 6 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	}
-	if err := xmlRPC.Call(utils.APIerSv2GetCDRs, utils.RPCCDRsFilter{DestinationPrefixes: []string{"+4915117174963"}}, &reply); err != nil {
+	if err := xmlRPC.Call(utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{DestinationPrefixes: []string{"+4915117174963"}}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 3 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))

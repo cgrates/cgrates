@@ -186,7 +186,7 @@ func testAccITAddVoiceBalance(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := accRPC.Call(utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
+	if err := accRPC.Call(utils.APIerSv2SetBalance, &attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
@@ -306,7 +306,7 @@ func testAccITAddBalance(t *testing.T) {
 	// verify the cdr from CdrLog
 	var cdrs []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{Sources: []string{utils.CDRLOG}}
-	if err := accRPC.Call(utils.APIerSv2GetCDRs, req, &cdrs); err != nil {
+	if err := accRPC.Call(utils.APIerSv2GetCDRs, &req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -334,7 +334,7 @@ func testAccITSetBalance(t *testing.T) {
 	// verify the cdr from CdrLog
 	var cdrs []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{Sources: []string{utils.CDRLOG}}
-	if err := accRPC.Call(utils.APIerSv2GetCDRs, req, &cdrs); err != nil {
+	if err := accRPC.Call(utils.APIerSv2GetCDRs, &req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 2 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -367,7 +367,7 @@ func testAccITSetBalanceWithExtraData(t *testing.T) {
 	// verify the cdr from CdrLog
 	var cdrs []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{Sources: []string{utils.CDRLOG}, Accounts: []string{"testAccITSetBalanceWithExtraData"}}
-	if err := accRPC.Call(utils.APIerSv2GetCDRs, req, &cdrs); err != nil {
+	if err := accRPC.Call(utils.APIerSv2GetCDRs, &req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -402,7 +402,7 @@ func testAccITSetBalanceWithExtraData2(t *testing.T) {
 	// verify the cdr from CdrLog
 	var cdrs []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{Sources: []string{utils.CDRLOG}, Accounts: []string{"testAccITSetBalanceWithExtraData2"}}
-	if err := accRPC.Call(utils.APIerSv2GetCDRs, req, &cdrs); err != nil {
+	if err := accRPC.Call(utils.APIerSv2GetCDRs, &req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -501,7 +501,7 @@ func testAccITGetDisabledAccounts(t *testing.T) {
 	}
 
 	var acnts []*engine.Account
-	if err := accRPC.Call(utils.APIerSv2GetAccounts, utils.AttrGetAccounts{Tenant: "cgrates.org", Filter: map[string]bool{utils.Disabled: true}},
+	if err := accRPC.Call(utils.APIerSv2GetAccounts, &utils.AttrGetAccounts{Tenant: "cgrates.org", Filter: map[string]bool{utils.Disabled: true}},
 		&acnts); err != nil {
 		t.Error(err)
 	} else if len(acnts) != 3 {
