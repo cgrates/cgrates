@@ -2,3 +2,4 @@
 cgrates.org,SELF,*internal,,
 cgrates.org,ALL,127.0.0.1:6013,*gob,false
 cgrates.org,ALL2,127.0.0.1:7013,*gob,false
+cgrates.org,UnexistedHost,127.0.0.1:10012,*json,false
