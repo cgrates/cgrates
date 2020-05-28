@@ -1648,6 +1648,7 @@ const (
 	CacheSTIR                      = "*stir"
 	CacheEventCharges              = "*event_charges"
 	CacheReverseFilterIndexes      = "*reverse_filter_indexes"
+	CacheVersions                  = "*versions"
 )
 
 // Prefix for indexing

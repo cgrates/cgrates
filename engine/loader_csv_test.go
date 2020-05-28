@@ -112,7 +112,7 @@ func init() {
 	if err := csvr.WriteToDatabase(false, false); err != nil {
 		log.Print("error when writing into database", err)
 	}
-	Cache.Clear(nil)
+	// Cache.Clear(nil)
 }
 
 func TestLoadDestinations(t *testing.T) {
