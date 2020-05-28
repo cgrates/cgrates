@@ -152,8 +152,8 @@ func startRpc(server *utils.Server, internalRaterChan,
 		}
 	}
 
-	go server.ServeJSON(cfg.ListenCfg().RPCJSONListen)
-	go server.ServeGOB(cfg.ListenCfg().RPCGOBListen)
+	go server.ServeJSON(cfg.ListenCfg().RPCJSONListen, exitChan)
+	go server.ServeGOB(cfg.ListenCfg().RPCGOBListen, exitChan)
 	go server.ServeHTTP(
 		cfg.ListenCfg().HTTPListen,
 		cfg.HTTPCfg().HTTPJsonRPCURL,
@@ -173,6 +173,7 @@ func startRpc(server *utils.Server, internalRaterChan,
 				cfg.TlsCfg().CaCertificate,
 				cfg.TlsCfg().ServerPolicy,
 				cfg.TlsCfg().ServerName,
+				exitChan,
 			)
 		}
 	}
@@ -187,6 +188,7 @@ func startRpc(server *utils.Server, internalRaterChan,
 				cfg.TlsCfg().CaCertificate,
 				cfg.TlsCfg().ServerPolicy,
 				cfg.TlsCfg().ServerName,
+				exitChan,
 			)
 		}
 	}
@@ -205,6 +207,7 @@ func startRpc(server *utils.Server, internalRaterChan,
 				cfg.HTTPCfg().HTTPWSURL,
 				cfg.HTTPCfg().HTTPUseBasicAuth,
 				cfg.HTTPCfg().HTTPAuthUsers,
+				exitChan,
 			)
 		}
 	}

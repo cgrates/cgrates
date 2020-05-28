@@ -111,6 +111,7 @@ func (smg *SessionService) Start() (err error) {
 				smg.Lock()
 				smg.bircpEnabled = false
 				smg.Unlock()
+				smg.exitChan <- true
 			}
 		}()
 	}
