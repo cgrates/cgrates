@@ -434,8 +434,8 @@ func (v1Sts v1Stat) AsStatQP() (filter *engine.Filter, sq *engine.StatQueue, stq
 	}
 	if len(v1Sts.Metrics) != 0 {
 		for i := range v1Sts.Metrics {
-			if !strings.HasPrefix(v1Sts.Metrics[i], "*") {
-				v1Sts.Metrics[i] = "*" + v1Sts.Metrics[i]
+			if !strings.HasPrefix(v1Sts.Metrics[i], utils.Meta) {
+				v1Sts.Metrics[i] = utils.Meta + v1Sts.Metrics[i]
 			}
 			v1Sts.Metrics[i] = strings.ToLower(v1Sts.Metrics[i])
 			stq.Metrics = append(stq.Metrics, &engine.MetricWithFilters{MetricID: v1Sts.Metrics[i]})

@@ -300,12 +300,12 @@ func (v2AttrPrf v2AttributeProfile) AsAttributeProfile() (attrPrf *v3AttributePr
 		filterIDs := make([]string, 0)
 		//append false translate to  if FieldName exist do stuff
 		if attr.Append == false {
-			filterIDs = append(filterIDs, utils.MetaExists+":"+attr.FieldName+":")
+			filterIDs = append(filterIDs, utils.MetaExists+utils.InInFieldSep+attr.FieldName+utils.InInFieldSep)
 		}
 		//Initial not *any translate to if value of fieldName = initial do stuff
 		initial := utils.IfaceAsString(attr.Initial)
 		if initial != utils.META_ANY {
-			filterIDs = append(filterIDs, utils.MetaString+":"+attr.FieldName+":"+initial)
+			filterIDs = append(filterIDs, utils.MetaString+utils.InInFieldSep+attr.FieldName+utils.InInFieldSep+initial)
 		}
 
 		attrPrf.Attributes = append(attrPrf.Attributes, &v3Attribute{
@@ -397,10 +397,13 @@ func (v4AttrPrf v4AttributeProfile) AsAttributeProfile() (attrPrf *engine.Attrib
 				return nil, err
 			}
 		}
-
+		var path string
+		if attr.FieldName != utils.EmptyString {
+			path = utils.MetaReq + utils.NestingSep + attr.FieldName
+		}
 		attrPrf.Attributes = append(attrPrf.Attributes, &engine.Attribute{
 			FilterIDs: attr.FilterIDs,
-			Path:      utils.MetaReq + utils.NestingSep + attr.FieldName,
+			Path:      path,
 			Value:     rsrVal,
 			Type:      attr.Type,
 		})

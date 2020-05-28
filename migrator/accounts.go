@@ -237,8 +237,8 @@ func (v1Acc v1Account) V1toV3Account() (ac *engine.Account) {
 	ac.ID = utils.ConcatenatedKey(idElements[1], idElements[2])
 	// balances
 	for oldBalKey, oldBalChain := range v1Acc.BalanceMap {
-		keyElements := strings.Split(oldBalKey, "*")
-		newBalKey := "*" + keyElements[1]
+		keyElements := strings.Split(oldBalKey, utils.Meta)
+		newBalKey := utils.Meta + keyElements[1]
 		ac.BalanceMap[newBalKey] = make(engine.Balances, len(oldBalChain))
 		for index, oldBal := range oldBalChain {
 			balVal := oldBal.Value
