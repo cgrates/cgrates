@@ -22,7 +22,6 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/ltcache"
-	"github.com/cgrates/rpcclient"
 )
 
 var (
@@ -2171,16 +2170,6 @@ func (dm *DataManager) GetDispatcherHost(tenant, id string, cacheRead, cacheWrit
 		}
 	}
 	if cacheWrite {
-		cfg := config.CgrConfig()
-		if dH.rpcConn, err = NewRPCPool( // send it wil lazy connect on true and try to connect only when the call is make
-			rpcclient.PoolFirst,
-			cfg.TlsCfg().ClientKey,
-			cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
-			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
-			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-			dH.Conns, IntRPC.GetInternalChanel(), true); err != nil {
-			return nil, err
-		}
 		Cache.Set(utils.CacheDispatcherHosts, tntID, dH, nil,
 			cacheCommit(transactionID), transactionID)
 	}

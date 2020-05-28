@@ -245,9 +245,6 @@ func TestDispatcherHostCall(t *testing.T) {
 		reply:         utils.StringPointer(""),
 	}
 	var reply string
-	if err := dspHost.Call(utils.AttributeSv1Ping, &utils.CGREvent{}, &reply); err == nil || err.Error() != utils.ErrNotConnected.Error() {
-		t.Errorf("Expected: %s , received: %v", utils.ErrNotConnected.Error(), err)
-	}
 	dspHost.rpcConn = tRPC
 	if err := dspHost.Call(utils.AttributeSv1Ping, &utils.CGREvent{}, &reply); err != nil {
 		t.Error(err)
