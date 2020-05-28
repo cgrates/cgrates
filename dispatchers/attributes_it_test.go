@@ -32,6 +32,7 @@ import (
 var sTestsDspAttr = []func(t *testing.T){
 	testDspAttrPingFailover,
 	testDspAttrPingFailover2,
+	testDspAttrPingFailoverNotFoundHost,
 	testDspAttrGetAttrFailover,
 	testDspAttrGetAttrRoundRobin,
 
@@ -124,6 +125,43 @@ func testDspAttrPingFailover(t *testing.T) {
 		t.Errorf("Expected error but recived %v and reply %v\n", err, reply)
 	}
 	allEngine.startEngine(t)
+	allEngine2.startEngine(t)
+	reply = ""
+	if err := dispEngine.RPC.Call(utils.AttributeSv1Ping, &ev, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.Pong {
+		t.Errorf("Received: %s", reply)
+	}
+}
+
+func testDspAttrPingFailoverNotFoundHost(t *testing.T) {
+	var reply string
+	if err := allEngine2.RPC.Call(utils.AttributeSv1Ping, new(utils.CGREvent), &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.Pong {
+		t.Errorf("Received: %s", reply)
+	}
+	ev := utils.CGREventWithArgDispatcher{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				"EventName": "UnexistedHost",
+			},
+		},
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("attr12345"),
+		},
+	}
+
+	if err := dispEngine.RPC.Call(utils.AttributeSv1Ping, &ev, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.Pong {
+		t.Errorf("Received: %s", reply)
+	}
+	allEngine2.stopEngine(t) // stop the engine and we expect to get error
+	if err := dispEngine.RPC.Call(utils.AttributeSv1Ping, &ev, &reply); err == nil {
+		t.Errorf("Expected error but recived %v and reply %v\n", err, reply)
+	}
 	allEngine2.startEngine(t)
 	reply = ""
 	if err := dispEngine.RPC.Call(utils.AttributeSv1Ping, &ev, &reply); err != nil {
