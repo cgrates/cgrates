@@ -245,8 +245,10 @@ func IsNetworkError(err error) bool {
 		return false
 	}
 	if operr, ok := err.(*net.OpError); ok &&
-		strings.HasSuffix(operr.Err.Error(),
-			syscall.ECONNRESET.Error()) { // connection reset
+		(strings.HasSuffix(operr.Err.Error(),
+			syscall.ECONNRESET.Error()) ||
+			(strings.HasSuffix(operr.Err.Error(),
+				syscall.ECONNREFUSED.Error()))) { // connection reset
 		return true
 	}
 	return err.Error() == rpc.ErrShutdown.Error() ||
@@ -254,7 +256,8 @@ func IsNetworkError(err error) bool {
 		err.Error() == ErrDisconnected.Error() ||
 		err.Error() == ErrReplyTimeout.Error() ||
 		err.Error() == ErrSessionNotFound.Error() ||
-		strings.HasPrefix(err.Error(), "rpc: can't find service")
+		strings.HasPrefix(err.Error(), "rpc: can't find service") ||
+		strings.HasSuffix(err.Error(), "no such host")
 }
 
 func ErrPathNotReachable(path string) error {
