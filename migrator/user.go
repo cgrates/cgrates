@@ -76,8 +76,12 @@ func userProfile2attributeProfile(user *v1UserProfile) (attr *engine.AttributePr
 			attr.FilterIDs = append(attr.FilterIDs, fmt.Sprintf("*string:~%s:%s", fieldName, substitute))
 			continue
 		}
+		var path string
+		if fieldName != utils.EmptyString {
+			path = utils.MetaReq + utils.NestingSep + fieldName
+		}
 		attr.Attributes = append(attr.Attributes, &engine.Attribute{
-			Path:  utils.MetaReq + utils.NestingSep + fieldName,
+			Path:  path,
 			Value: config.NewRSRParsersMustCompile(substitute, true, utils.INFIELD_SEP),
 			Type:  utils.MetaVariable,
 		})

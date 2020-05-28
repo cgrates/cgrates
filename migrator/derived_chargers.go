@@ -82,8 +82,12 @@ func fieldinfo2Attribute(attr []*engine.Attribute, fieldName, fieldInfo string) 
 		utils.Logger.Err(fmt.Sprintf("On Migrating rule: <%s>, error: %s", fieldInfo, err.Error()))
 		return attr
 	}
+	var path string
+	if fieldName != utils.EmptyString {
+		path = utils.MetaReq + utils.NestingSep + fieldName
+	}
 	return append(attr, &engine.Attribute{
-		Path:  utils.MetaReq + utils.NestingSep + fieldName,
+		Path:  path,
 		Value: rp,
 		Type:  utils.MetaVariable,
 	})

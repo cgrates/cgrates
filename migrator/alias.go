@@ -109,7 +109,7 @@ func alias2AtttributeProfile(alias *v1Alias, defaultTenant string) *engine.Attri
 				if fieldName == utils.Tenant {
 					fieldName = utils.MetaTenant
 					fld = utils.MetaTenant
-				} else {
+				} else if fieldName != utils.EmptyString {
 					fld = utils.MetaReq + utils.NestingSep + fieldName
 				}
 				attr := &engine.Attribute{
