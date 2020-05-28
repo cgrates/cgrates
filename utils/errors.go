@@ -24,7 +24,6 @@ import (
 	"net"
 	"net/rpc"
 	"strings"
-	"syscall"
 )
 
 var (
@@ -244,11 +243,10 @@ func IsNetworkError(err error) bool {
 	if err == nil {
 		return false
 	}
-	if operr, ok := err.(*net.OpError); ok &&
-		(strings.HasSuffix(operr.Err.Error(),
-			syscall.ECONNRESET.Error()) ||
-			(strings.HasSuffix(operr.Err.Error(),
-				syscall.ECONNREFUSED.Error()))) { // connection reset
+	if _, isNetError := err.(*net.OpError); isNetError { // connection reset
+		return true
+	}
+	if _, isDNSError := err.(*net.DNSError); isDNSError {
 		return true
 	}
 	return err.Error() == rpc.ErrShutdown.Error() ||
@@ -256,8 +254,7 @@ func IsNetworkError(err error) bool {
 		err.Error() == ErrDisconnected.Error() ||
 		err.Error() == ErrReplyTimeout.Error() ||
 		err.Error() == ErrSessionNotFound.Error() ||
-		strings.HasPrefix(err.Error(), "rpc: can't find service") ||
-		strings.HasSuffix(err.Error(), "no such host")
+		strings.HasPrefix(err.Error(), "rpc: can't find service")
 }
 
 func ErrPathNotReachable(path string) error {
