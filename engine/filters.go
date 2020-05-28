@@ -489,7 +489,7 @@ func (fS *FilterS) getFieldNameDataProvider(initialDP utils.DataProvider,
 	// don't need to take out the prefix because the navigable map have ~*req prefix
 	case fieldName == utils.EmptyString:
 	default:
-		return nil, utils.ErrPrefixNotFound(fmt.Sprintf(" data provider prefix for <%s>", fieldName))
+		return nil, fmt.Errorf("filter path: <%s> doesn't have a valid prefix", fieldName)
 	}
 	return
 }
