@@ -49,12 +49,11 @@ func (rS *RateS) ListenAndServe(exitChan chan bool, cfgRld chan struct{}) (err e
 		case e := <-exitChan: // global exit
 			rS.Shutdown()
 			exitChan <- e // put back for the others listening for shutdown request
-			break
+			return
 		case rld := <-cfgRld: // configuration was reloaded
 			cfgRld <- rld
 		}
 	}
-	return
 }
 
 // Shutdown is called to shutdown the service

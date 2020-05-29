@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
+	"fmt"
 	"sync"
 
 	v1 "github.com/cgrates/cgrates/apier/v1"
@@ -87,6 +88,7 @@ func (es *EventExporterService) Reload() (err error) {
 // Shutdown stops the service
 func (es *EventExporterService) Shutdown() (err error) {
 	es.Lock()
+
 	defer es.Unlock()
 	if err = es.eeS.Shutdown(); err != nil {
 		return
@@ -105,6 +107,8 @@ func (es *EventExporterService) Start() (err error) {
 	fltrS := <-es.filterSChan
 	es.filterSChan <- fltrS
 
+	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.EventExporterS))
+
 	es.Lock()
 	es.eeS = ees.NewEventExporterS(es.cfg, fltrS, es.connMgr)
 	es.Unlock()
@@ -113,5 +117,11 @@ func (es *EventExporterService) Start() (err error) {
 		es.server.RpcRegister(es.rpc)
 	}
 	es.intConnChan <- es.eeS
-	return es.eeS.ListenAndServe(es.exitChan, es.rldChan)
+	go func(eeS *ees.EventExporterS, exitChan chan bool, rldChan chan struct{}) {
+		if err := eeS.ListenAndServe(exitChan, rldChan); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.EventExporterS, err.Error()))
+			exitChan <- true
+		}
+	}(es.eeS, es.exitChan, es.rldChan)
+	return
 }
