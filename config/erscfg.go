@@ -116,6 +116,7 @@ type EventReaderCfg struct {
 	Type                     string
 	RowLength                int
 	FieldSep                 string
+	HeaderDefineChar         string
 	RunDelay                 time.Duration
 	ConcurrentReqs           int
 	SourcePath               string
@@ -147,6 +148,9 @@ func (er *EventReaderCfg) loadFromJsonCfg(jsnCfg *EventReaderJsonCfg, sep string
 	}
 	if jsnCfg.Field_separator != nil {
 		er.FieldSep = *jsnCfg.Field_separator
+	}
+	if jsnCfg.Header_define_character != nil {
+		er.HeaderDefineChar = *jsnCfg.Header_define_character
 	}
 	if jsnCfg.Run_delay != nil {
 		if er.RunDelay, err = utils.ParseDurationWithNanosecs(*jsnCfg.Run_delay); err != nil {
@@ -214,6 +218,7 @@ func (er *EventReaderCfg) Clone() (cln *EventReaderCfg) {
 	cln.ID = er.ID
 	cln.Type = er.Type
 	cln.FieldSep = er.FieldSep
+	cln.HeaderDefineChar = er.HeaderDefineChar
 	cln.RunDelay = er.RunDelay
 	cln.ConcurrentReqs = er.ConcurrentReqs
 	cln.SourcePath = er.SourcePath
@@ -295,6 +300,7 @@ func (er *EventReaderCfg) AsMapInterface(separator string) map[string]interface{
 		utils.TypeCfg:                     er.Type,
 		utils.RowLengthCfg:                er.RowLength,
 		utils.FieldSepCfg:                 er.FieldSep,
+		utils.HeaderDefCharCfg:            er.HeaderDefineChar,
 		utils.RunDelayCfg:                 runDelay,
 		utils.ConcurrentReqsCfg:           er.ConcurrentReqs,
 		utils.SourcePathCfg:               er.SourcePath,

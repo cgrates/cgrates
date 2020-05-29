@@ -2036,6 +2036,7 @@ const (
 	IDCfg                       = "id"
 	RowLengthCfg                = "row_length"
 	FieldSepCfg                 = "field_separator"
+	HeaderDefCharCfg            = "header_define_character"
 	RunDelayCfg                 = "run_delay"
 	SourcePathCfg               = "source_path"
 	ProcessedPathCfg            = "processed_path"

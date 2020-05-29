@@ -316,6 +316,7 @@ const CGRATES_CFG_JSON = `
 			"type": "*none",									// reader type <*file_csv>
 			"row_length" : 0, 									// Number of fields from csv file
 			"field_separator": ",",								// separator used in case of csv files
+			"header_define_character": ":",						// the starting character for header definition used in case of CSV files
 			"run_delay": "0",									// sleep interval in seconds between consecutive runs, -1 to use automation via inotify or 0 to disable running all together
 			"concurrent_requests": 1024,						// maximum simultaneous requests/files to process, 0 for unlimited
 			"source_path": "/var/spool/cgrates/cdrc/in",		// read data from this path
