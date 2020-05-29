@@ -1,6 +1,8 @@
 cgrates (0.10.2~dev) UNRELEASED; urgency=medium
 
   * [SupplierS] Uniformize the logic in model_helpers.go
+  * [FilterS] Updated error message in case of unknown prefix
+  * [Server] Corectly log the server listen error
 
  -- DanB <danb@cgrates.org>  Tue, 12 May 2020 13:08:15 +0300
 
