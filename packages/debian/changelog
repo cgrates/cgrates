@@ -63,6 +63,8 @@ cgrates (0.11.0~dev) UNRELEASED; urgency=medium
   * [AgentS] Added *constant: prefix to do not proccess the value
     with RSRParsers
   * [AgentS] Added DynamicDataProvider to AgentRequest
+  * [Server] Corectly log the server listen error
+  * [ERs] Added support to reference CSV fields by the column name
 
  -- DanB <danb@cgrates.org>  Wed, 19 Feb 2020 13:25:52 +0200
 

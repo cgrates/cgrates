@@ -131,11 +131,12 @@ func (rdr *CSVFileER) processFile(fPath, fName string) (err error) {
 	defer file.Close()
 	csvReader := csv.NewReader(bufio.NewReader(file))
 	csvReader.FieldsPerRecord = rdr.cgrCfg.ERsCfg().Readers[rdr.cfgIdx].RowLength
+	csvReader.Comment = utils.COMMENT_CHAR
 	csvReader.Comma = utils.CSV_SEP
 	if len(rdr.Config().FieldSep) > 0 {
 		csvReader.Comma = rune(rdr.Config().FieldSep[0])
 	}
-	csvReader.Comment = '#'
+	var headers map[string]int
 	rowNr := 0 // This counts the rows in the file, not really number of CDRs
 	evsPosted := 0
 	timeStart := time.Now()
@@ -148,9 +149,20 @@ func (rdr *CSVFileER) processFile(fPath, fName string) (err error) {
 			}
 			return
 		}
+		if rowNr == 0 && len(record) > 0 &&
+			strings.HasPrefix(record[0], rdr.cgrCfg.ERsCfg().Readers[rdr.cfgIdx].HeaderDefineChar) {
+			record[0] = strings.TrimPrefix(record[0], rdr.cgrCfg.ERsCfg().Readers[rdr.cfgIdx].HeaderDefineChar)
+			// map the templates
+			headers = make(map[string]int)
+			for i, hdr := range record {
+				headers[hdr] = i
+			}
+			continue
+		}
 		rowNr++ // increment the rowNr after checking if it's not the end of file
+
 		agReq := agents.NewAgentRequest(
-			config.NewSliceDP(record), reqVars,
+			config.NewSliceDP(record, headers), reqVars,
 			nil, nil, nil, rdr.Config().Tenant,
 			rdr.cgrCfg.GeneralCfg().DefaultTenant,
 			utils.FirstNonEmpty(rdr.Config().Timezone,

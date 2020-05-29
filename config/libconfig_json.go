@@ -179,6 +179,7 @@ type EventReaderJsonCfg struct {
 	Type                        *string
 	Row_length                  *int
 	Field_separator             *string
+	Header_define_character     *string
 	Run_delay                   *string
 	Concurrent_requests         *int
 	Source_path                 *string

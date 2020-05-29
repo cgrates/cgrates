@@ -27,15 +27,19 @@ import (
 )
 
 // NewSliceDP constructs a utils.DataProvider
-func NewSliceDP(record []string) (dP utils.DataProvider) {
-	dP = &SliceDP{req: record, cache: utils.MapStorage{}}
-	return
+func NewSliceDP(record []string, headers map[string]int) (dP utils.DataProvider) {
+	return &SliceDP{
+		req:   record,
+		cache: utils.MapStorage{},
+		hdrs:  headers,
+	}
 }
 
 // SliceDP implements engine.utils.DataProvider so we can pass it to filters
 type SliceDP struct {
 	req   []string
 	cache utils.MapStorage
+	hdrs  map[string]int
 }
 
 // String is part of engine.utils.DataProvider interface
@@ -57,14 +61,14 @@ func (cP *SliceDP) FieldAsInterface(fldPath []string) (data interface{}, err err
 		err != utils.ErrNotFound { // item found in cache
 		return
 	}
-	err = nil // cancel previous err
-	if cfgFieldIdx, err := strconv.Atoi(idx); err != nil {
+	var cfgFieldIdx int
+	if cfgFieldIdx, err = cP.getIndex(idx); err != nil {
 		return nil, fmt.Errorf("Ignoring record: %v with error : %+v", cP.req, err)
-	} else if len(cP.req) <= cfgFieldIdx {
-		return nil, utils.ErrNotFound
-	} else {
-		data = cP.req[cfgFieldIdx]
 	}
+	if len(cP.req) <= cfgFieldIdx {
+		return nil, utils.ErrNotFound
+	}
+	data = cP.req[cfgFieldIdx]
 	cP.cache.Set(fldPath, data)
 	return
 }
@@ -82,4 +86,14 @@ func (cP *SliceDP) FieldAsString(fldPath []string) (data string, err error) {
 // RemoteHost is part of engine.utils.DataProvider interface
 func (cP *SliceDP) RemoteHost() net.Addr {
 	return utils.LocalAddr()
+}
+
+func (cP *SliceDP) getIndex(idx string) (fieldIdx int, err error) {
+	if cP.hdrs != nil {
+		var has bool
+		if fieldIdx, has = cP.hdrs[idx]; has {
+			return
+		}
+	}
+	return strconv.Atoi(idx)
 }
