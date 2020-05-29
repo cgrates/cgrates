@@ -27,19 +27,19 @@ import (
 )
 
 // NewSliceDP constructs a utils.DataProvider
-func NewSliceDP(record []string, headers map[string]int) (dP utils.DataProvider) {
+func NewSliceDP(record []string, indxAls map[string]int) (dP utils.DataProvider) {
 	return &SliceDP{
-		req:   record,
-		cache: utils.MapStorage{},
-		hdrs:  headers,
+		req:    record,
+		cache:  utils.MapStorage{},
+		idxAls: indxAls,
 	}
 }
 
 // SliceDP implements engine.utils.DataProvider so we can pass it to filters
 type SliceDP struct {
-	req   []string
-	cache utils.MapStorage
-	hdrs  map[string]int
+	req    []string
+	cache  utils.MapStorage
+	idxAls map[string]int // aliases for indexes
 }
 
 // String is part of engine.utils.DataProvider interface
@@ -88,10 +88,11 @@ func (cP *SliceDP) RemoteHost() net.Addr {
 	return utils.LocalAddr()
 }
 
+// getIndex returns the index from index alias map or if not found try to convert it to int
 func (cP *SliceDP) getIndex(idx string) (fieldIdx int, err error) {
-	if cP.hdrs != nil {
+	if cP.idxAls != nil {
 		var has bool
-		if fieldIdx, has = cP.hdrs[idx]; has {
+		if fieldIdx, has = cP.idxAls[idx]; has {
 			return
 		}
 	}

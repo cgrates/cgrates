@@ -155,7 +155,7 @@ func (rdr *PartialCSVFileER) processFile(fPath, fName string) (err error) {
 		csvReader.Comma = rune(rdr.Config().FieldSep[0])
 	}
 	csvReader.Comment = '#'
-	var headers map[string]int
+	var indxAls map[string]int
 	rowNr := 0 // This counts the rows in the file, not really number of CDRs
 	evsPosted := 0
 	timeStart := time.Now()
@@ -172,15 +172,15 @@ func (rdr *PartialCSVFileER) processFile(fPath, fName string) (err error) {
 			strings.HasPrefix(record[0], rdr.cgrCfg.ERsCfg().Readers[rdr.cfgIdx].HeaderDefineChar) {
 			record[0] = strings.TrimPrefix(record[0], rdr.cgrCfg.ERsCfg().Readers[rdr.cfgIdx].HeaderDefineChar)
 			// map the templates
-			headers = make(map[string]int)
+			indxAls = make(map[string]int)
 			for i, hdr := range record {
-				headers[hdr] = i
+				indxAls[hdr] = i
 			}
 			continue
 		}
 		rowNr++ // increment the rowNr after checking if it's not the end of file
 		agReq := agents.NewAgentRequest(
-			config.NewSliceDP(record, headers), reqVars,
+			config.NewSliceDP(record, indxAls), reqVars,
 			nil, nil, nil, rdr.Config().Tenant,
 			rdr.cgrCfg.GeneralCfg().DefaultTenant,
 			utils.FirstNonEmpty(rdr.Config().Timezone,

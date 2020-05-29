@@ -292,7 +292,7 @@ func (srvMngr *ServiceManager) handleReload() {
 				return
 			}
 		case <-srvMngr.GetConfig().GetReloadChan(config.EEsJson):
-			if err = srvMngr.reloadService(config.EEsJson); err != nil {
+			if err = srvMngr.reloadService(utils.EventExporterS); err != nil {
 				return
 			}
 		case <-srvMngr.GetConfig().GetReloadChan(config.RateSJson):
