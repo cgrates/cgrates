@@ -185,6 +185,7 @@ func (m *Migrator) migrateAttributeProfile() (err error) {
 			switch version {
 			case current[utils.Attributes]:
 				if m.sameDataDB {
+					migrated = false
 					break
 				}
 				if err = m.migrateCurrentAttributeProfile(); err != nil {
