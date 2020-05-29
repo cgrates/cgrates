@@ -145,6 +145,23 @@ func (m *Migrator) migrateV2ActionTriggers() (err error) {
 	return
 }
 
+func (m *Migrator) removeV2Thresholds() (err error) {
+	var v2T *v2Threshold
+	for {
+		v2T, err = m.dmIN.getV2ThresholdProfile()
+		if err != nil && err != utils.ErrNoMoreData {
+			return err
+		}
+		if err == utils.ErrNoMoreData {
+			break
+		}
+		if err = m.dmIN.remV2ThresholdProfile(v2T.Tenant, v2T.ID); err != nil {
+			return err
+		}
+	}
+	return
+}
+
 func (m *Migrator) migrateV2Thresholds() (err error) {
 	var v2T *v2Threshold
 	for {
@@ -160,15 +177,15 @@ func (m *Migrator) migrateV2Thresholds() (err error) {
 		}
 		th := v2T.V2toV3Threshold()
 
-		if err = m.dmIN.remV2ThresholdProfile(v2T.Tenant, v2T.ID); err != nil {
-			return err
-		}
 		if err = m.dmOut.DataManager().SetThresholdProfile(th, true); err != nil {
 			return err
 		}
 		m.stats[utils.Thresholds] += 1
 	}
 	if m.dryRun {
+		return
+	}
+	if err = m.removeV2Thresholds(); err != nil {
 		return
 	}
 	// All done, update version wtih current one
