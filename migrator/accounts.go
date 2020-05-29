@@ -60,6 +60,23 @@ func (m *Migrator) migrateCurrentAccounts() (err error) {
 	return
 }
 
+func (m *Migrator) removeV1Accounts() (err error) {
+	var v1Acnt *v1Account
+	for {
+		v1Acnt, err = m.dmIN.getv1Account()
+		if err != nil && err != utils.ErrNoMoreData {
+			return err
+		}
+		if err == utils.ErrNoMoreData {
+			break
+		}
+		if err = m.dmIN.remV1Account(v1Acnt.Id); err != nil {
+			return err
+		}
+	}
+	return
+}
+
 func (m *Migrator) migrateV1Accounts() (err error) {
 	var v1Acnt *v1Account
 	for {
@@ -77,12 +94,12 @@ func (m *Migrator) migrateV1Accounts() (err error) {
 		if err = m.dmOut.DataManager().SetAccount(acnt); err != nil {
 			return err
 		}
-		if err = m.dmIN.remV1Account(v1Acnt.Id); err != nil {
-			return err
-		}
 		m.stats[utils.Accounts] += 1
 	}
 	if m.dryRun {
+		return
+	}
+	if err = m.removeV1Accounts(); err != nil {
 		return
 	}
 	// All done, update version wtih current one
@@ -92,6 +109,23 @@ func (m *Migrator) migrateV1Accounts() (err error) {
 			utils.ServerErrorCaps,
 			err.Error(),
 			fmt.Sprintf("error: <%s> when updating Accounts version into StorDB", err.Error()))
+	}
+	return
+}
+
+func (m *Migrator) removeV2Accounts() (err error) {
+	var v2Acnt *v2Account
+	for {
+		v2Acnt, err = m.dmIN.getv2Account()
+		if err != nil && err != utils.ErrNoMoreData {
+			return err
+		}
+		if err == utils.ErrNoMoreData {
+			break
+		}
+		if err = m.dmIN.remV2Account(v2Acnt.ID); err != nil {
+			return
+		}
 	}
 	return
 }
@@ -113,12 +147,12 @@ func (m *Migrator) migrateV2Accounts() (err error) {
 		if err = m.dmOut.DataManager().SetAccount(acnt); err != nil {
 			return err
 		}
-		if err = m.dmIN.remV2Account(v2Acnt.ID); err != nil {
-			return err
-		}
 		m.stats[utils.Accounts] += 1
 	}
 	if m.dryRun {
+		return
+	}
+	if err = m.removeV2Accounts(); err != nil {
 		return
 	}
 	// All done, update version wtih current one

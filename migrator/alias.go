@@ -146,6 +146,22 @@ func alias2AtttributeProfile(alias *v1Alias, defaultTenant string) *engine.Attri
 	return out
 }
 
+func (m *Migrator) removeAlias2Attributes() (err error) {
+	for {
+		alias, err := m.dmIN.getV1Alias()
+		if err == utils.ErrNoMoreData {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		if err := m.dmIN.remV1Alias(alias.GetId()); err != nil {
+			return err
+		}
+	}
+	return
+}
+
 func (m *Migrator) migrateAlias2Attributes() (err error) {
 	cfg := config.CgrConfig()
 
@@ -165,15 +181,15 @@ func (m *Migrator) migrateAlias2Attributes() (err error) {
 		if len(attr.Attributes) == 0 {
 			continue
 		}
-		if err := m.dmIN.remV1Alias(alias.GetId()); err != nil {
-			return err
-		}
 		if err := m.dmOut.DataManager().SetAttributeProfile(attr, true); err != nil {
 			return err
 		}
 		m.stats[Alias] += 1
 	}
 	if m.dryRun {
+		return
+	}
+	if err = m.removeAlias2Attributes(); err != nil {
 		return
 	}
 	// All done, update version wtih current one

@@ -89,7 +89,7 @@ func userProfile2attributeProfile(user *v1UserProfile) (attr *engine.AttributePr
 	return
 }
 
-func (m *Migrator) migrateV1User2AttributeProfile() (err error) {
+func (m *Migrator) removeV1UserProfile() (err error) {
 	for {
 		user, err := m.dmIN.getV1User()
 		if err == utils.ErrNoMoreData {
@@ -108,12 +108,35 @@ func (m *Migrator) migrateV1User2AttributeProfile() (err error) {
 		if err := m.dmIN.remV1User(user.GetId()); err != nil {
 			return err
 		}
+	}
+	return
+}
+
+func (m *Migrator) migrateV1User2AttributeProfile() (err error) {
+	for {
+		user, err := m.dmIN.getV1User()
+		if err == utils.ErrNoMoreData {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		if user == nil || user.Masked || m.dryRun {
+			continue
+		}
+		attr := userProfile2attributeProfile(user)
+		if len(attr.Attributes) == 0 {
+			continue
+		}
 		if err := m.dmOut.DataManager().SetAttributeProfile(attr, true); err != nil {
 			return err
 		}
 		m.stats[utils.User]++
 	}
 	if m.dryRun {
+		return
+	}
+	if err = m.removeV1UserProfile(); err != nil {
 		return
 	}
 	// All done, update version wtih current one

@@ -54,6 +54,24 @@ type SupplierProfile struct {
 	Weight             float64
 }
 
+func (m *Migrator) removeSupplier() (err error) {
+	for {
+		var spp *SupplierProfile
+		spp, err = m.dmIN.getSupplier()
+		if err == utils.ErrNoMoreData {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		if err = m.dmIN.remSupplier(spp.Tenant, spp.ID); err != nil {
+			return err
+		}
+	}
+	return
+
+}
+
 func (m *Migrator) migrateFromSupplierToRoute() (err error) {
 	for {
 		var spp *SupplierProfile
@@ -70,12 +88,12 @@ func (m *Migrator) migrateFromSupplierToRoute() (err error) {
 		if err := m.dmOut.DataManager().SetRouteProfile(convertSupplierToRoute(spp), true); err != nil {
 			return err
 		}
-		if err = m.dmIN.remSupplier(spp.Tenant, spp.ID); err != nil {
-			return err
-		}
 		m.stats[utils.DerivedChargersV] += 1
 	}
 	if m.dryRun {
+		return
+	}
+	if err = m.removeSupplier(); err != nil {
 		return
 	}
 	// All done, update version with current one

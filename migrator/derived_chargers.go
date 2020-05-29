@@ -185,6 +185,23 @@ func (m *Migrator) derivedChargers2Chargers(dck *v1DerivedChargersWithKey) (err 
 	return nil
 }
 
+func (m *Migrator) removeV1DerivedChargers() (err error) {
+	for {
+		var dck *v1DerivedChargersWithKey
+		dck, err = m.dmIN.getV1DerivedChargers()
+		if err == utils.ErrNoMoreData {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		if err = m.dmIN.remV1DerivedChargers(dck.Key); err != nil {
+			return err
+		}
+	}
+	return
+}
+
 func (m *Migrator) migrateV1DerivedChargers() (err error) {
 	for {
 		var dck *v1DerivedChargersWithKey
@@ -201,12 +218,13 @@ func (m *Migrator) migrateV1DerivedChargers() (err error) {
 		if err = m.derivedChargers2Chargers(dck); err != nil {
 			return err
 		}
-		if err = m.dmIN.remV1DerivedChargers(dck.Key); err != nil {
-			return err
-		}
+
 		m.stats[utils.DerivedChargersV] += 1
 	}
 	if m.dryRun {
+		return
+	}
+	if m.removeV1DerivedChargers(); err != nil {
 		return
 	}
 	// All done, update version wtih current one
