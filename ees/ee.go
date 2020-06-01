@@ -33,12 +33,12 @@ type EventExporter interface {
 }
 
 // NewEventExporter produces exporters
-func NewEventExporter(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.FilterS) (ee EventExporter, err error) {
+func NewEventExporter(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.FilterS, dc utils.MapStorage) (ee EventExporter, err error) {
 	switch cgrCfg.EEsCfg().Exporters[cfgIdx].Type {
 	case utils.MetaFileCSV:
-		return NewFileCSVee(cgrCfg, cfgIdx, filterS)
+		return NewFileCSVee(cgrCfg, cfgIdx, filterS, dc)
 	case utils.MetaFileFWV:
-		return NewFileFWVee(cgrCfg, cfgIdx, filterS)
+		return NewFileFWVee(cgrCfg, cfgIdx, filterS, dc)
 	default:
 		return nil, fmt.Errorf("unsupported exporter type: <%s>", cgrCfg.EEsCfg().Exporters[cfgIdx].Type)
 	}

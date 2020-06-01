@@ -2039,6 +2039,47 @@ func TestAgReqDynamicPath(t *testing.T) {
 	}
 }
 
+func TestAgReqRoundingDecimals(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, dm)
+	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
+	// populate request, emulating the way will be done in HTTPAgent
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathItems: utils.PathItems{{Field: utils.ToR}}}, utils.NewNMData(utils.VOICE))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Account, PathItems: utils.PathItems{{Field: utils.Account}}}, utils.NewNMData("1001"))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathItems: utils.PathItems{{Field: utils.Destination}}}, utils.NewNMData("1002"))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AnswerTime, PathItems: utils.PathItems{{Field: utils.AnswerTime}}}, utils.NewNMData(
+		time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC)))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.RequestType, PathItems: utils.PathItems{{Field: utils.RequestType}}}, utils.NewNMData(utils.META_PREPAID))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Cost, PathItems: utils.PathItems{{Field: utils.Cost}}}, utils.NewNMData(12.12645))
+
+	agReq.CGRReply = &utils.NavigableMap2{}
+
+	tplFlds := []*config.FCTemplate{
+		{Tag: "Cost",
+			Path: utils.MetaCgrep + utils.NestingSep + utils.Cost, Type: utils.META_COMPOSED,
+			Value: config.NewRSRParsersMustCompile("~*cgreq.Cost{*round:3}", true, utils.INFIELD_SEP)},
+	}
+	for _, v := range tplFlds {
+		v.ComputePath()
+	}
+	if err := agReq.SetFields(tplFlds); err != nil {
+		t.Error(err)
+	}
+
+	if rcv, err := agReq.CGRReply.Field(utils.PathItems{{Field: utils.Cost}}); err != nil {
+		t.Error(err)
+	} else if sls, canCast := rcv.(*utils.NMSlice); !canCast {
+		t.Errorf("Cannot cast to &utils.NMSlice %+v", rcv)
+	} else if len(*sls) != 1 {
+		t.Errorf("expecting: %+v, \n received: %+v ", 1, len(*sls))
+	} else if (*sls)[0].Interface() != "12.126" {
+		t.Errorf("expecting: %+v, \n received: %+v",
+			"12.126", (*sls)[0].Interface())
+	}
+}
+
 /*
 $go test -bench=.  -run=^$ -benchtime=10s -count=3
 goos: linux

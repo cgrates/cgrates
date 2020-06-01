@@ -376,6 +376,7 @@ const (
 	MetaDispatcherHosts         = "*dispatcher_hosts"
 	MetaFilters                 = "*filters"
 	MetaCDRs                    = "*cdrs"
+	MetaDC                      = "*dc"
 	MetaCaches                  = "*caches"
 	MetaCache                   = "*cache"
 	MetaGuardian                = "*guardians"
@@ -2152,6 +2153,23 @@ const (
 	// SupplierS
 	RoutesLimit  = "RoutesLimit"
 	RoutesOffset = "RoutesOffset"
+)
+
+// EventExporter metrics
+const (
+	NumberOfEvents    = "NumberOfEvents"
+	TotalCost         = "TotalCost"
+	PositiveExports   = "PositiveExports"
+	NegativeExports   = "NegativeExports"
+	FirstExpOrderID   = "FirstExpOrderID"
+	LastExpOrderID    = "LastExpOrderID"
+	FirstEventATime   = "FirstEventATime"
+	LastEventATime    = "LastEventATime"
+	TotalDuration     = "TotalDuration"
+	TotalDataUsage    = "TotalDataUsage"
+	TotalSMSUsage     = "TotalSMSUsage"
+	TotalMMSUsage     = "TotalMMSUsage"
+	TotalGenericUsage = "TotalGenericUsage"
 )
 
 func buildCacheInstRevPrefixes() {

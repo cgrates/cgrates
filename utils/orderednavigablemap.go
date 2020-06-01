@@ -143,7 +143,7 @@ func (onm OrderedNavigableMap) Len() int {
 	return onm.nm.Len()
 }
 
-// FieldAsString returns thevalue from path as string
+// FieldAsString returns the value from path as string
 func (onm *OrderedNavigableMap) FieldAsString(fldPath []string) (str string, err error) {
 	var val NMInterface
 	val, err = onm.nm.Field(NewPathItems(fldPath))

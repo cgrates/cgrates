@@ -1956,11 +1956,10 @@ func TestDfEventExporterCfg(t *testing.T) {
 			Value: utils.StringPointer(utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage),
 		},
 		{
-			Tag:               utils.StringPointer(utils.Cost),
-			Path:              utils.StringPointer("*exp.Cost"),
-			Type:              utils.StringPointer(utils.MetaVariable),
-			Value:             utils.StringPointer(utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.COST),
-			Rounding_decimals: utils.IntPointer(4),
+			Tag:   utils.StringPointer(utils.Cost),
+			Path:  utils.StringPointer("*exp.Cost"),
+			Type:  utils.StringPointer(utils.MetaVariable),
+			Value: utils.StringPointer(utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.COST + "{*round:4}"),
 		},
 	}
 	eCfg := &EEsJsonCfg{
