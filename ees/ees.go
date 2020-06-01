@@ -21,6 +21,7 @@ package ees
 import (
 	"fmt"
 	"sync"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -176,7 +177,7 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithOpts, rply *s
 			}
 		}
 		if !isCached {
-			if ee, err = NewEventExporter(eeS.cfg, cfgIdx, eeS.filterS); err != nil {
+			if ee, err = NewEventExporter(eeS.cfg, cfgIdx, eeS.filterS, newEEMetrics()); err != nil {
 				return
 			}
 			if hasCache {
@@ -208,4 +209,22 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithOpts, rply *s
 	*rply = utils.OK
 
 	return
+}
+
+func newEEMetrics() utils.MapStorage {
+	return utils.MapStorage{
+		utils.NumberOfEvents:    0,
+		utils.TotalCost:         0.0,
+		utils.PositiveExports:   utils.StringSet{},
+		utils.NegativeExports:   utils.StringSet{},
+		utils.FirstExpOrderID:   0,
+		utils.LastExpOrderID:    0,
+		utils.FirstEventATime:   time.Time{},
+		utils.LastEventATime:    time.Time{},
+		utils.TotalDuration:     time.Duration(0),
+		utils.TotalSMSUsage:     time.Duration(0),
+		utils.TotalMMSUsage:     time.Duration(0),
+		utils.TotalGenericUsage: time.Duration(0),
+		utils.TotalDataUsage:    time.Duration(0),
+	}
 }

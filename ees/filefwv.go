@@ -23,7 +23,6 @@ import (
 	"io"
 	"os"
 	"path"
-	"strconv"
 	"sync"
 	"time"
 
@@ -32,9 +31,9 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewFileFWVee(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.FilterS) (fFwv *FileFWVee, err error) {
+func NewFileFWVee(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.FilterS, dc utils.MapStorage) (fFwv *FileFWVee, err error) {
 	fFwv = &FileFWVee{id: cgrCfg.EEsCfg().Exporters[cfgIdx].ID,
-		cgrCfg: cgrCfg, cfgIdx: cfgIdx, filterS: filterS}
+		cgrCfg: cgrCfg, cfgIdx: cfgIdx, filterS: filterS, dc: dc}
 	err = fFwv.init()
 	return
 }
@@ -46,16 +45,8 @@ type FileFWVee struct {
 	cfgIdx  int // index of config instance within ERsCfg.Readers
 	filterS *engine.FilterS
 	file    *os.File
+	dc      utils.MapStorage
 	sync.RWMutex
-
-	firstEventATime, lastEventATime time.Time
-	numberOfEvents                  int
-	totalDuration, totalDataUsage, totalSmsUsage,
-	totalMmsUsage, totalGenericUsage time.Duration
-	totalCost                       float64
-	firstExpOrderID, lastExpOrderID int64
-	positiveExports                 utils.StringSet
-	negativeExports                 utils.StringSet
 }
 
 // init will create all the necessary dependencies, including opening the file
@@ -65,8 +56,6 @@ func (fFwv *FileFWVee) init() (err error) {
 		fFwv.id+utils.Underline+utils.UUIDSha1Prefix()+utils.FWVSuffix)); err != nil {
 		return
 	}
-	fFwv.positiveExports = utils.StringSet{}
-	fFwv.negativeExports = utils.StringSet{}
 	return fFwv.composeHeader()
 }
 
@@ -93,60 +82,62 @@ func (fFwv *FileFWVee) OnEvicted(_ string, _ interface{}) {
 func (fFwv *FileFWVee) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 	fFwv.Lock()
 	defer fFwv.Unlock()
-	fFwv.numberOfEvents++
+	fFwv.dc[utils.NumberOfEvents] = fFwv.dc[utils.NumberOfEvents].(int) + 1
 	var records []string
-	navMp := utils.MapStorage{utils.MetaReq: cgrEv.Event}
-	for _, cfgFld := range fFwv.cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].ContentFields() {
-		if pass, err := fFwv.filterS.Pass(cgrEv.Tenant, cfgFld.Filters,
-			navMp); err != nil || !pass {
-			continue
+	req := utils.MapStorage{}
+	for k, v := range cgrEv.Event {
+		req[k] = v
+	}
+	eeReq := NewEventExporterRequest(req, fFwv.dc, cgrEv.Tenant, fFwv.cgrCfg.GeneralCfg().DefaultTimezone,
+		fFwv.filterS)
+
+	if err = eeReq.SetFields(fFwv.cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].ContentFields()); err != nil {
+		fFwv.dc[utils.NegativeExports].(utils.StringSet).Add(cgrEv.ID)
+		return
+	}
+	for el := eeReq.cnt.GetFirstElement(); el != nil; el = el.Next() {
+		var strVal string
+		if strVal, err = eeReq.cnt.FieldAsString(el.Value.Slice()); err != nil {
+			return
 		}
-		val, err := cfgFld.Value.ParseDataProvider(navMp, utils.NestingSep)
-		if err != nil {
-			if err == utils.ErrNotFound {
-				err = utils.ErrPrefix(err, cfgFld.Value.GetRule())
-			}
-			fFwv.negativeExports.Add(cgrEv.ID)
-			return err
-		}
-		records = append(records, val)
+		records = append(records, strVal)
 	}
 	if aTime, err := cgrEv.FieldAsTime(utils.AnswerTime, fFwv.cgrCfg.GeneralCfg().DefaultTimezone); err == nil {
-		if fFwv.firstEventATime.IsZero() || fFwv.firstEventATime.Before(aTime) {
-			fFwv.firstEventATime = aTime
+		if fFwv.dc[utils.FirstEventATime].(time.Time).IsZero() || fFwv.dc[utils.FirstEventATime].(time.Time).Before(aTime) {
+			fFwv.dc[utils.FirstEventATime] = aTime
 		}
-		if aTime.After(fFwv.lastEventATime) {
-			fFwv.lastEventATime = aTime
+		if aTime.After(fFwv.dc[utils.LastEventATime].(time.Time)) {
+			fFwv.dc[utils.LastEventATime] = aTime
 		}
 	}
 	if oID, err := cgrEv.FieldAsInt64(utils.OrderID); err == nil {
-		if fFwv.firstExpOrderID > oID || fFwv.firstExpOrderID == 0 {
-			fFwv.firstExpOrderID = oID
+		if fFwv.dc[utils.FirstExpOrderID].(int64) > oID || fFwv.dc[utils.FirstExpOrderID].(int64) == 0 {
+			fFwv.dc[utils.FirstExpOrderID] = oID
 		}
-		if fFwv.lastExpOrderID < oID {
-			fFwv.lastExpOrderID = oID
+		if fFwv.dc[utils.LastExpOrderID].(int64) < oID {
+			fFwv.dc[utils.LastExpOrderID] = oID
 		}
 	}
 	if cost, err := cgrEv.FieldAsFloat64(utils.Cost); err == nil {
-		fFwv.totalCost += cost
+		fFwv.dc[utils.TotalCost] = fFwv.dc[utils.TotalCost].(float64) + cost
 	}
 	if tor, err := cgrEv.FieldAsString(utils.ToR); err == nil {
 		if usage, err := cgrEv.FieldAsDuration(utils.Usage); err == nil {
 			switch tor {
 			case utils.VOICE:
-				fFwv.totalDuration += usage
+				fFwv.dc[utils.TotalDuration] = fFwv.dc[utils.TotalDuration].(time.Duration) + usage
 			case utils.SMS:
-				fFwv.totalSmsUsage += usage
+				fFwv.dc[utils.TotalSMSUsage] = fFwv.dc[utils.TotalSMSUsage].(time.Duration) + usage
 			case utils.MMS:
-				fFwv.totalMmsUsage += usage
+				fFwv.dc[utils.TotalMMSUsage] = fFwv.dc[utils.TotalMMSUsage].(time.Duration) + usage
 			case utils.GENERIC:
-				fFwv.totalGenericUsage += usage
+				fFwv.dc[utils.TotalGenericUsage] = fFwv.dc[utils.TotalGenericUsage].(time.Duration) + usage
 			case utils.DATA:
-				fFwv.totalDataUsage += usage
+				fFwv.dc[utils.TotalDataUsage] = fFwv.dc[utils.TotalDataUsage].(time.Duration) + usage
 			}
 		}
 	}
-	fFwv.positiveExports.Add(cgrEv.ID)
+	fFwv.dc[utils.PositiveExports].(utils.StringSet).Add(cgrEv.ID)
 	for _, record := range append(records, "\n") {
 		if _, err = io.WriteString(fFwv.file, record); err != nil {
 			return
@@ -161,30 +152,17 @@ func (fFwv *FileFWVee) composeHeader() (err error) {
 		return
 	}
 	var records []string
-	for _, cfgFld := range fFwv.cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].HeaderFields() {
-		var outVal string
-		switch cfgFld.Type {
-		case utils.META_CONSTANT:
-			outVal, err = cfgFld.Value.ParseValue(utils.EmptyString)
-			if err != nil {
-				if err == utils.ErrNotFound {
-					err = utils.ErrPrefix(err, cfgFld.Value.GetRule())
-				}
-				return err
-			}
-		case utils.MetaExportID:
-			outVal = fFwv.id
-		case utils.MetaTimeNow:
-			outVal = time.Now().String()
-		default:
-			return fmt.Errorf("unsupported type in header for field: <%+v>", utils.ToJSON(cfgFld))
+	eeReq := NewEventExporterRequest(nil, fFwv.dc, fFwv.cgrCfg.GeneralCfg().DefaultTenant, fFwv.cgrCfg.GeneralCfg().DefaultTimezone,
+		fFwv.filterS)
+	if err = eeReq.SetFields(fFwv.cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].HeaderFields()); err != nil {
+		return
+	}
+	for el := eeReq.hdr.GetFirstElement(); el != nil; el = el.Next() {
+		var strVal string
+		if strVal, err = eeReq.hdr.FieldAsString(el.Value.Slice()); err != nil {
+			return
 		}
-		fmtOut := outVal
-		if fmtOut, err = utils.FmtFieldWidth(cfgFld.Tag, outVal, cfgFld.Width,
-			cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
-			return err
-		}
-		records = append(records, fmtOut)
+		records = append(records, strVal)
 	}
 	for _, record := range append(records, "\n") {
 		if _, err = io.WriteString(fFwv.file, record); err != nil {
@@ -200,57 +178,17 @@ func (fFwv *FileFWVee) composeTrailer() (err error) {
 		return
 	}
 	var records []string
-	for _, cfgFld := range fFwv.cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].TrailerFields() {
-		var val string
-		switch cfgFld.Type {
-		case utils.META_CONSTANT:
-			val, err = cfgFld.Value.ParseValue(utils.EmptyString)
-			if err != nil {
-				if err == utils.ErrNotFound {
-					err = utils.ErrPrefix(err, cfgFld.Value.GetRule())
-				}
-				return err
-			}
-		case utils.MetaExportID:
-			val = fFwv.id
-		case utils.MetaTimeNow:
-			val = time.Now().String()
-		case utils.MetaFirstEventATime:
-			val = fFwv.firstEventATime.Format(cfgFld.Layout)
-		case utils.MetaLastEventATime:
-			val = fFwv.lastEventATime.Format(cfgFld.Layout)
-		case utils.MetaEventNumber:
-			val = strconv.Itoa(fFwv.numberOfEvents)
-		case utils.MetaEventCost:
-			rounding := fFwv.cgrCfg.GeneralCfg().RoundingDecimals
-			if cfgFld.RoundingDecimals != nil {
-				rounding = *cfgFld.RoundingDecimals
-			}
-			val = strconv.FormatFloat(utils.Round(fFwv.totalCost,
-				rounding, utils.ROUNDING_MIDDLE), 'f', -1, 64)
-		case utils.MetaVoiceUsage:
-			val = fFwv.totalDuration.String()
-		case utils.MetaDataUsage:
-			val = strconv.Itoa(int(fFwv.totalDataUsage.Nanoseconds()))
-		case utils.MetaSMSUsage:
-			val = strconv.Itoa(int(fFwv.totalSmsUsage.Nanoseconds()))
-		case utils.MetaMMSUsage:
-			val = strconv.Itoa(int(fFwv.totalMmsUsage.Nanoseconds()))
-		case utils.MetaGenericUsage:
-			val = strconv.Itoa(int(fFwv.totalGenericUsage.Nanoseconds()))
-		case utils.MetaNegativeExports:
-			val = strconv.Itoa(len(fFwv.negativeExports.AsSlice()))
-		case utils.MetaPositiveExports:
-			val = strconv.Itoa(len(fFwv.positiveExports.AsSlice()))
-		default:
-			return fmt.Errorf("unsupported type in trailer for field: <%+v>", utils.ToJSON(cfgFld))
+	eeReq := NewEventExporterRequest(nil, fFwv.dc, fFwv.cgrCfg.GeneralCfg().DefaultTenant, fFwv.cgrCfg.GeneralCfg().DefaultTimezone,
+		fFwv.filterS)
+	if err = eeReq.SetFields(fFwv.cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].TrailerFields()); err != nil {
+		return
+	}
+	for el := eeReq.trl.GetFirstElement(); el != nil; el = el.Next() {
+		var strVal string
+		if strVal, err = eeReq.trl.FieldAsString(el.Value.Slice()); err != nil {
+			return
 		}
-		fmtOut := val
-		if fmtOut, err = utils.FmtFieldWidth(cfgFld.Tag, val, cfgFld.Width,
-			cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
-			return err
-		}
-		records = append(records, fmtOut)
+		records = append(records, strVal)
 	}
 	for _, record := range append(records, "\n") {
 		if _, err = io.WriteString(fFwv.file, record); err != nil {

@@ -53,9 +53,9 @@ var (
 		testCsvExportEvent,
 		testCsvVerifyExports,
 		testCsvExportComposedEvent,
-		//testCsvVerifyComposedExports,
+		testCsvVerifyComposedExports,
 		testCsvStopCgrEngine,
-		testCleanDirectory,
+		//testCleanDirectory,
 	}
 )
 
@@ -252,7 +252,7 @@ func testCsvExportComposedEvent(t *testing.T) {
 				utils.AnswerTime:    time.Unix(1383813746, 0).UTC(),
 				utils.Usage:         time.Duration(10) * time.Second,
 				utils.RunID:         utils.MetaDefault,
-				utils.Cost:          1.01,
+				utils.Cost:          1.016374,
 				"ExporterUsed":      "CSVExporterComposed",
 				"ExtraFields": map[string]string{"extra1": "val_extra1",
 					"extra2": "val_extra2", "extra3": "val_extra3"},
@@ -281,7 +281,7 @@ func testCsvExportComposedEvent(t *testing.T) {
 				utils.AnswerTime:    time.Unix(1383813746, 0).UTC(),
 				utils.Usage:         time.Duration(1),
 				utils.RunID:         utils.MetaDefault,
-				utils.Cost:          0.15,
+				utils.Cost:          0.155462,
 				"ExporterUsed":      "CSVExporterComposed",
 				"ExtraFields": map[string]string{"extra1": "val_extra1",
 					"extra2": "val_extra2", "extra3": "val_extra3"},
@@ -316,10 +316,10 @@ func testCsvVerifyComposedExports(t *testing.T) {
 	if len(files) != 1 {
 		t.Errorf("Expected %+v, received: %+v", 1, len(files))
 	}
-	eCnt := "CGRID,RunID,ToR,OriginID,RequestType,Tenant,Category,Account,Subject,Destination,SetupTime,AnswerTime,Usage,Cost" +
-		"\n" +
-		"dbafe9c8614c785a65aabd116dd3959c3c56f7f6,*default,*voice,dsafdsaf,*rated,cgrates.org,call,1001,1001,1002,2013-11-07T08:42:25Z,2013-11-07T08:42:26Z,10000000000,1.01\\n2478e9f18ebcd3c684f3c14596b8bfeab2b0d6d4,*default,*sms,sdf,wer,*rated,cgrates.org,call,1001,1001,1002,2013-11-07T08:42:25Z,2013-11-07T08:42:26Z,1,0.15" +
-		"\n"
+	eCnt := "NumberOfEvent,CGRID,RunID,ToR,OriginID,RequestType,Tenant,Category,Account,Subject,Destination,SetupTime,AnswerTime,Usage,Cost" + "\n" +
+		"1,dbafe9c8614c785a65aabd116dd3959c3c56f7f6,*default,*voice,dsafdsaf,*rated,cgrates.org,call,1001,1001,1002,2013-11-07T08:42:25Z,2013-11-07T08:42:26Z,10000000000,1.0164" + "\n" +
+		"2,2478e9f18ebcd3c684f3c14596b8bfeab2b0d6d4,*default,*sms,sdfwer,*rated,cgrates.org,call,1001,1001,1002,2013-11-07T08:42:25Z,2013-11-07T08:42:26Z,1,0.1555" + "\n" +
+		"2,10s,1ns,1.1718" + "\n"
 	if outContent1, err := ioutil.ReadFile(files[0]); err != nil {
 		t.Error(err)
 	} else if eCnt != string(outContent1) {
