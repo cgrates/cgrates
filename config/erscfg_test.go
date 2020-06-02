@@ -387,7 +387,7 @@ func TestERsCfgAsMapInterface(t *testing.T) {
 				"xml_root_path":               []string{""},
 				"cache_dump_fields":           []map[string]interface{}{},
 				"concurrent_requests":         1024,
-				"db_type":                     "*none",
+				"type":                        "*none",
 				"failed_calls_prefix":         "",
 				"field_separator":             ",",
 				utils.HeaderDefCharCfg:        ":",
@@ -408,7 +408,7 @@ func TestERsCfgAsMapInterface(t *testing.T) {
 			{
 				"cache_dump_fields":    []map[string]interface{}{},
 				"concurrent_requests":  1024,
-				"db_type":              "*file_csv",
+				"type":                 "*file_csv",
 				"failed_calls_prefix":  "",
 				"field_separator":      ",",
 				utils.HeaderDefCharCfg: ":",

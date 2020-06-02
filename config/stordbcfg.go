@@ -138,12 +138,12 @@ func (dbcfg *StorDbCfg) AsMapInterface() map[string]interface{} {
 	dbPort, _ := strconv.Atoi(dbcfg.Port)
 
 	return map[string]interface{}{
-		utils.TypeCfg:                utils.Meta + dbcfg.Type,
-		utils.HostCfg:                dbcfg.Host,
-		utils.PortCfg:                dbPort,
-		utils.NameCfg:                dbcfg.Name,
-		utils.UserCfg:                dbcfg.User,
-		utils.PasswordCfg:            dbcfg.Password,
+		utils.DataDbTypeCfg:          utils.Meta + dbcfg.Type,
+		utils.DataDbHostCfg:          dbcfg.Host,
+		utils.DataDbPortCfg:          dbPort,
+		utils.DataDbNameCfg:          dbcfg.Name,
+		utils.DataDbUserCfg:          dbcfg.User,
+		utils.DataDbPassCfg:          dbcfg.Password,
 		utils.MaxOpenConnsCfg:        dbcfg.MaxOpenConns,
 		utils.MaxIdleConnsCfg:        dbcfg.MaxIdleConns,
 		utils.ConnMaxLifetimeCfg:     dbcfg.ConnMaxLifetime,
