@@ -55,7 +55,7 @@ var (
 		testCsvExportComposedEvent,
 		testCsvVerifyComposedExports,
 		testCsvStopCgrEngine,
-		//testCleanDirectory,
+		testCleanDirectory,
 	}
 )
 

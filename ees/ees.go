@@ -221,6 +221,7 @@ func newEEMetrics() utils.MapStorage {
 		utils.LastExpOrderID:    0,
 		utils.FirstEventATime:   time.Time{},
 		utils.LastEventATime:    time.Time{},
+		utils.TimeNow:           time.Now(),
 		utils.TotalDuration:     time.Duration(0),
 		utils.TotalSMSUsage:     time.Duration(0),
 		utils.TotalMMSUsage:     time.Duration(0),
