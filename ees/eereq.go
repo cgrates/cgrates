@@ -202,6 +202,9 @@ func (eeR *EventExporterRequest) ParseField(
 		return utils.EmptyString, fmt.Errorf("unsupported type: <%s>", cfgFld.Type)
 	case utils.META_NONE:
 		return
+	case utils.MetaTimeNow:
+		out = time.Now().Format(cfgFld.Layout)
+		isString = true
 	case utils.META_FILLER:
 		out, err = cfgFld.Value.ParseValue(utils.EmptyString)
 		cfgFld.Padding = utils.MetaRight
@@ -349,6 +352,17 @@ func (eeR *EventExporterRequest) ParseField(
 			return nil, err
 		}
 		out = strconv.Itoa(int(t.Unix()))
+	case utils.MetaMaskedDestination:
+		//check if we have destination in the event
+		if dst, err := eeR.req.FieldAsString([]string{utils.Destination}); err != nil {
+			return nil, fmt.Errorf("error <%s> getting destination for %s",
+				err, utils.ToJSON(cfgFld))
+		} else if len(cfgFld.MaskDestID) != 0 && engine.CachedDestHasPrefix(cfgFld.MaskDestID, dst) {
+			out = "1"
+		} else {
+			out = "0"
+		}
+
 	}
 
 	if err != nil &&

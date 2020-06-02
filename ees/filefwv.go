@@ -32,6 +32,7 @@ import (
 )
 
 func NewFileFWVee(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.FilterS, dc utils.MapStorage) (fFwv *FileFWVee, err error) {
+	dc[utils.ExportID] = cgrCfg.EEsCfg().Exporters[cfgIdx].ID
 	fFwv = &FileFWVee{id: cgrCfg.EEsCfg().Exporters[cfgIdx].ID,
 		cgrCfg: cgrCfg, cfgIdx: cfgIdx, filterS: filterS, dc: dc}
 	err = fFwv.init()

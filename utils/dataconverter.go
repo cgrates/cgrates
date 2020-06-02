@@ -87,6 +87,11 @@ func NewDataConverter(params string) (conv DataConverter, err error) {
 			return NewPhoneNumberConverter("")
 		}
 		return NewPhoneNumberConverter(params[len(MetaLibPhoneNumber)+1:])
+	case strings.HasPrefix(params, MetaTimeString):
+		if len(params) == len(MetaTimeString) { // no extra params, defaults implied
+			return NewTimeStringConverter(time.RFC3339)
+		}
+		return NewTimeStringConverter(params[len(MetaTimeString)+1:])
 	default:
 		return nil, fmt.Errorf("unsupported converter definition: <%s>", params)
 	}
@@ -333,4 +338,33 @@ type SIPURIMethodConverter struct{}
 func (*SIPURIMethodConverter) Convert(in interface{}) (out interface{}, err error) {
 	val := IfaceAsString(in)
 	return sipingo.MethodFrom(val), nil
+}
+
+func NewTimeStringConverter(params string) (hdlr DataConverter, err error) {
+	tS := new(TimeStringConverter)
+	var paramsSplt []string
+	if params != EmptyString {
+		paramsSplt = strings.Split(params, InInFieldSep)
+	}
+	switch len(paramsSplt) {
+	case 1:
+		tS.Layout = paramsSplt[0]
+	default:
+		return nil, fmt.Errorf("invalid %s converter parameters: <%s>",
+			MetaTimeString, params)
+	}
+	return tS, nil
+}
+
+type TimeStringConverter struct {
+	Layout string
+}
+
+func (tS *TimeStringConverter) Convert(in interface{}) (
+	out interface{}, err error) {
+	tm, err := ParseTimeDetectLayout(in.(string), EmptyString)
+	if err != nil {
+		return nil, err
+	}
+	return tm.Format(tS.Layout), nil
 }
