@@ -120,42 +120,36 @@ func (m *Migrator) migrateCurrentStats() (err error) {
 
 func (m *Migrator) migrateV1CDRSTATS() (err error) {
 	var v1Sts *v1Stat
-	for {
-		v1Sts, err = m.dmIN.getV1Stats()
-		if err != nil && err != utils.ErrNoMoreData {
-			return err
-		}
-		if err == utils.ErrNoMoreData {
-			break
-		}
-		if v1Sts.Id != "" {
-			if len(v1Sts.Triggers) != 0 {
-				for _, Trigger := range v1Sts.Triggers {
-					if err := m.SasThreshold(Trigger); err != nil {
-						return err
+	//for {
+	v1Sts, err = m.dmIN.getV1Stats()
+	if err != nil {
+		return err
+	}
+	if v1Sts.Id != "" {
+		if len(v1Sts.Triggers) != 0 {
+			for _, Trigger := range v1Sts.Triggers {
+				if err := m.SasThreshold(Trigger); err != nil {
+					return err
 
-					}
 				}
 			}
-			filter, sq, sts, err := v1Sts.AsStatQP()
-			if err != nil {
-				return err
-			}
-			if m.dryRun {
-				continue
-			}
-			if err := m.dmOut.DataManager().SetFilter(filter); err != nil {
-				return err
-			}
-			if err := m.dmOut.DataManager().SetStatQueue(remakeQueue(sq)); err != nil {
-				return err
-			}
-			if err := m.dmOut.DataManager().SetStatQueueProfile(sts, true); err != nil {
-				return err
-			}
-			m.stats[utils.StatS] += 1
 		}
+		filter, sq, sts, err := v1Sts.AsStatQP()
+		if err != nil {
+			return err
+		}
+		if err := m.dmOut.DataManager().SetFilter(filter); err != nil {
+			return err
+		}
+		if err := m.dmOut.DataManager().SetStatQueue(remakeQueue(sq)); err != nil {
+			return err
+		}
+		if err := m.dmOut.DataManager().SetStatQueueProfile(sts, true); err != nil {
+			return err
+		}
+		m.stats[utils.StatS] += 1
 	}
+	//}
 	if m.dryRun {
 		return
 	}
@@ -244,21 +238,42 @@ func (m *Migrator) migrateStats() (err error) {
 			utils.UndefinedVersion,
 			"version number is not defined for ActionTriggers model")
 	}
-	switch vrs[utils.StatS] {
-	case 1:
-		if err = m.migrateV1CDRSTATS(); err != nil {
-			return err
+	migrated := true
+	for {
+		version := vrs[utils.StatS]
+		for {
+			switch version {
+			case current[utils.StatS]:
+				if m.sameDataDB {
+					migrated = false
+					break
+				}
+				if err = m.migrateCurrentStats(); err != nil {
+					return err
+				}
+				version = 3
+				migrated = false
+			case 1:
+				if err = m.migrateV1CDRSTATS(); err != nil {
+					return err
+				} else if err == utils.ErrNoMoreData {
+					break
+				}
+				version = 2
+			case 2:
+				if err = m.migrateV2Stats(); err != nil {
+					return err
+				} else if err == utils.ErrNoMoreData {
+					break
+				}
+				version = 3
+			}
+			if version == current[utils.StatS] || !migrated {
+				break
+			}
 		}
-	case 2:
-		if err = m.migrateV2Stats(); err != nil {
-			return err
-		}
-	case current[utils.StatS]:
-		if m.sameDataDB {
-			break
-		}
-		if err = m.migrateCurrentStats(); err != nil {
-			return err
+		if !m.dryRun && migrated {
+			// Set into db
 		}
 	}
 	return m.ensureIndexesDataDB(engine.ColSqs)
