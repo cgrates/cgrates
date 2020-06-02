@@ -1117,6 +1117,8 @@ func (cfg *CGRConfig) V1GetConfigSection(args *StringWithArgDispatcher, reply *m
 		jsonString = utils.ToJSON(cfg.ApierCfg())
 	case CDRE_JSN:
 		jsonString = utils.ToJSON(cfg.CdreProfiles)
+	case EEsJson:
+		jsonString = utils.ToJSON(cfg.EEsCfg())
 	case ERsJson:
 		jsonString = utils.ToJSON(cfg.ERsCfg())
 	case RPCConnsJsonName:
