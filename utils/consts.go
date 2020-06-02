@@ -1708,12 +1708,7 @@ const (
 
 // StorDbCfg
 const (
-	TypeCfg                = "db_type"
-	HostCfg                = "db_host"
-	PortCfg                = "db_port"
-	NameCfg                = "db_name"
-	UserCfg                = "db_user"
-	PasswordCfg            = "db_password"
+	TypeCfg                = "type"
 	MaxOpenConnsCfg        = "max_open_conns"
 	MaxIdleConnsCfg        = "max_idle_conns"
 	ConnMaxLifetimeCfg     = "conn_max_lifetime"

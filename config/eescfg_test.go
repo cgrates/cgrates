@@ -425,5 +425,4 @@ func TestEventExporterSameID(t *testing.T) {
 	} else if !reflect.DeepEqual(expectedEEsCfg, cfg.eesCfg) {
 		t.Errorf("Expected: %+v ,\n recived: %+v", utils.ToJSON(expectedEEsCfg), utils.ToJSON(cfg.eesCfg))
 	}
-
 }
