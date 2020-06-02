@@ -270,7 +270,7 @@ var cdrXmlBroadsoft = `<?xml version="1.0" encoding="ISO-8859-1"?>
   </cdrData>
 </broadWorksCDR>`
 
-// The default scenario, out of cdrc defined in .cfg file
+// The default scenario, out of ers defined in .cfg file
 func testXMLITHandleCdr1File(t *testing.T) {
 	fileName := "file1.xml"
 	tmpFilePath := path.Join("/tmp", fileName)

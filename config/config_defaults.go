@@ -302,13 +302,13 @@ const CGRATES_CFG_JSON = `
 	"readers": [
 		{
 			"id": "*default",									// identifier of the EventReader profile
-			"type": "*file_csv",								// reader type <*file_csv>
+			"type": "*none",									// reader type <*file_csv>
 			"row_length" : 0, 									// Number of fields from csv file
 			"field_separator": ",",								// separator used in case of csv files
 			"run_delay": "0",									// sleep interval in seconds between consecutive runs, -1 to use automation via inotify or 0 to disable running all together
 			"concurrent_requests": 1024,						// maximum simultaneous requests/files to process, 0 for unlimited
-			"source_path": "/var/spool/cgrates/cdrc/in",		// read data from this path
-			"processed_path": "/var/spool/cgrates/cdrc/out",	// move processed data here
+			"source_path": "/var/spool/cgrates/ers/in",			// read data from this path
+			"processed_path": "/var/spool/cgrates/ers/out",		// move processed data here
 			"xml_root_path": "",								// path towards one event in case of XML CDRs
 			"tenant": "",										// tenant used by import
 			"timezone": "",										// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>

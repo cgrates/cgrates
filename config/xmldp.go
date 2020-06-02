@@ -98,7 +98,7 @@ func (xP *XmlProvider) RemoteHost() net.Addr {
 
 // ElementText will process the node to extract the elementName's text out of it (only first one found)
 // returns utils.ErrNotFound if the element is not found in the node
-// Make the method exportable until we remove the cdrc
+// Make the method exportable until we remove the ers
 func ElementText(xmlElement *xmlquery.Node, elmntPath string) (string, error) {
 	elmnt := xmlquery.FindOne(xmlElement, elmntPath)
 	if elmnt == nil {

@@ -170,7 +170,7 @@ func testApierLoadConfig(t *testing.T) {
 }
 
 func testApierCreateDirs(t *testing.T) {
-	for _, pathDir := range []string{cfg.CdreProfiles[utils.MetaDefault].ExportPath, "/var/log/cgrates/cdrc/in", "/var/log/cgrates/cdrc/out"} {
+	for _, pathDir := range []string{cfg.CdreProfiles[utils.MetaDefault].ExportPath, "/var/log/cgrates/ers/in", "/var/log/cgrates/ers/out"} {
 		if err := os.RemoveAll(pathDir); err != nil {
 			t.Fatal("Error removing folder: ", pathDir, err)
 		}

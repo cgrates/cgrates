@@ -448,21 +448,21 @@ func testCGRConfigReloadERs(t *testing.T) {
 		Enabled:       true,
 		SessionSConns: []string{utils.MetaLocalHost},
 		Readers: []*EventReaderCfg{
-			&EventReaderCfg{
+			{
 				ID:              utils.MetaDefault,
-				Type:            utils.MetaFileCSV,
+				Type:            utils.META_NONE,
 				FieldSep:        ",",
 				RunDelay:        0,
 				ConcurrentReqs:  1024,
-				SourcePath:      "/var/spool/cgrates/cdrc/in",
-				ProcessedPath:   "/var/spool/cgrates/cdrc/out",
+				SourcePath:      "/var/spool/cgrates/ers/in",
+				ProcessedPath:   "/var/spool/cgrates/ers/out",
 				Filters:         []string{},
 				Flags:           flagsDefault,
 				Fields:          content,
 				CacheDumpFields: []*FCTemplate{},
 				XmlRootPath:     utils.HierarchyPath{utils.EmptyString},
 			},
-			&EventReaderCfg{
+			{
 				ID:              "file_reader1",
 				Type:            utils.MetaFileCSV,
 				FieldSep:        ",",
@@ -845,13 +845,13 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 				"Flags":                    map[string]interface{}{},
 				"FailedCallsPrefix":        "",
 				"ID":                       "*default",
-				"ProcessedPath":            "/var/spool/cgrates/cdrc/out",
+				"ProcessedPath":            "/var/spool/cgrates/ers/out",
 				"RowLength":                0,
 				"RunDelay":                 0,
-				"SourcePath":               "/var/spool/cgrates/cdrc/in",
+				"SourcePath":               "/var/spool/cgrates/ers/in",
 				"Tenant":                   nil,
 				"Timezone":                 "",
-				"Type":                     "*file_csv",
+				"Type":                     "*none",
 				"XmlRootPath":              []interface{}{utils.EmptyString},
 			},
 			map[string]interface{}{

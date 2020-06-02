@@ -1676,12 +1676,12 @@ func TestCgrCdfEventReader(t *testing.T) {
 		Readers: []*EventReaderCfg{
 			&EventReaderCfg{
 				ID:             utils.MetaDefault,
-				Type:           utils.MetaFileCSV,
+				Type:           utils.META_NONE,
 				FieldSep:       ",",
 				RunDelay:       time.Duration(0),
 				ConcurrentReqs: 1024,
-				SourcePath:     "/var/spool/cgrates/cdrc/in",
-				ProcessedPath:  "/var/spool/cgrates/cdrc/out",
+				SourcePath:     "/var/spool/cgrates/ers/in",
+				ProcessedPath:  "/var/spool/cgrates/ers/out",
 				XmlRootPath:    utils.HierarchyPath{utils.EmptyString},
 				Tenant:         nil,
 				Timezone:       utils.EmptyString,
@@ -1728,12 +1728,12 @@ func TestCgrCdfEventReader(t *testing.T) {
 func TestCgrCfgEventReaderDefault(t *testing.T) {
 	eCfg := &EventReaderCfg{
 		ID:             utils.MetaDefault,
-		Type:           utils.MetaFileCSV,
+		Type:           utils.META_NONE,
 		FieldSep:       ",",
 		RunDelay:       time.Duration(0),
 		ConcurrentReqs: 1024,
-		SourcePath:     "/var/spool/cgrates/cdrc/in",
-		ProcessedPath:  "/var/spool/cgrates/cdrc/out",
+		SourcePath:     "/var/spool/cgrates/ers/in",
+		ProcessedPath:  "/var/spool/cgrates/ers/out",
 		XmlRootPath:    utils.HierarchyPath{utils.EmptyString},
 		Tenant:         nil,
 		Timezone:       utils.EmptyString,

@@ -163,7 +163,7 @@ func testCsvITLoadTPFromFolder(t *testing.T) {
 	time.Sleep(500 * time.Millisecond)
 }
 
-// The default scenario, out of cdrc defined in .cfg file
+// The default scenario, out of ers defined in .cfg file
 func testCsvITHandleCdr1File(t *testing.T) {
 	fileName := "file1.csv"
 	tmpFilePath := path.Join("/tmp", fileName)

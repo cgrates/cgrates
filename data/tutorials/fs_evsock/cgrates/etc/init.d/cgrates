@@ -30,8 +30,8 @@ STACKTRACE=$RUNDIR/$NAME.strace
 ENABLE=true
 DAEMON_OPTS="-config_path=$TUTFOLDER/etc/cgrates"
 CDREDIR=$TMP_DIR/cdre
-CDRCINDIR=$TMP_DIR/cdrc/in
-CDRCOUTDIR=$TMP_DIR/cdrc/out
+ERSINDIR=$TMP_DIR/ers/in
+ERSOUTDIR=$TMP_DIR/ers/out
 
 # Exit if the package is not installed
 [ -x "$DAEMON" ] || exit 0
@@ -55,12 +55,12 @@ if [ ! -d $RUNDIR ]; then
   touch $STACKTRACE
   chown -R $USER:$GROUP $RUNDIR
 fi
-# Install the cdrc folder
-if [ ! -d $CDRCINDIR ]; then
-  mkdir -p $CDRCINDIR
-  chown $USER:$GROUP $CDRCINDIR
-  mkdir -p $CDRCOUTDIR
-  chown $USER:$GROUP $CDRCOUTDIR
+# Install the ers folder
+if [ ! -d $ERSINDIR ]; then
+  mkdir -p $ERSINDIR
+  chown $USER:$GROUP $ERSINDIR
+  mkdir -p $ERSOUTDIR
+  chown $USER:$GROUP $ERSOUTDIR
 fi
 # Install the cdre folder
 if [ ! -d $CDREDIR ]; then
