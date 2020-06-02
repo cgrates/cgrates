@@ -101,10 +101,6 @@ func (m *Migrator) removeV1UserProfile() (err error) {
 		if user == nil || user.Masked || m.dryRun {
 			continue
 		}
-		attr := userProfile2attributeProfile(user)
-		if len(attr.Attributes) == 0 {
-			continue
-		}
 		if err := m.dmIN.remV1User(user.GetId()); err != nil {
 			return err
 		}
