@@ -1638,67 +1638,6 @@ func TestDfSureTaxJsonCfg(t *testing.T) {
 	}
 }
 
-// func TestNewCgrJsonCfgFromFile(t *testing.T) {
-// 	cgrJsonCfg, err := NewCgrJsonCfgFromFile("cfg_data.json")
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
-// 	eCfg := &GeneralJsonCfg{Default_request_type: utils.StringPointer(utils.META_PSEUDOPREPAID)}
-// 	if gCfg, err := cgrJsonCfg.GeneralJsonCfg(); err != nil {
-// 		t.Error(err)
-// 	} else if !reflect.DeepEqual(eCfg, gCfg) {
-// 		t.Errorf("Expecting: %+v, received: %+v", eCfg, gCfg)
-// 	}
-// 	cdrFields := []*FcTemplateJsonCfg{
-// 		{Path: utils.StringPointer(utils.ToR), Value: utils.StringPointer("~7:s/^(voice|data|sms|mms|generic)$/*$1/")},
-// 		{Path: utils.StringPointer(utils.AnswerTime), Value: utils.StringPointer("~1")},
-// 		{Path: utils.StringPointer(utils.Usage), Value: utils.StringPointer(`~9:s/^(\d+)$/${1}s/`)},
-// 	}
-// 	eCfgCdrc := []*CdrcJsonCfg{
-// 		{
-// 			Id:            utils.StringPointer("CDRC-CSV1"),
-// 			Enabled:       utils.BoolPointer(true),
-// 			Cdr_in_path:   utils.StringPointer("/tmp/cgrates/cdrc1/in"),
-// 			Cdr_out_path:  utils.StringPointer("/tmp/cgrates/cdrc1/out"),
-// 			Cdr_source_id: utils.StringPointer("csv1"),
-// 		},
-// 		{
-// 			Id:             utils.StringPointer("CDRC-CSV2"),
-// 			Enabled:        utils.BoolPointer(true),
-// 			Run_delay:      utils.IntPointer(1),
-// 			Cdr_in_path:    utils.StringPointer("/tmp/cgrates/cdrc2/in"),
-// 			Cdr_out_path:   utils.StringPointer("/tmp/cgrates/cdrc2/out"),
-// 			Cdr_source_id:  utils.StringPointer("csv2"),
-// 			Fields: &cdrFields,
-// 		},
-// 	}
-// 	if cfg, err := cgrJsonCfg.CdrcJsonCfg(); err != nil {
-// 		t.Error(err)
-// 	} else if !reflect.DeepEqual(eCfgCdrc, cfg) {
-// 		t.Errorf("Expecting: %+v \n received: %+v", utils.ToIJSON(eCfgCdrc), utils.ToIJSON(cfg))
-// 	}
-// 	eCfgSmFs := &FreeswitchAgentJsonCfg{
-// 		Enabled: utils.BoolPointer(true),
-// 		Event_socket_conns: &[]*FsConnJsonCfg{
-// 			{
-// 				Address:    utils.StringPointer("1.2.3.4:8021"),
-// 				Password:   utils.StringPointer("ClueCon"),
-// 				Reconnects: utils.IntPointer(5),
-// 			},
-// 			{
-// 				Address:    utils.StringPointer("2.3.4.5:8021"),
-// 				Password:   utils.StringPointer("ClueCon"),
-// 				Reconnects: utils.IntPointer(5),
-// 			},
-// 		},
-// 	}
-// 	if smFsCfg, err := cgrJsonCfg.FreeswitchAgentJsonCfg(); err != nil {
-// 		t.Error(err)
-// 	} else if !reflect.DeepEqual(eCfgSmFs, smFsCfg) {
-// 		t.Error("Received: ", smFsCfg)
-// 	}
-// }
-
 func TestDfHttpJsonCfg(t *testing.T) {
 	eCfg := &HTTPJsonCfg{
 		Json_rpc_url:        utils.StringPointer("/jsonrpc"),
@@ -1854,8 +1793,8 @@ func TestDfEventReaderCfg(t *testing.T) {
 				Header_define_character: utils.StringPointer(":"),
 				Run_delay:               utils.StringPointer("0"),
 				Concurrent_requests:     utils.IntPointer(1024),
-				Source_path:             utils.StringPointer("/var/spool/cgrates/cdrc/in"),
-				Processed_path:          utils.StringPointer("/var/spool/cgrates/cdrc/out"),
+				Source_path:             utils.StringPointer("/var/spool/cgrates/ers/in"),
+				Processed_path:          utils.StringPointer("/var/spool/cgrates/ers/out"),
 				Xml_root_path:           utils.StringPointer(utils.EmptyString),
 				Tenant:                  utils.StringPointer(utils.EmptyString),
 				Timezone:                utils.StringPointer(utils.EmptyString),

@@ -122,6 +122,9 @@ func (erS *ERService) ListenAndServe(cfgRldChan chan struct{}) (err error) {
 						continue
 					}
 				}
+				if erS.cfg.ERsCfg().Readers[rdrIdx].Type == utils.META_NONE { // ignore *default reader
+					continue
+				}
 				if err := erS.addReader(id, rdrIdx); err != nil {
 					utils.Logger.Crit(
 						fmt.Sprintf("<%s> adding reader <%s> got error: <%s>",

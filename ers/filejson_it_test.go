@@ -180,7 +180,7 @@ func testJSONAddData(t *testing.T) {
 	}
 }
 
-// The default scenario, out of cdrc defined in .cfg file
+// The default scenario, out of ers defined in .cfg file
 func testJSONHandleFile(t *testing.T) {
 	fileName := "file1.json"
 	tmpFilePath := path.Join("/tmp", fileName)

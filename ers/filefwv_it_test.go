@@ -167,7 +167,7 @@ CDR0000330  0 20120710070434000123123458         0040123232350                  
 TRL0001DDB     ABC                                     Some Connect A.B.                       DDB-Some-10022-20120711-309.CDR         0003090000003300000030550000000001000000000100Y
 `
 
-// The default scenario, out of cdrc defined in .cfg file
+// The default scenario, out of ers defined in .cfg file
 func testFWVITHandleCdr1File(t *testing.T) {
 	fileName := "file1.fwv"
 	tmpFilePath := path.Join("/tmp", fileName)

@@ -452,7 +452,7 @@ func main() {
 
 	dmService := services.NewDataDBService(cfg, connManager)
 	storDBService := services.NewStorDBService(cfg)
-	if dmService.ShouldRun() { // Some services can run without db, ie:  CDRC
+	if dmService.ShouldRun() { // Some services can run without db, ie:  ERs
 		if err = dmService.Start(); err != nil {
 			return
 		}

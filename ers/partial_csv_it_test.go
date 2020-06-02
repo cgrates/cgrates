@@ -147,7 +147,7 @@ func testPartITLoadTPFromFolder(t *testing.T) {
 	}
 }
 
-// The default scenario, out of cdrc defined in .cfg file
+// The default scenario, out of ers defined in .cfg file
 func testPartITHandleCdr1File(t *testing.T) {
 	fileName := "file1.csv"
 	tmpFilePath := path.Join("/tmp", fileName)
@@ -159,7 +159,7 @@ func testPartITHandleCdr1File(t *testing.T) {
 	}
 }
 
-// The default scenario, out of cdrc defined in .cfg file
+// The default scenario, out of ers defined in .cfg file
 func testPartITHandleCdr2File(t *testing.T) {
 	fileName := "file2.csv"
 	tmpFilePath := path.Join("/tmp", fileName)
@@ -171,7 +171,7 @@ func testPartITHandleCdr2File(t *testing.T) {
 	}
 }
 
-// The default scenario, out of cdrc defined in .cfg file
+// The default scenario, out of ers defined in .cfg file
 func testPartITHandleCdr3File(t *testing.T) {
 	fileName := "file3.csv"
 	tmpFilePath := path.Join("/tmp", fileName)

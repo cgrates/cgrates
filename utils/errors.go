@@ -61,8 +61,6 @@ var (
 	ErrReplyTimeout             = errors.New("REPLY_TIMEOUT")
 	ErrSessionNotFound          = errors.New("SESSION_NOT_FOUND")
 	ErrJsonIncompleteComment    = errors.New("JSON_INCOMPLETE_COMMENT")
-	ErrCDRCNoProfileID          = errors.New("CDRC_PROFILE_WITHOUT_ID")
-	ErrCDRCNoInPath             = errors.New("CDRC_PROFILE_WITHOUT_IN_PATH")
 	ErrNotEnoughParameters      = errors.New("NotEnoughParameters")
 	ErrNotConnected             = errors.New("NOT_CONNECTED")
 	RalsErrorPrfx               = "RALS_ERROR"
@@ -105,8 +103,6 @@ var (
 		ErrReplyTimeout.Error():            ErrReplyTimeout,
 		ErrSessionNotFound.Error():         ErrSessionNotFound,
 		ErrJsonIncompleteComment.Error():   ErrJsonIncompleteComment,
-		ErrCDRCNoProfileID.Error():         ErrCDRCNoProfileID,
-		ErrCDRCNoInPath.Error():            ErrCDRCNoInPath,
 		ErrNotEnoughParameters.Error():     ErrNotEnoughParameters,
 		ErrUnsupportedFormat.Error():       ErrUnsupportedFormat,
 		ErrNoDatabaseConn.Error():          ErrNoDatabaseConn,
