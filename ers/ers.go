@@ -67,6 +67,9 @@ type ERService struct {
 // ListenAndServe keeps the service alive
 func (erS *ERService) ListenAndServe(cfgRldChan chan struct{}) (err error) {
 	for cfgIdx, rdrCfg := range erS.cfg.ERsCfg().Readers {
+		if rdrCfg.Type == utils.META_NONE { // ignore *default reader
+			continue
+		}
 		if err = erS.addReader(rdrCfg.ID, cfgIdx); err != nil {
 			utils.Logger.Crit(
 				fmt.Sprintf("<%s> adding reader <%s> got error: <%s>",
@@ -117,6 +120,9 @@ func (erS *ERService) ListenAndServe(cfgRldChan chan struct{}) (err error) {
 					if _, has := pathReloaded[id]; !has {
 						continue
 					}
+				}
+				if erS.cfg.ERsCfg().Readers[rdrIdx].Type == utils.META_NONE {
+					continue
 				}
 				if err := erS.addReader(id, rdrIdx); err != nil {
 					utils.Logger.Crit(

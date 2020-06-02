@@ -474,6 +474,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			}
 
 			switch rdr.Type {
+			case utils.META_NONE:
 			case utils.MetaFileCSV, utils.MetaPartialCSV, utils.MetaFlatstore:
 				for _, dir := range []string{rdr.ProcessedPath, rdr.SourcePath} {
 					if _, err := os.Stat(dir); err != nil && os.IsNotExist(err) {

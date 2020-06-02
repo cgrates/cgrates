@@ -123,7 +123,7 @@ type v1Cdrs struct {
 	Usage       time.Duration     // event usage information (eg: in case of tor=*voice this will represent the total duration of a call)
 	ExtraFields map[string]string // Extra fields to be stored in CDR
 	ExtraInfo   string            // Container for extra information related to this CDR, eg: populated with error reason in case of error on calculation
-	Partial     bool              // Used for partial record processing by CDRC
+	Partial     bool              // Used for partial record processing by ERs
 	Rated       bool              // Mark the CDR as rated so we do not process it during rating
 	CostSource  string            // The source of this cost
 	Cost        float64
