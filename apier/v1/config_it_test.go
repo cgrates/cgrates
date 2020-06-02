@@ -45,6 +45,7 @@ var (
 		testConfigSStartEngine,
 		testConfigSRPCConn,
 		testConfigSReloadConfigFromJSONSessionS,
+		testConfigSReloadConfigFromJSONEEs,
 		testConfigSKillEngine,
 	}
 )
@@ -107,8 +108,8 @@ func testConfigSRPCConn(t *testing.T) {
 		t.Fatal(err)
 	}
 }
-func testConfigSReloadConfigFromJSONSessionS(t *testing.T) {
 
+func testConfigSReloadConfigFromJSONSessionS(t *testing.T) {
 	var reply string
 	if err := configRPC.Call(utils.ConfigSv1ReloadConfigFromJSON, &config.JSONReloadWithArgDispatcher{
 		JSON: map[string]interface{}{
@@ -174,6 +175,59 @@ func testConfigSReloadConfigFromJSONSessionS(t *testing.T) {
 	var rpl map[string]interface{}
 	if err := configRPC.Call(utils.ConfigSv1GetJSONSection, &config.StringWithArgDispatcher{
 		Section: config.SessionSJson,
+	}, &rpl); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rpl) {
+		t.Errorf("Expected %+v , received: %+v ", utils.ToJSON(exp), utils.ToJSON(rpl))
+	}
+}
+
+func testConfigSReloadConfigFromJSONEEs(t *testing.T) {
+	if *encoding == utils.MetaGOB {
+		t.SkipNow()
+	}
+	var reply string
+	if err := configRPC.Call(utils.ConfigSv1ReloadConfigFromJSON, &config.JSONReloadWithArgDispatcher{
+		JSON: map[string]interface{}{
+			"ees": map[string]interface{}{
+				"enabled":          true,
+				"attributes_conns": []string{},
+				"cache":            map[string]interface{}{},
+				"exporters": []interface{}{map[string]interface{}{
+					"id":     utils.MetaDefault,
+					"fields": []interface{}{},
+				}},
+			},
+		},
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected OK received: %s", reply)
+	}
+	eporter := map[string]interface{}{
+		"Attempts":      1.,
+		"AttributeSCtx": "",
+		"AttributeSIDs": []interface{}{},
+		"ExportPath":    "/var/spool/cgrates/ees",
+		"FieldSep":      ",",
+		"Fields":        []interface{}{},
+		"Filters":       []interface{}{},
+		"Flags":         map[string]interface{}{},
+		"ID":            "*default",
+		"Synchronous":   false,
+		"Tenant":        nil,
+		"Timezone":      "",
+		"Type":          "*none",
+	}
+	exp := map[string]interface{}{
+		"Enabled":         true,
+		"AttributeSConns": []interface{}{},
+		"Cache":           map[string]interface{}{"*file_csv": map[string]interface{}{"Limit": -1., "Precache": false, "Replicate": false, "StaticTTL": false, "TTL": 5000000000.}},
+		"Exporters":       []interface{}{eporter},
+	}
+	var rpl map[string]interface{}
+	if err := configRPC.Call(utils.ConfigSv1GetJSONSection, &config.StringWithArgDispatcher{
+		Section: config.EEsJson,
 	}, &rpl); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exp, rpl) {
