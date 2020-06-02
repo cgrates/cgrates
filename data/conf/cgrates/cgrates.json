@@ -295,10 +295,11 @@
 // 			"type": "*none",									// reader type <*file_csv>
 // 			"row_length" : 0, 									// Number of fields from csv file
 // 			"field_separator": ",",								// separator used in case of csv files
+// 			"header_define_character": ":",						// the starting character for header definition used in case of CSV files
 // 			"run_delay": "0",									// sleep interval in seconds between consecutive runs, -1 to use automation via inotify or 0 to disable running all together
 // 			"concurrent_requests": 1024,						// maximum simultaneous requests/files to process, 0 for unlimited
-// 			"source_path": "/var/spool/cgrates/cdrc/in",		// read data from this path
-// 			"processed_path": "/var/spool/cgrates/cdrc/out",	// move processed data here
+// 			"source_path": "/var/spool/cgrates/ers/in",		// read data from this path
+// 			"processed_path": "/var/spool/cgrates/ers/out",	// move processed data here
 // 			"xml_root_path": "",								// path towards one event in case of XML CDRs
 // 			"tenant": "",										// tenant used by import
 // 			"timezone": "",										// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
@@ -357,7 +358,7 @@
 // 				{"tag": "SetupTime", "path": "*exp.SetupTime", "type": "*variable", "value": "~*req.SetupTime", "layout": "2006-01-02T15:04:05Z07:00"},
 // 				{"tag": "AnswerTime", "path": "*exp.AnswerTime", "type": "*variable", "value": "~*req.AnswerTime", "layout": "2006-01-02T15:04:05Z07:00"},
 // 				{"tag": "Usage", "path": "*exp.Usage", "type": "*variable", "value": "~*req.Usage"},
-// 				{"tag": "Cost", "path": "*exp.Cost", "type": "*variable", "value": "~*req.Cost", "rounding_decimals": 4},
+// 				{"tag": "Cost", "path": "*exp.Cost", "type": "*variable", "value": "~*req.Cost{*round:4}"},
 // 			],
 // 		},
 // 	],

@@ -148,7 +148,7 @@ func testFlatstoreITLoadTPFromFolder(t *testing.T) {
 	}
 }
 
-// The default scenario, out of cdrc defined in .cfg file
+// The default scenario, out of ers defined in .cfg file
 func testFlatstoreITHandleCdr1File(t *testing.T) {
 	if err := ioutil.WriteFile(path.Join("/tmp", "acc_1.log"), []byte(fullSuccessfull), 0644); err != nil {
 		t.Fatal(err.Error())
@@ -172,7 +172,7 @@ func testFlatstoreITHandleCdr1File(t *testing.T) {
 	// check the files to be processed
 	filesInDir, _ := ioutil.ReadDir("/tmp/flatstoreErs/in")
 	if len(filesInDir) != 0 {
-		t.Errorf("Files in cdrcInDir: %+v", filesInDir)
+		t.Errorf("Files in ersInDir: %+v", filesInDir)
 	}
 	filesOutDir, _ := ioutil.ReadDir("/tmp/flatstoreErs/out")
 	if len(filesOutDir) != 6 {
