@@ -1783,7 +1783,7 @@ func (rs *RedisStorage) GetIndexesDrv(idxItmType, tntCtx, idxKey string) (indexe
 
 // SetFilterIndexesDrv stores Indexes into DataDB
 func (rs *RedisStorage) SetIndexesDrv(idxItmType, tntCtx string,
-	indexes map[string]utils.StringMap, commit bool, transactionID string) (err error) {
+	indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 	originKey := utils.CacheInstanceToPrefix[idxItmType] + tntCtx
 	dbKey := originKey
 	if transactionID != "" {
