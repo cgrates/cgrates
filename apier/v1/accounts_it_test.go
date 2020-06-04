@@ -61,6 +61,8 @@ var (
 		testAccITAddBalanceWithNegative,
 		testAccITGetDisabledAccounts,
 		testAccITCountAccounts,
+		testAccITTPFromFolder,
+		testAccITAddBalanceWithDestinations,
 		testAccITStopCgrEngine,
 	}
 )
@@ -673,5 +675,105 @@ func testAccITAddBalanceWithValueInMap(t *testing.T) {
 			}
 			break
 		}
+	}
+}
+
+// Load the tariff plan, creating accounts and their balances
+func testAccITTPFromFolder(t *testing.T) {
+	attrs := &utils.AttrLoadTpFromFolder{
+		FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
+	var loadInst utils.LoadInstance
+	if err := accRPC.Call(utils.APIerSv2LoadTariffPlanFromFolder,
+		attrs, &loadInst); err != nil {
+		t.Error(err)
+	}
+	time.Sleep(500 * time.Millisecond)
+}
+
+func testAccITAddBalanceWithDestinations(t *testing.T) {
+	var reply string
+	args := &utils.AttrSetBalance{
+		Tenant:      "cgrates.org",
+		Account:     "testAccITAddBalanceWithDestinations",
+		BalanceType: utils.MONETARY,
+		Balance: map[string]interface{}{
+			utils.ID:             "testAccITAddBalanceWithDestinations",
+			utils.DestinationIDs: "DST_1002;!DST_1001;!DST_1003",
+			utils.Weight:         10,
+			utils.Value:          2,
+		},
+	}
+	if err := accRPC.Call(utils.APIerSv1SetBalance, args, &reply); err != nil {
+		t.Error("Got error on SetBalance: ", err.Error())
+	} else if reply != utils.OK {
+		t.Errorf("Calling SetBalance received: %s", reply)
+	}
+
+	var acnt engine.Account
+	attrAcc := &utils.AttrGetAccount{
+		Tenant:  accTenant,
+		Account: "testAccITAddBalanceWithDestinations",
+	}
+	if err := accRPC.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
+		t.Fatal(err)
+	}
+
+	for _, value := range acnt.BalanceMap[utils.MONETARY] {
+		// check only where balance ID is testBalanceID (SetBalance function call was made with this Balance ID)
+		if value.ID == "testAccITAddBalanceWithDestinations" {
+			if value.GetValue() != 2 {
+				t.Errorf("Expecting %+v, received: %+v", 2, value.GetValue())
+			}
+			if value.Weight != 10 {
+				t.Errorf("Expecting %+v, received: %+v", 10, value.Weight)
+			}
+			dstMp := utils.StringMap{
+				"DST_1002": true, "DST_1001": false, "DST_1003": false,
+			}
+			if !reflect.DeepEqual(value.DestinationIDs, dstMp) {
+				t.Errorf("Expecting %+v, received: %+v", dstMp, value.DestinationIDs)
+			}
+
+			break
+		}
+	}
+
+	tStart := time.Date(2016, 3, 31, 0, 0, 0, 0, time.UTC)
+	cd := &engine.CallDescriptorWithArgDispatcher{
+		CallDescriptor: &engine.CallDescriptor{
+			Category:      "sms",
+			Tenant:        "cgrates.org",
+			Subject:       "testAccITAddBalanceWithDestinations",
+			Account:       "testAccITAddBalanceWithDestinations",
+			Destination:   "1003",
+			DurationIndex: 0,
+			TimeStart:     tStart,
+			TimeEnd:       tStart.Add(time.Nanosecond),
+		},
+	}
+	var cc engine.CallCost
+	if err := accRPC.Call(utils.ResponderMaxDebit, cd, &cc); err != nil {
+		t.Error("Got error on Responder.Debit: ", err.Error())
+	} else if cc.GetDuration() != 0 {
+		t.Errorf("Calling Responder.MaxDebit got callcost: %v", utils.ToIJSON(cc))
+	}
+
+	tStart = time.Date(2016, 3, 31, 0, 0, 0, 0, time.UTC)
+	cd = &engine.CallDescriptorWithArgDispatcher{
+		CallDescriptor: &engine.CallDescriptor{
+			Category:      "sms",
+			Tenant:        "cgrates.org",
+			Subject:       "testAccITAddBalanceWithDestinations",
+			Account:       "testAccITAddBalanceWithDestinations",
+			Destination:   "1002",
+			DurationIndex: 0,
+			TimeStart:     tStart,
+			TimeEnd:       tStart.Add(time.Nanosecond),
+		},
+	}
+	if err := accRPC.Call(utils.ResponderMaxDebit, cd, &cc); err != nil {
+		t.Error("Got error on Responder.Debit: ", err.Error())
+	} else if cc.GetDuration() != 1 {
+		t.Errorf("Calling Responder.MaxDebit got callcost: %v", utils.ToIJSON(cc))
 	}
 }
