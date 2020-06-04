@@ -38,7 +38,7 @@ func TestSetFldPostCacheTTL(t *testing.T) {
 
 func TestAddFldPost(t *testing.T) {
 	SetFailedPostCacheTTL(time.Duration(5 * time.Second))
-	addFailedPost("path1", "format1", "module1", "1")
+	AddFailedPost("path1", "format1", "module1", "1")
 	x, ok := failedPostCache.Get(utils.ConcatenatedKey("path1", "format1", "module1"))
 	if !ok {
 		t.Error("Error reading from cache")
@@ -60,8 +60,8 @@ func TestAddFldPost(t *testing.T) {
 	if !reflect.DeepEqual(eOut, failedPost) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(failedPost))
 	}
-	addFailedPost("path1", "format1", "module1", "2")
-	addFailedPost("path2", "format2", "module2", "3")
+	AddFailedPost("path1", "format1", "module1", "2")
+	AddFailedPost("path2", "format2", "module2", "3")
 	x, ok = failedPostCache.Get(utils.ConcatenatedKey("path1", "format1", "module1"))
 	if !ok {
 		t.Error("Error reading from cache")

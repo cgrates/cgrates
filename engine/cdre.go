@@ -290,7 +290,7 @@ func (cdre *CDRExporter) postCdr(cdr *CDR) (err error) {
 		err = PostersCache.PostS3(cdre.exportPath, cdre.attempts, body.([]byte), utils.ConcatenatedKey(cdr.CGRID, cdr.RunID))
 	}
 	if err != nil && cdre.fallbackPath != utils.META_NONE {
-		addFailedPost(cdre.exportPath, cdre.exportFormat, utils.CDRPoster, body)
+		AddFailedPost(cdre.exportPath, cdre.exportFormat, utils.CDRPoster, body)
 	}
 	return
 }
