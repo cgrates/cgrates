@@ -50,7 +50,7 @@ var (
 		testFwvRPCConn,
 		testFwvExportEvent,
 		testFwvVerifyExports,
-		testFwvStopCgrEngine,
+		testStopCgrEngine,
 		testCleanDirectory,
 	}
 )
@@ -154,11 +154,5 @@ func testFwvVerifyExports(t *testing.T) {
 		t.Error(err)
 	} else if len(eHdr+eTrl+eCnt) != len(outContent1) {
 		t.Errorf("Expecting: <%+v>, received: <%+v>", len(eHdr+eTrl+eCnt), len(outContent1))
-	}
-}
-
-func testFwvStopCgrEngine(t *testing.T) {
-	if err := engine.KillEngine(100); err != nil {
-		t.Error(err)
 	}
 }
