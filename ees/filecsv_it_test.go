@@ -54,7 +54,7 @@ var (
 		testCsvVerifyExports,
 		testCsvExportComposedEvent,
 		testCsvVerifyComposedExports,
-		testCsvStopCgrEngine,
+		testStopCgrEngine,
 		testCleanDirectory,
 	}
 )
@@ -324,11 +324,5 @@ func testCsvVerifyComposedExports(t *testing.T) {
 		t.Error(err)
 	} else if eCnt != string(outContent1) {
 		t.Errorf("Expecting: \n<%q>, \nreceived: \n<%q>", eCnt, string(outContent1))
-	}
-}
-
-func testCsvStopCgrEngine(t *testing.T) {
-	if err := engine.KillEngine(100); err != nil {
-		t.Error(err)
 	}
 }

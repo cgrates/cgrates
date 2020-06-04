@@ -26,6 +26,8 @@ import (
 	"os"
 	"testing"
 
+	"github.com/cgrates/cgrates/engine"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -65,5 +67,11 @@ func testCleanDirectory(t *testing.T) {
 		if err := os.RemoveAll(dir); err != nil {
 			t.Fatal("Error removing folder: ", dir, err)
 		}
+	}
+}
+
+func testStopCgrEngine(t *testing.T) {
+	if err := engine.KillEngine(100); err != nil {
+		t.Error(err)
 	}
 }
