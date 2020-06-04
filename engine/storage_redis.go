@@ -1748,3 +1748,74 @@ func (rs *RedisStorage) RemoveRateProfileDrv(tenant, id string) (err error) {
 	}
 	return
 }
+
+// GetIndexesDrv retrieves Indexes from dataDB
+func (rs *RedisStorage) GetIndexesDrv(idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error) {
+	mp := make(map[string]string)
+	dbKey := utils.CacheInstanceToPrefix[idxItmType] + tntCtx
+	if len(idxKey) == 0 {
+		mp, err = rs.Cmd(redis_HGETALL, dbKey).Map()
+		if err != nil {
+			return
+		} else if len(mp) == 0 {
+			return nil, utils.ErrNotFound
+		}
+	} else {
+		var itmMpStrLst []string
+		itmMpStrLst, err = rs.Cmd(redis_HMGET, dbKey, idxKey).List()
+		if err != nil {
+			return
+		} else if itmMpStrLst[0] == "" {
+			return nil, utils.ErrNotFound
+		}
+		mp[idxKey] = itmMpStrLst[0]
+	}
+	indexes = make(map[string]utils.StringSet)
+	for k, v := range mp {
+		var sm utils.StringSet
+		if err = rs.ms.Unmarshal([]byte(v), &sm); err != nil {
+			return
+		}
+		indexes[k] = sm
+	}
+	return
+}
+
+// SetFilterIndexesDrv stores Indexes into DataDB
+func (rs *RedisStorage) SetIndexesDrv(idxItmType, tntCtx string,
+	indexes map[string]utils.StringMap, commit bool, transactionID string) (err error) {
+	originKey := utils.CacheInstanceToPrefix[idxItmType] + tntCtx
+	dbKey := originKey
+	if transactionID != "" {
+		dbKey = "tmp_" + utils.ConcatenatedKey(dbKey, transactionID)
+	}
+	if commit && transactionID != "" {
+		return rs.Cmd(redis_RENAME, dbKey, originKey).Err
+	}
+	mp := make(map[string]string)
+	nameValSls := []interface{}{dbKey}
+	for key, strMp := range indexes {
+		if len(strMp) == 0 { // remove with no more elements inside
+			nameValSls = append(nameValSls, key)
+			continue
+		}
+		if encodedMp, err := rs.ms.Marshal(strMp); err != nil {
+			return err
+		} else {
+			mp[key] = string(encodedMp)
+		}
+	}
+	if len(nameValSls) != 1 {
+		if err = rs.Cmd(redis_HDEL, nameValSls...).Err; err != nil {
+			return err
+		}
+	}
+	if len(mp) != 0 {
+		return rs.Cmd(redis_HMSET, dbKey, mp).Err
+	}
+	return
+}
+
+func (rs *RedisStorage) RemoveIndexesDrv(idxItmType, tntCtx string) (err error) {
+	return rs.Cmd(redis_DEL, utils.CacheInstanceToPrefix[idxItmType]+tntCtx).Err
+}
