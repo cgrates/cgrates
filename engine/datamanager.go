@@ -3281,13 +3281,13 @@ func (dm *DataManager) Reconnect(marshaller string, newcfg *config.DataDbCfg) (e
 	return
 }
 
-func (dm *DataManager) GetIndexes(idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error) {
+func (dm *DataManager) GetIndexes(idxItmType, tntCtx, idxKey string, cahceRead, cacheWrite bool) (indexes map[string]utils.StringSet, err error) {
 	if dm == nil {
 		err = utils.ErrNoDatabaseConn
 		return
 	}
 	var cachekey string
-	if idxKey != utils.EmptyString {
+	if idxKey != utils.EmptyString { // do not check cache if we want all the indexes
 		cachekey = utils.ConcatenatedKey(tntCtx, idxKey)
 
 		if x, ok := Cache.Get(idxItmType, cachekey); ok { // Attempt to find in cache first
@@ -3373,15 +3373,12 @@ func (dm *DataManager) SetFilterIndexes(cacheID, itemIDPrefix string,
 	}
 	return
 }
+*/
 
-func (dm *DataManager) RemoveFilterIndexes(cacheID, itemIDPrefix string) (err error) {
+func (dm *DataManager) RemoveIndexes(idxItmType, tntCtx, idxKey string) (err error) {
 	if dm == nil {
 		err = utils.ErrNoDatabaseConn
 		return
 	}
-	if err = dm.DataDB().RemoveFilterIndexesDrv(cacheID, itemIDPrefix); err != nil {
-		return
-	}
-	return
+	return dm.DataDB().RemoveIndexesDrv(idxItmType, tntCtx, idxKey)
 }
-*/
