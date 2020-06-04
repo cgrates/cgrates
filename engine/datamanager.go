@@ -3286,20 +3286,17 @@ func (dm *DataManager) GetIndexes(idxItmType, tntCtx, idxKey string) (indexes ma
 		err = utils.ErrNoDatabaseConn
 		return
 	}
-	if x, ok := Cache.Get(idxItmType, tntCtx); ok { // Attempt to find in cache first
-		if x == nil {
-			return nil, utils.ErrNotFound
-		}
-		indexes = x.(map[string]utils.StringSet)
-		if idxKey == utils.EmptyString { // in case of empty key we expect all indexes for tenant:context
-			return
-		}
-		indx, has := indexes[idxKey]
-		if has {
-			if indx == nil {
+	var cachekey string
+	if idxKey != utils.EmptyString {
+		cachekey = utils.ConcatenatedKey(tntCtx, idxKey)
+
+		if x, ok := Cache.Get(idxItmType, cachekey); ok { // Attempt to find in cache first
+			if x == nil {
 				return nil, utils.ErrNotFound
 			}
-			return map[string]utils.StringSet{idxKey: indx}, nil
+			return map[string]utils.StringSet{
+				idxKey: x.(utils.StringSet),
+			}, nil
 		}
 	}
 	if indexes, err = dm.DataDB().GetIndexesDrv(idxItmType, tntCtx, idxKey); err != nil {
@@ -3323,18 +3320,8 @@ func (dm *DataManager) GetIndexes(idxItmType, tntCtx, idxKey string) (indexes ma
 		// if err != nil {
 		// 	err = utils.CastRPCErr(err)
 		if err == utils.ErrNotFound {
-			if idxKey == utils.EmptyString {
-				if errCh := Cache.Set(idxItmType, tntCtx, nil, nil,
-					true, utils.NonTransactional); errCh != nil {
-					return nil, errCh
-				}
-			} else {
-				idx := make(map[string]utils.StringSet)
-				if x, ok := Cache.Get(idxItmType, tntCtx); ok && x != nil {
-					idx = x.(map[string]utils.StringSet)
-				}
-				idx[idxKey] = nil
-				if errCh := Cache.Set(idxItmType, tntCtx, idx, nil,
+			if idxKey != utils.EmptyString {
+				if errCh := Cache.Set(idxItmType, cachekey, nil, nil,
 					true, utils.NonTransactional); errCh != nil {
 					return nil, errCh
 				}
@@ -3343,17 +3330,14 @@ func (dm *DataManager) GetIndexes(idxItmType, tntCtx, idxKey string) (indexes ma
 		return nil, err
 		// }
 	}
-	idx := make(map[string]utils.StringSet)
-	if x, ok := Cache.Get(idxItmType, tntCtx); ok && x != nil {
-		idx = x.(map[string]utils.StringSet)
-	}
+
 	for k, v := range indexes {
-		idx[k] = v
+		if err = Cache.Set(idxItmType, utils.ConcatenatedKey(tntCtx, k), v, []string{tntCtx},
+			true, utils.NonTransactional); err != nil {
+			return nil, err
+		}
 	}
-	if err = Cache.Set(idxItmType, tntCtx, idx, nil,
-		true, utils.NonTransactional); err != nil {
-		return nil, err
-	}
+
 	return
 }
 

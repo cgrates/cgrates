@@ -21,6 +21,7 @@ package engine
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"sync"
 	"time"
 
@@ -1447,27 +1448,32 @@ func (iDB *InternalDB) RemoveLoadIDsDrv() (err error) {
 }
 
 func (iDB *InternalDB) GetIndexesDrv(idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error) {
-	dbKey := utils.CacheInstanceToPrefix[idxItmType] + tntCtx
+	if idxKey == utils.EmptyString { // return all
+		indexes = make(map[string]utils.StringSet)
+		for _, dbKey := range iDB.db.GetGroupItemIDs(idxItmType, tntCtx) {
+			x, ok := iDB.db.Get(idxItmType, dbKey)
+			if !ok || x == nil {
+				continue
+			}
+			dbKey = strings.TrimPrefix(dbKey, tntCtx+utils.CONCATENATED_KEY_SEP)
+			indexes[dbKey] = x.(utils.StringSet).Clone()
+		}
+		return
+	}
+	dbKey := utils.ConcatenatedKey(tntCtx, idxKey)
 	x, ok := iDB.db.Get(idxItmType, dbKey)
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
 	}
-	indexes = x.(map[string]utils.StringSet)
-	if len(idxKey) != 0 {
-		return map[string]utils.StringSet{
-			idxKey: indexes[idxKey].Clone(),
-		}, nil
-	}
-	if len(indexes) == 0 {
-		return nil, utils.ErrNotFound
-	}
+	return map[string]utils.StringSet{
+		idxKey: x.(utils.StringSet).Clone(),
+	}, nil
 	return
 }
 
 func (iDB *InternalDB) SetIndexesDrv(idxItmType, tntCtx string,
 	indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
-	originKey := utils.CacheInstanceToPrefix[idxItmType] + tntCtx
-	dbKey := originKey
+	dbKey := tntCtx
 	if transactionID != "" {
 		dbKey = "tmp_" + utils.ConcatenatedKey(dbKey, transactionID)
 	}
@@ -1475,7 +1481,7 @@ func (iDB *InternalDB) SetIndexesDrv(idxItmType, tntCtx string,
 		x, _ := iDB.db.Get(idxItmType, dbKey)
 		iDB.db.Remove(idxItmType, dbKey,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
-		iDB.db.Set(idxItmType, originKey, x, nil,
+		iDB.db.Set(idxItmType, tntCtx, x, []string{tntCtx},
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 		return
 	}
@@ -1493,7 +1499,7 @@ func (iDB *InternalDB) SetIndexesDrv(idxItmType, tntCtx string,
 
 	x, ok := iDB.db.Get(idxItmType, dbKey)
 	if !ok || x == nil {
-		iDB.db.Set(idxItmType, dbKey, toBeAdded, nil,
+		iDB.db.Set(idxItmType, dbKey, toBeAdded, []string{tntCtx},
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 		return err
 	}
@@ -1508,12 +1514,11 @@ func (iDB *InternalDB) SetIndexesDrv(idxItmType, tntCtx string,
 		}
 		mp[key] = strMp
 	}
-	iDB.db.Set(idxItmType, dbKey, mp, nil,
+	iDB.db.Set(idxItmType, dbKey, mp, []string{tntCtx},
 		cacheCommit(transactionID), transactionID)
 	return nil
 }
 func (iDB *InternalDB) RemoveIndexesDrv(idxItmType, tntCtx string) (err error) {
-	iDB.db.Remove(idxItmType, utils.CacheInstanceToPrefix[idxItmType]+tntCtx,
-		cacheCommit(utils.NonTransactional), utils.NonTransactional)
+	iDB.db.Remove(idxItmType, tntCtx, cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }
