@@ -318,7 +318,9 @@ var possibleReaderTypes = utils.NewStringSet([]string{utils.MetaFileCSV,
 	utils.MetaKafkajsonMap, utils.MetaFileXML, utils.MetaSQL, utils.MetaFileFWV,
 	utils.MetaPartialCSV, utils.MetaFlatstore, utils.MetaJSON, utils.META_NONE})
 
-var possibleExporterTypes = utils.NewStringSet([]string{utils.MetaFileCSV, utils.META_NONE, utils.MetaFileFWV})
+var possibleExporterTypes = utils.NewStringSet([]string{utils.MetaFileCSV, utils.META_NONE, utils.MetaFileFWV,
+	utils.MetaHTTPPost, utils.MetaHTTPjson, utils.MetaAMQPjsonMap, utils.MetaAMQPV1jsonMap, utils.MetaSQSjsonMap,
+	utils.MetaKafkajsonMap, utils.MetaS3jsonMap})
 
 func (cfg *CGRConfig) LazySanityCheck() {
 	for _, cdrePrfl := range cfg.cdrsCfg.OnlineCDRExports {
@@ -331,6 +333,20 @@ func (cfg *CGRConfig) LazySanityCheck() {
 			for _, arg := range []string{utils.AWSRegion, utils.AWSKey, utils.AWSSecret} {
 				if _, has := argsMap[arg]; !has {
 					utils.Logger.Warning(fmt.Sprintf("<%s> No %s present for AWS for cdre: <%s>.", poster, arg, cdrePrfl))
+				}
+			}
+		}
+	}
+	for _, exporter := range cfg.eesCfg.Exporters {
+		if exporter.Type == utils.MetaS3jsonMap || exporter.Type == utils.MetaSQSjsonMap {
+			poster := utils.SQSPoster
+			if exporter.Type == utils.MetaS3jsonMap {
+				poster = utils.S3Poster
+			}
+			argsMap := utils.GetUrlRawArguments(exporter.ExportPath)
+			for _, arg := range []string{utils.AWSRegion, utils.AWSKey, utils.AWSSecret} {
+				if _, has := argsMap[arg]; !has {
+					utils.Logger.Warning(fmt.Sprintf("<%s> No %s present for AWS for exporter with ID: <%s>.", poster, arg, exporter.ID))
 				}
 			}
 		}

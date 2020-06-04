@@ -39,6 +39,10 @@ func NewEventExporter(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.Filt
 		return NewFileCSVee(cgrCfg, cfgIdx, filterS, dc)
 	case utils.MetaFileFWV:
 		return NewFileFWVee(cgrCfg, cfgIdx, filterS, dc)
+	case utils.MetaHTTPPost:
+		return NewHTTPPostEe(cgrCfg, cfgIdx, filterS, dc)
+	case utils.MetaHTTPjsonMap, utils.MetaAMQPjsonMap, utils.MetaAMQPV1jsonMap, utils.MetaSQSjsonMap, utils.MetaKafkajsonMap, utils.MetaS3jsonMap:
+		return NewHTTPJsonMapEe(cgrCfg, cfgIdx, filterS, dc)
 	default:
 		return nil, fmt.Errorf("unsupported exporter type: <%s>", cgrCfg.EEsCfg().Exporters[cfgIdx].Type)
 	}

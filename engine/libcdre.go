@@ -58,7 +58,7 @@ func writeFailedPosts(itmID string, value interface{}) {
 	return
 }
 
-func addFailedPost(expPath, format, module string, ev interface{}) {
+func AddFailedPost(expPath, format, module string, ev interface{}) {
 	key := utils.ConcatenatedKey(expPath, format, module)
 	var failedPost *ExportEvents
 	if x, ok := failedPostCache.Get(key); ok {

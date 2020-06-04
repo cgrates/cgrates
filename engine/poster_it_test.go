@@ -75,7 +75,7 @@ func TestHttpJsonPoster(t *testing.T) {
 	if err = pstr.Post(jsn, utils.EmptyString); err == nil {
 		t.Error("Expected error")
 	}
-	addFailedPost("http://localhost:8080/invalid", utils.CONTENT_JSON, "test1", jsn)
+	AddFailedPost("http://localhost:8080/invalid", utils.CONTENT_JSON, "test1", jsn)
 	time.Sleep(2)
 	fs, err := filepath.Glob("/tmp/test1*")
 	if err != nil {
@@ -108,7 +108,7 @@ func TestHttpBytesPoster(t *testing.T) {
 	if err = pstr.Post(content, utils.EmptyString); err == nil {
 		t.Error("Expected error")
 	}
-	addFailedPost("http://localhost:8080/invalid", utils.CONTENT_JSON, "test2", content)
+	AddFailedPost("http://localhost:8080/invalid", utils.CONTENT_JSON, "test2", content)
 	time.Sleep(2)
 	fs, err := filepath.Glob("/tmp/test2*")
 	if err != nil {
