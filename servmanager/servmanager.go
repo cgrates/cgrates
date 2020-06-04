@@ -296,7 +296,7 @@ func (srvMngr *ServiceManager) handleReload() {
 				return
 			}
 		case <-srvMngr.GetConfig().GetReloadChan(config.RateSJson):
-			if err = srvMngr.reloadService(config.RateSJson); err != nil {
+			if err = srvMngr.reloadService(utils.RateS); err != nil {
 				return
 			}
 		case <-srvMngr.GetConfig().GetReloadChan(config.RPCConnsJsonName):

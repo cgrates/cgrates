@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
+	"fmt"
 	"sync"
 
 	"github.com/cgrates/cgrates/config"
@@ -113,5 +114,12 @@ func (rs *RateService) Start() (err error) {
 	}
 	*/
 	rs.intConnChan <- rs.rateS
-	return rs.rateS.ListenAndServe(rs.exitChan, rs.rldChan)
+
+	go func(rtS *rates.RateS, exitChan chan bool, rldChan chan struct{}) {
+		if err := rtS.ListenAndServe(exitChan, rldChan); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.EventExporterS, err.Error()))
+			exitChan <- true
+		}
+	}(rs.rateS, rs.exitChan, rs.rldChan)
+	return
 }
