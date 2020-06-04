@@ -129,6 +129,15 @@ func (iDBMig *internalMigrator) setV1Stats(x *v1Stat) (err error) {
 	return utils.ErrNotImplemented
 }
 
+func (iDBMig *internalMigrator) getV2Stats() (v2 *engine.StatQueue, err error) {
+	return nil, utils.ErrNotImplemented
+}
+
+//set
+func (iDBMig *internalMigrator) setV2Stats(v2 *engine.StatQueue) (err error) {
+	return utils.ErrNotImplemented
+}
+
 //Action  methods
 //get
 func (iDBMig *internalMigrator) getV2ActionTrigger() (v2at *v2ActionTrigger, err error) {

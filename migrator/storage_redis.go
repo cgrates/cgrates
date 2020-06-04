@@ -354,6 +354,46 @@ func (v1rs *redisMigrator) setV1Stats(x *v1Stat) (err error) {
 	return
 }
 
+//get
+func (v1rs *redisMigrator) getV2Stats() (v2 *engine.StatQueue, err error) {
+	if v1rs.qryIdx == nil {
+		v1rs.dataKeys, err = v1rs.rds.GetKeysForPrefix(utils.StatQueuePrefix)
+		if err != nil {
+			return
+		} else if len(v1rs.dataKeys) == 0 {
+			return nil, utils.ErrNoMoreData
+		}
+		v1rs.qryIdx = utils.IntPointer(0)
+	}
+	if *v1rs.qryIdx <= len(v1rs.dataKeys)-1 {
+		strVal, err := v1rs.rds.Cmd("GET", v1rs.dataKeys[*v1rs.qryIdx]).Bytes()
+		if err != nil {
+			return nil, err
+		}
+		if err := v1rs.rds.Marshaler().Unmarshal(strVal, &v2); err != nil {
+			return nil, err
+		}
+		*v1rs.qryIdx = *v1rs.qryIdx + 1
+	} else {
+		v1rs.qryIdx = nil
+		return nil, utils.ErrNoMoreData
+	}
+	return v2, nil
+}
+
+//set
+func (v1rs *redisMigrator) setV2Stats(v2 *engine.StatQueue) (err error) {
+	key := utils.StatQueuePrefix + v2.ID
+	bit, err := v1rs.rds.Marshaler().Marshal(v2)
+	if err != nil {
+		return err
+	}
+	if err = v1rs.rds.Cmd("SET", key, bit).Err; err != nil {
+		return err
+	}
+	return
+}
+
 //Action  methods
 //get
 func (v1rs *redisMigrator) getV2ActionTrigger() (v2at *v2ActionTrigger, err error) {

@@ -280,6 +280,32 @@ func (v1ms *mongoMigrator) setV1Stats(x *v1Stat) (err error) {
 	return
 }
 
+// get V2
+func (v1ms *mongoMigrator) getV2Stats() (v2 *engine.StatQueue, err error) {
+	if v1ms.cursor == nil {
+		v1ms.cursor, err = v1ms.mgoDB.DB().Collection(utils.StatQueuePrefix).Find(v1ms.mgoDB.GetContext(), bson.D{})
+		if err != nil {
+			return nil, err
+		}
+	}
+	if !(*v1ms.cursor).Next(v1ms.mgoDB.GetContext()) {
+		(*v1ms.cursor).Close(v1ms.mgoDB.GetContext())
+		v1ms.cursor = nil
+		return nil, utils.ErrNoMoreData
+	}
+	v2 = new(engine.StatQueue)
+	if err := (*v1ms.cursor).Decode(v2); err != nil {
+		return nil, err
+	}
+	return v2, nil
+}
+
+// set v2
+func (v1ms *mongoMigrator) setV2Stats(v2 *engine.StatQueue) (err error) {
+	_, err = v1ms.mgoDB.DB().Collection(utils.StatQueuePrefix).InsertOne(v1ms.mgoDB.GetContext(), v2)
+	return
+}
+
 //Stats methods
 //get
 func (v1ms *mongoMigrator) getV2ActionTrigger() (v2at *v2ActionTrigger, err error) {

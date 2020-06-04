@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package migrator
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -162,39 +163,14 @@ func remakeQueue(sq *engine.StatQueue) (out *engine.StatQueue) {
 func (m *Migrator) migrateV2Stats(v2Stats *engine.StatQueue) (v3Stats *engine.StatQueue, err error) {
 	if v2Stats == nil {
 		// read from DB
-
-	}
-
-	var ids []string
-	//StatQueue
-	if ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.StatQueuePrefix); err != nil {
-		return nil, err
-	}
-	for _, id := range ids {
-		tntID := strings.SplitN(strings.TrimPrefix(id, utils.StatQueuePrefix), utils.InInFieldSep, 2)
-		if len(tntID) < 2 {
-			return nil, fmt.Errorf("Invalid key <%s> when migrating stat queues", id)
-		}
-		sgs, err := m.dmIN.DataManager().GetStatQueue(tntID[0], tntID[1], false, false, utils.NonTransactional)
+		v2Stats, err = m.dmIN.getV2Stats()
 		if err != nil {
 			return nil, err
+		} else if v2Stats == nil {
+			return nil, errors.New("Stats NIL")
 		}
-		if sgs == nil || m.dryRun {
-			continue
-		}
-		// if err = m.dmOut.DataManager().SetStatQueue(remakeQueue(sgs)); err != nil {
-		// 	return err
-		// }
-		// if err = m.dmIN.DataManager().RemoveStatQueue(tntID[0], tntID[1], utils.NonTransactional); err != nil {
-		// 	return err
-		// }
-		m.stats[utils.StatS] += 1
 	}
-
-	// if err = m.moveStatQueueProfile(); err != nil {
-	// 	return err
-	// }
-
+	v3Stats = remakeQueue(v2Stats)
 	return
 }
 
@@ -262,7 +238,7 @@ func (m *Migrator) migrateStats() (err error) {
 				}
 			}
 			// Set the fresh-migrated Stats into DB
-			if err = m.dmOut.DataManager().SetStatQueue(remakeQueue(v3Stats)); err != nil {
+			if err = m.dmOut.DataManager().SetStatQueue(v3Stats); err != nil {
 				return err
 			}
 		}
