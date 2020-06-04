@@ -101,7 +101,7 @@ type DataDB interface {
 	GetIndexesDrv(idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error)
 	SetIndexesDrv(idxItmType, tntCtx string,
 		indexes map[string]utils.StringSet, commit bool, transactionID string) (err error)
-	RemoveIndexesDrv(idxItmType, tntCtx string) (err error)
+	RemoveIndexesDrv(idxItmType, tntCtx, idxKey string) (err error)
 	MatchFilterIndexDrv(cacheID, itemIDPrefix,
 		filterType, fieldName, fieldVal string) (itemIDs utils.StringMap, err error)
 	GetStatQueueProfileDrv(tenant string, ID string) (sq *StatQueueProfile, err error)

@@ -1781,7 +1781,7 @@ func (rs *RedisStorage) GetIndexesDrv(idxItmType, tntCtx, idxKey string) (indexe
 	return
 }
 
-// SetFilterIndexesDrv stores Indexes into DataDB
+// SetIndexesDrv stores Indexes into DataDB
 func (rs *RedisStorage) SetIndexesDrv(idxItmType, tntCtx string,
 	indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 	originKey := utils.CacheInstanceToPrefix[idxItmType] + tntCtx
@@ -1799,11 +1799,11 @@ func (rs *RedisStorage) SetIndexesDrv(idxItmType, tntCtx string,
 			nameValSls = append(nameValSls, key)
 			continue
 		}
-		if encodedMp, err := rs.ms.Marshal(strMp); err != nil {
+		encodedMp, err := rs.ms.Marshal(strMp)
+		if err != nil {
 			return err
-		} else {
-			mp[key] = string(encodedMp)
 		}
+		mp[key] = string(encodedMp)
 	}
 	if len(nameValSls) != 1 {
 		if err = rs.Cmd(redis_HDEL, nameValSls...).Err; err != nil {
@@ -1816,6 +1816,6 @@ func (rs *RedisStorage) SetIndexesDrv(idxItmType, tntCtx string,
 	return
 }
 
-func (rs *RedisStorage) RemoveIndexesDrv(idxItmType, tntCtx string) (err error) {
-	return rs.Cmd(redis_DEL, utils.CacheInstanceToPrefix[idxItmType]+tntCtx).Err
+func (rs *RedisStorage) RemoveIndexesDrv(idxItmType, tntCtx, idxKey string) (err error) {
+	return rs.Cmd(redis_DEL, utils.CacheInstanceToPrefix[idxItmType]+utils.ConcatenatedKey(tntCtx, idxKey)).Err
 }

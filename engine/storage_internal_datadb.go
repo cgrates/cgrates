@@ -1518,7 +1518,12 @@ func (iDB *InternalDB) SetIndexesDrv(idxItmType, tntCtx string,
 		cacheCommit(transactionID), transactionID)
 	return nil
 }
-func (iDB *InternalDB) RemoveIndexesDrv(idxItmType, tntCtx string) (err error) {
-	iDB.db.Remove(idxItmType, tntCtx, cacheCommit(utils.NonTransactional), utils.NonTransactional)
+
+func (iDB *InternalDB) RemoveIndexesDrv(idxItmType, tntCtx, idxKey string) (err error) {
+	if idxKey == utils.EmptyString {
+		iDB.db.RemoveGroup(idxItmType, tntCtx, true, utils.EmptyString)
+		return
+	}
+	iDB.db.Remove(idxItmType, utils.ConcatenatedKey(tntCtx, idxKey), cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }
