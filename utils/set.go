@@ -89,3 +89,15 @@ func (s StringSet) Intersect(s2 StringSet) {
 		}
 	}
 }
+
+// Clone creates a clone of the set
+func (s StringSet) Clone() (cln StringSet) {
+	if s == nil {
+		return
+	}
+	cln = make(StringSet)
+	for k := range s {
+		cln.Add(k)
+	}
+	return
+}

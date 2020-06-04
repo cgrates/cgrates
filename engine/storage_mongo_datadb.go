@@ -61,6 +61,7 @@ const (
 	ColVer  = "versions"
 	ColRsP  = "resource_profiles"
 	ColRFI  = "request_filter_indexes"
+	ColIndx = "indexes"
 	ColTmg  = "timings"
 	ColRes  = "resources"
 	ColSqs  = "statqueues"
@@ -1743,6 +1744,15 @@ func (ms *MongoStorage) RemoveTimingDrv(id string) (err error) {
 
 // GetFilterIndexesDrv retrieves Indexes from dataDB
 //filterType is used togheter with fieldName:Val
+
+/*
+dataManager.GetFilterIndexesDrv(
+	utils.CacheAttributeFilterIndexes,
+	"cgrates.org:*sessions", utils.MetaString,  map[string]string{
+		"Subject": "dan",
+	})
+
+*/
 func (ms *MongoStorage) GetFilterIndexesDrv(cacheID, itemIDPrefix, filterType string,
 	fldNameVal map[string]string) (indexes map[string]utils.StringMap, err error) {
 	type result struct {
@@ -1803,7 +1813,7 @@ func (ms *MongoStorage) GetFilterIndexesDrv(cacheID, itemIDPrefix, filterType st
 		if len(res.Value) == 0 {
 			continue
 		}
-		keys := strings.Split(res.Key, ":")
+		keys := strings.Split(res.Key, ":") // "cgrates.org:*sesions:*string:Subject:dan"
 		indexKey := utils.ConcatenatedKey(keys[1], keys[2], keys[3])
 		//check here if itemIDPrefix has context
 		if len(strings.Split(itemIDPrefix, ":")) == 2 {
@@ -2363,6 +2373,137 @@ func (ms *MongoStorage) RemoveRateProfileDrv(tenant, id string) (err error) {
 		if dr.DeletedCount == 0 {
 			return utils.ErrNotFound
 		}
+		return err
+	})
+}
+
+// GetIndexesDrv retrieves Indexes from dataDB
+// the key is the tenant of the item or in case of context dependent profiles is a concatenatedKey between tenant and context
+// id is used as a concatenated key in case of filterIndexes the id will be filterType:fieldName:fieldVal
+func (ms *MongoStorage) GetIndexesDrv(cacheID, key, id string) (indexes map[string]utils.StringSet, err error) {
+	type result struct {
+		Key   string
+		Value []string
+	}
+	dbKey := utils.CacheInstanceToPrefix[cacheID] + key
+	var q bson.M
+	if len(id) != 0 {
+		q = bson.M{"key": dbKey + id}
+
+	} else {
+		for _, character := range []string{".", "*"} {
+			dbKey = strings.Replace(dbKey, character, `\`+character, strings.Count(dbKey, character))
+		}
+		//inside bson.RegEx add carrot to match the prefix (optimization)
+		q = bson.M{"key": bsonx.Regex("^"+dbKey, "")}
+	}
+
+	indexes = make(map[string]utils.StringSet)
+	if err = ms.query(func(sctx mongo.SessionContext) (err error) {
+		cur, err := ms.getCol(ColIndx).Find(sctx, q)
+		if err != nil {
+			return err
+		}
+		for cur.Next(sctx) {
+			var elem result
+			if err := cur.Decode(&elem); err != nil {
+				return err
+			}
+			if len(elem.Value) == 0 {
+				continue
+			}
+			keys := strings.Split(elem.Key, ":")
+			indexKey := utils.ConcatenatedKey(keys[1], keys[2], keys[3])
+			//check here if key has context
+			if len(strings.Split(key, ":")) == 2 {
+				indexKey = utils.ConcatenatedKey(keys[2], keys[3], keys[4])
+			}
+			indexes[indexKey] = utils.NewStringSet(elem.Value)
+		}
+		return cur.Close(sctx)
+	}); err != nil {
+		return nil, err
+	}
+	if len(indexes) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	return indexes, nil
+}
+
+// SetIndexesDrv stores Indexes into DataDB
+// the key is the tenant of the item or in case of context dependent profiles is a concatenatedKey between tenant and context
+func (ms *MongoStorage) SetIndexesDrv(cacheID, key string,
+	indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+	originKey := utils.CacheInstanceToPrefix[cacheID] + key
+	dbKey := originKey
+	if transactionID != "" {
+		dbKey = "tmp_" + utils.ConcatenatedKey(originKey, transactionID)
+	}
+	if commit && transactionID != "" {
+		oldKey := "tmp_" + utils.ConcatenatedKey(originKey, transactionID)
+		regexKey := originKey
+		for _, character := range []string{".", "*"} {
+			regexKey = strings.Replace(regexKey, character, `\`+character, strings.Count(regexKey, character))
+			oldKey = strings.Replace(oldKey, character, `\`+character, strings.Count(oldKey, character))
+		}
+		//inside bson.RegEx add carrot to match the prefix (optimization)
+		if err = ms.query(func(sctx mongo.SessionContext) (err error) {
+			_, err = ms.getCol(ColIndx).DeleteMany(sctx, bson.M{"key": bsonx.Regex("^"+regexKey, "")})
+			return err
+		}); err != nil {
+			return err
+		}
+		var lastErr error
+		for key, itmMp := range indexes {
+			if err = ms.query(func(sctx mongo.SessionContext) (err error) {
+				_, err = ms.getCol(ColIndx).UpdateOne(sctx, bson.M{"key": utils.ConcatenatedKey(originKey, key)},
+					bson.M{"$set": bson.M{"key": utils.ConcatenatedKey(originKey, key), "value": itmMp.AsSlice()}},
+					options.Update().SetUpsert(true),
+				)
+				return err
+			}); err != nil {
+				lastErr = err
+			}
+		}
+		if lastErr != nil {
+			return lastErr
+		}
+		//inside bson.RegEx add carrot to match the prefix (optimization)
+		return ms.query(func(sctx mongo.SessionContext) (err error) {
+			_, err = ms.getCol(ColIndx).DeleteMany(sctx, bson.M{"key": bsonx.Regex("^"+oldKey, "")})
+			return err
+		})
+	}
+	var lastErr error
+	for key, itmMp := range indexes {
+		if err = ms.query(func(sctx mongo.SessionContext) (err error) {
+			var action bson.M
+			if len(itmMp) == 0 {
+				action = bson.M{"$unset": bson.M{"value": 1}}
+			} else {
+				action = bson.M{"$set": bson.M{"key": utils.ConcatenatedKey(dbKey, key), "value": itmMp.AsSlice()}}
+			}
+			_, err = ms.getCol(ColIndx).UpdateOne(sctx, bson.M{"key": utils.ConcatenatedKey(dbKey, key)},
+				action, options.Update().SetUpsert(true),
+			)
+			return err
+		}); err != nil {
+			lastErr = err
+		}
+	}
+	return lastErr
+}
+
+// RemoveIndexesDrv removes the indexes
+// the key is the tenant of the item or in case of context dependent profiles is a concatenatedKey between tenant and context
+func (ms *MongoStorage) RemoveIndexesDrv(cacheID, key string) (err error) {
+	regexKey := utils.CacheInstanceToPrefix[cacheID] + key
+	for _, character := range []string{".", "*"} {
+		regexKey = strings.Replace(regexKey, character, `\`+character, strings.Count(regexKey, character))
+	}
+	//inside bson.RegEx add carrot to match the prefix (optimization)
+	return ms.query(func(sctx mongo.SessionContext) (err error) {
+		_, err = ms.getCol(ColIndx).DeleteMany(sctx, bson.M{"key": bsonx.Regex("^"+regexKey, "")})
 		return err
 	})
 }

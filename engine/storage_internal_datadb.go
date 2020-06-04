@@ -1445,3 +1445,75 @@ func (iDB *InternalDB) RemoveRateProfileDrv(tenant, id string) (err error) {
 func (iDB *InternalDB) RemoveLoadIDsDrv() (err error) {
 	return utils.ErrNotImplemented
 }
+
+func (iDB *InternalDB) GetIndexesDrv(idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error) {
+	dbKey := utils.CacheInstanceToPrefix[idxItmType] + tntCtx
+	x, ok := iDB.db.Get(idxItmType, dbKey)
+	if !ok || x == nil {
+		return nil, utils.ErrNotFound
+	}
+	indexes = x.(map[string]utils.StringSet)
+	if len(idxKey) != 0 {
+		return map[string]utils.StringSet{
+			idxKey: indexes[idxKey].Clone(),
+		}, nil
+	}
+	if len(indexes) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	return
+}
+
+func (iDB *InternalDB) SetIndexesDrv(idxItmType, tntCtx string,
+	indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+	originKey := utils.CacheInstanceToPrefix[idxItmType] + tntCtx
+	dbKey := originKey
+	if transactionID != "" {
+		dbKey = "tmp_" + utils.ConcatenatedKey(dbKey, transactionID)
+	}
+	if commit && transactionID != "" {
+		x, _ := iDB.db.Get(idxItmType, dbKey)
+		iDB.db.Remove(idxItmType, dbKey,
+			cacheCommit(utils.NonTransactional), utils.NonTransactional)
+		iDB.db.Set(idxItmType, originKey, x, nil,
+			cacheCommit(utils.NonTransactional), utils.NonTransactional)
+		return
+	}
+	var toBeDeleted []string
+	toBeAdded := make(map[string]utils.StringSet)
+	for key, strMp := range indexes {
+		if len(strMp) == 0 { // remove with no more elements inside
+			toBeDeleted = append(toBeDeleted, key)
+			delete(indexes, key)
+			continue
+		}
+		toBeAdded[key] = make(utils.StringSet)
+		toBeAdded[key] = strMp
+	}
+
+	x, ok := iDB.db.Get(idxItmType, dbKey)
+	if !ok || x == nil {
+		iDB.db.Set(idxItmType, dbKey, toBeAdded, nil,
+			cacheCommit(utils.NonTransactional), utils.NonTransactional)
+		return err
+	}
+
+	mp := x.(map[string]utils.StringSet)
+	for _, key := range toBeDeleted {
+		delete(mp, key)
+	}
+	for key, strMp := range toBeAdded {
+		if _, has := mp[key]; !has {
+			mp[key] = make(utils.StringSet)
+		}
+		mp[key] = strMp
+	}
+	iDB.db.Set(idxItmType, dbKey, mp, nil,
+		cacheCommit(transactionID), transactionID)
+	return nil
+}
+func (iDB *InternalDB) RemoveIndexesDrv(idxItmType, tntCtx string) (err error) {
+	iDB.db.Remove(idxItmType, utils.CacheInstanceToPrefix[idxItmType]+tntCtx,
+		cacheCommit(utils.NonTransactional), utils.NonTransactional)
+	return
+}

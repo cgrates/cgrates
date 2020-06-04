@@ -3280,3 +3280,124 @@ func (dm *DataManager) Reconnect(marshaller string, newcfg *config.DataDbCfg) (e
 	dm.dataDB = d
 	return
 }
+
+func (dm *DataManager) GetIndexes(idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error) {
+	if dm == nil {
+		err = utils.ErrNoDatabaseConn
+		return
+	}
+	if x, ok := Cache.Get(idxItmType, tntCtx); ok { // Attempt to find in cache first
+		if x == nil {
+			return nil, utils.ErrNotFound
+		}
+		indexes = x.(map[string]utils.StringSet)
+		if idxKey == utils.EmptyString { // in case of empty key we expect all indexes for tenant:context
+			return
+		}
+		indx, has := indexes[idxKey]
+		if has {
+			if indx == nil {
+				return nil, utils.ErrNotFound
+			}
+			return map[string]utils.StringSet{idxKey: indx}, nil
+		}
+	}
+	if indexes, err = dm.DataDB().GetIndexesDrv(idxItmType, tntCtx, idxKey); err != nil {
+		// if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaFilterIndexes]; err == utils.ErrNotFound && itm.Remote {
+		// 	if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
+		// 		utils.ReplicatorSv1GetFilterIndexes,
+		// 		&utils.GetFilterIndexesArgWithArgDispatcher{
+		// 			GetFilterIndexesArg: &utils.GetFilterIndexesArg{
+		// 				CacheID:      cacheID,
+		// 				ItemIDPrefix: key,
+		// 				FilterType:   filterType,
+		// 				FldNameVal:   fldNameVal},
+		// 			TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
+		// 			ArgDispatcher: &utils.ArgDispatcher{
+		// 				APIKey:  utils.StringPointer(itm.APIKey),
+		// 				RouteID: utils.StringPointer(itm.RouteID)},
+		// 		}, &indexes); err == nil {
+		// 		err = dm.dataDB.SetFilterIndexesDrv(cacheID, key, indexes, true, utils.NonTransactional)
+		// 	}
+		// }
+		// if err != nil {
+		// 	err = utils.CastRPCErr(err)
+		if err == utils.ErrNotFound {
+			if idxKey == utils.EmptyString {
+				if errCh := Cache.Set(idxItmType, tntCtx, nil, nil,
+					true, utils.NonTransactional); errCh != nil {
+					return nil, errCh
+				}
+			} else {
+				idx := make(map[string]utils.StringSet)
+				if x, ok := Cache.Get(idxItmType, tntCtx); ok && x != nil {
+					idx = x.(map[string]utils.StringSet)
+				}
+				idx[idxKey] = nil
+				if errCh := Cache.Set(idxItmType, tntCtx, idx, nil,
+					true, utils.NonTransactional); errCh != nil {
+					return nil, errCh
+				}
+			}
+		}
+		return nil, err
+		// }
+	}
+	idx := make(map[string]utils.StringSet)
+	if x, ok := Cache.Get(idxItmType, tntCtx); ok && x != nil {
+		idx = x.(map[string]utils.StringSet)
+	}
+	for k, v := range indexes {
+		idx[k] = v
+	}
+	if err = Cache.Set(idxItmType, tntCtx, idx, nil,
+		true, utils.NonTransactional); err != nil {
+		return nil, err
+	}
+	return
+}
+
+/*
+
+func (dm *DataManager) SetFilterIndexes(cacheID, itemIDPrefix string,
+	indexes map[string]utils.StringMap, commit bool, transactionID string) (err error) {
+	if dm == nil {
+		err = utils.ErrNoDatabaseConn
+		return
+	}
+	if err = dm.DataDB().SetFilterIndexesDrv(cacheID, itemIDPrefix,
+		indexes, commit, transactionID); err != nil {
+		return
+	}
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaFilterIndexes]; itm.Replicate {
+		var reply string
+		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+			utils.ReplicatorSv1SetFilterIndexes,
+			&utils.SetFilterIndexesArgWithArgDispatcher{
+				SetFilterIndexesArg: &utils.SetFilterIndexesArg{
+					CacheID:      cacheID,
+					ItemIDPrefix: itemIDPrefix,
+					Indexes:      indexes},
+				TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
+				ArgDispatcher: &utils.ArgDispatcher{
+					APIKey:  utils.StringPointer(itm.APIKey),
+					RouteID: utils.StringPointer(itm.RouteID)},
+			}, &reply); err != nil {
+			err = utils.CastRPCErr(err)
+			return
+		}
+	}
+	return
+}
+
+func (dm *DataManager) RemoveFilterIndexes(cacheID, itemIDPrefix string) (err error) {
+	if dm == nil {
+		err = utils.ErrNoDatabaseConn
+		return
+	}
+	if err = dm.DataDB().RemoveFilterIndexesDrv(cacheID, itemIDPrefix); err != nil {
+		return
+	}
+	return
+}
+*/

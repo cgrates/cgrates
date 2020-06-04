@@ -294,22 +294,20 @@ func (rfi *FilterIndexer) RemoveItemFromIndex(tenant, itemID string, oldFilters 
 		}
 	}
 	for _, itmMp := range rfi.indexes {
-		for range itmMp {
-			if _, has := itmMp[itemID]; has {
-				delete(itmMp, itemID) //Force deleting in driver
-			}
+		if _, has := itmMp[itemID]; has {
+			delete(itmMp, itemID) //Force deleting in driver
 		}
 	}
 	return rfi.StoreIndexes(false, utils.NonTransactional)
 }
 
 //createAndIndex create indexes for an item
-func createAndIndex(itemPrefix, tenant, context, itemID string, filterIDs []string, dm *DataManager) (err error) {
+func createAndIndex(itmPrfx, tenant, context, itemID string, filterIDs []string, dm *DataManager) (err error) {
 	indexerKey := tenant
 	if context != "" {
 		indexerKey = utils.ConcatenatedKey(tenant, context)
 	}
-	indexer := NewFilterIndexer(dm, itemPrefix, indexerKey)
+	indexer := NewFilterIndexer(dm, itmPrfx, indexerKey)
 	fltrIDs := make([]string, len(filterIDs))
 	for i, fltrID := range filterIDs {
 		fltrIDs[i] = fltrID
@@ -335,7 +333,7 @@ func createAndIndex(itemPrefix, tenant, context, itemID string, filterIDs []stri
 			true, false, utils.NonTransactional); err != nil {
 			if err == utils.ErrNotFound {
 				err = fmt.Errorf("broken reference to filter: %+v for itemType: %+v and ID: %+v",
-					fltrID, itemPrefix, itemID)
+					fltrID, itmPrfx, itemID)
 			}
 			return
 		}

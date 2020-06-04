@@ -98,6 +98,10 @@ type DataDB interface {
 	SetFilterIndexesDrv(cacheID, itemIDPrefix string,
 		indexes map[string]utils.StringMap, commit bool, transactionID string) (err error)
 	RemoveFilterIndexesDrv(cacheID, itemIDPrefix string) (err error)
+	GetIndexesDrv(idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error)
+	SetIndexesDrv(idxItmType, tntCtx string,
+		indexes map[string]utils.StringSet, commit bool, transactionID string) (err error)
+	RemoveIndexesDrv(idxItmType, tntCtx string) (err error)
 	MatchFilterIndexDrv(cacheID, itemIDPrefix,
 		filterType, fieldName, fieldVal string) (itemIDs utils.StringMap, err error)
 	GetStatQueueProfileDrv(tenant string, ID string) (sq *StatQueueProfile, err error)
@@ -321,8 +325,5 @@ func (gm *GOBMarshaler) Unmarshal(data []byte, v interface{}) error {
 
 // Decide the value of cacheCommit parameter based on transactionID
 func cacheCommit(transactionID string) bool {
-	if transactionID == utils.NonTransactional {
-		return true
-	}
-	return false
+	return transactionID == utils.NonTransactional
 }
