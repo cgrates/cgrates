@@ -1490,10 +1490,8 @@ func (iDB *InternalDB) SetIndexesDrv(idxItmType, tntCtx string,
 	for key, strMp := range indexes {
 		if len(strMp) == 0 { // remove with no more elements inside
 			toBeDeleted = append(toBeDeleted, key)
-			delete(indexes, key)
 			continue
 		}
-		toBeAdded[key] = make(utils.StringSet)
 		toBeAdded[key] = strMp
 	}
 
@@ -1501,7 +1499,7 @@ func (iDB *InternalDB) SetIndexesDrv(idxItmType, tntCtx string,
 	if !ok || x == nil {
 		iDB.db.Set(idxItmType, dbKey, toBeAdded, []string{tntCtx},
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
-		return err
+		return
 	}
 
 	mp := x.(map[string]utils.StringSet)
@@ -1509,14 +1507,11 @@ func (iDB *InternalDB) SetIndexesDrv(idxItmType, tntCtx string,
 		delete(mp, key)
 	}
 	for key, strMp := range toBeAdded {
-		if _, has := mp[key]; !has {
-			mp[key] = make(utils.StringSet)
-		}
 		mp[key] = strMp
 	}
 	iDB.db.Set(idxItmType, dbKey, mp, []string{tntCtx},
 		cacheCommit(transactionID), transactionID)
-	return nil
+	return
 }
 
 func (iDB *InternalDB) RemoveIndexesDrv(idxItmType, tntCtx, idxKey string) (err error) {
