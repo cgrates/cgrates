@@ -1793,21 +1793,21 @@ func (rs *RedisStorage) SetIndexesDrv(idxItmType, tntCtx string,
 		return rs.Cmd(redis_RENAME, dbKey, originKey).Err
 	}
 	mp := make(map[string]string)
-	nameValSls := []interface{}{dbKey}
+	deleteArgs := []interface{}{dbKey} // the dbkey is necesary for the HDEL command
 	for key, strMp := range indexes {
 		if len(strMp) == 0 { // remove with no more elements inside
-			nameValSls = append(nameValSls, key)
+			deleteArgs = append(deleteArgs, key)
 			continue
 		}
-		encodedMp, err := rs.ms.Marshal(strMp)
-		if err != nil {
-			return err
+		var encodedMp []byte
+		if encodedMp, err = rs.ms.Marshal(strMp); err != nil {
+			return
 		}
 		mp[key] = string(encodedMp)
 	}
-	if len(nameValSls) != 1 {
-		if err = rs.Cmd(redis_HDEL, nameValSls...).Err; err != nil {
-			return err
+	if len(deleteArgs) != 1 {
+		if err = rs.Cmd(redis_HDEL, deleteArgs...).Err; err != nil {
+			return
 		}
 	}
 	if len(mp) != 0 {
