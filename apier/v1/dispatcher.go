@@ -1254,3 +1254,18 @@ func (dS *DispatcherReplicatorSv1) RemoveDispatcherHost(args *utils.TenantIDWith
 func (dS *DispatcherReplicatorSv1) RemoveRateProfile(args *utils.TenantIDWithArgDispatcher, reply *string) error {
 	return dS.dS.ReplicatorSv1RemoveRateProfile(args, reply)
 }
+
+// GetIndexes .
+func (dS *DispatcherReplicatorSv1) GetIndexes(args *utils.GetIndexesArg, reply *map[string]utils.StringSet) error {
+	return dS.dS.ReplicatorSv1GetIndexes(args, reply)
+}
+
+// SetIndexes .
+func (dS *DispatcherReplicatorSv1) SetIndexes(args *utils.SetIndexesArg, reply *string) error {
+	return dS.dS.ReplicatorSv1SetIndexes(args, reply)
+}
+
+// RemoveIndexes .
+func (dS *DispatcherReplicatorSv1) RemoveIndexes(args *utils.GetIndexesArg, reply *string) error {
+	return dS.dS.ReplicatorSv1RemoveIndexes(args, reply)
+}
