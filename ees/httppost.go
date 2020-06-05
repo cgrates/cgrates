@@ -19,7 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ees
 
 import (
+	"fmt"
 	"net/url"
+	"strings"
 	"sync"
 	"time"
 
@@ -81,11 +83,18 @@ func (httpPost *HTTPPost) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 		return
 	}
 	for el := eeReq.cnt.GetFirstElement(); el != nil; el = el.Next() {
-		var strVal string
-		if strVal, err = eeReq.cnt.FieldAsString(el.Value.Slice()); err != nil {
+		var nmIt utils.NMInterface
+		if nmIt, err = eeReq.cnt.Field(el.Value); err != nil {
 			return
 		}
-		urlVals.Set(el.Value.Slice()[1], strVal)
+		itm, isNMItem := nmIt.(*config.NMItem)
+		if !isNMItem {
+			return fmt.Errorf("cannot encode reply value: %s, err: not NMItems", utils.ToJSON(el.Value))
+		}
+		if itm == nil {
+			continue // all attributes, not writable to diameter packet
+		}
+		urlVals.Set(strings.Join(itm.Path, utils.NestingSep), utils.IfaceAsString(itm.Data))
 	}
 	if aTime, err := cgrEv.FieldAsTime(utils.AnswerTime, httpPost.cgrCfg.GeneralCfg().DefaultTimezone); err == nil {
 		if httpPost.dc[utils.FirstEventATime].(time.Time).IsZero() || httpPost.dc[utils.FirstEventATime].(time.Time).Before(aTime) {

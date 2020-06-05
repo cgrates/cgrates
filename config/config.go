@@ -319,7 +319,7 @@ var possibleReaderTypes = utils.NewStringSet([]string{utils.MetaFileCSV,
 	utils.MetaPartialCSV, utils.MetaFlatstore, utils.MetaJSON, utils.META_NONE})
 
 var possibleExporterTypes = utils.NewStringSet([]string{utils.MetaFileCSV, utils.META_NONE, utils.MetaFileFWV,
-	utils.MetaHTTPPost, utils.MetaHTTPjson, utils.MetaAMQPjsonMap, utils.MetaAMQPV1jsonMap, utils.MetaSQSjsonMap,
+	utils.MetaHTTPPost, utils.MetaHTTPjsonMap, utils.MetaAMQPjsonMap, utils.MetaAMQPV1jsonMap, utils.MetaSQSjsonMap,
 	utils.MetaKafkajsonMap, utils.MetaS3jsonMap})
 
 func (cfg *CGRConfig) LazySanityCheck() {

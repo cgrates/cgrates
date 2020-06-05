@@ -21,9 +21,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ees
 
 import (
+	"io/ioutil"
+	"net/http"
 	"net/rpc"
+	"net/url"
 	"path"
 	"testing"
+	"time"
+
+	"github.com/cgrates/cgrates/utils"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -34,15 +40,19 @@ var (
 	httpPostCfgPath   string
 	httpPostCfg       *config.CGRConfig
 	httpPostRpc       *rpc.Client
+	httpValues        url.Values
 
 	sTestsHTTPPost = []func(t *testing.T){
+		testCreateDirectory,
 		testHTTPPostLoadConfig,
 		testHTTPPostResetDataDB,
 		testHTTPPostResetStorDb,
 		testHTTPPostStartEngine,
 		testHTTPPostRPCConn,
-
+		testHTTPStartHTTPServer,
+		testHTTPExportEvent,
 		testStopCgrEngine,
+		testCleanDirectory,
 	}
 )
 
@@ -84,5 +94,167 @@ func testHTTPPostRPCConn(t *testing.T) {
 	httpPostRpc, err = newRPCClient(httpPostCfg.ListenCfg())
 	if err != nil {
 		t.Fatal(err)
+	}
+}
+
+func testHTTPStartHTTPServer(t *testing.T) {
+	http.HandleFunc("/event_http", func(writer http.ResponseWriter, request *http.Request) {
+		b, err := ioutil.ReadAll(request.Body)
+		request.Body.Close()
+		if err != nil {
+			t.Error(err)
+		}
+		httpValues, err = url.ParseQuery(string(b))
+		if err != nil {
+			t.Errorf("Cannot parse body: %s", string(b))
+		}
+	})
+	go http.ListenAndServe(":12080", nil)
+}
+
+func testHTTPExportEvent(t *testing.T) {
+	eventVoice := &utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "voiceEvent",
+			Time:   utils.TimePointer(time.Now()),
+			Event: map[string]interface{}{
+				utils.CGRID:       utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
+				utils.ToR:         utils.VOICE,
+				utils.OriginID:    "dsafdsaf",
+				utils.OriginHost:  "192.168.1.1",
+				utils.RequestType: utils.META_RATED,
+				utils.Tenant:      "cgrates.org",
+				utils.Category:    "call",
+				utils.Account:     "1001",
+				utils.Subject:     "1001",
+				utils.Destination: "1002",
+				utils.SetupTime:   time.Unix(1383813745, 0).UTC(),
+				utils.AnswerTime:  time.Unix(1383813746, 0).UTC(),
+				utils.Usage:       time.Duration(10) * time.Second,
+				utils.RunID:       utils.MetaDefault,
+				utils.Cost:        1.01,
+				"ExporterUsed":    "HTTPPostExporter",
+				"ExtraFields": map[string]string{"extra1": "val_extra1",
+					"extra2": "val_extra2", "extra3": "val_extra3"},
+			},
+		},
+	}
+
+	eventData := &utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "dataEvent",
+			Time:   utils.TimePointer(time.Now()),
+			Event: map[string]interface{}{
+				utils.CGRID:       utils.Sha1("abcdef", time.Unix(1383813745, 0).UTC().String()),
+				utils.ToR:         utils.DATA,
+				utils.OriginID:    "abcdef",
+				utils.OriginHost:  "192.168.1.1",
+				utils.RequestType: utils.META_RATED,
+				utils.Tenant:      "AnotherTenant",
+				utils.Category:    "call", //for data CDR use different Tenant
+				utils.Account:     "1001",
+				utils.Subject:     "1001",
+				utils.Destination: "1002",
+				utils.SetupTime:   time.Unix(1383813745, 0).UTC(),
+				utils.AnswerTime:  time.Unix(1383813746, 0).UTC(),
+				utils.Usage:       time.Duration(10) * time.Nanosecond,
+				utils.RunID:       utils.MetaDefault,
+				utils.Cost:        0.012,
+				"ExporterUsed":    "HTTPPostExporter",
+				"ExtraFields": map[string]string{"extra1": "val_extra1",
+					"extra2": "val_extra2", "extra3": "val_extra3"},
+			},
+		},
+	}
+
+	eventSMS := &utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "SMSEvent",
+			Time:   utils.TimePointer(time.Now()),
+			Event: map[string]interface{}{
+				utils.CGRID:       utils.Sha1("sdfwer", time.Unix(1383813745, 0).UTC().String()),
+				utils.ToR:         utils.SMS,
+				utils.OriginID:    "sdfwer",
+				utils.OriginHost:  "192.168.1.1",
+				utils.RequestType: utils.META_RATED,
+				utils.Tenant:      "cgrates.org",
+				utils.Category:    "call",
+				utils.Account:     "1001",
+				utils.Subject:     "1001",
+				utils.Destination: "1002",
+				utils.SetupTime:   time.Unix(1383813745, 0).UTC(),
+				utils.AnswerTime:  time.Unix(1383813746, 0).UTC(),
+				utils.Usage:       time.Duration(1),
+				utils.RunID:       utils.MetaDefault,
+				utils.Cost:        0.15,
+				"ExporterUsed":    "HTTPPostExporter",
+				"ExtraFields": map[string]string{"extra1": "val_extra1",
+					"extra2": "val_extra2", "extra3": "val_extra3"},
+			},
+		},
+	}
+	var reply string
+	if err := httpPostRpc.Call(utils.EventExporterSv1ProcessEvent, eventVoice, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected %+v, received: %+v", utils.OK, reply)
+	}
+	time.Sleep(10 * time.Millisecond)
+	// verify HTTPValues for eventVoice
+	for key, strVal := range map[string]string{
+		utils.CGRID:       utils.IfaceAsString(eventVoice.Event[utils.CGRID]),
+		utils.ToR:         utils.IfaceAsString(eventVoice.Event[utils.ToR]),
+		utils.Category:    utils.IfaceAsString(eventVoice.Event[utils.Category]),
+		utils.Account:     utils.IfaceAsString(eventVoice.Event[utils.Account]),
+		utils.Subject:     utils.IfaceAsString(eventVoice.Event[utils.Subject]),
+		utils.Destination: utils.IfaceAsString(eventVoice.Event[utils.Destination]),
+		utils.Cost:        utils.IfaceAsString(eventVoice.Event[utils.Cost]),
+	} {
+		if rcv := httpValues.Get(key); rcv != strVal {
+			t.Errorf("Expected %+v, received: %+v", strVal, rcv)
+		}
+	}
+	if err := httpPostRpc.Call(utils.EventExporterSv1ProcessEvent, eventData, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected %+v, received: %+v", utils.OK, reply)
+	}
+	time.Sleep(10 * time.Millisecond)
+	// verify HTTPValues for eventData
+	for key, strVal := range map[string]string{
+		utils.CGRID:       utils.IfaceAsString(eventData.Event[utils.CGRID]),
+		utils.ToR:         utils.IfaceAsString(eventData.Event[utils.ToR]),
+		utils.Category:    utils.IfaceAsString(eventData.Event[utils.Category]),
+		utils.Account:     utils.IfaceAsString(eventData.Event[utils.Account]),
+		utils.Subject:     utils.IfaceAsString(eventData.Event[utils.Subject]),
+		utils.Destination: utils.IfaceAsString(eventData.Event[utils.Destination]),
+		utils.Cost:        utils.IfaceAsString(eventData.Event[utils.Cost]),
+	} {
+		if rcv := httpValues.Get(key); rcv != strVal {
+			t.Errorf("Expected %+v, received: %+v", strVal, rcv)
+		}
+	}
+	if err := httpPostRpc.Call(utils.EventExporterSv1ProcessEvent, eventSMS, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected %+v, received: %+v", utils.OK, reply)
+	}
+	time.Sleep(10 * time.Millisecond)
+	// verify HTTPValues for eventSMS
+	for key, strVal := range map[string]string{
+		utils.CGRID:       utils.IfaceAsString(eventSMS.Event[utils.CGRID]),
+		utils.ToR:         utils.IfaceAsString(eventSMS.Event[utils.ToR]),
+		utils.Category:    utils.IfaceAsString(eventSMS.Event[utils.Category]),
+		utils.Account:     utils.IfaceAsString(eventSMS.Event[utils.Account]),
+		utils.Subject:     utils.IfaceAsString(eventSMS.Event[utils.Subject]),
+		utils.Destination: utils.IfaceAsString(eventSMS.Event[utils.Destination]),
+		utils.Cost:        utils.IfaceAsString(eventSMS.Event[utils.Cost]),
+	} {
+		if rcv := httpValues.Get(key); rcv != strVal {
+			t.Errorf("Expected %+v, received: %+v", strVal, rcv)
+		}
 	}
 }

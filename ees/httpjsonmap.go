@@ -20,6 +20,8 @@ package ees
 
 import (
 	"encoding/json"
+	"fmt"
+	"strings"
 	"sync"
 	"time"
 
@@ -84,11 +86,18 @@ func (httpJson *HTTPJsonMapEe) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 		return
 	}
 	for el := eeReq.cnt.GetFirstElement(); el != nil; el = el.Next() {
-		var strVal string
-		if strVal, err = eeReq.cnt.FieldAsString(el.Value.Slice()); err != nil {
+		var nmIt utils.NMInterface
+		if nmIt, err = eeReq.cnt.Field(el.Value); err != nil {
 			return
 		}
-		valMp[el.Value.Slice()[1]] = strVal
+		itm, isNMItem := nmIt.(*config.NMItem)
+		if !isNMItem {
+			return fmt.Errorf("cannot encode reply value: %s, err: not NMItems", utils.ToJSON(el.Value))
+		}
+		if itm == nil {
+			continue // all attributes, not writable to diameter packet
+		}
+		valMp[strings.Join(itm.Path, utils.NestingSep)] = utils.IfaceAsString(itm.Data)
 	}
 	if aTime, err := cgrEv.FieldAsTime(utils.AnswerTime, httpJson.cgrCfg.GeneralCfg().DefaultTimezone); err == nil {
 		if httpJson.dc[utils.FirstEventATime].(time.Time).IsZero() || httpJson.dc[utils.FirstEventATime].(time.Time).Before(aTime) {
