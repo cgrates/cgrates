@@ -786,6 +786,7 @@ const (
 	MetaRouteProfiles       = "*route_profiles"
 	MetaAttributeProfiles   = "*attribute_profiles"
 	MetaFilterIndexes       = "*filter_indexes"
+	MetaIndexes             = "*indexes"
 	MetaDispatcherProfiles  = "*dispatcher_profiles"
 	MetaRateProfiles        = "*rate_profiles"
 	MetaChargerProfiles     = "*charger_profiles"
@@ -1079,6 +1080,9 @@ const (
 	ReplicatorSv1RemoveDispatcherProfile = "ReplicatorSv1.RemoveDispatcherProfile"
 	ReplicatorSv1RemoveRateProfile       = "ReplicatorSv1.RemoveRateProfile"
 	ReplicatorSv1RemoveDispatcherHost    = "ReplicatorSv1.RemoveDispatcherHost"
+	ReplicatorSv1GetIndexes              = "ReplicatorSv1.GetIndexes"
+	ReplicatorSv1SetIndexes              = "ReplicatorSv1.SetIndexes"
+	ReplicatorSv1RemoveIndexes           = "ReplicatorSv1.RemoveIndexes"
 )
 
 // APIerSv1 APIs

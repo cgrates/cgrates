@@ -1727,3 +1727,72 @@ func (dS *DispatcherService) ReplicatorSv1RemoveRateProfile(args *utils.TenantID
 	return dS.Dispatch(&utils.CGREvent{Tenant: args.Tenant}, utils.MetaReplicator, routeID,
 		utils.ReplicatorSv1RemoveRateProfile, args, rpl)
 }
+
+// ReplicatorSv1GetIndexes .
+func (dS *DispatcherService) ReplicatorSv1GetIndexes(args *utils.GetIndexesArg, reply *map[string]utils.StringSet) (err error) {
+	if args == nil {
+		args = &utils.GetIndexesArg{}
+	}
+	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if args.ArgDispatcher == nil {
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
+		}
+		if err = dS.authorize(utils.ReplicatorSv1GetIndexes, args.Tenant,
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	var routeID *string
+	if args.ArgDispatcher != nil {
+		routeID = args.ArgDispatcher.RouteID
+	}
+	return dS.Dispatch(&utils.CGREvent{Tenant: args.Tenant}, utils.MetaReplicator, routeID,
+		utils.ReplicatorSv1GetIndexes, args, reply)
+}
+
+// ReplicatorSv1SetIndexes .
+func (dS *DispatcherService) ReplicatorSv1SetIndexes(args *utils.SetIndexesArg, reply *string) (err error) {
+	if args == nil {
+		args = &utils.SetIndexesArg{}
+	}
+	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if args.ArgDispatcher == nil {
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
+		}
+		if err = dS.authorize(utils.ReplicatorSv1SetIndexes, args.Tenant,
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	var routeID *string
+	if args.ArgDispatcher != nil {
+		routeID = args.ArgDispatcher.RouteID
+	}
+	return dS.Dispatch(&utils.CGREvent{Tenant: args.Tenant}, utils.MetaReplicator, routeID,
+		utils.ReplicatorSv1SetIndexes, args, reply)
+}
+
+// ReplicatorSv1RemoveIndexes .
+func (dS *DispatcherService) ReplicatorSv1RemoveIndexes(args *utils.GetIndexesArg, reply *string) (err error) {
+	if args == nil {
+		args = &utils.GetIndexesArg{}
+	}
+	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if args.ArgDispatcher == nil {
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
+		}
+		if err = dS.authorize(utils.ReplicatorSv1RemoveIndexes, args.Tenant,
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	var routeID *string
+	if args.ArgDispatcher != nil {
+		routeID = args.ArgDispatcher.RouteID
+	}
+	return dS.Dispatch(&utils.CGREvent{Tenant: args.Tenant}, utils.MetaReplicator, routeID,
+		utils.ReplicatorSv1RemoveIndexes, args, reply)
+}

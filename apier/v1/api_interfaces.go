@@ -255,4 +255,8 @@ type ReplicatorSv1Interface interface {
 	RemoveDispatcherProfile(args *utils.TenantIDWithArgDispatcher, reply *string) error
 	RemoveDispatcherHost(args *utils.TenantIDWithArgDispatcher, reply *string) error
 	RemoveRateProfile(args *utils.TenantIDWithArgDispatcher, reply *string) error
+
+	GetIndexes(args *utils.GetIndexesArg, reply *map[string]utils.StringSet) error
+	SetIndexes(args *utils.SetIndexesArg, reply *string) error
+	RemoveIndexes(args *utils.GetIndexesArg, reply *string) error
 }

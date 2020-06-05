@@ -881,6 +881,30 @@ type SetFilterIndexesArg struct {
 	Indexes      map[string]StringMap
 }
 
+type GetFilterIndexesArgWithArgDispatcher struct {
+	*GetFilterIndexesArg
+	TenantArg
+	*ArgDispatcher
+}
+
+type MatchFilterIndexArgWithArgDispatcher struct {
+	*MatchFilterIndexArg
+	TenantArg
+	*ArgDispatcher
+}
+
+type SetFilterIndexesArgWithArgDispatcher struct {
+	*SetFilterIndexesArg
+	TenantArg
+	*ArgDispatcher
+}
+
+type StringWithApiKey struct {
+	*ArgDispatcher
+	TenantArg
+	Arg string
+}
+
 func CastRPCErr(err error) error {
 	if _, has := ErrMap[err.Error()]; has {
 		return ErrMap[err.Error()]
@@ -894,30 +918,6 @@ func RandomInteger(min, max int) int {
 	return math_rand.Intn(max-min) + min
 }
 
-type GetFilterIndexesArgWithArgDispatcher struct {
-	*GetFilterIndexesArg
-	TenantArg
-	*ArgDispatcher
-}
-
-type MatchFilterIndexArgWithArgDispatcher struct {
-	*MatchFilterIndexArg
-	TenantArg
-	*ArgDispatcher
-}
-
-type StringWithApiKey struct {
-	*ArgDispatcher
-	TenantArg
-	Arg string
-}
-
-type SetFilterIndexesArgWithArgDispatcher struct {
-	*SetFilterIndexesArg
-	TenantArg
-	*ArgDispatcher
-}
-
 type LoadIDsWithArgDispatcher struct {
 	LoadIDs map[string]int64
 	TenantArg
@@ -928,4 +928,22 @@ type LoadIDsWithArgDispatcher struct {
 func IsURL(path string) bool {
 	return strings.HasPrefix(path, "https://") ||
 		strings.HasPrefix(path, "http://")
+}
+
+// GetIndexesArg the API argumets to specify an index
+type GetIndexesArg struct {
+	IdxItmType string
+	TntCtx     string
+	IdxKey     string
+	TenantArg
+	*ArgDispatcher
+}
+
+// SetIndexesArg the API arguments needed for seting an index
+type SetIndexesArg struct {
+	IdxItmType string
+	TntCtx     string
+	Indexes    map[string]StringSet
+	TenantArg
+	*ArgDispatcher
 }

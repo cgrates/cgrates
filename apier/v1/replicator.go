@@ -750,3 +750,31 @@ func (rplSv1 *ReplicatorSv1) Ping(ign *utils.CGREventWithArgDispatcher, reply *s
 	*reply = utils.Pong
 	return nil
 }
+
+// GetIndexes .
+func (rplSv1 *ReplicatorSv1) GetIndexes(args *utils.GetIndexesArg, reply *map[string]utils.StringSet) error {
+	indx, err := rplSv1.dm.DataDB().GetIndexesDrv(args.IdxItmType, args.TntCtx, args.IdxKey)
+	if err != nil {
+		return err
+	}
+	*reply = indx
+	return nil
+}
+
+// SetIndexes .
+func (rplSv1 *ReplicatorSv1) SetIndexes(args *utils.SetIndexesArg, reply *string) error {
+	if err := rplSv1.dm.DataDB().SetIndexesDrv(args.IdxItmType, args.TntCtx, args.Indexes, true, utils.NonTransactional); err != nil {
+		return err
+	}
+	*reply = utils.OK
+	return nil
+}
+
+// RemoveIndexes .
+func (rplSv1 *ReplicatorSv1) RemoveIndexes(args *utils.GetIndexesArg, reply *string) error {
+	if err := rplSv1.dm.DataDB().RemoveIndexesDrv(args.IdxItmType, args.TntCtx, args.IdxKey); err != nil {
+		return err
+	}
+	*reply = utils.OK
+	return nil
+}
