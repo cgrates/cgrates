@@ -2485,7 +2485,6 @@ func (ms *MongoStorage) SetIndexesDrv(idxItmType, tntCtx string,
 }
 
 // RemoveIndexesDrv removes the indexes
-// the key is the tenant of the item or in case of context dependent profiles is a concatenatedKey between tenant and context
 func (ms *MongoStorage) RemoveIndexesDrv(idxItmType, tntCtx, idxKey string) (err error) {
 	if len(idxKey) != 0 {
 		return ms.query(func(sctx mongo.SessionContext) (err error) {

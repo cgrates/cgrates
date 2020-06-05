@@ -3281,7 +3281,8 @@ func (dm *DataManager) Reconnect(marshaller string, newcfg *config.DataDbCfg) (e
 	return
 }
 
-func (dm *DataManager) GetIndexes(idxItmType, tntCtx, idxKey string, cahceRead, cacheWrite bool) (indexes map[string]utils.StringSet, err error) {
+func (dm *DataManager) GetIndexes(idxItmType, tntCtx, idxKey string,
+	cahceRead, cacheWrite bool) (indexes map[string]utils.StringSet, err error) {
 	if dm == nil {
 		err = utils.ErrNoDatabaseConn
 		return
@@ -3341,39 +3342,36 @@ func (dm *DataManager) GetIndexes(idxItmType, tntCtx, idxKey string, cahceRead, 
 	return
 }
 
-/*
-
-func (dm *DataManager) SetFilterIndexes(cacheID, itemIDPrefix string,
-	indexes map[string]utils.StringMap, commit bool, transactionID string) (err error) {
+func (dm *DataManager) SetIndexes(idxItmType, tntCtx string,
+	indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 	if dm == nil {
 		err = utils.ErrNoDatabaseConn
 		return
 	}
-	if err = dm.DataDB().SetFilterIndexesDrv(cacheID, itemIDPrefix,
+	if err = dm.DataDB().SetIndexesDrv(idxItmType, tntCtx,
 		indexes, commit, transactionID); err != nil {
 		return
 	}
-	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaFilterIndexes]; itm.Replicate {
-		var reply string
-		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
-			utils.ReplicatorSv1SetFilterIndexes,
-			&utils.SetFilterIndexesArgWithArgDispatcher{
-				SetFilterIndexesArg: &utils.SetFilterIndexesArg{
-					CacheID:      cacheID,
-					ItemIDPrefix: itemIDPrefix,
-					Indexes:      indexes},
-				TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
-				ArgDispatcher: &utils.ArgDispatcher{
-					APIKey:  utils.StringPointer(itm.APIKey),
-					RouteID: utils.StringPointer(itm.RouteID)},
-			}, &reply); err != nil {
-			err = utils.CastRPCErr(err)
-			return
-		}
-	}
+	// if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaFilterIndexes]; itm.Replicate {
+	// 	var reply string
+	// 	if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+	// 		utils.ReplicatorSv1SetFilterIndexes,
+	// 		&utils.SetFilterIndexesArgWithArgDispatcher{
+	// 			SetFilterIndexesArg: &utils.SetFilterIndexesArg{
+	// 				CacheID:      cacheID,
+	// 				ItemIDPrefix: itemIDPrefix,
+	// 				Indexes:      indexes},
+	// 			TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
+	// 			ArgDispatcher: &utils.ArgDispatcher{
+	// 				APIKey:  utils.StringPointer(itm.APIKey),
+	// 				RouteID: utils.StringPointer(itm.RouteID)},
+	// 		}, &reply); err != nil {
+	// 		err = utils.CastRPCErr(err)
+	// 		return
+	// 	}
+	// }
 	return
 }
-*/
 
 func (dm *DataManager) RemoveIndexes(idxItmType, tntCtx, idxKey string) (err error) {
 	if dm == nil {
@@ -3381,4 +3379,20 @@ func (dm *DataManager) RemoveIndexes(idxItmType, tntCtx, idxKey string) (err err
 		return
 	}
 	return dm.DataDB().RemoveIndexesDrv(idxItmType, tntCtx, idxKey)
+	// if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaFilterIndexes]; itm.Replicate {
+	// var reply string
+	// dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+	// utils.ReplicatorSv1RemoveFilterIndexes,
+	// &utils.SetFilterIndexesArgWithArgDispatcher{
+	// 			SetFilterIndexesArg: &utils.SetFilterIndexesArg{
+	// 				CacheID:      cacheID,
+	// 				ItemIDPrefix: itemIDPrefix,
+	// 				Indexes:      indexes},
+	// 			TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
+	// 			ArgDispatcher: &utils.ArgDispatcher{
+	// 				APIKey:  utils.StringPointer(itm.APIKey),
+	// 				RouteID: utils.StringPointer(itm.RouteID)},
+	// 		}, &reply); err != nil {
+	// 		err = utils.CastRPCErr(err)
+	// }
 }
