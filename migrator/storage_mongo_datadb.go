@@ -34,6 +34,7 @@ const (
 	v1AliasCol             = "aliases"
 	v1UserCol              = "users"
 	v1DerivedChargersCol   = "derived_chargers"
+	v2StatsCol             = "statqueues"
 )
 
 type mongoMigrator struct {
@@ -283,7 +284,7 @@ func (v1ms *mongoMigrator) setV1Stats(x *v1Stat) (err error) {
 // get V2
 func (v1ms *mongoMigrator) getV2Stats() (v2 *engine.StatQueue, err error) {
 	if v1ms.cursor == nil {
-		v1ms.cursor, err = v1ms.mgoDB.DB().Collection(utils.StatQueuePrefix).Find(v1ms.mgoDB.GetContext(), bson.D{})
+		v1ms.cursor, err = v1ms.mgoDB.DB().Collection(v2StatsCol).Find(v1ms.mgoDB.GetContext(), bson.D{})
 		if err != nil {
 			return nil, err
 		}
@@ -302,7 +303,7 @@ func (v1ms *mongoMigrator) getV2Stats() (v2 *engine.StatQueue, err error) {
 
 // set v2
 func (v1ms *mongoMigrator) setV2Stats(v2 *engine.StatQueue) (err error) {
-	_, err = v1ms.mgoDB.DB().Collection(utils.StatQueuePrefix).InsertOne(v1ms.mgoDB.GetContext(), v2)
+	_, err = v1ms.mgoDB.DB().Collection(v2StatsCol).InsertOne(v1ms.mgoDB.GetContext(), v2)
 	return
 }
 
