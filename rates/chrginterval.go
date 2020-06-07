@@ -21,7 +21,7 @@ package rates
 import "time"
 
 type ChargedInterval struct {
-	Increments     []*ChargingIncrement // specific increments applied to this interval
+	Increments     []*ChargedIncrement // specific increments applied to this interval
 	CompressFactor int
 	ecUsageIdx     *time.Duration // computed value of totalUsage at the starting of the interval
 	usage          *time.Duration // cache usage computation for this interval
