@@ -31,23 +31,22 @@ type RateProfile struct {
 	FilterIDs          []string
 	ActivationInterval *utils.ActivationInterval
 	Weight             float64
-	ConnectFee         float64 // #ToDo: replace here with decimal.Big
+	ConnectFee         *utils.Decimal
 	RoundingMethod     string
 	RoundingDecimals   int
-	MinCost            float64 // #ToDo: replace here with decimal.Big
-	MaxCost            float64 // #ToDo: replace here with decimal.Big
+	MinCost            *utils.Decimal
+	MaxCost            *utils.Decimal
 	MaxCostStrategy    string
 	Rates              []*Rate
 }
 
 // Route defines rate related information used within a RateProfile
 type Rate struct {
-	ID        string        // RateID
-	FilterIDs []string      // RateFilterIDs
-	Weight    float64       // RateWeight
-	Value     float64       // RateValue, #ToDo: replace here with decimal.Big
-	Unit      time.Duration // RateUnit
-	Increment time.Duration // RateIncrement
-	Blocker   bool          // RateBlocker will make this rate recurrent
-
+	ID        string         // RateID
+	FilterIDs []string       // RateFilterIDs
+	Weight    float64        // RateWeight
+	Value     *utils.Decimal // RateValue
+	Unit      time.Duration  // RateUnit
+	Increment time.Duration  // RateIncrement
+	Blocker   bool           // RateBlocker will make this rate recurrent
 }

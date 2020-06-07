@@ -28,6 +28,7 @@ require (
 	github.com/cgrates/sipingo v1.0.1-0.20200514112313-699ebc1cdb8e
 	github.com/creack/pty v1.1.7
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/ericlagergren/decimal v0.0.0-20191206042408-88212e6cfca9
 	github.com/fiorix/go-diameter v3.0.3-0.20190716165154-f4823472d0e0+incompatible
 	github.com/fortytw2/leaktest v1.3.0 // indirect
 	github.com/fsnotify/fsnotify v1.4.8-0.20190312181446-1485a34d5d57

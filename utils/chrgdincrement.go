@@ -16,14 +16,14 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package rates
+package utils
 
 import "time"
 
-type ChargedInterval struct {
-	Increments     []*ChargedIncrement // specific increments applied to this interval
+// ChargedIncrement represents one unit charged inside an interval
+type ChargedIncrement struct {
+	Usage          time.Duration
+	Cost           *Decimal
+	AccountSID     string // AccountS charged information
 	CompressFactor int
-	ecUsageIdx     *time.Duration // computed value of totalUsage at the starting of the interval
-	usage          *time.Duration // cache usage computation for this interval
-	cost           *float64       // cache cost calculation on this interval // #ToDo: replace here with decimal.Big
 }

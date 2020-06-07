@@ -16,14 +16,6 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package rates
+package utils
 
-import "time"
-
-// ChargedIncrement represents one unit charged inside an interval
-type ChargedIncrement struct {
-	Usage          time.Duration
-	Cost           float64 // #ToDo: replace here with decimal.Big
-	AccountSID     string  // AccountS charged information
-	CompressFactor int
-}
+type ChargedRating struct{} // placeholder for now
