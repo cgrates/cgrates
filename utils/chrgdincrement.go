@@ -24,6 +24,6 @@ import "time"
 type ChargedIncrement struct {
 	Usage          time.Duration
 	Cost           *Decimal
-	AccountSID     string // AccountS charged information
+	AccountingID   string // Accounting charged information
 	CompressFactor int
 }

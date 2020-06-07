@@ -22,6 +22,34 @@ import (
 	"github.com/ericlagergren/decimal"
 )
 
+func NewDecimalFromFloat64(x float64) *Decimal {
+	return &Decimal{new(decimal.Big).SetFloat64(x)}
+}
+
+func NewDecimal() *Decimal {
+	return &Decimal{new(decimal.Big)}
+}
+
+// Decimal extends the decimal.Big with additional methods
 type Decimal struct {
-	val *decimal.Big
+	*decimal.Big
+}
+
+func (d *Decimal) Float64() (f float64) {
+	f, _ = d.Big.Float64()
+	return
+}
+
+func (d *Decimal) MarshalJSON() ([]byte, error) {
+	if d.Big == nil {
+		d.Big = new(decimal.Big)
+	}
+	return d.Big.MarshalText()
+}
+
+func (d *Decimal) UnmarshalJSON(data []byte) error {
+	if d.Big == nil {
+		d.Big = new(decimal.Big)
+	}
+	return d.Big.UnmarshalJSON(data)
 }
