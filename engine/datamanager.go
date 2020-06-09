@@ -307,23 +307,59 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 			tntID := utils.NewTenantID(dataID)
 			_, err = dm.GetRateProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.AttributeFilterIndexes:
-			err = dm.MatchFilterIndexFromKey(utils.CacheAttributeFilterIndexes, dataID)
+			var tntCtx, idxKey string
+			if tntCtx, idxKey, err = splitFilterIndex(dataID); err != nil {
+				return
+			}
+			_, err = dm.GetIndexes(utils.CacheAttributeFilterIndexes, tntCtx, idxKey, false, true)
 		case utils.ResourceFilterIndexes:
-			err = dm.MatchFilterIndexFromKey(utils.CacheResourceFilterIndexes, dataID)
+			var tntCtx, idxKey string
+			if tntCtx, idxKey, err = splitFilterIndex(dataID); err != nil {
+				return
+			}
+			_, err = dm.GetIndexes(utils.CacheResourceFilterIndexes, tntCtx, idxKey, false, true)
 		case utils.StatFilterIndexes:
-			err = dm.MatchFilterIndexFromKey(utils.CacheStatFilterIndexes, dataID)
+			var tntCtx, idxKey string
+			if tntCtx, idxKey, err = splitFilterIndex(dataID); err != nil {
+				return
+			}
+			_, err = dm.GetIndexes(utils.CacheStatFilterIndexes, tntCtx, idxKey, false, true)
 		case utils.ThresholdFilterIndexes:
-			err = dm.MatchFilterIndexFromKey(utils.CacheThresholdFilterIndexes, dataID)
+			var tntCtx, idxKey string
+			if tntCtx, idxKey, err = splitFilterIndex(dataID); err != nil {
+				return
+			}
+			_, err = dm.GetIndexes(utils.CacheThresholdFilterIndexes, tntCtx, idxKey, false, true)
 		case utils.RouteFilterIndexes:
-			err = dm.MatchFilterIndexFromKey(utils.CacheRouteFilterIndexes, dataID)
+			var tntCtx, idxKey string
+			if tntCtx, idxKey, err = splitFilterIndex(dataID); err != nil {
+				return
+			}
+			_, err = dm.GetIndexes(utils.CacheRouteFilterIndexes, tntCtx, idxKey, false, true)
 		case utils.ChargerFilterIndexes:
-			err = dm.MatchFilterIndexFromKey(utils.CacheChargerFilterIndexes, dataID)
+			var tntCtx, idxKey string
+			if tntCtx, idxKey, err = splitFilterIndex(dataID); err != nil {
+				return
+			}
+			_, err = dm.GetIndexes(utils.CacheChargerFilterIndexes, tntCtx, idxKey, false, true)
 		case utils.DispatcherFilterIndexes:
-			err = dm.MatchFilterIndexFromKey(utils.CacheDispatcherFilterIndexes, dataID)
+			var tntCtx, idxKey string
+			if tntCtx, idxKey, err = splitFilterIndex(dataID); err != nil {
+				return
+			}
+			_, err = dm.GetIndexes(utils.CacheDispatcherFilterIndexes, tntCtx, idxKey, false, true)
 		case utils.RateProfilesFilterIndexPrfx:
-			err = dm.MatchFilterIndexFromKey(utils.CacheRateProfilesFilterIndexes, dataID)
+			var tntCtx, idxKey string
+			if tntCtx, idxKey, err = splitFilterIndex(dataID); err != nil {
+				return
+			}
+			_, err = dm.GetIndexes(utils.CacheRateProfilesFilterIndexes, tntCtx, idxKey, false, true)
 		case utils.RateFilterIndexPrfx:
-			err = dm.MatchFilterIndexFromKey(utils.CacheRateFilterIndexes, dataID)
+			var tntCtx, idxKey string
+			if tntCtx, idxKey, err = splitFilterIndex(dataID); err != nil {
+				return
+			}
+			_, err = dm.GetIndexes(utils.CacheRateFilterIndexes, tntCtx, idxKey, false, true)
 		case utils.LoadIDPrefix:
 			_, err = dm.GetItemLoadIDs(utils.EmptyString, true)
 		}
@@ -916,11 +952,11 @@ func (dm *DataManager) GetThresholdProfile(tenant, id string, cacheRead, cacheWr
 }
 
 func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile, withIndex bool) (err error) {
-	oldTh, err := dm.GetThresholdProfile(th.Tenant, th.ID, true, false, utils.NonTransactional)
 	if dm == nil {
 		err = utils.ErrNoDatabaseConn
 		return
 	}
+	oldTh, err := dm.GetThresholdProfile(th.Tenant, th.ID, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
@@ -928,22 +964,12 @@ func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile, withIndex bool)
 		return err
 	}
 	if withIndex {
+		var oldFiltersIDs *[]string
 		if oldTh != nil {
-			var needsRemove bool
-			for _, fltrID := range oldTh.FilterIDs {
-				if !utils.IsSliceMember(th.FilterIDs, fltrID) {
-					needsRemove = true
-				}
-			}
-			if needsRemove {
-				if err = NewFilterIndexer(dm, utils.ThresholdProfilePrefix,
-					th.Tenant).RemoveItemFromIndex(th.Tenant, th.ID, oldTh.FilterIDs); err != nil {
-					return
-				}
-			}
+			oldFiltersIDs = &oldTh.FilterIDs
 		}
-		if err := createAndIndex(utils.ThresholdProfilePrefix, th.Tenant,
-			utils.EmptyString, th.ID, th.FilterIDs, dm); err != nil {
+		if err := updatedIndexes(dm, utils.CacheThresholdFilterIndexes, th.Tenant,
+			utils.EmptyString, th.ID, oldFiltersIDs, th.FilterIDs); err != nil {
 			return err
 		}
 	}
@@ -981,8 +1007,8 @@ func (dm *DataManager) RemoveThresholdProfile(tenant, id,
 		return utils.ErrNotFound
 	}
 	if withIndex {
-		if err = NewFilterIndexer(dm, utils.ThresholdProfilePrefix,
-			tenant).RemoveItemFromIndex(tenant, id, oldTh.FilterIDs); err != nil {
+		if err = removeItemFromFilterIndex(dm, utils.CacheThresholdFilterIndexes,
+			tenant, utils.EmptyString, id, oldTh.FilterIDs); err != nil {
 			return
 		}
 	}
@@ -1062,23 +1088,13 @@ func (dm *DataManager) SetStatQueueProfile(sqp *StatQueueProfile, withIndex bool
 		return err
 	}
 	if withIndex {
+		var oldFiltersIDs *[]string
 		if oldSts != nil {
-			var needsRemove bool
-			for _, fltrID := range oldSts.FilterIDs {
-				if !utils.IsSliceMember(sqp.FilterIDs, fltrID) {
-					needsRemove = true
-				}
-			}
-			if needsRemove {
-				if err = NewFilterIndexer(dm, utils.StatQueueProfilePrefix,
-					sqp.Tenant).RemoveItemFromIndex(sqp.Tenant, sqp.ID, oldSts.FilterIDs); err != nil {
-					return
-				}
-			}
+			oldFiltersIDs = &oldSts.FilterIDs
 		}
-		if err = createAndIndex(utils.StatQueueProfilePrefix, sqp.Tenant,
-			utils.EmptyString, sqp.ID, sqp.FilterIDs, dm); err != nil {
-			return
+		if err := updatedIndexes(dm, utils.CacheStatFilterIndexes, sqp.Tenant,
+			utils.EmptyString, sqp.ID, oldFiltersIDs, sqp.FilterIDs); err != nil {
+			return err
 		}
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaStatQueueProfiles]; itm.Replicate {
@@ -1115,8 +1131,8 @@ func (dm *DataManager) RemoveStatQueueProfile(tenant, id,
 		return utils.ErrNotFound
 	}
 	if withIndex {
-		if err = NewFilterIndexer(dm, utils.StatQueueProfilePrefix,
-			tenant).RemoveItemFromIndex(tenant, id, oldSts.FilterIDs); err != nil {
+		if err = removeItemFromFilterIndex(dm, utils.CacheStatFilterIndexes,
+			tenant, utils.EmptyString, id, oldSts.FilterIDs); err != nil {
 			return
 		}
 	}
@@ -1388,22 +1404,13 @@ func (dm *DataManager) SetResourceProfile(rp *ResourceProfile, withIndex bool) (
 		return err
 	}
 	if withIndex {
+		var oldFiltersIDs *[]string
 		if oldRes != nil {
-			var needsRemove bool
-			for _, fltrID := range oldRes.FilterIDs {
-				if !utils.IsSliceMember(rp.FilterIDs, fltrID) {
-					needsRemove = true
-				}
-			}
-			if needsRemove {
-				if err = NewFilterIndexer(dm, utils.ResourceProfilesPrefix,
-					rp.Tenant).RemoveItemFromIndex(rp.Tenant, rp.ID, oldRes.FilterIDs); err != nil {
-					return
-				}
-			}
+			oldFiltersIDs = &oldRes.FilterIDs
 		}
-		if err = createAndIndex(utils.ResourceProfilesPrefix, rp.Tenant, utils.EmptyString, rp.ID, rp.FilterIDs, dm); err != nil {
-			return
+		if err := updatedIndexes(dm, utils.CacheResourceFilterIndexes, rp.Tenant,
+			utils.EmptyString, rp.ID, oldFiltersIDs, rp.FilterIDs); err != nil {
+			return err
 		}
 		Cache.Clear([]string{utils.CacheEventResources})
 	}
@@ -1440,8 +1447,8 @@ func (dm *DataManager) RemoveResourceProfile(tenant, id, transactionID string, w
 		return utils.ErrNotFound
 	}
 	if withIndex {
-		if err = NewFilterIndexer(dm, utils.ResourceProfilesPrefix,
-			tenant).RemoveItemFromIndex(tenant, id, oldRes.FilterIDs); err != nil {
+		if err = removeItemFromFilterIndex(dm, utils.CacheResourceFilterIndexes,
+			tenant, utils.EmptyString, id, oldRes.FilterIDs); err != nil {
 			return
 		}
 	}
@@ -2285,24 +2292,6 @@ func (dm *DataManager) RemoveFilterIndexes(cacheID, itemIDPrefix string) (err er
 	return
 }
 
-func (dm *DataManager) MatchFilterIndexFromKey(cacheID, key string) (err error) {
-	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
-	}
-	splt := utils.SplitConcatenatedKey(key) // prefix:filterType:fieldName:fieldVal
-	lsplt := len(splt)
-	if lsplt < 4 {
-		return utils.ErrNotFound
-	}
-	fieldVal := splt[lsplt-1]
-	fieldName := splt[lsplt-2]
-	filterType := splt[lsplt-3]
-	itemIDPrefix := utils.ConcatenatedKey(splt[:lsplt-3]...) // prefix may contain context/subsystems
-	_, err = dm.MatchFilterIndex(cacheID, itemIDPrefix, filterType, fieldName, fieldVal)
-	return
-}
-
 func (dm *DataManager) MatchFilterIndex(cacheID, itemIDPrefix,
 	filterType, fieldName, fieldVal string) (itemIDs utils.StringMap, err error) {
 	if dm == nil {
@@ -2421,23 +2410,13 @@ func (dm *DataManager) SetRouteProfile(rpp *RouteProfile, withIndex bool) (err e
 		return err
 	}
 	if withIndex {
+		var oldFiltersIDs *[]string
 		if oldRpp != nil {
-			var needsRemove bool
-			for _, fltrID := range oldRpp.FilterIDs {
-				if !utils.IsSliceMember(rpp.FilterIDs, fltrID) {
-					needsRemove = true
-				}
-			}
-			if needsRemove {
-				if err = NewFilterIndexer(dm, utils.RouteProfilePrefix,
-					rpp.Tenant).RemoveItemFromIndex(rpp.Tenant, rpp.ID, oldRpp.FilterIDs); err != nil {
-					return
-				}
-			}
+			oldFiltersIDs = &oldRpp.FilterIDs
 		}
-		if err = createAndIndex(utils.RouteProfilePrefix, rpp.Tenant,
-			utils.EmptyString, rpp.ID, rpp.FilterIDs, dm); err != nil {
-			return
+		if err := updatedIndexes(dm, utils.CacheRouteFilterIndexes, rpp.Tenant,
+			utils.EmptyString, rpp.ID, oldFiltersIDs, rpp.FilterIDs); err != nil {
+			return err
 		}
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRouteProfiles]; itm.Replicate {
@@ -2473,8 +2452,8 @@ func (dm *DataManager) RemoveRouteProfile(tenant, id, transactionID string, with
 		return utils.ErrNotFound
 	}
 	if withIndex {
-		if err = NewFilterIndexer(dm, utils.RouteProfilePrefix,
-			tenant).RemoveItemFromIndex(tenant, id, oldRpp.FilterIDs); err != nil {
+		if err = removeItemFromFilterIndex(dm, utils.CacheRouteFilterIndexes,
+			tenant, utils.EmptyString, id, oldRpp.FilterIDs); err != nil {
 			return
 		}
 	}
@@ -2569,31 +2548,15 @@ func (dm *DataManager) SetAttributeProfile(ap *AttributeProfile, withIndex bool)
 		return err
 	}
 	if withIndex {
+		var oldContexes *[]string
+		var oldFiltersIDs *[]string
 		if oldAP != nil {
-			for _, ctx := range oldAP.Contexts {
-				var needsRemove bool
-				if !utils.IsSliceMember(ap.Contexts, ctx) {
-					needsRemove = true
-				} else {
-					for _, fltrID := range oldAP.FilterIDs {
-						if !utils.IsSliceMember(ap.FilterIDs, fltrID) {
-							needsRemove = true
-						}
-					}
-				}
-				if needsRemove {
-					if err = NewFilterIndexer(dm, utils.AttributeProfilePrefix,
-						utils.ConcatenatedKey(ap.Tenant, ctx)).RemoveItemFromIndex(ap.Tenant, ap.ID, oldAP.FilterIDs); err != nil {
-						return
-					}
-				}
-			}
+			oldContexes = &oldAP.Contexts
+			oldFiltersIDs = &oldAP.FilterIDs
 		}
-		for _, ctx := range ap.Contexts {
-			if err = createAndIndex(utils.AttributeProfilePrefix,
-				ap.Tenant, ctx, ap.ID, ap.FilterIDs, dm); err != nil {
-				return
-			}
+		if err = updatedIndexesWithContexts(dm, utils.CacheAttributeFilterIndexes, ap.Tenant, ap.ID,
+			oldContexes, oldFiltersIDs, ap.Contexts, ap.FilterIDs); err != nil {
+			return
 		}
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaAttributeProfiles]; itm.Replicate {
@@ -2630,8 +2593,8 @@ func (dm *DataManager) RemoveAttributeProfile(tenant, id string, transactionID s
 	}
 	if withIndex {
 		for _, context := range oldAttr.Contexts {
-			if err = NewFilterIndexer(dm, utils.AttributeProfilePrefix,
-				utils.ConcatenatedKey(tenant, context)).RemoveItemFromIndex(tenant, id, oldAttr.FilterIDs); err != nil {
+			if err = removeItemFromFilterIndex(dm, utils.CacheAttributeFilterIndexes,
+				tenant, context, id, oldAttr.FilterIDs); err != nil {
 				return
 			}
 		}
@@ -2713,23 +2676,13 @@ func (dm *DataManager) SetChargerProfile(cpp *ChargerProfile, withIndex bool) (e
 		return err
 	}
 	if withIndex {
+		var oldFiltersIDs *[]string
 		if oldCpp != nil {
-			var needsRemove bool
-			for _, fltrID := range oldCpp.FilterIDs {
-				if !utils.IsSliceMember(cpp.FilterIDs, fltrID) {
-					needsRemove = true
-				}
-			}
-			if needsRemove {
-				if err = NewFilterIndexer(dm, utils.ChargerProfilePrefix,
-					cpp.Tenant).RemoveItemFromIndex(cpp.Tenant, cpp.ID, oldCpp.FilterIDs); err != nil {
-					return
-				}
-			}
+			oldFiltersIDs = &oldCpp.FilterIDs
 		}
-		if err = createAndIndex(utils.ChargerProfilePrefix, cpp.Tenant,
-			utils.EmptyString, cpp.ID, cpp.FilterIDs, dm); err != nil {
-			return
+		if err := updatedIndexes(dm, utils.CacheChargerFilterIndexes, cpp.Tenant,
+			utils.EmptyString, cpp.ID, oldFiltersIDs, cpp.FilterIDs); err != nil {
+			return err
 		}
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaChargerProfiles]; itm.Replicate {
@@ -2766,8 +2719,8 @@ func (dm *DataManager) RemoveChargerProfile(tenant, id string,
 		return utils.ErrNotFound
 	}
 	if withIndex {
-		if err = NewFilterIndexer(dm, utils.ChargerProfilePrefix,
-			tenant).RemoveItemFromIndex(tenant, id, oldCpp.FilterIDs); err != nil {
+		if err = removeItemFromFilterIndex(dm, utils.CacheChargerFilterIndexes,
+			tenant, utils.EmptyString, id, oldCpp.FilterIDs); err != nil {
 			return
 		}
 	}
@@ -2848,30 +2801,15 @@ func (dm *DataManager) SetDispatcherProfile(dpp *DispatcherProfile, withIndex bo
 		return err
 	}
 	if withIndex {
+		var oldContexes *[]string
+		var oldFiltersIDs *[]string
 		if oldDpp != nil {
-			for _, ctx := range oldDpp.Subsystems {
-				var needsRemove bool
-				if !utils.IsSliceMember(dpp.Subsystems, ctx) {
-					needsRemove = true
-				} else {
-					for _, fltrID := range oldDpp.FilterIDs {
-						if !utils.IsSliceMember(dpp.FilterIDs, fltrID) {
-							needsRemove = true
-						}
-					}
-				}
-				if needsRemove {
-					if err = NewFilterIndexer(dm, utils.DispatcherProfilePrefix,
-						utils.ConcatenatedKey(dpp.Tenant, ctx)).RemoveItemFromIndex(dpp.Tenant, dpp.ID, oldDpp.FilterIDs); err != nil {
-						return
-					}
-				}
-			}
+			oldContexes = &oldDpp.Subsystems
+			oldFiltersIDs = &oldDpp.FilterIDs
 		}
-		for _, ctx := range dpp.Subsystems {
-			if err = createAndIndex(utils.DispatcherProfilePrefix, dpp.Tenant, ctx, dpp.ID, dpp.FilterIDs, dm); err != nil {
-				return
-			}
+		if err = updatedIndexesWithContexts(dm, utils.CacheDispatcherFilterIndexes, dpp.Tenant, dpp.ID,
+			oldContexes, oldFiltersIDs, dpp.Subsystems, dpp.FilterIDs); err != nil {
+			return
 		}
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaDispatcherProfiles]; itm.Replicate {
@@ -2909,8 +2847,8 @@ func (dm *DataManager) RemoveDispatcherProfile(tenant, id string,
 	}
 	if withIndex {
 		for _, ctx := range oldDpp.Subsystems {
-			if err = NewFilterIndexer(dm, utils.DispatcherProfilePrefix,
-				utils.ConcatenatedKey(tenant, ctx)).RemoveItemFromIndex(tenant, id, oldDpp.FilterIDs); err != nil {
+			if err = removeItemFromFilterIndex(dm, utils.CacheDispatcherFilterIndexes,
+				tenant, ctx, id, oldDpp.FilterIDs); err != nil {
 				return
 			}
 		}
@@ -3058,7 +2996,7 @@ func (dm *DataManager) GetItemLoadIDs(itemIDPrefix string, cacheWrite bool) (loa
 		if err != nil {
 			err = utils.CastRPCErr(err)
 			if err == utils.ErrNotFound && cacheWrite {
-				for key, _ := range loadIDs {
+				for key := range loadIDs {
 					if errCh := Cache.Set(utils.CacheLoadIDs, key, nil, nil,
 						cacheCommit(utils.NonTransactional), utils.NonTransactional); errCh != nil {
 						return nil, errCh
@@ -3282,16 +3220,14 @@ func (dm *DataManager) Reconnect(marshaller string, newcfg *config.DataDbCfg) (e
 }
 
 func (dm *DataManager) GetIndexes(idxItmType, tntCtx, idxKey string,
-	cahceRead, cacheWrite bool) (indexes map[string]utils.StringSet, err error) {
+	cacheRead, cacheWrite bool) (indexes map[string]utils.StringSet, err error) {
 	if dm == nil {
 		err = utils.ErrNoDatabaseConn
 		return
 	}
-	var cachekey string
-	if idxKey != utils.EmptyString { // do not check cache if we want all the indexes
-		cachekey = utils.ConcatenatedKey(tntCtx, idxKey)
 
-		if x, ok := Cache.Get(idxItmType, cachekey); ok { // Attempt to find in cache first
+	if cacheRead && idxKey != utils.EmptyString { // do not check cache if we want all the indexes
+		if x, ok := Cache.Get(idxItmType, utils.ConcatenatedKey(tntCtx, idxKey)); ok { // Attempt to find in cache first
 			if x == nil {
 				return nil, utils.ErrNotFound
 			}
@@ -3319,8 +3255,8 @@ func (dm *DataManager) GetIndexes(idxItmType, tntCtx, idxKey string,
 		if err != nil {
 			err = utils.CastRPCErr(err)
 			if err == utils.ErrNotFound {
-				if idxKey != utils.EmptyString {
-					if errCh := Cache.Set(idxItmType, cachekey, nil, nil,
+				if cacheWrite && idxKey != utils.EmptyString {
+					if errCh := Cache.Set(idxItmType, utils.ConcatenatedKey(tntCtx, idxKey), nil, nil,
 						true, utils.NonTransactional); errCh != nil {
 						return nil, errCh
 					}
@@ -3330,13 +3266,14 @@ func (dm *DataManager) GetIndexes(idxItmType, tntCtx, idxKey string,
 		}
 	}
 
-	for k, v := range indexes {
-		if err = Cache.Set(idxItmType, utils.ConcatenatedKey(tntCtx, k), v, []string{tntCtx},
-			true, utils.NonTransactional); err != nil {
-			return nil, err
+	if cacheWrite {
+		for k, v := range indexes {
+			if err = Cache.Set(idxItmType, utils.ConcatenatedKey(tntCtx, k), v, []string{tntCtx},
+				true, utils.NonTransactional); err != nil {
+				return nil, err
+			}
 		}
 	}
-
 	return
 }
 

@@ -296,28 +296,6 @@ func (rplSv1 *ReplicatorSv1) GetItemLoadIDs(itemID *utils.StringWithApiKey, repl
 	return nil
 }
 
-//GetResourceProfile
-func (rplSv1 *ReplicatorSv1) GetFilterIndexes(args *utils.GetFilterIndexesArgWithArgDispatcher, reply *map[string]utils.StringMap) error {
-	if rcv, err := rplSv1.dm.DataDB().GetFilterIndexesDrv(args.CacheID, args.ItemIDPrefix,
-		args.FilterType, args.FldNameVal); err != nil {
-		return err
-	} else {
-		*reply = rcv
-	}
-	return nil
-}
-
-//GetResourceProfile
-func (rplSv1 *ReplicatorSv1) MatchFilterIndex(args *utils.MatchFilterIndexArgWithArgDispatcher, reply *utils.StringMap) error {
-	if rcv, err := rplSv1.dm.DataDB().MatchFilterIndexDrv(args.CacheID, args.ItemIDPrefix,
-		args.FilterType, args.FieldName, args.FieldVal); err != nil {
-		return err
-	} else {
-		*reply = rcv
-	}
-	return nil
-}
-
 // SetThresholdProfile alters/creates a ThresholdProfile
 func (rplSv1 *ReplicatorSv1) SetThresholdProfile(th *engine.ThresholdProfileWithArgDispatcher, reply *string) error {
 	if err := rplSv1.dm.DataDB().SetThresholdProfileDrv(th.ThresholdProfile); err != nil {
@@ -330,16 +308,6 @@ func (rplSv1 *ReplicatorSv1) SetThresholdProfile(th *engine.ThresholdProfileWith
 // SetThreshold
 func (rplSv1 *ReplicatorSv1) SetThreshold(th *engine.ThresholdWithArgDispatcher, reply *string) error {
 	if err := rplSv1.dm.DataDB().SetThresholdDrv(th.Threshold); err != nil {
-		return err
-	}
-	*reply = utils.OK
-	return nil
-}
-
-// SetFilterIndexes
-func (rplSv1 *ReplicatorSv1) SetFilterIndexes(args *utils.SetFilterIndexesArgWithArgDispatcher, reply *string) error {
-	if err := rplSv1.dm.DataDB().SetFilterIndexesDrv(args.CacheID, args.ItemIDPrefix,
-		args.Indexes, true, utils.NonTransactional); err != nil {
 		return err
 	}
 	*reply = utils.OK

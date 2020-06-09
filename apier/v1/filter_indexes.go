@@ -79,13 +79,13 @@ func (api *APIerSv1) RemoveFilterIndexes(arg *AttrRemFilterIndexes, reply *strin
 }
 
 func (api *APIerSv1) GetFilterIndexes(arg *AttrGetFilterIndexes, reply *[]string) (err error) {
-	var indexes map[string]utils.StringMap
+	var indexes map[string]utils.StringSet
 	var indexedSlice []string
-	indexesFilter := make(map[string]utils.StringMap)
+	indexesFilter := make(map[string]utils.StringSet)
 	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ItemType"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	key := arg.Tenant
+	tntCtx := arg.Tenant
 	switch arg.ItemType {
 	case utils.MetaThresholds:
 		arg.ItemType = utils.ThresholdProfilePrefix
@@ -102,24 +102,23 @@ func (api *APIerSv1) GetFilterIndexes(arg *AttrGetFilterIndexes, reply *[]string
 			return utils.NewErrMandatoryIeMissing(missing...)
 		}
 		arg.ItemType = utils.DispatcherProfilePrefix
-		key = utils.ConcatenatedKey(arg.Tenant, arg.Context)
+		tntCtx = utils.ConcatenatedKey(arg.Tenant, arg.Context)
 	case utils.MetaAttributes:
 		if missing := utils.MissingStructFields(arg, []string{"Context"}); len(missing) != 0 { //Params missing
 			return utils.NewErrMandatoryIeMissing(missing...)
 		}
 		arg.ItemType = utils.AttributeProfilePrefix
-		key = utils.ConcatenatedKey(arg.Tenant, arg.Context)
+		tntCtx = utils.ConcatenatedKey(arg.Tenant, arg.Context)
 	}
-	if indexes, err = api.DataManager.GetFilterIndexes(
-		utils.PrefixToIndexCache[arg.ItemType], key, utils.EmptyString, nil); err != nil {
-		return err
+	if indexes, err = api.DataManager.GetIndexes(
+		utils.PrefixToIndexCache[arg.ItemType], tntCtx, utils.EmptyString, true, true); err != nil {
+		return
 	}
 	if arg.FilterType != utils.EmptyString {
 		for val, strmap := range indexes {
 			if strings.HasPrefix(val, arg.FilterType) {
-				indexesFilter[val] = make(utils.StringMap)
 				indexesFilter[val] = strmap
-				for _, value := range strmap.Slice() {
+				for _, value := range strmap.AsSlice() {
 					indexedSlice = append(indexedSlice, utils.ConcatenatedKey(val, value))
 				}
 			}
@@ -130,12 +129,11 @@ func (api *APIerSv1) GetFilterIndexes(arg *AttrGetFilterIndexes, reply *[]string
 	}
 	if arg.FilterField != utils.EmptyString {
 		if len(indexedSlice) == 0 {
-			indexesFilter = make(map[string]utils.StringMap)
+			indexesFilter = make(map[string]utils.StringSet)
 			for val, strmap := range indexes {
 				if strings.Index(val, arg.FilterField) != -1 {
-					indexesFilter[val] = make(utils.StringMap)
 					indexesFilter[val] = strmap
-					for _, value := range strmap.Slice() {
+					for _, value := range strmap.AsSlice() {
 						indexedSlice = append(indexedSlice, utils.ConcatenatedKey(val, value))
 					}
 				}
@@ -147,7 +145,7 @@ func (api *APIerSv1) GetFilterIndexes(arg *AttrGetFilterIndexes, reply *[]string
 			var cloneIndexSlice []string
 			for val, strmap := range indexesFilter {
 				if strings.Index(val, arg.FilterField) != -1 {
-					for _, value := range strmap.Slice() {
+					for _, value := range strmap.AsSlice() {
 						cloneIndexSlice = append(cloneIndexSlice, utils.ConcatenatedKey(val, value))
 					}
 				}
@@ -162,7 +160,7 @@ func (api *APIerSv1) GetFilterIndexes(arg *AttrGetFilterIndexes, reply *[]string
 		if len(indexedSlice) == 0 {
 			for val, strmap := range indexes {
 				if strings.Index(val, arg.FilterValue) != -1 {
-					for _, value := range strmap.Slice() {
+					for _, value := range strmap.AsSlice() {
 						indexedSlice = append(indexedSlice, utils.ConcatenatedKey(val, value))
 					}
 				}
@@ -174,7 +172,7 @@ func (api *APIerSv1) GetFilterIndexes(arg *AttrGetFilterIndexes, reply *[]string
 			var cloneIndexSlice []string
 			for val, strmap := range indexesFilter {
 				if strings.Index(val, arg.FilterValue) != -1 {
-					for _, value := range strmap.Slice() {
+					for _, value := range strmap.AsSlice() {
 						cloneIndexSlice = append(cloneIndexSlice, utils.ConcatenatedKey(val, value))
 					}
 				}
@@ -187,7 +185,7 @@ func (api *APIerSv1) GetFilterIndexes(arg *AttrGetFilterIndexes, reply *[]string
 	}
 	if len(indexedSlice) == 0 {
 		for val, strmap := range indexes {
-			for _, value := range strmap.Slice() {
+			for _, value := range strmap.AsSlice() {
 				indexedSlice = append(indexedSlice, utils.ConcatenatedKey(val, value))
 			}
 		}

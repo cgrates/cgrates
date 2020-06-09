@@ -250,7 +250,7 @@ func (tS *ThresholdService) matchingThresholdsForEvent(args *ArgsProcessEvent) (
 		if err != nil {
 			return nil, err
 		}
-		tIDs = tIDsMap.Slice()
+		tIDs = tIDsMap.AsSlice()
 	}
 	evNm := utils.MapStorage{
 		utils.MetaReq: args.Event,

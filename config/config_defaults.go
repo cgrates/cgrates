@@ -100,6 +100,7 @@ const CGRATES_CFG_JSON = `
 		"*rate_profiles":{"remote":false, "replicate":false, "limit": -1, "ttl": "", "static_ttl": false},
 		"*filter_indexes" :{"remote":false, "replicate":false, "limit": -1, "ttl": "", "static_ttl": false}, 
 		"*load_ids":{"remote":false, "replicate":false, "limit": -1, "ttl": "", "static_ttl": false}, 
+		"*indexes":{"remote":false, "replicate":false, "limit": -1, "ttl": "", "static_ttl": false}, 
 	},
 },
 

@@ -204,11 +204,8 @@ type ReplicatorSv1Interface interface {
 	GetRateProfile(tntID *utils.TenantIDWithArgDispatcher, reply *engine.RateProfile) error
 	GetDispatcherHost(tntID *utils.TenantIDWithArgDispatcher, reply *engine.DispatcherHost) error
 	GetItemLoadIDs(itemID *utils.StringWithApiKey, reply *map[string]int64) error
-	GetFilterIndexes(args *utils.GetFilterIndexesArgWithArgDispatcher, reply *map[string]utils.StringMap) error
-	MatchFilterIndex(args *utils.MatchFilterIndexArgWithArgDispatcher, reply *utils.StringMap) error
 	SetThresholdProfile(th *engine.ThresholdProfileWithArgDispatcher, reply *string) error
 	SetThreshold(th *engine.ThresholdWithArgDispatcher, reply *string) error
-	SetFilterIndexes(args *utils.SetFilterIndexesArgWithArgDispatcher, reply *string) error
 	SetAccount(acc *engine.AccountWithArgDispatcher, reply *string) error
 	SetDestination(dst *engine.DestinationWithArgDispatcher, reply *string) error
 	SetReverseDestination(dst *engine.DestinationWithArgDispatcher, reply *string) error

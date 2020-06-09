@@ -998,16 +998,6 @@ func (dS *DispatcherReplicatorSv1) GetItemLoadIDs(itemID *utils.StringWithApiKey
 	return dS.dS.ReplicatorSv1GetItemLoadIDs(itemID, reply)
 }
 
-// GetFilterIndexes
-func (dS *DispatcherReplicatorSv1) GetFilterIndexes(args *utils.GetFilterIndexesArgWithArgDispatcher, reply *map[string]utils.StringMap) error {
-	return dS.dS.ReplicatorSv1GetFilterIndexes(args, reply)
-}
-
-// MatchFilterIndex
-func (dS *DispatcherReplicatorSv1) MatchFilterIndex(args *utils.MatchFilterIndexArgWithArgDispatcher, reply *utils.StringMap) error {
-	return dS.dS.ReplicatorSv1MatchFilterIndex(args, reply)
-}
-
 //finished all the above
 
 // SetThresholdProfile
@@ -1018,11 +1008,6 @@ func (dS *DispatcherReplicatorSv1) SetThresholdProfile(args *engine.ThresholdPro
 // SetThreshold
 func (dS *DispatcherReplicatorSv1) SetThreshold(args *engine.ThresholdWithArgDispatcher, reply *string) error {
 	return dS.dS.ReplicatorSv1SetThreshold(args, reply)
-}
-
-// SetFilterIndexes
-func (dS *DispatcherReplicatorSv1) SetFilterIndexes(args *utils.SetFilterIndexesArgWithArgDispatcher, reply *string) error {
-	return dS.dS.ReplicatorSv1SetFilterIndexes(args, reply)
 }
 
 // SetDestination

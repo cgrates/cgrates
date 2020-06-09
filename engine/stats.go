@@ -166,7 +166,7 @@ func (sS *StatService) matchingStatQueuesForEvent(args *StatsArgsProcessEvent) (
 		if err != nil {
 			return nil, err
 		}
-		sqIDs = mapIDs.Slice()
+		sqIDs = mapIDs.AsSlice()
 	}
 	evNm := utils.MapStorage{utils.MetaReq: args.Event}
 	for _, sqID := range sqIDs {

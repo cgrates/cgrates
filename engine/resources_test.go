@@ -688,10 +688,10 @@ func TestResourceMatchWithIndexFalse(t *testing.T) {
 }
 
 func TestResourceResIDsMp(t *testing.T) {
-	expected := utils.StringMap{
-		"ResourceProfile1": true,
-		"ResourceProfile2": true,
-		"ResourceProfile3": true,
+	expected := utils.StringSet{
+		"ResourceProfile1": struct{}{},
+		"ResourceProfile2": struct{}{},
+		"ResourceProfile3": struct{}{},
 	}
 	if rcv := resourceTest.resIDsMp(); !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)

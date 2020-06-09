@@ -1458,6 +1458,9 @@ func (iDB *InternalDB) GetIndexesDrv(idxItmType, tntCtx, idxKey string) (indexes
 			dbKey = strings.TrimPrefix(dbKey, tntCtx+utils.CONCATENATED_KEY_SEP)
 			indexes[dbKey] = x.(utils.StringSet).Clone()
 		}
+		if len(indexes) == 0 {
+			return nil, utils.ErrNotFound
+		}
 		return
 	}
 	dbKey := utils.ConcatenatedKey(tntCtx, idxKey)
@@ -1468,49 +1471,32 @@ func (iDB *InternalDB) GetIndexesDrv(idxItmType, tntCtx, idxKey string) (indexes
 	return map[string]utils.StringSet{
 		idxKey: x.(utils.StringSet).Clone(),
 	}, nil
-	return
 }
 
 func (iDB *InternalDB) SetIndexesDrv(idxItmType, tntCtx string,
 	indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
-	dbKey := tntCtx
-	if transactionID != "" {
-		dbKey = "tmp_" + utils.ConcatenatedKey(dbKey, transactionID)
-	}
-	if commit && transactionID != "" {
-		x, _ := iDB.db.Get(idxItmType, dbKey)
-		iDB.db.Remove(idxItmType, dbKey,
-			cacheCommit(utils.NonTransactional), utils.NonTransactional)
-		iDB.db.Set(idxItmType, tntCtx, x, []string{tntCtx},
-			cacheCommit(utils.NonTransactional), utils.NonTransactional)
-		return
-	}
-	var toBeDeleted []string
-	toBeAdded := make(map[string]utils.StringSet)
-	for key, strMp := range indexes {
-		if len(strMp) == 0 { // remove with no more elements inside
-			toBeDeleted = append(toBeDeleted, key)
+	for idxKey, indx := range indexes {
+		key := utils.ConcatenatedKey(tntCtx, idxKey)
+		dbKey := key
+		if transactionID != "" {
+			dbKey = "tmp_" + utils.ConcatenatedKey(dbKey, transactionID)
+		}
+		if commit && transactionID != "" {
+			x, _ := iDB.db.Get(idxItmType, dbKey)
+			iDB.db.Remove(idxItmType, dbKey,
+				cacheCommit(utils.NonTransactional), utils.NonTransactional)
+			iDB.db.Set(idxItmType, key, x, []string{tntCtx},
+				cacheCommit(utils.NonTransactional), utils.NonTransactional)
 			continue
 		}
-		toBeAdded[key] = strMp
-	}
-
-	x, ok := iDB.db.Get(idxItmType, dbKey)
-	if !ok || x == nil {
-		iDB.db.Set(idxItmType, dbKey, toBeAdded, []string{tntCtx},
+		if len(indx) == 0 {
+			iDB.db.Set(idxItmType, dbKey, nil, []string{tntCtx},
+				cacheCommit(utils.NonTransactional), utils.NonTransactional)
+			continue
+		}
+		iDB.db.Set(idxItmType, dbKey, indx, []string{tntCtx},
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
-		return
 	}
-
-	mp := x.(map[string]utils.StringSet)
-	for _, key := range toBeDeleted {
-		delete(mp, key)
-	}
-	for key, strMp := range toBeAdded {
-		mp[key] = strMp
-	}
-	iDB.db.Set(idxItmType, dbKey, mp, []string{tntCtx},
-		cacheCommit(transactionID), transactionID)
 	return
 }
 

@@ -92,7 +92,7 @@ func (alS *AttributeService) attributeProfileForEvent(args *AttrArgsProcessEvent
 				return nil, err
 			}
 		}
-		attrIDs = aPrflIDs.Slice()
+		attrIDs = aPrflIDs.AsSlice()
 	}
 
 	evNm := utils.MapStorage{
