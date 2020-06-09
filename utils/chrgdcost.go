@@ -25,7 +25,7 @@ type ChargedCost struct {
 	RunID          string
 	StartTime      time.Time
 	Usage          *time.Duration
-	Cost           *Decimal
+	Cost           float64
 	Charges        []*ChargedInterval
 	AccountSummary ChargedAccount
 	Accounting     ChargedAccounting

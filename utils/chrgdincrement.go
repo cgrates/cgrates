@@ -23,7 +23,9 @@ import "time"
 // ChargedIncrement represents one unit charged inside an interval
 type ChargedIncrement struct {
 	Usage          time.Duration
-	Cost           *Decimal
+	Cost           float64
 	AccountingID   string // Accounting charged information
 	CompressFactor int
+
+	cost *Decimal // cached version of the Decimal
 }

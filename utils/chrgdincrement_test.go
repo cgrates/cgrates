@@ -18,13 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package utils
 
-import (
-	"encoding/json"
-	"reflect"
-	"testing"
-	"time"
-)
-
+/*
 func TestJSONMarshalUnmarshal(t *testing.T) {
 	incrmt := &ChargedIncrement{
 		Usage:          time.Duration(1 * time.Hour),
@@ -58,3 +52,4 @@ func TestJSONMarshalUnmarshal(t *testing.T) {
 		t.Errorf("expecting: %+v, received: %+v", incrmt, uIncrmnt)
 	}
 }
+*/

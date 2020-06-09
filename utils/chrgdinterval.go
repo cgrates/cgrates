@@ -25,5 +25,5 @@ type ChargedInterval struct {
 	CompressFactor int
 	ccUsageIdx     *time.Duration // computed value of totalUsage at the starting of the interval
 	usage          *time.Duration // cache usage computation for this interval
-	cost           *float64       // cache cost calculation on this interval // #ToDo: replace here with decimal.Big
+	cost           *Decimal       // cache cost calculation on this interval // #ToDo: replace here with decimal.Big
 }
