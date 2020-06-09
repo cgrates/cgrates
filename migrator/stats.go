@@ -137,9 +137,6 @@ func (m *Migrator) migrateV1Stats() (filter *engine.Filter, v2Stats *engine.Stat
 		if filter, v2Stats, sts, err = v1Sts.AsStatQP(); err != nil {
 			return nil, nil, nil, err
 		}
-		// if err := m.dmOut.DataManager().SetStatQueue(remakeQueue(v2Stats)); err != nil {
-		// 	return nil, err
-		// }
 		m.stats[utils.StatS] += 1
 	}
 	return
