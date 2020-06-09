@@ -110,7 +110,7 @@ func removeItemFromFilterIndex(dm DataManager, idxItmType, tnt, ctx, itemID stri
 	for idxKey, index := range indexes {
 		index.Remove(itemID)
 		if index.Size() == 0 { // empty index set it with nil for cache
-			indexes[idxKey] = nil
+			indexes[idxKey] = nil // this will not be set in DB(handled by driver)
 		}
 	}
 	tntCtx := tnt
@@ -128,7 +128,7 @@ func updatedIndexes(dm DataManager, idxItmType, tnt, ctx, itemID string, oldFilt
 		return
 	}
 
-	// do not update the filters if they are the same
+	// check what indexes needs to be updated
 	oldFltrs := utils.NewStringSet(*oldFilterIds)
 	newFltrs := utils.NewStringSet(newFilterIDs)
 
