@@ -132,17 +132,16 @@ func NewRedisStorage(address string, db int, pass, mrshlerStr string,
 			sentinelInsts: sentinelInsts,
 			db:            db,
 			pass:          pass}, nil
-	} else {
-		p, err := pool.NewCustom(utils.TCP, address, maxConns, df)
-		if err != nil {
-			return nil, err
-		}
-		return &RedisStorage{
-			dbPool:   p,
-			maxConns: maxConns,
-			ms:       ms,
-		}, nil
 	}
+	p, err := pool.NewCustom(utils.TCP, address, maxConns, df)
+	if err != nil {
+		return nil, err
+	}
+	return &RedisStorage{
+		dbPool:   p,
+		maxConns: maxConns,
+		ms:       ms,
+	}, nil
 }
 
 func reconnectSentinel(addr, sentinelName string, db int, pass string, maxConns int) (*sentinel.Client, error) {
