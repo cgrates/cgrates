@@ -30,8 +30,8 @@ import (
 // fieldIDs limits the fields which are checked against indexes
 // helper on top of dataDB.MatchFilterIndex, adding utils.ANY to list of fields queried
 func MatchingItemIDsForEvent(ev map[string]interface{}, stringFldIDs, prefixFldIDs *[]string,
-	dm *DataManager, cacheID, itemIDPrefix string, indexedSelects, nestedFields bool) (itemIDs utils.StringMap, err error) {
-	itemIDs = make(utils.StringMap)
+	dm *DataManager, cacheID, itemIDPrefix string, indexedSelects, nestedFields bool) (itemIDs utils.StringSet, err error) {
+	itemIDs = make(utils.StringSet)
 	var allFieldIDs []string
 	navEv := utils.MapStorage(ev)
 	if indexedSelects && (stringFldIDs == nil || prefixFldIDs == nil) {
@@ -49,7 +49,7 @@ func MatchingItemIDsForEvent(ev map[string]interface{}, stringFldIDs, prefixFldI
 			for _, id := range keysWithID {
 				sliceIDs = append(sliceIDs, strings.Split(id, ":")[1])
 			}
-			itemIDs = utils.StringMapFromSlice(sliceIDs)
+			itemIDs = utils.NewStringSet(sliceIDs)
 			return
 		}
 		stringFieldVals := map[string]string{utils.ANY: utils.ANY}                        // cache here field string values, start with default one
@@ -75,15 +75,18 @@ func MatchingItemIDsForEvent(ev map[string]interface{}, stringFldIDs, prefixFldI
 				if fldName != utils.META_ANY {
 					fldName = utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + fldName
 				}
-				var dbItemIDs utils.StringMap // list of items matched in DB
+				var dbItemIDs utils.StringSet // list of items matched in DB
 				for _, val := range fldVals {
-					if dbItemIDs, err = dm.MatchFilterIndex(cacheID, itemIDPrefix, filterIndexTypes[i], fldName, val); err != nil {
+					var dbIndexes map[string]utils.StringSet // list of items matched in DB
+					key := utils.ConcatenatedKey(filterIndexTypes[i], fldName, val)
+					if dbIndexes, err = dm.GetIndexes(cacheID, itemIDPrefix, key, true, true); err != nil {
 						if err == utils.ErrNotFound {
 							err = nil
 							continue
 						}
 						return
 					}
+					dbItemIDs = dbIndexes[key]
 					break // we got at least one answer back, longest prefix wins
 				}
 				for itemID := range dbItemIDs {

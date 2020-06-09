@@ -241,10 +241,10 @@ func (rs Resources) clearUsage(ruTntID string) (err error) {
 }
 
 // resIDsMp returns a map of resource IDs which is used for caching
-func (rs Resources) resIDsMp() (mp utils.StringMap) {
-	mp = make(utils.StringMap)
+func (rs Resources) resIDsMp() (mp utils.StringSet) {
+	mp = make(utils.StringSet)
 	for _, r := range rs {
-		mp[r.ID] = true
+		mp.Add(r.ID)
 	}
 	return mp
 }
@@ -461,13 +461,13 @@ func (rS *ResourceService) matchingResourcesForEvent(ev *utils.CGREvent,
 	evUUID string, usageTTL *time.Duration) (rs Resources, err error) {
 	matchingResources := make(map[string]*Resource)
 	var isCached bool
-	var rIDs utils.StringMap
-	if x, ok := Cache.Get(utils.CacheEventResources, evUUID); ok { // The ResourceIDs were cached as utils.StringMap{"resID":bool}
+	var rIDs utils.StringSet
+	if x, ok := Cache.Get(utils.CacheEventResources, evUUID); ok { // The ResourceIDs were cached as utils.StringSet{"resID":bool}
 		isCached = true
 		if x == nil {
 			return nil, utils.ErrNotFound
 		}
-		rIDs = x.(utils.StringMap)
+		rIDs = x.(utils.StringSet)
 	} else { // select the resourceIDs out of dataDB
 		rIDs, err = MatchingItemIDsForEvent(ev.Event,
 			rS.cgrcfg.ResourceSCfg().StringIndexedFields,

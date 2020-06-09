@@ -404,6 +404,12 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Limit:      utils.IntPointer(-1),
 				Static_ttl: utils.BoolPointer(false)},
+			utils.MetaIndexes: {
+				Replicate:  utils.BoolPointer(false),
+				Remote:     utils.BoolPointer(false),
+				Ttl:        utils.StringPointer(utils.EmptyString),
+				Limit:      utils.IntPointer(-1),
+				Static_ttl: utils.BoolPointer(false)},
 		},
 	}
 	if cfg, err := dfCgrJsonCfg.DbJsonCfg(DATADB_JSN); err != nil {

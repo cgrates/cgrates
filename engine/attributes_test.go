@@ -247,7 +247,6 @@ func TestAttributeProfileForEvent(t *testing.T) {
 	if !reflect.DeepEqual(atrPs[0], atrp) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(atrPs[0]), utils.ToJSON(atrp))
 	}
-
 	atrp, err = attrService.attributeProfileForEvent(attrEvs[1])
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -415,15 +414,13 @@ func TestAttributeIndexer(t *testing.T) {
 	if err := dmAtr.SetAttributeProfile(attrPrf, true); err != nil {
 		t.Error(err)
 	}
-	eIdxes := map[string]utils.StringMap{
+	eIdxes := map[string]utils.StringSet{
 		"*string:~*req.Account:1007": {
-			"AttrPrf": true,
+			"AttrPrf": struct{}{},
 		},
 	}
-	rfi1 := NewFilterIndexer(dmAtr, utils.AttributeProfilePrefix,
-		utils.ConcatenatedKey(attrPrf.Tenant, utils.META_ANY))
-	if rcvIdx, err := dmAtr.GetFilterIndexes(utils.PrefixToIndexCache[rfi1.itemType],
-		rfi1.dbKeySuffix, utils.MetaString, nil); err != nil {
+	if rcvIdx, err := dmAtr.GetIndexes(utils.CacheAttributeFilterIndexes,
+		utils.ConcatenatedKey(attrPrf.Tenant, utils.META_ANY), "", false, false); err != nil {
 		t.Error(err)
 	} else {
 		if !reflect.DeepEqual(eIdxes, rcvIdx) {
@@ -437,10 +434,8 @@ func TestAttributeIndexer(t *testing.T) {
 	if err := dmAtr.SetAttributeProfile(cpAttrPrf, true); err != nil {
 		t.Error(err)
 	}
-	rfi2 := NewFilterIndexer(dmAtr, utils.AttributeProfilePrefix,
-		utils.ConcatenatedKey(attrPrf.Tenant, utils.MetaSessionS))
-	if rcvIdx, err := dmAtr.GetFilterIndexes(utils.PrefixToIndexCache[rfi2.itemType],
-		rfi2.dbKeySuffix, utils.MetaString, nil); err != nil {
+	if rcvIdx, err := dmAtr.GetIndexes(utils.CacheAttributeFilterIndexes,
+		utils.ConcatenatedKey(attrPrf.Tenant, utils.MetaSessionS), "", false, false); err != nil {
 		t.Error(err)
 	} else {
 		if !reflect.DeepEqual(eIdxes, rcvIdx) {
@@ -448,8 +443,8 @@ func TestAttributeIndexer(t *testing.T) {
 		}
 	}
 	//verify if old index was deleted ( context *any)
-	if _, err := dmAtr.GetFilterIndexes(utils.PrefixToIndexCache[rfi1.itemType],
-		rfi1.dbKeySuffix, utils.MetaString, nil); err != utils.ErrNotFound {
+	if _, err := dmAtr.GetIndexes(utils.CacheAttributeFilterIndexes,
+		utils.ConcatenatedKey(attrPrf.Tenant, utils.META_ANY), "", false, false); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
@@ -1839,7 +1834,7 @@ func TestGetAttributeProfileFromInline(t *testing.T) {
 		Tenant:   config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:       attrID,
 		Contexts: []string{utils.META_ANY},
-		Attributes: []*Attribute{&Attribute{
+		Attributes: []*Attribute{{
 			Path:  utils.MetaReq + utils.NestingSep + "Field2",
 			Type:  utils.MetaSum,
 			Value: config.NewRSRParsersMustCompile("10;~*req.NumField;20", true, utils.INFIELD_SEP),
@@ -1908,6 +1903,7 @@ func TestProcessAttributeVariable(t *testing.T) {
 	defaultCfg.AttributeSCfg().ProcessRuns = 1
 	data := NewInternalDB(nil, nil, true, defaultCfg.DataDbCfg().Items)
 	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	Cache.Clear(nil)
 	attrService, _ = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
 	attrPrf := &AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -1960,6 +1956,7 @@ func TestProcessAttributeComposed(t *testing.T) {
 	defaultCfg.AttributeSCfg().ProcessRuns = 1
 	data := NewInternalDB(nil, nil, true, defaultCfg.DataDbCfg().Items)
 	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	Cache.Clear(nil)
 	attrService, _ = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
 	attrPrf := &AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -2018,6 +2015,7 @@ func TestProcessAttributeUsageDifference(t *testing.T) {
 	defaultCfg.AttributeSCfg().ProcessRuns = 1
 	data := NewInternalDB(nil, nil, true, defaultCfg.DataDbCfg().Items)
 	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	Cache.Clear(nil)
 	attrService, _ = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
 	attrPrf := &AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -2071,6 +2069,7 @@ func TestProcessAttributeSum(t *testing.T) {
 	defaultCfg.AttributeSCfg().ProcessRuns = 1
 	data := NewInternalDB(nil, nil, true, defaultCfg.DataDbCfg().Items)
 	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	Cache.Clear(nil)
 	attrService, _ = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
 	attrPrf := &AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -2124,6 +2123,7 @@ func TestProcessAttributeDiff(t *testing.T) {
 	defaultCfg.AttributeSCfg().ProcessRuns = 1
 	data := NewInternalDB(nil, nil, true, defaultCfg.DataDbCfg().Items)
 	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	Cache.Clear(nil)
 	attrService, _ = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
 	attrPrf := &AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -2177,6 +2177,7 @@ func TestProcessAttributeMultiply(t *testing.T) {
 	defaultCfg.AttributeSCfg().ProcessRuns = 1
 	data := NewInternalDB(nil, nil, true, defaultCfg.DataDbCfg().Items)
 	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	Cache.Clear(nil)
 	attrService, _ = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
 	attrPrf := &AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -2230,6 +2231,7 @@ func TestProcessAttributeDivide(t *testing.T) {
 	defaultCfg.AttributeSCfg().ProcessRuns = 1
 	data := NewInternalDB(nil, nil, true, defaultCfg.DataDbCfg().Items)
 	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	Cache.Clear(nil)
 	attrService, _ = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
 	attrPrf := &AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -2283,6 +2285,7 @@ func TestProcessAttributeValueExponent(t *testing.T) {
 	defaultCfg.AttributeSCfg().ProcessRuns = 1
 	data := NewInternalDB(nil, nil, true, defaultCfg.DataDbCfg().Items)
 	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	Cache.Clear(nil)
 	attrService, _ = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
 	attrPrf := &AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -2336,6 +2339,7 @@ func TestProcessAttributeUnixTimeStamp(t *testing.T) {
 	defaultCfg.AttributeSCfg().ProcessRuns = 1
 	data := NewInternalDB(nil, nil, true, defaultCfg.DataDbCfg().Items)
 	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	Cache.Clear(nil)
 	attrService, _ = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
 	attrPrf := &AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
