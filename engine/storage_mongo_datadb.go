@@ -629,7 +629,7 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 	var category, subject string
 	keyLen := len(utils.DESTINATION_PREFIX)
 	if len(prefix) < keyLen {
-		return nil, fmt.Errorf("unsupported prefix in GetKeysForPrefix: %s", prefix)
+		return nil, fmt.Errorf("unsupported prefix in GetKeysForPrefix: %q", prefix)
 	}
 	category = prefix[:keyLen] // prefix length
 	tntID := utils.NewTenantID(prefix[keyLen:])
@@ -2385,7 +2385,7 @@ func (ms *MongoStorage) GetIndexesDrv(idxItmType, tntCtx, idxKey string) (indexe
 			dbKey = strings.Replace(dbKey, character, `\`+character, strings.Count(dbKey, character))
 		}
 		//inside bson.RegEx add carrot to match the prefix (optimization)
-		q = bson.M{"key": bsonx.Regex("^"+dbKey, "")}
+		q = bson.M{"key": bsonx.Regex("^"+dbKey, utils.EmptyString)}
 	}
 
 	indexes = make(map[string]utils.StringSet)
@@ -2426,43 +2426,30 @@ func (ms *MongoStorage) SetIndexesDrv(idxItmType, tntCtx string,
 	indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 	originKey := utils.CacheInstanceToPrefix[idxItmType] + tntCtx
 	dbKey := originKey
-	if transactionID != "" {
+	if transactionID != utils.EmptyString {
 		dbKey = "tmp_" + utils.ConcatenatedKey(originKey, transactionID)
 	}
-	if commit && transactionID != "" {
-		oldKey := "tmp_" + utils.ConcatenatedKey(originKey, transactionID)
-		regexKey := originKey
+	if commit && transactionID != utils.EmptyString {
+		regexKey := dbKey
 		for _, character := range []string{".", "*"} {
 			regexKey = strings.Replace(regexKey, character, `\`+character, strings.Count(regexKey, character))
-			oldKey = strings.Replace(oldKey, character, `\`+character, strings.Count(oldKey, character))
 		}
-		//inside bson.RegEx add carrot to match the prefix (optimization)
 		if err = ms.query(func(sctx mongo.SessionContext) (err error) {
-			_, err = ms.getCol(ColIndx).DeleteMany(sctx, bson.M{"key": bsonx.Regex("^"+regexKey, "")})
-			return err
+			var result []string
+			result, err = ms.getField3(sctx, ColIndx, regexKey, "key")
+			for _, key := range result {
+				idxKey := strings.TrimPrefix(key, dbKey)
+				if _, err = ms.getCol(ColIndx).UpdateOne(sctx, bson.M{"key": key},
+					bson.M{"$set": bson.M{"key": originKey + idxKey}}, // only update the key
+					options.Update().SetUpsert(true),
+				); err != nil {
+					return err
+				}
+			}
+			return nil
 		}); err != nil {
 			return err
 		}
-		var lastErr error
-		for idxKey, itmMp := range indexes {
-			if err = ms.query(func(sctx mongo.SessionContext) (err error) {
-				_, err = ms.getCol(ColIndx).UpdateOne(sctx, bson.M{"key": utils.ConcatenatedKey(originKey, idxKey)},
-					bson.M{"$set": bson.M{"key": utils.ConcatenatedKey(originKey, idxKey), "value": itmMp.AsSlice()}},
-					options.Update().SetUpsert(true),
-				)
-				return err
-			}); err != nil {
-				lastErr = err
-			}
-		}
-		if lastErr != nil {
-			return lastErr
-		}
-		//inside bson.RegEx add carrot to match the prefix (optimization)
-		return ms.query(func(sctx mongo.SessionContext) (err error) {
-			_, err = ms.getCol(ColIndx).DeleteMany(sctx, bson.M{"key": bsonx.Regex("^"+oldKey, "")})
-			return err
-		})
 	}
 	var lastErr error
 	for idxKey, itmMp := range indexes {
@@ -2502,7 +2489,7 @@ func (ms *MongoStorage) RemoveIndexesDrv(idxItmType, tntCtx, idxKey string) (err
 	}
 	//inside bson.RegEx add carrot to match the prefix (optimization)
 	return ms.query(func(sctx mongo.SessionContext) (err error) {
-		_, err = ms.getCol(ColIndx).DeleteMany(sctx, bson.M{"key": bsonx.Regex("^"+regexKey, "")})
+		_, err = ms.getCol(ColIndx).DeleteMany(sctx, bson.M{"key": bsonx.Regex("^"+regexKey, utils.EmptyString)})
 		return err
 	})
 }

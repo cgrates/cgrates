@@ -308,3 +308,46 @@ func splitFilterIndex(tntCtxIdxKey string) (tntCtx, idxKey string, err error) {
 	idxKey = utils.ConcatenatedKey(splt[lsplt-3:]...)
 	return
 }
+
+// ComputeIndexes gets the indexes from tha DB and ensure that the items are indexed
+// getFilters returns a list of filters IDs for the given profile id
+func ComputeIndexes(dm *DataManager, tnt, ctx, idxItmType string, IDs *[]string,
+	transactionID string, getFilters func(tnt, id, ctx string) (*[]string, error)) (err error) {
+	var profilesIDs []string
+	if IDs == nil { // get all items
+		var ids []string
+		if ids, err = dm.DataDB().GetKeysForPrefix(utils.CacheIndexesToPrefix[idxItmType]); err != nil {
+			return
+		}
+		for _, id := range ids {
+			profilesIDs = append(profilesIDs, utils.SplitConcatenatedKey(id)[1])
+		}
+	} else {
+		profilesIDs = *IDs
+	}
+	tntCtx := tnt
+	if ctx != utils.EmptyString {
+		tntCtx = utils.ConcatenatedKey(tnt, ctx)
+	}
+	for _, id := range profilesIDs {
+		var filterIDs *[]string
+		if filterIDs, err = getFilters(tnt, id, ctx); err != nil {
+			return
+		}
+		if filterIDs == nil {
+			continue
+		}
+		var index map[string]utils.StringSet
+		if index, err = newFilterIndex(dm, idxItmType,
+			tnt, ctx, id, *filterIDs); err != nil {
+			return
+		}
+		for _, idx := range index {
+			idx.Add(id)
+		}
+		if err = dm.SetIndexes(idxItmType, tntCtx, index, cacheCommit(transactionID), transactionID); err != nil {
+			return
+		}
+	}
+	return
+}
