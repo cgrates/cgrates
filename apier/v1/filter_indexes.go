@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/cgrates/cgrates/engine"
@@ -46,36 +45,36 @@ func (api *APIerSv1) RemoveFilterIndexes(arg *AttrRemFilterIndexes, reply *strin
 	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ItemType"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	key := arg.Tenant
+	tntCtx := arg.Tenant
 	switch arg.ItemType {
 	case utils.MetaThresholds:
-		arg.ItemType = utils.ThresholdProfilePrefix
+		arg.ItemType = utils.CacheThresholdFilterIndexes
 	case utils.MetaRoutes:
-		arg.ItemType = utils.RouteProfilePrefix
+		arg.ItemType = utils.CacheRouteFilterIndexes
 	case utils.MetaStats:
-		arg.ItemType = utils.StatQueueProfilePrefix
+		arg.ItemType = utils.CacheStatFilterIndexes
 	case utils.MetaResources:
-		arg.ItemType = utils.ResourceProfilesPrefix
+		arg.ItemType = utils.CacheResourceFilterIndexes
 	case utils.MetaChargers:
-		arg.ItemType = utils.ChargerProfilePrefix
+		arg.ItemType = utils.CacheChargerFilterIndexes
 	case utils.MetaDispatchers:
 		if missing := utils.MissingStructFields(arg, []string{"Context"}); len(missing) != 0 { //Params missing
 			return utils.NewErrMandatoryIeMissing(missing...)
 		}
-		arg.ItemType = utils.DispatcherProfilePrefix
-		key = utils.ConcatenatedKey(arg.Tenant, arg.Context)
+		arg.ItemType = utils.CacheDispatcherFilterIndexes
+		tntCtx = utils.ConcatenatedKey(arg.Tenant, arg.Context)
 	case utils.MetaAttributes:
 		if missing := utils.MissingStructFields(arg, []string{"Context"}); len(missing) != 0 { //Params missing
 			return utils.NewErrMandatoryIeMissing(missing...)
 		}
-		arg.ItemType = utils.AttributeProfilePrefix
-		key = utils.ConcatenatedKey(arg.Tenant, arg.Context)
+		arg.ItemType = utils.CacheAttributeFilterIndexes
+		tntCtx = utils.ConcatenatedKey(arg.Tenant, arg.Context)
 	}
-	if err = api.DataManager.RemoveFilterIndexes(utils.PrefixToIndexCache[arg.ItemType], key); err != nil {
-		return err
+	if err = api.DataManager.RemoveIndexes(arg.ItemType, tntCtx, utils.EmptyString); err != nil {
+		return
 	}
 	*reply = utils.OK
-	return nil
+	return
 }
 
 func (api *APIerSv1) GetFilterIndexes(arg *AttrGetFilterIndexes, reply *[]string) (err error) {
@@ -88,30 +87,30 @@ func (api *APIerSv1) GetFilterIndexes(arg *AttrGetFilterIndexes, reply *[]string
 	tntCtx := arg.Tenant
 	switch arg.ItemType {
 	case utils.MetaThresholds:
-		arg.ItemType = utils.ThresholdProfilePrefix
+		arg.ItemType = utils.CacheThresholdFilterIndexes
 	case utils.MetaRoutes:
-		arg.ItemType = utils.RouteProfilePrefix
+		arg.ItemType = utils.CacheRouteFilterIndexes
 	case utils.MetaStats:
-		arg.ItemType = utils.StatQueueProfilePrefix
+		arg.ItemType = utils.CacheStatFilterIndexes
 	case utils.MetaResources:
-		arg.ItemType = utils.ResourceProfilesPrefix
+		arg.ItemType = utils.CacheResourceFilterIndexes
 	case utils.MetaChargers:
-		arg.ItemType = utils.ChargerProfilePrefix
+		arg.ItemType = utils.CacheChargerFilterIndexes
 	case utils.MetaDispatchers:
 		if missing := utils.MissingStructFields(arg, []string{"Context"}); len(missing) != 0 { //Params missing
 			return utils.NewErrMandatoryIeMissing(missing...)
 		}
-		arg.ItemType = utils.DispatcherProfilePrefix
+		arg.ItemType = utils.CacheDispatcherFilterIndexes
 		tntCtx = utils.ConcatenatedKey(arg.Tenant, arg.Context)
 	case utils.MetaAttributes:
 		if missing := utils.MissingStructFields(arg, []string{"Context"}); len(missing) != 0 { //Params missing
 			return utils.NewErrMandatoryIeMissing(missing...)
 		}
-		arg.ItemType = utils.AttributeProfilePrefix
+		arg.ItemType = utils.CacheAttributeFilterIndexes
 		tntCtx = utils.ConcatenatedKey(arg.Tenant, arg.Context)
 	}
 	if indexes, err = api.DataManager.GetIndexes(
-		utils.PrefixToIndexCache[arg.ItemType], tntCtx, utils.EmptyString, true, true); err != nil {
+		arg.ItemType, tntCtx, utils.EmptyString, true, true); err != nil {
 		return
 	}
 	if arg.FilterType != utils.EmptyString {
@@ -202,102 +201,176 @@ func (api *APIerSv1) GetFilterIndexes(arg *AttrGetFilterIndexes, reply *[]string
 func (api *APIerSv1) ComputeFilterIndexes(args *utils.ArgsComputeFilterIndexes, reply *string) (err error) {
 	transactionID := utils.GenUUID()
 	//ThresholdProfile Indexes
-	var thdsIndexers *engine.FilterIndexer
 	if args.ThresholdS {
-		thdsIndexers, err = api.computeThresholdIndexes(args.Tenant, nil, transactionID)
-		if err != nil && err != utils.ErrNotFound {
+		if err = engine.ComputeIndexes(api.DataManager, args.Tenant, args.Context, utils.CacheThresholdFilterIndexes,
+			nil, transactionID, func(tnt, id, ctx string) (*[]string, error) {
+				th, e := api.DataManager.GetThresholdProfile(tnt, id, true, false, utils.NonTransactional)
+				if e != nil {
+					return nil, e
+				}
+				fltrIDs := make([]string, len(th.FilterIDs))
+				for i, fltrID := range th.FilterIDs {
+					fltrIDs[i] = fltrID
+				}
+				return &fltrIDs, nil
+			}); err != nil && err != utils.ErrNotFound {
 			return utils.APIErrorHandler(err)
 		}
 	}
 	//StatQueueProfile Indexes
-	var sqpIndexers *engine.FilterIndexer
 	if args.StatS {
-		sqpIndexers, err = api.computeStatIndexes(args.Tenant, nil, transactionID)
-		if err != nil && err != utils.ErrNotFound {
+		if err = engine.ComputeIndexes(api.DataManager, args.Tenant, args.Context, utils.CacheStatFilterIndexes,
+			nil, transactionID, func(tnt, id, ctx string) (*[]string, error) {
+				sq, e := api.DataManager.GetStatQueueProfile(tnt, id, true, false, utils.NonTransactional)
+				if e != nil {
+					return nil, e
+				}
+				fltrIDs := make([]string, len(sq.FilterIDs))
+				for i, fltrID := range sq.FilterIDs {
+					fltrIDs[i] = fltrID
+				}
+				return &fltrIDs, nil
+			}); err != nil && err != utils.ErrNotFound {
 			return utils.APIErrorHandler(err)
 		}
 	}
 	//ResourceProfile Indexes
-	var rsIndexes *engine.FilterIndexer
 	if args.ResourceS {
-		rsIndexes, err = api.computeResourceIndexes(args.Tenant, nil, transactionID)
-		if err != nil && err != utils.ErrNotFound {
+		if err = engine.ComputeIndexes(api.DataManager, args.Tenant, args.Context, utils.CacheResourceFilterIndexes,
+			nil, transactionID, func(tnt, id, ctx string) (*[]string, error) {
+				rp, e := api.DataManager.GetResourceProfile(tnt, id, true, false, utils.NonTransactional)
+				if e != nil {
+					return nil, e
+				}
+				fltrIDs := make([]string, len(rp.FilterIDs))
+				for i, fltrID := range rp.FilterIDs {
+					fltrIDs[i] = fltrID
+				}
+				return &fltrIDs, nil
+			}); err != nil && err != utils.ErrNotFound {
 			return utils.APIErrorHandler(err)
 		}
 	}
 	//SupplierProfile Indexes
-	var routeIndexes *engine.FilterIndexer
 	if args.RouteS {
-		routeIndexes, err = api.computeRouteIndexes(args.Tenant, nil, transactionID)
-		if err != nil && err != utils.ErrNotFound {
+		if err = engine.ComputeIndexes(api.DataManager, args.Tenant, args.Context, utils.CacheRouteFilterIndexes,
+			nil, transactionID, func(tnt, id, ctx string) (*[]string, error) {
+				rp, e := api.DataManager.GetRouteProfile(tnt, id, true, false, utils.NonTransactional)
+				if e != nil {
+					return nil, e
+				}
+				fltrIDs := make([]string, len(rp.FilterIDs))
+				for i, fltrID := range rp.FilterIDs {
+					fltrIDs[i] = fltrID
+				}
+				return &fltrIDs, nil
+			}); err != nil && err != utils.ErrNotFound {
 			return utils.APIErrorHandler(err)
 		}
 	}
 	//AttributeProfile Indexes
-	var attrIndexes *engine.FilterIndexer
 	if args.AttributeS {
-		attrIndexes, err = api.computeAttributeIndexes(args.Tenant, args.Context, nil, transactionID)
-		if err != nil && err != utils.ErrNotFound {
+		if err = engine.ComputeIndexes(api.DataManager, args.Tenant, args.Context, utils.CacheAttributeFilterIndexes,
+			nil, transactionID, func(tnt, id, ctx string) (*[]string, error) {
+				ap, e := api.DataManager.GetAttributeProfile(tnt, id, true, false, utils.NonTransactional)
+				if e != nil {
+					return nil, e
+				}
+				if !utils.IsSliceMember(ap.Contexts, ctx) {
+					return nil, nil
+				}
+				fltrIDs := make([]string, len(ap.FilterIDs))
+				for i, fltrID := range ap.FilterIDs {
+					fltrIDs[i] = fltrID
+				}
+
+				return &fltrIDs, nil
+			}); err != nil && err != utils.ErrNotFound {
 			return utils.APIErrorHandler(err)
 		}
 	}
 	//ChargerProfile  Indexes
-	var cppIndexes *engine.FilterIndexer
 	if args.ChargerS {
-		cppIndexes, err = api.computeChargerIndexes(args.Tenant, nil, transactionID)
-		if err != nil && err != utils.ErrNotFound {
+		if err = engine.ComputeIndexes(api.DataManager, args.Tenant, args.Context, utils.CacheChargerFilterIndexes,
+			nil, transactionID, func(tnt, id, ctx string) (*[]string, error) {
+				ap, e := api.DataManager.GetChargerProfile(tnt, id, true, false, utils.NonTransactional)
+				if e != nil {
+					return nil, e
+				}
+				fltrIDs := make([]string, len(ap.FilterIDs))
+				for i, fltrID := range ap.FilterIDs {
+					fltrIDs[i] = fltrID
+				}
+				return &fltrIDs, nil
+			}); err != nil && err != utils.ErrNotFound {
 			return utils.APIErrorHandler(err)
 		}
 	}
 	//DispatcherProfile Indexes
-	var dspIndexes *engine.FilterIndexer
 	if args.DispatcherS {
-		dspIndexes, err = api.computeDispatcherIndexes(args.Tenant, args.Context, nil, transactionID)
-		if err != nil && err != utils.ErrNotFound {
+		if err = engine.ComputeIndexes(api.DataManager, args.Tenant, args.Context, utils.CacheDispatcherFilterIndexes,
+			nil, transactionID, func(tnt, id, ctx string) (*[]string, error) {
+				dsp, e := api.DataManager.GetDispatcherProfile(tnt, id, true, false, utils.NonTransactional)
+				if e != nil {
+					return nil, e
+				}
+				if !utils.IsSliceMember(dsp.Subsystems, ctx) {
+					return nil, nil
+				}
+				fltrIDs := make([]string, len(dsp.FilterIDs))
+				for i, fltrID := range dsp.FilterIDs {
+					fltrIDs[i] = fltrID
+				}
+				return &fltrIDs, nil
+			}); err != nil && err != utils.ErrNotFound {
 			return utils.APIErrorHandler(err)
 		}
 	}
 
+	tntCtx := args.Tenant
+	if args.Context != utils.EmptyString {
+		tntCtx = utils.ConcatenatedKey(args.Tenant, args.Context)
+	}
 	//Now we move from tmpKey to the right key for each type
 	//ThresholdProfile Indexes
-	if thdsIndexers != nil {
-		if err = thdsIndexers.StoreIndexes(true, transactionID); err != nil {
+	if args.ThresholdS {
+		if err = api.DataManager.SetIndexes(utils.CacheThresholdFilterIndexes, args.Tenant, nil, true, transactionID); err != nil {
 			return
 		}
 	}
 	//StatQueueProfile Indexes
-	if sqpIndexers != nil {
-		if err = sqpIndexers.StoreIndexes(true, transactionID); err != nil {
+	if args.StatS {
+		if err = api.DataManager.SetIndexes(utils.CacheStatFilterIndexes, args.Tenant, nil, true, transactionID); err != nil {
 			return
 		}
 	}
 	//ResourceProfile Indexes
-	if rsIndexes != nil {
-		if err = rsIndexes.StoreIndexes(true, transactionID); err != nil {
+	if args.ResourceS {
+		if err = api.DataManager.SetIndexes(utils.CacheResourceFilterIndexes, args.Tenant, nil, true, transactionID); err != nil {
 			return
 		}
 	}
 	//RouteProfile Indexes
-	if routeIndexes != nil {
-		if err = routeIndexes.StoreIndexes(true, transactionID); err != nil {
+	if args.RouteS {
+		if err = api.DataManager.SetIndexes(utils.CacheRouteFilterIndexes, args.Tenant, nil, true, transactionID); err != nil {
 			return
 		}
 	}
 	//AttributeProfile Indexes
-	if attrIndexes != nil {
-		if err = attrIndexes.StoreIndexes(true, transactionID); err != nil {
+	if args.AttributeS {
+		if err = api.DataManager.SetIndexes(utils.CacheAttributeFilterIndexes, tntCtx, nil, true, transactionID); err != nil {
 			return
 		}
 	}
 	//ChargerProfile Indexes
-	if cppIndexes != nil {
-		if err = cppIndexes.StoreIndexes(true, transactionID); err != nil {
+	if args.ChargerS {
+		if err = api.DataManager.SetIndexes(utils.CacheChargerFilterIndexes, args.Tenant, nil, true, transactionID); err != nil {
 			return
 		}
 	}
 	//DispatcherProfile Indexes
-	if dspIndexes != nil {
-		if err = dspIndexes.StoreIndexes(true, transactionID); err != nil {
+	if args.DispatcherS {
+		if err = api.DataManager.SetIndexes(utils.CacheDispatcherFilterIndexes, tntCtx, nil, true, transactionID); err != nil {
 			return
 		}
 	}
@@ -307,619 +380,118 @@ func (api *APIerSv1) ComputeFilterIndexes(args *utils.ArgsComputeFilterIndexes, 
 
 // ComputeFilterIndexIDs computes specific filter indexes
 func (api *APIerSv1) ComputeFilterIndexIDs(args *utils.ArgsComputeFilterIndexIDs, reply *string) (err error) {
-	transactionID := utils.GenUUID()
+	transactionID := utils.NonTransactional
 	//ThresholdProfile Indexes
-	thdsIndexers, err := api.computeThresholdIndexes(args.Tenant, &args.ThresholdIDs, transactionID)
-	if err != nil && err != utils.ErrNotFound {
+	if err = engine.ComputeIndexes(api.DataManager, args.Tenant, args.Context, utils.CacheThresholdFilterIndexes,
+		&args.ThresholdIDs, transactionID, func(tnt, id, ctx string) (*[]string, error) {
+			th, e := api.DataManager.GetThresholdProfile(tnt, id, true, false, utils.NonTransactional)
+			if e != nil {
+				return nil, e
+			}
+			fltrIDs := make([]string, len(th.FilterIDs))
+			for i, fltrID := range th.FilterIDs {
+				fltrIDs[i] = fltrID
+			}
+			return &fltrIDs, nil
+		}); err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
 	}
 	//StatQueueProfile Indexes
-	sqpIndexers, err := api.computeStatIndexes(args.Tenant, &args.StatIDs, transactionID)
-	if err != nil && err != utils.ErrNotFound {
+	if err = engine.ComputeIndexes(api.DataManager, args.Tenant, args.Context, utils.CacheStatFilterIndexes,
+		&args.StatIDs, transactionID, func(tnt, id, ctx string) (*[]string, error) {
+			sq, e := api.DataManager.GetStatQueueProfile(tnt, id, true, false, utils.NonTransactional)
+			if e != nil {
+				return nil, e
+			}
+			fltrIDs := make([]string, len(sq.FilterIDs))
+			for i, fltrID := range sq.FilterIDs {
+				fltrIDs[i] = fltrID
+			}
+			return &fltrIDs, nil
+		}); err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
 	}
 	//ResourceProfile Indexes
-	rsIndexes, err := api.computeResourceIndexes(args.Tenant, &args.ResourceIDs, transactionID)
-	if err != nil && err != utils.ErrNotFound {
+	if err = engine.ComputeIndexes(api.DataManager, args.Tenant, args.Context, utils.CacheResourceFilterIndexes,
+		&args.ResourceIDs, transactionID, func(tnt, id, ctx string) (*[]string, error) {
+			rp, e := api.DataManager.GetResourceProfile(tnt, id, true, false, utils.NonTransactional)
+			if e != nil {
+				return nil, e
+			}
+			fltrIDs := make([]string, len(rp.FilterIDs))
+			for i, fltrID := range rp.FilterIDs {
+				fltrIDs[i] = fltrID
+			}
+			return &fltrIDs, nil
+		}); err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
 	}
 	//RouteProfile Indexes
-	routeIndexes, err := api.computeRouteIndexes(args.Tenant, &args.RouteIDs, transactionID)
-	if err != nil && err != utils.ErrNotFound {
+	if err = engine.ComputeIndexes(api.DataManager, args.Tenant, args.Context, utils.CacheRouteFilterIndexes,
+		&args.RouteIDs, transactionID, func(tnt, id, ctx string) (*[]string, error) {
+			rp, e := api.DataManager.GetRouteProfile(tnt, id, true, false, utils.NonTransactional)
+			if e != nil {
+				return nil, e
+			}
+			fltrIDs := make([]string, len(rp.FilterIDs))
+			for i, fltrID := range rp.FilterIDs {
+				fltrIDs[i] = fltrID
+			}
+			return &fltrIDs, nil
+		}); err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
 	}
 	//AttributeProfile Indexes
-	attrIndexes, err := api.computeAttributeIndexes(args.Tenant, args.Context, &args.AttributeIDs, transactionID)
-	if err != nil && err != utils.ErrNotFound {
+	if err = engine.ComputeIndexes(api.DataManager, args.Tenant, args.Context, utils.CacheAttributeFilterIndexes,
+		&args.AttributeIDs, transactionID, func(tnt, id, ctx string) (*[]string, error) {
+			ap, e := api.DataManager.GetAttributeProfile(tnt, id, true, false, utils.NonTransactional)
+			if e != nil {
+				return nil, e
+			}
+			if !utils.IsSliceMember(ap.Contexts, ctx) {
+				return nil, nil
+			}
+			fltrIDs := make([]string, len(ap.FilterIDs))
+			for i, fltrID := range ap.FilterIDs {
+				fltrIDs[i] = fltrID
+			}
+			return &fltrIDs, nil
+		}); err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
 	}
 	//ChargerProfile  Indexes
-	cppIndexes, err := api.computeChargerIndexes(args.Tenant, &args.ChargerIDs, transactionID)
-	if err != nil && err != utils.ErrNotFound {
+	if err = engine.ComputeIndexes(api.DataManager, args.Tenant, args.Context, utils.CacheChargerFilterIndexes,
+		&args.ChargerIDs, transactionID, func(tnt, id, ctx string) (*[]string, error) {
+			ap, e := api.DataManager.GetChargerProfile(tnt, id, true, false, utils.NonTransactional)
+			if e != nil {
+				return nil, e
+			}
+			fltrIDs := make([]string, len(ap.FilterIDs))
+			for i, fltrID := range ap.FilterIDs {
+				fltrIDs[i] = fltrID
+			}
+			return &fltrIDs, nil
+		}); err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
 	}
 	//DispatcherProfile Indexes
-	dspIndexes, err := api.computeDispatcherIndexes(args.Tenant, args.Context, &args.DispatcherIDs, transactionID)
-	if err != nil && err != utils.ErrNotFound {
+	if err = engine.ComputeIndexes(api.DataManager, args.Tenant, args.Context, utils.CacheDispatcherFilterIndexes,
+		&args.DispatcherIDs, transactionID, func(tnt, id, ctx string) (*[]string, error) {
+			dsp, e := api.DataManager.GetDispatcherProfile(tnt, id, true, false, utils.NonTransactional)
+			if e != nil {
+				return nil, e
+			}
+			if !utils.IsSliceMember(dsp.Subsystems, ctx) {
+				return nil, nil
+			}
+			fltrIDs := make([]string, len(dsp.FilterIDs))
+			for i, fltrID := range dsp.FilterIDs {
+				fltrIDs[i] = fltrID
+			}
+			return &fltrIDs, nil
+		}); err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
-	}
-
-	//Now we move from tmpKey to the right key for each type
-	//ThresholdProfile Indexes
-	if thdsIndexers != nil {
-		if err = thdsIndexers.StoreIndexes(true, transactionID); err != nil {
-			for _, id := range args.ThresholdIDs {
-				var th *engine.ThresholdProfile
-				if th, err = api.DataManager.GetThresholdProfile(args.Tenant, id, true, false, utils.NonTransactional); err != nil {
-					return
-				}
-				if err = thdsIndexers.RemoveItemFromIndex(args.Tenant, id, th.FilterIDs); err != nil {
-					return
-				}
-			}
-			return
-		}
-	}
-	//StatQueueProfile Indexes
-	if sqpIndexers != nil {
-		if err = sqpIndexers.StoreIndexes(true, transactionID); err != nil {
-			for _, id := range args.StatIDs {
-				var sqp *engine.StatQueueProfile
-				if sqp, err = api.DataManager.GetStatQueueProfile(args.Tenant, id, true, false, utils.NonTransactional); err != nil {
-					return
-				}
-				if err = sqpIndexers.RemoveItemFromIndex(args.Tenant, id, sqp.FilterIDs); err != nil {
-					return
-				}
-			}
-			return
-		}
-	}
-	//ResourceProfile Indexes
-	if rsIndexes != nil {
-		if err = rsIndexes.StoreIndexes(true, transactionID); err != nil {
-			for _, id := range args.ResourceIDs {
-				var rp *engine.ResourceProfile
-				if rp, err = api.DataManager.GetResourceProfile(args.Tenant, id, true, false, utils.NonTransactional); err != nil {
-					return
-				}
-				if err = rsIndexes.RemoveItemFromIndex(args.Tenant, id, rp.FilterIDs); err != nil {
-					return
-				}
-			}
-			return
-		}
-	}
-	//SupplierProfile Indexes
-	if routeIndexes != nil {
-		if err = routeIndexes.StoreIndexes(true, transactionID); err != nil {
-			for _, id := range args.RouteIDs {
-				var rPrf *engine.RouteProfile
-				if rPrf, err = api.DataManager.GetRouteProfile(args.Tenant, id, true, false, utils.NonTransactional); err != nil {
-					return
-				}
-				if err = routeIndexes.RemoveItemFromIndex(args.Tenant, id, rPrf.FilterIDs); err != nil {
-					return
-				}
-			}
-			return
-		}
-	}
-	//AttributeProfile Indexes
-	if attrIndexes != nil {
-		if err = attrIndexes.StoreIndexes(true, transactionID); err != nil {
-			for _, id := range args.AttributeIDs {
-				var ap *engine.AttributeProfile
-				if ap, err = api.DataManager.GetAttributeProfile(args.Tenant, id, true, false, utils.NonTransactional); err != nil {
-					return
-				}
-				if err = attrIndexes.RemoveItemFromIndex(args.Tenant, id, ap.FilterIDs); err != nil {
-					return
-				}
-			}
-			return
-		}
-	}
-	//ChargerProfile Indexes
-	if cppIndexes != nil {
-		if err = cppIndexes.StoreIndexes(true, transactionID); err != nil {
-			for _, id := range args.ChargerIDs {
-				var cpp *engine.ChargerProfile
-				if cpp, err = api.DataManager.GetChargerProfile(args.Tenant, id, true, false, utils.NonTransactional); err != nil {
-					return
-				}
-				if err = cppIndexes.RemoveItemFromIndex(args.Tenant, id, cpp.FilterIDs); err != nil {
-					return
-				}
-			}
-			return
-		}
-	}
-	//DispatcherProfile Indexes
-	if dspIndexes != nil {
-		if err = dspIndexes.StoreIndexes(true, transactionID); err != nil {
-			for _, id := range args.DispatcherIDs {
-				var dpp *engine.DispatcherProfile
-				if dpp, err = api.DataManager.GetDispatcherProfile(args.Tenant, id, true, false, utils.NonTransactional); err != nil {
-					return
-				}
-				if err = dspIndexes.RemoveItemFromIndex(args.Tenant, id, dpp.FilterIDs); err != nil {
-					return
-				}
-			}
-			return
-		}
 	}
 	*reply = utils.OK
 	return nil
-}
-
-func (api *APIerSv1) computeThresholdIndexes(tenant string, thIDs *[]string,
-	transactionID string) (filterIndexer *engine.FilterIndexer, err error) {
-	var thresholdIDs []string
-	thdsIndexers := engine.NewFilterIndexer(api.DataManager, utils.ThresholdProfilePrefix, tenant)
-	if thIDs == nil {
-		ids, err := api.DataManager.DataDB().GetKeysForPrefix(utils.ThresholdProfilePrefix)
-		if err != nil {
-			return nil, err
-		}
-		for _, id := range ids {
-			thresholdIDs = append(thresholdIDs, strings.Split(id, utils.CONCATENATED_KEY_SEP)[1])
-		}
-	} else {
-		thresholdIDs = *thIDs
-		transactionID = utils.NonTransactional
-	}
-	for _, id := range thresholdIDs {
-		th, err := api.DataManager.GetThresholdProfile(tenant, id, true, false, utils.NonTransactional)
-		if err != nil {
-			return nil, err
-		}
-		fltrIDs := make([]string, len(th.FilterIDs))
-		for i, fltrID := range th.FilterIDs {
-			fltrIDs[i] = fltrID
-		}
-		if len(fltrIDs) == 0 {
-			fltrIDs = []string{utils.META_NONE}
-		}
-		for _, fltrID := range fltrIDs {
-			var fltr *engine.Filter
-			if fltrID == utils.META_NONE {
-				fltr = &engine.Filter{
-					Tenant: th.Tenant,
-					ID:     th.ID,
-					Rules: []*engine.FilterRule{
-						{
-							Type:    utils.META_NONE,
-							Element: utils.META_ANY,
-							Values:  []string{utils.META_ANY},
-						},
-					},
-				}
-			} else if fltr, err = api.DataManager.GetFilter(th.Tenant, fltrID,
-				true, false, utils.NonTransactional); err != nil {
-				if err == utils.ErrNotFound {
-					err = fmt.Errorf("broken reference to filter: %+v for threshold: %+v",
-						fltrID, th)
-				}
-				return nil, err
-			}
-			thdsIndexers.IndexTPFilter(engine.FilterToTPFilter(fltr), th.ID)
-		}
-	}
-	if transactionID == utils.NonTransactional {
-		if err := thdsIndexers.StoreIndexes(true, transactionID); err != nil {
-			return nil, err
-		}
-		return nil, nil
-	} else {
-		if err := thdsIndexers.StoreIndexes(false, transactionID); err != nil {
-			return nil, err
-		}
-	}
-	return thdsIndexers, nil
-}
-
-func (api *APIerSv1) computeAttributeIndexes(tenant, context string, attrIDs *[]string,
-	transactionID string) (filterIndexer *engine.FilterIndexer, err error) {
-	var attributeIDs []string
-	attrIndexers := engine.NewFilterIndexer(api.DataManager, utils.AttributeProfilePrefix,
-		utils.ConcatenatedKey(tenant, context))
-	if attrIDs == nil {
-		ids, err := api.DataManager.DataDB().GetKeysForPrefix(utils.AttributeProfilePrefix)
-		if err != nil {
-			return nil, err
-		}
-		for _, id := range ids {
-			attributeIDs = append(attributeIDs, strings.Split(id, utils.CONCATENATED_KEY_SEP)[1])
-		}
-	} else {
-		attributeIDs = *attrIDs
-		transactionID = utils.NonTransactional
-	}
-	for _, id := range attributeIDs {
-		ap, err := api.DataManager.GetAttributeProfile(tenant, id, true, false, utils.NonTransactional)
-		if err != nil {
-			return nil, err
-		}
-		if !utils.IsSliceMember(ap.Contexts, context) && context != utils.META_ANY {
-			continue
-		}
-		fltrIDs := make([]string, len(ap.FilterIDs))
-		for i, fltrID := range ap.FilterIDs {
-			fltrIDs[i] = fltrID
-		}
-		if len(fltrIDs) == 0 {
-			fltrIDs = []string{utils.META_NONE}
-		}
-		for _, fltrID := range fltrIDs {
-			var fltr *engine.Filter
-			if fltrID == utils.META_NONE {
-				fltr = &engine.Filter{
-					Tenant: ap.Tenant,
-					ID:     ap.ID,
-					Rules: []*engine.FilterRule{
-						{
-							Type:    utils.META_NONE,
-							Element: utils.META_ANY,
-							Values:  []string{utils.META_ANY},
-						},
-					},
-				}
-			} else if fltr, err = api.DataManager.GetFilter(ap.Tenant, fltrID,
-				true, false, utils.NonTransactional); err != nil {
-				if err == utils.ErrNotFound {
-					err = fmt.Errorf("broken reference to filter: %+v for attribute: %+v",
-						fltrID, ap)
-				}
-				return nil, err
-			}
-			attrIndexers.IndexTPFilter(engine.FilterToTPFilter(fltr), ap.ID)
-		}
-	}
-	if transactionID == utils.NonTransactional {
-		if err := attrIndexers.StoreIndexes(true, transactionID); err != nil {
-			return nil, err
-		}
-		return nil, nil
-	} else {
-		if err := attrIndexers.StoreIndexes(false, transactionID); err != nil {
-			return nil, err
-		}
-	}
-	return attrIndexers, nil
-}
-
-func (api *APIerSv1) computeResourceIndexes(tenant string, rsIDs *[]string,
-	transactionID string) (filterIndexer *engine.FilterIndexer, err error) {
-	var resourceIDs []string
-	rpIndexers := engine.NewFilterIndexer(api.DataManager, utils.ResourceProfilesPrefix, tenant)
-	if rsIDs == nil {
-		ids, err := api.DataManager.DataDB().GetKeysForPrefix(utils.ResourceProfilesPrefix)
-		if err != nil {
-			return nil, err
-		}
-		for _, id := range ids {
-			resourceIDs = append(resourceIDs, strings.Split(id, utils.CONCATENATED_KEY_SEP)[1])
-		}
-	} else {
-		resourceIDs = *rsIDs
-		transactionID = utils.NonTransactional
-	}
-	for _, id := range resourceIDs {
-		rp, err := api.DataManager.GetResourceProfile(tenant, id, true, false, utils.NonTransactional)
-		if err != nil {
-			return nil, err
-		}
-		fltrIDs := make([]string, len(rp.FilterIDs))
-		for i, fltrID := range rp.FilterIDs {
-			fltrIDs[i] = fltrID
-		}
-		if len(fltrIDs) == 0 {
-			fltrIDs = []string{utils.META_NONE}
-		}
-		for _, fltrID := range fltrIDs {
-			var fltr *engine.Filter
-			if fltrID == utils.META_NONE {
-				fltr = &engine.Filter{
-					Tenant: rp.Tenant,
-					ID:     rp.ID,
-					Rules: []*engine.FilterRule{
-						{
-							Type:    utils.META_NONE,
-							Element: utils.META_ANY,
-							Values:  []string{utils.META_ANY},
-						},
-					},
-				}
-			} else if fltr, err = api.DataManager.GetFilter(rp.Tenant, fltrID,
-				true, false, utils.NonTransactional); err != nil {
-				if err == utils.ErrNotFound {
-					err = fmt.Errorf("broken reference to filter: %+v for resource: %+v",
-						fltrID, rp)
-				}
-				return nil, err
-			}
-			rpIndexers.IndexTPFilter(engine.FilterToTPFilter(fltr), rp.ID)
-		}
-	}
-	if transactionID == utils.NonTransactional {
-		if err := rpIndexers.StoreIndexes(true, transactionID); err != nil {
-			return nil, err
-		}
-		return nil, nil
-	} else {
-		if err := rpIndexers.StoreIndexes(false, transactionID); err != nil {
-			return nil, err
-		}
-	}
-	return rpIndexers, nil
-}
-
-func (api *APIerSv1) computeStatIndexes(tenant string, stIDs *[]string,
-	transactionID string) (filterIndexer *engine.FilterIndexer, err error) {
-	var statIDs []string
-	sqpIndexers := engine.NewFilterIndexer(api.DataManager, utils.StatQueueProfilePrefix, tenant)
-	if stIDs == nil {
-		ids, err := api.DataManager.DataDB().GetKeysForPrefix(utils.StatQueueProfilePrefix)
-		if err != nil {
-			return nil, err
-		}
-		for _, id := range ids {
-			statIDs = append(statIDs, strings.Split(id, utils.CONCATENATED_KEY_SEP)[1])
-		}
-	} else {
-		statIDs = *stIDs
-		transactionID = utils.NonTransactional
-	}
-	for _, id := range statIDs {
-		sqp, err := api.DataManager.GetStatQueueProfile(tenant, id, true, false, utils.NonTransactional)
-		if err != nil {
-			return nil, err
-		}
-		fltrIDs := make([]string, len(sqp.FilterIDs))
-		for i, fltrID := range sqp.FilterIDs {
-			fltrIDs[i] = fltrID
-		}
-		if len(fltrIDs) == 0 {
-			fltrIDs = []string{utils.META_NONE}
-		}
-		for _, fltrID := range fltrIDs {
-			var fltr *engine.Filter
-			if fltrID == utils.META_NONE {
-				fltr = &engine.Filter{
-					Tenant: sqp.Tenant,
-					ID:     sqp.ID,
-					Rules: []*engine.FilterRule{
-						{
-							Type:    utils.META_NONE,
-							Element: utils.META_ANY,
-							Values:  []string{utils.META_ANY},
-						},
-					},
-				}
-			} else if fltr, err = api.DataManager.GetFilter(sqp.Tenant, fltrID,
-				true, false, utils.NonTransactional); err != nil {
-				if err == utils.ErrNotFound {
-					err = fmt.Errorf("broken reference to filter: %+v for statqueue: %+v",
-						fltrID, sqp)
-				}
-				return nil, err
-			}
-			sqpIndexers.IndexTPFilter(engine.FilterToTPFilter(fltr), sqp.ID)
-		}
-	}
-	if transactionID == utils.NonTransactional {
-		if err := sqpIndexers.StoreIndexes(true, transactionID); err != nil {
-			return nil, err
-		}
-		return nil, nil
-	} else {
-		if err := sqpIndexers.StoreIndexes(false, transactionID); err != nil {
-			return nil, err
-		}
-	}
-	return sqpIndexers, nil
-}
-
-func (api *APIerSv1) computeRouteIndexes(tenant string, rPrfIDs *[]string,
-	transactionID string) (filterIndexer *engine.FilterIndexer, err error) {
-	var supplierIDs []string
-	rPrfIndexers := engine.NewFilterIndexer(api.DataManager, utils.RouteProfilePrefix, tenant)
-	if rPrfIDs == nil {
-		ids, err := api.DataManager.DataDB().GetKeysForPrefix(utils.RouteProfilePrefix)
-		if err != nil {
-			return nil, err
-		}
-		for _, id := range ids {
-			supplierIDs = append(supplierIDs, strings.Split(id, utils.CONCATENATED_KEY_SEP)[1])
-		}
-	} else {
-		supplierIDs = *rPrfIDs
-		transactionID = utils.NonTransactional
-	}
-	for _, id := range supplierIDs {
-		rPrf, err := api.DataManager.GetRouteProfile(tenant, id, true, false, utils.NonTransactional)
-		if err != nil {
-			return nil, err
-		}
-		fltrIDs := make([]string, len(rPrf.FilterIDs))
-		for i, fltrID := range rPrf.FilterIDs {
-			fltrIDs[i] = fltrID
-		}
-		if len(fltrIDs) == 0 {
-			fltrIDs = []string{utils.META_NONE}
-		}
-		for _, fltrID := range fltrIDs {
-			var fltr *engine.Filter
-			if fltrID == utils.META_NONE {
-				fltr = &engine.Filter{
-					Tenant: rPrf.Tenant,
-					ID:     rPrf.ID,
-					Rules: []*engine.FilterRule{
-						{
-							Type:    utils.META_NONE,
-							Element: utils.META_ANY,
-							Values:  []string{utils.META_ANY},
-						},
-					},
-				}
-			} else if fltr, err = api.DataManager.GetFilter(rPrf.Tenant, fltrID,
-				true, false, utils.NonTransactional); err != nil {
-				if err == utils.ErrNotFound {
-					err = fmt.Errorf("broken reference to filter: %+v for suppliers: %+v",
-						fltrID, rPrf)
-				}
-				return nil, err
-			}
-			rPrfIndexers.IndexTPFilter(engine.FilterToTPFilter(fltr), rPrf.ID)
-		}
-	}
-	if transactionID == utils.NonTransactional {
-		if err := rPrfIndexers.StoreIndexes(true, transactionID); err != nil {
-			return nil, err
-		}
-		return nil, nil
-	} else {
-		if err := rPrfIndexers.StoreIndexes(false, transactionID); err != nil {
-			return nil, err
-		}
-	}
-	return rPrfIndexers, nil
-}
-
-func (api *APIerSv1) computeChargerIndexes(tenant string, cppIDs *[]string,
-	transactionID string) (filterIndexer *engine.FilterIndexer, err error) {
-	var chargerIDs []string
-	cppIndexes := engine.NewFilterIndexer(api.DataManager, utils.ChargerProfilePrefix, tenant)
-	if cppIDs == nil {
-		ids, err := api.DataManager.DataDB().GetKeysForPrefix(utils.ChargerProfilePrefix)
-		if err != nil {
-			return nil, err
-		}
-		for _, id := range ids {
-			chargerIDs = append(chargerIDs, strings.Split(id, utils.CONCATENATED_KEY_SEP)[1])
-		}
-	} else {
-		chargerIDs = *cppIDs
-		transactionID = utils.NonTransactional
-	}
-	for _, id := range chargerIDs {
-		cpp, err := api.DataManager.GetChargerProfile(tenant, id, true, false, utils.NonTransactional)
-		if err != nil {
-			return nil, err
-		}
-		fltrIDs := make([]string, len(cpp.FilterIDs))
-		for i, fltrID := range cpp.FilterIDs {
-			fltrIDs[i] = fltrID
-		}
-		if len(fltrIDs) == 0 {
-			fltrIDs = []string{utils.META_NONE}
-		}
-		for _, fltrID := range fltrIDs {
-			var fltr *engine.Filter
-			if fltrID == utils.META_NONE {
-				fltr = &engine.Filter{
-					Tenant: cpp.Tenant,
-					ID:     cpp.ID,
-					Rules: []*engine.FilterRule{
-						{
-							Type:    utils.META_NONE,
-							Element: utils.META_ANY,
-							Values:  []string{utils.META_ANY},
-						},
-					},
-				}
-			} else if fltr, err = api.DataManager.GetFilter(cpp.Tenant, fltrID,
-				true, false, utils.NonTransactional); err != nil {
-				if err == utils.ErrNotFound {
-					err = fmt.Errorf("broken reference to filter: %+v for charger: %+v",
-						fltrID, cpp)
-				}
-				return nil, err
-			}
-			cppIndexes.IndexTPFilter(engine.FilterToTPFilter(fltr), cpp.ID)
-		}
-	}
-	if transactionID == utils.NonTransactional {
-		if err := cppIndexes.StoreIndexes(true, transactionID); err != nil {
-			return nil, err
-		}
-		return nil, nil
-	} else {
-		if err := cppIndexes.StoreIndexes(false, transactionID); err != nil {
-			return nil, err
-		}
-	}
-	return cppIndexes, nil
-}
-
-func (api *APIerSv1) computeDispatcherIndexes(tenant, context string, dspIDs *[]string,
-	transactionID string) (filterIndexer *engine.FilterIndexer, err error) {
-	var dispatcherIDs []string
-	dspIndexes := engine.NewFilterIndexer(api.DataManager, utils.DispatcherProfilePrefix,
-		utils.ConcatenatedKey(tenant, context))
-	if dspIDs == nil {
-		ids, err := api.DataManager.DataDB().GetKeysForPrefix(utils.DispatcherProfilePrefix)
-		if err != nil {
-			return nil, err
-		}
-		for _, id := range ids {
-			dispatcherIDs = append(dispatcherIDs, strings.Split(id, utils.CONCATENATED_KEY_SEP)[1])
-		}
-	} else {
-		dispatcherIDs = *dspIDs
-		transactionID = utils.NonTransactional
-	}
-	for _, id := range dispatcherIDs {
-		dsp, err := api.DataManager.GetDispatcherProfile(tenant, id, true, false, utils.NonTransactional)
-		if err != nil {
-			return nil, err
-		}
-		if !utils.IsSliceMember(dsp.Subsystems, context) && context != utils.META_ANY {
-			continue
-		}
-		fltrIDs := make([]string, len(dsp.FilterIDs))
-		for i, fltrID := range dsp.FilterIDs {
-			fltrIDs[i] = fltrID
-		}
-		if len(fltrIDs) == 0 {
-			fltrIDs = []string{utils.META_NONE}
-		}
-		for _, fltrID := range fltrIDs {
-			var fltr *engine.Filter
-			if fltrID == utils.META_NONE {
-				fltr = &engine.Filter{
-					Tenant: dsp.Tenant,
-					ID:     dsp.ID,
-					Rules: []*engine.FilterRule{
-						{
-							Type:    utils.META_NONE,
-							Element: utils.META_ANY,
-							Values:  []string{utils.META_ANY},
-						},
-					},
-				}
-			} else if fltr, err = api.DataManager.GetFilter(dsp.Tenant, fltrID,
-				true, false, utils.NonTransactional); err != nil {
-				if err == utils.ErrNotFound {
-					err = fmt.Errorf("broken reference to filter: %+v for dispatcher: %+v",
-						fltrID, dsp)
-				}
-				return nil, err
-			}
-			dspIndexes.IndexTPFilter(engine.FilterToTPFilter(fltr), dsp.ID)
-		}
-	}
-	if transactionID == utils.NonTransactional {
-		if err := dspIndexes.StoreIndexes(true, transactionID); err != nil {
-			return nil, err
-		}
-		return nil, nil
-	} else {
-		if err := dspIndexes.StoreIndexes(false, transactionID); err != nil {
-			return nil, err
-		}
-	}
-	return dspIndexes, nil
 }

@@ -1475,19 +1475,27 @@ func (iDB *InternalDB) GetIndexesDrv(idxItmType, tntCtx, idxKey string) (indexes
 
 func (iDB *InternalDB) SetIndexesDrv(idxItmType, tntCtx string,
 	indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
-	for idxKey, indx := range indexes {
-		key := utils.ConcatenatedKey(tntCtx, idxKey)
-		dbKey := key
-		if transactionID != "" {
-			dbKey = "tmp_" + utils.ConcatenatedKey(dbKey, transactionID)
-		}
-		if commit && transactionID != "" {
-			x, _ := iDB.db.Get(idxItmType, dbKey)
+	if commit && transactionID != utils.EmptyString {
+		for _, dbKey := range iDB.db.GetGroupItemIDs(idxItmType, tntCtx) {
+			if !strings.HasPrefix(dbKey, "tmp_") || !strings.HasSuffix(dbKey, transactionID) {
+				continue
+			}
+			x, ok := iDB.db.Get(idxItmType, dbKey)
+			if !ok || x == nil {
+				continue
+			}
 			iDB.db.Remove(idxItmType, dbKey,
 				cacheCommit(utils.NonTransactional), utils.NonTransactional)
+			key := strings.TrimSuffix(strings.TrimPrefix(dbKey, "tmp_"), transactionID)
 			iDB.db.Set(idxItmType, key, x, []string{tntCtx},
 				cacheCommit(utils.NonTransactional), utils.NonTransactional)
-			continue
+		}
+		return
+	}
+	for idxKey, indx := range indexes {
+		dbKey := utils.ConcatenatedKey(tntCtx, idxKey)
+		if transactionID != utils.EmptyString {
+			dbKey = "tmp_" + utils.ConcatenatedKey(dbKey, transactionID)
 		}
 		if len(indx) == 0 {
 			iDB.db.Set(idxItmType, dbKey, nil, []string{tntCtx},

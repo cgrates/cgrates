@@ -1764,7 +1764,7 @@ func (rs *RedisStorage) GetIndexesDrv(idxItmType, tntCtx, idxKey string) (indexe
 		itmMpStrLst, err = rs.Cmd(redis_HMGET, dbKey, idxKey).List()
 		if err != nil {
 			return
-		} else if itmMpStrLst[0] == "" {
+		} else if itmMpStrLst[0] == utils.EmptyString {
 			return nil, utils.ErrNotFound
 		}
 		mp[idxKey] = itmMpStrLst[0]
@@ -1785,10 +1785,10 @@ func (rs *RedisStorage) SetIndexesDrv(idxItmType, tntCtx string,
 	indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 	originKey := utils.CacheInstanceToPrefix[idxItmType] + tntCtx
 	dbKey := originKey
-	if transactionID != "" {
+	if transactionID != utils.EmptyString {
 		dbKey = "tmp_" + utils.ConcatenatedKey(dbKey, transactionID)
 	}
-	if commit && transactionID != "" {
+	if commit && transactionID != utils.EmptyString {
 		return rs.Cmd(redis_RENAME, dbKey, originKey).Err
 	}
 	mp := make(map[string]string)
@@ -1816,5 +1816,8 @@ func (rs *RedisStorage) SetIndexesDrv(idxItmType, tntCtx string,
 }
 
 func (rs *RedisStorage) RemoveIndexesDrv(idxItmType, tntCtx, idxKey string) (err error) {
-	return rs.Cmd(redis_DEL, utils.CacheInstanceToPrefix[idxItmType]+utils.ConcatenatedKey(tntCtx, idxKey)).Err
+	if idxKey == utils.EmptyString {
+		return rs.Cmd(redis_DEL, utils.CacheInstanceToPrefix[idxItmType]+tntCtx).Err
+	}
+	return rs.Cmd(redis_HDEL, utils.CacheInstanceToPrefix[idxItmType]+tntCtx, idxKey).Err
 }
