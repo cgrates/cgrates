@@ -132,7 +132,7 @@ var (
 		CacheChargerFilterIndexes, CacheDispatcherFilterIndexes, CacheLoadIDs, CacheAccounts})
 
 	CacheStorDBPartitions = NewStringSet([]string{TBLTPTimings, TBLTPDestinations, TBLTPRates,
-		TBLTPDestinationRates, TBLTPRatingPlans, TBLTPRateProfiles, TBLTPSharedGroups,
+		TBLTPDestinationRates, TBLTPRatingPlans, TBLTPRatingProfiles, TBLTPSharedGroups,
 		TBLTPActions, TBLTPActionPlans, TBLTPActionTriggers, TBLTPAccountActions, TBLTPResources, TBLTPStats,
 		TBLTPThresholds, TBLTPFilters, SessionCostsTBL, CDRsTBL,
 		TBLTPRoutes, TBLTPAttributes, TBLTPChargers, TBLTPDispatchers, TBLTPDispatcherHosts})
@@ -1554,7 +1554,7 @@ const (
 	TBLTPRates            = "tp_rates"
 	TBLTPDestinationRates = "tp_destination_rates"
 	TBLTPRatingPlans      = "tp_rating_plans"
-	TBLTPRateProfiles     = "tp_rating_profiles"
+	TBLTPRatingProfiles   = "tp_rating_profiles"
 	TBLTPSharedGroups     = "tp_shared_groups"
 	TBLTPActions          = "tp_actions"
 	TBLTPActionPlans      = "tp_action_plans"

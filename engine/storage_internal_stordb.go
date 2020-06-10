@@ -55,7 +55,7 @@ func (iDB *InternalDB) GetTpTableIds(tpid, table string, distinct utils.TPDistin
 		switch table {
 		// in case of account action <loadid:tenant:account> and rating profile <loadid:tenant:category:subject>
 		// the retutned value may be only the loadID
-		case utils.TBLTPAccountActions, utils.TBLTPRateProfiles:
+		case utils.TBLTPAccountActions, utils.TBLTPRatingProfiles:
 			if len(distinct) == 1 { // special case when to return only the loadID
 				sliceID := strings.Split(fullID[len(tpid)+1:], utils.CONCATENATED_KEY_SEP)
 				idSet.Add(sliceID[0])
@@ -239,9 +239,9 @@ func (iDB *InternalDB) GetTPRatingProfiles(filter *utils.TPRatingProfile) (rProf
 	if filter.Subject != utils.EmptyString {
 		key += utils.CONCATENATED_KEY_SEP + filter.Subject
 	}
-	ids := iDB.db.GetItemIDs(utils.TBLTPRateProfiles, key)
+	ids := iDB.db.GetItemIDs(utils.TBLTPRatingProfiles, key)
 	for _, id := range ids {
-		x, ok := iDB.db.Get(utils.TBLTPRateProfiles, id)
+		x, ok := iDB.db.Get(utils.TBLTPRatingProfiles, id)
 		if !ok || x == nil {
 			return nil, utils.ErrNotFound
 		}
@@ -644,7 +644,7 @@ func (iDB *InternalDB) SetTPRatingProfiles(ratingProfiles []*utils.TPRatingProfi
 		return nil
 	}
 	for _, rProfile := range ratingProfiles {
-		iDB.db.Set(utils.TBLTPRateProfiles, utils.ConcatenatedKey(rProfile.TPid,
+		iDB.db.Set(utils.TBLTPRatingProfiles, utils.ConcatenatedKey(rProfile.TPid,
 			rProfile.LoadId, rProfile.Tenant, rProfile.Category, rProfile.Subject), rProfile, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	}

@@ -327,7 +327,7 @@ func (ms *MongoStorage) GetTPRatingProfiles(tp *utils.TPRatingProfile) ([]*utils
 	}
 	var results []*utils.TPRatingProfile
 	err := ms.query(func(sctx mongo.SessionContext) (err error) {
-		cur, err := ms.getCol(utils.TBLTPRateProfiles).Find(sctx, filter)
+		cur, err := ms.getCol(utils.TBLTPRatingProfiles).Find(sctx, filter)
 		if err != nil {
 			return err
 		}
@@ -706,7 +706,7 @@ func (ms *MongoStorage) SetTPRatingProfiles(tps []*utils.TPRatingProfile) error 
 	}
 	return ms.query(func(sctx mongo.SessionContext) (err error) {
 		for _, tp := range tps {
-			_, err = ms.getCol(utils.TBLTPRateProfiles).UpdateOne(sctx, bson.M{
+			_, err = ms.getCol(utils.TBLTPRatingProfiles).UpdateOne(sctx, bson.M{
 				"tpid":     tp.TPid,
 				"loadid":   tp.LoadId,
 				"tenant":   tp.Tenant,

@@ -223,10 +223,10 @@ func newInternalDBCfg(itemsCacheCfg map[string]*config.ItemOpt, isDataDB bool) m
 				TTL:       itemsCacheCfg[utils.TBLTPRatingPlans].TTL,
 				StaticTTL: itemsCacheCfg[utils.TBLTPRatingPlans].StaticTTL,
 			},
-			utils.TBLTPRateProfiles: &ltcache.CacheConfig{
-				MaxItems:  itemsCacheCfg[utils.TBLTPRateProfiles].Limit,
-				TTL:       itemsCacheCfg[utils.TBLTPRateProfiles].TTL,
-				StaticTTL: itemsCacheCfg[utils.TBLTPRateProfiles].StaticTTL,
+			utils.TBLTPRatingProfiles: &ltcache.CacheConfig{
+				MaxItems:  itemsCacheCfg[utils.TBLTPRatingProfiles].Limit,
+				TTL:       itemsCacheCfg[utils.TBLTPRatingProfiles].TTL,
+				StaticTTL: itemsCacheCfg[utils.TBLTPRatingProfiles].StaticTTL,
 			},
 			utils.TBLTPSharedGroups: &ltcache.CacheConfig{
 				MaxItems:  itemsCacheCfg[utils.TBLTPSharedGroups].Limit,

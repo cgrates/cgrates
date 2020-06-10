@@ -305,7 +305,7 @@ func (ms *MongoStorage) ensureIndexesForCol(col string) (err error) { // exporte
 		if err = ms.enusureIndex(col, true, "tpid", "id"); err != nil {
 			return
 		}
-	case utils.TBLTPRateProfiles:
+	case utils.TBLTPRatingProfiles:
 		if err = ms.enusureIndex(col, true, "tpid", "tenant",
 			"category", "subject", "loadid"); err != nil {
 			return
@@ -363,7 +363,7 @@ func (ms *MongoStorage) EnsureIndexes(cols ...string) (err error) {
 			utils.TBLTPSharedGroups, utils.TBLTPActions,
 			utils.TBLTPActionPlans, utils.TBLTPActionTriggers,
 			utils.TBLTPStats, utils.TBLTPResources,
-			utils.TBLTPRateProfiles, utils.CDRsTBL, utils.SessionCostsTBL} {
+			utils.TBLTPRatingProfiles, utils.CDRsTBL, utils.SessionCostsTBL} {
 			if err = ms.ensureIndexesForCol(col); err != nil {
 				return
 			}

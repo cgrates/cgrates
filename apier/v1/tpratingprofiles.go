@@ -62,7 +62,7 @@ func (api *APIerSv1) GetTPRatingProfileLoadIds(attrs *utils.AttrTPRatingProfileI
 	if missing := utils.MissingStructFields(attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	ids, err := api.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPRateProfiles,
+	ids, err := api.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPRatingProfiles,
 		utils.TPDistinctIds{"loadid"}, map[string]string{
 			"tenant":   attrs.Tenant,
 			"category": attrs.Category,
@@ -115,7 +115,7 @@ func (api *APIerSv1) GetTPRatingProfileIds(attrs *AttrGetTPRatingProfileIds, rep
 	if missing := utils.MissingStructFields(attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	ids, err := api.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPRateProfiles,
+	ids, err := api.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPRatingProfiles,
 		utils.TPDistinctIds{"loadid", "tenant", "category", "subject"},
 		nil, &attrs.PaginatorWithSearch)
 	if err != nil {
@@ -137,7 +137,7 @@ func (api *APIerSv1) RemoveTPRatingProfile(attrs *AttrGetTPRatingProfile, reply 
 	if err = tmpRpf.SetRatingProfileID(attrs.RatingProfileID); err != nil {
 		return
 	}
-	err = api.StorDb.RemTpData(utils.TBLTPRateProfiles,
+	err = api.StorDb.RemTpData(utils.TBLTPRatingProfiles,
 		attrs.TPid, map[string]string{
 			"loadid":   tmpRpf.LoadId,
 			"tenant":   tmpRpf.Tenant,
