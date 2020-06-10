@@ -74,6 +74,7 @@ const (
 	ColCpp  = "charger_profiles"
 	ColDpp  = "dispatcher_profiles"
 	ColDph  = "dispatcher_hosts"
+	ColRpp  = "rate_profiles"
 	ColLID  = "load_ids"
 )
 
@@ -286,7 +287,7 @@ func (ms *MongoStorage) ensureIndexesForCol(col string) (err error) { // exporte
 		if err = ms.enusureIndex(col, true, "key"); err != nil {
 			return
 		}
-	case ColRsP, ColRes, ColSqs, ColSqp, ColTps, ColThs, ColRts, ColAttr, ColFlt, ColCpp, ColDpp, ColDph:
+	case ColRsP, ColRes, ColSqs, ColSqp, ColTps, ColThs, ColRts, ColAttr, ColFlt, ColCpp, ColDpp, ColDph, ColRpp:
 		if err = ms.enusureIndex(col, true, "tenant", "id"); err != nil {
 			return
 		}
@@ -350,7 +351,7 @@ func (ms *MongoStorage) EnsureIndexes(cols ...string) (err error) {
 	if ms.storageType == utils.DataDB {
 		for _, col := range []string{ColAct, ColApl, ColAAp, ColAtr,
 			ColRpl, ColDst, ColRds, ColLht, ColRFI, ColRsP, ColRes, ColSqs, ColSqp,
-			ColTps, ColThs, ColRts, ColAttr, ColFlt, ColCpp, ColDpp,
+			ColTps, ColThs, ColRts, ColAttr, ColFlt, ColCpp, ColDpp, ColRpp,
 			ColRpf, ColShg, ColAcc} {
 			if err = ms.ensureIndexesForCol(col); err != nil {
 				return
@@ -681,6 +682,8 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 			result, err = ms.getField2(sctx, ColCpp, utils.ChargerProfilePrefix, subject, tntID)
 		case utils.DispatcherProfilePrefix:
 			result, err = ms.getField2(sctx, ColDpp, utils.DispatcherProfilePrefix, subject, tntID)
+		case utils.RateProfilePrefix:
+			result, err = ms.getField2(sctx, ColRpp, utils.RateProfilePrefix, subject, tntID)
 		case utils.DispatcherHostPrefix:
 			result, err = ms.getField2(sctx, ColDph, utils.DispatcherHostPrefix, subject, tntID)
 		case utils.AttributeFilterIndexes:
@@ -745,6 +748,8 @@ func (ms *MongoStorage) HasDataDrv(category, subject, tenant string) (has bool, 
 			count, err = ms.getCol(ColDpp).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
 		case utils.DispatcherHostPrefix:
 			count, err = ms.getCol(ColDph).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
+		case utils.RateProfilePrefix:
+			count, err = ms.getCol(ColRpp).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
 		default:
 			err = fmt.Errorf("unsupported category in HasData: %s", category)
 		}
@@ -2322,6 +2327,42 @@ func (ms *MongoStorage) SetLoadIDsDrv(loadIDs map[string]int64) (err error) {
 func (ms *MongoStorage) RemoveLoadIDsDrv() (err error) {
 	return ms.query(func(sctx mongo.SessionContext) (err error) {
 		_, err = ms.getCol(ColLID).DeleteMany(sctx, bson.M{})
+		return err
+	})
+}
+
+func (ms *MongoStorage) GetRateProfileDrv(tenant, id string) (rpp *RateProfile, err error) {
+	rpp = new(RateProfile)
+	err = ms.query(func(sctx mongo.SessionContext) (err error) {
+		cur := ms.getCol(ColRpp).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
+		if err := cur.Decode(rpp); err != nil {
+			rpp = nil
+			if err == mongo.ErrNoDocuments {
+				return utils.ErrNotFound
+			}
+			return err
+		}
+		return nil
+	})
+	return
+}
+
+func (ms *MongoStorage) SetRateProfileDrv(rpp *RateProfile) (err error) {
+	return ms.query(func(sctx mongo.SessionContext) (err error) {
+		_, err = ms.getCol(ColRpp).UpdateOne(sctx, bson.M{"tenant": rpp.Tenant, "id": rpp.ID},
+			bson.M{"$set": rpp},
+			options.Update().SetUpsert(true),
+		)
+		return err
+	})
+}
+
+func (ms *MongoStorage) RemoveRateProfileDrv(tenant, id string) (err error) {
+	return ms.query(func(sctx mongo.SessionContext) (err error) {
+		dr, err := ms.getCol(ColRpp).DeleteOne(sctx, bson.M{"tenant": tenant, "id": id})
+		if dr.DeletedCount == 0 {
+			return utils.ErrNotFound
+		}
 		return err
 	})
 }

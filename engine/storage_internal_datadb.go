@@ -1402,6 +1402,26 @@ func (iDB *InternalDB) RemoveDispatcherHostDrv(tenant, id string) (err error) {
 	return
 }
 
+func (iDB *InternalDB) GetRateProfileDrv(tenant, id string) (rpp *RateProfile, err error) {
+	x, ok := iDB.db.Get(utils.CacheRateProfiles, utils.ConcatenatedKey(tenant, id))
+	if !ok || x == nil {
+		return nil, utils.ErrNotFound
+	}
+	return x.(*RateProfile), nil
+}
+
+func (iDB *InternalDB) SetRateProfileDrv(rpp *RateProfile) (err error) {
+	iDB.db.Set(utils.CacheRateProfiles, rpp.TenantID(), rpp, nil,
+		cacheCommit(utils.NonTransactional), utils.NonTransactional)
+	return
+}
+
+func (iDB *InternalDB) RemoveRateProfileDrv(tenant, id string) (err error) {
+	iDB.db.Remove(utils.CacheRateProfiles, utils.ConcatenatedKey(tenant, id),
+		cacheCommit(utils.NonTransactional), utils.NonTransactional)
+	return
+}
+
 func (iDB *InternalDB) RemoveLoadIDsDrv() (err error) {
 	return utils.ErrNotImplemented
 }

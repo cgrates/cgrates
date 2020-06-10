@@ -728,6 +728,28 @@ func (self *SQLStorage) SetTPDispatcherHosts(tpDPPs []*utils.TPDispatcherHost) e
 	return nil
 }
 
+func (self *SQLStorage) SetTPRateProfiles(tpDPPs []*TPRateProfile) error {
+	if len(tpDPPs) == 0 {
+		return nil
+	}
+	tx := self.db.Begin()
+	for _, dpp := range tpDPPs {
+		// Remove previous
+		if err := tx.Where(&RateProfileMdl{Tpid: dpp.TPid, ID: dpp.ID}).Delete(RateProfileMdl{}).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
+		for _, mst := range APItoModelTPRateProfile(dpp) {
+			if err := tx.Save(&mst).Error; err != nil {
+				tx.Rollback()
+				return err
+			}
+		}
+	}
+	tx.Commit()
+	return nil
+}
+
 func (self *SQLStorage) SetSMCost(smc *SMCost) error {
 	if smc.CostDetails == nil {
 		return nil
@@ -1568,6 +1590,27 @@ func (self *SQLStorage) GetTPDispatcherHosts(tpid, tenant, id string) ([]*utils.
 	}
 	arls := dpps.AsTPDispatcherHosts()
 	if len(arls) == 0 {
+		return arls, utils.ErrNotFound
+	}
+	return arls, nil
+}
+
+func (self *SQLStorage) GetTPRateProfiles(tpid, tenant, id string) ([]*TPRateProfile, error) {
+	var dpps RateProfileMdls
+	q := self.db.Where("tpid = ?", tpid)
+	if len(id) != 0 {
+		q = q.Where("id = ?", id)
+	}
+	if len(tenant) != 0 {
+		q = q.Where("tenant = ?", tenant)
+	}
+	if err := q.Find(&dpps).Error; err != nil {
+		return nil, err
+	}
+	arls, err := dpps.AsTPRateProfile()
+	if err != nil {
+		return nil, err
+	} else if len(arls) == 0 {
 		return arls, utils.ErrNotFound
 	}
 	return arls, nil

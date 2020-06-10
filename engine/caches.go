@@ -59,6 +59,9 @@ func init() {
 	gob.Register(new(DispatcherHost))
 	gob.Register(new(DispatcherHostProfile))
 	gob.Register(new(DispatcherHostWithArgDispatcher))
+	// RateProfiles
+	gob.Register(new(RateProfile))
+	gob.Register(new(RateProfileWithArgDispatcher))
 
 	// CDRs
 	gob.Register(new(EventCost))
@@ -443,6 +446,12 @@ func (chS *CacheS) V1ReloadCache(attrs utils.AttrReloadCacheWithArgDispatcher, r
 			return
 		}
 	}
+	if len(attrs.RateProfileIDs) != 0 {
+		// RateProfiles
+		if err = chS.reloadCache(utils.RateProfilePrefix, attrs.RateProfileIDs); err != nil {
+			return
+		}
+	}
 
 	//get loadIDs from database for all types
 	loadIDs, err := chS.dm.GetItemLoadIDs(utils.EmptyString, false)
@@ -486,6 +495,7 @@ func (chS *CacheS) V1LoadCache(args utils.AttrReloadCacheWithArgDispatcher, repl
 		args.ChargerProfileIDs,
 		args.DispatcherProfileIDs,
 		args.DispatcherHostIDs,
+		args.RateProfileIDs,
 	); err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -570,6 +580,9 @@ func populateCacheLoadIDs(loadIDs map[string]int64, attrs utils.ArgsCache) (cach
 	}
 	if attrs.DispatcherProfileIDs == nil || len(attrs.DispatcherProfileIDs) != 0 {
 		cacheLoadIDs[utils.CacheDispatcherProfiles] = loadIDs[utils.CacheDispatcherProfiles]
+	}
+	if attrs.RateProfileIDs == nil || len(attrs.RateProfileIDs) != 0 {
+		cacheLoadIDs[utils.CacheRateProfiles] = loadIDs[utils.CacheRateProfiles]
 	}
 	return
 }

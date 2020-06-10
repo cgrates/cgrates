@@ -3000,3 +3000,254 @@ func DispatcherHostToAPI(dph *DispatcherHost) (tpDPH *utils.TPDispatcherHost) {
 	}
 	return
 }
+
+// RateProfileMdls is used
+type RateProfileMdls []*RateProfileMdl
+
+// CSVHeader return the header for csv fields as a slice of string
+func (tps RateProfileMdls) CSVHeader() (result []string) {
+	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.ActivationIntervalString,
+		utils.Weight, utils.ConnectFee, utils.RoundingMethod, utils.RoundingDecimals, utils.MinCost,
+		utils.MaxCost, utils.MaxCostStrategy, utils.RateID, utils.RateFilterIDs, utils.RateWeight,
+		utils.RateValue, utils.RateUnit, utils.RateIncrement, utils.RateBlocker,
+	}
+}
+
+func (tps RateProfileMdls) AsTPRateProfile() (result []*TPRateProfile, err error) {
+	filtermap := make(map[string]utils.StringMap)
+	mst := make(map[string]*TPRateProfile)
+	rateMap := make(map[string]map[string]*Rate)
+	for _, tp := range tps {
+		tenID := (&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()
+		rPrf, found := mst[tenID]
+		if !found {
+			rPrf = &TPRateProfile{
+				TPid:   tp.Tpid,
+				Tenant: tp.Tenant,
+				ID:     tp.ID,
+			}
+		}
+		if tp.RateID != utils.EmptyString {
+			if _, has := rateMap[tenID]; !has {
+				rateMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()] = make(map[string]*Rate)
+			}
+			rateID := tp.RateID
+			if tp.RateFilterIDs != utils.EmptyString {
+				rateID = utils.ConcatenatedKey(rateID,
+					utils.NewStringSet(strings.Split(tp.RateFilterIDs, utils.INFIELD_SEP)).Sha1())
+			}
+			rate, found := rateMap[tenID][rateID]
+			if !found {
+				rate = &Rate{
+					ID:      tp.RateID,
+					Blocker: tp.RateBlocker,
+				}
+			}
+			if tp.RateFilterIDs != utils.EmptyString {
+				rateFilterSplit := strings.Split(tp.RateFilterIDs, utils.INFIELD_SEP)
+				rate.FilterIDs = append(rate.FilterIDs, rateFilterSplit...)
+			}
+			if tp.RateWeight != 0 {
+				rate.Weight = tp.RateWeight
+			}
+			if tp.RateValue != 0 {
+				rate.Value = tp.RateValue
+			}
+			if tp.RateIncrement != utils.EmptyString {
+				if rate.Increment, err = utils.ParseDurationWithNanosecs(tp.RateIncrement); err != nil {
+					return
+				}
+			}
+			if tp.RateUnit != utils.EmptyString {
+				if rate.Unit, err = utils.ParseDurationWithNanosecs(tp.RateUnit); err != nil {
+					return
+				}
+			}
+
+			rateMap[tenID][rateID] = rate
+		}
+
+		if tp.Weight != 0 {
+			rPrf.Weight = tp.Weight
+		}
+		if tp.ConnectFee != 0 {
+			rPrf.ConnectFee = tp.ConnectFee
+		}
+		if tp.RoundingMethod != utils.EmptyString {
+			rPrf.RoundingMethod = tp.RoundingMethod
+		}
+		if tp.RoundingDecimals != 0 {
+			rPrf.RoundingDecimals = tp.RoundingDecimals
+		}
+		if tp.MinCost != 0 {
+			rPrf.MinCost = tp.MinCost
+		}
+		if tp.MaxCost != 0 {
+			rPrf.MaxCost = tp.MaxCost
+		}
+		if tp.MaxCostStrategy != utils.EmptyString {
+			rPrf.MaxCostStrategy = tp.MaxCostStrategy
+		}
+		if tp.ActivationInterval != utils.EmptyString {
+			rPrf.ActivationInterval = new(utils.TPActivationInterval)
+			aiSplt := strings.Split(tp.ActivationInterval, utils.INFIELD_SEP)
+			if len(aiSplt) == 2 {
+				rPrf.ActivationInterval.ActivationTime = aiSplt[0]
+				rPrf.ActivationInterval.ExpiryTime = aiSplt[1]
+			} else if len(aiSplt) == 1 {
+				rPrf.ActivationInterval.ActivationTime = aiSplt[0]
+			}
+		}
+		if tp.FilterIDs != utils.EmptyString {
+			if _, has := filtermap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()]; !has {
+				filtermap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()] = make(utils.StringMap)
+			}
+			filterSplit := strings.Split(tp.FilterIDs, utils.INFIELD_SEP)
+			for _, filter := range filterSplit {
+				filtermap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()][filter] = true
+			}
+		}
+		mst[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()] = rPrf
+	}
+	result = make([]*TPRateProfile, len(mst))
+	i := 0
+	for tntID, th := range mst {
+		result[i] = th
+		for _, rate := range rateMap[tntID] {
+			result[i].Rates = append(result[i].Rates, rate)
+		}
+		for filterdata := range filtermap[tntID] {
+			result[i].FilterIDs = append(result[i].FilterIDs, filterdata)
+		}
+		i++
+	}
+	return
+}
+
+func APItoModelTPRateProfile(tPrf *TPRateProfile) (mdls RateProfileMdls) {
+	if len(tPrf.Rates) == 0 {
+		return
+	}
+	for i, rate := range tPrf.Rates {
+		mdl := &RateProfileMdl{
+			Tenant: tPrf.Tenant,
+			Tpid:   tPrf.TPid,
+			ID:     tPrf.ID,
+		}
+		if i == 0 {
+			for i, val := range tPrf.FilterIDs {
+				if i != 0 {
+					mdl.FilterIDs += utils.INFIELD_SEP
+				}
+				mdl.FilterIDs += val
+			}
+
+			if tPrf.ActivationInterval != nil {
+				if tPrf.ActivationInterval.ActivationTime != utils.EmptyString {
+					mdl.ActivationInterval = tPrf.ActivationInterval.ActivationTime
+				}
+				if tPrf.ActivationInterval.ExpiryTime != utils.EmptyString {
+					mdl.ActivationInterval += utils.INFIELD_SEP + tPrf.ActivationInterval.ExpiryTime
+				}
+			}
+			mdl.Weight = tPrf.Weight
+			mdl.ConnectFee = tPrf.ConnectFee
+			mdl.RoundingMethod = tPrf.RoundingMethod
+			mdl.RoundingDecimals = tPrf.RoundingDecimals
+			mdl.MinCost = tPrf.MinCost
+			mdl.MaxCost = tPrf.MaxCost
+			mdl.MaxCostStrategy = tPrf.MaxCostStrategy
+		}
+		mdl.RateID = rate.ID
+		for i, val := range rate.FilterIDs {
+			if i != 0 {
+				mdl.RateFilterIDs += utils.INFIELD_SEP
+			}
+			mdl.RateFilterIDs += val
+		}
+		mdl.RateWeight = rate.Weight
+		mdl.RateValue = rate.Weight
+		mdl.RateUnit = rate.Unit.String()
+		mdl.RateIncrement = rate.Increment.String()
+		mdl.RateBlocker = rate.Blocker
+		mdls = append(mdls, mdl)
+	}
+	return
+}
+
+func APItoRateProfile(tpRp *TPRateProfile, timezone string) (rp *RateProfile, err error) {
+	rp = &RateProfile{
+		Tenant:           tpRp.Tenant,
+		ID:               tpRp.ID,
+		FilterIDs:        make([]string, len(tpRp.FilterIDs)),
+		Weight:           tpRp.Weight,
+		ConnectFee:       tpRp.ConnectFee,
+		RoundingMethod:   tpRp.RoundingMethod,
+		RoundingDecimals: tpRp.RoundingDecimals,
+		MinCost:          tpRp.MinCost,
+		MaxCost:          tpRp.MaxCost,
+		MaxCostStrategy:  tpRp.MaxCostStrategy,
+		Rates:            make([]*Rate, len(tpRp.Rates)),
+	}
+	for i, stp := range tpRp.FilterIDs {
+		rp.FilterIDs[i] = stp
+	}
+	if tpRp.ActivationInterval != nil {
+		if rp.ActivationInterval, err = tpRp.ActivationInterval.AsActivationInterval(timezone); err != nil {
+			return nil, err
+		}
+	}
+	for i, rate := range tpRp.Rates {
+		rp.Rates[i] = &Rate{
+			ID:        rate.ID,
+			Weight:    rate.Weight,
+			Blocker:   rate.Blocker,
+			FilterIDs: rate.FilterIDs,
+			Value:     rate.Value,
+			Unit:      rate.Unit,
+			Increment: rate.Increment,
+		}
+	}
+	return rp, nil
+}
+
+func RateProfileToAPI(rp *RateProfile) (tpRp *TPRateProfile) {
+	tpRp = &TPRateProfile{
+		Tenant:             rp.Tenant,
+		ID:                 rp.ID,
+		FilterIDs:          make([]string, len(rp.FilterIDs)),
+		ActivationInterval: new(utils.TPActivationInterval),
+		Weight:             rp.Weight,
+		ConnectFee:         rp.ConnectFee,
+		RoundingMethod:     rp.RoundingMethod,
+		RoundingDecimals:   rp.RoundingDecimals,
+		MinCost:            rp.MinCost,
+		MaxCost:            rp.MaxCost,
+		MaxCostStrategy:    rp.MaxCostStrategy,
+		Rates:              make([]*Rate, len(rp.Rates)),
+	}
+
+	for i, rate := range rp.Rates {
+		tpRp.Rates[i] = &Rate{
+			ID:        rate.ID,
+			Weight:    rate.Weight,
+			Blocker:   rate.Blocker,
+			FilterIDs: rate.FilterIDs,
+			Value:     rate.Value,
+			Unit:      rate.Unit,
+			Increment: rate.Increment,
+		}
+	}
+	for i, fli := range rp.FilterIDs {
+		tpRp.FilterIDs[i] = fli
+	}
+	if rp.ActivationInterval != nil {
+		if !rp.ActivationInterval.ActivationTime.IsZero() {
+			tpRp.ActivationInterval.ActivationTime = rp.ActivationInterval.ActivationTime.Format(time.RFC3339)
+		}
+		if !rp.ActivationInterval.ExpiryTime.IsZero() {
+			tpRp.ActivationInterval.ExpiryTime = rp.ActivationInterval.ExpiryTime.Format(time.RFC3339)
+		}
+	}
+	return
+}

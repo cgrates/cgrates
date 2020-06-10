@@ -63,7 +63,7 @@ cgrates.org,call,discounted_minutes,2013-01-06T00:00:00Z,RP_UK_Mobile_BIG5_PKG,`
 	csvr, err := engine.NewTpReader(dataDB3.DataDB(), engine.NewStringCSVStorage(utils.CSV_SEP, destinations, timings, rates,
 		destinationRates, ratingPlans, ratingProfiles, sharedGroups, actions, actionPlans, actionTriggers,
 		accountActions, resLimits, stats,
-		thresholds, filters, suppliers, attrProfiles, chargerProfiles, ``, ""), "", "", nil, nil)
+		thresholds, filters, suppliers, attrProfiles, chargerProfiles, ``, "", utils.EmptyString), "", "", nil, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -109,7 +109,7 @@ cgrates.org,call,discounted_minutes,2013-01-06T00:00:00Z,RP_UK_Mobile_BIG5_PKG,`
 	}
 	engine.Cache.Clear(nil)
 	dataDB3.LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 
 	if cachedDests := len(engine.Cache.GetItemIDs(utils.CacheDestinations, "")); cachedDests != 0 {
 		t.Error("Wrong number of cached destinations found", cachedDests)

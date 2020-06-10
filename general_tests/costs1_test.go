@@ -52,8 +52,13 @@ RP_SMS1,DR_SMS_1,ALWAYS,10`
 	ratingProfiles := `cgrates.org,call,*any,2012-01-01T00:00:00Z,RP_RETAIL,
 cgrates.org,data,*any,2012-01-01T00:00:00Z,RP_DATA1,
 cgrates.org,sms,*any,2012-01-01T00:00:00Z,RP_SMS1,`
-	csvr, err := engine.NewTpReader(dataDB.DataDB(), engine.NewStringCSVStorage(utils.CSV_SEP, dests, timings, rates, destinationRates, ratingPlans, ratingProfiles,
-		"", "", "", "", "", "", "", "", "", "", "", "", "", ""), "", "", nil, nil)
+	csvr, err := engine.NewTpReader(dataDB.DataDB(), engine.NewStringCSVStorage(utils.CSV_SEP, dests, timings,
+		rates, destinationRates, ratingPlans, ratingProfiles,
+		utils.EmptyString, utils.EmptyString, utils.EmptyString,
+		utils.EmptyString, utils.EmptyString, utils.EmptyString,
+		utils.EmptyString, utils.EmptyString, utils.EmptyString,
+		utils.EmptyString, utils.EmptyString, utils.EmptyString,
+		utils.EmptyString, utils.EmptyString, utils.EmptyString), utils.EmptyString, utils.EmptyString, nil, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -78,19 +83,19 @@ cgrates.org,sms,*any,2012-01-01T00:00:00Z,RP_SMS1,`
 	csvr.WriteToDatabase(false, false)
 	engine.Cache.Clear(nil)
 	dataDB.LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 
-	if cachedRPlans := len(engine.Cache.GetItemIDs(utils.CacheRatingPlans, "")); cachedRPlans != 3 {
+	if cachedRPlans := len(engine.Cache.GetItemIDs(utils.CacheRatingPlans, utils.EmptyString)); cachedRPlans != 3 {
 		t.Error("Wrong number of cached rating plans found", cachedRPlans)
 	}
-	if cachedRProfiles := len(engine.Cache.GetItemIDs(utils.CacheRatingProfiles, "")); cachedRProfiles != 0 {
+	if cachedRProfiles := len(engine.Cache.GetItemIDs(utils.CacheRatingProfiles, utils.EmptyString)); cachedRProfiles != 0 {
 		t.Error("Wrong number of cached rating profiles found", cachedRProfiles)
 	}
 }
 
 func TestCosts1GetCost1(t *testing.T) {
-	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
-	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:30Z", "")
+	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", utils.EmptyString)
+	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:30Z", utils.EmptyString)
 	cd := &engine.CallDescriptor{
 		Category:    "call",
 		Tenant:      "cgrates.org",
@@ -108,8 +113,8 @@ func TestCosts1GetCost1(t *testing.T) {
 }
 
 func TestCosts1GetCostZeroDuration(t *testing.T) {
-	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
-	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
+	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", utils.EmptyString)
+	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", utils.EmptyString)
 	cd := &engine.CallDescriptor{
 		Category:    "call",
 		Tenant:      "cgrates.org",
