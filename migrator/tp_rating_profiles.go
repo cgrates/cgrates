@@ -27,7 +27,7 @@ import (
 
 func (m *Migrator) migrateCurrentTPratingprofiles() (err error) {
 
-	tpids, err := m.storDBIn.StorDB().GetTpIds(utils.TBLTPRateProfiles)
+	tpids, err := m.storDBIn.StorDB().GetTpIds(utils.TBLTPRatingProfiles)
 	if err != nil {
 		return err
 	}
@@ -43,7 +43,7 @@ func (m *Migrator) migrateCurrentTPratingprofiles() (err error) {
 					return err
 				}
 				for _, ratPrf := range ratingProfile {
-					if err := m.storDBIn.StorDB().RemTpData(utils.TBLTPRateProfiles, ratPrf.TPid,
+					if err := m.storDBIn.StorDB().RemTpData(utils.TBLTPRatingProfiles, ratPrf.TPid,
 						map[string]string{"loadid": ratPrf.LoadId,
 							"tenant": ratPrf.Tenant, "category": ratPrf.Category,
 							"subject": ratPrf.Subject}); err != nil {
@@ -81,5 +81,5 @@ func (m *Migrator) migrateTPratingprofiles() (err error) {
 			return err
 		}
 	}
-	return m.ensureIndexesStorDB(utils.TBLTPRateProfiles)
+	return m.ensureIndexesStorDB(utils.TBLTPRatingProfiles)
 }

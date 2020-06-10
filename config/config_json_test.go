@@ -434,7 +434,7 @@ func TestDfStorDBJsonCfg(t *testing.T) {
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Limit:      utils.IntPointer(-1),
 				Static_ttl: utils.BoolPointer(false)},
-			utils.TBLTPRateProfiles: {
+			utils.TBLTPRatingProfiles: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Limit:      utils.IntPointer(-1),
 				Static_ttl: utils.BoolPointer(false)},

@@ -100,7 +100,7 @@ func (self *SQLStorage) CreateTablesFromScript(scriptPath string) error {
 func (self *SQLStorage) IsDBEmpty() (resp bool, err error) {
 	tbls := []string{
 		utils.TBLTPTimings, utils.TBLTPDestinations, utils.TBLTPRates,
-		utils.TBLTPDestinationRates, utils.TBLTPRatingPlans, utils.TBLTPRateProfiles,
+		utils.TBLTPDestinationRates, utils.TBLTPRatingPlans, utils.TBLTPRatingProfiles,
 		utils.TBLTPSharedGroups, utils.TBLTPActions, utils.TBLTPActionTriggers,
 		utils.TBLTPAccountActions, utils.TBLTPResources, utils.TBLTPStats, utils.TBLTPThresholds,
 		utils.TBLTPFilters, utils.SessionCostsTBL, utils.CDRsTBL, utils.TBLTPActionPlans,
@@ -130,7 +130,7 @@ func (self *SQLStorage) GetTpIds(colName string) ([]string, error) {
 			utils.TBLTPRates,
 			utils.TBLTPDestinationRates,
 			utils.TBLTPRatingPlans,
-			utils.TBLTPRateProfiles,
+			utils.TBLTPRatingProfiles,
 			utils.TBLTPSharedGroups,
 			utils.TBLTPActions,
 			utils.TBLTPActionTriggers,
@@ -234,7 +234,7 @@ func (self *SQLStorage) RemTpData(table, tpid string, args map[string]string) er
 
 	if len(table) == 0 { // Remove tpid out of all tables
 		for _, tblName := range []string{utils.TBLTPTimings, utils.TBLTPDestinations, utils.TBLTPRates,
-			utils.TBLTPDestinationRates, utils.TBLTPRatingPlans, utils.TBLTPRateProfiles,
+			utils.TBLTPDestinationRates, utils.TBLTPRatingPlans, utils.TBLTPRatingProfiles,
 			utils.TBLTPSharedGroups, utils.TBLTPActions, utils.TBLTPActionPlans,
 			utils.TBLTPActionTriggers, utils.TBLTPAccountActions,
 			utils.TBLTPResources, utils.TBLTPStats, utils.TBLTPFilters,
