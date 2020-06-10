@@ -488,7 +488,7 @@ func GetRateInterval(rpl *utils.TPRatingPlanBinding, dr *utils.DestinationRate) 
 		},
 	}
 	for _, rl := range dr.Rate.RateSlots {
-		i.Rating.Rates = append(i.Rating.Rates, &Rate{
+		i.Rating.Rates = append(i.Rating.Rates, &RGRate{
 			GroupIntervalStart: rl.GroupIntervalStartDuration(),
 			Value:              rl.Rate,
 			RateIncrement:      rl.RateIncrementDuration(),

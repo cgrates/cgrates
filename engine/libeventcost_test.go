@@ -766,13 +766,13 @@ func TestRatingClone(t *testing.T) {
 func TestChargedRatesGetIDWithSet(t *testing.T) {
 	cr1 := ChargedRates{
 		"Key1": RateGroups{
-			&Rate{
+			&RGRate{
 				GroupIntervalStart: time.Hour,
 				Value:              0.17,
 				RateIncrement:      time.Second,
 				RateUnit:           time.Minute,
 			},
-			&Rate{
+			&RGRate{
 				GroupIntervalStart: time.Hour,
 				Value:              0.17,
 				RateIncrement:      time.Second,
@@ -780,13 +780,13 @@ func TestChargedRatesGetIDWithSet(t *testing.T) {
 			},
 		},
 		"Key2": RateGroups{
-			&Rate{
+			&RGRate{
 				GroupIntervalStart: time.Hour,
 				Value:              1.12,
 				RateIncrement:      time.Second,
 				RateUnit:           time.Minute,
 			},
-			&Rate{
+			&RGRate{
 				GroupIntervalStart: 0,
 				Value:              2,
 				RateIncrement:      time.Second,
@@ -795,13 +795,13 @@ func TestChargedRatesGetIDWithSet(t *testing.T) {
 		},
 	}
 	if id1 := cr1.GetIDWithSet(RateGroups{
-		&Rate{
+		&RGRate{
 			GroupIntervalStart: time.Hour,
 			Value:              0.17,
 			RateIncrement:      time.Second,
 			RateUnit:           time.Minute,
 		},
-		&Rate{
+		&RGRate{
 			GroupIntervalStart: time.Hour,
 			Value:              0.17,
 			RateIncrement:      time.Second,
@@ -812,13 +812,13 @@ func TestChargedRatesGetIDWithSet(t *testing.T) {
 	}
 
 	id2 := cr1.GetIDWithSet(RateGroups{
-		&Rate{
+		&RGRate{
 			GroupIntervalStart: time.Hour,
 			Value:              1,
 			RateIncrement:      time.Second,
 			RateUnit:           time.Minute,
 		},
-		&Rate{
+		&RGRate{
 			GroupIntervalStart: 0,
 			Value:              2,
 			RateIncrement:      time.Second,
@@ -837,13 +837,13 @@ func TestChargedRatesGetIDWithSet(t *testing.T) {
 func TestChargedRatesClone(t *testing.T) {
 	cr1 := ChargedRates{
 		"Key1": RateGroups{
-			&Rate{
+			&RGRate{
 				GroupIntervalStart: time.Hour,
 				Value:              0.17,
 				RateIncrement:      time.Second,
 				RateUnit:           time.Minute,
 			},
-			&Rate{
+			&RGRate{
 				GroupIntervalStart: 0,
 				Value:              0.7,
 				RateIncrement:      time.Second,
@@ -851,13 +851,13 @@ func TestChargedRatesClone(t *testing.T) {
 			},
 		},
 		"Key2": RateGroups{
-			&Rate{
+			&RGRate{
 				GroupIntervalStart: time.Hour,
 				Value:              1.12,
 				RateIncrement:      time.Second,
 				RateUnit:           time.Minute,
 			},
-			&Rate{
+			&RGRate{
 				GroupIntervalStart: 0,
 				Value:              2,
 				RateIncrement:      time.Second,

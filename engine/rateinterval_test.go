@@ -240,13 +240,13 @@ func TestRirStrigyfy(t *testing.T) {
 	rir1 := &RIRate{
 		ConnectFee: 0.1,
 		Rates: RateGroups{
-			&Rate{
+			&RGRate{
 				GroupIntervalStart: time.Hour,
 				Value:              0.17,
 				RateIncrement:      time.Second,
 				RateUnit:           time.Minute,
 			},
-			&Rate{
+			&RGRate{
 				GroupIntervalStart: 0,
 				Value:              0.7,
 				RateIncrement:      time.Second,
@@ -259,13 +259,13 @@ func TestRirStrigyfy(t *testing.T) {
 	rir2 := &RIRate{
 		ConnectFee: 0.1,
 		Rates: RateGroups{
-			&Rate{
+			&RGRate{
 				GroupIntervalStart: time.Hour,
 				Value:              0.17,
 				RateIncrement:      time.Second,
 				RateUnit:           time.Minute,
 			},
-			&Rate{
+			&RGRate{
 				GroupIntervalStart: 0,
 				Value:              0.7,
 				RateIncrement:      time.Second,
@@ -281,12 +281,12 @@ func TestRirStrigyfy(t *testing.T) {
 }
 
 func TestRateStrigyfy(t *testing.T) {
-	r1 := &Rate{
+	r1 := &RGRate{
 		GroupIntervalStart: time.Hour,
 		Value:              0.17,
 		RateUnit:           time.Minute,
 	}
-	r2 := &Rate{
+	r2 := &RGRate{
 		GroupIntervalStart: time.Hour,
 		Value:              0.17,
 		RateUnit:           time.Minute,
@@ -370,7 +370,7 @@ func TestRateIntervalCost(t *testing.T) {
 	ri := &RateInterval{
 		Rating: &RIRate{
 			Rates: RateGroups{
-				&Rate{
+				&RGRate{
 					Value:         0.1,
 					RateIncrement: time.Second,
 					RateUnit:      60 * time.Second,
@@ -386,13 +386,13 @@ func TestRateIntervalCost(t *testing.T) {
 
 func TestRateGroupsEquals(t *testing.T) {
 	rg1 := RateGroups{
-		&Rate{
+		&RGRate{
 			GroupIntervalStart: time.Duration(0),
 			Value:              0.1,
 			RateIncrement:      time.Minute,
 			RateUnit:           60 * time.Second,
 		},
-		&Rate{
+		&RGRate{
 			GroupIntervalStart: time.Duration(60 * time.Second),
 			Value:              0.05,
 			RateIncrement:      time.Second,
@@ -400,13 +400,13 @@ func TestRateGroupsEquals(t *testing.T) {
 		},
 	}
 	rg2 := RateGroups{
-		&Rate{
+		&RGRate{
 			GroupIntervalStart: time.Duration(0),
 			Value:              0.1,
 			RateIncrement:      time.Minute,
 			RateUnit:           60 * time.Second,
 		},
-		&Rate{
+		&RGRate{
 			GroupIntervalStart: time.Duration(60 * time.Second),
 			Value:              0.05,
 			RateIncrement:      time.Second,
@@ -417,13 +417,13 @@ func TestRateGroupsEquals(t *testing.T) {
 		t.Error("not equal")
 	}
 	rg2 = RateGroups{
-		&Rate{
+		&RGRate{
 			GroupIntervalStart: time.Duration(0),
 			Value:              0.1,
 			RateIncrement:      time.Minute,
 			RateUnit:           60 * time.Second,
 		},
-		&Rate{
+		&RGRate{
 			GroupIntervalStart: time.Duration(60 * time.Second),
 			Value:              0.3,
 			RateIncrement:      time.Second,
@@ -434,7 +434,7 @@ func TestRateGroupsEquals(t *testing.T) {
 		t.Error("equals")
 	}
 	rg2 = RateGroups{
-		&Rate{
+		&RGRate{
 			GroupIntervalStart: time.Duration(0),
 			Value:              0.1,
 			RateIncrement:      time.Minute,
@@ -505,7 +505,7 @@ func TestRIRateClone(t *testing.T) {
 		MaxCost:          0.7,
 		MaxCostStrategy:  "MaxCostStrategy_test",
 		Rates: RateGroups{
-			&Rate{
+			&RGRate{
 				GroupIntervalStart: time.Duration(10),
 				Value:              0.7,
 				RateIncrement:      time.Duration(10),
@@ -520,7 +520,7 @@ func TestRIRateClone(t *testing.T) {
 		MaxCost:          0.7,
 		MaxCostStrategy:  "MaxCostStrategy_test",
 		Rates: RateGroups{
-			&Rate{
+			&RGRate{
 				GroupIntervalStart: time.Duration(10),
 				Value:              0.7,
 				RateIncrement:      time.Duration(10),

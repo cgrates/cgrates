@@ -197,7 +197,7 @@ func TestDebitCreditZeroSecond(t *testing.T) {
 				TimeEnd:       time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
 				DurationIndex: 0,
 				RateInterval: &RateInterval{Rating: &RIRate{
-					Rates: RateGroups{&Rate{GroupIntervalStart: 0,
+					Rates: RateGroups{&RGRate{GroupIntervalStart: 0,
 						Value: 100, RateIncrement: 10 * time.Second,
 						RateUnit: time.Second}}}},
 			},
@@ -246,7 +246,7 @@ func TestDebitCreditBlocker(t *testing.T) {
 				DurationIndex: 0,
 				RateInterval: &RateInterval{
 					Rating: &RIRate{ConnectFee: 0.15,
-						Rates: RateGroups{&Rate{GroupIntervalStart: 0,
+						Rates: RateGroups{&RGRate{GroupIntervalStart: 0,
 							Value: 0.1, RateIncrement: time.Second,
 							RateUnit: time.Second}}}},
 			},
@@ -289,7 +289,7 @@ func TestDebitFreeEmpty(t *testing.T) {
 				DurationIndex: 0,
 				RateInterval: &RateInterval{Rating: &RIRate{
 					ConnectFee: 0, Rates: RateGroups{
-						&Rate{GroupIntervalStart: 0, Value: 0,
+						&RGRate{GroupIntervalStart: 0, Value: 0,
 							RateIncrement: time.Second,
 							RateUnit:      time.Second}}}},
 			},
@@ -337,7 +337,7 @@ func TestDebitCreditZeroMinute(t *testing.T) {
 				DurationIndex: 0,
 				RateInterval: &RateInterval{
 					Rating: &RIRate{Rates: RateGroups{
-						&Rate{GroupIntervalStart: 0, Value: 100,
+						&RGRate{GroupIntervalStart: 0, Value: 100,
 							RateIncrement: 10 * time.Second,
 							RateUnit:      time.Second}}}},
 			},
@@ -393,7 +393,7 @@ func TestDebitCreditZeroMixedMinute(t *testing.T) {
 				DurationIndex: 0,
 				RateInterval: &RateInterval{
 					Rating: &RIRate{Rates: RateGroups{
-						&Rate{GroupIntervalStart: 0,
+						&RGRate{GroupIntervalStart: 0,
 							Value: 100, RateIncrement: 10 * time.Second,
 							RateUnit: time.Second}}}},
 			},
@@ -445,7 +445,7 @@ func TestDebitCreditNoCredit(t *testing.T) {
 				RateInterval: &RateInterval{
 					Rating: &RIRate{
 						Rates: RateGroups{
-							&Rate{GroupIntervalStart: 0, Value: 100,
+							&RGRate{GroupIntervalStart: 0, Value: 100,
 								RateIncrement: 10 * time.Second,
 								RateUnit:      time.Second}}}},
 			},
@@ -456,7 +456,7 @@ func TestDebitCreditNoCredit(t *testing.T) {
 				RateInterval: &RateInterval{
 					Rating: &RIRate{
 						Rates: RateGroups{
-							&Rate{GroupIntervalStart: 0, Value: 100,
+							&RGRate{GroupIntervalStart: 0, Value: 100,
 								RateIncrement: 10 * time.Second,
 								RateUnit:      time.Second}}}},
 			},
@@ -508,7 +508,7 @@ func TestDebitCreditHasCredit(t *testing.T) {
 				DurationIndex: 0,
 				RateInterval: &RateInterval{
 					Rating: &RIRate{Rates: RateGroups{
-						&Rate{GroupIntervalStart: 0, Value: 1,
+						&RGRate{GroupIntervalStart: 0, Value: 1,
 							RateIncrement: 10 * time.Second,
 							RateUnit:      time.Second}}}},
 			},
@@ -518,7 +518,7 @@ func TestDebitCreditHasCredit(t *testing.T) {
 				DurationIndex: 10 * time.Second,
 				RateInterval: &RateInterval{
 					Rating: &RIRate{Rates: RateGroups{
-						&Rate{GroupIntervalStart: 0,
+						&RGRate{GroupIntervalStart: 0,
 							Value:         1,
 							RateIncrement: 10 * time.Second,
 							RateUnit:      time.Second}}}},
@@ -574,7 +574,7 @@ func TestDebitCreditSplitMinutesMoney(t *testing.T) {
 				RateInterval: &RateInterval{
 					Rating: &RIRate{
 						Rates: RateGroups{
-							&Rate{GroupIntervalStart: 0, Value: 1,
+							&RGRate{GroupIntervalStart: 0, Value: 1,
 								RateIncrement: 10 * time.Second,
 								RateUnit:      time.Second}}}},
 			},
@@ -633,7 +633,7 @@ func TestDebitCreditMoreTimespans(t *testing.T) {
 				RateInterval: &RateInterval{
 					Rating: &RIRate{
 						Rates: RateGroups{
-							&Rate{GroupIntervalStart: 0, Value: 100,
+							&RGRate{GroupIntervalStart: 0, Value: 100,
 								RateIncrement: 10 * time.Second,
 								RateUnit:      time.Second}}}},
 			},
@@ -643,7 +643,7 @@ func TestDebitCreditMoreTimespans(t *testing.T) {
 				DurationIndex: 10 * time.Second,
 				RateInterval: &RateInterval{
 					Rating: &RIRate{Rates: RateGroups{
-						&Rate{GroupIntervalStart: 0, Value: 100,
+						&RGRate{GroupIntervalStart: 0, Value: 100,
 							RateIncrement: 10 * time.Second,
 							RateUnit:      time.Second}}}},
 			},
@@ -695,7 +695,7 @@ func TestDebitCreditMoreTimespansMixed(t *testing.T) {
 				RateInterval: &RateInterval{
 					Rating: &RIRate{
 						Rates: RateGroups{
-							&Rate{GroupIntervalStart: 0,
+							&RGRate{GroupIntervalStart: 0,
 								Value:         100,
 								RateIncrement: 10 * time.Second,
 								RateUnit:      time.Second}}}},
@@ -706,7 +706,7 @@ func TestDebitCreditMoreTimespansMixed(t *testing.T) {
 				DurationIndex: 10 * time.Second,
 				RateInterval: &RateInterval{
 					Rating: &RIRate{Rates: RateGroups{
-						&Rate{GroupIntervalStart: 0,
+						&RGRate{GroupIntervalStart: 0,
 							Value:         100,
 							RateIncrement: 10 * time.Second,
 							RateUnit:      time.Second}}}},
@@ -758,7 +758,7 @@ func TestDebitCreditNoConectFeeCredit(t *testing.T) {
 				RateInterval: &RateInterval{
 					Rating: &RIRate{ConnectFee: 10.0,
 						Rates: RateGroups{
-							&Rate{GroupIntervalStart: 0,
+							&RGRate{GroupIntervalStart: 0,
 								Value:         100,
 								RateIncrement: 10 * time.Second,
 								RateUnit:      time.Second}}}},
@@ -770,7 +770,7 @@ func TestDebitCreditNoConectFeeCredit(t *testing.T) {
 				RateInterval: &RateInterval{
 					Rating: &RIRate{
 						Rates: RateGroups{
-							&Rate{GroupIntervalStart: 0,
+							&RGRate{GroupIntervalStart: 0,
 								Value:         1,
 								RateIncrement: 10 * time.Second,
 								RateUnit:      time.Second}}}},
@@ -814,7 +814,7 @@ func TestDebitCreditMoneyOnly(t *testing.T) {
 				RateInterval: &RateInterval{
 					Rating: &RIRate{
 						Rates: RateGroups{
-							&Rate{GroupIntervalStart: 0,
+							&RGRate{GroupIntervalStart: 0,
 								Value:         1,
 								RateIncrement: 10 * time.Second,
 								RateUnit:      time.Second}}}},
@@ -827,7 +827,7 @@ func TestDebitCreditMoneyOnly(t *testing.T) {
 				RateInterval: &RateInterval{
 					Rating: &RIRate{
 						Rates: RateGroups{
-							&Rate{GroupIntervalStart: 0,
+							&RGRate{GroupIntervalStart: 0,
 								Value:         1,
 								RateIncrement: 10 * time.Second,
 								RateUnit:      time.Second}}}},
@@ -887,7 +887,7 @@ func TestDebitCreditSubjectMinutes(t *testing.T) {
 				DurationIndex: 0,
 				RateInterval: &RateInterval{
 					Rating: &RIRate{Rates: RateGroups{
-						&Rate{GroupIntervalStart: 0,
+						&RGRate{GroupIntervalStart: 0,
 							Value:         1,
 							RateIncrement: 10 * time.Second,
 							RateUnit:      time.Second}}}},
@@ -950,7 +950,7 @@ func TestDebitCreditSubjectMoney(t *testing.T) {
 				RateInterval: &RateInterval{
 					Rating: &RIRate{
 						Rates: RateGroups{
-							&Rate{GroupIntervalStart: 0,
+							&RGRate{GroupIntervalStart: 0,
 								Value:         1,
 								RateIncrement: 10 * time.Second,
 								RateUnit:      time.Second}}}},
@@ -1450,7 +1450,7 @@ func TestDebitShared(t *testing.T) {
 				DurationIndex: 55 * time.Second,
 				RateInterval: &RateInterval{Rating: &RIRate{
 					Rates: RateGroups{
-						&Rate{GroupIntervalStart: 0, Value: 2,
+						&RGRate{GroupIntervalStart: 0, Value: 2,
 							RateIncrement: 10 * time.Second,
 							RateUnit:      time.Second}}}},
 			},
@@ -1521,7 +1521,7 @@ func TestMaxDurationShared(t *testing.T) {
 				DurationIndex: 55 * time.Second,
 				RateInterval: &RateInterval{
 					Rating: &RIRate{Rates: RateGroups{
-						&Rate{GroupIntervalStart: 0, Value: 2,
+						&RGRate{GroupIntervalStart: 0, Value: 2,
 							RateIncrement: 10 * time.Second,
 							RateUnit:      time.Second}}}},
 			},
@@ -1597,7 +1597,7 @@ func TestDebitSMS(t *testing.T) {
 				RateInterval: &RateInterval{
 					Rating: &RIRate{
 						Rates: RateGroups{
-							&Rate{GroupIntervalStart: 0,
+							&RGRate{GroupIntervalStart: 0,
 								Value:         100,
 								RateIncrement: 1,
 								RateUnit:      time.Nanosecond}}}},
@@ -1651,7 +1651,7 @@ func TestDebitGeneric(t *testing.T) {
 				RateInterval: &RateInterval{
 					Rating: &RIRate{
 						Rates: RateGroups{
-							&Rate{
+							&RGRate{
 								GroupIntervalStart: 0,
 								Value:              100,
 								RateIncrement:      1,
@@ -1709,7 +1709,7 @@ func TestDebitGenericBalance(t *testing.T) {
 				RateInterval: &RateInterval{
 					Rating: &RIRate{
 						Rates: RateGroups{
-							&Rate{GroupIntervalStart: 0,
+							&RGRate{GroupIntervalStart: 0,
 								Value:         100,
 								RateIncrement: 1 * time.Second,
 								RateUnit:      time.Second}}}},
@@ -1762,7 +1762,7 @@ func TestDebitGenericBalanceWithRatingSubject(t *testing.T) {
 				RateInterval: &RateInterval{
 					Rating: &RIRate{
 						Rates: RateGroups{
-							&Rate{GroupIntervalStart: 0, Value: 0,
+							&RGRate{GroupIntervalStart: 0, Value: 0,
 								RateIncrement: time.Second,
 								RateUnit:      time.Second}}}},
 			},
@@ -1815,10 +1815,10 @@ func TestDebitDataUnits(t *testing.T) {
 				RateInterval: &RateInterval{
 					Rating: &RIRate{
 						Rates: RateGroups{
-							&Rate{GroupIntervalStart: 0,
+							&RGRate{GroupIntervalStart: 0,
 								Value: 2, RateIncrement: 1,
 								RateUnit: 1},
-							&Rate{GroupIntervalStart: 60,
+							&RGRate{GroupIntervalStart: 60,
 								Value:         1,
 								RateIncrement: 1,
 								RateUnit:      1},
@@ -1880,7 +1880,7 @@ func TestDebitDataMoney(t *testing.T) {
 				RateInterval: &RateInterval{
 					Rating: &RIRate{
 						Rates: RateGroups{
-							&Rate{GroupIntervalStart: 0, Value: 2, RateIncrement: time.Minute, RateUnit: time.Second},
+							&RGRate{GroupIntervalStart: 0, Value: 2, RateIncrement: time.Minute, RateUnit: time.Second},
 						},
 					},
 				},

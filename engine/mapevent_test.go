@@ -604,19 +604,19 @@ func TestMapEventAsCDR(t *testing.T) {
 		},
 		Rates: ChargedRates{
 			"ec1a177": RateGroups{
-				&Rate{
+				&RGRate{
 					GroupIntervalStart: time.Duration(0),
 					Value:              0.01,
 					RateIncrement:      time.Duration(1 * time.Minute),
 					RateUnit:           time.Duration(1 * time.Second)},
 			},
 			"4910ecf": RateGroups{
-				&Rate{
+				&RGRate{
 					GroupIntervalStart: time.Duration(0),
 					Value:              0.005,
 					RateIncrement:      time.Duration(1 * time.Second),
 					RateUnit:           time.Duration(1 * time.Second)},
-				&Rate{
+				&RGRate{
 					GroupIntervalStart: time.Duration(60 * time.Second),
 					Value:              0.005,
 					RateIncrement:      time.Duration(1 * time.Second),

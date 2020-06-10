@@ -214,7 +214,7 @@ type RIRate struct {
 	RoundingDecimals int
 	MaxCost          float64
 	MaxCostStrategy  string
-	Rates            RateGroups // GroupRateInterval (start time): Rate
+	Rates            RateGroups // GroupRateInterval (start time): RGRate
 	tag              string     // loading validation only
 }
 
@@ -226,7 +226,7 @@ func (rir *RIRate) Stringify() string {
 	return utils.Sha1(str)[:8]
 }
 
-type Rate struct {
+type RGRate struct {
 	GroupIntervalStart time.Duration
 	Value              float64
 	RateIncrement      time.Duration
@@ -234,7 +234,7 @@ type Rate struct {
 }
 
 // FieldAsInterface func to help EventCost FieldAsInterface
-func (r *Rate) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+func (r *RGRate) FieldAsInterface(fldPath []string) (val interface{}, err error) {
 	if len(fldPath) != 1 {
 		return nil, utils.ErrNotFound
 	}
@@ -252,18 +252,18 @@ func (r *Rate) FieldAsInterface(fldPath []string) (val interface{}, err error) {
 	}
 }
 
-func (r *Rate) Stringify() string {
+func (r *RGRate) Stringify() string {
 	return utils.Sha1(fmt.Sprintf("%v", r))[:8]
 }
 
-func (p *Rate) Equal(o *Rate) bool {
+func (p *RGRate) Equal(o *RGRate) bool {
 	return p.GroupIntervalStart == o.GroupIntervalStart &&
 		p.Value == o.Value &&
 		p.RateIncrement == o.RateIncrement &&
 		p.RateUnit == o.RateUnit
 }
 
-type RateGroups []*Rate
+type RateGroups []*RGRate
 
 func (pg RateGroups) Len() int {
 	return len(pg)
@@ -293,7 +293,7 @@ func (pg RateGroups) Equal(og RateGroups) bool {
 	return true
 }
 
-func (pg *RateGroups) AddRate(ps ...*Rate) {
+func (pg *RateGroups) AddRate(ps ...*RGRate) {
 	for _, p := range ps {
 		found := false
 		for _, op := range *pg {
@@ -323,7 +323,7 @@ func (pg RateGroups) Equals(oRG RateGroups) bool {
 func (pg RateGroups) Clone() (cln RateGroups) {
 	cln = make(RateGroups, len(pg))
 	for i, rt := range pg {
-		cln[i] = new(Rate)
+		cln[i] = new(RGRate)
 		*cln[i] = *rt
 	}
 	return
@@ -487,7 +487,7 @@ func (rit *RIRate) Clone() (cln *RIRate) {
 		MaxCostStrategy:  rit.MaxCostStrategy,
 	}
 	if rit.Rates != nil {
-		cln.Rates = make([]*Rate, len(rit.Rates))
+		cln.Rates = make([]*RGRate, len(rit.Rates))
 		for i, rate := range rit.Rates {
 			cln.Rates[i] = rate.Clone()
 		}
@@ -496,11 +496,11 @@ func (rit *RIRate) Clone() (cln *RIRate) {
 }
 
 // Clone clones Rates
-func (r *Rate) Clone() (cln *Rate) {
+func (r *RGRate) Clone() (cln *RGRate) {
 	if r == nil {
 		return
 	}
-	cln = &Rate{
+	cln = &RGRate{
 		GroupIntervalStart: r.GroupIntervalStart,
 		Value:              r.Value,
 		RateIncrement:      r.RateIncrement,

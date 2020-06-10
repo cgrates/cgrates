@@ -1001,7 +1001,7 @@ func testApierGetRatingPlan(t *testing.T) {
 	if len(reply.Timings) != 1 || len(reply.Ratings) != 1 {
 		t.Error("Unexpected number of items received")
 	}
-	riRate := &engine.RIRate{ConnectFee: 0, RoundingMethod: "*up", RoundingDecimals: 2, Rates: []*engine.Rate{
+	riRate := &engine.RIRate{ConnectFee: 0, RoundingMethod: "*up", RoundingDecimals: 2, Rates: []*engine.RGRate{
 		{GroupIntervalStart: 0, Value: 0, RateIncrement: time.Duration(60) * time.Second, RateUnit: time.Duration(60) * time.Second},
 	}}
 	for _, rating := range reply.Ratings {

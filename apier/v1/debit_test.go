@@ -97,7 +97,7 @@ func TestDebitUsageWithOptions(t *testing.T) {
 		Ratings: map[string]*engine.RIRate{
 			"b457f86d": {
 				ConnectFee: 0,
-				Rates: []*engine.Rate{
+				Rates: []*engine.RGRate{
 					{
 						GroupIntervalStart: 0,
 						Value:              0.03,
