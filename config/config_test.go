@@ -428,6 +428,7 @@ func TestCgrCfgJSONDefaultsCDRS(t *testing.T) {
 		ThresholdSConns: []string{},
 		StatSConns:      []string{},
 		SchedulerConns:  []string{},
+		EEsConns:        []string{},
 	}
 	if !reflect.DeepEqual(eCdrsCfg, cgrCfg.cdrsCfg) {
 		t.Errorf("Expecting: %+v , received: %+v", eCdrsCfg, cgrCfg.cdrsCfg)

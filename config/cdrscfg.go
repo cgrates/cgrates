@@ -36,6 +36,7 @@ type CdrsCfg struct {
 	StatSConns       []string
 	OnlineCDRExports []string // list of CDRE templates to use for real-time CDR exports
 	SchedulerConns   []string
+	EEsConns         []string
 }
 
 //loadFromJsonCfg loads Cdrs config from JsonCfg
@@ -129,6 +130,17 @@ func (cdrscfg *CdrsCfg) loadFromJsonCfg(jsnCdrsCfg *CdrsJsonCfg) (err error) {
 		}
 	}
 
+	if jsnCdrsCfg.Ees_conns != nil {
+		cdrscfg.EEsConns = make([]string, len(*jsnCdrsCfg.Ees_conns))
+		for idx, connID := range *jsnCdrsCfg.Ees_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			if connID == utils.MetaInternal {
+				cdrscfg.EEsConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)
+			} else {
+				cdrscfg.EEsConns[idx] = connID
+			}
+		}
+	}
 	return nil
 }
 

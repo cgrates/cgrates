@@ -151,6 +151,7 @@ type CdrsJsonCfg struct {
 	Stats_conns          *[]string
 	Online_cdr_exports   *[]string
 	Scheduler_conns      *[]string
+	Ees_conns            *[]string
 }
 
 // Cdre config section

@@ -570,6 +570,7 @@ func TestDfCdrsJsonCfg(t *testing.T) {
 		Stats_conns:          &[]string{},
 		Online_cdr_exports:   &[]string{},
 		Scheduler_conns:      &[]string{},
+		Ees_conns:            &[]string{},
 	}
 	if cfg, err := dfCgrJsonCfg.CdrsJsonCfg(); err != nil {
 		t.Error(err)

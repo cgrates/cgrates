@@ -274,6 +274,7 @@ const CGRATES_CFG_JSON = `
 	"stats_conns": [],						// connections to StatS for CDR reporting, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
 	"online_cdr_exports":[],				// list of CDRE profiles to use for real-time CDR exports
 	"scheduler_conns": [],					// connections to SchedulerS in case of *dynaprepaid request
+	"ees_conns": [],						// connections to EventExporter
 },
 
 
