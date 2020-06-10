@@ -98,6 +98,14 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				return fmt.Errorf("<%s> cannot find CDR export template with ID: <%s>", utils.CDRs, cdrePrfl)
 			}
 		}
+		for _, connID := range cfg.cdrsCfg.EEsConns {
+			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.eesCfg.Enabled {
+				return fmt.Errorf("<%s> not enabled but requested by <%s> component.", utils.EEs, utils.CDRs)
+			}
+			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
+				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.CDRs, connID)
+			}
+		}
 		for prfl, cdre := range cfg.CdreProfiles {
 			for _, field := range cdre.Fields {
 				if field.Type != utils.META_NONE && field.Path == utils.EmptyString {
