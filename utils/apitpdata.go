@@ -461,6 +461,7 @@ type ArgsCache struct {
 	DispatcherProfileIDs  []string
 	DispatcherHostIDs     []string
 	DispatcherRoutesIDs   []string
+	RateProfileIDs        []string
 }
 
 type AttrExpFileCdrs struct {

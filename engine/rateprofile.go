@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package rates
+package engine
 
 import (
 	"time"
@@ -44,6 +44,10 @@ type RateProfile struct {
 	maxCost *utils.Decimal
 }
 
+func (rpp *RateProfile) TenantID() string {
+	return utils.ConcatenatedKey(rpp.Tenant, rpp.ID)
+}
+
 // Route defines rate related information used within a RateProfile
 type Rate struct {
 	ID        string        // RateID
@@ -55,4 +59,26 @@ type Rate struct {
 	Blocker   bool          // RateBlocker will make this rate recurrent
 
 	val *utils.Decimal // cached version of the Decimal
+}
+
+// RateProfileWithArgDispatcher is used in replicatorV1 for dispatcher
+type RateProfileWithArgDispatcher struct {
+	*RateProfile
+	*utils.ArgDispatcher
+}
+
+type TPRateProfile struct {
+	TPid               string
+	Tenant             string
+	ID                 string
+	FilterIDs          []string
+	ActivationInterval *utils.TPActivationInterval
+	Weight             float64
+	ConnectFee         float64
+	RoundingMethod     string
+	RoundingDecimals   int
+	MinCost            float64
+	MaxCost            float64
+	MaxCostStrategy    string
+	Rates              []*Rate
 }

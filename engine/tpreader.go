@@ -56,6 +56,7 @@ type TpReader struct {
 	chargerProfiles    map[utils.TenantID]*utils.TPChargerProfile
 	dispatcherProfiles map[utils.TenantID]*utils.TPDispatcherProfile
 	dispatcherHosts    map[utils.TenantID]*utils.TPDispatcherHost
+	rateProfiles       map[utils.TenantID]*TPRateProfile
 	resources          []*utils.TenantID // IDs of resources which need creation based on resourceProfiles
 	statQueues         []*utils.TenantID // IDs of statQueues which need creation based on statQueueProfiles
 	thresholds         []*utils.TenantID // IDs of thresholds which need creation based on thresholdProfiles
@@ -103,6 +104,7 @@ func (tpr *TpReader) Init() {
 	tpr.chargerProfiles = make(map[utils.TenantID]*utils.TPChargerProfile)
 	tpr.dispatcherProfiles = make(map[utils.TenantID]*utils.TPDispatcherProfile)
 	tpr.dispatcherHosts = make(map[utils.TenantID]*utils.TPDispatcherHost)
+	tpr.rateProfiles = make(map[utils.TenantID]*TPRateProfile)
 	tpr.filters = make(map[utils.TenantID]*utils.TPFilterProfile)
 	tpr.revDests = make(map[string][]string)
 	tpr.acntActionPlans = make(map[string][]string)
@@ -1240,6 +1242,23 @@ func (tpr *TpReader) LoadDispatcherHostsFiltered(tag string) (err error) {
 	return nil
 }
 
+func (tpr *TpReader) LoadRateProfiles() error {
+	return tpr.LoadRateProfilesFiltered("")
+}
+
+func (tpr *TpReader) LoadRateProfilesFiltered(tag string) (err error) {
+	rls, err := tpr.lr.GetTPRateProfiles(tpr.tpid, "", tag)
+	if err != nil {
+		return err
+	}
+	mapRateProfiles := make(map[utils.TenantID]*TPRateProfile)
+	for _, rl := range rls {
+		mapRateProfiles[utils.TenantID{Tenant: rl.Tenant, ID: rl.ID}] = rl
+	}
+	tpr.rateProfiles = mapRateProfiles
+	return nil
+}
+
 func (tpr *TpReader) LoadDispatcherHosts() error {
 	return tpr.LoadDispatcherHostsFiltered("")
 }
@@ -1303,6 +1322,9 @@ func (tpr *TpReader) LoadAll() (err error) {
 		return
 	}
 	if err = tpr.LoadDispatcherHosts(); err != nil && err.Error() != utils.NotFoundCaps {
+		return
+	}
+	if err = tpr.LoadRateProfiles(); err != nil && err.Error() != utils.NotFoundCaps {
 		return
 	}
 	return nil
@@ -1711,6 +1733,25 @@ func (tpr *TpReader) WriteToDatabase(verbose, disable_reverse bool) (err error) 
 	}
 
 	if verbose {
+		log.Print("RateProfiles:")
+	}
+	for _, tpTH := range tpr.rateProfiles {
+		th, err := APItoRateProfile(tpTH, tpr.timezone)
+		if err != nil {
+			return err
+		}
+		if err = tpr.dm.SetRateProfile(th, true); err != nil {
+			return err
+		}
+		if verbose {
+			log.Print("\t", th.TenantID())
+		}
+	}
+	if len(tpr.rateProfiles) != 0 {
+		loadIDs[utils.CacheRateProfiles] = loadID
+	}
+
+	if verbose {
 		log.Print("Timings:")
 	}
 	for _, t := range tpr.timings {
@@ -1817,6 +1858,8 @@ func (tpr *TpReader) ShowStatistics() {
 	log.Print("DispatcherProfiles: ", len(tpr.dispatcherProfiles))
 	// Dispatcher Hosts
 	log.Print("DispatcherHosts: ", len(tpr.dispatcherHosts))
+	// Rate profiles
+	log.Print("RateProfiles: ", len(tpr.rateProfiles))
 }
 
 // Returns the identities loaded for a specific category, useful for cache reloads
@@ -1963,6 +2006,15 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 		keys := make([]string, len(tpr.dispatcherHosts))
 		i := 0
 		for k := range tpr.dispatcherHosts {
+			keys[i] = k.TenantID()
+			i++
+		}
+		return keys, nil
+
+	case utils.RateProfilePrefix:
+		keys := make([]string, len(tpr.rateProfiles))
+		i := 0
+		for k := range tpr.rateProfiles {
 			keys[i] = k.TenantID()
 			i++
 		}
@@ -2210,6 +2262,19 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disable_reverse bool) (err erro
 	}
 
 	if verbose {
+		log.Print("RateProfiles:")
+	}
+	for _, tpRp := range tpr.rateProfiles {
+		if err = tpr.dm.RemoveRateProfile(tpRp.Tenant, tpRp.ID,
+			utils.NonTransactional, true); err != nil {
+			return err
+		}
+		if verbose {
+			log.Print("\t", utils.ConcatenatedKey(tpRp.Tenant, tpRp.ID))
+		}
+	}
+
+	if verbose {
 		log.Print("Timings:")
 	}
 	for _, t := range tpr.timings {
@@ -2314,6 +2379,9 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disable_reverse bool) (err erro
 	if len(tpr.dispatcherHosts) != 0 {
 		loadIDs[utils.CacheDispatcherHosts] = loadID
 	}
+	if len(tpr.rateProfiles) != 0 {
+		loadIDs[utils.CacheRateProfiles] = loadID
+	}
 	if len(tpr.timings) != 0 {
 		loadIDs[utils.CacheTimings] = loadID
 	}
@@ -2349,6 +2417,7 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, argDispatcher *ut
 	chargerIDs, _ := tpr.GetLoadedIds(utils.ChargerProfilePrefix)
 	dppIDs, _ := tpr.GetLoadedIds(utils.DispatcherProfilePrefix)
 	dphIDs, _ := tpr.GetLoadedIds(utils.DispatcherHostPrefix)
+	ratePrfIDs, _ := tpr.GetLoadedIds(utils.RateProfilePrefix)
 	aps, _ := tpr.GetLoadedIds(utils.ACTION_PLAN_PREFIX)
 
 	//compose Reload Cache argument
@@ -2376,6 +2445,7 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, argDispatcher *ut
 			ChargerProfileIDs:     chargerIDs,
 			DispatcherProfileIDs:  dppIDs,
 			DispatcherHostIDs:     dphIDs,
+			RateProfileIDs:        ratePrfIDs,
 		},
 	}
 
@@ -2426,6 +2496,9 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, argDispatcher *ut
 	}
 	if len(dppIDs) != 0 {
 		cacheIDs = append(cacheIDs, utils.CacheDispatcherFilterIndexes)
+	}
+	if len(ratePrfIDs) != 0 {
+		cacheIDs = append(cacheIDs, utils.CacheRateFilterIndexes)
 	}
 	if verbose {
 		log.Print("Clearing indexes")

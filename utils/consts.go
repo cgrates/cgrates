@@ -70,7 +70,7 @@ var (
 		CacheAttributeFilterIndexes, CacheChargerFilterIndexes, CacheDispatcherFilterIndexes,
 		CacheDispatcherRoutes, CacheDispatcherLoads, CacheDiameterMessages, CacheRPCResponses,
 		CacheClosedSessions, CacheCDRIDs, CacheLoadIDs, CacheRPCConnections, CacheRatingProfilesTmp,
-		CacheUCH, CacheSTIR, CacheEventCharges})
+		CacheUCH, CacheSTIR, CacheEventCharges, CacheRateProfiles, CacheRateFilterIndexes})
 	CacheInstanceToPrefix = map[string]string{
 		CacheDestinations:            DESTINATION_PREFIX,
 		CacheReverseDestinations:     REVERSE_DESTINATION_PREFIX,
@@ -94,6 +94,7 @@ var (
 		CacheChargerProfiles:         ChargerProfilePrefix,
 		CacheDispatcherProfiles:      DispatcherProfilePrefix,
 		CacheDispatcherHosts:         DispatcherHostPrefix,
+		CacheRateProfiles:            RateProfilePrefix,
 		CacheResourceFilterIndexes:   ResourceFilterIndexes,
 		CacheStatFilterIndexes:       StatFilterIndexes,
 		CacheThresholdFilterIndexes:  ThresholdFilterIndexes,
@@ -101,6 +102,7 @@ var (
 		CacheAttributeFilterIndexes:  AttributeFilterIndexes,
 		CacheChargerFilterIndexes:    ChargerFilterIndexes,
 		CacheDispatcherFilterIndexes: DispatcherFilterIndexes,
+		CacheRateFilterIndexes:       RateFilterIndexes,
 		CacheLoadIDs:                 LoadIDPrefix,
 		CacheAccounts:                ACCOUNT_PREFIX,
 	}
@@ -113,6 +115,7 @@ var (
 		AttributeProfilePrefix:  CacheAttributeFilterIndexes,
 		ChargerProfilePrefix:    CacheChargerFilterIndexes,
 		DispatcherProfilePrefix: CacheDispatcherFilterIndexes,
+		RateProfilePrefix:       CacheRateFilterIndexes,
 	}
 	CacheIndexesToPrefix map[string]string // will be built on init
 
@@ -129,7 +132,8 @@ var (
 		CacheFilters, CacheRouteProfiles, CacheAttributeProfiles, CacheChargerProfiles,
 		CacheDispatcherProfiles, CacheDispatcherHosts, CacheResourceFilterIndexes, CacheStatFilterIndexes,
 		CacheThresholdFilterIndexes, CacheRouteFilterIndexes, CacheAttributeFilterIndexes,
-		CacheChargerFilterIndexes, CacheDispatcherFilterIndexes, CacheLoadIDs, CacheAccounts})
+		CacheChargerFilterIndexes, CacheDispatcherFilterIndexes, CacheLoadIDs, CacheAccounts,
+		CacheRateProfiles, CacheRateFilterIndexes})
 
 	CacheStorDBPartitions = NewStringSet([]string{TBLTPTimings, TBLTPDestinations, TBLTPRates,
 		TBLTPDestinationRates, TBLTPRatingPlans, TBLTPRatingProfiles, TBLTPSharedGroups,
@@ -270,6 +274,7 @@ const (
 	AttributeProfilePrefix       = "alp_"
 	ChargerProfilePrefix         = "cpp_"
 	DispatcherProfilePrefix      = "dpp_"
+	RateProfilePrefix            = "rep_"
 	DispatcherHostPrefix         = "dph_"
 	ThresholdProfilePrefix       = "thp_"
 	StatQueuePrefix              = "stq_"
@@ -421,6 +426,7 @@ const (
 	Filters                     = "Filters"
 	DispatcherProfiles          = "DispatcherProfiles"
 	DispatcherHosts             = "DispatcherHosts"
+	RateProfiles                = "RateProfiles"
 	MetaEveryMinute             = "*every_minute"
 	MetaHourly                  = "*hourly"
 	ID                          = "ID"
@@ -542,6 +548,11 @@ const (
 	RoundingMethod           = "RoundingMethod"
 	RoundingDecimals         = "RoundingDecimals"
 	MaxCostStrategy          = "MaxCostStrategy"
+	RateID                   = "RateID"
+	RateFilterIDs            = "RateFilterIDs"
+	RateWeight               = "RateWeight"
+	RateValue                = "RateValue"
+	RateBlocker              = "RateBlocker"
 	TimingID                 = "TimingID"
 	RatesID                  = "RatesID"
 	RatingFiltersID          = "RatingFiltersID"
@@ -772,6 +783,7 @@ const (
 	MetaAttributeProfiles   = "*attribute_profiles"
 	MetaFilterIndexes       = "*filter_indexes"
 	MetaDispatcherProfiles  = "*dispatcher_profiles"
+	MetaRateProfiles        = "*rate_profiles"
 	MetaChargerProfiles     = "*charger_profiles"
 	MetaSharedGroups        = "*shared_groups"
 	MetaThresholds          = "*thresholds"
@@ -1008,6 +1020,7 @@ const (
 	ReplicatorSv1GetAttributeProfile     = "ReplicatorSv1.GetAttributeProfile"
 	ReplicatorSv1GetChargerProfile       = "ReplicatorSv1.GetChargerProfile"
 	ReplicatorSv1GetDispatcherProfile    = "ReplicatorSv1.GetDispatcherProfile"
+	ReplicatorSv1GetRateProfile          = "ReplicatorSv1.GetRateProfile"
 	ReplicatorSv1GetDispatcherHost       = "ReplicatorSv1.GetDispatcherHost"
 	ReplicatorSv1GetItemLoadIDs          = "ReplicatorSv1.GetItemLoadIDs"
 	ReplicatorSv1GetFilterIndexes        = "ReplicatorSv1.GetFilterIndexes"
@@ -1035,6 +1048,7 @@ const (
 	ReplicatorSv1SetAttributeProfile     = "ReplicatorSv1.SetAttributeProfile"
 	ReplicatorSv1SetChargerProfile       = "ReplicatorSv1.SetChargerProfile"
 	ReplicatorSv1SetDispatcherProfile    = "ReplicatorSv1.SetDispatcherProfile"
+	ReplicatorSv1SetRateProfile          = "ReplicatorSv1.SetRateProfile"
 	ReplicatorSv1SetDispatcherHost       = "ReplicatorSv1.SetDispatcherHost"
 	ReplicatorSv1SetLoadIDs              = "ReplicatorSv1.SetLoadIDs"
 	ReplicatorSv1RemoveThreshold         = "ReplicatorSv1.RemoveThreshold"
@@ -1058,6 +1072,7 @@ const (
 	ReplicatorSv1RemoveAttributeProfile  = "ReplicatorSv1.RemoveAttributeProfile"
 	ReplicatorSv1RemoveChargerProfile    = "ReplicatorSv1.RemoveChargerProfile"
 	ReplicatorSv1RemoveDispatcherProfile = "ReplicatorSv1.RemoveDispatcherProfile"
+	ReplicatorSv1RemoveRateProfile       = "ReplicatorSv1.RemoveRateProfile"
 	ReplicatorSv1RemoveDispatcherHost    = "ReplicatorSv1.RemoveDispatcherHost"
 )
 
@@ -1545,6 +1560,7 @@ const (
 	ChargersCsv           = "Chargers.csv"
 	DispatcherProfilesCsv = "DispatcherProfiles.csv"
 	DispatcherHostsCsv    = "DispatcherHosts.csv"
+	RateProfilesCsv       = "RateProfiles.csv"
 )
 
 // Table Name
@@ -1573,6 +1589,7 @@ const (
 	OldSMCosts            = "sm_costs"
 	TBLTPDispatchers      = "tp_dispatcher_profiles"
 	TBLTPDispatcherHosts  = "tp_dispatcher_hosts"
+	TBLTPRateProfiles     = "tp_rate_profiles"
 )
 
 // Cache Name
@@ -1603,6 +1620,7 @@ const (
 	CacheDispatchers             = "*dispatchers"
 	CacheDispatcherRoutes        = "*dispatcher_routes"
 	CacheDispatcherLoads         = "*dispatcher_loads"
+	CacheRateProfiles            = "*rate_profiles"
 	CacheResourceFilterIndexes   = "*resource_filter_indexes"
 	CacheStatFilterIndexes       = "*stat_filter_indexes"
 	CacheThresholdFilterIndexes  = "*threshold_filter_indexes"
@@ -1610,6 +1628,7 @@ const (
 	CacheAttributeFilterIndexes  = "*attribute_filter_indexes"
 	CacheChargerFilterIndexes    = "*charger_filter_indexes"
 	CacheDispatcherFilterIndexes = "*dispatcher_filter_indexes"
+	CacheRateFilterIndexes       = "*rate_filter_indexes"
 	CacheDiameterMessages        = "*diameter_messages"
 	CacheRPCResponses            = "*rpc_responses"
 	CacheClosedSessions          = "*closed_sessions"
@@ -1635,6 +1654,7 @@ const (
 	DispatcherFilterIndexes = "dfi_"
 	ActionPlanIndexes       = "api_"
 	RouteFilterIndexes      = "rti_"
+	RateFilterIndexes       = "rei_"
 )
 
 // Agents

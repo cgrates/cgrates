@@ -42,8 +42,11 @@ DR_DATA_2,*any,RT_DATA_1c,*up,4,0,`
 	ratingPlans := `RP_DATA1,DR_DATA_1,TM1,10
 RP_DATA1,DR_DATA_2,TM2,10`
 	ratingProfiles := `cgrates.org,data,*any,2012-01-01T00:00:00Z,RP_DATA1,`
-	csvr, err := engine.NewTpReader(dataDB.DataDB(), engine.NewStringCSVStorage(utils.CSV_SEP, "", timings, rates, destinationRates, ratingPlans, ratingProfiles,
-		"", "", "", "", "", "", "", "", "", "", "", "", "", ""), "", "", nil, nil)
+	csvr, err := engine.NewTpReader(dataDB.DataDB(), engine.NewStringCSVStorage(utils.CSV_SEP, utils.EmptyString, timings, rates, destinationRates, ratingPlans, ratingProfiles,
+		utils.EmptyString, utils.EmptyString, utils.EmptyString, utils.EmptyString, utils.EmptyString,
+		utils.EmptyString, utils.EmptyString, utils.EmptyString, utils.EmptyString, utils.EmptyString,
+		utils.EmptyString, utils.EmptyString, utils.EmptyString, utils.EmptyString, utils.EmptyString),
+		utils.EmptyString, utils.EmptyString, nil, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -65,12 +68,12 @@ RP_DATA1,DR_DATA_2,TM2,10`
 	csvr.WriteToDatabase(false, false)
 	engine.Cache.Clear(nil)
 	dataDB.LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 
-	if cachedRPlans := len(engine.Cache.GetItemIDs(utils.CacheRatingPlans, "")); cachedRPlans != 1 {
+	if cachedRPlans := len(engine.Cache.GetItemIDs(utils.CacheRatingPlans, utils.EmptyString)); cachedRPlans != 1 {
 		t.Error("Wrong number of cached rating plans found", cachedRPlans)
 	}
-	if cachedRProfiles := len(engine.Cache.GetItemIDs(utils.CacheRatingProfiles, "")); cachedRProfiles != 0 {
+	if cachedRProfiles := len(engine.Cache.GetItemIDs(utils.CacheRatingProfiles, utils.EmptyString)); cachedRProfiles != 0 {
 		t.Error("Wrong number of cached rating profiles found", cachedRProfiles)
 	}
 }

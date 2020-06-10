@@ -117,7 +117,7 @@ func (dm *DataManager) DataDB() DataDB {
 
 func (dm *DataManager) LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs,
 	aaPlIDs, atrgIDs, sgIDs, rpIDs, resIDs, stqIDs, stqpIDs, thIDs, thpIDs, fltrIDs,
-	rPrflIDs, alsPrfIDs, cppIDs, dppIDs, dphIDs []string) (err error) {
+	rPrflIDs, alsPrfIDs, cppIDs, dppIDs, dphIDs, ratePrfIDs []string) (err error) {
 	if dm == nil {
 		err = utils.ErrNoDatabaseConn
 		return
@@ -158,6 +158,7 @@ func (dm *DataManager) LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs,
 			utils.ChargerProfilePrefix:       cppIDs,
 			utils.DispatcherProfilePrefix:    dppIDs,
 			utils.DispatcherHostPrefix:       dphIDs,
+			utils.RateProfilePrefix:          ratePrfIDs,
 		} {
 			if err = dm.CacheDataFromDB(key, ids, false); err != nil {
 				return
@@ -296,6 +297,9 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 		case utils.DispatcherHostPrefix:
 			tntID := utils.NewTenantID(dataID)
 			_, err = dm.GetDispatcherHost(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
+		case utils.RateProfilePrefix:
+			tntID := utils.NewTenantID(dataID)
+			_, err = dm.GetRateProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.AttributeFilterIndexes:
 			err = dm.MatchFilterIndexFromKey(utils.CacheAttributeFilterIndexes, dataID)
 		case utils.ResourceFilterIndexes:
@@ -310,6 +314,8 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 			err = dm.MatchFilterIndexFromKey(utils.CacheChargerFilterIndexes, dataID)
 		case utils.DispatcherFilterIndexes:
 			err = dm.MatchFilterIndexFromKey(utils.CacheDispatcherFilterIndexes, dataID)
+		case utils.RateFilterIndexes:
+			err = dm.MatchFilterIndexFromKey(utils.CacheRateFilterIndexes, dataID)
 		case utils.LoadIDPrefix:
 			_, err = dm.GetItemLoadIDs(utils.EmptyString, true)
 		}
@@ -3088,6 +3094,143 @@ func (dm *DataManager) SetLoadIDs(loadIDs map[string]int64) (err error) {
 			err = utils.CastRPCErr(err)
 			return
 		}
+	}
+	return
+}
+
+func (dm *DataManager) GetRateProfile(tenant, id string, cacheRead, cacheWrite bool,
+	transactionID string) (rpp *RateProfile, err error) {
+	tntID := utils.ConcatenatedKey(tenant, id)
+	if cacheRead {
+		if x, ok := Cache.Get(utils.CacheRateProfiles, tntID); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
+			}
+			return x.(*RateProfile), nil
+		}
+	}
+	if dm == nil {
+		err = utils.ErrNoDatabaseConn
+		return
+	}
+	rpp, err = dm.dataDB.GetRateProfileDrv(tenant, id)
+	if err != nil {
+		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRateProfiles]; err == utils.ErrNotFound && itm.Remote {
+			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
+				utils.ReplicatorSv1GetRateProfile,
+				&utils.TenantIDWithArgDispatcher{
+					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
+					ArgDispatcher: &utils.ArgDispatcher{
+						APIKey:  utils.StringPointer(itm.APIKey),
+						RouteID: utils.StringPointer(itm.RouteID),
+					}}, &rpp); err == nil {
+				err = dm.dataDB.SetRateProfileDrv(rpp)
+			}
+		}
+		if err != nil {
+			err = utils.CastRPCErr(err)
+			if err == utils.ErrNotFound && cacheWrite {
+				if errCh := Cache.Set(utils.CacheRateProfiles, tntID, nil, nil,
+					cacheCommit(transactionID), transactionID); errCh != nil {
+					return nil, errCh
+				}
+
+			}
+			return nil, err
+		}
+	}
+	if cacheWrite {
+		if errCh := Cache.Set(utils.CacheRateProfiles, tntID, rpp, nil,
+			cacheCommit(transactionID), transactionID); errCh != nil {
+			return nil, errCh
+		}
+	}
+	return
+}
+
+func (dm *DataManager) SetRateProfile(rpp *RateProfile, withIndex bool) (err error) {
+	if dm == nil {
+		err = utils.ErrNoDatabaseConn
+		return
+	}
+	oldRpp, err := dm.GetRateProfile(rpp.Tenant, rpp.ID, true, false, utils.NonTransactional)
+	if err != nil && err != utils.ErrNotFound {
+		return err
+	}
+	if err = dm.DataDB().SetRateProfileDrv(rpp); err != nil {
+		return err
+	}
+	if withIndex {
+		if oldRpp != nil {
+			var needsRemove bool
+			for _, fltrID := range oldRpp.FilterIDs {
+				if !utils.IsSliceMember(rpp.FilterIDs, fltrID) {
+					needsRemove = true
+				}
+			}
+
+			if needsRemove {
+				if err = NewFilterIndexer(dm, utils.RouteProfilePrefix,
+					rpp.Tenant).RemoveItemFromIndex(rpp.Tenant, rpp.ID, oldRpp.FilterIDs); err != nil {
+					return
+				}
+			}
+		}
+		if err = createAndIndex(utils.RouteProfilePrefix, rpp.Tenant, utils.EmptyString,
+			rpp.ID, rpp.FilterIDs, dm); err != nil {
+			return
+		}
+
+	}
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaDispatcherProfiles]; itm.Replicate {
+		var reply string
+		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+			utils.ReplicatorSv1SetRateProfile,
+			&RateProfileWithArgDispatcher{
+				RateProfile: rpp,
+				ArgDispatcher: &utils.ArgDispatcher{
+					APIKey:  utils.StringPointer(itm.APIKey),
+					RouteID: utils.StringPointer(itm.RouteID),
+				}}, &reply); err != nil {
+			err = utils.CastRPCErr(err)
+			return
+		}
+	}
+	return
+}
+
+func (dm *DataManager) RemoveRateProfile(tenant, id string,
+	transactionID string, withIndex bool) (err error) {
+	if dm == nil {
+		err = utils.ErrNoDatabaseConn
+		return
+	}
+	oldRpp, err := dm.GetRateProfile(tenant, id, true, false, utils.NonTransactional)
+	if err != nil && err != utils.ErrNotFound {
+		return err
+	}
+	if err = dm.DataDB().RemoveRateProfileDrv(tenant, id); err != nil {
+		return
+	}
+	if oldRpp == nil {
+		return utils.ErrNotFound
+	}
+	if withIndex {
+		if err = NewFilterIndexer(dm, utils.RateProfilePrefix,
+			tenant).RemoveItemFromIndex(tenant, id, oldRpp.FilterIDs); err != nil {
+			return
+		}
+	}
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRateProfiles]; itm.Replicate {
+		var reply string
+		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+			utils.ReplicatorSv1RemoveRateProfile,
+			&utils.TenantIDWithArgDispatcher{
+				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
+				ArgDispatcher: &utils.ArgDispatcher{
+					APIKey:  utils.StringPointer(itm.APIKey),
+					RouteID: utils.StringPointer(itm.RouteID),
+				}}, &reply)
 	}
 	return
 }

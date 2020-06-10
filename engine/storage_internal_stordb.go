@@ -566,6 +566,28 @@ func (iDB *InternalDB) GetTPDispatcherHosts(tpid, tenant, id string) (dpps []*ut
 	return
 }
 
+func (iDB *InternalDB) GetTPRateProfiles(tpid, tenant, id string) (tpPrfs []*TPRateProfile, err error) {
+	key := tpid
+	if tenant != utils.EmptyString {
+		key += utils.CONCATENATED_KEY_SEP + tenant
+	}
+	if id != utils.EmptyString {
+		key += utils.CONCATENATED_KEY_SEP + id
+	}
+	ids := iDB.db.GetItemIDs(utils.TBLTPRateProfiles, key)
+	for _, id := range ids {
+		x, ok := iDB.db.Get(utils.TBLTPRateProfiles, id)
+		if !ok || x == nil {
+			return nil, utils.ErrNotFound
+		}
+		tpPrfs = append(tpPrfs, x.(*TPRateProfile))
+	}
+	if len(tpPrfs) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	return
+}
+
 //implement LoadWriter interface
 func (iDB *InternalDB) RemTpData(table, tpid string, args map[string]string) (err error) {
 	if table == utils.EmptyString {
@@ -800,6 +822,17 @@ func (iDB *InternalDB) SetTPDispatcherHosts(dpps []*utils.TPDispatcherHost) (err
 	}
 	for _, dpp := range dpps {
 		iDB.db.Set(utils.TBLTPDispatcherHosts, utils.ConcatenatedKey(dpp.TPid, dpp.Tenant, dpp.ID), dpp, nil,
+			cacheCommit(utils.NonTransactional), utils.NonTransactional)
+	}
+	return
+}
+
+func (iDB *InternalDB) SetTPRateProfiles(tpPrfs []*TPRateProfile) (err error) {
+	if len(tpPrfs) == 0 {
+		return nil
+	}
+	for _, tpPrf := range tpPrfs {
+		iDB.db.Set(utils.TBLTPRateProfiles, utils.ConcatenatedKey(tpPrf.TPid, tpPrf.Tenant, tpPrf.ID), tpPrf, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	}
 	return
