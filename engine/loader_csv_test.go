@@ -500,8 +500,8 @@ func TestLoadRatingPlans(t *testing.T) {
 		Ratings: map[string]*RIRate{
 			"ebefae11": &RIRate{
 				ConnectFee: 0,
-				Rates: []*Rate{
-					&Rate{
+				Rates: []*RGRate{
+					&RGRate{
 						GroupIntervalStart: 0,
 						Value:              0.2,
 						RateIncrement:      time.Second,
@@ -514,8 +514,8 @@ func TestLoadRatingPlans(t *testing.T) {
 			},
 			"fac0138e": &RIRate{
 				ConnectFee: 0,
-				Rates: []*Rate{
-					&Rate{
+				Rates: []*RGRate{
+					&RGRate{
 						GroupIntervalStart: 0,
 						Value:              0.1,
 						RateIncrement:      time.Second,
@@ -528,8 +528,8 @@ func TestLoadRatingPlans(t *testing.T) {
 			},
 			"781bfa03": &RIRate{
 				ConnectFee: 0,
-				Rates: []*Rate{
-					&Rate{
+				Rates: []*RGRate{
+					&RGRate{
 						GroupIntervalStart: 0,
 						Value:              0.05,
 						RateIncrement:      time.Second,
@@ -542,8 +542,8 @@ func TestLoadRatingPlans(t *testing.T) {
 			},
 			"f692daa4": &RIRate{
 				ConnectFee: 0,
-				Rates: []*Rate{
-					&Rate{
+				Rates: []*RGRate{
+					&RGRate{
 						GroupIntervalStart: 0,
 						Value:              0,
 						RateIncrement:      time.Second,

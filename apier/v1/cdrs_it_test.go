@@ -335,7 +335,7 @@ func testV1CDRsRefundOutOfSessionCost(t *testing.T) {
 				},
 				Rates: engine.ChargedRates{
 					"ec1a177": engine.RateGroups{
-						&engine.Rate{
+						&engine.RGRate{
 							GroupIntervalStart: time.Duration(0),
 							Value:              0.01,
 							RateIncrement:      time.Duration(1 * time.Minute),
@@ -490,7 +490,7 @@ func testV1CDRsRefundCDR(t *testing.T) {
 					},
 					Rates: engine.ChargedRates{
 						"ec1a177": engine.RateGroups{
-							&engine.Rate{
+							&engine.RGRate{
 								GroupIntervalStart: time.Duration(0),
 								Value:              0.01,
 								RateIncrement:      time.Duration(1 * time.Minute),

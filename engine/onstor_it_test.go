@@ -334,7 +334,7 @@ func testOnStorITHasData(t *testing.T) {
 		Ratings: map[string]*RIRate{
 			"ebefae11": {
 				ConnectFee: 0,
-				Rates: []*Rate{
+				Rates: []*RGRate{
 					{
 						GroupIntervalStart: 0,
 						Value:              0.2,
@@ -417,7 +417,7 @@ func testOnStorITRatingPlan(t *testing.T) {
 		Ratings: map[string]*RIRate{
 			"ebefae11": {
 				ConnectFee: 0,
-				Rates: []*Rate{
+				Rates: []*RGRate{
 					{
 						GroupIntervalStart: 0,
 						Value:              0.2,

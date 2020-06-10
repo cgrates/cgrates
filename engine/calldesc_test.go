@@ -263,7 +263,7 @@ func TestSplitSpansWeekend(t *testing.T) {
 							RoundingMethod:   "*up",
 							RoundingDecimals: 6,
 							Rates: RateGroups{
-								&Rate{Value: 1, RateIncrement: 1 * time.Second, RateUnit: 1 * time.Second},
+								&RGRate{Value: 1, RateIncrement: 1 * time.Second, RateUnit: 1 * time.Second},
 							},
 						},
 					},
@@ -277,7 +277,7 @@ func TestSplitSpansWeekend(t *testing.T) {
 							RoundingMethod:   "*up",
 							RoundingDecimals: 6,
 							Rates: RateGroups{
-								&Rate{Value: 1, RateIncrement: 1 * time.Second, RateUnit: 1 * time.Second},
+								&RGRate{Value: 1, RateIncrement: 1 * time.Second, RateUnit: 1 * time.Second},
 							},
 						},
 					},
@@ -291,7 +291,7 @@ func TestSplitSpansWeekend(t *testing.T) {
 							RoundingMethod:   "*up",
 							RoundingDecimals: 6,
 							Rates: RateGroups{
-								&Rate{Value: 1, RateIncrement: 1 * time.Second, RateUnit: 1 * time.Second},
+								&RGRate{Value: 1, RateIncrement: 1 * time.Second, RateUnit: 1 * time.Second},
 							},
 						},
 					},
@@ -1721,8 +1721,8 @@ func TestCDDebitBalanceSubjectWithFallback(t *testing.T) {
 		Ratings: map[string]*RIRate{
 			"b457f86d": &RIRate{
 
-				Rates: []*Rate{
-					&Rate{
+				Rates: []*RGRate{
+					&RGRate{
 						GroupIntervalStart: 0,
 						Value:              0,
 						RateIncrement:      60 * time.Second,
@@ -1756,8 +1756,8 @@ func TestCDDebitBalanceSubjectWithFallback(t *testing.T) {
 		},
 		Ratings: map[string]*RIRate{
 			"b457f861": &RIRate{
-				Rates: []*Rate{
-					&Rate{
+				Rates: []*RGRate{
+					&RGRate{
 						GroupIntervalStart: 0,
 						Value:              0.01,
 						RateIncrement:      time.Second,

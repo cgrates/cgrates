@@ -180,19 +180,19 @@ var testEC = &EventCost{
 	},
 	Rates: ChargedRates{
 		"ec1a177": RateGroups{
-			&Rate{
+			&RGRate{
 				GroupIntervalStart: time.Duration(0),
 				Value:              0.01,
 				RateIncrement:      time.Duration(1 * time.Minute),
 				RateUnit:           time.Duration(1 * time.Second)},
 		},
 		"4910ecf": RateGroups{
-			&Rate{
+			&RGRate{
 				GroupIntervalStart: time.Duration(0),
 				Value:              0.005,
 				RateIncrement:      time.Duration(1 * time.Second),
 				RateUnit:           time.Duration(1 * time.Second)},
-			&Rate{
+			&RGRate{
 				GroupIntervalStart: time.Duration(60 * time.Second),
 				Value:              0.005,
 				RateIncrement:      time.Duration(1 * time.Second),
@@ -339,7 +339,7 @@ func TestNewEventCostFromCallCost(t *testing.T) {
 						RoundingMethod:   "*up",
 						RoundingDecimals: 5,
 						Rates: RateGroups{
-							&Rate{
+							&RGRate{
 								GroupIntervalStart: time.Duration(0),
 								Value:              0.01,
 								RateUnit:           time.Duration(1 * time.Second),
@@ -399,13 +399,13 @@ func TestNewEventCostFromCallCost(t *testing.T) {
 										RoundingMethod:   "*up",
 										RoundingDecimals: 5,
 										Rates: RateGroups{
-											&Rate{
+											&RGRate{
 												GroupIntervalStart: time.Duration(0),
 												Value:              0.005,
 												RateUnit:           time.Duration(1 * time.Second),
 												RateIncrement:      time.Duration(1 * time.Second),
 											},
-											&Rate{
+											&RGRate{
 												GroupIntervalStart: time.Duration(60 * time.Second),
 												Value:              0.005,
 												RateUnit:           time.Duration(1 * time.Second),
@@ -439,7 +439,7 @@ func TestNewEventCostFromCallCost(t *testing.T) {
 						RoundingMethod:   "*up",
 						RoundingDecimals: 5,
 						Rates: RateGroups{
-							&Rate{
+							&RGRate{
 								GroupIntervalStart: time.Duration(0),
 								Value:              0.01,
 								RateUnit:           time.Duration(1 * time.Second),
@@ -579,19 +579,19 @@ func TestNewEventCostFromCallCost(t *testing.T) {
 		},
 		Rates: ChargedRates{
 			"6504fb84-6b27-47a8-a1c6-c0d843959f89": RateGroups{
-				&Rate{
+				&RGRate{
 					GroupIntervalStart: time.Duration(0),
 					Value:              0.01,
 					RateIncrement:      time.Duration(1 * time.Minute),
 					RateUnit:           time.Duration(1 * time.Second)},
 			},
 			"e5eb0f1c-3612-4e8c-b749-7f8f41dd90d4": RateGroups{
-				&Rate{
+				&RGRate{
 					GroupIntervalStart: time.Duration(0),
 					Value:              0.005,
 					RateIncrement:      time.Duration(1 * time.Second),
 					RateUnit:           time.Duration(1 * time.Second)},
-				&Rate{
+				&RGRate{
 					GroupIntervalStart: time.Duration(60 * time.Second),
 					Value:              0.005,
 					RateIncrement:      time.Duration(1 * time.Second),
@@ -1051,19 +1051,19 @@ func TestECAsCallCost(t *testing.T) {
 		},
 		Rates: ChargedRates{
 			"6504fb84-6b27-47a8-a1c6-c0d843959f89": RateGroups{
-				&Rate{
+				&RGRate{
 					GroupIntervalStart: time.Duration(0),
 					Value:              0.01,
 					RateIncrement:      time.Duration(1 * time.Minute),
 					RateUnit:           time.Duration(1 * time.Second)},
 			},
 			"e5eb0f1c-3612-4e8c-b749-7f8f41dd90d4": RateGroups{
-				&Rate{
+				&RGRate{
 					GroupIntervalStart: time.Duration(0),
 					Value:              0.005,
 					RateIncrement:      time.Duration(1 * time.Second),
 					RateUnit:           time.Duration(1 * time.Second)},
-				&Rate{
+				&RGRate{
 					GroupIntervalStart: time.Duration(60 * time.Second),
 					Value:              0.005,
 					RateIncrement:      time.Duration(1 * time.Second),
@@ -1095,7 +1095,7 @@ func TestECAsCallCost(t *testing.T) {
 						RoundingMethod:   "*up",
 						RoundingDecimals: 5,
 						Rates: RateGroups{
-							&Rate{
+							&RGRate{
 								GroupIntervalStart: time.Duration(0),
 								Value:              0.01,
 								RateUnit:           time.Duration(1 * time.Second),
@@ -1148,13 +1148,13 @@ func TestECAsCallCost(t *testing.T) {
 										RoundingMethod:   "*up",
 										RoundingDecimals: 5,
 										Rates: RateGroups{
-											&Rate{
+											&RGRate{
 												GroupIntervalStart: time.Duration(0),
 												Value:              0.005,
 												RateUnit:           time.Duration(1 * time.Second),
 												RateIncrement:      time.Duration(1 * time.Second),
 											},
-											&Rate{
+											&RGRate{
 												GroupIntervalStart: time.Duration(60 * time.Second),
 												Value:              0.005,
 												RateUnit:           time.Duration(1 * time.Second),
@@ -1186,7 +1186,7 @@ func TestECAsCallCost(t *testing.T) {
 						RoundingMethod:   "*up",
 						RoundingDecimals: 5,
 						Rates: RateGroups{
-							&Rate{
+							&RGRate{
 								GroupIntervalStart: time.Duration(0),
 								Value:              0.01,
 								RateUnit:           time.Duration(1 * time.Second),
@@ -1527,7 +1527,7 @@ func TestECMergeGT(t *testing.T) {
 		},
 		Rates: ChargedRates{
 			"06dee2e": RateGroups{
-				&Rate{
+				&RGRate{
 					RateIncrement: time.Duration(102400),
 					RateUnit:      time.Duration(102400)},
 			},
@@ -1585,7 +1585,7 @@ func TestECMergeGT(t *testing.T) {
 		},
 		Rates: ChargedRates{
 			"52f8b0f": RateGroups{
-				&Rate{
+				&RGRate{
 					RateIncrement: time.Duration(102400),
 					RateUnit:      time.Duration(102400)},
 			},
@@ -1644,7 +1644,7 @@ func TestECMergeGT(t *testing.T) {
 		},
 		Rates: ChargedRates{
 			"06dee2e": RateGroups{
-				&Rate{
+				&RGRate{
 					RateIncrement: time.Duration(102400),
 					RateUnit:      time.Duration(102400)},
 			},
@@ -1699,7 +1699,7 @@ func TestECAppendCIlFromEC(t *testing.T) {
 		},
 		Rates: ChargedRates{
 			"06dee2e": RateGroups{
-				&Rate{
+				&RGRate{
 					RateIncrement: time.Duration(102400),
 					RateUnit:      time.Duration(102400)},
 			},
@@ -1743,7 +1743,7 @@ func TestECAppendCIlFromEC(t *testing.T) {
 		},
 		Rates: ChargedRates{
 			"52f8b0f": RateGroups{
-				&Rate{
+				&RGRate{
 					RateIncrement: time.Duration(102400),
 					RateUnit:      time.Duration(102400)},
 			},
@@ -1788,7 +1788,7 @@ func TestECAppendCIlFromEC(t *testing.T) {
 		},
 		Rates: ChargedRates{
 			"06dee2e": RateGroups{
-				&Rate{
+				&RGRate{
 					RateIncrement: time.Duration(102400),
 					RateUnit:      time.Duration(102400)},
 			},
@@ -1837,7 +1837,7 @@ func TestECAppendCIlFromEC(t *testing.T) {
 		},
 		Rates: ChargedRates{
 			"06dee2e": RateGroups{
-				&Rate{
+				&RGRate{
 					RateIncrement: time.Duration(102400),
 					RateUnit:      time.Duration(102400)},
 			},
@@ -1881,7 +1881,7 @@ func TestECAppendCIlFromEC(t *testing.T) {
 		},
 		Rates: ChargedRates{
 			"52f8b0f": RateGroups{
-				&Rate{
+				&RGRate{
 					RateIncrement: time.Duration(102400),
 					RateUnit:      time.Duration(102400)},
 			},
@@ -1937,7 +1937,7 @@ func TestECAppendCIlFromEC(t *testing.T) {
 		},
 		Rates: ChargedRates{
 			"06dee2e": RateGroups{
-				&Rate{
+				&RGRate{
 					RateIncrement: time.Duration(102400),
 					RateUnit:      time.Duration(102400)},
 			},
@@ -1997,7 +1997,7 @@ func TestECAppendCIlFromEC(t *testing.T) {
 		},
 		Rates: ChargedRates{
 			"06dee2e": RateGroups{
-				&Rate{
+				&RGRate{
 					RateIncrement: time.Duration(102400),
 					RateUnit:      time.Duration(102400)},
 			},
@@ -2046,7 +2046,7 @@ func TestECAppendCIlFromEC(t *testing.T) {
 		},
 		Rates: ChargedRates{
 			"52f8b0f": RateGroups{
-				&Rate{
+				&RGRate{
 					RateIncrement: time.Duration(102400),
 					RateUnit:      time.Duration(102400)},
 			},
@@ -2129,7 +2129,7 @@ func TestECAppendCIlFromEC(t *testing.T) {
 		},
 		Rates: ChargedRates{
 			"06dee2e": RateGroups{
-				&Rate{
+				&RGRate{
 					RateIncrement: time.Duration(102400),
 					RateUnit:      time.Duration(102400)},
 			},
@@ -2178,7 +2178,7 @@ func TestECAppendCIlFromEC(t *testing.T) {
 		},
 		Rates: ChargedRates{
 			"06dee2e": RateGroups{
-				&Rate{
+				&RGRate{
 					RateIncrement: time.Duration(102400),
 					RateUnit:      time.Duration(102400)},
 			},
@@ -2222,7 +2222,7 @@ func TestECAppendCIlFromEC(t *testing.T) {
 		},
 		Rates: ChargedRates{
 			"52f8b0f": RateGroups{
-				&Rate{
+				&RGRate{
 					RateIncrement: time.Duration(102400),
 					RateUnit:      time.Duration(102400)},
 			},
@@ -2267,7 +2267,7 @@ func TestECAppendCIlFromEC(t *testing.T) {
 		},
 		Rates: ChargedRates{
 			"06dee2e": RateGroups{
-				&Rate{
+				&RGRate{
 					RateIncrement: time.Duration(102400),
 					RateUnit:      time.Duration(102400)},
 			},
@@ -2328,7 +2328,7 @@ func TestECSyncKeys(t *testing.T) {
 		},
 		Rates: ChargedRates{
 			"2c1a177": RateGroups{
-				&Rate{
+				&RGRate{
 					GroupIntervalStart: time.Duration(0),
 					Value:              0.01,
 					RateIncrement:      time.Duration(1 * time.Minute),
@@ -2491,19 +2491,19 @@ func TestECSyncKeys(t *testing.T) {
 		},
 		Rates: ChargedRates{
 			"2c1a177": RateGroups{
-				&Rate{
+				&RGRate{
 					GroupIntervalStart: time.Duration(0),
 					Value:              0.01,
 					RateIncrement:      time.Duration(1 * time.Minute),
 					RateUnit:           time.Duration(1 * time.Second)},
 			},
 			"4910ecf": RateGroups{
-				&Rate{
+				&RGRate{
 					GroupIntervalStart: time.Duration(0),
 					Value:              0.005,
 					RateIncrement:      time.Duration(1 * time.Second),
 					RateUnit:           time.Duration(1 * time.Second)},
-				&Rate{
+				&RGRate{
 					GroupIntervalStart: time.Duration(60 * time.Second),
 					Value:              0.005,
 					RateIncrement:      time.Duration(1 * time.Second),
@@ -2742,13 +2742,13 @@ func TestEventCostfieldAsInterface(t *testing.T) {
 	eventCost = &EventCost{
 		Rates: ChargedRates{
 			"test1": RateGroups{
-				&Rate{Value: 0.7},
+				&RGRate{Value: 0.7},
 			},
 		},
 	}
 	eChargedRates := ChargedRates{
 		"test1": RateGroups{
-			&Rate{Value: 0.7},
+			&RGRate{Value: 0.7},
 		},
 	}
 	if rcv, err := eventCost.fieldAsInterface([]string{utils.Rates}); err != nil {
@@ -2757,7 +2757,7 @@ func TestEventCostfieldAsInterface(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eChargedRates), utils.ToJSON(rcv))
 	}
 	eRateGroup := RateGroups{
-		&Rate{Value: 0.7},
+		&RGRate{Value: 0.7},
 	}
 	if rcv, err := eventCost.fieldAsInterface([]string{utils.Rates, "test1"}); err != nil {
 		t.Error(err)
@@ -2906,7 +2906,7 @@ func TestEventCostgetChargesForPath(t *testing.T) {
 	// fldPath[0] == utils.Rating
 	eventCost = &EventCost{
 		Rates: ChargedRates{
-			"RatingID": RateGroups{&Rate{Value: 0.8}}},
+			"RatingID": RateGroups{&RGRate{Value: 0.8}}},
 	}
 	if rcv, err := eventCost.getChargesForPath([]string{utils.Rating}, chargingInterval); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ErrNotFound, err)
@@ -2916,7 +2916,7 @@ func TestEventCostgetChargesForPath(t *testing.T) {
 	eventCost = &EventCost{
 		Rating: Rating{"RatingID": &RatingUnit{}},
 		Rates: ChargedRates{
-			"RatingID": RateGroups{&Rate{Value: 0.8}}},
+			"RatingID": RateGroups{&RGRate{Value: 0.8}}},
 	}
 	if rcv, err := eventCost.getChargesForPath([]string{utils.Rating, "unsupportedfield"}, chargingInterval); err == nil || err.Error() != "unsupported field prefix: <unsupportedfield>" {
 		t.Errorf("Expecting: unsupported field prefix: <unsupportedfield>, received: %+v", err)
@@ -2932,9 +2932,9 @@ func TestEventCostgetChargesForPath(t *testing.T) {
 		Rating: Rating{"RatingID": &RatingUnit{
 			RatesID: "RatesID",
 		}},
-		Rates: ChargedRates{"RatesID": RateGroups{&Rate{Value: 0.8}}},
+		Rates: ChargedRates{"RatesID": RateGroups{&RGRate{Value: 0.8}}},
 	}
-	RateGroups := RateGroups{&Rate{Value: 0.8}}
+	RateGroups := RateGroups{&RGRate{Value: 0.8}}
 	if rcv, err := eventCost.getChargesForPath([]string{utils.Rating, utils.Rates}, chargingInterval); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(RateGroups, rcv) {
@@ -3018,12 +3018,12 @@ func TestEventCostgetRatingForPath(t *testing.T) {
 	eventCost = &EventCost{
 		Rates: ChargedRates{
 			"RatesID": RateGroups{
-				&Rate{Value: 0.7},
+				&RGRate{Value: 0.7},
 			},
 		},
 	}
 	eChargedRates := RateGroups{
-		&Rate{Value: 0.7},
+		&RGRate{Value: 0.7},
 	}
 
 	// !has || rts == nil
@@ -3143,10 +3143,10 @@ func TestEventCostgetRatingForPath(t *testing.T) {
 	eventCost = &EventCost{
 		Rates: ChargedRates{
 			"RatesID": RateGroups{
-				&Rate{Value: 0.7},
+				&RGRate{Value: 0.7},
 			},
 			"RatesID2": RateGroups{
-				&Rate{Value: 0.7},
+				&RGRate{Value: 0.7},
 			},
 		},
 	}
@@ -3159,7 +3159,7 @@ func TestEventCostgetRatingForPath(t *testing.T) {
 	ratingUnit = &RatingUnit{
 		RatesID: "RatesID",
 	}
-	eRate := &Rate{Value: 0.7}
+	eRate := &RGRate{Value: 0.7}
 	if rcv, err := eventCost.getRatingForPath([]string{"Rates[0]"}, ratingUnit); err != nil {
 		t.Errorf("Expecting: nil, received: %+v", err)
 	} else if !reflect.DeepEqual(eRate, rcv) {

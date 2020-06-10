@@ -158,7 +158,7 @@ func testSessionCostITMigrate(t *testing.T) {
 				RateInterval: &engine.RateInterval{
 					Rating: &engine.RIRate{
 						Rates: engine.RateGroups{
-							&engine.Rate{
+							&engine.RGRate{
 								GroupIntervalStart: 0,
 								Value:              100,
 								RateIncrement:      10 * time.Second,

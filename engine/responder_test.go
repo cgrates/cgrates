@@ -57,7 +57,7 @@ func TestResponderGobSMCost(t *testing.T) {
 					RoundingDecimals: 0,
 					MaxCost:          0,
 					MaxCostStrategy:  "",
-					Rates: RateGroups{&Rate{
+					Rates: RateGroups{&RGRate{
 						GroupIntervalStart: 0,
 						Value:              0,
 						RateIncrement:      1 * time.Second,

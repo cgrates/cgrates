@@ -314,7 +314,7 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 		ts.RateInterval = &RateInterval{
 			Rating: &RIRate{
 				Rates: RateGroups{
-					&Rate{
+					&RGRate{
 						GroupIntervalStart: 0,
 						Value:              0,
 						RateIncrement:      duration,
@@ -588,7 +588,7 @@ func (b *Balance) debitMoney(cd *CallDescriptor, ub *Account, moneyBalances Bala
 
 		maxCost, strategy := ts.RateInterval.GetMaxCost()
 		//log.Printf("Timing: %+v", ts.RateInterval.Timing)
-		//log.Printf("Rate: %+v", ts.RateInterval.Rating)
+		//log.Printf("RGRate: %+v", ts.RateInterval.Rating)
 		for incIndex, inc := range ts.Increments {
 			// check standard subject tags
 			//log.Printf("INC: %+v", inc)
