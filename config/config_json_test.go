@@ -371,6 +371,12 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Limit:      utils.IntPointer(-1),
 				Static_ttl: utils.BoolPointer(false)},
+			utils.MetaRateProfiles: {
+				Replicate:  utils.BoolPointer(false),
+				Remote:     utils.BoolPointer(false),
+				Ttl:        utils.StringPointer(utils.EmptyString),
+				Limit:      utils.IntPointer(-1),
+				Static_ttl: utils.BoolPointer(false)},
 			utils.MetaChargerProfiles: {
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
@@ -497,6 +503,10 @@ func TestDfStorDBJsonCfg(t *testing.T) {
 				Limit:      utils.IntPointer(-1),
 				Static_ttl: utils.BoolPointer(false)},
 			utils.TBLTPDispatchers: {
+				Ttl:        utils.StringPointer(utils.EmptyString),
+				Limit:      utils.IntPointer(-1),
+				Static_ttl: utils.BoolPointer(false)},
+			utils.TBLTPRateProfiles: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Limit:      utils.IntPointer(-1),
 				Static_ttl: utils.BoolPointer(false)},

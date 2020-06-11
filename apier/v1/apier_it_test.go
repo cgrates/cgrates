@@ -821,7 +821,7 @@ func testApierLoadAccountActions(t *testing.T) {
 	expectedStats[utils.CacheAccountActionPlans].Items = 1
 	expectedStats[utils.CacheActionPlans].Items = 1
 	expectedStats[utils.CacheActions].Items = 1
-	expectedStats[utils.CacheLoadIDs].Items = 20
+	expectedStats[utils.CacheLoadIDs].Items = 21
 	expectedStats[utils.CacheRPCConnections].Items = 1
 	if err := rater.Call(utils.CacheSv1GetCacheStats, new(utils.AttrCacheIDsWithArgDispatcher), &rcvStats); err != nil {
 		t.Error("Got error on CacheSv1.GetCacheStats: ", err.Error())
@@ -859,7 +859,7 @@ func testApierSetRatingProfile(t *testing.T) {
 	expectedStats[utils.CacheActions].Items = 1
 	expectedStats[utils.CacheRatingProfiles].Items = 1
 	expectedStats[utils.CacheRPCConnections].Items = 1
-	expectedStats[utils.CacheLoadIDs].Items = 20
+	expectedStats[utils.CacheLoadIDs].Items = 21
 	if err := rater.Call(utils.CacheSv1GetCacheStats, new(utils.AttrCacheIDsWithArgDispatcher), &rcvStats); err != nil {
 		t.Error("Got error on CacheSv1.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
@@ -966,7 +966,7 @@ func testApierReloadCache(t *testing.T) {
 	expectedStats[utils.CacheRatingProfiles].Items = 2
 	expectedStats[utils.CacheRatingPlans].Items = 1
 	expectedStats[utils.CacheReverseDestinations].Items = 10
-	expectedStats[utils.CacheLoadIDs].Items = 20
+	expectedStats[utils.CacheLoadIDs].Items = 21
 	expectedStats[utils.CacheRPCConnections].Items = 1
 	if err := rater.Call(utils.CacheSv1GetCacheStats, new(utils.AttrCacheIDsWithArgDispatcher), &rcvStats); err != nil {
 		t.Error("Got error on CacheSv1.GetCacheStats: ", err.Error())
@@ -1495,7 +1495,7 @@ func testApierResetDataAfterLoadFromFolder(t *testing.T) {
 	expStats[utils.CacheRouteProfiles].Items = 2
 	expStats[utils.CacheThresholdProfiles].Items = 1
 	expStats[utils.CacheThresholds].Items = 1
-	expStats[utils.CacheLoadIDs].Items = 20
+	expStats[utils.CacheLoadIDs].Items = 21
 
 	if err := rater.Call(utils.CacheSv1GetCacheStats, new(utils.AttrCacheIDsWithArgDispatcher), &rcvStats); err != nil {
 		t.Error(err)

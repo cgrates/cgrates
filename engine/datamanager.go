@@ -77,6 +77,7 @@ var (
 		utils.ChargerProfilePrefix:       true,
 		utils.DispatcherProfilePrefix:    true,
 		utils.DispatcherHostPrefix:       true,
+		utils.RateProfilePrefix:          true,
 		utils.AttributeFilterIndexes:     true,
 		utils.ResourceFilterIndexes:      true,
 		utils.StatFilterIndexes:          true,
@@ -84,6 +85,7 @@ var (
 		utils.RouteFilterIndexes:         true,
 		utils.ChargerFilterIndexes:       true,
 		utils.DispatcherFilterIndexes:    true,
+		utils.RateFilterIndexes:          true,
 	}
 )
 

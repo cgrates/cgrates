@@ -19,46 +19,48 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
+	v1 "github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 func init() {
-	c := &CmdGetRatingProfileIDs{
-		name:      "ratingprofil_ids",
-		rpcMethod: utils.APIerSv1GetRatingProfileIDs,
+	c := &CmdSetRateProfile{
+		name:      "rateprofile_set",
+		rpcMethod: utils.APIerSv1SetRateProfile,
+		rpcParams: &v1.RateProfileWithCache{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
-// Commander implementation
-type CmdGetRatingProfileIDs struct {
+type CmdSetRateProfile struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.TenantArgWithPaginator
+	rpcParams *v1.RateProfileWithCache
 	*CommandExecuter
 }
 
-func (self *CmdGetRatingProfileIDs) Name() string {
+func (self *CmdSetRateProfile) Name() string {
 	return self.name
 }
 
-func (self *CmdGetRatingProfileIDs) RpcMethod() string {
+func (self *CmdSetRateProfile) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetRatingProfileIDs) RpcParams(reset bool) interface{} {
+func (self *CmdSetRateProfile) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = new(utils.TenantArgWithPaginator)
+		self.rpcParams = &v1.RateProfileWithCache{RateProfileWithArgDispatcher: new(engine.RateProfileWithArgDispatcher)}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdGetRatingProfileIDs) PostprocessRpcParams() error {
+func (self *CmdSetRateProfile) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetRatingProfileIDs) RpcResult() interface{} {
-	var s []string
+func (self *CmdSetRateProfile) RpcResult() interface{} {
+	var s string
 	return &s
 }

@@ -155,7 +155,7 @@ func testTutSMGCacheStats(t *testing.T) {
 	expectedStats[utils.CacheAttributeProfiles].Items = 2
 	expectedStats[utils.MetaDefault].Items = 1
 	expectedStats[utils.CacheActionTriggers].Items = 1
-	expectedStats[utils.CacheLoadIDs].Items = 20
+	expectedStats[utils.CacheLoadIDs].Items = 21
 	expectedStats[utils.CacheChargerProfiles].Items = 1
 	expectedStats[utils.CacheRPCConnections].Items = 2
 	if err := tutSMGRpc.Call(utils.CacheSv1GetCacheStats, new(utils.AttrCacheIDsWithArgDispatcher), &rcvStats); err != nil {

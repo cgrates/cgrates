@@ -303,6 +303,11 @@ func newInternalDBCfg(itemsCacheCfg map[string]*config.ItemOpt, isDataDB bool) m
 				TTL:       itemsCacheCfg[utils.TBLTPDispatcherHosts].TTL,
 				StaticTTL: itemsCacheCfg[utils.TBLTPDispatcherHosts].StaticTTL,
 			},
+			utils.TBLTPRateProfiles: &ltcache.CacheConfig{
+				MaxItems:  itemsCacheCfg[utils.TBLTPRateProfiles].Limit,
+				TTL:       itemsCacheCfg[utils.TBLTPRateProfiles].TTL,
+				StaticTTL: itemsCacheCfg[utils.TBLTPRateProfiles].StaticTTL,
+			},
 			utils.CDRsTBL: &ltcache.CacheConfig{
 				MaxItems:  itemsCacheCfg[utils.CDRsTBL].Limit,
 				TTL:       itemsCacheCfg[utils.CDRsTBL].TTL,
