@@ -608,7 +608,11 @@ type STIRJsonCfg struct {
 }
 
 type RateSJsonCfg struct {
-	Enabled *bool
+	Enabled               *bool
+	Indexed_selects       *bool
+	String_indexed_fields *[]string
+	Prefix_indexed_fields *[]string
+	Nested_fields         *bool // applies when indexed fields is not defined
 }
 
 // SIPAgentJsonCfg
