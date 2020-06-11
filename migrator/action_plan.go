@@ -73,7 +73,6 @@ func (m *Migrator) migrateCurrentActionPlans() (err error) {
 	return
 }
 
-func (m *Migrator) migrateV1ActionPlans() (err error) {
 func (m *Migrator) migrateV1ActionPlans() (v2 []*engine.ActionPlan, err error) {
 	var v1APs *v1ActionPlans
 	v1APs, err = m.dmIN.getV1ActionPlans()
