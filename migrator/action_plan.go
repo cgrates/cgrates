@@ -74,36 +74,14 @@ func (m *Migrator) migrateCurrentActionPlans() (err error) {
 }
 
 func (m *Migrator) migrateV1ActionPlans() (err error) {
+func (m *Migrator) migrateV1ActionPlans() (v2 []*engine.ActionPlan, err error) {
 	var v1APs *v1ActionPlans
-	for {
-		v1APs, err = m.dmIN.getV1ActionPlans()
-		if err != nil && err != utils.ErrNoMoreData {
-			return err
-		}
-		if err == utils.ErrNoMoreData {
-			break
-		}
-		if *v1APs == nil || m.dryRun {
-			continue
-		}
-		for _, v1ap := range *v1APs {
-			ap := v1ap.AsActionPlan()
-			if err = m.dmOut.DataManager().SetActionPlan(ap.Id, ap, true, utils.NonTransactional); err != nil {
-				return err
-			}
-			m.stats[utils.ActionPlans] += 1
-		}
+	v1APs, err = m.dmIN.getV1ActionPlans()
+	if err != nil {
+		return nil, err
 	}
-	if m.dryRun {
-		return
-	}
-	// All done, update version wtih current one
-	vrs := engine.Versions{utils.ActionPlans: engine.CurrentDataDBVersions()[utils.ActionPlans]}
-	if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
-		return utils.NewCGRError(utils.Migrator,
-			utils.ServerErrorCaps,
-			err.Error(),
-			fmt.Sprintf("error: <%s> when updating ActionPlans version into dataDB", err.Error()))
+	for _, v1ap := range *v1APs {
+		v2 = append(v2, v1ap.AsActionPlan())
 	}
 	return
 }
@@ -132,27 +110,70 @@ func (m *Migrator) migrateActionPlans() (err error) {
 			return err
 		}
 	}
-	switch vrs[utils.ActionPlans] {
-	case current[utils.ActionPlans]:
-		if m.sameDataDB {
+	migrated := true
+	var v3 []*engine.ActionPlan
+	for {
+		version := vrs[utils.ActionPlans]
+		for {
+			switch version {
+			case current[utils.ActionPlans]:
+				if m.sameDataDB {
+					break
+				}
+				if err = m.migrateCurrentActionPlans(); err != nil && err != utils.ErrNoMoreData {
+					return err
+				} else if err == utils.ErrNoMoreData {
+					break
+				}
+			case 1:
+				if v3, err = m.migrateV1ActionPlans(); err != nil && err != utils.ErrNoMoreData {
+					return err
+				} else if err == utils.ErrNoMoreData {
+					break
+				}
+				version = 3
+			case 2: // neded to rebuild action plan indexes for redis
+				// All done, update version wtih current one
+				vrs := engine.Versions{utils.ActionPlans: engine.CurrentDataDBVersions()[utils.ActionPlans]}
+				if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
+					return utils.NewCGRError(utils.Migrator,
+						utils.ServerErrorCaps,
+						err.Error(),
+						fmt.Sprintf("error: <%s> when updating ActionPlans version into dataDB", err.Error()))
+				}
+				version = 3
+				// err = utils.ErrNoMoreData
+			}
+			if version == current[utils.ActionPlans] || err == utils.ErrNoMoreData {
+				break
+			}
+		}
+		if err == utils.ErrNoMoreData || !migrated {
 			break
 		}
-		if err = m.migrateCurrentActionPlans(); err != nil {
-			return err
+
+		if !m.dryRun && migrated {
+			//set action plan
+			for _, ap := range v3 {
+				if err = m.dmOut.DataManager().SetActionPlan(ap.Id, ap, true, utils.NonTransactional); err != nil {
+					return err
+				}
+			}
 		}
-	case 2: // neded to rebuild action plan indexes for redis
-		// All done, update version wtih current one
-		vrs := engine.Versions{utils.ActionPlans: engine.CurrentDataDBVersions()[utils.ActionPlans]}
-		if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
-			return utils.NewCGRError(utils.Migrator,
-				utils.ServerErrorCaps,
-				err.Error(),
-				fmt.Sprintf("error: <%s> when updating ActionPlans version into dataDB", err.Error()))
-		}
-	case 1:
-		if err = m.migrateV1ActionPlans(); err != nil {
-			return err
-		}
+		m.stats[utils.ActionPlans] += 1
+	}
+	if m.dryRun || !migrated {
+		return nil
+	}
+	// remove old action plans
+
+	// All done, update version wtih current one
+	vrs = engine.Versions{utils.ActionPlans: engine.CurrentDataDBVersions()[utils.ActionPlans]}
+	if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
+		return utils.NewCGRError(utils.Migrator,
+			utils.ServerErrorCaps,
+			err.Error(),
+			fmt.Sprintf("error: <%s> when updating ActionPlans version into dataDB", err.Error()))
 	}
 	return m.ensureIndexesDataDB(engine.ColApl)
 }
