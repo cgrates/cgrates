@@ -1097,109 +1097,6 @@ func (iDB *InternalDB) AddLoadHistory(*utils.LoadInstance, int, string) error {
 	return nil
 }
 
-func (iDB *InternalDB) GetFilterIndexesDrv(cacheID, itemIDPrefix, filterType string,
-	fldNameVal map[string]string) (indexes map[string]utils.StringMap, err error) {
-	dbKey := utils.CacheInstanceToPrefix[cacheID] + itemIDPrefix
-	x, ok := iDB.db.Get(cacheID, dbKey)
-	if !ok || x == nil {
-		return nil, utils.ErrNotFound
-	}
-	if len(fldNameVal) != 0 {
-		rcvidx := x.(map[string]utils.StringMap)
-		indexes = make(map[string]utils.StringMap)
-		for fldName, fldVal := range fldNameVal {
-			if _, has := indexes[utils.ConcatenatedKey(filterType, fldName, fldVal)]; !has {
-				indexes[utils.ConcatenatedKey(filterType, fldName, fldVal)] = make(utils.StringMap)
-			}
-			if len(rcvidx[utils.ConcatenatedKey(filterType, fldName, fldVal)]) != 0 {
-				for key := range rcvidx[utils.ConcatenatedKey(filterType, fldName, fldVal)] {
-					indexes[utils.ConcatenatedKey(filterType, fldName, fldVal)][key] = true
-				}
-			}
-		}
-		return
-	} else {
-		indexes = x.(map[string]utils.StringMap)
-		if len(indexes) == 0 {
-			return nil, utils.ErrNotFound
-		}
-	}
-	return
-}
-
-func (iDB *InternalDB) SetFilterIndexesDrv(cacheID, itemIDPrefix string,
-	indexes map[string]utils.StringMap, commit bool, transactionID string) (err error) {
-	originKey := utils.CacheInstanceToPrefix[cacheID] + itemIDPrefix
-	dbKey := originKey
-	if transactionID != "" {
-		dbKey = "tmp_" + utils.ConcatenatedKey(dbKey, transactionID)
-	}
-	if commit && transactionID != "" {
-		x, _ := iDB.db.Get(cacheID, dbKey)
-		iDB.db.Remove(cacheID, dbKey,
-			cacheCommit(utils.NonTransactional), utils.NonTransactional)
-		iDB.db.Set(cacheID, originKey, x, nil,
-			cacheCommit(utils.NonTransactional), utils.NonTransactional)
-		return
-	}
-	var toBeDeleted []string
-	toBeAdded := make(map[string]utils.StringMap)
-	for key, strMp := range indexes {
-		if len(strMp) == 0 { // remove with no more elements inside
-			toBeDeleted = append(toBeDeleted, key)
-			delete(indexes, key)
-			continue
-		}
-		toBeAdded[key] = make(utils.StringMap)
-		toBeAdded[key] = strMp
-	}
-
-	x, ok := iDB.db.Get(cacheID, dbKey)
-	if !ok || x == nil {
-		iDB.db.Set(cacheID, dbKey, toBeAdded, nil,
-			cacheCommit(utils.NonTransactional), utils.NonTransactional)
-		return err
-	}
-
-	mp := x.(map[string]utils.StringMap)
-	for _, key := range toBeDeleted {
-		delete(mp, key)
-	}
-	for key, strMp := range toBeAdded {
-		if _, has := mp[key]; !has {
-			mp[key] = make(utils.StringMap)
-		}
-		mp[key] = strMp
-	}
-	iDB.db.Set(cacheID, dbKey, mp, nil,
-		cacheCommit(transactionID), transactionID)
-	return nil
-}
-func (iDB *InternalDB) RemoveFilterIndexesDrv(cacheID, itemIDPrefix string) (err error) {
-	iDB.db.Remove(cacheID, utils.CacheInstanceToPrefix[cacheID]+itemIDPrefix,
-		cacheCommit(utils.NonTransactional), utils.NonTransactional)
-	return
-}
-
-func (iDB *InternalDB) MatchFilterIndexDrv(cacheID, itemIDPrefix,
-	filterType, fieldName, fieldVal string) (itemIDs utils.StringMap, err error) {
-
-	x, ok := iDB.db.Get(cacheID, utils.CacheInstanceToPrefix[cacheID]+itemIDPrefix)
-	if !ok || x == nil {
-		return nil, utils.ErrNotFound
-	}
-
-	indexes := x.(map[string]utils.StringMap)
-
-	if _, hasIt := indexes[utils.ConcatenatedKey(filterType, fieldName, fieldVal)]; hasIt {
-		itemIDs = indexes[utils.ConcatenatedKey(filterType, fieldName, fieldVal)]
-	}
-	if len(itemIDs) == 0 {
-		return nil, utils.ErrNotFound
-	}
-	return
-}
-
 func (iDB *InternalDB) GetStatQueueProfileDrv(tenant string, id string) (sq *StatQueueProfile, err error) {
 	x, ok := iDB.db.Get(utils.CacheStatQueueProfiles, utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
@@ -1486,7 +1383,7 @@ func (iDB *InternalDB) SetIndexesDrv(idxItmType, tntCtx string,
 			}
 			iDB.db.Remove(idxItmType, dbKey,
 				cacheCommit(utils.NonTransactional), utils.NonTransactional)
-			key := strings.TrimSuffix(strings.TrimPrefix(dbKey, "tmp_"), transactionID)
+			key := strings.TrimSuffix(strings.TrimPrefix(dbKey, "tmp_"), utils.CONCATENATED_KEY_SEP+transactionID)
 			iDB.db.Set(idxItmType, key, x, []string{tntCtx},
 				cacheCommit(utils.NonTransactional), utils.NonTransactional)
 		}

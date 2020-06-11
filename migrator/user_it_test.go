@@ -193,13 +193,15 @@ func testUsrITMigrateAndMove(t *testing.T) {
 		t.Error("Error should be not found : ", err)
 	}
 
-	expUsrIdx := map[string]utils.StringMap{
-		"*string:~Account:1002": utils.StringMap{
-			"1001": true,
+	expUsrIdx := map[string]utils.StringSet{
+		"*string:~Account:1002": {
+			"1001": struct{}{},
 		},
 	}
-	if usridx, err := usrMigrator.dmOut.DataManager().GetFilterIndexes(utils.PrefixToIndexCache[utils.AttributeProfilePrefix],
-		utils.ConcatenatedKey("cgrates.org", utils.META_ANY), utils.MetaString, nil); err != nil {
+	if usridx, err := usrMigrator.dmOut.DataManager().GetIndexes(
+		utils.PrefixToIndexCache[utils.AttributeProfilePrefix],
+		utils.ConcatenatedKey("cgrates.org", utils.META_ANY),
+		"", true, true); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expUsrIdx, usridx) {
 		t.Errorf("Expected %v, recived: %v", utils.ToJSON(expUsrIdx), utils.ToJSON(usridx))

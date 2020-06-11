@@ -206,16 +206,17 @@ func testAlsITMigrateAndMove(t *testing.T) {
 		t.Error("Error should be not found : ", err)
 	}
 
-	expAlsIdx := map[string]utils.StringMap{
-		"*string:~*req.Account:1001": utils.StringMap{
-			"*out:*any:*any:1001:call_1001:*rated": true,
+	expAlsIdx := map[string]utils.StringSet{
+		"*string:~*req.Account:1001": {
+			"*out:*any:*any:1001:call_1001:*rated": struct{}{},
 		},
-		"*string:~*req.Subject:call_1001": utils.StringMap{
-			"*out:*any:*any:1001:call_1001:*rated": true,
+		"*string:~*req.Subject:call_1001": {
+			"*out:*any:*any:1001:call_1001:*rated": struct{}{},
 		},
 	}
-	if alsidx, err := alsMigrator.dmOut.DataManager().GetFilterIndexes(utils.PrefixToIndexCache[utils.AttributeProfilePrefix],
-		utils.ConcatenatedKey("cgrates.org", utils.META_ANY), utils.MetaString, nil); err != nil {
+	if alsidx, err := alsMigrator.dmOut.DataManager().GetIndexes(
+		utils.CacheAttributeFilterIndexes, utils.ConcatenatedKey("cgrates.org", utils.META_ANY),
+		"", false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expAlsIdx, alsidx) {
 		t.Errorf("Expected %v, recived: %v", utils.ToJSON(expAlsIdx), utils.ToJSON(alsidx))

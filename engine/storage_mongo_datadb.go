@@ -60,7 +60,6 @@ const (
 	ColLht  = "load_history"
 	ColVer  = "versions"
 	ColRsP  = "resource_profiles"
-	ColRFI  = "request_filter_indexes"
 	ColIndx = "indexes"
 	ColTmg  = "timings"
 	ColRes  = "resources"
@@ -284,7 +283,7 @@ func (ms *MongoStorage) ensureIndexesForCol(col string) (err error) { // exporte
 	}
 	err = nil
 	switch col {
-	case ColAct, ColApl, ColAAp, ColAtr, ColRpl, ColDst, ColRds, ColLht, ColRFI:
+	case ColAct, ColApl, ColAAp, ColAtr, ColRpl, ColDst, ColRds, ColLht, ColIndx:
 		if err = ms.enusureIndex(col, true, "key"); err != nil {
 			return
 		}
@@ -351,7 +350,7 @@ func (ms *MongoStorage) EnsureIndexes(cols ...string) (err error) {
 	}
 	if ms.storageType == utils.DataDB {
 		for _, col := range []string{ColAct, ColApl, ColAAp, ColAtr,
-			ColRpl, ColDst, ColRds, ColLht, ColRFI, ColRsP, ColRes, ColSqs, ColSqp,
+			ColRpl, ColDst, ColRds, ColLht, ColIndx, ColRsP, ColRes, ColSqs, ColSqp,
 			ColTps, ColThs, ColRts, ColAttr, ColFlt, ColCpp, ColDpp, ColRpp,
 			ColRpf, ColShg, ColAcc} {
 			if err = ms.ensureIndexesForCol(col); err != nil {
@@ -688,19 +687,19 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 		case utils.DispatcherHostPrefix:
 			result, err = ms.getField2(sctx, ColDph, utils.DispatcherHostPrefix, subject, tntID)
 		case utils.AttributeFilterIndexes:
-			result, err = ms.getField3(sctx, ColRFI, utils.AttributeFilterIndexes, "key")
+			result, err = ms.getField3(sctx, ColIndx, utils.AttributeFilterIndexes, "key")
 		case utils.ResourceFilterIndexes:
-			result, err = ms.getField3(sctx, ColRFI, utils.ResourceFilterIndexes, "key")
+			result, err = ms.getField3(sctx, ColIndx, utils.ResourceFilterIndexes, "key")
 		case utils.StatFilterIndexes:
-			result, err = ms.getField3(sctx, ColRFI, utils.StatFilterIndexes, "key")
+			result, err = ms.getField3(sctx, ColIndx, utils.StatFilterIndexes, "key")
 		case utils.ThresholdFilterIndexes:
-			result, err = ms.getField3(sctx, ColRFI, utils.ThresholdFilterIndexes, "key")
+			result, err = ms.getField3(sctx, ColIndx, utils.ThresholdFilterIndexes, "key")
 		case utils.RouteFilterIndexes:
-			result, err = ms.getField3(sctx, ColRFI, utils.RouteFilterIndexes, "key")
+			result, err = ms.getField3(sctx, ColIndx, utils.RouteFilterIndexes, "key")
 		case utils.ChargerFilterIndexes:
-			result, err = ms.getField3(sctx, ColRFI, utils.ChargerFilterIndexes, "key")
+			result, err = ms.getField3(sctx, ColIndx, utils.ChargerFilterIndexes, "key")
 		case utils.DispatcherFilterIndexes:
-			result, err = ms.getField3(sctx, ColRFI, utils.DispatcherFilterIndexes, "key")
+			result, err = ms.getField3(sctx, ColIndx, utils.DispatcherFilterIndexes, "key")
 		default:
 			err = fmt.Errorf("unsupported prefix in GetKeysForPrefix: %s", prefix)
 		}
@@ -1742,182 +1741,6 @@ func (ms *MongoStorage) RemoveTimingDrv(id string) (err error) {
 	})
 }
 
-// GetFilterIndexesDrv retrieves Indexes from dataDB
-//filterType is used togheter with fieldName:Val
-func (ms *MongoStorage) GetFilterIndexesDrv(cacheID, itemIDPrefix, filterType string,
-	fldNameVal map[string]string) (indexes map[string]utils.StringMap, err error) {
-	type result struct {
-		Key   string
-		Value []string
-	}
-	var results []result
-	dbKey := utils.CacheInstanceToPrefix[cacheID] + itemIDPrefix
-	if len(fldNameVal) != 0 {
-		for fldName, fldValue := range fldNameVal {
-			if err = ms.query(func(sctx mongo.SessionContext) (err error) {
-				cur, err := ms.getCol(ColRFI).Find(sctx, bson.M{"key": utils.ConcatenatedKey(dbKey, filterType, fldName, fldValue)})
-				if err != nil {
-					return err
-				}
-				for cur.Next(sctx) {
-					var elem result
-					if err := cur.Decode(&elem); err != nil {
-						return err
-					}
-					results = append(results, elem)
-				}
-				return cur.Close(sctx)
-			}); err != nil {
-				return nil, err
-			}
-			if len(results) == 0 {
-				return nil, utils.ErrNotFound
-			}
-		}
-	} else {
-		for _, character := range []string{".", "*"} {
-			dbKey = strings.Replace(dbKey, character, `\`+character, strings.Count(dbKey, character))
-		}
-		//inside bson.RegEx add carrot to match the prefix (optimization)
-		if err = ms.query(func(sctx mongo.SessionContext) (err error) {
-			cur, err := ms.getCol(ColRFI).Find(sctx, bson.M{"key": bsonx.Regex("^"+dbKey, "")})
-			if err != nil {
-				return err
-			}
-			for cur.Next(sctx) {
-				var elem result
-				if err := cur.Decode(&elem); err != nil {
-					return err
-				}
-				results = append(results, elem)
-			}
-			return cur.Close(sctx)
-		}); err != nil {
-			return nil, err
-		}
-		if len(results) == 0 {
-			return nil, utils.ErrNotFound
-		}
-	}
-	indexes = make(map[string]utils.StringMap)
-	for _, res := range results {
-		if len(res.Value) == 0 {
-			continue
-		}
-		keys := strings.Split(res.Key, ":") // "cgrates.org:*sesions:*string:Subject:dan"
-		indexKey := utils.ConcatenatedKey(keys[1], keys[2], keys[3])
-		//check here if itemIDPrefix has context
-		if len(strings.Split(itemIDPrefix, ":")) == 2 {
-			indexKey = utils.ConcatenatedKey(keys[2], keys[3], keys[4])
-		}
-		indexes[indexKey] = utils.StringMapFromSlice(res.Value)
-	}
-	if len(indexes) == 0 {
-		return nil, utils.ErrNotFound
-	}
-	return indexes, nil
-}
-
-// SetFilterIndexesDrv stores Indexes into DataDB
-func (ms *MongoStorage) SetFilterIndexesDrv(cacheID, itemIDPrefix string,
-	indexes map[string]utils.StringMap, commit bool, transactionID string) (err error) {
-	originKey := utils.CacheInstanceToPrefix[cacheID] + itemIDPrefix
-	dbKey := originKey
-	if transactionID != "" {
-		dbKey = "tmp_" + utils.ConcatenatedKey(originKey, transactionID)
-	}
-	if commit && transactionID != "" {
-		regexKey := originKey
-		for _, character := range []string{".", "*"} {
-			regexKey = strings.Replace(regexKey, character, `\`+character, strings.Count(regexKey, character))
-		}
-		//inside bson.RegEx add carrot to match the prefix (optimization)
-		if err = ms.query(func(sctx mongo.SessionContext) (err error) {
-			_, err = ms.getCol(ColRFI).DeleteMany(sctx, bson.M{"key": bsonx.Regex("^"+regexKey, "")})
-			return err
-		}); err != nil {
-			return err
-		}
-		var lastErr error
-		for key, itmMp := range indexes {
-			if err = ms.query(func(sctx mongo.SessionContext) (err error) {
-				_, err = ms.getCol(ColRFI).UpdateOne(sctx, bson.M{"key": utils.ConcatenatedKey(originKey, key)},
-					bson.M{"$set": bson.M{"key": utils.ConcatenatedKey(originKey, key), "value": itmMp.Slice()}},
-					options.Update().SetUpsert(true),
-				)
-				return err
-			}); err != nil {
-				lastErr = err
-			}
-		}
-		if lastErr != nil {
-			return lastErr
-		}
-		oldKey := "tmp_" + utils.ConcatenatedKey(originKey, transactionID)
-		for _, character := range []string{".", "*"} {
-			oldKey = strings.Replace(oldKey, character, `\`+character, strings.Count(oldKey, character))
-		}
-		//inside bson.RegEx add carrot to match the prefix (optimization)
-		return ms.query(func(sctx mongo.SessionContext) (err error) {
-			_, err = ms.getCol(ColRFI).DeleteMany(sctx, bson.M{"key": bsonx.Regex("^"+oldKey, "")})
-			return err
-		})
-	} else {
-		var lastErr error
-		for key, itmMp := range indexes {
-			if err = ms.query(func(sctx mongo.SessionContext) (err error) {
-				var action bson.M
-				if len(itmMp) == 0 {
-					action = bson.M{"$unset": bson.M{"value": 1}}
-				} else {
-					action = bson.M{"$set": bson.M{"key": utils.ConcatenatedKey(dbKey, key), "value": itmMp.Slice()}}
-				}
-				_, err = ms.getCol(ColRFI).UpdateOne(sctx, bson.M{"key": utils.ConcatenatedKey(dbKey, key)},
-					action, options.Update().SetUpsert(true),
-				)
-				return err
-			}); err != nil {
-				lastErr = err
-			}
-		}
-		return lastErr
-	}
-}
-
-func (ms *MongoStorage) RemoveFilterIndexesDrv(cacheID, itemIDPrefix string) (err error) {
-	regexKey := utils.CacheInstanceToPrefix[cacheID] + itemIDPrefix
-	for _, character := range []string{".", "*"} {
-		regexKey = strings.Replace(regexKey, character, `\`+character, strings.Count(regexKey, character))
-	}
-	//inside bson.RegEx add carrot to match the prefix (optimization)
-	return ms.query(func(sctx mongo.SessionContext) (err error) {
-		_, err = ms.getCol(ColRFI).DeleteMany(sctx, bson.M{"key": bsonx.Regex("^"+regexKey, "")})
-		return err
-	})
-}
-
-func (ms *MongoStorage) MatchFilterIndexDrv(cacheID, itemIDPrefix,
-	filterType, fldName, fldVal string) (itemIDs utils.StringMap, err error) {
-	var result struct {
-		Key   string
-		Value []string
-	}
-	dbKey := utils.CacheInstanceToPrefix[cacheID] + itemIDPrefix
-	if err = ms.query(func(sctx mongo.SessionContext) (err error) {
-		cur := ms.getCol(ColRFI).FindOne(sctx, bson.M{"key": utils.ConcatenatedKey(dbKey, filterType, fldName, fldVal)})
-		if err := cur.Decode(&result); err != nil {
-			if err == mongo.ErrNoDocuments {
-				return utils.ErrNotFound
-			}
-			return err
-		}
-		return nil
-	}); err != nil {
-		return nil, err
-	}
-	return utils.StringMapFromSlice(result.Value), nil
-}
-
 // GetStatQueueProfileDrv retrieves a StatQueueProfile from dataDB
 func (ms *MongoStorage) GetStatQueueProfileDrv(tenant string, id string) (sq *StatQueueProfile, err error) {
 	sq = new(StatQueueProfile)
@@ -2387,7 +2210,6 @@ func (ms *MongoStorage) GetIndexesDrv(idxItmType, tntCtx, idxKey string) (indexe
 		//inside bson.RegEx add carrot to match the prefix (optimization)
 		q = bson.M{"key": bsonx.Regex("^"+dbKey, utils.EmptyString)}
 	}
-
 	indexes = make(map[string]utils.StringSet)
 	if err = ms.query(func(sctx mongo.SessionContext) (err error) {
 		cur, err := ms.getCol(ColIndx).Find(sctx, q)
@@ -2439,9 +2261,12 @@ func (ms *MongoStorage) SetIndexesDrv(idxItmType, tntCtx string,
 			result, err = ms.getField3(sctx, ColIndx, regexKey, "key")
 			for _, key := range result {
 				idxKey := strings.TrimPrefix(key, dbKey)
+				if _, err = ms.getCol(ColIndx).DeleteOne(sctx,
+					bson.M{"key": originKey + idxKey}); err != nil { //ensure we do not have dup
+					return err
+				}
 				if _, err = ms.getCol(ColIndx).UpdateOne(sctx, bson.M{"key": key},
 					bson.M{"$set": bson.M{"key": originKey + idxKey}}, // only update the key
-					options.Update().SetUpsert(true),
 				); err != nil {
 					return err
 				}
@@ -2454,15 +2279,16 @@ func (ms *MongoStorage) SetIndexesDrv(idxItmType, tntCtx string,
 	var lastErr error
 	for idxKey, itmMp := range indexes {
 		if err = ms.query(func(sctx mongo.SessionContext) (err error) {
-			var action bson.M
-			if len(itmMp) == 0 {
-				action = bson.M{"$unset": bson.M{"value": 1}}
+			idxDbkey := utils.ConcatenatedKey(dbKey, idxKey)
+			if len(itmMp) == 0 { // remove from DB if we set it with empty indexes
+				_, err = ms.getCol(ColIndx).DeleteOne(sctx,
+					bson.M{"key": idxDbkey})
 			} else {
-				action = bson.M{"$set": bson.M{"key": utils.ConcatenatedKey(dbKey, idxKey), "value": itmMp.AsSlice()}}
+				_, err = ms.getCol(ColIndx).UpdateOne(sctx, bson.M{"key": idxDbkey},
+					bson.M{"$set": bson.M{"key": idxDbkey, "value": itmMp.AsSlice()}},
+					options.Update().SetUpsert(true),
+				)
 			}
-			_, err = ms.getCol(ColIndx).UpdateOne(sctx, bson.M{"key": utils.ConcatenatedKey(dbKey, idxKey)},
-				action, options.Update().SetUpsert(true),
-			)
 			return err
 		}); err != nil {
 			lastErr = err

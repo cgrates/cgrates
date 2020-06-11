@@ -232,11 +232,14 @@ func testFltrITMigrateAndMove(t *testing.T) {
 		if !reflect.DeepEqual(*expAttrProf, *resultattr) {
 			t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expAttrProf), utils.ToJSON(resultattr))
 		}
-		expFltrIdx := map[string]utils.StringMap{
-			"*prefix:~*req.Account:1001": {"ATTR_1": true},
-			"*string:~*req.Account:1001": {"ATTR_1": true}}
+		expFltrIdx := map[string]utils.StringSet{
+			"*prefix:~*req.Account:1001": {"ATTR_1": struct{}{}},
+			"*string:~*req.Account:1001": {"ATTR_1": struct{}{}}}
 
-		if fltridx, err := fltrMigrator.dmOut.DataManager().GetFilterIndexes(utils.PrefixToIndexCache[utils.AttributeProfilePrefix], utils.ConcatenatedKey(attrProf.Tenant, utils.META_ANY), utils.MetaString, nil); err != nil {
+		if fltridx, err := fltrMigrator.dmOut.DataManager().GetIndexes(
+			utils.CacheAttributeFilterIndexes,
+			utils.ConcatenatedKey(attrProf.Tenant, utils.META_ANY),
+			"", false, false); err != nil {
 			t.Error(err)
 		} else if !reflect.DeepEqual(expFltrIdx, fltridx) {
 			t.Errorf("Expected %v, recived: %v", utils.ToJSON(expFltrIdx), utils.ToJSON(fltridx))
@@ -398,12 +401,15 @@ func testFltrITMigratev2(t *testing.T) {
 	if !reflect.DeepEqual(*expAttrProf, *resultAttr) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expAttrProf), utils.ToJSON(resultAttr))
 	}
-	expFltrIdx := map[string]utils.StringMap{
-		"*string:~*req.Account:1001": utils.StringMap{"ATTR_1": true},
-		"*string:~*req.Subject:1001": utils.StringMap{"ATTR_1": true},
+	expFltrIdx := map[string]utils.StringSet{
+		"*string:~*req.Account:1001": {"ATTR_1": struct{}{}},
+		"*string:~*req.Subject:1001": {"ATTR_1": struct{}{}},
 	}
 
-	if fltridx, err := fltrMigrator.dmOut.DataManager().GetFilterIndexes(utils.PrefixToIndexCache[utils.AttributeProfilePrefix], utils.ConcatenatedKey(attrProf.Tenant, utils.META_ANY), utils.MetaString, nil); err != nil {
+	if fltridx, err := fltrMigrator.dmOut.DataManager().GetIndexes(
+		utils.CacheAttributeFilterIndexes,
+		utils.ConcatenatedKey(attrProf.Tenant, utils.META_ANY),
+		"", false, true); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expFltrIdx, fltridx) {
 		t.Errorf("Expected %v, recived: %v", utils.ToJSON(expFltrIdx), utils.ToJSON(fltridx))

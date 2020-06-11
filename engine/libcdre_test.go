@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"fmt"
 	"reflect"
 	"testing"
 	"time"
@@ -119,7 +118,6 @@ func TestFileName(t *testing.T) {
 	if rcv[:7] != "module|" {
 		t.Errorf("Expecting: 'module|', received: %+v", rcv[:7])
 	} else if rcv[14:] != ".gob" {
-		fmt.Println(rcv)
 		t.Errorf("Expecting: '.gob', received: %+v", rcv[14:])
 	}
 

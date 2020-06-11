@@ -846,6 +846,13 @@ func testv2CDRsGetCDRsDest(t *testing.T) {
 
 func testV2CDRsRerate(t *testing.T) {
 	var reply string
+	if err := cdrsRpc.Call(utils.CacheSv1Clear, &utils.AttrCacheIDsWithArgDispatcher{
+		CacheIDs: nil,
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Reply: ", reply)
+	}
 	//add a charger
 	chargerProfile := &v1.ChargerWithCache{
 		ChargerProfile: &engine.ChargerProfile{

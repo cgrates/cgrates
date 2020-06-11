@@ -202,7 +202,7 @@ func (api *APIerSv1) ComputeFilterIndexes(args *utils.ArgsComputeFilterIndexes, 
 	transactionID := utils.GenUUID()
 	//ThresholdProfile Indexes
 	if args.ThresholdS {
-		if err = engine.ComputeIndexes(api.DataManager, args.Tenant, args.Context, utils.CacheThresholdFilterIndexes,
+		if args.ThresholdS, err = engine.ComputeIndexes(api.DataManager, args.Tenant, args.Context, utils.CacheThresholdFilterIndexes,
 			nil, transactionID, func(tnt, id, ctx string) (*[]string, error) {
 				th, e := api.DataManager.GetThresholdProfile(tnt, id, true, false, utils.NonTransactional)
 				if e != nil {
@@ -219,7 +219,7 @@ func (api *APIerSv1) ComputeFilterIndexes(args *utils.ArgsComputeFilterIndexes, 
 	}
 	//StatQueueProfile Indexes
 	if args.StatS {
-		if err = engine.ComputeIndexes(api.DataManager, args.Tenant, args.Context, utils.CacheStatFilterIndexes,
+		if args.StatS, err = engine.ComputeIndexes(api.DataManager, args.Tenant, args.Context, utils.CacheStatFilterIndexes,
 			nil, transactionID, func(tnt, id, ctx string) (*[]string, error) {
 				sq, e := api.DataManager.GetStatQueueProfile(tnt, id, true, false, utils.NonTransactional)
 				if e != nil {
@@ -236,7 +236,7 @@ func (api *APIerSv1) ComputeFilterIndexes(args *utils.ArgsComputeFilterIndexes, 
 	}
 	//ResourceProfile Indexes
 	if args.ResourceS {
-		if err = engine.ComputeIndexes(api.DataManager, args.Tenant, args.Context, utils.CacheResourceFilterIndexes,
+		if args.ResourceS, err = engine.ComputeIndexes(api.DataManager, args.Tenant, args.Context, utils.CacheResourceFilterIndexes,
 			nil, transactionID, func(tnt, id, ctx string) (*[]string, error) {
 				rp, e := api.DataManager.GetResourceProfile(tnt, id, true, false, utils.NonTransactional)
 				if e != nil {
@@ -253,7 +253,7 @@ func (api *APIerSv1) ComputeFilterIndexes(args *utils.ArgsComputeFilterIndexes, 
 	}
 	//SupplierProfile Indexes
 	if args.RouteS {
-		if err = engine.ComputeIndexes(api.DataManager, args.Tenant, args.Context, utils.CacheRouteFilterIndexes,
+		if args.RouteS, err = engine.ComputeIndexes(api.DataManager, args.Tenant, args.Context, utils.CacheRouteFilterIndexes,
 			nil, transactionID, func(tnt, id, ctx string) (*[]string, error) {
 				rp, e := api.DataManager.GetRouteProfile(tnt, id, true, false, utils.NonTransactional)
 				if e != nil {
@@ -270,7 +270,7 @@ func (api *APIerSv1) ComputeFilterIndexes(args *utils.ArgsComputeFilterIndexes, 
 	}
 	//AttributeProfile Indexes
 	if args.AttributeS {
-		if err = engine.ComputeIndexes(api.DataManager, args.Tenant, args.Context, utils.CacheAttributeFilterIndexes,
+		if args.AttributeS, err = engine.ComputeIndexes(api.DataManager, args.Tenant, args.Context, utils.CacheAttributeFilterIndexes,
 			nil, transactionID, func(tnt, id, ctx string) (*[]string, error) {
 				ap, e := api.DataManager.GetAttributeProfile(tnt, id, true, false, utils.NonTransactional)
 				if e != nil {
@@ -291,7 +291,7 @@ func (api *APIerSv1) ComputeFilterIndexes(args *utils.ArgsComputeFilterIndexes, 
 	}
 	//ChargerProfile  Indexes
 	if args.ChargerS {
-		if err = engine.ComputeIndexes(api.DataManager, args.Tenant, args.Context, utils.CacheChargerFilterIndexes,
+		if args.ChargerS, err = engine.ComputeIndexes(api.DataManager, args.Tenant, args.Context, utils.CacheChargerFilterIndexes,
 			nil, transactionID, func(tnt, id, ctx string) (*[]string, error) {
 				ap, e := api.DataManager.GetChargerProfile(tnt, id, true, false, utils.NonTransactional)
 				if e != nil {
@@ -308,7 +308,7 @@ func (api *APIerSv1) ComputeFilterIndexes(args *utils.ArgsComputeFilterIndexes, 
 	}
 	//DispatcherProfile Indexes
 	if args.DispatcherS {
-		if err = engine.ComputeIndexes(api.DataManager, args.Tenant, args.Context, utils.CacheDispatcherFilterIndexes,
+		if args.DispatcherS, err = engine.ComputeIndexes(api.DataManager, args.Tenant, args.Context, utils.CacheDispatcherFilterIndexes,
 			nil, transactionID, func(tnt, id, ctx string) (*[]string, error) {
 				dsp, e := api.DataManager.GetDispatcherProfile(tnt, id, true, false, utils.NonTransactional)
 				if e != nil {
@@ -382,7 +382,7 @@ func (api *APIerSv1) ComputeFilterIndexes(args *utils.ArgsComputeFilterIndexes, 
 func (api *APIerSv1) ComputeFilterIndexIDs(args *utils.ArgsComputeFilterIndexIDs, reply *string) (err error) {
 	transactionID := utils.NonTransactional
 	//ThresholdProfile Indexes
-	if err = engine.ComputeIndexes(api.DataManager, args.Tenant, args.Context, utils.CacheThresholdFilterIndexes,
+	if _, err = engine.ComputeIndexes(api.DataManager, args.Tenant, args.Context, utils.CacheThresholdFilterIndexes,
 		&args.ThresholdIDs, transactionID, func(tnt, id, ctx string) (*[]string, error) {
 			th, e := api.DataManager.GetThresholdProfile(tnt, id, true, false, utils.NonTransactional)
 			if e != nil {
@@ -397,7 +397,7 @@ func (api *APIerSv1) ComputeFilterIndexIDs(args *utils.ArgsComputeFilterIndexIDs
 		return utils.APIErrorHandler(err)
 	}
 	//StatQueueProfile Indexes
-	if err = engine.ComputeIndexes(api.DataManager, args.Tenant, args.Context, utils.CacheStatFilterIndexes,
+	if _, err = engine.ComputeIndexes(api.DataManager, args.Tenant, args.Context, utils.CacheStatFilterIndexes,
 		&args.StatIDs, transactionID, func(tnt, id, ctx string) (*[]string, error) {
 			sq, e := api.DataManager.GetStatQueueProfile(tnt, id, true, false, utils.NonTransactional)
 			if e != nil {
@@ -412,7 +412,7 @@ func (api *APIerSv1) ComputeFilterIndexIDs(args *utils.ArgsComputeFilterIndexIDs
 		return utils.APIErrorHandler(err)
 	}
 	//ResourceProfile Indexes
-	if err = engine.ComputeIndexes(api.DataManager, args.Tenant, args.Context, utils.CacheResourceFilterIndexes,
+	if _, err = engine.ComputeIndexes(api.DataManager, args.Tenant, args.Context, utils.CacheResourceFilterIndexes,
 		&args.ResourceIDs, transactionID, func(tnt, id, ctx string) (*[]string, error) {
 			rp, e := api.DataManager.GetResourceProfile(tnt, id, true, false, utils.NonTransactional)
 			if e != nil {
@@ -427,7 +427,7 @@ func (api *APIerSv1) ComputeFilterIndexIDs(args *utils.ArgsComputeFilterIndexIDs
 		return utils.APIErrorHandler(err)
 	}
 	//RouteProfile Indexes
-	if err = engine.ComputeIndexes(api.DataManager, args.Tenant, args.Context, utils.CacheRouteFilterIndexes,
+	if _, err = engine.ComputeIndexes(api.DataManager, args.Tenant, args.Context, utils.CacheRouteFilterIndexes,
 		&args.RouteIDs, transactionID, func(tnt, id, ctx string) (*[]string, error) {
 			rp, e := api.DataManager.GetRouteProfile(tnt, id, true, false, utils.NonTransactional)
 			if e != nil {
@@ -442,7 +442,7 @@ func (api *APIerSv1) ComputeFilterIndexIDs(args *utils.ArgsComputeFilterIndexIDs
 		return utils.APIErrorHandler(err)
 	}
 	//AttributeProfile Indexes
-	if err = engine.ComputeIndexes(api.DataManager, args.Tenant, args.Context, utils.CacheAttributeFilterIndexes,
+	if _, err = engine.ComputeIndexes(api.DataManager, args.Tenant, args.Context, utils.CacheAttributeFilterIndexes,
 		&args.AttributeIDs, transactionID, func(tnt, id, ctx string) (*[]string, error) {
 			ap, e := api.DataManager.GetAttributeProfile(tnt, id, true, false, utils.NonTransactional)
 			if e != nil {
@@ -460,7 +460,7 @@ func (api *APIerSv1) ComputeFilterIndexIDs(args *utils.ArgsComputeFilterIndexIDs
 		return utils.APIErrorHandler(err)
 	}
 	//ChargerProfile  Indexes
-	if err = engine.ComputeIndexes(api.DataManager, args.Tenant, args.Context, utils.CacheChargerFilterIndexes,
+	if _, err = engine.ComputeIndexes(api.DataManager, args.Tenant, args.Context, utils.CacheChargerFilterIndexes,
 		&args.ChargerIDs, transactionID, func(tnt, id, ctx string) (*[]string, error) {
 			ap, e := api.DataManager.GetChargerProfile(tnt, id, true, false, utils.NonTransactional)
 			if e != nil {
@@ -475,7 +475,7 @@ func (api *APIerSv1) ComputeFilterIndexIDs(args *utils.ArgsComputeFilterIndexIDs
 		return utils.APIErrorHandler(err)
 	}
 	//DispatcherProfile Indexes
-	if err = engine.ComputeIndexes(api.DataManager, args.Tenant, args.Context, utils.CacheDispatcherFilterIndexes,
+	if _, err = engine.ComputeIndexes(api.DataManager, args.Tenant, args.Context, utils.CacheDispatcherFilterIndexes,
 		&args.DispatcherIDs, transactionID, func(tnt, id, ctx string) (*[]string, error) {
 			dsp, e := api.DataManager.GetDispatcherProfile(tnt, id, true, false, utils.NonTransactional)
 			if e != nil {

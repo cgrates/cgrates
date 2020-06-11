@@ -227,25 +227,28 @@ func testDCITMigrateAndMove(t *testing.T) {
 	if _, err = dcMigrator.dmIN.getV1DerivedChargers(); err != utils.ErrNoMoreData {
 		t.Error("Error should be not found : ", err)
 	}
-	expDcIdx := map[string]utils.StringMap{
-		"*string:~*req.Account:1003": utils.StringMap{
-			"*out:cgrates.org:*any:1003:*any_0": true,
+	expDcIdx := map[string]utils.StringSet{
+		"*string:~*req.Account:1003": {
+			"*out:cgrates.org:*any:1003:*any_0": struct{}{},
 		},
 	}
-	if dcidx, err := dcMigrator.dmOut.DataManager().GetFilterIndexes(utils.PrefixToIndexCache[utils.AttributeProfilePrefix],
-		utils.ConcatenatedKey("cgrates.org", utils.MetaChargers), utils.MetaString, nil); err != nil {
+	if dcidx, err := dcMigrator.dmOut.DataManager().GetIndexes(
+		utils.PrefixToIndexCache[utils.AttributeProfilePrefix],
+		utils.ConcatenatedKey("cgrates.org", utils.MetaChargers),
+		"", true, true); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expDcIdx, dcidx) {
 		t.Errorf("Expected %v, recived: %v", utils.ToJSON(expDcIdx), utils.ToJSON(dcidx))
 	}
-	expDcIdx = map[string]utils.StringMap{
-		"*string:~*req.Account:1003": utils.StringMap{
-			"*out:cgrates.org:*any:1003:*any_0": true,
+	expDcIdx = map[string]utils.StringSet{
+		"*string:~*req.Account:1003": {
+			"*out:cgrates.org:*any:1003:*any_0": struct{}{},
 		},
 	}
-	if dcidx, err := dcMigrator.dmOut.DataManager().GetFilterIndexes(utils.PrefixToIndexCache[utils.ChargerProfilePrefix],
+	if dcidx, err := dcMigrator.dmOut.DataManager().GetIndexes(
+		utils.PrefixToIndexCache[utils.ChargerProfilePrefix],
 		utils.ConcatenatedKey("cgrates.org", utils.MetaChargers),
-		utils.MetaString, nil); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		"", true, true); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected error %v, recived: %v with reply: %v", utils.ErrNotFound, err, utils.ToJSON(dcidx))
 	}
 
