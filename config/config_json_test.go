@@ -2032,3 +2032,18 @@ func TestDfEventExporterCfg(t *testing.T) {
 		t.Errorf("Expected: %+v, \nreceived: %+v", utils.ToJSON(eCfg), utils.ToJSON(cfg))
 	}
 }
+
+func TestDfRateSJsonCfg(t *testing.T) {
+	eCfg := &RateSJsonCfg{
+		Enabled:               utils.BoolPointer(false),
+		Indexed_selects:       utils.BoolPointer(true),
+		String_indexed_fields: nil,
+		Prefix_indexed_fields: &[]string{},
+		Nested_fields:         utils.BoolPointer(false),
+	}
+	if cfg, err := dfCgrJsonCfg.RateCfgJson(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCfg, cfg) {
+		t.Error("Received: ", utils.ToJSON(cfg))
+	}
+}

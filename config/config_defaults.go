@@ -922,6 +922,10 @@ const CGRATES_CFG_JSON = `
 
 "rates": {
 	"enabled": false,
+	"indexed_selects": true,				// enable profile matching exclusively on indexes
+	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
+	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
+	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 },
 
 "sip_agent": {							// SIP Agents, only used for redirections
