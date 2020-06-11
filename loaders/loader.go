@@ -550,6 +550,39 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 				cachePartition = utils.CacheDispatcherHosts
 			}
 		}
+	case utils.MetaRateProfiles:
+		for _, lDataSet := range lds {
+			rpMdls := make(engine.RateProfileMdls, len(lDataSet))
+			for i, ld := range lDataSet {
+				rpMdls[i] = new(engine.RateProfileMdl)
+				if err = utils.UpdateStructWithIfaceMap(rpMdls[i], ld); err != nil {
+					return
+				}
+			}
+			tpRpls, err := rpMdls.AsTPRateProfile()
+			if err != nil {
+				return err
+			}
+			for _, tpRpl := range tpRpls {
+				rpl, err := engine.APItoRateProfile(tpRpl, ldr.timezone)
+				if err != nil {
+					return err
+				}
+				if ldr.dryRun {
+					utils.Logger.Info(
+						fmt.Sprintf("<%s-%s> DRY_RUN: RateProfile: %s",
+							utils.LoaderS, ldr.ldrID, utils.ToJSON(rpl)))
+					continue
+				}
+				// get IDs so we can reload in cache
+				ids = append(ids, rpl.TenantID())
+				if err := ldr.dm.SetRateProfile(rpl, true); err != nil {
+					return err
+				}
+				cacheArgs.RateProfileIDs = ids
+				cachePartition = utils.CacheDispatcherProfiles
+			}
+		}
 	}
 
 	if len(ldr.cacheConns) != 0 {
@@ -700,7 +733,6 @@ func (ldr *Loader) removeLoadedData(loaderType, tntID, caching string) (err erro
 			cacheArgs.ResourceIDs = ids
 			cachePartition = utils.CacheResourceProfiles
 		}
-
 	case utils.MetaFilters:
 		if ldr.dryRun {
 			utils.Logger.Info(
@@ -819,6 +851,22 @@ func (ldr *Loader) removeLoadedData(loaderType, tntID, caching string) (err erro
 			}
 			cacheArgs.DispatcherHostIDs = ids
 			cachePartition = utils.CacheDispatcherHosts
+		}
+	case utils.MetaRateProfiles:
+		if ldr.dryRun {
+			utils.Logger.Info(
+				fmt.Sprintf("<%s-%s> DRY_RUN: RateProfileIDs: %s",
+					utils.LoaderS, ldr.ldrID, tntID))
+		} else {
+			tntIDStruct := utils.NewTenantID(tntID)
+			// get IDs so we can reload in cache
+			ids = append(ids, tntID)
+			if err := ldr.dm.RemoveRateProfile(tntIDStruct.Tenant,
+				tntIDStruct.ID, utils.NonTransactional, true); err != nil {
+				return err
+			}
+			cacheArgs.RateProfileIDs = ids
+			cachePartition = utils.CacheRateProfiles
 		}
 	}
 

@@ -2498,7 +2498,7 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, argDispatcher *ut
 		cacheIDs = append(cacheIDs, utils.CacheDispatcherFilterIndexes)
 	}
 	if len(ratePrfIDs) != 0 {
-		cacheIDs = append(cacheIDs, utils.CacheRateFilterIndexes)
+		cacheIDs = append(cacheIDs, utils.CacheRateProfilesFilterIndexes)
 	}
 	if verbose {
 		log.Print("Clearing indexes")

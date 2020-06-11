@@ -312,7 +312,7 @@ type CGRConfig struct {
 var posibleLoaderTypes = utils.NewStringSet([]string{utils.MetaAttributes,
 	utils.MetaResources, utils.MetaFilters, utils.MetaStats,
 	utils.MetaRoutes, utils.MetaThresholds, utils.MetaChargers,
-	utils.MetaDispatchers, utils.MetaDispatcherHosts})
+	utils.MetaDispatchers, utils.MetaDispatcherHosts, utils.MetaRateProfiles})
 
 var possibleReaderTypes = utils.NewStringSet([]string{utils.MetaFileCSV,
 	utils.MetaKafkajsonMap, utils.MetaFileXML, utils.MetaSQL, utils.MetaFileFWV,

@@ -218,7 +218,7 @@ const CGRATES_CFG_JSON = `
 		"*attribute_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 				// control attribute filter indexes caching
 		"*charger_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 					// control charger filter indexes caching
 		"*dispatcher_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 				// control dispatcher filter indexes caching
-		"*rate_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 					// control rate filter indexes caching
+		"*rate_profile_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 			// control rate profile filter indexes caching
 		"*dispatcher_routes": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 						// control dispatcher routes caching
 		"*dispatcher_loads": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},							// control dispatcher load ( in case of *load strategy )
 		"*dispatchers": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 								// control dispatcher interface
@@ -798,6 +798,30 @@ const CGRATES_CFG_JSON = `
 					{"tag": "Address", "path": "Address", "type": "*variable", "value": "~2"},
 					{"tag": "Transport", "path": "Transport", "type": "*variable", "value": "~3"},
 					{"tag": "TLS", "path": "TLS", "type": "*variable", "value": "~4"},
+				],
+			},
+			{
+				"type": "*rate_profiles",						// data source type
+				"file_name": "RateProfiles.csv",				// file name in the tp_in_dir
+				"fields": [
+					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~0", "mandatory": true},
+					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~1", "mandatory": true},
+					{"tag": "FilterIDs", "path": "FilterIDs", "type": "*variable", "value": "~2"},
+					{"tag": "ActivationInterval", "path": "ActivationInterval", "type": "*variable", "value": "~3"},
+					{"tag": "Weight", "path": "Weight", "type": "*variable", "value": "~4"},
+					{"tag": "ConnectFee", "path": "ConnectFee", "type": "*variable", "value": "~5"},
+					{"tag": "RoundingMethod", "path": "RoundingMethod", "type": "*variable", "value": "~6"},
+					{"tag": "RoundingDecimals", "path": "RoundingDecimals", "type": "*variable", "value": "~7"},
+					{"tag": "MinCost", "path": "MinCost", "type": "*variable", "value": "~8"},
+					{"tag": "MaxCost", "path": "MaxCost", "type": "*variable", "value": "~9"},
+					{"tag": "MaxCostStrategy", "path": "MaxCostStrategy", "type": "*variable", "value": "~10"},
+					{"tag": "RateID", "path": "RateID", "type": "*variable", "value": "~11"},
+					{"tag": "RateFilterIDs", "path": "RateFilterIDs", "type": "*variable", "value": "~12"},
+					{"tag": "RateWeight", "path": "RateWeight", "type": "*variable", "value": "~13"},
+					{"tag": "RateValue", "path": "RateValue", "type": "*variable", "value": "~14"},
+					{"tag": "RateUnit", "path": "RateUnit", "type": "*variable", "value": "~15"},
+					{"tag": "RateIncrement", "path": "RateIncrement", "type": "*variable", "value": "~16"},
+					{"tag": "RateBlocker", "path": "RateBlocker", "type": "*variable", "value": "~17"},
 				],
 			},
 		],

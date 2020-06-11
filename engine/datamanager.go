@@ -55,37 +55,37 @@ var (
 		utils.DispatcherHostPrefix:       true,
 	}
 	cachePrefixMap = utils.StringMap{
-		utils.DESTINATION_PREFIX:         true,
-		utils.REVERSE_DESTINATION_PREFIX: true,
-		utils.RATING_PLAN_PREFIX:         true,
-		utils.RATING_PROFILE_PREFIX:      true,
-		utils.ACTION_PREFIX:              true,
-		utils.ACTION_PLAN_PREFIX:         true,
-		utils.AccountActionPlansPrefix:   true,
-		utils.ACTION_TRIGGER_PREFIX:      true,
-		utils.SHARED_GROUP_PREFIX:        true,
-		utils.ResourceProfilesPrefix:     true,
-		utils.TimingsPrefix:              true,
-		utils.ResourcesPrefix:            true,
-		utils.StatQueuePrefix:            true,
-		utils.StatQueueProfilePrefix:     true,
-		utils.ThresholdPrefix:            true,
-		utils.ThresholdProfilePrefix:     true,
-		utils.FilterPrefix:               true,
-		utils.RouteProfilePrefix:         true,
-		utils.AttributeProfilePrefix:     true,
-		utils.ChargerProfilePrefix:       true,
-		utils.DispatcherProfilePrefix:    true,
-		utils.DispatcherHostPrefix:       true,
-		utils.RateProfilePrefix:          true,
-		utils.AttributeFilterIndexes:     true,
-		utils.ResourceFilterIndexes:      true,
-		utils.StatFilterIndexes:          true,
-		utils.ThresholdFilterIndexes:     true,
-		utils.RouteFilterIndexes:         true,
-		utils.ChargerFilterIndexes:       true,
-		utils.DispatcherFilterIndexes:    true,
-		utils.RateFilterIndexes:          true,
+		utils.DESTINATION_PREFIX:          true,
+		utils.REVERSE_DESTINATION_PREFIX:  true,
+		utils.RATING_PLAN_PREFIX:          true,
+		utils.RATING_PROFILE_PREFIX:       true,
+		utils.ACTION_PREFIX:               true,
+		utils.ACTION_PLAN_PREFIX:          true,
+		utils.AccountActionPlansPrefix:    true,
+		utils.ACTION_TRIGGER_PREFIX:       true,
+		utils.SHARED_GROUP_PREFIX:         true,
+		utils.ResourceProfilesPrefix:      true,
+		utils.TimingsPrefix:               true,
+		utils.ResourcesPrefix:             true,
+		utils.StatQueuePrefix:             true,
+		utils.StatQueueProfilePrefix:      true,
+		utils.ThresholdPrefix:             true,
+		utils.ThresholdProfilePrefix:      true,
+		utils.FilterPrefix:                true,
+		utils.RouteProfilePrefix:          true,
+		utils.AttributeProfilePrefix:      true,
+		utils.ChargerProfilePrefix:        true,
+		utils.DispatcherProfilePrefix:     true,
+		utils.DispatcherHostPrefix:        true,
+		utils.RateProfilePrefix:           true,
+		utils.AttributeFilterIndexes:      true,
+		utils.ResourceFilterIndexes:       true,
+		utils.StatFilterIndexes:           true,
+		utils.ThresholdFilterIndexes:      true,
+		utils.RouteFilterIndexes:          true,
+		utils.ChargerFilterIndexes:        true,
+		utils.DispatcherFilterIndexes:     true,
+		utils.RateProfilesFilterIndexPrfx: true,
 	}
 )
 
@@ -316,8 +316,8 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 			err = dm.MatchFilterIndexFromKey(utils.CacheChargerFilterIndexes, dataID)
 		case utils.DispatcherFilterIndexes:
 			err = dm.MatchFilterIndexFromKey(utils.CacheDispatcherFilterIndexes, dataID)
-		case utils.RateFilterIndexes:
-			err = dm.MatchFilterIndexFromKey(utils.CacheRateFilterIndexes, dataID)
+		case utils.RateProfilesFilterIndexPrfx:
+			err = dm.MatchFilterIndexFromKey(utils.CacheRateProfilesFilterIndexes, dataID)
 		case utils.LoadIDPrefix:
 			_, err = dm.GetItemLoadIDs(utils.EmptyString, true)
 		}
@@ -3172,13 +3172,13 @@ func (dm *DataManager) SetRateProfile(rpp *RateProfile, withIndex bool) (err err
 			}
 
 			if needsRemove {
-				if err = NewFilterIndexer(dm, utils.RouteProfilePrefix,
+				if err = NewFilterIndexer(dm, utils.RateProfilePrefix,
 					rpp.Tenant).RemoveItemFromIndex(rpp.Tenant, rpp.ID, oldRpp.FilterIDs); err != nil {
 					return
 				}
 			}
 		}
-		if err = createAndIndex(utils.RouteProfilePrefix, rpp.Tenant, utils.EmptyString,
+		if err = createAndIndex(utils.RateProfilePrefix, rpp.Tenant, utils.EmptyString,
 			rpp.ID, rpp.FilterIDs, dm); err != nil {
 			return
 		}
