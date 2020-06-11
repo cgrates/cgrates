@@ -563,6 +563,27 @@ func (dS *DispatcherService) ReplicatorSv1GetDispatcherHost(args *utils.TenantID
 	}, utils.MetaReplicator, routeID, utils.ReplicatorSv1GetDispatcherHost, args, reply)
 }
 
+func (dS *DispatcherService) ReplicatorSv1GetRateProfile(args *utils.TenantIDWithArgDispatcher, reply *engine.RateProfile) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.TenantID != nil && args.TenantID.Tenant != utils.EmptyString {
+		tnt = args.TenantID.Tenant
+	}
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(utils.ReplicatorSv1GetRateProfile, tnt,
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	routeID := args.ArgDispatcher.RouteID
+	return dS.Dispatch(&utils.CGREvent{
+		Tenant: tnt,
+		ID:     args.ID,
+	}, utils.MetaReplicator, routeID, utils.ReplicatorSv1GetRateProfile, args, reply)
+}
+
 func (dS *DispatcherService) ReplicatorSv1GetItemLoadIDs(args *utils.StringWithApiKey, rpl *map[string]int64) (err error) {
 	if args == nil {
 		args = &utils.StringWithApiKey{}
@@ -1089,6 +1110,28 @@ func (dS *DispatcherService) ReplicatorSv1SetDispatcherProfile(args *engine.Disp
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: args.Tenant}, utils.MetaReplicator, routeID,
 		utils.ReplicatorSv1SetDispatcherProfile, args, rpl)
+}
+
+func (dS *DispatcherService) ReplicatorSv1SetRateProfile(args *engine.RateProfileWithArgDispatcher, rpl *string) (err error) {
+	if args == nil {
+		args = &engine.RateProfileWithArgDispatcher{}
+	}
+	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if args.ArgDispatcher == nil {
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
+		}
+		if err = dS.authorize(utils.ReplicatorSv1SetRateProfile, args.Tenant,
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	var routeID *string
+	if args.ArgDispatcher != nil {
+		routeID = args.ArgDispatcher.RouteID
+	}
+	return dS.Dispatch(&utils.CGREvent{Tenant: args.Tenant}, utils.MetaReplicator, routeID,
+		utils.ReplicatorSv1SetRateProfile, args, rpl)
 }
 
 func (dS *DispatcherService) ReplicatorSv1SetActionPlan(args *engine.SetActionPlanArgWithArgDispatcher, rpl *string) (err error) {
@@ -1661,4 +1704,26 @@ func (dS *DispatcherService) ReplicatorSv1RemoveDispatcherHost(args *utils.Tenan
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: args.Tenant}, utils.MetaReplicator, routeID,
 		utils.ReplicatorSv1RemoveDispatcherHost, args, rpl)
+}
+
+func (dS *DispatcherService) ReplicatorSv1RemoveRateProfile(args *utils.TenantIDWithArgDispatcher, rpl *string) (err error) {
+	if args == nil {
+		args = &utils.TenantIDWithArgDispatcher{}
+	}
+	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if args.ArgDispatcher == nil {
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
+		}
+		if err = dS.authorize(utils.ReplicatorSv1RemoveRateProfile, args.Tenant,
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	var routeID *string
+	if args.ArgDispatcher != nil {
+		routeID = args.ArgDispatcher.RouteID
+	}
+	return dS.Dispatch(&utils.CGREvent{Tenant: args.Tenant}, utils.MetaReplicator, routeID,
+		utils.ReplicatorSv1RemoveRateProfile, args, rpl)
 }

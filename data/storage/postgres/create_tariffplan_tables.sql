@@ -456,6 +456,38 @@ CREATE INDEX tp_routes_unique ON tp_routes  ("tpid",  "tenant", "id",
     "address");
 
 --
+-- Table structure for table `tp_rate_profiles`
+--
+
+  DROP TABLE IF EXISTS tp_rate_profiles;
+  CREATE TABLE tp_rate_profiles (
+  "pk" SERIAL PRIMARY KEY,
+  "tpid" varchar(64) NOT NULL,
+  "tenant" varchar(64) NOT NULL,
+  "id" varchar(64) NOT NULL,
+  "filter_ids" varchar(64) NOT NULL,
+  "activation_interval" varchar(64) NOT NULL,
+  "weight" decimal(8,2) NOT NULL,
+  "connect_fee" decimal(8,4) NOT NULL,
+  "rounding_method" varchar(64) NOT NULL,
+  "rounding_decimals" SMALLINT NOT NULL,
+  "min_cost" decimal(8,4) NOT NULL,
+  "max_cost" decimal(8,4) NOT NULL,
+  "max_cost_strategy" VARCHAR(64) NOT NULL,
+  "rate_id" VARCHAR(64) NOT NULL,
+  "rate_filter_ids" VARCHAR(64) NOT NULL,
+  "rate_weight" decimal(8,2) NOT NULL,
+  "rate_value" decimal(8,4) NOT NULL,
+  "rate_unit" VARCHAR(64) NOT NULL,
+  "rate_increment" VARCHAR(64) NOT NULL,
+  "rate_blocker" BOOLEAN NOT NULL,
+  "created_at" TIMESTAMP WITH TIME ZONE
+  );
+  CREATE INDEX tp_rate_profiles_ids ON tp_rate_profiles (tpid);
+  CREATE INDEX tp_rate_profiles_unique ON tp_rate_profiles  ("tpid",  "tenant", "id",
+    "filter_ids", "rate_id");
+
+--
 -- Table structure for table `versions`
 --
 

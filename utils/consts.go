@@ -937,6 +937,7 @@ const (
 	TpRatingProfile    = "TpRatingProfile"
 	TpChargers         = "TpChargers"
 	TpDispatchers      = "TpDispatchers"
+	TpRateProfiles     = "TpRateProfiles"
 )
 
 // Dispatcher Const
@@ -1445,6 +1446,14 @@ const (
 	DispatcherSv1GetProfileForEvent = "DispatcherSv1.GetProfileForEvent"
 	DispatcherSv1Apier              = "DispatcherSv1.Apier"
 	DispatcherServicePing           = "DispatcherService.Ping"
+)
+
+// RateProfile APIs
+const (
+	APIerSv1SetRateProfile    = "APIerSv1.SetRateProfile"
+	APIerSv1GetRateProfile    = "APIerSv1.GetRateProfile"
+	APIerSv1GetRateProfileIDs = "APIerSv1.GetRateProfileIDs"
+	APIerSv1RemoveRateProfile = "APIerSv1.RemoveRateProfile"
 )
 
 // AnalyzerS APIs

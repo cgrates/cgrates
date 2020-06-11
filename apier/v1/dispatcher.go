@@ -983,6 +983,11 @@ func (dS *DispatcherReplicatorSv1) GetDispatcherProfile(tntID *utils.TenantIDWit
 	return dS.dS.ReplicatorSv1GetDispatcherProfile(tntID, reply)
 }
 
+// GetRateProfile
+func (dS *DispatcherReplicatorSv1) GetRateProfile(tntID *utils.TenantIDWithArgDispatcher, reply *engine.RateProfile) error {
+	return dS.dS.ReplicatorSv1GetRateProfile(tntID, reply)
+}
+
 // GetDispatcherHost
 func (dS *DispatcherReplicatorSv1) GetDispatcherHost(tntID *utils.TenantIDWithArgDispatcher, reply *engine.DispatcherHost) error {
 	return dS.dS.ReplicatorSv1GetDispatcherHost(tntID, reply)
@@ -1108,6 +1113,11 @@ func (dS *DispatcherReplicatorSv1) SetChargerProfile(args *engine.ChargerProfile
 // SetDispatcherProfile
 func (dS *DispatcherReplicatorSv1) SetDispatcherProfile(args *engine.DispatcherProfileWithArgDispatcher, reply *string) error {
 	return dS.dS.ReplicatorSv1SetDispatcherProfile(args, reply)
+}
+
+// SetRateProfile
+func (dS *DispatcherReplicatorSv1) SetRateProfile(args *engine.RateProfileWithArgDispatcher, reply *string) error {
+	return dS.dS.ReplicatorSv1SetRateProfile(args, reply)
 }
 
 // SetActionPlan
@@ -1238,4 +1248,9 @@ func (dS *DispatcherReplicatorSv1) RemoveDispatcherProfile(args *utils.TenantIDW
 // RemoveDispatcherHost
 func (dS *DispatcherReplicatorSv1) RemoveDispatcherHost(args *utils.TenantIDWithArgDispatcher, reply *string) error {
 	return dS.dS.ReplicatorSv1RemoveDispatcherHost(args, reply)
+}
+
+// RemoveRateProfile
+func (dS *DispatcherReplicatorSv1) RemoveRateProfile(args *utils.TenantIDWithArgDispatcher, reply *string) error {
+	return dS.dS.ReplicatorSv1RemoveRateProfile(args, reply)
 }

@@ -202,6 +202,8 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 			Items:  15,
 			Groups: 0,
 		},
+		utils.CacheRateFilterIndexes: {},
+		utils.CacheRateProfiles:      {},
 		utils.CacheRatingPlans: {
 			Items:  4,
 			Groups: 0,

@@ -201,6 +201,7 @@ type ReplicatorSv1Interface interface {
 	GetAttributeProfile(tntID *utils.TenantIDWithArgDispatcher, reply *engine.AttributeProfile) error
 	GetChargerProfile(tntID *utils.TenantIDWithArgDispatcher, reply *engine.ChargerProfile) error
 	GetDispatcherProfile(tntID *utils.TenantIDWithArgDispatcher, reply *engine.DispatcherProfile) error
+	GetRateProfile(tntID *utils.TenantIDWithArgDispatcher, reply *engine.RateProfile) error
 	GetDispatcherHost(tntID *utils.TenantIDWithArgDispatcher, reply *engine.DispatcherHost) error
 	GetItemLoadIDs(itemID *utils.StringWithApiKey, reply *map[string]int64) error
 	GetFilterIndexes(args *utils.GetFilterIndexesArgWithArgDispatcher, reply *map[string]utils.StringMap) error
@@ -226,6 +227,7 @@ type ReplicatorSv1Interface interface {
 	SetAttributeProfile(ap *engine.AttributeProfileWithArgDispatcher, reply *string) error
 	SetChargerProfile(cp *engine.ChargerProfileWithArgDispatcher, reply *string) error
 	SetDispatcherProfile(dpp *engine.DispatcherProfileWithArgDispatcher, reply *string) error
+	SetRateProfile(dpp *engine.RateProfileWithArgDispatcher, reply *string) error
 	SetActionPlan(args *engine.SetActionPlanArgWithArgDispatcher, reply *string) error
 	SetAccountActionPlans(args *engine.SetAccountActionPlansArgWithArgDispatcher, reply *string) error
 	SetDispatcherHost(dpp *engine.DispatcherHostWithArgDispatcher, reply *string) error
@@ -252,4 +254,5 @@ type ReplicatorSv1Interface interface {
 	RemoveChargerProfile(args *utils.TenantIDWithArgDispatcher, reply *string) error
 	RemoveDispatcherProfile(args *utils.TenantIDWithArgDispatcher, reply *string) error
 	RemoveDispatcherHost(args *utils.TenantIDWithArgDispatcher, reply *string) error
+	RemoveRateProfile(args *utils.TenantIDWithArgDispatcher, reply *string) error
 }

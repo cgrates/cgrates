@@ -97,6 +97,7 @@ const CGRATES_CFG_JSON = `
 		"*charger_profiles": {"remote":false, "replicate":false, "limit": -1, "ttl": "", "static_ttl": false}, 
 		"*dispatcher_profiles":{"remote":false, "replicate":false, "limit": -1, "ttl": "", "static_ttl": false}, 
 		"*dispatcher_hosts":{"remote":false, "replicate":false, "limit": -1, "ttl": "", "static_ttl": false}, 
+		"*rate_profiles":{"remote":false, "replicate":false, "limit": -1, "ttl": "", "static_ttl": false},
 		"*filter_indexes" :{"remote":false, "replicate":false, "limit": -1, "ttl": "", "static_ttl": false}, 
 		"*load_ids":{"remote":false, "replicate":false, "limit": -1, "ttl": "", "static_ttl": false}, 
 	},
@@ -141,6 +142,7 @@ const CGRATES_CFG_JSON = `
 		"versions": {"limit": -1, "ttl": "", "static_ttl": false}, 
 		"tp_dispatcher_profiles":{"limit": -1, "ttl": "", "static_ttl": false}, 
 		"tp_dispatcher_hosts":{"limit": -1, "ttl": "", "static_ttl": false}, 
+		"tp_rate_profiles":{"limit": -1, "ttl": "", "static_ttl": false}, 
 	},
 },
 

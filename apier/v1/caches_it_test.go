@@ -160,7 +160,7 @@ func testCacheSAfterLoadFromFolder(t *testing.T) {
 	expStats[utils.CacheRouteProfiles].Items = 2
 	expStats[utils.CacheThresholdProfiles].Items = 1
 	expStats[utils.CacheThresholds].Items = 1
-	expStats[utils.CacheLoadIDs].Items = 20
+	expStats[utils.CacheLoadIDs].Items = 21
 
 	if err := chcRPC.Call(utils.CacheSv1GetCacheStats, &utils.AttrCacheIDsWithArgDispatcher{}, &rcvStats); err != nil {
 		t.Error(err)
@@ -215,7 +215,7 @@ func testCacheSReload(t *testing.T) {
 	expStats[utils.CacheRouteProfiles].Items = 2
 	expStats[utils.CacheThresholdProfiles].Items = 1
 	expStats[utils.CacheThresholds].Items = 1
-	expStats[utils.CacheLoadIDs].Items = 20
+	expStats[utils.CacheLoadIDs].Items = 21
 
 	if err := chcRPC.Call(utils.CacheSv1GetCacheStats, &utils.AttrCacheIDsWithArgDispatcher{}, &rcvStats); err != nil {
 		t.Error(err)
