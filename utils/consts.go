@@ -105,10 +105,6 @@ var (
 		CacheRateProfilesFilterIndexes: RateProfilesFilterIndexPrfx,
 		CacheLoadIDs:                   LoadIDPrefix,
 		CacheAccounts:                  ACCOUNT_PREFIX,
-		CacheLoadIDs:                   LoadIDPrefix,
-		CacheAccounts:                  ACCOUNT_PREFIX,
-		CacheRateProfiles:              RateProfilePrfx,
-		CacheRateProfilesFilterIndexes: RateProfilesFilterIndexPrfx,
 		CacheRateFilterIndexes:         RateFilterIndexPrfx,
 	}
 	CachePrefixToInstance map[string]string // will be built on init
@@ -1648,7 +1644,6 @@ const (
 	CacheClosedSessions            = "*closed_sessions"
 	CacheRateProfilesFilterIndexes = "*rate_profile_filter_indexes"
 	CacheRateFilterIndexes         = "*rate_filter_indexes"
-	CacheRateProfiles              = "*rate_profiles"
 	MetaPrecaching                 = "*precaching"
 	MetaReady                      = "*ready"
 	CacheLoadIDs                   = "*load_ids"
