@@ -105,6 +105,11 @@ var (
 		CacheRateProfilesFilterIndexes: RateProfilesFilterIndexPrfx,
 		CacheLoadIDs:                   LoadIDPrefix,
 		CacheAccounts:                  ACCOUNT_PREFIX,
+		CacheLoadIDs:                   LoadIDPrefix,
+		CacheAccounts:                  ACCOUNT_PREFIX,
+		CacheRateProfiles:              RateProfilePrfx,
+		CacheRateProfilesFilterIndexes: RateProfilesFilterIndexPrfx,
+		CacheRateFilterIndexes:         RateFilterIndexPrfx,
 	}
 	CachePrefixToInstance map[string]string // will be built on init
 	PrefixToIndexCache    = map[string]string{
@@ -271,6 +276,7 @@ const (
 	VERSION_PREFIX               = "ver_"
 	StatQueueProfilePrefix       = "sqp_"
 	RouteProfilePrefix           = "rpp_"
+	RateProfilePrfx              = "rtp_"
 	AttributeProfilePrefix       = "alp_"
 	ChargerProfilePrefix         = "cpp_"
 	DispatcherProfilePrefix      = "dpp_"
@@ -1637,11 +1643,12 @@ const (
 	CacheAttributeFilterIndexes    = "*attribute_filter_indexes"
 	CacheChargerFilterIndexes      = "*charger_filter_indexes"
 	CacheDispatcherFilterIndexes   = "*dispatcher_filter_indexes"
-	CacheRateProfilesFilterIndexes = "*rate_profile_filter_indexes"
-	CacheRateFilterIndexes         = "*rate_filter_indexes"
 	CacheDiameterMessages          = "*diameter_messages"
 	CacheRPCResponses              = "*rpc_responses"
 	CacheClosedSessions            = "*closed_sessions"
+	CacheRateProfilesFilterIndexes = "*rate_profile_filter_indexes"
+	CacheRateFilterIndexes         = "*rate_filter_indexes"
+	CacheRateProfiles              = "*rate_profiles"
 	MetaPrecaching                 = "*precaching"
 	MetaReady                      = "*ready"
 	CacheLoadIDs                   = "*load_ids"

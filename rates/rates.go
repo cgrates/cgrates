@@ -38,6 +38,7 @@ func NewRateS(cfg *config.CGRConfig, filterS *engine.FilterS) *RateS {
 type RateS struct {
 	cfg     *config.CGRConfig
 	filterS *engine.FilterS
+	dm      *engine.DataManager
 }
 
 // ListenAndServe keeps the service alive
@@ -67,7 +68,63 @@ func (rS *RateS) Call(serviceMethod string, args interface{}, reply interface{})
 	return utils.RPCCall(rS, serviceMethod, args, reply)
 }
 
+/*
+// matchingRateProfileForEvent returns the matched RateProfile for the given event
+func (rS *RateS) matchingRateProfileForEvent(cgrEv *utils.CGREvent) (rtPfl *RateProfile, err error) {
+	var rPrfIDs []string
+	if rPrfIDs, err = engine.MatchingItemIDsForEvent(
+		cgrEv.Event,
+		rS.cfg.RateSCfg().StringIndexedFields,
+		rS.cfg.RateSCfg().PrefixIndexedFields,
+		rS.dm, utils.CacheRateProfilesFilterIndexes,
+		cgrEv.Tenant,
+		rpS.cgrcfg.RouteSCfg().IndexedSelects,
+		rpS.cgrcfg.RouteSCfg().NestedFields,
+	); err != nil {
+		return
+	}
+	evNm := utils.MapStorage{utils.MetaReq: ev.Event}
+	for lpID := range rPrfIDs {
+		rPrf, err := rpS.dm.GetRouteProfile(ev.Tenant, lpID, true, true, utils.NonTransactional)
+		if err != nil {
+			if err == utils.ErrNotFound {
+				continue
+			}
+			return nil, err
+		}
+		if rPrf.ActivationInterval != nil && ev.Time != nil &&
+			!rPrf.ActivationInterval.IsActiveAtTime(*ev.Time) { // not active
+			continue
+		}
+		if pass, err := rpS.filterS.Pass(ev.Tenant, rPrf.FilterIDs,
+			evNm); err != nil {
+			return nil, err
+		} else if !pass {
+			continue
+		}
+		if singleResult {
+			if matchingRPrf[0] == nil || matchingRPrf[0].Weight < rPrf.Weight {
+				matchingRPrf[0] = rPrf
+			}
+		} else {
+			matchingRPrf = append(matchingRPrf, rPrf)
+		}
+	}
+	if singleResult {
+		if matchingRPrf[0] == nil {
+			return nil, utils.ErrNotFound
+		}
+	} else {
+		if len(matchingRPrf) == 0 {
+			return nil, utils.ErrNotFound
+		}
+		sort.Slice(matchingRPrf, func(i, j int) bool { return matchingRPrf[i].Weight > matchingRPrf[j].Weight })
+	}
+	return
+}
+*/
+
 // V1CostForEvent will be called to calculate the cost for an event
-func (rS *RateS) V1CostForEvent(cgrEv *utils.CGREventWithOpts, rply *string) (err error) {
+func (rS *RateS) V1CostForEvent(cgrEv *utils.CGREventWithOpts, cC *utils.ChargedCost) (err error) {
 	return
 }
