@@ -334,7 +334,7 @@ func testV1FIdxSecondComputeThresholdsIndexes(t *testing.T) {
 	var indexes []string
 	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaThresholds, Tenant: tenant, FilterType: utils.MetaString},
-		&indexes); err != nil && err.Error() != utils.ErrNotFound.Error() {
+		&indexes); err != nil {
 		t.Error(err)
 	}
 	if !reflect.DeepEqual(expectedIDX, indexes) {
@@ -358,7 +358,7 @@ func testV1FIdxThirdComputeThresholdsIndexes(t *testing.T) {
 	var indexes []string
 	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaThresholds, Tenant: tenant, FilterType: utils.MetaString},
-		&indexes); err != nil && err.Error() != utils.ErrNotFound.Error() {
+		&indexes); err != nil {
 		t.Error(err)
 	}
 	sort.Strings(indexes)
@@ -405,7 +405,7 @@ func testV1FIdxRemoveThresholdProfile(t *testing.T) {
 	var indexes []string
 	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaThresholds, Tenant: tenant, FilterType: utils.MetaString},
-		&indexes); err != nil && err.Error() != utils.ErrNotFound.Error() {
+		&indexes); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
@@ -654,7 +654,7 @@ func testV1FIdxRemoveStatQueueProfile(t *testing.T) {
 	var indexes []string
 	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaStats, Tenant: tenant, FilterType: utils.MetaString},
-		&indexes); err != nil && err.Error() != utils.ErrNotFound.Error() {
+		&indexes); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
@@ -724,7 +724,7 @@ func testV1FIdxSetResourceProfileIndexes(t *testing.T) {
 	var indexes []string
 	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaResources, Tenant: tenant, FilterType: utils.MetaString},
-		&indexes); err != nil && err.Error() != utils.ErrNotFound.Error() {
+		&indexes); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
@@ -817,7 +817,7 @@ func testV1FIdxSetSecondResourceProfileIndexes(t *testing.T) {
 	var indexes []string
 	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaResources, Tenant: tenant, FilterType: utils.MetaString},
-		&indexes); err != nil && err.Error() != utils.ErrNotFound.Error() {
+		&indexes); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
@@ -882,7 +882,7 @@ func testV1FIdxRemoveResourceProfile(t *testing.T) {
 	var indexes []string
 	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaResources, Tenant: tenant, FilterType: utils.MetaString},
-		&indexes); err != nil && err.Error() != utils.ErrNotFound.Error() {
+		&indexes); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }

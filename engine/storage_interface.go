@@ -93,17 +93,10 @@ type DataDB interface {
 	RemoveTimingDrv(string) error
 	GetLoadHistory(int, bool, string) ([]*utils.LoadInstance, error)
 	AddLoadHistory(*utils.LoadInstance, int, string) error
-	GetFilterIndexesDrv(cacheID, itemIDPrefix, filterType string,
-		fldNameVal map[string]string) (indexes map[string]utils.StringMap, err error)
-	SetFilterIndexesDrv(cacheID, itemIDPrefix string,
-		indexes map[string]utils.StringMap, commit bool, transactionID string) (err error)
-	RemoveFilterIndexesDrv(cacheID, itemIDPrefix string) (err error)
 	GetIndexesDrv(idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error)
 	SetIndexesDrv(idxItmType, tntCtx string,
 		indexes map[string]utils.StringSet, commit bool, transactionID string) (err error)
 	RemoveIndexesDrv(idxItmType, tntCtx, idxKey string) (err error)
-	MatchFilterIndexDrv(cacheID, itemIDPrefix,
-		filterType, fieldName, fieldVal string) (itemIDs utils.StringMap, err error)
 	GetStatQueueProfileDrv(tenant string, ID string) (sq *StatQueueProfile, err error)
 	SetStatQueueProfileDrv(sq *StatQueueProfile) (err error)
 	RemStatQueueProfileDrv(tenant, id string) (err error)

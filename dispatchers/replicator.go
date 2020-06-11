@@ -606,50 +606,6 @@ func (dS *DispatcherService) ReplicatorSv1GetItemLoadIDs(args *utils.StringWithA
 		utils.ReplicatorSv1GetItemLoadIDs, args, rpl)
 }
 
-func (dS *DispatcherService) ReplicatorSv1GetFilterIndexes(args *utils.GetFilterIndexesArgWithArgDispatcher, rpl *map[string]utils.StringMap) (err error) {
-	if args == nil {
-		args = &utils.GetFilterIndexesArgWithArgDispatcher{}
-	}
-	args.TenantArg.Tenant = utils.FirstNonEmpty(args.TenantArg.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
-		}
-		if err = dS.authorize(utils.ReplicatorSv1GetFilterIndexes, args.TenantArg.Tenant,
-			args.APIKey, utils.TimePointer(time.Now())); err != nil {
-			return
-		}
-	}
-	var routeID *string
-	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
-	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaReplicator, routeID,
-		utils.ReplicatorSv1GetFilterIndexes, args, rpl)
-}
-
-func (dS *DispatcherService) ReplicatorSv1MatchFilterIndex(args *utils.MatchFilterIndexArgWithArgDispatcher, rpl *utils.StringMap) (err error) {
-	if args == nil {
-		args = &utils.MatchFilterIndexArgWithArgDispatcher{}
-	}
-	args.TenantArg.Tenant = utils.FirstNonEmpty(args.TenantArg.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
-		}
-		if err = dS.authorize(utils.ReplicatorSv1MatchFilterIndex, args.TenantArg.Tenant,
-			args.APIKey, utils.TimePointer(time.Now())); err != nil {
-			return
-		}
-	}
-	var routeID *string
-	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
-	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaReplicator, routeID,
-		utils.ReplicatorSv1MatchFilterIndex, args, rpl)
-}
-
 func (dS *DispatcherService) ReplicatorSv1SetThresholdProfile(args *engine.ThresholdProfileWithArgDispatcher, rpl *string) (err error) {
 	if args == nil {
 		args = &engine.ThresholdProfileWithArgDispatcher{}
@@ -692,28 +648,6 @@ func (dS *DispatcherService) ReplicatorSv1SetThreshold(args *engine.ThresholdWit
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: args.Tenant}, utils.MetaReplicator, routeID,
 		utils.ReplicatorSv1SetThreshold, args, rpl)
-}
-
-func (dS *DispatcherService) ReplicatorSv1SetFilterIndexes(args *utils.SetFilterIndexesArgWithArgDispatcher, rpl *string) (err error) {
-	if args == nil {
-		args = &utils.SetFilterIndexesArgWithArgDispatcher{}
-	}
-	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
-		}
-		if err = dS.authorize(utils.ReplicatorSv1SetFilterIndexes, args.Tenant,
-			args.APIKey, utils.TimePointer(time.Now())); err != nil {
-			return
-		}
-	}
-	var routeID *string
-	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
-	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: args.Tenant}, utils.MetaReplicator, routeID,
-		utils.ReplicatorSv1SetFilterIndexes, args, rpl)
 }
 
 func (dS *DispatcherService) ReplicatorSv1SetDestination(args *engine.DestinationWithArgDispatcher, rpl *string) (err error) {

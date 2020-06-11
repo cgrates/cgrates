@@ -860,45 +860,6 @@ func LongExecTimeDetector(logID string, maxDur time.Duration) (endchan chan stru
 	return
 }
 
-type GetFilterIndexesArg struct {
-	CacheID      string
-	ItemIDPrefix string
-	FilterType   string
-	FldNameVal   map[string]string
-}
-
-type MatchFilterIndexArg struct {
-	CacheID      string
-	ItemIDPrefix string
-	FilterType   string
-	FieldName    string
-	FieldVal     string
-}
-
-type SetFilterIndexesArg struct {
-	CacheID      string
-	ItemIDPrefix string
-	Indexes      map[string]StringMap
-}
-
-type GetFilterIndexesArgWithArgDispatcher struct {
-	*GetFilterIndexesArg
-	TenantArg
-	*ArgDispatcher
-}
-
-type MatchFilterIndexArgWithArgDispatcher struct {
-	*MatchFilterIndexArg
-	TenantArg
-	*ArgDispatcher
-}
-
-type SetFilterIndexesArgWithArgDispatcher struct {
-	*SetFilterIndexesArg
-	TenantArg
-	*ArgDispatcher
-}
-
 type StringWithApiKey struct {
 	*ArgDispatcher
 	TenantArg

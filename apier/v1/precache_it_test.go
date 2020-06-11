@@ -173,7 +173,7 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 		},
 		utils.CacheAttributeFilterIndexes: {
 			Items:  2,
-			Groups: 0,
+			Groups: 2,
 		},
 		utils.CacheAttributeProfiles: {
 			Items:  1,
@@ -215,7 +215,7 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 		},
 		utils.CacheResourceFilterIndexes: {
 			Items:  6,
-			Groups: 0,
+			Groups: 1,
 		},
 		utils.CacheResourceProfiles: {
 			Items:  3,
@@ -236,7 +236,7 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 		},
 		utils.CacheStatFilterIndexes: {
 			Items:  2,
-			Groups: 0,
+			Groups: 1,
 		},
 		utils.CacheStatQueueProfiles: {
 			Items:  1,
@@ -250,7 +250,7 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 		utils.CacheEventCharges: {},
 		utils.CacheRouteFilterIndexes: {
 			Items:  6,
-			Groups: 0,
+			Groups: 1,
 		},
 		utils.CacheRouteProfiles: {
 			Items:  3,
@@ -258,7 +258,7 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 		},
 		utils.CacheThresholdFilterIndexes: {
 			Items:  10,
-			Groups: 0,
+			Groups: 1,
 		},
 		utils.CacheThresholdProfiles: {
 			Items:  7,
