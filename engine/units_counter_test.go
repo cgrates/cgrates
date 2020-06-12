@@ -38,23 +38,15 @@ func TestUnitCounterClone(t *testing.T) {
 	uc = &UnitCounter{
 		CounterType: "testCounterType",
 		Counters: []*CounterFilter{
-			&CounterFilter{
-				Value: 0.7,
-			},
-			&CounterFilter{
-				Value: 0.8,
-			},
+			{Value: 0.7},
+			{Value: 0.8},
 		},
 	}
 	eOut = &UnitCounter{
 		CounterType: "testCounterType",
 		Counters: []*CounterFilter{
-			&CounterFilter{
-				Value: 0.7,
-			},
-			&CounterFilter{
-				Value: 0.8,
-			},
+			{Value: 0.7},
+			{Value: 0.8},
 		},
 	}
 	if rcv := uc.Clone(); !reflect.DeepEqual(eOut, rcv) {

@@ -703,12 +703,20 @@ func testDspSessionProcessEvent2(t *testing.T) {
 func testDspSessionReplicate(t *testing.T) {
 	allEngine.initDataDb(t)
 	allEngine.resetStorDb(t)
+	var reply string
+	// reload cache  in order to corectly cahce the indexes
+	if err := allEngine.RPC.Call(utils.CacheSv1Clear, &utils.AttrCacheIDsWithArgDispatcher{
+		CacheIDs: nil,
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Reply: ", reply)
+	}
 	allEngine.loadData(t, path.Join(dspDataDir, "tariffplans", "testit"))
 	testDspSessionAddBalacne(t)
 	testDspSessionAuthorize(t)
 	testDspSessionInit(t)
 
-	var reply string
 	if err := dispEngine.RPC.Call(utils.SessionSv1ReplicateSessions, &ArgsReplicateSessionsWithApiKey{
 		ArgDispatcher: &utils.ArgDispatcher{
 			APIKey: utils.StringPointer("ses12345"),
@@ -789,7 +797,7 @@ func testDspSessionPassive(t *testing.T) {
 			utils.Usage:       5 * time.Minute,
 		}),
 		SRuns: []*sessions.SRun{
-			&sessions.SRun{
+			{
 				Event: engine.NewMapEvent(map[string]interface{}{
 					"RunID":           "CustomerCharges",
 					utils.CGRID:       "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
