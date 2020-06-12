@@ -75,7 +75,7 @@ func (rS *RateS) Call(serviceMethod string, args interface{}, reply interface{})
 func (rS *RateS) matchingRateProfileForEvent(args *ArgsCostForEvent) (rtPfl *engine.RateProfile, err error) {
 	rPfIDs := args.RateProfileIDs
 	if len(rPfIDs) == 0 {
-		var rPfIDMp utils.StringMap
+		var rPfIDMp utils.StringSet
 		if rPfIDMp, err = engine.MatchingItemIDsForEvent(
 			args.CGREvent.Event,
 			rS.cfg.RateSCfg().StringIndexedFields,
@@ -88,7 +88,7 @@ func (rS *RateS) matchingRateProfileForEvent(args *ArgsCostForEvent) (rtPfl *eng
 		); err != nil {
 			return
 		}
-		rPfIDs = rPfIDMp.Slice()
+		rPfIDs = rPfIDMp.AsSlice()
 	}
 	matchingRPfs := make([]*engine.RateProfile, 0, len(rPfIDs))
 	evNm := utils.MapStorage{utils.MetaReq: args.CGREvent.Event}
@@ -126,7 +126,7 @@ func (rS *RateS) matchingRateProfileForEvent(args *ArgsCostForEvent) (rtPfl *eng
 // indexed based on intervalStart, there will be one winner per interval start
 // returned in order of intervalStart
 func (rS *RateS) matchingRatesForEvent(rtPfl *engine.RateProfile, cgrEv *utils.CGREvent) (rts []*engine.Rate, err error) {
-	var rtIDs utils.StringMap
+	var rtIDs utils.StringSet
 	// when matching we use the RateProfile ID as context
 	if rtIDs, err = engine.MatchingItemIDsForEvent(
 		cgrEv.Event,
