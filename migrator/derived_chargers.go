@@ -224,7 +224,7 @@ func (m *Migrator) migrateV1DerivedChargers() (err error) {
 	if m.dryRun {
 		return
 	}
-	if m.removeV1DerivedChargers(); err != nil {
+	if err = m.removeV1DerivedChargers(); err != nil && err != utils.ErrNoMoreData {
 		return
 	}
 	// All done, update version wtih current one
