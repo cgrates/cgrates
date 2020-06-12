@@ -2589,3 +2589,74 @@ func TestTPRoutesAsTPRouteProfile(t *testing.T) {
 		t.Errorf("Expecting: %+v,\nReceived: %+v", utils.ToJSON(expPrfRev), utils.ToJSON(rcvRev))
 	}
 }
+
+func TestRateProfileToAPI(t *testing.T) {
+	rPrf := &RateProfile{
+		Tenant:           "cgrates.org",
+		ID:               "RP1",
+		FilterIDs:        []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002"},
+		Weight:           0,
+		ConnectFee:       0.1,
+		RoundingMethod:   "*up",
+		RoundingDecimals: 4,
+		MinCost:          0.1,
+		MaxCost:          0.6,
+		MaxCostStrategy:  "*free",
+		Rates: []*Rate{
+			&Rate{
+				ID:        "FIRST_GI",
+				FilterIDs: []string{"*gi:~*req.Usage:0"},
+				Weight:    0,
+				Value:     0.12,
+				Unit:      time.Duration(1 * time.Minute),
+				Increment: time.Duration(1 * time.Minute),
+				Blocker:   false,
+			},
+			&Rate{
+				ID:        "SECOND_GI",
+				FilterIDs: []string{"*gi:~*req.Usage:1m"},
+				Weight:    10,
+				Value:     0.06,
+				Unit:      time.Duration(1 * time.Minute),
+				Increment: time.Duration(1 * time.Second),
+				Blocker:   false,
+			},
+		},
+	}
+	eTPRatePrf := &TPRateProfile{
+		Tenant:             "cgrates.org",
+		ID:                 "RP1",
+		FilterIDs:          []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002"},
+		ActivationInterval: new(utils.TPActivationInterval),
+		Weight:             0,
+		ConnectFee:         0.1,
+		RoundingMethod:     "*up",
+		RoundingDecimals:   4,
+		MinCost:            0.1,
+		MaxCost:            0.6,
+		MaxCostStrategy:    "*free",
+		Rates: []*Rate{
+			&Rate{
+				ID:        "FIRST_GI",
+				FilterIDs: []string{"*gi:~*req.Usage:0"},
+				Weight:    0,
+				Value:     0.12,
+				Unit:      time.Duration(1 * time.Minute),
+				Increment: time.Duration(1 * time.Minute),
+				Blocker:   false,
+			},
+			&Rate{
+				ID:        "SECOND_GI",
+				FilterIDs: []string{"*gi:~*req.Usage:1m"},
+				Weight:    10,
+				Value:     0.06,
+				Unit:      time.Duration(1 * time.Minute),
+				Increment: time.Duration(1 * time.Second),
+				Blocker:   false,
+			},
+		},
+	}
+	if rcv := RateProfileToAPI(rPrf); !reflect.DeepEqual(rcv, eTPRatePrf) {
+		t.Errorf("Expecting: %+v,\nReceived: %+v", utils.ToJSON(eTPRatePrf), utils.ToJSON(rcv))
+	}
+}
