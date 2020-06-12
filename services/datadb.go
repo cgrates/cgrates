@@ -43,7 +43,7 @@ type DataDBService struct {
 	oldDBCfg *config.DataDbCfg
 	connMgr  *engine.ConnManager
 
-	db     *engine.DataManager
+	dm     *engine.DataManager
 	dbchan chan *engine.DataManager
 }
 
@@ -69,13 +69,13 @@ func (db *DataDBService) Start() (err error) {
 		return
 	}
 
-	db.db = engine.NewDataManager(d, db.cfg.CacheCfg(), db.connMgr)
-	engine.SetDataStorage(db.db)
-	if err = engine.CheckVersions(db.db.DataDB()); err != nil {
+	db.dm = engine.NewDataManager(d, db.cfg.CacheCfg(), db.connMgr)
+	engine.SetDataStorage(db.dm)
+	if err = engine.CheckVersions(db.dm.DataDB()); err != nil {
 		fmt.Println(err)
 		return
 	}
-	db.dbchan <- db.db
+	db.dbchan <- db.dm
 	return
 }
 
@@ -84,14 +84,14 @@ func (db *DataDBService) Reload() (err error) {
 	db.Lock()
 	defer db.Unlock()
 	if db.needsConnectionReload() {
-		if err = db.db.Reconnect(db.cfg.GeneralCfg().DBDataEncoding, db.cfg.DataDbCfg()); err != nil {
+		if err = db.dm.Reconnect(db.cfg.GeneralCfg().DBDataEncoding, db.cfg.DataDbCfg()); err != nil {
 			return
 		}
 		db.oldDBCfg = db.cfg.DataDbCfg().Clone()
 		return
 	}
 	if db.cfg.DataDbCfg().DataDbType == utils.MONGO {
-		mgo, canCast := db.db.DataDB().(*engine.MongoStorage)
+		mgo, canCast := db.dm.DataDB().(*engine.MongoStorage)
 		if !canCast {
 			return fmt.Errorf("can't conver DataDB of type %s to MongoStorage",
 				db.cfg.DataDbCfg().DataDbType)
@@ -104,8 +104,8 @@ func (db *DataDBService) Reload() (err error) {
 // Shutdown stops the service
 func (db *DataDBService) Shutdown() (err error) {
 	db.Lock()
-	db.db.DataDB().Close()
-	db.db = nil
+	db.dm.DataDB().Close()
+	db.dm = nil
 	db.Unlock()
 	return
 }
@@ -114,7 +114,7 @@ func (db *DataDBService) Shutdown() (err error) {
 func (db *DataDBService) IsRunning() bool {
 	db.RLock()
 	defer db.RUnlock()
-	return db != nil && db.db != nil && db.db.DataDB() != nil
+	return db != nil && db.dm != nil && db.dm.DataDB() != nil
 }
 
 // ServiceName returns the service name
@@ -139,7 +139,7 @@ func (db *DataDBService) mandatoryDB() bool {
 func (db *DataDBService) GetDM() *engine.DataManager {
 	db.RLock()
 	defer db.RUnlock()
-	return db.db
+	return db.dm
 }
 
 // needsConnectionReload returns if the DB connection needs to reloaded

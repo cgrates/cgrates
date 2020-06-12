@@ -20,6 +20,7 @@ package rates
 
 import (
 	"fmt"
+	"sort"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -27,10 +28,11 @@ import (
 )
 
 // NewRateS instantiates the RateS
-func NewRateS(cfg *config.CGRConfig, filterS *engine.FilterS) *RateS {
+func NewRateS(cfg *config.CGRConfig, filterS *engine.FilterS, dm *engine.DataManager) *RateS {
 	return &RateS{
 		cfg:     cfg,
 		filterS: filterS,
+		dm:      dm,
 	}
 }
 
@@ -68,61 +70,47 @@ func (rS *RateS) Call(serviceMethod string, args interface{}, reply interface{})
 	return utils.RPCCall(rS, serviceMethod, args, reply)
 }
 
-/*
 // matchingRateProfileForEvent returns the matched RateProfile for the given event
-func (rS *RateS) matchingRateProfileForEvent(cgrEv *utils.CGREvent) (rtPfl *RateProfile, err error) {
-	var rPrfIDs []string
-	if rPrfIDs, err = engine.MatchingItemIDsForEvent(
+func (rS *RateS) matchingRateProfileForEvent(cgrEv *utils.CGREvent) (rtPfl *engine.RateProfile, err error) {
+	var rPfIDs utils.StringMap
+	if rPfIDs, err = engine.MatchingItemIDsForEvent(
 		cgrEv.Event,
 		rS.cfg.RateSCfg().StringIndexedFields,
 		rS.cfg.RateSCfg().PrefixIndexedFields,
 		rS.dm, utils.CacheRateProfilesFilterIndexes,
 		cgrEv.Tenant,
-		rpS.cgrcfg.RouteSCfg().IndexedSelects,
-		rpS.cgrcfg.RouteSCfg().NestedFields,
+		rS.cfg.RouteSCfg().IndexedSelects,
+		rS.cfg.RouteSCfg().NestedFields,
 	); err != nil {
 		return
 	}
-	evNm := utils.MapStorage{utils.MetaReq: ev.Event}
-	for lpID := range rPrfIDs {
-		rPrf, err := rpS.dm.GetRouteProfile(ev.Tenant, lpID, true, true, utils.NonTransactional)
-		if err != nil {
+	var matchingRPfs []*engine.RateProfile
+	evNm := utils.MapStorage{utils.MetaReq: cgrEv.Event}
+	for rPfID := range rPfIDs {
+		var rPf *engine.RateProfile
+		if rPf, err = rS.dm.GetRateProfile(cgrEv.Tenant, rPfID, true, true, utils.NonTransactional); err != nil {
 			if err == utils.ErrNotFound {
+				err = nil
 				continue
 			}
-			return nil, err
+			return
 		}
-		if rPrf.ActivationInterval != nil && ev.Time != nil &&
-			!rPrf.ActivationInterval.IsActiveAtTime(*ev.Time) { // not active
+		if rPf.ActivationInterval != nil && cgrEv.Time != nil &&
+			!rPf.ActivationInterval.IsActiveAtTime(*cgrEv.Time) { // not active
 			continue
 		}
-		if pass, err := rpS.filterS.Pass(ev.Tenant, rPrf.FilterIDs,
-			evNm); err != nil {
-			return nil, err
+		var pass bool
+		if pass, err = rS.filterS.Pass(cgrEv.Tenant, rPf.FilterIDs, evNm); err != nil {
+			return
 		} else if !pass {
 			continue
 		}
-		if singleResult {
-			if matchingRPrf[0] == nil || matchingRPrf[0].Weight < rPrf.Weight {
-				matchingRPrf[0] = rPrf
-			}
-		} else {
-			matchingRPrf = append(matchingRPrf, rPrf)
-		}
+
+		matchingRPfs = append(matchingRPfs, rPf)
 	}
-	if singleResult {
-		if matchingRPrf[0] == nil {
-			return nil, utils.ErrNotFound
-		}
-	} else {
-		if len(matchingRPrf) == 0 {
-			return nil, utils.ErrNotFound
-		}
-		sort.Slice(matchingRPrf, func(i, j int) bool { return matchingRPrf[i].Weight > matchingRPrf[j].Weight })
-	}
+	sort.Slice(matchingRPfs, func(i, j int) bool { return matchingRPfs[i].Weight > matchingRPfs[j].Weight })
 	return
 }
-*/
 
 // V1CostForEvent will be called to calculate the cost for an event
 func (rS *RateS) V1CostForEvent(cgrEv *utils.CGREventWithOpts, cC *utils.ChargedCost) (err error) {

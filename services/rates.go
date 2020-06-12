@@ -33,12 +33,15 @@ import (
 )
 
 // NewRateService constructs RateService
-func NewRateService(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
+func NewRateService(
+	cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
+	dmS *DataDBService,
 	server *utils.Server, exitChan chan bool,
 	intConnChan chan rpcclient.ClientConnector) servmanager.Service {
 	return &RateService{
 		cfg:         cfg,
 		filterSChan: filterSChan,
+		dmS:         dmS,
 		server:      server,
 		exitChan:    exitChan,
 		intConnChan: intConnChan,
@@ -52,6 +55,7 @@ type RateService struct {
 
 	cfg         *config.CGRConfig
 	filterSChan chan *engine.FilterS
+	dmS         *DataDBService
 	server      *utils.Server
 	exitChan    chan bool
 	intConnChan chan rpcclient.ClientConnector
@@ -104,9 +108,11 @@ func (rs *RateService) Start() (err error) {
 
 	fltrS := <-rs.filterSChan
 	rs.filterSChan <- fltrS
-
+	dbchan := rs.dmS.GetDMChan()
+	dm := <-dbchan
+	dbchan <- dm
 	rs.Lock()
-	rs.rateS = rates.NewRateS(rs.cfg, fltrS)
+	rs.rateS = rates.NewRateS(rs.cfg, fltrS, dm)
 	rs.Unlock()
 	/*rs.rpc = v1.NewEventExporterSv1(es.eeS)
 	if !rs.cfg.DispatcherSCfg().Enabled {

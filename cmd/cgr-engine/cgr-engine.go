@@ -530,7 +530,7 @@ func main() {
 		ldrs, anz, dspS, dmService, storDBService,
 		services.NewEventExporterService(cfg, filterSChan,
 			connManager, server, exitChan, internalEEsChan),
-		services.NewRateService(cfg, filterSChan,
+		services.NewRateService(cfg, filterSChan, dmService,
 			server, exitChan, internalRateSChan),
 		services.NewSIPAgent(cfg, filterSChan, exitChan, connManager),
 	)
