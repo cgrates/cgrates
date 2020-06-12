@@ -50,13 +50,14 @@ func (rpp *RateProfile) TenantID() string {
 
 // Route defines rate related information used within a RateProfile
 type Rate struct {
-	ID        string        // RateID
-	FilterIDs []string      // RateFilterIDs
-	Weight    float64       // RateWeight
-	Value     float64       // RateValue
-	Unit      time.Duration // RateUnit
-	Increment time.Duration // RateIncrement
-	Blocker   bool          // RateBlocker will make this rate recurrent
+	ID            string        // RateID
+	FilterIDs     []string      // RateFilterIDs
+	IntervalStart time.Duration // Starting point when the Rate kicks in
+	Weight        float64       // RateWeight will decide the winner per interval start
+	Value         float64       // RateValue
+	Unit          time.Duration // RateUnit
+	Increment     time.Duration // RateIncrement
+	Blocker       bool          // RateBlocker will make this rate recurrent, deactivating further intervals
 
 	val *utils.Decimal // cached version of the Decimal
 }
