@@ -136,7 +136,8 @@ func testLoaderITRemoveLoad(t *testing.T) {
 		}
 	}*/
 	loader, err = NewTpReader(dataDbCsv.DataDB(), NewFileCSVStorage(utils.CSV_SEP,
-		path.Join(*dataDir, "tariffplans", *tpCsvScenario)), "", "", []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil)
+		path.Join(*dataDir, "tariffplans", *tpCsvScenario)), "", "",
+		[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -213,7 +214,9 @@ func testLoaderITLoadFromCSV(t *testing.T) {
 			t.Error("Failed validating data: ", err.Error())
 		}
 	}*/
-	loader, err = NewTpReader(dataDbCsv.DataDB(), NewFileCSVStorage(utils.CSV_SEP, path.Join(*dataDir, "tariffplans", *tpCsvScenario)), "", "", []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil)
+	loader, err = NewTpReader(dataDbCsv.DataDB(), NewFileCSVStorage(utils.CSV_SEP,
+		path.Join(*dataDir, "tariffplans", *tpCsvScenario)), "", "",
+		[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil)
 	if err != nil {
 		t.Error(err)
 	}

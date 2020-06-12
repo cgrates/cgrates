@@ -76,6 +76,7 @@ var (
 		testOnStorITTestAttributeSubstituteIface,
 		testOnStorITChargerProfile,
 		testOnStorITDispatcherProfile,
+		testOnStorITRateProfile,
 
 		//testOnStorITCacheActionTriggers,
 		//testOnStorITCRUDActionTriggers,
@@ -2134,6 +2135,83 @@ func testOnStorITDispatcherProfile(t *testing.T) {
 	}
 	//check database if removed
 	if _, rcvErr := onStor.GetDispatcherProfile("cgrates.org", "Dsp1",
+		false, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
+		t.Error(rcvErr)
+	}
+}
+
+func testOnStorITRateProfile(t *testing.T) {
+	rPrf := &RateProfile{
+		Tenant:           "cgrates.org",
+		ID:               "RP1",
+		FilterIDs:        []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002"},
+		Weight:           0,
+		ConnectFee:       0.1,
+		RoundingMethod:   "*up",
+		RoundingDecimals: 4,
+		MinCost:          0.1,
+		MaxCost:          0.6,
+		MaxCostStrategy:  "*free",
+		Rates: []*Rate{
+			&Rate{
+				ID:        "FIRST_GI",
+				FilterIDs: []string{"*gi:~*req.Usage:0"},
+				Weight:    0,
+				Value:     0.12,
+				Unit:      time.Duration(1 * time.Minute),
+				Increment: time.Duration(1 * time.Minute),
+				Blocker:   false,
+			},
+			&Rate{
+				ID:        "SECOND_GI",
+				FilterIDs: []string{"*gi:~*req.Usage:1m"},
+				Weight:    10,
+				Value:     0.06,
+				Unit:      time.Duration(1 * time.Minute),
+				Increment: time.Duration(1 * time.Second),
+				Blocker:   false,
+			},
+		},
+	}
+	if _, rcvErr := onStor.GetRateProfile("cgrates.org", "RP1",
+		true, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
+		t.Error(rcvErr)
+	}
+	if err := onStor.SetRateProfile(rPrf, false); err != nil {
+		t.Error(err)
+	}
+	//get from database
+	if rcv, err := onStor.GetRateProfile("cgrates.org", "RP1",
+		false, false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rPrf, rcv) {
+		t.Errorf("Expecting: %v, received: %v", rPrf, rcv)
+	}
+	expectedT := []string{"rtp_cgrates.org:RP1"}
+	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.RateProfilePrefix); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedT, itm) {
+		t.Errorf("Expected : %+v, but received %+v", expectedT, itm)
+	}
+	//update
+	rPrf.FilterIDs = []string{"*string:Accout:1001", "*prefix:Destination:10"}
+	if err := onStor.SetRateProfile(rPrf, false); err != nil {
+		t.Error(err)
+	}
+	time.Sleep(sleepDelay)
+	//get from database
+	if rcv, err := onStor.GetRateProfile("cgrates.org", "RP1",
+		false, false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !(reflect.DeepEqual(rPrf, rcv)) {
+		t.Errorf("Expecting: %v, received: %v", rPrf, rcv)
+	}
+	if err := onStor.RemoveRateProfile(rPrf.Tenant, rPrf.ID,
+		utils.NonTransactional, false); err != nil {
+		t.Error(err)
+	}
+	//check database if removed
+	if _, rcvErr := onStor.GetRateProfile("cgrates.org", "RP1",
 		false, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}

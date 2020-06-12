@@ -106,6 +106,9 @@ func init() {
 	if err := csvr.LoadDispatcherHosts(); err != nil {
 		log.Print("error in LoadDispatcherHosts:", err)
 	}
+	if err := csvr.LoadRateProfiles(); err != nil {
+		log.Print("error in LoadRateProfiles:", err)
+	}
 	if err := csvr.WriteToDatabase(false, false); err != nil {
 		log.Print("error when writing into database", err)
 	}
@@ -1407,6 +1410,63 @@ func TestLoadDispatcherProfiles(t *testing.T) {
 	if !reflect.DeepEqual(eDispatcherProfiles, csvr.dispatcherProfiles[dppKey]) {
 		t.Errorf("Expecting: %+v, received: %+v",
 			utils.ToJSON(eDispatcherProfiles), utils.ToJSON(csvr.dispatcherProfiles[dppKey]))
+	}
+}
+
+func TestLoadRateProfiles(t *testing.T) {
+	eRatePrf := &TPRateProfile{
+		TPid:             testTPID,
+		Tenant:           "cgrates.org",
+		ID:               "RP1",
+		FilterIDs:        []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002"},
+		Weight:           0,
+		ConnectFee:       0.1,
+		RoundingMethod:   "*up",
+		RoundingDecimals: 4,
+		MinCost:          0.1,
+		MaxCost:          0.6,
+		MaxCostStrategy:  "*free",
+		Rates: []*Rate{
+			&Rate{
+				ID:        "FIRST_GI",
+				FilterIDs: []string{"*gi:~*req.Usage:0"},
+				Weight:    0,
+				Value:     0.12,
+				Unit:      time.Duration(1 * time.Minute),
+				Increment: time.Duration(1 * time.Minute),
+				Blocker:   false,
+			},
+			&Rate{
+				ID:        "SECOND_GI",
+				FilterIDs: []string{"*gi:~*req.Usage:1m"},
+				Weight:    10,
+				Value:     0.06,
+				Unit:      time.Duration(1 * time.Minute),
+				Increment: time.Duration(1 * time.Second),
+				Blocker:   false,
+			},
+		},
+	}
+	if len(csvr.rateProfiles) != 1 {
+		t.Errorf("Failed to load rateProfiles: %s", utils.ToIJSON(csvr.rateProfiles))
+	}
+	dppKey := utils.TenantID{Tenant: "cgrates.org", ID: "RP1"}
+	sort.Slice(eRatePrf.FilterIDs, func(i, j int) bool {
+		return eRatePrf.FilterIDs[i] < eRatePrf.FilterIDs[j]
+	})
+	sort.Slice(csvr.rateProfiles[dppKey].FilterIDs, func(i, j int) bool {
+		return csvr.rateProfiles[dppKey].FilterIDs[i] < csvr.rateProfiles[dppKey].FilterIDs[j]
+	})
+	sort.Slice(eRatePrf.Rates, func(i, j int) bool {
+		return eRatePrf.Rates[i].ID < eRatePrf.Rates[j].ID
+	})
+	sort.Slice(csvr.rateProfiles[dppKey].Rates, func(i, j int) bool {
+		return csvr.rateProfiles[dppKey].Rates[i].ID < csvr.rateProfiles[dppKey].Rates[j].ID
+	})
+
+	if !reflect.DeepEqual(eRatePrf, csvr.rateProfiles[dppKey]) {
+		t.Errorf("Expecting: %+v, received: %+v",
+			utils.ToJSON(eRatePrf), utils.ToJSON(csvr.rateProfiles[dppKey]))
 	}
 }
 

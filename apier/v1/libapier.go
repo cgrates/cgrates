@@ -62,6 +62,8 @@ func composeArgsReload(args utils.ArgsGetCacheItem) (rpl utils.ArgsCache) {
 		rpl.DispatcherProfileIDs = []string{args.ItemID}
 	case utils.CacheDispatcherHosts:
 		rpl.DispatcherHostIDs = []string{args.ItemID}
+	case utils.CacheRateProfiles:
+		rpl.RateProfileIDs = []string{args.ItemID}
 	}
 	return
 }
