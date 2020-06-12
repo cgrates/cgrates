@@ -240,6 +240,9 @@ func (m *Migrator) migrateStats() (err error) {
 			}
 		}
 	}
+	if m.dryRun || !migrated {
+		return nil
+	}
 	// call the remove function here
 
 	// All done, update version wtih current one
