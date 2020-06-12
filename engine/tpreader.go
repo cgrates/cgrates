@@ -552,7 +552,7 @@ func (tpr *TpReader) LoadActionPlans() (err error) {
 		return err
 	}
 	storAps := MapTPActionTimings(tps)
-	for atId, ats := range storAps {
+	for atID, ats := range storAps {
 		for _, at := range ats {
 
 			_, exists := tpr.actions[at.ActionsId]
@@ -569,9 +569,9 @@ func (tpr *TpReader) LoadActionPlans() (err error) {
 				return fmt.Errorf("[ActionPlans] Could not load the timing for tag: %v", at.TimingId)
 			}
 			var actPln *ActionPlan
-			if actPln, exists = tpr.actionPlans[atId]; !exists {
+			if actPln, exists = tpr.actionPlans[atID]; !exists {
 				actPln = &ActionPlan{
-					Id: atId,
+					Id: atID,
 				}
 			}
 			actPln.ActionTimings = append(actPln.ActionTimings, &ActionTiming{
@@ -589,7 +589,7 @@ func (tpr *TpReader) LoadActionPlans() (err error) {
 				ActionsID: at.ActionsId,
 			})
 
-			tpr.actionPlans[atId] = actPln
+			tpr.actionPlans[atID] = actPln
 		}
 	}
 	return nil
@@ -1796,7 +1796,7 @@ func (tpr *TpReader) ShowStatistics() {
 	prefixDist := make(map[int]int, 50)
 	prefixCount := 0
 	for _, d := range tpr.destinations {
-		prefixDist[len(d.Prefixes)] += 1
+		prefixDist[len(d.Prefixes)]++
 		prefixCount += len(d.Prefixes)
 	}
 	log.Print("Avg Prefixes: ", prefixCount/destCount)
@@ -1810,7 +1810,7 @@ func (tpr *TpReader) ShowStatistics() {
 	destRatesDist := make(map[int]int, 50)
 	destRatesCount := 0
 	for _, rpl := range tpr.ratingPlans {
-		destRatesDist[len(rpl.DestinationRates)] += 1
+		destRatesDist[len(rpl.DestinationRates)]++
 		destRatesCount += len(rpl.DestinationRates)
 	}
 	log.Print("Avg Destination Rates: ", destRatesCount/rplCount)
@@ -1824,7 +1824,7 @@ func (tpr *TpReader) ShowStatistics() {
 	activDist := make(map[int]int, 50)
 	activCount := 0
 	for _, rpf := range tpr.ratingProfiles {
-		activDist[len(rpf.RatingPlanActivations)] += 1
+		activDist[len(rpf.RatingPlanActivations)]++
 		activCount += len(rpf.RatingPlanActivations)
 	}
 	log.Print("Avg Activations: ", activCount/rpfCount)

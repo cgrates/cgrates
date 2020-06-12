@@ -37,6 +37,7 @@
 "cdrs": {
 	"enabled": true,
 	"stats_conns": ["*localhost"],
+	"chargers_conns": ["*internal"],
 	"rals_conns": ["*localhost"],
 	"sessions_cost_retries": 5,
 },
@@ -59,7 +60,7 @@
 	"thresholds_conns": ["*localhost"],
 	"chargers_conns": ["*localhost"],
 	"debit_interval": "5s",
-	"channel_sync_interval":"7s", 
+	"channel_sync_interval":"7s",
 },
 
 
@@ -101,6 +102,7 @@
 	"enabled": true,
 	"resources_conns": ["*internal"],
 	"stats_conns": ["*internal"],
+	"rals_conns": ["*internal"],	
 	"string_indexed_fields": ["Account"],
 },
 

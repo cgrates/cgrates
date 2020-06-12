@@ -116,8 +116,8 @@ func TestNewErrResourceS(t *testing.T) {
 
 func TestNewErrSupplierS(t *testing.T) {
 	cgrError := NewCGRError("context", "apiError", "shortError", "longError")
-	if rcv := NewErrSupplierS(cgrError); rcv.Error() != "SUPPLIERS_ERROR:shortError" {
-		t.Errorf("Expecting: SUPPLIERS_ERROR:shortError, received: %+v", rcv)
+	if rcv := NewErrSupplierS(cgrError); rcv.Error() != "ROUTES_ERROR:shortError" {
+		t.Errorf("Expecting: ROUTES_ERROR:shortError, received: %+v", rcv)
 	}
 }
 func TestNewErrAttributeS(t *testing.T) {

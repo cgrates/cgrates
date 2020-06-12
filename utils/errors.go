@@ -173,7 +173,7 @@ func NewErrResourceS(err error) error {
 }
 
 func NewErrSupplierS(err error) error {
-	return fmt.Errorf("SUPPLIERS_ERROR:%s", err)
+	return fmt.Errorf("ROUTES_ERROR:%s", err)
 }
 
 func NewErrAttributeS(err error) error {
