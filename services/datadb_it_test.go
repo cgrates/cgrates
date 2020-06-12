@@ -212,6 +212,11 @@ func TestDataDBReload(t *testing.T) {
 				Remote:    false,
 				TTL:       time.Duration(0),
 				Limit:     -1},
+			utils.MetaRateProfiles: {
+				Replicate: false,
+				Remote:    false,
+				TTL:       time.Duration(0),
+				Limit:     -1},
 		},
 	}
 	if !reflect.DeepEqual(oldcfg, db.oldDBCfg) {

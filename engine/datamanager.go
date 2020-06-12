@@ -2981,48 +2981,38 @@ func (dm *DataManager) SetRateProfile(rpp *RateProfile, withIndex bool) (err err
 		return err
 	}
 	if withIndex {
+		var oldFiltersIDs *[]string
 		if oldRpp != nil {
-			var needsRemove bool
-			for _, fltrID := range oldRpp.FilterIDs {
-				if !utils.IsSliceMember(rpp.FilterIDs, fltrID) {
-					needsRemove = true
+			oldFiltersIDs = &oldRpp.FilterIDs
+		}
+		if err := updatedIndexes(dm, utils.CacheRateProfilesFilterIndexes, rpp.Tenant,
+			utils.EmptyString, rpp.ID, oldFiltersIDs, rpp.FilterIDs); err != nil {
+			return err
+		}
+		// remove indexes for old rates
+		if oldRpp != nil {
+			for key, rate := range oldRpp.Rates {
+				if _, has := rpp.Rates[key]; has {
+					continue
 				}
-			}
-
-			if needsRemove {
-				if err = NewFilterIndexer(dm, utils.RateProfilePrefix,
-					rpp.Tenant).RemoveItemFromIndex(rpp.Tenant, rpp.ID, oldRpp.FilterIDs); err != nil {
+				if err = removeItemFromFilterIndex(dm, utils.CacheRateFilterIndexes,
+					rpp.Tenant, rpp.ID, key, rate.FilterIDs); err != nil {
 					return
 				}
 			}
 		}
-		if err = createAndIndex(utils.RateProfilePrefix, rpp.Tenant, utils.EmptyString,
-			rpp.ID, rpp.FilterIDs, dm); err != nil {
-			return
-		}
 		// create index for each rate
 		for key, rate := range rpp.Rates {
+			var oldRateFiltersIDs *[]string
 			if oldRpp != nil {
 				if oldRate, has := oldRpp.Rates[key]; has {
-					var needsRemove bool
-					for _, fltrID := range oldRate.FilterIDs {
-						if !utils.IsSliceMember(rate.FilterIDs, fltrID) {
-							needsRemove = true
-						}
-					}
-
-					if needsRemove {
-						if err = NewFilterIndexer(dm, utils.RatePrefix,
-							rpp.Tenant).RemoveItemFromIndex(rpp.Tenant, utils.ConcatenatedKey(rpp.ID, key), oldRate.FilterIDs); err != nil {
-							return
-						}
-					}
+					oldRateFiltersIDs = &oldRate.FilterIDs
 				}
 			}
 			// when we create the indexes for rates we use RateProfile ID as context
-			if err = createAndIndex(utils.RatePrefix, rpp.Tenant, rpp.ID,
-				key, rate.FilterIDs, dm); err != nil {
-				return
+			if err := updatedIndexes(dm, utils.CacheRateFilterIndexes, rpp.Tenant,
+				rpp.ID, key, oldRateFiltersIDs, rate.FilterIDs); err != nil {
+				return err
 			}
 		}
 
@@ -3061,8 +3051,14 @@ func (dm *DataManager) RemoveRateProfile(tenant, id string,
 		return utils.ErrNotFound
 	}
 	if withIndex {
-		if err = NewFilterIndexer(dm, utils.RateProfilePrefix,
-			tenant).RemoveItemFromIndex(tenant, id, oldRpp.FilterIDs); err != nil {
+		for key, rate := range oldRpp.Rates {
+			if err = removeItemFromFilterIndex(dm, utils.CacheRateFilterIndexes,
+				oldRpp.Tenant, oldRpp.ID, key, rate.FilterIDs); err != nil {
+				return
+			}
+		}
+		if err = removeItemFromFilterIndex(dm, utils.CacheRateProfilesFilterIndexes,
+			tenant, utils.EmptyString, id, oldRpp.FilterIDs); err != nil {
 			return
 		}
 	}
