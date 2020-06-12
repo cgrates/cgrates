@@ -20,6 +20,7 @@ package engine
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
@@ -158,6 +159,9 @@ func removeItemFromFilterIndex(dm *DataManager, idxItmType, tnt, ctx, itemID str
 // updatedIndexes will compare the old filtersIDs with the new ones and only uptdate the filters indexes that are added/removed
 func updatedIndexes(dm *DataManager, idxItmType, tnt, ctx, itemID string, oldFilterIds *[]string, newFilterIDs []string) (err error) {
 	if oldFilterIds == nil { // nothing to remove so just create the new indexes
+		if err = addIndexFiltersItem(dm, idxItmType, tnt, itemID, newFilterIDs); err != nil {
+			return
+		}
 		return addItemToFilterIndex(dm, idxItmType, tnt, ctx, itemID, newFilterIDs)
 	}
 	if len(*oldFilterIds) == 0 && len(newFilterIDs) == 0 { // nothing to update
@@ -186,6 +190,9 @@ func updatedIndexes(dm *DataManager, idxItmType, tnt, ctx, itemID string, oldFil
 	if len(oldFilterIDs) != 0 || oldFltrs.Size() == 0 {
 		// has some indexes to remove or
 		// the old profile doesn't have filters but the new one has so remove the *none index
+		if err = removeIndexFiltersItem(dm, idxItmType, tnt, itemID, oldFilterIDs); err != nil {
+			return
+		}
 		if err = removeItemFromFilterIndex(dm, idxItmType, tnt, ctx, itemID, oldFilterIDs); err != nil {
 			return
 		}
@@ -194,6 +201,9 @@ func updatedIndexes(dm *DataManager, idxItmType, tnt, ctx, itemID string, oldFil
 	if len(newFilterIDs) != 0 || newFltrs.Size() == 0 {
 		// has some indexes to add or
 		// the old profile has filters but the new one does not so add the *none index
+		if err = addIndexFiltersItem(dm, idxItmType, tnt, itemID, newFilterIDs); err != nil {
+			return
+		}
 		if err = addItemToFilterIndex(dm, idxItmType, tnt, ctx, itemID, newFilterIDs); err != nil {
 			return
 		}
@@ -204,6 +214,9 @@ func updatedIndexes(dm *DataManager, idxItmType, tnt, ctx, itemID string, oldFil
 func updatedIndexesWithContexts(dm *DataManager, idxItmType, tnt, itemID string,
 	oldContexts, oldFilterIDs *[]string, newContexts, newFilterIDs []string) (err error) {
 	if oldContexts == nil { // new profile add all indexes
+		if err = addIndexFiltersItem(dm, idxItmType, tnt, itemID, newFilterIDs); err != nil {
+			return
+		}
 		for _, ctx := range newContexts {
 			if err = addItemToFilterIndex(dm, idxItmType, tnt, ctx, itemID, newFilterIDs); err != nil {
 				return
@@ -234,6 +247,11 @@ func updatedIndexesWithContexts(dm *DataManager, idxItmType, tnt, itemID string,
 	}
 
 	if oldFilterIDs != nil {
+		if len(updateContexts) == 0 {
+			if err = removeIndexFiltersItem(dm, idxItmType, tnt, itemID, *oldFilterIDs); err != nil {
+				return
+			}
+		}
 		for _, ctx := range removeContexts {
 			if err = removeItemFromFilterIndex(dm, idxItmType, tnt, ctx, itemID, *oldFilterIDs); err != nil {
 				return
@@ -242,6 +260,9 @@ func updatedIndexesWithContexts(dm *DataManager, idxItmType, tnt, itemID string,
 	}
 	if len(updateContexts) != 0 {
 		if oldFilterIDs == nil { // nothing to remove so just create the new indexes
+			if err = addIndexFiltersItem(dm, idxItmType, tnt, itemID, newFilterIDs); err != nil {
+				return
+			}
 			for _, ctx := range updateContexts {
 				if err = addItemToFilterIndex(dm, idxItmType, tnt, ctx, itemID, newFilterIDs); err != nil {
 					return
@@ -270,6 +291,9 @@ func updatedIndexesWithContexts(dm *DataManager, idxItmType, tnt, itemID string,
 			if len(removeFilterIDs) != 0 || oldFltrs.Size() == 0 {
 				// has some indexes to remove or
 				// the old profile doesn't have filters but the new one has so remove the *none index
+				if err = removeIndexFiltersItem(dm, idxItmType, tnt, itemID, removeFilterIDs); err != nil {
+					return
+				}
 				for _, ctx := range updateContexts {
 					if err = removeItemFromFilterIndex(dm, idxItmType, tnt, ctx, itemID, removeFilterIDs); err != nil {
 						return
@@ -280,12 +304,19 @@ func updatedIndexesWithContexts(dm *DataManager, idxItmType, tnt, itemID string,
 			if len(addFilterIDs) != 0 || newFltrs.Size() == 0 {
 				// has some indexes to add or
 				// the old profile has filters but the new one does not so add the *none index
+				if err = addIndexFiltersItem(dm, idxItmType, tnt, itemID, addFilterIDs); err != nil {
+					return
+				}
 				for _, ctx := range updateContexts {
 					if err = addItemToFilterIndex(dm, idxItmType, tnt, ctx, itemID, addFilterIDs); err != nil {
 						return
 					}
 				}
 			}
+		}
+	} else {
+		if err = addIndexFiltersItem(dm, idxItmType, tnt, itemID, newFilterIDs); err != nil {
+			return
 		}
 	}
 
@@ -349,6 +380,64 @@ func ComputeIndexes(dm *DataManager, tnt, ctx, idxItmType string, IDs *[]string,
 			return
 		}
 		processed = true
+	}
+	return
+}
+
+func addIndexFiltersItem(dm *DataManager, idxItmType, tnt, itemID string, filterIDs []string) (err error) {
+	for _, ID := range filterIDs {
+		if strings.HasPrefix(ID, utils.Meta) { // skip inline
+			continue
+		}
+		tntCtx := utils.ConcatenatedKey(tnt, ID)
+		var indexes map[string]utils.StringSet
+		if indexes, err = dm.GetIndexes(utils.CacheFilterIndexes, tntCtx,
+			idxItmType, true, false); err != nil {
+			if err != utils.ErrNotFound {
+				return
+			}
+			err = nil
+			indexes[idxItmType] = make(utils.StringSet) // create an empty index if is not found in DB in case we add them later
+		}
+		indexes[idxItmType].Add(itemID)
+
+		if err = dm.SetIndexes(idxItmType, tntCtx, indexes, true, utils.NonTransactional); err != nil {
+			return
+		}
+		for indxKey := range indexes {
+			if err = Cache.Remove(utils.CacheFilterIndexes, utils.ConcatenatedKey(tntCtx, indxKey), true, utils.NonTransactional); err != nil {
+				return
+			}
+		}
+	}
+	return
+}
+
+func removeIndexFiltersItem(dm *DataManager, idxItmType, tnt, itemID string, filterIDs []string) (err error) {
+	for _, ID := range filterIDs {
+		if strings.HasPrefix(ID, utils.Meta) { // skip inline
+			continue
+		}
+		tntCtx := utils.ConcatenatedKey(tnt, ID)
+		var indexes map[string]utils.StringSet
+		if indexes, err = dm.GetIndexes(utils.CacheFilterIndexes, tntCtx,
+			idxItmType, true, false); err != nil {
+			if err != utils.ErrNotFound {
+				return
+			}
+			err = nil
+			continue // it is already removed
+		}
+		indexes[idxItmType].Remove(itemID)
+
+		if err = dm.SetIndexes(idxItmType, tntCtx, indexes, true, utils.NonTransactional); err != nil {
+			return
+		}
+		for indxKey := range indexes {
+			if err = Cache.Remove(utils.CacheFilterIndexes, utils.ConcatenatedKey(tntCtx, indxKey), true, utils.NonTransactional); err != nil {
+				return
+			}
+		}
 	}
 	return
 }
