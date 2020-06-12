@@ -199,7 +199,7 @@ func testUsrITMigrateAndMove(t *testing.T) {
 		},
 	}
 	if usridx, err := usrMigrator.dmOut.DataManager().GetIndexes(
-		utils.PrefixToIndexCache[utils.AttributeProfilePrefix],
+		utils.CacheAttributeFilterIndexes,
 		utils.ConcatenatedKey("cgrates.org", utils.META_ANY),
 		"", true, true); err != nil {
 		t.Error(err)

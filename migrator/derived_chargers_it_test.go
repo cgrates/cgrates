@@ -233,7 +233,7 @@ func testDCITMigrateAndMove(t *testing.T) {
 		},
 	}
 	if dcidx, err := dcMigrator.dmOut.DataManager().GetIndexes(
-		utils.PrefixToIndexCache[utils.AttributeProfilePrefix],
+		utils.CacheAttributeFilterIndexes,
 		utils.ConcatenatedKey("cgrates.org", utils.MetaChargers),
 		"", true, true); err != nil {
 		t.Error(err)
@@ -246,7 +246,7 @@ func testDCITMigrateAndMove(t *testing.T) {
 		},
 	}
 	if dcidx, err := dcMigrator.dmOut.DataManager().GetIndexes(
-		utils.PrefixToIndexCache[utils.ChargerProfilePrefix],
+		utils.CacheChargerFilterIndexes,
 		utils.ConcatenatedKey("cgrates.org", utils.MetaChargers),
 		"", true, true); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected error %v, recived: %v with reply: %v", utils.ErrNotFound, err, utils.ToJSON(dcidx))

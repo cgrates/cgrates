@@ -764,8 +764,16 @@ func (dm *DataManager) SetFilter(fltr *Filter) (err error) {
 		err = utils.ErrNoDatabaseConn
 		return
 	}
+	var oldFlt *Filter
+	if oldFlt, err = dm.GetFilter(fltr.Tenant, fltr.ID, true, false,
+		utils.NonTransactional); err != nil && err != utils.ErrNotFound {
+		return err
+	}
 	if err = dm.DataDB().SetFilterDrv(fltr); err != nil {
 		return
+	}
+	if withIndex {
+		// remove index?
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaFilters]; itm.Replicate {
 		var reply string
@@ -785,13 +793,24 @@ func (dm *DataManager) SetFilter(fltr *Filter) (err error) {
 
 }
 
-func (dm *DataManager) RemoveFilter(tenant, id, transactionID string) (err error) {
+func (dm *DataManager) RemoveFilter(tenant, id, transactionID string, withIndex bool) (err error) {
 	if dm == nil {
 		err = utils.ErrNoDatabaseConn
 		return
 	}
+	var oldFlt *Filter
+	if oldFlt, err = dm.GetFilter(tenant, id, true, false,
+		utils.NonTransactional); err != nil && err != utils.ErrNotFound {
+		return err
+	}
 	if err = dm.DataDB().RemoveFilterDrv(tenant, id); err != nil {
 		return
+	}
+	if oldFlt == nil {
+		return utils.ErrNotFound
+	}
+	if withIndex {
+		// remove index?
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaFilters]; itm.Replicate {
 		var reply string
@@ -1007,6 +1026,9 @@ func (dm *DataManager) RemoveThresholdProfile(tenant, id,
 		return utils.ErrNotFound
 	}
 	if withIndex {
+		if err = removeIndexFiltersItem(dm, utils.CacheThresholdFilterIndexes, tenant, id, oldTh.FilterIDs); err != nil {
+			return
+		}
 		if err = removeItemFromFilterIndex(dm, utils.CacheThresholdFilterIndexes,
 			tenant, utils.EmptyString, id, oldTh.FilterIDs); err != nil {
 			return
@@ -1131,6 +1153,9 @@ func (dm *DataManager) RemoveStatQueueProfile(tenant, id,
 		return utils.ErrNotFound
 	}
 	if withIndex {
+		if err = removeIndexFiltersItem(dm, utils.CacheStatFilterIndexes, tenant, id, oldSts.FilterIDs); err != nil {
+			return
+		}
 		if err = removeItemFromFilterIndex(dm, utils.CacheStatFilterIndexes,
 			tenant, utils.EmptyString, id, oldSts.FilterIDs); err != nil {
 			return
@@ -1447,6 +1472,9 @@ func (dm *DataManager) RemoveResourceProfile(tenant, id, transactionID string, w
 		return utils.ErrNotFound
 	}
 	if withIndex {
+		if err = removeIndexFiltersItem(dm, utils.CacheResourceFilterIndexes, tenant, id, oldRes.FilterIDs); err != nil {
+			return
+		}
 		if err = removeItemFromFilterIndex(dm, utils.CacheResourceFilterIndexes,
 			tenant, utils.EmptyString, id, oldRes.FilterIDs); err != nil {
 			return
@@ -2326,6 +2354,9 @@ func (dm *DataManager) RemoveRouteProfile(tenant, id, transactionID string, with
 		return utils.ErrNotFound
 	}
 	if withIndex {
+		if err = removeIndexFiltersItem(dm, utils.CacheRouteFilterIndexes, tenant, id, oldRpp.FilterIDs); err != nil {
+			return
+		}
 		if err = removeItemFromFilterIndex(dm, utils.CacheRouteFilterIndexes,
 			tenant, utils.EmptyString, id, oldRpp.FilterIDs); err != nil {
 			return
@@ -2466,6 +2497,9 @@ func (dm *DataManager) RemoveAttributeProfile(tenant, id string, transactionID s
 		return utils.ErrNotFound
 	}
 	if withIndex {
+		if err = removeIndexFiltersItem(dm, utils.CacheAttributeFilterIndexes, tenant, id, oldAttr.FilterIDs); err != nil {
+			return
+		}
 		for _, context := range oldAttr.Contexts {
 			if err = removeItemFromFilterIndex(dm, utils.CacheAttributeFilterIndexes,
 				tenant, context, id, oldAttr.FilterIDs); err != nil {
@@ -2593,6 +2627,9 @@ func (dm *DataManager) RemoveChargerProfile(tenant, id string,
 		return utils.ErrNotFound
 	}
 	if withIndex {
+		if err = removeIndexFiltersItem(dm, utils.CacheChargerFilterIndexes, tenant, id, oldCpp.FilterIDs); err != nil {
+			return
+		}
 		if err = removeItemFromFilterIndex(dm, utils.CacheChargerFilterIndexes,
 			tenant, utils.EmptyString, id, oldCpp.FilterIDs); err != nil {
 			return
@@ -2720,6 +2757,9 @@ func (dm *DataManager) RemoveDispatcherProfile(tenant, id string,
 		return utils.ErrNotFound
 	}
 	if withIndex {
+		if err = removeIndexFiltersItem(dm, utils.CacheDispatcherFilterIndexes, tenant, id, oldDpp.FilterIDs); err != nil {
+			return
+		}
 		for _, ctx := range oldDpp.Subsystems {
 			if err = removeItemFromFilterIndex(dm, utils.CacheDispatcherFilterIndexes,
 				tenant, ctx, id, oldDpp.FilterIDs); err != nil {

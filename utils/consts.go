@@ -26,10 +26,7 @@ var (
 		Account, Subject, Destination, SetupTime, AnswerTime, Usage, COST, RATED, Partial, RunID,
 		PreRated, CostSource, CostDetails, ExtraInfo, OrderID})
 	PostPaidRatedSlice = []string{META_POSTPAID, META_RATED}
-	ItemList           = NewStringSet([]string{MetaAccounts, MetaAttributes, MetaChargers, MetaDispatchers, MetaDispatcherHosts,
-		MetaFilters, MetaResources, MetaStats, MetaThresholds, MetaRoutes,
-	})
-	AttrInlineTypes = NewStringSet([]string{META_CONSTANT, MetaVariable, META_COMPOSED, META_USAGE_DIFFERENCE,
+	AttrInlineTypes    = NewStringSet([]string{META_CONSTANT, MetaVariable, META_COMPOSED, META_USAGE_DIFFERENCE,
 		MetaSum, MetaValueExponent})
 
 	GitLastLog                  string // If set, it will be processed as part of versioning
@@ -45,19 +42,7 @@ var (
 		MetaKafkajsonMap:  CONTENT_JSON,
 		MetaS3jsonMap:     CONTENT_JSON,
 	}
-	CDREFileSuffixes = map[string]string{
-		MetaHTTPjsonCDR:   JSNSuffix,
-		MetaHTTPjsonMap:   JSNSuffix,
-		MetaAMQPjsonCDR:   JSNSuffix,
-		MetaAMQPjsonMap:   JSNSuffix,
-		MetaAMQPV1jsonMap: JSNSuffix,
-		MetaSQSjsonMap:    JSNSuffix,
-		MetaKafkajsonMap:  JSNSuffix,
-		MetaS3jsonMap:     JSNSuffix,
-		MetaHTTPPost:      FormSuffix,
-		MetaFileCSV:       CSVSuffix,
-		MetaFileFWV:       FWVSuffix,
-	}
+
 	// CachePartitions enables creation of cache partitions
 	CachePartitions = NewStringSet([]string{CacheDestinations, CacheReverseDestinations,
 		CacheRatingPlans, CacheRatingProfiles, CacheActions, CacheActionPlans,
@@ -107,20 +92,20 @@ var (
 		CacheLoadIDs:                   LoadIDPrefix,
 		CacheAccounts:                  ACCOUNT_PREFIX,
 		CacheRateFilterIndexes:         RateFilterIndexPrfx,
+		CacheFilterIndexes:             FilterIndexPrfx,
 	}
-	CachePrefixToInstance map[string]string // will be built on init
-	PrefixToIndexCache    = map[string]string{
-		ThresholdProfilePrefix:  CacheThresholdFilterIndexes,
-		ResourceProfilesPrefix:  CacheResourceFilterIndexes,
-		StatQueueProfilePrefix:  CacheStatFilterIndexes,
-		RouteProfilePrefix:      CacheRouteFilterIndexes,
-		AttributeProfilePrefix:  CacheAttributeFilterIndexes,
-		ChargerProfilePrefix:    CacheChargerFilterIndexes,
-		DispatcherProfilePrefix: CacheDispatcherFilterIndexes,
-		RateProfilePrefix:       CacheRateProfilesFilterIndexes,
-		RatePrefix:              CacheRateFilterIndexes,
+	CachePrefixToInstance map[string]string    // will be built on init
+	CacheIndexesToPrefix  = map[string]string{ // used by match index to get all the ids when index selects is disabled and for compute indexes
+		CacheThresholdFilterIndexes:    ThresholdProfilePrefix,
+		CacheResourceFilterIndexes:     ResourceProfilesPrefix,
+		CacheStatFilterIndexes:         StatQueueProfilePrefix,
+		CacheRouteFilterIndexes:        RouteProfilePrefix,
+		CacheAttributeFilterIndexes:    AttributeProfilePrefix,
+		CacheChargerFilterIndexes:      ChargerProfilePrefix,
+		CacheDispatcherFilterIndexes:   DispatcherProfilePrefix,
+		CacheRateProfilesFilterIndexes: RateProfilePrefix,
+		CacheRateFilterIndexes:         RatePrefix,
 	}
-	CacheIndexesToPrefix map[string]string // will be built on init
 
 	// NonMonetaryBalances are types of balances which are not handled as monetary
 	NonMonetaryBalances = NewStringSet([]string{VOICE, SMS, DATA, GENERIC})
@@ -614,7 +599,6 @@ const (
 	MetaDivide               = "*divide"
 	MetaUrl                  = "*url"
 	MetaXml                  = "*xml"
-	ApiKey                   = "apikey"
 	MetaReq                  = "*req"
 	MetaVars                 = "*vars"
 	MetaRep                  = "*rep"
@@ -679,8 +663,6 @@ const (
 	LoadIDs                  = "load_ids"
 	DNSAgent                 = "DNSAgent"
 	TLSNoCaps                = "tls"
-	MetaRouteID              = "*route_id"
-	MetaApiKey               = "*api_key"
 	UsageID                  = "UsageID"
 	Rcode                    = "Rcode"
 	Replacement              = "Replacement"
@@ -1657,6 +1639,7 @@ const (
 	CacheUCH                       = "*uch"
 	CacheSTIR                      = "*stir"
 	CacheEventCharges              = "*event_charges"
+	CacheFilterIndexes             = "*filter_indexes"
 )
 
 // Prefix for indexing
@@ -1671,6 +1654,7 @@ const (
 	RouteFilterIndexes          = "rti_"
 	RateProfilesFilterIndexPrfx = "rpi_"
 	RateFilterIndexPrfx         = "rri_"
+	FilterIndexPrfx             = "fii_"
 )
 
 // Agents
@@ -2218,14 +2202,6 @@ func buildCacheInstRevPrefixes() {
 	}
 }
 
-func buildCacheIndexesToPrefix() {
-	CacheIndexesToPrefix = make(map[string]string)
-	for k, v := range PrefixToIndexCache {
-		CacheIndexesToPrefix[v] = k
-	}
-}
-
 func init() {
 	buildCacheInstRevPrefixes()
-	buildCacheIndexesToPrefix()
 }
