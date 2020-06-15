@@ -1589,7 +1589,7 @@ func testOnStorITThresholdProfile(t *testing.T) {
 		Weight:             1.4,
 		ActionIDs:          []string{"Action1"},
 	}
-	if err := onStor.SetFilter(fp); err != nil {
+	if err := onStor.SetFilter(fp, true); err != nil {
 		t.Error(err)
 	}
 	if _, rcvErr := onStor.GetThresholdProfile(th.Tenant, th.ID,
@@ -1706,7 +1706,7 @@ func testOnStorITFilter(t *testing.T) {
 		true, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.SetFilter(fp); err != nil {
+	if err := onStor.SetFilter(fp, true); err != nil {
 		t.Error(err)
 	}
 	//get from cache
@@ -1742,7 +1742,7 @@ func testOnStorITFilter(t *testing.T) {
 			Values:  []string{"10", "20"},
 		},
 	}
-	if err := onStor.SetFilter(fp); err != nil {
+	if err := onStor.SetFilter(fp, true); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(sleepDelay)
@@ -1760,7 +1760,7 @@ func testOnStorITFilter(t *testing.T) {
 	} else if !(reflect.DeepEqual(fp, rcv)) {
 		t.Errorf("Expecting: %v, received: %v", fp, rcv)
 	}
-	if err := onStor.RemoveFilter(fp.Tenant, fp.ID, utils.NonTransactional); err != nil {
+	if err := onStor.RemoveFilter(fp.Tenant, fp.ID, utils.NonTransactional, true); err != nil {
 		t.Error(err)
 	}
 	//check cache if removed

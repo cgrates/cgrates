@@ -322,7 +322,7 @@ func TestRoutesAddFilters(t *testing.T) {
 			},
 		},
 	}
-	dmSPP.SetFilter(fltrSupp1)
+	dmSPP.SetFilter(fltrSupp1, true)
 	fltrSupp2 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_SUPP_2",
@@ -344,7 +344,7 @@ func TestRoutesAddFilters(t *testing.T) {
 			},
 		},
 	}
-	dmSPP.SetFilter(fltrSupp2)
+	dmSPP.SetFilter(fltrSupp2, true)
 	fltrSupp3 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_SUPP_3",
@@ -356,7 +356,7 @@ func TestRoutesAddFilters(t *testing.T) {
 			},
 		},
 	}
-	dmSPP.SetFilter(fltrSupp3)
+	dmSPP.SetFilter(fltrSupp3, true)
 }
 
 func TestRoutesCache(t *testing.T) {

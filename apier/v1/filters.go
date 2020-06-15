@@ -35,7 +35,7 @@ func (APIerSv1 *APIerSv1) SetFilter(arg *FilterWithCache, reply *string) error {
 	if missing := utils.MissingStructFields(arg.Filter, []string{"Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := APIerSv1.DataManager.SetFilter(arg.Filter); err != nil {
+	if err := APIerSv1.DataManager.SetFilter(arg.Filter, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheFilters and store it in database
@@ -93,7 +93,7 @@ func (APIerSv1 *APIerSv1) RemoveFilter(arg *utils.TenantIDWithCache, reply *stri
 	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := APIerSv1.DataManager.RemoveFilter(arg.Tenant, arg.ID, utils.NonTransactional); err != nil {
+	if err := APIerSv1.DataManager.RemoveFilter(arg.Tenant, arg.ID, utils.NonTransactional, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheFilters and store it in database

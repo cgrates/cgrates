@@ -127,7 +127,6 @@ func (rS *RateS) matchingRateProfileForEvent(args *ArgsCostForEvent) (rtPfl *eng
 // returned in order of intervalStart
 func (rS *RateS) matchingRatesForEvent(rtPfl *engine.RateProfile, cgrEv *utils.CGREvent) (rts []*engine.Rate, err error) {
 	var rtIDs utils.StringSet
-	// when matching we use the RateProfile ID as context
 	if rtIDs, err = engine.MatchingItemIDsForEvent(
 		cgrEv.Event,
 		rS.cfg.RateSCfg().RateStringIndexedFields,

@@ -49,7 +49,7 @@ func TestFilterMatchingItemIDsForEvent(t *testing.T) {
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "stringFilter",
 		Rules:  stringFilter}
-	dmMatch.SetFilter(attribStringF)
+	dmMatch.SetFilter(attribStringF, true)
 	x, err = NewFilterRule(utils.MetaPrefix, "~*req.Field", []string{"profilePrefix"})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -59,7 +59,7 @@ func TestFilterMatchingItemIDsForEvent(t *testing.T) {
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "prefFilter",
 		Rules:  prefixFilter}
-	dmMatch.SetFilter(attribPrefF)
+	dmMatch.SetFilter(attribPrefF, true)
 	x, err = NewFilterRule(utils.MetaGreaterOrEqual, "~*req.Weight", []string{"200.00"})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -69,7 +69,7 @@ func TestFilterMatchingItemIDsForEvent(t *testing.T) {
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "defaultFilter",
 		Rules:  defaultFilter}
-	dmMatch.SetFilter(attribDefaultF)
+	dmMatch.SetFilter(attribDefaultF, true)
 
 	tnt := config.CgrConfig().GeneralCfg().DefaultTenant
 	if err = addItemToFilterIndex(dmMatch, utils.CacheAttributeFilterIndexes,
@@ -125,7 +125,7 @@ func TestFilterMatchingItemIDsForEvent2(t *testing.T) {
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "stringFilter",
 		Rules:  stringFilter}
-	dmMatch.SetFilter(attribStringF)
+	dmMatch.SetFilter(attribStringF, true)
 	x, err = NewFilterRule(utils.MetaPrefix, "~*req.CallCost.Field", []string{"profile"})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -135,7 +135,7 @@ func TestFilterMatchingItemIDsForEvent2(t *testing.T) {
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "prefFilter",
 		Rules:  prefixFilter}
-	dmMatch.SetFilter(attribPrefF)
+	dmMatch.SetFilter(attribPrefF, true)
 	x, err = NewFilterRule(utils.MetaGreaterOrEqual, "~*req.Weight", []string{"200.00"})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -145,7 +145,7 @@ func TestFilterMatchingItemIDsForEvent2(t *testing.T) {
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "defaultFilter",
 		Rules:  defaultFilter}
-	dmMatch.SetFilter(attribDefaultF)
+	dmMatch.SetFilter(attribDefaultF, true)
 
 	tnt := config.CgrConfig().GeneralCfg().DefaultTenant
 	if err = addItemToFilterIndex(dmMatch, utils.CacheAttributeFilterIndexes,

@@ -245,7 +245,7 @@ func testFltrITMigrateAndMove(t *testing.T) {
 			t.Errorf("Expected %v, recived: %v", utils.ToJSON(expFltrIdx), utils.ToJSON(fltridx))
 		}
 	case utils.Move:
-		if err := fltrMigrator.dmIN.DataManager().SetFilter(expFilters); err != nil {
+		if err := fltrMigrator.dmIN.DataManager().SetFilter(expFilters, true); err != nil {
 			t.Error(err)
 		}
 		currentVersion := engine.CurrentDataDBVersions()

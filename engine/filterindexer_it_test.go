@@ -240,7 +240,7 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
-	if err := dataManager.SetFilter(fp); err != nil {
+	if err := dataManager.SetFilter(fp, true); err != nil {
 		t.Error(err)
 	}
 	timeMinSleep := time.Duration(0 * time.Second)
@@ -306,7 +306,7 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
-	if err := dataManager.SetFilter(fp2); err != nil {
+	if err := dataManager.SetFilter(fp2, true); err != nil {
 		t.Error(err)
 	}
 	cloneTh1 := new(ThresholdProfile)
@@ -353,7 +353,7 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
-	if err := dataManager.SetFilter(fp3); err != nil {
+	if err := dataManager.SetFilter(fp3, true); err != nil {
 		t.Error(err)
 	}
 
@@ -419,7 +419,7 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
-	if err := dataManager.SetFilter(fp); err != nil {
+	if err := dataManager.SetFilter(fp, true); err != nil {
 		t.Error(err)
 	}
 	attrProfile := &AttributeProfile{
@@ -515,7 +515,7 @@ func testITTestThresholdInlineFilterIndexing(t *testing.T) {
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
-	if err := dataManager.SetFilter(fp); err != nil {
+	if err := dataManager.SetFilter(fp, true); err != nil {
 		t.Error(err)
 	}
 	th := &ThresholdProfile{

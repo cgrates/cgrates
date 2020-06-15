@@ -431,7 +431,7 @@ func TestResourceAddFilters(t *testing.T) {
 			},
 		},
 	}
-	dmRES.SetFilter(fltrRes1)
+	dmRES.SetFilter(fltrRes1, true)
 	fltrRes2 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_RES_2",
@@ -458,7 +458,7 @@ func TestResourceAddFilters(t *testing.T) {
 			},
 		},
 	}
-	dmRES.SetFilter(fltrRes2)
+	dmRES.SetFilter(fltrRes2, true)
 	fltrRes3 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_RES_3",
@@ -470,7 +470,7 @@ func TestResourceAddFilters(t *testing.T) {
 			},
 		},
 	}
-	dmRES.SetFilter(fltrRes3)
+	dmRES.SetFilter(fltrRes3, true)
 }
 
 func TestResourceAddResourceProfile(t *testing.T) {
