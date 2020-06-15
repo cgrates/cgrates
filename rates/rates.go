@@ -83,8 +83,8 @@ func (rS *RateS) matchingRateProfileForEvent(args *ArgsCostForEvent) (rtPfl *eng
 			rS.dm,
 			utils.CacheRateProfilesFilterIndexes,
 			args.CGREvent.Tenant,
-			rS.cfg.RouteSCfg().IndexedSelects,
-			rS.cfg.RouteSCfg().NestedFields,
+			rS.cfg.RateSCfg().IndexedSelects,
+			rS.cfg.RateSCfg().NestedFields,
 		); err != nil {
 			return
 		}
@@ -129,13 +129,13 @@ func (rS *RateS) matchingRatesForEvent(rtPfl *engine.RateProfile, cgrEv *utils.C
 	var rtIDs utils.StringMap
 	if rtIDs, err = engine.MatchingItemIDsForEvent(
 		cgrEv.Event,
-		rS.cfg.RateSCfg().StringIndexedFields,
-		rS.cfg.RateSCfg().PrefixIndexedFields,
+		rS.cfg.RateSCfg().RateStringIndexedFields,
+		rS.cfg.RateSCfg().RatePrefixIndexedFields,
 		rS.dm,
-		utils.CacheRateProfilesFilterIndexes,
+		utils.CacheRateFilterIndexes,
 		cgrEv.Tenant,
-		rS.cfg.RouteSCfg().IndexedSelects,
-		rS.cfg.RouteSCfg().NestedFields,
+		rS.cfg.RateSCfg().RateIndexedSelects,
+		rS.cfg.RateSCfg().RateNestedFields,
 	); err != nil {
 		return
 	}

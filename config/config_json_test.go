@@ -2035,11 +2035,15 @@ func TestDfEventExporterCfg(t *testing.T) {
 
 func TestDfRateSJsonCfg(t *testing.T) {
 	eCfg := &RateSJsonCfg{
-		Enabled:               utils.BoolPointer(false),
-		Indexed_selects:       utils.BoolPointer(true),
-		String_indexed_fields: nil,
-		Prefix_indexed_fields: &[]string{},
-		Nested_fields:         utils.BoolPointer(false),
+		Enabled:                    utils.BoolPointer(false),
+		Indexed_selects:            utils.BoolPointer(true),
+		String_indexed_fields:      nil,
+		Prefix_indexed_fields:      &[]string{},
+		Nested_fields:              utils.BoolPointer(false),
+		Rate_indexed_selects:       utils.BoolPointer(true),
+		Rate_string_indexed_fields: nil,
+		Rate_prefix_indexed_fields: &[]string{},
+		Rate_nested_fields:         utils.BoolPointer(false),
 	}
 	if cfg, err := dfCgrJsonCfg.RateCfgJson(); err != nil {
 		t.Error(err)

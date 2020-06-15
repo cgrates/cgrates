@@ -1889,11 +1889,15 @@ func TestCgrCfgJSONDefaultApierCfg(t *testing.T) {
 
 func TestCgrCfgJSONDefaultRateCfg(t *testing.T) {
 	eCfg := &RateSCfg{
-		Enabled:             false,
-		IndexedSelects:      true,
-		StringIndexedFields: nil,
-		PrefixIndexedFields: &[]string{},
-		NestedFields:        false,
+		Enabled:                 false,
+		IndexedSelects:          true,
+		StringIndexedFields:     nil,
+		PrefixIndexedFields:     &[]string{},
+		NestedFields:            false,
+		RateIndexedSelects:      true,
+		RateStringIndexedFields: nil,
+		RatePrefixIndexedFields: &[]string{},
+		RateNestedFields:        false,
 	}
 	if !reflect.DeepEqual(cgrCfg.rateSCfg, eCfg) {
 		t.Errorf("received: %+v, expecting: %+v", cgrCfg.rateSCfg, eCfg)

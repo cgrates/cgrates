@@ -23,11 +23,15 @@ import (
 )
 
 type RateSCfg struct {
-	Enabled             bool
-	IndexedSelects      bool
-	StringIndexedFields *[]string
-	PrefixIndexedFields *[]string
-	NestedFields        bool
+	Enabled                 bool
+	IndexedSelects          bool
+	StringIndexedFields     *[]string
+	PrefixIndexedFields     *[]string
+	NestedFields            bool
+	RateIndexedSelects      bool
+	RateStringIndexedFields *[]string
+	RatePrefixIndexedFields *[]string
+	RateNestedFields        bool
 }
 
 func (rCfg *RateSCfg) loadFromJsonCfg(jsnCfg *RateSJsonCfg) (err error) {
@@ -57,6 +61,27 @@ func (rCfg *RateSCfg) loadFromJsonCfg(jsnCfg *RateSJsonCfg) (err error) {
 	if jsnCfg.Nested_fields != nil {
 		rCfg.NestedFields = *jsnCfg.Nested_fields
 	}
+
+	if jsnCfg.Rate_indexed_selects != nil {
+		rCfg.RateIndexedSelects = *jsnCfg.Rate_indexed_selects
+	}
+	if jsnCfg.Rate_string_indexed_fields != nil {
+		sif := make([]string, len(*jsnCfg.Rate_string_indexed_fields))
+		for i, fID := range *jsnCfg.Rate_string_indexed_fields {
+			sif[i] = fID
+		}
+		rCfg.RateStringIndexedFields = &sif
+	}
+	if jsnCfg.Rate_prefix_indexed_fields != nil {
+		pif := make([]string, len(*jsnCfg.Rate_prefix_indexed_fields))
+		for i, fID := range *jsnCfg.Rate_prefix_indexed_fields {
+			pif[i] = fID
+		}
+		rCfg.RatePrefixIndexedFields = &pif
+	}
+	if jsnCfg.Rate_nested_fields != nil {
+		rCfg.RateNestedFields = *jsnCfg.Rate_nested_fields
+	}
 	return
 }
 
@@ -75,11 +100,29 @@ func (rCfg *RateSCfg) AsMapInterface() map[string]interface{} {
 			prefixIndexedFields[i] = item
 		}
 	}
+	rateStringIndexedFields := []string{}
+	if rCfg.RateStringIndexedFields != nil {
+		rateStringIndexedFields = make([]string, len(*rCfg.RateStringIndexedFields))
+		for i, item := range *rCfg.RateStringIndexedFields {
+			rateStringIndexedFields[i] = item
+		}
+	}
+	ratePrefixIndexedFields := []string{}
+	if rCfg.RatePrefixIndexedFields != nil {
+		ratePrefixIndexedFields = make([]string, len(*rCfg.RatePrefixIndexedFields))
+		for i, item := range *rCfg.RatePrefixIndexedFields {
+			ratePrefixIndexedFields[i] = item
+		}
+	}
 	return map[string]interface{}{
-		utils.EnabledCfg:             rCfg.Enabled,
-		utils.IndexedSelectsCfg:      rCfg.IndexedSelects,
-		utils.StringIndexedFieldsCfg: stringIndexedFields,
-		utils.PrefixIndexedFieldsCfg: prefixIndexedFields,
-		utils.NestedFieldsCfg:        rCfg.NestedFields,
+		utils.EnabledCfg:                 rCfg.Enabled,
+		utils.IndexedSelectsCfg:          rCfg.IndexedSelects,
+		utils.StringIndexedFieldsCfg:     stringIndexedFields,
+		utils.PrefixIndexedFieldsCfg:     prefixIndexedFields,
+		utils.NestedFieldsCfg:            rCfg.NestedFields,
+		utils.RateIndexedSelectsCfg:      rCfg.RateIndexedSelects,
+		utils.RateStringIndexedFieldsCfg: rateStringIndexedFields,
+		utils.RatePrefixIndexedFieldsCfg: ratePrefixIndexedFields,
+		utils.RateNestedFieldsCfg:        rCfg.RateNestedFields,
 	}
 }
