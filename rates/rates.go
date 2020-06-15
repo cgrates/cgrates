@@ -122,7 +122,7 @@ func (rS *RateS) matchingRateProfileForEvent(args *ArgsCostForEvent) (rtPfl *eng
 	return
 }
 
-// matchingRateProfileForEvent returns the matched RateProfile for the given event
+// matchingRatesForEvent returns the matched Rate out of a RateProfile for the given event
 // indexed based on intervalStart, there will be one winner per interval start
 // returned in order of intervalStart
 func (rS *RateS) matchingRatesForEvent(rtPfl *engine.RateProfile, cgrEv *utils.CGREvent) (rts []*engine.Rate, err error) {
