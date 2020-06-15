@@ -142,13 +142,7 @@ func (rS *RateS) matchingRatesForEvent(rtPfl *engine.RateProfile, cgrEv *utils.C
 	rtsWrk := make(map[time.Duration][]*engine.Rate)
 	evNm := utils.MapStorage{utils.MetaReq: cgrEv.Event}
 	for rtID := range rtIDs {
-		var rt *engine.Rate
-		for _, rtInst := range rtPfl.Rates {
-			if rtInst.ID == rtID {
-				rt = rtInst
-				break
-			}
-		}
+		rt := rtPfl.Rates[rtID] // pick the rate directly from map based on matched ID
 		var pass bool
 		if pass, err = rS.filterS.Pass(cgrEv.Tenant, rt.FilterIDs, evNm); err != nil {
 			return
