@@ -209,19 +209,19 @@ func (ms *MongoStorage) GetTPDestinations(tpid, id string) ([]*utils.TPDestinati
 	return results, err
 }
 
-func (ms *MongoStorage) GetTPRates(tpid, id string) ([]*utils.TPRate, error) {
+func (ms *MongoStorage) GetTPRates(tpid, id string) ([]*utils.TPRateRALs, error) {
 	filter := bson.M{"tpid": tpid}
 	if id != "" {
 		filter["id"] = id
 	}
-	var results []*utils.TPRate
+	var results []*utils.TPRateRALs
 	err := ms.query(func(sctx mongo.SessionContext) (err error) {
 		cur, err := ms.getCol(utils.TBLTPRates).Find(sctx, filter)
 		if err != nil {
 			return err
 		}
 		for cur.Next(sctx) {
-			var el utils.TPRate
+			var el utils.TPRateRALs
 			err := cur.Decode(&el)
 			if err != nil {
 				return err
@@ -631,7 +631,7 @@ func (ms *MongoStorage) SetTPDestinations(tpDsts []*utils.TPDestination) (err er
 	})
 }
 
-func (ms *MongoStorage) SetTPRates(tps []*utils.TPRate) error {
+func (ms *MongoStorage) SetTPRates(tps []*utils.TPRateRALs) error {
 	if len(tps) == 0 {
 		return nil
 	}
@@ -1531,7 +1531,7 @@ func (ms *MongoStorage) SetTPDispatcherHosts(tpDPPs []*utils.TPDispatcherHost) (
 	})
 }
 
-func (ms *MongoStorage) GetTPRateProfiles(tpid, tenant, id string) ([]*TPRateProfile, error) {
+func (ms *MongoStorage) GetTPRateProfiles(tpid, tenant, id string) ([]*utils.TPRateProfile, error) {
 	filter := bson.M{"tpid": tpid}
 	if id != "" {
 		filter["id"] = id
@@ -1539,14 +1539,14 @@ func (ms *MongoStorage) GetTPRateProfiles(tpid, tenant, id string) ([]*TPRatePro
 	if tenant != "" {
 		filter["tenant"] = tenant
 	}
-	var results []*TPRateProfile
+	var results []*utils.TPRateProfile
 	err := ms.query(func(sctx mongo.SessionContext) (err error) {
 		cur, err := ms.getCol(utils.TBLTPRateProfiles).Find(sctx, filter)
 		if err != nil {
 			return err
 		}
 		for cur.Next(sctx) {
-			var tp TPRateProfile
+			var tp utils.TPRateProfile
 			err := cur.Decode(&tp)
 			if err != nil {
 				return err
@@ -1561,7 +1561,7 @@ func (ms *MongoStorage) GetTPRateProfiles(tpid, tenant, id string) ([]*TPRatePro
 	return results, err
 }
 
-func (ms *MongoStorage) SetTPRateProfiles(tpDPPs []*TPRateProfile) (err error) {
+func (ms *MongoStorage) SetTPRateProfiles(tpDPPs []*utils.TPRateProfile) (err error) {
 	if len(tpDPPs) == 0 {
 		return
 	}

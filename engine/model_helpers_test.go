@@ -85,7 +85,7 @@ func TestTpDestinationsAsTPDestinations(t *testing.T) {
 }
 
 func TestTPRateAsExportSlice(t *testing.T) {
-	tpRate := &utils.TPRate{
+	tpRate := &utils.TPRateRALs{
 		TPid: "TEST_TPID",
 		ID:   "TEST_RATEID",
 		RateSlots: []*utils.RateSlot{
@@ -2602,8 +2602,8 @@ func TestRateProfileToAPI(t *testing.T) {
 		MinCost:          0.1,
 		MaxCost:          0.6,
 		MaxCostStrategy:  "*free",
-		Rates: []*Rate{
-			&Rate{
+		Rates: map[string]*Rate{
+			"FIRST_GI": &Rate{
 				ID:        "FIRST_GI",
 				FilterIDs: []string{"*gi:~*req.Usage:0"},
 				Weight:    0,
@@ -2612,7 +2612,7 @@ func TestRateProfileToAPI(t *testing.T) {
 				Increment: time.Duration(1 * time.Minute),
 				Blocker:   false,
 			},
-			&Rate{
+			"SECOND_GI": &Rate{
 				ID:        "SECOND_GI",
 				FilterIDs: []string{"*gi:~*req.Usage:1m"},
 				Weight:    10,
@@ -2623,7 +2623,7 @@ func TestRateProfileToAPI(t *testing.T) {
 			},
 		},
 	}
-	eTPRatePrf := &TPRateProfile{
+	eTPRatePrf := &utils.TPRateProfile{
 		Tenant:             "cgrates.org",
 		ID:                 "RP1",
 		FilterIDs:          []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002"},
@@ -2635,23 +2635,23 @@ func TestRateProfileToAPI(t *testing.T) {
 		MinCost:            0.1,
 		MaxCost:            0.6,
 		MaxCostStrategy:    "*free",
-		Rates: []*Rate{
-			&Rate{
+		Rates: map[string]*utils.TPRate{
+			"FIRST_GI": &utils.TPRate{
 				ID:        "FIRST_GI",
 				FilterIDs: []string{"*gi:~*req.Usage:0"},
 				Weight:    0,
 				Value:     0.12,
-				Unit:      time.Duration(1 * time.Minute),
-				Increment: time.Duration(1 * time.Minute),
+				Unit:      "1m0s",
+				Increment: "1m0s",
 				Blocker:   false,
 			},
-			&Rate{
+			"SECOND_GI": &utils.TPRate{
 				ID:        "SECOND_GI",
 				FilterIDs: []string{"*gi:~*req.Usage:1m"},
 				Weight:    10,
 				Value:     0.06,
-				Unit:      time.Duration(1 * time.Minute),
-				Increment: time.Duration(1 * time.Second),
+				Unit:      "1m0s",
+				Increment: "1s",
 				Blocker:   false,
 			},
 		},

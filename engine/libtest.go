@@ -281,9 +281,9 @@ cgrates.org,ALL1,127.0.0.1:2012,*json,true
 cgrates.org,ALL1,127.0.0.1:3012,*json,false
 `
 	RateProfileCSVContent = `
-#Tenant,ID,FilterIDs,ActivationInterval,Weight,ConnectFee,RoundingMethod,RoundingDecimals,MinCost,MaxCost,MaxCostStrategy,RateID,RateFilterIDs,RateWeight,RateValue,RateUnit,RateIncrement,RateBlocker
-cgrates.org,RP1,*string:~*req.Subject:1001,,0,0.1,*up,4,0.1,0.6,*free,FIRST_GI,*gi:~*req.Usage:0,0,0.12,1m,1m,FALSE
-cgrates.org,RP1,*string:~*req.Subject:1002,,,,,,,,,SECOND_GI,*gi:~*req.Usage:1m,10,0.06,1m,1s,FALSE
+#Tenant,ID,FilterIDs,ActivationInterval,Weight,ConnectFee,RoundingMethod,RoundingDecimals,MinCost,MaxCost,MaxCostStrategy,RateID,RateFilterIDs,RateActivationInterval,RateWeight,RateValue,RateUnit,RateIncrement,RateBlocker
+cgrates.org,RP1,*string:~*req.Subject:1001,,0,0.1,*up,4,0.1,0.6,*free,FIRST_GI,*gi:~*req.Usage:0,,0,0.12,1m,1m,FALSE
+cgrates.org,RP1,*string:~*req.Subject:1002,,,,,,,,,SECOND_GI,*gi:~*req.Usage:1m,,10,0.06,1m,1s,FALSE
 `
 )
 

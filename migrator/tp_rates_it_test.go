@@ -37,7 +37,7 @@ var (
 	tpRatesCfgIn    *config.CGRConfig
 	tpRatesCfgOut   *config.CGRConfig
 	tpRatesMigrator *Migrator
-	tpRates         []*utils.TPRate
+	tpRates         []*utils.TPRateRALs
 )
 
 var sTestsTpRatesIT = []func(t *testing.T){
@@ -106,7 +106,7 @@ func testTpRatesITFlush(t *testing.T) {
 }
 
 func testTpRatesITPopulate(t *testing.T) {
-	tpRates = []*utils.TPRate{
+	tpRates = []*utils.TPRateRALs{
 		{
 			TPid: "TPidTpRate",
 			ID:   "RT_FS_USERS",

@@ -19,16 +19,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // SetTPRateProfile creates a new TPRateProfile within a tariff plan
-func (api *APIerSv1) SetTPRateProfile(attrs *engine.TPRateProfile, reply *string) error {
+func (api *APIerSv1) SetTPRateProfile(attrs *utils.TPRateProfile, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := api.StorDb.SetTPRateProfiles([]*engine.TPRateProfile{attrs}); err != nil {
+	if err := api.StorDb.SetTPRateProfiles([]*utils.TPRateProfile{attrs}); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
@@ -36,7 +35,7 @@ func (api *APIerSv1) SetTPRateProfile(attrs *engine.TPRateProfile, reply *string
 }
 
 // GetTPRateProfile queries specific TPRateProfile on tariff plan
-func (api *APIerSv1) GetTPRateProfile(attr *utils.TPTntID, reply *engine.TPRateProfile) error {
+func (api *APIerSv1) GetTPRateProfile(attr *utils.TPTntID, reply *utils.TPRateProfile) error {
 	if missing := utils.MissingStructFields(attr, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

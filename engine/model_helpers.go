@@ -262,10 +262,10 @@ func APItoModelTimings(ts []*utils.ApierTPTiming) (result TpTimings) {
 
 type TpRates []TpRate
 
-func (tps TpRates) AsMapRates() (map[string]*utils.TPRate, error) {
-	result := make(map[string]*utils.TPRate)
+func (tps TpRates) AsMapRates() (map[string]*utils.TPRateRALs, error) {
+	result := make(map[string]*utils.TPRateRALs)
 	for _, tp := range tps {
-		r := &utils.TPRate{
+		r := &utils.TPRateRALs{
 			TPid: tp.Tpid,
 			ID:   tp.Tag,
 		}
@@ -289,7 +289,7 @@ func (tps TpRates) AsMapRates() (map[string]*utils.TPRate, error) {
 	return result, nil
 }
 
-func (tps TpRates) AsTPRates() (result []*utils.TPRate, err error) {
+func (tps TpRates) AsTPRates() (result []*utils.TPRateRALs, err error) {
 	if atps, err := tps.AsMapRates(); err != nil {
 		return nil, err
 	} else {
@@ -300,8 +300,8 @@ func (tps TpRates) AsTPRates() (result []*utils.TPRate, err error) {
 	}
 }
 
-func MapTPRates(s []*utils.TPRate) (map[string]*utils.TPRate, error) {
-	result := make(map[string]*utils.TPRate)
+func MapTPRates(s []*utils.TPRateRALs) (map[string]*utils.TPRateRALs, error) {
+	result := make(map[string]*utils.TPRateRALs)
 	for _, e := range s {
 		if _, found := result[e.ID]; !found {
 			result[e.ID] = e
@@ -312,7 +312,7 @@ func MapTPRates(s []*utils.TPRate) (map[string]*utils.TPRate, error) {
 	return result, nil
 }
 
-func APItoModelRate(r *utils.TPRate) (result TpRates) {
+func APItoModelRate(r *utils.TPRateRALs) (result TpRates) {
 	if r != nil {
 		for _, rs := range r.RateSlots {
 			result = append(result, TpRate{
@@ -335,7 +335,7 @@ func APItoModelRate(r *utils.TPRate) (result TpRates) {
 	return
 }
 
-func APItoModelRates(rs []*utils.TPRate) (result TpRates) {
+func APItoModelRates(rs []*utils.TPRateRALs) (result TpRates) {
 	for _, r := range rs {
 		for _, sr := range APItoModelRate(r) {
 			result = append(result, sr)
@@ -3013,15 +3013,15 @@ func (tps RateProfileMdls) CSVHeader() (result []string) {
 	}
 }
 
-func (tps RateProfileMdls) AsTPRateProfile() (result []*TPRateProfile, err error) {
+func (tps RateProfileMdls) AsTPRateProfile() (result []*utils.TPRateProfile) {
 	filtermap := make(map[string]utils.StringMap)
-	mst := make(map[string]*TPRateProfile)
-	rateMap := make(map[string]map[string]*Rate)
+	mst := make(map[string]*utils.TPRateProfile)
+	rateMap := make(map[string]map[string]*utils.TPRate)
 	for _, tp := range tps {
 		tenID := (&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()
 		rPrf, found := mst[tenID]
 		if !found {
-			rPrf = &TPRateProfile{
+			rPrf = &utils.TPRateProfile{
 				TPid:   tp.Tpid,
 				Tenant: tp.Tenant,
 				ID:     tp.ID,
@@ -3029,16 +3029,11 @@ func (tps RateProfileMdls) AsTPRateProfile() (result []*TPRateProfile, err error
 		}
 		if tp.RateID != utils.EmptyString {
 			if _, has := rateMap[tenID]; !has {
-				rateMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()] = make(map[string]*Rate)
+				rateMap[tenID] = make(map[string]*utils.TPRate)
 			}
-			rateID := tp.RateID
-			if tp.RateFilterIDs != utils.EmptyString {
-				rateID = utils.ConcatenatedKey(rateID,
-					utils.NewStringSet(strings.Split(tp.RateFilterIDs, utils.INFIELD_SEP)).Sha1())
-			}
-			rate, found := rateMap[tenID][rateID]
+			rate, found := rateMap[tenID][tp.RateID]
 			if !found {
-				rate = &Rate{
+				rate = &utils.TPRate{
 					ID:      tp.RateID,
 					Blocker: tp.RateBlocker,
 				}
@@ -3047,6 +3042,16 @@ func (tps RateProfileMdls) AsTPRateProfile() (result []*TPRateProfile, err error
 				rateFilterSplit := strings.Split(tp.RateFilterIDs, utils.INFIELD_SEP)
 				rate.FilterIDs = append(rate.FilterIDs, rateFilterSplit...)
 			}
+			if tp.RateActivationInterval != utils.EmptyString {
+				rate.ActivationInterval = new(utils.TPActivationInterval)
+				aiSplt := strings.Split(tp.RateActivationInterval, utils.INFIELD_SEP)
+				if len(aiSplt) == 2 {
+					rate.ActivationInterval.ActivationTime = aiSplt[0]
+					rate.ActivationInterval.ExpiryTime = aiSplt[1]
+				} else if len(aiSplt) == 1 {
+					rate.ActivationInterval.ActivationTime = aiSplt[0]
+				}
+			}
 			if tp.RateWeight != 0 {
 				rate.Weight = tp.RateWeight
 			}
@@ -3054,17 +3059,13 @@ func (tps RateProfileMdls) AsTPRateProfile() (result []*TPRateProfile, err error
 				rate.Value = tp.RateValue
 			}
 			if tp.RateIncrement != utils.EmptyString {
-				if rate.Increment, err = utils.ParseDurationWithNanosecs(tp.RateIncrement); err != nil {
-					return
-				}
+				rate.Increment = tp.RateIncrement
 			}
 			if tp.RateUnit != utils.EmptyString {
-				if rate.Unit, err = utils.ParseDurationWithNanosecs(tp.RateUnit); err != nil {
-					return
-				}
+				rate.Unit = tp.RateUnit
 			}
 
-			rateMap[tenID][rateID] = rate
+			rateMap[tenID][tp.RateID] = rate
 		}
 
 		if tp.Weight != 0 {
@@ -3109,13 +3110,11 @@ func (tps RateProfileMdls) AsTPRateProfile() (result []*TPRateProfile, err error
 		}
 		mst[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()] = rPrf
 	}
-	result = make([]*TPRateProfile, len(mst))
+	result = make([]*utils.TPRateProfile, len(mst))
 	i := 0
 	for tntID, th := range mst {
 		result[i] = th
-		for _, rate := range rateMap[tntID] {
-			result[i].Rates = append(result[i].Rates, rate)
-		}
+		result[i].Rates = rateMap[tntID]
 		for filterdata := range filtermap[tntID] {
 			result[i].FilterIDs = append(result[i].FilterIDs, filterdata)
 		}
@@ -3124,11 +3123,12 @@ func (tps RateProfileMdls) AsTPRateProfile() (result []*TPRateProfile, err error
 	return
 }
 
-func APItoModelTPRateProfile(tPrf *TPRateProfile) (mdls RateProfileMdls) {
+func APItoModelTPRateProfile(tPrf *utils.TPRateProfile) (mdls RateProfileMdls) {
 	if len(tPrf.Rates) == 0 {
 		return
 	}
-	for i, rate := range tPrf.Rates {
+	i := 0
+	for _, rate := range tPrf.Rates {
 		mdl := &RateProfileMdl{
 			Tenant: tPrf.Tenant,
 			Tpid:   tPrf.TPid,
@@ -3167,15 +3167,24 @@ func APItoModelTPRateProfile(tPrf *TPRateProfile) (mdls RateProfileMdls) {
 		}
 		mdl.RateWeight = rate.Weight
 		mdl.RateValue = rate.Weight
-		mdl.RateUnit = rate.Unit.String()
-		mdl.RateIncrement = rate.Increment.String()
+		if rate.ActivationInterval != nil {
+			if rate.ActivationInterval.ActivationTime != utils.EmptyString {
+				mdl.RateActivationInterval = rate.ActivationInterval.ActivationTime
+			}
+			if rate.ActivationInterval.ExpiryTime != utils.EmptyString {
+				mdl.RateActivationInterval += utils.INFIELD_SEP + rate.ActivationInterval.ExpiryTime
+			}
+		}
+		mdl.RateUnit = rate.Unit
+		mdl.RateIncrement = rate.Increment
 		mdl.RateBlocker = rate.Blocker
 		mdls = append(mdls, mdl)
+		i++
 	}
 	return
 }
 
-func APItoRateProfile(tpRp *TPRateProfile, timezone string) (rp *RateProfile, err error) {
+func APItoRateProfile(tpRp *utils.TPRateProfile, timezone string) (rp *RateProfile, err error) {
 	rp = &RateProfile{
 		Tenant:           tpRp.Tenant,
 		ID:               tpRp.ID,
@@ -3187,7 +3196,7 @@ func APItoRateProfile(tpRp *TPRateProfile, timezone string) (rp *RateProfile, er
 		MinCost:          tpRp.MinCost,
 		MaxCost:          tpRp.MaxCost,
 		MaxCostStrategy:  tpRp.MaxCostStrategy,
-		Rates:            make([]*Rate, len(tpRp.Rates)),
+		Rates:            make(map[string]*Rate),
 	}
 	for i, stp := range tpRp.FilterIDs {
 		rp.FilterIDs[i] = stp
@@ -3197,22 +3206,31 @@ func APItoRateProfile(tpRp *TPRateProfile, timezone string) (rp *RateProfile, er
 			return nil, err
 		}
 	}
-	for i, rate := range tpRp.Rates {
-		rp.Rates[i] = &Rate{
+	for key, rate := range tpRp.Rates {
+		rp.Rates[key] = &Rate{
 			ID:        rate.ID,
 			Weight:    rate.Weight,
 			Blocker:   rate.Blocker,
 			FilterIDs: rate.FilterIDs,
 			Value:     rate.Value,
-			Unit:      rate.Unit,
-			Increment: rate.Increment,
+		}
+		if rp.Rates[key].Unit, err = utils.ParseDurationWithNanosecs(rate.Unit); err != nil {
+			return nil, err
+		}
+		if rp.Rates[key].Increment, err = utils.ParseDurationWithNanosecs(rate.Increment); err != nil {
+			return nil, err
+		}
+		if rate.ActivationInterval != nil {
+			if rp.Rates[key].ActivationInterval, err = rate.ActivationInterval.AsActivationInterval(timezone); err != nil {
+				return nil, err
+			}
 		}
 	}
 	return rp, nil
 }
 
-func RateProfileToAPI(rp *RateProfile) (tpRp *TPRateProfile) {
-	tpRp = &TPRateProfile{
+func RateProfileToAPI(rp *RateProfile) (tpRp *utils.TPRateProfile) {
+	tpRp = &utils.TPRateProfile{
 		Tenant:             rp.Tenant,
 		ID:                 rp.ID,
 		FilterIDs:          make([]string, len(rp.FilterIDs)),
@@ -3224,18 +3242,26 @@ func RateProfileToAPI(rp *RateProfile) (tpRp *TPRateProfile) {
 		MinCost:            rp.MinCost,
 		MaxCost:            rp.MaxCost,
 		MaxCostStrategy:    rp.MaxCostStrategy,
-		Rates:              make([]*Rate, len(rp.Rates)),
+		Rates:              make(map[string]*utils.TPRate),
 	}
 
-	for i, rate := range rp.Rates {
-		tpRp.Rates[i] = &Rate{
+	for key, rate := range rp.Rates {
+		tpRp.Rates[key] = &utils.TPRate{
 			ID:        rate.ID,
 			Weight:    rate.Weight,
 			Blocker:   rate.Blocker,
 			FilterIDs: rate.FilterIDs,
 			Value:     rate.Value,
-			Unit:      rate.Unit,
-			Increment: rate.Increment,
+			Unit:      rate.Unit.String(),
+			Increment: rate.Increment.String(),
+		}
+		if rate.ActivationInterval != nil {
+			if !rate.ActivationInterval.ActivationTime.IsZero() {
+				tpRp.Rates[key].ActivationInterval.ActivationTime = rate.ActivationInterval.ActivationTime.Format(time.RFC3339)
+			}
+			if !rate.ActivationInterval.ExpiryTime.IsZero() {
+				tpRp.Rates[key].ActivationInterval.ExpiryTime = rate.ActivationInterval.ExpiryTime.Format(time.RFC3339)
+			}
 		}
 	}
 	for i, fli := range rp.FilterIDs {

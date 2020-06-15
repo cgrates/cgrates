@@ -289,7 +289,7 @@ func testStorDBitCRUDTpRates(t *testing.T) {
 		t.Error(err)
 	}
 	// WRITE
-	var snd = []*utils.TPRate{
+	var snd = []*utils.TPRateRALs{
 		{
 			TPid: "testTPid",
 			ID:   "1",

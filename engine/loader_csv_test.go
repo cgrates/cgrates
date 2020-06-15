@@ -1414,7 +1414,7 @@ func TestLoadDispatcherProfiles(t *testing.T) {
 }
 
 func TestLoadRateProfiles(t *testing.T) {
-	eRatePrf := &TPRateProfile{
+	eRatePrf := &utils.TPRateProfile{
 		TPid:             testTPID,
 		Tenant:           "cgrates.org",
 		ID:               "RP1",
@@ -1426,23 +1426,23 @@ func TestLoadRateProfiles(t *testing.T) {
 		MinCost:          0.1,
 		MaxCost:          0.6,
 		MaxCostStrategy:  "*free",
-		Rates: []*Rate{
-			&Rate{
+		Rates: map[string]*utils.TPRate{
+			"FIRST_GI": &utils.TPRate{
 				ID:        "FIRST_GI",
 				FilterIDs: []string{"*gi:~*req.Usage:0"},
 				Weight:    0,
 				Value:     0.12,
-				Unit:      time.Duration(1 * time.Minute),
-				Increment: time.Duration(1 * time.Minute),
+				Unit:      "1m",
+				Increment: "1m",
 				Blocker:   false,
 			},
-			&Rate{
+			"SECOND_GI": &utils.TPRate{
 				ID:        "SECOND_GI",
 				FilterIDs: []string{"*gi:~*req.Usage:1m"},
 				Weight:    10,
 				Value:     0.06,
-				Unit:      time.Duration(1 * time.Minute),
-				Increment: time.Duration(1 * time.Second),
+				Unit:      "1m",
+				Increment: "1s",
 				Blocker:   false,
 			},
 		},
@@ -1456,12 +1456,6 @@ func TestLoadRateProfiles(t *testing.T) {
 	})
 	sort.Slice(csvr.rateProfiles[dppKey].FilterIDs, func(i, j int) bool {
 		return csvr.rateProfiles[dppKey].FilterIDs[i] < csvr.rateProfiles[dppKey].FilterIDs[j]
-	})
-	sort.Slice(eRatePrf.Rates, func(i, j int) bool {
-		return eRatePrf.Rates[i].ID < eRatePrf.Rates[j].ID
-	})
-	sort.Slice(csvr.rateProfiles[dppKey].Rates, func(i, j int) bool {
-		return csvr.rateProfiles[dppKey].Rates[i].ID < csvr.rateProfiles[dppKey].Rates[j].ID
 	})
 
 	if !reflect.DeepEqual(eRatePrf, csvr.rateProfiles[dppKey]) {

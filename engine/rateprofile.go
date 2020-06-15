@@ -37,7 +37,7 @@ type RateProfile struct {
 	MinCost            float64
 	MaxCost            float64
 	MaxCostStrategy    string
-	Rates              []*Rate
+	Rates              map[string]*Rate
 
 	connFee *utils.Decimal // cached version of the Decimal
 	minCost *utils.Decimal
@@ -50,36 +50,22 @@ func (rpp *RateProfile) TenantID() string {
 
 // Route defines rate related information used within a RateProfile
 type Rate struct {
-	ID            string        // RateID
-	FilterIDs     []string      // RateFilterIDs
-	IntervalStart time.Duration // Starting point when the Rate kicks in
-	Weight        float64       // RateWeight will decide the winner per interval start
-	Value         float64       // RateValue
-	Unit          time.Duration // RateUnit
-	Increment     time.Duration // RateIncrement
-	Blocker       bool          // RateBlocker will make this rate recurrent, deactivating further intervals
+	ID                 string                    // RateID
+	FilterIDs          []string                  // RateFilterIDs
+	ActivationInterval *utils.ActivationInterval //TPActivationInterval have ATime and ETime as strings
+	IntervalStart      time.Duration             // Starting point when the Rate kicks in
+	Weight             float64                   // RateWeight will decide the winner per interval start
+	Value              float64                   // RateValue
+	Unit               time.Duration             // RateUnit
+	Increment          time.Duration             // RateIncrement
+	Blocker            bool                      // RateBlocker will make this rate recurrent, deactivating further intervals
 
-	val *utils.Decimal // cached version of the Decimal
+	val     *utils.Decimal // cached version of the Decimal
+	grpItvl *time.Duration // populated from IntervalStart if duration is provided
 }
 
 // RateProfileWithArgDispatcher is used in replicatorV1 for dispatcher
 type RateProfileWithArgDispatcher struct {
 	*RateProfile
 	*utils.ArgDispatcher
-}
-
-type TPRateProfile struct {
-	TPid               string
-	Tenant             string
-	ID                 string
-	FilterIDs          []string
-	ActivationInterval *utils.TPActivationInterval
-	Weight             float64
-	ConnectFee         float64
-	RoundingMethod     string
-	RoundingDecimals   int
-	MinCost            float64
-	MaxCost            float64
-	MaxCostStrategy    string
-	Rates              []*Rate
 }

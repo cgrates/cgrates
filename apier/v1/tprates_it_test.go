@@ -37,7 +37,7 @@ var (
 	tpRateCfg       *config.CGRConfig
 	tpRateRPC       *rpc.Client
 	tpRateDataDir   = "/usr/share/cgrates"
-	tpRate          *utils.TPRate
+	tpRate          *utils.TPRateRALs
 	tpRateDelay     int
 	tpRateConfigDIR string //run tests for specific configuration
 )
@@ -118,7 +118,7 @@ func testTPRatesRpcConn(t *testing.T) {
 }
 
 func testTPRatesGetTPRateforeSet(t *testing.T) {
-	var reply *utils.TPRate
+	var reply *utils.TPRateRALs
 	if err := tpRateRPC.Call(utils.APIerSv1GetTPRate,
 		&AttrGetTPRate{TPid: "TPidTpRate", ID: "RT_FS_USERS"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -126,7 +126,7 @@ func testTPRatesGetTPRateforeSet(t *testing.T) {
 }
 
 func testTPRatesSetTPRate(t *testing.T) {
-	tpRate = &utils.TPRate{
+	tpRate = &utils.TPRateRALs{
 		TPid: "TPidTpRate",
 		ID:   "RT_FS_USERS",
 		RateSlots: []*utils.RateSlot{
@@ -155,7 +155,7 @@ func testTPRatesSetTPRate(t *testing.T) {
 }
 
 func testTPRatesGetTPRateAfterSet(t *testing.T) {
-	var reply *utils.TPRate
+	var reply *utils.TPRateRALs
 	if err := tpRateRPC.Call(utils.APIerSv1GetTPRate, &AttrGetTPRate{TPid: "TPidTpRate", ID: tpRate.ID}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpRate, reply) {
@@ -206,7 +206,7 @@ func testTPRatesUpdateTPRate(t *testing.T) {
 }
 
 func testTPRatesGetTPRateAfterUpdate(t *testing.T) {
-	var reply *utils.TPRate
+	var reply *utils.TPRateRALs
 	if err := tpRateRPC.Call(utils.APIerSv1GetTPRate,
 		&AttrGetTPRate{TPid: "TPidTpRate", ID: tpRate.ID}, &reply); err != nil {
 		t.Error(err)
@@ -227,7 +227,7 @@ func testTPRatesRemoveTPRate(t *testing.T) {
 }
 
 func testTPRatesGetTPRateAfterRemove(t *testing.T) {
-	var reply *utils.TPRate
+	var reply *utils.TPRateRALs
 	if err := tpRateRPC.Call(utils.APIerSv1GetTPRate,
 		&AttrGetTPRate{TPid: "TPidTpRate", ID: "RT_FS_USERS"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)

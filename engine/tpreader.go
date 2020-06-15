@@ -42,7 +42,7 @@ type TpReader struct {
 	accountActions     map[string]*Account
 	destinations       map[string]*Destination
 	timings            map[string]*utils.TPTiming
-	rates              map[string]*utils.TPRate
+	rates              map[string]*utils.TPRateRALs
 	destinationRates   map[string]*utils.TPDestinationRate
 	ratingPlans        map[string]*RatingPlan
 	ratingProfiles     map[string]*RatingProfile
@@ -56,7 +56,7 @@ type TpReader struct {
 	chargerProfiles    map[utils.TenantID]*utils.TPChargerProfile
 	dispatcherProfiles map[utils.TenantID]*utils.TPDispatcherProfile
 	dispatcherHosts    map[utils.TenantID]*utils.TPDispatcherHost
-	rateProfiles       map[utils.TenantID]*TPRateProfile
+	rateProfiles       map[utils.TenantID]*utils.TPRateProfile
 	resources          []*utils.TenantID // IDs of resources which need creation based on resourceProfiles
 	statQueues         []*utils.TenantID // IDs of statQueues which need creation based on statQueueProfiles
 	thresholds         []*utils.TenantID // IDs of thresholds which need creation based on thresholdProfiles
@@ -88,7 +88,7 @@ func (tpr *TpReader) Init() {
 	tpr.actions = make(map[string][]*Action)
 	tpr.actionPlans = make(map[string]*ActionPlan)
 	tpr.actionsTriggers = make(map[string]ActionTriggers)
-	tpr.rates = make(map[string]*utils.TPRate)
+	tpr.rates = make(map[string]*utils.TPRateRALs)
 	tpr.destinations = make(map[string]*Destination)
 	tpr.destinationRates = make(map[string]*utils.TPDestinationRate)
 	tpr.timings = make(map[string]*utils.TPTiming)
@@ -104,7 +104,7 @@ func (tpr *TpReader) Init() {
 	tpr.chargerProfiles = make(map[utils.TenantID]*utils.TPChargerProfile)
 	tpr.dispatcherProfiles = make(map[utils.TenantID]*utils.TPDispatcherProfile)
 	tpr.dispatcherHosts = make(map[utils.TenantID]*utils.TPDispatcherHost)
-	tpr.rateProfiles = make(map[utils.TenantID]*TPRateProfile)
+	tpr.rateProfiles = make(map[utils.TenantID]*utils.TPRateProfile)
 	tpr.filters = make(map[utils.TenantID]*utils.TPFilterProfile)
 	tpr.revDests = make(map[string][]string)
 	tpr.acntActionPlans = make(map[string][]string)
@@ -1251,7 +1251,7 @@ func (tpr *TpReader) LoadRateProfilesFiltered(tag string) (err error) {
 	if err != nil {
 		return err
 	}
-	mapRateProfiles := make(map[utils.TenantID]*TPRateProfile)
+	mapRateProfiles := make(map[utils.TenantID]*utils.TPRateProfile)
 	for _, rl := range rls {
 		mapRateProfiles[utils.TenantID{Tenant: rl.Tenant, ID: rl.ID}] = rl
 	}

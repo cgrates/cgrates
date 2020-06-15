@@ -305,7 +305,7 @@ func (self *SQLStorage) SetTPDestinations(dests []*utils.TPDestination) error {
 	return nil
 }
 
-func (self *SQLStorage) SetTPRates(rs []*utils.TPRate) error {
+func (self *SQLStorage) SetTPRates(rs []*utils.TPRateRALs) error {
 	if len(rs) == 0 {
 		return nil //Nothing to set
 	}
@@ -728,7 +728,7 @@ func (self *SQLStorage) SetTPDispatcherHosts(tpDPPs []*utils.TPDispatcherHost) e
 	return nil
 }
 
-func (self *SQLStorage) SetTPRateProfiles(tpDPPs []*TPRateProfile) error {
+func (self *SQLStorage) SetTPRateProfiles(tpDPPs []*utils.TPRateProfile) error {
 	if len(tpDPPs) == 0 {
 		return nil
 	}
@@ -1206,7 +1206,7 @@ func (self *SQLStorage) GetTPDestinations(tpid, id string) (uTPDsts []*utils.TPD
 	return tpDests.AsTPDestinations(), nil
 }
 
-func (self *SQLStorage) GetTPRates(tpid, id string) ([]*utils.TPRate, error) {
+func (self *SQLStorage) GetTPRates(tpid, id string) ([]*utils.TPRateRALs, error) {
 	var tpRates TpRates
 	q := self.db.Where("tpid = ?", tpid).Order("id")
 	if len(id) != 0 {
@@ -1595,7 +1595,7 @@ func (self *SQLStorage) GetTPDispatcherHosts(tpid, tenant, id string) ([]*utils.
 	return arls, nil
 }
 
-func (self *SQLStorage) GetTPRateProfiles(tpid, tenant, id string) ([]*TPRateProfile, error) {
+func (self *SQLStorage) GetTPRateProfiles(tpid, tenant, id string) ([]*utils.TPRateProfile, error) {
 	var dpps RateProfileMdls
 	q := self.db.Where("tpid = ?", tpid)
 	if len(id) != 0 {
@@ -1607,10 +1607,8 @@ func (self *SQLStorage) GetTPRateProfiles(tpid, tenant, id string) ([]*TPRatePro
 	if err := q.Find(&dpps).Error; err != nil {
 		return nil, err
 	}
-	arls, err := dpps.AsTPRateProfile()
-	if err != nil {
-		return nil, err
-	} else if len(arls) == 0 {
+	arls := dpps.AsTPRateProfile()
+	if len(arls) == 0 {
 		return arls, utils.ErrNotFound
 	}
 	return arls, nil

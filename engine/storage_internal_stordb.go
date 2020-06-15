@@ -110,7 +110,7 @@ func (iDB *InternalDB) GetTPDestinations(tpid, id string) (dsts []*utils.TPDesti
 	return
 }
 
-func (iDB *InternalDB) GetTPRates(tpid, id string) (rates []*utils.TPRate, err error) {
+func (iDB *InternalDB) GetTPRates(tpid, id string) (rates []*utils.TPRateRALs, err error) {
 	key := tpid
 	if id != utils.EmptyString {
 		key += utils.CONCATENATED_KEY_SEP + id
@@ -121,7 +121,7 @@ func (iDB *InternalDB) GetTPRates(tpid, id string) (rates []*utils.TPRate, err e
 		if !ok || x == nil {
 			return nil, utils.ErrNotFound
 		}
-		result := x.(*utils.TPRate)
+		result := x.(*utils.TPRateRALs)
 		for _, rs := range result.RateSlots {
 			rs.SetDurations()
 		}
@@ -566,7 +566,7 @@ func (iDB *InternalDB) GetTPDispatcherHosts(tpid, tenant, id string) (dpps []*ut
 	return
 }
 
-func (iDB *InternalDB) GetTPRateProfiles(tpid, tenant, id string) (tpPrfs []*TPRateProfile, err error) {
+func (iDB *InternalDB) GetTPRateProfiles(tpid, tenant, id string) (tpPrfs []*utils.TPRateProfile, err error) {
 	key := tpid
 	if tenant != utils.EmptyString {
 		key += utils.CONCATENATED_KEY_SEP + tenant
@@ -580,7 +580,7 @@ func (iDB *InternalDB) GetTPRateProfiles(tpid, tenant, id string) (tpPrfs []*TPR
 		if !ok || x == nil {
 			return nil, utils.ErrNotFound
 		}
-		tpPrfs = append(tpPrfs, x.(*TPRateProfile))
+		tpPrfs = append(tpPrfs, x.(*utils.TPRateProfile))
 	}
 	if len(tpPrfs) == 0 {
 		return nil, utils.ErrNotFound
@@ -628,7 +628,7 @@ func (iDB *InternalDB) SetTPDestinations(dests []*utils.TPDestination) (err erro
 	return
 }
 
-func (iDB *InternalDB) SetTPRates(rates []*utils.TPRate) (err error) {
+func (iDB *InternalDB) SetTPRates(rates []*utils.TPRateRALs) (err error) {
 	if len(rates) == 0 {
 		return nil
 	}
@@ -827,7 +827,7 @@ func (iDB *InternalDB) SetTPDispatcherHosts(dpps []*utils.TPDispatcherHost) (err
 	return
 }
 
-func (iDB *InternalDB) SetTPRateProfiles(tpPrfs []*TPRateProfile) (err error) {
+func (iDB *InternalDB) SetTPRateProfiles(tpPrfs []*utils.TPRateProfile) (err error) {
 	if len(tpPrfs) == 0 {
 		return nil
 	}

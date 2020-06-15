@@ -331,16 +331,16 @@ func testApierTPDestination(t *testing.T) {
 	}
 }
 
-// Test here TPRate APIs
+// Test here TPRateRALs APIs
 func testApierTPRate(t *testing.T) {
 	var reply string
-	rt := &utils.TPRate{TPid: utils.TEST_SQL, ID: "RT_FS_USERS", RateSlots: []*utils.RateSlot{
+	rt := &utils.TPRateRALs{TPid: utils.TEST_SQL, ID: "RT_FS_USERS", RateSlots: []*utils.RateSlot{
 		{ConnectFee: 0, Rate: 0, RateUnit: "60s", RateIncrement: "60s", GroupIntervalStart: "0s"},
 	}}
-	rt2 := new(utils.TPRate)
+	rt2 := new(utils.TPRateRALs)
 	*rt2 = *rt
 	rt2.ID = "RT_FS_USERS2"
-	for _, r := range []*utils.TPRate{rt, rt2} {
+	for _, r := range []*utils.TPRateRALs{rt, rt2} {
 		if err := rater.Call(utils.APIerSv1SetTPRate, r, &reply); err != nil {
 			t.Error("Got error on APIerSv1.SetTPRate: ", err.Error())
 		} else if reply != utils.OK {
@@ -354,13 +354,13 @@ func testApierTPRate(t *testing.T) {
 		t.Error("Calling APIerSv1.SetTPRate got reply: ", reply)
 	}
 	// Check missing params
-	if err := rater.Call(utils.APIerSv1SetTPRate, new(utils.TPRate), &reply); err == nil {
+	if err := rater.Call(utils.APIerSv1SetTPRate, new(utils.TPRateRALs), &reply); err == nil {
 		t.Error("Calling APIerSv1.SetTPDestination, expected error, received: ", reply)
 	} else if err.Error() != "MANDATORY_IE_MISSING: [TPid ID RateSlots]" {
 		t.Error("Calling APIerSv1.SetTPRate got unexpected error: ", err.Error())
 	}
 	// Test get
-	var rplyRt2 *utils.TPRate
+	var rplyRt2 *utils.TPRateRALs
 	if err := rater.Call(utils.APIerSv1GetTPRate, &AttrGetTPRate{rt2.TPid, rt2.ID}, &rplyRt2); err != nil {
 		t.Error("Calling APIerSv1.GetTPRate, got error: ", err.Error())
 	} else if !reflect.DeepEqual(rt2, rplyRt2) {

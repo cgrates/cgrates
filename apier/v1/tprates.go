@@ -25,11 +25,11 @@ import (
 )
 
 // SetTPRate creates a new rate within a tariff plan
-func (api *APIerSv1) SetTPRate(attrs *utils.TPRate, reply *string) error {
+func (api *APIerSv1) SetTPRate(attrs *utils.TPRateRALs, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{"TPid", "ID", "RateSlots"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := api.StorDb.SetTPRates([]*utils.TPRate{attrs}); err != nil {
+	if err := api.StorDb.SetTPRates([]*utils.TPRateRALs{attrs}); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
@@ -42,7 +42,7 @@ type AttrGetTPRate struct {
 }
 
 // GetTPRate queries specific Rate on tariff plan
-func (api *APIerSv1) GetTPRate(attrs *AttrGetTPRate, reply *utils.TPRate) error {
+func (api *APIerSv1) GetTPRate(attrs *AttrGetTPRate, reply *utils.TPRateRALs) error {
 	if missing := utils.MissingStructFields(attrs, []string{"TPid", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
