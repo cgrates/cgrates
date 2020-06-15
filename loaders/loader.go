@@ -559,11 +559,7 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 					return
 				}
 			}
-			tpRpls, err := rpMdls.AsTPRateProfile()
-			if err != nil {
-				return err
-			}
-			for _, tpRpl := range tpRpls {
+			for _, tpRpl := range rpMdls.AsTPRateProfile() {
 				rpl, err := engine.APItoRateProfile(tpRpl, ldr.timezone)
 				if err != nil {
 					return err

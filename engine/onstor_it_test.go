@@ -2152,8 +2152,8 @@ func testOnStorITRateProfile(t *testing.T) {
 		MinCost:          0.1,
 		MaxCost:          0.6,
 		MaxCostStrategy:  "*free",
-		Rates: []*Rate{
-			&Rate{
+		Rates: map[string]*Rate{
+			"FIRST_GI": &Rate{
 				ID:        "FIRST_GI",
 				FilterIDs: []string{"*gi:~*req.Usage:0"},
 				Weight:    0,
@@ -2162,7 +2162,7 @@ func testOnStorITRateProfile(t *testing.T) {
 				Increment: time.Duration(1 * time.Minute),
 				Blocker:   false,
 			},
-			&Rate{
+			"SECOND_GI": &Rate{
 				ID:        "SECOND_GI",
 				FilterIDs: []string{"*gi:~*req.Usage:1m"},
 				Weight:    10,

@@ -431,7 +431,7 @@ func (csvs *CSVStorage) GetTPDestinations(tpid, id string) ([]*utils.TPDestinati
 	return tpDests.AsTPDestinations(), nil
 }
 
-func (csvs *CSVStorage) GetTPRates(tpid, id string) ([]*utils.TPRate, error) {
+func (csvs *CSVStorage) GetTPRates(tpid, id string) ([]*utils.TPRateRALs, error) {
 	var tpRates TpRates
 	if err := csvs.proccesData(TpRate{}, csvs.ratesFn, func(tp interface{}) {
 		r := tp.(TpRate)
@@ -653,7 +653,7 @@ func (csvs *CSVStorage) GetTPDispatcherHosts(tpid, tenant, id string) ([]*utils.
 	return tpDDHs.AsTPDispatcherHosts(), nil
 }
 
-func (csvs *CSVStorage) GetTPRateProfiles(tpid, tenant, id string) ([]*TPRateProfile, error) {
+func (csvs *CSVStorage) GetTPRateProfiles(tpid, tenant, id string) ([]*utils.TPRateProfile, error) {
 	var tpDPPs RateProfileMdls
 	if err := csvs.proccesData(RateProfileMdl{}, csvs.rateProfilesFn, func(tp interface{}) {
 		dpp := tp.(RateProfileMdl)
@@ -662,7 +662,7 @@ func (csvs *CSVStorage) GetTPRateProfiles(tpid, tenant, id string) ([]*TPRatePro
 	}); err != nil {
 		return nil, err
 	}
-	return tpDPPs.AsTPRateProfile()
+	return tpDPPs.AsTPRateProfile(), nil
 }
 
 func (csvs *CSVStorage) GetTpIds(colName string) ([]string, error) {

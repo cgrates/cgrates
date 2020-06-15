@@ -83,8 +83,8 @@ type TPDestination struct {
 }
 
 // This file deals with tp_* data definition
-
-type TPRate struct {
+// TPRateRALs -> TPRateRALs
+type TPRateRALs struct {
 	TPid      string      // Tariff plan id
 	ID        string      // Rate id
 	RateSlots []*RateSlot // One or more RateSlots
@@ -150,7 +150,7 @@ type TPDestinationRate struct {
 type DestinationRate struct {
 	DestinationId    string // The destination identity
 	RateId           string // The rate identity
-	Rate             *TPRate
+	Rate             *TPRateRALs
 	RoundingMethod   string
 	RoundingDecimals int
 	MaxCost          float64
@@ -1435,4 +1435,32 @@ type AttrsExecuteActionPlans struct {
 	Tenant, AccountID string
 	*ArgDispatcher
 	TenantArg
+}
+
+type TPRateProfile struct {
+	TPid               string
+	Tenant             string
+	ID                 string
+	FilterIDs          []string
+	ActivationInterval *TPActivationInterval
+	Weight             float64
+	ConnectFee         float64
+	RoundingMethod     string
+	RoundingDecimals   int
+	MinCost            float64
+	MaxCost            float64
+	MaxCostStrategy    string
+	Rates              map[string]*TPRate
+}
+
+type TPRate struct {
+	ID                 string                // RateID
+	FilterIDs          []string              // RateFilterIDs
+	ActivationInterval *TPActivationInterval //TPActivationInterval have ATime and ETime as strings
+	IntervalStart      string
+	Weight             float64 // RateWeight will decide the winner per interval start
+	Value              float64 // RateValue
+	Unit               string
+	Increment          string
+	Blocker            bool // RateBlocker will make this rate recurrent, deactivating further intervals
 }

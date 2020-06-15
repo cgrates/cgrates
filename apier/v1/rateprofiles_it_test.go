@@ -142,8 +142,8 @@ func testV1RatePrfVerifyRateProfile(t *testing.T) {
 		MinCost:          0.1,
 		MaxCost:          0.6,
 		MaxCostStrategy:  "*free",
-		Rates: []*engine.Rate{
-			&engine.Rate{
+		Rates: map[string]*engine.Rate{
+			"FIRST_GI": &engine.Rate{
 				ID:        "FIRST_GI",
 				FilterIDs: []string{"*gi:~*req.Usage:0"},
 				Weight:    0,
@@ -152,7 +152,7 @@ func testV1RatePrfVerifyRateProfile(t *testing.T) {
 				Increment: time.Duration(1 * time.Minute),
 				Blocker:   false,
 			},
-			&engine.Rate{
+			"SECOND_GI": &engine.Rate{
 				ID:        "SECOND_GI",
 				FilterIDs: []string{"*gi:~*req.Usage:1m"},
 				Weight:    10,

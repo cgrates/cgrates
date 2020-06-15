@@ -167,7 +167,7 @@ type LoadReader interface {
 		map[string]string, *utils.PaginatorWithSearch) ([]string, error)
 	GetTPTimings(string, string) ([]*utils.ApierTPTiming, error)
 	GetTPDestinations(string, string) ([]*utils.TPDestination, error)
-	GetTPRates(string, string) ([]*utils.TPRate, error)
+	GetTPRates(string, string) ([]*utils.TPRateRALs, error)
 	GetTPDestinationRates(string, string, *utils.Paginator) ([]*utils.TPDestinationRate, error)
 	GetTPRatingPlans(string, string, *utils.Paginator) ([]*utils.TPRatingPlan, error)
 	GetTPRatingProfiles(*utils.TPRatingProfile) ([]*utils.TPRatingProfile, error)
@@ -185,14 +185,14 @@ type LoadReader interface {
 	GetTPChargers(string, string, string) ([]*utils.TPChargerProfile, error)
 	GetTPDispatcherProfiles(string, string, string) ([]*utils.TPDispatcherProfile, error)
 	GetTPDispatcherHosts(string, string, string) ([]*utils.TPDispatcherHost, error)
-	GetTPRateProfiles(string, string, string) ([]*TPRateProfile, error)
+	GetTPRateProfiles(string, string, string) ([]*utils.TPRateProfile, error)
 }
 
 type LoadWriter interface {
 	RemTpData(string, string, map[string]string) error
 	SetTPTimings([]*utils.ApierTPTiming) error
 	SetTPDestinations([]*utils.TPDestination) error
-	SetTPRates([]*utils.TPRate) error
+	SetTPRates([]*utils.TPRateRALs) error
 	SetTPDestinationRates([]*utils.TPDestinationRate) error
 	SetTPRatingPlans([]*utils.TPRatingPlan) error
 	SetTPRatingProfiles([]*utils.TPRatingProfile) error
@@ -210,7 +210,7 @@ type LoadWriter interface {
 	SetTPChargers([]*utils.TPChargerProfile) error
 	SetTPDispatcherProfiles([]*utils.TPDispatcherProfile) error
 	SetTPDispatcherHosts([]*utils.TPDispatcherHost) error
-	SetTPRateProfiles([]*TPRateProfile) error
+	SetTPRateProfiles([]*utils.TPRateProfile) error
 }
 
 // NewMarshaler returns the marshaler type selected by mrshlerStr
