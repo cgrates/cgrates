@@ -128,7 +128,7 @@ func TestChargerAddFilter(t *testing.T) {
 			},
 		},
 	}
-	dmCharger.SetFilter(fltrCP1)
+	dmCharger.SetFilter(fltrCP1, true)
 	fltrCP2 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_CP_2",
@@ -140,7 +140,7 @@ func TestChargerAddFilter(t *testing.T) {
 			},
 		},
 	}
-	dmCharger.SetFilter(fltrCP2)
+	dmCharger.SetFilter(fltrCP2, true)
 	fltrCPPrefix := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_CP_3",
@@ -152,7 +152,7 @@ func TestChargerAddFilter(t *testing.T) {
 			},
 		},
 	}
-	dmCharger.SetFilter(fltrCPPrefix)
+	dmCharger.SetFilter(fltrCPPrefix, true)
 	fltrCP4 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_CP_4",
@@ -164,7 +164,7 @@ func TestChargerAddFilter(t *testing.T) {
 			},
 		},
 	}
-	dmCharger.SetFilter(fltrCP4)
+	dmCharger.SetFilter(fltrCP4, true)
 }
 
 func TestChargerSetChargerProfiles(t *testing.T) {

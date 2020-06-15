@@ -290,7 +290,7 @@ func testStsITMigrateAndMove(t *testing.T) {
 		if err := stsMigrator.dmIN.DataManager().SetStatQueue(sq); err != nil {
 			t.Error("Error when setting Stats ", err.Error())
 		}
-		if err := stsMigrator.dmOut.DataManager().SetFilter(filter); err != nil {
+		if err := stsMigrator.dmOut.DataManager().SetFilter(filter, true); err != nil {
 			t.Error("Error when setting Filter ", err.Error())
 		}
 		currentVersion := engine.CurrentDataDBVersions()

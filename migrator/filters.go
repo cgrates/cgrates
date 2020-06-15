@@ -45,10 +45,11 @@ func (m *Migrator) migrateCurrentRequestFilter() (err error) {
 		if m.dryRun || fl == nil {
 			continue
 		}
-		if err := m.dmIN.DataManager().RemoveFilter(tntID[0], tntID[1], utils.NonTransactional); err != nil {
+		if err := m.dmIN.DataManager().RemoveFilter(tntID[0], tntID[1],
+			utils.NonTransactional, true); err != nil {
 			return err
 		}
-		if err := m.dmOut.DataManager().SetFilter(fl); err != nil {
+		if err := m.dmOut.DataManager().SetFilter(fl, true); err != nil {
 			return err
 		}
 		m.stats[utils.RQF]++
@@ -202,7 +203,7 @@ func (m *Migrator) migrateRequestFilterV1() (err error) {
 		if m.dryRun || fl == nil {
 			continue
 		}
-		if err := m.dmOut.DataManager().SetFilter(migrateFilterV1(fl)); err != nil {
+		if err := m.dmOut.DataManager().SetFilter(migrateFilterV1(fl), true); err != nil {
 			return err
 		}
 		m.stats[utils.RQF]++
@@ -250,7 +251,7 @@ func (m *Migrator) migrateRequestFilterV2() (err error) {
 		if m.dryRun || fl == nil {
 			continue
 		}
-		if err := m.dmOut.DataManager().SetFilter(migrateFilterV2(fl)); err != nil {
+		if err := m.dmOut.DataManager().SetFilter(migrateFilterV2(fl), true); err != nil {
 			return fmt.Errorf("Error: <%s> when setting filter with tenant: <%s> and id: <%s> after migration",
 				err.Error(), fl.Tenant, fl.ID)
 		}
@@ -306,7 +307,7 @@ func (m *Migrator) migrateRequestFilterV3() (err error) {
 		if m.dryRun || fl == nil {
 			continue
 		}
-		if err := m.dmOut.DataManager().SetFilter(migrateFilterV3(fl)); err != nil {
+		if err := m.dmOut.DataManager().SetFilter(migrateFilterV3(fl), true); err != nil {
 			return fmt.Errorf("Error: <%s> when setting filter with tenant: <%s> and id: <%s> after migration",
 				err.Error(), fl.Tenant, fl.ID)
 		}

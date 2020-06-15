@@ -1526,7 +1526,7 @@ func (tpr *TpReader) WriteToDatabase(verbose, disable_reverse bool) (err error) 
 		if err != nil {
 			return err
 		}
-		if err = tpr.dm.SetFilter(th); err != nil {
+		if err = tpr.dm.SetFilter(th, true); err != nil {
 			return err
 		}
 		if verbose {
@@ -2309,7 +2309,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disable_reverse bool) (err erro
 	}
 	for _, tpFltr := range tpr.filters {
 		if err = tpr.dm.RemoveFilter(tpFltr.Tenant, tpFltr.ID,
-			utils.NonTransactional); err != nil {
+			utils.NonTransactional, true); err != nil {
 			return err
 		}
 		if verbose {

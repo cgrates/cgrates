@@ -759,7 +759,7 @@ func (dm *DataManager) GetFilter(tenant, id string, cacheRead, cacheWrite bool,
 	return
 }
 
-func (dm *DataManager) SetFilter(fltr *Filter) (err error) {
+func (dm *DataManager) SetFilter(fltr *Filter, withIndex bool) (err error) {
 	if dm == nil {
 		err = utils.ErrNoDatabaseConn
 		return
@@ -773,7 +773,9 @@ func (dm *DataManager) SetFilter(fltr *Filter) (err error) {
 		return
 	}
 	if withIndex {
-		// remove index?
+		if err = updateFilterIndex(dm, oldFlt, fltr); err != nil {
+			return
+		}
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaFilters]; itm.Replicate {
 		var reply string
@@ -803,14 +805,26 @@ func (dm *DataManager) RemoveFilter(tenant, id, transactionID string, withIndex 
 		utils.NonTransactional); err != nil && err != utils.ErrNotFound {
 		return err
 	}
+	var tntCtx string
+	if withIndex {
+		tntCtx = utils.ConcatenatedKey(tenant, id)
+		var rcvIndx map[string]utils.StringSet
+		if rcvIndx, err = dm.GetIndexes(utils.CacheFilterIndexes, tntCtx,
+			utils.EmptyString, true, true); err != nil {
+			if err != utils.ErrNotFound {
+				return
+			}
+			err = nil // no index for this filter so  no remove needed from index side
+		} else {
+			return fmt.Errorf("cannot remove filter <%s> because will broken the reference to following items: %s",
+				tntCtx, utils.ToJSON(rcvIndx))
+		}
+	}
 	if err = dm.DataDB().RemoveFilterDrv(tenant, id); err != nil {
 		return
 	}
 	if oldFlt == nil {
 		return utils.ErrNotFound
-	}
-	if withIndex {
-		// remove index?
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaFilters]; itm.Replicate {
 		var reply string
@@ -3166,7 +3180,7 @@ func (dm *DataManager) GetIndexes(idxItmType, tntCtx, idxKey string,
 			err = utils.CastRPCErr(err)
 			if err == utils.ErrNotFound {
 				if cacheWrite && idxKey != utils.EmptyString {
-					if errCh := Cache.Set(idxItmType, utils.ConcatenatedKey(tntCtx, idxKey), nil, nil,
+					if errCh := Cache.Set(idxItmType, utils.ConcatenatedKey(tntCtx, idxKey), nil, []string{tntCtx},
 						true, utils.NonTransactional); errCh != nil {
 						return nil, errCh
 					}

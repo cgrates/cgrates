@@ -119,7 +119,7 @@ func (m *Migrator) migrateV2ActionTriggers() (err error) {
 			if m.dryRun {
 				continue
 			}
-			if err := m.dmOut.DataManager().SetFilter(filter); err != nil {
+			if err := m.dmOut.DataManager().SetFilter(filter, true); err != nil {
 				return err
 			}
 			if err := m.dmOut.DataManager().SetThreshold(th); err != nil {
@@ -330,7 +330,7 @@ func (m *Migrator) SasThreshold(v2ATR *engine.ActionTrigger) (err error) {
 			return err
 		}
 		if filter != nil {
-			if err := m.dmOut.DataManager().SetFilter(filter); err != nil {
+			if err := m.dmOut.DataManager().SetFilter(filter, true); err != nil {
 				return err
 			}
 		}

@@ -227,7 +227,7 @@ func (m *Migrator) migrateStats() (err error) {
 		}
 		if !m.dryRun && migrated {
 			if vrs[utils.StatS] == 1 {
-				if err := m.dmOut.DataManager().SetFilter(filter); err != nil {
+				if err := m.dmOut.DataManager().SetFilter(filter, true); err != nil {
 					return err
 				}
 				if err := m.dmOut.DataManager().SetStatQueueProfile(sts, true); err != nil {
