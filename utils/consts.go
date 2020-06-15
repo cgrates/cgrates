@@ -1971,6 +1971,12 @@ const (
 	TransportCfg               = "transport"
 	StrategyCfg                = "strategy"
 	Dynaprepaid_actionplansCfg = "dynaprepaid_actionplans"
+
+	//RateSCfg
+	RateIndexedSelectsCfg      = "rate_indexed_selects"
+	RateNestedFieldsCfg        = "rate_nested_fields"
+	RateStringIndexedFieldsCfg = "rate_string_indexed_fields"
+	RatePrefixIndexedFieldsCfg = "rate_prefix_indexed_fields"
 )
 
 // FC Template
