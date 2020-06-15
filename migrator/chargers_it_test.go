@@ -206,7 +206,7 @@ func testChrgITMigrateAndMove(t *testing.T) {
 			t.Error(err)
 		}
 		currentVersion := engine.CurrentDataDBVersions()
-		err := chrgMigrator.dmOut.DataManager().DataDB().SetVersions(currentVersion, false)
+		err := chrgMigrator.dmIN.DataManager().DataDB().SetVersions(currentVersion, false)
 		if err != nil {
 			t.Error("Error when setting version for Chargers ", err.Error())
 		}

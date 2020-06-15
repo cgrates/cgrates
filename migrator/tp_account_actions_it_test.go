@@ -121,7 +121,7 @@ func testTpAccActITPopulate(t *testing.T) {
 		t.Error("Error when setting TpAccountActions ", err.Error())
 	}
 	currentVersion := engine.CurrentStorDBVersions()
-	err := tpAccActMigrator.storDBOut.StorDB().SetVersions(currentVersion, false)
+	err := tpAccActMigrator.storDBIn.StorDB().SetVersions(currentVersion, false)
 	if err != nil {
 		t.Error("Error when setting version for TpAccountActions ", err.Error())
 	}

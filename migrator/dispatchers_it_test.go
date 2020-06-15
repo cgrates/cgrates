@@ -202,7 +202,7 @@ func testDspITMigrateAndMove(t *testing.T) {
 		t.Error(err)
 	}
 	currentVersion := engine.CurrentDataDBVersions()
-	err := dspMigrator.dmOut.DataManager().DataDB().SetVersions(currentVersion, false)
+	err := dspMigrator.dmIN.DataManager().DataDB().SetVersions(currentVersion, false)
 	if err != nil {
 		t.Error("Error when setting version for Dispatchers ", err.Error())
 	}

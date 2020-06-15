@@ -355,7 +355,7 @@ func testTrsITMigrateAndMove(t *testing.T) {
 			t.Error("Error when setting Thresholds ", err.Error())
 		}
 		currentVersion := engine.CurrentDataDBVersions()
-		err := trsMigrator.dmOut.DataManager().DataDB().SetVersions(currentVersion, false)
+		err := trsMigrator.dmIN.DataManager().DataDB().SetVersions(currentVersion, false)
 		if err != nil {
 			t.Error("Error when setting version for Thresholds ", err.Error())
 		}

@@ -128,7 +128,7 @@ func testTpShrGrITPopulate(t *testing.T) {
 		t.Error("Error when setting TpSharedGroups ", err.Error())
 	}
 	currentVersion := engine.CurrentStorDBVersions()
-	err := tpShrGrMigrator.storDBOut.StorDB().SetVersions(currentVersion, false)
+	err := tpShrGrMigrator.storDBIn.StorDB().SetVersions(currentVersion, false)
 	if err != nil {
 		t.Error("Error when setting version for TpSharedGroups ", err.Error())
 	}

@@ -139,7 +139,7 @@ func testTpSplITPopulate(t *testing.T) {
 		t.Error("Error when setting TpSuppliers ", err.Error())
 	}
 	currentVersion := engine.CurrentStorDBVersions()
-	err := tpSplMigrator.storDBOut.StorDB().SetVersions(currentVersion, false)
+	err := tpSplMigrator.storDBIn.StorDB().SetVersions(currentVersion, false)
 	if err != nil {
 		t.Error("Error when setting version for TpSuppliers ", err.Error())
 	}

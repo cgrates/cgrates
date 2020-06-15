@@ -123,7 +123,7 @@ func testTpDstRtITPopulate(t *testing.T) {
 		t.Error("Error when setting TpDestinationRate ", err.Error())
 	}
 	currentVersion := engine.CurrentStorDBVersions()
-	err := tpDstRtMigrator.storDBOut.StorDB().SetVersions(currentVersion, false)
+	err := tpDstRtMigrator.storDBIn.StorDB().SetVersions(currentVersion, false)
 	if err != nil {
 		t.Error("Error when setting version for TpDestinationRate ", err.Error())
 	}

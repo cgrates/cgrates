@@ -164,7 +164,7 @@ func testTpActTrgITPopulate(t *testing.T) {
 		t.Error("Error when setting TpActionTriggers ", err.Error())
 	}
 	currentVersion := engine.CurrentStorDBVersions()
-	err := tpActTrgMigrator.storDBOut.StorDB().SetVersions(currentVersion, false)
+	err := tpActTrgMigrator.storDBIn.StorDB().SetVersions(currentVersion, false)
 	if err != nil {
 		t.Error("Error when setting version for TpActionTriggers ", err.Error())
 	}

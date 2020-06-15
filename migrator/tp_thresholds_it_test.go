@@ -129,7 +129,7 @@ func testTpTresITPopulate(t *testing.T) {
 		t.Error("Error when setting TpThresholds ", err.Error())
 	}
 	currentVersion := engine.CurrentStorDBVersions()
-	err := tpTresMigrator.storDBOut.StorDB().SetVersions(currentVersion, false)
+	err := tpTresMigrator.storDBIn.StorDB().SetVersions(currentVersion, false)
 	if err != nil {
 		t.Error("Error when setting version for TpThresholds ", err.Error())
 	}

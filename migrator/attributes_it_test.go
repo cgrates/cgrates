@@ -376,7 +376,7 @@ func testAttrITMigrateAndMove(t *testing.T) {
 			t.Error(err)
 		}
 		currentVersion := engine.CurrentDataDBVersions()
-		err := attrMigrator.dmOut.DataManager().DataDB().SetVersions(currentVersion, false)
+		err := attrMigrator.dmIN.DataManager().DataDB().SetVersions(currentVersion, false)
 		if err != nil {
 			t.Error("Error when setting version for Attributes ", err.Error())
 		}

@@ -199,7 +199,7 @@ func testSupITMigrateAndMove(t *testing.T) {
 			t.Error(err)
 		}
 		currentVersion := engine.CurrentDataDBVersions()
-		err := supMigrator.dmOut.DataManager().DataDB().SetVersions(currentVersion, false)
+		err := supMigrator.dmIN.DataManager().DataDB().SetVersions(currentVersion, false)
 		if err != nil {
 			t.Error("Error when setting version for Suppliers ", err.Error())
 		}

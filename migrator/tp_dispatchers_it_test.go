@@ -126,7 +126,7 @@ func testTpDispITPopulate(t *testing.T) {
 		t.Error("Error when setting TpDispatchers ", err.Error())
 	}
 	currentVersion := engine.CurrentStorDBVersions()
-	err := tpDispMigrator.storDBOut.StorDB().SetVersions(currentVersion, false)
+	err := tpDispMigrator.storDBIn.StorDB().SetVersions(currentVersion, false)
 	if err != nil {
 		t.Error("Error when setting version for TpDispatchers ", err.Error())
 	}

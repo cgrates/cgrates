@@ -97,7 +97,7 @@ func (m *Migrator) migrateCurrentTPDispatcherHosts() (err error) {
 func (m *Migrator) migrateTPDispatchers() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentStorDBVersions()
-	vrs, err = m.storDBOut.StorDB().GetVersions("")
+	vrs, err = m.storDBIn.StorDB().GetVersions("")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,

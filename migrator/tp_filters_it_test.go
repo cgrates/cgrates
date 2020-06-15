@@ -128,7 +128,7 @@ func testTpFltrITPopulate(t *testing.T) {
 		t.Error("Error when setting TpFilter ", err.Error())
 	}
 	currentVersion := engine.CurrentStorDBVersions()
-	err := tpFltrMigrator.storDBOut.StorDB().SetVersions(currentVersion, false)
+	err := tpFltrMigrator.storDBIn.StorDB().SetVersions(currentVersion, false)
 	if err != nil {
 		t.Error("Error when setting version for TpFilter ", err.Error())
 	}

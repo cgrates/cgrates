@@ -174,7 +174,7 @@ func (m *Migrator) migrateV2Stats(v2Stats *engine.StatQueue) (v3Stats *engine.St
 func (m *Migrator) migrateStats() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentDataDBVersions()
-	vrs, err = m.dmOut.DataManager().DataDB().GetVersions(utils.EmptyString)
+	vrs, err = m.dmIN.DataManager().DataDB().GetVersions(utils.EmptyString)
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps, err.Error(),

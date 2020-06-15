@@ -222,7 +222,7 @@ func testShrGrpITMigrateAndMove(t *testing.T) {
 			t.Error("Error when setting SharedGroup ", err.Error())
 		}
 		currentVersion := engine.CurrentDataDBVersions()
-		err := shrGrpMigrator.dmOut.DataManager().DataDB().SetVersions(currentVersion, false)
+		err := shrGrpMigrator.dmIN.DataManager().DataDB().SetVersions(currentVersion, false)
 		if err != nil {
 			t.Error("Error when setting version for SharedGroup ", err.Error())
 		}
