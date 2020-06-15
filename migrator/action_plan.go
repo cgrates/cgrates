@@ -117,13 +117,16 @@ func (m *Migrator) migrateActionPlans() (err error) {
 			switch version {
 			case current[utils.ActionPlans]:
 				if m.sameDataDB {
+					migrated = false
 					break
 				}
+				migrated = false
 				if err = m.migrateCurrentActionPlans(); err != nil && err != utils.ErrNoMoreData {
 					return err
 				} else if err == utils.ErrNoMoreData {
 					break
 				}
+				version = 3
 			case 1:
 				if v3, err = m.migrateV1ActionPlans(); err != nil && err != utils.ErrNoMoreData {
 					return err

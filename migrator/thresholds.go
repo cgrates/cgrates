@@ -185,7 +185,7 @@ func (m *Migrator) migrateV2Thresholds() (err error) {
 	if m.dryRun {
 		return
 	}
-	if err = m.removeV2Thresholds(); err != nil {
+	if err = m.removeV2Thresholds(); err != nil && err != utils.ErrNoMoreData {
 		return
 	}
 	// All done, update version wtih current one
@@ -202,7 +202,7 @@ func (m *Migrator) migrateV2Thresholds() (err error) {
 func (m *Migrator) migrateThresholds() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentDataDBVersions()
-	vrs, err = m.dmOut.DataManager().DataDB().GetVersions("")
+	vrs, err = m.dmIN.DataManager().DataDB().GetVersions("")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,

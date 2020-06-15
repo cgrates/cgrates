@@ -118,11 +118,11 @@ func testSessionCostITRename(t *testing.T) {
 	currentVersion := engine.Versions{
 		utils.SessionSCosts: 1,
 	}
-	err = sCostMigrator.storDBOut.StorDB().SetVersions(currentVersion, false)
+	err = sCostMigrator.storDBIn.StorDB().SetVersions(currentVersion, false)
 	if err != nil {
 		t.Error("Error when setting version for SessionsCosts ", err.Error())
 	}
-	if vrs, err := sCostMigrator.storDBOut.StorDB().GetVersions(""); err != nil {
+	if vrs, err := sCostMigrator.storDBIn.StorDB().GetVersions(""); err != nil {
 		t.Error(err)
 	} else if vrs[utils.SessionSCosts] != 1 {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.SessionSCosts])
@@ -187,11 +187,11 @@ func testSessionCostITMigrate(t *testing.T) {
 	currentVersion := engine.Versions{
 		utils.SessionSCosts: 2,
 	}
-	err = sCostMigrator.storDBOut.StorDB().SetVersions(currentVersion, false)
+	err = sCostMigrator.storDBIn.StorDB().SetVersions(currentVersion, false)
 	if err != nil {
 		t.Error("Error when setting version for SessionsCosts ", err.Error())
 	}
-	if vrs, err := sCostMigrator.storDBOut.StorDB().GetVersions(""); err != nil {
+	if vrs, err := sCostMigrator.storDBIn.StorDB().GetVersions(""); err != nil {
 		t.Error(err)
 	} else if vrs[utils.SessionSCosts] != 2 {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.SessionSCosts])

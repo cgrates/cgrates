@@ -190,7 +190,7 @@ func testResITMigrateAndMove(t *testing.T) {
 			t.Error(err)
 		}
 		currentVersion := engine.CurrentDataDBVersions()
-		err := resMigrator.dmOut.DataManager().DataDB().SetVersions(currentVersion, false)
+		err := resMigrator.dmIN.DataManager().DataDB().SetVersions(currentVersion, false)
 		if err != nil {
 			t.Error("Error when setting version for Resource ", err.Error())
 		}

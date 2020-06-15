@@ -128,7 +128,7 @@ func testTpRatPlnITPopulate(t *testing.T) {
 		t.Error("Error when setting TpRatingPlans ", err.Error())
 	}
 	currentVersion := engine.CurrentStorDBVersions()
-	err := tpRatPlnMigrator.storDBOut.StorDB().SetVersions(currentVersion, false)
+	err := tpRatPlnMigrator.storDBIn.StorDB().SetVersions(currentVersion, false)
 	if err != nil {
 		t.Error("Error when setting version for TpRatingPlans ", err.Error())
 	}

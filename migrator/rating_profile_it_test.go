@@ -191,7 +191,7 @@ func testRtPrfITMigrateAndMove(t *testing.T) {
 			t.Error(err)
 		}
 		currentVersion := engine.CurrentDataDBVersions()
-		err := rtprflMigrator.dmOut.DataManager().DataDB().SetVersions(currentVersion, false)
+		err := rtprflMigrator.dmIN.DataManager().DataDB().SetVersions(currentVersion, false)
 		if err != nil {
 			t.Error("Error when setting version for RatingProfile ", err.Error())
 		}

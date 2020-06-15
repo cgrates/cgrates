@@ -330,7 +330,7 @@ func testAccITMigrateAndMove(t *testing.T) {
 		}
 		//set versions for account
 		currentVersion := engine.CurrentDataDBVersions()
-		err := accMigrator.dmOut.DataManager().DataDB().SetVersions(currentVersion, false)
+		err := accMigrator.dmIN.DataManager().DataDB().SetVersions(currentVersion, false)
 		if err != nil {
 			t.Error("Error when setting version for Accounts ", err.Error())
 		}

@@ -162,11 +162,11 @@ func testCdrITMigrateAndMove(t *testing.T) {
 		utils.CostDetails: 2,
 		utils.CDRs:        1,
 	}
-	err = cdrMigrator.storDBOut.StorDB().SetVersions(currentVersion, false)
+	err = cdrMigrator.storDBIn.StorDB().SetVersions(currentVersion, false)
 	if err != nil {
 		t.Error("Error when setting version for CDRs ", err.Error())
 	}
-	if vrs, err := cdrMigrator.storDBOut.StorDB().GetVersions(""); err != nil {
+	if vrs, err := cdrMigrator.storDBIn.StorDB().GetVersions(""); err != nil {
 		t.Error(err)
 	} else if vrs[utils.CDRs] != 1 {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.CDRs])

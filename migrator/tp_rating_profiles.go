@@ -60,7 +60,7 @@ func (m *Migrator) migrateCurrentTPratingprofiles() (err error) {
 func (m *Migrator) migrateTPratingprofiles() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentStorDBVersions()
-	vrs, err = m.storDBOut.StorDB().GetVersions("")
+	vrs, err = m.storDBIn.StorDB().GetVersions("")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,

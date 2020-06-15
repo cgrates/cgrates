@@ -267,7 +267,7 @@ func testActITMigrateAndMove(t *testing.T) {
 			t.Error("Error when setting ActionPlan ", err.Error())
 		}
 		currentVersion := engine.CurrentDataDBVersions()
-		err := actMigrator.dmOut.DataManager().DataDB().SetVersions(currentVersion, false)
+		err := actMigrator.dmIN.DataManager().DataDB().SetVersions(currentVersion, false)
 		if err != nil {
 			t.Error("Error when setting version for Actions ", err.Error())
 		}

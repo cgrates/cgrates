@@ -212,7 +212,7 @@ func testActTrgITMigrateAndMove(t *testing.T) {
 			t.Error("Error when setting v1 ActionTriggers ", err.Error())
 		}
 		currentVersion := engine.Versions{utils.StatS: 2, utils.Thresholds: 2, utils.Accounts: 2, utils.Actions: 2, utils.ActionTriggers: 1, utils.ActionPlans: 2, utils.SharedGroups: 2}
-		err = actTrgMigrator.dmOut.DataManager().DataDB().SetVersions(currentVersion, false)
+		err = actTrgMigrator.dmIN.DataManager().DataDB().SetVersions(currentVersion, false)
 		if err != nil {
 			t.Error("Error when setting version for ActionTriggers ", err.Error())
 		}

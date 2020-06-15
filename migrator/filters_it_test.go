@@ -246,7 +246,7 @@ func testFltrITMigrateAndMove(t *testing.T) {
 			t.Error(err)
 		}
 		currentVersion := engine.CurrentDataDBVersions()
-		err := fltrMigrator.dmOut.DataManager().DataDB().SetVersions(currentVersion, false)
+		err := fltrMigrator.dmIN.DataManager().DataDB().SetVersions(currentVersion, false)
 		if err != nil {
 			t.Error("Error when setting version for Filters ", err.Error())
 		}

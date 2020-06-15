@@ -294,7 +294,7 @@ func testStsITMigrateAndMove(t *testing.T) {
 			t.Error("Error when setting Filter ", err.Error())
 		}
 		currentVersion := engine.CurrentDataDBVersions()
-		err := stsMigrator.dmOut.DataManager().DataDB().SetVersions(currentVersion, false)
+		err := stsMigrator.dmIN.DataManager().DataDB().SetVersions(currentVersion, false)
 		if err != nil {
 			t.Error("Error when setting version for stats ", err.Error())
 		}
@@ -372,7 +372,7 @@ func testStsITMigrateFromv1(t *testing.T) {
 		t.Error("Error when setting v1Stat ", err.Error())
 	}
 
-	if err := stsMigrator.dmOut.DataManager().DataDB().SetVersions(engine.Versions{utils.StatS: 1}, true); err != nil {
+	if err := stsMigrator.dmIN.DataManager().DataDB().SetVersions(engine.Versions{utils.StatS: 1}, true); err != nil {
 		t.Errorf("error: <%s> when updating Stats version into dataDB", err.Error())
 	}
 

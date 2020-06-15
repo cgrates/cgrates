@@ -193,7 +193,7 @@ func testRtPlITMigrateAndMove(t *testing.T) {
 			t.Error(err)
 		}
 		currentVersion := engine.CurrentDataDBVersions()
-		err := rtplMigrator.dmOut.DataManager().DataDB().SetVersions(currentVersion, false)
+		err := rtplMigrator.dmIN.DataManager().DataDB().SetVersions(currentVersion, false)
 		if err != nil {
 			t.Error("Error when setting version for RatingPlan ", err.Error())
 		}

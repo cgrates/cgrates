@@ -121,7 +121,7 @@ func testTpTimITPopulate(t *testing.T) {
 		t.Error("Error when setting TpTimings ", err.Error())
 	}
 	currentVersion := engine.CurrentStorDBVersions()
-	err := tpTimMigrator.storDBOut.StorDB().SetVersions(currentVersion, false)
+	err := tpTimMigrator.storDBIn.StorDB().SetVersions(currentVersion, false)
 	if err != nil {
 		t.Error("Error when setting version for TpTimings ", err.Error())
 	}

@@ -131,7 +131,7 @@ func testTpResITPopulate(t *testing.T) {
 		t.Error("Error when setting TpResources ", err.Error())
 	}
 	currentVersion := engine.CurrentStorDBVersions()
-	err := tpResMigrator.storDBOut.StorDB().SetVersions(currentVersion, false)
+	err := tpResMigrator.storDBIn.StorDB().SetVersions(currentVersion, false)
 	if err != nil {
 		t.Error("Error when setting version for TpResources ", err.Error())
 	}
