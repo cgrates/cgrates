@@ -64,6 +64,7 @@
 		"*dispatcher_profiles":{"remote":false,"replicate":true},
 		"*dispatcher_hosts":{"remote":false,"replicate":true},
 		"*filter_indexes" :{"remote":false,"replicate":true},
+		"*rate_profiles":{"remote":false,"replicate":true},
 		"*load_ids":{"remote":false,"replicate":true},
 	},
 },

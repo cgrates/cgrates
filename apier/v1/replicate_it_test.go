@@ -54,6 +54,7 @@ var (
 		testInternalReplicateITSetAccount,
 		testInternalReplicateITActionTrigger,
 		testInternalReplicateITThreshold,
+		testInternalReplicateITRateProfile,
 		testInternalReplicateITLoadIds,
 
 		testInternalReplicateITKillEngine,
@@ -1345,6 +1346,85 @@ func testInternalReplicateITThreshold(t *testing.T) {
 		t.Error(err)
 	}
 
+}
+
+func testInternalReplicateITRateProfile(t *testing.T) {
+	//set
+	rPrf := &RateProfileWithCache{
+		RateProfileWithArgDispatcher: &engine.RateProfileWithArgDispatcher{
+			RateProfile: &engine.RateProfile{
+				Tenant:           "cgrates.org",
+				ID:               "RP1",
+				FilterIDs:        []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002"},
+				Weight:           0,
+				ConnectFee:       0.1,
+				RoundingMethod:   "*up",
+				RoundingDecimals: 4,
+				MinCost:          0.1,
+				MaxCost:          0.6,
+				MaxCostStrategy:  "*free",
+				Rates: map[string]*engine.Rate{
+					"FIRST_GI": &engine.Rate{
+						ID:        "FIRST_GI",
+						FilterIDs: []string{"*gi:~*req.Usage:0"},
+						Weight:    0,
+						Value:     0.12,
+						Unit:      time.Duration(1 * time.Minute),
+						Increment: time.Duration(1 * time.Minute),
+						Blocker:   false,
+					},
+					"SECOND_GI": &engine.Rate{
+						ID:        "SECOND_GI",
+						FilterIDs: []string{"*gi:~*req.Usage:1m"},
+						Weight:    10,
+						Value:     0.06,
+						Unit:      time.Duration(1 * time.Minute),
+						Increment: time.Duration(1 * time.Second),
+						Blocker:   false,
+					},
+				},
+			},
+		},
+	}
+
+	var result string
+	if err := internalRPC.Call(utils.APIerSv1SetRateProfile, rPrf, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	// check
+	var reply *engine.RateProfile
+	if err := engineOneRPC.Call(utils.APIerSv1GetRateProfile,
+		utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: rPrf.Tenant, ID: rPrf.ID}}, &reply); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(rPrf.RateProfileWithArgDispatcher.RateProfile, reply) {
+		t.Errorf("Expecting : %+v, received: %+v", alsPrf.AttributeProfile, reply)
+	}
+	if err := engineTwoRPC.Call(utils.APIerSv1GetRateProfile,
+		utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: rPrf.Tenant, ID: rPrf.ID}}, &reply); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(rPrf.RateProfileWithArgDispatcher.RateProfile, reply) {
+		t.Errorf("Expecting : %+v, received: %+v", alsPrf.AttributeProfile, reply)
+	}
+	//remove
+	if err := internalRPC.Call(utils.APIerSv1RemoveRateProfile, &utils.TenantIDWithCache{
+		Tenant: rPrf.Tenant, ID: rPrf.ID}, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	//check again
+	if err := engineOneRPC.Call(utils.APIerSv1GetRateProfile,
+		utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: rPrf.Tenant, ID: rPrf.ID}}, &reply); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expecting: %+v recived: %+v", utils.ErrNotFound, err)
+	}
+	if err := engineTwoRPC.Call(utils.APIerSv1GetRateProfile,
+		utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: rPrf.Tenant, ID: rPrf.ID}}, &reply); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expecting: %+v recived: %+v", utils.ErrNotFound, err)
+	}
 }
 
 func testInternalReplicateITLoadIds(t *testing.T) {
