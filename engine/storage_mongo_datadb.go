@@ -2224,12 +2224,7 @@ func (ms *MongoStorage) GetIndexesDrv(idxItmType, tntCtx, idxKey string) (indexe
 			if len(elem.Value) == 0 {
 				continue
 			}
-			keys := strings.Split(elem.Key, ":")
-			indexKey := utils.ConcatenatedKey(keys[1], keys[2], keys[3])
-			//check here if key has context
-			if len(strings.Split(tntCtx, ":")) == 2 {
-				indexKey = utils.ConcatenatedKey(keys[2], keys[3], keys[4])
-			}
+			indexKey := strings.TrimPrefix(elem.Key, utils.CacheInstanceToPrefix[idxItmType]+tntCtx+utils.CONCATENATED_KEY_SEP)
 			indexes[indexKey] = utils.NewStringSet(elem.Value)
 		}
 		return cur.Close(sctx)

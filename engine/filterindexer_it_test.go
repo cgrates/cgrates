@@ -50,6 +50,8 @@ var sTests = []func(t *testing.T){
 	testITFlush,
 	testITIsDBEmpty,
 	testITTestStoreFilterIndexesWithTransID,
+	testITFlush,
+	testITIsDBEmpty,
 	testITTestStoreFilterIndexesWithTransID2,
 	testITFlush,
 	testITIsDBEmpty,
@@ -387,6 +389,51 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 	} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
 		t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
 	}
+
+	//replace old filter with two different filters
+	fp3 = &Filter{
+		Tenant: "cgrates.org",
+		ID:     "Filter3",
+		Rules: []*FilterRule{
+			{
+				Element: "Destination",
+				Type:    utils.MetaString,
+				Values:  []string{"30", "50"},
+			},
+		},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		},
+	}
+	if err := dataManager.SetFilter(fp3, true); err != nil {
+		t.Error(err)
+	}
+
+	eIdxes = map[string]utils.StringSet{
+		"*string:Destination:30": {
+			"THD_Test": struct{}{},
+		},
+		"*string:Destination:50": {
+			"THD_Test": struct{}{},
+		},
+		"*string:EventType:Event1": {
+			"THD_Test":  struct{}{},
+			"THD_Test2": struct{}{},
+		},
+		"*string:EventType:Event2": {
+			"THD_Test":  struct{}{},
+			"THD_Test2": struct{}{},
+		},
+	}
+	if rcvIdx, err := dataManager.GetIndexes(
+		utils.CacheThresholdFilterIndexes, th.Tenant,
+		utils.EmptyString, false, false); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
+		t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
+	}
+
 	//remove thresholds
 	if err := dataManager.RemoveThresholdProfile(th.Tenant,
 		th.ID, utils.NonTransactional, true); err != nil {
@@ -483,6 +530,57 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 			utils.EmptyString, false, false); err != nil && err != utils.ErrNotFound {
 			t.Error(err)
 		}
+	}
+
+	fp = &Filter{
+		Tenant: "cgrates.org",
+		ID:     "AttrFilter",
+		Rules: []*FilterRule{
+			{
+				Element: "EventType",
+				Type:    utils.MetaString,
+				Values:  []string{"Event3", "Event4"},
+			},
+		},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		},
+	}
+	if err := dataManager.SetFilter(fp, true); err != nil {
+		t.Error(err)
+	}
+	eIdxes = map[string]utils.StringSet{
+		"*string:EventType:Event3": {
+			"AttrPrf": struct{}{},
+		},
+		"*string:EventType:Event4": {
+			"AttrPrf": struct{}{},
+		},
+	}
+	for _, ctx := range attrProfile.Contexts {
+		if rcvIdx, err := dataManager.GetIndexes(
+			utils.CacheAttributeFilterIndexes,
+			utils.ConcatenatedKey(attrProfile.Tenant, ctx),
+			utils.EmptyString, false, false); err != nil {
+			t.Error(err)
+		} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
+			t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
+		}
+	}
+
+	eIdxes = map[string]utils.StringSet{
+		"*attribute_filter_indexes": {
+			"AttrPrf": struct{}{},
+		},
+	}
+	if rcvIdx, err := dataManager.GetIndexes(
+		utils.CacheFilterIndexes,
+		fp.TenantID(),
+		utils.EmptyString, false, false); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
+		t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
 	}
 
 	if err := dataManager.RemoveAttributeProfile(attrProfile.Tenant,
@@ -665,7 +763,7 @@ func testITTestStoreFilterIndexesWithTransID2(t *testing.T) {
 	}
 	//commit transaction
 	if err := dataManager.SetIndexes(utils.CacheResourceFilterIndexes,
-		"cgrates.org", idxes, true, transID); err != nil {
+		"cgrates.org", nil, true, transID); err != nil {
 		t.Error(err)
 	}
 	//verify if old key was deleted
@@ -681,7 +779,7 @@ func testITTestStoreFilterIndexesWithTransID2(t *testing.T) {
 		"cgrates.org", utils.EmptyString, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(idxes, rcv) {
-		t.Errorf("Expecting: %+v, received: %+v", idxes, rcv)
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(idxes), utils.ToJSON(rcv))
 	}
 }
 

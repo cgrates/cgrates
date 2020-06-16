@@ -133,7 +133,7 @@ func testFltrITFlush(t *testing.T) {
 }
 
 func testFltrITMigrateAndMove(t *testing.T) {
-	Filters := &v1Filter{
+	fltr := &v1Filter{
 		Tenant: "cgrates.org",
 		ID:     "FLTR_2",
 		Rules: []*v1FilterRule{{
@@ -186,10 +186,10 @@ func testFltrITMigrateAndMove(t *testing.T) {
 	attrProf.Compile()
 	switch fltrAction {
 	case utils.Migrate:
-		if err := fltrMigrator.dmIN.setV1Filter(Filters); err != nil {
+		if err := fltrMigrator.dmIN.setV1Filter(fltr); err != nil {
 			t.Error("Error when setting v1 Filters ", err.Error())
 		}
-		if err := fltrMigrator.dmIN.DataManager().SetAttributeProfile(attrProf, false); err != nil {
+		if err := fltrMigrator.dmIN.DataManager().SetAttributeProfile(attrProf, true); err != nil {
 			t.Error("Error when setting attribute profile for v1 Filters ", err.Error())
 		}
 		currentVersion := engine.Versions{utils.RQF: 1}
@@ -215,7 +215,7 @@ func testFltrITMigrateAndMove(t *testing.T) {
 			t.Errorf("Unexpected version returned: %d", vrs[utils.RQF])
 		}
 		//check if Filters was migrate correctly
-		result, err := fltrMigrator.dmOut.DataManager().GetFilter(Filters.Tenant, Filters.ID, false, false, utils.NonTransactional)
+		result, err := fltrMigrator.dmOut.DataManager().GetFilter(fltr.Tenant, fltr.ID, false, false, utils.NonTransactional)
 		if err != nil {
 			t.Fatalf("Error when getting Attributes %v", err.Error())
 		}
@@ -358,7 +358,7 @@ func testFltrITMigratev2(t *testing.T) {
 	if err := fltrMigrator.dmIN.setV1Filter(filters); err != nil {
 		t.Error("Error when setting v1 Filters ", err.Error())
 	}
-	if err := fltrMigrator.dmIN.DataManager().SetAttributeProfile(attrProf, false); err != nil {
+	if err := fltrMigrator.dmIN.DataManager().SetAttributeProfile(attrProf, true); err != nil {
 		t.Error("Error when setting attribute profile for v1 Filters ", err.Error())
 	}
 	currentVersion := engine.Versions{utils.RQF: 2}
@@ -424,17 +424,17 @@ func testFltrITMigratev3(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "FLTR_2",
 		Rules: []*v1FilterRule{
-			&v1FilterRule{
+			{
 				Type:      utils.MetaString,
 				FieldName: "~*req.Account",
 				Values:    []string{"1001"},
 			},
-			&v1FilterRule{
+			{
 				Type:      utils.MetaString,
 				FieldName: "~*req.Subject",
 				Values:    []string{"1001"},
 			},
-			&v1FilterRule{
+			{
 				Type:      utils.MetaRSR,
 				FieldName: utils.EmptyString,
 				Values:    []string{"~*req.Tenant(~^cgr.*\\.org$)"},
@@ -445,17 +445,17 @@ func testFltrITMigratev3(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "FLTR_2",
 		Rules: []*engine.FilterRule{
-			&engine.FilterRule{
+			{
 				Type:    utils.MetaString,
 				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
 				Values:  []string{"1001"},
 			},
-			&engine.FilterRule{
+			{
 				Type:    utils.MetaString,
 				Element: "~*req.Subject",
 				Values:  []string{"1001"},
 			},
-			&engine.FilterRule{
+			{
 				Type:    utils.MetaRSR,
 				Element: utils.EmptyString,
 				Values:  []string{"~*req.Tenant(~^cgr.*\\.org$)"},

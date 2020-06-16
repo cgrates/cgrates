@@ -407,7 +407,7 @@ func addIndexFiltersItem(dm *DataManager, idxItmType, tnt, itemID string, filter
 		}
 		indexes[idxItmType].Add(itemID)
 
-		if err = dm.SetIndexes(idxItmType, tntCtx, indexes, true, utils.NonTransactional); err != nil {
+		if err = dm.SetIndexes(utils.CacheFilterIndexes, tntCtx, indexes, true, utils.NonTransactional); err != nil {
 			return
 		}
 		for indxKey := range indexes {
@@ -437,7 +437,7 @@ func removeIndexFiltersItem(dm *DataManager, idxItmType, tnt, itemID string, fil
 		}
 		indexes[idxItmType].Remove(itemID)
 
-		if err = dm.SetIndexes(idxItmType, tntCtx, indexes, true, utils.NonTransactional); err != nil {
+		if err = dm.SetIndexes(utils.CacheFilterIndexes, tntCtx, indexes, true, utils.NonTransactional); err != nil {
 			return
 		}
 		for indxKey := range indexes {
@@ -626,7 +626,7 @@ func updateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 					for _, idx := range updIdx {
 						idx.Add(itemID)
 					}
-					if err = dm.SetIndexes(idxItmType, newFlt.TenantID(),
+					if err = dm.SetIndexes(idxItmType, utils.ConcatenatedKey(newFlt.Tenant, ctx),
 						updIdx, false, utils.NonTransactional); err != nil {
 						return
 					}
@@ -653,7 +653,7 @@ func updateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 					for _, idx := range updIdx {
 						idx.Add(itemID)
 					}
-					if err = dm.SetIndexes(idxItmType, newFlt.TenantID(),
+					if err = dm.SetIndexes(idxItmType, utils.ConcatenatedKey(newFlt.Tenant, ctx),
 						updIdx, false, utils.NonTransactional); err != nil {
 						return
 					}
