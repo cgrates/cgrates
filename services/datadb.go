@@ -132,7 +132,7 @@ func (db *DataDBService) mandatoryDB() bool {
 	return db.cfg.RalsCfg().Enabled || db.cfg.SchedulerCfg().Enabled || db.cfg.ChargerSCfg().Enabled ||
 		db.cfg.AttributeSCfg().Enabled || db.cfg.ResourceSCfg().Enabled || db.cfg.StatSCfg().Enabled ||
 		db.cfg.ThresholdSCfg().Enabled || db.cfg.RouteSCfg().Enabled || db.cfg.DispatcherSCfg().Enabled ||
-		db.cfg.LoaderCfg().Enabled() || db.cfg.ApierCfg().Enabled
+		db.cfg.LoaderCfg().Enabled() || db.cfg.ApierCfg().Enabled || db.cfg.RateSCfg().Enabled
 }
 
 // GetDM returns the DataManager
