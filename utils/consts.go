@@ -70,7 +70,8 @@ var (
 		CacheAttributeFilterIndexes, CacheChargerFilterIndexes, CacheDispatcherFilterIndexes,
 		CacheDispatcherRoutes, CacheDispatcherLoads, CacheDiameterMessages, CacheRPCResponses,
 		CacheClosedSessions, CacheCDRIDs, CacheLoadIDs, CacheRPCConnections, CacheRatingProfilesTmp,
-		CacheUCH, CacheSTIR, CacheEventCharges, CacheRateProfiles, CacheRateProfilesFilterIndexes})
+		CacheUCH, CacheSTIR, CacheEventCharges, CacheRateProfiles, CacheRateProfilesFilterIndexes,
+		CacheRateFilterIndexes})
 	CacheInstanceToPrefix = map[string]string{
 		CacheDestinations:              DESTINATION_PREFIX,
 		CacheReverseDestinations:       REVERSE_DESTINATION_PREFIX,
@@ -117,6 +118,7 @@ var (
 		ChargerProfilePrefix:    CacheChargerFilterIndexes,
 		DispatcherProfilePrefix: CacheDispatcherFilterIndexes,
 		RateProfilePrefix:       CacheRateProfilesFilterIndexes,
+		RatePrefix:              CacheRateFilterIndexes,
 	}
 	CacheIndexesToPrefix map[string]string // will be built on init
 
@@ -134,7 +136,7 @@ var (
 		CacheDispatcherProfiles, CacheDispatcherHosts, CacheResourceFilterIndexes, CacheStatFilterIndexes,
 		CacheThresholdFilterIndexes, CacheRouteFilterIndexes, CacheAttributeFilterIndexes,
 		CacheChargerFilterIndexes, CacheDispatcherFilterIndexes, CacheLoadIDs, CacheAccounts,
-		CacheRateProfiles, CacheRateProfilesFilterIndexes})
+		CacheRateProfiles, CacheRateProfilesFilterIndexes, CacheRateFilterIndexes})
 
 	CacheStorDBPartitions = NewStringSet([]string{TBLTPTimings, TBLTPDestinations, TBLTPRates,
 		TBLTPDestinationRates, TBLTPRatingPlans, TBLTPRatingProfiles, TBLTPSharedGroups,
@@ -272,7 +274,7 @@ const (
 	VERSION_PREFIX               = "ver_"
 	StatQueueProfilePrefix       = "sqp_"
 	RouteProfilePrefix           = "rpp_"
-	RateProfilePrfx              = "rtp_"
+	RatePrefix                   = "rep_"
 	AttributeProfilePrefix       = "alp_"
 	ChargerProfilePrefix         = "cpp_"
 	DispatcherProfilePrefix      = "dpp_"

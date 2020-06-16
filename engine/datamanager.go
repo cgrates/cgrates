@@ -86,6 +86,7 @@ var (
 		utils.ChargerFilterIndexes:        true,
 		utils.DispatcherFilterIndexes:     true,
 		utils.RateProfilesFilterIndexPrfx: true,
+		utils.RateFilterIndexPrfx:         true,
 	}
 )
 
@@ -318,6 +319,8 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 			err = dm.MatchFilterIndexFromKey(utils.CacheDispatcherFilterIndexes, dataID)
 		case utils.RateProfilesFilterIndexPrfx:
 			err = dm.MatchFilterIndexFromKey(utils.CacheRateProfilesFilterIndexes, dataID)
+		case utils.RateFilterIndexPrfx:
+			err = dm.MatchFilterIndexFromKey(utils.CacheRateFilterIndexes, dataID)
 		case utils.LoadIDPrefix:
 			_, err = dm.GetItemLoadIDs(utils.EmptyString, true)
 		}
@@ -3181,6 +3184,31 @@ func (dm *DataManager) SetRateProfile(rpp *RateProfile, withIndex bool) (err err
 		if err = createAndIndex(utils.RateProfilePrefix, rpp.Tenant, utils.EmptyString,
 			rpp.ID, rpp.FilterIDs, dm); err != nil {
 			return
+		}
+		// create index for each rate
+		for key, rate := range rpp.Rates {
+			if oldRpp != nil {
+				if oldRate, has := oldRpp.Rates[key]; has {
+					var needsRemove bool
+					for _, fltrID := range oldRate.FilterIDs {
+						if !utils.IsSliceMember(rate.FilterIDs, fltrID) {
+							needsRemove = true
+						}
+					}
+
+					if needsRemove {
+						if err = NewFilterIndexer(dm, utils.RatePrefix,
+							rpp.Tenant).RemoveItemFromIndex(rpp.Tenant, utils.ConcatenatedKey(rpp.ID, key), oldRate.FilterIDs); err != nil {
+							return
+						}
+					}
+				}
+			}
+			// when we create the indexes for rates we use RateProfile ID as context
+			if err = createAndIndex(utils.RatePrefix, rpp.Tenant, rpp.ID,
+				key, rate.FilterIDs, dm); err != nil {
+				return
+			}
 		}
 
 	}

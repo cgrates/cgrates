@@ -61,6 +61,7 @@ var sTests = []func(t *testing.T){
 	testITFlush,
 	testITIsDBEmpty,
 	testITTestIndexingMetaNot,
+	testITIndexRateProfile,
 }
 
 func TestFilterIndexerIT(t *testing.T) {
@@ -944,5 +945,167 @@ func testITTestIndexingMetaNot(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eMp, rcvMp) {
 		t.Errorf("Expecting: %+v, received: %+v", eMp, rcvMp)
+	}
+}
+
+func testITIndexRateProfile(t *testing.T) {
+	rfi := NewFilterIndexer(onStor, utils.RatePrefix, "cgrates.org:RP1")
+	rPrf := &RateProfile{
+		Tenant:           "cgrates.org",
+		ID:               "RP1",
+		FilterIDs:        []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002"},
+		Weight:           0,
+		ConnectFee:       0.1,
+		RoundingMethod:   "*up",
+		RoundingDecimals: 4,
+		MinCost:          0.1,
+		MaxCost:          0.6,
+		MaxCostStrategy:  "*free",
+		Rates: map[string]*Rate{
+			"FIRST_GI": &Rate{
+				ID:        "FIRST_GI",
+				FilterIDs: []string{"*string:~*req.Category:call"},
+				Weight:    0,
+				Value:     0.12,
+				Unit:      time.Duration(1 * time.Minute),
+				Increment: time.Duration(1 * time.Minute),
+				Blocker:   false,
+			},
+			"SECOND_GI": &Rate{
+				ID:        "SECOND_GI",
+				FilterIDs: []string{"*string:~*req.Category:voice"},
+				Weight:    10,
+				Value:     0.06,
+				Unit:      time.Duration(1 * time.Minute),
+				Increment: time.Duration(1 * time.Second),
+				Blocker:   false,
+			},
+		},
+	}
+	if err := dataManager.SetRateProfile(rPrf, true); err != nil {
+		t.Error(err)
+	}
+	eIdxes := map[string]utils.StringMap{
+		"*string:~*req.Category:call": {
+			"FIRST_GI": true,
+		},
+		"*string:~*req.Category:voice": {
+			"SECOND_GI": true,
+		},
+	}
+	if rcvIdx, err := dataManager.GetFilterIndexes(
+		utils.PrefixToIndexCache[rfi.itemType], rfi.dbKeySuffix,
+		utils.EmptyString, nil); err != nil {
+		t.Error(err)
+	} else {
+		if !reflect.DeepEqual(eIdxes, rcvIdx) {
+			t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
+		}
+	}
+	// update the RateProfile by adding a new Rate
+	rPrf.Rates = map[string]*Rate{
+		"FIRST_GI": &Rate{
+			ID:        "FIRST_GI",
+			FilterIDs: []string{"*string:~*req.Category:call"},
+			Weight:    0,
+			Value:     0.12,
+			Unit:      time.Duration(1 * time.Minute),
+			Increment: time.Duration(1 * time.Minute),
+			Blocker:   false,
+		},
+		"SECOND_GI": &Rate{
+			ID:        "SECOND_GI",
+			FilterIDs: []string{"*string:~*req.Category:voice"},
+			Weight:    10,
+			Value:     0.06,
+			Unit:      time.Duration(1 * time.Minute),
+			Increment: time.Duration(1 * time.Second),
+			Blocker:   false,
+		},
+		"THIRD_GI": &Rate{
+			ID:        "THIRD_GI",
+			FilterIDs: []string{"*string:~*req.Category:custom"},
+			Weight:    20,
+			Value:     0.06,
+			Unit:      time.Duration(1 * time.Minute),
+			Increment: time.Duration(1 * time.Second),
+			Blocker:   false,
+		},
+	}
+	if err := dataManager.SetRateProfile(rPrf, true); err != nil {
+		t.Error(err)
+	}
+	eIdxes = map[string]utils.StringMap{
+		"*string:~*req.Category:call": {
+			"FIRST_GI": true,
+		},
+		"*string:~*req.Category:voice": {
+			"SECOND_GI": true,
+		},
+		"*string:~*req.Category:custom": {
+			"THIRD_GI": true,
+		},
+	}
+	if rcvIdx, err := dataManager.GetFilterIndexes(
+		utils.PrefixToIndexCache[rfi.itemType], rfi.dbKeySuffix,
+		utils.EmptyString, nil); err != nil {
+		t.Error(err)
+	} else {
+		if !reflect.DeepEqual(eIdxes, rcvIdx) {
+			t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
+		}
+	}
+	rfi2 := NewFilterIndexer(onStor, utils.RatePrefix, "cgrates.org:RP2")
+	rPrf2 := &RateProfile{
+		Tenant:           "cgrates.org",
+		ID:               "RP2",
+		Weight:           0,
+		ConnectFee:       0.1,
+		RoundingMethod:   "*up",
+		RoundingDecimals: 4,
+		MinCost:          0.1,
+		MaxCost:          0.6,
+		MaxCostStrategy:  "*free",
+		Rates: map[string]*Rate{
+			"CUSTOM_RATE1": &Rate{
+				ID:        "CUSTOM_RATE1",
+				FilterIDs: []string{"*string:~*req.Subject:1001"},
+				Weight:    0,
+				Value:     0.12,
+				Unit:      time.Duration(1 * time.Minute),
+				Increment: time.Duration(1 * time.Minute),
+				Blocker:   false,
+			},
+			"CUSTOM_RATE2": &Rate{
+				ID:        "CUSTOM_RATE2",
+				FilterIDs: []string{"*string:~*req.Subject:1001", "*string:~*req.Category:call"},
+				Weight:    10,
+				Value:     0.6,
+				Unit:      time.Duration(1 * time.Minute),
+				Increment: time.Duration(1 * time.Second),
+				Blocker:   false,
+			},
+		},
+	}
+	if err := dataManager.SetRateProfile(rPrf2, true); err != nil {
+		t.Error(err)
+	}
+	eIdxes = map[string]utils.StringMap{
+		"*string:~*req.Subject:1001": {
+			"CUSTOM_RATE1": true,
+			"CUSTOM_RATE2": true,
+		},
+		"*string:~*req.Category:call": {
+			"CUSTOM_RATE2": true,
+		},
+	}
+	if rcvIdx, err := dataManager.GetFilterIndexes(
+		utils.PrefixToIndexCache[rfi2.itemType], rfi2.dbKeySuffix,
+		utils.EmptyString, nil); err != nil {
+		t.Error(err)
+	} else {
+		if !reflect.DeepEqual(eIdxes, rcvIdx) {
+			t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
+		}
 	}
 }

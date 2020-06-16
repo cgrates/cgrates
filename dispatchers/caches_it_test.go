@@ -186,6 +186,7 @@ func testDspChcPrecacheStatus(t *testing.T) {
 		utils.CacheChargerFilterIndexes:      utils.MetaReady,
 		utils.CacheDispatcherFilterIndexes:   utils.MetaReady,
 		utils.CacheRateProfilesFilterIndexes: utils.MetaReady,
+		utils.CacheRateFilterIndexes:         utils.MetaReady,
 		utils.CacheRateProfiles:              utils.MetaReady,
 		utils.CacheLoadIDs:                   utils.MetaReady,
 		utils.CacheCDRIDs:                    utils.MetaReady,
