@@ -76,8 +76,9 @@
 // 		"*charger_profiles": {"remote":false, "replicate":false, "limit": -1, "ttl": "", "static_ttl": false}, 
 // 		"*dispatcher_profiles":{"remote":false, "replicate":false, "limit": -1, "ttl": "", "static_ttl": false}, 
 // 		"*dispatcher_hosts":{"remote":false, "replicate":false, "limit": -1, "ttl": "", "static_ttl": false}, 
-// 		"*filter_indexes" :{"remote":false, "replicate":false, "limit": -1, "ttl": "", "static_ttl": false}, 
+// 		"*rate_profiles":{"remote":false, "replicate":false, "limit": -1, "ttl": "", "static_ttl": false},
 // 		"*load_ids":{"remote":false, "replicate":false, "limit": -1, "ttl": "", "static_ttl": false}, 
+// 		"*indexes":{"remote":false, "replicate":false, "limit": -1, "ttl": "", "static_ttl": false}, 
 // 	},
 // },
 
@@ -120,6 +121,7 @@
 // 		"versions": {"limit": -1, "ttl": "", "static_ttl": false}, 
 // 		"tp_dispatcher_profiles":{"limit": -1, "ttl": "", "static_ttl": false}, 
 // 		"tp_dispatcher_hosts":{"limit": -1, "ttl": "", "static_ttl": false}, 
+// 		"tp_rate_profiles":{"limit": -1, "ttl": "", "static_ttl": false}, 
 // 	},
 // },
 
@@ -187,6 +189,7 @@
 // 		"*charger_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// control charger profile caching
 // 		"*dispatcher_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},	// control dispatcher profile caching
 // 		"*dispatcher_hosts": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// control dispatcher hosts caching
+// 		"*rate_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},			// control rate profile caching
 // 		"*resource_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 				// control resource filter indexes caching
 // 		"*stat_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 					// control stat filter indexes caching
 // 		"*threshold_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 				// control threshold filter indexes caching
@@ -194,6 +197,9 @@
 // 		"*attribute_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 				// control attribute filter indexes caching
 // 		"*charger_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 					// control charger filter indexes caching
 // 		"*dispatcher_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 				// control dispatcher filter indexes caching
+// 		"*rate_profile_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 			// control rate profile filter indexes caching
+// 		"*rate_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 					// control rate filter indexes caching
+// 		"*reverse_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 					// control reverse filter indexes caching used only for set and remove filters 
 // 		"*dispatcher_routes": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 						// control dispatcher routes caching
 // 		"*dispatcher_loads": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},							// control dispatcher load ( in case of *load strategy )
 // 		"*dispatchers": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 								// control dispatcher interface
@@ -253,6 +259,7 @@
 // 	"stats_conns": [],						// connections to StatS for CDR reporting, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
 // 	"online_cdr_exports":[],				// list of CDRE profiles to use for real-time CDR exports
 // 	"scheduler_conns": [],					// connections to SchedulerS in case of *dynaprepaid request
+// 	"ees_conns": [],						// connections to EventExporter
 // },
 
 
@@ -774,6 +781,30 @@
 // 					{"tag": "TLS", "path": "TLS", "type": "*variable", "value": "~4"},
 // 				],
 // 			},
+// 			{
+// 				"type": "*rate_profiles",						// data source type
+// 				"file_name": "RateProfiles.csv",				// file name in the tp_in_dir
+// 				"fields": [
+// 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~0", "mandatory": true},
+// 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~1", "mandatory": true},
+// 					{"tag": "FilterIDs", "path": "FilterIDs", "type": "*variable", "value": "~2"},
+// 					{"tag": "ActivationInterval", "path": "ActivationInterval", "type": "*variable", "value": "~3"},
+// 					{"tag": "Weight", "path": "Weight", "type": "*variable", "value": "~4"},
+// 					{"tag": "ConnectFee", "path": "ConnectFee", "type": "*variable", "value": "~5"},
+// 					{"tag": "RoundingMethod", "path": "RoundingMethod", "type": "*variable", "value": "~6"},
+// 					{"tag": "RoundingDecimals", "path": "RoundingDecimals", "type": "*variable", "value": "~7"},
+// 					{"tag": "MinCost", "path": "MinCost", "type": "*variable", "value": "~8"},
+// 					{"tag": "MaxCost", "path": "MaxCost", "type": "*variable", "value": "~9"},
+// 					{"tag": "MaxCostStrategy", "path": "MaxCostStrategy", "type": "*variable", "value": "~10"},
+// 					{"tag": "RateID", "path": "RateID", "type": "*variable", "value": "~11"},
+// 					{"tag": "RateFilterIDs", "path": "RateFilterIDs", "type": "*variable", "value": "~12"},
+// 					{"tag": "RateWeight", "path": "RateWeight", "type": "*variable", "value": "~13"},
+// 					{"tag": "RateValue", "path": "RateValue", "type": "*variable", "value": "~14"},
+// 					{"tag": "RateUnit", "path": "RateUnit", "type": "*variable", "value": "~15"},
+// 					{"tag": "RateIncrement", "path": "RateIncrement", "type": "*variable", "value": "~16"},
+// 					{"tag": "RateBlocker", "path": "RateBlocker", "type": "*variable", "value": "~17"},
+// 				],
+// 			},
 // 		],
 // 	},
 // ],
@@ -872,6 +903,14 @@
 
 // "rates": {
 // 	"enabled": false,
+// 	"indexed_selects": true,				// enable profile matching exclusively on indexes
+// 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
+// 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
+// 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
+// 	"rate_indexed_selects": true,			// enable profile matching exclusively on indexes
+// 	//"rate_string_indexed_fields": [],		// query indexes based on these fields for faster processing
+// 	"rate_prefix_indexed_fields": [],		// query indexes based on these fields for faster processing
+// 	"rate_nested_fields": false,			// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 // },
 
 // "sip_agent": {							// SIP Agents, only used for redirections

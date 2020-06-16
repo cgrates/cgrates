@@ -49,7 +49,6 @@
       "*charger_profiles": {"remote":true},
       "*dispatcher_profiles":{"remote":true},
       "*dispatcher_hosts":{"remote":true},
-      "*filter_indexes" :{"remote":true},
       "*load_ids":{"remote":true},
       "*indexes":{"remote":true}
     }

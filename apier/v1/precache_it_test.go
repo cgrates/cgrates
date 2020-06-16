@@ -268,14 +268,15 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 			Items:  7,
 			Groups: 0,
 		},
-		utils.CacheTimings:           {},
-		utils.CacheDiameterMessages:  {},
-		utils.CacheClosedSessions:    {},
-		utils.CacheLoadIDs:           {},
-		utils.CacheRPCConnections:    {},
-		utils.CacheCDRIDs:            {},
-		utils.CacheRatingProfilesTmp: {},
-		utils.CacheUCH:               {},
+		utils.CacheTimings:              {},
+		utils.CacheDiameterMessages:     {},
+		utils.CacheClosedSessions:       {},
+		utils.CacheLoadIDs:              {},
+		utils.CacheRPCConnections:       {},
+		utils.CacheCDRIDs:               {},
+		utils.CacheRatingProfilesTmp:    {},
+		utils.CacheUCH:                  {},
+		utils.CacheReverseFilterIndexes: {},
 	}
 	if err := precacheRPC.Call(utils.CacheSv1GetCacheStats, args, &reply); err != nil {
 		t.Error(err.Error())

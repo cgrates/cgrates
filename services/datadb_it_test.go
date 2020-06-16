@@ -197,11 +197,6 @@ func TestDataDBReload(t *testing.T) {
 				Remote:    false,
 				TTL:       time.Duration(0),
 				Limit:     -1},
-			utils.MetaFilterIndexes: {
-				Replicate: false,
-				Remote:    false,
-				TTL:       time.Duration(0),
-				Limit:     -1},
 			utils.MetaLoadIDs: {
 				Replicate: false,
 				Remote:    false,

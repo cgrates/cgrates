@@ -249,15 +249,15 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 		DataDbSentinelName: "sentinel",
 		RmtConns:           []string{"Conn1"},
 		Items: map[string]*ItemOpt{
-			utils.MetaAccounts: &ItemOpt{
+			utils.MetaAccounts: {
 				Replicate: true,
 				TTL:       6,
 				Limit:     5,
 			},
-			utils.MetaReverseDestinations: &ItemOpt{
+			utils.MetaReverseDestinations: {
 				Replicate: false,
 			},
-			utils.MetaDestinations: &ItemOpt{
+			utils.MetaDestinations: {
 				Replicate: false,
 			},
 		},
@@ -285,7 +285,7 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 			"remote_conns":["Conn1"],
 			"items":{
 				"*dispatcher_hosts":{"remote":true, "replicate":true, "limit": -1, "ttl": "", "static_ttl": true}, 
-				"*filter_indexes" :{"remote":true, "replicate":true, "limit": -1, "ttl": "", "static_ttl": true}, 
+				"*indexes" :{"remote":true, "replicate":true, "limit": -1, "ttl": "", "static_ttl": true}, 
 				"*load_ids":{"remote":true, "replicate":true, "limit": -1, "ttl": "", "static_ttl": true}, 
 			
 			  }	
@@ -302,19 +302,19 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 		DataDbSentinelName: "sentinel",
 		RmtConns:           []string{"Conn1"},
 		Items: map[string]*ItemOpt{
-			utils.MetaDispatcherHosts: &ItemOpt{
+			utils.MetaDispatcherHosts: {
 				Remote:    true,
 				Replicate: true,
 				Limit:     -1,
 				StaticTTL: true,
 			},
-			utils.MetaFilterIndexes: &ItemOpt{
+			utils.MetaIndexes: {
 				Remote:    true,
 				Replicate: true,
 				Limit:     -1,
 				StaticTTL: true,
 			},
-			utils.MetaLoadIDs: &ItemOpt{
+			utils.MetaLoadIDs: {
 				Remote:    true,
 				Replicate: true,
 				Limit:     -1,
@@ -362,22 +362,22 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 		DataDbSentinelName: "sentinel",
 		RmtConns:           []string{"Conn1"},
 		Items: map[string]*ItemOpt{
-			utils.MetaTimings: &ItemOpt{
+			utils.MetaTimings: {
 				Limit:     9,
 				TTL:       8,
 				StaticTTL: true,
 			},
-			utils.MetaResourceProfile: &ItemOpt{
+			utils.MetaResourceProfile: {
 				Limit:     9,
 				TTL:       8,
 				StaticTTL: true,
 			},
-			utils.MetaResources: &ItemOpt{
+			utils.MetaResources: {
 				Limit:     9,
 				TTL:       8,
 				StaticTTL: true,
 			},
-			utils.MetaStatQueueProfiles: &ItemOpt{
+			utils.MetaStatQueueProfiles: {
 				Limit:     9,
 				TTL:       8,
 				StaticTTL: true,

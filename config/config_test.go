@@ -689,6 +689,8 @@ func TestCgrCfgJSONDefaultsCacheCFG(t *testing.T) {
 				TTL: time.Duration(0), StaticTTL: false, Precache: false},
 			utils.CacheRateFilterIndexes: {Limit: -1,
 				TTL: time.Duration(0), StaticTTL: false, Precache: false},
+			utils.CacheReverseFilterIndexes: {Limit: -1,
+				TTL: time.Duration(0), StaticTTL: false, Precache: false},
 			utils.CacheDispatcherRoutes: {Limit: -1,
 				TTL: time.Duration(0), StaticTTL: false, Precache: false},
 			utils.CacheDispatcherLoads: {Limit: -1,
