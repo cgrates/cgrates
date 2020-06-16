@@ -185,8 +185,11 @@ func (m *Migrator) migrateV2Thresholds() (err error) {
 	if m.dryRun {
 		return
 	}
-	if err = m.removeV2Thresholds(); err != nil && err != utils.ErrNoMoreData {
-		return
+
+	if !m.sameDataDB {
+		if err = m.removeV2Thresholds(); err != nil && err != utils.ErrNoMoreData {
+			return
+		}
 	}
 	// All done, update version wtih current one
 	vrs := engine.Versions{utils.Thresholds: engine.CurrentDataDBVersions()[utils.Thresholds]}
