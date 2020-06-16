@@ -185,6 +185,21 @@ func newInternalDBCfg(itemsCacheCfg map[string]*config.ItemOpt, isDataDB bool) m
 				TTL:       itemsCacheCfg[utils.CacheDispatcherHosts].TTL,
 				StaticTTL: itemsCacheCfg[utils.CacheDispatcherHosts].StaticTTL,
 			},
+			utils.CacheRateProfiles: &ltcache.CacheConfig{
+				MaxItems:  itemsCacheCfg[utils.CacheRateProfiles].Limit,
+				TTL:       itemsCacheCfg[utils.CacheRateProfiles].TTL,
+				StaticTTL: itemsCacheCfg[utils.CacheRateProfiles].StaticTTL,
+			},
+			utils.CacheRateProfilesFilterIndexes: &ltcache.CacheConfig{
+				MaxItems:  itemsCacheCfg[utils.MetaFilterIndexes].Limit,
+				TTL:       itemsCacheCfg[utils.MetaFilterIndexes].TTL,
+				StaticTTL: itemsCacheCfg[utils.MetaFilterIndexes].StaticTTL,
+			},
+			utils.CacheRateFilterIndexes: &ltcache.CacheConfig{
+				MaxItems:  itemsCacheCfg[utils.MetaFilterIndexes].Limit,
+				TTL:       itemsCacheCfg[utils.MetaFilterIndexes].TTL,
+				StaticTTL: itemsCacheCfg[utils.MetaFilterIndexes].StaticTTL,
+			},
 			utils.CacheLoadIDs: &ltcache.CacheConfig{
 				MaxItems:  itemsCacheCfg[utils.CacheLoadIDs].Limit,
 				TTL:       itemsCacheCfg[utils.CacheLoadIDs].TTL,
