@@ -103,6 +103,9 @@ func (rfi *FilterIndexer) cacheRemItemType() { // ToDo: tune here by removing pe
 
 	case utils.RateProfilePrefix:
 		Cache.Clear([]string{utils.CacheRateProfilesFilterIndexes})
+
+	case utils.RatePrefix:
+		Cache.Clear([]string{utils.CacheRateFilterIndexes})
 	}
 }
 
@@ -228,6 +231,21 @@ func (rfi *FilterIndexer) RemoveItemFromIndex(tenant, itemID string, oldFilters 
 			filterIDs = make([]string, len(rpp.FilterIDs))
 			for i, fltrID := range rpp.FilterIDs {
 				filterIDs[i] = fltrID
+			}
+		}
+	case utils.RatePrefix:
+		composedIDs := utils.SplitConcatenatedKey(itemID)
+		rppID, rateKey := composedIDs[0], composedIDs[1]
+		rpp, err := rfi.dm.GetRateProfile(tenant, rppID, true, false, utils.NonTransactional)
+		if err != nil && err != utils.ErrNotFound {
+			return err
+		}
+		if rpp != nil {
+			if rate, has := rpp.Rates[rateKey]; has {
+				filterIDs = make([]string, len(rate.FilterIDs))
+				for i, fltrID := range rate.FilterIDs {
+					filterIDs[i] = fltrID
+				}
 			}
 		}
 	default:
