@@ -157,9 +157,14 @@ func testTrsITConnect(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	trsMigrator, err = NewMigrator(dataDBIn, dataDBOut,
-		nil, nil,
-		false, false, false, false)
+	if !reflect.DeepEqual(trsCfgIn, trsCfgOut) {
+		trsMigrator, err = NewMigrator(dataDBIn, dataDBOut, nil, nil,
+			false, true, false, false)
+	} else {
+		trsMigrator, err = NewMigrator(dataDBIn, dataDBOut, nil, nil,
+			false, false, false, false)
+	}
+
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -367,16 +372,20 @@ func testTrsITMigrateAndMove(t *testing.T) {
 		if err != nil {
 			t.Error("Error when getting Thresholds ", err.Error())
 		}
-		if !reflect.DeepEqual(tresProf.ID, result.ID) {
-			t.Errorf("Expecting: %+v, received: %+v", tresProf.ID, result.ID)
-		} else if !reflect.DeepEqual(tresProf.Tenant, result.Tenant) {
-			t.Errorf("Expecting: %+v, received: %+v", tresProf.Tenant, result.Tenant)
-		} else if !reflect.DeepEqual(tresProf.Weight, result.Weight) {
-			t.Errorf("Expecting: %+v, received: %+v", tresProf.Weight, result.Weight)
-		} else if !reflect.DeepEqual(tresProf.ActivationInterval, result.ActivationInterval) {
-			t.Errorf("Expecting: %+v, received: %+v", tresProf.ActivationInterval, result.ActivationInterval)
-		} else if !reflect.DeepEqual(tresProf.MinSleep, result.MinSleep) {
-			t.Errorf("Expecting: %+v, received: %+v", tresProf.MinSleep, result.MinSleep)
+		if result != nil {
+			if !reflect.DeepEqual(tresProf.ID, result.ID) {
+				t.Errorf("Expecting: %+v, received: %+v", tresProf.ID, result.ID)
+			} else if !reflect.DeepEqual(tresProf.Tenant, result.Tenant) {
+				t.Errorf("Expecting: %+v, received: %+v", tresProf.Tenant, result.Tenant)
+			} else if !reflect.DeepEqual(tresProf.Weight, result.Weight) {
+				t.Errorf("Expecting: %+v, received: %+v", tresProf.Weight, result.Weight)
+			} else if !reflect.DeepEqual(tresProf.ActivationInterval, result.ActivationInterval) {
+				t.Errorf("Expecting: %+v, received: %+v", tresProf.ActivationInterval, result.ActivationInterval)
+			} else if !reflect.DeepEqual(tresProf.MinSleep, result.MinSleep) {
+				t.Errorf("Expecting: %+v, received: %+v", tresProf.MinSleep, result.MinSleep)
+			}
+		} else {
+			t.Error("result is nil")
 		}
 	}
 }
