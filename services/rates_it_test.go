@@ -45,7 +45,7 @@ func TestRateSReload(t *testing.T) {
 	server := utils.NewServer()
 	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
 	db := NewDataDBService(cfg, nil)
-	rS := NewRateService(cfg, filterSChan, server, engineShutdown, make(chan rpcclient.ClientConnector, 1))
+	rS := NewRateService(cfg, filterSChan, db, server, engineShutdown, make(chan rpcclient.ClientConnector, 1))
 	srvMngr.AddServices(rS,
 		NewLoaderService(cfg, db, filterSChan, server, engineShutdown, make(chan rpcclient.ClientConnector, 1), nil), db)
 	if err = srvMngr.StartServices(); err != nil {
