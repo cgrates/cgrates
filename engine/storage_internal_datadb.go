@@ -35,296 +35,301 @@ import (
 func newInternalDBCfg(itemsCacheCfg map[string]*config.ItemOpt, isDataDB bool) map[string]*ltcache.CacheConfig {
 	if isDataDB {
 		return map[string]*ltcache.CacheConfig{
-			utils.CacheDestinations: &ltcache.CacheConfig{
+			utils.CacheDestinations: {
 				MaxItems:  itemsCacheCfg[utils.CacheDestinations].Limit,
 				TTL:       itemsCacheCfg[utils.CacheDestinations].TTL,
 				StaticTTL: itemsCacheCfg[utils.CacheDestinations].StaticTTL,
 			},
-			utils.CacheReverseDestinations: &ltcache.CacheConfig{
+			utils.CacheReverseDestinations: {
 				MaxItems:  itemsCacheCfg[utils.CacheReverseDestinations].Limit,
 				TTL:       itemsCacheCfg[utils.CacheReverseDestinations].TTL,
 				StaticTTL: itemsCacheCfg[utils.CacheReverseDestinations].StaticTTL,
 			},
-			utils.CacheActions: &ltcache.CacheConfig{
+			utils.CacheActions: {
 				MaxItems:  itemsCacheCfg[utils.CacheActions].Limit,
 				TTL:       itemsCacheCfg[utils.CacheActions].TTL,
 				StaticTTL: itemsCacheCfg[utils.CacheActions].StaticTTL,
 			},
-			utils.CacheActionPlans: &ltcache.CacheConfig{
+			utils.CacheActionPlans: {
 				MaxItems:  itemsCacheCfg[utils.CacheActionPlans].Limit,
 				TTL:       itemsCacheCfg[utils.CacheActionPlans].TTL,
 				StaticTTL: itemsCacheCfg[utils.CacheActionPlans].StaticTTL,
 			},
-			utils.CacheAccountActionPlans: &ltcache.CacheConfig{
+			utils.CacheAccountActionPlans: {
 				MaxItems:  itemsCacheCfg[utils.CacheAccountActionPlans].Limit,
 				TTL:       itemsCacheCfg[utils.CacheAccountActionPlans].TTL,
 				StaticTTL: itemsCacheCfg[utils.CacheAccountActionPlans].StaticTTL,
 			},
-			utils.CacheActionTriggers: &ltcache.CacheConfig{
+			utils.CacheActionTriggers: {
 				MaxItems:  itemsCacheCfg[utils.CacheActionTriggers].Limit,
 				TTL:       itemsCacheCfg[utils.CacheActionTriggers].TTL,
 				StaticTTL: itemsCacheCfg[utils.CacheActionTriggers].StaticTTL,
 			},
-			utils.CacheRatingPlans: &ltcache.CacheConfig{
+			utils.CacheRatingPlans: {
 				MaxItems:  itemsCacheCfg[utils.CacheRatingPlans].Limit,
 				TTL:       itemsCacheCfg[utils.CacheRatingPlans].TTL,
 				StaticTTL: itemsCacheCfg[utils.CacheRatingPlans].StaticTTL,
 			},
-			utils.CacheRatingProfiles: &ltcache.CacheConfig{
+			utils.CacheRatingProfiles: {
 				MaxItems:  itemsCacheCfg[utils.CacheRatingProfiles].Limit,
 				TTL:       itemsCacheCfg[utils.CacheRatingProfiles].TTL,
 				StaticTTL: itemsCacheCfg[utils.CacheRatingProfiles].StaticTTL,
 			},
-			utils.CacheAccounts: &ltcache.CacheConfig{
+			utils.CacheAccounts: {
 				MaxItems:  itemsCacheCfg[utils.CacheAccounts].Limit,
 				TTL:       itemsCacheCfg[utils.CacheAccounts].TTL,
 				StaticTTL: itemsCacheCfg[utils.CacheAccounts].StaticTTL,
 			},
-			utils.CacheSharedGroups: &ltcache.CacheConfig{
+			utils.CacheSharedGroups: {
 				MaxItems:  itemsCacheCfg[utils.CacheSharedGroups].Limit,
 				TTL:       itemsCacheCfg[utils.CacheSharedGroups].TTL,
 				StaticTTL: itemsCacheCfg[utils.CacheSharedGroups].StaticTTL,
 			},
 
-			utils.CacheTimings: &ltcache.CacheConfig{
+			utils.CacheTimings: {
 				MaxItems:  itemsCacheCfg[utils.CacheTimings].Limit,
 				TTL:       itemsCacheCfg[utils.CacheTimings].TTL,
 				StaticTTL: itemsCacheCfg[utils.CacheTimings].StaticTTL,
 			},
-			utils.CacheFilters: &ltcache.CacheConfig{
+			utils.CacheFilters: {
 				MaxItems:  itemsCacheCfg[utils.CacheFilters].Limit,
 				TTL:       itemsCacheCfg[utils.CacheFilters].TTL,
 				StaticTTL: itemsCacheCfg[utils.CacheFilters].StaticTTL,
 			},
-			utils.CacheResourceProfiles: &ltcache.CacheConfig{
+			utils.CacheResourceProfiles: {
 				MaxItems:  itemsCacheCfg[utils.CacheResourceProfiles].Limit,
 				TTL:       itemsCacheCfg[utils.CacheResourceProfiles].TTL,
 				StaticTTL: itemsCacheCfg[utils.CacheResourceProfiles].StaticTTL,
 			},
-			utils.CacheResourceFilterIndexes: &ltcache.CacheConfig{
-				MaxItems:  itemsCacheCfg[utils.MetaFilterIndexes].Limit,
-				TTL:       itemsCacheCfg[utils.MetaFilterIndexes].TTL,
-				StaticTTL: itemsCacheCfg[utils.MetaFilterIndexes].StaticTTL,
+			utils.CacheResourceFilterIndexes: {
+				MaxItems:  itemsCacheCfg[utils.MetaIndexes].Limit,
+				TTL:       itemsCacheCfg[utils.MetaIndexes].TTL,
+				StaticTTL: itemsCacheCfg[utils.MetaIndexes].StaticTTL,
 			},
-			utils.CacheResources: &ltcache.CacheConfig{
+			utils.CacheResources: {
 				MaxItems:  itemsCacheCfg[utils.CacheResources].Limit,
 				TTL:       itemsCacheCfg[utils.CacheResources].TTL,
 				StaticTTL: itemsCacheCfg[utils.CacheResources].StaticTTL,
 			},
-			utils.CacheStatFilterIndexes: &ltcache.CacheConfig{
-				MaxItems:  itemsCacheCfg[utils.MetaFilterIndexes].Limit,
-				TTL:       itemsCacheCfg[utils.MetaFilterIndexes].TTL,
-				StaticTTL: itemsCacheCfg[utils.MetaFilterIndexes].StaticTTL,
+			utils.CacheStatFilterIndexes: {
+				MaxItems:  itemsCacheCfg[utils.MetaIndexes].Limit,
+				TTL:       itemsCacheCfg[utils.MetaIndexes].TTL,
+				StaticTTL: itemsCacheCfg[utils.MetaIndexes].StaticTTL,
 			},
-			utils.CacheStatQueueProfiles: &ltcache.CacheConfig{
+			utils.CacheStatQueueProfiles: {
 				MaxItems:  itemsCacheCfg[utils.CacheStatQueueProfiles].Limit,
 				TTL:       itemsCacheCfg[utils.CacheStatQueueProfiles].TTL,
 				StaticTTL: itemsCacheCfg[utils.CacheStatQueueProfiles].StaticTTL,
 			},
-			utils.CacheStatQueues: &ltcache.CacheConfig{
+			utils.CacheStatQueues: {
 				MaxItems:  itemsCacheCfg[utils.CacheStatQueues].Limit,
 				TTL:       itemsCacheCfg[utils.CacheStatQueues].TTL,
 				StaticTTL: itemsCacheCfg[utils.CacheStatQueues].StaticTTL,
 			},
-			utils.CacheThresholdFilterIndexes: &ltcache.CacheConfig{
-				MaxItems:  itemsCacheCfg[utils.MetaFilterIndexes].Limit,
-				TTL:       itemsCacheCfg[utils.MetaFilterIndexes].TTL,
-				StaticTTL: itemsCacheCfg[utils.MetaFilterIndexes].StaticTTL,
+			utils.CacheThresholdFilterIndexes: {
+				MaxItems:  itemsCacheCfg[utils.MetaIndexes].Limit,
+				TTL:       itemsCacheCfg[utils.MetaIndexes].TTL,
+				StaticTTL: itemsCacheCfg[utils.MetaIndexes].StaticTTL,
 			},
-			utils.CacheThresholdProfiles: &ltcache.CacheConfig{
+			utils.CacheThresholdProfiles: {
 				MaxItems:  itemsCacheCfg[utils.CacheThresholdProfiles].Limit,
 				TTL:       itemsCacheCfg[utils.CacheThresholdProfiles].TTL,
 				StaticTTL: itemsCacheCfg[utils.CacheThresholdProfiles].StaticTTL,
 			},
-			utils.CacheThresholds: &ltcache.CacheConfig{
+			utils.CacheThresholds: {
 				MaxItems:  itemsCacheCfg[utils.CacheThresholds].Limit,
 				TTL:       itemsCacheCfg[utils.CacheThresholds].TTL,
 				StaticTTL: itemsCacheCfg[utils.CacheThresholds].StaticTTL,
 			},
-			utils.CacheRouteFilterIndexes: &ltcache.CacheConfig{
-				MaxItems:  itemsCacheCfg[utils.MetaFilterIndexes].Limit,
-				TTL:       itemsCacheCfg[utils.MetaFilterIndexes].TTL,
-				StaticTTL: itemsCacheCfg[utils.MetaFilterIndexes].StaticTTL,
+			utils.CacheRouteFilterIndexes: {
+				MaxItems:  itemsCacheCfg[utils.MetaIndexes].Limit,
+				TTL:       itemsCacheCfg[utils.MetaIndexes].TTL,
+				StaticTTL: itemsCacheCfg[utils.MetaIndexes].StaticTTL,
 			},
-			utils.CacheRouteProfiles: &ltcache.CacheConfig{
+			utils.CacheRouteProfiles: {
 				MaxItems:  itemsCacheCfg[utils.CacheRouteProfiles].Limit,
 				TTL:       itemsCacheCfg[utils.CacheRouteProfiles].TTL,
 				StaticTTL: itemsCacheCfg[utils.CacheRouteProfiles].StaticTTL,
 			},
-			utils.CacheChargerFilterIndexes: &ltcache.CacheConfig{
-				MaxItems:  itemsCacheCfg[utils.MetaFilterIndexes].Limit,
-				TTL:       itemsCacheCfg[utils.MetaFilterIndexes].TTL,
-				StaticTTL: itemsCacheCfg[utils.MetaFilterIndexes].StaticTTL,
+			utils.CacheChargerFilterIndexes: {
+				MaxItems:  itemsCacheCfg[utils.MetaIndexes].Limit,
+				TTL:       itemsCacheCfg[utils.MetaIndexes].TTL,
+				StaticTTL: itemsCacheCfg[utils.MetaIndexes].StaticTTL,
 			},
-			utils.CacheChargerProfiles: &ltcache.CacheConfig{
+			utils.CacheChargerProfiles: {
 				MaxItems:  itemsCacheCfg[utils.CacheChargerProfiles].Limit,
 				TTL:       itemsCacheCfg[utils.CacheChargerProfiles].TTL,
 				StaticTTL: itemsCacheCfg[utils.CacheChargerProfiles].StaticTTL,
 			},
-			utils.CacheAttributeFilterIndexes: &ltcache.CacheConfig{
-				MaxItems:  itemsCacheCfg[utils.MetaFilterIndexes].Limit,
-				TTL:       itemsCacheCfg[utils.MetaFilterIndexes].TTL,
-				StaticTTL: itemsCacheCfg[utils.MetaFilterIndexes].StaticTTL,
+			utils.CacheAttributeFilterIndexes: {
+				MaxItems:  itemsCacheCfg[utils.MetaIndexes].Limit,
+				TTL:       itemsCacheCfg[utils.MetaIndexes].TTL,
+				StaticTTL: itemsCacheCfg[utils.MetaIndexes].StaticTTL,
 			},
-			utils.CacheAttributeProfiles: &ltcache.CacheConfig{
+			utils.CacheAttributeProfiles: {
 				MaxItems:  itemsCacheCfg[utils.CacheAttributeProfiles].Limit,
 				TTL:       itemsCacheCfg[utils.CacheAttributeProfiles].TTL,
 				StaticTTL: itemsCacheCfg[utils.CacheAttributeProfiles].StaticTTL,
 			},
-			utils.CacheDispatcherFilterIndexes: &ltcache.CacheConfig{
-				MaxItems:  itemsCacheCfg[utils.MetaFilterIndexes].Limit,
-				TTL:       itemsCacheCfg[utils.MetaFilterIndexes].TTL,
-				StaticTTL: itemsCacheCfg[utils.MetaFilterIndexes].StaticTTL,
+			utils.CacheDispatcherFilterIndexes: {
+				MaxItems:  itemsCacheCfg[utils.MetaIndexes].Limit,
+				TTL:       itemsCacheCfg[utils.MetaIndexes].TTL,
+				StaticTTL: itemsCacheCfg[utils.MetaIndexes].StaticTTL,
 			},
-			utils.CacheDispatcherProfiles: &ltcache.CacheConfig{
+			utils.CacheDispatcherProfiles: {
 				MaxItems:  itemsCacheCfg[utils.CacheDispatcherProfiles].Limit,
 				TTL:       itemsCacheCfg[utils.CacheDispatcherProfiles].TTL,
 				StaticTTL: itemsCacheCfg[utils.CacheDispatcherProfiles].StaticTTL,
 			},
-			utils.CacheDispatcherHosts: &ltcache.CacheConfig{
+			utils.CacheDispatcherHosts: {
 				MaxItems:  itemsCacheCfg[utils.CacheDispatcherHosts].Limit,
 				TTL:       itemsCacheCfg[utils.CacheDispatcherHosts].TTL,
 				StaticTTL: itemsCacheCfg[utils.CacheDispatcherHosts].StaticTTL,
 			},
-			utils.CacheRateProfiles: &ltcache.CacheConfig{
+			utils.CacheRateProfiles: {
 				MaxItems:  itemsCacheCfg[utils.CacheRateProfiles].Limit,
 				TTL:       itemsCacheCfg[utils.CacheRateProfiles].TTL,
 				StaticTTL: itemsCacheCfg[utils.CacheRateProfiles].StaticTTL,
 			},
-			utils.CacheRateProfilesFilterIndexes: &ltcache.CacheConfig{
-				MaxItems:  itemsCacheCfg[utils.MetaFilterIndexes].Limit,
-				TTL:       itemsCacheCfg[utils.MetaFilterIndexes].TTL,
-				StaticTTL: itemsCacheCfg[utils.MetaFilterIndexes].StaticTTL,
+			utils.CacheRateProfilesFilterIndexes: {
+				MaxItems:  itemsCacheCfg[utils.MetaIndexes].Limit,
+				TTL:       itemsCacheCfg[utils.MetaIndexes].TTL,
+				StaticTTL: itemsCacheCfg[utils.MetaIndexes].StaticTTL,
 			},
-			utils.CacheRateFilterIndexes: &ltcache.CacheConfig{
-				MaxItems:  itemsCacheCfg[utils.MetaFilterIndexes].Limit,
-				TTL:       itemsCacheCfg[utils.MetaFilterIndexes].TTL,
-				StaticTTL: itemsCacheCfg[utils.MetaFilterIndexes].StaticTTL,
+			utils.CacheRateFilterIndexes: {
+				MaxItems:  itemsCacheCfg[utils.MetaIndexes].Limit,
+				TTL:       itemsCacheCfg[utils.MetaIndexes].TTL,
+				StaticTTL: itemsCacheCfg[utils.MetaIndexes].StaticTTL,
 			},
-			utils.CacheLoadIDs: &ltcache.CacheConfig{
+			utils.CacheLoadIDs: {
 				MaxItems:  itemsCacheCfg[utils.CacheLoadIDs].Limit,
 				TTL:       itemsCacheCfg[utils.CacheLoadIDs].TTL,
 				StaticTTL: itemsCacheCfg[utils.CacheLoadIDs].StaticTTL,
 			},
+			utils.CacheReverseFilterIndexes: {
+				MaxItems:  itemsCacheCfg[utils.MetaIndexes].Limit,
+				TTL:       itemsCacheCfg[utils.MetaIndexes].TTL,
+				StaticTTL: itemsCacheCfg[utils.MetaIndexes].StaticTTL,
+			},
 		}
 	} else {
 		return map[string]*ltcache.CacheConfig{
-			utils.TBLVersions: &ltcache.CacheConfig{
+			utils.TBLVersions: {
 				MaxItems:  itemsCacheCfg[utils.TBLVersions].Limit,
 				TTL:       itemsCacheCfg[utils.TBLVersions].TTL,
 				StaticTTL: itemsCacheCfg[utils.TBLVersions].StaticTTL,
 			},
-			utils.TBLTPTimings: &ltcache.CacheConfig{
+			utils.TBLTPTimings: {
 				MaxItems:  itemsCacheCfg[utils.TBLTPTimings].Limit,
 				TTL:       itemsCacheCfg[utils.TBLTPTimings].TTL,
 				StaticTTL: itemsCacheCfg[utils.TBLTPTimings].StaticTTL,
 			},
-			utils.TBLTPDestinations: &ltcache.CacheConfig{
+			utils.TBLTPDestinations: {
 				MaxItems:  itemsCacheCfg[utils.TBLTPDestinations].Limit,
 				TTL:       itemsCacheCfg[utils.TBLTPDestinations].TTL,
 				StaticTTL: itemsCacheCfg[utils.TBLTPDestinations].StaticTTL,
 			},
-			utils.TBLTPRates: &ltcache.CacheConfig{
+			utils.TBLTPRates: {
 				MaxItems:  itemsCacheCfg[utils.TBLTPRates].Limit,
 				TTL:       itemsCacheCfg[utils.TBLTPRates].TTL,
 				StaticTTL: itemsCacheCfg[utils.TBLTPRates].StaticTTL,
 			},
-			utils.TBLTPDestinationRates: &ltcache.CacheConfig{
+			utils.TBLTPDestinationRates: {
 				MaxItems:  itemsCacheCfg[utils.TBLTPDestinationRates].Limit,
 				TTL:       itemsCacheCfg[utils.TBLTPDestinationRates].TTL,
 				StaticTTL: itemsCacheCfg[utils.TBLTPDestinationRates].StaticTTL,
 			},
-			utils.TBLTPRatingPlans: &ltcache.CacheConfig{
+			utils.TBLTPRatingPlans: {
 				MaxItems:  itemsCacheCfg[utils.TBLTPRatingPlans].Limit,
 				TTL:       itemsCacheCfg[utils.TBLTPRatingPlans].TTL,
 				StaticTTL: itemsCacheCfg[utils.TBLTPRatingPlans].StaticTTL,
 			},
-			utils.TBLTPRatingProfiles: &ltcache.CacheConfig{
+			utils.TBLTPRatingProfiles: {
 				MaxItems:  itemsCacheCfg[utils.TBLTPRatingProfiles].Limit,
 				TTL:       itemsCacheCfg[utils.TBLTPRatingProfiles].TTL,
 				StaticTTL: itemsCacheCfg[utils.TBLTPRatingProfiles].StaticTTL,
 			},
-			utils.TBLTPSharedGroups: &ltcache.CacheConfig{
+			utils.TBLTPSharedGroups: {
 				MaxItems:  itemsCacheCfg[utils.TBLTPSharedGroups].Limit,
 				TTL:       itemsCacheCfg[utils.TBLTPSharedGroups].TTL,
 				StaticTTL: itemsCacheCfg[utils.TBLTPSharedGroups].StaticTTL,
 			},
-			utils.TBLTPActions: &ltcache.CacheConfig{
+			utils.TBLTPActions: {
 				MaxItems:  itemsCacheCfg[utils.TBLTPActions].Limit,
 				TTL:       itemsCacheCfg[utils.TBLTPActions].TTL,
 				StaticTTL: itemsCacheCfg[utils.TBLTPActions].StaticTTL,
 			},
-			utils.TBLTPActionTriggers: &ltcache.CacheConfig{
+			utils.TBLTPActionTriggers: {
 				MaxItems:  itemsCacheCfg[utils.TBLTPActionTriggers].Limit,
 				TTL:       itemsCacheCfg[utils.TBLTPActionTriggers].TTL,
 				StaticTTL: itemsCacheCfg[utils.TBLTPActionTriggers].StaticTTL,
 			},
-			utils.TBLTPAccountActions: &ltcache.CacheConfig{
+			utils.TBLTPAccountActions: {
 				MaxItems:  itemsCacheCfg[utils.TBLTPAccountActions].Limit,
 				TTL:       itemsCacheCfg[utils.TBLTPAccountActions].TTL,
 				StaticTTL: itemsCacheCfg[utils.TBLTPAccountActions].StaticTTL,
 			},
-			utils.TBLTPResources: &ltcache.CacheConfig{
+			utils.TBLTPResources: {
 				MaxItems:  itemsCacheCfg[utils.TBLTPResources].Limit,
 				TTL:       itemsCacheCfg[utils.TBLTPResources].TTL,
 				StaticTTL: itemsCacheCfg[utils.TBLTPResources].StaticTTL,
 			},
-			utils.TBLTPStats: &ltcache.CacheConfig{
+			utils.TBLTPStats: {
 				MaxItems:  itemsCacheCfg[utils.TBLTPStats].Limit,
 				TTL:       itemsCacheCfg[utils.TBLTPStats].TTL,
 				StaticTTL: itemsCacheCfg[utils.TBLTPStats].StaticTTL,
 			},
-			utils.TBLTPThresholds: &ltcache.CacheConfig{
+			utils.TBLTPThresholds: {
 				MaxItems:  itemsCacheCfg[utils.TBLTPThresholds].Limit,
 				TTL:       itemsCacheCfg[utils.TBLTPThresholds].TTL,
 				StaticTTL: itemsCacheCfg[utils.TBLTPThresholds].StaticTTL,
 			},
-			utils.TBLTPFilters: &ltcache.CacheConfig{
+			utils.TBLTPFilters: {
 				MaxItems:  itemsCacheCfg[utils.TBLTPFilters].Limit,
 				TTL:       itemsCacheCfg[utils.TBLTPFilters].TTL,
 				StaticTTL: itemsCacheCfg[utils.TBLTPFilters].StaticTTL,
 			},
-			utils.SessionCostsTBL: &ltcache.CacheConfig{
+			utils.SessionCostsTBL: {
 				MaxItems:  itemsCacheCfg[utils.SessionCostsTBL].Limit,
 				TTL:       itemsCacheCfg[utils.SessionCostsTBL].TTL,
 				StaticTTL: itemsCacheCfg[utils.SessionCostsTBL].StaticTTL,
 			},
-			utils.TBLTPActionPlans: &ltcache.CacheConfig{
+			utils.TBLTPActionPlans: {
 				MaxItems:  itemsCacheCfg[utils.TBLTPActionPlans].Limit,
 				TTL:       itemsCacheCfg[utils.TBLTPActionPlans].TTL,
 				StaticTTL: itemsCacheCfg[utils.TBLTPActionPlans].StaticTTL,
 			},
-			utils.TBLTPRoutes: &ltcache.CacheConfig{
+			utils.TBLTPRoutes: {
 				MaxItems:  itemsCacheCfg[utils.TBLTPRoutes].Limit,
 				TTL:       itemsCacheCfg[utils.TBLTPRoutes].TTL,
 				StaticTTL: itemsCacheCfg[utils.TBLTPRoutes].StaticTTL,
 			},
-			utils.TBLTPAttributes: &ltcache.CacheConfig{
+			utils.TBLTPAttributes: {
 				MaxItems:  itemsCacheCfg[utils.TBLTPAttributes].Limit,
 				TTL:       itemsCacheCfg[utils.TBLTPAttributes].TTL,
 				StaticTTL: itemsCacheCfg[utils.TBLTPAttributes].StaticTTL,
 			},
-			utils.TBLTPChargers: &ltcache.CacheConfig{
+			utils.TBLTPChargers: {
 				MaxItems:  itemsCacheCfg[utils.TBLTPChargers].Limit,
 				TTL:       itemsCacheCfg[utils.TBLTPChargers].TTL,
 				StaticTTL: itemsCacheCfg[utils.TBLTPChargers].StaticTTL,
 			},
-			utils.TBLTPDispatchers: &ltcache.CacheConfig{
+			utils.TBLTPDispatchers: {
 				MaxItems:  itemsCacheCfg[utils.TBLTPDispatchers].Limit,
 				TTL:       itemsCacheCfg[utils.TBLTPDispatchers].TTL,
 				StaticTTL: itemsCacheCfg[utils.TBLTPDispatchers].StaticTTL,
 			},
-			utils.TBLTPDispatcherHosts: &ltcache.CacheConfig{
+			utils.TBLTPDispatcherHosts: {
 				MaxItems:  itemsCacheCfg[utils.TBLTPDispatcherHosts].Limit,
 				TTL:       itemsCacheCfg[utils.TBLTPDispatcherHosts].TTL,
 				StaticTTL: itemsCacheCfg[utils.TBLTPDispatcherHosts].StaticTTL,
 			},
-			utils.TBLTPRateProfiles: &ltcache.CacheConfig{
+			utils.TBLTPRateProfiles: {
 				MaxItems:  itemsCacheCfg[utils.TBLTPRateProfiles].Limit,
 				TTL:       itemsCacheCfg[utils.TBLTPRateProfiles].TTL,
 				StaticTTL: itemsCacheCfg[utils.TBLTPRateProfiles].StaticTTL,
 			},
-			utils.CDRsTBL: &ltcache.CacheConfig{
+			utils.CDRsTBL: {
 				MaxItems:  itemsCacheCfg[utils.CDRsTBL].Limit,
 				TTL:       itemsCacheCfg[utils.CDRsTBL].TTL,
 				StaticTTL: itemsCacheCfg[utils.CDRsTBL].StaticTTL,

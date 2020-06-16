@@ -809,7 +809,7 @@ func (dm *DataManager) RemoveFilter(tenant, id, transactionID string, withIndex 
 	if withIndex {
 		tntCtx = utils.ConcatenatedKey(tenant, id)
 		var rcvIndx map[string]utils.StringSet
-		if rcvIndx, err = dm.GetIndexes(utils.CacheFilterIndexes, tntCtx,
+		if rcvIndx, err = dm.GetIndexes(utils.CacheReverseFilterIndexes, tntCtx,
 			utils.EmptyString, true, true); err != nil {
 			if err != utils.ErrNotFound {
 				return

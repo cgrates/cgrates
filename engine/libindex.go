@@ -395,7 +395,7 @@ func addIndexFiltersItem(dm *DataManager, idxItmType, tnt, itemID string, filter
 		}
 		tntCtx := utils.ConcatenatedKey(tnt, ID)
 		var indexes map[string]utils.StringSet
-		if indexes, err = dm.GetIndexes(utils.CacheFilterIndexes, tntCtx,
+		if indexes, err = dm.GetIndexes(utils.CacheReverseFilterIndexes, tntCtx,
 			idxItmType, true, false); err != nil {
 			if err != utils.ErrNotFound {
 				return
@@ -407,11 +407,11 @@ func addIndexFiltersItem(dm *DataManager, idxItmType, tnt, itemID string, filter
 		}
 		indexes[idxItmType].Add(itemID)
 
-		if err = dm.SetIndexes(utils.CacheFilterIndexes, tntCtx, indexes, true, utils.NonTransactional); err != nil {
+		if err = dm.SetIndexes(utils.CacheReverseFilterIndexes, tntCtx, indexes, true, utils.NonTransactional); err != nil {
 			return
 		}
 		for indxKey := range indexes {
-			if err = Cache.Remove(utils.CacheFilterIndexes, utils.ConcatenatedKey(tntCtx, indxKey), true, utils.NonTransactional); err != nil {
+			if err = Cache.Remove(utils.CacheReverseFilterIndexes, utils.ConcatenatedKey(tntCtx, indxKey), true, utils.NonTransactional); err != nil {
 				return
 			}
 		}
@@ -427,7 +427,7 @@ func removeIndexFiltersItem(dm *DataManager, idxItmType, tnt, itemID string, fil
 		}
 		tntCtx := utils.ConcatenatedKey(tnt, ID)
 		var indexes map[string]utils.StringSet
-		if indexes, err = dm.GetIndexes(utils.CacheFilterIndexes, tntCtx,
+		if indexes, err = dm.GetIndexes(utils.CacheReverseFilterIndexes, tntCtx,
 			idxItmType, true, false); err != nil {
 			if err != utils.ErrNotFound {
 				return
@@ -437,11 +437,11 @@ func removeIndexFiltersItem(dm *DataManager, idxItmType, tnt, itemID string, fil
 		}
 		indexes[idxItmType].Remove(itemID)
 
-		if err = dm.SetIndexes(utils.CacheFilterIndexes, tntCtx, indexes, true, utils.NonTransactional); err != nil {
+		if err = dm.SetIndexes(utils.CacheReverseFilterIndexes, tntCtx, indexes, true, utils.NonTransactional); err != nil {
 			return
 		}
 		for indxKey := range indexes {
-			if err = Cache.Remove(utils.CacheFilterIndexes, utils.ConcatenatedKey(tntCtx, indxKey), true, utils.NonTransactional); err != nil {
+			if err = Cache.Remove(utils.CacheReverseFilterIndexes, utils.ConcatenatedKey(tntCtx, indxKey), true, utils.NonTransactional); err != nil {
 				return
 			}
 		}
@@ -493,7 +493,7 @@ func updateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 	}
 
 	var rcvIndx map[string]utils.StringSet
-	if rcvIndx, err = dm.GetIndexes(utils.CacheFilterIndexes, newFlt.TenantID(),
+	if rcvIndx, err = dm.GetIndexes(utils.CacheReverseFilterIndexes, newFlt.TenantID(),
 		utils.EmptyString, true, true); err != nil {
 		if err != utils.ErrNotFound {
 			return

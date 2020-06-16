@@ -575,7 +575,7 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 		},
 	}
 	if rcvIdx, err := dataManager.GetIndexes(
-		utils.CacheFilterIndexes,
+		utils.CacheReverseFilterIndexes,
 		fp.TenantID(),
 		utils.EmptyString, false, false); err != nil {
 		t.Error(err)

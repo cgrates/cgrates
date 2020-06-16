@@ -98,7 +98,6 @@ const CGRATES_CFG_JSON = `
 		"*dispatcher_profiles":{"remote":false, "replicate":false, "limit": -1, "ttl": "", "static_ttl": false}, 
 		"*dispatcher_hosts":{"remote":false, "replicate":false, "limit": -1, "ttl": "", "static_ttl": false}, 
 		"*rate_profiles":{"remote":false, "replicate":false, "limit": -1, "ttl": "", "static_ttl": false},
-		"*filter_indexes" :{"remote":false, "replicate":false, "limit": -1, "ttl": "", "static_ttl": false}, 
 		"*load_ids":{"remote":false, "replicate":false, "limit": -1, "ttl": "", "static_ttl": false}, 
 		"*indexes":{"remote":false, "replicate":false, "limit": -1, "ttl": "", "static_ttl": false}, 
 	},
@@ -221,6 +220,7 @@ const CGRATES_CFG_JSON = `
 		"*dispatcher_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 				// control dispatcher filter indexes caching
 		"*rate_profile_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 			// control rate profile filter indexes caching
 		"*rate_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 					// control rate filter indexes caching
+		"*reverse_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 					// control reverse filter indexes caching used only for set and remove filters 
 		"*dispatcher_routes": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 						// control dispatcher routes caching
 		"*dispatcher_loads": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},							// control dispatcher load ( in case of *load strategy )
 		"*dispatchers": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 								// control dispatcher interface

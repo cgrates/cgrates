@@ -172,6 +172,9 @@ func TestCacheJsonCfg(t *testing.T) {
 			utils.CacheRateFilterIndexes: {Limit: utils.IntPointer(-1),
 				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 				Replicate: utils.BoolPointer(false)},
+			utils.CacheReverseFilterIndexes: {Limit: utils.IntPointer(-1),
+				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
+				Replicate: utils.BoolPointer(false)},
 			utils.CacheDispatcherRoutes: {Limit: utils.IntPointer(-1),
 				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 				Replicate: utils.BoolPointer(false)},
@@ -392,19 +395,13 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Limit:      utils.IntPointer(-1),
 				Static_ttl: utils.BoolPointer(false)},
-			utils.MetaFilterIndexes: {
+			utils.MetaIndexes: {
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Limit:      utils.IntPointer(-1),
 				Static_ttl: utils.BoolPointer(false)},
 			utils.MetaLoadIDs: {
-				Replicate:  utils.BoolPointer(false),
-				Remote:     utils.BoolPointer(false),
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Limit:      utils.IntPointer(-1),
-				Static_ttl: utils.BoolPointer(false)},
-			utils.MetaIndexes: {
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
 				Ttl:        utils.StringPointer(utils.EmptyString),

@@ -55,7 +55,6 @@
       "*charger_profiles": {"replicate":false},
       "*dispatcher_profiles":{"replicate":false},
       "*dispatcher_hosts":{"replicate":false},
-      "*filter_indexes" :{"replicate":false},
       "*load_ids":{"replicate":false},
       "*indexes":{"replicate":false}
     }

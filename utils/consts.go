@@ -56,7 +56,7 @@ var (
 		CacheDispatcherRoutes, CacheDispatcherLoads, CacheDiameterMessages, CacheRPCResponses,
 		CacheClosedSessions, CacheCDRIDs, CacheLoadIDs, CacheRPCConnections, CacheRatingProfilesTmp,
 		CacheUCH, CacheSTIR, CacheEventCharges, CacheRateProfiles, CacheRateProfilesFilterIndexes,
-		CacheRateFilterIndexes})
+		CacheRateFilterIndexes, CacheReverseFilterIndexes})
 	CacheInstanceToPrefix = map[string]string{
 		CacheDestinations:              DESTINATION_PREFIX,
 		CacheReverseDestinations:       REVERSE_DESTINATION_PREFIX,
@@ -92,7 +92,7 @@ var (
 		CacheLoadIDs:                   LoadIDPrefix,
 		CacheAccounts:                  ACCOUNT_PREFIX,
 		CacheRateFilterIndexes:         RateFilterIndexPrfx,
-		CacheFilterIndexes:             FilterIndexPrfx,
+		CacheReverseFilterIndexes:      FilterIndexPrfx,
 	}
 	CachePrefixToInstance map[string]string    // will be built on init
 	CacheIndexesToPrefix  = map[string]string{ // used by match index to get all the ids when index selects is disabled and for compute indexes
@@ -121,7 +121,8 @@ var (
 		CacheDispatcherProfiles, CacheDispatcherHosts, CacheResourceFilterIndexes, CacheStatFilterIndexes,
 		CacheThresholdFilterIndexes, CacheRouteFilterIndexes, CacheAttributeFilterIndexes,
 		CacheChargerFilterIndexes, CacheDispatcherFilterIndexes, CacheLoadIDs, CacheAccounts,
-		CacheRateProfiles, CacheRateProfilesFilterIndexes, CacheRateFilterIndexes})
+		CacheRateProfiles, CacheRateProfilesFilterIndexes, CacheRateFilterIndexes,
+		CacheReverseFilterIndexes})
 
 	CacheStorDBPartitions = NewStringSet([]string{TBLTPTimings, TBLTPDestinations, TBLTPRates,
 		TBLTPDestinationRates, TBLTPRatingPlans, TBLTPRatingProfiles, TBLTPSharedGroups,
@@ -767,7 +768,6 @@ const (
 	MetaThresholdProfiles   = "*threshold_profiles"
 	MetaRouteProfiles       = "*route_profiles"
 	MetaAttributeProfiles   = "*attribute_profiles"
-	MetaFilterIndexes       = "*filter_indexes"
 	MetaIndexes             = "*indexes"
 	MetaDispatcherProfiles  = "*dispatcher_profiles"
 	MetaRateProfiles        = "*rate_profiles"
@@ -1639,7 +1639,7 @@ const (
 	CacheUCH                       = "*uch"
 	CacheSTIR                      = "*stir"
 	CacheEventCharges              = "*event_charges"
-	CacheFilterIndexes             = "*filter_indexes"
+	CacheReverseFilterIndexes      = "*reverse_filter_indexes"
 )
 
 // Prefix for indexing
