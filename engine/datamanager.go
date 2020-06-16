@@ -26,13 +26,15 @@ import (
 
 var (
 	filterIndexesPrefixMap = utils.StringMap{
-		utils.AttributeFilterIndexes:  true,
-		utils.ResourceFilterIndexes:   true,
-		utils.StatFilterIndexes:       true,
-		utils.ThresholdFilterIndexes:  true,
-		utils.RouteFilterIndexes:      true,
-		utils.ChargerFilterIndexes:    true,
-		utils.DispatcherFilterIndexes: true,
+		utils.AttributeFilterIndexes:      true,
+		utils.ResourceFilterIndexes:       true,
+		utils.StatFilterIndexes:           true,
+		utils.ThresholdFilterIndexes:      true,
+		utils.RouteFilterIndexes:          true,
+		utils.ChargerFilterIndexes:        true,
+		utils.DispatcherFilterIndexes:     true,
+		utils.RateProfilesFilterIndexPrfx: true,
+		utils.RateFilterIndexPrfx:         true,
 	}
 	loadCachePrefixMap = utils.StringMap{
 		utils.DESTINATION_PREFIX:         true,
@@ -53,6 +55,7 @@ var (
 		utils.ChargerProfilePrefix:       true,
 		utils.DispatcherProfilePrefix:    true,
 		utils.DispatcherHostPrefix:       true,
+		utils.RateProfilePrefix:          true,
 	}
 	cachePrefixMap = utils.StringMap{
 		utils.DESTINATION_PREFIX:          true,
