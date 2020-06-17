@@ -1843,6 +1843,7 @@ const (
 	SessionTTLCfg          = "session_ttl"
 	SessionTTLMaxDelayCfg  = "session_ttl_max_delay"
 	SessionTTLLastUsedCfg  = "session_ttl_last_used"
+	SessionTTLLastUsageCfg = "session_ttl_last_usage"
 	SessionTTLUsageCfg     = "session_ttl_usage"
 	SessionIndexesCfg      = "session_indexes"
 	ClientProtocolCfg      = "client_protocol"
@@ -2140,12 +2141,12 @@ var (
 	MetaZeroLeft = "*zeroleft"
 )
 
-// CGROptionsSet the posible cgr options
+// CGROptionsSet the possible cgr options
 var CGROptionsSet = NewStringSet([]string{STIRATest, STIRPayloadMaxDuration,
 	STIRIdentity, STIROriginatorTn, STIROriginatorURI, STIRDestinationTn,
 	STIRDestinationURI, STIRPublicKeyPath, STIRPrivateKeyPath,
 	DebitInterval, Context, SessionTTL, SessionTTLMaxDelay,
-	SessionTTLLastUsed, SessionTTLUsage, APIKey, RouteID})
+	SessionTTLLastUsed, SessionTTLLastUsage, SessionTTLUsage, APIKey, RouteID})
 
 // SessionS ProccessEvent posible options
 const (
@@ -2164,10 +2165,11 @@ const (
 	Context       = "Context"
 
 	// SessionS terminator
-	SessionTTL         = "SessionTTL"
-	SessionTTLMaxDelay = "SessionTTLMaxDelay"
-	SessionTTLLastUsed = "SessionTTLLastUsed"
-	SessionTTLUsage    = "SessionTTLUsage"
+	SessionTTL          = "SessionTTL"
+	SessionTTLMaxDelay  = "SessionTTLMaxDelay"
+	SessionTTLLastUsed  = "SessionTTLLastUsed"
+	SessionTTLLastUsage = "SessionTTLLastUsage"
+	SessionTTLUsage     = "SessionTTLUsage"
 
 	// DispatcherS
 	APIKey  = "APIKey"

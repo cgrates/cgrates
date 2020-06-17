@@ -224,33 +224,34 @@ type EventExporterJsonCfg struct {
 
 // SessionSJsonCfg config section
 type SessionSJsonCfg struct {
-	Enabled               *bool
-	Listen_bijson         *string
-	Chargers_conns        *[]string
-	Rals_conns            *[]string
-	Resources_conns       *[]string
-	Thresholds_conns      *[]string
-	Stats_conns           *[]string
-	Routes_conns          *[]string
-	Cdrs_conns            *[]string
-	Replication_conns     *[]string
-	Attributes_conns      *[]string
-	Debit_interval        *string
-	Store_session_costs   *bool
-	Min_call_duration     *string
-	Max_call_duration     *string
-	Session_ttl           *string
-	Session_ttl_max_delay *string
-	Session_ttl_last_used *string
-	Session_ttl_usage     *string
-	Session_indexes       *[]string
-	Client_protocol       *float64
-	Channel_sync_interval *string
-	Terminate_attempts    *int
-	Alterable_fields      *[]string
-	Min_dur_low_balance   *string
-	Scheduler_conns       *[]string
-	Stir                  *STIRJsonCfg
+	Enabled                *bool
+	Listen_bijson          *string
+	Chargers_conns         *[]string
+	Rals_conns             *[]string
+	Resources_conns        *[]string
+	Thresholds_conns       *[]string
+	Stats_conns            *[]string
+	Routes_conns           *[]string
+	Cdrs_conns             *[]string
+	Replication_conns      *[]string
+	Attributes_conns       *[]string
+	Debit_interval         *string
+	Store_session_costs    *bool
+	Min_call_duration      *string
+	Max_call_duration      *string
+	Session_ttl            *string
+	Session_ttl_max_delay  *string
+	Session_ttl_last_used  *string
+	Session_ttl_usage      *string
+	Session_ttl_last_usage *string
+	Session_indexes        *[]string
+	Client_protocol        *float64
+	Channel_sync_interval  *string
+	Terminate_attempts     *int
+	Alterable_fields       *[]string
+	Min_dur_low_balance    *string
+	Scheduler_conns        *[]string
+	Stir                   *STIRJsonCfg
 }
 
 // FreeSWITCHAgent config section

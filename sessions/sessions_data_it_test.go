@@ -49,6 +49,7 @@ var (
 		testSessionsDataTTLExpMultiUpdates,
 		testSessionsDataMultipleDataNoUsage,
 		testSessionsDataTTLUsageProtection,
+		testSessionsDataTTLLastUsage,
 		testSessionsDataTTKillEngine,
 	}
 )
@@ -1065,6 +1066,95 @@ func testSessionsDataTTLUsageProtection(t *testing.T) {
 	if err := sDataRPC.Call(utils.SessionSv1GetActiveSessions,
 		new(utils.SessionFilter), &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err, utils.ToJSON(aSessions))
+	}
+}
+
+func testSessionsDataTTLLastUsage(t *testing.T) {
+	var acnt *engine.Account
+	acntAttrs := &utils.AttrGetAccount{Tenant: "cgrates.org",
+		Account: "testSessionsDataTTLLastUsage"}
+	eAcntVal := 102400.0
+	attrSetBalance := utils.AttrSetBalance{
+		Tenant: acntAttrs.Tenant, Account: acntAttrs.Account,
+		BalanceType: utils.DATA,
+		Value:       eAcntVal,
+		Balance: map[string]interface{}{
+			utils.ID: "testSessionsDataTTLLastUsage",
+		},
+	}
+	var reply string
+	if err := sDataRPC.Call(utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Received: %s", reply)
+	}
+	if err := sDataRPC.Call(utils.APIerSv2GetAccount, acntAttrs, &acnt); err != nil {
+		t.Error(err)
+	} else if totalVal := acnt.BalanceMap[utils.DATA].GetTotalValue(); totalVal != eAcntVal {
+		t.Errorf("Expected: %f, received: %f", eAcntVal, totalVal)
+	}
+
+	usage := int64(1024)
+	initArgs := &V1InitSessionArgs{
+		InitSession: true,
+		Opts: map[string]interface{}{
+			utils.SessionTTLLastUsage: "2048",
+		},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSessionsDataTTLLastUsage",
+			Event: map[string]interface{}{
+				utils.EVENT_NAME:  "testSessionsDataTTLLastUsage",
+				utils.ToR:         utils.DATA,
+				utils.OriginID:    "testSessionsDataTTLLastUsage",
+				utils.Account:     acntAttrs.Account,
+				utils.Subject:     acntAttrs.Account,
+				utils.Destination: utils.DATA,
+				utils.Category:    "data",
+				utils.Tenant:      "cgrates.org",
+				utils.RequestType: utils.META_PREPAID,
+				utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
+				utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
+				utils.Usage:       "1024",
+			},
+		},
+	}
+
+	var initRpl *V1InitSessionReply
+	if err := sDataRPC.Call(utils.SessionSv1InitiateSession,
+		initArgs, &initRpl); err != nil {
+		t.Error(err)
+	}
+	if initRpl.MaxUsage.Nanoseconds() != usage {
+		t.Errorf("Expecting : %+v, received: %+v", usage, initRpl.MaxUsage.Nanoseconds())
+	}
+
+	eAcntVal = 101376.000000
+	if err := sDataRPC.Call(utils.APIerSv2GetAccount, acntAttrs, &acnt); err != nil {
+		t.Error(err)
+	} else if dataVal := acnt.BalanceMap[utils.DATA].GetTotalValue(); dataVal != eAcntVal {
+		t.Errorf("Expected: %f, received: %f", eAcntVal, dataVal)
+	}
+	time.Sleep(70 * time.Millisecond)
+
+	eAcntVal = 99328.000000 // 101376.000000 ( units remains after init session ) - SessionTTLLastUsage ( 2048 )
+	if err := sDataRPC.Call(utils.APIerSv2GetAccount, acntAttrs, &acnt); err != nil {
+		t.Error(err)
+	} else if dataVal := acnt.BalanceMap[utils.DATA].GetTotalValue(); dataVal != eAcntVal {
+		t.Errorf("Expected: %f, received: %f", eAcntVal, dataVal)
+	}
+
+	// verify the cdr usage to be 3072 (  init usage ( 1024 ) + SessionTTLLastUsage ( 2048 ) )
+	var cdrs []*engine.ExternalCDR
+	req := utils.RPCCDRsFilter{Accounts: []string{acntAttrs.Account}}
+	if err := sDataRPC.Call(utils.APIerSv2GetCDRs, &req, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+	} else {
+		if cdrs[0].Usage != "3072" {
+			t.Errorf("Unexpected CDR Usage received, cdr: %v %+v ", cdrs[0].Usage, cdrs[0])
+		}
 	}
 }
 
