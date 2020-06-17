@@ -39,6 +39,8 @@ cgrates (0.10.1) UNRELEASED; urgency=medium
   * [SupplierS] Allow multiple suppliers with the same ID
   * [Engine] Skip caching if limit is 0
   * [CacheS] Avoid long recaching
+  * [SessionS] Use correctly SessionTTLUsage when calculate end usage in case of terminate session from ttl mechanism
+  * [SessionS] Add SessionTLLLastUsage as option for an extra debit in case of ttl mechanism
 
  -- DanB <danb@cgrates.org>   Wed, 5 May 2020 15:22:59 +0200
 

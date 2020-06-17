@@ -353,6 +353,7 @@ const CGRATES_CFG_JSON = `
 	//"session_ttl_max_delay": "",			// activates session_ttl randomization and limits the maximum possible delay
 	//"session_ttl_last_used": "",			// tweak LastUsed for sessions timing-out, not defined by default
 	//"session_ttl_usage": "",				// tweak Usage for sessions timing-out, not defined by default
+	//"session_last_usage": "",				// tweak LastUsage for session timing-out, not defined by default
 	"session_indexes": [],					// index sessions based on these fields for GetActiveSessions API
 	"client_protocol": 1.0,					// version of protocol to use when acting as JSON-PRC client <"0","1.0">
 	"channel_sync_interval": "0",			// sync channels to detect stale sessions (0 to disable)
