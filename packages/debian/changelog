@@ -7,6 +7,7 @@ cgrates (0.10.2~dev) UNRELEASED; urgency=medium
   * [ERs] Renamed *default reader folders
   * [General] Added *mo+extraDuration time support (e.g. *mo+1h will 
     be time.Now() + 1 month + 1 hour)
+  * [SessionS] Use correctly SessionTTLUsage when calculate end usage in case of terminate session from ttl mechanism
 
  -- DanB <danb@cgrates.org>  Tue, 12 May 2020 13:08:15 +0300
 
