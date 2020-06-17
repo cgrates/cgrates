@@ -301,11 +301,7 @@ func (sS *SessionS) setSTerminator(s *Session, opts engine.MapEvent) {
 	go func() {
 		select {
 		case <-s.sTerminator.timer.C:
-			endUsage := s.sTerminator.ttl
-			if s.sTerminator.ttlUsage != nil {
-				endUsage = *s.sTerminator.ttlUsage
-			}
-			sS.forceSTerminate(s, endUsage,
+			sS.forceSTerminate(s, s.sTerminator.ttl, s.sTerminator.ttlUsage,
 				s.sTerminator.ttlLastUsed)
 		case <-s.sTerminator.endChan:
 			s.sTerminator.timer.Stop()
@@ -316,10 +312,10 @@ func (sS *SessionS) setSTerminator(s *Session, opts engine.MapEvent) {
 
 // forceSTerminate is called when a session times-out or it is forced from CGRateS side
 // not thread safe
-func (sS *SessionS) forceSTerminate(s *Session, extraDebit time.Duration, lastUsed *time.Duration) (err error) {
-	if extraDebit != 0 {
+func (sS *SessionS) forceSTerminate(s *Session, extraUsage time.Duration, tUsage, lastUsed *time.Duration) (err error) {
+	if extraUsage != 0 {
 		for i := range s.SRuns {
-			if _, err = sS.debitSession(s, i, extraDebit, lastUsed); err != nil {
+			if _, err = sS.debitSession(s, i, extraUsage, lastUsed); err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf(
 						"<%s> failed debitting cgrID %s, sRunIdx: %d, err: %s",
@@ -328,7 +324,7 @@ func (sS *SessionS) forceSTerminate(s *Session, extraDebit time.Duration, lastUs
 		}
 	}
 	// we apply the correction before
-	if err = sS.endSession(s, nil, nil, nil, false); err != nil {
+	if err = sS.endSession(s, tUsage, lastUsed, nil, false); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf(
 				"<%s> failed force terminating session with ID <%s>, err: <%s>",
@@ -517,7 +513,7 @@ func (sS *SessionS) debitLoopSession(s *Session, sRunIdx int,
 					fmt.Sprintf("<%s> could not disconnect session: %s, error: %s",
 						utils.SessionS, s.cgrID(), err.Error()))
 			}
-			if err = sS.forceSTerminate(s, 0, nil); err != nil {
+			if err = sS.forceSTerminate(s, 0, nil, nil); err != nil {
 				utils.Logger.Warning(fmt.Sprintf("<%s> failed force-terminating session: <%s>, err: <%s>", utils.SessionS, s.cgrID(), err))
 			}
 			s.Unlock()
@@ -551,7 +547,7 @@ func (sS *SessionS) debitLoopSession(s *Session, sRunIdx int,
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> could not disconnect session: <%s>, error: <%s>",
 						utils.SessionS, s.cgrID(), err.Error()))
-				if err = sS.forceSTerminate(s, 0, nil); err != nil {
+				if err = sS.forceSTerminate(s, 0, nil, nil); err != nil {
 					utils.Logger.Warning(fmt.Sprintf("<%s> failed force-terminating session: <%s>, err: <%s>",
 						utils.SessionS, s.cgrID(), err))
 				}
@@ -1312,7 +1308,7 @@ func (sS *SessionS) syncSessions() {
 		if len(ss) == 0 {
 			continue
 		}
-		if err := sS.forceSTerminate(ss[0], 0, nil); err != nil {
+		if err := sS.forceSTerminate(ss[0], 0, nil, nil); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> failed force-terminating session: <%s>, err: <%s>",
 					utils.SessionS, cgrID, err.Error()))
@@ -3587,7 +3583,7 @@ func (sS *SessionS) BiRPCv1ForceDisconnect(clnt rpcclient.ClientConnector,
 		if len(ss) == 0 {
 			continue
 		}
-		if errTerm := sS.forceSTerminate(ss[0], 0, nil); errTerm != nil {
+		if errTerm := sS.forceSTerminate(ss[0], 0, nil, nil); errTerm != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf(
 					"<%s> failed force-terminating session with id: <%s>, err: <%s>",

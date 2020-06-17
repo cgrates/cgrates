@@ -60,8 +60,7 @@ type Rate struct {
 	Increment          time.Duration             // RateIncrement
 	Blocker            bool                      // RateBlocker will make this rate recurrent, deactivating further intervals
 
-	val     *utils.Decimal // cached version of the Decimal
-	grpItvl *time.Duration // populated from IntervalStart if duration is provided
+	val *utils.Decimal // cached version of the Decimal
 }
 
 // RateProfileWithArgDispatcher is used in replicatorV1 for dispatcher
