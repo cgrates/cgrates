@@ -1052,7 +1052,6 @@ func testITTestIndexingMetaNot(t *testing.T) {
 }
 
 func testITIndexRateProfile(t *testing.T) {
-	rfi := NewFilterIndexer(onStor, utils.RatePrefix, "cgrates.org:RP1")
 	rPrf := &RateProfile{
 		Tenant:           "cgrates.org",
 		ID:               "RP1",
@@ -1065,7 +1064,7 @@ func testITIndexRateProfile(t *testing.T) {
 		MaxCost:          0.6,
 		MaxCostStrategy:  "*free",
 		Rates: map[string]*Rate{
-			"FIRST_GI": &Rate{
+			"FIRST_GI": {
 				ID:        "FIRST_GI",
 				FilterIDs: []string{"*string:~*req.Category:call"},
 				Weight:    0,
@@ -1074,7 +1073,7 @@ func testITIndexRateProfile(t *testing.T) {
 				Increment: time.Duration(1 * time.Minute),
 				Blocker:   false,
 			},
-			"SECOND_GI": &Rate{
+			"SECOND_GI": {
 				ID:        "SECOND_GI",
 				FilterIDs: []string{"*string:~*req.Category:voice"},
 				Weight:    10,
@@ -1088,26 +1087,26 @@ func testITIndexRateProfile(t *testing.T) {
 	if err := dataManager.SetRateProfile(rPrf, true); err != nil {
 		t.Error(err)
 	}
-	eIdxes := map[string]utils.StringMap{
+	eIdxes := map[string]utils.StringSet{
 		"*string:~*req.Category:call": {
-			"FIRST_GI": true,
+			"FIRST_GI": struct{}{},
 		},
 		"*string:~*req.Category:voice": {
-			"SECOND_GI": true,
+			"SECOND_GI": struct{}{},
 		},
 	}
-	if rcvIdx, err := dataManager.GetFilterIndexes(
-		utils.PrefixToIndexCache[rfi.itemType], rfi.dbKeySuffix,
-		utils.EmptyString, nil); err != nil {
+	if rcvIdx, err := dataManager.GetIndexes(
+		utils.CacheRateFilterIndexes, "cgrates.org:RP1",
+		utils.EmptyString, true, true); err != nil {
 		t.Error(err)
 	} else {
 		if !reflect.DeepEqual(eIdxes, rcvIdx) {
-			t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
+			t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(eIdxes), utils.ToJSON(rcvIdx))
 		}
 	}
 	// update the RateProfile by adding a new Rate
 	rPrf.Rates = map[string]*Rate{
-		"FIRST_GI": &Rate{
+		"FIRST_GI": {
 			ID:        "FIRST_GI",
 			FilterIDs: []string{"*string:~*req.Category:call"},
 			Weight:    0,
@@ -1116,7 +1115,7 @@ func testITIndexRateProfile(t *testing.T) {
 			Increment: time.Duration(1 * time.Minute),
 			Blocker:   false,
 		},
-		"SECOND_GI": &Rate{
+		"SECOND_GI": {
 			ID:        "SECOND_GI",
 			FilterIDs: []string{"*string:~*req.Category:voice"},
 			Weight:    10,
@@ -1125,7 +1124,7 @@ func testITIndexRateProfile(t *testing.T) {
 			Increment: time.Duration(1 * time.Second),
 			Blocker:   false,
 		},
-		"THIRD_GI": &Rate{
+		"THIRD_GI": {
 			ID:        "THIRD_GI",
 			FilterIDs: []string{"*string:~*req.Category:custom"},
 			Weight:    20,
@@ -1138,27 +1137,26 @@ func testITIndexRateProfile(t *testing.T) {
 	if err := dataManager.SetRateProfile(rPrf, true); err != nil {
 		t.Error(err)
 	}
-	eIdxes = map[string]utils.StringMap{
+	eIdxes = map[string]utils.StringSet{
 		"*string:~*req.Category:call": {
-			"FIRST_GI": true,
+			"FIRST_GI": struct{}{},
 		},
 		"*string:~*req.Category:voice": {
-			"SECOND_GI": true,
+			"SECOND_GI": struct{}{},
 		},
 		"*string:~*req.Category:custom": {
-			"THIRD_GI": true,
+			"THIRD_GI": struct{}{},
 		},
 	}
-	if rcvIdx, err := dataManager.GetFilterIndexes(
-		utils.PrefixToIndexCache[rfi.itemType], rfi.dbKeySuffix,
-		utils.EmptyString, nil); err != nil {
+	if rcvIdx, err := dataManager.GetIndexes(
+		utils.CacheRateFilterIndexes, "cgrates.org:RP1",
+		utils.EmptyString, true, true); err != nil {
 		t.Error(err)
 	} else {
 		if !reflect.DeepEqual(eIdxes, rcvIdx) {
 			t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
 		}
 	}
-	rfi2 := NewFilterIndexer(onStor, utils.RatePrefix, "cgrates.org:RP2")
 	rPrf2 := &RateProfile{
 		Tenant:           "cgrates.org",
 		ID:               "RP2",
@@ -1170,7 +1168,7 @@ func testITIndexRateProfile(t *testing.T) {
 		MaxCost:          0.6,
 		MaxCostStrategy:  "*free",
 		Rates: map[string]*Rate{
-			"CUSTOM_RATE1": &Rate{
+			"CUSTOM_RATE1": {
 				ID:        "CUSTOM_RATE1",
 				FilterIDs: []string{"*string:~*req.Subject:1001"},
 				Weight:    0,
@@ -1179,7 +1177,7 @@ func testITIndexRateProfile(t *testing.T) {
 				Increment: time.Duration(1 * time.Minute),
 				Blocker:   false,
 			},
-			"CUSTOM_RATE2": &Rate{
+			"CUSTOM_RATE2": {
 				ID:        "CUSTOM_RATE2",
 				FilterIDs: []string{"*string:~*req.Subject:1001", "*string:~*req.Category:call"},
 				Weight:    10,
@@ -1193,18 +1191,18 @@ func testITIndexRateProfile(t *testing.T) {
 	if err := dataManager.SetRateProfile(rPrf2, true); err != nil {
 		t.Error(err)
 	}
-	eIdxes = map[string]utils.StringMap{
+	eIdxes = map[string]utils.StringSet{
 		"*string:~*req.Subject:1001": {
-			"CUSTOM_RATE1": true,
-			"CUSTOM_RATE2": true,
+			"CUSTOM_RATE1": struct{}{},
+			"CUSTOM_RATE2": struct{}{},
 		},
 		"*string:~*req.Category:call": {
-			"CUSTOM_RATE2": true,
+			"CUSTOM_RATE2": struct{}{},
 		},
 	}
-	if rcvIdx, err := dataManager.GetFilterIndexes(
-		utils.PrefixToIndexCache[rfi2.itemType], rfi2.dbKeySuffix,
-		utils.EmptyString, nil); err != nil {
+	if rcvIdx, err := dataManager.GetIndexes(
+		utils.CacheRateFilterIndexes, "cgrates.org:RP2",
+		utils.EmptyString, true, true); err != nil {
 		t.Error(err)
 	} else {
 		if !reflect.DeepEqual(eIdxes, rcvIdx) {
