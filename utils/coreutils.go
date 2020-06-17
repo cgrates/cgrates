@@ -183,6 +183,15 @@ func Round(x float64, prec int, method string) float64 {
 	return rounder / pow
 }
 
+func getAddDuration(tmStr string) (addDur time.Duration, err error) {
+	eDurIdx := strings.Index(tmStr, "+")
+	if eDurIdx == -1 {
+		return
+	}
+	return time.ParseDuration(tmStr[eDurIdx+1:])
+}
+
+// ParseTimeDetectLayout returns the time from string
 func ParseTimeDetectLayout(tmStr string, timezone string) (time.Time, error) {
 	tmStr = strings.TrimSpace(tmStr)
 	var nilTime time.Time
@@ -204,14 +213,18 @@ func ParseTimeDetectLayout(tmStr string, timezone string) (time.Time, error) {
 		return time.Now().AddDate(1, 0, 0), nil // add one year
 	case strings.HasPrefix(tmStr, "*month_end"):
 		expDate := GetEndOfMonth(time.Now())
-		if eDurIdx := strings.Index(tmStr, "+"); eDurIdx != -1 {
-			var extraDur time.Duration
-			if extraDur, err = time.ParseDuration(tmStr[eDurIdx+1:]); err != nil {
-				return nilTime, err
-			}
-			expDate = expDate.Add(extraDur)
+		extraDur, err := getAddDuration(tmStr)
+		if err != nil {
+			return nilTime, err
 		}
+		expDate = expDate.Add(extraDur)
 		return expDate, nil
+	case strings.HasPrefix(tmStr, "*mo"): // add one month and extra duration
+		extraDur, err := getAddDuration(tmStr)
+		if err != nil {
+			return nilTime, err
+		}
+		return time.Now().AddDate(0, 1, 0).Add(extraDur), nil
 	case astTimestamp.MatchString(tmStr):
 		return time.Parse("2006-01-02T15:04:05.999999999-0700", tmStr)
 	case rfc3339Rule.MatchString(tmStr):
@@ -272,7 +285,7 @@ func ParseTimeDetectLayout(tmStr string, timezone string) (time.Time, error) {
 	return nilTime, errors.New("Unsupported time format")
 }
 
-// returns a number equal or larger than the amount that exactly
+// RoundDuration returns a number equal or larger than the amount that exactly
 // is divisible to whole
 func RoundDuration(whole, amount time.Duration) time.Duration {
 	a, w := float64(amount), float64(whole)

@@ -14,7 +14,7 @@ cgrates (0.11.0~dev) UNRELEASED; urgency=medium
   * [Templates] Added new dataconvertor: *ip2hex
   * [AgentS] Added support for *group type and correctly overwrite
     the values in case of *variable
-  * [EventReader] Correctly populate ConcurrentRequest from config
+  * [ERs] Correctly populate ConcurrentRequest from config
   * [FilterS] Updated *exists to dynamically compute the path if the
     path
   * [AgentS] Added support for *tmp path
@@ -67,6 +67,7 @@ cgrates (0.11.0~dev) UNRELEASED; urgency=medium
   * [ERs] Added support to reference CSV fields by the column name
   * [ERs] Renamed *default reader folders
   * [FilterS] Updated Filter indexes
+  * [General] Added *mo+extraDuration time support (e.g. *mo+1h will be time.Now() + 1 month + 1 hour)
 
  -- DanB <danb@cgrates.org>  Wed, 19 Feb 2020 13:25:52 +0200
 
