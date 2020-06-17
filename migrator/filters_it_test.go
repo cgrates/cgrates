@@ -49,40 +49,42 @@ var sTestsFltrIT = []func(t *testing.T){
 }
 
 func TestFiltersMigrateITRedis(t *testing.T) {
-	inPath := path.Join(*dataDir, "conf", "samples", "tutmysql")
-	testFltrStart("TestFiltersMigrateITRedis", inPath, inPath, utils.Migrate, t)
+	inPath = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	outPath = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	testFltrStart("TestFiltersMigrateITRedis", utils.Migrate, t)
 }
 
 func TestFiltersMigrateITMongo(t *testing.T) {
-	inPath := path.Join(*dataDir, "conf", "samples", "tutmongo")
-	testFltrStart("TestFiltersMigrateITMongo", inPath, inPath, utils.Migrate, t)
+	inPath = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	outPath = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	testFltrStart("TestFiltersMigrateITMongo", utils.Migrate, t)
 }
 
 func TestFiltersITMove(t *testing.T) {
-	inPath := path.Join(*dataDir, "conf", "samples", "tutmongo")
-	outPath := path.Join(*dataDir, "conf", "samples", "tutmysql")
-	testFltrStart("TestFiltersITMove", inPath, outPath, utils.Move, t)
+	inPath = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	outPath = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	testFltrStart("TestFiltersITMove", utils.Move, t)
 }
 
 func TestFiltersITMigrateMongo2Redis(t *testing.T) {
-	inPath := path.Join(*dataDir, "conf", "samples", "tutmongo")
-	outPath := path.Join(*dataDir, "conf", "samples", "tutmysql")
-	testFltrStart("TestFiltersITMigrateMongo2Redis", inPath, outPath, utils.Migrate, t)
+	inPath = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	outPath = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	testFltrStart("TestFiltersITMigrateMongo2Redis", utils.Migrate, t)
 }
 
 func TestFiltersITMoveEncoding(t *testing.T) {
-	inPath := path.Join(*dataDir, "conf", "samples", "tutmongo")
-	outPath := path.Join(*dataDir, "conf", "samples", "tutmongojson")
-	testFltrStart("TestFiltersITMoveEncoding", inPath, outPath, utils.Move, t)
+	inPath = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	outPath = path.Join(*dataDir, "conf", "samples", "tutmongojson")
+	testFltrStart("TestFiltersITMoveEncoding", utils.Move, t)
 }
 
 func TestFiltersITMoveEncoding2(t *testing.T) {
-	inPath := path.Join(*dataDir, "conf", "samples", "tutmysql")
-	outPath := path.Join(*dataDir, "conf", "samples", "tutmysqljson")
-	testFltrStart("TestFiltersITMoveEncoding2", inPath, outPath, utils.Move, t)
+	inPath = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	outPath = path.Join(*dataDir, "conf", "samples", "tutmysqljson")
+	testFltrStart("TestFiltersITMoveEncoding2", utils.Move, t)
 }
 
-func testFltrStart(testName, inPath, outPath, action string, t *testing.T) {
+func testFltrStart(testName, action string, t *testing.T) {
 	var err error
 	fltrAction = action
 	if fltrCfgIn, err = config.NewCGRConfigFromPath(inPath); err != nil {
@@ -114,8 +116,13 @@ func testFltrITConnect(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fltrMigrator, err = NewMigrator(dataDBIn, dataDBOut,
-		nil, nil, false, false, false, false)
+	if reflect.DeepEqual(inPath, outPath) {
+		fltrMigrator, err = NewMigrator(dataDBIn, dataDBOut, nil, nil,
+			false, true, false, false)
+	} else {
+		fltrMigrator, err = NewMigrator(dataDBIn, dataDBOut, nil, nil,
+			false, false, false, false)
+	}
 	if err != nil {
 		log.Fatal(err)
 	}

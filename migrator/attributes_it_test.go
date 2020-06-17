@@ -72,7 +72,8 @@ func TestAttributeITRedis(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	attrCfgOut, err = config.NewCGRConfigFromPath(attrPathIn)
+	attrPathOut = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	attrCfgOut, err = config.NewCGRConfigFromPath(attrPathOut)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -90,7 +91,8 @@ func TestAttributeITMongo(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	attrCfgOut, err = config.NewCGRConfigFromPath(attrPathIn)
+	attrPathOut = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	attrCfgOut, err = config.NewCGRConfigFromPath(attrPathOut)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -213,9 +215,14 @@ func testAttrITConnect(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	attrMigrator, err = NewMigrator(dataDBIn, dataDBOut,
-		nil, nil,
-		false, false, false, false)
+
+	if reflect.DeepEqual(attrPathIn, attrPathOut) {
+		attrMigrator, err = NewMigrator(dataDBIn, dataDBOut, nil, nil,
+			false, true, false, false)
+	} else {
+		attrMigrator, err = NewMigrator(dataDBIn, dataDBOut, nil, nil,
+			false, false, false, false)
+	}
 	if err != nil {
 		log.Fatal(err)
 	}

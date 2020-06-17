@@ -55,7 +55,8 @@ func TestAccountMigrateITRedis(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	accCfgOut, err = config.NewCGRConfigFromPath(accPathIn)
+	accPathOut = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	accCfgOut, err = config.NewCGRConfigFromPath(accPathOut)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -73,7 +74,8 @@ func TestAccountMigrateITMongo(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	accCfgOut, err = config.NewCGRConfigFromPath(accPathIn)
+	accPathOut = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	accCfgOut, err = config.NewCGRConfigFromPath(accPathOut)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -177,20 +179,24 @@ func testAccITConnect(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	accMigrator, err = NewMigrator(dataDBIn, dataDBOut,
-		nil, nil,
-		false, false, false, false)
+	if reflect.DeepEqual(accPathIn, accPathOut) {
+		accMigrator, err = NewMigrator(dataDBIn, dataDBOut, nil, nil,
+			false, true, false, false)
+	} else {
+		accMigrator, err = NewMigrator(dataDBIn, dataDBOut, nil, nil,
+			false, false, false, false)
+	}
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
 func testAccITFlush(t *testing.T) {
-	accMigrator.dmOut.DataManager().DataDB().Flush("")
+	accMigrator.dmOut.DataManager().DataDB().Flush(utils.EmptyString)
 	if err := engine.SetDBVersions(accMigrator.dmOut.DataManager().DataDB()); err != nil {
 		t.Error("Error  ", err.Error())
 	}
-	accMigrator.dmIN.DataManager().DataDB().Flush("")
+	accMigrator.dmIN.DataManager().DataDB().Flush(utils.EmptyString)
 	if err := engine.SetDBVersions(accMigrator.dmIN.DataManager().DataDB()); err != nil {
 		t.Error("Error  ", err.Error())
 	}
@@ -344,19 +350,24 @@ func testAccITMigrateAndMove(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		if !reflect.DeepEqual(testAccount.ID, result.ID) {
-			t.Errorf("Expecting: %+v, received: %+v", testAccount.ID, result.ID)
-		} else if !reflect.DeepEqual(testAccount.ActionTriggers, result.ActionTriggers) {
-			t.Errorf("Expecting: %+v, received: %+v", testAccount.ActionTriggers, result.ActionTriggers)
-		} else if !reflect.DeepEqual(testAccount.BalanceMap, result.BalanceMap) {
-			t.Errorf("Expecting: %+v, received: %+v", testAccount.BalanceMap, result.BalanceMap)
-		} else if !reflect.DeepEqual(testAccount.UnitCounters, result.UnitCounters) {
-			t.Errorf("Expecting: %+v, received: %+v", testAccount.UnitCounters, result.UnitCounters)
+		if result != nil {
+			if !reflect.DeepEqual(testAccount.ID, result.ID) {
+				t.Errorf("Expecting: %+v, received: %+v", testAccount.ID, result.ID)
+			} else if !reflect.DeepEqual(testAccount.ActionTriggers, result.ActionTriggers) {
+				t.Errorf("Expecting: %+v, received: %+v", testAccount.ActionTriggers, result.ActionTriggers)
+			} else if !reflect.DeepEqual(testAccount.BalanceMap, result.BalanceMap) {
+				t.Errorf("Expecting: %+v, received: %+v", testAccount.BalanceMap, result.BalanceMap)
+			} else if !reflect.DeepEqual(testAccount.UnitCounters, result.UnitCounters) {
+				t.Errorf("Expecting: %+v, received: %+v", testAccount.UnitCounters, result.UnitCounters)
+			}
+		} else {
+			t.Errorf("Expecting to be not nil")
 		}
 		//check if old account was deleted
 		result, err = accMigrator.dmIN.DataManager().GetAccount(testAccount.ID)
 		if err != utils.ErrNotFound {
 			t.Error(err)
 		}
+
 	}
 }

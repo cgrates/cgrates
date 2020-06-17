@@ -43,22 +43,22 @@ var sTestsLoadIdsIT = []func(t *testing.T){
 }
 
 func TestLoadIDsMigrateITRedis(t *testing.T) {
-	inPath := path.Join(*dataDir, "conf", "samples", "tutmysql")
-	testLoadIdsStart("TestLoadIDsMigrateITRedis", inPath, inPath, t)
+	inPath = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	testLoadIdsStart("TestLoadIDsMigrateITRedis", t)
 }
 
 func TestLoadIDsMigrateITMongo(t *testing.T) {
-	inPath := path.Join(*dataDir, "conf", "samples", "tutmongo")
-	testLoadIdsStart("TestLoadIDsMigrateITMongo", inPath, inPath, t)
+	inPath = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	testLoadIdsStart("TestLoadIDsMigrateITMongo", t)
 }
 
 func TestLoadIDsITMigrateMongo2Redis(t *testing.T) {
-	inPath := path.Join(*dataDir, "conf", "samples", "tutmongo")
-	outPath := path.Join(*dataDir, "conf", "samples", "tutmysql")
-	testLoadIdsStart("TestLoadIDsITMigrateMongo2Redis", inPath, outPath, t)
+	inPath = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	outPath = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	testLoadIdsStart("TestLoadIDsITMigrateMongo2Redis", t)
 }
 
-func testLoadIdsStart(testName, inPath, outPath string, t *testing.T) {
+func testLoadIdsStart(testName string, t *testing.T) {
 	var err error
 	if loadCfgIn, err = config.NewCGRConfigFromPath(inPath); err != nil {
 		t.Fatal(err)
@@ -90,8 +90,13 @@ func testLoadIdsITConnect(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	loadMigrator, err = NewMigrator(dataDBIn, dataDBOut,
-		nil, nil, false, false, false, false)
+	if inPath == outPath {
+		loadMigrator, err = NewMigrator(dataDBIn, dataDBOut,
+			nil, nil, false, true, false, false)
+	} else {
+		loadMigrator, err = NewMigrator(dataDBIn, dataDBOut,
+			nil, nil, false, false, false, false)
+	}
 	if err != nil {
 		log.Fatal(err)
 	}
