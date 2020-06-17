@@ -407,6 +407,18 @@ func TestParseTimeDetectLayout(t *testing.T) {
 	} else if expected.Sub(date).Seconds() > 1 {
 		t.Errorf("received: %+v", date)
 	}
+	expected = time.Now().AddDate(0, 1, 0)
+	if date, err := ParseTimeDetectLayout("*mo", ""); err != nil {
+		t.Error(err)
+	} else if expected.Sub(date).Seconds() > 1 {
+		t.Errorf("received: %+v", date)
+	}
+	expected = time.Now().AddDate(0, 1, 0).Add(time.Hour + 2*time.Minute)
+	if date, err := ParseTimeDetectLayout("*mo+1h2m", ""); err != nil {
+		t.Error(err)
+	} else if expected.Sub(date).Seconds() > 1 {
+		t.Errorf("received: %+v", date)
+	}
 	expected = time.Now().AddDate(1, 0, 0)
 	if date, err := ParseTimeDetectLayout("*yearly", ""); err != nil {
 		t.Error(err)
@@ -427,6 +439,12 @@ func TestParseTimeDetectLayout(t *testing.T) {
 		t.Errorf("expecting: %+v, received: %+v", expected, date)
 	}
 	if date, err := ParseTimeDetectLayout("*month_end+xyz", ""); err == nil {
+		t.Error("Expecting error 'time: invalid time duration', received: nil")
+	} else if date != nilTime {
+		t.Errorf("Expecting nilTime, received: %+v", date)
+	}
+
+	if date, err := ParseTimeDetectLayout("*mo+xyz", ""); err == nil {
 		t.Error("Expecting error 'time: invalid time duration', received: nil")
 	} else if date != nilTime {
 		t.Errorf("Expecting nilTime, received: %+v", date)
