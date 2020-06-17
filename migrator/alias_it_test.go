@@ -33,6 +33,8 @@ import (
 )
 
 var (
+	inPath      string
+	outPath     string
 	alsCfgIn    *config.CGRConfig
 	alsCfgOut   *config.CGRConfig
 	alsMigrator *Migrator
@@ -45,22 +47,24 @@ var sTestsAlsIT = []func(t *testing.T){
 }
 
 func TestAliasMigrateITRedis(t *testing.T) {
-	inPath := path.Join(*dataDir, "conf", "samples", "tutmysql")
-	testStart("TestAliasMigrateITRedis", inPath, inPath, t)
+	inPath = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	outPath = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	testStart("TestAliasMigrateITRedis", t)
 }
 
 func TestAliasMigrateITMongo(t *testing.T) {
-	inPath := path.Join(*dataDir, "conf", "samples", "tutmongo")
-	testStart("TestAliasMigrateITMongo", inPath, inPath, t)
+	inPath = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	outPath = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	testStart("TestAliasMigrateITMongo", t)
 }
 
 func TestAliasITMigrateMongo2Redis(t *testing.T) {
-	inPath := path.Join(*dataDir, "conf", "samples", "tutmongo")
-	outPath := path.Join(*dataDir, "conf", "samples", "tutmysql")
-	testStart("TestAliasITMigrateMongo2Redis", inPath, outPath, t)
+	inPath = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	outPath = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	testStart("TestAliasITMigrateMongo2Redis", t)
 }
 
-func testStart(testName, inPath, outPath string, t *testing.T) {
+func testStart(testName string, t *testing.T) {
 	var err error
 	if alsCfgIn, err = config.NewCGRConfigFromPath(inPath); err != nil {
 		t.Fatal(err)
@@ -91,8 +95,13 @@ func testAlsITConnect(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	alsMigrator, err = NewMigrator(dataDBIn, dataDBOut,
-		nil, nil, false, false, false, false)
+	if reflect.DeepEqual(inPath, outPath) {
+		alsMigrator, err = NewMigrator(dataDBIn, dataDBOut, nil, nil,
+			false, true, false, false)
+	} else {
+		alsMigrator, err = NewMigrator(dataDBIn, dataDBOut, nil, nil,
+			false, false, false, false)
+	}
 	if err != nil {
 		log.Fatal(err)
 	}

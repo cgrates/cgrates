@@ -53,7 +53,8 @@ func TestActionITRedis(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	actCfgOut, err = config.NewCGRConfigFromPath(actPathIn)
+	actPathOut = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	actCfgOut, err = config.NewCGRConfigFromPath(actPathOut)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -71,7 +72,8 @@ func TestActionITMongo(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	actCfgOut, err = config.NewCGRConfigFromPath(actPathIn)
+	actPathOut = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	actCfgOut, err = config.NewCGRConfigFromPath(actPathOut)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -175,9 +177,13 @@ func testActITConnect(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	actMigrator, err = NewMigrator(dataDBIn, dataDBOut,
-		nil, nil,
-		false, false, false, false)
+	if reflect.DeepEqual(actPathIn, actPathOut) {
+		actMigrator, err = NewMigrator(dataDBIn, dataDBOut, nil, nil,
+			false, true, false, false)
+	} else {
+		actMigrator, err = NewMigrator(dataDBIn, dataDBOut, nil, nil,
+			false, false, false, false)
+	}
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -139,9 +139,13 @@ func testRtPlITConnect(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	rtplMigrator, err = NewMigrator(dataDBIn, dataDBOut,
-		nil, nil,
-		false, false, false, false)
+	if rtplPathIn == rtplPathOut {
+		rtplMigrator, err = NewMigrator(dataDBIn, dataDBOut, nil, nil,
+			false, true, false, false)
+	} else {
+		rtplMigrator, err = NewMigrator(dataDBIn, dataDBOut, nil, nil,
+			false, false, false, false)
+	}
 	if err != nil {
 		log.Fatal(err)
 	}

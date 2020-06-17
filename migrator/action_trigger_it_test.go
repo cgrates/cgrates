@@ -21,7 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package migrator
 
 import (
-	//"flag"
 	"log"
 	"path"
 	"reflect"
@@ -55,7 +54,8 @@ func TestActionTriggerITRedis(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	actTrgCfgOut, err = config.NewCGRConfigFromPath(actTrgPathIn)
+	actTrgPathOut = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	actTrgCfgOut, err = config.NewCGRConfigFromPath(actTrgPathOut)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -73,7 +73,8 @@ func TestActionTriggerITMongo(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	actTrgCfgOut, err = config.NewCGRConfigFromPath(actTrgPathIn)
+	actTrgPathOut = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	actTrgCfgOut, err = config.NewCGRConfigFromPath(actTrgPathOut)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -158,9 +159,13 @@ func testActTrgITConnect(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	actTrgMigrator, err = NewMigrator(dataDBIn, dataDBOut,
-		nil, nil,
-		false, false, false, false)
+	if reflect.DeepEqual(actTrgPathIn, actTrgPathOut) {
+		actTrgMigrator, err = NewMigrator(dataDBIn, dataDBOut, nil, nil,
+			false, true, false, false)
+	} else {
+		actTrgMigrator, err = NewMigrator(dataDBIn, dataDBOut, nil, nil,
+			false, false, false, false)
+	}
 	if err != nil {
 		log.Fatal(err)
 	}

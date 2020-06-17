@@ -46,22 +46,24 @@ var sTestsDCIT = []func(t *testing.T){
 }
 
 func TestDerivedChargersVMigrateITRedis(t *testing.T) {
-	inPath := path.Join(*dataDir, "conf", "samples", "tutmysql")
-	testStartDC("TestDerivedChargersVMigrateITRedis", inPath, inPath, t)
+	inPath = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	outPath = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	testStartDC("TestDerivedChargersVMigrateITRedis", t)
 }
 
 func TestDerivedChargersVMigrateITMongo(t *testing.T) {
-	inPath := path.Join(*dataDir, "conf", "samples", "tutmongo")
-	testStartDC("TestDerivedChargersVMigrateITMongo", inPath, inPath, t)
+	inPath = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	outPath = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	testStartDC("TestDerivedChargersVMigrateITMongo", t)
 }
 
 func TestDerivedChargersVITMigrateMongo2Redis(t *testing.T) {
-	inPath := path.Join(*dataDir, "conf", "samples", "tutmongo")
-	outPath := path.Join(*dataDir, "conf", "samples", "tutmysql")
-	testStartDC("TestDerivedChargersVITMigrateMongo2Redis", inPath, outPath, t)
+	inPath = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	outPath = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	testStartDC("TestDerivedChargersVITMigrateMongo2Redis", t)
 }
 
-func testStartDC(testName, inPath, outPath string, t *testing.T) {
+func testStartDC(testName string, t *testing.T) {
 	var err error
 	if dcCfgIn, err = config.NewCGRConfigFromPath(inPath); err != nil {
 		t.Fatal(err)
@@ -92,8 +94,13 @@ func testDCITConnect(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	dcMigrator, err = NewMigrator(dataDBIn, dataDBOut,
-		nil, nil, false, false, false, false)
+	if reflect.DeepEqual(inPath, outPath) {
+		dcMigrator, err = NewMigrator(dataDBIn, dataDBOut, nil, nil,
+			false, true, false, false)
+	} else {
+		dcMigrator, err = NewMigrator(dataDBIn, dataDBOut, nil, nil,
+			false, false, false, false)
+	}
 	if err != nil {
 		log.Fatal(err)
 	}

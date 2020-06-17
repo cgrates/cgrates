@@ -53,7 +53,8 @@ func TestAccMigrateWithInternal(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	acc2CfgOut, err = config.NewCGRConfigFromPath(acc2PathIn)
+	acc2PathOut = path.Join(*dataDir, "conf", "samples", "migwithinternal")
+	acc2CfgOut, err = config.NewCGRConfigFromPath(acc2PathOut)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -101,9 +102,15 @@ func testAcc2ITConnect(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	acc2Migrator, err = NewMigrator(dataDBIn, dataDBOut,
-		storDBIn, storDBOut,
-		false, false, false, false)
+	if reflect.DeepEqual(acc2PathIn, acc2PathOut) {
+		acc2Migrator, err = NewMigrator(dataDBIn, dataDBOut,
+			storDBIn, storDBOut,
+			false, true, false, false)
+	} else {
+		acc2Migrator, err = NewMigrator(dataDBIn, dataDBOut,
+			storDBIn, storDBOut,
+			false, false, false, false)
+	}
 	if err != nil {
 		log.Fatal(err)
 	}

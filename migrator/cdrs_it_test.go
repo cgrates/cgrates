@@ -95,7 +95,7 @@ func testCdrITConnect(t *testing.T) {
 
 	cdrMigrator, err = NewMigrator(nil, nil,
 		storDBIn, storDBOut,
-		false, false, false, false)
+		false, true, false, false)
 	if err != nil {
 		t.Error(err)
 	}

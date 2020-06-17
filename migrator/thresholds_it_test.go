@@ -54,7 +54,8 @@ func TestThresholdsITRedis(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	trsCfgOut, err = config.NewCGRConfigFromPath(trsPathIn)
+	trsPathOut = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	trsCfgOut, err = config.NewCGRConfigFromPath(trsPathOut)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -72,7 +73,8 @@ func TestThresholdsITMongo(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	trsCfgOut, err = config.NewCGRConfigFromPath(trsPathIn)
+	trsPathOut = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	trsCfgOut, err = config.NewCGRConfigFromPath(trsPathOut)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -157,7 +159,7 @@ func testTrsITConnect(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if !reflect.DeepEqual(trsCfgIn, trsCfgOut) {
+	if reflect.DeepEqual(trsPathIn, trsPathOut) {
 		trsMigrator, err = NewMigrator(dataDBIn, dataDBOut, nil, nil,
 			false, true, false, false)
 	} else {
@@ -338,13 +340,12 @@ func testTrsITMigrateAndMove(t *testing.T) {
 		if err != nil {
 			t.Error("Error when migrating Thresholds ", err.Error())
 		}
-
 		result, err = trsMigrator.dmOut.DataManager().GetThresholdProfile(tresProf2.Tenant, tresProf2.ID, false, false, utils.NonTransactional)
 		if err != nil {
 			t.Error("Error when getting Thresholds ", err.Error())
 		}
 		if !reflect.DeepEqual(tresProf2, result) {
-			t.Errorf("Expectong: %+v, received: %+v", utils.ToJSON(tresProf2), utils.ToJSON(result))
+			t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(tresProf2), utils.ToJSON(result))
 		}
 
 		result, err = trsMigrator.dmOut.DataManager().GetThresholdProfile(tresProf3.Tenant, tresProf3.ID, false, false, utils.NonTransactional)
@@ -352,7 +353,7 @@ func testTrsITMigrateAndMove(t *testing.T) {
 			t.Error("Error when getting Thresholds ", err.Error())
 		}
 		if !reflect.DeepEqual(tresProf3, result) {
-			t.Errorf("Expectong: %+v, received: %+v", utils.ToJSON(tresProf3), utils.ToJSON(result))
+			t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(tresProf3), utils.ToJSON(result))
 		}
 
 	case utils.Move:

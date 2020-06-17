@@ -140,9 +140,13 @@ func testChrgITConnect(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	chrgMigrator, err = NewMigrator(dataDBIn, dataDBOut,
-		nil, nil,
-		false, false, false, false)
+	if reflect.DeepEqual(chrgPathIn, chrgPathOut) {
+		chrgMigrator, err = NewMigrator(dataDBIn, dataDBOut, nil, nil,
+			false, true, false, false)
+	} else {
+		chrgMigrator, err = NewMigrator(dataDBIn, dataDBOut, nil, nil,
+			false, false, false, false)
+	}
 	if err != nil {
 		log.Fatal(err)
 	}
