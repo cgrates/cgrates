@@ -93,6 +93,7 @@ type SessionSCfg struct {
 	SessionTTLMaxDelay  *time.Duration
 	SessionTTLLastUsed  *time.Duration
 	SessionTTLUsage     *time.Duration
+	SessionTTLLastUsage *time.Duration
 	SessionIndexes      utils.StringMap
 	ClientProtocol      float64
 	ChannelSyncInterval time.Duration
@@ -255,6 +256,13 @@ func (scfg *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) (err error) {
 			scfg.SessionTTLUsage = &sessionTTLUsage
 		}
 	}
+	if jsnCfg.Session_ttl_last_usage != nil {
+		if sessionTTLLastUsage, err := utils.ParseDurationWithNanosecs(*jsnCfg.Session_ttl_last_usage); err != nil {
+			return err
+		} else {
+			scfg.SessionTTLLastUsage = &sessionTTLLastUsage
+		}
+	}
 	if jsnCfg.Session_indexes != nil {
 		scfg.SessionIndexes = utils.StringMapFromSlice(*jsnCfg.Session_indexes)
 	}
@@ -319,6 +327,10 @@ func (scfg *SessionSCfg) AsMapInterface() map[string]interface{} {
 	var sessionTTLUsage string = "0"
 	if scfg.SessionTTLUsage != nil {
 		sessionTTLUsage = scfg.SessionTTLUsage.String()
+	}
+	var sessionTTLLastUsage string = "0"
+	if scfg.SessionTTLLastUsage != nil {
+		sessionTTLLastUsage = scfg.SessionTTLLastUsage.String()
 	}
 	var channelSyncInterval string = "0"
 	if scfg.ChannelSyncInterval != 0 {
@@ -431,6 +443,7 @@ func (scfg *SessionSCfg) AsMapInterface() map[string]interface{} {
 		utils.SessionTTLMaxDelayCfg:  sessionTTLMaxDelay,
 		utils.SessionTTLLastUsedCfg:  sessionTTLLastUsed,
 		utils.SessionTTLUsageCfg:     sessionTTLUsage,
+		utils.SessionTTLLastUsageCfg: sessionTTLLastUsage,
 		utils.SessionIndexesCfg:      scfg.SessionIndexes.Slice(),
 		utils.ClientProtocolCfg:      scfg.ClientProtocol,
 		utils.ChannelSyncIntervalCfg: channelSyncInterval,

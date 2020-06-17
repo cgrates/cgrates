@@ -69,6 +69,7 @@ cgrates (0.11.0~dev) UNRELEASED; urgency=medium
   * [FilterS] Updated Filter indexes
   * [General] Added *mo+extraDuration time support (e.g. *mo+1h will be time.Now() + 1 month + 1 hour)
   * [SessionS] Use correctly SessionTTLUsage when calculate end usage in case of terminate session from ttl mechanism
+  * [SessionS] Add SessionTLLLastUsage as option for an extra debit in case of ttl mechanism
 
  -- DanB <danb@cgrates.org>  Wed, 19 Feb 2020 13:25:52 +0200
 

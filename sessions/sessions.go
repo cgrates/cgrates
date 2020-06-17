@@ -197,11 +197,12 @@ type riFieldNameVal struct {
 
 // sTerminator holds the info needed to force-terminate sessions based on timer
 type sTerminator struct {
-	timer       *time.Timer
-	endChan     chan struct{}
-	ttl         time.Duration
-	ttlLastUsed *time.Duration
-	ttlUsage    *time.Duration
+	timer        *time.Timer
+	endChan      chan struct{}
+	ttl          time.Duration
+	ttlLastUsed  *time.Duration
+	ttlUsage     *time.Duration
+	ttlLastUsage *time.Duration
 }
 
 // setSTerminator installs a new terminator for a session
@@ -261,6 +262,21 @@ func (sS *SessionS) setSTerminator(s *Session, opts engine.MapEvent) {
 				utils.SessionS, utils.SessionTTLLastUsed, s.CGRID, opts.String(), err.Error()))
 		return
 	}
+	// LastUsage
+	var ttlLastUsage *time.Duration
+	if opts.HasField(utils.SessionTTLLastUsage) {
+		ttlLastUsage, err = opts.GetDurationPtr(utils.SessionTTLLastUsage)
+	} else if s.OptsStart.HasField(utils.SessionTTLLastUsage) {
+		ttlLastUsage, err = s.OptsStart.GetDurationPtr(utils.SessionTTLLastUsage)
+	} else {
+		ttlLastUsage = sS.cgrCfg.SessionSCfg().SessionTTLLastUsage
+	}
+	if err != nil {
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s>, cannot extract <%s> for session:<%s>, from it's options: <%s>, err: <%s>",
+				utils.SessionS, utils.SessionTTLLastUsage, s.CGRID, opts.String(), err.Error()))
+		return
+	}
 	// TTLUsage
 	var ttlUsage *time.Duration
 	if opts.HasField(utils.SessionTTLUsage) {
@@ -285,23 +301,31 @@ func (sS *SessionS) setSTerminator(s *Session, opts engine.MapEvent) {
 		if ttlUsage != nil {
 			s.sTerminator.ttlUsage = ttlUsage
 		}
+		if ttlLastUsage != nil {
+			s.sTerminator.ttlLastUsage = ttlLastUsage
+		}
 		s.sTerminator.timer.Reset(s.sTerminator.ttl)
 		return
 	}
 	// new set
 	s.sTerminator = &sTerminator{
-		timer:       time.NewTimer(ttl),
-		endChan:     make(chan struct{}),
-		ttl:         ttl,
-		ttlLastUsed: ttlLastUsed,
-		ttlUsage:    ttlUsage,
+		timer:        time.NewTimer(ttl),
+		endChan:      make(chan struct{}),
+		ttl:          ttl,
+		ttlLastUsed:  ttlLastUsed,
+		ttlUsage:     ttlUsage,
+		ttlLastUsage: ttlLastUsage,
 	}
 
 	// schedule automatic termination
 	go func() {
 		select {
 		case <-s.sTerminator.timer.C:
-			sS.forceSTerminate(s, s.sTerminator.ttl, s.sTerminator.ttlUsage,
+			lastUsage := s.sTerminator.ttl
+			if s.sTerminator.ttlLastUsage != nil {
+				lastUsage = *s.sTerminator.ttlLastUsage
+			}
+			sS.forceSTerminate(s, lastUsage, s.sTerminator.ttlUsage,
 				s.sTerminator.ttlLastUsed)
 		case <-s.sTerminator.endChan:
 			s.sTerminator.timer.Stop()
