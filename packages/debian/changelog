@@ -5,6 +5,8 @@ cgrates (0.10.2~dev) UNRELEASED; urgency=medium
   * [Server] Corectly log the server listen error
   * [ERs] Add *none EventReader type
   * [ERs] Renamed *default reader folders
+  * [General] Added *mo+extraDuration time support (e.g. *mo+1h will 
+    be time.Now() + 1 month + 1 hour)
 
  -- DanB <danb@cgrates.org>  Tue, 12 May 2020 13:08:15 +0300
 
@@ -19,7 +21,7 @@ cgrates (0.10.1) UNRELEASED; urgency=medium
   * [Templates] Added new dataconvertor: *ip2hex
   * [AgentRequest] Added support for *group type and correctly overwrite
     the values in case of *variable
-  * [EventReader] Correctly populate ConcurrentRequest from config in
+  * [ERs] Correctly populate ConcurrentRequest from config in
     EventReader
   * [SupplierS] In case of missing usage from Event use 1 minute as
     default value
@@ -34,7 +36,7 @@ cgrates (0.10.1) UNRELEASED; urgency=medium
   * [AgentRequest] Improved NavigableMap
   * [AgentRequest] FieldAsInterface return Data instead of NMItem
   * [SupplierS] Allow multiple suppliers with the same ID
-  * [Engine] Skip caching is limit is 0
+  * [Engine] Skip caching if limit is 0
   * [CacheS] Avoid long recaching
 
  -- DanB <danb@cgrates.org>   Wed, 5 May 2020 15:22:59 +0200
