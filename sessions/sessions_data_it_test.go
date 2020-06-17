@@ -608,11 +608,24 @@ func testSessionsDataTTLExpired(t *testing.T) {
 	}
 	time.Sleep(70 * time.Millisecond)
 
-	eAcntVal = 99328.000000
+	eAcntVal = 100352.000000
 	if err := sDataRPC.Call(utils.APIerSv2GetAccount, acntAttrs, &acnt); err != nil {
 		t.Error(err)
 	} else if dataVal := acnt.BalanceMap[utils.DATA].GetTotalValue(); dataVal != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, dataVal)
+	}
+
+	// verify the cdr usage SessionTTLUsage ( 2048)
+	var cdrs []*engine.ExternalCDR
+	req := utils.RPCCDRsFilter{Accounts: []string{acntAttrs.Account}}
+	if err := sDataRPC.Call(utils.APIerSv2GetCDRs, &req, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+	} else {
+		if cdrs[0].Usage != "2048" {
+			t.Errorf("Unexpected CDR Usage received, cdr: %v %+v ", cdrs[0].Usage, cdrs[0])
+		}
 	}
 }
 
@@ -735,7 +748,7 @@ func testSessionsDataTTLExpMultiUpdates(t *testing.T) {
 	}
 	time.Sleep(60 * time.Millisecond) // TTL will kick in
 
-	eAcntVal = 98304.000000 // 1MB is returned
+	eAcntVal = 100352.000000 // initial balance ( 102400 ) - SessionTTLUsage from update ( 2048 )
 	if err := sDataRPC.Call(utils.APIerSv2GetAccount, acntAttrs, &acnt); err != nil {
 		t.Error(err)
 	} else if dataVal := acnt.BalanceMap[utils.DATA].GetTotalValue(); dataVal != eAcntVal {
@@ -744,6 +757,19 @@ func testSessionsDataTTLExpMultiUpdates(t *testing.T) {
 	if err := sDataRPC.Call(utils.SessionSv1GetActiveSessions,
 		new(utils.SessionFilter), &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err, aSessions)
+	}
+
+	// verify the cdr usage SessionTTLUsage ( 2048)
+	var cdrs []*engine.ExternalCDR
+	req := utils.RPCCDRsFilter{Accounts: []string{acntAttrs.Account}}
+	if err := sDataRPC.Call(utils.APIerSv2GetCDRs, &req, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+	} else {
+		if cdrs[0].Usage != "2048" {
+			t.Errorf("Unexpected CDR Usage received, cdr: %v %+v ", cdrs[0].Usage, cdrs[0])
+		}
 	}
 }
 
