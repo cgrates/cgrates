@@ -190,6 +190,12 @@ func (v1rs *redisMigrator) setV1ActionPlans(x *v1ActionPlans) (err error) {
 	return
 }
 
+//rem
+func (v1rs *redisMigrator) remV1ActionPlans(x *v1ActionPlans) (err error) {
+	key := utils.ACTION_PLAN_PREFIX + (*x)[0].Id
+	return v1rs.rds.Cmd("DEL", key).Err
+}
+
 //Actions methods
 //get
 func (v1rs *redisMigrator) getV1Actions() (v1acs *v1Actions, err error) {

@@ -167,6 +167,15 @@ func (v1ms *mongoMigrator) setV1ActionPlans(x *v1ActionPlans) (err error) {
 	return
 }
 
+//rem
+func (v1ms *mongoMigrator) remV1ActionPlans(x *v1ActionPlans) (err error) {
+	for _, item := range *x {
+		_, err = v1ms.mgoDB.DB().Collection("actiontimings").DeleteOne(v1ms.mgoDB.GetContext(), bson.M{"id": item.Id})
+		return
+	}
+	return
+}
+
 //Actions methods
 //get
 func (v1ms *mongoMigrator) getV1Actions() (v1acs *v1Actions, err error) {

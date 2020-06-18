@@ -85,6 +85,11 @@ func (iDBMig *internalMigrator) setV1ActionPlans(x *v1ActionPlans) (err error) {
 	return utils.ErrNotImplemented
 }
 
+//rem
+func (iDBMig *internalMigrator) remV1ActionPlans(x *v1ActionPlans) (err error) {
+	return utils.ErrNotImplemented
+}
+
 //Actions methods
 //get
 func (iDBMig *internalMigrator) getV1Actions() (v1acs *v1Actions, err error) {
