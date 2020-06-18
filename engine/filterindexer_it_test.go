@@ -314,7 +314,6 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 	cloneTh1 := new(ThresholdProfile)
 	*cloneTh1 = *th
 	cloneTh1.FilterIDs = []string{"Filter2"}
-	time.Sleep(50 * time.Millisecond)
 	if err := dataManager.SetThresholdProfile(cloneTh1, true); err != nil {
 		t.Error(err)
 	}
@@ -362,7 +361,6 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 	clone2Th1 := new(ThresholdProfile)
 	*clone2Th1 = *th
 	clone2Th1.FilterIDs = []string{"Filter1", "Filter3"}
-	time.Sleep(50 * time.Millisecond)
 	if err := dataManager.SetThresholdProfile(clone2Th1, true); err != nil {
 		t.Error(err)
 	}
@@ -508,8 +506,22 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 		}
 	}
 	//Set AttributeProfile with 1 new context (con3)
-	attrProfile.Contexts = []string{"con3"}
-	time.Sleep(50 * time.Millisecond)
+	attrProfile = &AttributeProfile{ // recreate the profile because if we test on internal
+		Tenant:    "cgrates.org", // each update on the original item will update the item from DB
+		ID:        "AttrPrf",
+		FilterIDs: []string{"AttrFilter"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		},
+		Contexts: []string{"con3"},
+		Attributes: []*Attribute{
+			{
+				Path:  "FN1",
+				Value: config.NewRSRParsersMustCompile("Val1", true, utils.INFIELD_SEP),
+			},
+		},
+		Weight: 20,
+	}
 	if err := dataManager.SetAttributeProfile(attrProfile, true); err != nil {
 		t.Error(err)
 	}
@@ -524,10 +536,11 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 	}
 	//check if old contexts was delete
 	for _, ctx := range []string{"con1", "con2"} {
-		if _, err := dataManager.GetIndexes(
+		if _, err = dataManager.GetIndexes(
 			utils.CacheAttributeFilterIndexes,
 			utils.ConcatenatedKey(attrProfile.Tenant, ctx),
-			utils.EmptyString, false, false); err != nil && err != utils.ErrNotFound {
+			utils.EmptyString, false, false); err == nil ||
+			err != utils.ErrNotFound {
 			t.Error(err)
 		}
 	}
@@ -594,7 +607,6 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 		utils.MetaString, false, false); err != nil && err != utils.ErrNotFound {
 		t.Error(err)
 	}
-
 }
 
 func testITTestThresholdInlineFilterIndexing(t *testing.T) {
@@ -647,8 +659,17 @@ func testITTestThresholdInlineFilterIndexing(t *testing.T) {
 		t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
 	}
 	//Add an InlineFilter
-	th.FilterIDs = []string{"Filter1", "*string:Account:1001"}
-	time.Sleep(50 * time.Millisecond)
+	th = &ThresholdProfile{ // recreate the profile because if we test on internal
+		Tenant:             "cgrates.org", // each update on the original item will update the item from DB
+		ID:                 "THD_Test",
+		ActivationInterval: &utils.ActivationInterval{},
+		FilterIDs:          []string{"Filter1", "*string:Account:1001"},
+		MaxHits:            12,
+		MinSleep:           time.Duration(0 * time.Second),
+		Blocker:            true,
+		Weight:             1.4,
+		ActionIDs:          []string{},
+	}
 	if err := dataManager.SetThresholdProfile(th, true); err != nil {
 		t.Error(err)
 	}
@@ -668,7 +689,7 @@ func testITTestThresholdInlineFilterIndexing(t *testing.T) {
 		utils.EmptyString, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
-		t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
+		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(eIdxes), utils.ToJSON(rcvIdx))
 	}
 	//remove threshold
 	if err := dataManager.RemoveThresholdProfile(th.Tenant,
@@ -1105,33 +1126,45 @@ func testITIndexRateProfile(t *testing.T) {
 		}
 	}
 	// update the RateProfile by adding a new Rate
-	rPrf.Rates = map[string]*Rate{
-		"FIRST_GI": {
-			ID:        "FIRST_GI",
-			FilterIDs: []string{"*string:~*req.Category:call"},
-			Weight:    0,
-			Value:     0.12,
-			Unit:      time.Duration(1 * time.Minute),
-			Increment: time.Duration(1 * time.Minute),
-			Blocker:   false,
-		},
-		"SECOND_GI": {
-			ID:        "SECOND_GI",
-			FilterIDs: []string{"*string:~*req.Category:voice"},
-			Weight:    10,
-			Value:     0.06,
-			Unit:      time.Duration(1 * time.Minute),
-			Increment: time.Duration(1 * time.Second),
-			Blocker:   false,
-		},
-		"THIRD_GI": {
-			ID:        "THIRD_GI",
-			FilterIDs: []string{"*string:~*req.Category:custom"},
-			Weight:    20,
-			Value:     0.06,
-			Unit:      time.Duration(1 * time.Minute),
-			Increment: time.Duration(1 * time.Second),
-			Blocker:   false,
+	rPrf = &RateProfile{ // recreate the profile because if we test on internal
+		Tenant:           "cgrates.org", // each update on the original item will update the item from DB
+		ID:               "RP1",
+		FilterIDs:        []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002"},
+		Weight:           0,
+		ConnectFee:       0.1,
+		RoundingMethod:   "*up",
+		RoundingDecimals: 4,
+		MinCost:          0.1,
+		MaxCost:          0.6,
+		MaxCostStrategy:  "*free",
+		Rates: map[string]*Rate{
+			"FIRST_GI": {
+				ID:        "FIRST_GI",
+				FilterIDs: []string{"*string:~*req.Category:call"},
+				Weight:    0,
+				Value:     0.12,
+				Unit:      time.Duration(1 * time.Minute),
+				Increment: time.Duration(1 * time.Minute),
+				Blocker:   false,
+			},
+			"SECOND_GI": {
+				ID:        "SECOND_GI",
+				FilterIDs: []string{"*string:~*req.Category:voice"},
+				Weight:    10,
+				Value:     0.06,
+				Unit:      time.Duration(1 * time.Minute),
+				Increment: time.Duration(1 * time.Second),
+				Blocker:   false,
+			},
+			"THIRD_GI": {
+				ID:        "THIRD_GI",
+				FilterIDs: []string{"*string:~*req.Category:custom"},
+				Weight:    20,
+				Value:     0.06,
+				Unit:      time.Duration(1 * time.Minute),
+				Increment: time.Duration(1 * time.Second),
+				Blocker:   false,
+			},
 		},
 	}
 	if err := dataManager.SetRateProfile(rPrf, true); err != nil {
