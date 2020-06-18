@@ -74,6 +74,7 @@ var (
 		testInternalRemoteITGetChargerProfile,
 		testInternalRemoteITGetDispatcherProfile,
 		testInternalRemoteITGetDispatcherHost,
+		testInternalRemoteITGetRouteProfile,
 
 		testInternalReplicationSetThreshold,
 		testInternalMatchThreshold,
@@ -659,6 +660,7 @@ func testInternalRemoteITGetDispatcherProfile(t *testing.T) {
 		t.Errorf("Expecting : %+v, received: %+v", dispatcherProfile.DispatcherProfile, dsp)
 	}
 }
+
 func testInternalRemoteITGetDispatcherHost(t *testing.T) {
 	var reply string
 	if err := internalRPC.Call(utils.APIerSv1GetDispatcherHost,
@@ -699,6 +701,68 @@ func testInternalRemoteITGetDispatcherHost(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(dispatcherHost.DispatcherHost, dsp) {
 		t.Errorf("Expecting : %+v, received: %+v", dispatcherHost.DispatcherHost, dsp)
+	}
+}
+
+func testInternalRemoteITGetRouteProfile(t *testing.T) {
+	var rcv *engine.RateProfile
+	if err := internalRPC.Call(utils.APIerSv1GetRateProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "RP1"},
+		&rcv); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+
+	rPrf := &RateProfileWithCache{
+		RateProfileWithArgDispatcher: &engine.RateProfileWithArgDispatcher{
+			RateProfile: &engine.RateProfile{
+				Tenant:           "cgrates.org",
+				ID:               "RP1",
+				FilterIDs:        []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002"},
+				Weight:           0,
+				ConnectFee:       0.1,
+				RoundingMethod:   "*up",
+				RoundingDecimals: 4,
+				MinCost:          0.1,
+				MaxCost:          0.6,
+				MaxCostStrategy:  "*free",
+				Rates: map[string]*engine.Rate{
+					"FIRST_GI": &engine.Rate{
+						ID:        "FIRST_GI",
+						FilterIDs: []string{"*gi:~*req.Usage:0"},
+						Weight:    0,
+						Value:     0.12,
+						Unit:      time.Duration(1 * time.Minute),
+						Increment: time.Duration(1 * time.Minute),
+						Blocker:   false,
+					},
+					"SECOND_GI": &engine.Rate{
+						ID:        "SECOND_GI",
+						FilterIDs: []string{"*gi:~*req.Usage:1m"},
+						Weight:    10,
+						Value:     0.06,
+						Unit:      time.Duration(1 * time.Minute),
+						Increment: time.Duration(1 * time.Second),
+						Blocker:   false,
+					},
+				},
+			},
+		},
+	}
+	var reply string
+	if err := engineTwoRPC.Call(utils.APIerSv1SetRateProfile,
+		rPrf, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expecting : %+v, received: %+v", utils.OK, reply)
+	}
+
+	var rPfrg *engine.RateProfile
+	if err := internalRPC.Call(utils.APIerSv1GetRateProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "RP1"},
+		&rPfrg); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rPrf.RateProfileWithArgDispatcher.RateProfile, rPfrg) {
+		t.Errorf("Expecting : %+v, received: %+v", rPrf.RateProfileWithArgDispatcher.RateProfile, rPfrg)
 	}
 }
 
