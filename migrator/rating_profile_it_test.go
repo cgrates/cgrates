@@ -140,9 +140,13 @@ func testRtPrfITConnect(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	rtprflMigrator, err = NewMigrator(dataDBIn, dataDBOut,
-		nil, nil,
-		false, false, false, false)
+	if reflect.DeepEqual(rtprflPathIn, rtprflPathOut) {
+		rtprflMigrator, err = NewMigrator(dataDBIn, dataDBOut, nil, nil,
+			false, true, false, false)
+	} else {
+		rtprflMigrator, err = NewMigrator(dataDBIn, dataDBOut, nil, nil,
+			false, false, false, false)
+	}
 	if err != nil {
 		log.Fatal(err)
 	}

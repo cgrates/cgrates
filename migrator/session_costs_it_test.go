@@ -49,11 +49,11 @@ var sTestssCostIT = []func(t *testing.T){
 func TestSessionCostITMongo(t *testing.T) {
 	var err error
 	sCostPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
-	sCostPathOut = path.Join(*dataDir, "conf", "samples", "tutmongojson")
 	sCostCfgIn, err = config.NewCGRConfigFromPath(sCostPathIn)
 	if err != nil {
 		t.Error(err)
 	}
+	sCostPathOut = path.Join(*dataDir, "conf", "samples", "tutmongojson")
 	sCostCfgOut, err = config.NewCGRConfigFromPath(sCostPathOut)
 	if err != nil {
 		t.Error(err)
@@ -71,7 +71,8 @@ func TestSessionCostITMySql(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	sCostCfgOut, err = config.NewCGRConfigFromPath(sCostPathIn)
+	sCostPathOut = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	sCostCfgOut, err = config.NewCGRConfigFromPath(sCostPathOut)
 	if err != nil {
 		t.Error(err)
 	}
@@ -102,9 +103,13 @@ func testSessionCostITConnect(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	sCostMigrator, err = NewMigrator(nil, nil,
-		storDBIn, storDBOut,
-		false, false, false, false)
+	if actTrgPathIn == actTrgPathOut {
+		sCostMigrator, err = NewMigrator(nil, nil, storDBIn, storDBOut,
+			false, false, true, false)
+	} else {
+		sCostMigrator, err = NewMigrator(nil, nil, storDBIn, storDBOut,
+			false, false, false, false)
+	}
 	if err != nil {
 		t.Error(err)
 	}

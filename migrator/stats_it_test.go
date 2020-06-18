@@ -55,7 +55,8 @@ func TestStatsQueueITRedis(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	stsCfgOut, err = config.NewCGRConfigFromPath(stsPathIn)
+	stsPathOut = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	stsCfgOut, err = config.NewCGRConfigFromPath(stsPathOut)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -73,7 +74,8 @@ func TestStatsQueueITMongo(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	stsCfgOut, err = config.NewCGRConfigFromPath(stsPathIn)
+	stsPathOut = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	stsCfgOut, err = config.NewCGRConfigFromPath(stsPathOut)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -120,8 +122,13 @@ func testStsITConnect(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	stsMigrator, err = NewMigrator(dataDBIn, dataDBOut, nil, nil,
-		false, false, false, false)
+	if stsPathIn == stsPathOut {
+		stsMigrator, err = NewMigrator(dataDBIn, dataDBOut, nil, nil,
+			false, true, false, false)
+	} else {
+		stsMigrator, err = NewMigrator(dataDBIn, dataDBOut, nil, nil,
+			false, false, false, false)
+	}
 	if err != nil {
 		log.Fatal(err)
 	}
