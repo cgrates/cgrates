@@ -23,6 +23,7 @@ package dispatchers
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -52,6 +53,7 @@ var sTestsDspRpl = []func(t *testing.T){
 	testDspRplRatingPlan,
 	testDspRplRatingProfile,
 	testDspRplDestination,
+	testDspRplRateProfile,
 }
 
 //Test start here
@@ -1439,4 +1441,89 @@ func testDspRplLoadIDs(t *testing.T) {
 
 	// Start engine 1
 	allEngine.startEngine(t)
+}
+
+func testDspRplRateProfile(t *testing.T) {
+	// Set RateProfile
+	var replyStr string
+	rPrf := &engine.RateProfileWithArgDispatcher{
+		RateProfile: &engine.RateProfile{
+			Tenant:           "cgrates.org",
+			ID:               "RP1",
+			FilterIDs:        []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002"},
+			Weight:           0,
+			ConnectFee:       0.1,
+			RoundingMethod:   "*up",
+			RoundingDecimals: 4,
+			MinCost:          0.1,
+			MaxCost:          0.6,
+			MaxCostStrategy:  "*free",
+			Rates: map[string]*engine.Rate{
+				"FIRST_GI": &engine.Rate{
+					ID:        "FIRST_GI",
+					FilterIDs: []string{"*gi:~*req.Usage:0"},
+					Weight:    0,
+					Value:     0.12,
+					Unit:      time.Duration(1 * time.Minute),
+					Increment: time.Duration(1 * time.Minute),
+					Blocker:   false,
+				},
+				"SECOND_GI": &engine.Rate{
+					ID:        "SECOND_GI",
+					FilterIDs: []string{"*gi:~*req.Usage:1m"},
+					Weight:    10,
+					Value:     0.06,
+					Unit:      time.Duration(1 * time.Minute),
+					Increment: time.Duration(1 * time.Second),
+					Blocker:   false,
+				},
+			},
+		},
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("repl12345")},
+	}
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetRateProfile, rPrf, &replyStr); err != nil {
+		t.Error("Unexpected error when calling ReplicatorSv1.SetRateProfile: ", err)
+	} else if replyStr != utils.OK {
+		t.Error("Unexpected reply returned", replyStr)
+	}
+	// Get RateProfile
+	var reply *engine.RateProfile
+	args := &utils.TenantIDWithArgDispatcher{
+		TenantID: &utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "RP1",
+		},
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("repl12345")},
+	}
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetRateProfile, args, &reply); err != nil {
+		t.Error("Unexpected error when calling ReplicatorSv1.GetRateProfile: ", err)
+	} else if !reflect.DeepEqual(rPrf.RateProfile, reply) {
+		t.Errorf("Expecting: %+v, received: %+v, ", rPrf.RateProfile, reply)
+	}
+	// Stop engine 1
+	allEngine.stopEngine(t)
+
+	// Get RateProfile
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetRateProfile, args, &reply); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
+	}
+
+	// Start engine 1
+	allEngine.startEngine(t)
+
+	// Remove RateProfile
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1RemoveRateProfile, args, &replyStr); err != nil {
+		t.Error(err)
+	} else if replyStr != utils.OK {
+		t.Error("Unexpected reply returned", replyStr)
+	}
+
+	// Get RateProfile
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetRateProfile, args, &reply); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
+	}
 }
