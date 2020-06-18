@@ -53,7 +53,8 @@ func TestSharedGroupITRedis(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	shrGrpCfgOut, err = config.NewCGRConfigFromPath(shrGrpPathIn)
+	shrGrpPathOut = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	shrGrpCfgOut, err = config.NewCGRConfigFromPath(shrGrpPathOut)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -71,7 +72,8 @@ func TestSharedGroupITMongo(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	shrGrpCfgOut, err = config.NewCGRConfigFromPath(shrGrpPathIn)
+	shrGrpPathOut = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	shrGrpCfgOut, err = config.NewCGRConfigFromPath(shrGrpPathOut)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -156,9 +158,13 @@ func testShrGrpITConnect(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	shrGrpMigrator, err = NewMigrator(dataDBIn, dataDBOut,
-		nil, nil,
-		false, false, false, false)
+	if reflect.DeepEqual(shrGrpPathIn, shrGrpPathOut) {
+		shrGrpMigrator, err = NewMigrator(dataDBIn, dataDBOut, nil, nil,
+			false, true, false, false)
+	} else {
+		shrGrpMigrator, err = NewMigrator(dataDBIn, dataDBOut, nil, nil,
+			false, false, false, false)
+	}
 	if err != nil {
 		log.Fatal(err)
 	}
