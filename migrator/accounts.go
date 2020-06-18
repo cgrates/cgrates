@@ -187,15 +187,17 @@ func (m *Migrator) migrateAccounts() (err error) {
 	if m.dryRun || !migrated {
 		return nil
 	}
-	// Remove old accounts
-	switch migratedFrom {
-	case 1:
-		if err = m.removeV1Accounts(); err != nil && err != utils.ErrNoMoreData {
-			return
-		}
-	case 2:
-		if err = m.removeV2Accounts(); err != nil && err != utils.ErrNoMoreData {
-			return
+	// Remove old accounts from dbIn (only if dbIn != dbOut )
+	if !m.sameDataDB {
+		switch migratedFrom {
+		case 1:
+			if err = m.removeV1Accounts(); err != nil && err != utils.ErrNoMoreData {
+				return
+			}
+		case 2:
+			if err = m.removeV2Accounts(); err != nil && err != utils.ErrNoMoreData {
+				return
+			}
 		}
 	}
 

@@ -257,8 +257,4 @@ func testAcc2ITMigrate(t *testing.T) {
 	} else if !reflect.DeepEqual(testAccount.UnitCounters, result.UnitCounters) {
 		t.Errorf("Expecting: %+v, received: %+v", testAccount.UnitCounters, result.UnitCounters)
 	}
-	//check if old account was deleted
-	if _, err = acc2Migrator.dmIN.getv1Account(); err != utils.ErrNoMoreData {
-		t.Error("Error should be not found : ", err)
-	}
 }

@@ -325,10 +325,6 @@ func testAccITMigrateAndMove(t *testing.T) {
 		} else if !reflect.DeepEqual(testAccount.UnitCounters, result.UnitCounters) {
 			t.Errorf("Expecting: %+v, received: %+v", testAccount.UnitCounters, result.UnitCounters)
 		}
-		//check if old account was deleted
-		if _, err = accMigrator.dmIN.getv1Account(); err != utils.ErrNoMoreData {
-			t.Error("Error should be not found : ", err)
-		}
 	case utils.Move:
 		//set an account in dmIN
 		if err := accMigrator.dmIN.DataManager().SetAccount(testAccount); err != nil {
