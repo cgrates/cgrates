@@ -2660,3 +2660,307 @@ func TestRateProfileToAPI(t *testing.T) {
 		t.Errorf("Expecting: %+v,\nReceived: %+v", utils.ToJSON(eTPRatePrf), utils.ToJSON(rcv))
 	}
 }
+
+func TestAPIToRateProfile(t *testing.T) {
+	eRprf := &RateProfile{
+		Tenant:           "cgrates.org",
+		ID:               "RP1",
+		FilterIDs:        []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002"},
+		Weight:           0,
+		ConnectFee:       0.1,
+		RoundingMethod:   "*up",
+		RoundingDecimals: 4,
+		MinCost:          0.1,
+		MaxCost:          0.6,
+		MaxCostStrategy:  "*free",
+		Rates: map[string]*Rate{
+			"FIRST_GI": &Rate{
+				ID:        "FIRST_GI",
+				FilterIDs: []string{"*gi:~*req.Usage:0"},
+				Weight:    0,
+				Value:     0.12,
+				Unit:      time.Duration(1 * time.Minute),
+				Increment: time.Duration(1 * time.Minute),
+				Blocker:   false,
+			},
+			"SECOND_GI": &Rate{
+				ID:        "SECOND_GI",
+				FilterIDs: []string{"*gi:~*req.Usage:1m"},
+				Weight:    10,
+				Value:     0.06,
+				Unit:      time.Duration(1 * time.Minute),
+				Increment: time.Duration(1 * time.Second),
+				Blocker:   false,
+			},
+		},
+	}
+	tpRprf := &utils.TPRateProfile{
+		Tenant:           "cgrates.org",
+		ID:               "RP1",
+		FilterIDs:        []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002"},
+		Weight:           0,
+		ConnectFee:       0.1,
+		RoundingMethod:   "*up",
+		RoundingDecimals: 4,
+		MinCost:          0.1,
+		MaxCost:          0.6,
+		MaxCostStrategy:  "*free",
+		Rates: map[string]*utils.TPRate{
+			"FIRST_GI": &utils.TPRate{
+				ID:        "FIRST_GI",
+				FilterIDs: []string{"*gi:~*req.Usage:0"},
+				Weight:    0,
+				Value:     0.12,
+				Unit:      "1m0s",
+				Increment: "1m0s",
+				Blocker:   false,
+			},
+			"SECOND_GI": &utils.TPRate{
+				ID:        "SECOND_GI",
+				FilterIDs: []string{"*gi:~*req.Usage:1m"},
+				Weight:    10,
+				Value:     0.06,
+				Unit:      "1m0s",
+				Increment: "1s",
+				Blocker:   false,
+			},
+		},
+	}
+	if rcv, err := APItoRateProfile(tpRprf, utils.EmptyString); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, eRprf) {
+		t.Errorf("Expecting: %+v,\nReceived: %+v", utils.ToJSON(eRprf), utils.ToJSON(rcv))
+	}
+}
+
+func TestAPItoModelTPRateProfile(t *testing.T) {
+	tpRprf := &utils.TPRateProfile{
+		Tenant:           "cgrates.org",
+		ID:               "RP1",
+		FilterIDs:        []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002"},
+		Weight:           0,
+		ConnectFee:       0.1,
+		RoundingMethod:   "*up",
+		RoundingDecimals: 4,
+		MinCost:          0.1,
+		MaxCost:          0.6,
+		MaxCostStrategy:  "*free",
+		Rates: map[string]*utils.TPRate{
+			"FIRST_GI": &utils.TPRate{
+				ID:        "FIRST_GI",
+				FilterIDs: []string{"*gi:~*req.Usage:0"},
+				Weight:    0,
+				Value:     0.12,
+				Unit:      "1m0s",
+				Increment: "1m0s",
+				Blocker:   false,
+			},
+			"SECOND_GI": &utils.TPRate{
+				ID:        "SECOND_GI",
+				FilterIDs: []string{"*gi:~*req.Usage:1m"},
+				Weight:    10,
+				Value:     0.06,
+				Unit:      "1m0s",
+				Increment: "1s",
+				Blocker:   false,
+			},
+		},
+	}
+
+	expModels := RateProfileMdls{
+		&RateProfileMdl{
+			PK:                     0,
+			Tpid:                   "",
+			Tenant:                 "cgrates.org",
+			ID:                     "RP1",
+			FilterIDs:              "*string:~*req.Subject:1001;*string:~*req.Subject:1002",
+			ActivationInterval:     "",
+			Weight:                 0,
+			ConnectFee:             0.1,
+			RoundingMethod:         "*up",
+			RoundingDecimals:       4,
+			MinCost:                0.1,
+			MaxCost:                0.6,
+			MaxCostStrategy:        "*free",
+			RateID:                 "FIRST_GI",
+			RateFilterIDs:          "*gi:~*req.Usage:0",
+			RateActivationInterval: "",
+			RateWeight:             0,
+			RateValue:              0.12,
+			RateUnit:               "1m0s",
+			RateIncrement:          "1m0s",
+			RateBlocker:            false,
+			CreatedAt:              time.Time{},
+		},
+		&RateProfileMdl{
+			PK:                     0,
+			Tpid:                   "",
+			Tenant:                 "cgrates.org",
+			ID:                     "RP1",
+			FilterIDs:              "",
+			ActivationInterval:     "",
+			Weight:                 0,
+			ConnectFee:             0,
+			RoundingMethod:         "",
+			RoundingDecimals:       0,
+			MinCost:                0,
+			MaxCost:                0,
+			MaxCostStrategy:        "",
+			RateID:                 "SECOND_GI",
+			RateFilterIDs:          "*gi:~*req.Usage:1m",
+			RateActivationInterval: "",
+			RateWeight:             10,
+			RateValue:              0.06,
+			RateUnit:               "1m0s",
+			RateIncrement:          "1s",
+			RateBlocker:            false,
+			CreatedAt:              time.Time{},
+		},
+	}
+	expModelsRev := RateProfileMdls{
+		&RateProfileMdl{
+			PK:                     0,
+			Tpid:                   "",
+			Tenant:                 "cgrates.org",
+			ID:                     "RP1",
+			FilterIDs:              "*string:~*req.Subject:1001;*string:~*req.Subject:1002",
+			ActivationInterval:     "",
+			Weight:                 0,
+			ConnectFee:             0.1,
+			RoundingMethod:         "*up",
+			RoundingDecimals:       4,
+			MinCost:                0.1,
+			MaxCost:                0.6,
+			MaxCostStrategy:        "*free",
+			RateID:                 "SECOND_GI",
+			RateFilterIDs:          "*gi:~*req.Usage:1m",
+			RateActivationInterval: "",
+			RateWeight:             10,
+			RateValue:              0.06,
+			RateUnit:               "1m0s",
+			RateIncrement:          "1s",
+			RateBlocker:            false,
+			CreatedAt:              time.Time{},
+		},
+		&RateProfileMdl{
+			PK:                     0,
+			Tpid:                   "",
+			Tenant:                 "cgrates.org",
+			ID:                     "RP1",
+			FilterIDs:              "",
+			ActivationInterval:     "",
+			Weight:                 0,
+			ConnectFee:             0,
+			RoundingMethod:         "",
+			RoundingDecimals:       0,
+			MinCost:                0,
+			MaxCost:                0,
+			MaxCostStrategy:        "",
+			RateID:                 "FIRST_GI",
+			RateFilterIDs:          "*gi:~*req.Usage:0",
+			RateActivationInterval: "",
+			RateWeight:             0,
+			RateValue:              0.12,
+			RateUnit:               "1m0s",
+			RateIncrement:          "1m0s",
+			RateBlocker:            false,
+			CreatedAt:              time.Time{},
+		},
+	}
+	rcv := APItoModelTPRateProfile(tpRprf)
+	if !reflect.DeepEqual(rcv, expModels) && !reflect.DeepEqual(rcv, expModelsRev) {
+		t.Errorf("Expecting: %+v,\nReceived: %+v", utils.ToJSON(expModels), utils.ToJSON(rcv))
+	}
+}
+
+func TestAsTPRateProfile(t *testing.T) {
+	rtMdl := RateProfileMdls{
+		&RateProfileMdl{
+			PK:                     0,
+			Tpid:                   "",
+			Tenant:                 "cgrates.org",
+			ID:                     "RP1",
+			FilterIDs:              "*string:~*req.Subject:1001",
+			ActivationInterval:     "",
+			Weight:                 0,
+			ConnectFee:             0.1,
+			RoundingMethod:         "*up",
+			RoundingDecimals:       4,
+			MinCost:                0.1,
+			MaxCost:                0.6,
+			MaxCostStrategy:        "*free",
+			RateID:                 "FIRST_GI",
+			RateFilterIDs:          "*gi:~*req.Usage:0",
+			RateActivationInterval: "",
+			RateWeight:             0,
+			RateValue:              0.06,
+			RateUnit:               "1m0s",
+			RateIncrement:          "1m0s",
+			RateBlocker:            false,
+			CreatedAt:              time.Time{},
+		},
+		&RateProfileMdl{
+			PK:                     0,
+			Tpid:                   "",
+			Tenant:                 "cgrates.org",
+			ID:                     "RP1",
+			FilterIDs:              "",
+			ActivationInterval:     "",
+			Weight:                 0,
+			ConnectFee:             0,
+			RoundingMethod:         "",
+			RoundingDecimals:       0,
+			MinCost:                0,
+			MaxCost:                0,
+			MaxCostStrategy:        "",
+			RateID:                 "SECOND_GI",
+			RateFilterIDs:          "*gi:~*req.Usage:1m",
+			RateActivationInterval: "",
+			RateWeight:             10,
+			RateValue:              0.12,
+			RateUnit:               "1m0s",
+			RateIncrement:          "1s",
+			RateBlocker:            false,
+			CreatedAt:              time.Time{},
+		},
+	}
+
+	eRprf := &utils.TPRateProfile{
+		Tenant:           "cgrates.org",
+		ID:               "RP1",
+		FilterIDs:        []string{"*string:~*req.Subject:1001"},
+		Weight:           0,
+		ConnectFee:       0.1,
+		RoundingMethod:   "*up",
+		RoundingDecimals: 4,
+		MinCost:          0.1,
+		MaxCost:          0.6,
+		MaxCostStrategy:  "*free",
+		Rates: map[string]*utils.TPRate{
+			"FIRST_GI": &utils.TPRate{
+				ID:        "FIRST_GI",
+				FilterIDs: []string{"*gi:~*req.Usage:0"},
+				Weight:    0,
+				Value:     0.06,
+				Unit:      "1m0s",
+				Increment: "1m0s",
+				Blocker:   false,
+			},
+			"SECOND_GI": &utils.TPRate{
+				ID:        "SECOND_GI",
+				FilterIDs: []string{"*gi:~*req.Usage:1m"},
+				Weight:    10,
+				Value:     0.12,
+				Unit:      "1m0s",
+				Increment: "1s",
+				Blocker:   false,
+			},
+		},
+	}
+	rcv := rtMdl.AsTPRateProfile()
+	if len(rcv) != 1 {
+		t.Errorf("Expecting: %+v,\nReceived: %+v", 1, len(rcv))
+	} else if !reflect.DeepEqual(rcv[0], eRprf) {
+		t.Errorf("Expecting: %+v,\nReceived: %+v", utils.ToJSON(eRprf), utils.ToJSON(rcv[0]))
+	}
+}
