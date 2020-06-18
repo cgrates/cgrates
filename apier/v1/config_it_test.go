@@ -152,6 +152,7 @@ func testConfigSReloadConfigFromJSONSessionS(t *testing.T) {
 		"SessionTTLLastUsed":  nil,
 		"SessionTTLMaxDelay":  nil,
 		"SessionTTLUsage":     nil,
+		"SessionTTLLastUsage": nil,
 		"StoreSCosts":         false,
 		"AlterableFields":     map[string]interface{}{},
 		"STIRCfg": map[string]interface{}{

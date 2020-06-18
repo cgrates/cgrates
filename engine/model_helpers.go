@@ -3166,7 +3166,7 @@ func APItoModelTPRateProfile(tPrf *utils.TPRateProfile) (mdls RateProfileMdls) {
 			mdl.RateFilterIDs += val
 		}
 		mdl.RateWeight = rate.Weight
-		mdl.RateValue = rate.Weight
+		mdl.RateValue = rate.Value
 		if rate.ActivationInterval != nil {
 			if rate.ActivationInterval.ActivationTime != utils.EmptyString {
 				mdl.RateActivationInterval = rate.ActivationInterval.ActivationTime
