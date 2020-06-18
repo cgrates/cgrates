@@ -72,6 +72,20 @@ func (m *Migrator) migrateCurrentActionPlans() (err error) {
 	}
 	return
 }
+func (m *Migrator) removeV1ActionPlans() (err error) {
+	var v1 *v1ActionPlans
+	for {
+		if v1, err = m.dmIN.getV1ActionPlans(); err != nil && err != utils.ErrNoMoreData {
+			return err
+		}
+		if v1 == nil {
+			return nil
+		}
+		if err = m.dmIN.remV1ActionPlans(v1); err != nil {
+			return err
+		}
+	}
+}
 
 func (m *Migrator) migrateV1ActionPlans() (v2 []*engine.ActionPlan, err error) {
 	var v1APs *v1ActionPlans
@@ -110,6 +124,7 @@ func (m *Migrator) migrateActionPlans() (err error) {
 		}
 	}
 	migrated := true
+	migratedFrom := 0
 	var v3 []*engine.ActionPlan
 	for {
 		version := vrs[utils.ActionPlans]
@@ -127,6 +142,7 @@ func (m *Migrator) migrateActionPlans() (err error) {
 				if v3, err = m.migrateV1ActionPlans(); err != nil && err != utils.ErrNoMoreData {
 					return err
 				}
+				migratedFrom = 1
 				version = 3
 			case 2: // neded to rebuild action plan indexes for redis
 				// All done, update version wtih current one
@@ -137,8 +153,8 @@ func (m *Migrator) migrateActionPlans() (err error) {
 						err.Error(),
 						fmt.Sprintf("error: <%s> when updating ActionPlans version into dataDB", err.Error()))
 				}
+				migratedFrom = 2
 				version = 3
-				// err = utils.ErrNoMoreData
 			}
 			if version == current[utils.ActionPlans] || err == utils.ErrNoMoreData {
 				break
@@ -162,6 +178,14 @@ func (m *Migrator) migrateActionPlans() (err error) {
 		return nil
 	}
 	// remove old action plans
+	if !m.sameDataDB {
+		switch migratedFrom {
+		case 1:
+			if err = m.removeV1ActionPlans(); err != nil {
+				return
+			}
+		}
+	}
 
 	// All done, update version wtih current one
 	vrs = engine.Versions{utils.ActionPlans: engine.CurrentDataDBVersions()[utils.ActionPlans]}

@@ -28,6 +28,7 @@ type MigratorDataDB interface {
 	remV1Account(id string) (err error)
 	getV1ActionPlans() (v1aps *v1ActionPlans, err error)
 	setV1ActionPlans(x *v1ActionPlans) (err error)
+	remV1ActionPlans(x *v1ActionPlans) (err error)
 	getV1Actions() (v1acs *v1Actions, err error)
 	setV1Actions(x *v1Actions) (err error)
 	getV1ActionTriggers() (v1acts *v1ActionTriggers, err error)
