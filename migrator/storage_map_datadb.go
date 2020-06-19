@@ -112,6 +112,11 @@ func (iDBMig *internalMigrator) setV1ActionTriggers(x *v1ActionTriggers) (err er
 	return utils.ErrNotImplemented
 }
 
+//rem
+func (iDBMig *internalMigrator) remV1ActionTriggers(x *v1ActionTriggers) (err error) {
+	return utils.ErrNotImplemented
+}
+
 //SharedGroup methods
 //get
 func (iDBMig *internalMigrator) getV1SharedGroup() (v1sg *v1SharedGroup, err error) {

@@ -278,6 +278,12 @@ func (v1rs *redisMigrator) setV1ActionTriggers(x *v1ActionTriggers) (err error) 
 	return
 }
 
+//rem
+func (v1rs *redisMigrator) remV1ActionTriggers(x *v1ActionTriggers) (err error) {
+	key := utils.ACTION_TRIGGER_PREFIX + (*x)[0].Id
+	return v1rs.rds.Cmd("DEL", key).Err
+}
+
 //SharedGroup methods
 //get
 func (v1rs *redisMigrator) getV1SharedGroup() (v1sg *v1SharedGroup, err error) {

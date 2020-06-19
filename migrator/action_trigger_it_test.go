@@ -230,7 +230,7 @@ func testActTrgITMigrateAndMove(t *testing.T) {
 			t.Error("Error when getting ActionTriggers ", err.Error())
 		}
 		if !reflect.DeepEqual(actTrg, result) {
-			t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(actTrg), utils.ToJSON(result))
+			t.Errorf("Expecting: %+v,\nReceived: %+v", utils.ToJSON(actTrg), utils.ToJSON(result))
 		}
 		// utils.tojson si verificat
 	case utils.Move:

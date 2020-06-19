@@ -33,6 +33,7 @@ type MigratorDataDB interface {
 	setV1Actions(x *v1Actions) (err error)
 	getV1ActionTriggers() (v1acts *v1ActionTriggers, err error)
 	setV1ActionTriggers(x *v1ActionTriggers) (err error)
+	remV1ActionTriggers(x *v1ActionTriggers) (err error)
 	getV1SharedGroup() (v1acts *v1SharedGroup, err error)
 	setV1SharedGroup(x *v1SharedGroup) (err error)
 	getV1Stats() (v1st *v1Stat, err error)

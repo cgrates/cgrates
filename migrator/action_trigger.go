@@ -74,48 +74,44 @@ func (m *Migrator) migrateCurrentActionTrigger() (err error) {
 	return
 }
 
-func (m *Migrator) migrateV1ActionTrigger() (err error) {
+func (m *Migrator) migrateV1ActionTrigger() (acts engine.ActionTriggers, err error) {
 	var v1ACTs *v1ActionTriggers
-	var acts engine.ActionTriggers
-	for {
-		v1ACTs, err = m.dmIN.getV1ActionTriggers()
-		if err != nil && err != utils.ErrNoMoreData {
-			return err
-		}
-		if err == utils.ErrNoMoreData {
-			break
-		}
-		if *v1ACTs == nil || m.dryRun {
-			continue
-		}
-		for _, v1ac := range *v1ACTs {
-			act := v1ac.AsActionTrigger()
-			acts = append(acts, act)
-
-		}
-		if err := m.dmOut.DataManager().SetActionTriggers(acts[0].ID, acts, utils.NonTransactional); err != nil {
-			return err
-		}
-		m.stats[utils.ActionTriggers] += 1
+	v1ACTs, err = m.dmIN.getV1ActionTriggers()
+	if err != nil {
+		return nil, err
+	}
+	if v1ACTs == nil {
+		return nil, nil
+	}
+	for _, v1ac := range *v1ACTs {
+		act := v1ac.AsActionTrigger()
+		acts = append(acts, act)
 	}
 	if m.dryRun {
 		return
 	}
-	// All done, update version wtih current one
-	vrs := engine.Versions{utils.ActionTriggers: engine.CurrentDataDBVersions()[utils.ActionTriggers]}
-	if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
-		return utils.NewCGRError(utils.Migrator,
-			utils.ServerErrorCaps,
-			err.Error(),
-			fmt.Sprintf("error: <%s> when updating ActionTriggers version into DataDB", err.Error()))
-	}
 	return
+}
+
+func (m *Migrator) removeV1ActionTriggers() (err error) {
+	var v1ACTs *v1ActionTriggers
+	for {
+		if v1ACTs, err = m.dmIN.getV1ActionTriggers(); err != nil && err != utils.ErrNoMoreData {
+			return err
+		}
+		if v1ACTs == nil {
+			return nil
+		}
+		if err = m.dmIN.remV1ActionTriggers(v1ACTs); err != nil {
+			return err
+		}
+	}
 }
 
 func (m *Migrator) migrateActionTriggers() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentDataDBVersions()
-	vrs, err = m.dmIN.DataManager().DataDB().GetVersions("")
+	vrs, err = m.dmIN.DataManager().DataDB().GetVersions(utils.EmptyString)
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,
@@ -127,19 +123,67 @@ func (m *Migrator) migrateActionTriggers() (err error) {
 			utils.UndefinedVersion,
 			"version number is not defined for ActionTriggers model")
 	}
-	switch vrs[utils.ActionTriggers] {
-	case current[utils.ActionTriggers]:
-		if m.sameDataDB {
+	migrated := true
+	migratedFrom := 0
+	var v2 engine.ActionTriggers
+	for {
+		version := vrs[utils.ActionTriggers]
+		for {
+			switch version {
+			case current[utils.ActionTriggers]:
+				if m.sameDataDB {
+					migrated = false
+					break
+				}
+				if err = m.migrateCurrentActionTrigger(); err != nil {
+					return err
+				}
+				migrated = false
+			case 1:
+				fmt.Println("migration starts")
+				if v2, err = m.migrateV1ActionTrigger(); err != nil && err != utils.ErrNoMoreData {
+					return err
+				}
+				migratedFrom = 1
+				version = 2
+			}
+			if version == current[utils.ActionTriggers] || err == utils.ErrNoMoreData {
+				break
+			}
+		}
+		if err == utils.ErrNoMoreData || !migrated {
 			break
 		}
-		if err = m.migrateCurrentActionTrigger(); err != nil {
-			return err
+		if !m.dryRun && migrated {
+			//set action triggers
+			if err := m.dmOut.DataManager().SetActionTriggers(v2[0].ID, v2, utils.NonTransactional); err != nil {
+				return err
+			}
 		}
-	case 1:
-		if err = m.migrateV1ActionTrigger(); err != nil {
-			return err
+		m.stats[utils.ActionTriggers] += 1
+	}
+	if m.dryRun || !migrated {
+		return nil
+	}
+	// remove old action triggers
+	if !m.sameDataDB {
+		switch migratedFrom {
+		case 1:
+			if err = m.removeV1ActionTriggers(); err != nil {
+				return
+			}
 		}
 	}
+
+	// All done, update version wtih current one
+	vrs = engine.Versions{utils.ActionTriggers: engine.CurrentDataDBVersions()[utils.ActionTriggers]}
+	if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
+		return utils.NewCGRError(utils.Migrator,
+			utils.ServerErrorCaps,
+			err.Error(),
+			fmt.Sprintf("error: <%s> when updating ActionTriggers version into DataDB", err.Error()))
+	}
+
 	return m.ensureIndexesDataDB(engine.ColAtr)
 }
 
