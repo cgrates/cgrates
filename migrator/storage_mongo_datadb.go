@@ -236,6 +236,15 @@ func (v1ms *mongoMigrator) setV1ActionTriggers(act *v1ActionTriggers) (err error
 	return
 }
 
+//rem
+func (v1ms *mongoMigrator) remV1ActionTriggers(x *v1ActionTriggers) (err error) {
+	for _, item := range *x {
+		_, err = v1ms.mgoDB.DB().Collection(v1ActionTriggersCol).DeleteOne(v1ms.mgoDB.GetContext(), bson.M{"id": item.Id})
+		return
+	}
+	return
+}
+
 //Actions methods
 //get
 func (v1ms *mongoMigrator) getV1SharedGroup() (v1sg *v1SharedGroup, err error) {
