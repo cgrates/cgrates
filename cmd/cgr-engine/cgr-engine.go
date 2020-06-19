@@ -530,7 +530,7 @@ func main() {
 		ldrs, anz, dspS, dmService, storDBService,
 		services.NewEventExporterService(cfg, filterSChan,
 			connManager, server, exitChan, internalEEsChan),
-		services.NewRateService(cfg, filterSChan, dmService,
+		services.NewRateService(cfg, cacheS, filterSChan, dmService,
 			server, exitChan, internalRateSChan),
 		services.NewSIPAgent(cfg, filterSChan, exitChan, connManager),
 	)
@@ -564,6 +564,7 @@ func main() {
 	engine.IntRPC.AddInternalRPCClient(utils.ConfigSv1, internalConfigChan)
 	engine.IntRPC.AddInternalRPCClient(utils.CoreSv1, internalCoreSv1Chan)
 	engine.IntRPC.AddInternalRPCClient(utils.RALsV1, internalRALsChan)
+	engine.IntRPC.AddInternalRPCClient(utils.RateSv1, internalRateSChan)
 
 	initConfigSv1(internalConfigChan, server)
 

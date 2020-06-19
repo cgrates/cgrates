@@ -93,7 +93,7 @@ func (attrS *AttributeService) Start() (err error) {
 
 // Reload handles the change of config
 func (attrS *AttributeService) Reload() (err error) {
-	return // for the momment nothing to reload
+	return // for the moment nothing to reload
 }
 
 // Shutdown stops the service

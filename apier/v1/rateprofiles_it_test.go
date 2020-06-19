@@ -49,6 +49,7 @@ var (
 		testV1RatePrfVerifyRateProfile,
 		testV1RatePrfRemoveRateProfile,
 		testV1RatePrfNotFound,
+		testV1RatePing,
 		testV1RatePrfStopEngine,
 	}
 )
@@ -177,6 +178,15 @@ func testV1RatePrfRemoveRateProfile(t *testing.T) {
 		t.Fatal(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expecting: %+v, received: %+v", utils.OK, reply)
+	}
+}
+
+func testV1RatePing(t *testing.T) {
+	var resp string
+	if err := ratePrfRpc.Call(utils.RateSv1Ping, new(utils.CGREvent), &resp); err != nil {
+		t.Error(err)
+	} else if resp != utils.Pong {
+		t.Error("Unexpected reply returned", resp)
 	}
 }
 

@@ -22,6 +22,8 @@ import (
 	"fmt"
 	"sync"
 
+	v1 "github.com/cgrates/cgrates/apier/v1"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/rates"
@@ -34,12 +36,14 @@ import (
 
 // NewRateService constructs RateService
 func NewRateService(
-	cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
+	cfg *config.CGRConfig, cacheS *engine.CacheS,
+	filterSChan chan *engine.FilterS,
 	dmS *DataDBService,
 	server *utils.Server, exitChan chan bool,
 	intConnChan chan rpcclient.ClientConnector) servmanager.Service {
 	return &RateService{
 		cfg:         cfg,
+		cacheS:      cacheS,
 		filterSChan: filterSChan,
 		dmS:         dmS,
 		server:      server,
@@ -56,13 +60,15 @@ type RateService struct {
 	cfg         *config.CGRConfig
 	filterSChan chan *engine.FilterS
 	dmS         *DataDBService
+	cacheS      *engine.CacheS
 	server      *utils.Server
 	exitChan    chan bool
-	intConnChan chan rpcclient.ClientConnector
-	rldChan     chan struct{}
 
-	rateS *rates.RateS
-	//rpc *v1.EventExporterSv1
+	rldChan chan struct{}
+
+	rateS       *rates.RateS
+	rpc         *v1.RateSv1
+	intConnChan chan rpcclient.ClientConnector
 }
 
 // ServiceName returns the service name
@@ -106,20 +112,26 @@ func (rs *RateService) Start() (err error) {
 		return utils.ErrServiceAlreadyRunning
 	}
 
+	<-rs.cacheS.GetPrecacheChannel(utils.CacheRateProfiles)
+	<-rs.cacheS.GetPrecacheChannel(utils.CacheRateProfilesFilterIndexes)
+	<-rs.cacheS.GetPrecacheChannel(utils.CacheRateFilterIndexes)
+
 	fltrS := <-rs.filterSChan
 	rs.filterSChan <- fltrS
+
 	dbchan := rs.dmS.GetDMChan()
 	dm := <-dbchan
 	dbchan <- dm
 	rs.Lock()
 	rs.rateS = rates.NewRateS(rs.cfg, fltrS, dm)
 	rs.Unlock()
-	/*rs.rpc = v1.NewEventExporterSv1(es.eeS)
+
+	rs.rpc = v1.NewRateSv1(rs.rateS)
 	if !rs.cfg.DispatcherSCfg().Enabled {
-		rs.server.RpcRegister(es.rpc)
+		rs.server.RpcRegister(rs.rpc)
 	}
-	*/
-	rs.intConnChan <- rs.rateS
+
+	rs.intConnChan <- rs.rpc
 
 	go func(rtS *rates.RateS, exitChan chan bool, rldChan chan struct{}) {
 		if err := rtS.ListenAndServe(exitChan, rldChan); err != nil {

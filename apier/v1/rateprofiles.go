@@ -21,6 +21,8 @@ package v1
 import (
 	"time"
 
+	"github.com/cgrates/cgrates/rates"
+
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -130,5 +132,29 @@ func (APIerSv1 *APIerSv1) RemoveRateProfile(arg *utils.TenantIDWithCache, reply 
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
+	return nil
+}
+
+func NewRateSv1(rateS *rates.RateS) *RateSv1 {
+	return &RateSv1{rS: rateS}
+}
+
+// Exports RPC from RLs
+type RateSv1 struct {
+	rS *rates.RateS
+}
+
+// Call implements rpcclient.ClientConnector interface for internal RPC
+func (rSv1 *RateSv1) Call(serviceMethod string,
+	args interface{}, reply interface{}) error {
+	return utils.APIerRPCCall(rSv1, serviceMethod, args, reply)
+}
+
+func (rSv1 *RateSv1) CostForEvent(args *rates.ArgsCostForEvent, cC *utils.ChargedCost) (err error) {
+	return rSv1.rS.V1CostForEvent(args, cC)
+}
+
+func (rSv1 *RateSv1) Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error {
+	*reply = utils.Pong
 	return nil
 }
