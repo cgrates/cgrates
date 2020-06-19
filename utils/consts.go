@@ -831,6 +831,7 @@ const (
 	ReplicatorLow  = "replicator"
 	ApierSLow      = "apiers"
 	EEsLow         = "ees"
+	RateSLow       = "rates"
 )
 
 // Actions
@@ -1293,6 +1294,12 @@ const (
 	RALsV1                   = "RALsV1"
 	RALsV1GetRatingPlansCost = "RALsV1.GetRatingPlansCost"
 	RALsV1Ping               = "RALsV1.Ping"
+)
+
+const (
+	RateSv1             = "RateSv1"
+	RateSv1CostForEvent = "RALsV1.CostForEvent"
+	RateSv1Ping         = "RateSv1.Ping"
 )
 
 const (
