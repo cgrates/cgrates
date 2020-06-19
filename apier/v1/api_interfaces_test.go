@@ -108,3 +108,8 @@ func TestReplicatorSv1Interface(t *testing.T) {
 	_ = ReplicatorSv1Interface(NewDispatcherReplicatorSv1(nil))
 	_ = ReplicatorSv1Interface(NewReplicatorSv1(nil))
 }
+
+func TestRateSv1Interface(t *testing.T) {
+	_ = RateSv1Interface(NewDispatcherRateSv1(nil))
+	_ = RateSv1Interface(NewRateSv1(nil))
+}

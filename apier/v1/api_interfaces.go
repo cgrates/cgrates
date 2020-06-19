@@ -176,6 +176,10 @@ type CoreSv1Interface interface {
 	Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error
 }
 
+type RateSv1Interface interface {
+	Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error
+}
+
 type ReplicatorSv1Interface interface {
 	Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error
 	GetAccount(args *utils.StringWithApiKey, reply *engine.Account) error
