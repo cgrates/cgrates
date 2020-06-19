@@ -1254,3 +1254,17 @@ func (dS *DispatcherReplicatorSv1) SetIndexes(args *utils.SetIndexesArg, reply *
 func (dS *DispatcherReplicatorSv1) RemoveIndexes(args *utils.GetIndexesArg, reply *string) error {
 	return dS.dS.ReplicatorSv1RemoveIndexes(args, reply)
 }
+
+func NewDispatcherRateSv1(dps *dispatchers.DispatcherService) *DispatcherRateSv1 {
+	return &DispatcherRateSv1{dR: dps}
+}
+
+// Exports RPC from RLs
+type DispatcherRateSv1 struct {
+	dR *dispatchers.DispatcherService
+}
+
+// Ping implements SupplierSv1Ping
+func (dR *DispatcherRateSv1) Ping(args *utils.CGREventWithArgDispatcher, reply *string) error {
+	return dR.dR.RateSv1Ping(args, reply)
+}
