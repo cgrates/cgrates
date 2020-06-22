@@ -237,6 +237,13 @@ func (v1rs *redisMigrator) setV1Actions(x *v1Actions) (err error) {
 	return
 }
 
+//rem
+func (v1rs *redisMigrator) remV1Actions(x v1Actions) (err error) {
+	key := utils.ACTION_PREFIX + x[0].Id
+	return v1rs.rds.Cmd("DEL", key).Err
+
+}
+
 //ActionTriggers methods
 //get
 func (v1rs *redisMigrator) getV1ActionTriggers() (v1acts *v1ActionTriggers, err error) {

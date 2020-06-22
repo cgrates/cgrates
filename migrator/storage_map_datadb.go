@@ -101,6 +101,11 @@ func (iDBMig *internalMigrator) setV1Actions(x *v1Actions) (err error) {
 	return utils.ErrNotImplemented
 }
 
+//rem
+func (iDBMig *internalMigrator) remV1Actions(x v1Actions) (err error) {
+	return utils.ErrNotImplemented
+}
+
 //ActionTriggers methods
 //get
 func (iDBMig *internalMigrator) getV1ActionTriggers() (v1acts *v1ActionTriggers, err error) {

@@ -140,7 +140,6 @@ func (m *Migrator) migrateActionTriggers() (err error) {
 				}
 				migrated = false
 			case 1:
-				fmt.Println("migration starts")
 				if v2, err = m.migrateV1ActionTrigger(); err != nil && err != utils.ErrNoMoreData {
 					return err
 				}
