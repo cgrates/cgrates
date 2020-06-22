@@ -3,17 +3,12 @@
   become: true
   template:
     src: nginx.conf.j2
-    dest: "/etc/nginx/sites-available/yum.cgrates.org.vhost"
+    dest: "/etc/nginx/conf.d/yum.cgrates.org.vhost.conf"
     mode: '0600'
     owner: "{{ rootUser }}"
 
-- name: Create a symlink for yum.cgrates.org
-  become: true
-  file:
-    src: "/etc/nginx/sites-available/yum.cgrates.org.vhost"
-    dest: "/etc/nginx/sites-enabled/yum.cgrates.org.vhost"
-    state: link
+
 
 - name: Restart the nginx so the change take effects
   become: true
-  shell: "/etc/init.d/nginx reload"
+  shell: "sudo systemctl restart nginx"
