@@ -58,10 +58,10 @@ func NewScheduler(dm *engine.DataManager, cfg *config.CGRConfig,
 }
 
 func (s *Scheduler) updateActStats(act *engine.Action, isFailed bool) {
-	mux := s.aSMux
+	mux := &s.aSMux
 	statsMp := s.actSuccessStats
 	if isFailed {
-		mux = s.aFMux
+		mux = &s.aFMux
 		statsMp = s.actFailedStats
 	}
 	now := time.Now()
