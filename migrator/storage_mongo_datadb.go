@@ -204,6 +204,12 @@ func (v1ms *mongoMigrator) setV1Actions(x *v1Actions) (err error) {
 	return
 }
 
+//rem
+func (v1ms *mongoMigrator) remV1Actions(x v1Actions) (err error) {
+	_, err = v1ms.mgoDB.DB().Collection("actions").DeleteOne(v1ms.mgoDB.GetContext(), bson.M{"id": x[0].Id})
+	return
+}
+
 //ActionTriggers methods
 //get
 func (v1ms *mongoMigrator) getV1ActionTriggers() (v1acts *v1ActionTriggers, err error) {

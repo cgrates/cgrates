@@ -62,41 +62,36 @@ func (m *Migrator) migrateCurrentActions() (err error) {
 	return
 }
 
-func (m *Migrator) migrateV1Actions() (err error) {
-	var v1ACs *v1Actions
-	var acts engine.Actions
+func (m *Migrator) removeV1Actions() (err error) {
+	var v1 *v1Actions
 	for {
-		v1ACs, err = m.dmIN.getV1Actions()
-		if err != nil && err != utils.ErrNoMoreData {
+		if v1, err = m.dmIN.getV1Actions(); err != nil && err != utils.ErrNoMoreData {
 			return err
 		}
-		if err == utils.ErrNoMoreData {
-			break
+		if v1 == nil {
+			return nil
 		}
-		if *v1ACs == nil || m.dryRun {
-			continue
-		}
-		for _, v1ac := range *v1ACs {
-			act := v1ac.AsAction()
-			acts = append(acts, act)
-
-		}
-		if err := m.dmOut.DataManager().SetActions(acts[0].Id, acts, utils.NonTransactional); err != nil {
+		if err = m.dmIN.remV1Actions(*v1); err != nil {
 			return err
 		}
-		m.stats[utils.Actions] += 1
 	}
-	if m.dryRun {
+}
+
+func (m *Migrator) migrateV1Actions() (acts engine.Actions, err error) {
+	var v1ACs *v1Actions
+
+	if v1ACs, err = m.dmIN.getV1Actions(); err != nil {
+		return nil, err
+	}
+	if *v1ACs == nil {
 		return
 	}
-	// All done, update version wtih current one
-	vrs := engine.Versions{utils.Actions: engine.CurrentStorDBVersions()[utils.Actions]}
-	if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
-		return utils.NewCGRError(utils.Migrator,
-			utils.ServerErrorCaps,
-			err.Error(),
-			fmt.Sprintf("error: <%s> when updating Actions version into dataDB", err.Error()))
+	for _, v1ac := range *v1ACs {
+		act := v1ac.AsAction()
+		acts = append(acts, act)
+
 	}
+
 	return
 }
 
@@ -115,19 +110,55 @@ func (m *Migrator) migrateActions() (err error) {
 			utils.UndefinedVersion,
 			"version number is not defined for ActionTriggers model")
 	}
-	switch vrs[utils.Actions] {
-	case current[utils.Actions]:
-		if m.sameDataDB {
+	migrated := true
+	var acts engine.Actions
+	for {
+		version := vrs[utils.Actions]
+		for {
+			switch version {
+			case current[utils.Actions]:
+				migrated = false
+				if m.sameDataDB {
+					break
+				}
+				if err = m.migrateCurrentActions(); err != nil {
+					return err
+				}
+			case 1:
+				if acts, err = m.migrateV1Actions(); err != nil && err != utils.ErrNoMoreData {
+					return err
+				}
+				version = 2
+			}
+			if version == current[utils.Actions] || err == utils.ErrNoMoreData {
+				break
+			}
+		}
+		if err == utils.ErrNoMoreData || !migrated {
 			break
 		}
-		if err = m.migrateCurrentActions(); err != nil {
-			return err
+		if !m.dryRun && migrated {
+			if err := m.dmOut.DataManager().SetActions(acts[0].Id, acts, utils.NonTransactional); err != nil {
+				return err
+			}
 		}
-	case 1:
-		if err = m.migrateV1Actions(); err != nil {
-			return err
-		}
+		m.stats[utils.Actions] += 1
 	}
+
+	if m.dryRun || !migrated {
+		return nil
+	}
+	// remove old actions
+
+	// All done, update version wtih current one
+	vrs = engine.Versions{utils.Actions: engine.CurrentStorDBVersions()[utils.Actions]}
+	if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
+		return utils.NewCGRError(utils.Migrator,
+			utils.ServerErrorCaps,
+			err.Error(),
+			fmt.Sprintf("error: <%s> when updating Actions version into dataDB", err.Error()))
+	}
+
 	return m.ensureIndexesDataDB(engine.ColAct)
 }
 
