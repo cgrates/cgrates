@@ -21,7 +21,7 @@
 
 - name: When starting fresh we need to make sure we have rng-tools
   become: true
-  apt:
+  yum:
     name: rng-tools
     state: present
   ignore_errors: true
@@ -32,6 +32,7 @@
     path: /etc/default/rng-tools
     line: HRNGDEVICE=/dev/urandom
     insertafter: last
+    create: yes
 
 - name: generate randomness
   become: true
