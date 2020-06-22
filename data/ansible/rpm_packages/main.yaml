@@ -1,16 +1,3 @@
----
-- name: Check and set python version on YUM server
-  hosts: yum
-  remote_user: '{{ gouser }}'
-  gather_facts: false
-  tasks:
-    - name: symlink /usr/bin/python -> /usr/bin/python3
-      raw: |
-        if [ -f /usr/bin/python3 ] && [ ! -f /usr/bin/python ]; then
-          ln --symbolic /usr/bin/python3 /usr/bin/python; 
-        fi
-      become: true
-
 - name: Check and set python version on PKG server
   hosts: pkg
   remote_user: '{{ gouser }}'
@@ -63,17 +50,6 @@
 
     customPath: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
 
-    dependencies:
-      - build-essential
-      - git
-      - devscripts
-      - nginx
-      - rpm
-      - createrepo
-      - wget
-      - sshpass
-      - gnupg2
-
   remote_user: '{{ gouser }}'
   tasks:
     - name: set cgrates cgrates_distribution
@@ -82,13 +58,26 @@
 ###########################################################################################################################
 ###########################################################################################################################
 # install dependencies
+    - name: Add epel-relase repo so we can install sshpass
+      become: true
+      shell: "yum install epel-release -y"
+
     - name: Install dependencies
       become: yes
-      apt: name={{ dependencies }} state=present
+      yum:
+        name:
+          - git
+          - nginx
+          - rpm
+          - rpm-sign
+          - createrepo
+          - wget
+          - gnupg2
+          - sshpass
+        state: present
 ###########################################################################################################################
 ###########################################################################################################################
 # Prepare for configuration
-    # get yum version
     - name: set cgrates distribution
       set_fact:
         cgrates_distribution: "{{ cgrates_branch }}"
@@ -111,7 +100,7 @@
 
     - name: Check if NGINX needs to be configured
       become: true
-      shell: "ls /etc/nginx/sites-enabled | grep 'yum.cgrates.org.vhost'"
+      shell: "ls /etc/nginx/conf.d/ | grep 'yum.cgrates.org.vhost.conf'"
       ignore_errors: true
       register: nginxConfig
 
@@ -216,13 +205,6 @@
       args:
         chdir: '{{ cgrates_dir }}'
 
-    - name: symbol link
-      become: yes
-      file:
-        src: "{{ cgrates_dir }}/data"
-        dest: "/usr/share/cgrates"
-        state: link
-
     - name: get git tag
       shell: "git tag -l --points-at HEAD"
       args:
@@ -297,7 +279,7 @@
       register: yumFiles
       when : cgrates_branch == "master" or gitTagVar.stdout_lines|length > 0
 
-    # Clean the folder
+      #Clean the folder
     - name: Clean the incoming folder
       become: yes
       shell: "sudo rm -rf /var/packages/yum/{{ cgrates_distribution }}/*"
@@ -308,7 +290,7 @@
       command: mv cgr_build/RPMS/x86_64/{{ item }} /var/packages/yum/{{ cgrates_distribution }}/
       with_items: "{{ rmpFileName.stdout_lines }}"
       when: (cgrates_branch == "master" or gitTagVar.stdout_lines|length > 0) and rmpFileName.stdout_lines|length > 0
- 
+
     - name: Include the package with createrepo
       become: yes
       shell: createrepo /var/packages/yum/{{ cgrates_distribution }}
@@ -321,7 +303,7 @@
         state: absent
       with_items: "{{ rmpFileName.stdout_lines }}"
       when: cgrates_branch != "master" and gitTagVar.stdout_lines|length == 0
-      
+
 - hosts: pkg
   remote_user: '{{ gouser }}'
   tasks:
