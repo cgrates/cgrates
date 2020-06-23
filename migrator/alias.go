@@ -189,8 +189,10 @@ func (m *Migrator) migrateAlias2Attributes() (err error) {
 	if m.dryRun {
 		return
 	}
-	if err = m.removeAlias2Attributes(); err != nil {
-		return
+	if !m.sameDataDB {
+		if err = m.removeAlias2Attributes(); err != nil {
+			return
+		}
 	}
 	// All done, update version wtih current one
 	vrs := engine.Versions{Alias: 0} //engine.CurrentDataDBVersions()[utils.Alias]}
