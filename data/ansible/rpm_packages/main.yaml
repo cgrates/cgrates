@@ -92,10 +92,10 @@
         state: directory
 
     - name: Check if /var/packages/yum/{{ cgrates_distribution }} directory exists
-        become: true
-        file:
-          path: /var/packages/yum/{{ cgrates_distribution }}
-          state: directory
+      become: true
+      file:
+        path: /var/packages/yum/{{ cgrates_distribution }}
+        state: directory
 
     - name: Nginx on CentOS needs additional permissions
       become: true
