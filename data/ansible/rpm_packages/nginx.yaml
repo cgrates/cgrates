@@ -1,13 +1,23 @@
 ---
-- name: Add yum.cgrates.vhost in nginx
+- name: Rename the default nginx.conf to nginx.conf.original
+  become: true
+  shell: "sudo mv -v /etc/nginx/nginx.conf /etc/nginx/nginx.conf.original"
+
+- name: Add nginx.conf in nginx
   become: true
   template:
     src: nginx.conf.j2
-    dest: "/etc/nginx/conf.d/yum.cgrates.org.vhost.conf"
-    mode: '0600'
+    dest: "/etc/nginx/nginx.conf"
+    mode: '0666'
     owner: "{{ rootUser }}"
 
+- name: Allow nginx in firewall
+  become: true
+  shell: "sudo firewall-cmd --permanent --zone=public --add-service=https --add-service=http"
 
+- name: Restart the firewall
+  become: true
+  shell: "sudo firewall-cmd --reload"
 
 - name: Restart the nginx so the change take effects
   become: true
