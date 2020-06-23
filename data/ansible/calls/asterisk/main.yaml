@@ -14,7 +14,7 @@
     # Directory to store files downloaded for Go language SDK installation
     golang_download_dir: "{{ x_ansible_download_dir | default(ansible_env.HOME + '/.ansible/tmp/downloads') }}"
     # Location for GOPATH environment variable
-    golang_gopath: "/home/{{ gouser }}/go"
+    golang_gopath: "/home/{{ user }}/go"
     # Filename of Go language SDK redistributable package
     golang_redis_filename: 'go{{ golang_version }}.linux-amd64.tar.gz'
     ###############################################################
@@ -49,7 +49,7 @@
 
     customPath: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
 
-  remote_user: '{{ gouser }}'
+  remote_user: '{{ user }}'
   tasks:
 ###########################################################################################################################
 # install dependencies

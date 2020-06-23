@@ -25,7 +25,7 @@
 - name: Add user(s) to "docker" group
   become: true
   user:
-    name: "{{ gouser }}"
+    name: "{{ user }}"
     groups: "docker"
     append: true
 
