@@ -1,21 +1,29 @@
-server {
-  listen 80;
-  server_name yum.cgrates.org;
+user nginx nginx;
+worker_processes auto;
+error_log /var/log/nginx/error.log;
+pid /run/nginx.pid;
 
-  access_log /var/log/nginx/packages-error.log;
-  error_log /var/log/nginx/packages-error.log;
+events {
+    worker_connections 1024;
+}
 
-  location / {
-    root /var/packages;
-    index index.html;
-    autoindex on;
-  }
+http {
+    include             /etc/nginx/mime.types;
+    default_type        application/octet-stream;
 
-  location ~ /(.*)/conf {
-    deny all;
-  }
+    server {
+      listen 80;
+      server_name yum.cgrates.org;
 
-  location ~ /(.*)/db {
-    deny all;
-  }
+      access_log /var/log/nginx/yum.cgrates.org_access.log;
+      error_log /var/log/nginx/yum.cgrates.org_error.log;
+
+      root /var/packages;
+
+      location / {
+        root /var/packages;
+        index index.html;
+        autoindex on;
+      }
+    }
 }
