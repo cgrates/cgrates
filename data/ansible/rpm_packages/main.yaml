@@ -69,11 +69,13 @@
           - git
           - nginx
           - rpm
+          - rpm-build
           - rpm-sign
           - createrepo
           - wget
           - gnupg2
           - sshpass
+          - tar
         state: present
 ###########################################################################################################################
 ###########################################################################################################################
@@ -90,17 +92,25 @@
         state: directory
 
     - name: Check if /var/packages/yum/{{ cgrates_distribution }} directory exists
+        become: true
+        file:
+          path: /var/packages/yum/{{ cgrates_distribution }}
+          state: directory
+
+    - name: Nginx on CentOS needs additional permissions
       become: true
-      file:
-        path: /var/packages/yum/{{ cgrates_distribution }}
-        state: directory
+      shell: "sudo chcon -t httpd_sys_content_t /var/packages/ -R"
+
+    - name: Nginx on CentOS needs additional permissions2
+      become: true
+      shell: "sudo chcon -t httpd_sys_rw_content_t /var/packages/ -R"
         
     - name: Generate GPG Key
       include: gpg.yaml
 
     - name: Check if NGINX needs to be configured
       become: true
-      shell: "ls /etc/nginx/conf.d/ | grep 'yum.cgrates.org.vhost.conf'"
+      shell: "ls /etc/nginx/ | grep 'nginx.conf.original'"
       ignore_errors: true
       register: nginxConfig
 
