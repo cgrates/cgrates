@@ -1,7 +1,7 @@
 ---
 - name: Check and set python version on APT server
   hosts: docker
-  remote_user: '{{ gouser }}'
+  remote_user: '{{ user }}'
   gather_facts: false
   tasks:
     - name: symlink /usr/bin/python -> /usr/bin/python3
@@ -26,7 +26,7 @@
     # Directory to store files downloaded for Go language SDK installation
     golang_download_dir: "{{ x_ansible_download_dir | default(ansible_env.HOME + '/.ansible/tmp/downloads') }}"
     # Location for GOPATH environment variable
-    golang_gopath: "/home/{{ gouser }}/go"
+    golang_gopath: "/home/{{ user }}/go"
     # Filename of Go language SDK redistributable package
     golang_redis_filename: 'go{{ golang_version }}.linux-amd64.tar.gz'
 
@@ -52,7 +52,7 @@
       - python3-setuptools
     rootUser : root
     
-  remote_user: '{{ gouser }}'
+  remote_user: '{{ user }}'
   tasks:
     - name: set cgrates distribution
       set_fact:
@@ -103,10 +103,10 @@
       file:
         state: directory
         mode: 'u=rwx,go=rx'
-        owner: "{{ gouser }}"
-        group: "{{ gouser }}"
+        owner: "{{ user }}"
+        group: "{{ user }}"
         dest: '{{ cgrates_dir }}'
-      become_user: "{{ gouser }}"
+      become_user: "{{ user }}"
 
     - name: git clone cgrates
       git:
@@ -116,7 +116,7 @@
         force: yes
         version: "{{ cgrates_branch }}"
       become: yes
-      become_user: "{{ gouser }}"
+      become_user: "{{ user }}"
 
     - name: clean go cache
       become: yes
