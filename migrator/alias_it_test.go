@@ -210,9 +210,11 @@ func testAlsITMigrateAndMove(t *testing.T) {
 	if !reflect.DeepEqual(*attrProf, *result) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(attrProf), utils.ToJSON(result))
 	}
-	//check if old account was deleted
-	if _, err = alsMigrator.dmIN.getV1Alias(); err != utils.ErrNoMoreData {
-		t.Error("Error should be not found : ", err)
+	//check if old account was deleted (only if dmIN != dmOut)
+	if !alsMigrator.sameDataDB {
+		if _, err = alsMigrator.dmIN.getV1Alias(); err != utils.ErrNoMoreData {
+			t.Error("Error should be not found : ", err)
+		}
 	}
 
 	expAlsIdx := map[string]utils.StringSet{

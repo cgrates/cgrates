@@ -54,6 +54,11 @@ func (iDBMig *internalStorDBMigrator) setV1CDR(v1Cdr *v1Cdrs) (err error) {
 	return utils.ErrNotImplemented
 }
 
+//rem
+func (iDBMig *internalStorDBMigrator) remV1CDRs(v1Cdr *v1Cdrs) (err error) {
+	return utils.ErrNotImplemented
+}
+
 //SMCost methods
 //rename
 func (iDBMig *internalStorDBMigrator) renameV1SMCosts() (err error) {

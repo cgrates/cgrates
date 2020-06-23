@@ -46,7 +46,7 @@ func (m *Migrator) migrateCurrentCDRs() (err error) {
 func (m *Migrator) migrateCDRs() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentStorDBVersions()
-	vrs, err = m.storDBIn.StorDB().GetVersions("")
+	vrs, err = m.storDBIn.StorDB().GetVersions(utils.EmptyString)
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,
@@ -58,49 +58,73 @@ func (m *Migrator) migrateCDRs() (err error) {
 			utils.UndefinedVersion,
 			"version number is not defined for Actions")
 	}
-	switch vrs[utils.CDRs] {
-	case 1:
-		if err = m.migrateV1CDRs(); err != nil {
-			return err
-		}
-	case current[utils.CDRs]:
-		if err = m.migrateCurrentCDRs(); err != nil {
-			return err
-		}
-	}
-	return m.ensureIndexesStorDB(engine.ColCDRs)
-}
-
-func (m *Migrator) migrateV1CDRs() (err error) {
-	var v1CDR *v1Cdrs
+	migrated := true
+	var v2 *engine.CDR
 	for {
-		v1CDR, err = m.storDBIn.getV1CDR()
-		if err != nil && err != utils.ErrNoMoreData {
-			return err
+		version := vrs[utils.CDRs]
+		for {
+			switch vrs[utils.CDRs] {
+			case current[utils.CDRs]:
+				migrated = false
+				if err = m.migrateCurrentCDRs(); err != nil {
+					return err
+				}
+			case 1:
+				if v2, err = m.migrateV1CDRs(); err != nil && err != utils.ErrNoMoreData {
+					return err
+				}
+				version = 2
+			}
+			if version == current[utils.CDRs] || err == utils.ErrNoMoreData {
+				break
+			}
 		}
-		if err == utils.ErrNoMoreData {
+		if err == utils.ErrNoMoreData || !migrated {
 			break
 		}
-		if v1CDR == nil || m.dryRun {
-			continue
+
+		if !m.dryRun && migrated {
+			//set action plan
+			if err = m.storDBOut.StorDB().SetCDR(v2, true); err != nil {
+				return err
+			}
 		}
-		cdr := v1CDR.V1toV2Cdr()
-		if err = m.storDBOut.StorDB().SetCDR(cdr, true); err != nil {
-			return err
-		}
-		m.stats[utils.CDRs] += 1
-	}
-	if m.dryRun {
-		return
+		m.stats[utils.CDRs]++
 	}
 	// All done, update version wtih current one
-	vrs := engine.Versions{utils.CDRs: engine.CurrentStorDBVersions()[utils.CDRs]}
+	vrs = engine.Versions{utils.CDRs: engine.CurrentStorDBVersions()[utils.CDRs]}
 	if err = m.storDBOut.StorDB().SetVersions(vrs, false); err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,
 			err.Error(),
 			fmt.Sprintf("error: <%s> when updating CDRs version into StorDB", err.Error()))
 	}
+	return m.ensureIndexesStorDB(engine.ColCDRs)
+}
+
+func (m *Migrator) removeV1CDRs() (err error) {
+	var v1CDR *v1Cdrs
+	if v1CDR, err = m.storDBIn.getV1CDR(); err != nil {
+		return err
+	}
+	if v1CDR == nil {
+		return
+	}
+	if err = m.storDBIn.remV1CDRs(v1CDR); err != nil {
+		return
+	}
+	return
+}
+
+func (m *Migrator) migrateV1CDRs() (cdr *engine.CDR, err error) {
+	var v1CDR *v1Cdrs
+	if v1CDR, err = m.storDBIn.getV1CDR(); err != nil {
+		return nil, err
+	}
+	if v1CDR == nil {
+		return
+	}
+	cdr = v1CDR.V1toV2Cdr()
 	return
 }
 
