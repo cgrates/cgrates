@@ -4,10 +4,10 @@
   file:
     state: directory
     mode: 'u=rwx,go=rx'
-    owner: "{{ gouser }}"
-    group: "{{ gouser }}"
+    owner: "{{ user }}"
+    group: "{{ user }}"
     dest: '{{ cgrates_dir }}'
-  become_user: "{{ gouser }}"
+  become_user: "{{ user }}"
 
 - name: git clone cgrates
   git:
@@ -16,7 +16,7 @@
     update: yes
     force: yes
   become: yes
-  become_user: "{{ gouser }}"
+  become_user: "{{ user }}"
 
 - name:  build cgrates
   shell: "sh {{ cgrates_dir }}/build.sh"
