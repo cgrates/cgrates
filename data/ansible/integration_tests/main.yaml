@@ -14,7 +14,7 @@
     # Directory to store files downloaded for Go language SDK installation
     golang_download_dir: "{{ x_ansible_download_dir | default(ansible_env.HOME + '/.ansible/tmp/downloads') }}"
     # Location for GOPATH environment variable
-    golang_gopath: "/home/{{ gouser }}/go"
+    golang_gopath: "/home/{{ user }}/go"
     # Filename of Go language SDK redistributable package
     golang_redis_filename: 'go{{ golang_version }}.linux-amd64.tar.gz'
     ###############################################################
@@ -103,17 +103,17 @@
     file:
       state: directory
       mode: 'u=rwx,go=rx'
-      owner: "{{ gouser }}"
-      group: "{{ gouser }}"
+      owner: "{{ user }}"
+      group: "{{ user }}"
       dest: '{{ cgrates_dir }}'
-    become_user: "{{ gouser }}"
+    become_user: "{{ user }}"
 
   - name: git clone cgrates
     git:
       repo: https://github.com/cgrates/cgrates.git
       dest: '{{ cgrates_dir }}'
     become: yes
-    become_user: "{{ gouser }}"
+    become_user: "{{ user }}"
 
   - name:  build cgrates
     command: 'sh {{ cgrates_dir }}/build.sh'
