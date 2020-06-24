@@ -1,0 +1,5 @@
+#Tenant,ID,FilterIDs,ActivationInterval,RunID,AttributeIDs,Weight
+cgrates.org,DEFAULT,,,*default,*none,0
+cgrates.org,route1,,,*raw,*constant:*req.RequestType:*none;*constant:*req.Destination:1003,0
+cgrates.org,route2,,,*raw,*constant:*req.RequestType:*none;*constant:*req.Destination:1004,0
+cgrates.org,route3,,,*raw,*constant:*req.RequestType:*none;*constant:*req.Destination:1005,0

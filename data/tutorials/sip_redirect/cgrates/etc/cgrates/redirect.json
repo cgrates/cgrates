@@ -1,0 +1,141 @@
+{
+
+"sip_agent": {
+	"enabled": true,					// enables the SIP agent: <true|false>
+	"listen": "192.168.56.203:6060",			// address where to listen for SIP requests <x.y.z.y:1234>
+	"listen_net": "udp",				// network to listen on <udp|tcp|tcp-tls>
+	"request_processors": [
+			{
+				"id": "Register",
+				"filters": ["*notstring:~*vars.Method:INVITE"],
+				"flags": ["*none"],
+				"request_fields":[],
+				"reply_fields":[
+					{"tag": "Request", "path": "*rep.Request", "type": "*constant",
+						"value": "SIP/2.0 405 Method Not Allowed"}
+				]
+			},
+			{
+				"id": "RoutesQuery", 
+				"filters": ["*string:~*vars.Method:INVITE"],
+				"flags": ["*event", "*routes","*stir_initiate","*continue"],
+				"request_fields":[
+					{"tag": "Account", "path": "*cgreq.Account", "type": "*variable",
+						"value": "~*req.From{*sipuri_user}", "mandatory": true},
+					{"tag": "Destination", "path": "*cgreq.Destination", "type": "*variable",
+						"value": "~*req.To{*sipuri_user}", "mandatory": true},
+					{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*variable",
+						"value": "*now", "mandatory": true},
+					{"tag": "Category", "path": "*cgreq.Category", "type": "*variable",
+						"value": "call", "mandatory": true},
+					{"tag": "STIRPublicKeyPath", "path": "*opts.STIRPublicKeyPath", "type": "*constant",
+						"value": "/usr/share/cgrates/stir/stir_pubkey.pem", "mandatory": true},
+					{"tag": "STIRPrivateKeyPath", "path": "*opts.STIRPrivateKeyPath", "type": "*constant",
+						"value": "/usr/share/cgrates/stir/stir_privatekey.pem", "mandatory": true},
+				],
+				"reply_fields":[
+				]
+			},
+			{
+				"id": "RoutesQueryOneRoute",
+				"filters": ["*string:~*vars.Method:INVITE",
+					"*gte:~*cgrep.Routes.Count:1",
+				],
+				"flags": ["*none","*continue"], // do not send request to CGRateS
+				"reply_fields":[
+					{"tag": "Request", "path": "*rep.Request", "type": "*constant",
+						"value": "SIP/2.0 302 Moved Temporarily"},
+					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
+							"value":"\"1003\" <sip:"},
+					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
+						"value": "~*cgrep.Routes.SortedRoutes[0].RouteParameters"},
+
+					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
+							"value":"*constant:;q=0.7; expires=3600;cgr_cost="},
+					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
+						"value":"~*cgrep.Routes.SortedRoutes[0].SortingData.Cost"},
+
+					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
+							"value":"*constant:;cgr_maxusage="},
+					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
+						"value":"~*cgrep.Routes.SortedRoutes[0].SortingData.MaxUsage"},
+
+					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
+						"value":"*constant:;cgr_route="},
+					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
+						"value":"~*cgrep.Routes.SortedRoutes[0].RouteID"},
+
+					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
+						"value":"*constant:>"},
+
+					{"tag": "X-Identity", "path": "*rep.X-Identity", "type": "*variable",
+						"value":"~*cgrep.STIRIdentity[~*cgrep.Routes.SortedRoutes[0].RouteID]"},
+				]
+			},
+
+			{
+				"id": "RoutesQueryTwoRoute",
+				"filters": ["*string:~*vars.Method:INVITE",
+					"*gte:~*cgrep.Routes.Count:2",
+				],
+				"flags": ["*none","*continue"], // do not send request to CGRateS
+				"reply_fields":[
+					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
+						"value":",\"1004\" <sip:"},
+					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
+						"value": "~*cgrep.Routes.SortedRoutes[1].RouteParameters"},
+
+					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
+							"value":"*constant:;q=0.7; expires=3600;cgr_cost="},
+					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
+						"value":"~*cgrep.Routes.SortedRoutes[1].SortingData.Cost"},
+
+					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
+							"value":"*constant:;cgr_maxusage="},
+					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
+						"value":"~*cgrep.Routes.SortedRoutes[1].SortingData.MaxUsage"},
+
+					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
+						"value":"*constant:;cgr_route="},
+					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
+						"value":"~*cgrep.Routes.SortedRoutes[1].RouteID"},
+
+					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
+						"value":"*constant:>"},
+				]
+			},
+			{
+				"id": "RoutesQueryThreeRoute",
+				"filters": ["*string:~*vars.Method:INVITE",
+					"*gte:~*cgrep.Routes.Count:2",
+				],
+				"flags": ["*none","*continue"], // do not send request to CGRateS
+				"reply_fields":[
+					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
+							"value":",\"1005\" <sip:"},
+					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
+						"value": "~*cgrep.Routes.SortedRoutes[2].RouteParameters"},
+
+					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
+							"value":"*constant:;q=0.7; expires=3600;cgr_cost="},
+					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
+						"value":"~*cgrep.Routes.SortedRoutes[2].SortingData.Cost"},
+
+					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
+							"value":"*constant:;cgr_maxusage="},
+					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
+						"value":"~*cgrep.Routes.SortedRoutes[2].SortingData.MaxUsage"},
+
+					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
+						"value":"*constant:;cgr_route="},
+					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
+						"value":"~*cgrep.Routes.SortedRoutes[2].RouteID"},
+
+					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
+						"value":"*constant:>"},
+				]
+			},
+		]
+	}
+
+}

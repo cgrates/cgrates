@@ -119,6 +119,9 @@ func (sa *SIPAgent) serveUDP(stop chan struct{}) (err error) {
 				wg.Done()
 				return
 			}
+			if "ACK" == sipMessage.MethodFrom("Request") {
+				return
+			}
 			var sipAnswer sipingo.Message
 			var err error
 			if sipAnswer, err = sa.handleMessage(sipMessage, saddr.String()); err != nil {
@@ -202,6 +205,9 @@ func (sa *SIPAgent) serveTCP(stop chan struct{}) (err error) {
 						fmt.Sprintf("<%s> error: %s parsing message: %s",
 							utils.SIPAgent, err.Error(), string(buf[:n])))
 					wg.Done()
+					continue
+				}
+				if "ACK" == sipMessage.MethodFrom("Request") {
 					continue
 				}
 				var sipAnswer sipingo.Message
