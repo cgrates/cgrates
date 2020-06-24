@@ -125,7 +125,7 @@ func testSAitApierRpcConn(t *testing.T) {
 
 // Load the tariff plan, creating accounts and their balances
 func testSAitTPFromFolder(t *testing.T) {
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "sipagent")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tut_sip_redirect")}
 	var loadInst utils.LoadInstance
 	if err := saRPC.Call(utils.APIerSv2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
 		t.Error(err)

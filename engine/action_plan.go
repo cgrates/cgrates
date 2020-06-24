@@ -48,11 +48,10 @@ type ActionTiming struct {
 // Tasks converts an ActionTiming into multiple Tasks
 func (at *ActionTiming) Tasks() (tsks []*Task) {
 	if len(at.accountIDs) == 0 {
-		return []*Task{
-			&Task{
-				Uuid:      at.Uuid,
-				ActionsID: at.ActionsID,
-			}}
+		return []*Task{{
+			Uuid:      at.Uuid,
+			ActionsID: at.ActionsID,
+		}}
 	}
 	tsks = make([]*Task, len(at.accountIDs))
 	i := 0

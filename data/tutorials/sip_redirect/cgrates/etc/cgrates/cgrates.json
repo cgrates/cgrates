@@ -1,0 +1,105 @@
+{
+
+// Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+// Copyright (C) ITsysCOM GmbH
+
+"general": {
+    "log_level": 7,
+	"node_id":"CGRSIP",
+},
+
+
+"listen": {
+	"rpc_json": ":2012",
+	"rpc_gob": ":2013",
+	"http": ":2080",
+},
+
+
+"stor_db": {
+	"db_password": "CGRateS.org",
+},
+
+
+"schedulers": {
+	"enabled": true,
+},
+
+
+"rals": {
+	"enabled": true,
+	"thresholds_conns": ["*localhost"],
+	"stats_conns": ["*localhost"],
+},
+
+
+"cdrs": {
+	"enabled": true,
+	"stats_conns": ["*localhost"],
+	"chargers_conns": ["*internal"],
+	"rals_conns": ["*localhost"],
+	"sessions_cost_retries": 5,
+},
+
+
+"chargers": {
+	"enabled": true,
+	"attributes_conns": ["*internal"],
+},
+
+
+"sessions": {
+	"enabled": true,
+	"rals_conns": ["*localhost"],
+	"cdrs_conns": ["*localhost"],
+	"resources_conns": ["*localhost"],
+	"routes_conns": ["*localhost"],
+	"attributes_conns": ["*localhost"],
+	"stats_conns": ["*localhost"],
+	"thresholds_conns": ["*localhost"],
+	"chargers_conns": ["*internal"],
+	"debit_interval": "5s",
+	"channel_sync_interval":"7s",
+},
+
+
+"attributes": {
+	"enabled": true,
+	"string_indexed_fields": ["Account"],			
+},
+
+
+"resources": {
+	"enabled": true,
+	"string_indexed_fields": ["Account"],
+},
+
+
+"stats": {
+	"enabled": true,
+	"string_indexed_fields": ["Account","RunID","Destination"],
+},
+
+
+"thresholds": {
+	"enabled": true,
+	"string_indexed_fields": ["Account"],
+},
+
+
+"routes": {
+	"enabled": true,
+	"resources_conns": ["*internal"],
+	"stats_conns": ["*internal"],
+	"rals_conns": ["*internal"],	
+	"string_indexed_fields": ["Account"],
+},
+
+
+"apiers": {
+	"enabled": true,
+	"scheduler_conns": ["*internal"],
+},
+
+
+}
