@@ -269,7 +269,7 @@
     
     # Move the file to PKG server
     - name: Copy the file to PKG server
-      shell: 'scp cgr_build/RPMS/x86_64/{{ item }} {{ {{ pkgAddr }} }}:/tmp/'
+      shell: 'scp cgr_build/RPMS/x86_64/{{ item }} {{ pkgAddr }}:/tmp/'
       with_items: '{{ rmpFileName.stdout_lines }}'
     
     - name: Sign with rpm --addsign the .rpm file
