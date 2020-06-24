@@ -32,7 +32,11 @@ import (
 )
 
 const (
-	bufferSize = 5000
+	bufferSize    = 5000
+	ackMethod     = "ACK"
+	requestHeader = "Request"
+	callIDHeader  = "Call-ID"
+	fromHeader    = "From"
 )
 
 // NewSIPAgent will construct a SIPAgent
@@ -42,6 +46,7 @@ func NewSIPAgent(connMgr *engine.ConnManager, cfg *config.CGRConfig,
 		connMgr: connMgr,
 		filterS: filterS,
 		cfg:     cfg,
+		ackMap:  make(map[string]chan struct{}),
 	}
 }
 
@@ -51,6 +56,8 @@ type SIPAgent struct {
 	filterS  *engine.FilterS
 	cfg      *config.CGRConfig
 	stopChan chan struct{}
+	ackMap   map[string]chan struct{}
+	ackLocks sync.RWMutex
 }
 
 // Shutdown will stop the SIPAgent server
@@ -199,6 +206,8 @@ func (sa *SIPAgent) serveTCP(stop chan struct{}) (err error) {
 					continue
 				}
 
+
+
 				var sipMessage sipingo.Message // recreate map SIP
 				if sipMessage, err = sipingo.NewMessage(string(buf[:n])); err != nil {
 					utils.Logger.Warning(
@@ -214,18 +223,82 @@ func (sa *SIPAgent) serveTCP(stop chan struct{}) (err error) {
 				if sipAnswer, err = sa.handleMessage(sipMessage, conn.LocalAddr().String()); err != nil {
 					continue
 				}
+				if len(sipAnswer) == 0 {
+					continue
+				}
 				if _, err = conn.Write([]byte(sipAnswer.String())); err != nil {
 					utils.Logger.Warning(
 						fmt.Sprintf("<%s> error: %s sending message: %s",
 							utils.SIPAgent, err.Error(), sipAnswer))
 					continue
 				}
+				// go func(stopChan chan struct{},){ //map[string]chan struct{} callID+frontTag
+				// 	<-config.Timer:
+				// 	write message
+				// }
 			}
 		}(conn)
 	}
 }
 
-func (sa *SIPAgent) handleMessage(sipMessage sipingo.Message, remoteHost string) (sipAnswer sipingo.Message, err error) {
+func (sa *SIPAgent) answerMessage(messageStr, addr string, write func(ans []byte) error) (err error) {
+	var sipMessage sipingo.Message // recreate map SIP
+	if sipMessage, err = sipingo.NewMessage(messageStr); err != nil {
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s> error: %s parsing message: %s",
+				utils.SIPAgent, err.Error(), messageStr))
+		return // do we need to return error in case we can't parse the message?
+	}
+	key := utils.ConcatenatedKey(sipMessage[fromHeader], sipMessage[callIDHeader])
+	if ackMethod == sipMessage.MethodFrom(requestHeader) {
+		sa.ackLocks.Lock()
+		if stopChan, has := sa.ackMap[key]; has {
+			close(stopChan)
+			sa.ackLocks.Unlock()
+			return
+		}
+		sa.ackLocks.Unlock() // log the message if we did not find it in the map
+	}
+	var sipAnswer sipingo.Message
+	if sipAnswer, err = sa.handleMessage(sipMessage, addr); err != nil {
+		return
+	}
+	if len(sipAnswer) == 0 {
+		return // do not write the message if we do not have anything to reply
+	}
+	ans := []byte(sipAnswer.String())
+	if err = write(ans); err != nil {
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s> error: %s sending message: %s",
+				utils.SIPAgent, err.Error(), sipAnswer))
+		return
+	}
+	stopChan := make(chan struct{})
+	sa.ackLocks.Lock()
+	sa.ackMap[key] = stopChan
+	sa.ackLocks.Unlock()
+	go func(stopChan chan struct{}, a []byte) {
+		for {
+			select {
+			case <-time.After(time.Second):
+				if err = write(ans); err != nil {
+					utils.Logger.Warning(
+						fmt.Sprintf("<%s> error: %s sending message: %s",
+							utils.SIPAgent, err.Error(), sipAnswer))
+					return
+				}
+			case <-stopChan:
+				sa.ackLocks.Lock()
+				delete(sa.ackMap, key)
+				sa.ackLocks.Unlock()
+				return
+			}
+		}
+	}(stopChan, ans)
+	return
+}
+
+func (sa *SIPAgent) handleMessage(sipMessage sipingo.Message, remoteHost string) (sipAnswer sipingo.Message) {
 	if sipMessage["User-Agent"] != "" {
 		sipMessage["User-Agent"] = utils.CGRateS
 	}
@@ -242,6 +315,7 @@ func (sa *SIPAgent) handleMessage(sipMessage sipingo.Message, remoteHost string)
 		utils.RemoteHost: utils.NewNMData(remoteHost),
 		"Method":         utils.NewNMData(sipMessage.MethodFrom("Request")),
 	}
+	var err error
 	for _, reqProcessor := range sa.cfg.SIPAgentCfg().RequestProcessors {
 		agReq := NewAgentRequest(dp, reqVars, &cgrRplyNM, rplyNM,
 			opts, reqProcessor.Tenant, sa.cfg.GeneralCfg().DefaultTenant,
@@ -263,7 +337,7 @@ func (sa *SIPAgent) handleMessage(sipMessage sipingo.Message, remoteHost string)
 			break
 		}
 	}
-	if err != nil {
+	if err != nil { // write err message on conection 500 Server Error
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> error: %s processing message: %s from %s",
 				utils.SIPAgent, err.Error(), sipMessage, remoteHost))
@@ -275,6 +349,9 @@ func (sa *SIPAgent) handleMessage(sipMessage sipingo.Message, remoteHost string)
 				utils.SIPAgent, sipMessage, remoteHost))
 		return
 	}
+	if rplyNM.Len() == 0 { // if we do not populate the reply with any field we do not send any reply back
+		return
+	}
 	if err = updateSIPMsgFromNavMap(sipMessage, rplyNM); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> error: %s encoding out %s",
@@ -282,7 +359,7 @@ func (sa *SIPAgent) handleMessage(sipMessage sipingo.Message, remoteHost string)
 		return
 	}
 	sipMessage.PrepareReply()
-	return sipMessage, nil
+	return sipMessage
 }
 
 // processRequest represents one processor processing the request
