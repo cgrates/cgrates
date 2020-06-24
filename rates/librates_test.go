@@ -18,15 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package rates
 
-import (
-	"reflect"
-	"testing"
-	"time"
-
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
-)
-
+/*
 func TestOrderRatesOnIntervals(t *testing.T) {
 	allRts := map[time.Duration][]*engine.Rate{
 		time.Duration(0): {
@@ -160,3 +152,4 @@ func TestOrderRatesOnIntervals(t *testing.T) {
 			utils.ToIJSON(expOrdered), utils.ToIJSON(ordRts))
 	}
 }
+*/

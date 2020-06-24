@@ -68,3 +68,14 @@ type RateProfileWithArgDispatcher struct {
 	*RateProfile
 	*utils.ArgDispatcher
 }
+
+// RateSInterval is used by RateS to integrate Rate info for one charging interval
+type RateSInterval struct {
+	UsageStart time.Duration
+	Increments []*RateSIncrement
+}
+
+type RateSIncrement struct {
+	UsageStart time.Duration
+	Rate       *Rate
+}

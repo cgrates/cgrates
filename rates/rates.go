@@ -72,8 +72,7 @@ func (rS *RateS) Call(serviceMethod string, args interface{}, reply interface{})
 }
 
 // matchingRateProfileForEvent returns the matched RateProfile for the given event
-func (rS *RateS) matchingRateProfileForEvent(args *ArgsCostForEvent) (rtPfl *engine.RateProfile, err error) {
-	rPfIDs := args.RateProfileIDs
+func (rS *RateS) matchingRateProfileForEvent(args *ArgsCostForEvent, rPfIDs []string) (rtPfl *engine.RateProfile, err error) {
 	if len(rPfIDs) == 0 {
 		var rPfIDMp utils.StringSet
 		if rPfIDMp, err = engine.MatchingItemIDsForEvent(
@@ -92,17 +91,22 @@ func (rS *RateS) matchingRateProfileForEvent(args *ArgsCostForEvent) (rtPfl *eng
 	}
 	matchingRPfs := make([]*engine.RateProfile, 0, len(rPfIDs))
 	evNm := utils.MapStorage{utils.MetaReq: args.CGREvent.Event}
+	var sTime time.Time
+	if sTime, err = args.StartTime(rS.cfg.GeneralCfg().DefaultTimezone); err != nil {
+		return
+	}
 	for _, rPfID := range rPfIDs {
 		var rPf *engine.RateProfile
-		if rPf, err = rS.dm.GetRateProfile(args.CGREvent.Tenant, rPfID, true, true, utils.NonTransactional); err != nil {
+		if rPf, err = rS.dm.GetRateProfile(args.CGREvent.Tenant, rPfID,
+			true, true, utils.NonTransactional); err != nil {
 			if err == utils.ErrNotFound {
 				err = nil
 				continue
 			}
 			return
 		}
-		if rPf.ActivationInterval != nil && args.CGREvent.Time != nil &&
-			!rPf.ActivationInterval.IsActiveAtTime(*args.CGREvent.Time) { // not active
+		if rPf.ActivationInterval != nil &&
+			!rPf.ActivationInterval.IsActiveAtTime(sTime) { // not active
 			continue
 		}
 		var pass bool
@@ -111,35 +115,35 @@ func (rS *RateS) matchingRateProfileForEvent(args *ArgsCostForEvent) (rtPfl *eng
 		} else if !pass {
 			continue
 		}
-
 		matchingRPfs = append(matchingRPfs, rPf)
 	}
 	if len(matchingRPfs) == 0 {
 		return nil, utils.ErrNotFound
 	}
-	sort.Slice(matchingRPfs, func(i, j int) bool { return matchingRPfs[i].Weight > matchingRPfs[j].Weight })
+	sort.Slice(matchingRPfs, func(i, j int) bool {
+		return matchingRPfs[i].Weight > matchingRPfs[j].Weight
+	})
 	rtPfl = matchingRPfs[0]
 	return
 }
 
-// matchingRatesForEvent returns the matched Rate out of a RateProfile for the given event
-// indexed based on intervalStart, there will be one winner per interval start
-// returned in order of intervalStart
-func (rS *RateS) matchingRatesForEvent(rtPfl *engine.RateProfile, cgrEv *utils.CGREvent) (rts []*engine.Rate, err error) {
+/*
+// costForEvent computes the cost for an event based on a preselected rating profile
+func (rS *RateS) rateProfileCostForEvent(rtPfl *engine.RateProfile, args *ArgsCostForEvent) (rts []*engine.RateSInterval, err error) {
 	var rtIDs utils.StringSet
 	if rtIDs, err = engine.MatchingItemIDsForEvent(
-		cgrEv.Event,
+		args.CGRevent.Event,
 		rS.cfg.RateSCfg().RateStringIndexedFields,
 		rS.cfg.RateSCfg().RatePrefixIndexedFields,
 		rS.dm,
 		utils.CacheRateFilterIndexes,
-		utils.ConcatenatedKey(cgrEv.Tenant, rtPfl.ID),
+		utils.ConcatenatedKey(args.CGRevent.Tenant, rtPfl.ID),
 		rS.cfg.RateSCfg().RateIndexedSelects,
 		rS.cfg.RateSCfg().RateNestedFields,
 	); err != nil {
 		return
 	}
-	rtsWrk := make(map[time.Duration][]*engine.Rate)
+	aRates := make([]*engine.Rate, len(rtIDs))
 	evNm := utils.MapStorage{utils.MetaReq: cgrEv.Event}
 	for rtID := range rtIDs {
 		rt := rtPfl.Rates[rtID] // pick the rate directly from map based on matched ID
@@ -149,11 +153,12 @@ func (rS *RateS) matchingRatesForEvent(rtPfl *engine.RateProfile, cgrEv *utils.C
 		} else if !pass {
 			continue
 		}
-		rtsWrk[rt.IntervalStart] = append(rtsWrk[rt.IntervalStart], rt)
+		aRates = append(aRates, rt)
 	}
-	rts = orderRatesOnIntervals(rtsWrk)
+	ordRts := orderRatesOnIntervals(aRates)
 	return
 }
+*/
 
 // AttrArgsProcessEvent arguments used for proccess event
 type ArgsCostForEvent struct {
@@ -161,6 +166,30 @@ type ArgsCostForEvent struct {
 	Opts           map[string]interface{}
 	*utils.CGREvent
 	*utils.ArgDispatcher
+}
+
+// StartTime returns the event time used to check active rate profiles
+func (args *ArgsCostForEvent) StartTime(tmz string) (sTime time.Time, err error) {
+	if tIface, has := args.Opts[utils.OptsRatesStartTime]; has {
+		return utils.IfaceAsTime(tIface, tmz)
+	}
+	if sTime, err = args.CGREvent.FieldAsTime(utils.AnswerTime, tmz); err != nil {
+		if err != utils.ErrNotFound {
+			return
+		}
+		// not found, try SetupTime
+		if sTime, err = args.CGREvent.FieldAsTime(utils.SetupTime, tmz); err != nil &&
+			err != utils.ErrNotFound {
+			return
+		}
+	}
+	if err == nil {
+		return
+	}
+	if args.CGREvent.Time != nil {
+		return *args.CGREvent.Time, nil
+	}
+	return time.Now(), nil
 }
 
 // V1CostForEvent will be called to calculate the cost for an event

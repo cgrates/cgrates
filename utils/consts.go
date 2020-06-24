@@ -2204,6 +2204,11 @@ const (
 	TotalGenericUsage = "TotalGenericUsage"
 )
 
+// Event Opts
+const (
+	OptsRatesStartTime = "*ratesStartTime"
+)
+
 func buildCacheInstRevPrefixes() {
 	CachePrefixToInstance = make(map[string]string)
 	for k, v := range CacheInstanceToPrefix {

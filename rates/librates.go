@@ -25,20 +25,55 @@ import (
 	"github.com/cgrates/cgrates/engine"
 )
 
-// orderRatesOnIntervals will order the rates based on intervalStart
+// orderRatesOnIntervals will order the rates based on ActivationInterval and intervalStart of each Rate
 // there can be only one winning Rate for each interval, prioritized by the Weight
-func orderRatesOnIntervals(allRts map[time.Duration][]*engine.Rate) (ordRts []*engine.Rate) {
-	var idxOrdRts int
-	ordRts = make([]*engine.Rate, len(allRts))
-	for _, rts := range allRts {
-		sort.Slice(rts, func(i, j int) bool {
-			return rts[i].Weight > rts[j].Weight
-		})
-		ordRts[idxOrdRts] = rts[0]
-		idxOrdRts++
+func orderRatesOnIntervals(aRts []*engine.Rate, sTime time.Time, isDuration bool) (ordRts []*engine.RateSInterval) {
+	// index the received rates
+	rtIdx := make(map[time.Time]map[time.Duration][]*engine.Rate) // map[ActivationTime]map[IntervalStart][]*engine.Rate
+	for _, rt := range aRts {
+		var rtATimesKey time.Time
+		if rt.ActivationInterval != nil {
+			rtATimesKey = rt.ActivationInterval.ActivationTime
+		}
+		if _, has := rtIdx[rtATimesKey]; !has {
+			rtIdx[rtATimesKey] = make(map[time.Duration][]*engine.Rate)
+		}
+		rtIdx[rtATimesKey][rt.IntervalStart] = append(rtIdx[rtATimesKey][rt.IntervalStart], rt)
 	}
-	sort.Slice(ordRts, func(i, j int) bool {
-		return ordRts[i].IntervalStart < ordRts[j].IntervalStart
+
+	// sort the rates within the duration map
+	for _, durMp := range rtIdx {
+		for _, rts := range durMp {
+			sort.Slice(rts, func(i, j int) bool {
+				return rts[i].Weight > rts[j].Weight
+			})
+		}
+	}
+
+	// sort the IntervalStarts
+	sortedStarts := make(map[time.Time][]time.Duration) // map[ActivationTime]
+	for aTime, durMp := range rtIdx {
+		sortedStarts[aTime] = make([]time.Duration, len(durMp))
+		idxDur := 0
+		for dur := range durMp {
+			sortedStarts[aTime] = append(sortedStarts[aTime], dur)
+			idxDur++
+		}
+		sort.Slice(sortedStarts[aTime], func(i, j int) bool {
+			return sortedStarts[aTime][i] < sortedStarts[aTime][j]
+		})
+	}
+
+	// sort the activation times
+	sortedATimes := make([]time.Time, len(rtIdx))
+	idxATimes := 0
+	for aTime := range rtIdx {
+		sortedATimes[idxATimes] = aTime
+		idxATimes++
+	}
+	sort.Slice(sortedATimes, func(i, j int) bool {
+		return sortedATimes[i].Before(sortedATimes[j])
 	})
+
 	return
 }
