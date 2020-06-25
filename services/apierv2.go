@@ -109,5 +109,5 @@ func (api *APIerSv2Service) ServiceName() string {
 
 // ShouldRun returns if the service should be running
 func (api *APIerSv2Service) ShouldRun() bool {
-	return api.cfg.RalsCfg().Enabled
+	return api.cfg.ApierCfg().Enabled
 }
