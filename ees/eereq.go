@@ -363,10 +363,9 @@ func (eeR *EventExporterRequest) ParseField(
 		if dst, err := eeR.req.FieldAsString([]string{utils.Destination}); err != nil {
 			return nil, fmt.Errorf("error <%s> getting destination for %s",
 				err, utils.ToJSON(cfgFld))
-		} else if len(cfgFld.MaskDestID) != 0 && engine.CachedDestHasPrefix(cfgFld.MaskDestID, dst) {
-			out = "1"
-		} else {
-			out = "0"
+		} else if cfgFld.MaskLen != -1 && len(cfgFld.MaskDestID) != 0 &&
+			engine.CachedDestHasPrefix(cfgFld.MaskDestID, dst) {
+			out = utils.MaskSuffix(dst, cfgFld.MaskLen)
 		}
 
 	}

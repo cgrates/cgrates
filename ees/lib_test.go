@@ -49,7 +49,7 @@ func newRPCClient(cfg *config.ListenCfg) (c *rpc.Client, err error) {
 	}
 }
 
-var exportPath = []string{"/tmp/testCSV", "/tmp/testComposedCSV", "/tmp/testFWV"}
+var exportPath = []string{"/tmp/testCSV", "/tmp/testComposedCSV", "/tmp/testFWV", "/tmp/testCSVMasked"}
 
 func testCreateDirectory(t *testing.T) {
 	for _, dir := range exportPath {
