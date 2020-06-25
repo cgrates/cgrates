@@ -20,6 +20,7 @@ package config
 
 import (
 	"strings"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -30,6 +31,8 @@ type SIPAgentCfg struct {
 	ListenNet         string // udp or tcp
 	SessionSConns     []string
 	Timezone          string
+	ACKInterval       time.Duration // timeout replies if not reaching back
+	Templates         map[string][]*FCTemplate
 	RequestProcessors []*RequestProcessor
 }
 
@@ -57,6 +60,21 @@ func (da *SIPAgentCfg) loadFromJsonCfg(jsnCfg *SIPAgentJsonCfg, sep string) (err
 				da.SessionSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
 			} else {
 				da.SessionSConns[idx] = connID
+			}
+		}
+	}
+	if jsnCfg.Ack_interval != nil {
+		if da.ACKInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Ack_interval); err != nil {
+			return err
+		}
+	}
+	if jsnCfg.Templates != nil {
+		if da.Templates == nil {
+			da.Templates = make(map[string][]*FCTemplate)
+		}
+		for k, jsnTpls := range jsnCfg.Templates {
+			if da.Templates[k], err = FCTemplatesFromFCTemplatesJsonCfg(jsnTpls, sep); err != nil {
+				return
 			}
 		}
 	}

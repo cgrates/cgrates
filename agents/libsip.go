@@ -69,3 +69,9 @@ func sipErr(m utils.DataProvider, sipMessage sipingo.Message,
 	sipMessage.PrepareReply()
 	return sipMessage, nil
 }
+
+func bareSipErr(m sipingo.Message, err string) sipingo.Message {
+	m[requestHeader] = err
+	m.PrepareReply()
+	return m
+}

@@ -32,22 +32,41 @@ import (
 )
 
 const (
-	bufferSize    = 5000
-	ackMethod     = "ACK"
-	requestHeader = "Request"
-	callIDHeader  = "Call-ID"
-	fromHeader    = "From"
+	bufferSize      = 5000
+	ackMethod       = "ACK"
+	inviteMethod    = "INVITE"
+	requestHeader   = "Request"
+	callIDHeader    = "Call-ID"
+	fromHeader      = "From"
+	sipServerErr    = "SIP/2.0 500 Internal Server Error"
+	userAgentHeader = "User-Agent"
+	method          = "Method"
 )
 
 // NewSIPAgent will construct a SIPAgent
 func NewSIPAgent(connMgr *engine.ConnManager, cfg *config.CGRConfig,
-	filterS *engine.FilterS) *SIPAgent {
-	return &SIPAgent{
+	filterS *engine.FilterS) (sa *SIPAgent, err error) {
+	sa = &SIPAgent{
 		connMgr: connMgr,
 		filterS: filterS,
 		cfg:     cfg,
 		ackMap:  make(map[string]chan struct{}),
 	}
+	msgTemplates := sa.cfg.SIPAgentCfg().Templates
+	// Inflate *template field types
+	for _, procsr := range sa.cfg.SIPAgentCfg().RequestProcessors {
+		if tpls, err := config.InflateTemplates(procsr.RequestFields, msgTemplates); err != nil {
+			return nil, err
+		} else if tpls != nil {
+			procsr.RequestFields = tpls
+		}
+		if tpls, err := config.InflateTemplates(procsr.ReplyFields, msgTemplates); err != nil {
+			return nil, err
+		} else if tpls != nil {
+			procsr.ReplyFields = tpls
+		}
+	}
+	return
 }
 
 // SIPAgent is a handler for SIP requests
@@ -62,6 +81,11 @@ type SIPAgent struct {
 
 // Shutdown will stop the SIPAgent server
 func (sa *SIPAgent) Shutdown() {
+	sa.ackLocks.Lock()
+	for _, ch := range sa.ackMap { // close all ack
+		close(ch)
+	}
+	sa.ackLocks.Unlock()
 	close(sa.stopChan)
 }
 
@@ -79,6 +103,7 @@ func (sa *SIPAgent) ListenAndServe() (err error) {
 		return fmt.Errorf("Unecepected protocol %s", sa.cfg.SIPAgentCfg().ListenNet)
 	}
 }
+
 func (sa *SIPAgent) serveUDP(stop chan struct{}) (err error) {
 	var conn net.PacketConn
 	if conn, err = net.ListenPacket(utils.UDP, sa.cfg.SIPAgentCfg().Listen); err != nil {
@@ -117,33 +142,13 @@ func (sa *SIPAgent) serveUDP(stop chan struct{}) (err error) {
 			continue
 		}
 		wg.Add(1)
-		go func(message string, conn net.PacketConn) {
-			var sipMessage sipingo.Message
-			if sipMessage, err = sipingo.NewMessage(message); err != nil {
-				utils.Logger.Warning(
-					fmt.Sprintf("<%s> error: %s parsing message: %s",
-						utils.SIPAgent, err.Error(), message))
-				wg.Done()
+		go func(message string, saddr net.Addr, conn net.PacketConn) {
+			sa.answerMessage(message, saddr.String(), func(ans []byte) (werr error) {
+				_, werr = conn.WriteTo(ans, saddr)
 				return
-			}
-			if "ACK" == sipMessage.MethodFrom("Request") {
-				return
-			}
-			var sipAnswer sipingo.Message
-			var err error
-			if sipAnswer, err = sa.handleMessage(sipMessage, saddr.String()); err != nil {
-				wg.Done()
-				return
-			}
-			if _, err = conn.WriteTo([]byte(sipAnswer.String()), saddr); err != nil {
-				utils.Logger.Warning(
-					fmt.Sprintf("<%s> error: %s sending message: %s",
-						utils.SIPAgent, err.Error(), sipAnswer))
-				wg.Done()
-				return
-			}
+			}) // do not log the received error because is already logged in function so for now just ignore it
 			wg.Done()
-		}(string(buf[:n]), conn)
+		}(string(buf[:n]), saddr, conn)
 	}
 }
 
@@ -206,36 +211,10 @@ func (sa *SIPAgent) serveTCP(stop chan struct{}) (err error) {
 					continue
 				}
 
-
-
-				var sipMessage sipingo.Message // recreate map SIP
-				if sipMessage, err = sipingo.NewMessage(string(buf[:n])); err != nil {
-					utils.Logger.Warning(
-						fmt.Sprintf("<%s> error: %s parsing message: %s",
-							utils.SIPAgent, err.Error(), string(buf[:n])))
-					wg.Done()
-					continue
-				}
-				if "ACK" == sipMessage.MethodFrom("Request") {
-					continue
-				}
-				var sipAnswer sipingo.Message
-				if sipAnswer, err = sa.handleMessage(sipMessage, conn.LocalAddr().String()); err != nil {
-					continue
-				}
-				if len(sipAnswer) == 0 {
-					continue
-				}
-				if _, err = conn.Write([]byte(sipAnswer.String())); err != nil {
-					utils.Logger.Warning(
-						fmt.Sprintf("<%s> error: %s sending message: %s",
-							utils.SIPAgent, err.Error(), sipAnswer))
-					continue
-				}
-				// go func(stopChan chan struct{},){ //map[string]chan struct{} callID+frontTag
-				// 	<-config.Timer:
-				// 	write message
-				// }
+				sa.answerMessage(string(buf[:n]), conn.LocalAddr().String(), func(ans []byte) (werr error) {
+					_, werr = conn.Write(ans)
+					return
+				}) // do not log the received error because is already logged in function so for now just ignore it
 			}
 		}(conn)
 	}
@@ -250,7 +229,11 @@ func (sa *SIPAgent) answerMessage(messageStr, addr string, write func(ans []byte
 		return // do we need to return error in case we can't parse the message?
 	}
 	key := utils.ConcatenatedKey(sipMessage[fromHeader], sipMessage[callIDHeader])
-	if ackMethod == sipMessage.MethodFrom(requestHeader) {
+	method := sipMessage.MethodFrom(requestHeader)
+	if ackMethod == method {
+		if sa.cfg.SIPAgentCfg().ACKInterval == 0 { // ignore ACK
+			return
+		}
 		sa.ackLocks.Lock()
 		if stopChan, has := sa.ackMap[key]; has {
 			close(stopChan)
@@ -260,10 +243,7 @@ func (sa *SIPAgent) answerMessage(messageStr, addr string, write func(ans []byte
 		sa.ackLocks.Unlock() // log the message if we did not find it in the map
 	}
 	var sipAnswer sipingo.Message
-	if sipAnswer, err = sa.handleMessage(sipMessage, addr); err != nil {
-		return
-	}
-	if len(sipAnswer) == 0 {
+	if sipAnswer = sa.handleMessage(sipMessage, addr); len(sipAnswer) == 0 {
 		return // do not write the message if we do not have anything to reply
 	}
 	ans := []byte(sipAnswer.String())
@@ -273,6 +253,11 @@ func (sa *SIPAgent) answerMessage(messageStr, addr string, write func(ans []byte
 				utils.SIPAgent, err.Error(), sipAnswer))
 		return
 	}
+	// because we expext to send codes from 300-699 we wait for the ACK every time
+	if method != inviteMethod || // only invitest need ACK
+		sa.cfg.SIPAgentCfg().ACKInterval == 0 {
+		return // disabled ACK
+	}
 	stopChan := make(chan struct{})
 	sa.ackLocks.Lock()
 	sa.ackMap[key] = stopChan
@@ -280,7 +265,7 @@ func (sa *SIPAgent) answerMessage(messageStr, addr string, write func(ans []byte
 	go func(stopChan chan struct{}, a []byte) {
 		for {
 			select {
-			case <-time.After(time.Second):
+			case <-time.After(sa.cfg.SIPAgentCfg().ACKInterval):
 				if err = write(ans); err != nil {
 					utils.Logger.Warning(
 						fmt.Sprintf("<%s> error: %s sending message: %s",
@@ -299,8 +284,8 @@ func (sa *SIPAgent) answerMessage(messageStr, addr string, write func(ans []byte
 }
 
 func (sa *SIPAgent) handleMessage(sipMessage sipingo.Message, remoteHost string) (sipAnswer sipingo.Message) {
-	if sipMessage["User-Agent"] != "" {
-		sipMessage["User-Agent"] = utils.CGRateS
+	if sipMessage[userAgentHeader] != "" {
+		sipMessage[userAgentHeader] = utils.CGRateS
 	}
 	sipMessageIface := make(map[string]interface{})
 	for k, v := range sipMessage {
@@ -313,9 +298,22 @@ func (sa *SIPAgent) handleMessage(sipMessage sipingo.Message, remoteHost string)
 	opts := utils.NewOrderedNavigableMap()
 	reqVars := utils.NavigableMap2{
 		utils.RemoteHost: utils.NewNMData(remoteHost),
-		"Method":         utils.NewNMData(sipMessage.MethodFrom("Request")),
+		method:           utils.NewNMData(sipMessage.MethodFrom(requestHeader)),
 	}
-	var err error
+	// build the negative error answer
+	sErr, err := sipErr(
+		dp, sipMessage.Clone(), reqVars,
+		sa.cfg.SIPAgentCfg().Templates[utils.MetaErr],
+		sa.cfg.GeneralCfg().DefaultTenant,
+		sa.cfg.GeneralCfg().DefaultTimezone,
+		sa.filterS)
+	if err != nil {
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s> error: %s building errSIP for message: %s",
+				utils.SIPAgent, err.Error(), sipMessage))
+		return bareSipErr(sipMessage, sipServerErr)
+	}
+
 	for _, reqProcessor := range sa.cfg.SIPAgentCfg().RequestProcessors {
 		agReq := NewAgentRequest(dp, reqVars, &cgrRplyNM, rplyNM,
 			opts, reqProcessor.Tenant, sa.cfg.GeneralCfg().DefaultTenant,
@@ -341,7 +339,7 @@ func (sa *SIPAgent) handleMessage(sipMessage sipingo.Message, remoteHost string)
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> error: %s processing message: %s from %s",
 				utils.SIPAgent, err.Error(), sipMessage, remoteHost))
-		return
+		return sErr
 	}
 	if !processed {
 		utils.Logger.Warning(
@@ -356,7 +354,7 @@ func (sa *SIPAgent) handleMessage(sipMessage sipingo.Message, remoteHost string)
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> error: %s encoding out %s",
 				utils.SIPAgent, err.Error(), utils.ToJSON(rplyNM)))
-		return
+		return sErr
 	}
 	sipMessage.PrepareReply()
 	return sipMessage
