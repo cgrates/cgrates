@@ -65,7 +65,12 @@ func (sip *SIPAgent) Start() (err error) {
 	sip.Lock()
 	defer sip.Unlock()
 	sip.oldListen = sip.cfg.SIPAgentCfg().Listen
-	sip.sip = agents.NewSIPAgent(sip.connMgr, sip.cfg, filterS)
+	sip.sip, err = agents.NewSIPAgent(sip.connMgr, sip.cfg, filterS)
+	if err != nil {
+		utils.Logger.Err(fmt.Sprintf("<%s> error: %s!",
+			utils.SIPAgent, err))
+		return
+	}
 	go func() {
 		if err = sip.sip.ListenAndServe(); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.SIPAgent, err.Error()))

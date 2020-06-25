@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/sipingo"
 )
@@ -46,4 +47,31 @@ func updateSIPMsgFromNavMap(m sipingo.Message, navMp *utils.OrderedNavigableMap)
 		m[strings.Join(itm.Path, utils.NestingSep)] = utils.IfaceAsString(itm.Data)
 	}
 	return
+}
+
+func sipErr(m utils.DataProvider, sipMessage sipingo.Message,
+	reqVars utils.NavigableMap2,
+	tpl []*config.FCTemplate, tnt, tmz string,
+	filterS *engine.FilterS) (a sipingo.Message, err error) {
+	aReq := NewAgentRequest(
+		m, reqVars,
+		nil, nil, nil, nil,
+		tnt, tmz, filterS, nil, nil)
+	if err = aReq.SetFields(tpl); err != nil {
+		return
+	}
+	if err = updateSIPMsgFromNavMap(sipMessage, aReq.Reply); err != nil {
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s> error: %s encoding out %s",
+				utils.SIPAgent, err.Error(), utils.ToJSON(aReq.Reply)))
+		return
+	}
+	sipMessage.PrepareReply()
+	return sipMessage, nil
+}
+
+func bareSipErr(m sipingo.Message, err string) sipingo.Message {
+	m[requestHeader] = err
+	m.PrepareReply()
+	return m
 }

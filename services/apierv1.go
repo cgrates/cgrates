@@ -167,7 +167,7 @@ func (apiService *APIerSv1Service) GetAPIerSv1() *v1.APIerSv1 {
 
 // ShouldRun returns if the service should be running
 func (apiService *APIerSv1Service) ShouldRun() bool {
-	return apiService.cfg.RalsCfg().Enabled
+	return apiService.cfg.ApierCfg().Enabled
 }
 
 // GetDMChan returns the DataManager chanel

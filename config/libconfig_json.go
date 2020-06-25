@@ -627,5 +627,7 @@ type SIPAgentJsonCfg struct {
 	Listen_net         *string
 	Sessions_conns     *[]string
 	Timezone           *string
+	Ack_interval       *string
+	Templates          map[string][]*FcTemplateJsonCfg
 	Request_processors *[]*ReqProcessorJsnCfg
 }
