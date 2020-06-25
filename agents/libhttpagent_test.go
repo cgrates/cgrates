@@ -24,7 +24,6 @@ import (
 	"net/http"
 	"strings"
 	"testing"
-	//"github.com/cgrates/cgrates/utils"
 )
 
 func TestHttpUrlDPFieldAsInterface(t *testing.T) {

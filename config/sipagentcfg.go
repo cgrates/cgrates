@@ -26,14 +26,14 @@ import (
 )
 
 type SIPAgentCfg struct {
-	Enabled           bool
-	Listen            string
-	ListenNet         string // udp or tcp
-	SessionSConns     []string
-	Timezone          string
-	ACKInterval       time.Duration // timeout replies if not reaching back
-	Templates         map[string][]*FCTemplate
-	RequestProcessors []*RequestProcessor
+	Enabled             bool
+	Listen              string
+	ListenNet           string // udp or tcp
+	SessionSConns       []string
+	Timezone            string
+	RetransmissionTimer time.Duration // timeout replies if not reaching back
+	Templates           map[string][]*FCTemplate
+	RequestProcessors   []*RequestProcessor
 }
 
 func (da *SIPAgentCfg) loadFromJsonCfg(jsnCfg *SIPAgentJsonCfg, sep string) (err error) {
@@ -63,8 +63,8 @@ func (da *SIPAgentCfg) loadFromJsonCfg(jsnCfg *SIPAgentJsonCfg, sep string) (err
 			}
 		}
 	}
-	if jsnCfg.Ack_interval != nil {
-		if da.ACKInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Ack_interval); err != nil {
+	if jsnCfg.Retransmission_timer != nil {
+		if da.RetransmissionTimer, err = utils.ParseDurationWithNanosecs(*jsnCfg.Retransmission_timer); err != nil {
 			return err
 		}
 	}

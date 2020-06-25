@@ -54,7 +54,7 @@ type Migrator struct {
 	dryRun     bool
 	sameDataDB bool
 	sameStorDB bool
-	sameOutDB  bool
+	sameOutDB  bool // needed in case we set version and we use same DataDB as StorDB to store the versions without overwriting them
 	stats      map[string]int
 }
 

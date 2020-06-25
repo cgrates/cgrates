@@ -21,6 +21,7 @@ package agents
 import (
 	"fmt"
 	"net"
+	"regexp"
 	"sync"
 	"time"
 
@@ -41,6 +42,10 @@ const (
 	sipServerErr    = "SIP/2.0 500 Internal Server Error"
 	userAgentHeader = "User-Agent"
 	method          = "Method"
+)
+
+var (
+	sipTagRgx = regexp.MustCompile(`tag=([^ ,;>]*)`)
 )
 
 // NewSIPAgent will construct a SIPAgent
@@ -228,10 +233,12 @@ func (sa *SIPAgent) answerMessage(messageStr, addr string, write func(ans []byte
 				utils.SIPAgent, err.Error(), messageStr))
 		return // do we need to return error in case we can't parse the message?
 	}
-	key := utils.ConcatenatedKey(sipMessage[fromHeader], sipMessage[callIDHeader])
+	tags := sipTagRgx.FindStringSubmatch(sipMessage[fromHeader])
+	// in case we get a wrong sip message ( without tag in the From header) the next line should panic
+	key := utils.ConcatenatedKey(sipMessage[callIDHeader], tags[1])
 	method := sipMessage.MethodFrom(requestHeader)
 	if ackMethod == method {
-		if sa.cfg.SIPAgentCfg().ACKInterval == 0 { // ignore ACK
+		if sa.cfg.SIPAgentCfg().RetransmissionTimer == 0 { // ignore ACK
 			return
 		}
 		sa.ackLocks.Lock()
@@ -255,7 +262,7 @@ func (sa *SIPAgent) answerMessage(messageStr, addr string, write func(ans []byte
 	}
 	// because we expext to send codes from 300-699 we wait for the ACK every time
 	if method != inviteMethod || // only invitest need ACK
-		sa.cfg.SIPAgentCfg().ACKInterval == 0 {
+		sa.cfg.SIPAgentCfg().RetransmissionTimer == 0 {
 		return // disabled ACK
 	}
 	stopChan := make(chan struct{})
@@ -265,7 +272,7 @@ func (sa *SIPAgent) answerMessage(messageStr, addr string, write func(ans []byte
 	go func(stopChan chan struct{}, a []byte) {
 		for {
 			select {
-			case <-time.After(sa.cfg.SIPAgentCfg().ACKInterval):
+			case <-time.After(sa.cfg.SIPAgentCfg().RetransmissionTimer):
 				if err = write(ans); err != nil {
 					utils.Logger.Warning(
 						fmt.Sprintf("<%s> error: %s sending message: %s",
@@ -285,7 +292,7 @@ func (sa *SIPAgent) answerMessage(messageStr, addr string, write func(ans []byte
 
 func (sa *SIPAgent) handleMessage(sipMessage sipingo.Message, remoteHost string) (sipAnswer sipingo.Message) {
 	if sipMessage[userAgentHeader] != "" {
-		sipMessage[userAgentHeader] = utils.CGRateS
+		sipMessage[userAgentHeader] = fmt.Sprintf("%s@%s", utils.CGRateS, utils.VERSION)
 	}
 	sipMessageIface := make(map[string]interface{})
 	for k, v := range sipMessage {
