@@ -678,7 +678,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		}
 	}
 	for _, connID := range cfg.filterSCfg.ApierSConns {
-		if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.ralsCfg.Enabled {
+		if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.apier.Enabled {
 			return fmt.Errorf("<%s> not enabled but requested by <%s> component.", utils.ApierS, utils.FilterS)
 		}
 		if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
