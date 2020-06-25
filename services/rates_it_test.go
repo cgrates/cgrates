@@ -46,6 +46,9 @@ func TestRateSReload(t *testing.T) {
 	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
 	db := NewDataDBService(cfg, nil)
 	chS := engine.NewCacheS(cfg, nil)
+	close(chS.GetPrecacheChannel(utils.CacheRateProfiles))
+	close(chS.GetPrecacheChannel(utils.CacheRateProfilesFilterIndexes))
+	close(chS.GetPrecacheChannel(utils.CacheRateFilterIndexes))
 	rS := NewRateService(cfg, chS, filterSChan, db, server, engineShutdown, make(chan rpcclient.ClientConnector, 1))
 	srvMngr.AddServices(rS,
 		NewLoaderService(cfg, db, filterSChan, server, engineShutdown, make(chan rpcclient.ClientConnector, 1), nil), db)
