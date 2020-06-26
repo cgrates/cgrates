@@ -549,7 +549,7 @@ func (dDP *dynamicDP) RemoteHost() net.Addr {
 
 var initialDPPrefixes = utils.NewStringSet([]string{utils.MetaReq, utils.MetaVars,
 	utils.MetaCgreq, utils.MetaCgrep, utils.MetaRep, utils.MetaCGRAReq,
-	utils.MetaAct, utils.MetaEC})
+	utils.MetaAct, utils.MetaEC, utils.MetaCache})
 
 func (dDP *dynamicDP) FieldAsInterface(fldPath []string) (val interface{}, err error) {
 	if len(fldPath) == 0 {

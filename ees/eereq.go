@@ -127,11 +127,12 @@ func (eeR *EventExporterRequest) FieldAsString(fldPath []string) (val string, er
 func (eeR *EventExporterRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 	for _, tplFld := range tplFlds {
 		if pass, err := eeR.filterS.Pass(eeR.tnt,
-			tplFld.Filters, eeR); err != nil {
+			tplFld.Filters, eeR.dynamicProvider); err != nil {
 			return err
 		} else if !pass {
 			continue
 		}
+
 		var out interface{}
 		out, err = eeR.ParseField(tplFld)
 		if err != nil {
@@ -157,7 +158,6 @@ func (eeR *EventExporterRequest) SetFields(tplFlds []*config.FCTemplate) (err er
 		} else {
 			itmPath = fullPath.PathItems.Slice()[1:]
 		}
-
 		nMItm := &config.NMItem{Data: out, Path: itmPath, Config: tplFld}
 		switch tplFld.Type {
 		case utils.META_COMPOSED:

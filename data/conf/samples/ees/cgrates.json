@@ -298,6 +298,46 @@
 				{"tag": "Cost", "path": "*exp.Cost", "type": "*variable", "value": "~*req.Cost{*round:4}"},
 			],
 		},
+		{
+			"id": "RouteExporter", // this exporter will set the Cost Account and RunID in cache so we can use it in other exports
+			"type": "*virt",
+			"tenant": "cgrates.org",
+			"attempts": 1,
+			"filters": ["*string:~*req.ExporterUsed:RouteExporter"],
+			"fields":[
+				{"tag": "Cost", "path": "*cache[~*req.CGRID|~*req.RunID|-Cost]", "type": "*variable",
+					"value": "~*req.Cost", "rounding_decimals": 4},
+				{"tag": "Account", "path": "*cache[~*req.CGRID|~*req.RunID|-Account]", "type": "*variable", "value": "~*req.Account"},
+				{"tag": "RunID", "path": "*cache[~*req.CGRID|~*req.RunID|-RunID]", "type": "*variable", "value": "~*req.RunID"},
+				{"tag": "CustomVariable", "path": "*cache[~*req.CGRID|~*req.RunID|-CustomVariable]",
+					"type": "*variable", "value": "CustomValue"}
+			],
+		},
+		{
+			"id": "CSVExporterFromVirt",
+			"type": "*file_csv",
+			"export_path": "/tmp/testCSVfromVirt",
+			"tenant": "cgrates.org",
+			"flags": ["*attributes"],
+			"attribute_context": "customContext",
+			"attempts": 1,
+			"field_separator": ",",
+			"filters": ["*string:~*req.ExporterUsed:CSVExporterFromVirt"],
+			"fields":[
+				{"tag": "CGRID", "path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"},
+				{"tag": "RunID", "path": "*exp.RunID", "type": "*variable", "value": "~*req.RunID"},
+				{"tag": "OriginID", "path": "*exp.OriginID", "type": "*variable", "value": "~*req.OriginID"},
+				{"tag": "Tenant", "path": "*exp.Tenant", "type": "*variable", "value": "~*req.Tenant"},
+				{"tag": "Account", "path": "*exp.Account", "type": "*variable", "value": "~*req.Account"},
+				{"tag": "Cost", "path": "*exp.Cost", "type": "*variable", "value": "~*req.Cost", "rounding_decimals": 4},
+				{"tag": "SupplierCustomVariable","filters": ["*exists:*cache[~*req.CGRID|~*req.RunID|-CustomVariable]:"],
+					"path": "*exp.SupplierCustomVariable", "type": "*variable", "value": "~*cache[~*req.CGRID|~*req.RunID|-CustomVariable]"},
+				{"tag": "SupplierCost","filters": ["*exists:*cache[~*req.CGRID|~*req.RunID|-Cost]:"],
+					"path": "*exp.SupplierCost", "type": "*variable", "value": "~*cache[~*req.CGRID|~*req.RunID|-Cost]"},
+				{"tag": "SupplierRun","filters": ["*exists:*cache[~*req.CGRID|~*req.RunID|-RunID]:"],
+					"path": "*exp.SupplierRun", "type": "*variable", "value": "~*cache[~*req.CGRID|~*req.RunID|-RunID]"},
+			],
+		}
 	]
 },
 

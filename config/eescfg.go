@@ -205,6 +205,9 @@ func (eeC *EventExporterCfg) loadFromJsonCfg(jsnEec *EventExporterJsonCfg, separ
 			case utils.MetaTrl:
 				eeC.trailerFields = append(eeC.trailerFields, field)
 			}
+			if strings.HasPrefix(field.GetPathSlice()[0], utils.MetaCache) { // special cache when loading fields that contains *cache in path
+				eeC.contentFields = append(eeC.contentFields, field)
+			}
 		}
 	}
 	return

@@ -1,0 +1,192 @@
+// +build integration
+
+/*
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>
+*/
+
+package ees
+
+import (
+	"io/ioutil"
+	"net/rpc"
+	"os"
+	"path"
+	"path/filepath"
+	"strings"
+	"testing"
+	"time"
+
+	"github.com/cgrates/cgrates/utils"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+)
+
+var (
+	virtConfigDir string
+	virtCfgPath   string
+	virtCfg       *config.CGRConfig
+	virtRpc       *rpc.Client
+
+	sTestsVirt = []func(t *testing.T){
+		testCreateDirectory,
+		testVirtLoadConfig,
+		testVirtResetDataDB,
+		testVirtResetStorDb,
+		testVirtStartEngine,
+		testVirtRPCConn,
+		testVirtExportSupplierEvent,
+		testVirtExportEvents,
+		testVirtVerifyExports,
+		testStopCgrEngine,
+		testCleanDirectory,
+	}
+)
+
+func TestVirtualExport(t *testing.T) {
+	virtConfigDir = "ees"
+	for _, stest := range sTestsVirt {
+		t.Run(virtConfigDir, stest)
+	}
+}
+
+func testVirtLoadConfig(t *testing.T) {
+	var err error
+	virtCfgPath = path.Join(*dataDir, "conf", "samples", virtConfigDir)
+	if virtCfg, err = config.NewCGRConfigFromPath(virtCfgPath); err != nil {
+		t.Error(err)
+	}
+}
+
+func testVirtResetDataDB(t *testing.T) {
+	if err := engine.InitDataDb(virtCfg); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func testVirtResetStorDb(t *testing.T) {
+	if err := engine.InitStorDb(virtCfg); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func testVirtStartEngine(t *testing.T) {
+	if _, err := engine.StopStartEngine(virtCfgPath, *waitRater); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func testVirtRPCConn(t *testing.T) {
+	var err error
+	virtRpc, err = newRPCClient(virtCfg.ListenCfg())
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func testVirtExportSupplierEvent(t *testing.T) {
+	supplierEvent := &utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "supplierEvent",
+			Time:   utils.TimePointer(time.Now()),
+			Event: map[string]interface{}{
+				utils.CGRID:       utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
+				utils.ToR:         utils.VOICE,
+				utils.OriginID:    "dsafdsaf",
+				utils.OriginHost:  "192.168.1.1",
+				utils.RequestType: utils.META_RATED,
+				utils.Tenant:      "cgrates.org",
+				utils.Category:    "call",
+				utils.Account:     "1001",
+				utils.Subject:     "1001",
+				utils.Destination: "1002",
+				utils.SetupTime:   time.Unix(1383813745, 0).UTC(),
+				utils.AnswerTime:  time.Unix(1383813746, 0).UTC(),
+				utils.Usage:       time.Duration(10) * time.Second,
+				utils.RunID:       "SupplierRun",
+				utils.Cost:        1.23,
+				"ExporterUsed":    "RouteExporter",
+			},
+		},
+	}
+
+	var reply string
+	if err := virtRpc.Call(utils.EventExporterSv1ProcessEvent, supplierEvent, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected %+v, received: %+v", utils.OK, reply)
+	}
+	time.Sleep(10 * time.Millisecond)
+}
+
+func testVirtExportEvents(t *testing.T) {
+	eventVoice := &utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "voiceEvent",
+			Time:   utils.TimePointer(time.Now()),
+			Event: map[string]interface{}{
+				utils.CGRID:       utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
+				utils.ToR:         utils.VOICE,
+				utils.OriginID:    "dsafdsaf",
+				utils.OriginHost:  "192.168.1.1",
+				utils.RequestType: utils.META_RATED,
+				utils.Tenant:      "cgrates.org",
+				utils.Category:    "call",
+				utils.Account:     "1001",
+				utils.Subject:     "1001",
+				utils.Destination: "1002",
+				utils.SetupTime:   time.Unix(1383813745, 0).UTC(),
+				utils.AnswerTime:  time.Unix(1383813746, 0).UTC(),
+				utils.Usage:       time.Duration(10) * time.Second,
+				utils.RunID:       "SupplierRun",
+				utils.Cost:        1.01,
+				"ExporterUsed":    "CSVExporterFromVirt",
+			},
+		},
+	}
+	var reply string
+	if err := virtRpc.Call(utils.EventExporterSv1ProcessEvent, eventVoice, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected %+v, received: %+v", utils.OK, reply)
+	}
+	time.Sleep(1 * time.Second)
+}
+
+func testVirtVerifyExports(t *testing.T) {
+	var files []string
+	err := filepath.Walk("/tmp/testCSVfromVirt/", func(path string, info os.FileInfo, err error) error {
+		if strings.HasSuffix(path, utils.CSVSuffix) {
+			files = append(files, path)
+		}
+		return nil
+	})
+	if err != nil {
+		t.Error(err)
+	}
+	if len(files) != 1 {
+		t.Errorf("Expected %+v, received: %+v", 1, len(files))
+	}
+	eCnt := "dbafe9c8614c785a65aabd116dd3959c3c56f7f6,SupplierRun,dsafdsaf,cgrates.org,1001,1.01,CustomValue,1.23,SupplierRun\n"
+	if outContent1, err := ioutil.ReadFile(files[0]); err != nil {
+		t.Error(err)
+	} else if eCnt != string(outContent1) {
+		t.Errorf("Expecting: \n<%q>, \nreceived: \n<%q>", eCnt, string(outContent1))
+	}
+}
