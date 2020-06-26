@@ -31,7 +31,7 @@ import (
 func (iDB *InternalDB) GetTpIds(colName string) (ids []string, err error) {
 	tpIDs := utils.NewStringSet(nil)
 	if colName == "" { // if colName is empty we need to parse all partitions
-		for _, conNm := range utils.CacheStorDBPartitions.AsSlice() {
+		for _, conNm := range utils.CacheStorDBPartitions {
 			keys := Cache.GetItemIDs(conNm, utils.EmptyString)
 			for _, key := range keys {
 				tpIDs.Add(strings.Split(key, utils.InInFieldSep)[0])
@@ -574,9 +574,9 @@ func (iDB *InternalDB) GetTPRateProfiles(tpid, tenant, id string) (tpPrfs []*uti
 	if id != utils.EmptyString {
 		key += utils.CONCATENATED_KEY_SEP + id
 	}
-	ids := iDB.db.GetItemIDs(utils.TBLTPRateProfiles, key)
+	ids := Cache.GetItemIDs(utils.TBLTPRateProfiles, key)
 	for _, id := range ids {
-		x, ok := iDB.db.Get(utils.TBLTPRateProfiles, id)
+		x, ok := Cache.Get(utils.TBLTPRateProfiles, id)
 		if !ok || x == nil {
 			return nil, utils.ErrNotFound
 		}
@@ -601,7 +601,7 @@ func (iDB *InternalDB) RemTpData(table, tpid string, args map[string]string) (er
 	}
 	ids := Cache.GetItemIDs(table, key)
 	for _, id := range ids {
-		Cache.Remove(table, id,
+		Cache.RemoveWithoutReplicate(table, id,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	}
 	return
@@ -612,7 +612,7 @@ func (iDB *InternalDB) SetTPTimings(timings []*utils.ApierTPTiming) (err error) 
 		return nil
 	}
 	for _, timing := range timings {
-		Cache.Set(utils.TBLTPTimings, utils.ConcatenatedKey(timing.TPid, timing.ID), timing, nil,
+		Cache.SetWithoutReplicate(utils.TBLTPTimings, utils.ConcatenatedKey(timing.TPid, timing.ID), timing, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	}
 	return
@@ -622,7 +622,7 @@ func (iDB *InternalDB) SetTPDestinations(dests []*utils.TPDestination) (err erro
 		return nil
 	}
 	for _, destination := range dests {
-		Cache.Set(utils.TBLTPDestinations, utils.ConcatenatedKey(destination.TPid, destination.ID), destination, nil,
+		Cache.SetWithoutReplicate(utils.TBLTPDestinations, utils.ConcatenatedKey(destination.TPid, destination.ID), destination, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	}
 	return
@@ -633,7 +633,7 @@ func (iDB *InternalDB) SetTPRates(rates []*utils.TPRateRALs) (err error) {
 		return nil
 	}
 	for _, rate := range rates {
-		Cache.Set(utils.TBLTPRates, utils.ConcatenatedKey(rate.TPid, rate.ID), rate, nil,
+		Cache.SetWithoutReplicate(utils.TBLTPRates, utils.ConcatenatedKey(rate.TPid, rate.ID), rate, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	}
 	return
@@ -644,7 +644,7 @@ func (iDB *InternalDB) SetTPDestinationRates(dRates []*utils.TPDestinationRate) 
 		return nil
 	}
 	for _, dRate := range dRates {
-		Cache.Set(utils.TBLTPDestinationRates, utils.ConcatenatedKey(dRate.TPid, dRate.ID), dRate, nil,
+		Cache.SetWithoutReplicate(utils.TBLTPDestinationRates, utils.ConcatenatedKey(dRate.TPid, dRate.ID), dRate, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	}
 	return
@@ -655,7 +655,7 @@ func (iDB *InternalDB) SetTPRatingPlans(ratingPlans []*utils.TPRatingPlan) (err 
 		return nil
 	}
 	for _, rPlan := range ratingPlans {
-		Cache.Set(utils.TBLTPRatingPlans, utils.ConcatenatedKey(rPlan.TPid, rPlan.ID), rPlan, nil,
+		Cache.SetWithoutReplicate(utils.TBLTPRatingPlans, utils.ConcatenatedKey(rPlan.TPid, rPlan.ID), rPlan, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	}
 	return
@@ -666,7 +666,7 @@ func (iDB *InternalDB) SetTPRatingProfiles(ratingProfiles []*utils.TPRatingProfi
 		return nil
 	}
 	for _, rProfile := range ratingProfiles {
-		Cache.Set(utils.TBLTPRatingProfiles, utils.ConcatenatedKey(rProfile.TPid,
+		Cache.SetWithoutReplicate(utils.TBLTPRatingProfiles, utils.ConcatenatedKey(rProfile.TPid,
 			rProfile.LoadId, rProfile.Tenant, rProfile.Category, rProfile.Subject), rProfile, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	}
@@ -678,7 +678,7 @@ func (iDB *InternalDB) SetTPSharedGroups(groups []*utils.TPSharedGroups) (err er
 		return nil
 	}
 	for _, group := range groups {
-		Cache.Set(utils.TBLTPSharedGroups, utils.ConcatenatedKey(group.TPid, group.ID), group, nil,
+		Cache.SetWithoutReplicate(utils.TBLTPSharedGroups, utils.ConcatenatedKey(group.TPid, group.ID), group, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	}
 	return
@@ -689,7 +689,7 @@ func (iDB *InternalDB) SetTPActions(acts []*utils.TPActions) (err error) {
 		return nil
 	}
 	for _, action := range acts {
-		Cache.Set(utils.TBLTPActions, utils.ConcatenatedKey(action.TPid, action.ID), action, nil,
+		Cache.SetWithoutReplicate(utils.TBLTPActions, utils.ConcatenatedKey(action.TPid, action.ID), action, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	}
 	return
@@ -700,7 +700,7 @@ func (iDB *InternalDB) SetTPActionPlans(aPlans []*utils.TPActionPlan) (err error
 		return nil
 	}
 	for _, aPlan := range aPlans {
-		Cache.Set(utils.TBLTPActionPlans, utils.ConcatenatedKey(aPlan.TPid, aPlan.ID), aPlan, nil,
+		Cache.SetWithoutReplicate(utils.TBLTPActionPlans, utils.ConcatenatedKey(aPlan.TPid, aPlan.ID), aPlan, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	}
 	return
@@ -711,7 +711,7 @@ func (iDB *InternalDB) SetTPActionTriggers(aTriggers []*utils.TPActionTriggers) 
 		return nil
 	}
 	for _, aTrigger := range aTriggers {
-		Cache.Set(utils.TBLTPActionTriggers, utils.ConcatenatedKey(aTrigger.TPid, aTrigger.ID), aTrigger, nil,
+		Cache.SetWithoutReplicate(utils.TBLTPActionTriggers, utils.ConcatenatedKey(aTrigger.TPid, aTrigger.ID), aTrigger, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	}
 	return
@@ -722,7 +722,7 @@ func (iDB *InternalDB) SetTPAccountActions(accActions []*utils.TPAccountActions)
 		return nil
 	}
 	for _, accAction := range accActions {
-		Cache.Set(utils.TBLTPAccountActions, utils.ConcatenatedKey(accAction.TPid,
+		Cache.SetWithoutReplicate(utils.TBLTPAccountActions, utils.ConcatenatedKey(accAction.TPid,
 			accAction.LoadId, accAction.Tenant, accAction.Account), accAction, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	}
@@ -734,7 +734,7 @@ func (iDB *InternalDB) SetTPResources(resources []*utils.TPResourceProfile) (err
 		return nil
 	}
 	for _, resource := range resources {
-		Cache.Set(utils.TBLTPResources, utils.ConcatenatedKey(resource.TPid, resource.Tenant, resource.ID), resource, nil,
+		Cache.SetWithoutReplicate(utils.TBLTPResources, utils.ConcatenatedKey(resource.TPid, resource.Tenant, resource.ID), resource, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	}
 	return
@@ -744,7 +744,7 @@ func (iDB *InternalDB) SetTPStats(stats []*utils.TPStatProfile) (err error) {
 		return nil
 	}
 	for _, stat := range stats {
-		Cache.Set(utils.TBLTPStats, utils.ConcatenatedKey(stat.TPid, stat.Tenant, stat.ID), stat, nil,
+		Cache.SetWithoutReplicate(utils.TBLTPStats, utils.ConcatenatedKey(stat.TPid, stat.Tenant, stat.ID), stat, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	}
 	return
@@ -755,7 +755,7 @@ func (iDB *InternalDB) SetTPThresholds(thresholds []*utils.TPThresholdProfile) (
 	}
 
 	for _, threshold := range thresholds {
-		Cache.Set(utils.TBLTPThresholds, utils.ConcatenatedKey(threshold.TPid, threshold.Tenant, threshold.ID), threshold, nil,
+		Cache.SetWithoutReplicate(utils.TBLTPThresholds, utils.ConcatenatedKey(threshold.TPid, threshold.Tenant, threshold.ID), threshold, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	}
 	return
@@ -766,7 +766,7 @@ func (iDB *InternalDB) SetTPFilters(filters []*utils.TPFilterProfile) (err error
 	}
 
 	for _, filter := range filters {
-		Cache.Set(utils.TBLTPFilters, utils.ConcatenatedKey(filter.TPid, filter.Tenant, filter.ID), filter, nil,
+		Cache.SetWithoutReplicate(utils.TBLTPFilters, utils.ConcatenatedKey(filter.TPid, filter.Tenant, filter.ID), filter, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	}
 	return
@@ -777,7 +777,7 @@ func (iDB *InternalDB) SetTPRoutes(routes []*utils.TPRouteProfile) (err error) {
 		return nil
 	}
 	for _, route := range routes {
-		Cache.Set(utils.TBLTPRoutes, utils.ConcatenatedKey(route.TPid, route.Tenant, route.ID), route, nil,
+		Cache.SetWithoutReplicate(utils.TBLTPRoutes, utils.ConcatenatedKey(route.TPid, route.Tenant, route.ID), route, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	}
 	return
@@ -789,7 +789,7 @@ func (iDB *InternalDB) SetTPAttributes(attributes []*utils.TPAttributeProfile) (
 	}
 
 	for _, attribute := range attributes {
-		Cache.Set(utils.TBLTPAttributes, utils.ConcatenatedKey(attribute.TPid, attribute.Tenant, attribute.ID), attribute, nil,
+		Cache.SetWithoutReplicate(utils.TBLTPAttributes, utils.ConcatenatedKey(attribute.TPid, attribute.Tenant, attribute.ID), attribute, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	}
 	return
@@ -800,7 +800,7 @@ func (iDB *InternalDB) SetTPChargers(cpps []*utils.TPChargerProfile) (err error)
 	}
 
 	for _, cpp := range cpps {
-		Cache.Set(utils.TBLTPChargers, utils.ConcatenatedKey(cpp.TPid, cpp.Tenant, cpp.ID), cpp, nil,
+		Cache.SetWithoutReplicate(utils.TBLTPChargers, utils.ConcatenatedKey(cpp.TPid, cpp.Tenant, cpp.ID), cpp, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	}
 	return
@@ -811,7 +811,7 @@ func (iDB *InternalDB) SetTPDispatcherProfiles(dpps []*utils.TPDispatcherProfile
 	}
 
 	for _, dpp := range dpps {
-		Cache.Set(utils.TBLTPDispatchers, utils.ConcatenatedKey(dpp.TPid, dpp.Tenant, dpp.ID), dpp, nil,
+		Cache.SetWithoutReplicate(utils.TBLTPDispatchers, utils.ConcatenatedKey(dpp.TPid, dpp.Tenant, dpp.ID), dpp, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	}
 	return
@@ -821,7 +821,7 @@ func (iDB *InternalDB) SetTPDispatcherHosts(dpps []*utils.TPDispatcherHost) (err
 		return nil
 	}
 	for _, dpp := range dpps {
-		Cache.Set(utils.TBLTPDispatcherHosts, utils.ConcatenatedKey(dpp.TPid, dpp.Tenant, dpp.ID), dpp, nil,
+		Cache.SetWithoutReplicate(utils.TBLTPDispatcherHosts, utils.ConcatenatedKey(dpp.TPid, dpp.Tenant, dpp.ID), dpp, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	}
 	return
@@ -832,7 +832,7 @@ func (iDB *InternalDB) SetTPRateProfiles(tpPrfs []*utils.TPRateProfile) (err err
 		return nil
 	}
 	for _, tpPrf := range tpPrfs {
-		iDB.db.Set(utils.TBLTPRateProfiles, utils.ConcatenatedKey(tpPrf.TPid, tpPrf.Tenant, tpPrf.ID), tpPrf, nil,
+		Cache.SetWithoutReplicate(utils.TBLTPRateProfiles, utils.ConcatenatedKey(tpPrf.TPid, tpPrf.Tenant, tpPrf.ID), tpPrf, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	}
 	return
@@ -882,14 +882,14 @@ func (iDB *InternalDB) SetCDR(cdr *CDR, allowUpdate bool) (err error) {
 	}
 	iDB.indexedFieldsMutex.RUnlock()
 
-	Cache.Set(utils.CDRsTBL, cdrKey, cdr, idxs.AsSlice(),
+	Cache.SetWithoutReplicate(utils.CDRsTBL, cdrKey, cdr, idxs.AsSlice(),
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 
 	return
 }
 
 func (iDB *InternalDB) RemoveSMCost(smc *SMCost) (err error) {
-	Cache.Remove(utils.SessionCostsTBL, utils.ConcatenatedKey(smc.CGRID, smc.RunID, smc.OriginHost, smc.OriginID),
+	Cache.RemoveWithoutReplicate(utils.SessionCostsTBL, utils.ConcatenatedKey(smc.CGRID, smc.RunID, smc.OriginHost, smc.OriginID),
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }
@@ -970,7 +970,7 @@ func (iDB *InternalDB) RemoveSMCosts(qryFltr *utils.SMCostFilter) error {
 	}
 
 	for key := range smMpIDs {
-		Cache.Remove(utils.SessionCostsTBL, key,
+		Cache.RemoveWithoutReplicate(utils.SessionCostsTBL, key,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	}
 	return nil
@@ -1653,7 +1653,7 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 	}
 	if remove {
 		for _, cdr := range cdrs {
-			Cache.Remove(utils.CDRsTBL, utils.ConcatenatedKey(cdr.CGRID, cdr.RunID, cdr.OriginID),
+			Cache.RemoveWithoutReplicate(utils.CDRsTBL, utils.ConcatenatedKey(cdr.CGRID, cdr.RunID, cdr.OriginID),
 				cacheCommit(utils.NonTransactional), utils.NonTransactional)
 		}
 		return nil, 0, nil
@@ -1793,7 +1793,7 @@ func (iDB *InternalDB) SetSMCost(smCost *SMCost) (err error) {
 	idxs.Add(utils.ConcatenatedKey(utils.OriginHost, smCost.OriginHost))
 	idxs.Add(utils.ConcatenatedKey(utils.OriginID, smCost.OriginID))
 	idxs.Add(utils.ConcatenatedKey(utils.CostSource, smCost.CostSource))
-	Cache.Set(utils.SessionCostsTBL, utils.ConcatenatedKey(smCost.CGRID, smCost.RunID, smCost.OriginHost, smCost.OriginID), smCost, idxs.AsSlice(),
+	Cache.SetWithoutReplicate(utils.SessionCostsTBL, utils.ConcatenatedKey(smCost.CGRID, smCost.RunID, smCost.OriginHost, smCost.OriginID), smCost, idxs.AsSlice(),
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return err
 }

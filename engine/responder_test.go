@@ -28,13 +28,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var rsponder *Responder
-
-func init() {
-	cfg, _ := config.NewDefaultCGRConfig()
-	config.SetCgrConfig(cfg)
-	rsponder = &Responder{MaxComputedUsage: cfg.RalsCfg().MaxComputedUsage}
-}
+var rsponder = &Responder{MaxComputedUsage: config.CgrConfig().RalsCfg().MaxComputedUsage}
 
 func TestResponderGobSMCost(t *testing.T) {
 	cc := &CallCost{

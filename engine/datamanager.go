@@ -25,71 +25,50 @@ import (
 )
 
 var (
-	filterIndexesPrefixMap = utils.StringMap{
-		utils.AttributeFilterIndexes:      true,
-		utils.ResourceFilterIndexes:       true,
-		utils.StatFilterIndexes:           true,
-		utils.ThresholdFilterIndexes:      true,
-		utils.RouteFilterIndexes:          true,
-		utils.ChargerFilterIndexes:        true,
-		utils.DispatcherFilterIndexes:     true,
-		utils.RateProfilesFilterIndexPrfx: true,
-		utils.RateFilterIndexPrfx:         true,
+	filterIndexesPrefixMap = utils.StringSet{
+		utils.AttributeFilterIndexes:      struct{}{},
+		utils.ResourceFilterIndexes:       struct{}{},
+		utils.StatFilterIndexes:           struct{}{},
+		utils.ThresholdFilterIndexes:      struct{}{},
+		utils.RouteFilterIndexes:          struct{}{},
+		utils.ChargerFilterIndexes:        struct{}{},
+		utils.DispatcherFilterIndexes:     struct{}{},
+		utils.RateProfilesFilterIndexPrfx: struct{}{},
+		utils.RateFilterIndexPrfx:         struct{}{},
 	}
-	loadCachePrefixMap = utils.StringMap{
-		utils.DESTINATION_PREFIX:         true,
-		utils.REVERSE_DESTINATION_PREFIX: true,
-		utils.RATING_PLAN_PREFIX:         true,
-		utils.RATING_PROFILE_PREFIX:      true,
-		utils.ACTION_PREFIX:              true,
-		utils.ACTION_PLAN_PREFIX:         true,
-		utils.ACTION_TRIGGER_PREFIX:      true,
-		utils.SHARED_GROUP_PREFIX:        true,
-		utils.StatQueuePrefix:            true,
-		utils.StatQueueProfilePrefix:     true,
-		utils.ThresholdPrefix:            true,
-		utils.ThresholdProfilePrefix:     true,
-		utils.FilterPrefix:               true,
-		utils.RouteProfilePrefix:         true,
-		utils.AttributeProfilePrefix:     true,
-		utils.ChargerProfilePrefix:       true,
-		utils.DispatcherProfilePrefix:    true,
-		utils.DispatcherHostPrefix:       true,
-		utils.RateProfilePrefix:          true,
-	}
-	cachePrefixMap = utils.StringMap{
-		utils.DESTINATION_PREFIX:          true,
-		utils.REVERSE_DESTINATION_PREFIX:  true,
-		utils.RATING_PLAN_PREFIX:          true,
-		utils.RATING_PROFILE_PREFIX:       true,
-		utils.ACTION_PREFIX:               true,
-		utils.ACTION_PLAN_PREFIX:          true,
-		utils.AccountActionPlansPrefix:    true,
-		utils.ACTION_TRIGGER_PREFIX:       true,
-		utils.SHARED_GROUP_PREFIX:         true,
-		utils.ResourceProfilesPrefix:      true,
-		utils.TimingsPrefix:               true,
-		utils.ResourcesPrefix:             true,
-		utils.StatQueuePrefix:             true,
-		utils.StatQueueProfilePrefix:      true,
-		utils.ThresholdPrefix:             true,
-		utils.ThresholdProfilePrefix:      true,
-		utils.FilterPrefix:                true,
-		utils.RouteProfilePrefix:          true,
-		utils.AttributeProfilePrefix:      true,
-		utils.ChargerProfilePrefix:        true,
-		utils.DispatcherProfilePrefix:     true,
-		utils.DispatcherHostPrefix:        true,
-		utils.RateProfilePrefix:           true,
-		utils.AttributeFilterIndexes:      true,
-		utils.ResourceFilterIndexes:       true,
-		utils.StatFilterIndexes:           true,
-		utils.ThresholdFilterIndexes:      true,
-		utils.RouteFilterIndexes:          true,
-		utils.ChargerFilterIndexes:        true,
-		utils.DispatcherFilterIndexes:     true,
-		utils.RateProfilesFilterIndexPrfx: true,
-		utils.RateFilterIndexPrfx:         true,
+	cachePrefixMap = utils.StringSet{
+		utils.DESTINATION_PREFIX:          struct{}{},
+		utils.REVERSE_DESTINATION_PREFIX:  struct{}{},
+		utils.RATING_PLAN_PREFIX:          struct{}{},
+		utils.RATING_PROFILE_PREFIX:       struct{}{},
+		utils.ACTION_PREFIX:               struct{}{},
+		utils.ACTION_PLAN_PREFIX:          struct{}{},
+		utils.AccountActionPlansPrefix:    struct{}{},
+		utils.ACTION_TRIGGER_PREFIX:       struct{}{},
+		utils.SHARED_GROUP_PREFIX:         struct{}{},
+		utils.ResourceProfilesPrefix:      struct{}{},
+		utils.TimingsPrefix:               struct{}{},
+		utils.ResourcesPrefix:             struct{}{},
+		utils.StatQueuePrefix:             struct{}{},
+		utils.StatQueueProfilePrefix:      struct{}{},
+		utils.ThresholdPrefix:             struct{}{},
+		utils.ThresholdProfilePrefix:      struct{}{},
+		utils.FilterPrefix:                struct{}{},
+		utils.RouteProfilePrefix:          struct{}{},
+		utils.AttributeProfilePrefix:      struct{}{},
+		utils.ChargerProfilePrefix:        struct{}{},
+		utils.DispatcherProfilePrefix:     struct{}{},
+		utils.DispatcherHostPrefix:        struct{}{},
+		utils.RateProfilePrefix:           struct{}{},
+		utils.AttributeFilterIndexes:      struct{}{},
+		utils.ResourceFilterIndexes:       struct{}{},
+		utils.StatFilterIndexes:           struct{}{},
+		utils.ThresholdFilterIndexes:      struct{}{},
+		utils.RouteFilterIndexes:          struct{}{},
+		utils.ChargerFilterIndexes:        struct{}{},
+		utils.DispatcherFilterIndexes:     struct{}{},
+		utils.RateProfilesFilterIndexPrfx: struct{}{},
+		utils.RateFilterIndexPrfx:         struct{}{},
 	}
 )
 
@@ -129,85 +108,44 @@ func (dm *DataManager) LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs,
 		return
 	}
 	if dm.DataDB().GetStorageType() == utils.INTERNAL {
-		if dm.cacheCfg == nil {
+		return // all the data is in cache already
+	}
+	for key, ids := range map[string][]string{
+		utils.DESTINATION_PREFIX:         dstIDs,
+		utils.REVERSE_DESTINATION_PREFIX: rvDstIDs,
+		utils.RATING_PLAN_PREFIX:         rplIDs,
+		utils.RATING_PROFILE_PREFIX:      rpfIDs,
+		utils.ACTION_PREFIX:              actIDs,
+		utils.ACTION_PLAN_PREFIX:         aplIDs,
+		utils.AccountActionPlansPrefix:   aaPlIDs,
+		utils.ACTION_TRIGGER_PREFIX:      atrgIDs,
+		utils.SHARED_GROUP_PREFIX:        sgIDs,
+		utils.ResourceProfilesPrefix:     rpIDs,
+		utils.ResourcesPrefix:            resIDs,
+		utils.StatQueuePrefix:            stqIDs,
+		utils.StatQueueProfilePrefix:     stqpIDs,
+		utils.ThresholdPrefix:            thIDs,
+		utils.ThresholdProfilePrefix:     thpIDs,
+		utils.FilterPrefix:               fltrIDs,
+		utils.RouteProfilePrefix:         rPrflIDs,
+		utils.AttributeProfilePrefix:     alsPrfIDs,
+		utils.ChargerProfilePrefix:       cppIDs,
+		utils.DispatcherProfilePrefix:    dppIDs,
+		utils.DispatcherHostPrefix:       dphIDs,
+		utils.RateProfilePrefix:          ratePrfIDs,
+	} {
+		if err = dm.CacheDataFromDB(key, ids, false); err != nil {
 			return
-		}
-		for k, cacheCfg := range dm.cacheCfg.Partitions {
-			k = utils.CacheInstanceToPrefix[k] // alias into prefixes understood by storage
-			if loadCachePrefixMap.HasKey(k) && cacheCfg.Precache {
-				if err := dm.PreloadCacheForPrefix(k); err != nil && err != utils.ErrInvalidKey {
-					return err
-				}
-			}
-		}
-		return
-	} else {
-		for key, ids := range map[string][]string{
-			utils.DESTINATION_PREFIX:         dstIDs,
-			utils.REVERSE_DESTINATION_PREFIX: rvDstIDs,
-			utils.RATING_PLAN_PREFIX:         rplIDs,
-			utils.RATING_PROFILE_PREFIX:      rpfIDs,
-			utils.ACTION_PREFIX:              actIDs,
-			utils.ACTION_PLAN_PREFIX:         aplIDs,
-			utils.AccountActionPlansPrefix:   aaPlIDs,
-			utils.ACTION_TRIGGER_PREFIX:      atrgIDs,
-			utils.SHARED_GROUP_PREFIX:        sgIDs,
-			utils.ResourceProfilesPrefix:     rpIDs,
-			utils.ResourcesPrefix:            resIDs,
-			utils.StatQueuePrefix:            stqIDs,
-			utils.StatQueueProfilePrefix:     stqpIDs,
-			utils.ThresholdPrefix:            thIDs,
-			utils.ThresholdProfilePrefix:     thpIDs,
-			utils.FilterPrefix:               fltrIDs,
-			utils.RouteProfilePrefix:         rPrflIDs,
-			utils.AttributeProfilePrefix:     alsPrfIDs,
-			utils.ChargerProfilePrefix:       cppIDs,
-			utils.DispatcherProfilePrefix:    dppIDs,
-			utils.DispatcherHostPrefix:       dphIDs,
-			utils.RateProfilePrefix:          ratePrfIDs,
-		} {
-			if err = dm.CacheDataFromDB(key, ids, false); err != nil {
-				return
-			}
 		}
 	}
 	return
-}
-
-//Used for InternalDB
-func (dm *DataManager) PreloadCacheForPrefix(prefix string) error {
-	if dm == nil {
-		return utils.ErrNoDatabaseConn
-	}
-	transID := Cache.BeginTransaction()
-	Cache.Clear([]string{utils.CachePrefixToInstance[prefix]})
-	keyList, err := dm.DataDB().GetKeysForPrefix(prefix)
-	if err != nil {
-		Cache.RollbackTransaction(transID)
-		return err
-	}
-	switch prefix {
-	case utils.RATING_PLAN_PREFIX:
-		for _, key := range keyList {
-			_, err := dm.GetRatingPlan(key[len(utils.RATING_PLAN_PREFIX):], true, transID)
-			if err != nil {
-				Cache.RollbackTransaction(transID)
-				return err
-			}
-		}
-	default:
-		Cache.RollbackTransaction(transID)
-		return utils.ErrInvalidKey
-	}
-	Cache.CommitTransaction(transID)
-	return nil
 }
 
 func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
-	if !cachePrefixMap.HasKey(prfx) {
+	if !cachePrefixMap.Has(prfx) {
 		return utils.NewCGRError(utils.DataManager,
 			utils.MandatoryIEMissingCaps,
 			utils.UnsupportedCachePrefix,

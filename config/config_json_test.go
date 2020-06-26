@@ -211,6 +211,13 @@ func TestCacheJsonCfg(t *testing.T) {
 			utils.CacheSTIR: {Limit: utils.IntPointer(-1),
 				Ttl: utils.StringPointer("3h"), Static_ttl: utils.BoolPointer(false),
 				Replicate: utils.BoolPointer(false)},
+
+			utils.CacheVersions: {Limit: utils.IntPointer(-1),
+				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
+				Replicate: utils.BoolPointer(false)},
+			utils.CacheAccounts: {Limit: utils.IntPointer(-1),
+				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
+				Replicate: utils.BoolPointer(false)},
 		},
 		Replication_conns: &[]string{},
 	}

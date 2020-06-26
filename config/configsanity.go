@@ -592,13 +592,6 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 	}
 	// DataDB sanity checks
 	if cfg.dataDbCfg.DataDbType == utils.INTERNAL {
-		/*
-			for key, config := range cfg.cacheCfg.Partitions {
-				if utils.CacheDataDBPartitions.Has(key) && config.Limit != 0 {
-					return fmt.Errorf("<%s> %s needs to be 0 when DataBD is *internal, received : %d", utils.CacheS, key, config.Limit)
-				}
-			}
-		*/
 		if cfg.resourceSCfg.Enabled == true && cfg.resourceSCfg.StoreInterval != -1 {
 			return fmt.Errorf("<%s> the StoreInterval field needs to be -1 when DataBD is *internal, received : %d", utils.ResourceS, cfg.resourceSCfg.StoreInterval)
 		}

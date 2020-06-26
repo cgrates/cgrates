@@ -2603,7 +2603,7 @@ func TestRateProfileToAPI(t *testing.T) {
 		MaxCost:          0.6,
 		MaxCostStrategy:  "*free",
 		Rates: map[string]*Rate{
-			"FIRST_GI": &Rate{
+			"FIRST_GI": {
 				ID:        "FIRST_GI",
 				FilterIDs: []string{"*gi:~*req.Usage:0"},
 				Weight:    0,
@@ -2612,7 +2612,7 @@ func TestRateProfileToAPI(t *testing.T) {
 				Increment: time.Duration(1 * time.Minute),
 				Blocker:   false,
 			},
-			"SECOND_GI": &Rate{
+			"SECOND_GI": {
 				ID:        "SECOND_GI",
 				FilterIDs: []string{"*gi:~*req.Usage:1m"},
 				Weight:    10,
@@ -2636,7 +2636,7 @@ func TestRateProfileToAPI(t *testing.T) {
 		MaxCost:            0.6,
 		MaxCostStrategy:    "*free",
 		Rates: map[string]*utils.TPRate{
-			"FIRST_GI": &utils.TPRate{
+			"FIRST_GI": {
 				ID:        "FIRST_GI",
 				FilterIDs: []string{"*gi:~*req.Usage:0"},
 				Weight:    0,
@@ -2645,7 +2645,7 @@ func TestRateProfileToAPI(t *testing.T) {
 				Increment: "1m0s",
 				Blocker:   false,
 			},
-			"SECOND_GI": &utils.TPRate{
+			"SECOND_GI": {
 				ID:        "SECOND_GI",
 				FilterIDs: []string{"*gi:~*req.Usage:1m"},
 				Weight:    10,
@@ -2674,7 +2674,7 @@ func TestAPIToRateProfile(t *testing.T) {
 		MaxCost:          0.6,
 		MaxCostStrategy:  "*free",
 		Rates: map[string]*Rate{
-			"FIRST_GI": &Rate{
+			"FIRST_GI": {
 				ID:        "FIRST_GI",
 				FilterIDs: []string{"*gi:~*req.Usage:0"},
 				Weight:    0,
@@ -2683,7 +2683,7 @@ func TestAPIToRateProfile(t *testing.T) {
 				Increment: time.Duration(1 * time.Minute),
 				Blocker:   false,
 			},
-			"SECOND_GI": &Rate{
+			"SECOND_GI": {
 				ID:        "SECOND_GI",
 				FilterIDs: []string{"*gi:~*req.Usage:1m"},
 				Weight:    10,
@@ -2706,7 +2706,7 @@ func TestAPIToRateProfile(t *testing.T) {
 		MaxCost:          0.6,
 		MaxCostStrategy:  "*free",
 		Rates: map[string]*utils.TPRate{
-			"FIRST_GI": &utils.TPRate{
+			"FIRST_GI": {
 				ID:        "FIRST_GI",
 				FilterIDs: []string{"*gi:~*req.Usage:0"},
 				Weight:    0,
@@ -2715,7 +2715,7 @@ func TestAPIToRateProfile(t *testing.T) {
 				Increment: "1m0s",
 				Blocker:   false,
 			},
-			"SECOND_GI": &utils.TPRate{
+			"SECOND_GI": {
 				ID:        "SECOND_GI",
 				FilterIDs: []string{"*gi:~*req.Usage:1m"},
 				Weight:    10,
@@ -2746,7 +2746,7 @@ func TestAPItoModelTPRateProfile(t *testing.T) {
 		MaxCost:          0.6,
 		MaxCostStrategy:  "*free",
 		Rates: map[string]*utils.TPRate{
-			"FIRST_GI": &utils.TPRate{
+			"FIRST_GI": {
 				ID:        "FIRST_GI",
 				FilterIDs: []string{"*gi:~*req.Usage:0"},
 				Weight:    0,
@@ -2755,7 +2755,7 @@ func TestAPItoModelTPRateProfile(t *testing.T) {
 				Increment: "1m0s",
 				Blocker:   false,
 			},
-			"SECOND_GI": &utils.TPRate{
+			"SECOND_GI": {
 				ID:        "SECOND_GI",
 				FilterIDs: []string{"*gi:~*req.Usage:1m"},
 				Weight:    10,
@@ -2937,7 +2937,7 @@ func TestAsTPRateProfile(t *testing.T) {
 		MaxCost:          0.6,
 		MaxCostStrategy:  "*free",
 		Rates: map[string]*utils.TPRate{
-			"FIRST_GI": &utils.TPRate{
+			"FIRST_GI": {
 				ID:        "FIRST_GI",
 				FilterIDs: []string{"*gi:~*req.Usage:0"},
 				Weight:    0,
@@ -2946,7 +2946,7 @@ func TestAsTPRateProfile(t *testing.T) {
 				Increment: "1m0s",
 				Blocker:   false,
 			},
-			"SECOND_GI": &utils.TPRate{
+			"SECOND_GI": {
 				ID:        "SECOND_GI",
 				FilterIDs: []string{"*gi:~*req.Usage:1m"},
 				Weight:    10,

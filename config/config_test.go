@@ -715,6 +715,11 @@ func TestCgrCfgJSONDefaultsCacheCFG(t *testing.T) {
 				TTL: time.Duration(3 * time.Hour), StaticTTL: false},
 			utils.CacheSTIR: {Limit: -1,
 				TTL: time.Duration(3 * time.Hour), StaticTTL: false},
+
+			utils.CacheVersions: {Limit: -1,
+				TTL: time.Duration(0), StaticTTL: false, Precache: false},
+			utils.CacheAccounts: {Limit: -1,
+				TTL: time.Duration(0), StaticTTL: false, Precache: false},
 		},
 		ReplicationConns: []string{},
 	}

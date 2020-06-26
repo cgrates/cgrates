@@ -446,19 +446,6 @@ func (cfg *CGRConfig) loadDataDBCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if err = cfg.dataDbCfg.loadFromJsonCfg(jsnDataDbCfg); err != nil {
 		return
 	}
-	/*
-		// in case of internalDB we need to disable the cache
-		// so we enforce it here
-		if cfg.dataDbCfg.DataDbType == utils.INTERNAL {
-			// overwrite only DataDBPartitions and leave other unmodified ( e.g. *diameter_messages, *closed_sessions, etc... )
-			for key := range utils.CacheDataDBPartitions {
-				if _, has := cfg.cacheCfg.Partitions[key]; has {
-					cfg.cacheCfg.Partitions[key] = &CacheParamCfg{Limit: 0,
-						TTL: time.Duration(0), StaticTTL: false, Precache: false}
-				}
-			}
-		}
-	*/
 	return
 
 }

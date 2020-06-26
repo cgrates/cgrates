@@ -67,7 +67,6 @@ ENABLE_ACNT,*enable_account,,,,,,,,,,,,,false,false,10`
 	}
 	csvr.WriteToDatabase(false, false)
 
-	engine.Cache.Clear(nil)
 	dbAcntActs.LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 

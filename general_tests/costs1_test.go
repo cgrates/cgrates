@@ -30,6 +30,7 @@ func TestCosts1SetStorage(t *testing.T) {
 	dataDBInt := engine.NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
 	dataDB = engine.NewDataManager(dataDBInt, config.CgrConfig().CacheCfg(), nil)
 	engine.SetDataStorage(dataDB)
+	engine.Cache.Clear(nil)
 }
 
 func TestCosts1LoadCsvTp(t *testing.T) {
@@ -81,14 +82,13 @@ cgrates.org,sms,*any,2012-01-01T00:00:00Z,RP_SMS1,`
 		t.Fatal(err)
 	}
 	csvr.WriteToDatabase(false, false)
-	engine.Cache.Clear(nil)
 	dataDB.LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 
 	if cachedRPlans := len(engine.Cache.GetItemIDs(utils.CacheRatingPlans, utils.EmptyString)); cachedRPlans != 3 {
 		t.Error("Wrong number of cached rating plans found", cachedRPlans)
 	}
-	if cachedRProfiles := len(engine.Cache.GetItemIDs(utils.CacheRatingProfiles, utils.EmptyString)); cachedRProfiles != 0 {
+	if cachedRProfiles := len(engine.Cache.GetItemIDs(utils.CacheRatingProfiles, utils.EmptyString)); cachedRProfiles != 3 {
 		t.Error("Wrong number of cached rating profiles found", cachedRProfiles)
 	}
 }

@@ -534,7 +534,6 @@ func TestResourceMatchingResourcesForEvent(t *testing.T) {
 
 //UsageTTL 0 in ResourceProfile and give 10s duration
 func TestResourceUsageTTLCase1(t *testing.T) {
-	Cache.Clear(nil)
 	resprf[0].UsageTTL = time.Duration(0)
 	resourceTest[0].rPrf = resprf[0]
 	resourceTest[0].ttl = &timeDurationExample
@@ -562,7 +561,6 @@ func TestResourceUsageTTLCase1(t *testing.T) {
 
 //UsageTTL 5s in ResourceProfile and give nil duration
 func TestResourceUsageTTLCase2(t *testing.T) {
-	Cache.Clear(nil)
 	resprf[0].UsageTTL = time.Duration(0)
 	resourceTest[0].rPrf = resprf[0]
 	resourceTest[0].ttl = &resprf[0].UsageTTL
@@ -590,7 +588,6 @@ func TestResourceUsageTTLCase2(t *testing.T) {
 
 //UsageTTL 5s in ResourceProfile and give 0 duration
 func TestResourceUsageTTLCase3(t *testing.T) {
-	Cache.Clear(nil)
 	resprf[0].UsageTTL = time.Duration(0)
 	resourceTest[0].rPrf = resprf[0]
 	resourceTest[0].ttl = nil
@@ -618,7 +615,6 @@ func TestResourceUsageTTLCase3(t *testing.T) {
 
 //UsageTTL 5s in ResourceProfile and give 10s duration
 func TestResourceUsageTTLCase4(t *testing.T) {
-	Cache.Clear(nil)
 	resprf[0].UsageTTL = time.Duration(5)
 	resourceTest[0].rPrf = resprf[0]
 	resourceTest[0].ttl = &timeDurationExample
@@ -645,7 +641,6 @@ func TestResourceUsageTTLCase4(t *testing.T) {
 }
 
 func TestResourceMatchWithIndexFalse(t *testing.T) {
-	Cache.Clear(nil)
 	resService.cgrcfg.ResourceSCfg().IndexedSelects = false
 	mres, err := resService.matchingResourcesForEvent(resEvs[0],
 		"TestResourceMatchWithIndexFalse1", &timeDurationExample)

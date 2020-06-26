@@ -38,10 +38,10 @@ func init() {
 
 func populateDB() {
 	ats := []*Action{
-		&Action{ActionType: "*topup",
+		{ActionType: "*topup",
 			Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY),
 				Value: &utils.ValueFormula{Static: 10}}},
-		&Action{ActionType: "*topup",
+		{ActionType: "*topup",
 			Balance: &BalanceFilter{Type: utils.StringPointer(utils.VOICE),
 				Weight:         utils.Float64Pointer(20),
 				Value:          &utils.ValueFormula{Static: 10 * float64(time.Second)},
@@ -49,18 +49,18 @@ func populateDB() {
 	}
 
 	ats1 := []*Action{
-		&Action{ActionType: "*topup",
+		{ActionType: "*topup",
 			Balance: &BalanceFilter{
 				Type:  utils.StringPointer(utils.MONETARY),
 				Value: &utils.ValueFormula{Static: 10}}, Weight: 10},
-		&Action{ActionType: "*reset_account", Weight: 20},
+		{ActionType: "*reset_account", Weight: 20},
 	}
 
 	minu := &Account{
 		ID: "vdf:minu",
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: Balances{&Balance{Value: 50}},
-			utils.VOICE: Balances{
+			utils.MONETARY: {&Balance{Value: 50}},
+			utils.VOICE: {
 				&Balance{Value: 200 * float64(time.Second),
 					DestinationIDs: utils.NewStringMap("NAT"), Weight: 10},
 				&Balance{Value: 100 * float64(time.Second),
@@ -70,7 +70,7 @@ func populateDB() {
 	broker := &Account{
 		ID: "vdf:broker",
 		BalanceMap: map[string]Balances{
-			utils.VOICE: Balances{
+			utils.VOICE: {
 				&Balance{Value: 20 * float64(time.Second),
 					DestinationIDs: utils.NewStringMap("NAT"),
 					Weight:         10, RatingSubject: "rif"},
@@ -81,7 +81,7 @@ func populateDB() {
 	luna := &Account{
 		ID: "vdf:luna",
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: Balances{
+			utils.MONETARY: {
 				&Balance{Value: 0, Weight: 20},
 			}},
 	}
@@ -89,14 +89,14 @@ func populateDB() {
 	minitsboy := &Account{
 		ID: "vdf:minitsboy",
 		BalanceMap: map[string]Balances{
-			utils.VOICE: Balances{
+			utils.VOICE: {
 				&Balance{Value: 20 * float64(time.Second),
 					DestinationIDs: utils.NewStringMap("NAT"),
 					Weight:         10, RatingSubject: "rif"},
 				&Balance{Value: 100 * float64(time.Second),
 					DestinationIDs: utils.NewStringMap("RET"), Weight: 20},
 			},
-			utils.MONETARY: Balances{
+			utils.MONETARY: {
 				&Balance{Value: 100, Weight: 10},
 			},
 		},
@@ -104,14 +104,14 @@ func populateDB() {
 	max := &Account{
 		ID: "cgrates.org:max",
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: Balances{
+			utils.MONETARY: {
 				&Balance{Value: 11, Weight: 20},
 			}},
 	}
 	money := &Account{
 		ID: "cgrates.org:money",
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: Balances{
+			utils.MONETARY: {
 				&Balance{Value: 10000, Weight: 10},
 			}},
 	}

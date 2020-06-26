@@ -56,7 +56,8 @@ var (
 		CacheDispatcherRoutes, CacheDispatcherLoads, CacheDiameterMessages, CacheRPCResponses,
 		CacheClosedSessions, CacheCDRIDs, CacheLoadIDs, CacheRPCConnections, CacheRatingProfilesTmp,
 		CacheUCH, CacheSTIR, CacheEventCharges, CacheRateProfiles, CacheRateProfilesFilterIndexes,
-		CacheRateFilterIndexes, CacheReverseFilterIndexes})
+		CacheRateFilterIndexes, CacheReverseFilterIndexes,
+		CacheVersions, CacheAccounts})
 	CacheInstanceToPrefix = map[string]string{
 		CacheDestinations:              DESTINATION_PREFIX,
 		CacheReverseDestinations:       REVERSE_DESTINATION_PREFIX,
@@ -113,22 +114,11 @@ var (
 	// AccountableRequestTypes are the ones handled by Accounting subsystem
 	AccountableRequestTypes = NewStringSet([]string{META_PREPAID, META_POSTPAID, META_PSEUDOPREPAID})
 
-	CacheDataDBPartitions = NewStringSet([]string{CacheDestinations, CacheReverseDestinations,
-		CacheRatingPlans, CacheRatingProfiles, CacheActions,
-		CacheActionPlans, CacheAccountActionPlans, CacheActionTriggers, CacheSharedGroups, CacheResourceProfiles, CacheResources,
-		CacheTimings, CacheStatQueueProfiles, CacheStatQueues, CacheThresholdProfiles, CacheThresholds,
-		CacheFilters, CacheRouteProfiles, CacheAttributeProfiles, CacheChargerProfiles,
-		CacheDispatcherProfiles, CacheDispatcherHosts, CacheResourceFilterIndexes, CacheStatFilterIndexes,
-		CacheThresholdFilterIndexes, CacheRouteFilterIndexes, CacheAttributeFilterIndexes,
-		CacheChargerFilterIndexes, CacheDispatcherFilterIndexes, CacheLoadIDs, CacheAccounts,
-		CacheRateProfiles, CacheRateProfilesFilterIndexes, CacheRateFilterIndexes,
-		CacheReverseFilterIndexes})
-
-	CacheStorDBPartitions = NewStringSet([]string{TBLTPTimings, TBLTPDestinations, TBLTPRates,
+	CacheStorDBPartitions = []string{TBLTPTimings, TBLTPDestinations, TBLTPRates,
 		TBLTPDestinationRates, TBLTPRatingPlans, TBLTPRatingProfiles, TBLTPSharedGroups,
 		TBLTPActions, TBLTPActionPlans, TBLTPActionTriggers, TBLTPAccountActions, TBLTPResources, TBLTPStats,
 		TBLTPThresholds, TBLTPFilters, SessionCostsTBL, CDRsTBL,
-		TBLTPRoutes, TBLTPAttributes, TBLTPChargers, TBLTPDispatchers, TBLTPDispatcherHosts})
+		TBLTPRoutes, TBLTPAttributes, TBLTPChargers, TBLTPDispatchers, TBLTPDispatcherHosts}
 	// ProtectedSFlds are the fields that sessions should not alter
 	ProtectedSFlds = NewStringSet([]string{CGRID, OriginHost, OriginID, Usage})
 )

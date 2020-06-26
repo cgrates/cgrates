@@ -607,6 +607,16 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 		utils.MetaString, false, false); err != nil && err != utils.ErrNotFound {
 		t.Error(err)
 	}
+
+	eIdxes = map[string]utils.StringSet{}
+	if rcvIdx, err := dataManager.GetIndexes(
+		utils.CacheReverseFilterIndexes,
+		fp.TenantID(),
+		utils.EmptyString, false, false); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
+		t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
+	}
 }
 
 func testITTestThresholdInlineFilterIndexing(t *testing.T) {
