@@ -45,11 +45,11 @@ func NewHTTPAgent(connMgr *engine.ConnManager, sessionConns []string,
 
 // HTTPAgent is a handler for HTTP requests
 type HTTPAgent struct {
-	connMgr *engine.ConnManager
-	filterS *engine.FilterS
-	dfltTenant,
-	reqPayload,
-	rplyPayload string
+	connMgr       *engine.ConnManager
+	filterS       *engine.FilterS
+	dfltTenant    string
+	reqPayload    string
+	rplyPayload   string
 	reqProcessors []*config.RequestProcessor
 	sessionConns  []string
 }

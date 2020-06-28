@@ -622,12 +622,12 @@ type RateSJsonCfg struct {
 
 // SIPAgentJsonCfg
 type SIPAgentJsonCfg struct {
-	Enabled            *bool
-	Listen             *string
-	Listen_net         *string
-	Sessions_conns     *[]string
-	Timezone           *string
-	Ack_interval       *string
-	Templates          map[string][]*FcTemplateJsonCfg
-	Request_processors *[]*ReqProcessorJsnCfg
+	Enabled              *bool
+	Listen               *string
+	Listen_net           *string
+	Sessions_conns       *[]string
+	Timezone             *string
+	Retransmission_timer *string
+	Templates            map[string][]*FcTemplateJsonCfg
+	Request_processors   *[]*ReqProcessorJsnCfg
 }
