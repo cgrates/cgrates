@@ -45,11 +45,11 @@ func (m *Migrator) migrateCurrentRequestFilter() (err error) {
 		if m.dryRun || fl == nil {
 			continue
 		}
-		if err := m.dmIN.DataManager().RemoveFilter(tntID[0], tntID[1],
-			utils.NonTransactional, true); err != nil {
+		if err := m.dmOut.DataManager().SetFilter(fl, true); err != nil {
 			return err
 		}
-		if err := m.dmOut.DataManager().SetFilter(fl, true); err != nil {
+		if err := m.dmIN.DataManager().RemoveFilter(tntID[0], tntID[1],
+			utils.NonTransactional, true); err != nil {
 			return err
 		}
 		m.stats[utils.RQF]++
@@ -191,23 +191,7 @@ func migrateInlineFilterV2(fl string) string {
 	return fmt.Sprintf("%s::~%s", ruleSplt[0], utils.MetaReq+utils.NestingSep+strings.Join(ruleSplt[2:], utils.InInFieldSep))
 }
 
-func (m *Migrator) migrateRequestFilterV1() (err error) {
-	for {
-		fl, err := m.dmIN.getV1Filter()
-		if err != nil && err != utils.ErrNoMoreData {
-			return err
-		}
-		if err == utils.ErrNoMoreData {
-			break
-		}
-		if m.dryRun || fl == nil {
-			continue
-		}
-		if err := m.dmOut.DataManager().SetFilter(migrateFilterV1(fl), true); err != nil {
-			return err
-		}
-		m.stats[utils.RQF]++
-	}
+func (m *Migrator) migrateOthersv1() (err error) {
 	if err = m.migrateResourceProfileFiltersV1(); err != nil {
 		return err
 	}
@@ -229,34 +213,22 @@ func (m *Migrator) migrateRequestFilterV1() (err error) {
 	if err = m.migrateDispatcherProfileFiltersV1(); err != nil {
 		return err
 	}
-	vrs := engine.Versions{utils.RQF: engine.CurrentDataDBVersions()[utils.RQF]}
-	if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
-		return utils.NewCGRError(utils.Migrator,
-			utils.ServerErrorCaps,
-			err.Error(),
-			fmt.Sprintf("error: <%s> when updating Filters version into dataDB", err.Error()))
-	}
 	return
 }
 
-func (m *Migrator) migrateRequestFilterV2() (err error) {
-	for {
-		fl, err := m.dmIN.getV1Filter()
-		if err != nil && err != utils.ErrNoMoreData {
-			return err
-		}
-		if err == utils.ErrNoMoreData {
-			break
-		}
-		if m.dryRun || fl == nil {
-			continue
-		}
-		if err := m.dmOut.DataManager().SetFilter(migrateFilterV2(fl), true); err != nil {
-			return fmt.Errorf("Error: <%s> when setting filter with tenant: <%s> and id: <%s> after migration",
-				err.Error(), fl.Tenant, fl.ID)
-		}
-		m.stats[utils.RQF]++
+func (m *Migrator) migrateRequestFilterV1() (fltr *engine.Filter, err error) {
+	var v1Fltr *v1Filter
+	if v1Fltr, err = m.dmIN.getV1Filter(); err != nil {
+		return
 	}
+	if v1Fltr == nil {
+		return
+	}
+	fltr = migrateFilterV1(v1Fltr)
+	return
+}
+
+func (m *Migrator) migrateOthersV2() (err error) {
 	if err = m.migrateResourceProfileFiltersV2(); err != nil {
 		return fmt.Errorf("Error: <%s> when trying to migrate filter for ResourceProfiles",
 			err.Error())
@@ -285,41 +257,30 @@ func (m *Migrator) migrateRequestFilterV2() (err error) {
 		return fmt.Errorf("Error: <%s> when trying to migrate filter for DispatcherProfiles",
 			err.Error())
 	}
-	vrs := engine.Versions{utils.RQF: engine.CurrentDataDBVersions()[utils.RQF]}
-	if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
-		return utils.NewCGRError(utils.Migrator,
-			utils.ServerErrorCaps,
-			err.Error(),
-			fmt.Sprintf("error: <%s> when updating Filters version into dataDB", err.Error()))
-	}
 	return
 }
 
-func (m *Migrator) migrateRequestFilterV3() (err error) {
-	for {
-		fl, err := m.dmIN.getV1Filter()
-		if err != nil && err != utils.ErrNoMoreData {
-			return err
-		}
-		if err == utils.ErrNoMoreData {
-			break
-		}
-		if m.dryRun || fl == nil {
-			continue
-		}
-		if err := m.dmOut.DataManager().SetFilter(migrateFilterV3(fl), true); err != nil {
-			return fmt.Errorf("Error: <%s> when setting filter with tenant: <%s> and id: <%s> after migration",
-				err.Error(), fl.Tenant, fl.ID)
-		}
-		m.stats[utils.RQF]++
+func (m *Migrator) migrateRequestFilterV2() (fltr *engine.Filter, err error) {
+	var v1Fltr *v1Filter
+	if v1Fltr, err = m.dmIN.getV1Filter(); err != nil {
+		return nil, err
 	}
-	vrs := engine.Versions{utils.RQF: engine.CurrentDataDBVersions()[utils.RQF]}
-	if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
-		return utils.NewCGRError(utils.Migrator,
-			utils.ServerErrorCaps,
-			err.Error(),
-			fmt.Sprintf("error: <%s> when updating Filters version into dataDB", err.Error()))
+	if err == utils.ErrNoMoreData {
+		return nil, nil
 	}
+	fltr = migrateFilterV2(v1Fltr)
+	return
+}
+
+func (m *Migrator) migrateRequestFilterV3() (fltr *engine.Filter, err error) {
+	var v1Fltr *v1Filter
+	if v1Fltr, err = m.dmIN.getV1Filter(); err != nil {
+		return nil, err
+	}
+	if v1Fltr == nil {
+		return
+	}
+	fltr = migrateFilterV3(v1Fltr)
 	return
 }
 
@@ -338,26 +299,91 @@ func (m *Migrator) migrateFilters() (err error) {
 			utils.UndefinedVersion,
 			"version number is not defined for ActionTriggers model")
 	}
-	switch vrs[utils.RQF] {
-	case 3:
-		if err = m.migrateRequestFilterV3(); err != nil {
+	migrated := true
+	migratedFrom := 0
+	var fltr *engine.Filter
+	for {
+		version := vrs[utils.RQF]
+		for {
+			switch version {
+			case current[utils.RQF]:
+				migrated = false
+				if m.sameDataDB {
+					break
+				}
+				if err = m.migrateCurrentRequestFilter(); err != nil {
+					return err
+				}
+				version = 4
+			case 1:
+				if fltr, err = m.migrateRequestFilterV1(); err != nil && err != utils.ErrNoMoreData {
+					return err
+				}
+				migratedFrom = 1
+				version = 4
+			case 2:
+				if fltr, err = m.migrateRequestFilterV2(); err != nil && err != utils.ErrNoMoreData {
+					return err
+				}
+				migratedFrom = 2
+				version = 4
+			case 3:
+				if fltr, err = m.migrateRequestFilterV3(); err != nil && err != utils.ErrNoMoreData {
+					return err
+				}
+				migratedFrom = 3
+				version = 4
+			}
+			if version == current[utils.RQF] || err == utils.ErrNoMoreData {
+				break
+			}
+		}
+		if err == utils.ErrNoMoreData || !migrated {
+			break
+		}
+		if !m.dryRun && migrated {
+			//set filters
+			switch migratedFrom {
+			case 1:
+				if err := m.dmOut.DataManager().SetFilter(fltr, true); err != nil {
+					return fmt.Errorf("Error: <%s> when setting filter with tenant: <%s> and id: <%s> after migration",
+						err.Error(), fltr.Tenant, fltr.ID)
+				}
+			case 2:
+				if err := m.dmOut.DataManager().SetFilter(fltr, true); err != nil {
+					return fmt.Errorf("Error: <%s> when setting filter with tenant: <%s> and id: <%s> after migration",
+						err.Error(), fltr.Tenant, fltr.ID)
+				}
+			case 3:
+				if err := m.dmOut.DataManager().SetFilter(fltr, true); err != nil {
+					return fmt.Errorf("Error: <%s> when setting filter with tenant: <%s> and id: <%s> after migration",
+						err.Error(), fltr.Tenant, fltr.ID)
+				}
+			}
+		}
+		m.stats[utils.RQF]++
+	}
+	if m.dryRun || !migrated {
+		return nil
+	}
+
+	switch migratedFrom {
+	case 1:
+		if err := m.migrateOthersv1(); err != nil {
 			return err
 		}
 	case 2:
-		if err = m.migrateRequestFilterV2(); err != nil {
+		if err := m.migrateOthersV2(); err != nil {
 			return err
 		}
-	case 1:
-		if err = m.migrateRequestFilterV1(); err != nil {
-			return err
-		}
-	case current[utils.RQF]:
-		if m.sameDataDB {
-			break
-		}
-		if err = m.migrateCurrentRequestFilter(); err != nil {
-			return err
-		}
+	}
+
+	vrs = engine.Versions{utils.RQF: engine.CurrentDataDBVersions()[utils.RQF]}
+	if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
+		return utils.NewCGRError(utils.Migrator,
+			utils.ServerErrorCaps,
+			err.Error(),
+			fmt.Sprintf("error: <%s> when updating Filters version into dataDB", err.Error()))
 	}
 	return m.ensureIndexesDataDB(engine.ColFlt)
 }

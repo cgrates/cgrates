@@ -345,7 +345,7 @@ func testTrsITMigrateAndMove(t *testing.T) {
 			t.Error("Error when getting Thresholds ", err.Error())
 		}
 		if !reflect.DeepEqual(tresProf2, result) {
-			t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(tresProf2), utils.ToJSON(result))
+			t.Errorf("Expecting: %+v,\nReceived: %+v", utils.ToJSON(tresProf2), utils.ToJSON(result))
 		}
 
 		result, err = trsMigrator.dmOut.DataManager().GetThresholdProfile(tresProf3.Tenant, tresProf3.ID, false, false, utils.NonTransactional)
@@ -353,7 +353,7 @@ func testTrsITMigrateAndMove(t *testing.T) {
 			t.Error("Error when getting Thresholds ", err.Error())
 		}
 		if !reflect.DeepEqual(tresProf3, result) {
-			t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(tresProf3), utils.ToJSON(result))
+			t.Errorf("Expecting: %+v,\nReceived: %+v", utils.ToJSON(tresProf3), utils.ToJSON(result))
 		}
 
 	case utils.Move:
