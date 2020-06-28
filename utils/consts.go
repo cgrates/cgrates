@@ -396,6 +396,7 @@ const (
 	ActionsPoster               = "act"
 	CDRPoster                   = "cdr"
 	MetaFileCSV                 = "*file_csv"
+	MetaVirt                    = "*virt"
 	MetaFileFWV                 = "*file_fwv"
 	MetaFScsv                   = "*freeswitch_csv"
 	Accounts                    = "Accounts"

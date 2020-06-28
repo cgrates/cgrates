@@ -49,7 +49,7 @@ type GeneralCfg struct {
 	LockingTimeout    time.Duration // locking mechanism timeout to avoid deadlocks
 	DigestSeparator   string        //
 	DigestEqual       string        //
-	RSRSep            string        // separator used to split RSRParser (by degault is used ";")
+	RSRSep            string        // separator used to split RSRParser (by default is used ";")
 	MaxParralelConns  int           // the maximum number of connection used by the *parallel strategy
 }
 

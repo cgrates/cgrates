@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"net"
 	"strconv"
+	"strings"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -48,13 +49,13 @@ func (ld LoaderData) TenantIDStruct() utils.TenantID {
 func (ld LoaderData) UpdateFromCSV(fileName string, record []string,
 	cfgTpl []*config.FCTemplate, tnt config.RSRParsers, filterS *engine.FilterS) (err error) {
 	csvProvider := newCsvProvider(record, fileName)
+	tenant, err := tnt.ParseValue("")
+	if err != nil {
+		return err
+	}
 	for _, cfgFld := range cfgTpl {
 		// Make sure filters are matching
 		if len(cfgFld.Filters) != 0 {
-			tenant, err := tnt.ParseValue("")
-			if err != nil {
-				return err
-			}
 			if pass, err := filterS.Pass(tenant,
 				cfgFld.Filters, csvProvider); err != nil {
 				return err
@@ -62,7 +63,7 @@ func (ld LoaderData) UpdateFromCSV(fileName string, record []string,
 				continue // Not passes filters, ignore this CDR
 			}
 		}
-		out, err := cfgFld.Value.ParseDataProvider(csvProvider, utils.InInFieldSep)
+		out, err := cfgFld.Value.ParseDataProvider(csvProvider, utils.NestingSep)
 		if err != nil {
 			return err
 		}
@@ -111,17 +112,36 @@ func (cP *csvProvider) FieldAsInterface(fldPath []string) (data interface{}, err
 		return
 	}
 	err = nil // cancel previous err
-	idx := fldPath[0]
-	var fileName string
-	if len(fldPath) == 2 {
-		fileName = fldPath[0]
-		idx = fldPath[1]
+
+	if splt := strings.Split(fldPath[0], utils.MatchLessThan); len(splt) != 1 {
+		var fileName string
+		// check for *req prefix
+		if splt[0] != utils.MetaReq {
+			return nil, fmt.Errorf("invalid prefix for : %s", fldPath)
+		}
+		fileName = splt[1]
+		// find the last > and compute the name of the file
+		hasGrThan := false
+		for _, val := range fldPath[1:] {
+			if grSplt := strings.Split(val, utils.MatchGreaterThan); len(grSplt) == 1 {
+				fileName = fileName + utils.NestingSep + val
+			} else {
+				fileName = fileName + utils.NestingSep + grSplt[0]
+				hasGrThan = true
+				break
+			}
+		}
+		if !hasGrThan {
+			return nil, fmt.Errorf("filter rule <%s> needs to end in >", fldPath)
+		}
+		if cP.fileName != fileName {
+			cP.cache.Set(fldPath, nil)
+			return
+		}
+	} else if fldPath[0] != utils.MetaReq {
+		return nil, fmt.Errorf("invalid prefix for : %s", fldPath)
 	}
-	if fileName != "" && cP.fileName != fileName {
-		cP.cache.Set(fldPath, nil)
-		return
-	}
-	if cfgFieldIdx, err := strconv.Atoi(idx); err != nil || len(cP.req) <= cfgFieldIdx {
+	if cfgFieldIdx, err := strconv.Atoi(fldPath[len(fldPath)-1]); err != nil || len(cP.req) <= cfgFieldIdx {
 		return nil, fmt.Errorf("Ignoring record: %v with error : %+v", cP.req, err)
 	} else {
 		data = cP.req[cfgFieldIdx]
