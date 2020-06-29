@@ -1812,10 +1812,10 @@ func TestAgReqSetFieldsInCache(t *testing.T) {
 
 	tplFlds := []*config.FCTemplate{
 		{Tag: "Tenant",
-			Path: utils.MetaCache + utils.NestingSep + utils.Tenant, Type: utils.MetaVariable,
+			Path: utils.MetaUCH + utils.NestingSep + utils.Tenant, Type: utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP)},
 		{Tag: "Account",
-			Path: utils.MetaCache + utils.NestingSep + utils.Account, Type: utils.MetaVariable,
+			Path: utils.MetaUCH + utils.NestingSep + utils.Account, Type: utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("~*cgreq.Account", true, utils.INFIELD_SEP)},
 	}
 	for _, v := range tplFlds {
@@ -1825,19 +1825,19 @@ func TestAgReqSetFieldsInCache(t *testing.T) {
 		t.Error(err)
 	}
 
-	if val, err := agReq.FieldAsInterface([]string{utils.MetaCache, utils.Tenant}); err != nil {
+	if val, err := agReq.FieldAsInterface([]string{utils.MetaUCH, utils.Tenant}); err != nil {
 		t.Error(err)
 	} else if val != "cgrates.org" {
 		t.Errorf("expecting: %+v, \n received: %+v ", "cgrates.org", utils.ToJSON(val))
 	}
 
-	if val, err := agReq.FieldAsInterface([]string{utils.MetaCache, utils.Account}); err != nil {
+	if val, err := agReq.FieldAsInterface([]string{utils.MetaUCH, utils.Account}); err != nil {
 		t.Error(err)
 	} else if val != "1001" {
 		t.Errorf("expecting: %+v, \n received: %+v ", "1001", utils.ToJSON(val))
 	}
 
-	if _, err := agReq.FieldAsInterface([]string{utils.MetaCache, "Unexist"}); err == nil || err != utils.ErrNotFound {
+	if _, err := agReq.FieldAsInterface([]string{utils.MetaUCH, "Unexist"}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
@@ -1855,10 +1855,10 @@ func TestAgReqSetFieldsInCacheWithTimeOut(t *testing.T) {
 
 	tplFlds := []*config.FCTemplate{
 		{Tag: "Tenant",
-			Path: utils.MetaCache + utils.NestingSep + utils.Tenant, Type: utils.MetaVariable,
+			Path: utils.MetaUCH + utils.NestingSep + utils.Tenant, Type: utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP)},
 		{Tag: "Account",
-			Path: utils.MetaCache + utils.NestingSep + utils.Account, Type: utils.MetaVariable,
+			Path: utils.MetaUCH + utils.NestingSep + utils.Account, Type: utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("~*cgreq.Account", true, utils.INFIELD_SEP)},
 	}
 	for _, v := range tplFlds {
@@ -1868,27 +1868,27 @@ func TestAgReqSetFieldsInCacheWithTimeOut(t *testing.T) {
 		t.Error(err)
 	}
 
-	if val, err := agReq.FieldAsInterface([]string{utils.MetaCache, utils.Tenant}); err != nil {
+	if val, err := agReq.FieldAsInterface([]string{utils.MetaUCH, utils.Tenant}); err != nil {
 		t.Error(err)
 	} else if val != "cgrates.org" {
 		t.Errorf("expecting: %+v, \n received: %+v ", "cgrates.org", utils.ToJSON(val))
 	}
 
-	if val, err := agReq.FieldAsInterface([]string{utils.MetaCache, utils.Account}); err != nil {
+	if val, err := agReq.FieldAsInterface([]string{utils.MetaUCH, utils.Account}); err != nil {
 		t.Error(err)
 	} else if val != "1001" {
 		t.Errorf("expecting: %+v, \n received: %+v ", "1001", utils.ToJSON(val))
 	}
 
-	if _, err := agReq.FieldAsInterface([]string{utils.MetaCache, "Unexist"}); err == nil || err != utils.ErrNotFound {
+	if _, err := agReq.FieldAsInterface([]string{utils.MetaUCH, "Unexist"}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	// give enough time to Cache to remove ttl the *uch
 	time.Sleep(2 * time.Second)
-	if _, err := agReq.FieldAsInterface([]string{utils.MetaCache, utils.Tenant}); err == nil || err != utils.ErrNotFound {
+	if _, err := agReq.FieldAsInterface([]string{utils.MetaUCH, utils.Tenant}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
-	if _, err := agReq.FieldAsInterface([]string{utils.MetaCache, utils.Account}); err == nil || err != utils.ErrNotFound {
+	if _, err := agReq.FieldAsInterface([]string{utils.MetaUCH, utils.Account}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
