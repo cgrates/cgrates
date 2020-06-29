@@ -43,7 +43,7 @@ func (ddp *DynamicDataProvider) FieldAsInterface(fldPath []string) (out interfac
 		return val, nil
 	}
 	var newPath string
-	if newPath, err = ddp.processFieldPathForSet(path); err != nil { // proccess the path
+	if newPath, err = ddp.processFieldPath(path); err != nil { // process the path
 		return
 	}
 	if newPath == EmptyString { // no new path means no dynamic path so just take the value from the data provider
@@ -151,6 +151,60 @@ func (ddp *DynamicDataProvider) processFieldPathForSet(fldPath string) (newPath 
 	}
 	if !hasDyn { // the path doesn't have dynamic selector
 		newPath = EmptyString
+	}
+	return
+}
+
+func (ddp *DynamicDataProvider) processFieldPath(fldPath string) (newPath string, err error) {
+	idx := strings.Index(fldPath, IdxStart)
+	if idx == -1 {
+		return // no proccessing requred
+	}
+	newPath = fldPath[:idx+1] // add the first path of the path with the "[" included
+	for idx != -1 {           // stop when we do not find any "["
+		fldPath = fldPath[idx+1:]                        // move the path to the begining of the index
+		nextBeginIdx := strings.Index(fldPath, IdxStart) // get the next "[" if any
+		nextEndIdx := strings.Index(fldPath, IdxEnd)     // get the next "]" if any
+		if nextEndIdx == -1 {                            // no end index found so return error
+			err = ErrWrongPath
+			newPath = EmptyString
+			return
+		}
+
+		// parse the rest of the field path until we match the [ ]
+		bIdx, eIdx := nextBeginIdx, nextEndIdx
+		for nextBeginIdx != -1 && nextBeginIdx < nextEndIdx { // do this until no new [ is found or the next begining [ is after the end ]
+			nextBeginIdx = strings.Index(fldPath[bIdx+1:], IdxStart) // get the next "[" if any
+			nextEndIdx = strings.Index(fldPath[eIdx+1:], IdxEnd)     // get the next "]" if any
+			if nextEndIdx == -1 {                                    // no end index found so return error
+				err = ErrWrongPath
+				newPath = EmptyString
+				return
+			}
+			if nextBeginIdx == -1 { // if no index found do not increment but replace it
+				bIdx = -1
+			} else {
+				bIdx += nextBeginIdx + 1
+			}
+			// increment the indexes
+			eIdx += nextEndIdx + 1
+		}
+		var val string
+		for _, path := range strings.Split(fldPath[:eIdx], PipeSep) { // proccess the found path
+			var iface interface{}
+			if iface, err = DPDynamicInterface(path, ddp); err != nil {
+				newPath = EmptyString
+				return
+			}
+			val += IfaceAsString(iface) // compose the value
+		}
+		if bIdx == -1 { // if is the last ocurence add the rest of the path and exit
+			newPath += val + fldPath[eIdx:]
+		} else {
+			// else just add until the next [
+			newPath += val + fldPath[eIdx:bIdx+1]
+		}
+		idx = bIdx
 	}
 	return
 }
