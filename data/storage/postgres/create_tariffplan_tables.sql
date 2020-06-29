@@ -476,11 +476,13 @@ CREATE INDEX tp_routes_unique ON tp_routes  ("tpid",  "tenant", "id",
   "max_cost_strategy" VARCHAR(64) NOT NULL,
   "rate_id" VARCHAR(64) NOT NULL,
   "rate_filter_ids" VARCHAR(64) NOT NULL,
+  "rate_activation_start" VARCHAR(64) NOT NULL,
   "rate_weight" decimal(8,2) NOT NULL,
+  "rate_blocker" BOOLEAN NOT NULL,
+  "rate_interval_start" VARCHAR(64) NOT NULL,
   "rate_value" decimal(8,4) NOT NULL,
   "rate_unit" VARCHAR(64) NOT NULL,
   "rate_increment" VARCHAR(64) NOT NULL,
-  "rate_blocker" BOOLEAN NOT NULL,
   "created_at" TIMESTAMP WITH TIME ZONE
   );
   CREATE INDEX tp_rate_profiles_ids ON tp_rate_profiles (tpid);

@@ -50,15 +50,21 @@ func (rpp *RateProfile) TenantID() string {
 
 // Route defines rate related information used within a RateProfile
 type Rate struct {
-	ID                 string                    // RateID
-	FilterIDs          []string                  // RateFilterIDs
-	ActivationInterval *utils.ActivationInterval //TPActivationInterval have ATime and ETime as strings
-	IntervalStart      time.Duration             // Starting point when the Rate kicks in
-	Weight             float64                   // RateWeight will decide the winner per interval start
-	Value              float64                   // RateValue
-	Unit               time.Duration             // RateUnit
-	Increment          time.Duration             // RateIncrement
-	Blocker            bool                      // RateBlocker will make this rate recurrent, deactivating further intervals
+	ID              string   // RateID
+	FilterIDs       []string // RateFilterIDs
+	ActivationStart string   //TPActivationInterval have ATime and ETime as strings
+	Weight          float64  // RateWeight will decide the winner per interval start
+	Blocker         bool     // RateBlocker will make this rate recurrent, deactivating further intervals
+	IntervalRates   []*IntervalRate
+
+	//aTime cron.Schedule // compiled version of activation time as cron.Schedule interface
+}
+
+type IntervalRate struct {
+	IntervalStart time.Duration // Starting point when the Rate kicks in
+	Unit          time.Duration // RateUnit
+	Increment     time.Duration // RateIncrement
+	Value         float64       // RateValue
 
 	val *utils.Decimal // cached version of the Decimal
 }

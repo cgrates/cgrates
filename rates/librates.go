@@ -18,13 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package rates
 
-import (
-	"sort"
-	"time"
-
-	"github.com/cgrates/cgrates/engine"
-)
-
+/*
 // orderRatesOnIntervals will order the rates based on ActivationInterval and intervalStart of each Rate
 // there can be only one winning Rate for each interval, prioritized by the Weight
 func orderRatesOnIntervals(aRts []*engine.Rate, sTime time.Time, isDuration bool) (ordRts []*engine.RateSInterval) {
@@ -77,3 +71,4 @@ func orderRatesOnIntervals(aRts []*engine.Rate, sTime time.Time, isDuration bool
 
 	return
 }
+*/

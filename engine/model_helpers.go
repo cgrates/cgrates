@@ -1,4 +1,5 @@
 /*
+/*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
 
@@ -3006,10 +3007,11 @@ type RateProfileMdls []*RateProfileMdl
 
 // CSVHeader return the header for csv fields as a slice of string
 func (tps RateProfileMdls) CSVHeader() (result []string) {
-	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.ActivationIntervalString,
-		utils.Weight, utils.ConnectFee, utils.RoundingMethod, utils.RoundingDecimals, utils.MinCost,
-		utils.MaxCost, utils.MaxCostStrategy, utils.RateID, utils.RateFilterIDs, utils.RateWeight,
-		utils.RateValue, utils.RateUnit, utils.RateIncrement, utils.RateBlocker,
+	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs,
+		utils.ActivationIntervalString, utils.Weight, utils.ConnectFee, utils.RoundingMethod,
+		utils.RoundingDecimals, utils.MinCost, utils.MaxCost, utils.MaxCostStrategy, utils.RateID,
+		utils.RateFilterIDs, utils.RateActivationStart, utils.RateWeight, utils.RateBlocker,
+		utils.RateIntervalStart, utils.RateValue, utils.RateUnit, utils.RateIncrement,
 	}
 }
 
@@ -3034,37 +3036,36 @@ func (tps RateProfileMdls) AsTPRateProfile() (result []*utils.TPRateProfile) {
 			rate, found := rateMap[tenID][tp.RateID]
 			if !found {
 				rate = &utils.TPRate{
-					ID:      tp.RateID,
-					Blocker: tp.RateBlocker,
+					ID:            tp.RateID,
+					IntervalRates: make([]*utils.TPIntervalRate, 0),
+					Blocker:       tp.RateBlocker,
 				}
 			}
 			if tp.RateFilterIDs != utils.EmptyString {
 				rateFilterSplit := strings.Split(tp.RateFilterIDs, utils.INFIELD_SEP)
 				rate.FilterIDs = append(rate.FilterIDs, rateFilterSplit...)
 			}
-			if tp.RateActivationInterval != utils.EmptyString {
-				rate.ActivationInterval = new(utils.TPActivationInterval)
-				aiSplt := strings.Split(tp.RateActivationInterval, utils.INFIELD_SEP)
-				if len(aiSplt) == 2 {
-					rate.ActivationInterval.ActivationTime = aiSplt[0]
-					rate.ActivationInterval.ExpiryTime = aiSplt[1]
-				} else if len(aiSplt) == 1 {
-					rate.ActivationInterval.ActivationTime = aiSplt[0]
-				}
+			if tp.RateActivationStart != utils.EmptyString {
+				rate.ActivationStart = tp.RateActivationStart
 			}
 			if tp.RateWeight != 0 {
 				rate.Weight = tp.RateWeight
 			}
+			// create new interval rate and append to the slice
+			intervalRate := new(utils.TPIntervalRate)
+			if tp.RateIntervalStart != utils.EmptyString {
+				intervalRate.IntervalStart = tp.RateIntervalStart
+			}
 			if tp.RateValue != 0 {
-				rate.Value = tp.RateValue
+				intervalRate.Value = tp.RateValue
 			}
 			if tp.RateIncrement != utils.EmptyString {
-				rate.Increment = tp.RateIncrement
+				intervalRate.Increment = tp.RateIncrement
 			}
 			if tp.RateUnit != utils.EmptyString {
-				rate.Unit = tp.RateUnit
+				intervalRate.Unit = tp.RateUnit
 			}
-
+			rate.IntervalRates = append(rate.IntervalRates, intervalRate)
 			rateMap[tenID][tp.RateID] = rate
 		}
 
@@ -3129,57 +3130,57 @@ func APItoModelTPRateProfile(tPrf *utils.TPRateProfile) (mdls RateProfileMdls) {
 	}
 	i := 0
 	for _, rate := range tPrf.Rates {
-		mdl := &RateProfileMdl{
-			Tenant: tPrf.Tenant,
-			Tpid:   tPrf.TPid,
-			ID:     tPrf.ID,
-		}
-		if i == 0 {
-			for i, val := range tPrf.FilterIDs {
-				if i != 0 {
-					mdl.FilterIDs += utils.INFIELD_SEP
-				}
-				mdl.FilterIDs += val
+		for j, intervalRate := range rate.IntervalRates {
+			mdl := &RateProfileMdl{
+				Tenant: tPrf.Tenant,
+				Tpid:   tPrf.TPid,
+				ID:     tPrf.ID,
 			}
+			if i == 0 {
+				for i, val := range tPrf.FilterIDs {
+					if i != 0 {
+						mdl.FilterIDs += utils.INFIELD_SEP
+					}
+					mdl.FilterIDs += val
+				}
 
-			if tPrf.ActivationInterval != nil {
-				if tPrf.ActivationInterval.ActivationTime != utils.EmptyString {
-					mdl.ActivationInterval = tPrf.ActivationInterval.ActivationTime
+				if tPrf.ActivationInterval != nil {
+					if tPrf.ActivationInterval.ActivationTime != utils.EmptyString {
+						mdl.ActivationInterval = tPrf.ActivationInterval.ActivationTime
+					}
+					if tPrf.ActivationInterval.ExpiryTime != utils.EmptyString {
+						mdl.ActivationInterval += utils.INFIELD_SEP + tPrf.ActivationInterval.ExpiryTime
+					}
 				}
-				if tPrf.ActivationInterval.ExpiryTime != utils.EmptyString {
-					mdl.ActivationInterval += utils.INFIELD_SEP + tPrf.ActivationInterval.ExpiryTime
+				mdl.Weight = tPrf.Weight
+				mdl.ConnectFee = tPrf.ConnectFee
+				mdl.RoundingMethod = tPrf.RoundingMethod
+				mdl.RoundingDecimals = tPrf.RoundingDecimals
+				mdl.MinCost = tPrf.MinCost
+				mdl.MaxCost = tPrf.MaxCost
+				mdl.MaxCostStrategy = tPrf.MaxCostStrategy
+			}
+			mdl.RateID = rate.ID
+			if j == 0 {
+				for i, val := range rate.FilterIDs {
+					if i != 0 {
+						mdl.RateFilterIDs += utils.INFIELD_SEP
+					}
+					mdl.RateFilterIDs += val
 				}
+				mdl.RateWeight = rate.Weight
+				mdl.RateActivationStart = rate.ActivationStart
+				mdl.RateBlocker = rate.Blocker
+
 			}
-			mdl.Weight = tPrf.Weight
-			mdl.ConnectFee = tPrf.ConnectFee
-			mdl.RoundingMethod = tPrf.RoundingMethod
-			mdl.RoundingDecimals = tPrf.RoundingDecimals
-			mdl.MinCost = tPrf.MinCost
-			mdl.MaxCost = tPrf.MaxCost
-			mdl.MaxCostStrategy = tPrf.MaxCostStrategy
+			mdl.RateValue = intervalRate.Value
+			mdl.RateUnit = intervalRate.Unit
+			mdl.RateIncrement = intervalRate.Increment
+			mdl.RateIntervalStart = intervalRate.IntervalStart
+			mdls = append(mdls, mdl)
+			i++
 		}
-		mdl.RateID = rate.ID
-		for i, val := range rate.FilterIDs {
-			if i != 0 {
-				mdl.RateFilterIDs += utils.INFIELD_SEP
-			}
-			mdl.RateFilterIDs += val
-		}
-		mdl.RateWeight = rate.Weight
-		mdl.RateValue = rate.Value
-		if rate.ActivationInterval != nil {
-			if rate.ActivationInterval.ActivationTime != utils.EmptyString {
-				mdl.RateActivationInterval = rate.ActivationInterval.ActivationTime
-			}
-			if rate.ActivationInterval.ExpiryTime != utils.EmptyString {
-				mdl.RateActivationInterval += utils.INFIELD_SEP + rate.ActivationInterval.ExpiryTime
-			}
-		}
-		mdl.RateUnit = rate.Unit
-		mdl.RateIncrement = rate.Increment
-		mdl.RateBlocker = rate.Blocker
-		mdls = append(mdls, mdl)
-		i++
+
 	}
 	return
 }
@@ -3208,20 +3209,22 @@ func APItoRateProfile(tpRp *utils.TPRateProfile, timezone string) (rp *RateProfi
 	}
 	for key, rate := range tpRp.Rates {
 		rp.Rates[key] = &Rate{
-			ID:        rate.ID,
-			Weight:    rate.Weight,
-			Blocker:   rate.Blocker,
-			FilterIDs: rate.FilterIDs,
-			Value:     rate.Value,
+			ID:              rate.ID,
+			Weight:          rate.Weight,
+			Blocker:         rate.Blocker,
+			FilterIDs:       rate.FilterIDs,
+			ActivationStart: rate.ActivationStart,
+			IntervalRates:   make([]*IntervalRate, len(rate.IntervalRates)),
 		}
-		if rp.Rates[key].Unit, err = utils.ParseDurationWithNanosecs(rate.Unit); err != nil {
-			return nil, err
-		}
-		if rp.Rates[key].Increment, err = utils.ParseDurationWithNanosecs(rate.Increment); err != nil {
-			return nil, err
-		}
-		if rate.ActivationInterval != nil {
-			if rp.Rates[key].ActivationInterval, err = rate.ActivationInterval.AsActivationInterval(timezone); err != nil {
+		for i, iRate := range rate.IntervalRates {
+			if rp.Rates[key].IntervalRates[i].IntervalStart, err = utils.ParseDurationWithNanosecs(iRate.IntervalStart); err != nil {
+				return nil, err
+			}
+			rp.Rates[key].IntervalRates[i].Value = iRate.Value
+			if rp.Rates[key].IntervalRates[i].Unit, err = utils.ParseDurationWithNanosecs(iRate.Unit); err != nil {
+				return nil, err
+			}
+			if rp.Rates[key].IntervalRates[i].Increment, err = utils.ParseDurationWithNanosecs(iRate.Increment); err != nil {
 				return nil, err
 			}
 		}
@@ -3247,20 +3250,19 @@ func RateProfileToAPI(rp *RateProfile) (tpRp *utils.TPRateProfile) {
 
 	for key, rate := range rp.Rates {
 		tpRp.Rates[key] = &utils.TPRate{
-			ID:        rate.ID,
-			Weight:    rate.Weight,
-			Blocker:   rate.Blocker,
-			FilterIDs: rate.FilterIDs,
-			Value:     rate.Value,
-			Unit:      rate.Unit.String(),
-			Increment: rate.Increment.String(),
+			ID:              rate.ID,
+			Weight:          rate.Weight,
+			Blocker:         rate.Blocker,
+			FilterIDs:       rate.FilterIDs,
+			ActivationStart: rate.ActivationStart,
+			IntervalRates:   make([]*utils.TPIntervalRate, len(rate.IntervalRates)),
 		}
-		if rate.ActivationInterval != nil {
-			if !rate.ActivationInterval.ActivationTime.IsZero() {
-				tpRp.Rates[key].ActivationInterval.ActivationTime = rate.ActivationInterval.ActivationTime.Format(time.RFC3339)
-			}
-			if !rate.ActivationInterval.ExpiryTime.IsZero() {
-				tpRp.Rates[key].ActivationInterval.ExpiryTime = rate.ActivationInterval.ExpiryTime.Format(time.RFC3339)
+		for i, iRate := range rate.IntervalRates {
+			tpRp.Rates[key].IntervalRates[i] = &utils.TPIntervalRate{
+				IntervalStart: iRate.IntervalStart.String(),
+				Value:         iRate.Value,
+				Unit:          iRate.Unit.String(),
+				Increment:     iRate.Increment.String(),
 			}
 		}
 	}
