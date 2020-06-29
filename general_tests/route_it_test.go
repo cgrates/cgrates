@@ -713,7 +713,7 @@ func testV1SplSGetSoredSuppliersWithLoad(t *testing.T) {
 		},
 	}
 	expSuppliers := []*engine.SortedRoute{
-		&engine.SortedRoute{
+		{
 			RouteID:         "supplier2",
 			RouteParameters: "",
 			SortingData: map[string]interface{}{
@@ -721,7 +721,7 @@ func testV1SplSGetSoredSuppliersWithLoad(t *testing.T) {
 				"Ratio":  7.0,
 				"Weight": 20.0},
 		},
-		&engine.SortedRoute{
+		{
 			RouteID:         "supplier3",
 			RouteParameters: "",
 			SortingData: map[string]interface{}{
@@ -729,7 +729,7 @@ func testV1SplSGetSoredSuppliersWithLoad(t *testing.T) {
 				"Ratio":  5.0,
 				"Weight": 35.0},
 		},
-		&engine.SortedRoute{
+		{
 			RouteID:         "supplier1",
 			RouteParameters: "",
 			SortingData: map[string]interface{}{

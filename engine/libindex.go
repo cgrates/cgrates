@@ -406,14 +406,13 @@ func addIndexFiltersItem(dm *DataManager, idxItmType, tnt, itemID string, filter
 			}
 		}
 		indexes[idxItmType].Add(itemID)
-
-		if err = dm.SetIndexes(utils.CacheReverseFilterIndexes, tntCtx, indexes, true, utils.NonTransactional); err != nil {
-			return
-		}
 		for indxKey := range indexes {
 			if err = Cache.Remove(utils.CacheReverseFilterIndexes, utils.ConcatenatedKey(tntCtx, indxKey), true, utils.NonTransactional); err != nil {
 				return
 			}
+		}
+		if err = dm.SetIndexes(utils.CacheReverseFilterIndexes, tntCtx, indexes, true, utils.NonTransactional); err != nil {
+			return
 		}
 	}
 	return
@@ -437,13 +436,13 @@ func removeIndexFiltersItem(dm *DataManager, idxItmType, tnt, itemID string, fil
 		}
 		indexes[idxItmType].Remove(itemID)
 
-		if err = dm.SetIndexes(utils.CacheReverseFilterIndexes, tntCtx, indexes, true, utils.NonTransactional); err != nil {
-			return
-		}
 		for indxKey := range indexes {
 			if err = Cache.Remove(utils.CacheReverseFilterIndexes, utils.ConcatenatedKey(tntCtx, indxKey), true, utils.NonTransactional); err != nil {
 				return
 			}
+		}
+		if err = dm.SetIndexes(utils.CacheReverseFilterIndexes, tntCtx, indexes, true, utils.NonTransactional); err != nil {
+			return
 		}
 	}
 	return

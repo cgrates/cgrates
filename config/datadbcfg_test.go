@@ -232,7 +232,7 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 	"redis_sentinel":"sentinel",			// redis_sentinel is the name of sentinel
 	"remote_conns":["Conn1"],
     "items":{
-		"*accounts":{"replicate":true, "limit": 5,"ttl": "6"},
+		"*accounts":{"replicate":true},
 		"*reverse_destinations": {"replicate":false},
 		"*destinations": {"replicate":false},
 	  }	
@@ -251,8 +251,6 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 		Items: map[string]*ItemOpt{
 			utils.MetaAccounts: {
 				Replicate: true,
-				TTL:       6,
-				Limit:     5,
 			},
 			utils.MetaReverseDestinations: {
 				Replicate: false,
@@ -284,9 +282,9 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 			"redis_sentinel":"sentinel",			// redis_sentinel is the name of sentinel
 			"remote_conns":["Conn1"],
 			"items":{
-				"*dispatcher_hosts":{"remote":true, "replicate":true, "limit": -1, "ttl": "", "static_ttl": true}, 
-				"*indexes" :{"remote":true, "replicate":true, "limit": -1, "ttl": "", "static_ttl": true}, 
-				"*load_ids":{"remote":true, "replicate":true, "limit": -1, "ttl": "", "static_ttl": true}, 
+				"*dispatcher_hosts":{"remote":true, "replicate":true}, 
+				"*indexes" :{"remote":true, "replicate":true}, 
+				"*load_ids":{"remote":true, "replicate":true}, 
 			
 			  }	
 			}
@@ -305,20 +303,14 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 			utils.MetaDispatcherHosts: {
 				Remote:    true,
 				Replicate: true,
-				Limit:     -1,
-				StaticTTL: true,
 			},
 			utils.MetaIndexes: {
 				Remote:    true,
 				Replicate: true,
-				Limit:     -1,
-				StaticTTL: true,
 			},
 			utils.MetaLoadIDs: {
 				Remote:    true,
 				Replicate: true,
-				Limit:     -1,
-				StaticTTL: true,
 			},
 		},
 	}
@@ -344,10 +336,10 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 			"redis_sentinel":"sentinel",			// redis_sentinel is the name of sentinel
 			"remote_conns":["Conn1"],
 			"items":{
-				"*timings": {"remote":false, "replicate":false, "limit": 9, "ttl": "8", "static_ttl": true}, 
-				"*resource_profiles":{"remote":false, "replicate":false, "limit": 9, "ttl": "8", "static_ttl": true}, 
-				"*resources":{"remote":false, "replicate":false, "limit": 9, "ttl": "8", "static_ttl": true}, 
-				"*statqueue_profiles": {"remote":false, "replicate":false, "limit": 9, "ttl": "8", "static_ttl": true}, 
+				"*timings": {"remote":false, "replicate":false}, 
+				"*resource_profiles":{"remote":false, "replicate":false}, 
+				"*resources":{"remote":false, "replicate":false}, 
+				"*statqueue_profiles": {"remote":false, "replicate":false}, 
 			  }	
 			}
 		}`
@@ -362,26 +354,10 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 		DataDbSentinelName: "sentinel",
 		RmtConns:           []string{"Conn1"},
 		Items: map[string]*ItemOpt{
-			utils.MetaTimings: {
-				Limit:     9,
-				TTL:       8,
-				StaticTTL: true,
-			},
-			utils.MetaResourceProfile: {
-				Limit:     9,
-				TTL:       8,
-				StaticTTL: true,
-			},
-			utils.MetaResources: {
-				Limit:     9,
-				TTL:       8,
-				StaticTTL: true,
-			},
-			utils.MetaStatQueueProfiles: {
-				Limit:     9,
-				TTL:       8,
-				StaticTTL: true,
-			},
+			utils.MetaTimings:           {},
+			utils.MetaResourceProfile:   {},
+			utils.MetaResources:         {},
+			utils.MetaStatQueueProfiles: {},
 		},
 	}
 	dbcfg.Items = make(map[string]*ItemOpt)
@@ -412,8 +388,8 @@ func TestDataDbCfgAsMapInterface(t *testing.T) {
 		"remote_conns":[],
 		"replication_conns":[],
 		"items":{
-			"*accounts":{"remote":true, "replicate":false, "limit": -1, "ttl": "", "static_ttl": false}, 					
-			"*reverse_destinations": {"remote":false, "replicate":false, "limit": 7, "ttl": "", "static_ttl": true},
+			"*accounts":{"remote":true, "replicate":false}, 					
+			"*reverse_destinations": {"remote":false, "replicate":false},
 		},
 	},		
 }`
@@ -429,8 +405,8 @@ func TestDataDbCfgAsMapInterface(t *testing.T) {
 		"remote_conns":      []string{},
 		"replication_conns": []string{},
 		"items": map[string]interface{}{
-			"*accounts":             map[string]interface{}{"remote": true, "replicate": false, "limit": -1, "ttl": "", "static_ttl": false},
-			"*reverse_destinations": map[string]interface{}{"remote": false, "replicate": false, "limit": 7, "ttl": "", "static_ttl": true},
+			"*accounts":             map[string]interface{}{"remote": true, "replicate": false, "APIKey": "", "RouteID": ""},
+			"*reverse_destinations": map[string]interface{}{"remote": false, "replicate": false, "APIKey": "", "RouteID": ""},
 		},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {

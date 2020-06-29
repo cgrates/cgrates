@@ -121,10 +121,10 @@ func testdoubleRemoveStatQueueProfile(t *testing.T) {
 			QueueLength: 10,
 			TTL:         time.Duration(10) * time.Second,
 			Metrics: []*engine.MetricWithFilters{
-				&engine.MetricWithFilters{
+				{
 					MetricID: "*sum",
 				},
-				&engine.MetricWithFilters{
+				{
 					MetricID: "*acd",
 				},
 			},
@@ -179,19 +179,22 @@ func testdoubleRemoveStatQueueProfile(t *testing.T) {
 func testdoubleRemoveActions(t *testing.T) {
 	// check
 	var reply1 []*utils.TPAction
-	if err := sesRPC.Call(utils.APIerSv1GetActions, utils.StringPointer("ACTS_1"), &reply1); err == nil || err.Error() != "SERVER_ERROR: NOT_FOUND" {
-		t.Error(err)
+	if doubleRemoveDIR != "tutinternal" { // on internal do not get so we do not cache this action with nil in cache
+		if err := sesRPC.Call(utils.APIerSv1GetActions, utils.StringPointer("ACTS_1"), &reply1); err == nil || err.Error() != "SERVER_ERROR: NOT_FOUND" {
+			t.Error(err)
+		}
 	}
 	// set
 	attrs1 := &v1.V1AttrSetActions{
 		ActionsId: "ACTS_1",
 		Actions: []*v1.V1TPAction{
-			&v1.V1TPAction{
+			{
 				Identifier:  utils.TOPUP_RESET,
 				BalanceType: utils.MONETARY,
 				Units:       75.0,
 				ExpiryTime:  utils.UNLIMITED,
-				Weight:      20.0}}}
+				Weight:      20.0}},
+	}
 	var reply string
 	if err := sesRPC.Call(utils.APIerSv1SetActions, &attrs1, &reply); err != nil {
 		t.Error(err)
@@ -204,7 +207,7 @@ func testdoubleRemoveActions(t *testing.T) {
 	}
 	// check
 	eOut := []*utils.TPAction{
-		&utils.TPAction{
+		{
 			Identifier:      utils.TOPUP_RESET,
 			BalanceType:     utils.MONETARY,
 			Units:           "75",
@@ -242,9 +245,9 @@ func testdoubleRemoveActionPlan(t *testing.T) {
 	//set action
 	var reply string
 	if err := sesRPC.Call(utils.APIerSv2SetActions, &utils.AttrSetActions{
-		ActionsId: "ACTS_1",
+		ActionsId: "ACTS_2",
 		Actions:   []*utils.TPAction{{Identifier: utils.LOG}},
-	}, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv2.SetActions received: %s", reply)
@@ -252,7 +255,7 @@ func testdoubleRemoveActionPlan(t *testing.T) {
 	// check action
 	var reply1 []*utils.TPAction
 	eOut := []*utils.TPAction{
-		&utils.TPAction{
+		{
 			Identifier:      "*log",
 			Units:           "0",
 			BalanceWeight:   "0",
@@ -260,7 +263,7 @@ func testdoubleRemoveActionPlan(t *testing.T) {
 			BalanceDisabled: "false",
 			Weight:          0}}
 
-	if err := sesRPC.Call(utils.APIerSv1GetActions, utils.StringPointer("ACTS_1"), &reply1); err != nil {
+	if err := sesRPC.Call(utils.APIerSv1GetActions, utils.StringPointer("ACTS_2"), &reply1); err != nil {
 		t.Error("Got error on APIerSv1.GetActions: ", err.Error())
 	} else if !reflect.DeepEqual(eOut, reply1) {
 		t.Errorf("Expected: %v, received: %v", utils.ToJSON(eOut), utils.ToJSON(reply1))
@@ -280,8 +283,8 @@ func testdoubleRemoveActionPlan(t *testing.T) {
 	atms1 := &v1.AttrSetActionPlan{
 		Id: "ATMS_1",
 		ActionPlan: []*v1.AttrActionPlan{
-			&v1.AttrActionPlan{
-				ActionsId: "ACTS_1",
+			{
+				ActionsId: "ACTS_2",
 				Time:      utils.ASAP,
 				Weight:    20.0},
 		},
@@ -303,8 +306,8 @@ func testdoubleRemoveActionPlan(t *testing.T) {
 		t.Errorf("Expected: %v,\n received: %v", 1, len(aps))
 	} else if aps[0].Id != "ATMS_1" {
 		t.Errorf("Expected: ATMS_1,\n received: %v", aps[0].Id)
-	} else if aps[0].ActionTimings[0].ActionsID != "ACTS_1" {
-		t.Errorf("Expected: ACTS_1,\n received: %v", aps[0].ActionTimings[0].ActionsID)
+	} else if aps[0].ActionTimings[0].ActionsID != "ACTS_2" {
+		t.Errorf("Expected: ACTS_2,\n received: %v", aps[0].ActionTimings[0].ActionsID)
 	} else if aps[0].ActionTimings[0].Weight != 20.0 {
 		t.Errorf("Expected: 20.0,\n received: %v", aps[0].ActionTimings[0].Weight)
 	}

@@ -158,26 +158,17 @@ func (dbcfg *DataDbCfg) AsMapInterface() map[string]interface{} {
 type ItemOpt struct {
 	Remote    bool
 	Replicate bool
-	TTL       time.Duration
-	Limit     int
-	StaticTTL bool
 	// used for ArgDispatcher in case we send this to a dispatcher engine
 	RouteID string
 	APIKey  string
 }
 
 func (itm *ItemOpt) AsMapInterface() map[string]interface{} {
-	var ttl string = ""
-	if itm.TTL != 0 {
-		ttl = itm.TTL.String()
-	}
-
 	return map[string]interface{}{
 		utils.RemoteCfg:    itm.Remote,
 		utils.ReplicateCfg: itm.Replicate,
-		utils.LimitCfg:     itm.Limit,
-		utils.TTLCfg:       ttl,
-		utils.StaticTTLCfg: itm.StaticTTL,
+		utils.RouteID:      itm.RouteID,
+		utils.APIKey:       itm.APIKey,
 	}
 }
 
@@ -190,17 +181,6 @@ func (itm *ItemOpt) loadFromJsonCfg(jsonItm *ItemOptJson) (err error) {
 	}
 	if jsonItm.Replicate != nil {
 		itm.Replicate = *jsonItm.Replicate
-	}
-	if jsonItm.Ttl != nil {
-		if itm.TTL, err = utils.ParseDurationWithNanosecs(*jsonItm.Ttl); err != nil {
-			return err
-		}
-	}
-	if jsonItm.Limit != nil {
-		itm.Limit = *jsonItm.Limit
-	}
-	if jsonItm.Static_ttl != nil {
-		itm.StaticTTL = *jsonItm.Static_ttl
 	}
 	if jsonItm.Route_id != nil {
 		itm.RouteID = *jsonItm.Route_id

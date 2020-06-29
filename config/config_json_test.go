@@ -26,12 +26,12 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var dfCgrJsonCfg *CgrJsonCfg
+var dfCgrJSONCfg *CgrJsonCfg
 
 // Loads up the default configuration and  tests it's sections one by one
 func TestDfNewdfCgrJsonCfgFromReader(t *testing.T) {
 	var err error
-	if dfCgrJsonCfg, err = NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON)); err != nil {
+	if dfCgrJSONCfg, err = NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON)); err != nil {
 		t.Error(err)
 	}
 }
@@ -63,7 +63,7 @@ func TestDfGeneralJsonCfg(t *testing.T) {
 		Rsr_separator:        utils.StringPointer(";"),
 		Max_parralel_conns:   utils.IntPointer(100),
 	}
-	if gCfg, err := dfCgrJsonCfg.GeneralJsonCfg(); err != nil {
+	if gCfg, err := dfCgrJSONCfg.GeneralJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, gCfg) {
 		t.Errorf("expecting: %s, \nreceived: %s", utils.ToIJSON(eCfg), utils.ToIJSON(gCfg))
@@ -218,11 +218,81 @@ func TestCacheJsonCfg(t *testing.T) {
 			utils.CacheAccounts: {Limit: utils.IntPointer(-1),
 				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 				Replicate: utils.BoolPointer(false)},
+
+			utils.CacheTBLTPTimings: {Limit: utils.IntPointer(-1),
+				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
+				Replicate: utils.BoolPointer(false)},
+			utils.CacheTBLTPDestinations: {Limit: utils.IntPointer(-1),
+				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
+				Replicate: utils.BoolPointer(false)},
+			utils.CacheTBLTPRates: {Limit: utils.IntPointer(-1),
+				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
+				Replicate: utils.BoolPointer(false)},
+			utils.CacheTBLTPDestinationRates: {Limit: utils.IntPointer(-1),
+				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
+				Replicate: utils.BoolPointer(false)},
+			utils.CacheTBLTPRatingPlans: {Limit: utils.IntPointer(-1),
+				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
+				Replicate: utils.BoolPointer(false)},
+			utils.CacheTBLTPRatingProfiles: {Limit: utils.IntPointer(-1),
+				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
+				Replicate: utils.BoolPointer(false)},
+			utils.CacheTBLTPSharedGroups: {Limit: utils.IntPointer(-1),
+				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
+				Replicate: utils.BoolPointer(false)},
+			utils.CacheTBLTPActions: {Limit: utils.IntPointer(-1),
+				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
+				Replicate: utils.BoolPointer(false)},
+			utils.CacheTBLTPActionPlans: {Limit: utils.IntPointer(-1),
+				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
+				Replicate: utils.BoolPointer(false)},
+			utils.CacheTBLTPActionTriggers: {Limit: utils.IntPointer(-1),
+				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
+				Replicate: utils.BoolPointer(false)},
+			utils.CacheTBLTPAccountActions: {Limit: utils.IntPointer(-1),
+				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
+				Replicate: utils.BoolPointer(false)},
+			utils.CacheTBLTPResources: {Limit: utils.IntPointer(-1),
+				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
+				Replicate: utils.BoolPointer(false)},
+			utils.CacheTBLTPStats: {Limit: utils.IntPointer(-1),
+				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
+				Replicate: utils.BoolPointer(false)},
+			utils.CacheTBLTPThresholds: {Limit: utils.IntPointer(-1),
+				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
+				Replicate: utils.BoolPointer(false)},
+			utils.CacheTBLTPFilters: {Limit: utils.IntPointer(-1),
+				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
+				Replicate: utils.BoolPointer(false)},
+			utils.CacheSessionCostsTBL: {Limit: utils.IntPointer(-1),
+				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
+				Replicate: utils.BoolPointer(false)},
+			utils.CacheCDRsTBL: {Limit: utils.IntPointer(-1),
+				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
+				Replicate: utils.BoolPointer(false)},
+			utils.CacheTBLTPRoutes: {Limit: utils.IntPointer(-1),
+				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
+				Replicate: utils.BoolPointer(false)},
+			utils.CacheTBLTPAttributes: {Limit: utils.IntPointer(-1),
+				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
+				Replicate: utils.BoolPointer(false)},
+			utils.CacheTBLTPChargers: {Limit: utils.IntPointer(-1),
+				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
+				Replicate: utils.BoolPointer(false)},
+			utils.CacheTBLTPDispatchers: {Limit: utils.IntPointer(-1),
+				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
+				Replicate: utils.BoolPointer(false)},
+			utils.CacheTBLTPDispatcherHosts: {Limit: utils.IntPointer(-1),
+				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
+				Replicate: utils.BoolPointer(false)},
+			utils.CacheTBLTPRateProfiles: {Limit: utils.IntPointer(-1),
+				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
+				Replicate: utils.BoolPointer(false)},
 		},
 		Replication_conns: &[]string{},
 	}
 
-	if gCfg, err := dfCgrJsonCfg.CacheJsonCfg(); err != nil {
+	if gCfg, err := dfCgrJSONCfg.CacheJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, gCfg) {
 		t.Errorf("expected: %s\n, received: %s", utils.ToJSON(eCfg), utils.ToJSON(gCfg))
@@ -238,7 +308,7 @@ func TestDfListenJsonCfg(t *testing.T) {
 		Rpc_gob_tls:  utils.StringPointer("127.0.0.1:2023"),
 		Http_tls:     utils.StringPointer("127.0.0.1:2280"),
 	}
-	if cfg, err := dfCgrJsonCfg.ListenJsonCfg(); err != nil {
+	if cfg, err := dfCgrJSONCfg.ListenJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Error("Received: ", cfg)
@@ -259,164 +329,112 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 		Remote_conns:      &[]string{},
 		Items: &map[string]*ItemOptJson{
 			utils.MetaAccounts: {
-				Replicate:  utils.BoolPointer(false),
-				Remote:     utils.BoolPointer(false),
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Limit:      utils.IntPointer(-1),
-				Static_ttl: utils.BoolPointer(false)},
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false),
+			},
 			utils.MetaReverseDestinations: {
-				Replicate:  utils.BoolPointer(false),
-				Remote:     utils.BoolPointer(false),
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Limit:      utils.IntPointer(-1),
-				Static_ttl: utils.BoolPointer(false)},
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false),
+			},
 			utils.MetaDestinations: {
-				Replicate:  utils.BoolPointer(false),
-				Remote:     utils.BoolPointer(false),
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Limit:      utils.IntPointer(-1),
-				Static_ttl: utils.BoolPointer(false)},
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false),
+			},
 			utils.MetaRatingPlans: {
-				Replicate:  utils.BoolPointer(false),
-				Remote:     utils.BoolPointer(false),
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Limit:      utils.IntPointer(-1),
-				Static_ttl: utils.BoolPointer(false)},
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false),
+			},
 			utils.MetaRatingProfiles: {
-				Replicate:  utils.BoolPointer(false),
-				Remote:     utils.BoolPointer(false),
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Limit:      utils.IntPointer(-1),
-				Static_ttl: utils.BoolPointer(false)},
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false),
+			},
 			utils.MetaActions: {
-				Replicate:  utils.BoolPointer(false),
-				Remote:     utils.BoolPointer(false),
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Limit:      utils.IntPointer(-1),
-				Static_ttl: utils.BoolPointer(false)},
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false),
+			},
 			utils.MetaActionPlans: {
-				Replicate:  utils.BoolPointer(false),
-				Remote:     utils.BoolPointer(false),
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Limit:      utils.IntPointer(-1),
-				Static_ttl: utils.BoolPointer(false)},
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false),
+			},
 			utils.MetaAccountActionPlans: {
-				Replicate:  utils.BoolPointer(false),
-				Remote:     utils.BoolPointer(false),
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Limit:      utils.IntPointer(-1),
-				Static_ttl: utils.BoolPointer(false)},
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false),
+			},
 			utils.MetaActionTriggers: {
-				Replicate:  utils.BoolPointer(false),
-				Remote:     utils.BoolPointer(false),
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Limit:      utils.IntPointer(-1),
-				Static_ttl: utils.BoolPointer(false)},
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false),
+			},
 			utils.MetaSharedGroups: {
-				Replicate:  utils.BoolPointer(false),
-				Remote:     utils.BoolPointer(false),
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Limit:      utils.IntPointer(-1),
-				Static_ttl: utils.BoolPointer(false)},
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false),
+			},
 			utils.MetaTimings: {
-				Replicate:  utils.BoolPointer(false),
-				Remote:     utils.BoolPointer(false),
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Limit:      utils.IntPointer(-1),
-				Static_ttl: utils.BoolPointer(false)},
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false),
+			},
 			utils.MetaResourceProfile: {
-				Replicate:  utils.BoolPointer(false),
-				Remote:     utils.BoolPointer(false),
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Limit:      utils.IntPointer(-1),
-				Static_ttl: utils.BoolPointer(false)},
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false),
+			},
 			utils.MetaStatQueues: {
-				Replicate:  utils.BoolPointer(false),
-				Remote:     utils.BoolPointer(false),
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Limit:      utils.IntPointer(-1),
-				Static_ttl: utils.BoolPointer(false)},
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false),
+			},
 			utils.MetaResources: {
-				Replicate:  utils.BoolPointer(false),
-				Remote:     utils.BoolPointer(false),
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Limit:      utils.IntPointer(-1),
-				Static_ttl: utils.BoolPointer(false)},
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false),
+			},
 			utils.MetaStatQueueProfiles: {
-				Replicate:  utils.BoolPointer(false),
-				Remote:     utils.BoolPointer(false),
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Limit:      utils.IntPointer(-1),
-				Static_ttl: utils.BoolPointer(false)},
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false),
+			},
 			utils.MetaThresholds: {
-				Replicate:  utils.BoolPointer(false),
-				Remote:     utils.BoolPointer(false),
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Limit:      utils.IntPointer(-1),
-				Static_ttl: utils.BoolPointer(false)},
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false),
+			},
 			utils.MetaThresholdProfiles: {
-				Replicate:  utils.BoolPointer(false),
-				Remote:     utils.BoolPointer(false),
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Limit:      utils.IntPointer(-1),
-				Static_ttl: utils.BoolPointer(false)},
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false),
+			},
 			utils.MetaFilters: {
-				Replicate:  utils.BoolPointer(false),
-				Remote:     utils.BoolPointer(false),
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Limit:      utils.IntPointer(-1),
-				Static_ttl: utils.BoolPointer(false)},
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false),
+			},
 			utils.MetaRouteProfiles: {
-				Replicate:  utils.BoolPointer(false),
-				Remote:     utils.BoolPointer(false),
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Limit:      utils.IntPointer(-1),
-				Static_ttl: utils.BoolPointer(false)},
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false),
+			},
 			utils.MetaAttributeProfiles: {
-				Replicate:  utils.BoolPointer(false),
-				Remote:     utils.BoolPointer(false),
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Limit:      utils.IntPointer(-1),
-				Static_ttl: utils.BoolPointer(false)},
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false),
+			},
 			utils.MetaDispatcherHosts: {
-				Replicate:  utils.BoolPointer(false),
-				Remote:     utils.BoolPointer(false),
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Limit:      utils.IntPointer(-1),
-				Static_ttl: utils.BoolPointer(false)},
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false),
+			},
 			utils.MetaRateProfiles: {
-				Replicate:  utils.BoolPointer(false),
-				Remote:     utils.BoolPointer(false),
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Limit:      utils.IntPointer(-1),
-				Static_ttl: utils.BoolPointer(false)},
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false),
+			},
 			utils.MetaChargerProfiles: {
-				Replicate:  utils.BoolPointer(false),
-				Remote:     utils.BoolPointer(false),
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Limit:      utils.IntPointer(-1),
-				Static_ttl: utils.BoolPointer(false)},
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false),
+			},
 			utils.MetaDispatcherProfiles: {
-				Replicate:  utils.BoolPointer(false),
-				Remote:     utils.BoolPointer(false),
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Limit:      utils.IntPointer(-1),
-				Static_ttl: utils.BoolPointer(false)},
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false),
+			},
 			utils.MetaIndexes: {
-				Replicate:  utils.BoolPointer(false),
-				Remote:     utils.BoolPointer(false),
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Limit:      utils.IntPointer(-1),
-				Static_ttl: utils.BoolPointer(false)},
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false),
+			},
 			utils.MetaLoadIDs: {
-				Replicate:  utils.BoolPointer(false),
-				Remote:     utils.BoolPointer(false),
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Limit:      utils.IntPointer(-1),
-				Static_ttl: utils.BoolPointer(false)},
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false),
+			},
 		},
 	}
-	if cfg, err := dfCgrJsonCfg.DbJsonCfg(DATADB_JSN); err != nil {
+	if cfg, err := dfCgrJSONCfg.DbJsonCfg(DATADB_JSN); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Errorf("expecting: %s, \nreceived: %s", utils.ToIJSON(eCfg), utils.ToIJSON(cfg))
@@ -439,105 +457,105 @@ func TestDfStorDBJsonCfg(t *testing.T) {
 		Query_timeout:         utils.StringPointer("10s"),
 		Sslmode:               utils.StringPointer(utils.PostgressSSLModeDisable),
 		Items: &map[string]*ItemOptJson{
-			utils.TBLTPTimings: {
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Limit:      utils.IntPointer(-1),
-				Static_ttl: utils.BoolPointer(false)},
-			utils.TBLTPDestinations: {
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Limit:      utils.IntPointer(-1),
-				Static_ttl: utils.BoolPointer(false)},
-			utils.TBLTPRates: {
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Limit:      utils.IntPointer(-1),
-				Static_ttl: utils.BoolPointer(false)},
-			utils.TBLTPDestinationRates: {
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Limit:      utils.IntPointer(-1),
-				Static_ttl: utils.BoolPointer(false)},
-			utils.TBLTPRatingPlans: {
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Limit:      utils.IntPointer(-1),
-				Static_ttl: utils.BoolPointer(false)},
-			utils.TBLTPRatingProfiles: {
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Limit:      utils.IntPointer(-1),
-				Static_ttl: utils.BoolPointer(false)},
-			utils.TBLTPSharedGroups: {
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Limit:      utils.IntPointer(-1),
-				Static_ttl: utils.BoolPointer(false)},
-			utils.TBLTPActions: {
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Limit:      utils.IntPointer(-1),
-				Static_ttl: utils.BoolPointer(false)},
-			utils.TBLTPActionTriggers: {
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Limit:      utils.IntPointer(-1),
-				Static_ttl: utils.BoolPointer(false)},
-			utils.TBLTPAccountActions: {
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Limit:      utils.IntPointer(-1),
-				Static_ttl: utils.BoolPointer(false)},
-			utils.TBLTPResources: {
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Limit:      utils.IntPointer(-1),
-				Static_ttl: utils.BoolPointer(false)},
-			utils.TBLTPStats: {
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Limit:      utils.IntPointer(-1),
-				Static_ttl: utils.BoolPointer(false)},
-			utils.TBLTPThresholds: {
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Limit:      utils.IntPointer(-1),
-				Static_ttl: utils.BoolPointer(false)},
-			utils.TBLTPFilters: {
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Limit:      utils.IntPointer(-1),
-				Static_ttl: utils.BoolPointer(false)},
-			utils.SessionCostsTBL: {
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Limit:      utils.IntPointer(-1),
-				Static_ttl: utils.BoolPointer(false)},
-			utils.TBLTPActionPlans: {
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Limit:      utils.IntPointer(-1),
-				Static_ttl: utils.BoolPointer(false)},
-			utils.TBLTPRoutes: {
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Limit:      utils.IntPointer(-1),
-				Static_ttl: utils.BoolPointer(false)},
-			utils.TBLTPAttributes: {
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Limit:      utils.IntPointer(-1),
-				Static_ttl: utils.BoolPointer(false)},
-			utils.TBLTPChargers: {
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Limit:      utils.IntPointer(-1),
-				Static_ttl: utils.BoolPointer(false)},
-			utils.TBLTPDispatchers: {
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Limit:      utils.IntPointer(-1),
-				Static_ttl: utils.BoolPointer(false)},
-			utils.TBLTPRateProfiles: {
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Limit:      utils.IntPointer(-1),
-				Static_ttl: utils.BoolPointer(false)},
-			utils.TBLTPDispatcherHosts: {
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Limit:      utils.IntPointer(-1),
-				Static_ttl: utils.BoolPointer(false)},
-			utils.CDRsTBL: {
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Limit:      utils.IntPointer(-1),
-				Static_ttl: utils.BoolPointer(false)},
-			utils.TBLVersions: {
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Limit:      utils.IntPointer(-1),
-				Static_ttl: utils.BoolPointer(false)},
+			utils.CacheTBLTPTimings: {
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false),
+			},
+			utils.CacheTBLTPDestinations: {
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false),
+			},
+			utils.CacheTBLTPRates: {
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false),
+			},
+			utils.CacheTBLTPDestinationRates: {
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false),
+			},
+			utils.CacheTBLTPRatingPlans: {
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false),
+			},
+			utils.CacheTBLTPRatingProfiles: {
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false),
+			},
+			utils.CacheTBLTPSharedGroups: {
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false),
+			},
+			utils.CacheTBLTPActions: {
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false),
+			},
+			utils.CacheTBLTPActionTriggers: {
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false),
+			},
+			utils.CacheTBLTPAccountActions: {
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false),
+			},
+			utils.CacheTBLTPResources: {
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false),
+			},
+			utils.CacheTBLTPStats: {
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false),
+			},
+			utils.CacheTBLTPThresholds: {
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false),
+			},
+			utils.CacheTBLTPFilters: {
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false),
+			},
+			utils.CacheSessionCostsTBL: {
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false),
+			},
+			utils.CacheTBLTPActionPlans: {
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false),
+			},
+			utils.CacheTBLTPRoutes: {
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false),
+			},
+			utils.CacheTBLTPAttributes: {
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false),
+			},
+			utils.CacheTBLTPChargers: {
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false),
+			},
+			utils.CacheTBLTPDispatchers: {
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false),
+			},
+			utils.CacheTBLTPRateProfiles: {
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false),
+			},
+			utils.CacheTBLTPDispatcherHosts: {
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false),
+			},
+			utils.CacheCDRsTBL: {
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false),
+			},
+			utils.CacheVersions: {
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false),
+			},
 		},
 	}
-	if cfg, err := dfCgrJsonCfg.DbJsonCfg(STORDB_JSN); err != nil {
+	if cfg, err := dfCgrJSONCfg.DbJsonCfg(STORDB_JSN); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Errorf("Expected : %+v,\n Received: %+v", utils.ToJSON(eCfg), utils.ToJSON(cfg))
@@ -566,7 +584,7 @@ func TestDfRalsJsonCfg(t *testing.T) {
 		},
 		Dynaprepaid_actionplans: &[]string{},
 	}
-	if cfg, err := dfCgrJsonCfg.RalsJsonCfg(); err != nil {
+	if cfg, err := dfCgrJSONCfg.RalsJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Errorf("Received: %+v", cfg)
@@ -579,7 +597,7 @@ func TestDfSchedulerJsonCfg(t *testing.T) {
 		Cdrs_conns: &[]string{},
 		Filters:    &[]string{},
 	}
-	if cfg, err := dfCgrJsonCfg.SchedulerJsonCfg(); err != nil {
+	if cfg, err := dfCgrJSONCfg.SchedulerJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Error("Received: ", cfg)
@@ -601,7 +619,7 @@ func TestDfCdrsJsonCfg(t *testing.T) {
 		Scheduler_conns:      &[]string{},
 		Ees_conns:            &[]string{},
 	}
-	if cfg, err := dfCgrJsonCfg.CdrsJsonCfg(); err != nil {
+	if cfg, err := dfCgrJSONCfg.CdrsJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Errorf("Received: %+v", *cfg)
@@ -697,7 +715,7 @@ func TestDfCdreJsonCfgs(t *testing.T) {
 			Filters:            &[]string{},
 		},
 	}
-	if cfg, err := dfCgrJsonCfg.CdreJsonCfgs(); err != nil {
+	if cfg, err := dfCgrJSONCfg.CdreJsonCfgs(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		expect, _ := json.Marshal(eCfg)
@@ -738,7 +756,7 @@ func TestSmgJsonCfg(t *testing.T) {
 		},
 		Scheduler_conns: &[]string{},
 	}
-	if cfg, err := dfCgrJsonCfg.SessionSJsonCfg(); err != nil {
+	if cfg, err := dfCgrJSONCfg.SessionSJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Error("Received: ", cfg)
@@ -764,7 +782,7 @@ func TestFsAgentJsonCfg(t *testing.T) {
 				Alias:      utils.StringPointer(""),
 			}},
 	}
-	if cfg, err := dfCgrJsonCfg.FreeswitchAgentJsonCfg(); err != nil {
+	if cfg, err := dfCgrJSONCfg.FreeswitchAgentJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Error("Received: ", cfg)
@@ -783,7 +801,7 @@ func TestKamAgentJsonCfg(t *testing.T) {
 			},
 		},
 	}
-	if cfg, err := dfCgrJsonCfg.KamAgentJsonCfg(); err != nil {
+	if cfg, err := dfCgrJSONCfg.KamAgentJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Errorf("Expecting: %s, received: %s: ",
@@ -806,7 +824,7 @@ func TestAsteriskAgentJsonCfg(t *testing.T) {
 			},
 		},
 	}
-	if cfg, err := dfCgrJsonCfg.AsteriskAgentJsonCfg(); err != nil {
+	if cfg, err := dfCgrJSONCfg.AsteriskAgentJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Errorf("Expecting: %s, received: %s ", utils.ToJSON(eCfg), utils.ToJSON(cfg))
@@ -977,7 +995,7 @@ func TestDiameterAgentJsonCfg(t *testing.T) {
 		},
 		Request_processors: &[]*ReqProcessorJsnCfg{},
 	}
-	if cfg, err := dfCgrJsonCfg.DiameterAgentJsonCfg(); err != nil {
+	if cfg, err := dfCgrJSONCfg.DiameterAgentJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Errorf("expecting: %s, \n\nreceived: %s", utils.ToJSON(eCfg), utils.ToJSON(cfg))
@@ -999,7 +1017,7 @@ func TestRadiusAgentJsonCfg(t *testing.T) {
 		Sessions_conns:     &[]string{utils.MetaInternal},
 		Request_processors: &[]*ReqProcessorJsnCfg{},
 	}
-	if cfg, err := dfCgrJsonCfg.RadiusAgentJsonCfg(); err != nil {
+	if cfg, err := dfCgrJSONCfg.RadiusAgentJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		rcv := *cfg.Request_processors
@@ -1009,7 +1027,7 @@ func TestRadiusAgentJsonCfg(t *testing.T) {
 
 func TestHttpAgentJsonCfg(t *testing.T) {
 	eCfg := &[]*HttpAgentJsonCfg{}
-	if cfg, err := dfCgrJsonCfg.HttpAgentJsonCfg(); err != nil {
+	if cfg, err := dfCgrJSONCfg.HttpAgentJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Errorf("expecting: %+v, received: %+v", utils.ToJSON(eCfg), utils.ToJSON(cfg))
@@ -1025,7 +1043,7 @@ func TestDNSAgentJsonCfg(t *testing.T) {
 		Timezone:           utils.StringPointer(""),
 		Request_processors: &[]*ReqProcessorJsnCfg{},
 	}
-	if cfg, err := dfCgrJsonCfg.DNSAgentJsonCfg(); err != nil {
+	if cfg, err := dfCgrJSONCfg.DNSAgentJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Errorf("expecting: %+v, received: %+v", utils.ToJSON(eCfg), utils.ToJSON(cfg))
@@ -1041,7 +1059,7 @@ func TestDfAttributeServJsonCfg(t *testing.T) {
 		Process_runs:          utils.IntPointer(1),
 		Nested_fields:         utils.BoolPointer(false),
 	}
-	if cfg, err := dfCgrJsonCfg.AttributeServJsonCfg(); err != nil {
+	if cfg, err := dfCgrJSONCfg.AttributeServJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Error("Received: ", utils.ToJSON(cfg))
@@ -1057,7 +1075,7 @@ func TestDfChargerServJsonCfg(t *testing.T) {
 		Prefix_indexed_fields: &[]string{},
 		Nested_fields:         utils.BoolPointer(false),
 	}
-	if cfg, err := dfCgrJsonCfg.ChargerServJsonCfg(); err != nil {
+	if cfg, err := dfCgrJSONCfg.ChargerServJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Error("Received: ", utils.ToJSON(cfg))
@@ -1070,7 +1088,7 @@ func TestDfFilterSJsonCfg(t *testing.T) {
 		Resources_conns: &[]string{},
 		Apiers_conns:    &[]string{},
 	}
-	if cfg, err := dfCgrJsonCfg.FilterSJsonCfg(); err != nil {
+	if cfg, err := dfCgrJSONCfg.FilterSJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Errorf("Expected: %s, received: %s", utils.ToJSON(eCfg), utils.ToJSON(cfg))
@@ -1087,7 +1105,7 @@ func TestDfResourceLimiterSJsonCfg(t *testing.T) {
 		Prefix_indexed_fields: &[]string{},
 		Nested_fields:         utils.BoolPointer(false),
 	}
-	if cfg, err := dfCgrJsonCfg.ResourceSJsonCfg(); err != nil {
+	if cfg, err := dfCgrJSONCfg.ResourceSJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Errorf("Expected: %s, received: %s", utils.ToJSON(eCfg), utils.ToJSON(cfg))
@@ -1105,7 +1123,7 @@ func TestDfStatServiceJsonCfg(t *testing.T) {
 		Prefix_indexed_fields:    &[]string{},
 		Nested_fields:            utils.BoolPointer(false),
 	}
-	if cfg, err := dfCgrJsonCfg.StatSJsonCfg(); err != nil {
+	if cfg, err := dfCgrJSONCfg.StatSJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Error("Received: ", utils.ToJSON(cfg))
@@ -1121,7 +1139,7 @@ func TestDfThresholdSJsonCfg(t *testing.T) {
 		Prefix_indexed_fields: &[]string{},
 		Nested_fields:         utils.BoolPointer(false),
 	}
-	if cfg, err := dfCgrJsonCfg.ThresholdSJsonCfg(); err != nil {
+	if cfg, err := dfCgrJSONCfg.ThresholdSJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Errorf("expecting: %+v, received: %+v", utils.ToJSON(eCfg), utils.ToJSON(cfg))
@@ -1141,7 +1159,7 @@ func TestDfRouteSJsonCfg(t *testing.T) {
 		Default_ratio:         utils.IntPointer(1),
 		Nested_fields:         utils.BoolPointer(false),
 	}
-	if cfg, err := dfCgrJsonCfg.RouteSJsonCfg(); err != nil {
+	if cfg, err := dfCgrJSONCfg.RouteSJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Errorf("expecting: %+v, received: %+v", utils.ToJSON(eCfg), utils.ToJSON(cfg))
@@ -1690,7 +1708,7 @@ func TestDfLoaderJsonCfg(t *testing.T) {
 			},
 		},
 	}
-	if cfg, err := dfCgrJsonCfg.LoaderJsonCfg(); err != nil {
+	if cfg, err := dfCgrJSONCfg.LoaderJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Errorf("Expecting: %s, received: %s ",
@@ -1705,7 +1723,7 @@ func TestDfMailerJsonCfg(t *testing.T) {
 		Auth_password: utils.StringPointer("CGRateS.org"),
 		From_address:  utils.StringPointer("cgr-mailer@localhost.localdomain"),
 	}
-	if cfg, err := dfCgrJsonCfg.MailerJsonCfg(); err != nil {
+	if cfg, err := dfCgrJSONCfg.MailerJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Error("Received: ", cfg)
@@ -1741,7 +1759,7 @@ func TestDfSureTaxJsonCfg(t *testing.T) {
 		Sales_type_code:         utils.StringPointer("R"),
 		Tax_exemption_code_list: utils.StringPointer(""),
 	}
-	if cfg, err := dfCgrJsonCfg.SureTaxJsonCfg(); err != nil {
+	if cfg, err := dfCgrJSONCfg.SureTaxJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Error("Received: ", cfg)
@@ -1757,7 +1775,7 @@ func TestDfHttpJsonCfg(t *testing.T) {
 		Use_basic_auth:      utils.BoolPointer(false),
 		Auth_users:          utils.MapStringStringPointer(map[string]string{}),
 	}
-	if cfg, err := dfCgrJsonCfg.HttpJsonCfg(); err != nil {
+	if cfg, err := dfCgrJSONCfg.HttpJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Error("Received: ", cfg)
@@ -1773,7 +1791,7 @@ func TestDfDispatcherSJsonCfg(t *testing.T) {
 		Attributes_conns:      &[]string{},
 		Nested_fields:         utils.BoolPointer(false),
 	}
-	if cfg, err := dfCgrJsonCfg.DispatcherSJsonCfg(); err != nil {
+	if cfg, err := dfCgrJSONCfg.DispatcherSJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Errorf("expecting: %+v, received: %+v", utils.ToJSON(eCfg), utils.ToJSON(cfg))
@@ -1793,7 +1811,7 @@ func TestDfLoaderCfg(t *testing.T) {
 		Gapi_credentials: &cred,
 		Gapi_token:       &tok,
 	}
-	if cfg, err := dfCgrJsonCfg.LoaderCfgJson(); err != nil {
+	if cfg, err := dfCgrJSONCfg.LoaderCfgJson(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Errorf("Expected1: %s, received: %+v", utils.ToJSON(*eCfg), utils.ToJSON(cfg))
@@ -1817,7 +1835,7 @@ func TestDfMigratorCfg(t *testing.T) {
 		Out_storDB_password: utils.StringPointer(""),
 		Users_filters:       &[]string{},
 	}
-	if cfg, err := dfCgrJsonCfg.MigratorCfgJson(); err != nil {
+	if cfg, err := dfCgrJSONCfg.MigratorCfgJson(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Errorf("Expected: %+v, received: %+v", utils.ToJSON(eCfg), utils.ToJSON(cfg))
@@ -1834,7 +1852,7 @@ func TestDfTlsCfg(t *testing.T) {
 		Server_name:        utils.StringPointer(""),
 		Server_policy:      utils.IntPointer(4),
 	}
-	if cfg, err := dfCgrJsonCfg.TlsCfgJson(); err != nil {
+	if cfg, err := dfCgrJSONCfg.TlsCfgJson(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Errorf("Expected: %+v, received: %+v", utils.ToJSON(eCfg), utils.ToJSON(cfg))
@@ -1845,7 +1863,7 @@ func TestDfAnalyzerCfg(t *testing.T) {
 	eCfg := &AnalyzerSJsonCfg{
 		Enabled: utils.BoolPointer(false),
 	}
-	if cfg, err := dfCgrJsonCfg.AnalyzerCfgJson(); err != nil {
+	if cfg, err := dfCgrJSONCfg.AnalyzerCfgJson(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Errorf("Expected: %+v, received: %+v", utils.ToJSON(eCfg), utils.ToJSON(cfg))
@@ -1859,7 +1877,7 @@ func TestDfApierCfg(t *testing.T) {
 		Scheduler_conns:  &[]string{},
 		Attributes_conns: &[]string{},
 	}
-	if cfg, err := dfCgrJsonCfg.ApierCfgJson(); err != nil {
+	if cfg, err := dfCgrJSONCfg.ApierCfgJson(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Errorf("Expected: %+v, received: %+v", utils.ToJSON(eCfg), utils.ToJSON(cfg))
@@ -1915,7 +1933,7 @@ func TestDfEventReaderCfg(t *testing.T) {
 			},
 		},
 	}
-	if cfg, err := dfCgrJsonCfg.ERsJsonCfg(); err != nil {
+	if cfg, err := dfCgrJSONCfg.ERsJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Errorf("Expected: %+v, \nreceived: %+v", utils.ToJSON(eCfg), utils.ToJSON(cfg))
@@ -2039,7 +2057,7 @@ func TestDfEventExporterCfg(t *testing.T) {
 			},
 		},
 	}
-	if cfg, err := dfCgrJsonCfg.EEsJsonCfg(); err != nil {
+	if cfg, err := dfCgrJSONCfg.EEsJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Errorf("Expected: %+v, \nreceived: %+v", utils.ToJSON(eCfg), utils.ToJSON(cfg))
@@ -2058,7 +2076,7 @@ func TestDfRateSJsonCfg(t *testing.T) {
 		Rate_prefix_indexed_fields: &[]string{},
 		Rate_nested_fields:         utils.BoolPointer(false),
 	}
-	if cfg, err := dfCgrJsonCfg.RateCfgJson(); err != nil {
+	if cfg, err := dfCgrJSONCfg.RateCfgJson(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Error("Received: ", utils.ToJSON(cfg))
