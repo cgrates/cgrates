@@ -355,7 +355,9 @@ func testTrsITMigrateAndMove(t *testing.T) {
 		if !reflect.DeepEqual(tresProf3, result) {
 			t.Errorf("Expecting: %+v,\nReceived: %+v", utils.ToJSON(tresProf3), utils.ToJSON(result))
 		}
-
+		if trsMigrator.stats[utils.Thresholds] != 4 {
+			t.Errorf("Expected 4, recived: %v", trsMigrator.stats[utils.Thresholds])
+		}
 	case utils.Move:
 		if err := trsMigrator.dmIN.DataManager().SetThresholdProfile(tresProf, false); err != nil {
 			t.Error("Error when setting Thresholds ", err.Error())

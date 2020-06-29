@@ -39,6 +39,7 @@ func (m *Migrator) migrateCurrentCDRs() (err error) {
 		if err := m.storDBOut.StorDB().SetCDR(cdr, true); err != nil {
 			return err
 		}
+		m.stats[utils.CDRs]++
 	}
 	return
 }

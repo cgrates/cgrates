@@ -70,6 +70,8 @@ func (m *Migrator) migrateCurrentActionTrigger() (err error) {
 		if err := m.dmOut.DataManager().SetActionTriggers(idg, acts, utils.NonTransactional); err != nil {
 			return err
 		}
+		m.stats[utils.ActionTriggers]++
+
 	}
 	return
 }

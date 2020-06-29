@@ -219,6 +219,8 @@ func testRtPrfITMigrateAndMove(t *testing.T) {
 		result, err = rtprflMigrator.dmIN.DataManager().GetRatingProfile("RT_Profile", true, utils.NonTransactional)
 		if err != utils.ErrNotFound {
 			t.Error(err)
+		} else if rtprflMigrator.stats[utils.RatingProfile] != 1 {
+			t.Errorf("Expected 1, recived: %v", rtprflMigrator.stats[utils.RatingProfile])
 		}
 	}
 }

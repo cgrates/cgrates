@@ -50,6 +50,7 @@ func (m *Migrator) migrateCurrentSharedGroups() (err error) {
 		if err := m.dmOut.DataManager().SetSharedGroup(sgs, utils.NonTransactional); err != nil {
 			return err
 		}
+		m.stats[utils.SharedGroups] += 1
 	}
 	return
 }

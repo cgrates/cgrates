@@ -267,6 +267,8 @@ func testActITMigrateAndMove(t *testing.T) {
 		}
 		if !reflect.DeepEqual(act, &result) {
 			t.Errorf("Expecting: %+v, received: %+v", act, &result)
+		} else if actMigrator.stats[utils.Actions] != 1 {
+			t.Errorf("Expecting: 1, received: %+v", actMigrator.stats[utils.Actions])
 		}
 	case utils.Move:
 		if err := actMigrator.dmIN.DataManager().SetActions(v1act.Id, *act, utils.NonTransactional); err != nil {
@@ -287,6 +289,8 @@ func testActITMigrateAndMove(t *testing.T) {
 		}
 		if !reflect.DeepEqual(act, &result) {
 			t.Errorf("Expecting: %+v, received: %+v", act, &result)
+		} else if actMigrator.stats[utils.Actions] != 1 {
+			t.Errorf("Expecting: 1, received: %+v", actMigrator.stats[utils.Actions])
 		}
 	}
 }

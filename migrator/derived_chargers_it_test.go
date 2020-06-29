@@ -257,6 +257,8 @@ func testDCITMigrateAndMove(t *testing.T) {
 		utils.ConcatenatedKey("cgrates.org", utils.MetaChargers),
 		"", true, true); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected error %v, recived: %v with reply: %v", utils.ErrNotFound, err, utils.ToJSON(dcidx))
+	} else if dcMigrator.stats[utils.DerivedChargersV] != 1 {
+		t.Errorf("Expected 1, recived: %v", dcMigrator.stats[utils.DerivedChargersV])
 	}
 
 }

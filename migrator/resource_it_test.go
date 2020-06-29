@@ -218,6 +218,8 @@ func testResITMigrateAndMove(t *testing.T) {
 		result, err = resMigrator.dmIN.DataManager().GetResourceProfile("cgrates.org", "RES1", false, false, utils.NonTransactional)
 		if err != utils.ErrNotFound {
 			t.Error(err)
+		} else if resMigrator.stats[utils.Resource] != 1 {
+			t.Errorf("Expected 1, recived: %v", resMigrator.stats[utils.Resource])
 		}
 	}
 }
