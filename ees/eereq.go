@@ -81,7 +81,7 @@ func (eeR *EventExporterRequest) FieldAsInterface(fldPath []string) (val interfa
 		return nil, fmt.Errorf("unsupported field prefix: <%s>", fldPath[0])
 	case utils.MetaReq:
 		val, err = eeR.req.FieldAsInterface(fldPath[1:])
-	case utils.MetaCache:
+	case utils.MetaUCH:
 		if cacheVal, ok := engine.Cache.Get(utils.CacheUCH, strings.Join(fldPath[1:], utils.NestingSep)); !ok {
 			err = utils.ErrNotFound
 		} else {
@@ -196,8 +196,8 @@ func (eeR *EventExporterRequest) Set(fullPath *utils.FullPath, nm utils.NMInterf
 			PathItems: fullPath.PathItems[1:],
 			Path:      fullPath.Path[4:],
 		}, nm)
-	case utils.MetaCache:
-		err = engine.Cache.Set(utils.CacheUCH, fullPath.Path[7:], nm, nil, true, utils.NonTransactional)
+	case utils.MetaUCH:
+		err = engine.Cache.Set(utils.CacheUCH, fullPath.Path[5:], nm, nil, true, utils.NonTransactional)
 	}
 	return false, err
 }

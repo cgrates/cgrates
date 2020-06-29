@@ -373,7 +373,7 @@ const (
 	MetaCDRs                    = "*cdrs"
 	MetaDC                      = "*dc"
 	MetaCaches                  = "*caches"
-	MetaCache                   = "*cache"
+	MetaUCH                     = "*uch"
 	MetaGuardian                = "*guardians"
 	MetaEEs                     = "*ees"
 	MetaRateS                   = "*rates"

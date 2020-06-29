@@ -130,7 +130,7 @@ func (ar *AgentRequest) FieldAsInterface(fldPath []string) (val interface{}, err
 		val, err = ar.Trailer.FieldAsInterface(fldPath[1:])
 	case utils.MetaTmp:
 		val, err = ar.tmp.FieldAsInterface(fldPath[1:])
-	case utils.MetaCache:
+	case utils.MetaUCH:
 		if cacheVal, ok := engine.Cache.Get(utils.CacheUCH, strings.Join(fldPath[1:], utils.NestingSep)); !ok {
 			err = utils.ErrNotFound
 		} else {
@@ -281,8 +281,8 @@ func (ar *AgentRequest) Set(fullPath *utils.FullPath, nm utils.NMInterface) (add
 			PathItems: fullPath.PathItems[1:],
 			Path:      fullPath.Path[6:],
 		}, nm)
-	case utils.MetaCache:
-		err = engine.Cache.Set(utils.CacheUCH, fullPath.Path[7:], nm, nil, true, utils.NonTransactional)
+	case utils.MetaUCH:
+		err = engine.Cache.Set(utils.CacheUCH, fullPath.Path[5:], nm, nil, true, utils.NonTransactional)
 	}
 	return false, err
 }
@@ -304,7 +304,7 @@ func (ar *AgentRequest) RemoveAll(prefix string) error {
 		ar.diamreq.RemoveAll()
 	case utils.MetaTmp:
 		ar.tmp = utils.NavigableMap2{}
-	case utils.MetaCache:
+	case utils.MetaUCH:
 		engine.Cache.Clear([]string{utils.CacheUCH})
 	case utils.MetaOpts:
 		ar.Opts.RemoveAll()
@@ -343,8 +343,8 @@ func (ar *AgentRequest) Remove(fullPath *utils.FullPath) error {
 			PathItems: fullPath.PathItems[1:].Clone(),
 			Path:      fullPath.Path[6:],
 		})
-	case utils.MetaCache:
-		return engine.Cache.Remove(utils.CacheUCH, fullPath.Path[7:], true, utils.NonTransactional)
+	case utils.MetaUCH:
+		return engine.Cache.Remove(utils.CacheUCH, fullPath.Path[5:], true, utils.NonTransactional)
 	}
 }
 
