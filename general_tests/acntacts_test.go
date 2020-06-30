@@ -58,7 +58,7 @@ ENABLE_ACNT,*enable_account,,,,,,,,,,,,,false,false,10`
 	csvr, err := engine.NewTpReader(dbAcntActs.DataDB(), engine.NewStringCSVStorage(utils.CSV_SEP, destinations, timings,
 		rates, destinationRates, ratingPlans, ratingProfiles, sharedGroups,
 		actions, actionPlans, actionTriggers, accountActions,
-		resLimits, stats, thresholds, filters, suppliers, attrProfiles, chargerProfiles, ``, "", utils.EmptyString), "", "", nil, nil)
+		resLimits, stats, thresholds, filters, suppliers, attrProfiles, chargerProfiles, ``, "", utils.EmptyString), "", "", nil, nil, false)
 	if err != nil {
 		t.Error(err)
 	}
@@ -67,7 +67,6 @@ ENABLE_ACNT,*enable_account,,,,,,,,,,,,,false,false,10`
 	}
 	csvr.WriteToDatabase(false, false)
 
-	engine.Cache.Clear(nil)
 	dbAcntActs.LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 

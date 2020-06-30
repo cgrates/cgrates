@@ -792,6 +792,9 @@ func testAttributeSRemAlsPrf(t *testing.T) {
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
 	}
+	if alsPrfConfigDIR == "tutinternal" { // do not double remove the profile
+		return
+	}
 	var reply *engine.AttributeProfile
 	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfile,
 		utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}},

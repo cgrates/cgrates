@@ -381,7 +381,7 @@ func StopStartEngine(cfgPath string, waitEngine int) (*exec.Cmd, error) {
 func LoadTariffPlanFromFolder(tpPath, timezone string, dm *DataManager, disable_reverse bool,
 	cacheConns, schedConns []string) error {
 	loader, err := NewTpReader(dm.dataDB, NewFileCSVStorage(utils.CSV_SEP, tpPath), "",
-		timezone, cacheConns, schedConns)
+		timezone, cacheConns, schedConns, false)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -518,5 +518,31 @@ func GetDefaultEmptyCacheStats() map[string]*ltcache.CacheStats {
 		utils.CacheUCH:                       {},
 		utils.CacheEventCharges:              {},
 		utils.CacheReverseFilterIndexes:      {},
+
+		utils.CacheAccounts:              {},
+		utils.CacheVersions:              {},
+		utils.CacheTBLTPTimings:          {},
+		utils.CacheTBLTPDestinations:     {},
+		utils.CacheTBLTPRates:            {},
+		utils.CacheTBLTPDestinationRates: {},
+		utils.CacheTBLTPRatingPlans:      {},
+		utils.CacheTBLTPRatingProfiles:   {},
+		utils.CacheTBLTPSharedGroups:     {},
+		utils.CacheTBLTPActions:          {},
+		utils.CacheTBLTPActionPlans:      {},
+		utils.CacheTBLTPActionTriggers:   {},
+		utils.CacheTBLTPAccountActions:   {},
+		utils.CacheTBLTPResources:        {},
+		utils.CacheTBLTPStats:            {},
+		utils.CacheTBLTPThresholds:       {},
+		utils.CacheTBLTPFilters:          {},
+		utils.CacheSessionCostsTBL:       {},
+		utils.CacheCDRsTBL:               {},
+		utils.CacheTBLTPRoutes:           {},
+		utils.CacheTBLTPAttributes:       {},
+		utils.CacheTBLTPChargers:         {},
+		utils.CacheTBLTPDispatchers:      {},
+		utils.CacheTBLTPDispatcherHosts:  {},
+		utils.CacheTBLTPRateProfiles:     {},
 	}
 }

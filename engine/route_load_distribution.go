@@ -55,7 +55,7 @@ func (ws *LoadDistributionSorter) SortRoutes(prflID string,
 			floatRatio, err := utils.IfaceAsFloat64(route.cacheRoute[utils.MetaRatio])
 			if err != nil {
 				utils.Logger.Warning(
-					fmt.Sprintf("<%s> cannot convert ratio <%s> to float64 supplier: <%s>",
+					fmt.Sprintf("<%s> cannot convert ratio <%+v> to float64 supplier: <%s>",
 						utils.RouteS, route.cacheRoute[utils.MetaRatio], route.ID))
 			}
 			srtSpl.SortingData[utils.Ratio] = floatRatio

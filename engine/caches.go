@@ -134,6 +134,13 @@ func (chS *CacheS) Set(chID, itmID string, value interface{},
 	return chS.ReplicateSet(chID, itmID, value)
 }
 
+// SetWithoutReplicate is an exported method from TransCache
+// handled Replicate functionality
+func (chS *CacheS) SetWithoutReplicate(chID, itmID string, value interface{},
+	groupIDs []string, commit bool, transID string) {
+	chS.tCache.Set(chID, itmID, value, groupIDs, commit, transID)
+}
+
 // HasItem is an exported method from TransCache
 func (chS *CacheS) HasItem(chID, itmID string) (has bool) {
 	return chS.tCache.HasItem(chID, itmID)
@@ -153,6 +160,11 @@ func (chS *CacheS) GetItemIDs(chID, prfx string) (itmIDs []string) {
 func (chS *CacheS) Remove(chID, itmID string, commit bool, transID string) (err error) {
 	chS.tCache.Remove(chID, itmID, commit, transID)
 	return chS.ReplicateRemove(chID, itmID)
+}
+
+// RemoveWithoutReplicate is an exported method from TransCache
+func (chS *CacheS) RemoveWithoutReplicate(chID, itmID string, commit bool, transID string) {
+	chS.tCache.Remove(chID, itmID, commit, transID)
 }
 
 // Clear is an exported method from TransCache

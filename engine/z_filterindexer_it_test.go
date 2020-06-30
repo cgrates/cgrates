@@ -409,6 +409,19 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 	}
 
 	eIdxes = map[string]utils.StringSet{
+		utils.CacheThresholdFilterIndexes: {
+			"THD_Test": struct{}{},
+		},
+	}
+	if rcvIdx, err := dataManager.GetIndexes(
+		utils.CacheReverseFilterIndexes, "cgrates.org:Filter3",
+		utils.EmptyString, false, false); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
+		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(eIdxes), utils.ToJSON(rcvIdx))
+	}
+
+	eIdxes = map[string]utils.StringSet{
 		"*string:Destination:30": {
 			"THD_Test": struct{}{},
 		},
@@ -429,7 +442,7 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 		utils.EmptyString, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
-		t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
+		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(eIdxes), utils.ToJSON(rcvIdx))
 	}
 
 	//remove thresholds
@@ -443,6 +456,11 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 	}
 	if _, err := dataManager.GetIndexes(
 		utils.CacheThresholdFilterIndexes, th.Tenant,
+		utils.EmptyString, false, false); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+	if _, err := dataManager.GetIndexes(
+		utils.CacheReverseFilterIndexes, "cgrates.org:Filter3",
 		utils.EmptyString, false, false); err != utils.ErrNotFound {
 		t.Error(err)
 	}
@@ -605,6 +623,13 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 		utils.CacheAttributeFilterIndexes,
 		utils.ConcatenatedKey("cgrates.org", "con3"),
 		utils.MetaString, false, false); err != nil && err != utils.ErrNotFound {
+		t.Error(err)
+	}
+
+	if _, err := dataManager.GetIndexes(
+		utils.CacheReverseFilterIndexes,
+		fp.TenantID(),
+		utils.EmptyString, false, false); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }

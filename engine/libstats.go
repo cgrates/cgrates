@@ -283,7 +283,7 @@ func (sq *StatQueue) Compress(maxQL int64) bool {
 			idMap[id] = struct{}{}
 		}
 	}
-	for k, _ := range idMap {
+	for k := range idMap {
 		ttl, has := sqMap[k]
 		if !has { // log warning
 			ttl = defaultTTL

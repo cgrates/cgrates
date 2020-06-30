@@ -619,7 +619,7 @@ func testV1RsDBStore(t *testing.T) {
 func testV1RsGetResourceProfileBeforeSet(t *testing.T) {
 	var reply *string
 	if err := rlsV1Rpc.Call(utils.APIerSv1GetResourceProfile,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "RCFG1"},
+		&utils.TenantID{Tenant: "cgrates.org", ID: "RES_GR_TEST"},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -656,10 +656,13 @@ func testV1RsSetResourceProfile(t *testing.T) {
 
 func testV1RsGetResourceProfileIDs(t *testing.T) {
 	expected := []string{"ResGroup2", "ResGroup1", "ResGroup3", "RES_GR_TEST"}
+	sort.Strings(expected)
 	var result []string
 	if err := rlsV1Rpc.Call(utils.APIerSv1GetResourceProfileIDs, utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{Tenant: "cgrates.org"}}, &result); err != nil {
 		t.Error(err)
-	} else if len(expected) != len(result) {
+	}
+	sort.Strings(result)
+	if !reflect.DeepEqual(expected, result) {
 		t.Errorf("Expecting : %+v, received: %+v", expected, result)
 	}
 }
@@ -715,7 +718,7 @@ func testV1RsRemResourceProfile(t *testing.T) {
 func testV1RsGetResourceProfileAfterDelete(t *testing.T) {
 	var reply *string
 	if err := rlsV1Rpc.Call(utils.APIerSv1GetResourceProfile,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "RCFG1"},
+		&utils.TenantID{Tenant: "cgrates.org", ID: "RES_GR_TEST"},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}

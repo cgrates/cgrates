@@ -36,7 +36,7 @@ func TestAuthSetStorage(t *testing.T) {
 	engine.SetDataStorage(dbAuth)
 	rsponder = &engine.Responder{
 		MaxComputedUsage: config.CgrConfig().RalsCfg().MaxComputedUsage}
-
+	engine.Cache.Clear(nil)
 }
 
 func TestAuthLoadCsv(t *testing.T) {
@@ -64,7 +64,7 @@ cgrates.org,call,*any,2013-01-06T00:00:00Z,RP_ANY,`
 	chargerProfiles := ``
 	csvr, err := engine.NewTpReader(dbAuth.DataDB(), engine.NewStringCSVStorage(utils.CSV_SEP, destinations, timings, rates, destinationRates,
 		ratingPlans, ratingProfiles, sharedGroups, actions, actionPlans, actionTriggers, accountActions,
-		resLimits, stats, thresholds, filters, suppliers, attrProfiles, chargerProfiles, ``, "", utils.EmptyString), "", "", nil, nil)
+		resLimits, stats, thresholds, filters, suppliers, attrProfiles, chargerProfiles, ``, "", utils.EmptyString), "", "", nil, nil, false)
 	if err != nil {
 		t.Error(err)
 	}
@@ -78,20 +78,19 @@ cgrates.org,call,*any,2013-01-06T00:00:00Z,RP_ANY,`
 		t.Error("No account saved")
 	}
 
-	engine.Cache.Clear(nil)
 	dbAuth.LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 
-	if cachedDests := len(engine.Cache.GetItemIDs(utils.CacheDestinations, "")); cachedDests != 0 {
+	if cachedDests := len(engine.Cache.GetItemIDs(utils.CacheDestinations, "")); cachedDests != 1 {
 		t.Error("Wrong number of cached destinations found", cachedDests)
 	}
 	if cachedRPlans := len(engine.Cache.GetItemIDs(utils.CacheRatingPlans, "")); cachedRPlans != 2 {
 		t.Error("Wrong number of cached rating plans found", cachedRPlans)
 	}
-	if cachedRProfiles := len(engine.Cache.GetItemIDs(utils.CacheRatingProfiles, "")); cachedRProfiles != 0 {
+	if cachedRProfiles := len(engine.Cache.GetItemIDs(utils.CacheRatingProfiles, "")); cachedRProfiles != 3 {
 		t.Error("Wrong number of cached rating profiles found", cachedRProfiles)
 	}
-	if cachedActions := len(engine.Cache.GetItemIDs(utils.CacheActions, "")); cachedActions != 0 {
+	if cachedActions := len(engine.Cache.GetItemIDs(utils.CacheActions, "")); cachedActions != 1 {
 		t.Error("Wrong number of cached actions found", cachedActions)
 	}
 }

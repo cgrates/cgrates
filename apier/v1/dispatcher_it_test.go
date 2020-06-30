@@ -252,10 +252,10 @@ func testDispatcherSSetDispatcherHost(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "DspHst1",
 			Conns: []*config.RemoteHost{
-				&config.RemoteHost{
+				{
 					Address: "*internal",
 				},
-				&config.RemoteHost{
+				{
 					Address:   ":2012",
 					Transport: utils.MetaJSON,
 					TLS:       true,
@@ -322,11 +322,14 @@ func testDispatcherSUpdateDispatcherHost(t *testing.T) {
 }
 
 func testDispatcherSGetDispatcherHostCache(t *testing.T) {
+	if dispatcherConfigDIR == "tutinternal" {
+		t.SkipNow()
+	}
 	var rcvStats map[string]*ltcache.CacheStats
 	if err := dispatcherRPC.Call(utils.CacheSv1GetCacheStats, &utils.AttrCacheIDsWithArgDispatcher{}, &rcvStats); err != nil {
 		t.Error(err)
 	} else if rcvStats[utils.CacheDispatcherHosts].Items != 0 {
-		t.Errorf("Expecting: 0 DispatcherProfiles, received: %+v", rcvStats[utils.CacheDispatcherProfiles])
+		t.Errorf("Expecting: 0 DispatcherProfiles, received: %+v", rcvStats[utils.CacheDispatcherHosts])
 	}
 }
 

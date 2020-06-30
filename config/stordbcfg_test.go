@@ -152,8 +152,8 @@ func TestStorDbCfgAsMapInterface(t *testing.T) {
 			"query_timeout":"10s",
 			"sslmode":"disable",					
 			"items":{
-				"session_costs": {"limit": -1, "ttl": "", "static_ttl": false}, 
-				"cdrs": {"limit": -1, "ttl": "", "static_ttl": false}, 		
+				"session_costs": {}, 
+				"cdrs": {}, 		
 			},
 		},
 }`
@@ -173,8 +173,8 @@ func TestStorDbCfgAsMapInterface(t *testing.T) {
 		"query_timeout":         "10s",
 		"sslmode":               "disable",
 		"items": map[string]interface{}{
-			"session_costs": map[string]interface{}{"limit": -1, "ttl": "", "static_ttl": false, "remote": false, "replicate": false},
-			"cdrs":          map[string]interface{}{"limit": -1, "ttl": "", "static_ttl": false, "remote": false, "replicate": false},
+			"session_costs": map[string]interface{}{"remote": false, "replicate": false, "APIKey": "", "RouteID": ""},
+			"cdrs":          map[string]interface{}{"remote": false, "replicate": false, "APIKey": "", "RouteID": ""},
 		},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {

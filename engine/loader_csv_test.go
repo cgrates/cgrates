@@ -42,7 +42,7 @@ func init() {
 		ActionsCSVContent, ActionPlansCSVContent, ActionTriggersCSVContent, AccountActionsCSVContent,
 		ResourcesCSVContent, StatsCSVContent, ThresholdsCSVContent, FiltersCSVContent,
 		RoutesCSVContent, AttributesCSVContent, ChargersCSVContent, DispatcherCSVContent,
-		DispatcherHostCSVContent, RateProfileCSVContent), testTPID, "", nil, nil)
+		DispatcherHostCSVContent, RateProfileCSVContent), testTPID, "", nil, nil, false)
 	if err != nil {
 		log.Print("error when creating TpReader:", err)
 	}
@@ -112,7 +112,6 @@ func init() {
 	if err := csvr.WriteToDatabase(false, false); err != nil {
 		log.Print("error when writing into database", err)
 	}
-	Cache.Clear(nil)
 }
 
 func TestLoadDestinations(t *testing.T) {
@@ -163,22 +162,22 @@ func TestLoadDestinations(t *testing.T) {
 
 func TestLoadReverseDestinations(t *testing.T) {
 	eRevDsts := map[string][]string{
-		"444":     []string{"EU_LANDLINE"},
-		"0257":    []string{"NAT"},
-		"112":     []string{"URG"},
-		"49":      []string{"ALL GERMANY"},
-		"+4972":   []string{"PSTN_72"},
-		"999":     []string{"EXOTIC"},
-		"+4970":   []string{"PSTN_70"},
-		"41":      []string{"ALL GERMANY_O2"},
-		"0724":    []string{"RET"},
-		"0723045": []string{"SPEC"},
-		"43":      []string{"GERMANY_PREMIUM ALL"},
-		"0256":    []string{"NAT"},
-		"+49":     []string{"NAT"},
-		"+4971":   []string{"PSTN_71"},
-		"447956":  []string{"DST_UK_Mobile_BIG5"},
-		"0723":    []string{"RET NAT"},
+		"444":     {"EU_LANDLINE"},
+		"0257":    {"NAT"},
+		"112":     {"URG"},
+		"49":      {"ALL GERMANY"},
+		"+4972":   {"PSTN_72"},
+		"999":     {"EXOTIC"},
+		"+4970":   {"PSTN_70"},
+		"41":      {"ALL GERMANY_O2"},
+		"0724":    {"RET"},
+		"0723045": {"SPEC"},
+		"43":      {"GERMANY_PREMIUM ALL"},
+		"0256":    {"NAT"},
+		"+49":     {"NAT"},
+		"+4971":   {"PSTN_71"},
+		"447956":  {"DST_UK_Mobile_BIG5"},
+		"0723":    {"RET NAT"},
 	}
 	if len(eRevDsts) != len(csvr.revDests) {
 		t.Errorf("Expecting: %+v, received: %+v", eRevDsts, csvr.revDests)
@@ -314,21 +313,21 @@ func TestLoadDestinationRates(t *testing.T) {
 		TPid: testTPID,
 		ID:   "RT_STANDARD",
 		DestinationRates: []*utils.DestinationRate{
-			&utils.DestinationRate{
+			{
 				DestinationId:    "GERMANY",
 				RateId:           "R1",
 				Rate:             csvr.rates["R1"],
 				RoundingMethod:   utils.ROUNDING_MIDDLE,
 				RoundingDecimals: 4,
 			},
-			&utils.DestinationRate{
+			{
 				DestinationId:    "GERMANY_O2",
 				RateId:           "R2",
 				Rate:             csvr.rates["R2"],
 				RoundingMethod:   utils.ROUNDING_MIDDLE,
 				RoundingDecimals: 4,
 			},
-			&utils.DestinationRate{
+			{
 				DestinationId:    "GERMANY_PREMIUM",
 				RateId:           "R2",
 				Rate:             csvr.rates["R2"],
@@ -345,7 +344,7 @@ func TestLoadDestinationRates(t *testing.T) {
 		TPid: testTPID,
 		ID:   "RT_DEFAULT",
 		DestinationRates: []*utils.DestinationRate{
-			&utils.DestinationRate{
+			{
 				DestinationId:    "ALL",
 				RateId:           "R2",
 				Rate:             csvr.rates["R2"],
@@ -361,14 +360,14 @@ func TestLoadDestinationRates(t *testing.T) {
 		TPid: testTPID,
 		ID:   "RT_STD_WEEKEND",
 		DestinationRates: []*utils.DestinationRate{
-			&utils.DestinationRate{
+			{
 				DestinationId:    "GERMANY",
 				RateId:           "R2",
 				Rate:             csvr.rates["R2"],
 				RoundingMethod:   utils.ROUNDING_MIDDLE,
 				RoundingDecimals: 4,
 			},
-			&utils.DestinationRate{
+			{
 				DestinationId:    "GERMANY_O2",
 				RateId:           "R3",
 				Rate:             csvr.rates["R3"],
@@ -384,7 +383,7 @@ func TestLoadDestinationRates(t *testing.T) {
 		TPid: testTPID,
 		ID:   "P1",
 		DestinationRates: []*utils.DestinationRate{
-			&utils.DestinationRate{
+			{
 				DestinationId:    "NAT",
 				RateId:           "R4",
 				Rate:             csvr.rates["R4"],
@@ -400,7 +399,7 @@ func TestLoadDestinationRates(t *testing.T) {
 		TPid: testTPID,
 		ID:   "P2",
 		DestinationRates: []*utils.DestinationRate{
-			&utils.DestinationRate{
+			{
 				DestinationId:    "NAT",
 				RateId:           "R5",
 				Rate:             csvr.rates["R5"],
@@ -416,7 +415,7 @@ func TestLoadDestinationRates(t *testing.T) {
 		TPid: testTPID,
 		ID:   "T1",
 		DestinationRates: []*utils.DestinationRate{
-			&utils.DestinationRate{
+			{
 				DestinationId:    "NAT",
 				RateId:           "LANDLINE_OFFPEAK",
 				Rate:             csvr.rates["LANDLINE_OFFPEAK"],
@@ -432,21 +431,21 @@ func TestLoadDestinationRates(t *testing.T) {
 		TPid: testTPID,
 		ID:   "T2",
 		DestinationRates: []*utils.DestinationRate{
-			&utils.DestinationRate{
+			{
 				DestinationId:    "GERMANY",
 				RateId:           "GBP_72",
 				Rate:             csvr.rates["GBP_72"],
 				RoundingMethod:   utils.ROUNDING_MIDDLE,
 				RoundingDecimals: 4,
 			},
-			&utils.DestinationRate{
+			{
 				DestinationId:    "GERMANY_O2",
 				RateId:           "GBP_70",
 				Rate:             csvr.rates["GBP_70"],
 				RoundingMethod:   utils.ROUNDING_MIDDLE,
 				RoundingDecimals: 4,
 			},
-			&utils.DestinationRate{
+			{
 				DestinationId:    "GERMANY_PREMIUM",
 				RateId:           "GBP_71",
 				Rate:             csvr.rates["GBP_71"],
@@ -467,7 +466,7 @@ func TestLoadRatingPlans(t *testing.T) {
 	expected := &RatingPlan{
 		Id: "STANDARD",
 		Timings: map[string]*RITiming{
-			"59a981b9": &RITiming{
+			"59a981b9": {
 				Years:     utils.Years{},
 				Months:    utils.Months{},
 				MonthDays: utils.MonthDays{},
@@ -475,7 +474,7 @@ func TestLoadRatingPlans(t *testing.T) {
 				StartTime: "00:00:00",
 				tag:       "WORKDAYS_00",
 			},
-			"2d9ca6c4": &RITiming{
+			"2d9ca6c4": {
 				Years:     utils.Years{},
 				Months:    utils.Months{},
 				MonthDays: utils.MonthDays{},
@@ -483,7 +482,7 @@ func TestLoadRatingPlans(t *testing.T) {
 				StartTime: "18:00:00",
 				tag:       "WORKDAYS_18",
 			},
-			"ec8ed374": &RITiming{
+			"ec8ed374": {
 				Years:     utils.Years{},
 				Months:    utils.Months{},
 				MonthDays: utils.MonthDays{},
@@ -491,7 +490,7 @@ func TestLoadRatingPlans(t *testing.T) {
 				StartTime: "00:00:00",
 				tag:       "WEEKENDS",
 			},
-			"83429156": &RITiming{
+			"83429156": {
 				Years:     utils.Years{},
 				Months:    utils.Months{},
 				MonthDays: utils.MonthDays{},
@@ -501,10 +500,10 @@ func TestLoadRatingPlans(t *testing.T) {
 			},
 		},
 		Ratings: map[string]*RIRate{
-			"ebefae11": &RIRate{
+			"ebefae11": {
 				ConnectFee: 0,
 				Rates: []*RGRate{
-					&RGRate{
+					{
 						GroupIntervalStart: 0,
 						Value:              0.2,
 						RateIncrement:      time.Second,
@@ -515,10 +514,10 @@ func TestLoadRatingPlans(t *testing.T) {
 				RoundingDecimals: 4,
 				tag:              "R1",
 			},
-			"fac0138e": &RIRate{
+			"fac0138e": {
 				ConnectFee: 0,
 				Rates: []*RGRate{
-					&RGRate{
+					{
 						GroupIntervalStart: 0,
 						Value:              0.1,
 						RateIncrement:      time.Second,
@@ -529,10 +528,10 @@ func TestLoadRatingPlans(t *testing.T) {
 				RoundingDecimals: 4,
 				tag:              "R2",
 			},
-			"781bfa03": &RIRate{
+			"781bfa03": {
 				ConnectFee: 0,
 				Rates: []*RGRate{
-					&RGRate{
+					{
 						GroupIntervalStart: 0,
 						Value:              0.05,
 						RateIncrement:      time.Second,
@@ -543,10 +542,10 @@ func TestLoadRatingPlans(t *testing.T) {
 				RoundingDecimals: 4,
 				tag:              "R3",
 			},
-			"f692daa4": &RIRate{
+			"f692daa4": {
 				ConnectFee: 0,
 				Rates: []*RGRate{
-					&RGRate{
+					{
 						GroupIntervalStart: 0,
 						Value:              0,
 						RateIncrement:      time.Second,
@@ -560,48 +559,48 @@ func TestLoadRatingPlans(t *testing.T) {
 		},
 		DestinationRates: map[string]RPRateList{
 			"GERMANY": []*RPRate{
-				&RPRate{
+				{
 					Timing: "ec8ed374",
 					Rating: "ebefae11",
 					Weight: 10,
 				},
-				&RPRate{
+				{
 					Timing: "83429156",
 					Rating: "fac0138e",
 					Weight: 10,
 				},
-				&RPRate{
+				{
 					Timing: "a60bfb13",
 					Rating: "fac0138e",
 					Weight: 10,
 				},
 			},
 			"GERMANY_O2": []*RPRate{
-				&RPRate{
+				{
 					Timing: "ec8ed374",
 					Rating: "fac0138e",
 					Weight: 10,
 				},
-				&RPRate{
+				{
 					Timing: "83429156",
 					Rating: "781bfa03",
 					Weight: 10,
 				},
-				&RPRate{
+				{
 					Timing: "a60bfb13",
 					Rating: "781bfa03",
 					Weight: 10,
 				},
 			},
 			"GERMANY_PREMIUM": []*RPRate{
-				&RPRate{
+				{
 					Timing: "ec8ed374",
 					Rating: "16e9ee19",
 					Weight: 10,
 				},
 			},
 			"URG": []*RPRate{
-				&RPRate{
+				{
 					Timing: "2d9ca64",
 					Rating: "f692daa4",
 					Weight: 20,
@@ -656,7 +655,7 @@ func TestLoadActions(t *testing.T) {
 	}
 	as1 := csvr.actions["MINI"]
 	expected := []*Action{
-		&Action{
+		{
 			Id:               "MINI",
 			ActionType:       utils.TOPUP_RESET,
 			ExpirationString: utils.UNLIMITED,
@@ -675,7 +674,7 @@ func TestLoadActions(t *testing.T) {
 				Blocker:        utils.BoolPointer(false),
 			},
 		},
-		&Action{
+		{
 			Id:               "MINI",
 			ActionType:       utils.TOPUP,
 			ExpirationString: utils.UNLIMITED,
@@ -702,7 +701,7 @@ func TestLoadActions(t *testing.T) {
 	}
 	as2 := csvr.actions["SHARED"]
 	expected = []*Action{
-		&Action{
+		{
 			Id:               "SHARED",
 			ActionType:       utils.TOPUP,
 			ExpirationString: utils.UNLIMITED,
@@ -726,7 +725,7 @@ func TestLoadActions(t *testing.T) {
 	}
 	as3 := csvr.actions["DEFEE"]
 	expected = []*Action{
-		&Action{
+		{
 			Id:              "DEFEE",
 			ActionType:      utils.CDRLOG,
 			ExtraParameters: `{"Category":"^ddi","MediationRunId":"^did_run"}`,
@@ -748,7 +747,7 @@ func TestLoadActions(t *testing.T) {
 	asGnrc := csvr.actions["TOPUP_RST_GNR_1000"]
 	//TOPUP_RST_GNR_1000,*topup_reset,"{""*voice"": 60.0,""*data"":1024.0,""*sms"":1.0}",,,*generic,*out,,*any,,,*unlimited,,1000,20,false,false,10
 	expected = []*Action{
-		&Action{
+		{
 			Id:               "TOPUP_RST_GNR_1000",
 			ActionType:       utils.TOPUP_RESET,
 			ExtraParameters:  `{"*voice": 60.0,"*data":1024.0,"*sms":1.0}`,
@@ -778,7 +777,7 @@ func TestLoadSharedGroups(t *testing.T) {
 	expected := &SharedGroup{
 		Id: "SG1",
 		AccountParameters: map[string]*SharingParameters{
-			"*any": &SharingParameters{
+			"*any": {
 				Strategy:      "*lowest",
 				RatingSubject: "",
 			},
@@ -791,7 +790,7 @@ func TestLoadSharedGroups(t *testing.T) {
 	expected = &SharedGroup{
 		Id: "SG2",
 		AccountParameters: map[string]*SharingParameters{
-			"*any": &SharingParameters{
+			"*any": {
 				Strategy:      "*lowest",
 				RatingSubject: "one",
 			},
@@ -825,7 +824,7 @@ func TestLoadActionTimings(t *testing.T) {
 		Id:         "MORE_MINUTES",
 		AccountIDs: utils.StringMap{"vdf:minitsboy": true},
 		ActionTimings: []*ActionTiming{
-			&ActionTiming{
+			{
 				Uuid: atm.ActionTimings[0].Uuid,
 				Timing: &RateInterval{
 					Timing: &RITiming{
@@ -839,7 +838,7 @@ func TestLoadActionTimings(t *testing.T) {
 				Weight:    10,
 				ActionsID: "MINI",
 			},
-			&ActionTiming{
+			{
 				Uuid: atm.ActionTimings[1].Uuid,
 				Timing: &RateInterval{
 					Timing: &RITiming{
@@ -918,7 +917,7 @@ func TestLoadAccountActions(t *testing.T) {
 		ID: "vdf:minitsboy",
 		UnitCounters: UnitCounters{
 			utils.VOICE: []*UnitCounter{
-				&UnitCounter{
+				{
 					CounterType: "*event",
 					Counters: CounterFilters{
 						&CounterFilter{
@@ -962,7 +961,7 @@ func TestLoadAccountActions(t *testing.T) {
 
 func TestLoadResourceProfiles(t *testing.T) {
 	eResProfiles := map[utils.TenantID]*utils.TPResourceProfile{
-		utils.TenantID{Tenant: "cgrates.org", ID: "ResGroup21"}: &utils.TPResourceProfile{
+		{Tenant: "cgrates.org", ID: "ResGroup21"}: {
 			TPid:      testTPID,
 			Tenant:    "cgrates.org",
 			ID:        "ResGroup21",
@@ -977,7 +976,7 @@ func TestLoadResourceProfiles(t *testing.T) {
 			Blocker:           true,
 			Stored:            true,
 		},
-		utils.TenantID{Tenant: "cgrates.org", ID: "ResGroup22"}: &utils.TPResourceProfile{
+		{Tenant: "cgrates.org", ID: "ResGroup22"}: {
 			TPid:      testTPID,
 			Tenant:    "cgrates.org",
 			ID:        "ResGroup22",
@@ -1003,7 +1002,7 @@ func TestLoadResourceProfiles(t *testing.T) {
 
 func TestLoadStatQueueProfiles(t *testing.T) {
 	eStats := map[utils.TenantID]*utils.TPStatProfile{
-		utils.TenantID{Tenant: "cgrates.org", ID: "TestStats"}: &utils.TPStatProfile{
+		{Tenant: "cgrates.org", ID: "TestStats"}: {
 			Tenant:    "cgrates.org",
 			TPid:      testTPID,
 			ID:        "TestStats",
@@ -1014,13 +1013,13 @@ func TestLoadStatQueueProfiles(t *testing.T) {
 			QueueLength: 100,
 			TTL:         "1s",
 			Metrics: []*utils.MetricWithFilters{
-				&utils.MetricWithFilters{
+				{
 					MetricID: "*sum#Value",
 				},
-				&utils.MetricWithFilters{
+				{
 					MetricID: "*sum#Usage",
 				},
-				&utils.MetricWithFilters{
+				{
 					MetricID: "*average#Value",
 				},
 			},
@@ -1030,7 +1029,7 @@ func TestLoadStatQueueProfiles(t *testing.T) {
 			Weight:       20,
 			MinItems:     2,
 		},
-		utils.TenantID{Tenant: "cgrates.org", ID: "TestStats2"}: &utils.TPStatProfile{
+		{Tenant: "cgrates.org", ID: "TestStats2"}: {
 			Tenant:    "cgrates.org",
 			TPid:      testTPID,
 			ID:        "TestStats2",
@@ -1041,23 +1040,23 @@ func TestLoadStatQueueProfiles(t *testing.T) {
 			QueueLength: 100,
 			TTL:         "1s",
 			Metrics: []*utils.MetricWithFilters{
-				&utils.MetricWithFilters{
+				{
 					MetricID: "*sum#Value",
 				},
-				&utils.MetricWithFilters{
+				{
 					MetricID: "*sum#Usage",
 				},
-				&utils.MetricWithFilters{
+				{
 					FilterIDs: []string{"*string:Account:1001"},
 					MetricID:  "*sum#Cost",
 				},
-				&utils.MetricWithFilters{
+				{
 					MetricID: "*average#Value",
 				},
-				&utils.MetricWithFilters{
+				{
 					MetricID: "*average#Usage",
 				},
-				&utils.MetricWithFilters{
+				{
 					FilterIDs: []string{"*string:Account:1001"},
 					MetricID:  "*average#Cost",
 				},
@@ -1070,8 +1069,8 @@ func TestLoadStatQueueProfiles(t *testing.T) {
 		},
 	}
 	stKeys := []utils.TenantID{
-		utils.TenantID{Tenant: "cgrates.org", ID: "TestStats"},
-		utils.TenantID{Tenant: "cgrates.org", ID: "TestStats2"},
+		{Tenant: "cgrates.org", ID: "TestStats"},
+		{Tenant: "cgrates.org", ID: "TestStats2"},
 	}
 	for _, stKey := range stKeys {
 		if len(csvr.sqProfiles) != len(eStats) {
@@ -1101,7 +1100,7 @@ func TestLoadStatQueueProfiles(t *testing.T) {
 
 func TestLoadThresholdProfiles(t *testing.T) {
 	eThresholds := map[utils.TenantID]*utils.TPThresholdProfile{
-		utils.TenantID{Tenant: "cgrates.org", ID: "Threshold1"}: &utils.TPThresholdProfile{
+		{Tenant: "cgrates.org", ID: "Threshold1"}: {
 			TPid:      testTPID,
 			Tenant:    "cgrates.org",
 			ID:        "Threshold1",
@@ -1119,7 +1118,7 @@ func TestLoadThresholdProfiles(t *testing.T) {
 		},
 	}
 	eThresholdReverse := map[utils.TenantID]*utils.TPThresholdProfile{
-		utils.TenantID{Tenant: "cgrates.org", ID: "Threshold1"}: &utils.TPThresholdProfile{
+		{Tenant: "cgrates.org", ID: "Threshold1"}: {
 			TPid:      testTPID,
 			Tenant:    "cgrates.org",
 			ID:        "Threshold1",
@@ -1148,22 +1147,22 @@ func TestLoadThresholdProfiles(t *testing.T) {
 
 func TestLoadFilters(t *testing.T) {
 	eFilters := map[utils.TenantID]*utils.TPFilterProfile{
-		utils.TenantID{Tenant: "cgrates.org", ID: "FLTR_1"}: &utils.TPFilterProfile{
+		{Tenant: "cgrates.org", ID: "FLTR_1"}: {
 			TPid:   testTPID,
 			Tenant: "cgrates.org",
 			ID:     "FLTR_1",
 			Filters: []*utils.TPFilter{
-				&utils.TPFilter{
+				{
 					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
 					Type:    utils.MetaString,
 					Values:  []string{"1001", "1002"},
 				},
-				&utils.TPFilter{
+				{
 					Element: "~*req.Destination",
 					Type:    utils.MetaPrefix,
 					Values:  []string{"10", "20"},
 				},
-				&utils.TPFilter{
+				{
 					Element: "",
 					Type:    utils.MetaRSR,
 					Values:  []string{"~*req.Subject(~^1.*1$)", "~*req.Destination(1002)"},
@@ -1173,12 +1172,12 @@ func TestLoadFilters(t *testing.T) {
 				ActivationTime: "2014-07-29T15:00:00Z",
 			},
 		},
-		utils.TenantID{Tenant: "cgrates.org", ID: "FLTR_ACNT_dan"}: &utils.TPFilterProfile{
+		{Tenant: "cgrates.org", ID: "FLTR_ACNT_dan"}: {
 			TPid:   testTPID,
 			Tenant: "cgrates.org",
 			ID:     "FLTR_ACNT_dan",
 			Filters: []*utils.TPFilter{
-				&utils.TPFilter{
+				{
 					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
 					Type:    utils.MetaString,
 					Values:  []string{"dan"},
@@ -1188,12 +1187,12 @@ func TestLoadFilters(t *testing.T) {
 				ActivationTime: "2014-07-29T15:00:00Z",
 			},
 		},
-		utils.TenantID{Tenant: "cgrates.org", ID: "FLTR_DST_DE"}: &utils.TPFilterProfile{
+		{Tenant: "cgrates.org", ID: "FLTR_DST_DE"}: {
 			TPid:   testTPID,
 			Tenant: "cgrates.org",
 			ID:     "FLTR_DST_DE",
 			Filters: []*utils.TPFilter{
-				&utils.TPFilter{
+				{
 					Element: "~*req.Destination",
 					Type:    utils.MetaDestinations,
 					Values:  []string{"DST_DE"},
@@ -1203,12 +1202,12 @@ func TestLoadFilters(t *testing.T) {
 				ActivationTime: "2014-07-29T15:00:00Z",
 			},
 		},
-		utils.TenantID{Tenant: "cgrates.org", ID: "FLTR_DST_NL"}: &utils.TPFilterProfile{
+		{Tenant: "cgrates.org", ID: "FLTR_DST_NL"}: {
 			TPid:   testTPID,
 			Tenant: "cgrates.org",
 			ID:     "FLTR_DST_NL",
 			Filters: []*utils.TPFilter{
-				&utils.TPFilter{
+				{
 					Element: "~*req.Destination",
 					Type:    utils.MetaDestinations,
 					Values:  []string{"DST_NL"},
@@ -1239,7 +1238,7 @@ func TestLoadRouteProfiles(t *testing.T) {
 		Sorting:           "*least_cost",
 		SortingParameters: []string{},
 		Routes: []*utils.TPRoute{
-			&utils.TPRoute{
+			{
 				ID:              "supplier1",
 				FilterIDs:       []string{"FLTR_ACNT_dan"},
 				AccountIDs:      []string{"Account1", "Account1_1"},
@@ -1250,7 +1249,7 @@ func TestLoadRouteProfiles(t *testing.T) {
 				Blocker:         true,
 				RouteParameters: "param1",
 			},
-			&utils.TPRoute{
+			{
 				ID:              "supplier1",
 				RatingPlanIDs:   []string{"RPL_2"},
 				ResourceIDs:     []string{"ResGroup2", "ResGroup4"},
@@ -1259,7 +1258,7 @@ func TestLoadRouteProfiles(t *testing.T) {
 				Blocker:         false,
 				RouteParameters: utils.EmptyString,
 			},
-			&utils.TPRoute{
+			{
 				ID:              "supplier1",
 				FilterIDs:       []string{"FLTR_DST_DE"},
 				AccountIDs:      []string{"Account2"},
@@ -1297,7 +1296,7 @@ func TestLoadRouteProfiles(t *testing.T) {
 
 func TestLoadAttributeProfiles(t *testing.T) {
 	eAttrProfiles := map[utils.TenantID]*utils.TPAttributeProfile{
-		utils.TenantID{Tenant: "cgrates.org", ID: "ALS1"}: &utils.TPAttributeProfile{
+		{Tenant: "cgrates.org", ID: "ALS1"}: {
 			TPid:      testTPID,
 			Tenant:    "cgrates.org",
 			ID:        "ALS1",
@@ -1307,13 +1306,13 @@ func TestLoadAttributeProfiles(t *testing.T) {
 				ActivationTime: "2014-07-29T15:00:00Z",
 			},
 			Attributes: []*utils.TPAttribute{
-				&utils.TPAttribute{
+				{
 					FilterIDs: []string{"*string:~*req.Field1:Initial"},
 					Path:      utils.MetaReq + utils.NestingSep + "Field1",
 					Type:      utils.MetaVariable,
 					Value:     "Sub1",
 				},
-				&utils.TPAttribute{
+				{
 					FilterIDs: []string{},
 					Path:      utils.MetaReq + utils.NestingSep + "Field2",
 					Type:      utils.MetaVariable,
@@ -1346,7 +1345,7 @@ func TestLoadAttributeProfiles(t *testing.T) {
 
 func TestLoadChargerProfiles(t *testing.T) {
 	eChargerProfiles := map[utils.TenantID]*utils.TPChargerProfile{
-		utils.TenantID{Tenant: "cgrates.org", ID: "Charger1"}: &utils.TPChargerProfile{
+		{Tenant: "cgrates.org", ID: "Charger1"}: {
 			TPid:      testTPID,
 			Tenant:    "cgrates.org",
 			ID:        "Charger1",
@@ -1380,14 +1379,14 @@ func TestLoadDispatcherProfiles(t *testing.T) {
 		Strategy: "*first",
 		Weight:   20,
 		Hosts: []*utils.TPDispatcherHostProfile{
-			&utils.TPDispatcherHostProfile{
+			{
 				ID:        "C1",
 				FilterIDs: []string{"*gt:~*req.Usage:10"},
 				Weight:    10,
 				Params:    []interface{}{"192.168.56.203"},
 				Blocker:   false,
 			},
-			&utils.TPDispatcherHostProfile{
+			{
 				ID:        "C2",
 				FilterIDs: []string{"*lt:~*req.Usage:10"},
 				Weight:    10,
@@ -1427,7 +1426,7 @@ func TestLoadRateProfiles(t *testing.T) {
 		MaxCost:          0.6,
 		MaxCostStrategy:  "*free",
 		Rates: map[string]*utils.TPRate{
-			"FIRST_GI": &utils.TPRate{
+			"FIRST_GI": {
 				ID:        "FIRST_GI",
 				FilterIDs: []string{"*gi:~*req.Usage:0"},
 				Weight:    0,
@@ -1436,7 +1435,7 @@ func TestLoadRateProfiles(t *testing.T) {
 				Increment: "1m",
 				Blocker:   false,
 			},
-			"SECOND_GI": &utils.TPRate{
+			"SECOND_GI": {
 				ID:        "SECOND_GI",
 				FilterIDs: []string{"*gi:~*req.Usage:1m"},
 				Weight:    10,
@@ -1470,12 +1469,12 @@ func TestLoadDispatcherHosts(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "ALL1",
 		Conns: []*utils.TPDispatcherHostConn{
-			&utils.TPDispatcherHostConn{
+			{
 				Address:   "127.0.0.1:2012",
 				Transport: utils.MetaJSON,
 				TLS:       true,
 			},
-			&utils.TPDispatcherHostConn{
+			{
 				Address:   "127.0.0.1:3012",
 				Transport: utils.MetaJSON,
 				TLS:       false,
@@ -1497,11 +1496,11 @@ func TestLoadDispatcherHosts(t *testing.T) {
 
 func TestLoadResource(t *testing.T) {
 	eResources := []*utils.TenantID{
-		&utils.TenantID{
+		{
 			Tenant: "cgrates.org",
 			ID:     "ResGroup21",
 		},
-		&utils.TenantID{
+		{
 			Tenant: "cgrates.org",
 			ID:     "ResGroup22",
 		},
@@ -1513,11 +1512,11 @@ func TestLoadResource(t *testing.T) {
 
 func TestLoadstatQueues(t *testing.T) {
 	eStatQueues := []*utils.TenantID{
-		&utils.TenantID{
+		{
 			Tenant: "cgrates.org",
 			ID:     "TestStats",
 		},
-		&utils.TenantID{
+		{
 			Tenant: "cgrates.org",
 			ID:     "TestStats2",
 		},
@@ -1529,7 +1528,7 @@ func TestLoadstatQueues(t *testing.T) {
 
 func TestLoadThresholds(t *testing.T) {
 	eThresholds := []*utils.TenantID{
-		&utils.TenantID{
+		{
 			Tenant: "cgrates.org",
 			ID:     "Threshold1",
 		},

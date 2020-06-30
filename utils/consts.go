@@ -56,7 +56,15 @@ var (
 		CacheDispatcherRoutes, CacheDispatcherLoads, CacheDiameterMessages, CacheRPCResponses,
 		CacheClosedSessions, CacheCDRIDs, CacheLoadIDs, CacheRPCConnections, CacheRatingProfilesTmp,
 		CacheUCH, CacheSTIR, CacheEventCharges, CacheRateProfiles, CacheRateProfilesFilterIndexes,
-		CacheRateFilterIndexes, CacheReverseFilterIndexes})
+		CacheRateFilterIndexes, CacheReverseFilterIndexes,
+		// only internalDB
+		CacheVersions, CacheAccounts,
+		CacheTBLTPTimings, CacheTBLTPDestinations, CacheTBLTPRates, CacheTBLTPDestinationRates,
+		CacheTBLTPRatingPlans, CacheTBLTPRatingProfiles, CacheTBLTPSharedGroups, CacheTBLTPActions,
+		CacheTBLTPActionPlans, CacheTBLTPActionTriggers, CacheTBLTPAccountActions, CacheTBLTPResources,
+		CacheTBLTPStats, CacheTBLTPThresholds, CacheTBLTPFilters, CacheSessionCostsTBL, CacheCDRsTBL,
+		CacheTBLTPRoutes, CacheTBLTPAttributes, CacheTBLTPChargers, CacheTBLTPDispatchers,
+		CacheTBLTPDispatcherHosts, CacheTBLTPRateProfiles})
 	CacheInstanceToPrefix = map[string]string{
 		CacheDestinations:              DESTINATION_PREFIX,
 		CacheReverseDestinations:       REVERSE_DESTINATION_PREFIX,
@@ -113,22 +121,31 @@ var (
 	// AccountableRequestTypes are the ones handled by Accounting subsystem
 	AccountableRequestTypes = NewStringSet([]string{META_PREPAID, META_POSTPAID, META_PSEUDOPREPAID})
 
-	CacheDataDBPartitions = NewStringSet([]string{CacheDestinations, CacheReverseDestinations,
-		CacheRatingPlans, CacheRatingProfiles, CacheActions,
-		CacheActionPlans, CacheAccountActionPlans, CacheActionTriggers, CacheSharedGroups, CacheResourceProfiles, CacheResources,
-		CacheTimings, CacheStatQueueProfiles, CacheStatQueues, CacheThresholdProfiles, CacheThresholds,
-		CacheFilters, CacheRouteProfiles, CacheAttributeProfiles, CacheChargerProfiles,
-		CacheDispatcherProfiles, CacheDispatcherHosts, CacheResourceFilterIndexes, CacheStatFilterIndexes,
-		CacheThresholdFilterIndexes, CacheRouteFilterIndexes, CacheAttributeFilterIndexes,
-		CacheChargerFilterIndexes, CacheDispatcherFilterIndexes, CacheLoadIDs, CacheAccounts,
-		CacheRateProfiles, CacheRateProfilesFilterIndexes, CacheRateFilterIndexes,
-		CacheReverseFilterIndexes})
-
-	CacheStorDBPartitions = NewStringSet([]string{TBLTPTimings, TBLTPDestinations, TBLTPRates,
-		TBLTPDestinationRates, TBLTPRatingPlans, TBLTPRatingProfiles, TBLTPSharedGroups,
-		TBLTPActions, TBLTPActionPlans, TBLTPActionTriggers, TBLTPAccountActions, TBLTPResources, TBLTPStats,
-		TBLTPThresholds, TBLTPFilters, SessionCostsTBL, CDRsTBL,
-		TBLTPRoutes, TBLTPAttributes, TBLTPChargers, TBLTPDispatchers, TBLTPDispatcherHosts})
+	CacheStorDBPartitions = map[string]string{
+		TBLTPTimings:          CacheTBLTPTimings,
+		TBLTPDestinations:     CacheTBLTPDestinations,
+		TBLTPRates:            CacheTBLTPRates,
+		TBLTPDestinationRates: CacheTBLTPDestinationRates,
+		TBLTPRatingPlans:      CacheTBLTPRatingPlans,
+		TBLTPRatingProfiles:   CacheTBLTPRatingProfiles,
+		TBLTPSharedGroups:     CacheTBLTPSharedGroups,
+		TBLTPActions:          CacheTBLTPActions,
+		TBLTPActionPlans:      CacheTBLTPActionPlans,
+		TBLTPActionTriggers:   CacheTBLTPActionTriggers,
+		TBLTPAccountActions:   CacheTBLTPAccountActions,
+		TBLTPResources:        CacheTBLTPResources,
+		TBLTPStats:            CacheTBLTPStats,
+		TBLTPThresholds:       CacheTBLTPThresholds,
+		TBLTPFilters:          CacheTBLTPFilters,
+		SessionCostsTBL:       CacheSessionCostsTBL,
+		CDRsTBL:               CacheCDRsTBL,
+		TBLTPRoutes:           CacheTBLTPRoutes,
+		TBLTPAttributes:       CacheTBLTPAttributes,
+		TBLTPChargers:         CacheTBLTPChargers,
+		TBLTPDispatchers:      CacheTBLTPDispatchers,
+		TBLTPDispatcherHosts:  CacheTBLTPDispatcherHosts,
+		TBLTPRateProfiles:     CacheTBLTPRateProfiles,
+	}
 	// ProtectedSFlds are the fields that sessions should not alter
 	ProtectedSFlds = NewStringSet([]string{CGRID, OriginHost, OriginID, Usage})
 )
@@ -1640,7 +1657,6 @@ const (
 	MetaPrecaching                 = "*precaching"
 	MetaReady                      = "*ready"
 	CacheLoadIDs                   = "*load_ids"
-	CacheAccounts                  = "*accounts"
 	CacheRPCConnections            = "*rpc_connections"
 	CacheCDRIDs                    = "*cdr_ids"
 	CacheRatingProfilesTmp         = "*tmp_rating_profiles"
@@ -1648,6 +1664,33 @@ const (
 	CacheSTIR                      = "*stir"
 	CacheEventCharges              = "*event_charges"
 	CacheReverseFilterIndexes      = "*reverse_filter_indexes"
+	CacheAccounts                  = "*accounts"
+	CacheVersions                  = "*versions"
+
+	// storDB
+	CacheTBLTPTimings          = "*tp_timings"
+	CacheTBLTPDestinations     = "*tp_destinations"
+	CacheTBLTPRates            = "*tp_rates"
+	CacheTBLTPDestinationRates = "*tp_destination_rates"
+	CacheTBLTPRatingPlans      = "*tp_rating_plans"
+	CacheTBLTPRatingProfiles   = "*tp_rating_profiles"
+	CacheTBLTPSharedGroups     = "*tp_shared_groups"
+	CacheTBLTPActions          = "*tp_actions"
+	CacheTBLTPActionPlans      = "*tp_action_plans"
+	CacheTBLTPActionTriggers   = "*tp_action_triggers"
+	CacheTBLTPAccountActions   = "*tp_account_actions"
+	CacheTBLTPResources        = "*tp_resources"
+	CacheTBLTPStats            = "*tp_stats"
+	CacheTBLTPThresholds       = "*tp_thresholds"
+	CacheTBLTPFilters          = "*tp_filters"
+	CacheSessionCostsTBL       = "*session_costs"
+	CacheCDRsTBL               = "*cdrs"
+	CacheTBLTPRoutes           = "*tp_routes"
+	CacheTBLTPAttributes       = "*tp_attributes"
+	CacheTBLTPChargers         = "*tp_chargers"
+	CacheTBLTPDispatchers      = "*tp_dispatcher_profiles"
+	CacheTBLTPDispatcherHosts  = "*tp_dispatcher_hosts"
+	CacheTBLTPRateProfiles     = "*tp_rate_profiles"
 )
 
 // Prefix for indexing

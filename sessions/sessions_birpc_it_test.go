@@ -192,7 +192,7 @@ func testSessionsBiRPCSessionAutomaticDisconnects(t *testing.T) {
 	var initRpl *V1InitSessionReply
 	if err := sessionsBiRPC.Call(utils.SessionSv1InitiateSession,
 		initArgs, &initRpl); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	time.Sleep(10 * time.Millisecond) // give some time to allow the session to be created
 	expMaxUsage := 3 * time.Hour      // MaxCallDuration from config

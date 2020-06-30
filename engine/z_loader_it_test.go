@@ -93,8 +93,16 @@ func testLoaderITInitDataDB(t *testing.T) {
 		t.Fatal("Error on dataDb connection: ", err.Error())
 	}
 	dataDbCsv = NewDataManager(dbConn, lCfg.CacheCfg(), nil)
-	if err = dbConn.Flush(utils.EmptyString); err != nil {
-		t.Fatal("Error when flushing datadb")
+	if lCfg.DataDbCfg().DataDbType == utils.INTERNAL {
+		chIDs := []string{}
+		for dbKey := range utils.CacheInstanceToPrefix { // clear only the DataDB
+			chIDs = append(chIDs, dbKey)
+		}
+		Cache.Clear(chIDs)
+	} else {
+		if err = dbConn.Flush(utils.EmptyString); err != nil {
+			t.Fatal("Error when flushing datadb")
+		}
 	}
 	cacheChan := make(chan rpcclient.ClientConnector, 1)
 	cacheChan <- NewCacheS(lCfg, dataDbCsv)
@@ -137,7 +145,7 @@ func testLoaderITRemoveLoad(t *testing.T) {
 	}*/
 	loader, err = NewTpReader(dataDbCsv.DataDB(), NewFileCSVStorage(utils.CSV_SEP,
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario)), "", "",
-		[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil)
+		[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil, false)
 	if err != nil {
 		t.Error(err)
 	}
@@ -216,7 +224,7 @@ func testLoaderITLoadFromCSV(t *testing.T) {
 	}*/
 	loader, err = NewTpReader(dataDbCsv.DataDB(), NewFileCSVStorage(utils.CSV_SEP,
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario)), "", "",
-		[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil)
+		[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil, false)
 	if err != nil {
 		t.Error(err)
 	}
@@ -519,7 +527,7 @@ func testLoaderITImportToStorDb(t *testing.T) {
 
 // Loads data from storDb into dataDb
 func testLoaderITLoadFromStorDb(t *testing.T) {
-	loader, _ := NewTpReader(dataDbCsv.DataDB(), storDb, utils.TEST_SQL, "", []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil)
+	loader, _ := NewTpReader(dataDbCsv.DataDB(), storDb, utils.TEST_SQL, "", []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil, false)
 	if err := loader.LoadDestinations(); err != nil && err.Error() != utils.NotFoundCaps {
 		t.Error("Failed loading destinations: ", err.Error())
 	}
@@ -553,7 +561,7 @@ func testLoaderITLoadFromStorDb(t *testing.T) {
 }
 
 func testLoaderITLoadIndividualProfiles(t *testing.T) {
-	loader, _ := NewTpReader(dataDbCsv.DataDB(), storDb, utils.TEST_SQL, "", []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil)
+	loader, _ := NewTpReader(dataDbCsv.DataDB(), storDb, utils.TEST_SQL, "", []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil, false)
 	// Load ratingPlans. This will also set destination keys
 	if rps, err := storDb.GetTPRatingPlans(utils.TEST_SQL, "", nil); err != nil {
 		t.Fatal("Could not retrieve rating plans")

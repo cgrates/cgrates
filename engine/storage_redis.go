@@ -395,7 +395,7 @@ func (rs *RedisStorage) GetKeysForPrefix(prefix string) ([]string, error) {
 		return nil, r.Err
 	}
 	if keys, _ := r.List(); len(keys) != 0 {
-		if filterIndexesPrefixMap.HasKey(prefix) {
+		if filterIndexesPrefixMap.Has(prefix) {
 			return rs.getKeysForFilterIndexesKeys(keys)
 		}
 		return keys, nil

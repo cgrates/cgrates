@@ -185,7 +185,7 @@ func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 	ar.tmp = utils.NavigableMap2{}
 	for _, tplFld := range tplFlds {
 		if pass, err := ar.filterS.Pass(ar.Tenant,
-			tplFld.Filters, ar); err != nil {
+			tplFld.Filters, ar.dynamicProvider); err != nil {
 			return err
 		} else if !pass {
 			continue

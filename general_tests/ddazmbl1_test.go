@@ -33,6 +33,7 @@ func TestDZ1SetStorage(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
 	dataDB = engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	engine.SetDataStorage(dataDB)
+	engine.Cache.Clear(nil)
 }
 
 func TestDZ1LoadCsvTp(t *testing.T) {
@@ -67,7 +68,7 @@ TOPUP10_AT,TOPUP10_AC1,ASAP,10`
 			destinationRates, ratingPlans, ratingProfiles,
 			sharedGroups, actions, actionPlans, actionTriggers, accountActions,
 			resLimits, stats, thresholds, filters, suppliers,
-			attrProfiles, chargerProfiles, ``, "", utils.EmptyString), "", "", nil, nil)
+			attrProfiles, chargerProfiles, ``, "", utils.EmptyString), "", "", nil, nil, false)
 	if err != nil {
 		t.Error(err)
 	}
@@ -110,21 +111,20 @@ TOPUP10_AT,TOPUP10_AC1,ASAP,10`
 	} else if acnt == nil {
 		t.Error("No account saved")
 	}
-	engine.Cache.Clear(nil)
 
 	dataDB.LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 
-	if cachedDests := len(engine.Cache.GetItemIDs(utils.CacheDestinations, "")); cachedDests != 0 {
+	if cachedDests := len(engine.Cache.GetItemIDs(utils.CacheDestinations, "")); cachedDests != 1 {
 		t.Error("Wrong number of cached destinations found", cachedDests)
 	}
 	if cachedRPlans := len(engine.Cache.GetItemIDs(utils.CacheRatingPlans, "")); cachedRPlans != 2 {
 		t.Error("Wrong number of cached rating plans found", cachedRPlans)
 	}
-	if cachedRProfiles := len(engine.Cache.GetItemIDs(utils.CacheRatingProfiles, "")); cachedRProfiles != 0 {
+	if cachedRProfiles := len(engine.Cache.GetItemIDs(utils.CacheRatingProfiles, "")); cachedRProfiles != 2 {
 		t.Error("Wrong number of cached rating profiles found", cachedRProfiles)
 	}
-	if cachedActions := len(engine.Cache.GetItemIDs(utils.CacheActions, "")); cachedActions != 0 {
+	if cachedActions := len(engine.Cache.GetItemIDs(utils.CacheActions, "")); cachedActions != 2 {
 		t.Error("Wrong number of cached actions found", cachedActions)
 	}
 }
