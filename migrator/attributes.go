@@ -162,14 +162,8 @@ func (m *Migrator) migrateV4ToV5AttributeProfile(v4Attr *v4AttributeProfile) (v5
 func (m *Migrator) migrateAttributeProfile() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentDataDBVersions()
-	vrs, err = m.dmIN.DataManager().DataDB().GetVersions(utils.EmptyString)
-	if err != nil {
-		//error getting the current verions
-		return utils.NewCGRError(utils.Migrator, utils.ServerErrorCaps,
-			err.Error(), fmt.Sprintf("error: <%s> when querying oldDataDB for versions", err.Error()))
-	} else if len(vrs) == 0 {
-		return utils.NewCGRError(utils.Migrator, utils.MandatoryIEMissingCaps,
-			utils.UndefinedVersion, "version number is not defined for ActionTriggers model")
+	if vrs, err = m.getVersions(utils.Attributes); err != nil {
+		return
 	}
 
 	migrated := true
@@ -252,10 +246,8 @@ func (m *Migrator) migrateAttributeProfile() (err error) {
 		return nil
 	}
 	// All done, update version with current one
-	vrs = engine.Versions{utils.Attributes: engine.CurrentDataDBVersions()[utils.Attributes]}
-	if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
-		return utils.NewCGRError(utils.Migrator, utils.ServerErrorCaps, err.Error(),
-			fmt.Sprintf("error: <%s> when updating Attributes version into dataDB", err.Error()))
+	if err = m.setVersions(utils.Attributes); err != nil {
+		return err
 	}
 	return m.ensureIndexesDataDB(engine.ColAttr)
 

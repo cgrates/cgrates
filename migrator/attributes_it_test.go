@@ -276,6 +276,9 @@ func testAttrITMigrateOnlyVersion(t *testing.T) {
 	} else if vrs[utils.Attributes] != 5 {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.Attributes])
 	}
+	if attrMigrator.stats[utils.Attributes] != 0 {
+		t.Errorf("Expecting: 0, received: %+v", attrMigrator.stats[utils.Attributes])
+	}
 }
 
 func testAttrITMigrateAndMove(t *testing.T) {
@@ -374,6 +377,8 @@ func testAttrITMigrateAndMove(t *testing.T) {
 		attrPrf.Compile()
 		if !reflect.DeepEqual(result, attrPrf) {
 			t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(attrPrf), utils.ToJSON(result))
+		} else if attrMigrator.stats[utils.Attributes] != 1 {
+			t.Errorf("Expecting: 1, received: %+v", attrMigrator.stats[utils.Attributes])
 		}
 	case utils.Move:
 		if err := attrMigrator.dmIN.DataManager().SetAttributeProfile(attrPrf, false); err != nil {
@@ -431,6 +436,8 @@ func testAttrITMigrateAndMove(t *testing.T) {
 		if _, err = attrMigrator.dmIN.DataManager().GetAttributeProfile("cgrates.com",
 			"ATTR_1", false, false, utils.NonTransactional); err == nil || err != utils.ErrNotFound {
 			t.Error(err)
+		} else if attrMigrator.stats[utils.Attributes] != 2 {
+			t.Errorf("Expecting: 2, received: %+v", attrMigrator.stats[utils.Attributes])
 		}
 	}
 }
@@ -597,6 +604,9 @@ func testAttrITMigrateV3(t *testing.T) {
 	attrPrf.Compile()
 	if !reflect.DeepEqual(result, attrPrf) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(attrPrf), utils.ToJSON(result))
+	}
+	if attrMigrator.stats[utils.Attributes] != 3 {
+		t.Errorf("Expecting: 3, received: %+v", attrMigrator.stats[utils.Attributes])
 	}
 }
 
@@ -805,6 +815,15 @@ func testAttrITV1ToV5(t *testing.T) {
 		eOut2.Compile()
 		if !reflect.DeepEqual(result, eOut2) {
 			t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut2), utils.ToJSON(result))
+		}
+	}
+	if attrAction == utils.Move {
+		if attrMigrator.stats[utils.Attributes] != 4 {
+			t.Errorf("Expecting: 4, received: %+v", attrMigrator.stats[utils.Attributes])
+		}
+	} else {
+		if attrMigrator.stats[utils.Attributes] != 6 {
+			t.Errorf("Expecting: 6, received: %+v", attrMigrator.stats[utils.Attributes])
 		}
 	}
 }
@@ -1065,6 +1084,15 @@ func testAttrITV3ToV5(t *testing.T) {
 			t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut2), utils.ToJSON(result))
 		}
 	}
+	if attrAction == utils.Move {
+		if attrMigrator.stats[utils.Attributes] != 8 {
+			t.Errorf("Expecting: 8, received: %+v", attrMigrator.stats[utils.Attributes])
+		}
+	} else {
+		if attrMigrator.stats[utils.Attributes] != 10 {
+			t.Errorf("Expecting: 10, received: %+v", attrMigrator.stats[utils.Attributes])
+		}
+	}
 }
 
 func testAttrITdryRunV2ToV5(t *testing.T) {
@@ -1114,6 +1142,16 @@ func testAttrITdryRunV2ToV5(t *testing.T) {
 	if err != nil && err != utils.ErrNotFound {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ErrNotFound, err)
 	}
+
+	if attrAction == utils.Move {
+		if attrMigrator.stats[utils.Attributes] != 9 {
+			t.Errorf("Expecting: 9, received: %+v", attrMigrator.stats[utils.Attributes])
+		}
+	} else {
+		if attrMigrator.stats[utils.Attributes] != 11 {
+			t.Errorf("Expecting: 11, received: %+v", attrMigrator.stats[utils.Attributes])
+		}
+	}
 }
 
 func testAttrITdryRunV3ToV5(t *testing.T) {
@@ -1161,5 +1199,14 @@ func testAttrITdryRunV3ToV5(t *testing.T) {
 		"attributeprofile1", false, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ErrNotFound, err)
+	}
+	if attrAction == utils.Move {
+		if attrMigrator.stats[utils.Attributes] != 10 {
+			t.Errorf("Expecting: 10, received: %+v", attrMigrator.stats[utils.Attributes])
+		}
+	} else {
+		if attrMigrator.stats[utils.Attributes] != 12 {
+			t.Errorf("Expecting: 12, received: %+v", attrMigrator.stats[utils.Attributes])
+		}
 	}
 }

@@ -222,6 +222,8 @@ func testShrGrpITMigrateAndMove(t *testing.T) {
 		}
 		if !reflect.DeepEqual(shrGrp, result) {
 			t.Errorf("Expecting: %+v, received: %+v", shrGrp, result)
+		} else if shrGrpMigrator.stats[utils.SharedGroups] != 1 {
+			t.Errorf("Expected 1, recived: %v", shrGrpMigrator.stats[utils.SharedGroups])
 		}
 	case utils.Move:
 		if err := shrGrpMigrator.dmIN.DataManager().SetSharedGroup(shrGrp, utils.NonTransactional); err != nil {
@@ -242,6 +244,8 @@ func testShrGrpITMigrateAndMove(t *testing.T) {
 		}
 		if !reflect.DeepEqual(shrGrp, result) {
 			t.Errorf("Expecting: %+v, received: %+v", shrGrp, result)
+		} else if shrGrpMigrator.stats[utils.SharedGroups] != 1 {
+			t.Errorf("Expected 1, recived: %v", shrGrpMigrator.stats[utils.SharedGroups])
 		}
 	}
 }

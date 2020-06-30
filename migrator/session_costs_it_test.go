@@ -140,6 +140,8 @@ func testSessionCostITRename(t *testing.T) {
 		t.Error(err)
 	} else if vrs[utils.SessionSCosts] != 2 {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.SessionSCosts])
+	} else if sCostMigrator.stats[utils.SessionSCosts] != 0 {
+		t.Errorf("Expected 0, recived: %v", sCostMigrator.stats[utils.SessionSCosts])
 	}
 
 }

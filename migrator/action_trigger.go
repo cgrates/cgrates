@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package migrator
 
 import (
-	"fmt"
 	"strings"
 	"time"
 
@@ -70,6 +69,8 @@ func (m *Migrator) migrateCurrentActionTrigger() (err error) {
 		if err := m.dmOut.DataManager().SetActionTriggers(idg, acts, utils.NonTransactional); err != nil {
 			return err
 		}
+		m.stats[utils.ActionTriggers]++
+
 	}
 	return
 }
@@ -111,17 +112,8 @@ func (m *Migrator) removeV1ActionTriggers() (err error) {
 func (m *Migrator) migrateActionTriggers() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentDataDBVersions()
-	vrs, err = m.dmIN.DataManager().DataDB().GetVersions(utils.EmptyString)
-	if err != nil {
-		return utils.NewCGRError(utils.Migrator,
-			utils.ServerErrorCaps,
-			err.Error(),
-			fmt.Sprintf("error: <%s> when querying oldDataDB for versions", err.Error()))
-	} else if len(vrs) == 0 {
-		return utils.NewCGRError(utils.Migrator,
-			utils.MandatoryIEMissingCaps,
-			utils.UndefinedVersion,
-			"version number is not defined for ActionTriggers model")
+	if vrs, err = m.getVersions(utils.ActionTriggers); err != nil {
+		return
 	}
 	migrated := true
 	migratedFrom := 0
@@ -175,12 +167,8 @@ func (m *Migrator) migrateActionTriggers() (err error) {
 	}
 
 	// All done, update version wtih current one
-	vrs = engine.Versions{utils.ActionTriggers: engine.CurrentDataDBVersions()[utils.ActionTriggers]}
-	if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
-		return utils.NewCGRError(utils.Migrator,
-			utils.ServerErrorCaps,
-			err.Error(),
-			fmt.Sprintf("error: <%s> when updating ActionTriggers version into DataDB", err.Error()))
+	if err = m.setVersions(utils.ActionTriggers); err != nil {
+		return err
 	}
 
 	return m.ensureIndexesDataDB(engine.ColAtr)

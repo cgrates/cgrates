@@ -231,8 +231,9 @@ func testActTrgITMigrateAndMove(t *testing.T) {
 		}
 		if !reflect.DeepEqual(actTrg, result) {
 			t.Errorf("Expecting: %+v,\nReceived: %+v", utils.ToJSON(actTrg), utils.ToJSON(result))
+		} else if actTrgMigrator.stats[utils.ActionTriggers] != 1 {
+			t.Errorf("Expecting: 1, received: %+v", actTrgMigrator.stats[utils.ActionTriggers])
 		}
-		// utils.tojson si verificat
 	case utils.Move:
 		if err := actTrgMigrator.dmIN.DataManager().SetActionTriggers((*v1actTrg)[0].Id, actTrg, utils.NonTransactional); err != nil {
 			t.Error("Error when setting ActionTriggers ", err.Error())
@@ -252,6 +253,9 @@ func testActTrgITMigrateAndMove(t *testing.T) {
 		}
 		if !reflect.DeepEqual(actTrg, result) {
 			t.Errorf("Expecting: %+v, received: %+v", actTrg, result)
+		}
+		if actTrgMigrator.stats[utils.ActionTriggers] != 1 {
+			t.Errorf("Expecting: 1, received: %+v", actTrgMigrator.stats[utils.ActionTriggers])
 		}
 	}
 }

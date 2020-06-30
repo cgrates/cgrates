@@ -102,17 +102,8 @@ func (m *Migrator) migrateV1ActionPlans() (v2 []*engine.ActionPlan, err error) {
 func (m *Migrator) migrateActionPlans() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentDataDBVersions()
-	vrs, err = m.dmIN.DataManager().DataDB().GetVersions("")
-	if err != nil {
-		return utils.NewCGRError(utils.Migrator,
-			utils.ServerErrorCaps,
-			err.Error(),
-			fmt.Sprintf("error: <%s> when querying oldDataDB for versions", err.Error()))
-	} else if len(vrs) == 0 {
-		return utils.NewCGRError(utils.Migrator,
-			utils.MandatoryIEMissingCaps,
-			utils.UndefinedVersion,
-			"version number is not defined for ActionTriggers model")
+	if vrs, err = m.getVersions(utils.ActionPlans); err != nil {
+		return
 	}
 	if m.dmIN.DataManager().DataDB().GetStorageType() == utils.REDIS { // if redis rebuild action plans indexes
 		redisDB, can := m.dmIN.DataManager().DataDB().(*engine.RedisStorage)
@@ -188,12 +179,8 @@ func (m *Migrator) migrateActionPlans() (err error) {
 	}
 
 	// All done, update version wtih current one
-	vrs = engine.Versions{utils.ActionPlans: engine.CurrentDataDBVersions()[utils.ActionPlans]}
-	if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
-		return utils.NewCGRError(utils.Migrator,
-			utils.ServerErrorCaps,
-			err.Error(),
-			fmt.Sprintf("error: <%s> when updating ActionPlans version into dataDB", err.Error()))
+	if err = m.setVersions(utils.ActionPlans); err != nil {
+		return err
 	}
 	return m.ensureIndexesDataDB(engine.ColApl)
 }

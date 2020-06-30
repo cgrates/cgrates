@@ -231,5 +231,7 @@ func testAlsITMigrateAndMove(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expAlsIdx, alsidx) {
 		t.Errorf("Expected %v, recived: %v", utils.ToJSON(expAlsIdx), utils.ToJSON(alsidx))
+	} else if alsMigrator.stats[Alias] != 1 {
+		t.Errorf("Expected 1, recived: %v", alsMigrator.stats[Alias] != 1)
 	}
 }

@@ -227,6 +227,8 @@ func testSupITMigrateAndMove(t *testing.T) {
 		result, err = supMigrator.dmIN.DataManager().GetRouteProfile("cgrates.org", "SUP1", false, false, utils.NonTransactional)
 		if err != utils.ErrNotFound {
 			t.Error(err)
+		} else if supMigrator.stats[utils.Routes] != 1 {
+			t.Errorf("Expected 1, recived: %v", supMigrator.stats[utils.Routes])
 		}
 	}
 }

@@ -136,12 +136,8 @@ func (m *Migrator) migrateV1User2AttributeProfile() (err error) {
 		return
 	}
 	// All done, update version wtih current one
-	vrs := engine.Versions{utils.User: engine.CurrentDataDBVersions()[utils.User]}
-	if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
-		return utils.NewCGRError(utils.Migrator,
-			utils.ServerErrorCaps,
-			err.Error(),
-			fmt.Sprintf("error: <%s> when updating Alias version into dataDB", err.Error()))
+	if err = m.setVersions(utils.User); err != nil {
+		return err
 	}
 	return
 }

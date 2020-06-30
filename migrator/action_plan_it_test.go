@@ -262,6 +262,8 @@ func testActPlnITMigrateAndMove(t *testing.T) {
 			t.Errorf("Expecting: %+v, received: %+v", actPln.AccountIDs, result.AccountIDs)
 		} else if !reflect.DeepEqual(actPln.ActionTimings[0].Timing, result.ActionTimings[0].Timing) {
 			t.Errorf("Expecting: %+v, received: %+v", actPln.ActionTimings[0].Timing, result.ActionTimings[0].Timing)
+		} else if actPlnMigrator.stats[utils.ActionPlans] != 1 {
+			t.Errorf("Expecting: 1, received: %+v", actPlnMigrator.stats[utils.ActionPlans])
 		}
 	case utils.Move:
 		if err := actPlnMigrator.dmIN.DataManager().SetActionPlan((*v1actPln)[0].Id, actPln, true, utils.NonTransactional); err != nil {
@@ -291,6 +293,8 @@ func testActPlnITMigrateAndMove(t *testing.T) {
 		result, err = actPlnMigrator.dmIN.DataManager().GetActionPlan((*v1actPln)[0].Id, true, utils.NonTransactional)
 		if err != utils.ErrNotFound {
 			t.Error(err)
+		} else if actPlnMigrator.stats[utils.ActionPlans] != 1 {
+			t.Errorf("Expecting: 1, received: %+v", actPlnMigrator.stats[utils.ActionPlans])
 		}
 	}
 }

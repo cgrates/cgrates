@@ -139,12 +139,8 @@ func (m *Migrator) migrateCurrentRouteProfile() (err error) {
 func (m *Migrator) migrateRouteProfiles() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentDataDBVersions()
-	vrs, err = m.dmIN.DataManager().DataDB().GetVersions("")
-	if err != nil {
-		return utils.NewCGRError(utils.Migrator,
-			utils.ServerErrorCaps,
-			err.Error(),
-			fmt.Sprintf("error: <%s> when querying oldDataDB for versions", err.Error()))
+	if vrs, err = m.getVersions(utils.ActionTriggers); err != nil {
+		return
 	}
 	if routeVersion, has := vrs[utils.Routes]; !has {
 		if vrs[utils.RQF] != current[utils.RQF] {

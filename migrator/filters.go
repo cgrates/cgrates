@@ -287,17 +287,8 @@ func (m *Migrator) migrateRequestFilterV3() (fltr *engine.Filter, err error) {
 func (m *Migrator) migrateFilters() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentDataDBVersions()
-	vrs, err = m.dmIN.DataManager().DataDB().GetVersions("")
-	if err != nil {
-		return utils.NewCGRError(utils.Migrator,
-			utils.ServerErrorCaps,
-			err.Error(),
-			fmt.Sprintf("error: <%s> when querying oldDataDB for versions", err.Error()))
-	} else if len(vrs) == 0 {
-		return utils.NewCGRError(utils.Migrator,
-			utils.MandatoryIEMissingCaps,
-			utils.UndefinedVersion,
-			"version number is not defined for ActionTriggers model")
+	if vrs, err = m.getVersions(utils.RQF); err != nil {
+		return
 	}
 	migrated := true
 	migratedFrom := 0
@@ -378,12 +369,8 @@ func (m *Migrator) migrateFilters() (err error) {
 		}
 	}
 
-	vrs = engine.Versions{utils.RQF: engine.CurrentDataDBVersions()[utils.RQF]}
-	if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
-		return utils.NewCGRError(utils.Migrator,
-			utils.ServerErrorCaps,
-			err.Error(),
-			fmt.Sprintf("error: <%s> when updating Filters version into dataDB", err.Error()))
+	if err = m.setVersions(utils.RQF); err != nil {
+		return err
 	}
 	return m.ensureIndexesDataDB(engine.ColFlt)
 }

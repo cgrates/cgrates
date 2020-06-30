@@ -256,5 +256,7 @@ func testAcc2ITMigrate(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", testAccount.BalanceMap, result.BalanceMap)
 	} else if !reflect.DeepEqual(testAccount.UnitCounters, result.UnitCounters) {
 		t.Errorf("Expecting: %+v, received: %+v", testAccount.UnitCounters, result.UnitCounters)
+	} else if acc2Migrator.stats[utils.Accounts] != 1 {
+		t.Errorf("Expecting: 1, received: %+v", acc2Migrator.stats[utils.Accounts])
 	}
 }

@@ -324,6 +324,8 @@ func testAccITMigrateAndMove(t *testing.T) {
 			t.Errorf("Expecting: %+v, received: %+v", testAccount.BalanceMap, result.BalanceMap)
 		} else if !reflect.DeepEqual(testAccount.UnitCounters, result.UnitCounters) {
 			t.Errorf("Expecting: %+v, received: %+v", testAccount.UnitCounters, result.UnitCounters)
+		} else if accMigrator.stats[utils.Accounts] != 1 {
+			t.Errorf("Expecting: 1, received: %+v", accMigrator.stats[utils.Accounts])
 		}
 	case utils.Move:
 		//set an account in dmIN
@@ -363,6 +365,8 @@ func testAccITMigrateAndMove(t *testing.T) {
 		result, err = accMigrator.dmIN.DataManager().GetAccount(testAccount.ID)
 		if err != utils.ErrNotFound {
 			t.Error(err)
+		} else if accMigrator.stats[utils.Accounts] != 1 {
+			t.Errorf("Expecting: 1, received: %+v", accMigrator.stats[utils.Accounts])
 		}
 
 	}

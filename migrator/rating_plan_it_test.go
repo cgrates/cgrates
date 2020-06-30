@@ -221,6 +221,8 @@ func testRtPlITMigrateAndMove(t *testing.T) {
 		result, err = rtplMigrator.dmIN.DataManager().GetRatingPlan("RT_PLAN1", true, utils.NonTransactional)
 		if err != utils.ErrNotFound {
 			t.Error(err)
+		} else if rtplMigrator.stats[utils.RatingPlan] != 1 {
+			t.Errorf("Expected 1, recived: %v", rtplMigrator.stats[utils.RatingPlan])
 		}
 	}
 }
