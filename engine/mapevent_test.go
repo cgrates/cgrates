@@ -311,7 +311,7 @@ func TestMapEventAsMapString(t *testing.T) {
 
 func TestMapEventAsCDR(t *testing.T) {
 	me := NewMapEvent(nil)
-	expected := &CDR{Cost: -1.0, ExtraFields: make(map[string]string)}
+	expected := &CDR{Cost: -1.0, ExtraFields: make(map[string]string), CostDetails: NewBareEventCost()}
 	if rply, err := me.AsCDR(nil, utils.EmptyString, utils.EmptyString); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rply) {
@@ -330,6 +330,7 @@ func TestMapEventAsCDR(t *testing.T) {
 		Tenant:      cfg.GeneralCfg().DefaultTenant,
 		Category:    cfg.GeneralCfg().DefaultCategory,
 		ExtraFields: make(map[string]string),
+		CostDetails: NewBareEventCost(),
 	}
 	if rply, err := me.AsCDR(cfg, utils.EmptyString, utils.EmptyString); err != nil {
 		t.Error(err)
@@ -371,7 +372,8 @@ func TestMapEventAsCDR(t *testing.T) {
 
 	me = MapEvent{"ExtraField1": 5, "ExtraField2": "extra"}
 	expected = &CDR{
-		Cost: -1.0,
+		Cost:        -1.0,
+		CostDetails: NewBareEventCost(),
 		ExtraFields: map[string]string{
 			"ExtraField1": "5",
 			"ExtraField2": "extra",
@@ -403,6 +405,7 @@ func TestMapEventAsCDR(t *testing.T) {
 		Tenant:      cfg.GeneralCfg().DefaultTenant,
 		Category:    cfg.GeneralCfg().DefaultCategory,
 		ExtraInfo:   "ACCOUNT_NOT_FOUND",
+		CostDetails: NewBareEventCost(),
 	}
 	if rply, err := me.AsCDR(cfg, utils.EmptyString, utils.EmptyString); err != nil {
 		t.Error(err)
@@ -446,7 +449,8 @@ func TestMapEventAsCDR(t *testing.T) {
 			"ExtraField1": "5",
 			"ExtraField2": "extra",
 		},
-		ExtraInfo: "ACCOUNT_NOT_FOUND",
+		ExtraInfo:   "ACCOUNT_NOT_FOUND",
+		CostDetails: NewBareEventCost(),
 	}
 	if rply, err := me.AsCDR(cfg, utils.EmptyString, utils.EmptyString); err != nil {
 		t.Error(err)
@@ -629,6 +633,7 @@ func TestMapEventAsCDR(t *testing.T) {
 			},
 		},
 	}
+	ec1.initCache()
 	me = MapEvent{
 		"ExtraField1": 5,
 		"Source":      1001,

@@ -625,7 +625,7 @@ func TestSafEventAsMapString(t *testing.T) {
 
 func TestSafEventAsCDR(t *testing.T) {
 	se := SafEvent{Me: NewMapEvent(nil)}
-	expected := &CDR{Cost: -1.0, ExtraFields: make(map[string]string)}
+	expected := &CDR{Cost: -1.0, ExtraFields: make(map[string]string), CostDetails: NewBareEventCost()}
 	if rply, err := se.AsCDR(nil, utils.EmptyString, utils.EmptyString); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rply) {
@@ -644,6 +644,7 @@ func TestSafEventAsCDR(t *testing.T) {
 		Tenant:      cfg.GeneralCfg().DefaultTenant,
 		Category:    cfg.GeneralCfg().DefaultCategory,
 		ExtraFields: make(map[string]string),
+		CostDetails: NewBareEventCost(),
 	}
 	if rply, err := se.AsCDR(cfg, utils.EmptyString, utils.EmptyString); err != nil {
 		t.Error(err)
@@ -676,7 +677,8 @@ func TestSafEventAsCDR(t *testing.T) {
 	}
 	se = SafEvent{Me: MapEvent{"ExtraField1": 5, "ExtraField2": "extra"}}
 	expected = &CDR{
-		Cost: -1.0,
+		Cost:        -1.0,
+		CostDetails: NewBareEventCost(),
 		ExtraFields: map[string]string{
 			"ExtraField1": "5",
 			"ExtraField2": "extra",
@@ -706,6 +708,7 @@ func TestSafEventAsCDR(t *testing.T) {
 		RequestType: cfg.GeneralCfg().DefaultReqType,
 		Tenant:      cfg.GeneralCfg().DefaultTenant,
 		Category:    cfg.GeneralCfg().DefaultCategory,
+		CostDetails: NewBareEventCost(),
 	}
 	if rply, err := se.AsCDR(cfg, utils.EmptyString, utils.EmptyString); err != nil {
 		t.Error(err)
@@ -739,6 +742,7 @@ func TestSafEventAsCDR(t *testing.T) {
 		ToR:         utils.VOICE,
 		RequestType: cfg.GeneralCfg().DefaultReqType,
 		Category:    cfg.GeneralCfg().DefaultCategory,
+		CostDetails: NewBareEventCost(),
 	}
 	if rply, err := se.AsCDR(cfg, "itsyscom.com", utils.EmptyString); err != nil {
 		t.Error(err)
