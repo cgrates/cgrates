@@ -324,3 +324,33 @@ func TestRSRParserCompile3(t *testing.T) {
 		t.Error("Expected error received:", err)
 	}
 }
+func TestRSRParserDynamic(t *testing.T) {
+	ePrsr := &RSRParser{
+		Rules: "~*req.<~*req.CGRID;~*req.RunID;-Cost>",
+
+		dynRules:    NewRSRParsersMustCompile("~*req.CGRID;~*req.RunID;-Cost", ";"),
+		dynIdxStart: 6,
+		dynIdxEnd:   36,
+	}
+	prsr := &RSRParser{
+		Rules: "~*req.<~*req.CGRID;~*req.RunID;-Cost>",
+	}
+	if err := prsr.Compile(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(ePrsr, prsr) {
+		t.Errorf("expecting: %+v, received: %+v", ePrsr, prsr)
+	}
+
+	dP := utils.MapStorage{
+		utils.MetaReq: utils.MapStorage{
+			utils.CGRID:              "cgridUniq",
+			utils.RunID:              utils.MetaDefault,
+			"cgridUniq*default-Cost": 10,
+		},
+	}
+	if out, err := prsr.ParseDataProvider(dP); err != nil {
+		t.Error(err)
+	} else if out != "10" {
+		t.Errorf("Expected 10 received: %q", out)
+	}
+}

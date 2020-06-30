@@ -147,21 +147,6 @@ func (rsrf *RSRField) Compile() error {
 	return nil
 }
 
-// IsStatic detects if a RSRField is a static value
-func (rsrf *RSRField) IsStatic() bool {
-	return len(rsrf.staticValue) != 0
-}
-
-// RegexpMatched will investigate whether we had a regexp match through the rules
-func (rsrf *RSRField) RegexpMatched() bool {
-	for _, rsrule := range rsrf.RSRules {
-		if rsrule.Matched {
-			return true
-		}
-	}
-	return false
-}
-
 // parseValue the field value from a string
 func (rsrf *RSRField) parseValue(value string) string {
 	if len(rsrf.staticValue) != 0 { // Enforce parsing of static values

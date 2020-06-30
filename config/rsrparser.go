@@ -81,6 +81,11 @@ func NewRSRParsers(parsersRules string, rsrSeparator string) (prsrs RSRParsers, 
 		}
 		return NewRSRParsersFromSlice(splitedRule)
 	}
+	if dynIdxStart := strings.IndexByte(parsersRules, '<'); dynIdxStart != -1 {
+		if dynIdxEnd := strings.IndexByte(parsersRules[dynIdxStart:], '>'); dynIdxEnd != -1 {
+			return NewDynRSRParser(parsersRules, rsrSeparator, dynIdxStart, dynIdxStart+dynIdxEnd)
+		}
+	}
 	return NewRSRParsersFromSlice(strings.Split(parsersRules, rsrSeparator))
 }
 
@@ -186,6 +191,10 @@ type RSRParser struct {
 	path       string                   // instruct extracting info out of header in event
 	rsrRules   []*utils.ReSearchReplace // rules to use when parsing value
 	converters utils.DataConverters     // set of converters to apply on output
+
+	dynIdxStart int
+	dynIdxEnd   int
+	dynRules    RSRParsers
 }
 
 // AttrName exports the attribute name of the RSRParser
@@ -196,6 +205,20 @@ func (prsr *RSRParser) AttrName() string {
 // Compile parses Rules string and repopulates other fields
 func (prsr *RSRParser) Compile() (err error) {
 	parserRules := prsr.Rules
+	if dynIdxStart := strings.IndexByte(parserRules, '<'); dynIdxStart != -1 {
+		if dynIdxEnd := strings.IndexByte(parserRules[dynIdxStart:], '>'); dynIdxEnd != -1 {
+			var dynrules RSRParsers
+			if dynrules, err = NewRSRParsers(parserRules[dynIdxStart+1:dynIdxStart+dynIdxEnd],
+				CgrConfig().GeneralCfg().RSRSep); err != nil {
+				return
+			}
+			prsr.dynRules = dynrules
+			prsr.dynIdxStart = dynIdxStart
+			prsr.dynIdxEnd = dynIdxStart + dynIdxEnd
+			return
+		}
+	}
+
 	if idxConverters := strings.Index(parserRules, "{*"); idxConverters != -1 { // converters in the string
 		if !strings.HasSuffix(parserRules, "}") {
 			return fmt.Errorf("invalid converter terminator in rule: <%s>",
@@ -271,6 +294,17 @@ func (prsr *RSRParser) ParseValue(value interface{}) (out string, err error) {
 }
 
 func (prsr *RSRParser) ParseDataProvider(dP utils.DataProvider) (out string, err error) {
+	if prsr.dynRules != nil {
+		var dynPath string
+		if dynPath, err = prsr.dynRules.ParseDataProvider(dP); err != nil {
+			return
+		}
+		var dynRSR *RSRParser
+		if dynRSR, err = NewRSRParser(prsr.Rules[:prsr.dynIdxStart] + dynPath + prsr.Rules[prsr.dynIdxEnd+1:]); err != nil {
+			return
+		}
+		return dynRSR.ParseDataProvider(dP)
+	}
 	var outStr string
 	if outStr, err = utils.DPDynamicString(prsr.path, dP); err != nil {
 		return
@@ -279,9 +313,79 @@ func (prsr *RSRParser) ParseDataProvider(dP utils.DataProvider) (out string, err
 }
 
 func (prsr *RSRParser) ParseDataProviderWithInterfaces(dP utils.DataProvider) (out string, err error) {
+	if prsr.dynRules != nil {
+		var dynPath string
+		if dynPath, err = prsr.dynRules.ParseDataProvider(dP); err != nil {
+			return
+		}
+		var dynRSR *RSRParser
+		if dynRSR, err = NewRSRParser(prsr.Rules[:prsr.dynIdxStart] + dynPath + prsr.Rules[prsr.dynIdxEnd+1:]); err != nil {
+			return
+		}
+		return dynRSR.ParseDataProviderWithInterfaces(dP)
+	}
 	var outIface interface{}
 	if outIface, err = utils.DPDynamicInterface(prsr.path, dP); err != nil {
 		return
 	}
 	return prsr.parseValue(utils.IfaceAsString(outIface))
+}
+
+func NewDynRSRParser(parsersRules string, sep string, idxStart, idxEnd int) (prsrs RSRParsers, err error) {
+	lastSepIdxBDyn := strings.LastIndex(parsersRules[:idxStart], sep)
+	if lastSepIdxBDyn != -1 {
+		if prsrs, err = NewRSRParsersFromSlice(strings.Split(parsersRules[:lastSepIdxBDyn], sep)); err != nil {
+			return // an error ocured before the dynamic path
+		}
+	}
+	sepIdx := strings.Index(parsersRules[idxEnd:], sep)
+	if sepIdx == -1 { // not found any other separtor so is the last rule
+		sepIdx = len(parsersRules)
+	}
+
+	dynRuleStr := parsersRules[lastSepIdxBDyn+1 : sepIdx] // this should contain the rule with the dynamic information
+
+	var dynrules RSRParsers
+	if dynrules, err = NewRSRParsers(parsersRules[idxStart+1:idxEnd], sep); err != nil {
+		return
+	}
+	// add
+	prsrs = append(prsrs, &RSRParser{
+		Rules:       dynRuleStr,
+		dynRules:    dynrules,
+		dynIdxStart: idxStart,
+		dynIdxEnd:   idxEnd,
+	})
+	if sepIdx == len(parsersRules) { // there are no more rules so return
+		return
+	}
+	lastRules := parsersRules[sepIdx+1:]
+	if dynIdxStart := strings.IndexByte(lastRules, '<'); dynIdxStart != -1 {
+		if dynIdxEnd := strings.IndexByte(lastRules[dynIdxStart:], '>'); dynIdxEnd != -1 {
+			var lastrsr RSRParsers
+			if lastrsr, err = NewDynRSRParser(lastRules, sep,
+				dynIdxStart, dynIdxStart+dynIdxEnd); err != nil {
+				return
+			}
+			prsrs = append(prsrs, lastrsr...)
+			// alternative for append in order to not create a slice with unused capacity:
+			// cp := make(RSRParsers, len(prsrs)+len(lastrsr))
+			// copy(cp, prsrs)
+			// copy(cp[len(prsrs):], lastrsr)
+			// prsrs = cp
+			return
+		}
+	}
+	// no dynamic path anymore
+	var lastrsr RSRParsers
+	if lastrsr, err = NewRSRParsersFromSlice(strings.Split(lastRules, sep)); err != nil {
+		return
+	}
+	prsrs = append(prsrs, lastrsr...)
+	// alternative for append in order to not create a slice with unused capacity:
+	// cp := make(RSRParsers, len(prsrs)+len(lastrsr))
+	// copy(cp, prsrs)
+	// copy(cp[len(prsrs):], lastrsr)
+	// prsrs = cp
+	return
 }
