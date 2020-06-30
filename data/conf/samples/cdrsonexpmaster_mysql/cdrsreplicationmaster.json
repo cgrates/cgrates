@@ -30,7 +30,7 @@
 	"store_cdrs": false,		// store cdrs in storDb
 	"chargers_conns":["*internal"],
 	"rals_conns": ["*internal"],
-	"online_cdr_exports": ["http_localhost", "amqp_localhost", "http_test_file", "amqp_test_file","aws_test_file","sqs_test_file","kafka_localhost","s3_test_file"],
+	"online_cdr_exports": ["http_localhost", "amqp_localhost", "http_test_file", "amqp_test_file","aws_test_file","sqs_test_file","kafka_localhost","s3_test_file", "eventcost_filter"],
 },
 
 "chargers": {
@@ -122,6 +122,14 @@
 		"export_format": "*s3_json_map",
 		// export_path for s3:  "endpoint?aws_region=region&aws_key=IDkey&aws_secret=secret&aws_token=sessionToken&queue_id=cgrates-cdrs"  
 		"export_path": "http://s3.us-east-2.amazonaws.com/?aws_region=eu-west-2&aws_key=testkey&aws_secret=testsecret&queue_id=cgrates-cdrs",
+		"fields": [
+			{"path": "*exp.CGRID", "type": "*composed", "value": "~*req.CGRID"},
+		],
+	},
+	"eventcost_filter": {
+		"export_format": "*amqp_json_map",
+		"export_path": "amqp://guest:guest@wrongurl:25672/?queue_id=cgrates_cdrs",
+		"filters":["*string:~*ec.Cost:100"],
 		"fields": [
 			{"path": "*exp.CGRID", "type": "*composed", "value": "~*req.CGRID"},
 		],
