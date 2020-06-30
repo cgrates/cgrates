@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package migrator
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/cgrates/cgrates/engine"
@@ -75,12 +74,8 @@ func (m *Migrator) migrateV1SharedGroups() (err error) {
 		m.stats[utils.SharedGroups] += 1
 	}
 	// All done, update version wtih current one
-	vrs := engine.Versions{utils.SharedGroups: engine.CurrentStorDBVersions()[utils.SharedGroups]}
-	if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
-		return utils.NewCGRError(utils.Migrator,
-			utils.ServerErrorCaps,
-			err.Error(),
-			fmt.Sprintf("error: <%s> when updating SharedGroups version into dataDB", err.Error()))
+	if err = m.setVersions(utils.SharedGroups); err != nil {
+		return err
 	}
 	return
 }
@@ -88,17 +83,8 @@ func (m *Migrator) migrateV1SharedGroups() (err error) {
 func (m *Migrator) migrateSharedGroups() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentDataDBVersions()
-	vrs, err = m.dmIN.DataManager().DataDB().GetVersions("")
-	if err != nil {
-		return utils.NewCGRError(utils.Migrator,
-			utils.ServerErrorCaps,
-			err.Error(),
-			fmt.Sprintf("error: <%s> when querying oldDataDB for versions", err.Error()))
-	} else if len(vrs) == 0 {
-		return utils.NewCGRError(utils.Migrator,
-			utils.MandatoryIEMissingCaps,
-			utils.UndefinedVersion,
-			"version number is not defined for ActionTriggers model")
+	if vrs, err = m.getVersions(utils.SharedGroups); err != nil {
+		return
 	}
 	switch vrs[utils.SharedGroups] {
 	case current[utils.SharedGroups]:

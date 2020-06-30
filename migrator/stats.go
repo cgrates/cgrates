@@ -174,15 +174,8 @@ func (m *Migrator) migrateV2Stats(v2Stats *engine.StatQueue) (v3Stats *engine.St
 func (m *Migrator) migrateStats() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentDataDBVersions()
-	vrs, err = m.dmIN.DataManager().DataDB().GetVersions(utils.EmptyString)
-	if err != nil {
-		return utils.NewCGRError(utils.Migrator,
-			utils.ServerErrorCaps, err.Error(),
-			fmt.Sprintf("error: <%s> when querying oldDataDB for versions", err.Error()))
-	} else if len(vrs) == 0 {
-		return utils.NewCGRError(utils.Migrator,
-			utils.MandatoryIEMissingCaps, utils.UndefinedVersion,
-			"version number is not defined for ActionTriggers model")
+	if vrs, err = m.getVersions(utils.StatS); err != nil {
+		return
 	}
 	migrated := true
 	var filter *engine.Filter
@@ -246,12 +239,8 @@ func (m *Migrator) migrateStats() (err error) {
 	// call the remove function here
 
 	// All done, update version wtih current one
-	vrs = engine.Versions{utils.StatS: engine.CurrentDataDBVersions()[utils.StatS]}
-	if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
-		return utils.NewCGRError(utils.Migrator,
-			utils.ServerErrorCaps,
-			err.Error(),
-			fmt.Sprintf("error: <%s> when updating Stats version into dataDB", err.Error()))
+	if err = m.setVersions(utils.StatS); err != nil {
+		return err
 	}
 	return m.ensureIndexesDataDB(engine.ColSqs)
 }

@@ -58,18 +58,10 @@ func (m *Migrator) migrateCurrentResource() (err error) {
 func (m *Migrator) migrateResources() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentDataDBVersions()
-	vrs, err = m.dmIN.DataManager().DataDB().GetVersions("")
-	if err != nil {
-		return utils.NewCGRError(utils.Migrator,
-			utils.ServerErrorCaps,
-			err.Error(),
-			fmt.Sprintf("error: <%s> when querying oldDataDB for versions", err.Error()))
-	} else if len(vrs) == 0 {
-		return utils.NewCGRError(utils.Migrator,
-			utils.MandatoryIEMissingCaps,
-			utils.UndefinedVersion,
-			"version number is not defined for ActionTriggers model")
+	if vrs, err = m.getVersions(utils.Resource); err != nil {
+		return
 	}
+
 	switch vrs[utils.Resource] {
 	case current[utils.Resource]:
 		if m.sameDataDB {

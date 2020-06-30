@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package migrator
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/cgrates/cgrates/engine"
@@ -98,17 +97,8 @@ func (m *Migrator) migrateV1Actions() (acts engine.Actions, err error) {
 func (m *Migrator) migrateActions() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentDataDBVersions()
-	vrs, err = m.dmIN.DataManager().DataDB().GetVersions("")
-	if err != nil {
-		return utils.NewCGRError(utils.Migrator,
-			utils.ServerErrorCaps,
-			err.Error(),
-			fmt.Sprintf("error: <%s> when querying oldDataDB for versions", err.Error()))
-	} else if len(vrs) == 0 {
-		return utils.NewCGRError(utils.Migrator,
-			utils.MandatoryIEMissingCaps,
-			utils.UndefinedVersion,
-			"version number is not defined for ActionTriggers model")
+	if vrs, err = m.getVersions(utils.Actions); err != nil {
+		return
 	}
 	migrated := true
 	var acts engine.Actions
@@ -151,12 +141,8 @@ func (m *Migrator) migrateActions() (err error) {
 	// remove old actions
 
 	// All done, update version wtih current one
-	vrs = engine.Versions{utils.Actions: engine.CurrentStorDBVersions()[utils.Actions]}
-	if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
-		return utils.NewCGRError(utils.Migrator,
-			utils.ServerErrorCaps,
-			err.Error(),
-			fmt.Sprintf("error: <%s> when updating Actions version into dataDB", err.Error()))
+	if err = m.setVersions(utils.Actions); err != nil {
+		return err
 	}
 
 	return m.ensureIndexesDataDB(engine.ColAct)

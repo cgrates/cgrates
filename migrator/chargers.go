@@ -59,17 +59,8 @@ func (m *Migrator) migrateCurrentCharger() (err error) {
 func (m *Migrator) migrateChargers() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentDataDBVersions()
-	vrs, err = m.dmIN.DataManager().DataDB().GetVersions("")
-	if err != nil {
-		return utils.NewCGRError(utils.Migrator,
-			utils.ServerErrorCaps,
-			err.Error(),
-			fmt.Sprintf("error: <%s> when querying oldDataDB for versions", err.Error()))
-	} else if len(vrs) == 0 {
-		return utils.NewCGRError(utils.Migrator,
-			utils.MandatoryIEMissingCaps,
-			utils.UndefinedVersion,
-			"version number is not defined for ChargerProfile model")
+	if vrs, err = m.getVersions(utils.Chargers); err != nil {
+		return
 	}
 	switch vrs[utils.Chargers] {
 	case current[utils.Chargers]:

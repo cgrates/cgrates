@@ -21,6 +21,7 @@ package migrator
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -82,4 +83,40 @@ func NewMigratorStorDB(db_type, host, port, name, user, pass, marshaler, sslmode
 			db_type, utils.MYSQL, utils.MONGO, utils.POSTGRES, utils.INTERNAL))
 	}
 	return d, nil
+}
+func (m *Migrator) getVersions(str string) (vrs engine.Versions, err error) {
+	if str == utils.CDRs || str == utils.SessionSCosts || strings.HasPrefix(str, "Tp") {
+		vrs, err = m.storDBIn.StorDB().GetVersions(utils.EmptyString)
+	} else {
+		vrs, err = m.dmIN.DataManager().DataDB().GetVersions(utils.EmptyString)
+	}
+	if err != nil {
+		return nil, utils.NewCGRError(utils.Migrator,
+			utils.ServerErrorCaps,
+			err.Error(),
+			fmt.Sprintf("error: <%s> when querying oldDataDB for versions", err.Error()))
+	} else if len(vrs) == 0 {
+		return nil, utils.NewCGRError(utils.Migrator,
+			utils.MandatoryIEMissingCaps,
+			utils.UndefinedVersion,
+			"version number is not defined for "+str)
+	}
+	return
+}
+
+func (m *Migrator) setVersions(str string) (err error) {
+	if str == utils.CDRs || str == utils.SessionSCosts || strings.HasPrefix(str, "Tp") {
+		vrs := engine.Versions{str: engine.CurrentStorDBVersions()[str]}
+		err = m.storDBOut.StorDB().SetVersions(vrs, false)
+	} else {
+		vrs := engine.Versions{str: engine.CurrentDataDBVersions()[str]}
+		err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false)
+	}
+	if err != nil {
+		return utils.NewCGRError(utils.Migrator,
+			utils.ServerErrorCaps,
+			err.Error(),
+			fmt.Sprintf("error: <%s> when updating %s version into StorDB", err.Error(), str))
+	}
+	return
 }

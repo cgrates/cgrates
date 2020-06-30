@@ -20,7 +20,6 @@ package migrator
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"strings"
 	"time"
@@ -122,17 +121,8 @@ func (m *Migrator) migrateV2Accounts() (v3Acnt *engine.Account, err error) {
 func (m *Migrator) migrateAccounts() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentDataDBVersions()
-	vrs, err = m.dmIN.DataManager().DataDB().GetVersions(utils.EmptyString)
-	if err != nil {
-		return utils.NewCGRError(utils.Migrator,
-			utils.ServerErrorCaps,
-			err.Error(),
-			fmt.Sprintf("error: <%s> when querying oldDataDB for versions", err.Error()))
-	} else if len(vrs) == 0 {
-		return utils.NewCGRError(utils.Migrator,
-			utils.MandatoryIEMissingCaps,
-			utils.UndefinedVersion,
-			"version number is not defined for Actions")
+	if vrs, err = m.getVersions(utils.Accounts); err != nil {
+		return
 	}
 	migrated := true
 	migratedFrom := 0
@@ -202,12 +192,8 @@ func (m *Migrator) migrateAccounts() (err error) {
 	}
 
 	// All done, update version wtih current one
-	vrs = engine.Versions{utils.Accounts: engine.CurrentDataDBVersions()[utils.Accounts]}
-	if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
-		return utils.NewCGRError(utils.Migrator,
-			utils.ServerErrorCaps,
-			err.Error(),
-			fmt.Sprintf("error: <%s> when updating Accounts version into StorDB", err.Error()))
+	if err = m.setVersions(utils.Accounts); err != nil {
+		return err
 	}
 	return m.ensureIndexesDataDB(engine.ColAcc)
 }

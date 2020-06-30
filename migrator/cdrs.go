@@ -20,7 +20,6 @@ package migrator
 
 import (
 	"encoding/json"
-	"fmt"
 	"time"
 
 	"github.com/cgrates/cgrates/engine"
@@ -47,17 +46,8 @@ func (m *Migrator) migrateCurrentCDRs() (err error) {
 func (m *Migrator) migrateCDRs() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentStorDBVersions()
-	vrs, err = m.storDBIn.StorDB().GetVersions(utils.EmptyString)
-	if err != nil {
-		return utils.NewCGRError(utils.Migrator,
-			utils.ServerErrorCaps,
-			err.Error(),
-			fmt.Sprintf("error: <%s> when querying oldDataDB for versions", err.Error()))
-	} else if len(vrs) == 0 {
-		return utils.NewCGRError(utils.Migrator,
-			utils.MandatoryIEMissingCaps,
-			utils.UndefinedVersion,
-			"version number is not defined for Actions")
+	if vrs, err = m.getVersions(utils.CDRs); err != nil {
+		return
 	}
 	migrated := true
 	var v2 *engine.CDR
@@ -93,12 +83,8 @@ func (m *Migrator) migrateCDRs() (err error) {
 		m.stats[utils.CDRs]++
 	}
 	// All done, update version wtih current one
-	vrs = engine.Versions{utils.CDRs: engine.CurrentStorDBVersions()[utils.CDRs]}
-	if err = m.storDBOut.StorDB().SetVersions(vrs, false); err != nil {
-		return utils.NewCGRError(utils.Migrator,
-			utils.ServerErrorCaps,
-			err.Error(),
-			fmt.Sprintf("error: <%s> when updating CDRs version into StorDB", err.Error()))
+	if err = m.setVersions(utils.CDRs); err != nil {
+		return err
 	}
 	return m.ensureIndexesStorDB(engine.ColCDRs)
 }

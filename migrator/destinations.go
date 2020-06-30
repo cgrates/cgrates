@@ -52,18 +52,10 @@ func (m *Migrator) migrateCurrentDestinations() (err error) {
 func (m *Migrator) migrateDestinations() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentDataDBVersions()
-	vrs, err = m.dmIN.DataManager().DataDB().GetVersions("")
-	if err != nil {
-		return utils.NewCGRError(utils.Migrator,
-			utils.ServerErrorCaps,
-			err.Error(),
-			fmt.Sprintf("error: <%s> when querying oldDataDB for versions", err.Error()))
-	} else if len(vrs) == 0 {
-		return utils.NewCGRError(utils.Migrator,
-			utils.MandatoryIEMissingCaps,
-			utils.UndefinedVersion,
-			"version number is not defined for ActionTriggers model")
+	if vrs, err = m.getVersions(utils.Destinations); err != nil {
+		return
 	}
+
 	switch vrs[utils.Destinations] {
 	case current[utils.Destinations]:
 		if m.sameDataDB {
