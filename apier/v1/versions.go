@@ -24,8 +24,8 @@ import (
 )
 
 // Queries all versions from dataDB
-func (self *APIerSv1) GetDataDBVersions(ign *string, reply *engine.Versions) error {
-	if vrs, err := self.DataManager.DataDB().GetVersions(""); err != nil {
+func (apierSv1 *APIerSv1) GetDataDBVersions(ign *string, reply *engine.Versions) error {
+	if vrs, err := apierSv1.DataManager.DataDB().GetVersions(""); err != nil {
 		return utils.NewErrServerError(err)
 	} else if len(vrs) == 0 {
 		return utils.ErrNotFound
@@ -36,8 +36,8 @@ func (self *APIerSv1) GetDataDBVersions(ign *string, reply *engine.Versions) err
 }
 
 // Queries all versions from stordb
-func (self *APIerSv1) GetStorDBVersions(ign *string, reply *engine.Versions) error {
-	if vrs, err := self.StorDb.GetVersions(""); err != nil {
+func (apierSv1 *APIerSv1) GetStorDBVersions(ign *string, reply *engine.Versions) error {
+	if vrs, err := apierSv1.StorDb.GetVersions(""); err != nil {
 		return utils.NewErrServerError(err)
 	} else if len(vrs) == 0 {
 		return utils.ErrNotFound
@@ -53,11 +53,11 @@ type SetVersionsArg struct {
 }
 
 // Queries all versions from dataDB
-func (self *APIerSv1) SetDataDBVersions(arg *SetVersionsArg, reply *string) error {
+func (apierSv1 *APIerSv1) SetDataDBVersions(arg *SetVersionsArg, reply *string) error {
 	if arg.Versions == nil {
 		arg.Versions = engine.CurrentDataDBVersions()
 	}
-	if err := self.DataManager.DataDB().SetVersions(arg.Versions, arg.Overwrite); err != nil {
+	if err := apierSv1.DataManager.DataDB().SetVersions(arg.Versions, arg.Overwrite); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
@@ -65,11 +65,11 @@ func (self *APIerSv1) SetDataDBVersions(arg *SetVersionsArg, reply *string) erro
 }
 
 // Queries all versions from stordb
-func (self *APIerSv1) SetStorDBVersions(arg *SetVersionsArg, reply *string) error {
+func (apierSv1 *APIerSv1) SetStorDBVersions(arg *SetVersionsArg, reply *string) error {
 	if arg.Versions == nil {
 		arg.Versions = engine.CurrentDataDBVersions()
 	}
-	if err := self.StorDb.SetVersions(arg.Versions, arg.Overwrite); err != nil {
+	if err := apierSv1.StorDb.SetVersions(arg.Versions, arg.Overwrite); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK

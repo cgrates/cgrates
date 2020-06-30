@@ -26,11 +26,11 @@ import (
 )
 
 // GetAttributeProfile returns an Attribute Profile
-func (APIerSv1 *APIerSv1) GetAttributeProfile(arg *utils.TenantIDWithArgDispatcher, reply *engine.AttributeProfile) error {
+func (apierSv1 *APIerSv1) GetAttributeProfile(arg *utils.TenantIDWithArgDispatcher, reply *engine.AttributeProfile) error {
 	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if alsPrf, err := APIerSv1.DataManager.GetAttributeProfile(arg.Tenant, arg.ID, true, true, utils.NonTransactional); err != nil {
+	if alsPrf, err := apierSv1.DataManager.GetAttributeProfile(arg.Tenant, arg.ID, true, true, utils.NonTransactional); err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}
@@ -42,12 +42,12 @@ func (APIerSv1 *APIerSv1) GetAttributeProfile(arg *utils.TenantIDWithArgDispatch
 }
 
 // GetAttributeProfileIDs returns list of attributeProfile IDs registered for a tenant
-func (APIerSv1 *APIerSv1) GetAttributeProfileIDs(args *utils.TenantArgWithPaginator, attrPrfIDs *[]string) error {
+func (apierSv1 *APIerSv1) GetAttributeProfileIDs(args *utils.TenantArgWithPaginator, attrPrfIDs *[]string) error {
 	if missing := utils.MissingStructFields(args, []string{utils.Tenant}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	prfx := utils.AttributeProfilePrefix + args.Tenant + ":"
-	keys, err := APIerSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
+	keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
 	if err != nil {
 		return err
 	}
@@ -64,13 +64,13 @@ func (APIerSv1 *APIerSv1) GetAttributeProfileIDs(args *utils.TenantArgWithPagina
 
 // GetAttributeProfileIDsCount sets in reply var the total number of AttributeProfileIDs registered for a tenant
 // returns ErrNotFound in case of 0 AttributeProfileIDs
-func (APIerSv1 *APIerSv1) GetAttributeProfileIDsCount(args *utils.TenantArg, reply *int) (err error) {
+func (apierSv1 *APIerSv1) GetAttributeProfileIDsCount(args *utils.TenantArg, reply *int) (err error) {
 	if missing := utils.MissingStructFields(args, []string{utils.Tenant}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	var keys []string
 	prfx := utils.AttributeProfilePrefix + args.Tenant + ":"
-	if keys, err = APIerSv1.DataManager.DataDB().GetKeysForPrefix(prfx); err != nil {
+	if keys, err = apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx); err != nil {
 		return err
 	}
 	if len(keys) == 0 {
@@ -87,7 +87,7 @@ type AttributeWithCache struct {
 }
 
 //SetAttributeProfile add/update a new Attribute Profile
-func (APIerSv1 *APIerSv1) SetAttributeProfile(alsWrp *AttributeWithCache, reply *string) error {
+func (apierSv1 *APIerSv1) SetAttributeProfile(alsWrp *AttributeWithCache, reply *string) error {
 	if missing := utils.MissingStructFields(alsWrp.AttributeProfile, []string{"Tenant", "ID", "Attributes"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -103,18 +103,18 @@ func (APIerSv1 *APIerSv1) SetAttributeProfile(alsWrp *AttributeWithCache, reply 
 			}
 		}
 	}
-	if err := APIerSv1.DataManager.SetAttributeProfile(alsWrp.AttributeProfile, true); err != nil {
+	if err := apierSv1.DataManager.SetAttributeProfile(alsWrp.AttributeProfile, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheAttributeProfiles and store it in database
-	if err := APIerSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheAttributeProfiles: time.Now().UnixNano()}); err != nil {
+	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheAttributeProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	args := utils.ArgsGetCacheItem{
 		CacheID: utils.CacheAttributeProfiles,
 		ItemID:  alsWrp.TenantID(),
 	}
-	if err := APIerSv1.CallCache(GetCacheOpt(alsWrp.Cache), args); err != nil {
+	if err := apierSv1.CallCache(GetCacheOpt(alsWrp.Cache), args); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -122,23 +122,23 @@ func (APIerSv1 *APIerSv1) SetAttributeProfile(alsWrp *AttributeWithCache, reply 
 }
 
 //RemoveAttributeProfile remove a specific Attribute Profile
-func (APIerSv1 *APIerSv1) RemoveAttributeProfile(arg *utils.TenantIDWithCache, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveAttributeProfile(arg *utils.TenantIDWithCache, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := APIerSv1.DataManager.RemoveAttributeProfile(arg.Tenant, arg.ID,
+	if err := apierSv1.DataManager.RemoveAttributeProfile(arg.Tenant, arg.ID,
 		utils.NonTransactional, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheAttributeProfiles and store it in database
-	if err := APIerSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheAttributeProfiles: time.Now().UnixNano()}); err != nil {
+	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheAttributeProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	args := utils.ArgsGetCacheItem{
 		CacheID: utils.CacheAttributeProfiles,
 		ItemID:  utils.ConcatenatedKey(arg.Tenant, arg.ID),
 	}
-	if err := APIerSv1.CallCache(GetCacheOpt(arg.Cache), args); err != nil {
+	if err := apierSv1.CallCache(GetCacheOpt(arg.Cache), args); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

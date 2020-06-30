@@ -3009,7 +3009,7 @@ func (dm *DataManager) SetRateProfile(rpp *RateProfile, withIndex bool) (err err
 		}
 
 	}
-	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaDispatcherProfiles]; itm.Replicate {
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRateProfiles]; itm.Replicate {
 		var reply string
 		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
 			utils.ReplicatorSv1SetRateProfile,
@@ -3064,6 +3064,107 @@ func (dm *DataManager) RemoveRateProfile(tenant, id string,
 					APIKey:  utils.StringPointer(itm.APIKey),
 					RouteID: utils.StringPointer(itm.RouteID),
 				}}, &reply)
+	}
+	return
+}
+
+func (dm *DataManager) RemoveRateProfileRates(tenant, id string, rateIDs []string, withIndex bool) (err error) {
+	if dm == nil {
+		err = utils.ErrNoDatabaseConn
+		return
+	}
+	oldRpp, err := dm.GetRateProfile(tenant, id, true, false, utils.NonTransactional)
+	if err != nil {
+		return err
+	}
+	if len(rateIDs) == 0 {
+		if withIndex {
+			for key, rate := range oldRpp.Rates {
+				if err = removeItemFromFilterIndex(dm, utils.CacheRateFilterIndexes,
+					tenant, id, key, rate.FilterIDs); err != nil {
+					return
+				}
+			}
+		}
+		oldRpp.Rates = map[string]*Rate{}
+	} else {
+		for _, rateID := range rateIDs {
+			if _, has := oldRpp.Rates[rateID]; !has {
+				continue
+			}
+			if withIndex {
+
+				if err = removeItemFromFilterIndex(dm, utils.CacheRateFilterIndexes,
+					tenant, id, rateID, oldRpp.Rates[rateID].FilterIDs); err != nil {
+					return
+				}
+			}
+			delete(oldRpp.Rates, rateID)
+		}
+	}
+	if err = dm.DataDB().SetRateProfileDrv(oldRpp); err != nil {
+		return err
+	}
+
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRateProfiles]; itm.Replicate {
+		var reply string
+		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+			utils.ReplicatorSv1SetRateProfile,
+			&RateProfileWithArgDispatcher{
+				RateProfile: oldRpp,
+				ArgDispatcher: &utils.ArgDispatcher{
+					APIKey:  utils.StringPointer(itm.APIKey),
+					RouteID: utils.StringPointer(itm.RouteID),
+				}}, &reply); err != nil {
+			err = utils.CastRPCErr(err)
+			return
+		}
+	}
+	return
+}
+
+func (dm *DataManager) SetRateProfileRates(rpp *RateProfile, withIndex bool) (err error) {
+	if dm == nil {
+		err = utils.ErrNoDatabaseConn
+		return
+	}
+	oldRpp, err := dm.GetRateProfile(rpp.Tenant, rpp.ID, true, false, utils.NonTransactional)
+	if err != nil {
+		return err
+	}
+	// create index for each rate
+	for key, rate := range rpp.Rates {
+		if withIndex {
+			var oldRateFiltersIDs *[]string
+			if oldRate, has := oldRpp.Rates[key]; has {
+				oldRateFiltersIDs = &oldRate.FilterIDs
+			}
+			// when we create the indexes for rates we use RateProfile ID as context
+			if err := updatedIndexes(dm, utils.CacheRateFilterIndexes, rpp.Tenant,
+				rpp.ID, key, oldRateFiltersIDs, rate.FilterIDs); err != nil {
+				return err
+			}
+		}
+		oldRpp.Rates[key] = rate
+	}
+
+	if err = dm.DataDB().SetRateProfileDrv(oldRpp); err != nil {
+		return err
+	}
+
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRateProfiles]; itm.Replicate {
+		var reply string
+		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+			utils.ReplicatorSv1SetRateProfile,
+			&RateProfileWithArgDispatcher{
+				RateProfile: oldRpp,
+				ArgDispatcher: &utils.ArgDispatcher{
+					APIKey:  utils.StringPointer(itm.APIKey),
+					RouteID: utils.StringPointer(itm.RouteID),
+				}}, &reply); err != nil {
+			err = utils.CastRPCErr(err)
+			return
+		}
 	}
 	return
 }

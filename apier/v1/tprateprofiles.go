@@ -23,11 +23,11 @@ import (
 )
 
 // SetTPRateProfile creates a new TPRateProfile within a tariff plan
-func (api *APIerSv1) SetTPRateProfile(attrs *utils.TPRateProfile, reply *string) error {
+func (apierSv1 *APIerSv1) SetTPRateProfile(attrs *utils.TPRateProfile, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := api.StorDb.SetTPRateProfiles([]*utils.TPRateProfile{attrs}); err != nil {
+	if err := apierSv1.StorDb.SetTPRateProfiles([]*utils.TPRateProfile{attrs}); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
@@ -35,11 +35,11 @@ func (api *APIerSv1) SetTPRateProfile(attrs *utils.TPRateProfile, reply *string)
 }
 
 // GetTPRateProfile queries specific TPRateProfile on tariff plan
-func (api *APIerSv1) GetTPRateProfile(attr *utils.TPTntID, reply *utils.TPRateProfile) error {
+func (apierSv1 *APIerSv1) GetTPRateProfile(attr *utils.TPTntID, reply *utils.TPRateProfile) error {
 	if missing := utils.MissingStructFields(attr, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	filter, err := api.StorDb.GetTPRateProfiles(attr.TPid, attr.Tenant, attr.ID)
+	filter, err := apierSv1.StorDb.GetTPRateProfiles(attr.TPid, attr.Tenant, attr.ID)
 	if err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
@@ -56,11 +56,11 @@ type AttrGetTPRateProfileIds struct {
 }
 
 // GetTPRateProfileIds queries TPRateProfiles identities on specific tariff plan.
-func (api *APIerSv1) GetTPRateProfileIds(attrs *AttrGetTPRateProfileIds, reply *[]string) error {
+func (apierSv1 *APIerSv1) GetTPRateProfileIds(attrs *AttrGetTPRateProfileIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	ids, err := api.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPRateProfiles, utils.TPDistinctIds{"tenant", "id"},
+	ids, err := apierSv1.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPRateProfiles, utils.TPDistinctIds{"tenant", "id"},
 		nil, &attrs.PaginatorWithSearch)
 	if err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
@@ -73,11 +73,11 @@ func (api *APIerSv1) GetTPRateProfileIds(attrs *AttrGetTPRateProfileIds, reply *
 }
 
 // RemoveTPRateProfile removes specific TPRateProfile on Tariff plan
-func (api *APIerSv1) RemoveTPRateProfile(attrs *utils.TPTntID, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveTPRateProfile(attrs *utils.TPTntID, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := api.StorDb.RemTpData(utils.TBLTPRateProfiles, attrs.TPid,
+	if err := apierSv1.StorDb.RemTpData(utils.TBLTPRateProfiles, attrs.TPid,
 		map[string]string{"tenant": attrs.Tenant, "id": attrs.ID}); err != nil {
 		return utils.NewErrServerError(err)
 	}

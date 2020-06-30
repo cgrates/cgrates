@@ -116,19 +116,8 @@ func (apierSv1 *APIerSv1) SetRateProfileRates(rPrf *RateProfileWithCache, reply 
 	if missing := utils.MissingStructFields(rPrf.RateProfile, []string{"Tenant", "ID", "Rates"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	var rateProfile *engine.RateProfile
-	// make sure the RateProfile exists
-	if rateProfile, err = apierSv1.DataManager.GetRateProfile(rPrf.Tenant, rPrf.ID, true, true, utils.NonTransactional); err != nil {
-		if err.Error() != utils.ErrNotFound.Error() {
-			err = utils.NewErrServerError(err)
-		}
-		return err
-	}
-	// add the new rates and overwrite the existing ones
-	for key, rate := range rPrf.Rates {
-		rateProfile.Rates[key] = rate
-	}
-	if err = apierSv1.DataManager.SetRateProfile(rateProfile, true); err != nil {
+
+	if err = apierSv1.DataManager.SetRateProfileRates(rPrf.RateProfile, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheRateProfiles and store it in database
@@ -140,6 +129,35 @@ func (apierSv1 *APIerSv1) SetRateProfileRates(rPrf *RateProfileWithCache, reply 
 		ItemID:  rPrf.TenantID(),
 	}
 	if err = apierSv1.CallCache(GetCacheOpt(rPrf.Cache), args); err != nil {
+		return utils.APIErrorHandler(err)
+	}
+	*reply = utils.OK
+	return nil
+}
+
+type RemoveRPrfRates struct {
+	Tenant  string
+	ID      string
+	RateIDs []string
+	Cache   *string
+}
+
+func (apierSv1 *APIerSv1) RemoveRateProfileRates(args *RemoveRPrfRates, reply *string) (err error) {
+	if missing := utils.MissingStructFields(args, []string{"Tenant", "ID", "RateIDs"}); len(missing) != 0 {
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	if err := apierSv1.DataManager.RemoveRateProfileRates(args.Tenant, args.ID, args.RateIDs, true); err != nil {
+		return utils.APIErrorHandler(err)
+	}
+	//generate a loadID for CacheRateProfiles and store it in database
+	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheRateProfiles: time.Now().UnixNano()}); err != nil {
+		return utils.APIErrorHandler(err)
+	}
+	argsCache := utils.ArgsGetCacheItem{
+		CacheID: utils.CacheRateProfiles,
+		ItemID:  utils.ConcatenatedKey(args.Tenant, args.ID),
+	}
+	if err := apierSv1.CallCache(GetCacheOpt(args.Cache), argsCache); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

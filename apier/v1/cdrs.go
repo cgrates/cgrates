@@ -24,7 +24,7 @@ import (
 )
 
 // Retrieves the callCost out of CGR logDb
-func (apier *APIerSv1) GetEventCost(attrs *utils.AttrGetCallCost, reply *engine.EventCost) error {
+func (apierSv1 *APIerSv1) GetEventCost(attrs *utils.AttrGetCallCost, reply *engine.EventCost) error {
 	if attrs.CgrId == utils.EmptyString {
 		return utils.NewErrMandatoryIeMissing("CgrId")
 	}
@@ -35,7 +35,7 @@ func (apier *APIerSv1) GetEventCost(attrs *utils.AttrGetCallCost, reply *engine.
 		CGRIDs: []string{attrs.CgrId},
 		RunIDs: []string{attrs.RunId},
 	}
-	if cdrs, _, err := apier.CdrDb.GetCDRs(cdrFltr, false); err != nil {
+	if cdrs, _, err := apierSv1.CdrDb.GetCDRs(cdrFltr, false); err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
 		}
@@ -50,12 +50,12 @@ func (apier *APIerSv1) GetEventCost(attrs *utils.AttrGetCallCost, reply *engine.
 }
 
 // Retrieves CDRs based on the filters
-func (apier *APIerSv1) GetCDRs(attrs *utils.AttrGetCdrs, reply *[]*engine.ExternalCDR) error {
-	cdrsFltr, err := attrs.AsCDRsFilter(apier.Config.GeneralCfg().DefaultTimezone)
+func (apierSv1 *APIerSv1) GetCDRs(attrs *utils.AttrGetCdrs, reply *[]*engine.ExternalCDR) error {
+	cdrsFltr, err := attrs.AsCDRsFilter(apierSv1.Config.GeneralCfg().DefaultTimezone)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if cdrs, _, err := apier.CdrDb.GetCDRs(cdrsFltr, false); err != nil {
+	if cdrs, _, err := apierSv1.CdrDb.GetCDRs(cdrsFltr, false); err != nil {
 		return err
 	} else if len(cdrs) == 0 {
 		*reply = make([]*engine.ExternalCDR, 0)
@@ -68,12 +68,12 @@ func (apier *APIerSv1) GetCDRs(attrs *utils.AttrGetCdrs, reply *[]*engine.Extern
 }
 
 // New way of removing CDRs
-func (apier *APIerSv1) RemoveCDRs(attrs *utils.RPCCDRsFilter, reply *string) error {
-	cdrsFilter, err := attrs.AsCDRsFilter(apier.Config.GeneralCfg().DefaultTimezone)
+func (apierSv1 *APIerSv1) RemoveCDRs(attrs *utils.RPCCDRsFilter, reply *string) error {
+	cdrsFilter, err := attrs.AsCDRsFilter(apierSv1.Config.GeneralCfg().DefaultTimezone)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if _, _, err := apier.CdrDb.GetCDRs(cdrsFilter, true); err != nil {
+	if _, _, err := apierSv1.CdrDb.GetCDRs(cdrsFilter, true); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK

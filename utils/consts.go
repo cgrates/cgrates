@@ -1464,10 +1464,12 @@ const (
 
 // RateProfile APIs
 const (
-	APIerSv1SetRateProfile    = "APIerSv1.SetRateProfile"
-	APIerSv1GetRateProfile    = "APIerSv1.GetRateProfile"
-	APIerSv1GetRateProfileIDs = "APIerSv1.GetRateProfileIDs"
-	APIerSv1RemoveRateProfile = "APIerSv1.RemoveRateProfile"
+	APIerSv1SetRateProfile         = "APIerSv1.SetRateProfile"
+	APIerSv1GetRateProfile         = "APIerSv1.GetRateProfile"
+	APIerSv1GetRateProfileIDs      = "APIerSv1.GetRateProfileIDs"
+	APIerSv1RemoveRateProfile      = "APIerSv1.RemoveRateProfile"
+	APIerSv1SetRateProfileRates    = "APIerSv1.SetRateProfileRates"
+	APIerSv1RemoveRateProfileRates = "APIerSv1.RemoveRateProfileRates"
 )
 
 // AnalyzerS APIs

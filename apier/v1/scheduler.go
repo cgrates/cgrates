@@ -96,8 +96,8 @@ import (
 ]
 */
 
-func (self *APIerSv1) GetScheduledActions(args *scheduler.ArgsGetScheduledActions, reply *[]*scheduler.ScheduledAction) error {
-	sched := self.SchedulerService.GetScheduler()
+func (apierSv1 *APIerSv1) GetScheduledActions(args *scheduler.ArgsGetScheduledActions, reply *[]*scheduler.ScheduledAction) error {
+	sched := apierSv1.SchedulerService.GetScheduler()
 	if sched == nil {
 		return errors.New(utils.SchedulerNotRunningCaps)
 	}

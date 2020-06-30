@@ -24,12 +24,12 @@ import (
 )
 
 // SetTPAccountActions creates a new AccountActions profile within a tariff plan
-func (apiv1 *APIerSv1) SetTPAccountActions(attrs *utils.TPAccountActions, reply *string) error {
+func (apierSv1 *APIerSv1) SetTPAccountActions(attrs *utils.TPAccountActions, reply *string) error {
 	if missing := utils.MissingStructFields(attrs,
 		[]string{"TPid", "LoadId", "Tenant", "Account", "ActionPlanId"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := apiv1.StorDb.SetTPAccountActions([]*utils.TPAccountActions{attrs}); err != nil {
+	if err := apierSv1.StorDb.SetTPAccountActions([]*utils.TPAccountActions{attrs}); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
@@ -42,7 +42,7 @@ type AttrGetTPAccountActionsByLoadId struct {
 }
 
 // GetTPAccountActionsByLoadId queries specific AccountActions profile on tariff plan
-func (apiv1 *APIerSv1) GetTPAccountActionsByLoadId(attrs *utils.TPAccountActions, reply *[]*utils.TPAccountActions) error {
+func (apierSv1 *APIerSv1) GetTPAccountActionsByLoadId(attrs *utils.TPAccountActions, reply *[]*utils.TPAccountActions) error {
 	mndtryFlds := []string{"TPid", "LoadId"}
 	if len(attrs.Account) != 0 { // If account provided as filter, make all related fields mandatory
 		mndtryFlds = append(mndtryFlds, "Tenant", "Account")
@@ -50,7 +50,7 @@ func (apiv1 *APIerSv1) GetTPAccountActionsByLoadId(attrs *utils.TPAccountActions
 	if missing := utils.MissingStructFields(attrs, mndtryFlds); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	aas, err := apiv1.StorDb.GetTPAccountActions(attrs)
+	aas, err := apierSv1.StorDb.GetTPAccountActions(attrs)
 	if err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
@@ -67,7 +67,7 @@ type AttrGetTPAccountActions struct {
 }
 
 // GetTPAccountActions queries specific DerivedCharge on tariff plan
-func (apiv1 *APIerSv1) GetTPAccountActions(attrs *AttrGetTPAccountActions, reply *utils.TPAccountActions) error {
+func (apierSv1 *APIerSv1) GetTPAccountActions(attrs *AttrGetTPAccountActions, reply *utils.TPAccountActions) error {
 	if missing := utils.MissingStructFields(attrs, []string{"TPid", "AccountActionsId"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -75,7 +75,7 @@ func (apiv1 *APIerSv1) GetTPAccountActions(attrs *AttrGetTPAccountActions, reply
 	if err := filter.SetAccountActionsId(attrs.AccountActionsId); err != nil {
 		return err
 	}
-	aas, err := apiv1.StorDb.GetTPAccountActions(filter)
+	aas, err := apierSv1.StorDb.GetTPAccountActions(filter)
 	if err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
@@ -92,11 +92,11 @@ type AttrGetTPAccountActionIds struct {
 }
 
 // GetTPAccountActionLoadIds queries AccountActions identities on specific tariff plan.
-func (apiv1 *APIerSv1) GetTPAccountActionLoadIds(attrs *AttrGetTPAccountActionIds, reply *[]string) error {
+func (apierSv1 *APIerSv1) GetTPAccountActionLoadIds(attrs *AttrGetTPAccountActionIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	ids, err := apiv1.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPAccountActions,
+	ids, err := apierSv1.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPAccountActions,
 		utils.TPDistinctIds{"loadid"}, nil, &attrs.PaginatorWithSearch)
 	if err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
@@ -109,11 +109,11 @@ func (apiv1 *APIerSv1) GetTPAccountActionLoadIds(attrs *AttrGetTPAccountActionId
 }
 
 // GetTPAccountActionIds queries DerivedCharges identities on specific tariff plan.
-func (apiv1 *APIerSv1) GetTPAccountActionIds(attrs *AttrGetTPAccountActionIds, reply *[]string) error {
+func (apierSv1 *APIerSv1) GetTPAccountActionIds(attrs *AttrGetTPAccountActionIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	ids, err := apiv1.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPAccountActions,
+	ids, err := apierSv1.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPAccountActions,
 		utils.TPDistinctIds{"loadid", "tenant", "account"}, nil, &attrs.PaginatorWithSearch)
 	if err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
@@ -126,7 +126,7 @@ func (apiv1 *APIerSv1) GetTPAccountActionIds(attrs *AttrGetTPAccountActionIds, r
 }
 
 // RemoveTPAccountActions removes specific AccountActions on Tariff plan
-func (apiv1 *APIerSv1) RemoveTPAccountActions(attrs *AttrGetTPAccountActions, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveTPAccountActions(attrs *AttrGetTPAccountActions, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{"TPid", "LoadId", "Tenant", "Account"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -134,7 +134,7 @@ func (apiv1 *APIerSv1) RemoveTPAccountActions(attrs *AttrGetTPAccountActions, re
 	if err := aa.SetAccountActionId(attrs.AccountActionsId); err != nil {
 		return err
 	}
-	if err := apiv1.StorDb.RemTpData(utils.TBLTPAccountActions, aa.Tpid,
+	if err := apierSv1.StorDb.RemTpData(utils.TBLTPAccountActions, aa.Tpid,
 		map[string]string{"loadid": aa.Loadid, "tenant": aa.Tenant, "account": aa.Account}); err != nil {
 		return utils.NewErrServerError(err)
 	}

@@ -23,11 +23,11 @@ import (
 )
 
 // SetTPActionTriggers creates a new ActionTriggers profile within a tariff plan
-func (api *APIerSv1) SetTPActionTriggers(attrs *utils.TPActionTriggers, reply *string) error {
+func (apierSv1 *APIerSv1) SetTPActionTriggers(attrs *utils.TPActionTriggers, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{"TPid", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := api.StorDb.SetTPActionTriggers([]*utils.TPActionTriggers{attrs}); err != nil {
+	if err := apierSv1.StorDb.SetTPActionTriggers([]*utils.TPActionTriggers{attrs}); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
@@ -41,11 +41,11 @@ type AttrGetTPActionTriggers struct {
 }
 
 // GetTPActionTriggers queries specific ActionTriggers profile on tariff plan
-func (api *APIerSv1) GetTPActionTriggers(attrs *AttrGetTPActionTriggers, reply *utils.TPActionTriggers) error {
+func (apierSv1 *APIerSv1) GetTPActionTriggers(attrs *AttrGetTPActionTriggers, reply *utils.TPActionTriggers) error {
 	if missing := utils.MissingStructFields(attrs, []string{"TPid", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	ats, err := api.StorDb.GetTPActionTriggers(attrs.TPid, attrs.ID)
+	ats, err := apierSv1.StorDb.GetTPActionTriggers(attrs.TPid, attrs.ID)
 	if err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
@@ -63,11 +63,11 @@ type AttrGetTPActionTriggerIds struct {
 }
 
 // GetTPActionTriggerIds queries ActionTriggers identities on specific tariff plan.
-func (api *APIerSv1) GetTPActionTriggerIds(attrs *AttrGetTPActionTriggerIds, reply *[]string) error {
+func (apierSv1 *APIerSv1) GetTPActionTriggerIds(attrs *AttrGetTPActionTriggerIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	ids, err := api.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPActionTriggers,
+	ids, err := apierSv1.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPActionTriggers,
 		utils.TPDistinctIds{"tag"}, nil, &attrs.PaginatorWithSearch)
 	if err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
@@ -80,11 +80,11 @@ func (api *APIerSv1) GetTPActionTriggerIds(attrs *AttrGetTPActionTriggerIds, rep
 }
 
 // RemoveTPActionTriggers removes specific ActionTriggers on Tariff plan
-func (api *APIerSv1) RemoveTPActionTriggers(attrs *AttrGetTPActionTriggers, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveTPActionTriggers(attrs *AttrGetTPActionTriggers, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{"TPid", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	err := api.StorDb.RemTpData(utils.TBLTPActionTriggers,
+	err := apierSv1.StorDb.RemTpData(utils.TBLTPActionTriggers,
 		attrs.TPid, map[string]string{"tag": attrs.ID})
 	if err != nil {
 		return utils.NewErrServerError(err)
