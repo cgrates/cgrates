@@ -214,6 +214,9 @@ func testCDRsOnExpDisableOnlineExport(t *testing.T) {
 		RunID:       utils.MetaDefault,
 		Cost:        1.201,
 		PreRated:    true,
+		CostDetails: &engine.EventCost{
+			Cost: utils.Float64Pointer(10),
+		},
 	}
 	var reply string
 	if err := cdrsMasterRpc.Call(utils.CDRsV1ProcessEvent,
@@ -257,6 +260,9 @@ func testCDRsOnExpHttpCdrReplication(t *testing.T) {
 		RunID:       utils.MetaDefault,
 		Cost:        1.201,
 		PreRated:    true,
+		CostDetails: &engine.EventCost{
+			Cost: utils.Float64Pointer(10),
+		},
 	}
 	var reply string
 	if err := cdrsMasterRpc.Call(utils.CDRsV1ProcessEvent,
@@ -385,6 +391,9 @@ func testCDRsOnExpAMQPReplication(t *testing.T) {
 		RunID:       utils.MetaDefault,
 		Cost:        1.201,
 		PreRated:    true,
+		CostDetails: &engine.EventCost{
+			Cost: utils.Float64Pointer(10),
+		},
 	}
 	var reply string
 	if err := cdrsMasterRpc.Call(utils.CDRsV1ProcessEvent,
