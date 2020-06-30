@@ -1417,7 +1417,7 @@ func TestLoadRateProfiles(t *testing.T) {
 		TPid:             testTPID,
 		Tenant:           "cgrates.org",
 		ID:               "RP1",
-		FilterIDs:        []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002"},
+		FilterIDs:        []string{"*string:~*req.Subject:1001"},
 		Weight:           0,
 		ConnectFee:       0.1,
 		RoundingMethod:   "*up",
@@ -1426,23 +1426,50 @@ func TestLoadRateProfiles(t *testing.T) {
 		MaxCost:          0.6,
 		MaxCostStrategy:  "*free",
 		Rates: map[string]*utils.TPRate{
-			"FIRST_GI": {
-				ID:        "FIRST_GI",
-				FilterIDs: []string{"*gi:~*req.Usage:0"},
-				Weight:    0,
-				Value:     0.12,
-				Unit:      "1m",
-				Increment: "1m",
-				Blocker:   false,
+			"RT_WEEK": &utils.TPRate{
+				ID:              "RT_WEEK",
+				Weight:          0,
+				ActivationStart: "* * * * 1-5",
+				IntervalRates: []*utils.TPIntervalRate{
+					&utils.TPIntervalRate{
+						IntervalStart: "0s",
+						Value:         0.12,
+						Unit:          "1m",
+						Increment:     "1m",
+					},
+					&utils.TPIntervalRate{
+						IntervalStart: "1m",
+						Value:         0.06,
+						Unit:          "1m",
+						Increment:     "1s",
+					},
+				},
 			},
-			"SECOND_GI": {
-				ID:        "SECOND_GI",
-				FilterIDs: []string{"*gi:~*req.Usage:1m"},
-				Weight:    10,
-				Value:     0.06,
-				Unit:      "1m",
-				Increment: "1s",
-				Blocker:   false,
+			"RT_WEEKEND": &utils.TPRate{
+				ID:              "RT_WEEKEND",
+				Weight:          10,
+				ActivationStart: "* * * * 0,6",
+				IntervalRates: []*utils.TPIntervalRate{
+					&utils.TPIntervalRate{
+						IntervalStart: "0s",
+						Value:         0.06,
+						Unit:          "1m",
+						Increment:     "1s",
+					},
+				},
+			},
+			"RT_CHRISTMAS": &utils.TPRate{
+				ID:              "RT_CHRISTMAS",
+				Weight:          30,
+				ActivationStart: "* * 24 12 *",
+				IntervalRates: []*utils.TPIntervalRate{
+					&utils.TPIntervalRate{
+						IntervalStart: "0s",
+						Value:         0.06,
+						Unit:          "1m",
+						Increment:     "1s",
+					},
+				},
 			},
 		},
 	}
@@ -1450,15 +1477,12 @@ func TestLoadRateProfiles(t *testing.T) {
 		t.Errorf("Failed to load rateProfiles: %s", utils.ToIJSON(csvr.rateProfiles))
 	}
 	dppKey := utils.TenantID{Tenant: "cgrates.org", ID: "RP1"}
-	sort.Slice(eRatePrf.FilterIDs, func(i, j int) bool {
-		return eRatePrf.FilterIDs[i] < eRatePrf.FilterIDs[j]
-	})
-	sort.Slice(csvr.rateProfiles[dppKey].FilterIDs, func(i, j int) bool {
-		return csvr.rateProfiles[dppKey].FilterIDs[i] < csvr.rateProfiles[dppKey].FilterIDs[j]
+	sort.Slice(csvr.rateProfiles[dppKey].Rates["RT_WEEK"].IntervalRates, func(i, j int) bool {
+		return csvr.rateProfiles[dppKey].Rates["RT_WEEK"].IntervalRates[i].IntervalStart < csvr.rateProfiles[dppKey].Rates["RT_WEEK"].IntervalRates[j].IntervalStart
 	})
 
 	if !reflect.DeepEqual(eRatePrf, csvr.rateProfiles[dppKey]) {
-		t.Errorf("Expecting: %+v, received: %+v",
+		t.Errorf("Expecting: %+v,\n received: %+v",
 			utils.ToJSON(eRatePrf), utils.ToJSON(csvr.rateProfiles[dppKey]))
 	}
 }

@@ -135,7 +135,7 @@ func testV1RatePrfVerifyRateProfile(t *testing.T) {
 	rPrf := &engine.RateProfile{
 		Tenant:           "cgrates.org",
 		ID:               "RP1",
-		FilterIDs:        []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002"},
+		FilterIDs:        []string{"*string:~*req.Subject:1001"},
 		Weight:           0,
 		ConnectFee:       0.1,
 		RoundingMethod:   "*up",
@@ -144,23 +144,50 @@ func testV1RatePrfVerifyRateProfile(t *testing.T) {
 		MaxCost:          0.6,
 		MaxCostStrategy:  "*free",
 		Rates: map[string]*engine.Rate{
-			"FIRST_GI": &engine.Rate{
-				ID:        "FIRST_GI",
-				FilterIDs: []string{"*gi:~*req.Usage:0"},
-				Weight:    0,
-				Value:     0.12,
-				Unit:      time.Duration(1 * time.Minute),
-				Increment: time.Duration(1 * time.Minute),
-				Blocker:   false,
+			"RT_WEEK": &engine.Rate{
+				ID:              "RT_WEEK",
+				Weight:          0,
+				ActivationStart: "* * * * 1-5",
+				IntervalRates: []*engine.IntervalRate{
+					&engine.IntervalRate{
+						IntervalStart: time.Duration(0 * time.Second),
+						Value:         0.12,
+						Unit:          time.Duration(1 * time.Minute),
+						Increment:     time.Duration(1 * time.Minute),
+					},
+					&engine.IntervalRate{
+						IntervalStart: time.Duration(1 * time.Minute),
+						Value:         0.06,
+						Unit:          time.Duration(1 * time.Minute),
+						Increment:     time.Duration(1 * time.Second),
+					},
+				},
 			},
-			"SECOND_GI": &engine.Rate{
-				ID:        "SECOND_GI",
-				FilterIDs: []string{"*gi:~*req.Usage:1m"},
-				Weight:    10,
-				Value:     0.06,
-				Unit:      time.Duration(1 * time.Minute),
-				Increment: time.Duration(1 * time.Second),
-				Blocker:   false,
+			"RT_WEEKEND": &engine.Rate{
+				ID:              "RT_WEEKEND",
+				Weight:          10,
+				ActivationStart: "* * * * 0,6",
+				IntervalRates: []*engine.IntervalRate{
+					&engine.IntervalRate{
+						IntervalStart: time.Duration(0 * time.Second),
+						Value:         0.06,
+						Unit:          time.Duration(1 * time.Minute),
+						Increment:     time.Duration(1 * time.Second),
+					},
+				},
+			},
+			"RT_CHRISTMAS": &engine.Rate{
+				ID:              "RT_CHRISTMAS",
+				Weight:          30,
+				ActivationStart: "* * 24 12 *",
+				IntervalRates: []*engine.IntervalRate{
+					&engine.IntervalRate{
+						IntervalStart: time.Duration(0 * time.Second),
+						Value:         0.06,
+						Unit:          time.Duration(1 * time.Minute),
+						Increment:     time.Duration(1 * time.Second),
+					},
+				},
 			},
 		},
 	}

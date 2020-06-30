@@ -22,6 +22,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
+	"github.com/robfig/cron"
 )
 
 // RateProfile represents the configuration of a Rate profile
@@ -57,7 +58,7 @@ type Rate struct {
 	Blocker         bool     // RateBlocker will make this rate recurrent, deactivating further intervals
 	IntervalRates   []*IntervalRate
 
-	//aTime cron.Schedule // compiled version of activation time as cron.Schedule interface
+	aTime cron.Schedule // compiled version of activation time as cron.Schedule interface
 }
 
 type IntervalRate struct {

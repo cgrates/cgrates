@@ -3217,6 +3217,7 @@ func APItoRateProfile(tpRp *utils.TPRateProfile, timezone string) (rp *RateProfi
 			IntervalRates:   make([]*IntervalRate, len(rate.IntervalRates)),
 		}
 		for i, iRate := range rate.IntervalRates {
+			rp.Rates[key].IntervalRates[i] = new(IntervalRate)
 			if rp.Rates[key].IntervalRates[i].IntervalStart, err = utils.ParseDurationWithNanosecs(iRate.IntervalStart); err != nil {
 				return nil, err
 			}
