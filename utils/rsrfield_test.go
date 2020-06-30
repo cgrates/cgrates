@@ -214,17 +214,6 @@ func TestPrefix164(t *testing.T) {
 	}
 }
 
-func TestIsStatic(t *testing.T) {
-	rsr1 := &RSRField{Id: "0", staticValue: "0"}
-	if !rsr1.IsStatic() {
-		t.Error("Failed to detect static value.")
-	}
-	rsr2 := &RSRField{Id: "0", RSRules: []*ReSearchReplace{{SearchRegexp: regexp.MustCompile(`^([1-9]\d+)$`), ReplaceTemplate: "+$1"}}}
-	if rsr2.IsStatic() {
-		t.Error("Non static detected as static value")
-	}
-}
-
 func TestParseRSRFields(t *testing.T) {
 	fieldsStr1 := `~account:s/^\w+[mpls]\d{6}$//;~subject:s/^0\d{9}$//;^destination/+4912345/;~mediation_runid:s/^default$/default/`
 	rsrFld1, _ := NewRSRField(`~account:s/^\w+[mpls]\d{6}$//`)
