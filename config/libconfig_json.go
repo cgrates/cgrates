@@ -470,6 +470,7 @@ type RouteSJsonCfg struct {
 type LoaderJsonDataType struct {
 	Type      *string
 	File_name *string
+	Flags     *[]string
 	Fields    *[]*FcTemplateJsonCfg
 }
 

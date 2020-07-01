@@ -229,7 +229,7 @@
     # Move the file to PKG server
     - name: Copy the file to PKG server
       become: yes
-      shell: 'scp /var/packages/debian/incoming/{{ item }} {{ {{ pkgAddr }} }}:/tmp/'
+      shell: 'scp /var/packages/debian/incoming/{{ item }} {{ pkgAddr }}:/tmp/'
       args:
         chdir: /var/packages/debian/incoming/
       with_items: '{{ debFileName.stdout_lines }}'
