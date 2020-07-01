@@ -557,6 +557,7 @@ const (
 	RoundingDecimals         = "RoundingDecimals"
 	MaxCostStrategy          = "MaxCostStrategy"
 	RateID                   = "RateID"
+	RateIDs                  = "RateIDs"
 	RateFilterIDs            = "RateFilterIDs"
 	RateActivationStart      = "RateActivationStart"
 	RateWeight               = "RateWeight"
