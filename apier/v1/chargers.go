@@ -26,11 +26,11 @@ import (
 )
 
 // GetChargerProfile returns a Charger Profile
-func (APIerSv1 *APIerSv1) GetChargerProfile(arg *utils.TenantID, reply *engine.ChargerProfile) error {
+func (apierSv1 *APIerSv1) GetChargerProfile(arg *utils.TenantID, reply *engine.ChargerProfile) error {
 	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if cpp, err := APIerSv1.DataManager.GetChargerProfile(arg.Tenant, arg.ID, true, true, utils.NonTransactional); err != nil {
+	if cpp, err := apierSv1.DataManager.GetChargerProfile(arg.Tenant, arg.ID, true, true, utils.NonTransactional); err != nil {
 		return utils.APIErrorHandler(err)
 	} else {
 		*reply = *cpp
@@ -39,12 +39,12 @@ func (APIerSv1 *APIerSv1) GetChargerProfile(arg *utils.TenantID, reply *engine.C
 }
 
 // GetChargerProfileIDs returns list of chargerProfile IDs registered for a tenant
-func (APIerSv1 *APIerSv1) GetChargerProfileIDs(args *utils.TenantArgWithPaginator, chPrfIDs *[]string) error {
+func (apierSv1 *APIerSv1) GetChargerProfileIDs(args *utils.TenantArgWithPaginator, chPrfIDs *[]string) error {
 	if missing := utils.MissingStructFields(args, []string{utils.Tenant}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	prfx := utils.ChargerProfilePrefix + args.Tenant + ":"
-	keys, err := APIerSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
+	keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
 	if err != nil {
 		return err
 	}
@@ -65,15 +65,15 @@ type ChargerWithCache struct {
 }
 
 //SetChargerProfile add/update a new Charger Profile
-func (APIerSv1 *APIerSv1) SetChargerProfile(arg *ChargerWithCache, reply *string) error {
+func (apierSv1 *APIerSv1) SetChargerProfile(arg *ChargerWithCache, reply *string) error {
 	if missing := utils.MissingStructFields(arg.ChargerProfile, []string{"Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := APIerSv1.DataManager.SetChargerProfile(arg.ChargerProfile, true); err != nil {
+	if err := apierSv1.DataManager.SetChargerProfile(arg.ChargerProfile, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheChargerProfiles and store it in database
-	if err := APIerSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheChargerProfiles: time.Now().UnixNano()}); err != nil {
+	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheChargerProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for ChargerProfile
@@ -81,7 +81,7 @@ func (APIerSv1 *APIerSv1) SetChargerProfile(arg *ChargerWithCache, reply *string
 		CacheID: utils.CacheChargerProfiles,
 		ItemID:  arg.TenantID(),
 	}
-	if err := APIerSv1.CallCache(GetCacheOpt(arg.Cache), argCache); err != nil {
+	if err := apierSv1.CallCache(GetCacheOpt(arg.Cache), argCache); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -89,16 +89,16 @@ func (APIerSv1 *APIerSv1) SetChargerProfile(arg *ChargerWithCache, reply *string
 }
 
 //RemoveChargerProfile remove a specific Charger Profile
-func (APIerSv1 *APIerSv1) RemoveChargerProfile(arg *utils.TenantIDWithCache, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveChargerProfile(arg *utils.TenantIDWithCache, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := APIerSv1.DataManager.RemoveChargerProfile(arg.Tenant,
+	if err := apierSv1.DataManager.RemoveChargerProfile(arg.Tenant,
 		arg.ID, utils.NonTransactional, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheChargerProfiles and store it in database
-	if err := APIerSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheChargerProfiles: time.Now().UnixNano()}); err != nil {
+	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheChargerProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for ChargerProfile
@@ -106,7 +106,7 @@ func (APIerSv1 *APIerSv1) RemoveChargerProfile(arg *utils.TenantIDWithCache, rep
 		CacheID: utils.CacheChargerProfiles,
 		ItemID:  arg.TenantID(),
 	}
-	if err := APIerSv1.CallCache(GetCacheOpt(arg.Cache), argCache); err != nil {
+	if err := apierSv1.CallCache(GetCacheOpt(arg.Cache), argCache); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

@@ -65,11 +65,11 @@ func (rsv1 *ResourceSv1) GetResource(args *utils.TenantIDWithArgDispatcher, repl
 }
 
 // GetResourceProfile returns a resource configuration
-func (APIerSv1 *APIerSv1) GetResourceProfile(arg utils.TenantID, reply *engine.ResourceProfile) error {
+func (apierSv1 *APIerSv1) GetResourceProfile(arg utils.TenantID, reply *engine.ResourceProfile) error {
 	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if rcfg, err := APIerSv1.DataManager.GetResourceProfile(arg.Tenant, arg.ID, true, true, utils.NonTransactional); err != nil {
+	if rcfg, err := apierSv1.DataManager.GetResourceProfile(arg.Tenant, arg.ID, true, true, utils.NonTransactional); err != nil {
 		return utils.APIErrorHandler(err)
 	} else {
 		*reply = *rcfg
@@ -78,12 +78,12 @@ func (APIerSv1 *APIerSv1) GetResourceProfile(arg utils.TenantID, reply *engine.R
 }
 
 // GetResourceProfileIDs returns list of resourceProfile IDs registered for a tenant
-func (APIerSv1 *APIerSv1) GetResourceProfileIDs(args utils.TenantArgWithPaginator, rsPrfIDs *[]string) error {
+func (apierSv1 *APIerSv1) GetResourceProfileIDs(args utils.TenantArgWithPaginator, rsPrfIDs *[]string) error {
 	if missing := utils.MissingStructFields(&args, []string{utils.Tenant}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	prfx := utils.ResourceProfilesPrefix + args.Tenant + ":"
-	keys, err := APIerSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
+	keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
 	if err != nil {
 		return err
 	}
@@ -104,17 +104,17 @@ type ResourceWithCache struct {
 }
 
 //SetResourceProfile adds a new resource configuration
-func (APIerSv1 *APIerSv1) SetResourceProfile(arg *ResourceWithCache, reply *string) error {
+func (apierSv1 *APIerSv1) SetResourceProfile(arg *ResourceWithCache, reply *string) error {
 	if missing := utils.MissingStructFields(arg.ResourceProfile, []string{"Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := APIerSv1.DataManager.SetResourceProfile(arg.ResourceProfile, true); err != nil {
+	if err := apierSv1.DataManager.SetResourceProfile(arg.ResourceProfile, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheResourceProfiles and CacheResources and store it in database
 	//make 1 insert for both ResourceProfile and Resources instead of 2
 	loadID := time.Now().UnixNano()
-	if err := APIerSv1.DataManager.SetLoadIDs(
+	if err := apierSv1.DataManager.SetLoadIDs(
 		map[string]int64{utils.CacheResourceProfiles: loadID,
 			utils.CacheResources: loadID}); err != nil {
 		return utils.APIErrorHandler(err)
@@ -124,14 +124,14 @@ func (APIerSv1 *APIerSv1) SetResourceProfile(arg *ResourceWithCache, reply *stri
 		CacheID: utils.CacheResourceProfiles,
 		ItemID:  arg.TenantID(),
 	}
-	if err := APIerSv1.CallCache(GetCacheOpt(arg.Cache), argCache); err != nil {
+	if err := apierSv1.CallCache(GetCacheOpt(arg.Cache), argCache); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//add the resource only if it's not present
-	if has, err := APIerSv1.DataManager.HasData(utils.ResourcesPrefix, arg.ID, arg.Tenant); err != nil {
+	if has, err := apierSv1.DataManager.HasData(utils.ResourcesPrefix, arg.ID, arg.Tenant); err != nil {
 		return err
 	} else if !has {
-		if err := APIerSv1.DataManager.SetResource(
+		if err := apierSv1.DataManager.SetResource(
 			&engine.Resource{Tenant: arg.Tenant,
 				ID:     arg.ID,
 				Usages: make(map[string]*engine.ResourceUsage)}); err != nil {
@@ -142,7 +142,7 @@ func (APIerSv1 *APIerSv1) SetResourceProfile(arg *ResourceWithCache, reply *stri
 			CacheID: utils.CacheResources,
 			ItemID:  arg.TenantID(),
 		}
-		if err := APIerSv1.CallCache(GetCacheOpt(arg.Cache), argCache); err != nil {
+		if err := apierSv1.CallCache(GetCacheOpt(arg.Cache), argCache); err != nil {
 			return utils.APIErrorHandler(err)
 		}
 	}
@@ -152,11 +152,11 @@ func (APIerSv1 *APIerSv1) SetResourceProfile(arg *ResourceWithCache, reply *stri
 }
 
 //RemoveResourceProfile remove a specific resource configuration
-func (APIerSv1 *APIerSv1) RemoveResourceProfile(arg *utils.TenantIDWithCache, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveResourceProfile(arg *utils.TenantIDWithCache, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := APIerSv1.DataManager.RemoveResourceProfile(arg.Tenant, arg.ID, utils.NonTransactional, true); err != nil {
+	if err := apierSv1.DataManager.RemoveResourceProfile(arg.Tenant, arg.ID, utils.NonTransactional, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for ResourceProfile
@@ -164,16 +164,16 @@ func (APIerSv1 *APIerSv1) RemoveResourceProfile(arg *utils.TenantIDWithCache, re
 		CacheID: utils.CacheResourceProfiles,
 		ItemID:  arg.TenantID(),
 	}
-	if err := APIerSv1.CallCache(GetCacheOpt(arg.Cache), argCache); err != nil {
+	if err := apierSv1.CallCache(GetCacheOpt(arg.Cache), argCache); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	if err := APIerSv1.DataManager.RemoveResource(arg.Tenant, arg.ID, utils.NonTransactional); err != nil {
+	if err := apierSv1.DataManager.RemoveResource(arg.Tenant, arg.ID, utils.NonTransactional); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheResourceProfiles and CacheResources and store it in database
 	//make 1 insert for both ResourceProfile and Resources instead of 2
 	loadID := time.Now().UnixNano()
-	if err := APIerSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheResourceProfiles: loadID, utils.CacheResources: loadID}); err != nil {
+	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheResourceProfiles: loadID, utils.CacheResources: loadID}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for Resource
@@ -181,7 +181,7 @@ func (APIerSv1 *APIerSv1) RemoveResourceProfile(arg *utils.TenantIDWithCache, re
 		CacheID: utils.CacheResources,
 		ItemID:  arg.TenantID(),
 	}
-	if err := APIerSv1.CallCache(GetCacheOpt(arg.Cache), argCache); err != nil {
+	if err := apierSv1.CallCache(GetCacheOpt(arg.Cache), argCache); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

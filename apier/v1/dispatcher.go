@@ -30,11 +30,11 @@ import (
 )
 
 // GetDispatcherProfile returns a Dispatcher Profile
-func (APIerSv1 *APIerSv1) GetDispatcherProfile(arg *utils.TenantID, reply *engine.DispatcherProfile) error {
+func (apierSv1 *APIerSv1) GetDispatcherProfile(arg *utils.TenantID, reply *engine.DispatcherProfile) error {
 	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if dpp, err := APIerSv1.DataManager.GetDispatcherProfile(arg.Tenant, arg.ID, true, true, utils.NonTransactional); err != nil {
+	if dpp, err := apierSv1.DataManager.GetDispatcherProfile(arg.Tenant, arg.ID, true, true, utils.NonTransactional); err != nil {
 		return utils.APIErrorHandler(err)
 	} else {
 		*reply = *dpp
@@ -43,13 +43,13 @@ func (APIerSv1 *APIerSv1) GetDispatcherProfile(arg *utils.TenantID, reply *engin
 }
 
 // GetDispatcherProfileIDs returns list of dispatcherProfile IDs registered for a tenant
-func (APIerSv1 *APIerSv1) GetDispatcherProfileIDs(tenantArg *utils.TenantArgWithPaginator, dPrfIDs *[]string) error {
+func (apierSv1 *APIerSv1) GetDispatcherProfileIDs(tenantArg *utils.TenantArgWithPaginator, dPrfIDs *[]string) error {
 	if missing := utils.MissingStructFields(tenantArg, []string{utils.Tenant}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	tenant := tenantArg.Tenant
 	prfx := utils.DispatcherProfilePrefix + tenant + ":"
-	keys, err := APIerSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
+	keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
 	if err != nil {
 		return err
 	}
@@ -70,15 +70,15 @@ type DispatcherWithCache struct {
 }
 
 //SetDispatcherProfile add/update a new Dispatcher Profile
-func (APIerSv1 *APIerSv1) SetDispatcherProfile(args *DispatcherWithCache, reply *string) error {
+func (apierSv1 *APIerSv1) SetDispatcherProfile(args *DispatcherWithCache, reply *string) error {
 	if missing := utils.MissingStructFields(args.DispatcherProfile, []string{"Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := APIerSv1.DataManager.SetDispatcherProfile(args.DispatcherProfile, true); err != nil {
+	if err := apierSv1.DataManager.SetDispatcherProfile(args.DispatcherProfile, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheDispatcherProfiles and store it in database
-	if err := APIerSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheDispatcherProfiles: time.Now().UnixNano()}); err != nil {
+	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheDispatcherProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for DispatcherProfile
@@ -86,7 +86,7 @@ func (APIerSv1 *APIerSv1) SetDispatcherProfile(args *DispatcherWithCache, reply 
 		CacheID: utils.CacheDispatcherProfiles,
 		ItemID:  args.TenantID(),
 	}
-	if err := APIerSv1.CallCache(GetCacheOpt(args.Cache), argCache); err != nil {
+	if err := apierSv1.CallCache(GetCacheOpt(args.Cache), argCache); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -94,16 +94,16 @@ func (APIerSv1 *APIerSv1) SetDispatcherProfile(args *DispatcherWithCache, reply 
 }
 
 //RemoveDispatcherProfile remove a specific Dispatcher Profile
-func (APIerSv1 *APIerSv1) RemoveDispatcherProfile(arg *utils.TenantIDWithCache, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveDispatcherProfile(arg *utils.TenantIDWithCache, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := APIerSv1.DataManager.RemoveDispatcherProfile(arg.Tenant,
+	if err := apierSv1.DataManager.RemoveDispatcherProfile(arg.Tenant,
 		arg.ID, utils.NonTransactional, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheDispatcherProfiles and store it in database
-	if err := APIerSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheDispatcherProfiles: time.Now().UnixNano()}); err != nil {
+	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheDispatcherProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for DispatcherProfile
@@ -111,7 +111,7 @@ func (APIerSv1 *APIerSv1) RemoveDispatcherProfile(arg *utils.TenantIDWithCache, 
 		CacheID: utils.CacheDispatcherProfiles,
 		ItemID:  arg.TenantID(),
 	}
-	if err := APIerSv1.CallCache(GetCacheOpt(arg.Cache), argCache); err != nil {
+	if err := apierSv1.CallCache(GetCacheOpt(arg.Cache), argCache); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -119,26 +119,26 @@ func (APIerSv1 *APIerSv1) RemoveDispatcherProfile(arg *utils.TenantIDWithCache, 
 }
 
 // GetDispatcherHost returns a Dispatcher Host
-func (APIerSv1 *APIerSv1) GetDispatcherHost(arg *utils.TenantID, reply *engine.DispatcherHost) error {
+func (apierSv1 *APIerSv1) GetDispatcherHost(arg *utils.TenantID, reply *engine.DispatcherHost) error {
 	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	dpp, err := APIerSv1.DataManager.GetDispatcherHost(arg.Tenant, arg.ID, true, false, utils.NonTransactional)
-	if err != nil {
+	if dpp, err := apierSv1.DataManager.GetDispatcherHost(arg.Tenant, arg.ID, true, false, utils.NonTransactional); err != nil {
 		return utils.APIErrorHandler(err)
+	} else {
+		*reply = *dpp
 	}
-	*reply = *dpp
 	return nil
 }
 
 // GetDispatcherHostIDs returns list of dispatcherHost IDs registered for a tenant
-func (APIerSv1 *APIerSv1) GetDispatcherHostIDs(tenantArg *utils.TenantArgWithPaginator, dPrfIDs *[]string) error {
+func (apierSv1 *APIerSv1) GetDispatcherHostIDs(tenantArg *utils.TenantArgWithPaginator, dPrfIDs *[]string) error {
 	if missing := utils.MissingStructFields(tenantArg, []string{utils.Tenant}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	tenant := tenantArg.Tenant
 	prfx := utils.DispatcherHostPrefix + tenant + ":"
-	keys, err := APIerSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
+	keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
 	if err != nil {
 		return err
 	}
@@ -159,15 +159,15 @@ type DispatcherHostWithCache struct {
 }
 
 //SetDispatcherHost add/update a new Dispatcher Host
-func (APIerSv1 *APIerSv1) SetDispatcherHost(args *DispatcherHostWithCache, reply *string) error {
+func (apierSv1 *APIerSv1) SetDispatcherHost(args *DispatcherHostWithCache, reply *string) error {
 	if missing := utils.MissingStructFields(args.DispatcherHost, []string{"Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := APIerSv1.DataManager.SetDispatcherHost(args.DispatcherHost); err != nil {
+	if err := apierSv1.DataManager.SetDispatcherHost(args.DispatcherHost); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheDispatcherHosts and store it in database
-	if err := APIerSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheDispatcherHosts: time.Now().UnixNano()}); err != nil {
+	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheDispatcherHosts: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for DispatcherProfile
@@ -175,7 +175,7 @@ func (APIerSv1 *APIerSv1) SetDispatcherHost(args *DispatcherHostWithCache, reply
 		CacheID: utils.CacheDispatcherHosts,
 		ItemID:  args.TenantID(),
 	}
-	if err := APIerSv1.CallCache(GetCacheOpt(args.Cache), argCache); err != nil {
+	if err := apierSv1.CallCache(GetCacheOpt(args.Cache), argCache); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -183,16 +183,16 @@ func (APIerSv1 *APIerSv1) SetDispatcherHost(args *DispatcherHostWithCache, reply
 }
 
 //RemoveDispatcherHost remove a specific Dispatcher Host
-func (APIerSv1 *APIerSv1) RemoveDispatcherHost(arg *utils.TenantIDWithCache, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveDispatcherHost(arg *utils.TenantIDWithCache, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := APIerSv1.DataManager.RemoveDispatcherHost(arg.Tenant,
+	if err := apierSv1.DataManager.RemoveDispatcherHost(arg.Tenant,
 		arg.ID, utils.NonTransactional); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheDispatcherHosts and store it in database
-	if err := APIerSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheDispatcherHosts: time.Now().UnixNano()}); err != nil {
+	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheDispatcherHosts: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for DispatcherProfile
@@ -200,7 +200,7 @@ func (APIerSv1 *APIerSv1) RemoveDispatcherHost(arg *utils.TenantIDWithCache, rep
 		CacheID: utils.CacheDispatcherHosts,
 		ItemID:  arg.TenantID(),
 	}
-	if err := APIerSv1.CallCache(GetCacheOpt(arg.Cache), argCache); err != nil {
+	if err := apierSv1.CallCache(GetCacheOpt(arg.Cache), argCache); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

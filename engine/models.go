@@ -431,28 +431,30 @@ type TPDispatcherHost struct {
 }
 
 type RateProfileMdl struct {
-	PK                     uint `gorm:"primary_key"`
-	Tpid                   string
-	Tenant                 string  `index:"0" re:""`
-	ID                     string  `index:"1" re:""`
-	FilterIDs              string  `index:"2" re:""`
-	ActivationInterval     string  `index:"3" re:""`
-	Weight                 float64 `index:"4" re:"\d+\.?\d*"`
-	ConnectFee             float64 `index:"5" re:"\d+\.?\d*"`
-	RoundingMethod         string  `index:"6" re:""`
-	RoundingDecimals       int     `index:"7" re:""`
-	MinCost                float64 `index:"8"  re:"\d+\.?\d*""`
-	MaxCost                float64 `index:"9"  re:"\d+\.?\d*"`
-	MaxCostStrategy        string  `index:"10" re:""`
-	RateID                 string  `index:"11" re:""`
-	RateFilterIDs          string  `index:"12" re:""`
-	RateActivationInterval string  `index:"13" re:""`
-	RateWeight             float64 `index:"14" re:"\d+\.?\d*"`
-	RateValue              float64 `index:"15" re:"\d+\.?\d*"`
-	RateUnit               string  `index:"16" re:""`
-	RateIncrement          string  `index:"17" re:""`
-	RateBlocker            bool    `index:"18" re:""`
-	CreatedAt              time.Time
+	PK                  uint `gorm:"primary_key"`
+	Tpid                string
+	Tenant              string  `index:"0" re:""`
+	ID                  string  `index:"1" re:""`
+	FilterIDs           string  `index:"2" re:""`
+	ActivationInterval  string  `index:"3" re:""`
+	Weight              float64 `index:"4" re:"\d+\.?\d*"`
+	ConnectFee          float64 `index:"5" re:"\d+\.?\d*"`
+	RoundingMethod      string  `index:"6" re:""`
+	RoundingDecimals    int     `index:"7" re:""`
+	MinCost             float64 `index:"8"  re:"\d+\.?\d*""`
+	MaxCost             float64 `index:"9"  re:"\d+\.?\d*"`
+	MaxCostStrategy     string  `index:"10" re:""`
+	RateID              string  `index:"11" re:""`
+	RateFilterIDs       string  `index:"12" re:""`
+	RateActivationStart string  `index:"13" re:""`
+	RateWeight          float64 `index:"14" re:"\d+\.?\d*"`
+	RateBlocker         bool    `index:"15" re:""`
+	RateIntervalStart   string  `index:"16" re:""`
+	RateValue           float64 `index:"17" re:"\d+\.?\d*"`
+	RateUnit            string  `index:"18" re:""`
+	RateIncrement       string  `index:"19" re:""`
+
+	CreatedAt time.Time
 }
 
 func (_ RateProfileMdl) TableName() string {

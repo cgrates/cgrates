@@ -27,21 +27,21 @@ import (
 )
 
 // Returns MaxUsage (for calls in seconds), -1 for no limit
-func (self *APIerSv1) GetMaxUsage(usageRecord *engine.UsageRecordWithArgDispatcher, maxUsage *int64) error {
-	if self.Responder == nil {
+func (apierSv1 *APIerSv1) GetMaxUsage(usageRecord *engine.UsageRecordWithArgDispatcher, maxUsage *int64) error {
+	if apierSv1.Responder == nil {
 		return utils.NewErrNotConnected(utils.RALService)
 	}
 	if usageRecord.ToR == utils.EmptyString {
 		usageRecord.ToR = utils.VOICE
 	}
 	if usageRecord.RequestType == utils.EmptyString {
-		usageRecord.RequestType = self.Config.GeneralCfg().DefaultReqType
+		usageRecord.RequestType = apierSv1.Config.GeneralCfg().DefaultReqType
 	}
 	if usageRecord.Tenant == utils.EmptyString {
-		usageRecord.Tenant = self.Config.GeneralCfg().DefaultTenant
+		usageRecord.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	if usageRecord.Category == utils.EmptyString {
-		usageRecord.Category = self.Config.GeneralCfg().DefaultCategory
+		usageRecord.Category = apierSv1.Config.GeneralCfg().DefaultCategory
 	}
 	if usageRecord.Subject == utils.EmptyString {
 		usageRecord.Subject = usageRecord.Account
@@ -51,14 +51,14 @@ func (self *APIerSv1) GetMaxUsage(usageRecord *engine.UsageRecordWithArgDispatch
 	}
 	if usageRecord.Usage == utils.EmptyString {
 		usageRecord.Usage = strconv.FormatFloat(
-			self.Config.MaxCallDuration.Seconds(), 'f', -1, 64)
+			apierSv1.Config.MaxCallDuration.Seconds(), 'f', -1, 64)
 	}
-	cd, err := usageRecord.AsCallDescriptor(self.Config.GeneralCfg().DefaultTimezone, false)
+	cd, err := usageRecord.AsCallDescriptor(apierSv1.Config.GeneralCfg().DefaultTimezone, false)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
 	var maxDur time.Duration
-	if err := self.Responder.GetMaxSessionTime(&engine.CallDescriptorWithArgDispatcher{CallDescriptor: cd,
+	if err := apierSv1.Responder.GetMaxSessionTime(&engine.CallDescriptorWithArgDispatcher{CallDescriptor: cd,
 		ArgDispatcher: usageRecord.ArgDispatcher}, &maxDur); err != nil {
 		return err
 	}

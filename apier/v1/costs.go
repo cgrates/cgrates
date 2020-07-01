@@ -35,8 +35,8 @@ type AttrGetCost struct {
 	*utils.ArgDispatcher
 }
 
-func (apier *APIerSv1) GetCost(attrs *AttrGetCost, ec *engine.EventCost) error {
-	if apier.Responder == nil {
+func (apierSv1 *APIerSv1) GetCost(attrs *AttrGetCost, ec *engine.EventCost) error {
+	if apierSv1.Responder == nil {
 		return utils.NewErrNotConnected(utils.RALService)
 	}
 	usage, err := utils.ParseDurationWithNanosecs(attrs.Usage)
@@ -44,7 +44,7 @@ func (apier *APIerSv1) GetCost(attrs *AttrGetCost, ec *engine.EventCost) error {
 		return err
 	}
 	aTime, err := utils.ParseTimeDetectLayout(attrs.AnswerTime,
-		apier.Config.GeneralCfg().DefaultTimezone)
+		apierSv1.Config.GeneralCfg().DefaultTimezone)
 	if err != nil {
 		return err
 	}
@@ -59,7 +59,7 @@ func (apier *APIerSv1) GetCost(attrs *AttrGetCost, ec *engine.EventCost) error {
 		DurationIndex: usage,
 	}
 	var cc engine.CallCost
-	if err := apier.Responder.GetCost(
+	if err := apierSv1.Responder.GetCost(
 		&engine.CallDescriptorWithArgDispatcher{
 			CallDescriptor: cd,
 			ArgDispatcher:  attrs.ArgDispatcher}, &cc); err != nil {
@@ -79,12 +79,12 @@ type AttrGetDataCost struct {
 	*utils.ArgDispatcher
 }
 
-func (apier *APIerSv1) GetDataCost(attrs *AttrGetDataCost, reply *engine.DataCost) error {
-	if apier.Responder == nil {
+func (apierSv1 *APIerSv1) GetDataCost(attrs *AttrGetDataCost, reply *engine.DataCost) error {
+	if apierSv1.Responder == nil {
 		return utils.NewErrNotConnected(utils.RALService)
 	}
 	aTime, err := utils.ParseTimeDetectLayout(attrs.AnswerTime,
-		apier.Config.GeneralCfg().DefaultTimezone)
+		apierSv1.Config.GeneralCfg().DefaultTimezone)
 	if err != nil {
 		return err
 	}
@@ -98,7 +98,7 @@ func (apier *APIerSv1) GetDataCost(attrs *AttrGetDataCost, reply *engine.DataCos
 		ToR:           utils.DATA,
 	}
 	var cc engine.CallCost
-	if err := apier.Responder.GetCost(&engine.CallDescriptorWithArgDispatcher{CallDescriptor: cd,
+	if err := apierSv1.Responder.GetCost(&engine.CallDescriptorWithArgDispatcher{CallDescriptor: cd,
 		ArgDispatcher: attrs.ArgDispatcher}, &cc); err != nil {
 		return utils.NewErrServerError(err)
 	}

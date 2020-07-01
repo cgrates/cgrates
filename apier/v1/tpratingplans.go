@@ -25,11 +25,11 @@ import (
 )
 
 // SetTPRatingPlan creates a new DestinationRateTiming profile within a tariff plan
-func (api *APIerSv1) SetTPRatingPlan(attrs *utils.TPRatingPlan, reply *string) error {
+func (apierSv1 *APIerSv1) SetTPRatingPlan(attrs *utils.TPRatingPlan, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{"TPid", "ID", "RatingPlanBindings"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := api.StorDb.SetTPRatingPlans([]*utils.TPRatingPlan{attrs}); err != nil {
+	if err := apierSv1.StorDb.SetTPRatingPlans([]*utils.TPRatingPlan{attrs}); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
@@ -43,11 +43,11 @@ type AttrGetTPRatingPlan struct {
 }
 
 // GetTPRatingPlan queries specific RatingPlan profile on tariff plan
-func (api *APIerSv1) GetTPRatingPlan(attrs *AttrGetTPRatingPlan, reply *utils.TPRatingPlan) error {
+func (apierSv1 *APIerSv1) GetTPRatingPlan(attrs *AttrGetTPRatingPlan, reply *utils.TPRatingPlan) error {
 	if missing := utils.MissingStructFields(attrs, []string{"TPid", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	rps, err := api.StorDb.GetTPRatingPlans(attrs.TPid, attrs.ID, &attrs.Paginator)
+	rps, err := apierSv1.StorDb.GetTPRatingPlans(attrs.TPid, attrs.ID, &attrs.Paginator)
 	if err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
@@ -64,11 +64,11 @@ type AttrGetTPRatingPlanIds struct {
 }
 
 // GetTPRatingPlanIds queries RatingPlan identities on specific tariff plan.
-func (api *APIerSv1) GetTPRatingPlanIds(attrs *AttrGetTPRatingPlanIds, reply *[]string) error {
+func (apierSv1 *APIerSv1) GetTPRatingPlanIds(attrs *AttrGetTPRatingPlanIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	ids, err := api.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPRatingPlans,
+	ids, err := apierSv1.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPRatingPlans,
 		utils.TPDistinctIds{"tag"}, nil, &attrs.PaginatorWithSearch)
 	if err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
@@ -81,11 +81,11 @@ func (api *APIerSv1) GetTPRatingPlanIds(attrs *AttrGetTPRatingPlanIds, reply *[]
 }
 
 // RemoveTPRatingPlan removes specific RatingPlan on Tariff plan
-func (api *APIerSv1) RemoveTPRatingPlan(attrs *AttrGetTPRatingPlan, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveTPRatingPlan(attrs *AttrGetTPRatingPlan, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{"TPid", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := api.StorDb.RemTpData(utils.TBLTPRatingPlans, attrs.TPid, map[string]string{"tag": attrs.ID}); err != nil {
+	if err := apierSv1.StorDb.RemTpData(utils.TBLTPRatingPlans, attrs.TPid, map[string]string{"tag": attrs.ID}); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK

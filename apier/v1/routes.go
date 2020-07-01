@@ -26,11 +26,11 @@ import (
 )
 
 // GetRouteProfile returns a Route configuration
-func (APIerSv1 *APIerSv1) GetRouteProfile(arg *utils.TenantID, reply *engine.RouteProfile) error {
+func (apierSv1 *APIerSv1) GetRouteProfile(arg *utils.TenantID, reply *engine.RouteProfile) error {
 	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if rp, err := APIerSv1.DataManager.GetRouteProfile(arg.Tenant, arg.ID, true, true, utils.NonTransactional); err != nil {
+	if rp, err := apierSv1.DataManager.GetRouteProfile(arg.Tenant, arg.ID, true, true, utils.NonTransactional); err != nil {
 		return utils.APIErrorHandler(err)
 	} else {
 		*reply = *rp
@@ -39,12 +39,12 @@ func (APIerSv1 *APIerSv1) GetRouteProfile(arg *utils.TenantID, reply *engine.Rou
 }
 
 // GetRouteProfileIDs returns list of routeProfile IDs registered for a tenant
-func (APIerSv1 *APIerSv1) GetRouteProfileIDs(args *utils.TenantArgWithPaginator, sppPrfIDs *[]string) error {
+func (apierSv1 *APIerSv1) GetRouteProfileIDs(args *utils.TenantArgWithPaginator, sppPrfIDs *[]string) error {
 	if missing := utils.MissingStructFields(args, []string{utils.Tenant}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	prfx := utils.RouteProfilePrefix + args.Tenant + ":"
-	keys, err := APIerSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
+	keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
 	if err != nil {
 		return err
 	}
@@ -65,15 +65,15 @@ type RouteWithCache struct {
 }
 
 //SetRouteProfile add a new Route configuration
-func (APIerSv1 *APIerSv1) SetRouteProfile(args *RouteWithCache, reply *string) error {
+func (apierSv1 *APIerSv1) SetRouteProfile(args *RouteWithCache, reply *string) error {
 	if missing := utils.MissingStructFields(args.RouteProfile, []string{"Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := APIerSv1.DataManager.SetRouteProfile(args.RouteProfile, true); err != nil {
+	if err := apierSv1.DataManager.SetRouteProfile(args.RouteProfile, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheRouteProfiles and store it in database
-	if err := APIerSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheRouteProfiles: time.Now().UnixNano()}); err != nil {
+	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheRouteProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for SupplierProfile
@@ -81,7 +81,7 @@ func (APIerSv1 *APIerSv1) SetRouteProfile(args *RouteWithCache, reply *string) e
 		CacheID: utils.CacheRouteProfiles,
 		ItemID:  args.TenantID(),
 	}
-	if err := APIerSv1.CallCache(GetCacheOpt(args.Cache), argCache); err != nil {
+	if err := apierSv1.CallCache(GetCacheOpt(args.Cache), argCache); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -89,15 +89,15 @@ func (APIerSv1 *APIerSv1) SetRouteProfile(args *RouteWithCache, reply *string) e
 }
 
 //RemoveRouteProfile remove a specific Route configuration
-func (APIerSv1 *APIerSv1) RemoveRouteProfile(args *utils.TenantIDWithCache, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveRouteProfile(args *utils.TenantIDWithCache, reply *string) error {
 	if missing := utils.MissingStructFields(args, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := APIerSv1.DataManager.RemoveRouteProfile(args.Tenant, args.ID, utils.NonTransactional, true); err != nil {
+	if err := apierSv1.DataManager.RemoveRouteProfile(args.Tenant, args.ID, utils.NonTransactional, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheRouteProfiles and store it in database
-	if err := APIerSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheRouteProfiles: time.Now().UnixNano()}); err != nil {
+	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheRouteProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for SupplierProfile
@@ -105,7 +105,7 @@ func (APIerSv1 *APIerSv1) RemoveRouteProfile(args *utils.TenantIDWithCache, repl
 		CacheID: utils.CacheRouteProfiles,
 		ItemID:  args.TenantID(),
 	}
-	if err := APIerSv1.CallCache(GetCacheOpt(args.Cache), argCache); err != nil {
+	if err := apierSv1.CallCache(GetCacheOpt(args.Cache), argCache); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
