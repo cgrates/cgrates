@@ -50,6 +50,7 @@ var (
 		testV1RatePrfRemoveRateProfile,
 		testV1RatePrfNotFound,
 		testV1RatePrfSetRateProfileRates,
+		testV1RatePrfRemoveRateProfileRates,
 		testV1RatePing,
 		testV1RatePrfStopEngine,
 	}
@@ -376,6 +377,176 @@ func testV1RatePrfSetRateProfileRates(t *testing.T) {
 			utils.ToJSON(rPrfUpdated), utils.ToJSON(rply))
 	}
 
+}
+
+func testV1RatePrfRemoveRateProfileRates(t *testing.T) {
+	rPrf := &engine.RateProfile{
+		Tenant:           "cgrates.org",
+		ID:               "SpecialRate",
+		FilterIDs:        []string{"*string:~*req.Subject:1001"},
+		Weight:           0,
+		ConnectFee:       0.1,
+		RoundingMethod:   "*up",
+		RoundingDecimals: 4,
+		MinCost:          0.1,
+		MaxCost:          0.6,
+		MaxCostStrategy:  "*free",
+		Rates: map[string]*engine.Rate{
+			"RT_WEEK": &engine.Rate{
+				ID:              "RT_WEEK",
+				Weight:          0,
+				ActivationStart: "* * * * 1-5",
+				IntervalRates: []*engine.IntervalRate{
+					&engine.IntervalRate{
+						IntervalStart: time.Duration(0 * time.Second),
+						Value:         0.12,
+						Unit:          time.Duration(1 * time.Minute),
+						Increment:     time.Duration(1 * time.Minute),
+					},
+					&engine.IntervalRate{
+						IntervalStart: time.Duration(1 * time.Minute),
+						Value:         0.06,
+						Unit:          time.Duration(1 * time.Minute),
+						Increment:     time.Duration(1 * time.Second),
+					},
+				},
+			},
+			"RT_WEEKEND": &engine.Rate{
+				ID:              "RT_WEEKEND",
+				Weight:          10,
+				ActivationStart: "* * * * 0,6",
+				IntervalRates: []*engine.IntervalRate{
+					&engine.IntervalRate{
+						IntervalStart: time.Duration(0 * time.Second),
+						Value:         0.06,
+						Unit:          time.Duration(1 * time.Minute),
+						Increment:     time.Duration(1 * time.Second),
+					},
+				},
+			},
+			"RT_CHRISTMAS": &engine.Rate{
+				ID:              "RT_CHRISTMAS",
+				Weight:          30,
+				ActivationStart: "* * 24 12 *",
+				IntervalRates: []*engine.IntervalRate{
+					&engine.IntervalRate{
+						IntervalStart: time.Duration(0 * time.Second),
+						Value:         0.06,
+						Unit:          time.Duration(1 * time.Minute),
+						Increment:     time.Duration(1 * time.Second),
+					},
+				},
+			},
+		},
+	}
+	var reply string
+	if err := ratePrfRpc.Call(utils.APIerSv1SetRateProfile,
+		&RateProfileWithCache{
+			RateProfileWithArgDispatcher: &engine.RateProfileWithArgDispatcher{
+				RateProfile: rPrf},
+		}, &reply); err != nil {
+		t.Fatal(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expecting: %+v, received: %+v", utils.OK, reply)
+	}
+
+	if err := ratePrfRpc.Call(utils.APIerSv1RemoveRateProfileRates,
+		&RemoveRPrfRates{
+			Tenant:  "cgrates.org",
+			ID:      "SpecialRate",
+			RateIDs: []string{"RT_WEEKEND"},
+		}, &reply); err != nil {
+		t.Fatal(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expecting: %+v, received: %+v", utils.OK, reply)
+	}
+
+	rPrfUpdated := &engine.RateProfile{
+		Tenant:           "cgrates.org",
+		ID:               "SpecialRate",
+		FilterIDs:        []string{"*string:~*req.Subject:1001"},
+		Weight:           0,
+		ConnectFee:       0.1,
+		RoundingMethod:   "*up",
+		RoundingDecimals: 4,
+		MinCost:          0.1,
+		MaxCost:          0.6,
+		MaxCostStrategy:  "*free",
+		Rates: map[string]*engine.Rate{
+			"RT_WEEK": &engine.Rate{
+				ID:              "RT_WEEK",
+				Weight:          0,
+				ActivationStart: "* * * * 1-5",
+				IntervalRates: []*engine.IntervalRate{
+					&engine.IntervalRate{
+						IntervalStart: time.Duration(0 * time.Second),
+						Value:         0.12,
+						Unit:          time.Duration(1 * time.Minute),
+						Increment:     time.Duration(1 * time.Minute),
+					},
+					&engine.IntervalRate{
+						IntervalStart: time.Duration(1 * time.Minute),
+						Value:         0.06,
+						Unit:          time.Duration(1 * time.Minute),
+						Increment:     time.Duration(1 * time.Second),
+					},
+				},
+			},
+			"RT_CHRISTMAS": &engine.Rate{
+				ID:              "RT_CHRISTMAS",
+				Weight:          30,
+				ActivationStart: "* * 24 12 *",
+				IntervalRates: []*engine.IntervalRate{
+					&engine.IntervalRate{
+						IntervalStart: time.Duration(0 * time.Second),
+						Value:         0.06,
+						Unit:          time.Duration(1 * time.Minute),
+						Increment:     time.Duration(1 * time.Second),
+					},
+				},
+			},
+		},
+	}
+	var rply *engine.RateProfile
+	if err := ratePrfRpc.Call(utils.APIerSv1GetRateProfile,
+		utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "SpecialRate"}}, &rply); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(rPrfUpdated, rply) {
+		t.Errorf("Expecting: %+v, \n received: %+v",
+			utils.ToJSON(rPrfUpdated), utils.ToJSON(rply))
+	}
+
+	if err := ratePrfRpc.Call(utils.APIerSv1RemoveRateProfileRates,
+		&RemoveRPrfRates{
+			Tenant: "cgrates.org",
+			ID:     "SpecialRate",
+		}, &reply); err != nil {
+		t.Fatal(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expecting: %+v, received: %+v", utils.OK, reply)
+	}
+
+	rPrfUpdated2 := &engine.RateProfile{
+		Tenant:           "cgrates.org",
+		ID:               "SpecialRate",
+		FilterIDs:        []string{"*string:~*req.Subject:1001"},
+		Weight:           0,
+		ConnectFee:       0.1,
+		RoundingMethod:   "*up",
+		RoundingDecimals: 4,
+		MinCost:          0.1,
+		MaxCost:          0.6,
+		MaxCostStrategy:  "*free",
+		Rates:            map[string]*engine.Rate{},
+	}
+	var rply2 *engine.RateProfile
+	if err := ratePrfRpc.Call(utils.APIerSv1GetRateProfile,
+		utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "SpecialRate"}}, &rply2); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(rPrfUpdated2, rply2) {
+		t.Errorf("Expecting: %+v, \n received: %+v",
+			utils.ToJSON(rPrfUpdated2), utils.ToJSON(rply2))
+	}
 }
 
 func testV1RatePing(t *testing.T) {

@@ -143,7 +143,7 @@ type RemoveRPrfRates struct {
 }
 
 func (apierSv1 *APIerSv1) RemoveRateProfileRates(args *RemoveRPrfRates, reply *string) (err error) {
-	if missing := utils.MissingStructFields(args, []string{"Tenant", "ID", "RateIDs"}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(args, []string{"Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if err := apierSv1.DataManager.RemoveRateProfileRates(args.Tenant, args.ID, args.RateIDs, true); err != nil {
