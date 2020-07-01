@@ -72,6 +72,99 @@ func TestTPDestinationAsExportSlice(t *testing.T) {
 	}
 }
 
+func TestTpDestinationsAsMapDestinations(t *testing.T) {
+	in := &TpDestinations{}
+	eOut := map[string]*Destination{}
+
+	if rcv, err := in.AsMapDestinations(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, eOut) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+	in = &TpDestinations{
+		TpDestination{Tpid: "TEST_TPID", Tag: "TEST_DEST1", Prefix: "+491"},
+		TpDestination{Tpid: "TEST_TPID", Tag: "TEST_DEST2", Prefix: "+492"},
+	}
+	eOut = map[string]*Destination{
+		"TEST_DEST1": &Destination{
+			Id:       "TEST_DEST1",
+			Prefixes: []string{"+491"},
+		},
+		"TEST_DEST2": &Destination{
+			Id:       "TEST_DEST2",
+			Prefixes: []string{"+492"},
+		},
+	}
+	var rcv map[string]*Destination
+	if rcv, err = in.AsMapDestinations(); err != nil {
+		t.Error(err)
+	}
+	for key := range rcv {
+		if !reflect.DeepEqual(rcv[key], eOut[key]) {
+			t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut[key]), utils.ToJSON(rcv[key]))
+		}
+	}
+	in = &TpDestinations{
+		TpDestination{Tpid: "TEST_TPID", Tag: "TEST_DEST1", Prefix: "+491"},
+		TpDestination{Tpid: "TEST_TPID", Tag: "TEST_DEST2", Prefix: "+492"},
+		TpDestination{Tpid: "TEST_ID", Tag: "", Prefix: ""},
+	}
+	eOut = map[string]*Destination{
+		"TEST_DEST1": &Destination{
+			Id:       "TEST_DEST1",
+			Prefixes: []string{"+491"},
+		},
+		"TEST_DEST2": &Destination{
+			Id:       "TEST_DEST2",
+			Prefixes: []string{"+492"},
+		},
+		"": &Destination{
+			Id:       "",
+			Prefixes: []string{""},
+		},
+	}
+	if rcv, err = in.AsMapDestinations(); err != nil {
+		t.Error(err)
+	}
+	for key, _ := range rcv {
+		if !reflect.DeepEqual(rcv[key], eOut[key]) {
+			t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut[key]), utils.ToJSON(rcv[key]))
+		}
+	}
+}
+
+func TestTpDestinationsAPItoModelDestination(t *testing.T) {
+	d := &utils.TPDestination{}
+	eOut := TpDestinations{
+		TpDestination{},
+	}
+	if rcv := APItoModelDestination(d); rcv != nil {
+		if !reflect.DeepEqual(rcv, eOut) {
+			t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+		}
+
+	}
+	d = &utils.TPDestination{
+		TPid:     "TEST_TPID",
+		ID:       "TEST_ID",
+		Prefixes: []string{"+491"},
+	}
+	eOut = TpDestinations{
+		TpDestination{
+			Tpid:   "TEST_TPID",
+			Tag:    "TEST_ID",
+			Prefix: "+491",
+		},
+	}
+	if rcv := APItoModelDestination(d); rcv != nil {
+		if !reflect.DeepEqual(rcv, eOut) {
+			t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+		}
+
+	}
+
+}
+
 func TestTpDestinationsAsTPDestinations(t *testing.T) {
 	tpd1 := TpDestination{Tpid: "TEST_TPID", Tag: "TEST_DEST", Prefix: "+491"}
 	tpd2 := TpDestination{Tpid: "TEST_TPID", Tag: "TEST_DEST", Prefix: "+492"}
