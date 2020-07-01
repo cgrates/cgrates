@@ -71,6 +71,7 @@ func NewDfltLoaderDataTypeConfig() *LoaderDataType {
 type LoaderDataType struct { //rename to LoaderDataType
 	Type     string
 	Filename string
+	Flags    utils.FlagsWithParams
 	Fields   []*FCTemplate
 }
 
@@ -83,6 +84,11 @@ func (self *LoaderDataType) loadFromJsonCfg(jsnCfg *LoaderJsonDataType, separato
 	}
 	if jsnCfg.File_name != nil {
 		self.Filename = *jsnCfg.File_name
+	}
+	if jsnCfg.Flags != nil {
+		if self.Flags, err = utils.FlagsWithParamsFromSlice(*jsnCfg.Flags); err != nil {
+			return
+		}
 	}
 	if jsnCfg.Fields != nil {
 		if self.Fields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Fields, separator); err != nil {

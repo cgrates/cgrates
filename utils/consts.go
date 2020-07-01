@@ -766,6 +766,7 @@ const (
 	MetaWeekly               = "*weekly"
 	RateS                    = "RateS"
 	Underline                = "_"
+	MetaPartial              = "*partial"
 )
 
 // Migrator Action
@@ -791,6 +792,7 @@ const (
 	MetaIndexes             = "*indexes"
 	MetaDispatcherProfiles  = "*dispatcher_profiles"
 	MetaRateProfiles        = "*rate_profiles"
+	MetaRateProfileRates    = "*rate_profile_rates"
 	MetaChargerProfiles     = "*charger_profiles"
 	MetaSharedGroups        = "*shared_groups"
 	MetaThresholds          = "*thresholds"
