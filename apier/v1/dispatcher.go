@@ -125,8 +125,9 @@ func (apierSv1 *APIerSv1) GetDispatcherHost(arg *utils.TenantID, reply *engine.D
 	}
 	if dpp, err := apierSv1.DataManager.GetDispatcherHost(arg.Tenant, arg.ID, true, false, utils.NonTransactional); err != nil {
 		return utils.APIErrorHandler(err)
+	} else {
+		*reply = *dpp
 	}
-	*reply = *dpp
 	return nil
 }
 
