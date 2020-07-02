@@ -209,8 +209,16 @@ func ParseTimeDetectLayout(tmStr string, timezone string) (time.Time, error) {
 		return time.Now().AddDate(0, 0, 1), nil // add one day
 	case tmStr == "*monthly":
 		return time.Now().AddDate(0, 1, 0), nil // add one month
+	case tmStr == "*monthly_estimated":
+		initialMnt := time.Now().Month()
+		tAfter := time.Now().AddDate(0, 1, 0)
+		for tAfter.Month()-initialMnt > 1 {
+			tAfter = tAfter.AddDate(0, 0, -1)
+		}
+		return tAfter, nil
 	case tmStr == "*yearly":
 		return time.Now().AddDate(1, 0, 0), nil // add one year
+
 	case strings.HasPrefix(tmStr, "*month_end"):
 		expDate := GetEndOfMonth(time.Now())
 		extraDur, err := getAddDuration(tmStr)

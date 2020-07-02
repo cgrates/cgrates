@@ -18,7 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
-	"fmt"
 	"strings"
 	"testing"
 )
@@ -252,5 +251,4 @@ func TestDynamicDataProviderGetFullFieldPath(t *testing.T) {
 	if newpath == nil {
 		t.Errorf("Expected: %v,received %q", nil, newpath)
 	}
-	fmt.Println(*newpath)
 }
