@@ -122,6 +122,7 @@ func (prsrs RSRParsers) GetRule() (out string) {
 	return
 }
 
+// Compile parses Rules string and repopulates other fields
 func (prsrs RSRParsers) Compile() (err error) {
 	for _, prsr := range prsrs {
 		if err = prsr.Compile(); err != nil {
@@ -214,7 +215,7 @@ func (prsr *RSRParser) Compile() (err error) {
 			}
 			prsr.dynRules = dynrules
 			prsr.dynIdxStart = dynIdxStart
-			prsr.dynIdxEnd = dynIdxStart + dynIdxEnd
+			prsr.dynIdxEnd = dynIdxStart + dynIdxEnd + 1
 			return
 		}
 	}
@@ -300,7 +301,7 @@ func (prsr *RSRParser) ParseDataProvider(dP utils.DataProvider) (out string, err
 			return
 		}
 		var dynRSR *RSRParser
-		if dynRSR, err = NewRSRParser(prsr.Rules[:prsr.dynIdxStart] + dynPath + prsr.Rules[prsr.dynIdxEnd+1:]); err != nil {
+		if dynRSR, err = NewRSRParser(prsr.Rules[:prsr.dynIdxStart] + dynPath + prsr.Rules[prsr.dynIdxEnd:]); err != nil {
 			return
 		}
 		return dynRSR.ParseDataProvider(dP)
@@ -319,10 +320,10 @@ func (prsr *RSRParser) ParseDataProviderWithInterfaces(dP utils.DataProvider) (o
 			return
 		}
 		var dynRSR *RSRParser
-		if dynRSR, err = NewRSRParser(prsr.Rules[:prsr.dynIdxStart] + dynPath + prsr.Rules[prsr.dynIdxEnd+1:]); err != nil {
+		if dynRSR, err = NewRSRParser(prsr.Rules[:prsr.dynIdxStart] + dynPath + prsr.Rules[prsr.dynIdxEnd:]); err != nil {
 			return
 		}
-		return dynRSR.ParseDataProviderWithInterfaces(dP)
+		return dynRSR.ParseDataProvider(dP)
 	}
 	var outIface interface{}
 	if outIface, err = utils.DPDynamicInterface(prsr.path, dP); err != nil {
@@ -341,13 +342,20 @@ func NewDynRSRParser(parsersRules string, sep string, idxStart, idxEnd int) (prs
 	sepIdx := strings.Index(parsersRules[idxEnd:], sep)
 	if sepIdx == -1 { // not found any other separtor so is the last rule
 		sepIdx = len(parsersRules)
+	} else {
+		sepIdx += idxEnd
 	}
-
 	dynRuleStr := parsersRules[lastSepIdxBDyn+1 : sepIdx] // this should contain the rule with the dynamic information
 
 	var dynrules RSRParsers
 	if dynrules, err = NewRSRParsers(parsersRules[idxStart+1:idxEnd], sep); err != nil {
 		return
+	}
+	if lastSepIdxBDyn == -1 {
+		idxEnd++
+	} else {
+		idxStart = idxStart - lastSepIdxBDyn - 1
+		idxEnd -= lastSepIdxBDyn
 	}
 	// add
 	prsrs = append(prsrs, &RSRParser{

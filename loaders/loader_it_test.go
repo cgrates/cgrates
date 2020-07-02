@@ -161,13 +161,13 @@ func testLoaderCheckAttributes(t *testing.T) {
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC)},
 		Attributes: []*engine.Attribute{
-			&engine.Attribute{
+			{
 				FilterIDs: []string{"*string:~*req.Field1:Initial"},
 				Path:      utils.MetaReq + utils.NestingSep + "Field1",
 				Type:      utils.MetaVariable,
 				Value:     config.NewRSRParsersMustCompile("Sub1", utils.INFIELD_SEP),
 			},
-			&engine.Attribute{
+			{
 				FilterIDs: []string{},
 				Path:      utils.MetaReq + utils.NestingSep + "Field2",
 				Type:      utils.MetaVariable,
