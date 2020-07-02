@@ -711,3 +711,74 @@ func TestNewDataConverterMustCompile2(t *testing.T) {
 	}()
 	NewDataConverterMustCompile(MetaMultiply)
 }
+
+func TestNewTimeStringConverter(t *testing.T) {
+	//empty
+	eOut := &TimeStringConverter{Layout: EmptyString}
+	if rcv, err := NewTimeStringConverter(EmptyString); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+
+	//default
+	eOut = &TimeStringConverter{Layout: time.RFC3339}
+	var rcv DataConverter
+	var err error
+	if rcv, err = NewTimeStringConverter(time.RFC3339); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+	exp := "2015-07-07T14:52:08Z"
+	if rcv, err := rcv.Convert("1436280728"); err != nil {
+		t.Error(err)
+	} else if rcv.(string) != exp {
+		t.Errorf("Expecting: %+v, received: %+v", exp, rcv)
+	}
+	exp = "2013-07-30T19:33:10Z"
+	if rcv, err := rcv.Convert("1375212790"); err != nil {
+		t.Error(err)
+	} else if rcv.(string) != exp {
+		t.Errorf("Expecting: %+v, received: %+v", exp, rcv)
+	}
+
+	//other
+	eOut = &TimeStringConverter{"020106150400"}
+	if rcv, err = NewTimeStringConverter("020106150400"); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+	exp = "070715145200"
+	if rcv, err := rcv.Convert("1436280728"); err != nil {
+		t.Error(err)
+	} else if rcv.(string) != exp {
+		t.Errorf("Expecting: %+v, received: %+v", exp, rcv)
+	}
+	exp = "290720175900"
+	if rcv, err := rcv.Convert("2020-07-29T17:59:59Z"); err != nil {
+		t.Error(err)
+	} else if rcv.(string) != exp {
+		t.Errorf("Expecting: %+v, received: %+v", exp, rcv)
+	}
+
+	//wrong cases
+	eOut = &TimeStringConverter{"not really a good time"}
+	if rcv, err = NewTimeStringConverter("not really a good time"); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+	exp = "not really a good time"
+	if rcv, err := rcv.Convert(EmptyString); err != nil {
+		t.Error(err)
+	} else if rcv.(string) != exp {
+		t.Errorf("Expecting: %+v, received: %+v", exp, rcv)
+	}
+	if rcv, err := rcv.Convert("1375212790"); err != nil {
+		t.Error(err)
+	} else if rcv.(string) != exp {
+		t.Errorf("Expecting: %+v, received: %+v", exp, rcv)
+	}
+}

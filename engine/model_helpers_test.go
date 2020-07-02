@@ -160,9 +160,7 @@ func TestTpDestinationsAPItoModelDestination(t *testing.T) {
 		if !reflect.DeepEqual(rcv, eOut) {
 			t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
 		}
-
 	}
-
 }
 
 func TestTpDestinationsAsTPDestinations(t *testing.T) {
@@ -175,6 +173,144 @@ func TestTpDestinationsAsTPDestinations(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eTPDestinations, tpDst)
 	}
 
+}
+
+func TestMapTPTimings(t *testing.T) {
+	var tps []*utils.ApierTPTiming
+	eOut := map[string]*utils.TPTiming{}
+	if rcv, err := MapTPTimings(tps); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+
+	tps = []*utils.ApierTPTiming{
+		&utils.ApierTPTiming{
+			TPid: "TPid1",
+			ID:   "ID1",
+		},
+	}
+	eOut = map[string]*utils.TPTiming{
+		"ID1": &utils.TPTiming{
+			ID:        "ID1",
+			Years:     utils.Years{},
+			Months:    utils.Months{},
+			MonthDays: utils.MonthDays{},
+			WeekDays:  utils.WeekDays{},
+		},
+	}
+	if rcv, err := MapTPTimings(tps); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+	tps = []*utils.ApierTPTiming{
+		&utils.ApierTPTiming{
+			TPid:   "TPid1",
+			ID:     "ID1",
+			Months: "1;2;3;4",
+		},
+	}
+	eOut = map[string]*utils.TPTiming{
+		"ID1": &utils.TPTiming{
+			ID:        "ID1",
+			Years:     utils.Years{},
+			Months:    utils.Months{1, 2, 3, 4},
+			MonthDays: utils.MonthDays{},
+			WeekDays:  utils.WeekDays{},
+		},
+	}
+	if rcv, err := MapTPTimings(tps); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+	//same id error
+	tps = []*utils.ApierTPTiming{
+		&utils.ApierTPTiming{
+			TPid:   "TPid1",
+			ID:     "ID1",
+			Months: "1;2;3;4",
+		},
+		&utils.ApierTPTiming{
+			TPid:   "TPid1",
+			ID:     "ID1",
+			Months: "1;2;3;4",
+		},
+	}
+	eOut = map[string]*utils.TPTiming{
+		"ID1": &utils.TPTiming{
+			ID:        "ID1",
+			Years:     utils.Years{},
+			Months:    utils.Months{1, 2, 3, 4},
+			MonthDays: utils.MonthDays{},
+			WeekDays:  utils.WeekDays{},
+		},
+	}
+	if rcv, err := MapTPTimings(tps); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+}
+
+func TestAPItoModelTimings(t *testing.T) {
+	ts := []*utils.ApierTPTiming{}
+	eOut := TpTimings{}
+	if rcv := APItoModelTimings(ts); rcv != nil {
+		t.Errorf("Expecting: nil, received: %+v", utils.ToJSON(rcv))
+	}
+
+	ts = []*utils.ApierTPTiming{
+		&utils.ApierTPTiming{
+			TPid:   "TPid1",
+			ID:     "ID1",
+			Months: "1;2;3;4",
+		},
+	}
+	eOut = TpTimings{
+		TpTiming{
+			Tpid:   "TPid1",
+			Months: "1;2;3;4",
+			Tag:    "ID1",
+		},
+	}
+	if rcv := APItoModelTimings(ts); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+	ts = []*utils.ApierTPTiming{
+		&utils.ApierTPTiming{
+			TPid:   "TPid1",
+			ID:     "ID1",
+			Months: "1;2;3;4",
+		},
+		&utils.ApierTPTiming{
+			TPid:      "TPid2",
+			ID:        "ID2",
+			Months:    "1;2;3;4",
+			MonthDays: "1;2;3;4;28",
+			Years:     "2020;2019",
+			WeekDays:  "4;5",
+		},
+	}
+	eOut = TpTimings{
+		TpTiming{
+			Tpid:   "TPid1",
+			Months: "1;2;3;4",
+			Tag:    "ID1",
+		},
+		TpTiming{
+			Tpid:      "TPid2",
+			Tag:       "ID2",
+			Months:    "1;2;3;4",
+			MonthDays: "1;2;3;4;28",
+			Years:     "2020;2019",
+			WeekDays:  "4;5",
+		},
+	}
+	if rcv := APItoModelTimings(ts); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
 }
 
 func TestTPRateAsExportSlice(t *testing.T) {
@@ -212,6 +348,48 @@ func TestTPRateAsExportSlice(t *testing.T) {
 	}
 	if !reflect.DeepEqual(expectedSlc, slc) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedSlc[0], slc[0])
+	}
+}
+
+func TestAPItoModelRates(t *testing.T) {
+	rs := []*utils.TPRateRALs{}
+	eOut := TpRates{}
+	if rcv := APItoModelRates(rs); rcv != nil {
+		t.Errorf("Expecting: nil, received: %+v", utils.ToJSON(rcv))
+	}
+
+	rs = []*utils.TPRateRALs{
+		&utils.TPRateRALs{
+			ID:   "SomeID",
+			TPid: "TPid",
+			RateSlots: []*utils.RateSlot{
+				&utils.RateSlot{
+					ConnectFee: 0.7,
+					Rate:       0.8,
+				},
+				&utils.RateSlot{
+					ConnectFee: 0.77,
+					Rate:       0.88,
+				},
+			},
+		},
+	}
+	eOut = TpRates{
+		TpRate{
+			Tpid:       "TPid",
+			Tag:        "SomeID",
+			ConnectFee: 0.7,
+			Rate:       0.8,
+		},
+		TpRate{
+			Tpid:       "TPid",
+			Tag:        "SomeID",
+			ConnectFee: 0.77,
+			Rate:       0.88,
+		},
+	}
+	if rcv := APItoModelRates(rs); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
 	}
 }
 
