@@ -3233,6 +3233,57 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 		}
 		rply.StatQueueIDs = &sIDs
 	}
+	if argsFlagsWithParams.HasKey(utils.MetaCDRs) {
+		cgrID := GetSetCGRID(ev)
+		s := sS.getRelocateSession(cgrID,
+			ev.GetStringIgnoreErrors(utils.InitialOriginID),
+			ev.GetStringIgnoreErrors(utils.OriginID),
+			ev.GetStringIgnoreErrors(utils.OriginHost))
+		if s != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> ProcessCDR called for active session with CGRID: <%s>",
+					utils.SessionS, cgrID))
+		} else if sIface, has := engine.Cache.Get(utils.CacheClosedSessions, cgrID); has {
+			// found in cache
+			s = sIface.(*Session)
+		} else { // no cached session, CDR will be handled by CDRs
+			return sS.connMgr.Call(sS.cgrCfg.SessionSCfg().CDRsConns, nil, utils.CDRsV1ProcessEvent,
+				&engine.ArgV1ProcessEvent{
+					Flags:         []string{utils.MetaRALs},
+					CGREvent:      *args.CGREvent,
+					ArgDispatcher: args.ArgDispatcher}, rply)
+		}
+
+		// Use previously stored Session to generate CDRs
+		s.updateSRuns(ev, sS.cgrCfg.SessionSCfg().AlterableFields)
+		// create one CGREvent for each session run
+		var cgrEvs []*utils.CGREvent
+		if cgrEvs, err = s.asCGREvents(); err != nil {
+			return utils.NewErrServerError(err)
+		}
+		var withErrors bool
+		for _, cgrEv := range cgrEvs {
+			argsProc := &engine.ArgV1ProcessEvent{
+				Flags: []string{fmt.Sprintf("%s:false", utils.MetaChargers),
+					fmt.Sprintf("%s:false", utils.MetaAttributes)},
+				CGREvent:      *cgrEv,
+				ArgDispatcher: args.ArgDispatcher,
+			}
+			if mp := engine.MapEvent(cgrEv.Event); unratedReqs.HasField(mp.GetStringIgnoreErrors(utils.RequestType)) { // order additional rating for unrated request types
+				argsProc.Flags = append(argsProc.Flags, fmt.Sprintf("%s:true", utils.MetaRALs))
+			}
+			if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().CDRsConns, nil, utils.CDRsV1ProcessEvent,
+				argsProc, rply); err != nil {
+				utils.Logger.Warning(
+					fmt.Sprintf("<%s> error <%s> posting CDR with CGRID: <%s>",
+						utils.SessionS, err.Error(), cgrID))
+				withErrors = true
+			}
+		}
+		if withErrors {
+			err = utils.ErrPartiallyExecuted
+		}
+	}
 	if withErrors {
 		err = utils.ErrPartiallyExecuted
 	}
