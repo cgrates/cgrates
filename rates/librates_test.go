@@ -18,138 +18,54 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package rates
 
-/*
+import (
+	"reflect"
+	"testing"
+	"time"
+
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
+)
+
 func TestOrderRatesOnIntervals(t *testing.T) {
-	allRts := map[time.Duration][]*engine.Rate{
-		time.Duration(0): {
-			&engine.Rate{
-				ID:            "RATE0",
+	rt0 := &engine.Rate{
+		ID:     "RATE0",
+		Weight: 0,
+		IntervalRates: []*engine.IntervalRate{
+			{
 				IntervalStart: time.Duration(0),
-			},
-			&engine.Rate{
-				ID:            "RATE100",
-				IntervalStart: time.Duration(0),
-				Weight:        100,
-			},
-			&engine.Rate{
-				ID:            "RATE50",
-				IntervalStart: time.Duration(0),
-				Weight:        50,
 			},
 		},
 	}
-	expOrdered := []*engine.Rate{
-		&engine.Rate{
-			ID:            "RATE100",
-			IntervalStart: time.Duration(0),
-			Weight:        100,
-		},
-	}
-	if ordRts := orderRatesOnIntervals(allRts); !reflect.DeepEqual(expOrdered, ordRts) {
-		t.Errorf("expecting: %s\n, received: %s",
-			utils.ToIJSON(expOrdered), utils.ToIJSON(ordRts))
-	}
-	allRts = map[time.Duration][]*engine.Rate{
-		time.Duration(1 * time.Minute): {
-			&engine.Rate{
-				ID:            "RATE30",
-				IntervalStart: time.Duration(1 * time.Minute),
-				Weight:        30,
-			},
-			&engine.Rate{
-				ID:            "RATE70",
-				IntervalStart: time.Duration(1 * time.Minute),
-				Weight:        70,
-			},
-		},
-		time.Duration(0): {
-			&engine.Rate{
-				ID:            "RATE0",
+	rt0.Compile()
+	rtChristmas := &engine.Rate{
+		ID:              "RT_CHRISTMAS",
+		ActivationStart: "* * 24 12 *",
+		Weight:          50,
+		IntervalRates: []*engine.IntervalRate{
+			{
 				IntervalStart: time.Duration(0),
 			},
-			&engine.Rate{
-				ID:            "RATE100",
-				IntervalStart: time.Duration(0),
-				Weight:        100,
-			},
-			&engine.Rate{
-				ID:            "RATE50",
-				IntervalStart: time.Duration(0),
-				Weight:        50,
+		},
+	}
+	rtChristmas.Compile()
+	allRts := []*engine.Rate{rt0, rtChristmas}
+	expOrdered := []*engine.RateSInterval{
+		{
+			Increments: []*engine.RateSIncrement{
+				{
+					Rate:              rt0,
+					IntervalRateIndex: 0,
+				},
 			},
 		},
 	}
-	expOrdered = []*engine.Rate{
-		&engine.Rate{
-			ID:            "RATE100",
-			IntervalStart: time.Duration(0),
-			Weight:        100,
-		},
-		&engine.Rate{
-			ID:            "RATE70",
-			IntervalStart: time.Duration(1 * time.Minute),
-			Weight:        70,
-		},
-	}
-	if ordRts := orderRatesOnIntervals(allRts); !reflect.DeepEqual(expOrdered, ordRts) {
-		t.Errorf("expecting: %s\n, received: %s",
-			utils.ToIJSON(expOrdered), utils.ToIJSON(ordRts))
-	}
-	allRts = map[time.Duration][]*engine.Rate{
-		time.Duration(1 * time.Minute): {
-			&engine.Rate{
-				ID:            "RATE30",
-				IntervalStart: time.Duration(1 * time.Minute),
-				Weight:        30,
-			},
-			&engine.Rate{
-				ID:            "RATE70",
-				IntervalStart: time.Duration(1 * time.Minute),
-				Weight:        70,
-			},
-		},
-		time.Duration(2 * time.Minute): {
-			&engine.Rate{
-				ID:            "RATE0",
-				IntervalStart: time.Duration(2 * time.Minute),
-			},
-		},
-		time.Duration(0): {
-			&engine.Rate{
-				ID:            "RATE0",
-				IntervalStart: time.Duration(0),
-			},
-			&engine.Rate{
-				ID:            "RATE100",
-				IntervalStart: time.Duration(0),
-				Weight:        100,
-			},
-			&engine.Rate{
-				ID:            "RATE50",
-				IntervalStart: time.Duration(0),
-				Weight:        50,
-			},
-		},
-	}
-	expOrdered = []*engine.Rate{
-		&engine.Rate{
-			ID:            "RATE100",
-			IntervalStart: time.Duration(0),
-			Weight:        100,
-		},
-		&engine.Rate{
-			ID:            "RATE70",
-			IntervalStart: time.Duration(1 * time.Minute),
-			Weight:        70,
-		},
-		&engine.Rate{
-			ID:            "RATE0",
-			IntervalStart: time.Duration(2 * time.Minute),
-		},
-	}
-	if ordRts := orderRatesOnIntervals(allRts); !reflect.DeepEqual(expOrdered, ordRts) {
+	//
+	// time.Date(2020, time.December, 23, 23, 59, 05, 0, time.UTC),
+	if ordRts := orderRatesOnIntervals(
+		allRts, time.Date(2020, time.June, 28, 18, 56, 05, 0, time.UTC),
+		time.Duration(2*time.Minute), true); !reflect.DeepEqual(expOrdered, ordRts) {
 		t.Errorf("expecting: %s\n, received: %s",
 			utils.ToIJSON(expOrdered), utils.ToIJSON(ordRts))
 	}
 }
-*/

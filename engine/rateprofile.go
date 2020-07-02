@@ -45,8 +45,20 @@ type RateProfile struct {
 	maxCost *utils.Decimal
 }
 
-func (rpp *RateProfile) TenantID() string {
-	return utils.ConcatenatedKey(rpp.Tenant, rpp.ID)
+func (rp *RateProfile) TenantID() string {
+	return utils.ConcatenatedKey(rp.Tenant, rp.ID)
+}
+
+func (rp *RateProfile) Compile() (err error) {
+	rp.connFee = utils.NewDecimalFromFloat64(rp.ConnectFee)
+	rp.minCost = utils.NewDecimalFromFloat64(rp.MinCost)
+	rp.minCost = utils.NewDecimalFromFloat64(rp.MaxCost)
+	for _, rtP := range rp.Rates {
+		if err = rtP.Compile(); err != nil {
+			return
+		}
+	}
+	return
 }
 
 // Route defines rate related information used within a RateProfile
@@ -59,6 +71,21 @@ type Rate struct {
 	IntervalRates   []*IntervalRate
 
 	aTime cron.Schedule // compiled version of activation time as cron.Schedule interface
+}
+
+func (rt *Rate) Compile() (err error) {
+	aTime := rt.ActivationStart
+	if aTime == utils.EmptyString {
+		aTime = "* * * * *"
+	}
+	if rt.aTime, err = cron.ParseStandard(aTime); err != nil {
+		return
+	}
+	return
+}
+
+func (rt *Rate) NextActivationTime(t time.Time) time.Time {
+	return rt.aTime.Next(t)
 }
 
 type IntervalRate struct {
@@ -83,6 +110,7 @@ type RateSInterval struct {
 }
 
 type RateSIncrement struct {
-	UsageStart time.Duration
-	Rate       *Rate
+	Rate              *Rate
+	IntervalRateIndex int
+	Usage             time.Duration
 }
