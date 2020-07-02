@@ -35,6 +35,52 @@ func NewRSRParsers(parsersRules string, allFiltersMatch bool, rsrSeparator strin
 	if parsersRules == "" {
 		return
 	}
+	if count := strings.Count(parsersRules, "`"); count%2 != 0 { // check if we have matching `
+		return nil, fmt.Errorf("Unclosed unspilit syntax")
+	} else if count != 0 {
+		var splitedRule []string
+		for idx := strings.IndexByte(parsersRules, '`'); idx != -1; idx = strings.IndexByte(parsersRules, '`') {
+			insideARulePrefix := !strings.HasSuffix(parsersRules[:idx], utils.INFIELD_SEP) // if doesn't have ; we need to concatenate it with last rule
+			if insideARulePrefix {
+				splitedRule = append(splitedRule, strings.Split(parsersRules[:idx], utils.INFIELD_SEP)...)
+			} else {
+				splitedRule = append(splitedRule, strings.Split(parsersRules[:idx-1], utils.INFIELD_SEP)...)
+			}
+			parsersRules = parsersRules[idx+1:]
+			idx = strings.IndexByte(parsersRules, '`')
+			if insideARulePrefix {
+				splitedRule[len(splitedRule)-1] += parsersRules[:idx]
+			} else {
+				splitedRule = append(splitedRule, parsersRules[:idx])
+			}
+			parsersRules = parsersRules[idx+1:]
+			count -= 2 // the number of ` remaining
+			if len(parsersRules) == 0 {
+				continue
+			}
+			insideARuleSufix := !strings.HasPrefix(parsersRules, utils.INFIELD_SEP) // if doesn't have ; we need to concatenate it with last rule
+			if insideARuleSufix {
+				idx = strings.IndexByte(parsersRules, ';')
+				if idx == -1 {
+					idx = len(parsersRules)
+					splitedRule[len(splitedRule)-1] += parsersRules[:idx]
+					break
+				}
+				splitedRule[len(splitedRule)-1] += parsersRules[:idx]
+			} else {
+				idx = 0
+			}
+			parsersRules = parsersRules[idx+1:]
+			if len(parsersRules) == 0 {
+				break
+			}
+			if count == 0 { // no more ` so add the rest
+				splitedRule = append(splitedRule, strings.Split(parsersRules, utils.INFIELD_SEP)...)
+				break
+			}
+		}
+		return NewRSRParsersFromSlice(splitedRule, allFiltersMatch)
+	}
 	return NewRSRParsersFromSlice(strings.Split(parsersRules, rsrSeparator), allFiltersMatch)
 }
 
@@ -156,30 +202,18 @@ func NewRSRParser(parserRules string, allFiltersMatch bool) (rsrParser *RSRParse
 		convsSplt := strings.Split(convertersStr, utils.ANDSep)
 		rsrParser.converters = make(utils.DataConverters, len(convsSplt))
 		for i, convStr := range convsSplt {
-			if conv, err := utils.NewDataConverter(convStr); err != nil {
+			var conv utils.DataConverter
+			if conv, err = utils.NewDataConverter(convStr); err != nil {
 				return nil,
 					fmt.Errorf("invalid converter value in string: <%s>, err: %s",
 						convStr, err.Error())
-			} else {
-				rsrParser.converters[i] = conv
 			}
+			rsrParser.converters[i] = conv
 		}
 		parserRules = parserRules[:idxConverters]
 	}
-	if !strings.HasPrefix(parserRules, utils.DynamicDataPrefix) { // special case when RSR is defined as static attribute=value
-		var staticHdr, staticVal string
-		if splt := strings.Split(parserRules, utils.AttrValueSep); len(splt) == 2 { // using '='' as separator since ':' is often use in date/time fields
-			staticHdr, staticVal = splt[0], splt[1]               // strip the separator
-			if strings.HasSuffix(staticVal, utils.AttrValueSep) { // if value ends with sep, strip it since it is a part of the definition syntax
-				staticVal = staticVal[:len(staticVal)-1]
-			}
-		} else if len(splt) > 2 {
-			return nil, fmt.Errorf("invalid RSRField static rules: <%s>", parserRules)
-		} else {
-			staticVal = splt[0] // no attribute name
-		}
-		rsrParser.attrName = staticHdr
-		rsrParser.attrValue = staticVal
+	if rsrParser.isConstant = !strings.HasPrefix(parserRules, utils.DynamicDataPrefix) ||
+		len(parserRules) == 1; rsrParser.isConstant { // special case when RSR is defined as static attribute
 		return
 	}
 	// dynamic content via attributeNames
@@ -191,11 +225,14 @@ func NewRSRParser(parserRules string, allFiltersMatch bool) (rsrParser *RSRParse
 			if len(allMatches) != 3 {
 				return nil, fmt.Errorf("not enough members in Search&Replace, ruleStr: <%s>, matches: %v, ", ruleStr, allMatches)
 			}
-			if srRegexp, err := regexp.Compile(allMatches[1]); err != nil {
+			var srRegexp *regexp.Regexp
+			if srRegexp, err = regexp.Compile(allMatches[1]); err != nil {
 				return nil, fmt.Errorf("invalid Search&Replace subfield rule: <%s>", allMatches[1])
-			} else {
-				rsrParser.rsrRules = append(rsrParser.rsrRules, &utils.ReSearchReplace{SearchRegexp: srRegexp, ReplaceTemplate: allMatches[2]})
 			}
+			rsrParser.rsrRules = append(rsrParser.rsrRules, &utils.ReSearchReplace{
+				SearchRegexp:    srRegexp,
+				ReplaceTemplate: allMatches[2],
+			})
 		}
 	}
 	return
@@ -215,10 +252,10 @@ type RSRParser struct {
 	AllFiltersMatch bool   // all filters must match policy
 
 	attrName   string                   // instruct extracting info out of header in event
-	attrValue  string                   // if populated, enforces parsing always to this value
 	rsrRules   []*utils.ReSearchReplace // rules to use when parsing value
 	converters utils.DataConverters     // set of converters to apply on output
 	filters    utils.RSRFilters         // The value to compare when used as filter
+	isConstant bool
 }
 
 // AttrName exports the attribute name of the RSRParser
@@ -250,8 +287,8 @@ func (prsr *RSRParser) RegexpMatched() bool {
 
 // parseValue the field value from a string
 func (prsr *RSRParser) parseValue(value string) string {
-	if prsr.attrValue != "" { // Enforce parsing of static values
-		return prsr.attrValue
+	if prsr.isConstant { // Enforce parsing of static values
+		return prsr.Rules
 	}
 	for _, rsRule := range prsr.rsrRules {
 		value = rsRule.Process(value)
@@ -274,7 +311,7 @@ func (prsr *RSRParser) ParseValue(value interface{}) (out string, err error) {
 // ParseEvent will parse the value out considering converters and filters
 func (prsr *RSRParser) ParseEvent(ev map[string]interface{}) (out string, err error) {
 	val, has := ev[prsr.attrName]
-	if !has && prsr.attrValue == "" {
+	if !has && !prsr.isConstant {
 		return "", utils.ErrNotFound
 	}
 	return prsr.ParseValue(val)
@@ -282,7 +319,7 @@ func (prsr *RSRParser) ParseEvent(ev map[string]interface{}) (out string, err er
 
 func (prsr *RSRParser) ParseDataProvider(dP utils.DataProvider, separator string) (out string, err error) {
 	var outStr string
-	if prsr.attrValue == "" {
+	if !prsr.isConstant {
 		if outStr, err = dP.FieldAsString(
 			strings.Split(prsr.attrName, separator)); err != nil &&
 			(err != utils.ErrNotFound || prsr.filters.FilterRules() != "^$") {
@@ -294,7 +331,7 @@ func (prsr *RSRParser) ParseDataProvider(dP utils.DataProvider, separator string
 
 func (prsr *RSRParser) ParseDataProviderWithInterfaces(dP utils.DataProvider, separator string) (out string, err error) {
 	var outIface interface{}
-	if prsr.attrValue == "" {
+	if !prsr.isConstant {
 		if outIface, err = dP.FieldAsInterface(
 			strings.Split(prsr.attrName, separator)); err != nil &&
 			(err != utils.ErrNotFound || prsr.filters.FilterRules() != "^$") {

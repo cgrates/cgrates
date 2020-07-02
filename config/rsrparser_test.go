@@ -27,10 +27,10 @@ import (
 )
 
 func TestNewRSRParsers(t *testing.T) {
-	ruleStr := `Value1;Heade2=Value2;~Header3(Val3&!Val4);~Header4:s/a/${1}b/{*duration_seconds&*round:2}(b&c);Value5{*duration_seconds&*round:2}`
+	ruleStr := `Value1;Value2;~Header3(Val3&!Val4);~Header4:s/a/${1}b/{*duration_seconds&*round:2}(b&c);Value5{*duration_seconds&*round:2}`
 	eRSRParsers := RSRParsers{
-		&RSRParser{Rules: "Value1", AllFiltersMatch: true, attrValue: "Value1"},
-		&RSRParser{Rules: "Heade2=Value2", AllFiltersMatch: true, attrName: "Heade2", attrValue: "Value2"},
+		&RSRParser{Rules: "Value1", AllFiltersMatch: true, isConstant: true},
+		&RSRParser{Rules: "Value2", AllFiltersMatch: true, isConstant: true},
 		&RSRParser{Rules: "~Header3(Val3&!Val4)", AllFiltersMatch: true, attrName: "Header3",
 			filters: utils.RSRFilters{utils.NewRSRFilterMustCompile("Val3"),
 				utils.NewRSRFilterMustCompile("!Val4")}},
@@ -48,7 +48,7 @@ func TestNewRSRParsers(t *testing.T) {
 		},
 
 		&RSRParser{Rules: "Value5{*duration_seconds&*round:2}", AllFiltersMatch: true,
-			attrValue: "Value5",
+			isConstant: true,
 			converters: utils.DataConverters{utils.NewDataConverterMustCompile("*duration_seconds"),
 				utils.NewDataConverterMustCompile("*round:2")},
 		},
@@ -163,5 +163,67 @@ func TestRSRParsersParseInnerBracket(t *testing.T) {
 	expAttrName := "*req.Service-Information.IN-Information.CalledPartyAddress"
 	if prsr.AttrName() != expAttrName {
 		t.Errorf("expecting: %s, received: %s", expAttrName, prsr.AttrName())
+	}
+}
+
+func TestNewRSRParsersConstant(t *testing.T) {
+	ruleStr := "`>;q=0.7;expires=3600`"
+	eRSRParsers := RSRParsers{
+		&RSRParser{Rules: ">;q=0.7;expires=3600", AllFiltersMatch: true, isConstant: true},
+	}
+	if rsrParsers, err := NewRSRParsers(ruleStr, true, utils.INFIELD_SEP); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if !reflect.DeepEqual(eRSRParsers, rsrParsers) {
+		t.Errorf("expecting: %+v, received: %+v", eRSRParsers, rsrParsers)
+	} else if out, err := rsrParsers.ParseDataProvider(utils.MapStorage{}, utils.NestingSep); err != nil {
+		t.Error(err)
+	} else if expected := ">;q=0.7;expires=3600"; out != expected {
+		t.Errorf("Expected %+v ,received %+v", expected, out)
+	}
+}
+
+func TestNewRSRParsersConstant2(t *testing.T) {
+	ruleStr := "constant;something`>;q=0.7;expires=3600`new;constant"
+	if rsrParsers, err := NewRSRParsers(ruleStr, true, utils.INFIELD_SEP); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if out, err := rsrParsers.ParseDataProvider(utils.MapStorage{}, utils.NestingSep); err != nil {
+		t.Error(err)
+	} else if expected := "constantsomething>;q=0.7;expires=3600newconstant"; out != expected {
+		t.Errorf("Expected %q ,received %q", expected, out)
+	}
+
+	ruleStr = "constant;`>;q=0.7;expires=3600`;constant"
+	if rsrParsers, err := NewRSRParsers(ruleStr, true, utils.INFIELD_SEP); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if out, err := rsrParsers.ParseDataProvider(utils.MapStorage{}, utils.NestingSep); err != nil {
+		t.Error(err)
+	} else if expected := "constant>;q=0.7;expires=3600constant"; out != expected {
+		t.Errorf("Expected %q ,received %q", expected, out)
+	}
+
+	ruleStr = "constant;`>;q=0.7;expires=3600`constant"
+	if rsrParsers, err := NewRSRParsers(ruleStr, true, utils.INFIELD_SEP); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if out, err := rsrParsers.ParseDataProvider(utils.MapStorage{}, utils.NestingSep); err != nil {
+		t.Error(err)
+	} else if expected := "constant>;q=0.7;expires=3600constant"; out != expected {
+		t.Errorf("Expected %q ,received %q", expected, out)
+	}
+}
+
+func TestRSRParserCompileConstant(t *testing.T) {
+	ePrsr := &RSRParser{
+		Rules:           "*constant:>;q=0.7;expires=3600",
+		AllFiltersMatch: true,
+		isConstant:      true,
+	}
+	prsr := &RSRParser{
+		Rules:           "*constant:>;q=0.7;expires=3600",
+		AllFiltersMatch: true,
+	}
+	if err := prsr.Compile(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(ePrsr, prsr) {
+		t.Errorf("expecting: %+v, received: %+v", ePrsr, prsr)
 	}
 }
