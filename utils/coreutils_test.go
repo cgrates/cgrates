@@ -407,6 +407,19 @@ func TestParseTimeDetectLayout(t *testing.T) {
 	} else if expected.Sub(date).Seconds() > 1 {
 		t.Errorf("received: %+v", date)
 	}
+
+	expected = time.Now().AddDate(0, 1, 0)
+	if date, err := ParseTimeDetectLayout("*monthly_estimated", ""); err != nil {
+		t.Error(err)
+	} else {
+		for date.Month()-expected.Month() > 1 {
+			expected = expected.AddDate(0, 0, -1)
+		}
+		if expected.Sub(date).Seconds() > 1 {
+			t.Errorf("received: %+v", date)
+		}
+	}
+
 	expected = time.Now().AddDate(0, 1, 0)
 	if date, err := ParseTimeDetectLayout("*mo", ""); err != nil {
 		t.Error(err)

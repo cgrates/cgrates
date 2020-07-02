@@ -48,11 +48,10 @@ func (ld LoaderData) GetRateIDs() ([]string, error) {
 	if _, has := ld[utils.RateIDs]; !has {
 		return nil, fmt.Errorf("cannot find RateIDs in <%+v>", ld)
 	}
-	if rateIDs, canCast := ld[utils.RateIDs].([]string); !canCast {
-		return nil, fmt.Errorf("cannot cast <%+v> to []string", ld)
-	} else {
-		return rateIDs, nil
+	if rateIDs := ld[utils.RateIDs].(string); len(rateIDs) != 0 {
+		return strings.Split(rateIDs, utils.INFIELD_SEP), nil
 	}
+	return []string{}, nil
 }
 
 // UpdateFromCSV will update LoaderData with data received from fileName,

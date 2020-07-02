@@ -1645,3 +1645,319 @@ cgrates.org,RP1,,,,,,,,,,RT_CHRISTMAS,,* * 24 12 *,30,false,0s,0.06,1m,1s
 	}
 
 }
+
+func TestLoaderRemoveRateProfileRates(t *testing.T) {
+	data := engine.NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
+	ldr := &Loader{
+		ldrID:         "TestLoaderRemoveRateProfileRates",
+		bufLoaderData: make(map[string][]LoaderData),
+		flagsTpls:     make(map[string]utils.FlagsWithParams),
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		timezone:      "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.FCTemplate{
+		utils.MetaRateProfiles: []*config.FCTemplate{
+			&config.FCTemplate{Tag: "TenantID",
+				Path:      "Tenant",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~*req.0", true, utils.INFIELD_SEP),
+				Mandatory: true},
+			&config.FCTemplate{Tag: "ProfileID",
+				Path:      "ID",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~*req.1", true, utils.INFIELD_SEP),
+				Mandatory: true},
+			&config.FCTemplate{Tag: "RateIDs",
+				Path:  "RateIDs",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.2", true, utils.INFIELD_SEP)},
+		},
+	}
+
+	rPfr := &engine.RateProfile{
+		Tenant:           "cgrates.org",
+		ID:               "RP1",
+		FilterIDs:        []string{"*string:~*req.Subject:1001"},
+		Weight:           0,
+		ConnectFee:       0.1,
+		RoundingMethod:   "*up",
+		RoundingDecimals: 4,
+		MinCost:          0.1,
+		MaxCost:          0.6,
+		MaxCostStrategy:  "*free",
+		Rates: map[string]*engine.Rate{
+			"RT_WEEK": &engine.Rate{
+				ID:              "RT_WEEK",
+				Weight:          0,
+				ActivationStart: "* * * * 1-5",
+				IntervalRates: []*engine.IntervalRate{
+					&engine.IntervalRate{
+						IntervalStart: time.Duration(0 * time.Second),
+						Value:         0.12,
+						Unit:          time.Duration(1 * time.Minute),
+						Increment:     time.Duration(1 * time.Minute),
+					},
+					&engine.IntervalRate{
+						IntervalStart: time.Duration(1 * time.Minute),
+						Value:         0.06,
+						Unit:          time.Duration(1 * time.Minute),
+						Increment:     time.Duration(1 * time.Second),
+					},
+				},
+			},
+			"RT_WEEKEND": &engine.Rate{
+				ID:              "RT_WEEKEND",
+				Weight:          10,
+				ActivationStart: "* * * * 0,6",
+				IntervalRates: []*engine.IntervalRate{
+					&engine.IntervalRate{
+						IntervalStart: time.Duration(0 * time.Second),
+						Value:         0.06,
+						Unit:          time.Duration(1 * time.Minute),
+						Increment:     time.Duration(1 * time.Second),
+					},
+				},
+			},
+			"RT_CHRISTMAS": &engine.Rate{
+				ID:              "RT_CHRISTMAS",
+				Weight:          30,
+				ActivationStart: "* * 24 12 *",
+				IntervalRates: []*engine.IntervalRate{
+					&engine.IntervalRate{
+						IntervalStart: time.Duration(0 * time.Second),
+						Value:         0.06,
+						Unit:          time.Duration(1 * time.Minute),
+						Increment:     time.Duration(1 * time.Second),
+					},
+				},
+			},
+		},
+	}
+	if err := ldr.dm.SetRateProfile(rPfr, true); err != nil {
+		t.Error(err)
+	}
+	rPfr2 := &engine.RateProfile{
+		Tenant:           "cgrates.org",
+		ID:               "RP2",
+		FilterIDs:        []string{"*string:~*req.Subject:1001"},
+		Weight:           0,
+		ConnectFee:       0.1,
+		RoundingMethod:   "*up",
+		RoundingDecimals: 4,
+		MinCost:          0.1,
+		MaxCost:          0.6,
+		MaxCostStrategy:  "*free",
+		Rates: map[string]*engine.Rate{
+			"RT_WEEK": &engine.Rate{
+				ID:              "RT_WEEK",
+				Weight:          0,
+				ActivationStart: "* * * * 1-5",
+				IntervalRates: []*engine.IntervalRate{
+					&engine.IntervalRate{
+						IntervalStart: time.Duration(0 * time.Second),
+						Value:         0.12,
+						Unit:          time.Duration(1 * time.Minute),
+						Increment:     time.Duration(1 * time.Minute),
+					},
+					&engine.IntervalRate{
+						IntervalStart: time.Duration(1 * time.Minute),
+						Value:         0.06,
+						Unit:          time.Duration(1 * time.Minute),
+						Increment:     time.Duration(1 * time.Second),
+					},
+				},
+			},
+			"RT_WEEKEND": &engine.Rate{
+				ID:              "RT_WEEKEND",
+				Weight:          10,
+				ActivationStart: "* * * * 0,6",
+				IntervalRates: []*engine.IntervalRate{
+					&engine.IntervalRate{
+						IntervalStart: time.Duration(0 * time.Second),
+						Value:         0.06,
+						Unit:          time.Duration(1 * time.Minute),
+						Increment:     time.Duration(1 * time.Second),
+					},
+				},
+			},
+			"RT_CHRISTMAS": &engine.Rate{
+				ID:              "RT_CHRISTMAS",
+				Weight:          30,
+				ActivationStart: "* * 24 12 *",
+				IntervalRates: []*engine.IntervalRate{
+					&engine.IntervalRate{
+						IntervalStart: time.Duration(0 * time.Second),
+						Value:         0.06,
+						Unit:          time.Duration(1 * time.Minute),
+						Increment:     time.Duration(1 * time.Second),
+					},
+				},
+			},
+		},
+	}
+	if err := ldr.dm.SetRateProfile(rPfr2, true); err != nil {
+		t.Error(err)
+	}
+
+	ratePrfCnt1 := `
+#Tenant,ID,RateIDs
+cgrates.org,RP1,RT_WEEKEND
+`
+	ratePrfCnt2 := `
+#Tenant,ID,RateIDs
+cgrates.org,RP2,RT_WEEKEND;RT_CHRISTMAS
+cgrates.org,RP1,
+`
+	rdr1 := ioutil.NopCloser(strings.NewReader(ratePrfCnt1))
+	csvRdr1 := csv.NewReader(rdr1)
+	csvRdr1.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaRateProfiles: map[string]*openedCSVFile{
+			utils.RateProfilesCsv: &openedCSVFile{fileName: utils.RateProfilesCsv,
+				rdr: rdr1, csvRdr: csvRdr1}},
+	}
+	if flag, err := utils.FlagsWithParamsFromSlice([]string{utils.MetaPartial}); err != nil {
+		t.Error(err)
+	} else {
+		ldr.flagsTpls[utils.MetaRateProfiles] = flag
+	}
+	if err := ldr.removeContent(utils.MetaRateProfiles, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+	if len(ldr.bufLoaderData) != 0 {
+		t.Errorf("wrong buffer content: %+v", ldr.bufLoaderData)
+	}
+
+	eRatePrf := &engine.RateProfile{
+		Tenant:           "cgrates.org",
+		ID:               "RP1",
+		FilterIDs:        []string{"*string:~*req.Subject:1001"},
+		Weight:           0,
+		ConnectFee:       0.1,
+		RoundingMethod:   "*up",
+		RoundingDecimals: 4,
+		MinCost:          0.1,
+		MaxCost:          0.6,
+		MaxCostStrategy:  "*free",
+		Rates: map[string]*engine.Rate{
+			"RT_WEEK": &engine.Rate{
+				ID:              "RT_WEEK",
+				Weight:          0,
+				ActivationStart: "* * * * 1-5",
+				IntervalRates: []*engine.IntervalRate{
+					&engine.IntervalRate{
+						IntervalStart: time.Duration(0 * time.Second),
+						Value:         0.12,
+						Unit:          time.Duration(1 * time.Minute),
+						Increment:     time.Duration(1 * time.Minute),
+					},
+					&engine.IntervalRate{
+						IntervalStart: time.Duration(1 * time.Minute),
+						Value:         0.06,
+						Unit:          time.Duration(1 * time.Minute),
+						Increment:     time.Duration(1 * time.Second),
+					},
+				},
+			},
+			"RT_CHRISTMAS": &engine.Rate{
+				ID:              "RT_CHRISTMAS",
+				Weight:          30,
+				ActivationStart: "* * 24 12 *",
+				IntervalRates: []*engine.IntervalRate{
+					&engine.IntervalRate{
+						IntervalStart: time.Duration(0 * time.Second),
+						Value:         0.06,
+						Unit:          time.Duration(1 * time.Minute),
+						Increment:     time.Duration(1 * time.Second),
+					},
+				},
+			},
+		},
+	}
+	if rcv, err := ldr.dm.GetRateProfile("cgrates.org", "RP1",
+		true, false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, eRatePrf) {
+		t.Errorf("expecting: %+v,\n received: %+v", utils.ToJSON(eRatePrf), utils.ToJSON(rcv))
+	}
+
+	rdr2 := ioutil.NopCloser(strings.NewReader(ratePrfCnt2))
+	csvRdr2 := csv.NewReader(rdr2)
+	csvRdr2.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaRateProfiles: map[string]*openedCSVFile{
+			utils.RateProfilesCsv: &openedCSVFile{fileName: utils.RateProfilesCsv,
+				rdr: rdr2, csvRdr: csvRdr2}},
+	}
+	if flag, err := utils.FlagsWithParamsFromSlice([]string{utils.MetaPartial}); err != nil {
+		t.Error(err)
+	} else {
+		ldr.flagsTpls[utils.MetaRateProfiles] = flag
+	}
+	if err := ldr.removeContent(utils.MetaRateProfiles, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+	if len(ldr.bufLoaderData) != 0 {
+		t.Errorf("wrong buffer content: %+v", ldr.bufLoaderData)
+	}
+
+	eRatePrf2 := &engine.RateProfile{
+		Tenant:           "cgrates.org",
+		ID:               "RP2",
+		FilterIDs:        []string{"*string:~*req.Subject:1001"},
+		Weight:           0,
+		ConnectFee:       0.1,
+		RoundingMethod:   "*up",
+		RoundingDecimals: 4,
+		MinCost:          0.1,
+		MaxCost:          0.6,
+		MaxCostStrategy:  "*free",
+		Rates: map[string]*engine.Rate{
+			"RT_WEEK": &engine.Rate{
+				ID:              "RT_WEEK",
+				Weight:          0,
+				ActivationStart: "* * * * 1-5",
+				IntervalRates: []*engine.IntervalRate{
+					&engine.IntervalRate{
+						IntervalStart: time.Duration(0 * time.Second),
+						Value:         0.12,
+						Unit:          time.Duration(1 * time.Minute),
+						Increment:     time.Duration(1 * time.Minute),
+					},
+					&engine.IntervalRate{
+						IntervalStart: time.Duration(1 * time.Minute),
+						Value:         0.06,
+						Unit:          time.Duration(1 * time.Minute),
+						Increment:     time.Duration(1 * time.Second),
+					},
+				},
+			},
+		},
+	}
+	if rcv, err := ldr.dm.GetRateProfile("cgrates.org", "RP2",
+		true, false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, eRatePrf2) {
+		t.Errorf("expecting: %+v,\n received: %+v", utils.ToJSON(eRatePrf2), utils.ToJSON(rcv))
+	}
+
+	eRatePrf3 := &engine.RateProfile{
+		Tenant:           "cgrates.org",
+		ID:               "RP1",
+		FilterIDs:        []string{"*string:~*req.Subject:1001"},
+		Weight:           0,
+		ConnectFee:       0.1,
+		RoundingMethod:   "*up",
+		RoundingDecimals: 4,
+		MinCost:          0.1,
+		MaxCost:          0.6,
+		MaxCostStrategy:  "*free",
+		Rates:            map[string]*engine.Rate{},
+	}
+	if rcv, err := ldr.dm.GetRateProfile("cgrates.org", "RP1",
+		true, false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, eRatePrf3) {
+		t.Errorf("expecting: %+v,\n received: %+v", utils.ToJSON(eRatePrf3), utils.ToJSON(rcv))
+	}
+}

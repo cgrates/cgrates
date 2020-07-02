@@ -891,6 +891,7 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 				ids = append(ids, tntID)
 
 				if ldr.flagsTpls[loaderType].GetBool(utils.MetaPartial) {
+
 					if rateIDs, err := ldData[0].GetRateIDs(); err != nil {
 						return err
 					} else {
