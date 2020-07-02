@@ -29,16 +29,16 @@ import (
 func TestNewRSRParsers(t *testing.T) {
 	ruleStr := `Value1;Value2;~Header3(Val3&!Val4);~Header4:s/a/${1}b/{*duration_seconds&*round:2}(b&c);Value5{*duration_seconds&*round:2}`
 	eRSRParsers := RSRParsers{
-		&RSRParser{Rules: "Value1", AllFiltersMatch: true, isConstant: true},
-		&RSRParser{Rules: "Value2", AllFiltersMatch: true, isConstant: true},
-		&RSRParser{Rules: "~Header3(Val3&!Val4)", AllFiltersMatch: true, attrName: "Header3",
+		&RSRParser{Rules: "Value1", AllFiltersMatch: true},
+		&RSRParser{Rules: "Value2", AllFiltersMatch: true},
+		&RSRParser{Rules: "~Header3(Val3&!Val4)", AllFiltersMatch: true, path: "Header3",
 			filters: utils.RSRFilters{utils.NewRSRFilterMustCompile("Val3"),
 				utils.NewRSRFilterMustCompile("!Val4")}},
 
 		&RSRParser{Rules: "~Header4:s/a/${1}b/{*duration_seconds&*round:2}(b&c)", AllFiltersMatch: true,
-			attrName: "Header4",
+			path: "Header4",
 			rsrRules: []*utils.ReSearchReplace{
-				&utils.ReSearchReplace{
+				{
 					SearchRegexp:    regexp.MustCompile(`a`),
 					ReplaceTemplate: "${1}b"}},
 			converters: utils.DataConverters{utils.NewDataConverterMustCompile("*duration_seconds"),
@@ -48,7 +48,6 @@ func TestNewRSRParsers(t *testing.T) {
 		},
 
 		&RSRParser{Rules: "Value5{*duration_seconds&*round:2}", AllFiltersMatch: true,
-			isConstant: true,
 			converters: utils.DataConverters{utils.NewDataConverterMustCompile("*duration_seconds"),
 				utils.NewDataConverterMustCompile("*round:2")},
 		},
@@ -62,10 +61,10 @@ func TestNewRSRParsers(t *testing.T) {
 
 func TestRSRParserCompile(t *testing.T) {
 	ePrsr := &RSRParser{
-		Rules:    "~Header4:s/a/${1}b/{*duration_seconds&*round:2}(b&c)",
-		attrName: "Header4",
+		Rules: "~Header4:s/a/${1}b/{*duration_seconds&*round:2}(b&c)",
+		path:  "Header4",
 		rsrRules: []*utils.ReSearchReplace{
-			&utils.ReSearchReplace{
+			{
 				SearchRegexp:    regexp.MustCompile(`a`),
 				ReplaceTemplate: "${1}b"}},
 		converters: utils.DataConverters{utils.NewDataConverterMustCompile("*duration_seconds"),
@@ -80,20 +79,6 @@ func TestRSRParserCompile(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ePrsr, prsr) {
 		t.Errorf("expecting: %+v, received: %+v", ePrsr, prsr)
-	}
-}
-
-func TestRSRParsersParseEvent(t *testing.T) {
-	prsrs := NewRSRParsersMustCompile("~Header1;|;~Header2", true, utils.INFIELD_SEP)
-	ev := map[string]interface{}{
-		"Header1": "Value1",
-		"Header2": "Value2",
-	}
-	eOut := "Value1|Value2"
-	if out, err := prsrs.ParseEvent(ev); err != nil {
-		t.Error(err)
-	} else if eOut != out {
-		t.Errorf("expecting: %s, received: %s", eOut, out)
 	}
 }
 
@@ -123,36 +108,6 @@ func TestRSRParserNotConstant(t *testing.T) {
 	}
 }
 
-func TestRSRParsersParseEvent2(t *testing.T) {
-	prsrs := NewRSRParsersMustCompile("~Header1.Test;|;~Header2.Test", true, utils.INFIELD_SEP)
-	ev := map[string]interface{}{
-		"Header1.Test": "Value1",
-		"Header2.Test": "Value2",
-	}
-	eOut := "Value1|Value2"
-	if out, err := prsrs.ParseEvent(ev); err != nil {
-		t.Error(err)
-	} else if eOut != out {
-		t.Errorf("expecting: %s, received: %s", eOut, out)
-	}
-}
-
-func TestRSRParsersParseEvent3(t *testing.T) {
-	prsr, err := NewRSRParser("~Category:s/(.*)/${1}_suffix/", true)
-	if err != nil {
-		t.Error(err)
-	}
-	ev := map[string]interface{}{
-		"Category": "call",
-	}
-	eOut := "call_suffix"
-	if out, err := prsr.ParseEvent(ev); err != nil {
-		t.Error(err)
-	} else if eOut != out {
-		t.Errorf("expecting: %s, received: %s", eOut, out)
-	}
-}
-
 // TestRSRParsersParseInnerBraces makes sure the inner braces are allowed in a filter rule
 func TestRSRParsersParseInnerBracket(t *testing.T) {
 	rule := "~*req.Service-Information.IN-Information.CalledPartyAddress(~^(00)*(33|0)890240004$)"
@@ -169,7 +124,7 @@ func TestRSRParsersParseInnerBracket(t *testing.T) {
 func TestNewRSRParsersConstant(t *testing.T) {
 	ruleStr := "`>;q=0.7;expires=3600`"
 	eRSRParsers := RSRParsers{
-		&RSRParser{Rules: ">;q=0.7;expires=3600", AllFiltersMatch: true, isConstant: true},
+		&RSRParser{Rules: ">;q=0.7;expires=3600", AllFiltersMatch: true},
 	}
 	if rsrParsers, err := NewRSRParsers(ruleStr, true, utils.INFIELD_SEP); err != nil {
 		t.Error("Unexpected error: ", err.Error())
@@ -215,7 +170,6 @@ func TestRSRParserCompileConstant(t *testing.T) {
 	ePrsr := &RSRParser{
 		Rules:           "*constant:>;q=0.7;expires=3600",
 		AllFiltersMatch: true,
-		isConstant:      true,
 	}
 	prsr := &RSRParser{
 		Rules:           "*constant:>;q=0.7;expires=3600",

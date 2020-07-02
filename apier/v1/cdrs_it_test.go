@@ -280,16 +280,16 @@ func testV1CDRsRefundOutOfSessionCost(t *testing.T) {
 				Usage:     utils.DurationPointer(time.Duration(3 * time.Minute)),
 				Cost:      utils.Float64Pointer(2.3),
 				Charges: []*engine.ChargingInterval{
-					&engine.ChargingInterval{
+					{
 						RatingID: "c1a5ab9",
 						Increments: []*engine.ChargingIncrement{
-							&engine.ChargingIncrement{
+							{
 								Usage:          time.Duration(2 * time.Minute),
 								Cost:           2.0,
 								AccountingID:   "a012888",
 								CompressFactor: 1,
 							},
-							&engine.ChargingIncrement{
+							{
 								Usage:          time.Duration(1 * time.Second),
 								Cost:           0.005,
 								AccountingID:   "44d6c02",
@@ -303,7 +303,7 @@ func testV1CDRsRefundOutOfSessionCost(t *testing.T) {
 					Tenant: "cgrates.org",
 					ID:     "testV1CDRsRefundOutOfSessionCost",
 					BalanceSummaries: []*engine.BalanceSummary{
-						&engine.BalanceSummary{
+						{
 							UUID:  balanceUuid,
 							Type:  utils.MONETARY,
 							Value: 50,
@@ -364,7 +364,7 @@ func testV1CDRsRefundOutOfSessionCost(t *testing.T) {
 				utils.Account:     "testV1CDRsRefundOutOfSessionCost",
 				utils.Destination: "+4986517174963",
 				utils.AnswerTime:  time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC),
-				utils.Usage:       time.Duration(123) * time.Minute,
+				utils.Usage:       123 * time.Minute,
 			},
 		},
 	}
