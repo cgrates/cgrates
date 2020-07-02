@@ -1223,3 +1223,425 @@ func TestLoaderRemoveContentSingleFile(t *testing.T) {
 			utils.ToJSON(ap), utils.ToJSON(rcv))
 	}
 }
+
+func TestLoaderProcessRateProfile(t *testing.T) {
+	data := engine.NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
+	ldr := &Loader{
+		ldrID:         "TestLoaderProcessRateProfile",
+		bufLoaderData: make(map[string][]LoaderData),
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		timezone:      "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.FCTemplate{
+		utils.MetaRateProfiles: []*config.FCTemplate{
+			&config.FCTemplate{Tag: "TenantID",
+				Path:      "Tenant",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~*req.0", true, utils.INFIELD_SEP),
+				Mandatory: true},
+			&config.FCTemplate{Tag: "ProfileID",
+				Path:      "ID",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~*req.1", true, utils.INFIELD_SEP),
+				Mandatory: true},
+			&config.FCTemplate{Tag: "FilterIDs",
+				Path:  "FilterIDs",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.2", true, utils.INFIELD_SEP)},
+			&config.FCTemplate{Tag: "ActivationInterval",
+				Path:  "ActivationInterval",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.3", true, utils.INFIELD_SEP)},
+			&config.FCTemplate{Tag: "Weight",
+				Path:  "Weight",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.4", true, utils.INFIELD_SEP)},
+			&config.FCTemplate{Tag: "ConnectFee",
+				Path:  "ConnectFee",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.5", true, utils.INFIELD_SEP)},
+			&config.FCTemplate{Tag: "RoundingMethod",
+				Path:  "RoundingMethod",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.6", true, utils.INFIELD_SEP)},
+			&config.FCTemplate{Tag: "RoundingDecimals",
+				Path:  "RoundingDecimals",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.7", true, utils.INFIELD_SEP)},
+			&config.FCTemplate{Tag: "MinCost",
+				Path:  "MinCost",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.8", true, utils.INFIELD_SEP)},
+			&config.FCTemplate{Tag: "MaxCost",
+				Path:  "MaxCost",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.9", true, utils.INFIELD_SEP)},
+			&config.FCTemplate{Tag: "MaxCostStrategy",
+				Path:  "MaxCostStrategy",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.10", true, utils.INFIELD_SEP)},
+			&config.FCTemplate{Tag: "RateID",
+				Path:  "RateID",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.11", true, utils.INFIELD_SEP)},
+			&config.FCTemplate{Tag: "RateFilterIDs",
+				Path:  "RateFilterIDs",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.12", true, utils.INFIELD_SEP)},
+			&config.FCTemplate{Tag: "RateActivationStart",
+				Path:  "RateActivationStart",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.13", true, utils.INFIELD_SEP)},
+			&config.FCTemplate{Tag: "RateWeight",
+				Path:  "RateWeight",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.14", true, utils.INFIELD_SEP)},
+			&config.FCTemplate{Tag: "RateBlocker",
+				Path:  "RateBlocker",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.15", true, utils.INFIELD_SEP)},
+			&config.FCTemplate{Tag: "RateIntervalStart",
+				Path:  "RateIntervalStart",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.16", true, utils.INFIELD_SEP)},
+			&config.FCTemplate{Tag: "RateValue",
+				Path:  "RateValue",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.17", true, utils.INFIELD_SEP)},
+			&config.FCTemplate{Tag: "RateUnit",
+				Path:  "RateUnit",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.18", true, utils.INFIELD_SEP)},
+			&config.FCTemplate{Tag: "RateIncrement",
+				Path:  "RateIncrement",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.19", true, utils.INFIELD_SEP)},
+		},
+	}
+	rdr := ioutil.NopCloser(strings.NewReader(engine.RateProfileCSVContent))
+	csvRdr := csv.NewReader(rdr)
+	csvRdr.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaRateProfiles: map[string]*openedCSVFile{
+			utils.RateProfilesCsv: &openedCSVFile{fileName: utils.RateProfilesCsv,
+				rdr: rdr, csvRdr: csvRdr}},
+	}
+	if err := ldr.processContent(utils.MetaRateProfiles, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+	if len(ldr.bufLoaderData) != 0 {
+		t.Errorf("wrong buffer content: %+v", ldr.bufLoaderData)
+	}
+	eRatePrf := &engine.RateProfile{
+		Tenant:           "cgrates.org",
+		ID:               "RP1",
+		FilterIDs:        []string{"*string:~*req.Subject:1001"},
+		Weight:           0,
+		ConnectFee:       0.1,
+		RoundingMethod:   "*up",
+		RoundingDecimals: 4,
+		MinCost:          0.1,
+		MaxCost:          0.6,
+		MaxCostStrategy:  "*free",
+		Rates: map[string]*engine.Rate{
+			"RT_WEEK": &engine.Rate{
+				ID:              "RT_WEEK",
+				Weight:          0,
+				ActivationStart: "* * * * 1-5",
+				IntervalRates: []*engine.IntervalRate{
+					&engine.IntervalRate{
+						IntervalStart: time.Duration(0 * time.Second),
+						Value:         0.12,
+						Unit:          time.Duration(1 * time.Minute),
+						Increment:     time.Duration(1 * time.Minute),
+					},
+					&engine.IntervalRate{
+						IntervalStart: time.Duration(1 * time.Minute),
+						Value:         0.06,
+						Unit:          time.Duration(1 * time.Minute),
+						Increment:     time.Duration(1 * time.Second),
+					},
+				},
+			},
+			"RT_WEEKEND": &engine.Rate{
+				ID:              "RT_WEEKEND",
+				Weight:          10,
+				ActivationStart: "* * * * 0,6",
+				IntervalRates: []*engine.IntervalRate{
+					&engine.IntervalRate{
+						IntervalStart: time.Duration(0 * time.Second),
+						Value:         0.06,
+						Unit:          time.Duration(1 * time.Minute),
+						Increment:     time.Duration(1 * time.Second),
+					},
+				},
+			},
+			"RT_CHRISTMAS": &engine.Rate{
+				ID:              "RT_CHRISTMAS",
+				Weight:          30,
+				ActivationStart: "* * 24 12 *",
+				IntervalRates: []*engine.IntervalRate{
+					&engine.IntervalRate{
+						IntervalStart: time.Duration(0 * time.Second),
+						Value:         0.06,
+						Unit:          time.Duration(1 * time.Minute),
+						Increment:     time.Duration(1 * time.Second),
+					},
+				},
+			},
+		},
+	}
+	if rcv, err := ldr.dm.GetRateProfile("cgrates.org", "RP1",
+		true, false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, eRatePrf) {
+		t.Errorf("expecting: %+v,\n received: %+v", utils.ToJSON(eRatePrf), utils.ToJSON(rcv))
+	}
+
+}
+
+func TestLoaderProcessRateProfileRates(t *testing.T) {
+	data := engine.NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
+	ldr := &Loader{
+		ldrID:         "TestLoaderProcessRateProfile",
+		bufLoaderData: make(map[string][]LoaderData),
+		flagsTpls:     make(map[string]utils.FlagsWithParams),
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		timezone:      "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.FCTemplate{
+		utils.MetaRateProfiles: []*config.FCTemplate{
+			&config.FCTemplate{Tag: "TenantID",
+				Path:      "Tenant",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~*req.0", true, utils.INFIELD_SEP),
+				Mandatory: true},
+			&config.FCTemplate{Tag: "ProfileID",
+				Path:      "ID",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~*req.1", true, utils.INFIELD_SEP),
+				Mandatory: true},
+			&config.FCTemplate{Tag: "FilterIDs",
+				Path:  "FilterIDs",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.2", true, utils.INFIELD_SEP)},
+			&config.FCTemplate{Tag: "ActivationInterval",
+				Path:  "ActivationInterval",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.3", true, utils.INFIELD_SEP)},
+			&config.FCTemplate{Tag: "Weight",
+				Path:  "Weight",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.4", true, utils.INFIELD_SEP)},
+			&config.FCTemplate{Tag: "ConnectFee",
+				Path:  "ConnectFee",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.5", true, utils.INFIELD_SEP)},
+			&config.FCTemplate{Tag: "RoundingMethod",
+				Path:  "RoundingMethod",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.6", true, utils.INFIELD_SEP)},
+			&config.FCTemplate{Tag: "RoundingDecimals",
+				Path:  "RoundingDecimals",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.7", true, utils.INFIELD_SEP)},
+			&config.FCTemplate{Tag: "MinCost",
+				Path:  "MinCost",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.8", true, utils.INFIELD_SEP)},
+			&config.FCTemplate{Tag: "MaxCost",
+				Path:  "MaxCost",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.9", true, utils.INFIELD_SEP)},
+			&config.FCTemplate{Tag: "MaxCostStrategy",
+				Path:  "MaxCostStrategy",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.10", true, utils.INFIELD_SEP)},
+			&config.FCTemplate{Tag: "RateID",
+				Path:  "RateID",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.11", true, utils.INFIELD_SEP)},
+			&config.FCTemplate{Tag: "RateFilterIDs",
+				Path:  "RateFilterIDs",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.12", true, utils.INFIELD_SEP)},
+			&config.FCTemplate{Tag: "RateActivationStart",
+				Path:  "RateActivationStart",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.13", true, utils.INFIELD_SEP)},
+			&config.FCTemplate{Tag: "RateWeight",
+				Path:  "RateWeight",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.14", true, utils.INFIELD_SEP)},
+			&config.FCTemplate{Tag: "RateBlocker",
+				Path:  "RateBlocker",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.15", true, utils.INFIELD_SEP)},
+			&config.FCTemplate{Tag: "RateIntervalStart",
+				Path:  "RateIntervalStart",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.16", true, utils.INFIELD_SEP)},
+			&config.FCTemplate{Tag: "RateValue",
+				Path:  "RateValue",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.17", true, utils.INFIELD_SEP)},
+			&config.FCTemplate{Tag: "RateUnit",
+				Path:  "RateUnit",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.18", true, utils.INFIELD_SEP)},
+			&config.FCTemplate{Tag: "RateIncrement",
+				Path:  "RateIncrement",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.19", true, utils.INFIELD_SEP)},
+		},
+	}
+	ratePrfCnt1 := `
+#Tenant,ID,FilterIDs,ActivationInterval,Weight,ConnectFee,RoundingMethod,RoundingDecimals,MinCost,MaxCost,MaxCostStrategy,RateID,RateFilterIDs,RateActivationStart,RateWeight,RateBlocker,RateIntervalStart,RateValue,RateUnit,RateIncrement
+cgrates.org,RP1,*string:~*req.Subject:1001,,0,0.1,*up,4,0.1,0.6,*free,RT_WEEK,,"* * * * 1-5",0,false,0s,0.12,1m,1m
+cgrates.org,RP1,,,,,,,,,,RT_WEEK,,,,,1m,0.06,1m,1s
+`
+	ratePrfCnt2 := `
+#Tenant,ID,FilterIDs,ActivationInterval,Weight,ConnectFee,RoundingMethod,RoundingDecimals,MinCost,MaxCost,MaxCostStrategy,RateID,RateFilterIDs,RateActivationStart,RateWeight,RateBlocker,RateIntervalStart,RateValue,RateUnit,RateIncrement
+cgrates.org,RP1,,,,,,,,,,RT_WEEKEND,,"* * * * 0,6",10,false,0s,0.06,1m,1s
+cgrates.org,RP1,,,,,,,,,,RT_CHRISTMAS,,* * 24 12 *,30,false,0s,0.06,1m,1s
+`
+	rdr1 := ioutil.NopCloser(strings.NewReader(ratePrfCnt1))
+	csvRdr1 := csv.NewReader(rdr1)
+	csvRdr1.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaRateProfiles: map[string]*openedCSVFile{
+			utils.RateProfilesCsv: &openedCSVFile{fileName: utils.RateProfilesCsv,
+				rdr: rdr1, csvRdr: csvRdr1}},
+	}
+	if err := ldr.processContent(utils.MetaRateProfiles, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+	if len(ldr.bufLoaderData) != 0 {
+		t.Errorf("wrong buffer content: %+v", ldr.bufLoaderData)
+	}
+	eRatePrf := &engine.RateProfile{
+		Tenant:           "cgrates.org",
+		ID:               "RP1",
+		FilterIDs:        []string{"*string:~*req.Subject:1001"},
+		Weight:           0,
+		ConnectFee:       0.1,
+		RoundingMethod:   "*up",
+		RoundingDecimals: 4,
+		MinCost:          0.1,
+		MaxCost:          0.6,
+		MaxCostStrategy:  "*free",
+		Rates: map[string]*engine.Rate{
+			"RT_WEEK": &engine.Rate{
+				ID:              "RT_WEEK",
+				Weight:          0,
+				ActivationStart: "* * * * 1-5",
+				IntervalRates: []*engine.IntervalRate{
+					&engine.IntervalRate{
+						IntervalStart: time.Duration(0 * time.Second),
+						Value:         0.12,
+						Unit:          time.Duration(1 * time.Minute),
+						Increment:     time.Duration(1 * time.Minute),
+					},
+					&engine.IntervalRate{
+						IntervalStart: time.Duration(1 * time.Minute),
+						Value:         0.06,
+						Unit:          time.Duration(1 * time.Minute),
+						Increment:     time.Duration(1 * time.Second),
+					},
+				},
+			},
+		},
+	}
+	if rcv, err := ldr.dm.GetRateProfile("cgrates.org", "RP1",
+		true, false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, eRatePrf) {
+		t.Errorf("expecting: %+v,\n received: %+v", utils.ToJSON(eRatePrf), utils.ToJSON(rcv))
+	}
+
+	rdr2 := ioutil.NopCloser(strings.NewReader(ratePrfCnt2))
+	csvRdr2 := csv.NewReader(rdr2)
+	csvRdr2.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaRateProfiles: map[string]*openedCSVFile{
+			utils.RateProfilesCsv: &openedCSVFile{fileName: utils.RateProfilesCsv,
+				rdr: rdr2, csvRdr: csvRdr2}},
+	}
+	if flag, err := utils.FlagsWithParamsFromSlice([]string{utils.MetaPartial}); err != nil {
+		t.Error(err)
+	} else {
+		ldr.flagsTpls[utils.MetaRateProfiles] = flag
+	}
+	if err := ldr.processContent(utils.MetaRateProfiles, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+	if len(ldr.bufLoaderData) != 0 {
+		t.Errorf("wrong buffer content: %+v", ldr.bufLoaderData)
+	}
+	eRatePrf = &engine.RateProfile{
+		Tenant:           "cgrates.org",
+		ID:               "RP1",
+		FilterIDs:        []string{"*string:~*req.Subject:1001"},
+		Weight:           0,
+		ConnectFee:       0.1,
+		RoundingMethod:   "*up",
+		RoundingDecimals: 4,
+		MinCost:          0.1,
+		MaxCost:          0.6,
+		MaxCostStrategy:  "*free",
+		Rates: map[string]*engine.Rate{
+			"RT_WEEK": &engine.Rate{
+				ID:              "RT_WEEK",
+				Weight:          0,
+				ActivationStart: "* * * * 1-5",
+				IntervalRates: []*engine.IntervalRate{
+					&engine.IntervalRate{
+						IntervalStart: time.Duration(0 * time.Second),
+						Value:         0.12,
+						Unit:          time.Duration(1 * time.Minute),
+						Increment:     time.Duration(1 * time.Minute),
+					},
+					&engine.IntervalRate{
+						IntervalStart: time.Duration(1 * time.Minute),
+						Value:         0.06,
+						Unit:          time.Duration(1 * time.Minute),
+						Increment:     time.Duration(1 * time.Second),
+					},
+				},
+			},
+			"RT_WEEKEND": &engine.Rate{
+				ID:              "RT_WEEKEND",
+				Weight:          10,
+				ActivationStart: "* * * * 0,6",
+				IntervalRates: []*engine.IntervalRate{
+					&engine.IntervalRate{
+						IntervalStart: time.Duration(0 * time.Second),
+						Value:         0.06,
+						Unit:          time.Duration(1 * time.Minute),
+						Increment:     time.Duration(1 * time.Second),
+					},
+				},
+			},
+			"RT_CHRISTMAS": &engine.Rate{
+				ID:              "RT_CHRISTMAS",
+				Weight:          30,
+				ActivationStart: "* * 24 12 *",
+				IntervalRates: []*engine.IntervalRate{
+					&engine.IntervalRate{
+						IntervalStart: time.Duration(0 * time.Second),
+						Value:         0.06,
+						Unit:          time.Duration(1 * time.Minute),
+						Increment:     time.Duration(1 * time.Second),
+					},
+				},
+			},
+		},
+	}
+	if rcv, err := ldr.dm.GetRateProfile("cgrates.org", "RP1",
+		true, false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, eRatePrf) {
+		t.Errorf("expecting: %+v,\n received: %+v", utils.ToJSON(eRatePrf), utils.ToJSON(rcv))
+	}
+
+}

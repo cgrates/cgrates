@@ -44,6 +44,17 @@ func (ld LoaderData) TenantIDStruct() utils.TenantID {
 	}
 }
 
+func (ld LoaderData) GetRateIDs() ([]string, error) {
+	if _, has := ld[utils.RateIDs]; !has {
+		return nil, fmt.Errorf("cannot find RateIDs in <%+v>", ld)
+	}
+	if rateIDs, canCast := ld[utils.RateIDs].([]string); !canCast {
+		return nil, fmt.Errorf("cannot cast <%+v> to []string", ld)
+	} else {
+		return rateIDs, nil
+	}
+}
+
 // UpdateFromCSV will update LoaderData with data received from fileName,
 // contained in record and processed with cfgTpl
 func (ld LoaderData) UpdateFromCSV(fileName string, record []string,

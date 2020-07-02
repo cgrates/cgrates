@@ -880,7 +880,7 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 			}
 		}
 	case utils.MetaRateProfiles:
-		for tntID, _ := range lds {
+		for tntID, ldData := range lds {
 			if ldr.dryRun {
 				utils.Logger.Info(
 					fmt.Sprintf("<%s-%s> DRY_RUN: RateProfileIDs: %s",
@@ -889,10 +889,23 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 				tntIDStruct := utils.NewTenantID(tntID)
 				// get IDs so we can reload in cache
 				ids = append(ids, tntID)
-				if err := ldr.dm.RemoveRateProfile(tntIDStruct.Tenant,
-					tntIDStruct.ID, utils.NonTransactional, true); err != nil {
-					return err
+
+				if ldr.flagsTpls[loaderType].GetBool(utils.MetaPartial) {
+					if rateIDs, err := ldData[0].GetRateIDs(); err != nil {
+						return err
+					} else {
+						if err := ldr.dm.RemoveRateProfileRates(tntIDStruct.Tenant,
+							tntIDStruct.ID, rateIDs, true); err != nil {
+							return err
+						}
+					}
+				} else {
+					if err := ldr.dm.RemoveRateProfile(tntIDStruct.Tenant,
+						tntIDStruct.ID, utils.NonTransactional, true); err != nil {
+						return err
+					}
 				}
+
 				cacheArgs.RateProfileIDs = ids
 				cachePartition = utils.CacheRateProfiles
 			}
