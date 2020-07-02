@@ -151,11 +151,11 @@ func (cP *csvProvider) FieldAsInterface(fldPath []string) (data interface{}, err
 	} else if fldPath[0] != utils.MetaReq {
 		return nil, fmt.Errorf("invalid prefix for : %s", fldPath)
 	}
-	if cfgFieldIdx, err := strconv.Atoi(fldPath[len(fldPath)-1]); err != nil || len(cP.req) <= cfgFieldIdx {
+	var cfgFieldIdx int
+	if cfgFieldIdx, err = strconv.Atoi(fldPath[len(fldPath)-1]); err != nil || len(cP.req) <= cfgFieldIdx {
 		return nil, fmt.Errorf("Ignoring record: %v with error : %+v", cP.req, err)
-	} else {
-		data = cP.req[cfgFieldIdx]
 	}
+	data = cP.req[cfgFieldIdx]
 
 	cP.cache.Set(fldPath, data)
 	return

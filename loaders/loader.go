@@ -704,7 +704,7 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 	var cachePartition string
 	switch loaderType {
 	case utils.MetaAttributes:
-		for tntID, _ := range lds {
+		for tntID := range lds {
 			if ldr.dryRun {
 				utils.Logger.Info(
 					fmt.Sprintf("<%s-%s> DRY_RUN: AttributeProfileID: %s",
@@ -723,7 +723,7 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 		}
 
 	case utils.MetaResources:
-		for tntID, _ := range lds {
+		for tntID := range lds {
 			if ldr.dryRun {
 				utils.Logger.Info(
 					fmt.Sprintf("<%s-%s> DRY_RUN: ResourceProfileID: %s",
@@ -746,7 +746,7 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 			}
 		}
 	case utils.MetaFilters:
-		for tntID, _ := range lds {
+		for tntID := range lds {
 			if ldr.dryRun {
 				utils.Logger.Info(
 					fmt.Sprintf("<%s-%s> DRY_RUN: Filter: %s",
@@ -764,7 +764,7 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 			}
 		}
 	case utils.MetaStats:
-		for tntID, _ := range lds {
+		for tntID := range lds {
 			if ldr.dryRun {
 				utils.Logger.Info(
 					fmt.Sprintf("<%s-%s> DRY_RUN: StatsQueueProfileID: %s",
@@ -786,7 +786,7 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 			}
 		}
 	case utils.MetaThresholds:
-		for tntID, _ := range lds {
+		for tntID := range lds {
 			if ldr.dryRun {
 				utils.Logger.Info(
 					fmt.Sprintf("<%s-%s> DRY_RUN: ThresholdProfileID: %s",
@@ -808,7 +808,7 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 			}
 		}
 	case utils.MetaRoutes:
-		for tntID, _ := range lds {
+		for tntID := range lds {
 			if ldr.dryRun {
 				utils.Logger.Info(
 					fmt.Sprintf("<%s-%s> DRY_RUN: RouteProfileID: %s",
@@ -826,7 +826,7 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 			}
 		}
 	case utils.MetaChargers:
-		for tntID, _ := range lds {
+		for tntID := range lds {
 			if ldr.dryRun {
 				utils.Logger.Info(
 					fmt.Sprintf("<%s-%s> DRY_RUN: ChargerProfileID: %s",
@@ -844,7 +844,7 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 			}
 		}
 	case utils.MetaDispatchers:
-		for tntID, _ := range lds {
+		for tntID := range lds {
 			if ldr.dryRun {
 				utils.Logger.Info(
 					fmt.Sprintf("<%s-%s> DRY_RUN: DispatcherProfileID: %s",
@@ -862,7 +862,7 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 			}
 		}
 	case utils.MetaDispatcherHosts:
-		for tntID, _ := range lds {
+		for tntID := range lds {
 			if ldr.dryRun {
 				utils.Logger.Info(
 					fmt.Sprintf("<%s-%s> DRY_RUN: DispatcherHostID: %s",
@@ -931,7 +931,7 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 				return
 			}
 		case utils.MetaRemove:
-			for tntID, _ := range lds {
+			for tntID := range lds {
 				if err = ldr.connMgr.Call(ldr.cacheConns, nil,
 					utils.CacheSv1RemoveItem, &utils.ArgsGetCacheItemWithArgDispatcher{
 						ArgsGetCacheItem: utils.ArgsGetCacheItem{
