@@ -341,19 +341,9 @@ func (*SIPURIMethodConverter) Convert(in interface{}) (out interface{}, err erro
 }
 
 func NewTimeStringConverter(params string) (hdlr DataConverter, err error) {
-	tS := new(TimeStringConverter)
-	var paramsSplt []string
-	if params != EmptyString {
-		paramsSplt = strings.Split(params, InInFieldSep)
-	}
-	switch len(paramsSplt) {
-	case 1:
-		tS.Layout = paramsSplt[0]
-	default:
-		return nil, fmt.Errorf("invalid %s converter parameters: <%s>",
-			MetaTimeString, params)
-	}
-	return tS, nil
+	tm := new(TimeStringConverter)
+	tm.Layout = params
+	return tm, nil
 }
 
 type TimeStringConverter struct {
