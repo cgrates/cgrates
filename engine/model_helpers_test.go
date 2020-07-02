@@ -247,10 +247,8 @@ func TestMapTPTimings(t *testing.T) {
 			WeekDays:  utils.WeekDays{},
 		},
 	}
-	if rcv, err := MapTPTimings(tps); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eOut, rcv) {
-		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	if _, err := MapTPTimings(tps); err == nil || err.Error() != "duplicate timing tag: ID1" {
+		t.Errorf("Expecting: nil, received: %+v", err)
 	}
 }
 
