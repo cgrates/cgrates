@@ -23,7 +23,6 @@ package dispatchers
 import (
 	"reflect"
 	"testing"
-	"time"
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -1116,7 +1115,7 @@ func testDspRplActionPlan(t *testing.T) {
 				"AccountTest": true,
 			},
 			ActionTimings: []*engine.ActionTiming{
-				&engine.ActionTiming{
+				{
 					ActionsID: "ActionsID",
 				},
 			},
@@ -1232,9 +1231,9 @@ func testDspRplRatingPlan(t *testing.T) {
 		RatingPlan: &engine.RatingPlan{
 			Id: "id",
 			DestinationRates: map[string]engine.RPRateList{
-				"DestinationRates": engine.RPRateList{&engine.RPRate{Rating: "Rating"}}},
-			Ratings: map[string]*engine.RIRate{"Ratings": &engine.RIRate{ConnectFee: 0.7}},
-			Timings: map[string]*engine.RITiming{"Timings": &engine.RITiming{Months: utils.Months{4}}},
+				"DestinationRates": {&engine.RPRate{Rating: "Rating"}}},
+			Ratings: map[string]*engine.RIRate{"Ratings": {ConnectFee: 0.7}},
+			Timings: map[string]*engine.RITiming{"Timings": {Months: utils.Months{4}}},
 		},
 		TenantArg: utils.TenantArg{
 			Tenant: "cgrates.org",
@@ -1459,22 +1458,16 @@ func testDspRplRateProfile(t *testing.T) {
 			MaxCost:          0.6,
 			MaxCostStrategy:  "*free",
 			Rates: map[string]*engine.Rate{
-				"FIRST_GI": &engine.Rate{
+				"FIRST_GI": {
 					ID:        "FIRST_GI",
 					FilterIDs: []string{"*gi:~*req.Usage:0"},
 					Weight:    0,
-					Value:     0.12,
-					Unit:      time.Duration(1 * time.Minute),
-					Increment: time.Duration(1 * time.Minute),
 					Blocker:   false,
 				},
-				"SECOND_GI": &engine.Rate{
+				"SECOND_GI": {
 					ID:        "SECOND_GI",
 					FilterIDs: []string{"*gi:~*req.Usage:1m"},
 					Weight:    10,
-					Value:     0.06,
-					Unit:      time.Duration(1 * time.Minute),
-					Increment: time.Duration(1 * time.Second),
 					Blocker:   false,
 				},
 			},

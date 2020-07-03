@@ -34,7 +34,8 @@ import (
 )
 
 func TestEventExporterSReload(t *testing.T) {
-	for _, dir := range []string{"/tmp/testCSV", "/tmp/testComposedCSV", "/tmp/testFWV"} {
+	for _, dir := range []string{"/tmp/testCSV", "/tmp/testComposedCSV", "/tmp/testFWV", "/tmp/testCSVMasked",
+		"/tmp/testCSVfromVirt"} {
 		if err := os.RemoveAll(dir); err != nil {
 			t.Fatal("Error removing folder: ", dir, err)
 		}
