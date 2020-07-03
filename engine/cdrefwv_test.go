@@ -317,7 +317,7 @@ func TestWriteCdr(t *testing.T) {
 		t.Error(err)
 	}
 	if err = cdre.composeTrailer(); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	eHeader := "10   VOIfwv_107111308420018011511340001                                                                                                         \n"
 	eContentOut := "201001        1001                1002                    0211  07111308420010          1       3dsafdsaf                             0002.34570\n"

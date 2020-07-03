@@ -179,6 +179,7 @@ type Filter struct {
 	ActivationInterval *utils.ActivationInterval
 }
 
+// FilterWithArgDispatcher the arguments for the replication
 type FilterWithArgDispatcher struct {
 	*Filter
 	*utils.ArgDispatcher
@@ -329,7 +330,7 @@ func (fltr *FilterRule) passExists(dDP utils.DataProvider) (bool, error) {
 	var err error
 	path := fltr.Element
 	if fltr.rsrFields != nil {
-		if path, err = fltr.rsrFields.ParseDataProviderWithInterfaces(dDP, utils.NestingSep); err != nil {
+		if path, err = fltr.rsrFields.ParseDataProviderWithInterfaces(dDP); err != nil {
 			return false, err
 		}
 	}
@@ -446,7 +447,7 @@ func (fltr *FilterRule) passDestinations(dDP utils.DataProvider) (bool, error) {
 }
 
 func (fltr *FilterRule) passRSR(dDP utils.DataProvider) (bool, error) {
-	_, err := fltr.rsrFields.ParseDataProviderWithInterfaces(dDP, utils.NestingSep)
+	_, err := fltr.rsrFields.ParseDataProviderWithInterfaces(dDP)
 	if err != nil {
 		if err == utils.ErrNotFound || err == utils.ErrFilterNotPassingNoCaps {
 			return false, nil

@@ -30,6 +30,9 @@ import (
 // StringToInterface will parse string into supported types
 // if no other conversion possible, original string will be returned
 func StringToInterface(s string) interface{} {
+	if s == EmptyString {
+		return s
+	}
 	// int64
 	if i, err := strconv.ParseInt(s, 10, 64); err == nil {
 		return i

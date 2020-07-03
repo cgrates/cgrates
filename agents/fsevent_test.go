@@ -491,60 +491,60 @@ func TestParseEventValue(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
 	config.SetCgrConfig(cfg)
 	ev := NewFSEvent(hangupEv)
-	if tor, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.REGEXP_PREFIX+utils.ToR, true), ""); tor != utils.VOICE {
-		t.Error("Unexpected tor parsed", tor)
+	if tor, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.ToR, true), ""); tor != utils.VOICE {
+		t.Errorf("Unexpected tor parsed %q", tor)
 	}
-	if accid, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.REGEXP_PREFIX+utils.OriginID, true), ""); accid != "e3133bf7-dcde-4daf-9663-9a79ffcef5ad" {
+	if accid, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.OriginID, true), ""); accid != "e3133bf7-dcde-4daf-9663-9a79ffcef5ad" {
 		t.Error("Unexpected result parsed", accid)
 	}
-	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.REGEXP_PREFIX+utils.OriginHost, true), ""); parsed != "10.0.3.15" {
+	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.OriginHost, true), ""); parsed != "10.0.3.15" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.REGEXP_PREFIX+utils.Source, true), ""); parsed != "FS_EVENT" {
+	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.Source, true), ""); parsed != "FS_EVENT" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.REGEXP_PREFIX+utils.RequestType, true), ""); parsed != utils.META_PREPAID {
+	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.RequestType, true), ""); parsed != utils.META_PREPAID {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.REGEXP_PREFIX+utils.Tenant, true), ""); parsed != "cgrates.org" {
+	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.Tenant, true), ""); parsed != "cgrates.org" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.REGEXP_PREFIX+utils.Category, true), ""); parsed != "call" {
+	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.Category, true), ""); parsed != "call" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.REGEXP_PREFIX+utils.Account, true), ""); parsed != "1001" {
+	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.Account, true), ""); parsed != "1001" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.REGEXP_PREFIX+utils.Subject, true), ""); parsed != "1001" {
+	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.Subject, true), ""); parsed != "1001" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.REGEXP_PREFIX+utils.Destination, true), ""); parsed != "1003" {
+	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.Destination, true), ""); parsed != "1003" {
 		t.Error("Unexpected result parsed", parsed)
 	}
 	sTime, _ := utils.ParseTimeDetectLayout("1436280728471153"[:len("1436280728471153")-6], "") // We discard nanoseconds information so we can correlate csv
-	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.REGEXP_PREFIX+utils.SetupTime, true), ""); parsed != sTime.String() {
+	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.SetupTime, true), ""); parsed != sTime.String() {
 		t.Errorf("Expecting: %s, parsed: %s", sTime.String(), parsed)
 	}
 	aTime, _ := utils.ParseTimeDetectLayout("1436280728971147"[:len("1436280728971147")-6], "")
-	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.REGEXP_PREFIX+utils.AnswerTime, true), ""); parsed != aTime.String() {
+	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.AnswerTime, true), ""); parsed != aTime.String() {
 		t.Errorf("Expecting: %s, parsed: %s", aTime.String(), parsed)
 	}
-	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.REGEXP_PREFIX+utils.Usage, true), ""); parsed != "66000000000" {
+	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.Usage, true), ""); parsed != "66000000000" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.REGEXP_PREFIX+utils.PDD, true), ""); parsed != "0.028" {
+	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.PDD, true), ""); parsed != "0.028" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.REGEXP_PREFIX+utils.SUPPLIER, true), ""); parsed != "supplier1" {
+	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.SUPPLIER, true), ""); parsed != "supplier1" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.REGEXP_PREFIX+utils.RunID, true), ""); parsed != utils.MetaDefault {
+	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.RunID, true), ""); parsed != utils.MetaDefault {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.REGEXP_PREFIX+utils.COST, true), ""); parsed != "-1" {
+	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.COST, true), ""); parsed != "-1" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.REGEXP_PREFIX+"Hangup-Cause", true), ""); parsed != "NORMAL_CLEARING" {
+	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.DynamicDataPrefix+"Hangup-Cause", true), ""); parsed != "NORMAL_CLEARING" {
 		t.Error("Unexpected result parsed", parsed)
 	}
 }

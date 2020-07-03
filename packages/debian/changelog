@@ -73,6 +73,9 @@ cgrates (0.11.0~dev) UNRELEASED; urgency=medium
   * [LoaderS] Add *req as mandatory prefix
   * [AgentS] Rename prefix from *cache to *uch
   * [InternalDB] Updated InternalDB to use the global cache
+  * [RSRParsers] Removed *constant: prefix  
+  * [RSRParsers] Removed attribute sistem from RSRParser  
+  * [RSRParsers] Added grave accent(`) char as a delimiter to not split tge RSR value
 
  -- DanB <danb@cgrates.org>  Wed, 19 Feb 2020 13:25:52 +0200
 

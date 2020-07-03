@@ -197,16 +197,16 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent) (
 		case utils.META_CONSTANT:
 			substitute, err = attribute.Value.ParseValue(utils.EmptyString)
 		case utils.MetaVariable, utils.META_COMPOSED:
-			substitute, err = attribute.Value.ParseDataProvider(evNm, utils.NestingSep)
+			substitute, err = attribute.Value.ParseDataProvider(evNm)
 		case utils.META_USAGE_DIFFERENCE:
 			if len(attribute.Value) != 2 {
 				return nil, fmt.Errorf("invalid arguments <%s>", utils.ToJSON(attribute.Value))
 			}
-			strVal1, err := attribute.Value[0].ParseDataProvider(evNm, utils.NestingSep)
+			strVal1, err := attribute.Value[0].ParseDataProvider(evNm)
 			if err != nil {
 				return nil, err
 			}
-			strVal2, err := attribute.Value[1].ParseDataProvider(evNm, utils.NestingSep)
+			strVal2, err := attribute.Value[1].ParseDataProvider(evNm)
 			if err != nil {
 				return nil, err
 			}
@@ -222,7 +222,7 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent) (
 		case utils.MetaSum:
 			iFaceVals := make([]interface{}, len(attribute.Value))
 			for i, val := range attribute.Value {
-				strVal, err := val.ParseDataProvider(evNm, utils.NestingSep)
+				strVal, err := val.ParseDataProvider(evNm)
 				if err != nil {
 					return nil, err
 				}
@@ -236,7 +236,7 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent) (
 		case utils.MetaDifference:
 			iFaceVals := make([]interface{}, len(attribute.Value))
 			for i, val := range attribute.Value {
-				strVal, err := val.ParseDataProvider(evNm, utils.NestingSep)
+				strVal, err := val.ParseDataProvider(evNm)
 				if err != nil {
 					return nil, err
 				}
@@ -250,7 +250,7 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent) (
 		case utils.MetaMultiply:
 			iFaceVals := make([]interface{}, len(attribute.Value))
 			for i, val := range attribute.Value {
-				strVal, err := val.ParseDataProvider(evNm, utils.NestingSep)
+				strVal, err := val.ParseDataProvider(evNm)
 				if err != nil {
 					return nil, err
 				}
@@ -264,7 +264,7 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent) (
 		case utils.MetaDivide:
 			iFaceVals := make([]interface{}, len(attribute.Value))
 			for i, val := range attribute.Value {
-				strVal, err := val.ParseDataProvider(evNm, utils.NestingSep)
+				strVal, err := val.ParseDataProvider(evNm)
 				if err != nil {
 					return nil, err
 				}
@@ -280,7 +280,7 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent) (
 				return nil, fmt.Errorf("invalid arguments <%s> to %s",
 					utils.ToJSON(attribute.Value), utils.MetaValueExponent)
 			}
-			strVal1, err := attribute.Value[0].ParseDataProvider(evNm, utils.NestingSep) // String Value
+			strVal1, err := attribute.Value[0].ParseDataProvider(evNm) // String Value
 			if err != nil {
 				return nil, err
 			}
@@ -289,7 +289,7 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent) (
 				return nil, fmt.Errorf("invalid value <%s> to %s",
 					strVal1, utils.MetaValueExponent)
 			}
-			strVal2, err := attribute.Value[1].ParseDataProvider(evNm, utils.NestingSep) // String Exponent
+			strVal2, err := attribute.Value[1].ParseDataProvider(evNm) // String Exponent
 			if err != nil {
 				return nil, err
 			}
@@ -300,7 +300,7 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent) (
 			substitute = strconv.FormatFloat(utils.Round(val*math.Pow10(exp),
 				config.CgrConfig().GeneralCfg().RoundingDecimals, utils.ROUNDING_MIDDLE), 'f', -1, 64)
 		case utils.MetaUnixTimestamp:
-			val, err := attribute.Value.ParseDataProvider(evNm, utils.NestingSep)
+			val, err := attribute.Value.ParseDataProvider(evNm)
 			if err != nil {
 				return nil, err
 			}
@@ -310,7 +310,7 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent) (
 			}
 			substitute = strconv.Itoa(int(t.Unix()))
 		default: // backwards compatible in case that Type is empty
-			substitute, err = attribute.Value.ParseDataProvider(evNm, utils.NestingSep)
+			substitute, err = attribute.Value.ParseDataProvider(evNm)
 		}
 
 		if err != nil {

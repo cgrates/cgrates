@@ -46,7 +46,8 @@ type NavigableMapper interface {
 
 // DPDynamicInterface returns the value of the field if the path is dynamic
 func DPDynamicInterface(dnVal string, dP DataProvider) (interface{}, error) {
-	if strings.HasPrefix(dnVal, DynamicDataPrefix) {
+	if strings.HasPrefix(dnVal, DynamicDataPrefix) &&
+		dnVal != DynamicDataPrefix {
 		dnVal = strings.TrimPrefix(dnVal, DynamicDataPrefix)
 		return dP.FieldAsInterface(strings.Split(dnVal, NestingSep))
 	}
@@ -55,7 +56,8 @@ func DPDynamicInterface(dnVal string, dP DataProvider) (interface{}, error) {
 
 // DPDynamicString returns the string value of the field if the path is dynamic
 func DPDynamicString(dnVal string, dP DataProvider) (string, error) {
-	if strings.HasPrefix(dnVal, DynamicDataPrefix) {
+	if strings.HasPrefix(dnVal, DynamicDataPrefix) &&
+		dnVal != DynamicDataPrefix {
 		dnVal = strings.TrimPrefix(dnVal, DynamicDataPrefix)
 		return dP.FieldAsString(strings.Split(dnVal, NestingSep))
 	}

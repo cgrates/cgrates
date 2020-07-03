@@ -180,7 +180,7 @@ func cdrLogAction(acc *Account, a *Action, acs Actions, extraData interface{}) (
 		cdr.CGRID = utils.Sha1(cdr.OriginID, cdr.OriginHost)
 		elem := reflect.ValueOf(cdr).Elem()
 		for key, rsrFlds := range defaultTemplate {
-			parsedValue, err := rsrFlds.ParseDataProvider(cdrLogProvider, utils.NestingSep)
+			parsedValue, err := rsrFlds.ParseDataProvider(cdrLogProvider)
 			if err != nil {
 				return err
 			}

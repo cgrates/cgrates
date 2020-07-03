@@ -57,7 +57,7 @@ func TestNewSureTaxRequest(t *testing.T) {
 		ResponseGroup:  "03",
 		ResponseType:   "D4",
 		ItemList: []*STRequestItem{
-			&STRequestItem{
+			{
 				CustomerNumber:       "1001",
 				OrigNumber:           "1001",
 				TermNumber:           "1002",

@@ -142,7 +142,7 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithOpts, rply *s
 		if len(eeCfg.Filters) != 0 {
 			cgrDp := utils.MapStorage{utils.MetaReq: cgrEv.Event}
 			tnt := cgrEv.Tenant
-			if eeTnt, errTnt := eeCfg.Tenant.ParseEvent(cgrEv.Event); errTnt == nil && eeTnt != utils.EmptyString {
+			if eeTnt, errTnt := eeCfg.Tenant.ParseDataProvider(cgrDp); errTnt == nil && eeTnt != utils.EmptyString {
 				tnt = eeTnt
 			}
 			if pass, errPass := eeS.filterS.Pass(tnt,
