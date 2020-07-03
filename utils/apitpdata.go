@@ -1454,12 +1454,12 @@ type TPRateProfile struct {
 }
 
 type TPRate struct {
-	ID              string   // RateID
-	FilterIDs       []string // RateFilterIDs
-	ActivationStart string
-	Weight          float64 // RateWeight will decide the winner per interval start
-	Blocker         bool    // RateBlocker will make this rate recurrent, deactivating further intervals
-	IntervalRates   []*TPIntervalRate
+	ID             string   // RateID
+	FilterIDs      []string // RateFilterIDs
+	ActivationTime string
+	Weight         float64 // RateWeight will decide the winner per interval start
+	Blocker        bool    // RateBlocker will make this rate recurrent, deactivating further intervals
+	IntervalRates  []*TPIntervalRate
 }
 
 type TPIntervalRate struct {

@@ -3046,7 +3046,7 @@ func (tps RateProfileMdls) AsTPRateProfile() (result []*utils.TPRateProfile) {
 				rate.FilterIDs = append(rate.FilterIDs, rateFilterSplit...)
 			}
 			if tp.RateActivationStart != utils.EmptyString {
-				rate.ActivationStart = tp.RateActivationStart
+				rate.ActivationTime = tp.RateActivationStart
 			}
 			if tp.RateWeight != 0 {
 				rate.Weight = tp.RateWeight
@@ -3169,7 +3169,7 @@ func APItoModelTPRateProfile(tPrf *utils.TPRateProfile) (mdls RateProfileMdls) {
 					mdl.RateFilterIDs += val
 				}
 				mdl.RateWeight = rate.Weight
-				mdl.RateActivationStart = rate.ActivationStart
+				mdl.RateActivationStart = rate.ActivationTime
 				mdl.RateBlocker = rate.Blocker
 
 			}
@@ -3209,12 +3209,12 @@ func APItoRateProfile(tpRp *utils.TPRateProfile, timezone string) (rp *RateProfi
 	}
 	for key, rate := range tpRp.Rates {
 		rp.Rates[key] = &Rate{
-			ID:              rate.ID,
-			Weight:          rate.Weight,
-			Blocker:         rate.Blocker,
-			FilterIDs:       rate.FilterIDs,
-			ActivationStart: rate.ActivationStart,
-			IntervalRates:   make([]*IntervalRate, len(rate.IntervalRates)),
+			ID:             rate.ID,
+			Weight:         rate.Weight,
+			Blocker:        rate.Blocker,
+			FilterIDs:      rate.FilterIDs,
+			ActivationTime: rate.ActivationTime,
+			IntervalRates:  make([]*IntervalRate, len(rate.IntervalRates)),
 		}
 		for i, iRate := range rate.IntervalRates {
 			rp.Rates[key].IntervalRates[i] = new(IntervalRate)
@@ -3251,12 +3251,12 @@ func RateProfileToAPI(rp *RateProfile) (tpRp *utils.TPRateProfile) {
 
 	for key, rate := range rp.Rates {
 		tpRp.Rates[key] = &utils.TPRate{
-			ID:              rate.ID,
-			Weight:          rate.Weight,
-			Blocker:         rate.Blocker,
-			FilterIDs:       rate.FilterIDs,
-			ActivationStart: rate.ActivationStart,
-			IntervalRates:   make([]*utils.TPIntervalRate, len(rate.IntervalRates)),
+			ID:             rate.ID,
+			Weight:         rate.Weight,
+			Blocker:        rate.Blocker,
+			FilterIDs:      rate.FilterIDs,
+			ActivationTime: rate.ActivationTime,
+			IntervalRates:  make([]*utils.TPIntervalRate, len(rate.IntervalRates)),
 		}
 		for i, iRate := range rate.IntervalRates {
 			tpRp.Rates[key].IntervalRates[i] = &utils.TPIntervalRate{
