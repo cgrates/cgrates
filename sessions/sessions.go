@@ -3234,6 +3234,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 		rply.StatQueueIDs = &sIDs
 	}
 	if argsFlagsWithParams.HasKey(utils.MetaCDRs) {
+		var rplyCDR string
 		cgrID := GetSetCGRID(ev)
 		s := sS.getRelocateSession(cgrID,
 			ev.GetStringIgnoreErrors(utils.InitialOriginID),
@@ -3251,7 +3252,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 				&engine.ArgV1ProcessEvent{
 					Flags:         []string{utils.MetaRALs},
 					CGREvent:      *args.CGREvent,
-					ArgDispatcher: args.ArgDispatcher}, rply)
+					ArgDispatcher: args.ArgDispatcher}, &rplyCDR)
 		}
 
 		// Use previously stored Session to generate CDRs
@@ -3273,7 +3274,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 				argsProc.Flags = append(argsProc.Flags, fmt.Sprintf("%s:true", utils.MetaRALs))
 			}
 			if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().CDRsConns, nil, utils.CDRsV1ProcessEvent,
-				argsProc, rply); err != nil {
+				argsProc, &rplyCDR); err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> error <%s> posting CDR with CGRID: <%s>",
 						utils.SessionS, err.Error(), cgrID))

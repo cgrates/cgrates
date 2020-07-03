@@ -394,30 +394,31 @@ func testSSv1ItProcessEventTerminateSession(t *testing.T) {
 }
 
 func testSSv1ItProcessCDRForSessionFromProcessEvent(t *testing.T) {
-	args := utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "testSSv1ItProcessCDRForSessionFromProcessEvent",
-		Event: map[string]interface{}{
-			utils.Tenant:      "cgrates.org",
-			utils.ToR:         utils.VOICE,
-			utils.OriginID:    "testSSv1ItProcessEvent",
-			utils.RequestType: sSV1RequestType,
-			utils.Account:     "1001",
-			utils.Subject:     "ANY2CNT",
-			utils.Destination: "1002",
-			utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-			utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-			utils.Usage:       10 * time.Minute,
+	args := &sessions.V1ProcessEventArgs{
+		Flags: []string{utils.MetaCDRs},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testSSv1ItProcessCDRForSessionFromProcessEvent",
+			Event: map[string]interface{}{
+				utils.Tenant:      "cgrates.org",
+				utils.ToR:         utils.VOICE,
+				utils.OriginID:    "testSSv1ItProcessEvent",
+				utils.RequestType: sSV1RequestType,
+				utils.Account:     "1001",
+				utils.Subject:     "ANY2CNT",
+				utils.Destination: "1002",
+				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+				utils.Usage:       10 * time.Minute,
+			},
 		},
 	}
-	var rply string
-	if err := sSv1BiRpc.Call(utils.SessionSv1ProcessCDR,
-		args, &rply); err != nil {
+	var reply sessions.V1ProcessEventReply
+	if err := sSv1BiRpc.Call(utils.SessionSv1ProcessEvent,
+		args, &reply); err != nil {
 		t.Error(err)
 	}
-	if rply != utils.OK {
-		t.Errorf("Unexpected reply: %s", rply)
-	}
+
 	time.Sleep(100 * time.Millisecond)
 }
 
