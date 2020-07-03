@@ -157,7 +157,7 @@ func (cdr *CDR) FieldAsString(rsrPrs *config.RSRParser) (parsed string, err erro
 		utils.MapStorage{
 			utils.MetaReq: cdr.AsMapStringIface(),
 			utils.MetaEC:  cdr.CostDetails,
-		}, utils.NestingSep)
+		})
 	if err != nil {
 		return
 	}
@@ -166,11 +166,11 @@ func (cdr *CDR) FieldAsString(rsrPrs *config.RSRParser) (parsed string, err erro
 
 // FieldsAsString concatenates values of multiple fields defined in template, used eg in CDR templates
 func (cdr *CDR) FieldsAsString(rsrFlds config.RSRParsers) string {
-	outVal, err := rsrFlds.ParseDataProviderWithInterfaces(
+	outVal, err := rsrFlds.ParseDataProvider(
 		utils.MapStorage{
 			utils.MetaReq: cdr.AsMapStringIface(),
 			utils.MetaEC:  cdr.CostDetails,
-		}, utils.NestingSep)
+		})
 	if err != nil {
 		return ""
 	}

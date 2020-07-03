@@ -2735,7 +2735,6 @@ func TestEventCostfieldAsInterface(t *testing.T) {
 	if rcv, err := eventCost.fieldAsInterface([]string{utils.Timings, "test1"}); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eChargedTiming, rcv) {
-		fmt.Printf("%T", rcv)
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eChargedTiming), utils.ToJSON(rcv))
 	}
 	// case utils.Rates:

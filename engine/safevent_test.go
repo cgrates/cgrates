@@ -129,7 +129,7 @@ func TestSafEventString(t *testing.T) {
 	for i := 0; i < 10; i++ {
 		t.Run("string", func(t *testing.T) {
 			t.Parallel()
-			se.String()
+			_ = se.String()
 		})
 		t.Run("remove", func(t *testing.T) {
 			t.Parallel()

@@ -51,11 +51,11 @@
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
 						"value": "~*cgrep.Routes.SortedRoutes[0].RouteParameters"},
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
-							"value":"*constant:>;q=0.7; expires=3600;cgr_cost="},
+							"value":"`>;q=0.7; expires=3600;cgr_cost=`"},
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
 						"value":"~*cgrep.Routes.SortedRoutes[0].SortingData.Cost"},
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
-							"value":"*constant:;cgr_maxusage="},
+							"value":"`;cgr_maxusage=`"},
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
 						"value":"~*cgrep.Routes.SortedRoutes[0].SortingData.MaxUsage"}
 				]
@@ -80,11 +80,11 @@
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
 						"value": "~*cgrep.Routes.SortedRoutes[1].RouteParameters"},
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
-							"value":"*constant:>;q=0.2;cgr_cost="},
+							"value":"`>;q=0.2;cgr_cost=`"},
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
 							"value":"~*cgrep.Routes.SortedRoutes[1].SortingData.Cost"},
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
-							"value":"*constant:;cgr_maxusage="},
+							"value":"`;cgr_maxusage=`"},
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
 							"value":"~*cgrep.Routes.SortedRoutes[1].SortingData.MaxUsage"}
 				]
@@ -109,11 +109,11 @@
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
 							"value": "~*cgrep.Routes.SortedRoutes[2].RouteParameters"},
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
-							"value":"*constant:>;q=0.1;cgr_cost="},
+							"value":"`>;q=0.1;cgr_cost=`"},
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
 							"value":"~*cgrep.Routes.SortedRoutes[2].SortingData.Cost"},
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
-							"value":"*constant:;cgr_maxusage="},
+							"value":"`;cgr_maxusage=`"},
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
 							"value":"~*cgrep.Routes.SortedRoutes[2].SortingData.MaxUsage"}
 				]

@@ -85,7 +85,7 @@ func NewRSRField(fldStr string) (fld *RSRField, err error) {
 		rsrField.filters = filters
 		return rsrField, nil
 	}
-	if !strings.HasPrefix(fldStr, REGEXP_PREFIX) {
+	if !strings.HasPrefix(fldStr, DynamicDataPrefix) {
 		rsrField.Id = fldStr
 		rsrField.filters = filters
 		return rsrField, nil
@@ -210,7 +210,7 @@ func NewRSRFilter(fltrVal string) (rsrFltr *RSRFilter, err error) {
 		}
 	}
 	rsrFltr.filterRule = fltrVal
-	if fltrVal[:1] == REGEXP_PREFIX {
+	if fltrVal[:1] == DynamicDataPrefix {
 		if rsrFltr.fltrRgxp, err = regexp.Compile(fltrVal[1:]); err != nil {
 			return nil, err
 		}
@@ -242,7 +242,7 @@ func (rsrFltr *RSRFilter) Pass(val string) bool {
 	if rsrFltr.filterRule == "" {
 		return !rsrFltr.negative
 	}
-	if rsrFltr.filterRule[:1] == REGEXP_PREFIX {
+	if rsrFltr.filterRule[:1] == DynamicDataPrefix {
 		return rsrFltr.fltrRgxp.MatchString(val) != rsrFltr.negative
 	}
 	if rsrFltr.filterRule == "^$" { // Special case to test empty value

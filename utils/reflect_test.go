@@ -231,6 +231,9 @@ func TestStringToInterface(t *testing.T) {
 	if res := StringToInterface("1"); res != int64(1) {
 		t.Error("not parsing int")
 	}
+	if res := StringToInterface(""); res != "" {
+		t.Error("not parsing string")
+	}
 	if res := StringToInterface("true"); res != true {
 		t.Error("not parsing bool")
 	}
