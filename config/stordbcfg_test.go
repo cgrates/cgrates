@@ -135,6 +135,7 @@ func TestStoreDbCfgloadFromJsonCfgPort(t *testing.T) {
 
 func TestStorDbCfgAsMapInterface(t *testing.T) {
 	var dbcfg StorDbCfg
+	dbcfg.Items = make(map[string]*ItemOpt)
 	cfgJSONStr := `{
 		"stor_db": {								
 			"db_type": "*mysql",					

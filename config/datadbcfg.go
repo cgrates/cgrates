@@ -94,9 +94,8 @@ func (dbcfg *DataDbCfg) loadFromJsonCfg(jsnDbCfg *DbJsonCfg) (err error) {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
 			if rplConn == utils.MetaInternal {
 				return fmt.Errorf("Replication connection ID needs to be different than *internal")
-			} else {
-				dbcfg.RplConns[idx] = rplConn
 			}
+			dbcfg.RplConns[idx] = rplConn
 		}
 	}
 	if jsnDbCfg.Items != nil {

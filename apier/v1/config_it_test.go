@@ -149,6 +149,7 @@ func testConfigSReloadConfigFromJSONSessionS(t *testing.T) {
 		"MinCallDuration":     0.,
 		"SessionTTL":          0.,
 		"SessionTTLLastUsed":  nil,
+		"SessionTTLLastUsage": nil,
 		"SessionTTLMaxDelay":  nil,
 		"SessionTTLUsage":     nil,
 		"StoreSCosts":         false,
@@ -166,7 +167,7 @@ func testConfigSReloadConfigFromJSONSessionS(t *testing.T) {
 	}, &rpl); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exp, rpl) {
-		t.Errorf("Expected %+v , received: %+v ", exp, rpl)
+		t.Errorf("Expected %+v , received: %+v ", utils.ToJSON(exp), utils.ToJSON(rpl))
 	}
 }
 
