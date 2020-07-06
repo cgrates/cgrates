@@ -151,12 +151,9 @@ func (sS *StatService) StoreStatQueue(sq *StatQueue) (err error) {
 
 // matchingStatQueuesForEvent returns ordered list of matching resources which are active by the time of the call
 func (sS *StatService) matchingStatQueuesForEvent(args *StatsArgsProcessEvent) (sqs StatQueues, err error) {
-	matchingSQs := make(map[string]*StatQueue)
-	var sqIDs []string
-	if len(args.StatIDs) != 0 {
-		sqIDs = args.StatIDs
-	} else {
-		mapIDs, err := MatchingItemIDsForEvent(args.Event,
+	sqIDs := utils.NewStringSet(args.StatIDs)
+	if len(sqIDs) == 0 {
+		sqIDs, err = MatchingItemIDsForEvent(args.Event,
 			sS.cgrcfg.StatSCfg().StringIndexedFields,
 			sS.cgrcfg.StatSCfg().PrefixIndexedFields,
 			sS.dm, utils.CacheStatFilterIndexes, args.Tenant,
@@ -164,12 +161,12 @@ func (sS *StatService) matchingStatQueuesForEvent(args *StatsArgsProcessEvent) (
 			sS.cgrcfg.StatSCfg().NestedFields,
 		)
 		if err != nil {
-			return nil, err
+			return
 		}
-		sqIDs = mapIDs.AsSlice()
 	}
 	evNm := utils.MapStorage{utils.MetaReq: args.Event}
-	for _, sqID := range sqIDs {
+	sqs = make(StatQueues, 0, len(sqIDs))
+	for sqID := range sqIDs {
 		sqPrfl, err := sS.dm.GetStatQueueProfile(args.Tenant, sqID, true, true, utils.NonTransactional)
 		if err != nil {
 			if err == utils.ErrNotFound {
@@ -203,15 +200,12 @@ func (sS *StatService) matchingStatQueuesForEvent(args *StatsArgsProcessEvent) (
 			sq.ttl = utils.DurationPointer(sqPrfl.TTL)
 		}
 		sq.sqPrfl = sqPrfl
-		matchingSQs[sqPrfl.ID] = sq
+		sqs = append(sqs, sq)
+	}
+	if len(sqs) == 0 {
+		return nil, utils.ErrNotFound
 	}
 	// All good, convert from Map to Slice so we can sort
-	sqs = make(StatQueues, len(matchingSQs))
-	i := 0
-	for _, s := range matchingSQs {
-		sqs[i] = s
-		i++
-	}
 	sqs.Sort()
 	for i, s := range sqs {
 		if s.sqPrfl.Blocker { // blocker will stop processing

@@ -235,12 +235,9 @@ func (tS *ThresholdService) StoreThreshold(t *Threshold) (err error) {
 
 // matchingThresholdsForEvent returns ordered list of matching thresholds which are active for an Event
 func (tS *ThresholdService) matchingThresholdsForEvent(args *ArgsProcessEvent) (ts Thresholds, err error) {
-	matchingTs := make(map[string]*Threshold)
-	var tIDs []string
-	if len(args.ThresholdIDs) != 0 {
-		tIDs = args.ThresholdIDs
-	} else {
-		tIDsMap, err := MatchingItemIDsForEvent(args.Event,
+	tIDs := utils.NewStringSet(args.ThresholdIDs)
+	if len(tIDs) == 0 {
+		tIDs, err = MatchingItemIDsForEvent(args.Event,
 			tS.cgrcfg.ThresholdSCfg().StringIndexedFields,
 			tS.cgrcfg.ThresholdSCfg().PrefixIndexedFields,
 			tS.dm, utils.CacheThresholdFilterIndexes, args.Tenant,
@@ -250,12 +247,12 @@ func (tS *ThresholdService) matchingThresholdsForEvent(args *ArgsProcessEvent) (
 		if err != nil {
 			return nil, err
 		}
-		tIDs = tIDsMap.AsSlice()
 	}
 	evNm := utils.MapStorage{
 		utils.MetaReq: args.Event,
 	}
-	for _, tID := range tIDs {
+	ts = make(Thresholds, 0, len(tIDs))
+	for tID := range tIDs {
 		tPrfl, err := tS.dm.GetThresholdProfile(args.Tenant, tID, true, true, utils.NonTransactional)
 		if err != nil {
 			if err == utils.ErrNotFound {
@@ -281,14 +278,11 @@ func (tS *ThresholdService) matchingThresholdsForEvent(args *ArgsProcessEvent) (
 			t.dirty = utils.BoolPointer(false)
 		}
 		t.tPrfl = tPrfl
-		matchingTs[tPrfl.ID] = t
+		ts = append(ts, t)
 	}
 	// All good, convert from Map to Slice so we can sort
-	ts = make(Thresholds, len(matchingTs))
-	i := 0
-	for _, t := range matchingTs {
-		ts[i] = t
-		i++
+	if len(ts) == 0 {
+		return nil, utils.ErrNotFound
 	}
 	ts.Sort()
 	for i, t := range ts {
