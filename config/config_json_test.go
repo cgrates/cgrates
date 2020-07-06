@@ -61,7 +61,7 @@ func TestDfGeneralJsonCfg(t *testing.T) {
 		Digest_separator:     utils.StringPointer(","),
 		Digest_equal:         utils.StringPointer(":"),
 		Rsr_separator:        utils.StringPointer(";"),
-		Max_parralel_conns:   utils.IntPointer(100),
+		Max_parallel_conns:   utils.IntPointer(100),
 	}
 	if gCfg, err := dfCgrJSONCfg.GeneralJsonCfg(); err != nil {
 		t.Error(err)
