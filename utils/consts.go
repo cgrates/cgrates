@@ -767,6 +767,8 @@ const (
 	RateS                    = "RateS"
 	Underline                = "_"
 	MetaPartial              = "*partial"
+	MetaBusy                 = "*busy"
+	MetaQueue                = "*queue"
 )
 
 // Migrator Action
