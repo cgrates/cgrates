@@ -1114,13 +1114,27 @@ func testITIndexRateProfile(t *testing.T) {
 				ID:        "FIRST_GI",
 				FilterIDs: []string{"*string:~*req.Category:call"},
 				Weight:    0,
-				Blocker:   false,
+				IntervalRates: []*IntervalRate{
+					&IntervalRate{
+						Value:     0.12,
+						Unit:      time.Duration(1 * time.Minute),
+						Increment: time.Duration(1 * time.Minute),
+					},
+				},
+				Blocker: false,
 			},
 			"SECOND_GI": {
 				ID:        "SECOND_GI",
 				FilterIDs: []string{"*string:~*req.Category:voice"},
 				Weight:    10,
-				Blocker:   false,
+				IntervalRates: []*IntervalRate{
+					&IntervalRate{
+						Value:     0.06,
+						Unit:      time.Duration(1 * time.Minute),
+						Increment: time.Duration(1 * time.Second),
+					},
+				},
+				Blocker: false,
 			},
 		},
 	}
@@ -1161,19 +1175,40 @@ func testITIndexRateProfile(t *testing.T) {
 				ID:        "FIRST_GI",
 				FilterIDs: []string{"*string:~*req.Category:call"},
 				Weight:    0,
-				Blocker:   false,
+				IntervalRates: []*IntervalRate{
+					&IntervalRate{
+						Value:     0.12,
+						Unit:      time.Duration(1 * time.Minute),
+						Increment: time.Duration(1 * time.Minute),
+					},
+				},
+				Blocker: false,
 			},
 			"SECOND_GI": {
 				ID:        "SECOND_GI",
 				FilterIDs: []string{"*string:~*req.Category:voice"},
 				Weight:    10,
-				Blocker:   false,
+				IntervalRates: []*IntervalRate{
+					&IntervalRate{
+						Value:     0.06,
+						Unit:      time.Duration(1 * time.Minute),
+						Increment: time.Duration(1 * time.Second),
+					},
+				},
+				Blocker: false,
 			},
 			"THIRD_GI": {
 				ID:        "THIRD_GI",
 				FilterIDs: []string{"*string:~*req.Category:custom"},
 				Weight:    20,
-				Blocker:   false,
+				IntervalRates: []*IntervalRate{
+					&IntervalRate{
+						Value:     0.06,
+						Unit:      time.Duration(1 * time.Minute),
+						Increment: time.Duration(1 * time.Second),
+					},
+				},
+				Blocker: false,
 			},
 		},
 	}
@@ -1215,13 +1250,27 @@ func testITIndexRateProfile(t *testing.T) {
 				ID:        "CUSTOM_RATE1",
 				FilterIDs: []string{"*string:~*req.Subject:1001"},
 				Weight:    0,
-				Blocker:   false,
+				IntervalRates: []*IntervalRate{
+					&IntervalRate{
+						Value:     0.12,
+						Unit:      time.Duration(1 * time.Minute),
+						Increment: time.Duration(1 * time.Minute),
+					},
+				},
+				Blocker: false,
 			},
 			"CUSTOM_RATE2": {
 				ID:        "CUSTOM_RATE2",
 				FilterIDs: []string{"*string:~*req.Subject:1001", "*string:~*req.Category:call"},
 				Weight:    10,
-				Blocker:   false,
+				IntervalRates: []*IntervalRate{
+					&IntervalRate{
+						Value:     0.6,
+						Unit:      time.Duration(1 * time.Minute),
+						Increment: time.Duration(1 * time.Second),
+					},
+				},
+				Blocker: false,
 			},
 		},
 	}

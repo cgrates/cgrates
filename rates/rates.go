@@ -20,7 +20,6 @@ package rates
 
 import (
 	"fmt"
-	"sort"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
@@ -89,7 +88,6 @@ func (rS *RateS) matchingRateProfileForEvent(args *ArgsCostForEvent, rPfIDs []st
 		}
 		rPfIDs = rPfIDMp.AsSlice()
 	}
-	matchingRPfs := make([]*engine.RateProfile, 0, len(rPfIDs))
 	evNm := utils.MapStorage{utils.MetaReq: args.CGREvent.Event}
 	var sTime time.Time
 	if sTime, err = args.StartTime(rS.cfg.GeneralCfg().DefaultTimezone); err != nil {
@@ -115,15 +113,14 @@ func (rS *RateS) matchingRateProfileForEvent(args *ArgsCostForEvent, rPfIDs []st
 		} else if !pass {
 			continue
 		}
-		matchingRPfs = append(matchingRPfs, rPf)
+		if rtPfl == nil || rtPfl.Weight < rPf.Weight {
+			rtPfl = rPf
+		}
 	}
-	if len(matchingRPfs) == 0 {
+	if rtPfl == nil {
 		return nil, utils.ErrNotFound
 	}
-	sort.Slice(matchingRPfs, func(i, j int) bool {
-		return matchingRPfs[i].Weight > matchingRPfs[j].Weight
-	})
-	rtPfl = matchingRPfs[0]
+
 	return
 }
 

@@ -166,6 +166,8 @@ func (rpS *RouteService) matchingRouteProfilesForEvent(ev *utils.CGREvent, singl
 	}
 	if singleResult {
 		matchingRPrf = make([]*RouteProfile, 1)
+	} else {
+		matchingRPrf = make([]*RouteProfile, 0, len(rPrfIDs))
 	}
 	evNm := utils.MapStorage{utils.MetaReq: ev.Event}
 	for lpID := range rPrfIDs {
