@@ -206,7 +206,7 @@ func (s *Server) ServeGOB(addr string, exitChan chan bool) {
 				errCnt = 0 // reset error count if last error was more than 5 seconds ago
 			}
 			lastErrorTime = time.Now()
-			errCnt += 1
+			errCnt++
 			if errCnt > 50 { // Too many errors in short interval, network buffer failure most probably
 				break
 			}

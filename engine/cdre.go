@@ -121,19 +121,19 @@ func (cdre *CDRExporter) metaHandler(tag, arg string) (string, error) {
 		return strconv.Itoa(cdre.numberOfRecords), nil
 	case metaDurCDRs: // ToDo: remove this because they are useless
 		cdr := &CDR{ToR: utils.VOICE, Usage: cdre.totalDuration}
-		return cdr.FieldAsString(&config.RSRParser{Rules: utils.DynamicDataPrefix + utils.Usage, AllFiltersMatch: true})
+		return cdr.FieldAsString(&config.RSRParser{Rules: utils.DynamicDataPrefix + utils.Usage})
 	case metaSMSUsage:
 		cdr := &CDR{ToR: utils.SMS, Usage: cdre.totalDuration}
-		return cdr.FieldAsString(&config.RSRParser{Rules: utils.DynamicDataPrefix + utils.Usage, AllFiltersMatch: true})
+		return cdr.FieldAsString(&config.RSRParser{Rules: utils.DynamicDataPrefix + utils.Usage})
 	case metaMMSUsage:
 		cdr := &CDR{ToR: utils.MMS, Usage: cdre.totalDuration}
-		return cdr.FieldAsString(&config.RSRParser{Rules: utils.DynamicDataPrefix + utils.Usage, AllFiltersMatch: true})
+		return cdr.FieldAsString(&config.RSRParser{Rules: utils.DynamicDataPrefix + utils.Usage})
 	case metaGenericUsage:
 		cdr := &CDR{ToR: utils.GENERIC, Usage: cdre.totalDuration}
-		return cdr.FieldAsString(&config.RSRParser{Rules: utils.DynamicDataPrefix + utils.Usage, AllFiltersMatch: true})
+		return cdr.FieldAsString(&config.RSRParser{Rules: utils.DynamicDataPrefix + utils.Usage})
 	case metaDataUsage:
 		cdr := &CDR{ToR: utils.DATA, Usage: cdre.totalDuration}
-		return cdr.FieldAsString(&config.RSRParser{Rules: utils.DynamicDataPrefix + utils.Usage, AllFiltersMatch: true})
+		return cdr.FieldAsString(&config.RSRParser{Rules: utils.DynamicDataPrefix + utils.Usage})
 	case metaCostCDRs:
 		return strconv.FormatFloat(utils.Round(cdre.totalCost,
 			globalRoundingDecimals, utils.ROUNDING_MIDDLE), 'f', -1, 64), nil

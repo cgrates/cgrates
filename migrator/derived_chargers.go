@@ -30,9 +30,9 @@ import (
 var dcGetMapKeys = func(m utils.StringMap) (keys []string) {
 	keys = make([]string, len(m))
 	i := 0
-	for k, _ := range m {
+	for k := range m {
 		keys[i] = k
-		i += 1
+		i++
 	}
 	// sort.Strings(keys)
 	return keys
@@ -78,7 +78,7 @@ func fieldinfo2Attribute(attr []*engine.Attribute, fieldName, fieldInfo string) 
 		fieldInfo = fieldInfo[1:]
 	}
 	var err error
-	if rp, err = config.NewRSRParsers(fieldInfo, true, utils.INFIELD_SEP); err != nil {
+	if rp, err = config.NewRSRParsers(fieldInfo, utils.INFIELD_SEP); err != nil {
 		utils.Logger.Err(fmt.Sprintf("On Migrating rule: <%s>, error: %s", fieldInfo, err.Error()))
 		return attr
 	}
@@ -141,7 +141,17 @@ func derivedChargers2Charger(dc *v1DerivedCharger, tenant string, key string, fi
 		if strings.HasPrefix(filter, utils.DynamicDataPrefix) {
 			filter = filter[1:]
 		}
-		ch.FilterIDs = append(ch.FilterIDs, "*rsr::"+utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+filter)
+		if !strings.HasSuffix(filter, utils.FilterValEnd) { // Has filter, populate the var
+			return
+		}
+		fltrStart := strings.Index(filter, utils.FilterValStart)
+		if fltrStart < 1 {
+			return
+		}
+		fltrVal := filter[fltrStart+1 : len(filter)-1]
+		ch.FilterIDs = append(ch.FilterIDs, "*rsr:"+utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+
+			filter[:fltrStart]+utils.InInFieldSep+
+			strings.Replace(fltrVal, utils.ANDSep, utils.INFIELD_SEP, strings.Count(fltrVal, utils.ANDSep)))
 	}
 	return
 }
@@ -219,7 +229,7 @@ func (m *Migrator) migrateV1DerivedChargers() (err error) {
 			return err
 		}
 
-		m.stats[utils.DerivedChargersV] += 1
+		m.stats[utils.DerivedChargersV]++
 	}
 	if m.dryRun {
 		return

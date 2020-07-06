@@ -35,8 +35,8 @@ func NewRSRField(fldStr string) (fld *RSRField, err error) {
 	}
 	rsrField := &RSRField{Rules: fldStr}
 	var filters []*RSRFilter
-	if strings.HasSuffix(fldStr, FILTER_VAL_END) { // Has filter, populate the var
-		fltrStart := strings.LastIndex(fldStr, FILTER_VAL_START)
+	if strings.HasSuffix(fldStr, FilterValEnd) { // Has filter, populate the var
+		fltrStart := strings.LastIndex(fldStr, FilterValStart)
 		if fltrStart < 1 {
 			return nil, fmt.Errorf("Invalid FilterStartValue in string: %s", fldStr)
 		}

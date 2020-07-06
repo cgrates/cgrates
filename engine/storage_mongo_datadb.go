@@ -1910,7 +1910,6 @@ func (ms *MongoStorage) GetFilterDrv(tenant, id string) (r *Filter, err error) {
 	}); err != nil {
 		return nil, err
 	}
-	err = r.Compile()
 	return
 }
 

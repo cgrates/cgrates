@@ -91,7 +91,7 @@ The following types are implemented:
 	Is the negation of *\*destinations*.
 
 \*rsr
-	Will match the *RSRRules* defined in Values.
+	Will match the *RSRFilters* defined in Values on the Element.
 
 \*notrsr*
 	Is the negation of *\*rsr*.

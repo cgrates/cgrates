@@ -421,8 +421,7 @@ func testV2CDRsDifferentTenants(t *testing.T) {
 					Type: utils.META_CONSTANT,
 					Value: config.RSRParsers{
 						&config.RSRParser{
-							Rules:           "CustomTenant",
-							AllFiltersMatch: true,
+							Rules: "CustomTenant",
 						},
 					},
 				},
@@ -431,8 +430,7 @@ func testV2CDRsDifferentTenants(t *testing.T) {
 					Type: utils.META_CONSTANT,
 					Value: config.RSRParsers{
 						&config.RSRParser{
-							Rules:           "CustomTenant",
-							AllFiltersMatch: true,
+							Rules: "CustomTenant",
 						},
 					},
 				},

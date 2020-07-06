@@ -130,13 +130,13 @@ func cdrLogAction(acc *Account, a *Action, acs Actions, extraData interface{}) (
 		return fmt.Errorf("No connection with CDR Server")
 	}
 	defaultTemplate := map[string]config.RSRParsers{
-		utils.ToR:         config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"BalanceType", true, utils.INFIELD_SEP),
-		utils.OriginHost:  config.NewRSRParsersMustCompile("127.0.0.1", true, utils.INFIELD_SEP),
-		utils.RequestType: config.NewRSRParsersMustCompile(utils.META_NONE, true, utils.INFIELD_SEP),
-		utils.Tenant:      config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.Tenant, true, utils.INFIELD_SEP),
-		utils.Account:     config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.Account, true, utils.INFIELD_SEP),
-		utils.Subject:     config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.Account, true, utils.INFIELD_SEP),
-		utils.COST:        config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"ActionValue", true, utils.INFIELD_SEP),
+		utils.ToR:         config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"BalanceType", utils.INFIELD_SEP),
+		utils.OriginHost:  config.NewRSRParsersMustCompile("127.0.0.1", utils.INFIELD_SEP),
+		utils.RequestType: config.NewRSRParsersMustCompile(utils.META_NONE, utils.INFIELD_SEP),
+		utils.Tenant:      config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.Tenant, utils.INFIELD_SEP),
+		utils.Account:     config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.Account, utils.INFIELD_SEP),
+		utils.Subject:     config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.Account, utils.INFIELD_SEP),
+		utils.COST:        config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"ActionValue", utils.INFIELD_SEP),
 	}
 	template := make(map[string]string)
 	// overwrite default template
@@ -146,7 +146,7 @@ func cdrLogAction(acc *Account, a *Action, acs Actions, extraData interface{}) (
 		}
 		for field, rsr := range template {
 			if defaultTemplate[field], err = config.NewRSRParsers(rsr,
-				true, config.CgrConfig().GeneralCfg().RSRSep); err != nil {
+				config.CgrConfig().GeneralCfg().RSRSep); err != nil {
 				return
 			}
 		}
@@ -155,7 +155,7 @@ func cdrLogAction(acc *Account, a *Action, acs Actions, extraData interface{}) (
 	mapExtraData, _ := extraData.(map[string]interface{})
 	for key, val := range mapExtraData {
 		if defaultTemplate[key], err = config.NewRSRParsers(utils.IfaceAsString(val),
-			true, config.CgrConfig().GeneralCfg().RSRSep); err != nil {
+			config.CgrConfig().GeneralCfg().RSRSep); err != nil {
 			return
 		}
 	}

@@ -266,7 +266,7 @@ func TestFilterPassRSRFields(t *testing.T) {
 		DurationIndex: 132 * time.Second,
 		ExtraFields:   map[string]string{"navigation": "off"},
 	}
-	rf, err := NewFilterRule(utils.MetaRSR, "", []string{"~Tenant(~^cgr.*\\.org$)"})
+	rf, err := NewFilterRule(utils.MetaRSR, "~Tenant", []string{"~^cgr.*\\.org$"})
 	if err != nil {
 		t.Error(err)
 	}
@@ -275,7 +275,7 @@ func TestFilterPassRSRFields(t *testing.T) {
 	} else if !passes {
 		t.Error("Not passing")
 	}
-	rf, err = NewFilterRule(utils.MetaRSR, "", []string{"~navigation(on)"})
+	rf, err = NewFilterRule(utils.MetaRSR, "~navigation", []string{"on"})
 	if err != nil {
 		t.Error(err)
 	}
@@ -284,7 +284,7 @@ func TestFilterPassRSRFields(t *testing.T) {
 	} else if passes {
 		t.Error("Passing")
 	}
-	rf, err = NewFilterRule(utils.MetaRSR, "", []string{"~navigation(off)"})
+	rf, err = NewFilterRule(utils.MetaRSR, "~navigation", []string{"off"})
 	if err != nil {
 		t.Error(err)
 	}
@@ -294,7 +294,7 @@ func TestFilterPassRSRFields(t *testing.T) {
 		t.Error("Not passing")
 	}
 	//not
-	rf, err = NewFilterRule(utils.MetaNotRSR, "", []string{"~navigation(off)"})
+	rf, err = NewFilterRule(utils.MetaNotRSR, "~navigation", []string{"off"})
 	if err != nil {
 		t.Error(err)
 	}
@@ -655,20 +655,20 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	pEv = utils.MapStorage{}
 	pEv.Set([]string{utils.MetaReq}, passEvent)
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*rsr::~*req.Tenant(~^cgr.*\\.org$)"}, fEv); err != nil {
+		[]string{"*rsr:~*req.Tenant:~^cgr.*\\.org$"}, fEv); err != nil {
 		t.Errorf(err.Error())
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*rsr::~*req.Tenant(~^cgr.*\\.org$)"}, pEv); err != nil {
+		[]string{"*rsr:~*req.Tenant:~^cgr.*\\.org$"}, pEv); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
 	}
 	//not
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*notrsr::~*req.Tenant(~^cgr.*\\.org$)"}, pEv); err != nil {
+		[]string{"*notrsr:~*req.Tenant:~^cgr.*\\.org$"}, pEv); err != nil {
 		t.Errorf(err.Error())
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
@@ -790,7 +790,7 @@ func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
 	pEv := utils.MapStorage{}
 	pEv.Set([]string{utils.MetaReq}, ev)
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*rsr::~*req.Test(~^\\w{30,})"}, pEv); err != nil {
+		[]string{"*rsr:~*req.Test:~^\\w{30,}"}, pEv); err != nil {
 		t.Errorf(err.Error())
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
@@ -801,7 +801,7 @@ func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
 	pEv = utils.MapStorage{}
 	pEv.Set([]string{utils.MetaReq}, ev)
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*rsr::~*req.Test(~^\\w{30,})"}, pEv); err != nil {
+		[]string{"*rsr:~*req.Test:~^\\w{30,}"}, pEv); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
@@ -815,7 +815,7 @@ func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
 	pEv = utils.MapStorage{}
 	pEv.Set([]string{utils.MetaReq}, ev)
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*rsr::~*req.Test.Test2(~^\\w{30,})"}, pEv); err != nil {
+		[]string{"*rsr:~*req.Test.Test2:~^\\w{30,}"}, pEv); err != nil {
 		t.Errorf(err.Error())
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
@@ -828,7 +828,7 @@ func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
 	pEv = utils.MapStorage{}
 	pEv.Set([]string{utils.MetaReq}, ev)
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*rsr::~*req.Test.Test2(~^\\w{30,})"}, pEv); err != nil {
+		[]string{"*rsr:~*req.Test.Test2:~^\\w{30,}"}, pEv); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
@@ -844,8 +844,11 @@ func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
 	pEv = utils.MapStorage{}
 	pEv.Set([]string{utils.MetaReq}, ev)
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*string:~*req.Account:1003", "*prefix:~*req.Destination:10",
-			"*suffix:~*req.Subject:03", "*rsr::~*req.Destination(1002)"},
+		[]string{
+			"*string:~*req.Account:1003",
+			"*prefix:~*req.Destination:10",
+			"*suffix:~*req.Subject:03",
+			"*rsr:~*req.Destination:1002"},
 		pEv); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
@@ -868,7 +871,7 @@ func TestPassFilterMaxCost(t *testing.T) {
 	pEv := utils.MapStorage{}
 	pEv.Set([]string{utils.MetaReq}, passEvent1)
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*rsr::~*req.MaxUsage{*duration_nanoseconds}(>0)"}, pEv); err != nil {
+		[]string{"*gt:~*req.MaxUsage:0s"}, pEv); err != nil {
 		t.Errorf(err.Error())
 	} else if pass {
 		t.Errorf("Expecting: false , received: %+v", pass)
@@ -880,7 +883,7 @@ func TestPassFilterMaxCost(t *testing.T) {
 	pEv = utils.MapStorage{}
 	pEv.Set([]string{utils.MetaReq}, passEvent2)
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*rsr::~*req.MaxUsage{*duration_nanoseconds}(>0)"}, pEv); err != nil {
+		[]string{"*gt:~*req.MaxUsage:0s"}, pEv); err != nil {
 		t.Errorf(err.Error())
 	} else if pass {
 		t.Errorf("Expecting: false, received: %+v", pass)
@@ -892,7 +895,7 @@ func TestPassFilterMaxCost(t *testing.T) {
 	pEv = utils.MapStorage{}
 	pEv.Set([]string{utils.MetaReq}, passEvent3)
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*rsr::~*req.MaxUsage{*duration_nanoseconds}(>0)"}, pEv); err != nil {
+		[]string{"*gt:~*req.MaxUsage:0"}, pEv); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: true, received: %+v", pass)
@@ -920,7 +923,7 @@ func TestPassFilterMissingField(t *testing.T) {
 	pEv := utils.MapStorage{}
 	pEv.Set([]string{utils.MetaReq}, passEvent1)
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*rsr::~*req.Category(^$)"}, pEv); err != nil {
+		[]string{"*rsr:~*req.Category:^$"}, pEv); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: true , received: %+v", pass)
@@ -932,7 +935,7 @@ func TestPassFilterMissingField(t *testing.T) {
 	pEv = utils.MapStorage{}
 	pEv.Set([]string{utils.MetaReq}, passEvent2)
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*rsr::~*req.Category(^$)"}, pEv); err != nil {
+		[]string{"*rsr:~*req.Category:^$"}, pEv); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: true , received: %+v", pass)
@@ -944,7 +947,7 @@ func TestPassFilterMissingField(t *testing.T) {
 	pEv = utils.MapStorage{}
 	pEv.Set([]string{utils.MetaReq}, passEvent3)
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*rsr::~*req.Category(^$)"}, pEv); err != nil {
+		[]string{"*rsr:~*req.Category:^$"}, pEv); err != nil {
 		t.Errorf(err.Error())
 	} else if pass {
 		t.Errorf("Expecting: false , received: %+v", pass)

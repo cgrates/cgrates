@@ -22,6 +22,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 func toJSON(v interface{}) string {
@@ -198,19 +200,19 @@ func TestStructMatcherKeyValuePointer(t *testing.T) {
 }
 
 func TestStructMatcherOperatorValue(t *testing.T) {
-	root := &operatorValue{operator: CondGT, value: 3.4}
+	root := &operatorValue{operator: utils.MetaGreaterThan, value: 3.4}
 	if check, err := root.checkStruct(3.5); !check || err != nil {
 		t.Errorf("Error checking struct: %v %v  (%v)", check, err, toJSON(root))
 	}
-	root = &operatorValue{operator: CondEQ, value: 3.4}
+	root = &operatorValue{operator: utils.MetaEqual, value: 3.4}
 	if check, err := root.checkStruct(3.5); check || err != nil {
 		t.Errorf("Error checking struct: %v %v  (%v)", check, err, toJSON(root))
 	}
-	root = &operatorValue{operator: CondEQ, value: 3.4}
+	root = &operatorValue{operator: utils.MetaEqual, value: 3.4}
 	if check, err := root.checkStruct(3.4); !check || err != nil {
 		t.Errorf("Error checking struct: %v %v  (%v)", check, err, toJSON(root))
 	}
-	root = &operatorValue{operator: CondEQ, value: "zinc"}
+	root = &operatorValue{operator: utils.MetaEqual, value: "zinc"}
 	if check, err := root.checkStruct("zinc"); !check || err != nil {
 		t.Errorf("Error checking struct: %v %v  (%v)", check, err, toJSON(root))
 	}

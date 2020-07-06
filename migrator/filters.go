@@ -106,21 +106,15 @@ func migrateFilterV2(fl *v1Filter) (fltr *engine.Filter) {
 			strings.HasPrefix(rule.FieldName, utils.DynamicDataPrefix+utils.MetaAct) {
 			continue
 		}
-		if rule.Type != utils.MetaRSR {
-			// in case we found dynamic data prefix we remove it
-			if strings.HasPrefix(rule.FieldName, utils.DynamicDataPrefix) {
-				fl.Rules[i].FieldName = fl.Rules[i].FieldName[1:]
-			}
-			fltr.Rules[i].Element = utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + rule.FieldName
-		} else {
-			for idx, val := range rule.Values {
-				if strings.HasPrefix(val, utils.DynamicDataPrefix) {
-					// remove dynamic data prefix from fieldName
-					val = val[1:]
-				}
-				fltr.Rules[i].Values[idx] = utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + val
-			}
-		}
+		// if rule.Type != utils.MetaRSR {
+		// in case we found dynamic data prefix we remove it
+		fl.Rules[i].FieldName = strings.TrimPrefix(fl.Rules[i].FieldName, utils.DynamicDataPrefix)
+		fltr.Rules[i].Element = utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + rule.FieldName
+		// } else {
+		// 	for idx, val := range rule.Values {
+		// 		fltr.Rules[i].Values[idx] = val
+		// 	}
+		// }
 	}
 	return
 }
@@ -177,18 +171,14 @@ func migrateInlineFilterV2(fl string) string {
 		return fl
 	}
 
-	if ruleSplt[0] != utils.MetaRSR {
-		if strings.HasPrefix(ruleSplt[1], utils.DynamicDataPrefix) {
-			// remove dynamic data prefix from fieldName
-			ruleSplt[1] = ruleSplt[1][1:]
-		}
-		return fmt.Sprintf("%s:~%s:%s", ruleSplt[0], utils.MetaReq+utils.NestingSep+ruleSplt[1], strings.Join(ruleSplt[2:], utils.InInFieldSep))
-	} // in case of *rsr filter we need to add the prefix at fieldValue
-	if strings.HasPrefix(ruleSplt[2], utils.DynamicDataPrefix) {
-		// remove dynamic data prefix from fieldName
-		ruleSplt[2] = ruleSplt[2][1:]
-	}
-	return fmt.Sprintf("%s::~%s", ruleSplt[0], utils.MetaReq+utils.NestingSep+strings.Join(ruleSplt[2:], utils.InInFieldSep))
+	// if ruleSplt[0] != utils.MetaRSR {
+	// remove dynamic data prefix from fieldName
+	ruleSplt[1] = strings.TrimPrefix(ruleSplt[1], utils.DynamicDataPrefix)
+	return fmt.Sprintf("%s:~%s:%s", ruleSplt[0], utils.MetaReq+utils.NestingSep+ruleSplt[1], strings.Join(ruleSplt[2:], utils.InInFieldSep))
+	// } // in case of *rsr filter we need to add the prefix at fieldValue
+	// remove dynamic data prefix from fieldName
+	// ruleSplt[2] = strings.TrimPrefix(ruleSplt[2], utils.DynamicDataPrefix)
+	// return fmt.Sprintf("%s::~%s", ruleSplt[0], utils.MetaReq+utils.NestingSep+strings.Join(ruleSplt[2:], utils.InInFieldSep))
 }
 
 func (m *Migrator) migrateOthersv1() (err error) {
@@ -335,17 +325,7 @@ func (m *Migrator) migrateFilters() (err error) {
 		if !m.dryRun && migrated {
 			//set filters
 			switch migratedFrom {
-			case 1:
-				if err := m.dmOut.DataManager().SetFilter(fltr, true); err != nil {
-					return fmt.Errorf("Error: <%s> when setting filter with tenant: <%s> and id: <%s> after migration",
-						err.Error(), fltr.Tenant, fltr.ID)
-				}
-			case 2:
-				if err := m.dmOut.DataManager().SetFilter(fltr, true); err != nil {
-					return fmt.Errorf("Error: <%s> when setting filter with tenant: <%s> and id: <%s> after migration",
-						err.Error(), fltr.Tenant, fltr.ID)
-				}
-			case 3:
+			case 1, 2, 3:
 				if err := m.dmOut.DataManager().SetFilter(fltr, true); err != nil {
 					return fmt.Errorf("Error: <%s> when setting filter with tenant: <%s> and id: <%s> after migration",
 						err.Error(), fltr.Tenant, fltr.ID)

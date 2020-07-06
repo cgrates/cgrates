@@ -152,7 +152,7 @@ func (eeC *EventExporterCfg) loadFromJsonCfg(jsnEec *EventExporterJsonCfg, separ
 		eeC.ExportPath = *jsnEec.Export_path
 	}
 	if jsnEec.Tenant != nil {
-		if eeC.Tenant, err = NewRSRParsers(*jsnEec.Tenant, true, separator); err != nil {
+		if eeC.Tenant, err = NewRSRParsers(*jsnEec.Tenant, separator); err != nil {
 			return err
 		}
 	}

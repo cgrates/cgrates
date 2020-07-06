@@ -65,7 +65,6 @@ func testDspApierSetAttributes(t *testing.T) {
 				Value: config.RSRParsers{
 					&config.RSRParser{
 						Rules:           "roam",
-						AllFiltersMatch: true,
 					},
 				},
 			},
@@ -99,7 +98,6 @@ func testDspApierGetAttributes(t *testing.T) {
 				Value: config.RSRParsers{
 					&config.RSRParser{
 						Rules:           "roam",
-						AllFiltersMatch: true,
 					},
 				},
 			},

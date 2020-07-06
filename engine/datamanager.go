@@ -688,6 +688,9 @@ func (dm *DataManager) GetFilter(tenant, id string, cacheRead, cacheWrite bool,
 			return
 		}
 	}
+	if err = fltr.Compile(); err != nil {
+		return nil, err
+	}
 	if cacheWrite {
 		if errCh := Cache.Set(utils.CacheFilters, tntID, fltr, nil,
 			cacheCommit(transactionID), transactionID); errCh != nil {

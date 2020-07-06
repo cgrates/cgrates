@@ -496,7 +496,7 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 		Attributes: []*Attribute{
 			{
 				Path:  "FN1",
-				Value: config.NewRSRParsersMustCompile("Val1", true, utils.INFIELD_SEP),
+				Value: config.NewRSRParsersMustCompile("Val1", utils.INFIELD_SEP),
 			},
 		},
 		Weight: 20,
@@ -535,7 +535,7 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 		Attributes: []*Attribute{
 			{
 				Path:  "FN1",
-				Value: config.NewRSRParsersMustCompile("Val1", true, utils.INFIELD_SEP),
+				Value: config.NewRSRParsersMustCompile("Val1", utils.INFIELD_SEP),
 			},
 		},
 		Weight: 20,

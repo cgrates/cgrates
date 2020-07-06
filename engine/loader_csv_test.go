@@ -1163,9 +1163,14 @@ func TestLoadFilters(t *testing.T) {
 					Values:  []string{"10", "20"},
 				},
 				{
-					Element: "",
+					Element: "~*req.Subject",
 					Type:    utils.MetaRSR,
-					Values:  []string{"~*req.Subject(~^1.*1$)", "~*req.Destination(1002)"},
+					Values:  []string{"~^1.*1$"},
+				},
+				{
+					Element: "~*req.Destination",
+					Type:    utils.MetaRSR,
+					Values:  []string{"1002"},
 				},
 			},
 			ActivationInterval: &utils.TPActivationInterval{
@@ -1222,7 +1227,7 @@ func TestLoadFilters(t *testing.T) {
 	if len(csvr.filters) != len(eFilters) {
 		t.Errorf("Failed to load Filters: %s", utils.ToIJSON(csvr.filters))
 	} else if !reflect.DeepEqual(eFilters[fltrKey], csvr.filters[fltrKey]) {
-		t.Errorf("Expecting: %+v, received: %+v", eFilters[fltrKey], csvr.filters[fltrKey])
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eFilters[fltrKey]), utils.ToJSON(csvr.filters[fltrKey]))
 	}
 }
 

@@ -84,7 +84,7 @@ func TestRequestProcessorloadFromJsonCfg(t *testing.T) {
 	}
 	expected = RequestProcessor{
 		ID:      "cgrates",
-		Tenant:  NewRSRParsersMustCompile("tenant", true, utils.INFIELD_SEP),
+		Tenant:  NewRSRParsersMustCompile("tenant", utils.INFIELD_SEP),
 		Filters: []string{"filter1", "filter2"},
 		Flags:   utils.FlagsWithParams{"flag1": []string{}, "flag2": []string{}},
 	}

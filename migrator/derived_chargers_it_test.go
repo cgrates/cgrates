@@ -133,9 +133,9 @@ func testDCITMigrateAndMove(t *testing.T) {
 		Value: &v1DerivedChargers{
 			DestinationIDs: utils.StringMap{"1001": true, "1002": true, "1003": true},
 			Chargers: []*v1DerivedCharger{
-				&v1DerivedCharger{
+				{
 					RunID:      "RunID",
-					RunFilters: "~filterhdr1:s/(.+)/special_run3/",
+					RunFilters: "~filterhdr1(a&b)",
 
 					RequestTypeField: utils.MetaDefault,
 					CategoryField:    utils.MetaDefault,
@@ -158,12 +158,12 @@ func testDCITMigrateAndMove(t *testing.T) {
 			{
 				Path:  utils.MetaReq + utils.NestingSep + utils.Account,
 				Type:  utils.MetaVariable,
-				Value: config.NewRSRParsersMustCompile("1004", true, utils.INFIELD_SEP),
+				Value: config.NewRSRParsersMustCompile("1004", utils.INFIELD_SEP),
 			},
 			{
 				Path:  utils.MetaReq + utils.NestingSep + utils.Subject,
 				Type:  utils.MetaVariable,
-				Value: config.NewRSRParsersMustCompile("call_1003", true, utils.INFIELD_SEP),
+				Value: config.NewRSRParsersMustCompile("call_1003", utils.INFIELD_SEP),
 			},
 		},
 		Blocker: false,
@@ -176,7 +176,7 @@ func testDCITMigrateAndMove(t *testing.T) {
 		FilterIDs: []string{
 			"*destinations:~*req.Destination:1001;1002;1003",
 			"*string:~*req.Account:1003",
-			"*rsr::~*req.filterhdr1:s/(.+)/special_run3/",
+			"*rsr:~*req.filterhdr1:a;b",
 		},
 		ActivationInterval: nil,
 		RunID:              "RunID",

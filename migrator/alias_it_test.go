@@ -155,13 +155,13 @@ func testAlsITMigrateAndMove(t *testing.T) {
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Account",
 				Type:  utils.MetaVariable,
-				Value: config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
+				Value: config.NewRSRParsersMustCompile("1002", utils.INFIELD_SEP),
 			},
 			{
 				FilterIDs: []string{"*string:~*req.Category:call_1001"},
 				Path:      utils.MetaReq + utils.NestingSep + "Category",
 				Type:      utils.MetaVariable,
-				Value:     config.NewRSRParsersMustCompile("call_1002", true, utils.INFIELD_SEP),
+				Value:     config.NewRSRParsersMustCompile("call_1002", utils.INFIELD_SEP),
 			},
 		},
 		Blocker: false,

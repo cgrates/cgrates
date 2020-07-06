@@ -169,7 +169,7 @@ func testFltrITMigrateAndMove(t *testing.T) {
 			{
 				FilterIDs: []string{"*string:Account:1001"},
 				Path:      utils.MetaReq + utils.NestingSep + "Account",
-				Value:     config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
+				Value:     config.NewRSRParsersMustCompile("1002", utils.INFIELD_SEP),
 			},
 		},
 		Weight: 10,
@@ -184,7 +184,7 @@ func testFltrITMigrateAndMove(t *testing.T) {
 			{
 				FilterIDs: []string{"*string:~*req.Account:1001"},
 				Path:      utils.MetaReq + utils.NestingSep + "Account",
-				Value:     config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
+				Value:     config.NewRSRParsersMustCompile("1002", utils.INFIELD_SEP),
 			},
 		},
 		Weight: 10,
@@ -302,8 +302,8 @@ func testFltrITMigratev2(t *testing.T) {
 			},
 			{
 				Type:      utils.MetaRSR,
-				FieldName: utils.EmptyString,
-				Values:    []string{"~Tenant(~^cgr.*\\.org$)"},
+				FieldName: "~Tenant",
+				Values:    []string{`~^cgr.*\.org$`},
 			},
 		},
 	}
@@ -323,8 +323,8 @@ func testFltrITMigratev2(t *testing.T) {
 			},
 			{
 				Type:    utils.MetaRSR,
-				Element: utils.EmptyString,
-				Values:  []string{"~*req.Tenant(~^cgr.*\\.org$)"},
+				Element: "~*req.Tenant",
+				Values:  []string{"~^cgr.*\\.org$"},
 			},
 		},
 	}
@@ -339,7 +339,7 @@ func testFltrITMigratev2(t *testing.T) {
 			{
 				FilterIDs: []string{"*string:~Account:1001"},
 				Path:      utils.MetaReq + utils.NestingSep + "Account",
-				Value:     config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
+				Value:     config.NewRSRParsersMustCompile("1002", utils.INFIELD_SEP),
 			},
 		},
 		Weight: 10,
@@ -354,7 +354,7 @@ func testFltrITMigratev2(t *testing.T) {
 			{
 				FilterIDs: []string{"*string:~*req.Account:1001"},
 				Path:      utils.MetaReq + utils.NestingSep + "Account",
-				Value:     config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
+				Value:     config.NewRSRParsersMustCompile("1002", utils.INFIELD_SEP),
 			},
 		},
 		Weight: 10,
@@ -443,8 +443,8 @@ func testFltrITMigratev3(t *testing.T) {
 			},
 			{
 				Type:      utils.MetaRSR,
-				FieldName: utils.EmptyString,
-				Values:    []string{"~*req.Tenant(~^cgr.*\\.org$)"},
+				FieldName: "~*req.Tenant",
+				Values:    []string{"~^cgr.*\\.org$"},
 			},
 		},
 	}
@@ -464,8 +464,8 @@ func testFltrITMigratev3(t *testing.T) {
 			},
 			{
 				Type:    utils.MetaRSR,
-				Element: utils.EmptyString,
-				Values:  []string{"~*req.Tenant(~^cgr.*\\.org$)"},
+				Element: "~*req.Tenant",
+				Values:  []string{"~^cgr.*\\.org$"},
 			},
 		},
 	}

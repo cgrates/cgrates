@@ -58,7 +58,7 @@ func TestConvertExternalToProfile(t *testing.T) {
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Account",
-				Value: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
+				Value: config.NewRSRParsersMustCompile("1001", utils.INFIELD_SEP),
 			},
 		},
 		Weight: 20,
@@ -130,7 +130,7 @@ func TestNewAttributeFromInline(t *testing.T) {
 		Attributes: []*Attribute{&Attribute{
 			Path:  utils.MetaReq + utils.NestingSep + "Field2",
 			Type:  utils.MetaSum,
-			Value: config.NewRSRParsersMustCompile("10;~*req.NumField;20", true, utils.INFIELD_SEP),
+			Value: config.NewRSRParsersMustCompile("10;~*req.NumField;20", utils.INFIELD_SEP),
 		}},
 	}
 	attr, err := NewAttributeFromInline(config.CgrConfig().GeneralCfg().DefaultTenant, attrID)

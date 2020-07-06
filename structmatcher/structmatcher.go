@@ -54,17 +54,9 @@ import (
 )
 
 const (
-	CondEQ  = "*eq"
-	CondGT  = "*gt"
-	CondGTE = "*gte"
-	CondLT  = "*lt"
-	CondLTE = "*lte"
-	CondEXP = "*exp"
 	CondOR  = "*or"
 	CondAND = "*and"
-	CondNOT = "*not"
 	CondHAS = "*has"
-	CondRSR = "*rsr"
 )
 
 func NewErrInvalidArgument(arg interface{}) error {
@@ -77,10 +69,10 @@ var (
 	ErrParserError = errors.New("PARSER_ERROR")
 
 	operatorMap = map[string]func(field, value interface{}) (bool, error){
-		CondEQ: func(field, value interface{}) (bool, error) {
+		utils.MetaEqual: func(field, value interface{}) (bool, error) {
 			return value == field, nil
 		},
-		CondGT: func(field, value interface{}) (bool, error) {
+		utils.MetaGreaterThan: func(field, value interface{}) (bool, error) {
 			var of, vf float64
 			var ok bool
 			if of, ok = field.(float64); !ok {
@@ -91,7 +83,7 @@ var (
 			}
 			return of > vf, nil
 		},
-		CondGTE: func(field, value interface{}) (bool, error) {
+		utils.MetaGreaterOrEqual: func(field, value interface{}) (bool, error) {
 			var of, vf float64
 			var ok bool
 			if of, ok = field.(float64); !ok {
@@ -102,7 +94,7 @@ var (
 			}
 			return of >= vf, nil
 		},
-		CondLT: func(field, value interface{}) (bool, error) {
+		utils.MetaLessThan: func(field, value interface{}) (bool, error) {
 			var of, vf float64
 			var ok bool
 			if of, ok = field.(float64); !ok {
@@ -113,7 +105,7 @@ var (
 			}
 			return of < vf, nil
 		},
-		CondLTE: func(field, value interface{}) (bool, error) {
+		utils.MetaLessOrEqual: func(field, value interface{}) (bool, error) {
 			var of, vf float64
 			var ok bool
 			if of, ok = field.(float64); !ok {
@@ -124,7 +116,7 @@ var (
 			}
 			return of <= vf, nil
 		},
-		CondEXP: func(field, value interface{}) (bool, error) {
+		utils.MetaExp: func(field, value interface{}) (bool, error) {
 			var expDate time.Time
 			var ok bool
 			if expDate, ok = field.(time.Time); !ok {
@@ -157,7 +149,7 @@ var (
 			}
 			return true, nil
 		},
-		CondRSR: func(field, value interface{}) (bool, error) {
+		utils.MetaRSR: func(field, value interface{}) (bool, error) {
 			fltr, err := utils.NewRSRFilter(value.(string))
 			if err != nil {
 				return false, err
@@ -197,7 +189,7 @@ func (os *operatorSlice) checkStruct(o interface{}) (bool, error) {
 				return true, nil
 			}
 		}
-	case CondAND, CondNOT:
+	case CondAND, utils.MetaNot:
 		accumulator := true
 		for _, cond := range os.slice {
 			check, err := cond.checkStruct(o)

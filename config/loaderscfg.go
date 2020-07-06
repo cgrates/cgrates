@@ -109,7 +109,7 @@ func (self *LoaderSCfg) loadFromJsonCfg(jsnCfg *LoaderJsonCfg, separator string)
 		self.Enabled = *jsnCfg.Enabled
 	}
 	if jsnCfg.Tenant != nil {
-		if self.Tenant, err = NewRSRParsers(*jsnCfg.Tenant, true, separator); err != nil {
+		if self.Tenant, err = NewRSRParsers(*jsnCfg.Tenant, separator); err != nil {
 			return err
 		}
 	}

@@ -141,7 +141,7 @@ func (rp *RequestProcessor) loadFromJsonCfg(jsnCfg *ReqProcessorJsnCfg, sep stri
 		rp.Timezone = *jsnCfg.Timezone
 	}
 	if jsnCfg.Tenant != nil {
-		if rp.Tenant, err = NewRSRParsers(*jsnCfg.Tenant, true, sep); err != nil {
+		if rp.Tenant, err = NewRSRParsers(*jsnCfg.Tenant, sep); err != nil {
 			return err
 		}
 	}

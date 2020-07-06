@@ -35,62 +35,62 @@ func TestFieldinfo2Attribute(t *testing.T) {
 		Expected  []*engine.Attribute
 	}
 	tests := []testA{
-		testA{
+		{
 			Path:      utils.Account,
 			FieldInfo: utils.MetaDefault,
 			Initial:   make([]*engine.Attribute, 0),
 			Expected:  make([]*engine.Attribute, 0),
 		},
-		testA{
+		{
 			Path:      utils.Account,
 			FieldInfo: "",
 			Initial:   make([]*engine.Attribute, 0),
 			Expected:  make([]*engine.Attribute, 0),
 		},
-		testA{
+		{
 			Path:      utils.Account,
 			FieldInfo: "^1003",
 			Initial:   make([]*engine.Attribute, 0),
 			Expected: []*engine.Attribute{
-				&engine.Attribute{
+				{
 					Path:  utils.MetaReq + utils.NestingSep + utils.Account,
 					Type:  utils.MetaVariable,
-					Value: config.NewRSRParsersMustCompile("1003", true, utils.INFIELD_SEP),
+					Value: config.NewRSRParsersMustCompile("1003", utils.INFIELD_SEP),
 				},
 			},
 		},
-		testA{
+		{
 			Path:      utils.Subject,
 			FieldInfo: `~effective_caller_id_number:s/(\d+)/+$1/`,
 			Initial:   make([]*engine.Attribute, 0),
 			Expected: []*engine.Attribute{
-				&engine.Attribute{
+				{
 					Path:  utils.MetaReq + utils.NestingSep + utils.Subject,
 					Type:  utils.MetaVariable,
-					Value: config.NewRSRParsersMustCompile(`~effective_caller_id_number:s/(\d+)/+$1/`, true, utils.INFIELD_SEP),
+					Value: config.NewRSRParsersMustCompile(`~effective_caller_id_number:s/(\d+)/+$1/`, utils.INFIELD_SEP),
 				},
 			},
 		},
-		testA{
+		{
 			Path:      utils.Subject,
 			FieldInfo: "^call_1003",
 			Initial: []*engine.Attribute{
-				&engine.Attribute{
+				{
 					Path:  utils.MetaReq + utils.NestingSep + utils.Account,
 					Type:  utils.MetaVariable,
-					Value: config.NewRSRParsersMustCompile("1003", true, utils.INFIELD_SEP),
+					Value: config.NewRSRParsersMustCompile("1003", utils.INFIELD_SEP),
 				},
 			},
 			Expected: []*engine.Attribute{
-				&engine.Attribute{
+				{
 					Path:  utils.MetaReq + utils.NestingSep + utils.Account,
 					Type:  utils.MetaVariable,
-					Value: config.NewRSRParsersMustCompile("1003", true, utils.INFIELD_SEP),
+					Value: config.NewRSRParsersMustCompile("1003", utils.INFIELD_SEP),
 				},
-				&engine.Attribute{
+				{
 					Path:  utils.MetaReq + utils.NestingSep + utils.Subject,
 					Type:  utils.MetaVariable,
-					Value: config.NewRSRParsersMustCompile("call_1003", true, utils.INFIELD_SEP),
+					Value: config.NewRSRParsersMustCompile("call_1003", utils.INFIELD_SEP),
 				},
 			},
 		},
@@ -111,7 +111,7 @@ func TestDerivedChargers2AttributeProfile(t *testing.T) {
 		Expected *engine.AttributeProfile
 	}
 	tests := []testC{
-		testC{
+		{
 			DC: &v1DerivedCharger{
 				RequestTypeField: utils.MetaDefault,
 				CategoryField:    "^*voice",
@@ -127,22 +127,22 @@ func TestDerivedChargers2AttributeProfile(t *testing.T) {
 				FilterIDs:          make([]string, 0),
 				ActivationInterval: nil,
 				Attributes: []*engine.Attribute{
-					&engine.Attribute{
+					{
 						Path:  utils.MetaReq + utils.NestingSep + utils.Category,
 						Type:  utils.MetaVariable,
-						Value: config.NewRSRParsersMustCompile("*voice", true, utils.INFIELD_SEP),
+						Value: config.NewRSRParsersMustCompile("*voice", utils.INFIELD_SEP),
 					},
-					&engine.Attribute{
+					{
 						Path:  utils.MetaReq + utils.NestingSep + utils.Account,
 						Type:  utils.MetaVariable,
-						Value: config.NewRSRParsersMustCompile("1003", true, utils.INFIELD_SEP),
+						Value: config.NewRSRParsersMustCompile("1003", utils.INFIELD_SEP),
 					},
 				},
 				Blocker: false,
 				Weight:  10,
 			},
 		},
-		testC{
+		{
 			DC: &v1DerivedCharger{
 				RequestTypeField: utils.MetaDefault,
 				CategoryField:    "^*voice",
@@ -160,25 +160,25 @@ func TestDerivedChargers2AttributeProfile(t *testing.T) {
 				FilterIDs:          []string{"*string:~*req.Subject:1005"},
 				ActivationInterval: nil,
 				Attributes: []*engine.Attribute{
-					&engine.Attribute{
+					{
 						Path:  utils.MetaReq + utils.NestingSep + utils.Category,
 						Type:  utils.MetaVariable,
-						Value: config.NewRSRParsersMustCompile("*voice", true, utils.INFIELD_SEP),
+						Value: config.NewRSRParsersMustCompile("*voice", utils.INFIELD_SEP),
 					},
-					&engine.Attribute{
+					{
 						Path:  utils.MetaReq + utils.NestingSep + utils.Account,
 						Type:  utils.MetaVariable,
-						Value: config.NewRSRParsersMustCompile("1003", true, utils.INFIELD_SEP),
+						Value: config.NewRSRParsersMustCompile("1003", utils.INFIELD_SEP),
 					},
-					&engine.Attribute{
+					{
 						Path:  utils.MetaReq + utils.NestingSep + utils.Subject,
 						Type:  utils.MetaVariable,
-						Value: config.NewRSRParsersMustCompile("call_1003_to_1004", true, utils.INFIELD_SEP),
+						Value: config.NewRSRParsersMustCompile("call_1003_to_1004", utils.INFIELD_SEP),
 					},
-					&engine.Attribute{
+					{
 						Path:  utils.MetaReq + utils.NestingSep + utils.Destination,
 						Type:  utils.MetaVariable,
-						Value: config.NewRSRParsersMustCompile("1004", true, utils.INFIELD_SEP),
+						Value: config.NewRSRParsersMustCompile("1004", utils.INFIELD_SEP),
 					},
 				},
 				Blocker: false,
@@ -202,7 +202,7 @@ func TestDerivedChargers2Charger(t *testing.T) {
 		Expected *engine.ChargerProfile
 	}
 	tests := []testB{
-		testB{
+		{
 			DC: &v1DerivedCharger{
 				RunID:            "runID",
 				RunFilters:       "~Header4:s/a/${1}b/{*duration_seconds&*round:2}(b&c)",
@@ -222,7 +222,7 @@ func TestDerivedChargers2Charger(t *testing.T) {
 				FilterIDs: []string{
 					"*string:~*req.Category:*voice1",
 					"*string:~*req.Account:1001",
-					"*rsr::~*req.Header4:s/a/${1}b/{*duration_seconds&*round:2}(b&c)",
+					"*rsr:~*req.Header4:s/a/${1}b/{*duration_seconds&*round:2}:b;c",
 				},
 				ActivationInterval: nil,
 				RunID:              "runID",
@@ -230,7 +230,7 @@ func TestDerivedChargers2Charger(t *testing.T) {
 				Weight:             10,
 			},
 		},
-		testB{
+		{
 			DC: &v1DerivedCharger{
 				RunID:        "runID2",
 				RunFilters:   "^1003",
@@ -242,7 +242,7 @@ func TestDerivedChargers2Charger(t *testing.T) {
 			Expected: &engine.ChargerProfile{
 				Tenant:             defaultTenant,
 				ID:                 "key2",
-				FilterIDs:          []string{"*rsr::~*req.1003"},
+				FilterIDs:          []string{},
 				ActivationInterval: nil,
 				RunID:              "runID2",
 				AttributeIDs:       make([]string, 0),
