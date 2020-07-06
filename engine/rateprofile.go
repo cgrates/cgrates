@@ -63,18 +63,18 @@ func (rp *RateProfile) Compile() (err error) {
 
 // Route defines rate related information used within a RateProfile
 type Rate struct {
-	ID              string   // RateID
-	FilterIDs       []string // RateFilterIDs
-	ActivationStart string   //TPActivationInterval have ATime and ETime as strings
-	Weight          float64  // RateWeight will decide the winner per interval start
-	Blocker         bool     // RateBlocker will make this rate recurrent, deactivating further intervals
-	IntervalRates   []*IntervalRate
+	ID             string   // RateID
+	FilterIDs      []string // RateFilterIDs
+	ActivationTime string   //TPActivationInterval have ATime and ETime as strings
+	Weight         float64  // RateWeight will decide the winner per interval start
+	Blocker        bool     // RateBlocker will make this rate recurrent, deactivating further intervals
+	IntervalRates  []*IntervalRate
 
 	aTime cron.Schedule // compiled version of activation time as cron.Schedule interface
 }
 
 func (rt *Rate) Compile() (err error) {
-	aTime := rt.ActivationStart
+	aTime := rt.ActivationTime
 	if aTime == utils.EmptyString {
 		aTime = "* * * * *"
 	}

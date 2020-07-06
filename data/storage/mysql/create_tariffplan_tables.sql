@@ -490,7 +490,7 @@ CREATE TABLE tp_rate_profiles (
   `max_cost_strategy` varchar(64) NOT NULL,
   `rate_id` varchar(32) NOT NULL,
   `rate_filter_ids` varchar(64) NOT NULL,
-  `rate_activation_start` varchar(64) NOT NULL,
+  `rate_activation_time` varchar(64) NOT NULL,
   `route_weight` decimal(8,2) NOT NULL,
   `rate_blocker` BOOLEAN NOT NULL,
   `rate_interval_start` varchar(64) NOT NULL,

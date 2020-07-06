@@ -1345,9 +1345,9 @@ func TestLoaderProcessRateProfile(t *testing.T) {
 		MaxCostStrategy:  "*free",
 		Rates: map[string]*engine.Rate{
 			"RT_WEEK": &engine.Rate{
-				ID:              "RT_WEEK",
-				Weight:          0,
-				ActivationStart: "* * * * 1-5",
+				ID:             "RT_WEEK",
+				Weight:         0,
+				ActivationTime: "* * * * 1-5",
 				IntervalRates: []*engine.IntervalRate{
 					&engine.IntervalRate{
 						IntervalStart: time.Duration(0 * time.Second),
@@ -1364,9 +1364,9 @@ func TestLoaderProcessRateProfile(t *testing.T) {
 				},
 			},
 			"RT_WEEKEND": &engine.Rate{
-				ID:              "RT_WEEKEND",
-				Weight:          10,
-				ActivationStart: "* * * * 0,6",
+				ID:             "RT_WEEKEND",
+				Weight:         10,
+				ActivationTime: "* * * * 0,6",
 				IntervalRates: []*engine.IntervalRate{
 					&engine.IntervalRate{
 						IntervalStart: time.Duration(0 * time.Second),
@@ -1377,9 +1377,9 @@ func TestLoaderProcessRateProfile(t *testing.T) {
 				},
 			},
 			"RT_CHRISTMAS": &engine.Rate{
-				ID:              "RT_CHRISTMAS",
-				Weight:          30,
-				ActivationStart: "* * 24 12 *",
+				ID:             "RT_CHRISTMAS",
+				Weight:         30,
+				ActivationTime: "* * 24 12 *",
 				IntervalRates: []*engine.IntervalRate{
 					&engine.IntervalRate{
 						IntervalStart: time.Duration(0 * time.Second),
@@ -1532,9 +1532,9 @@ cgrates.org,RP1,,,,,,,,,,RT_CHRISTMAS,,* * 24 12 *,30,false,0s,0.06,1m,1s
 		MaxCostStrategy:  "*free",
 		Rates: map[string]*engine.Rate{
 			"RT_WEEK": &engine.Rate{
-				ID:              "RT_WEEK",
-				Weight:          0,
-				ActivationStart: "* * * * 1-5",
+				ID:             "RT_WEEK",
+				Weight:         0,
+				ActivationTime: "* * * * 1-5",
 				IntervalRates: []*engine.IntervalRate{
 					&engine.IntervalRate{
 						IntervalStart: time.Duration(0 * time.Second),
@@ -1591,9 +1591,9 @@ cgrates.org,RP1,,,,,,,,,,RT_CHRISTMAS,,* * 24 12 *,30,false,0s,0.06,1m,1s
 		MaxCostStrategy:  "*free",
 		Rates: map[string]*engine.Rate{
 			"RT_WEEK": &engine.Rate{
-				ID:              "RT_WEEK",
-				Weight:          0,
-				ActivationStart: "* * * * 1-5",
+				ID:             "RT_WEEK",
+				Weight:         0,
+				ActivationTime: "* * * * 1-5",
 				IntervalRates: []*engine.IntervalRate{
 					&engine.IntervalRate{
 						IntervalStart: time.Duration(0 * time.Second),
@@ -1610,9 +1610,9 @@ cgrates.org,RP1,,,,,,,,,,RT_CHRISTMAS,,* * 24 12 *,30,false,0s,0.06,1m,1s
 				},
 			},
 			"RT_WEEKEND": &engine.Rate{
-				ID:              "RT_WEEKEND",
-				Weight:          10,
-				ActivationStart: "* * * * 0,6",
+				ID:             "RT_WEEKEND",
+				Weight:         10,
+				ActivationTime: "* * * * 0,6",
 				IntervalRates: []*engine.IntervalRate{
 					&engine.IntervalRate{
 						IntervalStart: time.Duration(0 * time.Second),
@@ -1623,9 +1623,9 @@ cgrates.org,RP1,,,,,,,,,,RT_CHRISTMAS,,* * 24 12 *,30,false,0s,0.06,1m,1s
 				},
 			},
 			"RT_CHRISTMAS": &engine.Rate{
-				ID:              "RT_CHRISTMAS",
-				Weight:          30,
-				ActivationStart: "* * 24 12 *",
+				ID:             "RT_CHRISTMAS",
+				Weight:         30,
+				ActivationTime: "* * 24 12 *",
 				IntervalRates: []*engine.IntervalRate{
 					&engine.IntervalRate{
 						IntervalStart: time.Duration(0 * time.Second),
@@ -1687,9 +1687,9 @@ func TestLoaderRemoveRateProfileRates(t *testing.T) {
 		MaxCostStrategy:  "*free",
 		Rates: map[string]*engine.Rate{
 			"RT_WEEK": &engine.Rate{
-				ID:              "RT_WEEK",
-				Weight:          0,
-				ActivationStart: "* * * * 1-5",
+				ID:             "RT_WEEK",
+				Weight:         0,
+				ActivationTime: "* * * * 1-5",
 				IntervalRates: []*engine.IntervalRate{
 					&engine.IntervalRate{
 						IntervalStart: time.Duration(0 * time.Second),
@@ -1706,9 +1706,9 @@ func TestLoaderRemoveRateProfileRates(t *testing.T) {
 				},
 			},
 			"RT_WEEKEND": &engine.Rate{
-				ID:              "RT_WEEKEND",
-				Weight:          10,
-				ActivationStart: "* * * * 0,6",
+				ID:             "RT_WEEKEND",
+				Weight:         10,
+				ActivationTime: "* * * * 0,6",
 				IntervalRates: []*engine.IntervalRate{
 					&engine.IntervalRate{
 						IntervalStart: time.Duration(0 * time.Second),
@@ -1719,9 +1719,9 @@ func TestLoaderRemoveRateProfileRates(t *testing.T) {
 				},
 			},
 			"RT_CHRISTMAS": &engine.Rate{
-				ID:              "RT_CHRISTMAS",
-				Weight:          30,
-				ActivationStart: "* * 24 12 *",
+				ID:             "RT_CHRISTMAS",
+				Weight:         30,
+				ActivationTime: "* * 24 12 *",
 				IntervalRates: []*engine.IntervalRate{
 					&engine.IntervalRate{
 						IntervalStart: time.Duration(0 * time.Second),
@@ -1749,9 +1749,9 @@ func TestLoaderRemoveRateProfileRates(t *testing.T) {
 		MaxCostStrategy:  "*free",
 		Rates: map[string]*engine.Rate{
 			"RT_WEEK": &engine.Rate{
-				ID:              "RT_WEEK",
-				Weight:          0,
-				ActivationStart: "* * * * 1-5",
+				ID:             "RT_WEEK",
+				Weight:         0,
+				ActivationTime: "* * * * 1-5",
 				IntervalRates: []*engine.IntervalRate{
 					&engine.IntervalRate{
 						IntervalStart: time.Duration(0 * time.Second),
@@ -1768,9 +1768,9 @@ func TestLoaderRemoveRateProfileRates(t *testing.T) {
 				},
 			},
 			"RT_WEEKEND": &engine.Rate{
-				ID:              "RT_WEEKEND",
-				Weight:          10,
-				ActivationStart: "* * * * 0,6",
+				ID:             "RT_WEEKEND",
+				Weight:         10,
+				ActivationTime: "* * * * 0,6",
 				IntervalRates: []*engine.IntervalRate{
 					&engine.IntervalRate{
 						IntervalStart: time.Duration(0 * time.Second),
@@ -1781,9 +1781,9 @@ func TestLoaderRemoveRateProfileRates(t *testing.T) {
 				},
 			},
 			"RT_CHRISTMAS": &engine.Rate{
-				ID:              "RT_CHRISTMAS",
-				Weight:          30,
-				ActivationStart: "* * 24 12 *",
+				ID:             "RT_CHRISTMAS",
+				Weight:         30,
+				ActivationTime: "* * 24 12 *",
 				IntervalRates: []*engine.IntervalRate{
 					&engine.IntervalRate{
 						IntervalStart: time.Duration(0 * time.Second),
@@ -1841,9 +1841,9 @@ cgrates.org,RP1,
 		MaxCostStrategy:  "*free",
 		Rates: map[string]*engine.Rate{
 			"RT_WEEK": &engine.Rate{
-				ID:              "RT_WEEK",
-				Weight:          0,
-				ActivationStart: "* * * * 1-5",
+				ID:             "RT_WEEK",
+				Weight:         0,
+				ActivationTime: "* * * * 1-5",
 				IntervalRates: []*engine.IntervalRate{
 					&engine.IntervalRate{
 						IntervalStart: time.Duration(0 * time.Second),
@@ -1860,9 +1860,9 @@ cgrates.org,RP1,
 				},
 			},
 			"RT_CHRISTMAS": &engine.Rate{
-				ID:              "RT_CHRISTMAS",
-				Weight:          30,
-				ActivationStart: "* * 24 12 *",
+				ID:             "RT_CHRISTMAS",
+				Weight:         30,
+				ActivationTime: "* * 24 12 *",
 				IntervalRates: []*engine.IntervalRate{
 					&engine.IntervalRate{
 						IntervalStart: time.Duration(0 * time.Second),
@@ -1914,9 +1914,9 @@ cgrates.org,RP1,
 		MaxCostStrategy:  "*free",
 		Rates: map[string]*engine.Rate{
 			"RT_WEEK": &engine.Rate{
-				ID:              "RT_WEEK",
-				Weight:          0,
-				ActivationStart: "* * * * 1-5",
+				ID:             "RT_WEEK",
+				Weight:         0,
+				ActivationTime: "* * * * 1-5",
 				IntervalRates: []*engine.IntervalRate{
 					&engine.IntervalRate{
 						IntervalStart: time.Duration(0 * time.Second),

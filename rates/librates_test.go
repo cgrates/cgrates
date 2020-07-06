@@ -39,9 +39,9 @@ func TestOrderRatesOnIntervals(t *testing.T) {
 	}
 	rt0.Compile()
 	rtChristmas := &engine.Rate{
-		ID:              "RT_CHRISTMAS",
-		ActivationStart: "* * 24 12 *",
-		Weight:          50,
+		ID:             "RT_CHRISTMAS",
+		ActivationTime: "* * 24 12 *",
+		Weight:         50,
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: time.Duration(0),
