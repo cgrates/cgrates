@@ -45,8 +45,8 @@ func TestFiltersInlineMigrate(t *testing.T) {
 			exp: "",
 		},
 		{
-			in:  "*rsr:~Tenant:~^cgr.*\\.org$",
-			exp: "*rsr:~Tenant:~^cgr.*\\.org$",
+			in:  "*rsr::~Tenant(~^cgr.*\\.org$)",
+			exp: "*rsr::~Tenant(~^cgr.*\\.org$)",
 		},
 	}
 	for _, m := range data {
@@ -270,8 +270,8 @@ func TestFiltersInlineV2Migrate(t *testing.T) {
 			exp: "",
 		},
 		{
-			in:  "*rsr:~Tenant:~^cgr.*\\.org$",
-			exp: "*rsr:~*req.Tenant:~^cgr.*\\.org$",
+			in:  "*rsr::~Tenant(~^cgr.*\\.org$)",
+			exp: "*rsr::~*req.Tenant(~^cgr.*\\.org$)",
 		},
 	}
 	for _, m := range data {

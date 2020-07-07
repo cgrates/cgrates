@@ -113,7 +113,7 @@ func (m *Migrator) setVersions(str string) (err error) {
 		err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false)
 	}
 	if err != nil {
-		return utils.NewCGRError(utils.Migrator,
+		err = utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,
 			err.Error(),
 			fmt.Sprintf("error: <%s> when updating %s version into StorDB", err.Error(), str))

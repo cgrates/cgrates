@@ -113,7 +113,7 @@ func (m *Migrator) migrateCurrentStats() (err error) {
 		if err := m.dmIN.DataManager().RemoveStatQueue(tntID[0], tntID[1], utils.NonTransactional); err != nil {
 			return err
 		}
-		m.stats[utils.StatS] += 1
+		m.stats[utils.StatS]++
 	}
 
 	return m.moveStatQueueProfile()
@@ -137,7 +137,7 @@ func (m *Migrator) migrateV1Stats() (filter *engine.Filter, v2Stats *engine.Stat
 		if filter, v2Stats, sts, err = v1Sts.AsStatQP(); err != nil {
 			return nil, nil, nil, err
 		}
-		m.stats[utils.StatS] += 1
+		m.stats[utils.StatS]++
 	}
 	return
 }
@@ -150,8 +150,8 @@ func remakeQueue(sq *engine.StatQueue) (out *engine.StatQueue) {
 		SQMetrics: make(map[string]engine.StatMetric),
 		MinItems:  sq.MinItems,
 	}
-	for mId, metric := range sq.SQMetrics {
-		id := utils.ConcatenatedKey(utils.SplitConcatenatedKey(mId)...)
+	for mID, metric := range sq.SQMetrics {
+		id := utils.ConcatenatedKey(utils.SplitConcatenatedKey(mID)...)
 		out.SQMetrics[id] = metric
 	}
 	return
@@ -420,10 +420,8 @@ func (v1Sts v1Stat) AsStatQP() (filter *engine.Filter, sq *engine.StatQueue, stq
 			}
 			v1Sts.Metrics[i] = strings.ToLower(v1Sts.Metrics[i])
 			stq.Metrics = append(stq.Metrics, &engine.MetricWithFilters{MetricID: v1Sts.Metrics[i]})
-			if metric, err := engine.NewStatMetric(stq.Metrics[i].MetricID, 0, []string{}); err != nil {
+			if sq.SQMetrics[stq.Metrics[i].MetricID], err = engine.NewStatMetric(stq.Metrics[i].MetricID, 0, []string{}); err != nil {
 				return nil, nil, nil, err
-			} else {
-				sq.SQMetrics[stq.Metrics[i].MetricID] = metric
 			}
 		}
 	}

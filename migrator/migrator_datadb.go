@@ -70,10 +70,12 @@ type MigratorDataDB interface {
 	getV4AttributeProfile() (v4attrPrf *v4AttributeProfile, err error)
 	setV4AttributeProfile(x *v4AttributeProfile) (err error)
 	remV4AttributeProfile(tenant, id string) (err error)
+	getV5AttributeProfile() (v5attrPrf *engine.AttributeProfile, err error)
 
 	getV1Filter() (v1Fltr *v1Filter, err error)
 	setV1Filter(x *v1Filter) (err error)
 	remV1Filter(tenant, id string) (err error)
+	getV4Filter() (v1Fltr *engine.Filter, err error)
 
 	getSupplier() (spl *SupplierProfile, err error)
 	setSupplier(spl *SupplierProfile) (err error)

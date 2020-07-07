@@ -843,6 +843,32 @@ func (v1rs *redisMigrator) getV4AttributeProfile() (v3attrPrf *v4AttributeProfil
 	return v4attr, nil
 }
 
+func (v1rs *redisMigrator) getV5AttributeProfile() (v5attr *engine.AttributeProfile, err error) {
+	if v1rs.qryIdx == nil {
+		v1rs.dataKeys, err = v1rs.rds.GetKeysForPrefix(utils.AttributeProfilePrefix)
+		if err != nil {
+			return
+		} else if len(v1rs.dataKeys) == 0 {
+			return nil, utils.ErrNoMoreData
+		}
+		v1rs.qryIdx = utils.IntPointer(0)
+	}
+	if *v1rs.qryIdx <= len(v1rs.dataKeys)-1 {
+		strVal, err := v1rs.rds.Cmd("GET", v1rs.dataKeys[*v1rs.qryIdx]).Bytes()
+		if err != nil {
+			return nil, err
+		}
+		if err := v1rs.rds.Marshaler().Unmarshal(strVal, &v5attr); err != nil {
+			return nil, err
+		}
+		*v1rs.qryIdx = *v1rs.qryIdx + 1
+	} else {
+		v1rs.qryIdx = nil
+		return nil, utils.ErrNoMoreData
+	}
+	return
+}
+
 //set
 func (v1rs *redisMigrator) setV4AttributeProfile(x *v4AttributeProfile) (err error) {
 	key := utils.AttributeProfilePrefix + utils.ConcatenatedKey(x.Tenant, x.ID)
@@ -880,6 +906,32 @@ func (v1rs *redisMigrator) getV1Filter() (v1Fltr *v1Filter, err error) {
 			return nil, err
 		}
 		if err := v1rs.rds.Marshaler().Unmarshal(strVal, &v1Fltr); err != nil {
+			return nil, err
+		}
+		*v1rs.qryIdx = *v1rs.qryIdx + 1
+	} else {
+		v1rs.qryIdx = nil
+		return nil, utils.ErrNoMoreData
+	}
+	return
+}
+
+func (v1rs *redisMigrator) getV4Filter() (v4Fltr *engine.Filter, err error) {
+	if v1rs.qryIdx == nil {
+		v1rs.dataKeys, err = v1rs.rds.GetKeysForPrefix(utils.FilterPrefix)
+		if err != nil {
+			return
+		} else if len(v1rs.dataKeys) == 0 {
+			return nil, utils.ErrNoMoreData
+		}
+		v1rs.qryIdx = utils.IntPointer(0)
+	}
+	if *v1rs.qryIdx <= len(v1rs.dataKeys)-1 {
+		strVal, err := v1rs.rds.Cmd("GET", v1rs.dataKeys[*v1rs.qryIdx]).Bytes()
+		if err != nil {
+			return nil, err
+		}
+		if err := v1rs.rds.Marshaler().Unmarshal(strVal, &v4Fltr); err != nil {
 			return nil, err
 		}
 		*v1rs.qryIdx = *v1rs.qryIdx + 1

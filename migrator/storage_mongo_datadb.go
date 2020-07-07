@@ -661,6 +661,25 @@ func (v1ms *mongoMigrator) getV4AttributeProfile() (v4attrPrf *v4AttributeProfil
 	return v4attrPrf, nil
 }
 
+func (v1ms *mongoMigrator) getV5AttributeProfile() (v5attrPrf *engine.AttributeProfile, err error) {
+	if v1ms.cursor == nil {
+		v1ms.cursor, err = v1ms.mgoDB.DB().Collection(v1AttributeProfilesCol).Find(v1ms.mgoDB.GetContext(), bson.D{})
+		if err != nil {
+			return nil, err
+		}
+	}
+	if !(*v1ms.cursor).Next(v1ms.mgoDB.GetContext()) {
+		(*v1ms.cursor).Close(v1ms.mgoDB.GetContext())
+		v1ms.cursor = nil
+		return nil, utils.ErrNoMoreData
+	}
+	v5attrPrf = new(engine.AttributeProfile)
+	if err := (*v1ms.cursor).Decode(v5attrPrf); err != nil {
+		return nil, err
+	}
+	return v5attrPrf, nil
+}
+
 //set
 func (v1ms *mongoMigrator) setV4AttributeProfile(x *v4AttributeProfile) (err error) {
 	_, err = v1ms.mgoDB.DB().Collection(v1AttributeProfilesCol).InsertOne(v1ms.mgoDB.GetContext(), x)
@@ -689,6 +708,25 @@ func (v1ms *mongoMigrator) getV1Filter() (v1Fltr *v1Filter, err error) {
 	}
 	v1Fltr = new(v1Filter)
 	if err := (*v1ms.cursor).Decode(v1Fltr); err != nil {
+		return nil, err
+	}
+	return
+}
+
+func (v1ms *mongoMigrator) getV4Filter() (v4Fltr *engine.Filter, err error) {
+	if v1ms.cursor == nil {
+		v1ms.cursor, err = v1ms.mgoDB.DB().Collection(engine.ColFlt).Find(v1ms.mgoDB.GetContext(), bson.D{})
+		if err != nil {
+			return nil, err
+		}
+	}
+	if !(*v1ms.cursor).Next(v1ms.mgoDB.GetContext()) {
+		(*v1ms.cursor).Close(v1ms.mgoDB.GetContext())
+		v1ms.cursor = nil
+		return nil, utils.ErrNoMoreData
+	}
+	v4Fltr = new(engine.Filter)
+	if err := (*v1ms.cursor).Decode(v4Fltr); err != nil {
 		return nil, err
 	}
 	return

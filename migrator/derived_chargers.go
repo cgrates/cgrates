@@ -141,17 +141,7 @@ func derivedChargers2Charger(dc *v1DerivedCharger, tenant string, key string, fi
 		if strings.HasPrefix(filter, utils.DynamicDataPrefix) {
 			filter = filter[1:]
 		}
-		if !strings.HasSuffix(filter, utils.FilterValEnd) { // Has filter, populate the var
-			return
-		}
-		fltrStart := strings.Index(filter, utils.FilterValStart)
-		if fltrStart < 1 {
-			return
-		}
-		fltrVal := filter[fltrStart+1 : len(filter)-1]
-		ch.FilterIDs = append(ch.FilterIDs, "*rsr:"+utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+
-			filter[:fltrStart]+utils.InInFieldSep+
-			strings.Replace(fltrVal, utils.ANDSep, utils.INFIELD_SEP, strings.Count(fltrVal, utils.ANDSep)))
+		ch.FilterIDs = append(ch.FilterIDs, "*rsr::"+utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+filter)
 	}
 	return
 }

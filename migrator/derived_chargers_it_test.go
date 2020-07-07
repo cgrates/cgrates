@@ -135,7 +135,7 @@ func testDCITMigrateAndMove(t *testing.T) {
 			Chargers: []*v1DerivedCharger{
 				{
 					RunID:      "RunID",
-					RunFilters: "~filterhdr1(a&b)",
+					RunFilters: "~filterhdr1:s/(.+)/special_run3/",
 
 					RequestTypeField: utils.MetaDefault,
 					CategoryField:    utils.MetaDefault,
@@ -176,7 +176,7 @@ func testDCITMigrateAndMove(t *testing.T) {
 		FilterIDs: []string{
 			"*destinations:~*req.Destination:1001;1002;1003",
 			"*string:~*req.Account:1003",
-			"*rsr:~*req.filterhdr1:a;b",
+			"*rsr::~*req.filterhdr1:s/(.+)/special_run3/",
 		},
 		ActivationInterval: nil,
 		RunID:              "RunID",

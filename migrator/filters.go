@@ -31,26 +31,27 @@ func (m *Migrator) migrateCurrentRequestFilter() (err error) {
 	var ids []string
 	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.FilterPrefix)
 	if err != nil {
-		return err
+		return
 	}
 	for _, id := range ids {
 		tntID := strings.SplitN(strings.TrimPrefix(id, utils.FilterPrefix), utils.InInFieldSep, 2)
 		if len(tntID) < 2 {
 			return fmt.Errorf("Invalid key <%s> when migrating filters", id)
 		}
-		fl, err := m.dmIN.DataManager().GetFilter(tntID[0], tntID[1], false, false, utils.NonTransactional)
-		if err != nil {
-			return err
+		var fl *engine.Filter
+		if fl, err = m.dmIN.DataManager().GetFilter(tntID[0], tntID[1], false, false,
+			utils.NonTransactional); err != nil {
+			return
 		}
 		if m.dryRun || fl == nil {
 			continue
 		}
-		if err := m.dmOut.DataManager().SetFilter(fl, true); err != nil {
-			return err
+		if err = m.dmOut.DataManager().SetFilter(fl, true); err != nil {
+			return
 		}
-		if err := m.dmIN.DataManager().RemoveFilter(tntID[0], tntID[1],
+		if err = m.dmIN.DataManager().RemoveFilter(tntID[0], tntID[1],
 			utils.NonTransactional, true); err != nil {
-			return err
+			return
 		}
 		m.stats[utils.RQF]++
 	}
@@ -106,15 +107,21 @@ func migrateFilterV2(fl *v1Filter) (fltr *engine.Filter) {
 			strings.HasPrefix(rule.FieldName, utils.DynamicDataPrefix+utils.MetaAct) {
 			continue
 		}
-		// if rule.Type != utils.MetaRSR {
-		// in case we found dynamic data prefix we remove it
-		fl.Rules[i].FieldName = strings.TrimPrefix(fl.Rules[i].FieldName, utils.DynamicDataPrefix)
-		fltr.Rules[i].Element = utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + rule.FieldName
-		// } else {
-		// 	for idx, val := range rule.Values {
-		// 		fltr.Rules[i].Values[idx] = val
-		// 	}
-		// }
+		if rule.Type != utils.MetaRSR {
+			// in case we found dynamic data prefix we remove it
+			if strings.HasPrefix(rule.FieldName, utils.DynamicDataPrefix) {
+				fl.Rules[i].FieldName = fl.Rules[i].FieldName[1:]
+			}
+			fltr.Rules[i].Element = utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + rule.FieldName
+		} else {
+			for idx, val := range rule.Values {
+				if strings.HasPrefix(val, utils.DynamicDataPrefix) {
+					// remove dynamic data prefix from fieldName
+					val = val[1:]
+				}
+				fltr.Rules[i].Values[idx] = utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + val
+			}
+		}
 	}
 	return
 }
@@ -171,14 +178,18 @@ func migrateInlineFilterV2(fl string) string {
 		return fl
 	}
 
-	// if ruleSplt[0] != utils.MetaRSR {
-	// remove dynamic data prefix from fieldName
-	ruleSplt[1] = strings.TrimPrefix(ruleSplt[1], utils.DynamicDataPrefix)
-	return fmt.Sprintf("%s:~%s:%s", ruleSplt[0], utils.MetaReq+utils.NestingSep+ruleSplt[1], strings.Join(ruleSplt[2:], utils.InInFieldSep))
-	// } // in case of *rsr filter we need to add the prefix at fieldValue
-	// remove dynamic data prefix from fieldName
-	// ruleSplt[2] = strings.TrimPrefix(ruleSplt[2], utils.DynamicDataPrefix)
-	// return fmt.Sprintf("%s::~%s", ruleSplt[0], utils.MetaReq+utils.NestingSep+strings.Join(ruleSplt[2:], utils.InInFieldSep))
+	if ruleSplt[0] != utils.MetaRSR {
+		if strings.HasPrefix(ruleSplt[1], utils.DynamicDataPrefix) {
+			// remove dynamic data prefix from fieldName
+			ruleSplt[1] = ruleSplt[1][1:]
+		}
+		return fmt.Sprintf("%s:~%s:%s", ruleSplt[0], utils.MetaReq+utils.NestingSep+ruleSplt[1], strings.Join(ruleSplt[2:], utils.InInFieldSep))
+	} // in case of *rsr filter we need to add the prefix at fieldValue
+	if strings.HasPrefix(ruleSplt[2], utils.DynamicDataPrefix) {
+		// remove dynamic data prefix from fieldName
+		ruleSplt[2] = ruleSplt[2][1:]
+	}
+	return fmt.Sprintf("%s::~%s", ruleSplt[0], utils.MetaReq+utils.NestingSep+strings.Join(ruleSplt[2:], utils.InInFieldSep))
 }
 
 func (m *Migrator) migrateOthersv1() (err error) {
@@ -282,75 +293,77 @@ func (m *Migrator) migrateFilters() (err error) {
 	}
 	migrated := true
 	migratedFrom := 0
+	var v4Fltr *engine.Filter
 	var fltr *engine.Filter
 	for {
 		version := vrs[utils.RQF]
+		migratedFrom = int(version)
 		for {
 			switch version {
+			default:
+				return fmt.Errorf("Unsupported version %v", version)
 			case current[utils.RQF]:
 				migrated = false
 				if m.sameDataDB {
 					break
 				}
 				if err = m.migrateCurrentRequestFilter(); err != nil {
-					return err
+					return
 				}
-				version = 4
 			case 1:
-				if fltr, err = m.migrateRequestFilterV1(); err != nil && err != utils.ErrNoMoreData {
-					return err
+				if v4Fltr, err = m.migrateRequestFilterV1(); err != nil && err != utils.ErrNoMoreData {
+					return
 				}
-				migratedFrom = 1
 				version = 4
 			case 2:
-				if fltr, err = m.migrateRequestFilterV2(); err != nil && err != utils.ErrNoMoreData {
-					return err
+				if v4Fltr, err = m.migrateRequestFilterV2(); err != nil && err != utils.ErrNoMoreData {
+					return
 				}
-				migratedFrom = 2
 				version = 4
 			case 3:
-				if fltr, err = m.migrateRequestFilterV3(); err != nil && err != utils.ErrNoMoreData {
-					return err
+				if v4Fltr, err = m.migrateRequestFilterV3(); err != nil && err != utils.ErrNoMoreData {
+					return
 				}
-				migratedFrom = 3
 				version = 4
+			case 4: // in case we change the structure to the filters please update the geing method from this version
+				if fltr, err = m.migrateRequestFilterV4(v4Fltr); err != nil && err != utils.ErrNoMoreData {
+					return
+				}
+				version = 5
 			}
 			if version == current[utils.RQF] || err == utils.ErrNoMoreData {
 				break
 			}
 		}
 		if err == utils.ErrNoMoreData || !migrated {
+			err = nil
 			break
 		}
-		if !m.dryRun && migrated {
-			//set filters
-			switch migratedFrom {
-			case 1, 2, 3:
-				if err := m.dmOut.DataManager().SetFilter(fltr, true); err != nil {
-					return fmt.Errorf("Error: <%s> when setting filter with tenant: <%s> and id: <%s> after migration",
-						err.Error(), fltr.Tenant, fltr.ID)
-				}
+		if !m.dryRun {
+			if err = m.dmOut.DataManager().SetFilter(fltr, true); err != nil {
+				return fmt.Errorf("Error: <%s> when setting filter with tenant: <%s> and id: <%s> after migration",
+					err.Error(), fltr.Tenant, fltr.ID)
 			}
 		}
 		m.stats[utils.RQF]++
 	}
 	if m.dryRun || !migrated {
-		return nil
+		return
 	}
 
 	switch migratedFrom {
 	case 1:
-		if err := m.migrateOthersv1(); err != nil {
-			return err
+		if err = m.migrateOthersv1(); err != nil {
+			return
 		}
 	case 2:
-		if err := m.migrateOthersV2(); err != nil {
-			return err
+		if err = m.migrateOthersV2(); err != nil {
+			return
 		}
 	}
 
 	if err = m.setVersions(utils.RQF); err != nil {
-		return err
+		return
 	}
 	return m.ensureIndexesDataDB(engine.ColFlt)
 }
@@ -790,4 +803,72 @@ type v1FilterRule struct {
 	Values    []string          // Filter definition
 	rsrFields config.RSRParsers // Cache here the RSRFilter Values
 	negative  *bool
+}
+
+func (m *Migrator) migrateRequestFilterV4(v4Fltr *engine.Filter) (fltr *engine.Filter, err error) {
+	if v4Fltr == nil {
+		// read data from DataDB
+		v4Fltr, err = m.dmIN.getV4Filter()
+		if err != nil {
+			return nil, err
+		}
+	}
+	//migrate
+	fltr = &engine.Filter{
+		Tenant:             v4Fltr.Tenant,
+		ID:                 v4Fltr.ID,
+		Rules:              make([]*engine.FilterRule, 0, len(v4Fltr.Rules)),
+		ActivationInterval: v4Fltr.ActivationInterval,
+	}
+	for _, rule := range v4Fltr.Rules {
+		if rule.Type != utils.MetaRSR &&
+			rule.Type == utils.MetaNotRSR {
+			fltr.Rules = append(fltr.Rules, rule)
+			continue
+		}
+		for _, val := range rule.Values {
+			if !strings.HasSuffix(val, utils.FilterValEnd) { // is not a filter so we ignore this value
+				continue
+			}
+			fltrStart := strings.Index(val, utils.FilterValStart)
+			if fltrStart < 1 {
+				return nil, fmt.Errorf("invalid RSRFilter start rule in string: <%s> for filter<%s>", val, fltr.TenantID())
+			}
+			fltr.Rules = append(fltr.Rules, &engine.FilterRule{
+				Type:    rule.Type,
+				Element: val[:fltrStart],
+				Values:  strings.Split(val[fltrStart+1:len(val)-1], utils.ANDSep),
+			})
+		}
+	}
+	return
+}
+
+func migrateInlineFilterV4(v4fltIDs []string) (fltrIDs []string, err error) {
+	fltrIDs = make([]string, 0, len(v4fltIDs))
+	for _, v4flt := range v4fltIDs {
+		var fltr string
+		if strings.HasPrefix(v4flt, utils.MetaRSR) {
+			fltr = utils.MetaRSR + utils.InInFieldSep
+			v4flt = strings.TrimPrefix(v4flt, utils.MetaRSR+utils.InInFieldSep+utils.InInFieldSep)
+		} else if strings.HasPrefix(v4flt, utils.MetaNotRSR) {
+			fltr = utils.MetaNotRSR + utils.InInFieldSep
+			v4flt = strings.TrimPrefix(v4flt, utils.MetaNotRSR+utils.InInFieldSep+utils.InInFieldSep)
+		} else {
+			fltrIDs = append(fltrIDs, v4flt)
+		}
+		for _, val := range strings.Split(v4flt, utils.InInFieldSep) {
+			if !strings.HasSuffix(val, utils.FilterValEnd) { // is not a filter so we ignore this value
+				continue
+			}
+			fltrStart := strings.Index(val, utils.FilterValStart)
+			if fltrStart < 1 {
+				return nil, fmt.Errorf("invalid RSRFilter start rule in string: <%s> ", val)
+			}
+			fltrVal := val[fltrStart+1 : len(val)-1]
+			fltrIDs = append(fltrIDs, fltr+val[:fltrStart]+utils.InInFieldSep+
+				strings.Replace(fltrVal, utils.ANDSep, utils.INFIELD_SEP, strings.Count(fltrVal, utils.ANDSep)))
+		}
+	}
+	return
 }
