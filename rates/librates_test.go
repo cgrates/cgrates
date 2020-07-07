@@ -60,12 +60,72 @@ func TestOrderRatesOnIntervals(t *testing.T) {
 			},
 		},
 	}
-	//
-	// time.Date(2020, time.December, 23, 23, 59, 05, 0, time.UTC),
+
 	if ordRts := orderRatesOnIntervals(
 		allRts, time.Date(2020, time.June, 28, 18, 56, 05, 0, time.UTC),
-		time.Duration(2*time.Minute), true); !reflect.DeepEqual(expOrdered, ordRts) {
+		time.Duration(2*time.Minute), true, 10); !reflect.DeepEqual(expOrdered, ordRts) {
 		t.Errorf("expecting: %s\n, received: %s",
 			utils.ToIJSON(expOrdered), utils.ToIJSON(ordRts))
 	}
+
+	expOrdered = []*engine.RateSInterval{
+		{
+			Increments: []*engine.RateSIncrement{
+				{
+					Rate:              rt0,
+					IntervalRateIndex: 0,
+				},
+			},
+		},
+		{
+			Increments: []*engine.RateSIncrement{
+				{
+					Rate:              rtChristmas,
+					IntervalRateIndex: 0,
+				},
+			},
+		},
+	}
+	if ordRts := orderRatesOnIntervals(
+		allRts, time.Date(2020, time.December, 23, 23, 59, 05, 0, time.UTC),
+		time.Duration(2*time.Minute), true, 10); !reflect.DeepEqual(expOrdered, ordRts) {
+		t.Errorf("expecting: %s\n, received: %s",
+			utils.ToIJSON(expOrdered), utils.ToIJSON(ordRts))
+	}
+	expOrdered = []*engine.RateSInterval{
+		{
+			Increments: []*engine.RateSIncrement{
+				{
+					Rate:              rt0,
+					IntervalRateIndex: 0,
+				},
+			},
+		},
+		{
+			Increments: []*engine.RateSIncrement{
+				{
+					Rate:              rtChristmas,
+					IntervalRateIndex: 0,
+				},
+			},
+		},
+		{
+			Increments: []*engine.RateSIncrement{
+				{
+					Rate:              rt0,
+					IntervalRateIndex: 0,
+				},
+			},
+		},
+	}
+	/*
+		fmt.Println("Third test")
+		if ordRts := orderRatesOnIntervals(
+			allRts, time.Date(2020, time.December, 23, 23, 59, 05, 0, time.UTC),
+			time.Duration(2*time.Minute), true, 10); !reflect.DeepEqual(expOrdered, ordRts) {
+			t.Errorf("expecting: %s\n, received: %s",
+				utils.ToIJSON(expOrdered), utils.ToIJSON(ordRts))
+		}
+	*/
+
 }
