@@ -493,6 +493,22 @@ func TestAPItoModelRates(t *testing.T) {
 	if rcv := APItoModelRates(rs); !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
 	}
+	rs = []*utils.TPRateRALs{
+		&utils.TPRateRALs{
+			ID:        "SomeID",
+			TPid:      "TPid",
+			RateSlots: []*utils.RateSlot{},
+		},
+	}
+	eOut = TpRates{
+		TpRate{
+			Tpid: "TPid",
+			Tag:  "SomeID",
+		},
+	}
+	if rcv := APItoModelRates(rs); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
 }
 
 func TestTPDestinationRateAsExportSlice(t *testing.T) {
@@ -528,6 +544,185 @@ func TestTPDestinationRateAsExportSlice(t *testing.T) {
 
 	if !reflect.DeepEqual(expectedSlc, slc) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedSlc, slc)
+	}
+
+	tpDstRate = &utils.TPDestinationRate{
+		TPid:             "TEST_TPID",
+		ID:               "TEST_DSTRATE",
+		DestinationRates: []*utils.DestinationRate{},
+	}
+	eOut := TpDestinationRates{
+		TpDestinationRate{
+			Tpid: "TEST_TPID",
+			Tag:  "TEST_DSTRATE",
+		},
+	}
+	if rcv := APItoModelDestinationRate(tpDstRate); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+
+	}
+}
+
+func TestAPItoModelDestinationRates(t *testing.T) {
+	var drs []*utils.TPDestinationRate
+	if rcv := APItoModelDestinationRates(drs); rcv != nil {
+		t.Errorf("Expecting: nil, received: %+v", rcv)
+	}
+	drs = []*utils.TPDestinationRate{
+		&utils.TPDestinationRate{
+			TPid: "TEST_TPID",
+			ID:   "TEST_DSTRATE",
+			DestinationRates: []*utils.DestinationRate{
+				{
+					DestinationId:    "TEST_DEST1",
+					RateId:           "TEST_RATE1",
+					RoundingMethod:   "*up",
+					RoundingDecimals: 4},
+				{
+					DestinationId:    "TEST_DEST2",
+					RateId:           "TEST_RATE2",
+					RoundingMethod:   "*up",
+					RoundingDecimals: 4},
+			},
+		},
+	}
+	eOut := TpDestinationRates{
+		TpDestinationRate{
+			Tpid:             "TEST_TPID",
+			Tag:              "TEST_DSTRATE",
+			DestinationsTag:  "TEST_DEST1",
+			RatesTag:         "TEST_RATE1",
+			RoundingMethod:   "*up",
+			RoundingDecimals: 4,
+		},
+		TpDestinationRate{
+			Tpid:             "TEST_TPID",
+			Tag:              "TEST_DSTRATE",
+			DestinationsTag:  "TEST_DEST2",
+			RatesTag:         "TEST_RATE2",
+			RoundingMethod:   "*up",
+			RoundingDecimals: 4,
+		},
+	}
+	if rcv := APItoModelDestinationRates(drs); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+}
+
+func TestTpDestinationRatesAsTPDestinationRates(t *testing.T) {
+	pts := TpDestinationRates{}
+	eOut := []*utils.TPDestinationRate{}
+	if rcv, err := pts.AsTPDestinationRates(); err != nil {
+		t.Error(err)
+	} else if rcv != nil {
+		t.Errorf("Expecting: nil, received: %+v", utils.ToJSON(rcv))
+	}
+
+	pts = TpDestinationRates{
+		TpDestinationRate{
+			Id:               66,
+			Tpid:             "Tpid",
+			Tag:              "Tag",
+			DestinationsTag:  "DestinationsTag",
+			RatesTag:         "RatesTag",
+			RoundingMethod:   "*up",
+			RoundingDecimals: 2,
+			MaxCost:          0.7,
+			MaxCostStrategy:  "*free",
+		},
+	}
+	eOut = []*utils.TPDestinationRate{
+		&utils.TPDestinationRate{
+			TPid: "Tpid",
+			ID:   "Tag",
+			DestinationRates: []*utils.DestinationRate{
+				&utils.DestinationRate{
+					DestinationId:    "DestinationsTag",
+					RateId:           "RatesTag",
+					RoundingMethod:   "*up",
+					RoundingDecimals: 2,
+					MaxCost:          0.7,
+					MaxCostStrategy:  "*free",
+				},
+			},
+		},
+	}
+	if rcv, err := pts.AsTPDestinationRates(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+
+}
+
+func TestMapTPDestinationRates(t *testing.T) {
+	var s []*utils.TPDestinationRate
+	eOut := map[string]*utils.TPDestinationRate{}
+	if rcv, err := MapTPDestinationRates(s); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+
+	s = []*utils.TPDestinationRate{
+		&utils.TPDestinationRate{
+			TPid: "TEST_TPID",
+			ID:   "TEST_DSTRATE",
+			DestinationRates: []*utils.DestinationRate{
+				{
+					DestinationId:    "TEST_DEST1",
+					RateId:           "TEST_RATE1",
+					RoundingMethod:   "*up",
+					RoundingDecimals: 4},
+				{
+					DestinationId:    "TEST_DEST2",
+					RateId:           "TEST_RATE2",
+					RoundingMethod:   "*up",
+					RoundingDecimals: 4},
+			},
+		},
+	}
+	eOut = map[string]*utils.TPDestinationRate{
+		"TEST_DSTRATE": &utils.TPDestinationRate{
+			TPid: "TEST_TPID",
+			ID:   "TEST_DSTRATE",
+			DestinationRates: []*utils.DestinationRate{
+				&utils.DestinationRate{
+					DestinationId:    "TEST_DEST1",
+					RateId:           "TEST_RATE1",
+					RoundingMethod:   "*up",
+					RoundingDecimals: 4,
+				},
+				&utils.DestinationRate{
+					DestinationId:    "TEST_DEST2",
+					RateId:           "TEST_RATE2",
+					RoundingMethod:   "*up",
+					RoundingDecimals: 4,
+				},
+			},
+		},
+	}
+	if rcv, err := MapTPDestinationRates(s); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+	s = []*utils.TPDestinationRate{
+		&utils.TPDestinationRate{
+			TPid:             "TEST_TPID",
+			ID:               "TEST_DSTRATE",
+			DestinationRates: []*utils.DestinationRate{},
+		},
+		&utils.TPDestinationRate{
+			TPid:             "TEST_TPID",
+			ID:               "TEST_DSTRATE",
+			DestinationRates: []*utils.DestinationRate{},
+		},
+	}
+	if rcv, err := MapTPDestinationRates(s); err == nil || err.Error() != "Non unique ID TEST_DSTRATE" {
+		t.Error(err)
+	} else if rcv != nil {
+		t.Errorf("Expecting: nil, received: %+v", rcv)
 	}
 
 }
