@@ -143,6 +143,28 @@ func TestNewRSRParsersConstant2(t *testing.T) {
 	} else if expected := "constant>;q=0.7;expires=3600constant"; out != expected {
 		t.Errorf("Expected %q ,received %q", expected, out)
 	}
+
+	ruleStr = "constant;`>;q=0.7;expires=3600`;"
+	if rsrParsers, err := NewRSRParsers(ruleStr, utils.INFIELD_SEP); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if out, err := rsrParsers.ParseDataProvider(utils.MapStorage{}); err != nil {
+		t.Error(err)
+	} else if expected := "constant>;q=0.7;expires=3600"; out != expected {
+		t.Errorf("Expected %q ,received %q", expected, out)
+	}
+
+	ruleStr = "constant;`>;q=0.7;expires=3600constant"
+	if _, err := NewRSRParsers(ruleStr, utils.INFIELD_SEP); err == nil {
+		t.Error("Unexpected error: ", err.Error())
+	}
+
+	ruleStr = "constant;`>;q=0.7;expires=3600`;~*req.Account"
+	if rsrParsers, err := NewRSRParsers(ruleStr, utils.INFIELD_SEP); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if _, err := rsrParsers.ParseDataProvider(utils.MapStorage{}); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+
 }
 
 func TestRSRParserCompileConstant(t *testing.T) {
@@ -172,5 +194,133 @@ func TestNewRSRParsersParseDataProviderWithInterfaces(t *testing.T) {
 		t.Error(err)
 	} else if expected := "~*accounts.1001"; out != expected {
 		t.Errorf("Expected %q ,received %q", expected, out)
+	}
+
+	ruleStr = "constant;`>;q=0.7;expires=3600`;~*req.Account"
+	if rsrParsers, err := NewRSRParsers(ruleStr, utils.INFIELD_SEP); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if _, err := rsrParsers.ParseDataProviderWithInterfaces(utils.MapStorage{}); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+}
+
+func TestNewRSRParsersFromSlice(t *testing.T) {
+	if _, err := NewRSRParsersFromSlice([]string{""}); err == nil {
+		t.Error("Unexpected error: ", err)
+	}
+
+	if _, err := NewRSRParsersFromSlice([]string{"~*req.Account{*"}); err == nil {
+		t.Error("Unexpected error: ", err)
+	}
+}
+
+func TestNewRSRParsersMustCompile(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("Expected panic on wrong rule")
+		}
+	}()
+	NewRSRParsersMustCompile("~*req.Account{*", ";")
+}
+
+func TestRSRParserGetRule(t *testing.T) {
+	ruleStr := "constant;~*req.Account"
+	if rsrParsers, err := NewRSRParsers(ruleStr, utils.INFIELD_SEP); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if rule := rsrParsers.GetRule(); rule != ruleStr {
+		t.Errorf("Expected: %q received: %q", ruleStr, rule)
+	}
+}
+
+func TestRSRParsersCompile(t *testing.T) {
+	prsrs := RSRParsers{&RSRParser{
+		Rules: ":>;q=0.7;expires=3600",
+	}}
+	ePrsr := RSRParsers{&RSRParser{
+		Rules: ":>;q=0.7;expires=3600",
+
+		path: ":>;q=0.7;expires=3600",
+	}}
+	if err := prsrs.Compile(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(prsrs, ePrsr) {
+		t.Errorf("Expected %+v received %+v", ePrsr, prsrs)
+	}
+	prsrs = RSRParsers{&RSRParser{
+		Rules: "~*req.Account{*unuportedConverter}",
+	}}
+	if err := prsrs.Compile(); err == nil {
+		t.Error("Expected error received:", err)
+	}
+}
+
+func TestRSRParsersParseValue(t *testing.T) {
+	rsrParsers, err := NewRSRParsers("~*req.Account{*round}", utils.INFIELD_SEP)
+	if err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	}
+	if _, err = rsrParsers.ParseValue("A"); err == nil {
+		t.Error("Expected error received:", err)
+	}
+}
+
+func TestNewRSRParserMustCompile(t *testing.T) {
+	rsr := NewRSRParserMustCompile("~*req.Account")
+	ePrsr := &RSRParser{
+		Rules: "~*req.Account",
+
+		path: "~*req.Account",
+	}
+	if !reflect.DeepEqual(rsr, ePrsr) {
+		t.Errorf("Expected %+v received %+v", ePrsr, rsr)
+	}
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("Expected panic on wrong rule")
+		}
+	}()
+	NewRSRParserMustCompile("~*req.Account{*")
+}
+
+func TestRSRParserAttrName(t *testing.T) {
+	rsr := NewRSRParserMustCompile("~*req.Account")
+	expected := "*req.Account"
+	if attr := rsr.AttrName(); attr != expected {
+		t.Errorf("Expected: %q received: %q", expected, attr)
+	}
+}
+
+func TestRSRParserRegexpMatched(t *testing.T) {
+	rsr := NewRSRParserMustCompile("~*req.Time:s/(.*)/${1}s/")
+	expected := "1ss"
+	if val, err := rsr.parseValue("1s"); err != nil {
+		t.Error(err)
+	} else if val != expected {
+		t.Errorf("Expected: %q received: %q", expected, val)
+	}
+	if !rsr.RegexpMatched() {
+		t.Error("Expected the regex to match")
+	}
+	rsr = NewRSRParserMustCompile("~*req.Time:s/(a+)/${1}s/")
+	expected = "1s"
+	if val, err := rsr.parseValue("1s"); err != nil {
+		t.Error(err)
+	} else if val != expected {
+		t.Errorf("Expected: %q received: %q", expected, val)
+	}
+	if rsr.RegexpMatched() {
+		t.Error("Expected the regex to not match")
+	}
+}
+
+func TestRSRParserCompile3(t *testing.T) {
+	rsr := &RSRParser{Rules: "~*req.Account:s/(a+)/${1}s"}
+	if err := rsr.Compile(); err == nil {
+		t.Error("Expected error received:", err)
+	}
+
+	rsr = &RSRParser{Rules: "~*req.Account:s/*/${1}s/"}
+	if err := rsr.Compile(); err == nil {
+		t.Error("Expected error received:", err)
 	}
 }

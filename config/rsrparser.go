@@ -107,7 +107,7 @@ func NewRSRParsersMustCompile(parsersRules string, rsrSeparator string) (prsrs R
 // RSRParsers is a set of RSRParser
 type RSRParsers []*RSRParser
 
-func (prsrs RSRParsers) GetRule() (out string) { // ToDo: add tests for this
+func (prsrs RSRParsers) GetRule() (out string) {
 	for _, prsr := range prsrs {
 		out += utils.INFIELD_SEP + prsr.Rules
 	}
