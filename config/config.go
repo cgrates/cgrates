@@ -46,7 +46,6 @@ var (
 	dfltAstConnCfg           *AsteriskConnCfg
 	dfltLoaderConfig         *LoaderSCfg
 	dfltLoaderDataTypeConfig *LoaderDataType
-	conReqs                  *ConcReqs
 )
 
 func newDbDefaults() dbDefaults {
@@ -120,17 +119,11 @@ func (dbDflt dbDefaults) dbPass(dbType string, flagInput string) string {
 func init() {
 	cgrCfg, _ = NewDefaultCGRConfig()
 	dbDefaultsCfg = newDbDefaults()
-	conReqs = NewConReqs(cgrCfg.generalCfg.ConcurrentRequests, cgrCfg.generalCfg.ConcurrentStrategy)
 }
 
 // CgrConfig is used to retrieve system configuration from other packages
 func CgrConfig() *CGRConfig {
 	return cgrCfg
-}
-
-// ConReqs is used to retrieve system ConcurrentRequests counter from other packages
-func ConReqs() *ConcReqs {
-	return conReqs
 }
 
 // SetCgrConfig is used to set system configuration from other places
@@ -248,7 +241,6 @@ func NewCGRConfigFromPath(path string) (cfg *CGRConfig, err error) {
 		return
 	}
 	err = cfg.checkConfigSanity()
-	conReqs = NewConReqs(cfg.generalCfg.ConcurrentRequests, cfg.generalCfg.ConcurrentStrategy)
 	return
 }
 

@@ -16,13 +16,13 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package config
+package utils
 
 import (
 	"fmt"
-
-	"github.com/cgrates/cgrates/utils"
 )
+
+var ConReqs *ConcReqs
 
 type ConcReqs struct {
 	aReqs    chan struct{}
@@ -31,30 +31,34 @@ type ConcReqs struct {
 }
 
 func NewConReqs(reqs int, strategy string) *ConcReqs {
-	return &ConcReqs{
+	cR := &ConcReqs{
 		aReqs:    make(chan struct{}, reqs),
 		nAReqs:   reqs,
 		strategy: strategy,
 	}
+	for i := 0; i < reqs; i++ {
+		cR.aReqs <- struct{}{}
+	}
+	return cR
 }
 
-func (cR *ConcReqs) VerifyAndGet() (err error) {
+func (cR *ConcReqs) Allocate() (err error) {
 	if cR.nAReqs == 0 {
 		return
 	}
 	switch cR.strategy {
-	case utils.MetaBusy:
+	case MetaBusy:
 		if len(cR.aReqs) == 0 {
 			return fmt.Errorf("denying request due to maximum active requests reached")
 		}
 		fallthrough
-	case utils.MetaQueue:
+	case MetaQueue:
 		<-cR.aReqs // get from channel
 	}
 	return
 }
 
-func (cR *ConcReqs) Putback() {
+func (cR *ConcReqs) Deallocate() {
 	if cR.nAReqs == 0 {
 		return
 	}

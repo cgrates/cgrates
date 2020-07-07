@@ -16,6 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
+// Most of the logic follows standard library implementation in this file
 package utils
 
 import (
@@ -23,18 +24,10 @@ import (
 	"errors"
 	"io"
 	"net/rpc"
-	"strings"
 	"sync"
 )
 
-var errMissingParams = errors.New("jsonrpc: request body missing params")
-
-type MethodParameters struct {
-	Method     string
-	Parameters interface{}
-}
-
-type jsonServerCodec struct {
+type concReqsServerCodec struct {
 	dec *json.Decoder // for reading JSON values
 	enc *json.Encoder // for writing JSON values
 	c   io.Closer
@@ -53,9 +46,9 @@ type jsonServerCodec struct {
 	pending map[uint64]*json.RawMessage
 }
 
-// NewCustomJSONServerCodec is used only when DispatcherS is active to handle APIer methods generically
-func NewCustomJSONServerCodec(conn io.ReadWriteCloser) rpc.ServerCodec {
-	return &jsonServerCodec{
+// NewConcReqsServerCodec returns a new rpc.ServerCodec using JSON-RPC on conn.
+func NewConcReqsServerCodec(conn io.ReadWriteCloser) rpc.ServerCodec {
+	return &concReqsServerCodec{
 		dec:     json.NewDecoder(conn),
 		enc:     json.NewEncoder(conn),
 		c:       conn,
@@ -63,37 +56,15 @@ func NewCustomJSONServerCodec(conn io.ReadWriteCloser) rpc.ServerCodec {
 	}
 }
 
-type serverRequest struct {
-	Method  string           `json:"method"`
-	Params  *json.RawMessage `json:"params"`
-	Id      *json.RawMessage `json:"id"`
-	isApier bool
-}
-
-func (r *serverRequest) reset() {
-	r.Method = ""
-	r.Params = nil
-	r.Id = nil
-}
-
-type serverResponse struct {
-	Id     *json.RawMessage `json:"id"`
-	Result interface{}      `json:"result"`
-	Error  interface{}      `json:"error"`
-}
-
-func (c *jsonServerCodec) ReadRequestHeader(r *rpc.Request) error {
+func (c *concReqsServerCodec) ReadRequestHeader(r *rpc.Request) error {
+	if err := ConReqs.Allocate(); err != nil {
+		return err
+	}
 	c.req.reset()
 	if err := c.dec.Decode(&c.req); err != nil {
 		return err
 	}
-	// in case we get a request with APIerSv1 or APIerSv2 we redirect
-	// to Dispatcher to send it according to ArgDispatcher
-	if c.req.isApier = strings.HasPrefix(c.req.Method, ApierV); c.req.isApier {
-		r.ServiceMethod = DispatcherSv1Apier
-	} else {
-		r.ServiceMethod = c.req.Method
-	}
+	r.ServiceMethod = c.req.Method
 
 	// JSON request id can be any JSON value;
 	// RPC package expects uint64.  Translate to
@@ -108,24 +79,12 @@ func (c *jsonServerCodec) ReadRequestHeader(r *rpc.Request) error {
 	return nil
 }
 
-func (c *jsonServerCodec) ReadRequestBody(x interface{}) error {
-	if err := ConReqs.Allocate(); err != nil {
-		return err
-	}
+func (c *concReqsServerCodec) ReadRequestBody(x interface{}) error {
 	if x == nil {
 		return nil
 	}
 	if c.req.Params == nil {
 		return errMissingParams
-	}
-	// following example from ReadRequestHeader in case we get APIerSv1
-	// or APIerSv2 we compose the parameters
-	if c.req.isApier {
-		cx := x.(*MethodParameters)
-		cx.Method = c.req.Method
-		var params [1]interface{}
-		params[0] = &cx.Parameters
-		return json.Unmarshal(*c.req.Params, &params)
 	}
 	// JSON params is array value.
 	// RPC params is struct.
@@ -134,12 +93,9 @@ func (c *jsonServerCodec) ReadRequestBody(x interface{}) error {
 	var params [1]interface{}
 	params[0] = x
 	return json.Unmarshal(*c.req.Params, &params)
-
 }
 
-var null = json.RawMessage([]byte("null"))
-
-func (c *jsonServerCodec) WriteResponse(r *rpc.Response, x interface{}) error {
+func (c *concReqsServerCodec) WriteResponse(r *rpc.Response, x interface{}) error {
 	defer ConReqs.Deallocate()
 	c.mutex.Lock()
 	b, ok := c.pending[r.Seq]
@@ -163,6 +119,6 @@ func (c *jsonServerCodec) WriteResponse(r *rpc.Response, x interface{}) error {
 	return c.enc.Encode(resp)
 }
 
-func (c *jsonServerCodec) Close() error {
+func (c *concReqsServerCodec) Close() error {
 	return c.c.Close()
 }

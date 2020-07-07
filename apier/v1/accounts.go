@@ -38,11 +38,6 @@ type AccountActionTiming struct {
 }
 
 func (apierSv1 *APIerSv1) GetAccountActionPlan(attrs *utils.TenantAccount, reply *[]*AccountActionTiming) error {
-	if err := config.ConReqs().VerifyAndGet(); err != nil {
-		return err
-	}
-	defer config.ConReqs().Putback()
-
 	if missing := utils.MissingStructFields(attrs, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(strings.Join(missing, ","), "")
 	}
@@ -91,10 +86,6 @@ type AttrRemoveActionTiming struct {
 
 // Removes an ActionTimings or parts of it depending on filters being set
 func (apierSv1 *APIerSv1) RemoveActionTiming(attrs *AttrRemoveActionTiming, reply *string) (err error) {
-	if err := config.ConReqs().VerifyAndGet(); err != nil {
-		return err
-	}
-	defer config.ConReqs().Putback()
 	if missing := utils.MissingStructFields(attrs, []string{"ActionPlanId"}); len(missing) != 0 { // Only mandatory ActionPlanId
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -182,10 +173,6 @@ func (apierSv1 *APIerSv1) RemoveActionTiming(attrs *AttrRemoveActionTiming, repl
 
 // Ads a new account into dataDb. If already defined, returns success.
 func (apierSv1 *APIerSv1) SetAccount(attr *utils.AttrSetAccount, reply *string) (err error) {
-	if err := config.ConReqs().VerifyAndGet(); err != nil {
-		return err
-	}
-	defer config.ConReqs().Putback()
 	if missing := utils.MissingStructFields(attr, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -307,10 +294,6 @@ func (apierSv1 *APIerSv1) SetAccount(attr *utils.AttrSetAccount, reply *string) 
 }
 
 func (apierSv1 *APIerSv1) RemoveAccount(attr *utils.AttrRemoveAccount, reply *string) (err error) {
-	if err := config.ConReqs().VerifyAndGet(); err != nil {
-		return err
-	}
-	defer config.ConReqs().Putback()
 	if missing := utils.MissingStructFields(attr, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -369,10 +352,6 @@ func (apierSv1 *APIerSv1) RemoveAccount(attr *utils.AttrRemoveAccount, reply *st
 }
 
 func (apierSv1 *APIerSv1) GetAccounts(attr *utils.AttrGetAccounts, reply *[]interface{}) error {
-	if err := config.ConReqs().VerifyAndGet(); err != nil {
-		return err
-	}
-	defer config.ConReqs().Putback()
 	if len(attr.Tenant) == 0 {
 		return utils.NewErrMandatoryIeMissing("Tenant")
 	}
@@ -442,17 +421,9 @@ type AttrAddBalance struct {
 }
 
 func (apierSv1 *APIerSv1) AddBalance(attr *AttrAddBalance, reply *string) error {
-	if err := config.ConReqs().VerifyAndGet(); err != nil {
-		return err
-	}
-	defer config.ConReqs().Putback()
 	return apierSv1.modifyBalance(utils.TOPUP, attr, reply)
 }
 func (apierSv1 *APIerSv1) DebitBalance(attr *AttrAddBalance, reply *string) error {
-	if err := config.ConReqs().VerifyAndGet(); err != nil {
-		return err
-	}
-	defer config.ConReqs().Putback()
 	return apierSv1.modifyBalance(utils.DEBIT, attr, reply)
 }
 
@@ -530,10 +501,6 @@ func (apierSv1 *APIerSv1) modifyBalance(aType string, attr *AttrAddBalance, repl
 // SetBalance sets the balance for the given account
 // if the account is not already created it will create the account also
 func (apierSv1 *APIerSv1) SetBalance(attr *utils.AttrSetBalance, reply *string) (err error) {
-	if err := config.ConReqs().VerifyAndGet(); err != nil {
-		return err
-	}
-	defer config.ConReqs().Putback()
 	if missing := utils.MissingStructFields(attr, []string{"Tenant", "Account", "BalanceType"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -606,10 +573,6 @@ func (apierSv1 *APIerSv1) SetBalance(attr *utils.AttrSetBalance, reply *string) 
 
 // RemoveBalances remove the matching balances for the account
 func (apierSv1 *APIerSv1) RemoveBalances(attr *utils.AttrSetBalance, reply *string) (err error) {
-	if err := config.ConReqs().VerifyAndGet(); err != nil {
-		return err
-	}
-	defer config.ConReqs().Putback()
 	if missing := utils.MissingStructFields(attr, []string{"Tenant", "Account", "BalanceType"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -644,10 +607,6 @@ func (apierSv1 *APIerSv1) RemoveBalances(attr *utils.AttrSetBalance, reply *stri
 }
 
 func (apierSv1 *APIerSv1) GetAccountsCount(attr *utils.TenantArg, reply *int) (err error) {
-	if err := config.ConReqs().VerifyAndGet(); err != nil {
-		return err
-	}
-	defer config.ConReqs().Putback()
 	if len(attr.Tenant) == 0 {
 		return utils.NewErrMandatoryIeMissing("Tenant")
 	}
