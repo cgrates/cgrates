@@ -1478,8 +1478,8 @@ func TestSessionSrelocateSessionS(t *testing.T) {
 
 func TestSessionSNewV1AuthorizeArgsWithArgDispatcher(t *testing.T) {
 	opts := map[string]interface{}{
-		utils.APIKey:  "testkey",
-		utils.RouteID: "testrouteid",
+		utils.OptsAPIKey:  "testkey",
+		utils.OptsRouteID: "testrouteid",
 	}
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -1532,7 +1532,7 @@ func TestSessionSNewV1AuthorizeArgsWithArgDispatcher(t *testing.T) {
 
 func TestSessionSNewV1AuthorizeArgsWithArgDispatcher2(t *testing.T) {
 	opts := map[string]interface{}{
-		utils.RouteID: "testrouteid",
+		utils.OptsRouteID: "testrouteid",
 	}
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",

@@ -101,7 +101,7 @@ func testDspRplPingFailover(t *testing.T) {
 			Tenant: "cgrates.org",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("repl12345"),
+			OptsAPIKey: utils.StringPointer("repl12345"),
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1Ping, &ev, &reply); err != nil {
@@ -141,7 +141,7 @@ func testDspRplAccount(t *testing.T) {
 			Disabled:      true,
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("repl12345"),
+			OptsAPIKey: utils.StringPointer("repl12345"),
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetAccount, attrSetAccount, &replyStr); err != nil {
@@ -154,7 +154,7 @@ func testDspRplAccount(t *testing.T) {
 	argsGetAccount := &utils.StringWithApiKey{
 		Arg: "cgrates.org:1008",
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("repl12345"),
+			OptsAPIKey: utils.StringPointer("repl12345"),
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetAccount, argsGetAccount, &reply); err != nil {
@@ -178,7 +178,7 @@ func testDspRplAccount(t *testing.T) {
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1RemoveAccount, &utils.StringWithApiKey{
 		Arg: "cgrates.org:1008",
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("repl12345")},
+			OptsAPIKey: utils.StringPointer("repl12345")},
 	}, &replyStr); err != nil {
 		t.Error(err)
 	} else if replyStr != utils.OK {
@@ -199,7 +199,7 @@ func testDspRplSupplierProfile(t *testing.T) {
 			ID:     "ID",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("repl12345")},
+			OptsAPIKey: utils.StringPointer("repl12345")},
 	}
 
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetRouteProfile, argSetSupplierProfile, &replyStr); err != nil {
@@ -216,7 +216,7 @@ func testDspRplSupplierProfile(t *testing.T) {
 			ID:     "ID",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("repl12345")},
+			OptsAPIKey: utils.StringPointer("repl12345")},
 	}
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetRouteProfile, argRouteProfile, &reply); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.GetSupplierProfile: ", err)
@@ -258,7 +258,7 @@ func testDspRplAttributeProfile(t *testing.T) {
 			ID:     "id",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("repl12345")},
+			OptsAPIKey: utils.StringPointer("repl12345")},
 	}
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetAttributeProfile, setAttributeProfile, &replyStr); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.SetAttributeProfile: ", err)
@@ -274,7 +274,7 @@ func testDspRplAttributeProfile(t *testing.T) {
 			ID:     "id",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("repl12345")},
+			OptsAPIKey: utils.StringPointer("repl12345")},
 	}
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetAttributeProfile, argAttributeProfile, &reply); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.GetAttributeProfile: ", err)
@@ -316,7 +316,7 @@ func testDspRplChargerProfile(t *testing.T) {
 			Tenant: "cgrates.org",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("repl12345")},
+			OptsAPIKey: utils.StringPointer("repl12345")},
 	}
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetChargerProfile, setChargerProfile, &replyStr); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.SetChargerProfile: ", err)
@@ -331,7 +331,7 @@ func testDspRplChargerProfile(t *testing.T) {
 			ID:     "id",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("repl12345")},
+			OptsAPIKey: utils.StringPointer("repl12345")},
 	}
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetChargerProfile, argsChargerProfile, &reply); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.GetChargerProfile: ", err)
@@ -373,7 +373,7 @@ func testDspRplDispatcherProfile(t *testing.T) {
 			ID:     "ID",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("repl12345")},
+			OptsAPIKey: utils.StringPointer("repl12345")},
 	}
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetDispatcherProfile, setDispatcherProfile, &replyStr); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.SetDispatcherProfile: ", err)
@@ -388,7 +388,7 @@ func testDspRplDispatcherProfile(t *testing.T) {
 			ID:     "ID",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("repl12345")},
+			OptsAPIKey: utils.StringPointer("repl12345")},
 	}
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetDispatcherProfile, argsDispatcherProfile, &reply); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.GetDispatcherProfile: ", err)
@@ -430,7 +430,7 @@ func testDspRplDispatcherHost(t *testing.T) {
 			ID:     "ID",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("repl12345")},
+			OptsAPIKey: utils.StringPointer("repl12345")},
 	}
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetDispatcherHost, setDispatcherHost, &replyStr); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.SetDispatcherHost: ", err)
@@ -445,7 +445,7 @@ func testDspRplDispatcherHost(t *testing.T) {
 			ID:     "ID",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("repl12345")},
+			OptsAPIKey: utils.StringPointer("repl12345")},
 	}
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetDispatcherHost, argsDispatcherHost, &reply); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.GetDispatcherHost: ", err)
@@ -487,7 +487,7 @@ func testDspRplFilter(t *testing.T) {
 			ID:     "ID",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("repl12345")},
+			OptsAPIKey: utils.StringPointer("repl12345")},
 	}
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetFilter, setFilter, &replyStr); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.SetFilter: ", err)
@@ -502,7 +502,7 @@ func testDspRplFilter(t *testing.T) {
 			ID:     "ID",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("repl12345")},
+			OptsAPIKey: utils.StringPointer("repl12345")},
 	}
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetFilter, argsFilter, &reply); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.GetFilter: ", err)
@@ -544,7 +544,7 @@ func testDspRplThreshold(t *testing.T) {
 			ID:     "ID",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("repl12345")},
+			OptsAPIKey: utils.StringPointer("repl12345")},
 	}
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetThreshold, setThreshold, &replyStr); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.SetThreshold: ", err)
@@ -559,7 +559,7 @@ func testDspRplThreshold(t *testing.T) {
 			ID:     "ID",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("repl12345")},
+			OptsAPIKey: utils.StringPointer("repl12345")},
 	}
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetThreshold, argsThreshold, &reply); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.GetThreshold: ", err)
@@ -601,7 +601,7 @@ func testDspRplThresholdProfile(t *testing.T) {
 			ID:     "ID",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("repl12345")},
+			OptsAPIKey: utils.StringPointer("repl12345")},
 	}
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetThresholdProfile, setThresholdProfile, &replyStr); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.SetThresholdProfile: ", err)
@@ -616,7 +616,7 @@ func testDspRplThresholdProfile(t *testing.T) {
 			ID:     "ID",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("repl12345")},
+			OptsAPIKey: utils.StringPointer("repl12345")},
 	}
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetThresholdProfile, argsThresholdProfile, &reply); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.GetThresholdProfile: ", err)
@@ -658,7 +658,7 @@ func testDspRplStatQueue(t *testing.T) {
 			ID:     "ID",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("repl12345")},
+			OptsAPIKey: utils.StringPointer("repl12345")},
 	}
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetStatQueue, setStatQueue, &replyStr); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.SetStatQueue: ", err)
@@ -673,7 +673,7 @@ func testDspRplStatQueue(t *testing.T) {
 			ID:     "ID",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("repl12345")},
+			OptsAPIKey: utils.StringPointer("repl12345")},
 	}
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetStatQueue, argsStatQueue, &reply); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.GetStatQueue: ", err)
@@ -715,7 +715,7 @@ func testDspRplStatQueueProfile(t *testing.T) {
 			ID:     "ID",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("repl12345")},
+			OptsAPIKey: utils.StringPointer("repl12345")},
 	}
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetStatQueueProfile, setStatQueueProfile, &replyStr); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.SetStatQueueProfile: ", err)
@@ -730,7 +730,7 @@ func testDspRplStatQueueProfile(t *testing.T) {
 			ID:     "ID",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("repl12345")},
+			OptsAPIKey: utils.StringPointer("repl12345")},
 	}
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetStatQueueProfile, argsStatQueueProfile, &reply); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.GetStatQueueProfile: ", err)
@@ -772,7 +772,7 @@ func testDspRplResource(t *testing.T) {
 			ID:     "ID",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("repl12345")},
+			OptsAPIKey: utils.StringPointer("repl12345")},
 	}
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetResource, setResource, &replyStr); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.SetResource: ", err)
@@ -787,7 +787,7 @@ func testDspRplResource(t *testing.T) {
 			ID:     "ID",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("repl12345")},
+			OptsAPIKey: utils.StringPointer("repl12345")},
 	}
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetResource, argsResource, &reply); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.GetResource: ", err)
@@ -829,7 +829,7 @@ func testDspRplResourceProfile(t *testing.T) {
 			ID:     "ID",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("repl12345")},
+			OptsAPIKey: utils.StringPointer("repl12345")},
 	}
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetResourceProfile, setResourceProfile, &replyStr); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.SetResourceProfile: ", err)
@@ -844,7 +844,7 @@ func testDspRplResourceProfile(t *testing.T) {
 			ID:     "ID",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("repl12345")},
+			OptsAPIKey: utils.StringPointer("repl12345")},
 	}
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetResourceProfile, argsResourceProfile, &reply); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.GetResourceProfile: ", err)
@@ -889,7 +889,7 @@ func testDspRplTiming(t *testing.T) {
 			Tenant: "cgrates.org",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("repl12345")},
+			OptsAPIKey: utils.StringPointer("repl12345")},
 	}
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetTiming, setTiming, &replyStr); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.SetTiming: ", err)
@@ -904,7 +904,7 @@ func testDspRplTiming(t *testing.T) {
 			Tenant: "cgrates.org",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("repl12345")},
+			OptsAPIKey: utils.StringPointer("repl12345")},
 	}
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetTiming, argsTiming, &reply); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.GetTiming: ", err)
@@ -945,7 +945,7 @@ func testDspRplActionTriggers(t *testing.T) {
 		Attrs: engine.ActionTriggers{
 			&engine.ActionTrigger{ID: "testActionTriggers"}},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("repl12345")},
+			OptsAPIKey: utils.StringPointer("repl12345")},
 	}
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetActionTriggers, setActionTriggers, &replyStr); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.SetActionTriggers: ", err)
@@ -959,7 +959,7 @@ func testDspRplActionTriggers(t *testing.T) {
 		TenantArg: utils.TenantArg{
 			Tenant: "cgrates.org"},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("repl12345")},
+			OptsAPIKey: utils.StringPointer("repl12345")},
 	}
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetActionTriggers, argsActionTriggers, &reply); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.GetActionTriggers: ", err)
@@ -998,7 +998,7 @@ func testDspRplSharedGroup(t *testing.T) {
 			Id: "IDSharedGroup",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("repl12345")},
+			OptsAPIKey: utils.StringPointer("repl12345")},
 	}
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetSharedGroup, setSharedGroup, &replyStr); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.SetSharedGroup: ", err)
@@ -1013,7 +1013,7 @@ func testDspRplSharedGroup(t *testing.T) {
 			Tenant: "cgrates.org",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("repl12345")},
+			OptsAPIKey: utils.StringPointer("repl12345")},
 	}
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetSharedGroup, argsSharedGroup, &reply); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.GetSharedGroup: ", err)
@@ -1057,7 +1057,7 @@ func testDspRplActions(t *testing.T) {
 		Key:       "KeyActions",
 		TenantArg: utils.TenantArg{Tenant: "cgrates.org"},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("repl12345")},
+			OptsAPIKey: utils.StringPointer("repl12345")},
 	}
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetActions, setActions, &replyStr); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.SetActions: ", err)
@@ -1072,7 +1072,7 @@ func testDspRplActions(t *testing.T) {
 			Tenant: "cgrates.org",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("repl12345")},
+			OptsAPIKey: utils.StringPointer("repl12345")},
 	}
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetActions, argsActions, &reply); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.GetActions: ", err)
@@ -1123,7 +1123,7 @@ func testDspRplActionPlan(t *testing.T) {
 		Key:       "KeyActionPlan",
 		TenantArg: utils.TenantArg{Tenant: "cgrates.org"},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("repl12345")},
+			OptsAPIKey: utils.StringPointer("repl12345")},
 	}
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetActionPlan, setActionPlan, &replyStr); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.SetActionPlan: ", err)
@@ -1138,7 +1138,7 @@ func testDspRplActionPlan(t *testing.T) {
 			Tenant: "cgrates.org",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("repl12345")},
+			OptsAPIKey: utils.StringPointer("repl12345")},
 	}
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetActionPlan, argsActionPlan, &reply); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.GetActionPlan: ", err)
@@ -1178,7 +1178,7 @@ func testDspRplAccountActionPlans(t *testing.T) {
 		AcntID:    "KeyAccountActionPlans",
 		TenantArg: utils.TenantArg{Tenant: "cgrates.org"},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("repl12345")},
+			OptsAPIKey: utils.StringPointer("repl12345")},
 	}
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetAccountActionPlans, setAccountActionPlans, &replyStr); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.SetAccountActionPlans: ", err)
@@ -1193,7 +1193,7 @@ func testDspRplAccountActionPlans(t *testing.T) {
 			Tenant: "cgrates.org",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("repl12345")},
+			OptsAPIKey: utils.StringPointer("repl12345")},
 	}
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetAccountActionPlans, argsAccountActionPlans, &reply); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.GetAccountActionPlans: ", err)
@@ -1239,7 +1239,7 @@ func testDspRplRatingPlan(t *testing.T) {
 			Tenant: "cgrates.org",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("repl12345")},
+			OptsAPIKey: utils.StringPointer("repl12345")},
 	}
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetRatingPlan, setRatingPlan, &replyStr); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.SetRatingPlan: ", err)
@@ -1252,7 +1252,7 @@ func testDspRplRatingPlan(t *testing.T) {
 		Arg:       "id",
 		TenantArg: utils.TenantArg{Tenant: "cgrates.org"},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("repl12345")},
+			OptsAPIKey: utils.StringPointer("repl12345")},
 	}
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetRatingPlan, argsRatingPlan, &reply); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.GetRatingPlan: ", err)
@@ -1296,7 +1296,7 @@ func testDspRplRatingProfile(t *testing.T) {
 			Tenant: "cgrates.org",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("repl12345")},
+			OptsAPIKey: utils.StringPointer("repl12345")},
 	}
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetRatingProfile, setRatingProfile, &replyStr); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.SetRatingProfile: ", err)
@@ -1309,7 +1309,7 @@ func testDspRplRatingProfile(t *testing.T) {
 		Arg:       "idRatingProfile",
 		TenantArg: utils.TenantArg{Tenant: "cgrates.org"},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("repl12345")},
+			OptsAPIKey: utils.StringPointer("repl12345")},
 	}
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetRatingProfile, argsRatingProfile, &reply); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.GetRatingProfile: ", err)
@@ -1351,7 +1351,7 @@ func testDspRplDestination(t *testing.T) {
 			Tenant: "cgrates.org",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("repl12345")},
+			OptsAPIKey: utils.StringPointer("repl12345")},
 	}
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetDestination, setDestination, &replyStr); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.SetDestination: ", err)
@@ -1364,7 +1364,7 @@ func testDspRplDestination(t *testing.T) {
 		Arg:       "idDestination",
 		TenantArg: utils.TenantArg{Tenant: "cgrates.org"},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("repl12345")},
+			OptsAPIKey: utils.StringPointer("repl12345")},
 	}
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetDestination, argsDestination, &reply); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.GetDestination: ", err)
@@ -1406,7 +1406,7 @@ func testDspRplLoadIDs(t *testing.T) {
 			Tenant: "cgrates.org",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("repl12345")},
+			OptsAPIKey: utils.StringPointer("repl12345")},
 	}
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetLoadIDs, setLoadIDs, &replyStr); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.SetLoadIDs: ", err)
@@ -1419,7 +1419,7 @@ func testDspRplLoadIDs(t *testing.T) {
 		Arg:       "idLoadIDs",
 		TenantArg: utils.TenantArg{Tenant: "cgrates.org"},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("repl12345")},
+			OptsAPIKey: utils.StringPointer("repl12345")},
 	}
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetItemLoadIDs, argsLoadIDs, &reply); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.GetItemLoadIDs: ", err)
@@ -1473,7 +1473,7 @@ func testDspRplRateProfile(t *testing.T) {
 			},
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("repl12345")},
+			OptsAPIKey: utils.StringPointer("repl12345")},
 	}
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetRateProfile, rPrf, &replyStr); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.SetRateProfile: ", err)
@@ -1488,7 +1488,7 @@ func testDspRplRateProfile(t *testing.T) {
 			ID:     "RP1",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("repl12345")},
+			OptsAPIKey: utils.StringPointer("repl12345")},
 	}
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetRateProfile, args, &reply); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.GetRateProfile: ", err)

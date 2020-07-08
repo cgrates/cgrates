@@ -211,17 +211,17 @@ func (sS *SessionS) setSTerminator(s *Session, opts engine.MapEvent) {
 	var err error
 	// TTL
 	var ttl time.Duration
-	if opts.HasField(utils.SessionTTL) {
-		ttl, err = opts.GetDuration(utils.SessionTTL)
-	} else if s.OptsStart.HasField(utils.SessionTTL) {
-		ttl, err = s.OptsStart.GetDuration(utils.SessionTTL)
+	if opts.HasField(utils.OptsSessionTTL) {
+		ttl, err = opts.GetDuration(utils.OptsSessionTTL)
+	} else if s.OptsStart.HasField(utils.OptsSessionTTL) {
+		ttl, err = s.OptsStart.GetDuration(utils.OptsSessionTTL)
 	} else {
 		ttl = sS.cgrCfg.SessionSCfg().SessionTTL
 	}
 	if err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s>, cannot extract <%s> for session:<%s>, from it's options: <%s>, err: <%s>",
-				utils.SessionS, utils.SessionTTL, s.CGRID, opts, err))
+				utils.SessionS, utils.OptsSessionTTL, s.CGRID, opts, err))
 		return
 	}
 	if ttl == 0 {
@@ -229,17 +229,17 @@ func (sS *SessionS) setSTerminator(s *Session, opts engine.MapEvent) {
 	}
 	// random delay computation
 	var maxDelay time.Duration
-	if opts.HasField(utils.SessionTTLMaxDelay) {
-		maxDelay, err = opts.GetDuration(utils.SessionTTLMaxDelay)
-	} else if s.OptsStart.HasField(utils.SessionTTLMaxDelay) {
-		maxDelay, err = s.OptsStart.GetDuration(utils.SessionTTLMaxDelay)
+	if opts.HasField(utils.OptsSessionTTLMaxDelay) {
+		maxDelay, err = opts.GetDuration(utils.OptsSessionTTLMaxDelay)
+	} else if s.OptsStart.HasField(utils.OptsSessionTTLMaxDelay) {
+		maxDelay, err = s.OptsStart.GetDuration(utils.OptsSessionTTLMaxDelay)
 	} else if sS.cgrCfg.SessionSCfg().SessionTTLMaxDelay != nil {
 		maxDelay = *sS.cgrCfg.SessionSCfg().SessionTTLMaxDelay
 	}
 	if err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s>, cannot extract <%s> for session:<%s>, from it's options: <%s>, err: <%s>",
-				utils.SessionS, utils.SessionTTLMaxDelay, s.CGRID, opts.String(), err.Error()))
+				utils.SessionS, utils.OptsSessionTTLMaxDelay, s.CGRID, opts.String(), err.Error()))
 		return
 	}
 	if maxDelay != 0 {
@@ -249,47 +249,47 @@ func (sS *SessionS) setSTerminator(s *Session, opts engine.MapEvent) {
 	}
 	// LastUsed
 	var ttlLastUsed *time.Duration
-	if opts.HasField(utils.SessionTTLLastUsed) {
-		ttlLastUsed, err = opts.GetDurationPtr(utils.SessionTTLLastUsed)
-	} else if s.OptsStart.HasField(utils.SessionTTLLastUsed) {
-		ttlLastUsed, err = s.OptsStart.GetDurationPtr(utils.SessionTTLLastUsed)
+	if opts.HasField(utils.OptsSessionTTLLastUsed) {
+		ttlLastUsed, err = opts.GetDurationPtr(utils.OptsSessionTTLLastUsed)
+	} else if s.OptsStart.HasField(utils.OptsSessionTTLLastUsed) {
+		ttlLastUsed, err = s.OptsStart.GetDurationPtr(utils.OptsSessionTTLLastUsed)
 	} else {
 		ttlLastUsed = sS.cgrCfg.SessionSCfg().SessionTTLLastUsed
 	}
 	if err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s>, cannot extract <%s> for session:<%s>, from it's options: <%s>, err: <%s>",
-				utils.SessionS, utils.SessionTTLLastUsed, s.CGRID, opts.String(), err.Error()))
+				utils.SessionS, utils.OptsSessionTTLLastUsed, s.CGRID, opts.String(), err.Error()))
 		return
 	}
 	// LastUsage
 	var ttlLastUsage *time.Duration
-	if opts.HasField(utils.SessionTTLLastUsage) {
-		ttlLastUsage, err = opts.GetDurationPtr(utils.SessionTTLLastUsage)
-	} else if s.OptsStart.HasField(utils.SessionTTLLastUsage) {
-		ttlLastUsage, err = s.OptsStart.GetDurationPtr(utils.SessionTTLLastUsage)
+	if opts.HasField(utils.OptsSessionTTLLastUsage) {
+		ttlLastUsage, err = opts.GetDurationPtr(utils.OptsSessionTTLLastUsage)
+	} else if s.OptsStart.HasField(utils.OptsSessionTTLLastUsage) {
+		ttlLastUsage, err = s.OptsStart.GetDurationPtr(utils.OptsSessionTTLLastUsage)
 	} else {
 		ttlLastUsage = sS.cgrCfg.SessionSCfg().SessionTTLLastUsage
 	}
 	if err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s>, cannot extract <%s> for session:<%s>, from it's options: <%s>, err: <%s>",
-				utils.SessionS, utils.SessionTTLLastUsage, s.CGRID, opts.String(), err.Error()))
+				utils.SessionS, utils.OptsSessionTTLLastUsage, s.CGRID, opts.String(), err.Error()))
 		return
 	}
 	// TTLUsage
 	var ttlUsage *time.Duration
-	if opts.HasField(utils.SessionTTLUsage) {
-		ttlUsage, err = opts.GetDurationPtr(utils.SessionTTLUsage)
-	} else if s.OptsStart.HasField(utils.SessionTTLUsage) {
-		ttlUsage, err = s.OptsStart.GetDurationPtr(utils.SessionTTLUsage)
+	if opts.HasField(utils.OptsSessionTTLUsage) {
+		ttlUsage, err = opts.GetDurationPtr(utils.OptsSessionTTLUsage)
+	} else if s.OptsStart.HasField(utils.OptsSessionTTLUsage) {
+		ttlUsage, err = s.OptsStart.GetDurationPtr(utils.OptsSessionTTLUsage)
 	} else {
 		ttlUsage = sS.cgrCfg.SessionSCfg().SessionTTLUsage
 	}
 	if err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s>, cannot extract <%s> for session:<%s>, from it's options: <%s>, err: <%s>",
-				utils.SessionS, utils.SessionTTLUsage, s.CGRID, opts.String(), err.Error()))
+				utils.SessionS, utils.OptsSessionTTLUsage, s.CGRID, opts.String(), err.Error()))
 		return
 	}
 	// previously defined, reset
@@ -2224,8 +2224,8 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.ClientConnector,
 		var err error
 		opts := engine.MapEvent(args.Opts)
 		dbtItvl := sS.cgrCfg.SessionSCfg().DebitInterval
-		if opts.HasField(utils.DebitInterval) { // dynamic DebitInterval via CGRDebitInterval
-			if dbtItvl, err = opts.GetDuration(utils.DebitInterval); err != nil {
+		if opts.HasField(utils.OptsDebitInterval) { // dynamic DebitInterval via CGRDebitInterval
+			if dbtItvl, err = opts.GetDuration(utils.OptsDebitInterval); err != nil {
 				return utils.NewErrRALs(err)
 			}
 		}
@@ -2435,8 +2435,8 @@ func (sS *SessionS) BiRPCv1UpdateSession(clnt rpcclient.ClientConnector,
 		ev := engine.MapEvent(args.CGREvent.Event)
 		opts := engine.MapEvent(args.Opts)
 		dbtItvl := sS.cgrCfg.SessionSCfg().DebitInterval
-		if opts.HasField(utils.DebitInterval) { // dynamic DebitInterval via CGRDebitInterval
-			if dbtItvl, err = opts.GetDuration(utils.DebitInterval); err != nil {
+		if opts.HasField(utils.OptsDebitInterval) { // dynamic DebitInterval via CGRDebitInterval
+			if dbtItvl, err = opts.GetDuration(utils.OptsDebitInterval); err != nil {
 				return utils.NewErrRALs(err)
 			}
 		}
@@ -2580,8 +2580,8 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.ClientConnector,
 			return utils.NewErrMandatoryIeMissing(utils.OriginID)
 		}
 		dbtItvl := sS.cgrCfg.SessionSCfg().DebitInterval
-		if opts.HasField(utils.DebitInterval) { // dynamic DebitInterval via CGRDebitInterval
-			if dbtItvl, err = opts.GetDuration(utils.DebitInterval); err != nil {
+		if opts.HasField(utils.OptsDebitInterval) { // dynamic DebitInterval via CGRDebitInterval
+			if dbtItvl, err = opts.GetDuration(utils.OptsDebitInterval); err != nil {
 				return utils.NewErrRALs(err)
 			}
 		}
@@ -3087,7 +3087,7 @@ func (v1Rply *V1ProcessEventReply) AsNavigableMap() utils.NavigableMap2 {
 			for k, v := range v1Rply.STIRIdentity {
 				stir[k] = utils.NewNMData(v)
 			}
-			cgrReply[utils.STIRIdentity] = stir
+			cgrReply[utils.OptsStirIdentity] = stir
 		}
 	}
 	return cgrReply
@@ -3211,18 +3211,18 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 
 	if argsFlagsWithParams.HasKey(utils.MetaSTIRAuthenticate) {
 		attest := sS.cgrCfg.SessionSCfg().STIRCfg.AllowedAttest
-		if uattest := opts.GetStringIgnoreErrors(utils.STIRATest); uattest != utils.EmptyString {
+		if uattest := opts.GetStringIgnoreErrors(utils.OptsStirATest); uattest != utils.EmptyString {
 			attest = utils.NewStringSet(strings.Split(uattest, utils.INFIELD_SEP))
 		}
 		var stirMaxDur time.Duration
-		if stirMaxDur, err = opts.GetDuration(utils.STIRPayloadMaxDuration); err != nil {
+		if stirMaxDur, err = opts.GetDuration(utils.OptsStirPayloadMaxDuration); err != nil {
 			stirMaxDur = sS.cgrCfg.SessionSCfg().STIRCfg.PayloadMaxduration
 		}
-		if err = AuthStirShaken(opts.GetStringIgnoreErrors(utils.STIRIdentity),
-			utils.FirstNonEmpty(opts.GetStringIgnoreErrors(utils.STIROriginatorTn), ev.GetStringIgnoreErrors(utils.Account)),
-			opts.GetStringIgnoreErrors(utils.STIROriginatorURI),
-			utils.FirstNonEmpty(opts.GetStringIgnoreErrors(utils.STIRDestinationTn), ev.GetStringIgnoreErrors(utils.Destination)),
-			opts.GetStringIgnoreErrors(utils.STIRDestinationURI),
+		if err = AuthStirShaken(opts.GetStringIgnoreErrors(utils.OptsStirIdentity),
+			utils.FirstNonEmpty(opts.GetStringIgnoreErrors(utils.OptsStirOriginatorTn), ev.GetStringIgnoreErrors(utils.Account)),
+			opts.GetStringIgnoreErrors(utils.OptsStirOriginatorURI),
+			utils.FirstNonEmpty(opts.GetStringIgnoreErrors(utils.OptsStirDestinationTn), ev.GetStringIgnoreErrors(utils.Destination)),
+			opts.GetStringIgnoreErrors(utils.OptsStirDestinationURI),
 			attest, stirMaxDur); err != nil {
 			return utils.NewSTIRError(err.Error())
 		}
@@ -3241,26 +3241,26 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 			chrEv := engine.MapEvent(chrs.CGREvent.Event)
 			runID := chrs.ChargerSProfile
 			attest := sS.cgrCfg.SessionSCfg().STIRCfg.DefaultAttest
-			if uattest := chrOpts.GetStringIgnoreErrors(utils.STIRATest); uattest != utils.EmptyString {
+			if uattest := chrOpts.GetStringIgnoreErrors(utils.OptsStirATest); uattest != utils.EmptyString {
 				attest = uattest
 			}
 
-			destURI := chrOpts.GetStringIgnoreErrors(utils.STIRDestinationTn)
-			destTn := utils.FirstNonEmpty(chrOpts.GetStringIgnoreErrors(utils.STIRDestinationTn), chrEv.GetStringIgnoreErrors(utils.Destination))
+			destURI := chrOpts.GetStringIgnoreErrors(utils.OptsStirDestinationTn)
+			destTn := utils.FirstNonEmpty(chrOpts.GetStringIgnoreErrors(utils.OptsStirDestinationTn), chrEv.GetStringIgnoreErrors(utils.Destination))
 
 			dest := utils.NewPASSporTDestinationsIdentity(strings.Split(destTn, utils.INFIELD_SEP), strings.Split(destURI, utils.INFIELD_SEP))
 
 			var orig *utils.PASSporTOriginsIdentity
-			if origURI := chrOpts.GetStringIgnoreErrors(utils.STIROriginatorURI); origURI != utils.EmptyString {
+			if origURI := chrOpts.GetStringIgnoreErrors(utils.OptsStirOriginatorURI); origURI != utils.EmptyString {
 				orig = utils.NewPASSporTOriginsIdentity(utils.EmptyString, origURI)
 			} else {
 				orig = utils.NewPASSporTOriginsIdentity(
-					utils.FirstNonEmpty(chrOpts.GetStringIgnoreErrors(utils.STIROriginatorTn),
+					utils.FirstNonEmpty(chrOpts.GetStringIgnoreErrors(utils.OptsStirOriginatorTn),
 						chrEv.GetStringIgnoreErrors(utils.Account)),
 					utils.EmptyString)
 			}
-			pubkeyPath := utils.FirstNonEmpty(chrOpts.GetStringIgnoreErrors(utils.STIRPublicKeyPath), sS.cgrCfg.SessionSCfg().STIRCfg.PublicKeyPath)
-			prvkeyPath := utils.FirstNonEmpty(chrOpts.GetStringIgnoreErrors(utils.STIRPrivateKeyPath), sS.cgrCfg.SessionSCfg().STIRCfg.PrivateKeyPath)
+			pubkeyPath := utils.FirstNonEmpty(chrOpts.GetStringIgnoreErrors(utils.OptsStirPublicKeyPath), sS.cgrCfg.SessionSCfg().STIRCfg.PublicKeyPath)
+			prvkeyPath := utils.FirstNonEmpty(chrOpts.GetStringIgnoreErrors(utils.OptsStirPrivateKeyPath), sS.cgrCfg.SessionSCfg().STIRCfg.PrivateKeyPath)
 
 			payload := utils.NewPASSporTPayload(attest, chrs.CGREvent.ID, *dest, *orig)
 			header := utils.NewPASSporTHeader(pubkeyPath)
@@ -3383,8 +3383,8 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 				}
 			// check for init session
 			case ralsFlagsWithParams.HasKey(utils.MetaInitiate):
-				if opts.HasField(utils.DebitInterval) { // dynamic DebitInterval via CGRDebitInterval
-					if dbtItvl, err = opts.GetDuration(utils.DebitInterval); err != nil {
+				if opts.HasField(utils.OptsDebitInterval) { // dynamic DebitInterval via CGRDebitInterval
+					if dbtItvl, err = opts.GetDuration(utils.OptsDebitInterval); err != nil {
 						return utils.NewErrRALs(err)
 					}
 				}
@@ -3408,8 +3408,8 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 				}
 			//check for update session
 			case ralsFlagsWithParams.HasKey(utils.MetaUpdate):
-				if opts.HasField(utils.DebitInterval) { // dynamic DebitInterval via CGRDebitInterval
-					if dbtItvl, err = opts.GetDuration(utils.DebitInterval); err != nil {
+				if opts.HasField(utils.OptsDebitInterval) { // dynamic DebitInterval via CGRDebitInterval
+					if dbtItvl, err = opts.GetDuration(utils.OptsDebitInterval); err != nil {
 						return utils.NewErrRALs(err)
 					}
 				}
@@ -3432,8 +3432,8 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 				}
 			// check for terminate session
 			case ralsFlagsWithParams.HasKey(utils.MetaTerminate):
-				if opts.HasField(utils.DebitInterval) { // dynamic DebitInterval via CGRDebitInterval
-					if dbtItvl, err = opts.GetDuration(utils.DebitInterval); err != nil {
+				if opts.HasField(utils.OptsDebitInterval) { // dynamic DebitInterval via CGRDebitInterval
+					if dbtItvl, err = opts.GetDuration(utils.OptsDebitInterval); err != nil {
 						return utils.NewErrRALs(err)
 					}
 				}

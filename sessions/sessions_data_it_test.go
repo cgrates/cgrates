@@ -570,7 +570,7 @@ func testSessionsDataTTLExpired(t *testing.T) {
 	initArgs := &V1InitSessionArgs{
 		InitSession: true,
 		Opts: map[string]interface{}{
-			utils.SessionTTLUsage: "2048", // will be charged on TTL
+			utils.OptsSessionTTLUsage: "2048", // will be charged on TTL
 		},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -709,8 +709,8 @@ func testSessionsDataTTLExpMultiUpdates(t *testing.T) {
 	updateArgs := &V1UpdateSessionArgs{
 		UpdateSession: true,
 		Opts: map[string]interface{}{
-			utils.SessionTTLUsage:    "2048", // will be charged on TTL
-			utils.SessionTTLLastUsed: "1024",
+			utils.OptsSessionTTLUsage:    "2048", // will be charged on TTL
+			utils.OptsSessionTTLLastUsed: "1024",
 		},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -849,7 +849,7 @@ func testSessionsDataMultipleDataNoUsage(t *testing.T) {
 	updateArgs := &V1UpdateSessionArgs{
 		UpdateSession: true,
 		Opts: map[string]interface{}{
-			utils.SessionTTL: "0", // cancel timeout since usage 0 will not update it
+			utils.OptsSessionTTL: "0", // cancel timeout since usage 0 will not update it
 		},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -898,7 +898,7 @@ func testSessionsDataMultipleDataNoUsage(t *testing.T) {
 	updateArgs = &V1UpdateSessionArgs{
 		UpdateSession: true,
 		Opts: map[string]interface{}{
-			utils.SessionTTL: "1h", // cancel timeout since usage 0 will not update it
+			utils.OptsSessionTTL: "1h", // cancel timeout since usage 0 will not update it
 		},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -1098,7 +1098,7 @@ func testSessionsDataTTLLastUsage(t *testing.T) {
 	initArgs := &V1InitSessionArgs{
 		InitSession: true,
 		Opts: map[string]interface{}{
-			utils.SessionTTLLastUsage: "2048",
+			utils.OptsSessionTTLLastUsage: "2048",
 		},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
