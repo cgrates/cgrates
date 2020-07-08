@@ -273,7 +273,7 @@ func testAttrITMigrateOnlyVersion(t *testing.T) {
 
 	if vrs, err := attrMigrator.dmOut.DataManager().DataDB().GetVersions(""); err != nil {
 		t.Error(err)
-	} else if vrs[utils.Attributes] != 5 {
+	} else if vrs[utils.Attributes] != 6 {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.Attributes])
 	}
 	if attrMigrator.stats[utils.Attributes] != 0 {
@@ -365,7 +365,7 @@ func testAttrITMigrateAndMove(t *testing.T) {
 
 		if vrs, err := attrMigrator.dmOut.DataManager().DataDB().GetVersions(""); err != nil {
 			t.Error(err)
-		} else if vrs[utils.Attributes] != 5 {
+		} else if vrs[utils.Attributes] != 6 {
 			t.Errorf("Unexpected version returned: %d", vrs[utils.Attributes])
 		}
 		result, err := attrMigrator.dmOut.DataManager().GetAttributeProfile("cgrates.org",
@@ -457,7 +457,7 @@ func testAttrITMigrateV2(t *testing.T) {
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 		Attributes: []*v2Attribute{
-			&v2Attribute{
+			{
 				FieldName:  "FL1",
 				Initial:    "In1",
 				Substitute: config.NewRSRParsersMustCompile("Al1", utils.INFIELD_SEP),
@@ -510,7 +510,7 @@ func testAttrITMigrateV2(t *testing.T) {
 
 	if vrs, err := attrMigrator.dmOut.DataManager().DataDB().GetVersions(""); err != nil {
 		t.Error(err)
-	} else if vrs[utils.Attributes] != 5 {
+	} else if vrs[utils.Attributes] != 6 {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.Attributes])
 	}
 	result, err := attrMigrator.dmOut.DataManager().GetAttributeProfile("cgrates.org",
@@ -540,7 +540,7 @@ func testAttrITMigrateV3(t *testing.T) {
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 		Attributes: []*v3Attribute{
-			&v3Attribute{
+			{
 				FilterIDs:  []string{"*string:FL1:In1"},
 				FieldName:  "FL1",
 				Substitute: config.NewRSRParsersMustCompile("Al1", utils.INFIELD_SEP),
@@ -592,7 +592,7 @@ func testAttrITMigrateV3(t *testing.T) {
 
 	if vrs, err := attrMigrator.dmOut.DataManager().DataDB().GetVersions(""); err != nil {
 		t.Error(err)
-	} else if vrs[utils.Attributes] != 5 {
+	} else if vrs[utils.Attributes] != 6 {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.Attributes])
 	}
 	result, err := attrMigrator.dmOut.DataManager().GetAttributeProfile("cgrates.org",
@@ -625,7 +625,7 @@ func testAttrITMigrateV4(t *testing.T) {
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 		Attributes: []*v4Attribute{
-			&v4Attribute{
+			{
 				FilterIDs: []string{"*string:~*req.FL1:In1"},
 				FieldName: "FL1",
 				Value:     config.NewRSRParsersMustCompile("~Category:s/(.*)/${1}_UK_Mobile_Vodafone_GBRVF/", utils.INFIELD_SEP),
@@ -678,7 +678,7 @@ func testAttrITMigrateV4(t *testing.T) {
 
 	if vrs, err := attrMigrator.dmOut.DataManager().DataDB().GetVersions(""); err != nil {
 		t.Error(err)
-	} else if vrs[utils.Attributes] != 5 {
+	} else if vrs[utils.Attributes] != 6 {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.Attributes])
 	}
 	result, err := attrMigrator.dmOut.DataManager().GetAttributeProfile("cgrates.org",
@@ -754,7 +754,7 @@ func testAttrITV1ToV5(t *testing.T) {
 			ExpiryTime:     time.Date(2020, 4, 18, 14, 25, 0, 0, time.UTC),
 		},
 		Attributes: []*engine.Attribute{
-			&engine.Attribute{
+			{
 				FilterIDs: []string{"*string:FL1:In1"},
 				Path:      utils.MetaReq + utils.NestingSep + "FL1",
 				Type:      utils.MetaVariable,
@@ -772,7 +772,7 @@ func testAttrITV1ToV5(t *testing.T) {
 			ExpiryTime:     time.Date(2020, 4, 18, 14, 25, 0, 0, time.UTC),
 		},
 		Attributes: []*engine.Attribute{
-			&engine.Attribute{
+			{
 				FilterIDs: []string{"*string:FL1:In1"},
 				Path:      utils.MetaReq + utils.NestingSep + "FL1",
 				Type:      utils.MetaVariable,
@@ -788,7 +788,7 @@ func testAttrITV1ToV5(t *testing.T) {
 	// check the version
 	if vrs, err := attrMigrator.dmOut.DataManager().DataDB().GetVersions(""); err != nil {
 		t.Error(err)
-	} else if vrs[utils.Attributes] != 5 {
+	} else if vrs[utils.Attributes] != 6 {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.Attributes])
 	}
 
@@ -844,7 +844,7 @@ func testAttrITV2ToV5(t *testing.T) {
 			ExpiryTime:     time.Date(2020, 4, 18, 14, 25, 0, 0, time.UTC),
 		},
 		Attributes: []*v2Attribute{
-			&v2Attribute{
+			{
 				FieldName:  "FL1",
 				Initial:    "In1",
 				Substitute: sbstPrsr,
@@ -863,7 +863,7 @@ func testAttrITV2ToV5(t *testing.T) {
 			ExpiryTime:     time.Date(2020, 4, 18, 14, 25, 0, 0, time.UTC),
 		},
 		Attributes: []*v2Attribute{
-			&v2Attribute{
+			{
 				FieldName:  "FL1",
 				Initial:    "In1",
 				Substitute: sbstPrsr,
@@ -893,7 +893,7 @@ func testAttrITV2ToV5(t *testing.T) {
 			ExpiryTime:     time.Date(2020, 4, 18, 14, 25, 0, 0, time.UTC),
 		},
 		Attributes: []*engine.Attribute{
-			&engine.Attribute{
+			{
 				FilterIDs: []string{"*string:FL1:In1"},
 				Path:      utils.MetaReq + utils.NestingSep + "FL1",
 				Type:      utils.MetaVariable,
@@ -911,7 +911,7 @@ func testAttrITV2ToV5(t *testing.T) {
 			ExpiryTime:     time.Date(2020, 4, 18, 14, 25, 0, 0, time.UTC),
 		},
 		Attributes: []*engine.Attribute{
-			&engine.Attribute{
+			{
 				FilterIDs: []string{"*string:FL1:In1"},
 				Path:      utils.MetaReq + utils.NestingSep + "FL1",
 				Type:      utils.MetaVariable,
@@ -927,7 +927,7 @@ func testAttrITV2ToV5(t *testing.T) {
 	//check the version
 	if vrs, err := attrMigrator.dmOut.DataManager().DataDB().GetVersions(""); err != nil {
 		t.Error(err)
-	} else if vrs[utils.Attributes] != 5 {
+	} else if vrs[utils.Attributes] != 6 {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.Attributes])
 	}
 
@@ -974,7 +974,7 @@ func testAttrITV3ToV5(t *testing.T) {
 			ExpiryTime:     time.Date(2020, 4, 18, 14, 25, 0, 0, time.UTC),
 		},
 		Attributes: []*v3Attribute{
-			&v3Attribute{
+			{
 				FieldName:  "FL1",
 				Substitute: sbstPrsr,
 				FilterIDs:  []string{"*string:FL1:In1"},
@@ -992,7 +992,7 @@ func testAttrITV3ToV5(t *testing.T) {
 			ExpiryTime:     time.Date(2020, 4, 18, 14, 25, 0, 0, time.UTC),
 		},
 		Attributes: []*v3Attribute{
-			&v3Attribute{
+			{
 				FieldName:  "FL1",
 				Substitute: sbstPrsr,
 				FilterIDs:  []string{"*string:FL1:In1"},
@@ -1021,7 +1021,7 @@ func testAttrITV3ToV5(t *testing.T) {
 			ExpiryTime:     time.Date(2020, 4, 18, 14, 25, 0, 0, time.UTC),
 		},
 		Attributes: []*engine.Attribute{
-			&engine.Attribute{
+			{
 				FilterIDs: []string{"*string:FL1:In1"},
 				Path:      utils.MetaReq + utils.NestingSep + "FL1",
 				Type:      utils.MetaVariable,
@@ -1039,7 +1039,7 @@ func testAttrITV3ToV5(t *testing.T) {
 			ExpiryTime:     time.Date(2020, 4, 18, 14, 25, 0, 0, time.UTC),
 		},
 		Attributes: []*engine.Attribute{
-			&engine.Attribute{
+			{
 				FilterIDs: []string{"*string:FL1:In1"},
 				Path:      utils.MetaReq + utils.NestingSep + "FL1",
 				Type:      utils.MetaVariable,
@@ -1055,7 +1055,7 @@ func testAttrITV3ToV5(t *testing.T) {
 	//check the version
 	if vrs, err := attrMigrator.dmOut.DataManager().DataDB().GetVersions(""); err != nil {
 		t.Error(err)
-	} else if vrs[utils.Attributes] != 5 {
+	} else if vrs[utils.Attributes] != 6 {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.Attributes])
 	}
 
@@ -1112,7 +1112,7 @@ func testAttrITdryRunV2ToV5(t *testing.T) {
 			ExpiryTime:     time.Date(2020, 4, 18, 14, 25, 0, 0, time.UTC),
 		},
 		Attributes: []*v2Attribute{
-			&v2Attribute{
+			{
 				FieldName:  "FL1",
 				Initial:    "In1",
 				Substitute: sbstPrsr,
@@ -1171,7 +1171,7 @@ func testAttrITdryRunV3ToV5(t *testing.T) {
 			ExpiryTime:     time.Date(2020, 4, 18, 14, 25, 0, 0, time.UTC),
 		},
 		Attributes: []*v3Attribute{
-			&v3Attribute{
+			{
 				FieldName:  "FL1",
 				Substitute: sbstPrsr,
 				FilterIDs:  []string{"*string:FL1:In1"},

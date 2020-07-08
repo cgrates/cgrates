@@ -121,7 +121,7 @@ func testDCITMigrateAndMove(t *testing.T) {
 	dcGetMapKeys = func(m utils.StringMap) (keys []string) { //make sure destination are in order
 		keys = make([]string, len(m))
 		i := 0
-		for k, _ := range m {
+		for k := range m {
 			keys[i] = k
 			i += 1
 		}
@@ -135,7 +135,7 @@ func testDCITMigrateAndMove(t *testing.T) {
 			Chargers: []*v1DerivedCharger{
 				{
 					RunID:      "RunID",
-					RunFilters: "~filterhdr1:s/(.+)/special_run3/",
+					RunFilters: "~filterhdr1(.+)",
 
 					RequestTypeField: utils.MetaDefault,
 					CategoryField:    utils.MetaDefault,
@@ -176,7 +176,7 @@ func testDCITMigrateAndMove(t *testing.T) {
 		FilterIDs: []string{
 			"*destinations:~*req.Destination:1001;1002;1003",
 			"*string:~*req.Account:1003",
-			"*rsr::~*req.filterhdr1:s/(.+)/special_run3/",
+			"*rsr:~*req.filterhdr1:.+",
 		},
 		ActivationInterval: nil,
 		RunID:              "RunID",

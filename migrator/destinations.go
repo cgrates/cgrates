@@ -44,7 +44,7 @@ func (m *Migrator) migrateCurrentDestinations() (err error) {
 		if err := m.dmOut.DataManager().SetDestination(dst, utils.NonTransactional); err != nil {
 			return err
 		}
-		m.stats[utils.Destinations] += 1
+		m.stats[utils.Destinations]++
 	}
 	return
 }
@@ -55,13 +55,40 @@ func (m *Migrator) migrateDestinations() (err error) {
 	if vrs, err = m.getVersions(utils.Destinations); err != nil {
 		return
 	}
-
-	switch vrs[utils.Destinations] {
-	case current[utils.Destinations]:
-		if m.sameDataDB {
-			return
+	migrated := true
+	for {
+		version := vrs[utils.Destinations]
+		for {
+			switch version {
+			default:
+				return fmt.Errorf("Unsupported version %v", version)
+			case current[utils.Destinations]:
+				migrated = false
+				if m.sameDataDB {
+					break
+				}
+				if err = m.migrateCurrentDestinations(); err != nil {
+					return
+				}
+			}
+			if version == current[utils.Destinations] || err == utils.ErrNoMoreData {
+				break
+			}
 		}
-		return m.migrateCurrentDestinations()
+		if err == utils.ErrNoMoreData || !migrated {
+			break
+		}
+
+		// if !m.dryRun  {
+		// 		if err = m.dmIN.DataManager().SetDestination(v2, true); err != nil {
+		// 	return
+		// }
+		// }
+		m.stats[utils.Destinations]++
+	}
+	// All done, update version wtih current one
+	if err = m.setVersions(utils.Destinations); err != nil {
+		return
 	}
 	return
 }

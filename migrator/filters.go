@@ -20,6 +20,7 @@ package migrator
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/cgrates/cgrates/config"
@@ -179,16 +180,12 @@ func migrateInlineFilterV2(fl string) string {
 	}
 
 	if ruleSplt[0] != utils.MetaRSR {
-		if strings.HasPrefix(ruleSplt[1], utils.DynamicDataPrefix) {
-			// remove dynamic data prefix from fieldName
-			ruleSplt[1] = ruleSplt[1][1:]
-		}
+		// remove dynamic data prefix from fieldName
+		ruleSplt[1] = strings.TrimPrefix(ruleSplt[1], utils.DynamicDataPrefix)
 		return fmt.Sprintf("%s:~%s:%s", ruleSplt[0], utils.MetaReq+utils.NestingSep+ruleSplt[1], strings.Join(ruleSplt[2:], utils.InInFieldSep))
 	} // in case of *rsr filter we need to add the prefix at fieldValue
-	if strings.HasPrefix(ruleSplt[2], utils.DynamicDataPrefix) {
-		// remove dynamic data prefix from fieldName
-		ruleSplt[2] = ruleSplt[2][1:]
-	}
+	// remove dynamic data prefix from fieldName
+	ruleSplt[2] = strings.TrimPrefix(ruleSplt[2], utils.DynamicDataPrefix)
 	return fmt.Sprintf("%s::~%s", ruleSplt[0], utils.MetaReq+utils.NestingSep+strings.Join(ruleSplt[2:], utils.InInFieldSep))
 }
 
@@ -329,6 +326,11 @@ func (m *Migrator) migrateFilters() (err error) {
 				if fltr, err = m.migrateRequestFilterV4(v4Fltr); err != nil && err != utils.ErrNoMoreData {
 					return
 				}
+
+				// remove the filter to not compile the old rule on set
+				// if err = m.dmOut.DataManager().DataDB().SetFilterDrv(fltr); err != nil {
+				// return
+				// }
 				version = 5
 			}
 			if version == current[utils.RQF] || err == utils.ErrNoMoreData {
@@ -822,25 +824,57 @@ func (m *Migrator) migrateRequestFilterV4(v4Fltr *engine.Filter) (fltr *engine.F
 	}
 	for _, rule := range v4Fltr.Rules {
 		if rule.Type != utils.MetaRSR &&
-			rule.Type == utils.MetaNotRSR {
+			rule.Type != utils.MetaNotRSR {
 			fltr.Rules = append(fltr.Rules, rule)
 			continue
 		}
 		for _, val := range rule.Values {
-			if !strings.HasSuffix(val, utils.FilterValEnd) { // is not a filter so we ignore this value
-				continue
+			el, vals, err := migrateRSRFilterV4(val)
+			if err != nil {
+				return nil, fmt.Errorf("%s for filter<%s>", err.Error(), fltr.TenantID())
 			}
-			fltrStart := strings.Index(val, utils.FilterValStart)
-			if fltrStart < 1 {
-				return nil, fmt.Errorf("invalid RSRFilter start rule in string: <%s> for filter<%s>", val, fltr.TenantID())
+			if len(vals) == 0 { // is not a filter so we ignore this value
+				continue
 			}
 			fltr.Rules = append(fltr.Rules, &engine.FilterRule{
 				Type:    rule.Type,
-				Element: val[:fltrStart],
-				Values:  strings.Split(val[fltrStart+1:len(val)-1], utils.ANDSep),
+				Element: el,
+				Values:  vals,
 			})
 		}
 	}
+	return
+}
+
+var (
+	spltRgxp = regexp.MustCompile(`:s\/`)
+)
+
+func migrateRSRFilterV4(rsr string) (el string, vals []string, err error) {
+	if !strings.HasSuffix(rsr, utils.FilterValEnd) { // is not a filter so we ignore this value
+		return
+	}
+	fltrStart := strings.Index(rsr, utils.FilterValStart)
+	if fltrStart < 1 {
+		err = fmt.Errorf("invalid RSRFilter start rule in string: <%s> ", rsr)
+		return
+	}
+	vals = strings.Split(rsr[fltrStart+1:len(rsr)-1], utils.ANDSep)
+	el = rsr[:fltrStart]
+
+	if idxConverters := strings.Index(el, "{*"); idxConverters != -1 { // converters in the string
+		if !strings.HasSuffix(el, "}") {
+			err = fmt.Errorf("invalid converter terminator in rule: <%s>", el)
+			return
+		}
+		el = el[:idxConverters]
+	}
+	if !strings.HasPrefix(el, utils.DynamicDataPrefix) ||
+		len(el) == 1 { // special case when RSR is defined as static attribute
+		return
+	}
+	// dynamic content via attributeNames
+	el = spltRgxp.Split(el, -1)[0]
 	return
 }
 
@@ -857,17 +891,17 @@ func migrateInlineFilterV4(v4fltIDs []string) (fltrIDs []string, err error) {
 		} else {
 			fltrIDs = append(fltrIDs, v4flt)
 		}
-		for _, val := range strings.Split(v4flt, utils.InInFieldSep) {
-			if !strings.HasSuffix(val, utils.FilterValEnd) { // is not a filter so we ignore this value
+		for _, val := range strings.Split(v4flt, utils.INFIELD_SEP) {
+			el, vals, err := migrateRSRFilterV4(val)
+			if err != nil {
+				return nil, err
+			}
+			if len(vals) == 0 { // is not a filter so we ignore this value
 				continue
 			}
-			fltrStart := strings.Index(val, utils.FilterValStart)
-			if fltrStart < 1 {
-				return nil, fmt.Errorf("invalid RSRFilter start rule in string: <%s> ", val)
-			}
-			fltrVal := val[fltrStart+1 : len(val)-1]
-			fltrIDs = append(fltrIDs, fltr+val[:fltrStart]+utils.InInFieldSep+
-				strings.Replace(fltrVal, utils.ANDSep, utils.INFIELD_SEP, strings.Count(fltrVal, utils.ANDSep)))
+
+			fltrIDs = append(fltrIDs, fltr+el+utils.InInFieldSep+
+				strings.Join(vals, utils.INFIELD_SEP))
 		}
 	}
 	return

@@ -139,6 +139,10 @@ func (iDBMig *internalMigrator) getV1Stats() (v1st *v1Stat, err error) {
 	return nil, utils.ErrNotImplemented
 }
 
+func (iDBMig *internalMigrator) getV3Stats() (v1st *engine.StatQueueProfile, err error) {
+	return nil, utils.ErrNotImplemented
+}
+
 //set
 func (iDBMig *internalMigrator) setV1Stats(x *v1Stat) (err error) {
 	return utils.ErrNotImplemented
@@ -178,6 +182,10 @@ func (iDBMig *internalMigrator) setV1AttributeProfile(x *v1AttributeProfile) (er
 //ThresholdProfile methods
 //get
 func (iDBMig *internalMigrator) getV2ThresholdProfile() (v2T *v2Threshold, err error) {
+	return nil, utils.ErrNotImplemented
+}
+
+func (iDBMig *internalMigrator) getV3ThresholdProfile() (v2T *engine.ThresholdProfile, err error) {
 	return nil, utils.ErrNotImplemented
 }
 
@@ -327,3 +335,15 @@ func (iDBMig *internalMigrator) remSupplier(tenant, id string) (err error) {
 }
 
 func (iDBMig *internalMigrator) close() {}
+
+func (iDBMig *internalMigrator) getV1ChargerProfile() (v1chrPrf *engine.ChargerProfile, err error) {
+	return nil, utils.ErrNotImplemented
+}
+
+func (iDBMig *internalMigrator) getV1DispatcherProfile() (v1chrPrf *engine.DispatcherProfile, err error) {
+	return nil, utils.ErrNotImplemented
+}
+
+func (iDBMig *internalMigrator) getV1RouteProfile() (v1chrPrf *engine.RouteProfile, err error) {
+	return nil, utils.ErrNotImplemented
+}

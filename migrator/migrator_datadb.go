@@ -81,6 +81,13 @@ type MigratorDataDB interface {
 	setSupplier(spl *SupplierProfile) (err error)
 	remSupplier(tenant, id string) (err error)
 
+	getV1ChargerProfile() (v1chrPrf *engine.ChargerProfile, err error)
+	getV1DispatcherProfile() (v1chrPrf *engine.DispatcherProfile, err error)
+	getV1RouteProfile() (v1chrPrf *engine.RouteProfile, err error)
+
+	getV3Stats() (v1st *engine.StatQueueProfile, err error)
+	getV3ThresholdProfile() (v2T *engine.ThresholdProfile, err error)
+
 	DataManager() *engine.DataManager
 	close()
 }

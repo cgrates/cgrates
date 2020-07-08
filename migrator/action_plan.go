@@ -51,24 +51,24 @@ func (m *Migrator) migrateCurrentActionPlans() (err error) {
 	var ids []string
 	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.ACTION_PLAN_PREFIX)
 	if err != nil {
-		return err
+		return
 	}
 	for _, id := range ids {
 		idg := strings.TrimPrefix(id, utils.ACTION_PLAN_PREFIX)
-		acts, err := m.dmIN.DataManager().GetActionPlan(idg, true, utils.NonTransactional)
-		if err != nil {
-			return err
+		var acts *engine.ActionPlan
+		if acts, err = m.dmIN.DataManager().GetActionPlan(idg, true, utils.NonTransactional); err != nil {
+			return
 		}
 		if acts == nil || m.dryRun {
 			continue
 		}
-		if err := m.dmOut.DataManager().SetActionPlan(idg, acts, true, utils.NonTransactional); err != nil {
-			return err
+		if err = m.dmOut.DataManager().SetActionPlan(idg, acts, true, utils.NonTransactional); err != nil {
+			return
 		}
-		if err := m.dmIN.DataManager().RemoveActionPlan(idg, utils.NonTransactional); err != nil {
-			return err
+		if err = m.dmIN.DataManager().RemoveActionPlan(idg, utils.NonTransactional); err != nil {
+			return
 		}
-		m.stats[utils.ActionPlans] += 1
+		m.stats[utils.ActionPlans]++
 	}
 	return
 }
@@ -76,13 +76,13 @@ func (m *Migrator) removeV1ActionPlans() (err error) {
 	var v1 *v1ActionPlans
 	for {
 		if v1, err = m.dmIN.getV1ActionPlans(); err != nil && err != utils.ErrNoMoreData {
-			return err
+			return
 		}
 		if v1 == nil {
 			return nil
 		}
 		if err = m.dmIN.remV1ActionPlans(v1); err != nil {
-			return err
+			return
 		}
 	}
 }
@@ -111,7 +111,7 @@ func (m *Migrator) migrateActionPlans() (err error) {
 			return fmt.Errorf("Storage type %s could not be cated to <*engine.RedisStorage>", m.dmIN.DataManager().DataDB().GetStorageType())
 		}
 		if err = redisDB.RebbuildActionPlanKeys(); err != nil {
-			return err
+			return
 		}
 	}
 	migrated := true
@@ -119,21 +119,23 @@ func (m *Migrator) migrateActionPlans() (err error) {
 	var v3 []*engine.ActionPlan
 	for {
 		version := vrs[utils.ActionPlans]
+		migratedFrom = int(version)
 		for {
 			switch version {
+			default:
+				return fmt.Errorf("Unsupported version %v", version)
 			case current[utils.ActionPlans]:
 				migrated = false
 				if m.sameDataDB {
 					break
 				}
 				if err = m.migrateCurrentActionPlans(); err != nil && err != utils.ErrNoMoreData {
-					return err
+					return
 				}
 			case 1:
 				if v3, err = m.migrateV1ActionPlans(); err != nil && err != utils.ErrNoMoreData {
-					return err
+					return
 				}
-				migratedFrom = 1
 				version = 3
 			case 2: // neded to rebuild action plan indexes for redis
 				// All done, update version wtih current one
@@ -144,7 +146,6 @@ func (m *Migrator) migrateActionPlans() (err error) {
 						err.Error(),
 						fmt.Sprintf("error: <%s> when updating ActionPlans version into dataDB", err.Error()))
 				}
-				migratedFrom = 2
 				version = 3
 			}
 			if version == current[utils.ActionPlans] || err == utils.ErrNoMoreData {
@@ -155,11 +156,11 @@ func (m *Migrator) migrateActionPlans() (err error) {
 			break
 		}
 
-		if !m.dryRun && migrated {
+		if !m.dryRun {
 			//set action plan
 			for _, ap := range v3 {
 				if err = m.dmOut.DataManager().SetActionPlan(ap.Id, ap, true, utils.NonTransactional); err != nil {
-					return err
+					return
 				}
 			}
 		}
@@ -170,8 +171,7 @@ func (m *Migrator) migrateActionPlans() (err error) {
 	}
 	// remove old action plans
 	if !m.sameDataDB {
-		switch migratedFrom {
-		case 1:
+		if migratedFrom == 1 {
 			if err = m.removeV1ActionPlans(); err != nil {
 				return
 			}
@@ -186,8 +186,8 @@ func (m *Migrator) migrateActionPlans() (err error) {
 }
 
 func (v1AP v1ActionPlan) AsActionPlan() (ap *engine.ActionPlan) {
-	for idx, actionId := range v1AP.AccountIds {
-		idElements := strings.Split(actionId, "_")
+	for idx, actionID := range v1AP.AccountIds {
+		idElements := strings.Split(actionID, "_")
 		if len(idElements) != 2 {
 			continue
 		}

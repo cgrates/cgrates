@@ -50,7 +50,7 @@ func (m *Migrator) migrateCurrentTPactionplans() (err error) {
 							return err
 						}
 					}
-					m.stats[utils.TpActionPlans] += 1
+					m.stats[utils.TpActionPlans]++
 				}
 			}
 		}

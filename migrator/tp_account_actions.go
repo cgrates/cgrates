@@ -44,7 +44,7 @@ func (m *Migrator) migrateCurrentTPaccountAcction() (err error) {
 						return err
 					}
 				}
-				m.stats[utils.TpAccountActionsV] += 1
+				m.stats[utils.TpAccountActionsV]++
 			}
 		}
 	}

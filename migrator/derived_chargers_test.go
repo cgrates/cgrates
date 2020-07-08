@@ -222,7 +222,7 @@ func TestDerivedChargers2Charger(t *testing.T) {
 				FilterIDs: []string{
 					"*string:~*req.Category:*voice1",
 					"*string:~*req.Account:1001",
-					"*rsr::~*req.Header4:s/a/${1}b/{*duration_seconds&*round:2}(b&c)",
+					"*rsr:~*req.Header4:b;c",
 				},
 				ActivationInterval: nil,
 				RunID:              "runID",
@@ -233,7 +233,7 @@ func TestDerivedChargers2Charger(t *testing.T) {
 		{
 			DC: &v1DerivedCharger{
 				RunID:        "runID2",
-				RunFilters:   "^1003",
+				RunFilters:   "~Account(^1003)",
 				AccountField: "^1003",
 			},
 			Tenant:  defaultTenant,
@@ -242,7 +242,7 @@ func TestDerivedChargers2Charger(t *testing.T) {
 			Expected: &engine.ChargerProfile{
 				Tenant:             defaultTenant,
 				ID:                 "key2",
-				FilterIDs:          []string{"*rsr::~*req.1003"},
+				FilterIDs:          []string{"*rsr:~*req.Account:^1003"},
 				ActivationInterval: nil,
 				RunID:              "runID2",
 				AttributeIDs:       make([]string, 0),

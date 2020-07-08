@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package migrator
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/cgrates/cgrates/engine"
@@ -49,7 +50,7 @@ func (m *Migrator) migrateCurrentSharedGroups() (err error) {
 		if err := m.dmOut.DataManager().SetSharedGroup(sgs, utils.NonTransactional); err != nil {
 			return err
 		}
-		m.stats[utils.SharedGroups] += 1
+		m.stats[utils.SharedGroups]++
 	}
 	return
 }
@@ -71,7 +72,7 @@ func (m *Migrator) migrateV1SharedGroups() (err error) {
 		if err = m.dmOut.DataManager().SetSharedGroup(acnt, utils.NonTransactional); err != nil {
 			return err
 		}
-		m.stats[utils.SharedGroups] += 1
+		m.stats[utils.SharedGroups]++
 	}
 	// All done, update version wtih current one
 	if err = m.setVersions(utils.SharedGroups); err != nil {
@@ -86,7 +87,9 @@ func (m *Migrator) migrateSharedGroups() (err error) {
 	if vrs, err = m.getVersions(utils.SharedGroups); err != nil {
 		return
 	}
-	switch vrs[utils.SharedGroups] {
+	switch version := vrs[utils.SharedGroups]; version {
+	default:
+		return fmt.Errorf("Unsupported version %v", version)
 	case current[utils.SharedGroups]:
 		if m.sameDataDB {
 			break

@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package migrator
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/cgrates/cgrates/engine"
@@ -56,7 +57,7 @@ func (m *Migrator) migrateCurrentActions() (err error) {
 		if err := m.dmOut.DataManager().SetActions(idg, acts, utils.NonTransactional); err != nil {
 			return err
 		}
-		m.stats[utils.Actions] += 1
+		m.stats[utils.Actions]++
 	}
 	return
 }
@@ -106,17 +107,19 @@ func (m *Migrator) migrateActions() (err error) {
 		version := vrs[utils.Actions]
 		for {
 			switch version {
+			default:
+				return fmt.Errorf("Unsupported version %v", version)
 			case current[utils.Actions]:
 				migrated = false
 				if m.sameDataDB {
 					break
 				}
 				if err = m.migrateCurrentActions(); err != nil {
-					return err
+					return
 				}
 			case 1:
 				if acts, err = m.migrateV1Actions(); err != nil && err != utils.ErrNoMoreData {
-					return err
+					return
 				}
 				version = 2
 			}
@@ -127,12 +130,12 @@ func (m *Migrator) migrateActions() (err error) {
 		if err == utils.ErrNoMoreData || !migrated {
 			break
 		}
-		if !m.dryRun && migrated {
-			if err := m.dmOut.DataManager().SetActions(acts[0].Id, acts, utils.NonTransactional); err != nil {
-				return err
+		if !m.dryRun {
+			if err = m.dmOut.DataManager().SetActions(acts[0].Id, acts, utils.NonTransactional); err != nil {
+				return
 			}
 		}
-		m.stats[utils.Actions] += 1
+		m.stats[utils.Actions]++
 	}
 
 	if m.dryRun || !migrated {
@@ -142,7 +145,7 @@ func (m *Migrator) migrateActions() (err error) {
 
 	// All done, update version wtih current one
 	if err = m.setVersions(utils.Actions); err != nil {
-		return err
+		return
 	}
 
 	return m.ensureIndexesDataDB(engine.ColAct)

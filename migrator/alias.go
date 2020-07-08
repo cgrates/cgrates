@@ -40,8 +40,8 @@ type v1Alias struct {
 }
 
 var (
-	ALIASES_PREFIX = "als_"
-	Alias          = "Alias"
+	AliasesPrefix = "als_"
+	Alias         = "Alias"
 )
 
 type v1AliasValues []*v1AliasValue
@@ -184,7 +184,7 @@ func (m *Migrator) migrateAlias2Attributes() (err error) {
 		if err := m.dmOut.DataManager().SetAttributeProfile(attr, true); err != nil {
 			return err
 		}
-		m.stats[Alias] += 1
+		m.stats[Alias]++
 	}
 	if m.dryRun {
 		return
@@ -207,7 +207,7 @@ func (m *Migrator) migrateAlias2Attributes() (err error) {
 
 func (m *Migrator) migrateAlias() (err error) {
 	if err = m.migrateAlias2Attributes(); err != nil {
-		return err
+		return
 	}
 	return m.ensureIndexesDataDB(engine.ColAttr)
 }

@@ -141,7 +141,11 @@ func derivedChargers2Charger(dc *v1DerivedCharger, tenant string, key string, fi
 		if strings.HasPrefix(filter, utils.DynamicDataPrefix) {
 			filter = filter[1:]
 		}
-		ch.FilterIDs = append(ch.FilterIDs, "*rsr::"+utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+filter)
+		flt, err := migrateInlineFilterV4([]string{"*rsr::" + utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + filter})
+		if err != nil {
+			return
+		}
+		ch.FilterIDs = append(ch.FilterIDs, flt...)
 	}
 	return
 }
@@ -193,10 +197,10 @@ func (m *Migrator) removeV1DerivedChargers() (err error) {
 			break
 		}
 		if err != nil {
-			return err
+			return
 		}
 		if err = m.dmIN.remV1DerivedChargers(dck.Key); err != nil {
-			return err
+			return
 		}
 	}
 	return
@@ -210,13 +214,13 @@ func (m *Migrator) migrateV1DerivedChargers() (err error) {
 			break
 		}
 		if err != nil {
-			return err
+			return
 		}
 		if dck == nil || m.dryRun {
 			continue
 		}
 		if err = m.derivedChargers2Chargers(dck); err != nil {
-			return err
+			return
 		}
 
 		m.stats[utils.DerivedChargersV]++
@@ -240,7 +244,7 @@ func (m *Migrator) migrateV1DerivedChargers() (err error) {
 
 func (m *Migrator) migrateDerivedChargers() (err error) {
 	if err = m.migrateV1DerivedChargers(); err != nil {
-		return err
+		return
 	}
 	return m.ensureIndexesDataDB(engine.ColCpp, engine.ColAttr)
 }

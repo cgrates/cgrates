@@ -299,6 +299,25 @@ func (v1ms *mongoMigrator) getV1Stats() (v1st *v1Stat, err error) {
 	return v1st, nil
 }
 
+func (v1ms *mongoMigrator) getV3Stats() (v1st *engine.StatQueueProfile, err error) {
+	if v1ms.cursor == nil {
+		v1ms.cursor, err = v1ms.mgoDB.DB().Collection(engine.ColSqp).Find(v1ms.mgoDB.GetContext(), bson.D{})
+		if err != nil {
+			return nil, err
+		}
+	}
+	if !(*v1ms.cursor).Next(v1ms.mgoDB.GetContext()) {
+		(*v1ms.cursor).Close(v1ms.mgoDB.GetContext())
+		v1ms.cursor = nil
+		return nil, utils.ErrNoMoreData
+	}
+	v1st = new(engine.StatQueueProfile)
+	if err := (*v1ms.cursor).Decode(v1st); err != nil {
+		return nil, err
+	}
+	return v1st, nil
+}
+
 //set
 func (v1ms *mongoMigrator) setV1Stats(x *v1Stat) (err error) {
 	_, err = v1ms.mgoDB.DB().Collection(utils.CDR_STATS_PREFIX).InsertOne(v1ms.mgoDB.GetContext(), x)
@@ -400,6 +419,25 @@ func (v1ms *mongoMigrator) getV2ThresholdProfile() (v2T *v2Threshold, err error)
 		return nil, utils.ErrNoMoreData
 	}
 	v2T = new(v2Threshold)
+	if err := (*v1ms.cursor).Decode(v2T); err != nil {
+		return nil, err
+	}
+	return v2T, nil
+}
+
+func (v1ms *mongoMigrator) getV3ThresholdProfile() (v2T *engine.ThresholdProfile, err error) {
+	if v1ms.cursor == nil {
+		v1ms.cursor, err = v1ms.mgoDB.DB().Collection(engine.ColTps).Find(v1ms.mgoDB.GetContext(), bson.D{})
+		if err != nil {
+			return nil, err
+		}
+	}
+	if !(*v1ms.cursor).Next(v1ms.mgoDB.GetContext()) {
+		(*v1ms.cursor).Close(v1ms.mgoDB.GetContext())
+		v1ms.cursor = nil
+		return nil, utils.ErrNoMoreData
+	}
+	v2T = new(engine.ThresholdProfile)
 	if err := (*v1ms.cursor).Decode(v2T); err != nil {
 		return nil, err
 	}
@@ -774,5 +812,62 @@ func (v1ms *mongoMigrator) setSupplier(spl *SupplierProfile) (err error) {
 //rem
 func (v1ms *mongoMigrator) remSupplier(tenant, id string) (err error) {
 	_, err = v1ms.mgoDB.DB().Collection(ColSpp).DeleteOne(v1ms.mgoDB.GetContext(), bson.M{"tenant": tenant, "id": id})
+	return
+}
+
+func (v1ms *mongoMigrator) getV1ChargerProfile() (v1chrPrf *engine.ChargerProfile, err error) {
+	if v1ms.cursor == nil {
+		v1ms.cursor, err = v1ms.mgoDB.DB().Collection(engine.ColCpp).Find(v1ms.mgoDB.GetContext(), bson.D{})
+		if err != nil {
+			return nil, err
+		}
+	}
+	if !(*v1ms.cursor).Next(v1ms.mgoDB.GetContext()) {
+		(*v1ms.cursor).Close(v1ms.mgoDB.GetContext())
+		v1ms.cursor = nil
+		return nil, utils.ErrNoMoreData
+	}
+	v1chrPrf = new(engine.ChargerProfile)
+	if err := (*v1ms.cursor).Decode(v1chrPrf); err != nil {
+		return nil, err
+	}
+	return
+}
+
+func (v1ms *mongoMigrator) getV1DispatcherProfile() (v1dppPrf *engine.DispatcherProfile, err error) {
+	if v1ms.cursor == nil {
+		v1ms.cursor, err = v1ms.mgoDB.DB().Collection(engine.ColDpp).Find(v1ms.mgoDB.GetContext(), bson.D{})
+		if err != nil {
+			return nil, err
+		}
+	}
+	if !(*v1ms.cursor).Next(v1ms.mgoDB.GetContext()) {
+		(*v1ms.cursor).Close(v1ms.mgoDB.GetContext())
+		v1ms.cursor = nil
+		return nil, utils.ErrNoMoreData
+	}
+	v1dppPrf = new(engine.DispatcherProfile)
+	if err := (*v1ms.cursor).Decode(v1dppPrf); err != nil {
+		return nil, err
+	}
+	return
+}
+
+func (v1ms *mongoMigrator) getV1RouteProfile() (v1dppPrf *engine.RouteProfile, err error) {
+	if v1ms.cursor == nil {
+		v1ms.cursor, err = v1ms.mgoDB.DB().Collection(engine.ColRpp).Find(v1ms.mgoDB.GetContext(), bson.D{})
+		if err != nil {
+			return nil, err
+		}
+	}
+	if !(*v1ms.cursor).Next(v1ms.mgoDB.GetContext()) {
+		(*v1ms.cursor).Close(v1ms.mgoDB.GetContext())
+		v1ms.cursor = nil
+		return nil, utils.ErrNoMoreData
+	}
+	v1dppPrf = new(engine.RouteProfile)
+	if err := (*v1ms.cursor).Decode(v1dppPrf); err != nil {
+		return nil, err
+	}
 	return
 }
