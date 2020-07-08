@@ -2204,38 +2204,15 @@ var (
 )
 
 // CGROptionsSet the possible cgr options
-var CGROptionsSet = NewStringSet([]string{STIRATest, STIRPayloadMaxDuration,
-	STIRIdentity, STIROriginatorTn, STIROriginatorURI, STIRDestinationTn,
-	STIRDestinationURI, STIRPublicKeyPath, STIRPrivateKeyPath,
-	DebitInterval, Context, SessionTTL, SessionTTLMaxDelay,
-	SessionTTLLastUsed, SessionTTLLastUsage, SessionTTLUsage, APIKey, RouteID})
+var CGROptionsSet = NewStringSet([]string{OptsStirATest, OptsStirPayloadMaxDuration,
+	OptsStirIdentity, OptsStirOriginatorTn, OptsStirOriginatorURI, OptsStirDestinationTn,
+	OptsStirDestinationURI, OptsStirPublicKeyPath, OptsStirPrivateKeyPath,
+	OptsDebitInterval, Context, OptsSessionTTL, OptsSessionTTLMaxDelay,
+	OptsSessionTTLLastUsed, OptsSessionTTLLastUsage, OptsSessionTTLUsage, OptsAPIKey, OptsRouteID})
 
 // SessionS ProccessEvent posible options
 const (
-	// STIR
-	STIRATest              = "STIRATest"
-	STIRPayloadMaxDuration = "STIRPayloadMaxDuration"
-	STIRIdentity           = "STIRIdentity"
-	STIROriginatorTn       = "STIROriginatorTn"
-	STIROriginatorURI      = "STIROriginatorURI"
-	STIRDestinationTn      = "STIRDestinationTn"
-	STIRDestinationURI     = "STIRDestinationURI"
-	STIRPublicKeyPath      = "STIRPublicKeyPath"
-	STIRPrivateKeyPath     = "STIRPrivateKeyPath"
-
-	DebitInterval = "DebitInterval"
-	Context       = "Context"
-
-	// SessionS terminator
-	SessionTTL          = "SessionTTL"
-	SessionTTLMaxDelay  = "SessionTTLMaxDelay"
-	SessionTTLLastUsed  = "SessionTTLLastUsed"
-	SessionTTLLastUsage = "SessionTTLLastUsage"
-	SessionTTLUsage     = "SessionTTLUsage"
-
-	// DispatcherS
-	APIKey  = "APIKey"
-	RouteID = "RouteID"
+	Context = "Context"
 
 	// SupplierS
 	RoutesLimit  = "RoutesLimit"
@@ -2261,7 +2238,26 @@ const (
 
 // Event Opts
 const (
-	OptsRatesStartTime = "*ratesStartTime"
+	OptsRatesStartTime      = "*ratesStartTime"
+	OptsSessionTTL          = "*sessionTTL"
+	OptsSessionTTLMaxDelay  = "*sessionTTLMaxDelay"
+	OptsSessionTTLLastUsed  = "*sessionTTLLastUsed"
+	OptsSessionTTLLastUsage = "*sessionTTLLastUsage"
+	OptsSessionTTLUsage     = "*sessionTTLUsage"
+	OptsDebitInterval       = "*sessionDebitInterval"
+	// STIR
+	OptsStirATest              = "*stirATest"
+	OptsStirPayloadMaxDuration = "*stirPayloadMaxDuration"
+	OptsStirIdentity           = "*stirIdentity"
+	OptsStirOriginatorTn       = "*stirOriginatorTn"
+	OptsStirOriginatorURI      = "*stirOriginatorURI"
+	OptsStirDestinationTn      = "*stirDestinationTn"
+	OptsStirDestinationURI     = "*stirDestinationURI"
+	OptsStirPublicKeyPath      = "*stirPublicKeyPath"
+	OptsStirPrivateKeyPath     = "*stirPrivateKeyPath"
+	// DispatcherS
+	OptsAPIKey  = "*dispatcherApiKey"
+	OptsRouteID = "*dispatcherRouteID"
 )
 
 func buildCacheInstRevPrefixes() {

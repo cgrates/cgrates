@@ -298,29 +298,29 @@ func TestCGREventconsumeArgDispatcher(t *testing.T) {
 	//normal check without APIkey
 	routeID := "route"
 	opts = map[string]interface{}{
-		RouteID: routeID,
+		OptsRouteID: routeID,
 	}
 	eOut := &ArgDispatcher{
-		RouteID: &routeID,
+		OptsRouteID: &routeID,
 	}
 	rcv = getArgDispatcherFromOpts(opts)
 	if !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting:  %+v, received: %+v", eOut, rcv)
 	}
 	//check if *route_id was deleted
-	if _, has := opts[RouteID]; has {
+	if _, has := opts[OptsRouteID]; has {
 		t.Errorf("*route_id wasn't deleted")
 	}
 	//normal check with routeID and APIKey
 	apiKey := "key"
-	opts = map[string]interface{}{RouteID: routeID, APIKey: apiKey}
-	eOut.APIKey = &apiKey
+	opts = map[string]interface{}{OptsRouteID: routeID, OptsAPIKey: apiKey}
+	eOut.OptsAPIKey = &apiKey
 
 	rcv = getArgDispatcherFromOpts(opts)
 	//check if *api_key and *route_id was deleted
-	if _, has := opts[APIKey]; has {
+	if _, has := opts[OptsAPIKey]; has {
 		t.Errorf("*api_key wasn't deleted")
-	} else if _, has := opts[RouteID]; has {
+	} else if _, has := opts[OptsRouteID]; has {
 		t.Errorf("*route_id wasn't deleted")
 	}
 	if !reflect.DeepEqual(eOut, rcv) {
@@ -511,8 +511,8 @@ func TestCGREventWithArgDispatcherClone(t *testing.T) {
 	routeID := "routeid"
 
 	rcv.ArgDispatcher = &ArgDispatcher{
-		APIKey:  &apiKey,
-		RouteID: &routeID,
+		OptsAPIKey:  &apiKey,
+		OptsRouteID: &routeID,
 	}
 	if reflect.DeepEqual(cgrEventWithArgDispatcher.ArgDispatcher, rcv.ArgDispatcher) {
 		t.Errorf("Expected to be different")
@@ -546,8 +546,8 @@ func TestCGREventWithOptsClone(t *testing.T) {
 			},
 		},
 		ArgDispatcher: &ArgDispatcher{
-			APIKey:  StringPointer("api1"),
-			RouteID: StringPointer("route1"),
+			OptsAPIKey:  StringPointer("api1"),
+			OptsRouteID: StringPointer("route1"),
 		},
 		Opts: map[string]interface{}{
 			"Context": MetaSessionS,
@@ -559,8 +559,8 @@ func TestCGREventWithOptsClone(t *testing.T) {
 	}
 	//check vars
 	rcv.ArgDispatcher = &ArgDispatcher{
-		APIKey:  StringPointer("apikey"),
-		RouteID: StringPointer("routeid"),
+		OptsAPIKey:  StringPointer("apikey"),
+		OptsRouteID: StringPointer("routeid"),
 	}
 	if reflect.DeepEqual(cgrEventWithOpts.ArgDispatcher, rcv.ArgDispatcher) {
 		t.Errorf("Expected to be different")
