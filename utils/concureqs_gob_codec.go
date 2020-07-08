@@ -46,18 +46,18 @@ func NewConcReqsGobServerCodec(conn io.ReadWriteCloser) rpc.ServerCodec {
 }
 
 func (c *concReqsGobServerCodec) ReadRequestHeader(r *rpc.Request) error {
-	if err := ConReqs.Allocate(); err != nil {
-		return err
-	}
 	return c.dec.Decode(r)
 }
 
 func (c *concReqsGobServerCodec) ReadRequestBody(body interface{}) error {
+	if err := ConReqs.Allocate(); err != nil {
+		return err
+	}
 	return c.dec.Decode(body)
 }
 
 func (c *concReqsGobServerCodec) WriteResponse(r *rpc.Response, body interface{}) (err error) {
-	defer ConReqs.Deallocate()
+	defer ConReqs.Deallocate(r.Error)
 	if err = c.enc.Encode(r); err != nil {
 		if c.encBuf.Flush() == nil {
 			// Gob couldn't encode the header. Should not happen, so if it does,

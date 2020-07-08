@@ -82,9 +82,6 @@ type clientRequest struct {
 }
 
 func (c *concReqsBiJSONCoded) ReadHeader(req *rpc2.Request, resp *rpc2.Response) error {
-	if err := ConReqs.Allocate(); err != nil {
-		return err
-	}
 	c.msg = message{}
 	if err := c.dec.Decode(&c.msg); err != nil {
 		return err
@@ -137,6 +134,9 @@ func (c *concReqsBiJSONCoded) ReadHeader(req *rpc2.Request, resp *rpc2.Response)
 }
 
 func (c *concReqsBiJSONCoded) ReadRequestBody(x interface{}) error {
+	if err := ConReqs.Allocate(); err != nil {
+		return err
+	}
 	if x == nil {
 		return nil
 	}
@@ -179,7 +179,7 @@ func (c *concReqsBiJSONCoded) WriteRequest(r *rpc2.Request, param interface{}) e
 }
 
 func (c *concReqsBiJSONCoded) WriteResponse(r *rpc2.Response, x interface{}) error {
-	defer ConReqs.Deallocate()
+	defer ConReqs.Deallocate(r.Error)
 	c.mutex.Lock()
 	b, ok := c.pending[r.Seq]
 	if !ok {

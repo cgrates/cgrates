@@ -140,7 +140,7 @@ func (c *jsonServerCodec) ReadRequestBody(x interface{}) error {
 var null = json.RawMessage([]byte("null"))
 
 func (c *jsonServerCodec) WriteResponse(r *rpc.Response, x interface{}) error {
-	defer ConReqs.Deallocate()
+	defer ConReqs.Deallocate(r.Error)
 	c.mutex.Lock()
 	b, ok := c.pending[r.Seq]
 	if !ok {

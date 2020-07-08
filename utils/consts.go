@@ -1331,6 +1331,7 @@ const (
 	CoreSv1       = "CoreSv1"
 	CoreSv1Status = "CoreSv1.Status"
 	CoreSv1Ping   = "CoreSv1.Ping"
+	CoreSv1Sleep  = "CoreSv1.Sleep"
 )
 
 // RouteS APIs

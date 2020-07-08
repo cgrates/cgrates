@@ -57,9 +57,6 @@ func NewConcReqsServerCodec(conn io.ReadWriteCloser) rpc.ServerCodec {
 }
 
 func (c *concReqsServerCodec) ReadRequestHeader(r *rpc.Request) error {
-	if err := ConReqs.Allocate(); err != nil {
-		return err
-	}
 	c.req.reset()
 	if err := c.dec.Decode(&c.req); err != nil {
 		return err
@@ -80,6 +77,9 @@ func (c *concReqsServerCodec) ReadRequestHeader(r *rpc.Request) error {
 }
 
 func (c *concReqsServerCodec) ReadRequestBody(x interface{}) error {
+	if err := ConReqs.Allocate(); err != nil {
+		return err
+	}
 	if x == nil {
 		return nil
 	}
@@ -96,7 +96,7 @@ func (c *concReqsServerCodec) ReadRequestBody(x interface{}) error {
 }
 
 func (c *concReqsServerCodec) WriteResponse(r *rpc.Response, x interface{}) error {
-	defer ConReqs.Deallocate()
+	defer ConReqs.Deallocate(r.Error)
 	c.mutex.Lock()
 	b, ok := c.pending[r.Seq]
 	if !ok {

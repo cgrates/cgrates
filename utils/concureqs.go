@@ -42,6 +42,8 @@ func NewConReqs(reqs int, strategy string) *ConcReqs {
 	return cR
 }
 
+var errDeny = fmt.Errorf("denying request due to maximum active requests reached")
+
 func (cR *ConcReqs) Allocate() (err error) {
 	if cR.nAReqs == 0 {
 		return
@@ -49,7 +51,7 @@ func (cR *ConcReqs) Allocate() (err error) {
 	switch cR.strategy {
 	case MetaBusy:
 		if len(cR.aReqs) == 0 {
-			return fmt.Errorf("denying request due to maximum active requests reached")
+			return errDeny
 		}
 		fallthrough
 	case MetaQueue:
@@ -58,8 +60,8 @@ func (cR *ConcReqs) Allocate() (err error) {
 	return
 }
 
-func (cR *ConcReqs) Deallocate() {
-	if cR.nAReqs == 0 {
+func (cR *ConcReqs) Deallocate(errStr string) {
+	if cR.nAReqs == 0 || errStr == errDeny.Error() { // in case we receive denying request we don't need to put back the slot on channel because we returned error without getting it
 		return
 	}
 	cR.aReqs <- struct{}{}
