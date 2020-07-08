@@ -65,7 +65,7 @@ func (rp *RateProfile) Compile() (err error) {
 type Rate struct {
 	ID             string   // RateID
 	FilterIDs      []string // RateFilterIDs
-	ActivationTime string   //TPActivationInterval have ATime and ETime as strings
+	ActivationTime string   // ActivationTime is a cron formatted time interval
 	Weight         float64  // RateWeight will decide the winner per interval start
 	Blocker        bool     // RateBlocker will make this rate recurrent, deactivating further intervals
 	IntervalRates  []*IntervalRate
