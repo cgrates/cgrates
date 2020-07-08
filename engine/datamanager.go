@@ -733,7 +733,6 @@ func (dm *DataManager) SetFilter(fltr *Filter, withIndex bool) (err error) {
 		}
 	}
 	return
-
 }
 
 func (dm *DataManager) RemoveFilter(tenant, id, transactionID string, withIndex bool) (err error) {
