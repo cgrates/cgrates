@@ -236,11 +236,7 @@ func initLogger(cfg *config.CGRConfig) error {
 	if *syslogger != "" { // Modify the log level if provided by command arguments
 		sylogger = *syslogger
 	}
-	err := utils.Newlogger(sylogger, cfg.GeneralCfg().NodeID)
-	if err != nil {
-		return err
-	}
-	return nil
+	return utils.Newlogger(sylogger, cfg.GeneralCfg().NodeID)
 }
 
 func initConfigSv1(internalConfigChan chan rpcclient.ClientConnector,
@@ -394,7 +390,8 @@ func main() {
 		lgLevel = *logLevel
 	}
 	utils.Logger.SetLogLevel(lgLevel)
-
+	// init the concurrentRequests
+	utils.ConReqs = utils.NewConReqs(cfg.GeneralCfg().ConcurrentRequests, cfg.GeneralCfg().ConcurrentStrategy)
 	utils.Logger.Info(fmt.Sprintf("<CoreS> starting version <%s><%s>", vers, goVers))
 	cfg.LazySanityCheck()
 
