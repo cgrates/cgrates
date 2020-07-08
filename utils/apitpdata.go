@@ -1347,8 +1347,8 @@ type SessionFilter struct {
 
 // ArgDispatcher the basic information for dispatcher
 type ArgDispatcher struct {
-	APIKey  *string
-	RouteID *string
+	OptsAPIKey  *string
+	OptsRouteID *string
 }
 
 // Clone returns a copy of the ArgDispatcher
@@ -1357,11 +1357,11 @@ func (arg *ArgDispatcher) Clone() (clned *ArgDispatcher) {
 		return
 	}
 	clned = new(ArgDispatcher)
-	if arg.APIKey != nil {
-		clned.APIKey = StringPointer(*arg.APIKey)
+	if arg.OptsAPIKey != nil {
+		clned.OptsAPIKey = StringPointer(*arg.OptsAPIKey)
 	}
-	if arg.RouteID != nil {
-		clned.RouteID = StringPointer(*arg.RouteID)
+	if arg.OptsRouteID != nil {
+		clned.OptsRouteID = StringPointer(*arg.OptsRouteID)
 	}
 	return
 }

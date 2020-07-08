@@ -163,7 +163,7 @@ func (sSpls *SortedRoutes) Digest() string {
 
 func (ss *SortedRoute) AsNavigableMap() (nm utils.NavigableMap2) {
 	nm = utils.NavigableMap2{
-		utils.RouteID:         utils.NewNMData(ss.RouteID),
+		utils.OptsRouteID:     utils.NewNMData(ss.RouteID),
 		utils.RouteParameters: utils.NewNMData(ss.RouteParameters),
 	}
 	sd := utils.NavigableMap2{}

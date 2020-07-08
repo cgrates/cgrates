@@ -136,7 +136,7 @@ func testSessionsItTerminatUnexist(t *testing.T) {
 	termArgs := &V1TerminateSessionArgs{
 		TerminateSession: true,
 		Opts: map[string]interface{}{
-			utils.DebitInterval: "10s",
+			utils.OptsDebitInterval: "10s",
 		},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -211,7 +211,7 @@ func testSessionsItUpdateUnexist(t *testing.T) {
 	updtArgs := &V1UpdateSessionArgs{
 		UpdateSession: true,
 		Opts: map[string]interface{}{
-			utils.DebitInterval: "10s",
+			utils.OptsDebitInterval: "10s",
 		},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
