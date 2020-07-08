@@ -154,6 +154,9 @@ func (c *concReqsBiJSONCoded) ReadRequestBody(x interface{}) error {
 }
 
 func (c *concReqsBiJSONCoded) ReadResponseBody(x interface{}) error {
+	if err := ConReqs.Allocate(); err != nil {
+		return err
+	}
 	if x == nil {
 		return nil
 	}

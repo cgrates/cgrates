@@ -1442,6 +1442,7 @@ const (
 	SessionSv1DisconnectWarning          = "SessionSv1.DisconnectWarning"
 	SessionSv1STIRAuthenticate           = "SessionSv1.STIRAuthenticate"
 	SessionSv1STIRIdentity               = "SessionSv1.STIRIdentity"
+	SessionSv1Sleep                      = "SessionSv1.Sleep"
 )
 
 // Responder APIs

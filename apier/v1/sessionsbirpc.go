@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"time"
+
 	"github.com/cenkalti/rpc2"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
@@ -58,6 +60,8 @@ func (ssv1 *SessionSv1) Handlers() map[string]interface{} {
 
 		utils.SessionSv1STIRAuthenticate: ssv1.BiRPCV1STIRAuthenticate,
 		utils.SessionSv1STIRIdentity:     ssv1.BiRPCV1STIRIdentity,
+
+		utils.SessionSv1Sleep: ssv1.BiRPCV1Sleep, // Sleep method is used to test the concurrent requests mechanism
 	}
 }
 
@@ -191,4 +195,10 @@ func (ssv1 *SessionSv1) BiRPCV1STIRAuthenticate(clnt *rpc2.Client,
 func (ssv1 *SessionSv1) BiRPCV1STIRIdentity(clnt *rpc2.Client,
 	args *sessions.V1STIRIdentityArgs, reply *string) error {
 	return ssv1.Ss.BiRPCv1STIRIdentity(nil, args, reply)
+}
+
+func (ssv1 *SessionSv1) BiRPCV1Sleep(clnt *rpc2.Client, arg *DurationArgs, reply *string) error {
+	time.Sleep(arg.DurationTime)
+	*reply = utils.OK
+	return nil
 }

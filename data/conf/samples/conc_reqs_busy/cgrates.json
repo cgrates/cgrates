@@ -5,32 +5,38 @@
 	"node_id": "ConcurrentBusyEngine",
 	"reply_timeout": "50s",
 	"concurrent_requests": 2,
-	"concurrent_strategy": "*busy",
+	"concurrent_strategy": "*busy"
 },
 
 
 "listen": {
 	"rpc_json": ":2012",
 	"rpc_gob": ":2013",
-	"http": ":2080",
+	"http": ":2080"
 },
 
 
 "data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
 	"db_type": "redis",						// data_db type: <redis|mongo>
 	"db_port": 6379, 						// data_db port to reach the database
-	"db_name": "10", 						// data_db database name to connect to
+	"db_name": "10" 						// data_db database name to connect to
 },
 
 
 "stor_db": {
-	"db_password": "CGRateS.org",
+	"db_password": "CGRateS.org"
 },
 
 
 "apiers": {
-	"enabled": true,
+	"enabled": true
 },
 
 
-}
+"sessions": {
+	"enabled": true,
+	"listen_bijson": "127.0.0.1:2014"
+},
+
+
+},
