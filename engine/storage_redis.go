@@ -1469,11 +1469,6 @@ func (rs *RedisStorage) GetFilterDrv(tenant, id string) (r *Filter, err error) {
 	if err = rs.ms.Unmarshal(values, &r); err != nil {
 		return
 	}
-	for _, fltr := range r.Rules {
-		if err = fltr.CompileValues(); err != nil {
-			return
-		}
-	}
 	return
 }
 
