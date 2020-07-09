@@ -660,7 +660,7 @@ const (
 	InternalRPCSet              = "InternalRPCSet"
 	FileName                    = "FileName"
 	MetaBusy                    = "*busy"
-	MetaQueue                   = "*Queue"
+	MetaQueue                   = "*queue"
 )
 
 // Migrator Action

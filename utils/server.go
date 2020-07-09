@@ -31,7 +31,6 @@ import (
 	"net/http"
 	"net/http/pprof"
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"net/url"
 	"reflect"
 	"strings"
@@ -460,7 +459,7 @@ func (s *Server) ServeGOBTLS(addr, serverCrt, serverKey, caCert string,
 			continue
 		}
 		//utils.Logger.Info(fmt.Sprintf("<CGRServer> New incoming connection: %v", conn.RemoteAddr()))
-		go rpc.ServeConn(conn)
+		go rpc.ServeCodec(NewConcReqsGobServerCodec(conn))
 	}
 }
 
@@ -504,7 +503,7 @@ func (s *Server) ServeJSONTLS(addr, serverCrt, serverKey, caCert string,
 		if s.isDispatched {
 			go rpc.ServeCodec(NewCustomJSONServerCodec(conn))
 		} else {
-			go jsonrpc.ServeConn(conn)
+			go rpc.ServeCodec(NewConcReqsServerCodec(conn))
 		}
 	}
 }
@@ -539,7 +538,7 @@ func (s *Server) ServeHTTPTLS(addr, serverCrt, serverKey, caCert string, serverP
 			if s.isDispatched {
 				rpc.ServeCodec(NewCustomJSONServerCodec(ws))
 			} else {
-				jsonrpc.ServeConn(ws)
+				rpc.ServeCodec(NewConcReqsServerCodec(ws))
 			}
 		})
 		if useBasicAuth {
