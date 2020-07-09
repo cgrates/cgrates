@@ -186,9 +186,9 @@ func testA1itDataSession1(t *testing.T) {
 	initArgs := &sessions.V1InitSessionArgs{
 		InitSession: true,
 		Opts: map[string]interface{}{
-			utils.OptsSessionTTL:         "28800s",
-			utils.OptsSessionTTLLastUsed: "0s",
-			utils.OptsSessionTTLUsage:    "0s",
+			utils.SessionTTL:         "28800s",
+			utils.SessionTTLLastUsed: "0s",
+			utils.SessionTTLUsage:    "0s",
 		},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -222,9 +222,9 @@ func testA1itDataSession1(t *testing.T) {
 	updateArgs := &sessions.V1UpdateSessionArgs{
 		UpdateSession: true,
 		Opts: map[string]interface{}{
-			utils.OptsSessionTTL:         "28800s",
-			utils.OptsSessionTTLLastUsed: "2097152s",
-			utils.OptsSessionTTLUsage:    "0s",
+			utils.SessionTTL:         "28800s",
+			utils.SessionTTLLastUsed: "2097152s",
+			utils.SessionTTLUsage:    "0s",
 		},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",

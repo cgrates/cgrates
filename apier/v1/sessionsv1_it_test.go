@@ -903,7 +903,7 @@ func testSSv1ItDynamicDebit(t *testing.T) {
 		InitSession:   true,
 		GetAttributes: true,
 		Opts: map[string]interface{}{
-			utils.OptsDebitInterval: 30 * time.Millisecond,
+			utils.DebitInterval: 30 * time.Millisecond,
 		},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",

@@ -193,25 +193,25 @@ func getArgDispatcherFromOpts(ev map[string]interface{}) (arg *ArgDispatcher) {
 		return
 	}
 	//check if we have APIKey in event and in case it has add it in ArgDispatcher
-	apiKeyIface, hasAPIKey := ev[OptsAPIKey]
+	apiKeyIface, hasAPIKey := ev[APIKey]
 	if hasAPIKey {
-		delete(ev, OptsAPIKey)
+		delete(ev, APIKey)
 		arg = &ArgDispatcher{
-			OptsAPIKey: StringPointer(apiKeyIface.(string)),
+			APIKey: StringPointer(apiKeyIface.(string)),
 		}
 	}
 	//check if we have RouteID in event and in case it has add it in ArgDispatcher
-	routeIDIface, hasRouteID := ev[OptsRouteID]
+	routeIDIface, hasRouteID := ev[RouteID]
 	if !hasRouteID {
 		return
 	}
-	delete(ev, OptsRouteID)
+	delete(ev, RouteID)
 	if !hasAPIKey { //in case we don't have APIKey, but we have RouteID we need to initialize the struct
 		return &ArgDispatcher{
-			OptsRouteID: StringPointer(routeIDIface.(string)),
+			RouteID: StringPointer(routeIDIface.(string)),
 		}
 	}
-	arg.OptsRouteID = StringPointer(routeIDIface.(string))
+	arg.RouteID = StringPointer(routeIDIface.(string))
 	return
 }
 

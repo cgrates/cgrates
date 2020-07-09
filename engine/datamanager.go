@@ -332,8 +332,8 @@ func (dm *DataManager) GetDestination(key string, skipCache bool, transactionID 
 					Arg:       key,
 					TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 					ArgDispatcher: &utils.ArgDispatcher{
-						OptsAPIKey:  utils.StringPointer(itm.APIKey),
-						OptsRouteID: utils.StringPointer(itm.RouteID),
+						APIKey:  utils.StringPointer(itm.APIKey),
+						RouteID: utils.StringPointer(itm.RouteID),
 					},
 				}, &dest); err == nil {
 				err = dm.dataDB.SetDestinationDrv(dest, utils.NonTransactional)
