@@ -296,11 +296,11 @@ func (sm *FSsessions) Connect() error {
 		}
 		sm.conns[connIdx] = fSock
 		utils.Logger.Info(fmt.Sprintf("<%s> successfully connected to FreeSWITCH at: <%s>", utils.FreeSWITCHAgent, connCfg.Address))
-		go func() { // Start reading in own goroutine, return on error
-			if err := sm.conns[connIdx].ReadEvents(); err != nil {
+		go func(fsock *fsock.FSock) { // Start reading in own goroutine, return on error
+			if err := fsock.ReadEvents(); err != nil {
 				errChan <- err
 			}
-		}()
+		}(fSock)
 		fsSenderPool, err := fsock.NewFSockPool(5, connCfg.Address, connCfg.Password, 1, sm.cfg.MaxWaitConnection,
 			make(map[string][]func(string, int)), make(map[string][]string), utils.Logger.GetSyslog(), connIdx)
 		if err != nil {
