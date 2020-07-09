@@ -389,8 +389,8 @@ func testStsITMigrateFromv1(t *testing.T) {
 
 	if vrs, err := stsMigrator.dmOut.DataManager().DataDB().GetVersions(utils.StatS); err != nil {
 		t.Errorf("error: <%s> when updating Stats version into dataDB", err.Error())
-	} else if vrs[utils.StatS] != 3 {
-		t.Errorf("Expecting: 3, received: %+v", vrs[utils.StatS])
+	} else if vrs[utils.StatS] != 4 {
+		t.Errorf("Expecting: 4, received: %+v", vrs[utils.StatS])
 	}
 
 	//from V1 to V2

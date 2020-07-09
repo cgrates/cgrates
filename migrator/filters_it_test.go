@@ -210,6 +210,7 @@ func testFltrITMigrateAndMove(t *testing.T) {
 		} else if vrs[utils.RQF] != 1 {
 			t.Errorf("Unexpected version returned: %d", vrs[utils.RQF])
 		}
+
 		//migrate Filters
 		err, _ = fltrMigrator.Migrate([]string{utils.MetaFilters})
 		if err != nil {
@@ -379,6 +380,7 @@ func testFltrITMigratev2(t *testing.T) {
 	} else if vrs[utils.RQF] != 2 {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.RQF])
 	}
+
 	//migrate Filters
 	err, _ = fltrMigrator.Migrate([]string{utils.MetaFilters})
 	if err != nil {

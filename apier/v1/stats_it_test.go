@@ -374,10 +374,10 @@ func testV1STSSetStatQueueProfile(t *testing.T) {
 			QueueLength: 10,
 			TTL:         time.Duration(10) * time.Second,
 			Metrics: []*engine.MetricWithFilters{
-				&engine.MetricWithFilters{
+				{
 					MetricID: utils.MetaACD,
 				},
-				&engine.MetricWithFilters{
+				{
 					MetricID: utils.MetaTCD,
 				},
 			},

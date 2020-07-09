@@ -714,7 +714,7 @@ func (dm *DataManager) SetFilter(fltr *Filter, withIndex bool) (err error) {
 		return
 	}
 	if withIndex {
-		if err = updateFilterIndex(dm, oldFlt, fltr); err != nil {
+		if err = UpdateFilterIndex(dm, oldFlt, fltr); err != nil {
 			return
 		}
 	}

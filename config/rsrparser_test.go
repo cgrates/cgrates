@@ -31,7 +31,7 @@ func TestNewRSRParsers(t *testing.T) {
 	eRSRParsers := RSRParsers{
 		&RSRParser{Rules: "Value1", path: "Value1"},
 		&RSRParser{Rules: "Value2", path: "Value2"},
-		&RSRParser{Rules: "~Header3", path: "~Header3"},
+		&RSRParser{Rules: "~Header3", path: "~Header3", rsrRules: make([]*utils.ReSearchReplace, 0)},
 		&RSRParser{Rules: "~Header4:s/a/${1}b/{*duration_seconds&*round:2}",
 			path: "~Header4",
 			rsrRules: []*utils.ReSearchReplace{{
@@ -267,9 +267,9 @@ func TestRSRParsersParseValue(t *testing.T) {
 func TestNewRSRParserMustCompile(t *testing.T) {
 	rsr := NewRSRParserMustCompile("~*req.Account")
 	ePrsr := &RSRParser{
-		Rules: "~*req.Account",
-
-		path: "~*req.Account",
+		Rules:    "~*req.Account",
+		rsrRules: make([]*utils.ReSearchReplace, 0),
+		path:     "~*req.Account",
 	}
 	if !reflect.DeepEqual(rsr, ePrsr) {
 		t.Errorf("Expected %+v received %+v", ePrsr, rsr)

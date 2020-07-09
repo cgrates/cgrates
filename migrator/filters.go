@@ -326,11 +326,6 @@ func (m *Migrator) migrateFilters() (err error) {
 				if fltr, err = m.migrateRequestFilterV4(v4Fltr); err != nil && err != utils.ErrNoMoreData {
 					return
 				}
-
-				// remove the filter to not compile the old rule on set
-				// if err = m.dmOut.DataManager().DataDB().SetFilterDrv(fltr); err != nil {
-				// return
-				// }
 				version = 5
 			}
 			if version == current[utils.RQF] || err == utils.ErrNoMoreData {
@@ -342,7 +337,7 @@ func (m *Migrator) migrateFilters() (err error) {
 			break
 		}
 		if !m.dryRun {
-			if err = m.dmOut.DataManager().SetFilter(fltr, true); err != nil {
+			if err = m.setFilterv5WithoutCompile(fltr); err != nil {
 				return fmt.Errorf("Error: <%s> when setting filter with tenant: <%s> and id: <%s> after migration",
 					err.Error(), fltr.Tenant, fltr.ID)
 			}
@@ -905,4 +900,17 @@ func migrateInlineFilterV4(v4fltIDs []string) (fltrIDs []string, err error) {
 		}
 	}
 	return
+}
+
+// setFilterv5WithoutCompile we need a method that get's the filter from DataDB without compiling the filter rules
+func (m *Migrator) setFilterv5WithoutCompile(fltr *engine.Filter) (err error) {
+	var oldFlt *engine.Filter
+	if oldFlt, err = m.dmOut.DataManager().DataDB().GetFilterDrv(fltr.Tenant, fltr.ID); err != nil &&
+		err != utils.ErrNotFound {
+		return
+	}
+	if err = m.dmOut.DataManager().DataDB().SetFilterDrv(fltr); err != nil {
+		return
+	}
+	return engine.UpdateFilterIndex(m.dmOut.DataManager(), oldFlt, fltr)
 }

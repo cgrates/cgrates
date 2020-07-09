@@ -448,9 +448,10 @@ func removeIndexFiltersItem(dm *DataManager, idxItmType, tnt, itemID string, fil
 	return
 }
 
-// updateFilterIndex  will update the indexes for the new Filter
+// UpdateFilterIndex  will update the indexes for the new Filter
 // we do not care what is added
-func updateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
+// exported for the migrator
+func UpdateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 	if oldFlt == nil { // no filter before so no index to update
 		return // nothing to update
 	}

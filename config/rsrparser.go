@@ -222,6 +222,7 @@ func (prsr *RSRParser) Compile() (err error) {
 	// dynamic content via attributeNames
 	spltRules := spltRgxp.Split(parserRules, -1)
 	prsr.path = spltRules[0] // in form ~hdr_name
+	prsr.rsrRules = make([]*utils.ReSearchReplace, 0, len(spltRules[1:]))
 	if len(spltRules) > 1 {
 		for _, ruleStr := range spltRules[1:] { // :s/ already removed through split
 			allMatches := rulesRgxp.FindStringSubmatch(ruleStr)
@@ -256,11 +257,7 @@ func (prsr *RSRParser) parseValue(value string) (out string, err error) {
 	for _, rsRule := range prsr.rsrRules {
 		value = rsRule.Process(value)
 	}
-
-	if out, err = prsr.converters.ConvertString(value); err != nil {
-		return
-	}
-	return
+	return prsr.converters.ConvertString(value)
 }
 
 // ParseValue will parse the value out considering converters
