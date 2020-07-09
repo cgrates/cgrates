@@ -37,6 +37,8 @@ import (
 	"sync"
 	"time"
 
+	rpc2_jsonrpc "github.com/cenkalti/rpc2/jsonrpc"
+
 	"github.com/cenkalti/rpc2"
 	"golang.org/x/net/websocket"
 )
@@ -327,7 +329,7 @@ func (s *Server) ServeBiJSON(addr string, onConn func(*rpc2.Client), onDis func(
 				log.Fatal(err)
 				return // stop if we get Accept error
 			}
-			go s.birpcSrv.ServeCodec(NewConcReqsBiJSONCoded(conn))
+			go s.birpcSrv.ServeCodec(rpc2_jsonrpc.NewJSONCodec(conn))
 		}
 	}(lBiJSON)
 	<-s.stopbiRPCServer // wait until server is stoped to close the listener

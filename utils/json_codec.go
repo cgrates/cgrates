@@ -51,6 +51,8 @@ type jsonServerCodec struct {
 	mutex   sync.Mutex // protects seq, pending
 	seq     uint64
 	pending map[uint64]*json.RawMessage
+
+	allocated bool // populated if we have allocated a channel for concurrent requests
 }
 
 // NewCustomJSONServerCodec is used only when DispatcherS is active to handle APIer methods generically
@@ -112,6 +114,7 @@ func (c *jsonServerCodec) ReadRequestBody(x interface{}) error {
 	if err := ConReqs.Allocate(); err != nil {
 		return err
 	}
+	c.allocated = true
 	if x == nil {
 		return nil
 	}
@@ -140,7 +143,12 @@ func (c *jsonServerCodec) ReadRequestBody(x interface{}) error {
 var null = json.RawMessage([]byte("null"))
 
 func (c *jsonServerCodec) WriteResponse(r *rpc.Response, x interface{}) error {
-	defer ConReqs.Deallocate(r.Error)
+	if c.allocated {
+		defer func() {
+			ConReqs.Deallocate()
+			c.allocated = false
+		}()
+	}
 	c.mutex.Lock()
 	b, ok := c.pending[r.Seq]
 	if !ok {

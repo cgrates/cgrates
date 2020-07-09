@@ -25,16 +25,16 @@ import (
 var ConReqs *ConcReqs
 
 type ConcReqs struct {
-	aReqs    chan struct{}
-	nAReqs   int
+	limit    int
 	strategy string
+	aReqs    chan struct{}
 }
 
 func NewConReqs(reqs int, strategy string) *ConcReqs {
 	cR := &ConcReqs{
-		aReqs:    make(chan struct{}, reqs),
-		nAReqs:   reqs,
+		limit:    reqs,
 		strategy: strategy,
+		aReqs:    make(chan struct{}, reqs),
 	}
 	for i := 0; i < reqs; i++ {
 		cR.aReqs <- struct{}{}
@@ -45,7 +45,7 @@ func NewConReqs(reqs int, strategy string) *ConcReqs {
 var errDeny = fmt.Errorf("denying request due to maximum active requests reached")
 
 func (cR *ConcReqs) Allocate() (err error) {
-	if cR.nAReqs == 0 {
+	if cR.limit == 0 {
 		return
 	}
 	switch cR.strategy {
@@ -60,8 +60,8 @@ func (cR *ConcReqs) Allocate() (err error) {
 	return
 }
 
-func (cR *ConcReqs) Deallocate(errStr string) {
-	if cR.nAReqs == 0 || errStr == errDeny.Error() { // in case we receive denying request we don't need to put back the slot on channel because we returned error without getting it
+func (cR *ConcReqs) Deallocate() {
+	if cR.limit == 0 {
 		return
 	}
 	cR.aReqs <- struct{}{}

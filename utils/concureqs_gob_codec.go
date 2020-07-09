@@ -28,11 +28,12 @@ import (
 )
 
 type concReqsGobServerCodec struct {
-	rwc    io.ReadWriteCloser
-	dec    *gob.Decoder
-	enc    *gob.Encoder
-	encBuf *bufio.Writer
-	closed bool
+	rwc       io.ReadWriteCloser
+	dec       *gob.Decoder
+	enc       *gob.Encoder
+	encBuf    *bufio.Writer
+	closed    bool
+	allocated bool // populated if we have allocated a channel for concurrent requests
 }
 
 func NewConcReqsGobServerCodec(conn io.ReadWriteCloser) rpc.ServerCodec {
@@ -53,11 +54,17 @@ func (c *concReqsGobServerCodec) ReadRequestBody(body interface{}) error {
 	if err := ConReqs.Allocate(); err != nil {
 		return err
 	}
+	c.allocated = true
 	return c.dec.Decode(body)
 }
 
 func (c *concReqsGobServerCodec) WriteResponse(r *rpc.Response, body interface{}) (err error) {
-	defer ConReqs.Deallocate(r.Error)
+	if c.allocated {
+		defer func() {
+			ConReqs.Deallocate()
+			c.allocated = false
+		}()
+	}
 	if err = c.enc.Encode(r); err != nil {
 		if c.encBuf.Flush() == nil {
 			// Gob couldn't encode the header. Should not happen, so if it does,
