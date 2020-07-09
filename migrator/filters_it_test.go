@@ -169,7 +169,7 @@ func testFltrITMigrateAndMove(t *testing.T) {
 			{
 				FilterIDs: []string{"*string:Account:1001"},
 				Path:      utils.MetaReq + utils.NestingSep + "Account",
-				Value:     config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
+				Value:     config.NewRSRParsersMustCompile("1002", utils.INFIELD_SEP),
 			},
 		},
 		Weight: 10,
@@ -184,7 +184,7 @@ func testFltrITMigrateAndMove(t *testing.T) {
 			{
 				FilterIDs: []string{"*string:~*req.Account:1001"},
 				Path:      utils.MetaReq + utils.NestingSep + "Account",
-				Value:     config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
+				Value:     config.NewRSRParsersMustCompile("1002", utils.INFIELD_SEP),
 			},
 		},
 		Weight: 10,
@@ -210,6 +210,7 @@ func testFltrITMigrateAndMove(t *testing.T) {
 		} else if vrs[utils.RQF] != 1 {
 			t.Errorf("Unexpected version returned: %d", vrs[utils.RQF])
 		}
+
 		//migrate Filters
 		err, _ = fltrMigrator.Migrate([]string{utils.MetaFilters})
 		if err != nil {
@@ -218,7 +219,7 @@ func testFltrITMigrateAndMove(t *testing.T) {
 		//check if version was updated
 		if vrs, err := fltrMigrator.dmOut.DataManager().DataDB().GetVersions(""); err != nil {
 			t.Error(err)
-		} else if vrs[utils.RQF] != 4 {
+		} else if vrs[utils.RQF] != 5 {
 			t.Errorf("Unexpected version returned: %d", vrs[utils.RQF])
 		}
 		//check if Filters was migrate correctly
@@ -303,7 +304,7 @@ func testFltrITMigratev2(t *testing.T) {
 			{
 				Type:      utils.MetaRSR,
 				FieldName: utils.EmptyString,
-				Values:    []string{"~Tenant(~^cgr.*\\.org$)"},
+				Values:    []string{`~Tenant(~^cgr.*\.org$)`},
 			},
 		},
 	}
@@ -323,8 +324,8 @@ func testFltrITMigratev2(t *testing.T) {
 			},
 			{
 				Type:    utils.MetaRSR,
-				Element: utils.EmptyString,
-				Values:  []string{"~*req.Tenant(~^cgr.*\\.org$)"},
+				Element: "~*req.Tenant",
+				Values:  []string{"~^cgr.*\\.org$"},
 			},
 		},
 	}
@@ -339,7 +340,7 @@ func testFltrITMigratev2(t *testing.T) {
 			{
 				FilterIDs: []string{"*string:~Account:1001"},
 				Path:      utils.MetaReq + utils.NestingSep + "Account",
-				Value:     config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
+				Value:     config.NewRSRParsersMustCompile("1002", utils.INFIELD_SEP),
 			},
 		},
 		Weight: 10,
@@ -354,7 +355,7 @@ func testFltrITMigratev2(t *testing.T) {
 			{
 				FilterIDs: []string{"*string:~*req.Account:1001"},
 				Path:      utils.MetaReq + utils.NestingSep + "Account",
-				Value:     config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
+				Value:     config.NewRSRParsersMustCompile("1002", utils.INFIELD_SEP),
 			},
 		},
 		Weight: 10,
@@ -379,6 +380,7 @@ func testFltrITMigratev2(t *testing.T) {
 	} else if vrs[utils.RQF] != 2 {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.RQF])
 	}
+
 	//migrate Filters
 	err, _ = fltrMigrator.Migrate([]string{utils.MetaFilters})
 	if err != nil {
@@ -387,7 +389,7 @@ func testFltrITMigratev2(t *testing.T) {
 	//check if version was updated
 	if vrs, err := fltrMigrator.dmOut.DataManager().DataDB().GetVersions(""); err != nil {
 		t.Error(err)
-	} else if vrs[utils.RQF] != 4 {
+	} else if vrs[utils.RQF] != 5 {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.RQF])
 	}
 	//check if Filters was migrate correctly
@@ -464,8 +466,8 @@ func testFltrITMigratev3(t *testing.T) {
 			},
 			{
 				Type:    utils.MetaRSR,
-				Element: utils.EmptyString,
-				Values:  []string{"~*req.Tenant(~^cgr.*\\.org$)"},
+				Element: "~*req.Tenant",
+				Values:  []string{"~^cgr.*\\.org$"},
 			},
 		},
 	}
@@ -493,7 +495,7 @@ func testFltrITMigratev3(t *testing.T) {
 	//check if version was updated
 	if vrs, err := fltrMigrator.dmOut.DataManager().DataDB().GetVersions(""); err != nil {
 		t.Error(err)
-	} else if vrs[utils.RQF] != 4 {
+	} else if vrs[utils.RQF] != 5 {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.RQF])
 	}
 	//check if Filters was migrate correctly

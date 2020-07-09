@@ -249,7 +249,8 @@ cgrates.org,Threshold1,*string:~*req.Account:1001;*string:~*req.RunID:*default,2
 #Tenant[0],ID[1],Type[2],Element[3],Values[4],ActivationInterval[5]
 cgrates.org,FLTR_1,*string,~*req.Account,1001;1002,2014-07-29T15:00:00Z
 cgrates.org,FLTR_1,*prefix,~*req.Destination,10;20,2014-07-29T15:00:00Z
-cgrates.org,FLTR_1,*rsr,,~*req.Subject(~^1.*1$);~*req.Destination(1002),
+cgrates.org,FLTR_1,*rsr,~*req.Subject,~^1.*1$,
+cgrates.org,FLTR_1,*rsr,~*req.Destination,1002,
 cgrates.org,FLTR_ACNT_dan,*string,~*req.Account,dan,2014-07-29T15:00:00Z
 cgrates.org,FLTR_DST_DE,*destinations,~*req.Destination,DST_DE,2014-07-29T15:00:00Z
 cgrates.org,FLTR_DST_NL,*destinations,~*req.Destination,DST_NL,2014-07-29T15:00:00Z

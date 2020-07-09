@@ -50,7 +50,7 @@ func (m *Migrator) migrateCurrentResource() (err error) {
 		if err := m.dmIN.DataManager().RemoveResourceProfile(tntID[0], tntID[1], utils.NonTransactional, false); err != nil {
 			return err
 		}
-		m.stats[utils.Resource] += 1
+		m.stats[utils.Resource]++
 	}
 	return
 }
@@ -62,14 +62,39 @@ func (m *Migrator) migrateResources() (err error) {
 		return
 	}
 
-	switch vrs[utils.Resource] {
-	case current[utils.Resource]:
-		if m.sameDataDB {
+	migrated := true
+	for {
+		version := vrs[utils.Resource]
+		for {
+			switch version {
+			default:
+				return fmt.Errorf("Unsupported version %v", version)
+			case current[utils.Resource]:
+				migrated = false
+				if m.sameDataDB {
+					break
+				}
+				if err = m.migrateCurrentResource(); err != nil {
+					return
+				}
+			}
+			if version == current[utils.Resource] || err == utils.ErrNoMoreData {
+				break
+			}
+		}
+		if err == utils.ErrNoMoreData || !migrated {
 			break
 		}
-		if err = m.migrateCurrentResource(); err != nil {
-			return err
-		}
+		// if !m.dryRun {
+		// if err = m.dmIN.DataManager().SetResourceProfile(v2, true); err != nil {
+		// return
+		// }
+		// }
+		m.stats[utils.Resource]++
+	}
+	// All done, update version wtih current one
+	if err = m.setVersions(utils.Resource); err != nil {
+		return
 	}
 	return m.ensureIndexesDataDB(engine.ColRsP)
 }

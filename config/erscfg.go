@@ -170,7 +170,7 @@ func (er *EventReaderCfg) loadFromJsonCfg(jsnCfg *EventReaderJsonCfg, sep string
 		er.XmlRootPath = utils.ParseHierarchyPath(*jsnCfg.Xml_root_path, utils.EmptyString)
 	}
 	if jsnCfg.Tenant != nil {
-		if er.Tenant, err = NewRSRParsers(*jsnCfg.Tenant, true, sep); err != nil {
+		if er.Tenant, err = NewRSRParsers(*jsnCfg.Tenant, sep); err != nil {
 			return err
 		}
 	}

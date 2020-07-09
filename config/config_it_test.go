@@ -439,17 +439,17 @@ func testCGRConfigReloadERs(t *testing.T) {
 	flags, _ := utils.FlagsWithParamsFromSlice([]string{"*dryrun"})
 	flagsDefault, _ := utils.FlagsWithParamsFromSlice([]string{})
 	content := []*FCTemplate{
-		{Tag: utils.ToR, Path: utils.MetaCgreq + utils.NestingSep + utils.ToR, Type: utils.MetaVariable, Value: NewRSRParsersMustCompile("~*req.2", true, utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
-		{Tag: utils.OriginID, Path: utils.MetaCgreq + utils.NestingSep + utils.OriginID, Type: utils.MetaVariable, Value: NewRSRParsersMustCompile("~*req.3", true, utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
-		{Tag: utils.RequestType, Path: utils.MetaCgreq + utils.NestingSep + utils.RequestType, Type: utils.MetaVariable, Value: NewRSRParsersMustCompile("~*req.4", true, utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
-		{Tag: utils.Tenant, Path: utils.MetaCgreq + utils.NestingSep + utils.Tenant, Type: utils.MetaVariable, Value: NewRSRParsersMustCompile("~*req.6", true, utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
-		{Tag: utils.Category, Path: utils.MetaCgreq + utils.NestingSep + utils.Category, Type: utils.MetaVariable, Value: NewRSRParsersMustCompile("~*req.7", true, utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
-		{Tag: utils.Account, Path: utils.MetaCgreq + utils.NestingSep + utils.Account, Type: utils.MetaVariable, Value: NewRSRParsersMustCompile("~*req.8", true, utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
-		{Tag: utils.Subject, Path: utils.MetaCgreq + utils.NestingSep + utils.Subject, Type: utils.MetaVariable, Value: NewRSRParsersMustCompile("~*req.9", true, utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
-		{Tag: utils.Destination, Path: utils.MetaCgreq + utils.NestingSep + utils.Destination, Type: utils.MetaVariable, Value: NewRSRParsersMustCompile("~*req.10", true, utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
-		{Tag: utils.SetupTime, Path: utils.MetaCgreq + utils.NestingSep + utils.SetupTime, Type: utils.MetaVariable, Value: NewRSRParsersMustCompile("~*req.11", true, utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
-		{Tag: utils.AnswerTime, Path: utils.MetaCgreq + utils.NestingSep + utils.AnswerTime, Type: utils.MetaVariable, Value: NewRSRParsersMustCompile("~*req.12", true, utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
-		{Tag: utils.Usage, Path: utils.MetaCgreq + utils.NestingSep + utils.Usage, Type: utils.MetaVariable, Value: NewRSRParsersMustCompile("~*req.13", true, utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
+		{Tag: utils.ToR, Path: utils.MetaCgreq + utils.NestingSep + utils.ToR, Type: utils.MetaVariable, Value: NewRSRParsersMustCompile("~*req.2", utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
+		{Tag: utils.OriginID, Path: utils.MetaCgreq + utils.NestingSep + utils.OriginID, Type: utils.MetaVariable, Value: NewRSRParsersMustCompile("~*req.3", utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
+		{Tag: utils.RequestType, Path: utils.MetaCgreq + utils.NestingSep + utils.RequestType, Type: utils.MetaVariable, Value: NewRSRParsersMustCompile("~*req.4", utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
+		{Tag: utils.Tenant, Path: utils.MetaCgreq + utils.NestingSep + utils.Tenant, Type: utils.MetaVariable, Value: NewRSRParsersMustCompile("~*req.6", utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
+		{Tag: utils.Category, Path: utils.MetaCgreq + utils.NestingSep + utils.Category, Type: utils.MetaVariable, Value: NewRSRParsersMustCompile("~*req.7", utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
+		{Tag: utils.Account, Path: utils.MetaCgreq + utils.NestingSep + utils.Account, Type: utils.MetaVariable, Value: NewRSRParsersMustCompile("~*req.8", utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
+		{Tag: utils.Subject, Path: utils.MetaCgreq + utils.NestingSep + utils.Subject, Type: utils.MetaVariable, Value: NewRSRParsersMustCompile("~*req.9", utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
+		{Tag: utils.Destination, Path: utils.MetaCgreq + utils.NestingSep + utils.Destination, Type: utils.MetaVariable, Value: NewRSRParsersMustCompile("~*req.10", utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
+		{Tag: utils.SetupTime, Path: utils.MetaCgreq + utils.NestingSep + utils.SetupTime, Type: utils.MetaVariable, Value: NewRSRParsersMustCompile("~*req.11", utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
+		{Tag: utils.AnswerTime, Path: utils.MetaCgreq + utils.NestingSep + utils.AnswerTime, Type: utils.MetaVariable, Value: NewRSRParsersMustCompile("~*req.12", utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
+		{Tag: utils.Usage, Path: utils.MetaCgreq + utils.NestingSep + utils.Usage, Type: utils.MetaVariable, Value: NewRSRParsersMustCompile("~*req.13", utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
 	}
 	for _, v := range content {
 		v.ComputePath()
@@ -588,8 +588,7 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 			"Type":             "*variable",
 			"Value": []interface{}{
 				map[string]interface{}{
-					"AllFiltersMatch": true,
-					"Rules":           "~*req.2",
+					"Rules": "~*req.2",
 				}},
 			"Width": 0,
 		},
@@ -613,8 +612,7 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 			"Type":             "*variable",
 			"Value": []interface{}{
 				map[string]interface{}{
-					"AllFiltersMatch": true,
-					"Rules":           "~*req.3",
+					"Rules": "~*req.3",
 				}},
 			"Width": 0,
 		},
@@ -638,8 +636,7 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 			"Type":             "*variable",
 			"Value": []interface{}{
 				map[string]interface{}{
-					"AllFiltersMatch": true,
-					"Rules":           "~*req.4",
+					"Rules": "~*req.4",
 				}},
 			"Width": 0,
 		},
@@ -663,8 +660,7 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 			"Type":             "*variable",
 			"Value": []interface{}{
 				map[string]interface{}{
-					"AllFiltersMatch": true,
-					"Rules":           "~*req.6",
+					"Rules": "~*req.6",
 				}},
 			"Width": 0,
 		},
@@ -688,8 +684,7 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 			"Type":             "*variable",
 			"Value": []interface{}{
 				map[string]interface{}{
-					"AllFiltersMatch": true,
-					"Rules":           "~*req.7",
+					"Rules": "~*req.7",
 				}},
 			"Width": 0,
 		},
@@ -713,8 +708,7 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 			"Type":             "*variable",
 			"Value": []interface{}{
 				map[string]interface{}{
-					"AllFiltersMatch": true,
-					"Rules":           "~*req.8",
+					"Rules": "~*req.8",
 				}},
 			"Width": 0,
 		},
@@ -738,8 +732,7 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 			"Type":             "*variable",
 			"Value": []interface{}{
 				map[string]interface{}{
-					"AllFiltersMatch": true,
-					"Rules":           "~*req.9",
+					"Rules": "~*req.9",
 				}},
 			"Width": 0,
 		},
@@ -763,8 +756,7 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 			"Type":             "*variable",
 			"Value": []interface{}{
 				map[string]interface{}{
-					"AllFiltersMatch": true,
-					"Rules":           "~*req.10",
+					"Rules": "~*req.10",
 				}},
 			"Width": 0,
 		},
@@ -788,8 +780,7 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 			"Type":             "*variable",
 			"Value": []interface{}{
 				map[string]interface{}{
-					"AllFiltersMatch": true,
-					"Rules":           "~*req.11",
+					"Rules": "~*req.11",
 				}},
 			"Width": 0,
 		},
@@ -813,8 +804,7 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 			"Type":             "*variable",
 			"Value": []interface{}{
 				map[string]interface{}{
-					"AllFiltersMatch": true,
-					"Rules":           "~*req.12",
+					"Rules": "~*req.12",
 				}},
 			"Width": 0,
 		},
@@ -838,8 +828,7 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 			"Type":             "*variable",
 			"Value": []interface{}{
 				map[string]interface{}{
-					"AllFiltersMatch": true,
-					"Rules":           "~*req.13",
+					"Rules": "~*req.13",
 				}},
 			"Width": 0,
 		},

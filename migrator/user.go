@@ -64,7 +64,7 @@ func userProfile2attributeProfile(user *v1UserProfile) (attr *engine.AttributePr
 	if user.Tenant != attr.Tenant {
 		attr.Attributes = append(attr.Attributes, &engine.Attribute{
 			Path:  utils.MetaTenant,
-			Value: config.NewRSRParsersMustCompile(user.Tenant, true, utils.INFIELD_SEP),
+			Value: config.NewRSRParsersMustCompile(user.Tenant, utils.INFIELD_SEP),
 			Type:  utils.META_CONSTANT,
 		})
 	}
@@ -82,7 +82,7 @@ func userProfile2attributeProfile(user *v1UserProfile) (attr *engine.AttributePr
 		}
 		attr.Attributes = append(attr.Attributes, &engine.Attribute{
 			Path:  path,
-			Value: config.NewRSRParsersMustCompile(substitute, true, utils.INFIELD_SEP),
+			Value: config.NewRSRParsersMustCompile(substitute, utils.INFIELD_SEP),
 			Type:  utils.MetaVariable,
 		})
 	}

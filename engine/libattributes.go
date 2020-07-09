@@ -112,7 +112,7 @@ func (ext *ExternalAttributeProfile) AsAttributeProfile() (attr *AttributeProfil
 			return nil, utils.NewErrMandatoryIeMissing("Value")
 		}
 		attr.Attributes[i] = new(Attribute)
-		if attr.Attributes[i].Value, err = config.NewRSRParsers(extAttr.Value, true, utils.INFIELD_SEP); err != nil {
+		if attr.Attributes[i].Value, err = config.NewRSRParsers(extAttr.Value, utils.INFIELD_SEP); err != nil {
 			return nil, err
 		}
 		attr.Attributes[i].Type = extAttr.Type
@@ -136,14 +136,14 @@ func NewAttributeFromInline(tenant, inlnRule string) (attr *AttributeProfile, er
 		return nil, fmt.Errorf("inline parse error for string: <%s>", inlnRule)
 	}
 	var vals config.RSRParsers
-	if vals, err = config.NewRSRParsers(strings.Join(ruleSplt[2:], utils.InInFieldSep), true, utils.INFIELD_SEP); err != nil {
+	if vals, err = config.NewRSRParsers(strings.Join(ruleSplt[2:], utils.InInFieldSep), utils.INFIELD_SEP); err != nil {
 		return nil, err
 	}
 	attr = &AttributeProfile{
 		Tenant:   tenant,
 		ID:       inlnRule,
 		Contexts: []string{utils.META_ANY},
-		Attributes: []*Attribute{&Attribute{
+		Attributes: []*Attribute{{
 			Path:  ruleSplt[1],
 			Type:  ruleSplt[0],
 			Value: vals,

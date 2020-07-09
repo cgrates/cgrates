@@ -171,26 +171,26 @@ func (m *Migrator) migrateAttributeProfile() (err error) {
 	var v3Attr *v3AttributeProfile
 	var v4Attr *v4AttributeProfile
 	var v5Attr *engine.AttributeProfile
+	var v6Attr *engine.AttributeProfile
 	for {
 		// One attribute profile at a time
 		version := vrs[utils.Attributes]
 		for {
 			//Keep migrating until Attribute Profile reaches latest version
 			switch version {
+			default:
+				return fmt.Errorf("Unsupported version %v", version)
 			case current[utils.Attributes]:
+				migrated = false
 				if m.sameDataDB {
-					migrated = false
 					break
 				}
-				if err = m.migrateCurrentAttributeProfile(); err != nil {
-					return err
+				if err = m.migrateCurrentAttributeProfile(); err != nil { //generator like v1,2,3,4
+					return
 				}
-				version = 5
-				migrated = false
-				break
 			case 1: // Migrate from V1 to V4
 				if v4Attr, err = m.migrateV1ToV4AttributeProfile(); err != nil && err != utils.ErrNoMoreData {
-					return err
+					return
 				} else if err == utils.ErrNoMoreData {
 					break
 				}
@@ -198,7 +198,7 @@ func (m *Migrator) migrateAttributeProfile() (err error) {
 				version = 4
 			case 2: // Migrate from V2 to V3 (fallthrough untill latest version)
 				if v3Attr, err = m.migrateV2ToV3AttributeProfile(v2Attr); err != nil && err != utils.ErrNoMoreData {
-					return err
+					return
 				} else if err == utils.ErrNoMoreData {
 					break
 				}
@@ -206,7 +206,7 @@ func (m *Migrator) migrateAttributeProfile() (err error) {
 				fallthrough
 			case 3: // Migrate from V3 to V4
 				if v4Attr, err = m.migrateV3ToV4AttributeProfile(v3Attr); err != nil && err != utils.ErrNoMoreData {
-					return err
+					return
 				} else if err == utils.ErrNoMoreData {
 					break
 				}
@@ -214,11 +214,19 @@ func (m *Migrator) migrateAttributeProfile() (err error) {
 				fallthrough
 			case 4: // Migrate from V4 to V5
 				if v5Attr, err = m.migrateV4ToV5AttributeProfile(v4Attr); err != nil && err != utils.ErrNoMoreData {
-					return err
+					return
 				} else if err == utils.ErrNoMoreData {
 					break
 				}
 				version = 5
+				fallthrough
+			case 5:
+				if v6Attr, err = m.migrateV5ToV6AttributeProfile(v5Attr); err != nil && err != utils.ErrNoMoreData {
+					return
+				} else if err == utils.ErrNoMoreData {
+					break
+				}
+				version = 6
 			}
 			if version == current[utils.Attributes] || err == utils.ErrNoMoreData {
 				break
@@ -228,14 +236,14 @@ func (m *Migrator) migrateAttributeProfile() (err error) {
 			break
 		}
 
-		if !m.dryRun && migrated {
+		if !m.dryRun {
 			if vrs[utils.Attributes] == 1 {
-				if err := m.dmOut.DataManager().DataDB().SetAttributeProfileDrv(v5Attr); err != nil {
-					return err
+				if err = m.dmOut.DataManager().DataDB().SetAttributeProfileDrv(v6Attr); err != nil {
+					return
 				}
 			}
 			// Set the fresh-migrated AttributeProfile into DB
-			if err := m.dmOut.DataManager().SetAttributeProfile(v5Attr, true); err != nil {
+			if err = m.dmOut.DataManager().SetAttributeProfile(v6Attr, true); err != nil {
 				return err
 			}
 		}
@@ -247,7 +255,7 @@ func (m *Migrator) migrateAttributeProfile() (err error) {
 	}
 	// All done, update version with current one
 	if err = m.setVersions(utils.Attributes); err != nil {
-		return err
+		return
 	}
 	return m.ensureIndexesDataDB(engine.ColAttr)
 
@@ -265,7 +273,7 @@ func (v1AttrPrf v1AttributeProfile) AsAttributeProfile() (attrPrf *v2AttributePr
 	for _, mp := range v1AttrPrf.Attributes {
 		for _, attr := range mp {
 
-			sbstPrsr, err := config.NewRSRParsers(attr.Substitute, true, config.CgrConfig().GeneralCfg().RSRSep)
+			sbstPrsr, err := config.NewRSRParsers(attr.Substitute, config.CgrConfig().GeneralCfg().RSRSep)
 			if err != nil {
 				return nil, err
 			}
@@ -333,7 +341,7 @@ func (v1AttrPrf v1AttributeProfile) AsAttributeProfileV1To4() (attrPrf *v4Attrib
 				filterIDs = append(filterIDs, utils.MetaString+":"+attr.FieldName+":"+attr.Initial)
 			}
 			// create RSRParser
-			sbstPrsr, err := config.NewRSRParsers(attr.Substitute, true, config.CgrConfig().GeneralCfg().RSRSep)
+			sbstPrsr, err := config.NewRSRParsers(attr.Substitute, config.CgrConfig().GeneralCfg().RSRSep)
 			if err != nil {
 				return nil, err
 			}
@@ -379,13 +387,13 @@ func (v4AttrPrf v4AttributeProfile) AsAttributeProfile() (attrPrf *engine.Attrib
 		Weight:             v4AttrPrf.Weight,
 		ActivationInterval: v4AttrPrf.ActivationInterval,
 	}
-	for _, attr := range v4AttrPrf.Attributes {
+	for _, attr := range v4AttrPrf.Attributes { // ToDo:redo this
 		val := attr.Value.GetRule()
 		rsrVal := attr.Value
 		if strings.HasPrefix(val, utils.DynamicDataPrefix) {
 			val = val[1:] // remove the DynamicDataPrefix
 			val = utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + val
-			rsrVal, err = config.NewRSRParsers(val, true, config.CgrConfig().GeneralCfg().RSRSep)
+			rsrVal, err = config.NewRSRParsers(val, config.CgrConfig().GeneralCfg().RSRSep)
 			if err != nil {
 				return nil, err
 			}
@@ -453,4 +461,17 @@ type v4AttributeProfile struct {
 	Attributes         []*v4Attribute
 	Blocker            bool // blocker flag to stop processing on multiple runs
 	Weight             float64
+}
+
+func (m *Migrator) migrateV5ToV6AttributeProfile(v5Attr *engine.AttributeProfile) (_ *engine.AttributeProfile, err error) {
+	if v5Attr == nil {
+		// read data from DataDB
+		if v5Attr, err = m.dmIN.getV5AttributeProfile(); err != nil {
+			return
+		}
+	}
+	if v5Attr.FilterIDs, err = migrateInlineFilterV4(v5Attr.FilterIDs); err != nil {
+		return
+	}
+	return v5Attr, nil
 }

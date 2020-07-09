@@ -154,7 +154,7 @@ func testAttributeSSetAlsPrf(t *testing.T) {
 			Attributes: []*engine.Attribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "Account",
-					Value: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
+					Value: config.NewRSRParsersMustCompile("1001", utils.INFIELD_SEP),
 				},
 			},
 			Weight: 20,
@@ -216,11 +216,11 @@ func testAttributeSUpdateAlsPrf(t *testing.T) {
 			Attributes: []*engine.Attribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "Account",
-					Value: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
+					Value: config.NewRSRParsersMustCompile("1001", utils.INFIELD_SEP),
 				},
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "Subject",
-					Value: config.NewRSRParsersMustCompile("~*req.Account", true, utils.INFIELD_SEP),
+					Value: config.NewRSRParsersMustCompile("~*req.Account", utils.INFIELD_SEP),
 				},
 			},
 			Weight: 20,

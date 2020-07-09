@@ -359,7 +359,20 @@ func (dP *diameterDP) FieldAsInterface(fldPath []string) (data interface{}, err 
 			selIndxs := make(map[int]int) // use it to find intersection of all matched filters
 			slctrStrs := strings.Split(slctrStr, utils.PipeSep)
 			for _, slctrStr := range slctrStrs {
-				slctr, err := config.NewRSRParser(slctrStr, true)
+				var fltrs utils.RSRFilters
+				if strings.HasSuffix(slctrStr, utils.FilterValEnd) { // Has filter, populate the var
+					fltrStart := strings.Index(slctrStr, utils.FilterValStart)
+					if fltrStart < 1 {
+						return nil, fmt.Errorf("invalid RSRFilter start rule in string: <%s>", slctrStr)
+					}
+					fltrVal := slctrStr[fltrStart+1 : len(slctrStr)-1]
+					if fltrs, err = utils.ParseRSRFilters(fltrVal, utils.ANDSep); err != nil {
+						return nil, fmt.Errorf("Invalid FilterValue in string: %s, err: %s", fltrVal, err.Error())
+					}
+					slctrStr = slctrStr[:fltrStart] // Take the filter part out before compiling further
+				}
+
+				slctr, err := config.NewRSRParser(slctrStr)
 				if err != nil {
 					return nil, err
 				}
@@ -379,12 +392,13 @@ func (dP *diameterDP) FieldAsInterface(fldPath []string) (data interface{}, err 
 				for k, fAVP := range fltrAVPs {
 					if dataAVP, err := diamAVPAsIface(fAVP); err != nil {
 						return nil, err
-					} else if _, err := slctr.ParseValue(dataAVP); err != nil {
-						if err != utils.ErrFilterNotPassingNoCaps {
-							return nil, err
+					} else if fld, err := slctr.ParseValue(dataAVP); err != nil {
+						if err == utils.ErrNotFound && fltrs.FilterRules() == "^$" {
+							selIndxs[k+1]++ // filter passing, index it with one higher to cover 0
+							continue        // filter not passing, not really error
 						}
-						continue // filter not passing, not really error
-					} else {
+						return nil, err
+					} else if fltrs.Pass(fld, true) {
 						selIndxs[k+1]++ // filter passing, index it with one higher to cover 0
 					}
 				}

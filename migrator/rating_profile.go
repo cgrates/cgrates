@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package migrator
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/cgrates/cgrates/engine"
@@ -46,7 +47,7 @@ func (m *Migrator) migrateCurrentRatingProfiles() (err error) {
 		if err := m.dmIN.DataManager().RemoveRatingProfile(idg, utils.NonTransactional); err != nil {
 			return err
 		}
-		m.stats[utils.RatingProfile] += 1
+		m.stats[utils.RatingProfile]++
 	}
 	return
 }
@@ -58,14 +59,39 @@ func (m *Migrator) migrateRatingProfiles() (err error) {
 		return
 	}
 
-	switch vrs[utils.RatingProfile] {
-	case current[utils.RatingProfile]:
-		if m.sameDataDB {
+	migrated := true
+	for {
+		version := vrs[utils.RatingProfile]
+		for {
+			switch version {
+			default:
+				return fmt.Errorf("Unsupported version %v", version)
+			case current[utils.RatingProfile]:
+				migrated = false
+				if m.sameDataDB {
+					break
+				}
+				if err = m.migrateCurrentRatingProfiles(); err != nil {
+					return err
+				}
+			}
+			if version == current[utils.RatingProfile] || err == utils.ErrNoMoreData {
+				break
+			}
+		}
+		if err == utils.ErrNoMoreData || !migrated {
 			break
 		}
-		if err = m.migrateCurrentRatingProfiles(); err != nil {
-			return err
-		}
+		// if !m.dryRun {
+		// if err = m.dmIN.DataManager().SetRatingProfile(v2, true); err != nil {
+		// return
+		// }
+		// }
+		m.stats[utils.RatingProfile]++
+	}
+	// All done, update version wtih current one
+	if err = m.setVersions(utils.RatingProfile); err != nil {
+		return
 	}
 	return m.ensureIndexesDataDB(engine.ColRpf)
 }

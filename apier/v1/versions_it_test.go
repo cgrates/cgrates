@@ -121,14 +121,15 @@ func testVrsRpcConn(t *testing.T) {
 func testVrsDataDB(t *testing.T) {
 	var result engine.Versions
 	expectedVrs := engine.Versions{"ActionTriggers": 2,
-		"Actions": 2, "RQF": 4, "ReverseDestinations": 1, "Attributes": 5, "RatingPlan": 1,
-		"RatingProfile": 1, "User": 1, "Accounts": 3, "ActionPlans": 3, "Chargers": 1,
-		"Destinations": 1, "LoadIDs": 1, "SharedGroups": 2, "Stats": 2, "Resource": 1,
-		"Subscribers": 1, "Routes": 1, "Thresholds": 3, "Timing": 1}
+		"Actions": 2, "RQF": 5, "ReverseDestinations": 1, "Attributes": 6, "RatingPlan": 1,
+		"RatingProfile": 1, "Accounts": 3, "ActionPlans": 3, "Chargers": 2,
+		"Destinations": 1, "LoadIDs": 1, "SharedGroups": 2, "Stats": 4, "Resource": 1,
+		"Subscribers": 1, "Routes": 2, "Thresholds": 4, "Timing": 1, "Dispatchers": 2,
+		"RateProfiles": 1}
 	if err := vrsRPC.Call(utils.APIerSv1GetDataDBVersions, utils.StringPointer(utils.EmptyString), &result); err != nil {
 		t.Error(err)
 	} else if expectedVrs.Compare(result, vrsStorageType, true) != "" {
-		t.Errorf("Expecting: %+v, received: %+v", expectedVrs, result)
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedVrs), utils.ToJSON(result))
 	}
 }
 
@@ -142,7 +143,7 @@ func testVrsStorDB(t *testing.T) {
 	if err := vrsRPC.Call(utils.APIerSv1GetStorDBVersions, utils.StringPointer(utils.EmptyString), &result); err != nil {
 		t.Error(err)
 	} else if expectedVrs.Compare(result, vrsStorageType, true) != "" {
-		t.Errorf("Expecting: %+v, received: %+v", result, expectedVrs)
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(result), utils.ToJSON(expectedVrs))
 	}
 }
 
@@ -161,14 +162,15 @@ func testVrsSetDataDBVrs(t *testing.T) {
 
 	var result engine.Versions
 	expectedVrs := engine.Versions{"ActionTriggers": 2,
-		"Actions": 2, "RQF": 4, "ReverseDestinations": 1, "Attributes": 3, "RatingPlan": 1,
-		"RatingProfile": 1, "User": 1, "Accounts": 3, "ActionPlans": 3, "Chargers": 1,
-		"Destinations": 1, "LoadIDs": 1, "SharedGroups": 2, "Stats": 2, "Resource": 1,
-		"Subscribers": 1, "Routes": 1, "Thresholds": 3, "Timing": 1}
+		"Actions": 2, "RQF": 5, "ReverseDestinations": 1, "Attributes": 3, "RatingPlan": 1,
+		"RatingProfile": 1, "Accounts": 3, "ActionPlans": 3, "Chargers": 2,
+		"Destinations": 1, "LoadIDs": 1, "SharedGroups": 2, "Stats": 4, "Resource": 1,
+		"Subscribers": 1, "Routes": 2, "Thresholds": 4, "Timing": 1,
+		"RateProfiles": 1, "Dispatchers": 2}
 	if err := vrsRPC.Call(utils.APIerSv1GetDataDBVersions, utils.StringPointer(utils.EmptyString), &result); err != nil {
 		t.Error(err)
 	} else if expectedVrs.Compare(result, vrsStorageType, true) != "" {
-		t.Errorf("Expecting: %+v, received: %+v", expectedVrs, result)
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedVrs), utils.ToJSON(result))
 	}
 
 	args = SetVersionsArg{

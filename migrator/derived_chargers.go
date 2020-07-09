@@ -30,9 +30,9 @@ import (
 var dcGetMapKeys = func(m utils.StringMap) (keys []string) {
 	keys = make([]string, len(m))
 	i := 0
-	for k, _ := range m {
+	for k := range m {
 		keys[i] = k
-		i += 1
+		i++
 	}
 	// sort.Strings(keys)
 	return keys
@@ -78,7 +78,7 @@ func fieldinfo2Attribute(attr []*engine.Attribute, fieldName, fieldInfo string) 
 		fieldInfo = fieldInfo[1:]
 	}
 	var err error
-	if rp, err = config.NewRSRParsers(fieldInfo, true, utils.INFIELD_SEP); err != nil {
+	if rp, err = config.NewRSRParsers(fieldInfo, utils.INFIELD_SEP); err != nil {
 		utils.Logger.Err(fmt.Sprintf("On Migrating rule: <%s>, error: %s", fieldInfo, err.Error()))
 		return attr
 	}
@@ -141,7 +141,11 @@ func derivedChargers2Charger(dc *v1DerivedCharger, tenant string, key string, fi
 		if strings.HasPrefix(filter, utils.DynamicDataPrefix) {
 			filter = filter[1:]
 		}
-		ch.FilterIDs = append(ch.FilterIDs, "*rsr::"+utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+filter)
+		flt, err := migrateInlineFilterV4([]string{"*rsr::" + utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + filter})
+		if err != nil {
+			return
+		}
+		ch.FilterIDs = append(ch.FilterIDs, flt...)
 	}
 	return
 }
@@ -193,10 +197,10 @@ func (m *Migrator) removeV1DerivedChargers() (err error) {
 			break
 		}
 		if err != nil {
-			return err
+			return
 		}
 		if err = m.dmIN.remV1DerivedChargers(dck.Key); err != nil {
-			return err
+			return
 		}
 	}
 	return
@@ -210,16 +214,16 @@ func (m *Migrator) migrateV1DerivedChargers() (err error) {
 			break
 		}
 		if err != nil {
-			return err
+			return
 		}
 		if dck == nil || m.dryRun {
 			continue
 		}
 		if err = m.derivedChargers2Chargers(dck); err != nil {
-			return err
+			return
 		}
 
-		m.stats[utils.DerivedChargersV] += 1
+		m.stats[utils.DerivedChargersV]++
 	}
 	if m.dryRun {
 		return
@@ -240,7 +244,7 @@ func (m *Migrator) migrateV1DerivedChargers() (err error) {
 
 func (m *Migrator) migrateDerivedChargers() (err error) {
 	if err = m.migrateV1DerivedChargers(); err != nil {
-		return err
+		return
 	}
 	return m.ensureIndexesDataDB(engine.ColCpp, engine.ColAttr)
 }

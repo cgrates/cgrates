@@ -20,6 +20,7 @@ package migrator
 
 import (
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/cgrates/cgrates/engine"
@@ -54,15 +55,20 @@ func (m *Migrator) migrateCDRs() (err error) {
 	for {
 		version := vrs[utils.CDRs]
 		for {
-			switch vrs[utils.CDRs] {
+			switch version {
+			default:
+				return fmt.Errorf("Unsupported version %v", version)
 			case current[utils.CDRs]:
 				migrated = false
+				if m.sameStorDB {
+					break
+				}
 				if err = m.migrateCurrentCDRs(); err != nil {
-					return err
+					return
 				}
 			case 1:
 				if v2, err = m.migrateV1CDRs(); err != nil && err != utils.ErrNoMoreData {
-					return err
+					return
 				}
 				version = 2
 			}
@@ -74,17 +80,17 @@ func (m *Migrator) migrateCDRs() (err error) {
 			break
 		}
 
-		if !m.dryRun && migrated {
+		if !m.dryRun {
 			//set action plan
 			if err = m.storDBOut.StorDB().SetCDR(v2, true); err != nil {
-				return err
+				return
 			}
 		}
 		m.stats[utils.CDRs]++
 	}
 	// All done, update version wtih current one
 	if err = m.setVersions(utils.CDRs); err != nil {
-		return err
+		return
 	}
 	return m.ensureIndexesStorDB(engine.ColCDRs)
 }

@@ -41,60 +41,60 @@ func TestLoaderProcessContentSingleFile(t *testing.T) {
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaAttributes: []*config.FCTemplate{
+		utils.MetaAttributes: {
 			&config.FCTemplate{Tag: "TenantID",
 				Path:      "Tenant",
 				Type:      utils.META_COMPOSED,
-				Value:     config.NewRSRParsersMustCompile("~*req.0", true, utils.INFIELD_SEP),
+				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP),
 				Mandatory: true},
 			&config.FCTemplate{Tag: "ProfileID",
 				Path:      "ID",
 				Type:      utils.META_COMPOSED,
-				Value:     config.NewRSRParsersMustCompile("~*req.1", true, utils.INFIELD_SEP),
+				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.INFIELD_SEP),
 				Mandatory: true},
 			&config.FCTemplate{Tag: "Contexts",
 				Path:  "Contexts",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.2", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.2", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "FilterIDs",
 				Path:  "FilterIDs",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.3", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.3", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "ActivationInterval",
 				Path:  "ActivationInterval",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.4", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.4", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "AttributeFilterIDs",
 				Path:  "AttributeFilterIDs",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.5", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.5", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "Path",
 				Path:  "Path",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.6", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.6", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "Type",
 				Path:  "Type",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.7", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.7", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "Value",
 				Path:  "Value",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.8", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.8", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "Blocker",
 				Path:  "Blocker",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.9", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.9", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "Weight",
 				Path:  "Weight",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.10", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.10", utils.INFIELD_SEP)},
 		},
 	}
 	rdr := ioutil.NopCloser(strings.NewReader(engine.AttributesCSVContent))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaAttributes: map[string]*openedCSVFile{
+		utils.MetaAttributes: {
 			"Attributes.csv": &openedCSVFile{fileName: "Attributes.csv",
 				rdr: rdr, csvRdr: csvRdr}},
 	}
@@ -109,17 +109,17 @@ func TestLoaderProcessContentSingleFile(t *testing.T) {
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC)},
 		Attributes: []*engine.Attribute{
-			&engine.Attribute{
+			{
 				FilterIDs: []string{"*string:~*req.Field1:Initial"},
 				Path:      utils.MetaReq + utils.NestingSep + "Field1",
 				Type:      utils.MetaVariable,
-				Value:     config.NewRSRParsersMustCompile("Sub1", true, utils.INFIELD_SEP),
+				Value:     config.NewRSRParsersMustCompile("Sub1", utils.INFIELD_SEP),
 			},
-			&engine.Attribute{
+			{
 				FilterIDs: []string{},
 				Path:      utils.MetaReq + utils.NestingSep + "Field2",
 				Type:      utils.MetaVariable,
-				Value:     config.NewRSRParsersMustCompile("Sub2", true, utils.INFIELD_SEP),
+				Value:     config.NewRSRParsersMustCompile("Sub2", utils.INFIELD_SEP),
 			}},
 		Blocker: true,
 		Weight:  20,
@@ -147,33 +147,33 @@ func TestLoaderProcessContentMultiFiles(t *testing.T) {
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaAttributes: []*config.FCTemplate{
+		utils.MetaAttributes: {
 			&config.FCTemplate{Tag: "TenantID",
 				Path:      "Tenant",
 				Type:      utils.MetaString,
-				Value:     config.NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
+				Value:     config.NewRSRParsersMustCompile("cgrates.org", utils.INFIELD_SEP),
 				Mandatory: true},
 			&config.FCTemplate{Tag: "ProfileID",
 				Path:      "ID",
 				Type:      utils.META_COMPOSED,
-				Value:     config.NewRSRParsersMustCompile("~*req<File2.csv>.1", true, utils.INFIELD_SEP),
+				Value:     config.NewRSRParsersMustCompile("~*req<File2.csv>.1", utils.INFIELD_SEP),
 				Mandatory: true},
 			&config.FCTemplate{Tag: "Contexts",
 				Path:  "Contexts",
 				Type:  utils.MetaString,
-				Value: config.NewRSRParsersMustCompile("*any", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("*any", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "Path",
 				Path:  "Path",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req<File1.csv>.6", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req<File1.csv>.6", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "Value",
 				Path:  "Value",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req<File1.csv>.7", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req<File1.csv>.7", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "Weight",
 				Path:  "Weight",
 				Type:  utils.MetaString,
-				Value: config.NewRSRParsersMustCompile("10", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("10", utils.INFIELD_SEP)},
 		},
 	}
 	rdr1 := ioutil.NopCloser(strings.NewReader(file1CSV))
@@ -183,7 +183,7 @@ func TestLoaderProcessContentMultiFiles(t *testing.T) {
 	csvRdr2 := csv.NewReader(rdr2)
 	csvRdr2.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaAttributes: map[string]*openedCSVFile{
+		utils.MetaAttributes: {
 			"File1.csv": &openedCSVFile{fileName: "File1.csv",
 				rdr: rdr1, csvRdr: csvRdr1},
 			"File2.csv": &openedCSVFile{fileName: "File2.csv",
@@ -197,10 +197,10 @@ func TestLoaderProcessContentMultiFiles(t *testing.T) {
 		ID:       "TestLoader2",
 		Contexts: []string{utils.ANY},
 		Attributes: []*engine.Attribute{
-			&engine.Attribute{
+			{
 				Path:      utils.MetaReq + utils.NestingSep + "Subject",
 				FilterIDs: []string{},
-				Value:     config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
+				Value:     config.NewRSRParsersMustCompile("1001", utils.INFIELD_SEP),
 			}},
 		Weight: 10.0,
 	}
@@ -225,60 +225,60 @@ func TestLoaderProcessResource(t *testing.T) {
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaResources: []*config.FCTemplate{
+		utils.MetaResources: {
 			&config.FCTemplate{Tag: "Tenant",
 				Path:      "Tenant",
 				Type:      utils.META_COMPOSED,
-				Value:     config.NewRSRParsersMustCompile("~*req.0", true, utils.INFIELD_SEP),
+				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP),
 				Mandatory: true},
 			&config.FCTemplate{Tag: "ID",
 				Path:      "ID",
 				Type:      utils.META_COMPOSED,
-				Value:     config.NewRSRParsersMustCompile("~*req.1", true, utils.INFIELD_SEP),
+				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.INFIELD_SEP),
 				Mandatory: true},
 			&config.FCTemplate{Tag: "FilterIDs",
 				Path:  "FilterIDs",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.2", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.2", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "ActivationInterval",
 				Path:  "ActivationInterval",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.3", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.3", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "TTL",
 				Path:  "UsageTTL",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.4", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.4", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "Limit",
 				Path:  "Limit",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.5", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.5", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "AllocationMessage",
 				Path:  "AllocationMessage",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.6", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.6", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "Blocker",
 				Path:  "Blocker",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.7", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.7", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "Stored",
 				Path:  "Stored",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.8", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.8", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "Weight",
 				Path:  "Weight",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.9", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.9", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "Thresholds",
 				Path:  "Thresholds",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.10", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.10", utils.INFIELD_SEP)},
 		},
 	}
 	rdr := ioutil.NopCloser(strings.NewReader(engine.ResourcesCSVContent))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaResources: map[string]*openedCSVFile{
+		utils.MetaResources: {
 			"Resources.csv": &openedCSVFile{fileName: "Resources.csv",
 				rdr: rdr, csvRdr: csvRdr}},
 	}
@@ -343,40 +343,40 @@ func TestLoaderProcessFilters(t *testing.T) {
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaFilters: []*config.FCTemplate{
+		utils.MetaFilters: {
 			&config.FCTemplate{Tag: "Tenant",
 				Path:      "Tenant",
 				Type:      utils.META_COMPOSED,
-				Value:     config.NewRSRParsersMustCompile("~*req.0", true, utils.INFIELD_SEP),
+				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP),
 				Mandatory: true},
 			&config.FCTemplate{Tag: "ID",
 				Path:      "ID",
 				Type:      utils.META_COMPOSED,
-				Value:     config.NewRSRParsersMustCompile("~*req.1", true, utils.INFIELD_SEP),
+				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.INFIELD_SEP),
 				Mandatory: true},
 			&config.FCTemplate{Tag: "Type",
 				Path:  "Type",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.2", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.2", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "Element",
 				Path:  "Element",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.3", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.3", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "Values",
 				Path:  "Values",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.4", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.4", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "ActivationInterval",
 				Path:  "ActivationInterval",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.5", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.5", utils.INFIELD_SEP)},
 		},
 	}
 	rdr := ioutil.NopCloser(strings.NewReader(engine.FiltersCSVContent))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaFilters: map[string]*openedCSVFile{
+		utils.MetaFilters: {
 			"Filters.csv": &openedCSVFile{fileName: "Filters.csv",
 				rdr: rdr, csvRdr: csvRdr}},
 	}
@@ -387,20 +387,25 @@ func TestLoaderProcessFilters(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "FLTR_1",
 		Rules: []*engine.FilterRule{
-			&engine.FilterRule{
+			{
 				Type:    utils.MetaString,
 				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
 				Values:  []string{"1001", "1002"},
 			},
-			&engine.FilterRule{
-				Type:    "*prefix",
+			{
+				Type:    utils.MetaPrefix,
 				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Destination,
 				Values:  []string{"10", "20"},
 			},
-			&engine.FilterRule{
-				Type:    "*rsr",
-				Element: "",
-				Values:  []string{"~*req.Subject(~^1.*1$)", "~*req.Destination(1002)"},
+			{
+				Type:    utils.MetaRSR,
+				Element: "~*req.Subject",
+				Values:  []string{"~^1.*1$"},
+			},
+			{
+				Type:    utils.MetaRSR,
+				Element: "~*req.Destination",
+				Values:  []string{"1002"},
 			},
 		},
 		ActivationInterval: &utils.ActivationInterval{
@@ -411,11 +416,15 @@ func TestLoaderProcessFilters(t *testing.T) {
 	if err := eFltr1.Rules[2].CompileValues(); err != nil {
 		t.Error(err)
 	}
+	// Compile Value for rsr fields
+	if err := eFltr1.Rules[3].CompileValues(); err != nil {
+		t.Error(err)
+	}
 	eFltr2 := &engine.Filter{
 		Tenant: "cgrates.org",
 		ID:     "FLTR_DST_DE",
 		Rules: []*engine.FilterRule{
-			&engine.FilterRule{
+			{
 				Type:    "*destinations",
 				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Destination,
 				Values:  []string{"DST_DE"},
@@ -454,60 +463,60 @@ func TestLoaderProcessThresholds(t *testing.T) {
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaThresholds: []*config.FCTemplate{
+		utils.MetaThresholds: {
 			&config.FCTemplate{Tag: "TenantID",
 				Path:      "Tenant",
 				Type:      utils.META_COMPOSED,
-				Value:     config.NewRSRParsersMustCompile("~*req.0", true, utils.INFIELD_SEP),
+				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP),
 				Mandatory: true},
 			&config.FCTemplate{Tag: "ProfileID",
 				Path:      "ID",
 				Type:      utils.META_COMPOSED,
-				Value:     config.NewRSRParsersMustCompile("~*req.1", true, utils.INFIELD_SEP),
+				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.INFIELD_SEP),
 				Mandatory: true},
 			&config.FCTemplate{Tag: "FilterIDs",
 				Path:  "FilterIDs",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.2", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.2", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "ActivationInterval",
 				Path:  "ActivationInterval",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.3", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.3", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "MaxHits",
 				Path:  "MaxHits",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.4", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.4", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "MinHits",
 				Path:  "MinHits",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.5", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.5", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "MinSleep",
 				Path:  "MinSleep",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.6", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.6", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "Blocker",
 				Path:  "Blocker",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.7", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.7", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "Weight",
 				Path:  "Weight",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.8", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.8", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "ActionIDs",
 				Path:  "ActionIDs",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.9", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.9", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "Async",
 				Path:  "Async",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.10", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.10", utils.INFIELD_SEP)},
 		},
 	}
 	rdr := ioutil.NopCloser(strings.NewReader(engine.ThresholdsCSVContent))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaThresholds: map[string]*openedCSVFile{
+		utils.MetaThresholds: {
 			"Thresholds.csv": &openedCSVFile{fileName: "Thresholds.csv",
 				rdr: rdr, csvRdr: csvRdr}},
 	}
@@ -552,69 +561,69 @@ func TestLoaderProcessStats(t *testing.T) {
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaStats: []*config.FCTemplate{
+		utils.MetaStats: {
 			&config.FCTemplate{Tag: "TenantID",
 				Path:      "Tenant",
 				Type:      utils.META_COMPOSED,
-				Value:     config.NewRSRParsersMustCompile("~*req.0", true, utils.INFIELD_SEP),
+				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP),
 				Mandatory: true},
 			&config.FCTemplate{Tag: "ProfileID",
 				Path:      "ID",
 				Type:      utils.META_COMPOSED,
-				Value:     config.NewRSRParsersMustCompile("~*req.1", true, utils.INFIELD_SEP),
+				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.INFIELD_SEP),
 				Mandatory: true},
 			&config.FCTemplate{Tag: "FilterIDs",
 				Path:  "FilterIDs",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.2", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.2", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "ActivationInterval",
 				Path:  "ActivationInterval",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.3", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.3", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "QueueLength",
 				Path:  "QueueLength",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.4", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.4", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "TTL",
 				Path:  "TTL",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.5", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.5", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "MinItems",
 				Path:  "MinItems",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.6", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.6", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "MetricIDs",
 				Path:  "MetricIDs",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.7", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.7", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "MetricFilterIDs",
 				Path:  "MetricFilterIDs",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.8", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.8", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "Blocker",
 				Path:  "Blocker",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.9", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.9", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "Stored",
 				Path:  "Stored",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.10", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.10", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "Weight",
 				Path:  "Weight",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.11", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.11", utils.INFIELD_SEP)},
 
 			&config.FCTemplate{Tag: "ThresholdIDs",
 				Path:  "ThresholdIDs",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.12", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.12", utils.INFIELD_SEP)},
 		},
 	}
 	rdr := ioutil.NopCloser(strings.NewReader(engine.StatsCSVContent))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaStats: map[string]*openedCSVFile{
+		utils.MetaStats: {
 			"Stats.csv": &openedCSVFile{fileName: "Stats.csv",
 				rdr: rdr, csvRdr: csvRdr}},
 	}
@@ -634,13 +643,13 @@ func TestLoaderProcessStats(t *testing.T) {
 		QueueLength: 100,
 		TTL:         time.Duration(1 * time.Second),
 		Metrics: []*engine.MetricWithFilters{
-			&engine.MetricWithFilters{
+			{
 				MetricID: "*sum:~*req.Value",
 			},
-			&engine.MetricWithFilters{
+			{
 				MetricID: "*average:~*req.Value",
 			},
-			&engine.MetricWithFilters{
+			{
 				MetricID: "*sum:~*req.Usage",
 			},
 		},
@@ -674,80 +683,80 @@ func TestLoaderProcessRoutes(t *testing.T) {
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaRoutes: []*config.FCTemplate{
+		utils.MetaRoutes: {
 			&config.FCTemplate{Tag: "TenantID",
 				Path:      "Tenant",
 				Type:      utils.META_COMPOSED,
-				Value:     config.NewRSRParsersMustCompile("~*req.0", true, utils.INFIELD_SEP),
+				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP),
 				Mandatory: true},
 			&config.FCTemplate{Tag: "ProfileID",
 				Path:      "ID",
 				Type:      utils.META_COMPOSED,
-				Value:     config.NewRSRParsersMustCompile("~*req.1", true, utils.INFIELD_SEP),
+				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.INFIELD_SEP),
 				Mandatory: true},
 			&config.FCTemplate{Tag: "FilterIDs",
 				Path:  "FilterIDs",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.2", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.2", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "ActivationInterval",
 				Path:  "ActivationInterval",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.3", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.3", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "Sorting",
 				Path:  "Sorting",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.4", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.4", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "SortingParameters",
 				Path:  "SortingParameters",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.5", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.5", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "RouteID",
 				Path:  "RouteID",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.6", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.6", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "RouteFilterIDs",
 				Path:  "RouteFilterIDs",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.7", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.7", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "RouteAccountIDs",
 				Path:  "RouteAccountIDs",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.8", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.8", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "RouteRatingPlanIDs",
 				Path:  "RouteRatingplanIDs",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.9", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.9", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "RouteResourceIDs",
 				Path:  "RouteResourceIDs",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.10", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.10", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "RouteStatIDs",
 				Path:  "RouteStatIDs",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.11", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.11", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "RouteWeight",
 				Path:  "RouteWeight",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.12", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.12", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "RouteBlocker",
 				Path:  "RouteBlocker",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.13", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.13", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "RouteParameters",
 				Path:  "RouteParameters",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.14", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.14", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "Weight",
 				Path:  "Weight",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.15", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.15", utils.INFIELD_SEP)},
 		},
 	}
 	rdr := ioutil.NopCloser(strings.NewReader(engine.RoutesCSVContent))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaRoutes: map[string]*openedCSVFile{
+		utils.MetaRoutes: {
 			utils.RoutesCsv: &openedCSVFile{fileName: utils.RoutesCsv,
 				rdr: rdr, csvRdr: csvRdr}},
 	}
@@ -768,7 +777,7 @@ func TestLoaderProcessRoutes(t *testing.T) {
 		Sorting:           "*least_cost",
 		SortingParameters: []string{},
 		Routes: []*engine.Route{
-			&engine.Route{
+			{
 				ID:              "supplier1",
 				FilterIDs:       []string{"FLTR_ACNT_dan"},
 				AccountIDs:      []string{"Account1", "Account1_1"},
@@ -779,7 +788,7 @@ func TestLoaderProcessRoutes(t *testing.T) {
 				Blocker:         true,
 				RouteParameters: "param1",
 			},
-			&engine.Route{
+			{
 				ID:              "supplier1",
 				FilterIDs:       []string{"FLTR_DST_DE"},
 				AccountIDs:      []string{"Account2"},
@@ -790,7 +799,7 @@ func TestLoaderProcessRoutes(t *testing.T) {
 				Blocker:         false,
 				RouteParameters: utils.EmptyString,
 			},
-			&engine.Route{
+			{
 				ID:              "supplier1",
 				RatingPlanIDs:   []string{"RPL_2"},
 				ResourceIDs:     []string{"ResGroup2", "ResGroup4"},
@@ -831,44 +840,44 @@ func TestLoaderProcessChargers(t *testing.T) {
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaChargers: []*config.FCTemplate{
+		utils.MetaChargers: {
 			&config.FCTemplate{Tag: "TenantID",
 				Path:      "Tenant",
 				Type:      utils.META_COMPOSED,
-				Value:     config.NewRSRParsersMustCompile("~*req.0", true, utils.INFIELD_SEP),
+				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP),
 				Mandatory: true},
 			&config.FCTemplate{Tag: "ProfileID",
 				Path:      "ID",
 				Type:      utils.META_COMPOSED,
-				Value:     config.NewRSRParsersMustCompile("~*req.1", true, utils.INFIELD_SEP),
+				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.INFIELD_SEP),
 				Mandatory: true},
 			&config.FCTemplate{Tag: "FilterIDs",
 				Path:  "FilterIDs",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.2", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.2", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "ActivationInterval",
 				Path:  "ActivationInterval",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.3", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.3", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "RunID",
 				Path:  "RunID",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.4", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.4", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "AttributeIDs",
 				Path:  "AttributeIDs",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.5", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.5", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "Weight",
 				Path:  "Weight",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.6", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.6", utils.INFIELD_SEP)},
 		},
 	}
 	rdr := ioutil.NopCloser(strings.NewReader(engine.ChargersCSVContent))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaChargers: map[string]*openedCSVFile{
+		utils.MetaChargers: {
 			utils.ChargersCsv: &openedCSVFile{fileName: utils.ChargersCsv,
 				rdr: rdr, csvRdr: csvRdr}},
 	}
@@ -909,86 +918,86 @@ func TestLoaderProcessDispatches(t *testing.T) {
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaDispatchers: []*config.FCTemplate{
+		utils.MetaDispatchers: {
 			&config.FCTemplate{
 				Tag:       "TenantID",
 				Path:      "Tenant",
 				Type:      utils.META_COMPOSED,
-				Value:     config.NewRSRParsersMustCompile("~*req.0", true, utils.INFIELD_SEP),
+				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP),
 				Mandatory: true,
 			},
 			&config.FCTemplate{
 				Tag:       "ProfileID",
 				Path:      "ID",
 				Type:      utils.META_COMPOSED,
-				Value:     config.NewRSRParsersMustCompile("~*req.1", true, utils.INFIELD_SEP),
+				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.INFIELD_SEP),
 				Mandatory: true,
 			},
 			&config.FCTemplate{
 				Tag:   "Subsystems",
 				Path:  "Subsystems",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.2", true, utils.INFIELD_SEP),
+				Value: config.NewRSRParsersMustCompile("~*req.2", utils.INFIELD_SEP),
 			},
 			&config.FCTemplate{
 				Tag:   "FilterIDs",
 				Path:  "FilterIDs",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.3", true, utils.INFIELD_SEP),
+				Value: config.NewRSRParsersMustCompile("~*req.3", utils.INFIELD_SEP),
 			},
 			&config.FCTemplate{
 				Tag:   "ActivationInterval",
 				Path:  "ActivationInterval",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.4", true, utils.INFIELD_SEP),
+				Value: config.NewRSRParsersMustCompile("~*req.4", utils.INFIELD_SEP),
 			},
 			&config.FCTemplate{
 				Tag:   "Strategy",
 				Path:  "Strategy",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.5", true, utils.INFIELD_SEP),
+				Value: config.NewRSRParsersMustCompile("~*req.5", utils.INFIELD_SEP),
 			},
 			&config.FCTemplate{
 				Tag:   "StrategyParameters",
 				Path:  "StrategyParameters",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.6", true, utils.INFIELD_SEP),
+				Value: config.NewRSRParsersMustCompile("~*req.6", utils.INFIELD_SEP),
 			},
 			&config.FCTemplate{
 				Tag:   "ConnID",
 				Path:  "ConnID",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.7", true, utils.INFIELD_SEP),
+				Value: config.NewRSRParsersMustCompile("~*req.7", utils.INFIELD_SEP),
 			},
 			&config.FCTemplate{
 				Tag:   "ConnFilterIDs",
 				Path:  "ConnFilterIDs",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.8", true, utils.INFIELD_SEP),
+				Value: config.NewRSRParsersMustCompile("~*req.8", utils.INFIELD_SEP),
 			},
 			&config.FCTemplate{
 				Tag:   "ConnWeight",
 				Path:  "ConnWeight",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.9", true, utils.INFIELD_SEP),
+				Value: config.NewRSRParsersMustCompile("~*req.9", utils.INFIELD_SEP),
 			},
 			&config.FCTemplate{
 				Tag:   "ConnBlocker",
 				Path:  "ConnBlocker",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.10", true, utils.INFIELD_SEP),
+				Value: config.NewRSRParsersMustCompile("~*req.10", utils.INFIELD_SEP),
 			},
 			&config.FCTemplate{
 				Tag:   "ConnParameters",
 				Path:  "ConnParameters",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.11", true, utils.INFIELD_SEP),
+				Value: config.NewRSRParsersMustCompile("~*req.11", utils.INFIELD_SEP),
 			},
 			&config.FCTemplate{
 				Tag:   "Weight",
 				Path:  "Weight",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.12", true, utils.INFIELD_SEP),
+				Value: config.NewRSRParsersMustCompile("~*req.12", utils.INFIELD_SEP),
 			},
 		},
 	}
@@ -996,7 +1005,7 @@ func TestLoaderProcessDispatches(t *testing.T) {
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaDispatchers: map[string]*openedCSVFile{
+		utils.MetaDispatchers: {
 			utils.DispatcherProfilesCsv: &openedCSVFile{
 				fileName: utils.DispatcherProfilesCsv,
 				rdr:      rdr,
@@ -1061,38 +1070,38 @@ func TestLoaderProcessDispatcheHosts(t *testing.T) {
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaDispatcherHosts: []*config.FCTemplate{
+		utils.MetaDispatcherHosts: {
 			&config.FCTemplate{
 				Tag:       "Tenant",
 				Path:      "Tenant",
 				Type:      utils.META_COMPOSED,
-				Value:     config.NewRSRParsersMustCompile("~*req.0", true, utils.INFIELD_SEP),
+				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP),
 				Mandatory: true,
 			},
 			&config.FCTemplate{
 				Tag:       "ID",
 				Path:      "ID",
 				Type:      utils.META_COMPOSED,
-				Value:     config.NewRSRParsersMustCompile("~*req.1", true, utils.INFIELD_SEP),
+				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.INFIELD_SEP),
 				Mandatory: true,
 			},
 			&config.FCTemplate{
 				Tag:   "Address",
 				Path:  "Address",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.2", true, utils.INFIELD_SEP),
+				Value: config.NewRSRParsersMustCompile("~*req.2", utils.INFIELD_SEP),
 			},
 			&config.FCTemplate{
 				Tag:   "Transport",
 				Path:  "Transport",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.3", true, utils.INFIELD_SEP),
+				Value: config.NewRSRParsersMustCompile("~*req.3", utils.INFIELD_SEP),
 			},
 			&config.FCTemplate{
 				Tag:   "TLS",
 				Path:  "TLS",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.4", true, utils.INFIELD_SEP),
+				Value: config.NewRSRParsersMustCompile("~*req.4", utils.INFIELD_SEP),
 			},
 		},
 	}
@@ -1100,7 +1109,7 @@ func TestLoaderProcessDispatcheHosts(t *testing.T) {
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaDispatcherHosts: map[string]*openedCSVFile{
+		utils.MetaDispatcherHosts: {
 			utils.DispatcherProfilesCsv: &openedCSVFile{
 				fileName: utils.DispatcherProfilesCsv,
 				rdr:      rdr,
@@ -1118,12 +1127,12 @@ func TestLoaderProcessDispatcheHosts(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "ALL1",
 		Conns: []*config.RemoteHost{
-			&config.RemoteHost{
+			{
 				Address:   "127.0.0.1:2012",
 				Transport: utils.MetaJSON,
 				TLS:       true,
 			},
-			&config.RemoteHost{
+			{
 				Address:   "127.0.0.1:3012",
 				Transport: utils.MetaJSON,
 			},
@@ -1149,16 +1158,16 @@ func TestLoaderRemoveContentSingleFile(t *testing.T) {
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaAttributes: []*config.FCTemplate{
+		utils.MetaAttributes: {
 			&config.FCTemplate{Tag: "TenantID",
 				Path:      "Tenant",
 				Type:      utils.META_COMPOSED,
-				Value:     config.NewRSRParsersMustCompile("~*req.0", true, utils.INFIELD_SEP),
+				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP),
 				Mandatory: true},
 			&config.FCTemplate{Tag: "ProfileID",
 				Path:      "ID",
 				Type:      utils.META_COMPOSED,
-				Value:     config.NewRSRParsersMustCompile("~*req.1", true, utils.INFIELD_SEP),
+				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.INFIELD_SEP),
 				Mandatory: true},
 		},
 	}
@@ -1166,7 +1175,7 @@ func TestLoaderRemoveContentSingleFile(t *testing.T) {
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaAttributes: map[string]*openedCSVFile{
+		utils.MetaAttributes: {
 			"Attributes.csv": &openedCSVFile{fileName: "Attributes.csv",
 				rdr: rdr, csvRdr: csvRdr}},
 	}
@@ -1179,17 +1188,17 @@ func TestLoaderRemoveContentSingleFile(t *testing.T) {
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC)},
 		Attributes: []*engine.Attribute{
-			&engine.Attribute{
+			{
 				FilterIDs: []string{"*string:~*req.Field1:Initial"},
 				Path:      utils.MetaReq + utils.NestingSep + "Field1",
 				Type:      utils.MetaVariable,
-				Value:     config.NewRSRParsersMustCompile("Sub1", true, utils.INFIELD_SEP),
+				Value:     config.NewRSRParsersMustCompile("Sub1", utils.INFIELD_SEP),
 			},
-			&engine.Attribute{
+			{
 				FilterIDs: []string{},
 				Path:      utils.MetaReq + utils.NestingSep + "Field2",
 				Type:      utils.MetaVariable,
-				Value:     config.NewRSRParsersMustCompile("Sub2", true, utils.INFIELD_SEP),
+				Value:     config.NewRSRParsersMustCompile("Sub2", utils.INFIELD_SEP),
 			}},
 		Blocker: true,
 		Weight:  20,
@@ -1233,96 +1242,96 @@ func TestLoaderProcessRateProfile(t *testing.T) {
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaRateProfiles: []*config.FCTemplate{
+		utils.MetaRateProfiles: {
 			&config.FCTemplate{Tag: "TenantID",
 				Path:      "Tenant",
 				Type:      utils.META_COMPOSED,
-				Value:     config.NewRSRParsersMustCompile("~*req.0", true, utils.INFIELD_SEP),
+				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP),
 				Mandatory: true},
 			&config.FCTemplate{Tag: "ProfileID",
 				Path:      "ID",
 				Type:      utils.META_COMPOSED,
-				Value:     config.NewRSRParsersMustCompile("~*req.1", true, utils.INFIELD_SEP),
+				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.INFIELD_SEP),
 				Mandatory: true},
 			&config.FCTemplate{Tag: "FilterIDs",
 				Path:  "FilterIDs",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.2", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.2", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "ActivationInterval",
 				Path:  "ActivationInterval",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.3", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.3", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "Weight",
 				Path:  "Weight",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.4", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.4", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "ConnectFee",
 				Path:  "ConnectFee",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.5", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.5", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "RoundingMethod",
 				Path:  "RoundingMethod",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.6", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.6", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "RoundingDecimals",
 				Path:  "RoundingDecimals",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.7", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.7", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "MinCost",
 				Path:  "MinCost",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.8", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.8", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "MaxCost",
 				Path:  "MaxCost",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.9", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.9", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "MaxCostStrategy",
 				Path:  "MaxCostStrategy",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.10", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.10", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "RateID",
 				Path:  "RateID",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.11", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.11", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "RateFilterIDs",
 				Path:  "RateFilterIDs",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.12", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.12", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "RateActivationStart",
 				Path:  "RateActivationStart",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.13", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.13", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "RateWeight",
 				Path:  "RateWeight",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.14", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.14", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "RateBlocker",
 				Path:  "RateBlocker",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.15", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.15", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "RateIntervalStart",
 				Path:  "RateIntervalStart",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.16", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.16", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "RateValue",
 				Path:  "RateValue",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.17", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.17", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "RateUnit",
 				Path:  "RateUnit",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.18", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.18", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "RateIncrement",
 				Path:  "RateIncrement",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.19", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.19", utils.INFIELD_SEP)},
 		},
 	}
 	rdr := ioutil.NopCloser(strings.NewReader(engine.RateProfileCSVContent))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaRateProfiles: map[string]*openedCSVFile{
+		utils.MetaRateProfiles: {
 			utils.RateProfilesCsv: &openedCSVFile{fileName: utils.RateProfilesCsv,
 				rdr: rdr, csvRdr: csvRdr}},
 	}
@@ -1344,18 +1353,18 @@ func TestLoaderProcessRateProfile(t *testing.T) {
 		MaxCost:          0.6,
 		MaxCostStrategy:  "*free",
 		Rates: map[string]*engine.Rate{
-			"RT_WEEK": &engine.Rate{
+			"RT_WEEK": {
 				ID:             "RT_WEEK",
 				Weight:         0,
 				ActivationTime: "* * * * 1-5",
 				IntervalRates: []*engine.IntervalRate{
-					&engine.IntervalRate{
+					{
 						IntervalStart: time.Duration(0 * time.Second),
 						Value:         0.12,
 						Unit:          time.Duration(1 * time.Minute),
 						Increment:     time.Duration(1 * time.Minute),
 					},
-					&engine.IntervalRate{
+					{
 						IntervalStart: time.Duration(1 * time.Minute),
 						Value:         0.06,
 						Unit:          time.Duration(1 * time.Minute),
@@ -1363,12 +1372,12 @@ func TestLoaderProcessRateProfile(t *testing.T) {
 					},
 				},
 			},
-			"RT_WEEKEND": &engine.Rate{
+			"RT_WEEKEND": {
 				ID:             "RT_WEEKEND",
 				Weight:         10,
 				ActivationTime: "* * * * 0,6",
 				IntervalRates: []*engine.IntervalRate{
-					&engine.IntervalRate{
+					{
 						IntervalStart: time.Duration(0 * time.Second),
 						Value:         0.06,
 						Unit:          time.Duration(1 * time.Minute),
@@ -1376,12 +1385,12 @@ func TestLoaderProcessRateProfile(t *testing.T) {
 					},
 				},
 			},
-			"RT_CHRISTMAS": &engine.Rate{
+			"RT_CHRISTMAS": {
 				ID:             "RT_CHRISTMAS",
 				Weight:         30,
 				ActivationTime: "* * 24 12 *",
 				IntervalRates: []*engine.IntervalRate{
-					&engine.IntervalRate{
+					{
 						IntervalStart: time.Duration(0 * time.Second),
 						Value:         0.06,
 						Unit:          time.Duration(1 * time.Minute),
@@ -1410,89 +1419,89 @@ func TestLoaderProcessRateProfileRates(t *testing.T) {
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaRateProfiles: []*config.FCTemplate{
+		utils.MetaRateProfiles: {
 			&config.FCTemplate{Tag: "TenantID",
 				Path:      "Tenant",
 				Type:      utils.META_COMPOSED,
-				Value:     config.NewRSRParsersMustCompile("~*req.0", true, utils.INFIELD_SEP),
+				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP),
 				Mandatory: true},
 			&config.FCTemplate{Tag: "ProfileID",
 				Path:      "ID",
 				Type:      utils.META_COMPOSED,
-				Value:     config.NewRSRParsersMustCompile("~*req.1", true, utils.INFIELD_SEP),
+				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.INFIELD_SEP),
 				Mandatory: true},
 			&config.FCTemplate{Tag: "FilterIDs",
 				Path:  "FilterIDs",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.2", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.2", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "ActivationInterval",
 				Path:  "ActivationInterval",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.3", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.3", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "Weight",
 				Path:  "Weight",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.4", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.4", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "ConnectFee",
 				Path:  "ConnectFee",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.5", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.5", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "RoundingMethod",
 				Path:  "RoundingMethod",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.6", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.6", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "RoundingDecimals",
 				Path:  "RoundingDecimals",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.7", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.7", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "MinCost",
 				Path:  "MinCost",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.8", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.8", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "MaxCost",
 				Path:  "MaxCost",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.9", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.9", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "MaxCostStrategy",
 				Path:  "MaxCostStrategy",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.10", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.10", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "RateID",
 				Path:  "RateID",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.11", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.11", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "RateFilterIDs",
 				Path:  "RateFilterIDs",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.12", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.12", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "RateActivationStart",
 				Path:  "RateActivationStart",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.13", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.13", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "RateWeight",
 				Path:  "RateWeight",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.14", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.14", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "RateBlocker",
 				Path:  "RateBlocker",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.15", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.15", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "RateIntervalStart",
 				Path:  "RateIntervalStart",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.16", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.16", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "RateValue",
 				Path:  "RateValue",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.17", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.17", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "RateUnit",
 				Path:  "RateUnit",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.18", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.18", utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "RateIncrement",
 				Path:  "RateIncrement",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.19", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.19", utils.INFIELD_SEP)},
 		},
 	}
 	ratePrfCnt1 := `
@@ -1509,7 +1518,7 @@ cgrates.org,RP1,,,,,,,,,,RT_CHRISTMAS,,* * 24 12 *,30,false,0s,0.06,1m,1s
 	csvRdr1 := csv.NewReader(rdr1)
 	csvRdr1.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaRateProfiles: map[string]*openedCSVFile{
+		utils.MetaRateProfiles: {
 			utils.RateProfilesCsv: &openedCSVFile{fileName: utils.RateProfilesCsv,
 				rdr: rdr1, csvRdr: csvRdr1}},
 	}
@@ -1531,18 +1540,18 @@ cgrates.org,RP1,,,,,,,,,,RT_CHRISTMAS,,* * 24 12 *,30,false,0s,0.06,1m,1s
 		MaxCost:          0.6,
 		MaxCostStrategy:  "*free",
 		Rates: map[string]*engine.Rate{
-			"RT_WEEK": &engine.Rate{
+			"RT_WEEK": {
 				ID:             "RT_WEEK",
 				Weight:         0,
 				ActivationTime: "* * * * 1-5",
 				IntervalRates: []*engine.IntervalRate{
-					&engine.IntervalRate{
+					{
 						IntervalStart: time.Duration(0 * time.Second),
 						Value:         0.12,
 						Unit:          time.Duration(1 * time.Minute),
 						Increment:     time.Duration(1 * time.Minute),
 					},
-					&engine.IntervalRate{
+					{
 						IntervalStart: time.Duration(1 * time.Minute),
 						Value:         0.06,
 						Unit:          time.Duration(1 * time.Minute),
@@ -1563,7 +1572,7 @@ cgrates.org,RP1,,,,,,,,,,RT_CHRISTMAS,,* * 24 12 *,30,false,0s,0.06,1m,1s
 	csvRdr2 := csv.NewReader(rdr2)
 	csvRdr2.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaRateProfiles: map[string]*openedCSVFile{
+		utils.MetaRateProfiles: {
 			utils.RateProfilesCsv: &openedCSVFile{fileName: utils.RateProfilesCsv,
 				rdr: rdr2, csvRdr: csvRdr2}},
 	}
@@ -1590,18 +1599,18 @@ cgrates.org,RP1,,,,,,,,,,RT_CHRISTMAS,,* * 24 12 *,30,false,0s,0.06,1m,1s
 		MaxCost:          0.6,
 		MaxCostStrategy:  "*free",
 		Rates: map[string]*engine.Rate{
-			"RT_WEEK": &engine.Rate{
+			"RT_WEEK": {
 				ID:             "RT_WEEK",
 				Weight:         0,
 				ActivationTime: "* * * * 1-5",
 				IntervalRates: []*engine.IntervalRate{
-					&engine.IntervalRate{
+					{
 						IntervalStart: time.Duration(0 * time.Second),
 						Value:         0.12,
 						Unit:          time.Duration(1 * time.Minute),
 						Increment:     time.Duration(1 * time.Minute),
 					},
-					&engine.IntervalRate{
+					{
 						IntervalStart: time.Duration(1 * time.Minute),
 						Value:         0.06,
 						Unit:          time.Duration(1 * time.Minute),
@@ -1609,12 +1618,12 @@ cgrates.org,RP1,,,,,,,,,,RT_CHRISTMAS,,* * 24 12 *,30,false,0s,0.06,1m,1s
 					},
 				},
 			},
-			"RT_WEEKEND": &engine.Rate{
+			"RT_WEEKEND": {
 				ID:             "RT_WEEKEND",
 				Weight:         10,
 				ActivationTime: "* * * * 0,6",
 				IntervalRates: []*engine.IntervalRate{
-					&engine.IntervalRate{
+					{
 						IntervalStart: time.Duration(0 * time.Second),
 						Value:         0.06,
 						Unit:          time.Duration(1 * time.Minute),
@@ -1622,12 +1631,12 @@ cgrates.org,RP1,,,,,,,,,,RT_CHRISTMAS,,* * 24 12 *,30,false,0s,0.06,1m,1s
 					},
 				},
 			},
-			"RT_CHRISTMAS": &engine.Rate{
+			"RT_CHRISTMAS": {
 				ID:             "RT_CHRISTMAS",
 				Weight:         30,
 				ActivationTime: "* * 24 12 *",
 				IntervalRates: []*engine.IntervalRate{
-					&engine.IntervalRate{
+					{
 						IntervalStart: time.Duration(0 * time.Second),
 						Value:         0.06,
 						Unit:          time.Duration(1 * time.Minute),
@@ -1656,21 +1665,21 @@ func TestLoaderRemoveRateProfileRates(t *testing.T) {
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaRateProfiles: []*config.FCTemplate{
+		utils.MetaRateProfiles: {
 			&config.FCTemplate{Tag: "TenantID",
 				Path:      "Tenant",
 				Type:      utils.META_COMPOSED,
-				Value:     config.NewRSRParsersMustCompile("~*req.0", true, utils.INFIELD_SEP),
+				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP),
 				Mandatory: true},
 			&config.FCTemplate{Tag: "ProfileID",
 				Path:      "ID",
 				Type:      utils.META_COMPOSED,
-				Value:     config.NewRSRParsersMustCompile("~*req.1", true, utils.INFIELD_SEP),
+				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.INFIELD_SEP),
 				Mandatory: true},
 			&config.FCTemplate{Tag: "RateIDs",
 				Path:  "RateIDs",
 				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.2", true, utils.INFIELD_SEP)},
+				Value: config.NewRSRParsersMustCompile("~*req.2", utils.INFIELD_SEP)},
 		},
 	}
 
@@ -1686,18 +1695,18 @@ func TestLoaderRemoveRateProfileRates(t *testing.T) {
 		MaxCost:          0.6,
 		MaxCostStrategy:  "*free",
 		Rates: map[string]*engine.Rate{
-			"RT_WEEK": &engine.Rate{
+			"RT_WEEK": {
 				ID:             "RT_WEEK",
 				Weight:         0,
 				ActivationTime: "* * * * 1-5",
 				IntervalRates: []*engine.IntervalRate{
-					&engine.IntervalRate{
+					{
 						IntervalStart: time.Duration(0 * time.Second),
 						Value:         0.12,
 						Unit:          time.Duration(1 * time.Minute),
 						Increment:     time.Duration(1 * time.Minute),
 					},
-					&engine.IntervalRate{
+					{
 						IntervalStart: time.Duration(1 * time.Minute),
 						Value:         0.06,
 						Unit:          time.Duration(1 * time.Minute),
@@ -1705,12 +1714,12 @@ func TestLoaderRemoveRateProfileRates(t *testing.T) {
 					},
 				},
 			},
-			"RT_WEEKEND": &engine.Rate{
+			"RT_WEEKEND": {
 				ID:             "RT_WEEKEND",
 				Weight:         10,
 				ActivationTime: "* * * * 0,6",
 				IntervalRates: []*engine.IntervalRate{
-					&engine.IntervalRate{
+					{
 						IntervalStart: time.Duration(0 * time.Second),
 						Value:         0.06,
 						Unit:          time.Duration(1 * time.Minute),
@@ -1718,12 +1727,12 @@ func TestLoaderRemoveRateProfileRates(t *testing.T) {
 					},
 				},
 			},
-			"RT_CHRISTMAS": &engine.Rate{
+			"RT_CHRISTMAS": {
 				ID:             "RT_CHRISTMAS",
 				Weight:         30,
 				ActivationTime: "* * 24 12 *",
 				IntervalRates: []*engine.IntervalRate{
-					&engine.IntervalRate{
+					{
 						IntervalStart: time.Duration(0 * time.Second),
 						Value:         0.06,
 						Unit:          time.Duration(1 * time.Minute),
@@ -1748,18 +1757,18 @@ func TestLoaderRemoveRateProfileRates(t *testing.T) {
 		MaxCost:          0.6,
 		MaxCostStrategy:  "*free",
 		Rates: map[string]*engine.Rate{
-			"RT_WEEK": &engine.Rate{
+			"RT_WEEK": {
 				ID:             "RT_WEEK",
 				Weight:         0,
 				ActivationTime: "* * * * 1-5",
 				IntervalRates: []*engine.IntervalRate{
-					&engine.IntervalRate{
+					{
 						IntervalStart: time.Duration(0 * time.Second),
 						Value:         0.12,
 						Unit:          time.Duration(1 * time.Minute),
 						Increment:     time.Duration(1 * time.Minute),
 					},
-					&engine.IntervalRate{
+					{
 						IntervalStart: time.Duration(1 * time.Minute),
 						Value:         0.06,
 						Unit:          time.Duration(1 * time.Minute),
@@ -1767,12 +1776,12 @@ func TestLoaderRemoveRateProfileRates(t *testing.T) {
 					},
 				},
 			},
-			"RT_WEEKEND": &engine.Rate{
+			"RT_WEEKEND": {
 				ID:             "RT_WEEKEND",
 				Weight:         10,
 				ActivationTime: "* * * * 0,6",
 				IntervalRates: []*engine.IntervalRate{
-					&engine.IntervalRate{
+					{
 						IntervalStart: time.Duration(0 * time.Second),
 						Value:         0.06,
 						Unit:          time.Duration(1 * time.Minute),
@@ -1780,12 +1789,12 @@ func TestLoaderRemoveRateProfileRates(t *testing.T) {
 					},
 				},
 			},
-			"RT_CHRISTMAS": &engine.Rate{
+			"RT_CHRISTMAS": {
 				ID:             "RT_CHRISTMAS",
 				Weight:         30,
 				ActivationTime: "* * 24 12 *",
 				IntervalRates: []*engine.IntervalRate{
-					&engine.IntervalRate{
+					{
 						IntervalStart: time.Duration(0 * time.Second),
 						Value:         0.06,
 						Unit:          time.Duration(1 * time.Minute),
@@ -1812,7 +1821,7 @@ cgrates.org,RP1,
 	csvRdr1 := csv.NewReader(rdr1)
 	csvRdr1.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaRateProfiles: map[string]*openedCSVFile{
+		utils.MetaRateProfiles: {
 			utils.RateProfilesCsv: &openedCSVFile{fileName: utils.RateProfilesCsv,
 				rdr: rdr1, csvRdr: csvRdr1}},
 	}
@@ -1840,18 +1849,18 @@ cgrates.org,RP1,
 		MaxCost:          0.6,
 		MaxCostStrategy:  "*free",
 		Rates: map[string]*engine.Rate{
-			"RT_WEEK": &engine.Rate{
+			"RT_WEEK": {
 				ID:             "RT_WEEK",
 				Weight:         0,
 				ActivationTime: "* * * * 1-5",
 				IntervalRates: []*engine.IntervalRate{
-					&engine.IntervalRate{
+					{
 						IntervalStart: time.Duration(0 * time.Second),
 						Value:         0.12,
 						Unit:          time.Duration(1 * time.Minute),
 						Increment:     time.Duration(1 * time.Minute),
 					},
-					&engine.IntervalRate{
+					{
 						IntervalStart: time.Duration(1 * time.Minute),
 						Value:         0.06,
 						Unit:          time.Duration(1 * time.Minute),
@@ -1859,12 +1868,12 @@ cgrates.org,RP1,
 					},
 				},
 			},
-			"RT_CHRISTMAS": &engine.Rate{
+			"RT_CHRISTMAS": {
 				ID:             "RT_CHRISTMAS",
 				Weight:         30,
 				ActivationTime: "* * 24 12 *",
 				IntervalRates: []*engine.IntervalRate{
-					&engine.IntervalRate{
+					{
 						IntervalStart: time.Duration(0 * time.Second),
 						Value:         0.06,
 						Unit:          time.Duration(1 * time.Minute),
@@ -1885,7 +1894,7 @@ cgrates.org,RP1,
 	csvRdr2 := csv.NewReader(rdr2)
 	csvRdr2.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaRateProfiles: map[string]*openedCSVFile{
+		utils.MetaRateProfiles: {
 			utils.RateProfilesCsv: &openedCSVFile{fileName: utils.RateProfilesCsv,
 				rdr: rdr2, csvRdr: csvRdr2}},
 	}
@@ -1913,18 +1922,18 @@ cgrates.org,RP1,
 		MaxCost:          0.6,
 		MaxCostStrategy:  "*free",
 		Rates: map[string]*engine.Rate{
-			"RT_WEEK": &engine.Rate{
+			"RT_WEEK": {
 				ID:             "RT_WEEK",
 				Weight:         0,
 				ActivationTime: "* * * * 1-5",
 				IntervalRates: []*engine.IntervalRate{
-					&engine.IntervalRate{
+					{
 						IntervalStart: time.Duration(0 * time.Second),
 						Value:         0.12,
 						Unit:          time.Duration(1 * time.Minute),
 						Increment:     time.Duration(1 * time.Minute),
 					},
-					&engine.IntervalRate{
+					{
 						IntervalStart: time.Duration(1 * time.Minute),
 						Value:         0.06,
 						Unit:          time.Duration(1 * time.Minute),

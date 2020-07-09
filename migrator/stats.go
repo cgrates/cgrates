@@ -113,7 +113,7 @@ func (m *Migrator) migrateCurrentStats() (err error) {
 		if err := m.dmIN.DataManager().RemoveStatQueue(tntID[0], tntID[1], utils.NonTransactional); err != nil {
 			return err
 		}
-		m.stats[utils.StatS] += 1
+		m.stats[utils.StatS]++
 	}
 
 	return m.moveStatQueueProfile()
@@ -137,7 +137,6 @@ func (m *Migrator) migrateV1Stats() (filter *engine.Filter, v2Stats *engine.Stat
 		if filter, v2Stats, sts, err = v1Sts.AsStatQP(); err != nil {
 			return nil, nil, nil, err
 		}
-		m.stats[utils.StatS] += 1
 	}
 	return
 }
@@ -150,8 +149,8 @@ func remakeQueue(sq *engine.StatQueue) (out *engine.StatQueue) {
 		SQMetrics: make(map[string]engine.StatMetric),
 		MinItems:  sq.MinItems,
 	}
-	for mId, metric := range sq.SQMetrics {
-		id := utils.ConcatenatedKey(utils.SplitConcatenatedKey(mId)...)
+	for mID, metric := range sq.SQMetrics {
+		id := utils.ConcatenatedKey(utils.SplitConcatenatedKey(mID)...)
 		out.SQMetrics[id] = metric
 	}
 	return
@@ -179,37 +178,46 @@ func (m *Migrator) migrateStats() (err error) {
 	}
 	migrated := true
 	var filter *engine.Filter
-	var sts *engine.StatQueueProfile
+	var v3sts *engine.StatQueueProfile
+	var v4sts *engine.StatQueueProfile
 	var v2Stats *engine.StatQueue
 	var v3Stats *engine.StatQueue
 	for {
 		version := vrs[utils.StatS]
 		for {
 			switch version {
+			default:
+				return fmt.Errorf("Unsupported version %v", version)
 			case current[utils.StatS]:
+				migrated = false
 				if m.sameDataDB {
-					migrated = false
 					break
 				}
 				if err = m.migrateCurrentStats(); err != nil {
-					return err
+					return
 				}
 				version = 3
-				migrated = false
 			case 1: // migrate from V1 to V2
-				if filter, v2Stats, sts, err = m.migrateV1Stats(); err != nil && err != utils.ErrNoMoreData {
-					return err
+				if filter, v2Stats, v3sts, err = m.migrateV1Stats(); err != nil && err != utils.ErrNoMoreData {
+					return
 				} else if err == utils.ErrNoMoreData {
 					break
 				}
 				version = 2
 			case 2: // migrate from V2 to V3 (actual)
 				if v3Stats, err = m.migrateV2Stats(v2Stats); err != nil && err != utils.ErrNoMoreData {
-					return err
+					return
 				} else if err == utils.ErrNoMoreData {
 					break
 				}
 				version = 3
+			case 3:
+				if v4sts, err = m.migrateV3ToV4Stats(v3sts); err != nil && err != utils.ErrNoMoreData {
+					return
+				} else if err == utils.ErrNoMoreData {
+					break
+				}
+				version = 4
 			}
 			if version == current[utils.StatS] || err == utils.ErrNoMoreData {
 				break
@@ -218,20 +226,21 @@ func (m *Migrator) migrateStats() (err error) {
 		if err == utils.ErrNoMoreData || !migrated {
 			break
 		}
-		if !m.dryRun && migrated {
+		if !m.dryRun {
 			if vrs[utils.StatS] == 1 {
-				if err := m.dmOut.DataManager().SetFilter(filter, true); err != nil {
-					return err
-				}
-				if err := m.dmOut.DataManager().SetStatQueueProfile(sts, true); err != nil {
-					return err
+				if err = m.dmOut.DataManager().SetFilter(filter, true); err != nil {
+					return
 				}
 			}
 			// Set the fresh-migrated Stats into DB
+			if err = m.dmOut.DataManager().SetStatQueueProfile(v4sts, true); err != nil {
+				return
+			}
 			if err = m.dmOut.DataManager().SetStatQueue(v3Stats); err != nil {
-				return err
+				return
 			}
 		}
+		m.stats[utils.StatS]++
 	}
 	if m.dryRun || !migrated {
 		return nil
@@ -420,12 +429,23 @@ func (v1Sts v1Stat) AsStatQP() (filter *engine.Filter, sq *engine.StatQueue, stq
 			}
 			v1Sts.Metrics[i] = strings.ToLower(v1Sts.Metrics[i])
 			stq.Metrics = append(stq.Metrics, &engine.MetricWithFilters{MetricID: v1Sts.Metrics[i]})
-			if metric, err := engine.NewStatMetric(stq.Metrics[i].MetricID, 0, []string{}); err != nil {
+			if sq.SQMetrics[stq.Metrics[i].MetricID], err = engine.NewStatMetric(stq.Metrics[i].MetricID, 0, []string{}); err != nil {
 				return nil, nil, nil, err
-			} else {
-				sq.SQMetrics[stq.Metrics[i].MetricID] = metric
 			}
 		}
 	}
 	return filter, sq, stq, nil
+}
+
+func (m *Migrator) migrateV3ToV4Stats(v3sts *engine.StatQueueProfile) (v4Cpp *engine.StatQueueProfile, err error) {
+	if v3sts == nil {
+		// read data from DataDB
+		if v3sts, err = m.dmIN.getV3Stats(); err != nil {
+			return
+		}
+	}
+	if v3sts.FilterIDs, err = migrateInlineFilterV4(v3sts.FilterIDs); err != nil {
+		return
+	}
+	return v3sts, nil
 }

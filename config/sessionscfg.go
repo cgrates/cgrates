@@ -494,7 +494,7 @@ func (fscfg *FsAgentCfg) loadFromJsonCfg(jsnCfg *FreeswitchAgentJsonCfg) error {
 		fscfg.CreateCdr = *jsnCfg.Create_cdr
 	}
 	if jsnCfg.Extra_fields != nil {
-		if fscfg.ExtraFields, err = NewRSRParsersFromSlice(*jsnCfg.Extra_fields, true); err != nil {
+		if fscfg.ExtraFields, err = NewRSRParsersFromSlice(*jsnCfg.Extra_fields); err != nil {
 			return err
 		}
 	}

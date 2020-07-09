@@ -643,6 +643,14 @@ func TestHexConvertor(t *testing.T) {
 	} else if !reflect.DeepEqual(expected, rpl) {
 		t.Errorf("expecting: %+v, received: %+v", expected, rpl)
 	}
+
+	val = "62.87.114.244"
+	expected = "0x3e5772f4"
+	if rpl, err := hx.Convert(val); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rpl) {
+		t.Errorf("expecting: %+v, received: %+v", expected, rpl)
+	}
 }
 
 type testMockConverter struct{}

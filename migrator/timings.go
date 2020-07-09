@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package migrator
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/cgrates/cgrates/engine"
@@ -43,7 +44,7 @@ func (m *Migrator) migrateCurrentTiming() (err error) {
 		if err := m.dmOut.DataManager().SetTiming(tm); err != nil {
 			return err
 		}
-		m.stats[utils.Timing] += 1
+		m.stats[utils.Timing]++
 	}
 	return
 }
@@ -54,7 +55,9 @@ func (m *Migrator) migrateTimings() (err error) {
 	if vrs, err = m.getVersions(utils.Timing); err != nil {
 		return
 	}
-	switch vrs[utils.Timing] {
+	switch version := vrs[utils.Timing]; version {
+	default:
+		return fmt.Errorf("Unsupported version %v", version)
 	case current[utils.Timing]:
 		if m.sameDataDB {
 			break

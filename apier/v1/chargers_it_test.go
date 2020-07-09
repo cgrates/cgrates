@@ -169,8 +169,7 @@ func testChargerSLoadAddCharger(t *testing.T) {
 					Path: utils.MetaReq + utils.NestingSep + "Password",
 					Value: config.RSRParsers{
 						&config.RSRParser{
-							Rules:           "CGRateS.org",
-							AllFiltersMatch: true,
+							Rules: "CGRateS.org",
 						},
 					},
 				},

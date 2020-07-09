@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package migrator
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
@@ -120,22 +121,23 @@ func (m *Migrator) migrateActionTriggers() (err error) {
 	var v2 engine.ActionTriggers
 	for {
 		version := vrs[utils.ActionTriggers]
+		migratedFrom = int(version)
 		for {
 			switch version {
+			default:
+				return fmt.Errorf("Unsupported version %v", version)
 			case current[utils.ActionTriggers]:
+				migrated = false
 				if m.sameDataDB {
-					migrated = false
 					break
 				}
 				if err = m.migrateCurrentActionTrigger(); err != nil {
-					return err
+					return
 				}
-				migrated = false
 			case 1:
 				if v2, err = m.migrateV1ActionTrigger(); err != nil && err != utils.ErrNoMoreData {
-					return err
+					return
 				}
-				migratedFrom = 1
 				version = 2
 			}
 			if version == current[utils.ActionTriggers] || err == utils.ErrNoMoreData {
@@ -145,21 +147,20 @@ func (m *Migrator) migrateActionTriggers() (err error) {
 		if err == utils.ErrNoMoreData || !migrated {
 			break
 		}
-		if !m.dryRun && migrated {
+		if !m.dryRun {
 			//set action triggers
-			if err := m.dmOut.DataManager().SetActionTriggers(v2[0].ID, v2, utils.NonTransactional); err != nil {
-				return err
+			if err = m.dmOut.DataManager().SetActionTriggers(v2[0].ID, v2, utils.NonTransactional); err != nil {
+				return
 			}
 		}
-		m.stats[utils.ActionTriggers] += 1
+		m.stats[utils.ActionTriggers]++
 	}
 	if m.dryRun || !migrated {
 		return nil
 	}
 	// remove old action triggers
 	if !m.sameDataDB {
-		switch migratedFrom {
-		case 1:
+		if migratedFrom == 1 {
 			if err = m.removeV1ActionTriggers(); err != nil {
 				return
 			}
@@ -168,7 +169,7 @@ func (m *Migrator) migrateActionTriggers() (err error) {
 
 	// All done, update version wtih current one
 	if err = m.setVersions(utils.ActionTriggers); err != nil {
-		return err
+		return
 	}
 
 	return m.ensureIndexesDataDB(engine.ColAtr)

@@ -227,11 +227,11 @@ func testInternalReplicateITAttributeProfile(t *testing.T) {
 			Attributes: []*engine.Attribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + utils.Subject,
-					Value: config.NewRSRParsersMustCompile("ATTR_SUBJECT", true, utils.INFIELD_SEP),
+					Value: config.NewRSRParsersMustCompile("ATTR_SUBJECT", utils.INFIELD_SEP),
 				},
 				{
 					Path:  utils.MetaReq + utils.NestingSep + utils.Category,
-					Value: config.NewRSRParsersMustCompile("ATTR_CATEGORY", true, utils.INFIELD_SEP),
+					Value: config.NewRSRParsersMustCompile("ATTR_CATEGORY", utils.INFIELD_SEP),
 				},
 			},
 			Weight: 20,
@@ -1482,11 +1482,11 @@ func testInternalReplicateITLoadIds(t *testing.T) {
 				{
 					FilterIDs: []string{"*string:~*req.Account:1008"},
 					Path:      utils.MetaReq + utils.NestingSep + utils.Account,
-					Value:     config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
+					Value:     config.NewRSRParsersMustCompile("1001", utils.INFIELD_SEP),
 				},
 				{
 					Path:  utils.MetaReq + utils.NestingSep + utils.Subject,
-					Value: config.NewRSRParsersMustCompile(utils.MetaRemove, true, utils.INFIELD_SEP),
+					Value: config.NewRSRParsersMustCompile(utils.MetaRemove, utils.INFIELD_SEP),
 				},
 			},
 			Weight: 20,

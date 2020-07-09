@@ -33,7 +33,7 @@ func (m *Migrator) migrateLoadIDs() (err error) {
 		if err = m.dmOut.DataManager().DataDB().RemoveLoadIDsDrv(); err != nil {
 			return
 		}
-		if err = m.setVersions(utils.ActionTriggers); err != nil {
+		if err = m.setVersions(utils.LoadIDsVrs); err != nil {
 			return err
 		}
 	}

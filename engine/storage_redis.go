@@ -1406,9 +1406,8 @@ func (rs *RedisStorage) GetFilterDrv(tenant, id string) (r *Filter, err error) {
 		return
 	}
 	if err = rs.ms.Unmarshal(values, &r); err != nil {
-		return
+		return nil, err
 	}
-	err = r.Compile()
 	return
 }
 

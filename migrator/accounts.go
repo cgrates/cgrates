@@ -20,6 +20,7 @@ package migrator
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"strings"
 	"time"
@@ -55,7 +56,7 @@ func (m *Migrator) migrateCurrentAccounts() (err error) {
 		if err := m.dmIN.DataManager().RemoveAccount(idg); err != nil {
 			return err
 		}
-		m.stats[utils.Accounts] += 1
+		m.stats[utils.Accounts]++
 	}
 	return
 }
@@ -129,34 +130,34 @@ func (m *Migrator) migrateAccounts() (err error) {
 	var v3Acnt *engine.Account
 	for {
 		version := vrs[utils.Accounts]
+		migratedFrom = int(version)
 		for {
 			switch version {
+			default:
+				return fmt.Errorf("Unsupported version %v", version)
 			case current[utils.Accounts]:
+				migrated = false
 				if m.sameDataDB {
-					migrated = false
 					break
 				}
 				if err = m.migrateCurrentAccounts(); err != nil {
-					return err
+					return
 				}
 				version = 3
-				migrated = false
 			case 1: //migrate v1 to v3
 				if v3Acnt, err = m.migrateV1Accounts(); err != nil && err != utils.ErrNoMoreData {
 					return err
 				} else if err == utils.ErrNoMoreData {
 					break
 				}
-				migratedFrom = 1
 				version = 3
 			case 2: //migrate v2 to v3
 				if v3Acnt, err = m.migrateV2Accounts(); err != nil && err != utils.ErrNoMoreData {
-					return err
+					return
 				} else if err == utils.ErrNoMoreData {
 					break
 				}
 				version = 3
-				migratedFrom = 2
 			}
 			if version == current[utils.Accounts] || err == utils.ErrNoMoreData {
 				break
@@ -166,12 +167,12 @@ func (m *Migrator) migrateAccounts() (err error) {
 			break
 		}
 
-		if !m.dryRun && migrated {
+		if !m.dryRun {
 			if err = m.dmOut.DataManager().SetAccount(v3Acnt); err != nil {
-				return err
+				return
 			}
 		}
-		m.stats[utils.Accounts] += 1
+		m.stats[utils.Accounts]++
 
 	}
 	if m.dryRun || !migrated {

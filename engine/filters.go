@@ -206,7 +206,7 @@ var supportedFiltersType utils.StringSet = utils.NewStringSet([]string{utils.Met
 	utils.MetaGreaterThan, utils.MetaGreaterOrEqual, utils.MetaEqual,
 	utils.MetaNotEqual})
 var needsFieldName utils.StringSet = utils.NewStringSet([]string{utils.MetaString, utils.MetaPrefix,
-	utils.MetaSuffix, utils.MetaTimings, utils.MetaDestinations, utils.MetaLessThan,
+	utils.MetaSuffix, utils.MetaTimings, utils.MetaRSR, utils.MetaDestinations, utils.MetaLessThan,
 	utils.MetaEmpty, utils.MetaExists, utils.MetaLessOrEqual, utils.MetaGreaterThan,
 	utils.MetaGreaterOrEqual, utils.MetaEqual, utils.MetaNotEqual})
 var needsValues utils.StringSet = utils.NewStringSet([]string{utils.MetaString, utils.MetaPrefix,
@@ -219,7 +219,7 @@ func NewFilterRule(rfType, fieldName string, vals []string) (*FilterRule, error)
 	var negative bool
 	rType := rfType
 	if strings.HasPrefix(rfType, utils.MetaNot) {
-		rType = "*" + strings.TrimPrefix(rfType, utils.MetaNot)
+		rType = utils.Meta + strings.TrimPrefix(rfType, utils.MetaNot)
 		negative = true
 	}
 	if !supportedFiltersType.Has(rType) {
@@ -246,23 +246,24 @@ func NewFilterRule(rfType, fieldName string, vals []string) (*FilterRule, error)
 // FilterRule filters requests coming into various places
 // Pass rule: default negative, one matching rule should pass the filter
 type FilterRule struct {
-	Type      string            // Filter type (*string, *timing, *rsr_filters, *stats, *lt, *lte, *gt, *gte)
-	Element   string            // Name of the field providing us the Values to check (used in case of some )
-	Values    []string          // Filter definition
-	rsrFields config.RSRParsers // Cache here the RSRFilter Values
-	negative  *bool
+	Type       string            // Filter type (*string, *timing, *rsr_filters, *stats, *lt, *lte, *gt, *gte)
+	Element    string            // Name of the field providing us the Values to check (used in case of some )
+	Values     []string          // Filter definition
+	rsrFields  config.RSRParsers // Cache here the RSRFilter Values
+	rsrFilters utils.RSRFilters  // Cache here the RSRFilter Values
+	negative   *bool
 }
 
 // CompileValues compiles RSR fields
 func (fltr *FilterRule) CompileValues() (err error) {
 	switch fltr.Type {
 	case utils.MetaRSR, utils.MetaNotRSR:
-		if fltr.rsrFields, err = config.NewRSRParsersFromSlice(fltr.Values, true); err != nil {
+		if fltr.rsrFilters, err = utils.ParseRSRFiltersFromSlice(fltr.Values); err != nil {
 			return
 		}
 	case utils.MetaExists, utils.MetaNotExists:
 		if len(fltr.Values) != 0 {
-			if fltr.rsrFields, err = config.NewRSRParsersFromSlice(fltr.Values, true); err != nil {
+			if fltr.rsrFields, err = config.NewRSRParsersFromSlice(fltr.Values); err != nil {
 				return
 			}
 		}
@@ -447,14 +448,17 @@ func (fltr *FilterRule) passDestinations(dDP utils.DataProvider) (bool, error) {
 }
 
 func (fltr *FilterRule) passRSR(dDP utils.DataProvider) (bool, error) {
-	_, err := fltr.rsrFields.ParseDataProviderWithInterfaces(dDP)
+	fld, err := utils.DPDynamicString(fltr.Element, dDP)
 	if err != nil {
-		if err == utils.ErrNotFound || err == utils.ErrFilterNotPassingNoCaps {
-			return false, nil
+
+		if err == utils.ErrNotFound {
+			match := fltr.rsrFilters.FilterRules() == "^$"
+			return match, nil
 		}
 		return false, err
 	}
-	return true, nil
+	match := fltr.rsrFilters.Pass(fld, true)
+	return match, nil
 }
 
 func (fltr *FilterRule) passGreaterThan(dDP utils.DataProvider) (bool, error) {

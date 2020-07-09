@@ -61,7 +61,9 @@ func (m *Migrator) migrateSessionSCosts() (err error) {
 			utils.UndefinedVersion,
 			"version number is not defined for SessionsCosts model")
 	}
-	switch vrs[utils.SessionSCosts] {
+	switch version := vrs[utils.SessionSCosts]; version {
+	default:
+		return fmt.Errorf("Unsupported version %v", version)
 	case 0, 1:
 		if err = m.migrateV1SessionSCosts(); err != nil {
 			return err
@@ -115,7 +117,7 @@ func (m *Migrator) migrateV2SessionSCosts() (err error) {
 		if err = m.storDBIn.remV2SMCost(v2Cost); err != nil {
 			return err
 		}
-		m.stats[utils.SessionSCosts] += 1
+		m.stats[utils.SessionSCosts]++
 	}
 	if m.dryRun {
 		return

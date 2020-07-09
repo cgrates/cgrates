@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package migrator
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -51,7 +52,7 @@ func (m *Migrator) migrateCurrentCharger() (err error) {
 			tntID[1], utils.NonTransactional, false); err != nil {
 			return err
 		}
-		m.stats[utils.Chargers] += 1
+		m.stats[utils.Chargers]++
 	}
 	return
 }
@@ -62,14 +63,62 @@ func (m *Migrator) migrateChargers() (err error) {
 	if vrs, err = m.getVersions(utils.Chargers); err != nil {
 		return
 	}
-	switch vrs[utils.Chargers] {
-	case current[utils.Chargers]:
-		if m.sameDataDB {
+	migrated := true
+	var v2 *engine.ChargerProfile
+	for {
+		version := vrs[utils.Chargers]
+		for {
+			switch version {
+			default:
+				return fmt.Errorf("Unsupported version %v", version)
+			case current[utils.Chargers]:
+				migrated = false
+				if m.sameDataDB {
+					break
+				}
+				if err = m.migrateCurrentCharger(); err != nil {
+					return
+				}
+			case 1:
+				if v2, err = m.migrateV1ToV2Chargers(); err != nil && err != utils.ErrNoMoreData {
+					return
+				} else if err == utils.ErrNoMoreData {
+					break
+				}
+				version = 2
+			}
+			if version == current[utils.Chargers] || err == utils.ErrNoMoreData {
+				break
+			}
+		}
+		if err == utils.ErrNoMoreData || !migrated {
 			break
 		}
-		if err = m.migrateCurrentCharger(); err != nil {
-			return err
+
+		if !m.dryRun {
+			//set action plan
+			if err = m.dmOut.DataManager().SetChargerProfile(v2, true); err != nil {
+				return
+			}
 		}
+		m.stats[utils.Chargers]++
+	}
+	// All done, update version wtih current one
+	if err = m.setVersions(utils.Chargers); err != nil {
+		return
 	}
 	return m.ensureIndexesDataDB(engine.ColCpp)
+}
+
+func (m *Migrator) migrateV1ToV2Chargers() (v4Cpp *engine.ChargerProfile, err error) {
+	v4Cpp, err = m.dmIN.getV1ChargerProfile()
+	if err != nil {
+		return nil, err
+	} else if v4Cpp == nil {
+		return nil, errors.New("Charger NIL")
+	}
+	if v4Cpp.FilterIDs, err = migrateInlineFilterV4(v4Cpp.FilterIDs); err != nil {
+		return nil, err
+	}
+	return
 }

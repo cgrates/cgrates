@@ -374,10 +374,10 @@ func testV1STSSetStatQueueProfile(t *testing.T) {
 			QueueLength: 10,
 			TTL:         time.Duration(10) * time.Second,
 			Metrics: []*engine.MetricWithFilters{
-				&engine.MetricWithFilters{
+				{
 					MetricID: utils.MetaACD,
 				},
-				&engine.MetricWithFilters{
+				{
 					MetricID: utils.MetaTCD,
 				},
 			},
@@ -484,7 +484,7 @@ func testV1STSProcessMetricsWithFilter(t *testing.T) {
 			Metrics: []*engine.MetricWithFilters{
 				&engine.MetricWithFilters{
 					MetricID:  utils.MetaACD,
-					FilterIDs: []string{"*rsr::~*req.Usage{*duration}(>10s)"},
+					FilterIDs: []string{"*gt:~*req.Usage:10s"},
 				},
 				&engine.MetricWithFilters{
 					MetricID:  utils.MetaTCD,
