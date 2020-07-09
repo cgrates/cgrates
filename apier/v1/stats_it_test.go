@@ -484,7 +484,7 @@ func testV1STSProcessMetricsWithFilter(t *testing.T) {
 			Metrics: []*engine.MetricWithFilters{
 				&engine.MetricWithFilters{
 					MetricID:  utils.MetaACD,
-					FilterIDs: []string{"*rsr:~*req.Usage{*duration}:>10s"},
+					FilterIDs: []string{"*gt:~*req.Usage:10s"},
 				},
 				&engine.MetricWithFilters{
 					MetricID:  utils.MetaTCD,
