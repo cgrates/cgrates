@@ -37,13 +37,13 @@ func (dS *DispatcherService) ResponderPing(args *utils.CGREventWithArgDispatcher
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.ResponderPing, args.CGREvent.Tenant,
-			args.APIKey, args.CGREvent.Time); err != nil {
+			args.OptsAPIKey, args.CGREvent.Time); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
+		routeID = args.ArgDispatcher.OptsRouteID
 	}
 	return dS.Dispatch(args.CGREvent, utils.MetaResponder,
 		routeID, utils.ResponderPing, args, reply)
@@ -56,13 +56,13 @@ func (dS *DispatcherService) ResponderGetCost(args *engine.CallDescriptorWithArg
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.ResponderGetCost, args.Tenant,
-			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			args.OptsAPIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
+		routeID = args.ArgDispatcher.OptsRouteID
 	}
 	return dS.Dispatch(args.AsCGREvent(), utils.MetaResponder,
 		routeID, utils.ResponderGetCost, args, reply)
@@ -75,13 +75,13 @@ func (dS *DispatcherService) ResponderDebit(args *engine.CallDescriptorWithArgDi
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.ResponderDebit, args.Tenant,
-			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			args.OptsAPIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
+		routeID = args.ArgDispatcher.OptsRouteID
 	}
 	return dS.Dispatch(args.AsCGREvent(), utils.MetaResponder,
 		routeID, utils.ResponderDebit, args, reply)
@@ -94,13 +94,13 @@ func (dS *DispatcherService) ResponderMaxDebit(args *engine.CallDescriptorWithAr
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.ResponderMaxDebit, args.Tenant,
-			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			args.OptsAPIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
+		routeID = args.ArgDispatcher.OptsRouteID
 	}
 	return dS.Dispatch(args.AsCGREvent(), utils.MetaResponder,
 		routeID, utils.ResponderMaxDebit, args, reply)
@@ -113,13 +113,13 @@ func (dS *DispatcherService) ResponderRefundIncrements(args *engine.CallDescript
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.ResponderRefundIncrements, args.Tenant,
-			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			args.OptsAPIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
+		routeID = args.ArgDispatcher.OptsRouteID
 	}
 	return dS.Dispatch(args.AsCGREvent(), utils.MetaResponder,
 		routeID, utils.ResponderRefundIncrements, args, reply)
@@ -132,13 +132,13 @@ func (dS *DispatcherService) ResponderRefundRounding(args *engine.CallDescriptor
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.ResponderRefundRounding, args.Tenant,
-			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			args.OptsAPIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
+		routeID = args.ArgDispatcher.OptsRouteID
 	}
 	return dS.Dispatch(args.AsCGREvent(), utils.MetaResponder,
 		routeID, utils.ResponderRefundRounding, args, reply)
@@ -151,13 +151,13 @@ func (dS *DispatcherService) ResponderGetMaxSessionTime(args *engine.CallDescrip
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.ResponderGetMaxSessionTime, args.Tenant,
-			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			args.OptsAPIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
+		routeID = args.ArgDispatcher.OptsRouteID
 	}
 	return dS.Dispatch(args.AsCGREvent(), utils.MetaResponder,
 		routeID, utils.ResponderGetMaxSessionTime, args, reply)
@@ -171,13 +171,13 @@ func (dS *DispatcherService) ResponderShutdown(args *utils.TenantWithArgDispatch
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.ResponderShutdown, tnt,
-			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			args.OptsAPIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
+		routeID = args.ArgDispatcher.OptsRouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaResponder,
 		routeID, utils.ResponderShutdown, args, reply)

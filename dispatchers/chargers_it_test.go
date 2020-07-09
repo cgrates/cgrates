@@ -79,7 +79,7 @@ func testDspCppPingFailover(t *testing.T) {
 			Tenant: "cgrates.org",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("chrg12345"),
+			OptsAPIKey: utils.StringPointer("chrg12345"),
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.ChargerSv1Ping, &ev, &reply); err != nil {
@@ -112,7 +112,7 @@ func testDspCppGetChtgFailover(t *testing.T) {
 			},
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("chrg12345"),
+			OptsAPIKey: utils.StringPointer("chrg12345"),
 		},
 	}
 	eChargers := &engine.ChargerProfiles{
@@ -176,7 +176,7 @@ func testDspCppPing(t *testing.T) {
 			Tenant: "cgrates.org",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("chrg12345"),
+			OptsAPIKey: utils.StringPointer("chrg12345"),
 		},
 	}, &reply); err != nil {
 		t.Error(err)
@@ -195,7 +195,7 @@ func testDspCppTestAuthKey(t *testing.T) {
 			},
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("12345"),
+			OptsAPIKey: utils.StringPointer("12345"),
 		},
 	}
 	var reply *engine.ChargerProfiles
@@ -215,7 +215,7 @@ func testDspCppTestAuthKey2(t *testing.T) {
 			},
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("chrg12345"),
+			OptsAPIKey: utils.StringPointer("chrg12345"),
 		},
 	}
 	eChargers := &engine.ChargerProfiles{
@@ -264,7 +264,7 @@ func testDspCppGetChtgRoundRobin(t *testing.T) {
 			},
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("chrg12345"),
+			OptsAPIKey: utils.StringPointer("chrg12345"),
 		},
 	}
 	eChargers := &engine.ChargerProfiles{

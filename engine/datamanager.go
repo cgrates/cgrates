@@ -363,8 +363,8 @@ func (dm *DataManager) SetDestination(dest *Destination, transactionID string) (
 				Destination: dest,
 				TenantArg:   utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 				ArgDispatcher: &utils.ArgDispatcher{
-					APIKey:  utils.StringPointer(itm.APIKey),
-					RouteID: utils.StringPointer(itm.RouteID),
+					OptsAPIKey:  utils.StringPointer(itm.APIKey),
+					OptsRouteID: utils.StringPointer(itm.RouteID),
 				}}, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
@@ -388,8 +388,8 @@ func (dm *DataManager) RemoveDestination(destID string, transactionID string) (e
 				Arg:       destID,
 				TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 				ArgDispatcher: &utils.ArgDispatcher{
-					APIKey:  utils.StringPointer(itm.APIKey),
-					RouteID: utils.StringPointer(itm.RouteID),
+					OptsAPIKey:  utils.StringPointer(itm.APIKey),
+					OptsRouteID: utils.StringPointer(itm.RouteID),
 				}}, &reply)
 	}
 	return
@@ -428,8 +428,8 @@ func (dm *DataManager) GetReverseDestination(prefix string,
 					Arg:       prefix,
 					TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 					ArgDispatcher: &utils.ArgDispatcher{
-						APIKey:  utils.StringPointer(itm.APIKey),
-						RouteID: utils.StringPointer(itm.RouteID),
+						OptsAPIKey:  utils.StringPointer(itm.APIKey),
+						OptsRouteID: utils.StringPointer(itm.RouteID),
 					},
 				}, &ids); err == nil {
 				// need to discuss
@@ -467,8 +467,8 @@ func (dm *DataManager) GetAccount(id string) (acc *Account, err error) {
 					Arg:       id,
 					TenantArg: utils.TenantArg{Tenant: tenant},
 					ArgDispatcher: &utils.ArgDispatcher{
-						APIKey:  utils.StringPointer(itm.APIKey),
-						RouteID: utils.StringPointer(itm.RouteID),
+						OptsAPIKey:  utils.StringPointer(itm.APIKey),
+						OptsRouteID: utils.StringPointer(itm.RouteID),
 					},
 				}, &acc); err == nil {
 				err = dm.dataDB.SetAccountDrv(acc)
@@ -497,8 +497,8 @@ func (dm *DataManager) SetAccount(acc *Account) (err error) {
 			&AccountWithArgDispatcher{
 				Account: acc,
 				ArgDispatcher: &utils.ArgDispatcher{
-					APIKey:  utils.StringPointer(itm.APIKey),
-					RouteID: utils.StringPointer(itm.RouteID),
+					OptsAPIKey:  utils.StringPointer(itm.APIKey),
+					OptsRouteID: utils.StringPointer(itm.RouteID),
 				}}, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
@@ -523,8 +523,8 @@ func (dm *DataManager) RemoveAccount(id string) (err error) {
 				Arg:       id,
 				TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 				ArgDispatcher: &utils.ArgDispatcher{
-					APIKey:  utils.StringPointer(itm.APIKey),
-					RouteID: utils.StringPointer(itm.RouteID),
+					OptsAPIKey:  utils.StringPointer(itm.APIKey),
+					OptsRouteID: utils.StringPointer(itm.RouteID),
 				}}, &reply)
 	}
 	return
@@ -554,8 +554,8 @@ func (dm *DataManager) GetStatQueue(tenant, id string,
 				&utils.TenantIDWithArgDispatcher{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 					ArgDispatcher: &utils.ArgDispatcher{
-						APIKey:  utils.StringPointer(itm.APIKey),
-						RouteID: utils.StringPointer(itm.RouteID),
+						OptsAPIKey:  utils.StringPointer(itm.APIKey),
+						OptsRouteID: utils.StringPointer(itm.RouteID),
 					}}, sq); err == nil {
 				var ssq *StoredStatQueue
 				if dm.dataDB.GetStorageType() != utils.MetaInternal {
@@ -612,8 +612,8 @@ func (dm *DataManager) SetStatQueue(sq *StatQueue) (err error) {
 			&StoredStatQueueWithArgDispatcher{
 				StoredStatQueue: ssq,
 				ArgDispatcher: &utils.ArgDispatcher{
-					APIKey:  utils.StringPointer(itm.APIKey),
-					RouteID: utils.StringPointer(itm.RouteID),
+					OptsAPIKey:  utils.StringPointer(itm.APIKey),
+					OptsRouteID: utils.StringPointer(itm.RouteID),
 				}}, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
@@ -638,8 +638,8 @@ func (dm *DataManager) RemoveStatQueue(tenant, id string, transactionID string) 
 			&utils.TenantIDWithArgDispatcher{
 				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 				ArgDispatcher: &utils.ArgDispatcher{
-					APIKey:  utils.StringPointer(itm.APIKey),
-					RouteID: utils.StringPointer(itm.RouteID),
+					OptsAPIKey:  utils.StringPointer(itm.APIKey),
+					OptsRouteID: utils.StringPointer(itm.RouteID),
 				}}, &reply)
 	}
 	return
@@ -727,8 +727,8 @@ func (dm *DataManager) SetFilter(fltr *Filter, withIndex bool) (err error) {
 			&FilterWithArgDispatcher{
 				Filter: fltr,
 				ArgDispatcher: &utils.ArgDispatcher{
-					APIKey:  utils.StringPointer(itm.APIKey),
-					RouteID: utils.StringPointer(itm.RouteID),
+					OptsAPIKey:  utils.StringPointer(itm.APIKey),
+					OptsRouteID: utils.StringPointer(itm.RouteID),
 				}}, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
@@ -775,8 +775,8 @@ func (dm *DataManager) RemoveFilter(tenant, id, transactionID string, withIndex 
 			&utils.TenantIDWithArgDispatcher{
 				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 				ArgDispatcher: &utils.ArgDispatcher{
-					APIKey:  utils.StringPointer(itm.APIKey),
-					RouteID: utils.StringPointer(itm.RouteID),
+					OptsAPIKey:  utils.StringPointer(itm.APIKey),
+					OptsRouteID: utils.StringPointer(itm.RouteID),
 				}}, &reply)
 	}
 	return
@@ -804,8 +804,8 @@ func (dm *DataManager) GetThreshold(tenant, id string,
 				utils.ReplicatorSv1GetThreshold, &utils.TenantIDWithArgDispatcher{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 					ArgDispatcher: &utils.ArgDispatcher{
-						APIKey:  utils.StringPointer(itm.APIKey),
-						RouteID: utils.StringPointer(itm.RouteID),
+						OptsAPIKey:  utils.StringPointer(itm.APIKey),
+						OptsRouteID: utils.StringPointer(itm.RouteID),
 					}}, &th); err == nil {
 				err = dm.dataDB.SetThresholdDrv(th)
 			}
@@ -845,8 +845,8 @@ func (dm *DataManager) SetThreshold(th *Threshold) (err error) {
 			&ThresholdWithArgDispatcher{
 				Threshold: th,
 				ArgDispatcher: &utils.ArgDispatcher{
-					APIKey:  utils.StringPointer(itm.APIKey),
-					RouteID: utils.StringPointer(itm.RouteID),
+					OptsAPIKey:  utils.StringPointer(itm.APIKey),
+					OptsRouteID: utils.StringPointer(itm.RouteID),
 				}}, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
@@ -869,8 +869,8 @@ func (dm *DataManager) RemoveThreshold(tenant, id, transactionID string) (err er
 			&utils.TenantIDWithArgDispatcher{
 				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 				ArgDispatcher: &utils.ArgDispatcher{
-					APIKey:  utils.StringPointer(itm.APIKey),
-					RouteID: utils.StringPointer(itm.RouteID),
+					OptsAPIKey:  utils.StringPointer(itm.APIKey),
+					OptsRouteID: utils.StringPointer(itm.RouteID),
 				}}, &reply)
 	}
 	return
@@ -899,8 +899,8 @@ func (dm *DataManager) GetThresholdProfile(tenant, id string, cacheRead, cacheWr
 				&utils.TenantIDWithArgDispatcher{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 					ArgDispatcher: &utils.ArgDispatcher{
-						APIKey:  utils.StringPointer(itm.APIKey),
-						RouteID: utils.StringPointer(itm.RouteID),
+						OptsAPIKey:  utils.StringPointer(itm.APIKey),
+						OptsRouteID: utils.StringPointer(itm.RouteID),
 					}}, &th); err == nil {
 				err = dm.dataDB.SetThresholdProfileDrv(th)
 			}
@@ -955,8 +955,8 @@ func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile, withIndex bool)
 			&ThresholdProfileWithArgDispatcher{
 				ThresholdProfile: th,
 				ArgDispatcher: &utils.ArgDispatcher{
-					APIKey:  utils.StringPointer(itm.APIKey),
-					RouteID: utils.StringPointer(itm.RouteID)},
+					OptsAPIKey:  utils.StringPointer(itm.APIKey),
+					OptsRouteID: utils.StringPointer(itm.RouteID)},
 			}, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
@@ -996,8 +996,8 @@ func (dm *DataManager) RemoveThresholdProfile(tenant, id,
 			&utils.TenantIDWithArgDispatcher{
 				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 				ArgDispatcher: &utils.ArgDispatcher{
-					APIKey:  utils.StringPointer(itm.APIKey),
-					RouteID: utils.StringPointer(itm.RouteID),
+					OptsAPIKey:  utils.StringPointer(itm.APIKey),
+					OptsRouteID: utils.StringPointer(itm.RouteID),
 				}}, &reply)
 	}
 	return
@@ -1026,8 +1026,8 @@ func (dm *DataManager) GetStatQueueProfile(tenant, id string, cacheRead, cacheWr
 				&utils.TenantIDWithArgDispatcher{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 					ArgDispatcher: &utils.ArgDispatcher{
-						APIKey:  utils.StringPointer(itm.APIKey),
-						RouteID: utils.StringPointer(itm.RouteID),
+						OptsAPIKey:  utils.StringPointer(itm.APIKey),
+						OptsRouteID: utils.StringPointer(itm.RouteID),
 					}}, &sqp); err == nil {
 				err = dm.dataDB.SetStatQueueProfileDrv(sqp)
 			}
@@ -1082,8 +1082,8 @@ func (dm *DataManager) SetStatQueueProfile(sqp *StatQueueProfile, withIndex bool
 			&StatQueueProfileWithArgDispatcher{
 				StatQueueProfile: sqp,
 				ArgDispatcher: &utils.ArgDispatcher{
-					APIKey:  utils.StringPointer(itm.APIKey),
-					RouteID: utils.StringPointer(itm.RouteID),
+					OptsAPIKey:  utils.StringPointer(itm.APIKey),
+					OptsRouteID: utils.StringPointer(itm.RouteID),
 				}}, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
@@ -1123,8 +1123,8 @@ func (dm *DataManager) RemoveStatQueueProfile(tenant, id,
 			&utils.TenantIDWithArgDispatcher{
 				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 				ArgDispatcher: &utils.ArgDispatcher{
-					APIKey:  utils.StringPointer(itm.APIKey),
-					RouteID: utils.StringPointer(itm.RouteID),
+					OptsAPIKey:  utils.StringPointer(itm.APIKey),
+					OptsRouteID: utils.StringPointer(itm.RouteID),
 				}}, &reply)
 	}
 	return
@@ -1152,8 +1152,8 @@ func (dm *DataManager) GetTiming(id string, skipCache bool,
 					Arg:       id,
 					TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 					ArgDispatcher: &utils.ArgDispatcher{
-						APIKey:  utils.StringPointer(itm.APIKey),
-						RouteID: utils.StringPointer(itm.RouteID),
+						OptsAPIKey:  utils.StringPointer(itm.APIKey),
+						OptsRouteID: utils.StringPointer(itm.RouteID),
 					},
 				}, &t); err == nil {
 				err = dm.dataDB.SetTimingDrv(t)
@@ -1196,8 +1196,8 @@ func (dm *DataManager) SetTiming(t *utils.TPTiming) (err error) {
 			&utils.TPTimingWithArgDispatcher{
 				TPTiming: t,
 				ArgDispatcher: &utils.ArgDispatcher{
-					APIKey:  utils.StringPointer(itm.APIKey),
-					RouteID: utils.StringPointer(itm.RouteID),
+					OptsAPIKey:  utils.StringPointer(itm.APIKey),
+					OptsRouteID: utils.StringPointer(itm.RouteID),
 				}}, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
@@ -1249,8 +1249,8 @@ func (dm *DataManager) GetResource(tenant, id string, cacheRead, cacheWrite bool
 				&utils.TenantIDWithArgDispatcher{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 					ArgDispatcher: &utils.ArgDispatcher{
-						APIKey:  utils.StringPointer(itm.APIKey),
-						RouteID: utils.StringPointer(itm.RouteID),
+						OptsAPIKey:  utils.StringPointer(itm.APIKey),
+						OptsRouteID: utils.StringPointer(itm.RouteID),
 					}}, &rs); err == nil {
 				err = dm.dataDB.SetResourceDrv(rs)
 			}
@@ -1291,8 +1291,8 @@ func (dm *DataManager) SetResource(rs *Resource) (err error) {
 			&ResourceWithArgDispatcher{
 				Resource: rs,
 				ArgDispatcher: &utils.ArgDispatcher{
-					APIKey:  utils.StringPointer(itm.APIKey),
-					RouteID: utils.StringPointer(itm.RouteID),
+					OptsAPIKey:  utils.StringPointer(itm.APIKey),
+					OptsRouteID: utils.StringPointer(itm.RouteID),
 				}}, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
@@ -1316,8 +1316,8 @@ func (dm *DataManager) RemoveResource(tenant, id, transactionID string) (err err
 			&utils.TenantIDWithArgDispatcher{
 				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 				ArgDispatcher: &utils.ArgDispatcher{
-					APIKey:  utils.StringPointer(itm.APIKey),
-					RouteID: utils.StringPointer(itm.RouteID),
+					OptsAPIKey:  utils.StringPointer(itm.APIKey),
+					OptsRouteID: utils.StringPointer(itm.RouteID),
 				}}, &reply)
 	}
 	return
@@ -1345,8 +1345,8 @@ func (dm *DataManager) GetResourceProfile(tenant, id string, cacheRead, cacheWri
 				utils.ReplicatorSv1GetResourceProfile, &utils.TenantIDWithArgDispatcher{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 					ArgDispatcher: &utils.ArgDispatcher{
-						APIKey:  utils.StringPointer(itm.APIKey),
-						RouteID: utils.StringPointer(itm.RouteID),
+						OptsAPIKey:  utils.StringPointer(itm.APIKey),
+						OptsRouteID: utils.StringPointer(itm.RouteID),
 					}}, &rp); err == nil {
 				err = dm.dataDB.SetResourceProfileDrv(rp)
 			}
@@ -1402,8 +1402,8 @@ func (dm *DataManager) SetResourceProfile(rp *ResourceProfile, withIndex bool) (
 			&ResourceProfileWithArgDispatcher{
 				ResourceProfile: rp,
 				ArgDispatcher: &utils.ArgDispatcher{
-					APIKey:  utils.StringPointer(itm.APIKey),
-					RouteID: utils.StringPointer(itm.RouteID),
+					OptsAPIKey:  utils.StringPointer(itm.APIKey),
+					OptsRouteID: utils.StringPointer(itm.RouteID),
 				}}, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
@@ -1442,8 +1442,8 @@ func (dm *DataManager) RemoveResourceProfile(tenant, id, transactionID string, w
 			utils.ReplicatorSv1RemoveResourceProfile, &utils.TenantIDWithArgDispatcher{
 				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 				ArgDispatcher: &utils.ArgDispatcher{
-					APIKey:  utils.StringPointer(itm.APIKey),
-					RouteID: utils.StringPointer(itm.RouteID),
+					OptsAPIKey:  utils.StringPointer(itm.APIKey),
+					OptsRouteID: utils.StringPointer(itm.RouteID),
 				}}, &reply)
 	}
 	return
@@ -1471,8 +1471,8 @@ func (dm *DataManager) GetActionTriggers(id string, skipCache bool,
 					Arg:       id,
 					TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 					ArgDispatcher: &utils.ArgDispatcher{
-						APIKey:  utils.StringPointer(itm.APIKey),
-						RouteID: utils.StringPointer(itm.RouteID),
+						OptsAPIKey:  utils.StringPointer(itm.APIKey),
+						OptsRouteID: utils.StringPointer(itm.RouteID),
 					},
 				}, attrs); err == nil {
 				err = dm.dataDB.SetActionTriggersDrv(id, attrs)
@@ -1516,8 +1516,8 @@ func (dm *DataManager) RemoveActionTriggers(id, transactionID string) (err error
 				Arg:       id,
 				TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 				ArgDispatcher: &utils.ArgDispatcher{
-					APIKey:  utils.StringPointer(itm.APIKey),
-					RouteID: utils.StringPointer(itm.RouteID),
+					OptsAPIKey:  utils.StringPointer(itm.APIKey),
+					OptsRouteID: utils.StringPointer(itm.RouteID),
 				}}, &reply)
 	}
 	return
@@ -1549,8 +1549,8 @@ func (dm *DataManager) SetActionTriggers(key string, attr ActionTriggers,
 			&SetActionTriggersArgWithArgDispatcher{
 				Attrs: attr, Key: key,
 				ArgDispatcher: &utils.ArgDispatcher{
-					APIKey:  utils.StringPointer(itm.APIKey),
-					RouteID: utils.StringPointer(itm.RouteID)},
+					OptsAPIKey:  utils.StringPointer(itm.APIKey),
+					OptsRouteID: utils.StringPointer(itm.RouteID)},
 				TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 			}, &reply); err != nil {
 			err = utils.CastRPCErr(err)
@@ -1582,8 +1582,8 @@ func (dm *DataManager) GetSharedGroup(key string, skipCache bool,
 					Arg:       key,
 					TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 					ArgDispatcher: &utils.ArgDispatcher{
-						APIKey:  utils.StringPointer(itm.APIKey),
-						RouteID: utils.StringPointer(itm.RouteID),
+						OptsAPIKey:  utils.StringPointer(itm.APIKey),
+						OptsRouteID: utils.StringPointer(itm.RouteID),
 					},
 				}, &sg); err == nil {
 				err = dm.dataDB.SetSharedGroupDrv(sg)
@@ -1628,8 +1628,8 @@ func (dm *DataManager) SetSharedGroup(sg *SharedGroup,
 				SharedGroup: sg,
 				TenantArg:   utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 				ArgDispatcher: &utils.ArgDispatcher{
-					APIKey:  utils.StringPointer(itm.APIKey),
-					RouteID: utils.StringPointer(itm.RouteID),
+					OptsAPIKey:  utils.StringPointer(itm.APIKey),
+					OptsRouteID: utils.StringPointer(itm.RouteID),
 				}}, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
@@ -1658,8 +1658,8 @@ func (dm *DataManager) RemoveSharedGroup(id, transactionID string) (err error) {
 				Arg:       id,
 				TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 				ArgDispatcher: &utils.ArgDispatcher{
-					APIKey:  utils.StringPointer(itm.APIKey),
-					RouteID: utils.StringPointer(itm.RouteID),
+					OptsAPIKey:  utils.StringPointer(itm.APIKey),
+					OptsRouteID: utils.StringPointer(itm.RouteID),
 				}}, &reply)
 	}
 	return
@@ -1689,8 +1689,8 @@ func (dm *DataManager) GetActions(key string, skipCache bool, transactionID stri
 					Arg:       key,
 					TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 					ArgDispatcher: &utils.ArgDispatcher{
-						APIKey:  utils.StringPointer(itm.APIKey),
-						RouteID: utils.StringPointer(itm.RouteID),
+						OptsAPIKey:  utils.StringPointer(itm.APIKey),
+						OptsRouteID: utils.StringPointer(itm.RouteID),
 					},
 				}, &as); err == nil {
 				err = dm.dataDB.SetActionsDrv(key, as)
@@ -1740,8 +1740,8 @@ func (dm *DataManager) SetActions(key string, as Actions, transactionID string) 
 				Key: key, Acs: as,
 				TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 				ArgDispatcher: &utils.ArgDispatcher{
-					APIKey:  utils.StringPointer(itm.APIKey),
-					RouteID: utils.StringPointer(itm.RouteID),
+					OptsAPIKey:  utils.StringPointer(itm.APIKey),
+					OptsRouteID: utils.StringPointer(itm.RouteID),
 				}}, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
@@ -1769,8 +1769,8 @@ func (dm *DataManager) RemoveActions(key, transactionID string) (err error) {
 				Arg:       key,
 				TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 				ArgDispatcher: &utils.ArgDispatcher{
-					APIKey:  utils.StringPointer(itm.APIKey),
-					RouteID: utils.StringPointer(itm.RouteID),
+					OptsAPIKey:  utils.StringPointer(itm.APIKey),
+					OptsRouteID: utils.StringPointer(itm.RouteID),
 				}}, &reply)
 	}
 	return
@@ -1788,8 +1788,8 @@ func (dm *DataManager) GetActionPlan(key string, skipCache bool, transactionID s
 				Arg:       key,
 				TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 				ArgDispatcher: &utils.ArgDispatcher{
-					APIKey:  utils.StringPointer(itm.APIKey),
-					RouteID: utils.StringPointer(itm.RouteID),
+					OptsAPIKey:  utils.StringPointer(itm.APIKey),
+					OptsRouteID: utils.StringPointer(itm.RouteID),
 				},
 			}, &ats); err == nil {
 			err = dm.dataDB.SetActionPlanDrv(key, ats, true, utils.NonTransactional)
@@ -1829,8 +1829,8 @@ func (dm *DataManager) SetActionPlan(key string, ats *ActionPlan,
 				Overwrite: overwrite,
 				TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 				ArgDispatcher: &utils.ArgDispatcher{
-					APIKey:  utils.StringPointer(itm.APIKey),
-					RouteID: utils.StringPointer(itm.RouteID),
+					OptsAPIKey:  utils.StringPointer(itm.APIKey),
+					OptsRouteID: utils.StringPointer(itm.RouteID),
 				}}, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
@@ -1852,8 +1852,8 @@ func (dm *DataManager) GetAllActionPlans() (ats map[string]*ActionPlan, err erro
 				Arg:       utils.EmptyString,
 				TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 				ArgDispatcher: &utils.ArgDispatcher{
-					APIKey:  utils.StringPointer(itm.APIKey),
-					RouteID: utils.StringPointer(itm.RouteID),
+					OptsAPIKey:  utils.StringPointer(itm.APIKey),
+					OptsRouteID: utils.StringPointer(itm.RouteID),
 				},
 			}, &ats)
 	}
@@ -1880,8 +1880,8 @@ func (dm *DataManager) RemoveActionPlan(key string, transactionID string) (err e
 				Arg:       key,
 				TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 				ArgDispatcher: &utils.ArgDispatcher{
-					APIKey:  utils.StringPointer(itm.APIKey),
-					RouteID: utils.StringPointer(itm.RouteID),
+					OptsAPIKey:  utils.StringPointer(itm.APIKey),
+					OptsRouteID: utils.StringPointer(itm.RouteID),
 				}}, &reply)
 	}
 	return
@@ -1900,8 +1900,8 @@ func (dm *DataManager) GetAccountActionPlans(acntID string,
 				Arg:       acntID,
 				TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 				ArgDispatcher: &utils.ArgDispatcher{
-					APIKey:  utils.StringPointer(itm.APIKey),
-					RouteID: utils.StringPointer(itm.RouteID),
+					OptsAPIKey:  utils.StringPointer(itm.APIKey),
+					OptsRouteID: utils.StringPointer(itm.RouteID),
 				},
 			}, &apIDs); err == nil {
 			err = dm.dataDB.SetAccountActionPlansDrv(acntID, apIDs, true)
@@ -1940,8 +1940,8 @@ func (dm *DataManager) SetAccountActionPlans(acntID string, aPlIDs []string, ove
 				Overwrite: overwrite,
 				TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 				ArgDispatcher: &utils.ArgDispatcher{
-					APIKey:  utils.StringPointer(itm.APIKey),
-					RouteID: utils.StringPointer(itm.RouteID),
+					OptsAPIKey:  utils.StringPointer(itm.APIKey),
+					OptsRouteID: utils.StringPointer(itm.RouteID),
 				}}, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
@@ -1974,8 +1974,8 @@ func (dm *DataManager) RemAccountActionPlans(acntID string, apIDs []string) (err
 				AcntID: acntID, ApIDs: apIDs,
 				TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 				ArgDispatcher: &utils.ArgDispatcher{
-					APIKey:  utils.StringPointer(itm.APIKey),
-					RouteID: utils.StringPointer(itm.RouteID),
+					OptsAPIKey:  utils.StringPointer(itm.APIKey),
+					OptsRouteID: utils.StringPointer(itm.RouteID),
 				}}, &reply)
 	}
 	return
@@ -2004,8 +2004,8 @@ func (dm *DataManager) GetRatingPlan(key string, skipCache bool,
 					Arg:       key,
 					TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 					ArgDispatcher: &utils.ArgDispatcher{
-						APIKey:  utils.StringPointer(itm.APIKey),
-						RouteID: utils.StringPointer(itm.RouteID),
+						OptsAPIKey:  utils.StringPointer(itm.APIKey),
+						OptsRouteID: utils.StringPointer(itm.RouteID),
 					},
 				}, &rp); err == nil {
 				err = dm.dataDB.SetRatingPlanDrv(rp)
@@ -2048,8 +2048,8 @@ func (dm *DataManager) SetRatingPlan(rp *RatingPlan, transactionID string) (err 
 				RatingPlan: rp,
 				TenantArg:  utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 				ArgDispatcher: &utils.ArgDispatcher{
-					APIKey:  utils.StringPointer(itm.APIKey),
-					RouteID: utils.StringPointer(itm.RouteID),
+					OptsAPIKey:  utils.StringPointer(itm.APIKey),
+					OptsRouteID: utils.StringPointer(itm.RouteID),
 				}}, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
@@ -2078,8 +2078,8 @@ func (dm *DataManager) RemoveRatingPlan(key string, transactionID string) (err e
 				Arg:       key,
 				TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 				ArgDispatcher: &utils.ArgDispatcher{
-					APIKey:  utils.StringPointer(itm.APIKey),
-					RouteID: utils.StringPointer(itm.RouteID),
+					OptsAPIKey:  utils.StringPointer(itm.APIKey),
+					OptsRouteID: utils.StringPointer(itm.RouteID),
 				}}, &reply)
 	}
 	return
@@ -2111,8 +2111,8 @@ func (dm *DataManager) GetRatingProfile(key string, skipCache bool,
 					Arg:       key,
 					TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 					ArgDispatcher: &utils.ArgDispatcher{
-						APIKey:  utils.StringPointer(itm.APIKey),
-						RouteID: utils.StringPointer(itm.RouteID),
+						OptsAPIKey:  utils.StringPointer(itm.APIKey),
+						OptsRouteID: utils.StringPointer(itm.RouteID),
 					},
 				}, &rpf); err == nil {
 				err = dm.dataDB.SetRatingProfileDrv(rpf)
@@ -2156,8 +2156,8 @@ func (dm *DataManager) SetRatingProfile(rpf *RatingProfile,
 				RatingProfile: rpf,
 				TenantArg:     utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 				ArgDispatcher: &utils.ArgDispatcher{
-					APIKey:  utils.StringPointer(itm.APIKey),
-					RouteID: utils.StringPointer(itm.RouteID),
+					OptsAPIKey:  utils.StringPointer(itm.APIKey),
+					OptsRouteID: utils.StringPointer(itm.RouteID),
 				}}, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
@@ -2187,8 +2187,8 @@ func (dm *DataManager) RemoveRatingProfile(key string,
 				Arg:       key,
 				TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 				ArgDispatcher: &utils.ArgDispatcher{
-					APIKey:  utils.StringPointer(itm.APIKey),
-					RouteID: utils.StringPointer(itm.RouteID),
+					OptsAPIKey:  utils.StringPointer(itm.APIKey),
+					OptsRouteID: utils.StringPointer(itm.RouteID),
 				}}, &reply)
 	}
 	return
@@ -2224,8 +2224,8 @@ func (dm *DataManager) GetRouteProfile(tenant, id string, cacheRead, cacheWrite 
 				&utils.TenantIDWithArgDispatcher{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 					ArgDispatcher: &utils.ArgDispatcher{
-						APIKey:  utils.StringPointer(itm.APIKey),
-						RouteID: utils.StringPointer(itm.RouteID),
+						OptsAPIKey:  utils.StringPointer(itm.APIKey),
+						OptsRouteID: utils.StringPointer(itm.RouteID),
 					}}, &rpp); err == nil {
 				err = dm.dataDB.SetRouteProfileDrv(rpp)
 			}
@@ -2284,8 +2284,8 @@ func (dm *DataManager) SetRouteProfile(rpp *RouteProfile, withIndex bool) (err e
 			&RouteProfileWithArgDispatcher{
 				RouteProfile: rpp,
 				ArgDispatcher: &utils.ArgDispatcher{
-					APIKey:  utils.StringPointer(itm.APIKey),
-					RouteID: utils.StringPointer(itm.RouteID),
+					OptsAPIKey:  utils.StringPointer(itm.APIKey),
+					OptsRouteID: utils.StringPointer(itm.RouteID),
 				}}, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
@@ -2325,8 +2325,8 @@ func (dm *DataManager) RemoveRouteProfile(tenant, id, transactionID string, with
 			&utils.TenantIDWithArgDispatcher{
 				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 				ArgDispatcher: &utils.ArgDispatcher{
-					APIKey:  utils.StringPointer(itm.APIKey),
-					RouteID: utils.StringPointer(itm.RouteID),
+					OptsAPIKey:  utils.StringPointer(itm.APIKey),
+					OptsRouteID: utils.StringPointer(itm.RouteID),
 				}}, &reply)
 	}
 	return
@@ -2428,8 +2428,8 @@ func (dm *DataManager) SetAttributeProfile(ap *AttributeProfile, withIndex bool)
 			&AttributeProfileWithArgDispatcher{
 				AttributeProfile: ap,
 				ArgDispatcher: &utils.ArgDispatcher{
-					APIKey:  utils.StringPointer(itm.APIKey),
-					RouteID: utils.StringPointer(itm.RouteID),
+					OptsAPIKey:  utils.StringPointer(itm.APIKey),
+					OptsRouteID: utils.StringPointer(itm.RouteID),
 				}}, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
@@ -2471,8 +2471,8 @@ func (dm *DataManager) RemoveAttributeProfile(tenant, id string, transactionID s
 			&utils.TenantIDWithArgDispatcher{
 				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 				ArgDispatcher: &utils.ArgDispatcher{
-					APIKey:  utils.StringPointer(itm.APIKey),
-					RouteID: utils.StringPointer(itm.RouteID),
+					OptsAPIKey:  utils.StringPointer(itm.APIKey),
+					OptsRouteID: utils.StringPointer(itm.RouteID),
 				}}, &reply)
 	}
 	return
@@ -2501,8 +2501,8 @@ func (dm *DataManager) GetChargerProfile(tenant, id string, cacheRead, cacheWrit
 				&utils.TenantIDWithArgDispatcher{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 					ArgDispatcher: &utils.ArgDispatcher{
-						APIKey:  utils.StringPointer(itm.APIKey),
-						RouteID: utils.StringPointer(itm.RouteID),
+						OptsAPIKey:  utils.StringPointer(itm.APIKey),
+						OptsRouteID: utils.StringPointer(itm.RouteID),
 					}}, &cpp); err == nil {
 				err = dm.dataDB.SetChargerProfileDrv(cpp)
 			}
@@ -2557,8 +2557,8 @@ func (dm *DataManager) SetChargerProfile(cpp *ChargerProfile, withIndex bool) (e
 			&ChargerProfileWithArgDispatcher{
 				ChargerProfile: cpp,
 				ArgDispatcher: &utils.ArgDispatcher{
-					APIKey:  utils.StringPointer(itm.APIKey),
-					RouteID: utils.StringPointer(itm.RouteID),
+					OptsAPIKey:  utils.StringPointer(itm.APIKey),
+					OptsRouteID: utils.StringPointer(itm.RouteID),
 				}}, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
@@ -2599,8 +2599,8 @@ func (dm *DataManager) RemoveChargerProfile(tenant, id string,
 			&utils.TenantIDWithArgDispatcher{
 				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 				ArgDispatcher: &utils.ArgDispatcher{
-					APIKey:  utils.StringPointer(itm.APIKey),
-					RouteID: utils.StringPointer(itm.RouteID),
+					OptsAPIKey:  utils.StringPointer(itm.APIKey),
+					OptsRouteID: utils.StringPointer(itm.RouteID),
 				}}, &reply)
 	}
 	return
@@ -2629,8 +2629,8 @@ func (dm *DataManager) GetDispatcherProfile(tenant, id string, cacheRead, cacheW
 				&utils.TenantIDWithArgDispatcher{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 					ArgDispatcher: &utils.ArgDispatcher{
-						APIKey:  utils.StringPointer(itm.APIKey),
-						RouteID: utils.StringPointer(itm.RouteID),
+						OptsAPIKey:  utils.StringPointer(itm.APIKey),
+						OptsRouteID: utils.StringPointer(itm.RouteID),
 					}}, &dpp); err == nil {
 				err = dm.dataDB.SetDispatcherProfileDrv(dpp)
 			}
@@ -2687,8 +2687,8 @@ func (dm *DataManager) SetDispatcherProfile(dpp *DispatcherProfile, withIndex bo
 			&DispatcherProfileWithArgDispatcher{
 				DispatcherProfile: dpp,
 				ArgDispatcher: &utils.ArgDispatcher{
-					APIKey:  utils.StringPointer(itm.APIKey),
-					RouteID: utils.StringPointer(itm.RouteID),
+					OptsAPIKey:  utils.StringPointer(itm.APIKey),
+					OptsRouteID: utils.StringPointer(itm.RouteID),
 				}}, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
@@ -2731,8 +2731,8 @@ func (dm *DataManager) RemoveDispatcherProfile(tenant, id string,
 			&utils.TenantIDWithArgDispatcher{
 				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 				ArgDispatcher: &utils.ArgDispatcher{
-					APIKey:  utils.StringPointer(itm.APIKey),
-					RouteID: utils.StringPointer(itm.RouteID),
+					OptsAPIKey:  utils.StringPointer(itm.APIKey),
+					OptsRouteID: utils.StringPointer(itm.RouteID),
 				}}, &reply)
 	}
 	return
@@ -2761,8 +2761,8 @@ func (dm *DataManager) GetDispatcherHost(tenant, id string, cacheRead, cacheWrit
 				&utils.TenantIDWithArgDispatcher{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 					ArgDispatcher: &utils.ArgDispatcher{
-						APIKey:  utils.StringPointer(itm.APIKey),
-						RouteID: utils.StringPointer(itm.RouteID),
+						OptsAPIKey:  utils.StringPointer(itm.APIKey),
+						OptsRouteID: utils.StringPointer(itm.RouteID),
 					}}, &dH); err == nil {
 				err = dm.dataDB.SetDispatcherHostDrv(dH)
 			}
@@ -2803,8 +2803,8 @@ func (dm *DataManager) SetDispatcherHost(dpp *DispatcherHost) (err error) {
 			&DispatcherHostWithArgDispatcher{
 				DispatcherHost: dpp,
 				ArgDispatcher: &utils.ArgDispatcher{
-					APIKey:  utils.StringPointer(itm.APIKey),
-					RouteID: utils.StringPointer(itm.RouteID),
+					OptsAPIKey:  utils.StringPointer(itm.APIKey),
+					OptsRouteID: utils.StringPointer(itm.RouteID),
 				}}, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
@@ -2836,8 +2836,8 @@ func (dm *DataManager) RemoveDispatcherHost(tenant, id string,
 			&utils.TenantIDWithArgDispatcher{
 				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 				ArgDispatcher: &utils.ArgDispatcher{
-					APIKey:  utils.StringPointer(itm.APIKey),
-					RouteID: utils.StringPointer(itm.RouteID),
+					OptsAPIKey:  utils.StringPointer(itm.APIKey),
+					OptsRouteID: utils.StringPointer(itm.RouteID),
 				}}, &reply)
 	}
 	return
@@ -2857,8 +2857,8 @@ func (dm *DataManager) GetItemLoadIDs(itemIDPrefix string, cacheWrite bool) (loa
 					Arg:       itemIDPrefix,
 					TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 					ArgDispatcher: &utils.ArgDispatcher{
-						APIKey:  utils.StringPointer(itm.APIKey),
-						RouteID: utils.StringPointer(itm.RouteID),
+						OptsAPIKey:  utils.StringPointer(itm.APIKey),
+						OptsRouteID: utils.StringPointer(itm.RouteID),
 					},
 				}, &loadIDs); err == nil {
 				err = dm.dataDB.SetLoadIDsDrv(loadIDs)
@@ -2905,8 +2905,8 @@ func (dm *DataManager) SetLoadIDs(loadIDs map[string]int64) (err error) {
 				LoadIDs:   loadIDs,
 				TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 				ArgDispatcher: &utils.ArgDispatcher{
-					APIKey:  utils.StringPointer(itm.APIKey),
-					RouteID: utils.StringPointer(itm.RouteID),
+					OptsAPIKey:  utils.StringPointer(itm.APIKey),
+					OptsRouteID: utils.StringPointer(itm.RouteID),
 				}}, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
@@ -2938,8 +2938,8 @@ func (dm *DataManager) GetRateProfile(tenant, id string, cacheRead, cacheWrite b
 				&utils.TenantIDWithArgDispatcher{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 					ArgDispatcher: &utils.ArgDispatcher{
-						APIKey:  utils.StringPointer(itm.APIKey),
-						RouteID: utils.StringPointer(itm.RouteID),
+						OptsAPIKey:  utils.StringPointer(itm.APIKey),
+						OptsRouteID: utils.StringPointer(itm.RouteID),
 					}}, &rpp); err == nil {
 				err = dm.dataDB.SetRateProfileDrv(rpp)
 			}
@@ -3021,8 +3021,8 @@ func (dm *DataManager) SetRateProfile(rpp *RateProfile, withIndex bool) (err err
 			&RateProfileWithArgDispatcher{
 				RateProfile: rpp,
 				ArgDispatcher: &utils.ArgDispatcher{
-					APIKey:  utils.StringPointer(itm.APIKey),
-					RouteID: utils.StringPointer(itm.RouteID),
+					OptsAPIKey:  utils.StringPointer(itm.APIKey),
+					OptsRouteID: utils.StringPointer(itm.RouteID),
 				}}, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
@@ -3066,8 +3066,8 @@ func (dm *DataManager) RemoveRateProfile(tenant, id string,
 			&utils.TenantIDWithArgDispatcher{
 				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 				ArgDispatcher: &utils.ArgDispatcher{
-					APIKey:  utils.StringPointer(itm.APIKey),
-					RouteID: utils.StringPointer(itm.RouteID),
+					OptsAPIKey:  utils.StringPointer(itm.APIKey),
+					OptsRouteID: utils.StringPointer(itm.RouteID),
 				}}, &reply)
 	}
 	return
@@ -3118,8 +3118,8 @@ func (dm *DataManager) RemoveRateProfileRates(tenant, id string, rateIDs []strin
 			&RateProfileWithArgDispatcher{
 				RateProfile: oldRpp,
 				ArgDispatcher: &utils.ArgDispatcher{
-					APIKey:  utils.StringPointer(itm.APIKey),
-					RouteID: utils.StringPointer(itm.RouteID),
+					OptsAPIKey:  utils.StringPointer(itm.APIKey),
+					OptsRouteID: utils.StringPointer(itm.RouteID),
 				}}, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
@@ -3164,8 +3164,8 @@ func (dm *DataManager) SetRateProfileRates(rpp *RateProfile, withIndex bool) (er
 			&RateProfileWithArgDispatcher{
 				RateProfile: oldRpp,
 				ArgDispatcher: &utils.ArgDispatcher{
-					APIKey:  utils.StringPointer(itm.APIKey),
-					RouteID: utils.StringPointer(itm.RouteID),
+					OptsAPIKey:  utils.StringPointer(itm.APIKey),
+					OptsRouteID: utils.StringPointer(itm.RouteID),
 				}}, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
@@ -3214,8 +3214,8 @@ func (dm *DataManager) GetIndexes(idxItmType, tntCtx, idxKey string,
 					IdxKey:     idxKey,
 					TenantArg:  utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 					ArgDispatcher: &utils.ArgDispatcher{
-						APIKey:  utils.StringPointer(itm.APIKey),
-						RouteID: utils.StringPointer(itm.RouteID)},
+						OptsAPIKey:  utils.StringPointer(itm.APIKey),
+						OptsRouteID: utils.StringPointer(itm.RouteID)},
 				}, &indexes); err == nil {
 				err = dm.dataDB.SetIndexesDrv(idxItmType, tntCtx, indexes, true, utils.NonTransactional)
 			}
@@ -3265,8 +3265,8 @@ func (dm *DataManager) SetIndexes(idxItmType, tntCtx string,
 				Indexes:    indexes,
 				TenantArg:  utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 				ArgDispatcher: &utils.ArgDispatcher{
-					APIKey:  utils.StringPointer(itm.APIKey),
-					RouteID: utils.StringPointer(itm.RouteID)},
+					OptsAPIKey:  utils.StringPointer(itm.APIKey),
+					OptsRouteID: utils.StringPointer(itm.RouteID)},
 			}, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 		}
@@ -3292,8 +3292,8 @@ func (dm *DataManager) RemoveIndexes(idxItmType, tntCtx, idxKey string) (err err
 				IdxKey:     idxKey,
 				TenantArg:  utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 				ArgDispatcher: &utils.ArgDispatcher{
-					APIKey:  utils.StringPointer(itm.APIKey),
-					RouteID: utils.StringPointer(itm.RouteID)},
+					OptsAPIKey:  utils.StringPointer(itm.APIKey),
+					OptsRouteID: utils.StringPointer(itm.RouteID)},
 			}, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 		}

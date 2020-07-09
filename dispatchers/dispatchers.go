@@ -212,7 +212,7 @@ func (dS *DispatcherService) V1Apier(apier interface{}, args *utils.MethodParame
 	apiKeyIface, hasApiKey := parameters[utils.APIKey]
 	if hasApiKey && apiKeyIface != nil {
 		argD = &utils.ArgDispatcher{
-			APIKey: utils.StringPointer(apiKeyIface.(string)),
+			OptsAPIKey: utils.StringPointer(apiKeyIface.(string)),
 		}
 	}
 	//check if we have RouteID in event and in case it has add it in ArgDispatcher
@@ -220,10 +220,10 @@ func (dS *DispatcherService) V1Apier(apier interface{}, args *utils.MethodParame
 	if hasRouteID && routeIDIface != nil {
 		if !hasApiKey || apiKeyIface == nil { //in case we don't have APIKey, but we have RouteID we need to initialize the struct
 			argD = &utils.ArgDispatcher{
-				RouteID: utils.StringPointer(routeIDIface.(string)),
+				OptsRouteID: utils.StringPointer(routeIDIface.(string)),
 			}
 		} else {
-			argD.RouteID = utils.StringPointer(routeIDIface.(string))
+			argD.OptsRouteID = utils.StringPointer(routeIDIface.(string))
 		}
 	}
 
@@ -234,7 +234,7 @@ func (dS *DispatcherService) V1Apier(apier interface{}, args *utils.MethodParame
 		}
 		if err = dS.authorize(args.Method,
 			tenant,
-			argD.APIKey, utils.TimePointer(time.Now())); err != nil {
+			argD.OptsAPIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
@@ -281,7 +281,7 @@ func (dS *DispatcherService) V1Apier(apier interface{}, args *utils.MethodParame
 
 	var routeID *string
 	if argD != nil {
-		routeID = argD.RouteID
+		routeID = argD.OptsRouteID
 	}
 	if err := dS.Dispatch(&utils.CGREvent{Tenant: tenant, Event: parameters}, utils.MetaApier, routeID,
 		args.Method, realArgs, realReply); err != nil {

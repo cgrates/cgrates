@@ -1494,8 +1494,8 @@ func TestSessionSNewV1AuthorizeArgsWithArgDispatcher(t *testing.T) {
 		GetAttributes:      true,
 		CGREvent:           cgrEv,
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey:  utils.StringPointer("testkey"),
-			RouteID: utils.StringPointer("testrouteid"),
+			OptsAPIKey:  utils.StringPointer("testkey"),
+			OptsRouteID: utils.StringPointer("testrouteid"),
 		},
 		ForceDuration: true,
 		Opts:          opts,
@@ -1517,8 +1517,8 @@ func TestSessionSNewV1AuthorizeArgsWithArgDispatcher(t *testing.T) {
 		RoutesMaxCost:      utils.MetaRoutesEventCost,
 		CGREvent:           cgrEv,
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey:  utils.StringPointer("testkey"),
-			RouteID: utils.StringPointer("testrouteid"),
+			OptsAPIKey:  utils.StringPointer("testkey"),
+			OptsRouteID: utils.StringPointer("testrouteid"),
 		},
 		ForceDuration: true,
 		Opts:          opts,
@@ -1547,7 +1547,7 @@ func TestSessionSNewV1AuthorizeArgsWithArgDispatcher2(t *testing.T) {
 		GetAttributes:      true,
 		CGREvent:           cgrEv,
 		ArgDispatcher: &utils.ArgDispatcher{
-			RouteID: utils.StringPointer("testrouteid"),
+			OptsRouteID: utils.StringPointer("testrouteid"),
 		},
 		ForceDuration: true,
 		Opts:          opts,
@@ -1569,7 +1569,7 @@ func TestSessionSNewV1AuthorizeArgsWithArgDispatcher2(t *testing.T) {
 		RoutesMaxCost:      utils.MetaRoutesEventCost,
 		CGREvent:           cgrEv,
 		ArgDispatcher: &utils.ArgDispatcher{
-			RouteID: utils.StringPointer("testrouteid"),
+			OptsRouteID: utils.StringPointer("testrouteid"),
 		},
 		ForceDuration: true,
 		Opts:          opts,

@@ -75,7 +75,7 @@ func testDspResponderStatus(t *testing.T) {
 			Tenant: "cgrates.org",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("rsp12345"),
+			OptsAPIKey: utils.StringPointer("rsp12345"),
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.CoreSv1Status, &ev, &reply); err != nil {
@@ -103,8 +103,8 @@ func getNodeWithRoute(route string, t *testing.T) string {
 			},
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey:  utils.StringPointer("rsp12345"),
-			RouteID: &route,
+			OptsAPIKey:  utils.StringPointer("rsp12345"),
+			OptsRouteID: &route,
 		},
 	}
 	ev := utils.TenantWithArgDispatcher{
@@ -112,8 +112,8 @@ func getNodeWithRoute(route string, t *testing.T) string {
 			Tenant: "cgrates.org",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey:  utils.StringPointer("rsp12345"),
-			RouteID: &route,
+			OptsAPIKey:  utils.StringPointer("rsp12345"),
+			OptsRouteID: &route,
 		},
 	}
 
@@ -149,7 +149,7 @@ func testDspResponderShutdown(t *testing.T) {
 			Tenant: "cgrates.org",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("rsp12345"),
+			OptsAPIKey: utils.StringPointer("rsp12345"),
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.ResponderShutdown, ev, &reply); err != nil {
@@ -181,7 +181,7 @@ func testDspResponderBroadcast(t *testing.T) {
 			},
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("rsp12345"),
+			OptsAPIKey: utils.StringPointer("rsp12345"),
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.ResponderPing, pingEv, &pingReply); err != nil {
@@ -218,8 +218,8 @@ func testDspResponderInternal(t *testing.T) {
 			},
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey:  utils.StringPointer("rsp12345"),
-			RouteID: &route,
+			OptsAPIKey:  utils.StringPointer("rsp12345"),
+			OptsRouteID: &route,
 		},
 	}
 	ev := utils.TenantWithArgDispatcher{
@@ -227,8 +227,8 @@ func testDspResponderInternal(t *testing.T) {
 			Tenant: "cgrates.org",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey:  utils.StringPointer("rsp12345"),
-			RouteID: &route,
+			OptsAPIKey:  utils.StringPointer("rsp12345"),
+			OptsRouteID: &route,
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.CoreSv1Ping, pingEv, &pingReply); err != nil {

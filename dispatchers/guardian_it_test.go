@@ -72,7 +72,7 @@ func testDspGrdPing(t *testing.T) {
 			Tenant: "cgrates.org",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("grd12345"),
+			OptsAPIKey: utils.StringPointer("grd12345"),
 		},
 	}, &reply); err != nil {
 		t.Error(err)
@@ -95,7 +95,7 @@ func testDspGrdLock(t *testing.T) {
 			Tenant: "cgrates.org",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("grd12345"),
+			OptsAPIKey: utils.StringPointer("grd12345"),
 		},
 	}, &reply); err != nil {
 		t.Error(err)
@@ -108,7 +108,7 @@ func testDspGrdLock(t *testing.T) {
 			Tenant: "cgrates.org",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("grd12345"),
+			OptsAPIKey: utils.StringPointer("grd12345"),
 		},
 	}, &unlockReply); err != nil {
 		t.Error(err)

@@ -37,13 +37,13 @@ func (dS *DispatcherService) ServiceManagerV1Ping(args *utils.CGREventWithArgDis
 		}
 		if err = dS.authorize(utils.ServiceManagerV1Ping,
 			args.Tenant,
-			args.APIKey, args.Time); err != nil {
+			args.OptsAPIKey, args.Time); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
+		routeID = args.ArgDispatcher.OptsRouteID
 	}
 	return dS.Dispatch(args.CGREvent, utils.MetaServiceManager, routeID,
 		utils.ServiceManagerV1Ping, args, reply)
@@ -60,13 +60,13 @@ func (dS *DispatcherService) ServiceManagerV1StartService(args ArgStartServiceWi
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.ServiceManagerV1StartService, tnt,
-			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			args.OptsAPIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
+		routeID = args.ArgDispatcher.OptsRouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaServiceManager, routeID,
 		utils.ServiceManagerV1StartService, args, reply)
@@ -83,13 +83,13 @@ func (dS *DispatcherService) ServiceManagerV1StopService(args ArgStartServiceWit
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.ServiceManagerV1StopService, tnt,
-			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			args.OptsAPIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
+		routeID = args.ArgDispatcher.OptsRouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaServiceManager, routeID,
 		utils.ServiceManagerV1StopService, args, reply)
@@ -106,13 +106,13 @@ func (dS *DispatcherService) ServiceManagerV1ServiceStatus(args ArgStartServiceW
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.ServiceManagerV1ServiceStatus, tnt,
-			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			args.OptsAPIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
+		routeID = args.ArgDispatcher.OptsRouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaServiceManager, routeID,
 		utils.ServiceManagerV1ServiceStatus, args, reply)

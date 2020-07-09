@@ -71,7 +71,7 @@ func testDspRALsPing(t *testing.T) {
 			Tenant: "cgrates.org",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("rals12345"),
+			OptsAPIKey: utils.StringPointer("rals12345"),
 		},
 	}, &reply); err != nil {
 		t.Error(err)
@@ -87,7 +87,7 @@ func testDspRALsGetRatingPlanCost(t *testing.T) {
 		SetupTime:     utils.META_NOW,
 		Usage:         "1h",
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("rals12345"),
+			OptsAPIKey: utils.StringPointer("rals12345"),
 		},
 	}
 	var reply RatingPlanCost

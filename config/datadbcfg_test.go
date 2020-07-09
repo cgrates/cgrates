@@ -405,8 +405,8 @@ func TestDataDbCfgAsMapInterface(t *testing.T) {
 		"remote_conns":      []string{},
 		"replication_conns": []string{},
 		"items": map[string]interface{}{
-			"*accounts":             map[string]interface{}{"remote": true, "replicate": false, "APIKey": "", "RouteID": ""},
-			"*reverse_destinations": map[string]interface{}{"remote": false, "replicate": false, "APIKey": "", "RouteID": ""},
+			"*accounts":             map[string]interface{}{"remote": true, "replicate": false, "*dispatcherApiKey": "", "*dispatcherRouteID": ""},
+			"*reverse_destinations": map[string]interface{}{"remote": false, "replicate": false, "*dispatcherApiKey": "", "*dispatcherRouteID": ""},
 		},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
