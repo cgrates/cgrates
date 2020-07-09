@@ -76,6 +76,7 @@ information, please see the [`CONTRIBUTING.md`](CONTRIBUTING.md) file.
 | @JDLK7 | Jose Domenech |
 | @mintos5 | Michal Škuta |
 | @playingbogart | Eugene Bozhet |
+| @htrendev | Hristo Trendev |
 
 <!-- to sign, include a single line above this comment containing the following text:
 | @username | First Last |
