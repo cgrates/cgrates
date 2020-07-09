@@ -32,4 +32,10 @@
 },
 
 
+"sessions": {
+	"enabled": true,
+	"listen_bijson": "127.0.0.1:2014"
+},
+
+
 }

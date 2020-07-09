@@ -33,8 +33,8 @@ func main() {
 	log.Print("Start!")
 	var wg sync.WaitGroup
 	for i := 1; i < 1002; i++ {
+		wg.Add(1)
 		go func(index int) {
-			wg.Add(1)
 			resp, err := http.Post("http://localhost:2080/jsonrpc", "application/json", bytes.NewBuffer([]byte(fmt.Sprintf(`{"method": "APIerSv1.SetAccount","params": [{"Tenant":"reglo","Account":"100%d","ActionPlanId":"PACKAGE_NEW_FOR795", "ReloadScheduler":false}], "id":%d}`, index, index))))
 			if err != nil {
 				log.Print("Post error: ", err)

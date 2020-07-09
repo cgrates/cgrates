@@ -50,13 +50,13 @@ func (cS *CoreSv1) Ping(ign *utils.CGREventWithArgDispatcher, reply *string) err
 	return nil
 }
 
-type SleepArgs struct {
-	SleepTime time.Duration
+type DurationArgs struct {
+	DurationTime time.Duration
 }
 
 // Sleep is used to test the concurrent requests mechanism
-func (cS *CoreSv1) Sleep(arg *SleepArgs, reply *string) error {
-	time.Sleep(arg.SleepTime)
+func (cS *CoreSv1) Sleep(arg *DurationArgs, reply *string) error {
+	time.Sleep(arg.DurationTime)
 	*reply = utils.OK
 	return nil
 }

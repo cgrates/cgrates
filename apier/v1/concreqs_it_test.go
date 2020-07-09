@@ -21,22 +21,29 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"bytes"
+	"fmt"
+	"io/ioutil"
+	"net/http"
 	"net/rpc"
 	"path"
+	"strings"
 	"sync"
 	"testing"
 	"time"
 
-	"github.com/cgrates/cgrates/utils"
+	"github.com/cenkalti/rpc2"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 var (
 	concReqsCfgPath   string
 	concReqsCfg       *config.CGRConfig
 	concReqsRPC       *rpc.Client
+	concReqsBiRPC     *rpc2.Client
 	concReqsConfigDIR string //run tests for specific configuration
 
 	sTestsConcReqs = []func(t *testing.T){
@@ -45,6 +52,10 @@ var (
 		testConcReqsRPCConn,
 		testConcReqsBusyAPIs,
 		testConcReqsQueueAPIs,
+		testConcReqsOnHTTPBusy,
+		testConcReqsOnHTTPQueue,
+		testConcReqsOnBiJSONBusy,
+		testConcReqsOnBiJSONQueue,
 		testConcReqsKillEngine,
 	}
 )
@@ -98,11 +109,21 @@ func testConcReqsStartEngine(t *testing.T) {
 	}
 }
 
+func handlePing(clnt *rpc2.Client, arg *DurationArgs, reply *string) error {
+	time.Sleep(arg.DurationTime)
+	*reply = utils.OK
+	return nil
+}
+
 // Connect rpc client to rater
 func testConcReqsRPCConn(t *testing.T) {
 	var err error
 	concReqsRPC, err = newRPCClient(concReqsCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
+		t.Fatal(err)
+	}
+	if concReqsBiRPC, err = utils.NewBiJSONrpcClient(concReqsCfg.SessionSCfg().ListenBijson,
+		nil); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -113,14 +134,17 @@ func testConcReqsBusyAPIs(t *testing.T) {
 	}
 	var failedAPIs int
 	wg := new(sync.WaitGroup)
+	lock := new(sync.Mutex)
 	for i := 0; i < 5; i++ {
 		wg.Add(1)
 		go func() {
 			var resp string
 			if err := concReqsRPC.Call(utils.CoreSv1Sleep,
-				&SleepArgs{SleepTime: time.Duration(10 * time.Millisecond)},
+				&DurationArgs{DurationTime: time.Duration(10 * time.Millisecond)},
 				&resp); err != nil {
+				lock.Lock()
 				failedAPIs++
+				lock.Unlock()
 				wg.Done()
 				return
 			}
@@ -143,7 +167,118 @@ func testConcReqsQueueAPIs(t *testing.T) {
 		go func() {
 			var resp string
 			if err := concReqsRPC.Call(utils.CoreSv1Sleep,
-				&SleepArgs{SleepTime: time.Duration(10 * time.Millisecond)},
+				&DurationArgs{DurationTime: time.Duration(10 * time.Millisecond)},
+				&resp); err != nil {
+				wg.Done()
+				t.Error(err)
+				return
+			}
+			wg.Done()
+		}()
+	}
+	wg.Wait()
+}
+
+func testConcReqsOnHTTPBusy(t *testing.T) {
+	if concReqsConfigDIR != "conc_reqs_busy" {
+		t.SkipNow()
+	}
+	var fldAPIs int64
+	wg := new(sync.WaitGroup)
+	lock := new(sync.Mutex)
+	for i := 0; i < 5; i++ {
+		wg.Add(1)
+		go func(index int) {
+			resp, err := http.Post("http://localhost:2080/jsonrpc", "application/json", bytes.NewBuffer([]byte(fmt.Sprintf(`{"method": "CoreSv1.Sleep", "params": [{"DurationTime":10000000}], "id":%d}`, index))))
+			if err != nil {
+				wg.Done()
+				t.Error(err)
+				return
+			}
+			contents, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				wg.Done()
+				t.Error(err)
+				return
+			}
+			resp.Body.Close()
+			if strings.Contains(string(contents), "denying request due to maximum active requests reached") {
+				lock.Lock()
+				fldAPIs++
+				lock.Unlock()
+			}
+			wg.Done()
+			return
+		}(i)
+	}
+	wg.Wait()
+	if fldAPIs < 2 {
+		t.Errorf("Expected at leat 2 APIs to wait")
+	}
+}
+
+func testConcReqsOnHTTPQueue(t *testing.T) {
+	if concReqsConfigDIR != "conc_reqs_queue" {
+		t.SkipNow()
+	}
+	wg := new(sync.WaitGroup)
+	for i := 0; i < 5; i++ {
+		wg.Add(1)
+		go func(index int) {
+			_, err := http.Post("http://localhost:2080/jsonrpc", "application/json", bytes.NewBuffer([]byte(fmt.Sprintf(`{"method": "CoreSv1.Sleep", "params": [{"DurationTime":10000000}], "id":%d}`, index))))
+			if err != nil {
+				wg.Done()
+				t.Error(err)
+				return
+			}
+			wg.Done()
+			return
+		}(i)
+	}
+	wg.Wait()
+}
+
+func testConcReqsOnBiJSONBusy(t *testing.T) {
+	if concReqsConfigDIR != "conc_reqs_busy" {
+		t.SkipNow()
+	}
+	var failedAPIs int
+	wg := new(sync.WaitGroup)
+	lock := new(sync.Mutex)
+	for i := 0; i < 5; i++ {
+		wg.Add(1)
+		go func() {
+			var resp string
+			if err := concReqsBiRPC.Call(utils.SessionSv1Sleep,
+				&DurationArgs{DurationTime: time.Duration(10 * time.Millisecond)},
+				&resp); err != nil {
+				fmt.Println(err)
+				lock.Lock()
+				failedAPIs++
+				lock.Unlock()
+				wg.Done()
+				return
+			}
+			wg.Done()
+		}()
+	}
+	wg.Wait()
+	if failedAPIs < 2 {
+		t.Errorf("Expected at leat 2 APIs to wait")
+	}
+}
+
+func testConcReqsOnBiJSONQueue(t *testing.T) {
+	if concReqsConfigDIR != "conc_reqs_queue" {
+		t.SkipNow()
+	}
+	wg := new(sync.WaitGroup)
+	for i := 0; i < 5; i++ {
+		wg.Add(1)
+		go func() {
+			var resp string
+			if err := concReqsBiRPC.Call(utils.SessionSv1Sleep,
+				&DurationArgs{DurationTime: time.Duration(10 * time.Millisecond)},
 				&resp); err != nil {
 				wg.Done()
 				t.Error(err)
@@ -156,6 +291,7 @@ func testConcReqsQueueAPIs(t *testing.T) {
 }
 
 func testConcReqsKillEngine(t *testing.T) {
+	time.Sleep(100 * time.Millisecond)
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
 	}
