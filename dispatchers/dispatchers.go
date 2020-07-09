@@ -81,14 +81,14 @@ func (dS *DispatcherService) authorizeEvent(ev *utils.CGREvent,
 
 func (dS *DispatcherService) authorize(method, tenant string, apiKey *string, evTime *time.Time) (err error) {
 	if apiKey == nil || *apiKey == "" {
-		return utils.NewErrMandatoryIeMissing(utils.OptsAPIKey)
+		return utils.NewErrMandatoryIeMissing(utils.APIKey)
 	}
 	ev := &utils.CGREvent{
 		Tenant: tenant,
 		ID:     utils.UUIDSha1Prefix(),
 		Time:   evTime,
 		Event: map[string]interface{}{
-			utils.OptsAPIKey: *apiKey,
+			utils.APIKey: *apiKey,
 		},
 	}
 	var rplyEv engine.AttrSProcessEventReply
@@ -209,14 +209,14 @@ func (dS *DispatcherService) V1Apier(apier interface{}, args *utils.MethodParame
 
 	var argD *utils.ArgDispatcher
 	//check if we have APIKey in event and in case it has add it in ArgDispatcher
-	apiKeyIface, hasApiKey := parameters[utils.OptsAPIKey]
+	apiKeyIface, hasApiKey := parameters[utils.APIKey]
 	if hasApiKey && apiKeyIface != nil {
 		argD = &utils.ArgDispatcher{
 			APIKey: utils.StringPointer(apiKeyIface.(string)),
 		}
 	}
 	//check if we have RouteID in event and in case it has add it in ArgDispatcher
-	routeIDIface, hasRouteID := parameters[utils.OptsRouteID]
+	routeIDIface, hasRouteID := parameters[utils.RouteID]
 	if hasRouteID && routeIDIface != nil {
 		if !hasApiKey || apiKeyIface == nil { //in case we don't have APIKey, but we have RouteID we need to initialize the struct
 			argD = &utils.ArgDispatcher{
