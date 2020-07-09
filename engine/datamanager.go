@@ -541,27 +541,31 @@ func GetFilter(dm *DataManager, tenant, id string, cacheRead, cacheWrite bool,
 		}
 	}
 	if strings.HasPrefix(id, utils.Meta) {
-		fltr, err = NewFilterFromInline(tenant, id)
+		if fltr, err = NewFilterFromInline(tenant, id); err != nil {
+			return
+		}
 	} else if dm == nil { // in case we want the filter from dataDB but the connection to dataDB a optional (e.g. SessionS)
 		err = utils.ErrNoDatabaseConn
 		return
 	} else {
-		fltr, err = dm.DataDB().GetFilterDrv(tenant, id)
-	}
-	if err != nil {
-		if err == utils.ErrNotFound &&
-			config.CgrConfig().DataDbCfg().Items[utils.MetaFilters].Remote {
-			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil, utils.ReplicatorSv1GetFilter,
-				&utils.TenantID{Tenant: tenant, ID: id}, &fltr); err == nil {
-				err = dm.dataDB.SetFilterDrv(fltr)
+		if fltr, err = dm.DataDB().GetFilterDrv(tenant, id); err != nil {
+			if err == utils.ErrNotFound &&
+				config.CgrConfig().DataDbCfg().Items[utils.MetaFilters].Remote {
+				if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil, utils.ReplicatorSv1GetFilter,
+					&utils.TenantID{Tenant: tenant, ID: id}, &fltr); err == nil {
+					err = dm.dataDB.SetFilterDrv(fltr)
+				}
+			}
+			if err != nil {
+				err = utils.CastRPCErr(err)
+				if err == utils.ErrNotFound && cacheWrite {
+					Cache.Set(utils.CacheFilters, tntID, nil, nil,
+						cacheCommit(transactionID), transactionID)
+				}
+				return
 			}
 		}
-		if err != nil {
-			err = utils.CastRPCErr(err)
-			if err == utils.ErrNotFound && cacheWrite {
-				Cache.Set(utils.CacheFilters, tntID, nil, nil,
-					cacheCommit(transactionID), transactionID)
-			}
+		if err = fltr.Compile(); err != nil { // only compile the value when we get the filter from DB or from remote
 			return
 		}
 	}
@@ -1813,34 +1817,35 @@ func (dm *DataManager) GetAttributeProfile(tenant, id string, cacheRead, cacheWr
 		}
 	}
 	if isInline {
-		attrPrfl, err = NewAttributeFromInline(tenant, id)
+		if attrPrfl, err = NewAttributeFromInline(tenant, id); err != nil {
+			return
+		}
 	} else if dm == nil {
 		err = utils.ErrNoDatabaseConn
 		return
 	} else {
-		attrPrfl, err = dm.dataDB.GetAttributeProfileDrv(tenant, id)
-	}
-	if err != nil {
-		if err == utils.ErrNotFound &&
-			config.CgrConfig().DataDbCfg().Items[utils.MetaAttributeProfiles].Remote {
-			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
-				utils.ReplicatorSv1GetAttributeProfile,
-				&utils.TenantID{Tenant: tenant, ID: id}, &attrPrfl); err == nil {
-				err = dm.dataDB.SetAttributeProfileDrv(attrPrfl)
+		if attrPrfl, err = dm.dataDB.GetAttributeProfileDrv(tenant, id); err != nil {
+			if err == utils.ErrNotFound &&
+				config.CgrConfig().DataDbCfg().Items[utils.MetaAttributeProfiles].Remote {
+				if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
+					utils.ReplicatorSv1GetAttributeProfile,
+					&utils.TenantID{Tenant: tenant, ID: id}, &attrPrfl); err == nil {
+					err = dm.dataDB.SetAttributeProfileDrv(attrPrfl)
+				}
+			}
+			if err != nil {
+				err = utils.CastRPCErr(err)
+				if err == utils.ErrNotFound && cacheWrite {
+					Cache.Set(utils.CacheAttributeProfiles, tntID, nil, nil,
+						cacheCommit(transactionID), transactionID)
+
+				}
+				return nil, err
 			}
 		}
-		if err != nil {
-			err = utils.CastRPCErr(err)
-			if err == utils.ErrNotFound && cacheWrite {
-				Cache.Set(utils.CacheAttributeProfiles, tntID, nil, nil,
-					cacheCommit(transactionID), transactionID)
-
-			}
+		if err = attrPrfl.Compile(); err != nil { // only compile the value when we get the attribute from DB or from remote
 			return nil, err
 		}
-	}
-	if err = attrPrfl.Compile(); err != nil {
-		return nil, err
 	}
 	if cacheWrite {
 		Cache.Set(utils.CacheAttributeProfiles, tntID, attrPrfl, nil,
