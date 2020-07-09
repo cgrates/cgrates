@@ -20,6 +20,7 @@ package v1
 
 import (
 	"github.com/cenkalti/rpc2"
+	"github.com/cgrates/cgrates/utils"
 )
 
 // Publishes methods exported by SMGenericV1 as SMGenericV1 (so we can handle standard RPC methods via birpc socket)
@@ -36,29 +37,84 @@ func (smgv1 *SMGenericV1) Handlers() map[string]interface{} {
 /// Returns MaxUsage (for calls in seconds), -1 for no limit
 func (smgv1 *SMGenericV1) BiRPCV1GetMaxUsage(clnt *rpc2.Client,
 	ev map[string]interface{}, maxUsage *float64) error {
+	err := utils.ConReqs.Allocate()
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err != nil {
+			utils.ConReqs.Deallocate(err.Error())
+		} else {
+			utils.ConReqs.Deallocate(utils.EmptyString)
+		}
+	}()
 	return smgv1.Ss.BiRPCV1GetMaxUsage(clnt, ev, maxUsage)
 }
 
 // Called on session start, returns the maximum number of seconds the session can last
 func (smgv1 *SMGenericV1) BiRPCV1InitiateSession(clnt *rpc2.Client,
 	ev map[string]interface{}, maxUsage *float64) error {
+	err := utils.ConReqs.Allocate()
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err != nil {
+			utils.ConReqs.Deallocate(err.Error())
+		} else {
+			utils.ConReqs.Deallocate(utils.EmptyString)
+		}
+	}()
 	return smgv1.Ss.BiRPCV1InitiateSession(clnt, ev, maxUsage)
 }
 
 // Interim updates, returns remaining duration from the rater
 func (smgv1 *SMGenericV1) BiRPCV1UpdateSession(clnt *rpc2.Client,
 	ev map[string]interface{}, maxUsage *float64) error {
+	err := utils.ConReqs.Allocate()
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err != nil {
+			utils.ConReqs.Deallocate(err.Error())
+		} else {
+			utils.ConReqs.Deallocate(utils.EmptyString)
+		}
+	}()
 	return smgv1.Ss.BiRPCV1UpdateSession(clnt, ev, maxUsage)
 }
 
 // Called on session end, should stop debit loop
 func (smgv1 *SMGenericV1) BiRPCV1TerminateSession(clnt *rpc2.Client,
 	ev map[string]interface{}, reply *string) error {
+	err := utils.ConReqs.Allocate()
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err != nil {
+			utils.ConReqs.Deallocate(err.Error())
+		} else {
+			utils.ConReqs.Deallocate(utils.EmptyString)
+		}
+	}()
 	return smgv1.Ss.BiRPCV1TerminateSession(clnt, ev, reply)
 }
 
 // Called on session end, should send the CDR to CDRS
 func (smgv1 *SMGenericV1) BiRPCV1ProcessCDR(clnt *rpc2.Client,
 	ev map[string]interface{}, reply *string) error {
+	err := utils.ConReqs.Allocate()
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err != nil {
+			utils.ConReqs.Deallocate(err.Error())
+		} else {
+			utils.ConReqs.Deallocate(utils.EmptyString)
+		}
+	}()
 	return smgv1.Ss.BiRPCV1ProcessCDR(clnt, ev, reply)
 }

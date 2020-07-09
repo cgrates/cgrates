@@ -45,6 +45,7 @@ func NewConReqs(reqs int, strategy string) *ConcReqs {
 var errDeny = fmt.Errorf("denying request due to maximum active requests reached")
 
 func (cR *ConcReqs) Allocate() (err error) {
+	fmt.Println("ENTER IN ALLOCATE ")
 	if cR.nAReqs == 0 {
 		return
 	}

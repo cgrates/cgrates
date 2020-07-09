@@ -252,7 +252,6 @@ func testConcReqsOnBiJSONBusy(t *testing.T) {
 			if err := concReqsBiRPC.Call(utils.SessionSv1Sleep,
 				&DurationArgs{DurationTime: time.Duration(10 * time.Millisecond)},
 				&resp); err != nil {
-				fmt.Println(err)
 				lock.Lock()
 				failedAPIs++
 				lock.Unlock()
