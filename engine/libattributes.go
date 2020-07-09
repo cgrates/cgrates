@@ -143,7 +143,7 @@ func NewAttributeFromInline(tenant, inlnRule string) (attr *AttributeProfile, er
 		Tenant:   tenant,
 		ID:       inlnRule,
 		Contexts: []string{utils.META_ANY},
-		Attributes: []*Attribute{&Attribute{
+		Attributes: []*Attribute{{
 			Path:  ruleSplt[1],
 			Type:  ruleSplt[0],
 			Value: vals,
