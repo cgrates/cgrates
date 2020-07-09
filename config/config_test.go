@@ -1898,6 +1898,8 @@ func TestGeneralCfg(t *testing.T) {
 			"digest_equal": ":",
 			"rsr_separator": ";",
 			"max_parralel_conns": 100,
+			"concurrent_requests":  0,
+			"concurrent_strategy":  "",
 		},
 }`
 	eMap := map[string]interface{}{
@@ -1925,6 +1927,8 @@ func TestGeneralCfg(t *testing.T) {
 		"digest_equal":         ":",
 		"rsr_separator":        ";",
 		"max_parralel_conns":   100,
+		"concurrent_requests":  0,
+		"concurrent_strategy":  "",
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)

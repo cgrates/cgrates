@@ -178,7 +178,7 @@ func (s *Server) ServeJSON(addr string, exitChan chan bool) {
 		if s.isDispatched {
 			go rpc.ServeCodec(NewCustomJSONServerCodec(conn))
 		} else {
-			go jsonrpc.ServeConn(conn)
+			go rpc.ServeCodec(NewConcReqsServerCodec(conn))
 		}
 
 	}
@@ -217,8 +217,7 @@ func (s *Server) ServeGOB(addr string, exitChan chan bool) {
 			continue
 		}
 
-		//utils.Logger.Info(fmt.Sprintf("<CGRServer> New incoming connection: %v", conn.RemoteAddr()))
-		go rpc.ServeConn(conn)
+		go rpc.ServeCodec(NewConcReqsGobServerCodec(conn))
 	}
 }
 
@@ -281,7 +280,7 @@ func (s *Server) ServeHTTP(addr string, jsonRPCURL string, wsRPCURL string,
 			if s.isDispatched {
 				rpc.ServeCodec(NewCustomJSONServerCodec(ws))
 			} else {
-				jsonrpc.ServeConn(ws)
+				rpc.ServeCodec(NewConcReqsServerCodec(ws))
 			}
 		})
 		if useBasicAuth {
@@ -378,7 +377,7 @@ func (r *rpcRequest) Close() error {
 
 // Call invokes the RPC request, waits for it to complete, and returns the results.
 func (r *rpcRequest) Call() io.Reader {
-	go jsonrpc.ServeConn(r)
+	go rpc.ServeCodec(NewConcReqsServerCodec(r))
 	<-r.done
 	return r.rw
 }

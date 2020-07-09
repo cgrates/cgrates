@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"time"
+
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -42,8 +44,19 @@ func (cS *CoreSv1) Status(arg *utils.TenantWithArgDispatcher, reply *map[string]
 	return cS.cS.Status(arg, reply)
 }
 
-// Ping used to detreminate if component is active
+// Ping used to determinate if component is active
 func (cS *CoreSv1) Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error {
 	*reply = utils.Pong
+	return nil
+}
+
+type DurationArgs struct {
+	DurationTime time.Duration
+}
+
+// Sleep is used to test the concurrent requests mechanism
+func (cS *CoreSv1) Sleep(arg *DurationArgs, reply *string) error {
+	time.Sleep(arg.DurationTime)
+	*reply = utils.OK
 	return nil
 }

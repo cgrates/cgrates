@@ -659,6 +659,8 @@ const (
 	MetaGroup                   = "*group"
 	InternalRPCSet              = "InternalRPCSet"
 	FileName                    = "FileName"
+	MetaBusy                    = "*busy"
+	MetaQueue                   = "*Queue"
 )
 
 // Migrator Action
@@ -1202,6 +1204,7 @@ const (
 	CoreSv1       = "CoreSv1"
 	CoreSv1Status = "CoreSv1.Status"
 	CoreSv1Ping   = "CoreSv1.Ping"
+	CoreSv1Sleep  = "CoreSv1.Sleep"
 )
 
 // SupplierS APIs
@@ -1306,6 +1309,7 @@ const (
 	SessionSv1ActivateSessions           = "SessionSv1.ActivateSessions"
 	SessionSv1DeactivateSessions         = "SessionSv1.DeactivateSessions"
 	SMGenericV1InitiateSession           = "SMGenericV1.InitiateSession"
+	SessionSv1Sleep                      = "SessionSv1.Sleep"
 )
 
 // Responder APIs
@@ -1562,30 +1566,32 @@ var (
 
 // GeneralCfg
 const (
-	NodeIDCfg            = "node_id"
-	LoggerCfg            = "logger"
-	LogLevelCfg          = "log_level"
-	HttpSkipTlsVerifyCfg = "http_skip_tls_verify"
-	RoundingDecimalsCfg  = "rounding_decimals"
-	DBDataEncodingCfg    = "dbdata_encoding"
-	TpExportPathCfg      = "tpexport_dir"
-	PosterAttemptsCfg    = "poster_attempts"
-	FailedPostsDirCfg    = "failed_posts_dir"
-	FailedPostsTTLCfg    = "failed_posts_ttl"
-	DefaultReqTypeCfg    = "default_request_type"
-	DefaultCategoryCfg   = "default_category"
-	DefaultTenantCfg     = "default_tenant"
-	DefaultTimezoneCfg   = "default_timezone"
-	DefaultCachingCfg    = "default_caching"
-	ConnectAttemptsCfg   = "connect_attempts"
-	ReconnectsCfg        = "reconnects"
-	ConnectTimeoutCfg    = "connect_timeout"
-	ReplyTimeoutCfg      = "reply_timeout"
-	LockingTimeoutCfg    = "locking_timeout"
-	DigestSeparatorCfg   = "digest_separator"
-	DigestEqualCfg       = "digest_equal"
-	RSRSepCfg            = "rsr_separator"
-	MaxParralelConnsCfg  = "max_parralel_conns"
+	NodeIDCfg             = "node_id"
+	LoggerCfg             = "logger"
+	LogLevelCfg           = "log_level"
+	HttpSkipTlsVerifyCfg  = "http_skip_tls_verify"
+	RoundingDecimalsCfg   = "rounding_decimals"
+	DBDataEncodingCfg     = "dbdata_encoding"
+	TpExportPathCfg       = "tpexport_dir"
+	PosterAttemptsCfg     = "poster_attempts"
+	FailedPostsDirCfg     = "failed_posts_dir"
+	FailedPostsTTLCfg     = "failed_posts_ttl"
+	DefaultReqTypeCfg     = "default_request_type"
+	DefaultCategoryCfg    = "default_category"
+	DefaultTenantCfg      = "default_tenant"
+	DefaultTimezoneCfg    = "default_timezone"
+	DefaultCachingCfg     = "default_caching"
+	ConnectAttemptsCfg    = "connect_attempts"
+	ReconnectsCfg         = "reconnects"
+	ConnectTimeoutCfg     = "connect_timeout"
+	ReplyTimeoutCfg       = "reply_timeout"
+	LockingTimeoutCfg     = "locking_timeout"
+	DigestSeparatorCfg    = "digest_separator"
+	DigestEqualCfg        = "digest_equal"
+	RSRSepCfg             = "rsr_separator"
+	MaxParralelConnsCfg   = "max_parralel_conns"
+	ConcurrentRequestsCfg = "concurrent_requests"
+	ConcurrentStrategyCfg = "concurrent_strategy"
 )
 
 // StorDbCfg

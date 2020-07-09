@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"time"
+
 	"github.com/cenkalti/rpc2"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
@@ -51,108 +53,207 @@ func (ssv1 *SessionSv1) Handlers() map[string]interface{} {
 		utils.SessionSv1SetPassiveSession:  ssv1.BiRPCv1SetPassiveSession,
 		utils.SessionSv1ActivateSessions:   ssv1.BiRPCv1ActivateSessions,
 		utils.SessionSv1DeactivateSessions: ssv1.BiRPCv1DeactivateSessions,
+
+		utils.SessionSv1Sleep: ssv1.BiRPCV1Sleep, // Sleep method is used to test the concurrent requests mechanism
 	}
 }
 
 func (ssv1 *SessionSv1) BiRPCv1AuthorizeEvent(clnt *rpc2.Client, args *sessions.V1AuthorizeArgs,
-	rply *sessions.V1AuthorizeReply) error {
+	rply *sessions.V1AuthorizeReply) (err error) {
+	if err = utils.ConReqs.Allocate(); err != nil {
+		return
+	}
+	defer utils.ConReqs.Deallocate()
 	return ssv1.Ss.BiRPCv1AuthorizeEvent(clnt, args, rply)
 }
 
 func (ssv1 *SessionSv1) BiRPCv1AuthorizeEventWithDigest(clnt *rpc2.Client, args *sessions.V1AuthorizeArgs,
-	rply *sessions.V1AuthorizeReplyWithDigest) error {
+	rply *sessions.V1AuthorizeReplyWithDigest) (err error) {
+	if err = utils.ConReqs.Allocate(); err != nil {
+		return
+	}
+	defer utils.ConReqs.Deallocate()
 	return ssv1.Ss.BiRPCv1AuthorizeEventWithDigest(clnt, args, rply)
 }
 
 func (ssv1 *SessionSv1) BiRPCv1InitiateSession(clnt *rpc2.Client, args *sessions.V1InitSessionArgs,
-	rply *sessions.V1InitSessionReply) error {
+	rply *sessions.V1InitSessionReply) (err error) {
+	if err = utils.ConReqs.Allocate(); err != nil {
+		return
+	}
+	defer utils.ConReqs.Deallocate()
 	return ssv1.Ss.BiRPCv1InitiateSession(clnt, args, rply)
 }
 
 func (ssv1 *SessionSv1) BiRPCv1InitiateSessionWithDigest(clnt *rpc2.Client, args *sessions.V1InitSessionArgs,
-	rply *sessions.V1InitReplyWithDigest) error {
+	rply *sessions.V1InitReplyWithDigest) (err error) {
+	if err = utils.ConReqs.Allocate(); err != nil {
+		return
+	}
+	defer utils.ConReqs.Deallocate()
 	return ssv1.Ss.BiRPCv1InitiateSessionWithDigest(clnt, args, rply)
 }
 
 func (ssv1 *SessionSv1) BiRPCv1UpdateSession(clnt *rpc2.Client, args *sessions.V1UpdateSessionArgs,
-	rply *sessions.V1UpdateSessionReply) error {
+	rply *sessions.V1UpdateSessionReply) (err error) {
+	if err = utils.ConReqs.Allocate(); err != nil {
+		return
+	}
+	defer utils.ConReqs.Deallocate()
 	return ssv1.Ss.BiRPCv1UpdateSession(clnt, args, rply)
 }
 
 func (ssv1 *SessionSv1) BiRPCv1SyncSessions(clnt *rpc2.Client, args *string,
-	rply *string) error {
+	rply *string) (err error) {
+	if err = utils.ConReqs.Allocate(); err != nil {
+		return
+	}
+	defer utils.ConReqs.Deallocate()
 	return ssv1.Ss.BiRPCv1SyncSessions(clnt, "", rply)
 }
 
 func (ssv1 *SessionSv1) BiRPCv1TerminateSession(clnt *rpc2.Client, args *sessions.V1TerminateSessionArgs,
-	rply *string) error {
+	rply *string) (err error) {
+	if err = utils.ConReqs.Allocate(); err != nil {
+		return
+	}
+	defer utils.ConReqs.Deallocate()
 	return ssv1.Ss.BiRPCv1TerminateSession(clnt, args, rply)
 }
 
-func (ssv1 *SessionSv1) BiRPCv1ProcessCDR(clnt *rpc2.Client, cgrEv *utils.CGREventWithArgDispatcher, rply *string) error {
+func (ssv1 *SessionSv1) BiRPCv1ProcessCDR(clnt *rpc2.Client, cgrEv *utils.CGREventWithArgDispatcher,
+	rply *string) (err error) {
+	if err = utils.ConReqs.Allocate(); err != nil {
+		return
+	}
+	defer utils.ConReqs.Deallocate()
 	return ssv1.Ss.BiRPCv1ProcessCDR(clnt, cgrEv, rply)
 }
 
 func (ssv1 *SessionSv1) BiRPCv1ProcessMessage(clnt *rpc2.Client, args *sessions.V1ProcessMessageArgs,
-	rply *sessions.V1ProcessMessageReply) error {
+	rply *sessions.V1ProcessMessageReply) (err error) {
+	if err = utils.ConReqs.Allocate(); err != nil {
+		return
+	}
+	defer utils.ConReqs.Deallocate()
 	return ssv1.Ss.BiRPCv1ProcessMessage(clnt, args, rply)
 }
 
 func (ssv1 *SessionSv1) BiRPCv1ProcessEvent(clnt *rpc2.Client, args *sessions.V1ProcessEventArgs,
-	rply *sessions.V1ProcessEventReply) error {
+	rply *sessions.V1ProcessEventReply) (err error) {
+	if err = utils.ConReqs.Allocate(); err != nil {
+		return
+	}
+	defer utils.ConReqs.Deallocate()
 	return ssv1.Ss.BiRPCv1ProcessEvent(clnt, args, rply)
 }
 
 func (ssv1 *SessionSv1) BiRPCv1GetActiveSessions(clnt *rpc2.Client, args *utils.SessionFilter,
-	rply *[]*sessions.ExternalSession) error {
+	rply *[]*sessions.ExternalSession) (err error) {
+	if err = utils.ConReqs.Allocate(); err != nil {
+		return
+	}
+	defer utils.ConReqs.Deallocate()
 	return ssv1.Ss.BiRPCv1GetActiveSessions(clnt, args, rply)
 }
 
 func (ssv1 *SessionSv1) BiRPCv1GetActiveSessionsCount(clnt *rpc2.Client, args *utils.SessionFilter,
-	rply *int) error {
+	rply *int) (err error) {
+	if err = utils.ConReqs.Allocate(); err != nil {
+		return
+	}
+	defer utils.ConReqs.Deallocate()
 	return ssv1.Ss.BiRPCv1GetActiveSessionsCount(clnt, args, rply)
 }
 
 func (ssv1 *SessionSv1) BiRPCv1GetPassiveSessions(clnt *rpc2.Client, args *utils.SessionFilter,
-	rply *[]*sessions.ExternalSession) error {
+	rply *[]*sessions.ExternalSession) (err error) {
+	if err = utils.ConReqs.Allocate(); err != nil {
+		return
+	}
+	defer utils.ConReqs.Deallocate()
 	return ssv1.Ss.BiRPCv1GetPassiveSessions(clnt, args, rply)
 }
 
 func (ssv1 *SessionSv1) BiRPCv1GetPassiveSessionsCount(clnt *rpc2.Client, args *utils.SessionFilter,
-	rply *int) error {
+	rply *int) (err error) {
+	if err = utils.ConReqs.Allocate(); err != nil {
+		return
+	}
+	defer utils.ConReqs.Deallocate()
 	return ssv1.Ss.BiRPCv1GetPassiveSessionsCount(clnt, args, rply)
 }
 
 func (ssv1 *SessionSv1) BiRPCv1ForceDisconnect(clnt *rpc2.Client, args *utils.SessionFilter,
-	rply *string) error {
+	rply *string) (err error) {
+	if err = utils.ConReqs.Allocate(); err != nil {
+		return
+	}
+	defer utils.ConReqs.Deallocate()
 	return ssv1.Ss.BiRPCv1ForceDisconnect(clnt, args, rply)
 }
 
 func (ssv1 *SessionSv1) BiRPCv1RegisterInternalBiJSONConn(clnt *rpc2.Client, args string,
-	rply *string) error {
+	rply *string) (err error) {
+	if err = utils.ConReqs.Allocate(); err != nil {
+		return
+	}
+	defer utils.ConReqs.Deallocate()
 	return ssv1.Ss.BiRPCv1RegisterInternalBiJSONConn(clnt, args, rply)
 }
 
-func (ssv1 *SessionSv1) BiRPCPing(clnt *rpc2.Client, ign *utils.CGREventWithArgDispatcher, reply *string) error {
+func (ssv1 *SessionSv1) BiRPCPing(clnt *rpc2.Client, ign *utils.CGREventWithArgDispatcher,
+	reply *string) (err error) {
+	if err = utils.ConReqs.Allocate(); err != nil {
+		return
+	}
+	defer utils.ConReqs.Deallocate()
 	return ssv1.Ping(ign, reply)
 }
 
 func (ssv1 *SessionSv1) BiRPCv1ReplicateSessions(clnt *rpc2.Client,
-	args sessions.ArgsReplicateSessions, reply *string) error {
+	args sessions.ArgsReplicateSessions, reply *string) (err error) {
+	if err = utils.ConReqs.Allocate(); err != nil {
+		return
+	}
+	defer utils.ConReqs.Deallocate()
 	return ssv1.BiRPCv1ReplicateSessions(clnt, args, reply)
 }
 
 func (ssv1 *SessionSv1) BiRPCv1SetPassiveSession(clnt *rpc2.Client,
-	args *sessions.Session, reply *string) error {
+	args *sessions.Session, reply *string) (err error) {
+	if err = utils.ConReqs.Allocate(); err != nil {
+		return
+	}
+	defer utils.ConReqs.Deallocate()
 	return ssv1.Ss.BiRPCv1SetPassiveSession(clnt, args, reply)
 }
 
 func (ssv1 *SessionSv1) BiRPCv1ActivateSessions(clnt *rpc2.Client,
-	args []string, reply *string) error {
+	args []string, reply *string) (err error) {
+	if err = utils.ConReqs.Allocate(); err != nil {
+		return
+	}
+	defer utils.ConReqs.Deallocate()
 	return ssv1.Ss.BiRPCv1ActivateSessions(clnt, args, reply)
 }
 
 func (ssv1 *SessionSv1) BiRPCv1DeactivateSessions(clnt *rpc2.Client,
-	args []string, reply *string) error {
+	args []string, reply *string) (err error) {
+	if err = utils.ConReqs.Allocate(); err != nil {
+		return
+	}
+	defer utils.ConReqs.Deallocate()
 	return ssv1.Ss.BiRPCv1DeactivateSessions(clnt, args, reply)
+}
+
+func (ssv1 *SessionSv1) BiRPCV1Sleep(clnt *rpc2.Client, arg *DurationArgs,
+	reply *string) (err error) {
+	if err = utils.ConReqs.Allocate(); err != nil {
+		return
+	}
+	defer utils.ConReqs.Deallocate()
+	time.Sleep(arg.DurationTime)
+	*reply = utils.OK
+	return nil
 }
