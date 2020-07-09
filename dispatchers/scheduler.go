@@ -35,13 +35,13 @@ func (dS *DispatcherService) SchedulerSv1Ping(args *utils.CGREventWithArgDispatc
 		}
 		if err = dS.authorize(utils.SchedulerSv1Ping,
 			args.CGREvent.Tenant,
-			args.APIKey, args.CGREvent.Time); err != nil {
+			args.OptsAPIKey, args.CGREvent.Time); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
+		routeID = args.ArgDispatcher.OptsRouteID
 	}
 	return dS.Dispatch(args.CGREvent, utils.MetaScheduler, routeID,
 		utils.SchedulerSv1Ping, args, reply)
@@ -55,13 +55,13 @@ func (dS *DispatcherService) SchedulerSv1Reload(args *utils.CGREventWithArgDispa
 		}
 		if err = dS.authorize(utils.SchedulerSv1Ping,
 			args.CGREvent.Tenant,
-			args.APIKey, args.CGREvent.Time); err != nil {
+			args.OptsAPIKey, args.CGREvent.Time); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
+		routeID = args.ArgDispatcher.OptsRouteID
 	}
 	return dS.Dispatch(args.CGREvent, utils.MetaScheduler, routeID,
 		utils.SchedulerSv1Reload, args, reply)
@@ -75,13 +75,13 @@ func (dS *DispatcherService) SchedulerSv1ExecuteActions(args *utils.AttrsExecute
 		}
 		if err = dS.authorize(utils.SchedulerSv1ExecuteActions,
 			args.Tenant,
-			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			args.OptsAPIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
+		routeID = args.ArgDispatcher.OptsRouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: args.Tenant}, utils.MetaScheduler, routeID,
 		utils.SchedulerSv1ExecuteActions, args, reply)
@@ -95,13 +95,13 @@ func (dS *DispatcherService) SchedulerSv1ExecuteActionPlans(args *utils.AttrsExe
 		}
 		if err = dS.authorize(utils.SchedulerSv1ExecuteActionPlans,
 			args.Tenant,
-			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			args.OptsAPIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
+		routeID = args.ArgDispatcher.OptsRouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: args.Tenant}, utils.MetaScheduler, routeID,
 		utils.SchedulerSv1ExecuteActionPlans, args, reply)

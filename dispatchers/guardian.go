@@ -37,13 +37,13 @@ func (dS *DispatcherService) GuardianSv1Ping(args *utils.CGREventWithArgDispatch
 		}
 		if err = dS.authorize(utils.GuardianSv1Ping,
 			args.CGREvent.Tenant,
-			args.APIKey, args.CGREvent.Time); err != nil {
+			args.OptsAPIKey, args.CGREvent.Time); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
+		routeID = args.ArgDispatcher.OptsRouteID
 	}
 	return dS.Dispatch(args.CGREvent, utils.MetaGuardian, routeID,
 		utils.GuardianSv1Ping, args, reply)
@@ -61,13 +61,13 @@ func (dS *DispatcherService) GuardianSv1RemoteLock(args AttrRemoteLockWithApiKey
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.GuardianSv1RemoteLock, tnt,
-			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			args.OptsAPIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
+		routeID = args.ArgDispatcher.OptsRouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaGuardian, routeID,
 		utils.GuardianSv1RemoteLock, args, reply)
@@ -85,13 +85,13 @@ func (dS *DispatcherService) GuardianSv1RemoteUnlock(args AttrRemoteUnlockWithAp
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.GuardianSv1RemoteUnlock, tnt,
-			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			args.OptsAPIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
+		routeID = args.ArgDispatcher.OptsRouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaGuardian, routeID,
 		utils.GuardianSv1RemoteUnlock, args, reply)

@@ -40,13 +40,13 @@ func (dS *DispatcherService) CDRsV1Ping(args *utils.CGREventWithArgDispatcher,
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.CDRsV1Ping, tnt,
-			args.APIKey, args.CGREvent.Time); err != nil {
+			args.OptsAPIKey, args.CGREvent.Time); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
+		routeID = args.ArgDispatcher.OptsRouteID
 	}
 	return dS.Dispatch(args.CGREvent, utils.MetaCDRs, routeID,
 		utils.CDRsV1Ping, args, reply)
@@ -62,13 +62,13 @@ func (dS *DispatcherService) CDRsV1GetCDRs(args *utils.RPCCDRsFilterWithArgDispa
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.CDRsV1GetCDRs, tnt,
-			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			args.OptsAPIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
+		routeID = args.ArgDispatcher.OptsRouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCDRs, routeID,
 		utils.CDRsV1GetCDRs, args, reply)
@@ -84,13 +84,13 @@ func (dS *DispatcherService) CDRsV1GetCDRsCount(args *utils.RPCCDRsFilterWithArg
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.CDRsV1GetCDRsCount, tnt,
-			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			args.OptsAPIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
+		routeID = args.ArgDispatcher.OptsRouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCDRs, routeID,
 		utils.CDRsV1GetCDRsCount, args, reply)
@@ -106,13 +106,13 @@ func (dS *DispatcherService) CDRsV1StoreSessionCost(args *engine.AttrCDRSStoreSM
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.CDRsV1StoreSessionCost, tnt,
-			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			args.OptsAPIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
+		routeID = args.ArgDispatcher.OptsRouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCDRs, routeID,
 		utils.CDRsV1StoreSessionCost, args, reply)
@@ -128,13 +128,13 @@ func (dS *DispatcherService) CDRsV1RateCDRs(args *engine.ArgRateCDRs, reply *str
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.CDRsV1RateCDRs, tnt,
-			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			args.OptsAPIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
+		routeID = args.ArgDispatcher.OptsRouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCDRs, routeID,
 		utils.CDRsV1RateCDRs, args, reply)
@@ -150,13 +150,13 @@ func (dS *DispatcherService) CDRsV1ProcessExternalCDR(args *engine.ExternalCDRWi
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.CDRsV1ProcessExternalCDR, tnt,
-			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			args.OptsAPIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
+		routeID = args.ArgDispatcher.OptsRouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCDRs, routeID,
 		utils.CDRsV1ProcessExternalCDR, args, reply)
@@ -172,13 +172,13 @@ func (dS *DispatcherService) CDRsV1ProcessEvent(args *engine.ArgV1ProcessEvent, 
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.CDRsV1ProcessEvent, tnt,
-			args.APIKey, args.CGREvent.Time); err != nil {
+			args.OptsAPIKey, args.CGREvent.Time); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
+		routeID = args.ArgDispatcher.OptsRouteID
 	}
 	return dS.Dispatch(&args.CGREvent, utils.MetaCDRs, routeID,
 		utils.CDRsV1ProcessEvent, args, reply)
@@ -194,13 +194,13 @@ func (dS *DispatcherService) CDRsV1ProcessCDR(args *engine.CDRWithOpts, reply *s
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.CDRsV1ProcessCDR, tnt,
-			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			args.OptsAPIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
+		routeID = args.ArgDispatcher.OptsRouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCDRs, routeID,
 		utils.CDRsV1ProcessCDR, args, reply)
@@ -216,13 +216,13 @@ func (dS *DispatcherService) CDRsV2ProcessEvent(args *engine.ArgV1ProcessEvent, 
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.CDRsV2ProcessEvent, tnt,
-			args.APIKey, args.CGREvent.Time); err != nil {
+			args.OptsAPIKey, args.CGREvent.Time); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
+		routeID = args.ArgDispatcher.OptsRouteID
 	}
 	return dS.Dispatch(&args.CGREvent, utils.MetaCDRs, routeID,
 		utils.CDRsV2ProcessEvent, args, reply)
@@ -238,13 +238,13 @@ func (dS *DispatcherService) CDRsV2StoreSessionCost(args *engine.ArgsV2CDRSStore
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.CDRsV2StoreSessionCost, tnt,
-			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			args.OptsAPIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
+		routeID = args.ArgDispatcher.OptsRouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCDRs, routeID,
 		utils.CDRsV2StoreSessionCost, args, reply)

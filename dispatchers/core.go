@@ -35,13 +35,13 @@ func (dS *DispatcherService) CoreSv1Status(args *utils.TenantWithArgDispatcher,
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.CoreSv1Status, tnt,
-			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			args.OptsAPIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
+		routeID = args.ArgDispatcher.OptsRouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCore,
 		routeID, utils.CoreSv1Status, args, reply)
@@ -57,13 +57,13 @@ func (dS *DispatcherService) CoreSv1Ping(args *utils.CGREventWithArgDispatcher, 
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.CoreSv1Ping, tnt,
-			args.APIKey, args.Time); err != nil {
+			args.OptsAPIKey, args.Time); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
+		routeID = args.ArgDispatcher.OptsRouteID
 	}
 	return dS.Dispatch(args.CGREvent, utils.MetaCore, routeID,
 		utils.CoreSv1Ping, args, reply)

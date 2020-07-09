@@ -34,13 +34,13 @@ func (dS *DispatcherService) RALsV1Ping(args *utils.CGREventWithArgDispatcher, r
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.RALsV1Ping, args.CGREvent.Tenant,
-			args.APIKey, args.CGREvent.Time); err != nil {
+			args.OptsAPIKey, args.CGREvent.Time); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
+		routeID = args.ArgDispatcher.OptsRouteID
 	}
 	return dS.Dispatch(args.CGREvent, utils.MetaRALs, routeID,
 		utils.RALsV1Ping, args, rpl)
@@ -54,13 +54,13 @@ func (dS *DispatcherService) RALsV1GetRatingPlansCost(args *utils.RatingPlanCost
 		}
 		if err = dS.authorize(utils.RALsV1GetRatingPlansCost,
 			tenant,
-			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			args.OptsAPIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
+		routeID = args.ArgDispatcher.OptsRouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tenant}, utils.MetaRALs, routeID,
 		utils.RALsV1GetRatingPlansCost, args, rpl)

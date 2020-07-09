@@ -69,7 +69,7 @@ func testDspRPrfPing(t *testing.T) {
 			Tenant: "cgrates.org",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("rPrf12345"),
+			OptsAPIKey: utils.StringPointer("rPrf12345"),
 		},
 	}, &reply); err != nil {
 		t.Error(err)

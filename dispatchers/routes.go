@@ -34,13 +34,13 @@ func (dS *DispatcherService) RouteSv1Ping(args *utils.CGREventWithArgDispatcher,
 		}
 		if err = dS.authorize(utils.RouteSv1Ping,
 			args.CGREvent.Tenant,
-			args.APIKey, args.CGREvent.Time); err != nil {
+			args.OptsAPIKey, args.CGREvent.Time); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
+		routeID = args.ArgDispatcher.OptsRouteID
 	}
 	return dS.Dispatch(args.CGREvent, utils.MetaRoutes, routeID,
 		utils.RouteSv1Ping, args, reply)
@@ -55,13 +55,13 @@ func (dS *DispatcherService) RouteSv1GetRoutes(args *engine.ArgsGetRoutes,
 		}
 		if err = dS.authorize(utils.RouteSv1GetRoutes,
 			args.CGREvent.Tenant,
-			args.APIKey, args.CGREvent.Time); err != nil {
+			args.OptsAPIKey, args.CGREvent.Time); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
+		routeID = args.ArgDispatcher.OptsRouteID
 	}
 	return dS.Dispatch(args.CGREvent, utils.MetaRoutes, routeID,
 		utils.RouteSv1GetRoutes, args, reply)
@@ -76,13 +76,13 @@ func (dS *DispatcherService) RouteSv1GetRouteProfilesForEvent(args *utils.CGREve
 		}
 		if err = dS.authorize(utils.RouteSv1GetRouteProfilesForEvent,
 			args.CGREvent.Tenant,
-			args.APIKey, args.CGREvent.Time); err != nil {
+			args.OptsAPIKey, args.CGREvent.Time); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
+		routeID = args.ArgDispatcher.OptsRouteID
 	}
 	return dS.Dispatch(args.CGREvent, utils.MetaRoutes, routeID,
 		utils.RouteSv1GetRouteProfilesForEvent, args, reply)

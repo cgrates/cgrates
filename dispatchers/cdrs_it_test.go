@@ -108,7 +108,7 @@ func testDspCDRsPing(t *testing.T) {
 			Tenant: "cgrates.org",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("cdrs12345"),
+			OptsAPIKey: utils.StringPointer("cdrs12345"),
 		},
 	}, &reply); err != nil {
 		t.Error(err)
@@ -137,7 +137,7 @@ func testDspCDRsProcessEvent(t *testing.T) {
 			},
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("cdrs12345"),
+			OptsAPIKey: utils.StringPointer("cdrs12345"),
 		},
 	}
 
@@ -160,7 +160,7 @@ func testDspCDRsCountCDR(t *testing.T) {
 			Tenant: "cgrates.org",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("cdrs12345"),
+			OptsAPIKey: utils.StringPointer("cdrs12345"),
 		},
 	}
 
@@ -182,7 +182,7 @@ func testDspCDRsGetCDR(t *testing.T) {
 			Tenant: "cgrates.org",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("cdrs12345"),
+			OptsAPIKey: utils.StringPointer("cdrs12345"),
 		},
 	}
 
@@ -203,7 +203,7 @@ func testDspCDRsGetCDRWithoutTenant(t *testing.T) {
 			RunIDs:   []string{utils.MetaDefault},
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("cdrs12345"),
+			OptsAPIKey: utils.StringPointer("cdrs12345"),
 		},
 	}
 
@@ -232,7 +232,7 @@ func testDspCDRsProcessCDR(t *testing.T) {
 			Usage:       time.Duration(2) * time.Minute,
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("cdrs12345"),
+			OptsAPIKey: utils.StringPointer("cdrs12345"),
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.CDRsV1ProcessCDR, args, &reply); err != nil {
@@ -255,7 +255,7 @@ func testDspCDRsGetCDR2(t *testing.T) {
 			Tenant: "cgrates.org",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("cdrs12345"),
+			OptsAPIKey: utils.StringPointer("cdrs12345"),
 		},
 	}
 
@@ -288,7 +288,7 @@ func testDspCDRsProcessExternalCDR(t *testing.T) {
 			ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("cdrs12345"),
+			OptsAPIKey: utils.StringPointer("cdrs12345"),
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.CDRsV1ProcessExternalCDR, args, &reply); err != nil {
@@ -311,7 +311,7 @@ func testDspCDRsGetCDR3(t *testing.T) {
 			Tenant: "cgrates.org",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("cdrs12345"),
+			OptsAPIKey: utils.StringPointer("cdrs12345"),
 		},
 	}
 
@@ -343,7 +343,7 @@ func testDspCDRsV2ProcessEvent(t *testing.T) {
 			},
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("cdrsv212345"),
+			OptsAPIKey: utils.StringPointer("cdrsv212345"),
 		},
 	}
 
@@ -381,7 +381,7 @@ func testDspCDRsV2StoreSessionCost(t *testing.T) {
 			CostDetails: engine.NewEventCostFromCallCost(cc, "testDspCDRsV2StoreSessionCost", utils.MetaDefault),
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("cdrsv212345"),
+			OptsAPIKey: utils.StringPointer("cdrsv212345"),
 		},
 	}
 
