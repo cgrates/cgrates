@@ -21,7 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ers
 
 import (
-	"fmt"
 	"io/ioutil"
 	"net/rpc"
 	"os"
@@ -111,7 +110,6 @@ func testPartITInitConfig(t *testing.T) {
 	var err error
 	partCfgPath = path.Join(*dataDir, "conf", "samples", partCfgDIR)
 	if partCfg, err = config.NewCGRConfigFromPath(partCfgPath); err != nil {
-		fmt.Println(err)
 		t.Fatal("Got config error: ", err.Error())
 	}
 }

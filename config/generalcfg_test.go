@@ -60,28 +60,32 @@ func TestGeneralCfgloadFromJsonCfg(t *testing.T) {
 	"locking_timeout": "0",									// timeout internal locks to avoid deadlocks
 	"digest_separator": ",",
 	"digest_equal": ":",
+	"concurrent_requests":  0,
+	"concurrent_strategy":  "",
 }
 }`
 	expected = GeneralCfg{
-		NodeID:            "",
-		Logger:            "*syslog",
-		LogLevel:          6,
-		HttpSkipTlsVerify: false,
-		RoundingDecimals:  5,
-		DBDataEncoding:    "msgpack",
-		TpExportPath:      "/var/spool/cgrates/tpe",
-		PosterAttempts:    3,
-		FailedPostsDir:    "/var/spool/cgrates/failed_posts",
-		DefaultReqType:    "*rated",
-		DefaultCategory:   "call",
-		DefaultTenant:     "cgrates.org",
-		DefaultTimezone:   "Local",
-		ConnectAttempts:   3,
-		Reconnects:        -1,
-		ConnectTimeout:    time.Duration(1 * time.Second),
-		ReplyTimeout:      time.Duration(2 * time.Second),
-		DigestSeparator:   ",",
-		DigestEqual:       ":",
+		NodeID:             "",
+		Logger:             "*syslog",
+		LogLevel:           6,
+		HttpSkipTlsVerify:  false,
+		RoundingDecimals:   5,
+		DBDataEncoding:     "msgpack",
+		TpExportPath:       "/var/spool/cgrates/tpe",
+		PosterAttempts:     3,
+		FailedPostsDir:     "/var/spool/cgrates/failed_posts",
+		DefaultReqType:     "*rated",
+		DefaultCategory:    "call",
+		DefaultTenant:      "cgrates.org",
+		DefaultTimezone:    "Local",
+		ConnectAttempts:    3,
+		Reconnects:         -1,
+		ConnectTimeout:     time.Duration(1 * time.Second),
+		ReplyTimeout:       time.Duration(2 * time.Second),
+		DigestSeparator:    ",",
+		DigestEqual:        ":",
+		ConcurrentRequests: 0,
+		ConcurrentStrategy: utils.EmptyString,
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
@@ -121,7 +125,9 @@ func TestGeneralCfgAsMapInterface(t *testing.T) {
 			"digest_separator": ",",								
 			"digest_equal": ":",									
 			"rsr_separator": ";",									
-			"max_parralel_conns": 100,								
+			"max_parralel_conns": 100,	
+			"concurrent_requests":  0,
+			"concurrent_strategy":  "",
 		},
 	}`
 	eMap := map[string]interface{}{
@@ -149,6 +155,8 @@ func TestGeneralCfgAsMapInterface(t *testing.T) {
 		"digest_equal":         ":",
 		"rsr_separator":        ";",
 		"max_parralel_conns":   100,
+		"concurrent_requests":  0,
+		"concurrent_strategy":  "",
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)

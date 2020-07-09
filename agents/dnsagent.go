@@ -227,7 +227,6 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 		if err = agReq.setCGRReply(rply, err); err != nil {
 			return
 		}
-		fmt.Println(utils.ToJSON(rply))
 	case utils.MetaInitiate:
 		initArgs := sessions.NewV1InitSessionArgs(
 			reqProcessor.Flags.HasKey(utils.MetaAttributes),
