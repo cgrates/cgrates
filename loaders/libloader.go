@@ -123,26 +123,18 @@ func (cP *csvProvider) FieldAsInterface(fldPath []string) (data interface{}, err
 	}
 	err = nil // cancel previous err
 
-	if splt := strings.Split(fldPath[0], utils.MatchLessThan); len(splt) != 1 {
-		var fileName string
-		// check for *req prefix
-		if splt[0] != utils.MetaReq {
-			return nil, fmt.Errorf("invalid prefix for : %s", fldPath)
-		}
-		fileName = splt[1]
-		// find the last > and compute the name of the file
-		hasGrThan := false
+	if strings.HasPrefix(fldPath[0], utils.MetaFile+utils.FilterValStart) {
+		fileName := strings.TrimPrefix(fldPath[0], utils.MetaFile+utils.FilterValStart)
+		hasSelEnd := false
 		for _, val := range fldPath[1:] {
-			if grSplt := strings.Split(val, utils.MatchGreaterThan); len(grSplt) == 1 {
-				fileName = fileName + utils.NestingSep + val
-			} else {
-				fileName = fileName + utils.NestingSep + grSplt[0]
-				hasGrThan = true
+			if hasSelEnd = strings.HasSuffix(val, utils.FilterValEnd); hasSelEnd {
+				fileName = fileName + utils.NestingSep + val[:len(val)-1]
 				break
 			}
+			fileName = fileName + utils.NestingSep + val
 		}
-		if !hasGrThan {
-			return nil, fmt.Errorf("filter rule <%s> needs to end in >", fldPath)
+		if !hasSelEnd {
+			return nil, fmt.Errorf("filter rule <%s> needs to end in )", fldPath)
 		}
 		if cP.fileName != fileName {
 			cP.cache.Set(fldPath, nil)

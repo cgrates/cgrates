@@ -69,8 +69,12 @@ func NewLoader(dm *engine.DataManager, cfg *config.LoaderSCfg,
 		}
 		for _, cfgFld := range ldrData.Fields { // add all possible files to be opened
 			for _, cfgFldVal := range cfgFld.Value {
-				if idx := strings.Index(cfgFldVal.Rules, utils.InInFieldSep); idx != -1 {
-					ldr.rdrs[ldrData.Type][cfgFldVal.Rules[:idx]] = nil
+				rule := cfgFldVal.Rules
+				if !strings.HasPrefix(rule, utils.DynamicDataPrefix+utils.MetaFile+utils.FilterValStart) {
+					continue
+				}
+				if idxEnd := strings.Index(rule, utils.FilterValEnd); idxEnd != -1 {
+					ldr.rdrs[ldrData.Type][rule[7:idxEnd]] = nil
 				}
 			}
 		}

@@ -414,6 +414,7 @@ const (
 	MetaFileCSV                 = "*file_csv"
 	MetaVirt                    = "*virt"
 	MetaFileFWV                 = "*file_fwv"
+	MetaFile                    = "*file"
 	MetaFScsv                   = "*freeswitch_csv"
 	Accounts                    = "Accounts"
 	AccountService              = "AccountS"
