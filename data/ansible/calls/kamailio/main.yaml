@@ -31,6 +31,7 @@
     dependencies:
       - build-essential
       - git
+      - wget
       - redis-server
       - mariadb-server
       - postgresql
@@ -50,17 +51,6 @@
   - name: Install dependencies
     become: yes
     apt: name={{ dependencies }} state=present
-
-  - name: Add key for kamailio
-    become: yes
-    apt_key: url=http://deb.kamailio.org/kamailiodebkey.gpg state=present
-
-  - name: Add Kamailio apt repository (5.4) (Debian 8/Jessie)
-    become: yes
-    apt_repository:
-      repo: deb http://deb.kamailio.org/kamailio52 stretch main
-      state: present
-      filename: 'kamailio'
 
   # Install FreeSwitch
   - name: Install Kamailio
