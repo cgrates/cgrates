@@ -65,7 +65,6 @@ func NewAgentRequest(req utils.DataProvider,
 		Trailer:    trailer,
 		Opts:       opts,
 	}
-	ar.dynamicProvider = utils.NewDynamicDataProvider(ar)
 	// populate tenant
 	if tntIf, err := ar.ParseField(
 		&config.FCTemplate{Type: utils.META_COMPOSED,
@@ -81,20 +80,19 @@ func NewAgentRequest(req utils.DataProvider,
 // AgentRequest represents data related to one request towards agent
 // implements utils.DataProvider so we can pass it to filters
 type AgentRequest struct {
-	Request         utils.DataProvider         // request
-	Vars            utils.NavigableMap2        // shared data
-	CGRRequest      *utils.OrderedNavigableMap // Used in reply to access the request that was send
-	CGRReply        *utils.NavigableMap2
-	Reply           *utils.OrderedNavigableMap
-	Tenant          string
-	Timezone        string
-	filterS         *engine.FilterS
-	Header          utils.DataProvider
-	Trailer         utils.DataProvider
-	diamreq         *utils.OrderedNavigableMap // used in case of building requests (ie. DisconnectSession)
-	tmp             utils.NavigableMap2        // used in case you want to store temporary items and access them later
-	Opts            *utils.OrderedNavigableMap
-	dynamicProvider *utils.DynamicDataProvider
+	Request    utils.DataProvider         // request
+	Vars       utils.NavigableMap2        // shared data
+	CGRRequest *utils.OrderedNavigableMap // Used in reply to access the request that was send
+	CGRReply   *utils.NavigableMap2
+	Reply      *utils.OrderedNavigableMap
+	Tenant     string
+	Timezone   string
+	filterS    *engine.FilterS
+	Header     utils.DataProvider
+	Trailer    utils.DataProvider
+	diamreq    *utils.OrderedNavigableMap // used in case of building requests (ie. DisconnectSession)
+	tmp        utils.NavigableMap2        // used in case you want to store temporary items and access them later
+	Opts       *utils.OrderedNavigableMap
 }
 
 // String implements utils.DataProvider
@@ -185,7 +183,7 @@ func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 	ar.tmp = utils.NavigableMap2{}
 	for _, tplFld := range tplFlds {
 		if pass, err := ar.filterS.Pass(ar.Tenant,
-			tplFld.Filters, ar.dynamicProvider); err != nil {
+			tplFld.Filters, ar); err != nil {
 			return err
 		} else if !pass {
 			continue

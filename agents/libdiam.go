@@ -335,9 +335,9 @@ func (dP *diameterDP) FieldAsInterface(fldPath []string) (data interface{}, err 
 	// lastPath can contain selector inside
 	lastPath := fldPath[len(fldPath)-1]
 	var slctrStr string
-	if splt := strings.Split(lastPath, "<"); len(splt) != 1 {
+	if splt := strings.Split(lastPath, utils.IdxStart); len(splt) != 1 {
 		lastPath = splt[0]
-		if splt[1][len(splt[1])-1:] != ">" {
+		if splt[1][len(splt[1])-1:] != utils.IdxEnd {
 			return nil, fmt.Errorf("filter rule <%s> needs to end in ]", splt[1])
 		}
 		slctrStr = splt[1][:len(splt[1])-1] // also strip the last ]

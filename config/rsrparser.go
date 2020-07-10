@@ -32,14 +32,14 @@ var (
 )
 
 func NewRSRParsers(parsersRules string, rsrSeparator string) (prsrs RSRParsers, err error) {
-	if parsersRules == "" {
+	if parsersRules == utils.EmptyString {
 		return
 	}
-	if count := strings.Count(parsersRules, "`"); count%2 != 0 { // check if we have matching `
+	if count := strings.Count(parsersRules, utils.RSRConstSep); count%2 != 0 { // check if we have matching `
 		return nil, fmt.Errorf("Unclosed unspilit syntax")
 	} else if count != 0 {
 		var splitedRule []string
-		for idx := strings.IndexByte(parsersRules, '`'); idx != -1; idx = strings.IndexByte(parsersRules, '`') {
+		for idx := strings.IndexByte(parsersRules, utils.RSRConstChar); idx != -1; idx = strings.IndexByte(parsersRules, utils.RSRConstChar) {
 			insideARulePrefix := !strings.HasSuffix(parsersRules[:idx], utils.INFIELD_SEP) // if doesn't have ; we need to concatenate it with last rule
 			if insideARulePrefix {
 				splitedRule = append(splitedRule, strings.Split(parsersRules[:idx], utils.INFIELD_SEP)...)
@@ -47,7 +47,7 @@ func NewRSRParsers(parsersRules string, rsrSeparator string) (prsrs RSRParsers, 
 				splitedRule = append(splitedRule, strings.Split(parsersRules[:idx-1], utils.INFIELD_SEP)...)
 			}
 			parsersRules = parsersRules[idx+1:]
-			idx = strings.IndexByte(parsersRules, '`')
+			idx = strings.IndexByte(parsersRules, utils.RSRConstChar)
 			if insideARulePrefix {
 				splitedRule[len(splitedRule)-1] += parsersRules[:idx]
 			} else {
@@ -60,7 +60,7 @@ func NewRSRParsers(parsersRules string, rsrSeparator string) (prsrs RSRParsers, 
 			}
 			insideARuleSufix := !strings.HasPrefix(parsersRules, utils.INFIELD_SEP) // if doesn't have ; we need to concatenate it with last rule
 			if insideARuleSufix {
-				idx = strings.IndexByte(parsersRules, ';')
+				idx = strings.IndexByte(parsersRules, utils.FALLBACK_SEP) // ';'
 				if idx == -1 {
 					idx = len(parsersRules)
 					splitedRule[len(splitedRule)-1] += parsersRules[:idx]
@@ -81,8 +81,8 @@ func NewRSRParsers(parsersRules string, rsrSeparator string) (prsrs RSRParsers, 
 		}
 		return NewRSRParsersFromSlice(splitedRule)
 	}
-	if dynIdxStart := strings.IndexByte(parsersRules, '<'); dynIdxStart != -1 {
-		if dynIdxEnd := strings.IndexByte(parsersRules[dynIdxStart:], '>'); dynIdxEnd != -1 {
+	if dynIdxStart := strings.IndexByte(parsersRules, utils.RSRDynStartChar); dynIdxStart != -1 {
+		if dynIdxEnd := strings.IndexByte(parsersRules[dynIdxStart:], utils.RSRDynEndChar); dynIdxEnd != -1 {
 			return NewDynRSRParser(parsersRules, rsrSeparator, dynIdxStart, dynIdxStart+dynIdxEnd)
 		}
 	}
@@ -137,7 +137,7 @@ func (prsrs RSRParsers) ParseValue(value interface{}) (out string, err error) {
 	for _, prsr := range prsrs {
 		var outPrsr string
 		if outPrsr, err = prsr.ParseValue(value); err != nil {
-			return "", err
+			return utils.EmptyString, err
 		}
 		out += outPrsr
 	}
@@ -148,7 +148,7 @@ func (prsrs RSRParsers) ParseDataProvider(dP utils.DataProvider) (out string, er
 	for _, prsr := range prsrs {
 		var outPrsr string
 		if outPrsr, err = prsr.ParseDataProvider(dP); err != nil {
-			return "", err
+			return utils.EmptyString, err
 		}
 		out += outPrsr
 	}
@@ -159,7 +159,7 @@ func (prsrs RSRParsers) ParseDataProviderWithInterfaces(dP utils.DataProvider) (
 	for _, prsr := range prsrs {
 		var outPrsr string
 		if outPrsr, err = prsr.ParseDataProviderWithInterfaces(dP); err != nil {
-			return "", err
+			return utils.EmptyString, err
 		}
 		out += outPrsr
 	}
@@ -206,8 +206,8 @@ func (prsr *RSRParser) AttrName() string {
 // Compile parses Rules string and repopulates other fields
 func (prsr *RSRParser) Compile() (err error) {
 	parserRules := prsr.Rules
-	if dynIdxStart := strings.IndexByte(parserRules, '<'); dynIdxStart != -1 {
-		if dynIdxEnd := strings.IndexByte(parserRules[dynIdxStart:], '>'); dynIdxEnd != -1 {
+	if dynIdxStart := strings.IndexByte(parserRules, utils.RSRDynStartChar); dynIdxStart != -1 {
+		if dynIdxEnd := strings.IndexByte(parserRules[dynIdxStart:], utils.RSRDynEndChar); dynIdxEnd != -1 {
 			var dynrules RSRParsers
 			if dynrules, err = NewRSRParsers(parserRules[dynIdxStart+1:dynIdxStart+dynIdxEnd],
 				CgrConfig().GeneralCfg().RSRSep); err != nil {
@@ -220,8 +220,8 @@ func (prsr *RSRParser) Compile() (err error) {
 		}
 	}
 
-	if idxConverters := strings.Index(parserRules, "{*"); idxConverters != -1 { // converters in the string
-		if !strings.HasSuffix(parserRules, "}") {
+	if idxConverters := strings.Index(parserRules, utils.RSRDataConverterPrefix); idxConverters != -1 { // converters in the string
+		if !strings.HasSuffix(parserRules, utils.RSRDataConverterSufix) {
 			return fmt.Errorf("invalid converter terminator in rule: <%s>",
 				parserRules)
 		}
@@ -368,8 +368,8 @@ func NewDynRSRParser(parsersRules string, sep string, idxStart, idxEnd int) (prs
 		return
 	}
 	lastRules := parsersRules[sepIdx+1:]
-	if dynIdxStart := strings.IndexByte(lastRules, '<'); dynIdxStart != -1 {
-		if dynIdxEnd := strings.IndexByte(lastRules[dynIdxStart:], '>'); dynIdxEnd != -1 {
+	if dynIdxStart := strings.IndexByte(lastRules, utils.RSRDynStartChar); dynIdxStart != -1 {
+		if dynIdxEnd := strings.IndexByte(lastRules[dynIdxStart:], utils.RSRDynEndChar); dynIdxEnd != -1 {
 			var lastrsr RSRParsers
 			if lastrsr, err = NewDynRSRParser(lastRules, sep,
 				dynIdxStart, dynIdxStart+dynIdxEnd); err != nil {
