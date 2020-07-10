@@ -672,8 +672,8 @@ func (dm *DataManager) GetFilter(tenant, id string, cacheRead, cacheWrite bool,
 					&utils.TenantIDWithArgDispatcher{
 						TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 						ArgDispatcher: &utils.ArgDispatcher{
-							APIKey:  utils.StringPointer(itm.APIKey),
-							RouteID: utils.StringPointer(itm.RouteID),
+							OptsAPIKey:  utils.StringPointer(itm.APIKey),
+							OptsRouteID: utils.StringPointer(itm.RouteID),
 						}}, &fltr); err == nil {
 					err = dm.dataDB.SetFilterDrv(fltr)
 				}
@@ -2366,8 +2366,8 @@ func (dm *DataManager) GetAttributeProfile(tenant, id string, cacheRead, cacheWr
 					&utils.TenantIDWithArgDispatcher{
 						TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 						ArgDispatcher: &utils.ArgDispatcher{
-							APIKey:  utils.StringPointer(itm.APIKey),
-							RouteID: utils.StringPointer(itm.RouteID),
+							OptsAPIKey:  utils.StringPointer(itm.APIKey),
+							OptsRouteID: utils.StringPointer(itm.RouteID),
 						}}, &attrPrfl); err == nil {
 					err = dm.dataDB.SetAttributeProfileDrv(attrPrfl)
 				}

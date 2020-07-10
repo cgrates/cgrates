@@ -348,7 +348,7 @@ func (cdrS *CDRServer) attrSProcessEvent(cgrEv *utils.CGREventWithOpts) (err err
 	var rplyEv AttrSProcessEventReply
 	attrArgs := &AttrArgsProcessEvent{
 		Context: utils.StringPointer(utils.FirstNonEmpty(
-			utils.IfaceAsString(cgrEv.Opts[utils.Context]),
+			utils.IfaceAsString(cgrEv.Opts[utils.OptsContext]),
 			utils.MetaCDRs)),
 		CGREvent:      cgrEv.CGREvent,
 		ArgDispatcher: cgrEv.ArgDispatcher,

@@ -308,7 +308,7 @@ func (cdre *CDRExporter) processCDR(cdr *CDR) (err error) {
 		cdrEv := cdr.AsCGREvent()
 		args := &AttrArgsProcessEvent{
 			Context: utils.StringPointer(utils.FirstNonEmpty(
-				utils.IfaceAsString(cdrEv.Event[utils.Context]),
+				utils.IfaceAsString(cdrEv.Event[utils.OptsContext]),
 				cdre.exportTemplate.AttributeSContext)),
 			CGREvent: cdrEv,
 		}
