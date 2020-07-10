@@ -16,7 +16,7 @@
 				{"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*constant", "value": "*prepaid"},
 				{"tag": "Category", "path": "*cgreq.Category", "type": "*constant", "value": "generic"},
 				{"tag": "Account", "path": "*cgreq.Account", "type": "*variable", "mandatory": true,
-					"value": "~*req.Subscription-Id.Subscription-Id-Data<~Subscription-Id-Type(0)>"},
+					"value": "~*req.Subscription-Id.Subscription-Id-Data[~Subscription-Id-Type(0)]"},
 				{"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*variable",
 					"value": "~*req.Event-Timestamp", "mandatory": true},
 				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*value_exponent", "mandatory": true,

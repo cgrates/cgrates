@@ -34,7 +34,7 @@
 				{
 					"tag": "Account", "path": "*cgreq.Account",
 					"type": "*variable", "mandatory": true, 
-					"value": "~*req.Subscription-Id.Subscription-Id-Data<~Subscription-Id-Type(1)>"
+					"value": "~*req.Subscription-Id.Subscription-Id-Data[~Subscription-Id-Type(1)]"
 				},
 				{
 					"tag": "Destination", "path": "*cgreq.Destination",
@@ -93,7 +93,7 @@
 				{
 					"tag": "Account", "path": "Account", 
 					"type": "*variable", "mandatory": true, 
-					"value": "~*req.Subscription-Id.Subscription-Id-Data<~Subscription-Id-Type(0)>"
+					"value": "~*req.Subscription-Id.Subscription-Id-Data[~Subscription-Id-Type(0)]"
 				},
 				{
 					"tag": "Usage", "path": "Usage",
@@ -101,7 +101,7 @@
 				},
 				{
 					"tag": "LastUsed", "path": "LastUsed", "type": "*sum", 
-					"value": "~*req.Multiple-Services-Credit-Control.Used-Service-Unit.CC-Input-Octets<~Rating-Group(1)>;~*req.Multiple-Services-Credit-Control.Used-Service-Unit.CC-Output-Octets<~Rating-Group(1)>"
+					"value": "~*req.Multiple-Services-Credit-Control.Used-Service-Unit.CC-Input-Octets[~Rating-Group(1)>;~*req.Multiple-Services-Credit-Control.Used-Service-Unit.CC-Output-Octets[~Rating-Group(1)]"
 				},
 			],
 			"reply_fields": [
@@ -119,7 +119,7 @@
 			"id": "data_update_grp2",
 			"filters": [
 				"*string:~*vars.*cmd:CCR", "*string:~*req.CC-Request-Type:2",
-				"*string:~*req.Multiple-Services-Credit-Control.Rating-Group<1>:2",
+				"*string:~*req.Multiple-Services-Credit-Control.Rating-Group[1]:2",
 				"*prefix:~*req.Service-Context-Id:gprs"
 			],
 			"flags": ["*update", "*accounts"],
@@ -148,7 +148,7 @@
 				{
 					"tag": "Account", "path": "Account", 
 					"type": "*variable", "mandatory": true, 
-					"value": "~*req.Subscription-Id.Subscription-Id-Data<~Subscription-Id-Type(0)>"
+					"value": "~*req.Subscription-Id.Subscription-Id-Data[~Subscription-Id-Type(0)]"
 				},
 				{
 					"tag": "Destination", "path": "Destination", 
@@ -170,7 +170,7 @@
 				},
 				{
 					"tag": "LastUsed", "path": "LastUsed", "type": "*sum", 
-					"value": "~*req.Multiple-Services-Credit-Control.Used-Service-Unit.CC-Input-Octets<~Rating-Group(2)>;~*req.Multiple-Services-Credit-Control.Used-Service-Unit.CC-Output-Octets<~Rating-Group(2)>"
+					"value": "~*req.Multiple-Services-Credit-Control.Used-Service-Unit.CC-Input-Octets[~Rating-Group(2)>;~*req.Multiple-Services-Credit-Control.Used-Service-Unit.CC-Output-Octets[~Rating-Group(2)]"
 				},
 			],
 			"reply_fields": [

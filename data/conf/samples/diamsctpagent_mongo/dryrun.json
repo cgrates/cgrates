@@ -20,9 +20,9 @@
 				{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*variable",
 					"value": "~*req.Event-Timestamp", "mandatory": true},
 				{"tag": "UsedUnits1", "path": "*cgreq.UsedUnits1", "type": "*variable", "mandatory": true,
-					"value": "~*req.Multiple-Services-Credit-Control.Used-Service-Unit.CC-Total-Octets<~Rating-Group(1)>"},
+					"value": "~*req.Multiple-Services-Credit-Control.Used-Service-Unit.CC-Total-Octets[~Rating-Group(1)]"},
 				{"tag": "UsedUnits2", "path": "*cgreq.UsedUnits2", "type": "*variable", "mandatory": true,
-					"value": "~*req.Multiple-Services-Credit-Control.Used-Service-Unit.CC-Total-Octets<~Rating-Group(2)>"},
+					"value": "~*req.Multiple-Services-Credit-Control.Used-Service-Unit.CC-Total-Octets[~Rating-Group(2)]"},
 				
 			],
 			"reply_fields":[
@@ -54,9 +54,9 @@
 				{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*variable",
 					"value": "~*req.Event-Timestamp", "mandatory": true},
 				{"tag": "UsedUnits1", "path": "*cgreq.UsedUnits1", "type": "*variable", "mandatory": true,
-					"value": "~*req.Multiple-Services-Credit-Control.Used-Service-Unit.CC-Total-Octets<~Rating-Group(1)>"},
+					"value": "~*req.Multiple-Services-Credit-Control.Used-Service-Unit.CC-Total-Octets[~Rating-Group(1)]"},
 				{"tag": "UsedUnits2", "path": "*cgreq.UsedUnits2", "type": "*variable", "mandatory": true,
-					"value": "~*req.Multiple-Services-Credit-Control.Used-Service-Unit.CC-Total-Octets<~Rating-Group(2)>"},
+					"value": "~*req.Multiple-Services-Credit-Control.Used-Service-Unit.CC-Total-Octets[~Rating-Group(2)]"},
 				
 			],
 			"reply_fields":[

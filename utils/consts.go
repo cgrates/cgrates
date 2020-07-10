@@ -642,6 +642,12 @@ const (
 	AttrValueSep             = "="
 	ANDSep                   = "&"
 	PipeSep                  = "|"
+	RSRConstSep              = "`"
+	RSRConstChar             = '`'
+	RSRDataConverterPrefix   = "{*"
+	RSRDataConverterSufix    = "}"
+	RSRDynStartChar          = '<'
+	RSRDynEndChar            = '>'
 	MetaApp                  = "*app"
 	MetaAppID                = "*appid"
 	MetaCmd                  = "*cmd"

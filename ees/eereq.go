@@ -44,7 +44,6 @@ func NewEventExporterRequest(req utils.DataProvider, dc utils.MapStorage,
 		trl:     utils.NewOrderedNavigableMap(),
 		dc:      dc,
 	}
-	eeR.dynamicProvider = utils.NewDynamicDataProvider(eeR)
 	return
 }
 
@@ -60,8 +59,7 @@ type EventExporterRequest struct {
 	trl  *utils.OrderedNavigableMap // Used in reply to access the request that was send
 	dc   utils.MapStorage
 
-	filterS         *engine.FilterS
-	dynamicProvider *utils.DynamicDataProvider
+	filterS *engine.FilterS
 }
 
 // String implements utils.DataProvider
@@ -127,7 +125,7 @@ func (eeR *EventExporterRequest) FieldAsString(fldPath []string) (val string, er
 func (eeR *EventExporterRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 	for _, tplFld := range tplFlds {
 		if pass, err := eeR.filterS.Pass(eeR.tnt,
-			tplFld.Filters, eeR.dynamicProvider); err != nil {
+			tplFld.Filters, eeR); err != nil {
 			return err
 		} else if !pass {
 			continue
@@ -147,7 +145,7 @@ func (eeR *EventExporterRequest) SetFields(tplFlds []*config.FCTemplate) (err er
 		}
 		var fullPath *utils.FullPath
 		var itmPath []string
-		if fullPath, err = eeR.dynamicProvider.GetFullFieldPath(tplFld.Path); err != nil {
+		if fullPath, err = utils.GetFullFieldPath(tplFld.Path, eeR); err != nil {
 			return
 		} else if fullPath == nil { // no dynamic path
 			fullPath = &utils.FullPath{
@@ -222,18 +220,18 @@ func (eeR *EventExporterRequest) ParseField(
 		out = eeR.RemoteHost().String()
 		isString = true
 	case utils.MetaVariable, utils.META_COMPOSED, utils.MetaGroup:
-		out, err = cfgFld.Value.ParseDataProvider(eeR.dynamicProvider)
+		out, err = cfgFld.Value.ParseDataProvider(eeR)
 		isString = true
 	case utils.META_USAGE_DIFFERENCE:
 		if len(cfgFld.Value) != 2 {
 			return nil, fmt.Errorf("invalid arguments <%s> to %s",
 				utils.ToJSON(cfgFld.Value), utils.META_USAGE_DIFFERENCE)
 		}
-		strVal1, err := cfgFld.Value[0].ParseDataProvider(eeR.dynamicProvider)
+		strVal1, err := cfgFld.Value[0].ParseDataProvider(eeR)
 		if err != nil {
 			return "", err
 		}
-		strVal2, err := cfgFld.Value[1].ParseDataProvider(eeR.dynamicProvider)
+		strVal2, err := cfgFld.Value[1].ParseDataProvider(eeR)
 		if err != nil {
 			return "", err
 		}
@@ -252,7 +250,7 @@ func (eeR *EventExporterRequest) ParseField(
 			return nil, fmt.Errorf("invalid arguments <%s> to %s",
 				utils.ToJSON(cfgFld.Value), utils.MetaCCUsage)
 		}
-		strVal1, err := cfgFld.Value[0].ParseDataProvider(eeR.dynamicProvider) // ReqNr
+		strVal1, err := cfgFld.Value[0].ParseDataProvider(eeR) // ReqNr
 		if err != nil {
 			return "", err
 		}
@@ -261,7 +259,7 @@ func (eeR *EventExporterRequest) ParseField(
 			return "", fmt.Errorf("invalid requestNumber <%s> to %s",
 				strVal1, utils.MetaCCUsage)
 		}
-		strVal2, err := cfgFld.Value[1].ParseDataProvider(eeR.dynamicProvider) // TotalUsage
+		strVal2, err := cfgFld.Value[1].ParseDataProvider(eeR) // TotalUsage
 		if err != nil {
 			return "", err
 		}
@@ -270,7 +268,7 @@ func (eeR *EventExporterRequest) ParseField(
 			return "", fmt.Errorf("invalid usedCCTime <%s> to %s",
 				strVal2, utils.MetaCCUsage)
 		}
-		strVal3, err := cfgFld.Value[2].ParseDataProvider(eeR.dynamicProvider) // DebitInterval
+		strVal3, err := cfgFld.Value[2].ParseDataProvider(eeR) // DebitInterval
 		if err != nil {
 			return "", err
 		}
@@ -287,7 +285,7 @@ func (eeR *EventExporterRequest) ParseField(
 	case utils.MetaSum:
 		iFaceVals := make([]interface{}, len(cfgFld.Value))
 		for i, val := range cfgFld.Value {
-			strVal, err := val.ParseDataProvider(eeR.dynamicProvider)
+			strVal, err := val.ParseDataProvider(eeR)
 			if err != nil {
 				return "", err
 			}
@@ -297,7 +295,7 @@ func (eeR *EventExporterRequest) ParseField(
 	case utils.MetaDifference:
 		iFaceVals := make([]interface{}, len(cfgFld.Value))
 		for i, val := range cfgFld.Value {
-			strVal, err := val.ParseDataProvider(eeR.dynamicProvider)
+			strVal, err := val.ParseDataProvider(eeR)
 			if err != nil {
 				return "", err
 			}
@@ -307,7 +305,7 @@ func (eeR *EventExporterRequest) ParseField(
 	case utils.MetaMultiply:
 		iFaceVals := make([]interface{}, len(cfgFld.Value))
 		for i, val := range cfgFld.Value {
-			strVal, err := val.ParseDataProvider(eeR.dynamicProvider)
+			strVal, err := val.ParseDataProvider(eeR)
 			if err != nil {
 				return "", err
 			}
@@ -317,7 +315,7 @@ func (eeR *EventExporterRequest) ParseField(
 	case utils.MetaDivide:
 		iFaceVals := make([]interface{}, len(cfgFld.Value))
 		for i, val := range cfgFld.Value {
-			strVal, err := val.ParseDataProvider(eeR.dynamicProvider)
+			strVal, err := val.ParseDataProvider(eeR)
 			if err != nil {
 				return "", err
 			}
@@ -329,7 +327,7 @@ func (eeR *EventExporterRequest) ParseField(
 			return nil, fmt.Errorf("invalid arguments <%s> to %s",
 				utils.ToJSON(cfgFld.Value), utils.MetaValueExponent)
 		}
-		strVal1, err := cfgFld.Value[0].ParseDataProvider(eeR.dynamicProvider) // String Value
+		strVal1, err := cfgFld.Value[0].ParseDataProvider(eeR) // String Value
 		if err != nil {
 			return "", err
 		}
@@ -338,7 +336,7 @@ func (eeR *EventExporterRequest) ParseField(
 			return "", fmt.Errorf("invalid value <%s> to %s",
 				strVal1, utils.MetaValueExponent)
 		}
-		strVal2, err := cfgFld.Value[1].ParseDataProvider(eeR.dynamicProvider) // String Exponent
+		strVal2, err := cfgFld.Value[1].ParseDataProvider(eeR) // String Exponent
 		if err != nil {
 			return "", err
 		}
@@ -349,7 +347,7 @@ func (eeR *EventExporterRequest) ParseField(
 		out = strconv.FormatFloat(utils.Round(val*math.Pow10(exp),
 			config.CgrConfig().GeneralCfg().RoundingDecimals, utils.ROUNDING_MIDDLE), 'f', -1, 64)
 	case utils.MetaUnixTimestamp:
-		val, err := cfgFld.Value.ParseDataProvider(eeR.dynamicProvider)
+		val, err := cfgFld.Value.ParseDataProvider(eeR)
 		if err != nil {
 			return nil, err
 		}
