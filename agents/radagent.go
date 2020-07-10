@@ -308,9 +308,8 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 			CGREvent:      cgrEv,
 			ArgDispatcher: cgrArgs.ArgDispatcher,
 		}
-		needMaxUsage := reqProcessor.Flags.HasKey(utils.MetaAuth) ||
-			reqProcessor.Flags.HasKey(utils.MetaInit) ||
-			reqProcessor.Flags.HasKey(utils.MetaUpdate)
+		needMaxUsage := utils.IsSliceMember([]string{utils.MetaAuthorize, utils.MetaInitiate, utils.MetaUpdate},
+			reqProcessor.Flags.ParamsSlice(utils.MetaRALs)[0])
 		rply := new(sessions.V1ProcessEventReply)
 		err = ra.connMgr.Call(ra.cgrCfg.RadiusAgentCfg().SessionSConns, nil, utils.SessionSv1ProcessEvent,
 			evArgs, rply)
