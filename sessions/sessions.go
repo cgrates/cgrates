@@ -2932,13 +2932,13 @@ type V1ProcessEventArgs struct {
 
 // V1ProcessEventReply is the reply for the ProcessEvent API
 type V1ProcessEventReply struct {
-	MaxUsage        time.Duration
-	ResourceMessage *string
-	Attributes      *engine.AttrSProcessEventReply
-	Suppliers       *engine.SortedSuppliers
-	ThresholdIDs    *[]string
-	StatQueueIDs    *[]string
-	getMaxUsage     bool
+	MaxUsage           time.Duration
+	ResourceAllocation *string
+	Attributes         *engine.AttrSProcessEventReply
+	Suppliers          *engine.SortedSuppliers
+	ThresholdIDs       *[]string
+	StatQueueIDs       *[]string
+	getMaxUsage        bool
 }
 
 // SetMaxUsageNeeded used by agent that use the reply as NavigableMapper
@@ -2956,8 +2956,8 @@ func (v1Rply *V1ProcessEventReply) AsNavigableMap() utils.NavigableMap2 {
 		if v1Rply.getMaxUsage {
 			cgrReply[utils.CapMaxUsage] = utils.NewNMData(v1Rply.MaxUsage)
 		}
-		if v1Rply.ResourceMessage != nil {
-			cgrReply[utils.CapResourceMessage] = utils.NewNMData(*v1Rply.ResourceMessage)
+		if v1Rply.ResourceAllocation != nil {
+			cgrReply[utils.CapResourceAllocation] = utils.NewNMData(*v1Rply.ResourceAllocation)
 		}
 		if v1Rply.Attributes != nil {
 			attrs := make(utils.NavigableMap2)
@@ -3071,21 +3071,21 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 					attrRU, &resMessage); err != nil {
 					return utils.NewErrResourceS(err)
 				}
-				rply.ResourceMessage = &resMessage
+				rply.ResourceAllocation = &resMessage
 			}
 			if resourceFlagsWithParams.HasKey(utils.MetaAllocate) {
 				if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().ResSConns, nil, utils.ResourceSv1AllocateResources,
 					attrRU, &resMessage); err != nil {
 					return utils.NewErrResourceS(err)
 				}
-				rply.ResourceMessage = &resMessage
+				rply.ResourceAllocation = &resMessage
 			}
 			if resourceFlagsWithParams.HasKey(utils.MetaRelease) {
 				if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().ResSConns, nil, utils.ResourceSv1ReleaseResources,
 					attrRU, &resMessage); err != nil {
 					return utils.NewErrResourceS(err)
 				}
-				rply.ResourceMessage = &resMessage
+				rply.ResourceAllocation = &resMessage
 			}
 		}
 	}

@@ -244,9 +244,8 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 			ArgDispatcher: cgrArgs.ArgDispatcher,
 			Paginator:     *cgrArgs.SupplierPaginator,
 		}
-		needMaxUsage := reqProcessor.Flags.HasKey(utils.MetaAuth) ||
-			reqProcessor.Flags.HasKey(utils.MetaInit) ||
-			reqProcessor.Flags.HasKey(utils.MetaUpdate)
+		needMaxUsage := utils.IsSliceMember([]string{utils.MetaAuthorize, utils.MetaInitiate, utils.MetaUpdate},
+			reqProcessor.Flags.ParamsSlice(utils.MetaRALs)[0])
 		rply := new(sessions.V1ProcessEventReply)
 		err = ha.connMgr.Call(ha.sessionConns, nil, utils.SessionSv1ProcessEvent,
 			evArgs, rply)
