@@ -595,7 +595,7 @@ func (rpS *RouteService) V1GetRoutes(args *ArgsGetRoutes, reply *SortedRoutes) (
 	if len(rpS.cgrcfg.RouteSCfg().AttributeSConns) != 0 {
 		attrArgs := &AttrArgsProcessEvent{
 			Context: utils.StringPointer(utils.FirstNonEmpty(
-				utils.IfaceAsString(args.CGREvent.Event[utils.Context]),
+				utils.IfaceAsString(args.CGREvent.Event[utils.OptsContext]),
 				utils.MetaRoutes)),
 			CGREvent:      args.CGREvent,
 			ArgDispatcher: args.ArgDispatcher,

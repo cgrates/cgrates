@@ -2208,12 +2208,11 @@ var (
 var CGROptionsSet = NewStringSet([]string{OptsStirATest, OptsStirPayloadMaxDuration,
 	OptsStirIdentity, OptsStirOriginatorTn, OptsStirOriginatorURI, OptsStirDestinationTn,
 	OptsStirDestinationURI, OptsStirPublicKeyPath, OptsStirPrivateKeyPath,
-	OptsDebitInterval, Context, OptsSessionTTL, OptsSessionTTLMaxDelay,
+	OptsDebitInterval, OptsContext, OptsSessionTTL, OptsSessionTTLMaxDelay,
 	OptsSessionTTLLastUsed, OptsSessionTTLLastUsage, OptsSessionTTLUsage, OptsAPIKey, OptsRouteID})
 
 // SessionS ProccessEvent posible options
 const (
-	Context = "Context"
 
 	// SupplierS
 	RoutesLimit  = "RoutesLimit"
@@ -2259,6 +2258,8 @@ const (
 	// DispatcherS
 	OptsAPIKey  = "*dispatcherApiKey"
 	OptsRouteID = "*dispatcherRouteID"
+	// Others
+	OptsContext = "*context"
 )
 
 func buildCacheInstRevPrefixes() {

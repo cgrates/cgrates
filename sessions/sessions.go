@@ -3754,7 +3754,7 @@ func (sS *SessionS) processAttributes(cgrEv *utils.CGREvent, argDisp *utils.ArgD
 	}
 	attrArgs := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer(utils.FirstNonEmpty(
-			opts.GetStringIgnoreErrors(utils.Context),
+			opts.GetStringIgnoreErrors(utils.OptsContext),
 			utils.MetaSessionS)),
 		CGREvent:      cgrEv,
 		ArgDispatcher: argDisp,

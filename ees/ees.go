@@ -159,7 +159,7 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithOpts, rply *s
 				eeCfg.AttributeSIDs,
 				utils.FirstNonEmpty(
 					eeCfg.AttributeSCtx,
-					utils.IfaceAsString(cgrEv.Opts[utils.Context]),
+					utils.IfaceAsString(cgrEv.Opts[utils.OptsContext]),
 					utils.MetaEEs)); err != nil {
 				return
 			}
