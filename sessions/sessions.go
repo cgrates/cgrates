@@ -3024,14 +3024,14 @@ type V1ProcessEventArgs struct {
 
 // V1ProcessEventReply is the reply for the ProcessEvent API
 type V1ProcessEventReply struct {
-	MaxUsage        map[string]time.Duration
-	Cost            *float64 // Cost is the cost received from Rater, ignoring accounting part
-	ResourceMessage map[string]string
-	Attributes      *engine.AttrSProcessEventReply
-	Routes          *engine.SortedRoutes
-	ThresholdIDs    *[]string
-	StatQueueIDs    *[]string
-	STIRIdentity    map[string]string
+	MaxUsage           map[string]time.Duration
+	Cost               *float64 // Cost is the cost received from Rater, ignoring accounting part
+	ResourceAllocation map[string]string
+	Attributes         *engine.AttrSProcessEventReply
+	Routes             *engine.SortedRoutes
+	ThresholdIDs       *[]string
+	StatQueueIDs       *[]string
+	STIRIdentity       map[string]string
 }
 
 // AsNavigableMap is part of engine.NavigableMapper interface
@@ -3045,12 +3045,12 @@ func (v1Rply *V1ProcessEventReply) AsNavigableMap() utils.NavigableMap2 {
 			}
 			cgrReply[utils.CapMaxUsage] = usage
 		}
-		if v1Rply.ResourceMessage != nil {
+		if v1Rply.ResourceAllocation != nil {
 			res := make(utils.NavigableMap2)
-			for k, v := range v1Rply.ResourceMessage {
+			for k, v := range v1Rply.ResourceAllocation {
 				res[k] = utils.NewNMData(v)
 			}
-			cgrReply[utils.CapResourceMessage] = res
+			cgrReply[utils.CapResourceAllocation] = res
 		}
 		if v1Rply.Attributes != nil {
 			attrs := make(utils.NavigableMap2)
@@ -3286,7 +3286,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 		}); err != nil {
 			return
 		}
-		rply.ResourceMessage = make(map[string]string)
+		rply.ResourceAllocation = make(map[string]string)
 		for _, chrs := range chrgrs {
 			runID := chrs.ChargerSProfile
 
@@ -3309,19 +3309,19 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 						attrRU, &resMessage); err != nil {
 						return utils.NewErrResourceS(err)
 					}
-					rply.ResourceMessage[runID] = resMessage
+					rply.ResourceAllocation[runID] = resMessage
 				} else if resourceFlagsWithParams.HasKey(utils.MetaAllocate) {
 					if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().ResSConns, nil, utils.ResourceSv1AllocateResources,
 						attrRU, &resMessage); err != nil {
 						return utils.NewErrResourceS(err)
 					}
-					rply.ResourceMessage[runID] = resMessage
+					rply.ResourceAllocation[runID] = resMessage
 				} else if resourceFlagsWithParams.HasKey(utils.MetaRelease) {
 					if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().ResSConns, nil, utils.ResourceSv1ReleaseResources,
 						attrRU, &resMessage); err != nil {
 						return utils.NewErrResourceS(err)
 					}
-					rply.ResourceMessage[runID] = resMessage
+					rply.ResourceAllocation[runID] = resMessage
 				}
 			}
 		}

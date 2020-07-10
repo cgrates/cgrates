@@ -182,8 +182,8 @@ func testSSv1ItProcessEventAuth(t *testing.T) {
 	if rply.MaxUsage == nil || rply.MaxUsage["CustomerCharges"] != authUsage {
 		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
 	}
-	if rply.ResourceMessage == nil || rply.ResourceMessage["CustomerCharges"] == utils.EmptyString {
-		t.Errorf("Unexpected ResourceMessage: %s", rply.ResourceMessage)
+	if rply.ResourceAllocation == nil || rply.ResourceAllocation["CustomerCharges"] == utils.EmptyString {
+		t.Errorf("Unexpected ResourceAllocation: %s", rply.ResourceAllocation)
 	}
 	eSplrs := &engine.SortedRoutes{
 		ProfileID: "SPL_ACNT_1001",
@@ -266,8 +266,8 @@ func testSSv1ItProcessEventInitiateSession(t *testing.T) {
 	if rply.MaxUsage == nil || rply.MaxUsage["CustomerCharges"] != initUsage {
 		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
 	}
-	if rply.ResourceMessage == nil || rply.ResourceMessage["CustomerCharges"] != "RES_ACNT_1001" {
-		t.Errorf("Unexpected ResourceMessage: %s", rply.ResourceMessage)
+	if rply.ResourceAllocation == nil || rply.ResourceAllocation["CustomerCharges"] != "RES_ACNT_1001" {
+		t.Errorf("Unexpected ResourceAllocation: %s", rply.ResourceAllocation)
 	}
 	eAttrs := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_ACNT_1001"},
