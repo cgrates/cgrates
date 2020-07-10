@@ -919,7 +919,6 @@ const (
 	MetaDurationSeconds     = "*duration_seconds"
 	MetaDurationNanoseconds = "*duration_nanoseconds"
 	CapAttributes           = "Attributes"
-	CapResourceMessage      = "ResourceMessage"
 	CapResourceAllocation   = "ResourceAllocation"
 	CapMaxUsage             = "MaxUsage"
 	CapRoutes               = "Routes"

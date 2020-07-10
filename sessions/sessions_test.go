@@ -1341,8 +1341,8 @@ func TestV1ProcessEventReplyAsNavigableMap(t *testing.T) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
 	//resource message check
-	v1per.ResourceMessage = map[string]string{utils.MetaDefault: "Resource"}
-	expected[utils.CapResourceMessage] = utils.NavigableMap2{utils.MetaDefault: utils.NewNMData("Resource")}
+	v1per.ResourceAllocation = map[string]string{utils.MetaDefault: "Resource"}
+	expected[utils.CapResourceAllocation] = utils.NavigableMap2{utils.MetaDefault: utils.NewNMData("Resource")}
 	if rply := v1per.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}

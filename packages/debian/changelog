@@ -77,6 +77,7 @@ cgrates (0.11.0~dev) UNRELEASED; urgency=medium
   * [RSRParsers] Removed attribute sistem from RSRParser  
   * [RSRParsers] Added grave accent(`) char as a delimiter to not split tge RSR value
   * [RSRParsers] Moved RSRFilter from RSRParsers to the *rsr FilterS
+  * [SessionS] Rename from ResourceMessage to ResourceAllocation
 
  -- DanB <danb@cgrates.org>  Wed, 19 Feb 2020 13:25:52 +0200
 
