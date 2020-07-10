@@ -175,8 +175,8 @@ func testSSv1ItProcessEventAuth(t *testing.T) {
 	if rply.MaxUsage != authUsage {
 		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
 	}
-	if *rply.ResourceMessage == utils.EmptyString {
-		t.Errorf("Unexpected ResourceMessage: %s", *rply.ResourceMessage)
+	if *rply.ResourceAllocation == utils.EmptyString {
+		t.Errorf("Unexpected ResourceAllocation: %s", *rply.ResourceAllocation)
 	}
 	eSplrs := &engine.SortedSuppliers{
 		ProfileID: "SPL_ACNT_1001",
@@ -259,8 +259,8 @@ func testSSv1ItProcessEventInitiateSession(t *testing.T) {
 	if rply.MaxUsage != initUsage {
 		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
 	}
-	if *rply.ResourceMessage != "RES_ACNT_1001" {
-		t.Errorf("Unexpected ResourceMessage: %s", *rply.ResourceMessage)
+	if *rply.ResourceAllocation != "RES_ACNT_1001" {
+		t.Errorf("Unexpected ResourceAllocation: %s", *rply.ResourceAllocation)
 	}
 	eAttrs := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_ACNT_1001"},
