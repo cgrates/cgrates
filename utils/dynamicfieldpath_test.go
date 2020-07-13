@@ -41,25 +41,25 @@ func TestDynamicDataProviderProccesFieldPath(t *testing.T) {
 			"BestRoute": 0,
 		},
 	}
-	newpath, err := processFieldPath("~*cgrep.Stir[CHRG_|~*cgrep.Routes.SortedRoutes[1].ID|_END].Something[CHRG_|~*cgrep.Routes.SortedRoutes[~*cgrep.BestRoute].ID|_END]", dp)
+	newpath, err := processFieldPath("~*cgrep.Stir.<CHRG_;~*cgrep.Routes.SortedRoutes[1].ID;_END>", dp)
 	if err != nil {
 		t.Fatal(err)
 	}
-	expectedPath := "~*cgrep.Stir.CHRG_ROUTE2_END.Something.CHRG_ROUTE1_END"
+	expectedPath := "~*cgrep.Stir.CHRG_ROUTE2_END"
 	if newpath != expectedPath {
 		t.Errorf("Expected: %q,received %q", expectedPath, newpath)
 	}
-	_, err = processFieldPath("~*cgrep.Stir[CHRG_|~*cgrep.Routes.SortedRoutes[1].ID|_END].Something[CHRG_|~*cgrep.Routes.SortedRoutes[~*cgrep.BestRoute].ID|_END", dp)
+	_, err = processFieldPath("~*cgrep.Stir.<CHRG_;~*cgrep.Routes.SortedRoutes[1].ID;_END", dp)
 	if err != ErrWrongPath {
 		t.Errorf("Expected error %s received %v", ErrWrongPath, err)
 	}
 
-	_, err = processFieldPath("~*cgrep.Stir[CHRG_", dp)
+	_, err = processFieldPath("~*cgrep.Stir<CHRG_", dp)
 	if err != ErrWrongPath {
 		t.Errorf("Expected error %s received %v", ErrWrongPath, err)
 	}
 
-	_, err = processFieldPath("~*cgrep.Stir[CHRG_|~*cgrep.Routes.SortedRoutes[1].ID2|_END]", dp)
+	_, err = processFieldPath("~*cgrep.Stir<CHRG_;~*cgrep.Routes.SortedRoutes[1].ID2;_END>", dp)
 	if err != ErrNotFound {
 		t.Errorf("Expected error %s received %v", ErrNotFound, err)
 	}
@@ -92,25 +92,25 @@ func TestDynamicDataProviderGetFullFieldPath(t *testing.T) {
 			"BestRoute": 0,
 		},
 	}
-	newpath, err := GetFullFieldPath("~*cgrep.Stir[CHRG_|~*cgrep.Routes.SortedRoutes[1].ID|_END].Something[CHRG_|~*cgrep.Routes.SortedRoutes[~*cgrep.BestRoute].ID|_END]", dp)
+	newpath, err := GetFullFieldPath("~*cgrep.Stir.<CHRG_;~*cgrep.Routes.SortedRoutes[1].ID;_END>.Something", dp)
 	if err != nil {
 		t.Fatal(err)
 	}
-	expectedPath := "~*cgrep.Stir.CHRG_ROUTE2_END.Something.CHRG_ROUTE1_END"
+	expectedPath := "~*cgrep.Stir.CHRG_ROUTE2_END.Something"
 	if newpath.Path != expectedPath {
-		t.Errorf("Expected: %q,received %q", expectedPath, newpath)
+		t.Errorf("Expected: %q,received %q", expectedPath, newpath.Path)
 	}
-	_, err = GetFullFieldPath("~*cgrep.Stir[CHRG_|~*cgrep.Routes.SortedRoutes[1].ID|_END].Something[CHRG_|~*cgrep.Routes.SortedRoutes[~*cgrep.BestRoute].ID|_END", dp)
+	_, err = GetFullFieldPath("~*cgrep.Stir<CHRG_;~*cgrep.Routes.SortedRoutes[1].ID;_END.Something", dp)
 	if err != ErrWrongPath {
 		t.Errorf("Expected error %s received %v", ErrWrongPath, err)
 	}
 
-	_, err = GetFullFieldPath("~*cgrep.Stir[CHRG_", dp)
+	_, err = GetFullFieldPath("~*cgrep.Stir<CHRG_", dp)
 	if err != ErrWrongPath {
 		t.Errorf("Expected error %s received %v", ErrWrongPath, err)
 	}
 
-	_, err = GetFullFieldPath("~*cgrep.Stir[CHRG_|~*cgrep.Routes.SortedRoutes[1].ID2|_END]", dp)
+	_, err = GetFullFieldPath("~*cgrep.Stir<CHRG_;~*cgrep.Routes.SortedRoutes[1].ID2;_END>", dp)
 	if err != ErrNotFound {
 		t.Errorf("Expected error %s received %v", ErrNotFound, err)
 	}
@@ -130,11 +130,4 @@ func TestDynamicDataProviderGetFullFieldPath(t *testing.T) {
 		t.Errorf("Expected: %v,received %q", nil, newpath)
 	}
 
-	newpath, err = GetFullFieldPath("*cgrep.Stir[CHRG_|~*cgrep.Routes.SortedRoutes[~*cgrep.BestRoute].ID|_END]", dp)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if newpath == nil {
-		t.Errorf("Expected: %v,received %q", nil, newpath)
-	}
 }

@@ -2014,7 +2014,10 @@ func TestAgReqDynamicPath(t *testing.T) {
 	agReq.CGRRequest.Set(&utils.FullPath{Path: "BestRoute", PathItems: utils.PathItems{{Field: "BestRoute"}}}, utils.NewNMData("ROUTE1"))
 
 	agReq.CGRReply = &utils.NavigableMap2{}
-
+	val1, err := config.NewRSRParsersFromSlice([]string{"~*cgreq.Routes.<CGR_;~*cgreq.BestRoute>"})
+	if err != nil {
+		t.Error(err)
+	}
 	tplFlds := []*config.FCTemplate{
 		{Tag: "Tenant",
 			Path: utils.MetaCgrep + utils.NestingSep + utils.Tenant, Type: utils.META_COMPOSED,
@@ -2030,10 +2033,10 @@ func TestAgReqDynamicPath(t *testing.T) {
 			Value: config.NewRSRParsersMustCompile("30s", utils.INFIELD_SEP)},
 		{Tag: "Route",
 			Path: utils.MetaCgrep + utils.NestingSep + "Route",
-			Type: utils.MetaVariable, Value: config.NewRSRParsersMustCompile("~*cgreq.Routes[CGR_|~*cgreq.BestRoute]", utils.INFIELD_SEP),
+			Type: utils.MetaVariable, Value: val1,
 		},
 		{Tag: "Route2",
-			Path: utils.MetaCgrep + utils.NestingSep + "Route2[CGR_|~*cgreq.BestRoute]",
+			Path: utils.MetaCgrep + utils.NestingSep + "Route2.<CGR_;~*cgreq.BestRoute>",
 			Type: utils.MetaVariable, Value: config.NewRSRParsersMustCompile("~*cgreq.Routes[CGR_ROUTE2]", utils.INFIELD_SEP),
 		},
 	}

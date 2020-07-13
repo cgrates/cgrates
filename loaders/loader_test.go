@@ -412,6 +412,9 @@ func TestLoaderProcessFilters(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
 		},
 	}
+	if err := eFltr1.Compile(); err != nil {
+		t.Error(err)
+	}
 	// Compile Value for rsr fields
 	if err := eFltr1.Rules[2].CompileValues(); err != nil {
 		t.Error(err)
@@ -434,7 +437,9 @@ func TestLoaderProcessFilters(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
 		},
 	}
-
+	if err := eFltr2.Compile(); err != nil {
+		t.Error(err)
+	}
 	if len(ldr.bufLoaderData) != 0 {
 		t.Errorf("wrong buffer content: %+v", ldr.bufLoaderData)
 	}

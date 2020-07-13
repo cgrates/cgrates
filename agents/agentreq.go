@@ -216,7 +216,7 @@ func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 			}
 			var fullPath *utils.FullPath
 			var itmPath []string
-			if fullPath, err = ar.dynamicProvider.GetFullFieldPath(tplFld.Path); err != nil {
+			if fullPath, err = utils.GetFullFieldPath(tplFld.Path, ar); err != nil {
 				return
 			} else if fullPath == nil { // no dynamic path
 				fullPath = &utils.FullPath{
@@ -366,18 +366,18 @@ func (ar *AgentRequest) ParseField(
 		out = ar.RemoteHost().String()
 		isString = true
 	case utils.MetaVariable, utils.META_COMPOSED, utils.MetaGroup:
-		out, err = cfgFld.Value.ParseDataProvider(ar.dynamicProvider)
+		out, err = cfgFld.Value.ParseDataProvider(ar)
 		isString = true
 	case utils.META_USAGE_DIFFERENCE:
 		if len(cfgFld.Value) != 2 {
 			return nil, fmt.Errorf("invalid arguments <%s> to %s",
 				utils.ToJSON(cfgFld.Value), utils.META_USAGE_DIFFERENCE)
 		}
-		strVal1, err := cfgFld.Value[0].ParseDataProvider(ar.dynamicProvider)
+		strVal1, err := cfgFld.Value[0].ParseDataProvider(ar)
 		if err != nil {
 			return "", err
 		}
-		strVal2, err := cfgFld.Value[1].ParseDataProvider(ar.dynamicProvider)
+		strVal2, err := cfgFld.Value[1].ParseDataProvider(ar)
 		if err != nil {
 			return "", err
 		}
@@ -396,7 +396,7 @@ func (ar *AgentRequest) ParseField(
 			return nil, fmt.Errorf("invalid arguments <%s> to %s",
 				utils.ToJSON(cfgFld.Value), utils.MetaCCUsage)
 		}
-		strVal1, err := cfgFld.Value[0].ParseDataProvider(ar.dynamicProvider) // ReqNr
+		strVal1, err := cfgFld.Value[0].ParseDataProvider(ar) // ReqNr
 		if err != nil {
 			return "", err
 		}
@@ -405,7 +405,7 @@ func (ar *AgentRequest) ParseField(
 			return "", fmt.Errorf("invalid requestNumber <%s> to %s",
 				strVal1, utils.MetaCCUsage)
 		}
-		strVal2, err := cfgFld.Value[1].ParseDataProvider(ar.dynamicProvider) // TotalUsage
+		strVal2, err := cfgFld.Value[1].ParseDataProvider(ar) // TotalUsage
 		if err != nil {
 			return "", err
 		}
@@ -414,7 +414,7 @@ func (ar *AgentRequest) ParseField(
 			return "", fmt.Errorf("invalid usedCCTime <%s> to %s",
 				strVal2, utils.MetaCCUsage)
 		}
-		strVal3, err := cfgFld.Value[2].ParseDataProvider(ar.dynamicProvider) // DebitInterval
+		strVal3, err := cfgFld.Value[2].ParseDataProvider(ar) // DebitInterval
 		if err != nil {
 			return "", err
 		}
@@ -431,7 +431,7 @@ func (ar *AgentRequest) ParseField(
 	case utils.MetaSum:
 		iFaceVals := make([]interface{}, len(cfgFld.Value))
 		for i, val := range cfgFld.Value {
-			strVal, err := val.ParseDataProvider(ar.dynamicProvider)
+			strVal, err := val.ParseDataProvider(ar)
 			if err != nil {
 				return "", err
 			}
@@ -441,7 +441,7 @@ func (ar *AgentRequest) ParseField(
 	case utils.MetaDifference:
 		iFaceVals := make([]interface{}, len(cfgFld.Value))
 		for i, val := range cfgFld.Value {
-			strVal, err := val.ParseDataProvider(ar.dynamicProvider)
+			strVal, err := val.ParseDataProvider(ar)
 			if err != nil {
 				return "", err
 			}
@@ -451,7 +451,7 @@ func (ar *AgentRequest) ParseField(
 	case utils.MetaMultiply:
 		iFaceVals := make([]interface{}, len(cfgFld.Value))
 		for i, val := range cfgFld.Value {
-			strVal, err := val.ParseDataProvider(ar.dynamicProvider)
+			strVal, err := val.ParseDataProvider(ar)
 			if err != nil {
 				return "", err
 			}
@@ -461,7 +461,7 @@ func (ar *AgentRequest) ParseField(
 	case utils.MetaDivide:
 		iFaceVals := make([]interface{}, len(cfgFld.Value))
 		for i, val := range cfgFld.Value {
-			strVal, err := val.ParseDataProvider(ar.dynamicProvider)
+			strVal, err := val.ParseDataProvider(ar)
 			if err != nil {
 				return "", err
 			}
@@ -473,7 +473,7 @@ func (ar *AgentRequest) ParseField(
 			return nil, fmt.Errorf("invalid arguments <%s> to %s",
 				utils.ToJSON(cfgFld.Value), utils.MetaValueExponent)
 		}
-		strVal1, err := cfgFld.Value[0].ParseDataProvider(ar.dynamicProvider) // String Value
+		strVal1, err := cfgFld.Value[0].ParseDataProvider(ar) // String Value
 		if err != nil {
 			return "", err
 		}
@@ -482,7 +482,7 @@ func (ar *AgentRequest) ParseField(
 			return "", fmt.Errorf("invalid value <%s> to %s",
 				strVal1, utils.MetaValueExponent)
 		}
-		strVal2, err := cfgFld.Value[1].ParseDataProvider(ar.dynamicProvider) // String Exponent
+		strVal2, err := cfgFld.Value[1].ParseDataProvider(ar) // String Exponent
 		if err != nil {
 			return "", err
 		}
@@ -493,7 +493,7 @@ func (ar *AgentRequest) ParseField(
 		out = strconv.FormatFloat(utils.Round(val*math.Pow10(exp),
 			config.CgrConfig().GeneralCfg().RoundingDecimals, utils.ROUNDING_MIDDLE), 'f', -1, 64)
 	case utils.MetaUnixTimestamp:
-		val, err := cfgFld.Value.ParseDataProvider(ar.dynamicProvider)
+		val, err := cfgFld.Value.ParseDataProvider(ar)
 		if err != nil {
 			return nil, err
 		}
