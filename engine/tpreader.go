@@ -2613,6 +2613,15 @@ func (tpr *TpReader) addDefaultTimings() {
 		StartTime: startTime,
 		EndTime:   "",
 	}
+	tpr.timings[utils.MetaMonthEnd] = &utils.TPTiming{
+		ID:        utils.MetaMonthEnd,
+		Years:     utils.Years{},
+		Months:    utils.Months{},
+		MonthDays: utils.MonthDays{-1},
+		WeekDays:  utils.WeekDays{},
+		StartTime: startTime,
+		EndTime:   "",
+	}
 	tpr.timings[utils.MetaYearly] = &utils.TPTiming{
 		ID:        utils.MetaYearly,
 		Years:     utils.Years{},
