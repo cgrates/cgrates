@@ -25,7 +25,6 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/loaders"
-	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
@@ -34,7 +33,7 @@ import (
 func NewLoaderService(cfg *config.CGRConfig, dm *DataDBService,
 	filterSChan chan *engine.FilterS, server *utils.Server,
 	exitChan chan bool, internalLoaderSChan chan rpcclient.ClientConnector,
-	connMgr *engine.ConnManager) servmanager.Service {
+	connMgr *engine.ConnManager) *LoaderService {
 	return &LoaderService{
 		connChan:    internalLoaderSChan,
 		cfg:         cfg,
@@ -130,4 +129,8 @@ func (ldrs *LoaderService) ServiceName() string {
 // ShouldRun returns if the service should be running
 func (ldrs *LoaderService) ShouldRun() bool {
 	return ldrs.cfg.LoaderCfg().Enabled()
+}
+
+func (ldrs *LoaderService) GetLoaderS() *loaders.LoaderService {
+	return ldrs.ldrs
 }
