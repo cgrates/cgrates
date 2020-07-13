@@ -28,6 +28,7 @@ import (
 	"runtime"
 	"runtime/pprof"
 	"strconv"
+	"strings"
 	"syscall"
 	"time"
 
@@ -56,6 +57,7 @@ var (
 	syslogger         = cgrEngineFlags.String("logger", "", "logger <*syslog|*stdout>")
 	nodeID            = cgrEngineFlags.String("node_id", "", "The node ID of the engine")
 	logLevel          = cgrEngineFlags.Int("log_level", -1, "Log level (0-emergency to 7-debug)")
+	preload           = cgrEngineFlags.String("preload", "", "LoaderIDs used to load the data before the engine starts")
 
 	cfg *config.CGRConfig
 )
@@ -565,6 +567,19 @@ func main() {
 
 	initConfigSv1(internalConfigChan, server)
 
+	// verify if we need to do preload
+	if *preload != utils.EmptyString {
+		if !cfg.LoaderCfg().Enabled() {
+			fmt.Println("*preload flag required LoaderS to be enabled")
+			exitChan <- true
+			return
+		}
+		if err = ldrs.GetLoaderS().Preload(strings.Split(*preload, utils.FIELDS_SEP)); err != nil {
+			fmt.Println(err)
+			exitChan <- true
+			return
+		}
+	}
 	// Serve rpc connections
 	go startRpc(server, internalResponderChan, internalCDRServerChan,
 		internalResourceSChan, internalStatSChan,

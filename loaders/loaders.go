@@ -157,3 +157,26 @@ func (ldrS *LoaderService) Reload(dm *engine.DataManager, ldrsCfg []*config.Load
 	}
 	ldrS.Unlock()
 }
+
+func (ldrS *LoaderService) Preload(loaderIDs []string) (err error) {
+	ldrS.RLock()
+	defer ldrS.RUnlock()
+	for _, loaderID := range loaderIDs {
+		ldr, has := ldrS.ldrs[loaderID]
+		if !has {
+			return fmt.Errorf("UNKNOWN_LOADER: %s", loaderID)
+		}
+		if locked, err := ldr.isFolderLocked(); err != nil {
+			return utils.NewErrServerError(err)
+		} else if locked {
+			if err := ldr.unlockFolder(); err != nil {
+				return utils.NewErrServerError(err)
+			}
+			return errors.New("ANOTHER_LOADER_RUNNING")
+		}
+		if err := ldr.ProcessFolder(config.CgrConfig().GeneralCfg().DefaultCaching, utils.MetaStore); err != nil {
+			return utils.NewErrServerError(err)
+		}
+	}
+	return
+}
