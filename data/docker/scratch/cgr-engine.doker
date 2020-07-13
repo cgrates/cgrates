@@ -1,2 +1,3 @@
 FROM scratch
-ADD ./cgr-engine /
+ADD ./cgr-engine /usr/bin/
+ENTRYPOINT ["/usr/bin/cgr-engine", "-logger=*stdout"] 

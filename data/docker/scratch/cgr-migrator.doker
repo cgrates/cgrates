@@ -1,2 +1,4 @@
 FROM scratch
-ADD ./cgr-migrator /
+ADD ./cgr-migrator /usr/bin/
+ENTRYPOINT ["/usr/bin/cgr-migrator"]
+CMD ["-config_path=/etc/cgrates/"]
