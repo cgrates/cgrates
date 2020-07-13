@@ -786,6 +786,93 @@ func TestTPRatingPlanAsExportSlice(t *testing.T) {
 	}
 }
 
+func TestAPItoModelRatingPlan(t *testing.T) {
+	rp := &utils.TPRatingPlan{}
+	eOut := TpRatingPlans{TpRatingPlan{}}
+	if rcv := APItoModelRatingPlan(rp); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+	rp = &utils.TPRatingPlan{
+		TPid: "TEST_TPID",
+		ID:   "TEST_RPLAN",
+		RatingPlanBindings: []*utils.TPRatingPlanBinding{
+			{
+				DestinationRatesId: "TEST_DSTRATE1",
+				TimingId:           "TEST_TIMING1",
+				Weight:             10.0},
+			{
+				DestinationRatesId: "TEST_DSTRATE2",
+				TimingId:           "TEST_TIMING2",
+				Weight:             20.0},
+		}}
+
+	eOut = TpRatingPlans{
+		TpRatingPlan{
+			Tpid:         "TEST_TPID",
+			Tag:          "TEST_RPLAN",
+			DestratesTag: "TEST_DSTRATE1",
+			TimingTag:    "TEST_TIMING1",
+			Weight:       10.0,
+		},
+		TpRatingPlan{
+			Tpid:         "TEST_TPID",
+			Tag:          "TEST_RPLAN",
+			DestratesTag: "TEST_DSTRATE2",
+			TimingTag:    "TEST_TIMING2",
+			Weight:       20.0,
+		},
+	}
+	if rcv := APItoModelRatingPlan(rp); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+	rp = &utils.TPRatingPlan{
+		TPid: "TEST_TPID",
+		ID:   "TEST_RPLAN",
+	}
+	eOut = TpRatingPlans{
+		TpRatingPlan{
+			Tpid: "TEST_TPID",
+			Tag:  "TEST_RPLAN",
+		},
+	}
+	if rcv := APItoModelRatingPlan(rp); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+}
+
+func TestAPItoModelRatingPlans(t *testing.T) {
+	var rps []*utils.TPRatingPlan
+	if rcv := APItoModelRatingPlans(rps); rcv != nil {
+		t.Errorf("Expecting: nil, received: %+v", utils.ToJSON(rcv))
+	}
+	rps = []*utils.TPRatingPlan{
+		&utils.TPRatingPlan{
+			ID:   "ID",
+			TPid: "TPid",
+			RatingPlanBindings: []*utils.TPRatingPlanBinding{
+				&utils.TPRatingPlanBinding{
+					DestinationRatesId: "DestinationRatesId",
+					TimingId:           "TimingId",
+					Weight:             0.7,
+				},
+			},
+		},
+	}
+	eOut := TpRatingPlans{
+		TpRatingPlan{
+			Tag:          "ID",
+			Tpid:         "TPid",
+			DestratesTag: "DestinationRatesId",
+			TimingTag:    "TimingId",
+			Weight:       0.7,
+		},
+	}
+	if rcv := APItoModelRatingPlans(rps); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+
+}
+
 func TestTPRatingProfileAsExportSlice(t *testing.T) {
 	tpRpf := &utils.TPRatingProfile{
 		TPid:     "TEST_TPID",
