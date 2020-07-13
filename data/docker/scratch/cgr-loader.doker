@@ -1,2 +1,4 @@
 FROM scratch
-ADD ./cgr-loader /
+ADD ./cgr-loader /usr/bin/
+ENTRYPOINT ["/usr/bin/cgr-loader"]
+CMD ["-config_path=/etc/cgrates/"]
