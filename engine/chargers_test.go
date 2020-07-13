@@ -128,6 +128,9 @@ func TestChargerAddFilter(t *testing.T) {
 			},
 		},
 	}
+	if err := fltrCP1.Compile(); err != nil {
+		t.Error(err)
+	}
 	dmCharger.SetFilter(fltrCP1, true)
 	fltrCP2 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,

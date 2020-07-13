@@ -800,6 +800,9 @@ func (iDB *InternalDB) GetFilterDrv(tenant, id string) (fltr *Filter, err error)
 }
 
 func (iDB *InternalDB) SetFilterDrv(fltr *Filter) (err error) {
+	if err = fltr.Compile(); err != nil {
+		return
+	}
 	Cache.SetWithoutReplicate(utils.CacheFilters, fltr.TenantID(), fltr, nil,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return

@@ -36,6 +36,9 @@ func TestFilterPassString(t *testing.T) {
 	}
 	rf := &FilterRule{Type: utils.MetaString,
 		Element: "~Category", Values: []string{"call"}}
+	if err := rf.CompileValues(); err != nil {
+		t.Fatal(err)
+	}
 	if passes, err := rf.passString(cd); err != nil {
 		t.Error(err)
 	} else if !passes {
@@ -43,6 +46,9 @@ func TestFilterPassString(t *testing.T) {
 	}
 	rf = &FilterRule{Type: utils.MetaString,
 		Element: "~Category", Values: []string{"cal"}}
+	if err := rf.CompileValues(); err != nil {
+		t.Fatal(err)
+	}
 	if passes, err := rf.passString(cd); err != nil {
 		t.Error(err)
 	} else if passes {
@@ -51,6 +57,9 @@ func TestFilterPassString(t *testing.T) {
 	//not
 	rf = &FilterRule{Type: utils.MetaNotString,
 		Element: "~Category", Values: []string{"call"}}
+	if err := rf.CompileValues(); err != nil {
+		t.Fatal(err)
+	}
 	if passes, err := rf.Pass(cd); err != nil {
 		t.Error(err)
 	} else if passes {
@@ -58,6 +67,9 @@ func TestFilterPassString(t *testing.T) {
 	}
 	rf = &FilterRule{Type: utils.MetaNotString,
 		Element: "~Category", Values: []string{"cal"}}
+	if err := rf.CompileValues(); err != nil {
+		t.Fatal(err)
+	}
 	if passes, err := rf.Pass(cd); err != nil {
 		t.Error(err)
 	} else if !passes {
@@ -77,12 +89,18 @@ func TestFilterPassEmpty(t *testing.T) {
 		ExtraFields:   map[string]string{"navigation": "off"},
 	}
 	rf := &FilterRule{Type: utils.MetaEmpty, Element: "~Category", Values: []string{}}
+	if err := rf.CompileValues(); err != nil {
+		t.Fatal(err)
+	}
 	if passes, err := rf.passEmpty(cd); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("Not passes filter")
 	}
 	rf = &FilterRule{Type: utils.MetaEmpty, Element: "~ExtraFields", Values: []string{}}
+	if err := rf.CompileValues(); err != nil {
+		t.Fatal(err)
+	}
 	if passes, err := rf.passEmpty(cd); err != nil {
 		t.Error(err)
 	} else if passes {
@@ -90,6 +108,9 @@ func TestFilterPassEmpty(t *testing.T) {
 	}
 	cd.ExtraFields = map[string]string{}
 	rf = &FilterRule{Type: utils.MetaEmpty, Element: "~ExtraFields", Values: []string{}}
+	if err := rf.CompileValues(); err != nil {
+		t.Fatal(err)
+	}
 	if passes, err := rf.passEmpty(cd); err != nil {
 		t.Error(err)
 	} else if !passes {
@@ -97,6 +118,9 @@ func TestFilterPassEmpty(t *testing.T) {
 	}
 	//not
 	rf = &FilterRule{Type: utils.MetaNotEmpty, Element: "~Category", Values: []string{}}
+	if err := rf.CompileValues(); err != nil {
+		t.Fatal(err)
+	}
 	if passes, err := rf.Pass(cd); err != nil {
 		t.Error(err)
 	} else if passes {
@@ -116,12 +140,18 @@ func TestFilterPassExists(t *testing.T) {
 		ExtraFields:   map[string]string{"navigation": "off"},
 	}
 	rf := &FilterRule{Type: utils.MetaExists, Element: "~Category", Values: []string{}}
+	if err := rf.CompileValues(); err != nil {
+		t.Fatal(err)
+	}
 	if passes, err := rf.passExists(cd); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("Not passes filter")
 	}
 	rf = &FilterRule{Type: utils.MetaExists, Element: "~ExtraFields1", Values: []string{}}
+	if err := rf.CompileValues(); err != nil {
+		t.Fatal(err)
+	}
 	if passes, err := rf.passExists(cd); err != nil {
 		t.Error(err)
 	} else if passes {
@@ -129,6 +159,9 @@ func TestFilterPassExists(t *testing.T) {
 	}
 	cd.ExtraFields = map[string]string{}
 	rf = &FilterRule{Type: utils.MetaExists, Element: "~ExtraFields", Values: []string{}}
+	if err := rf.CompileValues(); err != nil {
+		t.Fatal(err)
+	}
 	if passes, err := rf.passExists(cd); err != nil {
 		t.Error(err)
 	} else if !passes {
@@ -136,6 +169,9 @@ func TestFilterPassExists(t *testing.T) {
 	}
 	//not
 	rf = &FilterRule{Type: utils.MetaNotExists, Element: "~Category1", Values: []string{}}
+	if err := rf.CompileValues(); err != nil {
+		t.Fatal(err)
+	}
 	if passes, err := rf.Pass(cd); err != nil {
 		t.Error(err)
 	} else if !passes {
@@ -155,36 +191,57 @@ func TestFilterPassStringPrefix(t *testing.T) {
 		ExtraFields:   map[string]string{"navigation": "off"},
 	}
 	rf := &FilterRule{Type: utils.MetaPrefix, Element: "~Category", Values: []string{"call"}}
+	if err := rf.CompileValues(); err != nil {
+		t.Fatal(err)
+	}
 	if passes, err := rf.passStringPrefix(cd); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("Not passes filter")
 	}
 	rf = &FilterRule{Type: utils.MetaPrefix, Element: "~Category", Values: []string{"premium"}}
+	if err := rf.CompileValues(); err != nil {
+		t.Fatal(err)
+	}
+	if err := rf.CompileValues(); err != nil {
+		t.Fatal(err)
+	}
 	if passes, err := rf.passStringPrefix(cd); err != nil {
 		t.Error(err)
 	} else if passes {
 		t.Error("Passes filter")
 	}
 	rf = &FilterRule{Type: utils.MetaPrefix, Element: "~Destination", Values: []string{"+49"}}
+	if err := rf.CompileValues(); err != nil {
+		t.Fatal(err)
+	}
 	if passes, err := rf.passStringPrefix(cd); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("Not passes filter")
 	}
 	rf = &FilterRule{Type: utils.MetaPrefix, Element: "~Destination", Values: []string{"+499"}}
+	if err := rf.CompileValues(); err != nil {
+		t.Fatal(err)
+	}
 	if passes, err := rf.passStringPrefix(cd); err != nil {
 		t.Error(err)
 	} else if passes {
 		t.Error("Passes filter")
 	}
 	rf = &FilterRule{Type: utils.MetaPrefix, Element: "~navigation", Values: []string{"off"}}
+	if err := rf.CompileValues(); err != nil {
+		t.Fatal(err)
+	}
 	if passes, err := rf.passStringPrefix(cd); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("Not passes filter")
 	}
 	rf = &FilterRule{Type: utils.MetaPrefix, Element: "~nonexisting", Values: []string{"off"}}
+	if err := rf.CompileValues(); err != nil {
+		t.Fatal(err)
+	}
 	if passing, err := rf.passStringPrefix(cd); err != nil {
 		t.Error(err)
 	} else if passing {
@@ -192,6 +249,9 @@ func TestFilterPassStringPrefix(t *testing.T) {
 	}
 	//not
 	rf = &FilterRule{Type: utils.MetaNotPrefix, Element: "~Category", Values: []string{"premium"}}
+	if err := rf.CompileValues(); err != nil {
+		t.Fatal(err)
+	}
 	if passes, err := rf.Pass(cd); err != nil {
 		t.Error(err)
 	} else if !passes {
@@ -211,36 +271,54 @@ func TestFilterPassStringSuffix(t *testing.T) {
 		ExtraFields:   map[string]string{"navigation": "off"},
 	}
 	rf := &FilterRule{Type: utils.MetaSuffix, Element: "~Category", Values: []string{"call"}}
+	if err := rf.CompileValues(); err != nil {
+		t.Fatal(err)
+	}
 	if passes, err := rf.passStringSuffix(cd); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("Not passes filter")
 	}
 	rf = &FilterRule{Type: utils.MetaSuffix, Element: "~Category", Values: []string{"premium"}}
+	if err := rf.CompileValues(); err != nil {
+		t.Fatal(err)
+	}
 	if passes, err := rf.passStringSuffix(cd); err != nil {
 		t.Error(err)
 	} else if passes {
 		t.Error("Passes filter")
 	}
 	rf = &FilterRule{Type: utils.MetaSuffix, Element: "~Destination", Values: []string{"963"}}
+	if err := rf.CompileValues(); err != nil {
+		t.Fatal(err)
+	}
 	if passes, err := rf.passStringSuffix(cd); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("Not passes filter")
 	}
 	rf = &FilterRule{Type: utils.MetaSuffix, Element: "~Destination", Values: []string{"4966"}}
+	if err := rf.CompileValues(); err != nil {
+		t.Fatal(err)
+	}
 	if passes, err := rf.passStringSuffix(cd); err != nil {
 		t.Error(err)
 	} else if passes {
 		t.Error("Passes filter")
 	}
 	rf = &FilterRule{Type: utils.MetaSuffix, Element: "~navigation", Values: []string{"off"}}
+	if err := rf.CompileValues(); err != nil {
+		t.Fatal(err)
+	}
 	if passes, err := rf.passStringSuffix(cd); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("Not passes filter")
 	}
 	rf = &FilterRule{Type: utils.MetaSuffix, Element: "~nonexisting", Values: []string{"off"}}
+	if err := rf.CompileValues(); err != nil {
+		t.Fatal(err)
+	}
 	if passing, err := rf.passStringSuffix(cd); err != nil {
 		t.Error(err)
 	} else if passing {
@@ -248,6 +326,9 @@ func TestFilterPassStringSuffix(t *testing.T) {
 	}
 	//not
 	rf = &FilterRule{Type: utils.MetaNotSuffix, Element: "~Destination", Values: []string{"963"}}
+	if err := rf.CompileValues(); err != nil {
+		t.Fatal(err)
+	}
 	if passes, err := rf.Pass(cd); err != nil {
 		t.Error(err)
 	} else if passes {
@@ -475,6 +556,9 @@ func TestFilterNewRequestFilter(t *testing.T) {
 		t.Errorf("Error: %+v", err)
 	}
 	erf := &FilterRule{Type: utils.MetaString, Element: "~MetaString", Values: []string{"String"}, negative: utils.BoolPointer(false)}
+	if err = erf.CompileValues(); err != nil {
+		t.Fatal(err)
+	}
 	if !reflect.DeepEqual(erf, rf) {
 		t.Errorf("Expecting: %+v, received: %+v", erf, rf)
 	}
@@ -483,6 +567,9 @@ func TestFilterNewRequestFilter(t *testing.T) {
 		t.Errorf("Error: %+v", err)
 	}
 	erf = &FilterRule{Type: utils.MetaEmpty, Element: "~MetaEmpty", Values: []string{}, negative: utils.BoolPointer(false)}
+	if err = erf.CompileValues(); err != nil {
+		t.Fatal(err)
+	}
 	if !reflect.DeepEqual(erf, rf) {
 		t.Errorf("Expecting: %+v, received: %+v", erf, rf)
 	}
@@ -491,6 +578,9 @@ func TestFilterNewRequestFilter(t *testing.T) {
 		t.Errorf("Error: %+v", err)
 	}
 	erf = &FilterRule{Type: utils.MetaExists, Element: "~MetaExists", Values: []string{}, negative: utils.BoolPointer(false)}
+	if err = erf.CompileValues(); err != nil {
+		t.Fatal(err)
+	}
 	if !reflect.DeepEqual(erf, rf) {
 		t.Errorf("Expecting: %+v, received: %+v", erf, rf)
 	}
@@ -499,6 +589,9 @@ func TestFilterNewRequestFilter(t *testing.T) {
 		t.Errorf("Error: %+v", err)
 	}
 	erf = &FilterRule{Type: utils.MetaPrefix, Element: "~MetaPrefix", Values: []string{"stringPrefix"}, negative: utils.BoolPointer(false)}
+	if err = erf.CompileValues(); err != nil {
+		t.Fatal(err)
+	}
 	if !reflect.DeepEqual(erf, rf) {
 		t.Errorf("Expecting: %+v, received: %+v", erf, rf)
 	}
@@ -507,22 +600,31 @@ func TestFilterNewRequestFilter(t *testing.T) {
 		t.Errorf("Error: %+v", err)
 	}
 	erf = &FilterRule{Type: utils.MetaSuffix, Element: "~MetaSuffix", Values: []string{"stringSuffix"}, negative: utils.BoolPointer(false)}
+	if err = erf.CompileValues(); err != nil {
+		t.Fatal(err)
+	}
 	if !reflect.DeepEqual(erf, rf) {
 		t.Errorf("Expecting: %+v, received: %+v", erf, rf)
 	}
-	rf, err = NewFilterRule(utils.MetaTimings, "~MetaTimings", []string{""})
+	// rf, err = NewFilterRule(utils.MetaTimings, "~MetaTimings", []string{""})
+	// if err != nil {
+	// 	t.Errorf("Error: %+v", err)
+	// }
+	// erf = &FilterRule{Type: utils.MetaTimings, Element: "~MetaTimings", Values: []string{""}, negative: utils.BoolPointer(false)}
+	// if err = erf.CompileValues(); err != nil {
+	// 	t.Fatal(err)
+	// }
+	// if !reflect.DeepEqual(erf, rf) {
+	// 	t.Errorf("Expecting: %+v, received: %+v", erf, rf)
+	// }
+	rf, err = NewFilterRule(utils.MetaDestinations, "~MetaDestinations", []string{"1001"})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	erf = &FilterRule{Type: utils.MetaTimings, Element: "~MetaTimings", Values: []string{""}, negative: utils.BoolPointer(false)}
-	if !reflect.DeepEqual(erf, rf) {
-		t.Errorf("Expecting: %+v, received: %+v", erf, rf)
+	erf = &FilterRule{Type: utils.MetaDestinations, Element: "~MetaDestinations", Values: []string{"1001"}, negative: utils.BoolPointer(false)}
+	if err = erf.CompileValues(); err != nil {
+		t.Fatal(err)
 	}
-	rf, err = NewFilterRule(utils.MetaDestinations, "~MetaDestinations", []string{""})
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
-	erf = &FilterRule{Type: utils.MetaDestinations, Element: "~MetaDestinations", Values: []string{""}, negative: utils.BoolPointer(false)}
 	if !reflect.DeepEqual(erf, rf) {
 		t.Errorf("Expecting: %+v, received: %+v", erf, rf)
 	}
@@ -531,6 +633,9 @@ func TestFilterNewRequestFilter(t *testing.T) {
 		t.Errorf("Error: %+v", err)
 	}
 	erf = &FilterRule{Type: utils.MetaLessThan, Element: "~MetaLessThan", Values: []string{"20"}, negative: utils.BoolPointer(false)}
+	if err = erf.CompileValues(); err != nil {
+		t.Fatal(err)
+	}
 	if !reflect.DeepEqual(erf, rf) {
 		t.Errorf("Expecting: %+v, received: %+v", erf, rf)
 	}
@@ -539,6 +644,9 @@ func TestFilterNewRequestFilter(t *testing.T) {
 		t.Errorf("Error: %+v", err)
 	}
 	erf = &FilterRule{Type: utils.MetaLessOrEqual, Element: "~MetaLessOrEqual", Values: []string{"20"}, negative: utils.BoolPointer(false)}
+	if err = erf.CompileValues(); err != nil {
+		t.Fatal(err)
+	}
 	if !reflect.DeepEqual(erf, rf) {
 		t.Errorf("Expecting: %+v, received: %+v", erf, rf)
 	}
@@ -547,6 +655,9 @@ func TestFilterNewRequestFilter(t *testing.T) {
 		t.Errorf("Error: %+v", err)
 	}
 	erf = &FilterRule{Type: utils.MetaGreaterThan, Element: "~MetaGreaterThan", Values: []string{"20"}, negative: utils.BoolPointer(false)}
+	if err = erf.CompileValues(); err != nil {
+		t.Fatal(err)
+	}
 	if !reflect.DeepEqual(erf, rf) {
 		t.Errorf("Expecting: %+v, received: %+v", erf, rf)
 	}
@@ -555,6 +666,9 @@ func TestFilterNewRequestFilter(t *testing.T) {
 		t.Errorf("Error: %+v", err)
 	}
 	erf = &FilterRule{Type: utils.MetaGreaterOrEqual, Element: "~MetaGreaterOrEqual", Values: []string{"20"}, negative: utils.BoolPointer(false)}
+	if err = erf.CompileValues(); err != nil {
+		t.Fatal(err)
+	}
 	if !reflect.DeepEqual(erf, rf) {
 		t.Errorf("Expecting: %+v, received: %+v", erf, rf)
 	}

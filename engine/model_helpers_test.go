@@ -1926,6 +1926,9 @@ func TestAPItoTPFilter(t *testing.T) {
 			},
 		},
 	}
+	if err := eTPs.Compile(); err != nil {
+		t.Fatal(err)
+	}
 	if st, err := APItoFilter(tps, "UTC"); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eTPs, st) {
