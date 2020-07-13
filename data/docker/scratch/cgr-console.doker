@@ -1,2 +1,3 @@
 FROM scratch
-ADD ./cgr-console /
+ADD ./cgr-console /usr/bin/
+ENTRYPOINT ["/usr/bin/cgr-console"]

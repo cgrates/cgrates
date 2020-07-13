@@ -1,2 +1,3 @@
 FROM scratch
-ADD ./cgr-tester /
+ADD ./cgr-tester /usr/bin/
+ENTRYPOINT ["/usr/bin/cgr-tester"]
