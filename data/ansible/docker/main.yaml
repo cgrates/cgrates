@@ -34,7 +34,7 @@
     # CGRateS vars
     cgrates_dir: "{{ golang_gopath }}/src/github.com/cgrates/cgrates"
     cgrates_branch: "v0.10"
-    cgrates_distribution: "nightly"
+    cgrates_distribution: "master"
     docker_tag: "latest"
 
     dependencies:
