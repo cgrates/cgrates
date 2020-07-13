@@ -769,6 +769,7 @@ const (
 	MetaPartial              = "*partial"
 	MetaBusy                 = "*busy"
 	MetaQueue                = "*queue"
+	MetaMonthEnd             = "*month_end"
 )
 
 // Migrator Action

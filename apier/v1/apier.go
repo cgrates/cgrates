@@ -809,6 +809,15 @@ func checkDefaultTiming(tStr string) (rTm *engine.RITiming, isDefault bool) {
 			StartTime: startTime,
 			EndTime:   "",
 		}, true
+	case utils.MetaMonthEnd:
+		return &engine.RITiming{
+			Years:     utils.Years{},
+			Months:    utils.Months{},
+			MonthDays: utils.MonthDays{-1},
+			WeekDays:  utils.WeekDays{},
+			StartTime: startTime,
+			EndTime:   "",
+		}, true
 	case utils.MetaYearly:
 		return &engine.RITiming{
 			Years:     utils.Years{},

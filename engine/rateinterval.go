@@ -118,6 +118,9 @@ func (rit *RITiming) CronString() string {
 			year += strconv.Itoa(int(md))
 		}
 	}
+	if monthday == "-1" { // in case we receive -1 we send to cron special character L ( Last )
+		monthday = "L"
+	}
 	rit.cronString = fmt.Sprintf("%s %s %s %s %s %s %s", sec, min, hour, monthday, month, weekday, year)
 	return rit.cronString
 }
