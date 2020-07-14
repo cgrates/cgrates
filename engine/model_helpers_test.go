@@ -911,6 +911,116 @@ func TestTPRatingProfileAsExportSlice(t *testing.T) {
 	}
 }
 
+func TestAPItoModelRatingProfile(t *testing.T) {
+	var rp *utils.TPRatingProfile
+	if rcv := APItoModelRatingProfile(rp); rcv != nil {
+		t.Errorf("Expecting: nil, received: %+v", rcv)
+	}
+	rp = &utils.TPRatingProfile{
+		TPid:     "TEST_TPID",
+		LoadId:   "TEST_LOADID",
+		Tenant:   "cgrates.org",
+		Category: "call",
+		Subject:  "*any",
+		RatingPlanActivations: []*utils.TPRatingActivation{
+			{
+				ActivationTime:   "2014-01-14T00:00:00Z",
+				RatingPlanId:     "TEST_RPLAN1",
+				FallbackSubjects: "subj1;subj2"},
+			{
+				ActivationTime:   "2014-01-15T00:00:00Z",
+				RatingPlanId:     "TEST_RPLAN2",
+				FallbackSubjects: "subj1;subj2"},
+		},
+	}
+	eOut := TpRatingProfiles{
+		TpRatingProfile{
+			Tpid:             "TEST_TPID",
+			Loadid:           "TEST_LOADID",
+			Tenant:           "cgrates.org",
+			Category:         "call",
+			Subject:          "*any",
+			RatingPlanTag:    "TEST_RPLAN1",
+			FallbackSubjects: "subj1;subj2",
+			ActivationTime:   "2014-01-14T00:00:00Z",
+		},
+		TpRatingProfile{
+			Tpid:             "TEST_TPID",
+			Loadid:           "TEST_LOADID",
+			Tenant:           "cgrates.org",
+			Category:         "call",
+			Subject:          "*any",
+			RatingPlanTag:    "TEST_RPLAN2",
+			FallbackSubjects: "subj1;subj2",
+			ActivationTime:   "2014-01-15T00:00:00Z",
+		},
+	}
+	if rcv := APItoModelRatingProfile(rp); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+	rp = &utils.TPRatingProfile{
+		TPid:     "TEST_TPID",
+		LoadId:   "TEST_LOADID",
+		Tenant:   "cgrates.org",
+		Category: "call",
+		Subject:  "*any",
+	}
+	eOut = TpRatingProfiles{
+		TpRatingProfile{
+			Tpid:     "TEST_TPID",
+			Loadid:   "TEST_LOADID",
+			Tenant:   "cgrates.org",
+			Category: "call",
+			Subject:  "*any",
+		},
+	}
+	if rcv := APItoModelRatingProfile(rp); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+}
+
+func TestAPItoModelRatingProfiles(t *testing.T) {
+	var rps []*utils.TPRatingProfile
+	if rcv := APItoModelRatingProfiles(rps); rcv != nil {
+		t.Errorf("Expecting: nil, received: %+v", rcv)
+	}
+	rps = []*utils.TPRatingProfile{
+		&utils.TPRatingProfile{
+			TPid:     "TEST_TPID",
+			LoadId:   "TEST_LOADID",
+			Tenant:   "cgrates.org",
+			Category: "call",
+			Subject:  "*any",
+		},
+		&utils.TPRatingProfile{
+			TPid:     "TEST_TPID2",
+			LoadId:   "TEST_LOADID2",
+			Tenant:   "cgrates.org",
+			Category: "call",
+			Subject:  "*any",
+		},
+	}
+	eOut := TpRatingProfiles{
+		TpRatingProfile{
+			Tpid:     "TEST_TPID",
+			Loadid:   "TEST_LOADID",
+			Tenant:   "cgrates.org",
+			Category: "call",
+			Subject:  "*any",
+		},
+		TpRatingProfile{
+			Tpid:     "TEST_TPID2",
+			Loadid:   "TEST_LOADID2",
+			Tenant:   "cgrates.org",
+			Category: "call",
+			Subject:  "*any",
+		},
+	}
+	if rcv := APItoModelRatingProfiles(rps); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+}
+
 func TestTPActionsAsExportSlice(t *testing.T) {
 	tpActs := &utils.TPActions{
 		TPid: "TEST_TPID",
@@ -994,6 +1104,126 @@ func TestTPSharedGroupsAsExportSlice(t *testing.T) {
 	}
 	if !reflect.DeepEqual(expectedSlc, slc) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedSlc, slc)
+	}
+}
+
+func TestAPItoModelSharedGroups(t *testing.T) {
+	sgs := []*utils.TPSharedGroups{}
+	if rcv := APItoModelSharedGroups(sgs); rcv != nil {
+		t.Errorf("Expecting: nil, received: %+v", rcv)
+	}
+	sgs = []*utils.TPSharedGroups{
+		&utils.TPSharedGroups{
+			TPid: "TEST_TPID",
+			ID:   "SHARED_GROUP_TEST",
+			SharedGroups: []*utils.TPSharedGroup{
+				{
+					Account:       "*any",
+					Strategy:      "*highest",
+					RatingSubject: "special1"},
+				{
+					Account:       "*second",
+					Strategy:      "*highest",
+					RatingSubject: "special2"},
+			},
+		},
+	}
+	eOut := TpSharedGroups{
+		TpSharedGroup{
+			Tpid:          "TEST_TPID",
+			Tag:           "SHARED_GROUP_TEST",
+			Account:       "*any",
+			Strategy:      "*highest",
+			RatingSubject: "special1",
+		},
+		TpSharedGroup{
+			Tpid:          "TEST_TPID",
+			Tag:           "SHARED_GROUP_TEST",
+			Account:       "*second",
+			Strategy:      "*highest",
+			RatingSubject: "special2",
+		},
+	}
+	if rcv := APItoModelSharedGroups(sgs); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+	sgs = []*utils.TPSharedGroups{
+		&utils.TPSharedGroups{
+			TPid: "TEST_TPID",
+			ID:   "SHARED_GROUP_TEST",
+		},
+	}
+	eOut = TpSharedGroups{
+		TpSharedGroup{
+			Tpid: "TEST_TPID",
+			Tag:  "SHARED_GROUP_TEST",
+		},
+	}
+	if rcv := APItoModelSharedGroups(sgs); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+	sgs = []*utils.TPSharedGroups{
+		&utils.TPSharedGroups{
+			TPid: "TEST_TPID",
+			ID:   "SHARED_GROUP_TEST",
+			SharedGroups: []*utils.TPSharedGroup{
+				{
+					Account:       "*any",
+					Strategy:      "*highest",
+					RatingSubject: "special1"},
+				{
+					Account:       "*second",
+					Strategy:      "*highest",
+					RatingSubject: "special2"},
+			},
+		},
+		&utils.TPSharedGroups{
+			TPid: "TEST_TPID2",
+			ID:   "SHARED_GROUP_TEST2",
+			SharedGroups: []*utils.TPSharedGroup{
+				{
+					Account:       "*any",
+					Strategy:      "*highest",
+					RatingSubject: "special1"},
+				{
+					Account:       "second",
+					Strategy:      "*highest",
+					RatingSubject: "special2"},
+			},
+		},
+	}
+	eOut = TpSharedGroups{
+		TpSharedGroup{
+			Tpid:          "TEST_TPID",
+			Tag:           "SHARED_GROUP_TEST",
+			Account:       "*any",
+			Strategy:      "*highest",
+			RatingSubject: "special1",
+		},
+		TpSharedGroup{
+			Tpid:          "TEST_TPID",
+			Tag:           "SHARED_GROUP_TEST",
+			Account:       "*second",
+			Strategy:      "*highest",
+			RatingSubject: "special2",
+		},
+		TpSharedGroup{
+			Tpid:          "TEST_TPID2",
+			Tag:           "SHARED_GROUP_TEST2",
+			Account:       "*any",
+			Strategy:      "*highest",
+			RatingSubject: "special1",
+		},
+		TpSharedGroup{
+			Tpid:          "TEST_TPID2",
+			Tag:           "SHARED_GROUP_TEST2",
+			Account:       "second",
+			Strategy:      "*highest",
+			RatingSubject: "special2",
+		},
+	}
+	if rcv := APItoModelSharedGroups(sgs); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
 	}
 }
 
@@ -1116,6 +1346,26 @@ func TestTPAccountActionsAsExportSlice(t *testing.T) {
 	slc = append(slc, lc)
 	if !reflect.DeepEqual(expectedSlc, slc) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedSlc, slc)
+	}
+}
+
+func TestAPItoModelAction(t *testing.T) {
+	var as *utils.TPActions
+	if rcv := APItoModelAction(as); rcv != nil {
+		t.Errorf("Expecting: nil, received: %+v", rcv)
+	}
+	as = &utils.TPActions{
+		TPid: "TEST_TPID",
+		ID:   "TEST_ACTIONS",
+	}
+	eOut := TpActions{
+		TpAction{
+			Tpid: "TEST_TPID",
+			Tag:  "TEST_ACTIONS",
+		},
+	}
+	if rcv := APItoModelAction(as); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
 	}
 }
 
