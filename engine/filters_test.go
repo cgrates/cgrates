@@ -1329,3 +1329,33 @@ func TestPassPartial(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", 0, len(ruleList))
 	}
 }
+
+func TestNewFilterFromInline(t *testing.T) {
+	exp := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "*string:~*req.Account:~*uhc.<~*req.CGRID;-Account>;1001",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Account",
+				Values:  []string{"~*uhc.<~*req.CGRID;-Account>", "1001"},
+			},
+		},
+	}
+	if err := exp.Compile(); err != nil {
+		t.Fatal(err)
+	}
+	if rcv, err := NewFilterFromInline("cgrates.org", "*string:~*req.Account:~*uhc.<~*req.CGRID;-Account>;1001"); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+
+	if _, err := NewFilterFromInline("cgrates.org", "*string:~*req.Account"); err == nil {
+		t.Error("Expected error received nil")
+	}
+
+	if _, err := NewFilterFromInline("cgrates.org", "*string:~*req.Account:~*req.CGRID{*;1001"); err == nil {
+		t.Error("Expected error received nil")
+	}
+}

@@ -69,7 +69,7 @@
 						"value":"`>`"},
 
 					{"tag": "X-Identity", "path": "*rep.X-Identity", "type": "*variable",
-						"value":"~*cgrep.STIRIdentity[~*cgrep.Routes.SortedRoutes[0].RouteID]"},
+						"value":"~*cgrep.STIRIdentity.<~*cgrep.Routes.SortedRoutes[0].RouteID>"},
 				]
 			},
 

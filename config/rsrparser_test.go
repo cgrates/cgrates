@@ -412,6 +412,31 @@ func TestRSRParserDynamic2(t *testing.T) {
 	} else if out != "2.10" {
 		t.Errorf("Expected 2.10 received: %q", out)
 	}
+
+	dP = utils.MapStorage{
+		utils.MetaReq: utils.MapStorage{
+			utils.CGRID: "cgridUniq",
+		},
+	}
+	if _, err := prsr.ParseDataProvider(dP); err != utils.ErrNotFound {
+		t.Errorf("Expected error %s, received: %v", utils.ErrNotFound, err)
+	}
+
+	prsr, err = NewRSRParsersFromSlice([]string{"2.", "~*req.CGRID<~*opts.Converter>"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	dP = utils.MapStorage{
+		utils.MetaReq: utils.MapStorage{
+			utils.CGRID: "cgridUniq",
+		},
+		utils.MetaOpts: utils.MapStorage{
+			"Converter": "{*",
+		},
+	}
+	if _, err := prsr.ParseDataProvider(dP); err == nil {
+		t.Error(err)
+	}
 }
 
 func TestRSRParserDynamic3(t *testing.T) {
@@ -437,19 +462,111 @@ func TestRSRParserDynamic3(t *testing.T) {
 		t.Errorf("Expected 2.10-MB received: %q", out)
 	}
 
-	// prsr, err = NewRSRParsers("2.{*};~*req.<~*req.CGRID;~*req.RunID;-Cos>t;-;~*req.<~*req.UnitField>", ";")
-	// expErr := "invalid converter value in string: <*>, err: unsupported converter definition: <*>"
-	// if err == nil || err.Error() != expErr {
-	// 	t.Fatal(err)
-	// }
+}
 
-	// prsr, err = NewRSRParsers("2.;~*req.<~*req.CGRID;~*req.RunID;-Cos>t;-;~*req.Unit{*}", ";")
-	// if err == nil || err.Error() != expErr {
-	// 	t.Fatal(err)
-	// }
+func TestRSRParserParseDataProviderWithInterfaces(t *testing.T) {
+	prsr, err := NewRSRParsersFromSlice([]string{"~*req.<~*req.CGRID;~*req.RunID;-Cos>t", "s"})
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	// prsr, err = NewRSRParsers("2.;~*req.<~*req.CGRID;~*req.RunID;-Cos>t;-;~*req.<~*req.UnitField{*}>", ";")
-	// if err == nil || err.Error() != expErr {
-	// 	t.Fatal(err)
-	// }
+	dP := utils.MapStorage{
+		utils.MetaReq: utils.MapStorage{
+			utils.CGRID:              "cgridUniq",
+			utils.RunID:              utils.MetaDefault,
+			"cgridUniq*default-Cost": 10,
+		},
+	}
+	if out, err := prsr.ParseDataProviderWithInterfaces(dP); err != nil {
+		t.Error(err)
+	} else if out != "10s" {
+		t.Errorf("Expected 10s received: %q", out)
+	}
+
+	prsr, err = NewRSRParsersFromSlice([]string{"2.", "~*req.<~*req.CGRID;~*req.RunID;-Cos>t", "s"})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if out, err := prsr.ParseDataProviderWithInterfaces(dP); err != nil {
+		t.Error(err)
+	} else if out != "210s" {
+		t.Errorf("Expected 210s received: %q", out)
+	}
+
+	prsr, err = NewRSRParsersFromSlice([]string{"2.", "~*req.<~*req.CGRID;~*req.RunID;-Cost>"})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if out, err := prsr.ParseDataProviderWithInterfaces(dP); err != nil {
+		t.Error(err)
+	} else if out != "210" {
+		t.Errorf("Expected 210 received: %q", out)
+	}
+
+	dP = utils.MapStorage{
+		utils.MetaReq: utils.MapStorage{
+			utils.CGRID: "cgridUniq",
+		},
+	}
+	if _, err := prsr.ParseDataProviderWithInterfaces(dP); err != utils.ErrNotFound {
+		t.Errorf("Expected error %s, received: %v", utils.ErrNotFound, err)
+	}
+
+	prsr, err = NewRSRParsersFromSlice([]string{"2.", "~*req.CGRID<~*opts.Converter>"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	dP = utils.MapStorage{
+		utils.MetaReq: utils.MapStorage{
+			utils.CGRID: "cgridUniq",
+		},
+		utils.MetaOpts: utils.MapStorage{
+			"Converter": "{*",
+		},
+	}
+	if _, err := prsr.ParseDataProviderWithInterfaces(dP); err == nil {
+		t.Error(err)
+	}
+}
+
+func TestRSRParserCompileDynRule(t *testing.T) {
+	prsr, err := NewRSRParser("~*req.<~*req.CGRID;~*req.RunID;-Cos>t")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	dP := utils.MapStorage{
+		utils.MetaReq: utils.MapStorage{
+			utils.CGRID:              "cgridUniq",
+			utils.RunID:              utils.MetaDefault,
+			"cgridUniq*default-Cost": 10,
+		},
+	}
+	if out, err := prsr.CompileDynRule(dP); err != nil {
+		t.Error(err)
+	} else if out != "~*req.cgridUniq*default-Cost" {
+		t.Errorf("Expected ~*req.cgridUniq*default-Cost received: %q", out)
+	}
+
+	dP = utils.MapStorage{
+		utils.MetaReq: utils.MapStorage{
+			utils.CGRID: "cgridUniq",
+		},
+	}
+	if _, err := prsr.CompileDynRule(dP); err != utils.ErrNotFound {
+		t.Errorf("Expected error %s, received: %v", utils.ErrNotFound, err)
+	}
+
+	prsr, err = NewRSRParser("~*req.CGRID")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if out, err := prsr.CompileDynRule(dP); err != nil {
+		t.Error(err)
+	} else if out != "~*req.CGRID" {
+		t.Errorf("Expected ~*req.CGRID received: %q", out)
+	}
 }

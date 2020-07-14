@@ -675,7 +675,7 @@ func testV1FltrAccountsExistsDynamicaly(t *testing.T) {
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "TH_AccountDinamic",
-			FilterIDs: []string{"*exists::~;*accounts.;~*req.Account"},
+			FilterIDs: []string{"*exists:~*accounts.<~*req.Account>:"},
 			MaxHits:   -1,
 			MinSleep:  time.Duration(1 * time.Millisecond),
 			Weight:    90.0,

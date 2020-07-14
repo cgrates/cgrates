@@ -196,8 +196,29 @@ func testFltrITMigrateAndMove(t *testing.T) {
 		if err := fltrMigrator.dmIN.setV1Filter(fltr); err != nil {
 			t.Error("Error when setting v1 Filters ", err.Error())
 		}
-		if err := fltrMigrator.dmIN.DataManager().SetAttributeProfile(attrProf, true); err != nil {
+		if err := fltrMigrator.dmIN.DataManager().SetAttributeProfile(attrProf, false); err != nil {
 			t.Error("Error when setting attribute profile for v1 Filters ", err.Error())
+		}
+		// manually set the indexes because the GetFilter functions compile the value from DB that is still the old version
+		wrongFltrIdx := map[string]utils.StringSet{
+			"*prefix::1001":        {"ATTR_1": struct{}{}},
+			"*string:Account:1001": {"ATTR_1": struct{}{}}}
+
+		if err := fltrMigrator.dmIN.DataManager().SetIndexes(
+			utils.CacheAttributeFilterIndexes,
+			utils.ConcatenatedKey(attrProf.Tenant, utils.META_ANY),
+			wrongFltrIdx, false, ""); err != nil {
+			t.Error(err)
+		}
+
+		wrongFltrIdx = map[string]utils.StringSet{
+			utils.CacheAttributeFilterIndexes: {"ATTR_1": struct{}{}},
+		}
+		if err := fltrMigrator.dmIN.DataManager().SetIndexes(
+			utils.CacheReverseFilterIndexes,
+			"cgrates.org:FLTR_2",
+			wrongFltrIdx, false, ""); err != nil {
+			t.Error(err)
 		}
 		currentVersion := engine.Versions{utils.RQF: 1}
 		err := fltrMigrator.dmIN.DataManager().DataDB().SetVersions(currentVersion, false)
@@ -366,9 +387,32 @@ func testFltrITMigratev2(t *testing.T) {
 	if err := fltrMigrator.dmIN.setV1Filter(filters); err != nil {
 		t.Error("Error when setting v1 Filters ", err.Error())
 	}
-	if err := fltrMigrator.dmIN.DataManager().SetAttributeProfile(attrProf, true); err != nil {
+	if err := fltrMigrator.dmIN.DataManager().SetAttributeProfile(attrProf, false); err != nil {
 		t.Error("Error when setting attribute profile for v1 Filters ", err.Error())
 	}
+
+	// manually set the indexes because the GetFilter functions compile the value from DB that is still the old version
+	wrongFltrIdx := map[string]utils.StringSet{
+		"*string::1001":         {"ATTR_1": struct{}{}},
+		"*string:~Account:1001": {"ATTR_1": struct{}{}}}
+
+	if err := fltrMigrator.dmIN.DataManager().SetIndexes(
+		utils.CacheAttributeFilterIndexes,
+		utils.ConcatenatedKey(attrProf.Tenant, utils.META_ANY),
+		wrongFltrIdx, false, ""); err != nil {
+		t.Error(err)
+	}
+
+	wrongFltrIdx = map[string]utils.StringSet{
+		utils.CacheAttributeFilterIndexes: {"ATTR_1": struct{}{}},
+	}
+	if err := fltrMigrator.dmIN.DataManager().SetIndexes(
+		utils.CacheReverseFilterIndexes,
+		"cgrates.org:FLTR_2",
+		wrongFltrIdx, false, ""); err != nil {
+		t.Error(err)
+	}
+
 	currentVersion := engine.Versions{utils.RQF: 2}
 	err := fltrMigrator.dmIN.DataManager().DataDB().SetVersions(currentVersion, false)
 	if err != nil {

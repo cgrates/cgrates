@@ -204,21 +204,6 @@ func (prsr *RSRParser) Compile() (err error) {
 
 	if dynIdxStart := strings.IndexByte(parserRules, utils.RSRDynStartChar); dynIdxStart != -1 {
 		if dynIdxEnd := strings.IndexByte(parserRules[dynIdxStart:], utils.RSRDynEndChar); dynIdxEnd != -1 {
-			dynIdxEnd += dynIdxStart
-			sep := ";"
-			var dynrules RSRParsers
-			if dynrules, err = NewRSRParsers(parserRules[dynIdxStart+1:dynIdxEnd], sep); err != nil {
-				return
-			}
-			prsr.dynRules = dynrules
-			prsr.dynIdxStart = dynIdxStart
-			prsr.dynIdxEnd = dynIdxEnd + 1
-			return
-		}
-	}
-
-	if dynIdxStart := strings.IndexByte(parserRules, utils.RSRDynStartChar); dynIdxStart != -1 {
-		if dynIdxEnd := strings.IndexByte(parserRules[dynIdxStart:], utils.RSRDynEndChar); dynIdxEnd != -1 {
 			var dynrules RSRParsers
 			if dynrules, err = NewRSRParsers(parserRules[dynIdxStart+1:dynIdxStart+dynIdxEnd],
 				CgrConfig().GeneralCfg().RSRSep); err != nil {

@@ -146,6 +146,24 @@ func (fS *FilterS) LazyPass(tenant string, filterIDs []string,
 	return
 }
 
+func splitDynFltrValues(val string) (vals []string) {
+	startIdx := strings.IndexByte(val, utils.RSRDynStartChar)
+	endIdx := strings.IndexByte(val, utils.RSRDynEndChar)
+	if startIdx == -1 || endIdx == -1 {
+		return strings.Split(val, utils.INFIELD_SEP)
+	}
+
+	vals = strings.Split(val[:startIdx], utils.INFIELD_SEP)
+	vals[len(vals)-1] += val[startIdx : endIdx+1]
+	val = val[endIdx+1:]
+	if len(val) == 0 {
+		return
+	}
+	valsEnd := splitDynFltrValues(val)
+	vals[len(vals)-1] += valsEnd[0]
+	return append(vals, valsEnd[1:]...)
+}
+
 // NewFilterFromInline parses an inline rule into a compiled Filter
 func NewFilterFromInline(tenant, inlnRule string) (f *Filter, err error) {
 	ruleSplt := strings.SplitN(inlnRule, utils.InInFieldSep, 3)
@@ -154,7 +172,7 @@ func NewFilterFromInline(tenant, inlnRule string) (f *Filter, err error) {
 	}
 	var vals []string
 	if ruleSplt[2] != utils.EmptyString {
-		vals = strings.Split(ruleSplt[2], utils.INFIELD_SEP)
+		vals = splitDynFltrValues(ruleSplt[2])
 	}
 	f = &Filter{
 		Tenant: tenant,
@@ -262,6 +280,12 @@ func (fltr *FilterRule) CompileValues() (err error) {
 		if fltr.rsrFilters, err = utils.ParseRSRFiltersFromSlice(fltr.Values); err != nil {
 			return
 		}
+		if fltr.rsrElement, err = config.NewRSRParser(fltr.Element); err != nil {
+			return
+		} else if fltr.rsrElement == nil {
+			return fmt.Errorf("emtpy RSRParser in rule: <%s>", fltr.Element)
+		}
+	case utils.MetaExists, utils.MetaNotExists, utils.MetaEmpty, utils.MetaNotEmpty: // only the element is builded
 		if fltr.rsrElement, err = config.NewRSRParser(fltr.Element); err != nil {
 			return
 		} else if fltr.rsrElement == nil {
