@@ -2266,7 +2266,8 @@ const (
 	OptsAPIKey  = "*dispatcherApiKey"
 	OptsRouteID = "*dispatcherRouteID"
 	// Others
-	OptsContext = "*context"
+	OptsContext  = "*context"
+	OptsMultiple = "*multiple"
 )
 
 func buildCacheInstRevPrefixes() {
