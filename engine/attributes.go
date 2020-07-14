@@ -107,6 +107,10 @@ func (alS *AttributeService) attributeProfileForEvent(args *AttrArgsProcessEvent
 			}
 			return nil, err
 		}
+		if !(len(aPrfl.Contexts) == 1 && aPrfl.Contexts[0] == utils.META_ANY) &&
+			!utils.IsSliceMember(aPrfl.Contexts, contextVal) {
+			continue
+		}
 		if aPrfl.ActivationInterval != nil && args.Time != nil &&
 			!aPrfl.ActivationInterval.IsActiveAtTime(*args.Time) { // not active
 			continue

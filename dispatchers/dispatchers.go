@@ -147,6 +147,10 @@ func (dS *DispatcherService) dispatcherProfileForEvent(ev *utils.CGREvent,
 			}
 			continue
 		}
+		if !(len(prfl.Subsystems) == 1 && prfl.Subsystems[0] == utils.META_ANY) &&
+			!utils.IsSliceMember(prfl.Subsystems, subsys) {
+			continue
+		}
 		if prfl.ActivationInterval != nil && ev.Time != nil &&
 			!prfl.ActivationInterval.IsActiveAtTime(*ev.Time) { // not active
 			continue
