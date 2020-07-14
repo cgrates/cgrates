@@ -77,6 +77,7 @@ func (ldrs *LoaderService) Start() (err error) {
 
 	ldrs.ldrs = loaders.NewLoaderService(datadb, ldrs.cfg.LoaderCfg(),
 		ldrs.cfg.GeneralCfg().DefaultTimezone, ldrs.exitChan, filterS, ldrs.connMgr)
+
 	if !ldrs.ldrs.Enabled() {
 		return
 	}
