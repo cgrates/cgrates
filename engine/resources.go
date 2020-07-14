@@ -215,14 +215,16 @@ func (rs Resources) recordUsage(ru *ResourceUsage) (err error) {
 	var nonReservedIdx int // index of first resource not reserved
 	for _, r := range rs {
 		if err = r.recordUsage(ru); err != nil {
-			utils.Logger.Warning(fmt.Sprintf("<ResourceLimits>, err: %s", err.Error()))
+			utils.Logger.Warning(fmt.Sprintf("<%s>cannot record usage, err: %s", utils.ResourceS, err.Error()))
 			break
 		}
 		nonReservedIdx += 1
 	}
 	if err != nil {
 		for _, r := range rs[:nonReservedIdx] {
-			r.clearUsage(ru.ID) // best effort
+			if errClear := r.clearUsage(ru.ID); errClear != nil {
+				utils.Logger.Warning(fmt.Sprintf("<%s> cannot clear usage, err: %s", utils.ResourceS, errClear.Error()))
+			} // best effort
 		}
 	}
 	return
@@ -233,7 +235,7 @@ func (rs Resources) clearUsage(ruTntID string) (err error) {
 	for _, r := range rs {
 		if errClear := r.clearUsage(ruTntID); errClear != nil &&
 			r.ttl != nil && *r.ttl != 0 { // we only consider not found error in case of ttl different than 0
-			utils.Logger.Warning(fmt.Sprintf("<ResourceLimits>, clear ruID: %s, err: %s", ruTntID, errClear.Error()))
+			utils.Logger.Warning(fmt.Sprintf("<%s>, clear ruID: %s, err: %s", utils.ResourceS, ruTntID, errClear.Error()))
 			err = errClear
 		}
 	}
@@ -278,7 +280,9 @@ func (rs Resources) allocateResource(ru *ResourceUsage, dryRun bool) (alcMessage
 		for _, r := range rs {
 			r.removeExpiredUnits()
 			if _, hasID := r.Usages[ru.ID]; hasID && !dryRun { // update
-				r.clearUsage(ru.ID)
+				if err = r.clearUsage(ru.ID); err != nil {
+					return
+				}
 			}
 			if r.rPrf == nil {
 				err = fmt.Errorf("empty configuration for resourceID: %s", r.TenantID())
@@ -690,14 +694,18 @@ func (rS *ResourceService) V1AllocateResource(args utils.ArgRSv1ResourceUsage, r
 		}
 		if rS.cgrcfg.ResourceSCfg().StoreInterval == -1 {
 			*r.dirty = true
-			rS.StoreResource(r)
+			if err = rS.StoreResource(r); err != nil {
+				return
+			}
 		} else {
 			*r.dirty = true // mark it to be saved
 			rS.srMux.Lock()
 			rS.storedResources[r.TenantID()] = true
 			rS.srMux.Unlock()
 		}
-		rS.processThresholds(r, args.ArgDispatcher)
+		if err = rS.processThresholds(r, args.ArgDispatcher); err != nil {
+			return
+		}
 	}
 	*reply = alcMsg
 	return
@@ -738,25 +746,29 @@ func (rS *ResourceService) V1ReleaseResource(args utils.ArgRSv1ResourceUsage, re
 		args.UsageTTL); err != nil {
 		return err
 	}
-	mtcRLs.clearUsage(args.UsageID)
+	if err = mtcRLs.clearUsage(args.UsageID); err != nil {
+		return
+	}
 
 	// Handle storing
 	if rS.cgrcfg.ResourceSCfg().StoreInterval != -1 {
 		rS.srMux.Lock()
+		defer rS.srMux.Unlock()
 	}
 	for _, r := range mtcRLs {
 		if r.dirty != nil {
 			if rS.cgrcfg.ResourceSCfg().StoreInterval == -1 {
-				rS.StoreResource(r)
+				if err = rS.StoreResource(r); err != nil {
+					return
+				}
 			} else {
 				*r.dirty = true // mark it to be saved
 				rS.storedResources[r.TenantID()] = true
 			}
 		}
-		rS.processThresholds(r, args.ArgDispatcher)
-	}
-	if rS.cgrcfg.ResourceSCfg().StoreInterval != -1 {
-		rS.srMux.Unlock()
+		if err = rS.processThresholds(r, args.ArgDispatcher); err != nil {
+			return
+		}
 	}
 
 	*reply = utils.OK
