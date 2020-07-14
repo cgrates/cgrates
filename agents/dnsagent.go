@@ -323,15 +323,13 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 			Paginator:     *cgrArgs.RoutePaginator,
 			Opts:          opts,
 		}
-		needMaxUsage := utils.IsSliceMember([]string{utils.MetaAuthorize, utils.MetaInitiate, utils.MetaUpdate},
-			reqProcessor.Flags.ParamsSlice(utils.MetaRALs)[0])
 		rply := new(sessions.V1ProcessEventReply)
 		err = da.connMgr.Call(da.cgrCfg.DNSAgentCfg().SessionSConns, nil,
 			utils.SessionSv1ProcessEvent,
 			evArgs, rply)
 		if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
 			cgrEv.Event[utils.Usage] = 0 // avoid further debits
-		} else if needMaxUsage {
+		} else if needsMaxUsage(reqProcessor.Flags.ParamsSlice(utils.MetaRALs)) {
 			cgrEv.Event[utils.Usage] = rply.MaxUsage // make sure the CDR reflects the debit
 		}
 		if err = agReq.setCGRReply(rply, err); err != nil {

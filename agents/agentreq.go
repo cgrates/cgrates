@@ -531,3 +531,13 @@ func (ar *AgentRequest) setCGRReply(rply utils.NavigableMapper, errRply error) (
 	*ar.CGRReply = nm // update value so we can share CGRReply
 	return
 }
+
+func needsMaxUsage(ralsFlags []string) bool {
+	for _, flag := range ralsFlags {
+		if utils.IsSliceMember([]string{utils.MetaAuthorize, utils.MetaInitiate, utils.MetaUpdate},
+			flag) {
+			return true
+		}
+	}
+	return false
+}
