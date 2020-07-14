@@ -152,7 +152,6 @@ func TestAttributePopulateAttrService(t *testing.T) {
 	defaultCfg.AttributeSCfg().ProcessRuns = 1
 	defaultCfg.AttributeSCfg().StringIndexedFields = nil
 	defaultCfg.AttributeSCfg().PrefixIndexedFields = nil
-	defaultCfg.AttributeSCfg().PrefixIndexedFields = nil
 	data := NewInternalDB(nil, nil, true, defaultCfg.DataDbCfg().Items)
 	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	attrService, err = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
@@ -2386,4 +2385,67 @@ func TestProcessAttributeUnixTimeStamp(t *testing.T) {
 	if !reflect.DeepEqual(eRply, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eRply), utils.ToJSON(rcv))
 	}
+}
+
+func TestAttributeIndexSelectsFalse(t *testing.T) {
+	// change the IndexedSelects to false
+	defaultCfg, _ := config.NewDefaultCGRConfig()
+	defaultCfg.AttributeSCfg().ProcessRuns = 1
+	defaultCfg.AttributeSCfg().StringIndexedFields = nil
+	defaultCfg.AttributeSCfg().PrefixIndexedFields = nil
+	defaultCfg.AttributeSCfg().IndexedSelects = false
+	data := NewInternalDB(nil, nil, true, defaultCfg.DataDbCfg().Items)
+	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	attrService, err = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+
+	//refresh the DM
+	if err := dmAtr.DataDB().Flush(""); err != nil {
+		t.Error(err)
+	}
+	if test, err := dmAtr.DataDB().IsDBEmpty(); err != nil {
+		t.Error(err)
+	} else if test != true {
+		t.Errorf("\nExpecting: true got :%+v", test)
+	}
+	attrPrf := &AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "AttrPrf",
+		Contexts:  []string{utils.MetaCDRs},
+		FilterIDs: []string{"*string:~*req.Account:1007"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     expTimeAttributes,
+		},
+		Attributes: []*Attribute{
+			{
+				Path:  utils.MetaReq + utils.NestingSep + utils.Account,
+				Value: config.NewRSRParsersMustCompile("1010", utils.INFIELD_SEP),
+			},
+		},
+		Weight: 20,
+	}
+	if err := dmAtr.SetAttributeProfile(attrPrf, true); err != nil {
+		t.Error(err)
+	}
+
+	attrArgs := &AttrArgsProcessEvent{
+		Context:     utils.StringPointer(utils.MetaSessionS),
+		ProcessRuns: utils.IntPointer(1),
+		CGREvent: &utils.CGREvent{
+			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:     utils.GenUUID(),
+			Event: map[string]interface{}{
+				"Account": "1007",
+			},
+		},
+	}
+
+	var reply AttrSProcessEventReply
+	if err := attrService.V1ProcessEvent(attrArgs, &reply); err == nil || err != utils.ErrNotFound {
+		t.Errorf("Expected not found, reveiced: %+v", err)
+	}
+
 }
