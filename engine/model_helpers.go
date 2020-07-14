@@ -1797,7 +1797,7 @@ func (tps TpFilterS) AsTPFilter() (result []*utils.TPFilterProfile) {
 		if tp.Type != utils.EmptyString {
 			var vals []string
 			if tp.Values != utils.EmptyString {
-				vals = strings.Split(tp.Values, utils.INFIELD_SEP)
+				vals = splitDynFltrValues(tp.Values)
 			}
 			th.Filters = append(th.Filters, &utils.TPFilter{
 				Type:    tp.Type,

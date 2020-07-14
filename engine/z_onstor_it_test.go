@@ -1360,7 +1360,12 @@ func testOnStorITTiming(t *testing.T) {
 
 func testOnStorITCRUDHistory(t *testing.T) {
 	time := time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC)
-	ist := &utils.LoadInstance{"Load", "RatingLoad", "Account", time}
+	ist := &utils.LoadInstance{
+		LoadID:           "Load",
+		RatingLoadID:     "RatingLoad",
+		AccountingLoadID: "Account",
+		LoadTime:         time,
+	}
 	if err := onStor.DataDB().AddLoadHistory(ist, 1, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
@@ -1506,9 +1511,9 @@ func testOnStorITStatQueue(t *testing.T) {
 				Answered: 2,
 				Count:    3,
 				Events: map[string]*StatWithCompress{
-					"cgrates.org:ev1": &StatWithCompress{Stat: 1},
-					"cgrates.org:ev2": &StatWithCompress{Stat: 1},
-					"cgrates.org:ev3": &StatWithCompress{Stat: 0},
+					"cgrates.org:ev1": {Stat: 1},
+					"cgrates.org:ev2": {Stat: 1},
+					"cgrates.org:ev3": {Stat: 0},
 				},
 			},
 		},
@@ -1539,9 +1544,9 @@ func testOnStorITStatQueue(t *testing.T) {
 			Answered: 3,
 			Count:    3,
 			Events: map[string]*StatWithCompress{
-				"cgrates.org:ev1": &StatWithCompress{Stat: 1},
-				"cgrates.org:ev2": &StatWithCompress{Stat: 1},
-				"cgrates.org:ev3": &StatWithCompress{Stat: 1},
+				"cgrates.org:ev1": {Stat: 1},
+				"cgrates.org:ev2": {Stat: 1},
+				"cgrates.org:ev3": {Stat: 1},
 			},
 		},
 	}
@@ -1707,6 +1712,9 @@ func testOnStorITFilter(t *testing.T) {
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
+	if err := fp.Compile(); err != nil {
+		t.Fatal(err)
+	}
 	if _, rcvErr := onStor.GetFilter("cgrates.org", "Filter1",
 		true, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
@@ -1746,6 +1754,9 @@ func testOnStorITFilter(t *testing.T) {
 			Type:    utils.MetaString,
 			Values:  []string{"10", "20"},
 		},
+	}
+	if err := fp.Compile(); err != nil {
+		t.Fatal(err)
 	}
 	if err := onStor.SetFilter(fp, true); err != nil {
 		t.Error(err)
@@ -2158,12 +2169,12 @@ func testOnStorITRateProfile(t *testing.T) {
 		MaxCost:          0.6,
 		MaxCostStrategy:  "*free",
 		Rates: map[string]*Rate{
-			"FIRST_GI": &Rate{
+			"FIRST_GI": {
 				ID:        "FIRST_GI",
 				FilterIDs: []string{"*gi:~*req.Usage:0"},
 				Weight:    0,
 				IntervalRates: []*IntervalRate{
-					&IntervalRate{
+					{
 						Value:     0.12,
 						Unit:      time.Duration(1 * time.Minute),
 						Increment: time.Duration(1 * time.Minute),
@@ -2171,12 +2182,12 @@ func testOnStorITRateProfile(t *testing.T) {
 				},
 				Blocker: false,
 			},
-			"SECOND_GI": &Rate{
+			"SECOND_GI": {
 				ID:        "SECOND_GI",
 				FilterIDs: []string{"*gi:~*req.Usage:1m"},
 				Weight:    10,
 				IntervalRates: []*IntervalRate{
-					&IntervalRate{
+					{
 						Value:     0.06,
 						Unit:      time.Duration(1 * time.Minute),
 						Increment: time.Duration(1 * time.Second),

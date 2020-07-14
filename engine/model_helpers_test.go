@@ -1849,6 +1849,41 @@ func TestTPFilterAsTPFilter(t *testing.T) {
 	}
 }
 
+func TestTPFilterAsTPFilterWithDynValues(t *testing.T) {
+	tps := []*TpFilter{
+		{
+			Tpid:               "TEST_TPID",
+			ID:                 "Filter1",
+			ActivationInterval: "2014-07-29T15:00:00Z;2014-08-29T15:00:00Z",
+			Type:               utils.MetaString,
+			Element:            "CustomField",
+			Values:             "1001;~*uch.<~*rep.CGRID;~*rep.RunID;-Cost>;1002;~*uch.<~*rep.CGRID;~*rep.RunID>",
+		},
+	}
+	eTPs := []*utils.TPFilterProfile{
+		{
+			TPid: tps[0].Tpid,
+			ID:   tps[0].ID,
+			ActivationInterval: &utils.TPActivationInterval{
+				ActivationTime: "2014-07-29T15:00:00Z",
+				ExpiryTime:     "2014-08-29T15:00:00Z",
+			},
+			Filters: []*utils.TPFilter{
+				{
+					Type:    utils.MetaString,
+					Element: "CustomField",
+					Values:  []string{"1001", "~*uch.<~*rep.CGRID;~*rep.RunID;-Cost>", "1002", "~*uch.<~*rep.CGRID;~*rep.RunID>"},
+				},
+			},
+		},
+	}
+
+	rcvTPs := TpFilterS(tps).AsTPFilter()
+	if !(reflect.DeepEqual(eTPs, rcvTPs) || reflect.DeepEqual(eTPs[0], rcvTPs[0])) {
+		t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v", utils.ToIJSON(eTPs), utils.ToIJSON(rcvTPs))
+	}
+}
+
 func TestTPFilterAsTPFilter2(t *testing.T) {
 	tps := []*TpFilter{
 		{
