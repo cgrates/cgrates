@@ -1347,8 +1347,9 @@ func TestV1ProcessEventReplyAsNavigableMap(t *testing.T) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
 	//attributes check
-	v1per.Attributes = attrs
-	expected[utils.CapAttributes] = utils.NavigableMap2{"OfficeGroup": utils.NewNMData("Marketing")}
+	v1per.Attributes = make(map[string]*engine.AttrSProcessEventReply)
+	v1per.Attributes[utils.MetaRaw] = attrs
+	expected[utils.CapAttributes] = utils.NavigableMap2{utils.MetaRaw: utils.NavigableMap2{"OfficeGroup": utils.NewNMData("Marketing")}}
 	if rply := v1per.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
@@ -1357,22 +1358,25 @@ func TestV1ProcessEventReplyAsNavigableMap(t *testing.T) {
 		ProfileID: "Route1",
 		Count:     1,
 	}
-	v1per.Routes = tmpRoutes
-	expected[utils.CapRoutes] = tmpRoutes.AsNavigableMap()
+	v1per.Routes = make(map[string]*engine.SortedRoutes)
+	v1per.Routes[utils.MetaRaw] = tmpRoutes
+	expected[utils.CapRoutes] = utils.NavigableMap2{utils.MetaRaw: tmpRoutes.AsNavigableMap()}
 	if rply := v1per.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
 	//tmpTresholdIDs check
 	tmpTresholdIDs := []string{"ID1", "ID2"}
-	v1per.ThresholdIDs = &tmpTresholdIDs
-	expected[utils.CapThresholds] = &utils.NMSlice{utils.NewNMData("ID1"), utils.NewNMData("ID2")}
+	v1per.ThresholdIDs = map[string][]string{}
+	v1per.ThresholdIDs[utils.MetaRaw] = tmpTresholdIDs
+	expected[utils.CapThresholds] = utils.NavigableMap2{utils.MetaRaw: &utils.NMSlice{utils.NewNMData("ID1"), utils.NewNMData("ID2")}}
 	if rply := v1per.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
 	//StatQueue check
 	tmpStatQueueIDs := []string{"Que1", "Que2"}
-	v1per.StatQueueIDs = &tmpStatQueueIDs
-	expected[utils.CapStatQueues] = &utils.NMSlice{utils.NewNMData("Que1"), utils.NewNMData("Que2")}
+	v1per.StatQueueIDs = make(map[string][]string)
+	v1per.StatQueueIDs[utils.MetaRaw] = tmpStatQueueIDs
+	expected[utils.CapStatQueues] = utils.NavigableMap2{utils.MetaRaw: &utils.NMSlice{utils.NewNMData("Que1"), utils.NewNMData("Que2")}}
 	if rply := v1per.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
