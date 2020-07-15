@@ -447,7 +447,7 @@ func testV1RsAuthorizeResources(t *testing.T) {
 }
 
 func testV1RsReleaseResource(t *testing.T) {
-	// relase the only resource active for Resource1
+	// release the only resource active for Resource1
 	var reply string
 	argsRU := utils.ArgRSv1ResourceUsage{
 		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e55", // same ID should be accepted by first group since the previous resource should be expired
@@ -513,6 +513,22 @@ func testV1RsReleaseResource(t *testing.T) {
 			(len(r.Usages) != 0 || len(r.TTLIdx) != 0) {
 			t.Errorf("Unexpected resource: %+v", r)
 		}
+	}
+	// release an empty resource should return error
+	argsRU = utils.ArgRSv1ResourceUsage{
+		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e55", // same ID should be accepted by first group since the previous resource should be expired
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     utils.UUIDSha1Prefix(),
+			Event: map[string]interface{}{
+				"Account":     "1002",
+				"Subject":     "1001",
+				"Destination": "1002"},
+		},
+	}
+	if err := rlsV1Rpc.Call(utils.ResourceSv1ReleaseResources,
+		argsRU, &reply); err == nil || err.Error() != "cannot find usage record with id: 651a8db2-4f67-4cf8-b622-169e8a482e55" {
+		t.Error(err)
 	}
 }
 
