@@ -63,6 +63,7 @@ var (
 		testAccITCountAccounts,
 		testAccITTPFromFolder,
 		testAccITAddBalanceWithDestinations,
+		//testAccITAccountWithTriggers,
 		testAccITStopCgrEngine,
 	}
 )
@@ -777,3 +778,154 @@ func testAccITAddBalanceWithDestinations(t *testing.T) {
 		t.Errorf("Calling Responder.MaxDebit got callcost: %v", utils.ToIJSON(cc))
 	}
 }
+
+/* Uncomment this test when found a solution for SetActions
+func testAccITAccountWithTriggers(t *testing.T) {
+	var reply string
+	args := &utils.AttrSetBalance{
+		Tenant:      "cgrates.org",
+		Account:     "testAccITAccountWithTriggers",
+		BalanceType: utils.MONETARY,
+		Balance: map[string]interface{}{
+			utils.ID:     "testAccITAccountWithTriggers",
+			utils.Weight: 10,
+			utils.Value:  5,
+		},
+	}
+	if err := accRPC.Call(utils.APIerSv1SetBalance, args, &reply); err != nil {
+		t.Error("Got error on SetBalance: ", err.Error())
+	} else if reply != utils.OK {
+		t.Errorf("Calling SetBalance received: %s", reply)
+	}
+
+	// add an action that contains topup and reset_triggers
+	topupAction := &utils.AttrSetActions{ActionsId: "TOPUP_WITH_RESET_TRIGGER", Actions: []*utils.TPAction{
+		{Identifier: utils.TOPUP_RESET, BalanceId: "testAccITAccountWithTriggers",
+			BalanceType: utils.MONETARY, Units: "5", Weight: 10.0},
+		{Identifier: utils.RESET_TRIGGERS},
+	}}
+
+	if err := accRPC.Call(utils.APIerSv2SetActions, topupAction, &reply); err != nil {
+		t.Error("Got error on APIerSv2.SetActions: ", err.Error())
+	} else if reply != utils.OK {
+		t.Errorf("Calling APIerSv2.SetActions received: %s", reply)
+	}
+
+	// add an action to be executed when the trigger is triggered
+	actTrigger := &utils.AttrSetActions{ActionsId: "ACT_TRIGGER", Actions: []*utils.TPAction{
+		{Identifier: utils.TOPUP, BalanceId: "CustomBanalce",
+			BalanceType: utils.MONETARY, Units: "5", Weight: 10.0},
+	}}
+
+	if err := accRPC.Call(utils.APIerSv2SetActions, actTrigger, &reply); err != nil {
+		t.Error("Got error on APIerSv2.SetActions: ", err.Error())
+	} else if reply != utils.OK {
+		t.Errorf("Calling APIerSv2.SetActions received: %s", reply)
+	}
+
+	attrsAddTrigger := &AttrAddActionTrigger{Tenant: "cgrates.org", Account: "testAccITAccountWithTriggers", BalanceType: utils.MONETARY,
+		ThresholdType: "*min_balance", ThresholdValue: 2, Weight: 10, ActionsId: "ACT_TRIGGER"}
+	if err := accRPC.Call(utils.APIerSv1AddTriggeredAction, attrsAddTrigger, &reply); err != nil {
+		t.Error("Got error on APIerSv1.AddTriggeredAction: ", err.Error())
+	} else if reply != utils.OK {
+		t.Errorf("Calling APIerSv1.AddTriggeredAction received: %s", reply)
+	}
+
+	var acnt engine.Account
+	attrAcc := &utils.AttrGetAccount{
+		Tenant:  accTenant,
+		Account: "testAccITAccountWithTriggers",
+	}
+
+	if err := accRPC.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
+		t.Fatal(err)
+	} else {
+		for _, value := range acnt.BalanceMap[utils.MONETARY] {
+			if value.ID == "testAccITAccountWithTriggers" {
+				if value.GetValue() != 5 {
+					t.Errorf("Expecting %+v, received: %+v", 5, value.GetValue())
+				}
+				if value.Weight != 10 {
+					t.Errorf("Expecting %+v, received: %+v", 10, value.Weight)
+				}
+				break
+			}
+		}
+		if len(acnt.ActionTriggers) != 1 {
+			t.Errorf("Expected 1, received: %+v", len(acnt.ActionTriggers))
+		} else {
+			if acnt.ActionTriggers[0].Executed != false {
+				t.Errorf("Expected false, received: %+v", acnt.ActionTriggers[0].Executed)
+			}
+		}
+	}
+
+	// Debit balance will trigger the Trigger from the account
+	if err := accRPC.Call(utils.APIerSv1DebitBalance, &AttrAddBalance{
+		Tenant:      "cgrates.org",
+		Account:     "testAccITAccountWithTriggers",
+		BalanceType: utils.MONETARY,
+		Value:       3,
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Received: %s", reply)
+	}
+
+	if err := accRPC.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
+		t.Fatal(err)
+	} else {
+		for _, value := range acnt.BalanceMap[utils.MONETARY] {
+			if value.ID == "testAccITAccountWithTriggers" {
+				if value.GetValue() != 2 {
+					t.Errorf("Expecting %+v, received: %+v", 2, value.GetValue())
+				}
+			} else if value.ID == "CustomBanalce" {
+				if value.GetValue() != 5 {
+					t.Errorf("Expecting %+v, received: %+v", 5, value.GetValue())
+				}
+			}
+		}
+		if len(acnt.ActionTriggers) != 1 {
+			t.Errorf("Expected 1, received: %+v", len(acnt.ActionTriggers))
+		} else {
+			if acnt.ActionTriggers[0].Executed != true {
+				t.Errorf("Expected true, received: %+v", acnt.ActionTriggers[0].Executed)
+			}
+		}
+	}
+
+	// execute the action that topup_reset the balance and reset the trigger
+	attrsEA := &utils.AttrExecuteAction{Tenant: "cgrates.org", Account: "testAccITAccountWithTriggers",
+		ActionsId: "TOPUP_WITH_RESET_TRIGGER"}
+	if err := accRPC.Call(utils.APIerSv1ExecuteAction, attrsEA, &reply); err != nil {
+		t.Error("Got error on APIerSv1.ExecuteAction: ", err.Error())
+	} else if reply != utils.OK {
+		t.Errorf("Calling APIerSv1.ExecuteAction received: %s", reply)
+	}
+
+	if err := accRPC.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
+		t.Fatal(err)
+	} else {
+		for _, value := range acnt.BalanceMap[utils.MONETARY] {
+			if value.ID == "testAccITAccountWithTriggers" {
+				if value.GetValue() != 2 {
+					t.Errorf("Expecting %+v, received: %+v", 2, value.GetValue())
+				}
+			} else if value.ID == "CustomBanalce" {
+				if value.GetValue() != 5 {
+					t.Errorf("Expecting %+v, received: %+v", 5, value.GetValue())
+				}
+			}
+		}
+		if len(acnt.ActionTriggers) != 1 {
+			t.Errorf("Expected 1, received: %+v", len(acnt.ActionTriggers))
+		} else {
+			if acnt.ActionTriggers[0].Executed != true {
+				t.Errorf("Expected true, received: %+v", acnt.ActionTriggers[0].Executed)
+			}
+		}
+	}
+
+}
+*/
