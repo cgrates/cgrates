@@ -3160,7 +3160,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 			ArgDispatcher: args.ArgDispatcher,
 		},
 	}
-	if argsFlagsWithParams.GetBool(utils.OptsMultiple) {
+	if argsFlagsWithParams.GetBool(utils.MetaMultiple) {
 		var chrgrs []*engine.ChrgSProcessEventReply
 		if chrgrs, err = sS.processChargerS(&utils.CGREventWithOpts{
 			CGREvent:      args.CGREvent,

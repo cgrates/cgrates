@@ -84,7 +84,7 @@
 				},
 				{
 					"tag": "ResultCode","path": "*rep.Result-Code",
-					"filters": ["*eq:~*cgrep.MaxUsage:0"],
+					"filters": ["*eq:~*cgrep.MaxUsage[*raw]:0"],
 					"type": "*constant", "value": "4012",
 					"blocker": true
 				},

@@ -79,6 +79,7 @@ cgrates (0.11.0~dev) UNRELEASED; urgency=medium
   * [RSRParsers] Moved RSRFilter from RSRParsers to the *rsr FilterS
   * [SessionS] Rename from ResourceMessage to ResourceAllocation
   * [LoaderS] Updated file selector from *req<FileName> to *file(FileName)
+  * [SessionS] Added *multiple flag to ProcessEvent to proccess the events from ChargerS with other subsystems
 
  -- DanB <danb@cgrates.org>  Wed, 19 Feb 2020 13:25:52 +0200
 

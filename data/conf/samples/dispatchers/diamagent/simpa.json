@@ -10,7 +10,7 @@
 			"flags": ["*message", "*accounts", "*log"],
 			"request_fields":[
 				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*generic"},
-				{"tag": "APIKey", "path": "*opts.APIKey", "type": "*constant", "value": "ses12345"},
+				{"tag": "APIKey", "path": "*opts.*dispatcherApiKey", "type": "*constant", "value": "ses12345"},
 				{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable",
 					"value": "~*req.Session-Id", "mandatory": true},
 				{"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*constant", "value": "*prepaid"},

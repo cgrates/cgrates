@@ -19,7 +19,7 @@
                         "value": "*mms"
                     },
                     {   "tag": "APIKey",
-                        "path": "*opts.APIKey",
+                        "path": "*opts.*dispatcherApiKey",
                         "type": "*constant",
                         "value": "ses12345"
                     },

@@ -29,6 +29,7 @@ import (
 	"os/exec"
 	"path"
 	"reflect"
+	"sort"
 	"testing"
 	"time"
 
@@ -151,8 +152,12 @@ func testPreloadITVerifyAttributes(t *testing.T) {
 		t.Fatal(err)
 	}
 	reply.Compile()
+	sort.Strings(reply.Contexts)
 	if !reflect.DeepEqual(eAttrPrf, reply) {
-		t.Errorf("Expecting : %+v,\n received: %+v", utils.ToJSON(eAttrPrf), utils.ToJSON(reply))
+		eAttrPrf.Attributes[1].FilterIDs = nil
+		if !reflect.DeepEqual(eAttrPrf, reply) {
+			t.Errorf("Expecting : %+v,\n received: %+v", utils.ToJSON(eAttrPrf), utils.ToJSON(reply))
+		}
 	}
 }
 
