@@ -1260,6 +1260,117 @@ func TestTPActionTriggersAsExportSlice(t *testing.T) {
 	}
 }
 
+func TestAPItoModelActionPlan(t *testing.T) {
+	var a *utils.TPActionPlan
+	if rcv := APItoModelActionPlan(a); rcv != nil {
+		t.Errorf("Expecting: nil, received: %+v", rcv)
+	}
+	a = &utils.TPActionPlan{
+		TPid: "TEST_TPID",
+		ID:   "PACKAGE_10",
+		ActionPlan: []*utils.TPActionTiming{
+			{
+				ActionsId: "TOPUP_RST_10",
+				TimingId:  "ASAP",
+				Weight:    10.0},
+			{
+				ActionsId: "TOPUP_RST_5",
+				TimingId:  "ASAP",
+				Weight:    20.0},
+		},
+	}
+
+	eOut := TpActionPlans{
+		TpActionPlan{
+			Tpid:       "TEST_TPID",
+			Tag:        "PACKAGE_10",
+			ActionsTag: "TOPUP_RST_10",
+			TimingTag:  "ASAP",
+			Weight:     10,
+		},
+		TpActionPlan{
+			Tpid:       "TEST_TPID",
+			Tag:        "PACKAGE_10",
+			ActionsTag: "TOPUP_RST_5",
+			TimingTag:  "ASAP",
+			Weight:     20,
+		},
+	}
+	if rcv := APItoModelActionPlan(a); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+	a = &utils.TPActionPlan{
+		TPid: "TEST_TPID",
+		ID:   "PACKAGE_10",
+	}
+	eOut = TpActionPlans{
+		TpActionPlan{
+			Tpid: "TEST_TPID",
+			Tag:  "PACKAGE_10",
+		},
+	}
+	if rcv := APItoModelActionPlan(a); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+}
+
+func TestAPItoModelActionPlans(t *testing.T) {
+	var a []*utils.TPActionPlan
+	if rcv := APItoModelActionPlans(a); rcv != nil {
+		t.Errorf("Expecting: nil, received: %+v", rcv)
+	}
+	a = []*utils.TPActionPlan{
+		&utils.TPActionPlan{
+			TPid: "TEST_TPID",
+			ID:   "PACKAGE_10",
+			ActionPlan: []*utils.TPActionTiming{
+				{
+					ActionsId: "TOPUP_RST_10",
+					TimingId:  "ASAP",
+					Weight:    10.0},
+				{
+					ActionsId: "TOPUP_RST_5",
+					TimingId:  "ASAP",
+					Weight:    20.0},
+			},
+		},
+	}
+	eOut := TpActionPlans{
+		TpActionPlan{
+			Tpid:       "TEST_TPID",
+			Tag:        "PACKAGE_10",
+			ActionsTag: "TOPUP_RST_10",
+			TimingTag:  "ASAP",
+			Weight:     10,
+		},
+		TpActionPlan{
+			Tpid:       "TEST_TPID",
+			Tag:        "PACKAGE_10",
+			ActionsTag: "TOPUP_RST_5",
+			TimingTag:  "ASAP",
+			Weight:     20,
+		},
+	}
+	if rcv := APItoModelActionPlans(a); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+	a = []*utils.TPActionPlan{
+		&utils.TPActionPlan{
+			TPid: "TEST_TPID",
+			ID:   "PACKAGE_10",
+		},
+	}
+	eOut = TpActionPlans{
+		TpActionPlan{
+			Tpid: "TEST_TPID",
+			Tag:  "PACKAGE_10",
+		},
+	}
+	if rcv := APItoModelActionPlans(a); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+}
+
 func TestTPActionPlanAsExportSlice(t *testing.T) {
 	at := &utils.TPActionTriggers{
 		TPid: "TEST_TPID",
@@ -1325,6 +1436,119 @@ func TestTPActionPlanAsExportSlice(t *testing.T) {
 	}
 }
 
+func TestAPItoModelActionTrigger(t *testing.T) {
+	var at *utils.TPActionTriggers
+	if rcv := APItoModelActionTrigger(at); rcv != nil {
+		t.Errorf("Expecting: nil, received: %+v", rcv)
+	}
+
+	at = &utils.TPActionTriggers{
+		TPid: "TEST_TPID",
+		ID:   "STANDARD_TRIGGERS",
+		ActionTriggers: []*utils.TPActionTrigger{
+			{
+				Id:                    "STANDARD_TRIGGERS",
+				UniqueID:              "1",
+				ThresholdType:         "*min_balance",
+				ThresholdValue:        2.0,
+				Recurrent:             false,
+				MinSleep:              "0",
+				BalanceId:             "b1",
+				BalanceType:           "*monetary",
+				BalanceDestinationIds: "",
+				BalanceWeight:         "0.0",
+				BalanceExpirationDate: "*never",
+				BalanceTimingTags:     "T1",
+				BalanceRatingSubject:  "special1",
+				BalanceCategories:     "call",
+				BalanceSharedGroups:   "SHARED_1",
+				BalanceBlocker:        "false",
+				BalanceDisabled:       "false",
+				ActionsId:             "LOG_WARNING",
+				Weight:                10},
+			{
+				Id:                    "STANDARD_TRIGGERS",
+				UniqueID:              "2",
+				ThresholdType:         "*max_event_counter",
+				ThresholdValue:        5.0,
+				Recurrent:             false,
+				MinSleep:              "0",
+				BalanceId:             "b2",
+				BalanceType:           "*monetary",
+				BalanceDestinationIds: "FS_USERS",
+				BalanceWeight:         "0.0",
+				BalanceExpirationDate: "*never",
+				BalanceTimingTags:     "T1",
+				BalanceRatingSubject:  "special1",
+				BalanceCategories:     "call",
+				BalanceSharedGroups:   "SHARED_1",
+				BalanceBlocker:        "false",
+				BalanceDisabled:       "false",
+				ActionsId:             "LOG_WARNING",
+				Weight:                10},
+		},
+	}
+	eOut := TpActionTriggers{
+		TpActionTrigger{
+			Tpid:                 "TEST_TPID",
+			Tag:                  "STANDARD_TRIGGERS",
+			UniqueId:             "1",
+			ThresholdType:        "*min_balance",
+			ThresholdValue:       2,
+			MinSleep:             "0",
+			BalanceTag:           "b1",
+			BalanceType:          "*monetary",
+			BalanceCategories:    "call",
+			BalanceRatingSubject: "special1",
+			BalanceSharedGroups:  "SHARED_1",
+			BalanceExpiryTime:    "*never",
+			BalanceTimingTags:    "T1",
+			BalanceWeight:        "0.0",
+			BalanceBlocker:       "false",
+			BalanceDisabled:      "false",
+			ActionsTag:           "LOG_WARNING",
+			Weight:               10,
+		},
+		TpActionTrigger{
+			Tpid:                   "TEST_TPID",
+			Tag:                    "STANDARD_TRIGGERS",
+			UniqueId:               "2",
+			ThresholdType:          "*max_event_counter",
+			ThresholdValue:         5,
+			MinSleep:               "0",
+			BalanceTag:             "b2",
+			BalanceType:            "*monetary",
+			BalanceCategories:      "call",
+			BalanceDestinationTags: "FS_USERS",
+			BalanceRatingSubject:   "special1",
+			BalanceSharedGroups:    "SHARED_1",
+			BalanceExpiryTime:      "*never",
+			BalanceTimingTags:      "T1",
+			BalanceWeight:          "0.0",
+			BalanceBlocker:         "false",
+			BalanceDisabled:        "false",
+			ActionsTag:             "LOG_WARNING",
+			Weight:                 10,
+		},
+	}
+	if rcv := APItoModelActionTrigger(at); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+	at = &utils.TPActionTriggers{
+		TPid: "TEST_TPID",
+		ID:   "STANDARD_TRIGGERS",
+	}
+	eOut = TpActionTriggers{
+		TpActionTrigger{
+			Tpid: "TEST_TPID",
+			Tag:  "STANDARD_TRIGGERS",
+		},
+	}
+	if rcv := APItoModelActionTrigger(at); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+}
+
 func TestTPAccountActionsAsExportSlice(t *testing.T) {
 	aa := &utils.TPAccountActions{
 		TPid:             "TEST_TPID",
@@ -1348,6 +1572,49 @@ func TestTPAccountActionsAsExportSlice(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedSlc, slc)
 	}
 }
+func TestAPItoModelActionTriggers(t *testing.T) {
+	var ts []*utils.TPActionTriggers
+	if rcv := APItoModelActionTriggers(ts); rcv != nil {
+		t.Errorf("Expecting: nil, received: %+v", rcv)
+	}
+	ts = []*utils.TPActionTriggers{
+		&utils.TPActionTriggers{
+			TPid: "TEST_TPID",
+			ID:   "STANDARD_TRIGGERS",
+			ActionTriggers: []*utils.TPActionTrigger{
+				{
+					Id:            "STANDARD_TRIGGERS",
+					UniqueID:      "1",
+					ThresholdType: "*min_balance",
+					Weight:        0.7},
+				{
+					Id:            "STANDARD_TRIGGERS",
+					UniqueID:      "2",
+					ThresholdType: "*max_event_counter",
+					Weight:        0.8},
+			},
+		},
+	}
+	eOut := TpActionTriggers{
+		TpActionTrigger{
+			Tpid:          "TEST_TPID",
+			Tag:           "STANDARD_TRIGGERS",
+			UniqueId:      "1",
+			ThresholdType: "*min_balance",
+			Weight:        0.7,
+		},
+		TpActionTrigger{
+			Tpid:          "TEST_TPID",
+			Tag:           "STANDARD_TRIGGERS",
+			UniqueId:      "2",
+			ThresholdType: "*max_event_counter",
+			Weight:        0.8,
+		},
+	}
+	if rcv := APItoModelActionTriggers(ts); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v,\nreceived: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+}
 
 func TestAPItoModelAction(t *testing.T) {
 	var as *utils.TPActions
@@ -1366,6 +1633,149 @@ func TestAPItoModelAction(t *testing.T) {
 	}
 	if rcv := APItoModelAction(as); !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+	as = &utils.TPActions{
+		TPid: "TEST_TPID",
+		ID:   "TEST_ACTIONS",
+		Actions: []*utils.TPAction{
+			{
+				Identifier:      "*topup_reset",
+				BalanceType:     "*monetary",
+				Units:           "5.0",
+				ExpiryTime:      "*never",
+				DestinationIds:  "*any",
+				RatingSubject:   "special1",
+				Categories:      "call",
+				SharedGroups:    "GROUP1",
+				BalanceWeight:   "10.0",
+				ExtraParameters: "",
+				Weight:          10.0},
+			{
+				Identifier:      "*http_post",
+				BalanceType:     "",
+				Units:           "0.0",
+				ExpiryTime:      "",
+				DestinationIds:  "",
+				RatingSubject:   "",
+				Categories:      "",
+				SharedGroups:    "",
+				BalanceWeight:   "0.0",
+				ExtraParameters: "http://localhost/&param1=value1",
+				Weight:          20.0},
+		},
+	}
+	eOut = TpActions{
+		TpAction{
+			Tpid:            "TEST_TPID",
+			Tag:             "TEST_ACTIONS",
+			BalanceType:     "*monetary",
+			Categories:      "call",
+			DestinationTags: "*any",
+			RatingSubject:   "special1",
+			SharedGroups:    "GROUP1",
+			ExpiryTime:      "*never",
+			Units:           "5.0",
+			BalanceWeight:   "10.0",
+			Weight:          10,
+			Action:          "*topup_reset",
+		},
+		TpAction{
+			Tpid:            "TEST_TPID",
+			Tag:             "TEST_ACTIONS",
+			Action:          "*http_post",
+			ExtraParameters: "http://localhost/\u0026param1=value1",
+			Units:           "0.0",
+			BalanceWeight:   "0.0",
+			Weight:          20,
+		},
+	}
+	if rcv := APItoModelAction(as); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v,\nreceived: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+}
+
+func TestAPItoModelActions(t *testing.T) {
+	var as []*utils.TPActions
+	if rcv := APItoModelActions(as); rcv != nil {
+		t.Errorf("Expecting: nil, received: %+v", rcv)
+	}
+	as = []*utils.TPActions{
+		&utils.TPActions{
+			TPid: "TEST_TPID",
+			ID:   "TEST_ACTIONS",
+		},
+		&utils.TPActions{
+			TPid: "TEST_TPID2",
+			ID:   "TEST_ACTIONS2",
+		},
+	}
+	eOut := TpActions{
+		TpAction{
+			Tpid: "TEST_TPID",
+			Tag:  "TEST_ACTIONS",
+		},
+		TpAction{
+			Tpid: "TEST_TPID2",
+			Tag:  "TEST_ACTIONS2",
+		},
+	}
+	if rcv := APItoModelActions(as); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v,\nreceived: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+	as = []*utils.TPActions{
+		&utils.TPActions{
+			TPid: "TEST_TPID",
+			ID:   "TEST_ACTIONS",
+			Actions: []*utils.TPAction{
+				{
+					Identifier:      "*topup_reset",
+					BalanceType:     "*monetary",
+					Units:           "5.0",
+					ExpiryTime:      "*never",
+					DestinationIds:  "*any",
+					RatingSubject:   "special1",
+					Categories:      "call",
+					SharedGroups:    "GROUP1",
+					BalanceWeight:   "10.0",
+					ExtraParameters: "",
+					Weight:          10.0},
+				{
+					Identifier:      "*http_post",
+					BalanceType:     "",
+					Units:           "0.0",
+					BalanceWeight:   "0.0",
+					ExtraParameters: "http://localhost/&param1=value1",
+					Weight:          20.0},
+			},
+		},
+	}
+	eOut = TpActions{
+		TpAction{
+			Tpid:            "TEST_TPID",
+			Tag:             "TEST_ACTIONS",
+			BalanceType:     "*monetary",
+			Categories:      "call",
+			DestinationTags: "*any",
+			RatingSubject:   "special1",
+			SharedGroups:    "GROUP1",
+			ExpiryTime:      "*never",
+			Units:           "5.0",
+			BalanceWeight:   "10.0",
+			Weight:          10,
+			Action:          "*topup_reset",
+		},
+		TpAction{
+			Tpid:            "TEST_TPID",
+			Tag:             "TEST_ACTIONS",
+			Action:          "*http_post",
+			ExtraParameters: "http://localhost/\u0026param1=value1",
+			Units:           "0.0",
+			BalanceWeight:   "0.0",
+			Weight:          20,
+		},
+	}
+	if rcv := APItoModelActions(as); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v,\nreceived: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
 	}
 }
 
