@@ -158,7 +158,7 @@ func testSSv1ItProcessEventAuth(t *testing.T) {
 	args := &sessions.V1ProcessEventArgs{
 		Flags: []string{utils.ConcatenatedKey(utils.MetaResources, utils.MetaAuthorize),
 			utils.ConcatenatedKey(utils.MetaRALs, utils.MetaAuthorize),
-			utils.MetaRoutes, utils.MetaAttributes},
+			utils.MetaRoutes, utils.MetaAttributes, utils.MetaMultiple},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSSv1ItProcessEventAuth",
@@ -204,8 +204,8 @@ func testSSv1ItProcessEventAuth(t *testing.T) {
 			},
 		},
 	}
-	if !reflect.DeepEqual(eSplrs, rply.Routes) {
-		t.Errorf("expecting: %+v,\n received: %+v", utils.ToJSON(eSplrs), utils.ToJSON(rply.Routes))
+	if !reflect.DeepEqual(eSplrs, rply.Routes[utils.MetaRaw]) {
+		t.Errorf("expecting: %+v,\n received: %+v", utils.ToJSON(eSplrs), utils.ToJSON(rply.Routes[utils.MetaRaw]))
 	}
 	eAttrs := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_ACNT_1001"},
@@ -227,9 +227,9 @@ func testSSv1ItProcessEventAuth(t *testing.T) {
 			},
 		},
 	}
-	if !reflect.DeepEqual(eAttrs, rply.Attributes) {
+	if !reflect.DeepEqual(eAttrs, rply.Attributes[utils.MetaRaw]) {
 		t.Errorf("expecting: %+v, received: %+v",
-			utils.ToJSON(eAttrs), utils.ToJSON(rply.Attributes))
+			utils.ToJSON(eAttrs), utils.ToJSON(rply.Attributes[utils.MetaRaw]))
 	}
 }
 
@@ -237,7 +237,8 @@ func testSSv1ItProcessEventInitiateSession(t *testing.T) {
 	initUsage := 5 * time.Minute
 	args := &sessions.V1ProcessEventArgs{
 		Flags: []string{utils.ConcatenatedKey(utils.MetaRALs, utils.MetaInitiate),
-			utils.ConcatenatedKey(utils.MetaResources, utils.MetaAllocate), utils.MetaAttributes},
+			utils.ConcatenatedKey(utils.MetaResources, utils.MetaAllocate), utils.MetaAttributes,
+			utils.MetaMultiple},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSSv1ItProcessEventInitiateSession",
@@ -290,9 +291,9 @@ func testSSv1ItProcessEventInitiateSession(t *testing.T) {
 			},
 		},
 	}
-	if !reflect.DeepEqual(eAttrs, rply.Attributes) {
+	if !reflect.DeepEqual(eAttrs, rply.Attributes[utils.MetaRaw]) {
 		t.Errorf("expecting: %+v, received: %+v",
-			utils.ToJSON(eAttrs), utils.ToJSON(rply.Attributes))
+			utils.ToJSON(eAttrs), utils.ToJSON(rply.Attributes[utils.MetaRaw]))
 	}
 	aSessions := make([]*sessions.ExternalSession, 0)
 	if err := sSv1BiRpc.Call(utils.SessionSv1GetActiveSessions, &utils.SessionFilter{}, &aSessions); err != nil {
@@ -349,9 +350,9 @@ func testSSv1ItProcessEventUpdateSession(t *testing.T) {
 			},
 		},
 	}
-	if !reflect.DeepEqual(eAttrs, rply.Attributes) {
+	if !reflect.DeepEqual(eAttrs, rply.Attributes[utils.MetaRaw]) {
 		t.Errorf("expecting: %+v, received: %+v",
-			utils.ToJSON(eAttrs), utils.ToJSON(rply.Attributes))
+			utils.ToJSON(eAttrs), utils.ToJSON(rply.Attributes[utils.MetaRaw]))
 	}
 	// in case of prepaid and pseudoprepade we expect a MaxUsage of 5min
 	// and in case of postpaid and rated we expect the value of Usage field
@@ -499,15 +500,15 @@ func testSSv1ItProcessEventWithGetCost(t *testing.T) {
 	}
 	if rply.Attributes == nil {
 		t.Error("Received nil Attributes")
-	} else if !reflect.DeepEqual(rply.Attributes.MatchedProfiles, []string{"ATTR_SUBJECT_CASE1"}) {
-		t.Errorf("Expected: %+v,received: %+v", []string{"ATTR_SUBJECT_CASE1"}, rply.Attributes.MatchedProfiles)
-	} else if !reflect.DeepEqual(rply.Attributes.AlteredFields, []string{"*req.Subject"}) {
-		t.Errorf("Expected: %+v,received: %+v", []string{"*req.Subject"}, rply.Attributes.AlteredFields)
+	} else if !reflect.DeepEqual(rply.Attributes[utils.MetaRaw].MatchedProfiles, []string{"ATTR_SUBJECT_CASE1"}) {
+		t.Errorf("Expected: %+v,received: %+v", []string{"ATTR_SUBJECT_CASE1"}, rply.Attributes[utils.MetaRaw].MatchedProfiles)
+	} else if !reflect.DeepEqual(rply.Attributes[utils.MetaRaw].AlteredFields, []string{"*req.Subject"}) {
+		t.Errorf("Expected: %+v,received: %+v", []string{"*req.Subject"}, rply.Attributes[utils.MetaRaw].AlteredFields)
 	}
 	if rply.Cost == nil {
 		t.Errorf("Received nil Cost")
-	} else if *rply.Cost != 0.198 { // same cost as in CDR
-		t.Errorf("Expected: %+v,received: %+v", 0.198, *rply.Cost)
+	} else if rply.Cost[utils.MetaRaw] != 0.198 { // same cost as in CDR
+		t.Errorf("Expected: %+v,received: %+v", 0.198, rply.Cost[utils.MetaRaw])
 	}
 }
 
@@ -538,15 +539,15 @@ func testSSv1ItProcessEventWithGetCost2(t *testing.T) {
 	}
 	if rply.Attributes == nil {
 		t.Error("Received nil Attributes")
-	} else if !reflect.DeepEqual(rply.Attributes.MatchedProfiles, []string{"ATTR_SUBJECT_CASE2"}) {
-		t.Errorf("Expected: %+v,received: %+v", []string{"ATTR_SUBJECT_CASE2"}, rply.Attributes.MatchedProfiles)
-	} else if !reflect.DeepEqual(rply.Attributes.AlteredFields, []string{"*req.Subject"}) {
-		t.Errorf("Expected: %+v,received: %+v", []string{"*req.Subject"}, rply.Attributes.AlteredFields)
+	} else if !reflect.DeepEqual(rply.Attributes[utils.MetaRaw].MatchedProfiles, []string{"ATTR_SUBJECT_CASE2"}) {
+		t.Errorf("Expected: %+v,received: %+v", []string{"ATTR_SUBJECT_CASE2"}, rply.Attributes[utils.MetaRaw].MatchedProfiles)
+	} else if !reflect.DeepEqual(rply.Attributes[utils.MetaRaw].AlteredFields, []string{"*req.Subject"}) {
+		t.Errorf("Expected: %+v,received: %+v", []string{"*req.Subject"}, rply.Attributes[utils.MetaRaw].AlteredFields)
 	}
 	if rply.Cost == nil {
 		t.Errorf("Received nil Cost")
-	} else if *rply.Cost != 0.102 { // same cost as in CDR
-		t.Errorf("Expected: %+v,received: %+v", 0.102, *rply.Cost)
+	} else if rply.Cost[utils.MetaRaw] != 0.102 { // same cost as in CDR
+		t.Errorf("Expected: %+v,received: %+v", 0.102, rply.Cost[utils.MetaRaw])
 	}
 }
 
@@ -579,15 +580,15 @@ func testSSv1ItProcessEventWithGetCost3(t *testing.T) {
 	}
 	if rply.Attributes == nil {
 		t.Error("Received nil Attributes")
-	} else if !reflect.DeepEqual(rply.Attributes.MatchedProfiles, []string{"ATTR_SUBJECT_CASE3"}) {
-		t.Errorf("Expected: %+v,received: %+v", []string{"ATTR_SUBJECT_CASE3"}, rply.Attributes.MatchedProfiles)
-	} else if !reflect.DeepEqual(rply.Attributes.AlteredFields, []string{"*req.Subject"}) {
-		t.Errorf("Expected: %+v,received: %+v", []string{"*req.Subject"}, rply.Attributes.AlteredFields)
+	} else if !reflect.DeepEqual(rply.Attributes[utils.MetaRaw].MatchedProfiles, []string{"ATTR_SUBJECT_CASE3"}) {
+		t.Errorf("Expected: %+v,received: %+v", []string{"ATTR_SUBJECT_CASE3"}, rply.Attributes[utils.MetaRaw].MatchedProfiles)
+	} else if !reflect.DeepEqual(rply.Attributes[utils.MetaRaw].AlteredFields, []string{"*req.Subject"}) {
+		t.Errorf("Expected: %+v,received: %+v", []string{"*req.Subject"}, rply.Attributes[utils.MetaRaw].AlteredFields)
 	}
 	if rply.Cost == nil {
 		t.Errorf("Received nil Cost")
-	} else if *rply.Cost != 2.9999 {
-		t.Errorf("Expected: %+v,received: %+v", 2.9999, *rply.Cost)
+	} else if rply.Cost[utils.MetaRaw] != 2.9999 {
+		t.Errorf("Expected: %+v,received: %+v", 2.9999, rply.Cost[utils.MetaRaw])
 	}
 }
 

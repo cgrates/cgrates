@@ -250,7 +250,7 @@ func testSes2StirInit(t *testing.T) {
 		args, &rply); err != nil { // no error verificated with success
 		t.Error(err)
 	}
-	if err := sessions.AuthStirShaken(rply.STIRIdentity["DEFAULT"], "1001", "", "1002", "", utils.NewStringSet([]string{"A"}), 10*time.Minute); err != nil {
+	if err := sessions.AuthStirShaken(rply.STIRIdentity[utils.MetaRaw], "1001", "", "1002", "", utils.NewStringSet([]string{"A"}), 10*time.Minute); err != nil {
 		t.Fatal(err)
 	}
 }

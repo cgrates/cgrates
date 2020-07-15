@@ -81,7 +81,7 @@
 				},
 				{
 					"tag": "DebitInterval",
-					"path": "*opts.DebitInterval", 
+					"path": "*opts.*sessionDebitInterval", 
 					"type": "*constant",
 					"value": "1s"
 				},

@@ -2267,7 +2267,7 @@ const (
 	OptsRouteID = "*dispatcherRouteID"
 	// Others
 	OptsContext  = "*context"
-	OptsMultiple = "*multiple"
+	MetaMultiple = "*multiple"
 )
 
 func buildCacheInstRevPrefixes() {

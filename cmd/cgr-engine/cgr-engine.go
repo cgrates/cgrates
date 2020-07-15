@@ -481,12 +481,19 @@ func main() {
 	})
 
 	dmService := services.NewDataDBService(cfg, connManager)
-	storDBService := services.NewStorDBService(cfg)
 	if dmService.ShouldRun() { // Some services can run without db, ie:  ERs
 		if err = dmService.Start(); err != nil {
 			return
 		}
 	}
+
+	storDBService := services.NewStorDBService(cfg)
+	if storDBService.ShouldRun() { // Some services can run without db, ie:  ERs
+		if err = storDBService.Start(); err != nil {
+			return
+		}
+	}
+
 	// Done initing DBs
 	engine.SetRoundingDecimals(cfg.GeneralCfg().RoundingDecimals)
 	engine.SetFailedPostCacheTTL(cfg.GeneralCfg().FailedPostsTTL)
