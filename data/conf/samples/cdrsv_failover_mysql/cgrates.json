@@ -7,28 +7,28 @@
 "general": {
     "log_level": 7,
 	"poster_attempts": 1,									// number of attempts before considering post request failed (eg: *http_post, CDR exports)
-	"failed_posts_ttl": "1s",				// time to wait before writing the failed posts in a single file
+	"failed_posts_ttl": "1s"				// time to wait before writing the failed posts in a single file
 },
 
 
 "data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
 	"db_type": "redis",						// data_db type: <redis|mongo>
 	"db_port": 6379, 						// data_db port to reach the database
-	"db_name": "10", 						// data_db database name to connect to
+	"db_name": "10" 						// data_db database name to connect to
 },
 
 "stor_db": {
-	"db_password": "CGRateS.org",
+	"db_password": "CGRateS.org"
 },
 
 
 "rals": {
 	"enabled": true,						// enable Rater service: <true|false>
-	"thresholds_conns": ["*localhost"],
+	"thresholds_conns": ["*localhost"]
 },
 
 "schedulers": {
-	"enabled": true,
+	"enabled": true
 },
 
 "cdrs": {
@@ -39,43 +39,51 @@
 	"stats_conns": ["*localhost"],
 	"thresholds_conns": ["*localhost"],
 	"online_cdr_exports": ["s3_test_file"],
+	"ees_conns": ["*localhost"]
 },
 
 "attributes": {
-	"enabled": true,
+	"enabled": true
 },
 
 "stats": {
 	"enabled": true,
 	"store_interval": "1s",
-	"thresholds_conns": ["*internal"],
+	"thresholds_conns": ["*internal"]
 },
 
 "thresholds": {
 	"enabled": true,
-	"store_interval": "1s",
+	"store_interval": "1s"
 },
 
 "chargers": {
 	"enabled": true,
-	"attributes_conns": ["*internal"],
+	"attributes_conns": ["*internal"]
 },
 
 "apiers": {
 	"enabled": true,
-	"scheduler_conns": ["*internal"],
+	"scheduler_conns": ["*internal"]
 },
 
-"cdre": {
-	"s3_test_file": {
-		"export_format": "*s3_json_map",
-		// export_path for s3:  "endpoint?aws_region=region&aws_key=IDkey&aws_secret=secret&aws_token=sessionToken&queue_id=cgrates-cdrs"  
-		"export_path": "http://s3.us-east-2.amazonaws.com/?aws_region=eu-west-2&aws_key=testkey&aws_secret=testsecret&queue_id=cgrates-cdrs",
-		"fields": [
-			{"path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"},
-		],
-	},
+"ees": {
+	"enabled": true,
+	"attributes_conns": ["*internal"],
+	"exporters": [
+		{
+			"id": "s3_test_file",
+			"export_format": "*s3_json_map",
+			// export_path for s3:  "endpoint?aws_region=region&aws_key=IDkey&aws_secret=secret&aws_token=sessionToken&queue_id=cgrates-cdrs"
+			"export_path": "http://s3.us-east-2.amazonaws.com/?aws_region=eu-west-2&aws_key=testkey&aws_secret=testsecret&queue_id=cgrates-cdrs",
+			"tenant": "cgrates.org",
+			"attempts": 1,
+			"fields":[
+				{"tag": "CGRID", "path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"},
+			],
+		}
+	]
 },
 
 
-}
+},
