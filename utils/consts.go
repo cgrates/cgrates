@@ -19,9 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 var (
-	CDRExportFormats = NewStringSet([]string{DRYRUN, MetaFileCSV, MetaFileFWV, MetaHTTPjsonCDR, MetaHTTPjsonMap,
-		MetaHTTPjson, MetaHTTPPost, MetaAMQPjsonCDR, MetaAMQPjsonMap, MetaAMQPV1jsonMap, MetaSQSjsonMap,
-		MetaKafkajsonMap, MetaS3jsonMap})
 	MainCDRFields = NewStringSet([]string{CGRID, Source, OriginHost, OriginID, ToR, RequestType, Tenant, Category,
 		Account, Subject, Destination, SetupTime, AnswerTime, Usage, COST, RATED, Partial, RunID,
 		PreRated, CostSource, CostDetails, ExtraInfo, OrderID})
@@ -236,7 +233,6 @@ const (
 	ZERO_RATING_SUBJECT_PREFIX   = "*zero"
 	OK                           = "OK"
 	MetaFileXML                  = "*file_xml"
-	CDRE                         = "cdre"
 	MASK_CHAR                    = "*"
 	CONCATENATED_KEY_SEP         = ":"
 	UNIT_TEST                    = "UNIT_TEST"
@@ -249,10 +245,8 @@ const (
 	VOICE                        = "*voice"
 	MAX_COST_FREE                = "*free"
 	MAX_COST_DISCONNECT          = "*disconnect"
-	SECONDS                      = "seconds"
 	META_OUT                     = "*out"
 	META_ANY                     = "*any"
-	ASR                          = "ASR"
 	ACD                          = "ACD"
 	TASKS_KEY                    = "tasks"
 	ACTION_PLAN_PREFIX           = "apl_"
@@ -1254,8 +1248,6 @@ const (
 	APIerSv1RemoveActionPlan            = "APIerSv1.RemoveActionPlan"
 	APIerSv1RemoveActions               = "APIerSv1.RemoveActions"
 	APIerSv1RemoveBalances              = "APIerSv1.RemoveBalances"
-	APIerSv1ReloadCdrcConfig            = "APIerSv1.ReloadCdrcConfig"
-	APIerSv1ReloadCdreConfig            = "APIerSv1.ReloadCdreConfig"
 	APIerSv1GetLoadHistory              = "APIerSv1.GetLoadHistory"
 	APIerSv1GetLoadIDs                  = "APIerSv1.GetLoadIDs"
 	APIerSv1GetLoadTimes                = "APIerSv1.GetLoadTimes"
@@ -2149,7 +2141,6 @@ const (
 
 // CGRConfig
 const (
-	CdreProfiles     = "cdre"             // from JSON
 	LoaderCfg        = "loaders"          // from JSON
 	HttpAgentCfg     = "http_agent"       // from JSON
 	RpcConns         = "rpc_conns"        // from JSON

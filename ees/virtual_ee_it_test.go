@@ -99,28 +99,30 @@ func testVirtRPCConn(t *testing.T) {
 }
 
 func testVirtExportSupplierEvent(t *testing.T) {
-	supplierEvent := &utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "supplierEvent",
-			Time:   utils.TimePointer(time.Now()),
-			Event: map[string]interface{}{
-				utils.CGRID:       utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
-				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "dsafdsaf",
-				utils.OriginHost:  "192.168.1.1",
-				utils.RequestType: utils.META_RATED,
-				utils.Tenant:      "cgrates.org",
-				utils.Category:    "call",
-				utils.Account:     "1001",
-				utils.Subject:     "1001",
-				utils.Destination: "1002",
-				utils.SetupTime:   time.Unix(1383813745, 0).UTC(),
-				utils.AnswerTime:  time.Unix(1383813746, 0).UTC(),
-				utils.Usage:       time.Duration(10) * time.Second,
-				utils.RunID:       "SupplierRun",
-				utils.Cost:        1.23,
-				"ExporterUsed":    "RouteExporter",
+	supplierEvent := &utils.CGREventWithIDs{
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "supplierEvent",
+				Time:   utils.TimePointer(time.Now()),
+				Event: map[string]interface{}{
+					utils.CGRID:       utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
+					utils.ToR:         utils.VOICE,
+					utils.OriginID:    "dsafdsaf",
+					utils.OriginHost:  "192.168.1.1",
+					utils.RequestType: utils.META_RATED,
+					utils.Tenant:      "cgrates.org",
+					utils.Category:    "call",
+					utils.Account:     "1001",
+					utils.Subject:     "1001",
+					utils.Destination: "1002",
+					utils.SetupTime:   time.Unix(1383813745, 0).UTC(),
+					utils.AnswerTime:  time.Unix(1383813746, 0).UTC(),
+					utils.Usage:       time.Duration(10) * time.Second,
+					utils.RunID:       "SupplierRun",
+					utils.Cost:        1.23,
+					"ExporterUsed":    "RouteExporter",
+				},
 			},
 		},
 	}
@@ -135,28 +137,30 @@ func testVirtExportSupplierEvent(t *testing.T) {
 }
 
 func testVirtExportEvents(t *testing.T) {
-	eventVoice := &utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "voiceEvent",
-			Time:   utils.TimePointer(time.Now()),
-			Event: map[string]interface{}{
-				utils.CGRID:       utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
-				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "dsafdsaf",
-				utils.OriginHost:  "192.168.1.1",
-				utils.RequestType: utils.META_RATED,
-				utils.Tenant:      "cgrates.org",
-				utils.Category:    "call",
-				utils.Account:     "1001",
-				utils.Subject:     "1001",
-				utils.Destination: "1002",
-				utils.SetupTime:   time.Unix(1383813745, 0).UTC(),
-				utils.AnswerTime:  time.Unix(1383813746, 0).UTC(),
-				utils.Usage:       time.Duration(10) * time.Second,
-				utils.RunID:       "SupplierRun",
-				utils.Cost:        1.01,
-				"ExporterUsed":    "CSVExporterFromVirt",
+	eventVoice := &utils.CGREventWithIDs{
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "voiceEvent",
+				Time:   utils.TimePointer(time.Now()),
+				Event: map[string]interface{}{
+					utils.CGRID:       utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
+					utils.ToR:         utils.VOICE,
+					utils.OriginID:    "dsafdsaf",
+					utils.OriginHost:  "192.168.1.1",
+					utils.RequestType: utils.META_RATED,
+					utils.Tenant:      "cgrates.org",
+					utils.Category:    "call",
+					utils.Account:     "1001",
+					utils.Subject:     "1001",
+					utils.Destination: "1002",
+					utils.SetupTime:   time.Unix(1383813745, 0).UTC(),
+					utils.AnswerTime:  time.Unix(1383813746, 0).UTC(),
+					utils.Usage:       time.Duration(10) * time.Second,
+					utils.RunID:       "SupplierRun",
+					utils.Cost:        1.01,
+					"ExporterUsed":    "CSVExporterFromVirt",
+				},
 			},
 		},
 	}

@@ -37,7 +37,7 @@ func (eSv1 *EventExporterSv1) Ping(ign *utils.CGREventWithArgDispatcher, reply *
 }
 
 // ProcessEvent triggers exports on EEs side
-func (eSv1 *EventExporterSv1) ProcessEvent(args *utils.CGREventWithOpts,
+func (eSv1 *EventExporterSv1) ProcessEvent(args *utils.CGREventWithIDs,
 	reply *string) error {
 	return eSv1.eeS.V1ProcessEvent(args, reply)
 }

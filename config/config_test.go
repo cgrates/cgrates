@@ -462,128 +462,6 @@ func TestCgrCfgJSONLoadCDRS(t *testing.T) {
 	}
 }
 
-func TestCgrCfgJSONDefaultsCdreProfiles(t *testing.T) {
-	eContentFlds := []*FCTemplate{
-		{
-			Tag:    "*exp.CGRID",
-			Path:   "*exp.CGRID",
-			Type:   utils.MetaVariable,
-			Value:  NewRSRParsersMustCompile("~*req.CGRID", utils.INFIELD_SEP),
-			Layout: time.RFC3339,
-		},
-		{
-			Tag:    "*exp.RunID",
-			Path:   "*exp.RunID",
-			Type:   utils.MetaVariable,
-			Value:  NewRSRParsersMustCompile("~*req.RunID", utils.INFIELD_SEP),
-			Layout: time.RFC3339,
-		},
-		{
-			Tag:    "*exp.ToR",
-			Path:   "*exp.ToR",
-			Type:   utils.MetaVariable,
-			Value:  NewRSRParsersMustCompile("~*req.ToR", utils.INFIELD_SEP),
-			Layout: time.RFC3339,
-		},
-		{
-			Tag:    "*exp.OriginID",
-			Path:   "*exp.OriginID",
-			Type:   utils.MetaVariable,
-			Value:  NewRSRParsersMustCompile("~*req.OriginID", utils.INFIELD_SEP),
-			Layout: time.RFC3339,
-		},
-		{
-			Tag:    "*exp.RequestType",
-			Path:   "*exp.RequestType",
-			Type:   utils.MetaVariable,
-			Value:  NewRSRParsersMustCompile("~*req.RequestType", utils.INFIELD_SEP),
-			Layout: time.RFC3339,
-		},
-		{
-			Tag:    "*exp.Tenant",
-			Path:   "*exp.Tenant",
-			Type:   utils.MetaVariable,
-			Value:  NewRSRParsersMustCompile("~*req.Tenant", utils.INFIELD_SEP),
-			Layout: time.RFC3339,
-		},
-		{
-			Tag:    "*exp.Category",
-			Path:   "*exp.Category",
-			Type:   utils.MetaVariable,
-			Value:  NewRSRParsersMustCompile("~*req.Category", utils.INFIELD_SEP),
-			Layout: time.RFC3339,
-		},
-		{
-			Tag:    "*exp.Account",
-			Path:   "*exp.Account",
-			Type:   utils.MetaVariable,
-			Value:  NewRSRParsersMustCompile("~*req.Account", utils.INFIELD_SEP),
-			Layout: time.RFC3339,
-		},
-		{
-			Tag:    "*exp.Subject",
-			Path:   "*exp.Subject",
-			Type:   utils.MetaVariable,
-			Value:  NewRSRParsersMustCompile("~*req.Subject", utils.INFIELD_SEP),
-			Layout: time.RFC3339,
-		},
-		{
-			Tag:    "*exp.Destination",
-			Path:   "*exp.Destination",
-			Type:   utils.MetaVariable,
-			Value:  NewRSRParsersMustCompile("~*req.Destination", utils.INFIELD_SEP),
-			Layout: time.RFC3339,
-		},
-		{
-			Tag:    "*exp.SetupTime",
-			Path:   "*exp.SetupTime",
-			Type:   utils.MetaVariable,
-			Value:  NewRSRParsersMustCompile("~*req.SetupTime", utils.INFIELD_SEP),
-			Layout: "2006-01-02T15:04:05Z07:00",
-		},
-		{
-			Tag:    "*exp.AnswerTime",
-			Path:   "*exp.AnswerTime",
-			Type:   utils.MetaVariable,
-			Value:  NewRSRParsersMustCompile("~*req.AnswerTime", utils.INFIELD_SEP),
-			Layout: "2006-01-02T15:04:05Z07:00",
-		},
-		{
-			Tag:    "*exp.Usage",
-			Path:   "*exp.Usage",
-			Type:   utils.MetaVariable,
-			Value:  NewRSRParsersMustCompile("~*req.Usage", utils.INFIELD_SEP),
-			Layout: time.RFC3339,
-		},
-		{
-			Tag:              "*exp.Cost",
-			Path:             "*exp.Cost",
-			Type:             utils.MetaVariable,
-			Value:            NewRSRParsersMustCompile("~*req.Cost", utils.INFIELD_SEP),
-			Layout:           time.RFC3339,
-			RoundingDecimals: utils.IntPointer(4),
-		},
-	}
-	for _, v := range eContentFlds {
-		v.ComputePath()
-	}
-	eCdreCfg := map[string]*CdreCfg{
-		utils.MetaDefault: {
-			ExportFormat:      utils.MetaFileCSV,
-			ExportPath:        "/var/spool/cgrates/cdre",
-			Filters:           []string{},
-			Synchronous:       false,
-			Attempts:          1,
-			AttributeSContext: "",
-			FieldSeparator:    utils.CSV_SEP,
-			Fields:            eContentFlds,
-		},
-	}
-	if !reflect.DeepEqual(cgrCfg.CdreProfiles, eCdreCfg) {
-		t.Errorf("Expecting: %+v,\nReceived %+v", utils.ToJSON(eCdreCfg), utils.ToJSON(cgrCfg.CdreProfiles))
-	}
-}
-
 func TestCgrCfgJSONDefaultsSMGenericCfg(t *testing.T) {
 	eSessionSCfg := &SessionSCfg{
 		Enabled:             false,
@@ -2654,8 +2532,7 @@ func TestCheckConfigSanity(t *testing.T) {
 	}
 	cfg.statsCfg.Enabled = true
 	cfg.cdrsCfg.OnlineCDRExports = []string{"stringy"}
-	cfg.CdreProfiles = map[string]*CdreCfg{"stringx": &CdreCfg{}}
-	expected = "<CDRs> cannot find CDR export template with ID: <stringy>"
+	expected = "<CDRs> cannot find exporter with ID: <stringy>"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}

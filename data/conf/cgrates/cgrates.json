@@ -263,36 +263,6 @@
 // },
 
 
-// "cdre": {												// CDRe config
-// 	"*default": {
-// 		"export_format": "*file_csv",					// exported CDRs format <*file_csv|*file_fwv|*http_post|*http_json_cdr|*http_json_map|*amqp_json_cdr|*amqp_json_map|*sqs_json_map>
-// 		"export_path": "/var/spool/cgrates/cdre",		// path where the exported CDRs will be placed
-// 		"filters" :[],									// filters for this export
-// 		"tenant": "",									// tenant used in filterS.Pass
-// 		"synchronous": false,							// block processing until export has a result
-// 		"attempts": 1,									// export attempts
-// 		"field_separator": ",",							// used field separator in some export formats, eg: *file_csv
-// 		"attributes_context": "",						// attributes context - empty disables attributes processing
-// 		"fields": [										// template of the exported content fields
-// 			{"path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"},
-// 			{"path": "*exp.RunID", "type": "*variable", "value": "~*req.RunID"},
-// 			{"path": "*exp.ToR", "type": "*variable", "value": "~*req.ToR"},
-// 			{"path": "*exp.OriginID", "type": "*variable", "value": "~*req.OriginID"},
-// 			{"path": "*exp.RequestType", "type": "*variable", "value": "~*req.RequestType"},
-// 			{"path": "*exp.Tenant", "type": "*variable", "value": "~*req.Tenant"},
-// 			{"path": "*exp.Category", "type": "*variable", "value": "~*req.Category"},
-// 			{"path": "*exp.Account", "type": "*variable", "value": "~*req.Account"},
-// 			{"path": "*exp.Subject", "type": "*variable", "value": "~*req.Subject"},
-// 			{"path": "*exp.Destination", "type": "*variable", "value": "~*req.Destination"},
-// 			{"path": "*exp.SetupTime", "type": "*variable", "value": "~*req.SetupTime", "layout": "2006-01-02T15:04:05Z07:00"},
-// 			{"path": "*exp.AnswerTime", "type": "*variable", "value": "~*req.AnswerTime", "layout": "2006-01-02T15:04:05Z07:00"},
-// 			{"path": "*exp.Usage", "type": "*variable", "value": "~*req.Usage"},
-// 			{"path": "*exp.Cost", "type": "*variable", "value": "~*req.Cost", "rounding_decimals": 4},
-// 		],
-// 	},
-// },
-
-
 // "ers": {									// EventReaderService
 // 	"enabled": false,						// starts the EventReader service: <true|false>
 // 	"sessions_conns":["*internal"],			// RPC Connections IDs

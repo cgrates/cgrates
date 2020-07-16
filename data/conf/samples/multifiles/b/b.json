@@ -7,11 +7,6 @@
 	"default_request_type": "*pseudoprepaid",			// default request type to consider when missing from requests: <""|*prepaid|*postpaid|*pseudoprepaid|*rated>
 },
 
-"cdre": {
-	"*default": {
-		"export_path": "/tmp/cgrates/cdre",			// path where the exported CDRs will be placed
-	},
-},
 
 "http_agent": [
 	{
