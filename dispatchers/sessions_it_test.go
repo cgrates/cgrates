@@ -143,7 +143,7 @@ func testDspSessionPing(t *testing.T) {
 			Tenant: "cgrates.org",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("ses12345"),
+			APIKey: utils.StringPointer("ses12345"),
 		},
 	}, &reply); err != nil {
 		t.Error(err)
@@ -164,7 +164,7 @@ func testDspSessionPingFailover(t *testing.T) {
 			Tenant: "cgrates.org",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("ses12345"),
+			APIKey: utils.StringPointer("ses12345"),
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.SessionSv1Ping, &ev, &reply); err != nil {
@@ -209,7 +209,7 @@ func testDspSessionTestAuthKey(t *testing.T) {
 			},
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("12345"),
+			APIKey: utils.StringPointer("12345"),
 		},
 	}
 	var rply sessions.V1AuthorizeReplyWithDigest
@@ -243,7 +243,7 @@ func testDspSessionAuthorize(t *testing.T) {
 			},
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("ses12345"),
+			APIKey: utils.StringPointer("ses12345"),
 		},
 	}
 	var rply sessions.V1AuthorizeReplyWithDigest
@@ -295,7 +295,7 @@ func testDspSessionInit(t *testing.T) {
 			},
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("ses12345"),
+			APIKey: utils.StringPointer("ses12345"),
 		},
 	}
 	var rply sessions.V1InitReplyWithDigest
@@ -314,7 +314,7 @@ func testDspSessionInit(t *testing.T) {
 func testDspGetSessions(t *testing.T) {
 	filtr := utils.SessionFilter{
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("ses12345"),
+			APIKey: utils.StringPointer("ses12345"),
 		},
 		Tenant:  "cgrates.org",
 		Filters: []string{},
@@ -370,7 +370,7 @@ func testDspSessionUpdate(t *testing.T) {
 			},
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("ses12345"),
+			APIKey: utils.StringPointer("ses12345"),
 		},
 	}
 	var rply sessions.V1UpdateSessionReply
@@ -437,7 +437,7 @@ func testDspSessionUpdate2(t *testing.T) {
 			},
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("ses12345"),
+			APIKey: utils.StringPointer("ses12345"),
 		},
 	}
 	var rply sessions.V1UpdateSessionReply
@@ -509,7 +509,7 @@ func testDspSessionTerminate(t *testing.T) {
 			},
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("ses12345"),
+			APIKey: utils.StringPointer("ses12345"),
 		},
 	}
 	var rply string
@@ -541,7 +541,7 @@ func testDspSessionProcessCDR(t *testing.T) {
 			},
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("ses12345"),
+			APIKey: utils.StringPointer("ses12345"),
 		},
 	}
 
@@ -580,7 +580,7 @@ func testDspSessionProcessEvent(t *testing.T) {
 			},
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("ses12345"),
+			APIKey: utils.StringPointer("ses12345"),
 		},
 	}
 	var rply sessions.V1ProcessMessageReply
@@ -653,7 +653,7 @@ func testDspSessionProcessEvent2(t *testing.T) {
 			},
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("pse12345"),
+			APIKey: utils.StringPointer("pse12345"),
 		},
 	}
 	var rply sessions.V1ProcessMessageReply
@@ -719,7 +719,7 @@ func testDspSessionReplicate(t *testing.T) {
 
 	if err := dispEngine.RPC.Call(utils.SessionSv1ReplicateSessions, &ArgsReplicateSessionsWithApiKey{
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("ses12345"),
+			APIKey: utils.StringPointer("ses12345"),
 		},
 		TenantArg: utils.TenantArg{
 			Tenant: "cgrates.org",
@@ -751,7 +751,7 @@ func testDspSessionPassive(t *testing.T) {
 	var repl int
 	filtr := utils.SessionFilter{
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("ses12345"),
+			APIKey: utils.StringPointer("ses12345"),
 		},
 		Tenant:  "cgrates.org",
 		Filters: []string{},
@@ -820,7 +820,7 @@ func testDspSessionPassive(t *testing.T) {
 			},
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("ses12345"),
+			APIKey: utils.StringPointer("ses12345"),
 		},
 	}, &reply); err != nil {
 		t.Fatal(err)
@@ -853,7 +853,7 @@ func testDspSessionForceDisconect(t *testing.T) {
 	var repl int
 	filtr := utils.SessionFilter{
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("ses12345"),
+			APIKey: utils.StringPointer("ses12345"),
 		},
 		Tenant:  "cgrates.org",
 		Filters: []string{},
@@ -921,7 +921,7 @@ func testDspSessionProcessEvent3(t *testing.T) {
 			},
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("pse12345"),
+			APIKey: utils.StringPointer("pse12345"),
 		},
 	}
 	var rply sessions.V1ProcessEventReply
@@ -934,7 +934,7 @@ func testDspSessionProcessEvent3(t *testing.T) {
 	if err := dispEngine.RPC.Call(utils.SessionSv1GetActiveSessionsCount,
 		utils.SessionFilter{
 			ArgDispatcher: &utils.ArgDispatcher{
-				OptsAPIKey: utils.StringPointer("ses12345"),
+				APIKey: utils.StringPointer("ses12345"),
 			},
 			Tenant:  "cgrates.org",
 			Filters: []string{},
@@ -964,7 +964,7 @@ func testDspSessionGetCost(t *testing.T) {
 			},
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("ses12345"),
+			APIKey: utils.StringPointer("ses12345"),
 		},
 	}
 
@@ -994,7 +994,7 @@ func testDspSessionSTIRAuthenticate(t *testing.T) {
 			Identity:           "eyJhbGciOiJFUzI1NiIsInBwdCI6InNoYWtlbiIsInR5cCI6InBhc3Nwb3J0IiwieDV1IjoiL3Vzci9zaGFyZS9jZ3JhdGVzL3N0aXIvc3Rpcl9wdWJrZXkucGVtIn0.eyJhdHRlc3QiOiJBIiwiZGVzdCI6eyJ0biI6WyIxMDAyIl19LCJpYXQiOjE1ODcwMzg4MDIsIm9yaWciOnsidG4iOiIxMDAxIn0sIm9yaWdpZCI6IjEyMzQ1NiJ9.cMEMlFnfyTu8uxfeU4RoZTamA7ifFT9Ibwrvi1_LKwL2xAU6fZ_CSIxKbtyOpNhM_sV03x7CfA_v0T4sHkifzg;info=</usr/share/cgrates/stir/stir_pubkey.pem>;ppt=shaken",
 			OriginatorTn:       "1001",
 			ArgDispatcher: &utils.ArgDispatcher{
-				OptsAPIKey: utils.StringPointer("ses12345"),
+				APIKey: utils.StringPointer("ses12345"),
 			},
 		}, &rply); err != nil {
 		t.Fatal(err)
@@ -1016,7 +1016,7 @@ func testDspSessionSTIRIdentity(t *testing.T) {
 		PrivateKeyPath: "/usr/share/cgrates/stir/stir_privatekey.pem",
 		OverwriteIAT:   true,
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("ses12345"),
+			APIKey: utils.StringPointer("ses12345"),
 		},
 	}
 	var rply string

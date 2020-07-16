@@ -85,7 +85,7 @@ func testDspChcPing(t *testing.T) {
 			Tenant: "cgrates.org",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("chc12345"),
+			APIKey: utils.StringPointer("chc12345"),
 		},
 	}, &reply); err != nil {
 		t.Error(err)
@@ -105,7 +105,7 @@ func testDspChcLoadAfterFolder(t *testing.T) {
 	expStats[utils.CacheRPCConnections].Items = 2
 	args := utils.AttrCacheIDsWithArgDispatcher{
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("chc12345"),
+			APIKey: utils.StringPointer("chc12345"),
 		},
 		TenantArg: utils.TenantArg{
 			Tenant: "cgrates.org",
@@ -120,7 +120,7 @@ func testDspChcLoadAfterFolder(t *testing.T) {
 	// Simple test that command is executed without errors
 	if err := dispEngine.RPC.Call(utils.CacheSv1LoadCache, utils.AttrReloadCacheWithArgDispatcher{
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("chc12345"),
+			APIKey: utils.StringPointer("chc12345"),
 		},
 		TenantArg: utils.TenantArg{
 			Tenant: "cgrates.org",
@@ -232,7 +232,7 @@ func testDspChcPrecacheStatus(t *testing.T) {
 
 	if err := dispEngine.RPC.Call(utils.CacheSv1PrecacheStatus, utils.AttrCacheIDsWithArgDispatcher{
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("chc12345"),
+			APIKey: utils.StringPointer("chc12345"),
 		},
 		TenantArg: utils.TenantArg{
 			Tenant: "cgrates.org",
@@ -252,7 +252,7 @@ func testDspChcGetItemIDs(t *testing.T) {
 			CacheID: utils.CacheChargerProfiles,
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("chc12345"),
+			APIKey: utils.StringPointer("chc12345"),
 		},
 		TenantArg: utils.TenantArg{
 			Tenant: "cgrates.org",
@@ -276,7 +276,7 @@ func testDspChcHasItem(t *testing.T) {
 			ItemID:  "cgrates.org:DEFAULT",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("chc12345"),
+			APIKey: utils.StringPointer("chc12345"),
 		},
 		TenantArg: utils.TenantArg{
 			Tenant: "cgrates.org",
@@ -298,7 +298,7 @@ func testDspChcGetItemExpiryTime(t *testing.T) {
 			ItemID:  "cgrates.org:DEFAULT",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("chc12345"),
+			APIKey: utils.StringPointer("chc12345"),
 		},
 		TenantArg: utils.TenantArg{
 			Tenant: "cgrates.org",
@@ -315,7 +315,7 @@ func testDspChcReloadCache(t *testing.T) {
 	reply := ""
 	if err := dispEngine.RPC.Call(utils.CacheSv1ReloadCache, &utils.AttrReloadCacheWithArgDispatcher{
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("chc12345"),
+			APIKey: utils.StringPointer("chc12345"),
 		},
 		TenantArg: utils.TenantArg{
 			Tenant: "cgrates.org",
@@ -335,7 +335,7 @@ func testDspChcRemoveItem(t *testing.T) {
 			ItemID:  "cgrates.org:DEFAULT",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("chc12345"),
+			APIKey: utils.StringPointer("chc12345"),
 		},
 		TenantArg: utils.TenantArg{
 			Tenant: "cgrates.org",
@@ -363,7 +363,7 @@ func testDspChcClear(t *testing.T) {
 	reply := ""
 	if err := dispEngine.RPC.Call(utils.CacheSv1Clear, utils.AttrCacheIDsWithArgDispatcher{
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("chc12345"),
+			APIKey: utils.StringPointer("chc12345"),
 		},
 		TenantArg: utils.TenantArg{
 			Tenant: "cgrates.org",
@@ -377,7 +377,7 @@ func testDspChcClear(t *testing.T) {
 	expStats := engine.GetDefaultEmptyCacheStats()
 	if err := dispEngine.RPC.Call(utils.CacheSv1GetCacheStats, utils.AttrCacheIDsWithArgDispatcher{
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("chc12345"),
+			APIKey: utils.StringPointer("chc12345"),
 		},
 		TenantArg: utils.TenantArg{
 			Tenant: "cgrates.org",

@@ -48,11 +48,12 @@ var (
 					utils.Account: "1001",
 				},
 			},
+			Opts: map[string]interface{}{utils.OptsContext: "simpleauth"},
 		},
 		{
 			CGREvent: &utils.CGREvent{ // no matching
 				Tenant: "cgrates.org",
-				ID:     "event1",
+				ID:     "event2",
 				Event: map[string]interface{}{
 					utils.Account:   "1010",
 					"DistinctMatch": "cgrates",
@@ -225,6 +226,7 @@ func testChargerSProcessEvent(t *testing.T) {
 			ChargerSProfile:    "Charger1",
 			AttributeSProfiles: []string{"ATTR_1001_SIMPLEAUTH"},
 			AlteredFields:      []string{utils.MetaReqRunID, "*req.Password"},
+			Opts:               map[string]interface{}{utils.OptsContext: "simpleauth"},
 			CGREvent: &utils.CGREvent{ // matching Charger1
 				Tenant: "cgrates.org",
 				ID:     "event1",

@@ -104,7 +104,7 @@ func testDspAttrPingFailover(t *testing.T) {
 			Tenant: "cgrates.org",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("attr12345"),
+			APIKey: utils.StringPointer("attr12345"),
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.AttributeSv1Ping, &ev, &reply); err != nil {
@@ -149,7 +149,7 @@ func testDspAttrPingFailoverNotFoundHost(t *testing.T) {
 			},
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("attr12345"),
+			APIKey: utils.StringPointer("attr12345"),
 		},
 	}
 
@@ -190,7 +190,7 @@ func testDspAttrPingFailover2(t *testing.T) {
 			Tenant: "cgrates.org",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("attr12345"),
+			APIKey: utils.StringPointer("attr12345"),
 		},
 	}
 	allEngine.stopEngine(t) // stop the engine and the call should go to the second engine
@@ -226,7 +226,7 @@ func testDspAttrGetAttrFailover(t *testing.T) {
 			},
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("attr12345"),
+			APIKey: utils.StringPointer("attr12345"),
 		},
 	}
 	eAttrPrf := &engine.AttributeProfile{
@@ -317,7 +317,7 @@ func testDspAttrPing(t *testing.T) {
 			Tenant: "cgrates.org",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("attr12345"),
+			APIKey: utils.StringPointer("attr12345"),
 		},
 	}, &reply); err != nil {
 		t.Error(err)
@@ -358,7 +358,7 @@ func testDspAttrTestMissingApiKey(t *testing.T) {
 	}
 	var attrReply *engine.AttributeProfile
 	if err := dispEngine.RPC.Call(utils.AttributeSv1GetAttributeForEvent,
-		args, &attrReply); err == nil || err.Error() != utils.NewErrMandatoryIeMissing(utils.OptsAPIKey).Error() {
+		args, &attrReply); err == nil || err.Error() != utils.NewErrMandatoryIeMissing(utils.APIKey).Error() {
 		t.Errorf("Error:%v rply=%s", err, utils.ToJSON(attrReply))
 	}
 }
@@ -374,7 +374,7 @@ func testDspAttrTestUnknownApiKey(t *testing.T) {
 			},
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("1234"),
+			APIKey: utils.StringPointer("1234"),
 		},
 	}
 	var attrReply *engine.AttributeProfile
@@ -395,7 +395,7 @@ func testDspAttrTestAuthKey(t *testing.T) {
 			},
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("12345"),
+			APIKey: utils.StringPointer("12345"),
 		},
 	}
 	var attrReply *engine.AttributeProfile
@@ -416,7 +416,7 @@ func testDspAttrTestAuthKey2(t *testing.T) {
 			},
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("attr12345"),
+			APIKey: utils.StringPointer("attr12345"),
 		},
 	}
 	eAttrPrf := &engine.AttributeProfile{
@@ -485,7 +485,7 @@ func testDspAttrTestAuthKey3(t *testing.T) {
 			},
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("attr12345"),
+			APIKey: utils.StringPointer("attr12345"),
 		},
 	}
 	var attrReply *engine.AttributeProfile
@@ -507,7 +507,7 @@ func testDspAttrGetAttrRoundRobin(t *testing.T) {
 			},
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("attr12345"),
+			APIKey: utils.StringPointer("attr12345"),
 		},
 	}
 	eAttrPrf := &engine.AttributeProfile{
@@ -595,7 +595,7 @@ func testDspAttrGetAttrInternal(t *testing.T) {
 			},
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("attr12345"),
+			APIKey: utils.StringPointer("attr12345"),
 		},
 	}
 

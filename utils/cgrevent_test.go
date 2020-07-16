@@ -301,7 +301,7 @@ func TestCGREventconsumeArgDispatcher(t *testing.T) {
 		OptsRouteID: routeID,
 	}
 	eOut := &ArgDispatcher{
-		OptsRouteID: &routeID,
+		RouteID: &routeID,
 	}
 	rcv = getArgDispatcherFromOpts(opts)
 	if !reflect.DeepEqual(eOut, rcv) {
@@ -314,7 +314,7 @@ func TestCGREventconsumeArgDispatcher(t *testing.T) {
 	//normal check with routeID and APIKey
 	apiKey := "key"
 	opts = map[string]interface{}{OptsRouteID: routeID, OptsAPIKey: apiKey}
-	eOut.OptsAPIKey = &apiKey
+	eOut.APIKey = &apiKey
 
 	rcv = getArgDispatcherFromOpts(opts)
 	//check if *api_key and *route_id was deleted
@@ -511,8 +511,8 @@ func TestCGREventWithArgDispatcherClone(t *testing.T) {
 	routeID := "routeid"
 
 	rcv.ArgDispatcher = &ArgDispatcher{
-		OptsAPIKey:  &apiKey,
-		OptsRouteID: &routeID,
+		APIKey:  &apiKey,
+		RouteID: &routeID,
 	}
 	if reflect.DeepEqual(cgrEventWithArgDispatcher.ArgDispatcher, rcv.ArgDispatcher) {
 		t.Errorf("Expected to be different")
@@ -546,8 +546,8 @@ func TestCGREventWithOptsClone(t *testing.T) {
 			},
 		},
 		ArgDispatcher: &ArgDispatcher{
-			OptsAPIKey:  StringPointer("api1"),
-			OptsRouteID: StringPointer("route1"),
+			APIKey:  StringPointer("api1"),
+			RouteID: StringPointer("route1"),
 		},
 		Opts: map[string]interface{}{
 			"Context": MetaSessionS,
@@ -559,8 +559,8 @@ func TestCGREventWithOptsClone(t *testing.T) {
 	}
 	//check vars
 	rcv.ArgDispatcher = &ArgDispatcher{
-		OptsAPIKey:  StringPointer("apikey"),
-		OptsRouteID: StringPointer("routeid"),
+		APIKey:  StringPointer("apikey"),
+		RouteID: StringPointer("routeid"),
 	}
 	if reflect.DeepEqual(cgrEventWithOpts.ArgDispatcher, rcv.ArgDispatcher) {
 		t.Errorf("Expected to be different")

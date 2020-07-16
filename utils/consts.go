@@ -777,6 +777,8 @@ const (
 	MetaBusy                 = "*busy"
 	MetaQueue                = "*queue"
 	MetaMonthEnd             = "*month_end"
+	APIKey                   = "ApiKey"
+	RouteID                  = "RouteID"
 )
 
 // Migrator Action

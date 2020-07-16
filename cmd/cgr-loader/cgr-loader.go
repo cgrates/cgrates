@@ -349,8 +349,8 @@ func main() {
 	}
 	// reload cache
 	if err = tpReader.ReloadCache(ldrCfg.GeneralCfg().DefaultCaching, *verbose, &utils.ArgDispatcher{
-		OptsAPIKey:  apiKey,
-		OptsRouteID: routeID,
+		APIKey:  apiKey,
+		RouteID: routeID,
 	}); err != nil {
 		log.Fatal("Could not reload cache: ", err)
 	}

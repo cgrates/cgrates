@@ -79,7 +79,7 @@ func testDspStsPingFailover(t *testing.T) {
 			Tenant: "cgrates.org",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("stat12345"),
+			APIKey: utils.StringPointer("stat12345"),
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.StatSv1Ping, &ev, &reply); err != nil {
@@ -119,7 +119,7 @@ func testDspStsGetStatFailover(t *testing.T) {
 				utils.Destination: "1002"},
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("stat12345"),
+			APIKey: utils.StringPointer("stat12345"),
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.StatSv1ProcessEvent, args, &reply); err != nil {
@@ -130,7 +130,7 @@ func testDspStsGetStatFailover(t *testing.T) {
 
 	args2 := utils.TenantIDWithArgDispatcher{
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("stat12345"),
+			APIKey: utils.StringPointer("stat12345"),
 		},
 		TenantID: &utils.TenantID{
 			Tenant: "cgrates.org",
@@ -165,7 +165,7 @@ func testDspStsPing(t *testing.T) {
 			Tenant: "cgrates.org",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("stat12345"),
+			APIKey: utils.StringPointer("stat12345"),
 		},
 	}, &reply); err != nil {
 		t.Error(err)
@@ -188,7 +188,7 @@ func testDspStsTestAuthKey(t *testing.T) {
 				utils.PDD:        time.Duration(12 * time.Second)},
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("12345"),
+			APIKey: utils.StringPointer("12345"),
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.StatSv1ProcessEvent,
@@ -198,7 +198,7 @@ func testDspStsTestAuthKey(t *testing.T) {
 
 	args2 := utils.TenantIDWithArgDispatcher{
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("12345"),
+			APIKey: utils.StringPointer("12345"),
 		},
 		TenantID: &utils.TenantID{
 			Tenant: "cgrates.org",
@@ -230,7 +230,7 @@ func testDspStsTestAuthKey2(t *testing.T) {
 				utils.Destination: "1002"},
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("stat12345"),
+			APIKey: utils.StringPointer("stat12345"),
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.StatSv1ProcessEvent, args, &reply); err != nil {
@@ -241,7 +241,7 @@ func testDspStsTestAuthKey2(t *testing.T) {
 
 	args2 := utils.TenantIDWithArgDispatcher{
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("stat12345"),
+			APIKey: utils.StringPointer("stat12345"),
 		},
 		TenantID: &utils.TenantID{
 			Tenant: "cgrates.org",
@@ -274,7 +274,7 @@ func testDspStsTestAuthKey2(t *testing.T) {
 			},
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("stat12345"),
+			APIKey: utils.StringPointer("stat12345"),
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.StatSv1ProcessEvent, args, &reply); err != nil {
@@ -301,7 +301,7 @@ func testDspStsTestAuthKey3(t *testing.T) {
 
 	args2 := utils.TenantIDWithArgDispatcher{
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("stat12345"),
+			APIKey: utils.StringPointer("stat12345"),
 		},
 		TenantID: &utils.TenantID{
 			Tenant: "cgrates.org",
@@ -327,7 +327,7 @@ func testDspStsTestAuthKey3(t *testing.T) {
 				Tenant: "cgrates.org",
 			},
 			ArgDispatcher: &utils.ArgDispatcher{
-				OptsAPIKey: utils.StringPointer("stat12345"),
+				APIKey: utils.StringPointer("stat12345"),
 			},
 		}, &reply); err != nil {
 		t.Error(err)
@@ -354,7 +354,7 @@ func testDspStsTestAuthKey3(t *testing.T) {
 				},
 			},
 			ArgDispatcher: &utils.ArgDispatcher{
-				OptsAPIKey: utils.StringPointer("stat12345"),
+				APIKey: utils.StringPointer("stat12345"),
 			},
 		}, &reply); err != nil {
 		t.Error(err)

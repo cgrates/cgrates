@@ -587,7 +587,7 @@ type dynamicDP struct {
 	cache utils.MapStorage
 }
 
-func (dDP *dynamicDP) String() string { return utils.ToJSON(dDP) }
+func (dDP *dynamicDP) String() string { return dDP.initialDP.String() }
 
 func (dDP *dynamicDP) FieldAsString(fldPath []string) (string, error) {
 	val, err := dDP.FieldAsInterface(fldPath)

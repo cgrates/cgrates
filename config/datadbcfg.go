@@ -167,8 +167,8 @@ func (itm *ItemOpt) AsMapInterface() map[string]interface{} {
 	return map[string]interface{}{
 		utils.RemoteCfg:    itm.Remote,
 		utils.ReplicateCfg: itm.Replicate,
-		utils.OptsRouteID:  itm.RouteID,
-		utils.OptsAPIKey:   itm.APIKey,
+		utils.RouteID:      itm.RouteID,
+		utils.APIKey:       itm.APIKey,
 	}
 }
 

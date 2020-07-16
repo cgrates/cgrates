@@ -1899,7 +1899,7 @@ type TPRoutes []*TpRoute
 // CSVHeader return the header for csv fields as a slice of string
 func (tps TPRoutes) CSVHeader() (result []string) {
 	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.ActivationIntervalString,
-		utils.Sorting, utils.SortingParameters, utils.OptsRouteID, utils.RouteFilterIDs,
+		utils.Sorting, utils.SortingParameters, utils.RouteID, utils.RouteFilterIDs,
 		utils.RouteAccountIDs, utils.RouteRatingplanIDs, utils.RouteResourceIDs,
 		utils.RouteStatIDs, utils.RouteWeight, utils.RouteBlocker,
 		utils.RouteParameters, utils.Weight,
