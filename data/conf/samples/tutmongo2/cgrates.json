@@ -47,34 +47,42 @@
 	"extra_fields": ["PayPalAccount", "LCRProfile", "ResourceID"],
 	"chargers_conns":["*localhost"],
 	"store_cdrs": true,
-	"online_cdr_exports": []
+	"online_cdr_exports": [],
+	"ees_conns": ["*localhost"]
 },
 
 
-"cdre": {
-	"amqp_localhost": {
-		"export_format": "*amqp_json_map",
-		"export_path": "amqp://guest:guest@localhost:5672/?queue_id=cgrates_cdrs",
-		"fields": [
-			{"path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"},
-			{"path": "*exp.RunID", "type": "*variable", "value": "~*req.RunID"},
-			{"path": "*exp.ToR", "type": "*variable", "value": "~*req.ToR"},
-			{"path": "*exp.OriginID", "type": "*variable", "value": "~*req.OriginID"},
-			{"path": "*exp.OriginHost", "type": "*variable", "value": "~*req.OriginHost"},
-			{"path": "*exp.RequestType", "type": "*variable", "value": "~*req.RequestType", },
-			{"path": "*exp.Tenant", "type": "*variable", "value": "~*req.Tenant"},
-			{"path": "*exp.Category", "type": "*variable", "value": "~*req.Category"},
-			{"path": "*exp.Account", "type": "*variable", "value": "~*req.Account"},
-			{"path": "*exp.Destination", "type": "*variable", "value": "~*req.Destination"},
-			{"path": "*exp.SetupTime", "type": "*variable", "value": "~*req.SetupTime"},
-			{"path": "*exp.AnswerTime", "type": "*variable", "value": "~*req.AnswerTime"},
-			{"path": "*exp.Usage", "type": "*variable", "value": "~*req.Usage"},
-			{"path": "*exp.Cost", "type": "*variable", "value": "~*req.Cost"},
-			{"path": "*exp.PayPalAccount", "type": "*variable", "value": "~*req.PayPalAccount"},
-			{"path": "*exp.LCRProfile", "type": "*variable", "value": "~*req.LCRProfile", },
-			{"path": "*exp.ResourceID", "type": "*variable", "value": "~*req.ResourceID", },
-		],
-	},
+"ees": {
+	"enabled": true,
+	"attributes_conns":["*internal"],
+	"exporters": [
+		{
+			"id": "amqp_localhost",
+			"type": "*amqp_json_map",
+			"export_path": "amqp://guest:guest@localhost:5672/?queue_id=cgrates_cdrs",
+			"tenant": "cgrates.org",
+			"attempts": 1,
+			"fields":[
+				{"tag": "CGRID", "path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"},
+				{"tag": "RunID", "path": "*exp.RunID", "type": "*variable", "value": "~*req.RunID"},
+				{"tag": "ToR", "path": "*exp.ToR", "type": "*variable", "value": "~*req.ToR"},
+				{"tag": "OriginID", "path": "*exp.OriginID", "type": "*variable", "value": "~*req.OriginID"},
+				{"tag": "RequestType", "path": "*exp.RequestType", "type": "*variable", "value": "~*req.RequestType"},
+				{"tag": "Tenant", "path": "*exp.Tenant", "type": "*variable", "value": "~*req.Tenant"},
+				{"tag": "Category", "path": "*exp.Category", "type": "*variable", "value": "~*req.Category"},
+				{"tag": "Account", "path": "*exp.Account", "type": "*variable", "value": "~*req.Account"},
+				{"tag": "Subject", "path": "*exp.Subject", "type": "*variable", "value": "~*req.Subject"},
+				{"tag": "Destination", "path": "*exp.Destination", "type": "*variable", "value": "~*req.Destination"},
+				{"tag": "SetupTime", "path": "*exp.SetupTime", "type": "*variable", "value": "~*req.SetupTime"},
+				{"tag": "AnswerTime", "path": "*exp.AnswerTime", "type": "*variable", "value": "~*req.AnswerTime"},
+				{"tag": "Usage", "path": "*exp.Usage", "type": "*variable", "value": "~*req.Usage"},
+				{"tag": "Cost", "path": "*exp.Cost", "type": "*variable", "value": "~*req.Cost{*round:4}"},
+				{"tag": "PayPalAccount", "path": "*exp.PayPalAccount", "type": "*variable", "value": "~*req.PayPalAccount"},
+				{"tag": "LCRProfile", "path": "*exp.LCRProfile", "type": "*variable", "value": "~*req.LCRProfile"},
+				{"tag": "ResourceID", "path": "*exp.ResourceID", "type": "*variable", "value": "~*req.ResourceID"}
+			],
+		},
+	],
 },
 
 

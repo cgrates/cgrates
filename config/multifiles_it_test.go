@@ -51,34 +51,6 @@ func TestMfGeneralItems(t *testing.T) {
 	}
 }
 
-func TestMfCdreDefaultInstance(t *testing.T) {
-	for _, prflName := range []string{utils.MetaDefault, "export1"} {
-		if _, hasIt := mfCgrCfg.CdreProfiles[prflName]; !hasIt {
-			t.Error("Cdre does not contain profile ", prflName)
-		}
-	}
-	prfl := utils.MetaDefault
-	if mfCgrCfg.CdreProfiles[prfl].ExportFormat != utils.MetaFileCSV {
-		t.Error("Default instance has cdrFormat: ", mfCgrCfg.CdreProfiles[prfl].ExportFormat)
-	}
-	if len(mfCgrCfg.CdreProfiles[prfl].Fields) != 11 {
-		t.Error("Default instance has number of content fields: ", len(mfCgrCfg.CdreProfiles[prfl].Fields))
-	}
-}
-
-func TestMfCdreExport1Instance(t *testing.T) {
-	prfl := "export1"
-	if mfCgrCfg.CdreProfiles[prfl].ExportFormat != utils.MetaFileCSV {
-		t.Error("Export1 instance has cdrFormat: ", mfCgrCfg.CdreProfiles[prfl].ExportFormat)
-	}
-	if len(mfCgrCfg.CdreProfiles[prfl].Fields) != 9 {
-		t.Error("Export1 instance has number of content fields: ", len(mfCgrCfg.CdreProfiles[prfl].Fields))
-	}
-	if mfCgrCfg.CdreProfiles[prfl].Fields[2].Tag != "*exp.Account" {
-		t.Error("Unexpected headerField value: ", mfCgrCfg.CdreProfiles[prfl].Fields[2].Tag)
-	}
-}
-
 func TestMfEnvReaderITRead(t *testing.T) {
 	expected := GeneralCfg{
 		NodeID:            "d80fac5",
