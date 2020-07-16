@@ -3160,7 +3160,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 			ArgDispatcher: args.ArgDispatcher,
 		},
 	}
-	if argsFlagsWithParams.GetBool(utils.MetaMultiple) {
+	if argsFlagsWithParams.GetBool(utils.MetaChargers) {
 		var chrgrs []*engine.ChrgSProcessEventReply
 		if chrgrs, err = sS.processChargerS(&utils.CGREventWithOpts{
 			CGREvent:      args.CGREvent,
@@ -3180,10 +3180,11 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 
 	// check for *attribute
 	if argsFlagsWithParams.HasKey(utils.MetaAttributes) {
+		attrIDs := argsFlagsWithParams.ParamsSlice(utils.MetaAttributes)
 		rply.Attributes = make(map[string]*engine.AttrSProcessEventReply)
 		for runID, cgrEv := range events {
 			rplyAttr, err := sS.processAttributes(cgrEv.CGREvent, cgrEv.ArgDispatcher,
-				argsFlagsWithParams.ParamsSlice(utils.MetaAttributes), cgrEv.Opts)
+				attrIDs, cgrEv.Opts)
 			if err != nil {
 				if err.Error() != utils.ErrNotFound.Error() {
 					return utils.NewErrAttributeS(err)
@@ -3231,9 +3232,9 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 	// process thresholds if required
 	if argsFlagsWithParams.HasKey(utils.MetaThresholds) {
 		rply.ThresholdIDs = make(map[string][]string)
+		thIDs := argsFlagsWithParams.ParamsSlice(utils.MetaThresholds)
 		for runID, cgrEv := range events {
-			tIDs, err := sS.processThreshold(cgrEv.CGREvent, cgrEv.ArgDispatcher,
-				argsFlagsWithParams.ParamsSlice(utils.MetaThresholds))
+			tIDs, err := sS.processThreshold(cgrEv.CGREvent, cgrEv.ArgDispatcher, thIDs)
 			if err != nil && err.Error() != utils.ErrNotFound.Error() {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> error: %s processing event %+v for RunID <%s>  with ThresholdS.",
@@ -3247,9 +3248,9 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 	// process stats if required
 	if argsFlagsWithParams.HasKey(utils.MetaStats) {
 		rply.StatQueueIDs = make(map[string][]string)
+		stIDs := argsFlagsWithParams.ParamsSlice(utils.MetaStats)
 		for runID, cgrEv := range events {
-			sIDs, err := sS.processStats(cgrEv.CGREvent, cgrEv.ArgDispatcher,
-				argsFlagsWithParams.ParamsSlice(utils.MetaStats))
+			sIDs, err := sS.processStats(cgrEv.CGREvent, cgrEv.ArgDispatcher, stIDs)
 			if err != nil &&
 				err.Error() != utils.ErrNotFound.Error() {
 				utils.Logger.Warning(
@@ -3323,21 +3324,21 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 			return utils.NewErrNotConnected(utils.ResourceS)
 		}
 		rply.ResourceAllocation = make(map[string]string)
-		for runID, cgrEv := range events {
-			originID := engine.MapEvent(cgrEv.CGREvent.Event).GetStringIgnoreErrors(utils.OriginID)
-			if originID == "" {
-				return utils.NewErrMandatoryIeMissing(utils.OriginID)
-			}
+		if resOpt := argsFlagsWithParams.ParamsSlice(utils.MetaResources); len(resOpt) != 0 {
+			for runID, cgrEv := range events {
+				originID := engine.MapEvent(cgrEv.CGREvent.Event).GetStringIgnoreErrors(utils.OriginID)
+				if originID == "" {
+					return utils.NewErrMandatoryIeMissing(utils.OriginID)
+				}
 
-			attrRU := &utils.ArgRSv1ResourceUsage{
-				CGREvent:      cgrEv.CGREvent,
-				UsageID:       originID,
-				Units:         1,
-				ArgDispatcher: cgrEv.ArgDispatcher,
-			}
-			var resMessage string
-			// check what we need to do for resources (*authorization/*allocation)
-			if resOpt := argsFlagsWithParams.ParamsSlice(utils.MetaResources); len(resOpt) != 0 {
+				attrRU := &utils.ArgRSv1ResourceUsage{
+					CGREvent:      cgrEv.CGREvent,
+					UsageID:       originID,
+					Units:         1,
+					ArgDispatcher: cgrEv.ArgDispatcher,
+				}
+				var resMessage string
+				// check what we need to do for resources (*authorization/*allocation)
 				//check for subflags and convert them into utils.FlagsWithParams
 				resourceFlagsWithParams, err := utils.FlagsWithParamsFromSlice(resOpt)
 				if err != nil {
