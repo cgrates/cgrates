@@ -1817,7 +1817,7 @@ func (tps TpFilterS) AsTPFilter() (result []*utils.TPFilterProfile) {
 }
 
 func APItoModelTPFilter(th *utils.TPFilterProfile) (mdls TpFilterS) {
-	if len(th.Filters) == 0 {
+	if th == nil || len(th.Filters) == 0 {
 		return
 	}
 	for _, fltr := range th.Filters {
