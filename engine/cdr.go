@@ -71,17 +71,6 @@ func NewCDRFromExternalCDR(extCdr *ExternalCDR, timezone string) (*CDR, error) {
 	return cdr, nil
 }
 
-func NewCDRWithDefaults(cfg *config.CGRConfig) *CDR {
-	return &CDR{
-		ToR:         utils.VOICE,
-		RequestType: cfg.GeneralCfg().DefaultReqType,
-		Tenant:      cfg.GeneralCfg().DefaultTenant,
-		Category:    cfg.GeneralCfg().DefaultCategory,
-		ExtraFields: make(map[string]string),
-		Cost:        -1,
-	}
-}
-
 type CDR struct {
 	CGRID       string
 	RunID       string
@@ -427,36 +416,6 @@ func (cdr *CDR) AsExportRecord(exportFields []*config.FCTemplate,
 	return expRecord, nil
 }
 
-// AsExportMap converts the CDR into a map[string]string based on export template
-// Used in real-time replication as well as remote exports
-func (cdr *CDR) AsExportMap(exportFields []*config.FCTemplate, httpSkipTLSCheck bool,
-	groupedCDRs []*CDR, filterS *FilterS) (expMap map[string]string, err error) {
-	expMap = make(map[string]string)
-	nM := utils.MapStorage{
-		utils.MetaReq: cdr.AsMapStringIface(),
-		utils.MetaEC:  cdr.CostDetails,
-	}
-	for _, cfgFld := range exportFields {
-		if !strings.HasPrefix(cfgFld.Path, utils.MetaExp+utils.NestingSep) {
-			continue
-		}
-		if pass, err := filterS.Pass(cdr.Tenant,
-			cfgFld.Filters, nM); err != nil {
-			return nil, err
-		} else if !pass {
-			continue
-		}
-		var fmtOut string
-		if fmtOut, err = cdr.formatField(cfgFld, httpSkipTLSCheck, groupedCDRs, filterS); err != nil {
-			utils.Logger.Warning(fmt.Sprintf("<CDR> error: %s exporting field: %s, CDR: %s\n",
-				err.Error(), utils.ToJSON(cfgFld), utils.ToJSON(cdr)))
-			return nil, err
-		}
-		expMap[strings.TrimPrefix(cfgFld.Path, utils.MetaExp+utils.NestingSep)] += fmtOut
-	}
-	return
-}
-
 // AsCDRsql converts the CDR into the format used for SQL storage
 func (cdr *CDR) AsCDRsql() (cdrSQL *CDRsql) {
 	cdrSQL = new(CDRsql)
@@ -490,75 +449,6 @@ func (cdr *CDR) AsCGREvent() *utils.CGREvent {
 		ID:     utils.UUIDSha1Prefix(),
 		Event:  cdr.AsMapStringIface(),
 	}
-}
-
-// UpdateFromCGREvent will update CDR with event fields from CGREvent
-func (cdr *CDR) UpdateFromCGREvent(cgrEv *utils.CGREvent, fields []string) (err error) {
-	for _, fldName := range fields {
-		fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
-		if _, has := cgrEv.Event[fldName]; !has {
-			continue //maybe removed
-		}
-		switch fldName {
-		case utils.OriginHost:
-			if cdr.OriginHost, err = cgrEv.FieldAsString(fldName); err != nil {
-				return
-			}
-		case utils.Source:
-			if cdr.Source, err = cgrEv.FieldAsString(fldName); err != nil {
-				return
-			}
-		case utils.ToR:
-			if cdr.ToR, err = cgrEv.FieldAsString(fldName); err != nil {
-				return
-			}
-		case utils.RequestType:
-			if cdr.RequestType, err = cgrEv.FieldAsString(fldName); err != nil {
-				return
-			}
-		case utils.Tenant:
-			if cdr.Tenant, err = cgrEv.FieldAsString(fldName); err != nil {
-				return
-			}
-		case utils.Category:
-			if cdr.Category, err = cgrEv.FieldAsString(fldName); err != nil {
-				return
-			}
-		case utils.Account:
-			if cdr.Account, err = cgrEv.FieldAsString(fldName); err != nil {
-				return
-			}
-		case utils.Subject:
-			if cdr.Subject, err = cgrEv.FieldAsString(fldName); err != nil {
-				return
-			}
-		case utils.Destination:
-			if cdr.Destination, err = cgrEv.FieldAsString(fldName); err != nil {
-				return
-			}
-		case utils.SetupTime:
-			if cdr.SetupTime, err = cgrEv.FieldAsTime(fldName,
-				config.CgrConfig().GeneralCfg().DefaultTimezone); err != nil {
-				return
-			}
-		case utils.AnswerTime:
-			if cdr.AnswerTime, err = cgrEv.FieldAsTime(fldName,
-				config.CgrConfig().GeneralCfg().DefaultTimezone); err != nil {
-				return
-			}
-		case utils.Usage:
-			if cdr.Usage, err = cgrEv.FieldAsDuration(fldName); err != nil {
-				return
-			}
-		default:
-			var fldVal string
-			if fldVal, err = cgrEv.FieldAsString(fldName); err != nil {
-				return
-			}
-			cdr.ExtraFields[fldName] = fldVal
-		}
-	}
-	return
 }
 
 // NewCDRFromSQL converts the CDRsql into CDR
@@ -634,28 +524,6 @@ type UsageRecord struct {
 	AnswerTime  string
 	Usage       string
 	ExtraFields map[string]string
-}
-
-func (self *UsageRecord) AsCDR(timezone string) (*CDR, error) {
-	var err error
-	cdr := &CDR{CGRID: self.GetId(), ToR: self.ToR, RequestType: self.RequestType, Tenant: self.Tenant,
-		Category: self.Category, Account: self.Account, Subject: self.Subject, Destination: self.Destination}
-	if cdr.SetupTime, err = utils.ParseTimeDetectLayout(self.SetupTime, timezone); err != nil {
-		return nil, err
-	}
-	if cdr.AnswerTime, err = utils.ParseTimeDetectLayout(self.AnswerTime, timezone); err != nil {
-		return nil, err
-	}
-	if cdr.Usage, err = utils.ParseDurationWithNanosecs(self.Usage); err != nil {
-		return nil, err
-	}
-	if self.ExtraFields != nil {
-		cdr.ExtraFields = make(map[string]string)
-	}
-	for k, v := range self.ExtraFields {
-		cdr.ExtraFields[k] = v
-	}
-	return cdr, nil
 }
 
 func (self *UsageRecord) AsCallDescriptor(timezone string, denyNegative bool) (*CallDescriptor, error) {
