@@ -2219,6 +2219,63 @@ func TestTPThresholdsAsTPThreshold(t *testing.T) {
 	}
 }
 
+func TestAPItoModelAccountActions(t *testing.T) {
+	var aas []*utils.TPAccountActions
+	if rcv := APItoModelAccountActions(aas); rcv != nil {
+		t.Errorf("Expecting: nil , Received: %+v", utils.ToIJSON(rcv))
+	}
+	aas = []*utils.TPAccountActions{
+		&utils.TPAccountActions{
+			TPid:             "TEST_TPID",
+			LoadId:           "TEST_LOADID",
+			Tenant:           "cgrates.org",
+			Account:          "1001",
+			ActionPlanId:     "PACKAGE_10_SHARED_A_5",
+			ActionTriggersId: "STANDARD_TRIGGERS",
+		},
+		&utils.TPAccountActions{
+			TPid:             "TEST_TPID2",
+			LoadId:           "TEST_LOADID2",
+			Tenant:           "cgrates.org",
+			Account:          "1001",
+			ActionPlanId:     "PACKAGE_10_SHARED_A_5",
+			ActionTriggersId: "STANDARD_TRIGGERS",
+		},
+	}
+	eOut := TpAccountActions{
+		TpAccountAction{
+			Tpid:              "TEST_TPID",
+			Loadid:            "TEST_LOADID",
+			Tenant:            "cgrates.org",
+			Account:           "1001",
+			ActionPlanTag:     "PACKAGE_10_SHARED_A_5",
+			ActionTriggersTag: "STANDARD_TRIGGERS",
+		},
+		TpAccountAction{
+			Tpid:              "TEST_TPID2",
+			Loadid:            "TEST_LOADID2",
+			Tenant:            "cgrates.org",
+			Account:           "1001",
+			ActionPlanTag:     "PACKAGE_10_SHARED_A_5",
+			ActionTriggersTag: "STANDARD_TRIGGERS",
+		},
+	}
+	if rcv := APItoModelAccountActions(aas); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+}
+
+func TestCSVHeader(t *testing.T) {
+	var tps TpResources
+	eOut := []string{
+		"#Tenant", "ID", "FilterIDs", "ActivationInterval", "UsageTTL", "Limit", "AllocationMessage", "Blocker", "Stored", "Weight", "ThresholdIDs",
+	}
+	if rcv := tps.CSVHeader(); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+
+}
+
 func TestAPItoModelTPThreshold(t *testing.T) {
 	th := &utils.TPThresholdProfile{
 		TPid:      "TP1",
@@ -2596,6 +2653,107 @@ func TestTPFilterAsTPFilter2(t *testing.T) {
 	}
 }
 
+func TestAPItoModelTPFilter(t *testing.T) {
+	var th *utils.TPFilterProfile
+	if rcv := APItoModelTPFilter(th); rcv != nil {
+		t.Errorf("Expecting: nil ,Received: %+v", utils.ToJSON(rcv))
+	}
+	th = &utils.TPFilterProfile{
+		ID: "someID",
+	}
+	if rcv := APItoModelTPFilter(th); rcv != nil {
+		t.Errorf("Expecting: nil ,Received: %+v", utils.ToJSON(rcv))
+	}
+	th = &utils.TPFilterProfile{
+		ID: "someID",
+		Filters: []*utils.TPFilter{
+			&utils.TPFilter{
+				Type:    utils.MetaPrefix,
+				Element: "Account",
+				Values:  []string{"1010"},
+			},
+
+			&utils.TPFilter{
+				Type:    utils.MetaPrefix,
+				Element: "Account",
+				Values:  []string{"0708"},
+			},
+		},
+	}
+	eOut := TpFilterS{
+		&TpFilter{
+			ID:      "someID",
+			Type:    "*prefix",
+			Element: "Account",
+			Values:  "1010",
+		},
+		&TpFilter{
+			ID:      "someID",
+			Type:    "*prefix",
+			Element: "Account",
+			Values:  "0708",
+		},
+	}
+	if rcv := APItoModelTPFilter(th); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+	th = &utils.TPFilterProfile{
+		TPid:   "TPid",
+		Tenant: "cgrates.org",
+		ID:     "someID",
+		Filters: []*utils.TPFilter{
+			{
+				Type:    utils.MetaPrefix,
+				Element: "Account",
+				Values:  []string{"1001", "1002"},
+			},
+		},
+	}
+	eOut = TpFilterS{
+		{
+			Tpid:    "TPid",
+			Tenant:  "cgrates.org",
+			ID:      "someID",
+			Type:    "*prefix",
+			Element: "Account",
+			Values:  "1001;1002",
+		},
+	}
+	if rcv := APItoModelTPFilter(th); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+	th = &utils.TPFilterProfile{
+		TPid:   "TPid",
+		ID:     "testID",
+		Tenant: "cgrates.org",
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-29T15:00:00Z",
+			ExpiryTime:     "2014-08-29T15:00:00Z",
+		},
+		Filters: []*utils.TPFilter{
+			{
+				Type:    utils.MetaString,
+				Element: "CustomField",
+				Values:  []string{"1001", "~*uch.<~*rep.CGRID;~*rep.RunID;-Cost>", "1002", "~*uch.<~*rep.CGRID;~*rep.RunID>"},
+			},
+		},
+	}
+	eOut = TpFilterS{
+		{
+			Tpid:               "TPid",
+			Tenant:             "cgrates.org",
+			ID:                 "testID",
+			Type:               "*string",
+			Element:            "CustomField",
+			Values:             "1001;~*uch.\u003c~*rep.CGRID;~*rep.RunID;-Cost\u003e;1002;~*uch.\u003c~*rep.CGRID;~*rep.RunID\u003e",
+			ActivationInterval: "2014-07-29T15:00:00Z;2014-08-29T15:00:00Z",
+		},
+	}
+	if rcv := APItoModelTPFilter(th); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+}
+
 func TestAPItoTPFilter(t *testing.T) {
 	tps := &utils.TPFilterProfile{
 		TPid:   testTPID,
@@ -2665,6 +2823,16 @@ func TestFilterToTPFilter(t *testing.T) {
 	eTPFilter := FilterToTPFilter(filter)
 	if !reflect.DeepEqual(tpfilter, eTPFilter) {
 		t.Errorf("Expecting: %+v, received: %+v", tpfilter, eTPFilter)
+	}
+}
+
+func TestCsvHeader(t *testing.T) {
+	var tps TPRoutes
+	eOut := []string{
+		"#Tenant", "ID", "FilterIDs", "ActivationInterval", "Sorting", "SortingParameters", "*dispatcherRouteID", "RouteFilterIDs", "RouteAccountIDs", "RouteRatingplanIDs", "RouteResourceIDs", "RouteStatIDs", "RouteWeight", "RouteBlocker", "RouteParameters", "Weight",
+	}
+	if rcv := tps.CSVHeader(); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
 	}
 }
 
