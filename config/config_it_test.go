@@ -325,7 +325,7 @@ func testCGRConfigReloadCDRs(t *testing.T) {
 		SMCostRetries:   5,
 		StoreCdrs:       true,
 		SchedulerConns:  []string{},
-		EEsConns:        []string{},
+		EEsConns:        []string{utils.MetaLocalHost},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.CdrsCfg()) {
 		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.CdrsCfg()))
