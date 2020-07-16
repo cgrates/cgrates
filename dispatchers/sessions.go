@@ -33,13 +33,13 @@ func (dS *DispatcherService) SessionSv1Ping(args *utils.CGREventWithArgDispatche
 		}
 		if err = dS.authorize(utils.SessionSv1Ping,
 			args.CGREvent.Tenant,
-			args.OptsAPIKey, args.CGREvent.Time); err != nil {
+			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.OptsRouteID
+		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(args.CGREvent, utils.MetaSessionS, routeID,
 		utils.SessionSv1Ping, args, reply)
@@ -54,13 +54,13 @@ func (dS *DispatcherService) SessionSv1AuthorizeEvent(args *sessions.V1Authorize
 		}
 		if err = dS.authorize(utils.SessionSv1AuthorizeEvent,
 			args.CGREvent.Tenant,
-			args.OptsAPIKey, args.CGREvent.Time); err != nil {
+			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.OptsRouteID
+		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(args.CGREvent, utils.MetaSessionS, routeID,
 		utils.SessionSv1AuthorizeEvent, args, reply)
@@ -75,13 +75,13 @@ func (dS *DispatcherService) SessionSv1AuthorizeEventWithDigest(args *sessions.V
 		}
 		if err = dS.authorize(utils.SessionSv1AuthorizeEventWithDigest,
 			args.CGREvent.Tenant,
-			args.OptsAPIKey, args.CGREvent.Time); err != nil {
+			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.OptsRouteID
+		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(args.CGREvent, utils.MetaSessionS, routeID,
 		utils.SessionSv1AuthorizeEventWithDigest, args, reply)
@@ -96,13 +96,13 @@ func (dS *DispatcherService) SessionSv1InitiateSession(args *sessions.V1InitSess
 		}
 		if err = dS.authorize(utils.SessionSv1InitiateSession,
 			args.CGREvent.Tenant,
-			args.OptsAPIKey, args.CGREvent.Time); err != nil {
+			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.OptsRouteID
+		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(args.CGREvent, utils.MetaSessionS, routeID,
 		utils.SessionSv1InitiateSession, args, reply)
@@ -117,13 +117,13 @@ func (dS *DispatcherService) SessionSv1InitiateSessionWithDigest(args *sessions.
 		}
 		if err = dS.authorize(utils.SessionSv1InitiateSessionWithDigest,
 			args.CGREvent.Tenant,
-			args.OptsAPIKey, args.CGREvent.Time); err != nil {
+			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.OptsRouteID
+		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(args.CGREvent, utils.MetaSessionS, routeID,
 		utils.SessionSv1InitiateSessionWithDigest, args, reply)
@@ -138,13 +138,13 @@ func (dS *DispatcherService) SessionSv1UpdateSession(args *sessions.V1UpdateSess
 		}
 		if err = dS.authorize(utils.SessionSv1UpdateSession,
 			args.CGREvent.Tenant,
-			args.OptsAPIKey, args.CGREvent.Time); err != nil {
+			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.OptsRouteID
+		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(args.CGREvent, utils.MetaSessionS, routeID,
 		utils.SessionSv1UpdateSession, args, reply)
@@ -161,13 +161,13 @@ func (dS *DispatcherService) SessionSv1SyncSessions(args *utils.TenantWithArgDis
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.SessionSv1SyncSessions, tnt,
-			args.OptsAPIKey, utils.TimePointer(time.Now())); err != nil {
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.OptsRouteID
+		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaSessionS, routeID,
 		utils.SessionSv1SyncSessions, args, reply)
@@ -182,13 +182,13 @@ func (dS *DispatcherService) SessionSv1TerminateSession(args *sessions.V1Termina
 		}
 		if err = dS.authorize(utils.SessionSv1TerminateSession,
 			args.CGREvent.Tenant,
-			args.OptsAPIKey, args.CGREvent.Time); err != nil {
+			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.OptsRouteID
+		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(args.CGREvent, utils.MetaSessionS, routeID,
 		utils.SessionSv1TerminateSession, args, reply)
@@ -203,13 +203,13 @@ func (dS *DispatcherService) SessionSv1ProcessCDR(args *utils.CGREventWithArgDis
 		}
 		if err = dS.authorize(utils.SessionSv1ProcessCDR,
 			args.CGREvent.Tenant,
-			args.OptsAPIKey, args.CGREvent.Time); err != nil {
+			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.OptsRouteID
+		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(args.CGREvent, utils.MetaSessionS, routeID,
 		utils.SessionSv1ProcessCDR, args, reply)
@@ -224,13 +224,13 @@ func (dS *DispatcherService) SessionSv1ProcessMessage(args *sessions.V1ProcessMe
 		}
 		if err = dS.authorize(utils.SessionSv1ProcessMessage,
 			args.CGREvent.Tenant,
-			args.OptsAPIKey, args.CGREvent.Time); err != nil {
+			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.OptsRouteID
+		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(args.CGREvent, utils.MetaSessionS, routeID,
 		utils.SessionSv1ProcessMessage, args, reply)
@@ -245,13 +245,13 @@ func (dS *DispatcherService) SessionSv1ProcessEvent(args *sessions.V1ProcessEven
 		}
 		if err = dS.authorize(utils.SessionSv1ProcessEvent,
 			args.CGREvent.Tenant,
-			args.OptsAPIKey, args.CGREvent.Time); err != nil {
+			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.OptsRouteID
+		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(args.CGREvent, utils.MetaSessionS, routeID,
 		utils.SessionSv1ProcessEvent, args, reply)
@@ -266,13 +266,13 @@ func (dS *DispatcherService) SessionSv1GetCost(args *sessions.V1ProcessEventArgs
 		}
 		if err = dS.authorize(utils.SessionSv1GetCost,
 			args.CGREvent.Tenant,
-			args.OptsAPIKey, args.CGREvent.Time); err != nil {
+			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.OptsRouteID
+		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(args.CGREvent, utils.MetaSessionS, routeID,
 		utils.SessionSv1GetCost, args, reply)
@@ -289,13 +289,13 @@ func (dS *DispatcherService) SessionSv1GetActiveSessions(args *utils.SessionFilt
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.SessionSv1GetActiveSessions,
-			tnt, args.OptsAPIKey, utils.TimePointer(time.Now())); err != nil {
+			tnt, args.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.OptsRouteID
+		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaSessionS, routeID,
 		utils.SessionSv1GetActiveSessions, args, reply)
@@ -312,13 +312,13 @@ func (dS *DispatcherService) SessionSv1GetActiveSessionsCount(args *utils.Sessio
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.SessionSv1GetActiveSessionsCount,
-			tnt, args.OptsAPIKey, utils.TimePointer(time.Now())); err != nil {
+			tnt, args.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.OptsRouteID
+		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaSessionS, routeID,
 		utils.SessionSv1GetActiveSessionsCount, args, reply)
@@ -335,13 +335,13 @@ func (dS *DispatcherService) SessionSv1ForceDisconnect(args *utils.SessionFilter
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.SessionSv1ForceDisconnect,
-			tnt, args.OptsAPIKey, utils.TimePointer(time.Now())); err != nil {
+			tnt, args.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.OptsRouteID
+		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaSessionS, routeID,
 		utils.SessionSv1ForceDisconnect, args, reply)
@@ -358,13 +358,13 @@ func (dS *DispatcherService) SessionSv1GetPassiveSessions(args *utils.SessionFil
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.SessionSv1GetPassiveSessions,
-			tnt, args.OptsAPIKey, utils.TimePointer(time.Now())); err != nil {
+			tnt, args.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.OptsRouteID
+		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaSessionS, routeID,
 		utils.SessionSv1GetPassiveSessions, args, reply)
@@ -381,13 +381,13 @@ func (dS *DispatcherService) SessionSv1GetPassiveSessionsCount(args *utils.Sessi
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.SessionSv1GetPassiveSessionsCount,
-			tnt, args.OptsAPIKey, utils.TimePointer(time.Now())); err != nil {
+			tnt, args.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.OptsRouteID
+		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaSessionS, routeID,
 		utils.SessionSv1GetPassiveSessionsCount, args, reply)
@@ -404,13 +404,13 @@ func (dS *DispatcherService) SessionSv1ReplicateSessions(args ArgsReplicateSessi
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.SessionSv1ReplicateSessions, tnt,
-			args.OptsAPIKey, utils.TimePointer(time.Now())); err != nil {
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.OptsRouteID
+		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaSessionS, routeID,
 		utils.SessionSv1ReplicateSessions, args, reply)
@@ -427,13 +427,13 @@ func (dS *DispatcherService) SessionSv1SetPassiveSession(args *sessions.Session,
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.SessionSv1SetPassiveSession, tnt,
-			args.OptsAPIKey, utils.TimePointer(time.Now())); err != nil {
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.OptsRouteID
+		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaSessionS, routeID,
 		utils.SessionSv1SetPassiveSession, args, reply)
@@ -449,13 +449,13 @@ func (dS *DispatcherService) SessionSv1ActivateSessions(args *utils.SessionIDsWi
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.SessionSv1ActivateSessions,
-			tnt, args.OptsAPIKey, utils.TimePointer(time.Now())); err != nil {
+			tnt, args.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.OptsRouteID
+		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaSessionS, routeID,
 		utils.SessionSv1ActivateSessions, args, reply)
@@ -471,13 +471,13 @@ func (dS *DispatcherService) SessionSv1DeactivateSessions(args *utils.SessionIDs
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.SessionSv1DeactivateSessions,
-			tnt, args.OptsAPIKey, utils.TimePointer(time.Now())); err != nil {
+			tnt, args.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.OptsRouteID
+		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaSessionS, routeID,
 		utils.SessionSv1DeactivateSessions, args, reply)
@@ -490,13 +490,13 @@ func (dS *DispatcherService) SessionSv1STIRAuthenticate(args *sessions.V1STIRAut
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.SessionSv1STIRAuthenticate,
-			tnt, args.OptsAPIKey, utils.TimePointer(time.Now())); err != nil {
+			tnt, args.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.OptsRouteID
+		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaSessionS, routeID,
 		utils.SessionSv1STIRAuthenticate, args, reply)
@@ -509,13 +509,13 @@ func (dS *DispatcherService) SessionSv1STIRIdentity(args *sessions.V1STIRIdentit
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.SessionSv1STIRIdentity,
-			tnt, args.OptsAPIKey, utils.TimePointer(time.Now())); err != nil {
+			tnt, args.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.OptsRouteID
+		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaSessionS, routeID,
 		utils.SessionSv1STIRIdentity, args, reply)

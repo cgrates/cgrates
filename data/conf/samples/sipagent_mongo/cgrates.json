@@ -53,6 +53,7 @@
 
 "chargers": {
 	"enabled": true,
+	"attributes_conns": ["*localhost"],					// connections to AttributeS for event fields altering <""|127.0.0.1:2013>
 },
 
 

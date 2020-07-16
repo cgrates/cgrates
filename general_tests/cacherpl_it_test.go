@@ -312,7 +312,7 @@ func testCacheRplPing(t *testing.T) {
 			Tenant: "cgrates.org",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsRouteID: utils.StringPointer("testRoute123"),
+			RouteID: utils.StringPointer("testRoute123"),
 		},
 	}
 	if err := dspEngine1RPC.Call(utils.CoreSv1Status, &ev, &reply); err != nil {
@@ -327,7 +327,7 @@ func testCacheRplPing(t *testing.T) {
 			Tenant: "cgrates.org",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsRouteID: utils.StringPointer("testRoute123"),
+			RouteID: utils.StringPointer("testRoute123"),
 		},
 	}, &rpl); err != nil {
 		t.Error(err)
@@ -373,7 +373,7 @@ func testCacheRplCheckReplication(t *testing.T) {
 			Tenant: "cgrates.org",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsRouteID: utils.StringPointer("testRoute123"),
+			RouteID: utils.StringPointer("testRoute123"),
 		},
 	}, &rpl); err != nil {
 		t.Error(err)
@@ -407,7 +407,7 @@ func testCacheRplAACheckReplication(t *testing.T) {
 			Tenant: "cgrates.org",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsRouteID: utils.StringPointer("testRouteFromDispatcher2"),
+			RouteID: utils.StringPointer("testRouteFromDispatcher2"),
 		},
 	}, &rpl); err != nil {
 		t.Error(err)
@@ -420,7 +420,7 @@ func testCacheRplAACheckReplication(t *testing.T) {
 			Tenant: "cgrates.org",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsRouteID: utils.StringPointer("testRouteFromDispatcher1"),
+			RouteID: utils.StringPointer("testRouteFromDispatcher1"),
 		},
 	}, &rpl); err != nil {
 		t.Error(err)
@@ -487,7 +487,7 @@ func testCacheRplAACheckLoadReplication(t *testing.T) {
 					},
 				},
 				ArgDispatcher: &utils.ArgDispatcher{
-					OptsRouteID: utils.StringPointer("testRouteFromDispatcher1"),
+					RouteID: utils.StringPointer("testRouteFromDispatcher1"),
 				},
 			}, &rpl); err != nil {
 				t.Error(err)
@@ -508,7 +508,7 @@ func testCacheRplAACheckLoadReplication(t *testing.T) {
 					},
 				},
 				ArgDispatcher: &utils.ArgDispatcher{
-					OptsRouteID: utils.StringPointer("testRouteFromDispatcher2"),
+					RouteID: utils.StringPointer("testRouteFromDispatcher2"),
 				},
 			}, &rpl); err != nil {
 				t.Error(err)
@@ -605,7 +605,7 @@ func testCacheRplCheckLoadReplication(t *testing.T) {
 					},
 				},
 				ArgDispatcher: &utils.ArgDispatcher{
-					OptsRouteID: utils.StringPointer("testRoute123"),
+					RouteID: utils.StringPointer("testRoute123"),
 				},
 			}, &rpl); err != nil {
 				t.Error(err)

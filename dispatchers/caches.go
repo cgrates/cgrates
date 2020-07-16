@@ -37,13 +37,13 @@ func (dS *DispatcherService) CacheSv1Ping(args *utils.CGREventWithArgDispatcher,
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.CacheSv1Ping, args.CGREvent.Tenant,
-			args.OptsAPIKey, args.CGREvent.Time); err != nil {
+			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.OptsRouteID
+		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(args.CGREvent, utils.MetaCaches, routeID,
 		utils.CacheSv1Ping, args, reply)
@@ -61,13 +61,13 @@ func (dS *DispatcherService) CacheSv1GetItemIDs(args *utils.ArgsGetCacheItemIDsW
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.CacheSv1GetItemIDs, tnt,
-			args.OptsAPIKey, utils.TimePointer(time.Now())); err != nil {
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.OptsRouteID
+		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCaches, routeID,
 		utils.CacheSv1GetItemIDs, args, reply)
@@ -85,13 +85,13 @@ func (dS *DispatcherService) CacheSv1HasItem(args *utils.ArgsGetCacheItemWithArg
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.CacheSv1HasItem, tnt,
-			args.OptsAPIKey, utils.TimePointer(time.Now())); err != nil {
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.OptsRouteID
+		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCaches, routeID,
 		utils.CacheSv1HasItem, args, reply)
@@ -109,13 +109,13 @@ func (dS *DispatcherService) CacheSv1GetItemExpiryTime(args *utils.ArgsGetCacheI
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.CacheSv1GetItemExpiryTime, tnt,
-			args.OptsAPIKey, utils.TimePointer(time.Now())); err != nil {
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.OptsRouteID
+		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCaches, routeID,
 		utils.CacheSv1GetItemExpiryTime, args, reply)
@@ -133,13 +133,13 @@ func (dS *DispatcherService) CacheSv1RemoveItem(args *utils.ArgsGetCacheItemWith
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.CacheSv1RemoveItem, tnt,
-			args.OptsAPIKey, utils.TimePointer(time.Now())); err != nil {
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.OptsRouteID
+		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCaches, routeID,
 		utils.CacheSv1RemoveItem, args, reply)
@@ -157,13 +157,13 @@ func (dS *DispatcherService) CacheSv1Clear(args *utils.AttrCacheIDsWithArgDispat
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.CacheSv1Clear, tnt,
-			args.OptsAPIKey, utils.TimePointer(time.Now())); err != nil {
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.OptsRouteID
+		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCaches, routeID,
 		utils.CacheSv1Clear, args, reply)
@@ -181,13 +181,13 @@ func (dS *DispatcherService) CacheSv1GetCacheStats(args *utils.AttrCacheIDsWithA
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.CacheSv1GetCacheStats, tnt,
-			args.OptsAPIKey, utils.TimePointer(time.Now())); err != nil {
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.OptsRouteID
+		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCaches, routeID,
 		utils.CacheSv1GetCacheStats, args, reply)
@@ -204,13 +204,13 @@ func (dS *DispatcherService) CacheSv1PrecacheStatus(args *utils.AttrCacheIDsWith
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.CacheSv1PrecacheStatus, tnt,
-			args.OptsAPIKey, utils.TimePointer(time.Now())); err != nil {
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.OptsRouteID
+		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCaches, routeID,
 		utils.CacheSv1PrecacheStatus, args, reply)
@@ -228,13 +228,13 @@ func (dS *DispatcherService) CacheSv1HasGroup(args *utils.ArgsGetGroupWithArgDis
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.CacheSv1HasGroup, tnt,
-			args.OptsAPIKey, utils.TimePointer(time.Now())); err != nil {
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.OptsRouteID
+		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCaches, routeID,
 		utils.CacheSv1HasGroup, args, reply)
@@ -252,13 +252,13 @@ func (dS *DispatcherService) CacheSv1GetGroupItemIDs(args *utils.ArgsGetGroupWit
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.CacheSv1GetGroupItemIDs, tnt,
-			args.OptsAPIKey, utils.TimePointer(time.Now())); err != nil {
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.OptsRouteID
+		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCaches, routeID,
 		utils.CacheSv1GetGroupItemIDs, args, reply)
@@ -275,13 +275,13 @@ func (dS *DispatcherService) CacheSv1RemoveGroup(args *utils.ArgsGetGroupWithArg
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.CacheSv1RemoveGroup, tnt,
-			args.OptsAPIKey, utils.TimePointer(time.Now())); err != nil {
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.OptsRouteID
+		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCaches, routeID,
 		utils.CacheSv1RemoveGroup, args, reply)
@@ -298,13 +298,13 @@ func (dS *DispatcherService) CacheSv1ReloadCache(args utils.AttrReloadCacheWithA
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.CacheSv1ReloadCache, tnt,
-			args.OptsAPIKey, utils.TimePointer(time.Now())); err != nil {
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.OptsRouteID
+		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCaches, routeID,
 		utils.CacheSv1ReloadCache, args, reply)
@@ -321,13 +321,13 @@ func (dS *DispatcherService) CacheSv1LoadCache(args utils.AttrReloadCacheWithArg
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.CacheSv1LoadCache, tnt,
-			args.OptsAPIKey, utils.TimePointer(time.Now())); err != nil {
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.OptsRouteID
+		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCaches, routeID,
 		utils.CacheSv1LoadCache, args, reply)
@@ -344,13 +344,13 @@ func (dS *DispatcherService) CacheSv1ReplicateRemove(args *utils.ArgCacheReplica
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.CacheSv1ReplicateRemove, tnt,
-			args.OptsAPIKey, utils.TimePointer(time.Now())); err != nil {
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.OptsRouteID
+		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCaches, routeID,
 		utils.CacheSv1ReplicateRemove, args, reply)
@@ -367,13 +367,13 @@ func (dS *DispatcherService) CacheSv1ReplicateSet(args *utils.ArgCacheReplicateS
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.CacheSv1ReplicateSet, tnt,
-			args.OptsAPIKey, utils.TimePointer(time.Now())); err != nil {
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.OptsRouteID
+		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCaches, routeID,
 		utils.CacheSv1ReplicateSet, args, reply)

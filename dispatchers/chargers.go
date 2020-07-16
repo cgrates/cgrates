@@ -33,13 +33,13 @@ func (dS *DispatcherService) ChargerSv1Ping(args *utils.CGREventWithArgDispatche
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.ChargerSv1Ping, args.CGREvent.Tenant,
-			args.OptsAPIKey, args.Time); err != nil {
+			args.APIKey, args.Time); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.OptsRouteID
+		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(args.CGREvent, utils.MetaChargers, routeID,
 		utils.ChargerSv1Ping, args, reply)
@@ -56,13 +56,13 @@ func (dS *DispatcherService) ChargerSv1GetChargersForEvent(args *utils.CGREventW
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.ChargerSv1GetChargersForEvent, tnt,
-			args.OptsAPIKey, args.CGREvent.Time); err != nil {
+			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.OptsRouteID
+		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(args.CGREvent, utils.MetaChargers, routeID,
 		utils.ChargerSv1GetChargersForEvent, args, reply)
@@ -79,13 +79,13 @@ func (dS *DispatcherService) ChargerSv1ProcessEvent(args *utils.CGREventWithOpts
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.ChargerSv1ProcessEvent, tnt,
-			args.OptsAPIKey, args.CGREvent.Time); err != nil {
+			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.OptsRouteID
+		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(args.CGREvent, utils.MetaChargers, routeID,
 		utils.ChargerSv1ProcessEvent, args, reply)

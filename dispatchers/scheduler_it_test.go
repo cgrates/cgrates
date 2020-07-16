@@ -70,7 +70,7 @@ func testDspSchedPing(t *testing.T) {
 			Tenant: "cgrates.org",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("sched12345"),
+			APIKey: utils.StringPointer("sched12345"),
 		},
 	}, &reply); err != nil {
 		t.Error(err)

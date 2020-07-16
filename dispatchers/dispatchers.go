@@ -81,14 +81,14 @@ func (dS *DispatcherService) authorizeEvent(ev *utils.CGREvent,
 
 func (dS *DispatcherService) authorize(method, tenant string, apiKey *string, evTime *time.Time) (err error) {
 	if apiKey == nil || *apiKey == "" {
-		return utils.NewErrMandatoryIeMissing(utils.OptsAPIKey)
+		return utils.NewErrMandatoryIeMissing(utils.APIKey)
 	}
 	ev := &utils.CGREvent{
 		Tenant: tenant,
 		ID:     utils.UUIDSha1Prefix(),
 		Time:   evTime,
 		Event: map[string]interface{}{
-			utils.OptsAPIKey: *apiKey,
+			utils.APIKey: *apiKey,
 		},
 	}
 	var rplyEv engine.AttrSProcessEventReply
@@ -213,21 +213,21 @@ func (dS *DispatcherService) V1Apier(apier interface{}, args *utils.MethodParame
 
 	var argD *utils.ArgDispatcher
 	//check if we have APIKey in event and in case it has add it in ArgDispatcher
-	apiKeyIface, hasApiKey := parameters[utils.OptsAPIKey]
-	if hasApiKey && apiKeyIface != nil {
+	apiKeyIface, hasAPIKey := parameters[utils.APIKey]
+	if hasAPIKey && apiKeyIface != nil {
 		argD = &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer(apiKeyIface.(string)),
+			APIKey: utils.StringPointer(apiKeyIface.(string)),
 		}
 	}
 	//check if we have RouteID in event and in case it has add it in ArgDispatcher
-	routeIDIface, hasRouteID := parameters[utils.OptsRouteID]
+	routeIDIface, hasRouteID := parameters[utils.RouteID]
 	if hasRouteID && routeIDIface != nil {
-		if !hasApiKey || apiKeyIface == nil { //in case we don't have APIKey, but we have RouteID we need to initialize the struct
+		if !hasAPIKey || apiKeyIface == nil { //in case we don't have APIKey, but we have RouteID we need to initialize the struct
 			argD = &utils.ArgDispatcher{
-				OptsRouteID: utils.StringPointer(routeIDIface.(string)),
+				RouteID: utils.StringPointer(routeIDIface.(string)),
 			}
 		} else {
-			argD.OptsRouteID = utils.StringPointer(routeIDIface.(string))
+			argD.RouteID = utils.StringPointer(routeIDIface.(string))
 		}
 	}
 
@@ -238,7 +238,7 @@ func (dS *DispatcherService) V1Apier(apier interface{}, args *utils.MethodParame
 		}
 		if err = dS.authorize(args.Method,
 			tenant,
-			argD.OptsAPIKey, utils.TimePointer(time.Now())); err != nil {
+			argD.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
@@ -285,7 +285,7 @@ func (dS *DispatcherService) V1Apier(apier interface{}, args *utils.MethodParame
 
 	var routeID *string
 	if argD != nil {
-		routeID = argD.OptsRouteID
+		routeID = argD.RouteID
 	}
 	if err := dS.Dispatch(&utils.CGREvent{Tenant: tenant, Event: parameters}, utils.MetaApier, routeID,
 		args.Method, realArgs, realReply); err != nil {

@@ -80,7 +80,7 @@ func testDspSupPing(t *testing.T) {
 			Tenant: "cgrates.org",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("sup12345"),
+			APIKey: utils.StringPointer("sup12345"),
 		},
 	}, &reply); err != nil {
 		t.Error(err)
@@ -101,7 +101,7 @@ func testDspSupPingFailover(t *testing.T) {
 			Tenant: "cgrates.org",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("sup12345"),
+			APIKey: utils.StringPointer("sup12345"),
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.RouteSv1Ping, &ev, &reply); err != nil {
@@ -179,7 +179,7 @@ func testDspSupGetSupFailover(t *testing.T) {
 			},
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("sup12345"),
+			APIKey: utils.StringPointer("sup12345"),
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.RouteSv1GetRoutes,
@@ -213,7 +213,7 @@ func testDspSupTestAuthKey(t *testing.T) {
 			},
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("12345"),
+			APIKey: utils.StringPointer("12345"),
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.RouteSv1GetRoutes,
@@ -263,7 +263,7 @@ func testDspSupTestAuthKey2(t *testing.T) {
 			},
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("sup12345"),
+			APIKey: utils.StringPointer("sup12345"),
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.RouteSv1GetRoutes,
@@ -330,7 +330,7 @@ func testDspSupGetSupRoundRobin(t *testing.T) {
 			},
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("sup12345"),
+			APIKey: utils.StringPointer("sup12345"),
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.RouteSv1GetRoutes,
@@ -361,7 +361,7 @@ func testDspSupGetSupplierForEvent(t *testing.T) {
 			},
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("sup12345"),
+			APIKey: utils.StringPointer("sup12345"),
 		},
 	}
 	expected := engine.RouteProfile{

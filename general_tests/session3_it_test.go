@@ -148,7 +148,7 @@ func testSes3ItProcessEvent(t *testing.T) {
 			},
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("ses12345"),
+			APIKey: utils.StringPointer("ses12345"),
 		},
 	}
 	var rply sessions.V1ProcessMessageReply

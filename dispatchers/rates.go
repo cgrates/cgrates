@@ -30,13 +30,13 @@ func (dS *DispatcherService) RateSv1Ping(args *utils.CGREventWithArgDispatcher, 
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.RateSv1Ping, args.CGREvent.Tenant,
-			args.OptsAPIKey, args.CGREvent.Time); err != nil {
+			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.OptsRouteID
+		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(args.CGREvent, utils.RateS, routeID,
 		utils.RateSv1Ping, args, rpl)

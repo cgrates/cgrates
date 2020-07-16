@@ -35,13 +35,13 @@ func (dS *DispatcherService) ConfigSv1GetJSONSection(args *config.StringWithArgD
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.ConfigSv1GetJSONSection, tnt,
-			args.OptsAPIKey, utils.TimePointer(time.Now())); err != nil {
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.OptsRouteID
+		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt},
 		utils.MetaConfig, routeID, utils.ConfigSv1GetJSONSection, args, reply)
@@ -57,13 +57,13 @@ func (dS *DispatcherService) ConfigSv1ReloadConfigFromPath(args *config.ConfigRe
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.ConfigSv1ReloadConfigFromPath, tnt,
-			args.OptsAPIKey, utils.TimePointer(time.Now())); err != nil {
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.OptsRouteID
+		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt},
 		utils.MetaConfig, routeID, utils.ConfigSv1ReloadConfigFromPath, args, reply)
@@ -79,13 +79,13 @@ func (dS *DispatcherService) ConfigSv1ReloadConfigFromJSON(args *config.JSONRelo
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.ConfigSv1ReloadConfigFromJSON, tnt,
-			args.OptsAPIKey, utils.TimePointer(time.Now())); err != nil {
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.OptsRouteID
+		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt},
 		utils.MetaConfig, routeID, utils.ConfigSv1ReloadConfigFromJSON, args, reply)

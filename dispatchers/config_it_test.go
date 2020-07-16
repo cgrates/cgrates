@@ -74,7 +74,7 @@ func testDspConfigSv1GetJSONSection(t *testing.T) {
 			Tenant: "cgrates.org",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("cfg12345"),
+			APIKey: utils.StringPointer("cfg12345"),
 		},
 		Section: "listen",
 	}, &reply); err != nil {

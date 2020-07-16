@@ -35,13 +35,13 @@ func (dS *DispatcherService) ResourceSv1Ping(args *utils.CGREventWithArgDispatch
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.ResourceSv1Ping, args.CGREvent.Tenant,
-			args.OptsAPIKey, args.CGREvent.Time); err != nil {
+			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.OptsRouteID
+		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(args.CGREvent, utils.MetaResources, routeID,
 		utils.ResourceSv1Ping, args, rpl)
@@ -58,14 +58,14 @@ func (dS *DispatcherService) ResourceSv1GetResourcesForEvent(args utils.ArgRSv1R
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.ResourceSv1GetResourcesForEvent, tnt,
-			args.OptsAPIKey, args.CGREvent.Time); err != nil {
+			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}
 
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.OptsRouteID
+		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(args.CGREvent, utils.MetaResources, routeID,
 		utils.ResourceSv1GetResourcesForEvent, args, reply)
@@ -82,14 +82,14 @@ func (dS *DispatcherService) ResourceSv1AuthorizeResources(args utils.ArgRSv1Res
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.ResourceSv1AuthorizeResources, tnt,
-			args.OptsAPIKey, args.CGREvent.Time); err != nil {
+			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}
 
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.OptsRouteID
+		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(args.CGREvent, utils.MetaResources, routeID,
 		utils.ResourceSv1AuthorizeResources, args, reply)
@@ -106,14 +106,14 @@ func (dS *DispatcherService) ResourceSv1AllocateResources(args utils.ArgRSv1Reso
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.ResourceSv1AllocateResources, tnt,
-			args.OptsAPIKey, args.CGREvent.Time); err != nil {
+			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}
 
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.OptsRouteID
+		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(args.CGREvent, utils.MetaResources, routeID,
 		utils.ResourceSv1AllocateResources, args, reply)
@@ -130,14 +130,14 @@ func (dS *DispatcherService) ResourceSv1ReleaseResources(args utils.ArgRSv1Resou
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.ResourceSv1ReleaseResources, tnt,
-			args.OptsAPIKey, args.CGREvent.Time); err != nil {
+			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}
 
 	}
 	var routeID *string
 	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.OptsRouteID
+		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(args.CGREvent, utils.MetaResources, routeID,
 		utils.ResourceSv1ReleaseResources, args, reply)
@@ -153,11 +153,11 @@ func (dS *DispatcherService) ResourceSv1GetResource(args *utils.TenantIDWithArgD
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ResourceSv1GetResource, tnt,
-			args.OptsAPIKey, utils.TimePointer(time.Now())); err != nil {
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
-	routeID := args.ArgDispatcher.OptsRouteID
+	routeID := args.ArgDispatcher.RouteID
 	return dS.Dispatch(&utils.CGREvent{
 		Tenant: tnt,
 		ID:     args.ID,

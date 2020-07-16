@@ -15,7 +15,7 @@
 			{
 				"id": "RoutesQuery", 
 				"filters": ["*string:~*vars.Method:INVITE"],
-				"flags": ["*event", "*routes","*continue"],
+				"flags": ["*event","*multiple", "*routes", "*attributes","*continue"],
 				"request_fields":[
 					{"tag": "Account", "path": "*cgreq.Account", "type": "*variable",
 						"value": "~*req.From{*sipuri_user}", "mandatory": true},
@@ -57,7 +57,10 @@
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
 							"value":"`;cgr_maxusage=`"},
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
-						"value":"~*cgrep.Routes[*raw].SortedRoutes[0].SortingData.MaxUsage"}
+						"value":"~*cgrep.Routes[*raw].SortedRoutes[0].SortingData.MaxUsage"},
+					{"tag": "P-Charge-Info", "path": "*rep.P-Charge-Info", "type": "*composed",
+                  		"filters": ["*notempty:~*cgrep.Attributes[<~*cgrep.Routes[*raw].SortedRoutes[0].RouteID>].P-Charge-Info:"],
+						"value": "~*cgrep.Attributes[<~*cgrep.Routes[*raw].SortedRoutes[0].RouteID>].P-Charge-Info"},
 				]
 			},
 			{

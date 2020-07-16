@@ -176,16 +176,16 @@ func testSAitSIPInvite(t *testing.T) {
 	if _, err = saConn.Read(buffer); err != nil {
 		t.Fatal(err)
 	}
-	var recived sipingo.Message
-	if recived, err = sipingo.NewMessage(string(buffer)); err != nil {
+	var received sipingo.Message
+	if received, err = sipingo.NewMessage(string(buffer)); err != nil {
 		t.Fatal(err)
 	}
 
-	if expected := "SIP/2.0 302 Moved Temporarily"; recived["Request"] != expected {
-		t.Errorf("Expected %q, received: %q", expected, recived["Request"])
+	if expected := "SIP/2.0 302 Moved Temporarily"; received["Request"] != expected {
+		t.Errorf("Expected %q, received: %q", expected, received["Request"])
 	}
-	if expected := "\"1002\" <sip:1002@cgrates.org>;q=0.7; expires=3600;cgr_cost=0.3;cgr_maxusage=60000000000,\"1002\" <sip:1002@cgrates.net>;q=0.2;cgr_cost=0.6;cgr_maxusage=60000000000,\"1002\" <sip:1002@cgrates.com>;q=0.1;cgr_cost=0.01;cgr_maxusage=60000000000"; recived["Contact"] != expected {
-		t.Errorf("Expected %q, received: %q", expected, recived["Contact"])
+	if expected := "\"1002\" <sip:1002@cgrates.org>;q=0.7; expires=3600;cgr_cost=0.3;cgr_maxusage=60000000000,\"1002\" <sip:1002@cgrates.net>;q=0.2;cgr_cost=0.6;cgr_maxusage=60000000000,\"1002\" <sip:1002@cgrates.com>;q=0.1;cgr_cost=0.01;cgr_maxusage=60000000000"; received["Contact"] != expected {
+		t.Errorf("Expected %q, received: %q", expected, received["Contact"])
 	}
 
 	time.Sleep(time.Second)
@@ -193,15 +193,19 @@ func testSAitSIPInvite(t *testing.T) {
 	if _, err = saConn.Read(buffer); err != nil {
 		t.Fatal(err)
 	}
-	if recived, err = sipingo.NewMessage(string(buffer)); err != nil {
+	if received, err = sipingo.NewMessage(string(buffer)); err != nil {
 		t.Fatal(err)
 	}
 
-	if expected := "SIP/2.0 302 Moved Temporarily"; recived["Request"] != expected {
-		t.Errorf("Expected %q, received: %q", expected, recived["Request"])
+	if expected := "SIP/2.0 302 Moved Temporarily"; received["Request"] != expected {
+		t.Errorf("Expected %q, received: %q", expected, received["Request"])
 	}
-	if expected := "\"1002\" <sip:1002@cgrates.org>;q=0.7; expires=3600;cgr_cost=0.3;cgr_maxusage=60000000000,\"1002\" <sip:1002@cgrates.net>;q=0.2;cgr_cost=0.6;cgr_maxusage=60000000000,\"1002\" <sip:1002@cgrates.com>;q=0.1;cgr_cost=0.01;cgr_maxusage=60000000000"; recived["Contact"] != expected {
-		t.Errorf("Expected %q, received: %q", expected, recived["Contact"])
+	if expected := "\"1002\" <sip:1002@cgrates.org>;q=0.7; expires=3600;cgr_cost=0.3;cgr_maxusage=60000000000,\"1002\" <sip:1002@cgrates.net>;q=0.2;cgr_cost=0.6;cgr_maxusage=60000000000,\"1002\" <sip:1002@cgrates.com>;q=0.1;cgr_cost=0.01;cgr_maxusage=60000000000"; received["Contact"] != expected {
+		t.Errorf("Expected %q, received: %q", expected, received["Contact"])
+	}
+
+	if expected := "<sip:1002@route1.com>"; received["P-Charge-Info"] != expected {
+		t.Errorf("Expected %q, received: %q", expected, received["P-Charge-Info"])
 	}
 
 	if _, err = saConn.Write([]byte(ack)); err != nil {

@@ -76,7 +76,7 @@ func testDspResPingFailover(t *testing.T) {
 			Tenant: "cgrates.org",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("res12345"),
+			APIKey: utils.StringPointer("res12345"),
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.ResourceSv1Ping, &ev, &reply); err != nil {
@@ -110,7 +110,7 @@ func testDspResPing(t *testing.T) {
 			Tenant: "cgrates.org",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("res12345"),
+			APIKey: utils.StringPointer("res12345"),
 		},
 	}, &reply); err != nil {
 		t.Error(err)
@@ -132,7 +132,7 @@ func testDspResTestAuthKey(t *testing.T) {
 		},
 		UsageID: utils.UUIDSha1Prefix(),
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("12345"),
+			APIKey: utils.StringPointer("12345"),
 		},
 	}
 
@@ -155,7 +155,7 @@ func testDspResTestAuthKey2(t *testing.T) {
 		},
 		UsageID: utils.UUIDSha1Prefix(),
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("res12345"),
+			APIKey: utils.StringPointer("res12345"),
 		},
 	}
 	eRs := &engine.Resources{
@@ -189,7 +189,7 @@ func testDspResTestAuthKey3(t *testing.T) {
 		},
 		Units: 1,
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("res12345"),
+			APIKey: utils.StringPointer("res12345"),
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.ResourceSv1AllocateResources,
@@ -218,7 +218,7 @@ func testDspResTestAuthKey3(t *testing.T) {
 		},
 		Units: 17,
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("res12345"),
+			APIKey: utils.StringPointer("res12345"),
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.ResourceSv1AuthorizeResources,
@@ -238,7 +238,7 @@ func testDspResTestAuthKey3(t *testing.T) {
 				"Destination": "1002"},
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("res12345"),
+			APIKey: utils.StringPointer("res12345"),
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.ResourceSv1ReleaseResources,
@@ -259,7 +259,7 @@ func testDspResTestAuthKey3(t *testing.T) {
 		},
 		Units: 6,
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("res12345"),
+			APIKey: utils.StringPointer("res12345"),
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.ResourceSv1AuthorizeResources, &argsRU, &reply); err != nil {
@@ -279,7 +279,7 @@ func testDspResTestAuthKey3(t *testing.T) {
 		},
 		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e61",
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("res12345"),
+			APIKey: utils.StringPointer("res12345"),
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
@@ -305,7 +305,7 @@ func testDspResTestAuthKey3(t *testing.T) {
 	argsGetResource := &utils.TenantIDWithArgDispatcher{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ResGroup1"},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("res12345"),
+			APIKey: utils.StringPointer("res12345"),
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.ResourceSv1GetResource, argsGetResource, &r); err != nil {

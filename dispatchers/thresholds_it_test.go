@@ -79,7 +79,7 @@ func testDspThPingFailover(t *testing.T) {
 			Tenant: "cgrates.org",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("thr12345"),
+			APIKey: utils.StringPointer("thr12345"),
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.ThresholdSv1Ping, &ev, &reply); err != nil {
@@ -115,7 +115,7 @@ func testDspThProcessEventFailover(t *testing.T) {
 				utils.Account:    "1001"},
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("thr12345"),
+			APIKey: utils.StringPointer("thr12345"),
 		},
 	}
 
@@ -144,7 +144,7 @@ func testDspThPing(t *testing.T) {
 			Tenant: "cgrates.org",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("thr12345"),
+			APIKey: utils.StringPointer("thr12345"),
 		},
 	}, &reply); err != nil {
 		t.Error(err)
@@ -165,7 +165,7 @@ func testDspThTestAuthKey(t *testing.T) {
 				utils.Account: "1002"},
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("12345"),
+			APIKey: utils.StringPointer("12345"),
 		},
 	}
 
@@ -193,7 +193,7 @@ func testDspThTestAuthKey2(t *testing.T) {
 				utils.Account: "1002"},
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("thr12345"),
+			APIKey: utils.StringPointer("thr12345"),
 		},
 	}
 
@@ -234,7 +234,7 @@ func testDspThTestAuthKey3(t *testing.T) {
 			ID:     "THD_ACNT_1002",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("thr12345"),
+			APIKey: utils.StringPointer("thr12345"),
 		},
 	}, &th); err != nil {
 		t.Error(err)
@@ -254,7 +254,7 @@ func testDspThTestAuthKey3(t *testing.T) {
 			Tenant: "cgrates.org",
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
-			OptsAPIKey: utils.StringPointer("thr12345"),
+			APIKey: utils.StringPointer("thr12345"),
 		},
 	}, &ids); err != nil {
 		t.Fatal(err)
