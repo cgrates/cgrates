@@ -97,30 +97,32 @@ func testFwvRPCConn(t *testing.T) {
 }
 
 func testFwvExportEvent(t *testing.T) {
-	event := &utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "Event",
-			Time:   utils.TimePointer(time.Now()),
-			Event: map[string]interface{}{
-				utils.OrderID:     1,
-				utils.CGRID:       utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()),
-				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "dsafdsaf",
-				utils.OriginHost:  "192.168.1.1",
-				utils.RequestType: utils.META_RATED,
-				utils.Tenant:      "cgrates.org",
-				utils.Category:    "call",
-				utils.Account:     "1001",
-				utils.Subject:     "1001",
-				utils.Destination: "1002",
-				utils.SetupTime:   time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
-				utils.AnswerTime:  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
-				utils.Usage:       time.Duration(10) * time.Second,
-				utils.RunID:       utils.MetaDefault,
-				utils.Cost:        2.34567,
-				"ExporterUsed":    "FWVExporter",
-				"ExtraFields":     map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+	event := &utils.CGREventWithIDs{
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "Event",
+				Time:   utils.TimePointer(time.Now()),
+				Event: map[string]interface{}{
+					utils.OrderID:     1,
+					utils.CGRID:       utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()),
+					utils.ToR:         utils.VOICE,
+					utils.OriginID:    "dsafdsaf",
+					utils.OriginHost:  "192.168.1.1",
+					utils.RequestType: utils.META_RATED,
+					utils.Tenant:      "cgrates.org",
+					utils.Category:    "call",
+					utils.Account:     "1001",
+					utils.Subject:     "1001",
+					utils.Destination: "1002",
+					utils.SetupTime:   time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
+					utils.AnswerTime:  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
+					utils.Usage:       time.Duration(10) * time.Second,
+					utils.RunID:       utils.MetaDefault,
+					utils.Cost:        2.34567,
+					"ExporterUsed":    "FWVExporter",
+					"ExtraFields":     map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+				},
 			},
 		},
 	}

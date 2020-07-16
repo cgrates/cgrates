@@ -155,7 +155,6 @@ func NewDefaultCGRConfig() (cfg *CGRConfig, err error) {
 	cfg.ralsCfg.BalanceRatingSubject = make(map[string]string)
 	cfg.schedulerCfg = new(SchedulerCfg)
 	cfg.cdrsCfg = new(CdrsCfg)
-	cfg.CdreProfiles = make(map[string]*CdreCfg)
 	cfg.analyzerSCfg = new(AnalyzerSCfg)
 	cfg.sessionSCfg = new(SessionSCfg)
 	cfg.sessionSCfg.STIRCfg = new(STIRcfg)
@@ -185,8 +184,6 @@ func NewDefaultCGRConfig() (cfg *CGRConfig, err error) {
 	cfg.sipAgentCfg = new(SIPAgentCfg)
 
 	cfg.ConfigReloads = make(map[string]chan struct{})
-	cfg.ConfigReloads[utils.CDRE] = make(chan struct{}, 1)
-	cfg.ConfigReloads[utils.CDRE] <- struct{}{} // Unlock the channel
 
 	var cgrJsonCfg *CgrJsonCfg
 	if cgrJsonCfg, err = NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON)); err != nil {
@@ -196,7 +193,6 @@ func NewDefaultCGRConfig() (cfg *CGRConfig, err error) {
 		return
 	}
 
-	cfg.dfltCdreProfile = cfg.CdreProfiles[utils.MetaDefault].Clone() // So default will stay unique, will have nil pointer in case of no defaults loaded which is an extra check
 	// populate default ERs reader
 	for _, ersRdr := range cfg.ersCfg.Readers {
 		if ersRdr.ID == utils.MetaDefault {
@@ -259,13 +255,11 @@ type CGRConfig struct {
 	ConfigPath      string        // Path towards config
 
 	// Cache defaults loaded from json and needing clones
-	dfltCdreProfile *CdreCfg          // Default cdreConfig profile
-	dfltEvRdr       *EventReaderCfg   // default event reader
-	dfltEvExp       *EventExporterCfg // default event exporter
+	dfltEvRdr *EventReaderCfg   // default event reader
+	dfltEvExp *EventExporterCfg // default event exporter
 
-	CdreProfiles map[string]*CdreCfg // Cdre config profiles
-	loaderCfg    LoaderSCfgs         // LoaderS configs
-	httpAgentCfg HttpAgentCfgs       // HttpAgent configs
+	loaderCfg    LoaderSCfgs   // LoaderS configs
+	httpAgentCfg HttpAgentCfgs // HttpAgent configs
 
 	ConfigReloads map[string]chan struct{} // Signals to specific entities that a config reload should occur
 	rldChans      map[string]chan struct{} // index here the channels used for reloads
@@ -323,16 +317,18 @@ var possibleExporterTypes = utils.NewStringSet([]string{utils.MetaFileCSV, utils
 	utils.MetaKafkajsonMap, utils.MetaS3jsonMap, utils.MetaVirt})
 
 func (cfg *CGRConfig) LazySanityCheck() {
-	for _, cdrePrfl := range cfg.cdrsCfg.OnlineCDRExports {
-		if cdreProfile, hasIt := cfg.CdreProfiles[cdrePrfl]; hasIt && (cdreProfile.ExportFormat == utils.MetaS3jsonMap || cdreProfile.ExportFormat == utils.MetaSQSjsonMap) {
-			poster := utils.SQSPoster
-			if cdreProfile.ExportFormat == utils.MetaS3jsonMap {
-				poster = utils.S3Poster
-			}
-			argsMap := utils.GetUrlRawArguments(cdreProfile.ExportPath)
-			for _, arg := range []string{utils.AWSRegion, utils.AWSKey, utils.AWSSecret} {
-				if _, has := argsMap[arg]; !has {
-					utils.Logger.Warning(fmt.Sprintf("<%s> No %s present for AWS for cdre: <%s>.", poster, arg, cdrePrfl))
+	for _, expID := range cfg.cdrsCfg.OnlineCDRExports {
+		for _, ee := range cfg.eesCfg.Exporters {
+			if ee.ID == expID && ee.Type == utils.MetaS3jsonMap || ee.Type == utils.MetaSQSjsonMap {
+				poster := utils.SQSPoster
+				if ee.Type == utils.MetaS3jsonMap {
+					poster = utils.S3Poster
+				}
+				argsMap := utils.GetUrlRawArguments(ee.ExportPath)
+				for _, arg := range []string{utils.AWSRegion, utils.AWSKey, utils.AWSSecret} {
+					if _, has := argsMap[arg]; !has {
+						utils.Logger.Warning(fmt.Sprintf("<%s> No %s present for AWS for exporter with ID : <%s>.", poster, arg, ee.ID))
+					}
 				}
 			}
 		}
@@ -361,7 +357,7 @@ func (cfg *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		cfg.loadGeneralCfg, cfg.loadCacheCfg, cfg.loadListenCfg,
 		cfg.loadHTTPCfg, cfg.loadDataDBCfg, cfg.loadStorDBCfg,
 		cfg.loadFilterSCfg, cfg.loadRalSCfg, cfg.loadSchedulerCfg,
-		cfg.loadCdrsCfg, cfg.loadCdreCfg, cfg.loadSessionSCfg,
+		cfg.loadCdrsCfg, cfg.loadSessionSCfg,
 		cfg.loadFreeswitchAgentCfg, cfg.loadKamAgentCfg,
 		cfg.loadAsteriskAgentCfg, cfg.loadDiameterAgentCfg, cfg.loadRadiusAgentCfg,
 		cfg.loadDNSAgentCfg, cfg.loadHttpAgentCfg, cfg.loadAttributeSCfg,
@@ -493,28 +489,6 @@ func (cfg *CGRConfig) loadCdrsCfg(jsnCfg *CgrJsonCfg) (err error) {
 		return
 	}
 	return cfg.cdrsCfg.loadFromJsonCfg(jsnCdrsCfg)
-}
-
-// loadCdreCfg loads the Cdre section of the configuration
-func (cfg *CGRConfig) loadCdreCfg(jsnCfg *CgrJsonCfg) (err error) {
-	var jsnCdreCfg map[string]*CdreJsonCfg
-	if jsnCdreCfg, err = jsnCfg.CdreJsonCfgs(); err != nil {
-		return
-	}
-	if jsnCdreCfg != nil {
-		for profileName, jsnCdre1Cfg := range jsnCdreCfg {
-			if _, hasProfile := cfg.CdreProfiles[profileName]; !hasProfile { // New profile, create before loading from json
-				cfg.CdreProfiles[profileName] = new(CdreCfg)
-				if profileName != utils.MetaDefault {
-					cfg.CdreProfiles[profileName] = cfg.dfltCdreProfile.Clone() // Clone default so we do not inherit pointers
-				}
-			}
-			if err = cfg.CdreProfiles[profileName].loadFromJsonCfg(jsnCdre1Cfg, cfg.generalCfg.RSRSep); err != nil { // Update the existing profile with content from json config
-				return
-			}
-		}
-	}
-	return
 }
 
 // loadSessionSCfg loads the SessionS section of the configuration
@@ -1120,8 +1094,6 @@ func (cfg *CGRConfig) V1GetConfigSection(args *StringWithArgDispatcher, reply *m
 		jsonString = utils.ToJSON(cfg.MigratorCgrCfg())
 	case ApierS:
 		jsonString = utils.ToJSON(cfg.ApierCfg())
-	case CDRE_JSN:
-		jsonString = utils.ToJSON(cfg.CdreProfiles)
 	case EEsJson:
 		jsonString = utils.ToJSON(cfg.EEsCfg())
 	case ERsJson:
@@ -1228,7 +1200,6 @@ func (cfg *CGRConfig) getLoadFunctions() map[string]func(*CgrJsonCfg) error {
 		FilterSjsn:         cfg.loadFilterSCfg,
 		RALS_JSN:           cfg.loadRalSCfg,
 		CDRS_JSN:           cfg.loadCdrsCfg,
-		CDRE_JSN:           cfg.loadCdreCfg,
 		ERsJson:            cfg.loadErsCfg,
 		EEsJson:            cfg.loadEesCfg,
 		SessionSJson:       cfg.loadSessionSCfg,
@@ -1541,11 +1512,6 @@ func (cfg *CGRConfig) AsMapInterface(separator string) map[string]interface{} {
 		rpcConns[key] = val.AsMapInterface()
 	}
 
-	cdreProfiles := make(map[string]map[string]interface{})
-	for key, val := range cfg.CdreProfiles {
-		cdreProfiles[key] = val.AsMapInterface(separator)
-	}
-
 	loaderCfg := make([]map[string]interface{}, len(cfg.loaderCfg))
 	for i, item := range cfg.loaderCfg {
 		loaderCfg[i] = item.AsMapInterface(separator)
@@ -1557,7 +1523,6 @@ func (cfg *CGRConfig) AsMapInterface(separator string) map[string]interface{} {
 	}
 
 	return map[string]interface{}{
-		utils.CdreProfiles:     cdreProfiles,
 		utils.LoaderCfg:        loaderCfg,
 		utils.HttpAgentCfg:     httpAgentCfg,
 		utils.RpcConns:         rpcConns,

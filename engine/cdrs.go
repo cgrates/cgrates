@@ -399,29 +399,8 @@ func (cdrS *CDRServer) statSProcessEvent(cgrEv *utils.CGREventWithArgDispatcher)
 	return
 }
 
-// exportCDRs will export the CDRs received
-func (cdrS *CDRServer) exportCDRs(cdrs []*CDR) (err error) {
-	for _, exportID := range cdrS.cgrCfg.CdrsCfg().OnlineCDRExports {
-		expTpl := cdrS.cgrCfg.CdreProfiles[exportID] // not checking for existence of profile since this should be done in a higher layer
-		var cdre *CDRExporter
-		if cdre, err = NewCDRExporter(cdrs, expTpl, expTpl.ExportFormat,
-			expTpl.ExportPath, cdrS.cgrCfg.GeneralCfg().FailedPostsDir,
-			"CDRSReplication", expTpl.Synchronous, expTpl.Attempts,
-			expTpl.FieldSeparator, cdrS.cgrCfg.GeneralCfg().HttpSkipTlsVerify,
-			cdrS.cgrCfg.CdrsCfg().AttributeSConns, cdrS.filterS); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<CDRS> Building CDRExporter for online exports got error: <%s>", err.Error()))
-			continue
-		}
-		if err = cdre.ExportCDRs(); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<CDRS> Replicating CDR: %+v, got error: <%s>", cdrs, err.Error()))
-			continue
-		}
-	}
-	return
-}
-
 // eeSProcessEvent will process the event with the EEs component
-func (cdrS *CDRServer) eeSProcessEvent(cgrEv *utils.CGREventWithOpts) (err error) {
+func (cdrS *CDRServer) eeSProcessEvent(cgrEv *utils.CGREventWithIDs) (err error) {
 	var reply string
 	if err = cdrS.connMgr.Call(cdrS.cgrCfg.CdrsCfg().EEsConns, nil,
 		utils.EventExporterSv1ProcessEvent,
@@ -583,19 +562,17 @@ func (cdrS *CDRServer) processEvent(ev *utils.CGREventWithOpts,
 	}
 	var partiallyExecuted bool // from here actions are optional and a general error is returned
 	if export {
-		if len(cdrS.cgrCfg.CdrsCfg().OnlineCDRExports) != 0 {
-			if err = cdrS.exportCDRs(cdrs); err != nil {
-				utils.Logger.Warning(
-					fmt.Sprintf("<%s> error: <%s> exporting CDRs %+v",
-						utils.CDRs, err.Error(), cdrs))
-				partiallyExecuted = true
-			}
-		}
 		if len(cdrS.cgrCfg.CdrsCfg().EEsConns) != 0 {
 			for _, cgrEv := range cgrEvs {
-				evWithOpts := &utils.CGREventWithOpts{
-					CGREvent:      cgrEv.CGREvent,
-					ArgDispatcher: cgrEv.ArgDispatcher}
+				evWithOpts := &utils.CGREventWithIDs{
+					CGREventWithOpts: &utils.CGREventWithOpts{
+						CGREvent:      cgrEv.CGREvent,
+						ArgDispatcher: cgrEv.ArgDispatcher,
+					},
+				}
+				if len(cdrS.cgrCfg.CdrsCfg().OnlineCDRExports) != 0 {
+					evWithOpts.IDs = cdrS.cgrCfg.CdrsCfg().OnlineCDRExports
+				}
 				if err = cdrS.eeSProcessEvent(evWithOpts); err != nil {
 					utils.Logger.Warning(
 						fmt.Sprintf("<%s> error: <%s> exporting cdr %+v",
@@ -717,7 +694,7 @@ func (cdrS *CDRServer) V1ProcessCDR(cdr *CDRWithOpts, reply *string) (err error)
 		!cdr.PreRated, // rate the CDR if is not PreRated
 		cdrS.cgrCfg.CdrsCfg().StoreCdrs,
 		false, // no rerate
-		(len(cdrS.cgrCfg.CdrsCfg().OnlineCDRExports) != 0 || len(cdrS.cgrCfg.CdrsCfg().EEsConns) != 0),
+		len(cdrS.cgrCfg.CdrsCfg().OnlineCDRExports) != 0 || len(cdrS.cgrCfg.CdrsCfg().EEsConns) != 0,
 		len(cdrS.cgrCfg.CdrsCfg().ThresholdSConns) != 0,
 		len(cdrS.cgrCfg.CdrsCfg().StatSConns) != 0); err != nil {
 		return

@@ -79,13 +79,6 @@
 },
 
 
-"cdre": {
-	"*default": {
-		"export_path": "/tmp/cgrates/cdr/cdrexport/csv",			// path where the exported CDRs will be placed
-	}
-},
-
-
 "apiers": {
 	"enabled": true,
 	"scheduler_conns": ["*internal"],

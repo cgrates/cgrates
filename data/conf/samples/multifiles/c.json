@@ -3,23 +3,6 @@
 // Used in multifile configuration tests
 // Should be the third file loaded
 
-"cdre": {
-	"export1": {
-		"cost_rounding_decimals": 3,					// rounding decimals for Cost values. -1 to disable rounding
-		"fields": [								// template of the exported content fields
-			{"path": "*exp.Tenant", "cdr_field_id": "tenant", "type": "cdrfield", "value": "tenant"},
-			{"path": "*exp.Category", "cdr_field_id": "category", "type": "cdrfield", "value": "category"},
-			{"path": "*exp.Account", "cdr_field_id": "account", "type": "cdrfield", "value": "account"},
-			{"path": "*exp.Subject", "cdr_field_id": "subject", "type": "cdrfield", "value": "subject"},
-			{"path": "*exp.Destination", "cdr_field_id": "destination", "type": "cdrfield", "value": "destination"},
-			{"path": "*exp.SetupTime", "cdr_field_id": "setup_time", "type": "cdrfield", "value": "setup_time", "layout": "2006-01-02T15:04:05Z07:00"},
-			{"path": "*exp.AnswerTime", "cdr_field_id": "answer_time", "type": "cdrfield", "value": "answer_time", "layout": "2006-01-02T15:04:05Z07:00"},
-			{"path": "*exp.Usage", "cdr_field_id": "usage", "type": "cdrfield", "value": "usage"},
-			{"path": "*exp.Cost", "cdr_field_id": "cost", "type": "cdrfield", "value": "cost"},			
-		],						// template of the exported header fields
-	}
-},
-
 "http_agent": [
 	{
 		"id": "conecto_xml",

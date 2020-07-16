@@ -108,8 +108,7 @@ func TestConfigSanityCDRServer(t *testing.T) {
 	cfg.cdrsCfg.StatSConns = []string{}
 
 	cfg.cdrsCfg.OnlineCDRExports = []string{"stringy"}
-	cfg.CdreProfiles = map[string]*CdreCfg{"stringx": &CdreCfg{}}
-	expected = "<CDRs> cannot find CDR export template with ID: <stringy>"
+	expected = "<CDRs> cannot find exporter with ID: <stringy>"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}

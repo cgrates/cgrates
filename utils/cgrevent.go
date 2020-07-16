@@ -285,3 +285,9 @@ func (ev *CGREventWithOpts) Clone() (clned *CGREventWithOpts) {
 	}
 	return
 }
+
+// CGREventWithIDs is the CGREventWithOpts with ExporterIDs
+type CGREventWithIDs struct {
+	IDs []string
+	*CGREventWithOpts
+}

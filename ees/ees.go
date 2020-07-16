@@ -128,7 +128,7 @@ func (eeS *EventExporterS) attrSProcessEvent(cgrEv *utils.CGREventWithOpts, attr
 }
 
 // V1ProcessEvent will be called each time a new event is received from readers
-func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithOpts, rply *string) (err error) {
+func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithIDs, rply *string) (err error) {
 	eeS.cfg.RLocks(config.EEsJson)
 	defer eeS.cfg.RUnlocks(config.EEsJson)
 
@@ -137,6 +137,12 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithOpts, rply *s
 	for cfgIdx, eeCfg := range eeS.cfg.EEsNoLksCfg().Exporters {
 		if eeCfg.Type == utils.META_NONE { // ignore *none type exporter
 			continue
+		}
+
+		if len(cgrEv.IDs) != 0 {
+			if !utils.IsSliceMember(cgrEv.IDs, eeCfg.ID) {
+				continue
+			}
 		}
 
 		if len(eeCfg.Filters) != 0 {
@@ -155,7 +161,7 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithOpts, rply *s
 
 		if eeCfg.Flags.GetBool(utils.MetaAttributes) {
 			if err = eeS.attrSProcessEvent(
-				cgrEv,
+				cgrEv.CGREventWithOpts,
 				eeCfg.AttributeSIDs,
 				utils.FirstNonEmpty(
 					eeCfg.AttributeSCtx,

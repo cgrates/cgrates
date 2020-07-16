@@ -93,9 +93,16 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.CDRs, connID)
 			}
 		}
-		for _, cdrePrfl := range cfg.cdrsCfg.OnlineCDRExports {
-			if _, hasIt := cfg.CdreProfiles[cdrePrfl]; !hasIt {
-				return fmt.Errorf("<%s> cannot find CDR export template with ID: <%s>", utils.CDRs, cdrePrfl)
+		for _, expID := range cfg.cdrsCfg.OnlineCDRExports {
+			has := false
+			for _, ee := range cfg.eesCfg.Exporters {
+				if ee.ID == expID {
+					has = true
+					break
+				}
+			}
+			if !has {
+				return fmt.Errorf("<%s> cannot find exporter with ID: <%s>", utils.CDRs, expID)
 			}
 		}
 		for _, connID := range cfg.cdrsCfg.EEsConns {
@@ -104,13 +111,6 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			}
 			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
 				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.CDRs, connID)
-			}
-		}
-		for prfl, cdre := range cfg.CdreProfiles {
-			for _, field := range cdre.Fields {
-				if field.Type != utils.META_NONE && field.Path == utils.EmptyString {
-					return fmt.Errorf("<%s> %s for %s at %s", utils.CDRs, utils.NewErrMandatoryIeMissing(utils.Path), prfl, field.Tag)
-				}
 			}
 		}
 	}
