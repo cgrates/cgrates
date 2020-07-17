@@ -22,6 +22,17 @@
 },
 
 
+"rpc_conns": {
+	"replicateToCache": {
+		"strategy": "*broadcast_sync",
+		"conns": [
+			{"address": "*internal"},
+			{"address": "127.0.0.1:2012", "transport":"*json"},
+		],
+	}
+},
+
+
 "rals": {
 	"enabled": true,
 },
@@ -35,6 +46,7 @@
 "apiers": {
 	"enabled": true,
 	"scheduler_conns": ["*internal"],
+	"caches_conns": ["replicateToCache"],
 },
 
 }
