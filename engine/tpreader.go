@@ -533,6 +533,7 @@ func (tpr *TpReader) LoadActions() (err error) {
 						}
 					}
 					acts[idx].Balance.Timings = append(acts[idx].Balance.Timings, &RITiming{
+						ID:        timingID,
 						Years:     timing.Years,
 						Months:    timing.Months,
 						MonthDays: timing.MonthDays,
@@ -581,6 +582,7 @@ func (tpr *TpReader) LoadActionPlans() (err error) {
 				Weight: at.Weight,
 				Timing: &RateInterval{
 					Timing: &RITiming{
+						ID:        at.TimingId,
 						Years:     t.Years,
 						Months:    t.Months,
 						MonthDays: t.MonthDays,
@@ -757,6 +759,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 					Weight: at.Weight,
 					Timing: &RateInterval{
 						Timing: &RITiming{
+							ID:        at.TimingId,
 							Months:    t.Months,
 							MonthDays: t.MonthDays,
 							WeekDays:  t.WeekDays,
@@ -986,6 +989,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 						for _, timingID := range timingIds {
 							if timing, found := tpr.timings[timingID]; found {
 								acts[idx].Balance.Timings = append(acts[idx].Balance.Timings, &RITiming{
+									ID:        timingID,
 									Years:     timing.Years,
 									Months:    timing.Months,
 									MonthDays: timing.MonthDays,
@@ -2606,6 +2610,15 @@ func (tpr *TpReader) addDefaultTimings() {
 	}
 	tpr.timings[utils.MetaMonthly] = &utils.TPTiming{
 		ID:        utils.MetaMonthly,
+		Years:     utils.Years{},
+		Months:    utils.Months{},
+		MonthDays: utils.MonthDays{time.Now().Day()},
+		WeekDays:  utils.WeekDays{},
+		StartTime: startTime,
+		EndTime:   "",
+	}
+	tpr.timings[utils.MetaMonthlyEstimated] = &utils.TPTiming{
+		ID:        utils.MetaMonthlyEstimated,
 		Years:     utils.Years{},
 		Months:    utils.Months{},
 		MonthDays: utils.MonthDays{time.Now().Day()},

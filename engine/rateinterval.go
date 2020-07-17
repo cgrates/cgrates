@@ -40,6 +40,7 @@ type RateInterval struct {
 
 // Separate structure used for rating plan size optimization
 type RITiming struct {
+	ID                 string
 	Years              utils.Years
 	Months             utils.Months
 	MonthDays          utils.MonthDays
@@ -467,6 +468,7 @@ func (rit *RITiming) Clone() (cln *RITiming) {
 		return
 	}
 	cln = &RITiming{
+		ID:        rit.ID,
 		Years:     rit.Years,
 		Months:    rit.Months,
 		MonthDays: rit.MonthDays,

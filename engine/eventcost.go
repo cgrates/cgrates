@@ -176,7 +176,7 @@ func (ec *EventCost) rateIntervalForRatingID(ratingID string) (ri *RateInterval)
 	}
 	if cIlRU.TimingID != "" {
 		cIlTm := ec.Timings[cIlRU.TimingID]
-		ri.Timing = &RITiming{Years: cIlTm.Years, Months: cIlTm.Months, MonthDays: cIlTm.MonthDays,
+		ri.Timing = &RITiming{ID: cIlRU.TimingID, Years: cIlTm.Years, Months: cIlTm.Months, MonthDays: cIlTm.MonthDays,
 			WeekDays: cIlTm.WeekDays, StartTime: cIlTm.StartTime}
 	}
 	return

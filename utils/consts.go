@@ -773,6 +773,7 @@ const (
 	MetaMonthEnd             = "*month_end"
 	APIKey                   = "ApiKey"
 	RouteID                  = "RouteID"
+	MetaMonthlyEstimated     = "*monthly_estimated"
 )
 
 // Migrator Action

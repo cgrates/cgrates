@@ -1088,6 +1088,7 @@ func TestECAsCallCost(t *testing.T) {
 				Cost:      0.25,
 				RateInterval: &RateInterval{ // standard rating
 					Timing: &RITiming{
+						ID:        "27f1e5f8-05bb-4f1c-a596-bf1010ad296c",
 						StartTime: "00:00:00",
 					},
 					Rating: &RIRate{
@@ -1141,6 +1142,7 @@ func TestECAsCallCost(t *testing.T) {
 								Consumed: 1.0,
 								RateInterval: &RateInterval{
 									Timing: &RITiming{
+										ID:        "27f1e5f8-05bb-4f1c-a596-bf1010ad296c",
 										StartTime: "00:00:00",
 									},
 									Rating: &RIRate{
@@ -1179,6 +1181,7 @@ func TestECAsCallCost(t *testing.T) {
 				Cost:      0.6,
 				RateInterval: &RateInterval{ // standard rating
 					Timing: &RITiming{
+						ID:        "27f1e5f8-05bb-4f1c-a596-bf1010ad296c",
 						StartTime: "00:00:00",
 					},
 					Rating: &RIRate{
@@ -1218,7 +1221,7 @@ func TestECAsCallCost(t *testing.T) {
 	}
 	cc := ec.AsCallCost(utils.EmptyString)
 	if !reflect.DeepEqual(eCC, cc) {
-		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eCC), utils.ToJSON(cc))
+		t.Errorf("Expecting: %+v,\n received: %+v", utils.ToJSON(eCC), utils.ToJSON(cc))
 	}
 }
 

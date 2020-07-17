@@ -471,6 +471,7 @@ func (tps TpRatingPlans) AsTPRatingPlans() (result []*utils.TPRatingPlan, err er
 func GetRateInterval(rpl *utils.TPRatingPlanBinding, dr *utils.DestinationRate) (i *RateInterval) {
 	i = &RateInterval{
 		Timing: &RITiming{
+			ID:        rpl.Timing().ID,
 			Years:     rpl.Timing().Years,
 			Months:    rpl.Timing().Months,
 			MonthDays: rpl.Timing().MonthDays,

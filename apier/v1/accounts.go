@@ -467,6 +467,7 @@ func (apierSv1 *APIerSv1) modifyBalance(aType string, attr *AttrAddBalance, repl
 				return
 			}
 			balance.Timings = append(balance.Timings, &engine.RITiming{
+				ID:        tmg.ID,
 				Years:     tmg.Years,
 				Months:    tmg.Months,
 				MonthDays: tmg.MonthDays,
@@ -540,6 +541,7 @@ func (apierSv1 *APIerSv1) SetBalance(attr *utils.AttrSetBalance, reply *string) 
 				return
 			}
 			balance.Timings = append(balance.Timings, &engine.RITiming{
+				ID:        tmg.ID,
 				Years:     tmg.Years,
 				Months:    tmg.Months,
 				MonthDays: tmg.MonthDays,
