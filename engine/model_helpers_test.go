@@ -2829,7 +2829,11 @@ func TestFilterToTPFilter(t *testing.T) {
 func TestCsvHeader(t *testing.T) {
 	var tps TPRoutes
 	eOut := []string{
-		"#Tenant", "ID", "FilterIDs", "ActivationInterval", "Sorting", "SortingParameters", "*dispatcherRouteID", "RouteFilterIDs", "RouteAccountIDs", "RouteRatingplanIDs", "RouteResourceIDs", "RouteStatIDs", "RouteWeight", "RouteBlocker", "RouteParameters", "Weight",
+		"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.ActivationIntervalString,
+		utils.Sorting, utils.SortingParameters, utils.RouteID, utils.RouteFilterIDs,
+		utils.RouteAccountIDs, utils.RouteRatingplanIDs, utils.RouteResourceIDs,
+		utils.RouteStatIDs, utils.RouteWeight, utils.RouteBlocker,
+		utils.RouteParameters, utils.Weight,
 	}
 	if rcv := tps.CSVHeader(); !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
