@@ -678,15 +678,29 @@ func (apierSv1 *APIerSv1) SetActionPlan(attrs *AttrSetActionPlan, reply *string)
 			if dfltTiming, isDefault := checkDefaultTiming(apiAtm.Time); isDefault {
 				timing = dfltTiming
 			} else {
-				timing.ID = apiAtm.TimingID
-				timing.Years.Parse(apiAtm.Years, ";")
-				timing.Months.Parse(apiAtm.Months, ";")
-				timing.MonthDays.Parse(apiAtm.MonthDays, ";")
-				timing.WeekDays.Parse(apiAtm.WeekDays, ";")
-				if !verifyFormat(apiAtm.Time) {
-					return 0, fmt.Errorf("%s:%s", utils.ErrUnsupportedFormat.Error(), apiAtm.Time)
+				if !strings.HasPrefix(apiAtm.TimingID, utils.Meta) {
+					dbTiming, err := apierSv1.DataManager.GetTiming(apiAtm.TimingID, false, utils.NonTransactional)
+					if err != nil {
+						return 0, err
+					}
+					timing.ID = dbTiming.ID
+					timing.Years = dbTiming.Years
+					timing.Months = dbTiming.Months
+					timing.MonthDays = dbTiming.MonthDays
+					timing.WeekDays = dbTiming.WeekDays
+					timing.StartTime = dbTiming.StartTime
+				} else {
+					timing.ID = apiAtm.TimingID
+					timing.Years.Parse(apiAtm.Years, ";")
+					timing.Months.Parse(apiAtm.Months, ";")
+					timing.MonthDays.Parse(apiAtm.MonthDays, ";")
+					timing.WeekDays.Parse(apiAtm.WeekDays, ";")
+					if !verifyFormat(apiAtm.Time) {
+						return 0, fmt.Errorf("%s:%s", utils.ErrUnsupportedFormat.Error(), apiAtm.Time)
+					}
+					timing.StartTime = apiAtm.Time
 				}
-				timing.StartTime = apiAtm.Time
+
 			}
 
 			ap.ActionTimings = append(ap.ActionTimings, &engine.ActionTiming{
