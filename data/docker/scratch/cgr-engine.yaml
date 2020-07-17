@@ -1,7 +1,7 @@
 version: "3.7"
 services:
   cgr-engine:
-    image: dkr.cgrates.org/v0.10/cgr-engine:20200309151603f0ba1bc9c
+    image: dkr.cgrates.org/v0.10/cgr-engine:202007170943010f2fa346a
     container_name: cgr-engine
     depends_on: 
       - redis
@@ -10,12 +10,9 @@ services:
     ports:
       - 2012:2012
       - 2080:2080
-    volumes:
-      - ../../conf/samples/docker/:/etc/cgrates/:ro
-      - ../../tariffplans/tutorial/:/data/:ro
     environment:
       - DOCKER_IP=0.0.0.0
-    command: /cgr-engine --logger=*stdout -httprof_path=/pprof
+    command:  --logger=*stdout -httprof_path=/pprof -config_path=https://raw.githubusercontent.com/cgrates/cgrates/v0.10/data/conf/samples/docker/cgrates.json
   
   redis:
     image: redis
