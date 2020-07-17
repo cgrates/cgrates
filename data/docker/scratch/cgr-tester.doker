@@ -1,3 +1,4 @@
 FROM scratch
 ADD ./cgr-tester /usr/bin/
+COPY ./ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 ENTRYPOINT ["/usr/bin/cgr-tester"]

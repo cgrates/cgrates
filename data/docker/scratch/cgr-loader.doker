@@ -1,4 +1,5 @@
 FROM scratch
 ADD ./cgr-loader /usr/bin/
+COPY ./ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 ENTRYPOINT ["/usr/bin/cgr-loader"]
 CMD ["-config_path=/etc/cgrates/"]

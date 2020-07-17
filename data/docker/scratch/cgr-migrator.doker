@@ -1,4 +1,5 @@
 FROM scratch
 ADD ./cgr-migrator /usr/bin/
+COPY ./ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 ENTRYPOINT ["/usr/bin/cgr-migrator"]
 CMD ["-config_path=/etc/cgrates/"]
