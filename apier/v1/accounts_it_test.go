@@ -63,7 +63,7 @@ var (
 		testAccITCountAccounts,
 		testAccITTPFromFolder,
 		testAccITAddBalanceWithDestinations,
-		//testAccITAccountWithTriggers,
+		testAccITAccountWithTriggers,
 		testAccITStopCgrEngine,
 	}
 )
@@ -780,7 +780,6 @@ func testAccITAddBalanceWithDestinations(t *testing.T) {
 	}
 }
 
-/* Uncomment this test when found a solution for SetActions
 func testAccITAccountWithTriggers(t *testing.T) {
 	var reply string
 	args := &utils.AttrSetBalance{
@@ -910,8 +909,8 @@ func testAccITAccountWithTriggers(t *testing.T) {
 	} else {
 		for _, value := range acnt.BalanceMap[utils.MONETARY] {
 			if value.ID == "testAccITAccountWithTriggers" {
-				if value.GetValue() != 2 {
-					t.Errorf("Expecting %+v, received: %+v", 2, value.GetValue())
+				if value.GetValue() != 5 {
+					t.Errorf("Expecting %+v, received: %+v", 5, value.GetValue())
 				}
 			} else if value.ID == "CustomBanalce" {
 				if value.GetValue() != 5 {
@@ -922,11 +921,10 @@ func testAccITAccountWithTriggers(t *testing.T) {
 		if len(acnt.ActionTriggers) != 1 {
 			t.Errorf("Expected 1, received: %+v", len(acnt.ActionTriggers))
 		} else {
-			if acnt.ActionTriggers[0].Executed != true {
+			if acnt.ActionTriggers[0].Executed != false {
 				t.Errorf("Expected true, received: %+v", acnt.ActionTriggers[0].Executed)
 			}
 		}
 	}
 
 }
-*/

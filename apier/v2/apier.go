@@ -325,7 +325,9 @@ func (apiv2 *APIerSv2) SetActions(attrs *utils.AttrSetActions, reply *string) er
 			ExpirationString: apiAct.ExpiryTime,
 			ExtraParameters:  apiAct.ExtraParameters,
 			Filter:           apiAct.Filter,
-			Balance: &engine.BalanceFilter{ // TODO: update this part
+		}
+		if apiAct.Identifier != utils.RESET_TRIGGERS { // add an exception for ResetTriggers
+			a.Balance = &engine.BalanceFilter{ // TODO: update this part
 				Uuid:           utils.StringPointer(apiAct.BalanceUuid),
 				ID:             utils.StringPointer(apiAct.BalanceId),
 				Type:           utils.StringPointer(apiAct.BalanceType),
@@ -338,7 +340,7 @@ func (apiv2 *APIerSv2) SetActions(attrs *utils.AttrSetActions, reply *string) er
 				TimingIDs:      utils.StringMapPointer(utils.ParseStringMap(apiAct.TimingTags)),
 				Blocker:        blocker,
 				Disabled:       disabled,
-			},
+			}
 		}
 		storeActions[idx] = a
 	}
