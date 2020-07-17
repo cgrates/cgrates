@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
-	"reflect"
 	"strconv"
 	"strings"
 )
@@ -222,44 +221,76 @@ func MapStringToInt64(in map[string]string) (out map[string]int64, err error) {
 }
 
 // FlagsWithParamsFromSlice construct a  FlagsWithParams from the given slice
-func FlagsWithParamsFromSlice(s []string) (FlagsWithParams, error) {
-	result := make(FlagsWithParams, len(s))
+func FlagsWithParamsFromSlice(s []string) (flags FlagsWithParams) {
+	flags = make(FlagsWithParams)
 	for _, v := range s {
-		subsystemWithIDs := strings.Split(v, InInFieldSep)
-		result[subsystemWithIDs[0]] = []string{}
-		if len(subsystemWithIDs) == 2 {
-			result[subsystemWithIDs[0]] = strings.Split(subsystemWithIDs[1], INFIELD_SEP)
-		} else if len(subsystemWithIDs) > 2 {
-			return nil, ErrUnsupportedFormat
+		flag := strings.SplitN(v, InInFieldSep, 3)
+		if !flags.Has(flag[0]) {
+			flags[flag[0]] = make(FlagParams)
 		}
+		flags[flag[0]].Add(flag[1:])
 	}
-	return result, nil
+	return
 }
 
-// FlagsWithParams should store a list of profiles for each subsystem
-type FlagsWithParams map[string][]string
+// FlagParams stores the parameters for a flag
+type FlagParams map[string][]string
 
-// HasKey returns if the key was mentioned in flags
-func (fWp FlagsWithParams) HasKey(key string) (has bool) {
-	_, has = fWp[key]
+// Has returns if the key was mentioned in flags
+func (fWp FlagParams) Has(opt string) (has bool) {
+	_, has = fWp[opt]
+	return
+}
+
+// Add adds the options to the flag
+func (fWp FlagParams) Add(opts []string) {
+	switch len(opts) {
+	case 0:
+	case 1:
+		fWp[opts[0]] = []string{}
+	default: // just in case we call this function with more elements than needed
+		fallthrough
+	case 2:
+		fWp[opts[0]] = InfieldSplit(opts[1])
+	}
 	return
 }
 
 // ParamsSlice returns the list of profiles for the subsystem
-func (fWp FlagsWithParams) ParamsSlice(subs string) (ps []string) {
+func (fWp FlagParams) ParamsSlice(opt string) (ps []string) {
+	return fWp[opt] // if it doesn't have the option it will return an empty slice
+}
+
+// FlagsWithParams should store a list of flags for each subsystem
+type FlagsWithParams map[string]FlagParams
+
+// Has returns if the key was mentioned in flags
+func (fWp FlagsWithParams) Has(flag string) (has bool) {
+	_, has = fWp[flag]
+	return
+}
+
+// ParamsSlice returns the list of profiles for the subsystem
+func (fWp FlagsWithParams) ParamsSlice(subs, opt string) (ps []string) {
 	if psIfc, has := fWp[subs]; has {
-		ps = psIfc
+		ps = psIfc.ParamsSlice(opt)
 	}
 	return
 }
 
 // SliceFlags converts from FlagsWithParams back to []string
 func (fWp FlagsWithParams) SliceFlags() (sls []string) {
-	for key := range fWp {
-		if prmSlice := fWp.ParamsSlice(key); !reflect.DeepEqual(prmSlice, []string{}) {
-			sls = append(sls, ConcatenatedKey(key, strings.Join(prmSlice, INFIELD_SEP)))
-		} else {
+	for key, sub := range fWp {
+		if len(sub) == 0 { // no option for these subsystem
 			sls = append(sls, key)
+			continue
+		}
+		for opt, values := range sub {
+			if len(values) == 0 { // it's an option without values(e.g *derivedreply)
+				sls = append(sls, ConcatenatedKey(key, opt))
+				continue
+			}
+			sls = append(sls, ConcatenatedKey(key, opt, strings.Join(values, INFIELD_SEP)))
 		}
 	}
 	return
@@ -267,12 +298,12 @@ func (fWp FlagsWithParams) SliceFlags() (sls []string) {
 
 // GetBool returns the flag as boolean
 func (fWp FlagsWithParams) GetBool(key string) (b bool) {
-	var v []string
+	var v FlagParams
 	if v, b = fWp[key]; !b {
 		return // not present means false
 	}
 	if v == nil || len(v) == 0 {
-		return true // empty slice
+		return true // empty map
 	}
-	return v[0] == "true" // check only the first element
+	return !v.Has("*disabled") // check if has *disable param
 }
