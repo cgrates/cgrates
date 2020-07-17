@@ -244,6 +244,7 @@ func testAccITSetBalanceTimingIds(t *testing.T) {
 	}
 	eOut := []*engine.RITiming{
 		{
+			ID:        "Timing",
 			Years:     utils.Years{2017},
 			Months:    utils.Months{05},
 			MonthDays: utils.MonthDays{1},

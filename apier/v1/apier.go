@@ -767,6 +767,7 @@ func checkDefaultTiming(tStr string) (rTm *engine.RITiming, isDefault bool) {
 	switch tStr {
 	case utils.MetaEveryMinute:
 		return &engine.RITiming{
+			ID:        utils.MetaEveryMinute,
 			Years:     utils.Years{},
 			Months:    utils.Months{},
 			MonthDays: utils.MonthDays{},
@@ -776,6 +777,7 @@ func checkDefaultTiming(tStr string) (rTm *engine.RITiming, isDefault bool) {
 		}, true
 	case utils.MetaHourly:
 		return &engine.RITiming{
+			ID:        utils.MetaHourly,
 			Years:     utils.Years{},
 			Months:    utils.Months{},
 			MonthDays: utils.MonthDays{},
@@ -785,6 +787,7 @@ func checkDefaultTiming(tStr string) (rTm *engine.RITiming, isDefault bool) {
 		}, true
 	case utils.MetaDaily:
 		return &engine.RITiming{
+			ID:        utils.MetaDaily,
 			Years:     utils.Years{},
 			Months:    utils.Months{},
 			MonthDays: utils.MonthDays{},
@@ -793,6 +796,7 @@ func checkDefaultTiming(tStr string) (rTm *engine.RITiming, isDefault bool) {
 			EndTime:   ""}, true
 	case utils.MetaWeekly:
 		return &engine.RITiming{
+			ID:        utils.MetaWeekly,
 			Years:     utils.Years{},
 			Months:    utils.Months{},
 			MonthDays: utils.MonthDays{},
@@ -802,6 +806,17 @@ func checkDefaultTiming(tStr string) (rTm *engine.RITiming, isDefault bool) {
 		}, true
 	case utils.MetaMonthly:
 		return &engine.RITiming{
+			ID:        utils.MetaMonthly,
+			Years:     utils.Years{},
+			Months:    utils.Months{},
+			MonthDays: utils.MonthDays{time.Now().Day()},
+			WeekDays:  utils.WeekDays{},
+			StartTime: startTime,
+			EndTime:   "",
+		}, true
+	case utils.MetaMonthlyEstimated:
+		return &engine.RITiming{
+			ID:        utils.MetaMonthlyEstimated,
 			Years:     utils.Years{},
 			Months:    utils.Months{},
 			MonthDays: utils.MonthDays{time.Now().Day()},
@@ -811,6 +826,7 @@ func checkDefaultTiming(tStr string) (rTm *engine.RITiming, isDefault bool) {
 		}, true
 	case utils.MetaMonthEnd:
 		return &engine.RITiming{
+			ID:        utils.MetaMonthEnd,
 			Years:     utils.Years{},
 			Months:    utils.Months{},
 			MonthDays: utils.MonthDays{-1},
@@ -820,6 +836,7 @@ func checkDefaultTiming(tStr string) (rTm *engine.RITiming, isDefault bool) {
 		}, true
 	case utils.MetaYearly:
 		return &engine.RITiming{
+			ID:        utils.MetaYearly,
 			Years:     utils.Years{},
 			Months:    utils.Months{time.Now().Month()},
 			MonthDays: utils.MonthDays{time.Now().Day()},

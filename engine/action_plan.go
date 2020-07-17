@@ -127,14 +127,14 @@ func (at *ActionTiming) GetNextStartTime(t1 time.Time) (t time.Time) {
 	if len(i.Timing.Months) > 0 && len(i.Timing.MonthDays) == 0 {
 		i.Timing.MonthDays = append(i.Timing.MonthDays, 1)
 	}
-
 	at.stCache = cronexpr.MustParse(i.Timing.CronString()).Next(t1)
-	//if // timingId is *monthly_estimated && at.stCache.Month != t1.Month + 1
-	//{
-	//	// clone la timing i.Clone()
-	//	// i.Clone().Timing.MonthDays -1
-	//	// at .stCache = cronexpr.MustParse(i.Timing.CronString()).Next(t1)
-	//}
+	if i.Timing.ID == utils.MetaMonthlyEstimated && at.stCache.Month() != t1.Month()+1 {
+		clnRITiming := i.Timing.Clone()
+		for at.stCache.Month() != t1.Month()+1 {
+			clnRITiming.MonthDays[0]--
+			at.stCache = cronexpr.MustParse(clnRITiming.CronString()).Next(t1)
+		}
+	}
 
 	return at.stCache
 }

@@ -185,7 +185,7 @@ func TestLoadReverseDestinations(t *testing.T) {
 }
 
 func TestLoadTimimgs(t *testing.T) {
-	if len(csvr.timings) != 13 {
+	if len(csvr.timings) != 14 {
 		t.Error("Failed to load timings: ", csvr.timings)
 	}
 	timing := csvr.timings["WORKDAYS_00"]
@@ -615,6 +615,7 @@ func TestLoadRatingPlans(t *testing.T) {
 		t.Errorf("Expecting:\n%s\nReceived:\n%s", utils.ToIJSON(expected.Ratings), utils.ToIJSON(rplan.Ratings))
 	}
 	anyTiming := &RITiming{
+		ID:         utils.ANY,
 		Years:      utils.Years{},
 		Months:     utils.Months{},
 		MonthDays:  utils.MonthDays{},
@@ -625,8 +626,8 @@ func TestLoadRatingPlans(t *testing.T) {
 		tag:        utils.ANY,
 	}
 
-	if !reflect.DeepEqual(csvr.ratingPlans["ANY_PLAN"].Timings["1323e132"], anyTiming) {
-		t.Errorf("Error using *any timing in rating plans: %+v : %+v", csvr.ratingPlans["ANY_PLAN"].Timings["1323e132"], anyTiming)
+	if !reflect.DeepEqual(csvr.ratingPlans["ANY_PLAN"].Timings["b9b78731"], anyTiming) {
+		t.Errorf("Error using *any timing in rating plans: %+v : %+v", csvr.ratingPlans["ANY_PLAN"].Timings["b9b78731"], anyTiming)
 	}
 }
 
@@ -828,6 +829,7 @@ func TestLoadActionTimings(t *testing.T) {
 				Uuid: atm.ActionTimings[0].Uuid,
 				Timing: &RateInterval{
 					Timing: &RITiming{
+						ID:        "ONE_TIME_RUN",
 						Years:     utils.Years{2012},
 						Months:    utils.Months{},
 						MonthDays: utils.MonthDays{},
@@ -842,6 +844,7 @@ func TestLoadActionTimings(t *testing.T) {
 				Uuid: atm.ActionTimings[1].Uuid,
 				Timing: &RateInterval{
 					Timing: &RITiming{
+						ID:        "ONE_TIME_RUN",
 						Years:     utils.Years{2012},
 						Months:    utils.Months{},
 						MonthDays: utils.MonthDays{},
@@ -855,7 +858,7 @@ func TestLoadActionTimings(t *testing.T) {
 		},
 	}
 	if !reflect.DeepEqual(atm, expected) {
-		t.Errorf("Error loading action timing:\n%+v", atm.ActionTimings[1])
+		t.Errorf("Error loading action timing:\n%+v", utils.ToJSON(atm))
 	}
 }
 
