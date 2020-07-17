@@ -34,7 +34,7 @@
 	"exporters": [
 		{
 			"id": "aws_test_file",
-			"export_format": "*amqp_json_map",
+			"type": "*amqp_json_map",
 			"export_path": "amqps://guest:guest@localhost:256733/",
 			"tenant": "cgrates.org",
 			"attempts": 1,
