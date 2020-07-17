@@ -272,10 +272,10 @@ func testV1CDRsProcessEventChrgS(t *testing.T) {
 		t.Errorf("Expecting: test2_processEvent, received: %+v, %+v, %+v ", cdrs[0].OriginID, cdrs[1].OriginID, cdrs[2].OriginID)
 	}
 	sort.Slice(cdrs, func(i, j int) bool { return cdrs[i].RunID < cdrs[j].RunID })
-	if cdrs[0].RunID != utils.MetaRaw { // charger with RunID *raw
-		t.Errorf("Expecting: %+v, received: %+v", utils.MetaRaw, cdrs[0].RunID)
-	} else if cdrs[1].RunID != "CustomerCharges" {
-		t.Errorf("Expecting: %+v, received: %+v", "CustomerCharges", cdrs[1].RunID)
+	if cdrs[1].RunID != "raw" { // charger with RunID *raw
+		t.Errorf("Expecting: %+v, received: %+v", "raw", cdrs[1].RunID)
+	} else if cdrs[0].RunID != "CustomerCharges" {
+		t.Errorf("Expecting: %+v, received: %+v", "CustomerCharges", cdrs[0].RunID)
 	} else if cdrs[2].RunID != "SupplierCharges" {
 		t.Errorf("Expecting: %+v, received: %+v", "SupplierCharges", cdrs[2].RunID)
 	}

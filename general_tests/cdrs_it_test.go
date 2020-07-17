@@ -197,7 +197,7 @@ func testV2CDRsGetCdrs(t *testing.T) {
 		t.Error("Unexpected number of CDRs returned: ", cdrCnt)
 	}
 	var cdrs []*engine.ExternalCDR
-	args := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaRaw}}
+	args := utils.RPCCDRsFilter{RunIDs: []string{"raw"}}
 	if err := cdrsRpc.Call(utils.APIerSv2GetCDRs, &args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
@@ -268,7 +268,7 @@ func testV2CDRsGetCdrs2(t *testing.T) {
 		t.Error("Unexpected number of CDRs returned: ", cdrCnt)
 	}
 	var cdrs []*engine.ExternalCDR
-	args := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaRaw}, OriginIDs: []string{"testV2CDRsProcessCDR2"}}
+	args := utils.RPCCDRsFilter{RunIDs: []string{"raw"}, OriginIDs: []string{"testV2CDRsProcessCDR2"}}
 	if err := cdrsRpc.Call(utils.APIerSv2GetCDRs, &args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
@@ -404,7 +404,7 @@ func testV2CDRsGetCdrs4(t *testing.T) {
 	}
 	var cdrs []*engine.ExternalCDR
 	args := utils.RPCCDRsFilter{
-		RunIDs:    []string{utils.MetaRaw},
+		RunIDs:    []string{"raw"},
 		OriginIDs: []string{"testV2CDRsProcessCDR4"},
 	}
 	if err := cdrsRpc.Call(utils.APIerSv2GetCDRs, &args, &cdrs); err != nil {
@@ -449,7 +449,7 @@ func testV2CDRsGetCdrs5(t *testing.T) {
 	}
 	var cdrs []*engine.ExternalCDR
 	args := utils.RPCCDRsFilter{
-		RunIDs:    []string{utils.MetaRaw},
+		RunIDs:    []string{"raw"},
 		OriginIDs: []string{"testV2CDRsProcessCDR5"},
 	}
 	if err := cdrsRpc.Call(utils.APIerSv2GetCDRs, &args, &cdrs); err == nil || err.Error() != utils.ErrNotFound.Error() {
@@ -720,7 +720,7 @@ func testV2CDRsGetCdrs7(t *testing.T) {
 	}
 	var cdrs []*engine.ExternalCDR
 	args := utils.RPCCDRsFilter{
-		RunIDs:    []string{utils.MetaRaw},
+		RunIDs:    []string{"raw"},
 		OriginIDs: []string{"testV2CDRsProcessCDR7"},
 	}
 	if err := cdrsRpc.Call(utils.APIerSv2GetCDRs, &args, &cdrs); err != nil {

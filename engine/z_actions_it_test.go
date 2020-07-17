@@ -536,7 +536,7 @@ func testActionsitThresholdCgrRpcAction(t *testing.T) {
 	var reply string
 
 	attrsAA := &utils.AttrSetActions{ActionsId: "ACT_TH_CGRRPC", Actions: []*utils.TPAction{
-		&utils.TPAction{Identifier: utils.CGR_RPC, ExtraParameters: `{"Address": "127.0.0.1:2012",
+		{Identifier: utils.CGR_RPC, ExtraParameters: `{"Address": "127.0.0.1:2012",
 "Transport": "*json",
 "Method": "RALsV1.Ping",
 "Attempts":1,
@@ -604,7 +604,7 @@ func testActionsitThresholdPostEvent(t *testing.T) {
 
 	//if we check syslog we will see that it tries to post
 	attrsAA := &utils.AttrSetActions{ActionsId: "ACT_TH_POSTEVENT", Actions: []*utils.TPAction{
-		&utils.TPAction{Identifier: utils.MetaPostEvent, ExtraParameters: "http://127.0.0.1:12080/invalid_json"},
+		{Identifier: utils.MetaPostEvent, ExtraParameters: "http://127.0.0.1:12080/invalid_json"},
 	}}
 	if err := actsLclRpc.Call(utils.APIerSv2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on APIerSv2.SetActions: ", err.Error())
