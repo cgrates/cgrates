@@ -76,7 +76,7 @@
 	"exporters": [
 		{
 			"id": "s3_test_file",
-			"export_format": "*s3_json_map",
+			"type": "*s3_json_map",
 			// export_path for s3:  "endpoint?aws_region=region&aws_key=IDkey&aws_secret=secret&aws_token=sessionToken&queue_id=cgrates-cdrs"
 			"export_path": "http://s3.us-east-2.amazonaws.com/?aws_region=eu-west-2&aws_key=testkey&aws_secret=testsecret&queue_id=cgrates-cdrs",
 			"tenant": "cgrates.org",

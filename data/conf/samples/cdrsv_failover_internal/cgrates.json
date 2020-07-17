@@ -5,7 +5,8 @@
 // Starts rater, cdrs and mediator connecting over internal channel
 
 "general": {
-    "log_level": 7,
+	"log_level": 7,
+	"node_id": "TestFailCDRS",
 	"poster_attempts": 1,									// number of attempts before considering post request failed (eg: *http_post, CDR exports)
 	"failed_posts_ttl": "1s",				// time to wait before writing the failed posts in a single file
 },
@@ -66,7 +67,7 @@
 	"exporters": [
 		{
 			"id": "s3_test_file",
-			"export_format": "*s3_json_map",
+			"type": "*s3_json_map",
 			// export_path for s3:  "endpoint?aws_region=region&aws_key=IDkey&aws_secret=secret&aws_token=sessionToken&queue_id=cgrates-cdrs"
 			"export_path": "http://s3.us-east-2.amazonaws.com/?aws_region=eu-west-2&aws_key=testkey&aws_secret=testsecret&queue_id=cgrates-cdrs",
 			"tenant": "cgrates.org",
@@ -74,7 +75,7 @@
 			"fields":[
 				{"tag": "CGRID", "path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"},
 			],
-		}
+		},
 	]
 },
 

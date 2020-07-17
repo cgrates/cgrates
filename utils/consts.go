@@ -1997,7 +1997,6 @@ const (
 	PrecacheCfg   = "precache"
 
 	// CdreCfg
-	ExportFormatCfg      = "export_format"
 	ExportPathCfg        = "export_path"
 	AttributeSContextCfg = "attributes_context"
 	SynchronousCfg       = "synchronous"
