@@ -3170,7 +3170,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 			return
 		}
 		for _, chrgr := range chrgrs {
-			events[chrgr.ChargerSProfile] = &utils.CGREventWithOpts{
+			events[utils.IfaceAsString(chrgr.CGREvent.Event[utils.RunID])] = &utils.CGREventWithOpts{
 				CGREvent:      chrgr.CGREvent,
 				Opts:          chrgr.Opts,
 				ArgDispatcher: args.ArgDispatcher,
