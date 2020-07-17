@@ -4564,7 +4564,7 @@ func TestAsTPRateProfile(t *testing.T) {
 	}
 
 	eRprf := &utils.TPRateProfile{
-		TPid:             "",
+		TPid:             utils.EmptyString,
 		Tenant:           "cgrates.org",
 		ID:               "RP1",
 		FilterIDs:        []string{"*string:~*req.Subject:1001"},
