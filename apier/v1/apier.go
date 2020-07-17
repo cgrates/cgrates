@@ -637,6 +637,7 @@ type AttrSetActionPlan struct {
 
 type AttrActionPlan struct {
 	ActionsId string  // Actions id
+	TimingID  string  // timingID is used to specify the ID of the timing for a corner case ( e.g. *monthly_estimated )
 	Years     string  // semicolon separated list of years this timing is valid on, *any or empty supported
 	Months    string  // semicolon separated list of months this timing is valid on, *any or empty supported
 	MonthDays string  // semicolon separated list of month's days this timing is valid on, *any or empty supported
@@ -677,6 +678,7 @@ func (apierSv1 *APIerSv1) SetActionPlan(attrs *AttrSetActionPlan, reply *string)
 			if dfltTiming, isDefault := checkDefaultTiming(apiAtm.Time); isDefault {
 				timing = dfltTiming
 			} else {
+				timing.ID = apiAtm.TimingID
 				timing.Years.Parse(apiAtm.Years, ";")
 				timing.Months.Parse(apiAtm.Months, ";")
 				timing.MonthDays.Parse(apiAtm.MonthDays, ";")
