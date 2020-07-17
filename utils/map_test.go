@@ -197,93 +197,77 @@ func TestMapHasKey(t *testing.T) {
 }
 
 func TestMapSubsystemIDsFromSlice(t *testing.T) {
-	sls := []string{"*event", "*thresholds:ID1;ID2;ID3", "*attributes", "*stats:ID"}
+	sls := []string{"*event", "*thresholds:*ids:ID1;ID2;ID3", "*thresholds:*derivedreply", "*attributes:*disabled", "*stats:*ids:ID"}
 	eMp := FlagsWithParams{
-		"*event":      []string{},
-		"*thresholds": []string{"ID1", "ID2", "ID3"},
-		"*attributes": []string{},
-		"*stats":      []string{"ID"},
+		"*event":      map[string][]string{},
+		"*thresholds": map[string][]string{"*ids": {"ID1", "ID2", "ID3"}, MetaDerivedReply: {}},
+		"*attributes": map[string][]string{"*disabled": {}},
+		"*stats":      map[string][]string{"*ids": {"ID"}},
 	}
-	if mp, err := FlagsWithParamsFromSlice(sls); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(mp, eMp) {
+	if mp := FlagsWithParamsFromSlice(sls); !reflect.DeepEqual(mp, eMp) {
 		t.Errorf("Expecting: %+v, received: %+v", eMp, mp)
-	}
-}
-
-func TestMapSubsystemIDsFromSliceWithErr(t *testing.T) {
-	sls := []string{"*event", "*thresholds:ID1;ID2;ID3:error:", "*attributes", "*stats:ID"}
-
-	if _, err := FlagsWithParamsFromSlice(sls); err != ErrUnsupportedFormat {
-		t.Error(err)
 	}
 }
 
 func TestMapSubsystemIDsHasKey(t *testing.T) {
-	sls := []string{"*event", "*thresholds:ID1;ID2;ID3", "*attributes", "*stats:ID"}
+	sls := []string{"*event", "*thresholds:*ids:ID1;ID2;ID3", "*attributes", "*stats:*ids:ID"}
 	eMp := FlagsWithParams{
-		"*event":      []string{},
-		"*thresholds": []string{"ID1", "ID2", "ID3"},
-		"*attributes": []string{},
-		"*stats":      []string{"ID"},
+		"*event":      map[string][]string{},
+		"*thresholds": map[string][]string{"*ids": {"ID1", "ID2", "ID3"}},
+		"*attributes": map[string][]string{},
+		"*stats":      map[string][]string{"*ids": {"ID"}},
 	}
-	mp, err := FlagsWithParamsFromSlice(sls)
-	if err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(mp, eMp) {
+	mp := FlagsWithParamsFromSlice(sls)
+	if !reflect.DeepEqual(mp, eMp) {
 		t.Errorf("Expecting: %+v, received: %+v", eMp, mp)
 	}
-	if has := mp.HasKey("*event"); !has {
+	if has := mp.Has("*event"); !has {
 		t.Errorf("Expecting: true, received: %+v", has)
 	}
-	if has := mp.HasKey("*thresholds"); !has {
+	if has := mp.Has("*thresholds"); !has {
 		t.Errorf("Expecting: true, received: %+v", has)
 	}
-	if has := mp.HasKey("*resources"); has {
+	if has := mp.Has("*resources"); has {
 		t.Errorf("Expecting: false, received: %+v", has)
 	}
 }
 
 func TestMapSubsystemIDsGetIDs(t *testing.T) {
-	sls := []string{"*event", "*thresholds:ID1;ID2;ID3", "*attributes", "*stats:ID"}
+	sls := []string{"*event", "*thresholds:*ids:ID1;ID2;ID3", "*attributes", "*stats:*ids:ID"}
 	eMp := FlagsWithParams{
-		"*event":      []string{},
-		"*thresholds": []string{"ID1", "ID2", "ID3"},
-		"*attributes": []string{},
-		"*stats":      []string{"ID"},
+		"*event":      map[string][]string{},
+		"*thresholds": map[string][]string{"*ids": {"ID1", "ID2", "ID3"}},
+		"*attributes": map[string][]string{},
+		"*stats":      map[string][]string{"*ids": {"ID"}},
 	}
-	mp, err := FlagsWithParamsFromSlice(sls)
-	if err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(mp, eMp) {
+	mp := FlagsWithParamsFromSlice(sls)
+	if !reflect.DeepEqual(mp, eMp) {
 		t.Errorf("Expecting: %+v, received: %+v", eMp, mp)
 	}
 	eIDs := []string{"ID1", "ID2", "ID3"}
-	if ids := mp.ParamsSlice("*thresholds"); !reflect.DeepEqual(ids, eIDs) {
-		t.Errorf("Expecting: %+v, received: %+v", eIDs, ids)
-	}
-	eIDs = []string{}
-	if ids := mp.ParamsSlice("*event"); !reflect.DeepEqual(ids, eIDs) {
+	if ids := mp.ParamsSlice("*thresholds", "*ids"); !reflect.DeepEqual(ids, eIDs) {
 		t.Errorf("Expecting: %+v, received: %+v", eIDs, ids)
 	}
 	eIDs = nil
-	if ids := mp.ParamsSlice("*test"); !reflect.DeepEqual(ids, eIDs) {
+	if ids := mp.ParamsSlice("*event", "*ids"); !reflect.DeepEqual(ids, eIDs) {
+		t.Errorf("Expecting: %+v, received: %+v", eIDs, ids)
+	}
+	if ids := mp.ParamsSlice("*test", "*ids"); !reflect.DeepEqual(ids, eIDs) {
 		t.Errorf("Expecting: %+v, received: %+v", eIDs, ids)
 	}
 }
 
 func TestFlagsToSlice(t *testing.T) {
-	sls := []string{"*event", "*thresholds:ID1;ID2;ID3", "*attributes", "*stats:ID"}
+	sls := []string{"*event", "*thresholds:*ids:ID1;ID2;ID3", "*attributes", "*stats:*ids:ID", "*routes:*derivedreply"}
 	eMp := FlagsWithParams{
-		"*event":      []string{},
-		"*thresholds": []string{"ID1", "ID2", "ID3"},
-		"*attributes": []string{},
-		"*stats":      []string{"ID"},
+		"*event":      map[string][]string{},
+		"*thresholds": map[string][]string{"*ids": {"ID1", "ID2", "ID3"}},
+		"*attributes": map[string][]string{},
+		"*stats":      map[string][]string{"*ids": {"ID"}},
+		"*routes":     map[string][]string{MetaDerivedReply: {}},
 	}
-	mp, err := FlagsWithParamsFromSlice(sls)
-	if err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(mp, eMp) {
+	mp := FlagsWithParamsFromSlice(sls)
+	if !reflect.DeepEqual(mp, eMp) {
 		t.Errorf("Expecting: %+v, received: %+v", eMp, mp)
 	}
 	sort.Strings(sls)
@@ -296,9 +280,9 @@ func TestFlagsToSlice(t *testing.T) {
 
 func TestFlagsWithParamsGetBool(t *testing.T) {
 	flagsWithParams := &FlagsWithParams{
-		"test":  []string{"string1", "string2"},
-		"test2": []string{"true", "string2"},
-		"empty": []string{},
+		"test":  map[string][]string{"*disabled": {}, "string2": {}},
+		"test2": map[string][]string{"string2": {}},
+		"empty": map[string][]string{},
 	}
 	key := "notpresent"
 	if rcv := flagsWithParams.GetBool(key); rcv != false {
@@ -315,5 +299,16 @@ func TestFlagsWithParamsGetBool(t *testing.T) {
 	key = "test2"
 	if rcv := flagsWithParams.GetBool(key); rcv != true {
 		t.Errorf("Expecting: true, received: %+v", ToJSON(rcv))
+	}
+}
+
+func TestFlagParamsAdd(t *testing.T) {
+	flgs := make(FlagParams)
+	exp := FlagParams{
+		"*ids": []string{"id1", "id2"},
+	}
+	flgs.Add([]string{"*ids", "id1;id2", "ignored"})
+	if !reflect.DeepEqual(flgs, exp) {
+		t.Errorf("Expecting: %+v, received: %+v", exp, flgs)
 	}
 }
