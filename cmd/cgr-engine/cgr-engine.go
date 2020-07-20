@@ -341,7 +341,8 @@ func runPreload(loader *services.LoaderService, internalLoaderSChan chan rpcclie
 	var reply string
 	for _, loaderID := range strings.Split(*preload, utils.FIELDS_SEP) {
 		if err := loader.GetLoaderS().V1Load(&loaders.ArgsProcessFolder{
-			LoaderID: loaderID,
+			ForceLock: true, // force lock will unlock the file in case is locked and return error
+			LoaderID:  loaderID,
 		}, &reply); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> preload failed on loadID <%s> , err: <%s>", utils.LoaderS, loaderID, err.Error()))
 			exitChan <- true
