@@ -589,6 +589,7 @@ const (
 	MetaDuration                = "*duration"
 	MetaLibPhoneNumber          = "*libphonenumber"
 	MetaIP2Hex                  = "*ip2hex"
+	MetaString2Hex              = "*string2hex"
 	MetaReload                  = "*reload"
 	MetaLoad                    = "*load"
 	MetaRemove                  = "*remove"
