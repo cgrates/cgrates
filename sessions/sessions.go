@@ -3179,7 +3179,8 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 	if argsFlagsWithParams.GetBool(utils.MetaAttributes) {
 		attrIDs := argsFlagsWithParams.ParamsSlice(utils.MetaAttributes, utils.MetaIDs)
 		rply.Attributes = make(map[string]*engine.AttrSProcessEventReply)
-		for runID, cgrEv := range events {
+
+		for runID, cgrEv := range getDerivedEvents(events, argsFlagsWithParams[utils.MetaAttributes].Has(utils.MetaDerivedReply)) {
 			rplyAttr, err := sS.processAttributes(cgrEv.CGREvent, cgrEv.ArgDispatcher,
 				attrIDs, cgrEv.Opts)
 			if err != nil {
@@ -3207,7 +3208,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 		if flags.Has(utils.MetaEventCost) {
 			maxCost = utils.MetaRoutesEventCost
 		}
-		for runID, cgrEv := range events {
+		for runID, cgrEv := range getDerivedEvents(events, flags.Has(utils.MetaDerivedReply)) {
 			routesReply, err := sS.getRoutes(cgrEv.CGREvent.Clone(), cgrEv.ArgDispatcher,
 				args.Paginator, ignoreErrors, maxCost, cgrEv.Opts)
 			if err != nil {
@@ -3223,7 +3224,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 	if argsFlagsWithParams.GetBool(utils.MetaThresholds) {
 		rply.ThresholdIDs = make(map[string][]string)
 		thIDs := argsFlagsWithParams.ParamsSlice(utils.MetaThresholds, utils.MetaIDs)
-		for runID, cgrEv := range events {
+		for runID, cgrEv := range getDerivedEvents(events, argsFlagsWithParams[utils.MetaThresholds].Has(utils.MetaDerivedReply)) {
 			tIDs, err := sS.processThreshold(cgrEv.CGREvent, cgrEv.ArgDispatcher, thIDs)
 			if err != nil && err.Error() != utils.ErrNotFound.Error() {
 				utils.Logger.Warning(
@@ -3239,7 +3240,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 	if argsFlagsWithParams.GetBool(utils.MetaStats) {
 		rply.StatQueueIDs = make(map[string][]string)
 		stIDs := argsFlagsWithParams.ParamsSlice(utils.MetaStats, utils.MetaIDs)
-		for runID, cgrEv := range events {
+		for runID, cgrEv := range getDerivedEvents(events, argsFlagsWithParams[utils.MetaStats].Has(utils.MetaDerivedReply)) {
 			sIDs, err := sS.processStats(cgrEv.CGREvent, cgrEv.ArgDispatcher, stIDs)
 			if err != nil &&
 				err.Error() != utils.ErrNotFound.Error() {
@@ -3253,7 +3254,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 	}
 
 	if argsFlagsWithParams.GetBool(utils.MetaSTIRAuthenticate) {
-		for _, cgrEv := range events {
+		for _, cgrEv := range getDerivedEvents(events, argsFlagsWithParams[utils.MetaSTIRAuthenticate].Has(utils.MetaDerivedReply)) {
 			ev := engine.MapEvent(cgrEv.CGREvent.Event)
 			opts := engine.MapEvent(cgrEv.Opts)
 			attest := sS.cgrCfg.SessionSCfg().STIRCfg.AllowedAttest
@@ -3275,7 +3276,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 		}
 	} else if argsFlagsWithParams.GetBool(utils.MetaSTIRInitiate) {
 		rply.STIRIdentity = make(map[string]string)
-		for runID, cgrEv := range events {
+		for runID, cgrEv := range getDerivedEvents(events, argsFlagsWithParams[utils.MetaSTIRInitiate].Has(utils.MetaDerivedReply)) {
 			ev := engine.MapEvent(cgrEv.CGREvent.Event)
 			opts := engine.MapEvent(cgrEv.Opts)
 			attest := sS.cgrCfg.SessionSCfg().STIRCfg.DefaultAttest
@@ -3315,7 +3316,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 		}
 		rply.ResourceAllocation = make(map[string]string)
 		if resOpt := argsFlagsWithParams[utils.MetaResources]; len(resOpt) != 0 {
-			for runID, cgrEv := range events {
+			for runID, cgrEv := range getDerivedEvents(events, resOpt.Has(utils.MetaDerivedReply)) {
 				originID := engine.MapEvent(cgrEv.CGREvent.Event).GetStringIgnoreErrors(utils.OriginID)
 				if originID == "" {
 					return utils.NewErrMandatoryIeMissing(utils.OriginID)
@@ -3362,7 +3363,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 			// check for *cost
 			if ralsOpts.Has(utils.MetaCost) {
 				rply.Cost = make(map[string]float64)
-				for runID, cgrEv := range events {
+				for runID, cgrEv := range getDerivedEvents(events, ralsOpts.Has(utils.MetaDerivedReply)) {
 					ev := engine.MapEvent(cgrEv.CGREvent.Event)
 					//compose the CallDescriptor with Args
 					startTime := ev.GetTimeIgnoreErrors(utils.AnswerTime,
@@ -3497,10 +3498,11 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 
 	if argsFlagsWithParams.GetBool(utils.MetaCDRs) {
 		var cdrRply string
-		for _, cgrEv := range events {
+		flgs := argsFlagsWithParams[utils.MetaCDRs].SliceFlags()
+		for _, cgrEv := range getDerivedEvents(events, argsFlagsWithParams[utils.MetaCDRs].Has(utils.MetaDerivedReply)) {
 			if err := sS.connMgr.Call(sS.cgrCfg.SessionSCfg().CDRsConns, nil, utils.CDRsV1ProcessEvent,
 				&engine.ArgV1ProcessEvent{
-					Flags:         argsFlagsWithParams[utils.MetaCDRs].SliceFlags(),
+					Flags:         flgs,
 					CGREvent:      *cgrEv.CGREvent,
 					ArgDispatcher: cgrEv.ArgDispatcher,
 				}, &cdrRply); err != nil {

@@ -263,3 +263,13 @@ type V1STIRIdentityArgs struct {
 	OverwriteIAT   bool                   // if true the IAT from payload is overwrited with the present unix timestamp
 	*utils.ArgDispatcher
 }
+
+// getDerivedEvents returns only the *raw event if derivedReply flag is not specified
+func getDerivedEvents(events map[string]*utils.CGREventWithOpts, derivedReply bool) map[string]*utils.CGREventWithOpts {
+	if derivedReply {
+		return events
+	}
+	return map[string]*utils.CGREventWithOpts{
+		utils.MetaRaw: events[utils.MetaRaw],
+	}
+}

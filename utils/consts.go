@@ -2264,7 +2264,7 @@ const (
 
 // Event Flags
 const (
-	MetaDerivedReply = "*derivedreply"
+	MetaDerivedReply = "*derived_reply"
 
 	MetaIDs = "*ids"
 

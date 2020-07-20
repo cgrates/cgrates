@@ -80,7 +80,8 @@ cgrates (0.11.0~dev) UNRELEASED; urgency=medium
   * [SessionS] Rename from ResourceMessage to ResourceAllocation
   * [LoaderS] Updated file selector from *req<FileName> to *file(FileName)
   * [SessionS] Added *chargers flag to ProcessEvent to proccess the events from ChargerS with other subsystems
-  * [SessionS] Updated the ids handling in flags by ading *ids as a new flag
+  * [SessionS] Updated the ids handling in flags by adding *ids as a new flag
+  * [SessionS] Added *derived_reply sub flag to ProcessEvent to specify if a subsystem needs to process the events from ChargerS
 
  -- DanB <danb@cgrates.org>  Wed, 19 Feb 2020 13:25:52 +0200
 

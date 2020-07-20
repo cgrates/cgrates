@@ -295,3 +295,19 @@ aa+jqv4dwkr/FLEcN1zC76Y/IniI65fId55hVJvN3ORuzUqYEtzD3irmsw==
 		t.Fatal(err)
 	}
 }
+
+func TestGetDerivedEvents(t *testing.T) {
+	events := map[string]*utils.CGREventWithOpts{
+		utils.MetaRaw: {},
+		"DEFAULT":     {},
+	}
+	if rply := getDerivedEvents(events, true); !reflect.DeepEqual(events, rply) {
+		t.Errorf("Expected %s received %s", utils.ToJSON(events), utils.ToJSON(rply))
+	}
+	exp := map[string]*utils.CGREventWithOpts{
+		utils.MetaRaw: events[utils.MetaRaw],
+	}
+	if rply := getDerivedEvents(events, false); !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expected %s received %s", utils.ToJSON(exp), utils.ToJSON(rply))
+	}
+}
