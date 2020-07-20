@@ -197,7 +197,7 @@ func TestMapHasKey(t *testing.T) {
 }
 
 func TestMapSubsystemIDsFromSlice(t *testing.T) {
-	sls := []string{"*event", "*thresholds:*ids:ID1;ID2;ID3", "*thresholds:*derivedreply", "*attributes:*disabled", "*stats:*ids:ID"}
+	sls := []string{"*event", "*thresholds:*ids:ID1;ID2;ID3", "*thresholds:*derived_reply", "*attributes:*disabled", "*stats:*ids:ID"}
 	eMp := FlagsWithParams{
 		"*event":      map[string][]string{},
 		"*thresholds": map[string][]string{MetaIDs: {"ID1", "ID2", "ID3"}, MetaDerivedReply: {}},
@@ -258,7 +258,7 @@ func TestMapSubsystemIDsGetIDs(t *testing.T) {
 }
 
 func TestFlagsToSlice(t *testing.T) {
-	sls := []string{"*event", "*thresholds:*ids:ID1;ID2;ID3", "*attributes", "*stats:*ids:ID", "*routes:*derivedreply"}
+	sls := []string{"*event", "*thresholds:*ids:ID1;ID2;ID3", "*attributes", "*stats:*ids:ID", "*routes:*derived_reply"}
 	eMp := FlagsWithParams{
 		"*event":      map[string][]string{},
 		"*thresholds": map[string][]string{MetaIDs: {"ID1", "ID2", "ID3"}},
@@ -319,7 +319,7 @@ func TestFlagParamsAdd(t *testing.T) {
 }
 
 func TestFlagsToSlice2(t *testing.T) {
-	sls := []string{"*event", "*thresholds:*ids:ID1;ID2;ID3", "*attributes", "*stats:*ids:ID", "*routes:*derivedreply", "*cdrs:*attributes", "*cdrs:*stats:ID"}
+	sls := []string{"*event", "*thresholds:*ids:ID1;ID2;ID3", "*attributes", "*stats:*ids:ID", "*routes:*derived_reply", "*cdrs:*attributes", "*cdrs:*stats:ID"}
 	eMp := FlagsWithParams{
 		"*event":      map[string][]string{},
 		"*thresholds": map[string][]string{MetaIDs: {"ID1", "ID2", "ID3"}},
