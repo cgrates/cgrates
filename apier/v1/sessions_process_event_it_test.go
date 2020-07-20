@@ -56,6 +56,8 @@ var sTestSessionSv1ProcessEvent = []func(t *testing.T){
 	testSSv1ItGetCost,
 	testSSv1ItProcessEventWithCDR,
 	testSSv1ItGetCDRsFromProcessEvent,
+	testSSv1ItProcessEventWithCDRResourceError,
+	testSSv1ItGetCDRsFromProcessEventResourceError,
 	testSSv1ItStopCgrEngine,
 }
 
@@ -728,6 +730,84 @@ func testSSv1ItGetCDRsFromProcessEvent(t *testing.T) {
 	args = &utils.RPCCDRsFilterWithArgDispatcher{RPCCDRsFilter: &utils.RPCCDRsFilter{
 		RunIDs:    []string{"SupplierCharges"},
 		OriginIDs: []string{"testSSv1ItProcessEventWithCDR"}}}
+	if err := sSApierRpc.Call(utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+	} else {
+		if cdrs[0].Cost != 0.102 {
+			t.Errorf("Unexpected cost for CDR: %f", cdrs[0].Cost)
+		}
+	}
+}
+
+func testSSv1ItProcessEventWithCDRResourceError(t *testing.T) {
+	args := &sessions.V1ProcessEventArgs{
+		Flags: []string{utils.MetaCDRs + utils.InInFieldSep + utils.MetaRALs,
+			utils.ConcatenatedKey(utils.MetaResources, utils.MetaRelease)}, // force a resource error and expect that the cdr to be written
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testSSv1ItProcessEventWithCDRResourceError",
+			Event: map[string]interface{}{
+				utils.Tenant:      "cgrates.org",
+				utils.ToR:         utils.VOICE,
+				utils.OriginID:    "testSSv1ItProcessEventWithCDRResourceError",
+				utils.RequestType: sSV1RequestType,
+				utils.Account:     "1001",
+				utils.Subject:     "ANY2CNT",
+				utils.Destination: "1002",
+				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+				utils.Usage:       10 * time.Minute,
+			},
+		},
+	}
+	var rply sessions.V1ProcessEventReply
+	if err := sSv1BiRpc.Call(utils.SessionSv1ProcessEvent,
+		args, &rply); err == nil || err.Error() != utils.ErrPartiallyExecuted.Error() {
+		t.Error(err)
+	}
+	time.Sleep(100 * time.Millisecond)
+}
+
+func testSSv1ItGetCDRsFromProcessEventResourceError(t *testing.T) {
+	var cdrCnt int64
+	req := &utils.RPCCDRsFilterWithArgDispatcher{RPCCDRsFilter: &utils.RPCCDRsFilter{
+		OriginIDs: []string{"testSSv1ItProcessEventWithCDRResourceError"}}}
+	if err := sSApierRpc.Call(utils.CDRsV1GetCDRsCount, req, &cdrCnt); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if cdrCnt != 3 { // 3 for each CDR
+		t.Error("Unexpected number of CDRs returned: ", cdrCnt)
+	}
+
+	var cdrs []*engine.CDR
+	args := &utils.RPCCDRsFilterWithArgDispatcher{RPCCDRsFilter: &utils.RPCCDRsFilter{
+		OriginIDs: []string{"testSSv1ItProcessEventWithCDRResourceError"},
+		RunIDs:    []string{"raw"}}}
+	if err := sSApierRpc.Call(utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+	} else {
+		if cdrs[0].Cost != -1.0 {
+			t.Errorf("Unexpected cost for CDR: %f", cdrs[0].Cost)
+		}
+	}
+	args = &utils.RPCCDRsFilterWithArgDispatcher{RPCCDRsFilter: &utils.RPCCDRsFilter{
+		RunIDs:    []string{"CustomerCharges"},
+		OriginIDs: []string{"testSSv1ItProcessEventWithCDRResourceError"}}}
+	if err := sSApierRpc.Call(utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+	} else {
+		if cdrs[0].Cost != 0.198 {
+			t.Errorf("Unexpected cost for CDR: %f", cdrs[0].Cost)
+		}
+	}
+	args = &utils.RPCCDRsFilterWithArgDispatcher{RPCCDRsFilter: &utils.RPCCDRsFilter{
+		RunIDs:    []string{"SupplierCharges"},
+		OriginIDs: []string{"testSSv1ItProcessEventWithCDRResourceError"}}}
 	if err := sSApierRpc.Call(utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {

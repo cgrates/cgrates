@@ -3335,22 +3335,29 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 				case resOpt.Has(utils.MetaAuthorize):
 					if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().ResSConns, nil, utils.ResourceSv1AuthorizeResources,
 						attrRU, &resMessage); err != nil {
-						return utils.NewErrResourceS(err)
+						utils.Logger.Warning(
+							fmt.Sprintf("<%s> error: <%s> processing event %+v for RunID <%s>  with ResourceS.",
+								utils.SessionS, err.Error(), cgrEv.CGREvent, runID))
+						withErrors = true
 					}
-					rply.ResourceAllocation[runID] = resMessage
 				case resOpt.Has(utils.MetaAllocate):
 					if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().ResSConns, nil, utils.ResourceSv1AllocateResources,
 						attrRU, &resMessage); err != nil {
-						return utils.NewErrResourceS(err)
+						utils.Logger.Warning(
+							fmt.Sprintf("<%s> error: <%s> processing event %+v for RunID <%s>  with ResourceS.",
+								utils.SessionS, err.Error(), cgrEv.CGREvent, runID))
+						withErrors = true
 					}
-					rply.ResourceAllocation[runID] = resMessage
 				case resOpt.Has(utils.MetaRelease):
 					if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().ResSConns, nil, utils.ResourceSv1ReleaseResources,
 						attrRU, &resMessage); err != nil {
-						return utils.NewErrResourceS(err)
+						utils.Logger.Warning(
+							fmt.Sprintf("<%s> error: <%s> processing event %+v for RunID <%s>  with ResourceS.",
+								utils.SessionS, err.Error(), cgrEv.CGREvent, runID))
+						withErrors = true
 					}
-					rply.ResourceAllocation[runID] = resMessage
 				}
+				rply.ResourceAllocation[runID] = resMessage
 			}
 		}
 	}
