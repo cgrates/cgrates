@@ -178,19 +178,19 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 		utils.MetaInitiate, utils.MetaUpdate,
 		utils.MetaTerminate, utils.MetaMessage,
 		utils.MetaCDRs, utils.MetaEvent, utils.META_NONE, utils.MetaRadauth} {
-		if reqProcessor.Flags.HasKey(typ) { // request type is identified through flags
+		if reqProcessor.Flags.Has(typ) { // request type is identified through flags
 			reqType = typ
 			break
 		}
 	}
 	var cgrArgs utils.ExtractedArgs
-	if cgrArgs, err = utils.ExtractArgsFromOpts(opts, reqProcessor.Flags.HasKey(utils.MetaDispatchers),
+	if cgrArgs, err = utils.ExtractArgsFromOpts(opts, reqProcessor.Flags.Has(utils.MetaDispatchers),
 		reqType == utils.MetaAuthorize || reqType == utils.MetaMessage || reqType == utils.MetaEvent); err != nil {
 		utils.Logger.Warning(fmt.Sprintf("<%s> args extraction failed because <%s>",
 			utils.RadiusAgent, err.Error()))
 		err = nil // reset the error and continue the processing
 	}
-	if reqProcessor.Flags.HasKey(utils.MetaLog) {
+	if reqProcessor.Flags.Has(utils.MetaLog) {
 		utils.Logger.Info(
 			fmt.Sprintf("<%s> LOG, processorID: %s, radius message: %s",
 				utils.RadiusAgent, reqProcessor.ID, agReq.Request.String()))
@@ -205,19 +205,19 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 				utils.RadiusAgent, reqProcessor.ID, utils.ToJSON(cgrEv)))
 	case utils.MetaAuthorize:
 		authArgs := sessions.NewV1AuthorizeArgs(
-			reqProcessor.Flags.HasKey(utils.MetaAttributes),
-			reqProcessor.Flags.ParamsSlice(utils.MetaAttributes),
-			reqProcessor.Flags.HasKey(utils.MetaThresholds),
-			reqProcessor.Flags.ParamsSlice(utils.MetaThresholds),
-			reqProcessor.Flags.HasKey(utils.MetaStats),
-			reqProcessor.Flags.ParamsSlice(utils.MetaStats),
-			reqProcessor.Flags.HasKey(utils.MetaResources),
-			reqProcessor.Flags.HasKey(utils.MetaAccounts),
-			reqProcessor.Flags.HasKey(utils.MetaRoutes),
-			reqProcessor.Flags.HasKey(utils.MetaRoutesIgnoreErrors),
-			reqProcessor.Flags.HasKey(utils.MetaRoutesEventCost),
+			reqProcessor.Flags.Has(utils.MetaAttributes),
+			reqProcessor.Flags.ParamsSlice(utils.MetaAttributes, utils.MetaIDs),
+			reqProcessor.Flags.Has(utils.MetaThresholds),
+			reqProcessor.Flags.ParamsSlice(utils.MetaThresholds, utils.MetaIDs),
+			reqProcessor.Flags.Has(utils.MetaStats),
+			reqProcessor.Flags.ParamsSlice(utils.MetaStats, utils.MetaIDs),
+			reqProcessor.Flags.Has(utils.MetaResources),
+			reqProcessor.Flags.Has(utils.MetaAccounts),
+			reqProcessor.Flags.Has(utils.MetaRoutes),
+			reqProcessor.Flags.Has(utils.MetaRoutesIgnoreErrors),
+			reqProcessor.Flags.Has(utils.MetaRoutesEventCost),
 			cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.RoutePaginator,
-			reqProcessor.Flags.HasKey(utils.MetaFD),
+			reqProcessor.Flags.Has(utils.MetaFD),
 			opts,
 		)
 		rply := new(sessions.V1AuthorizeReply)
@@ -228,16 +228,16 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 		}
 	case utils.MetaInitiate:
 		initArgs := sessions.NewV1InitSessionArgs(
-			reqProcessor.Flags.HasKey(utils.MetaAttributes),
-			reqProcessor.Flags.ParamsSlice(utils.MetaAttributes),
-			reqProcessor.Flags.HasKey(utils.MetaThresholds),
-			reqProcessor.Flags.ParamsSlice(utils.MetaThresholds),
-			reqProcessor.Flags.HasKey(utils.MetaStats),
-			reqProcessor.Flags.ParamsSlice(utils.MetaStats),
-			reqProcessor.Flags.HasKey(utils.MetaResources),
-			reqProcessor.Flags.HasKey(utils.MetaAccounts),
+			reqProcessor.Flags.Has(utils.MetaAttributes),
+			reqProcessor.Flags.ParamsSlice(utils.MetaAttributes, utils.MetaIDs),
+			reqProcessor.Flags.Has(utils.MetaThresholds),
+			reqProcessor.Flags.ParamsSlice(utils.MetaThresholds, utils.MetaIDs),
+			reqProcessor.Flags.Has(utils.MetaStats),
+			reqProcessor.Flags.ParamsSlice(utils.MetaStats, utils.MetaIDs),
+			reqProcessor.Flags.Has(utils.MetaResources),
+			reqProcessor.Flags.Has(utils.MetaAccounts),
 			cgrEv, cgrArgs.ArgDispatcher,
-			reqProcessor.Flags.HasKey(utils.MetaFD),
+			reqProcessor.Flags.Has(utils.MetaFD),
 			opts)
 		rply := new(sessions.V1InitSessionReply)
 		err = ra.connMgr.Call(ra.cgrCfg.RadiusAgentCfg().SessionSConns, nil, utils.SessionSv1InitiateSession,
@@ -247,11 +247,11 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 		}
 	case utils.MetaUpdate:
 		updateArgs := sessions.NewV1UpdateSessionArgs(
-			reqProcessor.Flags.HasKey(utils.MetaAttributes),
-			reqProcessor.Flags.ParamsSlice(utils.MetaAttributes),
-			reqProcessor.Flags.HasKey(utils.MetaAccounts),
+			reqProcessor.Flags.Has(utils.MetaAttributes),
+			reqProcessor.Flags.ParamsSlice(utils.MetaAttributes, utils.MetaIDs),
+			reqProcessor.Flags.Has(utils.MetaAccounts),
 			cgrEv, cgrArgs.ArgDispatcher,
-			reqProcessor.Flags.HasKey(utils.MetaFD),
+			reqProcessor.Flags.Has(utils.MetaFD),
 			opts)
 		rply := new(sessions.V1UpdateSessionReply)
 		err = ra.connMgr.Call(ra.cgrCfg.RadiusAgentCfg().SessionSConns, nil, utils.SessionSv1UpdateSession,
@@ -261,14 +261,14 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 		}
 	case utils.MetaTerminate:
 		terminateArgs := sessions.NewV1TerminateSessionArgs(
-			reqProcessor.Flags.HasKey(utils.MetaAccounts),
-			reqProcessor.Flags.HasKey(utils.MetaResources),
-			reqProcessor.Flags.HasKey(utils.MetaThresholds),
-			reqProcessor.Flags.ParamsSlice(utils.MetaThresholds),
-			reqProcessor.Flags.HasKey(utils.MetaStats),
-			reqProcessor.Flags.ParamsSlice(utils.MetaStats),
+			reqProcessor.Flags.Has(utils.MetaAccounts),
+			reqProcessor.Flags.Has(utils.MetaResources),
+			reqProcessor.Flags.Has(utils.MetaThresholds),
+			reqProcessor.Flags.ParamsSlice(utils.MetaThresholds, utils.MetaIDs),
+			reqProcessor.Flags.Has(utils.MetaStats),
+			reqProcessor.Flags.ParamsSlice(utils.MetaStats, utils.MetaIDs),
 			cgrEv, cgrArgs.ArgDispatcher,
-			reqProcessor.Flags.HasKey(utils.MetaFD),
+			reqProcessor.Flags.Has(utils.MetaFD),
 			opts)
 		rply := utils.StringPointer("")
 		err = ra.connMgr.Call(ra.cgrCfg.RadiusAgentCfg().SessionSConns, nil, utils.SessionSv1TerminateSession,
@@ -278,19 +278,19 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 		}
 	case utils.MetaMessage:
 		evArgs := sessions.NewV1ProcessMessageArgs(
-			reqProcessor.Flags.HasKey(utils.MetaAttributes),
-			reqProcessor.Flags.ParamsSlice(utils.MetaAttributes),
-			reqProcessor.Flags.HasKey(utils.MetaThresholds),
-			reqProcessor.Flags.ParamsSlice(utils.MetaThresholds),
-			reqProcessor.Flags.HasKey(utils.MetaStats),
-			reqProcessor.Flags.ParamsSlice(utils.MetaStats),
-			reqProcessor.Flags.HasKey(utils.MetaResources),
-			reqProcessor.Flags.HasKey(utils.MetaAccounts),
-			reqProcessor.Flags.HasKey(utils.MetaRoutes),
-			reqProcessor.Flags.HasKey(utils.MetaRoutesIgnoreErrors),
-			reqProcessor.Flags.HasKey(utils.MetaRoutesEventCost),
+			reqProcessor.Flags.Has(utils.MetaAttributes),
+			reqProcessor.Flags.ParamsSlice(utils.MetaAttributes, utils.MetaIDs),
+			reqProcessor.Flags.Has(utils.MetaThresholds),
+			reqProcessor.Flags.ParamsSlice(utils.MetaThresholds, utils.MetaIDs),
+			reqProcessor.Flags.Has(utils.MetaStats),
+			reqProcessor.Flags.ParamsSlice(utils.MetaStats, utils.MetaIDs),
+			reqProcessor.Flags.Has(utils.MetaResources),
+			reqProcessor.Flags.Has(utils.MetaAccounts),
+			reqProcessor.Flags.Has(utils.MetaRoutes),
+			reqProcessor.Flags.Has(utils.MetaRoutesIgnoreErrors),
+			reqProcessor.Flags.Has(utils.MetaRoutesEventCost),
 			cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.RoutePaginator,
-			reqProcessor.Flags.HasKey(utils.MetaFD),
+			reqProcessor.Flags.Has(utils.MetaFD),
 			opts)
 		rply := new(sessions.V1ProcessMessageReply)
 		err = ra.connMgr.Call(ra.cgrCfg.RadiusAgentCfg().SessionSConns, nil, utils.SessionSv1ProcessMessage, evArgs, rply)
@@ -313,7 +313,7 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 			evArgs, rply)
 		if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
 			cgrEv.Event[utils.Usage] = 0 // avoid further debits
-		} else if needsMaxUsage(reqProcessor.Flags.ParamsSlice(utils.MetaRALs)) {
+		} else if needsMaxUsage(reqProcessor.Flags[utils.MetaRALs]) {
 			cgrEv.Event[utils.Usage] = rply.MaxUsage // make sure the CDR reflects the debit
 		}
 		if err = agReq.setCGRReply(rply, err); err != nil {
@@ -328,7 +328,7 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 		}
 	}
 	// separate request so we can capture the Terminate/Event also here
-	if reqProcessor.Flags.HasKey(utils.MetaCDRs) {
+	if reqProcessor.Flags.Has(utils.MetaCDRs) {
 		rplyCDRs := utils.StringPointer("")
 		if err = ra.connMgr.Call(ra.cgrCfg.RadiusAgentCfg().SessionSConns, nil, utils.SessionSv1ProcessCDR,
 			&utils.CGREventWithArgDispatcher{CGREvent: cgrEv,
@@ -342,7 +342,7 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 		return false, err
 	}
 
-	if reqProcessor.Flags.HasKey(utils.MetaLog) {
+	if reqProcessor.Flags.Has(utils.MetaLog) {
 		utils.Logger.Info(
 			fmt.Sprintf("<%s> LOG, Radius reply: %s",
 				utils.RadiusAgent, utils.ToIJSON(agReq.Reply)))

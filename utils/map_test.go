@@ -200,9 +200,9 @@ func TestMapSubsystemIDsFromSlice(t *testing.T) {
 	sls := []string{"*event", "*thresholds:*ids:ID1;ID2;ID3", "*thresholds:*derivedreply", "*attributes:*disabled", "*stats:*ids:ID"}
 	eMp := FlagsWithParams{
 		"*event":      map[string][]string{},
-		"*thresholds": map[string][]string{"*ids": {"ID1", "ID2", "ID3"}, MetaDerivedReply: {}},
+		"*thresholds": map[string][]string{MetaIDs: {"ID1", "ID2", "ID3"}, MetaDerivedReply: {}},
 		"*attributes": map[string][]string{"*disabled": {}},
-		"*stats":      map[string][]string{"*ids": {"ID"}},
+		"*stats":      map[string][]string{MetaIDs: {"ID"}},
 	}
 	if mp := FlagsWithParamsFromSlice(sls); !reflect.DeepEqual(mp, eMp) {
 		t.Errorf("Expecting: %+v, received: %+v", eMp, mp)
@@ -213,9 +213,9 @@ func TestMapSubsystemIDsHasKey(t *testing.T) {
 	sls := []string{"*event", "*thresholds:*ids:ID1;ID2;ID3", "*attributes", "*stats:*ids:ID"}
 	eMp := FlagsWithParams{
 		"*event":      map[string][]string{},
-		"*thresholds": map[string][]string{"*ids": {"ID1", "ID2", "ID3"}},
+		"*thresholds": map[string][]string{MetaIDs: {"ID1", "ID2", "ID3"}},
 		"*attributes": map[string][]string{},
-		"*stats":      map[string][]string{"*ids": {"ID"}},
+		"*stats":      map[string][]string{MetaIDs: {"ID"}},
 	}
 	mp := FlagsWithParamsFromSlice(sls)
 	if !reflect.DeepEqual(mp, eMp) {
@@ -236,23 +236,23 @@ func TestMapSubsystemIDsGetIDs(t *testing.T) {
 	sls := []string{"*event", "*thresholds:*ids:ID1;ID2;ID3", "*attributes", "*stats:*ids:ID"}
 	eMp := FlagsWithParams{
 		"*event":      map[string][]string{},
-		"*thresholds": map[string][]string{"*ids": {"ID1", "ID2", "ID3"}},
+		"*thresholds": map[string][]string{MetaIDs: {"ID1", "ID2", "ID3"}},
 		"*attributes": map[string][]string{},
-		"*stats":      map[string][]string{"*ids": {"ID"}},
+		"*stats":      map[string][]string{MetaIDs: {"ID"}},
 	}
 	mp := FlagsWithParamsFromSlice(sls)
 	if !reflect.DeepEqual(mp, eMp) {
 		t.Errorf("Expecting: %+v, received: %+v", eMp, mp)
 	}
 	eIDs := []string{"ID1", "ID2", "ID3"}
-	if ids := mp.ParamsSlice("*thresholds", "*ids"); !reflect.DeepEqual(ids, eIDs) {
+	if ids := mp.ParamsSlice("*thresholds", MetaIDs); !reflect.DeepEqual(ids, eIDs) {
 		t.Errorf("Expecting: %+v, received: %+v", eIDs, ids)
 	}
 	eIDs = nil
-	if ids := mp.ParamsSlice("*event", "*ids"); !reflect.DeepEqual(ids, eIDs) {
+	if ids := mp.ParamsSlice("*event", MetaIDs); !reflect.DeepEqual(ids, eIDs) {
 		t.Errorf("Expecting: %+v, received: %+v", eIDs, ids)
 	}
-	if ids := mp.ParamsSlice("*test", "*ids"); !reflect.DeepEqual(ids, eIDs) {
+	if ids := mp.ParamsSlice("*test", MetaIDs); !reflect.DeepEqual(ids, eIDs) {
 		t.Errorf("Expecting: %+v, received: %+v", eIDs, ids)
 	}
 }
@@ -261,9 +261,9 @@ func TestFlagsToSlice(t *testing.T) {
 	sls := []string{"*event", "*thresholds:*ids:ID1;ID2;ID3", "*attributes", "*stats:*ids:ID", "*routes:*derivedreply"}
 	eMp := FlagsWithParams{
 		"*event":      map[string][]string{},
-		"*thresholds": map[string][]string{"*ids": {"ID1", "ID2", "ID3"}},
+		"*thresholds": map[string][]string{MetaIDs: {"ID1", "ID2", "ID3"}},
 		"*attributes": map[string][]string{},
-		"*stats":      map[string][]string{"*ids": {"ID"}},
+		"*stats":      map[string][]string{MetaIDs: {"ID"}},
 		"*routes":     map[string][]string{MetaDerivedReply: {}},
 	}
 	mp := FlagsWithParamsFromSlice(sls)
@@ -280,8 +280,9 @@ func TestFlagsToSlice(t *testing.T) {
 
 func TestFlagsWithParamsGetBool(t *testing.T) {
 	flagsWithParams := &FlagsWithParams{
-		"test":  map[string][]string{"*disabled": {}, "string2": {}},
+		"test":  map[string][]string{"false": {}, "string2": {}},
 		"test2": map[string][]string{"string2": {}},
+		"test3": map[string][]string{"true": {}},
 		"empty": map[string][]string{},
 	}
 	key := "notpresent"
@@ -300,15 +301,48 @@ func TestFlagsWithParamsGetBool(t *testing.T) {
 	if rcv := flagsWithParams.GetBool(key); rcv != true {
 		t.Errorf("Expecting: true, received: %+v", ToJSON(rcv))
 	}
+	key = "test3"
+	if rcv := flagsWithParams.GetBool(key); rcv != true {
+		t.Errorf("Expecting: true, received: %+v", ToJSON(rcv))
+	}
 }
 
 func TestFlagParamsAdd(t *testing.T) {
 	flgs := make(FlagParams)
 	exp := FlagParams{
-		"*ids": []string{"id1", "id2"},
+		MetaIDs: []string{"id1", "id2"},
 	}
-	flgs.Add([]string{"*ids", "id1;id2", "ignored"})
+	flgs.Add([]string{MetaIDs, "id1;id2", "ignored"})
 	if !reflect.DeepEqual(flgs, exp) {
 		t.Errorf("Expecting: %+v, received: %+v", exp, flgs)
+	}
+}
+
+func TestFlagsToSlice2(t *testing.T) {
+	sls := []string{"*event", "*thresholds:*ids:ID1;ID2;ID3", "*attributes", "*stats:*ids:ID", "*routes:*derivedreply", "*cdrs:*attributes", "*cdrs:*stats:ID"}
+	eMp := FlagsWithParams{
+		"*event":      map[string][]string{},
+		"*thresholds": map[string][]string{MetaIDs: {"ID1", "ID2", "ID3"}},
+		"*attributes": map[string][]string{},
+		"*stats":      map[string][]string{MetaIDs: {"ID"}},
+		"*routes":     map[string][]string{MetaDerivedReply: {}},
+		"*cdrs":       map[string][]string{MetaAttributes: {}, MetaStats: {"ID"}},
+	}
+	mp := FlagsWithParamsFromSlice(sls)
+	if !reflect.DeepEqual(mp, eMp) {
+		t.Errorf("Expecting: %+v, received: %+v", ToJSON(eMp), ToJSON(mp))
+	}
+	sort.Strings(sls)
+	flgSls := mp.SliceFlags()
+	sort.Strings(flgSls)
+	if !reflect.DeepEqual(flgSls, sls) {
+		t.Errorf("Expecting: %+v, received: %+v", sls, flgSls)
+	}
+
+	sls = []string{"*attributes", "*stats:ID"}
+	flgSls = mp["*cdrs"].SliceFlags()
+	sort.Strings(flgSls)
+	if !reflect.DeepEqual(flgSls, sls) {
+		t.Errorf("Expecting: %+v, received: %+v", sls, flgSls)
 	}
 }

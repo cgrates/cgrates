@@ -99,7 +99,7 @@ func TestMfHttpAgentMultipleFields(t *testing.T) {
 					ID:            "OutboundAUTHDryRun",
 					Filters:       []string{},
 					Tenant:        NewRSRParsersMustCompile("cgrates.org", utils.INFIELD_SEP),
-					Flags:         utils.FlagsWithParams{"*dryrun": []string{}},
+					Flags:         utils.FlagsWithParams{"*dryrun": {}},
 					RequestFields: []*FCTemplate{},
 					ReplyFields: []*FCTemplate{{
 						Tag:       "Allow",
@@ -114,8 +114,8 @@ func TestMfHttpAgentMultipleFields(t *testing.T) {
 					ID:      "OutboundAUTH",
 					Filters: []string{"*string:~*req.request_type:OutboundAUTH"},
 					Tenant:  NewRSRParsersMustCompile("cgrates.org", utils.INFIELD_SEP),
-					Flags: utils.FlagsWithParams{"*accounts": []string{},
-						"*attributes": []string{}, "*authorize": []string{}},
+					Flags: utils.FlagsWithParams{"*accounts": {},
+						"*attributes": {}, "*authorize": {}},
 					RequestFields: []*FCTemplate{
 						{
 							Tag:       "RequestType",
@@ -141,7 +141,7 @@ func TestMfHttpAgentMultipleFields(t *testing.T) {
 					ID:      "mtcall_cdr",
 					Filters: []string{"*string:~*req.request_type:MTCALL_CDR"},
 					Tenant:  NewRSRParsersMustCompile("cgrates.org", utils.INFIELD_SEP),
-					Flags:   utils.FlagsWithParams{"*cdrs": []string{}},
+					Flags:   utils.FlagsWithParams{"*cdrs": {}},
 					RequestFields: []*FCTemplate{{
 						Tag:       "RequestType",
 						Path:      "RequestType",
@@ -170,7 +170,7 @@ func TestMfHttpAgentMultipleFields(t *testing.T) {
 			RequestProcessors: []*RequestProcessor{{
 				ID:     "cdr_from_xml",
 				Tenant: NewRSRParsersMustCompile("cgrates.org", utils.INFIELD_SEP),
-				Flags:  utils.FlagsWithParams{"*cdrs": []string{}},
+				Flags:  utils.FlagsWithParams{"*cdrs": {}},
 				RequestFields: []*FCTemplate{
 					{
 						Tag:       "ToR",

@@ -137,7 +137,7 @@ func TestSIPAgentCfgAsMapInterface(t *testing.T) {
 				"id":             "OutboundAUTHDryRun",
 				"filters":        []string{"*string:~*req.request_type:OutboundAUTH", "*string:~*req.Msisdn:497700056231"},
 				"tenant":         "cgrates.org",
-				"flags":          map[string][]string{"*dryrun": {}},
+				"flags":          []string{"*dryrun"},
 				"Timezone":       "",
 				"request_fields": []map[string]interface{}{},
 				"reply_fields": []map[string]interface{}{

@@ -166,9 +166,7 @@ func (eeC *EventExporterCfg) loadFromJsonCfg(jsnEec *EventExporterJsonCfg, separ
 		}
 	}
 	if jsnEec.Flags != nil {
-		if eeC.Flags, err = utils.FlagsWithParamsFromSlice(*jsnEec.Flags); err != nil {
-			return
-		}
+		eeC.Flags = utils.FlagsWithParamsFromSlice(*jsnEec.Flags)
 	}
 	if jsnEec.Attribute_context != nil {
 		eeC.AttributeSCtx = *jsnEec.Attribute_context
@@ -285,14 +283,6 @@ func (eeC *EventExporterCfg) AsMapInterface(separator string) map[string]interfa
 		tenant = strings.Join(values, separator)
 	}
 
-	flags := make(map[string][]interface{}, len(eeC.Flags))
-	for key, val := range eeC.Flags {
-		buf := make([]interface{}, len(val))
-		for i, item := range val {
-			buf[i] = item
-		}
-		flags[key] = buf
-	}
 	fields := make([]map[string]interface{}, 0, len(eeC.Fields))
 	for _, fld := range eeC.Fields {
 		fields = append(fields, fld.AsMapInterface(separator))
@@ -306,7 +296,7 @@ func (eeC *EventExporterCfg) AsMapInterface(separator string) map[string]interfa
 		utils.TenantCfg:           tenant,
 		utils.TimezoneCfg:         eeC.Timezone,
 		utils.FiltersCfg:          eeC.Filters,
-		utils.FlagsCfg:            flags,
+		utils.FlagsCfg:            eeC.Flags.SliceFlags(),
 		utils.AttributeContextCfg: eeC.AttributeSCtx,
 		utils.AttributeIDsCfg:     eeC.AttributeSIDs,
 		utils.SynchronousCfg:      eeC.Synchronous,

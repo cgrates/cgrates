@@ -72,7 +72,7 @@ func TestHttpAgentCfgsloadFromJsonCfg(t *testing.T) {
 			ID:            "OutboundAUTHDryRun",
 			Filters:       []string{"*string:*req.request_type:OutboundAUTH", "*string:*req.Msisdn:497700056231"},
 			Tenant:        NewRSRParsersMustCompile("cgrates.org", utils.INFIELD_SEP),
-			Flags:         utils.FlagsWithParams{"*dryrun": []string{}},
+			Flags:         utils.FlagsWithParams{"*dryrun": {}},
 			RequestFields: []*FCTemplate{},
 			ReplyFields: []*FCTemplate{{
 				Tag:       "Allow",
@@ -150,7 +150,7 @@ func TestHttpAgentCfgsloadFromJsonCfg(t *testing.T) {
 					ID:            "OutboundAUTHDryRun",
 					Filters:       []string{"*string:*req.request_type:OutboundAUTH", "*string:*req.Msisdn:497700056231"},
 					Tenant:        NewRSRParsersMustCompile("cgrates.org", utils.INFIELD_SEP),
-					Flags:         utils.FlagsWithParams{"*dryrun": []string{}},
+					Flags:         utils.FlagsWithParams{"*dryrun": {}},
 					RequestFields: []*FCTemplate{},
 					ReplyFields: []*FCTemplate{{
 						Tag:       "Allow",
@@ -165,7 +165,7 @@ func TestHttpAgentCfgsloadFromJsonCfg(t *testing.T) {
 					ID:      "mtcall_cdr",
 					Filters: []string{"*string:*req.request_type:MTCALL_CDR"},
 					Tenant:  NewRSRParsersMustCompile("cgrates.org", utils.INFIELD_SEP),
-					Flags:   utils.FlagsWithParams{"*cdrs": []string{}},
+					Flags:   utils.FlagsWithParams{"*cdrs": {}},
 					RequestFields: []*FCTemplate{{
 						Tag:       "RequestType",
 						Path:      "RequestType",
@@ -192,7 +192,7 @@ func TestHttpAgentCfgsloadFromJsonCfg(t *testing.T) {
 			RequestProcessors: []*RequestProcessor{{
 				ID:            "cdr_from_xml",
 				Tenant:        NewRSRParsersMustCompile("cgrates.org", utils.INFIELD_SEP),
-				Flags:         utils.FlagsWithParams{"*cdrs": []string{}},
+				Flags:         utils.FlagsWithParams{"*cdrs": {}},
 				RequestFields: []*FCTemplate{},
 				ReplyFields:   []*FCTemplate{},
 			}},
@@ -251,7 +251,7 @@ func TestHttpAgentCfgloadFromJsonCfg(t *testing.T) {
 			ID:            "OutboundAUTHDryRun",
 			Filters:       []string{"*string:*req.request_type:OutboundAUTH", "*string:*req.Msisdn:497700056231"},
 			Tenant:        NewRSRParsersMustCompile("cgrates.org", utils.INFIELD_SEP),
-			Flags:         utils.FlagsWithParams{"*dryrun": []string{}},
+			Flags:         utils.FlagsWithParams{"*dryrun": {}},
 			RequestFields: []*FCTemplate{},
 			ReplyFields:   []*FCTemplate{},
 		}},
@@ -275,7 +275,7 @@ func TestHttpAgentCfgappendHttpAgntProcCfgs(t *testing.T) {
 			ID:            "OutboundAUTHDryRun",
 			Filters:       []string{"*string:*req.request_type:OutboundAUTH", "*string:*req.Msisdn:497700056231"},
 			Tenant:        NewRSRParsersMustCompile("cgrates.org", utils.INFIELD_SEP),
-			Flags:         utils.FlagsWithParams{"*dryrun": []string{}},
+			Flags:         utils.FlagsWithParams{"*dryrun": {}},
 			RequestFields: []*FCTemplate{},
 			ReplyFields: []*FCTemplate{{
 				Tag:       "Allow",
@@ -325,7 +325,7 @@ func TestHttpAgentCfgappendHttpAgntProcCfgs(t *testing.T) {
 			ID:            "OutboundAUTHDryRun",
 			Filters:       []string{"*string:*req.request_type:OutboundAUTH", "*string:*req.Msisdn:497700056231"},
 			Tenant:        NewRSRParsersMustCompile("cgrates.org", utils.INFIELD_SEP),
-			Flags:         utils.FlagsWithParams{"*dryrun": []string{}},
+			Flags:         utils.FlagsWithParams{"*dryrun": {}},
 			RequestFields: []*FCTemplate{},
 			ReplyFields: []*FCTemplate{{
 				Tag:       "Allow",
@@ -339,7 +339,7 @@ func TestHttpAgentCfgappendHttpAgntProcCfgs(t *testing.T) {
 			ID:            "OutboundAUTHDryRun1",
 			Filters:       []string{"*string:*req.request_type:OutboundAUTH", "*string:*req.Msisdn:497700056231"},
 			Tenant:        NewRSRParsersMustCompile("cgrates.org", utils.INFIELD_SEP),
-			Flags:         utils.FlagsWithParams{"*dryrun": []string{}},
+			Flags:         utils.FlagsWithParams{"*dryrun": {}},
 			RequestFields: []*FCTemplate{},
 			ReplyFields: []*FCTemplate{{
 				Tag:       "Allow",
@@ -408,7 +408,7 @@ func TestHttpAgentCfgAsMapInterface(t *testing.T) {
 					"id":             "OutboundAUTHDryRun",
 					"filters":        []string{"*string:~*req.request_type:OutboundAUTH", "*string:~*req.Msisdn:497700056231"},
 					"tenant":         "cgrates.org",
-					"flags":          map[string][]string{"*dryrun": {}},
+					"flags":          []string{"*dryrun"},
 					"Timezone":       "",
 					"request_fields": []map[string]interface{}{},
 					"reply_fields": []map[string]interface{}{

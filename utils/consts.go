@@ -2259,8 +2259,17 @@ const (
 	OptsAPIKey  = "*dispatcherApiKey"
 	OptsRouteID = "*dispatcherRouteID"
 	// Others
-	OptsContext      = "*context"
+	OptsContext = "*context"
+)
+
+// Event Flags
+const (
 	MetaDerivedReply = "*derivedreply"
+
+	MetaIDs = "*ids"
+
+	TrueStr  = "true"
+	FalseStr = "false"
 )
 
 func buildCacheInstRevPrefixes() {

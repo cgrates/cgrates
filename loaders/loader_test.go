@@ -1581,11 +1581,7 @@ cgrates.org,RP1,,,,,,,,,,RT_CHRISTMAS,,* * 24 12 *,30,false,0s,0.06,1m,1s
 			utils.RateProfilesCsv: &openedCSVFile{fileName: utils.RateProfilesCsv,
 				rdr: rdr2, csvRdr: csvRdr2}},
 	}
-	if flag, err := utils.FlagsWithParamsFromSlice([]string{utils.MetaPartial}); err != nil {
-		t.Error(err)
-	} else {
-		ldr.flagsTpls[utils.MetaRateProfiles] = flag
-	}
+	ldr.flagsTpls[utils.MetaRateProfiles] = utils.FlagsWithParamsFromSlice([]string{utils.MetaPartial})
 	if err := ldr.processContent(utils.MetaRateProfiles, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
@@ -1830,11 +1826,7 @@ cgrates.org,RP1,
 			utils.RateProfilesCsv: &openedCSVFile{fileName: utils.RateProfilesCsv,
 				rdr: rdr1, csvRdr: csvRdr1}},
 	}
-	if flag, err := utils.FlagsWithParamsFromSlice([]string{utils.MetaPartial}); err != nil {
-		t.Error(err)
-	} else {
-		ldr.flagsTpls[utils.MetaRateProfiles] = flag
-	}
+	ldr.flagsTpls[utils.MetaRateProfiles] = utils.FlagsWithParamsFromSlice([]string{utils.MetaPartial})
 	if err := ldr.removeContent(utils.MetaRateProfiles, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
@@ -1903,11 +1895,7 @@ cgrates.org,RP1,
 			utils.RateProfilesCsv: &openedCSVFile{fileName: utils.RateProfilesCsv,
 				rdr: rdr2, csvRdr: csvRdr2}},
 	}
-	if flag, err := utils.FlagsWithParamsFromSlice([]string{utils.MetaPartial}); err != nil {
-		t.Error(err)
-	} else {
-		ldr.flagsTpls[utils.MetaRateProfiles] = flag
-	}
+	ldr.flagsTpls[utils.MetaRateProfiles] = utils.FlagsWithParamsFromSlice([]string{utils.MetaPartial})
 	if err := ldr.removeContent(utils.MetaRateProfiles, utils.EmptyString); err != nil {
 		t.Error(err)
 	}

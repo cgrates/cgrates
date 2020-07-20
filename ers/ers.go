@@ -154,7 +154,7 @@ func (erS *ERService) addReader(rdrID string, cfgIdx int) (err error) {
 func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 	rdrCfg *config.EventReaderCfg, opts map[string]interface{}) (err error) {
 	// log the event created if requested by flags
-	if rdrCfg.Flags.HasKey(utils.MetaLog) {
+	if rdrCfg.Flags.Has(utils.MetaLog) {
 		utils.Logger.Info(
 			fmt.Sprintf("<%s> LOG, reader: <%s>, message: %s",
 				utils.ERs, rdrCfg.ID, utils.ToIJSON(cgrEv)))
@@ -166,14 +166,14 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 		utils.MetaInitiate, utils.MetaUpdate,
 		utils.MetaTerminate, utils.MetaMessage,
 		utils.MetaCDRs, utils.MetaEvent, utils.META_NONE} {
-		if rdrCfg.Flags.HasKey(typ) { // request type is identified through flags
+		if rdrCfg.Flags.Has(typ) { // request type is identified through flags
 			reqType = typ
 			break
 		}
 	}
 	var cgrArgs utils.ExtractedArgs
 	if cgrArgs, err = utils.ExtractArgsFromOpts(opts,
-		rdrCfg.Flags.HasKey(utils.MetaDispatchers),
+		rdrCfg.Flags.Has(utils.MetaDispatchers),
 		reqType == utils.MetaAuthorize ||
 			reqType == utils.MetaMessage ||
 			reqType == utils.MetaEvent); err != nil {
@@ -192,19 +192,19 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 				utils.ERs, rdrCfg.ID, utils.ToJSON(cgrEv)))
 	case utils.MetaAuthorize:
 		authArgs := sessions.NewV1AuthorizeArgs(
-			rdrCfg.Flags.HasKey(utils.MetaAttributes),
-			rdrCfg.Flags.ParamsSlice(utils.MetaAttributes),
-			rdrCfg.Flags.HasKey(utils.MetaThresholds),
-			rdrCfg.Flags.ParamsSlice(utils.MetaThresholds),
-			rdrCfg.Flags.HasKey(utils.MetaStats),
-			rdrCfg.Flags.ParamsSlice(utils.MetaStats),
-			rdrCfg.Flags.HasKey(utils.MetaResources),
-			rdrCfg.Flags.HasKey(utils.MetaAccounts),
-			rdrCfg.Flags.HasKey(utils.MetaRoutes),
-			rdrCfg.Flags.HasKey(utils.MetaRoutesIgnoreErrors),
-			rdrCfg.Flags.HasKey(utils.MetaRoutesEventCost),
+			rdrCfg.Flags.Has(utils.MetaAttributes),
+			rdrCfg.Flags.ParamsSlice(utils.MetaAttributes, utils.MetaIDs),
+			rdrCfg.Flags.Has(utils.MetaThresholds),
+			rdrCfg.Flags.ParamsSlice(utils.MetaThresholds, utils.MetaIDs),
+			rdrCfg.Flags.Has(utils.MetaStats),
+			rdrCfg.Flags.ParamsSlice(utils.MetaStats, utils.MetaIDs),
+			rdrCfg.Flags.Has(utils.MetaResources),
+			rdrCfg.Flags.Has(utils.MetaAccounts),
+			rdrCfg.Flags.Has(utils.MetaRoutes),
+			rdrCfg.Flags.Has(utils.MetaRoutesIgnoreErrors),
+			rdrCfg.Flags.Has(utils.MetaRoutesEventCost),
 			cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.RoutePaginator,
-			rdrCfg.Flags.HasKey(utils.MetaFD),
+			rdrCfg.Flags.Has(utils.MetaFD),
 			opts,
 		)
 		rply := new(sessions.V1AuthorizeReply)
@@ -212,60 +212,60 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 			authArgs, rply)
 	case utils.MetaInitiate:
 		initArgs := sessions.NewV1InitSessionArgs(
-			rdrCfg.Flags.HasKey(utils.MetaAttributes),
-			rdrCfg.Flags.ParamsSlice(utils.MetaAttributes),
-			rdrCfg.Flags.HasKey(utils.MetaThresholds),
-			rdrCfg.Flags.ParamsSlice(utils.MetaThresholds),
-			rdrCfg.Flags.HasKey(utils.MetaStats),
-			rdrCfg.Flags.ParamsSlice(utils.MetaStats),
-			rdrCfg.Flags.HasKey(utils.MetaResources),
-			rdrCfg.Flags.HasKey(utils.MetaAccounts),
+			rdrCfg.Flags.Has(utils.MetaAttributes),
+			rdrCfg.Flags.ParamsSlice(utils.MetaAttributes, utils.MetaIDs),
+			rdrCfg.Flags.Has(utils.MetaThresholds),
+			rdrCfg.Flags.ParamsSlice(utils.MetaThresholds, utils.MetaIDs),
+			rdrCfg.Flags.Has(utils.MetaStats),
+			rdrCfg.Flags.ParamsSlice(utils.MetaStats, utils.MetaIDs),
+			rdrCfg.Flags.Has(utils.MetaResources),
+			rdrCfg.Flags.Has(utils.MetaAccounts),
 			cgrEv, cgrArgs.ArgDispatcher,
-			rdrCfg.Flags.HasKey(utils.MetaFD),
+			rdrCfg.Flags.Has(utils.MetaFD),
 			opts)
 		rply := new(sessions.V1InitSessionReply)
 		err = erS.connMgr.Call(erS.cfg.ERsCfg().SessionSConns, nil, utils.SessionSv1InitiateSession,
 			initArgs, rply)
 	case utils.MetaUpdate:
 		updateArgs := sessions.NewV1UpdateSessionArgs(
-			rdrCfg.Flags.HasKey(utils.MetaAttributes),
-			rdrCfg.Flags.ParamsSlice(utils.MetaAttributes),
-			rdrCfg.Flags.HasKey(utils.MetaAccounts),
+			rdrCfg.Flags.Has(utils.MetaAttributes),
+			rdrCfg.Flags.ParamsSlice(utils.MetaAttributes, utils.MetaIDs),
+			rdrCfg.Flags.Has(utils.MetaAccounts),
 			cgrEv, cgrArgs.ArgDispatcher,
-			rdrCfg.Flags.HasKey(utils.MetaFD),
+			rdrCfg.Flags.Has(utils.MetaFD),
 			opts)
 		rply := new(sessions.V1UpdateSessionReply)
 		err = erS.connMgr.Call(erS.cfg.ERsCfg().SessionSConns, nil, utils.SessionSv1UpdateSession,
 			updateArgs, rply)
 	case utils.MetaTerminate:
 		terminateArgs := sessions.NewV1TerminateSessionArgs(
-			rdrCfg.Flags.HasKey(utils.MetaAccounts),
-			rdrCfg.Flags.HasKey(utils.MetaResources),
-			rdrCfg.Flags.HasKey(utils.MetaThresholds),
-			rdrCfg.Flags.ParamsSlice(utils.MetaThresholds),
-			rdrCfg.Flags.HasKey(utils.MetaStats),
-			rdrCfg.Flags.ParamsSlice(utils.MetaStats),
+			rdrCfg.Flags.Has(utils.MetaAccounts),
+			rdrCfg.Flags.Has(utils.MetaResources),
+			rdrCfg.Flags.Has(utils.MetaThresholds),
+			rdrCfg.Flags.ParamsSlice(utils.MetaThresholds, utils.MetaIDs),
+			rdrCfg.Flags.Has(utils.MetaStats),
+			rdrCfg.Flags.ParamsSlice(utils.MetaStats, utils.MetaIDs),
 			cgrEv, cgrArgs.ArgDispatcher,
-			rdrCfg.Flags.HasKey(utils.MetaFD),
+			rdrCfg.Flags.Has(utils.MetaFD),
 			opts)
 		rply := utils.StringPointer("")
 		err = erS.connMgr.Call(erS.cfg.ERsCfg().SessionSConns, nil, utils.SessionSv1TerminateSession,
 			terminateArgs, rply)
 	case utils.MetaMessage:
 		evArgs := sessions.NewV1ProcessMessageArgs(
-			rdrCfg.Flags.HasKey(utils.MetaAttributes),
-			rdrCfg.Flags.ParamsSlice(utils.MetaAttributes),
-			rdrCfg.Flags.HasKey(utils.MetaThresholds),
-			rdrCfg.Flags.ParamsSlice(utils.MetaThresholds),
-			rdrCfg.Flags.HasKey(utils.MetaStats),
-			rdrCfg.Flags.ParamsSlice(utils.MetaStats),
-			rdrCfg.Flags.HasKey(utils.MetaResources),
-			rdrCfg.Flags.HasKey(utils.MetaAccounts),
-			rdrCfg.Flags.HasKey(utils.MetaRoutes),
-			rdrCfg.Flags.HasKey(utils.MetaRoutesIgnoreErrors),
-			rdrCfg.Flags.HasKey(utils.MetaRoutesEventCost),
+			rdrCfg.Flags.Has(utils.MetaAttributes),
+			rdrCfg.Flags.ParamsSlice(utils.MetaAttributes, utils.MetaIDs),
+			rdrCfg.Flags.Has(utils.MetaThresholds),
+			rdrCfg.Flags.ParamsSlice(utils.MetaThresholds, utils.MetaIDs),
+			rdrCfg.Flags.Has(utils.MetaStats),
+			rdrCfg.Flags.ParamsSlice(utils.MetaStats, utils.MetaIDs),
+			rdrCfg.Flags.Has(utils.MetaResources),
+			rdrCfg.Flags.Has(utils.MetaAccounts),
+			rdrCfg.Flags.Has(utils.MetaRoutes),
+			rdrCfg.Flags.Has(utils.MetaRoutesIgnoreErrors),
+			rdrCfg.Flags.Has(utils.MetaRoutesEventCost),
 			cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.RoutePaginator,
-			rdrCfg.Flags.HasKey(utils.MetaFD),
+			rdrCfg.Flags.Has(utils.MetaFD),
 			opts)
 		rply := new(sessions.V1ProcessMessageReply) // need it so rpcclient can clone
 		err = erS.connMgr.Call(erS.cfg.ERsCfg().SessionSConns, nil, utils.SessionSv1ProcessMessage,
@@ -292,8 +292,8 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 		return
 	}
 	// separate request so we can capture the Terminate/Event also here
-	if rdrCfg.Flags.HasKey(utils.MetaCDRs) &&
-		!rdrCfg.Flags.HasKey(utils.MetaDryRun) {
+	if rdrCfg.Flags.Has(utils.MetaCDRs) &&
+		!rdrCfg.Flags.Has(utils.MetaDryRun) {
 		rplyCDRs := utils.StringPointer("")
 		err = erS.connMgr.Call(erS.cfg.ERsCfg().SessionSConns, nil, utils.SessionSv1ProcessCDR,
 			&utils.CGREventWithArgDispatcher{CGREvent: cgrEv,

@@ -133,9 +133,7 @@ func (rp *RequestProcessor) loadFromJsonCfg(jsnCfg *ReqProcessorJsnCfg, sep stri
 		}
 	}
 	if jsnCfg.Flags != nil {
-		if rp.Flags, err = utils.FlagsWithParamsFromSlice(*jsnCfg.Flags); err != nil {
-			return
-		}
+		rp.Flags = utils.FlagsWithParamsFromSlice(*jsnCfg.Flags)
 	}
 	if jsnCfg.Timezone != nil {
 		rp.Timezone = *jsnCfg.Timezone
@@ -177,16 +175,11 @@ func (rp *RequestProcessor) AsMapInterface(separator string) map[string]interfac
 		tenant = strings.Join(values, separator)
 	}
 
-	flags := make(map[string][]string, len(rp.Flags))
-	for key, item := range rp.Flags {
-		flags[key] = item
-	}
-
 	return map[string]interface{}{
 		utils.IDCfg:            rp.ID,
 		utils.TenantCfg:        tenant,
 		utils.FiltersCfg:       rp.Filters,
-		utils.FlagsCfg:         flags,
+		utils.FlagsCfg:         rp.Flags.SliceFlags(),
 		utils.TimezoneCfgC:     rp.Timezone,
 		utils.RequestFieldsCfg: requestFields,
 		utils.ReplyFieldsCfg:   replyFields,

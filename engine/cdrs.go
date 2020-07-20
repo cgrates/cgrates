@@ -737,47 +737,44 @@ func (cdrS *CDRServer) V1ProcessEvent(arg *ArgV1ProcessEvent, reply *string) (er
 	// end of RPC caching
 
 	// processing options
-	var flgs utils.FlagsWithParams
-	if flgs, err = utils.FlagsWithParamsFromSlice(arg.Flags); err != nil {
-		return
-	}
+	flgs := utils.FlagsWithParamsFromSlice(arg.Flags)
 	attrS := len(cdrS.cgrCfg.CdrsCfg().AttributeSConns) != 0
-	if flgs.HasKey(utils.MetaAttributes) {
+	if flgs.Has(utils.MetaAttributes) {
 		attrS = flgs.GetBool(utils.MetaAttributes)
 	}
 	store := cdrS.cgrCfg.CdrsCfg().StoreCdrs
-	if flgs.HasKey(utils.MetaStore) {
+	if flgs.Has(utils.MetaStore) {
 		store = flgs.GetBool(utils.MetaStore)
 	}
 	export := len(cdrS.cgrCfg.CdrsCfg().OnlineCDRExports) != 0 || len(cdrS.cgrCfg.CdrsCfg().EEsConns) != 0
-	if flgs.HasKey(utils.MetaExport) {
+	if flgs.Has(utils.MetaExport) {
 		export = flgs.GetBool(utils.MetaExport)
 	}
 	thdS := len(cdrS.cgrCfg.CdrsCfg().ThresholdSConns) != 0
-	if flgs.HasKey(utils.MetaThresholds) {
+	if flgs.Has(utils.MetaThresholds) {
 		thdS = flgs.GetBool(utils.MetaThresholds)
 	}
 	stS := len(cdrS.cgrCfg.CdrsCfg().StatSConns) != 0
-	if flgs.HasKey(utils.MetaStats) {
+	if flgs.Has(utils.MetaStats) {
 		stS = flgs.GetBool(utils.MetaStats)
 	}
 	chrgS := len(cdrS.cgrCfg.CdrsCfg().ChargerSConns) != 0 // activate charging for the Event
-	if flgs.HasKey(utils.MetaChargers) {
+	if flgs.Has(utils.MetaChargers) {
 		chrgS = flgs.GetBool(utils.MetaChargers)
 	}
 	var ralS bool // activate single rating for the CDR
-	if flgs.HasKey(utils.MetaRALs) {
+	if flgs.Has(utils.MetaRALs) {
 		ralS = flgs.GetBool(utils.MetaRALs)
 	}
 	var reRate bool
-	if flgs.HasKey(utils.MetaRerate) {
+	if flgs.Has(utils.MetaRerate) {
 		reRate = flgs.GetBool(utils.MetaRerate)
 		if reRate {
 			ralS = true
 		}
 	}
 	var refund bool
-	if flgs.HasKey(utils.MetaRefund) {
+	if flgs.Has(utils.MetaRefund) {
 		refund = flgs.GetBool(utils.MetaRefund)
 	}
 	// end of processing options
@@ -821,47 +818,44 @@ func (cdrS *CDRServer) V2ProcessEvent(arg *ArgV1ProcessEvent, evs *[]*utils.Even
 	// end of RPC caching
 
 	// processing options
-	var flgs utils.FlagsWithParams
-	if flgs, err = utils.FlagsWithParamsFromSlice(arg.Flags); err != nil {
-		return
-	}
+	flgs := utils.FlagsWithParamsFromSlice(arg.Flags)
 	attrS := len(cdrS.cgrCfg.CdrsCfg().AttributeSConns) != 0
-	if flgs.HasKey(utils.MetaAttributes) {
+	if flgs.Has(utils.MetaAttributes) {
 		attrS = flgs.GetBool(utils.MetaAttributes)
 	}
 	store := cdrS.cgrCfg.CdrsCfg().StoreCdrs
-	if flgs.HasKey(utils.MetaStore) {
+	if flgs.Has(utils.MetaStore) {
 		store = flgs.GetBool(utils.MetaStore)
 	}
 	export := len(cdrS.cgrCfg.CdrsCfg().OnlineCDRExports) != 0 || len(cdrS.cgrCfg.CdrsCfg().EEsConns) != 0
-	if flgs.HasKey(utils.MetaExport) {
+	if flgs.Has(utils.MetaExport) {
 		export = flgs.GetBool(utils.MetaExport)
 	}
 	thdS := len(cdrS.cgrCfg.CdrsCfg().ThresholdSConns) != 0
-	if flgs.HasKey(utils.MetaThresholds) {
+	if flgs.Has(utils.MetaThresholds) {
 		thdS = flgs.GetBool(utils.MetaThresholds)
 	}
 	stS := len(cdrS.cgrCfg.CdrsCfg().StatSConns) != 0
-	if flgs.HasKey(utils.MetaStats) {
+	if flgs.Has(utils.MetaStats) {
 		stS = flgs.GetBool(utils.MetaStats)
 	}
 	chrgS := len(cdrS.cgrCfg.CdrsCfg().ChargerSConns) != 0 // activate charging for the Event
-	if flgs.HasKey(utils.MetaChargers) {
+	if flgs.Has(utils.MetaChargers) {
 		chrgS = flgs.GetBool(utils.MetaChargers)
 	}
 	var ralS bool // activate single rating for the CDR
-	if flgs.HasKey(utils.MetaRALs) {
+	if flgs.Has(utils.MetaRALs) {
 		ralS = flgs.GetBool(utils.MetaRALs)
 	}
 	var reRate bool
-	if flgs.HasKey(utils.MetaRerate) {
+	if flgs.Has(utils.MetaRerate) {
 		reRate = flgs.GetBool(utils.MetaRerate)
 		if reRate {
 			ralS = true
 		}
 	}
 	var refund bool
-	if flgs.HasKey(utils.MetaRefund) {
+	if flgs.Has(utils.MetaRefund) {
 		refund = flgs.GetBool(utils.MetaRefund)
 	}
 	// end of processing options
@@ -875,9 +869,8 @@ func (cdrS *CDRServer) V2ProcessEvent(arg *ArgV1ProcessEvent, evs *[]*utils.Even
 	if procEvs, err = cdrS.processEvent(cgrEv, chrgS, attrS, refund,
 		ralS, store, reRate, export, thdS, stS); err != nil {
 		return
-	} else {
-		*evs = procEvs
 	}
+	*evs = procEvs
 	return nil
 }
 
@@ -996,32 +989,29 @@ func (cdrS *CDRServer) V1RateCDRs(arg *ArgRateCDRs, reply *string) (err error) {
 	if err != nil {
 		return
 	}
-	var flgs utils.FlagsWithParams
-	if flgs, err = utils.FlagsWithParamsFromSlice(arg.Flags); err != nil {
-		return
-	}
+	flgs := utils.FlagsWithParamsFromSlice(arg.Flags)
 	store := cdrS.cgrCfg.CdrsCfg().StoreCdrs
-	if flgs.HasKey(utils.MetaStore) {
+	if flgs.Has(utils.MetaStore) {
 		store = flgs.GetBool(utils.MetaStore)
 	}
 	export := len(cdrS.cgrCfg.CdrsCfg().OnlineCDRExports) != 0 || len(cdrS.cgrCfg.CdrsCfg().EEsConns) != 0
-	if flgs.HasKey(utils.MetaExport) {
+	if flgs.Has(utils.MetaExport) {
 		export = flgs.GetBool(utils.MetaExport)
 	}
 	thdS := len(cdrS.cgrCfg.CdrsCfg().ThresholdSConns) != 0
-	if flgs.HasKey(utils.MetaThresholds) {
+	if flgs.Has(utils.MetaThresholds) {
 		thdS = flgs.GetBool(utils.MetaThresholds)
 	}
 	statS := len(cdrS.cgrCfg.CdrsCfg().StatSConns) != 0
-	if flgs.HasKey(utils.MetaStatS) {
+	if flgs.Has(utils.MetaStatS) {
 		statS = flgs.GetBool(utils.MetaStatS)
 	}
 	chrgS := len(cdrS.cgrCfg.CdrsCfg().ChargerSConns) != 0
-	if flgs.HasKey(utils.MetaChargers) {
+	if flgs.Has(utils.MetaChargers) {
 		chrgS = flgs.GetBool(utils.MetaChargers)
 	}
 	attrS := len(cdrS.cgrCfg.CdrsCfg().AttributeSConns) != 0
-	if flgs.HasKey(utils.MetaAttributes) {
+	if flgs.Has(utils.MetaAttributes) {
 		attrS = flgs.GetBool(utils.MetaAttributes)
 	}
 
