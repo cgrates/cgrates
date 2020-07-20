@@ -667,6 +667,7 @@ const (
 	MetaLibPhoneNumber       = "*libphonenumber"
 	MetaTimeString           = "*time_string"
 	MetaIP2Hex               = "*ip2hex"
+	MetaString2Hex           = "*string2hex"
 	MetaSIPURIMethod         = "*sipuri_method"
 	MetaSIPURIHost           = "*sipuri_host"
 	MetaSIPURIUser           = "*sipuri_user"

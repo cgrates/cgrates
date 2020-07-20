@@ -1691,6 +1691,34 @@ func TestAgReqSetFieldsIp2Hex(t *testing.T) {
 	}
 }
 
+func TestAgReqSetFieldsString2Hex(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, dm)
+	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
+	agReq.CGRRequest.Set(&utils.FullPath{Path: "CustomField", PathItems: utils.PathItems{{Field: "CustomField"}}}, utils.NewNMData(string([]byte{0x94, 0x71, 0x02, 0x31, 0x01, 0x59})))
+
+	tplFlds := []*config.FCTemplate{
+		{Tag: "CustomField",
+			Path: utils.MetaTmp + utils.NestingSep + "CustomField", Type: utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("~*cgreq.CustomField{*string2hex}", utils.INFIELD_SEP)},
+	}
+	for _, v := range tplFlds {
+		v.ComputePath()
+	}
+	eMp := utils.NavigableMap2{}
+	eMp.Set(utils.PathItems{{Field: "CustomField"}}, &utils.NMSlice{
+		&config.NMItem{Data: "0x947102310159", Path: []string{"CustomField"},
+			Config: tplFlds[0]}})
+
+	if err := agReq.SetFields(tplFlds); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(agReq.tmp, eMp) {
+		t.Errorf("expecting: %+v,\n received: %+v", eMp, agReq.tmp)
+	}
+}
+
 func TestAgReqSetFieldsWithRemove(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)

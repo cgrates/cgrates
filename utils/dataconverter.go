@@ -76,6 +76,8 @@ func NewDataConverter(params string) (conv DataConverter, err error) {
 		return NewDurationConverter("")
 	case params == MetaIP2Hex:
 		return new(IP2HexConverter), nil
+	case params == MetaString2Hex:
+		return new(String2HexConverter), nil
 	case params == MetaSIPURIHost:
 		return new(SIPURIHostConverter), nil
 	case params == MetaSIPURIUser:
@@ -357,4 +359,18 @@ func (tS *TimeStringConverter) Convert(in interface{}) (
 		return nil, err
 	}
 	return tm.Format(tS.Layout), nil
+}
+
+// String2HexConverter will transform the string to hex
+type String2HexConverter struct{}
+
+// Convert implements DataConverter interface
+func (*String2HexConverter) Convert(in interface{}) (o interface{}, err error) {
+	var out string
+	if out = hex.EncodeToString([]byte(IfaceAsString(in))); len(out) == 0 {
+		o = out
+		return
+	}
+	o = "0x" + out
+	return
 }
