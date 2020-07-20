@@ -11,7 +11,7 @@ cgrates (0.11.0~dev) UNRELEASED; urgency=medium
   * [DiameterAgent] Using String function from diam.Message instead of
     ToJSON for request String method
   * [DiameterAgent] Updated 3gp_vendor dictionary
-  * [Templates] Added new dataconvertor: *ip2hex
+  * [Templates] Added new dataconverter: *ip2hex
   * [AgentS] Added support for *group type and correctly overwrite
     the values in case of *variable
   * [ERs] Correctly populate ConcurrentRequest from config
@@ -82,6 +82,7 @@ cgrates (0.11.0~dev) UNRELEASED; urgency=medium
   * [SessionS] Added *chargers flag to ProcessEvent to proccess the events from ChargerS with other subsystems
   * [SessionS] Updated the ids handling in flags by adding *ids as a new flag
   * [SessionS] Added *derived_reply sub flag to ProcessEvent to specify if a subsystem needs to process the events from ChargerS
+  * [Templates] Added new dataconverter: *string2hex
 
  -- DanB <danb@cgrates.org>  Wed, 19 Feb 2020 13:25:52 +0200
 

@@ -142,6 +142,14 @@ func TestNewDataConverter(t *testing.T) {
 	if _, err := NewDataConverter("unsupported"); err == nil || err.Error() != "unsupported converter definition: <unsupported>" {
 	}
 
+	hex, err := NewDataConverter(MetaString2Hex)
+	if err != nil {
+		t.Error(err)
+	}
+	exp := new(String2HexConverter)
+	if !reflect.DeepEqual(hex, exp) {
+		t.Errorf("Expected %+v received: %+v", exp, hex)
+	}
 }
 
 func TestNewDataConverterMustCompile(t *testing.T) {
@@ -788,5 +796,37 @@ func TestNewTimeStringConverter(t *testing.T) {
 		t.Error(err)
 	} else if rcv.(string) != exp {
 		t.Errorf("Expecting: %+v, received: %+v", exp, rcv)
+	}
+func TestStringHexConvertor(t *testing.T) {
+	hx := new(String2HexConverter)
+	val := "127.0.0.1"
+	expected := "0x3132372e302e302e31"
+	if rpl, err := hx.Convert(val); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rpl) {
+		t.Errorf("expecting: %+v, received: %+v", expected, rpl)
+	}
+
+	val3 := []byte("127.0.0.1")
+	if rpl, err := hx.Convert(val3); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rpl) {
+		t.Errorf("expecting: %+v, received: %+v", expected, rpl)
+	}
+
+	val = ""
+	expected = ""
+	if rpl, err := hx.Convert(val); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rpl) {
+		t.Errorf("expecting: %+v, received: %+v", expected, rpl)
+	}
+
+	val3 = []byte{0x94, 0x71, 0x02, 0x31, 0x01, 0x59}
+	expected = "0x947102310159"
+	if rpl, err := hx.Convert(val3); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rpl) {
+		t.Errorf("expecting: %+v, received: %+v", expected, rpl)
 	}
 }
