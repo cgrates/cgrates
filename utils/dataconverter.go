@@ -90,10 +90,11 @@ func NewDataConverter(params string) (conv DataConverter, err error) {
 		}
 		return NewPhoneNumberConverter(params[len(MetaLibPhoneNumber)+1:])
 	case strings.HasPrefix(params, MetaTimeString):
-		if len(params) == len(MetaTimeString) { // no extra params, defaults implied
-			return NewTimeStringConverter(time.RFC3339)
+		layout := time.RFC3339
+		if len(params) > len(MetaTimeString) { // no extra params, defaults implied
+			layout = params[len(MetaTimeString)+1:]
 		}
-		return NewTimeStringConverter(params[len(MetaTimeString)+1:])
+		return NewTimeStringConverter(layout), nil
 	default:
 		return nil, fmt.Errorf("unsupported converter definition: <%s>", params)
 	}
@@ -342,10 +343,8 @@ func (*SIPURIMethodConverter) Convert(in interface{}) (out interface{}, err erro
 	return sipingo.MethodFrom(val), nil
 }
 
-func NewTimeStringConverter(params string) (hdlr DataConverter, err error) {
-	tm := new(TimeStringConverter)
-	tm.Layout = params
-	return tm, nil
+func NewTimeStringConverter(params string) (hdlr DataConverter) {
+	return &TimeStringConverter{Layout: params}
 }
 
 type TimeStringConverter struct {

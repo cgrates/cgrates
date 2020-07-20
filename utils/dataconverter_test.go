@@ -150,6 +150,24 @@ func TestNewDataConverter(t *testing.T) {
 	if !reflect.DeepEqual(hex, exp) {
 		t.Errorf("Expected %+v received: %+v", exp, hex)
 	}
+
+	tm, err := NewDataConverter(MetaTimeString)
+	if err != nil {
+		t.Error(err)
+	}
+	expTime := NewTimeStringConverter(time.RFC3339)
+	if !reflect.DeepEqual(tm, expTime) {
+		t.Errorf("Expected %+v received: %+v", expTime, tm)
+	}
+
+	tm, err = NewDataConverter("*time_string:020106150400")
+	if err != nil {
+		t.Error(err)
+	}
+	expTime = NewTimeStringConverter("020106150400")
+	if !reflect.DeepEqual(tm, expTime) {
+		t.Errorf("Expected %+v received: %+v", expTime, tm)
+	}
 }
 
 func TestNewDataConverterMustCompile(t *testing.T) {
@@ -731,19 +749,14 @@ func TestNewDataConverterMustCompile2(t *testing.T) {
 func TestNewTimeStringConverter(t *testing.T) {
 	//empty
 	eOut := &TimeStringConverter{Layout: EmptyString}
-	if rcv, err := NewTimeStringConverter(EmptyString); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eOut, rcv) {
+	if rcv := NewTimeStringConverter(EmptyString); !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
 	}
 
 	//default
 	eOut = &TimeStringConverter{Layout: time.RFC3339}
 	var rcv DataConverter
-	var err error
-	if rcv, err = NewTimeStringConverter(time.RFC3339); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eOut, rcv) {
+	if rcv = NewTimeStringConverter(time.RFC3339); !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
 	}
 	exp := "2015-07-07T14:52:08Z"
@@ -761,9 +774,7 @@ func TestNewTimeStringConverter(t *testing.T) {
 
 	//other
 	eOut = &TimeStringConverter{"020106150400"}
-	if rcv, err = NewTimeStringConverter("020106150400"); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eOut, rcv) {
+	if rcv = NewTimeStringConverter("020106150400"); !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
 	}
 	exp = "070715145200"
@@ -781,9 +792,7 @@ func TestNewTimeStringConverter(t *testing.T) {
 
 	//wrong cases
 	eOut = &TimeStringConverter{"not really a good time"}
-	if rcv, err = NewTimeStringConverter("not really a good time"); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eOut, rcv) {
+	if rcv = NewTimeStringConverter("not really a good time"); !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
 	}
 	exp = "not really a good time"
@@ -797,6 +806,11 @@ func TestNewTimeStringConverter(t *testing.T) {
 	} else if rcv.(string) != exp {
 		t.Errorf("Expecting: %+v, received: %+v", exp, rcv)
 	}
+	if _, err := rcv.Convert("137521s2790"); err == nil {
+		t.Errorf("Expected error received: %v:", err)
+	}
+}
+
 func TestStringHexConvertor(t *testing.T) {
 	hx := new(String2HexConverter)
 	val := "127.0.0.1"
