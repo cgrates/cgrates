@@ -436,8 +436,8 @@ func testCGRConfigReloadERs(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %s", reply)
 	}
-	flags, _ := utils.FlagsWithParamsFromSlice([]string{"*dryrun"})
-	flagsDefault, _ := utils.FlagsWithParamsFromSlice([]string{})
+	flags := utils.FlagsWithParamsFromSlice([]string{"*dryrun"})
+	flagsDefault := utils.FlagsWithParamsFromSlice([]string{})
 	content := []*FCTemplate{
 		{Tag: utils.ToR, Path: utils.MetaCgreq + utils.NestingSep + utils.ToR, Type: utils.MetaVariable, Value: NewRSRParsersMustCompile("~*req.2", utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
 		{Tag: utils.OriginID, Path: utils.MetaCgreq + utils.NestingSep + utils.OriginID, Type: utils.MetaVariable, Value: NewRSRParsersMustCompile("~*req.3", utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
@@ -864,7 +864,7 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 				"HeaderDefineChar": ":",
 				"Filters":          nil,
 				"Flags": map[string]interface{}{
-					"*dryrun": []interface{}{},
+					"*dryrun": map[string][]interface{}{},
 				},
 				"FailedCallsPrefix":        "",
 				"PartialCacheExpiryAction": "",

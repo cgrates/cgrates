@@ -439,7 +439,7 @@ func TestProcessRequest(t *testing.T) {
 			return nil
 		},
 	}}
-	reqProcessor.Flags, _ = utils.FlagsWithParamsFromSlice([]string{utils.MetaAuthorize, utils.MetaAccounts})
+	reqProcessor.Flags = utils.FlagsWithParamsFromSlice([]string{utils.MetaAuthorize, utils.MetaAccounts})
 	agReq := NewAgentRequest(diamDP, reqVars, &cgrRplyNM, rply, nil,
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
 		config.CgrConfig().GeneralCfg().DefaultTimezone, filters, nil, nil)
@@ -463,7 +463,7 @@ func TestProcessRequest(t *testing.T) {
 		t.Errorf("Expected the reply to have 2 values received: %s", rply.String())
 	}
 
-	reqProcessor.Flags, _ = utils.FlagsWithParamsFromSlice([]string{utils.MetaInitiate, utils.MetaAccounts, utils.MetaAttributes})
+	reqProcessor.Flags = utils.FlagsWithParamsFromSlice([]string{utils.MetaInitiate, utils.MetaAccounts, utils.MetaAttributes})
 	cgrRplyNM = utils.NavigableMap2{}
 	rply = utils.NewOrderedNavigableMap()
 
@@ -480,7 +480,7 @@ func TestProcessRequest(t *testing.T) {
 		t.Errorf("Expected the reply to have 2 values received: %s", rply.String())
 	}
 
-	reqProcessor.Flags, _ = utils.FlagsWithParamsFromSlice([]string{utils.MetaUpdate, utils.MetaAccounts, utils.MetaAttributes})
+	reqProcessor.Flags = utils.FlagsWithParamsFromSlice([]string{utils.MetaUpdate, utils.MetaAccounts, utils.MetaAttributes})
 	cgrRplyNM = utils.NavigableMap2{}
 	rply = utils.NewOrderedNavigableMap()
 
@@ -497,7 +497,7 @@ func TestProcessRequest(t *testing.T) {
 		t.Errorf("Expected the reply to have 2 values received: %s", rply.String())
 	}
 
-	reqProcessor.Flags, _ = utils.FlagsWithParamsFromSlice([]string{utils.MetaTerminate, utils.MetaAccounts, utils.MetaAttributes, utils.MetaCDRs})
+	reqProcessor.Flags = utils.FlagsWithParamsFromSlice([]string{utils.MetaTerminate, utils.MetaAccounts, utils.MetaAttributes, utils.MetaCDRs})
 	reqProcessor.ReplyFields = []*config.FCTemplate{{Tag: "ResultCode",
 		Type: utils.META_CONSTANT, Path: utils.MetaRep + utils.NestingSep + "ResultCode",
 		Value: config.NewRSRParsersMustCompile("2001", utils.INFIELD_SEP)}}
@@ -520,7 +520,7 @@ func TestProcessRequest(t *testing.T) {
 		t.Errorf("Expected the reply to have one value received: %s", rply.String())
 	}
 
-	reqProcessor.Flags, _ = utils.FlagsWithParamsFromSlice([]string{utils.MetaMessage, utils.MetaAccounts, utils.MetaAttributes})
+	reqProcessor.Flags = utils.FlagsWithParamsFromSlice([]string{utils.MetaMessage, utils.MetaAccounts, utils.MetaAttributes})
 	cgrRplyNM = utils.NavigableMap2{}
 	rply = utils.NewOrderedNavigableMap()
 

@@ -3148,10 +3148,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 	}
 
 	//convert from Flags []string to utils.FlagsWithParams
-	var argsFlagsWithParams utils.FlagsWithParams
-	if argsFlagsWithParams, err = utils.FlagsWithParamsFromSlice(args.Flags); err != nil {
-		return
-	}
+	argsFlagsWithParams := utils.FlagsWithParamsFromSlice(args.Flags)
 
 	events := map[string]*utils.CGREventWithOpts{
 		utils.MetaRaw: {
@@ -3179,8 +3176,8 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 	}
 
 	// check for *attribute
-	if argsFlagsWithParams.HasKey(utils.MetaAttributes) {
-		attrIDs := argsFlagsWithParams.ParamsSlice(utils.MetaAttributes)
+	if argsFlagsWithParams.GetBool(utils.MetaAttributes) {
+		attrIDs := argsFlagsWithParams.ParamsSlice(utils.MetaAttributes, utils.MetaIDs)
 		rply.Attributes = make(map[string]*engine.AttrSProcessEventReply)
 		for runID, cgrEv := range events {
 			rplyAttr, err := sS.processAttributes(cgrEv.CGREvent, cgrEv.ArgDispatcher,
@@ -3201,21 +3198,14 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 	}
 
 	// get routes if required
-	if argsFlagsWithParams.HasKey(utils.MetaRoutes) {
+	if argsFlagsWithParams.GetBool(utils.MetaRoutes) {
 		rply.Routes = make(map[string]*engine.SortedRoutes)
-		var ignoreErrors bool
-		var maxCost string
 		// check in case we have options for suppliers
-		if splOpts := argsFlagsWithParams.ParamsSlice(utils.MetaRoutes); len(splOpts) != 0 {
-			//check for subflags and convert them into utils.FlagsWithParams
-			splsFlagsWithParams, err := utils.FlagsWithParamsFromSlice(splOpts)
-			if err != nil {
-				return err
-			}
-			ignoreErrors = splsFlagsWithParams.HasKey(utils.MetaIgnoreErrors)
-			if splsFlagsWithParams.HasKey(utils.MetaEventCost) {
-				maxCost = utils.MetaRoutesEventCost
-			}
+		flags := argsFlagsWithParams[utils.MetaRoutes]
+		ignoreErrors := flags.Has(utils.MetaIgnoreErrors)
+		var maxCost string
+		if flags.Has(utils.MetaEventCost) {
+			maxCost = utils.MetaRoutesEventCost
 		}
 		for runID, cgrEv := range events {
 			routesReply, err := sS.getRoutes(cgrEv.CGREvent.Clone(), cgrEv.ArgDispatcher,
@@ -3230,9 +3220,9 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 	}
 
 	// process thresholds if required
-	if argsFlagsWithParams.HasKey(utils.MetaThresholds) {
+	if argsFlagsWithParams.GetBool(utils.MetaThresholds) {
 		rply.ThresholdIDs = make(map[string][]string)
-		thIDs := argsFlagsWithParams.ParamsSlice(utils.MetaThresholds)
+		thIDs := argsFlagsWithParams.ParamsSlice(utils.MetaThresholds, utils.MetaIDs)
 		for runID, cgrEv := range events {
 			tIDs, err := sS.processThreshold(cgrEv.CGREvent, cgrEv.ArgDispatcher, thIDs)
 			if err != nil && err.Error() != utils.ErrNotFound.Error() {
@@ -3246,9 +3236,9 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 	}
 
 	// process stats if required
-	if argsFlagsWithParams.HasKey(utils.MetaStats) {
+	if argsFlagsWithParams.GetBool(utils.MetaStats) {
 		rply.StatQueueIDs = make(map[string][]string)
-		stIDs := argsFlagsWithParams.ParamsSlice(utils.MetaStats)
+		stIDs := argsFlagsWithParams.ParamsSlice(utils.MetaStats, utils.MetaIDs)
 		for runID, cgrEv := range events {
 			sIDs, err := sS.processStats(cgrEv.CGREvent, cgrEv.ArgDispatcher, stIDs)
 			if err != nil &&
@@ -3262,7 +3252,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 		}
 	}
 
-	if argsFlagsWithParams.HasKey(utils.MetaSTIRAuthenticate) {
+	if argsFlagsWithParams.GetBool(utils.MetaSTIRAuthenticate) {
 		for _, cgrEv := range events {
 			ev := engine.MapEvent(cgrEv.CGREvent.Event)
 			opts := engine.MapEvent(cgrEv.Opts)
@@ -3283,7 +3273,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 				return utils.NewSTIRError(err.Error())
 			}
 		}
-	} else if argsFlagsWithParams.HasKey(utils.MetaSTIRInitiate) {
+	} else if argsFlagsWithParams.GetBool(utils.MetaSTIRInitiate) {
 		rply.STIRIdentity = make(map[string]string)
 		for runID, cgrEv := range events {
 			ev := engine.MapEvent(cgrEv.CGREvent.Event)
@@ -3319,12 +3309,12 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 	}
 
 	// check for *resources
-	if argsFlagsWithParams.HasKey(utils.MetaResources) {
+	if argsFlagsWithParams.GetBool(utils.MetaResources) {
 		if len(sS.cgrCfg.SessionSCfg().ResSConns) == 0 {
 			return utils.NewErrNotConnected(utils.ResourceS)
 		}
 		rply.ResourceAllocation = make(map[string]string)
-		if resOpt := argsFlagsWithParams.ParamsSlice(utils.MetaResources); len(resOpt) != 0 {
+		if resOpt := argsFlagsWithParams[utils.MetaResources]; len(resOpt) != 0 {
 			for runID, cgrEv := range events {
 				originID := engine.MapEvent(cgrEv.CGREvent.Event).GetStringIgnoreErrors(utils.OriginID)
 				if originID == "" {
@@ -3340,24 +3330,20 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 				var resMessage string
 				// check what we need to do for resources (*authorization/*allocation)
 				//check for subflags and convert them into utils.FlagsWithParams
-				resourceFlagsWithParams, err := utils.FlagsWithParamsFromSlice(resOpt)
-				if err != nil {
-					return err
-				}
 				switch {
-				case resourceFlagsWithParams.HasKey(utils.MetaAuthorize):
+				case resOpt.Has(utils.MetaAuthorize):
 					if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().ResSConns, nil, utils.ResourceSv1AuthorizeResources,
 						attrRU, &resMessage); err != nil {
 						return utils.NewErrResourceS(err)
 					}
 					rply.ResourceAllocation[runID] = resMessage
-				case resourceFlagsWithParams.HasKey(utils.MetaAllocate):
+				case resOpt.Has(utils.MetaAllocate):
 					if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().ResSConns, nil, utils.ResourceSv1AllocateResources,
 						attrRU, &resMessage); err != nil {
 						return utils.NewErrResourceS(err)
 					}
 					rply.ResourceAllocation[runID] = resMessage
-				case resourceFlagsWithParams.HasKey(utils.MetaRelease):
+				case resOpt.Has(utils.MetaRelease):
 					if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().ResSConns, nil, utils.ResourceSv1ReleaseResources,
 						attrRU, &resMessage); err != nil {
 						return utils.NewErrResourceS(err)
@@ -3370,12 +3356,11 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 
 	// check what we need to do for RALs (*authorize/*initiate/*update/*terminate)
 	dbtItvl := sS.cgrCfg.SessionSCfg().DebitInterval
-	if argsFlagsWithParams.HasKey(utils.MetaRALs) {
-		if ralsOpts := argsFlagsWithParams.ParamsSlice(utils.MetaRALs); len(ralsOpts) != 0 {
+	if argsFlagsWithParams.GetBool(utils.MetaRALs) {
+		if ralsOpts := argsFlagsWithParams[utils.MetaRALs]; len(ralsOpts) != 0 {
 			//check for subflags and convert them into utils.FlagsWithParams
-			ralsFlagsWithParams, err := utils.FlagsWithParamsFromSlice(ralsOpts)
 			// check for *cost
-			if ralsFlagsWithParams.HasKey(utils.MetaCost) {
+			if ralsOpts.Has(utils.MetaCost) {
 				rply.Cost = make(map[string]float64)
 				for runID, cgrEv := range events {
 					ev := engine.MapEvent(cgrEv.CGREvent.Event)
@@ -3406,7 +3391,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 						Destination:   ev.GetStringIgnoreErrors(utils.Destination),
 						TimeStart:     startTime,
 						TimeEnd:       startTime.Add(ev.GetDurationIgnoreErrors(utils.Usage)),
-						ForceDuration: ralsFlagsWithParams.HasKey(utils.MetaFD),
+						ForceDuration: ralsOpts.Has(utils.MetaFD),
 					}
 					var cc engine.CallCost
 					if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().RALsConns, nil,
@@ -3423,16 +3408,16 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 			originID := ev.GetStringIgnoreErrors(utils.OriginID)
 			switch {
 			//check for auth session
-			case ralsFlagsWithParams.HasKey(utils.MetaAuthorize):
+			case ralsOpts.Has(utils.MetaAuthorize):
 				if rply.MaxUsage, err = sS.authEvent(&utils.CGREventWithOpts{
 					CGREvent:      args.CGREvent,
 					Opts:          args.Opts,
 					ArgDispatcher: args.ArgDispatcher,
-				}, ralsFlagsWithParams.HasKey(utils.MetaFD)); err != nil {
+				}, ralsOpts.Has(utils.MetaFD)); err != nil {
 					return err
 				}
 			// check for init session
-			case ralsFlagsWithParams.HasKey(utils.MetaInitiate):
+			case ralsOpts.Has(utils.MetaInitiate):
 				if opts.HasField(utils.OptsDebitInterval) { // dynamic DebitInterval via CGRDebitInterval
 					if dbtItvl, err = opts.GetDuration(utils.OptsDebitInterval); err != nil {
 						return utils.NewErrRALs(err)
@@ -3443,7 +3428,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 					Opts:          args.Opts,
 					ArgDispatcher: args.ArgDispatcher,
 				}, sS.biJClntID(clnt), originID, dbtItvl, false,
-					ralsFlagsWithParams.HasKey(utils.MetaFD))
+					ralsOpts.Has(utils.MetaFD))
 				if err != nil {
 					return err
 				}
@@ -3455,7 +3440,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 					return utils.NewErrRALs(err)
 				}
 			//check for update session
-			case ralsFlagsWithParams.HasKey(utils.MetaUpdate):
+			case ralsOpts.Has(utils.MetaUpdate):
 				if opts.HasField(utils.OptsDebitInterval) { // dynamic DebitInterval via CGRDebitInterval
 					if dbtItvl, err = opts.GetDuration(utils.OptsDebitInterval); err != nil {
 						return utils.NewErrRALs(err)
@@ -3471,7 +3456,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 						Opts:          args.Opts,
 						ArgDispatcher: args.ArgDispatcher,
 					}, sS.biJClntID(clnt), ev.GetStringIgnoreErrors(utils.OriginID),
-						dbtItvl, false, ralsFlagsWithParams.HasKey(utils.MetaFD)); err != nil {
+						dbtItvl, false, ralsOpts.Has(utils.MetaFD)); err != nil {
 						return err
 					}
 				}
@@ -3479,7 +3464,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 					return utils.NewErrRALs(err)
 				}
 			// check for terminate session
-			case ralsFlagsWithParams.HasKey(utils.MetaTerminate):
+			case ralsOpts.Has(utils.MetaTerminate):
 				if opts.HasField(utils.OptsDebitInterval) { // dynamic DebitInterval via CGRDebitInterval
 					if dbtItvl, err = opts.GetDuration(utils.OptsDebitInterval); err != nil {
 						return utils.NewErrRALs(err)
@@ -3495,7 +3480,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 						Opts:          args.Opts,
 						ArgDispatcher: args.ArgDispatcher,
 					}, sS.biJClntID(clnt), ev.GetStringIgnoreErrors(utils.OriginID),
-						dbtItvl, false, ralsFlagsWithParams.HasKey(utils.MetaFD)); err != nil {
+						dbtItvl, false, ralsOpts.Has(utils.MetaFD)); err != nil {
 						return err
 					}
 				}
@@ -3510,12 +3495,12 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 		}
 	}
 
-	if argsFlagsWithParams.HasKey(utils.MetaCDRs) {
+	if argsFlagsWithParams.GetBool(utils.MetaCDRs) {
 		var cdrRply string
 		for _, cgrEv := range events {
 			if err := sS.connMgr.Call(sS.cgrCfg.SessionSCfg().CDRsConns, nil, utils.CDRsV1ProcessEvent,
 				&engine.ArgV1ProcessEvent{
-					Flags:         argsFlagsWithParams[utils.MetaCDRs],
+					Flags:         argsFlagsWithParams[utils.MetaCDRs].SliceFlags(),
 					CGREvent:      *cgrEv.CGREvent,
 					ArgDispatcher: cgrEv.ArgDispatcher,
 				}, &cdrRply); err != nil {
@@ -3571,14 +3556,11 @@ func (sS *SessionS) BiRPCv1GetCost(clnt rpcclient.ClientConnector,
 	}
 
 	//convert from Flags []string to utils.FlagsWithParams
-	var argsFlagsWithParams utils.FlagsWithParams
-	if argsFlagsWithParams, err = utils.FlagsWithParamsFromSlice(args.Flags); err != nil {
-		return
-	}
+	argsFlagsWithParams := utils.FlagsWithParamsFromSlice(args.Flags)
 	// check for *attribute
-	if argsFlagsWithParams.HasKey(utils.MetaAttributes) {
+	if argsFlagsWithParams.Has(utils.MetaAttributes) {
 		rplyAttr, err := sS.processAttributes(args.CGREvent, args.ArgDispatcher,
-			argsFlagsWithParams.ParamsSlice(utils.MetaAttributes), args.Opts)
+			argsFlagsWithParams.ParamsSlice(utils.MetaAttributes, utils.MetaIDs), args.Opts)
 		if err == nil {
 			args.CGREvent = rplyAttr.CGREvent.Clone()
 			args.Opts = rplyAttr.Opts

@@ -185,19 +185,19 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 		utils.MetaInitiate, utils.MetaUpdate,
 		utils.MetaTerminate, utils.MetaMessage,
 		utils.MetaCDRs, utils.MetaEvent, utils.META_NONE} {
-		if reqProcessor.Flags.HasKey(typ) { // request type is identified through flags
+		if reqProcessor.Flags.Has(typ) { // request type is identified through flags
 			reqType = typ
 			break
 		}
 	}
 	var cgrArgs utils.ExtractedArgs
-	if cgrArgs, err = utils.ExtractArgsFromOpts(opts, reqProcessor.Flags.HasKey(utils.MetaDispatchers),
+	if cgrArgs, err = utils.ExtractArgsFromOpts(opts, reqProcessor.Flags.Has(utils.MetaDispatchers),
 		reqType == utils.MetaAuthorize || reqType == utils.MetaMessage || reqType == utils.MetaEvent); err != nil {
 		utils.Logger.Warning(fmt.Sprintf("<%s> args extraction failed because <%s>",
 			utils.DNSAgent, err.Error()))
 		err = nil // reset the error and continue the processing
 	}
-	if reqProcessor.Flags.HasKey(utils.MetaLog) {
+	if reqProcessor.Flags.Has(utils.MetaLog) {
 		utils.Logger.Info(
 			fmt.Sprintf("<%s> LOG, processorID: <%s>, message: %s",
 				utils.DNSAgent, reqProcessor.ID, agReq.Request.String()))
@@ -212,19 +212,19 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 				utils.DNSAgent, reqProcessor.ID, utils.ToJSON(cgrEv)))
 	case utils.MetaAuthorize:
 		authArgs := sessions.NewV1AuthorizeArgs(
-			reqProcessor.Flags.HasKey(utils.MetaAttributes),
-			reqProcessor.Flags.ParamsSlice(utils.MetaAttributes),
-			reqProcessor.Flags.HasKey(utils.MetaThresholds),
-			reqProcessor.Flags.ParamsSlice(utils.MetaThresholds),
-			reqProcessor.Flags.HasKey(utils.MetaStats),
-			reqProcessor.Flags.ParamsSlice(utils.MetaStats),
-			reqProcessor.Flags.HasKey(utils.MetaResources),
-			reqProcessor.Flags.HasKey(utils.MetaAccounts),
-			reqProcessor.Flags.HasKey(utils.MetaRoutes),
-			reqProcessor.Flags.HasKey(utils.MetaRoutesIgnoreErrors),
-			reqProcessor.Flags.HasKey(utils.MetaRoutesEventCost),
+			reqProcessor.Flags.Has(utils.MetaAttributes),
+			reqProcessor.Flags.ParamsSlice(utils.MetaAttributes, utils.MetaIDs),
+			reqProcessor.Flags.Has(utils.MetaThresholds),
+			reqProcessor.Flags.ParamsSlice(utils.MetaThresholds, utils.MetaIDs),
+			reqProcessor.Flags.Has(utils.MetaStats),
+			reqProcessor.Flags.ParamsSlice(utils.MetaStats, utils.MetaIDs),
+			reqProcessor.Flags.Has(utils.MetaResources),
+			reqProcessor.Flags.Has(utils.MetaAccounts),
+			reqProcessor.Flags.Has(utils.MetaRoutes),
+			reqProcessor.Flags.Has(utils.MetaRoutesIgnoreErrors),
+			reqProcessor.Flags.Has(utils.MetaRoutesEventCost),
 			cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.RoutePaginator,
-			reqProcessor.Flags.HasKey(utils.MetaFD),
+			reqProcessor.Flags.Has(utils.MetaFD),
 			opts,
 		)
 		rply := new(sessions.V1AuthorizeReply)
@@ -236,16 +236,16 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 		}
 	case utils.MetaInitiate:
 		initArgs := sessions.NewV1InitSessionArgs(
-			reqProcessor.Flags.HasKey(utils.MetaAttributes),
-			reqProcessor.Flags.ParamsSlice(utils.MetaAttributes),
-			reqProcessor.Flags.HasKey(utils.MetaThresholds),
-			reqProcessor.Flags.ParamsSlice(utils.MetaThresholds),
-			reqProcessor.Flags.HasKey(utils.MetaStats),
-			reqProcessor.Flags.ParamsSlice(utils.MetaStats),
-			reqProcessor.Flags.HasKey(utils.MetaResources),
-			reqProcessor.Flags.HasKey(utils.MetaAccounts),
+			reqProcessor.Flags.Has(utils.MetaAttributes),
+			reqProcessor.Flags.ParamsSlice(utils.MetaAttributes, utils.MetaIDs),
+			reqProcessor.Flags.Has(utils.MetaThresholds),
+			reqProcessor.Flags.ParamsSlice(utils.MetaThresholds, utils.MetaIDs),
+			reqProcessor.Flags.Has(utils.MetaStats),
+			reqProcessor.Flags.ParamsSlice(utils.MetaStats, utils.MetaIDs),
+			reqProcessor.Flags.Has(utils.MetaResources),
+			reqProcessor.Flags.Has(utils.MetaAccounts),
 			cgrEv, cgrArgs.ArgDispatcher,
-			reqProcessor.Flags.HasKey(utils.MetaFD),
+			reqProcessor.Flags.Has(utils.MetaFD),
 			opts)
 		rply := new(sessions.V1InitSessionReply)
 		err = da.connMgr.Call(da.cgrCfg.DNSAgentCfg().SessionSConns, nil,
@@ -256,11 +256,11 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 		}
 	case utils.MetaUpdate:
 		updateArgs := sessions.NewV1UpdateSessionArgs(
-			reqProcessor.Flags.HasKey(utils.MetaAttributes),
-			reqProcessor.Flags.ParamsSlice(utils.MetaAttributes),
-			reqProcessor.Flags.HasKey(utils.MetaAccounts),
+			reqProcessor.Flags.Has(utils.MetaAttributes),
+			reqProcessor.Flags.ParamsSlice(utils.MetaAttributes, utils.MetaIDs),
+			reqProcessor.Flags.Has(utils.MetaAccounts),
 			cgrEv, cgrArgs.ArgDispatcher,
-			reqProcessor.Flags.HasKey(utils.MetaFD),
+			reqProcessor.Flags.Has(utils.MetaFD),
 			opts)
 		rply := new(sessions.V1UpdateSessionReply)
 		err = da.connMgr.Call(da.cgrCfg.DNSAgentCfg().SessionSConns, nil,
@@ -271,14 +271,14 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 		}
 	case utils.MetaTerminate:
 		terminateArgs := sessions.NewV1TerminateSessionArgs(
-			reqProcessor.Flags.HasKey(utils.MetaAccounts),
-			reqProcessor.Flags.HasKey(utils.MetaResources),
-			reqProcessor.Flags.HasKey(utils.MetaThresholds),
-			reqProcessor.Flags.ParamsSlice(utils.MetaThresholds),
-			reqProcessor.Flags.HasKey(utils.MetaStats),
-			reqProcessor.Flags.ParamsSlice(utils.MetaStats),
+			reqProcessor.Flags.Has(utils.MetaAccounts),
+			reqProcessor.Flags.Has(utils.MetaResources),
+			reqProcessor.Flags.Has(utils.MetaThresholds),
+			reqProcessor.Flags.ParamsSlice(utils.MetaThresholds, utils.MetaIDs),
+			reqProcessor.Flags.Has(utils.MetaStats),
+			reqProcessor.Flags.ParamsSlice(utils.MetaStats, utils.MetaIDs),
 			cgrEv, cgrArgs.ArgDispatcher,
-			reqProcessor.Flags.HasKey(utils.MetaFD),
+			reqProcessor.Flags.Has(utils.MetaFD),
 			opts)
 		rply := utils.StringPointer("")
 		err = da.connMgr.Call(da.cgrCfg.DNSAgentCfg().SessionSConns, nil,
@@ -289,19 +289,19 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 		}
 	case utils.MetaMessage:
 		evArgs := sessions.NewV1ProcessMessageArgs(
-			reqProcessor.Flags.HasKey(utils.MetaAttributes),
-			reqProcessor.Flags.ParamsSlice(utils.MetaAttributes),
-			reqProcessor.Flags.HasKey(utils.MetaThresholds),
-			reqProcessor.Flags.ParamsSlice(utils.MetaThresholds),
-			reqProcessor.Flags.HasKey(utils.MetaStats),
-			reqProcessor.Flags.ParamsSlice(utils.MetaStats),
-			reqProcessor.Flags.HasKey(utils.MetaResources),
-			reqProcessor.Flags.HasKey(utils.MetaAccounts),
-			reqProcessor.Flags.HasKey(utils.MetaRoutes),
-			reqProcessor.Flags.HasKey(utils.MetaRoutesIgnoreErrors),
-			reqProcessor.Flags.HasKey(utils.MetaRoutesEventCost),
+			reqProcessor.Flags.Has(utils.MetaAttributes),
+			reqProcessor.Flags.ParamsSlice(utils.MetaAttributes, utils.MetaIDs),
+			reqProcessor.Flags.Has(utils.MetaThresholds),
+			reqProcessor.Flags.ParamsSlice(utils.MetaThresholds, utils.MetaIDs),
+			reqProcessor.Flags.Has(utils.MetaStats),
+			reqProcessor.Flags.ParamsSlice(utils.MetaStats, utils.MetaIDs),
+			reqProcessor.Flags.Has(utils.MetaResources),
+			reqProcessor.Flags.Has(utils.MetaAccounts),
+			reqProcessor.Flags.Has(utils.MetaRoutes),
+			reqProcessor.Flags.Has(utils.MetaRoutesIgnoreErrors),
+			reqProcessor.Flags.Has(utils.MetaRoutesEventCost),
 			cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.RoutePaginator,
-			reqProcessor.Flags.HasKey(utils.MetaFD),
+			reqProcessor.Flags.Has(utils.MetaFD),
 			opts)
 		rply := new(sessions.V1ProcessMessageReply) // need it so rpcclient can clone
 		err = da.connMgr.Call(da.cgrCfg.DNSAgentCfg().SessionSConns, nil,
@@ -329,7 +329,7 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 			evArgs, rply)
 		if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
 			cgrEv.Event[utils.Usage] = 0 // avoid further debits
-		} else if needsMaxUsage(reqProcessor.Flags.ParamsSlice(utils.MetaRALs)) {
+		} else if needsMaxUsage(reqProcessor.Flags[utils.MetaRALs]) {
 			cgrEv.Event[utils.Usage] = rply.MaxUsage // make sure the CDR reflects the debit
 		}
 		if err = agReq.setCGRReply(rply, err); err != nil {
@@ -338,8 +338,8 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 	case utils.MetaCDRs: // allow CDR processing
 	}
 	// separate request so we can capture the Terminate/Event also here
-	if reqProcessor.Flags.HasKey(utils.MetaCDRs) &&
-		!reqProcessor.Flags.HasKey(utils.MetaDryRun) {
+	if reqProcessor.Flags.Has(utils.MetaCDRs) &&
+		!reqProcessor.Flags.Has(utils.MetaDryRun) {
 		rplyCDRs := utils.StringPointer("")
 		if err = da.connMgr.Call(da.cgrCfg.DNSAgentCfg().SessionSConns, nil,
 			utils.SessionSv1ProcessCDR,
@@ -351,7 +351,7 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 	if err := agReq.SetFields(reqProcessor.ReplyFields); err != nil {
 		return false, err
 	}
-	if reqProcessor.Flags.HasKey(utils.MetaLog) {
+	if reqProcessor.Flags.Has(utils.MetaLog) {
 		utils.Logger.Info(
 			fmt.Sprintf("<%s> LOG, reply: %s",
 				utils.DNSAgent, agReq.Reply))

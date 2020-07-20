@@ -261,6 +261,18 @@ func (fWp FlagParams) ParamsSlice(opt string) (ps []string) {
 	return fWp[opt] // if it doesn't have the option it will return an empty slice
 }
 
+// SliceFlags converts from FlagsParams to []string
+func (fWp FlagParams) SliceFlags() (sls []string) {
+	for key, sub := range fWp {
+		if len(sub) == 0 { // no option for these subsystem
+			sls = append(sls, key)
+			continue
+		}
+		sls = append(sls, ConcatenatedKey(key, strings.Join(sub, INFIELD_SEP)))
+	}
+	return
+}
+
 // FlagsWithParams should store a list of flags for each subsystem
 type FlagsWithParams map[string]FlagParams
 
@@ -305,5 +317,5 @@ func (fWp FlagsWithParams) GetBool(key string) (b bool) {
 	if v == nil || len(v) == 0 {
 		return true // empty map
 	}
-	return !v.Has("*disabled") // check if has *disable param
+	return v.Has(TrueStr) || !v.Has(FalseStr)
 }

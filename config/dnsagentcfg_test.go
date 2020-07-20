@@ -86,7 +86,7 @@ func TestRequestProcessorloadFromJsonCfg(t *testing.T) {
 		ID:      "cgrates",
 		Tenant:  NewRSRParsersMustCompile("tenant", utils.INFIELD_SEP),
 		Filters: []string{"filter1", "filter2"},
-		Flags:   utils.FlagsWithParams{"flag1": []string{}, "flag2": []string{}},
+		Flags:   utils.FlagsWithParams{"flag1": {}, "flag2": {}},
 	}
 	if err = dareq.loadFromJsonCfg(json, utils.INFIELD_SEP); err != nil {
 		t.Error(err)
@@ -168,7 +168,7 @@ func TestDNSAgentCfgAsMapInterface(t *testing.T) {
 				"id":             "OutboundAUTHDryRun",
 				"filters":        []string{"*string:~*req.request_type:OutboundAUTH", "*string:~*req.Msisdn:497700056231"},
 				"tenant":         "cgrates.org",
-				"flags":          map[string][]string{"*dryrun": {}},
+				"flags":          []string{"*dryrun"},
 				"Timezone":       "",
 				"request_fields": []map[string]interface{}{},
 				"reply_fields": []map[string]interface{}{

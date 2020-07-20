@@ -122,7 +122,7 @@ func radauthReq(flags utils.FlagsWithParams, req *radigo.Packet, aReq *AgentRequ
 		return false, err
 	}
 	switch {
-	case flags.HasKey(utils.MetaPAP):
+	case flags.Has(utils.MetaPAP):
 		userPassAvps := req.AttributesWithName(UserPasswordAVP, utils.EmptyString)
 		if len(userPassAvps) == 0 {
 			return false, utils.NewErrMandatoryIeMissing(UserPasswordAVP)
@@ -130,14 +130,14 @@ func radauthReq(flags utils.FlagsWithParams, req *radigo.Packet, aReq *AgentRequ
 		if userPassAvps[0].StringValue != (*nmItems.(*utils.NMSlice))[0].Interface() {
 			return false, nil
 		}
-	case flags.HasKey(utils.MetaCHAP):
+	case flags.Has(utils.MetaCHAP):
 		chapAVPs := req.AttributesWithName(CHAPPasswordAVP, utils.EmptyString)
 		if len(chapAVPs) == 0 {
 			return false, utils.NewErrMandatoryIeMissing(CHAPPasswordAVP)
 		}
 		return radigo.AuthenticateCHAP([]byte(utils.IfaceAsString((*nmItems.(*utils.NMSlice))[0].Interface())),
 			req.Authenticator[:], chapAVPs[0].RawValue), nil
-	case flags.HasKey(utils.MetaMSCHAPV2):
+	case flags.Has(utils.MetaMSCHAPV2):
 		msChallenge := req.AttributesWithName(MSCHAPChallengeAVP, MicrosoftVendor)
 		if len(msChallenge) == 0 {
 			return false, utils.NewErrMandatoryIeMissing(MSCHAPChallengeAVP)

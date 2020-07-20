@@ -532,10 +532,12 @@ func (ar *AgentRequest) setCGRReply(rply utils.NavigableMapper, errRply error) (
 	return
 }
 
-func needsMaxUsage(ralsFlags []string) bool {
-	for _, flag := range ralsFlags {
-		if utils.IsSliceMember([]string{utils.MetaAuthorize, utils.MetaInitiate, utils.MetaUpdate},
-			flag) {
+func needsMaxUsage(ralsFlags utils.FlagParams) bool {
+	if len(ralsFlags) == 0 {
+		return false
+	}
+	for _, flag := range []string{utils.MetaAuthorize, utils.MetaInitiate, utils.MetaUpdate} {
+		if ralsFlags.Has(flag) {
 			return true
 		}
 	}

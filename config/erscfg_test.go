@@ -374,7 +374,7 @@ func TestERsCfgAsMapInterface(t *testing.T) {
 		"readers": []map[string]interface{}{
 			{
 				"filters":                     []string{},
-				"flags":                       map[string][]interface{}{},
+				"flags":                       filters,
 				"id":                          "*default",
 				"partial_record_cache":        "0",
 				"processed_path":              "/var/spool/cgrates/ers/out",
@@ -426,7 +426,7 @@ func TestERsCfgAsMapInterface(t *testing.T) {
 					{"mandatory": true, "path": "*cgreq.Usage", "tag": "Usage", "type": "*variable", "value": "~*req.13"},
 				},
 				"filters":                     filters,
-				"flags":                       map[string][]interface{}{},
+				"flags":                       filters,
 				"id":                          "file_reader1",
 				"partial_record_cache":        "0",
 				"processed_path":              "/tmp/ers/out",

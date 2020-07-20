@@ -184,9 +184,7 @@ func (er *EventReaderCfg) loadFromJsonCfg(jsnCfg *EventReaderJsonCfg, sep string
 		}
 	}
 	if jsnCfg.Flags != nil {
-		if er.Flags, err = utils.FlagsWithParamsFromSlice(*jsnCfg.Flags); err != nil {
-			return
-		}
+		er.Flags = utils.FlagsWithParamsFromSlice(*jsnCfg.Flags)
 	}
 	if jsnCfg.Failed_calls_prefix != nil {
 		er.FailedCallsPrefix = *jsnCfg.Failed_calls_prefix
@@ -265,14 +263,6 @@ func (er *EventReaderCfg) AsMapInterface(separator string) map[string]interface{
 		tenant = strings.Join(values, separator)
 	}
 
-	flags := make(map[string][]interface{}, len(er.Flags))
-	for key, val := range er.Flags {
-		buf := make([]interface{}, len(val))
-		for i, item := range val {
-			buf[i] = item
-		}
-		flags[key] = buf
-	}
 	fields := make([]map[string]interface{}, len(er.Fields))
 	for i, item := range er.Fields {
 		fields[i] = item.AsMapInterface(separator)
@@ -309,7 +299,7 @@ func (er *EventReaderCfg) AsMapInterface(separator string) map[string]interface{
 		utils.TenantCfg:                   tenant,
 		utils.TimezoneCfg:                 er.Timezone,
 		utils.FiltersCfg:                  er.Filters,
-		utils.FlagsCfg:                    flags,
+		utils.FlagsCfg:                    er.Flags.SliceFlags(),
 		utils.FailedCallsPrefixCfg:        er.FailedCallsPrefix,
 		utils.PartialRecordCacheCfg:       partialRecordCache,
 		utils.PartialCacheExpiryActionCfg: er.PartialCacheExpiryAction,

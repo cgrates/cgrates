@@ -86,9 +86,7 @@ func (self *LoaderDataType) loadFromJsonCfg(jsnCfg *LoaderJsonDataType, separato
 		self.Filename = *jsnCfg.File_name
 	}
 	if jsnCfg.Flags != nil {
-		if self.Flags, err = utils.FlagsWithParamsFromSlice(*jsnCfg.Flags); err != nil {
-			return
-		}
+		self.Flags = utils.FlagsWithParamsFromSlice(*jsnCfg.Flags)
 	}
 	if jsnCfg.Fields != nil {
 		if self.Fields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Fields, separator); err != nil {
