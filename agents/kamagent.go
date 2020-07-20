@@ -92,7 +92,7 @@ func (self *KamailioAgent) Connect() (err error) {
 func (self *KamailioAgent) Shutdown() (err error) {
 	for conIndx, conn := range self.conns {
 		if conn == nil {
-			continue
+			break
 		}
 		if err = conn.Disconnect(); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> can't disconnect connection at index %v because: %s",
