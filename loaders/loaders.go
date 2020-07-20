@@ -92,12 +92,12 @@ func (ldrS *LoaderService) V1Load(args *ArgsProcessFolder,
 	if locked, err := ldr.isFolderLocked(); err != nil {
 		return utils.NewErrServerError(err)
 	} else if locked {
-		if args.ForceLock {
-			if err := ldr.unlockFolder(); err != nil {
-				return utils.NewErrServerError(err)
-			}
+		if !args.ForceLock {
+			return errors.New("ANOTHER_LOADER_RUNNING")
 		}
-		return errors.New("ANOTHER_LOADER_RUNNING")
+		if err := ldr.unlockFolder(); err != nil {
+			return utils.NewErrServerError(err)
+		}
 	}
 	//verify If Caching is present in arguments
 	caching := config.CgrConfig().GeneralCfg().DefaultCaching
