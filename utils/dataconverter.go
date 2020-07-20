@@ -74,7 +74,9 @@ func NewDataConverter(params string) (conv DataConverter, err error) {
 	case params == MetaDuration:
 		return NewDurationConverter("")
 	case params == MetaIP2Hex:
-		return &IP2HexConvertor{}, nil
+		return new(IP2HexConverter), nil
+	case params == MetaString2Hex:
+		return new(String2HexConverter), nil
 	case strings.HasPrefix(params, MetaLibPhoneNumber):
 		if len(params) == len(MetaLibPhoneNumber) {
 			return NewPhoneNumberConverter("")
@@ -279,9 +281,9 @@ func (lc *PhoneNumberConverter) Convert(in interface{}) (out interface{}, err er
 }
 
 // HexConvertor will round floats
-type IP2HexConvertor struct{}
+type IP2HexConverter struct{}
 
-func (_ *IP2HexConvertor) Convert(in interface{}) (out interface{}, err error) {
+func (_ *IP2HexConverter) Convert(in interface{}) (out interface{}, err error) {
 	var ip net.IP
 	switch val := in.(type) {
 	case string:
@@ -298,4 +300,18 @@ func (_ *IP2HexConvertor) Convert(in interface{}) (out interface{}, err error) {
 		return hx, nil
 	}
 	return "0x" + string([]byte(hx)[len(hx)-8:]), nil
+}
+
+// String2HexConverter will transform the string to hex
+type String2HexConverter struct{}
+
+// Convert implements DataConverter interface
+func (*String2HexConverter) Convert(in interface{}) (o interface{}, err error) {
+	var out string
+	if out = hex.EncodeToString([]byte(IfaceAsString(in))); len(out) == 0 {
+		o = out
+		return
+	}
+	o = "0x" + out
+	return
 }

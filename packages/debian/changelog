@@ -23,8 +23,8 @@ cgrates (0.10.1) UNRELEASED; urgency=medium
   * [DiameterAgent] Using String function from diam.Message instead of
     ToJSON for request String method
   * [DiameterAgent] Updated 3gp_vendor dictionary
-  * [Templates] Added new dataconvertor: *ip2hex
-  * [AgentRequest] Added support for *group type and correctly overwrite
+  * [Templates] Added new dataconverter: *ip2hex
+  * [AgentS] Added support for *group type and correctly overwrite
     the values in case of *variable
   * [ERs] Correctly populate ConcurrentRequest from config in
     EventReader
@@ -45,6 +45,7 @@ cgrates (0.10.1) UNRELEASED; urgency=medium
   * [CacheS] Avoid long recaching
   * [SessionS] Use correctly SessionTTLUsage when calculate end usage in case of terminate session from ttl mechanism
   * [SessionS] Add SessionTLLLastUsage as option for an extra debit in case of ttl mechanism
+  * [Templates] Added new dataconverter: *string2hex
 
  -- DanB <danb@cgrates.org>   Wed, 5 May 2020 15:22:59 +0200
 
