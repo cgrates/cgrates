@@ -154,3 +154,15 @@ func NewAttributeFromInline(tenant, inlnRule string) (attr *AttributeProfile, er
 	}
 	return
 }
+
+func getIfaceFromValues(values config.RSRParsers, evNm utils.DataProvider) (iFaceVals []interface{}, err error) {
+	iFaceVals = make([]interface{}, len(values))
+	for i, val := range values {
+		var strVal string
+		if strVal, err = val.ParseDataProvider(evNm); err != nil {
+			return
+		}
+		iFaceVals[i] = utils.StringToInterface(strVal)
+	}
+	return
+}
