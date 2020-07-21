@@ -304,7 +304,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 		}
 	}
 	var cgrArgs utils.ExtractedArgs
-	if cgrArgs, err = utils.ExtractArgsFromOpts(opts, reqProcessor.Flags.Has(utils.MetaDispatchers),
+	if cgrArgs, err = utils.ExtractArgsFromOpts(opts, reqProcessor.Flags.GetBool(utils.MetaDispatchers),
 		reqType == utils.MetaAuthorize || reqType == utils.MetaMessage || reqType == utils.MetaEvent); err != nil {
 		utils.Logger.Warning(fmt.Sprintf("<%s> args extraction failed because <%s>",
 			utils.DiameterAgent, err.Error()))
@@ -326,13 +326,13 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 				utils.DiameterAgent, reqProcessor.ID, agReq.Request.String()))
 	case utils.MetaAuthorize:
 		authArgs := sessions.NewV1AuthorizeArgs(
-			reqProcessor.Flags.Has(utils.MetaAttributes),
+			reqProcessor.Flags.GetBool(utils.MetaAttributes),
 			reqProcessor.Flags.ParamsSlice(utils.MetaAttributes, utils.MetaIDs),
-			reqProcessor.Flags.Has(utils.MetaThresholds),
+			reqProcessor.Flags.GetBool(utils.MetaThresholds),
 			reqProcessor.Flags.ParamsSlice(utils.MetaThresholds, utils.MetaIDs),
-			reqProcessor.Flags.Has(utils.MetaStats),
+			reqProcessor.Flags.GetBool(utils.MetaStats),
 			reqProcessor.Flags.ParamsSlice(utils.MetaStats, utils.MetaIDs),
-			reqProcessor.Flags.Has(utils.MetaResources),
+			reqProcessor.Flags.GetBool(utils.MetaResources),
 			reqProcessor.Flags.Has(utils.MetaAccounts),
 			reqProcessor.Flags.Has(utils.MetaRoutes),
 			reqProcessor.Flags.Has(utils.MetaRoutesIgnoreErrors),
@@ -349,13 +349,13 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 		}
 	case utils.MetaInitiate:
 		initArgs := sessions.NewV1InitSessionArgs(
-			reqProcessor.Flags.Has(utils.MetaAttributes),
+			reqProcessor.Flags.GetBool(utils.MetaAttributes),
 			reqProcessor.Flags.ParamsSlice(utils.MetaAttributes, utils.MetaIDs),
-			reqProcessor.Flags.Has(utils.MetaThresholds),
+			reqProcessor.Flags.GetBool(utils.MetaThresholds),
 			reqProcessor.Flags.ParamsSlice(utils.MetaThresholds, utils.MetaIDs),
-			reqProcessor.Flags.Has(utils.MetaStats),
+			reqProcessor.Flags.GetBool(utils.MetaStats),
 			reqProcessor.Flags.ParamsSlice(utils.MetaStats, utils.MetaIDs),
-			reqProcessor.Flags.Has(utils.MetaResources),
+			reqProcessor.Flags.GetBool(utils.MetaResources),
 			reqProcessor.Flags.Has(utils.MetaAccounts),
 			cgrEv, cgrArgs.ArgDispatcher,
 			reqProcessor.Flags.Has(utils.MetaFD),
@@ -368,7 +368,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 		}
 	case utils.MetaUpdate:
 		updateArgs := sessions.NewV1UpdateSessionArgs(
-			reqProcessor.Flags.Has(utils.MetaAttributes),
+			reqProcessor.Flags.GetBool(utils.MetaAttributes),
 			reqProcessor.Flags.ParamsSlice(utils.MetaAttributes, utils.MetaIDs),
 			reqProcessor.Flags.Has(utils.MetaAccounts),
 			cgrEv, cgrArgs.ArgDispatcher,
@@ -383,10 +383,10 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 	case utils.MetaTerminate:
 		terminateArgs := sessions.NewV1TerminateSessionArgs(
 			reqProcessor.Flags.Has(utils.MetaAccounts),
-			reqProcessor.Flags.Has(utils.MetaResources),
-			reqProcessor.Flags.Has(utils.MetaThresholds),
+			reqProcessor.Flags.GetBool(utils.MetaResources),
+			reqProcessor.Flags.GetBool(utils.MetaThresholds),
 			reqProcessor.Flags.ParamsSlice(utils.MetaThresholds, utils.MetaIDs),
-			reqProcessor.Flags.Has(utils.MetaStats),
+			reqProcessor.Flags.GetBool(utils.MetaStats),
 			reqProcessor.Flags.ParamsSlice(utils.MetaStats, utils.MetaIDs),
 			cgrEv, cgrArgs.ArgDispatcher,
 			reqProcessor.Flags.Has(utils.MetaFD),
@@ -399,15 +399,15 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 		}
 	case utils.MetaMessage:
 		msgArgs := sessions.NewV1ProcessMessageArgs(
-			reqProcessor.Flags.Has(utils.MetaAttributes),
+			reqProcessor.Flags.GetBool(utils.MetaAttributes),
 			reqProcessor.Flags.ParamsSlice(utils.MetaAttributes, utils.MetaIDs),
-			reqProcessor.Flags.Has(utils.MetaThresholds),
+			reqProcessor.Flags.GetBool(utils.MetaThresholds),
 			reqProcessor.Flags.ParamsSlice(utils.MetaThresholds, utils.MetaIDs),
-			reqProcessor.Flags.Has(utils.MetaStats),
+			reqProcessor.Flags.GetBool(utils.MetaStats),
 			reqProcessor.Flags.ParamsSlice(utils.MetaStats, utils.MetaIDs),
-			reqProcessor.Flags.Has(utils.MetaResources),
+			reqProcessor.Flags.GetBool(utils.MetaResources),
 			reqProcessor.Flags.Has(utils.MetaAccounts),
-			reqProcessor.Flags.Has(utils.MetaRoutes),
+			reqProcessor.Flags.GetBool(utils.MetaRoutes),
 			reqProcessor.Flags.Has(utils.MetaRoutesIgnoreErrors),
 			reqProcessor.Flags.Has(utils.MetaRoutesEventCost),
 			cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.RoutePaginator,
@@ -446,7 +446,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 	case utils.MetaCDRs: // allow CDR processing
 	}
 	// separate request so we can capture the Terminate/Event also here
-	if reqProcessor.Flags.Has(utils.MetaCDRs) &&
+	if reqProcessor.Flags.GetBool(utils.MetaCDRs) &&
 		!reqProcessor.Flags.Has(utils.MetaDryRun) {
 		rplyCDRs := utils.StringPointer("")
 		if err = da.connMgr.Call(da.cgrCfg.DiameterAgentCfg().SessionSConns, da, utils.SessionSv1ProcessCDR,
