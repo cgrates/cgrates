@@ -64,6 +64,7 @@ var (
 		testAccITTPFromFolder,
 		testAccITAddBalanceWithDestinations,
 		testAccITAccountWithTriggers,
+		testAccITAccountMonthlyEstimated,
 		testAccITStopCgrEngine,
 	}
 )
@@ -927,4 +928,75 @@ func testAccITAccountWithTriggers(t *testing.T) {
 		}
 	}
 
+}
+
+func testAccITAccountMonthlyEstimated(t *testing.T) {
+	var reply string
+	// add an action that contains topup
+	topupAction := &utils.AttrSetActions{ActionsId: "TOPUP_ACTION", Actions: []*utils.TPAction{
+		{Identifier: utils.TOPUP_RESET, BalanceId: "testAccITAccountMonthlyEstimated",
+			BalanceType: utils.MONETARY, Units: "5", Weight: 10.0},
+	}}
+
+	if err := accRPC.Call(utils.APIerSv2SetActions, topupAction, &reply); err != nil {
+		t.Error("Got error on APIerSv2.SetActions: ", err.Error())
+	} else if reply != utils.OK {
+		t.Errorf("Calling APIerSv2.SetActions received: %s", reply)
+	}
+
+	atms1 := &AttrSetActionPlan{
+		Id:              "ATMS_1",
+		ReloadScheduler: true,
+		ActionPlan: []*AttrActionPlan{
+			&AttrActionPlan{ActionsId: "TOPUP_ACTION",
+				MonthDays: "31",
+				Time:      "00:00:00",
+				Weight:    20.0,
+				TimingID:  utils.MetaMonthlyEstimated},
+		},
+	}
+	if err := accRPC.Call(utils.APIerSv1SetActionPlan, &atms1, &reply); err != nil {
+		t.Error("Got error on APIerSv1.SetActionPlan: ", err.Error())
+	} else if reply != utils.OK {
+		t.Errorf("Calling APIerSv1.SetActionPlan received: %s", reply)
+	}
+
+	acnt1 := utils.AttrSetAccount{Tenant: "cgrates.org",
+		Account:         "testAccITAccountMonthlyEstimated",
+		ReloadScheduler: true,
+		ActionPlanID:    "ATMS_1",
+	}
+	if err := accRPC.Call(utils.APIerSv1SetAccount, acnt1, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Calling APIerSv1.SetAccount received: %s", reply)
+	}
+
+	var aps []*engine.ActionPlan
+	accIDsStrMp := utils.StringMap{
+		"cgrates.org:testAccITAccountMonthlyEstimated": true,
+	}
+	eTiming := &engine.RITiming{
+		ID:        utils.MetaMonthlyEstimated,
+		Years:     utils.Years{},
+		Months:    utils.Months{},
+		MonthDays: utils.MonthDays{31},
+		WeekDays:  utils.WeekDays{},
+		StartTime: "00:00:00",
+		EndTime:   "",
+	}
+	if err := accRPC.Call(utils.APIerSv1GetActionPlan,
+		&AttrGetActionPlan{ID: "ATMS_1"}, &aps); err != nil {
+		t.Error(err)
+	} else if len(aps) != 1 {
+		t.Errorf("Expected: %v,\n received: %v", 1, len(aps))
+	} else if aps[0].Id != "ATMS_1" {
+		t.Errorf("Expected: %v,\n received: %v", "AP_PACKAGE_10", aps[0].Id)
+	} else if !reflect.DeepEqual(aps[0].AccountIDs, accIDsStrMp) {
+		t.Errorf("Expected: %v,\n received: %v", accIDsStrMp, aps[0].AccountIDs)
+	} else if len(aps[0].ActionTimings) != 1 {
+		t.Errorf("Expected: %v,\n received: %v", 1, len(aps))
+	} else if !reflect.DeepEqual(aps[0].ActionTimings[0].Timing.Timing, eTiming) {
+		t.Errorf("Expected: %v,\n received: %v", utils.ToJSON(eTiming), utils.ToJSON(aps[0].ActionTimings[0].Timing.Timing))
+	}
 }
