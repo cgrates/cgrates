@@ -883,6 +883,13 @@ func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 func (cd *CallDescriptor) refundIncrements() (acnt *Account, err error) {
 	accountsCache := make(map[string]*Account)
 	for _, increment := range cd.Increments {
+		// work around for the refund from CDRServer:
+		// for the calls with Cost 0 but with at least a TimeSpan it will make the information
+		// from BalanceInfo nil so here we can ignore all increments with BalanceInfo nil
+		if increment.BalanceInfo == nil {
+			continue
+		}
+
 		account, found := accountsCache[increment.BalanceInfo.AccountID]
 		if !found {
 			if acc, err := dm.GetAccount(increment.BalanceInfo.AccountID); err == nil && acc != nil {

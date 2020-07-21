@@ -693,4 +693,12 @@ func TestStringHexConvertor(t *testing.T) {
 	} else if !reflect.DeepEqual(expected, rpl) {
 		t.Errorf("expecting: %+v, received: %+v", expected, rpl)
 	}
+
+	val3 = []byte{0x88, 0x90, 0xa6}
+	expected = "0x8890a6"
+	if rpl, err := hx.Convert(val3); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rpl) {
+		t.Errorf("expecting: %+v, received: %+v", expected, rpl)
+	}
 }
