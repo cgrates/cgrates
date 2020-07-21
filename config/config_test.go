@@ -784,7 +784,7 @@ func TestCgrCfgJSONDefaultRouteSCfg(t *testing.T) {
 		AttributeSConns:     []string{},
 		ResourceSConns:      []string{},
 		StatSConns:          []string{},
-		ResponderSConns:     []string{},
+		RALsConns:           []string{},
 		DefaultRatio:        1,
 	}
 	if !reflect.DeepEqual(eSupplSCfg, cgrCfg.routeSCfg) {

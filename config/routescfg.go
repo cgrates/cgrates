@@ -33,7 +33,7 @@ type RouteSCfg struct {
 	AttributeSConns     []string
 	ResourceSConns      []string
 	StatSConns          []string
-	ResponderSConns     []string
+	RALsConns           []string
 	DefaultRatio        int
 	NestedFields        bool
 }
@@ -96,13 +96,13 @@ func (rts *RouteSCfg) loadFromJsonCfg(jsnCfg *RouteSJsonCfg) (err error) {
 		}
 	}
 	if jsnCfg.Rals_conns != nil {
-		rts.ResponderSConns = make([]string, len(*jsnCfg.Rals_conns))
+		rts.RALsConns = make([]string, len(*jsnCfg.Rals_conns))
 		for idx, conn := range *jsnCfg.Rals_conns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
 			if conn == utils.MetaInternal {
-				rts.ResponderSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder)
+				rts.RALsConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder)
 			} else {
-				rts.ResponderSConns[idx] = conn
+				rts.RALsConns[idx] = conn
 			}
 		}
 	}
@@ -140,14 +140,14 @@ func (rts *RouteSCfg) AsMapInterface() map[string]interface{} {
 			attributeSConns[i] = item
 		}
 	}
-	responderSConns := make([]string, len(rts.ResponderSConns))
-	for i, item := range rts.ResponderSConns {
+	ralSConns := make([]string, len(rts.RALsConns))
+	for i, item := range rts.RALsConns {
 		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder)
 
 		if item == buf {
-			responderSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaResponder, utils.EmptyString)
+			ralSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaResponder, utils.EmptyString)
 		} else {
-			responderSConns[i] = item
+			ralSConns[i] = item
 		}
 	}
 	resourceSConns := make([]string, len(rts.ResourceSConns))
@@ -177,7 +177,7 @@ func (rts *RouteSCfg) AsMapInterface() map[string]interface{} {
 		utils.AttributeSConnsCfg:     attributeSConns,
 		utils.ResourceSConnsCfg:      resourceSConns,
 		utils.StatSConnsCfg:          statSConns,
-		utils.RALsConnsCfg:           responderSConns,
+		utils.RALsConnsCfg:           ralSConns,
 		utils.DefaultRatioCfg:        rts.DefaultRatio,
 		utils.NestedFieldsCfg:        rts.NestedFields,
 	}
