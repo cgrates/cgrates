@@ -61,6 +61,7 @@ var (
 		testV1RsRemResourceProfile,
 		testV1RsGetResourceProfileAfterDelete,
 		testV1RsResourcePing,
+		testV1RsMatchNotFound,
 		testV1RsStopEngine,
 	}
 )
@@ -746,6 +747,47 @@ func testV1RsResourcePing(t *testing.T) {
 		t.Error(err)
 	} else if resp != utils.Pong {
 		t.Error("Unexpected reply returned", resp)
+	}
+}
+
+func testV1RsMatchNotFound(t *testing.T) {
+	rlsConfig = &ResourceWithCache{
+		ResourceProfile: &engine.ResourceProfile{
+			Tenant:            "cgrates.org",
+			ID:                "Res_NotFound",
+			FilterIDs:         []string{"*string:~*req.Account:CustomTest", "*notempty:~*req.Custom:"},
+			UsageTTL:          time.Duration(1) * time.Nanosecond,
+			Limit:             10,
+			AllocationMessage: "MessageAllocation",
+			Stored:            true,
+			Weight:            20,
+			ThresholdIDs:      []string{utils.META_NONE},
+		},
+	}
+
+	var result string
+
+	if err := rlsV1Rpc.Call(utils.APIerSv1SetResourceProfile, rlsConfig, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+
+	argsRU := utils.ArgRSv1ResourceUsage{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     utils.UUIDSha1Prefix(),
+			Event: map[string]interface{}{
+				"Account": "CustomTest",
+				"Custom":  ""},
+		},
+		UsageID: "test",
+		Units:   1,
+	}
+	var reply string
+	if err := rlsV1Rpc.Call(utils.ResourceSv1ReleaseResources,
+		argsRU, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
 	}
 }
 
