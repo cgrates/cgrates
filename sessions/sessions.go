@@ -615,7 +615,6 @@ func (sS *SessionS) refundSession(s *Session, sRunIdx int, rUsage time.Duration)
 			}
 			for i := 0; i < tmspn.CompressFactor; i++ {
 				incrmts = append(incrmts, incr)
-
 			}
 		}
 	}
