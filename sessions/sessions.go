@@ -3416,13 +3416,15 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 			switch {
 			//check for auth session
 			case ralsOpts.Has(utils.MetaAuthorize):
-				if rply.MaxUsage, err = sS.authEvent(&utils.CGREventWithOpts{
+				var sRunsMaxUsage map[string]time.Duration
+				if sRunsMaxUsage, err = sS.authEvent(&utils.CGREventWithOpts{
 					CGREvent:      args.CGREvent,
 					Opts:          args.Opts,
 					ArgDispatcher: args.ArgDispatcher,
 				}, ralsOpts.Has(utils.MetaFD)); err != nil {
 					return err
 				}
+				rply.MaxUsage = getDerivedMaxUsage(sRunsMaxUsage, ralsOpts.Has(utils.MetaDerivedReply))
 			// check for init session
 			case ralsOpts.Has(utils.MetaInitiate):
 				if opts.HasField(utils.OptsDebitInterval) { // dynamic DebitInterval via CGRDebitInterval
@@ -3439,14 +3441,16 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 				if err != nil {
 					return err
 				}
+				sRunsMaxUsage := make(map[string]time.Duration)
 				if s.debitStop != nil { //active debit
 					for _, sr := range s.SRuns {
-						rply.MaxUsage[sr.CD.RunID] = sS.cgrCfg.SessionSCfg().MaxCallDuration
+						sRunsMaxUsage[sr.CD.RunID] = sS.cgrCfg.SessionSCfg().MaxCallDuration
 					}
-				} else if rply.MaxUsage, err = sS.updateSession(s, nil, args.Opts, false); err != nil {
+				} else if sRunsMaxUsage, err = sS.updateSession(s, nil, args.Opts, false); err != nil {
 					return utils.NewErrRALs(err)
 				}
-			//check for update session
+				rply.MaxUsage = getDerivedMaxUsage(sRunsMaxUsage, ralsOpts.Has(utils.MetaDerivedReply))
+				//check for update session
 			case ralsOpts.Has(utils.MetaUpdate):
 				if opts.HasField(utils.OptsDebitInterval) { // dynamic DebitInterval via CGRDebitInterval
 					if dbtItvl, err = opts.GetDuration(utils.OptsDebitInterval); err != nil {
@@ -3467,10 +3471,12 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 						return err
 					}
 				}
-				if rply.MaxUsage, err = sS.updateSession(s, ev, args.Opts, false); err != nil {
+				var sRunsMaxUsage map[string]time.Duration
+				if sRunsMaxUsage, err = sS.updateSession(s, ev, args.Opts, false); err != nil {
 					return utils.NewErrRALs(err)
 				}
-			// check for terminate session
+				rply.MaxUsage = getDerivedMaxUsage(sRunsMaxUsage, ralsOpts.Has(utils.MetaDerivedReply))
+				// check for terminate session
 			case ralsOpts.Has(utils.MetaTerminate):
 				if opts.HasField(utils.OptsDebitInterval) { // dynamic DebitInterval via CGRDebitInterval
 					if dbtItvl, err = opts.GetDuration(utils.OptsDebitInterval); err != nil {

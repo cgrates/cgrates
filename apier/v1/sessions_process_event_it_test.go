@@ -161,6 +161,7 @@ func testSSv1ItProcessEventAuth(t *testing.T) {
 		Flags: []string{utils.ConcatenatedKey(utils.MetaResources, utils.MetaAuthorize),
 			utils.ConcatenatedKey(utils.MetaResources, utils.MetaDerivedReply),
 			utils.ConcatenatedKey(utils.MetaRALs, utils.MetaAuthorize),
+			utils.ConcatenatedKey(utils.MetaRALs, utils.MetaDerivedReply),
 			utils.MetaRoutes, utils.MetaAttributes, utils.MetaChargers},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -182,8 +183,14 @@ func testSSv1ItProcessEventAuth(t *testing.T) {
 	if err := sSv1BiRpc.Call(utils.SessionSv1ProcessEvent, args, &rply); err != nil {
 		t.Fatal(err)
 	}
-	if rply.MaxUsage == nil || rply.MaxUsage["CustomerCharges"] != authUsage {
-		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
+	expMaxUsage := map[string]time.Duration{
+		"CustomerCharges": authUsage,
+		"SupplierCharges": authUsage,
+		"raw":             authUsage,
+		utils.MetaRaw:     authUsage,
+	}
+	if !reflect.DeepEqual(expMaxUsage, rply.MaxUsage) {
+		t.Errorf("Expected %s received %s", expMaxUsage, rply.MaxUsage)
 	}
 	if rply.ResourceAllocation == nil || rply.ResourceAllocation["CustomerCharges"] == utils.EmptyString {
 		t.Errorf("Unexpected ResourceAllocation: %s", rply.ResourceAllocation)
@@ -240,6 +247,7 @@ func testSSv1ItProcessEventInitiateSession(t *testing.T) {
 	initUsage := 5 * time.Minute
 	args := &sessions.V1ProcessEventArgs{
 		Flags: []string{utils.ConcatenatedKey(utils.MetaRALs, utils.MetaInitiate),
+			utils.ConcatenatedKey(utils.MetaRALs, utils.MetaDerivedReply),
 			utils.ConcatenatedKey(utils.MetaResources, utils.MetaAllocate),
 			utils.ConcatenatedKey(utils.MetaResources, utils.MetaDerivedReply),
 			utils.MetaAttributes, utils.MetaChargers},
@@ -268,8 +276,14 @@ func testSSv1ItProcessEventInitiateSession(t *testing.T) {
 	// in case of prepaid and pseudoprepade we expect a MaxUsage of 5min
 	// and in case of postpaid and rated we expect the value of Usage field
 	// if this was missing the MaxUsage should be equal to MaxCallDuration from config
-	if rply.MaxUsage == nil || rply.MaxUsage["CustomerCharges"] != initUsage {
-		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
+	expMaxUsage := map[string]time.Duration{
+		"CustomerCharges": initUsage,
+		"SupplierCharges": initUsage,
+		"raw":             initUsage,
+		utils.MetaRaw:     initUsage,
+	}
+	if !reflect.DeepEqual(expMaxUsage, rply.MaxUsage) {
+		t.Errorf("Expected %s received %s", expMaxUsage, rply.MaxUsage)
 	}
 	if rply.ResourceAllocation == nil || rply.ResourceAllocation["CustomerCharges"] != "RES_ACNT_1001" {
 		t.Errorf("Unexpected ResourceAllocation: %s", rply.ResourceAllocation)
@@ -310,7 +324,9 @@ func testSSv1ItProcessEventInitiateSession(t *testing.T) {
 func testSSv1ItProcessEventUpdateSession(t *testing.T) {
 	reqUsage := 5 * time.Minute
 	args := &sessions.V1ProcessEventArgs{
-		Flags: []string{utils.ConcatenatedKey(utils.MetaRALs, utils.MetaUpdate), utils.MetaAttributes},
+		Flags: []string{utils.ConcatenatedKey(utils.MetaRALs, utils.MetaUpdate),
+			utils.ConcatenatedKey(utils.MetaRALs, utils.MetaDerivedReply),
+			utils.MetaAttributes},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSSv1ItProcessEventUpdateSession",
@@ -361,8 +377,14 @@ func testSSv1ItProcessEventUpdateSession(t *testing.T) {
 	// in case of prepaid and pseudoprepade we expect a MaxUsage of 5min
 	// and in case of postpaid and rated we expect the value of Usage field
 	// if this was missing the MaxUsage should be equal to MaxCallDuration from config
-	if rply.MaxUsage == nil || rply.MaxUsage["CustomerCharges"] != reqUsage {
-		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
+	expMaxUsage := map[string]time.Duration{
+		"CustomerCharges": reqUsage,
+		"SupplierCharges": reqUsage,
+		"raw":             reqUsage,
+		utils.MetaRaw:     reqUsage,
+	}
+	if !reflect.DeepEqual(expMaxUsage, rply.MaxUsage) {
+		t.Errorf("Expected %s received %s", expMaxUsage, rply.MaxUsage)
 	}
 	aSessions := make([]*sessions.ExternalSession, 0)
 	if err := sSv1BiRpc.Call(utils.SessionSv1GetActiveSessions, &utils.SessionFilter{}, &aSessions); err != nil {
