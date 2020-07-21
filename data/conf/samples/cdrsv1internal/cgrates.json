@@ -15,7 +15,10 @@
 
 
 "rals": {
-	"enabled": true
+	"enabled": true,
+	"balance_rating_subject":{
+		"*data":"*zero1s"
+	},
 },
 
 
@@ -27,6 +30,7 @@
 "cdrs": {
 	"enabled": true,
 	"rals_conns": ["*localhost"],
+	"session_cost_retries": 1,
 },
 
 

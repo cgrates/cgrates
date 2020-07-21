@@ -47,6 +47,15 @@ var (
 		testV1CDRsRefundOutOfSessionCost,
 		testV1CDRsRefundCDR,
 		testV1CDRsKillEngine,
+
+		testV1CDRsInitConfig,
+		testV1CDRsInitDataDb,
+		testV1CDRsInitCdrDb,
+		testV1CDRsStartEngine,
+		testV1CDRsRpcConn,
+		testV1CDRsLoadTariffPlanFromFolderSMS,
+		testV1CDRsAddBalanceForSMS,
+		testV1CDRsKillEngine,
 	}
 )
 
@@ -515,6 +524,98 @@ func testV1CDRsRefundCDR(t *testing.T) {
 	} else if rply := acnt.BalanceMap[utils.MONETARY].GetTotalValue(); rply != exp {
 		t.Errorf("Expecting: %v, received: %v", exp, rply)
 	}
+}
+
+func testV1CDRsLoadTariffPlanFromFolderSMS(t *testing.T) {
+	var loadInst string
+	if err := cdrsRpc.Call(utils.APIerSv1LoadTariffPlanFromFolder,
+		&utils.AttrLoadTpFromFolder{FolderPath: path.Join(
+			*dataDir, "tariffplans", "tutorial")}, &loadInst); err != nil {
+		t.Error(err)
+	}
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
+}
+
+func testV1CDRsAddBalanceForSMS(t *testing.T) {
+	var reply string
+	attrs := &AttrAddBalance{
+		Tenant:      "cgrates.org",
+		Account:     "testV1CDRsAddBalanceForSMS",
+		BalanceType: utils.SMS,
+		Value:       1000,
+	}
+	if err := cdrsRpc.Call(utils.APIerSv1AddBalance, attrs, &reply); err != nil {
+		t.Error("Got error on APIerSv1.AddBalance: ", err.Error())
+	} else if reply != utils.OK {
+		t.Errorf("Calling APIerSv1.AddBalance received: %s", reply)
+	}
+
+	attrs = &AttrAddBalance{
+		Tenant:      "cgrates.org",
+		Account:     "testV1CDRsAddBalanceForSMS",
+		BalanceType: utils.MONETARY,
+		Value:       10,
+	}
+	if err := cdrsRpc.Call(utils.APIerSv1AddBalance, attrs, &reply); err != nil {
+		t.Error("Got error on APIerSv1.AddBalance: ", err.Error())
+	} else if reply != utils.OK {
+		t.Errorf("Calling APIerSv1.AddBalance received: %s", reply)
+	}
+
+	var acnt *engine.Account
+	attrAcc := &utils.AttrGetAccount{
+		Tenant:  "cgrates.org",
+		Account: "testV1CDRsAddBalanceForSMS",
+	}
+
+	if err := cdrsRpc.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
+		t.Error(err)
+	} else if len(acnt.BalanceMap[utils.SMS]) != 1 {
+		t.Errorf("Expecting: %v, received: %v", 1, len(acnt.BalanceMap[utils.SMS]))
+	} else if acnt.BalanceMap[utils.SMS].GetTotalValue() != 1000 {
+		t.Errorf("Expecting: %v, received: %v", 1000, acnt.BalanceMap[utils.SMS].GetTotalValue())
+	} else if len(acnt.BalanceMap[utils.MONETARY]) != 1 {
+		t.Errorf("Expecting: %v, received: %v", 1, len(acnt.BalanceMap[utils.MONETARY]))
+	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != 10 {
+		t.Errorf("Expecting: %v, received: %v", 10, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	}
+
+	argsEv := &engine.ArgV1ProcessEvent{
+		Flags: []string{utils.MetaRALs},
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				utils.CGRID:       "asdfas",
+				utils.ToR:         utils.SMS,
+				utils.Category:    "sms",
+				utils.RunID:       utils.MetaDefault,
+				utils.OriginID:    "testV1CDRsAddBalanceForSMS",
+				utils.RequestType: utils.META_PREPAID,
+				utils.Account:     "testV1CDRsAddBalanceForSMS",
+				utils.Destination: "+4986517174963",
+				utils.AnswerTime:  time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC),
+				utils.Usage:       time.Duration(1),
+			},
+		},
+	}
+	if err := cdrsRpc.Call(utils.CDRsV1ProcessEvent, argsEv, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply received: ", reply)
+	}
+
+	if err := cdrsRpc.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
+		t.Error(err)
+	} else if len(acnt.BalanceMap[utils.SMS]) != 1 {
+		t.Errorf("Expecting: %v, received: %v", 1, len(acnt.BalanceMap[utils.SMS]))
+	} else if acnt.BalanceMap[utils.SMS].GetTotalValue() != 999 {
+		t.Errorf("Expecting: %v, received: %v", 999, acnt.BalanceMap[utils.SMS].GetTotalValue())
+	} else if len(acnt.BalanceMap[utils.MONETARY]) != 1 {
+		t.Errorf("Expecting: %v, received: %v", 1, len(acnt.BalanceMap[utils.MONETARY]))
+	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != 10 {
+		t.Errorf("Expecting: %v, received: %v", 10, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	}
+
 }
 
 func testV1CDRsKillEngine(t *testing.T) {
