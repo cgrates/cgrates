@@ -245,7 +245,7 @@ func (rpS *RouteService) costForEvent(ev *utils.CGREvent,
 		err = nil
 	}
 	var rplyVals map[string]interface{}
-	if err := rpS.connMgr.Call(rpS.cgrcfg.RouteSCfg().ResponderSConns, nil, utils.ResponderGetMaxSessionTimeOnAccounts,
+	if err := rpS.connMgr.Call(rpS.cgrcfg.RouteSCfg().RALsConns, nil, utils.ResponderGetMaxSessionTimeOnAccounts,
 		&utils.GetMaxSessionTimeOnAccountsArgs{
 			Tenant:      ev.Tenant,
 			Subject:     subj,
@@ -260,7 +260,7 @@ func (rpS *RouteService) costForEvent(ev *utils.CGREvent,
 		costData[k] = v
 	}
 	rplyVals = make(map[string]interface{}) // reset the map
-	if err := rpS.connMgr.Call(rpS.cgrcfg.RouteSCfg().ResponderSConns, nil, utils.ResponderGetCostOnRatingPlans,
+	if err := rpS.connMgr.Call(rpS.cgrcfg.RouteSCfg().RALsConns, nil, utils.ResponderGetCostOnRatingPlans,
 		&utils.GetCostOnRatingPlansArgs{
 			Tenant:        ev.Tenant,
 			Account:       acnt,
