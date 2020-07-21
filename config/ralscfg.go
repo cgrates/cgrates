@@ -87,7 +87,6 @@ func (ralsCfg *RalsCfg) loadFromJsonCfg(jsnRALsCfg *RalsJsonCfg) (err error) {
 		ralsCfg.RemoveExpired = *jsnRALsCfg.Remove_expired
 	}
 	if jsnRALsCfg.Max_computed_usage != nil {
-		ralsCfg.MaxComputedUsage = make(map[string]time.Duration, len(*jsnRALsCfg.Max_computed_usage))
 		for k, v := range *jsnRALsCfg.Max_computed_usage {
 			if ralsCfg.MaxComputedUsage[k], err = utils.ParseDurationWithNanosecs(v); err != nil {
 				return
@@ -98,7 +97,6 @@ func (ralsCfg *RalsCfg) loadFromJsonCfg(jsnRALsCfg *RalsJsonCfg) (err error) {
 		ralsCfg.MaxIncrements = *jsnRALsCfg.Max_increments
 	}
 	if jsnRALsCfg.Balance_rating_subject != nil {
-		ralsCfg.BalanceRatingSubject = make(map[string]string, len(*jsnRALsCfg.Balance_rating_subject))
 		for k, v := range *jsnRALsCfg.Balance_rating_subject {
 			ralsCfg.BalanceRatingSubject[k] = v
 		}
