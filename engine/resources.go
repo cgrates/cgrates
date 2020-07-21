@@ -539,6 +539,9 @@ func (rS *ResourceService) matchingResourcesForEvent(ev *utils.CGREvent,
 		}
 		return
 	}
+	if len(matchingResources) == 0 {
+		return nil, utils.ErrNotFound
+	}
 	// All good, convert from Map to Slice so we can sort
 	rs = make(Resources, len(matchingResources))
 	i := 0
