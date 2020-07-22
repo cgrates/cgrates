@@ -333,13 +333,16 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent, evNm utils
 		}
 		if attribute.Type == utils.META_COMPOSED {
 			var val string
-			if val, err = evNm.FieldAsString(strings.Split(attribute.Path, utils.NestingSep)); err != nil {
+			if val, err = evNm.FieldAsString(strings.Split(attribute.Path, utils.NestingSep)); err != nil && err != utils.ErrNotFound {
 				rply = nil
 				return
 			}
 			substitute = val + substitute
 		}
-		evNm.Set(strings.Split(attribute.Path, utils.NestingSep), substitute)
+		if err = evNm.Set(strings.Split(attribute.Path, utils.NestingSep), substitute); err != nil {
+			rply = nil
+			return
+		}
 	}
 	return
 }
@@ -413,16 +416,17 @@ func (alS *AttributeService) V1ProcessEvent(args *AttrArgsProcessEvent,
 			break
 		}
 	}
-	if err != nil {
-		return
-	}
-	// Make sure the requested fields were populated
-	for field, val := range args.CGREvent.Event {
-		if val == utils.MetaAttributes {
-			// mandatory IE missing
-			err = utils.NewErrMandatoryIeMissing(field)
-			return
+	if err == nil || err == utils.ErrNotFound {
+		// Make sure the requested fields were populated
+		for field, val := range args.CGREvent.Event {
+			if val == utils.MetaAttributes {
+				// mandatory IE missing
+				err = utils.NewErrMandatoryIeMissing(field)
+				return
+			}
 		}
+	} else {
+		return
 	}
 
 	*reply = AttrSProcessEventReply{

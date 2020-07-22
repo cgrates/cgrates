@@ -19,6 +19,7 @@ package engine
 
 import (
 	"reflect"
+	"sort"
 	"testing"
 	"time"
 
@@ -588,6 +589,7 @@ func TestAttributeProcessWithMultipleRuns1(t *testing.T) {
 	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {
 		t.Fatalf("Expecting %+v, received: %+v", eRply.MatchedProfiles, reply.MatchedProfiles)
 	}
+	sort.Strings(reply.AlteredFields)
 	if !reflect.DeepEqual(eRply.AlteredFields, reply.AlteredFields) {
 		t.Errorf("Expecting %+v, received: %+v", eRply.AlteredFields, reply.AlteredFields)
 	}
@@ -676,7 +678,7 @@ func TestAttributeProcessWithMultipleRuns2(t *testing.T) {
 		},
 	}
 	eRply := &AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_1", "ATTR_2"},
+		MatchedProfiles: []string{"ATTR_1", "ATTR_2", "ATTR_1", "ATTR_2"},
 		AlteredFields: []string{utils.MetaReq + utils.NestingSep + "Field1",
 			utils.MetaReq + utils.NestingSep + "Field2"},
 		CGREvent: &utils.CGREvent{
@@ -696,6 +698,7 @@ func TestAttributeProcessWithMultipleRuns2(t *testing.T) {
 	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {
 		t.Errorf("Expecting %+v, received: %+v", eRply.MatchedProfiles, reply.MatchedProfiles)
 	}
+	sort.Strings(reply.AlteredFields)
 	if !reflect.DeepEqual(eRply.AlteredFields, reply.AlteredFields) {
 		t.Errorf("Expecting %+v, received: %+v", eRply.AlteredFields, reply.AlteredFields)
 	}
@@ -703,8 +706,6 @@ func TestAttributeProcessWithMultipleRuns2(t *testing.T) {
 		t.Errorf("Expecting %+v, received: %+v", eRply.CGREvent.Event, reply.CGREvent.Event)
 	}
 }
-
-/*
 
 func TestAttributeProcessWithMultipleRuns3(t *testing.T) {
 	//refresh the DM
@@ -875,7 +876,7 @@ func TestAttributeProcessWithMultipleRuns4(t *testing.T) {
 		},
 	}
 	eRply := &AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_1", "ATTR_2"},
+		MatchedProfiles: []string{"ATTR_1", "ATTR_2", "ATTR_1", "ATTR_2"},
 		AlteredFields: []string{utils.MetaReq + utils.NestingSep + "Field1",
 			utils.MetaReq + utils.NestingSep + "Field2"},
 		CGREvent: &utils.CGREvent{
@@ -895,6 +896,7 @@ func TestAttributeProcessWithMultipleRuns4(t *testing.T) {
 	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {
 		t.Errorf("Expecting %+v, received: %+v", eRply.MatchedProfiles, reply.MatchedProfiles)
 	}
+	sort.Strings(reply.AlteredFields)
 	if !reflect.DeepEqual(eRply.AlteredFields, reply.AlteredFields) {
 		t.Errorf("Expecting %+v, received: %+v", eRply.AlteredFields, reply.AlteredFields)
 	}
@@ -1006,6 +1008,7 @@ func TestAttributeMultipleProcessWithBlocker(t *testing.T) {
 	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {
 		t.Errorf("Expecting %+v, received: %+v", eRply.MatchedProfiles, reply.MatchedProfiles)
 	}
+	sort.Strings(reply.AlteredFields)
 	if !reflect.DeepEqual(eRply.AlteredFields, reply.AlteredFields) {
 		t.Errorf("Expecting %+v, received: %+v", eRply.AlteredFields, reply.AlteredFields)
 	}
@@ -1264,6 +1267,7 @@ func TestAttributeAttributeFilterIDs(t *testing.T) {
 	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {
 		t.Errorf("Expecting %+v, received: %+v", eRply.MatchedProfiles, reply.MatchedProfiles)
 	}
+	sort.Strings(reply.AlteredFields)
 	if !reflect.DeepEqual(eRply.AlteredFields, reply.AlteredFields) {
 		t.Errorf("Expecting %+v, received: %+v", eRply.AlteredFields, reply.AlteredFields)
 	}
@@ -1491,7 +1495,7 @@ func TestAttributeProcessEventComposed(t *testing.T) {
 	}
 	var reply AttrSProcessEventReply
 	if err := attrService.V1ProcessEvent(attrArgs, &reply); err != nil {
-		t.Errorf("Error: %+v", err)
+		t.Fatalf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {
 		t.Errorf("Expecting %+v, received: %+v", eRply.MatchedProfiles, reply.MatchedProfiles)
@@ -2547,4 +2551,3 @@ func TestAttributeIndexSelectsFalse(t *testing.T) {
 	}
 
 }
-*/

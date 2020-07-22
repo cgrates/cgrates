@@ -480,7 +480,9 @@ func testAttributeSProcessEventWithNoneSubstitute(t *testing.T) {
 	if err := attrSRPC.Call(utils.AttributeSv1ProcessEvent,
 		ev, &rplyEv); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(eRply, &rplyEv) {
+	}
+	sort.Strings(rplyEv.AlteredFields)
+	if !reflect.DeepEqual(eRply, &rplyEv) {
 		t.Errorf("Expecting: %s, received: %s",
 			utils.ToJSON(eRply), utils.ToJSON(rplyEv))
 	}
@@ -1063,7 +1065,7 @@ func testAttributeSProcessWithMultipleRuns(t *testing.T) {
 		},
 	}
 	eRply := &engine.AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_1", "ATTR_2"},
+		MatchedProfiles: []string{"ATTR_1", "ATTR_2", "ATTR_1", "ATTR_2"},
 		AlteredFields:   []string{"*req.Field1", "*req.Field2"},
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -1173,7 +1175,7 @@ func testAttributeSProcessWithMultipleRuns2(t *testing.T) {
 		},
 	}
 	eRply := &engine.AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_1", "ATTR_2", "ATTR_3"},
+		MatchedProfiles: []string{"ATTR_1", "ATTR_2", "ATTR_3", "ATTR_2"},
 		AlteredFields:   []string{"*req.Field1", "*req.Field2", "*req.Field3"},
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
