@@ -2344,14 +2344,7 @@ func (dm *DataManager) GetAttributeProfile(tenant, id string, cacheRead, cacheWr
 			return x.(*AttributeProfile), nil
 		}
 	}
-	isInline := false
-	for typeAttr := range utils.AttrInlineTypes {
-		if strings.HasPrefix(id, typeAttr) {
-			isInline = true
-			break
-		}
-	}
-	if isInline {
+	if strings.HasPrefix(id, utils.Meta) {
 		attrPrfl, err = NewAttributeFromInline(tenant, id)
 		return // do not set inline attributes in cache it breaks the interanal db matching
 	} else if dm == nil {

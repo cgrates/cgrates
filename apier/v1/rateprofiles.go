@@ -32,14 +32,14 @@ func (apierSv1 *APIerSv1) GetRateProfile(arg *utils.TenantIDWithArgDispatcher, r
 	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if rPrf, err := apierSv1.DataManager.GetRateProfile(arg.Tenant, arg.ID, true, true, utils.NonTransactional); err != nil {
+	rPrf, err := apierSv1.DataManager.GetRateProfile(arg.Tenant, arg.ID, true, true, utils.NonTransactional)
+	if err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}
 		return err
-	} else {
-		*reply = *rPrf
 	}
+	*reply = *rPrf
 	return nil
 }
 

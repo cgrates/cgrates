@@ -75,22 +75,6 @@ func TestConcReqsQueueJSON(t *testing.T) {
 	}
 }
 
-func TestConcReqsBusyGOB(t *testing.T) {
-	concReqsConfigDIR = "conc_reqs_busy"
-	encoding = utils.StringPointer(utils.MetaGOB)
-	for _, stest := range sTestsConcReqs {
-		t.Run(concReqsConfigDIR, stest)
-	}
-}
-
-func TestConcReqsQueueGOB(t *testing.T) {
-	concReqsConfigDIR = "conc_reqs_queue"
-	encoding = utils.StringPointer(utils.MetaGOB)
-	for _, stest := range sTestsConcReqs {
-		t.Run(concReqsConfigDIR, stest)
-	}
-}
-
 func testConcReqsInitCfg(t *testing.T) {
 	var err error
 	concReqsCfgPath = path.Join(*dataDir, "conf", "samples", concReqsConfigDIR)
