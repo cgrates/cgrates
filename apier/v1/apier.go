@@ -646,6 +646,41 @@ type AttrActionPlan struct {
 	Weight    float64 // Binding's weight
 }
 
+func (attr *AttrActionPlan) getRITiming(dm *engine.DataManager) (timing *engine.RITiming, err error) {
+	if dfltTiming, isDefault := checkDefaultTiming(attr.Time); isDefault {
+		return dfltTiming, nil
+	}
+	timing = new(engine.RITiming)
+
+	if attr.TimingID != utils.EmptyString &&
+		!strings.HasPrefix(attr.TimingID, utils.Meta) { // in case of dynamic timing
+		if dbTiming, err := dm.GetTiming(attr.TimingID, false, utils.NonTransactional); err != nil {
+			if err != utils.ErrNotFound { // if not found let the user to populate all the timings values
+				return nil, err
+			}
+		} else {
+			timing.ID = dbTiming.ID
+			timing.Years = dbTiming.Years
+			timing.Months = dbTiming.Months
+			timing.MonthDays = dbTiming.MonthDays
+			timing.WeekDays = dbTiming.WeekDays
+			timing.StartTime = dbTiming.StartTime
+			timing.EndTime = dbTiming.EndTime
+		}
+	}
+	timing.ID = attr.TimingID
+	timing.Years.Parse(attr.Years, ";")
+	timing.Months.Parse(attr.Months, ";")
+	timing.MonthDays.Parse(attr.MonthDays, ";")
+	timing.WeekDays.Parse(attr.WeekDays, ";")
+	if !verifyFormat(attr.Time) {
+		err = fmt.Errorf("%s:%s", utils.ErrUnsupportedFormat.Error(), attr.Time)
+		return
+	}
+	timing.StartTime = attr.Time
+	return
+}
+
 func (apierSv1 *APIerSv1) SetActionPlan(attrs *AttrSetActionPlan, reply *string) (err error) {
 	if missing := utils.MissingStructFields(attrs, []string{"Id", "ActionPlan"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -674,35 +709,10 @@ func (apierSv1 *APIerSv1) SetActionPlan(attrs *AttrSetActionPlan, reply *string)
 			} else if !exists {
 				return 0, fmt.Errorf("%s:%s", utils.ErrBrokenReference.Error(), apiAtm.ActionsId)
 			}
-			timing := new(engine.RITiming)
-			if dfltTiming, isDefault := checkDefaultTiming(apiAtm.Time); isDefault {
-				timing = dfltTiming
-			} else {
-				if !strings.HasPrefix(apiAtm.TimingID, utils.Meta) {
-					dbTiming, err := apierSv1.DataManager.GetTiming(apiAtm.TimingID, false, utils.NonTransactional)
-					if err != nil {
-						return 0, err
-					}
-					timing.ID = dbTiming.ID
-					timing.Years = dbTiming.Years
-					timing.Months = dbTiming.Months
-					timing.MonthDays = dbTiming.MonthDays
-					timing.WeekDays = dbTiming.WeekDays
-					timing.StartTime = dbTiming.StartTime
-				} else {
-					timing.ID = apiAtm.TimingID
-					timing.Years.Parse(apiAtm.Years, ";")
-					timing.Months.Parse(apiAtm.Months, ";")
-					timing.MonthDays.Parse(apiAtm.MonthDays, ";")
-					timing.WeekDays.Parse(apiAtm.WeekDays, ";")
-					if !verifyFormat(apiAtm.Time) {
-						return 0, fmt.Errorf("%s:%s", utils.ErrUnsupportedFormat.Error(), apiAtm.Time)
-					}
-					timing.StartTime = apiAtm.Time
-				}
-
+			timing, err := apiAtm.getRITiming(apierSv1.DataManager)
+			if err != nil {
+				return 0, err
 			}
-
 			ap.ActionTimings = append(ap.ActionTimings, &engine.ActionTiming{
 				Uuid:      utils.GenUUID(),
 				Weight:    apiAtm.Weight,
