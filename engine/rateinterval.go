@@ -51,7 +51,7 @@ type RITiming struct {
 }
 
 func (rit *RITiming) CronString() string {
-	if rit.cronString != "" {
+	if rit.cronString != "" && rit.ID != utils.MetaMonthlyEstimated {
 		return rit.cronString
 	}
 	var sec, min, hour, monthday, month, weekday, year string
@@ -469,12 +469,32 @@ func (rit *RITiming) Clone() (cln *RITiming) {
 	}
 	cln = &RITiming{
 		ID:        rit.ID,
-		Years:     rit.Years,
-		Months:    rit.Months,
-		MonthDays: rit.MonthDays,
-		WeekDays:  rit.WeekDays,
 		StartTime: rit.StartTime,
 		EndTime:   rit.EndTime,
+	}
+	if len(rit.Years) != 0 {
+		cln.Years = make(utils.Years, len(rit.Years))
+		for i, year := range rit.Years {
+			cln.Years[i] = year
+		}
+	}
+	if len(rit.Months) != 0 {
+		cln.Months = make(utils.Months, len(rit.Months))
+		for i, month := range rit.Months {
+			cln.Months[i] = month
+		}
+	}
+	if len(rit.MonthDays) != 0 {
+		cln.MonthDays = make(utils.MonthDays, len(rit.MonthDays))
+		for i, monthDay := range rit.MonthDays {
+			cln.MonthDays[i] = monthDay
+		}
+	}
+	if len(rit.WeekDays) != 0 {
+		cln.WeekDays = make(utils.WeekDays, len(rit.WeekDays))
+		for i, weekDay := range rit.WeekDays {
+			cln.WeekDays[i] = weekDay
+		}
 	}
 	return
 }

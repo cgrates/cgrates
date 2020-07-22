@@ -21,6 +21,7 @@ import (
 	"reflect"
 	"sort"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -259,5 +260,67 @@ func TestCacheGetCloned(t *testing.T) {
 	at1Cloned := clned.(*ActionPlan)
 	if !reflect.DeepEqual(at1, at1Cloned) {
 		t.Errorf("Expecting: %+v, received: %+v", at1, at1Cloned)
+	}
+}
+
+func TestActionTimingGetNextStartTime(t *testing.T) {
+	t1 := time.Date(2020, 2, 7, 14, 25, 0, 0, time.UTC)
+	at := &ActionTiming{
+		Timing: &RateInterval{
+			Timing: &RITiming{
+				ID:        utils.MetaMonthlyEstimated,
+				MonthDays: utils.MonthDays{31},
+				StartTime: "00:00:00"}}}
+	exp := time.Date(2020, 2, 29, 0, 0, 0, 0, time.UTC)
+	if st := at.GetNextStartTime(t1); !st.Equal(exp) {
+		t.Errorf("Expecting: %+v, received: %+v", exp, st)
+	}
+
+	t1 = time.Date(2020, 2, 17, 14, 25, 0, 0, time.UTC)
+	at = &ActionTiming{
+		Timing: &RateInterval{
+			Timing: &RITiming{
+				ID:        utils.MetaMonthlyEstimated,
+				MonthDays: utils.MonthDays{16},
+				StartTime: "00:00:00"}}}
+	exp = time.Date(2020, 3, 16, 0, 0, 0, 0, time.UTC)
+	if st := at.GetNextStartTime(t1); !st.Equal(exp) {
+		t.Errorf("Expecting: %+v, received: %+v", exp, st)
+	}
+
+	t1 = time.Date(2020, 12, 17, 14, 25, 0, 0, time.UTC)
+	at = &ActionTiming{
+		Timing: &RateInterval{
+			Timing: &RITiming{
+				ID:        utils.MetaMonthlyEstimated,
+				MonthDays: utils.MonthDays{16},
+				StartTime: "00:00:00"}}}
+	exp = time.Date(2021, 1, 16, 0, 0, 0, 0, time.UTC)
+	if st := at.GetNextStartTime(t1); !st.Equal(exp) {
+		t.Errorf("Expecting: %+v, received: %+v", exp, st)
+	}
+
+	t1 = time.Date(2020, 12, 17, 14, 25, 0, 0, time.UTC)
+	at = &ActionTiming{
+		Timing: &RateInterval{
+			Timing: &RITiming{
+				ID:        utils.MetaMonthlyEstimated,
+				MonthDays: utils.MonthDays{31},
+				StartTime: "00:00:00"}}}
+	exp = time.Date(2020, 12, 31, 0, 0, 0, 0, time.UTC)
+	if st := at.GetNextStartTime(t1); !st.Equal(exp) {
+		t.Errorf("Expecting: %+v, received: %+v", exp, st)
+	}
+
+	t1 = time.Date(2020, 7, 31, 14, 25, 0, 0, time.UTC)
+	at = &ActionTiming{
+		Timing: &RateInterval{
+			Timing: &RITiming{
+				ID:        utils.MetaMonthlyEstimated,
+				MonthDays: utils.MonthDays{31},
+				StartTime: "15:00:00"}}}
+	exp = time.Date(2020, 7, 31, 15, 0, 0, 0, time.UTC)
+	if st := at.GetNextStartTime(t1); !st.Equal(exp) {
+		t.Errorf("Expecting: %+v, received: %+v", exp, st)
 	}
 }

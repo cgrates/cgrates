@@ -112,13 +112,16 @@ func (ldr *Loader) ListenAndServe(exitChan chan struct{}) (err error) {
 }
 
 // ProcessFolder will process the content in the folder with locking
-func (ldr *Loader) ProcessFolder(caching, loadOption string) (err error) {
+func (ldr *Loader) ProcessFolder(caching, loadOption string, stopOnError bool) (err error) {
 	if err = ldr.lockFolder(); err != nil {
 		return
 	}
 	defer ldr.unlockFolder()
 	for ldrType := range ldr.rdrs {
 		if err = ldr.processFiles(ldrType, caching, loadOption); err != nil {
+			if stopOnError {
+				return
+			}
 			utils.Logger.Warning(fmt.Sprintf("<%s-%s> loaderType: <%s> cannot open files, err: %s",
 				utils.LoaderS, ldr.ldrID, ldrType, err.Error()))
 			continue
