@@ -152,6 +152,7 @@ func testInternalRemoteITDataFlush(t *testing.T) {
 }
 
 func testInternalRemoteITStartEngine(t *testing.T) {
+	engine.KillEngine(100)
 	if _, err := engine.StartEngine(engineOneCfgPath, 500); err != nil {
 		t.Fatal(err)
 	}
