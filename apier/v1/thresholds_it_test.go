@@ -170,7 +170,7 @@ var (
 					utils.PDD:         time.Duration(0) * time.Second,
 					utils.AnswerTime:  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
 					utils.Usage:       time.Duration(10) * time.Second,
-					utils.SUPPLIER:    "SUPPL1",
+					utils.ROUTE:       "SUPPL1",
 					utils.COST:        -1.0,
 				},
 			},
