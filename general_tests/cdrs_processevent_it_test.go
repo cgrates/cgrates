@@ -272,12 +272,12 @@ func testV1CDRsProcessEventChrgS(t *testing.T) {
 		t.Errorf("Expecting: test2_processEvent, received: %+v, %+v, %+v ", cdrs[0].OriginID, cdrs[1].OriginID, cdrs[2].OriginID)
 	}
 	sort.Slice(cdrs, func(i, j int) bool { return cdrs[i].RunID < cdrs[j].RunID })
-	if cdrs[1].RunID != "raw" { // charger with RunID *raw
-		t.Errorf("Expecting: %+v, received: %+v", "raw", cdrs[1].RunID)
+	if cdrs[2].RunID != "raw" { // charger with RunID *raw
+		t.Errorf("Expecting: %+v, received: %+v", "raw", cdrs[2].RunID)
 	} else if cdrs[0].RunID != "CustomerCharges" {
 		t.Errorf("Expecting: %+v, received: %+v", "CustomerCharges", cdrs[0].RunID)
-	} else if cdrs[2].RunID != "SupplierCharges" {
-		t.Errorf("Expecting: %+v, received: %+v", "SupplierCharges", cdrs[2].RunID)
+	} else if cdrs[1].RunID != "SupplierCharges" {
+		t.Errorf("Expecting: %+v, received: %+v", "SupplierCharges", cdrs[1].RunID)
 	}
 }
 
@@ -347,7 +347,7 @@ func testV1CDRsProcessEventSts(t *testing.T) {
 	}
 	var cdrs []*engine.CDR
 	eOut := []*engine.CDR{
-		&engine.CDR{
+		{
 			CGRID:       "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
 			RunID:       "testv1",
 			OrderID:     0,
@@ -440,9 +440,8 @@ func testV1CDRsProcessEventThreshold(t *testing.T) {
 	if err := pecdrsRpc.Call(utils.APIerSv2SetActions, &utils.AttrSetActions{
 		ActionsId: "ACT_LOG",
 		Actions: []*utils.TPAction{
-			&utils.TPAction{
-				Identifier: utils.LOG},
-			&utils.TPAction{
+			{Identifier: utils.LOG},
+			{
 				Identifier: utils.TOPUP_RESET, BalanceType: utils.VOICE,
 				Units: "10", ExpiryTime: "*unlimited",
 				DestinationIds: "*any", BalanceWeight: "10", Weight: 10},
