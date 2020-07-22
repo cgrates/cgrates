@@ -651,7 +651,7 @@ func testAttributeSProcessEventWithHeader(t *testing.T) {
 				},
 			},
 			Blocker: true,
-			Weight:  10,
+			Weight:  5,
 		},
 	}
 	var result string
@@ -1192,10 +1192,12 @@ func testAttributeSProcessWithMultipleRuns2(t *testing.T) {
 	var rplyEv engine.AttrSProcessEventReply
 	if err := attrSRPC.Call(utils.AttributeSv1ProcessEvent,
 		attrArgs, &rplyEv); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	} else if !reflect.DeepEqual(eRply.MatchedProfiles, rplyEv.MatchedProfiles) {
 		t.Errorf("Expecting %+v, received: %+v", eRply.MatchedProfiles, rplyEv.MatchedProfiles)
-	} else if !reflect.DeepEqual(eRply.AlteredFields, rplyEv.AlteredFields) {
+	}
+	sort.Strings(rplyEv.AlteredFields)
+	if !reflect.DeepEqual(eRply.AlteredFields, rplyEv.AlteredFields) {
 		t.Errorf("Expecting %+v, received: %+v", eRply.AlteredFields, rplyEv.AlteredFields)
 	} else if !reflect.DeepEqual(eRply.CGREvent.Event, rplyEv.CGREvent.Event) {
 		t.Errorf("Expecting %+v, received: %+v", eRply.CGREvent.Event, rplyEv.CGREvent.Event)

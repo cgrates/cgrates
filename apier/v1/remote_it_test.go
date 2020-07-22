@@ -161,6 +161,7 @@ func testInternalRemoteITStartEngine(t *testing.T) {
 	if _, err := engine.StartEngine(internalCfgPath, 500); err != nil {
 		t.Fatal(err)
 	}
+	time.Sleep(200 * time.Millisecond)
 }
 
 func testInternalRemoteITRPCConn(t *testing.T) {
@@ -169,17 +170,14 @@ func testInternalRemoteITRPCConn(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	time.Sleep(200 * time.Millisecond)
 	engineTwoRPC, err = newRPCClient(engineTwoCfg.ListenCfg())
 	if err != nil {
 		t.Fatal(err)
 	}
-	time.Sleep(200 * time.Millisecond)
 	internalRPC, err = newRPCClient(internalCfg.ListenCfg())
 	if err != nil {
 		t.Fatal(err)
 	}
-	time.Sleep(200 * time.Millisecond)
 }
 
 func testInternalRemoteLoadDataInEngineTwo(t *testing.T) {
@@ -674,10 +672,10 @@ func testInternalRemoteITGetDispatcherHost(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "DspHst1",
 			Conns: []*config.RemoteHost{
-				&config.RemoteHost{
+				{
 					Address: "*internal",
 				},
-				&config.RemoteHost{
+				{
 					Address:   ":2012",
 					Transport: utils.MetaJSON,
 					TLS:       true,
