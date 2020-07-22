@@ -45,6 +45,7 @@ var (
 		testV1RouteResetStorDb,
 		testV1RouteStartEngine,
 		testV1RouteRpcConn,
+		testV1RouteGetBeforeDataLoad,
 		testV1RouteFromFolder,
 		testV1RouteGetWeightRoutes,
 		testV1RouteGetLeastCostRoutes,
@@ -127,6 +128,17 @@ func testV1RouteRpcConn(t *testing.T) {
 	splSv1Rpc, err = newRPCClient(splSv1Cfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
+	}
+}
+
+func testV1RouteGetBeforeDataLoad(t *testing.T) {
+	var suplsReply *engine.RouteProfile
+	if err := splSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
+		&utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "SPL_WEIGHT_1",
+		}, &suplsReply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
 	}
 }
 
