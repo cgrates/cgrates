@@ -109,7 +109,7 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 		utils.Usage:            "1m23s",
 		utils.LastUsed:         "21s",
 		utils.PDD:              "300ms",
-		utils.SUPPLIER:         "supplier1",
+		utils.ROUTE:            "supplier1",
 		utils.DISCONNECT_CAUSE: "NORMAL_DISCONNECT",
 		utils.OriginHost:       "127.0.0.1",
 		"Extra1":               "Value1",
@@ -429,7 +429,7 @@ func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 		utils.Usage:       "1m23s",
 		utils.LastUsed:    "21s",
 		utils.PDD:         "300ms",
-		utils.SUPPLIER:    "supplier1",
+		utils.ROUTE:       "supplier1",
 		utils.OriginHost:  "127.0.0.1",
 	})
 	s := &Session{
@@ -487,7 +487,7 @@ func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 		utils.Usage:       "1m23s",
 		utils.LastUsed:    "21s",
 		utils.PDD:         "300ms",
-		utils.SUPPLIER:    "supplier2",
+		utils.ROUTE:       "supplier2",
 		utils.OriginHost:  "127.0.0.1",
 	})
 	s2 := &Session{
@@ -553,7 +553,7 @@ func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 		utils.Usage:            "1m23s",
 		utils.LastUsed:         "21s",
 		utils.PDD:              "300ms",
-		utils.SUPPLIER:         "supplier2",
+		utils.ROUTE:            "supplier2",
 		utils.DISCONNECT_CAUSE: "NORMAL_DISCONNECT",
 		utils.OriginHost:       "127.0.0.1",
 	})
@@ -647,7 +647,7 @@ func TestSessionSRegisterAndUnregisterPSessions(t *testing.T) {
 		utils.Usage:       "1m23s",
 		utils.LastUsed:    "21s",
 		utils.PDD:         "300ms",
-		utils.SUPPLIER:    "supplier1",
+		utils.ROUTE:       "supplier1",
 		utils.OriginHost:  "127.0.0.1",
 	})
 	s := &Session{
@@ -708,7 +708,7 @@ func TestSessionSRegisterAndUnregisterPSessions(t *testing.T) {
 		utils.Usage:       "1m23s",
 		utils.LastUsed:    "21s",
 		utils.PDD:         "300ms",
-		utils.SUPPLIER:    "supplier2",
+		utils.ROUTE:       "supplier2",
 		utils.OriginHost:  "127.0.0.1",
 	})
 	s2 := &Session{
@@ -774,7 +774,7 @@ func TestSessionSRegisterAndUnregisterPSessions(t *testing.T) {
 		utils.Usage:            "1m23s",
 		utils.LastUsed:         "21s",
 		utils.PDD:              "300ms",
-		utils.SUPPLIER:         "supplier2",
+		utils.ROUTE:            "supplier2",
 		utils.DISCONNECT_CAUSE: "NORMAL_DISCONNECT",
 		utils.OriginHost:       "127.0.0.1",
 	})
@@ -1401,7 +1401,7 @@ func TestSessionStransitSState(t *testing.T) {
 		utils.Usage:       "1m23s",
 		utils.LastUsed:    "21s",
 		utils.PDD:         "300ms",
-		utils.SUPPLIER:    "supplier1",
+		utils.ROUTE:       "supplier1",
 		utils.OriginHost:  "127.0.0.1",
 	})
 	s := &Session{
@@ -1447,7 +1447,7 @@ func TestSessionSrelocateSessionS(t *testing.T) {
 		utils.Usage:       "1m23s",
 		utils.LastUsed:    "21s",
 		utils.PDD:         "300ms",
-		utils.SUPPLIER:    "supplier1",
+		utils.ROUTE:       "supplier1",
 		utils.OriginHost:  "127.0.0.1",
 	})
 	initialCGRID := GetSetCGRID(sSEv)
@@ -1659,7 +1659,7 @@ func TestSessionSgetSessionIDsMatchingIndexes(t *testing.T) {
 		utils.Usage:            "1m23s",
 		utils.LastUsed:         "21s",
 		utils.PDD:              "300ms",
-		utils.SUPPLIER:         "supplier1",
+		utils.ROUTE:            "supplier1",
 		utils.DISCONNECT_CAUSE: "NORMAL_DISCONNECT",
 		utils.OriginHost:       "127.0.0.1",
 		"Extra1":               "Value1",
@@ -1943,7 +1943,7 @@ func TestSessionSgetSession(t *testing.T) {
 		utils.Usage:       "1m23s",
 		utils.LastUsed:    "21s",
 		utils.PDD:         "300ms",
-		utils.SUPPLIER:    "supplier1",
+		utils.ROUTE:       "supplier1",
 		utils.OriginHost:  "127.0.0.1",
 	})
 	s := &Session{
@@ -1990,7 +1990,7 @@ func TestSessionSfilterSessions(t *testing.T) {
 		utils.Usage:            "1m23s",
 		utils.LastUsed:         "21s",
 		utils.PDD:              "300ms",
-		utils.SUPPLIER:         "supplier1",
+		utils.ROUTE:            "supplier1",
 		utils.DISCONNECT_CAUSE: "NORMAL_DISCONNECT",
 		utils.OriginHost:       "127.0.0.1",
 		"Extra1":               "Value1",
@@ -2050,7 +2050,7 @@ func TestSessionSfilterSessions(t *testing.T) {
 			"Extra3":          "",
 			"LastUsed":        "21s",
 			"PDD":             "300ms",
-			utils.SUPPLIER:    "supplier1",
+			utils.ROUTE:       "supplier1",
 		},
 		NodeID: sSCfg.GeneralCfg().NodeID,
 	}
@@ -2075,7 +2075,7 @@ func TestSessionSfilterSessions(t *testing.T) {
 			"Extra3":          "",
 			"LastUsed":        "21s",
 			"PDD":             "300ms",
-			utils.SUPPLIER:    "supplier1",
+			utils.ROUTE:       "supplier1",
 		},
 		NodeID: sSCfg.GeneralCfg().NodeID,
 	}
@@ -2166,7 +2166,7 @@ func TestSessionSfilterSessionsCount(t *testing.T) {
 		utils.Usage:            "1m23s",
 		utils.LastUsed:         "21s",
 		utils.PDD:              "300ms",
-		utils.SUPPLIER:         "supplier1",
+		utils.ROUTE:            "supplier1",
 		utils.DISCONNECT_CAUSE: "NORMAL_DISCONNECT",
 		utils.OriginHost:       "127.0.0.1",
 		"Extra1":               "Value1",

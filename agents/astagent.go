@@ -38,7 +38,7 @@ import (
 const (
 	CGRAuthAPP               = "cgrates_auth"
 	CGRMaxSessionTime        = "CGRMaxSessionTime"
-	CGRSupplier              = "CGRSupplier"
+	CGRRoute                 = "CGRRoute"
 	ARIStasisStart           = "StasisStart"
 	ARIChannelStateChange    = "ChannelStateChange"
 	ARIChannelDestroyed      = "ChannelDestroyed"
@@ -211,7 +211,7 @@ func (sma *AsteriskAgent) handleStasisStart(ev *SMAsteriskEvent) {
 	if authReply.Routes != nil {
 		for i, route := range authReply.Routes.SortedRoutes {
 			if !sma.setChannelVar(ev.ChannelID(),
-				CGRSupplier+strconv.Itoa(i+1), route.RouteID) {
+				CGRRoute+strconv.Itoa(i+1), route.RouteID) {
 				return
 			}
 		}

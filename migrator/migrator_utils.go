@@ -28,6 +28,10 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+var (
+	SUPPLIER = "Supplier"
+)
+
 func NewMigratorDataDB(db_type, host, port, name, user, pass,
 	marshaler string, cacheCfg *config.CacheCfg, sentinelName string,
 	itemsCacheCfg map[string]*config.ItemOpt) (db MigratorDataDB, err error) {

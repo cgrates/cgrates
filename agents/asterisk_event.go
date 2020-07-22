@@ -156,8 +156,8 @@ func (smaEv *SMAsteriskEvent) PDD() string {
 	return smaEv.cachedFields[utils.CGR_PDD]
 }
 
-func (smaEv *SMAsteriskEvent) Supplier() string {
-	return smaEv.cachedFields[utils.CGR_SUPPLIER]
+func (smaEv *SMAsteriskEvent) Route() string {
+	return smaEv.cachedFields[utils.CGR_ROUTE]
 }
 
 func (smaEv *SMAsteriskEvent) Subsystems() string {
@@ -179,7 +179,7 @@ func (smaEv *SMAsteriskEvent) DisconnectCause() string {
 }
 
 var primaryFields = utils.NewStringSet([]string{eventType, channelID, timestamp, utils.SetupTime, utils.CGR_ACCOUNT, utils.CGR_DESTINATION, utils.CGR_REQTYPE,
-	utils.CGR_TENANT, utils.CGR_CATEGORY, utils.CGR_SUBJECT, utils.CGR_PDD, utils.CGR_SUPPLIER, utils.CGR_DISCONNECT_CAUSE})
+	utils.CGR_TENANT, utils.CGR_CATEGORY, utils.CGR_SUBJECT, utils.CGR_PDD, utils.CGR_ROUTE, utils.CGR_DISCONNECT_CAUSE})
 
 func (smaEv *SMAsteriskEvent) ExtraParameters() (extraParams map[string]string) {
 	extraParams = make(map[string]string)
@@ -248,8 +248,8 @@ func (smaEv *SMAsteriskEvent) AsMapStringInterface() (mp map[string]interface{})
 	mp[utils.Account] = smaEv.Account()
 	mp[utils.Destination] = smaEv.Destination()
 	mp[utils.SetupTime] = smaEv.SetupTime()
-	if smaEv.Supplier() != "" {
-		mp[utils.SUPPLIER] = smaEv.Supplier()
+	if smaEv.Route() != "" {
+		mp[utils.ROUTE] = smaEv.Route()
 	}
 	for extraKey, extraVal := range smaEv.ExtraParameters() { // Append extraParameters
 		mp[extraKey] = extraVal

@@ -40,7 +40,7 @@ const (
 	DESTINATION              = varPrefix + utils.CGR_DESTINATION
 	REQTYPE                  = varPrefix + utils.CGR_REQTYPE //prepaid or postpaid
 	CATEGORY                 = varPrefix + utils.CGR_CATEGORY
-	VAR_CGR_SUPPLIER         = varPrefix + utils.CGR_SUPPLIER
+	VAR_CGR_ROUTE            = varPrefix + utils.CGR_ROUTE
 	UUID                     = "Unique-ID" // -Unique ID for this call leg
 	CSTMID                   = varPrefix + utils.CGR_TENANT
 	CALL_DEST_NR             = "Caller-Destination-Number"
@@ -259,11 +259,11 @@ func (fsev FSEvent) GetADC(fieldName string) (time.Duration, error) {
 	return utils.ParseDurationWithSecs(ACDStr)
 }
 
-func (fsev FSEvent) GetSupplier(fieldName string) string {
+func (fsev FSEvent) GetRoute(fieldName string) string {
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
 		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
 	}
-	return utils.FirstNonEmpty(fsev[fieldName], fsev[VAR_CGR_SUPPLIER])
+	return utils.FirstNonEmpty(fsev[fieldName], fsev[VAR_CGR_ROUTE])
 }
 
 func (fsev FSEvent) GetDisconnectCause(fieldName string) string {
@@ -333,8 +333,8 @@ func (fsev FSEvent) ParseEventValue(rsrFld *config.RSRParser, timezone string) (
 	case utils.PDD:
 		PDD, _ := fsev.GetPdd(utils.MetaDefault)
 		return rsrFld.ParseValue(strconv.FormatFloat(PDD.Seconds(), 'f', -1, 64))
-	case utils.SUPPLIER:
-		return rsrFld.ParseValue(fsev.GetSupplier(""))
+	case utils.ROUTE:
+		return rsrFld.ParseValue(fsev.GetRoute(""))
 	case utils.DISCONNECT_CAUSE:
 		return rsrFld.ParseValue(fsev.GetDisconnectCause(""))
 	case utils.RunID:
@@ -386,7 +386,7 @@ func (fsev FSEvent) AsMapStringInterface(timezone string) map[string]interface{}
 	mp[utils.PDD], _ = fsev.GetPdd(utils.MetaDefault)
 	mp[utils.ACD], _ = fsev.GetADC(utils.MetaDefault)
 	mp[utils.COST] = -1.0
-	mp[utils.SUPPLIER] = fsev.GetSupplier(utils.MetaDefault)
+	mp[utils.ROUTE] = fsev.GetRoute(utils.MetaDefault)
 	mp[utils.DISCONNECT_CAUSE] = fsev.GetDisconnectCause(utils.MetaDefault)
 	return mp
 }

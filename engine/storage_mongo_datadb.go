@@ -92,7 +92,6 @@ var (
 	CategoryLow        = strings.ToLower(utils.Category)
 	AccountLow         = strings.ToLower(utils.Account)
 	SubjectLow         = strings.ToLower(utils.Subject)
-	SupplierLow        = strings.ToLower(utils.SUPPLIER)
 	DisconnectCauseLow = strings.ToLower(utils.DISCONNECT_CAUSE)
 	SetupTimeLow       = strings.ToLower(utils.SetupTime)
 	AnswerTimeLow      = strings.ToLower(utils.AnswerTime)
