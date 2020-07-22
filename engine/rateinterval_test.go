@@ -493,6 +493,34 @@ func TestRITimingClone(t *testing.T) {
 	}
 }
 
+func TestRITimingClone2(t *testing.T) {
+	var rit, cln RITiming
+	rit = RITiming{
+		Years:     utils.Years{2019},
+		Months:    utils.Months{4},
+		MonthDays: utils.MonthDays{18},
+		WeekDays:  utils.WeekDays{5},
+		StartTime: "StartTime_test",
+		EndTime:   "EndTime_test",
+	}
+	cln = RITiming{
+		Years:     utils.Years{2019},
+		Months:    utils.Months{4},
+		MonthDays: utils.MonthDays{18},
+		WeekDays:  utils.WeekDays{5},
+		StartTime: "StartTime_test",
+		EndTime:   "EndTime_test",
+	}
+	cloned := rit.Clone()
+	if !reflect.DeepEqual(cln, *cloned) {
+		t.Errorf("Expecting: %+v, received: %+v", cln, *cloned)
+	}
+	rit.Years[0] = 2020
+	if cloned.Years[0] != cln.Years[0] {
+		t.Errorf("Expecting: 2019, received: %+v", cloned.Years)
+	}
+}
+
 func TestRIRateClone(t *testing.T) {
 	var rit, cln RIRate
 	if cloned := rit.Clone(); !reflect.DeepEqual(cln, *cloned) {

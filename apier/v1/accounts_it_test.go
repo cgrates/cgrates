@@ -978,10 +978,7 @@ func testAccITAccountMonthlyEstimated(t *testing.T) {
 	}
 	eTiming := &engine.RITiming{
 		ID:        utils.MetaMonthlyEstimated,
-		Years:     utils.Years{},
-		Months:    utils.Months{},
 		MonthDays: utils.MonthDays{31},
-		WeekDays:  utils.WeekDays{},
 		StartTime: "00:00:00",
 		EndTime:   "",
 	}
@@ -998,5 +995,11 @@ func testAccITAccountMonthlyEstimated(t *testing.T) {
 		t.Errorf("Expected: %v,\n received: %v", 1, len(aps))
 	} else if !reflect.DeepEqual(aps[0].ActionTimings[0].Timing.Timing, eTiming) {
 		t.Errorf("Expected: %v,\n received: %v", utils.ToJSON(eTiming), utils.ToJSON(aps[0].ActionTimings[0].Timing.Timing))
+	} else {
+		// verify the GetNextTimeStart
+		endOfMonth := utils.GetEndOfMonth(time.Now())
+		if execDay := aps[0].ActionTimings[0].GetNextStartTime(time.Now()).Day(); execDay != endOfMonth.Day() {
+			t.Errorf("Expected: %v,\n received: %v", endOfMonth.Day(), execDay)
+		}
 	}
 }

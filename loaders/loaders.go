@@ -73,9 +73,10 @@ func (ldrS *LoaderService) ListenAndServe(exitChan chan bool) (err error) {
 }
 
 type ArgsProcessFolder struct {
-	LoaderID  string
-	ForceLock bool
-	Caching   *string
+	LoaderID    string
+	ForceLock   bool
+	Caching     *string
+	StopOnError bool
 }
 
 func (ldrS *LoaderService) V1Load(args *ArgsProcessFolder,
@@ -104,7 +105,7 @@ func (ldrS *LoaderService) V1Load(args *ArgsProcessFolder,
 	if args.Caching != nil {
 		caching = *args.Caching
 	}
-	if err := ldr.ProcessFolder(caching, utils.MetaStore); err != nil {
+	if err := ldr.ProcessFolder(caching, utils.MetaStore, args.StopOnError); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*rply = utils.OK
@@ -137,7 +138,7 @@ func (ldrS *LoaderService) V1Remove(args *ArgsProcessFolder,
 	if args.Caching != nil {
 		caching = *args.Caching
 	}
-	if err := ldr.ProcessFolder(caching, utils.MetaRemove); err != nil {
+	if err := ldr.ProcessFolder(caching, utils.MetaRemove, args.StopOnError); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*rply = utils.OK
@@ -156,27 +157,4 @@ func (ldrS *LoaderService) Reload(dm *engine.DataManager, ldrsCfg []*config.Load
 		ldrS.ldrs[ldrCfg.Id] = NewLoader(dm, ldrCfg, timezone, exitChan, filterS, connMgr, ldrCfg.CacheSConns)
 	}
 	ldrS.Unlock()
-}
-
-func (ldrS *LoaderService) Preload(loaderIDs []string) (err error) {
-	ldrS.RLock()
-	defer ldrS.RUnlock()
-	for _, loaderID := range loaderIDs {
-		ldr, has := ldrS.ldrs[loaderID]
-		if !has {
-			return fmt.Errorf("UNKNOWN_LOADER: %s", loaderID)
-		}
-		if locked, err := ldr.isFolderLocked(); err != nil {
-			return utils.NewErrServerError(err)
-		} else if locked {
-			if err := ldr.unlockFolder(); err != nil {
-				return utils.NewErrServerError(err)
-			}
-			return errors.New("ANOTHER_LOADER_RUNNING")
-		}
-		if err := ldr.ProcessFolder(config.CgrConfig().GeneralCfg().DefaultCaching, utils.MetaStore); err != nil {
-			return utils.NewErrServerError(err)
-		}
-	}
-	return
 }
