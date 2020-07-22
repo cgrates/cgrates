@@ -217,11 +217,11 @@ func testV2CDRsOfflineBalanceUpdate(t *testing.T) {
 func testV2CDRsOfflineExpiryBalance(t *testing.T) {
 	var reply string
 	acc := &utils.AttrSetActions{ActionsId: "ACT_TOPUP_TEST2", Actions: []*utils.TPAction{
-		&utils.TPAction{Identifier: utils.TOPUP, BalanceType: utils.MONETARY, BalanceId: "BalanceExpired1", Units: "5",
+		{Identifier: utils.TOPUP, BalanceType: utils.MONETARY, BalanceId: "BalanceExpired1", Units: "5",
 			ExpiryTime: time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC).String(), BalanceWeight: "10", Weight: 20.0},
-		&utils.TPAction{Identifier: utils.TOPUP, BalanceType: utils.MONETARY, BalanceId: "BalanceExpired2", Units: "10",
+		{Identifier: utils.TOPUP, BalanceType: utils.MONETARY, BalanceId: "BalanceExpired2", Units: "10",
 			ExpiryTime: time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC).String(), BalanceWeight: "10", Weight: 20.0},
-		&utils.TPAction{Identifier: utils.TOPUP, BalanceType: utils.MONETARY, BalanceId: "NewBalance", Units: "10",
+		{Identifier: utils.TOPUP, BalanceType: utils.MONETARY, BalanceId: "NewBalance", Units: "10",
 			ExpiryTime: utils.UNLIMITED, BalanceWeight: "10", Weight: 20.0},
 	}}
 	if err := cdrsOfflineRpc.Call(utils.APIerSv2SetActions, acc, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
