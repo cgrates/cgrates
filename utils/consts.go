@@ -209,7 +209,7 @@ const (
 	Value                        = "Value"
 	LastUsed                     = "LastUsed"
 	PDD                          = "PDD"
-	SUPPLIER                     = "Supplier"
+	ROUTE                        = "Route"
 	RunID                        = "RunID"
 	AttributeIDs                 = "AttributeIDs"
 	MetaReqRunID                 = "*req.RunID"
@@ -1557,7 +1557,7 @@ const (
 //cgr_ variables
 const (
 	CGR_ACCOUNT          = "cgr_account"
-	CGR_SUPPLIER         = "cgr_supplier"
+	CGR_ROUTE            = "cgr_route"
 	CGR_DESTINATION      = "cgr_destination"
 	CGR_SUBJECT          = "cgr_subject"
 	CGR_CATEGORY         = "cgr_category"

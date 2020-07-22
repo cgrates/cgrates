@@ -242,7 +242,7 @@ func (kev KamEvent) AsKamAuthReply(authArgs *sessions.V1AuthorizeArgs,
 		kar.MaxUsage = int(utils.Round(authReply.MaxUsage.Seconds(), 0, utils.ROUNDING_MIDDLE))
 	}
 	if authArgs.GetRoutes && authReply.Routes != nil {
-		kar.Suppliers = authReply.Routes.Digest()
+		kar.Routes = authReply.Routes.Digest()
 	}
 
 	if authArgs.ProcessThresholds && authReply.ThresholdIDs != nil {
@@ -335,7 +335,7 @@ func (kev KamEvent) AsKamProcessMessageReply(procEvArgs *sessions.V1ProcessMessa
 		kar.MaxUsage = int(utils.Round(procEvReply.MaxUsage.Seconds(), 0, utils.ROUNDING_MIDDLE))
 	}
 	if procEvArgs.GetRoutes && procEvReply.Routes != nil {
-		kar.Suppliers = procEvReply.Routes.Digest()
+		kar.Routes = procEvReply.Routes.Digest()
 	}
 
 	if procEvArgs.ProcessThresholds {
@@ -405,7 +405,7 @@ type KamReply struct {
 	Attributes         string
 	ResourceAllocation string
 	MaxUsage           int    // Maximum session time in case of success, -1 for unlimited
-	Suppliers          string // List of suppliers, comma separated
+	Routes             string // List of routes, comma separated
 	Thresholds         string
 	StatQueues         string
 	Error              string // Reply in case of error

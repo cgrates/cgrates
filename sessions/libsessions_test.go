@@ -44,7 +44,7 @@ func TestLibSessionSGetSetCGRID(t *testing.T) {
 		utils.Usage:            "1m23s",
 		utils.LastUsed:         "21s",
 		utils.PDD:              "300ms",
-		utils.SUPPLIER:         "supplier1",
+		utils.ROUTE:            "supplier1",
 		utils.DISCONNECT_CAUSE: "NORMAL_DISCONNECT",
 		utils.OriginHost:       "127.0.0.1",
 	})
