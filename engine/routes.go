@@ -244,7 +244,9 @@ func (rpS *RouteService) costForEvent(ev *utils.CGREvent,
 		usage = time.Duration(1 * time.Minute)
 		err = nil
 	}
-	var rplyVals map[string]interface{}
+	var accountMaxUsage time.Duration
+	var acntCost map[string]interface{}
+	var initialUsage time.Duration
 	if err := rpS.connMgr.Call(rpS.cgrcfg.RouteSCfg().RALsConns, nil, utils.ResponderGetMaxSessionTimeOnAccounts,
 		&utils.GetMaxSessionTimeOnAccountsArgs{
 			Tenant:      ev.Tenant,
@@ -253,28 +255,47 @@ func (rpS *RouteService) costForEvent(ev *utils.CGREvent,
 			SetupTime:   sTime,
 			Usage:       usage,
 			AccountIDs:  acntIDs,
-		}, &rplyVals); err != nil {
+		}, &acntCost); err != nil {
 		return nil, err
 	}
-	for k, v := range rplyVals { // do not overwrite the return map
-		costData[k] = v
+	if ifaceMaxUsage, has := acntCost[utils.CapMaxUsage]; has {
+		if accountMaxUsage, err = utils.IfaceAsDuration(ifaceMaxUsage); err != nil {
+			return nil, err
+		}
+		if usage > accountMaxUsage {
+			// remain usage needs to be covered by rating plans
+			if len(rpIDs) == 0 {
+				return nil, fmt.Errorf("no rating plans defined for remaining usage")
+			}
+			// update the setup time and the usage
+			sTime = sTime.Add(accountMaxUsage)
+			initialUsage = usage
+			usage = usage - accountMaxUsage
+		}
+		for k, v := range acntCost { // update the costData with the infos from AccountS
+			costData[k] = v
+		}
 	}
-	rplyVals = make(map[string]interface{}) // reset the map
-	if err := rpS.connMgr.Call(rpS.cgrcfg.RouteSCfg().RALsConns, nil, utils.ResponderGetCostOnRatingPlans,
-		&utils.GetCostOnRatingPlansArgs{
-			Tenant:        ev.Tenant,
-			Account:       acnt,
-			Subject:       subj,
-			Destination:   dst,
-			SetupTime:     sTime,
-			Usage:         usage,
-			RatingPlanIDs: rpIDs,
-		}, &rplyVals); err != nil {
-		return nil, err
+
+	if accountMaxUsage == 0 || accountMaxUsage < initialUsage {
+		var rpCost map[string]interface{}
+		if err := rpS.connMgr.Call(rpS.cgrcfg.RouteSCfg().RALsConns, nil, utils.ResponderGetCostOnRatingPlans,
+			&utils.GetCostOnRatingPlansArgs{
+				Tenant:        ev.Tenant,
+				Account:       acnt,
+				Subject:       subj,
+				Destination:   dst,
+				SetupTime:     sTime,
+				Usage:         usage,
+				RatingPlanIDs: rpIDs,
+			}, &rpCost); err != nil {
+			return nil, err
+		}
+		for k, v := range rpCost { // do not overwrite the return map
+			costData[k] = v
+		}
 	}
-	for k, v := range rplyVals {
-		costData[k] = v
-	}
+
 	return
 }
 
@@ -396,6 +417,7 @@ func (rpS *RouteService) populateSortingData(ev *utils.CGREvent, route *Route,
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> ignoring route with ID: %s, missing cost information",
 					utils.RouteS, route.ID))
+			return nil, false, nil
 		} else {
 			if extraOpts.maxCost != 0 &&
 				costData[utils.Cost].(float64) > extraOpts.maxCost {

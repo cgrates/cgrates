@@ -315,6 +315,7 @@ func (rs *Responder) GetMaxSessionTime(arg *CallDescriptorWithArgDispatcher, rep
 
 func (rs *Responder) GetMaxSessionTimeOnAccounts(arg *utils.GetMaxSessionTimeOnAccountsArgs,
 	reply *map[string]interface{}) (err error) {
+	var maxDur time.Duration
 	for _, anctID := range arg.AccountIDs {
 		cd := &CallDescriptor{
 			Category:      utils.MetaRoutes,
@@ -326,11 +327,11 @@ func (rs *Responder) GetMaxSessionTimeOnAccounts(arg *utils.GetMaxSessionTimeOnA
 			TimeEnd:       arg.SetupTime.Add(arg.Usage),
 			DurationIndex: arg.Usage,
 		}
-		if maxDur, err := cd.GetMaxSessionDuration(); err != nil {
+		if maxDur, err = cd.GetMaxSessionDuration(); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> ignoring cost for account: %s, err: %s",
 					utils.Responder, anctID, err.Error()))
-		} else if maxDur >= arg.Usage {
+		} else {
 			*reply = map[string]interface{}{
 				utils.CapMaxUsage: maxDur,
 				utils.Cost:        0.0,
