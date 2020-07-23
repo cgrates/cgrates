@@ -113,6 +113,10 @@ func (cS *ChargerService) processEvent(cgrEv *utils.CGREventWithOpts) (rply []*C
 	if cPs, err = cS.matchingChargerProfilesForEvent(cgrEv.CGREvent); err != nil {
 		return nil, err
 	}
+	if cgrEv.Opts == nil {
+		cgrEv.Opts = make(map[string]interface{})
+	}
+	cgrEv.Opts[utils.Subsys] = utils.MetaChargers
 	rply = make([]*ChrgSProcessEventReply, len(cPs))
 	for i, cP := range cPs {
 		clonedEv := cgrEv.Clone()
@@ -147,7 +151,7 @@ func (cS *ChargerService) processEvent(cgrEv *utils.CGREventWithOpts) (rply []*C
 		if len(evReply.AlteredFields) != 0 {
 			rply[i].AlteredFields = append(rply[i].AlteredFields, evReply.AlteredFields...)
 			rply[i].CGREvent = evReply.CGREvent
-			rply[i].Opts = opts
+			rply[i].Opts = evReply.Opts
 		}
 	}
 	return

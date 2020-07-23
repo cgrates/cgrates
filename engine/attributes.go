@@ -395,7 +395,7 @@ func (alS *AttributeService) V1ProcessEvent(args *AttrArgsProcessEvent,
 	matchedIDs := make([]string, 0, processRuns)
 	alteredFields := make(utils.StringSet)
 	for i := 0; i < processRuns; i++ {
-		(eNV[utils.MetaVars].(utils.MapStorage))[utils.ProcessRuns] = utils.NewNMData(i)
+		(eNV[utils.MetaVars].(utils.MapStorage))[utils.ProcessRuns] = utils.NewNMData(i + 1)
 		var evRply *AttrSProcessEventReply
 		evRply, err = alS.processEvent(args, eNV, lastID)
 		if err != nil {

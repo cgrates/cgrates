@@ -220,6 +220,7 @@ func testSSv1ItProcessEventAuth(t *testing.T) {
 		t.Errorf("expecting: %+v,\n received: %+v", utils.ToJSON(eSplrs), utils.ToJSON(rply.Routes[utils.MetaRaw]))
 	}
 	eAttrs := &engine.AttrSProcessEventReply{
+		Opts:            map[string]interface{}{utils.Subsys: utils.MetaSessionS},
 		MatchedProfiles: []string{"ATTR_ACNT_1001"},
 		AlteredFields:   []string{"*req.OfficeGroup"},
 		CGREvent: &utils.CGREvent{
@@ -291,6 +292,7 @@ func testSSv1ItProcessEventInitiateSession(t *testing.T) {
 		t.Errorf("Unexpected ResourceAllocation: %s", rply.ResourceAllocation)
 	}
 	eAttrs := &engine.AttrSProcessEventReply{
+		Opts:            map[string]interface{}{utils.Subsys: utils.MetaSessionS},
 		MatchedProfiles: []string{"ATTR_ACNT_1001"},
 		AlteredFields:   []string{"*req.OfficeGroup"},
 		CGREvent: &utils.CGREvent{
@@ -352,6 +354,7 @@ func testSSv1ItProcessEventUpdateSession(t *testing.T) {
 		t.Error(err)
 	}
 	eAttrs := &engine.AttrSProcessEventReply{
+		Opts:            map[string]interface{}{utils.Subsys: utils.MetaSessionS},
 		MatchedProfiles: []string{"ATTR_ACNT_1001"},
 		AlteredFields:   []string{"*req.OfficeGroup"},
 		CGREvent: &utils.CGREvent{

@@ -379,6 +379,7 @@ func testDspSessionUpdate(t *testing.T) {
 		t.Error(err)
 	}
 	eAttrs := &engine.AttrSProcessEventReply{
+		Opts:            map[string]interface{}{utils.Subsys: utils.MetaSessionS},
 		MatchedProfiles: []string{"ATTR_ACNT_1001"},
 		AlteredFields:   []string{"*req.OfficeGroup"},
 		CGREvent: &utils.CGREvent{
@@ -446,6 +447,7 @@ func testDspSessionUpdate2(t *testing.T) {
 		t.Fatal(err)
 	}
 	eAttrs := &engine.AttrSProcessEventReply{
+		Opts:            map[string]interface{}{utils.Subsys: utils.MetaSessionS},
 		MatchedProfiles: []string{"ATTR_1001_SESSIONAUTH"},
 		AlteredFields:   []string{"*req.LCRProfile", "*req.Password", "*req.RequestType", "*req.PaypalAccount"},
 		CGREvent: &utils.CGREvent{
@@ -595,6 +597,7 @@ func testDspSessionProcessEvent(t *testing.T) {
 		t.Errorf("Unexpected ResourceAllocation: %s", *rply.ResourceAllocation)
 	}
 	eAttrs := &engine.AttrSProcessEventReply{
+		Opts:            map[string]interface{}{utils.Subsys: utils.MetaSessionS},
 		MatchedProfiles: []string{"ATTR_ACNT_1001"},
 		AlteredFields:   []string{"*req.OfficeGroup"},
 		CGREvent: &utils.CGREvent{
@@ -668,6 +671,7 @@ func testDspSessionProcessEvent2(t *testing.T) {
 		t.Errorf("Unexpected ResourceAllocation: %s", *rply.ResourceAllocation)
 	}
 	eAttrs := &engine.AttrSProcessEventReply{
+		Opts:            map[string]interface{}{utils.Subsys: utils.MetaSessionS},
 		MatchedProfiles: []string{"ATTR_1001_SIMPLEAUTH"},
 		AlteredFields:   []string{"*req.Password", "*req.EventName"},
 		CGREvent: &utils.CGREvent{

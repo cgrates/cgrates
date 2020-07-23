@@ -69,6 +69,7 @@ func (dS *DispatcherService) authorizeEvent(ev *utils.CGREvent,
 	if err = dS.connMgr.Call(dS.cfg.DispatcherSCfg().AttributeSConns, nil,
 		utils.AttributeSv1ProcessEvent,
 		&engine.AttrArgsProcessEvent{
+			Opts:     map[string]interface{}{utils.Subsys: utils.MetaDispatchers},
 			Context:  utils.StringPointer(utils.MetaAuth),
 			CGREvent: ev}, reply); err != nil {
 		if err.Error() == utils.ErrNotFound.Error() {

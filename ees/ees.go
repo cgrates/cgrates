@@ -108,9 +108,14 @@ func (eeS *EventExporterS) setupCache(chCfgs map[string]*config.CacheParamCfg) {
 
 func (eeS *EventExporterS) attrSProcessEvent(cgrEv *utils.CGREventWithOpts, attrIDs []string, ctx string) (err error) {
 	var rplyEv engine.AttrSProcessEventReply
+	if cgrEv.Opts == nil {
+		cgrEv.Opts = make(map[string]interface{})
+	}
+	cgrEv.Opts[utils.Subsys] = utils.MetaEEs
 	attrArgs := &engine.AttrArgsProcessEvent{
 		AttributeIDs:  attrIDs,
 		Context:       utils.StringPointer(ctx),
+		Opts:          cgrEv.Opts,
 		CGREvent:      cgrEv.CGREvent,
 		ArgDispatcher: cgrEv.ArgDispatcher,
 	}

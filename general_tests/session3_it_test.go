@@ -163,6 +163,7 @@ func testSes3ItProcessEvent(t *testing.T) {
 		t.Errorf("Unexpected ResourceAllocation: %s", *rply.ResourceAllocation)
 	}
 	eAttrs := &engine.AttrSProcessEventReply{
+		Opts:            map[string]interface{}{utils.Subsys: utils.MetaSessionS},
 		MatchedProfiles: []string{"ATTR_ACNT_1001"},
 		AlteredFields:   []string{"*req.OfficeGroup"},
 		CGREvent: &utils.CGREvent{
@@ -191,7 +192,7 @@ func testSes3ItProcessEvent(t *testing.T) {
 	}
 	if !reflect.DeepEqual(*eAttrs, *rply.Attributes) {
 		t.Errorf("expecting: %+v, received: %+v",
-			eAttrs.CGREvent, rply.Attributes.CGREvent)
+			utils.ToJSON(eAttrs), utils.ToJSON(rply.Attributes))
 	}
 }
 
