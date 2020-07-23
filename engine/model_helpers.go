@@ -2388,9 +2388,10 @@ func (tps TPChargers) CSVHeader() (result []string) {
 func (tps TPChargers) AsTPChargers() (result []*utils.TPChargerProfile) {
 	mst := make(map[string]*utils.TPChargerProfile)
 	filterMap := make(map[string]utils.StringMap)
-	attributeMap := make(map[string]utils.StringMap)
+	attributeMap := make(map[string][]string)
 	for _, tp := range tps {
-		tpCPP, found := mst[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()]
+		tntID := (&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()
+		tpCPP, found := mst[tntID]
 		if !found {
 			tpCPP = &utils.TPChargerProfile{
 				TPid:   tp.Tpid,
@@ -2412,36 +2413,48 @@ func (tps TPChargers) AsTPChargers() (result []*utils.TPChargerProfile) {
 			}
 		}
 		if tp.FilterIDs != utils.EmptyString {
-			if _, has := filterMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()]; !has {
-				filterMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()] = make(utils.StringMap)
+			if _, has := filterMap[tntID]; !has {
+				filterMap[tntID] = make(utils.StringMap)
 			}
 			filterSplit := strings.Split(tp.FilterIDs, utils.INFIELD_SEP)
 			for _, filter := range filterSplit {
-				filterMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()][filter] = true
+				filterMap[tntID][filter] = true
 			}
 		}
 		if tp.RunID != utils.EmptyString {
 			tpCPP.RunID = tp.RunID
 		}
 		if tp.AttributeIDs != utils.EmptyString {
-			if _, has := attributeMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()]; !has {
-				attributeMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()] = make(utils.StringMap)
-			}
 			attributeSplit := strings.Split(tp.AttributeIDs, utils.INFIELD_SEP)
+			var inlineAttribute string
 			for _, attribute := range attributeSplit {
-				attributeMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()][attribute] = true
+				if !strings.HasPrefix(attribute, utils.Meta) {
+					if inlineAttribute != utils.EmptyString {
+						attributeMap[tntID] = append(attributeMap[tntID], inlineAttribute[1:])
+						inlineAttribute = utils.EmptyString
+					}
+					attributeMap[tntID] = append(attributeMap[tntID], attribute)
+					continue
+				}
+				inlineAttribute += utils.INFIELD_SEP + attribute
+			}
+			if inlineAttribute != utils.EmptyString {
+				attributeMap[tntID] = append(attributeMap[tntID], inlineAttribute[1:])
+				inlineAttribute = utils.EmptyString
 			}
 		}
-		mst[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()] = tpCPP
+		mst[tntID] = tpCPP
 	}
 	result = make([]*utils.TPChargerProfile, len(mst))
 	i := 0
 	for tntID, tp := range mst {
 		result[i] = tp
+		result[i].FilterIDs = make([]string, 0, len(filterMap[tntID]))
 		for filterID := range filterMap[tntID] {
 			result[i].FilterIDs = append(result[i].FilterIDs, filterID)
 		}
-		for attributeID := range attributeMap[tntID] {
+		result[i].AttributeIDs = make([]string, 0, len(attributeMap[tntID]))
+		for _, attributeID := range attributeMap[tntID] {
 			result[i].AttributeIDs = append(result[i].AttributeIDs, attributeID)
 		}
 		i++
