@@ -374,6 +374,7 @@ const (
 	MetaCore                    = "*core"
 	MetaServiceManager          = "*servicemanager"
 	MetaChargers                = "*chargers"
+	MetaBlockerError            = "*blocker_error"
 	MetaConfig                  = "*config"
 	MetaDispatchers             = "*dispatchers"
 	MetaDispatcherHosts         = "*dispatcher_hosts"
