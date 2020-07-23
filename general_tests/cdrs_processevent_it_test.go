@@ -564,10 +564,9 @@ func testV1CDRsProcessEventExport(t *testing.T) {
 			},
 		},
 	}
-	if err := pecdrsRpc.Call(utils.CDRsV1ProcessEvent, args, &reply); err != nil {
+	if err := pecdrsRpc.Call(utils.CDRsV1ProcessEvent, args, &reply); err == nil ||
+		err.Error() != utils.ErrPartiallyExecuted.Error() { // the export should fail as we test if the cdr is corectly writen in file
 		t.Error("Unexpected error: ", err)
-	} else if reply != utils.OK {
-		t.Error("Unexpected reply received: ", reply)
 	}
 }
 func testV1CDRsProcessEventExportCheck(t *testing.T) {
@@ -580,7 +579,7 @@ func testV1CDRsProcessEventExportCheck(t *testing.T) {
 	var fileName string
 	for _, file := range filesInDir { // First file in directory is the one we need, harder to find it's name out of config
 		fileName = file.Name()
-		if strings.HasPrefix(fileName, "cdr|") {
+		if strings.HasPrefix(fileName, "EventExporterS|") {
 			foundFile = true
 			filePath := path.Join(pecdrsCfg.GeneralCfg().FailedPostsDir, fileName)
 			ev, err := engine.NewExportEventsFromFile(filePath)

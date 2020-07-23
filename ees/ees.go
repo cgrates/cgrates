@@ -132,21 +132,19 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithIDs, rply *st
 	eeS.cfg.RLocks(config.EEsJson)
 	defer eeS.cfg.RUnlocks(config.EEsJson)
 
+	expIDs := utils.NewStringSet(cgrEv.IDs)
+	lenExpIDs := expIDs.Size()
+	cgrDp := utils.MapStorage{utils.MetaReq: cgrEv.Event}
+
 	var wg sync.WaitGroup
 	var withErr bool
 	for cfgIdx, eeCfg := range eeS.cfg.EEsNoLksCfg().Exporters {
-		if eeCfg.Type == utils.META_NONE { // ignore *none type exporter
+		if eeCfg.Type == utils.META_NONE || // ignore *none type exporter
+			(lenExpIDs != 0 && !expIDs.Has(eeCfg.ID)) {
 			continue
 		}
 
-		if len(cgrEv.IDs) != 0 {
-			if !utils.IsSliceMember(cgrEv.IDs, eeCfg.ID) {
-				continue
-			}
-		}
-
 		if len(eeCfg.Filters) != 0 {
-			cgrDp := utils.MapStorage{utils.MetaReq: cgrEv.Event}
 			tnt := cgrEv.Tenant
 			if eeTnt, errTnt := eeCfg.Tenant.ParseDataProvider(cgrDp); errTnt == nil && eeTnt != utils.EmptyString {
 				tnt = eeTnt
