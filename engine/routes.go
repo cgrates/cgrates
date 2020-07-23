@@ -615,12 +615,17 @@ func (rpS *RouteService) V1GetRoutes(args *ArgsGetRoutes, reply *SortedRoutes) (
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
 	if len(rpS.cgrcfg.RouteSCfg().AttributeSConns) != 0 {
+		if args.Opts == nil {
+			args.Opts = make(map[string]interface{})
+		}
+		args.Opts[utils.Subsys] = utils.MetaRoutes
 		attrArgs := &AttrArgsProcessEvent{
 			Context: utils.StringPointer(utils.FirstNonEmpty(
 				utils.IfaceAsString(args.CGREvent.Event[utils.OptsContext]),
 				utils.MetaRoutes)),
 			CGREvent:      args.CGREvent,
 			ArgDispatcher: args.ArgDispatcher,
+			Opts:          args.Opts,
 		}
 		var rplyEv AttrSProcessEventReply
 		if err := rpS.connMgr.Call(rpS.cgrcfg.RouteSCfg().AttributeSConns, nil,

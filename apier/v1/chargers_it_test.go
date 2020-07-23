@@ -256,7 +256,7 @@ func testChargerSProcessEvent(t *testing.T) {
 			ChargerSProfile:    "Charger1",
 			AttributeSProfiles: []string{"ATTR_1001_SIMPLEAUTH"},
 			AlteredFields:      []string{utils.MetaReqRunID, "*req.Password"},
-			Opts:               map[string]interface{}{utils.OptsContext: "simpleauth"},
+			Opts:               map[string]interface{}{utils.OptsContext: "simpleauth", utils.Subsys: utils.MetaChargers},
 			CGREvent: &utils.CGREvent{ // matching Charger1
 				Tenant: "cgrates.org",
 				ID:     "event1",
@@ -284,7 +284,7 @@ func testChargerSProcessEvent(t *testing.T) {
 			ChargerSProfile:    "Charger2",
 			AttributeSProfiles: []string{"*constant:*req.RequestType:*rated;*constant:*req.Category:call"},
 			AlteredFields:      []string{"*req.Category", "*req.RequestType", utils.MetaReqRunID},
-			Opts:               map[string]interface{}{utils.OptsContext: "simpleauth"},
+			Opts:               map[string]interface{}{utils.OptsContext: "simpleauth", utils.Subsys: utils.MetaChargers},
 			CGREvent: &utils.CGREvent{ // matching Charger1
 				Tenant: "cgrates.org",
 				ID:     "event1",

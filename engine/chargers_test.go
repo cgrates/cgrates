@@ -211,6 +211,7 @@ func TestChargerProcessEvent(t *testing.T) {
 	rpl := []*ChrgSProcessEventReply{
 		{
 			ChargerSProfile: "CPP_1",
+			Opts:            map[string]interface{}{utils.Subsys: utils.MetaChargers},
 			AlteredFields:   []string{utils.MetaReqRunID},
 			CGREvent:        chargerEvents[0].CGREvent,
 		},

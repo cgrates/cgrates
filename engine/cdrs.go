@@ -346,12 +346,17 @@ func (cdrS *CDRServer) chrgrSProcessEvent(cgrEv *utils.CGREventWithOpts) (cgrEvs
 // attrSProcessEvent will send the event to StatS if the connection is configured
 func (cdrS *CDRServer) attrSProcessEvent(cgrEv *utils.CGREventWithOpts) (err error) {
 	var rplyEv AttrSProcessEventReply
+	if cgrEv.Opts == nil {
+		cgrEv.Opts = make(map[string]interface{})
+	}
+	cgrEv.Opts[utils.Subsys] = utils.MetaCDRs
 	attrArgs := &AttrArgsProcessEvent{
 		Context: utils.StringPointer(utils.FirstNonEmpty(
 			utils.IfaceAsString(cgrEv.Opts[utils.OptsContext]),
 			utils.MetaCDRs)),
 		CGREvent:      cgrEv.CGREvent,
 		ArgDispatcher: cgrEv.ArgDispatcher,
+		Opts:          cgrEv.Opts,
 	}
 	if err = cdrS.connMgr.Call(cdrS.cgrCfg.CdrsCfg().AttributeSConns, nil,
 		utils.AttributeSv1ProcessEvent,

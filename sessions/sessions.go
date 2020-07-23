@@ -1912,7 +1912,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.ClientConnector,
 		var sRunsUsage map[string]time.Duration
 		if sRunsUsage, err = sS.authEvent(&utils.CGREventWithOpts{
 			CGREvent:      args.CGREvent,
-			Opts:          args.Opts,
+			Opts:          engine.MapEvent(args.Opts).Clone(),
 			ArgDispatcher: args.ArgDispatcher,
 		}, args.ForceDuration); err != nil {
 			return err
@@ -2925,7 +2925,7 @@ func (sS *SessionS) BiRPCv1ProcessMessage(clnt rpcclient.ClientConnector,
 		var maxUsage time.Duration
 		if maxUsage, err = sS.chargeEvent(&utils.CGREventWithOpts{
 			CGREvent:      args.CGREvent,
-			Opts:          args.Opts,
+			Opts:          engine.MapEvent(args.Opts).Clone(),
 			ArgDispatcher: args.ArgDispatcher,
 		}, args.ForceDuration); err != nil {
 			return err
@@ -3825,6 +3825,10 @@ func (sS *SessionS) processAttributes(cgrEv *utils.CGREvent, argDisp *utils.ArgD
 	if len(sS.cgrCfg.SessionSCfg().AttrSConns) == 0 {
 		return rplyEv, utils.NewErrNotConnected(utils.AttributeS)
 	}
+	if opts == nil {
+		opts = make(engine.MapEvent)
+	}
+	opts[utils.Subsys] = utils.MetaSessionS
 	attrArgs := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer(utils.FirstNonEmpty(
 			opts.GetStringIgnoreErrors(utils.OptsContext),
@@ -3832,14 +3836,10 @@ func (sS *SessionS) processAttributes(cgrEv *utils.CGREvent, argDisp *utils.ArgD
 		CGREvent:      cgrEv,
 		ArgDispatcher: argDisp,
 		Opts:          opts,
+		AttributeIDs:  attrIDs,
 	}
-	if len(attrIDs) != 0 {
-		attrArgs.AttributeIDs = attrIDs
-	}
-	if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().AttrSConns, nil, utils.AttributeSv1ProcessEvent,
-		attrArgs, &rplyEv); err != nil {
-		return
-	}
+	err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().AttrSConns, nil, utils.AttributeSv1ProcessEvent,
+		attrArgs, &rplyEv)
 	return
 }
 
