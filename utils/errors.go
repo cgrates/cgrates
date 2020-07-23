@@ -184,6 +184,18 @@ func NewErrChargerS(err error) error {
 	return fmt.Errorf("CHARGERS_ERROR:%s", err)
 }
 
+func NewErrStatS(err error) error {
+	return fmt.Errorf("STATS_ERROR:%s", err)
+}
+
+func NewErrCDRS(err error) error {
+	return fmt.Errorf("CDRS_ERROR:%s", err)
+}
+
+func NewErrThresholdS(err error) error {
+	return fmt.Errorf("THRESHOLDS_ERROR:%s", err)
+}
+
 func NewErrDispatcherS(err error) error {
 	return fmt.Errorf("%s:%s", DispatcherErrorPrefix, err.Error())
 }

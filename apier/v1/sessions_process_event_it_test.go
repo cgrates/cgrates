@@ -58,6 +58,8 @@ var sTestSessionSv1ProcessEvent = []func(t *testing.T){
 	testSSv1ItGetCDRsFromProcessEvent,
 	testSSv1ItProcessEventWithCDRResourceError,
 	testSSv1ItGetCDRsFromProcessEventResourceError,
+	testSSv1ItProcessEventWithCDRResourceErrorBlockError,
+	testSSv1ItGetCDRsFromProcessEventResourceErrorBlockError,
 	testSSv1ItStopCgrEngine,
 }
 
@@ -839,4 +841,46 @@ func testSSv1ItGetCDRsFromProcessEventResourceError(t *testing.T) {
 			t.Errorf("Unexpected cost for CDR: %f", cdrs[0].Cost)
 		}
 	}
+}
+
+func testSSv1ItProcessEventWithCDRResourceErrorBlockError(t *testing.T) {
+	args := &sessions.V1ProcessEventArgs{
+		Flags: []string{utils.MetaCDRs + utils.InInFieldSep + utils.MetaRALs,
+			utils.ConcatenatedKey(utils.MetaResources, utils.MetaRelease),
+			utils.MetaBlockerError}, // expended to stop the processing because we have error at resource
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testSSv1ItProcessEventWithCDRResourceErrorBlockError",
+			Event: map[string]interface{}{
+				utils.Tenant:      "cgrates.org",
+				utils.ToR:         utils.VOICE,
+				utils.OriginID:    "testSSv1ItProcessEventWithCDRResourceErrorBlockError",
+				utils.RequestType: sSV1RequestType,
+				utils.Account:     "1001",
+				utils.Subject:     "ANY2CNT",
+				utils.Destination: "1002",
+				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+				utils.Usage:       10 * time.Minute,
+			},
+		},
+	}
+	var rply sessions.V1ProcessEventReply
+	if err := sSv1BiRpc.Call(utils.SessionSv1ProcessEvent,
+		args, &rply); err == nil || err.Error() != "RESOURCES_ERROR:cannot find usage record with id: testSSv1ItProcessEventWithCDRResourceErrorBlockError" {
+		t.Error(err)
+	}
+	time.Sleep(100 * time.Millisecond)
+}
+
+func testSSv1ItGetCDRsFromProcessEventResourceErrorBlockError(t *testing.T) {
+	var cdrCnt int64
+	req := &utils.RPCCDRsFilterWithArgDispatcher{RPCCDRsFilter: &utils.RPCCDRsFilter{
+		OriginIDs: []string{"testSSv1ItProcessEventWithCDRResourceErrorBlockError"}}}
+	if err := sSApierRpc.Call(utils.CDRsV1GetCDRsCount, req, &cdrCnt); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if cdrCnt != 0 {
+		t.Error("Unexpected number of CDRs returned: ", cdrCnt)
+	}
+
 }

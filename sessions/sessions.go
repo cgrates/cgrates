@@ -3099,6 +3099,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 	//convert from Flags []string to utils.FlagsWithParams
 	argsFlagsWithParams := utils.FlagsWithParamsFromSlice(args.Flags)
 
+	blockError := argsFlagsWithParams.GetBool(utils.MetaBlockerError)
 	events := map[string]*utils.CGREventWithOpts{
 		utils.MetaRaw: {
 			CGREvent:      args.CGREvent,
@@ -3176,6 +3177,9 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 		for runID, cgrEv := range getDerivedEvents(events, argsFlagsWithParams[utils.MetaThresholds].Has(utils.MetaDerivedReply)) {
 			tIDs, err := sS.processThreshold(cgrEv.CGREvent, cgrEv.ArgDispatcher, thIDs)
 			if err != nil && err.Error() != utils.ErrNotFound.Error() {
+				if blockError {
+					return utils.NewErrThresholdS(err)
+				}
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> error: %s processing event %+v for RunID <%s>  with ThresholdS.",
 						utils.SessionS, err.Error(), cgrEv.CGREvent, runID))
@@ -3193,6 +3197,9 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 			sIDs, err := sS.processStats(cgrEv.CGREvent, cgrEv.ArgDispatcher, stIDs)
 			if err != nil &&
 				err.Error() != utils.ErrNotFound.Error() {
+				if blockError {
+					return utils.NewErrStatS(err)
+				}
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> error: %s processing event %+v for RunID <%s> with StatS.",
 						utils.SessionS, err.Error(), cgrEv.CGREvent, runID))
@@ -3284,6 +3291,9 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 				case resOpt.Has(utils.MetaAuthorize):
 					if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().ResSConns, nil, utils.ResourceSv1AuthorizeResources,
 						attrRU, &resMessage); err != nil {
+						if blockError {
+							return utils.NewErrResourceS(err)
+						}
 						utils.Logger.Warning(
 							fmt.Sprintf("<%s> error: <%s> processing event %+v for RunID <%s>  with ResourceS.",
 								utils.SessionS, err.Error(), cgrEv.CGREvent, runID))
@@ -3292,6 +3302,9 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 				case resOpt.Has(utils.MetaAllocate):
 					if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().ResSConns, nil, utils.ResourceSv1AllocateResources,
 						attrRU, &resMessage); err != nil {
+						if blockError {
+							return utils.NewErrResourceS(err)
+						}
 						utils.Logger.Warning(
 							fmt.Sprintf("<%s> error: <%s> processing event %+v for RunID <%s>  with ResourceS.",
 								utils.SessionS, err.Error(), cgrEv.CGREvent, runID))
@@ -3300,6 +3313,9 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 				case resOpt.Has(utils.MetaRelease):
 					if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().ResSConns, nil, utils.ResourceSv1ReleaseResources,
 						attrRU, &resMessage); err != nil {
+						if blockError {
+							return utils.NewErrResourceS(err)
+						}
 						utils.Logger.Warning(
 							fmt.Sprintf("<%s> error: <%s> processing event %+v for RunID <%s>  with ResourceS.",
 								utils.SessionS, err.Error(), cgrEv.CGREvent, runID))
@@ -3466,6 +3482,9 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 		var cdrRply string
 		for _, cgrEv := range getDerivedEvents(events, argsFlagsWithParams[utils.MetaCDRs].Has(utils.MetaDerivedReply)) {
 			if err := sS.processCDR(cgrEv.CGREvent, cgrEv.ArgDispatcher, flgs, &cdrRply); err != nil {
+				if blockError {
+					return utils.NewErrCDRS(err)
+				}
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> error: <%s> processing event %+v with CDRs.",
 						utils.SessionS, err.Error(), cgrEv.CGREvent))
