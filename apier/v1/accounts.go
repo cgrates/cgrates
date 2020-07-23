@@ -573,6 +573,86 @@ func (apierSv1 *APIerSv1) SetBalance(attr *utils.AttrSetBalance, reply *string) 
 	return
 }
 
+// SetBalances sets multiple balances for the given account
+// if the account is not already created it will create the account also
+func (apierSv1 *APIerSv1) SetBalances(attr *utils.AttrSetBalances, reply *string) (err error) {
+	if missing := utils.MissingStructFields(attr, []string{"Tenant", "Account", "Balances"}); len(missing) != 0 {
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+
+	accID := utils.ConcatenatedKey(attr.Tenant, attr.Account)
+	if _, err = apierSv1.DataManager.GetAccount(accID); err != nil {
+		// create account if not exists
+		account := &engine.Account{
+			ID: accID,
+		}
+		if err = apierSv1.DataManager.SetAccount(account); err != nil {
+			return
+		}
+	}
+	for _, bal := range attr.Balances {
+		at := &engine.ActionTiming{}
+
+		var balFltr *engine.BalanceFilter
+		if balFltr, err = engine.NewBalanceFilter(bal.Balance, apierSv1.Config.GeneralCfg().DefaultTimezone); err != nil {
+			return
+		}
+		balFltr.Type = utils.StringPointer(bal.BalanceType)
+		if bal.Value != 0 {
+			balFltr.Value = &utils.ValueFormula{Static: math.Abs(bal.Value)}
+		}
+		if (balFltr.ID == nil || *balFltr.ID == "") &&
+			(balFltr.Uuid == nil || *balFltr.Uuid == "") {
+			return utils.NewErrMandatoryIeMissing("BalanceID", "or", "BalanceUUID")
+		}
+
+		//check if we have extra data
+		if bal.ActionExtraData != nil && len(*bal.ActionExtraData) != 0 {
+			at.ExtraData = *bal.ActionExtraData
+		}
+
+		at.SetAccountIDs(utils.StringMap{accID: true})
+		if balFltr.TimingIDs != nil {
+			for _, timingID := range balFltr.TimingIDs.Slice() {
+				var tmg *utils.TPTiming
+				if tmg, err = apierSv1.DataManager.GetTiming(timingID, false, utils.NonTransactional); err != nil {
+					return
+				}
+				balFltr.Timings = append(balFltr.Timings, &engine.RITiming{
+					ID:        tmg.ID,
+					Years:     tmg.Years,
+					Months:    tmg.Months,
+					MonthDays: tmg.MonthDays,
+					WeekDays:  tmg.WeekDays,
+					StartTime: tmg.StartTime,
+					EndTime:   tmg.EndTime,
+				})
+			}
+		}
+
+		a := &engine.Action{
+			ActionType: utils.SET_BALANCE,
+			Balance:    balFltr,
+		}
+		publishAction := &engine.Action{
+			ActionType: utils.MetaPublishBalance,
+		}
+		acts := engine.Actions{a, publishAction}
+		if bal.Cdrlog {
+			acts = engine.Actions{a, publishAction, &engine.Action{
+				ActionType: utils.CDRLOG,
+			}}
+		}
+		at.SetActions(acts)
+		if err = at.Execute(nil, nil); err != nil {
+			return
+		}
+	}
+
+	*reply = utils.OK
+	return
+}
+
 // RemoveBalances remove the matching balances for the account
 func (apierSv1 *APIerSv1) RemoveBalances(attr *utils.AttrSetBalance, reply *string) (err error) {
 	if missing := utils.MissingStructFields(attr, []string{"Tenant", "Account", "BalanceType"}); len(missing) != 0 {

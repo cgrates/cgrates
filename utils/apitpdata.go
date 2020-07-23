@@ -916,6 +916,20 @@ type AttrSetBalance struct {
 	Cdrlog          bool
 }
 
+type AttrSetBalances struct {
+	Tenant   string
+	Account  string
+	Balances []*AttrBalance
+}
+
+type AttrBalance struct {
+	BalanceType     string
+	Value           float64
+	Balance         map[string]interface{}
+	ActionExtraData *map[string]interface{}
+	Cdrlog          bool
+}
+
 // TPResourceProfile is used in APIs to manage remotely offline ResourceProfile
 type TPResourceProfile struct {
 	TPid               string
