@@ -2551,3 +2551,77 @@ func TestAttributeIndexSelectsFalse(t *testing.T) {
 	}
 
 }
+
+func TestProcessAttributeWithSameWheight(t *testing.T) {
+	defaultCfg, _ := config.NewDefaultCGRConfig()
+	defaultCfg.AttributeSCfg().ProcessRuns = 1
+	data := NewInternalDB(nil, nil, true, defaultCfg.DataDbCfg().Items)
+	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	Cache.Clear(nil)
+	attrService, _ = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
+	attrPrf := &AttributeProfile{
+		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:        "ATTR_1",
+		Contexts:  []string{utils.MetaSessionS},
+		FilterIDs: []string{"*string:~*req.Field1:Val1"},
+		Attributes: []*Attribute{
+			{
+				Path:  utils.MetaReq + utils.NestingSep + "Field2",
+				Type:  utils.MetaVariable,
+				Value: config.NewRSRParsersMustCompile("~*req.RandomField", utils.INFIELD_SEP),
+			},
+		},
+		Weight: 10,
+	}
+	attrPrf2 := &AttributeProfile{
+		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:        "ATTR_2",
+		Contexts:  []string{utils.MetaSessionS},
+		FilterIDs: []string{"*string:~*req.Field1:Val1"},
+		Attributes: []*Attribute{
+			{
+				Path:  utils.MetaReq + utils.NestingSep + "Field3",
+				Type:  utils.MetaVariable,
+				Value: config.NewRSRParsersMustCompile("~*req.RandomField", utils.INFIELD_SEP),
+			},
+		},
+		Weight: 10,
+	}
+	// Add attribute in DM
+	if err := dmAtr.SetAttributeProfile(attrPrf, true); err != nil {
+		t.Error(err)
+	}
+	if err := dmAtr.SetAttributeProfile(attrPrf2, true); err != nil {
+		t.Error(err)
+	}
+	ev := &AttrArgsProcessEvent{
+		ProcessRuns: utils.IntPointer(2),
+		Context:     utils.StringPointer(utils.MetaSessionS),
+		CGREvent: &utils.CGREvent{ //matching ATTR_UNIX_TIMESTAMP
+			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:     "TestProcessAttributeUnixTimeStamp",
+			Event: map[string]interface{}{
+				"Field1":      "Val1",
+				"RandomField": "1",
+				utils.Weight:  "20.0",
+			},
+		},
+	}
+	var rcv AttrSProcessEventReply
+	if err := attrService.V1ProcessEvent(ev, &rcv); err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	clnEv := ev.CGREvent.Clone()
+	clnEv.Event["Field2"] = "1"
+	clnEv.Event["Field3"] = "1"
+	eRply := AttrSProcessEventReply{
+		MatchedProfiles: []string{"ATTR_1", "ATTR_2"},
+		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "Field2", utils.MetaReq + utils.NestingSep + "Field3"},
+		CGREvent:        clnEv,
+	}
+	sort.Strings(rcv.MatchedProfiles)
+	sort.Strings(rcv.AlteredFields)
+	if !reflect.DeepEqual(eRply, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eRply), utils.ToJSON(rcv))
+	}
+}
