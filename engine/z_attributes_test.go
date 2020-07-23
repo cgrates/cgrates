@@ -1870,7 +1870,7 @@ func TestGetAttributeProfileFromInline(t *testing.T) {
 	} else if test != true {
 		t.Errorf("\nExpecting: true got :%+v", test)
 	}
-	attrID := "*sum:*req.Field2:10;~*req.NumField;20"
+	attrID := "*sum:*req.Field2:10|~*req.NumField|20"
 	expAttrPrf1 := &AttributeProfile{
 		Tenant:   config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:       attrID,

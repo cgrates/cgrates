@@ -131,26 +131,25 @@ func (ext *ExternalAttributeProfile) AsAttributeProfile() (attr *AttributeProfil
 
 // NewAttributeFromInline parses an inline rule into a compiled AttributeProfile
 func NewAttributeFromInline(tenant, inlnRule string) (attr *AttributeProfile, err error) {
-	ruleSplt := strings.Split(inlnRule, utils.InInFieldSep)
-	if len(ruleSplt) < 3 {
-		return nil, fmt.Errorf("inline parse error for string: <%s>", inlnRule)
-	}
-	var vals config.RSRParsers
-	if vals, err = config.NewRSRParsers(strings.Join(ruleSplt[2:], utils.InInFieldSep), utils.INFIELD_SEP); err != nil {
-		return nil, err
-	}
 	attr = &AttributeProfile{
 		Tenant:   tenant,
 		ID:       inlnRule,
 		Contexts: []string{utils.META_ANY},
-		Attributes: []*Attribute{{
+	}
+	for _, rule := range strings.Split(inlnRule, utils.INFIELD_SEP) {
+		ruleSplt := strings.SplitN(rule, utils.InInFieldSep, 3)
+		if len(ruleSplt) < 3 {
+			return nil, fmt.Errorf("inline parse error for string: <%s>", rule)
+		}
+		var vals config.RSRParsers
+		if vals, err = config.NewRSRParsers(ruleSplt[2], utils.PipeSep); err != nil {
+			return nil, err
+		}
+		attr.Attributes = append(attr.Attributes, &Attribute{
 			Path:  ruleSplt[1],
 			Type:  ruleSplt[0],
 			Value: vals,
-		}},
-	}
-	if err = attr.Compile(); err != nil {
-		return nil, err
+		})
 	}
 	return
 }

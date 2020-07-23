@@ -3446,6 +3446,39 @@ func TestModelAsTPChargers(t *testing.T) {
 	}
 }
 
+func TestModelAsTPChargers2(t *testing.T) {
+	models := TPChargers{
+		&TPCharger{
+			Tpid:               "TP1",
+			Tenant:             "cgrates.org",
+			ID:                 "Charger1",
+			FilterIDs:          "FLTR_ACNT_dan;FLTR_DST_DE",
+			RunID:              "*rated",
+			AttributeIDs:       "*constant:*req.RequestType:*rated;*constant:*req.Category:call;ATTR1;*constant:*req.Category:call",
+			ActivationInterval: "2014-07-14T14:35:00Z",
+			Weight:             20,
+		},
+	}
+	expected := &utils.TPChargerProfile{
+		TPid:      "TP1",
+		Tenant:    "cgrates.org",
+		ID:        "Charger1",
+		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
+		RunID:     "*rated",
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-14T14:35:00Z",
+			ExpiryTime:     "",
+		},
+		AttributeIDs: []string{"*constant:*req.RequestType:*rated;*constant:*req.Category:call", "ATTR1", "*constant:*req.Category:call"},
+		Weight:       20,
+	}
+	rcv := models.AsTPChargers()
+	sort.Strings(rcv[0].FilterIDs)
+	if !reflect.DeepEqual(expected, rcv[0]) {
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rcv[0]))
+	}
+}
+
 func TestAPItoDispatcherProfile(t *testing.T) {
 	tpDPP := &utils.TPDispatcherProfile{
 		TPid:       "TP1",

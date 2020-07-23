@@ -376,8 +376,8 @@ func TestCDRAsHttpForm(t *testing.T) {
 	if cdrForm.Get(utils.Usage) != "10" {
 		t.Errorf("Expected: %s, received: %s", "10", cdrForm.Get(utils.Usage))
 	}
-	if cdrForm.Get(utils.SUPPLIER) != "SUPPL1" {
-		t.Errorf("Expected: %s, received: %s", "1001", cdrForm.Get(utils.SUPPLIER))
+	if cdrForm.Get(utils.ROUTE) != "SUPPL1" {
+		t.Errorf("Expected: %s, received: %s", "1001", cdrForm.Get(utils.ROUTE))
 	}
 	if cdrForm.Get("field_extr1") != "val_extr1" {
 		t.Errorf("Expected: %s, received: %s", "val_extr1", cdrForm.Get("field_extr1"))

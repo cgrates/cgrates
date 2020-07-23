@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 	"time"
@@ -122,7 +123,7 @@ func TestConvertExternalToProfileMissing2(t *testing.T) {
 }
 
 func TestNewAttributeFromInline(t *testing.T) {
-	attrID := "*sum:*req.Field2:10;~*req.NumField;20"
+	attrID := "*sum:*req.Field2:10|~*req.NumField|20"
 	expAttrPrf1 := &AttributeProfile{
 		Tenant:   config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:       attrID,
@@ -138,5 +139,63 @@ func TestNewAttributeFromInline(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expAttrPrf1, attr) {
 		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(expAttrPrf1), utils.ToJSON(attr))
+	}
+}
+
+func TestNewAttributeFromInlineWithMultipleRuns(t *testing.T) {
+	attrID := "*constant:*req.RequestType:*rated;*constant:*req.Category:call"
+	expAttrPrf1 := &AttributeProfile{
+		Tenant:   config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:       attrID,
+		Contexts: []string{utils.META_ANY},
+		Attributes: []*Attribute{&Attribute{
+			Path:  utils.MetaReq + utils.NestingSep + "RequestType",
+			Type:  utils.META_CONSTANT,
+			Value: config.NewRSRParsersMustCompile("*rated", utils.INFIELD_SEP),
+		},
+			&Attribute{
+				Path:  utils.MetaReq + utils.NestingSep + "Category",
+				Type:  utils.META_CONSTANT,
+				Value: config.NewRSRParsersMustCompile("call", utils.INFIELD_SEP),
+			},
+		},
+	}
+	attr, err := NewAttributeFromInline(config.CgrConfig().GeneralCfg().DefaultTenant, attrID)
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expAttrPrf1, attr) {
+		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(expAttrPrf1), utils.ToJSON(attr))
+	}
+}
+
+func TestGetIfaceFromValues(t *testing.T) {
+	dp := utils.MapStorage{
+		utils.MetaReq: utils.MapStorage{
+			utils.Category: "call",
+		},
+	}
+	exp := []interface{}{"*rated", "call"}
+	if rply, err := getIfaceFromValues(config.NewRSRParsersMustCompile("*rated;~*req.Category", utils.INFIELD_SEP), dp); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expecting %q, received: %q", exp, rply)
+	}
+	if _, err := getIfaceFromValues(config.NewRSRParsersMustCompile("*rated;~req.Category", utils.INFIELD_SEP), utils.MapStorage{}); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+}
+
+func TestNewAttributeFromInlineWithMultipleRuns2(t *testing.T) {
+	attrID := "*constant:*req.RequestType*rated;*constant:*req.Category:call"
+
+	expErr := fmt.Sprintf("inline parse error for string: <%s>", "*constant:*req.RequestType*rated")
+	if _, err := NewAttributeFromInline(config.CgrConfig().GeneralCfg().DefaultTenant, attrID); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error: %s received %v", expErr, err)
+	}
+
+	attrID = "*constant:*req.RequestType:`*rated;*constant:*req.Category:call"
+
+	if _, err := NewAttributeFromInline(config.CgrConfig().GeneralCfg().DefaultTenant, attrID); err == nil {
+		t.Error(err)
 	}
 }
