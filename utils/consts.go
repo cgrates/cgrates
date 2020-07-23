@@ -1106,6 +1106,7 @@ const (
 	APIerSv1GetDispatcherProfile        = "APIerSv1.GetDispatcherProfile"
 	APIerSv1GetDispatcherProfileIDs     = "APIerSv1.GetDispatcherProfileIDs"
 	APIerSv1RemoveDispatcherProfile     = "APIerSv1.RemoveDispatcherProfile"
+	APIerSv1SetBalances                 = "APIerSv1.SetBalances"
 	APIerSv1SetDispatcherHost           = "APIerSv1.SetDispatcherHost"
 	APIerSv1GetDispatcherHost           = "APIerSv1.GetDispatcherHost"
 	APIerSv1GetDispatcherHostIDs        = "APIerSv1.GetDispatcherHostIDs"

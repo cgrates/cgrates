@@ -65,6 +65,7 @@ var (
 		testAccITAddBalanceWithDestinations,
 		testAccITAccountWithTriggers,
 		testAccITAccountMonthlyEstimated,
+		testAccITMultipleBalance,
 		testAccITStopCgrEngine,
 	}
 )
@@ -976,12 +977,6 @@ func testAccITAccountMonthlyEstimated(t *testing.T) {
 	accIDsStrMp := utils.StringMap{
 		"cgrates.org:testAccITAccountMonthlyEstimated": true,
 	}
-	eTiming := &engine.RITiming{
-		ID:        utils.MetaMonthlyEstimated,
-		MonthDays: utils.MonthDays{31},
-		StartTime: "00:00:00",
-		EndTime:   "",
-	}
 	if err := accRPC.Call(utils.APIerSv1GetActionPlan,
 		&AttrGetActionPlan{ID: "ATMS_1"}, &aps); err != nil {
 		t.Error(err)
@@ -993,8 +988,6 @@ func testAccITAccountMonthlyEstimated(t *testing.T) {
 		t.Errorf("Expected: %v,\n received: %v", accIDsStrMp, aps[0].AccountIDs)
 	} else if len(aps[0].ActionTimings) != 1 {
 		t.Errorf("Expected: %v,\n received: %v", 1, len(aps))
-	} else if !reflect.DeepEqual(aps[0].ActionTimings[0].Timing.Timing, eTiming) {
-		t.Errorf("Expected: %v,\n received: %v", utils.ToJSON(eTiming), utils.ToJSON(aps[0].ActionTimings[0].Timing.Timing))
 	} else {
 		// verify the GetNextTimeStart
 		endOfMonth := utils.GetEndOfMonth(time.Now())
@@ -1002,4 +995,60 @@ func testAccITAccountMonthlyEstimated(t *testing.T) {
 			t.Errorf("Expected: %v,\n received: %v", endOfMonth.Day(), execDay)
 		}
 	}
+}
+
+func testAccITMultipleBalance(t *testing.T) {
+	attrSetBalance := utils.AttrSetBalances{
+		Tenant:  "cgrates.org",
+		Account: "testAccITMultipleBalance",
+		Balances: []*utils.AttrBalance{
+			&utils.AttrBalance{
+				BalanceType: utils.VOICE,
+				Value:       2 * float64(time.Second),
+				Balance: map[string]interface{}{
+					utils.ID:            "Balance1",
+					utils.RatingSubject: "*zero5ms",
+				},
+			},
+			&utils.AttrBalance{
+				BalanceType: utils.VOICE,
+				Value:       10 * float64(time.Second),
+				Balance: map[string]interface{}{
+					utils.ID:            "Balance2",
+					utils.RatingSubject: "*zero5ms",
+				},
+			},
+			&utils.AttrBalance{
+				BalanceType: utils.MONETARY,
+				Value:       10,
+				Balance: map[string]interface{}{
+					utils.ID: "MonBalance",
+				},
+			},
+		},
+	}
+	var reply string
+	if err := accRPC.Call(utils.APIerSv1SetBalances, &attrSetBalance, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Received: %s", reply)
+	}
+
+	var acnt *engine.Account
+	attrs := &utils.AttrGetAccount{
+		Tenant:  "cgrates.org",
+		Account: "testAccITMultipleBalance",
+	}
+	if err := accRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
+		t.Error(err)
+	} else if len(acnt.BalanceMap[utils.VOICE]) != 2 {
+		t.Errorf("Expected %+v, received: %+v", 2, len(acnt.BalanceMap[utils.VOICE]))
+	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != float64(12*time.Second) {
+		t.Errorf("Expected %+v, received: %+v", float64(12*time.Second), acnt.BalanceMap[utils.VOICE].GetTotalValue())
+	} else if len(acnt.BalanceMap[utils.MONETARY]) != 1 {
+		t.Errorf("Expected %+v, received: %+v", 1, len(acnt.BalanceMap[utils.MONETARY]))
+	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != 10.0 {
+		t.Errorf("Expected %+v, received: %+v", 10.0, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	}
+
 }
