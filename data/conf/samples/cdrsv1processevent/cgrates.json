@@ -33,7 +33,7 @@
 	"attributes_conns": ["*internal"],
 	"exporters": [
 		{
-			"id": "aws_test_file",
+			"id": "amqp_test_file",
 			"type": "*amqp_json_map",
 			"export_path": "amqps://guest:guest@localhost:256733/",
 			"tenant": "cgrates.org",
@@ -75,7 +75,7 @@
 	"chargers_conns": ["*internal"],
 	"stats_conns": ["*internal"],
 	"thresholds_conns": ["*internal"],
-	"online_cdr_exports": ["aws_test_file"],
+	"online_cdr_exports": ["amqp_test_file"],
 	"ees_conns": ["*localhost"]
 },
 

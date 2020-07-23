@@ -569,9 +569,7 @@ func (cdrS *CDRServer) processEvent(ev *utils.CGREventWithOpts,
 						CGREvent:      cgrEv.CGREvent,
 						ArgDispatcher: cgrEv.ArgDispatcher,
 					},
-				}
-				if len(cdrS.cgrCfg.CdrsCfg().OnlineCDRExports) != 0 {
-					evWithOpts.IDs = cdrS.cgrCfg.CdrsCfg().OnlineCDRExports
+					IDs: cdrS.cgrCfg.CdrsCfg().OnlineCDRExports,
 				}
 				if err = cdrS.eeSProcessEvent(evWithOpts); err != nil {
 					utils.Logger.Warning(

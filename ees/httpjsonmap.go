@@ -31,12 +31,12 @@ import (
 )
 
 func NewHTTPJsonMapEe(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.FilterS,
-	dc utils.MapStorage) (httpJson *HTTPJsonMapEe, err error) {
+	dc utils.MapStorage) (httpJSON *HTTPJsonMapEe, err error) {
 	dc[utils.ExportID] = cgrCfg.EEsCfg().Exporters[cfgIdx].ID
-	httpJson = &HTTPJsonMapEe{id: cgrCfg.EEsCfg().Exporters[cfgIdx].ID,
+	httpJSON = &HTTPJsonMapEe{id: cgrCfg.EEsCfg().Exporters[cfgIdx].ID,
 		cgrCfg: cgrCfg, cfgIdx: cfgIdx, filterS: filterS, dc: dc}
 	if cgrCfg.EEsCfg().Exporters[cfgIdx].Type == utils.MetaHTTPjsonMap {
-		httpJson.httpPoster, err = engine.NewHTTPPoster(cgrCfg.GeneralCfg().HttpSkipTlsVerify,
+		httpJSON.httpPoster, err = engine.NewHTTPPoster(cgrCfg.GeneralCfg().HttpSkipTlsVerify,
 			cgrCfg.GeneralCfg().ReplyTimeout, cgrCfg.EEsCfg().Exporters[cfgIdx].ExportPath,
 			utils.PosterTransportContentTypes[cgrCfg.EEsCfg().Exporters[cfgIdx].Type], cgrCfg.EEsCfg().Exporters[cfgIdx].Attempts)
 	}
@@ -44,7 +44,7 @@ func NewHTTPJsonMapEe(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.Filt
 	return
 }
 
-// FileCSVee implements EventExporter interface for .csv files
+// HTTPJsonMapEe implements EventExporter interface for .csv files
 type HTTPJsonMapEe struct {
 	id         string
 	cgrCfg     *config.CGRConfig
@@ -61,28 +61,29 @@ func (httpJson *HTTPJsonMapEe) ID() string {
 }
 
 // OnEvicted implements EventExporter, doing the cleanup before exit
-func (httpJson *HTTPJsonMapEe) OnEvicted(_ string, _ interface{}) {
+func (httpJson *HTTPJsonMapEe) OnEvicted(string, interface{}) {
 	return
 }
 
 // ExportEvent implements EventExporter
 func (httpJson *HTTPJsonMapEe) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 	httpJson.Lock()
-	defer httpJson.Unlock()
+	defer func() {
+		if err != nil {
+			httpJson.dc[utils.NegativeExports].(utils.StringSet).Add(cgrEv.ID)
+		} else {
+			httpJson.dc[utils.PositiveExports].(utils.StringSet).Add(cgrEv.ID)
+		}
+		httpJson.Unlock()
+	}()
 
 	httpJson.dc[utils.NumberOfEvents] = httpJson.dc[utils.NumberOfEvents].(int) + 1
 
-	var body interface{}
 	valMp := make(map[string]string)
-	req := utils.MapStorage{}
-	for k, v := range cgrEv.Event {
-		req[k] = v
-	}
-	eeReq := NewEventExporterRequest(req, httpJson.dc, cgrEv.Tenant, httpJson.cgrCfg.GeneralCfg().DefaultTimezone,
-		httpJson.filterS)
+	eeReq := NewEventExporterRequest(utils.MapStorage(cgrEv.Event), httpJson.dc,
+		cgrEv.Tenant, httpJson.cgrCfg.GeneralCfg().DefaultTimezone, httpJson.filterS)
 
 	if err = eeReq.SetFields(httpJson.cgrCfg.EEsCfg().Exporters[httpJson.cfgIdx].ContentFields()); err != nil {
-		httpJson.dc[utils.NegativeExports].(utils.StringSet).Add(cgrEv.ID)
 		return
 	}
 	for el := eeReq.cnt.GetFirstElement(); el != nil; el = el.Next() {
@@ -92,7 +93,8 @@ func (httpJson *HTTPJsonMapEe) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 		}
 		itm, isNMItem := nmIt.(*config.NMItem)
 		if !isNMItem {
-			return fmt.Errorf("cannot encode reply value: %s, err: not NMItems", utils.ToJSON(el.Value))
+			err = fmt.Errorf("cannot encode reply value: %s, err: not NMItems", utils.ToJSON(el.Value))
+			return
 		}
 		if itm == nil {
 			continue // all attributes, not writable to diameter packet
@@ -134,36 +136,35 @@ func (httpJson *HTTPJsonMapEe) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 			}
 		}
 	}
-	cgrID := utils.GenUUID()
-	cgrID, err = cgrEv.FieldAsString(utils.CGRID)
-	var runID string
-	runID, err = cgrEv.FieldAsString(utils.RunID)
-	httpJson.dc[utils.PositiveExports].(utils.StringSet).Add(cgrEv.ID)
+	cgrID := utils.FirstNonEmpty(engine.MapEvent(cgrEv.Event).GetStringIgnoreErrors(utils.CGRID), utils.GenUUID())
+	runID := utils.FirstNonEmpty(engine.MapEvent(cgrEv.Event).GetStringIgnoreErrors(utils.RunID), utils.MetaDefault)
+	var body []byte
 	if body, err = json.Marshal(valMp); err != nil {
 		return
 	}
-	return httpJson.post(body, utils.ConcatenatedKey(cgrID, runID))
+	err = httpJson.post(body, utils.ConcatenatedKey(cgrID, runID))
+	return
 }
 
-func (httpJson *HTTPJsonMapEe) post(body interface{}, key string) (err error) {
+func (httpJson *HTTPJsonMapEe) post(body []byte, key string) (err error) {
 	switch httpJson.cgrCfg.EEsCfg().Exporters[httpJson.cfgIdx].Type {
 	case utils.MetaHTTPjsonMap:
 		err = httpJson.httpPoster.Post(body, utils.EmptyString)
 	case utils.MetaAMQPjsonMap:
 		err = engine.PostersCache.PostAMQP(httpJson.cgrCfg.EEsCfg().Exporters[httpJson.cfgIdx].ExportPath,
-			httpJson.cgrCfg.EEsCfg().Exporters[httpJson.cfgIdx].Attempts, body.([]byte))
+			httpJson.cgrCfg.EEsCfg().Exporters[httpJson.cfgIdx].Attempts, body)
 	case utils.MetaAMQPV1jsonMap:
 		err = engine.PostersCache.PostAMQPv1(httpJson.cgrCfg.EEsCfg().Exporters[httpJson.cfgIdx].ExportPath,
-			httpJson.cgrCfg.EEsCfg().Exporters[httpJson.cfgIdx].Attempts, body.([]byte))
+			httpJson.cgrCfg.EEsCfg().Exporters[httpJson.cfgIdx].Attempts, body)
 	case utils.MetaSQSjsonMap:
 		err = engine.PostersCache.PostSQS(httpJson.cgrCfg.EEsCfg().Exporters[httpJson.cfgIdx].ExportPath,
-			httpJson.cgrCfg.EEsCfg().Exporters[httpJson.cfgIdx].Attempts, body.([]byte))
+			httpJson.cgrCfg.EEsCfg().Exporters[httpJson.cfgIdx].Attempts, body)
 	case utils.MetaKafkajsonMap:
 		err = engine.PostersCache.PostKafka(httpJson.cgrCfg.EEsCfg().Exporters[httpJson.cfgIdx].ExportPath,
-			httpJson.cgrCfg.EEsCfg().Exporters[httpJson.cfgIdx].Attempts, body.([]byte), key)
+			httpJson.cgrCfg.EEsCfg().Exporters[httpJson.cfgIdx].Attempts, body, key)
 	case utils.MetaS3jsonMap:
 		err = engine.PostersCache.PostS3(httpJson.cgrCfg.EEsCfg().Exporters[httpJson.cfgIdx].ExportPath,
-			httpJson.cgrCfg.EEsCfg().Exporters[httpJson.cfgIdx].Attempts, body.([]byte), key)
+			httpJson.cgrCfg.EEsCfg().Exporters[httpJson.cfgIdx].Attempts, body, key)
 	}
 	if err != nil && httpJson.cgrCfg.GeneralCfg().FailedPostsDir != utils.META_NONE {
 		engine.AddFailedPost(httpJson.cgrCfg.EEsCfg().Exporters[httpJson.cfgIdx].ExportPath,
