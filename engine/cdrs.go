@@ -473,7 +473,7 @@ func (cdrS *CDRServer) processEvent(ev *utils.CGREventWithOpts,
 				cgrEv.Tenant, cdrS.cgrCfg.GeneralCfg().DefaultTimezone); err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> error: <%s> converting event %+v to CDR",
-						utils.CDRs, err.Error(), cgrEv))
+						utils.CDRs, err.Error(), utils.ToJSON(cgrEv)))
 				err = utils.ErrPartiallyExecuted
 				return
 			}
