@@ -184,7 +184,7 @@ func testSAitSIPInvite(t *testing.T) {
 	if expected := "SIP/2.0 302 Moved Temporarily"; received["Request"] != expected {
 		t.Errorf("Expected %q, received: %q", expected, received["Request"])
 	}
-	if expected := "\"1002\" <sip:1002@cgrates.org>;q=0.7; expires=3600;cgr_cost=0.3;cgr_maxusage=60000000000,\"1002\" <sip:1002@cgrates.net>;q=0.2;cgr_cost=0.6;cgr_maxusage=60000000000,\"1002\" <sip:1002@cgrates.com>;q=0.1;cgr_cost=0.01;cgr_maxusage=60000000000"; received["Contact"] != expected {
+	if expected := "\"1002\" <sip:1002@cgrates.org>;q=0.7; expires=3600;cgr_cost=0.3;cgr_maxusage=30000000000,\"1002\" <sip:1002@cgrates.net>;q=0.2;cgr_cost=0.6;cgr_maxusage=30000000000,\"1002\" <sip:1002@cgrates.com>;q=0.1;cgr_cost=0.01;cgr_maxusage=30000000000"; received["Contact"] != expected {
 		t.Errorf("Expected %q, received: %q", expected, received["Contact"])
 	}
 
@@ -200,7 +200,7 @@ func testSAitSIPInvite(t *testing.T) {
 	if expected := "SIP/2.0 302 Moved Temporarily"; received["Request"] != expected {
 		t.Errorf("Expected %q, received: %q", expected, received["Request"])
 	}
-	if expected := "\"1002\" <sip:1002@cgrates.org>;q=0.7; expires=3600;cgr_cost=0.3;cgr_maxusage=60000000000,\"1002\" <sip:1002@cgrates.net>;q=0.2;cgr_cost=0.6;cgr_maxusage=60000000000,\"1002\" <sip:1002@cgrates.com>;q=0.1;cgr_cost=0.01;cgr_maxusage=60000000000"; received["Contact"] != expected {
+	if expected := "\"1002\" <sip:1002@cgrates.org>;q=0.7; expires=3600;cgr_cost=0.3;cgr_maxusage=30000000000,\"1002\" <sip:1002@cgrates.net>;q=0.2;cgr_cost=0.6;cgr_maxusage=30000000000,\"1002\" <sip:1002@cgrates.com>;q=0.1;cgr_cost=0.01;cgr_maxusage=30000000000"; received["Contact"] != expected {
 		t.Errorf("Expected %q, received: %q", expected, received["Contact"])
 	}
 
