@@ -116,7 +116,8 @@ func (dS *DispatcherService) dispatcherProfileForEvent(ev *utils.CGREvent,
 	if subsys != "" {
 		idxKeyPrfx = utils.ConcatenatedKey(ev.Tenant, subsys)
 	}
-	prflIDs, err := engine.MatchingItemIDsForEvent(ev.Event,
+	evNm := utils.MapStorage{utils.MetaReq: ev.Event}
+	prflIDs, err := engine.MatchingItemIDsForEvent(evNm,
 		dS.cfg.DispatcherSCfg().StringIndexedFields,
 		dS.cfg.DispatcherSCfg().PrefixIndexedFields,
 		dS.dm, utils.CacheDispatcherFilterIndexes, idxKeyPrfx,
@@ -128,7 +129,7 @@ func (dS *DispatcherService) dispatcherProfileForEvent(ev *utils.CGREvent,
 		if err != utils.ErrNotFound {
 			return nil, err
 		}
-		prflIDs, err = engine.MatchingItemIDsForEvent(ev.Event,
+		prflIDs, err = engine.MatchingItemIDsForEvent(evNm,
 			dS.cfg.DispatcherSCfg().StringIndexedFields,
 			dS.cfg.DispatcherSCfg().PrefixIndexedFields,
 			dS.dm, utils.CacheDispatcherFilterIndexes, anyIdxPrfx,
@@ -139,7 +140,6 @@ func (dS *DispatcherService) dispatcherProfileForEvent(ev *utils.CGREvent,
 			return nil, err
 		}
 	}
-	evNm := utils.MapStorage{utils.MetaReq: ev.Event}
 	for prflID := range prflIDs {
 		prfl, err := dS.dm.GetDispatcherProfile(ev.Tenant, prflID, true, true, utils.NonTransactional)
 		if err != nil {

@@ -235,7 +235,7 @@ func testDCITMigrateAndMove(t *testing.T) {
 		t.Error("Error should be not found : ", err)
 	}
 	expDcIdx := map[string]utils.StringSet{
-		"*string:~*req.Account:1003": {
+		"*string:*req.Account:1003": {
 			"*out:cgrates.org:*any:1003:*any_0": struct{}{},
 		},
 	}
@@ -248,7 +248,7 @@ func testDCITMigrateAndMove(t *testing.T) {
 		t.Errorf("Expected %v, recived: %v", utils.ToJSON(expDcIdx), utils.ToJSON(dcidx))
 	}
 	expDcIdx = map[string]utils.StringSet{
-		"*string:~*req.Account:1003": {
+		"*string:*req.Account:1003": {
 			"*out:cgrates.org:*any:1003:*any_0": struct{}{},
 		},
 	}

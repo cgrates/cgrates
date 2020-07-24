@@ -34,7 +34,7 @@ type dataStorage interface {
 
 	Set(fldPath []string, val interface{}) error
 	Remove(fldPath []string) error
-	GetKeys(nesteed bool) []string
+	GetKeys(nested bool, nesteedLimit int, prefix string) []string
 }
 
 // MapStorage is the basic dataStorage
@@ -207,64 +207,78 @@ func (ms MapStorage) Set(fldPath []string, val interface{}) (err error) {
 }
 
 // GetKeys returns all the keys from map
-func (ms MapStorage) GetKeys(nesteed bool) (keys []string) {
-	if !nesteed {
-		keys = make([]string, len(ms))
-		i := 0
-		for k := range ms {
-			keys[i] = k
-			i++
+func (ms MapStorage) GetKeys(nested bool, nestedLimit int, prefix string) (keys []string) {
+	if prefix != EmptyString {
+		prefix += NestingSep
+	}
+	if !nested {
+		// this is a special case for the filter matching were we have the full map:
+		/*
+			ms:=MapStorage{
+				"*req":MapStorage{
+					...
+				},
+				"*opts":MapStorage{
+					...
+				},
+			}
+			when nested is false we should stiil look inside `*req` and `*opts` but only in the first level of them
+		*/
+		if nestedLimit <= 1 {
+			keys = make([]string, 0, len(ms))
+			for k := range ms {
+				keys = append(keys, prefix+k)
+			}
+			return
+		}
+		for k, v := range ms { // in case of nested on false we take in consideraton the nestedLimit
+			keys = append(keys, prefix+k)
+			switch rv := v.(type) { // and for performance we only take in consideration a limited set of types for nested false
+			case dataStorage:
+				keys = append(keys, rv.GetKeys(nested, nestedLimit-1, prefix+k)...)
+			case map[string]interface{}:
+				keys = append(keys, MapStorage(rv).GetKeys(nested, nestedLimit-1, prefix+k)...)
+			}
 		}
 		return
 	}
 	for k, v := range ms {
-		keys = append(keys, k)
+		keys = append(keys, prefix+k)
 		switch rv := v.(type) {
 		case dataStorage:
-			for _, dsKey := range rv.GetKeys(nesteed) {
-				keys = append(keys, k+NestingSep+dsKey)
-			}
+			keys = append(keys, rv.GetKeys(nested, nestedLimit, prefix+k)...)
 		case map[string]interface{}:
-			for _, dsKey := range MapStorage(rv).GetKeys(nesteed) {
-				keys = append(keys, k+NestingSep+dsKey)
-			}
+			keys = append(keys, MapStorage(rv).GetKeys(nested, nestedLimit, prefix+k)...)
 		case []MapStorage:
 			for i, dp := range rv {
-				pref := k + fmt.Sprintf("[%v]", i)
+				pref := prefix + k + fmt.Sprintf("[%v]", i)
 				keys = append(keys, pref)
-				for _, dsKey := range dp.GetKeys(nesteed) {
-					keys = append(keys, pref+NestingSep+dsKey)
-				}
+				keys = append(keys, dp.GetKeys(nested, nestedLimit, pref)...)
 			}
 		case []dataStorage:
 			for i, dp := range rv {
-				pref := k + fmt.Sprintf("[%v]", i)
+				pref := prefix + k + fmt.Sprintf("[%v]", i)
 				keys = append(keys, pref)
-				for _, dsKey := range dp.GetKeys(nesteed) {
-					keys = append(keys, pref+NestingSep+dsKey)
-				}
+				keys = append(keys, dp.GetKeys(nested, nestedLimit, pref)...)
 			}
 		case []map[string]interface{}:
 			for i, dp := range rv {
-				pref := k + fmt.Sprintf("[%v]", i)
+				pref := prefix + k + fmt.Sprintf("[%v]", i)
 				keys = append(keys, pref)
-				for _, dsKey := range MapStorage(dp).GetKeys(nesteed) {
-					keys = append(keys, pref+NestingSep+dsKey)
-				}
+				keys = append(keys, MapStorage(dp).GetKeys(nested, nestedLimit, pref)...)
 			}
 		case []interface{}:
 			for i := range rv {
-				keys = append(keys, k+fmt.Sprintf("[%v]", i))
+				keys = append(keys, prefix+k+fmt.Sprintf("[%v]", i))
 			}
 		case []string:
 			for i := range rv {
-				keys = append(keys, k+fmt.Sprintf("[%v]", i))
+				keys = append(keys, prefix+k+fmt.Sprintf("[%v]", i))
 			}
 		default:
 			// ToDo:should not be called
-			keys = append(keys, getPathFromInterface(v, k+NestingSep)...)
+			keys = append(keys, getPathFromInterface(v, prefix+k+NestingSep)...)
 		}
-
 	}
 	return
 

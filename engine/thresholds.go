@@ -235,9 +235,10 @@ func (tS *ThresholdService) StoreThreshold(t *Threshold) (err error) {
 
 // matchingThresholdsForEvent returns ordered list of matching thresholds which are active for an Event
 func (tS *ThresholdService) matchingThresholdsForEvent(args *ArgsProcessEvent) (ts Thresholds, err error) {
+	evNm := utils.MapStorage{utils.MetaReq: args.Event}
 	tIDs := utils.NewStringSet(args.ThresholdIDs)
 	if len(tIDs) == 0 {
-		tIDs, err = MatchingItemIDsForEvent(args.Event,
+		tIDs, err = MatchingItemIDsForEvent(evNm,
 			tS.cgrcfg.ThresholdSCfg().StringIndexedFields,
 			tS.cgrcfg.ThresholdSCfg().PrefixIndexedFields,
 			tS.dm, utils.CacheThresholdFilterIndexes, args.Tenant,
@@ -247,9 +248,6 @@ func (tS *ThresholdService) matchingThresholdsForEvent(args *ArgsProcessEvent) (
 		if err != nil {
 			return nil, err
 		}
-	}
-	evNm := utils.MapStorage{
-		utils.MetaReq: args.Event,
 	}
 	ts = make(Thresholds, 0, len(tIDs))
 	for tID := range tIDs {

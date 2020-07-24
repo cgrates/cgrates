@@ -151,9 +151,10 @@ func (sS *StatService) StoreStatQueue(sq *StatQueue) (err error) {
 
 // matchingStatQueuesForEvent returns ordered list of matching resources which are active by the time of the call
 func (sS *StatService) matchingStatQueuesForEvent(args *StatsArgsProcessEvent) (sqs StatQueues, err error) {
+	evNm := utils.MapStorage{utils.MetaReq: args.Event}
 	sqIDs := utils.NewStringSet(args.StatIDs)
 	if len(sqIDs) == 0 {
-		sqIDs, err = MatchingItemIDsForEvent(args.Event,
+		sqIDs, err = MatchingItemIDsForEvent(evNm,
 			sS.cgrcfg.StatSCfg().StringIndexedFields,
 			sS.cgrcfg.StatSCfg().PrefixIndexedFields,
 			sS.dm, utils.CacheStatFilterIndexes, args.Tenant,
@@ -164,7 +165,6 @@ func (sS *StatService) matchingStatQueuesForEvent(args *StatsArgsProcessEvent) (
 			return
 		}
 	}
-	evNm := utils.MapStorage{utils.MetaReq: args.Event}
 	sqs = make(StatQueues, 0, len(sqIDs))
 	for sqID := range sqIDs {
 		sqPrfl, err := sS.dm.GetStatQueueProfile(args.Tenant, sqID, true, true, utils.NonTransactional)
@@ -218,8 +218,8 @@ func (sS *StatService) matchingStatQueuesForEvent(args *StatsArgsProcessEvent) (
 
 // Call implements rpcclient.ClientConnector interface for internal RPC
 // here for cases when passing StatsService as rpccclient.RpcClientConnection
-func (ss *StatService) Call(serviceMethod string, args interface{}, reply interface{}) error {
-	return utils.RPCCall(ss, serviceMethod, args, reply)
+func (sS *StatService) Call(serviceMethod string, args interface{}, reply interface{}) error {
+	return utils.RPCCall(sS, serviceMethod, args, reply)
 }
 
 type StatsArgsProcessEvent struct {
@@ -326,7 +326,7 @@ func (sS *StatService) V1ProcessEvent(args *StatsArgsProcessEvent, reply *[]stri
 	return
 }
 
-// V1StatQueuesForEvent implements StatV1 method for processing an Event
+// V1GetStatQueuesForEvent implements StatV1 method for processing an Event
 func (sS *StatService) V1GetStatQueuesForEvent(args *StatsArgsProcessEvent, reply *[]string) (err error) {
 	if args.CGREvent == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
@@ -351,11 +351,11 @@ func (sS *StatService) V1GetStatQueuesForEvent(args *StatsArgsProcessEvent, repl
 
 // V1GetStatQueue returns a StatQueue object
 func (sS *StatService) V1GetStatQueue(args *utils.TenantIDWithArgDispatcher, reply *StatQueue) (err error) {
-	if sq, err := sS.dm.GetStatQueue(args.Tenant, args.ID, true, true, ""); err != nil {
+	sq, err := sS.dm.GetStatQueue(args.Tenant, args.ID, true, true, "")
+	if err != nil {
 		return err
-	} else {
-		*reply = *sq
 	}
+	*reply = *sq
 	return
 }
 
@@ -381,7 +381,7 @@ func (sS *StatService) V1GetQueueStringMetrics(args *utils.TenantID, reply *map[
 	return
 }
 
-// V1GetFloatMetrics returns the metrics as float64 values
+// V1GetQueueFloatMetrics returns the metrics as float64 values
 func (sS *StatService) V1GetQueueFloatMetrics(args *utils.TenantID, reply *map[string]float64) (err error) {
 	if missing := utils.MissingStructFields(args, []string{utils.Tenant, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)

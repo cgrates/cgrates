@@ -232,7 +232,7 @@ func testChargerSGetChargersForEvent(t *testing.T) {
 	}
 	var result *engine.ChargerProfiles
 	if err := chargerRPC.Call(utils.ChargerSv1GetChargersForEvent,
-		&utils.CGREventWithArgDispatcher{
+		&utils.CGREventWithOpts{
 			CGREvent:      chargerEvent[1].CGREvent,
 			ArgDispatcher: chargerEvent[1].ArgDispatcher,
 		}, &result); err == nil ||

@@ -451,7 +451,7 @@ func TestAttributeIndexer(t *testing.T) {
 		t.Error(err)
 	}
 	eIdxes := map[string]utils.StringSet{
-		"*string:~*req.Account:1007": {
+		"*string:*req.Account:1007": {
 			"AttrPrf": struct{}{},
 		},
 	}
@@ -807,6 +807,7 @@ func TestAttributeProcessWithMultipleRuns3(t *testing.T) {
 	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {
 		t.Errorf("Expecting %+v, received: %+v", eRply.MatchedProfiles, reply.MatchedProfiles)
 	}
+	sort.Strings(reply.AlteredFields)
 	if !reflect.DeepEqual(eRply.AlteredFields, reply.AlteredFields) {
 		t.Errorf("Expecting %+v, received: %+v", eRply.AlteredFields, reply.AlteredFields)
 	}

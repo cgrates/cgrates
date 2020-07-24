@@ -99,41 +99,41 @@
 
 "attributes": {
 	"enabled": true,
-	"string_indexed_fields": ["Account"]
+	"string_indexed_fields": ["*req.Account"]
 },
 
 
 "chargers": {
 	"enabled": true,
 	"attributes_conns": ["*localhost"],
-	"string_indexed_fields": ["Account"]
+	"string_indexed_fields": ["*req.Account"]
 },
 
 
 "resources": {
 	"enabled": true,
 	"thresholds_conns": ["*localhost"],
-	"string_indexed_fields": ["Account"]
+	"string_indexed_fields": ["*req.Account"]
 },
 
 
 "stats": {
 	"enabled": true,
 	"thresholds_conns": ["*localhost"],
-	"string_indexed_fields": ["Account"]
+	"string_indexed_fields": ["*req.Account"]
 },
 
 
 "thresholds": {
 	"enabled": true,
-	"string_indexed_fields": ["Account"]
+	"string_indexed_fields": ["*req.Account"]
 },
 
 
 "routes": {
 	"enabled": true,
-	"string_indexed_fields": ["LCRProfile"],
-	"prefix_indexed_fields":["Destination"],
+	"string_indexed_fields": ["*req.LCRProfile"],
+	"prefix_indexed_fields":["*req.Destination"],
 },
 
 

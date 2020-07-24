@@ -277,7 +277,7 @@ func TestNavMapFieldAsInterface(t *testing.T) {
 
 func TestNavMapGetKeys(t *testing.T) {
 	navMp := MapStorage{
-		"FirstLevel": map[string]interface{}{
+		"FirstLevel": MapStorage{
 			"SecondLevel": map[string]interface{}{
 				"ThirdLevel": map[string]interface{}{
 					"Fld1": 123.123,
@@ -319,7 +319,20 @@ func TestNavMapGetKeys(t *testing.T) {
 		"Field6[0]",
 		"Field6[1]",
 	}
-	keys := navMp.GetKeys(true)
+	keys := navMp.GetKeys(true, 0, EmptyString)
+	sort.Strings(expKeys)
+	sort.Strings(keys)
+	if !reflect.DeepEqual(expKeys, keys) {
+		t.Errorf("Expecting: %+v, received: %+v", ToJSON(expKeys), ToJSON(keys))
+	}
+
+	expKeys = []string{
+		"*req.FirstLevel",
+		"*req.FistLever2",
+		"*req.Field5",
+		"*req.Field6",
+	}
+	keys = navMp.GetKeys(false, 1, MetaReq)
 	sort.Strings(expKeys)
 	sort.Strings(keys)
 	if !reflect.DeepEqual(expKeys, keys) {
@@ -328,11 +341,15 @@ func TestNavMapGetKeys(t *testing.T) {
 
 	expKeys = []string{
 		"FirstLevel",
+		"FirstLevel.SecondLevel",
 		"FistLever2",
+		"FistLever2.SecondLevel2",
+		"FistLever2.Field3",
+		"FistLever2.Field4",
 		"Field5",
 		"Field6",
 	}
-	keys = navMp.GetKeys(false)
+	keys = navMp.GetKeys(false, 2, EmptyString)
 	sort.Strings(expKeys)
 	sort.Strings(keys)
 	if !reflect.DeepEqual(expKeys, keys) {
@@ -667,7 +684,7 @@ func TestNavMapGetKeys2(t *testing.T) {
 		"Field10[0]",
 		"Field10[0].A",
 	}
-	keys := navMp.GetKeys(true)
+	keys := navMp.GetKeys(true, 0, EmptyString)
 	sort.Strings(expKeys)
 	sort.Strings(keys)
 	if !reflect.DeepEqual(expKeys, keys) {

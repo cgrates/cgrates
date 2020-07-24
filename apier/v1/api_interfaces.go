@@ -69,7 +69,7 @@ type AttributeSv1Interface interface {
 
 type ChargerSv1Interface interface {
 	Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error
-	GetChargersForEvent(cgrEv *utils.CGREventWithArgDispatcher, reply *engine.ChargerProfiles) error
+	GetChargersForEvent(cgrEv *utils.CGREventWithOpts, reply *engine.ChargerProfiles) error
 	ProcessEvent(args *utils.CGREventWithOpts, reply *[]*engine.ChrgSProcessEventReply) error
 }
 

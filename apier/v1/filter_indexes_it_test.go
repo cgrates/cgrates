@@ -234,7 +234,7 @@ func testV1FIdxComputeThresholdsIndexes(t *testing.T) {
 	if reply2 != utils.OK {
 		t.Errorf("Error: %+v", reply2)
 	}
-	expectedIDX := []string{"*string:~*req.Account:1001:TEST_PROFILE1"}
+	expectedIDX := []string{"*string:*req.Account:1001:TEST_PROFILE1"}
 	var indexes []string
 	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaThresholds, Tenant: tenant, FilterType: utils.MetaString},
@@ -330,7 +330,7 @@ func testV1FIdxSecondComputeThresholdsIndexes(t *testing.T) {
 	if result != utils.OK {
 		t.Errorf("Error: %+v", result)
 	}
-	expectedIDX := []string{"*string:~*req.Account:1002:TEST_PROFILE2"}
+	expectedIDX := []string{"*string:*req.Account:1002:TEST_PROFILE2"}
 	var indexes []string
 	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaThresholds, Tenant: tenant, FilterType: utils.MetaString},
@@ -353,7 +353,7 @@ func testV1FIdxThirdComputeThresholdsIndexes(t *testing.T) {
 	if result != utils.OK {
 		t.Errorf("Error: %+v", result)
 	}
-	expectedIDX := []string{"*string:~*req.Account:1001:TEST_PROFILE1", "*string:~*req.Account:1002:TEST_PROFILE2"}
+	expectedIDX := []string{"*string:*req.Account:1001:TEST_PROFILE1", "*string:*req.Account:1002:TEST_PROFILE2"}
 	sort.Strings(expectedIDX)
 	var indexes []string
 	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
@@ -451,10 +451,10 @@ func testV1FIdxSetStatQueueProfileIndexes(t *testing.T) {
 			QueueLength: 10,
 			TTL:         time.Duration(10) * time.Second,
 			Metrics: []*engine.MetricWithFilters{
-				&engine.MetricWithFilters{
+				{
 					MetricID: utils.MetaSum,
 				},
-				&engine.MetricWithFilters{
+				{
 					MetricID: utils.MetaACD,
 				},
 			},
@@ -501,7 +501,7 @@ func testV1FIdxComputeStatQueueProfileIndexes(t *testing.T) {
 	if result != utils.OK {
 		t.Errorf("Error: %+v", result)
 	}
-	expectedIDX := []string{"*string:~*req.Account:1001:TEST_PROFILE1"}
+	expectedIDX := []string{"*string:*req.Account:1001:TEST_PROFILE1"}
 	var indexes []string
 	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaStats, Tenant: tenant, FilterType: utils.MetaString},
@@ -554,10 +554,10 @@ func testV1FIdxSetSecondStatQueueProfileIndexes(t *testing.T) {
 			QueueLength: 10,
 			TTL:         time.Duration(10) * time.Second,
 			Metrics: []*engine.MetricWithFilters{
-				&engine.MetricWithFilters{
+				{
 					MetricID: "*sum",
 				},
-				&engine.MetricWithFilters{
+				{
 					MetricID: utils.MetaACD,
 				},
 			},
@@ -605,7 +605,7 @@ func testV1FIdxSecondComputeStatQueueProfileIndexes(t *testing.T) {
 	if result != utils.OK {
 		t.Errorf("Error: %+v", result)
 	}
-	expectedIDX := []string{"*string:~*req.Account:1001:TEST_PROFILE2"}
+	expectedIDX := []string{"*string:*req.Account:1001:TEST_PROFILE2"}
 	var indexes []string
 	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaStats, Tenant: tenant, FilterType: utils.MetaString},
@@ -740,7 +740,7 @@ func testV1FIdxComputeResourceProfileIndexes(t *testing.T) {
 	if reply2 != utils.OK {
 		t.Errorf("Error: %+v", reply2)
 	}
-	expectedIDX := []string{"*string:~*req.Account:1001:RCFG1"}
+	expectedIDX := []string{"*string:*req.Account:1001:RCFG1"}
 	var indexes []string
 	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaResources, Tenant: tenant, FilterType: utils.MetaString},
@@ -835,7 +835,7 @@ func testV1FIdxSecondComputeResourceProfileIndexes(t *testing.T) {
 	if reply2 != utils.OK {
 		t.Errorf("Error: %+v", reply2)
 	}
-	expectedIDX := []string{"*string:~*req.Account:1001:RCFG2"}
+	expectedIDX := []string{"*string:*req.Account:1001:RCFG2"}
 	var indexes []string
 	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaResources, Tenant: tenant, FilterType: utils.MetaString},
@@ -975,7 +975,7 @@ func testV1FIdxComputeRouteProfileIndexes(t *testing.T) {
 	if reply2 != utils.OK {
 		t.Errorf("Error: %+v", reply2)
 	}
-	expectedIDX := []string{"*string:~*req.Account:1001:TEST_PROFILE1"}
+	expectedIDX := []string{"*string:*req.Account:1001:TEST_PROFILE1"}
 	var indexes []string
 	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaRoutes, Tenant: tenant, FilterType: utils.MetaString},
@@ -1074,7 +1074,7 @@ func testV1FIdxSecondComputeRouteProfileIndexes(t *testing.T) {
 	if reply2 != utils.OK {
 		t.Errorf("Error: %+v", reply2)
 	}
-	expectedIDX := []string{"*string:~*req.Account:1001:TEST_PROFILE2"}
+	expectedIDX := []string{"*string:*req.Account:1001:TEST_PROFILE2"}
 	var indexes []string
 	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaRoutes, Tenant: tenant, FilterType: utils.MetaString},
@@ -1225,7 +1225,7 @@ func testV1FIdxComputeAttributeProfileIndexes(t *testing.T) {
 	} else if result != utils.OK {
 		t.Errorf("Error: %+v", result)
 	}
-	expectedIDX := []string{"*string:~*req.Account:1001:ApierTest"}
+	expectedIDX := []string{"*string:*req.Account:1001:ApierTest"}
 	var indexes []string
 	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType:   utils.MetaAttributes,
@@ -1338,7 +1338,7 @@ func testV1FIdxSecondComputeAttributeProfileIndexes(t *testing.T) {
 	} else if result != utils.OK {
 		t.Errorf("Error: %+v", result)
 	}
-	expectedIDX := []string{"*string:~*req.Account:1001:ApierTest2"}
+	expectedIDX := []string{"*string:*req.Account:1001:ApierTest2"}
 	var indexes []string
 	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType:   utils.MetaAttributes,
@@ -1494,27 +1494,27 @@ func testV1FIdxGetFilterIndexes1(t *testing.T) {
 		ItemType: utils.MetaResources,
 	}
 	expectedIndexes := []string{
-		"*string:~*req.Account:3001:ResProfile3",
-		"*string:~*req.Destination:1001:ResProfile1",
-		"*string:~*req.Destination:1001:ResProfile2",
-		"*string:~*req.Destination:1001:ResProfile3",
-		"*string:~*req.Account:1002:ResProfile1",
-		"*string:~*req.Account:1002:ResProfile2",
-		"*string:~*req.Account:1002:ResProfile3",
-		"*string:~*req.Account:1003:ResProfile3",
-		"*prefix:~*req.Destination:20:ResProfile1",
-		"*prefix:~*req.Destination:20:ResProfile2",
-		"*string:~*req.Account:1001:ResProfile1",
-		"*string:~*req.Account:1001:ResProfile2",
-		"*string:~*req.Account:2002:ResProfile2",
-		"*prefix:~*req.Destination:1001:ResProfile3",
-		"*prefix:~*req.Destination:200:ResProfile3",
-		"*string:~*req.Destination:2001:ResProfile1",
-		"*string:~*req.Destination:2001:ResProfile2",
-		"*string:~*req.Destination:2001:ResProfile3",
-		"*prefix:~*req.Account:10:ResProfile1",
-		"*prefix:~*req.Account:10:ResProfile2",
-		"*prefix:~*req.Account:10:ResProfile3"}
+		"*string:*req.Account:3001:ResProfile3",
+		"*string:*req.Destination:1001:ResProfile1",
+		"*string:*req.Destination:1001:ResProfile2",
+		"*string:*req.Destination:1001:ResProfile3",
+		"*string:*req.Account:1002:ResProfile1",
+		"*string:*req.Account:1002:ResProfile2",
+		"*string:*req.Account:1002:ResProfile3",
+		"*string:*req.Account:1003:ResProfile3",
+		"*prefix:*req.Destination:20:ResProfile1",
+		"*prefix:*req.Destination:20:ResProfile2",
+		"*string:*req.Account:1001:ResProfile1",
+		"*string:*req.Account:1001:ResProfile2",
+		"*string:*req.Account:2002:ResProfile2",
+		"*prefix:*req.Destination:1001:ResProfile3",
+		"*prefix:*req.Destination:200:ResProfile3",
+		"*string:*req.Destination:2001:ResProfile1",
+		"*string:*req.Destination:2001:ResProfile2",
+		"*string:*req.Destination:2001:ResProfile3",
+		"*prefix:*req.Account:10:ResProfile1",
+		"*prefix:*req.Account:10:ResProfile2",
+		"*prefix:*req.Account:10:ResProfile3"}
 	sort.Strings(expectedIndexes)
 	var reply []string
 	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, arg, &reply); err != nil {
@@ -1531,20 +1531,20 @@ func testV1FIdxGetFilterIndexes2(t *testing.T) {
 		FilterType: utils.MetaString,
 	}
 	expectedIndexes := []string{
-		"*string:~*req.Account:1003:ResProfile3",
-		"*string:~*req.Account:3001:ResProfile3",
-		"*string:~*req.Destination:1001:ResProfile1",
-		"*string:~*req.Destination:1001:ResProfile2",
-		"*string:~*req.Destination:1001:ResProfile3",
-		"*string:~*req.Account:1002:ResProfile1",
-		"*string:~*req.Account:1002:ResProfile2",
-		"*string:~*req.Account:1002:ResProfile3",
-		"*string:~*req.Account:1001:ResProfile1",
-		"*string:~*req.Account:1001:ResProfile2",
-		"*string:~*req.Destination:2001:ResProfile3",
-		"*string:~*req.Destination:2001:ResProfile1",
-		"*string:~*req.Destination:2001:ResProfile2",
-		"*string:~*req.Account:2002:ResProfile2"}
+		"*string:*req.Account:1003:ResProfile3",
+		"*string:*req.Account:3001:ResProfile3",
+		"*string:*req.Destination:1001:ResProfile1",
+		"*string:*req.Destination:1001:ResProfile2",
+		"*string:*req.Destination:1001:ResProfile3",
+		"*string:*req.Account:1002:ResProfile1",
+		"*string:*req.Account:1002:ResProfile2",
+		"*string:*req.Account:1002:ResProfile3",
+		"*string:*req.Account:1001:ResProfile1",
+		"*string:*req.Account:1001:ResProfile2",
+		"*string:*req.Destination:2001:ResProfile3",
+		"*string:*req.Destination:2001:ResProfile1",
+		"*string:*req.Destination:2001:ResProfile2",
+		"*string:*req.Account:2002:ResProfile2"}
 	sort.Strings(expectedIndexes)
 	var reply []string
 	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, arg, &reply); err != nil {
@@ -1561,13 +1561,13 @@ func testV1FIdxGetFilterIndexes3(t *testing.T) {
 		FilterType: utils.MetaPrefix,
 	}
 	expectedIndexes := []string{
-		"*prefix:~*req.Destination:20:ResProfile1",
-		"*prefix:~*req.Destination:20:ResProfile2",
-		"*prefix:~*req.Account:10:ResProfile1",
-		"*prefix:~*req.Account:10:ResProfile2",
-		"*prefix:~*req.Account:10:ResProfile3",
-		"*prefix:~*req.Destination:200:ResProfile3",
-		"*prefix:~*req.Destination:1001:ResProfile3"}
+		"*prefix:*req.Destination:20:ResProfile1",
+		"*prefix:*req.Destination:20:ResProfile2",
+		"*prefix:*req.Account:10:ResProfile1",
+		"*prefix:*req.Account:10:ResProfile2",
+		"*prefix:*req.Account:10:ResProfile3",
+		"*prefix:*req.Destination:200:ResProfile3",
+		"*prefix:*req.Destination:1001:ResProfile3"}
 	sort.Strings(expectedIndexes)
 	var reply []string
 	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, arg, &reply); err != nil {
@@ -1585,14 +1585,14 @@ func testV1FIdxGetFilterIndexes4(t *testing.T) {
 		FilterField: "Account",
 	}
 	expectedIndexes := []string{
-		"*string:~*req.Account:1003:ResProfile3",
-		"*string:~*req.Account:3001:ResProfile3",
-		"*string:~*req.Account:1002:ResProfile1",
-		"*string:~*req.Account:1002:ResProfile2",
-		"*string:~*req.Account:1002:ResProfile3",
-		"*string:~*req.Account:1001:ResProfile1",
-		"*string:~*req.Account:1001:ResProfile2",
-		"*string:~*req.Account:2002:ResProfile2"}
+		"*string:*req.Account:1003:ResProfile3",
+		"*string:*req.Account:3001:ResProfile3",
+		"*string:*req.Account:1002:ResProfile1",
+		"*string:*req.Account:1002:ResProfile2",
+		"*string:*req.Account:1002:ResProfile3",
+		"*string:*req.Account:1001:ResProfile1",
+		"*string:*req.Account:1001:ResProfile2",
+		"*string:*req.Account:2002:ResProfile2"}
 	sort.Strings(expectedIndexes)
 	var reply []string
 	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, arg, &reply); err != nil {
@@ -1632,8 +1632,8 @@ func testV1FIdxSetDispatcherProfile(t *testing.T) {
 		FilterType: utils.MetaString,
 	}
 	expectedIndexes := []string{
-		"*string:~*req.Account:1001:DSP_Test1",
-		"*string:~*req.Subject:2012:DSP_Test1",
+		"*string:*req.Account:1001:DSP_Test1",
+		"*string:*req.Subject:2012:DSP_Test1",
 	}
 	sort.Strings(expectedIndexes)
 	var idx []string
@@ -1651,8 +1651,8 @@ func testV1FIdxSetDispatcherProfile(t *testing.T) {
 		FilterType: utils.MetaString,
 	}
 	expectedIndexes = []string{
-		"*string:~*req.Account:1001:DSP_Test1",
-		"*string:~*req.Subject:2012:DSP_Test1",
+		"*string:*req.Account:1001:DSP_Test1",
+		"*string:*req.Subject:2012:DSP_Test1",
 	}
 	sort.Strings(expectedIndexes)
 	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, arg, &idx); err != nil {
@@ -1668,9 +1668,9 @@ func testV1FIdxSetDispatcherProfile(t *testing.T) {
 		ItemType: utils.MetaDispatchers,
 	}
 	expectedIndexes = []string{
-		"*prefix:~*req.RandomField:RandomValue:DSP_Test1",
-		"*string:~*req.Account:1001:DSP_Test1",
-		"*string:~*req.Subject:2012:DSP_Test1",
+		"*prefix:*req.RandomField:RandomValue:DSP_Test1",
+		"*string:*req.Account:1001:DSP_Test1",
+		"*string:*req.Subject:2012:DSP_Test1",
 	}
 	sort.Strings(expectedIndexes)
 	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, arg, &idx); err != nil {
@@ -1702,9 +1702,9 @@ func testV1FIdxSetDispatcherProfile(t *testing.T) {
 		ItemType: utils.MetaDispatchers,
 	}
 	expectedIndexes = []string{
-		"*prefix:~*req.RandomField:RandomValue:DSP_Test1",
-		"*string:~*req.Account:1001:DSP_Test1",
-		"*string:~*req.Subject:2012:DSP_Test1",
+		"*prefix:*req.RandomField:RandomValue:DSP_Test1",
+		"*string:*req.Account:1001:DSP_Test1",
+		"*string:*req.Subject:2012:DSP_Test1",
 	}
 	sort.Strings(expectedIndexes)
 	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, arg, &idx); err != nil {
@@ -1728,9 +1728,9 @@ func testV1FIdxComputeDispatcherProfileIndexes(t *testing.T) {
 		t.Errorf("Error: %+v", result)
 	}
 	expectedIndexes := []string{
-		"*prefix:~*req.RandomField:RandomValue:DSP_Test1",
-		"*string:~*req.Account:1001:DSP_Test1",
-		"*string:~*req.Subject:2012:DSP_Test1",
+		"*prefix:*req.RandomField:RandomValue:DSP_Test1",
+		"*string:*req.Account:1001:DSP_Test1",
+		"*string:*req.Subject:2012:DSP_Test1",
 	}
 	sort.Strings(expectedIndexes)
 	var indexes []string
@@ -1792,9 +1792,9 @@ func testV1FIdxSetDispatcherProfile2(t *testing.T) {
 	}
 	expectedIndexes := []string{
 		"*none:*any:*any:DSP_Test2",
-		"*prefix:~*req.RandomField:RandomValue:DSP_Test1",
-		"*string:~*req.Account:1001:DSP_Test1",
-		"*string:~*req.Subject:2012:DSP_Test1",
+		"*prefix:*req.RandomField:RandomValue:DSP_Test1",
+		"*string:*req.Account:1001:DSP_Test1",
+		"*string:*req.Subject:2012:DSP_Test1",
 	}
 	sort.Strings(expectedIndexes)
 	var idx []string
@@ -1812,9 +1812,9 @@ func testV1FIdxSetDispatcherProfile2(t *testing.T) {
 	}
 	expectedIndexes = []string{
 		"*none:*any:*any:DSP_Test3",
-		"*prefix:~*req.RandomField:RandomValue:DSP_Test1",
-		"*string:~*req.Account:1001:DSP_Test1",
-		"*string:~*req.Subject:2012:DSP_Test1",
+		"*prefix:*req.RandomField:RandomValue:DSP_Test1",
+		"*string:*req.Account:1001:DSP_Test1",
+		"*string:*req.Subject:2012:DSP_Test1",
 	}
 	sort.Strings(expectedIndexes)
 	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, arg, &idx); err != nil {
@@ -1876,9 +1876,9 @@ func testV1FIdxComputeDispatcherProfileIndexes2(t *testing.T) {
 	}
 	expectedIndexes := []string{
 		"*none:*any:*any:DSP_Test3",
-		"*prefix:~*req.RandomField:RandomValue:DSP_Test1",
-		"*string:~*req.Account:1001:DSP_Test1",
-		"*string:~*req.Subject:2012:DSP_Test1",
+		"*prefix:*req.RandomField:RandomValue:DSP_Test1",
+		"*string:*req.Account:1001:DSP_Test1",
+		"*string:*req.Subject:2012:DSP_Test1",
 	}
 	sort.Strings(expectedIndexes)
 	var indexes []string
@@ -1904,9 +1904,9 @@ func testV1FIdxComputeDispatcherProfileIndexes2(t *testing.T) {
 	}
 	expectedIndexes = []string{
 		"*none:*any:*any:DSP_Test2",
-		"*prefix:~*req.RandomField:RandomValue:DSP_Test1",
-		"*string:~*req.Account:1001:DSP_Test1",
-		"*string:~*req.Subject:2012:DSP_Test1",
+		"*prefix:*req.RandomField:RandomValue:DSP_Test1",
+		"*string:*req.Account:1001:DSP_Test1",
+		"*string:*req.Subject:2012:DSP_Test1",
 	}
 	sort.Strings(expectedIndexes)
 	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{

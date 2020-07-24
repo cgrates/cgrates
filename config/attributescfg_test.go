@@ -40,13 +40,13 @@ func TestAttributeSCfgloadFromJsonCfg(t *testing.T) {
 "attributes": {								// Attribute service
 	"enabled": true,						// starts attribute service: <true|false>.
 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
-	"prefix_indexed_fields": ["index1","index2"],			// query indexes based on these fields for faster processing
+	"prefix_indexed_fields": ["*req.index1","*req.index2"],			// query indexes based on these fields for faster processing
 	"process_runs": 1,						// number of run loops when processing event
 	},		
 }`
 	expected = AttributeSCfg{
 		Enabled:             true,
-		PrefixIndexedFields: &[]string{"index1", "index2"},
+		PrefixIndexedFields: &[]string{"*req.index1", "*req.index2"},
 		ProcessRuns:         1,
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
@@ -65,13 +65,13 @@ func TestAttributeSCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
 "attributes": {								
 	"enabled": true,									
-	"prefix_indexed_fields": ["index1","index2"],			
+	"prefix_indexed_fields": ["*req.index1","*req.index2"],			
 	"process_runs": 3,						
 	},		
 }`
 	eMap := map[string]interface{}{
 		"enabled":               true,
-		"prefix_indexed_fields": []string{"index1", "index2"},
+		"prefix_indexed_fields": []string{"*req.index1", "*req.index2"},
 		"process_runs":          3,
 		"indexed_selects":       false,
 		"nested_fields":         false,

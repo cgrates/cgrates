@@ -218,10 +218,10 @@ func testAlsITMigrateAndMove(t *testing.T) {
 	}
 
 	expAlsIdx := map[string]utils.StringSet{
-		"*string:~*req.Account:1001": {
+		"*string:*req.Account:1001": {
 			"*out:*any:*any:1001:call_1001:*rated": struct{}{},
 		},
-		"*string:~*req.Subject:call_1001": {
+		"*string:*req.Subject:call_1001": {
 			"*out:*any:*any:1001:call_1001:*rated": struct{}{},
 		},
 	}

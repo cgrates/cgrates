@@ -43,14 +43,14 @@ func TestResourceSConfigloadFromJsonCfg(t *testing.T) {
 	"store_interval": "1s",					// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
 	"thresholds_conns": [],					// address where to reach the thresholds service, empty to disable thresholds functionality: <""|*internal|x.y.z.y:1234>
 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
-	"prefix_indexed_fields": ["index1", "index2"],			// query indexes based on these fields for faster processing
+	"prefix_indexed_fields": ["*req.index1", "*req.index2"],			// query indexes based on these fields for faster processing
 },	
 }`
 	expected = ResourceSConfig{
 		Enabled:             true,
 		StoreInterval:       time.Duration(time.Second),
 		ThresholdSConns:     []string{},
-		PrefixIndexedFields: &[]string{"index1", "index2"},
+		PrefixIndexedFields: &[]string{"*req.index1", "*req.index2"},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
@@ -101,7 +101,7 @@ func TestResourceSConfigAsMapInterface(t *testing.T) {
 			"store_interval": "7m",					
 			"thresholds_conns": ["*internal"],					
 			"indexed_selects":true,					
-			"prefix_indexed_fields": ["prefix_indexed_fields1","prefix_indexed_fields2"],			
+			"prefix_indexed_fields": ["*req.prefix_indexed_fields1","*req.prefix_indexed_fields2"],			
 			"nested_fields": false,					
 		},	
 	}`
@@ -111,7 +111,7 @@ func TestResourceSConfigAsMapInterface(t *testing.T) {
 		"thresholds_conns":      []string{"*internal"},
 		"indexed_selects":       true,
 		"string_indexed_fields": []string{},
-		"prefix_indexed_fields": []string{"prefix_indexed_fields1", "prefix_indexed_fields2"},
+		"prefix_indexed_fields": []string{"*req.prefix_indexed_fields1", "*req.prefix_indexed_fields2"},
 		"nested_fields":         false,
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {

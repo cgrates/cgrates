@@ -128,7 +128,7 @@ func testCGRConfigReloadAttributeS(t *testing.T) {
 	}
 	expAttr := &AttributeSCfg{
 		Enabled:             true,
-		StringIndexedFields: &[]string{utils.Account},
+		StringIndexedFields: &[]string{utils.MetaReq + utils.NestingSep + utils.Account},
 		PrefixIndexedFields: &[]string{},
 		IndexedSelects:      true,
 		ProcessRuns:         1,
@@ -154,7 +154,7 @@ func testCGRConfigReloadChargerS(t *testing.T) {
 	}
 	expAttr := &ChargerSCfg{
 		Enabled:             true,
-		StringIndexedFields: &[]string{utils.Account},
+		StringIndexedFields: &[]string{utils.MetaReq + utils.NestingSep + utils.Account},
 		PrefixIndexedFields: &[]string{},
 		IndexedSelects:      true,
 		AttributeSConns:     []string{"*localhost"},
@@ -180,7 +180,7 @@ func testCGRConfigReloadThresholdS(t *testing.T) {
 	}
 	expAttr := &ThresholdSCfg{
 		Enabled:             true,
-		StringIndexedFields: &[]string{utils.Account},
+		StringIndexedFields: &[]string{utils.MetaReq + utils.NestingSep + utils.Account},
 		PrefixIndexedFields: &[]string{},
 		IndexedSelects:      true,
 	}
@@ -205,7 +205,7 @@ func testCGRConfigReloadStatS(t *testing.T) {
 	}
 	expAttr := &StatSCfg{
 		Enabled:             true,
-		StringIndexedFields: &[]string{utils.Account},
+		StringIndexedFields: &[]string{utils.MetaReq + utils.NestingSep + utils.Account},
 		PrefixIndexedFields: &[]string{},
 		IndexedSelects:      true,
 		ThresholdSConns:     []string{utils.MetaLocalHost},
@@ -231,7 +231,7 @@ func testCGRConfigReloadResourceS(t *testing.T) {
 	}
 	expAttr := &ResourceSConfig{
 		Enabled:             true,
-		StringIndexedFields: &[]string{utils.Account},
+		StringIndexedFields: &[]string{utils.MetaReq + utils.NestingSep + utils.Account},
 		PrefixIndexedFields: &[]string{},
 		IndexedSelects:      true,
 		ThresholdSConns:     []string{utils.MetaLocalHost},
@@ -257,8 +257,8 @@ func testCGRConfigReloadSupplierS(t *testing.T) {
 	}
 	expAttr := &RouteSCfg{
 		Enabled:             true,
-		StringIndexedFields: &[]string{"LCRProfile"},
-		PrefixIndexedFields: &[]string{utils.Destination},
+		StringIndexedFields: &[]string{"*req.LCRProfile"},
+		PrefixIndexedFields: &[]string{utils.MetaReq + utils.NestingSep + utils.Destination},
 		ResourceSConns:      []string{},
 		StatSConns:          []string{},
 		AttributeSConns:     []string{},

@@ -72,7 +72,7 @@ func (alS *AttributeService) attributeProfileForEvent(args *AttrArgsProcessEvent
 	if len(args.AttributeIDs) != 0 {
 		attrIDs = args.AttributeIDs
 	} else {
-		aPrflIDs, err := MatchingItemIDsForEvent(args.Event,
+		aPrflIDs, err := MatchingItemIDsForEvent(evNm,
 			alS.cgrcfg.AttributeSCfg().StringIndexedFields,
 			alS.cgrcfg.AttributeSCfg().PrefixIndexedFields,
 			alS.dm, utils.CacheAttributeFilterIndexes, attrIdxKey,
@@ -83,7 +83,7 @@ func (alS *AttributeService) attributeProfileForEvent(args *AttrArgsProcessEvent
 			if err != utils.ErrNotFound {
 				return nil, err
 			}
-			if aPrflIDs, err = MatchingItemIDsForEvent(args.Event,
+			if aPrflIDs, err = MatchingItemIDsForEvent(evNm,
 				alS.cgrcfg.AttributeSCfg().StringIndexedFields,
 				alS.cgrcfg.AttributeSCfg().PrefixIndexedFields,
 				alS.dm, utils.CacheAttributeFilterIndexes,

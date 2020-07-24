@@ -29,13 +29,12 @@ import (
 // MatchingItemIDsForEvent returns the list of item IDs matching fieldName/fieldValue for an event
 // fieldIDs limits the fields which are checked against indexes
 // helper on top of dataDB.GetIndexes, adding utils.ANY to list of fields queried
-func MatchingItemIDsForEvent(ev map[string]interface{}, stringFldIDs, prefixFldIDs *[]string,
+func MatchingItemIDsForEvent(ev utils.MapStorage, stringFldIDs, prefixFldIDs *[]string,
 	dm *DataManager, cacheID, itemIDPrefix string, indexedSelects, nestedFields bool) (itemIDs utils.StringSet, err error) {
 	itemIDs = make(utils.StringSet)
 	var allFieldIDs []string
-	navEv := utils.MapStorage(ev)
 	if indexedSelects && (stringFldIDs == nil || prefixFldIDs == nil) {
-		allFieldIDs = navEv.GetKeys(nestedFields)
+		allFieldIDs = ev.GetKeys(nestedFields, 2, utils.EmptyString)
 	}
 	// Guard will protect the function with automatic locking
 	lockID := utils.CacheInstanceToPrefix[cacheID] + itemIDPrefix
@@ -59,7 +58,7 @@ func MatchingItemIDsForEvent(ev map[string]interface{}, stringFldIDs, prefixFldI
 				fieldIDs = &allFieldIDs
 			}
 			for _, fldName := range *fieldIDs {
-				fieldValIf, err := navEv.FieldAsInterface(strings.Split(fldName, utils.NestingSep))
+				fieldValIf, err := ev.FieldAsInterface(strings.Split(fldName, utils.NestingSep))
 				if err != nil && filterIndexTypes[i] != utils.META_NONE {
 					continue
 				}
@@ -71,9 +70,6 @@ func MatchingItemIDsForEvent(ev map[string]interface{}, stringFldIDs, prefixFldI
 				// default is only one fieldValue checked
 				if filterIndexTypes[i] == utils.MetaPrefix {
 					fldVals = utils.SplitPrefix(fldVal, 1) // all prefixes till last digit
-				}
-				if fldName != utils.META_ANY {
-					fldName = utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + fldName
 				}
 				var dbItemIDs utils.StringSet // list of items matched in DB
 				for _, val := range fldVals {
