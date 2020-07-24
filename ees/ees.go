@@ -112,12 +112,19 @@ func (eeS *EventExporterS) attrSProcessEvent(cgrEv *utils.CGREventWithOpts, attr
 		cgrEv.Opts = make(map[string]interface{})
 	}
 	cgrEv.Opts[utils.Subsys] = utils.MetaEEs
+	var processRuns *int
+	if val, has := cgrEv.Opts[utils.OptsAttributesProcessRuns]; has {
+		if v, err := utils.IfaceAsTInt64(val); err == nil {
+			processRuns = utils.IntPointer(int(v))
+		}
+	}
 	attrArgs := &engine.AttrArgsProcessEvent{
 		AttributeIDs:  attrIDs,
 		Context:       utils.StringPointer(ctx),
 		Opts:          cgrEv.Opts,
 		CGREvent:      cgrEv.CGREvent,
 		ArgDispatcher: cgrEv.ArgDispatcher,
+		ProcessRuns:   processRuns,
 	}
 	if err = eeS.connMgr.Call(
 		eeS.cfg.EEsNoLksCfg().AttributeSConns, nil,

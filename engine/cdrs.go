@@ -350,6 +350,12 @@ func (cdrS *CDRServer) attrSProcessEvent(cgrEv *utils.CGREventWithOpts) (err err
 		cgrEv.Opts = make(map[string]interface{})
 	}
 	cgrEv.Opts[utils.Subsys] = utils.MetaCDRs
+	var processRuns *int
+	if val, has := cgrEv.Opts[utils.OptsAttributesProcessRuns]; has {
+		if v, err := utils.IfaceAsTInt64(val); err == nil {
+			processRuns = utils.IntPointer(int(v))
+		}
+	}
 	attrArgs := &AttrArgsProcessEvent{
 		Context: utils.StringPointer(utils.FirstNonEmpty(
 			utils.IfaceAsString(cgrEv.Opts[utils.OptsContext]),
@@ -357,6 +363,7 @@ func (cdrS *CDRServer) attrSProcessEvent(cgrEv *utils.CGREventWithOpts) (err err
 		CGREvent:      cgrEv.CGREvent,
 		ArgDispatcher: cgrEv.ArgDispatcher,
 		Opts:          cgrEv.Opts,
+		ProcessRuns:   processRuns,
 	}
 	if err = cdrS.connMgr.Call(cdrS.cgrCfg.CdrsCfg().AttributeSConns, nil,
 		utils.AttributeSv1ProcessEvent,

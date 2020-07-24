@@ -3829,6 +3829,12 @@ func (sS *SessionS) processAttributes(cgrEv *utils.CGREvent, argDisp *utils.ArgD
 		opts = make(engine.MapEvent)
 	}
 	opts[utils.Subsys] = utils.MetaSessionS
+	var processRuns *int
+	if val, has := opts[utils.OptsAttributesProcessRuns]; has {
+		if v, err := utils.IfaceAsTInt64(val); err == nil {
+			processRuns = utils.IntPointer(int(v))
+		}
+	}
 	attrArgs := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer(utils.FirstNonEmpty(
 			opts.GetStringIgnoreErrors(utils.OptsContext),
@@ -3837,6 +3843,7 @@ func (sS *SessionS) processAttributes(cgrEv *utils.CGREvent, argDisp *utils.ArgD
 		ArgDispatcher: argDisp,
 		Opts:          opts,
 		AttributeIDs:  attrIDs,
+		ProcessRuns:   processRuns,
 	}
 	err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().AttrSConns, nil, utils.AttributeSv1ProcessEvent,
 		attrArgs, &rplyEv)

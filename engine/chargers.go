@@ -117,6 +117,12 @@ func (cS *ChargerService) processEvent(cgrEv *utils.CGREventWithOpts) (rply []*C
 		cgrEv.Opts = make(map[string]interface{})
 	}
 	cgrEv.Opts[utils.Subsys] = utils.MetaChargers
+	var processRuns *int
+	if val, has := cgrEv.Opts[utils.OptsAttributesProcessRuns]; has {
+		if v, err := utils.IfaceAsTInt64(val); err == nil {
+			processRuns = utils.IntPointer(int(v))
+		}
+	}
 	if cPs, err = cS.matchingChargerProfilesForEvent(cgrEv); err != nil {
 		return nil, err
 	}
@@ -140,7 +146,7 @@ func (cS *ChargerService) processEvent(cgrEv *utils.CGREventWithOpts) (rply []*C
 			Context: utils.StringPointer(utils.FirstNonEmpty(
 				utils.IfaceAsString(opts[utils.OptsContext]),
 				utils.MetaChargers)),
-			ProcessRuns:   nil,
+			ProcessRuns:   processRuns,
 			CGREvent:      clonedEv.CGREvent,
 			ArgDispatcher: clonedEv.ArgDispatcher,
 			Opts:          opts,

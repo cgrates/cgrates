@@ -88,6 +88,7 @@ var (
 		testChargerSRemChargerProfile,
 		testChargerSPing,
 		testChargerSProcessWithNotFoundAttribute,
+		testChargerSProccessEventWithProcceSRunS,
 		testChargerSKillEngine,
 	}
 )
@@ -432,6 +433,7 @@ func testChargerSProcessWithNotFoundAttribute(t *testing.T) {
 	}
 	processedEv := []*engine.ChrgSProcessEventReply{
 		{
+			Opts:               map[string]interface{}{utils.Subsys: utils.MetaChargers},
 			ChargerSProfile:    "ChargerWithoutAttribute",
 			AttributeSProfiles: []string{},
 			AlteredFields:      []string{utils.MetaReqRunID},
@@ -450,12 +452,78 @@ func testChargerSProcessWithNotFoundAttribute(t *testing.T) {
 	if err := chargerRPC.Call(utils.ChargerSv1ProcessEvent, ev, &rply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rply, processedEv) {
-		t.Errorf("Expecting : %+v, received: %+v", processedEv, rply)
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(processedEv), utils.ToJSON(rply))
 	}
 
 }
 func testChargerSKillEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
+	}
+}
+
+func testChargerSProccessEventWithProcceSRunS(t *testing.T) {
+	chargerProfile = &ChargerWithCache{
+		ChargerProfile: &engine.ChargerProfile{
+			Tenant:    "cgrates.org",
+			ID:        "ApierTest",
+			FilterIDs: []string{"*string:~*req.Account:1010"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			},
+			RunID:        utils.MetaDefault,
+			AttributeIDs: []string{"*constant:*req.Account:1002", "*constant:*req.Account:1003"},
+			Weight:       20,
+		},
+	}
+	var result string
+	if err := chargerRPC.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	var reply *engine.ChargerProfile
+	if err := chargerRPC.Call(utils.APIerSv1GetChargerProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(chargerProfile.ChargerProfile, reply) {
+		t.Errorf("Expecting : %+v, received: %+v", chargerProfile.ChargerProfile, reply)
+	}
+
+	processedEv := []*engine.ChrgSProcessEventReply{
+		{
+			ChargerSProfile:    "ApierTest",
+			AttributeSProfiles: []string{"*constant:*req.Account:1002"},
+			AlteredFields:      []string{utils.MetaReqRunID, "*req.Account"},
+			Opts: map[string]interface{}{
+				utils.Subsys:                    utils.MetaChargers,
+				utils.OptsAttributesProcessRuns: 1.,
+			},
+			CGREvent: &utils.CGREvent{ // matching Charger1
+				Tenant: "cgrates.org",
+				ID:     "event1",
+				Event: map[string]interface{}{
+					utils.Account: "1002",
+					utils.RunID:   "*default",
+				},
+			},
+		},
+	}
+	cgrEv := &utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{ // matching Charger1
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				utils.Account: "1010",
+			},
+		},
+		Opts: map[string]interface{}{utils.OptsAttributesProcessRuns: 1},
+	}
+	var result2 []*engine.ChrgSProcessEventReply
+	if err := chargerRPC.Call(utils.ChargerSv1ProcessEvent, cgrEv, &result2); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(result2, processedEv) {
+		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(processedEv), utils.ToJSON(result2))
 	}
 }
