@@ -247,33 +247,35 @@ func (rpS *RouteService) costForEvent(ev *utils.CGREvent,
 	var accountMaxUsage time.Duration
 	var acntCost map[string]interface{}
 	var initialUsage time.Duration
-	if err := rpS.connMgr.Call(rpS.cgrcfg.RouteSCfg().RALsConns, nil, utils.ResponderGetMaxSessionTimeOnAccounts,
-		&utils.GetMaxSessionTimeOnAccountsArgs{
-			Tenant:      ev.Tenant,
-			Subject:     subj,
-			Destination: dst,
-			SetupTime:   sTime,
-			Usage:       usage,
-			AccountIDs:  acntIDs,
-		}, &acntCost); err != nil {
-		return nil, err
-	}
-	if ifaceMaxUsage, has := acntCost[utils.CapMaxUsage]; has {
-		if accountMaxUsage, err = utils.IfaceAsDuration(ifaceMaxUsage); err != nil {
+	if len(acntIDs) != 0 {
+		if err := rpS.connMgr.Call(rpS.cgrcfg.RouteSCfg().RALsConns, nil, utils.ResponderGetMaxSessionTimeOnAccounts,
+			&utils.GetMaxSessionTimeOnAccountsArgs{
+				Tenant:      ev.Tenant,
+				Subject:     subj,
+				Destination: dst,
+				SetupTime:   sTime,
+				Usage:       usage,
+				AccountIDs:  acntIDs,
+			}, &acntCost); err != nil {
 			return nil, err
 		}
-		if usage > accountMaxUsage {
-			// remain usage needs to be covered by rating plans
-			if len(rpIDs) == 0 {
-				return nil, fmt.Errorf("no rating plans defined for remaining usage")
+		if ifaceMaxUsage, has := acntCost[utils.CapMaxUsage]; has {
+			if accountMaxUsage, err = utils.IfaceAsDuration(ifaceMaxUsage); err != nil {
+				return nil, err
 			}
-			// update the setup time and the usage
-			sTime = sTime.Add(accountMaxUsage)
-			initialUsage = usage
-			usage = usage - accountMaxUsage
-		}
-		for k, v := range acntCost { // update the costData with the infos from AccountS
-			costData[k] = v
+			if usage > accountMaxUsage {
+				// remain usage needs to be covered by rating plans
+				if len(rpIDs) == 0 {
+					return nil, fmt.Errorf("no rating plans defined for remaining usage")
+				}
+				// update the setup time and the usage
+				sTime = sTime.Add(accountMaxUsage)
+				initialUsage = usage
+				usage = usage - accountMaxUsage
+			}
+			for k, v := range acntCost { // update the costData with the infos from AccountS
+				costData[k] = v
+			}
 		}
 	}
 
