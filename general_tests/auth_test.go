@@ -39,6 +39,36 @@ func TestAuthSetStorage(t *testing.T) {
 	engine.Cache.Clear(nil)
 }
 
+func TestAuthLoadCsvFail(t *testing.T) {
+	timings := ``
+	destinations := ``
+	rates := ``
+	destinationRates := ``
+	ratingPlans := ``
+	ratingProfiles := ``
+	sharedGroups := ``
+	actions := ``
+	actionPlans := ``
+	actionTriggers := ``
+	accountActions := ``
+	resLimits := ``
+	stats := ``
+	thresholds := ``
+	filters := ``
+	suppliers := ``
+	attrProfiles := `cgrates.org,ATTR_1,*any,*string~*req.RunID:route1,,,*req.Info,*constant,1001,false,10`
+	chargerProfiles := ``
+	csvr, err := engine.NewTpReader(dbAuth.DataDB(), engine.NewStringCSVStorage(utils.CSV_SEP, destinations, timings, rates, destinationRates,
+		ratingPlans, ratingProfiles, sharedGroups, actions, actionPlans, actionTriggers, accountActions,
+		resLimits, stats, thresholds, filters, suppliers, attrProfiles, chargerProfiles, ``, "", utils.EmptyString), "", "", nil, nil, false)
+	if err != nil {
+		t.Error(err)
+	}
+	if err := csvr.LoadAll(); err == nil {
+		t.Fatal("Expected error received nil")
+	}
+}
+
 func TestAuthLoadCsv(t *testing.T) {
 	timings := ``
 	destinations := `DST_GERMANY_LANDLINE,49`

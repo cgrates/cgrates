@@ -665,3 +665,13 @@ func (dDP *dynamicDP) fieldAsInterface(fldPath []string) (val interface{}, err e
 	}
 	return nil, utils.ErrNotFound
 }
+func verifyInlineFilterS(fltrs []string) (err error) {
+	for _, fl := range fltrs {
+		if strings.HasPrefix(fl, utils.Meta) {
+			if _, err = NewFilterFromInline(utils.EmptyString, fl); err != nil {
+				return
+			}
+		}
+	}
+	return
+}
