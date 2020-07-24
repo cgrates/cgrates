@@ -1085,6 +1085,9 @@ func (tpr *TpReader) LoadResourceProfilesFiltered(tag string) (err error) {
 	}
 	mapRsPfls := make(map[utils.TenantID]*utils.TPResourceProfile)
 	for _, rl := range rls {
+		if err = verifyInlineFilterS(rl.FilterIDs); err != nil {
+			return
+		}
 		mapRsPfls[utils.TenantID{Tenant: rl.Tenant, ID: rl.ID}] = rl
 	}
 	tpr.resProfiles = mapRsPfls
@@ -1109,6 +1112,9 @@ func (tpr *TpReader) LoadStatsFiltered(tag string) (err error) {
 	}
 	mapSTs := make(map[utils.TenantID]*utils.TPStatProfile)
 	for _, st := range tps {
+		if err = verifyInlineFilterS(st.FilterIDs); err != nil {
+			return
+		}
 		mapSTs[utils.TenantID{Tenant: st.Tenant, ID: st.ID}] = st
 	}
 	tpr.sqProfiles = mapSTs
@@ -1133,6 +1139,9 @@ func (tpr *TpReader) LoadThresholdsFiltered(tag string) (err error) {
 	}
 	mapTHs := make(map[utils.TenantID]*utils.TPThresholdProfile)
 	for _, th := range tps {
+		if err = verifyInlineFilterS(th.FilterIDs); err != nil {
+			return
+		}
 		mapTHs[utils.TenantID{Tenant: th.Tenant, ID: th.ID}] = th
 	}
 	tpr.thProfiles = mapTHs
@@ -1174,6 +1183,9 @@ func (tpr *TpReader) LoadRouteProfilesFiltered(tag string) (err error) {
 	}
 	mapRsPfls := make(map[utils.TenantID]*utils.TPRouteProfile)
 	for _, rl := range rls {
+		if err = verifyInlineFilterS(rl.FilterIDs); err != nil {
+			return
+		}
 		mapRsPfls[utils.TenantID{Tenant: rl.Tenant, ID: rl.ID}] = rl
 	}
 	tpr.routeProfiles = mapRsPfls
@@ -1191,6 +1203,9 @@ func (tpr *TpReader) LoadAttributeProfilesFiltered(tag string) (err error) {
 	}
 	mapAttrPfls := make(map[utils.TenantID]*utils.TPAttributeProfile)
 	for _, attr := range attrs {
+		if err = verifyInlineFilterS(attr.FilterIDs); err != nil {
+			return
+		}
 		mapAttrPfls[utils.TenantID{Tenant: attr.Tenant, ID: attr.ID}] = attr
 	}
 	tpr.attributeProfiles = mapAttrPfls
@@ -1208,6 +1223,9 @@ func (tpr *TpReader) LoadChargerProfilesFiltered(tag string) (err error) {
 	}
 	mapChargerProfile := make(map[utils.TenantID]*utils.TPChargerProfile)
 	for _, rl := range rls {
+		if err = verifyInlineFilterS(rl.FilterIDs); err != nil {
+			return
+		}
 		mapChargerProfile[utils.TenantID{Tenant: rl.Tenant, ID: rl.ID}] = rl
 	}
 	tpr.chargerProfiles = mapChargerProfile
@@ -1225,6 +1243,9 @@ func (tpr *TpReader) LoadDispatcherProfilesFiltered(tag string) (err error) {
 	}
 	mapDispatcherProfile := make(map[utils.TenantID]*utils.TPDispatcherProfile)
 	for _, rl := range rls {
+		if err = verifyInlineFilterS(rl.FilterIDs); err != nil {
+			return
+		}
 		mapDispatcherProfile[utils.TenantID{Tenant: rl.Tenant, ID: rl.ID}] = rl
 	}
 	tpr.dispatcherProfiles = mapDispatcherProfile
@@ -1259,6 +1280,9 @@ func (tpr *TpReader) LoadRateProfilesFiltered(tag string) (err error) {
 	}
 	mapRateProfiles := make(map[utils.TenantID]*utils.TPRateProfile)
 	for _, rl := range rls {
+		if err = verifyInlineFilterS(rl.FilterIDs); err != nil {
+			return
+		}
 		mapRateProfiles[utils.TenantID{Tenant: rl.Tenant, ID: rl.ID}] = rl
 	}
 	tpr.rateProfiles = mapRateProfiles
