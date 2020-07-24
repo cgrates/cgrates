@@ -87,6 +87,7 @@ var (
 		testChargerSUpdateChargerProfile,
 		testChargerSRemChargerProfile,
 		testChargerSPing,
+		testChargerSProcessWithNotFoundAttribute,
 		testChargerSKillEngine,
 	}
 )
@@ -400,6 +401,59 @@ func testChargerSPing(t *testing.T) {
 	}
 }
 
+func testChargerSProcessWithNotFoundAttribute(t *testing.T) {
+	var result string
+	chargerProfile = &ChargerWithCache{
+		ChargerProfile: &engine.ChargerProfile{
+			Tenant:    "cgrates.org",
+			ID:        "ChargerWithoutAttribute",
+			FilterIDs: []string{"*string:~*req.CustomField:WithoutAttributes"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
+			},
+			RunID:  "CustomRun",
+			Weight: 20,
+		},
+	}
+
+	if err := chargerRPC.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "CustomEvent",
+		Event: map[string]interface{}{
+			utils.Account: "Random",
+			"CustomField": "WithoutAttributes",
+		},
+	}
+	processedEv := []*engine.ChrgSProcessEventReply{
+		{
+			ChargerSProfile:    "ChargerWithoutAttribute",
+			AttributeSProfiles: []string{},
+			AlteredFields:      []string{utils.MetaReqRunID},
+			CGREvent: &utils.CGREvent{ // matching ChargerWithoutAttribute
+				Tenant: "cgrates.org",
+				ID:     "CustomEvent",
+				Event: map[string]interface{}{
+					utils.Account: "Random",
+					"CustomField": "WithoutAttributes",
+					"RunID":       "CustomRun",
+				},
+			},
+		},
+	}
+	var rply []*engine.ChrgSProcessEventReply
+	if err := chargerRPC.Call(utils.ChargerSv1ProcessEvent, ev, &rply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rply, processedEv) {
+		t.Errorf("Expecting : %+v, received: %+v", processedEv, rply)
+	}
+
+}
 func testChargerSKillEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)

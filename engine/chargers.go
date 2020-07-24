@@ -148,7 +148,10 @@ func (cS *ChargerService) processEvent(cgrEv *utils.CGREventWithOpts) (rply []*C
 		var evReply AttrSProcessEventReply
 		if err = cS.connMgr.Call(cS.cfg.ChargerSCfg().AttributeSConns, nil,
 			utils.AttributeSv1ProcessEvent, args, &evReply); err != nil {
-			return nil, err
+			if err.Error() != utils.ErrNotFound.Error() {
+				return nil, err
+			}
+			err = nil
 		}
 		rply[i].AttributeSProfiles = evReply.MatchedProfiles
 		if len(evReply.AlteredFields) != 0 {
