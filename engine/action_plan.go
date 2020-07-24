@@ -131,7 +131,7 @@ func (at *ActionTiming) GetNextStartTime(t1 time.Time) (t time.Time) {
 	if i.Timing.ID == utils.MetaMonthlyEstimated {
 		clnRITiming := at.Timing.Timing.Clone()
 		mnt := t1.Month()
-		if t1.Day() > clnRITiming.MonthDays[0] {
+		if t1.Day() >= clnRITiming.MonthDays[0] {
 			mnt++
 			if mnt == 13 { // special case in case of december next month is January
 				mnt = 1

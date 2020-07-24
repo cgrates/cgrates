@@ -323,4 +323,28 @@ func TestActionTimingGetNextStartTime(t *testing.T) {
 	if st := at.GetNextStartTime(t1); !st.Equal(exp) {
 		t.Errorf("Expecting: %+v, received: %+v", exp, st)
 	}
+
+	t1 = time.Date(2020, 2, 17, 14, 25, 0, 0, time.UTC)
+	at = &ActionTiming{
+		Timing: &RateInterval{
+			Timing: &RITiming{
+				ID:        utils.MetaMonthlyEstimated,
+				MonthDays: utils.MonthDays{17},
+				StartTime: "15:00:00"}}}
+	exp = time.Date(2020, 2, 17, 15, 0, 0, 0, time.UTC)
+	if st := at.GetNextStartTime(t1); !st.Equal(exp) {
+		t.Errorf("Expecting: %+v, received: %+v", exp, st)
+	}
+
+	t1 = time.Date(2020, 2, 17, 15, 25, 0, 0, time.UTC)
+	at = &ActionTiming{
+		Timing: &RateInterval{
+			Timing: &RITiming{
+				ID:        utils.MetaMonthlyEstimated,
+				MonthDays: utils.MonthDays{17},
+				StartTime: "10:00:00"}}}
+	exp = time.Date(2020, 3, 17, 10, 0, 0, 0, time.UTC)
+	if st := at.GetNextStartTime(t1); !st.Equal(exp) {
+		t.Errorf("Expecting: %+v, received: %+v", exp, st)
+	}
 }
