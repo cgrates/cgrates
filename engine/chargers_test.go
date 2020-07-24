@@ -33,7 +33,7 @@ var (
 		&ChargerProfile{
 			Tenant:    "cgrates.org",
 			ID:        "CPP_1",
-			FilterIDs: []string{"FLTR_CP_1", "FLTR_CP_4"},
+			FilterIDs: []string{"FLTR_CP_1", "FLTR_CP_4", "*string:~*opts.*subsys:*chargers"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			},
@@ -66,6 +66,9 @@ var (
 	}
 	chargerEvents = []*utils.CGREventWithOpts{
 		{
+			Opts: map[string]interface{}{
+				utils.Subsys: utils.MetaChargers,
+			},
 			CGREvent: &utils.CGREvent{
 				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 				ID:     utils.GenUUID(),
