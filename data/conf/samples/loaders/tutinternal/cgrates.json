@@ -81,7 +81,7 @@
 
 "attributes": {
 	"enabled": true,
-	"prefix_indexed_fields":["Destination"],
+	"prefix_indexed_fields":["*req.Destination"],
 },
 
 

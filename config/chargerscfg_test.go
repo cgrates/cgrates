@@ -41,13 +41,13 @@ func TestChargerSCfgloadFromJsonCfg(t *testing.T) {
 	"enabled": true,						// starts charger service: <true|false>.
 	"attributes_conns": [],					// address where to reach the AttributeS <""|127.0.0.1:2013>
 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
-	"prefix_indexed_fields": ["index1", "index2"],			// query indexes based on these fields for faster processing
+	"prefix_indexed_fields": ["*req.index1", "*req.index2"],			// query indexes based on these fields for faster processing
 },	
 }`
 	expected = ChargerSCfg{
 		Enabled:             true,
 		AttributeSConns:     []string{},
-		PrefixIndexedFields: &[]string{"index1", "index2"},
+		PrefixIndexedFields: &[]string{"*req.index1", "*req.index2"},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)

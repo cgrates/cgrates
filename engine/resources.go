@@ -69,6 +69,7 @@ type ResourceUsage struct {
 	Units      float64 // Number of units used
 }
 
+// TenantID returns the concatenated key between tenant and ID
 func (ru *ResourceUsage) TenantID() string {
 	return utils.ConcatenatedKey(ru.Tenant, ru.ID)
 }
@@ -78,7 +79,7 @@ func (ru *ResourceUsage) isActive(atTime time.Time) bool {
 	return ru.ExpiryTime.IsZero() || ru.ExpiryTime.Sub(atTime) > 0
 }
 
-// clone duplicates ru
+// Clone duplicates ru
 func (ru *ResourceUsage) Clone() (cln *ResourceUsage) {
 	cln = new(ResourceUsage)
 	*cln = *ru
@@ -116,7 +117,7 @@ func (r *Resource) removeExpiredUnits() {
 		if r, has := r.Usages[rID]; has && r.isActive(time.Now()) {
 			break
 		}
-		firstActive += 1
+		firstActive++
 	}
 	if firstActive == 0 {
 		return
@@ -205,7 +206,7 @@ func (r *Resource) clearUsage(ruID string) (err error) {
 // Resources is an orderable list of Resources based on Weight
 type Resources []*Resource
 
-// sort based on Weight
+// Sort sorts based on Weight
 func (rs Resources) Sort() {
 	sort.Slice(rs, func(i, j int) bool { return rs[i].rPrf.Weight > rs[j].rPrf.Weight })
 }
@@ -218,7 +219,7 @@ func (rs Resources) recordUsage(ru *ResourceUsage) (err error) {
 			utils.Logger.Warning(fmt.Sprintf("<%s>cannot record usage, err: %s", utils.ResourceS, err.Error()))
 			break
 		}
-		nonReservedIdx += 1
+		nonReservedIdx++
 	}
 	if err != nil {
 		for _, r := range rs[:nonReservedIdx] {
@@ -337,7 +338,7 @@ type ResourceService struct {
 	connMgr         *ConnManager
 }
 
-// Called to start the service
+// ListenAndServe is called to start the service
 func (rS *ResourceService) ListenAndServe(exitChan chan bool) error {
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.ResourceS))
 	go rS.runBackup() // start backup loop
@@ -346,7 +347,7 @@ func (rS *ResourceService) ListenAndServe(exitChan chan bool) error {
 	return nil
 }
 
-// Called to shutdown the service
+// Shutdown is called to shutdown the service
 func (rS *ResourceService) Shutdown() error {
 	utils.Logger.Info("<ResourceS> service shutdown initialized")
 	close(rS.stopBackup)
@@ -466,6 +467,7 @@ func (rS *ResourceService) matchingResourcesForEvent(ev *utils.CGREvent,
 	matchingResources := make(map[string]*Resource)
 	var isCached bool
 	var rIDs utils.StringSet
+	evNm := utils.MapStorage{utils.MetaReq: ev.Event}
 	if x, ok := Cache.Get(utils.CacheEventResources, evUUID); ok { // The ResourceIDs were cached as utils.StringSet{"resID":bool}
 		isCached = true
 		if x == nil {
@@ -473,7 +475,7 @@ func (rS *ResourceService) matchingResourcesForEvent(ev *utils.CGREvent,
 		}
 		rIDs = x.(utils.StringSet)
 	} else { // select the resourceIDs out of dataDB
-		rIDs, err = MatchingItemIDsForEvent(ev.Event,
+		rIDs, err = MatchingItemIDsForEvent(evNm,
 			rS.cgrcfg.ResourceSCfg().StringIndexedFields,
 			rS.cgrcfg.ResourceSCfg().PrefixIndexedFields,
 			rS.dm, utils.CacheResourceFilterIndexes, ev.Tenant,
@@ -489,7 +491,6 @@ func (rS *ResourceService) matchingResourcesForEvent(ev *utils.CGREvent,
 			return
 		}
 	}
-	evNm := utils.MapStorage{utils.MetaReq: ev.Event}
 	lockIDs := utils.PrefixSliceItems(rs.IDs(), utils.ResourcesPrefix)
 	guardian.Guardian.Guard(func() (gIface interface{}, gErr error) {
 		for resName := range rIDs {
@@ -778,16 +779,16 @@ func (rS *ResourceService) V1ReleaseResource(args utils.ArgRSv1ResourceUsage, re
 	return
 }
 
-// GetResource returns a resource configuration
+// V1GetResource returns a resource configuration
 func (rS *ResourceService) V1GetResource(arg *utils.TenantIDWithArgDispatcher, reply *Resource) error {
 	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if res, err := rS.dm.GetResource(arg.Tenant, arg.ID, true, true, utils.NonTransactional); err != nil {
+	res, err := rS.dm.GetResource(arg.Tenant, arg.ID, true, true, utils.NonTransactional)
+	if err != nil {
 		return err
-	} else {
-		*reply = *res
 	}
+	*reply = *res
 	return nil
 }
 

@@ -201,8 +201,9 @@ func testFltrITMigrateAndMove(t *testing.T) {
 		}
 		// manually set the indexes because the GetFilter functions compile the value from DB that is still the old version
 		wrongFltrIdx := map[string]utils.StringSet{
-			"*prefix::1001":        {"ATTR_1": struct{}{}},
-			"*string:Account:1001": {"ATTR_1": struct{}{}}}
+			"*prefix::1001": {"ATTR_1": struct{}{}},
+			// "*string:Account:1001": {"ATTR_1": struct{}{}},
+		}
 
 		if err := fltrMigrator.dmIN.DataManager().SetIndexes(
 			utils.CacheAttributeFilterIndexes,
@@ -261,17 +262,20 @@ func testFltrITMigrateAndMove(t *testing.T) {
 		if !reflect.DeepEqual(*expAttrProf, *resultattr) {
 			t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expAttrProf), utils.ToJSON(resultattr))
 		}
-		expFltrIdx := map[string]utils.StringSet{
-			"*prefix:~*req.Account:1001": {"ATTR_1": struct{}{}},
-			"*string:~*req.Account:1001": {"ATTR_1": struct{}{}}}
+		// the Indexes should be recomputed after migration to the same DB
+		if inPath != outPath {
+			expFltrIdx := map[string]utils.StringSet{
+				"*prefix:*req.Account:1001": {"ATTR_1": struct{}{}},
+				"*string:*req.Account:1001": {"ATTR_1": struct{}{}}}
 
-		if fltridx, err := fltrMigrator.dmOut.DataManager().GetIndexes(
-			utils.CacheAttributeFilterIndexes,
-			utils.ConcatenatedKey(attrProf.Tenant, utils.META_ANY),
-			"", false, false); err != nil {
-			t.Error(err)
-		} else if !reflect.DeepEqual(expFltrIdx, fltridx) {
-			t.Errorf("Expected %v, recived: %v", utils.ToJSON(expFltrIdx), utils.ToJSON(fltridx))
+			if fltridx, err := fltrMigrator.dmOut.DataManager().GetIndexes(
+				utils.CacheAttributeFilterIndexes,
+				utils.ConcatenatedKey(attrProf.Tenant, utils.META_ANY),
+				"", false, false); err != nil {
+				t.Error(err)
+			} else if !reflect.DeepEqual(expFltrIdx, fltridx) {
+				t.Errorf("Expected %v, recived: %v", utils.ToJSON(expFltrIdx), utils.ToJSON(fltridx))
+			}
 		}
 	case utils.Move:
 		if err := fltrMigrator.dmIN.DataManager().SetFilter(expFilters, true); err != nil {
@@ -454,18 +458,22 @@ func testFltrITMigratev2(t *testing.T) {
 	if !reflect.DeepEqual(*expAttrProf, *resultAttr) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expAttrProf), utils.ToJSON(resultAttr))
 	}
-	expFltrIdx := map[string]utils.StringSet{
-		"*string:~*req.Account:1001": {"ATTR_1": struct{}{}},
-		"*string:~*req.Subject:1001": {"ATTR_1": struct{}{}},
-	}
 
-	if fltridx, err := fltrMigrator.dmOut.DataManager().GetIndexes(
-		utils.CacheAttributeFilterIndexes,
-		utils.ConcatenatedKey(attrProf.Tenant, utils.META_ANY),
-		"", false, true); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expFltrIdx, fltridx) {
-		t.Errorf("Expected %v, recived: %v", utils.ToJSON(expFltrIdx), utils.ToJSON(fltridx))
+	// the Indexes should be recomputed after migration to the same DB
+	if inPath != outPath {
+		expFltrIdx := map[string]utils.StringSet{
+			"*string:*req.Account:1001": {"ATTR_1": struct{}{}},
+			"*string:*req.Subject:1001": {"ATTR_1": struct{}{}},
+		}
+
+		if fltridx, err := fltrMigrator.dmOut.DataManager().GetIndexes(
+			utils.CacheAttributeFilterIndexes,
+			utils.ConcatenatedKey(attrProf.Tenant, utils.META_ANY),
+			"", false, true); err != nil {
+			t.Error(err)
+		} else if !reflect.DeepEqual(expFltrIdx, fltridx) {
+			t.Errorf("Expected %v, recived: %v", utils.ToJSON(expFltrIdx), utils.ToJSON(fltridx))
+		}
 	}
 }
 

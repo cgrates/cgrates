@@ -45,7 +45,7 @@ func (dS *DispatcherService) ChargerSv1Ping(args *utils.CGREventWithArgDispatche
 		utils.ChargerSv1Ping, args, reply)
 }
 
-func (dS *DispatcherService) ChargerSv1GetChargersForEvent(args *utils.CGREventWithArgDispatcher,
+func (dS *DispatcherService) ChargerSv1GetChargersForEvent(args *utils.CGREventWithOpts,
 	reply *engine.ChargerProfiles) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.CGREvent != nil && args.CGREvent.Tenant != utils.EmptyString {

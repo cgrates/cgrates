@@ -389,7 +389,7 @@ func (dC *DispatcherChargerSv1) Ping(args *utils.CGREventWithArgDispatcher, repl
 }
 
 // GetChargersForEvent implements ChargerSv1GetChargersForEvent
-func (dC *DispatcherChargerSv1) GetChargersForEvent(args *utils.CGREventWithArgDispatcher,
+func (dC *DispatcherChargerSv1) GetChargersForEvent(args *utils.CGREventWithOpts,
 	reply *engine.ChargerProfiles) (err error) {
 	return dC.dC.ChargerSv1GetChargersForEvent(args, reply)
 }

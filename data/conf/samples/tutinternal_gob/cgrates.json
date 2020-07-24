@@ -83,7 +83,7 @@
 
 "routes": {
 	"enabled": true,
-	"prefix_indexed_fields":["Destination"],
+	"prefix_indexed_fields":["*req.Destination"],
 	"stats_conns": ["conn1"],
 	"resources_conns": ["conn1"],
 },

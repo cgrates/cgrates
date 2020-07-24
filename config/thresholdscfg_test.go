@@ -42,12 +42,12 @@ func TestThresholdSCfgloadFromJsonCfg(t *testing.T) {
 	"enabled": false,						// starts ThresholdS service: <true|false>.
 	"store_interval": "2h",					// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
-	"prefix_indexed_fields": ["index1", "index2"],			// query indexes based on these fields for faster processing
+	"prefix_indexed_fields": ["*req.index1", "*req.index2"],			// query indexes based on these fields for faster processing
 	},		
 }`
 	expected = ThresholdSCfg{
 		StoreInterval:       time.Duration(time.Hour * 2),
-		PrefixIndexedFields: &[]string{"index1", "index2"},
+		PrefixIndexedFields: &[]string{"*req.index1", "*req.index2"},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
@@ -95,8 +95,8 @@ func TestThresholdSCfgAsMapInterface(t *testing.T) {
 			"enabled": true,						
 			"store_interval": "96h",					
 			"indexed_selects":true,
-			"string_indexed_fields": ["string","indexed","fields"],					
-			"prefix_indexed_fields": ["prefix_indexed_fields1","prefix_indexed_fields2"],			
+			"string_indexed_fields": ["*req.string","*req.indexed","*req.fields"],					
+			"prefix_indexed_fields": ["*req.prefix_indexed_fields1","*req.prefix_indexed_fields2"],			
 			"nested_fields": true,					
 		},		
 }`
@@ -104,8 +104,8 @@ func TestThresholdSCfgAsMapInterface(t *testing.T) {
 		"enabled":               true,
 		"store_interval":        "96h0m0s",
 		"indexed_selects":       true,
-		"string_indexed_fields": []string{"string", "indexed", "fields"},
-		"prefix_indexed_fields": []string{"prefix_indexed_fields1", "prefix_indexed_fields2"},
+		"string_indexed_fields": []string{"*req.string", "*req.indexed", "*req.fields"},
+		"prefix_indexed_fields": []string{"*req.prefix_indexed_fields1", "*req.prefix_indexed_fields2"},
 		"nested_fields":         true,
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {

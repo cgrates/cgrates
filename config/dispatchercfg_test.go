@@ -111,8 +111,8 @@ func TestDispatcherSCfgAsMapInterface(t *testing.T) {
 		"dispatchers":{
 			"enabled": false,
 			"indexed_selects":true,
-			"string_indexed_fields": ["string","indexed","fields"],
-			"prefix_indexed_fields": ["prefix","indexed","fields"],
+			"string_indexed_fields": ["*req.string","*req.indexed","*req.fields"],
+			"prefix_indexed_fields": ["*req.prefix","*req.indexed","*req.fields"],
 			"nested_fields": false,
 			"attributes_conns": ["*internal"],
 		},
@@ -121,10 +121,10 @@ func TestDispatcherSCfgAsMapInterface(t *testing.T) {
 	eMap = map[string]interface{}{
 		"enabled":               false,
 		"indexed_selects":       true,
-		"prefix_indexed_fields": []string{"prefix", "indexed", "fields"},
+		"prefix_indexed_fields": []string{"*req.prefix", "*req.indexed", "*req.fields"},
 		"nested_fields":         false,
 		"attributes_conns":      []string{"*internal"},
-		"string_indexed_fields": []string{"string", "indexed", "fields"},
+		"string_indexed_fields": []string{"*req.string", "*req.indexed", "*req.fields"},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)

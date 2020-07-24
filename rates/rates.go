@@ -72,10 +72,11 @@ func (rS *RateS) Call(serviceMethod string, args interface{}, reply interface{})
 
 // matchingRateProfileForEvent returns the matched RateProfile for the given event
 func (rS *RateS) matchingRateProfileForEvent(args *ArgsCostForEvent, rPfIDs []string) (rtPfl *engine.RateProfile, err error) {
+	evNm := utils.MapStorage{utils.MetaReq: args.CGREvent.Event}
 	if len(rPfIDs) == 0 {
 		var rPfIDMp utils.StringSet
 		if rPfIDMp, err = engine.MatchingItemIDsForEvent(
-			args.CGREvent.Event,
+			evNm,
 			rS.cfg.RateSCfg().StringIndexedFields,
 			rS.cfg.RateSCfg().PrefixIndexedFields,
 			rS.dm,
@@ -88,7 +89,6 @@ func (rS *RateS) matchingRateProfileForEvent(args *ArgsCostForEvent, rPfIDs []st
 		}
 		rPfIDs = rPfIDMp.AsSlice()
 	}
-	evNm := utils.MapStorage{utils.MetaReq: args.CGREvent.Event}
 	var sTime time.Time
 	if sTime, err = args.StartTime(rS.cfg.GeneralCfg().DefaultTimezone); err != nil {
 		return
@@ -157,7 +157,7 @@ func (rS *RateS) rateProfileCostForEvent(rtPfl *engine.RateProfile, args *ArgsCo
 }
 */
 
-// AttrArgsProcessEvent arguments used for proccess event
+// ArgsCostForEvent arguments used for proccess event
 type ArgsCostForEvent struct {
 	RateProfileIDs []string
 	Opts           map[string]interface{}

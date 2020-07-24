@@ -40,7 +40,7 @@ func TestRouteSCfgloadFromJsonCfg(t *testing.T) {
 "routes": {								// Route service 
 	"enabled": false,						// starts RouteS service: <true|false>.
 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
-	"prefix_indexed_fields": ["index1", "index2"],			// query indexes based on these fields for faster processing
+	"prefix_indexed_fields": ["*req.index1", "*req.index2"],			// query indexes based on these fields for faster processing
 	"attributes_conns": [],					// address where to reach the AttributeS <""|127.0.0.1:2013>
 	"resources_conns": [],					// address where to reach the Resource service, empty to disable functionality: <""|*internal|x.y.z.y:1234>
 	"stats_conns": [],						// address where to reach the Stat service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
@@ -48,7 +48,7 @@ func TestRouteSCfgloadFromJsonCfg(t *testing.T) {
 },
 }`
 	expected = RouteSCfg{
-		PrefixIndexedFields: &[]string{"index1", "index2"},
+		PrefixIndexedFields: &[]string{"*req.index1", "*req.index2"},
 		AttributeSConns:     []string{},
 		ResourceSConns:      []string{},
 		StatSConns:          []string{},
@@ -106,7 +106,7 @@ func TestRouteSCfgAsMapInterface(t *testing.T) {
 		"routes": {
 			"enabled": false,
 			"indexed_selects":true,
-			"prefix_indexed_fields": ["prefix","indexed","fields"],
+			"prefix_indexed_fields": ["*req.prefix","*req.indexed","*req.fields"],
 			"nested_fields": false,
 			"attributes_conns": ["*internal"],
 			"resources_conns": ["*internal"],
@@ -118,7 +118,7 @@ func TestRouteSCfgAsMapInterface(t *testing.T) {
 	eMap = map[string]interface{}{
 		"enabled":               false,
 		"indexed_selects":       true,
-		"prefix_indexed_fields": []string{"prefix", "indexed", "fields"},
+		"prefix_indexed_fields": []string{"*req.prefix", "*req.indexed", "*req.fields"},
 		"string_indexed_fields": []string{},
 		"nested_fields":         false,
 		"attributes_conns":      []string{"*internal"},

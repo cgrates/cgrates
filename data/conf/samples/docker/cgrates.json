@@ -91,7 +91,7 @@
 
 "routes": {
 	"enabled": true,
-	"prefix_indexed_fields":["Destination"],
+	"prefix_indexed_fields":["*req.Destination"],
 	"stats_conns": ["*internal"],
 	"resources_conns": ["*internal"],
 	"rals_conns": ["*internal"],

@@ -46,6 +46,7 @@ var sTests = []func(t *testing.T){
 	testITIsDBEmpty,
 	testITTestThresholdFilterIndexes,
 	testITTestAttributeProfileFilterIndexes,
+	testITTestAttributeProfileFilterIndexes2,
 	testITTestThresholdInlineFilterIndexing,
 	testITFlush,
 	testITIsDBEmpty,
@@ -232,7 +233,7 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 		ID:     "Filter1",
 		Rules: []*FilterRule{
 			{
-				Element: "EventType",
+				Element: "~*req.EventType",
 				Type:    utils.MetaString,
 				Values:  []string{"Event1", "Event2"},
 			},
@@ -275,11 +276,11 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 		t.Error(err)
 	}
 	eIdxes := map[string]utils.StringSet{
-		"*string:EventType:Event1": {
+		"*string:*req.EventType:Event1": {
 			"THD_Test":  struct{}{},
 			"THD_Test2": struct{}{},
 		},
-		"*string:EventType:Event2": {
+		"*string:*req.EventType:Event2": {
 			"THD_Test":  struct{}{},
 			"THD_Test2": struct{}{},
 		},
@@ -298,7 +299,7 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 		ID:     "Filter2",
 		Rules: []*FilterRule{
 			{
-				Element: "Account",
+				Element: "~*req.Account",
 				Type:    utils.MetaString,
 				Values:  []string{"1001", "1002"},
 			},
@@ -318,16 +319,16 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 		t.Error(err)
 	}
 	eIdxes = map[string]utils.StringSet{
-		"*string:Account:1001": {
+		"*string:*req.Account:1001": {
 			"THD_Test": struct{}{},
 		},
-		"*string:Account:1002": {
+		"*string:*req.Account:1002": {
 			"THD_Test": struct{}{},
 		},
-		"*string:EventType:Event1": {
+		"*string:*req.EventType:Event1": {
 			"THD_Test2": struct{}{},
 		},
-		"*string:EventType:Event2": {
+		"*string:*req.EventType:Event2": {
 			"THD_Test2": struct{}{},
 		},
 	}
@@ -344,7 +345,7 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 		ID:     "Filter3",
 		Rules: []*FilterRule{
 			{
-				Element: "Destination",
+				Element: "~*req.Destination",
 				Type:    utils.MetaString,
 				Values:  []string{"10", "20"},
 			},
@@ -365,17 +366,17 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 		t.Error(err)
 	}
 	eIdxes = map[string]utils.StringSet{
-		"*string:Destination:10": {
+		"*string:*req.Destination:10": {
 			"THD_Test": struct{}{},
 		},
-		"*string:Destination:20": {
+		"*string:*req.Destination:20": {
 			"THD_Test": struct{}{},
 		},
-		"*string:EventType:Event1": {
+		"*string:*req.EventType:Event1": {
 			"THD_Test":  struct{}{},
 			"THD_Test2": struct{}{},
 		},
-		"*string:EventType:Event2": {
+		"*string:*req.EventType:Event2": {
 			"THD_Test":  struct{}{},
 			"THD_Test2": struct{}{},
 		},
@@ -385,7 +386,7 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 		utils.EmptyString, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
-		t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
+		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(eIdxes), utils.ToJSON(rcvIdx))
 	}
 
 	//replace old filter with two different filters
@@ -394,7 +395,7 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 		ID:     "Filter3",
 		Rules: []*FilterRule{
 			{
-				Element: "Destination",
+				Element: "~*req.Destination",
 				Type:    utils.MetaString,
 				Values:  []string{"30", "50"},
 			},
@@ -422,17 +423,17 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 	}
 
 	eIdxes = map[string]utils.StringSet{
-		"*string:Destination:30": {
+		"*string:*req.Destination:30": {
 			"THD_Test": struct{}{},
 		},
-		"*string:Destination:50": {
+		"*string:*req.Destination:50": {
 			"THD_Test": struct{}{},
 		},
-		"*string:EventType:Event1": {
+		"*string:*req.EventType:Event1": {
 			"THD_Test":  struct{}{},
 			"THD_Test2": struct{}{},
 		},
-		"*string:EventType:Event2": {
+		"*string:*req.EventType:Event2": {
 			"THD_Test":  struct{}{},
 			"THD_Test2": struct{}{},
 		},
@@ -472,7 +473,7 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 		ID:     "AttrFilter",
 		Rules: []*FilterRule{
 			{
-				Element: "EventType",
+				Element: "~*req.EventType",
 				Type:    utils.MetaString,
 				Values:  []string{"Event1", "Event2"},
 			},
@@ -506,10 +507,10 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 		t.Error(err)
 	}
 	eIdxes := map[string]utils.StringSet{
-		"*string:EventType:Event1": {
+		"*string:*req.EventType:Event1": {
 			"AttrPrf": struct{}{},
 		},
-		"*string:EventType:Event2": {
+		"*string:*req.EventType:Event2": {
 			"AttrPrf": struct{}{},
 		},
 	}
@@ -568,9 +569,9 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 		ID:     "AttrFilter",
 		Rules: []*FilterRule{
 			{
-				Element: "EventType",
+				Element: "~*req.EventType",
 				Type:    utils.MetaString,
-				Values:  []string{"Event3", "Event4"},
+				Values:  []string{"Event3", "~*req.Event4"},
 			},
 		},
 		ActivationInterval: &utils.ActivationInterval{
@@ -582,10 +583,99 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 		t.Error(err)
 	}
 	eIdxes = map[string]utils.StringSet{
-		"*string:EventType:Event3": {
+		"*string:*req.EventType:Event3": {
 			"AttrPrf": struct{}{},
 		},
-		"*string:EventType:Event4": {
+	}
+	for _, ctx := range attrProfile.Contexts {
+		if rcvIdx, err := dataManager.GetIndexes(
+			utils.CacheAttributeFilterIndexes,
+			utils.ConcatenatedKey(attrProfile.Tenant, ctx),
+			utils.EmptyString, false, false); err != nil {
+			t.Error(err)
+		} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
+			t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(eIdxes), rcvIdx)
+		}
+	}
+
+	eIdxes = map[string]utils.StringSet{
+		"*attribute_filter_indexes": {
+			"AttrPrf": struct{}{},
+		},
+	}
+	if rcvIdx, err := dataManager.GetIndexes(
+		utils.CacheReverseFilterIndexes,
+		fp.TenantID(),
+		utils.EmptyString, false, false); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
+		t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
+	}
+
+	if err := dataManager.RemoveAttributeProfile(attrProfile.Tenant,
+		attrProfile.ID, utils.NonTransactional, true); err != nil {
+		t.Error(err)
+	}
+	//check if index is removed
+	if _, err := dataManager.GetIndexes(
+		utils.CacheAttributeFilterIndexes,
+		utils.ConcatenatedKey("cgrates.org", "con3"),
+		utils.MetaString, false, false); err != nil && err != utils.ErrNotFound {
+		t.Error(err)
+	}
+
+	if _, err := dataManager.GetIndexes(
+		utils.CacheReverseFilterIndexes,
+		fp.TenantID(),
+		utils.EmptyString, false, false); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+}
+
+func testITTestAttributeProfileFilterIndexes2(t *testing.T) {
+	fp := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "AttrFilter",
+		Rules: []*FilterRule{
+			{
+				Element: "EventType",
+				Type:    utils.MetaString,
+				Values:  []string{"~*req.Event1", "~*req.Event2"},
+			},
+		},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		},
+	}
+	if err := dataManager.SetFilter(fp, true); err != nil {
+		t.Error(err)
+	}
+	attrProfile := &AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "AttrPrf",
+		FilterIDs: []string{"AttrFilter"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		},
+		Contexts: []string{"con1", "con2"},
+		Attributes: []*Attribute{
+			{
+				Path:  "FN1",
+				Value: config.NewRSRParsersMustCompile("Val1", utils.INFIELD_SEP),
+			},
+		},
+		Weight: 20,
+	}
+	//Set AttributeProfile with 2 contexts ( con1 , con2)
+	if err := dataManager.SetAttributeProfile(attrProfile, true); err != nil {
+		t.Error(err)
+	}
+	eIdxes := map[string]utils.StringSet{
+		"*string:*req.Event1:EventType": {
+			"AttrPrf": struct{}{},
+		},
+		"*string:*req.Event2:EventType": {
 			"AttrPrf": struct{}{},
 		},
 	}
@@ -597,6 +687,79 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 			t.Error(err)
 		} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
 			t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
+		}
+	}
+	//Set AttributeProfile with 1 new context (con3)
+	attrProfile = &AttributeProfile{ // recreate the profile because if we test on internal
+		Tenant:    "cgrates.org", // each update on the original item will update the item from DB
+		ID:        "AttrPrf",
+		FilterIDs: []string{"AttrFilter"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		},
+		Contexts: []string{"con3"},
+		Attributes: []*Attribute{
+			{
+				Path:  "FN1",
+				Value: config.NewRSRParsersMustCompile("Val1", utils.INFIELD_SEP),
+			},
+		},
+		Weight: 20,
+	}
+	if err := dataManager.SetAttributeProfile(attrProfile, true); err != nil {
+		t.Error(err)
+	}
+	//check indexes with the new context (con3)
+	if rcvIdx, err := dataManager.GetIndexes(
+		utils.CacheAttributeFilterIndexes,
+		utils.ConcatenatedKey(attrProfile.Tenant, "con3"),
+		utils.EmptyString, false, false); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
+		t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
+	}
+	//check if old contexts was delete
+	for _, ctx := range []string{"con1", "con2"} {
+		if _, err = dataManager.GetIndexes(
+			utils.CacheAttributeFilterIndexes,
+			utils.ConcatenatedKey(attrProfile.Tenant, ctx),
+			utils.EmptyString, false, false); err == nil ||
+			err != utils.ErrNotFound {
+			t.Error(err)
+		}
+	}
+
+	fp = &Filter{
+		Tenant: "cgrates.org",
+		ID:     "AttrFilter",
+		Rules: []*FilterRule{
+			{
+				Element: "~*req.EventType",
+				Type:    utils.MetaString,
+				Values:  []string{"Event3", "~*req.Event4"},
+			},
+		},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		},
+	}
+	if err := dataManager.SetFilter(fp, true); err != nil {
+		t.Error(err)
+	}
+	eIdxes = map[string]utils.StringSet{
+		"*string:*req.EventType:Event3": {
+			"AttrPrf": struct{}{},
+		},
+	}
+	for _, ctx := range attrProfile.Contexts {
+		if rcvIdx, err := dataManager.GetIndexes(
+			utils.CacheAttributeFilterIndexes,
+			utils.ConcatenatedKey(attrProfile.Tenant, ctx),
+			utils.EmptyString, false, false); err != nil {
+			t.Error(err)
+		} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
+			t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(eIdxes), rcvIdx)
 		}
 	}
 
@@ -640,7 +803,7 @@ func testITTestThresholdInlineFilterIndexing(t *testing.T) {
 		ID:     "Filter1",
 		Rules: []*FilterRule{
 			{
-				Element: "EventType",
+				Element: "~*req.EventType",
 				Type:    utils.MetaString,
 				Values:  []string{"Event1", "Event2"},
 			},
@@ -669,10 +832,10 @@ func testITTestThresholdInlineFilterIndexing(t *testing.T) {
 		t.Error(err)
 	}
 	eIdxes := map[string]utils.StringSet{
-		"*string:EventType:Event1": {
+		"*string:*req.EventType:Event1": {
 			"THD_Test": struct{}{},
 		},
-		"*string:EventType:Event2": {
+		"*string:*req.EventType:Event2": {
 			"THD_Test": struct{}{},
 		},
 	}
@@ -688,7 +851,7 @@ func testITTestThresholdInlineFilterIndexing(t *testing.T) {
 		Tenant:             "cgrates.org", // each update on the original item will update the item from DB
 		ID:                 "THD_Test",
 		ActivationInterval: &utils.ActivationInterval{},
-		FilterIDs:          []string{"Filter1", "*string:Account:1001"},
+		FilterIDs:          []string{"Filter1", "*string:~*req.Account:1001"},
 		MaxHits:            12,
 		MinSleep:           time.Duration(0 * time.Second),
 		Blocker:            true,
@@ -699,13 +862,13 @@ func testITTestThresholdInlineFilterIndexing(t *testing.T) {
 		t.Error(err)
 	}
 	eIdxes = map[string]utils.StringSet{
-		"*string:Account:1001": {
+		"*string:*req.Account:1001": {
 			"THD_Test": struct{}{},
 		},
-		"*string:EventType:Event1": {
+		"*string:*req.EventType:Event1": {
 			"THD_Test": struct{}{},
 		},
-		"*string:EventType:Event2": {
+		"*string:*req.EventType:Event2": {
 			"THD_Test": struct{}{},
 		},
 	}
@@ -979,19 +1142,19 @@ func testITTestIndexingThresholds(t *testing.T) {
 	th := &ThresholdProfile{
 		Tenant:    "cgrates.org",
 		ID:        "TH1",
-		FilterIDs: []string{"*string:Account:1001", "*gt:Balance:1000"},
+		FilterIDs: []string{"*string:~*req.Account:1001", "*gt:~*req.Balance:1000"},
 		ActionIDs: []string{},
 	}
 	th2 := &ThresholdProfile{
 		Tenant:    "cgrates.org",
 		ID:        "TH2",
-		FilterIDs: []string{"*string:Account:1001", "*gt:Balance:1000"},
+		FilterIDs: []string{"*string:~*req.Account:1001", "*gt:~*req.Balance:1000"},
 		ActionIDs: []string{},
 	}
 	th3 := &ThresholdProfile{
 		Tenant:    "cgrates.org",
 		ID:        "TH3",
-		FilterIDs: []string{"*string:Account:1002", "*lt:Balance:1000"},
+		FilterIDs: []string{"*string:~*req.Account:1002", "*lt:~*req.Balance:1000"},
 		ActionIDs: []string{},
 	}
 	if err := dataManager.SetThresholdProfile(th, true); err != nil {
@@ -1004,11 +1167,11 @@ func testITTestIndexingThresholds(t *testing.T) {
 		t.Error(err)
 	}
 	eIdxes := map[string]utils.StringSet{
-		"*string:Account:1001": {
+		"*string:*req.Account:1001": {
 			"TH1": struct{}{},
 			"TH2": struct{}{},
 		},
-		"*string:Account:1002": {
+		"*string:*req.Account:1002": {
 			"TH3": struct{}{},
 		},
 	}
@@ -1022,14 +1185,14 @@ func testITTestIndexingThresholds(t *testing.T) {
 		}
 	}
 	eMp := map[string]utils.StringSet{
-		"*string:Account:1001": {
+		"*string:*req.Account:1001": {
 			"TH1": struct{}{},
 			"TH2": struct{}{},
 		},
 	}
 	if rcvMp, err := dataManager.GetIndexes(
 		utils.CacheThresholdFilterIndexes, th.Tenant,
-		utils.ConcatenatedKey(utils.MetaString, utils.Account, "1001"),
+		utils.ConcatenatedKey(utils.MetaString, utils.MetaReq+utils.NestingSep+utils.Account, "1001"),
 		true, true); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eMp, rcvMp) {
@@ -1041,19 +1204,19 @@ func testITTestIndexingMetaNot(t *testing.T) {
 	th := &ThresholdProfile{
 		Tenant:    "cgrates.org",
 		ID:        "TH1",
-		FilterIDs: []string{"*string:Account:1001", "*notstring:Destination:+49123"},
+		FilterIDs: []string{"*string:~*req.Account:1001", "*notstring:~*req.Destination:+49123"},
 		ActionIDs: []string{},
 	}
 	th2 := &ThresholdProfile{
 		Tenant:    "cgrates.org",
 		ID:        "TH2",
-		FilterIDs: []string{"*prefix:EventName:Name", "*notprefix:Destination:10"},
+		FilterIDs: []string{"*prefix:~*req.EventName:Name", "*notprefix:~*req.Destination:10"},
 		ActionIDs: []string{},
 	}
 	th3 := &ThresholdProfile{
 		Tenant:    "cgrates.org",
 		ID:        "TH3",
-		FilterIDs: []string{"*notstring:Account:1002", "*notstring:Balance:1000"},
+		FilterIDs: []string{"*notstring:~*req.Account:1002", "*notstring:~*req.Balance:1000"},
 		ActionIDs: []string{},
 	}
 	if err := dataManager.SetThresholdProfile(th, true); err != nil {
@@ -1066,10 +1229,10 @@ func testITTestIndexingMetaNot(t *testing.T) {
 		t.Error(err)
 	}
 	eIdxes := map[string]utils.StringSet{
-		"*string:Account:1001": {
+		"*string:*req.Account:1001": {
 			"TH1": struct{}{},
 		},
-		"*prefix:EventName:Name": {
+		"*prefix:*req.EventName:Name": {
 			"TH2": struct{}{},
 		},
 	}
@@ -1083,13 +1246,13 @@ func testITTestIndexingMetaNot(t *testing.T) {
 		}
 	}
 	eMp := map[string]utils.StringSet{
-		"*string:Account:1001": {
+		"*string:*req.Account:1001": {
 			"TH1": struct{}{},
 		},
 	}
 	if rcvMp, err := dataManager.GetIndexes(
 		utils.CacheThresholdFilterIndexes, th.Tenant,
-		utils.ConcatenatedKey(utils.MetaString, utils.Account, "1001"),
+		utils.ConcatenatedKey(utils.MetaString, utils.MetaReq+utils.NestingSep+utils.Account, "1001"),
 		true, true); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eMp, rcvMp) {
@@ -1115,7 +1278,7 @@ func testITIndexRateProfile(t *testing.T) {
 				FilterIDs: []string{"*string:~*req.Category:call"},
 				Weight:    0,
 				IntervalRates: []*IntervalRate{
-					&IntervalRate{
+					{
 						Value:     0.12,
 						Unit:      time.Duration(1 * time.Minute),
 						Increment: time.Duration(1 * time.Minute),
@@ -1128,7 +1291,7 @@ func testITIndexRateProfile(t *testing.T) {
 				FilterIDs: []string{"*string:~*req.Category:voice"},
 				Weight:    10,
 				IntervalRates: []*IntervalRate{
-					&IntervalRate{
+					{
 						Value:     0.06,
 						Unit:      time.Duration(1 * time.Minute),
 						Increment: time.Duration(1 * time.Second),
@@ -1142,10 +1305,10 @@ func testITIndexRateProfile(t *testing.T) {
 		t.Error(err)
 	}
 	eIdxes := map[string]utils.StringSet{
-		"*string:~*req.Category:call": {
+		"*string:*req.Category:call": {
 			"FIRST_GI": struct{}{},
 		},
-		"*string:~*req.Category:voice": {
+		"*string:*req.Category:voice": {
 			"SECOND_GI": struct{}{},
 		},
 	}
@@ -1176,7 +1339,7 @@ func testITIndexRateProfile(t *testing.T) {
 				FilterIDs: []string{"*string:~*req.Category:call"},
 				Weight:    0,
 				IntervalRates: []*IntervalRate{
-					&IntervalRate{
+					{
 						Value:     0.12,
 						Unit:      time.Duration(1 * time.Minute),
 						Increment: time.Duration(1 * time.Minute),
@@ -1189,7 +1352,7 @@ func testITIndexRateProfile(t *testing.T) {
 				FilterIDs: []string{"*string:~*req.Category:voice"},
 				Weight:    10,
 				IntervalRates: []*IntervalRate{
-					&IntervalRate{
+					{
 						Value:     0.06,
 						Unit:      time.Duration(1 * time.Minute),
 						Increment: time.Duration(1 * time.Second),
@@ -1202,7 +1365,7 @@ func testITIndexRateProfile(t *testing.T) {
 				FilterIDs: []string{"*string:~*req.Category:custom"},
 				Weight:    20,
 				IntervalRates: []*IntervalRate{
-					&IntervalRate{
+					{
 						Value:     0.06,
 						Unit:      time.Duration(1 * time.Minute),
 						Increment: time.Duration(1 * time.Second),
@@ -1216,13 +1379,13 @@ func testITIndexRateProfile(t *testing.T) {
 		t.Error(err)
 	}
 	eIdxes = map[string]utils.StringSet{
-		"*string:~*req.Category:call": {
+		"*string:*req.Category:call": {
 			"FIRST_GI": struct{}{},
 		},
-		"*string:~*req.Category:voice": {
+		"*string:*req.Category:voice": {
 			"SECOND_GI": struct{}{},
 		},
-		"*string:~*req.Category:custom": {
+		"*string:*req.Category:custom": {
 			"THIRD_GI": struct{}{},
 		},
 	}
@@ -1251,7 +1414,7 @@ func testITIndexRateProfile(t *testing.T) {
 				FilterIDs: []string{"*string:~*req.Subject:1001"},
 				Weight:    0,
 				IntervalRates: []*IntervalRate{
-					&IntervalRate{
+					{
 						Value:     0.12,
 						Unit:      time.Duration(1 * time.Minute),
 						Increment: time.Duration(1 * time.Minute),
@@ -1264,7 +1427,7 @@ func testITIndexRateProfile(t *testing.T) {
 				FilterIDs: []string{"*string:~*req.Subject:1001", "*string:~*req.Category:call"},
 				Weight:    10,
 				IntervalRates: []*IntervalRate{
-					&IntervalRate{
+					{
 						Value:     0.6,
 						Unit:      time.Duration(1 * time.Minute),
 						Increment: time.Duration(1 * time.Second),
@@ -1278,11 +1441,11 @@ func testITIndexRateProfile(t *testing.T) {
 		t.Error(err)
 	}
 	eIdxes = map[string]utils.StringSet{
-		"*string:~*req.Subject:1001": {
+		"*string:*req.Subject:1001": {
 			"CUSTOM_RATE1": struct{}{},
 			"CUSTOM_RATE2": struct{}{},
 		},
-		"*string:~*req.Category:call": {
+		"*string:*req.Category:call": {
 			"CUSTOM_RATE2": struct{}{},
 		},
 	}

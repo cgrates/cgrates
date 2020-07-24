@@ -82,10 +82,10 @@ func TestFilterMatchingItemIDsForEvent(t *testing.T) {
 	}
 	tntCtx := utils.ConcatenatedKey(tnt, context)
 
-	matchEV = map[string]interface{}{
+	matchEV = utils.MapStorage{utils.MetaReq: map[string]interface{}{
 		utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 		"Field":          "profile",
-	}
+	}}
 	aPrflIDs, err := MatchingItemIDsForEvent(matchEV, nil, nil,
 		dmMatch, utils.CacheAttributeFilterIndexes, tntCtx, true, false)
 	if err != nil {
@@ -95,9 +95,9 @@ func TestFilterMatchingItemIDsForEvent(t *testing.T) {
 	if !has {
 		t.Errorf("Expecting: %+v, received: %+v", stringFilterID, aPrflIDs)
 	}
-	matchEV = map[string]interface{}{
+	matchEV = utils.MapStorage{utils.MetaReq: map[string]interface{}{
 		"Field": "profilePrefix",
-	}
+	}}
 	aPrflIDs, err = MatchingItemIDsForEvent(matchEV, nil, nil,
 		dmMatch, utils.CacheAttributeFilterIndexes, tntCtx, true, false)
 	if err != nil {
@@ -158,10 +158,10 @@ func TestFilterMatchingItemIDsForEvent2(t *testing.T) {
 	}
 	tntCtx := utils.ConcatenatedKey(config.CgrConfig().GeneralCfg().DefaultTenant, context)
 
-	matchEV = map[string]interface{}{
+	matchEV = utils.MapStorage{utils.MetaReq: map[string]interface{}{
 		utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 		"CallCost":       map[string]interface{}{"Account": 1001},
-	}
+	}}
 	aPrflIDs, err := MatchingItemIDsForEvent(matchEV, nil, nil,
 		dmMatch, utils.CacheAttributeFilterIndexes, tntCtx, true, true)
 	if err != nil {
@@ -171,9 +171,9 @@ func TestFilterMatchingItemIDsForEvent2(t *testing.T) {
 	if !has {
 		t.Errorf("Expecting: %+v, received: %+v", stringFilterID, aPrflIDs)
 	}
-	matchEV = map[string]interface{}{
+	matchEV = utils.MapStorage{utils.MetaReq: map[string]interface{}{
 		"CallCost": map[string]interface{}{"Field": "profilePrefix"},
-	}
+	}}
 	aPrflIDs, err = MatchingItemIDsForEvent(matchEV, nil, nil,
 		dmMatch, utils.CacheAttributeFilterIndexes, tntCtx, true, true)
 	if err != nil {

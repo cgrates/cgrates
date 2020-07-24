@@ -67,8 +67,20 @@ func newFilterIndex(dm *DataManager, idxItmType, tnt, ctx, itemID string, filter
 				continue
 			}
 
+			isDyn := strings.HasPrefix(flt.Element, utils.DynamicDataPrefix)
 			for _, fldVal := range flt.Values {
-				idxKey := utils.ConcatenatedKey(flt.Type, flt.Element, fldVal)
+				var idxKey string
+				if isDyn {
+					if strings.HasPrefix(fldVal, utils.DynamicDataPrefix) { // do not index if both the element and the value is dynamic
+						continue
+					}
+					idxKey = utils.ConcatenatedKey(flt.Type, flt.Element[1:], fldVal)
+				} else if strings.HasPrefix(fldVal, utils.DynamicDataPrefix) {
+					idxKey = utils.ConcatenatedKey(flt.Type, fldVal[1:], flt.Element)
+				} else {
+					// do not index not dynamic filters
+					continue
+				}
 				var rcvIndx map[string]utils.StringSet
 				if rcvIndx, err = dm.GetIndexes(idxItmType, tntCtx,
 					idxKey, true, false); err != nil {
@@ -464,19 +476,45 @@ func UpdateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 		if !utils.SliceHasMember([]string{utils.MetaPrefix, utils.MetaString}, flt.Type) {
 			continue
 		}
+		isDyn := strings.HasPrefix(flt.Element, utils.DynamicDataPrefix)
 		for _, fldVal := range flt.Values {
-			newRules.Add(utils.ConcatenatedKey(flt.Type, flt.Element, fldVal))
+			var idxKey string
+			if isDyn {
+				if strings.HasPrefix(fldVal, utils.DynamicDataPrefix) { // do not index if both the element and the value is dynamic
+					continue
+				}
+				idxKey = utils.ConcatenatedKey(flt.Type, flt.Element[1:], fldVal)
+			} else if strings.HasPrefix(fldVal, utils.DynamicDataPrefix) {
+				idxKey = utils.ConcatenatedKey(flt.Type, fldVal[1:], flt.Element)
+			} else {
+				// do not index not dynamic filters
+				continue
+			}
+			newRules.Add(idxKey)
 		}
 	}
 	for _, flt := range oldFlt.Rules {
 		if !utils.SliceHasMember([]string{utils.MetaPrefix, utils.MetaString}, flt.Type) {
 			continue
 		}
+		isDyn := strings.HasPrefix(flt.Element, utils.DynamicDataPrefix)
 		for _, fldVal := range flt.Values {
-			if key := utils.ConcatenatedKey(flt.Type, flt.Element, fldVal); !newRules.Has(key) {
-				removeRules.Add(key)
+			var idxKey string
+			if isDyn {
+				if strings.HasPrefix(fldVal, utils.DynamicDataPrefix) { // do not index if both the element and the value is dynamic
+					continue
+				}
+				idxKey = utils.ConcatenatedKey(flt.Type, flt.Element[1:], fldVal)
+			} else if strings.HasPrefix(fldVal, utils.DynamicDataPrefix) {
+				idxKey = utils.ConcatenatedKey(flt.Type, fldVal[1:], flt.Element)
 			} else {
-				oldRules.Add(key)
+				// do not index not dynamic filters
+				continue
+			}
+			if !newRules.Has(idxKey) {
+				removeRules.Add(idxKey)
+			} else {
+				oldRules.Add(idxKey)
 			}
 		}
 	}
@@ -506,7 +544,7 @@ func UpdateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 	for idxItmType, indx := range rcvIndx {
 		switch idxItmType {
 		case utils.CacheThresholdFilterIndexes:
-			if err = removeFilterIndexesForFilrer(dm, idxItmType, newFlt.Tenant, // remove the indexes for the filter
+			if err = removeFilterIndexesForFilter(dm, idxItmType, newFlt.Tenant, // remove the indexes for the filter
 				removeIndexKeys, indx); err != nil {
 				return
 			}
@@ -526,7 +564,7 @@ func UpdateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 				return utils.APIErrorHandler(err)
 			}
 		case utils.CacheStatFilterIndexes:
-			if err = removeFilterIndexesForFilrer(dm, idxItmType, newFlt.Tenant, // remove the indexes for the filter
+			if err = removeFilterIndexesForFilter(dm, idxItmType, newFlt.Tenant, // remove the indexes for the filter
 				removeIndexKeys, indx); err != nil {
 				return
 			}
@@ -546,7 +584,7 @@ func UpdateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 				return utils.APIErrorHandler(err)
 			}
 		case utils.CacheResourceFilterIndexes:
-			if err = removeFilterIndexesForFilrer(dm, idxItmType, newFlt.Tenant, // remove the indexes for the filter
+			if err = removeFilterIndexesForFilter(dm, idxItmType, newFlt.Tenant, // remove the indexes for the filter
 				removeIndexKeys, indx); err != nil {
 				return
 			}
@@ -566,7 +604,7 @@ func UpdateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 				return utils.APIErrorHandler(err)
 			}
 		case utils.CacheRouteFilterIndexes:
-			if err = removeFilterIndexesForFilrer(dm, idxItmType, newFlt.Tenant, // remove the indexes for the filter
+			if err = removeFilterIndexesForFilter(dm, idxItmType, newFlt.Tenant, // remove the indexes for the filter
 				removeIndexKeys, indx); err != nil {
 				return
 			}
@@ -586,7 +624,7 @@ func UpdateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 				return utils.APIErrorHandler(err)
 			}
 		case utils.CacheChargerFilterIndexes:
-			if err = removeFilterIndexesForFilrer(dm, idxItmType, newFlt.Tenant, // remove the indexes for the filter
+			if err = removeFilterIndexesForFilter(dm, idxItmType, newFlt.Tenant, // remove the indexes for the filter
 				removeIndexKeys, indx); err != nil {
 				return
 			}
@@ -613,7 +651,7 @@ func UpdateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 					return
 				}
 				for _, ctx := range ap.Contexts {
-					if err = removeFilterIndexesForFilrer(dm, idxItmType,
+					if err = removeFilterIndexesForFilter(dm, idxItmType,
 						utils.ConcatenatedKey(newFlt.Tenant, ctx), // remove the indexes for the filter
 						removeIndexKeys, indx); err != nil {
 						return
@@ -640,7 +678,7 @@ func UpdateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 					return
 				}
 				for _, ctx := range dp.Subsystems {
-					if err = removeFilterIndexesForFilrer(dm, idxItmType,
+					if err = removeFilterIndexesForFilter(dm, idxItmType,
 						utils.ConcatenatedKey(newFlt.Tenant, ctx), // remove the indexes for the filter
 						removeIndexKeys, indx); err != nil {
 						return
@@ -664,8 +702,8 @@ func UpdateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 	return
 }
 
-// removeFilterIndexesForFilrer removes the itemID for the index keys
-func removeFilterIndexesForFilrer(dm *DataManager, idxItmType, tnt string,
+// removeFilterIndexesForFilter removes the itemID for the index keys
+func removeFilterIndexesForFilter(dm *DataManager, idxItmType, tnt string,
 	removeIndexKeys []string, itemIDs utils.StringSet) (err error) {
 	for _, idxKey := range removeIndexKeys { // delete old filters indexes for this item
 		var remIndx map[string]utils.StringSet

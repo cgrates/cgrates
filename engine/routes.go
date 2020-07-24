@@ -154,7 +154,8 @@ func (rpS *RouteService) Shutdown() error {
 
 // matchingRouteProfilesForEvent returns ordered list of matching resources which are active by the time of the call
 func (rpS *RouteService) matchingRouteProfilesForEvent(ev *utils.CGREvent, singleResult bool) (matchingRPrf []*RouteProfile, err error) {
-	rPrfIDs, err := MatchingItemIDsForEvent(ev.Event,
+	evNm := utils.MapStorage{utils.MetaReq: ev.Event}
+	rPrfIDs, err := MatchingItemIDsForEvent(evNm,
 		rpS.cgrcfg.RouteSCfg().StringIndexedFields,
 		rpS.cgrcfg.RouteSCfg().PrefixIndexedFields,
 		rpS.dm, utils.CacheRouteFilterIndexes, ev.Tenant,
@@ -169,7 +170,6 @@ func (rpS *RouteService) matchingRouteProfilesForEvent(ev *utils.CGREvent, singl
 	} else {
 		matchingRPrf = make([]*RouteProfile, 0, len(rPrfIDs))
 	}
-	evNm := utils.MapStorage{utils.MetaReq: ev.Event}
 	for lpID := range rPrfIDs {
 		rPrf, err := rpS.dm.GetRouteProfile(ev.Tenant, lpID, true, true, utils.NonTransactional)
 		if err != nil {

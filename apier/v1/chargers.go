@@ -134,7 +134,7 @@ func (cSv1 *ChargerSv1) Ping(ign *utils.CGREventWithArgDispatcher, reply *string
 }
 
 // GetChargerForEvent  returns matching ChargerProfile for Event
-func (cSv1 *ChargerSv1) GetChargersForEvent(cgrEv *utils.CGREventWithArgDispatcher,
+func (cSv1 *ChargerSv1) GetChargersForEvent(cgrEv *utils.CGREventWithOpts,
 	reply *engine.ChargerProfiles) error {
 	return cSv1.cS.V1GetChargersForEvent(cgrEv, reply)
 }

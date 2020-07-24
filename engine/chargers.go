@@ -56,8 +56,12 @@ func (cS *ChargerService) Shutdown() (err error) {
 }
 
 // matchingChargingProfilesForEvent returns ordered list of matching chargers which are active by the time of the function call
-func (cS *ChargerService) matchingChargerProfilesForEvent(cgrEv *utils.CGREvent) (cPs ChargerProfiles, err error) {
-	cpIDs, err := MatchingItemIDsForEvent(cgrEv.Event,
+func (cS *ChargerService) matchingChargerProfilesForEvent(cgrEv *utils.CGREventWithOpts) (cPs ChargerProfiles, err error) {
+	evNm := utils.MapStorage{
+		utils.MetaReq:  cgrEv.Event,
+		utils.MetaOpts: cgrEv.Opts,
+	}
+	cpIDs, err := MatchingItemIDsForEvent(evNm,
 		cS.cfg.ChargerSCfg().StringIndexedFields,
 		cS.cfg.ChargerSCfg().PrefixIndexedFields,
 		cS.dm, utils.CacheChargerFilterIndexes, cgrEv.Tenant,
@@ -68,7 +72,6 @@ func (cS *ChargerService) matchingChargerProfilesForEvent(cgrEv *utils.CGREvent)
 		return nil, err
 	}
 	matchingCPs := make(map[string]*ChargerProfile)
-	evNm := utils.MapStorage{utils.MetaReq: cgrEv.Event}
 	for cpID := range cpIDs {
 		cP, err := cS.dm.GetChargerProfile(cgrEv.Tenant, cpID, true, true, utils.NonTransactional)
 		if err != nil {
@@ -110,13 +113,13 @@ type ChrgSProcessEventReply struct {
 
 func (cS *ChargerService) processEvent(cgrEv *utils.CGREventWithOpts) (rply []*ChrgSProcessEventReply, err error) {
 	var cPs ChargerProfiles
-	if cPs, err = cS.matchingChargerProfilesForEvent(cgrEv.CGREvent); err != nil {
-		return nil, err
-	}
 	if cgrEv.Opts == nil {
 		cgrEv.Opts = make(map[string]interface{})
 	}
 	cgrEv.Opts[utils.Subsys] = utils.MetaChargers
+	if cPs, err = cS.matchingChargerProfilesForEvent(cgrEv); err != nil {
+		return nil, err
+	}
 	rply = make([]*ChrgSProcessEventReply, len(cPs))
 	for i, cP := range cPs {
 		clonedEv := cgrEv.Clone()
@@ -176,9 +179,9 @@ func (cS *ChargerService) V1ProcessEvent(args *utils.CGREventWithOpts,
 }
 
 // V1GetChargersForEvent exposes the list of ordered matching ChargingProfiles for an event
-func (cS *ChargerService) V1GetChargersForEvent(args *utils.CGREventWithArgDispatcher,
+func (cS *ChargerService) V1GetChargersForEvent(args *utils.CGREventWithOpts,
 	rply *ChargerProfiles) (err error) {
-	cPs, err := cS.matchingChargerProfilesForEvent(args.CGREvent)
+	cPs, err := cS.matchingChargerProfilesForEvent(args)
 	if err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
