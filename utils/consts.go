@@ -2261,8 +2261,9 @@ const (
 	OptsAPIKey  = "*dispatcherApiKey"
 	OptsRouteID = "*dispatcherRouteID"
 	// Others
-	OptsContext = "*context"
-	Subsys      = "*subsys"
+	OptsContext               = "*context"
+	Subsys                    = "*subsys"
+	OptsAttributesProcessRuns = "*attributesProcessRuns"
 )
 
 // Event Flags

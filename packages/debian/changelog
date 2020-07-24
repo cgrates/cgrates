@@ -85,6 +85,7 @@ cgrates (0.11.0~dev) UNRELEASED; urgency=medium
   * [Templates] Added new dataconverter: *string2hex
   * [AttributeS] Updated AttributeProfile matching to match the second AttributeProfile with the same weight
   * [AttributeS] Updated inline AttributeProfiles to unite all consecutive inline attributes in a single profile 
+  * [SessionS] Added *attributesProcessRuns option to control the process runs for AttributeS
 
  -- DanB <danb@cgrates.org>  Wed, 19 Feb 2020 13:25:52 +0200
 
