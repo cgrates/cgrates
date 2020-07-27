@@ -522,13 +522,34 @@ func TestRoundDuration(t *testing.T) {
 }
 
 func TestSplitPrefix(t *testing.T) {
+	exp := []string{"0123456789", "012345678", "01234567", "0123456", "012345", "01234", "0123", "012", "01", "0"}
 	if a := SplitPrefix("0123456789", 1); len(a) != 10 {
 		t.Error("Error splitting prefix: ", a)
+	} else if !reflect.DeepEqual(a, exp) {
+		t.Errorf("Expecting: %v, received: %v", exp, a)
 	}
+	exp = []string{"0123456789", "012345678", "01234567", "0123456", "012345", "01234"}
 	if a := SplitPrefix("0123456789", 5); len(a) != 6 {
 		t.Error("Error splitting prefix: ", a)
+	} else if !reflect.DeepEqual(a, exp) {
+		t.Errorf("Expecting: %v, received: %v", exp, a)
 	}
+	exp = []string{}
 	if a := SplitPrefix("", 1); len(a) != 0 {
+		t.Error("Error splitting prefix: ", a)
+	} else if !reflect.DeepEqual(a, exp) {
+		t.Errorf("Expecting: %v, received: %v", exp, a)
+	}
+}
+
+func TestSplitSuffix(t *testing.T) {
+	exp := []string{"9", "89", "789", "6789", "56789", "456789", "3456789", "23456789", "123456789", "0123456789"}
+	if a := SplitSuffix("0123456789"); len(a) != 10 {
+		t.Error("Error splitting prefix: ", ToJSON(a))
+	} else if !reflect.DeepEqual(a, exp) {
+		t.Errorf("Expecting: %v, received: %v", exp, a)
+	}
+	if a := SplitSuffix(""); len(a) != 0 {
 		t.Error("Error splitting prefix: ", a)
 	}
 }
