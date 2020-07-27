@@ -2263,7 +2263,7 @@ const (
 	// Others
 	OptsContext               = "*context"
 	Subsys                    = "*subsys"
-	OptsAttributesProcessRuns = "*attributesProcessRuns"
+	OptsAttributesProcessRuns = "*processRuns"
 )
 
 // Event Flags
