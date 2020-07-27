@@ -79,6 +79,8 @@ func userProfile2attributeProfile(user *v1UserProfile) (attr *engine.AttributePr
 		var path string
 		if fieldName != utils.EmptyString {
 			path = utils.MetaReq + utils.NestingSep + fieldName
+		} else {
+			continue // ignore empty filedNames
 		}
 		attr.Attributes = append(attr.Attributes, &engine.Attribute{
 			Path:  path,

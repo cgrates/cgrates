@@ -108,6 +108,9 @@ func (ext *ExternalAttributeProfile) AsAttributeProfile() (attr *AttributeProfil
 	}
 	attr.Attributes = make([]*Attribute, len(ext.Attributes))
 	for i, extAttr := range ext.Attributes {
+		if extAttr.Path == utils.EmptyString {
+			return nil, utils.NewErrMandatoryIeMissing("Path")
+		}
 		if len(extAttr.Value) == 0 {
 			return nil, utils.NewErrMandatoryIeMissing("Value")
 		}
@@ -144,6 +147,10 @@ func NewAttributeFromInline(tenant, inlnRule string) (attr *AttributeProfile, er
 		var vals config.RSRParsers
 		if vals, err = config.NewRSRParsers(ruleSplt[2], utils.PipeSep); err != nil {
 			return nil, err
+		}
+		if len(ruleSplt[1]) == 0 {
+			err = fmt.Errorf("empty path in inline AttributeProfile <%s>", inlnRule)
+			return
 		}
 		attr.Attributes = append(attr.Attributes, &Attribute{
 			Path:  ruleSplt[1],

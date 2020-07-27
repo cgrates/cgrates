@@ -499,6 +499,11 @@ func (m *Migrator) migrateAttributeProfileFiltersV1() (err error) {
 			attrPrf.FilterIDs[i] = migrateInlineFilter(fl)
 		}
 		for i, attr := range attrPrf.Attributes {
+			if attr.Path == utils.EmptyString {
+				// in case of older version of attributes we do not have Path
+				// stop the inline migration until the attributes are migrated
+				return fmt.Errorf("error: <empty path> when migrating filter for attribute profile: <%s>", attrPrf.TenantID())
+			}
 			for j, fl := range attr.FilterIDs {
 				attrPrf.Attributes[i].FilterIDs[j] = migrateInlineFilter(fl)
 			}
@@ -712,6 +717,11 @@ func (m *Migrator) migrateAttributeProfileFiltersV2() (err error) {
 			attrPrf.FilterIDs[i] = migrateInlineFilterV2(fl)
 		}
 		for i, attr := range attrPrf.Attributes {
+			if attr.Path == utils.EmptyString {
+				// in case of older version of attributes we do not have Path
+				// stop the inline migration until the attributes are migrated
+				return fmt.Errorf("error: <empty path> when migrating filter for attribute profile: <%s>", attrPrf.TenantID())
+			}
 			for j, fl := range attr.FilterIDs {
 				attrPrf.Attributes[i].FilterIDs[j] = migrateInlineFilterV2(fl)
 			}

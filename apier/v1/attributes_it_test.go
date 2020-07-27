@@ -71,6 +71,7 @@ var (
 		testAttributeSProcessWithMultipleRuns,
 		testAttributeSProcessWithMultipleRuns2,
 		testAttributeSGetAttributeProfileIDsCount,
+		testAttributeSSetAttributeWithEmptyPath,
 		testAttributeSKillEngine,
 		//start test for cache options
 		testAttributeSInitCfg,
@@ -1715,4 +1716,27 @@ func testAttributeSCachingMetaRemove(t *testing.T) {
 		t.Errorf("Expecting : %+v, received: %+v", expected, rcvIDs)
 	}
 
+}
+
+func testAttributeSSetAttributeWithEmptyPath(t *testing.T) {
+	eAttrPrf2 := &AttributeWithCache{
+		AttributeProfile: &engine.AttributeProfile{
+			Tenant:    "cgrates.org",
+			ID:        "ATTR_3",
+			FilterIDs: []string{"*string:~*req.Account:dan"},
+			Contexts:  []string{utils.MetaSessionS},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 1, 14, 0, 0, 0, 0, time.UTC)},
+			Attributes: []*engine.Attribute{
+				{
+					Value: config.NewRSRParsersMustCompile("1001", utils.INFIELD_SEP),
+				},
+			},
+			Weight: 10.0,
+		},
+	}
+	var result string
+	if err := attrSRPC.Call(utils.APIerSv1SetAttributeProfile, eAttrPrf2, &result); err == nil {
+		t.Errorf("Expected error received nil")
+	}
 }

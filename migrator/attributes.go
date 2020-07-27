@@ -237,6 +237,12 @@ func (m *Migrator) migrateAttributeProfile() (err error) {
 		}
 
 		if !m.dryRun {
+			for _, attr := range v6Attr.Attributes {
+				if attr.Path == utils.EmptyString { // we do not suppot empty Path in Attributes
+					err = fmt.Errorf("the AttributeProfile <%s> was not migrated corectly", v6Attr.TenantID())
+					return
+				}
+			}
 			if vrs[utils.Attributes] == 1 {
 				if err = m.dmOut.DataManager().DataDB().SetAttributeProfileDrv(v6Attr); err != nil {
 					return
