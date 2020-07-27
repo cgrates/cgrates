@@ -727,6 +727,7 @@ func TestCgrCfgJSONDefaultSChargerSCfg(t *testing.T) {
 		AttributeSConns:     []string{},
 		StringIndexedFields: nil,
 		PrefixIndexedFields: &[]string{},
+		SuffixIndexedFields: &[]string{},
 	}
 	if !reflect.DeepEqual(eChargerSCfg, cgrCfg.chargerSCfg) {
 		t.Errorf("received: %+v, expecting: %+v", eChargerSCfg, cgrCfg.chargerSCfg)
@@ -741,6 +742,7 @@ func TestCgrCfgJSONDefaultsResLimCfg(t *testing.T) {
 		StoreInterval:       0,
 		StringIndexedFields: nil,
 		PrefixIndexedFields: &[]string{},
+		SuffixIndexedFields: &[]string{},
 	}
 	if !reflect.DeepEqual(cgrCfg.resourceSCfg, eResLiCfg) {
 		t.Errorf("expecting: %s, received: %s", utils.ToJSON(eResLiCfg), utils.ToJSON(cgrCfg.resourceSCfg))
@@ -756,6 +758,7 @@ func TestCgrCfgJSONDefaultStatsCfg(t *testing.T) {
 		ThresholdSConns:     []string{},
 		StringIndexedFields: nil,
 		PrefixIndexedFields: &[]string{},
+		SuffixIndexedFields: &[]string{},
 	}
 	if !reflect.DeepEqual(cgrCfg.statsCfg, eStatsCfg) {
 		t.Errorf("received: %+v, expecting: %+v", cgrCfg.statsCfg, eStatsCfg)
@@ -769,6 +772,7 @@ func TestCgrCfgJSONDefaultThresholdSCfg(t *testing.T) {
 		StoreInterval:       0,
 		StringIndexedFields: nil,
 		PrefixIndexedFields: &[]string{},
+		SuffixIndexedFields: &[]string{},
 	}
 	if !reflect.DeepEqual(eThresholdSCfg, cgrCfg.thresholdSCfg) {
 		t.Errorf("received: %+v, expecting: %+v", eThresholdSCfg, cgrCfg.thresholdSCfg)
@@ -781,6 +785,7 @@ func TestCgrCfgJSONDefaultRouteSCfg(t *testing.T) {
 		IndexedSelects:      true,
 		StringIndexedFields: nil,
 		PrefixIndexedFields: &[]string{},
+		SuffixIndexedFields: &[]string{},
 		AttributeSConns:     []string{},
 		ResourceSConns:      []string{},
 		StatSConns:          []string{},
@@ -1685,6 +1690,7 @@ func TestCgrCfgJSONDefaultDispatcherSCfg(t *testing.T) {
 		IndexedSelects:      true,
 		StringIndexedFields: nil,
 		PrefixIndexedFields: &[]string{},
+		SuffixIndexedFields: &[]string{},
 		AttributeSConns:     []string{},
 	}
 	if !reflect.DeepEqual(cgrCfg.dispatcherSCfg, eDspSCfg) {
@@ -1838,10 +1844,12 @@ func TestCgrCfgJSONDefaultRateCfg(t *testing.T) {
 		IndexedSelects:          true,
 		StringIndexedFields:     nil,
 		PrefixIndexedFields:     &[]string{},
+		SuffixIndexedFields:     &[]string{},
 		NestedFields:            false,
 		RateIndexedSelects:      true,
 		RateStringIndexedFields: nil,
 		RatePrefixIndexedFields: &[]string{},
+		RateSuffixIndexedFields: &[]string{},
 		RateNestedFields:        false,
 	}
 	if !reflect.DeepEqual(cgrCfg.rateSCfg, eCfg) {

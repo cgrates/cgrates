@@ -241,6 +241,7 @@ func (tS *ThresholdService) matchingThresholdsForEvent(args *ArgsProcessEvent) (
 		tIDs, err = MatchingItemIDsForEvent(evNm,
 			tS.cgrcfg.ThresholdSCfg().StringIndexedFields,
 			tS.cgrcfg.ThresholdSCfg().PrefixIndexedFields,
+			tS.cgrcfg.ThresholdSCfg().SuffixIndexedFields,
 			tS.dm, utils.CacheThresholdFilterIndexes, args.Tenant,
 			tS.cgrcfg.ThresholdSCfg().IndexedSelects,
 			tS.cgrcfg.ThresholdSCfg().NestedFields,

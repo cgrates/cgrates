@@ -32,6 +32,7 @@ type ResourceSConfig struct {
 	StoreInterval       time.Duration // Dump regularly from cache into dataDB
 	StringIndexedFields *[]string
 	PrefixIndexedFields *[]string
+	SuffixIndexedFields *[]string
 	NestedFields        bool
 }
 
@@ -74,6 +75,13 @@ func (rlcfg *ResourceSConfig) loadFromJsonCfg(jsnCfg *ResourceSJsonCfg) (err err
 			pif[i] = fID
 		}
 		rlcfg.PrefixIndexedFields = &pif
+	}
+	if jsnCfg.Suffix_indexed_fields != nil {
+		sif := make([]string, len(*jsnCfg.Suffix_indexed_fields))
+		for i, fID := range *jsnCfg.Suffix_indexed_fields {
+			sif[i] = fID
+		}
+		rlcfg.SuffixIndexedFields = &sif
 	}
 	if jsnCfg.Nested_fields != nil {
 		rlcfg.NestedFields = *jsnCfg.Nested_fields

@@ -958,6 +958,7 @@ func TestDfAttributeServJsonCfg(t *testing.T) {
 		Indexed_selects:       utils.BoolPointer(true),
 		String_indexed_fields: nil,
 		Prefix_indexed_fields: &[]string{},
+		Suffix_indexed_fields: &[]string{},
 		Process_runs:          utils.IntPointer(1),
 		Nested_fields:         utils.BoolPointer(false),
 	}
@@ -975,6 +976,7 @@ func TestDfChargerServJsonCfg(t *testing.T) {
 		Attributes_conns:      &[]string{},
 		String_indexed_fields: nil,
 		Prefix_indexed_fields: &[]string{},
+		Suffix_indexed_fields: &[]string{},
 		Nested_fields:         utils.BoolPointer(false),
 	}
 	if cfg, err := dfCgrJSONCfg.ChargerServJsonCfg(); err != nil {
@@ -1005,6 +1007,7 @@ func TestDfResourceLimiterSJsonCfg(t *testing.T) {
 		Store_interval:        utils.StringPointer(""),
 		String_indexed_fields: nil,
 		Prefix_indexed_fields: &[]string{},
+		Suffix_indexed_fields: &[]string{},
 		Nested_fields:         utils.BoolPointer(false),
 	}
 	if cfg, err := dfCgrJSONCfg.ResourceSJsonCfg(); err != nil {
@@ -1023,6 +1026,7 @@ func TestDfStatServiceJsonCfg(t *testing.T) {
 		Thresholds_conns:         &[]string{},
 		String_indexed_fields:    nil,
 		Prefix_indexed_fields:    &[]string{},
+		Suffix_indexed_fields:    &[]string{},
 		Nested_fields:            utils.BoolPointer(false),
 	}
 	if cfg, err := dfCgrJSONCfg.StatSJsonCfg(); err != nil {
@@ -1039,6 +1043,7 @@ func TestDfThresholdSJsonCfg(t *testing.T) {
 		Store_interval:        utils.StringPointer(""),
 		String_indexed_fields: nil,
 		Prefix_indexed_fields: &[]string{},
+		Suffix_indexed_fields: &[]string{},
 		Nested_fields:         utils.BoolPointer(false),
 	}
 	if cfg, err := dfCgrJSONCfg.ThresholdSJsonCfg(); err != nil {
@@ -1054,6 +1059,7 @@ func TestDfRouteSJsonCfg(t *testing.T) {
 		Indexed_selects:       utils.BoolPointer(true),
 		String_indexed_fields: nil,
 		Prefix_indexed_fields: &[]string{},
+		Suffix_indexed_fields: &[]string{},
 		Attributes_conns:      &[]string{},
 		Resources_conns:       &[]string{},
 		Stats_conns:           &[]string{},
@@ -1698,6 +1704,7 @@ func TestDfDispatcherSJsonCfg(t *testing.T) {
 		Indexed_selects:       utils.BoolPointer(true),
 		String_indexed_fields: nil,
 		Prefix_indexed_fields: &[]string{},
+		Suffix_indexed_fields: &[]string{},
 		Attributes_conns:      &[]string{},
 		Nested_fields:         utils.BoolPointer(false),
 	}
@@ -1980,10 +1987,12 @@ func TestDfRateSJsonCfg(t *testing.T) {
 		Indexed_selects:            utils.BoolPointer(true),
 		String_indexed_fields:      nil,
 		Prefix_indexed_fields:      &[]string{},
+		Suffix_indexed_fields:      &[]string{},
 		Nested_fields:              utils.BoolPointer(false),
 		Rate_indexed_selects:       utils.BoolPointer(true),
 		Rate_string_indexed_fields: nil,
 		Rate_prefix_indexed_fields: &[]string{},
+		Rate_suffix_indexed_fields: &[]string{},
 		Rate_nested_fields:         utils.BoolPointer(false),
 	}
 	if cfg, err := dfCgrJSONCfg.RateCfgJson(); err != nil {

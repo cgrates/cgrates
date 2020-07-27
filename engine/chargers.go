@@ -64,6 +64,7 @@ func (cS *ChargerService) matchingChargerProfilesForEvent(cgrEv *utils.CGREventW
 	cpIDs, err := MatchingItemIDsForEvent(evNm,
 		cS.cfg.ChargerSCfg().StringIndexedFields,
 		cS.cfg.ChargerSCfg().PrefixIndexedFields,
+		cS.cfg.ChargerSCfg().SuffixIndexedFields,
 		cS.dm, utils.CacheChargerFilterIndexes, cgrEv.Tenant,
 		cS.cfg.ChargerSCfg().IndexedSelects,
 		cS.cfg.ChargerSCfg().NestedFields,

@@ -26,6 +26,7 @@ type AttributeSCfg struct {
 	IndexedSelects      bool
 	StringIndexedFields *[]string
 	PrefixIndexedFields *[]string
+	SuffixIndexedFields *[]string
 	ProcessRuns         int
 	NestedFields        bool
 }
@@ -53,6 +54,13 @@ func (alS *AttributeSCfg) loadFromJsonCfg(jsnCfg *AttributeSJsonCfg) (err error)
 			pif[i] = fID
 		}
 		alS.PrefixIndexedFields = &pif
+	}
+	if jsnCfg.Suffix_indexed_fields != nil {
+		sif := make([]string, len(*jsnCfg.Suffix_indexed_fields))
+		for i, fID := range *jsnCfg.Suffix_indexed_fields {
+			sif[i] = fID
+		}
+		alS.SuffixIndexedFields = &sif
 	}
 	if jsnCfg.Process_runs != nil {
 		alS.ProcessRuns = *jsnCfg.Process_runs
