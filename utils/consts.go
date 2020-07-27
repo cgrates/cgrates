@@ -622,6 +622,7 @@ const (
 	MetaTrl                  = "*trl"
 	MetaTmp                  = "*tmp"
 	MetaOpts                 = "*opts"
+	MetaScPrefix             = "~*sc." // used for SMCostFilter
 	CGROriginHost            = "cgr_originhost"
 	MetaInitiate             = "*initiate"
 	MetaUpdate               = "*update"

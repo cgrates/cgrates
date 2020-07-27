@@ -183,7 +183,7 @@ func testActionsExecuteRemoveSMCos1(t *testing.T) {
 			{
 				Identifier:      utils.MetaRemoveSessionCosts,
 				TimingTags:      utils.ASAP,
-				ExtraParameters: "*string:~OriginID:13;*notstring:~OriginID:12",
+				ExtraParameters: "*string:~*sc.OriginID:13;*notstring:~*sc.OriginID:12",
 				Weight:          20,
 			},
 		},
