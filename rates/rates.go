@@ -79,6 +79,7 @@ func (rS *RateS) matchingRateProfileForEvent(args *ArgsCostForEvent, rPfIDs []st
 			evNm,
 			rS.cfg.RateSCfg().StringIndexedFields,
 			rS.cfg.RateSCfg().PrefixIndexedFields,
+			rS.cfg.RateSCfg().SuffixIndexedFields,
 			rS.dm,
 			utils.CacheRateProfilesFilterIndexes,
 			args.CGREvent.Tenant,

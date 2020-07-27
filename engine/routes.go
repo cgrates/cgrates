@@ -158,6 +158,7 @@ func (rpS *RouteService) matchingRouteProfilesForEvent(ev *utils.CGREvent, singl
 	rPrfIDs, err := MatchingItemIDsForEvent(evNm,
 		rpS.cgrcfg.RouteSCfg().StringIndexedFields,
 		rpS.cgrcfg.RouteSCfg().PrefixIndexedFields,
+		rpS.cgrcfg.RouteSCfg().SuffixIndexedFields,
 		rpS.dm, utils.CacheRouteFilterIndexes, ev.Tenant,
 		rpS.cgrcfg.RouteSCfg().IndexedSelects,
 		rpS.cgrcfg.RouteSCfg().NestedFields,

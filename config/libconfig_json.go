@@ -408,6 +408,7 @@ type AttributeSJsonCfg struct {
 	Indexed_selects       *bool
 	String_indexed_fields *[]string
 	Prefix_indexed_fields *[]string
+	Suffix_indexed_fields *[]string
 	Nested_fields         *bool // applies when indexed fields is not defined
 	Process_runs          *int
 }
@@ -419,6 +420,7 @@ type ChargerSJsonCfg struct {
 	Attributes_conns      *[]string
 	String_indexed_fields *[]string
 	Prefix_indexed_fields *[]string
+	Suffix_indexed_fields *[]string
 	Nested_fields         *bool // applies when indexed fields is not defined
 }
 
@@ -430,6 +432,7 @@ type ResourceSJsonCfg struct {
 	Store_interval        *string
 	String_indexed_fields *[]string
 	Prefix_indexed_fields *[]string
+	Suffix_indexed_fields *[]string
 	Nested_fields         *bool // applies when indexed fields is not defined
 }
 
@@ -442,6 +445,7 @@ type StatServJsonCfg struct {
 	Thresholds_conns         *[]string
 	String_indexed_fields    *[]string
 	Prefix_indexed_fields    *[]string
+	Suffix_indexed_fields    *[]string
 	Nested_fields            *bool // applies when indexed fields is not defined
 }
 
@@ -452,15 +456,17 @@ type ThresholdSJsonCfg struct {
 	Store_interval        *string
 	String_indexed_fields *[]string
 	Prefix_indexed_fields *[]string
+	Suffix_indexed_fields *[]string
 	Nested_fields         *bool // applies when indexed fields is not defined
 }
 
-// Rounte service config section
+// Route service config section
 type RouteSJsonCfg struct {
 	Enabled               *bool
 	Indexed_selects       *bool
 	String_indexed_fields *[]string
 	Prefix_indexed_fields *[]string
+	Suffix_indexed_fields *[]string
 	Nested_fields         *bool // applies when indexed fields is not defined
 	Attributes_conns      *[]string
 	Resources_conns       *[]string
@@ -533,6 +539,7 @@ type DispatcherSJsonCfg struct {
 	Indexed_selects       *bool
 	String_indexed_fields *[]string
 	Prefix_indexed_fields *[]string
+	Suffix_indexed_fields *[]string
 	Nested_fields         *bool // applies when indexed fields is not defined
 	Attributes_conns      *[]string
 }
@@ -613,10 +620,12 @@ type RateSJsonCfg struct {
 	Indexed_selects            *bool
 	String_indexed_fields      *[]string
 	Prefix_indexed_fields      *[]string
+	Suffix_indexed_fields      *[]string
 	Nested_fields              *bool // applies when indexed fields is not defined
 	Rate_indexed_selects       *bool
 	Rate_string_indexed_fields *[]string
 	Rate_prefix_indexed_fields *[]string
+	Rate_suffix_indexed_fields *[]string
 	Rate_nested_fields         *bool // applies when indexed fields is not defined
 }
 

@@ -30,6 +30,7 @@ type DispatcherSCfg struct {
 	IndexedSelects      bool
 	StringIndexedFields *[]string
 	PrefixIndexedFields *[]string
+	SuffixIndexedFields *[]string
 	AttributeSConns     []string
 	NestedFields        bool
 }
@@ -57,6 +58,13 @@ func (dps *DispatcherSCfg) loadFromJsonCfg(jsnCfg *DispatcherSJsonCfg) (err erro
 			pif[i] = fID
 		}
 		dps.PrefixIndexedFields = &pif
+	}
+	if jsnCfg.Suffix_indexed_fields != nil {
+		sif := make([]string, len(*jsnCfg.Suffix_indexed_fields))
+		for i, fID := range *jsnCfg.Suffix_indexed_fields {
+			sif[i] = fID
+		}
+		dps.SuffixIndexedFields = &sif
 	}
 	if jsnCfg.Attributes_conns != nil {
 		dps.AttributeSConns = make([]string, len(*jsnCfg.Attributes_conns))

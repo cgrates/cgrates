@@ -29,7 +29,7 @@ import (
 // MatchingItemIDsForEvent returns the list of item IDs matching fieldName/fieldValue for an event
 // fieldIDs limits the fields which are checked against indexes
 // helper on top of dataDB.GetIndexes, adding utils.ANY to list of fields queried
-func MatchingItemIDsForEvent(ev utils.MapStorage, stringFldIDs, prefixFldIDs *[]string,
+func MatchingItemIDsForEvent(ev utils.MapStorage, stringFldIDs, prefixFldIDs, suffixFldIDs *[]string,
 	dm *DataManager, cacheID, itemIDPrefix string, indexedSelects, nestedFields bool) (itemIDs utils.StringSet, err error) {
 	itemIDs = make(utils.StringSet)
 	var allFieldIDs []string

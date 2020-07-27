@@ -157,6 +157,7 @@ func (sS *StatService) matchingStatQueuesForEvent(args *StatsArgsProcessEvent) (
 		sqIDs, err = MatchingItemIDsForEvent(evNm,
 			sS.cgrcfg.StatSCfg().StringIndexedFields,
 			sS.cgrcfg.StatSCfg().PrefixIndexedFields,
+			sS.cgrcfg.StatSCfg().SuffixIndexedFields,
 			sS.dm, utils.CacheStatFilterIndexes, args.Tenant,
 			sS.cgrcfg.StatSCfg().IndexedSelects,
 			sS.cgrcfg.StatSCfg().NestedFields,

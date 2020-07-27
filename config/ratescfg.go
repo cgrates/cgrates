@@ -27,10 +27,12 @@ type RateSCfg struct {
 	IndexedSelects          bool
 	StringIndexedFields     *[]string
 	PrefixIndexedFields     *[]string
+	SuffixIndexedFields     *[]string
 	NestedFields            bool
 	RateIndexedSelects      bool
 	RateStringIndexedFields *[]string
 	RatePrefixIndexedFields *[]string
+	RateSuffixIndexedFields *[]string
 	RateNestedFields        bool
 }
 
@@ -58,6 +60,13 @@ func (rCfg *RateSCfg) loadFromJsonCfg(jsnCfg *RateSJsonCfg) (err error) {
 		}
 		rCfg.PrefixIndexedFields = &pif
 	}
+	if jsnCfg.Suffix_indexed_fields != nil {
+		sif := make([]string, len(*jsnCfg.Suffix_indexed_fields))
+		for i, fID := range *jsnCfg.Suffix_indexed_fields {
+			sif[i] = fID
+		}
+		rCfg.SuffixIndexedFields = &sif
+	}
 	if jsnCfg.Nested_fields != nil {
 		rCfg.NestedFields = *jsnCfg.Nested_fields
 	}
@@ -78,6 +87,13 @@ func (rCfg *RateSCfg) loadFromJsonCfg(jsnCfg *RateSJsonCfg) (err error) {
 			pif[i] = fID
 		}
 		rCfg.RatePrefixIndexedFields = &pif
+	}
+	if jsnCfg.Rate_suffix_indexed_fields != nil {
+		sif := make([]string, len(*jsnCfg.Rate_suffix_indexed_fields))
+		for i, fID := range *jsnCfg.Rate_suffix_indexed_fields {
+			sif[i] = fID
+		}
+		rCfg.RateSuffixIndexedFields = &sif
 	}
 	if jsnCfg.Rate_nested_fields != nil {
 		rCfg.RateNestedFields = *jsnCfg.Rate_nested_fields

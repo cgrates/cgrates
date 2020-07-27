@@ -30,6 +30,7 @@ type RouteSCfg struct {
 	IndexedSelects      bool
 	StringIndexedFields *[]string
 	PrefixIndexedFields *[]string
+	SuffixIndexedFields *[]string
 	AttributeSConns     []string
 	ResourceSConns      []string
 	StatSConns          []string
@@ -61,6 +62,13 @@ func (rts *RouteSCfg) loadFromJsonCfg(jsnCfg *RouteSJsonCfg) (err error) {
 			pif[i] = fID
 		}
 		rts.PrefixIndexedFields = &pif
+	}
+	if jsnCfg.Suffix_indexed_fields != nil {
+		sif := make([]string, len(*jsnCfg.Suffix_indexed_fields))
+		for i, fID := range *jsnCfg.Suffix_indexed_fields {
+			sif[i] = fID
+		}
+		rts.SuffixIndexedFields = &sif
 	}
 	if jsnCfg.Attributes_conns != nil {
 		rts.AttributeSConns = make([]string, len(*jsnCfg.Attributes_conns))

@@ -31,6 +31,7 @@ type ChargerSCfg struct {
 	AttributeSConns     []string
 	StringIndexedFields *[]string
 	PrefixIndexedFields *[]string
+	SuffixIndexedFields *[]string
 	NestedFields        bool
 }
 
@@ -68,6 +69,13 @@ func (cS *ChargerSCfg) loadFromJsonCfg(jsnCfg *ChargerSJsonCfg) (err error) {
 			pif[i] = fID
 		}
 		cS.PrefixIndexedFields = &pif
+	}
+	if jsnCfg.Suffix_indexed_fields != nil {
+		sif := make([]string, len(*jsnCfg.Suffix_indexed_fields))
+		for i, fID := range *jsnCfg.Suffix_indexed_fields {
+			sif[i] = fID
+		}
+		cS.SuffixIndexedFields = &sif
 	}
 	if jsnCfg.Nested_fields != nil {
 		cS.NestedFields = *jsnCfg.Nested_fields
