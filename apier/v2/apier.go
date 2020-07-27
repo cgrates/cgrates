@@ -284,38 +284,38 @@ func (apiv2 *APIerSv2) SetActions(attrs *utils.AttrSetActions, reply *string) er
 	for idx, apiAct := range attrs.Actions {
 		var vf *utils.ValueFormula
 		if apiAct.Units != "" {
-			if x, err := utils.ParseBalanceFilterValue(apiAct.BalanceType, apiAct.Units); err == nil {
-				vf = x
-			} else {
+			x, err := utils.ParseBalanceFilterValue(apiAct.BalanceType, apiAct.Units)
+			if err != nil {
 				return err
 			}
+			vf = x
 		}
 
 		var weight *float64
 		if apiAct.BalanceWeight != "" {
-			if x, err := strconv.ParseFloat(apiAct.BalanceWeight, 64); err == nil {
-				weight = &x
-			} else {
+			x, err := strconv.ParseFloat(apiAct.BalanceWeight, 64)
+			if err != nil {
 				return err
 			}
+			weight = &x
 		}
 
 		var blocker *bool
 		if apiAct.BalanceBlocker != "" {
-			if x, err := strconv.ParseBool(apiAct.BalanceBlocker); err == nil {
-				blocker = &x
-			} else {
+			x, err := strconv.ParseBool(apiAct.BalanceBlocker)
+			if err != nil {
 				return err
 			}
+			blocker = &x
 		}
 
 		var disabled *bool
 		if apiAct.BalanceDisabled != "" {
-			if x, err := strconv.ParseBool(apiAct.BalanceDisabled); err == nil {
-				disabled = &x
-			} else {
+			x, err := strconv.ParseBool(apiAct.BalanceDisabled)
+			if err != nil {
 				return err
 			}
+			disabled = &x
 		}
 
 		a := &engine.Action{

@@ -1204,7 +1204,7 @@ type SMCostFilter struct { //id cu litere mare
 func AppendToSMCostFilter(smcFilter *SMCostFilter, fieldType, fieldName string,
 	values []string, timezone string) (smcf *SMCostFilter, err error) {
 	switch fieldName {
-	case DynamicDataPrefix + CGRID:
+	case MetaScPrefix + CGRID:
 		switch fieldType {
 		case MetaString:
 			smcFilter.CGRIDs = append(smcFilter.CGRIDs, values...)
@@ -1213,7 +1213,7 @@ func AppendToSMCostFilter(smcFilter *SMCostFilter, fieldType, fieldName string,
 		default:
 			err = fmt.Errorf("FilterType: %q not supported for FieldName: %q", fieldType, fieldName)
 		}
-	case DynamicDataPrefix + RunID:
+	case MetaScPrefix + RunID:
 		switch fieldType {
 		case MetaString:
 			smcFilter.RunIDs = append(smcFilter.RunIDs, values...)
@@ -1222,7 +1222,7 @@ func AppendToSMCostFilter(smcFilter *SMCostFilter, fieldType, fieldName string,
 		default:
 			err = fmt.Errorf("FilterType: %q not supported for FieldName: %q", fieldType, fieldName)
 		}
-	case DynamicDataPrefix + OriginHost:
+	case MetaScPrefix + OriginHost:
 		switch fieldType {
 		case MetaString:
 			smcFilter.OriginHosts = append(smcFilter.OriginHosts, values...)
@@ -1231,7 +1231,7 @@ func AppendToSMCostFilter(smcFilter *SMCostFilter, fieldType, fieldName string,
 		default:
 			err = fmt.Errorf("FilterType: %q not supported for FieldName: %q", fieldType, fieldName)
 		}
-	case DynamicDataPrefix + OriginID:
+	case MetaScPrefix + OriginID:
 		switch fieldType {
 		case MetaString:
 			smcFilter.OriginIDs = append(smcFilter.OriginIDs, values...)
@@ -1240,7 +1240,7 @@ func AppendToSMCostFilter(smcFilter *SMCostFilter, fieldType, fieldName string,
 		default:
 			err = fmt.Errorf("FilterType: %q not supported for FieldName: %q", fieldType, fieldName)
 		}
-	case DynamicDataPrefix + CostSource:
+	case MetaScPrefix + CostSource:
 		switch fieldType {
 		case MetaString:
 			smcFilter.CostSources = append(smcFilter.CostSources, values...)
@@ -1249,7 +1249,7 @@ func AppendToSMCostFilter(smcFilter *SMCostFilter, fieldType, fieldName string,
 		default:
 			err = fmt.Errorf("FilterType: %q not supported for FieldName: %q", fieldType, fieldName)
 		}
-	case DynamicDataPrefix + Usage:
+	case MetaScPrefix + Usage:
 		switch fieldType {
 		case MetaGreaterOrEqual:
 			var minUsage time.Duration
@@ -1270,7 +1270,7 @@ func AppendToSMCostFilter(smcFilter *SMCostFilter, fieldType, fieldName string,
 		default:
 			err = fmt.Errorf("FilterType: %q not supported for FieldName: %q", fieldType, fieldName)
 		}
-	case DynamicDataPrefix + CreatedAt:
+	case MetaScPrefix + CreatedAt:
 		switch fieldType {
 		case MetaGreaterOrEqual:
 			var start time.Time
