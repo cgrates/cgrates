@@ -154,7 +154,7 @@ func (srvMngr *ServiceManager) StartServices() (err error) {
 					if err == utils.ErrServiceAlreadyRunning { // in case the service was started in another gorutine
 						return
 					}
-					utils.Logger.Err(fmt.Sprintf("<%s> failed to start %s because: %s", utils.ServiceManager, service.ServiceName(), err))
+					utils.Logger.Err(fmt.Sprintf("<%s> failed to start %s because: %s", utils.ServiceManager, srv.ServiceName(), err))
 					srvMngr.engineShutdown <- true
 				}
 			}(service)
