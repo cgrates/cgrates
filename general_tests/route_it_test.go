@@ -176,7 +176,7 @@ func testV1SplSSetSupplierProfilesWithoutRatingPlanIDs(t *testing.T) {
 	}
 	var suplsReply engine.SortedRoutes
 	if err := splSv1Rpc.Call(utils.RouteSv1GetRoutes,
-		ev, &suplsReply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		ev, &suplsReply); err == nil || err.Error() != utils.NewErrServerError(utils.ErrAccountNotFound).Error() {
 		t.Error(err)
 	}
 	if err := splSv1Rpc.Call(utils.APIerSv1RemoveRouteProfile, utils.TenantID{
