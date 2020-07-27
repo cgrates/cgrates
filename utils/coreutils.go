@@ -313,6 +313,16 @@ func SplitPrefix(prefix string, minLength int) []string {
 	return subs
 }
 
+func SplitSuffix(suffix string) []string {
+	length := len(suffix)
+	subs := make([]string, length)
+	max := len(suffix) - 1
+	for i := 0; i < length; i++ {
+		subs[i] = suffix[max-i:]
+	}
+	return subs
+}
+
 func CopyHour(src, dest time.Time) time.Time {
 	if src.Hour() == 0 && src.Minute() == 0 && src.Second() == 0 {
 		return src

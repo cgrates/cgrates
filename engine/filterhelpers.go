@@ -33,7 +33,7 @@ func MatchingItemIDsForEvent(ev utils.MapStorage, stringFldIDs, prefixFldIDs, su
 	dm *DataManager, cacheID, itemIDPrefix string, indexedSelects, nestedFields bool) (itemIDs utils.StringSet, err error) {
 	itemIDs = make(utils.StringSet)
 	var allFieldIDs []string
-	if indexedSelects && (stringFldIDs == nil || prefixFldIDs == nil) {
+	if indexedSelects && (stringFldIDs == nil || prefixFldIDs == nil || suffixFldIDs == nil) {
 		allFieldIDs = ev.GetKeys(nestedFields, 2, utils.EmptyString)
 	}
 	// Guard will protect the function with automatic locking
@@ -51,9 +51,9 @@ func MatchingItemIDsForEvent(ev utils.MapStorage, stringFldIDs, prefixFldIDs, su
 			itemIDs = utils.NewStringSet(sliceIDs)
 			return
 		}
-		stringFieldVals := map[string]string{utils.ANY: utils.ANY}                        // cache here field string values, start with default one
-		filterIndexTypes := []string{utils.MetaString, utils.MetaPrefix, utils.META_NONE} // the META_NONE is used for all items that do not have filters
-		for i, fieldIDs := range []*[]string{stringFldIDs, prefixFldIDs, {utils.ANY}} {   // same routine for both string and prefix filter types
+		stringFieldVals := map[string]string{utils.ANY: utils.ANY}                                          // cache here field string values, start with default one
+		filterIndexTypes := []string{utils.MetaString, utils.MetaPrefix, utils.MetaSuffix, utils.META_NONE} // the META_NONE is used for all items that do not have filters
+		for i, fieldIDs := range []*[]string{stringFldIDs, prefixFldIDs, suffixFldIDs, {utils.ANY}} {       // same routine for both string and prefix filter types
 			if fieldIDs == nil {
 				fieldIDs = &allFieldIDs
 			}
@@ -70,6 +70,8 @@ func MatchingItemIDsForEvent(ev utils.MapStorage, stringFldIDs, prefixFldIDs, su
 				// default is only one fieldValue checked
 				if filterIndexTypes[i] == utils.MetaPrefix {
 					fldVals = utils.SplitPrefix(fldVal, 1) // all prefixes till last digit
+				} else if filterIndexTypes[i] == utils.MetaSuffix {
+					fldVals = utils.SplitSuffix(fldVal) // all suffix till first digit
 				}
 				var dbItemIDs utils.StringSet // list of items matched in DB
 				for _, val := range fldVals {
