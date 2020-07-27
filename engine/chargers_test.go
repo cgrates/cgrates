@@ -225,7 +225,7 @@ func TestChargerProcessEvent(t *testing.T) {
 		ArgDispatcher: chargerEvents[0].ArgDispatcher,
 	})
 	if err != nil {
-		t.Errorf("Error: %+v", err)
+		t.Fatalf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(rpl[0], rcv[0]) {
 		t.Errorf("Expecting: %+v, received: %+v ", utils.ToJSON(rpl[0]), utils.ToJSON(rcv[0]))

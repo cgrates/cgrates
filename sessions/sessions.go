@@ -1103,7 +1103,7 @@ func (sS *SessionS) newSession(cgrEv *utils.CGREventWithOpts, resID, clntConnID 
 		Tenant:        cgrEv.Tenant,
 		ResourceID:    resID,
 		EventStart:    cgrEv.Event,
-		OptsStart:     cgrEv.Opts,
+		OptsStart:     engine.MapEvent(cgrEv.Opts).Clone(),
 		ClientConnID:  clntConnID,
 		DebitInterval: dbtItval,
 		ArgDispatcher: cgrEv.ArgDispatcher,
@@ -1912,7 +1912,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.ClientConnector,
 		var sRunsUsage map[string]time.Duration
 		if sRunsUsage, err = sS.authEvent(&utils.CGREventWithOpts{
 			CGREvent:      args.CGREvent,
-			Opts:          engine.MapEvent(args.Opts).Clone(),
+			Opts:          args.Opts,
 			ArgDispatcher: args.ArgDispatcher,
 		}, args.ForceDuration); err != nil {
 			return err

@@ -113,6 +113,7 @@ type ChrgSProcessEventReply struct {
 
 func (cS *ChargerService) processEvent(cgrEv *utils.CGREventWithOpts) (rply []*ChrgSProcessEventReply, err error) {
 	var cPs ChargerProfiles
+	cgrEv.Opts = MapEvent(cgrEv.Opts).Clone()
 	if cgrEv.Opts == nil {
 		cgrEv.Opts = make(map[string]interface{})
 	}
