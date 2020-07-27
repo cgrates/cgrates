@@ -580,7 +580,6 @@ type FcTemplateJsonCfg struct {
 	New_branch           *bool
 	Timezone             *string
 	Blocker              *bool
-	Break_on_success     *bool
 	Layout               *string
 	Cost_shift_digits    *int
 	Rounding_decimals    *int

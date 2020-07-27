@@ -442,9 +442,9 @@ func updateDiamMsgFromNavMap(m *diam.Message, navMp *utils.OrderedNavigableMap, 
 		if itm == nil {
 			continue // all attributes, not writable to diameter packet
 		}
-		newBranch := itm.Config != nil && itm.Config.NewBranch
-		if err = messageSetAVPsWithPath(m, itm.Path,
-			utils.IfaceAsString(itm.Data), newBranch, tmz); err != nil {
+		if err = messageSetAVPsWithPath(m,
+			itm.Path, utils.IfaceAsString(itm.Data),
+			itm.Config != nil && itm.Config.NewBranch, tmz); err != nil {
 			return fmt.Errorf("setting item with path: %+v got err: %s", itm.Path, err.Error())
 		}
 	}

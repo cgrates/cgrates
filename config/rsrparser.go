@@ -161,6 +161,19 @@ func (prsrs RSRParsers) ParseDataProviderWithInterfaces(dP utils.DataProvider) (
 	return
 }
 
+// GetIfaceFromValues returns an interface for each RSRParser
+func (prsrs RSRParsers) GetIfaceFromValues(evNm utils.DataProvider) (iFaceVals []interface{}, err error) {
+	iFaceVals = make([]interface{}, len(prsrs))
+	for i, val := range prsrs {
+		var strVal string
+		if strVal, err = val.ParseDataProvider(evNm); err != nil {
+			return
+		}
+		iFaceVals[i] = utils.StringToInterface(strVal)
+	}
+	return
+}
+
 func NewRSRParser(parserRules string) (rsrParser *RSRParser, err error) {
 	if len(parserRules) == 0 {
 		return

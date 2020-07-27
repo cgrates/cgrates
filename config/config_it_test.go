@@ -571,7 +571,6 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 		map[string]interface{}{
 			"AttributeID":      "",
 			"Blocker":          false,
-			"BreakOnSuccess":   false,
 			"CostShiftDigits":  0,
 			"Path":             "*cgreq.ToR",
 			"Filters":          nil,
@@ -595,7 +594,6 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 		map[string]interface{}{
 			"AttributeID":      "",
 			"Blocker":          false,
-			"BreakOnSuccess":   false,
 			"CostShiftDigits":  0,
 			"Path":             "*cgreq.OriginID",
 			"Filters":          nil,
@@ -619,7 +617,6 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 		map[string]interface{}{
 			"AttributeID":      "",
 			"Blocker":          false,
-			"BreakOnSuccess":   false,
 			"CostShiftDigits":  0,
 			"Path":             "*cgreq.RequestType",
 			"Filters":          nil,
@@ -643,7 +640,6 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 		map[string]interface{}{
 			"AttributeID":      "",
 			"Blocker":          false,
-			"BreakOnSuccess":   false,
 			"CostShiftDigits":  0,
 			"Path":             "*cgreq.Tenant",
 			"Filters":          nil,
@@ -667,7 +663,6 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 		map[string]interface{}{
 			"AttributeID":      "",
 			"Blocker":          false,
-			"BreakOnSuccess":   false,
 			"CostShiftDigits":  0,
 			"Path":             "*cgreq.Category",
 			"Filters":          nil,
@@ -691,7 +686,6 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 		map[string]interface{}{
 			"AttributeID":      "",
 			"Blocker":          false,
-			"BreakOnSuccess":   false,
 			"CostShiftDigits":  0,
 			"Path":             "*cgreq.Account",
 			"Filters":          nil,
@@ -715,7 +709,6 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 		map[string]interface{}{
 			"AttributeID":      "",
 			"Blocker":          false,
-			"BreakOnSuccess":   false,
 			"CostShiftDigits":  0,
 			"Path":             "*cgreq.Subject",
 			"Filters":          nil,
@@ -739,7 +732,6 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 		map[string]interface{}{
 			"AttributeID":      "",
 			"Blocker":          false,
-			"BreakOnSuccess":   false,
 			"CostShiftDigits":  0,
 			"Path":             "*cgreq.Destination",
 			"Filters":          nil,
@@ -763,7 +755,6 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 		map[string]interface{}{
 			"AttributeID":      "",
 			"Blocker":          false,
-			"BreakOnSuccess":   false,
 			"CostShiftDigits":  0,
 			"Path":             "*cgreq.SetupTime",
 			"Filters":          nil,
@@ -787,7 +778,6 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 		map[string]interface{}{
 			"AttributeID":      "",
 			"Blocker":          false,
-			"BreakOnSuccess":   false,
 			"CostShiftDigits":  0,
 			"Path":             "*cgreq.AnswerTime",
 			"Filters":          nil,
@@ -811,7 +801,6 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 		map[string]interface{}{
 			"AttributeID":      "",
 			"Blocker":          false,
-			"BreakOnSuccess":   false,
 			"CostShiftDigits":  0,
 			"Path":             "*cgreq.Usage",
 			"Filters":          nil,

@@ -222,7 +222,7 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent, evNm utils
 			substitute = tEnd.Sub(tStart).String()
 		case utils.MetaSum:
 			var ifaceVals []interface{}
-			if ifaceVals, err = getIfaceFromValues(attribute.Value, evNm); err != nil {
+			if ifaceVals, err = attribute.Value.GetIfaceFromValues(evNm); err != nil {
 				rply = nil
 				return
 			}
@@ -234,7 +234,7 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent, evNm utils
 			substitute = utils.IfaceAsString(ifaceSum)
 		case utils.MetaDifference:
 			var ifaceVals []interface{}
-			if ifaceVals, err = getIfaceFromValues(attribute.Value, evNm); err != nil {
+			if ifaceVals, err = attribute.Value.GetIfaceFromValues(evNm); err != nil {
 				rply = nil
 				return
 			}
@@ -246,7 +246,7 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent, evNm utils
 			substitute = utils.IfaceAsString(ifaceSum)
 		case utils.MetaMultiply:
 			var ifaceVals []interface{}
-			if ifaceVals, err = getIfaceFromValues(attribute.Value, evNm); err != nil {
+			if ifaceVals, err = attribute.Value.GetIfaceFromValues(evNm); err != nil {
 				rply = nil
 				return
 			}
@@ -258,7 +258,7 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent, evNm utils
 			substitute = utils.IfaceAsString(ifaceSum)
 		case utils.MetaDivide:
 			var ifaceVals []interface{}
-			if ifaceVals, err = getIfaceFromValues(attribute.Value, evNm); err != nil {
+			if ifaceVals, err = attribute.Value.GetIfaceFromValues(evNm); err != nil {
 				rply = nil
 				return
 			}
