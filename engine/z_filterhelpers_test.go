@@ -26,10 +26,8 @@ import (
 )
 
 var (
-	matchEV             map[string]interface{}
-	dmMatch             *DataManager
-	stringIndexedFields *[]string
-	prefixIndexedFields *[]string
+	matchEV map[string]interface{}
+	dmMatch *DataManager
 )
 
 func TestFilterMatchingItemIDsForEvent(t *testing.T) {
