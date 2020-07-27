@@ -2322,6 +2322,10 @@ func APItoAttributeProfile(tpAttr *utils.TPAttributeProfile, timezone string) (a
 		attrPrf.Contexts[i] = context
 	}
 	for i, reqAttr := range tpAttr.Attributes {
+		if reqAttr.Path == utils.EmptyString { // we do not suppot empty Path in Attributes
+			err = fmt.Errorf("empty path in AttributeProfile <%s>", attrPrf.TenantID())
+			return
+		}
 		sbstPrsr, err := config.NewRSRParsers(reqAttr.Value, config.CgrConfig().GeneralCfg().RSRSep)
 		if err != nil {
 			return nil, err

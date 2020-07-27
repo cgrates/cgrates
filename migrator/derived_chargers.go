@@ -83,9 +83,10 @@ func fieldinfo2Attribute(attr []*engine.Attribute, fieldName, fieldInfo string) 
 		return attr
 	}
 	var path string
-	if fieldName != utils.EmptyString {
-		path = utils.MetaReq + utils.NestingSep + fieldName
+	if fieldName == utils.EmptyString {
+		return attr // do not append attribute if fieldName is empty
 	}
+	path = utils.MetaReq + utils.NestingSep + fieldName
 	return append(attr, &engine.Attribute{
 		Path:  path,
 		Value: rp,

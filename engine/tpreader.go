@@ -1206,6 +1206,12 @@ func (tpr *TpReader) LoadAttributeProfilesFiltered(tag string) (err error) {
 		if err = verifyInlineFilterS(attr.FilterIDs); err != nil {
 			return
 		}
+		for _, at := range attr.Attributes {
+			if at.Path == utils.EmptyString { // we do not suppot empty Path in Attributes
+				err = fmt.Errorf("empty path in AttributeProfile <%s>", utils.ConcatenatedKey(attr.Tenant, attr.ID))
+				return
+			}
+		}
 		mapAttrPfls[utils.TenantID{Tenant: attr.Tenant, ID: attr.ID}] = attr
 	}
 	tpr.attributeProfiles = mapAttrPfls

@@ -91,15 +91,16 @@ func (apierSv1 *APIerSv1) SetAttributeProfile(alsWrp *AttributeWithCache, reply 
 	if missing := utils.MissingStructFields(alsWrp.AttributeProfile, []string{"Tenant", "ID", "Attributes"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if len(alsWrp.Attributes) != 0 {
-		for _, attr := range alsWrp.Attributes {
-			for _, sub := range attr.Value {
-				if sub.Rules == "" {
-					return utils.NewErrMandatoryIeMissing("Rules")
-				}
-				if err := sub.Compile(); err != nil {
-					return utils.NewErrServerError(err)
-				}
+	for _, attr := range alsWrp.Attributes {
+		if attr.Path == utils.EmptyString {
+			return utils.NewErrMandatoryIeMissing("Path")
+		}
+		for _, sub := range attr.Value {
+			if sub.Rules == utils.EmptyString {
+				return utils.NewErrMandatoryIeMissing("Rules")
+			}
+			if err := sub.Compile(); err != nil {
+				return utils.NewErrServerError(err)
 			}
 		}
 	}

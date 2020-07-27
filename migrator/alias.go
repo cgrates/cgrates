@@ -111,6 +111,8 @@ func alias2AtttributeProfile(alias *v1Alias, defaultTenant string) *engine.Attri
 					fld = utils.MetaTenant
 				} else if fieldName != utils.EmptyString {
 					fld = utils.MetaReq + utils.NestingSep + fieldName
+				} else {
+					continue // ignore empty fieldNames
 				}
 				attr := &engine.Attribute{
 					Path:  fld,
