@@ -570,3 +570,20 @@ func TestRSRParserCompileDynRule(t *testing.T) {
 		t.Errorf("Expected ~*req.CGRID received: %q", out)
 	}
 }
+
+func TestRSRParsersGetIfaceFromValues(t *testing.T) {
+	dp := utils.MapStorage{
+		utils.MetaReq: utils.MapStorage{
+			utils.Category: "call",
+		},
+	}
+	exp := []interface{}{"*rated", "call"}
+	if rply, err := NewRSRParsersMustCompile("*rated;~*req.Category", utils.INFIELD_SEP).GetIfaceFromValues(dp); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expecting %q, received: %q", exp, rply)
+	}
+	if _, err := NewRSRParsersMustCompile("*rated;~req.Category", utils.INFIELD_SEP).GetIfaceFromValues(utils.MapStorage{}); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+}

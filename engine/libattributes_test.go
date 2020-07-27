@@ -167,24 +167,6 @@ func TestNewAttributeFromInlineWithMultipleRuns(t *testing.T) {
 		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(expAttrPrf1), utils.ToJSON(attr))
 	}
 }
-
-func TestGetIfaceFromValues(t *testing.T) {
-	dp := utils.MapStorage{
-		utils.MetaReq: utils.MapStorage{
-			utils.Category: "call",
-		},
-	}
-	exp := []interface{}{"*rated", "call"}
-	if rply, err := getIfaceFromValues(config.NewRSRParsersMustCompile("*rated;~*req.Category", utils.INFIELD_SEP), dp); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(exp, rply) {
-		t.Errorf("Expecting %q, received: %q", exp, rply)
-	}
-	if _, err := getIfaceFromValues(config.NewRSRParsersMustCompile("*rated;~req.Category", utils.INFIELD_SEP), utils.MapStorage{}); err != utils.ErrNotFound {
-		t.Error(err)
-	}
-}
-
 func TestNewAttributeFromInlineWithMultipleRuns2(t *testing.T) {
 	attrID := "*constant:*req.RequestType*rated;*constant:*req.Category:call"
 

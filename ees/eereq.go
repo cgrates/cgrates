@@ -219,7 +219,7 @@ func (eeR *EventExporterRequest) ParseField(
 	case utils.MetaRemoteHost:
 		out = eeR.RemoteHost().String()
 		isString = true
-	case utils.MetaVariable, utils.META_COMPOSED, utils.MetaGroup:
+	case utils.MetaVariable, utils.META_COMPOSED:
 		out, err = cfgFld.Value.ParseDataProvider(eeR)
 		isString = true
 	case utils.META_USAGE_DIFFERENCE:
@@ -227,21 +227,21 @@ func (eeR *EventExporterRequest) ParseField(
 			return nil, fmt.Errorf("invalid arguments <%s> to %s",
 				utils.ToJSON(cfgFld.Value), utils.META_USAGE_DIFFERENCE)
 		}
-		strVal1, err := cfgFld.Value[0].ParseDataProvider(eeR)
-		if err != nil {
-			return "", err
+		var strVal1 string
+		if strVal1, err = cfgFld.Value[0].ParseDataProvider(eeR); err != nil {
+			return
 		}
-		strVal2, err := cfgFld.Value[1].ParseDataProvider(eeR)
-		if err != nil {
-			return "", err
+		var strVal2 string
+		if strVal2, err = cfgFld.Value[1].ParseDataProvider(eeR); err != nil {
+			return
 		}
-		tEnd, err := utils.ParseTimeDetectLayout(strVal1, eeR.tmz)
-		if err != nil {
-			return "", err
+		var tEnd time.Time
+		if tEnd, err = utils.ParseTimeDetectLayout(strVal1, eeR.tmz); err != nil {
+			return
 		}
-		tStart, err := utils.ParseTimeDetectLayout(strVal2, eeR.tmz)
-		if err != nil {
-			return "", err
+		var tStart time.Time
+		if tStart, err = utils.ParseTimeDetectLayout(strVal2, eeR.tmz); err != nil {
+			return
 		}
 		out = tEnd.Sub(tStart).String()
 		isString = true
@@ -250,76 +250,63 @@ func (eeR *EventExporterRequest) ParseField(
 			return nil, fmt.Errorf("invalid arguments <%s> to %s",
 				utils.ToJSON(cfgFld.Value), utils.MetaCCUsage)
 		}
-		strVal1, err := cfgFld.Value[0].ParseDataProvider(eeR) // ReqNr
-		if err != nil {
-			return "", err
+		var strVal1 string
+		if strVal1, err = cfgFld.Value[0].ParseDataProvider(eeR); err != nil {
+			return
 		}
-		reqNr, err := strconv.ParseInt(strVal1, 10, 64)
-		if err != nil {
-			return "", fmt.Errorf("invalid requestNumber <%s> to %s",
+		var reqNr int64
+		if reqNr, err = strconv.ParseInt(strVal1, 10, 64); err != nil {
+			err = fmt.Errorf("invalid requestNumber <%s> to %s",
 				strVal1, utils.MetaCCUsage)
+			return
 		}
-		strVal2, err := cfgFld.Value[1].ParseDataProvider(eeR) // TotalUsage
-		if err != nil {
-			return "", err
+		var strVal2 string
+		if strVal2, err = cfgFld.Value[1].ParseDataProvider(eeR); err != nil {
+			return
 		}
-		usedCCTime, err := utils.ParseDurationWithNanosecs(strVal2)
-		if err != nil {
-			return "", fmt.Errorf("invalid usedCCTime <%s> to %s",
+		var usedCCTime time.Duration
+		if usedCCTime, err = utils.ParseDurationWithNanosecs(strVal2); err != nil {
+			err = fmt.Errorf("invalid usedCCTime <%s> to %s",
 				strVal2, utils.MetaCCUsage)
+			return
 		}
-		strVal3, err := cfgFld.Value[2].ParseDataProvider(eeR) // DebitInterval
-		if err != nil {
-			return "", err
+		var strVal3 string
+		if strVal3, err = cfgFld.Value[2].ParseDataProvider(eeR); err != nil {
+			return
 		}
-		debitItvl, err := utils.ParseDurationWithNanosecs(strVal3)
-		if err != nil {
-			return "", fmt.Errorf("invalid debitInterval <%s> to %s",
+		var debitItvl time.Duration
+		if debitItvl, err = utils.ParseDurationWithNanosecs(strVal3); err != nil {
+			err = fmt.Errorf("invalid debitInterval <%s> to %s",
 				strVal3, utils.MetaCCUsage)
+			return
 		}
-		mltpl := reqNr - 1 // terminate will be ignored (init request should always be 0)
-		if mltpl < 0 {
-			mltpl = 0
+
+		if reqNr--; reqNr < 0 { // terminate will be ignored (init request should always be 0)
+			reqNr = 0
 		}
-		return usedCCTime + time.Duration(debitItvl.Nanoseconds()*mltpl), nil
+		return usedCCTime + time.Duration(debitItvl.Nanoseconds()*reqNr), nil
 	case utils.MetaSum:
-		iFaceVals := make([]interface{}, len(cfgFld.Value))
-		for i, val := range cfgFld.Value {
-			strVal, err := val.ParseDataProvider(eeR)
-			if err != nil {
-				return "", err
-			}
-			iFaceVals[i] = utils.StringToInterface(strVal)
+		var iFaceVals []interface{}
+		if iFaceVals, err = cfgFld.Value.GetIfaceFromValues(eeR); err != nil {
+			return
 		}
 		out, err = utils.Sum(iFaceVals...)
 	case utils.MetaDifference:
-		iFaceVals := make([]interface{}, len(cfgFld.Value))
-		for i, val := range cfgFld.Value {
-			strVal, err := val.ParseDataProvider(eeR)
-			if err != nil {
-				return "", err
-			}
-			iFaceVals[i] = utils.StringToInterface(strVal)
+		var iFaceVals []interface{}
+		if iFaceVals, err = cfgFld.Value.GetIfaceFromValues(eeR); err != nil {
+			return
 		}
 		out, err = utils.Difference(iFaceVals...)
 	case utils.MetaMultiply:
-		iFaceVals := make([]interface{}, len(cfgFld.Value))
-		for i, val := range cfgFld.Value {
-			strVal, err := val.ParseDataProvider(eeR)
-			if err != nil {
-				return "", err
-			}
-			iFaceVals[i] = utils.StringToInterface(strVal)
+		var iFaceVals []interface{}
+		if iFaceVals, err = cfgFld.Value.GetIfaceFromValues(eeR); err != nil {
+			return
 		}
 		out, err = utils.Multiply(iFaceVals...)
 	case utils.MetaDivide:
-		iFaceVals := make([]interface{}, len(cfgFld.Value))
-		for i, val := range cfgFld.Value {
-			strVal, err := val.ParseDataProvider(eeR)
-			if err != nil {
-				return "", err
-			}
-			iFaceVals[i] = utils.StringToInterface(strVal)
+		var iFaceVals []interface{}
+		if iFaceVals, err = cfgFld.Value.GetIfaceFromValues(eeR); err != nil {
+			return
 		}
 		out, err = utils.Divide(iFaceVals...)
 	case utils.MetaValueExponent:
@@ -327,41 +314,45 @@ func (eeR *EventExporterRequest) ParseField(
 			return nil, fmt.Errorf("invalid arguments <%s> to %s",
 				utils.ToJSON(cfgFld.Value), utils.MetaValueExponent)
 		}
-		strVal1, err := cfgFld.Value[0].ParseDataProvider(eeR) // String Value
-		if err != nil {
-			return "", err
+		var strVal1 string
+		if strVal1, err = cfgFld.Value[0].ParseDataProvider(eeR); err != nil {
+			return
 		}
-		val, err := strconv.ParseFloat(strVal1, 64)
-		if err != nil {
-			return "", fmt.Errorf("invalid value <%s> to %s",
+		var val float64
+		if val, err = strconv.ParseFloat(strVal1, 64); err != nil {
+			err = fmt.Errorf("invalid value <%s> to %s",
 				strVal1, utils.MetaValueExponent)
+			return
 		}
-		strVal2, err := cfgFld.Value[1].ParseDataProvider(eeR) // String Exponent
-		if err != nil {
-			return "", err
+		var strVal2 string
+		if strVal2, err = cfgFld.Value[1].ParseDataProvider(eeR); err != nil {
+			return
 		}
-		exp, err := strconv.Atoi(strVal2)
-		if err != nil {
-			return "", err
+		var exp int
+		if exp, err = strconv.Atoi(strVal2); err != nil {
+			return
 		}
 		out = strconv.FormatFloat(utils.Round(val*math.Pow10(exp),
 			config.CgrConfig().GeneralCfg().RoundingDecimals, utils.ROUNDING_MIDDLE), 'f', -1, 64)
 	case utils.MetaUnixTimestamp:
-		val, err := cfgFld.Value.ParseDataProvider(eeR)
-		if err != nil {
-			return nil, err
+		var val string
+		if val, err = cfgFld.Value.ParseDataProvider(eeR); err != nil {
+			return
 		}
-		t, err := utils.ParseTimeDetectLayout(val, cfgFld.Timezone)
-		if err != nil {
-			return nil, err
+		var t1 time.Time
+		if t1, err = utils.ParseTimeDetectLayout(val, cfgFld.Timezone); err != nil {
+			return
 		}
-		out = strconv.Itoa(int(t.Unix()))
+		out = strconv.Itoa(int(t1.Unix()))
 	case utils.MetaMaskedDestination:
 		//check if we have destination in the event
-		if dst, err := eeR.req.FieldAsString([]string{utils.Destination}); err != nil {
-			return nil, fmt.Errorf("error <%s> getting destination for %s",
+		var dst string
+		if dst, err = eeR.req.FieldAsString([]string{utils.Destination}); err != nil {
+			err = fmt.Errorf("error <%s> getting destination for %s",
 				err, utils.ToJSON(cfgFld))
-		} else if cfgFld.MaskLen != -1 && len(cfgFld.MaskDestID) != 0 &&
+			return
+		}
+		if cfgFld.MaskLen != -1 && len(cfgFld.MaskDestID) != 0 &&
 			engine.CachedDestHasPrefix(cfgFld.MaskDestID, dst) {
 			out = utils.MaskSuffix(dst, cfgFld.MaskLen)
 		}

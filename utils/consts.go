@@ -2207,11 +2207,11 @@ var (
 )
 
 // CGROptionsSet the possible cgr options
-var CGROptionsSet = NewStringSet([]string{OptsStirATest, OptsStirPayloadMaxDuration,
-	OptsStirIdentity, OptsStirOriginatorTn, OptsStirOriginatorURI, OptsStirDestinationTn,
-	OptsStirDestinationURI, OptsStirPublicKeyPath, OptsStirPrivateKeyPath,
-	OptsDebitInterval, OptsContext, OptsSessionTTL, OptsSessionTTLMaxDelay,
-	OptsSessionTTLLastUsed, OptsSessionTTLLastUsage, OptsSessionTTLUsage, OptsAPIKey, OptsRouteID})
+var CGROptionsSet = NewStringSet([]string{OptsRatesStartTime, OptsSessionTTL, OptsSessionTTLMaxDelay,
+	OptsSessionTTLLastUsed, OptsSessionTTLLastUsage, OptsSessionTTLUsage, OptsDebitInterval, OptsStirATest,
+	OptsStirPayloadMaxDuration, OptsStirIdentity, OptsStirOriginatorTn, OptsStirOriginatorURI,
+	OptsStirDestinationTn, OptsStirDestinationURI, OptsStirPublicKeyPath, OptsStirPrivateKeyPath,
+	OptsAPIKey, OptsRouteID, OptsContext, OptsAttributesProcessRuns})
 
 // SessionS ProccessEvent posible options
 const (

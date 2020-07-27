@@ -77,9 +77,6 @@ func NewFCTemplateFromFCTemplateJsonCfg(jsnCfg *FcTemplateJsonCfg, separator str
 	if jsnCfg.Blocker != nil {
 		fcTmp.Blocker = *jsnCfg.Blocker
 	}
-	if jsnCfg.Break_on_success != nil {
-		fcTmp.BreakOnSuccess = *jsnCfg.Break_on_success
-	}
 	fcTmp.Layout = time.RFC3339
 	if jsnCfg.Layout != nil {
 		fcTmp.Layout = *jsnCfg.Layout
@@ -114,7 +111,6 @@ type FCTemplate struct {
 	NewBranch        bool   // Used by NavigableMap when creating XMLElements
 	Timezone         string
 	Blocker          bool
-	BreakOnSuccess   bool
 	Layout           string // time format
 	CostShiftDigits  int    // Used for CDR
 	RoundingDecimals *int
@@ -196,7 +192,6 @@ func (fc *FCTemplate) Clone() *FCTemplate {
 	cln.NewBranch = fc.NewBranch
 	cln.Timezone = fc.Timezone
 	cln.Blocker = fc.Blocker
-	cln.BreakOnSuccess = fc.BreakOnSuccess
 	cln.Layout = fc.Layout
 	cln.CostShiftDigits = fc.CostShiftDigits
 	cln.RoundingDecimals = fc.RoundingDecimals
@@ -254,9 +249,6 @@ func (fc *FCTemplate) AsMapInterface(separator string) (mp map[string]interface{
 	}
 	if fc.Blocker != false {
 		mp[utils.BlockerCfg] = fc.Blocker
-	}
-	if fc.BreakOnSuccess != false {
-		mp[utils.BreakOnSuccessCfg] = fc.BreakOnSuccess
 	}
 	if fc.Layout != time.RFC3339 {
 		mp[utils.LayoutCfg] = fc.Layout
