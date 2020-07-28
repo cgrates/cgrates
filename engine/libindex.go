@@ -27,6 +27,10 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+var (
+	filterIndexTypes = utils.NewStringSet([]string{utils.MetaPrefix, utils.MetaString, utils.MetaSuffix})
+)
+
 // newFilterIndex will get the index from DataManager if is not found it will create it
 func newFilterIndex(dm *DataManager, idxItmType, tnt, ctx, itemID string, filterIDs []string) (indexes map[string]utils.StringSet, err error) {
 	tntCtx := tnt
@@ -63,7 +67,7 @@ func newFilterIndex(dm *DataManager, idxItmType, tnt, ctx, itemID string, filter
 			return
 		}
 		for _, flt := range fltr.Rules {
-			if !utils.SliceHasMember([]string{utils.MetaPrefix, utils.MetaString}, flt.Type) {
+			if !filterIndexTypes.Has(flt.Type) {
 				continue
 			}
 
@@ -130,7 +134,7 @@ func addItemToFilterIndex(dm *DataManager, idxItmType, tnt, ctx, itemID string, 
 	return dm.SetIndexes(idxItmType, tntCtx, indexes, true, utils.NonTransactional)
 }
 
-// addItemToFilterIndex will remove the itemID from the existing/created index and set it in the DataDB
+// removeItemFromFilterIndex will remove the itemID from the existing/created index and set it in the DataDB
 func removeItemFromFilterIndex(dm *DataManager, idxItmType, tnt, ctx, itemID string, filterIDs []string) (err error) {
 	var indexes map[string]utils.StringSet
 	if indexes, err = newFilterIndex(dm, idxItmType, tnt, ctx, itemID, filterIDs); err != nil {
@@ -163,7 +167,7 @@ func removeItemFromFilterIndex(dm *DataManager, idxItmType, tnt, ctx, itemID str
 	return dm.SetIndexes(idxItmType, tntCtx, indexes, true, utils.NonTransactional)
 }
 
-// updatedIndexes will compare the old filtersIDs with the new ones and only uptdate the filters indexes that are added/removed
+// updatedIndexes will compare the old filtersIDs with the new ones and only update the filters indexes that are added/removed
 func updatedIndexes(dm *DataManager, idxItmType, tnt, ctx, itemID string, oldFilterIds *[]string, newFilterIDs []string) (err error) {
 	if oldFilterIds == nil { // nothing to remove so just create the new indexes
 		if err = addIndexFiltersItem(dm, idxItmType, tnt, itemID, newFilterIDs); err != nil {
@@ -473,7 +477,7 @@ func UpdateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 	newRules := utils.StringSet{}    // we only need to determine if we added new rules to rebuild
 	removeRules := utils.StringSet{} // but we need to know what indexes to remove
 	for _, flt := range newFlt.Rules {
-		if !utils.SliceHasMember([]string{utils.MetaPrefix, utils.MetaString}, flt.Type) {
+		if !filterIndexTypes.Has(flt.Type) {
 			continue
 		}
 		isDyn := strings.HasPrefix(flt.Element, utils.DynamicDataPrefix)
@@ -494,7 +498,7 @@ func UpdateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 		}
 	}
 	for _, flt := range oldFlt.Rules {
-		if !utils.SliceHasMember([]string{utils.MetaPrefix, utils.MetaString}, flt.Type) {
+		if !filterIndexTypes.Has(flt.Type) {
 			continue
 		}
 		isDyn := strings.HasPrefix(flt.Element, utils.DynamicDataPrefix)
