@@ -31,9 +31,10 @@ var (
 )
 
 func TestFilterMatchingItemIDsForEvent(t *testing.T) {
-	var stringFilter, prefixFilter, defaultFilter []*FilterRule
+	var stringFilter, prefixFilter, suffixFilter, defaultFilter []*FilterRule
 	stringFilterID := "stringFilterID"
 	prefixFilterID := "prefixFilterID"
+	suffixFilterID := "suffixFilterID"
 	data := NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
 	dmMatch = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	Cache.Clear(nil)
@@ -69,6 +70,17 @@ func TestFilterMatchingItemIDsForEvent(t *testing.T) {
 		Rules:  defaultFilter}
 	dmMatch.SetFilter(attribDefaultF, true)
 
+	x, err = NewFilterRule(utils.MetaSuffix, "~*req.Field", []string{"Prefix"})
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	suffixFilter = append(suffixFilter, x)
+	attribSufF := &Filter{
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:     "sufFilter",
+		Rules:  suffixFilter}
+	dmMatch.SetFilter(attribSufF, true)
+
 	tnt := config.CgrConfig().GeneralCfg().DefaultTenant
 	if err = addItemToFilterIndex(dmMatch, utils.CacheAttributeFilterIndexes,
 		tnt, context, stringFilterID, []string{"stringFilter"}); err != nil {
@@ -76,6 +88,10 @@ func TestFilterMatchingItemIDsForEvent(t *testing.T) {
 	}
 	if err = addItemToFilterIndex(dmMatch, utils.CacheAttributeFilterIndexes,
 		tnt, context, prefixFilterID, []string{"prefFilter"}); err != nil {
+		t.Error(err)
+	}
+	if err = addItemToFilterIndex(dmMatch, utils.CacheAttributeFilterIndexes,
+		tnt, context, suffixFilterID, []string{"sufFilter"}); err != nil {
 		t.Error(err)
 	}
 	tntCtx := utils.ConcatenatedKey(tnt, context)
@@ -93,6 +109,7 @@ func TestFilterMatchingItemIDsForEvent(t *testing.T) {
 	if !has {
 		t.Errorf("Expecting: %+v, received: %+v", stringFilterID, aPrflIDs)
 	}
+
 	matchEV = utils.MapStorage{utils.MetaReq: map[string]interface{}{
 		"Field": "profilePrefix",
 	}}
@@ -104,6 +121,19 @@ func TestFilterMatchingItemIDsForEvent(t *testing.T) {
 	_, has = aPrflIDs[prefixFilterID]
 	if !has {
 		t.Errorf("Expecting: %+v, received: %+v", prefixFilterID, aPrflIDs)
+	}
+
+	matchEV = utils.MapStorage{utils.MetaReq: map[string]interface{}{
+		"Field": "profilePrefix",
+	}}
+	aPrflIDs, err = MatchingItemIDsForEvent(matchEV, nil, nil, nil,
+		dmMatch, utils.CacheAttributeFilterIndexes, tntCtx, true, false)
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	_, has = aPrflIDs[suffixFilterID]
+	if !has {
+		t.Errorf("Expecting: %+v, received: %+v", suffixFilterID, aPrflIDs)
 	}
 }
 
