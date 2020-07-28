@@ -25,7 +25,7 @@ import (
 
 // DebitUsage will debit the balance for the usage cost, allowing the
 // account to go negative if the cost calculated is greater than the balance
-func (apierSv1 *APIerSv1) DebitUsage(usageRecord *engine.UsageRecordWithArgDispatcher, reply *string) error {
+func (apierSv1 *APIerSv1) DebitUsage(usageRecord *engine.UsageRecordWithOpts, reply *string) error {
 	return apierSv1.DebitUsageWithOptions(&AttrDebitUsageWithOptions{
 		UsageRecord:          usageRecord,
 		AllowNegativeAccount: true,
@@ -34,7 +34,7 @@ func (apierSv1 *APIerSv1) DebitUsage(usageRecord *engine.UsageRecordWithArgDispa
 
 // AttrDebitUsageWithOptions represents the DebitUsage request
 type AttrDebitUsageWithOptions struct {
-	UsageRecord          *engine.UsageRecordWithArgDispatcher
+	UsageRecord          *engine.UsageRecordWithOpts
 	AllowNegativeAccount bool // allow account to go negative during debit
 }
 
@@ -78,8 +78,10 @@ func (apierSv1 *APIerSv1) DebitUsageWithOptions(args *AttrDebitUsageWithOptions,
 
 	// Calculate the cost for usage and debit the account
 	var cc engine.CallCost
-	if err := apierSv1.Responder.Debit(&engine.CallDescriptorWithArgDispatcher{CallDescriptor: cd,
-		ArgDispatcher: args.UsageRecord.ArgDispatcher}, &cc); err != nil {
+	if err := apierSv1.Responder.Debit(&engine.CallDescriptorWithOpts{
+		CallDescriptor: cd,
+		Opts:           args.UsageRecord.Opts,
+	}, &cc); err != nil {
 		return utils.NewErrServerError(err)
 	}
 

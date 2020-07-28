@@ -226,9 +226,8 @@ func (sma *AsteriskAgent) handleStasisStart(ev *SMAsteriskEvent) {
 	// Done with processing event, cache it for later use
 	sma.evCacheMux.Lock()
 	sma.eventsCache[ev.ChannelID()] = &utils.CGREventWithOpts{
-		CGREvent:      authArgs.CGREvent,
-		ArgDispatcher: authArgs.ArgDispatcher,
-		Opts:          authArgs.Opts,
+		CGREvent: authArgs.CGREvent,
+		Opts:     authArgs.Opts,
 	}
 	sma.evCacheMux.Unlock()
 }
@@ -317,9 +316,9 @@ func (sma *AsteriskAgent) handleChannelDestroyed(ev *SMAsteriskEvent) {
 	if sma.cgrCfg.AsteriskAgentCfg().CreateCDR {
 		if err := sma.connMgr.Call(sma.cgrCfg.AsteriskAgentCfg().SessionSConns, sma,
 			utils.SessionSv1ProcessCDR,
-			&utils.CGREventWithArgDispatcher{
-				CGREvent:      cgrEvDisp.CGREvent,
-				ArgDispatcher: cgrEvDisp.ArgDispatcher,
+			&utils.CGREventWithOpts{
+				CGREvent: cgrEvDisp.CGREvent,
+				Opts:     cgrEvDisp.Opts,
 			}, &reply); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> Error: %s when attempting to process CDR for channelID: %s",
 				utils.AsteriskAgent, err.Error(), ev.ChannelID()))

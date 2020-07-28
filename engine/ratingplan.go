@@ -34,11 +34,11 @@ type RatingPlan struct {
 	DestinationRates map[string]RPRateList
 }
 
-// RatingPlanWithArgDispatcher is used in replicatorV1 for dispatcher
-type RatingPlanWithArgDispatcher struct {
+// RatingPlanWithOpts is used in replicatorV1 for dispatcher
+type RatingPlanWithOpts struct {
 	*RatingPlan
 	utils.TenantArg
-	*utils.ArgDispatcher
+	Opts map[string]interface{}
 }
 
 type RPRate struct {

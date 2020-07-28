@@ -36,22 +36,24 @@ import (
 var attrs = &engine.AttrSProcessEventReply{
 	MatchedProfiles: []string{"ATTR_ACNT_1001"},
 	AlteredFields:   []string{"*req.OfficeGroup"},
-	CGREvent: &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "TestSSv1ItAuth",
-		Event: map[string]interface{}{
-			utils.CGRID:       "5668666d6b8e44eb949042f25ce0796ec3592ff9",
-			utils.Tenant:      "cgrates.org",
-			utils.Category:    "call",
-			utils.ToR:         utils.VOICE,
-			utils.Account:     "1001",
-			utils.Subject:     "ANY2CNT",
-			utils.Destination: "1002",
-			"OfficeGroup":     "Marketing",
-			utils.OriginID:    "TestSSv1It1",
-			utils.RequestType: utils.META_PREPAID,
-			utils.SetupTime:   "2018-01-07T17:00:00Z",
-			utils.Usage:       300000000000.0,
+	CGREventWithOpts: &utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSSv1ItAuth",
+			Event: map[string]interface{}{
+				utils.CGRID:       "5668666d6b8e44eb949042f25ce0796ec3592ff9",
+				utils.Tenant:      "cgrates.org",
+				utils.Category:    "call",
+				utils.ToR:         utils.VOICE,
+				utils.Account:     "1001",
+				utils.Subject:     "ANY2CNT",
+				utils.Destination: "1002",
+				"OfficeGroup":     "Marketing",
+				utils.OriginID:    "TestSSv1It1",
+				utils.RequestType: utils.META_PREPAID,
+				utils.SetupTime:   "2018-01-07T17:00:00Z",
+				utils.Usage:       300000000000.0,
+			},
 		},
 	},
 }
@@ -855,10 +857,12 @@ func TestSessionSNewV1AuthorizeArgs(t *testing.T) {
 	expected := &V1AuthorizeArgs{
 		AuthorizeResources: true,
 		GetAttributes:      true,
-		CGREvent:           cgrEv,
-		ForceDuration:      true,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: cgrEv,
+		},
+		ForceDuration: true,
 	}
-	rply := NewV1AuthorizeArgs(true, nil, false, nil, false, nil, true, false, false, false, false, cgrEv, nil, utils.Paginator{}, true, nil)
+	rply := NewV1AuthorizeArgs(true, nil, false, nil, false, nil, true, false, false, false, false, cgrEv, utils.Paginator{}, true, nil)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
@@ -871,10 +875,12 @@ func TestSessionSNewV1AuthorizeArgs(t *testing.T) {
 		GetRoutes:          false,
 		RoutesIgnoreErrors: true,
 		RoutesMaxCost:      utils.MetaRoutesEventCost,
-		CGREvent:           cgrEv,
-		ForceDuration:      true,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: cgrEv,
+		},
+		ForceDuration: true,
 	}
-	rply = NewV1AuthorizeArgs(true, nil, false, nil, true, nil, false, true, false, true, true, cgrEv, nil, utils.Paginator{}, true, nil)
+	rply = NewV1AuthorizeArgs(true, nil, false, nil, true, nil, false, true, false, true, true, cgrEv, utils.Paginator{}, true, nil)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v,\n received: %+v", expected, rply)
 	}
@@ -891,13 +897,15 @@ func TestSessionSNewV1AuthorizeArgs(t *testing.T) {
 		GetRoutes:          false,
 		RoutesIgnoreErrors: true,
 		RoutesMaxCost:      utils.MetaRoutesEventCost,
-		CGREvent:           cgrEv,
-		AttributeIDs:       []string{"ATTR1", "ATTR2"},
-		ThresholdIDs:       []string{"ID1", "ID2"},
-		StatIDs:            []string{"test3", "test4"},
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: cgrEv,
+		},
+		AttributeIDs: []string{"ATTR1", "ATTR2"},
+		ThresholdIDs: []string{"ID1", "ID2"},
+		StatIDs:      []string{"test3", "test4"},
 	}
 	rply = NewV1AuthorizeArgs(true, attributeIDs, false, thresholdIDs,
-		true, statIDs, false, true, false, true, true, cgrEv, nil, utils.Paginator{}, false, nil)
+		true, statIDs, false, true, false, true, true, cgrEv, utils.Paginator{}, false, nil)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v,\n received: %+v", expected, rply)
 	}
@@ -913,7 +921,7 @@ func TestV1AuthorizeArgsParseFlags(t *testing.T) {
 		t.Errorf("Expecting %+v,\n received: %+v", eOut, v1authArgs)
 	}
 	//normal check -> without *dispatchers
-	cgrArgs, _ := utils.ExtractArgsFromOpts(v1authArgs.Opts, false, true)
+	cgrArgs, _ := utils.GetRoutePaginatorFromOpts(v1authArgs.Opts)
 	eOut = &V1AuthorizeArgs{
 		GetMaxUsage:        true,
 		AuthorizeResources: true,
@@ -926,8 +934,7 @@ func TestV1AuthorizeArgsParseFlags(t *testing.T) {
 		ThresholdIDs:       []string{"tr1", "tr2", "tr3"},
 		ProcessStats:       true,
 		StatIDs:            []string{"st1", "st2", "st3"},
-		ArgDispatcher:      cgrArgs.ArgDispatcher,
-		Paginator:          *cgrArgs.RoutePaginator,
+		Paginator:          cgrArgs,
 		ForceDuration:      true,
 	}
 
@@ -937,7 +944,7 @@ func TestV1AuthorizeArgsParseFlags(t *testing.T) {
 		t.Errorf("Expecting %+v,\n received: %+v\n", utils.ToJSON(eOut), utils.ToJSON(v1authArgs))
 	}
 	// //normal check -> with *dispatchers
-	cgrArgs, _ = utils.ExtractArgsFromOpts(v1authArgs.Opts, true, true)
+	cgrArgs, _ = utils.GetRoutePaginatorFromOpts(v1authArgs.Opts)
 	eOut = &V1AuthorizeArgs{
 		GetMaxUsage:        true,
 		AuthorizeResources: true,
@@ -950,8 +957,7 @@ func TestV1AuthorizeArgsParseFlags(t *testing.T) {
 		ThresholdIDs:       []string{"tr1", "tr2", "tr3"},
 		ProcessStats:       true,
 		StatIDs:            []string{"st1", "st2", "st3"},
-		ArgDispatcher:      cgrArgs.ArgDispatcher,
-		Paginator:          *cgrArgs.RoutePaginator,
+		Paginator:          cgrArgs,
 		ForceDuration:      true,
 	}
 
@@ -974,26 +980,30 @@ func TestSessionSNewV1UpdateSessionArgs(t *testing.T) {
 	expected := &V1UpdateSessionArgs{
 		GetAttributes: true,
 		UpdateSession: true,
-		CGREvent:      cgrEv,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: cgrEv,
+		},
 		ForceDuration: true,
 	}
-	rply := NewV1UpdateSessionArgs(true, nil, true, cgrEv, nil, true, nil)
+	rply := NewV1UpdateSessionArgs(true, nil, true, cgrEv, true, nil)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
 	expected = &V1UpdateSessionArgs{
 		GetAttributes: false,
 		UpdateSession: true,
-		CGREvent:      cgrEv,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: cgrEv,
+		},
 		ForceDuration: true,
 	}
-	rply = NewV1UpdateSessionArgs(false, nil, true, cgrEv, nil, true, nil)
+	rply = NewV1UpdateSessionArgs(false, nil, true, cgrEv, true, nil)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
 	//test with len(AttributeIDs) != 0
 	attributeIDs := []string{"ATTR1", "ATTR2"}
-	rply = NewV1UpdateSessionArgs(false, attributeIDs, true, cgrEv, nil, true, nil)
+	rply = NewV1UpdateSessionArgs(false, attributeIDs, true, cgrEv, true, nil)
 	expected.AttributeIDs = []string{"ATTR1", "ATTR2"}
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
@@ -1012,18 +1022,22 @@ func TestSessionSNewV1TerminateSessionArgs(t *testing.T) {
 	expected := &V1TerminateSessionArgs{
 		TerminateSession:  true,
 		ProcessThresholds: true,
-		CGREvent:          cgrEv,
-		ForceDuration:     true,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: cgrEv,
+		},
+		ForceDuration: true,
 	}
-	rply := NewV1TerminateSessionArgs(true, false, true, nil, false, nil, cgrEv, nil, true, nil)
+	rply := NewV1TerminateSessionArgs(true, false, true, nil, false, nil, cgrEv, true, nil)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
 	expected = &V1TerminateSessionArgs{
-		CGREvent:      cgrEv,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: cgrEv,
+		},
 		ForceDuration: true,
 	}
-	rply = NewV1TerminateSessionArgs(false, false, false, nil, false, nil, cgrEv, nil, true, nil)
+	rply = NewV1TerminateSessionArgs(false, false, false, nil, false, nil, cgrEv, true, nil)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
@@ -1031,12 +1045,14 @@ func TestSessionSNewV1TerminateSessionArgs(t *testing.T) {
 	thresholdIDs := []string{"ID1", "ID2"}
 	statIDs := []string{"test1", "test2"}
 	expected = &V1TerminateSessionArgs{
-		CGREvent:      cgrEv,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: cgrEv,
+		},
 		ThresholdIDs:  []string{"ID1", "ID2"},
 		StatIDs:       []string{"test1", "test2"},
 		ForceDuration: true,
 	}
-	rply = NewV1TerminateSessionArgs(false, false, false, thresholdIDs, false, statIDs, cgrEv, nil, true, nil)
+	rply = NewV1TerminateSessionArgs(false, false, false, thresholdIDs, false, statIDs, cgrEv, true, nil)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
@@ -1056,26 +1072,30 @@ func TestSessionSNewV1ProcessMessageArgs(t *testing.T) {
 		AllocateResources: true,
 		Debit:             true,
 		GetAttributes:     true,
-		CGREvent:          cgrEv,
-		GetRoutes:         true,
-		ForceDuration:     true,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: cgrEv,
+		},
+		GetRoutes:     true,
+		ForceDuration: true,
 	}
 	rply := NewV1ProcessMessageArgs(true, nil, false, nil, false,
-		nil, true, true, true, false, false, cgrEv, nil, utils.Paginator{}, true, nil)
+		nil, true, true, true, false, false, cgrEv, utils.Paginator{}, true, nil)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
 	expected = &V1ProcessMessageArgs{
-		AllocateResources:  true,
-		GetAttributes:      true,
-		CGREvent:           cgrEv,
+		AllocateResources: true,
+		GetAttributes:     true,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: cgrEv,
+		},
 		GetRoutes:          true,
 		RoutesMaxCost:      utils.MetaRoutesEventCost,
 		RoutesIgnoreErrors: true,
 		ForceDuration:      true,
 	}
 	rply = NewV1ProcessMessageArgs(true, nil, false, nil, false,
-		nil, true, false, true, true, true, cgrEv, nil, utils.Paginator{}, true, nil)
+		nil, true, false, true, true, true, cgrEv, utils.Paginator{}, true, nil)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
@@ -1085,9 +1105,11 @@ func TestSessionSNewV1ProcessMessageArgs(t *testing.T) {
 	statIDs := []string{"test3", "test4"}
 
 	expected = &V1ProcessMessageArgs{
-		AllocateResources:  true,
-		GetAttributes:      true,
-		CGREvent:           cgrEv,
+		AllocateResources: true,
+		GetAttributes:     true,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: cgrEv,
+		},
 		GetRoutes:          true,
 		RoutesMaxCost:      utils.MetaRoutesEventCost,
 		RoutesIgnoreErrors: true,
@@ -1097,7 +1119,7 @@ func TestSessionSNewV1ProcessMessageArgs(t *testing.T) {
 		ForceDuration:      true,
 	}
 	rply = NewV1ProcessMessageArgs(true, attributeIDs, false, thresholdIDs, false, statIDs,
-		true, false, true, true, true, cgrEv, nil, utils.Paginator{}, true, nil)
+		true, false, true, true, true, cgrEv, utils.Paginator{}, true, nil)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
@@ -1126,10 +1148,12 @@ func TestSessionSNewV1InitSessionArgs(t *testing.T) {
 		AttributeIDs:      []string{"ATTR1", "ATTR2"},
 		ThresholdIDs:      []string{"test1", "test2"},
 		StatIDs:           []string{"test3", "test4"},
-		CGREvent:          cgrEv,
-		ForceDuration:     true,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: cgrEv,
+		},
+		ForceDuration: true,
 	}
-	rply := NewV1InitSessionArgs(true, attributeIDs, true, thresholdIDs, true, statIDs, true, true, cgrEv, nil, true, nil)
+	rply := NewV1InitSessionArgs(true, attributeIDs, true, thresholdIDs, true, statIDs, true, true, cgrEv, true, nil)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
@@ -1149,10 +1173,12 @@ func TestSessionSNewV1InitSessionArgs(t *testing.T) {
 		InitSession:       true,
 		ProcessThresholds: true,
 		ProcessStats:      true,
-		CGREvent:          cgrEv,
-		ForceDuration:     true,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: cgrEv,
+		},
+		ForceDuration: true,
 	}
-	rply = NewV1InitSessionArgs(true, nil, true, nil, true, nil, true, true, cgrEv, nil, true, nil)
+	rply = NewV1InitSessionArgs(true, nil, true, nil, true, nil, true, true, cgrEv, true, nil)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
@@ -1162,10 +1188,12 @@ func TestSessionSNewV1InitSessionArgs(t *testing.T) {
 		InitSession:       true,
 		ProcessThresholds: false,
 		ProcessStats:      true,
-		CGREvent:          cgrEv,
-		ForceDuration:     true,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: cgrEv,
+		},
+		ForceDuration: true,
 	}
-	rply = NewV1InitSessionArgs(true, nil, false, nil, true, nil, false, true, cgrEv, nil, true, nil)
+	rply = NewV1InitSessionArgs(true, nil, false, nil, true, nil, false, true, cgrEv, true, nil)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
@@ -1480,7 +1508,7 @@ func TestSessionSrelocateSessionS(t *testing.T) {
 	}
 }
 
-func TestSessionSNewV1AuthorizeArgsWithArgDispatcher(t *testing.T) {
+func TestSessionSNewV1AuthorizeArgsWithOpts(t *testing.T) {
 	opts := map[string]interface{}{
 		utils.OptsAPIKey:  "testkey",
 		utils.OptsRouteID: "testrouteid",
@@ -1496,17 +1524,15 @@ func TestSessionSNewV1AuthorizeArgsWithArgDispatcher(t *testing.T) {
 	expected := &V1AuthorizeArgs{
 		AuthorizeResources: true,
 		GetAttributes:      true,
-		CGREvent:           cgrEv,
-		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey:  utils.StringPointer("testkey"),
-			RouteID: utils.StringPointer("testrouteid"),
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: cgrEv,
+			Opts:     opts,
 		},
 		ForceDuration: true,
-		Opts:          opts,
 	}
-	cgrArgs, _ := utils.ExtractArgsFromOpts(opts, true, true)
+	cgrArgs, _ := utils.GetRoutePaginatorFromOpts(opts)
 	rply := NewV1AuthorizeArgs(true, nil, false, nil, false, nil, true, false,
-		false, false, false, cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.RoutePaginator, true, opts)
+		false, false, false, cgrEv, cgrArgs, true, opts)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rply))
 	}
@@ -1519,22 +1545,20 @@ func TestSessionSNewV1AuthorizeArgsWithArgDispatcher(t *testing.T) {
 		GetRoutes:          false,
 		RoutesIgnoreErrors: true,
 		RoutesMaxCost:      utils.MetaRoutesEventCost,
-		CGREvent:           cgrEv,
-		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey:  utils.StringPointer("testkey"),
-			RouteID: utils.StringPointer("testrouteid"),
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: cgrEv,
+			Opts:     opts,
 		},
 		ForceDuration: true,
-		Opts:          opts,
 	}
 	rply = NewV1AuthorizeArgs(true, nil, false, nil, true, nil, false, true,
-		false, true, true, cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.RoutePaginator, true, opts)
+		false, true, true, cgrEv, cgrArgs, true, opts)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rply))
 	}
 }
 
-func TestSessionSNewV1AuthorizeArgsWithArgDispatcher2(t *testing.T) {
+func TestSessionSNewV1AuthorizeArgsWithOpts2(t *testing.T) {
 	opts := map[string]interface{}{
 		utils.OptsRouteID: "testrouteid",
 	}
@@ -1549,16 +1573,15 @@ func TestSessionSNewV1AuthorizeArgsWithArgDispatcher2(t *testing.T) {
 	expected := &V1AuthorizeArgs{
 		AuthorizeResources: true,
 		GetAttributes:      true,
-		CGREvent:           cgrEv,
-		ArgDispatcher: &utils.ArgDispatcher{
-			RouteID: utils.StringPointer("testrouteid"),
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: cgrEv,
+			Opts:     opts,
 		},
 		ForceDuration: true,
-		Opts:          opts,
 	}
-	cgrArgs, _ := utils.ExtractArgsFromOpts(opts, true, true)
+	cgrArgs, _ := utils.GetRoutePaginatorFromOpts(opts)
 	rply := NewV1AuthorizeArgs(true, nil, false, nil, false, nil, true, false, false,
-		false, false, cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.RoutePaginator, true, opts)
+		false, false, cgrEv, cgrArgs, true, opts)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rply))
 	}
@@ -1571,15 +1594,14 @@ func TestSessionSNewV1AuthorizeArgsWithArgDispatcher2(t *testing.T) {
 		GetRoutes:          false,
 		RoutesIgnoreErrors: true,
 		RoutesMaxCost:      utils.MetaRoutesEventCost,
-		CGREvent:           cgrEv,
-		ArgDispatcher: &utils.ArgDispatcher{
-			RouteID: utils.StringPointer("testrouteid"),
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: cgrEv,
+			Opts:     opts,
 		},
 		ForceDuration: true,
-		Opts:          opts,
 	}
 	rply = NewV1AuthorizeArgs(true, nil, false, nil, true, nil, false, true, false,
-		true, true, cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.RoutePaginator, true, opts)
+		true, true, cgrEv, cgrArgs, true, opts)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rply))
 	}
@@ -1782,11 +1804,9 @@ func TestV1InitSessionArgsParseFlags(t *testing.T) {
 		t.Errorf("Expecting %+v,\n received: %+v", eOut, v1InitSsArgs)
 	}
 	//normal check -> without *dispatchers
-	cgrArgs, _ := utils.ExtractArgsFromOpts(v1InitSsArgs.Opts, false, true)
 	eOut = &V1InitSessionArgs{
 		InitSession:       true,
 		AllocateResources: true,
-		ArgDispatcher:     cgrArgs.ArgDispatcher,
 		GetAttributes:     true,
 		AttributeIDs:      []string{"Attr1", "Attr2"},
 		ProcessThresholds: true,
@@ -1801,11 +1821,9 @@ func TestV1InitSessionArgsParseFlags(t *testing.T) {
 		t.Errorf("Expecting %+v,\n received: %+v\n", utils.ToJSON(eOut), utils.ToJSON(v1InitSsArgs))
 	}
 	// //normal check -> with *dispatchers
-	cgrArgs, _ = utils.ExtractArgsFromOpts(v1InitSsArgs.Opts, true, true)
 	eOut = &V1InitSessionArgs{
 		InitSession:       true,
 		AllocateResources: true,
-		ArgDispatcher:     cgrArgs.ArgDispatcher,
 		GetAttributes:     true,
 		AttributeIDs:      []string{"Attr1", "Attr2"},
 		ProcessThresholds: true,
@@ -1832,7 +1850,6 @@ func TestV1TerminateSessionArgsParseFlags(t *testing.T) {
 		t.Errorf("Expecting %+v,\n received: %+v", eOut, v1TerminateSsArgs)
 	}
 	//normal check -> without *dispatchers
-	cgrArgs, _ := utils.ExtractArgsFromOpts(v1TerminateSsArgs.Opts, false, true)
 	eOut = &V1TerminateSessionArgs{
 		TerminateSession:  true,
 		ReleaseResources:  true,
@@ -1840,7 +1857,6 @@ func TestV1TerminateSessionArgsParseFlags(t *testing.T) {
 		ThresholdIDs:      []string{"tr1", "tr2", "tr3"},
 		ProcessStats:      true,
 		StatIDs:           []string{"st1", "st2", "st3"},
-		ArgDispatcher:     cgrArgs.ArgDispatcher,
 	}
 
 	strArg = "*accounts,*resources,*routes,*thresholds:tr1;tr2;tr3,*stats:st1;st2;st3"
@@ -1849,7 +1865,6 @@ func TestV1TerminateSessionArgsParseFlags(t *testing.T) {
 		t.Errorf("Expecting %+v,\n received: %+v\n", utils.ToJSON(eOut), utils.ToJSON(v1TerminateSsArgs))
 	}
 	// //normal check -> with *dispatchers
-	cgrArgs, _ = utils.ExtractArgsFromOpts(v1TerminateSsArgs.Opts, true, true)
 	eOut = &V1TerminateSessionArgs{
 		TerminateSession:  true,
 		ReleaseResources:  true,
@@ -1857,7 +1872,6 @@ func TestV1TerminateSessionArgsParseFlags(t *testing.T) {
 		ThresholdIDs:      []string{"tr1", "tr2", "tr3"},
 		ProcessStats:      true,
 		StatIDs:           []string{"st1", "st2", "st3"},
-		ArgDispatcher:     cgrArgs.ArgDispatcher,
 	}
 
 	strArg = "*accounts,*resources,,*dispatchers,*thresholds:tr1;tr2;tr3,*stats:st1;st2;st3"
@@ -1878,7 +1892,6 @@ func TestV1ProcessMessageArgsParseFlags(t *testing.T) {
 		t.Errorf("Expecting %+v,\n received: %+v", eOut, v1ProcessMsgArgs)
 	}
 	//normal check -> without *dispatchers
-	cgrArgs, _ := utils.ExtractArgsFromOpts(v1ProcessMsgArgs.Opts, false, true)
 	eOut = &V1ProcessMessageArgs{
 		Debit:              true,
 		AllocateResources:  true,
@@ -1891,7 +1904,6 @@ func TestV1ProcessMessageArgsParseFlags(t *testing.T) {
 		ThresholdIDs:       []string{"tr1", "tr2", "tr3"},
 		ProcessStats:       true,
 		StatIDs:            []string{"st1", "st2", "st3"},
-		ArgDispatcher:      cgrArgs.ArgDispatcher,
 	}
 
 	strArg = "*accounts,*resources,*routes,*routes_ignore_errors,*routes_event_cost,*attributes:Attr1;Attr2,*thresholds:tr1;tr2;tr3,*stats:st1;st2;st3"
@@ -1901,7 +1913,6 @@ func TestV1ProcessMessageArgsParseFlags(t *testing.T) {
 	}
 
 	//normal check -> with *dispatchers
-	cgrArgs, _ = utils.ExtractArgsFromOpts(v1ProcessMsgArgs.Opts, true, true)
 	eOut = &V1ProcessMessageArgs{
 		Debit:              true,
 		AllocateResources:  true,
@@ -1914,7 +1925,6 @@ func TestV1ProcessMessageArgsParseFlags(t *testing.T) {
 		ThresholdIDs:       []string{"tr1", "tr2", "tr3"},
 		ProcessStats:       true,
 		StatIDs:            []string{"st1", "st2", "st3"},
-		ArgDispatcher:      cgrArgs.ArgDispatcher,
 	}
 
 	strArg = "*accounts,*resources,*dispatchers,*routes,*routes_ignore_errors,*routes_event_cost,*attributes:Attr1;Attr2,*thresholds:tr1;tr2;tr3,*stats:st1;st2;st3"

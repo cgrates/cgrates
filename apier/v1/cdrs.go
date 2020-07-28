@@ -100,7 +100,7 @@ func (cdrSv1 *CDRsV1) ProcessEvent(arg *engine.ArgV1ProcessEvent, reply *string)
 }
 
 // ProcessExternalCDR will process a CDR in external format
-func (cdrSv1 *CDRsV1) ProcessExternalCDR(cdr *engine.ExternalCDRWithArgDispatcher, reply *string) error {
+func (cdrSv1 *CDRsV1) ProcessExternalCDR(cdr *engine.ExternalCDRWithOpts, reply *string) error {
 	return cdrSv1.CDRs.V1ProcessExternalCDR(cdr, reply)
 }
 
@@ -114,15 +114,15 @@ func (cdrSv1 *CDRsV1) StoreSessionCost(attr *engine.AttrCDRSStoreSMCost, reply *
 	return cdrSv1.CDRs.V1StoreSessionCost(attr, reply)
 }
 
-func (cdrSv1 *CDRsV1) GetCDRsCount(args *utils.RPCCDRsFilterWithArgDispatcher, reply *int64) error {
+func (cdrSv1 *CDRsV1) GetCDRsCount(args *utils.RPCCDRsFilterWithOpts, reply *int64) error {
 	return cdrSv1.CDRs.V1CountCDRs(args, reply)
 }
 
-func (cdrSv1 *CDRsV1) GetCDRs(args *utils.RPCCDRsFilterWithArgDispatcher, reply *[]*engine.CDR) error {
+func (cdrSv1 *CDRsV1) GetCDRs(args *utils.RPCCDRsFilterWithOpts, reply *[]*engine.CDR) error {
 	return cdrSv1.CDRs.V1GetCDRs(*args, reply)
 }
 
-func (cdrSv1 *CDRsV1) Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error {
+func (cdrSv1 *CDRsV1) Ping(ign *utils.CGREventWithOpts, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

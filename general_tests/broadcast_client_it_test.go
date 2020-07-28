@@ -133,7 +133,7 @@ func testbrodcastItLoadFromFolder(t *testing.T) {
 }
 
 func testbrodcastItProccessEvent(t *testing.T) {
-	args := utils.CGREventWithArgDispatcher{
+	args := utils.CGREventWithOpts{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItProcessCDR",
@@ -187,7 +187,7 @@ func testbrodcastItGetCDRs(t *testing.T) {
 		Cost:        -1,
 	}
 	var cdrs []*engine.CDR
-	args := utils.RPCCDRsFilterWithArgDispatcher{RPCCDRsFilter: &utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault}}}
+	args := utils.RPCCDRsFilterWithOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault}}}
 	if err := brodcastRPC.Call(utils.CDRsV1GetCDRs, &args, &cdrs); err != nil {
 		t.Fatal("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {

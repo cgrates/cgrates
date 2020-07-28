@@ -36,32 +36,32 @@ func init() {
 	// Threshold
 	gob.Register(new(Threshold))
 	gob.Register(new(ThresholdProfile))
-	gob.Register(new(ThresholdProfileWithArgDispatcher))
-	gob.Register(new(ThresholdWithArgDispatcher))
+	gob.Register(new(ThresholdProfileWithOpts))
+	gob.Register(new(ThresholdWithOpts))
 	// Resource
 	gob.Register(new(Resource))
 	gob.Register(new(ResourceProfile))
-	gob.Register(new(ResourceProfileWithArgDispatcher))
-	gob.Register(new(ResourceWithArgDispatcher))
+	gob.Register(new(ResourceProfileWithOpts))
+	gob.Register(new(ResourceWithOpts))
 	// Stats
 	gob.Register(new(StatQueue))
 	gob.Register(new(StatQueueProfile))
-	gob.Register(new(StatQueueProfileWithArgDispatcher))
+	gob.Register(new(StatQueueProfileWithOpts))
 	gob.Register(new(StoredStatQueue))
-	gob.Register(new(StatQueueProfileWithArgDispatcher))
+	gob.Register(new(StatQueueProfileWithOpts))
 	// Suppliers
 	gob.Register(new(RouteProfile))
-	gob.Register(new(RouteProfileWithArgDispatcher))
+	gob.Register(new(RouteProfileWithOpts))
 	// Filters
 	gob.Register(new(Filter))
-	gob.Register(new(FilterWithArgDispatcher))
+	gob.Register(new(FilterWithOpts))
 	// Dispatcher
 	gob.Register(new(DispatcherHost))
 	gob.Register(new(DispatcherHostProfile))
-	gob.Register(new(DispatcherHostWithArgDispatcher))
+	gob.Register(new(DispatcherHostWithOpts))
 	// RateProfiles
 	gob.Register(new(RateProfile))
-	gob.Register(new(RateProfileWithArgDispatcher))
+	gob.Register(new(RateProfileWithOpts))
 
 	// CDRs
 	gob.Register(new(EventCost))
@@ -238,7 +238,7 @@ func (chS *CacheS) Call(serviceMethod string, args interface{}, reply interface{
 	return utils.RPCCall(chS, serviceMethod, args, reply)
 }
 
-func (chS *CacheS) V1GetItemIDs(args *utils.ArgsGetCacheItemIDsWithArgDispatcher,
+func (chS *CacheS) V1GetItemIDs(args *utils.ArgsGetCacheItemIDsWithOpts,
 	reply *[]string) (err error) {
 	itmIDs := chS.tCache.GetItemIDs(args.CacheID, args.ItemIDPrefix)
 	if len(itmIDs) == 0 {
@@ -248,13 +248,13 @@ func (chS *CacheS) V1GetItemIDs(args *utils.ArgsGetCacheItemIDsWithArgDispatcher
 	return
 }
 
-func (chS *CacheS) V1HasItem(args *utils.ArgsGetCacheItemWithArgDispatcher,
+func (chS *CacheS) V1HasItem(args *utils.ArgsGetCacheItemWithOpts,
 	reply *bool) (err error) {
 	*reply = chS.tCache.HasItem(args.CacheID, args.ItemID)
 	return
 }
 
-func (chS *CacheS) V1GetItemExpiryTime(args *utils.ArgsGetCacheItemWithArgDispatcher,
+func (chS *CacheS) V1GetItemExpiryTime(args *utils.ArgsGetCacheItemWithOpts,
 	reply *time.Time) (err error) {
 	expTime, has := chS.tCache.GetItemExpiryTime(args.CacheID, args.ItemID)
 	if !has {
@@ -264,28 +264,28 @@ func (chS *CacheS) V1GetItemExpiryTime(args *utils.ArgsGetCacheItemWithArgDispat
 	return
 }
 
-func (chS *CacheS) V1RemoveItem(args *utils.ArgsGetCacheItemWithArgDispatcher,
+func (chS *CacheS) V1RemoveItem(args *utils.ArgsGetCacheItemWithOpts,
 	reply *string) (err error) {
 	chS.tCache.Remove(args.CacheID, args.ItemID, true, utils.NonTransactional)
 	*reply = utils.OK
 	return
 }
 
-func (chS *CacheS) V1Clear(args *utils.AttrCacheIDsWithArgDispatcher,
+func (chS *CacheS) V1Clear(args *utils.AttrCacheIDsWithOpts,
 	reply *string) (err error) {
 	chS.tCache.Clear(args.CacheIDs)
 	*reply = utils.OK
 	return
 }
 
-func (chS *CacheS) V1GetCacheStats(args *utils.AttrCacheIDsWithArgDispatcher,
+func (chS *CacheS) V1GetCacheStats(args *utils.AttrCacheIDsWithOpts,
 	rply *map[string]*ltcache.CacheStats) (err error) {
 	cs := chS.tCache.GetCacheStats(args.CacheIDs)
 	*rply = cs
 	return
 }
 
-func (chS *CacheS) V1PrecacheStatus(args *utils.AttrCacheIDsWithArgDispatcher, rply *map[string]string) (err error) {
+func (chS *CacheS) V1PrecacheStatus(args *utils.AttrCacheIDsWithOpts, rply *map[string]string) (err error) {
 	if len(args.CacheIDs) == 0 {
 		args.CacheIDs = utils.CachePartitions.AsSlice()
 	}
@@ -305,13 +305,13 @@ func (chS *CacheS) V1PrecacheStatus(args *utils.AttrCacheIDsWithArgDispatcher, r
 	return
 }
 
-func (chS *CacheS) V1HasGroup(args *utils.ArgsGetGroupWithArgDispatcher,
+func (chS *CacheS) V1HasGroup(args *utils.ArgsGetGroupWithOpts,
 	rply *bool) (err error) {
 	*rply = chS.tCache.HasGroup(args.CacheID, args.GroupID)
 	return
 }
 
-func (chS *CacheS) V1GetGroupItemIDs(args *utils.ArgsGetGroupWithArgDispatcher,
+func (chS *CacheS) V1GetGroupItemIDs(args *utils.ArgsGetGroupWithOpts,
 	rply *[]string) (err error) {
 	if has := chS.tCache.HasGroup(args.CacheID, args.GroupID); !has {
 		return utils.ErrNotFound
@@ -320,7 +320,7 @@ func (chS *CacheS) V1GetGroupItemIDs(args *utils.ArgsGetGroupWithArgDispatcher,
 	return
 }
 
-func (chS *CacheS) V1RemoveGroup(args *utils.ArgsGetGroupWithArgDispatcher,
+func (chS *CacheS) V1RemoveGroup(args *utils.ArgsGetGroupWithOpts,
 	rply *string) (err error) {
 	chS.tCache.RemoveGroup(args.CacheID, args.GroupID, true, utils.NonTransactional)
 	*rply = utils.OK
@@ -331,7 +331,7 @@ func (chS *CacheS) reloadCache(chID string, IDs []string) error {
 	return chS.dm.CacheDataFromDB(chID, IDs, true)
 }
 
-func (chS *CacheS) V1ReloadCache(attrs utils.AttrReloadCacheWithArgDispatcher, reply *string) (err error) {
+func (chS *CacheS) V1ReloadCache(attrs utils.AttrReloadCacheWithOpts, reply *string) (err error) {
 	if len(attrs.DestinationIDs) != 0 {
 		// Reload Destinations
 		if err = chS.reloadCache(utils.DESTINATION_PREFIX, attrs.DestinationIDs); err != nil {
@@ -484,7 +484,7 @@ func (chS *CacheS) V1ReloadCache(attrs utils.AttrReloadCacheWithArgDispatcher, r
 	return nil
 }
 
-func (chS *CacheS) V1LoadCache(args utils.AttrReloadCacheWithArgDispatcher, reply *string) (err error) {
+func (chS *CacheS) V1LoadCache(args utils.AttrReloadCacheWithOpts, reply *string) (err error) {
 	if err := chS.dm.LoadDataDBCache(
 		args.DestinationIDs,
 		args.ReverseDestinationIDs,

@@ -41,22 +41,22 @@ func (tSv1 *ThresholdSv1) Call(serviceMethod string, args interface{}, reply int
 }
 
 // GetThresholdIDs returns list of threshold IDs registered for a tenant
-func (tSv1 *ThresholdSv1) GetThresholdIDs(tenant *utils.TenantWithArgDispatcher, tIDs *[]string) error {
+func (tSv1 *ThresholdSv1) GetThresholdIDs(tenant *utils.TenantWithOpts, tIDs *[]string) error {
 	return tSv1.tS.V1GetThresholdIDs(tenant.Tenant, tIDs)
 }
 
 // GetThresholdsForEvent returns a list of thresholds matching an event
-func (tSv1 *ThresholdSv1) GetThresholdsForEvent(args *engine.ArgsProcessEvent, reply *engine.Thresholds) error {
+func (tSv1 *ThresholdSv1) GetThresholdsForEvent(args *engine.ThresholdsArgsProcessEvent, reply *engine.Thresholds) error {
 	return tSv1.tS.V1GetThresholdsForEvent(args, reply)
 }
 
 // GetThreshold queries a Threshold
-func (tSv1 *ThresholdSv1) GetThreshold(tntID *utils.TenantIDWithArgDispatcher, t *engine.Threshold) error {
+func (tSv1 *ThresholdSv1) GetThreshold(tntID *utils.TenantIDWithOpts, t *engine.Threshold) error {
 	return tSv1.tS.V1GetThreshold(tntID.TenantID, t)
 }
 
 // ProcessEvent will process an Event
-func (tSv1 *ThresholdSv1) ProcessEvent(args *engine.ArgsProcessEvent, tIDs *[]string) error {
+func (tSv1 *ThresholdSv1) ProcessEvent(args *engine.ThresholdsArgsProcessEvent, tIDs *[]string) error {
 	return tSv1.tS.V1ProcessEvent(args, tIDs)
 }
 
@@ -192,7 +192,7 @@ func (apierSv1 *APIerSv1) RemoveThresholdProfile(args *utils.TenantIDWithCache, 
 	return nil
 }
 
-func (tSv1 *ThresholdSv1) Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error {
+func (tSv1 *ThresholdSv1) Ping(ign *utils.CGREventWithOpts, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

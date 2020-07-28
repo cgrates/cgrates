@@ -37,10 +37,10 @@ type Destination struct {
 	Prefixes []string
 }
 
-type DestinationWithArgDispatcher struct {
+type DestinationWithOpts struct {
 	*Destination
 	utils.TenantArg
-	*utils.ArgDispatcher
+	Opts map[string]interface{}
 }
 
 // returns prefix precision

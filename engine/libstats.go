@@ -44,10 +44,10 @@ type StatQueueProfile struct {
 	ThresholdIDs       []string // list of thresholds to be checked after changes
 }
 
-// StatQueueProfileWithArgDispatcher is used in replicatorV1 for dispatcher
-type StatQueueProfileWithArgDispatcher struct {
+// StatQueueProfileWithOpts is used in replicatorV1 for dispatcher
+type StatQueueProfileWithOpts struct {
 	*StatQueueProfile
-	*utils.ArgDispatcher
+	Opts map[string]interface{}
 }
 
 type StatQueueWithCache struct {
@@ -97,9 +97,9 @@ type StoredStatQueue struct {
 	Compressed bool
 }
 
-type StoredStatQueueWithArgDispatcher struct {
+type StoredStatQueueWithOpts struct {
 	*StoredStatQueue
-	*utils.ArgDispatcher
+	Opts map[string]interface{}
 }
 
 // SqID will compose the unique identifier for the StatQueue out of Tenant and ID

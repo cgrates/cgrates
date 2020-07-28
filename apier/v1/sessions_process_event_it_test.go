@@ -165,19 +165,21 @@ func testSSv1ItProcessEventAuth(t *testing.T) {
 			utils.ConcatenatedKey(utils.MetaRALs, utils.MetaAuthorize),
 			utils.ConcatenatedKey(utils.MetaRALs, utils.MetaDerivedReply),
 			utils.MetaRoutes, utils.MetaAttributes, utils.MetaChargers},
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testSSv1ItProcessEventAuth",
-			Event: map[string]interface{}{
-				utils.Tenant:      "cgrates.org",
-				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "testSSv1ItProcessEvent",
-				utils.RequestType: sSV1RequestType,
-				utils.Account:     "1001",
-				utils.Subject:     "ANY2CNT",
-				utils.Destination: "1002",
-				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-				utils.Usage:       authUsage,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testSSv1ItProcessEventAuth",
+				Event: map[string]interface{}{
+					utils.Tenant:      "cgrates.org",
+					utils.ToR:         utils.VOICE,
+					utils.OriginID:    "testSSv1ItProcessEvent",
+					utils.RequestType: sSV1RequestType,
+					utils.Account:     "1001",
+					utils.Subject:     "ANY2CNT",
+					utils.Destination: "1002",
+					utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+					utils.Usage:       authUsage,
+				},
 			},
 		},
 	}
@@ -220,23 +222,25 @@ func testSSv1ItProcessEventAuth(t *testing.T) {
 		t.Errorf("expecting: %+v,\n received: %+v", utils.ToJSON(eSplrs), utils.ToJSON(rply.Routes[utils.MetaRaw]))
 	}
 	eAttrs := &engine.AttrSProcessEventReply{
-		Opts:            map[string]interface{}{utils.Subsys: utils.MetaSessionS},
 		MatchedProfiles: []string{"ATTR_ACNT_1001"},
 		AlteredFields:   []string{"*req.OfficeGroup"},
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testSSv1ItProcessEventAuth",
-			Event: map[string]interface{}{
-				utils.Tenant:      "cgrates.org",
-				utils.ToR:         utils.VOICE,
-				utils.Account:     "1001",
-				utils.Subject:     "ANY2CNT",
-				utils.Destination: "1002",
-				"OfficeGroup":     "Marketing",
-				utils.OriginID:    "testSSv1ItProcessEvent",
-				utils.RequestType: sSV1RequestType,
-				utils.SetupTime:   "2018-01-07T17:00:00Z",
-				utils.Usage:       300000000000.0,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			Opts: map[string]interface{}{utils.Subsys: utils.MetaSessionS},
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testSSv1ItProcessEventAuth",
+				Event: map[string]interface{}{
+					utils.Tenant:      "cgrates.org",
+					utils.ToR:         utils.VOICE,
+					utils.Account:     "1001",
+					utils.Subject:     "ANY2CNT",
+					utils.Destination: "1002",
+					"OfficeGroup":     "Marketing",
+					utils.OriginID:    "testSSv1ItProcessEvent",
+					utils.RequestType: sSV1RequestType,
+					utils.SetupTime:   "2018-01-07T17:00:00Z",
+					utils.Usage:       300000000000.0,
+				},
 			},
 		},
 	}
@@ -254,20 +258,22 @@ func testSSv1ItProcessEventInitiateSession(t *testing.T) {
 			utils.ConcatenatedKey(utils.MetaResources, utils.MetaAllocate),
 			utils.ConcatenatedKey(utils.MetaResources, utils.MetaDerivedReply),
 			utils.MetaAttributes, utils.MetaChargers},
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testSSv1ItProcessEventInitiateSession",
-			Event: map[string]interface{}{
-				utils.Tenant:      "cgrates.org",
-				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "testSSv1ItProcessEvent",
-				utils.RequestType: sSV1RequestType,
-				utils.Account:     "1001",
-				utils.Subject:     "ANY2CNT",
-				utils.Destination: "1002",
-				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-				utils.Usage:       initUsage,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testSSv1ItProcessEventInitiateSession",
+				Event: map[string]interface{}{
+					utils.Tenant:      "cgrates.org",
+					utils.ToR:         utils.VOICE,
+					utils.OriginID:    "testSSv1ItProcessEvent",
+					utils.RequestType: sSV1RequestType,
+					utils.Account:     "1001",
+					utils.Subject:     "ANY2CNT",
+					utils.Destination: "1002",
+					utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+					utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+					utils.Usage:       initUsage,
+				},
 			},
 		},
 	}
@@ -292,24 +298,26 @@ func testSSv1ItProcessEventInitiateSession(t *testing.T) {
 		t.Errorf("Unexpected ResourceAllocation: %s", rply.ResourceAllocation)
 	}
 	eAttrs := &engine.AttrSProcessEventReply{
-		Opts:            map[string]interface{}{utils.Subsys: utils.MetaSessionS},
 		MatchedProfiles: []string{"ATTR_ACNT_1001"},
 		AlteredFields:   []string{"*req.OfficeGroup"},
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testSSv1ItProcessEventInitiateSession",
-			Event: map[string]interface{}{
-				utils.Tenant:      "cgrates.org",
-				utils.ToR:         utils.VOICE,
-				utils.Account:     "1001",
-				utils.Subject:     "ANY2CNT",
-				utils.Destination: "1002",
-				"OfficeGroup":     "Marketing",
-				utils.OriginID:    "testSSv1ItProcessEvent",
-				utils.RequestType: sSV1RequestType,
-				utils.SetupTime:   "2018-01-07T17:00:00Z",
-				utils.AnswerTime:  "2018-01-07T17:00:10Z",
-				utils.Usage:       300000000000.0,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			Opts: map[string]interface{}{utils.Subsys: utils.MetaSessionS},
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testSSv1ItProcessEventInitiateSession",
+				Event: map[string]interface{}{
+					utils.Tenant:      "cgrates.org",
+					utils.ToR:         utils.VOICE,
+					utils.Account:     "1001",
+					utils.Subject:     "ANY2CNT",
+					utils.Destination: "1002",
+					"OfficeGroup":     "Marketing",
+					utils.OriginID:    "testSSv1ItProcessEvent",
+					utils.RequestType: sSV1RequestType,
+					utils.SetupTime:   "2018-01-07T17:00:00Z",
+					utils.AnswerTime:  "2018-01-07T17:00:10Z",
+					utils.Usage:       300000000000.0,
+				},
 			},
 		},
 	}
@@ -331,20 +339,22 @@ func testSSv1ItProcessEventUpdateSession(t *testing.T) {
 		Flags: []string{utils.ConcatenatedKey(utils.MetaRALs, utils.MetaUpdate),
 			utils.ConcatenatedKey(utils.MetaRALs, utils.MetaDerivedReply),
 			utils.MetaAttributes},
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testSSv1ItProcessEventUpdateSession",
-			Event: map[string]interface{}{
-				utils.Tenant:      "cgrates.org",
-				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "testSSv1ItProcessEvent",
-				utils.RequestType: sSV1RequestType,
-				utils.Account:     "1001",
-				utils.Subject:     "ANY2CNT",
-				utils.Destination: "1002",
-				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-				utils.Usage:       reqUsage,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testSSv1ItProcessEventUpdateSession",
+				Event: map[string]interface{}{
+					utils.Tenant:      "cgrates.org",
+					utils.ToR:         utils.VOICE,
+					utils.OriginID:    "testSSv1ItProcessEvent",
+					utils.RequestType: sSV1RequestType,
+					utils.Account:     "1001",
+					utils.Subject:     "ANY2CNT",
+					utils.Destination: "1002",
+					utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+					utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+					utils.Usage:       reqUsage,
+				},
 			},
 		},
 	}
@@ -354,24 +364,26 @@ func testSSv1ItProcessEventUpdateSession(t *testing.T) {
 		t.Error(err)
 	}
 	eAttrs := &engine.AttrSProcessEventReply{
-		Opts:            map[string]interface{}{utils.Subsys: utils.MetaSessionS},
 		MatchedProfiles: []string{"ATTR_ACNT_1001"},
 		AlteredFields:   []string{"*req.OfficeGroup"},
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testSSv1ItProcessEventUpdateSession",
-			Event: map[string]interface{}{
-				utils.Tenant:      "cgrates.org",
-				utils.ToR:         utils.VOICE,
-				utils.Account:     "1001",
-				utils.Subject:     "ANY2CNT",
-				utils.Destination: "1002",
-				"OfficeGroup":     "Marketing",
-				utils.OriginID:    "testSSv1ItProcessEvent",
-				utils.RequestType: sSV1RequestType,
-				utils.SetupTime:   "2018-01-07T17:00:00Z",
-				utils.AnswerTime:  "2018-01-07T17:00:10Z",
-				utils.Usage:       300000000000.0,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			Opts: map[string]interface{}{utils.Subsys: utils.MetaSessionS},
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testSSv1ItProcessEventUpdateSession",
+				Event: map[string]interface{}{
+					utils.Tenant:      "cgrates.org",
+					utils.ToR:         utils.VOICE,
+					utils.Account:     "1001",
+					utils.Subject:     "ANY2CNT",
+					utils.Destination: "1002",
+					"OfficeGroup":     "Marketing",
+					utils.OriginID:    "testSSv1ItProcessEvent",
+					utils.RequestType: sSV1RequestType,
+					utils.SetupTime:   "2018-01-07T17:00:00Z",
+					utils.AnswerTime:  "2018-01-07T17:00:10Z",
+					utils.Usage:       300000000000.0,
+				},
 			},
 		},
 	}
@@ -403,20 +415,22 @@ func testSSv1ItProcessEventTerminateSession(t *testing.T) {
 	args := &sessions.V1ProcessEventArgs{
 		Flags: []string{utils.ConcatenatedKey(utils.MetaRALs, utils.MetaTerminate),
 			utils.ConcatenatedKey(utils.MetaResources, utils.MetaRelease)},
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testSSv1ItProcessEventTerminateSession",
-			Event: map[string]interface{}{
-				utils.Tenant:      "cgrates.org",
-				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "testSSv1ItProcessEvent",
-				utils.RequestType: sSV1RequestType,
-				utils.Account:     "1001",
-				utils.Subject:     "ANY2CNT",
-				utils.Destination: "1002",
-				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-				utils.Usage:       10 * time.Minute,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testSSv1ItProcessEventTerminateSession",
+				Event: map[string]interface{}{
+					utils.Tenant:      "cgrates.org",
+					utils.ToR:         utils.VOICE,
+					utils.OriginID:    "testSSv1ItProcessEvent",
+					utils.RequestType: sSV1RequestType,
+					utils.Account:     "1001",
+					utils.Subject:     "ANY2CNT",
+					utils.Destination: "1002",
+					utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+					utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+					utils.Usage:       10 * time.Minute,
+				},
 			},
 		},
 	}
@@ -462,7 +476,7 @@ func testSSv1ItProcessCDRForSessionFromProcessEvent(t *testing.T) {
 
 func testSSv1ItGetCDRs(t *testing.T) {
 	var cdrCnt int64
-	req := &utils.RPCCDRsFilterWithArgDispatcher{RPCCDRsFilter: &utils.RPCCDRsFilter{}}
+	req := &utils.RPCCDRsFilterWithOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{}}
 	if err := sSApierRpc.Call(utils.CDRsV1GetCDRsCount, req, &cdrCnt); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if cdrCnt != 3 { // 3 for each CDR
@@ -470,7 +484,7 @@ func testSSv1ItGetCDRs(t *testing.T) {
 	}
 
 	var cdrs []*engine.CDR
-	args := &utils.RPCCDRsFilterWithArgDispatcher{RPCCDRsFilter: &utils.RPCCDRsFilter{RunIDs: []string{"raw"}}}
+	args := &utils.RPCCDRsFilterWithOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{RunIDs: []string{"raw"}}}
 	if err := sSApierRpc.Call(utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
@@ -480,7 +494,7 @@ func testSSv1ItGetCDRs(t *testing.T) {
 			t.Errorf("Unexpected cost for CDR: %f", cdrs[0].Cost)
 		}
 	}
-	args = &utils.RPCCDRsFilterWithArgDispatcher{RPCCDRsFilter: &utils.RPCCDRsFilter{RunIDs: []string{"CustomerCharges"},
+	args = &utils.RPCCDRsFilterWithOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{RunIDs: []string{"CustomerCharges"},
 		OriginIDs: []string{"testSSv1ItProcessEvent"}}}
 	if err := sSApierRpc.Call(utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
@@ -491,7 +505,7 @@ func testSSv1ItGetCDRs(t *testing.T) {
 			t.Errorf("Unexpected cost for CDR: %f", cdrs[0].Cost)
 		}
 	}
-	args = &utils.RPCCDRsFilterWithArgDispatcher{RPCCDRsFilter: &utils.RPCCDRsFilter{RunIDs: []string{"SupplierCharges"},
+	args = &utils.RPCCDRsFilterWithOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{RunIDs: []string{"SupplierCharges"},
 		OriginIDs: []string{"testSSv1ItProcessEvent"}}}
 	if err := sSApierRpc.Call(utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
@@ -508,19 +522,21 @@ func testSSv1ItProcessEventWithGetCost(t *testing.T) {
 	// GetCost for ANY2CNT Subject
 	args := &sessions.V1ProcessEventArgs{
 		Flags: []string{utils.MetaAttributes, utils.ConcatenatedKey(utils.MetaRALs, utils.MetaCost)},
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testSSv1ItProcessEventWithGetCost",
-			Event: map[string]interface{}{
-				utils.Tenant:      "cgrates.org",
-				utils.ToR:         utils.MONETARY,
-				utils.OriginID:    "testSSv1ItProcessEventWithGetCost",
-				utils.RequestType: sSV1RequestType,
-				utils.Subject:     "*attributes",
-				utils.Destination: "1002",
-				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-				utils.Usage:       10 * time.Minute,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testSSv1ItProcessEventWithGetCost",
+				Event: map[string]interface{}{
+					utils.Tenant:      "cgrates.org",
+					utils.ToR:         utils.MONETARY,
+					utils.OriginID:    "testSSv1ItProcessEventWithGetCost",
+					utils.RequestType: sSV1RequestType,
+					utils.Subject:     "*attributes",
+					utils.Destination: "1002",
+					utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+					utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+					utils.Usage:       10 * time.Minute,
+				},
 			},
 		},
 	}
@@ -547,19 +563,21 @@ func testSSv1ItProcessEventWithGetCost2(t *testing.T) {
 	// GetCost for SPECIAL_1002 Subject
 	args := &sessions.V1ProcessEventArgs{
 		Flags: []string{utils.MetaAttributes, utils.ConcatenatedKey(utils.MetaRALs, utils.MetaCost)},
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testSSv1ItProcessEventWithGetCost2",
-			Event: map[string]interface{}{
-				utils.Tenant:      "cgrates.org",
-				utils.ToR:         utils.MONETARY,
-				utils.OriginID:    "testSSv1ItProcessEventWithGetCost2",
-				utils.RequestType: sSV1RequestType,
-				utils.Subject:     "*attributes",
-				utils.Destination: "1002",
-				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-				utils.Usage:       10 * time.Minute,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testSSv1ItProcessEventWithGetCost2",
+				Event: map[string]interface{}{
+					utils.Tenant:      "cgrates.org",
+					utils.ToR:         utils.MONETARY,
+					utils.OriginID:    "testSSv1ItProcessEventWithGetCost2",
+					utils.RequestType: sSV1RequestType,
+					utils.Subject:     "*attributes",
+					utils.Destination: "1002",
+					utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+					utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+					utils.Usage:       10 * time.Minute,
+				},
 			},
 		},
 	}
@@ -588,19 +606,21 @@ func testSSv1ItProcessEventWithGetCost3(t *testing.T) {
 	// for the 9 minutes remaining apply
 	args := &sessions.V1ProcessEventArgs{
 		Flags: []string{utils.MetaAttributes, utils.ConcatenatedKey(utils.MetaRALs, utils.MetaCost)},
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testSSv1ItProcessEventWithGetCost3",
-			Event: map[string]interface{}{
-				utils.Tenant:      "cgrates.org",
-				utils.ToR:         utils.MONETARY,
-				utils.OriginID:    "testSSv1ItProcessEventWithGetCost3",
-				utils.RequestType: sSV1RequestType,
-				utils.Subject:     "*attributes",
-				utils.Destination: "1002",
-				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-				utils.Usage:       10 * time.Minute,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testSSv1ItProcessEventWithGetCost3",
+				Event: map[string]interface{}{
+					utils.Tenant:      "cgrates.org",
+					utils.ToR:         utils.MONETARY,
+					utils.OriginID:    "testSSv1ItProcessEventWithGetCost3",
+					utils.RequestType: sSV1RequestType,
+					utils.Subject:     "*attributes",
+					utils.Destination: "1002",
+					utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+					utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+					utils.Usage:       10 * time.Minute,
+				},
 			},
 		},
 	}
@@ -626,19 +646,21 @@ func testSSv1ItProcessEventWithGetCost3(t *testing.T) {
 func testSSv1ItProcessEventWithGetCost4(t *testing.T) {
 	args := &sessions.V1ProcessEventArgs{
 		Flags: []string{utils.MetaAttributes, utils.ConcatenatedKey(utils.MetaRALs, utils.MetaCost)},
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testSSv1ItProcessEventWithGetCost4",
-			Event: map[string]interface{}{
-				utils.Tenant:      "cgrates.org",
-				utils.ToR:         utils.MONETARY,
-				utils.OriginID:    "testSSv1ItProcessEventWithGetCost4",
-				utils.RequestType: sSV1RequestType,
-				utils.Subject:     "*attributes",
-				utils.Destination: "1002",
-				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-				utils.Usage:       10 * time.Minute,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testSSv1ItProcessEventWithGetCost4",
+				Event: map[string]interface{}{
+					utils.Tenant:      "cgrates.org",
+					utils.ToR:         utils.MONETARY,
+					utils.OriginID:    "testSSv1ItProcessEventWithGetCost4",
+					utils.RequestType: sSV1RequestType,
+					utils.Subject:     "*attributes",
+					utils.Destination: "1002",
+					utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+					utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+					utils.Usage:       10 * time.Minute,
+				},
 			},
 		},
 	}
@@ -654,19 +676,21 @@ func testSSv1ItGetCost(t *testing.T) {
 	// GetCost for ANY2CNT Subject
 	args := &sessions.V1ProcessEventArgs{
 		Flags: []string{utils.MetaAttributes},
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testSSv1ItGetCost",
-			Event: map[string]interface{}{
-				utils.Tenant:      "cgrates.org",
-				utils.ToR:         utils.MONETARY,
-				utils.OriginID:    "testSSv1ItProcessEventWithGetCost",
-				utils.RequestType: sSV1RequestType,
-				utils.Subject:     "*attributes",
-				utils.Destination: "1002",
-				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-				utils.Usage:       10 * time.Minute,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testSSv1ItGetCost",
+				Event: map[string]interface{}{
+					utils.Tenant:      "cgrates.org",
+					utils.ToR:         utils.MONETARY,
+					utils.OriginID:    "testSSv1ItProcessEventWithGetCost",
+					utils.RequestType: sSV1RequestType,
+					utils.Subject:     "*attributes",
+					utils.Destination: "1002",
+					utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+					utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+					utils.Usage:       10 * time.Minute,
+				},
 			},
 		},
 	}
@@ -694,20 +718,22 @@ func testSSv1ItGetCost(t *testing.T) {
 func testSSv1ItProcessEventWithCDR(t *testing.T) {
 	args := &sessions.V1ProcessEventArgs{
 		Flags: []string{utils.MetaCDRs + utils.InInFieldSep + utils.MetaRALs}, // *cdrs:*rals
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testSSv1ItProcessEventWithCDR",
-			Event: map[string]interface{}{
-				utils.Tenant:      "cgrates.org",
-				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "testSSv1ItProcessEventWithCDR",
-				utils.RequestType: sSV1RequestType,
-				utils.Account:     "1001",
-				utils.Subject:     "ANY2CNT",
-				utils.Destination: "1002",
-				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-				utils.Usage:       10 * time.Minute,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testSSv1ItProcessEventWithCDR",
+				Event: map[string]interface{}{
+					utils.Tenant:      "cgrates.org",
+					utils.ToR:         utils.VOICE,
+					utils.OriginID:    "testSSv1ItProcessEventWithCDR",
+					utils.RequestType: sSV1RequestType,
+					utils.Account:     "1001",
+					utils.Subject:     "ANY2CNT",
+					utils.Destination: "1002",
+					utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+					utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+					utils.Usage:       10 * time.Minute,
+				},
 			},
 		},
 	}
@@ -721,7 +747,7 @@ func testSSv1ItProcessEventWithCDR(t *testing.T) {
 
 func testSSv1ItGetCDRsFromProcessEvent(t *testing.T) {
 	var cdrCnt int64
-	req := &utils.RPCCDRsFilterWithArgDispatcher{RPCCDRsFilter: &utils.RPCCDRsFilter{
+	req := &utils.RPCCDRsFilterWithOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{
 		OriginIDs: []string{"testSSv1ItProcessEventWithCDR"}}}
 	if err := sSApierRpc.Call(utils.CDRsV1GetCDRsCount, req, &cdrCnt); err != nil {
 		t.Error("Unexpected error: ", err.Error())
@@ -730,7 +756,7 @@ func testSSv1ItGetCDRsFromProcessEvent(t *testing.T) {
 	}
 
 	var cdrs []*engine.CDR
-	args := &utils.RPCCDRsFilterWithArgDispatcher{RPCCDRsFilter: &utils.RPCCDRsFilter{
+	args := &utils.RPCCDRsFilterWithOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{
 		OriginIDs: []string{"testSSv1ItProcessEventWithCDR"},
 		RunIDs:    []string{"raw"}}}
 	if err := sSApierRpc.Call(utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
@@ -742,7 +768,7 @@ func testSSv1ItGetCDRsFromProcessEvent(t *testing.T) {
 			t.Errorf("Unexpected cost for CDR: %f", cdrs[0].Cost)
 		}
 	}
-	args = &utils.RPCCDRsFilterWithArgDispatcher{RPCCDRsFilter: &utils.RPCCDRsFilter{
+	args = &utils.RPCCDRsFilterWithOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{
 		RunIDs:    []string{"CustomerCharges"},
 		OriginIDs: []string{"testSSv1ItProcessEventWithCDR"}}}
 	if err := sSApierRpc.Call(utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
@@ -754,7 +780,7 @@ func testSSv1ItGetCDRsFromProcessEvent(t *testing.T) {
 			t.Errorf("Unexpected cost for CDR: %f", cdrs[0].Cost)
 		}
 	}
-	args = &utils.RPCCDRsFilterWithArgDispatcher{RPCCDRsFilter: &utils.RPCCDRsFilter{
+	args = &utils.RPCCDRsFilterWithOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{
 		RunIDs:    []string{"SupplierCharges"},
 		OriginIDs: []string{"testSSv1ItProcessEventWithCDR"}}}
 	if err := sSApierRpc.Call(utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
@@ -772,20 +798,22 @@ func testSSv1ItProcessEventWithCDRResourceError(t *testing.T) {
 	args := &sessions.V1ProcessEventArgs{
 		Flags: []string{utils.MetaCDRs + utils.InInFieldSep + utils.MetaRALs,
 			utils.ConcatenatedKey(utils.MetaResources, utils.MetaRelease)}, // force a resource error and expect that the cdr to be written
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testSSv1ItProcessEventWithCDRResourceError",
-			Event: map[string]interface{}{
-				utils.Tenant:      "cgrates.org",
-				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "testSSv1ItProcessEventWithCDRResourceError",
-				utils.RequestType: sSV1RequestType,
-				utils.Account:     "1001",
-				utils.Subject:     "ANY2CNT",
-				utils.Destination: "1002",
-				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-				utils.Usage:       10 * time.Minute,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testSSv1ItProcessEventWithCDRResourceError",
+				Event: map[string]interface{}{
+					utils.Tenant:      "cgrates.org",
+					utils.ToR:         utils.VOICE,
+					utils.OriginID:    "testSSv1ItProcessEventWithCDRResourceError",
+					utils.RequestType: sSV1RequestType,
+					utils.Account:     "1001",
+					utils.Subject:     "ANY2CNT",
+					utils.Destination: "1002",
+					utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+					utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+					utils.Usage:       10 * time.Minute,
+				},
 			},
 		},
 	}
@@ -799,7 +827,7 @@ func testSSv1ItProcessEventWithCDRResourceError(t *testing.T) {
 
 func testSSv1ItGetCDRsFromProcessEventResourceError(t *testing.T) {
 	var cdrCnt int64
-	req := &utils.RPCCDRsFilterWithArgDispatcher{RPCCDRsFilter: &utils.RPCCDRsFilter{
+	req := &utils.RPCCDRsFilterWithOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{
 		OriginIDs: []string{"testSSv1ItProcessEventWithCDRResourceError"}}}
 	if err := sSApierRpc.Call(utils.CDRsV1GetCDRsCount, req, &cdrCnt); err != nil {
 		t.Error("Unexpected error: ", err.Error())
@@ -808,7 +836,7 @@ func testSSv1ItGetCDRsFromProcessEventResourceError(t *testing.T) {
 	}
 
 	var cdrs []*engine.CDR
-	args := &utils.RPCCDRsFilterWithArgDispatcher{RPCCDRsFilter: &utils.RPCCDRsFilter{
+	args := &utils.RPCCDRsFilterWithOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{
 		OriginIDs: []string{"testSSv1ItProcessEventWithCDRResourceError"},
 		RunIDs:    []string{"raw"}}}
 	if err := sSApierRpc.Call(utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
@@ -820,7 +848,7 @@ func testSSv1ItGetCDRsFromProcessEventResourceError(t *testing.T) {
 			t.Errorf("Unexpected cost for CDR: %f", cdrs[0].Cost)
 		}
 	}
-	args = &utils.RPCCDRsFilterWithArgDispatcher{RPCCDRsFilter: &utils.RPCCDRsFilter{
+	args = &utils.RPCCDRsFilterWithOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{
 		RunIDs:    []string{"CustomerCharges"},
 		OriginIDs: []string{"testSSv1ItProcessEventWithCDRResourceError"}}}
 	if err := sSApierRpc.Call(utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
@@ -832,7 +860,7 @@ func testSSv1ItGetCDRsFromProcessEventResourceError(t *testing.T) {
 			t.Errorf("Unexpected cost for CDR: %f", cdrs[0].Cost)
 		}
 	}
-	args = &utils.RPCCDRsFilterWithArgDispatcher{RPCCDRsFilter: &utils.RPCCDRsFilter{
+	args = &utils.RPCCDRsFilterWithOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{
 		RunIDs:    []string{"SupplierCharges"},
 		OriginIDs: []string{"testSSv1ItProcessEventWithCDRResourceError"}}}
 	if err := sSApierRpc.Call(utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
@@ -851,20 +879,22 @@ func testSSv1ItProcessEventWithCDRResourceErrorBlockError(t *testing.T) {
 		Flags: []string{utils.MetaCDRs + utils.InInFieldSep + utils.MetaRALs,
 			utils.ConcatenatedKey(utils.MetaResources, utils.MetaRelease),
 			utils.MetaBlockerError}, // expended to stop the processing because we have error at resource
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testSSv1ItProcessEventWithCDRResourceErrorBlockError",
-			Event: map[string]interface{}{
-				utils.Tenant:      "cgrates.org",
-				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "testSSv1ItProcessEventWithCDRResourceErrorBlockError",
-				utils.RequestType: sSV1RequestType,
-				utils.Account:     "1001",
-				utils.Subject:     "ANY2CNT",
-				utils.Destination: "1002",
-				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-				utils.Usage:       10 * time.Minute,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testSSv1ItProcessEventWithCDRResourceErrorBlockError",
+				Event: map[string]interface{}{
+					utils.Tenant:      "cgrates.org",
+					utils.ToR:         utils.VOICE,
+					utils.OriginID:    "testSSv1ItProcessEventWithCDRResourceErrorBlockError",
+					utils.RequestType: sSV1RequestType,
+					utils.Account:     "1001",
+					utils.Subject:     "ANY2CNT",
+					utils.Destination: "1002",
+					utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+					utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+					utils.Usage:       10 * time.Minute,
+				},
 			},
 		},
 	}
@@ -878,7 +908,7 @@ func testSSv1ItProcessEventWithCDRResourceErrorBlockError(t *testing.T) {
 
 func testSSv1ItGetCDRsFromProcessEventResourceErrorBlockError(t *testing.T) {
 	var cdrCnt int64
-	req := &utils.RPCCDRsFilterWithArgDispatcher{RPCCDRsFilter: &utils.RPCCDRsFilter{
+	req := &utils.RPCCDRsFilterWithOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{
 		OriginIDs: []string{"testSSv1ItProcessEventWithCDRResourceErrorBlockError"}}}
 	if err := sSApierRpc.Call(utils.CDRsV1GetCDRsCount, req, &cdrCnt); err != nil {
 		t.Error("Unexpected error: ", err.Error())

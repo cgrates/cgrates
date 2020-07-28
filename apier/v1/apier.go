@@ -155,7 +155,7 @@ func (apierSv1 *APIerSv1) SetDestination(attrs *utils.AttrSetDestination, reply 
 		return
 	}
 	if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
-		utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
+		utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithOpts{
 			ArgsCache: utils.ArgsCache{ReverseDestinationIDs: dest.Prefixes,
 				DestinationIDs: []string{attrs.Id}},
 		}, reply); err != nil {
@@ -231,7 +231,7 @@ func (apierSv1 *APIerSv1) LoadDestination(attrs *AttrLoadDestination, reply *str
 		return utils.ErrNotFound
 	}
 	if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
-		utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
+		utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithOpts{
 			ArgsCache: utils.ArgsCache{DestinationIDs: []string{attrs.ID}},
 		}, reply); err != nil {
 		return err
@@ -310,11 +310,11 @@ func (apiv1 *APIerSv1) LoadSharedGroup(attrs *AttrLoadSharedGroup, reply *string
 }
 
 type AttrLoadTpFromStorDb struct {
-	TPid          string
-	DryRun        bool // Only simulate, no write
-	Validate      bool // Run structural checks
-	ArgDispatcher *utils.ArgDispatcher
-	Caching       *string // Caching strategy
+	TPid     string
+	DryRun   bool // Only simulate, no write
+	Validate bool // Run structural checks
+	Opts     map[string]interface{}
+	Caching  *string // Caching strategy
 }
 
 // Loads complete data in a TP from storDb
@@ -352,7 +352,7 @@ func (apiv1 *APIerSv1) LoadTariffPlanFromStorDb(attrs *AttrLoadTpFromStorDb, rep
 	}
 	// reload cache
 	utils.Logger.Info("APIerSv1.LoadTariffPlanFromStorDb, reloading cache.")
-	if err := dbReader.ReloadCache(caching, true, attrs.ArgDispatcher); err != nil {
+	if err := dbReader.ReloadCache(caching, true, attrs.Opts); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	if len(apiv1.Config.ApierCfg().SchedulerConns) != 0 {
@@ -724,7 +724,7 @@ func (apierSv1 *APIerSv1) SetActionPlan(attrs *AttrSetActionPlan, reply *string)
 			return 0, utils.NewErrServerError(err)
 		}
 		if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
-			utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
+			utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithOpts{
 				ArgsCache: utils.ArgsCache{ActionPlanIDs: []string{ap.Id}},
 			}, reply); err != nil {
 			return 0, err
@@ -737,7 +737,7 @@ func (apierSv1 *APIerSv1) SetActionPlan(attrs *AttrSetActionPlan, reply *string)
 		if len(prevAccountIDs) != 0 {
 			sl := prevAccountIDs.Slice()
 			if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
-				utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
+				utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithOpts{
 					ArgsCache: utils.ArgsCache{AccountActionPlanIDs: sl},
 				}, reply); err != nil {
 				return 0, err
@@ -923,7 +923,7 @@ func (apierSv1 *APIerSv1) RemoveActionPlan(attr *AttrGetActionPlan, reply *strin
 		if len(prevAccountIDs) != 0 {
 			sl := prevAccountIDs.Slice()
 			if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
-				utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
+				utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithOpts{
 					ArgsCache: utils.ArgsCache{AccountActionPlanIDs: sl},
 				}, reply); err != nil {
 				return 0, err
@@ -1014,7 +1014,7 @@ func (apiv1 *APIerSv1) LoadTariffPlanFromFolder(attrs *utils.AttrLoadTpFromFolde
 	}
 	// reload cache
 	utils.Logger.Info("APIerSv1.LoadTariffPlanFromFolder, reloading cache.")
-	if err := loader.ReloadCache(caching, true, attrs.ArgDispatcher); err != nil {
+	if err := loader.ReloadCache(caching, true, attrs.Opts); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	if len(apiv1.Config.ApierCfg().SchedulerConns) != 0 {
@@ -1080,7 +1080,7 @@ func (apiv1 *APIerSv1) RemoveTPFromFolder(attrs *utils.AttrLoadTpFromFolder, rep
 	}
 	// reload cache
 	utils.Logger.Info("APIerSv1.RemoveTPFromFolder, reloading cache.")
-	if err := loader.ReloadCache(caching, true, attrs.ArgDispatcher); err != nil {
+	if err := loader.ReloadCache(caching, true, attrs.Opts); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	if len(apiv1.Config.ApierCfg().SchedulerConns) != 0 {
@@ -1132,7 +1132,7 @@ func (apiv1 *APIerSv1) RemoveTPFromStorDB(attrs *AttrLoadTpFromStorDb, reply *st
 	}
 	// reload cache
 	utils.Logger.Info("APIerSv1.RemoveTPFromStorDB, reloading cache.")
-	if err := dbReader.ReloadCache(caching, true, attrs.ArgDispatcher); err != nil {
+	if err := dbReader.ReloadCache(caching, true, attrs.Opts); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	if len(apiv1.Config.ApierCfg().SchedulerConns) != 0 {
@@ -1347,25 +1347,25 @@ func (apierSv1 *APIerSv1) CallCache(cacheOpt string, args utils.ArgsGetCacheItem
 		return
 	case utils.MetaReload:
 		if err = apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
-			utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
+			utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithOpts{
 				ArgsCache: composeArgsReload(args)}, &reply); err != nil {
 			return err
 		}
 	case utils.MetaLoad:
 		if err = apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
-			utils.CacheSv1LoadCache, utils.AttrReloadCacheWithArgDispatcher{
+			utils.CacheSv1LoadCache, utils.AttrReloadCacheWithOpts{
 				ArgsCache: composeArgsReload(args)}, &reply); err != nil {
 			return err
 		}
 	case utils.MetaRemove:
 		if err = apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
 			utils.CacheSv1RemoveItem,
-			&utils.ArgsGetCacheItemWithArgDispatcher{ArgsGetCacheItem: args}, &reply); err != nil {
+			&utils.ArgsGetCacheItemWithOpts{ArgsGetCacheItem: args}, &reply); err != nil {
 			return err
 		}
 	case utils.MetaClear:
 		if err = apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
-			utils.CacheSv1Clear, &utils.AttrCacheIDsWithArgDispatcher{
+			utils.CacheSv1Clear, &utils.AttrCacheIDsWithOpts{
 				CacheIDs: []string{args.CacheID},
 			}, &reply); err != nil {
 			return err

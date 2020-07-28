@@ -28,7 +28,7 @@ import (
 )
 
 // GetRateProfile returns an Rate Profile
-func (apierSv1 *APIerSv1) GetRateProfile(arg *utils.TenantIDWithArgDispatcher, reply *engine.RateProfile) error {
+func (apierSv1 *APIerSv1) GetRateProfile(arg *utils.TenantIDWithOpts, reply *engine.RateProfile) error {
 	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -83,7 +83,7 @@ func (apierSv1 *APIerSv1) GetRateProfileIDsCount(args *utils.TenantArg, reply *i
 }
 
 type RateProfileWithCache struct {
-	*engine.RateProfileWithArgDispatcher
+	*engine.RateProfileWithOpts
 	Cache *string
 }
 
@@ -207,7 +207,7 @@ func (rSv1 *RateSv1) CostForEvent(args *rates.ArgsCostForEvent, cC *utils.Charge
 	return rSv1.rS.V1CostForEvent(args, cC)
 }
 
-func (rSv1 *RateSv1) Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error {
+func (rSv1 *RateSv1) Ping(ign *utils.CGREventWithOpts, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

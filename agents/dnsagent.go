@@ -343,7 +343,7 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 		rplyCDRs := utils.StringPointer("")
 		if err = da.connMgr.Call(da.cgrCfg.DNSAgentCfg().SessionSConns, nil,
 			utils.SessionSv1ProcessCDR,
-			&utils.CGREventWithArgDispatcher{CGREvent: cgrEv,
+			&utils.CGREventWithOpts{CGREvent: cgrEv,
 				ArgDispatcher: cgrArgs.ArgDispatcher}, &rplyCDRs); err != nil {
 			agReq.CGRReply.Set(utils.PathItems{{Field: utils.Error}}, utils.NewNMData(err.Error()))
 		}

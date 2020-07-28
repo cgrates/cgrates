@@ -20,24 +20,16 @@ package dispatchers
 
 import "github.com/cgrates/cgrates/utils"
 
-func (dS *DispatcherService) RateSv1Ping(args *utils.CGREventWithArgDispatcher, rpl *string) (err error) {
+func (dS *DispatcherService) RateSv1Ping(args *utils.CGREventWithOpts, rpl *string) (err error) {
 	if args == nil {
-		args = utils.NewCGREventWithArgDispatcher()
+		args = new(utils.CGREventWithOpts)
 	}
 	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
-		}
 		if err = dS.authorize(utils.RateSv1Ping, args.CGREvent.Tenant,
-			args.APIKey, args.CGREvent.Time); err != nil {
+			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
 			return
 		}
 	}
-	var routeID *string
-	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
-	}
-	return dS.Dispatch(args.CGREvent, utils.RateS, routeID,
-		utils.RateSv1Ping, args, rpl)
+	return dS.Dispatch(args, utils.RateS, utils.RateSv1Ping, args, rpl)
 }

@@ -136,19 +136,21 @@ func TestProcessRequest(t *testing.T) {
 			}
 			expargs := &sessions.V1AuthorizeArgs{
 				GetMaxUsage: true,
-				Opts:        map[string]interface{}{},
-				CGREvent: &utils.CGREvent{
-					Tenant: "cgrates.org",
-					ID:     id,
-					Time:   tm,
-					Event: map[string]interface{}{
-						"Account":     "1001",
-						"Category":    "call",
-						"Destination": "1003",
-						"OriginHost":  "local",
-						"OriginID":    "123456",
-						"ToR":         "*voice",
-						"Usage":       "10s",
+				CGREventWithOpts: &utils.CGREventWithOpts{
+					Opts: map[string]interface{}{},
+					CGREvent: &utils.CGREvent{
+						Tenant: "cgrates.org",
+						ID:     id,
+						Time:   tm,
+						Event: map[string]interface{}{
+							"Account":     "1001",
+							"Category":    "call",
+							"Destination": "1003",
+							"OriginHost":  "local",
+							"OriginID":    "123456",
+							"ToR":         "*voice",
+							"Usage":       "10s",
+						},
 					},
 				},
 			}
@@ -179,19 +181,21 @@ func TestProcessRequest(t *testing.T) {
 			expargs := &sessions.V1InitSessionArgs{
 				GetAttributes: true,
 				InitSession:   true,
-				Opts:          map[string]interface{}{},
-				CGREvent: &utils.CGREvent{
-					Tenant: "cgrates.org",
-					ID:     id,
-					Time:   tm,
-					Event: map[string]interface{}{
-						"Account":     "1001",
-						"Category":    "call",
-						"Destination": "1003",
-						"OriginHost":  "local",
-						"OriginID":    "123456",
-						"ToR":         "*voice",
-						"Usage":       "10s",
+				CGREventWithOpts: &utils.CGREventWithOpts{
+					Opts: map[string]interface{}{},
+					CGREvent: &utils.CGREvent{
+						Tenant: "cgrates.org",
+						ID:     id,
+						Time:   tm,
+						Event: map[string]interface{}{
+							"Account":     "1001",
+							"Category":    "call",
+							"Destination": "1003",
+							"OriginHost":  "local",
+							"OriginID":    "123456",
+							"ToR":         "*voice",
+							"Usage":       "10s",
+						},
 					},
 				},
 			}
@@ -207,22 +211,24 @@ func TestProcessRequest(t *testing.T) {
 				Attributes: &engine.AttrSProcessEventReply{
 					MatchedProfiles: []string{"ATTR_1001_SESSIONAUTH"},
 					AlteredFields:   []string{"*req.Password", "*req.PaypalAccount", "*req.RequestType", "*req.LCRProfile"},
-					CGREvent: &utils.CGREvent{
-						Tenant: "cgrates.org",
-						ID:     "e7d35bf",
-						Event: map[string]interface{}{
-							"Account":       "1001",
-							"CGRID":         "1133dc80896edf5049b46aa911cb9085eeb27f4c",
-							"Category":      "call",
-							"Destination":   "1003",
-							"LCRProfile":    "premium_cli",
-							"OriginHost":    "local",
-							"OriginID":      "123456",
-							"Password":      "CGRateS.org",
-							"PaypalAccount": "cgrates@paypal.com",
-							"RequestType":   "*prepaid",
-							"ToR":           "*voice",
-							"Usage":         "10s",
+					CGREventWithOpts: &utils.CGREventWithOpts{
+						CGREvent: &utils.CGREvent{
+							Tenant: "cgrates.org",
+							ID:     "e7d35bf",
+							Event: map[string]interface{}{
+								"Account":       "1001",
+								"CGRID":         "1133dc80896edf5049b46aa911cb9085eeb27f4c",
+								"Category":      "call",
+								"Destination":   "1003",
+								"LCRProfile":    "premium_cli",
+								"OriginHost":    "local",
+								"OriginID":      "123456",
+								"Password":      "CGRateS.org",
+								"PaypalAccount": "cgrates@paypal.com",
+								"RequestType":   "*prepaid",
+								"ToR":           "*voice",
+								"Usage":         "10s",
+							},
 						},
 					},
 				},
@@ -244,19 +250,21 @@ func TestProcessRequest(t *testing.T) {
 			expargs := &sessions.V1UpdateSessionArgs{
 				GetAttributes: true,
 				UpdateSession: true,
-				Opts:          map[string]interface{}{},
-				CGREvent: &utils.CGREvent{
-					Tenant: "cgrates.org",
-					ID:     id,
-					Time:   tm,
-					Event: map[string]interface{}{
-						"Account":     "1001",
-						"Category":    "call",
-						"Destination": "1003",
-						"OriginHost":  "local",
-						"OriginID":    "123456",
-						"ToR":         "*voice",
-						"Usage":       "10s",
+				CGREventWithOpts: &utils.CGREventWithOpts{
+					Opts: map[string]interface{}{},
+					CGREvent: &utils.CGREvent{
+						Tenant: "cgrates.org",
+						ID:     id,
+						Time:   tm,
+						Event: map[string]interface{}{
+							"Account":     "1001",
+							"Category":    "call",
+							"Destination": "1003",
+							"OriginHost":  "local",
+							"OriginID":    "123456",
+							"ToR":         "*voice",
+							"Usage":       "10s",
+						},
 					},
 				},
 			}
@@ -272,22 +280,24 @@ func TestProcessRequest(t *testing.T) {
 				Attributes: &engine.AttrSProcessEventReply{
 					MatchedProfiles: []string{"ATTR_1001_SESSIONAUTH"},
 					AlteredFields:   []string{"*req.Password", "*req.PaypalAccount", "*req.RequestType", "*req.LCRProfile"},
-					CGREvent: &utils.CGREvent{
-						Tenant: "cgrates.org",
-						ID:     "e7d35bf",
-						Event: map[string]interface{}{
-							"Account":       "1001",
-							"CGRID":         "1133dc80896edf5049b46aa911cb9085eeb27f4c",
-							"Category":      "call",
-							"Destination":   "1003",
-							"LCRProfile":    "premium_cli",
-							"OriginHost":    "local",
-							"OriginID":      "123456",
-							"Password":      "CGRateS.org",
-							"PaypalAccount": "cgrates@paypal.com",
-							"RequestType":   "*prepaid",
-							"ToR":           "*voice",
-							"Usage":         "10s",
+					CGREventWithOpts: &utils.CGREventWithOpts{
+						CGREvent: &utils.CGREvent{
+							Tenant: "cgrates.org",
+							ID:     "e7d35bf",
+							Event: map[string]interface{}{
+								"Account":       "1001",
+								"CGRID":         "1133dc80896edf5049b46aa911cb9085eeb27f4c",
+								"Category":      "call",
+								"Destination":   "1003",
+								"LCRProfile":    "premium_cli",
+								"OriginHost":    "local",
+								"OriginID":      "123456",
+								"Password":      "CGRateS.org",
+								"PaypalAccount": "cgrates@paypal.com",
+								"RequestType":   "*prepaid",
+								"ToR":           "*voice",
+								"Usage":         "10s",
+							},
 						},
 					},
 				},
@@ -300,13 +310,13 @@ func TestProcessRequest(t *testing.T) {
 			var id string
 			if arg == nil {
 				t.Errorf("args is nil")
-			} else if rargs, can := arg.(*utils.CGREventWithArgDispatcher); !can {
-				t.Errorf("args is not of utils.CGREventWithArgDispatcher type")
+			} else if rargs, can := arg.(*utils.CGREventWithOpts); !can {
+				t.Errorf("args is not of utils.CGREventWithOpts type")
 			} else {
 				tm = rargs.Time // need time
 				id = rargs.ID
 			}
-			expargs := &utils.CGREventWithArgDispatcher{
+			expargs := &utils.CGREventWithOpts{
 				CGREvent: &utils.CGREvent{
 					Tenant: "cgrates.org",
 					ID:     id,
@@ -346,19 +356,21 @@ func TestProcessRequest(t *testing.T) {
 			}
 			expargs := &sessions.V1TerminateSessionArgs{
 				TerminateSession: true,
-				Opts:             map[string]interface{}{},
-				CGREvent: &utils.CGREvent{
-					Tenant: "cgrates.org",
-					ID:     id,
-					Time:   tm,
-					Event: map[string]interface{}{
-						"Account":     "1001",
-						"Category":    "call",
-						"Destination": "1003",
-						"OriginHost":  "local",
-						"OriginID":    "123456",
-						"ToR":         "*voice",
-						"Usage":       "10s",
+				CGREventWithOpts: &utils.CGREventWithOpts{
+					Opts: map[string]interface{}{},
+					CGREvent: &utils.CGREvent{
+						Tenant: "cgrates.org",
+						ID:     id,
+						Time:   tm,
+						Event: map[string]interface{}{
+							"Account":     "1001",
+							"Category":    "call",
+							"Destination": "1003",
+							"OriginHost":  "local",
+							"OriginID":    "123456",
+							"ToR":         "*voice",
+							"Usage":       "10s",
+						},
 					},
 				},
 			}
@@ -387,19 +399,21 @@ func TestProcessRequest(t *testing.T) {
 			expargs := &sessions.V1ProcessMessageArgs{
 				GetAttributes: true,
 				Debit:         true,
-				Opts:          map[string]interface{}{},
-				CGREvent: &utils.CGREvent{
-					Tenant: "cgrates.org",
-					ID:     id,
-					Time:   tm,
-					Event: map[string]interface{}{
-						"Account":     "1001",
-						"Category":    "call",
-						"Destination": "1003",
-						"OriginHost":  "local",
-						"OriginID":    "123456",
-						"ToR":         "*voice",
-						"Usage":       "10s",
+				CGREventWithOpts: &utils.CGREventWithOpts{
+					Opts: map[string]interface{}{},
+					CGREvent: &utils.CGREvent{
+						Tenant: "cgrates.org",
+						ID:     id,
+						Time:   tm,
+						Event: map[string]interface{}{
+							"Account":     "1001",
+							"Category":    "call",
+							"Destination": "1003",
+							"OriginHost":  "local",
+							"OriginID":    "123456",
+							"ToR":         "*voice",
+							"Usage":       "10s",
+						},
 					},
 				},
 			}
@@ -415,22 +429,24 @@ func TestProcessRequest(t *testing.T) {
 				Attributes: &engine.AttrSProcessEventReply{
 					MatchedProfiles: []string{"ATTR_1001_SESSIONAUTH"},
 					AlteredFields:   []string{"*req.Password", "*req.PaypalAccount", "*req.RequestType", "*req.LCRProfile"},
-					CGREvent: &utils.CGREvent{
-						Tenant: "cgrates.org",
-						ID:     "e7d35bf",
-						Event: map[string]interface{}{
-							"Account":       "1001",
-							"CGRID":         "1133dc80896edf5049b46aa911cb9085eeb27f4c",
-							"Category":      "call",
-							"Destination":   "1003",
-							"LCRProfile":    "premium_cli",
-							"OriginHost":    "local",
-							"OriginID":      "123456",
-							"Password":      "CGRateS.org",
-							"PaypalAccount": "cgrates@paypal.com",
-							"RequestType":   "*prepaid",
-							"ToR":           "*voice",
-							"Usage":         "10s",
+					CGREventWithOpts: &utils.CGREventWithOpts{
+						CGREvent: &utils.CGREvent{
+							Tenant: "cgrates.org",
+							ID:     "e7d35bf",
+							Event: map[string]interface{}{
+								"Account":       "1001",
+								"CGRID":         "1133dc80896edf5049b46aa911cb9085eeb27f4c",
+								"Category":      "call",
+								"Destination":   "1003",
+								"LCRProfile":    "premium_cli",
+								"OriginHost":    "local",
+								"OriginID":      "123456",
+								"Password":      "CGRateS.org",
+								"PaypalAccount": "cgrates@paypal.com",
+								"RequestType":   "*prepaid",
+								"ToR":           "*voice",
+								"Usage":         "10s",
+							},
 						},
 					},
 				},

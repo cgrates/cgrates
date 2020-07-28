@@ -27,7 +27,7 @@ func init() {
 	c := &CmdGetThreshold{
 		name:      "threshold",
 		rpcMethod: utils.ThresholdSv1GetThreshold,
-		rpcParams: &utils.TenantIDWithArgDispatcher{},
+		rpcParams: &utils.TenantIDWithOpts{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -36,7 +36,7 @@ func init() {
 type CmdGetThreshold struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.TenantIDWithArgDispatcher
+	rpcParams *utils.TenantIDWithOpts
 	*CommandExecuter
 }
 
@@ -50,9 +50,9 @@ func (self *CmdGetThreshold) RpcMethod() string {
 
 func (self *CmdGetThreshold) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.TenantIDWithArgDispatcher{
-			TenantID:      new(utils.TenantID),
-			ArgDispatcher: new(utils.ArgDispatcher),
+		self.rpcParams = &utils.TenantIDWithOpts{
+			TenantID: new(utils.TenantID),
+			Opts:     make(map[string]interface{}),
 		}
 	}
 	return self.rpcParams

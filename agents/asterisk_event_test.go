@@ -343,7 +343,9 @@ func TestSMAEventV1AuthorizeArgs(t *testing.T) {
 	}
 	exp := &sessions.V1AuthorizeArgs{
 		GetMaxUsage: true,
-		CGREvent:    cgrEv,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: cgrEv,
+		},
 	}
 	if rcv := smaEv.V1AuthorizeArgs(); !reflect.DeepEqual(exp.GetMaxUsage, rcv.GetMaxUsage) {
 		t.Errorf("Expecting: %+v, received: %+v", exp.GetMaxUsage, rcv.GetMaxUsage)
@@ -368,7 +370,9 @@ func TestSMAEventV1AuthorizeArgs(t *testing.T) {
 		ProcessThresholds:  true,
 		ProcessStats:       true,
 		GetRoutes:          true,
-		CGREvent:           cgrEv2,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: cgrEv2,
+		},
 	}
 	if rcv := smaEv2.V1AuthorizeArgs(); !reflect.DeepEqual(exp2.GetAttributes, rcv.GetAttributes) {
 		t.Errorf("Expecting: %+v, received: %+v", exp2.GetAttributes, rcv.GetAttributes)
@@ -393,7 +397,9 @@ func TestSMAEventV1InitSessionArgs(t *testing.T) {
 	}
 	exp := &sessions.V1InitSessionArgs{
 		InitSession: true,
-		CGREvent:    cgrEv,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: cgrEv,
+		},
 	}
 	var ev map[string]interface{}
 	if err := json.Unmarshal([]byte(stasisStart), &ev); err != nil {
@@ -408,7 +414,9 @@ func TestSMAEventV1InitSessionArgs(t *testing.T) {
 		GetAttributes:     true,
 		AllocateResources: true,
 		InitSession:       true,
-		CGREvent:          cgrEv,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: cgrEv,
+		},
 	}
 	cgrEv.Event[utils.CGRFlags] = "*resources,*accounts,*attributes"
 	if rcv := smaEv.V1InitSessionArgs(utils.CGREventWithOpts{CGREvent: cgrEv}); !reflect.DeepEqual(exp2, rcv) {
@@ -426,7 +434,9 @@ func TestSMAEventV1TerminateSessionArgs(t *testing.T) {
 	}
 	exp := &sessions.V1TerminateSessionArgs{
 		TerminateSession: true,
-		CGREvent:         cgrEv,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: cgrEv,
+		},
 	}
 	var ev map[string]interface{}
 	if err := json.Unmarshal([]byte(stasisStart), &ev); err != nil {
@@ -441,7 +451,9 @@ func TestSMAEventV1TerminateSessionArgs(t *testing.T) {
 		TerminateSession: true,
 		ReleaseResources: true,
 		ProcessStats:     true,
-		CGREvent:         cgrEv,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: cgrEv,
+		},
 	}
 	cgrEv.Event[utils.CGRFlags] = "*resources,*accounts,*stats"
 	if rcv := smaEv.V1TerminateSessionArgs(utils.CGREventWithOpts{CGREvent: cgrEv}); !reflect.DeepEqual(exp2, rcv) {

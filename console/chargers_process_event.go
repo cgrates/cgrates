@@ -29,7 +29,7 @@ func init() {
 	c := &CmdChargersProcessEvent{
 		name:      "chargers_process_event",
 		rpcMethod: utils.ChargerSv1ProcessEvent,
-		rpcParams: &utils.CGREventWithArgDispatcher{},
+		rpcParams: &utils.CGREventWithOpts{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -38,7 +38,7 @@ func init() {
 type CmdChargersProcessEvent struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.CGREventWithArgDispatcher
+	rpcParams *utils.CGREventWithOpts
 	*CommandExecuter
 }
 
@@ -52,9 +52,9 @@ func (self *CmdChargersProcessEvent) RpcMethod() string {
 
 func (self *CmdChargersProcessEvent) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.CGREventWithArgDispatcher{
-			CGREvent:      new(utils.CGREvent),
-			ArgDispatcher: new(utils.ArgDispatcher),
+		self.rpcParams = &utils.CGREventWithOpts{
+			CGREvent: new(utils.CGREvent),
+			Opts:     make(map[string]interface{}),
 		}
 	}
 	return self.rpcParams

@@ -58,9 +58,9 @@ func (ssv1 *SessionSv1) UpdateSession(args *sessions.V1UpdateSessionArgs,
 	return ssv1.Ss.BiRPCv1UpdateSession(nil, args, rply)
 }
 
-func (ssv1 *SessionSv1) SyncSessions(args *utils.TenantWithArgDispatcher,
+func (ssv1 *SessionSv1) SyncSessions(args *utils.TenantWithOpts,
 	rply *string) error {
-	return ssv1.Ss.BiRPCv1SyncSessions(nil, &utils.TenantWithArgDispatcher{}, rply)
+	return ssv1.Ss.BiRPCv1SyncSessions(nil, &utils.TenantWithOpts{}, rply)
 }
 
 func (ssv1 *SessionSv1) TerminateSession(args *sessions.V1TerminateSessionArgs,
@@ -68,7 +68,7 @@ func (ssv1 *SessionSv1) TerminateSession(args *sessions.V1TerminateSessionArgs,
 	return ssv1.Ss.BiRPCv1TerminateSession(nil, args, rply)
 }
 
-func (ssv1 *SessionSv1) ProcessCDR(cgrEv *utils.CGREventWithArgDispatcher, rply *string) error {
+func (ssv1 *SessionSv1) ProcessCDR(cgrEv *utils.CGREventWithOpts, rply *string) error {
 	return ssv1.Ss.BiRPCv1ProcessCDR(nil, cgrEv, rply)
 }
 
@@ -112,12 +112,12 @@ func (ssv1 *SessionSv1) GetPassiveSessionsCount(args *utils.SessionFilter,
 	return ssv1.Ss.BiRPCv1GetPassiveSessionsCount(nil, args, rply)
 }
 
-func (ssv1 *SessionSv1) Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error {
+func (ssv1 *SessionSv1) Ping(ign *utils.CGREventWithOpts, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }
 
-func (ssv1 *SessionSv1) ReplicateSessions(args *dispatchers.ArgsReplicateSessionsWithApiKey, rply *string) error {
+func (ssv1 *SessionSv1) ReplicateSessions(args *dispatchers.ArgsReplicateSessionsWithOpts, rply *string) error {
 	return ssv1.Ss.BiRPCv1ReplicateSessions(nil, args.ArgsReplicateSessions, rply)
 }
 

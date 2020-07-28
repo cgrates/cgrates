@@ -71,12 +71,12 @@ func testDspResPingFailover(t *testing.T) {
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	ev := utils.CGREventWithArgDispatcher{
+	ev := utils.CGREventWithOpts{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 		},
-		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("res12345"),
+		Opts: map[string]interface{}{
+			utils.OptsAPIKey: "res12345",
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.ResourceSv1Ping, &ev, &reply); err != nil {
@@ -105,12 +105,12 @@ func testDspResPing(t *testing.T) {
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	if err := dispEngine.RPC.Call(utils.ResourceSv1Ping, &utils.CGREventWithArgDispatcher{
+	if err := dispEngine.RPC.Call(utils.ResourceSv1Ping, &utils.CGREventWithOpts{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 		},
-		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("res12345"),
+		Opts: map[string]interface{}{
+			utils.OptsAPIKey: "res12345",
 		},
 	}, &reply); err != nil {
 		t.Error(err)
@@ -122,18 +122,20 @@ func testDspResPing(t *testing.T) {
 func testDspResTestAuthKey(t *testing.T) {
 	var rs *engine.Resources
 	args := &utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
-				utils.Account:     "1001",
-				utils.Destination: "1002",
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     utils.UUIDSha1Prefix(),
+				Event: map[string]interface{}{
+					utils.Account:     "1001",
+					utils.Destination: "1002",
+				},
+			},
+			Opts: map[string]interface{}{
+				utils.OptsAPIKey: "12345",
 			},
 		},
 		UsageID: utils.UUIDSha1Prefix(),
-		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("12345"),
-		},
 	}
 
 	if err := dispEngine.RPC.Call(utils.ResourceSv1GetResourcesForEvent,
@@ -145,18 +147,20 @@ func testDspResTestAuthKey(t *testing.T) {
 func testDspResTestAuthKey2(t *testing.T) {
 	var rs *engine.Resources
 	args := &utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
-				utils.Account:     "1001",
-				utils.Destination: "1002",
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     utils.UUIDSha1Prefix(),
+				Event: map[string]interface{}{
+					utils.Account:     "1001",
+					utils.Destination: "1002",
+				},
+			},
+			Opts: map[string]interface{}{
+				utils.OptsAPIKey: "res12345",
 			},
 		},
 		UsageID: utils.UUIDSha1Prefix(),
-		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("res12345"),
-		},
 	}
 	eRs := &engine.Resources{
 		&engine.Resource{
@@ -179,18 +183,20 @@ func testDspResTestAuthKey3(t *testing.T) {
 	var reply string
 	argsRU := utils.ArgRSv1ResourceUsage{
 		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e51",
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
-				"Account":     "1002",
-				"Subject":     "1001",
-				"Destination": "1002"},
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     utils.UUIDSha1Prefix(),
+				Event: map[string]interface{}{
+					"Account":     "1002",
+					"Subject":     "1001",
+					"Destination": "1002"},
+			},
+			Opts: map[string]interface{}{
+				utils.OptsAPIKey: "res12345",
+			},
 		},
 		Units: 1,
-		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("res12345"),
-		},
 	}
 	if err := dispEngine.RPC.Call(utils.ResourceSv1AllocateResources,
 		argsRU, &reply); err != nil {
@@ -208,18 +214,20 @@ func testDspResTestAuthKey3(t *testing.T) {
 	}
 	argsRU = utils.ArgRSv1ResourceUsage{
 		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e61",
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
-				"Account":     "1002",
-				"Subject":     "1001",
-				"Destination": "1002"},
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     utils.UUIDSha1Prefix(),
+				Event: map[string]interface{}{
+					"Account":     "1002",
+					"Subject":     "1001",
+					"Destination": "1002"},
+			},
+			Opts: map[string]interface{}{
+				utils.OptsAPIKey: "res12345",
+			},
 		},
 		Units: 17,
-		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("res12345"),
-		},
 	}
 	if err := dispEngine.RPC.Call(utils.ResourceSv1AuthorizeResources,
 		&argsRU, &reply); err == nil || err.Error() != utils.ErrResourceUnauthorized.Error() {
@@ -229,16 +237,18 @@ func testDspResTestAuthKey3(t *testing.T) {
 	// relase the only resource active for Resource1
 	argsRU = utils.ArgRSv1ResourceUsage{
 		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e55",
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
-				"Account":     "1002",
-				"Subject":     "1001",
-				"Destination": "1002"},
-		},
-		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("res12345"),
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     utils.UUIDSha1Prefix(),
+				Event: map[string]interface{}{
+					"Account":     "1002",
+					"Subject":     "1001",
+					"Destination": "1002"},
+			},
+			Opts: map[string]interface{}{
+				utils.OptsAPIKey: "res12345",
+			},
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.ResourceSv1ReleaseResources,
@@ -249,18 +259,20 @@ func testDspResTestAuthKey3(t *testing.T) {
 	// only match Resource1 since we don't want for storing of the resource2 bellow
 	argsRU = utils.ArgRSv1ResourceUsage{
 		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e61",
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
-				"Account":     "1002",
-				"Subject":     "1001",
-				"Destination": "1002"},
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     utils.UUIDSha1Prefix(),
+				Event: map[string]interface{}{
+					"Account":     "1002",
+					"Subject":     "1001",
+					"Destination": "1002"},
+			},
+			Opts: map[string]interface{}{
+				utils.OptsAPIKey: "res12345",
+			},
 		},
 		Units: 6,
-		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("res12345"),
-		},
 	}
 	if err := dispEngine.RPC.Call(utils.ResourceSv1AuthorizeResources, &argsRU, &reply); err != nil {
 		t.Error(err)
@@ -269,18 +281,20 @@ func testDspResTestAuthKey3(t *testing.T) {
 	}
 	var rs *engine.Resources
 	args := &utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "Event5",
-			Event: map[string]interface{}{
-				"Account":     "1002",
-				"Subject":     "1001",
-				"Destination": "1002"},
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "Event5",
+				Event: map[string]interface{}{
+					"Account":     "1002",
+					"Subject":     "1001",
+					"Destination": "1002"},
+			},
+			Opts: map[string]interface{}{
+				utils.OptsAPIKey: "res12345",
+			},
 		},
 		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e61",
-		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("res12345"),
-		},
 	}
 	if err := dispEngine.RPC.Call(utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
 		t.Error(err)
@@ -302,10 +316,10 @@ func testDspResTestAuthKey3(t *testing.T) {
 		}
 	}
 	var r *engine.Resource
-	argsGetResource := &utils.TenantIDWithArgDispatcher{
+	argsGetResource := &utils.TenantIDWithOpts{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ResGroup1"},
-		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("res12345"),
+		Opts: map[string]interface{}{
+			utils.OptsAPIKey: "res12345",
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.ResourceSv1GetResource, argsGetResource, &r); err != nil {

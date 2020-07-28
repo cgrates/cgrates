@@ -59,10 +59,10 @@ type RouteProfile struct {
 	cache map[string]interface{}
 }
 
-// RouteProfileWithArgDispatcher is used in replicatorV1 for dispatcher
-type RouteProfileWithArgDispatcher struct {
+// RouteProfileWithOpts is used in replicatorV1 for dispatcher
+type RouteProfileWithOpts struct {
 	*RouteProfile
-	*utils.ArgDispatcher
+	Opts map[string]interface{}
 }
 
 func (rp *RouteProfile) compileCacheParameters() error {
@@ -310,7 +310,7 @@ func (rpS *RouteService) statMetrics(statIDs []string, tenant string) (stsMetric
 		for _, statID := range statIDs {
 			var metrics map[string]float64
 			if err = rpS.connMgr.Call(rpS.cgrcfg.RouteSCfg().StatSConns, nil, utils.StatSv1GetQueueFloatMetrics,
-				&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: tenant, ID: statID}}, &metrics); err != nil &&
+				&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: statID}}, &metrics); err != nil &&
 				err.Error() != utils.ErrNotFound.Error() {
 				utils.Logger.Warning(
 					fmt.Sprintf("<SupplierS> error: %s getting statMetrics for stat : %s", err.Error(), statID))
@@ -343,7 +343,7 @@ func (rpS *RouteService) statMetricsForLoadDistribution(statIDs []string, tenant
 			if err = rpS.connMgr.Call(
 				rpS.cgrcfg.RouteSCfg().StatSConns, nil,
 				utils.StatSv1GetQueueFloatMetrics,
-				&utils.TenantIDWithArgDispatcher{
+				&utils.TenantIDWithOpts{
 					TenantID: &utils.TenantID{
 						Tenant: tenant, ID: statWithMetric[0]}},
 				&metrics); err != nil &&
@@ -384,7 +384,7 @@ func (rpS *RouteService) resourceUsage(resIDs []string, tenant string) (tUsage f
 		for _, resID := range resIDs {
 			var res Resource
 			if err = rpS.connMgr.Call(rpS.cgrcfg.RouteSCfg().ResourceSConns, nil, utils.ResourceSv1GetResource,
-				&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: tenant, ID: resID}}, &res); err != nil && err.Error() != utils.ErrNotFound.Error() {
+				&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: resID}}, &res); err != nil && err.Error() != utils.ErrNotFound.Error() {
 				utils.Logger.Warning(
 					fmt.Sprintf("<SupplierS> error: %s getting resource for ID : %s", err.Error(), resID))
 				continue
@@ -567,10 +567,8 @@ func (rpS *RouteService) sortedRoutesForEvent(args *ArgsGetRoutes) (sortedRoutes
 type ArgsGetRoutes struct {
 	IgnoreErrors bool
 	MaxCost      string // toDo: try with interface{} here
-	Opts         map[string]interface{}
-	*utils.CGREvent
+	*utils.CGREventWithOpts
 	utils.Paginator
-	*utils.ArgDispatcher
 }
 
 func (args *ArgsGetRoutes) asOptsGetRoutes() (opts *optsGetRoutes, err error) {
@@ -657,7 +655,7 @@ func (rpS *RouteService) V1GetRoutes(args *ArgsGetRoutes, reply *SortedRoutes) (
 }
 
 // V1GetRouteProfilesForEvent returns the list of valid route profiles
-func (rpS *RouteService) V1GetRouteProfilesForEvent(args *utils.CGREventWithArgDispatcher, reply *[]*RouteProfile) (err error) {
+func (rpS *RouteService) V1GetRouteProfilesForEvent(args *utils.CGREventWithOpts, reply *[]*RouteProfile) (err error) {
 	if missing := utils.MissingStructFields(args.CGREvent, []string{utils.Tenant, utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	} else if args.CGREvent.Event == nil {

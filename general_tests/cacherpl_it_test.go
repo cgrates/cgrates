@@ -307,7 +307,7 @@ func testCacheRplAAAddData(t *testing.T) {
 
 func testCacheRplPing(t *testing.T) {
 	var reply map[string]interface{}
-	ev := utils.TenantWithArgDispatcher{
+	ev := utils.TenantWithOpts{
 		TenantArg: &utils.TenantArg{
 			Tenant: "cgrates.org",
 		},
@@ -322,7 +322,7 @@ func testCacheRplPing(t *testing.T) {
 	}
 
 	var rpl string
-	if err := dspEngine1RPC.Call(utils.AttributeSv1Ping, &utils.CGREventWithArgDispatcher{
+	if err := dspEngine1RPC.Call(utils.AttributeSv1Ping, &utils.CGREventWithOpts{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 		},
@@ -338,7 +338,7 @@ func testCacheRplPing(t *testing.T) {
 
 func testCacheRplCheckReplication(t *testing.T) {
 	var reply map[string]interface{}
-	ev := utils.TenantWithArgDispatcher{
+	ev := utils.TenantWithOpts{
 		TenantArg: &utils.TenantArg{
 			Tenant: "cgrates.org",
 		},
@@ -350,7 +350,7 @@ func testCacheRplCheckReplication(t *testing.T) {
 	}
 	var rcvKeys []string
 	expKeys := []string{"testRoute123:*core", "testRoute123:*attributes"}
-	argsAPI := utils.ArgsGetCacheItemIDsWithArgDispatcher{
+	argsAPI := utils.ArgsGetCacheItemIDsWithOpts{
 		TenantArg: utils.TenantArg{
 			Tenant: "cgrates.org",
 		},
@@ -368,7 +368,7 @@ func testCacheRplCheckReplication(t *testing.T) {
 	}
 
 	var rpl string
-	if err := dspEngine2RPC.Call(utils.AttributeSv1Ping, &utils.CGREventWithArgDispatcher{
+	if err := dspEngine2RPC.Call(utils.AttributeSv1Ping, &utils.CGREventWithOpts{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 		},
@@ -384,7 +384,7 @@ func testCacheRplCheckReplication(t *testing.T) {
 
 func testCacheRplAACheckReplication(t *testing.T) {
 	var rcvKeys []string
-	argsAPI := utils.ArgsGetCacheItemIDsWithArgDispatcher{
+	argsAPI := utils.ArgsGetCacheItemIDsWithOpts{
 		TenantArg: utils.TenantArg{
 			Tenant: "cgrates.org",
 		},
@@ -402,7 +402,7 @@ func testCacheRplAACheckReplication(t *testing.T) {
 	}
 
 	var rpl string
-	if err := dspEngine2RPC.Call(utils.AttributeSv1Ping, &utils.CGREventWithArgDispatcher{
+	if err := dspEngine2RPC.Call(utils.AttributeSv1Ping, &utils.CGREventWithOpts{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 		},
@@ -415,7 +415,7 @@ func testCacheRplAACheckReplication(t *testing.T) {
 		t.Errorf("Received: %s", rpl)
 	}
 
-	if err := dspEngine1RPC.Call(utils.AttributeSv1Ping, &utils.CGREventWithArgDispatcher{
+	if err := dspEngine1RPC.Call(utils.AttributeSv1Ping, &utils.CGREventWithOpts{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 		},
@@ -452,7 +452,7 @@ func testCacheRplAACheckReplication(t *testing.T) {
 
 func testCacheRplAACheckLoadReplication(t *testing.T) {
 	var rcvKeys []string
-	argsAPI := utils.ArgsGetCacheItemIDsWithArgDispatcher{
+	argsAPI := utils.ArgsGetCacheItemIDsWithOpts{
 		TenantArg: utils.TenantArg{
 			Tenant: "cgrates.org",
 		},
@@ -523,7 +523,7 @@ func testCacheRplAACheckLoadReplication(t *testing.T) {
 	expKeys := []string{"testRouteFromDispatcher1:*attributes",
 		"testRouteFromDispatcher1:*chargers", "testRouteFromDispatcher2:*attributes",
 		"testRouteFromDispatcher2:*chargers"}
-	argsAPI = utils.ArgsGetCacheItemIDsWithArgDispatcher{
+	argsAPI = utils.ArgsGetCacheItemIDsWithOpts{
 		TenantArg: utils.TenantArg{
 			Tenant: "cgrates.org",
 		},
@@ -549,7 +549,7 @@ func testCacheRplAACheckLoadReplication(t *testing.T) {
 	}
 
 	expKeys = []string{"cgrates.org:Engine2"}
-	argsAPI = utils.ArgsGetCacheItemIDsWithArgDispatcher{
+	argsAPI = utils.ArgsGetCacheItemIDsWithOpts{
 		TenantArg: utils.TenantArg{
 			Tenant: "cgrates.org",
 		},
@@ -577,7 +577,7 @@ func testCacheRplAACheckLoadReplication(t *testing.T) {
 
 func testCacheRplCheckLoadReplication(t *testing.T) {
 	var rcvKeys []string
-	argsAPI := utils.ArgsGetCacheItemIDsWithArgDispatcher{
+	argsAPI := utils.ArgsGetCacheItemIDsWithOpts{
 		TenantArg: utils.TenantArg{
 			Tenant: "cgrates.org",
 		},
@@ -617,7 +617,7 @@ func testCacheRplCheckLoadReplication(t *testing.T) {
 	}
 	wg.Wait()
 	expKeys := []string{"testRoute123:*core", "testRoute123:*attributes", "testRoute123:*chargers"}
-	argsAPI = utils.ArgsGetCacheItemIDsWithArgDispatcher{
+	argsAPI = utils.ArgsGetCacheItemIDsWithOpts{
 		TenantArg: utils.TenantArg{
 			Tenant: "cgrates.org",
 		},
@@ -635,7 +635,7 @@ func testCacheRplCheckLoadReplication(t *testing.T) {
 	}
 
 	expKeys = []string{"cgrates.org:Engine2"}
-	argsAPI = utils.ArgsGetCacheItemIDsWithArgDispatcher{
+	argsAPI = utils.ArgsGetCacheItemIDsWithOpts{
 		TenantArg: utils.TenantArg{
 			Tenant: "cgrates.org",
 		},

@@ -154,12 +154,14 @@ func testV1RouteFromFolder(t *testing.T) {
 
 func testV1RouteGetWeightRoutes(t *testing.T) {
 	ev := &engine.ArgsGetRoutes{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testV1RouteGetWeightRoutes",
-			Event: map[string]interface{}{
-				utils.Account:     "1007",
-				utils.Destination: "+491511231234",
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testV1RouteGetWeightRoutes",
+				Event: map[string]interface{}{
+					utils.Account:     "1007",
+					utils.Destination: "+491511231234",
+				},
 			},
 		},
 	}
@@ -194,15 +196,17 @@ func testV1RouteGetWeightRoutes(t *testing.T) {
 
 func testV1RouteGetLeastCostRoutes(t *testing.T) {
 	ev := &engine.ArgsGetRoutes{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testV1RouteGetLeastCostRoutes",
-			Event: map[string]interface{}{
-				utils.Account:     "1003",
-				utils.Subject:     "1003",
-				utils.Destination: "1002",
-				utils.SetupTime:   time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
-				utils.Usage:       "1m20s",
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testV1RouteGetLeastCostRoutes",
+				Event: map[string]interface{}{
+					utils.Account:     "1003",
+					utils.Subject:     "1003",
+					utils.Destination: "1002",
+					utils.SetupTime:   time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
+					utils.Usage:       "1m20s",
+				},
 			},
 		},
 	}
@@ -249,14 +253,16 @@ func testV1RouteGetLeastCostRoutes(t *testing.T) {
 
 func testV1RouteGetLeastCostRoutesWithoutUsage(t *testing.T) {
 	ev := &engine.ArgsGetRoutes{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testV1RouteGetLeastCostRoutes",
-			Event: map[string]interface{}{
-				utils.Account:     "1003",
-				utils.Subject:     "1003",
-				utils.Destination: "1002",
-				utils.SetupTime:   time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testV1RouteGetLeastCostRoutes",
+				Event: map[string]interface{}{
+					utils.Account:     "1003",
+					utils.Subject:     "1003",
+					utils.Destination: "1002",
+					utils.SetupTime:   time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
+				},
 			},
 		},
 	}
@@ -304,15 +310,17 @@ func testV1RouteGetLeastCostRoutesWithoutUsage(t *testing.T) {
 func testV1RouteGetLeastCostRoutesWithMaxCost(t *testing.T) {
 	ev := &engine.ArgsGetRoutes{
 		MaxCost: "0.30",
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testV1RouteGetLeastCostRoutes",
-			Event: map[string]interface{}{
-				utils.Account:     "1003",
-				utils.Subject:     "1001",
-				utils.Destination: "1002",
-				utils.SetupTime:   time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
-				utils.Usage:       "1m20s",
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testV1RouteGetLeastCostRoutes",
+				Event: map[string]interface{}{
+					utils.Account:     "1003",
+					utils.Subject:     "1001",
+					utils.Destination: "1002",
+					utils.SetupTime:   time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
+					utils.Usage:       "1m20s",
+				},
 			},
 		},
 	}
@@ -352,15 +360,17 @@ func testV1RouteGetLeastCostRoutesWithMaxCost(t *testing.T) {
 func testV1RouteGetLeastCostRoutesWithMaxCostNotFound(t *testing.T) {
 	ev := &engine.ArgsGetRoutes{
 		MaxCost: "0.001",
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testV1RouteGetLeastCostRoutes",
-			Event: map[string]interface{}{
-				utils.Account:     "1003",
-				utils.Subject:     "1001",
-				utils.Destination: "1002",
-				utils.SetupTime:   time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
-				utils.Usage:       "1m20s",
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testV1RouteGetLeastCostRoutes",
+				Event: map[string]interface{}{
+					utils.Account:     "1003",
+					utils.Subject:     "1001",
+					utils.Destination: "1002",
+					utils.SetupTime:   time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
+					utils.Usage:       "1m20s",
+				},
 			},
 		},
 	}
@@ -374,16 +384,18 @@ func testV1RouteGetLeastCostRoutesWithMaxCostNotFound(t *testing.T) {
 func testV1RouteGetLeastCostRoutesWithMaxCost2(t *testing.T) {
 	ev := &engine.ArgsGetRoutes{
 		MaxCost: utils.MetaEventCost,
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testV1RouteGetLeastCostRoutes",
-			Event: map[string]interface{}{
-				utils.Account:     "1003",
-				utils.Subject:     "SPECIAL_1002",
-				utils.Destination: "1002",
-				utils.SetupTime:   time.Date(2014, 01, 14, 0, 0, 0, 0, time.UTC),
-				utils.Usage:       "10m20s",
-				utils.Category:    "call",
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testV1RouteGetLeastCostRoutes",
+				Event: map[string]interface{}{
+					utils.Account:     "1003",
+					utils.Subject:     "SPECIAL_1002",
+					utils.Destination: "1002",
+					utils.SetupTime:   time.Date(2014, 01, 14, 0, 0, 0, 0, time.UTC),
+					utils.Usage:       "10m20s",
+					utils.Category:    "call",
+				},
 			},
 		},
 	}
@@ -422,15 +434,17 @@ func testV1RouteGetLeastCostRoutesWithMaxCost2(t *testing.T) {
 
 func testV1RouteGetHighestCostRoutes(t *testing.T) {
 	ev := &engine.ArgsGetRoutes{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testV1RouteGetHighestCostRoutes",
-			Event: map[string]interface{}{
-				utils.Account:     "1003",
-				utils.Destination: "1002",
-				utils.SetupTime:   time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
-				utils.Usage:       "1m20s",
-				"DistinctMatch":   "*highest_cost",
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testV1RouteGetHighestCostRoutes",
+				Event: map[string]interface{}{
+					utils.Account:     "1003",
+					utils.Destination: "1002",
+					utils.SetupTime:   time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
+					utils.Usage:       "1m20s",
+					"DistinctMatch":   "*highest_cost",
+				},
 			},
 		},
 	}
@@ -478,14 +492,16 @@ func testV1RouteGetHighestCostRoutes(t *testing.T) {
 func testV1RouteGetLeastCostRoutesErr(t *testing.T) {
 	ev := &engine.ArgsGetRoutes{
 		IgnoreErrors: true,
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testV1RouteGetHighestCostRoutes",
-			Event: map[string]interface{}{
-				utils.Account:     "1000",
-				utils.Destination: "1001",
-				utils.SetupTime:   "*now",
-				"Subject":         "TEST",
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testV1RouteGetHighestCostRoutes",
+				Event: map[string]interface{}{
+					utils.Account:     "1000",
+					utils.Destination: "1001",
+					utils.SetupTime:   "*now",
+					"Subject":         "TEST",
+				},
 			},
 		},
 	}
@@ -500,14 +516,16 @@ func testV1RoutePolulateStatsForQOS(t *testing.T) {
 	var reply []string
 	expected := []string{"Stat_1"}
 	ev1 := &engine.StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				utils.Account:    "1001",
-				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				utils.Usage:      time.Duration(11 * time.Second),
-				utils.COST:       10.0,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "event1",
+				Event: map[string]interface{}{
+					utils.Account:    "1001",
+					utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+					utils.Usage:      time.Duration(11 * time.Second),
+					utils.COST:       10.0,
+				},
 			},
 		},
 	}
@@ -519,14 +537,16 @@ func testV1RoutePolulateStatsForQOS(t *testing.T) {
 
 	expected = []string{"Stat_1"}
 	ev1 = &engine.StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event2",
-			Event: map[string]interface{}{
-				utils.Account:    "1001",
-				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				utils.Usage:      time.Duration(11 * time.Second),
-				utils.COST:       10.5,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "event2",
+				Event: map[string]interface{}{
+					utils.Account:    "1001",
+					utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+					utils.Usage:      time.Duration(11 * time.Second),
+					utils.COST:       10.5,
+				},
 			},
 		},
 	}
@@ -538,14 +558,16 @@ func testV1RoutePolulateStatsForQOS(t *testing.T) {
 
 	expected = []string{"Stat_2"}
 	ev1 = &engine.StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event2",
-			Event: map[string]interface{}{
-				utils.Account:    "1002",
-				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				utils.Usage:      time.Duration(5 * time.Second),
-				utils.COST:       12.5,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "event2",
+				Event: map[string]interface{}{
+					utils.Account:    "1002",
+					utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+					utils.Usage:      time.Duration(5 * time.Second),
+					utils.COST:       12.5,
+				},
 			},
 		},
 	}
@@ -557,14 +579,16 @@ func testV1RoutePolulateStatsForQOS(t *testing.T) {
 
 	expected = []string{"Stat_2"}
 	ev1 = &engine.StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event2",
-			Event: map[string]interface{}{
-				utils.Account:    "1002",
-				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				utils.Usage:      time.Duration(6 * time.Second),
-				utils.COST:       17.5,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "event2",
+				Event: map[string]interface{}{
+					utils.Account:    "1002",
+					utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+					utils.Usage:      time.Duration(6 * time.Second),
+					utils.COST:       17.5,
+				},
 			},
 		},
 	}
@@ -576,14 +600,16 @@ func testV1RoutePolulateStatsForQOS(t *testing.T) {
 
 	expected = []string{"Stat_3"}
 	ev1 = &engine.StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event3",
-			Event: map[string]interface{}{
-				utils.Account:    "1003",
-				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				utils.Usage:      time.Duration(11 * time.Second),
-				utils.COST:       12.5,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "event3",
+				Event: map[string]interface{}{
+					utils.Account:    "1003",
+					utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+					utils.Usage:      time.Duration(11 * time.Second),
+					utils.COST:       12.5,
+				},
 			},
 		},
 	}
@@ -595,15 +621,17 @@ func testV1RoutePolulateStatsForQOS(t *testing.T) {
 
 	expected = []string{"Stat_1_1"}
 	ev1 = &engine.StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event3",
-			Event: map[string]interface{}{
-				"Stat":           "Stat1_1",
-				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				utils.Usage:      time.Duration(11 * time.Second),
-				utils.COST:       12.5,
-				utils.PDD:        time.Duration(12 * time.Second),
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "event3",
+				Event: map[string]interface{}{
+					"Stat":           "Stat1_1",
+					utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+					utils.Usage:      time.Duration(11 * time.Second),
+					utils.COST:       12.5,
+					utils.PDD:        time.Duration(12 * time.Second),
+				},
 			},
 		},
 	}
@@ -615,15 +643,17 @@ func testV1RoutePolulateStatsForQOS(t *testing.T) {
 
 	expected = []string{"Stat_1_1"}
 	ev1 = &engine.StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event3",
-			Event: map[string]interface{}{
-				"Stat":           "Stat1_1",
-				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				utils.Usage:      time.Duration(15 * time.Second),
-				utils.COST:       15.5,
-				utils.PDD:        time.Duration(15 * time.Second),
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "event3",
+				Event: map[string]interface{}{
+					"Stat":           "Stat1_1",
+					utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+					utils.Usage:      time.Duration(15 * time.Second),
+					utils.COST:       15.5,
+					utils.PDD:        time.Duration(15 * time.Second),
+				},
 			},
 		},
 	}
@@ -636,11 +666,13 @@ func testV1RoutePolulateStatsForQOS(t *testing.T) {
 
 func testV1RouteGetQOSRoutes(t *testing.T) {
 	ev := &engine.ArgsGetRoutes{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testV1RouteGetQOSRoutes",
-			Event: map[string]interface{}{
-				"DistinctMatch": "*qos",
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testV1RouteGetQOSRoutes",
+				Event: map[string]interface{}{
+					"DistinctMatch": "*qos",
+				},
 			},
 		},
 	}
@@ -667,11 +699,13 @@ func testV1RouteGetQOSRoutes(t *testing.T) {
 
 func testV1RouteGetQOSRoutes2(t *testing.T) {
 	ev := &engine.ArgsGetRoutes{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testV1RouteGetQOSRoutes",
-			Event: map[string]interface{}{
-				"DistinctMatch": "*qos2",
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testV1RouteGetQOSRoutes",
+				Event: map[string]interface{}{
+					"DistinctMatch": "*qos2",
+				},
 			},
 		},
 	}
@@ -698,11 +732,13 @@ func testV1RouteGetQOSRoutes2(t *testing.T) {
 
 func testV1RouteGetQOSRoutes3(t *testing.T) {
 	ev := &engine.ArgsGetRoutes{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testV1RouteGetQOSRoutes",
-			Event: map[string]interface{}{
-				"DistinctMatch": "*qos3",
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testV1RouteGetQOSRoutes",
+				Event: map[string]interface{}{
+					"DistinctMatch": "*qos3",
+				},
 			},
 		},
 	}
@@ -729,11 +765,13 @@ func testV1RouteGetQOSRoutes3(t *testing.T) {
 
 func testV1RouteGetQOSRoutesFiltred(t *testing.T) {
 	ev := &engine.ArgsGetRoutes{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testV1RouteGetQOSRoutes",
-			Event: map[string]interface{}{
-				"DistinctMatch": "*qos_filtred",
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testV1RouteGetQOSRoutes",
+				Event: map[string]interface{}{
+					"DistinctMatch": "*qos_filtred",
+				},
 			},
 		},
 	}
@@ -760,15 +798,17 @@ func testV1RouteGetQOSRoutesFiltred(t *testing.T) {
 
 func testV1RouteGetQOSRoutesFiltred2(t *testing.T) {
 	ev := &engine.ArgsGetRoutes{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testV1RouteGetQOSRoutes",
-			Event: map[string]interface{}{
-				"DistinctMatch":   "*qos_filtred2",
-				utils.Account:     "1003",
-				utils.Destination: "1002",
-				utils.SetupTime:   time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
-				utils.Usage:       "1m20s",
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testV1RouteGetQOSRoutes",
+				Event: map[string]interface{}{
+					"DistinctMatch":   "*qos_filtred2",
+					utils.Account:     "1003",
+					utils.Destination: "1002",
+					utils.SetupTime:   time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
+					utils.Usage:       "1m20s",
+				},
 			},
 		},
 	}
@@ -795,12 +835,14 @@ func testV1RouteGetQOSRoutesFiltred2(t *testing.T) {
 
 func testV1RouteGetRouteWithoutFilter(t *testing.T) {
 	ev := &engine.ArgsGetRoutes{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testV1RouteGetRouteWithoutFilter",
-			Event: map[string]interface{}{
-				utils.Account:     "1008",
-				utils.Destination: "+49",
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testV1RouteGetRouteWithoutFilter",
+				Event: map[string]interface{}{
+					utils.Account:     "1008",
+					utils.Destination: "+49",
+				},
 			},
 		},
 	}
@@ -979,7 +1021,7 @@ func testV1RouteRoutePing(t *testing.T) {
 }
 
 func testV1RouteGetRouteForEvent(t *testing.T) {
-	ev := &utils.CGREventWithArgDispatcher{
+	ev := &utils.CGREventWithOpts{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testV1RouteGetHighestCostRoutes",
@@ -1088,14 +1130,16 @@ func testV1RoutesOneRouteWithoutDestination(t *testing.T) {
 	}
 
 	ev := &engine.ArgsGetRoutes{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testV1RoutesOneRouteWithoutDestination",
-			Event: map[string]interface{}{
-				utils.Account:     "SpecialCase",
-				utils.Destination: "+24680",
-				utils.SetupTime:   utils.MetaNow,
-				utils.Usage:       "2m",
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testV1RoutesOneRouteWithoutDestination",
+				Event: map[string]interface{}{
+					utils.Account:     "SpecialCase",
+					utils.Destination: "+24680",
+					utils.SetupTime:   utils.MetaNow,
+					utils.Usage:       "2m",
+				},
 			},
 		},
 	}
@@ -1163,16 +1207,18 @@ func testV1RouteMultipleRouteSameID(t *testing.T) {
 	}
 	tNow := time.Now()
 	ev := &engine.ArgsGetRoutes{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			Time:   &tNow,
-			ID:     "testV1RouteMultipleRouteSameID",
-			Event: map[string]interface{}{
-				utils.Account:     "SpecialCase2",
-				utils.Destination: "+135876",
-				utils.SetupTime:   utils.MetaNow,
-				utils.Usage:       "2m",
-				"Month":           "April",
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				Time:   &tNow,
+				ID:     "testV1RouteMultipleRouteSameID",
+				Event: map[string]interface{}{
+					utils.Account:     "SpecialCase2",
+					utils.Destination: "+135876",
+					utils.SetupTime:   utils.MetaNow,
+					utils.Usage:       "2m",
+					"Month":           "April",
+				},
 			},
 		},
 	}
@@ -1201,16 +1247,18 @@ func testV1RouteMultipleRouteSameID(t *testing.T) {
 	}
 
 	ev = &engine.ArgsGetRoutes{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			Time:   &tNow,
-			ID:     "testV1RouteMultipleRouteSameID",
-			Event: map[string]interface{}{
-				utils.Account:     "SpecialCase2",
-				utils.Destination: "+135876",
-				utils.SetupTime:   utils.MetaNow,
-				utils.Usage:       "2m",
-				"Month":           "May",
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				Time:   &tNow,
+				ID:     "testV1RouteMultipleRouteSameID",
+				Event: map[string]interface{}{
+					utils.Account:     "SpecialCase2",
+					utils.Destination: "+135876",
+					utils.SetupTime:   utils.MetaNow,
+					utils.Usage:       "2m",
+					"Month":           "May",
+				},
 			},
 		},
 	}
@@ -1299,16 +1347,18 @@ func testV1RouteAccountWithRatingPlan(t *testing.T) {
 	// we expect that the route with account to have cost 0
 	tNow := time.Now()
 	ev := &engine.ArgsGetRoutes{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			Time:   &tNow,
-			ID:     "testV1RouteAccountWithRatingPlan",
-			Event: map[string]interface{}{
-				utils.Account:     "RandomAccount",
-				utils.Destination: "+135876",
-				utils.SetupTime:   utils.MetaNow,
-				utils.Usage:       "30s",
-				"EventType":       "testV1RouteAccountWithRatingPlan",
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				Time:   &tNow,
+				ID:     "testV1RouteAccountWithRatingPlan",
+				Event: map[string]interface{}{
+					utils.Account:     "RandomAccount",
+					utils.Destination: "+135876",
+					utils.SetupTime:   utils.MetaNow,
+					utils.Usage:       "30s",
+					"EventType":       "testV1RouteAccountWithRatingPlan",
+				},
 			},
 		},
 	}
@@ -1348,16 +1398,18 @@ func testV1RouteAccountWithRatingPlan(t *testing.T) {
 	// test for 60 seconds usage
 	// 30 seconds are covered by account and the remaining will be calculated
 	ev = &engine.ArgsGetRoutes{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			Time:   &tNow,
-			ID:     "testV1RouteAccountWithRatingPlan",
-			Event: map[string]interface{}{
-				utils.Account:     "RandomAccount",
-				utils.Destination: "+135876",
-				utils.SetupTime:   utils.MetaNow,
-				utils.Usage:       "60s",
-				"EventType":       "testV1RouteAccountWithRatingPlan",
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				Time:   &tNow,
+				ID:     "testV1RouteAccountWithRatingPlan",
+				Event: map[string]interface{}{
+					utils.Account:     "RandomAccount",
+					utils.Destination: "+135876",
+					utils.SetupTime:   utils.MetaNow,
+					utils.Usage:       "60s",
+					"EventType":       "testV1RouteAccountWithRatingPlan",
+				},
 			},
 		},
 	}
@@ -1398,16 +1450,18 @@ func testV1RouteAccountWithRatingPlan(t *testing.T) {
 	// test for 61 seconds usage
 	// 30 seconds are covered by account and the remaining will be calculated
 	ev = &engine.ArgsGetRoutes{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			Time:   &tNow,
-			ID:     "testV1RouteAccountWithRatingPlan",
-			Event: map[string]interface{}{
-				utils.Account:     "RandomAccount",
-				utils.Destination: "+135876",
-				utils.SetupTime:   utils.MetaNow,
-				utils.Usage:       "1m1s",
-				"EventType":       "testV1RouteAccountWithRatingPlan",
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				Time:   &tNow,
+				ID:     "testV1RouteAccountWithRatingPlan",
+				Event: map[string]interface{}{
+					utils.Account:     "RandomAccount",
+					utils.Destination: "+135876",
+					utils.SetupTime:   utils.MetaNow,
+					utils.Usage:       "1m1s",
+					"EventType":       "testV1RouteAccountWithRatingPlan",
+				},
 			},
 		},
 	}

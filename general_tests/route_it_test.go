@@ -589,7 +589,7 @@ func testV1SplSPopulateStats(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaSum, utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+"LoadReq"): "2",
 	}
 	if err := splSv1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
-		&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stat_Supplier1"}},
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stat_Supplier1"}},
 		&metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
@@ -631,7 +631,7 @@ func testV1SplSPopulateStats(t *testing.T) {
 	}
 
 	if err := splSv1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
-		&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stat_Supplier2"}},
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stat_Supplier2"}},
 		&metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
@@ -694,7 +694,7 @@ func testV1SplSPopulateStats(t *testing.T) {
 	}
 
 	if err := splSv1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
-		&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stat_Supplier3"}},
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stat_Supplier3"}},
 		&metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {

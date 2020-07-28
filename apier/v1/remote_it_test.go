@@ -257,7 +257,7 @@ func testInternalRemoteITGetAttribute(t *testing.T) {
 	alsPrf.Compile()
 	var reply *engine.AttributeProfile
 	if err := internalRPC.Call(utils.APIerSv1GetAttributeProfile,
-		utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1001_SIMPLEAUTH"}}, &reply); err != nil {
+		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1001_SIMPLEAUTH"}}, &reply); err != nil {
 		t.Fatal(err)
 	}
 	if *encoding == utils.MetaGOB { // in gob emtpty slice is encoded as nil
@@ -273,7 +273,7 @@ func testInternalRemoteITGetThreshold(t *testing.T) {
 	var td engine.Threshold
 	eTd := engine.Threshold{Tenant: "cgrates.org", ID: "THD_ACNT_1001"}
 	if err := internalRPC.Call(utils.ThresholdSv1GetThreshold,
-		&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1001"}}, &td); err != nil {
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1001"}}, &td); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eTd, td) {
 		t.Errorf("expecting: %+v, received: %+v", eTd, td)
@@ -314,7 +314,7 @@ func testInternalRemoteITGetResource(t *testing.T) {
 		Usages: map[string]*engine.ResourceUsage{},
 	}
 	if err := internalRPC.Call(utils.ResourceSv1GetResource,
-		&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ResGroup1"}}, &reply); err != nil {
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ResGroup1"}}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expectedResources) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedResources), utils.ToJSON(reply))
@@ -712,7 +712,7 @@ func testInternalRemoteITGetRouteProfile(t *testing.T) {
 	}
 
 	rPrf := &RateProfileWithCache{
-		RateProfileWithArgDispatcher: &engine.RateProfileWithArgDispatcher{
+		RateProfileWithOpts: &engine.RateProfileWithOpts{
 			RateProfile: &engine.RateProfile{
 				Tenant:           "cgrates.org",
 				ID:               "RP1",
@@ -787,8 +787,8 @@ func testInternalRemoteITGetRouteProfile(t *testing.T) {
 		&utils.TenantID{Tenant: "cgrates.org", ID: "RP1"},
 		&rPfrg); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(rPrf.RateProfileWithArgDispatcher.RateProfile, rPfrg) {
-		t.Errorf("Expecting : %+v, received: %+v", rPrf.RateProfileWithArgDispatcher.RateProfile, rPfrg)
+	} else if !reflect.DeepEqual(rPrf.RateProfileWithOpts.RateProfile, rPfrg) {
+		t.Errorf("Expecting : %+v, received: %+v", rPrf.RateProfileWithOpts.RateProfile, rPfrg)
 	}
 }
 
@@ -922,12 +922,14 @@ func testInternalReplicationSetThreshold(t *testing.T) {
 }
 
 func testInternalMatchThreshold(t *testing.T) {
-	ev := &engine.ArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event2",
-			Event: map[string]interface{}{
-				utils.Account: "1002",
+	ev := &engine.ThresholdsArgsProcessEvent{
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "event2",
+				Event: map[string]interface{}{
+					utils.Account: "1002",
+				},
 			},
 		},
 	}
@@ -938,12 +940,14 @@ func testInternalMatchThreshold(t *testing.T) {
 	} else if !reflect.DeepEqual(ids, eIDs) {
 		t.Errorf("Expecting ids: %s, received: %s", eIDs, ids)
 	}
-	ev = &engine.ArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event2",
-			Event: map[string]interface{}{
-				utils.Account: "1001",
+	ev = &engine.ThresholdsArgsProcessEvent{
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "event2",
+				Event: map[string]interface{}{
+					utils.Account: "1001",
+				},
 			},
 		},
 	}
@@ -953,12 +957,14 @@ func testInternalMatchThreshold(t *testing.T) {
 	} else if !reflect.DeepEqual(ids, eIDs) {
 		t.Errorf("Expecting ids: %s, received: %s", eIDs, ids)
 	}
-	ev2 := &engine.ArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event3",
-			Event: map[string]interface{}{
-				utils.Account: "1001",
+	ev2 := &engine.ThresholdsArgsProcessEvent{
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "event3",
+				Event: map[string]interface{}{
+					utils.Account: "1001",
+				},
 			},
 		},
 	}

@@ -8,7 +8,7 @@
 			"flags": ["*dryrun","*continue"],
 			"request_fields":[
 				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*sms"},
-				{"tag": "APIKey", "path": "*opts.*dispatcherApiKey", "type": "*constant", "value": "ses12345"},
+				{"tag": "APIKey", "path": "*opts.*apiKey", "type": "*constant", "value": "ses12345"},
 				{"tag": "Val1", "path": "*cgreq.Val1", "type": "*constant", "value": "1"},
 				{"tag": "Val2", "path": "*cgreq.Val2", "type": "*constant", "value": "2"},
 				{"tag": "Val3", "path": "*cgreq.Val3", "type": "*constant", "value": "3"},
@@ -43,7 +43,7 @@
 			"flags": ["*dryrun"],
 			"request_fields":[
 				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*sms"},
-				{"tag": "APIKey", "path": "*opts.*dispatcherApiKey", "type": "*constant", "value": "ses12345"},
+				{"tag": "APIKey", "path": "*opts.*apiKey", "type": "*constant", "value": "ses12345"},
 				{"tag": "Val1", "path": "*cgreq.Val1", "type": "*constant", "value": "1"},
 				{"tag": "Val2", "path": "*cgreq.Val2", "type": "*constant", "value": "2"},
 				{"tag": "Val3", "path": "*cgreq.Val3", "type": "*constant", "value": "3"},

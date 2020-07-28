@@ -111,7 +111,7 @@ func testConfigSRPCConn(t *testing.T) {
 
 func testConfigSReloadConfigFromJSONSessionS(t *testing.T) {
 	var reply string
-	if err := configRPC.Call(utils.ConfigSv1ReloadConfigFromJSON, &config.JSONReloadWithArgDispatcher{
+	if err := configRPC.Call(utils.ConfigSv1ReloadConfigFromJSON, &config.JSONReloadWithOpts{
 		JSON: map[string]interface{}{
 			"sessions": map[string]interface{}{
 				"enabled":          true,
@@ -174,7 +174,7 @@ func testConfigSReloadConfigFromJSONSessionS(t *testing.T) {
 		exp["ThreshSConns"] = empty
 	}
 	var rpl map[string]interface{}
-	if err := configRPC.Call(utils.ConfigSv1GetJSONSection, &config.StringWithArgDispatcher{
+	if err := configRPC.Call(utils.ConfigSv1GetJSONSection, &config.StringWithOpts{
 		Section: config.SessionSJson,
 	}, &rpl); err != nil {
 		t.Error(err)
@@ -188,7 +188,7 @@ func testConfigSReloadConfigFromJSONEEs(t *testing.T) {
 		t.SkipNow()
 	}
 	var reply string
-	if err := configRPC.Call(utils.ConfigSv1ReloadConfigFromJSON, &config.JSONReloadWithArgDispatcher{
+	if err := configRPC.Call(utils.ConfigSv1ReloadConfigFromJSON, &config.JSONReloadWithOpts{
 		JSON: map[string]interface{}{
 			"ees": map[string]interface{}{
 				"enabled":          true,
@@ -227,7 +227,7 @@ func testConfigSReloadConfigFromJSONEEs(t *testing.T) {
 		"Exporters":       []interface{}{eporter},
 	}
 	var rpl map[string]interface{}
-	if err := configRPC.Call(utils.ConfigSv1GetJSONSection, &config.StringWithArgDispatcher{
+	if err := configRPC.Call(utils.ConfigSv1GetJSONSection, &config.StringWithOpts{
 		Section: config.EEsJson,
 	}, &rpl); err != nil {
 		t.Error(err)

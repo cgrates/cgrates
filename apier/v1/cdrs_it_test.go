@@ -168,16 +168,18 @@ func testV1CDRsProcessEventWithRefund(t *testing.T) {
 	}
 	argsEv := &engine.ArgV1ProcessEvent{
 		Flags: []string{utils.MetaRALs},
-		CGREvent: utils.CGREvent{
-			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
-				utils.RunID:       "testv1",
-				utils.OriginID:    "testV1CDRsProcessEventWithRefund",
-				utils.RequestType: utils.META_PSEUDOPREPAID,
-				utils.Account:     "testV1CDRsProcessEventWithRefund",
-				utils.Destination: "+4986517174963",
-				utils.AnswerTime:  time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC),
-				utils.Usage:       time.Duration(3) * time.Minute,
+		CGREventWithOpts: utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				Event: map[string]interface{}{
+					utils.RunID:       "testv1",
+					utils.OriginID:    "testV1CDRsProcessEventWithRefund",
+					utils.RequestType: utils.META_PSEUDOPREPAID,
+					utils.Account:     "testV1CDRsProcessEventWithRefund",
+					utils.Destination: "+4986517174963",
+					utils.AnswerTime:  time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC),
+					utils.Usage:       time.Duration(3) * time.Minute,
+				},
 			},
 		},
 	}
@@ -216,16 +218,18 @@ func testV1CDRsProcessEventWithRefund(t *testing.T) {
 	}
 	argsEv = &engine.ArgV1ProcessEvent{
 		Flags: []string{utils.MetaRALs, utils.MetaRerate},
-		CGREvent: utils.CGREvent{
-			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
-				utils.RunID:       "testv1",
-				utils.OriginID:    "testV1CDRsProcessEventWithRefund",
-				utils.RequestType: utils.META_PSEUDOPREPAID,
-				utils.Account:     "testV1CDRsProcessEventWithRefund",
-				utils.Destination: "+4986517174963",
-				utils.AnswerTime:  time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC),
-				utils.Usage:       time.Duration(1) * time.Minute,
+		CGREventWithOpts: utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				Event: map[string]interface{}{
+					utils.RunID:       "testv1",
+					utils.OriginID:    "testV1CDRsProcessEventWithRefund",
+					utils.RequestType: utils.META_PSEUDOPREPAID,
+					utils.Account:     "testV1CDRsProcessEventWithRefund",
+					utils.Destination: "+4986517174963",
+					utils.AnswerTime:  time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC),
+					utils.Usage:       time.Duration(1) * time.Minute,
+				},
 			},
 		},
 	}
@@ -363,17 +367,19 @@ func testV1CDRsRefundOutOfSessionCost(t *testing.T) {
 
 	argsEv := &engine.ArgV1ProcessEvent{
 		Flags: []string{utils.MetaRALs},
-		CGREvent: utils.CGREvent{
-			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
-				utils.CGRID:       "test1",
-				utils.RunID:       utils.MetaDefault,
-				utils.OriginID:    "testV1CDRsRefundOutOfSessionCost",
-				utils.RequestType: utils.META_PREPAID,
-				utils.Account:     "testV1CDRsRefundOutOfSessionCost",
-				utils.Destination: "+4986517174963",
-				utils.AnswerTime:  time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC),
-				utils.Usage:       time.Duration(123) * time.Minute,
+		CGREventWithOpts: utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				Event: map[string]interface{}{
+					utils.CGRID:       "test1",
+					utils.RunID:       utils.MetaDefault,
+					utils.OriginID:    "testV1CDRsRefundOutOfSessionCost",
+					utils.RequestType: utils.META_PREPAID,
+					utils.Account:     "testV1CDRsRefundOutOfSessionCost",
+					utils.Destination: "+4986517174963",
+					utils.AnswerTime:  time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC),
+					utils.Usage:       time.Duration(123) * time.Minute,
+				},
 			},
 		},
 	}
@@ -427,83 +433,85 @@ func testV1CDRsRefundCDR(t *testing.T) {
 
 	argsEv := &engine.ArgV1ProcessEvent{
 		Flags: []string{utils.MetaRefund},
-		CGREvent: utils.CGREvent{
-			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
-				utils.RunID:       utils.MetaDefault,
-				utils.OriginID:    "testV1CDRsRefundCDR",
-				utils.RequestType: utils.META_PSEUDOPREPAID,
-				utils.Account:     "testV1CDRsRefundCDR",
-				utils.Destination: "+4986517174963",
-				utils.AnswerTime:  time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC),
-				utils.Usage:       time.Duration(10) * time.Minute,
-				utils.CostDetails: &engine.EventCost{
-					CGRID:     "test1",
-					RunID:     utils.MetaDefault,
-					StartTime: time.Date(2017, 1, 9, 16, 18, 21, 0, time.UTC),
-					Usage:     utils.DurationPointer(time.Duration(3 * time.Minute)),
-					Cost:      utils.Float64Pointer(2.3),
-					Charges: []*engine.ChargingInterval{
-						{
-							RatingID: "c1a5ab9",
-							Increments: []*engine.ChargingIncrement{
-								{
-									Usage:          time.Duration(2 * time.Minute),
-									Cost:           2.0,
-									AccountingID:   "a012888",
-									CompressFactor: 1,
-								},
-								{
-									Usage:          time.Duration(1 * time.Second),
-									Cost:           0.005,
-									AccountingID:   "44d6c02",
-									CompressFactor: 60,
-								},
-							},
-							CompressFactor: 1,
-						},
-					},
-					AccountSummary: &engine.AccountSummary{
-						Tenant: "cgrates.org",
-						ID:     "testV1CDRsRefundCDR",
-						BalanceSummaries: []*engine.BalanceSummary{
+		CGREventWithOpts: utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				Event: map[string]interface{}{
+					utils.RunID:       utils.MetaDefault,
+					utils.OriginID:    "testV1CDRsRefundCDR",
+					utils.RequestType: utils.META_PSEUDOPREPAID,
+					utils.Account:     "testV1CDRsRefundCDR",
+					utils.Destination: "+4986517174963",
+					utils.AnswerTime:  time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC),
+					utils.Usage:       time.Duration(10) * time.Minute,
+					utils.CostDetails: &engine.EventCost{
+						CGRID:     "test1",
+						RunID:     utils.MetaDefault,
+						StartTime: time.Date(2017, 1, 9, 16, 18, 21, 0, time.UTC),
+						Usage:     utils.DurationPointer(time.Duration(3 * time.Minute)),
+						Cost:      utils.Float64Pointer(2.3),
+						Charges: []*engine.ChargingInterval{
 							{
-								UUID:  balanceUuid,
-								Type:  utils.MONETARY,
-								Value: 50,
+								RatingID: "c1a5ab9",
+								Increments: []*engine.ChargingIncrement{
+									{
+										Usage:          time.Duration(2 * time.Minute),
+										Cost:           2.0,
+										AccountingID:   "a012888",
+										CompressFactor: 1,
+									},
+									{
+										Usage:          time.Duration(1 * time.Second),
+										Cost:           0.005,
+										AccountingID:   "44d6c02",
+										CompressFactor: 60,
+									},
+								},
+								CompressFactor: 1,
 							},
 						},
-						AllowNegative: false,
-						Disabled:      false,
-					},
-					Rating: engine.Rating{
-						"c1a5ab9": &engine.RatingUnit{
-							ConnectFee:       0.1,
-							RoundingMethod:   "*up",
-							RoundingDecimals: 5,
-							RatesID:          "ec1a177",
-							RatingFiltersID:  "43e77dc",
+						AccountSummary: &engine.AccountSummary{
+							Tenant: "cgrates.org",
+							ID:     "testV1CDRsRefundCDR",
+							BalanceSummaries: []*engine.BalanceSummary{
+								{
+									UUID:  balanceUuid,
+									Type:  utils.MONETARY,
+									Value: 50,
+								},
+							},
+							AllowNegative: false,
+							Disabled:      false,
 						},
-					},
-					Accounting: engine.Accounting{
-						"a012888": &engine.BalanceCharge{
-							AccountID:   "cgrates.org:testV1CDRsRefundCDR",
-							BalanceUUID: balanceUuid,
-							Units:       120.7,
+						Rating: engine.Rating{
+							"c1a5ab9": &engine.RatingUnit{
+								ConnectFee:       0.1,
+								RoundingMethod:   "*up",
+								RoundingDecimals: 5,
+								RatesID:          "ec1a177",
+								RatingFiltersID:  "43e77dc",
+							},
 						},
-						"44d6c02": &engine.BalanceCharge{
-							AccountID:   "cgrates.org:testV1CDRsRefundCDR",
-							BalanceUUID: balanceUuid,
-							Units:       120.7,
+						Accounting: engine.Accounting{
+							"a012888": &engine.BalanceCharge{
+								AccountID:   "cgrates.org:testV1CDRsRefundCDR",
+								BalanceUUID: balanceUuid,
+								Units:       120.7,
+							},
+							"44d6c02": &engine.BalanceCharge{
+								AccountID:   "cgrates.org:testV1CDRsRefundCDR",
+								BalanceUUID: balanceUuid,
+								Units:       120.7,
+							},
 						},
-					},
-					Rates: engine.ChargedRates{
-						"ec1a177": engine.RateGroups{
-							&engine.RGRate{
-								GroupIntervalStart: time.Duration(0),
-								Value:              0.01,
-								RateIncrement:      time.Duration(1 * time.Minute),
-								RateUnit:           time.Duration(1 * time.Second)},
+						Rates: engine.ChargedRates{
+							"ec1a177": engine.RateGroups{
+								&engine.RGRate{
+									GroupIntervalStart: time.Duration(0),
+									Value:              0.01,
+									RateIncrement:      time.Duration(1 * time.Minute),
+									RateUnit:           time.Duration(1 * time.Second)},
+							},
 						},
 					},
 				},
@@ -582,19 +590,21 @@ func testV1CDRsAddBalanceForSMS(t *testing.T) {
 
 	argsEv := &engine.ArgV1ProcessEvent{
 		Flags: []string{utils.MetaRALs},
-		CGREvent: utils.CGREvent{
-			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
-				utils.CGRID:       "asdfas",
-				utils.ToR:         utils.SMS,
-				utils.Category:    "sms",
-				utils.RunID:       utils.MetaDefault,
-				utils.OriginID:    "testV1CDRsAddBalanceForSMS",
-				utils.RequestType: utils.META_PREPAID,
-				utils.Account:     "testV1CDRsAddBalanceForSMS",
-				utils.Destination: "+4986517174963",
-				utils.AnswerTime:  time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC),
-				utils.Usage:       time.Duration(1),
+		CGREventWithOpts: utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				Event: map[string]interface{}{
+					utils.CGRID:       "asdfas",
+					utils.ToR:         utils.SMS,
+					utils.Category:    "sms",
+					utils.RunID:       utils.MetaDefault,
+					utils.OriginID:    "testV1CDRsAddBalanceForSMS",
+					utils.RequestType: utils.META_PREPAID,
+					utils.Account:     "testV1CDRsAddBalanceForSMS",
+					utils.Destination: "+4986517174963",
+					utils.AnswerTime:  time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC),
+					utils.Usage:       time.Duration(1),
+				},
 			},
 		},
 	}

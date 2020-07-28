@@ -26,7 +26,7 @@ func init() {
 	c := &CmdGetPrecacheStatus{
 		name:      "cache_precache_status",
 		rpcMethod: utils.CacheSv1PrecacheStatus,
-		rpcParams: &utils.AttrCacheIDsWithArgDispatcher{},
+		rpcParams: &utils.AttrCacheIDsWithOpts{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -36,7 +36,7 @@ func init() {
 type CmdGetPrecacheStatus struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.AttrCacheIDsWithArgDispatcher
+	rpcParams *utils.AttrCacheIDsWithOpts
 	*CommandExecuter
 }
 
@@ -50,7 +50,7 @@ func (self *CmdGetPrecacheStatus) RpcMethod() string {
 
 func (self *CmdGetPrecacheStatus) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = new(utils.AttrCacheIDsWithArgDispatcher)
+		self.rpcParams = new(utils.AttrCacheIDsWithOpts)
 	}
 	return self.rpcParams
 }

@@ -29,17 +29,19 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+// ThresholdWithCache used in api to determine how to reload cache
 type ThresholdWithCache struct {
 	*ThresholdProfile
 	Cache *string
 }
 
-// ThresholdProfileWithArgDispatcher is used in replicatorV1 for dispatcher
-type ThresholdProfileWithArgDispatcher struct {
+// ThresholdProfileWithOpts is used in replicatorV1 for dispatcher
+type ThresholdProfileWithOpts struct {
 	*ThresholdProfile
-	*utils.ArgDispatcher
+	Opts map[string]interface{}
 }
 
+// ThresholdProfile the profile for threshold
 type ThresholdProfile struct {
 	Tenant             string
 	ID                 string
@@ -54,14 +56,15 @@ type ThresholdProfile struct {
 	Async              bool
 }
 
+// TenantID returns the concatenated key beteen tenant and ID
 func (tp *ThresholdProfile) TenantID() string {
 	return utils.ConcatenatedKey(tp.Tenant, tp.ID)
 }
 
-// ThresholdWithArgDispatcher is used in replicatorV1 for dispatcher
-type ThresholdWithArgDispatcher struct {
+// ThresholdWithOpts is used in replicatorV1 for dispatcher
+type ThresholdWithOpts struct {
 	*Threshold
-	*utils.ArgDispatcher
+	Opts map[string]interface{}
 }
 
 // Threshold is the unit matched by filters
@@ -75,13 +78,14 @@ type Threshold struct {
 	dirty *bool // needs save
 }
 
+// TenantID returns the concatenated key beteen tenant and ID
 func (t *Threshold) TenantID() string {
 	return utils.ConcatenatedKey(t.Tenant, t.ID)
 }
 
 // ProcessEvent processes an ThresholdEvent
 // concurrentActions limits the number of simultaneous action sets executed
-func (t *Threshold) ProcessEvent(args *ArgsProcessEvent, dm *DataManager) (err error) {
+func (t *Threshold) ProcessEvent(args *ThresholdsArgsProcessEvent, dm *DataManager) (err error) {
 	if t.Snooze.After(time.Now()) { // snoozed, not executing actions
 		return
 	}
@@ -126,11 +130,12 @@ func (t *Threshold) ProcessEvent(args *ArgsProcessEvent, dm *DataManager) (err e
 // Thresholds is a sortable slice of Threshold
 type Thresholds []*Threshold
 
-// sort based on Weight
+// Sort sorts based on Weight
 func (ts Thresholds) Sort() {
 	sort.Slice(ts, func(i, j int) bool { return ts[i].tPrfl.Weight > ts[j].tPrfl.Weight })
 }
 
+// NewThresholdService the constructor for ThresoldS service
 func NewThresholdService(dm *DataManager, cgrcfg *config.CGRConfig, filterS *FilterS) (tS *ThresholdService, err error) {
 	return &ThresholdService{dm: dm,
 		cgrcfg:      cgrcfg,
@@ -151,7 +156,7 @@ type ThresholdService struct {
 	stMux       sync.RWMutex    // protects storedTdIDs
 }
 
-// Called to start the service
+// ListenAndServe is called to start the service
 func (tS *ThresholdService) ListenAndServe(exitChan chan bool) error {
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.ThresholdS))
 	go tS.runBackup() // start backup loop
@@ -227,14 +232,13 @@ func (tS *ThresholdService) StoreThreshold(t *Threshold) (err error) {
 			fmt.Sprintf("<ThresholdS> failed saving Threshold with tenant: %s and ID: %s, error: %s",
 				t.Tenant, t.ID, err.Error()))
 		return
-	} else {
-		*t.dirty = false
 	}
+	*t.dirty = false
 	return
 }
 
 // matchingThresholdsForEvent returns ordered list of matching thresholds which are active for an Event
-func (tS *ThresholdService) matchingThresholdsForEvent(args *ArgsProcessEvent) (ts Thresholds, err error) {
+func (tS *ThresholdService) matchingThresholdsForEvent(args *ThresholdsArgsProcessEvent) (ts Thresholds, err error) {
 	evNm := utils.MapStorage{utils.MetaReq: args.Event}
 	tIDs := utils.NewStringSet(args.ThresholdIDs)
 	if len(tIDs) == 0 {
@@ -292,14 +296,14 @@ func (tS *ThresholdService) matchingThresholdsForEvent(args *ArgsProcessEvent) (
 	return
 }
 
-type ArgsProcessEvent struct {
+// ThresholdsArgsProcessEvent are the arguments to proccess the event with thresholds
+type ThresholdsArgsProcessEvent struct {
 	ThresholdIDs []string
-	*utils.CGREvent
-	*utils.ArgDispatcher
+	*utils.CGREventWithOpts
 }
 
 // processEvent processes a new event, dispatching to matching thresholds
-func (tS *ThresholdService) processEvent(args *ArgsProcessEvent) (thresholdsIDs []string, err error) {
+func (tS *ThresholdService) processEvent(args *ThresholdsArgsProcessEvent) (thresholdsIDs []string, err error) {
 	matchTs, err := tS.matchingThresholdsForEvent(args)
 	if err != nil {
 		return nil, err
@@ -356,7 +360,7 @@ func (tS *ThresholdService) processEvent(args *ArgsProcessEvent) (thresholdsIDs 
 }
 
 // V1ProcessEvent implements ThresholdService method for processing an Event
-func (tS *ThresholdService) V1ProcessEvent(args *ArgsProcessEvent, reply *[]string) (err error) {
+func (tS *ThresholdService) V1ProcessEvent(args *ThresholdsArgsProcessEvent, reply *[]string) (err error) {
 	if args.CGREvent == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
@@ -365,16 +369,16 @@ func (tS *ThresholdService) V1ProcessEvent(args *ArgsProcessEvent, reply *[]stri
 	} else if args.CGREvent.Event == nil {
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
-	if ids, err := tS.processEvent(args); err != nil {
-		return err
-	} else {
-		*reply = ids
+	var ids []string
+	if ids, err = tS.processEvent(args); err != nil {
+		return
 	}
+	*reply = ids
 	return
 }
 
 // V1GetThresholdsForEvent queries thresholds matching an Event
-func (tS *ThresholdService) V1GetThresholdsForEvent(args *ArgsProcessEvent, reply *Thresholds) (err error) {
+func (tS *ThresholdService) V1GetThresholdsForEvent(args *ThresholdsArgsProcessEvent, reply *Thresholds) (err error) {
 	if args.CGREvent == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
@@ -390,7 +394,7 @@ func (tS *ThresholdService) V1GetThresholdsForEvent(args *ArgsProcessEvent, repl
 	return
 }
 
-// V1GetQueueIDs returns list of thresholdIDs configured for a tenant
+// V1GetThresholdIDs returns list of thresholdIDs configured for a tenant
 func (tS *ThresholdService) V1GetThresholdIDs(tenant string, tIDs *[]string) (err error) {
 	prfx := utils.ThresholdPrefix + tenant + ":"
 	keys, err := tS.dm.DataDB().GetKeysForPrefix(prfx)
@@ -407,11 +411,11 @@ func (tS *ThresholdService) V1GetThresholdIDs(tenant string, tIDs *[]string) (er
 
 // V1GetThreshold retrieves a Threshold
 func (tS *ThresholdService) V1GetThreshold(tntID *utils.TenantID, t *Threshold) (err error) {
-	if thd, err := tS.dm.GetThreshold(tntID.Tenant, tntID.ID, true, true, ""); err != nil {
-		return err
-	} else {
-		*t = *thd
+	var thd *Threshold
+	if thd, err = tS.dm.GetThreshold(tntID.Tenant, tntID.ID, true, true, ""); err != nil {
+		return
 	}
+	*t = *thd
 	return
 }
 

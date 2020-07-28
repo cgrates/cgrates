@@ -591,7 +591,7 @@ func testV2CDRsGetStats1(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaSum, utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+utils.Usage): utils.NOT_AVAILABLE,
 	}
 	if err := cdrsRpc.Call(utils.StatSv1GetQueueStringMetrics,
-		&utils.TenantIDWithArgDispatcher{
+		&utils.TenantIDWithOpts{
 			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]},
 		}, &metrics); err != nil {
 		t.Error(err)
@@ -611,7 +611,7 @@ func testV2CDRsGetThreshold1(t *testing.T) {
 	}
 	var td engine.Threshold
 	if err := cdrsRpc.Call(utils.ThresholdSv1GetThreshold,
-		&utils.TenantIDWithArgDispatcher{
+		&utils.TenantIDWithOpts{
 			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_PoccessCDR"},
 		}, &td); err != nil {
 		t.Error(err)
@@ -658,7 +658,7 @@ func testV2CDRsGetStats2(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaSum, utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+utils.Usage): "60000000000",
 	}
 	if err := cdrsRpc.Call(utils.StatSv1GetQueueStringMetrics,
-		&utils.TenantIDWithArgDispatcher{
+		&utils.TenantIDWithOpts{
 			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]},
 		}, &metrics); err != nil {
 		t.Error(err)
@@ -670,7 +670,7 @@ func testV2CDRsGetStats2(t *testing.T) {
 func testV2CDRsGetThreshold2(t *testing.T) {
 	var td engine.Threshold
 	if err := cdrsRpc.Call(utils.ThresholdSv1GetThreshold,
-		&utils.TenantIDWithArgDispatcher{
+		&utils.TenantIDWithOpts{
 			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_PoccessCDR"},
 		}, &td); err != nil {
 		t.Error(err)

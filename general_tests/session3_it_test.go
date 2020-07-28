@@ -200,7 +200,7 @@ func testSes3ItThreshold1002After(t *testing.T) {
 	var td engine.Threshold
 	eTd := engine.Threshold{Tenant: "cgrates.org", ID: "THD_ACNT_1001", Hits: 1}
 	if err := ses3RPC.Call(utils.ThresholdSv1GetThreshold,
-		&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1001"}}, &td); err != nil {
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1001"}}, &td); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eTd.Tenant, td.Tenant) {
 		t.Errorf("expecting: %+v, received: %+v", eTd.Tenant, td.Tenant)
@@ -220,7 +220,7 @@ func testSes3ItStatMetricsAfter(t *testing.T) {
 	}
 
 	if err := ses3RPC.Call(utils.StatSv1GetQueueStringMetrics,
-		&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stat_1"}}, &metrics); err != nil {
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stat_1"}}, &metrics); err != nil {
 		t.Error(err)
 	}
 	if !reflect.DeepEqual(statMetrics, metrics) {
@@ -232,7 +232,7 @@ func testSes3ItThreshold1002After2(t *testing.T) {
 	var td engine.Threshold
 	eTd := engine.Threshold{Tenant: "cgrates.org", ID: "THD_ACNT_1001", Hits: 2}
 	if err := ses3RPC.Call(utils.ThresholdSv1GetThreshold,
-		&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1001"}}, &td); err != nil {
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1001"}}, &td); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eTd.Tenant, td.Tenant) {
 		t.Errorf("expecting: %+v, received: %+v", eTd.Tenant, td.Tenant)
@@ -252,7 +252,7 @@ func testSes3ItStatMetricsAfter2(t *testing.T) {
 	}
 
 	if err := ses3RPC.Call(utils.StatSv1GetQueueStringMetrics,
-		&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stat_1"}}, &metrics); err != nil {
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stat_1"}}, &metrics); err != nil {
 		t.Error(err)
 	}
 	if !reflect.DeepEqual(statMetrics, metrics) {
@@ -379,7 +379,7 @@ func testSes3ItBalance(t *testing.T) {
 
 func testSes3ItCDRs(t *testing.T) {
 	var reply string
-	if err := ses3RPC.Call(utils.SessionSv1ProcessCDR, &engine.ArgsProcessEvent{
+	if err := ses3RPC.Call(utils.SessionSv1ProcessCDR, &engine.ThresholdsArgsProcessEvent{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSesItProccesCDR",

@@ -797,7 +797,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 			}
 			var reply string
 			if err := connMgr.Call(tpr.cacheConns, nil,
-				utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
+				utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithOpts{
 					ArgsCache: utils.ArgsCache{AccountActionPlanIDs: []string{id},
 						ActionPlanIDs: []string{accountAction.ActionPlanId}},
 				}, &reply); err != nil {
@@ -2427,7 +2427,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disable_reverse bool) (err erro
 	return
 }
 
-func (tpr *TpReader) ReloadCache(caching string, verbose bool, argDispatcher *utils.ArgDispatcher) (err error) {
+func (tpr *TpReader) ReloadCache(caching string, verbose bool, opts map[string]interface{}) (err error) {
 	if tpr.isInternalDB {
 		return
 	}
@@ -2460,8 +2460,8 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, argDispatcher *ut
 	aps, _ := tpr.GetLoadedIds(utils.ACTION_PLAN_PREFIX)
 
 	//compose Reload Cache argument
-	cacheArgs := utils.AttrReloadCacheWithArgDispatcher{
-		ArgDispatcher: argDispatcher,
+	cacheArgs := utils.AttrReloadCacheWithOpts{
+		Opts: opts,
 		ArgsCache: utils.ArgsCache{
 			DestinationIDs:        dstIds,
 			ReverseDestinationIDs: revDstIDs,
@@ -2508,7 +2508,7 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, argDispatcher *ut
 			return
 		}
 	case utils.MetaClear:
-		if err = connMgr.Call(tpr.cacheConns, nil, utils.CacheSv1Clear, new(utils.AttrCacheIDsWithArgDispatcher), &reply); err != nil {
+		if err = connMgr.Call(tpr.cacheConns, nil, utils.CacheSv1Clear, new(utils.AttrCacheIDsWithOpts), &reply); err != nil {
 			return
 		}
 	}
@@ -2543,9 +2543,9 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, argDispatcher *ut
 	if verbose {
 		log.Print("Clearing indexes")
 	}
-	clearArgs := &utils.AttrCacheIDsWithArgDispatcher{
-		ArgDispatcher: argDispatcher,
-		CacheIDs:      cacheIDs,
+	clearArgs := &utils.AttrCacheIDsWithOpts{
+		Opts:     opts,
+		CacheIDs: cacheIDs,
 	}
 	if err = connMgr.Call(tpr.cacheConns, nil, utils.CacheSv1Clear, clearArgs, &reply); err != nil {
 		log.Printf("WARNING: Got error on cache clear: %s\n", err.Error())
@@ -2575,7 +2575,7 @@ func (tpr *TpReader) ReloadScheduler(verbose bool) (err error) {
 			log.Print("Reloading scheduler")
 		}
 		if err = connMgr.Call(tpr.schedulerConns, nil, utils.SchedulerSv1Reload,
-			new(utils.CGREventWithArgDispatcher), &reply); err != nil {
+			new(utils.CGREventWithOpts), &reply); err != nil {
 			log.Printf("WARNING: Got error on scheduler reload: %s\n", err.Error())
 		}
 	}

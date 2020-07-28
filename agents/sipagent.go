@@ -537,7 +537,7 @@ func (sa *SIPAgent) processRequest(reqProcessor *config.RequestProcessor,
 	// 	!reqProcessor.Flags.Has(utils.MetaDryRun) {
 	// 	rplyCDRs := utils.StringPointer("")
 	// 	if err = sa.connMgr.Call(sa.cfg.SIPAgentCfg().SessionSConns, nil, utils.SessionSv1ProcessCDR,
-	// 		&utils.CGREventWithArgDispatcher{CGREvent: cgrEv,
+	// 		&utils.CGREventWithOpts{CGREvent: cgrEv,
 	// 			ArgDispatcher: cgrArgs.ArgDispatcher},
 	// 		rplyCDRs); err != nil {
 	// 		agReq.CGRReply.Set(utils.PathItems{{Field: utils.Error}}, utils.NewNMData(err.Error()))

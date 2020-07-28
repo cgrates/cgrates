@@ -137,12 +137,6 @@ func (ev *CGREvent) Clone() (clned *CGREvent) {
 	return
 }
 
-// ExtractedArgs stores the extracted arguments from CGREvent
-type ExtractedArgs struct {
-	ArgDispatcher  *ArgDispatcher
-	RoutePaginator *Paginator
-}
-
 // CGREvents is a group of generic events processed by CGR services
 // ie: derived CDRs
 type CGREvents struct {
@@ -152,25 +146,26 @@ type CGREvents struct {
 	Events []map[string]interface{}
 }
 
-func NewCGREventWithArgDispatcher() *CGREventWithArgDispatcher {
-	return new(CGREventWithArgDispatcher)
-}
-
-type CGREventWithArgDispatcher struct {
+// CGREventWithOpts is the event with Opts
+type CGREventWithOpts struct {
+	Opts map[string]interface{}
 	*CGREvent
-	*ArgDispatcher
 }
 
-func (ev *CGREventWithArgDispatcher) Clone() (clned *CGREventWithArgDispatcher) {
+// Clone return a copy of the CGREventWithOpts
+func (ev *CGREventWithOpts) Clone() (clned *CGREventWithOpts) {
 	if ev == nil {
 		return
 	}
-	clned = new(CGREventWithArgDispatcher)
+	clned = new(CGREventWithOpts)
 	if ev.CGREvent != nil {
 		clned.CGREvent = ev.CGREvent.Clone()
 	}
-	if ev.ArgDispatcher != nil {
-		clned.ArgDispatcher = ev.ArgDispatcher.Clone()
+	if ev.Opts != nil {
+		clned.Opts = make(map[string]interface{})
+		for opt, val := range ev.Opts {
+			clned.Opts[opt] = val
+		}
 	}
 	return
 }
@@ -181,43 +176,8 @@ type EventWithFlags struct {
 	Event map[string]interface{}
 }
 
-// CGREventWithOpts is the event with Opts needed for ChargerSv1.ProccesEvent
-type CGREventWithOpts struct {
-	Opts map[string]interface{}
-	*CGREvent
-	*ArgDispatcher
-}
-
-func getArgDispatcherFromOpts(ev map[string]interface{}) (arg *ArgDispatcher) {
-	if ev == nil {
-		return
-	}
-	//check if we have APIKey in event and in case it has add it in ArgDispatcher
-	apiKeyIface, hasAPIKey := ev[OptsAPIKey]
-	if hasAPIKey {
-		delete(ev, OptsAPIKey)
-		arg = &ArgDispatcher{
-			APIKey: StringPointer(apiKeyIface.(string)),
-		}
-	}
-	//check if we have RouteID in event and in case it has add it in ArgDispatcher
-	routeIDIface, hasRouteID := ev[OptsRouteID]
-	if !hasRouteID {
-		return
-	}
-	delete(ev, OptsRouteID)
-	if !hasAPIKey { //in case we don't have APIKey, but we have RouteID we need to initialize the struct
-		return &ArgDispatcher{
-			RouteID: StringPointer(routeIDIface.(string)),
-		}
-	}
-	arg.RouteID = StringPointer(routeIDIface.(string))
-	return
-}
-
-// getRoutePaginatorFromOpts will consume supplierPaginator if present
-func getRoutePaginatorFromOpts(ev map[string]interface{}) (args *Paginator, err error) {
-	args = new(Paginator)
+// GetRoutePaginatorFromOpts will consume supplierPaginator if present
+func GetRoutePaginatorFromOpts(ev map[string]interface{}) (args Paginator, err error) {
 	if ev == nil {
 		return
 	}
@@ -229,7 +189,7 @@ func getRoutePaginatorFromOpts(ev map[string]interface{}) (args *Paginator, err 
 		if limit, err = IfaceAsInt64(limitIface); err != nil {
 			return
 		}
-		args = &Paginator{
+		args = Paginator{
 			Limit: IntPointer(int(limit)),
 		}
 	}
@@ -244,45 +204,12 @@ func getRoutePaginatorFromOpts(ev map[string]interface{}) (args *Paginator, err 
 		return
 	}
 	if !hasRoutesLimit { //in case we don't have limit, but we have offset we need to initialize the struct
-		args = &Paginator{
+		args = Paginator{
 			Offset: IntPointer(int(offset)),
 		}
 		return
 	}
 	args.Offset = IntPointer(int(offset))
-	return
-}
-
-// ExtractArgsFromOpts extracts the posible arguments(ArgDispatcher and RoutePaginator) from options
-func ExtractArgsFromOpts(ev map[string]interface{}, dispatcherFlag, consumeRoutePaginator bool) (ca ExtractedArgs, err error) {
-	ca = ExtractedArgs{
-		ArgDispatcher: getArgDispatcherFromOpts(ev),
-	}
-	if dispatcherFlag && ca.ArgDispatcher == nil {
-		ca.ArgDispatcher = new(ArgDispatcher)
-	}
-	if consumeRoutePaginator {
-		ca.RoutePaginator, err = getRoutePaginatorFromOpts(ev)
-	}
-	return
-}
-
-// Clone return a copy of the CGREventWithOpts
-func (ev *CGREventWithOpts) Clone() (clned *CGREventWithOpts) {
-	if ev == nil {
-		return
-	}
-	clned = new(CGREventWithOpts)
-	if ev.CGREvent != nil {
-		clned.CGREvent = ev.CGREvent.Clone()
-	}
-	clned.ArgDispatcher = ev.ArgDispatcher.Clone()
-	if ev.Opts != nil {
-		clned.Opts = make(map[string]interface{})
-		for opt, val := range ev.Opts {
-			clned.Opts[opt] = val
-		}
-	}
 	return
 }
 

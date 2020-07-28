@@ -51,7 +51,7 @@ func (self *CmdSetRateProfile) RpcMethod() string {
 
 func (self *CmdSetRateProfile) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &v1.RateProfileWithCache{RateProfileWithArgDispatcher: new(engine.RateProfileWithArgDispatcher)}
+		self.rpcParams = &v1.RateProfileWithCache{RateProfileWithOpts: new(engine.RateProfileWithOpts)}
 	}
 	return self.rpcParams
 }

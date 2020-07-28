@@ -133,9 +133,8 @@ func (alS *AttributeService) attributeProfileForEvent(args *AttrArgsProcessEvent
 type AttrSProcessEventReply struct {
 	MatchedProfiles []string
 	AlteredFields   []string
-	CGREvent        *utils.CGREvent
-	Opts            map[string]interface{}
-	blocker         bool // internally used to stop further processRuns
+	*utils.CGREventWithOpts
+	blocker bool // internally used to stop further processRuns
 }
 
 // Digest returns serialized version of alteredFields in AttrSProcessEventReply
@@ -160,9 +159,7 @@ type AttrArgsProcessEvent struct {
 	AttributeIDs []string
 	Context      *string // attach the event to a context
 	ProcessRuns  *int    // number of loops for ProcessEvent
-	Opts         map[string]interface{}
-	*utils.CGREvent
-	*utils.ArgDispatcher
+	*utils.CGREventWithOpts
 }
 
 // processEvent will match event with attribute profile and do the necessary replacements
@@ -174,9 +171,11 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent, evNm utils
 	}
 	rply = &AttrSProcessEventReply{
 		MatchedProfiles: []string{attrPrf.ID},
-		CGREvent:        args.CGREvent,
-		Opts:            args.Opts,
-		blocker:         attrPrf.Blocker,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: args.CGREvent,
+			Opts:     args.Opts,
+		},
+		blocker: attrPrf.Blocker,
 	}
 	for _, attribute := range attrPrf.Attributes {
 		//in case that we have filter for attribute send them to FilterS to be processed
@@ -432,8 +431,10 @@ func (alS *AttributeService) V1ProcessEvent(args *AttrArgsProcessEvent,
 	*reply = AttrSProcessEventReply{
 		MatchedProfiles: matchedIDs,
 		AlteredFields:   alteredFields.AsSlice(),
-		CGREvent:        args.CGREvent,
-		Opts:            args.Opts,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: args.CGREvent,
+			Opts:     args.Opts,
+		},
 	}
 	return
 }

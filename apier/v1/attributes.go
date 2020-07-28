@@ -26,18 +26,18 @@ import (
 )
 
 // GetAttributeProfile returns an Attribute Profile
-func (apierSv1 *APIerSv1) GetAttributeProfile(arg *utils.TenantIDWithArgDispatcher, reply *engine.AttributeProfile) error {
+func (apierSv1 *APIerSv1) GetAttributeProfile(arg *utils.TenantIDWithOpts, reply *engine.AttributeProfile) (err error) {
 	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if alsPrf, err := apierSv1.DataManager.GetAttributeProfile(arg.Tenant, arg.ID, true, true, utils.NonTransactional); err != nil {
+	var alsPrf *engine.AttributeProfile
+	if alsPrf, err = apierSv1.DataManager.GetAttributeProfile(arg.Tenant, arg.ID, true, true, utils.NonTransactional); err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}
-		return err
-	} else {
-		*reply = *alsPrf
+		return
 	}
+	*reply = *alsPrf
 	return nil
 }
 
@@ -83,7 +83,7 @@ func (apierSv1 *APIerSv1) GetAttributeProfileIDsCount(args *utils.TenantArg, rep
 type AttributeWithCache struct {
 	*engine.AttributeProfile
 	Cache *string
-	*utils.ArgDispatcher
+	Opts  map[string]interface{}
 }
 
 //SetAttributeProfile add/update a new Attribute Profile
@@ -150,7 +150,7 @@ func NewAttributeSv1(attrS *engine.AttributeService) *AttributeSv1 {
 	return &AttributeSv1{attrS: attrS}
 }
 
-// Exports RPC from RLs
+// AttributeSv1 exports RPC from RLs
 type AttributeSv1 struct {
 	attrS *engine.AttributeService
 }
@@ -173,7 +173,7 @@ func (alSv1 *AttributeSv1) ProcessEvent(args *engine.AttrArgsProcessEvent,
 	return alSv1.attrS.V1ProcessEvent(args, reply)
 }
 
-func (alSv1 *AttributeSv1) Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error {
+func (alSv1 *AttributeSv1) Ping(ign *utils.CGREventWithOpts, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

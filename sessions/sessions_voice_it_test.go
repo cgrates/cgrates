@@ -131,22 +131,24 @@ func testSessionsVoiceMonetaryRefund(t *testing.T) {
 	usage := time.Duration(1*time.Minute + 30*time.Second)
 	initArgs := &V1InitSessionArgs{
 		InitSession: true,
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "TestSessionsVoiceMonetaryRefund",
-			Event: map[string]interface{}{
-				utils.EVENT_NAME:  "TEST_EVENT",
-				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "123451",
-				utils.Account:     "1001",
-				utils.Subject:     "1001",
-				utils.Destination: "1004",
-				utils.Category:    "call",
-				utils.Tenant:      "cgrates.org",
-				utils.RequestType: utils.META_PREPAID,
-				utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC),
-				utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-				utils.Usage:       usage,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TestSessionsVoiceMonetaryRefund",
+				Event: map[string]interface{}{
+					utils.EVENT_NAME:  "TEST_EVENT",
+					utils.ToR:         utils.VOICE,
+					utils.OriginID:    "123451",
+					utils.Account:     "1001",
+					utils.Subject:     "1001",
+					utils.Destination: "1004",
+					utils.Category:    "call",
+					utils.Tenant:      "cgrates.org",
+					utils.RequestType: utils.META_PREPAID,
+					utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC),
+					utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
+					utils.Usage:       usage,
+				},
 			},
 		},
 	}
@@ -171,22 +173,24 @@ func testSessionsVoiceMonetaryRefund(t *testing.T) {
 	usage = time.Duration(time.Minute)
 	termArgs := &V1TerminateSessionArgs{
 		TerminateSession: true,
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "TestSessionsVoiceMonetaryRefund",
-			Event: map[string]interface{}{
-				utils.EVENT_NAME:  "TEST_EVENT",
-				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "123451",
-				utils.Account:     "1001",
-				utils.Subject:     "1001",
-				utils.Destination: "1004",
-				utils.Category:    "call",
-				utils.Tenant:      "cgrates.org",
-				utils.RequestType: utils.META_PREPAID,
-				utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC),
-				utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-				utils.Usage:       usage,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TestSessionsVoiceMonetaryRefund",
+				Event: map[string]interface{}{
+					utils.EVENT_NAME:  "TEST_EVENT",
+					utils.ToR:         utils.VOICE,
+					utils.OriginID:    "123451",
+					utils.Account:     "1001",
+					utils.Subject:     "1001",
+					utils.Destination: "1004",
+					utils.Category:    "call",
+					utils.Tenant:      "cgrates.org",
+					utils.RequestType: utils.META_PREPAID,
+					utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC),
+					utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
+					utils.Usage:       usage,
+				},
 			},
 		},
 	}
@@ -208,22 +212,24 @@ func testSessionsVoiceVoiceRefund(t *testing.T) {
 	usage := time.Duration(1*time.Minute + 30*time.Second)
 	initArgs := &V1InitSessionArgs{
 		InitSession: true,
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "TestSessionsVoiceVoiceRefund",
-			Event: map[string]interface{}{
-				utils.EVENT_NAME:  "TEST_EVENT",
-				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "123452",
-				utils.Account:     "1001",
-				utils.Subject:     "1001",
-				utils.Destination: "1003",
-				utils.Category:    "call",
-				utils.Tenant:      "cgrates.org",
-				utils.RequestType: utils.META_PREPAID,
-				utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC),
-				utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-				utils.Usage:       usage,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TestSessionsVoiceVoiceRefund",
+				Event: map[string]interface{}{
+					utils.EVENT_NAME:  "TEST_EVENT",
+					utils.ToR:         utils.VOICE,
+					utils.OriginID:    "123452",
+					utils.Account:     "1001",
+					utils.Subject:     "1001",
+					utils.Destination: "1003",
+					utils.Category:    "call",
+					utils.Tenant:      "cgrates.org",
+					utils.RequestType: utils.META_PREPAID,
+					utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC),
+					utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
+					utils.Usage:       usage,
+				},
 			},
 		},
 	}
@@ -250,22 +256,24 @@ func testSessionsVoiceVoiceRefund(t *testing.T) {
 	usage = time.Duration(time.Minute)
 	termArgs := &V1TerminateSessionArgs{
 		TerminateSession: true,
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "TestSessionsVoiceVoiceRefund",
-			Event: map[string]interface{}{
-				utils.EVENT_NAME:  "TEST_EVENT",
-				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "123452",
-				utils.Account:     "1001",
-				utils.Subject:     "1001",
-				utils.Destination: "1003",
-				utils.Category:    "call",
-				utils.Tenant:      "cgrates.org",
-				utils.RequestType: utils.META_PREPAID,
-				utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC),
-				utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-				utils.Usage:       usage,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TestSessionsVoiceVoiceRefund",
+				Event: map[string]interface{}{
+					utils.EVENT_NAME:  "TEST_EVENT",
+					utils.ToR:         utils.VOICE,
+					utils.OriginID:    "123452",
+					utils.Account:     "1001",
+					utils.Subject:     "1001",
+					utils.Destination: "1003",
+					utils.Category:    "call",
+					utils.Tenant:      "cgrates.org",
+					utils.RequestType: utils.META_PREPAID,
+					utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC),
+					utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
+					utils.Usage:       usage,
+				},
 			},
 		},
 	}
@@ -293,22 +301,24 @@ func testSessionsVoiceMixedRefund(t *testing.T) {
 	usage := time.Duration(1*time.Minute + 30*time.Second)
 	initArgs := &V1InitSessionArgs{
 		InitSession: true,
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "TestSessionsVoiceMixedRefund",
-			Event: map[string]interface{}{
-				utils.EVENT_NAME:  "TEST_EVENT",
-				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "123453",
-				utils.Account:     "1001",
-				utils.Subject:     "1001",
-				utils.Destination: "1002",
-				utils.Category:    "call",
-				utils.Tenant:      "cgrates.org",
-				utils.RequestType: utils.META_PREPAID,
-				utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC),
-				utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-				utils.Usage:       usage,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TestSessionsVoiceMixedRefund",
+				Event: map[string]interface{}{
+					utils.EVENT_NAME:  "TEST_EVENT",
+					utils.ToR:         utils.VOICE,
+					utils.OriginID:    "123453",
+					utils.Account:     "1001",
+					utils.Subject:     "1001",
+					utils.Destination: "1002",
+					utils.Category:    "call",
+					utils.Tenant:      "cgrates.org",
+					utils.RequestType: utils.META_PREPAID,
+					utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC),
+					utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
+					utils.Usage:       usage,
+				},
 			},
 		},
 	}
@@ -338,22 +348,24 @@ func testSessionsVoiceMixedRefund(t *testing.T) {
 	usage = time.Duration(time.Minute)
 	termArgs := &V1TerminateSessionArgs{
 		TerminateSession: true,
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "TestSessionsVoiceMixedRefund",
-			Event: map[string]interface{}{
-				utils.EVENT_NAME:  "TEST_EVENT",
-				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "123453",
-				utils.Account:     "1001",
-				utils.Subject:     "1001",
-				utils.Destination: "1002",
-				utils.Category:    "call",
-				utils.Tenant:      "cgrates.org",
-				utils.RequestType: utils.META_PREPAID,
-				utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC),
-				utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-				utils.Usage:       usage,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TestSessionsVoiceMixedRefund",
+				Event: map[string]interface{}{
+					utils.EVENT_NAME:  "TEST_EVENT",
+					utils.ToR:         utils.VOICE,
+					utils.OriginID:    "123453",
+					utils.Account:     "1001",
+					utils.Subject:     "1001",
+					utils.Destination: "1002",
+					utils.Category:    "call",
+					utils.Tenant:      "cgrates.org",
+					utils.RequestType: utils.META_PREPAID,
+					utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC),
+					utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
+					utils.Usage:       usage,
+				},
 			},
 		},
 	}
@@ -390,22 +402,24 @@ func testSessionsVoiceLastUsed(t *testing.T) {
 	usage := time.Duration(2 * time.Minute)
 	initArgs := &V1InitSessionArgs{
 		InitSession: true,
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "TestSessionsVoiceLastUsed",
-			Event: map[string]interface{}{
-				utils.EVENT_NAME:  "TEST_EVENT",
-				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "12350",
-				utils.Account:     "1001",
-				utils.Subject:     "1001",
-				utils.Destination: "1006",
-				utils.Category:    "call",
-				utils.Tenant:      "cgrates.org",
-				utils.RequestType: utils.META_PREPAID,
-				utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC),
-				utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-				utils.Usage:       usage,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TestSessionsVoiceLastUsed",
+				Event: map[string]interface{}{
+					utils.EVENT_NAME:  "TEST_EVENT",
+					utils.ToR:         utils.VOICE,
+					utils.OriginID:    "12350",
+					utils.Account:     "1001",
+					utils.Subject:     "1001",
+					utils.Destination: "1006",
+					utils.Category:    "call",
+					utils.Tenant:      "cgrates.org",
+					utils.RequestType: utils.META_PREPAID,
+					utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC),
+					utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
+					utils.Usage:       usage,
+				},
 			},
 		},
 	}
@@ -429,21 +443,23 @@ func testSessionsVoiceLastUsed(t *testing.T) {
 	lastUsage := time.Duration(1*time.Minute + 30*time.Second)
 	updateArgs := &V1UpdateSessionArgs{
 		UpdateSession: true,
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "TestSessionsVoiceLastUsed",
-			Event: map[string]interface{}{
-				utils.EVENT_NAME:  "Update1",
-				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "12350",
-				utils.Account:     "1001",
-				utils.Subject:     "1001",
-				utils.Destination: "1006",
-				utils.Category:    "call",
-				utils.Tenant:      "cgrates.org",
-				utils.RequestType: utils.META_PREPAID,
-				utils.Usage:       usage,
-				utils.LastUsed:    lastUsage,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TestSessionsVoiceLastUsed",
+				Event: map[string]interface{}{
+					utils.EVENT_NAME:  "Update1",
+					utils.ToR:         utils.VOICE,
+					utils.OriginID:    "12350",
+					utils.Account:     "1001",
+					utils.Subject:     "1001",
+					utils.Destination: "1006",
+					utils.Category:    "call",
+					utils.Tenant:      "cgrates.org",
+					utils.RequestType: utils.META_PREPAID,
+					utils.Usage:       usage,
+					utils.LastUsed:    lastUsage,
+				},
 			},
 		},
 	}
@@ -466,23 +482,25 @@ func testSessionsVoiceLastUsed(t *testing.T) {
 	lastUsage = time.Duration(2*time.Minute + 30*time.Second)
 	updateArgs = &V1UpdateSessionArgs{
 		UpdateSession: true,
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "TestSessionsVoiceLastUsed",
-			Event: map[string]interface{}{
-				utils.EVENT_NAME:  "Update2",
-				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "12350",
-				utils.Account:     "1001",
-				utils.Subject:     "1001",
-				utils.Destination: "1006",
-				utils.Category:    "call",
-				utils.Tenant:      "cgrates.org",
-				utils.RequestType: utils.META_PREPAID,
-				utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC),
-				utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-				utils.Usage:       usage,
-				utils.LastUsed:    lastUsage,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TestSessionsVoiceLastUsed",
+				Event: map[string]interface{}{
+					utils.EVENT_NAME:  "Update2",
+					utils.ToR:         utils.VOICE,
+					utils.OriginID:    "12350",
+					utils.Account:     "1001",
+					utils.Subject:     "1001",
+					utils.Destination: "1006",
+					utils.Category:    "call",
+					utils.Tenant:      "cgrates.org",
+					utils.RequestType: utils.META_PREPAID,
+					utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC),
+					utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
+					utils.Usage:       usage,
+					utils.LastUsed:    lastUsage,
+				},
 			},
 		},
 	}
@@ -504,22 +522,24 @@ func testSessionsVoiceLastUsed(t *testing.T) {
 	usage = time.Duration(1 * time.Minute)
 	termArgs := &V1TerminateSessionArgs{
 		TerminateSession: true,
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "TestSessionsVoiceLastUsed",
-			Event: map[string]interface{}{
-				utils.EVENT_NAME:  "TEST_EVENT",
-				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "12350",
-				utils.Account:     "1001",
-				utils.Subject:     "1001",
-				utils.Destination: "1006",
-				utils.Category:    "call",
-				utils.Tenant:      "cgrates.org",
-				utils.RequestType: utils.META_PREPAID,
-				utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC),
-				utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-				utils.Usage:       usage,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TestSessionsVoiceLastUsed",
+				Event: map[string]interface{}{
+					utils.EVENT_NAME:  "TEST_EVENT",
+					utils.ToR:         utils.VOICE,
+					utils.OriginID:    "12350",
+					utils.Account:     "1001",
+					utils.Subject:     "1001",
+					utils.Destination: "1006",
+					utils.Category:    "call",
+					utils.Tenant:      "cgrates.org",
+					utils.RequestType: utils.META_PREPAID,
+					utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC),
+					utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
+					utils.Usage:       usage,
+				},
 			},
 		},
 	}
@@ -551,22 +571,24 @@ func testSessionsVoiceLastUsedEnd(t *testing.T) {
 	usage := time.Duration(2 * time.Minute)
 	initArgs := &V1InitSessionArgs{
 		InitSession: true,
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "TestSessionsVoiceLastUsedEnd",
-			Event: map[string]interface{}{
-				utils.EVENT_NAME:  "TEST_EVENT",
-				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "1234911",
-				utils.Account:     "1001",
-				utils.Subject:     "1001",
-				utils.Destination: "1006",
-				utils.Category:    "call",
-				utils.Tenant:      "cgrates.org",
-				utils.RequestType: utils.META_PREPAID,
-				utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC),
-				utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-				utils.Usage:       usage,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TestSessionsVoiceLastUsedEnd",
+				Event: map[string]interface{}{
+					utils.EVENT_NAME:  "TEST_EVENT",
+					utils.ToR:         utils.VOICE,
+					utils.OriginID:    "1234911",
+					utils.Account:     "1001",
+					utils.Subject:     "1001",
+					utils.Destination: "1006",
+					utils.Category:    "call",
+					utils.Tenant:      "cgrates.org",
+					utils.RequestType: utils.META_PREPAID,
+					utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC),
+					utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
+					utils.Usage:       usage,
+				},
 			},
 		},
 	}
@@ -590,21 +612,23 @@ func testSessionsVoiceLastUsedEnd(t *testing.T) {
 	lastUsage := time.Duration(30 * time.Second)
 	updateArgs := &V1UpdateSessionArgs{
 		UpdateSession: true,
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "TestSessionsVoiceLastUsedEnd",
-			Event: map[string]interface{}{
-				utils.EVENT_NAME:  "TEST_EVENT",
-				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "1234911",
-				utils.Account:     "1001",
-				utils.Subject:     "1001",
-				utils.Destination: "1006",
-				utils.Category:    "call",
-				utils.Tenant:      "cgrates.org",
-				utils.RequestType: utils.META_PREPAID,
-				utils.Usage:       usage,
-				utils.LastUsed:    lastUsage,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TestSessionsVoiceLastUsedEnd",
+				Event: map[string]interface{}{
+					utils.EVENT_NAME:  "TEST_EVENT",
+					utils.ToR:         utils.VOICE,
+					utils.OriginID:    "1234911",
+					utils.Account:     "1001",
+					utils.Subject:     "1001",
+					utils.Destination: "1006",
+					utils.Category:    "call",
+					utils.Tenant:      "cgrates.org",
+					utils.RequestType: utils.META_PREPAID,
+					utils.Usage:       usage,
+					utils.LastUsed:    lastUsage,
+				},
 			},
 		},
 	}
@@ -628,20 +652,22 @@ func testSessionsVoiceLastUsedEnd(t *testing.T) {
 
 	termArgs := &V1TerminateSessionArgs{
 		TerminateSession: true,
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "TestSessionsVoiceLastUsedEnd",
-			Event: map[string]interface{}{
-				utils.EVENT_NAME:  "TEST_EVENT",
-				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "1234911",
-				utils.Account:     "1001",
-				utils.Subject:     "1001",
-				utils.Destination: "1006",
-				utils.Category:    "call",
-				utils.Tenant:      "cgrates.org",
-				utils.RequestType: utils.META_PREPAID,
-				utils.LastUsed:    "0s",
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TestSessionsVoiceLastUsedEnd",
+				Event: map[string]interface{}{
+					utils.EVENT_NAME:  "TEST_EVENT",
+					utils.ToR:         utils.VOICE,
+					utils.OriginID:    "1234911",
+					utils.Account:     "1001",
+					utils.Subject:     "1001",
+					utils.Destination: "1006",
+					utils.Category:    "call",
+					utils.Tenant:      "cgrates.org",
+					utils.RequestType: utils.META_PREPAID,
+					utils.LastUsed:    "0s",
+				},
 			},
 		},
 	}
@@ -673,22 +699,24 @@ func testSessionsVoiceLastUsedNotFixed(t *testing.T) {
 	usage := time.Duration(2 * time.Minute)
 	initArgs := &V1InitSessionArgs{
 		InitSession: true,
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "TestSessionsVoiceLastUsedNotFixed",
-			Event: map[string]interface{}{
-				utils.EVENT_NAME:  "TEST_EVENT",
-				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "1234922",
-				utils.Account:     "1001",
-				utils.Subject:     "1001",
-				utils.Destination: "1006",
-				utils.Category:    "call",
-				utils.Tenant:      "cgrates.org",
-				utils.RequestType: utils.META_PREPAID,
-				utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC),
-				utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-				utils.Usage:       usage,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TestSessionsVoiceLastUsedNotFixed",
+				Event: map[string]interface{}{
+					utils.EVENT_NAME:  "TEST_EVENT",
+					utils.ToR:         utils.VOICE,
+					utils.OriginID:    "1234922",
+					utils.Account:     "1001",
+					utils.Subject:     "1001",
+					utils.Destination: "1006",
+					utils.Category:    "call",
+					utils.Tenant:      "cgrates.org",
+					utils.RequestType: utils.META_PREPAID,
+					utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC),
+					utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
+					utils.Usage:       usage,
+				},
 			},
 		},
 	}
@@ -713,21 +741,23 @@ func testSessionsVoiceLastUsedNotFixed(t *testing.T) {
 	lastUsage := time.Duration(12 * time.Second)
 	updateArgs := &V1UpdateSessionArgs{
 		UpdateSession: true,
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "TestSessionsVoiceLastUsedNotFixed",
-			Event: map[string]interface{}{
-				utils.EVENT_NAME:  "TEST_EVENT",
-				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "1234922",
-				utils.Account:     "1001",
-				utils.Subject:     "1001",
-				utils.Destination: "1006",
-				utils.Category:    "call",
-				utils.Tenant:      "cgrates.org",
-				utils.RequestType: utils.META_PREPAID,
-				utils.Usage:       usage,
-				utils.LastUsed:    lastUsage,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TestSessionsVoiceLastUsedNotFixed",
+				Event: map[string]interface{}{
+					utils.EVENT_NAME:  "TEST_EVENT",
+					utils.ToR:         utils.VOICE,
+					utils.OriginID:    "1234922",
+					utils.Account:     "1001",
+					utils.Subject:     "1001",
+					utils.Destination: "1006",
+					utils.Category:    "call",
+					utils.Tenant:      "cgrates.org",
+					utils.RequestType: utils.META_PREPAID,
+					utils.Usage:       usage,
+					utils.LastUsed:    lastUsage,
+				},
 			},
 		},
 	}
@@ -750,20 +780,22 @@ func testSessionsVoiceLastUsedNotFixed(t *testing.T) {
 
 	termArgs := &V1TerminateSessionArgs{
 		TerminateSession: true,
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "TestSessionsVoiceLastUsedNotFixed",
-			Event: map[string]interface{}{
-				utils.EVENT_NAME:  "TEST_EVENT",
-				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "1234922",
-				utils.Account:     "1001",
-				utils.Subject:     "1001",
-				utils.Destination: "1006",
-				utils.Category:    "call",
-				utils.Tenant:      "cgrates.org",
-				utils.RequestType: utils.META_PREPAID,
-				utils.LastUsed:    "0s",
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TestSessionsVoiceLastUsedNotFixed",
+				Event: map[string]interface{}{
+					utils.EVENT_NAME:  "TEST_EVENT",
+					utils.ToR:         utils.VOICE,
+					utils.OriginID:    "1234922",
+					utils.Account:     "1001",
+					utils.Subject:     "1001",
+					utils.Destination: "1006",
+					utils.Category:    "call",
+					utils.Tenant:      "cgrates.org",
+					utils.RequestType: utils.META_PREPAID,
+					utils.LastUsed:    "0s",
+				},
 			},
 		},
 	}
@@ -796,22 +828,24 @@ func testSessionsVoiceSessionTTL(t *testing.T) {
 	usage := time.Duration(2 * time.Minute)
 	initArgs := &V1InitSessionArgs{
 		InitSession: true,
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "TestSessionsVoiceSessionTTL",
-			Event: map[string]interface{}{
-				utils.EVENT_NAME:  "TEST_EVENT_SESSION_TTL",
-				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "12360",
-				utils.Account:     "1001",
-				utils.Subject:     "1001",
-				utils.Destination: "1008",
-				utils.Category:    "call",
-				utils.Tenant:      "cgrates.org",
-				utils.RequestType: utils.META_PREPAID,
-				utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC),
-				utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-				utils.Usage:       usage,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TestSessionsVoiceSessionTTL",
+				Event: map[string]interface{}{
+					utils.EVENT_NAME:  "TEST_EVENT_SESSION_TTL",
+					utils.ToR:         utils.VOICE,
+					utils.OriginID:    "12360",
+					utils.Account:     "1001",
+					utils.Subject:     "1001",
+					utils.Destination: "1008",
+					utils.Category:    "call",
+					utils.Tenant:      "cgrates.org",
+					utils.RequestType: utils.META_PREPAID,
+					utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC),
+					utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
+					utils.Usage:       usage,
+				},
 			},
 		},
 	}
@@ -864,21 +898,23 @@ func testSessionsVoiceSessionTTL(t *testing.T) {
 	lastUsage := time.Duration(30 * time.Second)
 	updateArgs := &V1UpdateSessionArgs{
 		UpdateSession: true,
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "TestSessionsVoiceSessionTTL",
-			Event: map[string]interface{}{
-				utils.EVENT_NAME:  "TEST_EVENT_SESSION_TTL",
-				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "12360",
-				utils.Account:     "1001",
-				utils.Subject:     "1001",
-				utils.Destination: "1008",
-				utils.Category:    "call",
-				utils.Tenant:      "cgrates.org",
-				utils.RequestType: utils.META_PREPAID,
-				utils.Usage:       usage,
-				utils.LastUsed:    lastUsage,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TestSessionsVoiceSessionTTL",
+				Event: map[string]interface{}{
+					utils.EVENT_NAME:  "TEST_EVENT_SESSION_TTL",
+					utils.ToR:         utils.VOICE,
+					utils.OriginID:    "12360",
+					utils.Account:     "1001",
+					utils.Subject:     "1001",
+					utils.Destination: "1008",
+					utils.Category:    "call",
+					utils.Tenant:      "cgrates.org",
+					utils.RequestType: utils.META_PREPAID,
+					utils.Usage:       usage,
+					utils.LastUsed:    lastUsage,
+				},
 			},
 		},
 	}
@@ -969,22 +1005,24 @@ func testSessionsVoiceSessionTTLWithRelocate(t *testing.T) {
 	usage := time.Duration(2 * time.Minute)
 	initArgs := &V1InitSessionArgs{
 		InitSession: true,
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "TestSessionsVoiceSessionTTLWithRelocate",
-			Event: map[string]interface{}{
-				utils.EVENT_NAME:  "TEST_EVENT_SESSION_TTL_RELOCATE",
-				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "12361",
-				utils.Account:     "TestTTLWithRelocate",
-				utils.Subject:     "TestTTLWithRelocate",
-				utils.Destination: "1009",
-				utils.Category:    "call",
-				utils.Tenant:      "cgrates.org",
-				utils.RequestType: utils.META_PREPAID,
-				utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC),
-				utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-				utils.Usage:       usage,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TestSessionsVoiceSessionTTLWithRelocate",
+				Event: map[string]interface{}{
+					utils.EVENT_NAME:  "TEST_EVENT_SESSION_TTL_RELOCATE",
+					utils.ToR:         utils.VOICE,
+					utils.OriginID:    "12361",
+					utils.Account:     "TestTTLWithRelocate",
+					utils.Subject:     "TestTTLWithRelocate",
+					utils.Destination: "1009",
+					utils.Category:    "call",
+					utils.Tenant:      "cgrates.org",
+					utils.RequestType: utils.META_PREPAID,
+					utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC),
+					utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
+					utils.Usage:       usage,
+				},
 			},
 		},
 	}
@@ -1025,24 +1063,26 @@ func testSessionsVoiceSessionTTLWithRelocate(t *testing.T) {
 	lastUsage := time.Duration(30 * time.Second)
 	updateArgs := &V1UpdateSessionArgs{
 		UpdateSession: true,
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "TestSessionsVoiceSessionTTLWithRelocate",
-			Event: map[string]interface{}{
-				utils.EVENT_NAME:      "TEST_EVENT_SESSION_TTL_RELOCATE",
-				utils.ToR:             utils.VOICE,
-				utils.InitialOriginID: "12361", //take the initial originID from init
-				utils.OriginID:        "12362",
-				utils.Account:         "TestTTLWithRelocate",
-				utils.Subject:         "TestTTLWithRelocate",
-				utils.Destination:     "1009",
-				utils.Category:        "call",
-				utils.Tenant:          "cgrates.org",
-				utils.RequestType:     utils.META_PREPAID,
-				utils.SetupTime:       time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC),
-				utils.AnswerTime:      time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-				utils.Usage:           usage,
-				utils.LastUsed:        lastUsage,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TestSessionsVoiceSessionTTLWithRelocate",
+				Event: map[string]interface{}{
+					utils.EVENT_NAME:      "TEST_EVENT_SESSION_TTL_RELOCATE",
+					utils.ToR:             utils.VOICE,
+					utils.InitialOriginID: "12361", //take the initial originID from init
+					utils.OriginID:        "12362",
+					utils.Account:         "TestTTLWithRelocate",
+					utils.Subject:         "TestTTLWithRelocate",
+					utils.Destination:     "1009",
+					utils.Category:        "call",
+					utils.Tenant:          "cgrates.org",
+					utils.RequestType:     utils.META_PREPAID,
+					utils.SetupTime:       time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC),
+					utils.AnswerTime:      time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
+					utils.Usage:           usage,
+					utils.LastUsed:        lastUsage,
+				},
 			},
 		},
 	}
@@ -1142,22 +1182,24 @@ func testSessionsVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 	usage := time.Duration(2 * time.Minute)
 	initArgs := &V1InitSessionArgs{
 		InitSession: true,
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "TestSessionsVoiceRelocateWithOriginIDPrefix",
-			Event: map[string]interface{}{
-				utils.EVENT_NAME:  "TEST_EVENT_RELOCATE_ORIGPREFIX",
-				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "12371",
-				utils.Account:     attrSetBalance.Account,
-				utils.Subject:     attrSetBalance.Account,
-				utils.Destination: "12371",
-				utils.Category:    "call",
-				utils.Tenant:      "cgrates.org",
-				utils.RequestType: utils.META_PREPAID,
-				utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC),
-				utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-				utils.Usage:       usage,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TestSessionsVoiceRelocateWithOriginIDPrefix",
+				Event: map[string]interface{}{
+					utils.EVENT_NAME:  "TEST_EVENT_RELOCATE_ORIGPREFIX",
+					utils.ToR:         utils.VOICE,
+					utils.OriginID:    "12371",
+					utils.Account:     attrSetBalance.Account,
+					utils.Subject:     attrSetBalance.Account,
+					utils.Destination: "12371",
+					utils.Category:    "call",
+					utils.Tenant:      "cgrates.org",
+					utils.RequestType: utils.META_PREPAID,
+					utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC),
+					utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
+					utils.Usage:       usage,
+				},
 			},
 		},
 	}
@@ -1198,24 +1240,26 @@ func testSessionsVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 	lastUsage := time.Duration(30 * time.Second)
 	updateArgs := &V1UpdateSessionArgs{
 		UpdateSession: true,
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "TestSessionsVoiceSessionTTLWithRelocate",
-			Event: map[string]interface{}{
-				utils.EVENT_NAME:      "TEST_EVENT_RELOCATE_ORIGPREFIX",
-				utils.ToR:             utils.VOICE,
-				utils.InitialOriginID: "12371",
-				utils.OriginID:        "12372-1",
-				utils.Account:         attrSetBalance.Account,
-				utils.Subject:         attrSetBalance.Account,
-				utils.Destination:     "12371",
-				utils.Category:        "call",
-				utils.Tenant:          "cgrates.org",
-				utils.RequestType:     utils.META_PREPAID,
-				utils.SetupTime:       time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC),
-				utils.AnswerTime:      time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-				utils.Usage:           usage,
-				utils.LastUsed:        lastUsage,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TestSessionsVoiceSessionTTLWithRelocate",
+				Event: map[string]interface{}{
+					utils.EVENT_NAME:      "TEST_EVENT_RELOCATE_ORIGPREFIX",
+					utils.ToR:             utils.VOICE,
+					utils.InitialOriginID: "12371",
+					utils.OriginID:        "12372-1",
+					utils.Account:         attrSetBalance.Account,
+					utils.Subject:         attrSetBalance.Account,
+					utils.Destination:     "12371",
+					utils.Category:        "call",
+					utils.Tenant:          "cgrates.org",
+					utils.RequestType:     utils.META_PREPAID,
+					utils.SetupTime:       time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC),
+					utils.AnswerTime:      time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
+					utils.Usage:           usage,
+					utils.LastUsed:        lastUsage,
+				},
 			},
 		},
 	}
@@ -1253,22 +1297,24 @@ func testSessionsVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 
 	termArgs := &V1TerminateSessionArgs{
 		TerminateSession: true,
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "TestSessionsVoiceLastUsedNotFixed",
-			Event: map[string]interface{}{
-				utils.EVENT_NAME:  "TEST_EVENT_RELOCATE_ORIGPREFIX",
-				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "12372-1",
-				utils.Account:     attrSetBalance.Account,
-				utils.Subject:     attrSetBalance.Account,
-				utils.Destination: "12371",
-				utils.Category:    "call",
-				utils.Tenant:      "cgrates.org",
-				utils.RequestType: utils.META_PREPAID,
-				utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC),
-				utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-				utils.Usage:       time.Duration(time.Minute),
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TestSessionsVoiceLastUsedNotFixed",
+				Event: map[string]interface{}{
+					utils.EVENT_NAME:  "TEST_EVENT_RELOCATE_ORIGPREFIX",
+					utils.ToR:         utils.VOICE,
+					utils.OriginID:    "12372-1",
+					utils.Account:     attrSetBalance.Account,
+					utils.Subject:     attrSetBalance.Account,
+					utils.Destination: "12371",
+					utils.Category:    "call",
+					utils.Tenant:      "cgrates.org",
+					utils.RequestType: utils.META_PREPAID,
+					utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC),
+					utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
+					utils.Usage:       time.Duration(time.Minute),
+				},
 			},
 		},
 	}
@@ -1299,7 +1345,7 @@ func testSessionsVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 			eAcntVal, acnt.BalanceMap[utils.VOICE].GetTotalValue())
 	}
 
-	if err := sessionsRPC.Call(utils.SessionSv1ProcessCDR, &utils.CGREventWithArgDispatcher{CGREvent: termArgs.CGREvent}, &reply); err != nil {
+	if err := sessionsRPC.Call(utils.SessionSv1ProcessCDR, &utils.CGREventWithOpts{CGREvent: termArgs.CGREvent}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received reply: %s", reply)

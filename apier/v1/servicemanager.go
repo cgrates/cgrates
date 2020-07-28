@@ -32,20 +32,20 @@ type ServiceManagerV1 struct {
 	sm *servmanager.ServiceManager // Need to have them capitalize so we can export in V2
 }
 
-func (servManager *ServiceManagerV1) StartService(args *dispatchers.ArgStartServiceWithApiKey, reply *string) (err error) {
+func (servManager *ServiceManagerV1) StartService(args *dispatchers.ArgStartServiceWithOpts, reply *string) (err error) {
 	return servManager.sm.V1StartService(args.ArgStartService, reply)
 }
 
-func (servManager *ServiceManagerV1) StopService(args *dispatchers.ArgStartServiceWithApiKey, reply *string) (err error) {
+func (servManager *ServiceManagerV1) StopService(args *dispatchers.ArgStartServiceWithOpts, reply *string) (err error) {
 	return servManager.sm.V1StopService(args.ArgStartService, reply)
 }
 
-func (servManager *ServiceManagerV1) ServiceStatus(args *dispatchers.ArgStartServiceWithApiKey, reply *string) (err error) {
+func (servManager *ServiceManagerV1) ServiceStatus(args *dispatchers.ArgStartServiceWithOpts, reply *string) (err error) {
 	return servManager.sm.V1ServiceStatus(args.ArgStartService, reply)
 }
 
 // Ping return pong if the service is active
-func (servManager *ServiceManagerV1) Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error {
+func (servManager *ServiceManagerV1) Ping(ign *utils.CGREventWithOpts, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

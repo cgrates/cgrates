@@ -26,311 +26,272 @@ import (
 )
 
 // CacheSv1Ping interogates CacheSv1 server responsible to process the event
-func (dS *DispatcherService) CacheSv1Ping(args *utils.CGREventWithArgDispatcher,
+func (dS *DispatcherService) CacheSv1Ping(args *utils.CGREventWithOpts,
 	reply *string) (err error) {
 	if args == nil {
-		args = utils.NewCGREventWithArgDispatcher()
+		args = new(utils.CGREventWithOpts)
 	}
-	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.CGREvent != nil && args.CGREvent.Tenant != utils.EmptyString {
+		tnt = args.CGREvent.Tenant
+	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
-		}
-		if err = dS.authorize(utils.CacheSv1Ping, args.CGREvent.Tenant,
-			args.APIKey, args.CGREvent.Time); err != nil {
+		if err = dS.authorize(utils.CacheSv1Ping, tnt,
+			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
 			return
 		}
 	}
-	var routeID *string
-	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
-	}
-	return dS.Dispatch(args.CGREvent, utils.MetaCaches, routeID,
-		utils.CacheSv1Ping, args, reply)
+	return dS.Dispatch(args, utils.MetaCaches, utils.CacheSv1Ping, args, reply)
 }
 
-// GetItemIDs returns the IDs for cacheID with given prefix
-func (dS *DispatcherService) CacheSv1GetItemIDs(args *utils.ArgsGetCacheItemIDsWithArgDispatcher,
+// CacheSv1GetItemIDs returns the IDs for cacheID with given prefix
+func (dS *DispatcherService) CacheSv1GetItemIDs(args *utils.ArgsGetCacheItemIDsWithOpts,
 	reply *[]string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.TenantArg.Tenant != utils.EmptyString {
 		tnt = args.TenantArg.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
-		}
 		if err = dS.authorize(utils.CacheSv1GetItemIDs, tnt,
-			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
-	var routeID *string
-	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
-	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCaches, routeID,
-		utils.CacheSv1GetItemIDs, args, reply)
+	return dS.Dispatch(&utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
+			Tenant: tnt,
+		},
+		Opts: args.Opts,
+	}, utils.MetaCaches, utils.CacheSv1GetItemIDs, args, reply)
 }
 
-// HasItem verifies the existence of an Item in cache
-func (dS *DispatcherService) CacheSv1HasItem(args *utils.ArgsGetCacheItemWithArgDispatcher,
+// CacheSv1HasItem verifies the existence of an Item in cache
+func (dS *DispatcherService) CacheSv1HasItem(args *utils.ArgsGetCacheItemWithOpts,
 	reply *bool) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.TenantArg.Tenant != utils.EmptyString {
 		tnt = args.TenantArg.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
-		}
 		if err = dS.authorize(utils.CacheSv1HasItem, tnt,
-			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
-	var routeID *string
-	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
-	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCaches, routeID,
-		utils.CacheSv1HasItem, args, reply)
+
+	return dS.Dispatch(&utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
+			Tenant: tnt,
+		},
+		Opts: args.Opts,
+	}, utils.MetaCaches, utils.CacheSv1HasItem, args, reply)
 }
 
-// GetItemExpiryTime returns the expiryTime for an item
-func (dS *DispatcherService) CacheSv1GetItemExpiryTime(args *utils.ArgsGetCacheItemWithArgDispatcher,
+// CacheSv1GetItemExpiryTime returns the expiryTime for an item
+func (dS *DispatcherService) CacheSv1GetItemExpiryTime(args *utils.ArgsGetCacheItemWithOpts,
 	reply *time.Time) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.TenantArg.Tenant != utils.EmptyString {
 		tnt = args.TenantArg.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
-		}
 		if err = dS.authorize(utils.CacheSv1GetItemExpiryTime, tnt,
-			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
-	var routeID *string
-	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
-	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCaches, routeID,
-		utils.CacheSv1GetItemExpiryTime, args, reply)
+
+	return dS.Dispatch(&utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
+			Tenant: tnt,
+		},
+		Opts: args.Opts,
+	}, utils.MetaCaches, utils.CacheSv1GetItemExpiryTime, args, reply)
 }
 
-// RemoveItem removes the Item with ID from cache
-func (dS *DispatcherService) CacheSv1RemoveItem(args *utils.ArgsGetCacheItemWithArgDispatcher,
+// CacheSv1RemoveItem removes the Item with ID from cache
+func (dS *DispatcherService) CacheSv1RemoveItem(args *utils.ArgsGetCacheItemWithOpts,
 	reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.TenantArg.Tenant != utils.EmptyString {
 		tnt = args.TenantArg.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
-		}
 		if err = dS.authorize(utils.CacheSv1RemoveItem, tnt,
-			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
-	var routeID *string
-	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
-	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCaches, routeID,
-		utils.CacheSv1RemoveItem, args, reply)
+	return dS.Dispatch(&utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
+			Tenant: tnt,
+		},
+		Opts: args.Opts,
+	}, utils.MetaCaches, utils.CacheSv1RemoveItem, args, reply)
 }
 
-// Clear will clear partitions in the cache (nil fol all, empty slice for none)
-func (dS *DispatcherService) CacheSv1Clear(args *utils.AttrCacheIDsWithArgDispatcher,
+// CacheSv1Clear will clear partitions in the cache (nil fol all, empty slice for none)
+func (dS *DispatcherService) CacheSv1Clear(args *utils.AttrCacheIDsWithOpts,
 	reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.TenantArg.Tenant != utils.EmptyString {
 		tnt = args.TenantArg.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
-		}
 		if err = dS.authorize(utils.CacheSv1Clear, tnt,
-			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
-	var routeID *string
-	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
-	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCaches, routeID,
-		utils.CacheSv1Clear, args, reply)
+	return dS.Dispatch(&utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
+			Tenant: tnt,
+		},
+		Opts: args.Opts,
+	}, utils.MetaCaches, utils.CacheSv1Clear, args, reply)
 }
 
-// GetCacheStats returns CacheStats filtered by cacheIDs
-func (dS *DispatcherService) CacheSv1GetCacheStats(args *utils.AttrCacheIDsWithArgDispatcher,
+// CacheSv1GetCacheStats returns CacheStats filtered by cacheIDs
+func (dS *DispatcherService) CacheSv1GetCacheStats(args *utils.AttrCacheIDsWithOpts,
 	reply *map[string]*ltcache.CacheStats) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.TenantArg.Tenant != utils.EmptyString {
 		tnt = args.TenantArg.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
-		}
 		if err = dS.authorize(utils.CacheSv1GetCacheStats, tnt,
-			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
-	var routeID *string
-	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
-	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCaches, routeID,
-		utils.CacheSv1GetCacheStats, args, reply)
+	return dS.Dispatch(&utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
+			Tenant: tnt,
+		},
+		Opts: args.Opts,
+	}, utils.MetaCaches, utils.CacheSv1GetCacheStats, args, reply)
 }
 
-// PrecacheStatus checks status of active precache processes
-func (dS *DispatcherService) CacheSv1PrecacheStatus(args *utils.AttrCacheIDsWithArgDispatcher, reply *map[string]string) (err error) {
+// CacheSv1PrecacheStatus checks status of active precache processes
+func (dS *DispatcherService) CacheSv1PrecacheStatus(args *utils.AttrCacheIDsWithOpts, reply *map[string]string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.TenantArg.Tenant != utils.EmptyString {
 		tnt = args.TenantArg.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
-		}
 		if err = dS.authorize(utils.CacheSv1PrecacheStatus, tnt,
-			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
-	var routeID *string
-	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
-	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCaches, routeID,
-		utils.CacheSv1PrecacheStatus, args, reply)
+	return dS.Dispatch(&utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
+			Tenant: tnt,
+		},
+		Opts: args.Opts,
+	}, utils.MetaCaches, utils.CacheSv1PrecacheStatus, args, reply)
 }
 
-// HasGroup checks existence of a group in cache
-func (dS *DispatcherService) CacheSv1HasGroup(args *utils.ArgsGetGroupWithArgDispatcher,
+// CacheSv1HasGroup checks existence of a group in cache
+func (dS *DispatcherService) CacheSv1HasGroup(args *utils.ArgsGetGroupWithOpts,
 	reply *bool) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.TenantArg.Tenant != utils.EmptyString {
 		tnt = args.TenantArg.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
-		}
 		if err = dS.authorize(utils.CacheSv1HasGroup, tnt,
-			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
-	var routeID *string
-	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
-	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCaches, routeID,
-		utils.CacheSv1HasGroup, args, reply)
+	return dS.Dispatch(&utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
+			Tenant: tnt,
+		},
+		Opts: args.Opts,
+	}, utils.MetaCaches, utils.CacheSv1HasGroup, args, reply)
 }
 
 // GetGroupItemIDs returns a list of itemIDs in a cache group
-func (dS *DispatcherService) CacheSv1GetGroupItemIDs(args *utils.ArgsGetGroupWithArgDispatcher,
+func (dS *DispatcherService) CacheSv1GetGroupItemIDs(args *utils.ArgsGetGroupWithOpts,
 	reply *[]string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.TenantArg.Tenant != utils.EmptyString {
 		tnt = args.TenantArg.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
-		}
 		if err = dS.authorize(utils.CacheSv1GetGroupItemIDs, tnt,
-			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
-	var routeID *string
-	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
-	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCaches, routeID,
-		utils.CacheSv1GetGroupItemIDs, args, reply)
+	return dS.Dispatch(&utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
+			Tenant: tnt,
+		},
+		Opts: args.Opts,
+	}, utils.MetaCaches, utils.CacheSv1GetGroupItemIDs, args, reply)
 }
 
 // RemoveGroup will remove a group and all items belonging to it from cache
-func (dS *DispatcherService) CacheSv1RemoveGroup(args *utils.ArgsGetGroupWithArgDispatcher, reply *string) (err error) {
+func (dS *DispatcherService) CacheSv1RemoveGroup(args *utils.ArgsGetGroupWithOpts, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.TenantArg.Tenant != utils.EmptyString {
 		tnt = args.TenantArg.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
-		}
 		if err = dS.authorize(utils.CacheSv1RemoveGroup, tnt,
-			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
-	var routeID *string
-	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
-	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCaches, routeID,
-		utils.CacheSv1RemoveGroup, args, reply)
+	return dS.Dispatch(&utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
+			Tenant: tnt,
+		},
+		Opts: args.Opts,
+	}, utils.MetaCaches, utils.CacheSv1RemoveGroup, args, reply)
 }
 
 // ReloadCache reloads cache from DB for a prefix or completely
-func (dS *DispatcherService) CacheSv1ReloadCache(args utils.AttrReloadCacheWithArgDispatcher, reply *string) (err error) {
+func (dS *DispatcherService) CacheSv1ReloadCache(args utils.AttrReloadCacheWithOpts, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.TenantArg.Tenant != utils.EmptyString {
 		tnt = args.TenantArg.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
-		}
 		if err = dS.authorize(utils.CacheSv1ReloadCache, tnt,
-			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
-	var routeID *string
-	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
-	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCaches, routeID,
-		utils.CacheSv1ReloadCache, args, reply)
+	return dS.Dispatch(&utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
+			Tenant: tnt,
+		},
+		Opts: args.Opts,
+	}, utils.MetaCaches, utils.CacheSv1ReloadCache, args, reply)
 }
 
 // LoadCache loads cache from DB for a prefix or completely
-func (dS *DispatcherService) CacheSv1LoadCache(args utils.AttrReloadCacheWithArgDispatcher, reply *string) (err error) {
+func (dS *DispatcherService) CacheSv1LoadCache(args utils.AttrReloadCacheWithOpts, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.TenantArg.Tenant != utils.EmptyString {
 		tnt = args.TenantArg.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
-		}
 		if err = dS.authorize(utils.CacheSv1LoadCache, tnt,
-			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
-	var routeID *string
-	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
-	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCaches, routeID,
-		utils.CacheSv1LoadCache, args, reply)
+	return dS.Dispatch(&utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
+			Tenant: tnt,
+		},
+		Opts: args.Opts,
+	}, utils.MetaCaches, utils.CacheSv1LoadCache, args, reply)
 }
 
 // ReplicateRemove remove an item
@@ -340,20 +301,17 @@ func (dS *DispatcherService) CacheSv1ReplicateRemove(args *utils.ArgCacheReplica
 		tnt = args.TenantArg.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
-		}
 		if err = dS.authorize(utils.CacheSv1ReplicateRemove, tnt,
-			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
-	var routeID *string
-	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
-	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCaches, routeID,
-		utils.CacheSv1ReplicateRemove, args, reply)
+	return dS.Dispatch(&utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
+			Tenant: tnt,
+		},
+		Opts: args.Opts,
+	}, utils.MetaCaches, utils.CacheSv1ReplicateRemove, args, reply)
 }
 
 // ReplicateSet replicate an item
@@ -363,18 +321,15 @@ func (dS *DispatcherService) CacheSv1ReplicateSet(args *utils.ArgCacheReplicateS
 		tnt = args.TenantArg.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
-		}
 		if err = dS.authorize(utils.CacheSv1ReplicateSet, tnt,
-			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
-	var routeID *string
-	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
-	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCaches, routeID,
-		utils.CacheSv1ReplicateSet, args, reply)
+	return dS.Dispatch(&utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
+			Tenant: tnt,
+		},
+		Opts: args.Opts,
+	}, utils.MetaCaches, utils.CacheSv1ReplicateSet, args, reply)
 }

@@ -66,12 +66,12 @@ func testDspRALsPing(t *testing.T) {
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	if err := dispEngine.RPC.Call(utils.RALsV1Ping, &utils.CGREventWithArgDispatcher{
+	if err := dispEngine.RPC.Call(utils.RALsV1Ping, &utils.CGREventWithOpts{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 		},
-		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("rals12345"),
+		Opts: map[string]interface{}{
+			utils.OptsAPIKey: "rals12345",
 		},
 	}, &reply); err != nil {
 		t.Error(err)
@@ -86,8 +86,8 @@ func testDspRALsGetRatingPlanCost(t *testing.T) {
 		RatingPlanIDs: []string{"RP_1001", "RP_1002"},
 		SetupTime:     utils.META_NOW,
 		Usage:         "1h",
-		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("rals12345"),
+		Opts: map[string]interface{}{
+			utils.OptsAPIKey: "rals12345",
 		},
 	}
 	var reply RatingPlanCost

@@ -314,7 +314,7 @@ func singnalHandler(exitChan chan bool) {
 			go func() {
 				var reply string
 				if err := config.CgrConfig().V1ReloadConfigFromPath(
-					&config.ConfigReloadWithArgDispatcher{
+					&config.ConfigReloadWithOpts{
 						Section: utils.EmptyString,
 						Path:    config.CgrConfig().ConfigPath, // use the same path
 					}, &reply); err != nil {

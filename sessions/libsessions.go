@@ -252,7 +252,7 @@ type V1STIRAuthenticateArgs struct {
 	OriginatorTn       string   // the expected originator telephone number
 	OriginatorURI      string   // the expected originator URI; if this is populated the OriginatorTn is ignored
 	PayloadMaxDuration string   // the duration the payload is valid after it's creation
-	*utils.ArgDispatcher
+	Opts               map[string]interface{}
 }
 
 // V1STIRIdentityArgs are the arguments for STIRIdentity API
@@ -261,7 +261,7 @@ type V1STIRIdentityArgs struct {
 	PublicKeyPath  string                 // the path to the public key used in the header
 	PrivateKeyPath string                 // the private key path
 	OverwriteIAT   bool                   // if true the IAT from payload is overwrited with the present unix timestamp
-	*utils.ArgDispatcher
+	Opts           map[string]interface{}
 }
 
 // getDerivedEvents returns only the *raw event if derivedReply flag is not specified

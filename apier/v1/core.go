@@ -40,12 +40,12 @@ func (cS *CoreSv1) Call(serviceMethod string,
 	return utils.APIerRPCCall(cS, serviceMethod, args, reply)
 }
 
-func (cS *CoreSv1) Status(arg *utils.TenantWithArgDispatcher, reply *map[string]interface{}) error {
+func (cS *CoreSv1) Status(arg *utils.TenantWithOpts, reply *map[string]interface{}) error {
 	return cS.cS.Status(arg, reply)
 }
 
 // Ping used to determinate if component is active
-func (cS *CoreSv1) Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error {
+func (cS *CoreSv1) Ping(ign *utils.CGREventWithOpts, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

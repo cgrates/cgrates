@@ -29,7 +29,7 @@ func init() {
 	c := &CmdThresholdProcessEvent{
 		name:      "thresholds_process_event",
 		rpcMethod: utils.ThresholdSv1ProcessEvent,
-		rpcParams: &engine.ArgsProcessEvent{},
+		rpcParams: &engine.ThresholdsArgsProcessEvent{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -38,7 +38,7 @@ func init() {
 type CmdThresholdProcessEvent struct {
 	name      string
 	rpcMethod string
-	rpcParams *engine.ArgsProcessEvent
+	rpcParams *engine.ThresholdsArgsProcessEvent
 	*CommandExecuter
 }
 
@@ -52,7 +52,7 @@ func (self *CmdThresholdProcessEvent) RpcMethod() string {
 
 func (self *CmdThresholdProcessEvent) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &engine.ArgsProcessEvent{ArgDispatcher: new(utils.ArgDispatcher)}
+		self.rpcParams = &engine.ThresholdsArgsProcessEvent{CGREventWithOpts: &utils.CGREventWithOpts{Opts: make(map[string]interface{})}}
 	}
 	return self.rpcParams
 }

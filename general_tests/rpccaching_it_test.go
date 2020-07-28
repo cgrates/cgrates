@@ -230,7 +230,7 @@ func testRPCMethodsAuthorizeSession(t *testing.T) {
 
 	//disable the account
 	var ids []string
-	thEvent := &engine.ArgsProcessEvent{
+	thEvent := &engine.ThresholdsArgsProcessEvent{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "DisableAccount",
@@ -325,7 +325,7 @@ func testRPCMethodsInitSession(t *testing.T) {
 
 	//disable the account
 	var ids []string
-	thEvent := &engine.ArgsProcessEvent{
+	thEvent := &engine.ThresholdsArgsProcessEvent{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "DisableAccount",
@@ -421,7 +421,7 @@ func testRPCMethodsUpdateSession(t *testing.T) {
 
 	//disable the account
 	var ids []string
-	thEvent := &engine.ArgsProcessEvent{
+	thEvent := &engine.ThresholdsArgsProcessEvent{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "DisableAccount",
@@ -533,7 +533,7 @@ func testRPCMethodsTerminateSession(t *testing.T) {
 }
 
 func testRPCMethodsProcessCDR(t *testing.T) {
-	args := &engine.ArgsProcessEvent{
+	args := &engine.ThresholdsArgsProcessEvent{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testRPCMethodsProcessCDR",
@@ -561,7 +561,7 @@ func testRPCMethodsProcessCDR(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
 	//verify the CDR
 	var cdrs []*engine.CDR
-	argsCDR := &utils.RPCCDRsFilterWithArgDispatcher{RPCCDRsFilter: &utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault}}}
+	argsCDR := &utils.RPCCDRsFilterWithOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault}}}
 	if err := rpcRpc.Call(utils.CDRsV1GetCDRs, argsCDR, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
@@ -635,7 +635,7 @@ func testRPCMethodsProcessEvent(t *testing.T) {
 
 	//disable the account
 	var ids []string
-	thEvent := &engine.ArgsProcessEvent{
+	thEvent := &engine.ThresholdsArgsProcessEvent{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "DisableAccount",
@@ -727,7 +727,7 @@ func testRPCMethodsCdrsProcessCDR(t *testing.T) {
 	time.Sleep(time.Duration(150) * time.Millisecond) // Give time for CDR to be rated
 	//verify the CDR
 	var cdrs []*engine.CDR
-	argsCDR := utils.RPCCDRsFilterWithArgDispatcher{RPCCDRsFilter: &utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault}}}
+	argsCDR := utils.RPCCDRsFilterWithOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault}}}
 	if err := rpcRpc.Call(utils.CDRsV1GetCDRs, &argsCDR, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
@@ -828,7 +828,7 @@ func testRPCMethodsLoadData(t *testing.T) {
 
 func testRPCMethodsResponderDebit(t *testing.T) {
 	tStart := time.Date(2016, 3, 31, 0, 0, 0, 0, time.UTC)
-	cd := &engine.CallDescriptorWithArgDispatcher{
+	cd := &engine.CallDescriptorWithOpts{
 		CallDescriptor: &engine.CallDescriptor{
 			CgrID:         "testRPCMethodsResponderDebit",
 			Category:      "call",
@@ -851,7 +851,7 @@ func testRPCMethodsResponderDebit(t *testing.T) {
 		t.Errorf("Expecting: %+v, \n received: %+v",
 			15, cc.Cost)
 	}
-	cd2 := &engine.CallDescriptorWithArgDispatcher{
+	cd2 := &engine.CallDescriptorWithOpts{
 		CallDescriptor: &engine.CallDescriptor{
 			CgrID: "testRPCMethodsResponderDebit",
 		},
@@ -873,7 +873,7 @@ func testRPCMethodsResponderDebit(t *testing.T) {
 
 func testRPCMethodsResponderMaxDebit(t *testing.T) {
 	tStart := time.Date(2016, 3, 31, 0, 0, 0, 0, time.UTC)
-	cd := &engine.CallDescriptorWithArgDispatcher{
+	cd := &engine.CallDescriptorWithOpts{
 		CallDescriptor: &engine.CallDescriptor{
 			CgrID:         "testRPCMethodsResponderMaxDebit",
 			Category:      "call",
@@ -897,7 +897,7 @@ func testRPCMethodsResponderMaxDebit(t *testing.T) {
 		t.Errorf("Expecting: %+v, \n received: %+v",
 			0, cc.Cost)
 	}
-	cd2 := &engine.CallDescriptorWithArgDispatcher{
+	cd2 := &engine.CallDescriptorWithOpts{
 		CallDescriptor: &engine.CallDescriptor{
 			CgrID: "testRPCMethodsResponderMaxDebit",
 		},

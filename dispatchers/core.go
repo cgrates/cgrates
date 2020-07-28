@@ -24,47 +24,36 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (dS *DispatcherService) CoreSv1Status(args *utils.TenantWithArgDispatcher,
+func (dS *DispatcherService) CoreSv1Status(args *utils.TenantWithOpts,
 	reply *map[string]interface{}) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.TenantArg != nil && args.TenantArg.Tenant != utils.EmptyString {
 		tnt = args.TenantArg.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
-		}
 		if err = dS.authorize(utils.CoreSv1Status, tnt,
-			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
-	var routeID *string
-	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
-	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCore,
-		routeID, utils.CoreSv1Status, args, reply)
+	return dS.Dispatch(&utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
+			Tenant: tnt,
+		},
+		Opts: args.Opts,
+	}, utils.MetaCore, utils.CoreSv1Status, args, reply)
 }
 
-func (dS *DispatcherService) CoreSv1Ping(args *utils.CGREventWithArgDispatcher, reply *string) (err error) {
+func (dS *DispatcherService) CoreSv1Ping(args *utils.CGREventWithOpts, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.CGREvent != nil && args.CGREvent.Tenant != utils.EmptyString {
 		tnt = args.CGREvent.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
-		}
 		if err = dS.authorize(utils.CoreSv1Ping, tnt,
-			args.APIKey, args.Time); err != nil {
+			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.Time); err != nil {
 			return
 		}
 	}
-	var routeID *string
-	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
-	}
-	return dS.Dispatch(args.CGREvent, utils.MetaCore, routeID,
-		utils.CoreSv1Ping, args, reply)
+	return dS.Dispatch(args, utils.MetaCore, utils.CoreSv1Ping, args, reply)
 }

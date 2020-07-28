@@ -177,11 +177,11 @@ type TPTiming struct {
 	EndTime   string
 }
 
-// TPTimingWithArgDispatcher is used in replicatorV1 for dispatcher
-type TPTimingWithArgDispatcher struct {
+// TPTimingWithOpts is used in replicatorV1 for dispatcher
+type TPTimingWithOpts struct {
 	*TPTiming
 	TenantArg
-	*ArgDispatcher
+	Opts map[string]interface{}
 }
 
 func NewTiming(ID, years, mounths, mounthdays, weekdays, time string) (rt *TPTiming) {
@@ -611,19 +611,19 @@ func (fltr *AttrGetCdrs) AsCDRsFilter(timezone string) (cdrFltr *CDRsFilter, err
 }
 
 type AttrLoadTpFromFolder struct {
-	FolderPath    string // Take files from folder absolute path
-	DryRun        bool   // Do not write to database but parse only
-	Validate      bool   // Run structural checks on data
-	ArgDispatcher *ArgDispatcher
-	Caching       *string
+	FolderPath string // Take files from folder absolute path
+	DryRun     bool   // Do not write to database but parse only
+	Validate   bool   // Run structural checks on data
+	Opts       map[string]interface{}
+	Caching    *string
 }
 
 type AttrImportTPFromFolder struct {
-	TPid          string
-	FolderPath    string
-	RunId         string
-	CsvSeparator  string
-	ArgDispatcher *ArgDispatcher
+	TPid         string
+	FolderPath   string
+	RunId        string
+	CsvSeparator string
+	Opts         map[string]interface{}
 }
 
 func NewTAFromAccountKey(accountKey string) (*TenantAccount, error) {
@@ -953,11 +953,10 @@ type TPActivationInterval struct {
 }
 
 type ArgRSv1ResourceUsage struct {
-	*CGREvent
+	*CGREventWithOpts
 	UsageID  string // ResourceUsage Identifier
 	UsageTTL *time.Duration
 	Units    float64
-	*ArgDispatcher
 }
 
 type ArgsComputeFilterIndexIDs struct {
@@ -1301,38 +1300,38 @@ func AppendToSMCostFilter(smcFilter *SMCostFilter, fieldType, fieldName string,
 	return smcFilter, err
 }
 
-type RPCCDRsFilterWithArgDispatcher struct {
+type RPCCDRsFilterWithOpts struct {
 	*RPCCDRsFilter
-	*ArgDispatcher
+	Opts map[string]interface{}
 	*TenantArg
 }
 
-type ArgsGetCacheItemIDsWithArgDispatcher struct {
-	*ArgDispatcher
+type ArgsGetCacheItemIDsWithOpts struct {
+	Opts map[string]interface{}
 	TenantArg
 	ArgsGetCacheItemIDs
 }
 
-type ArgsGetCacheItemWithArgDispatcher struct {
-	*ArgDispatcher
+type ArgsGetCacheItemWithOpts struct {
+	Opts map[string]interface{}
 	TenantArg
 	ArgsGetCacheItem
 }
 
-type AttrReloadCacheWithArgDispatcher struct {
-	*ArgDispatcher
+type AttrReloadCacheWithOpts struct {
+	Opts map[string]interface{}
 	TenantArg
 	ArgsCache
 }
 
-type AttrCacheIDsWithArgDispatcher struct {
-	*ArgDispatcher
+type AttrCacheIDsWithOpts struct {
+	Opts map[string]interface{}
 	TenantArg
 	CacheIDs []string
 }
 
-type ArgsGetGroupWithArgDispatcher struct {
-	*ArgDispatcher
+type ArgsGetGroupWithOpts struct {
+	Opts map[string]interface{}
 	TenantArg
 	ArgsGetGroup
 }
@@ -1356,28 +1355,7 @@ type SessionFilter struct {
 	Limit   *int
 	Filters []string
 	Tenant  string
-	*ArgDispatcher
-}
-
-// ArgDispatcher the basic information for dispatcher
-type ArgDispatcher struct {
-	APIKey  *string
-	RouteID *string
-}
-
-// Clone returns a copy of the ArgDispatcher
-func (arg *ArgDispatcher) Clone() (clned *ArgDispatcher) {
-	if arg == nil {
-		return
-	}
-	clned = new(ArgDispatcher)
-	if arg.APIKey != nil {
-		clned.APIKey = StringPointer(*arg.APIKey)
-	}
-	if arg.RouteID != nil {
-		clned.RouteID = StringPointer(*arg.RouteID)
-	}
-	return
+	Opts    map[string]interface{}
 }
 
 type RatingPlanCostArg struct {
@@ -1385,12 +1363,12 @@ type RatingPlanCostArg struct {
 	Destination   string
 	SetupTime     string
 	Usage         string
-	*ArgDispatcher
+	Opts          map[string]interface{}
 }
 type SessionIDsWithArgsDispatcher struct {
 	IDs    []string
 	Tenant string
-	*ArgDispatcher
+	Opts   map[string]interface{}
 }
 
 type GetCostOnRatingPlansArgs struct {
@@ -1425,29 +1403,33 @@ type DPRArgs struct {
 }
 
 type ArgCacheReplicateSet struct {
-	CacheID, ItemID string
-	Value           interface{}
-	*ArgDispatcher
+	CacheID string
+	ItemID  string
+	Value   interface{}
+	Opts    map[string]interface{}
 	TenantArg
 }
 
 type ArgCacheReplicateRemove struct {
-	CacheID, ItemID string
-	*ArgDispatcher
+	CacheID string
+	ItemID  string
+	Opts    map[string]interface{}
 	TenantArg
 }
 
 type AttrsExecuteActions struct {
-	ActionPlanID       string
-	TimeStart, TimeEnd time.Time // replay the action timings between the two dates
-	*ArgDispatcher
+	ActionPlanID string
+	TimeStart    time.Time
+	TimeEnd      time.Time // replay the action timings between the two dates
+	Opts         map[string]interface{}
 	TenantArg
 }
 
 type AttrsExecuteActionPlans struct {
-	ActionPlanIDs     []string
-	Tenant, AccountID string
-	*ArgDispatcher
+	ActionPlanIDs []string
+	Tenant        string
+	AccountID     string
+	Opts          map[string]interface{}
 	TenantArg
 }
 

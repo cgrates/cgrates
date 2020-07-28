@@ -60,7 +60,7 @@ func (rsv1 *ResourceSv1) ReleaseResources(args *utils.ArgRSv1ResourceUsage, repl
 }
 
 // GetResource returns a resource configuration
-func (rsv1 *ResourceSv1) GetResource(args *utils.TenantIDWithArgDispatcher, reply *engine.Resource) error {
+func (rsv1 *ResourceSv1) GetResource(args *utils.TenantIDWithOpts, reply *engine.Resource) error {
 	return rsv1.rls.V1GetResource(args, reply)
 }
 
@@ -188,7 +188,7 @@ func (apierSv1 *APIerSv1) RemoveResourceProfile(arg *utils.TenantIDWithCache, re
 	return nil
 }
 
-func (rsv1 *ResourceSv1) Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error {
+func (rsv1 *ResourceSv1) Ping(ign *utils.CGREventWithOpts, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

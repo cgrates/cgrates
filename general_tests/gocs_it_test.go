@@ -537,7 +537,7 @@ func testGOCSTerminateSession(t *testing.T) {
 }
 
 func testGOCSProcessCDR(t *testing.T) {
-	args := &utils.CGREventWithArgDispatcher{
+	args := &utils.CGREventWithOpts{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItProcessCDR",

@@ -32,7 +32,7 @@ type AttrGetCost struct {
 	AnswerTime  string
 	Destination string
 	Usage       string
-	*utils.ArgDispatcher
+	Opts        map[string]interface{}
 }
 
 func (apierSv1 *APIerSv1) GetCost(attrs *AttrGetCost, ec *engine.EventCost) error {
@@ -60,9 +60,10 @@ func (apierSv1 *APIerSv1) GetCost(attrs *AttrGetCost, ec *engine.EventCost) erro
 	}
 	var cc engine.CallCost
 	if err := apierSv1.Responder.GetCost(
-		&engine.CallDescriptorWithArgDispatcher{
+		&engine.CallDescriptorWithOpts{
 			CallDescriptor: cd,
-			ArgDispatcher:  attrs.ArgDispatcher}, &cc); err != nil {
+			Opts:           attrs.Opts,
+		}, &cc); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*ec = *engine.NewEventCostFromCallCost(&cc, "", "")
@@ -76,7 +77,7 @@ type AttrGetDataCost struct {
 	Subject    string
 	AnswerTime string
 	Usage      time.Duration // the call duration so far (till TimeEnd)
-	*utils.ArgDispatcher
+	Opts       map[string]interface{}
 }
 
 func (apierSv1 *APIerSv1) GetDataCost(attrs *AttrGetDataCost, reply *engine.DataCost) error {
@@ -98,8 +99,10 @@ func (apierSv1 *APIerSv1) GetDataCost(attrs *AttrGetDataCost, reply *engine.Data
 		ToR:           utils.DATA,
 	}
 	var cc engine.CallCost
-	if err := apierSv1.Responder.GetCost(&engine.CallDescriptorWithArgDispatcher{CallDescriptor: cd,
-		ArgDispatcher: attrs.ArgDispatcher}, &cc); err != nil {
+	if err := apierSv1.Responder.GetCost(&engine.CallDescriptorWithOpts{
+		CallDescriptor: cd,
+		Opts:           attrs.Opts,
+	}, &cc); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	if dc, err := cc.ToDataCost(); err != nil {

@@ -27,7 +27,7 @@ func init() {
 	c := &CmdGetJSONConfig{
 		name:      "get_json_section",
 		rpcMethod: utils.ConfigSv1GetJSONSection,
-		rpcParams: &config.StringWithArgDispatcher{},
+		rpcParams: &config.StringWithOpts{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -37,7 +37,7 @@ func init() {
 type CmdGetJSONConfig struct {
 	name      string
 	rpcMethod string
-	rpcParams *config.StringWithArgDispatcher
+	rpcParams *config.StringWithOpts
 	*CommandExecuter
 }
 
@@ -51,7 +51,7 @@ func (self *CmdGetJSONConfig) RpcMethod() string {
 
 func (self *CmdGetJSONConfig) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &config.StringWithArgDispatcher{ArgDispatcher: new(utils.ArgDispatcher)}
+		self.rpcParams = &config.StringWithOpts{Opts: make(map[string]interface{})}
 	}
 	return self.rpcParams
 }

@@ -169,22 +169,24 @@ func testSessionsBiRPCSessionAutomaticDisconnects(t *testing.T) {
 
 	initArgs := &V1InitSessionArgs{
 		InitSession: true,
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "TestSessionsBiRPCSessionAutomaticDisconnects",
-			Event: map[string]interface{}{
-				utils.EVENT_NAME:  "TEST_EVENT",
-				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "123451",
-				utils.Account:     attrSetBalance.Account,
-				utils.Subject:     attrSetBalance.Account,
-				utils.Destination: "1004",
-				utils.Category:    "call",
-				utils.Tenant:      attrSetBalance.Tenant,
-				utils.RequestType: utils.META_PREPAID,
-				utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
-				utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-				utils.Usage:       time.Duration(200 * time.Millisecond),
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TestSessionsBiRPCSessionAutomaticDisconnects",
+				Event: map[string]interface{}{
+					utils.EVENT_NAME:  "TEST_EVENT",
+					utils.ToR:         utils.VOICE,
+					utils.OriginID:    "123451",
+					utils.Account:     attrSetBalance.Account,
+					utils.Subject:     attrSetBalance.Account,
+					utils.Destination: "1004",
+					utils.Category:    "call",
+					utils.Tenant:      attrSetBalance.Tenant,
+					utils.RequestType: utils.META_PREPAID,
+					utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
+					utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
+					utils.Usage:       time.Duration(200 * time.Millisecond),
+				},
 			},
 		},
 	}
@@ -211,22 +213,24 @@ func testSessionsBiRPCSessionAutomaticDisconnects(t *testing.T) {
 	}
 	termArgs := &V1TerminateSessionArgs{
 		TerminateSession: true,
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "TestSessionsDataLastUsedData",
-			Event: map[string]interface{}{
-				utils.EVENT_NAME:  "TEST_EVENT",
-				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "123451",
-				utils.Account:     attrSetBalance.Account,
-				utils.Subject:     attrSetBalance.Account,
-				utils.Destination: "1004",
-				utils.Category:    "call",
-				utils.Tenant:      attrSetBalance.Tenant,
-				utils.RequestType: utils.META_PREPAID,
-				utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
-				utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-				utils.Usage:       initArgs.CGREvent.Event[utils.Usage],
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TestSessionsDataLastUsedData",
+				Event: map[string]interface{}{
+					utils.EVENT_NAME:  "TEST_EVENT",
+					utils.ToR:         utils.VOICE,
+					utils.OriginID:    "123451",
+					utils.Account:     attrSetBalance.Account,
+					utils.Subject:     attrSetBalance.Account,
+					utils.Destination: "1004",
+					utils.Category:    "call",
+					utils.Tenant:      attrSetBalance.Tenant,
+					utils.RequestType: utils.META_PREPAID,
+					utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
+					utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
+					utils.Usage:       initArgs.CGREvent.Event[utils.Usage],
+				},
 			},
 		},
 	}
@@ -291,22 +295,24 @@ func testSessionsBiRPCSessionOriginatorTerminate(t *testing.T) {
 
 	initArgs := &V1InitSessionArgs{
 		InitSession: true,
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "TestSessionsBiRPCSessionOriginatorTerminate",
-			Event: map[string]interface{}{
-				utils.EVENT_NAME:  "TEST_EVENT",
-				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "123452",
-				utils.Account:     attrSetBalance.Account,
-				utils.Subject:     attrSetBalance.Account,
-				utils.Destination: "1005",
-				utils.Category:    "call",
-				utils.Tenant:      attrSetBalance.Tenant,
-				utils.RequestType: utils.META_PREPAID,
-				utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
-				utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-				utils.Usage:       time.Duration(200 * time.Millisecond),
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TestSessionsBiRPCSessionOriginatorTerminate",
+				Event: map[string]interface{}{
+					utils.EVENT_NAME:  "TEST_EVENT",
+					utils.ToR:         utils.VOICE,
+					utils.OriginID:    "123452",
+					utils.Account:     attrSetBalance.Account,
+					utils.Subject:     attrSetBalance.Account,
+					utils.Destination: "1005",
+					utils.Category:    "call",
+					utils.Tenant:      attrSetBalance.Tenant,
+					utils.RequestType: utils.META_PREPAID,
+					utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
+					utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
+					utils.Usage:       time.Duration(200 * time.Millisecond),
+				},
 			},
 		},
 	}
@@ -326,22 +332,24 @@ func testSessionsBiRPCSessionOriginatorTerminate(t *testing.T) {
 
 	termArgs := &V1TerminateSessionArgs{
 		TerminateSession: true,
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "TestSessionsBiRPCSessionOriginatorTerminate",
-			Event: map[string]interface{}{
-				utils.EVENT_NAME:  "TEST_EVENT",
-				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "123452",
-				utils.Account:     attrSetBalance.Account,
-				utils.Subject:     attrSetBalance.Account,
-				utils.Destination: "1005",
-				utils.Category:    "call",
-				utils.Tenant:      attrSetBalance.Tenant,
-				utils.RequestType: utils.META_PREPAID,
-				utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
-				utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-				utils.Usage:       time.Duration(7 * time.Millisecond),
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TestSessionsBiRPCSessionOriginatorTerminate",
+				Event: map[string]interface{}{
+					utils.EVENT_NAME:  "TEST_EVENT",
+					utils.ToR:         utils.VOICE,
+					utils.OriginID:    "123452",
+					utils.Account:     attrSetBalance.Account,
+					utils.Subject:     attrSetBalance.Account,
+					utils.Destination: "1005",
+					utils.Category:    "call",
+					utils.Tenant:      attrSetBalance.Tenant,
+					utils.RequestType: utils.META_PREPAID,
+					utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
+					utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
+					utils.Usage:       time.Duration(7 * time.Millisecond),
+				},
 			},
 		},
 	}
@@ -358,7 +366,7 @@ func testSessionsBiRPCSessionOriginatorTerminate(t *testing.T) {
 		t.Errorf("Balance value: %f", acnt.BalanceMap[utils.VOICE].GetTotalValue())
 	}
 
-	if err := sessionsRPC.Call(utils.SessionSv1ProcessCDR, &utils.CGREventWithArgDispatcher{CGREvent: termArgs.CGREvent}, &reply); err != nil {
+	if err := sessionsRPC.Call(utils.SessionSv1ProcessCDR, &utils.CGREventWithOpts{CGREvent: termArgs.CGREvent}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received reply: %s", reply)

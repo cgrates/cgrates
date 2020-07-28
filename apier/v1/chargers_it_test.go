@@ -235,16 +235,16 @@ func testChargerSGetChargersForEvent(t *testing.T) {
 	var result *engine.ChargerProfiles
 	if err := chargerRPC.Call(utils.ChargerSv1GetChargersForEvent,
 		&utils.CGREventWithOpts{
-			CGREvent:      chargerEvent[1].CGREvent,
-			ArgDispatcher: chargerEvent[1].ArgDispatcher,
+			CGREvent: chargerEvent[1].CGREvent,
+			Opts:     chargerEvent[1].Opts,
 		}, &result); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 	if err := chargerRPC.Call(utils.ChargerSv1GetChargersForEvent,
-		&utils.CGREventWithArgDispatcher{
-			CGREvent:      chargerEvent[0].CGREvent,
-			ArgDispatcher: chargerEvent[0].ArgDispatcher,
+		&utils.CGREventWithOpts{
+			CGREvent: chargerEvent[0].CGREvent,
+			Opts:     chargerEvent[0].Opts,
 		}, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(result, chargerProfiles) {

@@ -10,7 +10,7 @@
 			"flags": ["*initiate", "*accounts"],
 			"request_fields":[
 				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*data"},
-				{"tag": "APIkey", "path": "*opts.*dispatcherApiKey", "type": "*constant", "value": "ses12345"},
+				{"tag": "APIkey", "path": "*opts.*apiKey", "type": "*constant", "value": "ses12345"},
 				{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable",
 					"value": "~*req.Session-Id", "mandatory": true},
 				{"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*constant", "value": "*prepaid"},
@@ -38,7 +38,7 @@
 			"flags": ["*update", "*accounts","*continue"],
 			"request_fields":[
 				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*data"},
-				{"tag": "APIkey", "path": "*opts.*dispatcherApiKey", "type": "*constant", "value": "ses12345"},
+				{"tag": "APIkey", "path": "*opts.*apiKey", "type": "*constant", "value": "ses12345"},
 				{"tag": "InitialOriginID", "path": "*cgreq.InitialOriginID", "type": "*variable",
 					"value": "~*req.Session-Id", "mandatory": true},
 				{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*composed",
@@ -71,7 +71,7 @@
 			"flags": ["*update", "*accounts"],
 			"request_fields":[
 				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*data"},
-				{"tag": "APIkey", "path": "*opts.*dispatcherApiKey", "type": "*constant", "value": "ses12345"},
+				{"tag": "APIkey", "path": "*opts.*apiKey", "type": "*constant", "value": "ses12345"},
 				{"tag": "InitialOriginID", "path": "*cgreq.InitialOriginID", "type": "*variable",
 					"value": "~*req.Session-Id", "mandatory": true},
 				{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*composed",
@@ -104,7 +104,7 @@
 			"flags": ["*terminate", "*accounts"],
 			"request_fields":[
 				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*data"},
-				{"tag": "APIkey", "path": "*opts.*dispatcherApiKey", "type": "*constant", "value": "ses12345"},
+				{"tag": "APIkey", "path": "*opts.*apiKey", "type": "*constant", "value": "ses12345"},
 				{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable",
 					"value": "~*req.Session-Id", "mandatory": true},
 				{"tag": "OriginIDPrefix", "path": "*cgreq.OriginIDPrefix", "type": "*variable",

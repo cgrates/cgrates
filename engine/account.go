@@ -44,9 +44,9 @@ type Account struct {
 	executingTriggers bool
 }
 
-type AccountWithArgDispatcher struct {
+type AccountWithOpts struct {
 	*Account
-	*utils.ArgDispatcher
+	Opts map[string]interface{}
 }
 
 // User's available minutes for the specified destination
@@ -542,7 +542,7 @@ func (acc *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun bo
 				//send default balance to thresholdS to be processed
 				if len(config.CgrConfig().RalsCfg().ThresholdSConns) != 0 {
 					acntTnt := utils.NewTenantID(acc.ID)
-					thEv := &ArgsProcessEvent{
+					thEv := &ThresholdsArgsProcessEvent{
 						CGREvent: &utils.CGREvent{
 							Tenant: acntTnt.Tenant,
 							ID:     utils.GenUUID(),
@@ -1130,7 +1130,7 @@ func (acc *Account) Publish() {
 			var tIDs []string
 			if err := connMgr.Call(config.CgrConfig().RalsCfg().ThresholdSConns, nil,
 				utils.ThresholdSv1ProcessEvent,
-				&ArgsProcessEvent{CGREvent: cgrEv}, &tIDs); err != nil &&
+				&ThresholdsArgsProcessEvent{CGREvent: cgrEv}, &tIDs); err != nil &&
 				err.Error() != utils.ErrNotFound.Error() {
 				utils.Logger.Warning(
 					fmt.Sprintf("<AccountS> error: %s processing account event %+v with ThresholdS.", err.Error(), cgrEv))

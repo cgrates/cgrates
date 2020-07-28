@@ -119,7 +119,7 @@ func testA1itLoadTPFromFolder(t *testing.T) {
 	time.Sleep(time.Duration(100 * time.Millisecond))
 	tStart := time.Date(2017, 3, 3, 10, 39, 33, 0, time.UTC)
 	tEnd := time.Date(2017, 3, 3, 10, 39, 33, 10240, time.UTC)
-	cd := &engine.CallDescriptorWithArgDispatcher{
+	cd := &engine.CallDescriptorWithOpts{
 		CallDescriptor: &engine.CallDescriptor{
 			Category:    "data1",
 			Tenant:      "cgrates.org",
@@ -286,7 +286,7 @@ func testA1itDataSession1(t *testing.T) {
 		t.Error(err)
 	}
 
-	if err := a1rpc.Call(utils.SessionSv1ProcessCDR, &utils.CGREventWithArgDispatcher{CGREvent: termArgs.CGREvent}, &rpl); err != nil {
+	if err := a1rpc.Call(utils.SessionSv1ProcessCDR, &utils.CGREventWithOpts{CGREvent: termArgs.CGREvent}, &rpl); err != nil {
 		t.Error(err)
 	} else if rpl != utils.OK {
 		t.Errorf("Received reply: %s", rpl)
