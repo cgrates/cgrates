@@ -65,6 +65,9 @@ var sTests = []func(t *testing.T){
 	testITIsDBEmpty,
 	testITTestIndexingMetaNot,
 	testITIndexRateProfile,
+	testITFlush,
+	testITIsDBEmpty,
+	testITTestIndexingMetaSuffix,
 }
 
 func TestFilterIndexerIT(t *testing.T) {
@@ -1456,6 +1459,66 @@ func testITIndexRateProfile(t *testing.T) {
 	} else {
 		if !reflect.DeepEqual(eIdxes, rcvIdx) {
 			t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
+		}
+	}
+}
+
+func testITTestIndexingMetaSuffix(t *testing.T) {
+	th := &ThresholdProfile{
+		Tenant:    "cgrates.org",
+		ID:        "TH1",
+		FilterIDs: []string{"*string:~*req.Account:1001", "*suffix:~*req.Subject:10"},
+		ActionIDs: []string{},
+	}
+	th2 := &ThresholdProfile{
+		Tenant:    "cgrates.org",
+		ID:        "TH2",
+		FilterIDs: []string{"*string:~*req.Destination:1002", "*suffix:~*req.Subject:101"},
+		ActionIDs: []string{},
+	}
+	th3 := &ThresholdProfile{
+		Tenant:    "cgrates.org",
+		ID:        "TH3",
+		FilterIDs: []string{"*string:~*req.Destination:1002", "*prefix:~*req.Account:100", "*suffix:~*req.Random:Prfx"},
+		ActionIDs: []string{},
+	}
+	if err := dataManager.SetThresholdProfile(th, true); err != nil {
+		t.Error(err)
+	}
+	if err := dataManager.SetThresholdProfile(th2, true); err != nil {
+		t.Error(err)
+	}
+	if err := dataManager.SetThresholdProfile(th3, true); err != nil {
+		t.Error(err)
+	}
+	eIdxes := map[string]utils.StringSet{
+		"*prefix:*req.Account:100": {
+			"TH3": struct{}{},
+		},
+		"*string:*req.Account:1001": {
+			"TH1": struct{}{},
+		},
+		"*string:*req.Destination:1002": {
+			"TH2": struct{}{},
+			"TH3": struct{}{},
+		},
+		"*suffix:*req.Random:Prfx": {
+			"TH3": struct{}{},
+		},
+		"*suffix:*req.Subject:10": {
+			"TH1": struct{}{},
+		},
+		"*suffix:*req.Subject:101": {
+			"TH2": struct{}{},
+		},
+	}
+	if rcvIdx, err := dataManager.GetIndexes(
+		utils.CacheThresholdFilterIndexes, th.Tenant,
+		utils.EmptyString, false, false); err != nil {
+		t.Error(err)
+	} else {
+		if !reflect.DeepEqual(eIdxes, rcvIdx) {
+			t.Errorf("Expecting %+v,\n received: %+v", utils.ToJSON(eIdxes), utils.ToJSON(rcvIdx))
 		}
 	}
 }
