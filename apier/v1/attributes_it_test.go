@@ -152,7 +152,7 @@ func testAttributeSRPCConn(t *testing.T) {
 func testAttributeSGetAlsPrfBeforeSet(t *testing.T) {
 	var reply *engine.AttributeProfile
 	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfile,
-		utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}},
+		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -170,12 +170,14 @@ func testAttributeSLoadFromFolder(t *testing.T) {
 func testAttributeSGetAttributeForEvent(t *testing.T) {
 	ev := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer(utils.MetaSessionS),
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testAttributeSGetAttributeForEvent",
-			Event: map[string]interface{}{
-				utils.Account:     "1007",
-				utils.Destination: "+491511231234",
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testAttributeSGetAttributeForEvent",
+				Event: map[string]interface{}{
+					utils.Account:     "1007",
+					utils.Destination: "+491511231234",
+				},
 			},
 		},
 	}
@@ -223,12 +225,14 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 func testAttributeSGetAttributeForEventNotFound(t *testing.T) {
 	ev := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer(utils.MetaCDRs),
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testAttributeSGetAttributeForEventWihMetaAnyContext",
-			Event: map[string]interface{}{
-				utils.Account:     "dan",
-				utils.Destination: "+491511231234",
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testAttributeSGetAttributeForEventWihMetaAnyContext",
+				Event: map[string]interface{}{
+					utils.Account:     "dan",
+					utils.Destination: "+491511231234",
+				},
 			},
 		},
 	}
@@ -258,7 +262,7 @@ func testAttributeSGetAttributeForEventNotFound(t *testing.T) {
 	}
 	var reply *engine.AttributeProfile
 	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfile,
-		utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_3"}}, &reply); err != nil {
+		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_3"}}, &reply); err != nil {
 		t.Fatal(err)
 	}
 	reply.Compile()
@@ -275,12 +279,14 @@ func testAttributeSGetAttributeForEventNotFound(t *testing.T) {
 func testAttributeSGetAttributeForEventWithMetaAnyContext(t *testing.T) {
 	ev := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer(utils.MetaCDRs),
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testAttributeSGetAttributeForEventWihMetaAnyContext",
-			Event: map[string]interface{}{
-				utils.Account:     "dan",
-				utils.Destination: "+491511231234",
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testAttributeSGetAttributeForEventWihMetaAnyContext",
+				Event: map[string]interface{}{
+					utils.Account:     "dan",
+					utils.Destination: "+491511231234",
+				},
 			},
 		},
 	}
@@ -310,7 +316,7 @@ func testAttributeSGetAttributeForEventWithMetaAnyContext(t *testing.T) {
 	}
 	var reply *engine.AttributeProfile
 	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfile,
-		utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_2"}}, &reply); err != nil {
+		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_2"}}, &reply); err != nil {
 		t.Fatal(err)
 	}
 	reply.Compile()
@@ -331,12 +337,14 @@ func testAttributeSGetAttributeForEventWithMetaAnyContext(t *testing.T) {
 func testAttributeSProcessEvent(t *testing.T) {
 	ev := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer(utils.MetaSessionS),
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testAttributeSProcessEvent",
-			Event: map[string]interface{}{
-				utils.Account:     "1007",
-				utils.Destination: "+491511231234",
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testAttributeSProcessEvent",
+				Event: map[string]interface{}{
+					utils.Account:     "1007",
+					utils.Destination: "+491511231234",
+				},
 			},
 		},
 	}
@@ -344,13 +352,15 @@ func testAttributeSProcessEvent(t *testing.T) {
 		MatchedProfiles: []string{"ATTR_1"},
 		AlteredFields: []string{utils.MetaReq + utils.NestingSep + utils.Subject,
 			utils.MetaReq + utils.NestingSep + utils.Account},
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testAttributeSProcessEvent",
-			Event: map[string]interface{}{
-				utils.Account:     "1001",
-				utils.Subject:     "1001",
-				utils.Destination: "+491511231234",
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testAttributeSProcessEvent",
+				Event: map[string]interface{}{
+					utils.Account:     "1001",
+					utils.Subject:     "1001",
+					utils.Destination: "+491511231234",
+				},
 			},
 		},
 	}
@@ -358,13 +368,15 @@ func testAttributeSProcessEvent(t *testing.T) {
 		MatchedProfiles: []string{"ATTR_1"},
 		AlteredFields: []string{utils.MetaReq + utils.NestingSep + utils.Account,
 			utils.MetaReq + utils.NestingSep + utils.Subject},
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testAttributeSProcessEvent",
-			Event: map[string]interface{}{
-				utils.Account: "1001",
-				utils.Subject: "1001",
-				"Destination": "+491511231234",
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testAttributeSProcessEvent",
+				Event: map[string]interface{}{
+					utils.Account: "1001",
+					utils.Subject: "1001",
+					"Destination": "+491511231234",
+				},
 			},
 		},
 	}
@@ -382,12 +394,14 @@ func testAttributeSProcessEvent(t *testing.T) {
 func testAttributeSProcessEventNotFound(t *testing.T) {
 	ev := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer(utils.MetaSessionS),
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testAttributeSProcessEventNotFound",
-			Event: map[string]interface{}{
-				utils.Account:     "Inexistent",
-				utils.Destination: "+491511231234",
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testAttributeSProcessEventNotFound",
+				Event: map[string]interface{}{
+					utils.Account:     "Inexistent",
+					utils.Destination: "+491511231234",
+				},
 			},
 		},
 	}
@@ -402,13 +416,15 @@ func testAttributeSProcessEventNotFound(t *testing.T) {
 func testAttributeSProcessEventMissing(t *testing.T) {
 	ev := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer(utils.MetaSessionS),
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testAttributeSProcessEvent",
-			Event: map[string]interface{}{
-				utils.Account:     "NonExist",
-				utils.Category:    "*attributes",
-				utils.Destination: "+491511231234",
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testAttributeSProcessEvent",
+				Event: map[string]interface{}{
+					utils.Account:     "NonExist",
+					utils.Category:    "*attributes",
+					utils.Destination: "+491511231234",
+				},
 			},
 		},
 	}
@@ -423,12 +439,14 @@ func testAttributeSProcessEventMissing(t *testing.T) {
 func testAttributeSProcessEventWithNoneSubstitute(t *testing.T) {
 	ev := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer(utils.MetaSessionS),
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testAttributeSWithNoneSubstitute",
-			Event: map[string]interface{}{
-				utils.Account:     "1008",
-				utils.Destination: "+491511231234",
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testAttributeSWithNoneSubstitute",
+				Event: map[string]interface{}{
+					utils.Account:     "1008",
+					utils.Destination: "+491511231234",
+				},
 			},
 		},
 	}
@@ -467,12 +485,14 @@ func testAttributeSProcessEventWithNoneSubstitute(t *testing.T) {
 		MatchedProfiles: []string{"AttributeWithNonSubstitute"},
 		AlteredFields: []string{utils.MetaReq + utils.NestingSep + utils.Account,
 			utils.MetaReq + utils.NestingSep + utils.Subject},
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testAttributeSWithNoneSubstitute",
-			Event: map[string]interface{}{
-				utils.Account:     "1001",
-				utils.Destination: "+491511231234",
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testAttributeSWithNoneSubstitute",
+				Event: map[string]interface{}{
+					utils.Account:     "1001",
+					utils.Destination: "+491511231234",
+				},
 			},
 		},
 	}
@@ -492,13 +512,15 @@ func testAttributeSProcessEventWithNoneSubstitute(t *testing.T) {
 func testAttributeSProcessEventWithNoneSubstitute2(t *testing.T) {
 	ev := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer(utils.MetaSessionS),
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testAttributeSWithNoneSubstitute",
-			Event: map[string]interface{}{
-				utils.Account:     "1008",
-				utils.Subject:     "1008",
-				utils.Destination: "+491511231234",
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testAttributeSWithNoneSubstitute",
+				Event: map[string]interface{}{
+					utils.Account:     "1008",
+					utils.Subject:     "1008",
+					utils.Destination: "+491511231234",
+				},
 			},
 		},
 	}
@@ -535,12 +557,14 @@ func testAttributeSProcessEventWithNoneSubstitute2(t *testing.T) {
 	eRply := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"AttributeWithNonSubstitute"},
 		AlteredFields:   []string{"*req.Account", "*req.Subject"},
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testAttributeSWithNoneSubstitute",
-			Event: map[string]interface{}{
-				utils.Account:     "1001",
-				utils.Destination: "+491511231234",
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testAttributeSWithNoneSubstitute",
+				Event: map[string]interface{}{
+					utils.Account:     "1001",
+					utils.Destination: "+491511231234",
+				},
 			},
 		},
 	}
@@ -548,12 +572,14 @@ func testAttributeSProcessEventWithNoneSubstitute2(t *testing.T) {
 		MatchedProfiles: []string{"AttributeWithNonSubstitute"},
 		AlteredFields: []string{utils.MetaReq + utils.NestingSep + utils.Subject,
 			utils.MetaReq + utils.NestingSep + utils.Account},
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testAttributeSWithNoneSubstitute",
-			Event: map[string]interface{}{
-				utils.Account:     "1001",
-				utils.Destination: "+491511231234",
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testAttributeSWithNoneSubstitute",
+				Event: map[string]interface{}{
+					utils.Account:     "1001",
+					utils.Destination: "+491511231234",
+				},
 			},
 		},
 	}
@@ -571,13 +597,15 @@ func testAttributeSProcessEventWithNoneSubstitute2(t *testing.T) {
 func testAttributeSProcessEventWithNoneSubstitute3(t *testing.T) {
 	ev := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer(utils.MetaSessionS),
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testAttributeSWithNoneSubstitute",
-			Event: map[string]interface{}{
-				utils.Account:     "1008",
-				utils.Subject:     "1001",
-				utils.Destination: "+491511231234",
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testAttributeSWithNoneSubstitute",
+				Event: map[string]interface{}{
+					utils.Account:     "1008",
+					utils.Subject:     "1001",
+					utils.Destination: "+491511231234",
+				},
 			},
 		},
 	}
@@ -615,13 +643,15 @@ func testAttributeSProcessEventWithNoneSubstitute3(t *testing.T) {
 	eRply := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"AttributeWithNonSubstitute"},
 		AlteredFields:   []string{"*req.Account"},
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testAttributeSWithNoneSubstitute",
-			Event: map[string]interface{}{
-				utils.Account:     "1001",
-				utils.Subject:     "1001",
-				utils.Destination: "+491511231234",
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testAttributeSWithNoneSubstitute",
+				Event: map[string]interface{}{
+					utils.Account:     "1001",
+					utils.Subject:     "1001",
+					utils.Destination: "+491511231234",
+				},
 			},
 		},
 	}
@@ -664,23 +694,27 @@ func testAttributeSProcessEventWithHeader(t *testing.T) {
 	attrArgs := &engine.AttrArgsProcessEvent{
 		ProcessRuns: utils.IntPointer(1),
 		Context:     utils.StringPointer(utils.MetaSessionS),
-		CGREvent: &utils.CGREvent{
-			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:     "HeaderEventForAttribute",
-			Event: map[string]interface{}{
-				"Field1": "Value1",
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+				ID:     "HeaderEventForAttribute",
+				Event: map[string]interface{}{
+					"Field1": "Value1",
+				},
 			},
 		},
 	}
 	eRply := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_Header"},
 		AlteredFields:   []string{"*req.Field2"},
-		CGREvent: &utils.CGREvent{
-			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:     "HeaderEventForAttribute",
-			Event: map[string]interface{}{
-				"Field1": "Value1",
-				"Field2": "Value1",
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+				ID:     "HeaderEventForAttribute",
+				Event: map[string]interface{}{
+					"Field1": "Value1",
+					"Field2": "Value1",
+				},
 			},
 		},
 	}
@@ -745,7 +779,7 @@ func testAttributeSSetAlsPrf(t *testing.T) {
 	}
 	var reply *engine.AttributeProfile
 	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfile,
-		utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}}, &reply); err != nil {
+		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}}, &reply); err != nil {
 		t.Fatal(err)
 	}
 	reply.Compile()
@@ -774,7 +808,7 @@ func testAttributeSUpdateAlsPrf(t *testing.T) {
 	}
 	var reply *engine.AttributeProfile
 	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfile,
-		utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}}, &reply); err != nil {
+		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}}, &reply); err != nil {
 		t.Fatal(err)
 	}
 	reply.Compile()
@@ -800,7 +834,7 @@ func testAttributeSRemAlsPrf(t *testing.T) {
 	}
 	var reply *engine.AttributeProfile
 	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfile,
-		utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}},
+		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -846,7 +880,7 @@ func testAttributeSSetAlsPrf2(t *testing.T) {
 	}
 	var reply *engine.AttributeProfile
 	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfile,
-		utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "golant", ID: "ATTR_972587832508_SESSIONAUTH"}}, &reply); err != nil {
+		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "golant", ID: "ATTR_972587832508_SESSIONAUTH"}}, &reply); err != nil {
 		t.Fatal(err)
 	}
 	reply.Compile()
@@ -953,22 +987,26 @@ func testAttributeSProcessEventWithSearchAndReplace(t *testing.T) {
 	attrArgs := &engine.AttrArgsProcessEvent{
 		ProcessRuns: utils.IntPointer(1),
 		Context:     utils.StringPointer(utils.MetaSessionS),
-		CGREvent: &utils.CGREvent{
-			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:     "HeaderEventForAttribute",
-			Event: map[string]interface{}{
-				"Category": "call",
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+				ID:     "HeaderEventForAttribute",
+				Event: map[string]interface{}{
+					"Category": "call",
+				},
 			},
 		},
 	}
 	eRply := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_Search_and_replace"},
 		AlteredFields:   []string{"*req.Category"},
-		CGREvent: &utils.CGREvent{
-			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:     "HeaderEventForAttribute",
-			Event: map[string]interface{}{
-				"Category": "call_suffix",
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+				ID:     "HeaderEventForAttribute",
+				Event: map[string]interface{}{
+					"Category": "call_suffix",
+				},
 			},
 		},
 	}
@@ -1057,24 +1095,28 @@ func testAttributeSProcessWithMultipleRuns(t *testing.T) {
 	attrArgs := &engine.AttrArgsProcessEvent{
 		Context:     utils.StringPointer(utils.MetaSessionS),
 		ProcessRuns: utils.IntPointer(4),
-		CGREvent: &utils.CGREvent{
-			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
-				"InitialField": "InitialValue",
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+				ID:     utils.GenUUID(),
+				Event: map[string]interface{}{
+					"InitialField": "InitialValue",
+				},
 			},
 		},
 	}
 	eRply := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_1", "ATTR_2", "ATTR_1", "ATTR_2"},
 		AlteredFields:   []string{"*req.Field1", "*req.Field2"},
-		CGREvent: &utils.CGREvent{
-			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
-				"InitialField": "InitialValue",
-				"Field1":       "Value1",
-				"Field2":       "Value2",
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+				ID:     utils.GenUUID(),
+				Event: map[string]interface{}{
+					"InitialField": "InitialValue",
+					"Field1":       "Value1",
+					"Field2":       "Value2",
+				},
 			},
 		},
 	}
@@ -1169,25 +1211,29 @@ func testAttributeSProcessWithMultipleRuns2(t *testing.T) {
 	attrArgs := &engine.AttrArgsProcessEvent{
 		Context:     utils.StringPointer(utils.MetaSessionS),
 		ProcessRuns: utils.IntPointer(4),
-		CGREvent: &utils.CGREvent{
-			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
-				"InitialField": "InitialValue",
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+				ID:     utils.GenUUID(),
+				Event: map[string]interface{}{
+					"InitialField": "InitialValue",
+				},
 			},
 		},
 	}
 	eRply := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_1", "ATTR_2", "ATTR_3", "ATTR_2"},
 		AlteredFields:   []string{"*req.Field1", "*req.Field2", "*req.Field3"},
-		CGREvent: &utils.CGREvent{
-			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
-				"InitialField": "InitialValue",
-				"Field1":       "Value1",
-				"Field2":       "Value2",
-				"Field3":       "Value3",
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+				ID:     utils.GenUUID(),
+				Event: map[string]interface{}{
+					"InitialField": "InitialValue",
+					"Field1":       "Value1",
+					"Field2":       "Value2",
+					"Field3":       "Value3",
+				},
 			},
 		},
 	}
@@ -1569,7 +1615,7 @@ func testAttributeSCachingMetaReload2(t *testing.T) {
 
 	var reply *engine.AttributeProfile
 	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfile,
-		utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1"}}, &reply); err != nil {
+		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1"}}, &reply); err != nil {
 		t.Fatal(err)
 	}
 	attrPrf1.Compile()
@@ -1607,7 +1653,7 @@ func testAttributeSCachingMetaReload2(t *testing.T) {
 	}
 
 	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfile,
-		utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1"}}, &reply); err != nil {
+		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1"}}, &reply); err != nil {
 		t.Fatal(err)
 	}
 	attrPrf2.Compile()

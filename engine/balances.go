@@ -718,7 +718,7 @@ func (b *Balance) Publish() {
 		go func() {
 			var tIDs []string
 			if err := connMgr.Call(config.CgrConfig().RalsCfg().ThresholdSConns, nil,
-				utils.ThresholdSv1ProcessEvent, &ArgsProcessEvent{CGREvent: cgrEv}, &tIDs); err != nil &&
+				utils.ThresholdSv1ProcessEvent, &ThresholdsArgsProcessEvent{CGREvent: cgrEv}, &tIDs); err != nil &&
 				err.Error() != utils.ErrNotFound.Error() {
 				utils.Logger.Warning(
 					fmt.Sprintf("<AccountS> error: %s processing balance event %+v with ThresholdS.",
@@ -810,7 +810,7 @@ func (bc Balances) SaveDirtyBalances(acc *Account) {
 				continue
 			}
 			acntTnt := utils.NewTenantID(b.account.ID)
-			thEv := &ArgsProcessEvent{
+			thEv := &ThresholdsArgsProcessEvent{
 				CGREvent: &utils.CGREvent{
 					Tenant: acntTnt.Tenant,
 					ID:     utils.GenUUID(),
@@ -842,7 +842,7 @@ func (bc Balances) SaveDirtyBalances(acc *Account) {
 	if len(savedAccounts) != 0 && len(config.CgrConfig().RalsCfg().ThresholdSConns) != 0 {
 		for _, acnt := range savedAccounts {
 			acntTnt := utils.NewTenantID(acnt.ID)
-			thEv := &ArgsProcessEvent{
+			thEv := &ThresholdsArgsProcessEvent{
 				CGREvent: &utils.CGREvent{
 					Tenant: acntTnt.Tenant,
 					ID:     utils.GenUUID(),

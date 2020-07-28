@@ -97,10 +97,10 @@ type IntervalRate struct {
 	val *utils.Decimal // cached version of the Decimal
 }
 
-// RateProfileWithArgDispatcher is used in replicatorV1 for dispatcher
-type RateProfileWithArgDispatcher struct {
+// RateProfileWithOpts is used in replicatorV1 for dispatcher
+type RateProfileWithOpts struct {
 	*RateProfile
-	*utils.ArgDispatcher
+	Opts map[string]interface{}
 }
 
 // RateSInterval is used by RateS to integrate Rate info for one charging interval

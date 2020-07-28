@@ -223,10 +223,10 @@ func (sS *StatService) Call(serviceMethod string, args interface{}, reply interf
 	return utils.RPCCall(sS, serviceMethod, args, reply)
 }
 
+// StatsArgsProcessEvent the arguments for processing the event with stats
 type StatsArgsProcessEvent struct {
 	StatIDs []string
-	*utils.CGREvent
-	*utils.ArgDispatcher
+	*utils.CGREventWithOpts
 }
 
 // processEvent processes a new event, dispatching to matching queues
@@ -273,17 +273,19 @@ func (sS *StatService) processEvent(args *StatsArgsProcessEvent) (statQueueIDs [
 				}
 				thIDs = sq.sqPrfl.ThresholdIDs
 			}
-			thEv := &ArgsProcessEvent{
+			thEv := &ThresholdsArgsProcessEvent{
 				ThresholdIDs: thIDs,
-				CGREvent: &utils.CGREvent{
-					Tenant: sq.Tenant,
-					ID:     utils.GenUUID(),
-					Event: map[string]interface{}{
-						utils.EventType: utils.StatUpdate,
-						utils.StatID:    sq.ID,
+				CGREventWithOpts: &utils.CGREventWithOpts{
+					CGREvent: &utils.CGREvent{
+						Tenant: sq.Tenant,
+						ID:     utils.GenUUID(),
+						Event: map[string]interface{}{
+							utils.EventType: utils.StatUpdate,
+							utils.StatID:    sq.ID,
+						},
 					},
+					Opts: args.Opts,
 				},
-				ArgDispatcher: args.ArgDispatcher,
 			}
 			for metricID, metric := range sq.SQMetrics {
 				thEv.Event[metricID] = metric.GetValue()
@@ -319,11 +321,11 @@ func (sS *StatService) V1ProcessEvent(args *StatsArgsProcessEvent, reply *[]stri
 	} else if args.Event == nil {
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
-	if ids, err := sS.processEvent(args); err != nil {
-		return err
-	} else {
-		*reply = ids
+	var ids []string
+	if ids, err = sS.processEvent(args); err != nil {
+		return
 	}
+	*reply = ids
 	return
 }
 
@@ -340,18 +342,17 @@ func (sS *StatService) V1GetStatQueuesForEvent(args *StatsArgsProcessEvent, repl
 	var sQs StatQueues
 	if sQs, err = sS.matchingStatQueuesForEvent(args); err != nil {
 		return
-	} else {
-		ids := make([]string, len(sQs))
-		for i, sq := range sQs {
-			ids[i] = sq.ID
-		}
-		*reply = ids
 	}
+	ids := make([]string, len(sQs))
+	for i, sq := range sQs {
+		ids[i] = sq.ID
+	}
+	*reply = ids
 	return
 }
 
 // V1GetStatQueue returns a StatQueue object
-func (sS *StatService) V1GetStatQueue(args *utils.TenantIDWithArgDispatcher, reply *StatQueue) (err error) {
+func (sS *StatService) V1GetStatQueue(args *utils.TenantIDWithOpts, reply *StatQueue) (err error) {
 	sq, err := sS.dm.GetStatQueue(args.Tenant, args.ID, true, true, "")
 	if err != nil {
 		return err

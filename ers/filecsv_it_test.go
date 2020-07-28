@@ -237,7 +237,7 @@ func testCsvITAnalyseCDRs(t *testing.T) {
 	time.Sleep(500 * time.Millisecond)
 
 	var cdrs []*engine.CDR
-	args := &utils.RPCCDRsFilterWithArgDispatcher{
+	args := &utils.RPCCDRsFilterWithOpts{
 		RPCCDRsFilter: &utils.RPCCDRsFilter{
 			RunIDs:    []string{"CustomerCharges"},
 			OriginIDs: []string{"SessionFromCsv"},
@@ -289,7 +289,7 @@ func testCsvITAnalyzeFilteredCDR(t *testing.T) {
 	time.Sleep(500 * time.Millisecond)
 
 	var cdrs []*engine.CDR
-	args := &utils.RPCCDRsFilterWithArgDispatcher{
+	args := &utils.RPCCDRsFilterWithOpts{
 		RPCCDRsFilter: &utils.RPCCDRsFilter{
 			NotRunIDs: []string{"CustomerCharges", "SupplierCharges"},
 			Sources:   []string{"ers_csv"},

@@ -197,10 +197,10 @@ type Filter struct {
 	ActivationInterval *utils.ActivationInterval
 }
 
-// FilterWithArgDispatcher the arguments for the replication
-type FilterWithArgDispatcher struct {
+// FilterWithOpts the arguments for the replication
+type FilterWithOpts struct {
 	*Filter
-	*utils.ArgDispatcher
+	Opts map[string]interface{}
 }
 
 // TenantID returns the tenant wit the ID
@@ -653,7 +653,7 @@ func (dDP *dynamicDP) fieldAsInterface(fldPath []string) (val interface{}, err e
 		var statValues map[string]float64
 
 		if err := dDP.connMgr.Call(dDP.cfg.FilterSCfg().StatSConns, nil, utils.StatSv1GetQueueFloatMetrics,
-			&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: dDP.tenant, ID: fldPath[1]}},
+			&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: dDP.tenant, ID: fldPath[1]}},
 			&statValues); err != nil {
 			return nil, err
 		}

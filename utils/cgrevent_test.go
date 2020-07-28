@@ -282,56 +282,10 @@ func TestCGREventClone(t *testing.T) {
 	}
 }
 
-func TestCGREventconsumeArgDispatcher(t *testing.T) {
-	//empty check
-	var opts map[string]interface{}
-	rcv := getArgDispatcherFromOpts(opts)
-	if rcv != nil {
-		t.Errorf("Expecting: nil, received: %+v", rcv)
-	}
-	//nil check
-	opts = nil
-	rcv = getArgDispatcherFromOpts(opts)
-	if rcv != nil {
-		t.Errorf("Expecting: nil, received: %+v", rcv)
-	}
-	//normal check without APIkey
-	routeID := "route"
-	opts = map[string]interface{}{
-		OptsRouteID: routeID,
-	}
-	eOut := &ArgDispatcher{
-		RouteID: &routeID,
-	}
-	rcv = getArgDispatcherFromOpts(opts)
-	if !reflect.DeepEqual(eOut, rcv) {
-		t.Errorf("Expecting:  %+v, received: %+v", eOut, rcv)
-	}
-	//check if *route_id was deleted
-	if _, has := opts[OptsRouteID]; has {
-		t.Errorf("*route_id wasn't deleted")
-	}
-	//normal check with routeID and APIKey
-	apiKey := "key"
-	opts = map[string]interface{}{OptsRouteID: routeID, OptsAPIKey: apiKey}
-	eOut.APIKey = &apiKey
-
-	rcv = getArgDispatcherFromOpts(opts)
-	//check if *api_key and *route_id was deleted
-	if _, has := opts[OptsAPIKey]; has {
-		t.Errorf("*api_key wasn't deleted")
-	} else if _, has := opts[OptsRouteID]; has {
-		t.Errorf("*route_id wasn't deleted")
-	}
-	if !reflect.DeepEqual(eOut, rcv) {
-		t.Errorf("Expecting:  %+v, received: %+v", eOut, rcv)
-	}
-}
-
 func TestCGREventconsumeRoutePaginator(t *testing.T) {
 	//empty check
 	var opts map[string]interface{}
-	rcv, err := getRoutePaginatorFromOpts(opts)
+	rcv, err := GetRoutePaginatorFromOpts(opts)
 	if err != nil {
 		t.Error(err)
 	}
@@ -340,7 +294,7 @@ func TestCGREventconsumeRoutePaginator(t *testing.T) {
 		t.Errorf("Expecting:  %+v, received: %+v", eOut, rcv)
 	}
 	opts = nil
-	rcv, err = getRoutePaginatorFromOpts(opts)
+	rcv, err = GetRoutePaginatorFromOpts(opts)
 	if err != nil {
 		t.Error(err)
 	}
@@ -357,7 +311,7 @@ func TestCGREventconsumeRoutePaginator(t *testing.T) {
 		Limit:  IntPointer(18),
 		Offset: IntPointer(20),
 	}
-	rcv, err = getRoutePaginatorFromOpts(opts)
+	rcv, err = GetRoutePaginatorFromOpts(opts)
 	if err != nil {
 		t.Error(err)
 	}
@@ -378,7 +332,7 @@ func TestCGREventconsumeRoutePaginator(t *testing.T) {
 	eOut = &Paginator{
 		Offset: IntPointer(20),
 	}
-	rcv, err = getRoutePaginatorFromOpts(opts)
+	rcv, err = GetRoutePaginatorFromOpts(opts)
 	if err != nil {
 		t.Error(err)
 	}
@@ -396,7 +350,7 @@ func TestCGREventconsumeRoutePaginator(t *testing.T) {
 		RoutesLimit: "Not an int",
 	}
 	eOut = new(Paginator)
-	rcv, err = getRoutePaginatorFromOpts(opts)
+	rcv, err = GetRoutePaginatorFromOpts(opts)
 	if err == nil {
 		t.Error("Expected error")
 	}
@@ -408,114 +362,12 @@ func TestCGREventconsumeRoutePaginator(t *testing.T) {
 		RoutesOffset: "Not an int",
 	}
 	eOut = new(Paginator)
-	rcv, err = getRoutePaginatorFromOpts(opts)
+	rcv, err = GetRoutePaginatorFromOpts(opts)
 	if err == nil {
 		t.Error("Expected error")
 	}
 	if !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting:  %+v, received: %+v", eOut, rcv)
-	}
-}
-
-func TestCGREventConsumeArgs(t *testing.T) {
-	//empty check
-	opts := map[string]interface{}{}
-	eOut := ExtractedArgs{}
-	// false false
-	rcv, err := ExtractArgsFromOpts(opts, false, false)
-	if err != nil {
-		t.Error(err)
-	}
-	if !reflect.DeepEqual(eOut, rcv) {
-		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
-	}
-	// false true
-	rcv, err = ExtractArgsFromOpts(opts, false, true)
-	if err != nil {
-		t.Error(err)
-	}
-	eOut.RoutePaginator = new(Paginator)
-	if !reflect.DeepEqual(eOut, rcv) {
-		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
-	}
-	//true false
-	eOut = ExtractedArgs{
-		ArgDispatcher:  new(ArgDispatcher),
-		RoutePaginator: nil,
-	}
-	rcv, err = ExtractArgsFromOpts(opts, true, false)
-	if err != nil {
-		t.Error(err)
-	}
-	if !reflect.DeepEqual(eOut, rcv) {
-		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
-	}
-	//true true
-	rcv, err = ExtractArgsFromOpts(opts, true, true)
-	if err != nil {
-		t.Error(err)
-	}
-	eOut = ExtractedArgs{
-		RoutePaginator: new(Paginator),
-		ArgDispatcher:  new(ArgDispatcher),
-	}
-	if !reflect.DeepEqual(eOut, rcv) {
-		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
-	}
-
-}
-
-func TestNewCGREventWithArgDispatcher(t *testing.T) {
-	eOut := new(CGREventWithArgDispatcher)
-	rcv := NewCGREventWithArgDispatcher()
-
-	if !reflect.DeepEqual(eOut, rcv) {
-		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
-	}
-}
-
-func TestCGREventWithArgDispatcherClone(t *testing.T) {
-	//empty check
-	cgrEventWithArgDispatcher := new(CGREventWithArgDispatcher)
-	rcv := cgrEventWithArgDispatcher.Clone()
-	if !reflect.DeepEqual(cgrEventWithArgDispatcher, rcv) {
-		t.Errorf("Expecting: %+v, received: %+v", cgrEventWithArgDispatcher, rcv)
-	}
-	//nil check
-	cgrEventWithArgDispatcher = nil
-	rcv = cgrEventWithArgDispatcher.Clone()
-	if !reflect.DeepEqual(cgrEventWithArgDispatcher, rcv) {
-		t.Errorf("Expecting: %+v, received: %+v", cgrEventWithArgDispatcher, rcv)
-	}
-	//normal check
-	now := time.Now()
-	cgrEventWithArgDispatcher = &CGREventWithArgDispatcher{
-		CGREvent: &CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "IDtest",
-			Time:   &now,
-			Event: map[string]interface{}{
-				"test1": 1,
-				"test2": 2,
-				"test3": 3,
-			},
-		},
-		ArgDispatcher: new(ArgDispatcher),
-	}
-	rcv = cgrEventWithArgDispatcher.Clone()
-	if !reflect.DeepEqual(cgrEventWithArgDispatcher, rcv) {
-		t.Errorf("Expecting: %+v, received: %+v", cgrEventWithArgDispatcher, rcv)
-	}
-	//check vars
-	apiKey := "apikey"
-	routeID := "routeid"
-
-	rcv.ArgDispatcher = &ArgDispatcher{
-		APIKey:  &apiKey,
-		RouteID: &routeID,
-	}
-	if reflect.DeepEqual(cgrEventWithArgDispatcher.ArgDispatcher, rcv.ArgDispatcher) {
-		t.Errorf("Expected to be different")
 	}
 }
 
@@ -545,10 +397,6 @@ func TestCGREventWithOptsClone(t *testing.T) {
 				"test3": 3,
 			},
 		},
-		ArgDispatcher: &ArgDispatcher{
-			APIKey:  StringPointer("api1"),
-			RouteID: StringPointer("route1"),
-		},
 		Opts: map[string]interface{}{
 			"Context": MetaSessionS,
 		},
@@ -558,11 +406,8 @@ func TestCGREventWithOptsClone(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", cgrEventWithOpts, rcv)
 	}
 	//check vars
-	rcv.ArgDispatcher = &ArgDispatcher{
-		APIKey:  StringPointer("apikey"),
-		RouteID: StringPointer("routeid"),
-	}
-	if reflect.DeepEqual(cgrEventWithOpts.ArgDispatcher, rcv.ArgDispatcher) {
+	rcv.Opts["var"] = 1
+	if reflect.DeepEqual(cgrEventWithOpts.Opts, rcv.Opts) {
 		t.Errorf("Expected to be different")
 	}
 

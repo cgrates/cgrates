@@ -110,13 +110,13 @@ func (ssv1 *SessionSv1) BiRPCv1UpdateSession(clnt *rpc2.Client, args *sessions.V
 	return ssv1.Ss.BiRPCv1UpdateSession(clnt, args, rply)
 }
 
-func (ssv1 *SessionSv1) BiRPCv1SyncSessions(clnt *rpc2.Client, args *utils.TenantWithArgDispatcher,
+func (ssv1 *SessionSv1) BiRPCv1SyncSessions(clnt *rpc2.Client, args *utils.TenantWithOpts,
 	rply *string) (err error) {
 	if err = utils.ConReqs.Allocate(); err != nil {
 		return
 	}
 	defer utils.ConReqs.Deallocate()
-	return ssv1.Ss.BiRPCv1SyncSessions(clnt, &utils.TenantWithArgDispatcher{}, rply)
+	return ssv1.Ss.BiRPCv1SyncSessions(clnt, &utils.TenantWithOpts{}, rply)
 }
 
 func (ssv1 *SessionSv1) BiRPCv1TerminateSession(clnt *rpc2.Client, args *sessions.V1TerminateSessionArgs,
@@ -128,7 +128,7 @@ func (ssv1 *SessionSv1) BiRPCv1TerminateSession(clnt *rpc2.Client, args *session
 	return ssv1.Ss.BiRPCv1TerminateSession(clnt, args, rply)
 }
 
-func (ssv1 *SessionSv1) BiRPCv1ProcessCDR(clnt *rpc2.Client, cgrEv *utils.CGREventWithArgDispatcher,
+func (ssv1 *SessionSv1) BiRPCv1ProcessCDR(clnt *rpc2.Client, cgrEv *utils.CGREventWithOpts,
 	rply *string) (err error) {
 	if err = utils.ConReqs.Allocate(); err != nil {
 		return
@@ -218,7 +218,7 @@ func (ssv1 *SessionSv1) BiRPCv1RegisterInternalBiJSONConn(clnt *rpc2.Client, arg
 	return ssv1.Ss.BiRPCv1RegisterInternalBiJSONConn(clnt, args, rply)
 }
 
-func (ssv1 *SessionSv1) BiRPCPing(clnt *rpc2.Client, ign *utils.CGREventWithArgDispatcher,
+func (ssv1 *SessionSv1) BiRPCPing(clnt *rpc2.Client, ign *utils.CGREventWithOpts,
 	reply *string) (err error) {
 	if err = utils.ConReqs.Allocate(); err != nil {
 		return

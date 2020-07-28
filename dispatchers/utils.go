@@ -35,32 +35,26 @@ var ( //var used in all tests
 	nowTime    = time.Now()
 )
 
-type DispatcherEvent struct {
-	utils.CGREvent
-	*utils.ArgDispatcher
-	Subsystem string
-}
-
-type ArgsReplicateSessionsWithApiKey struct {
-	*utils.ArgDispatcher
+type ArgsReplicateSessionsWithOpts struct {
+	Opts map[string]interface{}
 	utils.TenantArg
 	sessions.ArgsReplicateSessions
 }
 
-type AttrRemoteLockWithApiKey struct {
-	*utils.ArgDispatcher
+type AttrRemoteLockWithOpts struct {
+	Opts map[string]interface{}
 	utils.TenantArg
 	utils.AttrRemoteLock
 }
 
-type AttrRemoteUnlockWithApiKey struct {
-	*utils.ArgDispatcher
+type AttrRemoteUnlockWithOpts struct {
+	Opts map[string]interface{}
 	utils.TenantArg
 	RefID string
 }
 
-type ArgStartServiceWithApiKey struct {
-	*utils.ArgDispatcher
+type ArgStartServiceWithOpts struct {
+	Opts map[string]interface{}
 	utils.TenantArg
 	servmanager.ArgStartService
 }

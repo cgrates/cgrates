@@ -1155,7 +1155,7 @@ func testV1FIdxSetAttributeProfileIndexes(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	if err := tFIdxRpc.Call(utils.APIerSv1GetAttributeProfile,
-		&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: tenant, ID: "ApierTest"}}, &reply); err == nil ||
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "ApierTest"}}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -1185,7 +1185,7 @@ func testV1FIdxSetAttributeProfileIndexes(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	if err := tFIdxRpc.Call(utils.APIerSv1GetAttributeProfile,
-		&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: tenant, ID: "ApierTest"}}, &reply); err != nil {
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "ApierTest"}}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(alsPrf.FilterIDs, reply.FilterIDs) {
 		t.Errorf("Expecting : %+v, received: %+v", alsPrf.FilterIDs, reply.FilterIDs)
@@ -1263,7 +1263,7 @@ func testV1FIdxSetSecondAttributeProfileIndexes(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	if err := tFIdxRpc.Call(utils.APIerSv1GetAttributeProfile,
-		&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{
 			Tenant: tenant, ID: "ApierTest2"}}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -1292,7 +1292,7 @@ func testV1FIdxSetSecondAttributeProfileIndexes(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	if err := tFIdxRpc.Call(utils.APIerSv1GetAttributeProfile,
-		&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{
 			Tenant: tenant, ID: "ApierTest2"}}, &reply); err != nil {
 		t.Error(err)
 		t.Error(err)
@@ -1405,13 +1405,13 @@ func testV1FIdxRemoveAttributeProfile(t *testing.T) {
 	}
 	var reply *engine.AttributeProfile
 	if err := tFIdxRpc.Call(utils.APIerSv1GetAttributeProfile,
-		&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{
 			Tenant: tenant, ID: "ApierTest2"}}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 	if err := tFIdxRpc.Call(utils.APIerSv1GetAttributeProfile,
-		&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{
 			Tenant: tenant, ID: "ApierTest"}}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)

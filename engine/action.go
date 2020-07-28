@@ -552,7 +552,7 @@ func setddestinations(ub *Account, a *Action, acs Actions, extraData interface{}
 			}
 			var sts StatQueue
 			if err = connMgr.Call(config.CgrConfig().RalsCfg().StatSConns, nil, utils.StatSv1GetStatQueue,
-				&utils.TenantIDWithArgDispatcher{
+				&utils.TenantIDWithOpts{
 					TenantID: &utils.TenantID{
 						Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 						ID:     statID,

@@ -36,76 +36,76 @@ type CacheSv1 struct {
 }
 
 // GetItemIDs returns the IDs for cacheID with given prefix
-func (chSv1 *CacheSv1) GetItemIDs(args *utils.ArgsGetCacheItemIDsWithArgDispatcher,
+func (chSv1 *CacheSv1) GetItemIDs(args *utils.ArgsGetCacheItemIDsWithOpts,
 	reply *[]string) error {
 	return chSv1.cacheS.V1GetItemIDs(args, reply)
 }
 
 // HasItem verifies the existence of an Item in cache
-func (chSv1 *CacheSv1) HasItem(args *utils.ArgsGetCacheItemWithArgDispatcher,
+func (chSv1 *CacheSv1) HasItem(args *utils.ArgsGetCacheItemWithOpts,
 	reply *bool) error {
 	return chSv1.cacheS.V1HasItem(args, reply)
 }
 
 // GetItemExpiryTime returns the expiryTime for an item
-func (chSv1 *CacheSv1) GetItemExpiryTime(args *utils.ArgsGetCacheItemWithArgDispatcher,
+func (chSv1 *CacheSv1) GetItemExpiryTime(args *utils.ArgsGetCacheItemWithOpts,
 	reply *time.Time) error {
 	return chSv1.cacheS.V1GetItemExpiryTime(args, reply)
 }
 
 // RemoveItem removes the Item with ID from cache
-func (chSv1 *CacheSv1) RemoveItem(args *utils.ArgsGetCacheItemWithArgDispatcher,
+func (chSv1 *CacheSv1) RemoveItem(args *utils.ArgsGetCacheItemWithOpts,
 	reply *string) error {
 	return chSv1.cacheS.V1RemoveItem(args, reply)
 }
 
 // Clear will clear partitions in the cache (nil fol all, empty slice for none)
-func (chSv1 *CacheSv1) Clear(args *utils.AttrCacheIDsWithArgDispatcher,
+func (chSv1 *CacheSv1) Clear(args *utils.AttrCacheIDsWithOpts,
 	reply *string) error {
 	return chSv1.cacheS.V1Clear(args, reply)
 }
 
 // GetCacheStats returns CacheStats filtered by cacheIDs
-func (chSv1 *CacheSv1) GetCacheStats(args *utils.AttrCacheIDsWithArgDispatcher,
+func (chSv1 *CacheSv1) GetCacheStats(args *utils.AttrCacheIDsWithOpts,
 	rply *map[string]*ltcache.CacheStats) error {
 	return chSv1.cacheS.V1GetCacheStats(args, rply)
 }
 
 // PrecacheStatus checks status of active precache processes
-func (chSv1 *CacheSv1) PrecacheStatus(args *utils.AttrCacheIDsWithArgDispatcher, rply *map[string]string) error {
+func (chSv1 *CacheSv1) PrecacheStatus(args *utils.AttrCacheIDsWithOpts, rply *map[string]string) error {
 	return chSv1.cacheS.V1PrecacheStatus(args, rply)
 }
 
 // HasGroup checks existence of a group in cache
-func (chSv1 *CacheSv1) HasGroup(args *utils.ArgsGetGroupWithArgDispatcher,
+func (chSv1 *CacheSv1) HasGroup(args *utils.ArgsGetGroupWithOpts,
 	rply *bool) (err error) {
 	return chSv1.cacheS.V1HasGroup(args, rply)
 }
 
 // GetGroupItemIDs returns a list of itemIDs in a cache group
-func (chSv1 *CacheSv1) GetGroupItemIDs(args *utils.ArgsGetGroupWithArgDispatcher,
+func (chSv1 *CacheSv1) GetGroupItemIDs(args *utils.ArgsGetGroupWithOpts,
 	rply *[]string) (err error) {
 	return chSv1.cacheS.V1GetGroupItemIDs(args, rply)
 }
 
 // RemoveGroup will remove a group and all items belonging to it from cache
-func (chSv1 *CacheSv1) RemoveGroup(args *utils.ArgsGetGroupWithArgDispatcher,
+func (chSv1 *CacheSv1) RemoveGroup(args *utils.ArgsGetGroupWithOpts,
 	rply *string) (err error) {
 	return chSv1.cacheS.V1RemoveGroup(args, rply)
 }
 
 // ReloadCache reloads cache from DB for a prefix or completely
-func (chSv1 *CacheSv1) ReloadCache(args *utils.AttrReloadCacheWithArgDispatcher, reply *string) (err error) {
+func (chSv1 *CacheSv1) ReloadCache(args *utils.AttrReloadCacheWithOpts, reply *string) (err error) {
 	return chSv1.cacheS.V1ReloadCache(*args, reply)
 }
 
 // LoadCache loads cache from DB for a prefix or completely
-func (chSv1 *CacheSv1) LoadCache(args *utils.AttrReloadCacheWithArgDispatcher, reply *string) (err error) {
+func (chSv1 *CacheSv1) LoadCache(args *utils.AttrReloadCacheWithOpts, reply *string) (err error) {
 	return chSv1.cacheS.V1LoadCache(*args, reply)
 }
 
 // Ping used to determinate if component is active
-func (chSv1 *CacheSv1) Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error {
+func (chSv1 *CacheSv1) Ping(ign *utils.CGREventWithOpts, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

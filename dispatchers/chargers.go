@@ -23,26 +23,21 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (dS *DispatcherService) ChargerSv1Ping(args *utils.CGREventWithArgDispatcher, reply *string) (err error) {
+func (dS *DispatcherService) ChargerSv1Ping(args *utils.CGREventWithOpts, reply *string) (err error) {
 	if args == nil {
-		args = utils.NewCGREventWithArgDispatcher()
+		args = new(utils.CGREventWithOpts)
 	}
-	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.CGREvent != nil && args.CGREvent.Tenant != utils.EmptyString {
+		tnt = args.CGREvent.Tenant
+	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
-		}
-		if err = dS.authorize(utils.ChargerSv1Ping, args.CGREvent.Tenant,
-			args.APIKey, args.Time); err != nil {
+		if err = dS.authorize(utils.ChargerSv1Ping, tnt,
+			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.Time); err != nil {
 			return
 		}
 	}
-	var routeID *string
-	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
-	}
-	return dS.Dispatch(args.CGREvent, utils.MetaChargers, routeID,
-		utils.ChargerSv1Ping, args, reply)
+	return dS.Dispatch(args, utils.MetaChargers, utils.ChargerSv1Ping, args, reply)
 }
 
 func (dS *DispatcherService) ChargerSv1GetChargersForEvent(args *utils.CGREventWithOpts,
@@ -52,20 +47,12 @@ func (dS *DispatcherService) ChargerSv1GetChargersForEvent(args *utils.CGREventW
 		tnt = args.CGREvent.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
-		}
 		if err = dS.authorize(utils.ChargerSv1GetChargersForEvent, tnt,
-			args.APIKey, args.CGREvent.Time); err != nil {
+			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
 			return
 		}
 	}
-	var routeID *string
-	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
-	}
-	return dS.Dispatch(args.CGREvent, utils.MetaChargers, routeID,
-		utils.ChargerSv1GetChargersForEvent, args, reply)
+	return dS.Dispatch(args, utils.MetaChargers, utils.ChargerSv1GetChargersForEvent, args, reply)
 }
 
 func (dS *DispatcherService) ChargerSv1ProcessEvent(args *utils.CGREventWithOpts,
@@ -75,18 +62,10 @@ func (dS *DispatcherService) ChargerSv1ProcessEvent(args *utils.CGREventWithOpts
 		tnt = args.CGREvent.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
-		}
 		if err = dS.authorize(utils.ChargerSv1ProcessEvent, tnt,
-			args.APIKey, args.CGREvent.Time); err != nil {
+			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
 			return
 		}
 	}
-	var routeID *string
-	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
-	}
-	return dS.Dispatch(args.CGREvent, utils.MetaChargers, routeID,
-		utils.ChargerSv1ProcessEvent, args, reply)
+	return dS.Dispatch(args, utils.MetaChargers, utils.ChargerSv1ProcessEvent, args, reply)
 }

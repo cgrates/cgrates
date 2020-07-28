@@ -743,7 +743,7 @@ func testAccITAddBalanceWithDestinations(t *testing.T) {
 	}
 
 	tStart := time.Date(2016, 3, 31, 0, 0, 0, 0, time.UTC)
-	cd := &engine.CallDescriptorWithArgDispatcher{
+	cd := &engine.CallDescriptorWithOpts{
 		CallDescriptor: &engine.CallDescriptor{
 			Category:      "sms",
 			Tenant:        "cgrates.org",
@@ -763,7 +763,7 @@ func testAccITAddBalanceWithDestinations(t *testing.T) {
 	}
 
 	tStart = time.Date(2016, 3, 31, 0, 0, 0, 0, time.UTC)
-	cd = &engine.CallDescriptorWithArgDispatcher{
+	cd = &engine.CallDescriptorWithOpts{
 		CallDescriptor: &engine.CallDescriptor{
 			Category:      "sms",
 			Tenant:        "cgrates.org",

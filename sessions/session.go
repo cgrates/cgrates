@@ -80,7 +80,6 @@ type Session struct {
 
 	debitStop   chan struct{}
 	sTerminator *sTerminator // automatic timeout for the session
-	*utils.ArgDispatcher
 }
 
 // Lock exported function from sync.RWMutex
@@ -221,13 +220,16 @@ func (s *Session) totalUsage() (tDur time.Duration) {
 
 // AsCGREvents is a  method to return the Session as CGREvents
 // AsCGREvents is not thread safe since it is supposed to run by the time Session is closed
-func (s *Session) asCGREvents() (cgrEvs []*utils.CGREvent, err error) {
-	cgrEvs = make([]*utils.CGREvent, len(s.SRuns)) // so we can gather all cdr info while under lock
+func (s *Session) asCGREvents() (cgrEvs []*utils.CGREventWithOpts, err error) {
+	cgrEvs = make([]*utils.CGREventWithOpts, len(s.SRuns)) // so we can gather all cdr info while under lock
 	for i, sr := range s.SRuns {
-		cgrEvs[i] = &utils.CGREvent{
-			Tenant: s.Tenant,
-			ID:     utils.UUIDSha1Prefix(),
-			Event:  sr.Event,
+		cgrEvs[i] = &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: s.Tenant,
+				ID:     utils.UUIDSha1Prefix(),
+				Event:  sr.Event,
+			},
+			Opts: s.OptsStart,
 		}
 	}
 	return

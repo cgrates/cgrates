@@ -281,8 +281,10 @@ func (smaEv *SMAsteriskEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs)
 		return
 	}
 	args = &sessions.V1AuthorizeArgs{
-		CGREvent: cgrEv,
-		Opts:     smaEv.opts,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: cgrEv,
+			Opts:     smaEv.opts,
+		},
 	}
 	if smaEv.Subsystems() == utils.EmptyString {
 		utils.Logger.Err(fmt.Sprintf("<%s> cgr_flags variable is not set",
@@ -296,8 +298,10 @@ func (smaEv *SMAsteriskEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs)
 
 func (smaEv *SMAsteriskEvent) V1InitSessionArgs(cgrEvDisp utils.CGREventWithOpts) (args *sessions.V1InitSessionArgs) {
 	args = &sessions.V1InitSessionArgs{ // defaults
-		CGREvent: cgrEvDisp.CGREvent,
-		Opts:     cgrEvDisp.Opts,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: cgrEvDisp.CGREvent,
+			Opts:     cgrEvDisp.Opts,
+		},
 	}
 	subsystems, err := cgrEvDisp.CGREvent.FieldAsString(utils.CGRFlags)
 	if err != nil {
@@ -312,8 +316,10 @@ func (smaEv *SMAsteriskEvent) V1InitSessionArgs(cgrEvDisp utils.CGREventWithOpts
 
 func (smaEv *SMAsteriskEvent) V1TerminateSessionArgs(cgrEvDisp utils.CGREventWithOpts) (args *sessions.V1TerminateSessionArgs) {
 	args = &sessions.V1TerminateSessionArgs{ // defaults
-		CGREvent: cgrEvDisp.CGREvent,
-		Opts:     cgrEvDisp.Opts,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: cgrEvDisp.CGREvent,
+			Opts:     cgrEvDisp.Opts,
+		},
 	}
 	subsystems, err := cgrEvDisp.CGREvent.FieldAsString(utils.CGRFlags)
 	if err != nil {

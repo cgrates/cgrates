@@ -27,7 +27,7 @@ func init() {
 	c := &CmdGetRouteForEvent{
 		name:      "route_profiles_for_event",
 		rpcMethod: utils.RouteSv1GetRouteProfilesForEvent,
-		rpcParams: &utils.CGREventWithArgDispatcher{},
+		rpcParams: &utils.CGREventWithOpts{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -36,7 +36,7 @@ func init() {
 type CmdGetRouteForEvent struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.CGREventWithArgDispatcher
+	rpcParams *utils.CGREventWithOpts
 	*CommandExecuter
 }
 
@@ -50,9 +50,10 @@ func (self *CmdGetRouteForEvent) RpcMethod() string {
 
 func (self *CmdGetRouteForEvent) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.CGREventWithArgDispatcher{
-			CGREvent:      new(utils.CGREvent),
-			ArgDispatcher: new(utils.ArgDispatcher)}
+		self.rpcParams = &utils.CGREventWithOpts{
+			CGREvent: new(utils.CGREvent),
+			Opts:     make(map[string]interface{}),
+		}
 	}
 	return self.rpcParams
 }

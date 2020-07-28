@@ -27,7 +27,7 @@ import (
 )
 
 // Returns MaxUsage (for calls in seconds), -1 for no limit
-func (apierSv1 *APIerSv1) GetMaxUsage(usageRecord *engine.UsageRecordWithArgDispatcher, maxUsage *int64) error {
+func (apierSv1 *APIerSv1) GetMaxUsage(usageRecord *engine.UsageRecordWithOpts, maxUsage *int64) error {
 	if apierSv1.Responder == nil {
 		return utils.NewErrNotConnected(utils.RALService)
 	}
@@ -58,8 +58,10 @@ func (apierSv1 *APIerSv1) GetMaxUsage(usageRecord *engine.UsageRecordWithArgDisp
 		return utils.NewErrServerError(err)
 	}
 	var maxDur time.Duration
-	if err := apierSv1.Responder.GetMaxSessionTime(&engine.CallDescriptorWithArgDispatcher{CallDescriptor: cd,
-		ArgDispatcher: usageRecord.ArgDispatcher}, &maxDur); err != nil {
+	if err := apierSv1.Responder.GetMaxSessionTime(&engine.CallDescriptorWithOpts{
+		CallDescriptor: cd,
+		Opts:           usageRecord.Opts,
+	}, &maxDur); err != nil {
 		return err
 	}
 	if maxDur == time.Duration(-1) {

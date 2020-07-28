@@ -23,67 +23,43 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (dS *DispatcherService) RouteSv1Ping(args *utils.CGREventWithArgDispatcher, reply *string) (err error) {
+func (dS *DispatcherService) RouteSv1Ping(args *utils.CGREventWithOpts, reply *string) (err error) {
 	if args == nil {
-		args = utils.NewCGREventWithArgDispatcher()
+		args = new(utils.CGREventWithOpts)
 	}
 	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
-		}
 		if err = dS.authorize(utils.RouteSv1Ping,
 			args.CGREvent.Tenant,
-			args.APIKey, args.CGREvent.Time); err != nil {
+			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
 			return
 		}
 	}
-	var routeID *string
-	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
-	}
-	return dS.Dispatch(args.CGREvent, utils.MetaRoutes, routeID,
-		utils.RouteSv1Ping, args, reply)
+	return dS.Dispatch(args, utils.MetaRoutes, utils.RouteSv1Ping, args, reply)
 }
 
 func (dS *DispatcherService) RouteSv1GetRoutes(args *engine.ArgsGetRoutes,
 	reply *engine.SortedRoutes) (err error) {
 	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
-		}
 		if err = dS.authorize(utils.RouteSv1GetRoutes,
 			args.CGREvent.Tenant,
-			args.APIKey, args.CGREvent.Time); err != nil {
+			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
 			return
 		}
 	}
-	var routeID *string
-	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
-	}
-	return dS.Dispatch(args.CGREvent, utils.MetaRoutes, routeID,
-		utils.RouteSv1GetRoutes, args, reply)
+	return dS.Dispatch(args.CGREventWithOpts, utils.MetaRoutes, utils.RouteSv1GetRoutes, args, reply)
 }
 
-func (dS *DispatcherService) RouteSv1GetRouteProfilesForEvent(args *utils.CGREventWithArgDispatcher,
+func (dS *DispatcherService) RouteSv1GetRouteProfilesForEvent(args *utils.CGREventWithOpts,
 	reply *[]*engine.RouteProfile) (err error) {
 	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
-		}
 		if err = dS.authorize(utils.RouteSv1GetRouteProfilesForEvent,
 			args.CGREvent.Tenant,
-			args.APIKey, args.CGREvent.Time); err != nil {
+			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
 			return
 		}
 	}
-	var routeID *string
-	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
-	}
-	return dS.Dispatch(args.CGREvent, utils.MetaRoutes, routeID,
-		utils.RouteSv1GetRouteProfilesForEvent, args, reply)
+	return dS.Dispatch(args, utils.MetaRoutes, utils.RouteSv1GetRouteProfilesForEvent, args, reply)
 }

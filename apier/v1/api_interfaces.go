@@ -30,20 +30,20 @@ import (
 )
 
 type ThresholdSv1Interface interface {
-	GetThresholdIDs(tenant *utils.TenantWithArgDispatcher, tIDs *[]string) error
-	GetThresholdsForEvent(args *engine.ArgsProcessEvent, reply *engine.Thresholds) error
-	GetThreshold(tntID *utils.TenantIDWithArgDispatcher, t *engine.Threshold) error
-	ProcessEvent(args *engine.ArgsProcessEvent, tIDs *[]string) error
-	Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error
+	GetThresholdIDs(tenant *utils.TenantWithOpts, tIDs *[]string) error
+	GetThresholdsForEvent(args *engine.ThresholdsArgsProcessEvent, reply *engine.Thresholds) error
+	GetThreshold(tntID *utils.TenantIDWithOpts, t *engine.Threshold) error
+	ProcessEvent(args *engine.ThresholdsArgsProcessEvent, tIDs *[]string) error
+	Ping(ign *utils.CGREventWithOpts, reply *string) error
 }
 
 type StatSv1Interface interface {
-	GetQueueIDs(tenant *utils.TenantWithArgDispatcher, qIDs *[]string) error
+	GetQueueIDs(tenant *utils.TenantWithOpts, qIDs *[]string) error
 	ProcessEvent(args *engine.StatsArgsProcessEvent, reply *[]string) error
 	GetStatQueuesForEvent(args *engine.StatsArgsProcessEvent, reply *[]string) (err error)
-	GetQueueStringMetrics(args *utils.TenantIDWithArgDispatcher, reply *map[string]string) (err error)
-	GetQueueFloatMetrics(args *utils.TenantIDWithArgDispatcher, reply *map[string]float64) (err error)
-	Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error
+	GetQueueStringMetrics(args *utils.TenantIDWithOpts, reply *map[string]string) (err error)
+	GetQueueFloatMetrics(args *utils.TenantIDWithOpts, reply *map[string]float64) (err error)
+	Ping(ign *utils.CGREventWithOpts, reply *string) error
 }
 
 type ResourceSv1Interface interface {
@@ -51,24 +51,24 @@ type ResourceSv1Interface interface {
 	AuthorizeResources(args *utils.ArgRSv1ResourceUsage, reply *string) error
 	AllocateResources(args *utils.ArgRSv1ResourceUsage, reply *string) error
 	ReleaseResources(args *utils.ArgRSv1ResourceUsage, reply *string) error
-	GetResource(args *utils.TenantIDWithArgDispatcher, reply *engine.Resource) error
-	Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error
+	GetResource(args *utils.TenantIDWithOpts, reply *engine.Resource) error
+	Ping(ign *utils.CGREventWithOpts, reply *string) error
 }
 
 type RouteSv1Interface interface {
 	GetRoutes(args *engine.ArgsGetRoutes, reply *engine.SortedRoutes) error
-	GetRouteProfilesForEvent(args *utils.CGREventWithArgDispatcher, reply *[]*engine.RouteProfile) error
-	Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error
+	GetRouteProfilesForEvent(args *utils.CGREventWithOpts, reply *[]*engine.RouteProfile) error
+	Ping(ign *utils.CGREventWithOpts, reply *string) error
 }
 
 type AttributeSv1Interface interface {
 	GetAttributeForEvent(args *engine.AttrArgsProcessEvent, reply *engine.AttributeProfile) (err error)
 	ProcessEvent(args *engine.AttrArgsProcessEvent, reply *engine.AttrSProcessEventReply) error
-	Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error
+	Ping(ign *utils.CGREventWithOpts, reply *string) error
 }
 
 type ChargerSv1Interface interface {
-	Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error
+	Ping(ign *utils.CGREventWithOpts, reply *string) error
 	GetChargersForEvent(cgrEv *utils.CGREventWithOpts, reply *engine.ChargerProfiles) error
 	ProcessEvent(args *utils.CGREventWithOpts, reply *[]*engine.ChrgSProcessEventReply) error
 }
@@ -79,9 +79,9 @@ type SessionSv1Interface interface {
 	InitiateSession(args *sessions.V1InitSessionArgs, rply *sessions.V1InitSessionReply) error
 	InitiateSessionWithDigest(args *sessions.V1InitSessionArgs, rply *sessions.V1InitReplyWithDigest) error
 	UpdateSession(args *sessions.V1UpdateSessionArgs, rply *sessions.V1UpdateSessionReply) error
-	SyncSessions(args *utils.TenantWithArgDispatcher, rply *string) error
+	SyncSessions(args *utils.TenantWithOpts, rply *string) error
 	TerminateSession(args *sessions.V1TerminateSessionArgs, rply *string) error
-	ProcessCDR(cgrEv *utils.CGREventWithArgDispatcher, rply *string) error
+	ProcessCDR(cgrEv *utils.CGREventWithOpts, rply *string) error
 	ProcessMessage(args *sessions.V1ProcessMessageArgs, rply *sessions.V1ProcessMessageReply) error
 	ProcessEvent(args *sessions.V1ProcessEventArgs, rply *sessions.V1ProcessEventReply) error
 	GetCost(args *sessions.V1ProcessEventArgs, rply *sessions.V1GetCostReply) error
@@ -90,8 +90,8 @@ type SessionSv1Interface interface {
 	ForceDisconnect(args *utils.SessionFilter, rply *string) error
 	GetPassiveSessions(args *utils.SessionFilter, rply *[]*sessions.ExternalSession) error
 	GetPassiveSessionsCount(args *utils.SessionFilter, rply *int) error
-	Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error
-	ReplicateSessions(args *dispatchers.ArgsReplicateSessionsWithApiKey, rply *string) error
+	Ping(ign *utils.CGREventWithOpts, reply *string) error
+	ReplicateSessions(args *dispatchers.ArgsReplicateSessionsWithOpts, rply *string) error
 	SetPassiveSession(args *sessions.Session, reply *string) error
 	ActivateSessions(args *utils.SessionIDsWithArgsDispatcher, reply *string) error
 	DeactivateSessions(args *utils.SessionIDsWithArgsDispatcher, reply *string) error
@@ -101,43 +101,43 @@ type SessionSv1Interface interface {
 }
 
 type ResponderInterface interface {
-	GetCost(arg *engine.CallDescriptorWithArgDispatcher, reply *engine.CallCost) (err error)
-	Debit(arg *engine.CallDescriptorWithArgDispatcher, reply *engine.CallCost) (err error)
-	MaxDebit(arg *engine.CallDescriptorWithArgDispatcher, reply *engine.CallCost) (err error)
-	RefundIncrements(arg *engine.CallDescriptorWithArgDispatcher, reply *engine.Account) (err error)
-	RefundRounding(arg *engine.CallDescriptorWithArgDispatcher, reply *float64) (err error)
-	GetMaxSessionTime(arg *engine.CallDescriptorWithArgDispatcher, reply *time.Duration) (err error)
-	Shutdown(arg *utils.TenantWithArgDispatcher, reply *string) (err error)
-	Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error
+	GetCost(arg *engine.CallDescriptorWithOpts, reply *engine.CallCost) (err error)
+	Debit(arg *engine.CallDescriptorWithOpts, reply *engine.CallCost) (err error)
+	MaxDebit(arg *engine.CallDescriptorWithOpts, reply *engine.CallCost) (err error)
+	RefundIncrements(arg *engine.CallDescriptorWithOpts, reply *engine.Account) (err error)
+	RefundRounding(arg *engine.CallDescriptorWithOpts, reply *float64) (err error)
+	GetMaxSessionTime(arg *engine.CallDescriptorWithOpts, reply *time.Duration) (err error)
+	Shutdown(arg *utils.TenantWithOpts, reply *string) (err error)
+	Ping(ign *utils.CGREventWithOpts, reply *string) error
 }
 
 type CacheSv1Interface interface {
-	GetItemIDs(args *utils.ArgsGetCacheItemIDsWithArgDispatcher, reply *[]string) error
-	HasItem(args *utils.ArgsGetCacheItemWithArgDispatcher, reply *bool) error
-	GetItemExpiryTime(args *utils.ArgsGetCacheItemWithArgDispatcher, reply *time.Time) error
-	RemoveItem(args *utils.ArgsGetCacheItemWithArgDispatcher, reply *string) error
-	Clear(cacheIDs *utils.AttrCacheIDsWithArgDispatcher, reply *string) error
-	GetCacheStats(cacheIDs *utils.AttrCacheIDsWithArgDispatcher, rply *map[string]*ltcache.CacheStats) error
-	PrecacheStatus(cacheIDs *utils.AttrCacheIDsWithArgDispatcher, rply *map[string]string) error
-	HasGroup(args *utils.ArgsGetGroupWithArgDispatcher, rply *bool) error
-	GetGroupItemIDs(args *utils.ArgsGetGroupWithArgDispatcher, rply *[]string) error
-	RemoveGroup(args *utils.ArgsGetGroupWithArgDispatcher, rply *string) error
-	ReloadCache(attrs *utils.AttrReloadCacheWithArgDispatcher, reply *string) error
-	LoadCache(args *utils.AttrReloadCacheWithArgDispatcher, reply *string) error
+	GetItemIDs(args *utils.ArgsGetCacheItemIDsWithOpts, reply *[]string) error
+	HasItem(args *utils.ArgsGetCacheItemWithOpts, reply *bool) error
+	GetItemExpiryTime(args *utils.ArgsGetCacheItemWithOpts, reply *time.Time) error
+	RemoveItem(args *utils.ArgsGetCacheItemWithOpts, reply *string) error
+	Clear(cacheIDs *utils.AttrCacheIDsWithOpts, reply *string) error
+	GetCacheStats(cacheIDs *utils.AttrCacheIDsWithOpts, rply *map[string]*ltcache.CacheStats) error
+	PrecacheStatus(cacheIDs *utils.AttrCacheIDsWithOpts, rply *map[string]string) error
+	HasGroup(args *utils.ArgsGetGroupWithOpts, rply *bool) error
+	GetGroupItemIDs(args *utils.ArgsGetGroupWithOpts, rply *[]string) error
+	RemoveGroup(args *utils.ArgsGetGroupWithOpts, rply *string) error
+	ReloadCache(attrs *utils.AttrReloadCacheWithOpts, reply *string) error
+	LoadCache(args *utils.AttrReloadCacheWithOpts, reply *string) error
 	ReplicateSet(args *utils.ArgCacheReplicateSet, reply *string) (err error)
 	ReplicateRemove(args *utils.ArgCacheReplicateRemove, reply *string) (err error)
-	Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error
+	Ping(ign *utils.CGREventWithOpts, reply *string) error
 }
 
 type GuardianSv1Interface interface {
-	RemoteLock(attr *dispatchers.AttrRemoteLockWithApiKey, reply *string) (err error)
-	RemoteUnlock(refID *dispatchers.AttrRemoteUnlockWithApiKey, reply *[]string) (err error)
-	Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error
+	RemoteLock(attr *dispatchers.AttrRemoteLockWithOpts, reply *string) (err error)
+	RemoteUnlock(refID *dispatchers.AttrRemoteUnlockWithOpts, reply *[]string) (err error)
+	Ping(ign *utils.CGREventWithOpts, reply *string) error
 }
 
 type SchedulerSv1Interface interface {
-	Reload(arg *utils.CGREventWithArgDispatcher, reply *string) error
-	Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error
+	Reload(arg *utils.CGREventWithOpts, reply *string) error
+	Ping(ign *utils.CGREventWithOpts, reply *string) error
 	ExecuteActions(attr *utils.AttrsExecuteActions, reply *string) error
 	ExecuteActionPlans(attr *utils.AttrsExecuteActionPlans, reply *string) error
 }
@@ -145,117 +145,117 @@ type SchedulerSv1Interface interface {
 type CDRsV1Interface interface {
 	ProcessCDR(cdr *engine.CDRWithOpts, reply *string) error
 	ProcessEvent(arg *engine.ArgV1ProcessEvent, reply *string) error
-	ProcessExternalCDR(cdr *engine.ExternalCDRWithArgDispatcher, reply *string) error
+	ProcessExternalCDR(cdr *engine.ExternalCDRWithOpts, reply *string) error
 	RateCDRs(arg *engine.ArgRateCDRs, reply *string) error
 	StoreSessionCost(attr *engine.AttrCDRSStoreSMCost, reply *string) error
-	GetCDRsCount(args *utils.RPCCDRsFilterWithArgDispatcher, reply *int64) error
-	GetCDRs(args *utils.RPCCDRsFilterWithArgDispatcher, reply *[]*engine.CDR) error
-	Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error
+	GetCDRsCount(args *utils.RPCCDRsFilterWithOpts, reply *int64) error
+	GetCDRs(args *utils.RPCCDRsFilterWithOpts, reply *[]*engine.CDR) error
+	Ping(ign *utils.CGREventWithOpts, reply *string) error
 }
 
 type ServiceManagerV1Interface interface {
-	StartService(args *dispatchers.ArgStartServiceWithApiKey, reply *string) error
-	StopService(args *dispatchers.ArgStartServiceWithApiKey, reply *string) error
-	ServiceStatus(args *dispatchers.ArgStartServiceWithApiKey, reply *string) error
-	Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error
+	StartService(args *dispatchers.ArgStartServiceWithOpts, reply *string) error
+	StopService(args *dispatchers.ArgStartServiceWithOpts, reply *string) error
+	ServiceStatus(args *dispatchers.ArgStartServiceWithOpts, reply *string) error
+	Ping(ign *utils.CGREventWithOpts, reply *string) error
 }
 
 type RALsV1Interface interface {
 	GetRatingPlansCost(arg *utils.RatingPlanCostArg, reply *dispatchers.RatingPlanCost) error
-	Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error
+	Ping(ign *utils.CGREventWithOpts, reply *string) error
 }
 
 type ConfigSv1Interface interface {
-	GetJSONSection(section *config.StringWithArgDispatcher, reply *map[string]interface{}) (err error)
-	ReloadConfigFromPath(section *config.ConfigReloadWithArgDispatcher, reply *string) (err error)
-	ReloadConfigFromJSON(args *config.JSONReloadWithArgDispatcher, reply *string) (err error)
+	GetJSONSection(section *config.StringWithOpts, reply *map[string]interface{}) (err error)
+	ReloadConfigFromPath(section *config.ConfigReloadWithOpts, reply *string) (err error)
+	ReloadConfigFromJSON(args *config.JSONReloadWithOpts, reply *string) (err error)
 }
 
 type CoreSv1Interface interface {
-	Status(arg *utils.TenantWithArgDispatcher, reply *map[string]interface{}) error
-	Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error
+	Status(arg *utils.TenantWithOpts, reply *map[string]interface{}) error
+	Ping(ign *utils.CGREventWithOpts, reply *string) error
 }
 
 type RateSv1Interface interface {
-	Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error
+	Ping(ign *utils.CGREventWithOpts, reply *string) error
 }
 
 type ReplicatorSv1Interface interface {
-	Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error
-	GetAccount(args *utils.StringWithApiKey, reply *engine.Account) error
-	GetDestination(key *utils.StringWithApiKey, reply *engine.Destination) error
-	GetReverseDestination(key *utils.StringWithApiKey, reply *[]string) error
-	GetStatQueue(tntID *utils.TenantIDWithArgDispatcher, reply *engine.StatQueue) error
-	GetFilter(tntID *utils.TenantIDWithArgDispatcher, reply *engine.Filter) error
-	GetThreshold(tntID *utils.TenantIDWithArgDispatcher, reply *engine.Threshold) error
-	GetThresholdProfile(tntID *utils.TenantIDWithArgDispatcher, reply *engine.ThresholdProfile) error
-	GetStatQueueProfile(tntID *utils.TenantIDWithArgDispatcher, reply *engine.StatQueueProfile) error
-	GetTiming(id *utils.StringWithApiKey, reply *utils.TPTiming) error
-	GetResource(tntID *utils.TenantIDWithArgDispatcher, reply *engine.Resource) error
-	GetResourceProfile(tntID *utils.TenantIDWithArgDispatcher, reply *engine.ResourceProfile) error
-	GetActionTriggers(id *utils.StringWithApiKey, reply *engine.ActionTriggers) error
-	GetSharedGroup(id *utils.StringWithApiKey, reply *engine.SharedGroup) error
-	GetActions(id *utils.StringWithApiKey, reply *engine.Actions) error
-	GetActionPlan(id *utils.StringWithApiKey, reply *engine.ActionPlan) error
-	GetAllActionPlans(_ *utils.StringWithApiKey, reply *map[string]*engine.ActionPlan) error
-	GetAccountActionPlans(id *utils.StringWithApiKey, reply *[]string) error
-	GetRatingPlan(id *utils.StringWithApiKey, reply *engine.RatingPlan) error
-	GetRatingProfile(id *utils.StringWithApiKey, reply *engine.RatingProfile) error
-	GetRouteProfile(tntID *utils.TenantIDWithArgDispatcher, reply *engine.RouteProfile) error
-	GetAttributeProfile(tntID *utils.TenantIDWithArgDispatcher, reply *engine.AttributeProfile) error
-	GetChargerProfile(tntID *utils.TenantIDWithArgDispatcher, reply *engine.ChargerProfile) error
-	GetDispatcherProfile(tntID *utils.TenantIDWithArgDispatcher, reply *engine.DispatcherProfile) error
-	GetRateProfile(tntID *utils.TenantIDWithArgDispatcher, reply *engine.RateProfile) error
-	GetDispatcherHost(tntID *utils.TenantIDWithArgDispatcher, reply *engine.DispatcherHost) error
-	GetItemLoadIDs(itemID *utils.StringWithApiKey, reply *map[string]int64) error
-	SetThresholdProfile(th *engine.ThresholdProfileWithArgDispatcher, reply *string) error
-	SetThreshold(th *engine.ThresholdWithArgDispatcher, reply *string) error
-	SetAccount(acc *engine.AccountWithArgDispatcher, reply *string) error
-	SetDestination(dst *engine.DestinationWithArgDispatcher, reply *string) error
-	SetReverseDestination(dst *engine.DestinationWithArgDispatcher, reply *string) error
-	SetStatQueue(ssq *engine.StoredStatQueueWithArgDispatcher, reply *string) error
-	SetFilter(fltr *engine.FilterWithArgDispatcher, reply *string) error
-	SetStatQueueProfile(sq *engine.StatQueueProfileWithArgDispatcher, reply *string) error
-	SetTiming(tm *utils.TPTimingWithArgDispatcher, reply *string) error
-	SetResource(rs *engine.ResourceWithArgDispatcher, reply *string) error
-	SetResourceProfile(rs *engine.ResourceProfileWithArgDispatcher, reply *string) error
-	SetActionTriggers(args *engine.SetActionTriggersArgWithArgDispatcher, reply *string) error
-	SetSharedGroup(shg *engine.SharedGroupWithArgDispatcher, reply *string) error
-	SetActions(args *engine.SetActionsArgsWithArgDispatcher, reply *string) error
-	SetRatingPlan(rp *engine.RatingPlanWithArgDispatcher, reply *string) error
-	SetRatingProfile(rp *engine.RatingProfileWithArgDispatcher, reply *string) error
-	SetRouteProfile(sp *engine.RouteProfileWithArgDispatcher, reply *string) error
-	SetAttributeProfile(ap *engine.AttributeProfileWithArgDispatcher, reply *string) error
-	SetChargerProfile(cp *engine.ChargerProfileWithArgDispatcher, reply *string) error
-	SetDispatcherProfile(dpp *engine.DispatcherProfileWithArgDispatcher, reply *string) error
-	SetRateProfile(dpp *engine.RateProfileWithArgDispatcher, reply *string) error
-	SetActionPlan(args *engine.SetActionPlanArgWithArgDispatcher, reply *string) error
-	SetAccountActionPlans(args *engine.SetAccountActionPlansArgWithArgDispatcher, reply *string) error
-	SetDispatcherHost(dpp *engine.DispatcherHostWithArgDispatcher, reply *string) error
-	RemoveThreshold(args *utils.TenantIDWithArgDispatcher, reply *string) error
-	SetLoadIDs(args *utils.LoadIDsWithArgDispatcher, reply *string) error
-	RemoveDestination(id *utils.StringWithApiKey, reply *string) error
-	RemoveAccount(id *utils.StringWithApiKey, reply *string) error
-	RemoveStatQueue(args *utils.TenantIDWithArgDispatcher, reply *string) error
-	RemoveFilter(args *utils.TenantIDWithArgDispatcher, reply *string) error
-	RemoveThresholdProfile(args *utils.TenantIDWithArgDispatcher, reply *string) error
-	RemoveStatQueueProfile(args *utils.TenantIDWithArgDispatcher, reply *string) error
-	RemoveTiming(id *utils.StringWithApiKey, reply *string) error
-	RemoveResource(args *utils.TenantIDWithArgDispatcher, reply *string) error
-	RemoveResourceProfile(args *utils.TenantIDWithArgDispatcher, reply *string) error
-	RemoveActionTriggers(id *utils.StringWithApiKey, reply *string) error
-	RemoveSharedGroup(id *utils.StringWithApiKey, reply *string) error
-	RemoveActions(id *utils.StringWithApiKey, reply *string) error
-	RemoveActionPlan(id *utils.StringWithApiKey, reply *string) error
-	RemAccountActionPlans(args *engine.RemAccountActionPlansArgsWithArgDispatcher, reply *string) error
-	RemoveRatingPlan(id *utils.StringWithApiKey, reply *string) error
-	RemoveRatingProfile(id *utils.StringWithApiKey, reply *string) error
-	RemoveRouteProfile(args *utils.TenantIDWithArgDispatcher, reply *string) error
-	RemoveAttributeProfile(args *utils.TenantIDWithArgDispatcher, reply *string) error
-	RemoveChargerProfile(args *utils.TenantIDWithArgDispatcher, reply *string) error
-	RemoveDispatcherProfile(args *utils.TenantIDWithArgDispatcher, reply *string) error
-	RemoveDispatcherHost(args *utils.TenantIDWithArgDispatcher, reply *string) error
-	RemoveRateProfile(args *utils.TenantIDWithArgDispatcher, reply *string) error
+	Ping(ign *utils.CGREventWithOpts, reply *string) error
+	GetAccount(args *utils.StringWithOpts, reply *engine.Account) error
+	GetDestination(key *utils.StringWithOpts, reply *engine.Destination) error
+	GetReverseDestination(key *utils.StringWithOpts, reply *[]string) error
+	GetStatQueue(tntID *utils.TenantIDWithOpts, reply *engine.StatQueue) error
+	GetFilter(tntID *utils.TenantIDWithOpts, reply *engine.Filter) error
+	GetThreshold(tntID *utils.TenantIDWithOpts, reply *engine.Threshold) error
+	GetThresholdProfile(tntID *utils.TenantIDWithOpts, reply *engine.ThresholdProfile) error
+	GetStatQueueProfile(tntID *utils.TenantIDWithOpts, reply *engine.StatQueueProfile) error
+	GetTiming(id *utils.StringWithOpts, reply *utils.TPTiming) error
+	GetResource(tntID *utils.TenantIDWithOpts, reply *engine.Resource) error
+	GetResourceProfile(tntID *utils.TenantIDWithOpts, reply *engine.ResourceProfile) error
+	GetActionTriggers(id *utils.StringWithOpts, reply *engine.ActionTriggers) error
+	GetSharedGroup(id *utils.StringWithOpts, reply *engine.SharedGroup) error
+	GetActions(id *utils.StringWithOpts, reply *engine.Actions) error
+	GetActionPlan(id *utils.StringWithOpts, reply *engine.ActionPlan) error
+	GetAllActionPlans(_ *utils.StringWithOpts, reply *map[string]*engine.ActionPlan) error
+	GetAccountActionPlans(id *utils.StringWithOpts, reply *[]string) error
+	GetRatingPlan(id *utils.StringWithOpts, reply *engine.RatingPlan) error
+	GetRatingProfile(id *utils.StringWithOpts, reply *engine.RatingProfile) error
+	GetRouteProfile(tntID *utils.TenantIDWithOpts, reply *engine.RouteProfile) error
+	GetAttributeProfile(tntID *utils.TenantIDWithOpts, reply *engine.AttributeProfile) error
+	GetChargerProfile(tntID *utils.TenantIDWithOpts, reply *engine.ChargerProfile) error
+	GetDispatcherProfile(tntID *utils.TenantIDWithOpts, reply *engine.DispatcherProfile) error
+	GetRateProfile(tntID *utils.TenantIDWithOpts, reply *engine.RateProfile) error
+	GetDispatcherHost(tntID *utils.TenantIDWithOpts, reply *engine.DispatcherHost) error
+	GetItemLoadIDs(itemID *utils.StringWithOpts, reply *map[string]int64) error
+	SetThresholdProfile(th *engine.ThresholdProfileWithOpts, reply *string) error
+	SetThreshold(th *engine.ThresholdWithOpts, reply *string) error
+	SetAccount(acc *engine.AccountWithOpts, reply *string) error
+	SetDestination(dst *engine.DestinationWithOpts, reply *string) error
+	SetReverseDestination(dst *engine.DestinationWithOpts, reply *string) error
+	SetStatQueue(ssq *engine.StoredStatQueueWithOpts, reply *string) error
+	SetFilter(fltr *engine.FilterWithOpts, reply *string) error
+	SetStatQueueProfile(sq *engine.StatQueueProfileWithOpts, reply *string) error
+	SetTiming(tm *utils.TPTimingWithOpts, reply *string) error
+	SetResource(rs *engine.ResourceWithOpts, reply *string) error
+	SetResourceProfile(rs *engine.ResourceProfileWithOpts, reply *string) error
+	SetActionTriggers(args *engine.SetActionTriggersArgWithOpts, reply *string) error
+	SetSharedGroup(shg *engine.SharedGroupWithOpts, reply *string) error
+	SetActions(args *engine.SetActionsArgsWithOpts, reply *string) error
+	SetRatingPlan(rp *engine.RatingPlanWithOpts, reply *string) error
+	SetRatingProfile(rp *engine.RatingProfileWithOpts, reply *string) error
+	SetRouteProfile(sp *engine.RouteProfileWithOpts, reply *string) error
+	SetAttributeProfile(ap *engine.AttributeProfileWithOpts, reply *string) error
+	SetChargerProfile(cp *engine.ChargerProfileWithOpts, reply *string) error
+	SetDispatcherProfile(dpp *engine.DispatcherProfileWithOpts, reply *string) error
+	SetRateProfile(dpp *engine.RateProfileWithOpts, reply *string) error
+	SetActionPlan(args *engine.SetActionPlanArgWithOpts, reply *string) error
+	SetAccountActionPlans(args *engine.SetAccountActionPlansArgWithOpts, reply *string) error
+	SetDispatcherHost(dpp *engine.DispatcherHostWithOpts, reply *string) error
+	RemoveThreshold(args *utils.TenantIDWithOpts, reply *string) error
+	SetLoadIDs(args *utils.LoadIDsWithOpts, reply *string) error
+	RemoveDestination(id *utils.StringWithOpts, reply *string) error
+	RemoveAccount(id *utils.StringWithOpts, reply *string) error
+	RemoveStatQueue(args *utils.TenantIDWithOpts, reply *string) error
+	RemoveFilter(args *utils.TenantIDWithOpts, reply *string) error
+	RemoveThresholdProfile(args *utils.TenantIDWithOpts, reply *string) error
+	RemoveStatQueueProfile(args *utils.TenantIDWithOpts, reply *string) error
+	RemoveTiming(id *utils.StringWithOpts, reply *string) error
+	RemoveResource(args *utils.TenantIDWithOpts, reply *string) error
+	RemoveResourceProfile(args *utils.TenantIDWithOpts, reply *string) error
+	RemoveActionTriggers(id *utils.StringWithOpts, reply *string) error
+	RemoveSharedGroup(id *utils.StringWithOpts, reply *string) error
+	RemoveActions(id *utils.StringWithOpts, reply *string) error
+	RemoveActionPlan(id *utils.StringWithOpts, reply *string) error
+	RemAccountActionPlans(args *engine.RemAccountActionPlansArgsWithOpts, reply *string) error
+	RemoveRatingPlan(id *utils.StringWithOpts, reply *string) error
+	RemoveRatingProfile(id *utils.StringWithOpts, reply *string) error
+	RemoveRouteProfile(args *utils.TenantIDWithOpts, reply *string) error
+	RemoveAttributeProfile(args *utils.TenantIDWithOpts, reply *string) error
+	RemoveChargerProfile(args *utils.TenantIDWithOpts, reply *string) error
+	RemoveDispatcherProfile(args *utils.TenantIDWithOpts, reply *string) error
+	RemoveDispatcherHost(args *utils.TenantIDWithOpts, reply *string) error
+	RemoveRateProfile(args *utils.TenantIDWithOpts, reply *string) error
 
 	GetIndexes(args *utils.GetIndexesArg, reply *map[string]utils.StringSet) error
 	SetIndexes(args *utils.SetIndexesArg, reply *string) error

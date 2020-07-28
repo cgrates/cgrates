@@ -64,12 +64,12 @@ func testDspRPrfPing(t *testing.T) {
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	if err := dispEngine.RPC.Call(utils.RateSv1Ping, &utils.CGREventWithArgDispatcher{
+	if err := dispEngine.RPC.Call(utils.RateSv1Ping, &utils.CGREventWithOpts{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 		},
-		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("rPrf12345"),
+		Opts: map[string]interface{}{
+			utils.OptsAPIKey: "rPrf12345",
 		},
 	}, &reply); err != nil {
 		t.Error(err)

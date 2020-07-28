@@ -44,11 +44,11 @@ type SharedGroup struct {
 	//members           []*Account // accounts caching
 }
 
-// SharedGroupWithArgDispatcher is used in replicatorV1 for dispatcher
-type SharedGroupWithArgDispatcher struct {
+// SharedGroupWithOpts is used in replicatorV1 for dispatcher
+type SharedGroupWithOpts struct {
 	*SharedGroup
 	utils.TenantArg
-	*utils.ArgDispatcher
+	Opts map[string]interface{}
 }
 
 type SharingParameters struct {

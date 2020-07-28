@@ -89,33 +89,39 @@ var (
 			Hits:   0,
 		},
 	}
-	argsGetThresholds = []*ArgsProcessEvent{
+	argsGetThresholds = []*ThresholdsArgsProcessEvent{
 		{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "Ev1",
-				Event: map[string]interface{}{
-					"Threshold": "TH_1",
-					"Weight":    "10.0",
+			CGREventWithOpts: &utils.CGREventWithOpts{
+				CGREvent: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "Ev1",
+					Event: map[string]interface{}{
+						"Threshold": "TH_1",
+						"Weight":    "10.0",
+					},
 				},
 			},
 		},
 		{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "Ev1",
-				Event: map[string]interface{}{
-					"Threshold": "TH_2",
-					"Weight":    "20.0",
+			CGREventWithOpts: &utils.CGREventWithOpts{
+				CGREvent: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "Ev1",
+					Event: map[string]interface{}{
+						"Threshold": "TH_2",
+						"Weight":    "20.0",
+					},
 				},
 			},
 		},
 		{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "Ev1",
-				Event: map[string]interface{}{
-					"Threshold": "ThresholdPrefix123",
+			CGREventWithOpts: &utils.CGREventWithOpts{
+				CGREvent: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "Ev1",
+					Event: map[string]interface{}{
+						"Threshold": "ThresholdPrefix123",
+					},
 				},
 			},
 		},
@@ -341,9 +347,11 @@ func TestThresholdsProcessEvent2(t *testing.T) {
 		ID:     "TH_4",
 		Hits:   0,
 	}
-	ev := &ArgsProcessEvent{
+	ev := &ThresholdsArgsProcessEvent{
 		ThresholdIDs: []string{"TH_1", "TH_2", "TH_3", "TH_4"},
-		CGREvent:     argsGetThresholds[0].CGREvent,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: argsGetThresholds[0].CGREvent,
+		},
 	}
 	if err = dmTH.SetThresholdProfile(thPrf, true); err != nil {
 		t.Errorf("Error: %+v", err)

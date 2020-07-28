@@ -136,11 +136,13 @@ func testAPIerLoadFromFolder(t *testing.T) {
 func testAPIerVerifyAttributesAfterLoad(t *testing.T) {
 	ev := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer("simpleauth"),
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testAPIerAfterDelete",
-			Event: map[string]interface{}{
-				utils.Account: "1001",
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testAPIerAfterDelete",
+				Event: map[string]interface{}{
+					utils.Account: "1001",
+				},
 			},
 		},
 	}
@@ -196,7 +198,7 @@ func testAPIerRemoveTPFromFolder(t *testing.T) {
 func testAPIerAfterDelete(t *testing.T) {
 	var reply *engine.AttributeProfile
 	if err := apierRPC.Call(utils.APIerSv1GetAttributeProfile,
-		utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1001_SIMPLEAUTH"}}, &reply); err == nil ||
+		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1001_SIMPLEAUTH"}}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatal(err)
 	}
@@ -212,11 +214,13 @@ func testAPIerAfterDelete(t *testing.T) {
 func testAPIerVerifyAttributesAfterDelete(t *testing.T) {
 	ev := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer("simpleauth"),
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testAPIerAfterDelete",
-			Event: map[string]interface{}{
-				utils.Account: "1001",
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testAPIerAfterDelete",
+				Event: map[string]interface{}{
+					utils.Account: "1001",
+				},
 			},
 		},
 	}

@@ -26,7 +26,7 @@ func init() {
 	c := &CmdGetStatQueueStringMetrics{
 		name:      "stats_metrics",
 		rpcMethod: utils.StatSv1GetQueueStringMetrics,
-		rpcParams: &utils.TenantIDWithArgDispatcher{},
+		rpcParams: &utils.TenantIDWithOpts{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -36,7 +36,7 @@ func init() {
 type CmdGetStatQueueStringMetrics struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.TenantIDWithArgDispatcher
+	rpcParams *utils.TenantIDWithOpts
 	*CommandExecuter
 }
 
@@ -50,9 +50,9 @@ func (self *CmdGetStatQueueStringMetrics) RpcMethod() string {
 
 func (self *CmdGetStatQueueStringMetrics) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.TenantIDWithArgDispatcher{
-			TenantID:      new(utils.TenantID),
-			ArgDispatcher: new(utils.ArgDispatcher),
+		self.rpcParams = &utils.TenantIDWithOpts{
+			TenantID: new(utils.TenantID),
+			Opts:     make(map[string]interface{}),
 		}
 	}
 	return self.rpcParams

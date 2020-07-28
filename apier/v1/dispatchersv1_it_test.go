@@ -29,7 +29,6 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/dispatchers"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -47,6 +46,7 @@ var (
 		testDspITRPCConn,
 		testDspITLoadData,
 		testDspDspv1GetProfileForEvent,
+		testDspDspv1GetProfileForEventWithMethod,
 		testDspITStopCgrEngine,
 	}
 )
@@ -132,15 +132,17 @@ func testDspITLoadData(t *testing.T) {
 }
 
 func testDspDspv1GetProfileForEvent(t *testing.T) {
-	arg := dispatchers.DispatcherEvent{
-		CGREvent: utils.CGREvent{
+	arg := utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testDspv1",
 			Event: map[string]interface{}{
 				utils.EVENT_NAME: "Event1",
 			},
 		},
-		Subsystem: utils.META_ANY,
+		Opts: map[string]interface{}{
+			utils.Subsys: utils.META_ANY,
+		},
 	}
 	var reply engine.DispatcherProfile
 	expected := engine.DispatcherProfile{
@@ -169,6 +171,49 @@ func testDspDspv1GetProfileForEvent(t *testing.T) {
 	if *encoding == utils.MetaGOB { // in gob emtpty slice is encoded as nil
 		expected.Hosts[0].FilterIDs = nil
 		expected.Hosts[1].FilterIDs = nil
+	}
+	expected.Hosts.Sort()
+	if err := dspRPC.Call(utils.DispatcherSv1GetProfileForEvent, &arg, &reply); err != nil {
+		t.Fatal(err)
+	}
+	reply.Hosts.Sort()
+	if !reflect.DeepEqual(expected, reply) {
+		t.Errorf("expected: %s ,\n received: %s", utils.ToJSON(expected), utils.ToJSON(reply))
+	}
+}
+
+func testDspDspv1GetProfileForEventWithMethod(t *testing.T) {
+	arg := utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testDspv2",
+			Event:  map[string]interface{}{},
+		},
+		Opts: map[string]interface{}{
+			utils.Subsys:               utils.META_ANY,
+			utils.OptsDispatcherMethod: utils.DispatcherSv1GetProfileForEvent,
+		},
+	}
+	var reply engine.DispatcherProfile
+	expected := engine.DispatcherProfile{
+		Tenant:         "cgrates.org",
+		ID:             "EVENT6",
+		Subsystems:     []string{utils.META_ANY},
+		FilterIDs:      []string{"*string:~*opts.*method:DispatcherSv1.GetProfileForEvent"},
+		StrategyParams: make(map[string]interface{}),
+		Strategy:       utils.MetaWeight,
+		Weight:         20,
+		Hosts: engine.DispatcherHostProfiles{
+			&engine.DispatcherHostProfile{
+				ID:        "SELF",
+				FilterIDs: []string{},
+				Weight:    20,
+				Params:    make(map[string]interface{}),
+			},
+		},
+	}
+	if *encoding == utils.MetaGOB { // in gob emtpty slice is encoded as nil
+		expected.Hosts[0].FilterIDs = nil
 	}
 	expected.Hosts.Sort()
 	if err := dspRPC.Call(utils.DispatcherSv1GetProfileForEvent, &arg, &reply); err != nil {

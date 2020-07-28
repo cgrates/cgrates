@@ -604,20 +604,20 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 			return
 		case utils.MetaReload:
 			if err = ldr.connMgr.Call(ldr.cacheConns, nil,
-				utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
+				utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithOpts{
 					ArgsCache: cacheArgs}, &reply); err != nil {
 				return
 			}
 		case utils.MetaLoad:
 			if err = ldr.connMgr.Call(ldr.cacheConns, nil,
-				utils.CacheSv1LoadCache, utils.AttrReloadCacheWithArgDispatcher{
+				utils.CacheSv1LoadCache, utils.AttrReloadCacheWithOpts{
 					ArgsCache: cacheArgs}, &reply); err != nil {
 				return
 			}
 		case utils.MetaRemove:
 			for _, id := range ids {
 				if err = ldr.connMgr.Call(ldr.cacheConns, nil,
-					utils.CacheSv1RemoveItem, &utils.ArgsGetCacheItemWithArgDispatcher{
+					utils.CacheSv1RemoveItem, &utils.ArgsGetCacheItemWithOpts{
 						ArgsGetCacheItem: utils.ArgsGetCacheItem{
 							CacheID: cachePartition,
 							ItemID:  id,
@@ -628,7 +628,7 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 			}
 		case utils.MetaClear:
 			if err = ldr.connMgr.Call(ldr.cacheConns, nil,
-				utils.CacheSv1Clear, new(utils.AttrCacheIDsWithArgDispatcher), &reply); err != nil {
+				utils.CacheSv1Clear, new(utils.AttrCacheIDsWithOpts), &reply); err != nil {
 				return
 			}
 		}
@@ -927,20 +927,20 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 			return
 		case utils.MetaReload:
 			if err = ldr.connMgr.Call(ldr.cacheConns, nil,
-				utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
+				utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithOpts{
 					ArgsCache: cacheArgs}, &reply); err != nil {
 				return
 			}
 		case utils.MetaLoad:
 			if err = ldr.connMgr.Call(ldr.cacheConns, nil,
-				utils.CacheSv1LoadCache, utils.AttrReloadCacheWithArgDispatcher{
+				utils.CacheSv1LoadCache, utils.AttrReloadCacheWithOpts{
 					ArgsCache: cacheArgs}, &reply); err != nil {
 				return
 			}
 		case utils.MetaRemove:
 			for tntID := range lds {
 				if err = ldr.connMgr.Call(ldr.cacheConns, nil,
-					utils.CacheSv1RemoveItem, &utils.ArgsGetCacheItemWithArgDispatcher{
+					utils.CacheSv1RemoveItem, &utils.ArgsGetCacheItemWithOpts{
 						ArgsGetCacheItem: utils.ArgsGetCacheItem{
 							CacheID: cachePartition,
 							ItemID:  tntID,
@@ -951,7 +951,7 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 			}
 		case utils.MetaClear:
 			if err = ldr.connMgr.Call(ldr.cacheConns, nil,
-				utils.CacheSv1Clear, new(utils.AttrCacheIDsWithArgDispatcher), &reply); err != nil {
+				utils.CacheSv1Clear, new(utils.AttrCacheIDsWithOpts), &reply); err != nil {
 				return
 			}
 		}

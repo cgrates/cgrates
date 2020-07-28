@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	"github.com/cgrates/cgrates/dispatchers"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -37,7 +36,7 @@ func init() {
 type CmdDispatcherProfile struct {
 	name      string
 	rpcMethod string
-	rpcParams *dispatchers.DispatcherEvent
+	rpcParams *utils.CGREventWithOpts
 	*CommandExecuter
 }
 
@@ -51,7 +50,7 @@ func (self *CmdDispatcherProfile) RpcMethod() string {
 
 func (self *CmdDispatcherProfile) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &dispatchers.DispatcherEvent{ArgDispatcher: new(utils.ArgDispatcher)}
+		self.rpcParams = &utils.CGREventWithOpts{Opts: make(map[string]interface{})}
 	}
 	return self.rpcParams
 }

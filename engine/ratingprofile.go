@@ -33,11 +33,11 @@ type RatingProfile struct {
 	RatingPlanActivations RatingPlanActivations
 }
 
-// RatingProfileWithArgDispatcher is used in replicatorV1 for dispatcher
-type RatingProfileWithArgDispatcher struct {
+// RatingProfileWithOpts is used in replicatorV1 for dispatcher
+type RatingProfileWithOpts struct {
 	*RatingProfile
 	utils.TenantArg
-	*utils.ArgDispatcher
+	Opts map[string]interface{}
 }
 
 type RatingPlanActivation struct {

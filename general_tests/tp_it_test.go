@@ -132,7 +132,7 @@ func testTpLoadTariffPlanFromFolder(t *testing.T) {
 
 func testTpBalanceCounter(t *testing.T) {
 	tStart := time.Date(2016, 3, 31, 0, 0, 0, 0, time.UTC)
-	cd := &engine.CallDescriptorWithArgDispatcher{
+	cd := &engine.CallDescriptorWithOpts{
 		CallDescriptor: &engine.CallDescriptor{
 			Category:      "call",
 			Tenant:        "cgrates.org",
@@ -216,7 +216,7 @@ func testTpZeroCost(t *testing.T) {
 	}
 	balanceValueBefore := acnt.BalanceMap[utils.MONETARY][0].Value
 	tStart := time.Date(2016, 3, 31, 0, 0, 0, 0, time.UTC)
-	cd := &engine.CallDescriptorWithArgDispatcher{
+	cd := &engine.CallDescriptorWithOpts{
 		CallDescriptor: &engine.CallDescriptor{
 			Category:      "call",
 			Tenant:        "cgrates.org",
@@ -243,7 +243,7 @@ func testTpZeroCost(t *testing.T) {
 
 func testTpZeroNegativeCost(t *testing.T) {
 	tStart := time.Date(2016, 3, 31, 0, 0, 0, 0, time.UTC)
-	cd := &engine.CallDescriptorWithArgDispatcher{
+	cd := &engine.CallDescriptorWithOpts{
 		CallDescriptor: &engine.CallDescriptor{
 			Category:      "call",
 			Tenant:        "cgrates.org",

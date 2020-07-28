@@ -2259,12 +2259,13 @@ const (
 	OptsStirPublicKeyPath      = "*stirPublicKeyPath"
 	OptsStirPrivateKeyPath     = "*stirPrivateKeyPath"
 	// DispatcherS
-	OptsAPIKey  = "*dispatcherApiKey"
-	OptsRouteID = "*dispatcherRouteID"
+	OptsAPIKey  = "*apiKey"
+	OptsRouteID = "*routeID"
 	// Others
 	OptsContext               = "*context"
 	Subsys                    = "*subsys"
 	OptsAttributesProcessRuns = "*processRuns"
+	OptsDispatcherMethod      = "*method"
 )
 
 // Event Flags

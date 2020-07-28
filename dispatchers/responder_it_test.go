@@ -65,17 +65,17 @@ func TestDspResponder(t *testing.T) {
 
 func testDspResponderStatus(t *testing.T) {
 	var reply map[string]interface{}
-	if err := allEngine.RPC.Call(utils.CoreSv1Status, utils.TenantWithArgDispatcher{}, &reply); err != nil {
+	if err := allEngine.RPC.Call(utils.CoreSv1Status, utils.TenantWithOpts{}, &reply); err != nil {
 		t.Error(err)
 	} else if reply[utils.NodeID] != "ALL" {
 		t.Errorf("Received: %s", reply)
 	}
-	ev := utils.TenantWithArgDispatcher{
+	ev := utils.TenantWithOpts{
 		TenantArg: &utils.TenantArg{
 			Tenant: "cgrates.org",
 		},
-		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("rsp12345"),
+		Opts: map[string]interface{}{
+			utils.OptsAPIKey: "rsp12345",
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.CoreSv1Status, &ev, &reply); err != nil {
@@ -95,25 +95,25 @@ func testDspResponderStatus(t *testing.T) {
 func getNodeWithRoute(route string, t *testing.T) string {
 	var reply map[string]interface{}
 	var pingReply string
-	pingEv := utils.CGREventWithArgDispatcher{
+	pingEv := utils.CGREventWithOpts{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]interface{}{
 				utils.EVENT_NAME: "Random",
 			},
 		},
-		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey:  utils.StringPointer("rsp12345"),
-			RouteID: &route,
+		Opts: map[string]interface{}{
+			utils.OptsAPIKey:  "rsp12345",
+			utils.OptsRouteID: route,
 		},
 	}
-	ev := utils.TenantWithArgDispatcher{
+	ev := utils.TenantWithOpts{
 		TenantArg: &utils.TenantArg{
 			Tenant: "cgrates.org",
 		},
-		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey:  utils.StringPointer("rsp12345"),
-			RouteID: &route,
+		Opts: map[string]interface{}{
+			utils.OptsAPIKey:  "rsp12345",
+			utils.OptsRouteID: route,
 		},
 	}
 
@@ -144,12 +144,12 @@ func testDspResponderRandom(t *testing.T) {
 func testDspResponderShutdown(t *testing.T) {
 	var reply string
 	var statusReply map[string]interface{}
-	ev := utils.TenantWithArgDispatcher{
+	ev := utils.TenantWithOpts{
 		TenantArg: &utils.TenantArg{
 			Tenant: "cgrates.org",
 		},
-		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("rsp12345"),
+		Opts: map[string]interface{}{
+			utils.OptsAPIKey: "rsp12345",
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.ResponderShutdown, ev, &reply); err != nil {
@@ -173,15 +173,15 @@ func testDspResponderShutdown(t *testing.T) {
 
 func testDspResponderBroadcast(t *testing.T) {
 	var pingReply string
-	pingEv := utils.CGREventWithArgDispatcher{
+	pingEv := utils.CGREventWithOpts{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]interface{}{
 				utils.EVENT_NAME: "Broadcast",
 			},
 		},
-		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("rsp12345"),
+		Opts: map[string]interface{}{
+			utils.OptsAPIKey: "rsp12345",
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.ResponderPing, pingEv, &pingReply); err != nil {
@@ -210,25 +210,25 @@ func testDspResponderInternal(t *testing.T) {
 	var reply map[string]interface{}
 	var pingReply string
 	route := "internal"
-	pingEv := utils.CGREventWithArgDispatcher{
+	pingEv := utils.CGREventWithOpts{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]interface{}{
 				utils.EVENT_NAME: "Internal",
 			},
 		},
-		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey:  utils.StringPointer("rsp12345"),
-			RouteID: &route,
+		Opts: map[string]interface{}{
+			utils.OptsAPIKey:  "rsp12345",
+			utils.OptsRouteID: route,
 		},
 	}
-	ev := utils.TenantWithArgDispatcher{
+	ev := utils.TenantWithOpts{
 		TenantArg: &utils.TenantArg{
 			Tenant: "cgrates.org",
 		},
-		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey:  utils.StringPointer("rsp12345"),
-			RouteID: &route,
+		Opts: map[string]interface{}{
+			utils.OptsAPIKey:  "rsp12345",
+			utils.OptsRouteID: route,
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.CoreSv1Ping, pingEv, &pingReply); err != nil {

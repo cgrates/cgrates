@@ -326,7 +326,7 @@ func testRunSession(t *testing.T) {
 		utils.RandomInteger(0, 100)) * time.Millisecond)
 
 	// processCDR
-	argsCDR := &utils.CGREventWithArgDispatcher{
+	argsCDR := &utils.CGREventWithOpts{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     fmt.Sprintf("TestSCncrCDR%s", originID),

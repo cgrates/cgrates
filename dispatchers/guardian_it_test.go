@@ -67,12 +67,12 @@ func testDspGrdPing(t *testing.T) {
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	if err := dispEngine.RPC.Call(utils.GuardianSv1Ping, &utils.CGREventWithArgDispatcher{
+	if err := dispEngine.RPC.Call(utils.GuardianSv1Ping, &utils.CGREventWithOpts{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 		},
-		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("grd12345"),
+		Opts: map[string]interface{}{
+			utils.OptsAPIKey: "grd12345",
 		},
 	}, &reply); err != nil {
 		t.Error(err)
@@ -89,26 +89,26 @@ func testDspGrdLock(t *testing.T) {
 		Timeout:     500 * time.Millisecond,
 	}
 	var reply string
-	if err := dispEngine.RPC.Call(utils.GuardianSv1RemoteLock, &AttrRemoteLockWithApiKey{
+	if err := dispEngine.RPC.Call(utils.GuardianSv1RemoteLock, &AttrRemoteLockWithOpts{
 		AttrRemoteLock: args,
 		TenantArg: utils.TenantArg{
 			Tenant: "cgrates.org",
 		},
-		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("grd12345"),
+		Opts: map[string]interface{}{
+			utils.OptsAPIKey: "grd12345",
 		},
 	}, &reply); err != nil {
 		t.Error(err)
 	}
 
 	var unlockReply []string
-	if err := dispEngine.RPC.Call(utils.GuardianSv1RemoteUnlock, &AttrRemoteUnlockWithApiKey{
+	if err := dispEngine.RPC.Call(utils.GuardianSv1RemoteUnlock, &AttrRemoteUnlockWithOpts{
 		RefID: reply,
 		TenantArg: utils.TenantArg{
 			Tenant: "cgrates.org",
 		},
-		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("grd12345"),
+		Opts: map[string]interface{}{
+			utils.OptsAPIKey: "grd12345",
 		},
 	}, &unlockReply); err != nil {
 		t.Error(err)

@@ -183,7 +183,7 @@ func testExpVerifyAttributes(t *testing.T) {
 	}
 	var reply *engine.AttributeProfile
 	if err := expRpc.Call(utils.APIerSv1GetAttributeProfile,
-		utils.TenantIDWithArgDispatcher{
+		utils.TenantIDWithOpts{
 			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1003_SESSIONAUTH"}}, &reply); err != nil {
 		t.Fatal(err)
 	}

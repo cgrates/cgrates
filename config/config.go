@@ -1024,14 +1024,14 @@ func (cfg *CGRConfig) Call(serviceMethod string,
 }
 
 // ToDo: move this structure in utils as is used in other packages
-type StringWithArgDispatcher struct {
-	*utils.ArgDispatcher
+type StringWithOpts struct {
+	Opts map[string]interface{}
 	utils.TenantArg
 	Section string
 }
 
 //V1GetConfigSection will retrieve from CGRConfig a section
-func (cfg *CGRConfig) V1GetConfigSection(args *StringWithArgDispatcher, reply *map[string]interface{}) (err error) {
+func (cfg *CGRConfig) V1GetConfigSection(args *StringWithOpts, reply *map[string]interface{}) (err error) {
 	var jsonString string
 	switch args.Section {
 	case GENERAL_JSN:
@@ -1109,8 +1109,8 @@ func (cfg *CGRConfig) V1GetConfigSection(args *StringWithArgDispatcher, reply *m
 	return
 }
 
-type ConfigReloadWithArgDispatcher struct {
-	*utils.ArgDispatcher
+type ConfigReloadWithOpts struct {
+	Opts map[string]interface{}
 	utils.TenantArg
 	Path    string
 	Section string
@@ -1157,7 +1157,7 @@ func (cfg *CGRConfig) RUnlocks(lkIDs ...string) {
 }
 
 // V1ReloadConfigFromPath reloads the configuration
-func (cfg *CGRConfig) V1ReloadConfigFromPath(args *ConfigReloadWithArgDispatcher, reply *string) (err error) {
+func (cfg *CGRConfig) V1ReloadConfigFromPath(args *ConfigReloadWithOpts, reply *string) (err error) {
 	if missing := utils.MissingStructFields(args, []string{"Path"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -1360,15 +1360,15 @@ func (cfg *CGRConfig) initChanels() {
 	}
 }
 
-// JSONReloadWithArgDispatcher the API params for V1ReloadConfigFromJSON
-type JSONReloadWithArgDispatcher struct {
-	*utils.ArgDispatcher
+// JSONReloadWithOpts the API params for V1ReloadConfigFromJSON
+type JSONReloadWithOpts struct {
+	Opts map[string]interface{}
 	utils.TenantArg
 	JSON map[string]interface{}
 }
 
 // V1ReloadConfigFromJSON reloads the sections of configz
-func (cfg *CGRConfig) V1ReloadConfigFromJSON(args *JSONReloadWithArgDispatcher, reply *string) (err error) {
+func (cfg *CGRConfig) V1ReloadConfigFromJSON(args *JSONReloadWithOpts, reply *string) (err error) {
 	if len(args.JSON) == 0 {
 		*reply = utils.OK
 		return

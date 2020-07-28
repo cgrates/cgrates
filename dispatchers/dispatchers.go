@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package dispatchers
 
 import (
-	"encoding/json"
 	"fmt"
 	"reflect"
 	"strings"
@@ -69,9 +68,12 @@ func (dS *DispatcherService) authorizeEvent(ev *utils.CGREvent,
 	if err = dS.connMgr.Call(dS.cfg.DispatcherSCfg().AttributeSConns, nil,
 		utils.AttributeSv1ProcessEvent,
 		&engine.AttrArgsProcessEvent{
-			Opts:     map[string]interface{}{utils.Subsys: utils.MetaDispatchers},
-			Context:  utils.StringPointer(utils.MetaAuth),
-			CGREvent: ev}, reply); err != nil {
+			CGREventWithOpts: &utils.CGREventWithOpts{
+				CGREvent: ev,
+				Opts:     map[string]interface{}{utils.Subsys: utils.MetaDispatchers},
+			},
+			Context: utils.StringPointer(utils.MetaAuth),
+		}, reply); err != nil {
 		if err.Error() == utils.ErrNotFound.Error() {
 			err = utils.ErrUnknownApiKey
 		}
@@ -80,8 +82,8 @@ func (dS *DispatcherService) authorizeEvent(ev *utils.CGREvent,
 	return
 }
 
-func (dS *DispatcherService) authorize(method, tenant string, apiKey *string, evTime *time.Time) (err error) {
-	if apiKey == nil || *apiKey == "" {
+func (dS *DispatcherService) authorize(method, tenant string, apiKey string, evTime *time.Time) (err error) {
+	if apiKey == "" {
 		return utils.NewErrMandatoryIeMissing(utils.APIKey)
 	}
 	ev := &utils.CGREvent{
@@ -89,7 +91,7 @@ func (dS *DispatcherService) authorize(method, tenant string, apiKey *string, ev
 		ID:     utils.UUIDSha1Prefix(),
 		Time:   evTime,
 		Event: map[string]interface{}{
-			utils.APIKey: *apiKey,
+			utils.APIKey: apiKey,
 		},
 	}
 	var rplyEv engine.AttrSProcessEventReply
@@ -108,7 +110,7 @@ func (dS *DispatcherService) authorize(method, tenant string, apiKey *string, ev
 
 // dispatcherForEvent returns a dispatcher instance configured for specific event
 // or utils.ErrNotFound if none present
-func (dS *DispatcherService) dispatcherProfileForEvent(ev *utils.CGREvent,
+func (dS *DispatcherService) dispatcherProfileForEvent(ev *utils.CGREventWithOpts,
 	subsys string) (dPrlf *engine.DispatcherProfile, err error) {
 	// find out the matching profiles
 	anyIdxPrfx := utils.ConcatenatedKey(ev.Tenant, utils.META_ANY)
@@ -116,7 +118,10 @@ func (dS *DispatcherService) dispatcherProfileForEvent(ev *utils.CGREvent,
 	if subsys != "" {
 		idxKeyPrfx = utils.ConcatenatedKey(ev.Tenant, subsys)
 	}
-	evNm := utils.MapStorage{utils.MetaReq: ev.Event}
+	evNm := utils.MapStorage{
+		utils.MetaReq:  ev.CGREvent.Event,
+		utils.MetaOpts: ev.Opts,
+	}
 	prflIDs, err := engine.MatchingItemIDsForEvent(evNm,
 		dS.cfg.DispatcherSCfg().StringIndexedFields,
 		dS.cfg.DispatcherSCfg().PrefixIndexedFields,
@@ -175,7 +180,7 @@ func (dS *DispatcherService) dispatcherProfileForEvent(ev *utils.CGREvent,
 }
 
 // Dispatch is the method forwarding the request towards the right connection
-func (dS *DispatcherService) Dispatch(ev *utils.CGREvent, subsys string, routeID *string,
+func (dS *DispatcherService) Dispatch(ev *utils.CGREventWithOpts, subsys string,
 	serviceMethod string, args interface{}, reply interface{}) (err error) {
 	dPrfl, errDsp := dS.dispatcherProfileForEvent(ev, subsys)
 	if errDsp != nil {
@@ -193,12 +198,14 @@ func (dS *DispatcherService) Dispatch(ev *utils.CGREvent, subsys string, routeID
 	if errCh := engine.Cache.Set(utils.CacheDispatchers, tntID, d, nil, true, utils.EmptyString); errCh != nil {
 		return utils.NewErrDispatcherS(errCh)
 	}
-	return d.Dispatch(routeID, subsys, serviceMethod, args, reply)
+	route := utils.IfaceAsString(ev.Opts[utils.OptsRouteID])
+	ev.Opts[utils.OptsRouteID] = route
+	return d.Dispatch(&route, subsys, serviceMethod, args, reply)
 }
 
-func (dS *DispatcherService) V1GetProfileForEvent(ev *DispatcherEvent,
+func (dS *DispatcherService) V1GetProfileForEvent(ev *utils.CGREventWithOpts,
 	dPfl *engine.DispatcherProfile) (err error) {
-	retDPfl, errDpfl := dS.dispatcherProfileForEvent(&ev.CGREvent, ev.Subsystem)
+	retDPfl, errDpfl := dS.dispatcherProfileForEvent(ev, utils.IfaceAsString(ev.Opts[utils.Subsys]))
 	if errDpfl != nil {
 		return utils.NewErrDispatcherS(errDpfl)
 	}
@@ -206,6 +213,7 @@ func (dS *DispatcherService) V1GetProfileForEvent(ev *DispatcherEvent,
 	return
 }
 
+/*
 // V1Apier is a generic way to cover all APIer methods
 func (dS *DispatcherService) V1Apier(apier interface{}, args *utils.MethodParameters, reply *interface{}) (err error) {
 
@@ -298,6 +306,7 @@ func (dS *DispatcherService) V1Apier(apier interface{}, args *utils.MethodParame
 	return nil
 
 }
+*/
 
 // Call implements rpcclient.ClientConnector interface for internal RPC
 func (dS *DispatcherService) Call(serviceMethod string, // all API fuction must be of type: SubsystemMethod

@@ -69,12 +69,12 @@ func testDspConfigSv1GetJSONSection(t *testing.T) {
 		"RPCJSONTLSListen": "127.0.0.1:2022",
 	}
 	var reply map[string]interface{}
-	if err := dispEngine.RPC.Call(utils.ConfigSv1GetJSONSection, &config.StringWithArgDispatcher{
+	if err := dispEngine.RPC.Call(utils.ConfigSv1GetJSONSection, &config.StringWithOpts{
 		TenantArg: utils.TenantArg{
 			Tenant: "cgrates.org",
 		},
-		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("cfg12345"),
+		Opts: map[string]interface{}{
+			utils.OptsAPIKey: "cfg12345",
 		},
 		Section: "listen",
 	}, &reply); err != nil {

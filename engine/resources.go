@@ -50,10 +50,10 @@ type ResourceProfile struct {
 	ThresholdIDs       []string // Thresholds to check after changing Limit
 }
 
-// ResourceProfileWithArgDispatcher is used in replicatorV1 for dispatcher
-type ResourceProfileWithArgDispatcher struct {
+// ResourceProfileWithOpts is used in replicatorV1 for dispatcher
+type ResourceProfileWithOpts struct {
 	*ResourceProfile
-	*utils.ArgDispatcher
+	Opts map[string]interface{}
 }
 
 // TenantID returns unique identifier of the ResourceProfile in a multi-tenant environment
@@ -99,10 +99,10 @@ type Resource struct {
 	rPrf   *ResourceProfile // for ordering purposes
 }
 
-// ResourceWithArgDispatcher is used in replicatorV1 for dispatcher
-type ResourceWithArgDispatcher struct {
+// ResourceWithOpts is used in replicatorV1 for dispatcher
+type ResourceWithOpts struct {
 	*Resource
-	*utils.ArgDispatcher
+	Opts map[string]interface{}
 }
 
 // TenantID returns the unique ID in a multi-tenant environment
@@ -438,7 +438,7 @@ func (rS *ResourceService) processThresholds(r *Resource, argDispatcher *utils.A
 		}
 		thIDs = r.rPrf.ThresholdIDs
 	}
-	thEv := &ArgsProcessEvent{ThresholdIDs: thIDs,
+	thEv := &ThresholdsArgsProcessEvent{ThresholdIDs: thIDs,
 		CGREvent: &utils.CGREvent{
 			Tenant: r.Tenant,
 			ID:     utils.GenUUID(),
@@ -781,7 +781,7 @@ func (rS *ResourceService) V1ReleaseResource(args utils.ArgRSv1ResourceUsage, re
 }
 
 // V1GetResource returns a resource configuration
-func (rS *ResourceService) V1GetResource(arg *utils.TenantIDWithArgDispatcher, reply *Resource) error {
+func (rS *ResourceService) V1GetResource(arg *utils.TenantIDWithOpts, reply *Resource) error {
 	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

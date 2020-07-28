@@ -328,7 +328,7 @@ func (dm *DataManager) GetDestination(key string, skipCache bool, transactionID 
 	if err != nil {
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaDestinations]; err == utils.ErrNotFound && itm.Remote {
 			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
-				utils.ReplicatorSv1GetDestination, &utils.StringWithApiKey{
+				utils.ReplicatorSv1GetDestination, &utils.StringWithOpts{
 					Arg:       key,
 					TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 					ArgDispatcher: &utils.ArgDispatcher{
@@ -359,7 +359,7 @@ func (dm *DataManager) SetDestination(dest *Destination, transactionID string) (
 		var reply string
 		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
 			utils.ReplicatorSv1SetDestination,
-			&DestinationWithArgDispatcher{
+			&DestinationWithOpts{
 				Destination: dest,
 				TenantArg:   utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 				ArgDispatcher: &utils.ArgDispatcher{
@@ -384,7 +384,7 @@ func (dm *DataManager) RemoveDestination(destID string, transactionID string) (e
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaDestinations]; itm.Replicate {
 		var reply string
 		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil, utils.ReplicatorSv1RemoveDestination,
-			&utils.StringWithApiKey{
+			&utils.StringWithOpts{
 				Arg:       destID,
 				TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 				ArgDispatcher: &utils.ArgDispatcher{
@@ -424,7 +424,7 @@ func (dm *DataManager) GetReverseDestination(prefix string,
 	if err != nil {
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaReverseDestinations]; err == utils.ErrNotFound && itm.Remote {
 			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
-				utils.ReplicatorSv1GetReverseDestination, &utils.StringWithApiKey{
+				utils.ReplicatorSv1GetReverseDestination, &utils.StringWithOpts{
 					Arg:       prefix,
 					TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 					ArgDispatcher: &utils.ArgDispatcher{
@@ -463,7 +463,7 @@ func (dm *DataManager) GetAccount(id string) (acc *Account, err error) {
 			splt := utils.SplitConcatenatedKey(id)
 			tenant := utils.FirstNonEmpty(splt[0], config.CgrConfig().GeneralCfg().DefaultTenant)
 			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
-				utils.ReplicatorSv1GetAccount, &utils.StringWithApiKey{
+				utils.ReplicatorSv1GetAccount, &utils.StringWithOpts{
 					Arg:       id,
 					TenantArg: utils.TenantArg{Tenant: tenant},
 					ArgDispatcher: &utils.ArgDispatcher{
@@ -494,7 +494,7 @@ func (dm *DataManager) SetAccount(acc *Account) (err error) {
 		var reply string
 		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
 			utils.ReplicatorSv1SetAccount,
-			&AccountWithArgDispatcher{
+			&AccountWithOpts{
 				Account: acc,
 				ArgDispatcher: &utils.ArgDispatcher{
 					APIKey:  utils.StringPointer(itm.APIKey),
@@ -519,7 +519,7 @@ func (dm *DataManager) RemoveAccount(id string) (err error) {
 		var reply string
 		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
 			utils.ReplicatorSv1RemoveAccount,
-			&utils.StringWithApiKey{
+			&utils.StringWithOpts{
 				Arg:       id,
 				TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 				ArgDispatcher: &utils.ArgDispatcher{
@@ -551,7 +551,7 @@ func (dm *DataManager) GetStatQueue(tenant, id string,
 	if err != nil {
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaStatQueues]; err == utils.ErrNotFound && itm.Remote {
 			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil, utils.ReplicatorSv1GetStatQueue,
-				&utils.TenantIDWithArgDispatcher{
+				&utils.TenantIDWithOpts{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 					ArgDispatcher: &utils.ArgDispatcher{
 						APIKey:  utils.StringPointer(itm.APIKey),
@@ -609,7 +609,7 @@ func (dm *DataManager) SetStatQueue(sq *StatQueue) (err error) {
 		var reply string
 		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
 			utils.ReplicatorSv1SetStatQueue,
-			&StoredStatQueueWithArgDispatcher{
+			&StoredStatQueueWithOpts{
 				StoredStatQueue: ssq,
 				ArgDispatcher: &utils.ArgDispatcher{
 					APIKey:  utils.StringPointer(itm.APIKey),
@@ -635,7 +635,7 @@ func (dm *DataManager) RemoveStatQueue(tenant, id string, transactionID string) 
 		var reply string
 		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
 			utils.ReplicatorSv1RemoveStatQueue,
-			&utils.TenantIDWithArgDispatcher{
+			&utils.TenantIDWithOpts{
 				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 				ArgDispatcher: &utils.ArgDispatcher{
 					APIKey:  utils.StringPointer(itm.APIKey),
@@ -669,7 +669,7 @@ func (dm *DataManager) GetFilter(tenant, id string, cacheRead, cacheWrite bool,
 		if err != nil {
 			if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaFilters]; err == utils.ErrNotFound && itm.Remote {
 				if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil, utils.ReplicatorSv1GetFilter,
-					&utils.TenantIDWithArgDispatcher{
+					&utils.TenantIDWithOpts{
 						TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 						ArgDispatcher: &utils.ArgDispatcher{
 							APIKey:  utils.StringPointer(itm.APIKey),
@@ -724,7 +724,7 @@ func (dm *DataManager) SetFilter(fltr *Filter, withIndex bool) (err error) {
 		var reply string
 		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
 			utils.ReplicatorSv1SetFilter,
-			&FilterWithArgDispatcher{
+			&FilterWithOpts{
 				Filter: fltr,
 				ArgDispatcher: &utils.ArgDispatcher{
 					APIKey:  utils.StringPointer(itm.APIKey),
@@ -772,7 +772,7 @@ func (dm *DataManager) RemoveFilter(tenant, id, transactionID string, withIndex 
 		var reply string
 		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
 			utils.ReplicatorSv1RemoveFilter,
-			&utils.TenantIDWithArgDispatcher{
+			&utils.TenantIDWithOpts{
 				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 				ArgDispatcher: &utils.ArgDispatcher{
 					APIKey:  utils.StringPointer(itm.APIKey),
@@ -801,7 +801,7 @@ func (dm *DataManager) GetThreshold(tenant, id string,
 	if err != nil {
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaThresholds]; err == utils.ErrNotFound && itm.Remote {
 			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
-				utils.ReplicatorSv1GetThreshold, &utils.TenantIDWithArgDispatcher{
+				utils.ReplicatorSv1GetThreshold, &utils.TenantIDWithOpts{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 					ArgDispatcher: &utils.ArgDispatcher{
 						APIKey:  utils.StringPointer(itm.APIKey),
@@ -842,7 +842,7 @@ func (dm *DataManager) SetThreshold(th *Threshold) (err error) {
 		var reply string
 		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
 			utils.ReplicatorSv1SetThreshold,
-			&ThresholdWithArgDispatcher{
+			&ThresholdWithOpts{
 				Threshold: th,
 				ArgDispatcher: &utils.ArgDispatcher{
 					APIKey:  utils.StringPointer(itm.APIKey),
@@ -866,7 +866,7 @@ func (dm *DataManager) RemoveThreshold(tenant, id, transactionID string) (err er
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaThresholds]; itm.Replicate {
 		var reply string
 		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil, utils.ReplicatorSv1RemoveThreshold,
-			&utils.TenantIDWithArgDispatcher{
+			&utils.TenantIDWithOpts{
 				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 				ArgDispatcher: &utils.ArgDispatcher{
 					APIKey:  utils.StringPointer(itm.APIKey),
@@ -896,7 +896,7 @@ func (dm *DataManager) GetThresholdProfile(tenant, id string, cacheRead, cacheWr
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaThresholdProfiles]; err == utils.ErrNotFound && itm.Remote {
 			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
 				utils.ReplicatorSv1GetThresholdProfile,
-				&utils.TenantIDWithArgDispatcher{
+				&utils.TenantIDWithOpts{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 					ArgDispatcher: &utils.ArgDispatcher{
 						APIKey:  utils.StringPointer(itm.APIKey),
@@ -952,7 +952,7 @@ func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile, withIndex bool)
 		var reply string
 		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
 			utils.ReplicatorSv1SetThresholdProfile,
-			&ThresholdProfileWithArgDispatcher{
+			&ThresholdProfileWithOpts{
 				ThresholdProfile: th,
 				ArgDispatcher: &utils.ArgDispatcher{
 					APIKey:  utils.StringPointer(itm.APIKey),
@@ -993,7 +993,7 @@ func (dm *DataManager) RemoveThresholdProfile(tenant, id,
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaThresholdProfiles]; itm.Replicate {
 		var reply string
 		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil, utils.ReplicatorSv1RemoveThresholdProfile,
-			&utils.TenantIDWithArgDispatcher{
+			&utils.TenantIDWithOpts{
 				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 				ArgDispatcher: &utils.ArgDispatcher{
 					APIKey:  utils.StringPointer(itm.APIKey),
@@ -1023,7 +1023,7 @@ func (dm *DataManager) GetStatQueueProfile(tenant, id string, cacheRead, cacheWr
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaStatQueueProfiles]; err == utils.ErrNotFound && itm.Remote {
 			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
 				utils.ReplicatorSv1GetStatQueueProfile,
-				&utils.TenantIDWithArgDispatcher{
+				&utils.TenantIDWithOpts{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 					ArgDispatcher: &utils.ArgDispatcher{
 						APIKey:  utils.StringPointer(itm.APIKey),
@@ -1079,7 +1079,7 @@ func (dm *DataManager) SetStatQueueProfile(sqp *StatQueueProfile, withIndex bool
 		var reply string
 		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
 			utils.ReplicatorSv1SetStatQueueProfile,
-			&StatQueueProfileWithArgDispatcher{
+			&StatQueueProfileWithOpts{
 				StatQueueProfile: sqp,
 				ArgDispatcher: &utils.ArgDispatcher{
 					APIKey:  utils.StringPointer(itm.APIKey),
@@ -1120,7 +1120,7 @@ func (dm *DataManager) RemoveStatQueueProfile(tenant, id,
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaStatQueueProfiles]; itm.Replicate {
 		var reply string
 		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil, utils.ReplicatorSv1RemoveStatQueueProfile,
-			&utils.TenantIDWithArgDispatcher{
+			&utils.TenantIDWithOpts{
 				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 				ArgDispatcher: &utils.ArgDispatcher{
 					APIKey:  utils.StringPointer(itm.APIKey),
@@ -1148,7 +1148,7 @@ func (dm *DataManager) GetTiming(id string, skipCache bool,
 	if err != nil {
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaTimings]; err == utils.ErrNotFound && itm.Remote {
 			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil, utils.ReplicatorSv1GetTiming,
-				&utils.StringWithApiKey{
+				&utils.StringWithOpts{
 					Arg:       id,
 					TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 					ArgDispatcher: &utils.ArgDispatcher{
@@ -1193,7 +1193,7 @@ func (dm *DataManager) SetTiming(t *utils.TPTiming) (err error) {
 		var reply string
 		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
 			utils.ReplicatorSv1SetTiming,
-			&utils.TPTimingWithArgDispatcher{
+			&utils.TPTimingWithOpts{
 				TPTiming: t,
 				ArgDispatcher: &utils.ArgDispatcher{
 					APIKey:  utils.StringPointer(itm.APIKey),
@@ -1246,7 +1246,7 @@ func (dm *DataManager) GetResource(tenant, id string, cacheRead, cacheWrite bool
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaResources]; err == utils.ErrNotFound && itm.Remote {
 			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
 				utils.ReplicatorSv1GetResource,
-				&utils.TenantIDWithArgDispatcher{
+				&utils.TenantIDWithOpts{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 					ArgDispatcher: &utils.ArgDispatcher{
 						APIKey:  utils.StringPointer(itm.APIKey),
@@ -1288,7 +1288,7 @@ func (dm *DataManager) SetResource(rs *Resource) (err error) {
 		var reply string
 		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
 			utils.ReplicatorSv1SetResource,
-			&ResourceWithArgDispatcher{
+			&ResourceWithOpts{
 				Resource: rs,
 				ArgDispatcher: &utils.ArgDispatcher{
 					APIKey:  utils.StringPointer(itm.APIKey),
@@ -1313,7 +1313,7 @@ func (dm *DataManager) RemoveResource(tenant, id, transactionID string) (err err
 		var reply string
 		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
 			utils.ReplicatorSv1RemoveResource,
-			&utils.TenantIDWithArgDispatcher{
+			&utils.TenantIDWithOpts{
 				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 				ArgDispatcher: &utils.ArgDispatcher{
 					APIKey:  utils.StringPointer(itm.APIKey),
@@ -1342,7 +1342,7 @@ func (dm *DataManager) GetResourceProfile(tenant, id string, cacheRead, cacheWri
 	if err != nil {
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaResourceProfile]; err == utils.ErrNotFound && itm.Remote {
 			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
-				utils.ReplicatorSv1GetResourceProfile, &utils.TenantIDWithArgDispatcher{
+				utils.ReplicatorSv1GetResourceProfile, &utils.TenantIDWithOpts{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 					ArgDispatcher: &utils.ArgDispatcher{
 						APIKey:  utils.StringPointer(itm.APIKey),
@@ -1399,7 +1399,7 @@ func (dm *DataManager) SetResourceProfile(rp *ResourceProfile, withIndex bool) (
 		var reply string
 		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
 			utils.ReplicatorSv1SetResourceProfile,
-			&ResourceProfileWithArgDispatcher{
+			&ResourceProfileWithOpts{
 				ResourceProfile: rp,
 				ArgDispatcher: &utils.ArgDispatcher{
 					APIKey:  utils.StringPointer(itm.APIKey),
@@ -1439,7 +1439,7 @@ func (dm *DataManager) RemoveResourceProfile(tenant, id, transactionID string, w
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaResourceProfile]; itm.Replicate {
 		var reply string
 		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
-			utils.ReplicatorSv1RemoveResourceProfile, &utils.TenantIDWithArgDispatcher{
+			utils.ReplicatorSv1RemoveResourceProfile, &utils.TenantIDWithOpts{
 				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 				ArgDispatcher: &utils.ArgDispatcher{
 					APIKey:  utils.StringPointer(itm.APIKey),
@@ -1467,7 +1467,7 @@ func (dm *DataManager) GetActionTriggers(id string, skipCache bool,
 	if err != nil {
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaActionTriggers]; err == utils.ErrNotFound && itm.Remote {
 			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil, utils.ReplicatorSv1GetActionTriggers,
-				&utils.StringWithApiKey{
+				&utils.StringWithOpts{
 					Arg:       id,
 					TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 					ArgDispatcher: &utils.ArgDispatcher{
@@ -1512,7 +1512,7 @@ func (dm *DataManager) RemoveActionTriggers(id, transactionID string) (err error
 		var reply string
 		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
 			utils.ReplicatorSv1RemoveActionTriggers,
-			&utils.StringWithApiKey{
+			&utils.StringWithOpts{
 				Arg:       id,
 				TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 				ArgDispatcher: &utils.ArgDispatcher{
@@ -1523,12 +1523,12 @@ func (dm *DataManager) RemoveActionTriggers(id, transactionID string) (err error
 	return
 }
 
-//SetActionTriggersArgWithArgDispatcher is used to send the key and the ActionTriggers to Replicator
-type SetActionTriggersArgWithArgDispatcher struct {
+//SetActionTriggersArgWithOpts is used to send the key and the ActionTriggers to Replicator
+type SetActionTriggersArgWithOpts struct {
 	Key   string
 	Attrs ActionTriggers
 	utils.TenantArg
-	*utils.ArgDispatcher
+	Opts map[string]interface{}
 }
 
 func (dm *DataManager) SetActionTriggers(key string, attr ActionTriggers,
@@ -1546,7 +1546,7 @@ func (dm *DataManager) SetActionTriggers(key string, attr ActionTriggers,
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaActionTriggers]; itm.Replicate {
 		var reply string
 		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil, utils.ReplicatorSv1SetActionTriggers,
-			&SetActionTriggersArgWithArgDispatcher{
+			&SetActionTriggersArgWithOpts{
 				Attrs: attr, Key: key,
 				ArgDispatcher: &utils.ArgDispatcher{
 					APIKey:  utils.StringPointer(itm.APIKey),
@@ -1578,7 +1578,7 @@ func (dm *DataManager) GetSharedGroup(key string, skipCache bool,
 	if err != nil {
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaSharedGroups]; err == utils.ErrNotFound && itm.Remote {
 			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
-				utils.ReplicatorSv1GetSharedGroup, &utils.StringWithApiKey{
+				utils.ReplicatorSv1GetSharedGroup, &utils.StringWithOpts{
 					Arg:       key,
 					TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 					ArgDispatcher: &utils.ArgDispatcher{
@@ -1624,7 +1624,7 @@ func (dm *DataManager) SetSharedGroup(sg *SharedGroup,
 		var reply string
 		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
 			utils.ReplicatorSv1SetSharedGroup,
-			&SharedGroupWithArgDispatcher{
+			&SharedGroupWithOpts{
 				SharedGroup: sg,
 				TenantArg:   utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 				ArgDispatcher: &utils.ArgDispatcher{
@@ -1654,7 +1654,7 @@ func (dm *DataManager) RemoveSharedGroup(id, transactionID string) (err error) {
 		var reply string
 		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
 			utils.ReplicatorSv1RemoveSharedGroup,
-			&utils.StringWithApiKey{
+			&utils.StringWithOpts{
 				Arg:       id,
 				TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 				ArgDispatcher: &utils.ArgDispatcher{
@@ -1685,7 +1685,7 @@ func (dm *DataManager) GetActions(key string, skipCache bool, transactionID stri
 	if err != nil {
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaActions]; err == utils.ErrNotFound && itm.Remote {
 			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
-				utils.ReplicatorSv1GetActions, &utils.StringWithApiKey{
+				utils.ReplicatorSv1GetActions, &utils.StringWithOpts{
 					Arg:       key,
 					TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 					ArgDispatcher: &utils.ArgDispatcher{
@@ -1714,12 +1714,12 @@ func (dm *DataManager) GetActions(key string, skipCache bool, transactionID stri
 	return
 }
 
-//SetActionsArgsWithArgDispatcher is used to send the key and the Actions to replicator
-type SetActionsArgsWithArgDispatcher struct {
+//SetActionsArgsWithOpts is used to send the key and the Actions to replicator
+type SetActionsArgsWithOpts struct {
 	Key string
 	Acs Actions
 	utils.TenantArg
-	*utils.ArgDispatcher
+	Opts map[string]interface{}
 }
 
 func (dm *DataManager) SetActions(key string, as Actions, transactionID string) (err error) {
@@ -1736,7 +1736,7 @@ func (dm *DataManager) SetActions(key string, as Actions, transactionID string) 
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaActions]; itm.Replicate {
 		var reply string
 		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil, utils.ReplicatorSv1SetActions,
-			&SetActionsArgsWithArgDispatcher{
+			&SetActionsArgsWithOpts{
 				Key: key, Acs: as,
 				TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 				ArgDispatcher: &utils.ArgDispatcher{
@@ -1765,7 +1765,7 @@ func (dm *DataManager) RemoveActions(key, transactionID string) (err error) {
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaActions]; itm.Replicate {
 		var reply string
 		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
-			utils.ReplicatorSv1RemoveActions, &utils.StringWithApiKey{
+			utils.ReplicatorSv1RemoveActions, &utils.StringWithOpts{
 				Arg:       key,
 				TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 				ArgDispatcher: &utils.ArgDispatcher{
@@ -1784,7 +1784,7 @@ func (dm *DataManager) GetActionPlan(key string, skipCache bool, transactionID s
 	ats, err = dm.dataDB.GetActionPlanDrv(key, skipCache, transactionID)
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaActionPlans]; err == utils.ErrNotFound && itm.Remote {
 		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
-			utils.ReplicatorSv1GetActionPlan, &utils.StringWithApiKey{
+			utils.ReplicatorSv1GetActionPlan, &utils.StringWithOpts{
 				Arg:       key,
 				TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 				ArgDispatcher: &utils.ArgDispatcher{
@@ -1802,13 +1802,13 @@ func (dm *DataManager) GetActionPlan(key string, skipCache bool, transactionID s
 	return
 }
 
-// SetActionPlanArgWithArgDispatcher is used in replicatorV1 for dispatcher
-type SetActionPlanArgWithArgDispatcher struct {
+// SetActionPlanArgWithOpts is used in replicatorV1 for dispatcher
+type SetActionPlanArgWithOpts struct {
 	Key       string
 	Ats       *ActionPlan
 	Overwrite bool
 	utils.TenantArg
-	*utils.ArgDispatcher
+	Opts map[string]interface{}
 }
 
 func (dm *DataManager) SetActionPlan(key string, ats *ActionPlan,
@@ -1823,7 +1823,7 @@ func (dm *DataManager) SetActionPlan(key string, ats *ActionPlan,
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaActionPlans]; itm.Replicate {
 		var reply string
 		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
-			utils.ReplicatorSv1SetActionPlan, &SetActionPlanArgWithArgDispatcher{
+			utils.ReplicatorSv1SetActionPlan, &SetActionPlanArgWithOpts{
 				Key:       key,
 				Ats:       ats,
 				Overwrite: overwrite,
@@ -1848,7 +1848,7 @@ func (dm *DataManager) GetAllActionPlans() (ats map[string]*ActionPlan, err erro
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaActionPlans]; ((err == nil && len(ats) == 0) || err == utils.ErrNotFound) && itm.Remote {
 		err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
 			utils.ReplicatorSv1GetAllActionPlans,
-			&utils.StringWithApiKey{
+			&utils.StringWithOpts{
 				Arg:       utils.EmptyString,
 				TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 				ArgDispatcher: &utils.ArgDispatcher{
@@ -1876,7 +1876,7 @@ func (dm *DataManager) RemoveActionPlan(key string, transactionID string) (err e
 		var reply string
 		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
 			utils.ReplicatorSv1RemoveActionPlan,
-			&utils.StringWithApiKey{
+			&utils.StringWithOpts{
 				Arg:       key,
 				TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 				ArgDispatcher: &utils.ArgDispatcher{
@@ -1896,7 +1896,7 @@ func (dm *DataManager) GetAccountActionPlans(acntID string,
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaAccountActionPlans]; ((err == nil && len(apIDs) == 0) || err == utils.ErrNotFound) && itm.Remote {
 		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
 			utils.ReplicatorSv1GetAccountActionPlans,
-			&utils.StringWithApiKey{
+			&utils.StringWithOpts{
 				Arg:       acntID,
 				TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 				ArgDispatcher: &utils.ArgDispatcher{
@@ -1914,13 +1914,13 @@ func (dm *DataManager) GetAccountActionPlans(acntID string,
 	return
 }
 
-//SetAccountActionPlansArgWithArgDispatcher is used to send the key and the Actions to replicator
-type SetAccountActionPlansArgWithArgDispatcher struct {
+//SetAccountActionPlansArgWithOpts is used to send the key and the Actions to replicator
+type SetAccountActionPlansArgWithOpts struct {
 	AcntID    string
 	AplIDs    []string
 	Overwrite bool
 	utils.TenantArg
-	*utils.ArgDispatcher
+	Opts map[string]interface{}
 }
 
 func (dm *DataManager) SetAccountActionPlans(acntID string, aPlIDs []string, overwrite bool) (err error) {
@@ -1934,7 +1934,7 @@ func (dm *DataManager) SetAccountActionPlans(acntID string, aPlIDs []string, ove
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaAccountActionPlans]; itm.Replicate {
 		var reply string
 		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
-			utils.ReplicatorSv1SetAccountActionPlans, &SetAccountActionPlansArgWithArgDispatcher{
+			utils.ReplicatorSv1SetAccountActionPlans, &SetAccountActionPlansArgWithOpts{
 				AcntID:    acntID,
 				AplIDs:    aPlIDs,
 				Overwrite: overwrite,
@@ -1950,12 +1950,12 @@ func (dm *DataManager) SetAccountActionPlans(acntID string, aPlIDs []string, ove
 	return
 }
 
-// RemAccountActionPlansArgsWithArgDispatcher is used in replicatorV1 for dispatcher
-type RemAccountActionPlansArgsWithArgDispatcher struct {
+// RemAccountActionPlansArgsWithOpts is used in replicatorV1 for dispatcher
+type RemAccountActionPlansArgsWithOpts struct {
 	AcntID string
 	ApIDs  []string
 	utils.TenantArg
-	*utils.ArgDispatcher
+	Opts map[string]interface{}
 }
 
 func (dm *DataManager) RemAccountActionPlans(acntID string, apIDs []string) (err error) {
@@ -1970,7 +1970,7 @@ func (dm *DataManager) RemAccountActionPlans(acntID string, apIDs []string) (err
 		var reply string
 		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
 			utils.ReplicatorSv1RemAccountActionPlans,
-			&RemAccountActionPlansArgsWithArgDispatcher{
+			&RemAccountActionPlansArgsWithOpts{
 				AcntID: acntID, ApIDs: apIDs,
 				TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 				ArgDispatcher: &utils.ArgDispatcher{
@@ -2000,7 +2000,7 @@ func (dm *DataManager) GetRatingPlan(key string, skipCache bool,
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRatingPlans]; err == utils.ErrNotFound && itm.Remote {
 			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
 				utils.ReplicatorSv1GetRatingPlan,
-				&utils.StringWithApiKey{
+				&utils.StringWithOpts{
 					Arg:       key,
 					TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 					ArgDispatcher: &utils.ArgDispatcher{
@@ -2044,7 +2044,7 @@ func (dm *DataManager) SetRatingPlan(rp *RatingPlan, transactionID string) (err 
 		var reply string
 		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
 			utils.ReplicatorSv1SetRatingPlan,
-			&RatingPlanWithArgDispatcher{
+			&RatingPlanWithOpts{
 				RatingPlan: rp,
 				TenantArg:  utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 				ArgDispatcher: &utils.ArgDispatcher{
@@ -2074,7 +2074,7 @@ func (dm *DataManager) RemoveRatingPlan(key string, transactionID string) (err e
 		var reply string
 		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
 			utils.ReplicatorSv1RemoveRatingPlan,
-			&utils.StringWithApiKey{
+			&utils.StringWithOpts{
 				Arg:       key,
 				TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 				ArgDispatcher: &utils.ArgDispatcher{
@@ -2107,7 +2107,7 @@ func (dm *DataManager) GetRatingProfile(key string, skipCache bool,
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRatingProfiles]; err == utils.ErrNotFound && itm.Remote {
 			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
 				utils.ReplicatorSv1GetRatingProfile,
-				&utils.StringWithApiKey{
+				&utils.StringWithOpts{
 					Arg:       key,
 					TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 					ArgDispatcher: &utils.ArgDispatcher{
@@ -2152,7 +2152,7 @@ func (dm *DataManager) SetRatingProfile(rpf *RatingProfile,
 		var reply string
 		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
 			utils.ReplicatorSv1SetRatingProfile,
-			&RatingProfileWithArgDispatcher{
+			&RatingProfileWithOpts{
 				RatingProfile: rpf,
 				TenantArg:     utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 				ArgDispatcher: &utils.ArgDispatcher{
@@ -2183,7 +2183,7 @@ func (dm *DataManager) RemoveRatingProfile(key string,
 		var reply string
 		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
 			utils.ReplicatorSv1RemoveRatingProfile,
-			&utils.StringWithApiKey{
+			&utils.StringWithOpts{
 				Arg:       key,
 				TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 				ArgDispatcher: &utils.ArgDispatcher{
@@ -2221,7 +2221,7 @@ func (dm *DataManager) GetRouteProfile(tenant, id string, cacheRead, cacheWrite 
 	if err != nil {
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRouteProfiles]; err == utils.ErrNotFound && itm.Remote {
 			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil, utils.ReplicatorSv1GetRouteProfile,
-				&utils.TenantIDWithArgDispatcher{
+				&utils.TenantIDWithOpts{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 					ArgDispatcher: &utils.ArgDispatcher{
 						APIKey:  utils.StringPointer(itm.APIKey),
@@ -2281,7 +2281,7 @@ func (dm *DataManager) SetRouteProfile(rpp *RouteProfile, withIndex bool) (err e
 		var reply string
 		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
 			utils.ReplicatorSv1SetRouteProfile,
-			&RouteProfileWithArgDispatcher{
+			&RouteProfileWithOpts{
 				RouteProfile: rpp,
 				ArgDispatcher: &utils.ArgDispatcher{
 					APIKey:  utils.StringPointer(itm.APIKey),
@@ -2322,7 +2322,7 @@ func (dm *DataManager) RemoveRouteProfile(tenant, id, transactionID string, with
 		var reply string
 		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
 			utils.ReplicatorSv1RemoveRouteProfile,
-			&utils.TenantIDWithArgDispatcher{
+			&utils.TenantIDWithOpts{
 				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 				ArgDispatcher: &utils.ArgDispatcher{
 					APIKey:  utils.StringPointer(itm.APIKey),
@@ -2355,7 +2355,7 @@ func (dm *DataManager) GetAttributeProfile(tenant, id string, cacheRead, cacheWr
 			if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaAttributeProfiles]; err == utils.ErrNotFound && itm.Remote {
 				if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
 					utils.ReplicatorSv1GetAttributeProfile,
-					&utils.TenantIDWithArgDispatcher{
+					&utils.TenantIDWithOpts{
 						TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 						ArgDispatcher: &utils.ArgDispatcher{
 							APIKey:  utils.StringPointer(itm.APIKey),
@@ -2417,7 +2417,7 @@ func (dm *DataManager) SetAttributeProfile(ap *AttributeProfile, withIndex bool)
 		var reply string
 		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
 			utils.ReplicatorSv1SetAttributeProfile,
-			&AttributeProfileWithArgDispatcher{
+			&AttributeProfileWithOpts{
 				AttributeProfile: ap,
 				ArgDispatcher: &utils.ArgDispatcher{
 					APIKey:  utils.StringPointer(itm.APIKey),
@@ -2460,7 +2460,7 @@ func (dm *DataManager) RemoveAttributeProfile(tenant, id string, transactionID s
 		var reply string
 		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
 			utils.ReplicatorSv1RemoveAttributeProfile,
-			&utils.TenantIDWithArgDispatcher{
+			&utils.TenantIDWithOpts{
 				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 				ArgDispatcher: &utils.ArgDispatcher{
 					APIKey:  utils.StringPointer(itm.APIKey),
@@ -2490,7 +2490,7 @@ func (dm *DataManager) GetChargerProfile(tenant, id string, cacheRead, cacheWrit
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaChargerProfiles]; err == utils.ErrNotFound && itm.Remote {
 			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
 				utils.ReplicatorSv1GetChargerProfile,
-				&utils.TenantIDWithArgDispatcher{
+				&utils.TenantIDWithOpts{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 					ArgDispatcher: &utils.ArgDispatcher{
 						APIKey:  utils.StringPointer(itm.APIKey),
@@ -2546,7 +2546,7 @@ func (dm *DataManager) SetChargerProfile(cpp *ChargerProfile, withIndex bool) (e
 		var reply string
 		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
 			utils.ReplicatorSv1SetChargerProfile,
-			&ChargerProfileWithArgDispatcher{
+			&ChargerProfileWithOpts{
 				ChargerProfile: cpp,
 				ArgDispatcher: &utils.ArgDispatcher{
 					APIKey:  utils.StringPointer(itm.APIKey),
@@ -2588,7 +2588,7 @@ func (dm *DataManager) RemoveChargerProfile(tenant, id string,
 		var reply string
 		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
 			utils.ReplicatorSv1RemoveChargerProfile,
-			&utils.TenantIDWithArgDispatcher{
+			&utils.TenantIDWithOpts{
 				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 				ArgDispatcher: &utils.ArgDispatcher{
 					APIKey:  utils.StringPointer(itm.APIKey),
@@ -2618,7 +2618,7 @@ func (dm *DataManager) GetDispatcherProfile(tenant, id string, cacheRead, cacheW
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaDispatcherProfiles]; err == utils.ErrNotFound && itm.Remote {
 			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
 				utils.ReplicatorSv1GetDispatcherProfile,
-				&utils.TenantIDWithArgDispatcher{
+				&utils.TenantIDWithOpts{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 					ArgDispatcher: &utils.ArgDispatcher{
 						APIKey:  utils.StringPointer(itm.APIKey),
@@ -2676,7 +2676,7 @@ func (dm *DataManager) SetDispatcherProfile(dpp *DispatcherProfile, withIndex bo
 		var reply string
 		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
 			utils.ReplicatorSv1SetDispatcherProfile,
-			&DispatcherProfileWithArgDispatcher{
+			&DispatcherProfileWithOpts{
 				DispatcherProfile: dpp,
 				ArgDispatcher: &utils.ArgDispatcher{
 					APIKey:  utils.StringPointer(itm.APIKey),
@@ -2720,7 +2720,7 @@ func (dm *DataManager) RemoveDispatcherProfile(tenant, id string,
 		var reply string
 		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
 			utils.ReplicatorSv1RemoveDispatcherProfile,
-			&utils.TenantIDWithArgDispatcher{
+			&utils.TenantIDWithOpts{
 				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 				ArgDispatcher: &utils.ArgDispatcher{
 					APIKey:  utils.StringPointer(itm.APIKey),
@@ -2750,7 +2750,7 @@ func (dm *DataManager) GetDispatcherHost(tenant, id string, cacheRead, cacheWrit
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaDispatcherHosts]; err == utils.ErrNotFound && itm.Remote {
 			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
 				utils.ReplicatorSv1GetDispatcherHost,
-				&utils.TenantIDWithArgDispatcher{
+				&utils.TenantIDWithOpts{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 					ArgDispatcher: &utils.ArgDispatcher{
 						APIKey:  utils.StringPointer(itm.APIKey),
@@ -2792,7 +2792,7 @@ func (dm *DataManager) SetDispatcherHost(dpp *DispatcherHost) (err error) {
 		var reply string
 		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
 			utils.ReplicatorSv1SetDispatcherHost,
-			&DispatcherHostWithArgDispatcher{
+			&DispatcherHostWithOpts{
 				DispatcherHost: dpp,
 				ArgDispatcher: &utils.ArgDispatcher{
 					APIKey:  utils.StringPointer(itm.APIKey),
@@ -2825,7 +2825,7 @@ func (dm *DataManager) RemoveDispatcherHost(tenant, id string,
 		var reply string
 		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
 			utils.ReplicatorSv1RemoveDispatcherHost,
-			&utils.TenantIDWithArgDispatcher{
+			&utils.TenantIDWithOpts{
 				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 				ArgDispatcher: &utils.ArgDispatcher{
 					APIKey:  utils.StringPointer(itm.APIKey),
@@ -2845,7 +2845,7 @@ func (dm *DataManager) GetItemLoadIDs(itemIDPrefix string, cacheWrite bool) (loa
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaLoadIDs]; err == utils.ErrNotFound && itm.Remote {
 			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
 				utils.ReplicatorSv1GetItemLoadIDs,
-				&utils.StringWithApiKey{
+				&utils.StringWithOpts{
 					Arg:       itemIDPrefix,
 					TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 					ArgDispatcher: &utils.ArgDispatcher{
@@ -2893,7 +2893,7 @@ func (dm *DataManager) SetLoadIDs(loadIDs map[string]int64) (err error) {
 		var reply string
 		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
 			utils.ReplicatorSv1SetLoadIDs,
-			&utils.LoadIDsWithArgDispatcher{
+			&utils.LoadIDsWithOpts{
 				LoadIDs:   loadIDs,
 				TenantArg: utils.TenantArg{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant},
 				ArgDispatcher: &utils.ArgDispatcher{
@@ -2927,7 +2927,7 @@ func (dm *DataManager) GetRateProfile(tenant, id string, cacheRead, cacheWrite b
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRateProfiles]; err == utils.ErrNotFound && itm.Remote {
 			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
 				utils.ReplicatorSv1GetRateProfile,
-				&utils.TenantIDWithArgDispatcher{
+				&utils.TenantIDWithOpts{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 					ArgDispatcher: &utils.ArgDispatcher{
 						APIKey:  utils.StringPointer(itm.APIKey),
@@ -3010,7 +3010,7 @@ func (dm *DataManager) SetRateProfile(rpp *RateProfile, withIndex bool) (err err
 		var reply string
 		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
 			utils.ReplicatorSv1SetRateProfile,
-			&RateProfileWithArgDispatcher{
+			&RateProfileWithOpts{
 				RateProfile: rpp,
 				ArgDispatcher: &utils.ArgDispatcher{
 					APIKey:  utils.StringPointer(itm.APIKey),
@@ -3055,7 +3055,7 @@ func (dm *DataManager) RemoveRateProfile(tenant, id string,
 		var reply string
 		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
 			utils.ReplicatorSv1RemoveRateProfile,
-			&utils.TenantIDWithArgDispatcher{
+			&utils.TenantIDWithOpts{
 				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 				ArgDispatcher: &utils.ArgDispatcher{
 					APIKey:  utils.StringPointer(itm.APIKey),
@@ -3107,7 +3107,7 @@ func (dm *DataManager) RemoveRateProfileRates(tenant, id string, rateIDs []strin
 		var reply string
 		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
 			utils.ReplicatorSv1SetRateProfile,
-			&RateProfileWithArgDispatcher{
+			&RateProfileWithOpts{
 				RateProfile: oldRpp,
 				ArgDispatcher: &utils.ArgDispatcher{
 					APIKey:  utils.StringPointer(itm.APIKey),
@@ -3153,7 +3153,7 @@ func (dm *DataManager) SetRateProfileRates(rpp *RateProfile, withIndex bool) (er
 		var reply string
 		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
 			utils.ReplicatorSv1SetRateProfile,
-			&RateProfileWithArgDispatcher{
+			&RateProfileWithOpts{
 				RateProfile: oldRpp,
 				ArgDispatcher: &utils.ArgDispatcher{
 					APIKey:  utils.StringPointer(itm.APIKey),

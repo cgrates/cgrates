@@ -181,7 +181,7 @@ func testLoaderCheckAttributes(t *testing.T) {
 	}
 	var reply *engine.AttributeProfile
 	if err := loaderRPC.Call(utils.APIerSv1GetAttributeProfile,
-		&utils.TenantIDWithArgDispatcher{
+		&utils.TenantIDWithOpts{
 			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ALS1"},
 		}, &reply); err != nil {
 		t.Fatal(err)

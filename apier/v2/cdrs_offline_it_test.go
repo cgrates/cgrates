@@ -206,7 +206,7 @@ func testV2CDRsOfflineBalanceUpdate(t *testing.T) {
 		t.Error("Unexpected error received: ", err)
 	}
 	//process cdr should trigger balance update event
-	if err := cdrsOfflineRpc.Call(utils.CDRsV1ProcessCDR, &engine.CDRWithArgDispatcher{CDR: cdr}, &reply); err != nil {
+	if err := cdrsOfflineRpc.Call(utils.CDRsV1ProcessCDR, &engine.CDRWithOpts{CDR: cdr}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
@@ -306,19 +306,21 @@ func testV2CDRsOfflineExpiryBalance(t *testing.T) {
 	}
 
 	args := &engine.ArgV1ProcessEvent{
-		CGREvent: utils.CGREvent{
-			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
-				utils.OriginID:    "testV2CDRsOfflineProcessCDR1",
-				utils.OriginHost:  "192.168.1.1",
-				utils.Source:      "testV2CDRsOfflineProcessCDR",
-				utils.RequestType: utils.META_POSTPAID,
-				utils.Category:    "call",
-				utils.Account:     "test2",
-				utils.Subject:     "test2",
-				utils.Destination: "1002",
-				utils.AnswerTime:  time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
-				utils.Usage:       time.Duration(1) * time.Minute,
+		CGREventWithOpts: utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				Event: map[string]interface{}{
+					utils.OriginID:    "testV2CDRsOfflineProcessCDR1",
+					utils.OriginHost:  "192.168.1.1",
+					utils.Source:      "testV2CDRsOfflineProcessCDR",
+					utils.RequestType: utils.META_POSTPAID,
+					utils.Category:    "call",
+					utils.Account:     "test2",
+					utils.Subject:     "test2",
+					utils.Destination: "1002",
+					utils.AnswerTime:  time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+					utils.Usage:       time.Duration(1) * time.Minute,
+				},
 			},
 		},
 	}
@@ -380,7 +382,7 @@ func testV2CDRsBalancesWithSameWeight(t *testing.T) {
 		t.Error("Unexpected error received: ", err)
 	}
 	//process cdr should trigger balance update event
-	if err := cdrsOfflineRpc.Call(utils.CDRsV1ProcessCDR, &engine.CDRWithArgDispatcher{CDR: cdr}, &reply); err != nil {
+	if err := cdrsOfflineRpc.Call(utils.CDRsV1ProcessCDR, &engine.CDRWithOpts{CDR: cdr}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)

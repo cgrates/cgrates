@@ -34,17 +34,17 @@ type ConfigSv1 struct {
 }
 
 // GetJSONSection will retrieve from CGRConfig a section
-func (cSv1 *ConfigSv1) GetJSONSection(section *config.StringWithArgDispatcher, reply *map[string]interface{}) (err error) {
+func (cSv1 *ConfigSv1) GetJSONSection(section *config.StringWithOpts, reply *map[string]interface{}) (err error) {
 	return cSv1.cfg.V1GetConfigSection(section, reply)
 }
 
 // ReloadConfigFromPath reloads the configuration
-func (cSv1 *ConfigSv1) ReloadConfigFromPath(args *config.ConfigReloadWithArgDispatcher, reply *string) (err error) {
+func (cSv1 *ConfigSv1) ReloadConfigFromPath(args *config.ConfigReloadWithOpts, reply *string) (err error) {
 	return cSv1.cfg.V1ReloadConfigFromPath(args, reply)
 }
 
 // ReloadConfigFromJSON reloads the sections of configz
-func (cSv1 *ConfigSv1) ReloadConfigFromJSON(args *config.JSONReloadWithArgDispatcher, reply *string) (err error) {
+func (cSv1 *ConfigSv1) ReloadConfigFromJSON(args *config.JSONReloadWithOpts, reply *string) (err error) {
 	return cSv1.cfg.V1ReloadConfigFromJSON(args, reply)
 }
 

@@ -247,7 +247,7 @@ func testInternalReplicateITAttributeProfile(t *testing.T) {
 	// check
 	var reply *engine.AttributeProfile
 	if err := engineOneRPC.Call(utils.APIerSv1GetAttributeProfile,
-		utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: alsPrf.Tenant, ID: alsPrf.ID}}, &reply); err != nil {
+		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: alsPrf.Tenant, ID: alsPrf.ID}}, &reply); err != nil {
 		t.Fatal(err)
 	}
 	reply.Compile()
@@ -255,7 +255,7 @@ func testInternalReplicateITAttributeProfile(t *testing.T) {
 		t.Errorf("Expecting : %+v, received: %+v", alsPrf.AttributeProfile, reply)
 	}
 	if err := engineTwoRPC.Call(utils.APIerSv1GetAttributeProfile,
-		utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: alsPrf.Tenant, ID: alsPrf.ID}}, &reply); err != nil {
+		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: alsPrf.Tenant, ID: alsPrf.ID}}, &reply); err != nil {
 		t.Fatal(err)
 	}
 	reply.Compile()
@@ -272,11 +272,11 @@ func testInternalReplicateITAttributeProfile(t *testing.T) {
 	}
 	//check again
 	if err := engineOneRPC.Call(utils.APIerSv1GetAttributeProfile,
-		utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: alsPrf.Tenant, ID: alsPrf.ID}}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: alsPrf.Tenant, ID: alsPrf.ID}}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expecting: %+v recived: %+v", utils.ErrNotFound, err)
 	}
 	if err := engineTwoRPC.Call(utils.APIerSv1GetAttributeProfile,
-		utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: alsPrf.Tenant, ID: alsPrf.ID}}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: alsPrf.Tenant, ID: alsPrf.ID}}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expecting: %+v recived: %+v", utils.ErrNotFound, err)
 	}
 }
@@ -1205,7 +1205,7 @@ func testInternalReplicateITThreshold(t *testing.T) {
 	// get threshold
 	var td engine.Threshold
 	if err := engineOneRPC.Call(utils.ThresholdSv1GetThreshold,
-		&utils.TenantIDWithArgDispatcher{
+		&utils.TenantIDWithOpts{
 			TenantID: &utils.TenantID{
 				Tenant: tenant,
 				ID:     "THD_Test"},
@@ -1214,7 +1214,7 @@ func testInternalReplicateITThreshold(t *testing.T) {
 		t.Error(err)
 	}
 	if err := engineTwoRPC.Call(utils.ThresholdSv1GetThreshold,
-		&utils.TenantIDWithArgDispatcher{
+		&utils.TenantIDWithOpts{
 			TenantID: &utils.TenantID{
 				Tenant: tenant,
 				ID:     "THD_Test"},
@@ -1222,16 +1222,18 @@ func testInternalReplicateITThreshold(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	tEvs := engine.ArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				utils.EventType:     utils.AccountUpdate,
-				utils.Account:       "1005",
-				utils.AllowNegative: true,
-				utils.Disabled:      false,
-				utils.Units:         12.3},
+	tEvs := engine.ThresholdsArgsProcessEvent{
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "event1",
+				Event: map[string]interface{}{
+					utils.EventType:     utils.AccountUpdate,
+					utils.Account:       "1005",
+					utils.AllowNegative: true,
+					utils.Disabled:      false,
+					utils.Units:         12.3},
+			},
 		},
 	}
 	//set Actions
@@ -1262,7 +1264,7 @@ func testInternalReplicateITThreshold(t *testing.T) {
 	}
 	//get
 	if err := internalRPC.Call(utils.ThresholdSv1GetThreshold,
-		&utils.TenantIDWithArgDispatcher{
+		&utils.TenantIDWithOpts{
 			TenantID: &utils.TenantID{
 				Tenant: tenant,
 				ID:     "THD_Test"},
@@ -1308,7 +1310,7 @@ func testInternalReplicateITThreshold(t *testing.T) {
 	}
 	//get
 	if err := internalRPC.Call(utils.ThresholdSv1GetThreshold,
-		&utils.TenantIDWithArgDispatcher{
+		&utils.TenantIDWithOpts{
 			TenantID: &utils.TenantID{
 				Tenant: tenant,
 				ID:     "THD_Test"},
@@ -1328,7 +1330,7 @@ func testInternalReplicateITThreshold(t *testing.T) {
 	}
 
 	if err := engineOneRPC.Call(utils.ThresholdSv1GetThreshold,
-		&utils.TenantIDWithArgDispatcher{
+		&utils.TenantIDWithOpts{
 			TenantID: &utils.TenantID{
 				Tenant: tenant,
 				ID:     "THD_Test"},
@@ -1337,7 +1339,7 @@ func testInternalReplicateITThreshold(t *testing.T) {
 		t.Error(err)
 	}
 	if err := engineTwoRPC.Call(utils.ThresholdSv1GetThreshold,
-		&utils.TenantIDWithArgDispatcher{
+		&utils.TenantIDWithOpts{
 			TenantID: &utils.TenantID{
 				Tenant: tenant,
 				ID:     "THD_Test"},
@@ -1351,7 +1353,7 @@ func testInternalReplicateITThreshold(t *testing.T) {
 func testInternalReplicateITRateProfile(t *testing.T) {
 	//set
 	rPrf := &RateProfileWithCache{
-		RateProfileWithArgDispatcher: &engine.RateProfileWithArgDispatcher{
+		RateProfileWithOpts: &engine.RateProfileWithOpts{
 			RateProfile: &engine.RateProfile{
 				Tenant:           "cgrates.org",
 				ID:               "RP1",
@@ -1423,15 +1425,15 @@ func testInternalReplicateITRateProfile(t *testing.T) {
 	// check
 	var reply *engine.RateProfile
 	if err := engineOneRPC.Call(utils.APIerSv1GetRateProfile,
-		utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: rPrf.Tenant, ID: rPrf.ID}}, &reply); err != nil {
+		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: rPrf.Tenant, ID: rPrf.ID}}, &reply); err != nil {
 		t.Fatal(err)
-	} else if !reflect.DeepEqual(rPrf.RateProfileWithArgDispatcher.RateProfile, reply) {
+	} else if !reflect.DeepEqual(rPrf.RateProfileWithOpts.RateProfile, reply) {
 		t.Errorf("Expecting : %+v, received: %+v", alsPrf.AttributeProfile, reply)
 	}
 	if err := engineTwoRPC.Call(utils.APIerSv1GetRateProfile,
-		utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: rPrf.Tenant, ID: rPrf.ID}}, &reply); err != nil {
+		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: rPrf.Tenant, ID: rPrf.ID}}, &reply); err != nil {
 		t.Fatal(err)
-	} else if !reflect.DeepEqual(rPrf.RateProfileWithArgDispatcher.RateProfile, reply) {
+	} else if !reflect.DeepEqual(rPrf.RateProfileWithOpts.RateProfile, reply) {
 		t.Errorf("Expecting : %+v, received: %+v", alsPrf.AttributeProfile, reply)
 	}
 	//remove
@@ -1443,12 +1445,12 @@ func testInternalReplicateITRateProfile(t *testing.T) {
 	}
 	//check again
 	if err := engineOneRPC.Call(utils.APIerSv1GetRateProfile,
-		utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: rPrf.Tenant, ID: rPrf.ID}}, &reply); err == nil ||
+		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: rPrf.Tenant, ID: rPrf.ID}}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expecting: %+v recived: %+v", utils.ErrNotFound, err)
 	}
 	if err := engineTwoRPC.Call(utils.APIerSv1GetRateProfile,
-		utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: rPrf.Tenant, ID: rPrf.ID}}, &reply); err == nil ||
+		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: rPrf.Tenant, ID: rPrf.ID}}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expecting: %+v recived: %+v", utils.ErrNotFound, err)
 	}
@@ -1502,7 +1504,7 @@ func testInternalReplicateITLoadIds(t *testing.T) {
 	// check AttributeProfile
 	var reply *engine.AttributeProfile
 	if err := engineOneRPC.Call(utils.APIerSv1GetAttributeProfile,
-		utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: alsPrf.Tenant, ID: alsPrf.ID}}, &reply); err != nil {
+		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: alsPrf.Tenant, ID: alsPrf.ID}}, &reply); err != nil {
 		t.Fatal(err)
 	}
 	reply.Compile()

@@ -138,12 +138,12 @@ func testDspSessionPing(t *testing.T) {
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	if err := dispEngine.RPC.Call(utils.SessionSv1Ping, &utils.CGREventWithArgDispatcher{
+	if err := dispEngine.RPC.Call(utils.SessionSv1Ping, &utils.CGREventWithOpts{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 		},
-		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("ses12345"),
+		Opts: map[string]interface{}{
+			utils.OptsAPIKey: "ses12345",
 		},
 	}, &reply); err != nil {
 		t.Error(err)
@@ -159,12 +159,12 @@ func testDspSessionPingFailover(t *testing.T) {
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	ev := utils.CGREventWithArgDispatcher{
+	ev := utils.CGREventWithOpts{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 		},
-		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("ses12345"),
+		Opts: map[string]interface{}{
+			utils.OptsAPIKey: "ses12345",
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.SessionSv1Ping, &ev, &reply); err != nil {
@@ -193,23 +193,25 @@ func testDspSessionTestAuthKey(t *testing.T) {
 		AuthorizeResources: true,
 		GetRoutes:          true,
 		GetAttributes:      true,
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "TestSSv1ItAuth",
-			Event: map[string]interface{}{
-				utils.Tenant:      "cgrates.org",
-				utils.Category:    "call",
-				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "TestSSv1It1",
-				utils.RequestType: utils.META_PREPAID,
-				utils.Account:     "1001",
-				utils.Destination: "1002",
-				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-				utils.Usage:       authUsage,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TestSSv1ItAuth",
+				Event: map[string]interface{}{
+					utils.Tenant:      "cgrates.org",
+					utils.Category:    "call",
+					utils.ToR:         utils.VOICE,
+					utils.OriginID:    "TestSSv1It1",
+					utils.RequestType: utils.META_PREPAID,
+					utils.Account:     "1001",
+					utils.Destination: "1002",
+					utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+					utils.Usage:       authUsage,
+				},
 			},
-		},
-		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("12345"),
+			Opts: map[string]interface{}{
+				utils.OptsAPIKey: "12345",
+			},
 		},
 	}
 	var rply sessions.V1AuthorizeReplyWithDigest
@@ -226,24 +228,26 @@ func testDspSessionAuthorize(t *testing.T) {
 		AuthorizeResources: true,
 		GetRoutes:          true,
 		GetAttributes:      true,
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "TestSSv1ItAuth",
-			Event: map[string]interface{}{
-				utils.CGRID:       "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
-				utils.Tenant:      "cgrates.org",
-				utils.Category:    "call",
-				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "TestSSv1It1",
-				utils.RequestType: utils.META_PREPAID,
-				utils.Account:     "1001",
-				utils.Destination: "1002",
-				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-				utils.Usage:       authUsage,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TestSSv1ItAuth",
+				Event: map[string]interface{}{
+					utils.CGRID:       "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
+					utils.Tenant:      "cgrates.org",
+					utils.Category:    "call",
+					utils.ToR:         utils.VOICE,
+					utils.OriginID:    "TestSSv1It1",
+					utils.RequestType: utils.META_PREPAID,
+					utils.Account:     "1001",
+					utils.Destination: "1002",
+					utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+					utils.Usage:       authUsage,
+				},
 			},
-		},
-		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("ses12345"),
+			Opts: map[string]interface{}{
+				utils.OptsAPIKey: "ses12345",
+			},
 		},
 	}
 	var rply sessions.V1AuthorizeReplyWithDigest
@@ -277,25 +281,27 @@ func testDspSessionInit(t *testing.T) {
 		InitSession:       true,
 		AllocateResources: true,
 		GetAttributes:     true,
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "TestSSv1ItInitiateSession",
-			Event: map[string]interface{}{
-				utils.CGRID:       "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
-				utils.Tenant:      "cgrates.org",
-				utils.Category:    "call",
-				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "TestSSv1It1",
-				utils.RequestType: utils.META_PREPAID,
-				utils.Account:     "1001",
-				utils.Destination: "1002",
-				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-				utils.Usage:       initUsage,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TestSSv1ItInitiateSession",
+				Event: map[string]interface{}{
+					utils.CGRID:       "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
+					utils.Tenant:      "cgrates.org",
+					utils.Category:    "call",
+					utils.ToR:         utils.VOICE,
+					utils.OriginID:    "TestSSv1It1",
+					utils.RequestType: utils.META_PREPAID,
+					utils.Account:     "1001",
+					utils.Destination: "1002",
+					utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+					utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+					utils.Usage:       initUsage,
+				},
 			},
-		},
-		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("ses12345"),
+			Opts: map[string]interface{}{
+				utils.OptsAPIKey: "ses12345",
+			},
 		},
 	}
 	var rply sessions.V1InitReplyWithDigest
@@ -313,8 +319,8 @@ func testDspSessionInit(t *testing.T) {
 
 func testDspGetSessions(t *testing.T) {
 	filtr := utils.SessionFilter{
-		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("ses12345"),
+		Opts: map[string]interface{}{
+			utils.OptsAPIKey: "ses12345",
 		},
 		Tenant:  "cgrates.org",
 		Filters: []string{},
@@ -352,25 +358,27 @@ func testDspSessionUpdate(t *testing.T) {
 	argsUpdate := &sessions.V1UpdateSessionArgs{
 		GetAttributes: true,
 		UpdateSession: true,
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "TestSSv1ItUpdateSession",
-			Event: map[string]interface{}{
-				utils.CGRID:       "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
-				utils.Tenant:      "cgrates.org",
-				utils.Category:    "call",
-				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "TestSSv1It1",
-				utils.RequestType: utils.META_PREPAID,
-				utils.Account:     "1001",
-				utils.Destination: "1002",
-				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-				utils.Usage:       reqUsage,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TestSSv1ItUpdateSession",
+				Event: map[string]interface{}{
+					utils.CGRID:       "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
+					utils.Tenant:      "cgrates.org",
+					utils.Category:    "call",
+					utils.ToR:         utils.VOICE,
+					utils.OriginID:    "TestSSv1It1",
+					utils.RequestType: utils.META_PREPAID,
+					utils.Account:     "1001",
+					utils.Destination: "1002",
+					utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+					utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+					utils.Usage:       reqUsage,
+				},
 			},
-		},
-		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("ses12345"),
+			Opts: map[string]interface{}{
+				utils.OptsAPIKey: "ses12345",
+			},
 		},
 	}
 	var rply sessions.V1UpdateSessionReply
@@ -379,25 +387,27 @@ func testDspSessionUpdate(t *testing.T) {
 		t.Error(err)
 	}
 	eAttrs := &engine.AttrSProcessEventReply{
-		Opts:            map[string]interface{}{utils.Subsys: utils.MetaSessionS},
 		MatchedProfiles: []string{"ATTR_ACNT_1001"},
 		AlteredFields:   []string{"*req.OfficeGroup"},
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "TestSSv1ItUpdateSession",
-			Event: map[string]interface{}{
-				utils.Tenant:      "cgrates.org",
-				utils.Category:    "call",
-				utils.ToR:         utils.VOICE,
-				utils.Account:     "1001",
-				utils.Destination: "1002",
-				"OfficeGroup":     "Marketing",
-				utils.OriginID:    "TestSSv1It1",
-				utils.RequestType: utils.META_PREPAID,
-				utils.SetupTime:   "2018-01-07T17:00:00Z",
-				utils.AnswerTime:  "2018-01-07T17:00:10Z",
-				utils.Usage:       float64(reqUsage),
-				utils.CGRID:       "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			Opts: map[string]interface{}{utils.Subsys: utils.MetaSessionS},
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TestSSv1ItUpdateSession",
+				Event: map[string]interface{}{
+					utils.Tenant:      "cgrates.org",
+					utils.Category:    "call",
+					utils.ToR:         utils.VOICE,
+					utils.Account:     "1001",
+					utils.Destination: "1002",
+					"OfficeGroup":     "Marketing",
+					utils.OriginID:    "TestSSv1It1",
+					utils.RequestType: utils.META_PREPAID,
+					utils.SetupTime:   "2018-01-07T17:00:00Z",
+					utils.AnswerTime:  "2018-01-07T17:00:10Z",
+					utils.Usage:       float64(reqUsage),
+					utils.CGRID:       "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
+				},
 			},
 		},
 	}
@@ -420,25 +430,27 @@ func testDspSessionUpdate2(t *testing.T) {
 	argsUpdate := &sessions.V1UpdateSessionArgs{
 		GetAttributes: true,
 		UpdateSession: true,
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "TestSSv1ItUpdateSession",
-			Event: map[string]interface{}{
-				utils.CGRID:       "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
-				utils.Tenant:      "cgrates.org",
-				utils.Category:    "call",
-				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "TestSSv1It1",
-				utils.RequestType: utils.META_PREPAID,
-				utils.Account:     "1001",
-				utils.Destination: "1002",
-				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-				utils.Usage:       reqUsage,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TestSSv1ItUpdateSession",
+				Event: map[string]interface{}{
+					utils.CGRID:       "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
+					utils.Tenant:      "cgrates.org",
+					utils.Category:    "call",
+					utils.ToR:         utils.VOICE,
+					utils.OriginID:    "TestSSv1It1",
+					utils.RequestType: utils.META_PREPAID,
+					utils.Account:     "1001",
+					utils.Destination: "1002",
+					utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+					utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+					utils.Usage:       reqUsage,
+				},
 			},
-		},
-		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("ses12345"),
+			Opts: map[string]interface{}{
+				utils.OptsAPIKey: "ses12345",
+			},
 		},
 	}
 	var rply sessions.V1UpdateSessionReply
@@ -447,27 +459,29 @@ func testDspSessionUpdate2(t *testing.T) {
 		t.Fatal(err)
 	}
 	eAttrs := &engine.AttrSProcessEventReply{
-		Opts:            map[string]interface{}{utils.Subsys: utils.MetaSessionS},
 		MatchedProfiles: []string{"ATTR_1001_SESSIONAUTH"},
 		AlteredFields:   []string{"*req.LCRProfile", "*req.Password", "*req.RequestType", "*req.PaypalAccount"},
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "TestSSv1ItUpdateSession",
-			Event: map[string]interface{}{
-				utils.CGRID:       "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
-				utils.Tenant:      "cgrates.org",
-				utils.Category:    "call",
-				utils.ToR:         utils.VOICE,
-				utils.Account:     "1001",
-				utils.Destination: "1002",
-				"LCRProfile":      "premium_cli",
-				"Password":        "CGRateS.org",
-				"PaypalAccount":   "cgrates@paypal.com",
-				utils.OriginID:    "TestSSv1It1",
-				utils.RequestType: utils.META_PREPAID,
-				utils.SetupTime:   "2018-01-07T17:00:00Z",
-				utils.AnswerTime:  "2018-01-07T17:00:10Z",
-				utils.Usage:       float64(reqUsage),
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			Opts: map[string]interface{}{utils.Subsys: utils.MetaSessionS},
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TestSSv1ItUpdateSession",
+				Event: map[string]interface{}{
+					utils.CGRID:       "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
+					utils.Tenant:      "cgrates.org",
+					utils.Category:    "call",
+					utils.ToR:         utils.VOICE,
+					utils.Account:     "1001",
+					utils.Destination: "1002",
+					"LCRProfile":      "premium_cli",
+					"Password":        "CGRateS.org",
+					"PaypalAccount":   "cgrates@paypal.com",
+					utils.OriginID:    "TestSSv1It1",
+					utils.RequestType: utils.META_PREPAID,
+					utils.SetupTime:   "2018-01-07T17:00:00Z",
+					utils.AnswerTime:  "2018-01-07T17:00:10Z",
+					utils.Usage:       float64(reqUsage),
+				},
 			},
 		},
 	}
@@ -493,25 +507,27 @@ func testDspSessionTerminate(t *testing.T) {
 	args := &sessions.V1TerminateSessionArgs{
 		TerminateSession: true,
 		ReleaseResources: true,
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "TestSSv1ItUpdateSession",
-			Event: map[string]interface{}{
-				utils.CGRID:       "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
-				utils.Tenant:      "cgrates.org",
-				utils.Category:    "call",
-				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "TestSSv1It1",
-				utils.RequestType: utils.META_PREPAID,
-				utils.Account:     "1001",
-				utils.Destination: "1002",
-				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-				utils.Usage:       10 * time.Minute,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TestSSv1ItUpdateSession",
+				Event: map[string]interface{}{
+					utils.CGRID:       "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
+					utils.Tenant:      "cgrates.org",
+					utils.Category:    "call",
+					utils.ToR:         utils.VOICE,
+					utils.OriginID:    "TestSSv1It1",
+					utils.RequestType: utils.META_PREPAID,
+					utils.Account:     "1001",
+					utils.Destination: "1002",
+					utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+					utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+					utils.Usage:       10 * time.Minute,
+				},
 			},
-		},
-		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("ses12345"),
+			Opts: map[string]interface{}{
+				utils.OptsAPIKey: "ses12345",
+			},
 		},
 	}
 	var rply string
@@ -525,7 +541,7 @@ func testDspSessionTerminate(t *testing.T) {
 }
 
 func testDspSessionProcessCDR(t *testing.T) {
-	args := utils.CGREventWithArgDispatcher{
+	args := utils.CGREventWithOpts{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItProcessCDR",
@@ -542,8 +558,8 @@ func testDspSessionProcessCDR(t *testing.T) {
 				utils.Usage:       10 * time.Minute,
 			},
 		},
-		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("ses12345"),
+		Opts: map[string]interface{}{
+			utils.OptsAPIKey: "ses12345",
 		},
 	}
 
@@ -563,26 +579,28 @@ func testDspSessionProcessEvent(t *testing.T) {
 		AllocateResources: true,
 		Debit:             true,
 		GetAttributes:     true,
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "TestSSv1ItProcessEvent",
-			Event: map[string]interface{}{
-				utils.CGRID:       "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebac",
-				utils.Tenant:      "cgrates.org",
-				utils.Category:    "call",
-				utils.ToR:         utils.VOICE,
-				utils.OriginHost:  "disp",
-				utils.OriginID:    "TestSSv1It2",
-				utils.RequestType: utils.META_PREPAID,
-				utils.Account:     "1001",
-				utils.Destination: "1002",
-				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-				utils.Usage:       initUsage,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TestSSv1ItProcessEvent",
+				Event: map[string]interface{}{
+					utils.CGRID:       "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebac",
+					utils.Tenant:      "cgrates.org",
+					utils.Category:    "call",
+					utils.ToR:         utils.VOICE,
+					utils.OriginHost:  "disp",
+					utils.OriginID:    "TestSSv1It2",
+					utils.RequestType: utils.META_PREPAID,
+					utils.Account:     "1001",
+					utils.Destination: "1002",
+					utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+					utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+					utils.Usage:       initUsage,
+				},
 			},
-		},
-		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("ses12345"),
+			Opts: map[string]interface{}{
+				utils.OptsAPIKey: "ses12345",
+			},
 		},
 	}
 	var rply sessions.V1ProcessMessageReply
@@ -597,26 +615,28 @@ func testDspSessionProcessEvent(t *testing.T) {
 		t.Errorf("Unexpected ResourceAllocation: %s", *rply.ResourceAllocation)
 	}
 	eAttrs := &engine.AttrSProcessEventReply{
-		Opts:            map[string]interface{}{utils.Subsys: utils.MetaSessionS},
 		MatchedProfiles: []string{"ATTR_ACNT_1001"},
 		AlteredFields:   []string{"*req.OfficeGroup"},
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "TestSSv1ItProcessEvent",
-			Event: map[string]interface{}{
-				utils.CGRID:       "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebac",
-				utils.Tenant:      "cgrates.org",
-				utils.Category:    "call",
-				utils.ToR:         utils.VOICE,
-				utils.Account:     "1001",
-				utils.Destination: "1002",
-				"OfficeGroup":     "Marketing",
-				utils.OriginHost:  "disp",
-				utils.OriginID:    "TestSSv1It2",
-				utils.RequestType: utils.META_PREPAID,
-				utils.SetupTime:   "2018-01-07T17:00:00Z",
-				utils.AnswerTime:  "2018-01-07T17:00:10Z",
-				utils.Usage:       300000000000.0,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			Opts: map[string]interface{}{utils.Subsys: utils.MetaSessionS},
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TestSSv1ItProcessEvent",
+				Event: map[string]interface{}{
+					utils.CGRID:       "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebac",
+					utils.Tenant:      "cgrates.org",
+					utils.Category:    "call",
+					utils.ToR:         utils.VOICE,
+					utils.Account:     "1001",
+					utils.Destination: "1002",
+					"OfficeGroup":     "Marketing",
+					utils.OriginHost:  "disp",
+					utils.OriginID:    "TestSSv1It2",
+					utils.RequestType: utils.META_PREPAID,
+					utils.SetupTime:   "2018-01-07T17:00:00Z",
+					utils.AnswerTime:  "2018-01-07T17:00:10Z",
+					utils.Usage:       300000000000.0,
+				},
 			},
 		},
 	}
@@ -637,26 +657,28 @@ func testDspSessionProcessEvent2(t *testing.T) {
 		AllocateResources: true,
 		Debit:             true,
 		GetAttributes:     true,
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "TestSSv1ItProcessEvent",
-			Event: map[string]interface{}{
-				utils.CGRID:       "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
-				utils.Tenant:      "cgrates.org",
-				utils.Category:    "call",
-				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "TestSSv1It2",
-				utils.RequestType: utils.META_PREPAID,
-				utils.Account:     "1001",
-				utils.Destination: "1002",
-				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-				utils.Usage:       initUsage,
-				utils.EVENT_NAME:  "Internal",
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TestSSv1ItProcessEvent",
+				Event: map[string]interface{}{
+					utils.CGRID:       "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
+					utils.Tenant:      "cgrates.org",
+					utils.Category:    "call",
+					utils.ToR:         utils.VOICE,
+					utils.OriginID:    "TestSSv1It2",
+					utils.RequestType: utils.META_PREPAID,
+					utils.Account:     "1001",
+					utils.Destination: "1002",
+					utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+					utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+					utils.Usage:       initUsage,
+					utils.EVENT_NAME:  "Internal",
+				},
 			},
-		},
-		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("pse12345"),
+			Opts: map[string]interface{}{
+				utils.OptsAPIKey: "pse12345",
+			},
 		},
 	}
 	var rply sessions.V1ProcessMessageReply
@@ -671,25 +693,27 @@ func testDspSessionProcessEvent2(t *testing.T) {
 		t.Errorf("Unexpected ResourceAllocation: %s", *rply.ResourceAllocation)
 	}
 	eAttrs := &engine.AttrSProcessEventReply{
-		Opts:            map[string]interface{}{utils.Subsys: utils.MetaSessionS},
 		MatchedProfiles: []string{"ATTR_1001_SIMPLEAUTH"},
 		AlteredFields:   []string{"*req.Password", "*req.EventName"},
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "TestSSv1ItProcessEvent",
-			Event: map[string]interface{}{
-				utils.CGRID:       "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
-				utils.Tenant:      "cgrates.org",
-				utils.Category:    "call",
-				utils.ToR:         utils.VOICE,
-				utils.Account:     "1001",
-				utils.Destination: "1002",
-				"Password":        "CGRateS.org",
-				utils.OriginID:    "TestSSv1It2",
-				utils.RequestType: utils.META_PREPAID,
-				utils.SetupTime:   "2018-01-07T17:00:00Z",
-				utils.AnswerTime:  "2018-01-07T17:00:10Z",
-				utils.Usage:       300000000000.0,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			Opts: map[string]interface{}{utils.Subsys: utils.MetaSessionS},
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TestSSv1ItProcessEvent",
+				Event: map[string]interface{}{
+					utils.CGRID:       "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
+					utils.Tenant:      "cgrates.org",
+					utils.Category:    "call",
+					utils.ToR:         utils.VOICE,
+					utils.Account:     "1001",
+					utils.Destination: "1002",
+					"Password":        "CGRateS.org",
+					utils.OriginID:    "TestSSv1It2",
+					utils.RequestType: utils.META_PREPAID,
+					utils.SetupTime:   "2018-01-07T17:00:00Z",
+					utils.AnswerTime:  "2018-01-07T17:00:10Z",
+					utils.Usage:       300000000000.0,
+				},
 			},
 		},
 	}
@@ -709,7 +733,7 @@ func testDspSessionReplicate(t *testing.T) {
 	allEngine.resetStorDb(t)
 	var reply string
 	// reload cache  in order to corectly cahce the indexes
-	if err := allEngine.RPC.Call(utils.CacheSv1Clear, &utils.AttrCacheIDsWithArgDispatcher{
+	if err := allEngine.RPC.Call(utils.CacheSv1Clear, &utils.AttrCacheIDsWithOpts{
 		CacheIDs: nil,
 	}, &reply); err != nil {
 		t.Error(err)
@@ -721,9 +745,9 @@ func testDspSessionReplicate(t *testing.T) {
 	testDspSessionAuthorize(t)
 	testDspSessionInit(t)
 
-	if err := dispEngine.RPC.Call(utils.SessionSv1ReplicateSessions, &ArgsReplicateSessionsWithApiKey{
-		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("ses12345"),
+	if err := dispEngine.RPC.Call(utils.SessionSv1ReplicateSessions, &ArgsReplicateSessionsWithOpts{
+		Opts: map[string]interface{}{
+			utils.OptsAPIKey: "ses12345",
 		},
 		TenantArg: utils.TenantArg{
 			Tenant: "cgrates.org",
@@ -754,8 +778,8 @@ func testDspSessionPassive(t *testing.T) {
 	testDspSessionUpdate2(t)
 	var repl int
 	filtr := utils.SessionFilter{
-		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("ses12345"),
+		Opts: map[string]interface{}{
+			utils.OptsAPIKey: "ses12345",
 		},
 		Tenant:  "cgrates.org",
 		Filters: []string{},
@@ -823,8 +847,8 @@ func testDspSessionPassive(t *testing.T) {
 				TotalUsage: 10 * time.Minute,
 			},
 		},
-		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("ses12345"),
+		OptsStart: map[string]interface{}{
+			utils.OptsAPIKey: "ses12345",
 		},
 	}, &reply); err != nil {
 		t.Fatal(err)
@@ -856,8 +880,8 @@ func testDspSessionForceDisconect(t *testing.T) {
 	testDspSessionInit(t)
 	var repl int
 	filtr := utils.SessionFilter{
-		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("ses12345"),
+		Opts: map[string]interface{}{
+			utils.OptsAPIKey: "ses12345",
 		},
 		Tenant:  "cgrates.org",
 		Filters: []string{},
@@ -908,24 +932,26 @@ func testDspSessionForceDisconect(t *testing.T) {
 func testDspSessionProcessEvent3(t *testing.T) {
 	args := &sessions.V1ProcessEventArgs{
 		Flags: []string{"*rals:*terminate", "*resources:*release"},
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testSSv1ItProcessEventTerminateSession",
-			Event: map[string]interface{}{
-				utils.Tenant:      "cgrates.org",
-				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "TestSSv1It2",
-				utils.RequestType: utils.META_PREPAID,
-				utils.Account:     "1001",
-				utils.Subject:     "ANY2CNT",
-				utils.Destination: "1002",
-				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-				utils.Usage:       10 * time.Minute,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testSSv1ItProcessEventTerminateSession",
+				Event: map[string]interface{}{
+					utils.Tenant:      "cgrates.org",
+					utils.ToR:         utils.VOICE,
+					utils.OriginID:    "TestSSv1It2",
+					utils.RequestType: utils.META_PREPAID,
+					utils.Account:     "1001",
+					utils.Subject:     "ANY2CNT",
+					utils.Destination: "1002",
+					utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+					utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+					utils.Usage:       10 * time.Minute,
+				},
 			},
-		},
-		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("pse12345"),
+			Opts: map[string]interface{}{
+				utils.OptsAPIKey: "pse12345",
+			},
 		},
 	}
 	var rply sessions.V1ProcessEventReply
@@ -937,8 +963,8 @@ func testDspSessionProcessEvent3(t *testing.T) {
 	var repl int
 	if err := dispEngine.RPC.Call(utils.SessionSv1GetActiveSessionsCount,
 		utils.SessionFilter{
-			ArgDispatcher: &utils.ArgDispatcher{
-				APIKey: utils.StringPointer("ses12345"),
+			Opts: map[string]interface{}{
+				utils.OptsAPIKey: "ses12345",
 			},
 			Tenant:  "cgrates.org",
 			Filters: []string{},
@@ -952,23 +978,25 @@ func testDspSessionProcessEvent3(t *testing.T) {
 func testDspSessionGetCost(t *testing.T) {
 
 	args := &sessions.V1ProcessEventArgs{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testSSv1ItGetCost",
-			Event: map[string]interface{}{
-				utils.Tenant:      "cgrates.org",
-				utils.ToR:         utils.MONETARY,
-				utils.OriginID:    "testSSv1ItProcessEventWithGetCost",
-				utils.RequestType: utils.META_PREPAID,
-				utils.Subject:     "ANY2CNT",
-				utils.Destination: "1002",
-				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-				utils.Usage:       10 * time.Minute,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testSSv1ItGetCost",
+				Event: map[string]interface{}{
+					utils.Tenant:      "cgrates.org",
+					utils.ToR:         utils.MONETARY,
+					utils.OriginID:    "testSSv1ItProcessEventWithGetCost",
+					utils.RequestType: utils.META_PREPAID,
+					utils.Subject:     "ANY2CNT",
+					utils.Destination: "1002",
+					utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+					utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+					utils.Usage:       10 * time.Minute,
+				},
 			},
-		},
-		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("ses12345"),
+			Opts: map[string]interface{}{
+				utils.OptsAPIKey: "ses12345",
+			},
 		},
 	}
 
@@ -997,8 +1025,8 @@ func testDspSessionSTIRAuthenticate(t *testing.T) {
 			DestinationTn:      "1002",
 			Identity:           "eyJhbGciOiJFUzI1NiIsInBwdCI6InNoYWtlbiIsInR5cCI6InBhc3Nwb3J0IiwieDV1IjoiL3Vzci9zaGFyZS9jZ3JhdGVzL3N0aXIvc3Rpcl9wdWJrZXkucGVtIn0.eyJhdHRlc3QiOiJBIiwiZGVzdCI6eyJ0biI6WyIxMDAyIl19LCJpYXQiOjE1ODcwMzg4MDIsIm9yaWciOnsidG4iOiIxMDAxIn0sIm9yaWdpZCI6IjEyMzQ1NiJ9.cMEMlFnfyTu8uxfeU4RoZTamA7ifFT9Ibwrvi1_LKwL2xAU6fZ_CSIxKbtyOpNhM_sV03x7CfA_v0T4sHkifzg;info=</usr/share/cgrates/stir/stir_pubkey.pem>;ppt=shaken",
 			OriginatorTn:       "1001",
-			ArgDispatcher: &utils.ArgDispatcher{
-				APIKey: utils.StringPointer("ses12345"),
+			Opts: map[string]interface{}{
+				utils.OptsAPIKey: "ses12345",
 			},
 		}, &rply); err != nil {
 		t.Fatal(err)
@@ -1019,8 +1047,8 @@ func testDspSessionSTIRIdentity(t *testing.T) {
 		PublicKeyPath:  "/usr/share/cgrates/stir/stir_pubkey.pem",
 		PrivateKeyPath: "/usr/share/cgrates/stir/stir_privatekey.pem",
 		OverwriteIAT:   true,
-		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("ses12345"),
+		Opts: map[string]interface{}{
+			utils.OptsAPIKey: "ses12345",
 		},
 	}
 	var rply string

@@ -144,22 +144,24 @@ func testSessionSRplInitiate(t *testing.T) {
 	usage := time.Duration(1*time.Minute + 30*time.Second)
 	argsInit := &V1InitSessionArgs{
 		InitSession: true,
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "TestSessionSRplInitiate",
-			Event: map[string]interface{}{
-				utils.EVENT_NAME:  "TEST_EVENT",
-				utils.Tenant:      "cgrates.org",
-				utils.OriginID:    "123451",
-				utils.ToR:         utils.VOICE,
-				utils.RequestType: utils.META_PREPAID,
-				utils.Account:     "1001",
-				utils.Subject:     "1001",
-				utils.Destination: "1004",
-				utils.Category:    "call",
-				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-				utils.Usage:       usage,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TestSessionSRplInitiate",
+				Event: map[string]interface{}{
+					utils.EVENT_NAME:  "TEST_EVENT",
+					utils.Tenant:      "cgrates.org",
+					utils.OriginID:    "123451",
+					utils.ToR:         utils.VOICE,
+					utils.RequestType: utils.META_PREPAID,
+					utils.Account:     "1001",
+					utils.Subject:     "1001",
+					utils.Destination: "1004",
+					utils.Category:    "call",
+					utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+					utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+					utils.Usage:       usage,
+				},
 			},
 		},
 	}
@@ -210,22 +212,24 @@ func testSessionSRplUpdate(t *testing.T) {
 	usage := time.Duration(1 * time.Minute)
 	argsUpdate := &V1UpdateSessionArgs{
 		UpdateSession: true,
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "TestSessionSRplUpdate",
-			Event: map[string]interface{}{
-				utils.EVENT_NAME:  "TEST_EVENT",
-				utils.Tenant:      "cgrates.org",
-				utils.OriginID:    "123451",
-				utils.ToR:         utils.VOICE,
-				utils.RequestType: utils.META_PREPAID,
-				utils.Account:     "1001",
-				utils.Subject:     "1001",
-				utils.Destination: "1004",
-				utils.Category:    "call",
-				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-				utils.Usage:       usage,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TestSessionSRplUpdate",
+				Event: map[string]interface{}{
+					utils.EVENT_NAME:  "TEST_EVENT",
+					utils.Tenant:      "cgrates.org",
+					utils.OriginID:    "123451",
+					utils.ToR:         utils.VOICE,
+					utils.RequestType: utils.META_PREPAID,
+					utils.Account:     "1001",
+					utils.Subject:     "1001",
+					utils.Destination: "1004",
+					utils.Category:    "call",
+					utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+					utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+					utils.Usage:       usage,
+				},
 			},
 		},
 	}
@@ -288,22 +292,24 @@ func testSessionSRplUpdate(t *testing.T) {
 func testSessionSRplTerminate(t *testing.T) {
 	args := &V1TerminateSessionArgs{
 		TerminateSession: true,
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "TestSessionSRplTerminate",
-			Event: map[string]interface{}{
-				utils.EVENT_NAME:  "TEST_EVENT",
-				utils.Tenant:      "cgrates.org",
-				utils.OriginID:    "123451",
-				utils.ToR:         utils.VOICE,
-				utils.RequestType: utils.META_PREPAID,
-				utils.Account:     "1001",
-				utils.Subject:     "1001",
-				utils.Destination: "1004",
-				utils.Category:    "call",
-				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-				utils.Usage:       time.Duration(2*time.Minute + 30*time.Second),
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TestSessionSRplTerminate",
+				Event: map[string]interface{}{
+					utils.EVENT_NAME:  "TEST_EVENT",
+					utils.Tenant:      "cgrates.org",
+					utils.OriginID:    "123451",
+					utils.ToR:         utils.VOICE,
+					utils.RequestType: utils.META_PREPAID,
+					utils.Account:     "1001",
+					utils.Subject:     "1001",
+					utils.Destination: "1004",
+					utils.Category:    "call",
+					utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+					utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+					utils.Usage:       time.Duration(2*time.Minute + 30*time.Second),
+				},
 			},
 		},
 	}
@@ -351,44 +357,48 @@ func testSessionSRplManualReplicate(t *testing.T) {
 	// create two sessions
 	argsInit1 := &V1InitSessionArgs{
 		InitSession: true,
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "TestSSv1ItAuth",
-			Event: map[string]interface{}{
-				utils.EVENT_NAME:  "TEST_EVENT",
-				utils.Tenant:      "cgrates.org",
-				utils.OriginID:    "123451",
-				utils.ToR:         utils.VOICE,
-				utils.RequestType: utils.META_PREPAID,
-				utils.Account:     "1001",
-				utils.Subject:     "1001",
-				utils.Destination: "1004",
-				utils.Category:    "call",
-				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-				utils.Usage:       1*time.Minute + 30*time.Second,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TestSSv1ItAuth",
+				Event: map[string]interface{}{
+					utils.EVENT_NAME:  "TEST_EVENT",
+					utils.Tenant:      "cgrates.org",
+					utils.OriginID:    "123451",
+					utils.ToR:         utils.VOICE,
+					utils.RequestType: utils.META_PREPAID,
+					utils.Account:     "1001",
+					utils.Subject:     "1001",
+					utils.Destination: "1004",
+					utils.Category:    "call",
+					utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+					utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+					utils.Usage:       1*time.Minute + 30*time.Second,
+				},
 			},
 		},
 	}
 
 	argsInit2 := &V1InitSessionArgs{
 		InitSession: true,
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "TestSSv1ItAuth2",
-			Event: map[string]interface{}{
-				utils.EVENT_NAME:  "TEST_EVENT",
-				utils.Tenant:      "cgrates.org",
-				utils.OriginID:    "123481",
-				utils.ToR:         utils.VOICE,
-				utils.RequestType: utils.META_PREPAID,
-				utils.Account:     "1001",
-				utils.Subject:     "1001",
-				utils.Destination: "1005",
-				utils.Category:    "call",
-				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-				utils.Usage:       1*time.Minute + 30*time.Second,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TestSSv1ItAuth2",
+				Event: map[string]interface{}{
+					utils.EVENT_NAME:  "TEST_EVENT",
+					utils.Tenant:      "cgrates.org",
+					utils.OriginID:    "123481",
+					utils.ToR:         utils.VOICE,
+					utils.RequestType: utils.META_PREPAID,
+					utils.Account:     "1001",
+					utils.Subject:     "1001",
+					utils.Destination: "1005",
+					utils.Category:    "call",
+					utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+					utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+					utils.Usage:       1*time.Minute + 30*time.Second,
+				},
 			},
 		},
 	}
@@ -451,10 +461,10 @@ func testSessionSRplManualReplicate(t *testing.T) {
 		t.Errorf("Failed to kill process, error: %v", err.Error())
 	}
 	var status map[string]interface{}
-	if err := smgRplcMstrRPC.Call(utils.CoreSv1Status, utils.TenantWithArgDispatcher{}, &status); err == nil { // master should not longer be reachable
+	if err := smgRplcMstrRPC.Call(utils.CoreSv1Status, utils.TenantWithOpts{}, &status); err == nil { // master should not longer be reachable
 		t.Error(err, status)
 	}
-	if err := smgRplcSlvRPC.Call(utils.CoreSv1Status, utils.TenantWithArgDispatcher{}, &status); err != nil { // slave should be still operational
+	if err := smgRplcSlvRPC.Call(utils.CoreSv1Status, utils.TenantWithOpts{}, &status); err != nil { // slave should be still operational
 		t.Error(err)
 	}
 	// start master

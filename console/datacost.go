@@ -53,7 +53,7 @@ func (self *CmdGetDataCost) RpcMethod() string {
 
 func (self *CmdGetDataCost) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &v1.AttrGetDataCost{ArgDispatcher: new(utils.ArgDispatcher)}
+		self.rpcParams = &v1.AttrGetDataCost{Opts: make(map[string]interface{})}
 	}
 	return self.rpcParams
 }

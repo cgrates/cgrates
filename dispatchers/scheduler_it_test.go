@@ -65,12 +65,12 @@ func testDspSchedPing(t *testing.T) {
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	if err := dispEngine.RPC.Call(utils.SchedulerSv1Ping, &utils.CGREventWithArgDispatcher{
+	if err := dispEngine.RPC.Call(utils.SchedulerSv1Ping, &utils.CGREventWithOpts{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 		},
-		ArgDispatcher: &utils.ArgDispatcher{
-			APIKey: utils.StringPointer("sched12345"),
+		Opts: map[string]interface{}{
+			utils.OptsAPIKey: "sched12345",
 		},
 	}, &reply); err != nil {
 		t.Error(err)

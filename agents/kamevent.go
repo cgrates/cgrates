@@ -292,12 +292,12 @@ func (kev KamEvent) V1ProcessMessageArgs() (args *sessions.V1ProcessMessageArgs)
 }
 
 // V1ProcessCDRArgs returns the arguments used in SessionSv1.ProcessCDR
-func (kev KamEvent) V1ProcessCDRArgs() (args *utils.CGREventWithArgDispatcher) {
+func (kev KamEvent) V1ProcessCDRArgs() (args *utils.CGREventWithOpts) {
 	cgrEv, err := kev.AsCGREvent(config.CgrConfig().GeneralCfg().DefaultTimezone)
 	if err != nil {
 		return
 	}
-	args = &utils.CGREventWithArgDispatcher{ // defaults
+	args = &utils.CGREventWithOpts{ // defaults
 		CGREvent: cgrEv,
 	}
 	subsystems, has := kev[utils.CGRFlags]
@@ -348,7 +348,7 @@ func (kev KamEvent) AsKamProcessMessageReply(procEvArgs *sessions.V1ProcessMessa
 }
 
 // AsKamProcessCDRReply builds up a Kamailio ProcessEvent based on arguments and reply from SessionS
-func (kev KamEvent) AsKamProcessCDRReply(cgrEvWithArgDisp *utils.CGREventWithArgDispatcher,
+func (kev KamEvent) AsKamProcessCDRReply(cgrEvWithArgDisp *utils.CGREventWithOpts,
 	rply *string, rplyErr error) (kar *KamReply, err error) {
 	evName := CGR_PROCESS_CDR
 	if kamRouReply, has := kev[KamReplyRoute]; has {

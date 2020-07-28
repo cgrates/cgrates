@@ -162,8 +162,7 @@ func (rS *RateS) rateProfileCostForEvent(rtPfl *engine.RateProfile, args *ArgsCo
 type ArgsCostForEvent struct {
 	RateProfileIDs []string
 	Opts           map[string]interface{}
-	*utils.CGREvent
-	*utils.ArgDispatcher
+	*utils.CGREventWithOpts
 }
 
 // StartTime returns the event time used to check active rate profiles

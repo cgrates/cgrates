@@ -237,7 +237,7 @@ func (ka *KamailioAgent) onCallEnd(evData []byte, connIdx int) {
 			return
 		}
 		if err := ka.connMgr.Call(ka.cfg.SessionSConns, ka, utils.SessionSv1ProcessCDR,
-			&utils.CGREventWithArgDispatcher{CGREvent: cgrEv, ArgDispatcher: tsArgs.ArgDispatcher}, &reply); err != nil {
+			&utils.CGREventWithOpts{CGREvent: cgrEv, ArgDispatcher: tsArgs.ArgDispatcher}, &reply); err != nil {
 			utils.Logger.Err(fmt.Sprintf("%s> failed processing CGREvent: %s, error: %s",
 				utils.KamailioAgent, utils.ToJSON(cgrEv), err.Error()))
 		}

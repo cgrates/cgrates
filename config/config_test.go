@@ -1877,7 +1877,7 @@ func TestCgrCfgV1GetConfigSection(t *testing.T) {
 	var rcv map[string]interface{}
 	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(jsnCfg); err != nil {
 		t.Error(err)
-	} else if err := cgrCfg.V1GetConfigSection(&StringWithArgDispatcher{Section: LISTEN_JSN}, &rcv); err != nil {
+	} else if err := cgrCfg.V1GetConfigSection(&StringWithOpts{Section: LISTEN_JSN}, &rcv); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rcv) {
 		t.Errorf("Expected: %+v, received: %+v", expected, rcv)

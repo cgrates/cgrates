@@ -52,7 +52,7 @@ func (self *CmdResourceAuthorize) RpcMethod() string {
 
 func (self *CmdResourceAuthorize) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.ArgRSv1ResourceUsage{ArgDispatcher: new(utils.ArgDispatcher)}
+		self.rpcParams = &utils.ArgRSv1ResourceUsage{CGREventWithOpts: &utils.CGREventWithOpts{Opts: make(map[string]interface{})}}
 	}
 	return self.rpcParams
 }

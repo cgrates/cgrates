@@ -128,7 +128,7 @@ func testReloadVerifyDisabledReaders(t *testing.T) {
 
 func testReloadReloadConfigFromPath(t *testing.T) {
 	var reply string
-	if err := reloadRPC.Call(utils.ConfigSv1ReloadConfigFromPath, &config.ConfigReloadWithArgDispatcher{
+	if err := reloadRPC.Call(utils.ConfigSv1ReloadConfigFromPath, &config.ConfigReloadWithOpts{
 		Path:    path.Join(*dataDir, "conf", "samples", "ers_reload", "first_reload"),
 		Section: config.ERsJson,
 	}, &reply); err != nil {
@@ -140,7 +140,7 @@ func testReloadReloadConfigFromPath(t *testing.T) {
 
 func testReloadVerifyFirstReload(t *testing.T) {
 	var reply map[string]interface{}
-	if err := reloadRPC.Call(utils.ConfigSv1GetJSONSection, &config.StringWithArgDispatcher{
+	if err := reloadRPC.Call(utils.ConfigSv1GetJSONSection, &config.StringWithOpts{
 		Section: config.ERsJson,
 	}, &reply); err != nil {
 		t.Error(err)

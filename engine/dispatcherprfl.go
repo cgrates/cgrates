@@ -113,10 +113,10 @@ type DispatcherProfile struct {
 	Hosts              DispatcherHostProfiles // dispatch to these connections
 }
 
-// DispatcherProfileWithArgDispatcher is used in replicatorV1 for dispatcher
-type DispatcherProfileWithArgDispatcher struct {
+// DispatcherProfileWithOpts is used in replicatorV1 for dispatcher
+type DispatcherProfileWithOpts struct {
 	*DispatcherProfile
-	*utils.ArgDispatcher
+	Opts map[string]interface{}
 }
 
 func (dP *DispatcherProfile) TenantID() string {
@@ -139,10 +139,10 @@ type DispatcherHost struct {
 	rpcConn rpcclient.ClientConnector
 }
 
-// DispatcherHostWithArgDispatcher is used in replicatorV1 for dispatcher
-type DispatcherHostWithArgDispatcher struct {
+// DispatcherHostWithOpts is used in replicatorV1 for dispatcher
+type DispatcherHostWithOpts struct {
 	*DispatcherHost
-	*utils.ArgDispatcher
+	Opts map[string]interface{}
 }
 
 func (dH *DispatcherHost) TenantID() string {

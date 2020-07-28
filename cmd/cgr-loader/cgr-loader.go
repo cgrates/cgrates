@@ -348,9 +348,9 @@ func main() {
 		log.Fatal("Could not write to database: ", err)
 	}
 	// reload cache
-	if err = tpReader.ReloadCache(ldrCfg.GeneralCfg().DefaultCaching, *verbose, &utils.ArgDispatcher{
-		APIKey:  apiKey,
-		RouteID: routeID,
+	if err = tpReader.ReloadCache(ldrCfg.GeneralCfg().DefaultCaching, *verbose, map[string]interface{}{
+		utils.OptsAPIKey:  *apiKey,
+		utils.OptsRouteID: *routeID,
 	}); err != nil {
 		log.Fatal("Could not reload cache: ", err)
 	}

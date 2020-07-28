@@ -322,7 +322,7 @@ func testV1FltrPupulateThreshold(t *testing.T) {
 
 func testV1FltrGetThresholdForEvent(t *testing.T) {
 	// check the event
-	tEv := &engine.ArgsProcessEvent{
+	tEv := &engine.ThresholdsArgsProcessEvent{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
@@ -385,7 +385,7 @@ func testV1FltrGetThresholdForEvent2(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 
-	tEv := &engine.ArgsProcessEvent{
+	tEv := &engine.ThresholdsArgsProcessEvent{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
@@ -493,7 +493,7 @@ func testV1FltrPopulateResources(t *testing.T) {
 	}
 
 	// check the event
-	tEv := &engine.ArgsProcessEvent{
+	tEv := &engine.ThresholdsArgsProcessEvent{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
@@ -610,7 +610,7 @@ func testV1FltrAccounts(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", tPrfl.ThresholdProfile, rcvTh)
 	}
 
-	tEv := &engine.ArgsProcessEvent{
+	tEv := &engine.ThresholdsArgsProcessEvent{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
@@ -698,7 +698,7 @@ func testV1FltrAccountsExistsDynamicaly(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", tPrfl.ThresholdProfile, rcvTh)
 	}
 
-	tEv := &engine.ArgsProcessEvent{
+	tEv := &engine.ThresholdsArgsProcessEvent{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
@@ -713,7 +713,7 @@ func testV1FltrAccountsExistsDynamicaly(t *testing.T) {
 		t.Error("Unexpected reply returned", ids)
 	}
 
-	tEv = &engine.ArgsProcessEvent{
+	tEv = &engine.ThresholdsArgsProcessEvent{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event2",

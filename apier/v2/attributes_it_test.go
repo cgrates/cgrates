@@ -163,7 +163,7 @@ func testAttributeSSetAlsPrf(t *testing.T) {
 	alsPrf.Compile()
 	var reply *engine.AttributeProfile
 	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfile,
-		utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ExternalAttribute"}}, &reply); err != nil {
+		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ExternalAttribute"}}, &reply); err != nil {
 		t.Fatal(err)
 	}
 	reply.Compile()
@@ -230,7 +230,7 @@ func testAttributeSUpdateAlsPrf(t *testing.T) {
 	alsPrf.Compile()
 	var reply *engine.AttributeProfile
 	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfile,
-		utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ExternalAttribute"}}, &reply); err != nil {
+		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ExternalAttribute"}}, &reply); err != nil {
 		t.Fatal(err)
 	}
 	sort.Strings(reply.Contexts)
