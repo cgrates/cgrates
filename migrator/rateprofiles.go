@@ -85,7 +85,7 @@ func (m *Migrator) migrateRateProfiles() (err error) {
 		if err == utils.ErrNoMoreData || !migrated {
 			break
 		}
-		m.stats[utils.RatingPlan]++
+		m.stats[utils.RateProfiles]++
 	}
 	// All done, update version wtih current one
 	if err = m.setVersions(utils.RateProfiles); err != nil {
