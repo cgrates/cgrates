@@ -54,6 +54,8 @@ var (
 		testV1FltrPopulateResources,
 		testV1FltrAccounts,
 		testV1FltrAccountsExistsDynamicaly,
+		testV1FltrInitDataDb,
+		testV1FltrChargerSuffix,
 		testV1FltrStopEngine,
 	}
 )
@@ -722,6 +724,124 @@ func testV1FltrAccountsExistsDynamicaly(t *testing.T) {
 	ids = nil
 	if err := fltrRpc.Call(utils.ThresholdSv1ProcessEvent, tEv, &ids); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
+	}
+}
+
+func testV1FltrChargerSuffix(t *testing.T) {
+	var reply string
+	if err := fltrRpc.Call(utils.CacheSv1Clear, &utils.AttrCacheIDsWithArgDispatcher{
+		CacheIDs: nil,
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Reply: ", reply)
+	}
+	chargerProfile := &v1.ChargerWithCache{
+		ChargerProfile: &engine.ChargerProfile{
+			Tenant:       "cgrates.org",
+			ID:           "IntraCharger",
+			FilterIDs:    []string{"*suffix:~*req.Subject:intra"},
+			RunID:        "Intra",
+			AttributeIDs: []string{"*constant:*req.Subject:intraState"},
+			Weight:       20,
+		},
+	}
+	var result string
+	if err := fltrRpc.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+
+	chargerProfile2 := &v1.ChargerWithCache{
+		ChargerProfile: &engine.ChargerProfile{
+			Tenant:       "cgrates.org",
+			ID:           "InterCharger",
+			FilterIDs:    []string{"*suffix:~*req.Subject:inter"},
+			RunID:        "Inter",
+			AttributeIDs: []string{"*constant:*req.Subject:interState"},
+			Weight:       20,
+		},
+	}
+	if err := fltrRpc.Call(utils.APIerSv1SetChargerProfile, chargerProfile2, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+
+	processedEv := []*engine.ChrgSProcessEventReply{
+		{
+			ChargerSProfile:    "IntraCharger",
+			AttributeSProfiles: []string{"*constant:*req.Subject:intraState"},
+			AlteredFields:      []string{utils.MetaReqRunID, "*req.Subject"},
+			Opts: map[string]interface{}{
+				utils.Subsys: utils.MetaChargers,
+			},
+			CGREvent: &utils.CGREvent{ // matching Charger1
+				Tenant: "cgrates.org",
+				ID:     "event1",
+				Event: map[string]interface{}{
+					utils.Account:     "1010",
+					utils.Subject:     "intraState",
+					utils.RunID:       "Intra",
+					utils.Destination: "999",
+				},
+			},
+		},
+	}
+	cgrEv := &utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				utils.Account:     "1010",
+				utils.Subject:     "Something_intra",
+				utils.Destination: "999",
+			},
+		},
+	}
+	var result2 []*engine.ChrgSProcessEventReply
+	if err := fltrRpc.Call(utils.ChargerSv1ProcessEvent, cgrEv, &result2); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(result2, processedEv) {
+		t.Errorf("Expecting : %s, \n received: %s", utils.ToJSON(processedEv), utils.ToJSON(result2))
+	}
+
+	processedEv = []*engine.ChrgSProcessEventReply{
+		{
+			ChargerSProfile:    "InterCharger",
+			AttributeSProfiles: []string{"*constant:*req.Subject:interState"},
+			AlteredFields:      []string{utils.MetaReqRunID, "*req.Subject"},
+			Opts: map[string]interface{}{
+				utils.Subsys: utils.MetaChargers,
+			},
+			CGREvent: &utils.CGREvent{ // matching Charger1
+				Tenant: "cgrates.org",
+				ID:     "event1",
+				Event: map[string]interface{}{
+					utils.Account:     "1010",
+					utils.Subject:     "interState",
+					utils.RunID:       "Inter",
+					utils.Destination: "999",
+				},
+			},
+		},
+	}
+	cgrEv = &utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				utils.Account:     "1010",
+				utils.Subject:     "Something_inter",
+				utils.Destination: "999",
+			},
+		},
+	}
+	if err := fltrRpc.Call(utils.ChargerSv1ProcessEvent, cgrEv, &result2); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(result2, processedEv) {
+		t.Errorf("Expecting : %s, \n received: %s", utils.ToJSON(processedEv), utils.ToJSON(result2))
 	}
 }
 
