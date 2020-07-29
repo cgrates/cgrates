@@ -212,8 +212,11 @@ func cdrLogAction(acc *Account, a *Action, acs Actions, extraData interface{}) (
 		if err := connMgr.Call(config.CgrConfig().SchedulerCfg().CDRsConns, nil,
 			utils.CDRsV1ProcessEvent,
 			&ArgV1ProcessEvent{
-				Flags:    []string{utils.ConcatenatedKey(utils.MetaChargers, "false")}, // do not try to get the chargers for cdrlog
-				CGREvent: *cdr.AsCGREvent()}, &rply); err != nil {
+				Flags: []string{utils.ConcatenatedKey(utils.MetaChargers, "false")}, // do not try to get the chargers for cdrlog
+				CGREventWithOpts: utils.CGREventWithOpts{
+					CGREvent: cdr.AsCGREvent(),
+				},
+			}, &rply); err != nil {
 			return err
 		}
 	}

@@ -185,27 +185,29 @@ func testA1itDataSession1(t *testing.T) {
 	usage := time.Duration(10240)
 	initArgs := &sessions.V1InitSessionArgs{
 		InitSession: true,
-		Opts: map[string]interface{}{
-			utils.OptsSessionTTL:         "28800s",
-			utils.OptsSessionTTLLastUsed: "0s",
-			utils.OptsSessionTTLUsage:    "0s",
-		},
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "TestA1itDataSession1",
-			Event: map[string]interface{}{
-				utils.EVENT_NAME:  "INITIATE_SESSION",
-				utils.ToR:         utils.DATA,
-				utils.OriginID:    "504966119",
-				utils.Account:     "rpdata1",
-				utils.Subject:     "rpdata1",
-				utils.Destination: "data",
-				utils.Category:    "data1",
-				utils.Tenant:      "cgrates.org",
-				utils.RequestType: utils.META_PREPAID,
-				utils.SetupTime:   "2017-03-03 11:39:32 +0100 CET",
-				utils.AnswerTime:  "2017-03-03 11:39:32 +0100 CET",
-				utils.Usage:       "10240",
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			Opts: map[string]interface{}{
+				utils.OptsSessionTTL:         "28800s",
+				utils.OptsSessionTTLLastUsed: "0s",
+				utils.OptsSessionTTLUsage:    "0s",
+			},
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TestA1itDataSession1",
+				Event: map[string]interface{}{
+					utils.EVENT_NAME:  "INITIATE_SESSION",
+					utils.ToR:         utils.DATA,
+					utils.OriginID:    "504966119",
+					utils.Account:     "rpdata1",
+					utils.Subject:     "rpdata1",
+					utils.Destination: "data",
+					utils.Category:    "data1",
+					utils.Tenant:      "cgrates.org",
+					utils.RequestType: utils.META_PREPAID,
+					utils.SetupTime:   "2017-03-03 11:39:32 +0100 CET",
+					utils.AnswerTime:  "2017-03-03 11:39:32 +0100 CET",
+					utils.Usage:       "10240",
+				},
 			},
 		},
 	}
@@ -221,29 +223,31 @@ func testA1itDataSession1(t *testing.T) {
 
 	updateArgs := &sessions.V1UpdateSessionArgs{
 		UpdateSession: true,
-		Opts: map[string]interface{}{
-			utils.OptsSessionTTL:         "28800s",
-			utils.OptsSessionTTLLastUsed: "2097152s",
-			utils.OptsSessionTTLUsage:    "0s",
-		},
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "TestSessionsVoiceLastUsed",
-			Event: map[string]interface{}{
-				utils.EVENT_NAME:      "UPDATE_SESSION",
-				utils.Account:         "rpdata1",
-				utils.Category:        "data1",
-				utils.Destination:     "data",
-				utils.InitialOriginID: "504966119",
-				utils.LastUsed:        "0s",
-				utils.OriginID:        "504966119-1",
-				utils.RequestType:     utils.META_PREPAID,
-				utils.Subject:         "rpdata1",
-				utils.Tenant:          "cgrates.org",
-				utils.ToR:             utils.DATA,
-				utils.SetupTime:       "2017-03-03 11:39:32 +0100 CET",
-				utils.AnswerTime:      "2017-03-03 11:39:32 +0100 CET",
-				utils.Usage:           "2097152",
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			Opts: map[string]interface{}{
+				utils.OptsSessionTTL:         "28800s",
+				utils.OptsSessionTTLLastUsed: "2097152s",
+				utils.OptsSessionTTLUsage:    "0s",
+			},
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TestSessionsVoiceLastUsed",
+				Event: map[string]interface{}{
+					utils.EVENT_NAME:      "UPDATE_SESSION",
+					utils.Account:         "rpdata1",
+					utils.Category:        "data1",
+					utils.Destination:     "data",
+					utils.InitialOriginID: "504966119",
+					utils.LastUsed:        "0s",
+					utils.OriginID:        "504966119-1",
+					utils.RequestType:     utils.META_PREPAID,
+					utils.Subject:         "rpdata1",
+					utils.Tenant:          "cgrates.org",
+					utils.ToR:             utils.DATA,
+					utils.SetupTime:       "2017-03-03 11:39:32 +0100 CET",
+					utils.AnswerTime:      "2017-03-03 11:39:32 +0100 CET",
+					utils.Usage:           "2097152",
+				},
 			},
 		},
 	}
@@ -260,23 +264,25 @@ func testA1itDataSession1(t *testing.T) {
 	usage = time.Duration(1 * time.Minute)
 	termArgs := &sessions.V1TerminateSessionArgs{
 		TerminateSession: true,
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "TestSessionsVoiceLastUsed",
-			Event: map[string]interface{}{
-				utils.EVENT_NAME:     "TERMINATE_SESSION",
-				utils.Account:        "rpdata1",
-				utils.Category:       "data1",
-				utils.Destination:    "data",
-				utils.LastUsed:       "2202800",
-				utils.OriginID:       "504966119-1",
-				utils.OriginIDPrefix: "504966119-1",
-				utils.RequestType:    utils.META_PREPAID,
-				utils.SetupTime:      "2017-03-03 11:39:32 +0100 CET",
-				utils.AnswerTime:     "2017-03-03 11:39:32 +0100 CET",
-				utils.Subject:        "rpdata1",
-				utils.Tenant:         "cgrates.org",
-				utils.ToR:            utils.DATA,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TestSessionsVoiceLastUsed",
+				Event: map[string]interface{}{
+					utils.EVENT_NAME:     "TERMINATE_SESSION",
+					utils.Account:        "rpdata1",
+					utils.Category:       "data1",
+					utils.Destination:    "data",
+					utils.LastUsed:       "2202800",
+					utils.OriginID:       "504966119-1",
+					utils.OriginIDPrefix: "504966119-1",
+					utils.RequestType:    utils.META_PREPAID,
+					utils.SetupTime:      "2017-03-03 11:39:32 +0100 CET",
+					utils.AnswerTime:     "2017-03-03 11:39:32 +0100 CET",
+					utils.Subject:        "rpdata1",
+					utils.Tenant:         "cgrates.org",
+					utils.ToR:            utils.DATA,
+				},
 			},
 		},
 	}

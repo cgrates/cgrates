@@ -307,14 +307,18 @@ func testCallCheckResourceBeforeAllocation(t *testing.T) {
 	var rs *engine.Resources
 	args := &utils.ArgRSv1ResourceUsage{
 		UsageID: "OriginID",
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "ResourceEvent",
-			Event: map[string]interface{}{
-				utils.Account:     "1001",
-				utils.Subject:     "1001",
-				utils.Destination: "1002"},
-		}}
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "ResourceEvent",
+				Event: map[string]interface{}{
+					utils.Account:     "1001",
+					utils.Subject:     "1001",
+					utils.Destination: "1002",
+				},
+			},
+		},
+	}
 	if err := tutorialCallsRpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
 		t.Fatal(err)
 	} else if len(*rs) != 1 {
@@ -456,14 +460,18 @@ func testCallCheckResourceAllocation(t *testing.T) {
 	var rs *engine.Resources
 	args := &utils.ArgRSv1ResourceUsage{
 		UsageID: "OriginID1",
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "ResourceAllocation",
-			Event: map[string]interface{}{
-				utils.Account:     "1001",
-				utils.Subject:     "1001",
-				utils.Destination: "1002"},
-		}}
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "ResourceAllocation",
+				Event: map[string]interface{}{
+					utils.Account:     "1001",
+					utils.Subject:     "1001",
+					utils.Destination: "1002",
+				},
+			},
+		},
+	}
 	if err := tutorialCallsRpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
 		t.Fatal(err)
 	} else if len(*rs) != 1 {
@@ -644,14 +652,18 @@ func testCallCheckResourceRelease(t *testing.T) {
 	var rs *engine.Resources
 	args := &utils.ArgRSv1ResourceUsage{
 		UsageID: "OriginID2",
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "ResourceRelease",
-			Event: map[string]interface{}{
-				utils.Account:     "1001",
-				utils.Subject:     "1001",
-				utils.Destination: "1002"},
-		}}
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "ResourceRelease",
+				Event: map[string]interface{}{
+					utils.Account:     "1001",
+					utils.Subject:     "1001",
+					utils.Destination: "1002",
+				},
+			},
+		},
+	}
 	if err := tutorialCallsRpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
 		t.Fatal(err)
 	} else if len(*rs) != 1 {
@@ -719,14 +731,18 @@ func testCallSyncSessions(t *testing.T) {
 	var rs *engine.Resources
 	args := &utils.ArgRSv1ResourceUsage{
 		UsageID: "OriginID3",
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "AllocateResource",
-			Event: map[string]interface{}{
-				utils.Account:     "1001",
-				utils.Subject:     "1001",
-				utils.Destination: "1002"},
-		}}
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "AllocateResource",
+				Event: map[string]interface{}{
+					utils.Account:     "1001",
+					utils.Subject:     "1001",
+					utils.Destination: "1002",
+				},
+			},
+		},
+	}
 	if err := tutorialCallsRpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
 		t.Fatal(err)
 	} else if len(*rs) != 1 {

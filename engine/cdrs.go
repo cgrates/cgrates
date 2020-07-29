@@ -973,7 +973,6 @@ func (cdrS *CDRServer) V2StoreSessionCost(args *ArgsV2CDRSStoreSMCost, reply *st
 type ArgRateCDRs struct {
 	Flags []string
 	utils.RPCCDRsFilter
-	*utils.ArgDispatcher
 	*utils.TenantArg
 	Opts map[string]interface{}
 }

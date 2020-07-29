@@ -366,32 +366,34 @@ func testActionsitThresholdCDrLog(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", tPrfl.ThresholdProfile, thReply)
 	}
 	ev := &ThresholdsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "cdrev1",
-			Event: map[string]interface{}{
-				utils.EventType:   utils.CDR,
-				"field_extr1":     "val_extr1",
-				"fieldextr2":      "valextr2",
-				utils.CGRID:       utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
-				utils.RunID:       utils.MetaRaw,
-				utils.OrderID:     123,
-				utils.OriginHost:  "192.168.1.1",
-				utils.Source:      utils.UNIT_TEST,
-				utils.OriginID:    "dsafdsaf",
-				utils.ToR:         utils.VOICE,
-				utils.RequestType: utils.META_RATED,
-				utils.Tenant:      "cgrates.org",
-				utils.Category:    "call",
-				utils.Account:     "th_acc",
-				utils.Subject:     "th_acc",
-				utils.Destination: "+4986517174963",
-				utils.SetupTime:   time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
-				utils.PDD:         time.Duration(0) * time.Second,
-				utils.AnswerTime:  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
-				utils.Usage:       time.Duration(10) * time.Second,
-				utils.ROUTE:       "SUPPL1",
-				utils.COST:        -1.0,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "cdrev1",
+				Event: map[string]interface{}{
+					utils.EventType:   utils.CDR,
+					"field_extr1":     "val_extr1",
+					"fieldextr2":      "valextr2",
+					utils.CGRID:       utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
+					utils.RunID:       utils.MetaRaw,
+					utils.OrderID:     123,
+					utils.OriginHost:  "192.168.1.1",
+					utils.Source:      utils.UNIT_TEST,
+					utils.OriginID:    "dsafdsaf",
+					utils.ToR:         utils.VOICE,
+					utils.RequestType: utils.META_RATED,
+					utils.Tenant:      "cgrates.org",
+					utils.Category:    "call",
+					utils.Account:     "th_acc",
+					utils.Subject:     "th_acc",
+					utils.Destination: "+4986517174963",
+					utils.SetupTime:   time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
+					utils.PDD:         time.Duration(0) * time.Second,
+					utils.AnswerTime:  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
+					utils.Usage:       time.Duration(10) * time.Second,
+					utils.ROUTE:       "SUPPL1",
+					utils.COST:        -1.0,
+				},
 			},
 		},
 	}
@@ -589,7 +591,8 @@ func testActionsitThresholdCgrRpcAction(t *testing.T) {
 	}
 	var ids []string
 	eIDs := []string{"TH_CGRRPC"}
-	if err := actsLclRpc.Call(utils.ThresholdSv1ProcessEvent, &ThresholdsArgsProcessEvent{CGREvent: ev}, &ids); err != nil {
+	if err := actsLclRpc.Call(utils.ThresholdSv1ProcessEvent, &ThresholdsArgsProcessEvent{
+		CGREventWithOpts: &utils.CGREventWithOpts{CGREvent: ev}}, &ids); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ids, eIDs) {
 		t.Errorf("Expecting ids: %s, received: %s", eIDs, ids)
@@ -669,7 +672,8 @@ func testActionsitThresholdPostEvent(t *testing.T) {
 	}
 	var ids []string
 	eIDs := []string{"THD_PostEvent"}
-	if err := actsLclRpc.Call(utils.ThresholdSv1ProcessEvent, &ThresholdsArgsProcessEvent{CGREvent: ev}, &ids); err != nil {
+	if err := actsLclRpc.Call(utils.ThresholdSv1ProcessEvent, &ThresholdsArgsProcessEvent{
+		CGREventWithOpts: &utils.CGREventWithOpts{CGREvent: ev}}, &ids); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ids, eIDs) {
 		t.Errorf("Expecting ids: %s, received: %s", eIDs, ids)
@@ -755,12 +759,17 @@ func testActionsitSetSDestinations(t *testing.T) {
 	var reply2 []string
 	expected := []string{"DistinctMetricProfile"}
 	args := StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				utils.Destination: "333",
-				utils.Usage:       time.Duration(6 * time.Second)}}}
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "event1",
+				Event: map[string]interface{}{
+					utils.Destination: "333",
+					utils.Usage:       time.Duration(6 * time.Second),
+				},
+			},
+		},
+	}
 	if err := actsLclRpc.Call(utils.StatSv1ProcessEvent, &args, &reply2); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply2, expected) {
@@ -768,12 +777,17 @@ func testActionsitSetSDestinations(t *testing.T) {
 	}
 
 	args = StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event2",
-			Event: map[string]interface{}{
-				utils.Destination: "777",
-				utils.Usage:       time.Duration(6 * time.Second)}}}
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "event2",
+				Event: map[string]interface{}{
+					utils.Destination: "777",
+					utils.Usage:       time.Duration(6 * time.Second),
+				},
+			},
+		},
+	}
 	if err := actsLclRpc.Call(utils.StatSv1ProcessEvent, &args, &reply2); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply2, expected) {

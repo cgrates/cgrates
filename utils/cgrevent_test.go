@@ -289,7 +289,7 @@ func TestCGREventconsumeRoutePaginator(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	eOut := new(Paginator)
+	var eOut Paginator
 	if !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting:  %+v, received: %+v", eOut, rcv)
 	}
@@ -307,7 +307,7 @@ func TestCGREventconsumeRoutePaginator(t *testing.T) {
 		RoutesOffset: 20,
 	}
 
-	eOut = &Paginator{
+	eOut = Paginator{
 		Limit:  IntPointer(18),
 		Offset: IntPointer(20),
 	}
@@ -329,7 +329,7 @@ func TestCGREventconsumeRoutePaginator(t *testing.T) {
 		RoutesOffset: 20,
 	}
 
-	eOut = &Paginator{
+	eOut = Paginator{
 		Offset: IntPointer(20),
 	}
 	rcv, err = GetRoutePaginatorFromOpts(opts)
@@ -349,7 +349,7 @@ func TestCGREventconsumeRoutePaginator(t *testing.T) {
 	opts = map[string]interface{}{
 		RoutesLimit: "Not an int",
 	}
-	eOut = new(Paginator)
+	eOut = Paginator{}
 	rcv, err = GetRoutePaginatorFromOpts(opts)
 	if err == nil {
 		t.Error("Expected error")
@@ -361,7 +361,7 @@ func TestCGREventconsumeRoutePaginator(t *testing.T) {
 	opts = map[string]interface{}{
 		RoutesOffset: "Not an int",
 	}
-	eOut = new(Paginator)
+	eOut = Paginator{}
 	rcv, err = GetRoutePaginatorFromOpts(opts)
 	if err == nil {
 		t.Error("Expected error")

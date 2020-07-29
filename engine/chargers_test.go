@@ -221,8 +221,8 @@ func TestChargerProcessEvent(t *testing.T) {
 	}
 	rpl[0].CGREvent.Event[utils.RunID] = cPPs[0].RunID
 	rcv, err := chargerSrv.processEvent(&utils.CGREventWithOpts{
-		CGREvent:      chargerEvents[0].CGREvent,
-		ArgDispatcher: chargerEvents[0].ArgDispatcher,
+		CGREvent: chargerEvents[0].CGREvent,
+		Opts:     chargerEvents[0].Opts,
 	})
 	if err != nil {
 		t.Fatalf("Error: %+v", err)

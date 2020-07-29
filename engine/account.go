@@ -543,15 +543,20 @@ func (acc *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun bo
 				if len(config.CgrConfig().RalsCfg().ThresholdSConns) != 0 {
 					acntTnt := utils.NewTenantID(acc.ID)
 					thEv := &ThresholdsArgsProcessEvent{
-						CGREvent: &utils.CGREvent{
-							Tenant: acntTnt.Tenant,
-							ID:     utils.GenUUID(),
-							Event: map[string]interface{}{
-								utils.EventType:   utils.BalanceUpdate,
-								utils.EventSource: utils.AccountService,
-								utils.Account:     acntTnt.ID,
-								utils.BalanceID:   defaultBalance.ID,
-								utils.Units:       defaultBalance.Value}}}
+						CGREventWithOpts: &utils.CGREventWithOpts{
+							CGREvent: &utils.CGREvent{
+								Tenant: acntTnt.Tenant,
+								ID:     utils.GenUUID(),
+								Event: map[string]interface{}{
+									utils.EventType:   utils.BalanceUpdate,
+									utils.EventSource: utils.AccountService,
+									utils.Account:     acntTnt.ID,
+									utils.BalanceID:   defaultBalance.ID,
+									utils.Units:       defaultBalance.Value,
+								},
+							},
+						},
+					}
 					var tIDs []string
 					if err := connMgr.Call(config.CgrConfig().RalsCfg().ThresholdSConns, nil,
 						utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
@@ -1117,7 +1122,8 @@ func (acc *Account) Publish() {
 		go func() {
 			var reply []string
 			if err := connMgr.Call(config.CgrConfig().RalsCfg().StatSConns, nil,
-				utils.StatSv1ProcessEvent, &StatsArgsProcessEvent{CGREvent: cgrEv}, &reply); err != nil &&
+				utils.StatSv1ProcessEvent, &StatsArgsProcessEvent{CGREventWithOpts: &utils.CGREventWithOpts{
+					CGREvent: cgrEv}}, &reply); err != nil &&
 				err.Error() != utils.ErrNotFound.Error() {
 				utils.Logger.Warning(
 					fmt.Sprintf("<AccountS> error: %s processing balance event %+v with StatS.",
@@ -1130,7 +1136,8 @@ func (acc *Account) Publish() {
 			var tIDs []string
 			if err := connMgr.Call(config.CgrConfig().RalsCfg().ThresholdSConns, nil,
 				utils.ThresholdSv1ProcessEvent,
-				&ThresholdsArgsProcessEvent{CGREvent: cgrEv}, &tIDs); err != nil &&
+				&ThresholdsArgsProcessEvent{CGREventWithOpts: &utils.CGREventWithOpts{
+					CGREvent: cgrEv}}, &tIDs); err != nil &&
 				err.Error() != utils.ErrNotFound.Error() {
 				utils.Logger.Warning(
 					fmt.Sprintf("<AccountS> error: %s processing account event %+v with ThresholdS.", err.Error(), cgrEv))

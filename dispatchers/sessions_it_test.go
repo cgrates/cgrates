@@ -390,7 +390,10 @@ func testDspSessionUpdate(t *testing.T) {
 		MatchedProfiles: []string{"ATTR_ACNT_1001"},
 		AlteredFields:   []string{"*req.OfficeGroup"},
 		CGREventWithOpts: &utils.CGREventWithOpts{
-			Opts: map[string]interface{}{utils.Subsys: utils.MetaSessionS},
+			Opts: map[string]interface{}{
+				utils.OptsAPIKey: "ses12345",
+				utils.Subsys:     utils.MetaSessionS,
+			},
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "TestSSv1ItUpdateSession",
@@ -462,7 +465,10 @@ func testDspSessionUpdate2(t *testing.T) {
 		MatchedProfiles: []string{"ATTR_1001_SESSIONAUTH"},
 		AlteredFields:   []string{"*req.LCRProfile", "*req.Password", "*req.RequestType", "*req.PaypalAccount"},
 		CGREventWithOpts: &utils.CGREventWithOpts{
-			Opts: map[string]interface{}{utils.Subsys: utils.MetaSessionS},
+			Opts: map[string]interface{}{
+				utils.OptsAPIKey: "ses12345",
+				utils.Subsys:     utils.MetaSessionS,
+			},
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "TestSSv1ItUpdateSession",
@@ -618,7 +624,10 @@ func testDspSessionProcessEvent(t *testing.T) {
 		MatchedProfiles: []string{"ATTR_ACNT_1001"},
 		AlteredFields:   []string{"*req.OfficeGroup"},
 		CGREventWithOpts: &utils.CGREventWithOpts{
-			Opts: map[string]interface{}{utils.Subsys: utils.MetaSessionS},
+			Opts: map[string]interface{}{
+				utils.OptsAPIKey: "ses12345",
+				utils.Subsys:     utils.MetaSessionS,
+			},
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "TestSSv1ItProcessEvent",
@@ -696,7 +705,10 @@ func testDspSessionProcessEvent2(t *testing.T) {
 		MatchedProfiles: []string{"ATTR_1001_SIMPLEAUTH"},
 		AlteredFields:   []string{"*req.Password", "*req.EventName"},
 		CGREventWithOpts: &utils.CGREventWithOpts{
-			Opts: map[string]interface{}{utils.Subsys: utils.MetaSessionS},
+			Opts: map[string]interface{}{
+				utils.OptsAPIKey: "pse12345",
+				utils.Subsys:     utils.MetaSessionS,
+			},
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "TestSSv1ItProcessEvent",

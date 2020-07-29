@@ -125,12 +125,15 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 			break
 		}
 	}
-	var cgrArgs utils.ExtractedArgs
-	if cgrArgs, err = utils.ExtractArgsFromOpts(opts, reqProcessor.Flags.GetBool(utils.MetaDispatchers),
-		reqType == utils.MetaAuthorize || reqType == utils.MetaMessage || reqType == utils.MetaEvent); err != nil {
-		utils.Logger.Warning(fmt.Sprintf("<%s> args extraction failed because <%s>",
-			utils.HTTPAgent, err.Error()))
-		err = nil // reset the error and continue the processing
+	var cgrArgs utils.Paginator
+	if reqType == utils.MetaAuthorize ||
+		reqType == utils.MetaMessage ||
+		reqType == utils.MetaEvent {
+		if cgrArgs, err = utils.GetRoutePaginatorFromOpts(opts); err != nil {
+			utils.Logger.Warning(fmt.Sprintf("<%s> args extraction failed because <%s>",
+				utils.HTTPAgent, err.Error()))
+			err = nil // reset the error and continue the processing
+		}
 	}
 	if reqProcessor.Flags.Has(utils.MetaLog) {
 		utils.Logger.Info(
@@ -158,8 +161,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.GetBool(utils.MetaRoutes),
 			reqProcessor.Flags.Has(utils.MetaRoutesIgnoreErrors),
 			reqProcessor.Flags.Has(utils.MetaRoutesEventCost),
-			cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.RoutePaginator,
-			reqProcessor.Flags.Has(utils.MetaFD),
+			cgrEv, cgrArgs, reqProcessor.Flags.Has(utils.MetaFD),
 			opts,
 		)
 		rply := new(sessions.V1AuthorizeReply)
@@ -178,8 +180,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.ParamsSlice(utils.MetaStats, utils.MetaIDs),
 			reqProcessor.Flags.GetBool(utils.MetaResources),
 			reqProcessor.Flags.Has(utils.MetaAccounts),
-			cgrEv, cgrArgs.ArgDispatcher,
-			reqProcessor.Flags.Has(utils.MetaFD),
+			cgrEv, reqProcessor.Flags.Has(utils.MetaFD),
 			opts)
 		rply := new(sessions.V1InitSessionReply)
 		err = ha.connMgr.Call(ha.sessionConns, nil, utils.SessionSv1InitiateSession,
@@ -192,8 +193,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.GetBool(utils.MetaAttributes),
 			reqProcessor.Flags.ParamsSlice(utils.MetaAttributes, utils.MetaIDs),
 			reqProcessor.Flags.Has(utils.MetaAccounts),
-			cgrEv, cgrArgs.ArgDispatcher,
-			reqProcessor.Flags.Has(utils.MetaFD),
+			cgrEv, reqProcessor.Flags.Has(utils.MetaFD),
 			opts)
 		rply := new(sessions.V1UpdateSessionReply)
 		err = ha.connMgr.Call(ha.sessionConns, nil, utils.SessionSv1UpdateSession,
@@ -209,8 +209,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.ParamsSlice(utils.MetaThresholds, utils.MetaIDs),
 			reqProcessor.Flags.GetBool(utils.MetaStats),
 			reqProcessor.Flags.ParamsSlice(utils.MetaStats, utils.MetaIDs),
-			cgrEv, cgrArgs.ArgDispatcher,
-			reqProcessor.Flags.Has(utils.MetaFD),
+			cgrEv, reqProcessor.Flags.Has(utils.MetaFD),
 			opts)
 		rply := utils.StringPointer("")
 		err = ha.connMgr.Call(ha.sessionConns, nil, utils.SessionSv1TerminateSession,
@@ -231,8 +230,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.GetBool(utils.MetaRoutes),
 			reqProcessor.Flags.Has(utils.MetaRoutesIgnoreErrors),
 			reqProcessor.Flags.Has(utils.MetaRoutesEventCost),
-			cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.RoutePaginator,
-			reqProcessor.Flags.Has(utils.MetaFD),
+			cgrEv, cgrArgs, reqProcessor.Flags.Has(utils.MetaFD),
 			opts)
 		rply := new(sessions.V1ProcessMessageReply)
 		err = ha.connMgr.Call(ha.sessionConns, nil, utils.SessionSv1ProcessMessage,
@@ -247,11 +245,12 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 		}
 	case utils.MetaEvent:
 		evArgs := &sessions.V1ProcessEventArgs{
-			Flags:         reqProcessor.Flags.SliceFlags(),
-			CGREvent:      cgrEv,
-			ArgDispatcher: cgrArgs.ArgDispatcher,
-			Paginator:     *cgrArgs.RoutePaginator,
-			Opts:          opts,
+			Flags: reqProcessor.Flags.SliceFlags(),
+			CGREventWithOpts: &utils.CGREventWithOpts{
+				CGREvent: cgrEv,
+				Opts:     opts,
+			},
+			Paginator: cgrArgs,
 		}
 		rply := new(sessions.V1ProcessEventReply)
 		err = ha.connMgr.Call(ha.sessionConns, nil, utils.SessionSv1ProcessEvent,
@@ -271,9 +270,10 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 		!reqProcessor.Flags.Has(utils.MetaDryRun) {
 		rplyCDRs := utils.StringPointer("")
 		if err = ha.connMgr.Call(ha.sessionConns, nil, utils.SessionSv1ProcessCDR,
-			&utils.CGREventWithOpts{CGREvent: cgrEv,
-				ArgDispatcher: cgrArgs.ArgDispatcher},
-			rplyCDRs); err != nil {
+			&utils.CGREventWithOpts{
+				CGREvent: cgrEv,
+				Opts:     opts,
+			}, rplyCDRs); err != nil {
 			agReq.CGRReply.Set(utils.PathItems{{Field: utils.Error}}, utils.NewNMData(err.Error()))
 		}
 	}

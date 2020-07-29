@@ -913,7 +913,9 @@ func TestSessionSNewV1AuthorizeArgs(t *testing.T) {
 
 func TestV1AuthorizeArgsParseFlags(t *testing.T) {
 	v1authArgs := new(V1AuthorizeArgs)
+	v1authArgs.CGREventWithOpts = new(utils.CGREventWithOpts)
 	eOut := new(V1AuthorizeArgs)
+	eOut.CGREventWithOpts = new(utils.CGREventWithOpts)
 	//empty check
 	strArg := ""
 	v1authArgs.ParseFlags(strArg)
@@ -935,6 +937,7 @@ func TestV1AuthorizeArgsParseFlags(t *testing.T) {
 		ProcessStats:       true,
 		StatIDs:            []string{"st1", "st2", "st3"},
 		Paginator:          cgrArgs,
+		CGREventWithOpts:   eOut.CGREventWithOpts,
 		ForceDuration:      true,
 	}
 
@@ -958,6 +961,7 @@ func TestV1AuthorizeArgsParseFlags(t *testing.T) {
 		ProcessStats:       true,
 		StatIDs:            []string{"st1", "st2", "st3"},
 		Paginator:          cgrArgs,
+		CGREventWithOpts:   eOut.CGREventWithOpts,
 		ForceDuration:      true,
 	}
 
@@ -1884,7 +1888,9 @@ func TestV1TerminateSessionArgsParseFlags(t *testing.T) {
 
 func TestV1ProcessMessageArgsParseFlags(t *testing.T) {
 	v1ProcessMsgArgs := new(V1ProcessMessageArgs)
+	v1ProcessMsgArgs.CGREventWithOpts = new(utils.CGREventWithOpts)
 	eOut := new(V1ProcessMessageArgs)
+	eOut.CGREventWithOpts = new(utils.CGREventWithOpts)
 	//empty check
 	strArg := ""
 	v1ProcessMsgArgs.ParseFlags(strArg)
@@ -1904,6 +1910,7 @@ func TestV1ProcessMessageArgsParseFlags(t *testing.T) {
 		ThresholdIDs:       []string{"tr1", "tr2", "tr3"},
 		ProcessStats:       true,
 		StatIDs:            []string{"st1", "st2", "st3"},
+		CGREventWithOpts:   eOut.CGREventWithOpts,
 	}
 
 	strArg = "*accounts,*resources,*routes,*routes_ignore_errors,*routes_event_cost,*attributes:Attr1;Attr2,*thresholds:tr1;tr2;tr3,*stats:st1;st2;st3"
@@ -1925,6 +1932,7 @@ func TestV1ProcessMessageArgsParseFlags(t *testing.T) {
 		ThresholdIDs:       []string{"tr1", "tr2", "tr3"},
 		ProcessStats:       true,
 		StatIDs:            []string{"st1", "st2", "st3"},
+		CGREventWithOpts:   eOut.CGREventWithOpts,
 	}
 
 	strArg = "*accounts,*resources,*dispatchers,*routes,*routes_ignore_errors,*routes_event_cost,*attributes:Attr1;Attr2,*thresholds:tr1;tr2;tr3,*stats:st1;st2;st3"

@@ -381,18 +381,22 @@ func TestResourcePopulateResourceService(t *testing.T) {
 func TestResourceV1AuthorizeResourceMissingStruct(t *testing.T) {
 	var reply *string
 	argsMissingTenant := utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			ID:    "id1",
-			Event: map[string]interface{}{},
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				ID:    "id1",
+				Event: map[string]interface{}{},
+			},
 		},
 		UsageID: "test1", // ResourceUsage Identifier
 		Units:   20,
 	}
 	argsMissingUsageID := utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "id1",
-			Event:  map[string]interface{}{},
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "id1",
+				Event:  map[string]interface{}{},
+			},
 		},
 		Units: 20,
 	}

@@ -46,13 +46,13 @@ type Dispatcher interface {
 	// HostIDs returns the ordered list of host IDs
 	HostIDs() (hostIDs []string)
 	// Dispatch is used to send the method over the connections given
-	Dispatch(routeID *string, subsystem,
+	Dispatch(routeID string, subsystem,
 		serviceMethod string, args interface{}, reply interface{}) (err error)
 }
 
 type strategyDispatcher interface {
 	// dispatch is used to send the method over the connections given
-	dispatch(dm *engine.DataManager, routeID *string, subsystem, tnt string, hostIDs []string,
+	dispatch(dm *engine.DataManager, routeID string, subsystem, tnt string, hostIDs []string,
 		serviceMethod string, args interface{}, reply interface{}) (err error)
 }
 
@@ -130,7 +130,7 @@ func (wd *WeightDispatcher) HostIDs() (hostIDs []string) {
 	return
 }
 
-func (wd *WeightDispatcher) Dispatch(routeID *string, subsystem,
+func (wd *WeightDispatcher) Dispatch(routeID string, subsystem,
 	serviceMethod string, args interface{}, reply interface{}) (err error) {
 	return wd.strategy.dispatch(wd.dm, routeID, subsystem, wd.tnt, wd.HostIDs(),
 		serviceMethod, args, reply)
@@ -161,7 +161,7 @@ func (d *RandomDispatcher) HostIDs() (hostIDs []string) {
 	return hosts.HostIDs()
 }
 
-func (d *RandomDispatcher) Dispatch(routeID *string, subsystem,
+func (d *RandomDispatcher) Dispatch(routeID string, subsystem,
 	serviceMethod string, args interface{}, reply interface{}) (err error) {
 	return d.strategy.dispatch(d.dm, routeID, subsystem, d.tnt, d.HostIDs(),
 		serviceMethod, args, reply)
@@ -196,7 +196,7 @@ func (d *RoundRobinDispatcher) HostIDs() (hostIDs []string) {
 	return hosts.HostIDs()
 }
 
-func (d *RoundRobinDispatcher) Dispatch(routeID *string, subsystem,
+func (d *RoundRobinDispatcher) Dispatch(routeID string, subsystem,
 	serviceMethod string, args interface{}, reply interface{}) (err error) {
 	return d.strategy.dispatch(d.dm, routeID, subsystem, d.tnt, d.HostIDs(),
 		serviceMethod, args, reply)
@@ -226,7 +226,7 @@ func (d *BroadcastDispatcher) HostIDs() (hostIDs []string) {
 	return
 }
 
-func (d *BroadcastDispatcher) Dispatch(routeID *string, subsystem,
+func (d *BroadcastDispatcher) Dispatch(routeID string, subsystem,
 	serviceMethod string, args interface{}, reply interface{}) (lastErr error) { // no cache needed for this strategy because we need to call all connections
 	return d.strategy.dispatch(d.dm, routeID, subsystem, d.tnt, d.HostIDs(),
 		serviceMethod, args, reply)
@@ -234,15 +234,15 @@ func (d *BroadcastDispatcher) Dispatch(routeID *string, subsystem,
 
 type singleResultstrategyDispatcher struct{}
 
-func (_ *singleResultstrategyDispatcher) dispatch(dm *engine.DataManager, routeID *string, subsystem, tnt string,
+func (_ *singleResultstrategyDispatcher) dispatch(dm *engine.DataManager, routeID string, subsystem, tnt string,
 	hostIDs []string, serviceMethod string, args interface{}, reply interface{}) (err error) {
 	var dH *engine.DispatcherHost
-	if routeID != nil && *routeID != "" {
+	if routeID != utils.EmptyString {
 		// overwrite routeID with RouteID:Subsystem
-		*routeID = utils.ConcatenatedKey(*routeID, subsystem)
+		routeID = utils.ConcatenatedKey(routeID, subsystem)
 		// use previously discovered route
 		if x, ok := engine.Cache.Get(utils.CacheDispatcherRoutes,
-			*routeID); ok && x != nil {
+			routeID); ok && x != nil {
 			dH = x.(*engine.DispatcherHost)
 			if err = dH.Call(serviceMethod, args, reply); !utils.IsNetworkError(err) {
 				return
@@ -257,8 +257,8 @@ func (_ *singleResultstrategyDispatcher) dispatch(dm *engine.DataManager, routeI
 		if err = dH.Call(serviceMethod, args, reply); utils.IsNetworkError(err) {
 			continue
 		}
-		if routeID != nil && *routeID != "" { // cache the discovered route
-			if err = engine.Cache.Set(utils.CacheDispatcherRoutes, *routeID, dH,
+		if routeID != utils.EmptyString { // cache the discovered route
+			if err = engine.Cache.Set(utils.CacheDispatcherRoutes, routeID, dH,
 				nil, true, utils.EmptyString); err != nil {
 				return
 			}
@@ -270,7 +270,7 @@ func (_ *singleResultstrategyDispatcher) dispatch(dm *engine.DataManager, routeI
 
 type brodcastStrategyDispatcher struct{}
 
-func (_ *brodcastStrategyDispatcher) dispatch(dm *engine.DataManager, routeID *string, subsystem, tnt string, hostIDs []string,
+func (_ *brodcastStrategyDispatcher) dispatch(dm *engine.DataManager, routeID string, subsystem, tnt string, hostIDs []string,
 	serviceMethod string, args interface{}, reply interface{}) (err error) {
 	var hasErrors bool
 	for _, hostID := range hostIDs {
@@ -336,7 +336,7 @@ type LoadMetrics struct {
 	SumRatio   int64
 }
 
-func (ld *loadStrategyDispatcher) dispatch(dm *engine.DataManager, routeID *string, subsystem, tnt string, hostIDs []string,
+func (ld *loadStrategyDispatcher) dispatch(dm *engine.DataManager, routeID string, subsystem, tnt string, hostIDs []string,
 	serviceMethod string, args interface{}, reply interface{}) (err error) {
 	var dH *engine.DispatcherHost
 	var lM *LoadMetrics
@@ -349,12 +349,12 @@ func (ld *loadStrategyDispatcher) dispatch(dm *engine.DataManager, routeID *stri
 		return
 	}
 
-	if routeID != nil && *routeID != "" {
+	if routeID != utils.EmptyString {
 		// overwrite routeID with RouteID:Subsystem
-		*routeID = utils.ConcatenatedKey(*routeID, subsystem)
+		routeID = utils.ConcatenatedKey(routeID, subsystem)
 		// use previously discovered route
 		if x, ok := engine.Cache.Get(utils.CacheDispatcherRoutes,
-			*routeID); ok && x != nil {
+			routeID); ok && x != nil {
 			dH = x.(*engine.DispatcherHost)
 			lM.incrementLoad(dH.ID, ld.tntID)
 			err = dH.Call(serviceMethod, args, reply)
@@ -375,8 +375,8 @@ func (ld *loadStrategyDispatcher) dispatch(dm *engine.DataManager, routeID *stri
 		if utils.IsNetworkError(err) {
 			continue
 		}
-		if routeID != nil && *routeID != "" { // cache the discovered route
-			if err = engine.Cache.Set(utils.CacheDispatcherRoutes, *routeID, dH,
+		if routeID != utils.EmptyString { // cache the discovered route
+			if err = engine.Cache.Set(utils.CacheDispatcherRoutes, routeID, dH,
 				nil, true, utils.EmptyString); err != nil {
 				return
 			}

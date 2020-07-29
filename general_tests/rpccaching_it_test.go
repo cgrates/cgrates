@@ -203,19 +203,21 @@ func testRPCMethodsAuthorizeSession(t *testing.T) {
 	authUsage := 5 * time.Minute
 	args := &sessions.V1AuthorizeArgs{
 		GetMaxUsage: true,
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testRPCMethodsAuthorizeSession",
-			Event: map[string]interface{}{
-				utils.Tenant:      "cgrates.org",
-				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "testRPCMethodsAuthorizeSession",
-				utils.RequestType: utils.META_PREPAID,
-				utils.Account:     "1001",
-				utils.Subject:     "1001",
-				utils.Destination: "1002",
-				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-				utils.Usage:       authUsage,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testRPCMethodsAuthorizeSession",
+				Event: map[string]interface{}{
+					utils.Tenant:      "cgrates.org",
+					utils.ToR:         utils.VOICE,
+					utils.OriginID:    "testRPCMethodsAuthorizeSession",
+					utils.RequestType: utils.META_PREPAID,
+					utils.Account:     "1001",
+					utils.Subject:     "1001",
+					utils.Destination: "1002",
+					utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+					utils.Usage:       authUsage,
+				},
 			},
 		},
 	}
@@ -231,12 +233,14 @@ func testRPCMethodsAuthorizeSession(t *testing.T) {
 	//disable the account
 	var ids []string
 	thEvent := &engine.ThresholdsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "DisableAccount",
-			Event: map[string]interface{}{
-				utils.Account:   "1001",
-				"DisableAction": "DisableAction",
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "DisableAccount",
+				Event: map[string]interface{}{
+					utils.Account:   "1001",
+					"DisableAction": "DisableAction",
+				},
 			},
 		},
 	}
@@ -297,20 +301,22 @@ func testRPCMethodsInitSession(t *testing.T) {
 	initUsage := 5 * time.Minute
 	args := &sessions.V1InitSessionArgs{
 		InitSession: true,
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testRPCMethodsInitSession",
-			Event: map[string]interface{}{
-				utils.Tenant:      "cgrates.org",
-				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "testRPCMethodsInitSession",
-				utils.RequestType: utils.META_PREPAID,
-				utils.Account:     "1001",
-				utils.Subject:     "ANY2CNT",
-				utils.Destination: "1002",
-				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-				utils.Usage:       initUsage,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testRPCMethodsInitSession",
+				Event: map[string]interface{}{
+					utils.Tenant:      "cgrates.org",
+					utils.ToR:         utils.VOICE,
+					utils.OriginID:    "testRPCMethodsInitSession",
+					utils.RequestType: utils.META_PREPAID,
+					utils.Account:     "1001",
+					utils.Subject:     "ANY2CNT",
+					utils.Destination: "1002",
+					utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+					utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+					utils.Usage:       initUsage,
+				},
 			},
 		},
 	}
@@ -326,12 +332,14 @@ func testRPCMethodsInitSession(t *testing.T) {
 	//disable the account
 	var ids []string
 	thEvent := &engine.ThresholdsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "DisableAccount",
-			Event: map[string]interface{}{
-				utils.Account:   "1001",
-				"DisableAction": "DisableAction",
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "DisableAccount",
+				Event: map[string]interface{}{
+					utils.Account:   "1001",
+					"DisableAction": "DisableAction",
+				},
 			},
 		},
 	}
@@ -393,20 +401,22 @@ func testRPCMethodsUpdateSession(t *testing.T) {
 	reqUsage := 5 * time.Minute
 	args := &sessions.V1UpdateSessionArgs{
 		UpdateSession: true,
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testRPCMethodsUpdateSession",
-			Event: map[string]interface{}{
-				utils.Tenant:      "cgrates.org",
-				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "testRPCMethodsUpdateSession",
-				utils.RequestType: utils.META_PREPAID,
-				utils.Account:     "1001",
-				utils.Subject:     "ANY2CNT",
-				utils.Destination: "1002",
-				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-				utils.Usage:       reqUsage,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testRPCMethodsUpdateSession",
+				Event: map[string]interface{}{
+					utils.Tenant:      "cgrates.org",
+					utils.ToR:         utils.VOICE,
+					utils.OriginID:    "testRPCMethodsUpdateSession",
+					utils.RequestType: utils.META_PREPAID,
+					utils.Account:     "1001",
+					utils.Subject:     "ANY2CNT",
+					utils.Destination: "1002",
+					utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+					utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+					utils.Usage:       reqUsage,
+				},
 			},
 		},
 	}
@@ -422,12 +432,14 @@ func testRPCMethodsUpdateSession(t *testing.T) {
 	//disable the account
 	var ids []string
 	thEvent := &engine.ThresholdsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "DisableAccount",
-			Event: map[string]interface{}{
-				utils.Account:   "1001",
-				"DisableAction": "DisableAction",
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "DisableAccount",
+				Event: map[string]interface{}{
+					utils.Account:   "1001",
+					"DisableAction": "DisableAction",
+				},
 			},
 		},
 	}
@@ -487,20 +499,22 @@ func testRPCMethodsUpdateSession(t *testing.T) {
 func testRPCMethodsTerminateSession(t *testing.T) {
 	args := &sessions.V1TerminateSessionArgs{
 		TerminateSession: true,
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testRPCMethodsTerminateSession",
-			Event: map[string]interface{}{
-				utils.Tenant:      "cgrates.org",
-				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "testRPCMethodsTerminateSession",
-				utils.RequestType: utils.META_PREPAID,
-				utils.Account:     "1001",
-				utils.Subject:     "ANY2CNT",
-				utils.Destination: "1002",
-				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-				utils.Usage:       10 * time.Minute,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testRPCMethodsTerminateSession",
+				Event: map[string]interface{}{
+					utils.Tenant:      "cgrates.org",
+					utils.ToR:         utils.VOICE,
+					utils.OriginID:    "testRPCMethodsTerminateSession",
+					utils.RequestType: utils.META_PREPAID,
+					utils.Account:     "1001",
+					utils.Subject:     "ANY2CNT",
+					utils.Destination: "1002",
+					utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+					utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+					utils.Usage:       10 * time.Minute,
+				},
 			},
 		},
 	}
@@ -534,20 +548,22 @@ func testRPCMethodsTerminateSession(t *testing.T) {
 
 func testRPCMethodsProcessCDR(t *testing.T) {
 	args := &engine.ThresholdsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testRPCMethodsProcessCDR",
-			Event: map[string]interface{}{
-				utils.Tenant:      "cgrates.org",
-				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "testRPCMethodsProcessCDR",
-				utils.RequestType: utils.META_PREPAID,
-				utils.Account:     "1001",
-				utils.Subject:     "ANY2CNT",
-				utils.Destination: "1002",
-				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-				utils.Usage:       10 * time.Minute,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testRPCMethodsProcessCDR",
+				Event: map[string]interface{}{
+					utils.Tenant:      "cgrates.org",
+					utils.ToR:         utils.VOICE,
+					utils.OriginID:    "testRPCMethodsProcessCDR",
+					utils.RequestType: utils.META_PREPAID,
+					utils.Account:     "1001",
+					utils.Subject:     "ANY2CNT",
+					utils.Destination: "1002",
+					utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+					utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+					utils.Usage:       10 * time.Minute,
+				},
 			},
 		},
 	}
@@ -608,20 +624,22 @@ func testRPCMethodsProcessEvent(t *testing.T) {
 	initUsage := 5 * time.Minute
 	args := &sessions.V1ProcessMessageArgs{
 		Debit: true,
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testRPCMethodsProcessEvent",
-			Event: map[string]interface{}{
-				utils.Tenant:      "cgrates.org",
-				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "testRPCMethodsProcessEvent",
-				utils.RequestType: utils.META_PREPAID,
-				utils.Account:     "1001",
-				utils.Subject:     "1001",
-				utils.Destination: "1002",
-				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-				utils.Usage:       initUsage,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testRPCMethodsProcessEvent",
+				Event: map[string]interface{}{
+					utils.Tenant:      "cgrates.org",
+					utils.ToR:         utils.VOICE,
+					utils.OriginID:    "testRPCMethodsProcessEvent",
+					utils.RequestType: utils.META_PREPAID,
+					utils.Account:     "1001",
+					utils.Subject:     "1001",
+					utils.Destination: "1002",
+					utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+					utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+					utils.Usage:       initUsage,
+				},
 			},
 		},
 	}
@@ -636,12 +654,14 @@ func testRPCMethodsProcessEvent(t *testing.T) {
 	//disable the account
 	var ids []string
 	thEvent := &engine.ThresholdsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "DisableAccount",
-			Event: map[string]interface{}{
-				utils.Account:   "1001",
-				"DisableAction": "DisableAction",
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "DisableAccount",
+				Event: map[string]interface{}{
+					utils.Account:   "1001",
+					"DisableAction": "DisableAction",
+				},
 			},
 		},
 	}

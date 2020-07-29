@@ -198,9 +198,7 @@ func (dS *DispatcherService) Dispatch(ev *utils.CGREventWithOpts, subsys string,
 	if errCh := engine.Cache.Set(utils.CacheDispatchers, tntID, d, nil, true, utils.EmptyString); errCh != nil {
 		return utils.NewErrDispatcherS(errCh)
 	}
-	route := utils.IfaceAsString(ev.Opts[utils.OptsRouteID])
-	ev.Opts[utils.OptsRouteID] = route
-	return d.Dispatch(&route, subsys, serviceMethod, args, reply)
+	return d.Dispatch(utils.IfaceAsString(ev.Opts[utils.OptsRouteID]), subsys, serviceMethod, args, reply)
 }
 
 func (dS *DispatcherService) V1GetProfileForEvent(ev *utils.CGREventWithOpts,

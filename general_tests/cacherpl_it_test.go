@@ -311,8 +311,8 @@ func testCacheRplPing(t *testing.T) {
 		TenantArg: &utils.TenantArg{
 			Tenant: "cgrates.org",
 		},
-		ArgDispatcher: &utils.ArgDispatcher{
-			RouteID: utils.StringPointer("testRoute123"),
+		Opts: map[string]interface{}{
+			utils.OptsRouteID: "testRoute123",
 		},
 	}
 	if err := dspEngine1RPC.Call(utils.CoreSv1Status, &ev, &reply); err != nil {
@@ -326,8 +326,8 @@ func testCacheRplPing(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 		},
-		ArgDispatcher: &utils.ArgDispatcher{
-			RouteID: utils.StringPointer("testRoute123"),
+		Opts: map[string]interface{}{
+			utils.OptsRouteID: "testRoute123",
 		},
 	}, &rpl); err != nil {
 		t.Error(err)
@@ -372,8 +372,8 @@ func testCacheRplCheckReplication(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 		},
-		ArgDispatcher: &utils.ArgDispatcher{
-			RouteID: utils.StringPointer("testRoute123"),
+		Opts: map[string]interface{}{
+			utils.OptsRouteID: "testRoute123",
 		},
 	}, &rpl); err != nil {
 		t.Error(err)
@@ -406,8 +406,8 @@ func testCacheRplAACheckReplication(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 		},
-		ArgDispatcher: &utils.ArgDispatcher{
-			RouteID: utils.StringPointer("testRouteFromDispatcher2"),
+		Opts: map[string]interface{}{
+			utils.OptsRouteID: "testRouteFromDispatcher2",
 		},
 	}, &rpl); err != nil {
 		t.Error(err)
@@ -419,8 +419,8 @@ func testCacheRplAACheckReplication(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 		},
-		ArgDispatcher: &utils.ArgDispatcher{
-			RouteID: utils.StringPointer("testRouteFromDispatcher1"),
+		Opts: map[string]interface{}{
+			utils.OptsRouteID: "testRouteFromDispatcher1",
 		},
 	}, &rpl); err != nil {
 		t.Error(err)
@@ -486,8 +486,8 @@ func testCacheRplAACheckLoadReplication(t *testing.T) {
 						"EventName":       "TestLoad",
 					},
 				},
-				ArgDispatcher: &utils.ArgDispatcher{
-					RouteID: utils.StringPointer("testRouteFromDispatcher1"),
+				Opts: map[string]interface{}{
+					utils.OptsRouteID: "testRouteFromDispatcher1",
 				},
 			}, &rpl); err != nil {
 				t.Error(err)
@@ -507,8 +507,8 @@ func testCacheRplAACheckLoadReplication(t *testing.T) {
 						"EventName":       "TestLoad",
 					},
 				},
-				ArgDispatcher: &utils.ArgDispatcher{
-					RouteID: utils.StringPointer("testRouteFromDispatcher2"),
+				Opts: map[string]interface{}{
+					utils.OptsRouteID: "testRouteFromDispatcher2",
 				},
 			}, &rpl); err != nil {
 				t.Error(err)
@@ -604,8 +604,8 @@ func testCacheRplCheckLoadReplication(t *testing.T) {
 						"EventName":       "TestLoad",
 					},
 				},
-				ArgDispatcher: &utils.ArgDispatcher{
-					RouteID: utils.StringPointer("testRoute123"),
+				Opts: map[string]interface{}{
+					utils.OptsRouteID: "testRoute123",
 				},
 			}, &rpl); err != nil {
 				t.Error(err)
