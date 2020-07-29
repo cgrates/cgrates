@@ -142,6 +142,8 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 			err = m.migrateTimings()
 		case utils.MetaResources:
 			err = m.migrateResources()
+		case utils.MetaRateProfiles:
+			err = m.migrateRateProfiles()
 		case MetaAliases:
 			err = m.migrateAlias()
 		case utils.MetaUsers:
