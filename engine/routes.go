@@ -629,10 +629,8 @@ func (rpS *RouteService) V1GetRoutes(args *ArgsGetRoutes, reply *SortedRoutes) (
 			Context: utils.StringPointer(utils.FirstNonEmpty(
 				utils.IfaceAsString(args.CGREvent.Event[utils.OptsContext]),
 				utils.MetaRoutes)),
-			CGREvent:      args.CGREvent,
-			ArgDispatcher: args.ArgDispatcher,
-			Opts:          args.Opts,
-			ProcessRuns:   processRuns,
+			CGREventWithOpts: args.CGREventWithOpts,
+			ProcessRuns:      processRuns,
 		}
 		var rplyEv AttrSProcessEventReply
 		if err := rpS.connMgr.Call(rpS.cgrcfg.RouteSCfg().AttributeSConns, nil,

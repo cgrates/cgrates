@@ -317,6 +317,7 @@ func TestProcessRequest(t *testing.T) {
 				id = rargs.ID
 			}
 			expargs := &utils.CGREventWithOpts{
+				Opts: make(map[string]interface{}),
 				CGREvent: &utils.CGREvent{
 					Tenant: "cgrates.org",
 					ID:     id,

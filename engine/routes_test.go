@@ -129,47 +129,55 @@ var (
 	}
 	argsGetRoutes = []*ArgsGetRoutes{
 		{ //matching RouteProfile1
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "utils.CGREvent1",
-				Event: map[string]interface{}{
-					"Route":          "RouteProfile1",
-					utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
-					"UsageInterval":  "1s",
-					"PddInterval":    "1s",
-					"Weight":         "20.0",
+			CGREventWithOpts: &utils.CGREventWithOpts{
+				CGREvent: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "utils.CGREvent1",
+					Event: map[string]interface{}{
+						"Route":          "RouteProfile1",
+						utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+						"UsageInterval":  "1s",
+						"PddInterval":    "1s",
+						"Weight":         "20.0",
+					},
 				},
 			},
 		},
 		{ //matching RouteProfile2
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "utils.CGREvent1",
-				Event: map[string]interface{}{
-					"Route":          "RouteProfile2",
-					utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
-					"UsageInterval":  "1s",
-					"PddInterval":    "1s",
-					"Weight":         "20.0",
+			CGREventWithOpts: &utils.CGREventWithOpts{
+				CGREvent: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "utils.CGREvent1",
+					Event: map[string]interface{}{
+						"Route":          "RouteProfile2",
+						utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+						"UsageInterval":  "1s",
+						"PddInterval":    "1s",
+						"Weight":         "20.0",
+					},
 				},
 			},
 		},
 		{ //matching RouteProfilePrefix
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "utils.CGREvent1",
-				Event: map[string]interface{}{
-					"Route": "RouteProfilePrefix",
+			CGREventWithOpts: &utils.CGREventWithOpts{
+				CGREvent: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "utils.CGREvent1",
+					Event: map[string]interface{}{
+						"Route": "RouteProfilePrefix",
+					},
 				},
 			},
 		},
 		{ //matching
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "CGR",
-				Event: map[string]interface{}{
-					"UsageInterval": "1s",
-					"PddInterval":   "1s",
+			CGREventWithOpts: &utils.CGREventWithOpts{
+				CGREvent: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "CGR",
+					Event: map[string]interface{}{
+						"UsageInterval": "1s",
+						"PddInterval":   "1s",
+					},
 				},
 			},
 		},

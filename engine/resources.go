@@ -427,7 +427,7 @@ func (rS *ResourceService) runBackup() {
 }
 
 // processThresholds will pass the event for resource to ThresholdS
-func (rS *ResourceService) processThresholds(r *Resource, argDispatcher *utils.ArgDispatcher) (err error) {
+func (rS *ResourceService) processThresholds(r *Resource, opts map[string]interface{}) (err error) {
 	if rS.thdS == nil {
 		return
 	}
@@ -439,16 +439,18 @@ func (rS *ResourceService) processThresholds(r *Resource, argDispatcher *utils.A
 		thIDs = r.rPrf.ThresholdIDs
 	}
 	thEv := &ThresholdsArgsProcessEvent{ThresholdIDs: thIDs,
-		CGREvent: &utils.CGREvent{
-			Tenant: r.Tenant,
-			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
-				utils.EventType:  utils.ResourceUpdate,
-				utils.ResourceID: r.ID,
-				utils.Usage:      r.totalUsage(),
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: r.Tenant,
+				ID:     utils.GenUUID(),
+				Event: map[string]interface{}{
+					utils.EventType:  utils.ResourceUpdate,
+					utils.ResourceID: r.ID,
+					utils.Usage:      r.totalUsage(),
+				},
 			},
+			Opts: opts,
 		},
-		ArgDispatcher: argDispatcher,
 	}
 	var tIDs []string
 	if err = rS.connMgr.Call(rS.cgrcfg.ResourceSCfg().ThresholdSConns, nil,
@@ -707,7 +709,7 @@ func (rS *ResourceService) V1AllocateResource(args utils.ArgRSv1ResourceUsage, r
 			rS.storedResources[r.TenantID()] = true
 			rS.srMux.Unlock()
 		}
-		if err = rS.processThresholds(r, args.ArgDispatcher); err != nil {
+		if err = rS.processThresholds(r, args.Opts); err != nil {
 			return
 		}
 	}
@@ -770,7 +772,7 @@ func (rS *ResourceService) V1ReleaseResource(args utils.ArgRSv1ResourceUsage, re
 				rS.storedResources[r.TenantID()] = true
 			}
 		}
-		if err = rS.processThresholds(r, args.ArgDispatcher); err != nil {
+		if err = rS.processThresholds(r, args.Opts); err != nil {
 			return
 		}
 	}

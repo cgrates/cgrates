@@ -147,10 +147,11 @@ func (cS *ChargerService) processEvent(cgrEv *utils.CGREventWithOpts) (rply []*C
 			Context: utils.StringPointer(utils.FirstNonEmpty(
 				utils.IfaceAsString(opts[utils.OptsContext]),
 				utils.MetaChargers)),
-			ProcessRuns:   processRuns,
-			CGREvent:      clonedEv.CGREvent,
-			ArgDispatcher: clonedEv.ArgDispatcher,
-			Opts:          opts,
+			ProcessRuns: processRuns,
+			CGREventWithOpts: &utils.CGREventWithOpts{
+				CGREvent: clonedEv.CGREvent,
+				Opts:     opts,
+			},
 		}
 		var evReply AttrSProcessEventReply
 		if err = cS.connMgr.Call(cS.cfg.ChargerSCfg().AttributeSConns, nil,

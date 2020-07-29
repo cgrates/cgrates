@@ -134,22 +134,24 @@ func testCDRsPostFailoverProcessCDR(t *testing.T) {
 	args := &engine.ArgV1ProcessEvent{
 		Flags: []string{utils.MetaExport, "*attributes:false", "*rals:false", "*chargers:false",
 			"*store:false", "*thresholds:false", "*stats:false"}, // only export the CDR
-		CGREvent: utils.CGREvent{
-			ID:     "1",
-			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
-				utils.OriginID:    "testCDRsPostFailoverProcessCDR",
-				utils.OriginHost:  "192.168.1.1",
-				utils.Source:      "testCDRsPostFailoverProcessCDR",
-				utils.RequestType: utils.META_RATED,
-				utils.Category:    "call",
-				utils.Account:     "testCDRsPostFailoverProcessCDR",
-				utils.Subject:     "ANY2CNT",
-				utils.Destination: "+4986517174963",
-				utils.AnswerTime:  time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
-				utils.Usage:       time.Duration(1) * time.Minute,
-				"field_extr1":     "val_extr1",
-				"fieldextr2":      "valextr2",
+		CGREventWithOpts: utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				ID:     "1",
+				Tenant: "cgrates.org",
+				Event: map[string]interface{}{
+					utils.OriginID:    "testCDRsPostFailoverProcessCDR",
+					utils.OriginHost:  "192.168.1.1",
+					utils.Source:      "testCDRsPostFailoverProcessCDR",
+					utils.RequestType: utils.META_RATED,
+					utils.Category:    "call",
+					utils.Account:     "testCDRsPostFailoverProcessCDR",
+					utils.Subject:     "ANY2CNT",
+					utils.Destination: "+4986517174963",
+					utils.AnswerTime:  time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+					utils.Usage:       time.Duration(1) * time.Minute,
+					"field_extr1":     "val_extr1",
+					"fieldextr2":      "valextr2",
+				},
 			},
 		},
 	}

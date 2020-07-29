@@ -264,6 +264,9 @@ func testDspAttrGetAttrFailover(t *testing.T) {
 					"Password":       "CGRateS.org",
 				},
 			},
+			Opts: map[string]interface{}{
+				utils.OptsAPIKey: "attr12345",
+			},
 		},
 	}
 
@@ -345,7 +348,7 @@ func testDspAttrTestMissingArgDispatcher(t *testing.T) {
 	}
 	var attrReply *engine.AttributeProfile
 	if err := dispEngine.RPC.Call(utils.AttributeSv1GetAttributeForEvent,
-		args, &attrReply); err == nil || err.Error() != utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField).Error() {
+		args, &attrReply); err == nil || err.Error() != utils.NewErrMandatoryIeMissing(utils.APIKey).Error() {
 		t.Errorf("Error:%v rply=%s", err, utils.ToJSON(attrReply))
 	}
 }
@@ -467,6 +470,9 @@ func testDspAttrTestAuthKey2(t *testing.T) {
 		MatchedProfiles: []string{"ATTR_1001_SIMPLEAUTH"},
 		AlteredFields:   []string{"*req.Password"},
 		CGREventWithOpts: &utils.CGREventWithOpts{
+			Opts: map[string]interface{}{
+				utils.OptsAPIKey: "attr12345",
+			},
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "testAttributeSGetAttributeForEvent",
@@ -562,6 +568,9 @@ func testDspAttrGetAttrRoundRobin(t *testing.T) {
 					"Password":       "CGRateS.org",
 				},
 			},
+			Opts: map[string]interface{}{
+				utils.OptsAPIKey: "attr12345",
+			},
 		},
 	}
 
@@ -626,6 +635,9 @@ func testDspAttrGetAttrInternal(t *testing.T) {
 		MatchedProfiles: []string{"ATTR_1003_SIMPLEAUTH"},
 		AlteredFields:   []string{"*req.Password"},
 		CGREventWithOpts: &utils.CGREventWithOpts{
+			Opts: map[string]interface{}{
+				utils.OptsAPIKey: "attr12345",
+			},
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "testAttributeSGetAttributeForEvent",

@@ -232,14 +232,10 @@ func (ka *KamailioAgent) onCallEnd(evData []byte, connIdx int) {
 		// no return here since we want CDR anyhow
 	}
 	if ka.cfg.CreateCdr || strings.Index(kev[utils.CGRFlags], utils.MetaCDRs) != -1 {
-		cgrEv, err := kev.AsCGREvent(ka.timezone) // FixMe: do we need to create the event once again?
-		if err != nil {
-			return
-		}
 		if err := ka.connMgr.Call(ka.cfg.SessionSConns, ka, utils.SessionSv1ProcessCDR,
-			&utils.CGREventWithOpts{CGREvent: cgrEv, ArgDispatcher: tsArgs.ArgDispatcher}, &reply); err != nil {
+			tsArgs.CGREventWithOpts, &reply); err != nil {
 			utils.Logger.Err(fmt.Sprintf("%s> failed processing CGREvent: %s, error: %s",
-				utils.KamailioAgent, utils.ToJSON(cgrEv), err.Error()))
+				utils.KamailioAgent, utils.ToJSON(tsArgs.CGREventWithOpts), err.Error()))
 		}
 	}
 }

@@ -131,14 +131,16 @@ func testV1FltrAddStats(t *testing.T) {
 	var reply []string
 	expected := []string{"Stat_1"}
 	ev1 := &engine.StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				utils.Account:    "1001",
-				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				utils.Usage:      time.Duration(11 * time.Second),
-				utils.COST:       10.0,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "event1",
+				Event: map[string]interface{}{
+					utils.Account:    "1001",
+					utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+					utils.Usage:      time.Duration(11 * time.Second),
+					utils.COST:       10.0,
+				},
 			},
 		},
 	}
@@ -321,11 +323,13 @@ func testV1FltrPupulateThreshold(t *testing.T) {
 func testV1FltrGetThresholdForEvent(t *testing.T) {
 	// check the event
 	tEv := &engine.ThresholdsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				utils.Account: "1010"},
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "event1",
+				Event: map[string]interface{}{
+					utils.Account: "1010"},
+			},
 		},
 	}
 	var ids []string
@@ -384,11 +388,13 @@ func testV1FltrGetThresholdForEvent2(t *testing.T) {
 	}
 
 	tEv := &engine.ThresholdsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				utils.Account: "1010"},
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "event1",
+				Event: map[string]interface{}{
+					utils.Account: "1010"},
+			},
 		},
 	}
 	var ids []string
@@ -428,12 +434,14 @@ func testV1FltrPopulateResources(t *testing.T) {
 
 	// Allocate 3 units for resource ResTest
 	argsRU := utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
-				"Account":     "3001",
-				"Destination": "3002"},
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     utils.UUIDSha1Prefix(),
+				Event: map[string]interface{}{
+					"Account":     "3001",
+					"Destination": "3002"},
+			},
 		},
 		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e21",
 		Units:   3,
@@ -492,11 +500,13 @@ func testV1FltrPopulateResources(t *testing.T) {
 
 	// check the event
 	tEv := &engine.ThresholdsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				utils.Account: "2020"},
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "event1",
+				Event: map[string]interface{}{
+					utils.Account: "2020"},
+			},
 		},
 	}
 	var ids []string
@@ -609,11 +619,13 @@ func testV1FltrAccounts(t *testing.T) {
 	}
 
 	tEv := &engine.ThresholdsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				utils.Account: "1001"},
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "event1",
+				Event: map[string]interface{}{
+					utils.Account: "1001"},
+			},
 		},
 	}
 	var ids []string
@@ -697,11 +709,13 @@ func testV1FltrAccountsExistsDynamicaly(t *testing.T) {
 	}
 
 	tEv := &engine.ThresholdsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				utils.Account: "1001"},
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "event1",
+				Event: map[string]interface{}{
+					utils.Account: "1001"},
+			},
 		},
 	}
 	var ids []string
@@ -712,11 +726,13 @@ func testV1FltrAccountsExistsDynamicaly(t *testing.T) {
 	}
 
 	tEv = &engine.ThresholdsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event2",
-			Event: map[string]interface{}{
-				utils.Account: "non"},
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "event2",
+				Event: map[string]interface{}{
+					utils.Account: "non"},
+			},
 		},
 	}
 	ids = nil

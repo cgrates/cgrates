@@ -120,25 +120,29 @@ func testAttributeSLoadFromFolder(t *testing.T) {
 func testAttributeSProcessEvent(t *testing.T) {
 	ev := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer(utils.MetaSessionS),
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testAttributeSProcessEvent",
-			Event: map[string]interface{}{
-				utils.EVENT_NAME: "VariableTest",
-				utils.ToR:        utils.VOICE,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testAttributeSProcessEvent",
+				Event: map[string]interface{}{
+					utils.EVENT_NAME: "VariableTest",
+					utils.ToR:        utils.VOICE,
+				},
 			},
 		},
 	}
 	eRply := engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_VARIABLE"},
 		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + utils.Category},
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testAttributeSProcessEvent",
-			Event: map[string]interface{}{
-				utils.EVENT_NAME: "VariableTest",
-				utils.Category:   utils.VOICE,
-				utils.ToR:        utils.VOICE,
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testAttributeSProcessEvent",
+				Event: map[string]interface{}{
+					utils.EVENT_NAME: "VariableTest",
+					utils.Category:   utils.VOICE,
+					utils.ToR:        utils.VOICE,
+				},
 			},
 		},
 	}

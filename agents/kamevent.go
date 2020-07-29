@@ -205,8 +205,10 @@ func (kev KamEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs) {
 		return
 	}
 	args = &sessions.V1AuthorizeArgs{
-		CGREvent: cgrEv,
-		Opts:     kev.GetOptions(),
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: cgrEv,
+			Opts:     kev.GetOptions(),
+		},
 	}
 	subsystems, has := kev[utils.CGRFlags]
 	if !has {
@@ -261,8 +263,10 @@ func (kev KamEvent) V1InitSessionArgs() (args *sessions.V1InitSessionArgs) {
 		return
 	}
 	args = &sessions.V1InitSessionArgs{ // defaults
-		CGREvent: cgrEv,
-		Opts:     kev.GetOptions(),
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: cgrEv,
+			Opts:     kev.GetOptions(),
+		},
 	}
 	subsystems, has := kev[utils.CGRFlags]
 	if !has {
@@ -280,8 +284,10 @@ func (kev KamEvent) V1ProcessMessageArgs() (args *sessions.V1ProcessMessageArgs)
 		return
 	}
 	args = &sessions.V1ProcessMessageArgs{ // defaults
-		CGREvent: cgrEv,
-		Opts:     kev.GetOptions(),
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: cgrEv,
+			Opts:     kev.GetOptions(),
+		},
 	}
 	subsystems, has := kev[utils.CGRFlags]
 	if !has {
@@ -299,14 +305,8 @@ func (kev KamEvent) V1ProcessCDRArgs() (args *utils.CGREventWithOpts) {
 	}
 	args = &utils.CGREventWithOpts{ // defaults
 		CGREvent: cgrEv,
+		Opts:     kev.GetOptions(),
 	}
-	subsystems, has := kev[utils.CGRFlags]
-	if !has {
-		return
-	}
-	opts := kev.GetOptions()
-	cgrArgs, _ := utils.ExtractArgsFromOpts(opts, strings.Index(subsystems, utils.MetaDispatchers) != -1, false)
-	args.ArgDispatcher = cgrArgs.ArgDispatcher
 	return
 }
 
@@ -379,14 +379,18 @@ func (kev KamEvent) AsKamProcessMessageEmptyReply() (kar *KamReply) {
 
 // V1TerminateSessionArgs returns the arguments used in SMGv1.TerminateSession
 func (kev KamEvent) V1TerminateSessionArgs() (args *sessions.V1TerminateSessionArgs) {
-	cgrEv, err := kev.AsCGREvent(config.CgrConfig().GeneralCfg().DefaultTimezone)
+	cgrEv, err := kev.AsCGREvent(utils.FirstNonEmpty(
+		config.CgrConfig().KamAgentCfg().Timezone,
+		config.CgrConfig().GeneralCfg().DefaultTimezone))
 	if err != nil {
 		return
 	}
 	args = &sessions.V1TerminateSessionArgs{ // defaults
 		TerminateSession: true,
-		CGREvent:         cgrEv,
-		Opts:             kev.GetOptions(),
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: cgrEv,
+			Opts:     kev.GetOptions(),
+		},
 	}
 	subsystems, has := kev[utils.CGRFlags]
 	if !has {
