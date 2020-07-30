@@ -12,5 +12,5 @@ In these tutorials we exemplify a few cases of integration between FreeSWITCH_ a
    tut_freeswitch_json
    tut_cgrates_usage
 
-.. _FreeSWITCH: http://www.freeswitch.org/
+.. _FreeSWITCH: https://freeswitch.com/
 

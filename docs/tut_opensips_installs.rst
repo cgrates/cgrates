@@ -22,4 +22,4 @@ We got OpenSIPS_ installed via following commands:
 
 Once installed we proceed with loading the configuration out of specific tutorial cases bellow.
 
-.. _OpenSIPS: http://www.opensips.org/
+.. _OpenSIPS: https://opensips.org/

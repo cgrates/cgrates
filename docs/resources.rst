@@ -6,7 +6,7 @@ ResourceS
 
 **ResourceS** is a standalone subsystem part of the **CGRateS** infrastructure, designed to allocate virtual resources for the generic *Events* (hashmaps) it receives.
 
-Both receiving of *Events* as well as operational commands on the virtual resources is performed via a complete set of :ref:`CGRateS RPC APIs<remote-management>`.
+Both receiving of *Events* as well as operational commands on the virtual resources is performed via a complete set of `CGRateS RPC APIs <https://godoc.org/github.com/cgrates/cgrates/apier/>`_.
 
 Due it's real-time nature, **ResourceS** are designed towards high throughput being able to process thousands of *Events* per second. This is doable since each *Resource* is a very light object, held in memory and eventually backed up in *DataDB*.
 
@@ -46,7 +46,7 @@ nested_fields
 ResourceProfile
 ^^^^^^^^^^^^^^^
 
-The **ResourceProfile** is the configuration of a *Resource*. This will be performed over :ref:`CGRateS RPC APIs<remote-management>` or *.csv* files. A profile is comprised out of the following parameters:
+The **ResourceProfile** is the configuration of a *Resource*. This will be performed over `CGRateS RPC APIs <https://godoc.org/github.com/cgrates/cgrates/apier/>`_ or *.csv* files. A profile is comprised out of the following parameters:
 
 Tenant
 	The tenant on the platform (one can see the tenant as partition ID).

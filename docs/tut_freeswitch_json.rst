@@ -62,5 +62,5 @@ At the end of each call FreeSWITCH_ will issue a http post with the CDR. This wi
 Since it is common to most of the tutorials, the example for **CGRateS** usage is provided in a separate page `here <http://cgrates.readthedocs.org/en/latest/tut_cgrates_usage.html>`_
 
 
-.. _FreeSWITCH: http://www.freeswitch.org/
-.. _Jitsi: http://www.jitsi.org/
+.. _FreeSWITCH: https://freeswitch.com/
+.. _Jitsi: https://jitsi.org/
