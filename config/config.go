@@ -712,7 +712,7 @@ func (cfg *CGRConfig) loadErsCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnERsCfg, err = jsnCfg.ERsJsonCfg(); err != nil {
 		return
 	}
-	return cfg.ersCfg.loadFromJsonCfg(jsnERsCfg, cfg.generalCfg.RSRSep, cfg.dfltEvRdr)
+	return cfg.ersCfg.loadFromJsonCfg(jsnERsCfg, cfg.generalCfg.RSRSep, cfg.dfltEvRdr, cfg.generalCfg.RSRSep)
 }
 
 // loadEesCfg loads the Ees section of the configuration
@@ -721,7 +721,7 @@ func (cfg *CGRConfig) loadEesCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnEEsCfg, err = jsnCfg.EEsJsonCfg(); err != nil {
 		return
 	}
-	return cfg.eesCfg.loadFromJsonCfg(jsnEEsCfg, cfg.generalCfg.RSRSep, cfg.dfltEvExp)
+	return cfg.eesCfg.loadFromJsonCfg(jsnEEsCfg, cfg.generalCfg.RSRSep, cfg.dfltEvExp, cfg.generalCfg.RSRSep)
 }
 
 // loadRateSCfg loads the rates section of the configuration

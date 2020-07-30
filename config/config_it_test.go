@@ -130,6 +130,7 @@ func testCGRConfigReloadAttributeS(t *testing.T) {
 		Enabled:             true,
 		StringIndexedFields: &[]string{utils.MetaReq + utils.NestingSep + utils.Account},
 		PrefixIndexedFields: &[]string{},
+		SuffixIndexedFields: &[]string{},
 		IndexedSelects:      true,
 		ProcessRuns:         1,
 	}
@@ -156,6 +157,7 @@ func testCGRConfigReloadChargerS(t *testing.T) {
 		Enabled:             true,
 		StringIndexedFields: &[]string{utils.MetaReq + utils.NestingSep + utils.Account},
 		PrefixIndexedFields: &[]string{},
+		SuffixIndexedFields: &[]string{},
 		IndexedSelects:      true,
 		AttributeSConns:     []string{"*localhost"},
 	}
@@ -182,6 +184,7 @@ func testCGRConfigReloadThresholdS(t *testing.T) {
 		Enabled:             true,
 		StringIndexedFields: &[]string{utils.MetaReq + utils.NestingSep + utils.Account},
 		PrefixIndexedFields: &[]string{},
+		SuffixIndexedFields: &[]string{},
 		IndexedSelects:      true,
 	}
 	if !reflect.DeepEqual(expAttr, cfg.ThresholdSCfg()) {
@@ -207,6 +210,7 @@ func testCGRConfigReloadStatS(t *testing.T) {
 		Enabled:             true,
 		StringIndexedFields: &[]string{utils.MetaReq + utils.NestingSep + utils.Account},
 		PrefixIndexedFields: &[]string{},
+		SuffixIndexedFields: &[]string{},
 		IndexedSelects:      true,
 		ThresholdSConns:     []string{utils.MetaLocalHost},
 	}
@@ -233,6 +237,7 @@ func testCGRConfigReloadResourceS(t *testing.T) {
 		Enabled:             true,
 		StringIndexedFields: &[]string{utils.MetaReq + utils.NestingSep + utils.Account},
 		PrefixIndexedFields: &[]string{},
+		SuffixIndexedFields: &[]string{},
 		IndexedSelects:      true,
 		ThresholdSConns:     []string{utils.MetaLocalHost},
 	}
@@ -259,6 +264,7 @@ func testCGRConfigReloadSupplierS(t *testing.T) {
 		Enabled:             true,
 		StringIndexedFields: &[]string{"*req.LCRProfile"},
 		PrefixIndexedFields: &[]string{utils.MetaReq + utils.NestingSep + utils.Destination},
+		SuffixIndexedFields: &[]string{},
 		ResourceSConns:      []string{},
 		StatSConns:          []string{},
 		AttributeSConns:     []string{},
@@ -457,6 +463,7 @@ func testCGRConfigReloadERs(t *testing.T) {
 	expAttr := &ERsCfg{
 		Enabled:       true,
 		SessionSConns: []string{utils.MetaLocalHost},
+		Templates:     map[string][]*FCTemplate{},
 		Readers: []*EventReaderCfg{
 			{
 				ID:               utils.MetaDefault,
@@ -873,6 +880,7 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 		"SessionSConns": []string{
 			utils.MetaLocalHost,
 		},
+		"Templates": map[string]interface{}{},
 	}
 
 	cfg, _ := NewDefaultCGRConfig()

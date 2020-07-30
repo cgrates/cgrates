@@ -1888,6 +1888,7 @@ func TestCgrCdfEventReader(t *testing.T) {
 	eCfg := &ERsCfg{
 		Enabled:       false,
 		SessionSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
+		Templates:     map[string][]*FCTemplate{},
 		Readers: []*EventReaderCfg{
 			{
 				ID:               utils.MetaDefault,
@@ -1952,6 +1953,7 @@ func TestCgrCdfEventExporter(t *testing.T) {
 				StaticTTL: false,
 			},
 		},
+		Templates: map[string][]*FCTemplate{},
 		Exporters: []*EventExporterCfg{
 			&EventExporterCfg{
 				ID:            utils.MetaDefault,

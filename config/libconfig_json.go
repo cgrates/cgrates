@@ -153,23 +153,11 @@ type CdrsJsonCfg struct {
 	Ees_conns            *[]string
 }
 
-// Cdre config section
-type CdreJsonCfg struct {
-	Export_format      *string
-	Export_path        *string
-	Filters            *[]string
-	Tenant             *string
-	Attributes_context *string
-	Synchronous        *bool
-	Attempts           *int
-	Field_separator    *string
-	Fields             *[]*FcTemplateJsonCfg
-}
-
 // EventReaderSJsonCfg contains the configuration of EventReaderService
 type ERsJsonCfg struct {
 	Enabled        *bool
 	Sessions_conns *[]string
+	Templates      map[string][]*FcTemplateJsonCfg
 	Readers        *[]*EventReaderJsonCfg
 }
 
@@ -201,6 +189,7 @@ type EEsJsonCfg struct {
 	Enabled          *bool
 	Attributes_conns *[]string
 	Cache            *map[string]*CacheParamJsonCfg
+	Templates        map[string][]*FcTemplateJsonCfg
 	Exporters        *[]*EventExporterJsonCfg
 }
 

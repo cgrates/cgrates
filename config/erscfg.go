@@ -28,10 +28,11 @@ import (
 type ERsCfg struct {
 	Enabled       bool
 	SessionSConns []string
+	Templates     map[string][]*FCTemplate
 	Readers       []*EventReaderCfg
 }
 
-func (erS *ERsCfg) loadFromJsonCfg(jsnCfg *ERsJsonCfg, sep string, dfltRdrCfg *EventReaderCfg) (err error) {
+func (erS *ERsCfg) loadFromJsonCfg(jsnCfg *ERsJsonCfg, sep string, dfltRdrCfg *EventReaderCfg, separator string) (err error) {
 	if jsnCfg == nil {
 		return
 	}
@@ -46,6 +47,16 @@ func (erS *ERsCfg) loadFromJsonCfg(jsnCfg *ERsJsonCfg, sep string, dfltRdrCfg *E
 				erS.SessionSConns[i] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
 			} else {
 				erS.SessionSConns[i] = fID
+			}
+		}
+	}
+	if jsnCfg.Templates != nil {
+		if erS.Templates == nil {
+			erS.Templates = make(map[string][]*FCTemplate)
+		}
+		for k, jsnTpls := range jsnCfg.Templates {
+			if erS.Templates[k], err = FCTemplatesFromFCTemplatesJsonCfg(jsnTpls, separator); err != nil {
+				return
 			}
 		}
 	}
