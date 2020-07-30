@@ -104,7 +104,7 @@ func (apierSv1 *APIerSv1) SetRateProfile(rPrf *RateProfileWithCache, reply *stri
 		CacheID: utils.CacheRateProfiles,
 		ItemID:  rPrf.TenantID(),
 	}
-	if err := apierSv1.CallCache(GetCacheOpt(rPrf.Cache), args); err != nil {
+	if err := apierSv1.CallCache(GetCacheOpt(rPrf.Cache), args, rPrf.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -128,7 +128,7 @@ func (apierSv1 *APIerSv1) SetRateProfileRates(rPrf *RateProfileWithCache, reply 
 		CacheID: utils.CacheRateProfiles,
 		ItemID:  rPrf.TenantID(),
 	}
-	if err = apierSv1.CallCache(GetCacheOpt(rPrf.Cache), args); err != nil {
+	if err = apierSv1.CallCache(GetCacheOpt(rPrf.Cache), args, rPrf.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -140,6 +140,7 @@ type RemoveRPrfRates struct {
 	ID      string
 	RateIDs []string
 	Cache   *string
+	Opts    map[string]interface{}
 }
 
 func (apierSv1 *APIerSv1) RemoveRateProfileRates(args *RemoveRPrfRates, reply *string) (err error) {
@@ -157,7 +158,7 @@ func (apierSv1 *APIerSv1) RemoveRateProfileRates(args *RemoveRPrfRates, reply *s
 		CacheID: utils.CacheRateProfiles,
 		ItemID:  utils.ConcatenatedKey(args.Tenant, args.ID),
 	}
-	if err := apierSv1.CallCache(GetCacheOpt(args.Cache), argsCache); err != nil {
+	if err := apierSv1.CallCache(GetCacheOpt(args.Cache), argsCache, args.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -181,7 +182,7 @@ func (apierSv1 *APIerSv1) RemoveRateProfile(arg *utils.TenantIDWithCache, reply 
 		CacheID: utils.CacheRateProfiles,
 		ItemID:  utils.ConcatenatedKey(arg.Tenant, arg.ID),
 	}
-	if err := apierSv1.CallCache(GetCacheOpt(arg.Cache), args); err != nil {
+	if err := apierSv1.CallCache(GetCacheOpt(arg.Cache), args, arg.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

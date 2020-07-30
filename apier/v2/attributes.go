@@ -29,6 +29,7 @@ import (
 type AttributeWithCache struct {
 	*engine.ExternalAttributeProfile
 	Cache *string
+	Opts  map[string]interface{}
 }
 
 //SetAttributeProfile add/update a new Attribute Profile
@@ -54,7 +55,7 @@ func (APIerSv2 *APIerSv2) SetAttributeProfile(arg *AttributeWithCache, reply *st
 	}
 	if err := APIerSv2.APIerSv1.CallCache(
 		v1.GetCacheOpt(arg.Cache),
-		args); err != nil {
+		args, arg.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

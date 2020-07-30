@@ -62,6 +62,7 @@ func (apierSv1 *APIerSv1) GetRouteProfileIDs(args *utils.TenantArgWithPaginator,
 type RouteWithCache struct {
 	*engine.RouteProfile
 	Cache *string
+	Opts  map[string]interface{}
 }
 
 //SetRouteProfile add a new Route configuration
@@ -81,7 +82,7 @@ func (apierSv1 *APIerSv1) SetRouteProfile(args *RouteWithCache, reply *string) e
 		CacheID: utils.CacheRouteProfiles,
 		ItemID:  args.TenantID(),
 	}
-	if err := apierSv1.CallCache(GetCacheOpt(args.Cache), argCache); err != nil {
+	if err := apierSv1.CallCache(GetCacheOpt(args.Cache), argCache, args.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -105,7 +106,7 @@ func (apierSv1 *APIerSv1) RemoveRouteProfile(args *utils.TenantIDWithCache, repl
 		CacheID: utils.CacheRouteProfiles,
 		ItemID:  args.TenantID(),
 	}
-	if err := apierSv1.CallCache(GetCacheOpt(args.Cache), argCache); err != nil {
+	if err := apierSv1.CallCache(GetCacheOpt(args.Cache), argCache, args.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

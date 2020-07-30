@@ -1340,7 +1340,7 @@ func (apierSv1 *APIerSv1) ReplayFailedPosts(args *ArgsReplyFailedPosts, reply *s
 
 // CallCache caching the item based on cacheopt
 // visible in APIerSv2
-func (apierSv1 *APIerSv1) CallCache(cacheOpt string, args utils.ArgsGetCacheItem) (err error) {
+func (apierSv1 *APIerSv1) CallCache(cacheOpt string, args utils.ArgsGetCacheItem, opts map[string]interface{}) (err error) {
 	var reply string
 	switch cacheOpt {
 	case utils.META_NONE:
@@ -1348,25 +1348,26 @@ func (apierSv1 *APIerSv1) CallCache(cacheOpt string, args utils.ArgsGetCacheItem
 	case utils.MetaReload:
 		if err = apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
 			utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithOpts{
-				ArgsCache: composeArgsReload(args)}, &reply); err != nil {
+				ArgsCache: composeArgsReload(args), Opts: opts}, &reply); err != nil {
 			return err
 		}
 	case utils.MetaLoad:
 		if err = apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
 			utils.CacheSv1LoadCache, utils.AttrReloadCacheWithOpts{
-				ArgsCache: composeArgsReload(args)}, &reply); err != nil {
+				ArgsCache: composeArgsReload(args), Opts: opts}, &reply); err != nil {
 			return err
 		}
 	case utils.MetaRemove:
 		if err = apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
 			utils.CacheSv1RemoveItem,
-			&utils.ArgsGetCacheItemWithOpts{ArgsGetCacheItem: args}, &reply); err != nil {
+			&utils.ArgsGetCacheItemWithOpts{ArgsGetCacheItem: args, Opts: opts}, &reply); err != nil {
 			return err
 		}
 	case utils.MetaClear:
 		if err = apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
 			utils.CacheSv1Clear, &utils.AttrCacheIDsWithOpts{
 				CacheIDs: []string{args.CacheID},
+				Opts:     opts,
 			}, &reply); err != nil {
 			return err
 		}

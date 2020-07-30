@@ -62,6 +62,7 @@ func (apierSv1 *APIerSv1) GetChargerProfileIDs(args *utils.TenantArgWithPaginato
 type ChargerWithCache struct {
 	*engine.ChargerProfile
 	Cache *string
+	Opts  map[string]interface{}
 }
 
 //SetChargerProfile add/update a new Charger Profile
@@ -81,7 +82,7 @@ func (apierSv1 *APIerSv1) SetChargerProfile(arg *ChargerWithCache, reply *string
 		CacheID: utils.CacheChargerProfiles,
 		ItemID:  arg.TenantID(),
 	}
-	if err := apierSv1.CallCache(GetCacheOpt(arg.Cache), argCache); err != nil {
+	if err := apierSv1.CallCache(GetCacheOpt(arg.Cache), argCache, arg.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -106,7 +107,7 @@ func (apierSv1 *APIerSv1) RemoveChargerProfile(arg *utils.TenantIDWithCache, rep
 		CacheID: utils.CacheChargerProfiles,
 		ItemID:  arg.TenantID(),
 	}
-	if err := apierSv1.CallCache(GetCacheOpt(arg.Cache), argCache); err != nil {
+	if err := apierSv1.CallCache(GetCacheOpt(arg.Cache), argCache, arg.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

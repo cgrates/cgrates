@@ -67,6 +67,7 @@ func (apierSv1 *APIerSv1) GetDispatcherProfileIDs(tenantArg *utils.TenantArgWith
 type DispatcherWithCache struct {
 	*engine.DispatcherProfile
 	Cache *string
+	Opts  map[string]interface{}
 }
 
 //SetDispatcherProfile add/update a new Dispatcher Profile
@@ -86,7 +87,7 @@ func (apierSv1 *APIerSv1) SetDispatcherProfile(args *DispatcherWithCache, reply 
 		CacheID: utils.CacheDispatcherProfiles,
 		ItemID:  args.TenantID(),
 	}
-	if err := apierSv1.CallCache(GetCacheOpt(args.Cache), argCache); err != nil {
+	if err := apierSv1.CallCache(GetCacheOpt(args.Cache), argCache, args.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -111,7 +112,7 @@ func (apierSv1 *APIerSv1) RemoveDispatcherProfile(arg *utils.TenantIDWithCache, 
 		CacheID: utils.CacheDispatcherProfiles,
 		ItemID:  arg.TenantID(),
 	}
-	if err := apierSv1.CallCache(GetCacheOpt(arg.Cache), argCache); err != nil {
+	if err := apierSv1.CallCache(GetCacheOpt(arg.Cache), argCache, arg.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -156,6 +157,7 @@ func (apierSv1 *APIerSv1) GetDispatcherHostIDs(tenantArg *utils.TenantArgWithPag
 type DispatcherHostWithCache struct {
 	*engine.DispatcherHost
 	Cache *string
+	Opts  map[string]interface{}
 }
 
 //SetDispatcherHost add/update a new Dispatcher Host
@@ -175,7 +177,7 @@ func (apierSv1 *APIerSv1) SetDispatcherHost(args *DispatcherHostWithCache, reply
 		CacheID: utils.CacheDispatcherHosts,
 		ItemID:  args.TenantID(),
 	}
-	if err := apierSv1.CallCache(GetCacheOpt(args.Cache), argCache); err != nil {
+	if err := apierSv1.CallCache(GetCacheOpt(args.Cache), argCache, args.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -200,7 +202,7 @@ func (apierSv1 *APIerSv1) RemoveDispatcherHost(arg *utils.TenantIDWithCache, rep
 		CacheID: utils.CacheDispatcherHosts,
 		ItemID:  arg.TenantID(),
 	}
-	if err := apierSv1.CallCache(GetCacheOpt(arg.Cache), argCache); err != nil {
+	if err := apierSv1.CallCache(GetCacheOpt(arg.Cache), argCache, arg.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

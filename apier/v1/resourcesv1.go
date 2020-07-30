@@ -101,6 +101,7 @@ func (apierSv1 *APIerSv1) GetResourceProfileIDs(args utils.TenantArgWithPaginato
 type ResourceWithCache struct {
 	*engine.ResourceProfile
 	Cache *string
+	Opts  map[string]interface{}
 }
 
 //SetResourceProfile adds a new resource configuration
@@ -124,7 +125,7 @@ func (apierSv1 *APIerSv1) SetResourceProfile(arg *ResourceWithCache, reply *stri
 		CacheID: utils.CacheResourceProfiles,
 		ItemID:  arg.TenantID(),
 	}
-	if err := apierSv1.CallCache(GetCacheOpt(arg.Cache), argCache); err != nil {
+	if err := apierSv1.CallCache(GetCacheOpt(arg.Cache), argCache, arg.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//add the resource only if it's not present
@@ -142,7 +143,7 @@ func (apierSv1 *APIerSv1) SetResourceProfile(arg *ResourceWithCache, reply *stri
 			CacheID: utils.CacheResources,
 			ItemID:  arg.TenantID(),
 		}
-		if err := apierSv1.CallCache(GetCacheOpt(arg.Cache), argCache); err != nil {
+		if err := apierSv1.CallCache(GetCacheOpt(arg.Cache), argCache, arg.Opts); err != nil {
 			return utils.APIErrorHandler(err)
 		}
 	}
@@ -164,7 +165,7 @@ func (apierSv1 *APIerSv1) RemoveResourceProfile(arg *utils.TenantIDWithCache, re
 		CacheID: utils.CacheResourceProfiles,
 		ItemID:  arg.TenantID(),
 	}
-	if err := apierSv1.CallCache(GetCacheOpt(arg.Cache), argCache); err != nil {
+	if err := apierSv1.CallCache(GetCacheOpt(arg.Cache), argCache, arg.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	if err := apierSv1.DataManager.RemoveResource(arg.Tenant, arg.ID, utils.NonTransactional); err != nil {
@@ -181,7 +182,7 @@ func (apierSv1 *APIerSv1) RemoveResourceProfile(arg *utils.TenantIDWithCache, re
 		CacheID: utils.CacheResources,
 		ItemID:  arg.TenantID(),
 	}
-	if err := apierSv1.CallCache(GetCacheOpt(arg.Cache), argCache); err != nil {
+	if err := apierSv1.CallCache(GetCacheOpt(arg.Cache), argCache, arg.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
