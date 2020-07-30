@@ -745,7 +745,7 @@ func testV1FltrAccountsExistsDynamicaly(t *testing.T) {
 
 func testV1FltrChargerSuffix(t *testing.T) {
 	var reply string
-	if err := fltrRpc.Call(utils.CacheSv1Clear, &utils.AttrCacheIDsWithArgDispatcher{
+	if err := fltrRpc.Call(utils.CacheSv1Clear, &utils.AttrCacheIDsWithOpts{
 		CacheIDs: nil,
 	}, &reply); err != nil {
 		t.Error(err)

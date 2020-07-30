@@ -1029,7 +1029,7 @@ func testv2CDRsDynaPrepaid(t *testing.T) {
 
 func testV2CDRsDuplicateCDRs(t *testing.T) {
 	var reply string
-	if err := cdrsRpc.Call(utils.CacheSv1Clear, &utils.AttrCacheIDsWithArgDispatcher{
+	if err := cdrsRpc.Call(utils.CacheSv1Clear, &utils.AttrCacheIDsWithOpts{
 		CacheIDs: nil,
 	}, &reply); err != nil {
 		t.Error(err)
@@ -1088,20 +1088,22 @@ func testV2CDRsDuplicateCDRs(t *testing.T) {
 
 	args := &engine.ArgV1ProcessEvent{
 		Flags: []string{utils.MetaRerate},
-		CGREvent: utils.CGREvent{
-			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
-				utils.OriginID:    "testV2CDRsDuplicateCDRs",
-				utils.OriginHost:  "192.168.1.1",
-				utils.Source:      "testV2CDRsDuplicateCDRs",
-				utils.RequestType: utils.META_PSEUDOPREPAID,
-				utils.Account:     "testV2CDRsDuplicateCDRs",
-				utils.Subject:     "ANY2CNT",
-				utils.Destination: "+4986517174963",
-				utils.AnswerTime:  time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
-				utils.Usage:       2 * time.Minute,
-				"field_extr1":     "val_extr1",
-				"fieldextr2":      "valextr2",
+		CGREventWithOpts: utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				Event: map[string]interface{}{
+					utils.OriginID:    "testV2CDRsDuplicateCDRs",
+					utils.OriginHost:  "192.168.1.1",
+					utils.Source:      "testV2CDRsDuplicateCDRs",
+					utils.RequestType: utils.META_PSEUDOPREPAID,
+					utils.Account:     "testV2CDRsDuplicateCDRs",
+					utils.Subject:     "ANY2CNT",
+					utils.Destination: "+4986517174963",
+					utils.AnswerTime:  time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+					utils.Usage:       2 * time.Minute,
+					"field_extr1":     "val_extr1",
+					"fieldextr2":      "valextr2",
+				},
 			},
 		},
 	}
@@ -1125,20 +1127,22 @@ func testV2CDRsDuplicateCDRs(t *testing.T) {
 			var rplProcEv []*utils.EventWithFlags
 			args2 := &engine.ArgV1ProcessEvent{
 				Flags: []string{utils.MetaRerate},
-				CGREvent: utils.CGREvent{
-					Tenant: "cgrates.org",
-					Event: map[string]interface{}{
-						utils.OriginID:    "testV2CDRsDuplicateCDRs",
-						utils.OriginHost:  "192.168.1.1",
-						utils.Source:      "testV2CDRsDuplicateCDRs",
-						utils.RequestType: utils.META_PSEUDOPREPAID,
-						utils.Account:     "testV2CDRsDuplicateCDRs",
-						utils.Subject:     "ANY2CNT",
-						utils.Destination: "+4986517174963",
-						utils.AnswerTime:  time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
-						utils.Usage:       1 * time.Minute,
-						"field_extr1":     "val_extr1",
-						"fieldextr2":      "valextr2",
+				CGREventWithOpts: utils.CGREventWithOpts{
+					CGREvent: &utils.CGREvent{
+						Tenant: "cgrates.org",
+						Event: map[string]interface{}{
+							utils.OriginID:    "testV2CDRsDuplicateCDRs",
+							utils.OriginHost:  "192.168.1.1",
+							utils.Source:      "testV2CDRsDuplicateCDRs",
+							utils.RequestType: utils.META_PSEUDOPREPAID,
+							utils.Account:     "testV2CDRsDuplicateCDRs",
+							utils.Subject:     "ANY2CNT",
+							utils.Destination: "+4986517174963",
+							utils.AnswerTime:  time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+							utils.Usage:       1 * time.Minute,
+							"field_extr1":     "val_extr1",
+							"fieldextr2":      "valextr2",
+						},
 					},
 				},
 			}
