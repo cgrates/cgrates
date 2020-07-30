@@ -357,7 +357,7 @@ type DispatcherAttributeSv1 struct {
 	dA *dispatchers.DispatcherService
 }
 
-// Ping implements SupplierSv1Ping
+// Ping implements AttributeSv1Ping
 func (dA *DispatcherAttributeSv1) Ping(args *utils.CGREventWithOpts, reply *string) error {
 	return dA.dA.AttributeSv1Ping(args, reply)
 }
@@ -1266,7 +1266,7 @@ type DispatcherRateSv1 struct {
 	dR *dispatchers.DispatcherService
 }
 
-// Ping implements SupplierSv1Ping
+// Ping implements RateSv1Ping
 func (dR *DispatcherRateSv1) Ping(args *utils.CGREventWithOpts, reply *string) error {
 	return dR.dR.RateSv1Ping(args, reply)
 }

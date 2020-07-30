@@ -49,7 +49,7 @@ func init() {
 	gob.Register(new(StatQueueProfileWithOpts))
 	gob.Register(new(StoredStatQueue))
 	gob.Register(new(StatQueueProfileWithOpts))
-	// Suppliers
+	// RouteS
 	gob.Register(new(RouteProfile))
 	gob.Register(new(RouteProfileWithOpts))
 	// Filters

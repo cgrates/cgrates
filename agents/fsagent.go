@@ -196,7 +196,7 @@ func (fsa *FSsessions) onChannelPark(fsev FSEvent, connIdx int) {
 		fsArray := SliceAsFsArray(authReply.Routes.RoutesWithParams())
 		if _, err := fsa.conns[connIdx].SendApiCmd(fmt.Sprintf("uuid_setvar %s %s %s\n\n",
 			fsev.GetUUID(), utils.CGR_ROUTES, fsArray)); err != nil {
-			utils.Logger.Info(fmt.Sprintf("<%s> error setting suppliers: %s",
+			utils.Logger.Info(fmt.Sprintf("<%s> error setting routes: %s",
 				utils.FreeSWITCHAgent, err.Error()))
 			fsa.unparkCall(fsev.GetUUID(), connIdx, fsev.GetCallDestNr(utils.MetaDefault), err.Error())
 			return

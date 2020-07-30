@@ -12,6 +12,6 @@ In these tutorials we exemplify a few cases of integration between Kamailio_ and
    tut_kamailio_evapi
    tut_cgrates_usage
 
-.. _Kamailio: http://www.kamailio.org/
+.. _Kamailio: https://www.kamailio.org/w/
 .. _CGRateS: http://www.cgrates.org/
 

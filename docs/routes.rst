@@ -4,13 +4,13 @@
 .. _OpenSIPS: https://opensips.org/
 
 
-.. _Suppliers:
+.. _Routes:
 
-SupplierS
+RouteS
 =========
 
 
-**SupplierS** is a standalone subsystem within **CGRateS** responsible to compute a list of suppliers which can be used for a specific event received to process. It is accessed via :ref:`CGRateS RPC APIs<remote-management>`.
+**RouteS** is a standalone subsystem within **CGRateS** responsible to compute a list of routes which can be used for a specific event received to process. It is accessed via `CGRateS RPC APIs <https://godoc.org/github.com/cgrates/cgrates/apier/>`_.
 
 As most of the other subsystems, it is performance oriented, stored inside *DataDB* but cached inside the *cgr-engine* process. 
 Caching can be done dynamically/on-demand or at start-time/precached and it is configurable within *cache* section in the :ref:`JSON configuration <configuration>`.
@@ -19,7 +19,7 @@ Caching can be done dynamically/on-demand or at start-time/precached and it is c
 Processing logic
 ----------------
 
-When a new *Event* is received, **SupplierS** will pass it to :ref:`FilterS` in order to find all :ref:`SupplierProfiles<SupplierProfile>` matching the *Event*. 
+When a new *Event* is received, **RouteS** will pass it to :ref:`FilterS` in order to find all :ref:`SupplierProfiles<SupplierProfile>` matching the *Event*. 
 
 As a result of the selection process we will get a single :ref:`SupplierProfile` matching the *Event*, is active at the *EventTime* and has a higher priority than the other matching :ref:`SupplierProfiles<SupplierProfile>`. 
 
@@ -37,20 +37,20 @@ Given the *Event* it will return a list of ordered *SupplierProfiles* matching a
 This API is useful to test configurations.
 
 
-GetSuppliers
+GetRoutes
 ^^^^^^^^^^^^
 
-Will return a list of *Suppliers* from within a *SupplierProfile* ordered based on *Strategy*.
+Will return a list of *Routes* from within a *SupplierProfile* ordered based on *Strategy*.
 
 
 Parameters
 ----------
 
 
-SupplierS
+RouteS
 ^^^^^^^^^
 
-**SupplierS** is the **CGRateS** component responsible for handling the *SupplierProfiles*.
+**RouteS** is the **CGRateS** component responsible for handling the *SupplierProfiles*.
 
 It is configured within **routes** section from :ref:`JSON configuration <configuration>` via the following parameters:
 
@@ -87,7 +87,7 @@ default_ratio
 SupplierProfile
 ^^^^^^^^^^^^^^^
 
-Contains the configuration for a set of suppliers which will be returned in case of match. Following fields can be defined:
+Contains the configuration for a set of routes which will be returned in case of match. Following fields can be defined:
 
 Tenant
 	The tenant on the platform (one can see the tenant as partition ID).
@@ -102,32 +102,32 @@ ActivationInterval
 	The time interval when this profile becomes active. If undefined, the profile is always active. Other options are start time, end time or both.
 
 Sorting
-	Sorting strategy applied when ordering the individual *Suppliers* defined bellow. Possible values are:
+	Sorting strategy applied when ordering the individual *Routes* defined bellow. Possible values are:
 
 	**\*weight**
-		Classic method of statically sorting the suppliers based on their priority.
+		Classic method of statically sorting the routes based on their priority.
 
 	**\*lc**
-		LeastCost will sort the suppliers based on their cost (lowest cost will have higher priority). If two suppliers will be identical as cost, their *Weight* will influence the sorting further. If *AccountIDs* will be specified, bundles can be also used during cost calculation, the only condition is that the bundles should cover complete usage.
+		LeastCost will sort the routes based on their cost (lowest cost will have higher priority). If two routes will be identical as cost, their *Weight* will influence the sorting further. If *AccountIDs* will be specified, bundles can be also used during cost calculation, the only condition is that the bundles should cover complete usage.
 
 		The following fields are mandatory for cost calculation: *Account*/*Subject*, *Destination*, *SetupTime*. *Usage* is optional and if present in event, it will be used for the cost calculation.
 
 	**\*hc**
-		HighestCost will sort the suppliers based on their cost(higher cost will have higher priority). If two suppliers will be identical as cost, their *Weight* will influence the sorting further.
+		HighestCost will sort the routes based on their cost(higher cost will have higher priority). If two routes will be identical as cost, their *Weight* will influence the sorting further.
 
 		The following fields are mandatory for cost calculation: *Account*/*Subject*, *Destination*, *SetupTime*. *Usage* is optional and if present in event, it will be used for the cost calculation.
 
 	**\*qos**
-		QualityOfService strategy will sort the suppliers based on their stats. It takes the StatIDs to check from the supplier *StatIDs* definition. The metrics used as part of sorting are to be defined in *SortingParameters* field bellow. If Stats are missing the metrics defined in *SortingParameters* defaults for those will be populated for order (10000000 as PDD and -1 for the rest).
+		QualityOfService strategy will sort the routes based on their stats. It takes the StatIDs to check from the supplier *StatIDs* definition. The metrics used as part of sorting are to be defined in *SortingParameters* field bellow. If Stats are missing the metrics defined in *SortingParameters* defaults for those will be populated for order (10000000 as PDD and -1 for the rest).
 
 	**\*reas**
-		ResourceAscendentSorter will sort the suppliers based on their resource usage, lowest usage giving higher priority. The resources will be queried for each supplier based on it's *ResourceIDs* field and the final usage for each supplier will be given by the sum of all the resource usages queried.
+		ResourceAscendentSorter will sort the routes based on their resource usage, lowest usage giving higher priority. The resources will be queried for each supplier based on it's *ResourceIDs* field and the final usage for each supplier will be given by the sum of all the resource usages queried.
 
 	**\*reds**
-		ResourceDescendentSorter will sort the suppliers based on their resource usage, highest usage giving higher priority. The resources will be queried for each supplier based on it's *ResourceIDs* field and the final usage for each supplier will be given by the sum of all the resource usages queried.
+		ResourceDescendentSorter will sort the routes based on their resource usage, highest usage giving higher priority. The resources will be queried for each supplier based on it's *ResourceIDs* field and the final usage for each supplier will be given by the sum of all the resource usages queried.
 
 	**\*load**
-		LoadDistribution will sort the suppliers based on their load. An important parameter is the *\*ratio* which is defined as *supplierID:Ratio* within the SortingParameters. If no supplierID is present within SortingParameters, the system will look for *\*default* or fallback in the configuration to *default_ratio* within :ref:`JSON configuration <configuration>`. The *\*ratio* will specify the probability to get traffic on a *Supplier*, the higher the *\*ratio* more chances will a *Supplier* get for traffic. 
+		LoadDistribution will sort the routes based on their load. An important parameter is the *\*ratio* which is defined as *supplierID:Ratio* within the SortingParameters. If no supplierID is present within SortingParameters, the system will look for *\*default* or fallback in the configuration to *default_ratio* within :ref:`JSON configuration <configuration>`. The *\*ratio* will specify the probability to get traffic on a *Supplier*, the higher the *\*ratio* more chances will a *Supplier* get for traffic. 
 
 		The load will be calculated out of the *StatIDs* parameter of each *Supplier*. It is possible to also specify there directly the metric being used in the format *StatID:MetricID*. If only *StatID* is instead specified, all metrics will be summed to get the final value. 
 
@@ -141,7 +141,7 @@ SortingParameters
 Weight
 	Priority in case of multiple *SupplierProfiles* matching an *Event*. Higher *Weight* will have more priority.
 
-Suppliers
+Routes
 	List of :ref:`Supplier` objects which are part of this *SupplierProfile*
 
 
@@ -174,7 +174,7 @@ Weight
 	Used for sorting in some strategies (ie: *weight, *lc or *hc).
 
 Blocker
-	No more suppliers are provided after this one.
+	No more routes are provided after this one.
 	
 SupplierParameters
 	Container which is trasparently passed to the remote client to be used in it's own logic (ie: gateway prefix stripping or other gateway parameters).
@@ -184,7 +184,7 @@ SupplierParameters
 Use cases
 ---------
 
-* Calculate LCR directly by querying APIs (GetSuppliers).
+* Calculate LCR directly by querying APIs (GetRoutes).
 * LCR system together with  Kamailio_ *dispatcher* module where the *SupplierID* whithin *CGRateS* will be used as dispatcher set within Kamailio_.
 * LCR system together with OpenSIPS_ drouting module where the *SupplierID* whithin *CGRateS* will be used as drouting carrier id.
 * LCR system together with FreeSWITCH_ or Asterisk_ where the *SupplierID* whithin *CGRateS* will be used as gateway ID within the dialplan of FreesWITCH_ or Asterisk_.

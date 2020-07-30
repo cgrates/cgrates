@@ -24,7 +24,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// SupplierSCfg is the configuration of supplier service
+// ChargerSCfg is the configuration of charger service
 type ChargerSCfg struct {
 	Enabled             bool
 	IndexedSelects      bool

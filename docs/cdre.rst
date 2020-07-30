@@ -10,7 +10,7 @@ CDRe
 ====
 
 
-**CDRe** is an extension of :ref:`CDRs`, responsible for exporting the *CDR* events processed by :ref:`CDRs`. It is accessed via :ref:`CGRateS RPC APIs<remote-management>` and configured within *cdre* section inside :ref:`JSON configuration <configuration>`.
+**CDRe** is an extension of :ref:`CDRs`, responsible for exporting the *CDR* events processed by :ref:`CDRs`. It is accessed via `CGRateS RPC APIs <https://godoc.org/github.com/cgrates/cgrates/apier/>`_ and configured within *cdre* section inside :ref:`JSON configuration <configuration>`.
 
 
 Export types
@@ -32,7 +32,7 @@ You can control the templates which are to be executed via the filters which are
 Offline exports
 ^^^^^^^^^^^^^^^
 
-Are exports which are triggered via :ref:`CGRateS RPC APIs<remote-management>` and they have as data source the CDRs stored within *StorDB*.
+Are exports which are triggered via `CGRateS RPC APIs <https://godoc.org/github.com/cgrates/cgrates/apier/>`_ and they have as data source the CDRs stored within *StorDB*.
 
 
 
@@ -56,16 +56,16 @@ export_format
 		Exports into a fixed width file format.
 
 	**\*http_post**
-		Will post the CDR to a HTTP server. The export content will be a HTTP form encoded representation of the :ref:`internal CDR object<CDR>`.
+		Will post the CDR to a HTTP server. The export content will be a HTTP form encoded representation of the `internal CDR object <https://godoc.org/github.com/cgrates/cgrates/engine#CDR>`_.
 
 	**\*http_json_cdr**
-		Will post the CDR to a HTTP server. The export content will be a JSON serialized representation of the :ref:`internal CDR object<CDR>`.
+		Will post the CDR to a HTTP server. The export content will be a JSON serialized representation of the `internal CDR object <https://godoc.org/github.com/cgrates/cgrates/engine#CDR>`_.
 
 	**\*http_json_map**
 		Will post the CDR to a HTTP server. The export content will be a JSON serialized hmap with fields defined within the *fields* section of the template.
 
 	**\*amqp_json_cdr**
-		Will post the CDR to an AMQP_ queue. The export content will be a JSON serialized representation of the :ref:`internal CDR object<CDR>`. Uses AMQP_ protocol version 0.9.1.
+		Will post the CDR to an AMQP_ queue. The export content will be a JSON serialized representation of the `internal CDR object <https://godoc.org/github.com/cgrates/cgrates/engine#CDR>`_. Uses AMQP_ protocol version 0.9.1.
 
 	**\*amqp_json_map**
 		Will post the CDR to an AMQP_ queue. The export content will be a JSON serialized hmap with fields defined within the *fields* section of the template. Uses AMQP_ protocol version 1.0.

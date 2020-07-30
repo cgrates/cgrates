@@ -1,7 +1,7 @@
-.. _Redis: http://redis.io
-.. _MySQL: http://www.mysql.org
-.. _PostgreSQL: http://www.postgresql.org
-.. _MongoDB: http://www.mongodb.org
+.. _Redis: https://redis.io/
+.. _MySQL: https://dev.mysql.com/
+.. _PostgreSQL: https://www.postgresql.org/
+.. _MongoDB: https://www.mongodb.com/
 
 
 
@@ -51,7 +51,7 @@ Update & install:
     sudo apt-get install cgrates
 
 
-Once the installation is completed, one should perform the :ref:`post-install` section in order to have the CGRateS properly set and ready to run.
+Once the installation is completed, one should perform the :ref:`post_install` section in order to have the CGRateS properly set and ready to run.
 After *post-install* actions are performed, CGRateS will be configured in **/etc/cgrates/cgrates.json** and enabled in **/etc/default/cgrates**.
 
 
@@ -94,7 +94,7 @@ To install CGRateS out of YUM execute the following commands
     sudo yum update
     sudo yum install cgrates
 
-Once the installation is completed, one should perform the :ref:`post-install` section in order to have the CGRateS properly set and ready to run.
+Once the installation is completed, one should perform the :ref:`post_install` section in order to have the CGRateS properly set and ready to run.
 After *post-install* actions are performed, CGRateS will be configured in **/etc/cgrates/cgrates.json** and enabled in **/etc/default/cgrates**.
 
 
@@ -178,7 +178,7 @@ Install Custom Debian / Ubuntu Package
 
 
 Generate RPM Packages from Source
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Prerequisites
  * :ref:`Install Golang <InstallGO>`
@@ -209,7 +209,8 @@ Execute the following commands
     rpmbuild -bb --define "_topdir $HOME/cgr_build" SPECS/cgrates.spec
 
 
-.. _post-install:
+.. _post_install:
+
 Post-install
 ------------
 

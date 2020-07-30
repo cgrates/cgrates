@@ -109,7 +109,7 @@ func (rs *Responder) GetCost(arg *CallDescriptorWithOpts, reply *CallCost) (err 
 	return
 }
 
-//GetCostOnRatingPlans is used by SupplierS to calculate the cost
+// GetCostOnRatingPlans is used by RouteS to calculate the cost
 // Receive a list of RatingPlans and pick the first without error
 func (rs *Responder) GetCostOnRatingPlans(arg *utils.GetCostOnRatingPlansArgs, reply *map[string]interface{}) (err error) {
 	for _, rp := range arg.RatingPlanIDs { // loop through RatingPlans until we find one without errors

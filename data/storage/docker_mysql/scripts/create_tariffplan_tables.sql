@@ -340,12 +340,12 @@ CREATE TABLE tp_filters (
 );
 
 --
--- Table structure for table `tp_suppliers`
+-- Table structure for table `tp_routes`
 --
 
 
-DROP TABLE IF EXISTS tp_suppliers;
-CREATE TABLE tp_suppliers (
+DROP TABLE IF EXISTS tp_routes;
+CREATE TABLE tp_routes (
   `pk` int(11) NOT NULL AUTO_INCREMENT,
   `tpid` varchar(64) NOT NULL,
   `tenant` varchar(64) NOT NULL,
@@ -367,7 +367,7 @@ CREATE TABLE tp_suppliers (
   `created_at` TIMESTAMP,
   PRIMARY KEY (`pk`),
   KEY `tpid` (`tpid`),
-  UNIQUE KEY `unique_tp_suppliers` (`tpid`,`tenant`,
+  UNIQUE KEY `unique_tp_routes` (`tpid`,`tenant`,
     `id`,`filter_ids`,`supplier_id`,`supplier_filter_ids`,`supplier_account_ids`,
     `supplier_ratingplan_ids`,`supplier_resource_ids`,`supplier_stat_ids` )
 );

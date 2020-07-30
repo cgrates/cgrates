@@ -1,3 +1,5 @@
+.. _tariffplan:
+
 TariffPlans
 ===========
 
@@ -14,72 +16,4 @@ Due to complex data definition we have split information necessary on each load 
 
 Each individual CSV file can have any number of rows starting with comment character (#) which will be ignored on processing.
 
-Depending on CGRateS subsystem, following files are required:
-
-Rating
-~~~~~~
-
-.. toctree::
-   :maxdepth: 2
-
-   csv_tptimings
-
-.. toctree::
-   :maxdepth: 2
-
-   csv_tpdestinations
-
-.. toctree::
-   :maxdepth: 2
-
-   csv_tprates
-
-.. toctree::
-   :maxdepth: 2
-
-   csv_tpdestinationrates
-
-.. toctree::
-   :maxdepth: 2
-
-   csv_tpdestratetimings
-
-.. toctree::
-   :maxdepth: 2
-
-   csv_tpratingprofiles
-
-Accounting
-~~~~~~~~~~
-
-.. toctree::
-   :maxdepth: 2
-
-   csv_tptimings
-
-.. toctree::
-   :maxdepth: 2
-
-   csv_tpdestinations
-
-.. toctree::
-   :maxdepth: 2
-
-   csv_tpactions
-
-.. toctree::
-   :maxdepth: 2
-
-   csv_tpactiontimings
-
-.. toctree::
-   :maxdepth: 2
-
-   csv_tpactiontriggers
-
-.. toctree::
-   :maxdepth: 2
-
-   csv_tpaccountactions
-
-
+Examples of TariffPlans as CSVs can be found on the `GitHub repository <https://github.com/cgrates/cgrates/tree/master/data/tariffplans>`_ . 

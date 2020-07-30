@@ -1,8 +1,10 @@
+.. _rals:
+
 RALs
 ====
 
 
-**RALs** is a standalone subsystem within **CGRateS** designed to handle two major tasks: :ref:`Rating` and :ref:`Accounting`. It is accessed via :ref:`CGRateS RPC APIs<remote-management>`.
+**RALs** is a standalone subsystem within **CGRateS** designed to handle two major tasks: :ref:`Rating` and :ref:`Accounting`. It is accessed via `CGRateS RPC APIs <https://godoc.org/github.com/cgrates/cgrates/apier/>`_.
 
 
 
@@ -377,7 +379,7 @@ LastExecutionTime
 Action
 ------
 
-Actions are routines executed on demand (ie. by one of the three subsystems: :ref:`SchedulerS`, :ref:`ThresholdS` or :ref:`ActionTriggers`) or called by API by external scripts.
+Actions are routines executed on demand (ie. by one of the three subsystems: :ref:`SchedulerS`, :ref:`ThresholdS` or :ref:`ActionTriggers <ActionTrigger>`) or called by API by external scripts.
 
 An *Action has the following parameters:
 
@@ -424,7 +426,7 @@ ActionType
 		Debit the value from the :ref:`Balance` matching the filters.
 
 	**\*reset_counters**
-		Reset the :ref:`Balance` counters (used by :ref:`ActionTriggers <ActionTrigger>).
+		Reset the :ref:`Balance` counters (used by :ref:`ActionTriggers <ActionTrigger>`).
 
 	**\*enable_account**
 		Unset the :ref:`Account` *Disabled* flag.

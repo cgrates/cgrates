@@ -4,7 +4,7 @@ SessionS
 ========
 
 
-**SessionS** is a standalone subsystem within **CGRateS** responsible to manage virtual sessions based on events received. It is accessed via :ref:`CGRateS RPC APIs<remote-management>`.
+**SessionS** is a standalone subsystem within **CGRateS** responsible to manage virtual sessions based on events received. It is accessed via `CGRateS RPC APIs <https://godoc.org/github.com/cgrates/cgrates/apier/>`_.
 
 
 Parameters
@@ -39,8 +39,8 @@ thresholds_conns
 stats_conns
 	Connections towards :ref:`StatS` component to compute stat metrics for events.
 
-suppliers_conns
-	Connections towards :ref:`SupplierS` component to compute suppliers for events.
+routes_conns
+	Connections towards :ref:`RouteS` component to compute routes for events.
 
 attributes_conns
 	Connections towards :ref:`AttributeS` component for altering the events.
@@ -143,14 +143,14 @@ ProcessStats
 StatIDs
 	Selects only specific stat profiles (instead of discovering them via :ref:`FilterS`). Faster in processing than the discovery mechanism.
 
-GetSuppliers
-	Sends the event to :ref:`SupplierS` to return the list of suppliers for it as part as authorization.
+GetRoutes
+	Sends the event to :ref:`RouteS` to return the list of routes for it as part as authorization.
 
-SuppliersMaxCost
-	Mechanism to implement revenue assurance for suppliers coming from :ref:`SupplierS` component. Can be defined as a number or special meta variable: *\*event_cost*, assuring that the supplier cost will never be higher than event cost.
+RoutesMaxCost
+	Mechanism to implement revenue assurance for routes coming from :ref:`RouteS` component. Can be defined as a number or special meta variable: *\*event_cost*, assuring that the route cost will never be higher than event cost.
 
-SuppliersIgnoreErrors
-	Instructs to ignore suppliers with errors(ie: without price for specific destination in tariff plan). Without this setting the whole query will fail instead of just the supplier being ignored.
+RoutesIgnoreErrors
+	Instructs to ignore routes with errors(ie: without price for specific destination in tariff plan). Without this setting the whole query will fail instead of just the route being ignored.
 
 
 InitiateSession, InitiateSessionWithDigest
@@ -283,14 +283,14 @@ ProcessStats
 StatIDs
 	Selects only specific stat profiles (instead of discovering them via :ref:`FilterS`). Faster in processing than the discovery mechanism.
 
-GetSuppliers
-	Sends the event to :ref:`SupplierS` to return the list of suppliers for it.
+GetRoutes
+	Sends the event to :ref:`RouteS` to return the list of routes for it.
 
-SuppliersMaxCost
-	Mechanism to implement revenue assurance for suppliers coming from :ref:`SupplierS` component. Can be a number or special meta variable: *\*event_cost*, assuring that the supplier cost will never be higher than event cost.
+RoutesMaxCost
+	Mechanism to implement revenue assurance for routes coming from :ref:`RouteS` component. Can be a number or special meta variable: *\*event_cost*, assuring that the route cost will never be higher than event cost.
 
-SuppliersIgnoreErrors
-	Instructs to ignore suppliers with errors(ie: without price for specific destination in tariff plan). Without this setting the whole query will fail instead of just the supplier being ignored.
+RoutesIgnoreErrors
+	Instructs to ignore routes with errors(ie: without price for specific destination in tariff plan). Without this setting the whole query will fail instead of just the route being ignored.
 
 
 
@@ -342,7 +342,7 @@ Instead of arguments, the options for enabling various functionaity will come in
 		Terminate a session (or initialize + terminate) out of event.
 
 \*routes
-	Process the event with :ref:`Suppliers`. Auxiliary flags available:
+	Process the event with :ref:`Routes`. Auxiliary flags available:
 
 	**\*ignore_errors**
 		Ignore the routes with errors instead of failing the request completely.
