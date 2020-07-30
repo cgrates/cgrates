@@ -103,6 +103,7 @@ func TestEventReaderLoadFromJSON(t *testing.T) {
 	expectedERsCfg := &ERsCfg{
 		Enabled:       true,
 		SessionSConns: []string{"conn1", "conn3"},
+		Templates:     map[string][]*FCTemplate{},
 		Readers: []*EventReaderCfg{
 			{
 				ID:               utils.MetaDefault,
@@ -241,6 +242,7 @@ func TestEventReaderSameID(t *testing.T) {
 	expectedERsCfg := &ERsCfg{
 		Enabled:       true,
 		SessionSConns: []string{"conn1"},
+		Templates:     map[string][]*FCTemplate{},
 		Readers: []*EventReaderCfg{
 			{
 				ID:               utils.MetaDefault,

@@ -1829,6 +1829,7 @@ func TestDfEventReaderCfg(t *testing.T) {
 	eCfg := &ERsJsonCfg{
 		Enabled:        utils.BoolPointer(false),
 		Sessions_conns: &[]string{utils.MetaInternal},
+		Templates:      map[string][]*FcTemplateJsonCfg{},
 		Readers: &[]*EventReaderJsonCfg{
 			{
 				Id:                      utils.StringPointer(utils.MetaDefault),
@@ -1956,6 +1957,7 @@ func TestDfEventExporterCfg(t *testing.T) {
 				Static_ttl: utils.BoolPointer(false),
 			},
 		},
+		Templates: map[string][]*FcTemplateJsonCfg{},
 		Exporters: &[]*EventExporterJsonCfg{
 			{
 				Id:                utils.StringPointer(utils.MetaDefault),

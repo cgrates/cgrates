@@ -315,6 +315,7 @@ const CGRATES_CFG_JSON = `
 
 "ers": {									// EventReaderService
 	"enabled": false,						// starts the EventReader service: <true|false>
+	"templates":{},							// default templates for ERs
 	"sessions_conns":["*internal"],			// RPC Connections IDs
 	"readers": [
 		{
@@ -357,6 +358,7 @@ const CGRATES_CFG_JSON = `
 	"cache": {
 		"*file_csv": {"limit": -1, "ttl": "5s", "static_ttl": false},
 	},
+	"templates":{},							// default templates for EEs
 	"exporters": [
 		{
 			"id": "*default",									// identifier of the EventReader profile

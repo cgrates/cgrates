@@ -151,6 +151,7 @@ func TestEventExporterSameID(t *testing.T) {
 				StaticTTL: false,
 			},
 		},
+		Templates: map[string][]*FCTemplate{},
 		Exporters: []*EventExporterCfg{
 			&EventExporterCfg{
 				ID:            utils.MetaDefault,
