@@ -28,6 +28,7 @@ import (
 type FilterWithCache struct {
 	*engine.Filter
 	Cache *string
+	Opts  map[string]interface{}
 }
 
 //SetFilter add a new Filter
@@ -47,7 +48,7 @@ func (apierSv1 *APIerSv1) SetFilter(arg *FilterWithCache, reply *string) error {
 		CacheID: utils.CacheFilters,
 		ItemID:  arg.TenantID(),
 	}
-	if err := apierSv1.CallCache(GetCacheOpt(arg.Cache), argCache); err != nil {
+	if err := apierSv1.CallCache(GetCacheOpt(arg.Cache), argCache, arg.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -105,7 +106,7 @@ func (apierSv1 *APIerSv1) RemoveFilter(arg *utils.TenantIDWithCache, reply *stri
 		CacheID: utils.CacheFilters,
 		ItemID:  arg.TenantID(),
 	}
-	if err := apierSv1.CallCache(GetCacheOpt(arg.Cache), argCache); err != nil {
+	if err := apierSv1.CallCache(GetCacheOpt(arg.Cache), argCache, arg.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

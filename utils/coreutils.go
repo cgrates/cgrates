@@ -773,6 +773,7 @@ type TenantIDWithCache struct {
 	Tenant string
 	ID     string
 	Cache  *string
+	Opts   map[string]interface{}
 }
 
 func (tID *TenantIDWithCache) TenantID() string {

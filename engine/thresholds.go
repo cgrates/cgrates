@@ -33,6 +33,7 @@ import (
 type ThresholdWithCache struct {
 	*ThresholdProfile
 	Cache *string
+	Opts  map[string]interface{}
 }
 
 // ThresholdProfileWithOpts is used in replicatorV1 for dispatcher

@@ -53,6 +53,7 @@ type StatQueueProfileWithOpts struct {
 type StatQueueWithCache struct {
 	*StatQueueProfile
 	Cache *string
+	Opts  map[string]interface{}
 }
 
 func (sqp *StatQueueProfile) TenantID() string {
