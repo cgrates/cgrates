@@ -84,6 +84,7 @@ var (
 		testAttributeSCachingMetaReload1,
 		testAttributeSCachingMetaReload2,
 		testAttributeSCachingMetaRemove,
+		testAttributeSCacheOpts,
 		testAttributeSKillEngine,
 	}
 )
@@ -1784,5 +1785,37 @@ func testAttributeSSetAttributeWithEmptyPath(t *testing.T) {
 	var result string
 	if err := attrSRPC.Call(utils.APIerSv1SetAttributeProfile, eAttrPrf2, &result); err == nil {
 		t.Errorf("Expected error received nil")
+	}
+}
+
+func testAttributeSCacheOpts(t *testing.T) {
+	attrPrf1 := &AttributeWithCache{
+		AttributeProfile: &engine.AttributeProfile{
+			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:        "ATTR_WITH_OPTS",
+			Contexts:  []string{utils.MetaSessionS},
+			FilterIDs: []string{"*string:~*req.InitialField:InitialValue"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			},
+			Attributes: []*engine.Attribute{
+				{
+					Path:  utils.MetaReq + utils.NestingSep + "Field1",
+					Value: config.NewRSRParsersMustCompile("Value1", utils.INFIELD_SEP),
+				},
+			},
+			Weight: 10,
+		},
+		Opts: map[string]interface{}{
+			"Method":      "SetAttributeProfile",
+			"CustomField": "somethingCustom",
+		},
+	}
+	// set the profile
+	var result string
+	if err := attrSRPC.Call(utils.APIerSv1SetAttributeProfile, attrPrf1, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
 	}
 }
