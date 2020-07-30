@@ -1,9 +1,11 @@
+.. _chargers:
+
 ChargerS
 ========
 
 **ChargerS** is a **CGRateS** subsystem designed to produce billing runs via *DerivedCharging* mechanism. 
 
-It works as standalone component of **CGRateS**, accessible via :ref:`CGRateS RPC<remote-management>` via a rich set of *APIs*. As input **ChargerS** is capable of receiving generic events (hashmaps) with dynamic types for fields.
+It works as standalone component of **CGRateS**, accessible via `CGRateS RPC <https://godoc.org/github.com/cgrates/cgrates/apier/>`_ via a rich set of *APIs*. As input **ChargerS** is capable of receiving generic events (hashmaps) with dynamic types for fields.
 
 **ChargerS** is an **important** part of the charging process within **CGRateS** since with no *ChargingProfile* matching, there will be no billing run performed.
 

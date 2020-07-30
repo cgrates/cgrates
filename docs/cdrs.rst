@@ -4,7 +4,7 @@ CDRs
 ====
 
 
-**CDRs** is a standalone subsystem within **CGRateS** responsible to process *CDR* events. It is accessed via :ref:`CGRateS RPC APIs<remote-management>` or separate *HTTP handlers* configured within *http* section inside :ref:`JSON configuration <configuration>`.
+**CDRs** is a standalone subsystem within **CGRateS** responsible to process *CDR* events. It is accessed via `CGRateS RPC APIs <https://godoc.org/github.com/cgrates/cgrates/apier/>`_ or separate *HTTP handlers* configured within *http* section inside :ref:`JSON configuration <configuration>`.
 
 Due to multiple interfaces exposed, the **CDRs** is designed to function as centralized server for *CDRs* received from various sources. Examples of such sources are:
 	*\*real-time events* from interfaces like *Diameter*, *Radius*, *Asterisk*, *FreeSWITCH*, *Kamailio*, *OpenSIPS*

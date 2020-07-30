@@ -57,4 +57,4 @@ At the end of each call OpenSIPS_ will generate an CDR event and due to automati
 Since it is common to most of the tutorials, the example for **CGRateS** usage is provided in a separate page `here <http://cgrates.readthedocs.org/en/latest/tut_cgrates_usage.html>`_
 
 
-.. _OpenSIPS: http://www.opensips.org/
+.. _OpenSIPS: https://opensips.org/
