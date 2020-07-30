@@ -12,6 +12,6 @@ In these tutorials we exemplify a few cases of integration between OpenSIPS_ and
    tut_opensips_event
    tut_cgrates_usage
 
-.. _OpenSIPS: http://www.opensips.org/
+.. _OpenSIPS: https://www.opensips.org/
 .. _CGRateS: http://www.cgrates.org/
 

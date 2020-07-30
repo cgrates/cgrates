@@ -2,8 +2,8 @@
 .. _Go: http://golang.org
 .. _Docker: https://www.docker.com/
 .. _Kafka: https://kafka.apache.org/
-.. _redis: http://redis.io
-.. _mongodb: http://www.mongodb.org
+.. _redis: https://redis.io/
+.. _mongodb: https://www.mongodb.com/
 .. _api docs: https://godoc.org/github.com/cgrates/cgrates/apier
 .. _SQS: https://aws.amazon.com/de/sqs/
 .. _AMQP: https://www.amqp.org/

@@ -56,4 +56,4 @@ At the end of each call Kamailio_ will generate an CDR event via *evapi* and thi
 Since it is common to most of the tutorials, the example for **CGRateS** usage is provided in a separate page `here <http://cgrates.readthedocs.org/en/latest/tut_cgrates_usage.html>`_
 
 
-.. _Kamailio: http://www.kamailio.org/
+.. _Kamailio: https://www.kamailio.org/w/

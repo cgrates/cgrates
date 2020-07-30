@@ -172,7 +172,7 @@ func NewErrResourceS(err error) error {
 	return fmt.Errorf("RESOURCES_ERROR:%s", err)
 }
 
-func NewErrSupplierS(err error) error {
+func NewErrRouteS(err error) error {
 	return fmt.Errorf("ROUTES_ERROR:%s", err)
 }
 

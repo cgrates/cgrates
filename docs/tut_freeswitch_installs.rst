@@ -29,4 +29,4 @@ We will install FreeSWITCH_ via following commands:
 
 Once installed, we will proceed with loading the configuration out of specific tutorial cases bellow.
 
-.. _FreeSWITCH: http://www.freeswitch.org/
+.. _FreeSWITCH: https://freeswitch.com//

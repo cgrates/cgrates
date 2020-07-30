@@ -3779,7 +3779,7 @@ func (sS *SessionS) getRoutes(cgrEv *utils.CGREvent, pag utils.Paginator, ignore
 	}
 	if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().RouteSConns, nil, utils.RouteSv1GetRoutes,
 		sArgs, &routesReply); err != nil {
-		return routesReply, utils.NewErrSupplierS(err)
+		return routesReply, utils.NewErrRouteS(err)
 	}
 	return
 }

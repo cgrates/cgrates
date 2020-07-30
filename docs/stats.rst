@@ -1,10 +1,12 @@
+.. _stats:
+
 StatS
 =====
 
 
 **StatS** is a standalone subsystem part of the **CGRateS** infrastructure, designed to aggregate and calculate statistical metrics for the generic *Events* (hashmaps) it receives.
 
-Both receiving of *Events* as well as *Metrics* displaying is performed via a complete set of :ref:`CGRateS RPC APIs<remote-management>`.
+Both receiving of *Events* as well as *Metrics* displaying is performed via a complete set of `CGRateS RPC APIs <https://godoc.org/github.com/cgrates/cgrates/apier/>`_.
 
 Due it's real-time nature, **StatS** are designed towards high throughput being able to process thousands of *Events* per second. This is doable since each *StatQueue* is a very light object, held in memory and eventually backed up in *DataDB*.
 

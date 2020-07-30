@@ -23,4 +23,4 @@ We got Kamailio_ installed via following commands:
 
 Once installed we proceed with loading the configuration out of specific tutorial cases bellow.
 
-.. _Kamailio: http://www.kamailio.org/
+.. _Kamailio: https://www.kamailio.org/w/
