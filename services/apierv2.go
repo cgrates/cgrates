@@ -73,10 +73,6 @@ func (api *APIerSv2Service) Start() (err error) {
 		api.server.RpcRegisterName(utils.ApierV2, api.api)
 	}
 
-	utils.RegisterRpcParams("", &v2.CDRsV2{})
-	utils.RegisterRpcParams("", api.api)
-	utils.RegisterRpcParams(utils.ApierV2, api.api)
-
 	api.connChan <- api.api
 	return
 }

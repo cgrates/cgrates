@@ -20,16 +20,14 @@ package utils
 
 import "reflect"
 
-var rpcParamsMap map[string]*RpcParams
+var (
+	rpcParamsMap = make(map[string]*RpcParams)
+)
 
 type RpcParams struct {
 	Object   interface{}
 	InParam  interface{}
 	OutParam interface{}
-}
-
-func init() {
-	rpcParamsMap = make(map[string]*RpcParams)
 }
 
 func RegisterRpcParams(name string, obj interface{}) {
@@ -58,10 +56,10 @@ func RegisterRpcParams(name string, obj interface{}) {
 	}
 }
 
-func GetRpcParams(method string) (*RpcParams, error) {
-	x, found := rpcParamsMap[method]
-	if !found {
+func GetRpcParams(method string) (params *RpcParams, err error) {
+	var found bool
+	if params, found = rpcParamsMap[method]; !found {
 		return nil, ErrNotFound
 	}
-	return x, nil
+	return
 }

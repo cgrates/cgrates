@@ -68,8 +68,6 @@ func (resp *ResponderService) Start() (err error) {
 		resp.server.RpcRegister(resp.resp)
 	}
 
-	utils.RegisterRpcParams("", resp.resp)
-
 	resp.connChan <- resp.resp // Rater done
 	return
 }

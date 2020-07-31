@@ -1,8 +1,9 @@
 package utils
 
 import (
-	"reflect"
 	"testing"
+
+	"github.com/mitchellh/mapstructure"
 )
 
 type RpcStruct struct{}
@@ -35,17 +36,19 @@ func TestRPCObjectPointer(t *testing.T) {
 		t.Errorf("error getting rpcobject: %v (%+v)", rpcParamsMap, x)
 	}
 	a := x.InParam
-	if v, err := FromMapStringInterfaceValue(map[string]interface{}{"Name": "a", "Surname": "b", "Age": 10.2}, reflect.ValueOf(a)); err != nil || v.(Attr).Name != "a" || v.(Attr).Surname != "b" || v.(Attr).Age != 10.2 {
-		t.Errorf("error converting to struct: %+v (%v)", v, err)
+	if err := mapstructure.Decode(map[string]interface{}{"Name": "a", "Surname": "b", "Age": 10.2}, a); err != nil || a.(*Attr).Name != "a" || a.(*Attr).Surname != "b" || a.(*Attr).Age != 10.2 {
+		t.Errorf("error converting to struct: %+v (%v)", a, err)
 	}
+	/*
 	//TODO: make pointer in arguments usable
-	/*x, found = rpcParamsMap["RpcStruct.Tropa"]
+	x, found = rpcParamsMap["RpcStruct.Tropa"]
 	if !found {
 		t.Errorf("error getting rpcobject: %v (%+v)", rpcParamsMap, x)
 	}
 	b := x.InParam
-	log.Printf("T: %+v", b)
-	if v, err := FromMapStringInterfaceValue(map[string]interface{}{"Name": "a", "Surname": "b", "Age": 10.2}, b); err != nil || v.(Attr).Name != "a" || v.(Attr).Surname != "b" || v.(Attr).Age != 10.2 {
-		t.Errorf("error converting to struct: %+v (%v)", v, err)
-	}*/
+	// log.Printf("T: %+v", b)
+	if err := mapstructure.Decode(map[string]interface{}{"Name": "a", "Surname": "b", "Age": 10.2}, b); err != nil || b.(*Attr).Name != "a" || b.(*Attr).Surname != "b" || b.(*Attr).Age != 10.2 {
+		t.Errorf("error converting to struct: %+v (%v)", b, err)
+	}
+	*/
 }
