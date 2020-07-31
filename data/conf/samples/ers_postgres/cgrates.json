@@ -72,6 +72,22 @@
 "ers": {
 	"enabled": true,
 	"sessions_conns": ["*internal"],
+	"templates": {
+		"reqFields": [
+			{"tag": "Source", "path": "*cgreq.Source", "type": "*constant", "value": "ers_template_combined", "mandatory": true},
+			{"tag": "ToR", "path": "*cgreq.ToR", "type": "*variable", "value": "~*req.2", "mandatory": true},
+			{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable", "value": "~*req.3", "mandatory": true},
+			{"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*variable", "value": "~*req.4", "mandatory": true},
+			{"tag": "Tenant", "path": "*cgreq.Tenant", "type": "*variable", "value": "~*req.6", "mandatory": true},
+			{"tag": "Category", "path": "*cgreq.Category", "type": "*variable", "value": "~*req.7", "mandatory": true},
+			{"tag": "Account", "path": "*cgreq.Account", "type": "*variable", "value": "~*req.8", "mandatory": true},
+			{"tag": "Subject", "path": "*cgreq.Subject", "type": "*variable", "value": "~*req.9", "mandatory": true},
+			{"tag": "Destination", "path": "*cgreq.Destination", "type": "*variable", "value": "~*req.10", "mandatory": true},
+			{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*variable", "value": "~*req.11", "mandatory": true},
+			{"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*variable", "value": "~*req.12", "mandatory": true},
+			{"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable", "value": "~*req.13", "mandatory": true}
+		],
+	},
 	"readers": [
 		{
 			"id": "file_reader1",
@@ -364,6 +380,20 @@
 				{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*variable", "value": "~*req.SetupTime", "mandatory": true},
 				{"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*variable", "value": "~*req.AnswerTime", "mandatory": true},
 				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable", "value": "~*req.Usage", "mandatory": true},
+			],
+		},
+		{
+			"id": "readerWithTemplate",
+			"run_delay":  "-1",
+			"field_separator": ",",
+			"type": "*file_csv",
+			"source_path": "/tmp/readerWithTemplate/in",
+			"flags": ["*cdrs","*log"],
+			"processed_path": "/tmp/readerWithTemplate/out",
+			"fields":[
+				{"tag": "reqFields","type": "*template", "value": "reqFields"},
+				{"tag": "ExtraInfo1", "path": "*cgreq.ExtraInfo1", "type": "*constant", "value": "ExtraInfo1"},
+				{"tag": "ExtraInfo2", "path": "*cgreq.ExtraInfo2", "type": "*constant", "value": "ExtraInfo2"},
 			],
 		}
 	]
