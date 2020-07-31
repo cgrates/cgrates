@@ -778,8 +778,7 @@ func (cdrS *CDRServer) V1ProcessEvent(arg *ArgV1ProcessEvent, reply *string) (er
 	}
 	var reRate bool
 	if flgs.Has(utils.MetaRerate) {
-		reRate = flgs.GetBool(utils.MetaRerate)
-		if reRate {
+		if reRate = flgs.GetBool(utils.MetaRerate); reRate {
 			ralS = true
 		}
 	}
@@ -984,8 +983,8 @@ func (cdrS *CDRServer) V1RateCDRs(arg *ArgRateCDRs, reply *string) (err error) {
 	if cdrFltr, err = arg.RPCCDRsFilter.AsCDRsFilter(cdrS.cgrCfg.GeneralCfg().DefaultTimezone); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	cdrs, _, err := cdrS.cdrDb.GetCDRs(cdrFltr, false)
-	if err != nil {
+	var cdrs []*CDR
+	if cdrs, _, err = cdrS.cdrDb.GetCDRs(cdrFltr, false); err != nil {
 		return
 	}
 	flgs := utils.FlagsWithParamsFromSlice(arg.Flags)
