@@ -741,53 +741,47 @@ Sq - CDRStatsQueueTriggered object
 
 We can actually use everythiong that go templates offer. You can read more here: https://golang.org/pkg/text/template/
 */
-func cgrRPCAction(ub *Account, a *Action, acs Actions, extraData interface{}) error {
+func cgrRPCAction(ub *Account, a *Action, acs Actions, extraData interface{}) (err error) {
 	// parse template
 	tmpl := template.New("extra_params")
 	tmpl.Delims("<<", ">>")
-	t, err := tmpl.Parse(a.ExtraParameters)
-	if err != nil {
+	if tmpl, err = tmpl.Parse(a.ExtraParameters); err != nil {
 		utils.Logger.Err(fmt.Sprintf("error parsing *cgr_rpc template: %s", err.Error()))
-		return err
+		return
 	}
 	var buf bytes.Buffer
-	if err = t.Execute(&buf, struct {
+	if err = tmpl.Execute(&buf, struct {
 		Account   *Account
 		Action    *Action
 		Actions   Actions
 		ExtraData interface{}
 	}{ub, a, acs, extraData}); err != nil {
 		utils.Logger.Err(fmt.Sprintf("error executing *cgr_rpc template %s:", err.Error()))
-		return err
+		return
 	}
-	processedExtraParam := buf.String()
-	//utils.Logger.Info("ExtraParameters: " + parsedExtraParameters)
-	req := RPCRequest{}
-	if err := json.Unmarshal([]byte(processedExtraParam), &req); err != nil {
-		return err
+	var req RPCRequest
+	if err = json.Unmarshal(buf.Bytes(), &req); err != nil {
+		return
 	}
-	params, err := utils.GetRpcParams(req.Method)
-	if err != nil {
-		return err
+	var params *utils.RpcParams
+	if params, err = utils.GetRpcParams(req.Method); err != nil {
+		return
 	}
 	var client rpcclient.ClientConnector
-	if req.Address != utils.MetaInternal {
-		if client, err = rpcclient.NewRPCClient(utils.TCP, req.Address, false, "", "", "",
-			req.Attempts, 0, config.CgrConfig().GeneralCfg().ConnectTimeout,
-			config.CgrConfig().GeneralCfg().ReplyTimeout, req.Transport,
-			nil, false); err != nil {
-			return err
-		}
-	} else {
+	if req.Address == utils.MetaInternal {
 		client = params.Object.(rpcclient.ClientConnector)
+	} else if client, err = rpcclient.NewRPCClient(utils.TCP, req.Address, false, "", "", "",
+		req.Attempts, 0, config.CgrConfig().GeneralCfg().ConnectTimeout,
+		config.CgrConfig().GeneralCfg().ReplyTimeout, req.Transport,
+		nil, false); err != nil {
+		return
 	}
 	in, out := params.InParam, params.OutParam
 	//utils.Logger.Info("Params: " + utils.ToJSON(req.Params))
 	//p, err := utils.FromMapStringInterfaceValue(req.Params, in)
-	mapstructure.Decode(req.Params, in)
-	if err != nil {
+	if err = mapstructure.Decode(req.Params, in); err != nil {
 		utils.Logger.Info("<*cgr_rpc> err: " + err.Error())
-		return err
+		return
 	}
 	if in == nil {
 		utils.Logger.Info(fmt.Sprintf("<*cgr_rpc> nil params err: req.Params: %+v params: %+v", req.Params, params))
@@ -797,13 +791,13 @@ func cgrRPCAction(ub *Account, a *Action, acs Actions, extraData interface{}) er
 	if !req.Async {
 		err = client.Call(req.Method, in, out)
 		utils.Logger.Info(fmt.Sprintf("<*cgr_rpc> result: %s err: %v", utils.ToJSON(out), err))
-		return err
+		return
 	}
 	go func() {
 		err := client.Call(req.Method, in, out)
 		utils.Logger.Info(fmt.Sprintf("<*cgr_rpc> result: %s err: %v", utils.ToJSON(out), err))
 	}()
-	return nil
+	return
 }
 
 func topupZeroNegativeAction(ub *Account, a *Action, acs Actions, extraData interface{}) error {

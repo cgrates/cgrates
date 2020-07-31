@@ -74,6 +74,7 @@ func (s *Server) SetDispatched() {
 }
 
 func (s *Server) RpcRegister(rcvr interface{}) {
+	RegisterRpcParams(EmptyString, rcvr)
 	rpc.Register(rcvr)
 	s.Lock()
 	s.rpcEnabled = true
@@ -81,6 +82,7 @@ func (s *Server) RpcRegister(rcvr interface{}) {
 }
 
 func (s *Server) RpcRegisterName(name string, rcvr interface{}) {
+	RegisterRpcParams(name, rcvr)
 	rpc.RegisterName(name, rcvr)
 	s.Lock()
 	s.rpcEnabled = true

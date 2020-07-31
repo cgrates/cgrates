@@ -119,12 +119,7 @@ func (apiService *APIerSv1Service) Start() (err error) {
 		apiService.server.RpcRegister(v1.NewReplicatorSv1(datadb))
 	}
 
-	utils.RegisterRpcParams("", &v1.CDRsV1{})
-	utils.RegisterRpcParams("", &v1.SMGenericV1{})
-	utils.RegisterRpcParams("", apiService.api)
-	utils.RegisterRpcParams(utils.ApierV1, apiService.api)
 	//backwards compatible
-
 	apiService.connChan <- apiService.api
 
 	apiService.APIerSv1Chan <- apiService.api
