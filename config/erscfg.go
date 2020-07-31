@@ -60,10 +60,10 @@ func (erS *ERsCfg) loadFromJsonCfg(jsnCfg *ERsJsonCfg, sep string, dfltRdrCfg *E
 			}
 		}
 	}
-	return erS.appendERsReaders(jsnCfg.Readers, sep, dfltRdrCfg)
+	return erS.appendERsReaders(jsnCfg.Readers, erS.Templates, sep, dfltRdrCfg)
 }
 
-func (ers *ERsCfg) appendERsReaders(jsnReaders *[]*EventReaderJsonCfg, sep string,
+func (ers *ERsCfg) appendERsReaders(jsnReaders *[]*EventReaderJsonCfg, msgTemplates map[string][]*FCTemplate, sep string,
 	dfltRdrCfg *EventReaderCfg) (err error) {
 	if jsnReaders == nil {
 		return
@@ -84,7 +84,7 @@ func (ers *ERsCfg) appendERsReaders(jsnReaders *[]*EventReaderJsonCfg, sep strin
 			}
 		}
 
-		if err := rdr.loadFromJsonCfg(jsnReader, sep); err != nil {
+		if err := rdr.loadFromJsonCfg(jsnReader, msgTemplates, sep); err != nil {
 			return err
 		}
 		if !haveID {
@@ -144,7 +144,7 @@ type EventReaderCfg struct {
 	CacheDumpFields          []*FCTemplate
 }
 
-func (er *EventReaderCfg) loadFromJsonCfg(jsnCfg *EventReaderJsonCfg, sep string) (err error) {
+func (er *EventReaderCfg) loadFromJsonCfg(jsnCfg *EventReaderJsonCfg, msgTemplates map[string][]*FCTemplate, sep string) (err error) {
 	if jsnCfg == nil {
 		return
 	}
@@ -212,10 +212,20 @@ func (er *EventReaderCfg) loadFromJsonCfg(jsnCfg *EventReaderJsonCfg, sep string
 		if er.Fields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Fields, sep); err != nil {
 			return err
 		}
+		if tpls, err := InflateTemplates(er.Fields, msgTemplates); err != nil {
+			return err
+		} else if tpls != nil {
+			er.Fields = tpls
+		}
 	}
 	if jsnCfg.Cache_dump_fields != nil {
 		if er.CacheDumpFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Cache_dump_fields, sep); err != nil {
 			return err
+		}
+		if tpls, err := InflateTemplates(er.CacheDumpFields, msgTemplates); err != nil {
+			return err
+		} else if tpls != nil {
+			er.CacheDumpFields = tpls
 		}
 	}
 	return

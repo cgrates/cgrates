@@ -74,6 +74,8 @@ accid23;*rated;cgrates.org;1001;086517174963;2013-02-03 19:54:00;26;val_extra3;"
 		testCsvITProcessFilteredCDR,
 		testCsvITAnalyzeFilteredCDR,
 		testCsvITProcessedFiles,
+		testCsvITReaderWithFilter,
+		testCsvITAnalyzeReaderWithFilter,
 		testCleanupFiles,
 		testCsvITKillEngine,
 	}
@@ -327,6 +329,40 @@ func testCsvITProcessedFiles(t *testing.T) {
 		t.Error(err)
 	} else if fileContentForFilter != string(outContent4) {
 		t.Errorf("Expecting: %q, received: %q", fileContentForFilter, string(outContent4))
+	}
+}
+
+func testCsvITReaderWithFilter(t *testing.T) {
+	fileName := "file1.csv"
+	tmpFilePath := path.Join("/tmp", fileName)
+	if err := ioutil.WriteFile(tmpFilePath, []byte(fileContent1), 0644); err != nil {
+		t.Fatal(err.Error())
+	}
+	if err := os.Rename(tmpFilePath, path.Join("/tmp/readerWithTemplate/in", fileName)); err != nil {
+		t.Fatal("Error moving file to processing directory: ", err)
+	}
+}
+
+func testCsvITAnalyzeReaderWithFilter(t *testing.T) {
+	time.Sleep(500 * time.Millisecond)
+
+	var cdrs []*engine.CDR
+	args := &utils.RPCCDRsFilterWithOpts{
+		RPCCDRsFilter: &utils.RPCCDRsFilter{
+			NotRunIDs: []string{"CustomerCharges", "SupplierCharges"},
+			Sources:   []string{"ers_template_combined"},
+		},
+	}
+	if err := csvRPC.Call(utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 2 {
+		t.Error("Unexpected number of CDRs returned: ", utils.ToJSON(cdrs))
+	} else if cdrs[0].Account != "1001" || cdrs[1].Account != "1001" {
+		t.Errorf("Expecting: 1001, received: <%s> , <%s>", cdrs[0].Account, cdrs[1].Account)
+	} else if cdrs[0].Tenant != "cgrates.org" || cdrs[1].Tenant != "cgrates.org" {
+		t.Errorf("Expecting: itsyscom.com, received: <%s> , <%s>", cdrs[0].Tenant, cdrs[1].Tenant)
+	} else if cdrs[0].ExtraFields["ExtraInfo1"] != "ExtraInfo1" || cdrs[1].ExtraFields["ExtraInfo1"] != "ExtraInfo1" {
+		t.Errorf("Expecting: itsyscom.com, received: <%s> , <%s>", cdrs[1].ExtraFields["ExtraInfo1"], cdrs[1].ExtraFields["ExtraInfo1"])
 	}
 }
 
