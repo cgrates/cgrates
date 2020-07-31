@@ -37,7 +37,7 @@ func onCacheEvicted(itmID string, value interface{}) {
 
 // NewEventExporterS instantiates the EventExporterS
 func NewEventExporterS(cfg *config.CGRConfig, filterS *engine.FilterS,
-	connMgr *engine.ConnManager) (eeS *EventExporterS) {
+	connMgr *engine.ConnManager) (eeS *EventExporterS, err error) {
 	eeS = &EventExporterS{
 		cfg:     cfg,
 		filterS: filterS,

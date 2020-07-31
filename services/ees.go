@@ -110,8 +110,15 @@ func (es *EventExporterService) Start() (err error) {
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.EventExporterS))
 
 	es.Lock()
-	es.eeS = ees.NewEventExporterS(es.cfg, fltrS, es.connMgr)
-	es.Unlock()
+	defer es.Unlock()
+
+	es.eeS, err = ees.NewEventExporterS(es.cfg, fltrS, es.connMgr)
+	if err != nil {
+		utils.Logger.Err(fmt.Sprintf("<%s> error: %s!",
+			utils.EventExporterS, err))
+		return
+	}
+
 	es.rpc = v1.NewEventExporterSv1(es.eeS)
 	if !es.cfg.DispatcherSCfg().Enabled {
 		es.server.RpcRegister(es.rpc)

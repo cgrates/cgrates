@@ -69,10 +69,10 @@ func (eeS *EEsCfg) loadFromJsonCfg(jsnCfg *EEsJsonCfg, sep string, dfltExpCfg *E
 			}
 		}
 	}
-	return eeS.appendEEsExporters(jsnCfg.Exporters, sep, dfltExpCfg)
+	return eeS.appendEEsExporters(jsnCfg.Exporters, eeS.Templates, sep, dfltExpCfg)
 }
 
-func (eeS *EEsCfg) appendEEsExporters(exporters *[]*EventExporterJsonCfg, separator string, dfltExpCfg *EventExporterCfg) (err error) {
+func (eeS *EEsCfg) appendEEsExporters(exporters *[]*EventExporterJsonCfg, msgTemplates map[string][]*FCTemplate, separator string, dfltExpCfg *EventExporterCfg) (err error) {
 	if exporters == nil {
 		return
 	}
@@ -92,7 +92,7 @@ func (eeS *EEsCfg) appendEEsExporters(exporters *[]*EventExporterJsonCfg, separa
 			}
 		}
 
-		if err := exp.loadFromJsonCfg(jsnExp, separator); err != nil {
+		if err := exp.loadFromJsonCfg(jsnExp, msgTemplates, separator); err != nil {
 			return err
 		}
 		if !haveID {
@@ -149,7 +149,7 @@ type EventExporterCfg struct {
 	trailerFields []*FCTemplate
 }
 
-func (eeC *EventExporterCfg) loadFromJsonCfg(jsnEec *EventExporterJsonCfg, separator string) (err error) {
+func (eeC *EventExporterCfg) loadFromJsonCfg(jsnEec *EventExporterJsonCfg, msgTemplates map[string][]*FCTemplate, separator string) (err error) {
 	if jsnEec == nil {
 		return
 	}
@@ -204,6 +204,11 @@ func (eeC *EventExporterCfg) loadFromJsonCfg(jsnEec *EventExporterJsonCfg, separ
 		eeC.Fields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnEec.Fields, separator)
 		if err != nil {
 			return
+		}
+		if tpls, err := InflateTemplates(eeC.Fields, msgTemplates); err != nil {
+			return err
+		} else if tpls != nil {
+			eeC.Fields = tpls
 		}
 		for _, field := range eeC.Fields {
 			switch field.GetPathSlice()[0] {
