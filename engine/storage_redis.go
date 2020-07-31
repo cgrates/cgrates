@@ -53,33 +53,6 @@ type sentinelInst struct {
 	conn *sentinel.Client
 }
 
-// Redis commands
-const (
-	redis_AUTH     = "AUTH"
-	redis_SELECT   = "SELECT"
-	redis_FLUSHDB  = "FLUSHDB"
-	redis_DEL      = "DEL"
-	redis_HGETALL  = "HGETALL"
-	redis_KEYS     = "KEYS"
-	redis_SADD     = "SADD"
-	redis_SMEMBERS = "SMEMBERS"
-	redis_SREM     = "SREM"
-	redis_EXISTS   = "EXISTS"
-	redis_GET      = "GET"
-	redis_SET      = "SET"
-	redis_LRANGE   = "LRANGE"
-	redis_LLEN     = "LLEN"
-	redis_RPOP     = "RPOP"
-	redis_LPUSH    = "LPUSH"
-	redis_RPUSH    = "RPUSH"
-	redis_LPOP     = "LPOP"
-	redis_HMGET    = "HMGET"
-	redis_HDEL     = "HDEL"
-	redis_HGET     = "HGET"
-	redis_RENAME   = "RENAME"
-	redis_HMSET    = "HMSET"
-)
-
 func NewRedisStorage(address string, db int, pass, mrshlerStr string,
 	maxConns int, sentinelName string) (*RedisStorage, error) {
 

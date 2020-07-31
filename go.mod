@@ -37,6 +37,7 @@ require (
 	github.com/lib/pq v1.8.0
 	github.com/mattn/go-runewidth v0.0.9 // indirect
 	github.com/mediocregopher/radix.v2 v0.0.0-20181115013041-b67df6e626f9
+	github.com/mediocregopher/radix/v3 v3.5.2 // indirect
 	github.com/miekg/dns v1.1.30
 	github.com/mitchellh/mapstructure v1.3.3
 	github.com/nyaruka/phonenumbers v1.0.56
