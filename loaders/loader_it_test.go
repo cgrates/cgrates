@@ -35,11 +35,10 @@ import (
 )
 
 var (
-	loaderCfgPath               string
-	loaderCfgDIR                string //run tests for specific configuration
-	loaderCfg                   *config.CGRConfig
-	loaderRPC                   *rpc.Client
-	loaderPathIn, loaderPathOut string
+	loaderCfgPath string
+	loaderCfgDIR  string //run tests for specific configuration
+	loaderCfg     *config.CGRConfig
+	loaderRPC     *rpc.Client
 
 	sTestsLoader = []func(t *testing.T){
 		testLoaderMakeFolders,
@@ -50,6 +49,11 @@ var (
 		testLoaderPopulateData,
 		testLoaderLoadAttributes,
 		testLoaderVerifyOutDir,
+		testLoaderCheckAttributes,
+		testLoaderResetDataDB,
+		testLoaderPopulateDataWithoutMoving,
+		testLoaderLoadAttributesWithoutMoving,
+		testLoaderVerifyOutDirWithoutMoving,
 		testLoaderCheckAttributes,
 		testLoaderKillEngine,
 	}
@@ -89,7 +93,7 @@ func testLoaderInitCfg(t *testing.T) {
 
 func testLoaderMakeFolders(t *testing.T) {
 	// active the loaders here
-	for _, dir := range []string{"/tmp/In", "/tmp/Out"} {
+	for _, dir := range []string{"/tmp/In", "/tmp/Out", "/tmp/LoaderIn"} {
 		if err := os.RemoveAll(dir); err != nil {
 			t.Fatal("Error removing folder: ", dir, err)
 		}
@@ -97,8 +101,6 @@ func testLoaderMakeFolders(t *testing.T) {
 			t.Fatal("Error creating folder: ", dir, err)
 		}
 	}
-	loaderPathIn = "/tmp/In"
-	loaderPathOut = "/tmp/Out"
 }
 
 // Wipe out the cdr database
@@ -130,7 +132,7 @@ func testLoaderPopulateData(t *testing.T) {
 	if err := ioutil.WriteFile(tmpFilePath, []byte(engine.AttributesCSVContent), 0777); err != nil {
 		t.Fatal(err.Error())
 	}
-	if err := os.Rename(tmpFilePath, path.Join(loaderPathIn, fileName)); err != nil {
+	if err := os.Rename(tmpFilePath, path.Join("/tmp/In", fileName)); err != nil {
 		t.Fatal("Error moving file to processing directory: ", err)
 	}
 }
@@ -145,7 +147,7 @@ func testLoaderLoadAttributes(t *testing.T) {
 
 func testLoaderVerifyOutDir(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
-	if outContent1, err := ioutil.ReadFile(path.Join(loaderPathOut, utils.AttributesCsv)); err != nil {
+	if outContent1, err := ioutil.ReadFile(path.Join("/tmp/Out", utils.AttributesCsv)); err != nil {
 		t.Error(err)
 	} else if engine.AttributesCSVContent != string(outContent1) {
 		t.Errorf("Expecting: %q, received: %q", engine.AttributesCSVContent, string(outContent1))
@@ -192,6 +194,35 @@ func testLoaderCheckAttributes(t *testing.T) {
 	sort.Strings(reply.Contexts)
 	if !reflect.DeepEqual(eAttrPrf, reply) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(eAttrPrf), utils.ToJSON(reply))
+	}
+}
+
+func testLoaderPopulateDataWithoutMoving(t *testing.T) {
+	fileName := utils.AttributesCsv
+	tmpFilePath := path.Join("/tmp/", fileName)
+	if err := ioutil.WriteFile(tmpFilePath, []byte(engine.AttributesCSVContent), 0777); err != nil {
+		t.Fatal(err.Error())
+	}
+	if err := os.Rename(tmpFilePath, path.Join("/tmp/LoaderIn", fileName)); err != nil {
+		t.Fatal("Error moving file to processing directory: ", err)
+	}
+}
+
+func testLoaderLoadAttributesWithoutMoving(t *testing.T) {
+	var reply string
+	if err := loaderRPC.Call(utils.LoaderSv1Load,
+		&ArgsProcessFolder{LoaderID: "WithoutMoveToOut"}, &reply); err != nil {
+		t.Error(err)
+	}
+}
+
+func testLoaderVerifyOutDirWithoutMoving(t *testing.T) {
+	time.Sleep(100 * time.Millisecond)
+	// we expect that after the LoaderS process the file leave in in the input folder
+	if outContent1, err := ioutil.ReadFile(path.Join("/tmp/LoaderIn", utils.AttributesCsv)); err != nil {
+		t.Error(err)
+	} else if engine.AttributesCSVContent != string(outContent1) {
+		t.Errorf("Expecting: %q, received: %q", engine.AttributesCSVContent, string(outContent1))
 	}
 }
 

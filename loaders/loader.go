@@ -161,6 +161,9 @@ func (ldr *Loader) unreferenceFile(loaderType, fileName string) (err error) {
 }
 
 func (ldr *Loader) moveFiles() (err error) {
+	if ldr.tpOutDir == utils.EmptyString {
+		return
+	}
 	filesInDir, _ := ioutil.ReadDir(ldr.tpInDir)
 	for _, file := range filesInDir {
 		fName := file.Name()

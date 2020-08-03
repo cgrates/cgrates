@@ -87,6 +87,9 @@ cgrates (0.11.0~dev) UNRELEASED; urgency=medium
   * [AttributeS] Updated inline AttributeProfiles to unite all consecutive inline attributes in a single profile 
   * [SessionS] Added *processRuns option to control the process runs for AttributeS
   * [DispatcherS] Removed ArgDispatcher in favor of Opts
+  * [ERs] Add support for *template type
+  * [EEs] Add support for *template type
+  * [LoaderS] In case of empty output directory path don't move the processed file
 
  -- DanB <danb@cgrates.org>  Wed, 19 Feb 2020 13:25:52 +0200
 

@@ -119,9 +119,12 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		if !ldrSCfg.Enabled {
 			continue
 		}
-		for _, dir := range []string{ldrSCfg.TpInDir, ldrSCfg.TpOutDir} {
-			if _, err := os.Stat(dir); err != nil && os.IsNotExist(err) {
-				return fmt.Errorf("<%s> nonexistent folder: %s", utils.LoaderS, dir)
+		if _, err := os.Stat(ldrSCfg.TpInDir); err != nil && os.IsNotExist(err) { // if loader is enabled tpInDir must exist
+			return fmt.Errorf("<%s> nonexistent folder: %s", utils.LoaderS, ldrSCfg.TpInDir)
+		}
+		if ldrSCfg.TpOutDir != utils.EmptyString { // tpOutDir support empty string for no moving files after process
+			if _, err := os.Stat(ldrSCfg.TpOutDir); err != nil && os.IsNotExist(err) {
+				return fmt.Errorf("<%s> nonexistent folder: %s", utils.LoaderS, ldrSCfg.TpOutDir)
 			}
 		}
 		for _, data := range ldrSCfg.Data {
