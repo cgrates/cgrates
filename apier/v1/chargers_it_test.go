@@ -69,6 +69,7 @@ var (
 		testChargerSRPCConn,
 		testChargerSLoadAddCharger,
 		testChargerSGetChargersForEvent,
+		testChargerSGetChargersForEvent2,
 		testChargerSProcessEvent,
 		testChargerSSetChargerProfile,
 		testChargerSGetChargerProfileIDs,
@@ -159,6 +160,27 @@ func testChargerSLoadAddCharger(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
+
+	chargerProfile = &ChargerWithCache{
+		ChargerProfile: &engine.ChargerProfile{
+			Tenant:    "cgrates.org",
+			ID:        "ChargerNotMatching",
+			FilterIDs: []string{"*string:~*req.Account:1015", "*gt:~*req.Usage:10"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
+			},
+			RunID:        utils.MetaDefault,
+			AttributeIDs: []string{"*none"},
+			Weight:       20,
+		},
+	}
+
+	if err := chargerRPC.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+
 	alsPrf = &AttributeWithCache{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:   "cgrates.org",
@@ -209,6 +231,25 @@ func testChargerSGetChargersForEvent(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(result, chargerProfiles) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(chargerProfiles), utils.ToJSON(result))
+	}
+}
+
+func testChargerSGetChargersForEvent2(t *testing.T) {
+	var result *engine.ChargerProfiles
+	if err := chargerRPC.Call(utils.ChargerSv1GetChargersForEvent,
+		&utils.CGREventWithArgDispatcher{
+			CGREvent: &utils.CGREvent{ // matching Charger1
+				Tenant: "cgrates.org",
+				ID:     "event1",
+				Event: map[string]interface{}{
+					utils.Account: "1015",
+					utils.Usage:   1,
+				},
+			},
+		}, &result); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+		t.Error(utils.ToJSON(result))
 	}
 }
 
@@ -272,7 +313,7 @@ func testChargerSSetChargerProfile(t *testing.T) {
 }
 
 func testChargerSGetChargerProfileIDs(t *testing.T) {
-	expected := []string{"Charger1", "ApierTest"}
+	expected := []string{"Charger1", "ApierTest", "ChargerNotMatching"}
 	var result []string
 	if err := chargerRPC.Call(utils.APIerSv1GetChargerProfileIDs, utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{Tenant: "cgrates.org"}}, &result); err != nil {
 		t.Error(err)
