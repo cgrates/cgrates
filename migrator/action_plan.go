@@ -108,7 +108,7 @@ func (m *Migrator) migrateActionPlans() (err error) {
 	if m.dmIN.DataManager().DataDB().GetStorageType() == utils.REDIS { // if redis rebuild action plans indexes
 		redisDB, can := m.dmIN.DataManager().DataDB().(*engine.RedisStorage)
 		if !can {
-			return fmt.Errorf("Storage type %s could not be cated to <*engine.RedisStorage>", m.dmIN.DataManager().DataDB().GetStorageType())
+			return fmt.Errorf("Storage type %s could not be casted to <*engine.RedisStorage>", m.dmIN.DataManager().DataDB().GetStorageType())
 		}
 		if err = redisDB.RebbuildActionPlanKeys(); err != nil {
 			return

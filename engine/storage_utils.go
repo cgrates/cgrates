@@ -46,7 +46,7 @@ func NewDataDBConn(dbType, host, port, name, user,
 		if port != "" && strings.Index(host, ":") == -1 {
 			host += ":" + port
 		}
-		d, err = NewRedisStorage(host, dbNo, pass, marshaler, utils.REDIS_MAX_CONNS, sentinelName)
+		d, err = NewRedisStorage(host, dbNo, user, pass, marshaler, utils.REDIS_MAX_CONNS, sentinelName)
 	case utils.MONGO:
 		d, err = NewMongoStorage(host, port, name, user, pass, marshaler, utils.DataDB, nil, true)
 	case utils.INTERNAL:

@@ -93,7 +93,7 @@ func TestOnStorIT(t *testing.T) {
 		cfg, _ := config.NewDefaultCGRConfig()
 		rdsITdb, err = NewRedisStorage(
 			fmt.Sprintf("%s:%s", cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort),
-			4, cfg.DataDbCfg().DataDbPass, cfg.GeneralCfg().DBDataEncoding,
+			4, cfg.DataDbCfg().DataDbUser, cfg.DataDbCfg().DataDbPass, cfg.GeneralCfg().DBDataEncoding,
 			utils.REDIS_MAX_CONNS, "")
 		if err != nil {
 			t.Fatal("Could not connect to Redis", err.Error())
@@ -1377,7 +1377,8 @@ func testOnStorITCRUDHistory(t *testing.T) {
 }
 
 func testOnStorITCRUDStructVersion(t *testing.T) {
-	if _, err := onStor.DataDB().GetVersions(utils.Accounts); err != utils.ErrNotFound {
+	if vrst, err := onStor.DataDB().GetVersions(utils.Accounts); err != utils.ErrNotFound {
+		fmt.Println(vrst)
 		t.Error(err)
 	}
 	vrs := Versions{

@@ -52,7 +52,7 @@ func TestDMitinitDB(t *testing.T) {
 	case utils.MetaMySQL:
 		dataDB, err = NewRedisStorage(
 			fmt.Sprintf("%s:%s", cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort),
-			4, cfg.DataDbCfg().DataDbPass, cfg.GeneralCfg().DBDataEncoding,
+			4, cfg.DataDbCfg().DataDbUser, cfg.DataDbCfg().DataDbPass, cfg.GeneralCfg().DBDataEncoding,
 			utils.REDIS_MAX_CONNS, "")
 		if err != nil {
 			t.Fatal("Could not connect to Redis", err.Error())
@@ -105,9 +105,9 @@ func testDMitCRUDStatQueue(t *testing.T) {
 				Answered: 2,
 				Count:    3,
 				Events: map[string]*StatWithCompress{
-					"cgrates.org:ev1": &StatWithCompress{Stat: 1},
-					"cgrates.org:ev2": &StatWithCompress{Stat: 1},
-					"cgrates.org:ev3": &StatWithCompress{Stat: 0},
+					"cgrates.org:ev1": {Stat: 1},
+					"cgrates.org:ev2": {Stat: 1},
+					"cgrates.org:ev3": {Stat: 0},
 				},
 			},
 		},

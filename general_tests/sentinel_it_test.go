@@ -156,7 +156,7 @@ func testRedisSentinelSetGetAttribute(t *testing.T) {
 	var reply *engine.AttributeProfile
 	if err := sentinelRPC.Call(utils.APIerSv1GetAttributeProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	reply.Compile()
 	if !reflect.DeepEqual(alsPrf, reply) {
@@ -268,7 +268,7 @@ func testRedisSentinelGetAttrAfterFailover(t *testing.T) {
 	var reply *engine.AttributeProfile
 	if err := sentinelRPC.Call(utils.APIerSv1GetAttributeProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	reply.Compile()
 	if !reflect.DeepEqual(alsPrf, reply) {
