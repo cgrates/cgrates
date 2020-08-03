@@ -35,17 +35,20 @@ require (
 	github.com/ishidawataru/sctp v0.0.0-20191218070446-00ab2ac2db07 // indirect
 	github.com/jinzhu/gorm v1.9.15
 	github.com/lib/pq v1.8.0
+	github.com/mailru/easyjson v0.7.2 // indirect
 	github.com/mattn/go-runewidth v0.0.9 // indirect
-	github.com/mediocregopher/radix.v2 v0.0.0-20181115013041-b67df6e626f9
-	github.com/mediocregopher/radix/v3 v3.5.2 // indirect
+	github.com/mediocregopher/radix/v3 v3.5.2
 	github.com/miekg/dns v1.1.30
 	github.com/mitchellh/mapstructure v1.3.3
 	github.com/nyaruka/phonenumbers v1.0.56
 	github.com/peterh/liner v1.2.0
+	github.com/philhofer/fwd v1.0.0 // indirect
+	github.com/pquerna/ffjson v0.0.0-20190930134022-aa0246cd15f7 // indirect
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/segmentio/kafka-go v0.3.7
 	github.com/streadway/amqp v1.0.0
-	github.com/ugorji/go/codec v1.1.7
+	github.com/tinylib/msgp v1.1.2 // indirect
+	github.com/ugorji/go v0.0.0-20171112025056-5a66da2e74af
 	github.com/xdg/stringprep v1.0.1-0.20180714160509-73f8eece6fdc // indirect
 	go.mongodb.org/mongo-driver v1.4.0
 	golang.org/x/net v0.0.0-20200707034311-ab3426394381

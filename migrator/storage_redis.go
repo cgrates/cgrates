@@ -23,7 +23,6 @@ import (
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/mediocregopher/radix.v2/redis"
 )
 
 type redisMigrator struct {
@@ -66,8 +65,8 @@ func (v1rs *redisMigrator) getv1Account() (v1Acnt *v1Account, err error) {
 		v1rs.qryIdx = utils.IntPointer(0)
 	}
 	if *v1rs.qryIdx <= len(v1rs.dataKeys)-1 {
-		strVal, err := v1rs.rds.Cmd("GET", v1rs.dataKeys[*v1rs.qryIdx]).Bytes()
-		if err != nil {
+		var strVal []byte
+		if err := v1rs.rds.Cmd(&strVal, "GET", v1rs.dataKeys[*v1rs.qryIdx]); err != nil {
 			return nil, err
 		}
 		v1Acnt = &v1Account{Id: v1rs.dataKeys[*v1rs.qryIdx]}
@@ -89,7 +88,7 @@ func (v1rs *redisMigrator) setV1Account(x *v1Account) (err error) {
 	if err != nil {
 		return err
 	}
-	if err = v1rs.rds.Cmd("SET", key, bit).Err; err != nil {
+	if err = v1rs.rds.Cmd(nil, "SET", key, string(bit)); err != nil {
 		return err
 	}
 	return
@@ -98,7 +97,7 @@ func (v1rs *redisMigrator) setV1Account(x *v1Account) (err error) {
 //rem
 func (v1rs *redisMigrator) remV1Account(id string) (err error) {
 	key := v1AccountDBPrefix + id
-	return v1rs.rds.Cmd("DEL", key).Err
+	return v1rs.rds.Cmd(nil, "DEL", key)
 }
 
 //V2
@@ -114,8 +113,8 @@ func (v1rs *redisMigrator) getv2Account() (v2Acnt *v2Account, err error) {
 		v1rs.qryIdx = utils.IntPointer(0)
 	}
 	if *v1rs.qryIdx <= len(v1rs.dataKeys)-1 {
-		strVal, err := v1rs.rds.Cmd("GET", v1rs.dataKeys[*v1rs.qryIdx]).Bytes()
-		if err != nil {
+		var strVal []byte
+		if err := v1rs.rds.Cmd(&strVal, "GET", v1rs.dataKeys[*v1rs.qryIdx]); err != nil {
 			return nil, err
 		}
 		v2Acnt = &v2Account{ID: v1rs.dataKeys[*v1rs.qryIdx]}
@@ -137,7 +136,7 @@ func (v1rs *redisMigrator) setV2Account(x *v2Account) (err error) {
 	if err != nil {
 		return err
 	}
-	if err = v1rs.rds.Cmd("SET", key, bit).Err; err != nil {
+	if err = v1rs.rds.Cmd(nil, "SET", key, string(bit)); err != nil {
 		return err
 	}
 	return
@@ -146,7 +145,7 @@ func (v1rs *redisMigrator) setV2Account(x *v2Account) (err error) {
 //rem
 func (v1rs *redisMigrator) remV2Account(id string) (err error) {
 	key := utils.ACCOUNT_PREFIX + id
-	return v1rs.rds.Cmd("DEL", key).Err
+	return v1rs.rds.Cmd(nil, "DEL", key)
 }
 
 //ActionPlans methods
@@ -162,8 +161,8 @@ func (v1rs *redisMigrator) getV1ActionPlans() (v1aps *v1ActionPlans, err error) 
 		v1rs.qryIdx = utils.IntPointer(0)
 	}
 	if *v1rs.qryIdx <= len(v1rs.dataKeys)-1 {
-		strVal, err := v1rs.rds.Cmd("GET", v1rs.dataKeys[*v1rs.qryIdx]).Bytes()
-		if err != nil {
+		var strVal []byte
+		if err := v1rs.rds.Cmd(&strVal, "GET", v1rs.dataKeys[*v1rs.qryIdx]); err != nil {
 			return nil, err
 		}
 		if err := v1rs.rds.Marshaler().Unmarshal(strVal, &v1aps); err != nil {
@@ -184,7 +183,7 @@ func (v1rs *redisMigrator) setV1ActionPlans(x *v1ActionPlans) (err error) {
 	if err != nil {
 		return err
 	}
-	if err = v1rs.rds.Cmd("SET", key, bit).Err; err != nil {
+	if err = v1rs.rds.Cmd(nil, "SET", key, string(bit)); err != nil {
 		return err
 	}
 	return
@@ -193,7 +192,7 @@ func (v1rs *redisMigrator) setV1ActionPlans(x *v1ActionPlans) (err error) {
 //rem
 func (v1rs *redisMigrator) remV1ActionPlans(x *v1ActionPlans) (err error) {
 	key := utils.ACTION_PLAN_PREFIX + (*x)[0].Id
-	return v1rs.rds.Cmd("DEL", key).Err
+	return v1rs.rds.Cmd(nil, "DEL", key)
 }
 
 //Actions methods
@@ -209,8 +208,8 @@ func (v1rs *redisMigrator) getV1Actions() (v1acs *v1Actions, err error) {
 		v1rs.qryIdx = utils.IntPointer(0)
 	}
 	if *v1rs.qryIdx <= len(v1rs.dataKeys)-1 {
-		strVal, err := v1rs.rds.Cmd("GET", v1rs.dataKeys[*v1rs.qryIdx]).Bytes()
-		if err != nil {
+		var strVal []byte
+		if err = v1rs.rds.Cmd(&strVal, "GET", v1rs.dataKeys[*v1rs.qryIdx]); err != nil {
 			return nil, err
 		}
 		if err := v1rs.rds.Marshaler().Unmarshal(strVal, &v1acs); err != nil {
@@ -231,7 +230,7 @@ func (v1rs *redisMigrator) setV1Actions(x *v1Actions) (err error) {
 	if err != nil {
 		return err
 	}
-	if err = v1rs.rds.Cmd("SET", key, bit).Err; err != nil {
+	if err = v1rs.rds.Cmd(nil, "SET", key, string(bit)); err != nil {
 		return err
 	}
 	return
@@ -240,7 +239,7 @@ func (v1rs *redisMigrator) setV1Actions(x *v1Actions) (err error) {
 //rem
 func (v1rs *redisMigrator) remV1Actions(x v1Actions) (err error) {
 	key := utils.ACTION_PREFIX + x[0].Id
-	return v1rs.rds.Cmd("DEL", key).Err
+	return v1rs.rds.Cmd(nil, "DEL", key)
 
 }
 
@@ -257,8 +256,8 @@ func (v1rs *redisMigrator) getV1ActionTriggers() (v1acts *v1ActionTriggers, err 
 		v1rs.qryIdx = utils.IntPointer(0)
 	}
 	if *v1rs.qryIdx <= len(v1rs.dataKeys)-1 {
-		strVal, err := v1rs.rds.Cmd("GET", v1rs.dataKeys[*v1rs.qryIdx]).Bytes()
-		if err != nil {
+		var strVal []byte
+		if err = v1rs.rds.Cmd(&strVal, "GET", v1rs.dataKeys[*v1rs.qryIdx]); err != nil {
 			return nil, err
 		}
 		if err := v1rs.rds.Marshaler().Unmarshal(strVal, &v1acts); err != nil {
@@ -279,7 +278,7 @@ func (v1rs *redisMigrator) setV1ActionTriggers(x *v1ActionTriggers) (err error) 
 	if err != nil {
 		return err
 	}
-	if err = v1rs.rds.Cmd("SET", key, bit).Err; err != nil {
+	if err = v1rs.rds.Cmd(nil, "SET", key, string(bit)); err != nil {
 		return err
 	}
 	return
@@ -288,7 +287,7 @@ func (v1rs *redisMigrator) setV1ActionTriggers(x *v1ActionTriggers) (err error) 
 //rem
 func (v1rs *redisMigrator) remV1ActionTriggers(x *v1ActionTriggers) (err error) {
 	key := utils.ACTION_TRIGGER_PREFIX + (*x)[0].Id
-	return v1rs.rds.Cmd("DEL", key).Err
+	return v1rs.rds.Cmd(nil, "DEL", key)
 }
 
 //SharedGroup methods
@@ -304,8 +303,8 @@ func (v1rs *redisMigrator) getV1SharedGroup() (v1sg *v1SharedGroup, err error) {
 		v1rs.qryIdx = utils.IntPointer(0)
 	}
 	if *v1rs.qryIdx <= len(v1rs.dataKeys)-1 {
-		strVal, err := v1rs.rds.Cmd("GET", v1rs.dataKeys[*v1rs.qryIdx]).Bytes()
-		if err != nil {
+		var strVal []byte
+		if err = v1rs.rds.Cmd(&strVal, "GET", v1rs.dataKeys[*v1rs.qryIdx]); err != nil {
 			return nil, err
 		}
 		if err := v1rs.rds.Marshaler().Unmarshal(strVal, &v1sg); err != nil {
@@ -326,7 +325,7 @@ func (v1rs *redisMigrator) setV1SharedGroup(x *v1SharedGroup) (err error) {
 	if err != nil {
 		return err
 	}
-	if err = v1rs.rds.Cmd("SET", key, bit).Err; err != nil {
+	if err = v1rs.rds.Cmd(nil, "SET", key, string(bit)); err != nil {
 		return err
 	}
 	return
@@ -345,8 +344,8 @@ func (v1rs *redisMigrator) getV1Stats() (v1st *v1Stat, err error) {
 		v1rs.qryIdx = utils.IntPointer(0)
 	}
 	if *v1rs.qryIdx <= len(v1rs.dataKeys)-1 {
-		strVal, err := v1rs.rds.Cmd("GET", v1rs.dataKeys[*v1rs.qryIdx]).Bytes()
-		if err != nil {
+		var strVal []byte
+		if err = v1rs.rds.Cmd(&strVal, "GET", v1rs.dataKeys[*v1rs.qryIdx]); err != nil {
 			return nil, err
 		}
 		if err := v1rs.rds.Marshaler().Unmarshal(strVal, &v1st); err != nil {
@@ -371,8 +370,8 @@ func (v1rs *redisMigrator) getV3Stats() (v1st *engine.StatQueueProfile, err erro
 		v1rs.qryIdx = utils.IntPointer(0)
 	}
 	if *v1rs.qryIdx <= len(v1rs.dataKeys)-1 {
-		strVal, err := v1rs.rds.Cmd("GET", v1rs.dataKeys[*v1rs.qryIdx]).Bytes()
-		if err != nil {
+		var strVal []byte
+		if err = v1rs.rds.Cmd(&strVal, "GET", v1rs.dataKeys[*v1rs.qryIdx]); err != nil {
 			return nil, err
 		}
 		if err := v1rs.rds.Marshaler().Unmarshal(strVal, &v1st); err != nil {
@@ -393,7 +392,7 @@ func (v1rs *redisMigrator) setV1Stats(x *v1Stat) (err error) {
 	if err != nil {
 		return err
 	}
-	if err = v1rs.rds.Cmd("SET", key, bit).Err; err != nil {
+	if err = v1rs.rds.Cmd(nil, "SET", key, string(bit)); err != nil {
 		return err
 	}
 	return
@@ -411,8 +410,8 @@ func (v1rs *redisMigrator) getV2Stats() (v2 *engine.StatQueue, err error) {
 		v1rs.qryIdx = utils.IntPointer(0)
 	}
 	if *v1rs.qryIdx <= len(v1rs.dataKeys)-1 {
-		strVal, err := v1rs.rds.Cmd("GET", v1rs.dataKeys[*v1rs.qryIdx]).Bytes()
-		if err != nil {
+		var strVal []byte
+		if err = v1rs.rds.Cmd(&strVal, "GET", v1rs.dataKeys[*v1rs.qryIdx]); err != nil {
 			return nil, err
 		}
 		if err := v1rs.rds.Marshaler().Unmarshal(strVal, &v2); err != nil {
@@ -433,7 +432,7 @@ func (v1rs *redisMigrator) setV2Stats(v2 *engine.StatQueue) (err error) {
 	if err != nil {
 		return err
 	}
-	if err = v1rs.rds.Cmd("SET", key, bit).Err; err != nil {
+	if err = v1rs.rds.Cmd(nil, "SET", key, string(bit)); err != nil {
 		return err
 	}
 	return
@@ -452,8 +451,8 @@ func (v1rs *redisMigrator) getV2ActionTrigger() (v2at *v2ActionTrigger, err erro
 		v1rs.qryIdx = utils.IntPointer(0)
 	}
 	if *v1rs.qryIdx <= len(v1rs.dataKeys)-1 {
-		strVal, err := v1rs.rds.Cmd("GET", v1rs.dataKeys[*v1rs.qryIdx]).Bytes()
-		if err != nil {
+		var strVal []byte
+		if err = v1rs.rds.Cmd(&strVal, "GET", v1rs.dataKeys[*v1rs.qryIdx]); err != nil {
 			return nil, err
 		}
 		if err := v1rs.rds.Marshaler().Unmarshal(strVal, &v2at); err != nil {
@@ -474,7 +473,7 @@ func (v1rs *redisMigrator) setV2ActionTrigger(x *v2ActionTrigger) (err error) {
 	if err != nil {
 		return err
 	}
-	if err = v1rs.rds.Cmd("SET", key, bit).Err; err != nil {
+	if err = v1rs.rds.Cmd(nil, "SET", key, string(bit)); err != nil {
 		return err
 	}
 	return
@@ -494,8 +493,8 @@ func (v1rs *redisMigrator) getV1AttributeProfile() (v1attrPrf *v1AttributeProfil
 		v1rs.qryIdx = utils.IntPointer(0)
 	}
 	if *v1rs.qryIdx <= len(v1rs.dataKeys)-1 {
-		strVal, err := v1rs.rds.Cmd("GET", v1rs.dataKeys[*v1rs.qryIdx]).Bytes()
-		if err != nil {
+		var strVal []byte
+		if err = v1rs.rds.Cmd(&strVal, "GET", v1rs.dataKeys[*v1rs.qryIdx]); err != nil {
 			return nil, err
 		}
 		if err := v1rs.rds.Marshaler().Unmarshal(strVal, &v1attr); err != nil {
@@ -516,7 +515,7 @@ func (v1rs *redisMigrator) setV1AttributeProfile(x *v1AttributeProfile) (err err
 	if err != nil {
 		return err
 	}
-	if err = v1rs.rds.Cmd("SET", key, bit).Err; err != nil {
+	if err = v1rs.rds.Cmd(nil, "SET", key, string(bit)); err != nil {
 		return err
 	}
 	return
@@ -536,8 +535,8 @@ func (v1rs *redisMigrator) getV2ThresholdProfile() (v2T *v2Threshold, err error)
 		v1rs.qryIdx = utils.IntPointer(0)
 	}
 	if *v1rs.qryIdx <= len(v1rs.dataKeys)-1 {
-		strVal, err := v1rs.rds.Cmd("GET", v1rs.dataKeys[*v1rs.qryIdx]).Bytes()
-		if err != nil {
+		var strVal []byte
+		if err = v1rs.rds.Cmd(&strVal, "GET", v1rs.dataKeys[*v1rs.qryIdx]); err != nil {
 			return nil, err
 		}
 		if err := v1rs.rds.Marshaler().Unmarshal(strVal, &v2Th); err != nil {
@@ -562,8 +561,8 @@ func (v1rs *redisMigrator) getV3ThresholdProfile() (v2T *engine.ThresholdProfile
 		v1rs.qryIdx = utils.IntPointer(0)
 	}
 	if *v1rs.qryIdx <= len(v1rs.dataKeys)-1 {
-		strVal, err := v1rs.rds.Cmd("GET", v1rs.dataKeys[*v1rs.qryIdx]).Bytes()
-		if err != nil {
+		var strVal []byte
+		if err = v1rs.rds.Cmd(&strVal, "GET", v1rs.dataKeys[*v1rs.qryIdx]); err != nil {
 			return nil, err
 		}
 		if err := v1rs.rds.Marshaler().Unmarshal(strVal, &v2T); err != nil {
@@ -584,7 +583,7 @@ func (v1rs *redisMigrator) setV2ThresholdProfile(x *v2Threshold) (err error) {
 	if err != nil {
 		return err
 	}
-	if err = v1rs.rds.Cmd("SET", key, bit).Err; err != nil {
+	if err = v1rs.rds.Cmd(nil, "SET", key, string(bit)); err != nil {
 		return err
 	}
 	return
@@ -593,7 +592,7 @@ func (v1rs *redisMigrator) setV2ThresholdProfile(x *v2Threshold) (err error) {
 //rem
 func (v1rs *redisMigrator) remV2ThresholdProfile(tenant, id string) (err error) {
 	key := utils.ThresholdProfilePrefix + utils.ConcatenatedKey(tenant, id)
-	return v1rs.rds.Cmd("DEL", key).Err
+	return v1rs.rds.Cmd(nil, "DEL", key)
 }
 
 //ThresholdProfile methods
@@ -611,8 +610,8 @@ func (v1rs *redisMigrator) getV1Alias() (v1a *v1Alias, err error) {
 	}
 	if *v1rs.qryIdx <= len(v1rs.dataKeys)-1 {
 		key := v1rs.dataKeys[*v1rs.qryIdx]
-		strVal, err := v1rs.rds.Cmd("GET", key).Bytes()
-		if err != nil {
+		var strVal []byte
+		if err = v1rs.rds.Cmd(&strVal, "GET", key); err != nil {
 			return nil, err
 		}
 		v1a.SetId(strings.TrimPrefix(key, AliasesPrefix))
@@ -635,7 +634,7 @@ func (v1rs *redisMigrator) setV1Alias(al *v1Alias) (err error) {
 		return
 	}
 	key := AliasesPrefix + al.GetId()
-	if err = v1rs.rds.Cmd("SET", key, result).Err; err != nil {
+	if err = v1rs.rds.Cmd(nil, "SET", key, string(result)); err != nil {
 		return
 	}
 	return
@@ -647,11 +646,11 @@ func (v1rs *redisMigrator) remV1Alias(key string) (err error) {
 	// get alias for values list
 
 	var values []byte
-	if values, err = v1rs.rds.Cmd("GET",
-		AliasesPrefix+key).Bytes(); err != nil {
-		if err == redis.ErrRespNil { // did not find the destination
-			err = utils.ErrNotFound
-		}
+	if err = v1rs.rds.Cmd(&values, "GET",
+		AliasesPrefix+key); err != nil {
+		return
+	} else if len(values) == 0 {
+		err = utils.ErrNotFound
 		return
 	}
 	al := &v1Alias{Values: make(v1AliasValues, 0)}
@@ -660,7 +659,7 @@ func (v1rs *redisMigrator) remV1Alias(key string) (err error) {
 		return err
 	}
 
-	err = v1rs.rds.Cmd("DEL", AliasesPrefix+key).Err
+	err = v1rs.rds.Cmd(nil, "DEL", AliasesPrefix+key)
 	if err != nil {
 		return err
 	}
@@ -669,7 +668,7 @@ func (v1rs *redisMigrator) remV1Alias(key string) (err error) {
 		for target, pairs := range value.Pairs {
 			for _, alias := range pairs {
 				revID := alias + target + al.Context
-				err = v1rs.rds.Cmd("SREM", reverseAliasesPrefix+revID, tmpKey).Err
+				err = v1rs.rds.Cmd(nil, "SREM", reverseAliasesPrefix+revID, tmpKey)
 				if err != nil {
 					return err
 				}
@@ -678,7 +677,7 @@ func (v1rs *redisMigrator) remV1Alias(key string) (err error) {
 	}
 	return
 
-	return v1rs.rds.Cmd("DEL", key).Err
+	return v1rs.rds.Cmd(nil, "DEL", key)
 }
 
 // User methods
@@ -694,8 +693,8 @@ func (v1rs *redisMigrator) getV1User() (v1u *v1UserProfile, err error) {
 		v1rs.qryIdx = utils.IntPointer(0)
 	}
 	if *v1rs.qryIdx <= len(v1rs.dataKeys)-1 {
-		strVal, err := v1rs.rds.Cmd("GET", v1rs.dataKeys[*v1rs.qryIdx]).Bytes()
-		if err != nil {
+		var strVal []byte
+		if err = v1rs.rds.Cmd(&strVal, "GET", v1rs.dataKeys[*v1rs.qryIdx]); err != nil {
 			return nil, err
 		}
 		v1u = new(v1UserProfile)
@@ -715,12 +714,12 @@ func (v1rs *redisMigrator) setV1User(us *v1UserProfile) (err error) {
 	if err != nil {
 		return err
 	}
-	return v1rs.rds.Cmd("SET", utils.USERS_PREFIX+us.GetId(), bit).Err
+	return v1rs.rds.Cmd(nil, "SET", utils.USERS_PREFIX+us.GetId(), string(bit))
 }
 
 //rem
 func (v1rs *redisMigrator) remV1User(key string) (err error) {
-	return v1rs.rds.Cmd("DEL", utils.USERS_PREFIX+key).Err
+	return v1rs.rds.Cmd(nil, "DEL", utils.USERS_PREFIX+key)
 }
 
 // DerivedChargers methods
@@ -736,8 +735,8 @@ func (v1rs *redisMigrator) getV1DerivedChargers() (v1d *v1DerivedChargersWithKey
 		v1rs.qryIdx = utils.IntPointer(0)
 	}
 	if *v1rs.qryIdx <= len(v1rs.dataKeys)-1 {
-		strVal, err := v1rs.rds.Cmd("GET", v1rs.dataKeys[*v1rs.qryIdx]).Bytes()
-		if err != nil {
+		var strVal []byte
+		if err = v1rs.rds.Cmd(&strVal, "GET", v1rs.dataKeys[*v1rs.qryIdx]); err != nil {
 			return nil, err
 		}
 		v1d = new(v1DerivedChargersWithKey)
@@ -762,12 +761,12 @@ func (v1rs *redisMigrator) setV1DerivedChargers(dc *v1DerivedChargersWithKey) (e
 	if err != nil {
 		return err
 	}
-	return v1rs.rds.Cmd("SET", utils.DERIVEDCHARGERS_PREFIX+dc.Key, bit).Err
+	return v1rs.rds.Cmd(nil, "SET", utils.DERIVEDCHARGERS_PREFIX+dc.Key, string(bit))
 }
 
 //rem
 func (v1rs *redisMigrator) remV1DerivedChargers(key string) (err error) {
-	return v1rs.rds.Cmd("DEL", utils.DERIVEDCHARGERS_PREFIX+key).Err
+	return v1rs.rds.Cmd(nil, "DEL", utils.DERIVEDCHARGERS_PREFIX+key)
 }
 
 //AttributeProfile methods
@@ -784,8 +783,8 @@ func (v1rs *redisMigrator) getV2AttributeProfile() (v2attrPrf *v2AttributeProfil
 		v1rs.qryIdx = utils.IntPointer(0)
 	}
 	if *v1rs.qryIdx <= len(v1rs.dataKeys)-1 {
-		strVal, err := v1rs.rds.Cmd("GET", v1rs.dataKeys[*v1rs.qryIdx]).Bytes()
-		if err != nil {
+		var strVal []byte
+		if err = v1rs.rds.Cmd(&strVal, "GET", v1rs.dataKeys[*v1rs.qryIdx]); err != nil {
 			return nil, err
 		}
 		if err := v1rs.rds.Marshaler().Unmarshal(strVal, &v2attr); err != nil {
@@ -806,7 +805,7 @@ func (v1rs *redisMigrator) setV2AttributeProfile(x *v2AttributeProfile) (err err
 	if err != nil {
 		return err
 	}
-	if err = v1rs.rds.Cmd("SET", key, bit).Err; err != nil {
+	if err = v1rs.rds.Cmd(nil, "SET", key, string(bit)); err != nil {
 		return err
 	}
 	return
@@ -815,7 +814,7 @@ func (v1rs *redisMigrator) setV2AttributeProfile(x *v2AttributeProfile) (err err
 //rem
 func (v1rs *redisMigrator) remV2AttributeProfile(tenant, id string) (err error) {
 	key := utils.AttributeProfilePrefix + utils.ConcatenatedKey(tenant, id)
-	return v1rs.rds.Cmd("DEL", key).Err
+	return v1rs.rds.Cmd(nil, "DEL", key)
 }
 
 //AttributeProfile methods
@@ -832,8 +831,8 @@ func (v1rs *redisMigrator) getV3AttributeProfile() (v3attrPrf *v3AttributeProfil
 		v1rs.qryIdx = utils.IntPointer(0)
 	}
 	if *v1rs.qryIdx <= len(v1rs.dataKeys)-1 {
-		strVal, err := v1rs.rds.Cmd("GET", v1rs.dataKeys[*v1rs.qryIdx]).Bytes()
-		if err != nil {
+		var strVal []byte
+		if err = v1rs.rds.Cmd(&strVal, "GET", v1rs.dataKeys[*v1rs.qryIdx]); err != nil {
 			return nil, err
 		}
 		if err := v1rs.rds.Marshaler().Unmarshal(strVal, &v3attr); err != nil {
@@ -854,7 +853,7 @@ func (v1rs *redisMigrator) setV3AttributeProfile(x *v3AttributeProfile) (err err
 	if err != nil {
 		return err
 	}
-	if err = v1rs.rds.Cmd("SET", key, bit).Err; err != nil {
+	if err = v1rs.rds.Cmd(nil, "SET", key, string(bit)); err != nil {
 		return err
 	}
 	return
@@ -863,7 +862,7 @@ func (v1rs *redisMigrator) setV3AttributeProfile(x *v3AttributeProfile) (err err
 //rem
 func (v1rs *redisMigrator) remV3AttributeProfile(tenant, id string) (err error) {
 	key := utils.AttributeProfilePrefix + utils.ConcatenatedKey(tenant, id)
-	return v1rs.rds.Cmd("DEL", key).Err
+	return v1rs.rds.Cmd(nil, "DEL", key)
 }
 
 //AttributeProfile methods
@@ -880,8 +879,8 @@ func (v1rs *redisMigrator) getV4AttributeProfile() (v3attrPrf *v4AttributeProfil
 		v1rs.qryIdx = utils.IntPointer(0)
 	}
 	if *v1rs.qryIdx <= len(v1rs.dataKeys)-1 {
-		strVal, err := v1rs.rds.Cmd("GET", v1rs.dataKeys[*v1rs.qryIdx]).Bytes()
-		if err != nil {
+		var strVal []byte
+		if err = v1rs.rds.Cmd(&strVal, "GET", v1rs.dataKeys[*v1rs.qryIdx]); err != nil {
 			return nil, err
 		}
 		if err := v1rs.rds.Marshaler().Unmarshal(strVal, &v4attr); err != nil {
@@ -906,8 +905,8 @@ func (v1rs *redisMigrator) getV5AttributeProfile() (v5attr *engine.AttributeProf
 		v1rs.qryIdx = utils.IntPointer(0)
 	}
 	if *v1rs.qryIdx <= len(v1rs.dataKeys)-1 {
-		strVal, err := v1rs.rds.Cmd("GET", v1rs.dataKeys[*v1rs.qryIdx]).Bytes()
-		if err != nil {
+		var strVal []byte
+		if err = v1rs.rds.Cmd(&strVal, "GET", v1rs.dataKeys[*v1rs.qryIdx]); err != nil {
 			return nil, err
 		}
 		if err := v1rs.rds.Marshaler().Unmarshal(strVal, &v5attr); err != nil {
@@ -928,7 +927,7 @@ func (v1rs *redisMigrator) setV4AttributeProfile(x *v4AttributeProfile) (err err
 	if err != nil {
 		return err
 	}
-	if err = v1rs.rds.Cmd("SET", key, bit).Err; err != nil {
+	if err = v1rs.rds.Cmd(nil, "SET", key, string(bit)); err != nil {
 		return err
 	}
 	return
@@ -937,7 +936,7 @@ func (v1rs *redisMigrator) setV4AttributeProfile(x *v4AttributeProfile) (err err
 //rem
 func (v1rs *redisMigrator) remV4AttributeProfile(tenant, id string) (err error) {
 	key := utils.AttributeProfilePrefix + utils.ConcatenatedKey(tenant, id)
-	return v1rs.rds.Cmd("DEL", key).Err
+	return v1rs.rds.Cmd(nil, "DEL", key)
 }
 
 // Filter Methods
@@ -953,8 +952,8 @@ func (v1rs *redisMigrator) getV1Filter() (v1Fltr *v1Filter, err error) {
 		v1rs.qryIdx = utils.IntPointer(0)
 	}
 	if *v1rs.qryIdx <= len(v1rs.dataKeys)-1 {
-		strVal, err := v1rs.rds.Cmd("GET", v1rs.dataKeys[*v1rs.qryIdx]).Bytes()
-		if err != nil {
+		var strVal []byte
+		if err = v1rs.rds.Cmd(&strVal, "GET", v1rs.dataKeys[*v1rs.qryIdx]); err != nil {
 			return nil, err
 		}
 		if err := v1rs.rds.Marshaler().Unmarshal(strVal, &v1Fltr); err != nil {
@@ -979,8 +978,8 @@ func (v1rs *redisMigrator) getV4Filter() (v4Fltr *engine.Filter, err error) {
 		v1rs.qryIdx = utils.IntPointer(0)
 	}
 	if *v1rs.qryIdx <= len(v1rs.dataKeys)-1 {
-		strVal, err := v1rs.rds.Cmd("GET", v1rs.dataKeys[*v1rs.qryIdx]).Bytes()
-		if err != nil {
+		var strVal []byte
+		if err = v1rs.rds.Cmd(&strVal, "GET", v1rs.dataKeys[*v1rs.qryIdx]); err != nil {
 			return nil, err
 		}
 		if err := v1rs.rds.Marshaler().Unmarshal(strVal, &v4Fltr); err != nil {
@@ -1001,13 +1000,13 @@ func (v1rs *redisMigrator) setV1Filter(x *v1Filter) (err error) {
 	if err != nil {
 		return err
 	}
-	return v1rs.rds.Cmd("SET", key, bit).Err
+	return v1rs.rds.Cmd(nil, "SET", key, string(bit))
 }
 
 //rem
 func (v1rs *redisMigrator) remV1Filter(tenant, id string) (err error) {
 	key := utils.FilterPrefix + utils.ConcatenatedKey(tenant, id)
-	return v1rs.rds.Cmd("DEL", key).Err
+	return v1rs.rds.Cmd(nil, "DEL", key)
 }
 
 // SupplierMethods
@@ -1022,8 +1021,8 @@ func (v1rs *redisMigrator) getSupplier() (spl *SupplierProfile, err error) {
 		v1rs.qryIdx = utils.IntPointer(0)
 	}
 	if *v1rs.qryIdx <= len(v1rs.dataKeys)-1 {
-		strVal, err := v1rs.rds.Cmd("GET", v1rs.dataKeys[*v1rs.qryIdx]).Bytes()
-		if err != nil {
+		var strVal []byte
+		if err = v1rs.rds.Cmd(&strVal, "GET", v1rs.dataKeys[*v1rs.qryIdx]); err != nil {
 			return nil, err
 		}
 		if err := v1rs.rds.Marshaler().Unmarshal(strVal, &spl); err != nil {
@@ -1044,7 +1043,7 @@ func (v1rs *redisMigrator) setSupplier(spl *SupplierProfile) (err error) {
 	if err != nil {
 		return err
 	}
-	if err = v1rs.rds.Cmd("SET", key, bit).Err; err != nil {
+	if err = v1rs.rds.Cmd(nil, "SET", key, string(bit)); err != nil {
 		return err
 	}
 	return
@@ -1053,7 +1052,7 @@ func (v1rs *redisMigrator) setSupplier(spl *SupplierProfile) (err error) {
 //rem
 func (v1rs *redisMigrator) remSupplier(tenant, id string) (err error) {
 	key := SupplierProfilePrefix + utils.ConcatenatedKey(tenant, id)
-	return v1rs.rds.Cmd("DEL", key).Err
+	return v1rs.rds.Cmd(nil, "DEL", key)
 }
 
 func (v1rs *redisMigrator) getV1ChargerProfile() (v1chrPrf *engine.ChargerProfile, err error) {
@@ -1067,8 +1066,8 @@ func (v1rs *redisMigrator) getV1ChargerProfile() (v1chrPrf *engine.ChargerProfil
 		v1rs.qryIdx = utils.IntPointer(0)
 	}
 	if *v1rs.qryIdx <= len(v1rs.dataKeys)-1 {
-		strVal, err := v1rs.rds.Cmd("GET", v1rs.dataKeys[*v1rs.qryIdx]).Bytes()
-		if err != nil {
+		var strVal []byte
+		if err = v1rs.rds.Cmd(&strVal, "GET", v1rs.dataKeys[*v1rs.qryIdx]); err != nil {
 			return nil, err
 		}
 		if err := v1rs.rds.Marshaler().Unmarshal(strVal, &v1chrPrf); err != nil {
@@ -1093,8 +1092,8 @@ func (v1rs *redisMigrator) getV1DispatcherProfile() (v1chrPrf *engine.Dispatcher
 		v1rs.qryIdx = utils.IntPointer(0)
 	}
 	if *v1rs.qryIdx <= len(v1rs.dataKeys)-1 {
-		strVal, err := v1rs.rds.Cmd("GET", v1rs.dataKeys[*v1rs.qryIdx]).Bytes()
-		if err != nil {
+		var strVal []byte
+		if err = v1rs.rds.Cmd(&strVal, "GET", v1rs.dataKeys[*v1rs.qryIdx]); err != nil {
 			return nil, err
 		}
 		if err := v1rs.rds.Marshaler().Unmarshal(strVal, &v1chrPrf); err != nil {
@@ -1119,8 +1118,8 @@ func (v1rs *redisMigrator) getV1RouteProfile() (v1chrPrf *engine.RouteProfile, e
 		v1rs.qryIdx = utils.IntPointer(0)
 	}
 	if *v1rs.qryIdx <= len(v1rs.dataKeys)-1 {
-		strVal, err := v1rs.rds.Cmd("GET", v1rs.dataKeys[*v1rs.qryIdx]).Bytes()
-		if err != nil {
+		var strVal []byte
+		if err = v1rs.rds.Cmd(&strVal, "GET", v1rs.dataKeys[*v1rs.qryIdx]); err != nil {
 			return nil, err
 		}
 		if err := v1rs.rds.Marshaler().Unmarshal(strVal, &v1chrPrf); err != nil {
