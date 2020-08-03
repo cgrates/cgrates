@@ -93,6 +93,9 @@ func (cS *ChargerService) matchingChargerProfilesForEvent(cgrEv *utils.CGREventW
 		}
 		matchingCPs[cpID] = cP
 	}
+	if len(matchingCPs) == 0 {
+		return nil, utils.ErrNotFound
+	}
 	cPs = make(ChargerProfiles, len(matchingCPs))
 	i := 0
 	for _, cP := range matchingCPs {

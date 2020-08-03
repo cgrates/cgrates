@@ -30,7 +30,7 @@
 // 	"digest_separator": ",",								// separator to use in replies containing data digests
 // 	"digest_equal": ":",									// equal symbol used in case of digests
 // 	"rsr_separator": ";",									// separator used within RSR fields
-// 	"max_parralel_conns": 100,								// the maximum number of connection used by the *parallel strategy
+// 	"max_parallel_conns": 100,								// the maximum number of connection used by the *parallel strategy
 // },
 
 
@@ -53,32 +53,32 @@
 // 	"remote_conns":[],
 // 	"replication_conns":[],
 // 	"items":{
-// 		"*accounts":{"remote":false, "replicate":false, "limit": -1, "ttl": "", "static_ttl": false}, 					
-// 		"*reverse_destinations": {"remote":false, "replicate":false, "limit": -1, "ttl": "", "static_ttl": false},
-// 		"*destinations": {"remote":false, "replicate":false, "limit": -1, "ttl": "", "static_ttl": false}, 
-// 		"*rating_plans": {"remote":false, "replicate":false, "limit": -1, "ttl": "", "static_ttl": false}, 
-// 		"*rating_profiles":{"remote":false, "replicate":false, "limit": -1, "ttl": "", "static_ttl": false}, 
-// 		"*actions":{"remote":false, "replicate":false, "limit": -1, "ttl": "", "static_ttl": false}, 
-// 		"*action_plans": {"remote":false, "replicate":false, "limit": -1, "ttl": "", "static_ttl": false}, 
-// 		"*account_action_plans":{"remote":false, "replicate":false, "limit": -1, "ttl": "", "static_ttl": false}, 
-// 		"*action_triggers":{"remote":false, "replicate":false, "limit": -1, "ttl": "", "static_ttl": false}, 
-// 		"*shared_groups":{"remote":false, "replicate":false, "limit": -1, "ttl": "", "static_ttl": false}, 
-// 		"*timings": {"remote":false, "replicate":false, "limit": -1, "ttl": "", "static_ttl": false}, 
-// 		"*resource_profiles":{"remote":false, "replicate":false, "limit": -1, "ttl": "", "static_ttl": false}, 
-// 		"*resources":{"remote":false, "replicate":false, "limit": -1, "ttl": "", "static_ttl": false}, 
-// 		"*statqueue_profiles": {"remote":false, "replicate":false, "limit": -1, "ttl": "", "static_ttl": false}, 
-// 		"*statqueues": {"remote":false, "replicate":false, "limit": -1, "ttl": "", "static_ttl": false}, 
-// 		"*threshold_profiles": {"remote":false, "replicate":false, "limit": -1, "ttl": "", "static_ttl": false}, 
-// 		"*thresholds": {"remote":false, "replicate":false, "limit": -1, "ttl": "", "static_ttl": false}, 
-// 		"*filters": {"remote":false, "replicate":false, "limit": -1, "ttl": "", "static_ttl": false}, 
-// 		"*route_profiles":{"remote":false, "replicate":false, "limit": -1, "ttl": "", "static_ttl": false}, 
-// 		"*attribute_profiles":{"remote":false, "replicate":false, "limit": -1, "ttl": "", "static_ttl": false}, 
-// 		"*charger_profiles": {"remote":false, "replicate":false, "limit": -1, "ttl": "", "static_ttl": false}, 
-// 		"*dispatcher_profiles":{"remote":false, "replicate":false, "limit": -1, "ttl": "", "static_ttl": false}, 
-// 		"*dispatcher_hosts":{"remote":false, "replicate":false, "limit": -1, "ttl": "", "static_ttl": false}, 
-// 		"*rate_profiles":{"remote":false, "replicate":false, "limit": -1, "ttl": "", "static_ttl": false},
-// 		"*load_ids":{"remote":false, "replicate":false, "limit": -1, "ttl": "", "static_ttl": false}, 
-// 		"*indexes":{"remote":false, "replicate":false, "limit": -1, "ttl": "", "static_ttl": false}, 
+// 		"*accounts":{"remote":false, "replicate":false}, 					
+// 		"*reverse_destinations": {"remote":false, "replicate":false},
+// 		"*destinations": {"remote":false, "replicate":false}, 
+// 		"*rating_plans": {"remote":false, "replicate":false}, 
+// 		"*rating_profiles":{"remote":false, "replicate":false}, 
+// 		"*actions":{"remote":false, "replicate":false}, 
+// 		"*action_plans": {"remote":false, "replicate":false}, 
+// 		"*account_action_plans":{"remote":false, "replicate":false}, 
+// 		"*action_triggers":{"remote":false, "replicate":false}, 
+// 		"*shared_groups":{"remote":false, "replicate":false}, 
+// 		"*timings": {"remote":false, "replicate":false}, 
+// 		"*resource_profiles":{"remote":false, "replicate":false}, 
+// 		"*resources":{"remote":false, "replicate":false}, 
+// 		"*statqueue_profiles": {"remote":false, "replicate":false}, 
+// 		"*statqueues": {"remote":false, "replicate":false}, 
+// 		"*threshold_profiles": {"remote":false, "replicate":false}, 
+// 		"*thresholds": {"remote":false, "replicate":false}, 
+// 		"*filters": {"remote":false, "replicate":false}, 
+// 		"*route_profiles":{"remote":false, "replicate":false}, 
+// 		"*attribute_profiles":{"remote":false, "replicate":false}, 
+// 		"*charger_profiles": {"remote":false, "replicate":false}, 
+// 		"*dispatcher_profiles":{"remote":false, "replicate":false}, 
+// 		"*dispatcher_hosts":{"remote":false, "replicate":false}, 
+// 		"*rate_profiles":{"remote":false, "replicate":false},
+// 		"*load_ids":{"remote":false, "replicate":false}, 
+// 		"*indexes":{"remote":false, "replicate":false}, 
 // 	},
 // },
 
@@ -98,30 +98,30 @@
 // 	"query_timeout":"10s",
 // 	"sslmode":"disable",					// sslmode in case of *postgres
 // 	"items":{
-// 		"session_costs": {"limit": -1, "ttl": "", "static_ttl": false}, 
-// 		"cdrs": {"limit": -1, "ttl": "", "static_ttl": false}, 		
-// 		"tp_timings":{"limit": -1, "ttl": "", "static_ttl": false}, 					
-// 		"tp_destinations": {"limit": -1, "ttl": "", "static_ttl": false},
-// 		"tp_rates": {"limit": -1, "ttl": "", "static_ttl": false}, 
-// 		"tp_destination_rates": {"limit": -1, "ttl": "", "static_ttl": false}, 
-// 		"tp_rating_plans":{"limit": -1, "ttl": "", "static_ttl": false}, 
-// 		"tp_rating_profiles":{"limit": -1, "ttl": "", "static_ttl": false}, 
-// 		"tp_shared_groups": {"limit": -1, "ttl": "", "static_ttl": false}, 
-// 		"tp_actions":{"limit": -1, "ttl": "", "static_ttl": false}, 
-// 		"tp_action_plans":{"limit": -1, "ttl": "", "static_ttl": false}, 
-// 		"tp_action_triggers":{"limit": -1, "ttl": "", "static_ttl": false}, 
-// 		"tp_account_actions": {"limit": -1, "ttl": "", "static_ttl": false}, 
-// 		"tp_resources":{"limit": -1, "ttl": "", "static_ttl": false}, 
-// 		"tp_stats":{"limit": -1, "ttl": "", "static_ttl": false}, 
-// 		"tp_thresholds": {"limit": -1, "ttl": "", "static_ttl": false}, 
-// 		"tp_filters": {"limit": -1, "ttl": "", "static_ttl": false},
-// 		"tp_routes": {"limit": -1, "ttl": "", "static_ttl": false}, 
-// 		"tp_attributes":{"limit": -1, "ttl": "", "static_ttl": false}, 
-// 		"tp_chargers":{"limit": -1, "ttl": "", "static_ttl": false}, 
-// 		"versions": {"limit": -1, "ttl": "", "static_ttl": false}, 
-// 		"tp_dispatcher_profiles":{"limit": -1, "ttl": "", "static_ttl": false}, 
-// 		"tp_dispatcher_hosts":{"limit": -1, "ttl": "", "static_ttl": false}, 
-// 		"tp_rate_profiles":{"limit": -1, "ttl": "", "static_ttl": false}, 
+// 		"*session_costs": {"remote":false, "replicate":false}, 
+// 		"*cdrs": {"remote":false, "replicate":false}, 		
+// 		"*tp_timings":{"remote":false, "replicate":false}, 					
+// 		"*tp_destinations": {"remote":false, "replicate":false},
+// 		"*tp_rates": {"remote":false, "replicate":false}, 
+// 		"*tp_destination_rates": {"remote":false, "replicate":false}, 
+// 		"*tp_rating_plans":{"remote":false, "replicate":false}, 
+// 		"*tp_rating_profiles":{"remote":false, "replicate":false}, 
+// 		"*tp_shared_groups": {"remote":false, "replicate":false}, 
+// 		"*tp_actions":{"remote":false, "replicate":false}, 
+// 		"*tp_action_plans":{"remote":false, "replicate":false}, 
+// 		"*tp_action_triggers":{"remote":false, "replicate":false}, 
+// 		"*tp_account_actions": {"remote":false, "replicate":false}, 
+// 		"*tp_resources":{"remote":false, "replicate":false}, 
+// 		"*tp_stats":{"remote":false, "replicate":false}, 
+// 		"*tp_thresholds": {"remote":false, "replicate":false}, 
+// 		"*tp_filters": {"remote":false, "replicate":false},
+// 		"*tp_routes": {"remote":false, "replicate":false}, 
+// 		"*tp_attributes":{"remote":false, "replicate":false}, 
+// 		"*tp_chargers":{"remote":false, "replicate":false}, 
+// 		"*versions": {"remote":false, "replicate":false}, 
+// 		"*tp_dispatcher_profiles":{"remote":false, "replicate":false}, 
+// 		"*tp_dispatcher_hosts":{"remote":false, "replicate":false}, 
+// 		"*tp_rate_profiles":{"remote":false, "replicate":false}, 
 // 	},
 // },
 
@@ -212,6 +212,35 @@
 // 		"*rpc_connections": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},							// RPC connections caching
 // 		"*uch": {"limit": -1, "ttl": "3h", "static_ttl": false, "replicate": false},									// User cache
 // 		"*stir": {"limit": -1, "ttl": "3h", "static_ttl": false, "replicate": false},									// stirShaken cache keys
+		
+// 		// only for *internal database
+// 		"*versions": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},									// for version storing
+// 		"*accounts": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},									// for account storing
+// 		// internal storDB tabels
+// 		"*session_costs": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
+// 		"*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 		
+// 		"*tp_timings":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 					
+// 		"*tp_destinations": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},
+// 		"*tp_rates": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
+// 		"*tp_destination_rates": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
+// 		"*tp_rating_plans":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
+// 		"*tp_rating_profiles":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
+// 		"*tp_shared_groups": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
+// 		"*tp_actions":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
+// 		"*tp_action_plans":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
+// 		"*tp_action_triggers":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
+// 		"*tp_account_actions": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
+// 		"*tp_resources":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
+// 		"*tp_stats":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
+// 		"*tp_thresholds": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
+// 		"*tp_filters": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},
+// 		"*tp_routes": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
+// 		"*tp_attributes":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
+// 		"*tp_chargers":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
+// 		"*versions": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
+// 		"*tp_dispatcher_profiles":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
+// 		"*tp_dispatcher_hosts":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
+// 		"*tp_rate_profiles":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
 // 	},
 // 	"replication_conns": [],
 // },
@@ -362,6 +391,7 @@
 // 	//"session_ttl_max_delay": "",			// activates session_ttl randomization and limits the maximum possible delay
 // 	//"session_ttl_last_used": "",			// tweak LastUsed for sessions timing-out, not defined by default
 // 	//"session_ttl_usage": "",				// tweak Usage for sessions timing-out, not defined by default
+// 	//"session_last_usage": "",				// tweak LastUsage for session timing-out, not defined by default
 // 	"session_indexes": [],					// index sessions based on these fields for GetActiveSessions API
 // 	"client_protocol": 1.0,					// version of protocol to use when acting as JSON-PRC client <"0","1.0">
 // 	"channel_sync_interval": "0",			// sync channels to detect stale sessions (0 to disable)
@@ -529,6 +559,7 @@
 // 	"indexed_selects": true,				// enable profile matching exclusively on indexes
 // 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
+// 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 // 	"process_runs": 1,						// number of run loops when processing event
 // },
@@ -540,6 +571,7 @@
 // 	"indexed_selects": true,				// enable profile matching exclusively on indexes
 // 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
+// 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 // },
 
@@ -551,6 +583,7 @@
 // 	"indexed_selects": true,				// enable profile matching exclusively on indexes
 // 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
+// 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 // },
 
@@ -563,6 +596,7 @@
 // 	"indexed_selects": true,				// enable profile matching exclusively on indexes
 // 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
+// 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 // },
 
@@ -573,6 +607,7 @@
 // 	"indexed_selects": true,				// enable profile matching exclusively on indexes
 // 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
+// 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 // },
 
@@ -582,6 +617,7 @@
 // 	"indexed_selects": true,				// enable profile matching exclusively on indexes
 // 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
+// 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 // 	"attributes_conns": [],					// connections to AttributeS for altering events before route queries: <""|*internal|$rpc_conns_id>
 // 	"resources_conns": [],					// connections to ResourceS for *res sorting, empty to disable functionality: <""|*internal|$rpc_conns_id>
@@ -608,171 +644,174 @@
 // 				"type": "*attributes",						// data source type
 // 				"file_name": "Attributes.csv",				// file name in the tp_in_dir
 // 				"fields": [
-// 					{"tag": "TenantID", "path": "Tenant", "type": "*variable", "value": "~0", "mandatory": true},
-// 					{"tag": "ProfileID", "path": "ID", "type": "*variable", "value": "~1", "mandatory": true},
-// 					{"tag": "Contexts", "path": "Contexts", "type": "*variable", "value": "~2"},
-// 					{"tag": "FilterIDs", "path": "FilterIDs", "type": "*variable", "value": "~3"},
-// 					{"tag": "ActivationInterval", "path": "ActivationInterval", "type": "*variable", "value": "~4"},
-// 					{"tag": "AttributeFilterIDs", "path": "AttributeFilterIDs", "type": "*variable", "value": "~5"},
-// 					{"tag": "Path", "path": "Path", "type": "*variable", "value": "~6"},
-// 					{"tag": "Type", "path": "Type", "type": "*variable", "value": "~7"},
-// 					{"tag": "Value", "path": "Value", "type": "*variable", "value": "~8"},
-// 					{"tag": "Blocker", "path": "Blocker", "type": "*variable", "value": "~9"},
-// 					{"tag": "Weight", "path": "Weight", "type": "*variable", "value": "~10"},
+// 					{"tag": "TenantID", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
+// 					{"tag": "ProfileID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
+// 					{"tag": "Contexts", "path": "Contexts", "type": "*variable", "value": "~*req.2"},
+// 					{"tag": "FilterIDs", "path": "FilterIDs", "type": "*variable", "value": "~*req.3"},
+// 					{"tag": "ActivationInterval", "path": "ActivationInterval", "type": "*variable", "value": "~*req.4"},
+// 					{"tag": "AttributeFilterIDs", "path": "AttributeFilterIDs", "type": "*variable", "value": "~*req.5"},
+// 					{"tag": "Path", "path": "Path", "type": "*variable", "value": "~*req.6"},
+// 					{"tag": "Type", "path": "Type", "type": "*variable", "value": "~*req.7"},
+// 					{"tag": "Value", "path": "Value", "type": "*variable", "value": "~*req.8"},
+// 					{"tag": "Blocker", "path": "Blocker", "type": "*variable", "value": "~*req.9"},
+// 					{"tag": "Weight", "path": "Weight", "type": "*variable", "value": "~*req.10"},
 // 				],
 // 			},
 // 			{
 // 				"type": "*filters",						// data source type
 // 				"file_name": "Filters.csv",				// file name in the tp_in_dir
 // 				"fields": [
-// 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~0", "mandatory": true},
-// 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~1", "mandatory": true},
-// 					{"tag": "Type", "path": "Type", "type": "*variable", "value": "~2"},
-// 					{"tag": "Element", "path": "Element", "type": "*variable", "value": "~3"},
-// 					{"tag": "Values", "path": "Values", "type": "*variable", "value": "~4"},
-// 					{"tag": "ActivationInterval", "path": "ActivationInterval", "type": "*variable", "value": "~5"},
+// 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
+// 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
+// 					{"tag": "Type", "path": "Type", "type": "*variable", "value": "~*req.2"},
+// 					{"tag": "Element", "path": "Element", "type": "*variable", "value": "~*req.3"},
+// 					{"tag": "Values", "path": "Values", "type": "*variable", "value": "~*req.4"},
+// 					{"tag": "ActivationInterval", "path": "ActivationInterval", "type": "*variable", "value": "~*req.5"},
 // 				],
 // 			},
 // 			{
 // 				"type": "*resources",						// data source type
 // 				"file_name": "Resources.csv",				// file name in the tp_in_dir
 // 				"fields": [
-// 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~0", "mandatory": true},
-// 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~1", "mandatory": true},
-// 					{"tag": "FilterIDs", "path": "FilterIDs", "type": "*variable", "value": "~2"},
-// 					{"tag": "ActivationInterval", "path": "ActivationInterval", "type": "*variable", "value": "~3"},
-// 					{"tag": "TTL", "path": "UsageTTL", "type": "*variable", "value": "~4"},
-// 					{"tag": "Limit", "path": "Limit", "type": "*variable", "value": "~5"},
-// 					{"tag": "AllocationMessage", "path": "AllocationMessage", "type": "*variable", "value": "~6"},
-// 					{"tag": "Blocker", "path": "Blocker", "type": "*variable", "value": "~7"},
-// 					{"tag": "Stored", "path": "Stored", "type": "*variable", "value": "~8"},
-// 					{"tag": "Weight", "path": "Weight", "type": "*variable", "value": "~9"},
-// 					{"tag": "ThresholdIDs", "path": "ThresholdIDs", "type": "*variable", "value": "~10"},
+// 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
+// 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
+// 					{"tag": "FilterIDs", "path": "FilterIDs", "type": "*variable", "value": "~*req.2"},
+// 					{"tag": "ActivationInterval", "path": "ActivationInterval", "type": "*variable", "value": "~*req.3"},
+// 					{"tag": "TTL", "path": "UsageTTL", "type": "*variable", "value": "~*req.4"},
+// 					{"tag": "Limit", "path": "Limit", "type": "*variable", "value": "~*req.5"},
+// 					{"tag": "AllocationMessage", "path": "AllocationMessage", "type": "*variable", "value": "~*req.6"},
+// 					{"tag": "Blocker", "path": "Blocker", "type": "*variable", "value": "~*req.7"},
+// 					{"tag": "Stored", "path": "Stored", "type": "*variable", "value": "~*req.8"},
+// 					{"tag": "Weight", "path": "Weight", "type": "*variable", "value": "~*req.9"},
+// 					{"tag": "ThresholdIDs", "path": "ThresholdIDs", "type": "*variable", "value": "~*req.10"},
 // 				],
 // 			},
 // 			{
 // 				"type": "*stats",						// data source type
 // 				"file_name": "Stats.csv",				// file name in the tp_in_dir
 // 				"fields": [
-// 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~0", "mandatory": true},
-// 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~1", "mandatory": true},
-// 					{"tag": "FilterIDs", "path": "FilterIDs", "type": "*variable", "value": "~2"},
-// 					{"tag": "ActivationInterval", "path": "ActivationInterval", "type": "*variable", "value": "~3"},
-// 					{"tag": "QueueLength", "path": "QueueLength", "type": "*variable", "value": "~4"},
-// 					{"tag": "TTL", "path": "TTL", "type": "*variable", "value": "~5"},
-// 					{"tag": "MinItems", "path": "MinItems", "type": "*variable", "value": "~6"},
-// 					{"tag": "MetricIDs", "path": "MetricIDs", "type": "*variable", "value": "~7"},
-// 					{"tag": "MetricFilterIDs", "path": "MetricFilterIDs", "type": "*variable", "value": "~8"},
-// 					{"tag": "Blocker", "path": "Blocker", "type": "*variable", "value": "~9"},
-// 					{"tag": "Stored", "path": "Stored", "type": "*variable", "value": "~10"},
-// 					{"tag": "Weight", "path": "Weight", "type": "*variable", "value": "~11"},
-// 					{"tag": "ThresholdIDs", "path": "ThresholdIDs", "type": "*variable", "value": "~12"},
+// 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
+// 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
+// 					{"tag": "FilterIDs", "path": "FilterIDs", "type": "*variable", "value": "~*req.2"},
+// 					{"tag": "ActivationInterval", "path": "ActivationInterval", "type": "*variable", "value": "~*req.3"},
+// 					{"tag": "QueueLength", "path": "QueueLength", "type": "*variable", "value": "~*req.4"},
+// 					{"tag": "TTL", "path": "TTL", "type": "*variable", "value": "~*req.5"},
+// 					{"tag": "MinItems", "path": "MinItems", "type": "*variable", "value": "~*req.6"},
+// 					{"tag": "MetricIDs", "path": "MetricIDs", "type": "*variable", "value": "~*req.7"},
+// 					{"tag": "MetricFilterIDs", "path": "MetricFilterIDs", "type": "*variable", "value": "~*req.8"},
+// 					{"tag": "Blocker", "path": "Blocker", "type": "*variable", "value": "~*req.9"},
+// 					{"tag": "Stored", "path": "Stored", "type": "*variable", "value": "~*req.10"},
+// 					{"tag": "Weight", "path": "Weight", "type": "*variable", "value": "~*req.11"},
+// 					{"tag": "ThresholdIDs", "path": "ThresholdIDs", "type": "*variable", "value": "~*req.12"},
 // 				],
 // 			},
 // 			{
 // 				"type": "*thresholds",						// data source type
 // 				"file_name": "Thresholds.csv",				// file name in the tp_in_dir
 // 				"fields": [
-// 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~0", "mandatory": true},
-// 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~1", "mandatory": true},
-// 					{"tag": "FilterIDs", "path": "FilterIDs", "type": "*variable", "value": "~2"},
-// 					{"tag": "ActivationInterval", "path": "ActivationInterval", "type": "*variable", "value": "~3"},
-// 					{"tag": "MaxHits", "path": "MaxHits", "type": "*variable", "value": "~4"},
-// 					{"tag": "MinHits", "path": "MinHits", "type": "*variable", "value": "~5"},
-// 					{"tag": "MinSleep", "path": "MinSleep", "type": "*variable", "value": "~6"},
-// 					{"tag": "Blocker", "path": "Blocker", "type": "*variable", "value": "~7"},
-// 					{"tag": "Weight", "path": "Weight", "type": "*variable", "value": "~8"},
-// 					{"tag": "ActionIDs", "path": "ActionIDs", "type": "*variable", "value": "~9"},
-// 					{"tag": "Async", "path": "Async", "type": "*variable", "value": "~10"},
+// 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
+// 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
+// 					{"tag": "FilterIDs", "path": "FilterIDs", "type": "*variable", "value": "~*req.2"},
+// 					{"tag": "ActivationInterval", "path": "ActivationInterval", "type": "*variable", "value": "~*req.3"},
+// 					{"tag": "MaxHits", "path": "MaxHits", "type": "*variable", "value": "~*req.4"},
+// 					{"tag": "MinHits", "path": "MinHits", "type": "*variable", "value": "~*req.5"},
+// 					{"tag": "MinSleep", "path": "MinSleep", "type": "*variable", "value": "~*req.6"},
+// 					{"tag": "Blocker", "path": "Blocker", "type": "*variable", "value": "~*req.7"},
+// 					{"tag": "Weight", "path": "Weight", "type": "*variable", "value": "~*req.8"},
+// 					{"tag": "ActionIDs", "path": "ActionIDs", "type": "*variable", "value": "~*req.9"},
+// 					{"tag": "Async", "path": "Async", "type": "*variable", "value": "~*req.10"},
 // 				],
 // 			},
 // 			{
 // 				"type": "*routes",						// data source type
 // 				"file_name": "Routes.csv",				// file name in the tp_in_dir
 // 				"fields": [
-// 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~0", "mandatory": true},
-// 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~1", "mandatory": true},
-// 					{"tag": "FilterIDs", "path": "FilterIDs", "type": "*variable", "value": "~2"},
-// 					{"tag": "ActivationInterval", "path": "ActivationInterval", "type": "*variable", "value": "~3"},
-// 					{"tag": "Sorting", "path": "Sorting", "type": "*variable", "value": "~4"},
-// 					{"tag": "SortingParameters", "path": "SortingParameters", "type": "*variable", "value": "~5"},
-// 					{"tag": "RouteID", "path": "RouteID", "type": "*variable", "value": "~6"},
-// 					{"tag": "RouteFilterIDs", "path": "RouteFilterIDs", "type": "*variable", "value": "~7"},
-// 					{"tag": "RouteAccountIDs", "path": "RouteAccountIDs", "type": "*variable", "value": "~8"},
-// 					{"tag": "RouteRatingPlanIDs", "path": "RouteRatingPlanIDs", "type": "*variable", "value": "~9"},
-// 					{"tag": "RouteResourceIDs", "path": "RouteResourceIDs", "type": "*variable", "value": "~10"},
-// 					{"tag": "RouteStatIDs", "path": "RouteStatIDs", "type": "*variable", "value": "~11"},
-// 					{"tag": "RouteWeight", "path": "RouteWeight", "type": "*variable", "value": "~12"},
-// 					{"tag": "RouteBlocker", "path": "RouteBlocker", "type": "*variable", "value": "~13"},
-// 					{"tag": "RouteParameters", "path": "RouteParameters", "type": "*variable", "value": "~14"},
-// 					{"tag": "Weight", "path": "Weight", "type": "*variable", "value": "~15"},
+// 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
+// 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
+// 					{"tag": "FilterIDs", "path": "FilterIDs", "type": "*variable", "value": "~*req.2"},
+// 					{"tag": "ActivationInterval", "path": "ActivationInterval", "type": "*variable", "value": "~*req.3"},
+// 					{"tag": "Sorting", "path": "Sorting", "type": "*variable", "value": "~*req.4"},
+// 					{"tag": "SortingParameters", "path": "SortingParameters", "type": "*variable", "value": "~*req.5"},
+// 					{"tag": "RouteID", "path": "RouteID", "type": "*variable", "value": "~*req.6"},
+// 					{"tag": "RouteFilterIDs", "path": "RouteFilterIDs", "type": "*variable", "value": "~*req.7"},
+// 					{"tag": "RouteAccountIDs", "path": "RouteAccountIDs", "type": "*variable", "value": "~*req.8"},
+// 					{"tag": "RouteRatingPlanIDs", "path": "RouteRatingPlanIDs", "type": "*variable", "value": "~*req.9"},
+// 					{"tag": "RouteResourceIDs", "path": "RouteResourceIDs", "type": "*variable", "value": "~*req.10"},
+// 					{"tag": "RouteStatIDs", "path": "RouteStatIDs", "type": "*variable", "value": "~*req.11"},
+// 					{"tag": "RouteWeight", "path": "RouteWeight", "type": "*variable", "value": "~*req.12"},
+// 					{"tag": "RouteBlocker", "path": "RouteBlocker", "type": "*variable", "value": "~*req.13"},
+// 					{"tag": "RouteParameters", "path": "RouteParameters", "type": "*variable", "value": "~*req.14"},
+// 					{"tag": "Weight", "path": "Weight", "type": "*variable", "value": "~*req.15"},
 // 				],
 // 			},
 // 			{
 // 				"type": "*chargers",						// data source type
 // 				"file_name": "Chargers.csv",				// file name in the tp_in_dir
 // 				"fields": [
-// 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~0", "mandatory": true},
-// 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~1", "mandatory": true},
-// 					{"tag": "FilterIDs", "path": "FilterIDs", "type": "*variable", "value": "~2"},
-// 					{"tag": "ActivationInterval", "path": "ActivationInterval", "type": "*variable", "value": "~3"},
-// 					{"tag": "RunID", "path": "RunID", "type": "*variable", "value": "~4"},
-// 					{"tag": "AttributeIDs", "path": "AttributeIDs", "type": "*variable", "value": "~5"},
-// 					{"tag": "Weight", "path": "Weight", "type": "*variable", "value": "~6"},
+// 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
+// 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
+// 					{"tag": "FilterIDs", "path": "FilterIDs", "type": "*variable", "value": "~*req.2"},
+// 					{"tag": "ActivationInterval", "path": "ActivationInterval", "type": "*variable", "value": "~*req.3"},
+// 					{"tag": "RunID", "path": "RunID", "type": "*variable", "value": "~*req.4"},
+// 					{"tag": "AttributeIDs", "path": "AttributeIDs", "type": "*variable", "value": "~*req.5"},
+// 					{"tag": "Weight", "path": "Weight", "type": "*variable", "value": "~*req.6"},
 // 				],
 // 			},
 // 			{
 // 				"type": "*dispatchers",						// data source type
 // 				"file_name": "DispatcherProfiles.csv",		// file name in the tp_in_dir
 // 				"fields": [
-// 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~0", "mandatory": true},
-// 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~1", "mandatory": true},
-// 					{"tag": "Contexts", "path": "Contexts", "type": "*variable", "value": "~2"},
-// 					{"tag": "FilterIDs", "path": "FilterIDs", "type": "*variable", "value": "~3"},
-// 					{"tag": "ActivationInterval", "path": "ActivationInterval", "type": "*variable", "value": "~4"},
-// 					{"tag": "Strategy", "path": "Strategy", "type": "*variable", "value": "~5"},
-// 					{"tag": "StrategyParameters", "path": "StrategyParameters", "type": "*variable", "value": "~6"},
-// 					{"tag": "ConnID", "path": "ConnID", "type": "*variable", "value": "~7"},
-// 					{"tag": "ConnFilterIDs", "path": "ConnFilterIDs", "type": "*variable", "value": "~8"},
-// 					{"tag": "ConnWeight", "path": "ConnWeight", "type": "*variable", "value": "~9"},
-// 					{"tag": "ConnBlocker", "path": "ConnBlocker", "type": "*variable", "value": "~10"},
-// 					{"tag": "ConnParameters", "path": "ConnParameters", "type": "*variable", "value": "~11"},
-// 					{"tag": "Weight", "path": "Weight", "type": "*variable", "value": "~12"},
+// 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
+// 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
+// 					{"tag": "Contexts", "path": "Contexts", "type": "*variable", "value": "~*req.2"},
+// 					{"tag": "FilterIDs", "path": "FilterIDs", "type": "*variable", "value": "~*req.3"},
+// 					{"tag": "ActivationInterval", "path": "ActivationInterval", "type": "*variable", "value": "~*req.4"},
+// 					{"tag": "Strategy", "path": "Strategy", "type": "*variable", "value": "~*req.5"},
+// 					{"tag": "StrategyParameters", "path": "StrategyParameters", "type": "*variable", "value": "~*req.6"},
+// 					{"tag": "ConnID", "path": "ConnID", "type": "*variable", "value": "~*req.7"},
+// 					{"tag": "ConnFilterIDs", "path": "ConnFilterIDs", "type": "*variable", "value": "~*req.8"},
+// 					{"tag": "ConnWeight", "path": "ConnWeight", "type": "*variable", "value": "~*req.9"},
+// 					{"tag": "ConnBlocker", "path": "ConnBlocker", "type": "*variable", "value": "~*req.10"},
+// 					{"tag": "ConnParameters", "path": "ConnParameters", "type": "*variable", "value": "~*req.11"},
+// 					{"tag": "Weight", "path": "Weight", "type": "*variable", "value": "~*req.12"},
 // 				],
 // 			},
 // 			{
 // 				"type": "*dispatcher_hosts",						// data source type
 // 				"file_name": "DispatcherHosts.csv",					// file name in the tp_in_dir
 // 				"fields": [
-// 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~0", "mandatory": true},
-// 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~1", "mandatory": true},
-// 					{"tag": "Address", "path": "Address", "type": "*variable", "value": "~2"},
-// 					{"tag": "Transport", "path": "Transport", "type": "*variable", "value": "~3"},
-// 					{"tag": "TLS", "path": "TLS", "type": "*variable", "value": "~4"},
+// 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
+// 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
+// 					{"tag": "Address", "path": "Address", "type": "*variable", "value": "~*req.2"},
+// 					{"tag": "Transport", "path": "Transport", "type": "*variable", "value": "~*req.3"},
+// 					{"tag": "TLS", "path": "TLS", "type": "*variable", "value": "~*req.4"},
 // 				],
 // 			},
 // 			{
 // 				"type": "*rate_profiles",						// data source type
 // 				"file_name": "RateProfiles.csv",				// file name in the tp_in_dir
 // 				"fields": [
-// 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~0", "mandatory": true},
-// 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~1", "mandatory": true},
-// 					{"tag": "FilterIDs", "path": "FilterIDs", "type": "*variable", "value": "~2"},
-// 					{"tag": "ActivationInterval", "path": "ActivationInterval", "type": "*variable", "value": "~3"},
-// 					{"tag": "Weight", "path": "Weight", "type": "*variable", "value": "~4"},
-// 					{"tag": "ConnectFee", "path": "ConnectFee", "type": "*variable", "value": "~5"},
-// 					{"tag": "RoundingMethod", "path": "RoundingMethod", "type": "*variable", "value": "~6"},
-// 					{"tag": "RoundingDecimals", "path": "RoundingDecimals", "type": "*variable", "value": "~7"},
-// 					{"tag": "MinCost", "path": "MinCost", "type": "*variable", "value": "~8"},
-// 					{"tag": "MaxCost", "path": "MaxCost", "type": "*variable", "value": "~9"},
-// 					{"tag": "MaxCostStrategy", "path": "MaxCostStrategy", "type": "*variable", "value": "~10"},
-// 					{"tag": "RateID", "path": "RateID", "type": "*variable", "value": "~11"},
-// 					{"tag": "RateFilterIDs", "path": "RateFilterIDs", "type": "*variable", "value": "~12"},
-// 					{"tag": "RateWeight", "path": "RateWeight", "type": "*variable", "value": "~13"},
-// 					{"tag": "RateValue", "path": "RateValue", "type": "*variable", "value": "~14"},
-// 					{"tag": "RateUnit", "path": "RateUnit", "type": "*variable", "value": "~15"},
-// 					{"tag": "RateIncrement", "path": "RateIncrement", "type": "*variable", "value": "~16"},
-// 					{"tag": "RateBlocker", "path": "RateBlocker", "type": "*variable", "value": "~17"},
+// 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
+// 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
+// 					{"tag": "FilterIDs", "path": "FilterIDs", "type": "*variable", "value": "~*req.2"},
+// 					{"tag": "ActivationInterval", "path": "ActivationInterval", "type": "*variable", "value": "~*req.3"},
+// 					{"tag": "Weight", "path": "Weight", "type": "*variable", "value": "~*req.4"},
+// 					{"tag": "ConnectFee", "path": "ConnectFee", "type": "*variable", "value": "~*req.5"},
+// 					{"tag": "RoundingMethod", "path": "RoundingMethod", "type": "*variable", "value": "~*req.6"},
+// 					{"tag": "RoundingDecimals", "path": "RoundingDecimals", "type": "*variable", "value": "~*req.7"},
+// 					{"tag": "MinCost", "path": "MinCost", "type": "*variable", "value": "~*req.8"},
+// 					{"tag": "MaxCost", "path": "MaxCost", "type": "*variable", "value": "~*req.9"},
+// 					{"tag": "MaxCostStrategy", "path": "MaxCostStrategy", "type": "*variable", "value": "~*req.10"},
+// 					{"tag": "RateID", "path": "RateID", "type": "*variable", "value": "~*req.11"},
+// 					{"tag": "RateFilterIDs", "path": "RateFilterIDs", "type": "*variable", "value": "~*req.12"},
+// 					{"tag": "RateActivationStart", "path": "RateActivationStart", "type": "*variable", "value": "~*req.13"},
+// 					{"tag": "RateWeight", "path": "RateWeight", "type": "*variable", "value": "~*req.14"},
+// 					{"tag": "RateBlocker", "path": "RateBlocker", "type": "*variable", "value": "~*req.15"},
+// 					{"tag": "RateIntervalStart", "path": "RateIntervalStart", "type": "*variable", "value": "~*req.16"},
+// 					{"tag": "RateValue", "path": "RateValue", "type": "*variable", "value": "~*req.17"},
+// 					{"tag": "RateUnit", "path": "RateUnit", "type": "*variable", "value": "~*req.18"},
+// 					{"tag": "RateIncrement", "path": "RateIncrement", "type": "*variable", "value": "~*req.19"},
+					
 // 				],
 // 			},
 // 		],
@@ -853,6 +892,7 @@
 // 	"indexed_selects": true,				// enable profile matching exclusively on indexes
 // 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
+// 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 // 	"attributes_conns": [],					// connections to AttributeS for API authorization, empty to disable auth functionality: <""|*internal|$rpc_conns_id>
 // },
@@ -876,10 +916,12 @@
 // 	"indexed_selects": true,				// enable profile matching exclusively on indexes
 // 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
+// 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 // 	"rate_indexed_selects": true,			// enable profile matching exclusively on indexes
 // 	//"rate_string_indexed_fields": [],		// query indexes based on these fields for faster processing
 // 	"rate_prefix_indexed_fields": [],		// query indexes based on these fields for faster processing
+// 	"rate_suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"rate_nested_fields": false,			// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 // },
 
@@ -889,6 +931,13 @@
 // 	"listen_net": "udp",				// network to listen on <udp|tcp|tcp-tls>
 // 	"sessions_conns": ["*internal"],
 // 	"timezone": "",						// timezone of the events if not specified  <UTC|Local|$IANA_TZ_DB>
+// 	"retransmission_timer": "1s",				// the duration to wait to receive an ACK before resending the reply
+// 	"templates":{						// default message templates
+// 		"*err": [
+// 				{"tag": "Request", "path": "*rep.Request", "type": "*constant",
+// 					"value": "SIP/2.0 500 Internal Server Error", "mandatory": true},
+// 		],
+// 	},
 // 	"request_processors": [				// request processors to be applied to SIP messages
 // 	],
 // },
