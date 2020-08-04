@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"sort"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -113,4 +114,13 @@ type RateSIncrement struct {
 	Rate              *Rate
 	IntervalRateIndex int
 	Usage             time.Duration
+}
+
+// Sort will sort the IntervalRates from each Rate based on IntervalStart
+func (rpp *RateProfile) Sort() {
+	for _, rate := range rpp.Rates {
+		sort.Slice(rate.IntervalRates, func(i, j int) bool {
+			return rate.IntervalRates[i].IntervalStart < rate.IntervalRates[j].IntervalStart
+		})
+	}
 }
