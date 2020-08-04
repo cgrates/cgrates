@@ -2935,6 +2935,7 @@ func (dm *DataManager) GetRateProfile(tenant, id string, cacheRead, cacheWrite b
 						utils.OptsAPIKey:  itm.APIKey,
 						utils.OptsRouteID: itm.RouteID,
 					}}, &rpp); err == nil {
+				rpp.Sort()
 				err = dm.dataDB.SetRateProfileDrv(rpp)
 			}
 		}
@@ -2968,6 +2969,7 @@ func (dm *DataManager) SetRateProfile(rpp *RateProfile, withIndex bool) (err err
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
+	rpp.Sort()
 	if err = dm.DataDB().SetRateProfileDrv(rpp); err != nil {
 		return err
 	}
