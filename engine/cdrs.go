@@ -503,7 +503,7 @@ func (cdrS *CDRServer) processEvent(ev *utils.CGREventWithOpts,
 				cdr.RequestType, cdr.ToR); errRfd != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> error: <%s> refunding CDR %+v",
-						utils.CDRs, errRfd.Error(), cdr))
+						utils.CDRs, errRfd.Error(), utils.ToJSON(cdr)))
 			} else if rfnd {
 				procFlgs[i].Add(utils.MetaRefund)
 			}
@@ -537,7 +537,7 @@ func (cdrS *CDRServer) processEvent(ev *utils.CGREventWithOpts,
 					cdr.RequestType, cdr.ToR); errRfd != nil {
 					utils.Logger.Warning(
 						fmt.Sprintf("<%s> error: <%s> refunding CDR %+v",
-							utils.CDRs, errRfd.Error(), cdr))
+							utils.CDRs, errRfd.Error(), utils.ToJSON(cdr)))
 				}
 			}
 		}
@@ -568,7 +568,7 @@ func (cdrS *CDRServer) processEvent(ev *utils.CGREventWithOpts,
 				if err = cdrS.cdrDb.SetCDR(cdr, true); err != nil {
 					utils.Logger.Warning(
 						fmt.Sprintf("<%s> error: <%s> updating CDR %+v",
-							utils.CDRs, err.Error(), cdr))
+							utils.CDRs, err.Error(), utils.ToJSON(cdr)))
 					err = utils.ErrPartiallyExecuted
 					return
 				}
@@ -589,7 +589,7 @@ func (cdrS *CDRServer) processEvent(ev *utils.CGREventWithOpts,
 				if err = cdrS.eeSProcessEvent(evWithOpts); err != nil {
 					utils.Logger.Warning(
 						fmt.Sprintf("<%s> error: <%s> exporting cdr %+v",
-							utils.CDRs, err.Error(), evWithOpts))
+							utils.CDRs, err.Error(), utils.ToJSON(evWithOpts)))
 					partiallyExecuted = true
 				}
 			}
@@ -600,7 +600,7 @@ func (cdrS *CDRServer) processEvent(ev *utils.CGREventWithOpts,
 			if err = cdrS.thdSProcessEvent(cgrEv); err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> error: <%s> processing event %+v with %s",
-						utils.CDRs, err.Error(), cgrEv, utils.ThresholdS))
+						utils.CDRs, err.Error(), utils.ToJSON(cgrEv), utils.ThresholdS))
 				partiallyExecuted = true
 			}
 		}
@@ -610,7 +610,7 @@ func (cdrS *CDRServer) processEvent(ev *utils.CGREventWithOpts,
 			if err = cdrS.statSProcessEvent(cgrEv); err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> error: <%s> processing event %+v with %s",
-						utils.CDRs, err.Error(), cgrEv, utils.StatS))
+						utils.CDRs, err.Error(), utils.ToJSON(cgrEv), utils.StatS))
 				partiallyExecuted = true
 			}
 		}
