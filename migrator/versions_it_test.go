@@ -77,7 +77,7 @@ func testVrsITConnect(t *testing.T) {
 		vrsCfg.DataDbCfg().DataDbHost, vrsCfg.DataDbCfg().DataDbPort,
 		vrsCfg.DataDbCfg().DataDbName, vrsCfg.DataDbCfg().DataDbUser,
 		vrsCfg.DataDbCfg().DataDbPass, vrsCfg.GeneralCfg().DBDataEncoding,
-		config.CgrConfig().CacheCfg(), "", vrsCfg.DataDbCfg().Items)
+		config.CgrConfig().CacheCfg(), "", false, 0, 0, vrsCfg.DataDbCfg().Items)
 	if err != nil {
 		t.Fatal(err)
 	}

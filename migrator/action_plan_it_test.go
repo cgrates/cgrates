@@ -165,7 +165,7 @@ func testActPlnITConnect(t *testing.T) {
 		actPlnCfgIn.DataDbCfg().DataDbHost, actPlnCfgIn.DataDbCfg().DataDbPort,
 		actPlnCfgIn.DataDbCfg().DataDbName, actPlnCfgIn.DataDbCfg().DataDbUser,
 		actPlnCfgIn.DataDbCfg().DataDbPass, actPlnCfgIn.GeneralCfg().DBDataEncoding,
-		config.CgrConfig().CacheCfg(), "", actPlnCfgIn.DataDbCfg().Items)
+		config.CgrConfig().CacheCfg(), "", false, 0, 0, actPlnCfgIn.DataDbCfg().Items)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -173,7 +173,7 @@ func testActPlnITConnect(t *testing.T) {
 		actPlnCfgOut.DataDbCfg().DataDbHost, actPlnCfgOut.DataDbCfg().DataDbPort,
 		actPlnCfgOut.DataDbCfg().DataDbName, actPlnCfgOut.DataDbCfg().DataDbUser,
 		actPlnCfgOut.DataDbCfg().DataDbPass, actPlnCfgOut.GeneralCfg().DBDataEncoding,
-		config.CgrConfig().CacheCfg(), "", actPlnCfgOut.DataDbCfg().Items)
+		config.CgrConfig().CacheCfg(), "", false, 0, 0, actPlnCfgOut.DataDbCfg().Items)
 	if err != nil {
 		log.Fatal(err)
 	}

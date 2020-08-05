@@ -33,7 +33,8 @@ import (
 
 // NewDataDBConn creates a DataDB connection
 func NewDataDBConn(dbType, host, port, name, user,
-	pass, marshaler, sentinelName string,
+	pass, marshaler, sentinelName string, isCluster bool,
+	clusterSync, clusterOnDownDelay time.Duration,
 	itemsCacheCfg map[string]*config.ItemOpt) (d DataDB, err error) {
 	switch dbType {
 	case utils.REDIS:
@@ -46,7 +47,9 @@ func NewDataDBConn(dbType, host, port, name, user,
 		if port != "" && strings.Index(host, ":") == -1 {
 			host += ":" + port
 		}
-		d, err = NewRedisStorage(host, dbNo, user, pass, marshaler, utils.REDIS_MAX_CONNS, sentinelName)
+		d, err = NewRedisStorage(host, dbNo, user, pass, marshaler,
+			utils.REDIS_MAX_CONNS, sentinelName, isCluster,
+			clusterSync, clusterOnDownDelay)
 	case utils.MONGO:
 		d, err = NewMongoStorage(host, port, name, user, pass, marshaler, utils.DataDB, nil, true)
 	case utils.INTERNAL:

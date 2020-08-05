@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -33,11 +34,13 @@ var (
 )
 
 func NewMigratorDataDB(db_type, host, port, name, user, pass,
-	marshaler string, cacheCfg *config.CacheCfg, sentinelName string,
+	marshaler string, cacheCfg *config.CacheCfg, sentinelName string, isCluster bool,
+	clusterSync, clusterOnDownDelay time.Duration,
 	itemsCacheCfg map[string]*config.ItemOpt) (db MigratorDataDB, err error) {
 	dbCon, err := engine.NewDataDBConn(db_type,
 		host, port, name, user, pass, marshaler,
-		sentinelName, itemsCacheCfg)
+		sentinelName, isCluster, clusterSync, clusterOnDownDelay,
+		itemsCacheCfg)
 	if err != nil {
 		return nil, err
 	}

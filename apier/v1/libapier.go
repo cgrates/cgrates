@@ -37,6 +37,32 @@ func GetCacheOpt(apiOpt *string) string {
 // composeArgsReload add the ItemID to AttrReloadCache
 // for a specific CacheID
 func composeArgsReload(args utils.ArgsGetCacheItem) (rpl utils.ArgsCache) {
+	// ToDo: make the load cache API compatible with gob encoding
+	rpl = utils.ArgsCache{ // in case of load cache we check if the ids are nil so populate them here for the moment
+		DestinationIDs:        []string{},
+		ReverseDestinationIDs: []string{},
+		RatingPlanIDs:         []string{},
+		RatingProfileIDs:      []string{},
+		ActionIDs:             []string{},
+		ActionPlanIDs:         []string{},
+		AccountActionPlanIDs:  []string{},
+		ActionTriggerIDs:      []string{},
+		SharedGroupIDs:        []string{},
+		ResourceProfileIDs:    []string{},
+		ResourceIDs:           []string{},
+		StatsQueueIDs:         []string{},
+		StatsQueueProfileIDs:  []string{},
+		ThresholdIDs:          []string{},
+		ThresholdProfileIDs:   []string{},
+		FilterIDs:             []string{},
+		RouteProfileIDs:       []string{},
+		AttributeProfileIDs:   []string{},
+		ChargerProfileIDs:     []string{},
+		DispatcherProfileIDs:  []string{},
+		DispatcherHostIDs:     []string{},
+		DispatcherRoutesIDs:   []string{},
+		RateProfileIDs:        []string{},
+	}
 	switch args.CacheID {
 	case utils.CacheResourceProfiles:
 		rpl.ResourceProfileIDs = []string{args.ItemID}

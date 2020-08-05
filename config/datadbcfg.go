@@ -37,6 +37,9 @@ type DataDbCfg struct {
 	DataDbPass         string // The user's password.
 	DataDbSentinelName string
 	QueryTimeout       time.Duration
+	RedisCluster       bool
+	ClusterSync        time.Duration
+	ClusterOnDownDelay time.Duration
 	RmtConns           []string // Remote DataDB  connIDs
 	RplConns           []string // Replication connIDs
 	Items              map[string]*ItemOpt
@@ -77,15 +80,27 @@ func (dbcfg *DataDbCfg) loadFromJsonCfg(jsnDbCfg *DbJsonCfg) (err error) {
 			return err
 		}
 	}
+	if jsnDbCfg.Redis_cluster != nil {
+		dbcfg.RedisCluster = *jsnDbCfg.Redis_cluster
+	}
+	if jsnDbCfg.Cluster_ondown_delay != nil {
+		if dbcfg.ClusterOnDownDelay, err = utils.ParseDurationWithNanosecs(*jsnDbCfg.Cluster_ondown_delay); err != nil {
+			return err
+		}
+	}
+	if jsnDbCfg.Cluster_sync != nil {
+		if dbcfg.ClusterSync, err = utils.ParseDurationWithNanosecs(*jsnDbCfg.Cluster_sync); err != nil {
+			return err
+		}
+	}
 	if jsnDbCfg.Remote_conns != nil {
 		dbcfg.RmtConns = make([]string, len(*jsnDbCfg.Remote_conns))
 		for idx, rmtConn := range *jsnDbCfg.Remote_conns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
 			if rmtConn == utils.MetaInternal {
 				return fmt.Errorf("Remote connection ID needs to be different than *internal")
-			} else {
-				dbcfg.RmtConns[idx] = rmtConn
 			}
+			dbcfg.RmtConns[idx] = rmtConn
 		}
 	}
 	if jsnDbCfg.Replication_conns != nil {
@@ -94,9 +109,8 @@ func (dbcfg *DataDbCfg) loadFromJsonCfg(jsnDbCfg *DbJsonCfg) (err error) {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
 			if rplConn == utils.MetaInternal {
 				return fmt.Errorf("Replication connection ID needs to be different than *internal")
-			} else {
-				dbcfg.RplConns[idx] = rplConn
 			}
+			dbcfg.RplConns[idx] = rplConn
 		}
 	}
 	if jsnDbCfg.Items != nil {

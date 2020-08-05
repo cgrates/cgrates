@@ -96,6 +96,9 @@ type DbJsonCfg struct {
 	Redis_sentinel        *string
 	Query_timeout         *string
 	Sslmode               *string // Used only in case of storDb
+	Redis_cluster         *bool
+	Cluster_sync          *string
+	Cluster_ondown_delay  *string
 	Remote_conns          *[]string
 	Replication_conns     *[]string
 	Items                 *map[string]*ItemOptJson
@@ -556,21 +559,24 @@ type LoaderCfgJson struct {
 }
 
 type MigratorCfgJson struct {
-	Out_dataDB_type           *string
-	Out_dataDB_host           *string
-	Out_dataDB_port           *string
-	Out_dataDB_name           *string
-	Out_dataDB_user           *string
-	Out_dataDB_password       *string
-	Out_dataDB_encoding       *string
-	Out_dataDB_redis_sentinel *string
-	Out_storDB_type           *string
-	Out_storDB_host           *string
-	Out_storDB_port           *string
-	Out_storDB_name           *string
-	Out_storDB_user           *string
-	Out_storDB_password       *string
-	Users_filters             *[]string
+	Out_dataDB_type                 *string
+	Out_dataDB_host                 *string
+	Out_dataDB_port                 *string
+	Out_dataDB_name                 *string
+	Out_dataDB_user                 *string
+	Out_dataDB_password             *string
+	Out_dataDB_encoding             *string
+	Out_dataDB_redis_sentinel       *string
+	Out_dataDB_redis_cluster        *bool
+	Out_dataDB_cluster_sync         *string
+	Out_dataDB_cluster_ondown_delay *string
+	Out_storDB_type                 *string
+	Out_storDB_host                 *string
+	Out_storDB_port                 *string
+	Out_storDB_name                 *string
+	Out_storDB_user                 *string
+	Out_storDB_password             *string
+	Users_filters                   *[]string
 }
 
 type FcTemplateJsonCfg struct {

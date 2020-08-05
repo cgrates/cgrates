@@ -230,7 +230,9 @@ func main() {
 		mgrCfg.DataDbCfg().DataDbHost, mgrCfg.DataDbCfg().DataDbPort,
 		mgrCfg.DataDbCfg().DataDbName, mgrCfg.DataDbCfg().DataDbUser,
 		mgrCfg.DataDbCfg().DataDbPass, mgrCfg.GeneralCfg().DBDataEncoding,
-		mgrCfg.CacheCfg(), mgrCfg.DataDbCfg().DataDbSentinelName, mgrCfg.DataDbCfg().Items); err != nil {
+		mgrCfg.CacheCfg(), mgrCfg.DataDbCfg().DataDbSentinelName, mgrCfg.DataDbCfg().RedisCluster,
+		mgrCfg.DataDbCfg().ClusterSync, mgrCfg.DataDbCfg().ClusterOnDownDelay,
+		mgrCfg.DataDbCfg().Items); err != nil {
 		log.Fatal(err)
 	}
 
@@ -240,7 +242,9 @@ func main() {
 		mgrCfg.MigratorCgrCfg().OutDataDBHost, mgrCfg.MigratorCgrCfg().OutDataDBPort,
 		mgrCfg.MigratorCgrCfg().OutDataDBName, mgrCfg.MigratorCgrCfg().OutDataDBUser,
 		mgrCfg.MigratorCgrCfg().OutDataDBPassword, mgrCfg.MigratorCgrCfg().OutDataDBEncoding,
-		mgrCfg.CacheCfg(), mgrCfg.MigratorCgrCfg().OutDataDBRedisSentinel, mgrCfg.DataDbCfg().Items); err != nil {
+		mgrCfg.CacheCfg(), mgrCfg.MigratorCgrCfg().OutDataDBRedisSentinel,
+		mgrCfg.MigratorCgrCfg().OutDataDBRedisCluster, mgrCfg.MigratorCgrCfg().OutDataDBClusterSync,
+		mgrCfg.MigratorCgrCfg().OutDataDBClusterOndownDelay, mgrCfg.DataDbCfg().Items); err != nil {
 		log.Fatal(err)
 	}
 

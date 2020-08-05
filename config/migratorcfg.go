@@ -20,26 +20,30 @@ package config
 
 import (
 	"strings"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
 
 type MigratorCgrCfg struct {
-	OutDataDBType          string
-	OutDataDBHost          string
-	OutDataDBPort          string
-	OutDataDBName          string
-	OutDataDBUser          string
-	OutDataDBPassword      string
-	OutDataDBEncoding      string
-	OutDataDBRedisSentinel string
-	OutStorDBType          string
-	OutStorDBHost          string
-	OutStorDBPort          string
-	OutStorDBName          string
-	OutStorDBUser          string
-	OutStorDBPassword      string
-	UsersFilters           []string
+	OutDataDBType               string
+	OutDataDBHost               string
+	OutDataDBPort               string
+	OutDataDBName               string
+	OutDataDBUser               string
+	OutDataDBPassword           string
+	OutDataDBEncoding           string
+	OutDataDBRedisSentinel      string
+	OutDataDBRedisCluster       bool
+	OutDataDBClusterSync        time.Duration
+	OutDataDBClusterOndownDelay time.Duration
+	OutStorDBType               string
+	OutStorDBHost               string
+	OutStorDBPort               string
+	OutStorDBName               string
+	OutStorDBUser               string
+	OutStorDBPassword           string
+	UsersFilters                []string
 }
 
 func (mg *MigratorCgrCfg) loadFromJsonCfg(jsnCfg *MigratorCfgJson) (err error) {
@@ -92,6 +96,20 @@ func (mg *MigratorCgrCfg) loadFromJsonCfg(jsnCfg *MigratorCfgJson) (err error) {
 		mg.UsersFilters = make([]string, len(*jsnCfg.Users_filters))
 		for i, v := range *jsnCfg.Users_filters {
 			mg.UsersFilters[i] = v
+		}
+	}
+
+	if jsnCfg.Out_dataDB_redis_cluster != nil {
+		mg.OutDataDBRedisCluster = *jsnCfg.Out_dataDB_redis_cluster
+	}
+	if jsnCfg.Out_dataDB_cluster_ondown_delay != nil {
+		if mg.OutDataDBClusterOndownDelay, err = utils.ParseDurationWithNanosecs(*jsnCfg.Out_dataDB_cluster_ondown_delay); err != nil {
+			return err
+		}
+	}
+	if jsnCfg.Out_dataDB_cluster_sync != nil {
+		if mg.OutDataDBClusterSync, err = utils.ParseDurationWithNanosecs(*jsnCfg.Out_dataDB_cluster_sync); err != nil {
+			return err
 		}
 	}
 	return nil

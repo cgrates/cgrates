@@ -72,7 +72,9 @@ func testInitDataDB(t *testing.T) {
 		cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort,
 		cfg.DataDbCfg().DataDbName, cfg.DataDbCfg().DataDbUser,
 		cfg.DataDbCfg().DataDbPass, cfg.GeneralCfg().DBDataEncoding,
-		"", cfg.DataDbCfg().Items)
+		"", cfg.DataDbCfg().RedisCluster,
+		cfg.DataDbCfg().ClusterSync, cfg.DataDbCfg().ClusterOnDownDelay,
+		cfg.DataDbCfg().Items)
 	if err != nil {
 		log.Fatal(err)
 	}

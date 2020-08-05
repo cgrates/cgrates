@@ -88,7 +88,9 @@ func testLoaderITInitDataDB(t *testing.T) {
 	dbConn, err := NewDataDBConn(lCfg.DataDbCfg().DataDbType,
 		lCfg.DataDbCfg().DataDbHost, lCfg.DataDbCfg().DataDbPort, lCfg.DataDbCfg().DataDbName,
 		lCfg.DataDbCfg().DataDbUser, lCfg.DataDbCfg().DataDbPass, lCfg.GeneralCfg().DBDataEncoding,
-		lCfg.DataDbCfg().DataDbSentinelName, lCfg.DataDbCfg().Items)
+		lCfg.DataDbCfg().DataDbSentinelName, lCfg.DataDbCfg().RedisCluster,
+		lCfg.DataDbCfg().ClusterSync, lCfg.DataDbCfg().ClusterOnDownDelay,
+		lCfg.DataDbCfg().Items)
 	if err != nil {
 		t.Fatal("Error on dataDb connection: ", err.Error())
 	}
