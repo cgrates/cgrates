@@ -127,7 +127,7 @@ func testRtPlITConnect(t *testing.T) {
 		rtplCfgIn.DataDbCfg().DataDbHost, rtplCfgIn.DataDbCfg().DataDbPort,
 		rtplCfgIn.DataDbCfg().DataDbName, rtplCfgIn.DataDbCfg().DataDbUser,
 		rtplCfgIn.DataDbCfg().DataDbPass, rtplCfgIn.GeneralCfg().DBDataEncoding,
-		config.CgrConfig().CacheCfg(), "", rtplCfgIn.DataDbCfg().Items)
+		config.CgrConfig().CacheCfg(), "", false, 0, 0, rtplCfgIn.DataDbCfg().Items)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -135,7 +135,7 @@ func testRtPlITConnect(t *testing.T) {
 		rtplCfgOut.DataDbCfg().DataDbHost, rtplCfgOut.DataDbCfg().DataDbPort,
 		rtplCfgOut.DataDbCfg().DataDbName, rtplCfgOut.DataDbCfg().DataDbUser,
 		rtplCfgOut.DataDbCfg().DataDbPass, rtplCfgOut.GeneralCfg().DBDataEncoding,
-		config.CgrConfig().CacheCfg(), "", rtplCfgOut.DataDbCfg().Items)
+		config.CgrConfig().CacheCfg(), "", false, 0, 0, rtplCfgOut.DataDbCfg().Items)
 	if err != nil {
 		log.Fatal(err)
 	}

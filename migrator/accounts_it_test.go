@@ -167,7 +167,7 @@ func testAccITConnect(t *testing.T) {
 		accCfgIn.DataDbCfg().DataDbHost, accCfgIn.DataDbCfg().DataDbPort,
 		accCfgIn.DataDbCfg().DataDbName, accCfgIn.DataDbCfg().DataDbUser,
 		accCfgIn.DataDbCfg().DataDbPass, accCfgIn.GeneralCfg().DBDataEncoding,
-		config.CgrConfig().CacheCfg(), "", accCfgIn.DataDbCfg().Items)
+		config.CgrConfig().CacheCfg(), utils.EmptyString, false, 0, 0, accCfgIn.DataDbCfg().Items)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -175,7 +175,7 @@ func testAccITConnect(t *testing.T) {
 		accCfgOut.DataDbCfg().DataDbHost, accCfgOut.DataDbCfg().DataDbPort,
 		accCfgOut.DataDbCfg().DataDbName, accCfgOut.DataDbCfg().DataDbUser,
 		accCfgOut.DataDbCfg().DataDbPass, accCfgOut.GeneralCfg().DBDataEncoding,
-		config.CgrConfig().CacheCfg(), "", accCfgOut.DataDbCfg().Items)
+		config.CgrConfig().CacheCfg(), utils.EmptyString, false, 0, 0, accCfgOut.DataDbCfg().Items)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -229,36 +229,36 @@ func testAccITMigrateAndMove(t *testing.T) {
 					Timings:        timingSlice}}}}
 
 	v2d := &engine.Balance{
-		Uuid: "", ID: "",
+		Uuid: utils.EmptyString, ID: utils.EmptyString,
 		Value:          100000,
 		ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC),
 		Weight:         10,
 		DestinationIDs: utils.StringMap{"NAT": true},
-		RatingSubject:  "",
+		RatingSubject:  utils.EmptyString,
 		Categories:     utils.NewStringMap(),
 		SharedGroups:   utils.NewStringMap(),
 		Timings:        timingSlice,
 		TimingIDs:      utils.NewStringMap(""),
 		Factor:         engine.ValueFactor{}}
 	v2b := &engine.Balance{
-		Uuid: "", ID: "",
+		Uuid: utils.EmptyString, ID: utils.EmptyString,
 		Value:          0.0001,
 		ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC),
 		Weight:         10,
 		DestinationIDs: utils.StringMap{"NAT": true},
-		RatingSubject:  "",
+		RatingSubject:  utils.EmptyString,
 		Categories:     utils.NewStringMap(),
 		SharedGroups:   utils.NewStringMap(),
 		Timings:        timingSlice,
 		TimingIDs:      utils.NewStringMap(""),
 		Factor:         engine.ValueFactor{}}
 	m2 := &engine.Balance{
-		Uuid:           "",
-		ID:             "",
+		Uuid:           utils.EmptyString,
+		ID:             utils.EmptyString,
 		Value:          21,
 		ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC),
 		DestinationIDs: utils.NewStringMap(""),
-		RatingSubject:  "",
+		RatingSubject:  utils.EmptyString,
 		Categories:     utils.NewStringMap(),
 		SharedGroups:   utils.NewStringMap(),
 		Timings:        timingSlice,

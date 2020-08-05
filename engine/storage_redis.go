@@ -67,7 +67,8 @@ const (
 )
 
 func NewRedisStorage(address string, db int, user, pass, mrshlerStr string,
-	maxConns int, sentinelName string) (rs *RedisStorage, err error) {
+	maxConns int, sentinelName string, isCluster bool, clusterSync,
+	clusterOnDownDelay time.Duration) (rs *RedisStorage, err error) {
 
 	rs = new(RedisStorage)
 
@@ -90,12 +91,22 @@ func NewRedisStorage(address string, db int, user, pass, mrshlerStr string,
 	dialFunc := func(network, addr string) (radix.Conn, error) {
 		return radix.Dial(network, addr, dialOpts...)
 	}
-
+	dialFuncAuthOnly := func(network, addr string) (radix.Conn, error) {
+		return radix.Dial(network, addr, dialOpts[1:]...)
+	}
 	switch {
-	case sentinelName != utils.EmptyString:
-		dialFuncAuthOnly := func(network, addr string) (radix.Conn, error) {
-			return radix.Dial(network, addr, dialOpts[1:]...)
+	case isCluster:
+		if rs.client, err = radix.NewCluster(utils.InfieldSplit(address),
+			radix.ClusterSyncEvery(clusterSync),
+			radix.ClusterOnDownDelayActionsBy(clusterOnDownDelay),
+			radix.ClusterPoolFunc(func(network, addr string) (radix.Client, error) {
+				// in cluster enviorment do not select the DB as we expect to have only one DB
+				return radix.NewPool(network, addr, maxConns, radix.PoolConnFunc(dialFuncAuthOnly))
+			})); err != nil {
+			rs = nil
+			return
 		}
+	case sentinelName != utils.EmptyString:
 		if rs.client, err = radix.NewSentinel(sentinelName, utils.InfieldSplit(address),
 			radix.SentinelConnFunc(dialFuncAuthOnly),
 			radix.SentinelPoolFunc(func(network, addr string) (radix.Client, error) {

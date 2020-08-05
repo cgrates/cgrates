@@ -317,16 +317,19 @@ func TestDfListenJsonCfg(t *testing.T) {
 
 func TestDfDataDbJsonCfg(t *testing.T) {
 	eCfg := &DbJsonCfg{
-		Db_type:           utils.StringPointer("*redis"),
-		Db_host:           utils.StringPointer("127.0.0.1"),
-		Db_port:           utils.IntPointer(6379),
-		Db_name:           utils.StringPointer("10"),
-		Db_user:           utils.StringPointer("cgrates"),
-		Db_password:       utils.StringPointer(""),
-		Redis_sentinel:    utils.StringPointer(""),
-		Query_timeout:     utils.StringPointer("10s"),
-		Replication_conns: &[]string{},
-		Remote_conns:      &[]string{},
+		Db_type:              utils.StringPointer("*redis"),
+		Db_host:              utils.StringPointer("127.0.0.1"),
+		Db_port:              utils.IntPointer(6379),
+		Db_name:              utils.StringPointer("10"),
+		Db_user:              utils.StringPointer("cgrates"),
+		Db_password:          utils.StringPointer(""),
+		Redis_sentinel:       utils.StringPointer(""),
+		Query_timeout:        utils.StringPointer("10s"),
+		Replication_conns:    &[]string{},
+		Remote_conns:         &[]string{},
+		Redis_cluster:        utils.BoolPointer(false),
+		Cluster_ondown_delay: utils.StringPointer("0"),
+		Cluster_sync:         utils.StringPointer("5s"),
 		Items: &map[string]*ItemOptJson{
 			utils.MetaAccounts: {
 				Replicate: utils.BoolPointer(false),
@@ -622,7 +625,7 @@ func TestDfCdrsJsonCfg(t *testing.T) {
 	if cfg, err := dfCgrJSONCfg.CdrsJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
-		t.Errorf("Received: %+v", *cfg)
+		t.Errorf("Received: %+v", cfg)
 	}
 }
 
@@ -1737,20 +1740,24 @@ func TestDfLoaderCfg(t *testing.T) {
 
 func TestDfMigratorCfg(t *testing.T) {
 	eCfg := &MigratorCfgJson{
-		Out_dataDB_type:     utils.StringPointer("redis"),
-		Out_dataDB_host:     utils.StringPointer("127.0.0.1"),
-		Out_dataDB_port:     utils.StringPointer("6379"),
-		Out_dataDB_name:     utils.StringPointer("10"),
-		Out_dataDB_user:     utils.StringPointer("cgrates"),
-		Out_dataDB_password: utils.StringPointer(""),
-		Out_dataDB_encoding: utils.StringPointer("msgpack"),
-		Out_storDB_type:     utils.StringPointer("mysql"),
-		Out_storDB_host:     utils.StringPointer("127.0.0.1"),
-		Out_storDB_port:     utils.StringPointer("3306"),
-		Out_storDB_name:     utils.StringPointer("cgrates"),
-		Out_storDB_user:     utils.StringPointer("cgrates"),
-		Out_storDB_password: utils.StringPointer(""),
-		Users_filters:       &[]string{},
+		Out_dataDB_type:                 utils.StringPointer("redis"),
+		Out_dataDB_host:                 utils.StringPointer("127.0.0.1"),
+		Out_dataDB_port:                 utils.StringPointer("6379"),
+		Out_dataDB_name:                 utils.StringPointer("10"),
+		Out_dataDB_user:                 utils.StringPointer("cgrates"),
+		Out_dataDB_password:             utils.StringPointer(""),
+		Out_dataDB_encoding:             utils.StringPointer("msgpack"),
+		Out_dataDB_redis_sentinel:       utils.StringPointer(""),
+		Out_dataDB_redis_cluster:        utils.BoolPointer(false),
+		Out_dataDB_cluster_sync:         utils.StringPointer("5s"),
+		Out_dataDB_cluster_ondown_delay: utils.StringPointer("0"),
+		Out_storDB_type:                 utils.StringPointer("mysql"),
+		Out_storDB_host:                 utils.StringPointer("127.0.0.1"),
+		Out_storDB_port:                 utils.StringPointer("3306"),
+		Out_storDB_name:                 utils.StringPointer("cgrates"),
+		Out_storDB_user:                 utils.StringPointer("cgrates"),
+		Out_storDB_password:             utils.StringPointer(""),
+		Users_filters:                   &[]string{},
 	}
 	if cfg, err := dfCgrJSONCfg.MigratorCfgJson(); err != nil {
 		t.Error(err)

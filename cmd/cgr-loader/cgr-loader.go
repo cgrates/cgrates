@@ -38,7 +38,7 @@ var (
 
 	cgrLoaderFlags = flag.NewFlagSet("cgr-loader", flag.ContinueOnError)
 	dfltCfg        = config.CgrConfig()
-	cfgPath        = cgrLoaderFlags.String("config_path", "",
+	cfgPath        = cgrLoaderFlags.String("config_path", utils.EmptyString,
 		"Configuration directory path.")
 
 	dataDBType = cgrLoaderFlags.String("datadb_type", dfltCfg.DataDbCfg().DataDbType,
@@ -71,7 +71,7 @@ var (
 	storDBPasswd = cgrLoaderFlags.String("stordb_passwd", dfltCfg.StorDbCfg().Password,
 		"The storDb user's password.")
 
-	cachingArg = cgrLoaderFlags.String("caching", "",
+	cachingArg = cgrLoaderFlags.String("caching", utils.EmptyString,
 		"Caching strategy used when loading TP")
 	tpid = cgrLoaderFlags.String("tpid", dfltCfg.LoaderCgrCfg().TpID,
 		"The tariff plan ID from the database")
@@ -86,13 +86,13 @@ var (
 	fieldSep = cgrLoaderFlags.String("field_sep", ",",
 		`Separator for csv file (by default "," is used)`)
 
-	importID       = cgrLoaderFlags.String("import_id", "", "Uniquely identify an import/load, postpended to some automatic fields")
-	timezone       = cgrLoaderFlags.String("timezone", "", `Timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>`)
+	importID       = cgrLoaderFlags.String("import_id", utils.EmptyString, "Uniquely identify an import/load, postpended to some automatic fields")
+	timezone       = cgrLoaderFlags.String("timezone", utils.EmptyString, `Timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>`)
 	disableReverse = cgrLoaderFlags.Bool("disable_reverse_mappings", false, "Will disable reverse mappings rebuilding")
 	flushStorDB    = cgrLoaderFlags.Bool("flush_stordb", false, "Remove tariff plan data for id from the database")
 	remove         = cgrLoaderFlags.Bool("remove", false, "Will remove instead of adding data from DB")
-	apiKey         = cgrLoaderFlags.String("api_key", "", "Api Key used to comosed ArgDispatcher")
-	routeID        = cgrLoaderFlags.String("route_id", "", "RouteID used to comosed ArgDispatcher")
+	apiKey         = cgrLoaderFlags.String("api_key", utils.EmptyString, "Api Key used to comosed ArgDispatcher")
+	routeID        = cgrLoaderFlags.String("route_id", utils.EmptyString, "RouteID used to comosed ArgDispatcher")
 
 	fromStorDB    = cgrLoaderFlags.Bool("from_stordb", false, "Load the tariff plan from storDb to dataDb")
 	toStorDB      = cgrLoaderFlags.Bool("to_stordb", false, "Import the tariff plan from files to storDb")
@@ -104,7 +104,7 @@ var (
 
 func loadConfig() (ldrCfg *config.CGRConfig) {
 	ldrCfg = config.CgrConfig()
-	if *cfgPath != "" {
+	if *cfgPath != utils.EmptyString {
 		var err error
 		if ldrCfg, err = config.NewCGRConfigFromPath(*cfgPath); err != nil {
 			log.Fatalf("Error loading config file %s", err)
@@ -215,7 +215,7 @@ func loadConfig() (ldrCfg *config.CGRConfig) {
 		}
 	}
 
-	if *importID == "" {
+	if *importID == utils.EmptyString {
 		*importID = utils.UUIDSha1Prefix()
 	}
 
@@ -234,11 +234,11 @@ func loadConfig() (ldrCfg *config.CGRConfig) {
 }
 
 func importData(cfg *config.CGRConfig) (err error) {
-	if cfg.LoaderCgrCfg().TpID == "" {
+	if cfg.LoaderCgrCfg().TpID == utils.EmptyString {
 		return errors.New("TPid required")
 	}
 	if *flushStorDB {
-		if err = storDB.RemTpData("", cfg.LoaderCgrCfg().TpID, map[string]string{}); err != nil {
+		if err = storDB.RemTpData(utils.EmptyString, cfg.LoaderCgrCfg().TpID, map[string]string{}); err != nil {
 			return err
 		}
 	}
@@ -292,7 +292,9 @@ func main() {
 			ldrCfg.DataDbCfg().DataDbHost, ldrCfg.DataDbCfg().DataDbPort,
 			ldrCfg.DataDbCfg().DataDbName, ldrCfg.DataDbCfg().DataDbUser,
 			ldrCfg.DataDbCfg().DataDbPass, ldrCfg.GeneralCfg().DBDataEncoding,
-			ldrCfg.DataDbCfg().DataDbSentinelName, ldrCfg.DataDbCfg().Items); err != nil {
+			ldrCfg.DataDbCfg().DataDbSentinelName, ldrCfg.DataDbCfg().RedisCluster,
+			ldrCfg.DataDbCfg().ClusterSync, ldrCfg.DataDbCfg().ClusterOnDownDelay,
+			ldrCfg.DataDbCfg().Items); err != nil {
 			log.Fatalf("Coud not open dataDB connection: %s", err.Error())
 		}
 		defer dataDB.Close()

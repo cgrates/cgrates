@@ -69,7 +69,10 @@ const CGRATES_CFG_JSON = `
 	"db_name": "10", 						// data_db database name to connect to
 	"db_user": "cgrates", 					// username to use when connecting to data_db
 	"db_password": "", 						// password to use when connecting to data_db
-	"redis_sentinel":"",					// the name of sentinel when used
+	"redis_sentinel": "",					// the name of sentinel when used
+	"redis_cluster": false,					// if enabled the datadb will try to connect to the redis cluster
+	"cluster_sync": "5s",					// the sync interval for the redis cluster
+	"cluster_ondown_delay": "0",			// the delay before executing the commands if the redis cluster is in the CLUSTERDOWN state
 	"query_timeout":"10s",
 	"remote_conns":[],
 	"replication_conns":[],
@@ -900,6 +903,10 @@ const CGRATES_CFG_JSON = `
 	"out_datadb_user": "cgrates",
 	"out_datadb_password": "",
 	"out_datadb_encoding" : "msgpack",
+	"out_datadb_redis_sentinel": "",					
+	"out_datadb_redis_cluster": false,					
+	"out_datadb_cluster_sync": "5s",					
+	"out_datadb_cluster_ondown_delay": "0",			
 	"out_stordb_type": "mysql",
 	"out_stordb_host": "127.0.0.1",
 	"out_stordb_port": "3306",

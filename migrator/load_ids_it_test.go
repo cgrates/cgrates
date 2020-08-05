@@ -78,7 +78,7 @@ func testLoadIdsITConnect(t *testing.T) {
 		loadCfgIn.DataDbCfg().DataDbHost, loadCfgIn.DataDbCfg().DataDbPort,
 		loadCfgIn.DataDbCfg().DataDbName, loadCfgIn.DataDbCfg().DataDbUser,
 		loadCfgIn.DataDbCfg().DataDbPass, loadCfgIn.GeneralCfg().DBDataEncoding,
-		config.CgrConfig().CacheCfg(), "", loadCfgIn.DataDbCfg().Items)
+		config.CgrConfig().CacheCfg(), "", false, 0, 0, loadCfgIn.DataDbCfg().Items)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -86,7 +86,7 @@ func testLoadIdsITConnect(t *testing.T) {
 		loadCfgOut.DataDbCfg().DataDbHost, loadCfgOut.DataDbCfg().DataDbPort,
 		loadCfgOut.DataDbCfg().DataDbName, loadCfgOut.DataDbCfg().DataDbUser,
 		loadCfgOut.DataDbCfg().DataDbPass, loadCfgOut.GeneralCfg().DBDataEncoding,
-		config.CgrConfig().CacheCfg(), "", loadCfgOut.DataDbCfg().Items)
+		config.CgrConfig().CacheCfg(), "", false, 0, 0, loadCfgOut.DataDbCfg().Items)
 	if err != nil {
 		log.Fatal(err)
 	}

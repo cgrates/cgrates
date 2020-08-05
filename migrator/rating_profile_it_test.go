@@ -128,7 +128,7 @@ func testRtPrfITConnect(t *testing.T) {
 		rtprflCfgIn.DataDbCfg().DataDbHost, rtprflCfgIn.DataDbCfg().DataDbPort,
 		rtprflCfgIn.DataDbCfg().DataDbName, rtprflCfgIn.DataDbCfg().DataDbUser,
 		rtprflCfgIn.DataDbCfg().DataDbPass, rtprflCfgIn.GeneralCfg().DBDataEncoding,
-		config.CgrConfig().CacheCfg(), "", rtprflCfgIn.DataDbCfg().Items)
+		config.CgrConfig().CacheCfg(), "", false, 0, 0, rtprflCfgIn.DataDbCfg().Items)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -136,7 +136,7 @@ func testRtPrfITConnect(t *testing.T) {
 		rtprflCfgOut.DataDbCfg().DataDbHost, rtprflCfgOut.DataDbCfg().DataDbPort,
 		rtprflCfgOut.DataDbCfg().DataDbName, rtprflCfgOut.DataDbCfg().DataDbUser,
 		rtprflCfgOut.DataDbCfg().DataDbPass, rtprflCfgOut.GeneralCfg().DBDataEncoding,
-		config.CgrConfig().CacheCfg(), "", rtplCfgOut.DataDbCfg().Items)
+		config.CgrConfig().CacheCfg(), "", false, 0, 0, rtplCfgOut.DataDbCfg().Items)
 	if err != nil {
 		log.Fatal(err)
 	}

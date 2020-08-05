@@ -295,7 +295,9 @@ func InitDataDb(cfg *config.CGRConfig) error {
 		cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort,
 		cfg.DataDbCfg().DataDbName, cfg.DataDbCfg().DataDbUser,
 		cfg.DataDbCfg().DataDbPass, cfg.GeneralCfg().DBDataEncoding,
-		cfg.DataDbCfg().DataDbSentinelName, cfg.DataDbCfg().Items)
+		cfg.DataDbCfg().DataDbSentinelName, cfg.DataDbCfg().RedisCluster,
+		cfg.DataDbCfg().ClusterSync, cfg.DataDbCfg().ClusterOnDownDelay,
+		cfg.DataDbCfg().Items)
 	if err != nil {
 		return err
 	}
