@@ -262,25 +262,27 @@ func (tpr *TpReader) LoadRatingPlansFiltered(tag string) (bool, error) {
 				if drate.DestinationId == utils.ANY {
 					continue // no need of loading the destinations in this case
 				}
+
 				tpDests, err := tpr.lr.GetTPDestinations(tpr.tpid, drate.DestinationId)
 				if err != nil {
-					return false, err
+					if err.Error() == utils.ErrNotFound.Error() { // if the destination doesn't exists in stordb check it in dataDB
+						if tpr.dm.dataDB != nil {
+							if dbExists, err := tpr.dm.HasData(utils.DESTINATION_PREFIX, drate.DestinationId, ""); err != nil {
+								return false, err
+							} else if dbExists {
+								continue
+							} else if !dbExists { // if the error doesn't exists in datadb return error
+								return false, fmt.Errorf("could not get destination for tag %v", drate.DestinationId)
+							}
+						}
+					} else {
+						return false, err
+					}
 				}
+
 				dms := make([]*Destination, len(tpDests))
 				for i, tpDst := range tpDests {
 					dms[i] = NewDestinationFromTPDestination(tpDst)
-				}
-				destsExist := len(dms) != 0
-				if !destsExist && tpr.dm.dataDB != nil {
-					if dbExists, err := tpr.dm.HasData(utils.DESTINATION_PREFIX, drate.DestinationId, ""); err != nil {
-						return false, err
-					} else if dbExists {
-						destsExist = true
-					}
-					continue
-				}
-				if !destsExist {
-					return false, fmt.Errorf("could not get destination for tag %v", drate.DestinationId)
 				}
 				for _, destination := range dms {
 					tpr.dm.SetDestination(destination, utils.NonTransactional)
