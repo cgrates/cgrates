@@ -35,6 +35,9 @@ var (
 	dbType    = flag.String("dbtype", utils.MetaInternal, "The type of DataBase (Internal/Mongo/mySql)")
 )
 
+var loaderPaths = []string{"/tmp/In", "/tmp/Out", "/tmp/LoaderIn", "/tmp/SubpathWithoutMove",
+	"/tmp/SubpathLoaderWithMove", "/tmp/SubpathOut"}
+
 func newRPCClient(cfg *config.ListenCfg) (c *rpc.Client, err error) {
 	switch *encoding {
 	case utils.MetaJSON:

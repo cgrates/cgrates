@@ -55,6 +55,16 @@ var (
 		testLoaderLoadAttributesWithoutMoving,
 		testLoaderVerifyOutDirWithoutMoving,
 		testLoaderCheckAttributes,
+		testLoaderResetDataDB,
+		testLoaderPopulateDataWithSubpath,
+		testLoaderLoadAttributesWithSubpath,
+		testLoaderVerifyOutDirWithSubpath,
+		testLoaderCheckAttributes,
+		testLoaderResetDataDB,
+		testLoaderPopulateDataWithSubpathWithMove,
+		testLoaderLoadAttributesWithoutSubpathWithMove,
+		testLoaderVerifyOutDirWithSubpathWithMove,
+		testLoaderCheckAttributes,
 		testLoaderKillEngine,
 	}
 )
@@ -74,7 +84,6 @@ func TestLoaderIT(t *testing.T) {
 		t.Fatal("Unknown Database type")
 	}
 
-	loaderCfgDIR = "tutmysql"
 	for _, stest := range sTestsLoader {
 		t.Run(loaderCfgDIR, stest)
 	}
@@ -93,7 +102,7 @@ func testLoaderInitCfg(t *testing.T) {
 
 func testLoaderMakeFolders(t *testing.T) {
 	// active the loaders here
-	for _, dir := range []string{"/tmp/In", "/tmp/Out", "/tmp/LoaderIn"} {
+	for _, dir := range loaderPaths {
 		if err := os.RemoveAll(dir); err != nil {
 			t.Fatal("Error removing folder: ", dir, err)
 		}
@@ -108,6 +117,7 @@ func testLoaderResetDataDB(t *testing.T) {
 	if err := engine.InitDataDb(loaderCfg); err != nil {
 		t.Fatal(err)
 	}
+	engine.Cache.Clear(nil)
 }
 
 // Start CGR Engine
@@ -220,6 +230,69 @@ func testLoaderVerifyOutDirWithoutMoving(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
 	// we expect that after the LoaderS process the file leave in in the input folder
 	if outContent1, err := ioutil.ReadFile(path.Join("/tmp/LoaderIn", utils.AttributesCsv)); err != nil {
+		t.Error(err)
+	} else if engine.AttributesCSVContent != string(outContent1) {
+		t.Errorf("Expecting: %q, received: %q", engine.AttributesCSVContent, string(outContent1))
+	}
+}
+
+func testLoaderPopulateDataWithSubpath(t *testing.T) {
+	fileName := utils.AttributesCsv
+	tmpFilePath := path.Join("/tmp/", fileName)
+	if err := ioutil.WriteFile(tmpFilePath, []byte(engine.AttributesCSVContent), 0777); err != nil {
+		t.Fatal(err.Error())
+	}
+	if err := os.MkdirAll("/tmp/SubpathWithoutMove/folder1", 0755); err != nil {
+		t.Fatal("Error creating folder: /tmp/SubpathWithoutMove/folder1", err)
+	}
+	if err := os.Rename(tmpFilePath, path.Join("/tmp/SubpathWithoutMove/folder1", fileName)); err != nil {
+		t.Fatal("Error moving file to processing directory: ", err)
+	}
+}
+
+func testLoaderLoadAttributesWithSubpath(t *testing.T) {
+	var reply string
+	if err := loaderRPC.Call(utils.LoaderSv1Load,
+		&ArgsProcessFolder{LoaderID: "SubpathLoaderWithoutMove"}, &reply); err != nil {
+		t.Error(err)
+	}
+}
+
+func testLoaderVerifyOutDirWithSubpath(t *testing.T) {
+	time.Sleep(100 * time.Millisecond)
+	// we expect that after the LoaderS process the file leave in in the input folder
+	if outContent1, err := ioutil.ReadFile(path.Join("/tmp/SubpathWithoutMove/folder1", utils.AttributesCsv)); err != nil {
+		t.Error(err)
+	} else if engine.AttributesCSVContent != string(outContent1) {
+		t.Errorf("Expecting: %q, received: %q", engine.AttributesCSVContent, string(outContent1))
+	}
+}
+
+func testLoaderPopulateDataWithSubpathWithMove(t *testing.T) {
+	fileName := utils.AttributesCsv
+	tmpFilePath := path.Join("/tmp/", fileName)
+	if err := ioutil.WriteFile(tmpFilePath, []byte(engine.AttributesCSVContent), 0777); err != nil {
+		t.Fatal(err.Error())
+	}
+	if err := os.MkdirAll("/tmp/SubpathLoaderWithMove/folder1", 0755); err != nil {
+		t.Fatal("Error creating folder: /tmp/SubpathLoaderWithMove/folder1", err)
+	}
+	if err := os.Rename(tmpFilePath, path.Join("/tmp/SubpathLoaderWithMove/folder1", fileName)); err != nil {
+		t.Fatal("Error moving file to processing directory: ", err)
+	}
+}
+
+func testLoaderLoadAttributesWithoutSubpathWithMove(t *testing.T) {
+	var reply string
+	if err := loaderRPC.Call(utils.LoaderSv1Load,
+		&ArgsProcessFolder{LoaderID: "SubpathLoaderWithMove"}, &reply); err != nil {
+		t.Error(err)
+	}
+}
+
+func testLoaderVerifyOutDirWithSubpathWithMove(t *testing.T) {
+	time.Sleep(100 * time.Millisecond)
+	if outContent1, err := ioutil.ReadFile(path.Join("/tmp/SubpathOut/folder1", utils.AttributesCsv)); err != nil {
 		t.Error(err)
 	} else if engine.AttributesCSVContent != string(outContent1) {
 		t.Errorf("Expecting: %q, received: %q", engine.AttributesCSVContent, string(outContent1))
