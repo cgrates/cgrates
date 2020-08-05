@@ -60,6 +60,8 @@ var (
 		testAPIerGetActionPlanIDs,
 		testAPIerGetRatingPlanIDs,
 		testAPIerSetActionPlanDfltTime,
+		testAPIerLoadRatingPlan,
+		testAPIerLoadRatingPlan2,
 		testAPIerKillEngine,
 	}
 )
@@ -417,6 +419,92 @@ func testAPIerSetActionPlanDfltTime(t *testing.T) {
 			}
 		}
 	}
+}
+
+func testAPIerLoadRatingPlan(t *testing.T) {
+	attrs := utils.AttrSetDestination{Id: "DEST_CUSTOM", Prefixes: []string{"+4986517174963", "+4986517174960"}}
+	var reply string
+	if err := apierRPC.Call(utils.APIerSv1SetDestination, &attrs, &reply); err != nil {
+		t.Error("Unexpected error", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+
+	rt := &utils.TPRateRALs{TPid: "TP_SAMPLE", ID: "SAMPLE_RATE_ID", RateSlots: []*utils.RateSlot{
+		{ConnectFee: 0, Rate: 0, RateUnit: "1s", RateIncrement: "1s", GroupIntervalStart: "0s"},
+	}}
+	if err := apierRPC.Call(utils.APIerSv1SetTPRate, rt, &reply); err != nil {
+		t.Error("Got error on APIerSv1.SetTPRate: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply received when calling APIerSv1.SetTPRate: ", reply)
+	}
+
+	dr := &utils.TPDestinationRate{TPid: "TP_SAMPLE", ID: "DR_SAMPLE_DESTINATION_RATE", DestinationRates: []*utils.DestinationRate{
+		{DestinationId: "DEST_CUSTOM", RateId: "SAMPLE_RATE_ID",
+			RoundingMethod: "*up", RoundingDecimals: 4},
+	}}
+	if err := apierRPC.Call(utils.APIerSv1SetTPDestinationRate, dr, &reply); err != nil {
+		t.Error("Got error on APIerSv1.SetTPDestinationRate: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply received when calling APIerSv1.SetTPDestinationRate: ", reply)
+	}
+
+	rp := &utils.TPRatingPlan{TPid: "TP_SAMPLE", ID: "RPl_SAMPLE_RATING_PLAN",
+		RatingPlanBindings: []*utils.TPRatingPlanBinding{
+			{DestinationRatesId: "DR_SAMPLE_DESTINATION_RATE", TimingId: utils.META_ANY,
+				Weight: 10},
+		}}
+
+	if err := apierRPC.Call(utils.APIerSv1SetTPRatingPlan, rp, &reply); err != nil {
+		t.Error("Got error on APIerSv1.SetTPRatingPlan: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply received when calling APIerSv1.SetTPRatingPlan: ", reply)
+	}
+
+	if err := apierRPC.Call(utils.APIerSv1LoadRatingPlan, &AttrLoadRatingPlan{TPid: "TP_SAMPLE", RatingPlanId: "RPl_SAMPLE_RATING_PLAN"}, &reply); err != nil {
+		t.Error("Got error on APIerSv1.LoadRatingPlan: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Calling APIerSv1.LoadRatingPlan got reply: ", reply)
+	}
+
+	rpRply := new(engine.RatingPlan)
+	rplnId := "RPl_SAMPLE_RATING_PLAN"
+	if err := apierRPC.Call(utils.APIerSv1GetRatingPlan, &rplnId, rpRply); err != nil {
+		t.Error("Got error on APIerSv1.GetRatingPlan: ", err.Error())
+	}
+
+}
+
+func testAPIerLoadRatingPlan2(t *testing.T) {
+	var reply string
+
+	dr := &utils.TPDestinationRate{TPid: "TP_SAMPLE", ID: "DR_WITH_ERROR", DestinationRates: []*utils.DestinationRate{
+		{DestinationId: "DST_NOT_FOUND", RateId: "SAMPLE_RATE_ID",
+			RoundingMethod: "*up", RoundingDecimals: 4},
+	}}
+	if err := apierRPC.Call(utils.APIerSv1SetTPDestinationRate, dr, &reply); err != nil {
+		t.Error("Got error on APIerSv1.SetTPDestinationRate: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply received when calling APIerSv1.SetTPDestinationRate: ", reply)
+	}
+
+	rp := &utils.TPRatingPlan{TPid: "TP_SAMPLE", ID: "RPL_WITH_ERROR",
+		RatingPlanBindings: []*utils.TPRatingPlanBinding{
+			{DestinationRatesId: "DR_WITH_ERROR", TimingId: utils.META_ANY,
+				Weight: 10},
+		}}
+
+	if err := apierRPC.Call(utils.APIerSv1SetTPRatingPlan, rp, &reply); err != nil {
+		t.Error("Got error on APIerSv1.SetTPRatingPlan: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply received when calling APIerSv1.SetTPRatingPlan: ", reply)
+	}
+
+	if err := apierRPC.Call(utils.APIerSv1LoadRatingPlan,
+		&AttrLoadRatingPlan{TPid: "TP_SAMPLE", RatingPlanId: "RPL_WITH_ERROR"}, &reply); err == nil {
+		t.Error("Expected to get error: ", err)
+	}
+
 }
 
 func testAPIerKillEngine(t *testing.T) {
