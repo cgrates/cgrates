@@ -28,7 +28,9 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -78,10 +80,15 @@ var (
 		testClsrFlushDb,
 		testClsrStartEngine,
 		testClsrRPCConection,
+		testClsrSetGetAttribute,
+		testClsrStopMaster,
+		testClsrSetGetAttribute2,
+		testClsrReStartMaster,
+		testClsrGetAttribute,
 		testClsrStopNodes,
 		testClsrKillEngine,
-		testClsrPrintOutput,
 		testClsrDeleteFolder,
+		// testClsrPrintOutput,
 	}
 
 	clsrRedisCliArgs = []string{
@@ -147,6 +154,7 @@ func testClsrCreateCluster(t *testing.T) {
 		t.Errorf("Could not create the cluster because %s", err)
 		t.Logf("The output was:\n %s", stdOut.String()) // print the output to debug the error
 	}
+	time.Sleep(200 * time.Millisecond)
 }
 
 func testClsrInitConfig(t *testing.T) {
@@ -165,7 +173,7 @@ func testClsrFlushDb(t *testing.T) {
 }
 
 func testClsrStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(clsrEngineCfgPath, 2000); err != nil {
+	if _, err := engine.StopStartEngine(clsrEngineCfgPath, 200); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -175,6 +183,117 @@ func testClsrRPCConection(t *testing.T) {
 	clsrRPC, err = newRPCClient(clsrConfig.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
+	}
+}
+
+func testClsrSetGetAttribute(t *testing.T) {
+	alsPrf := &engine.AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ClsrTest",
+		Contexts:  []string{utils.MetaSessionS, utils.MetaCDRs},
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Attributes: []*engine.Attribute{
+			{
+				Path:  utils.MetaReq + utils.NestingSep + utils.Subject,
+				Value: config.NewRSRParsersMustCompile("1001", utils.INFIELD_SEP),
+			},
+		},
+		Weight: 20,
+	}
+	alsPrf.Compile()
+	var result string
+	if err := clsrRPC.Call(utils.APIerSv1SetAttributeProfile, alsPrf, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	var reply *engine.AttributeProfile
+	if err := clsrRPC.Call(utils.APIerSv1GetAttributeProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "ClsrTest"}, &reply); err != nil {
+		t.Fatal(err)
+	}
+	reply.Compile()
+	if !reflect.DeepEqual(alsPrf, reply) {
+		t.Errorf("Expecting : %+v, received: %+v", alsPrf, reply)
+	}
+}
+
+func testClsrStopMaster(t *testing.T) {
+	path := fmt.Sprintf(clsrNodeCfgPath, 3)
+	if err = clsrNodes[path].Process.Kill(); err != nil {
+		t.Fatal(err)
+	}
+	time.Sleep(time.Second)
+}
+
+func testClsrSetGetAttribute2(t *testing.T) {
+	alsPrf := &engine.AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ClsrTest",
+		Contexts:  []string{utils.MetaSessionS, utils.MetaCDRs},
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Attributes: []*engine.Attribute{
+			{
+				Path:  utils.MetaReq + utils.NestingSep + utils.Subject,
+				Value: config.NewRSRParsersMustCompile("1001", utils.INFIELD_SEP),
+			},
+		},
+		Weight: 20,
+	}
+	alsPrf.Compile()
+	var reply *engine.AttributeProfile
+	if err := clsrRPC.Call(utils.APIerSv1GetAttributeProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "ClsrTest"}, &reply); err != nil {
+		t.Fatal(err)
+	}
+	reply.Compile()
+	if !reflect.DeepEqual(alsPrf, reply) {
+		t.Errorf("Expecting : %+v, received: %+v", alsPrf, reply)
+	}
+	// add another attribute
+	alsPrf.ID += "2"
+	var result string
+	if err := clsrRPC.Call(utils.APIerSv1SetAttributeProfile, alsPrf, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+}
+
+func testClsrReStartMaster(t *testing.T) {
+	path := fmt.Sprintf(clsrNodeCfgPath, 3)
+	clsrNodes[path] = exec.Command(clsrRedisCmd, path)
+	clsrOutput[path] = bytes.NewBuffer(nil)
+	clsrNodes[path].Stdout = clsrOutput[path]
+	if err := clsrNodes[path].Start(); err != nil {
+		t.Fatalf("Could not start node %v because %s", 3, err)
+	}
+	time.Sleep(200 * time.Millisecond)
+}
+
+func testClsrGetAttribute(t *testing.T) {
+	alsPrf := &engine.AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ClsrTest2",
+		Contexts:  []string{utils.MetaSessionS, utils.MetaCDRs},
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Attributes: []*engine.Attribute{
+			{
+				Path:  utils.MetaReq + utils.NestingSep + utils.Subject,
+				Value: config.NewRSRParsersMustCompile("1001", utils.INFIELD_SEP),
+			},
+		},
+		Weight: 20,
+	}
+	alsPrf.Compile()
+	var reply *engine.AttributeProfile
+	if err := clsrRPC.Call(utils.APIerSv1GetAttributeProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "ClsrTest2"}, &reply); err != nil {
+		t.Fatal(err)
+	}
+	reply.Compile()
+	if !reflect.DeepEqual(alsPrf, reply) {
+		t.Errorf("Expecting : %+v, received: %+v", alsPrf, reply)
 	}
 }
 
