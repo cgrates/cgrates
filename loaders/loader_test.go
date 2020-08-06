@@ -774,16 +774,16 @@ func TestLoaderProcessRoutes(t *testing.T) {
 
 	eSp := &engine.RouteProfile{
 		Tenant:    "cgrates.org",
-		ID:        "SPP_1",
+		ID:        "RoutePrf1",
 		FilterIDs: []string{"*string:~*req.Account:dan"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
 		},
-		Sorting:           "*least_cost",
+		Sorting:           utils.MetaLC,
 		SortingParameters: []string{},
 		Routes: []*engine.Route{
 			{
-				ID:              "supplier1",
+				ID:              "route1",
 				FilterIDs:       []string{"FLTR_ACNT_dan"},
 				AccountIDs:      []string{"Account1", "Account1_1"},
 				RatingPlanIDs:   []string{"RPL_1"},
@@ -794,7 +794,7 @@ func TestLoaderProcessRoutes(t *testing.T) {
 				RouteParameters: "param1",
 			},
 			{
-				ID:              "supplier1",
+				ID:              "route1",
 				FilterIDs:       []string{"FLTR_DST_DE"},
 				AccountIDs:      []string{"Account2"},
 				RatingPlanIDs:   []string{"RPL_3"},
@@ -805,7 +805,7 @@ func TestLoaderProcessRoutes(t *testing.T) {
 				RouteParameters: utils.EmptyString,
 			},
 			{
-				ID:              "supplier1",
+				ID:              "route1",
 				RatingPlanIDs:   []string{"RPL_2"},
 				ResourceIDs:     []string{"ResGroup2", "ResGroup4"},
 				StatIDs:         []string{"Stat3"},
@@ -821,7 +821,7 @@ func TestLoaderProcessRoutes(t *testing.T) {
 			eSp.Routes[j].ID+strings.Join(eSp.Routes[j].FilterIDs, utils.CONCATENATED_KEY_SEP)) < 0
 	})
 
-	aps, err := ldr.dm.GetRouteProfile("cgrates.org", "SPP_1",
+	aps, err := ldr.dm.GetRouteProfile("cgrates.org", "RoutePrf1",
 		true, false, utils.NonTransactional)
 	if err != nil {
 		t.Fatal(err)

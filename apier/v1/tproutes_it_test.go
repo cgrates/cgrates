@@ -35,110 +35,110 @@ import (
 )
 
 var (
-	tpSplPrfCfgPath   string
-	tpSplPrfCfg       *config.CGRConfig
-	tpSplPrfRPC       *rpc.Client
-	tpSplPrfDataDire  = "/usr/share/cgrates"
-	tpSplPr           *utils.TPRouteProfile
-	tpSplPrfDelay     int
-	tpSplPrfConfigDIR string //run tests for specific configuration
+	tpRouteCfgPath   string
+	tpRouteCfg       *config.CGRConfig
+	tpRouteRPC       *rpc.Client
+	tpRouteDataDire  = "/usr/share/cgrates"
+	tpRoutePrf       *utils.TPRouteProfile
+	tpRouteDelay     int
+	tpRouteConfigDIR string //run tests for specific configuration
 )
 
-var sTestsTPSplPrf = []func(t *testing.T){
-	testTPSplPrfInitCfg,
-	testTPSplPrfResetStorDb,
-	testTPSplPrfStartEngine,
-	testTPSplPrfRPCConn,
-	testTPSplPrfGetTPSplPrfBeforeSet,
-	testTPSplPrfSetTPSplPrf,
-	testTPSplPrfGetTPSplPrfAfterSet,
-	testTPSplPrfGetTPSplPrfIDs,
-	testTPSplPrfUpdateTPSplPrf,
-	testTPSplPrfGetTPSplPrfAfterUpdate,
-	testTPSplPrfRemTPSplPrf,
-	testTPSplPrfGetTPSplPrfAfterRemove,
-	testTPSplPrfKillEngine,
+var sTestsTPRoute = []func(t *testing.T){
+	testTPRouteInitCfg,
+	testTPRouteResetStorDb,
+	testTPRouteStartEngine,
+	testTPRouteRPCConn,
+	testTPRouteGetTPRouteBeforeSet,
+	testTPRouteSetTPRoute,
+	testTPRouteGetTPRouteAfterSet,
+	testTPRouteGetTPRouteIDs,
+	testTPRouteUpdateTPRoute,
+	testTPRouteGetTPRouteAfterUpdate,
+	testTPRouteRemTPRoute,
+	testTPRouteGetTPRouteAfterRemove,
+	testTPRouteKillEngine,
 }
 
 //Test start here
-func TestTPSplPrfIT(t *testing.T) {
+func TestTPRouteIT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
-		tpSplPrfConfigDIR = "tutinternal"
+		tpRouteConfigDIR = "tutinternal"
 	case utils.MetaMySQL:
-		tpSplPrfConfigDIR = "tutmysql"
+		tpRouteConfigDIR = "tutmysql"
 	case utils.MetaMongo:
-		tpSplPrfConfigDIR = "tutmongo"
+		tpRouteConfigDIR = "tutmongo"
 	case utils.MetaPostgres:
 		t.SkipNow()
 	default:
 		t.Fatal("Unknown Database type")
 	}
-	for _, stest := range sTestsTPSplPrf {
-		t.Run(tpSplPrfConfigDIR, stest)
+	for _, stest := range sTestsTPRoute {
+		t.Run(tpRouteConfigDIR, stest)
 	}
 }
 
-func testTPSplPrfInitCfg(t *testing.T) {
+func testTPRouteInitCfg(t *testing.T) {
 	var err error
-	tpSplPrfCfgPath = path.Join(tpSplPrfDataDire, "conf", "samples", tpSplPrfConfigDIR)
-	tpSplPrfCfg, err = config.NewCGRConfigFromPath(tpSplPrfCfgPath)
+	tpRouteCfgPath = path.Join(tpRouteDataDire, "conf", "samples", tpRouteConfigDIR)
+	tpRouteCfg, err = config.NewCGRConfigFromPath(tpRouteCfgPath)
 	if err != nil {
 		t.Error(err)
 	}
-	tpSplPrfCfg.DataFolderPath = tpSplPrfDataDire // Share DataFolderPath through config towards StoreDb for Flush()
-	config.SetCgrConfig(tpSplPrfCfg)
-	tpSplPrfDelay = 1000
+	tpRouteCfg.DataFolderPath = tpRouteDataDire // Share DataFolderPath through config towards StoreDb for Flush()
+	config.SetCgrConfig(tpRouteCfg)
+	tpRouteDelay = 1000
 
 }
 
 // Wipe out the cdr database
-func testTPSplPrfResetStorDb(t *testing.T) {
-	if err := engine.InitStorDb(tpSplPrfCfg); err != nil {
+func testTPRouteResetStorDb(t *testing.T) {
+	if err := engine.InitStorDb(tpRouteCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Start CGR Engine
-func testTPSplPrfStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(tpSplPrfCfgPath, tpSplPrfDelay); err != nil {
+func testTPRouteStartEngine(t *testing.T) {
+	if _, err := engine.StopStartEngine(tpRouteCfgPath, tpRouteDelay); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Connect rpc client to rater
-func testTPSplPrfRPCConn(t *testing.T) {
+func testTPRouteRPCConn(t *testing.T) {
 	var err error
-	tpSplPrfRPC, err = jsonrpc.Dial(utils.TCP, tpSplPrfCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	tpRouteRPC, err = jsonrpc.Dial(utils.TCP, tpRouteCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
 }
 
-func testTPSplPrfGetTPSplPrfBeforeSet(t *testing.T) {
+func testTPRouteGetTPRouteBeforeSet(t *testing.T) {
 	var reply *utils.TPRoute
-	if err := tpSplPrfRPC.Call(utils.APIerSv1GetTPRouteProfile,
-		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "SUPL_1"},
+	if err := tpRouteRPC.Call(utils.APIerSv1GetTPRouteProfile,
+		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "RoutePrf"},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
 
-func testTPSplPrfSetTPSplPrf(t *testing.T) {
-	tpSplPr = &utils.TPRouteProfile{
+func testTPRouteSetTPRoute(t *testing.T) {
+	tpRoutePrf = &utils.TPRouteProfile{
 		TPid:      "TP1",
 		Tenant:    "cgrates.org",
-		ID:        "SUPL_1",
+		ID:        "RoutePrf",
 		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
 		ActivationInterval: &utils.TPActivationInterval{
 			ActivationTime: "2014-07-29T15:00:00Z",
 			ExpiryTime:     "",
 		},
-		Sorting:           "*lowest_cost",
+		Sorting:           "*lc",
 		SortingParameters: []string{},
 		Routes: []*utils.TPRoute{
 			&utils.TPRoute{
-				ID:              "supplier1",
+				ID:              "route1",
 				FilterIDs:       []string{"FLTR_1"},
 				AccountIDs:      []string{"Acc1", "Acc2"},
 				RatingPlanIDs:   []string{"RPL_1"},
@@ -151,32 +151,32 @@ func testTPSplPrfSetTPSplPrf(t *testing.T) {
 		},
 		Weight: 20,
 	}
-	sort.Strings(tpSplPr.FilterIDs)
+	sort.Strings(tpRoutePrf.FilterIDs)
 	var result string
-	if err := tpSplPrfRPC.Call(utils.APIerSv1SetTPRouteProfile,
-		tpSplPr, &result); err != nil {
+	if err := tpRouteRPC.Call(utils.APIerSv1SetTPRouteProfile,
+		tpRoutePrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 }
 
-func testTPSplPrfGetTPSplPrfAfterSet(t *testing.T) {
+func testTPRouteGetTPRouteAfterSet(t *testing.T) {
 	var reply *utils.TPRouteProfile
-	if err := tpSplPrfRPC.Call(utils.APIerSv1GetTPRouteProfile,
-		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "SUPL_1"}, &reply); err != nil {
+	if err := tpRouteRPC.Call(utils.APIerSv1GetTPRouteProfile,
+		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "RoutePrf"}, &reply); err != nil {
 		t.Fatal(err)
 	}
 	sort.Strings(reply.FilterIDs)
-	if !reflect.DeepEqual(tpSplPr, reply) {
-		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(tpSplPr), utils.ToJSON(reply))
+	if !reflect.DeepEqual(tpRoutePrf, reply) {
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(tpRoutePrf), utils.ToJSON(reply))
 	}
 }
 
-func testTPSplPrfGetTPSplPrfIDs(t *testing.T) {
+func testTPRouteGetTPRouteIDs(t *testing.T) {
 	var result []string
-	expectedTPID := []string{"cgrates.org:SUPL_1"}
-	if err := tpSplPrfRPC.Call(utils.APIerSv1GetTPRouteProfileIDs,
+	expectedTPID := []string{"cgrates.org:RoutePrf"}
+	if err := tpRouteRPC.Call(utils.APIerSv1GetTPRouteProfileIDs,
 		&AttrGetTPRouteProfileIDs{TPid: "TP1"}, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedTPID, result) {
@@ -185,10 +185,10 @@ func testTPSplPrfGetTPSplPrfIDs(t *testing.T) {
 
 }
 
-func testTPSplPrfUpdateTPSplPrf(t *testing.T) {
-	tpSplPr.Routes = []*utils.TPRoute{
+func testTPRouteUpdateTPRoute(t *testing.T) {
+	tpRoutePrf.Routes = []*utils.TPRoute{
 		&utils.TPRoute{
-			ID:              "supplier1",
+			ID:              "route1",
 			FilterIDs:       []string{"FLTR_1"},
 			AccountIDs:      []string{"Acc1", "Acc2"},
 			RatingPlanIDs:   []string{"RPL_1"},
@@ -199,7 +199,7 @@ func testTPSplPrfUpdateTPSplPrf(t *testing.T) {
 			RouteParameters: "SortingParam1",
 		},
 		&utils.TPRoute{
-			ID:              "supplier2",
+			ID:              "route2",
 			FilterIDs:       []string{"FLTR_1"},
 			AccountIDs:      []string{"Acc3"},
 			RatingPlanIDs:   []string{"RPL_1"},
@@ -211,36 +211,36 @@ func testTPSplPrfUpdateTPSplPrf(t *testing.T) {
 		},
 	}
 	var result string
-	if err := tpSplPrfRPC.Call(utils.APIerSv1SetTPRouteProfile,
-		tpSplPr, &result); err != nil {
+	if err := tpRouteRPC.Call(utils.APIerSv1SetTPRouteProfile,
+		tpRoutePrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	sort.Slice(tpSplPr.Routes, func(i, j int) bool {
-		return strings.Compare(tpSplPr.Routes[i].ID, tpSplPr.Routes[j].ID) == -1
+	sort.Slice(tpRoutePrf.Routes, func(i, j int) bool {
+		return strings.Compare(tpRoutePrf.Routes[i].ID, tpRoutePrf.Routes[j].ID) == -1
 	})
 }
 
-func testTPSplPrfGetTPSplPrfAfterUpdate(t *testing.T) {
+func testTPRouteGetTPRouteAfterUpdate(t *testing.T) {
 	var reply *utils.TPRouteProfile
-	if err := tpSplPrfRPC.Call(utils.APIerSv1GetTPRouteProfile,
-		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "SUPL_1"}, &reply); err != nil {
+	if err := tpRouteRPC.Call(utils.APIerSv1GetTPRouteProfile,
+		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "RoutePrf"}, &reply); err != nil {
 		t.Fatal(err)
 	}
 	sort.Strings(reply.FilterIDs)
 	sort.Slice(reply.Routes, func(i, j int) bool {
 		return strings.Compare(reply.Routes[i].ID, reply.Routes[j].ID) == -1
 	})
-	if !reflect.DeepEqual(tpSplPr.Routes, reply.Routes) {
-		t.Errorf("Expecting: %+v,\n received: %+v", utils.ToJSON(tpSplPr), utils.ToJSON(reply))
+	if !reflect.DeepEqual(tpRoutePrf.Routes, reply.Routes) {
+		t.Errorf("Expecting: %+v,\n received: %+v", utils.ToJSON(tpRoutePrf), utils.ToJSON(reply))
 	}
 }
 
-func testTPSplPrfRemTPSplPrf(t *testing.T) {
+func testTPRouteRemTPRoute(t *testing.T) {
 	var resp string
-	if err := tpSplPrfRPC.Call(utils.APIerSv1RemoveTPRouteProfile,
-		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "SUPL_1"},
+	if err := tpRouteRPC.Call(utils.APIerSv1RemoveTPRouteProfile,
+		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "RoutePrf"},
 		&resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
@@ -248,17 +248,17 @@ func testTPSplPrfRemTPSplPrf(t *testing.T) {
 	}
 }
 
-func testTPSplPrfGetTPSplPrfAfterRemove(t *testing.T) {
+func testTPRouteGetTPRouteAfterRemove(t *testing.T) {
 	var reply *utils.TPRouteProfile
-	if err := tpSplPrfRPC.Call(utils.APIerSv1GetTPRouteProfile,
-		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "SUPL_1"},
+	if err := tpRouteRPC.Call(utils.APIerSv1GetTPRouteProfile,
+		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "RoutePrf"},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
 
-func testTPSplPrfKillEngine(t *testing.T) {
-	if err := engine.KillEngine(tpSplPrfDelay); err != nil {
+func testTPRouteKillEngine(t *testing.T) {
+	if err := engine.KillEngine(tpRouteDelay); err != nil {
 		t.Error(err)
 	}
 }
