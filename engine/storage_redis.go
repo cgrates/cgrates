@@ -69,9 +69,7 @@ const (
 func NewRedisStorage(address string, db int, user, pass, mrshlerStr string,
 	maxConns int, sentinelName string, isCluster bool, clusterSync,
 	clusterOnDownDelay time.Duration) (rs *RedisStorage, err error) {
-
 	rs = new(RedisStorage)
-
 	if rs.ms, err = NewMarshaler(mrshlerStr); err != nil {
 		rs = nil
 		return
