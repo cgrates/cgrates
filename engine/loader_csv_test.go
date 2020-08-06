@@ -92,7 +92,7 @@ func init() {
 		log.Print("error in LoadThresholds:", err)
 	}
 	if err := csvr.LoadRouteProfiles(); err != nil {
-		log.Print("error in LoadSupplierProfiles:", err)
+		log.Print("error in LoadRouteProfiles:", err)
 	}
 	if err := csvr.LoadAttributeProfiles(); err != nil {
 		log.Print("error in LoadAttributeProfiles:", err)
@@ -1238,16 +1238,16 @@ func TestLoadRouteProfiles(t *testing.T) {
 	eSppProfile := &utils.TPRouteProfile{
 		TPid:      testTPID,
 		Tenant:    "cgrates.org",
-		ID:        "SPP_1",
+		ID:        "RoutePrf1",
 		FilterIDs: []string{"*string:~*req.Account:dan"},
 		ActivationInterval: &utils.TPActivationInterval{
 			ActivationTime: "2014-07-29T15:00:00Z",
 		},
-		Sorting:           "*least_cost",
+		Sorting:           utils.MetaLC,
 		SortingParameters: []string{},
 		Routes: []*utils.TPRoute{
 			{
-				ID:              "supplier1",
+				ID:              "route1",
 				FilterIDs:       []string{"FLTR_ACNT_dan"},
 				AccountIDs:      []string{"Account1", "Account1_1"},
 				RatingPlanIDs:   []string{"RPL_1"},
@@ -1258,7 +1258,7 @@ func TestLoadRouteProfiles(t *testing.T) {
 				RouteParameters: "param1",
 			},
 			{
-				ID:              "supplier1",
+				ID:              "route1",
 				RatingPlanIDs:   []string{"RPL_2"},
 				ResourceIDs:     []string{"ResGroup2", "ResGroup4"},
 				StatIDs:         []string{"Stat3"},
@@ -1267,7 +1267,7 @@ func TestLoadRouteProfiles(t *testing.T) {
 				RouteParameters: utils.EmptyString,
 			},
 			{
-				ID:              "supplier1",
+				ID:              "route1",
 				FilterIDs:       []string{"FLTR_DST_DE"},
 				AccountIDs:      []string{"Account2"},
 				RatingPlanIDs:   []string{"RPL_3"},
@@ -1284,9 +1284,9 @@ func TestLoadRouteProfiles(t *testing.T) {
 		return strings.Compare(eSppProfile.Routes[i].ID+strings.Join(eSppProfile.Routes[i].FilterIDs, utils.CONCATENATED_KEY_SEP),
 			eSppProfile.Routes[j].ID+strings.Join(eSppProfile.Routes[j].FilterIDs, utils.CONCATENATED_KEY_SEP)) < 0
 	})
-	resKey := utils.TenantID{Tenant: "cgrates.org", ID: "SPP_1"}
+	resKey := utils.TenantID{Tenant: "cgrates.org", ID: "RoutePrf1"}
 	if len(csvr.routeProfiles) != 1 {
-		t.Errorf("Failed to load SupplierProfiles: %s", utils.ToIJSON(csvr.routeProfiles))
+		t.Errorf("Failed to load RouteProfiles: %s", utils.ToIJSON(csvr.routeProfiles))
 	} else {
 		rcvRoute := csvr.routeProfiles[resKey]
 		if rcvRoute == nil {

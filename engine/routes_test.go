@@ -28,13 +28,13 @@ import (
 
 var (
 	expTimeRoutes = time.Now().Add(time.Duration(20 * time.Minute))
-	splService    *RouteService
+	routeService  *RouteService
 	dmSPP         *DataManager
 	sppTest       = RouteProfiles{
 		&RouteProfile{
 			Tenant:    "cgrates.org",
 			ID:        "RouteProfile1",
-			FilterIDs: []string{"FLTR_SUPP_1"},
+			FilterIDs: []string{"FLTR_RPP_1"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 				ExpiryTime:     expTimeRoutes,
@@ -43,7 +43,7 @@ var (
 			SortingParameters: []string{},
 			Routes: []*Route{
 				{
-					ID:              "supplier1",
+					ID:              "route1",
 					FilterIDs:       []string{},
 					AccountIDs:      []string{},
 					RatingPlanIDs:   []string{},
@@ -68,7 +68,7 @@ var (
 			SortingParameters: []string{},
 			Routes: []*Route{
 				{
-					ID:              "supplier2",
+					ID:              "route2",
 					FilterIDs:       []string{},
 					AccountIDs:      []string{},
 					RatingPlanIDs:   []string{},
@@ -78,7 +78,7 @@ var (
 					RouteParameters: "param2",
 				},
 				{
-					ID:              "supplier3",
+					ID:              "route3",
 					FilterIDs:       []string{},
 					AccountIDs:      []string{},
 					RatingPlanIDs:   []string{},
@@ -88,7 +88,7 @@ var (
 					RouteParameters: "param3",
 				},
 				{
-					ID:              "supplier1",
+					ID:              "route1",
 					FilterIDs:       []string{},
 					AccountIDs:      []string{},
 					RatingPlanIDs:   []string{},
@@ -113,7 +113,7 @@ var (
 			SortingParameters: []string{},
 			Routes: []*Route{
 				{
-					ID:              "supplier1",
+					ID:              "route1",
 					FilterIDs:       []string{},
 					AccountIDs:      []string{},
 					RatingPlanIDs:   []string{},
@@ -188,7 +188,7 @@ func TestRoutesSort(t *testing.T) {
 	sprs := RouteProfiles{
 		&RouteProfile{
 			Tenant:    "cgrates.org",
-			ID:        "supplierprofile1",
+			ID:        "RoutePrf1",
 			FilterIDs: []string{},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -198,7 +198,7 @@ func TestRoutesSort(t *testing.T) {
 			SortingParameters: []string{},
 			Routes: []*Route{
 				{
-					ID:              "supplier1",
+					ID:              "route1",
 					FilterIDs:       []string{},
 					AccountIDs:      []string{},
 					RatingPlanIDs:   []string{},
@@ -213,7 +213,7 @@ func TestRoutesSort(t *testing.T) {
 		},
 		&RouteProfile{
 			Tenant:    "cgrates.org",
-			ID:        "supplierprofile2",
+			ID:        "RoutePrf2",
 			FilterIDs: []string{},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -223,7 +223,7 @@ func TestRoutesSort(t *testing.T) {
 			SortingParameters: []string{},
 			Routes: []*Route{
 				{
-					ID:              "supplier1",
+					ID:              "route1",
 					FilterIDs:       []string{},
 					AccountIDs:      []string{},
 					RatingPlanIDs:   []string{},
@@ -240,7 +240,7 @@ func TestRoutesSort(t *testing.T) {
 	eRouteProfile := RouteProfiles{
 		&RouteProfile{
 			Tenant:    "cgrates.org",
-			ID:        "supplierprofile2",
+			ID:        "RoutePrf2",
 			FilterIDs: []string{},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -250,7 +250,7 @@ func TestRoutesSort(t *testing.T) {
 			SortingParameters: []string{},
 			Routes: []*Route{
 				{
-					ID:              "supplier1",
+					ID:              "route1",
 					FilterIDs:       []string{},
 					AccountIDs:      []string{},
 					RatingPlanIDs:   []string{},
@@ -265,7 +265,7 @@ func TestRoutesSort(t *testing.T) {
 		},
 		&RouteProfile{
 			Tenant:    "cgrates.org",
-			ID:        "supplierprofile1",
+			ID:        "RoutePrf1",
 			FilterIDs: []string{},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -275,7 +275,7 @@ func TestRoutesSort(t *testing.T) {
 			SortingParameters: []string{},
 			Routes: []*Route{
 				{
-					ID:              "supplier1",
+					ID:              "route1",
 					FilterIDs:       []string{},
 					AccountIDs:      []string{},
 					RatingPlanIDs:   []string{},
@@ -301,7 +301,7 @@ func TestRoutesPopulateRouteService(t *testing.T) {
 	dmSPP = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	defaultCfg.RouteSCfg().StringIndexedFields = nil
 	defaultCfg.RouteSCfg().PrefixIndexedFields = nil
-	splService, err = NewRouteService(dmSPP, &FilterS{
+	routeService, err = NewRouteService(dmSPP, &FilterS{
 		dm: dmSPP, cfg: defaultCfg}, defaultCfg, nil)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -311,7 +311,7 @@ func TestRoutesPopulateRouteService(t *testing.T) {
 func TestRoutesAddFilters(t *testing.T) {
 	fltrSupp1 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-		ID:     "FLTR_SUPP_1",
+		ID:     "FLTR_RPP_1",
 		Rules: []*FilterRule{
 			{
 				Type:    utils.MetaString,
@@ -373,7 +373,7 @@ func TestRoutesCache(t *testing.T) {
 			t.Errorf("Error: %+v", err)
 		}
 	}
-	//Test each supplier profile from cache
+	//Test each route profile from cache
 	for _, spp := range sppTest {
 		if tempSpp, err := dmSPP.GetRouteProfile(spp.Tenant,
 			spp.ID, true, true, utils.NonTransactional); err != nil {
@@ -385,7 +385,7 @@ func TestRoutesCache(t *testing.T) {
 }
 
 func TestRoutesmatchingRouteProfilesForEvent(t *testing.T) {
-	sprf, err := splService.matchingRouteProfilesForEvent(argsGetRoutes[0].CGREvent, true)
+	sprf, err := routeService.matchingRouteProfilesForEvent(argsGetRoutes[0].CGREvent, true)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -393,7 +393,7 @@ func TestRoutesmatchingRouteProfilesForEvent(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", sppTest[0], sprf[0])
 	}
 
-	sprf, err = splService.matchingRouteProfilesForEvent(argsGetRoutes[1].CGREvent, true)
+	sprf, err = routeService.matchingRouteProfilesForEvent(argsGetRoutes[1].CGREvent, true)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -401,7 +401,7 @@ func TestRoutesmatchingRouteProfilesForEvent(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", sppTest[1], sprf[0])
 	}
 
-	sprf, err = splService.matchingRouteProfilesForEvent(argsGetRoutes[2].CGREvent, true)
+	sprf, err = routeService.matchingRouteProfilesForEvent(argsGetRoutes[2].CGREvent, true)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -417,7 +417,7 @@ func TestRoutesSortedForEvent(t *testing.T) {
 		Count:     1,
 		SortedRoutes: []*SortedRoute{
 			{
-				RouteID: "supplier1",
+				RouteID: "route1",
 				SortingData: map[string]interface{}{
 					"Weight": 10.0,
 				},
@@ -425,7 +425,7 @@ func TestRoutesSortedForEvent(t *testing.T) {
 			},
 		},
 	}
-	sprf, err := splService.sortedRoutesForEvent(argsGetRoutes[0])
+	sprf, err := routeService.sortedRoutesForEvent(argsGetRoutes[0])
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -439,21 +439,21 @@ func TestRoutesSortedForEvent(t *testing.T) {
 		Count:     3,
 		SortedRoutes: []*SortedRoute{
 			{
-				RouteID: "supplier1",
+				RouteID: "route1",
 				SortingData: map[string]interface{}{
 					"Weight": 30.0,
 				},
 				RouteParameters: "param1",
 			},
 			{
-				RouteID: "supplier2",
+				RouteID: "route2",
 				SortingData: map[string]interface{}{
 					"Weight": 20.0,
 				},
 				RouteParameters: "param2",
 			},
 			{
-				RouteID: "supplier3",
+				RouteID: "route3",
 				SortingData: map[string]interface{}{
 					"Weight": 10.0,
 				},
@@ -462,7 +462,7 @@ func TestRoutesSortedForEvent(t *testing.T) {
 		},
 	}
 
-	sprf, err = splService.sortedRoutesForEvent(argsGetRoutes[1])
+	sprf, err = routeService.sortedRoutesForEvent(argsGetRoutes[1])
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -476,7 +476,7 @@ func TestRoutesSortedForEvent(t *testing.T) {
 		Count:     1,
 		SortedRoutes: []*SortedRoute{
 			{
-				RouteID: "supplier1",
+				RouteID: "route1",
 				SortingData: map[string]interface{}{
 					"Weight": 10.0,
 				},
@@ -485,7 +485,7 @@ func TestRoutesSortedForEvent(t *testing.T) {
 		},
 	}
 
-	sprf, err = splService.sortedRoutesForEvent(argsGetRoutes[2])
+	sprf, err = routeService.sortedRoutesForEvent(argsGetRoutes[2])
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -501,14 +501,14 @@ func TestRoutesSortedForEventWithLimit(t *testing.T) {
 		Count:     2,
 		SortedRoutes: []*SortedRoute{
 			{
-				RouteID: "supplier1",
+				RouteID: "route1",
 				SortingData: map[string]interface{}{
 					"Weight": 30.0,
 				},
 				RouteParameters: "param1",
 			},
 			{
-				RouteID: "supplier2",
+				RouteID: "route2",
 				SortingData: map[string]interface{}{
 					"Weight": 20.0,
 				},
@@ -519,7 +519,7 @@ func TestRoutesSortedForEventWithLimit(t *testing.T) {
 	argsGetRoutes[1].Paginator = utils.Paginator{
 		Limit: utils.IntPointer(2),
 	}
-	sprf, err := splService.sortedRoutesForEvent(argsGetRoutes[1])
+	sprf, err := routeService.sortedRoutesForEvent(argsGetRoutes[1])
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -535,7 +535,7 @@ func TestRoutesSortedForEventWithOffset(t *testing.T) {
 		Count:     1,
 		SortedRoutes: []*SortedRoute{
 			{
-				RouteID: "supplier3",
+				RouteID: "route3",
 				SortingData: map[string]interface{}{
 					"Weight": 10.0,
 				},
@@ -546,7 +546,7 @@ func TestRoutesSortedForEventWithOffset(t *testing.T) {
 	argsGetRoutes[1].Paginator = utils.Paginator{
 		Offset: utils.IntPointer(2),
 	}
-	sprf, err := splService.sortedRoutesForEvent(argsGetRoutes[1])
+	sprf, err := routeService.sortedRoutesForEvent(argsGetRoutes[1])
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -562,7 +562,7 @@ func TestRoutesSortedForEventWithLimitAndOffset(t *testing.T) {
 		Count:     1,
 		SortedRoutes: []*SortedRoute{
 			{
-				RouteID: "supplier2",
+				RouteID: "route2",
 				SortingData: map[string]interface{}{
 					"Weight": 20.0,
 				},
@@ -574,7 +574,7 @@ func TestRoutesSortedForEventWithLimitAndOffset(t *testing.T) {
 		Limit:  utils.IntPointer(1),
 		Offset: utils.IntPointer(1),
 	}
-	sprf, err := splService.sortedRoutesForEvent(argsGetRoutes[1])
+	sprf, err := routeService.sortedRoutesForEvent(argsGetRoutes[1])
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -634,8 +634,8 @@ func TestRoutesAsOptsGetRoutesMaxCost(t *testing.T) {
 }
 
 func TestRoutesMatchWithIndexFalse(t *testing.T) {
-	splService.cgrcfg.RouteSCfg().IndexedSelects = false
-	sprf, err := splService.matchingRouteProfilesForEvent(argsGetRoutes[0].CGREvent, true)
+	routeService.cgrcfg.RouteSCfg().IndexedSelects = false
+	sprf, err := routeService.matchingRouteProfilesForEvent(argsGetRoutes[0].CGREvent, true)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -643,7 +643,7 @@ func TestRoutesMatchWithIndexFalse(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", sppTest[0], sprf[0])
 	}
 
-	sprf, err = splService.matchingRouteProfilesForEvent(argsGetRoutes[1].CGREvent, true)
+	sprf, err = routeService.matchingRouteProfilesForEvent(argsGetRoutes[1].CGREvent, true)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -651,7 +651,7 @@ func TestRoutesMatchWithIndexFalse(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", sppTest[1], sprf[0])
 	}
 
-	sprf, err = splService.matchingRouteProfilesForEvent(argsGetRoutes[2].CGREvent, true)
+	sprf, err = routeService.matchingRouteProfilesForEvent(argsGetRoutes[2].CGREvent, true)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
