@@ -255,7 +255,7 @@ func TestRateProfileCompile(t *testing.T) {
 		Weight:         30,
 		ActivationTime: "error",
 	}
-	if err := rt.Compile(); err == nil || err.Error() != "Expected exactly 5 fields, found 1: error" {
+	if err := rt.Compile(); err == nil || err.Error() != "expected exactly 5 fields, found 1: [error]" {
 		t.Error(err)
 	}
 }
