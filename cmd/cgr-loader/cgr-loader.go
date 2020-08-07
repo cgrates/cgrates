@@ -113,7 +113,7 @@ func loadConfig() (ldrCfg *config.CGRConfig) {
 	}
 	// Data for DataDB
 	if *dataDBType != dfltCfg.DataDbCfg().DataDbType {
-		ldrCfg.DataDbCfg().DataDbType = strings.TrimPrefix(*dataDBType, "*")
+		ldrCfg.DataDbCfg().DataDbType = strings.TrimPrefix(*dataDBType, utils.Meta)
 	}
 
 	if *dataDBHost != dfltCfg.DataDbCfg().DataDbHost {
@@ -146,7 +146,7 @@ func loadConfig() (ldrCfg *config.CGRConfig) {
 
 	// Data for StorDB
 	if *storDBType != dfltCfg.StorDbCfg().Type {
-		ldrCfg.StorDbCfg().Type = strings.TrimPrefix(*storDBType, "*")
+		ldrCfg.StorDbCfg().Type = strings.TrimPrefix(*storDBType, utils.Meta)
 	}
 
 	if *storDBHost != dfltCfg.StorDbCfg().Host {
@@ -169,7 +169,7 @@ func loadConfig() (ldrCfg *config.CGRConfig) {
 		ldrCfg.StorDbCfg().Password = *storDBPasswd
 	}
 
-	if *tpid != dfltCfg.LoaderCgrCfg().DataPath {
+	if *tpid != dfltCfg.LoaderCgrCfg().TpID {
 		ldrCfg.LoaderCgrCfg().TpID = *tpid
 	}
 
@@ -342,13 +342,13 @@ func main() {
 		if err = tpReader.RemoveFromDatabase(*verbose, *disableReverse); err != nil {
 			log.Fatal("Could not delete from database: ", err)
 		}
-		return
+	} else {
+		// write maps to database
+		if err = tpReader.WriteToDatabase(*verbose, *disableReverse); err != nil {
+			log.Fatal("Could not write to database: ", err)
+		}
 	}
 
-	// write maps to database
-	if err = tpReader.WriteToDatabase(*verbose, *disableReverse); err != nil {
-		log.Fatal("Could not write to database: ", err)
-	}
 	// reload cache
 	if err = tpReader.ReloadCache(ldrCfg.GeneralCfg().DefaultCaching, *verbose, map[string]interface{}{
 		utils.OptsAPIKey:  *apiKey,
@@ -356,6 +356,7 @@ func main() {
 	}); err != nil {
 		log.Fatal("Could not reload cache: ", err)
 	}
+
 	if len(ldrCfg.LoaderCgrCfg().SchedulerConns) != 0 {
 		if err = tpReader.ReloadScheduler(*verbose); err != nil {
 			log.Fatal("Could not reload scheduler: ", err)

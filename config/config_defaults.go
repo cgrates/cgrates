@@ -329,8 +329,8 @@ const CGRATES_CFG_JSON = `
 			"header_define_character": ":",						// the starting character for header definition used in case of CSV files
 			"run_delay": "0",									// sleep interval in seconds between consecutive runs, -1 to use automation via inotify or 0 to disable running all together
 			"concurrent_requests": 1024,						// maximum simultaneous requests/files to process, 0 for unlimited
-			"source_path": "/var/spool/cgrates/ers/in",		// read data from this path
-			"processed_path": "/var/spool/cgrates/ers/out",	// move processed data here
+			"source_path": "/var/spool/cgrates/ers/in",			// read data from this path
+			"processed_path": "/var/spool/cgrates/ers/out",		// move processed data here
 			"xml_root_path": "",								// path towards one event in case of XML CDRs
 			"tenant": "",										// tenant used by import
 			"timezone": "",										// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
@@ -439,6 +439,9 @@ const CGRATES_CFG_JSON = `
 	"enabled": false,						// starts the Asterisk agent: <true|false>
 	"sessions_conns": ["*internal"],
 	"create_cdr": false,					// create CDR out of events and sends it to CDRS component
+	"low_balance_ann_file": "",				// file to be played when low balance is reached for prepaid calls
+	"empty_balance_context": "",			// if defined, prepaid calls will be transferred to this context on empty balance
+	"empty_balance_ann_file": "",			// file to be played before disconnecting prepaid calls on empty balance (applies only if no context defined)
 	"asterisk_conns":[						// instantiate connections to multiple Asterisk servers
 		{"address": "127.0.0.1:8088", "user": "cgrates", "password": "CGRateS.org", "connect_attempts": 3,"reconnects": 5}
 	],

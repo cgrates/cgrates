@@ -28,7 +28,12 @@ import (
 )
 
 func NewSMAsteriskEvent(ariEv map[string]interface{}, asteriskIP, asteriskAlias string) *SMAsteriskEvent {
-	smsmaEv := &SMAsteriskEvent{ariEv: ariEv, asteriskIP: asteriskIP, cachedFields: make(map[string]string)}
+	smsmaEv := &SMAsteriskEvent{
+		ariEv:        ariEv,
+		asteriskIP:   asteriskIP,
+		cachedFields: make(map[string]string),
+		opts:         make(map[string]interface{}),
+	}
 	smsmaEv.parseStasisArgs() // Populate appArgs
 	return smsmaEv
 }
@@ -258,7 +263,7 @@ func (smaEv *SMAsteriskEvent) AsMapStringInterface() (mp map[string]interface{})
 	return
 }
 
-// AsCDR converts AsteriskEvent into CGREvent
+// AsCGREvent converts AsteriskEvent into CGREvent
 func (smaEv *SMAsteriskEvent) AsCGREvent(timezone string) (cgrEv *utils.CGREvent, err error) {
 	setupTime, err := utils.ParseTimeDetectLayout(
 		smaEv.Timestamp(), timezone)

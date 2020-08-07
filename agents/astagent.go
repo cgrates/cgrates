@@ -272,7 +272,8 @@ func (sma *AsteriskAgent) handleChannelStateChange(ev *SMAsteriskEvent) {
 			fmt.Sprintf("<%s> error: %s when attempting to initiate session for channelID: %s",
 				utils.AsteriskAgent, err.Error(), ev.ChannelID()))
 		return
-	} else if initSessionArgs.InitSession && (initReply.MaxUsage == nil || *initReply.MaxUsage == time.Duration(0)) {
+	}
+	if initSessionArgs.InitSession && (initReply.MaxUsage == nil || *initReply.MaxUsage == time.Duration(0)) {
 		sma.hangupChannel(ev.ChannelID(), "")
 		return
 	}
@@ -381,6 +382,51 @@ func (*AsteriskAgent) V1DisconnectPeer(args *utils.DPRArgs, reply *string) (err 
 }
 
 // DisconnectWarning is used to implement the sessions.BiRPClient interface
-func (*AsteriskAgent) DisconnectWarning(args map[string]interface{}, reply *string) (err error) {
-	return utils.ErrNotImplemented
+func (sma *AsteriskAgent) DisconnectWarning(args map[string]interface{}, reply *string) (err error) {
+	channelID := engine.NewMapEvent(args).GetStringIgnoreErrors(channelID)
+	if err = sma.playFileOnChannel(channelID, sma.cgrCfg.AsteriskAgentCfg().LowBalanceAnnFile); err != nil {
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s> failed play file <%s> on channel <%s> because: %s",
+				utils.AsteriskAgent, sma.cgrCfg.AsteriskAgentCfg().LowBalanceAnnFile,
+				channelID, err.Error()))
+		return
+	}
+	*reply = utils.OK
+	return
+}
+
+// hangupChannel will disconnect from CGRateS side with congestion reason
+func (sma *AsteriskAgent) playFileOnChannel(channelID, file string) (err error) {
+	if file == utils.EmptyString {
+		return
+	}
+	_, err = sma.astConn.Call(aringo.HTTP_POST, fmt.Sprintf("http://%s/ari/channels/%s/play",
+		sma.cgrCfg.AsteriskAgentCfg().AsteriskConns[sma.astConnIdx].Address, channelID),
+		url.Values{"media": {file}})
+	return
+}
+
+// Sets the call timeout valid of starting of the call
+func (sma *AsteriskAgent) setMaxCallDuration(channelID string, connIdx int,
+	maxDur time.Duration, destNr string) (err error) {
+	if len(sma.cgrCfg.AsteriskAgentCfg().EmptyBalanceContext) != 0 {
+		if _, err = sma.astConn.Call(aringo.HTTP_POST, fmt.Sprintf("http://%s/ari/channels/%s/continue",
+			sma.cgrCfg.AsteriskAgentCfg().AsteriskConns[sma.astConnIdx].Address, channelID),
+			url.Values{"context": {sma.cgrCfg.AsteriskAgentCfg().EmptyBalanceContext}}); err != nil {
+			utils.Logger.Err(
+				fmt.Sprintf("<%s> Could not transfer the call to empty balance context, error: <%s>, channelID: %v",
+					utils.FreeSWITCHAgent, err.Error(), connIdx))
+		}
+		return
+	}
+	if len(sma.cgrCfg.AsteriskAgentCfg().EmptyBalanceAnnFile) != 0 {
+		if err = sma.playFileOnChannel(channelID, sma.cgrCfg.AsteriskAgentCfg().EmptyBalanceAnnFile); err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> failed play file <%s> on channel <%s> because: %s",
+					utils.AsteriskAgent, sma.cgrCfg.AsteriskAgentCfg().EmptyBalanceAnnFile,
+					channelID, err.Error()))
+		}
+		return
+	}
+	return
 }

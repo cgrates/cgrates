@@ -716,9 +716,12 @@ func TestKamAgentJsonCfg(t *testing.T) {
 
 func TestAsteriskAgentJsonCfg(t *testing.T) {
 	eCfg := &AsteriskAgentJsonCfg{
-		Enabled:        utils.BoolPointer(false),
-		Sessions_conns: &[]string{utils.MetaInternal},
-		Create_cdr:     utils.BoolPointer(false),
+		Enabled:                utils.BoolPointer(false),
+		Sessions_conns:         &[]string{utils.MetaInternal},
+		Create_cdr:             utils.BoolPointer(false),
+		Empty_balance_ann_file: utils.StringPointer(""),
+		Empty_balance_context:  utils.StringPointer(""),
+		Low_balance_ann_file:   utils.StringPointer(""),
 		Asterisk_conns: &[]*AstConnJsonCfg{
 			{
 				Address:          utils.StringPointer("127.0.0.1:8088"),
