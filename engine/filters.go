@@ -218,19 +218,21 @@ func (fltr *Filter) Compile() (err error) {
 	return
 }
 
-var supportedFiltersType utils.StringSet = utils.NewStringSet([]string{utils.MetaString, utils.MetaPrefix, utils.MetaSuffix,
+var supportedFiltersType utils.StringSet = utils.NewStringSet([]string{
+	utils.MetaString, utils.MetaPrefix, utils.MetaSuffix,
 	utils.MetaTimings, utils.MetaRSR, utils.MetaDestinations,
 	utils.MetaEmpty, utils.MetaExists, utils.MetaLessThan, utils.MetaLessOrEqual,
 	utils.MetaGreaterThan, utils.MetaGreaterOrEqual, utils.MetaEqual,
-	utils.MetaNotEqual})
-var needsFieldName utils.StringSet = utils.NewStringSet([]string{utils.MetaString, utils.MetaPrefix,
-	utils.MetaSuffix, utils.MetaTimings, utils.MetaRSR, utils.MetaDestinations, utils.MetaLessThan,
+	utils.MetaNotEqual, utils.MetaIPNet})
+var needsFieldName utils.StringSet = utils.NewStringSet([]string{
+	utils.MetaString, utils.MetaPrefix, utils.MetaSuffix,
+	utils.MetaTimings, utils.MetaRSR, utils.MetaDestinations, utils.MetaLessThan,
 	utils.MetaEmpty, utils.MetaExists, utils.MetaLessOrEqual, utils.MetaGreaterThan,
-	utils.MetaGreaterOrEqual, utils.MetaEqual, utils.MetaNotEqual})
+	utils.MetaGreaterOrEqual, utils.MetaEqual, utils.MetaNotEqual, utils.MetaIPNet})
 var needsValues utils.StringSet = utils.NewStringSet([]string{utils.MetaString, utils.MetaPrefix,
 	utils.MetaSuffix, utils.MetaTimings, utils.MetaRSR, utils.MetaDestinations,
 	utils.MetaLessThan, utils.MetaLessOrEqual, utils.MetaGreaterThan, utils.MetaGreaterOrEqual,
-	utils.MetaEqual, utils.MetaNotEqual})
+	utils.MetaEqual, utils.MetaNotEqual, utils.MetaIPNet})
 
 // NewFilterRule returns a new filter
 func NewFilterRule(rfType, fieldName string, vals []string) (*FilterRule, error) {
@@ -331,6 +333,8 @@ func (fltr *FilterRule) Pass(dDP utils.DataProvider) (result bool, err error) {
 		result, err = fltr.passGreaterThan(dDP)
 	case utils.MetaEqual, utils.MetaNotEqual:
 		result, err = fltr.passEqualTo(dDP)
+	case utils.MetaIPNet, utils.MetaNotIPNet:
+		result, err = fltr.passIPNet(dDP)
 	default:
 		err = utils.ErrPrefixNotErrNotImplemented(fltr.Type)
 	}
@@ -561,6 +565,30 @@ func (fltr *FilterRule) passEqualTo(dDP utils.DataProvider) (bool, error) {
 		if eq, err := utils.EqualTo(fldIf, sval); err != nil {
 			return false, err
 		} else if eq {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
+func (fltr *FilterRule) passIPNet(dDP utils.DataProvider) (bool, error) {
+	strVal, err := fltr.rsrElement.ParseDataProvider(dDP)
+	if err != nil {
+		if err == utils.ErrNotFound {
+			return false, nil
+		}
+		return false, err
+	}
+	_, ip, err := net.ParseCIDR(strVal)
+	if err != nil {
+		return false, err
+	}
+	for _, val := range fltr.rsrValues {
+		sval, err := val.ParseDataProvider(dDP)
+		if err != nil {
+			continue
+		}
+		if ip.Contains(net.ParseIP(sval)) {
 			return true, nil
 		}
 	}
