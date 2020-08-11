@@ -579,16 +579,21 @@ func (fltr *FilterRule) passIPNet(dDP utils.DataProvider) (bool, error) {
 		}
 		return false, err
 	}
-	_, ip, err := net.ParseCIDR(strVal)
-	if err != nil {
-		return false, err
+	ip := net.ParseIP(strVal)
+	if ip == nil {
+		return false, nil
 	}
+
 	for _, val := range fltr.rsrValues {
 		sval, err := val.ParseDataProvider(dDP)
 		if err != nil {
 			continue
 		}
-		if ip.Contains(net.ParseIP(sval)) {
+		_, ipNet, err := net.ParseCIDR(sval)
+		if err != nil {
+			continue
+		}
+		if ipNet.Contains(ip) {
 			return true, nil
 		}
 	}
