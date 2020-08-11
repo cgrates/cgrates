@@ -37,6 +37,7 @@ import (
 
 var (
 	dataDir = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
+	dbType  = flag.String("dbtype", utils.MetaInternal, "The type of DataBase (Internal/Mongo/mySql)")
 )
 
 func TestLoadConfig(t *testing.T) {
@@ -93,6 +94,7 @@ func TestLoadConfig(t *testing.T) {
 	// General
 	*cachingArg = utils.MetaLoad
 	*dbDataEncoding = utils.MetaJSON
+	*timezone = utils.Local
 	ldrCfg := loadConfig()
 	ldrCfg.DataDbCfg().Items = nil
 	ldrCfg.StorDbCfg().Items = nil
@@ -101,6 +103,9 @@ func TestLoadConfig(t *testing.T) {
 	}
 	if ldrCfg.GeneralCfg().DBDataEncoding != utils.MetaJSON {
 		t.Errorf("Expected %s received %s", utils.MetaJSON, ldrCfg.GeneralCfg().DBDataEncoding)
+	}
+	if ldrCfg.GeneralCfg().DefaultTimezone != utils.Local {
+		t.Errorf("Expected %s received %s", utils.Local, ldrCfg.GeneralCfg().DefaultTimezone)
 	}
 	if !reflect.DeepEqual(ldrCfg.StorDbCfg(), expStorDB) {
 		t.Errorf("Expected %s received %s", utils.ToJSON(expStorDB), utils.ToJSON(ldrCfg.StorDbCfg()))
@@ -168,6 +173,7 @@ func TestLoadConfig(t *testing.T) {
 }
 
 var (
+	ldrItCfgDir  string
 	ldrItCfgPath string
 	ldrItCfg     *config.CGRConfig
 	db           engine.DataDB
@@ -181,6 +187,12 @@ var (
 		testLoadItCheckAttributes,
 		testLoadItStartLoaderRemove,
 		testLoadItCheckAttributes2,
+
+		testLoadItStartLoaderToStorDB,
+		testLoadItStartLoaderFlushStorDB,
+		testLoadItStartLoaderFromStorDB,
+		testLoadItCheckAttributes2,
+
 		testLoadItStartLoaderToStorDB,
 		testLoadItCheckAttributes2,
 		testLoadItStartLoaderFromStorDB,
@@ -189,6 +201,18 @@ var (
 )
 
 func TestLoadIt(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		ldrItCfgDir = "tutinternal"
+	case utils.MetaMySQL:
+		ldrItCfgDir = "tutmysql"
+	case utils.MetaMongo:
+		ldrItCfgDir = "tutmongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
+	}
 	for _, stest := range ldrItTests {
 		t.Run("TestLoadIt", stest)
 	}
@@ -196,7 +220,7 @@ func TestLoadIt(t *testing.T) {
 
 func testLoadItLoadConfig(t *testing.T) {
 	var err error
-	ldrItCfgPath = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	ldrItCfgPath = path.Join(*dataDir, "conf", "samples", ldrItCfgDir)
 	if ldrItCfg, err = config.NewCGRConfigFromPath(ldrItCfgPath); err != nil {
 		t.Error(err)
 	}
@@ -300,6 +324,20 @@ func testLoadItStartLoaderToStorDB(t *testing.T) {
 
 func testLoadItStartLoaderFromStorDB(t *testing.T) {
 	cmd := exec.Command("cgr-loader", "-config_path="+ldrItCfgPath, "-path="+path.Join(*dataDir, "tariffplans", "tutorial"), "-caches_address=", "-scheduler_address=", "-from_stordb", "-tpid=TPID")
+	output := bytes.NewBuffer(nil)
+	outerr := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	cmd.Stderr = outerr
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Log(outerr.String())
+		t.Fatal(err)
+	}
+}
+
+func testLoadItStartLoaderFlushStorDB(t *testing.T) {
+	cmd := exec.Command("cgr-loader", "-config_path="+ldrItCfgPath, "-path="+path.Join(*dataDir, "tariffplans", "tutorial"), "-caches_address=", "-scheduler_address=", "-flush_stordb", "-tpid=TPID")
 	output := bytes.NewBuffer(nil)
 	outerr := bytes.NewBuffer(nil)
 	cmd.Stdout = output

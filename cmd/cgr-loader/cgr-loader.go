@@ -87,7 +87,7 @@ var (
 		`Separator for csv file (by default "," is used)`)
 
 	importID       = cgrLoaderFlags.String("import_id", utils.EmptyString, "Uniquely identify an import/load, postpended to some automatic fields")
-	timezone       = cgrLoaderFlags.String("timezone", utils.EmptyString, `Timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>`)
+	timezone       = cgrLoaderFlags.String("timezone", dfltCfg.GeneralCfg().DefaultTimezone, `Timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>`)
 	disableReverse = cgrLoaderFlags.Bool("disable_reverse_mappings", false, "Will disable reverse mappings rebuilding")
 	flushStorDB    = cgrLoaderFlags.Bool("flush_stordb", false, "Remove tariff plan data for id from the database")
 	remove         = cgrLoaderFlags.Bool("remove", false, "Will remove instead of adding data from DB")
