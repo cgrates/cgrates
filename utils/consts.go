@@ -996,6 +996,7 @@ const (
 	MetaGreaterOrEqual = "*gte"
 	MetaResources      = "*resources"
 	MetaEqual          = "*eq"
+	MetaIPNet          = "*ipnet"
 
 	MetaNotString       = "*notstring"
 	MetaNotPrefix       = "*notprefix"
@@ -1008,6 +1009,7 @@ const (
 	MetaNotDestinations = "*notdestinations"
 	MetaNotResources    = "*notresources"
 	MetaNotEqual        = "*noteq"
+	MetaNotIPNet        = "*notipnet"
 
 	MetaEC = "*ec"
 )

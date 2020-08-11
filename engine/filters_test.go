@@ -1368,3 +1368,79 @@ func TestVerifyInlineFilterS(t *testing.T) {
 		t.Errorf("Expected error received nil")
 	}
 }
+
+func TestFilterPassIPNet(t *testing.T) {
+	cd := utils.MapStorage{
+		"IP":      "192.0.2.1/24",
+		"WrongIP": "192.0.2.1",
+	}
+	rf := &FilterRule{Type: utils.MetaIPNet,
+		Element: "~IP", Values: []string{"192.0.2.0"}}
+	if err := rf.CompileValues(); err != nil {
+		t.Fatal(err)
+	}
+	if passes, err := rf.passIPNet(cd); err != nil {
+		t.Error(err)
+	} else if !passes {
+		t.Error("Not passes filter")
+	}
+	rf = &FilterRule{Type: utils.MetaIPNet,
+		Element: "~IP", Values: []string{"~IP2", "192.0.3.0"}}
+	if err := rf.CompileValues(); err != nil {
+		t.Fatal(err)
+	}
+	if passes, err := rf.passIPNet(cd); err != nil {
+		t.Error(err)
+	} else if passes {
+		t.Error("Filter passes")
+	}
+	//not
+	rf = &FilterRule{Type: utils.MetaNotIPNet,
+		Element: "~IP", Values: []string{"192.0.2.0"}}
+	if err := rf.CompileValues(); err != nil {
+		t.Fatal(err)
+	}
+	if passes, err := rf.Pass(cd); err != nil {
+		t.Error(err)
+	} else if passes {
+		t.Error("Filter passes")
+	}
+	rf = &FilterRule{Type: utils.MetaNotIPNet,
+		Element: "~IP", Values: []string{"192.0.3.0"}}
+	if err := rf.CompileValues(); err != nil {
+		t.Fatal(err)
+	}
+	if passes, err := rf.Pass(cd); err != nil {
+		t.Error(err)
+	} else if !passes {
+		t.Error("Not passes filter")
+	}
+
+	rf = &FilterRule{Type: utils.MetaIPNet,
+		Element: "~IP2", Values: []string{"192.0.2.0"}}
+	if err := rf.CompileValues(); err != nil {
+		t.Fatal(err)
+	}
+	if passes, err := rf.passIPNet(cd); err != nil {
+		t.Error(err)
+	} else if passes {
+		t.Error("Filter passes")
+	}
+
+	rf = &FilterRule{Type: utils.MetaIPNet,
+		Element: "~WrongIP", Values: []string{"192.0.2.0"}}
+	if err := rf.CompileValues(); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := rf.passIPNet(cd); err == nil {
+		t.Error(err)
+	}
+	rf = &FilterRule{Type: utils.MetaIPNet,
+		Element: "~IP{*duration}", Values: []string{"192.0.2.0"}}
+	if err := rf.CompileValues(); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := rf.Pass(cd); err == nil {
+		t.Error(err)
+	}
+}
