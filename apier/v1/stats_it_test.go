@@ -733,10 +733,10 @@ func testV1STSProcessStatWithThreshold(t *testing.T) {
 			QueueLength: 100,
 			TTL:         time.Duration(1) * time.Second,
 			Metrics: []*engine.MetricWithFilters{
-				&engine.MetricWithFilters{
+				{
 					MetricID: utils.MetaTCD,
 				},
-				&engine.MetricWithFilters{
+				{
 					MetricID: utils.ConcatenatedKey(utils.MetaSum, "2"),
 				},
 			},
