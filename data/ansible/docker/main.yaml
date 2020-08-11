@@ -228,6 +228,11 @@
         - cgr-migrator
         - cgr-tester
 
+    - name: remove local docker images
+      become: yes
+      shell: 
+        docker image prune -af
+
     - name:  docker_tag is
       debug:
         msg: "{{ docker_tag }}"
