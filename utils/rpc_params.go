@@ -18,10 +18,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package utils
 
-import "reflect"
+import (
+	"reflect"
+	"sync"
+)
 
 var (
-	rpcParamsMap = make(map[string]*RpcParams)
+	rpcParamsMap  = make(map[string]*RpcParams)
+	rpcParamsLock sync.Mutex
 )
 
 type RpcParams struct {
@@ -47,17 +51,21 @@ func RegisterRpcParams(name string, obj interface{}) {
 			if out.Kind() == reflect.Ptr {
 				out = out.Elem()
 			}
+			rpcParamsLock.Lock()
 			rpcParamsMap[name+"."+method.Name] = &RpcParams{
 				Object:   obj,
 				InParam:  reflect.New(methodType.In(1)).Interface(),
 				OutParam: reflect.New(out).Interface(),
 			}
+			rpcParamsLock.Unlock()
 		}
 	}
 }
 
 func GetRpcParams(method string) (params *RpcParams, err error) {
 	var found bool
+	rpcParamsLock.Lock()
+	defer rpcParamsLock.Unlock()
 	if params, found = rpcParamsMap[method]; !found {
 		return nil, ErrNotFound
 	}
