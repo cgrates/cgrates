@@ -100,9 +100,7 @@ func (dm *DataManager) DataDB() DataDB {
 	return nil
 }
 
-func (dm *DataManager) LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs,
-	aaPlIDs, atrgIDs, sgIDs, rpIDs, resIDs, stqIDs, stqpIDs, thIDs, thpIDs, fltrIDs,
-	rPrflIDs, alsPrfIDs, cppIDs, dppIDs, dphIDs, ratePrfIDs []string) (err error) {
+func (dm *DataManager) LoadDataDBCache(attr map[string][]string) (err error) {
 	if dm == nil {
 		err = utils.ErrNoDatabaseConn
 		return
@@ -110,30 +108,7 @@ func (dm *DataManager) LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs,
 	if dm.DataDB().GetStorageType() == utils.INTERNAL {
 		return // all the data is in cache already
 	}
-	for key, ids := range map[string][]string{
-		utils.DESTINATION_PREFIX:         dstIDs,
-		utils.REVERSE_DESTINATION_PREFIX: rvDstIDs,
-		utils.RATING_PLAN_PREFIX:         rplIDs,
-		utils.RATING_PROFILE_PREFIX:      rpfIDs,
-		utils.ACTION_PREFIX:              actIDs,
-		utils.ACTION_PLAN_PREFIX:         aplIDs,
-		utils.AccountActionPlansPrefix:   aaPlIDs,
-		utils.ACTION_TRIGGER_PREFIX:      atrgIDs,
-		utils.SHARED_GROUP_PREFIX:        sgIDs,
-		utils.ResourceProfilesPrefix:     rpIDs,
-		utils.ResourcesPrefix:            resIDs,
-		utils.StatQueuePrefix:            stqIDs,
-		utils.StatQueueProfilePrefix:     stqpIDs,
-		utils.ThresholdPrefix:            thIDs,
-		utils.ThresholdProfilePrefix:     thpIDs,
-		utils.FilterPrefix:               fltrIDs,
-		utils.RouteProfilePrefix:         rPrflIDs,
-		utils.AttributeProfilePrefix:     alsPrfIDs,
-		utils.ChargerProfilePrefix:       cppIDs,
-		utils.DispatcherProfilePrefix:    dppIDs,
-		utils.DispatcherHostPrefix:       dphIDs,
-		utils.RateProfilePrefix:          ratePrfIDs,
-	} {
+	for key, ids := range attr {
 		if err = dm.CacheDataFromDB(key, ids, false); err != nil {
 			return
 		}

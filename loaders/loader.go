@@ -275,7 +275,7 @@ func (ldr *Loader) processContent(loaderType, caching string) (err error) {
 func (ldr *Loader) storeLoadedData(loaderType string,
 	lds map[string][]LoaderData, caching string) (err error) {
 	var ids []string
-	var cacheArgs utils.ArgsCache
+	cacheArgs := make(map[string][]string)
 	var cachePartition string
 	switch loaderType {
 	case utils.MetaAttributes:
@@ -304,7 +304,7 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 					return err
 				}
 			}
-			cacheArgs.AttributeProfileIDs = ids
+			cacheArgs[utils.AttributeProfileIDs] = ids
 			cachePartition = utils.CacheAttributeProfiles
 		}
 	case utils.MetaResources:
@@ -339,8 +339,8 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 						Usages: make(map[string]*engine.ResourceUsage)}); err != nil {
 					return err
 				}
-				cacheArgs.ResourceProfileIDs = ids
-				cacheArgs.ResourceIDs = ids
+				cacheArgs[utils.ResourceProfileIDs] = ids
+				cacheArgs[utils.ResourceIDs] = ids
 				cachePartition = utils.CacheResourceProfiles
 			}
 		}
@@ -370,7 +370,7 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 				if err := ldr.dm.SetFilter(fltrPrf, true); err != nil {
 					return err
 				}
-				cacheArgs.FilterIDs = ids
+				cacheArgs[utils.FilterIDs] = ids
 				cachePartition = utils.CacheFilters
 			}
 		}
@@ -410,8 +410,8 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 				if err := ldr.dm.SetStatQueue(&engine.StatQueue{Tenant: stsPrf.Tenant, ID: stsPrf.ID, SQMetrics: metrics}); err != nil {
 					return err
 				}
-				cacheArgs.StatsQueueProfileIDs = ids
-				cacheArgs.StatsQueueIDs = ids
+				cacheArgs[utils.StatsQueueProfileIDs] = ids
+				cacheArgs[utils.StatsQueueIDs] = ids
 				cachePartition = utils.CacheFilters
 			}
 		}
@@ -443,8 +443,8 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 				if err := ldr.dm.SetThreshold(&engine.Threshold{Tenant: thPrf.Tenant, ID: thPrf.ID}); err != nil {
 					return err
 				}
-				cacheArgs.ThresholdProfileIDs = ids
-				cacheArgs.ThresholdIDs = ids
+				cacheArgs[utils.ThresholdProfileIDs] = ids
+				cacheArgs[utils.ThresholdIDs] = ids
 				cachePartition = utils.CacheThresholdProfiles
 			}
 		}
@@ -474,7 +474,7 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 				if err := ldr.dm.SetRouteProfile(spPrf, true); err != nil {
 					return err
 				}
-				cacheArgs.RouteProfileIDs = ids
+				cacheArgs[utils.RouteProfileIDs] = ids
 				cachePartition = utils.CacheRouteProfiles
 			}
 		}
@@ -504,7 +504,7 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 				if err := ldr.dm.SetChargerProfile(cpp, true); err != nil {
 					return err
 				}
-				cacheArgs.ChargerProfileIDs = ids
+				cacheArgs[utils.ChargerProfileIDs] = ids
 				cachePartition = utils.CacheChargerProfiles
 			}
 		}
@@ -533,7 +533,7 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 				if err := ldr.dm.SetDispatcherProfile(dsp, true); err != nil {
 					return err
 				}
-				cacheArgs.DispatcherProfileIDs = ids
+				cacheArgs[utils.DispatcherProfileIDs] = ids
 				cachePartition = utils.CacheDispatcherProfiles
 			}
 		}
@@ -559,7 +559,7 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 				if err := ldr.dm.SetDispatcherHost(dsp); err != nil {
 					return err
 				}
-				cacheArgs.DispatcherHostIDs = ids
+				cacheArgs[utils.DispatcherHostIDs] = ids
 				cachePartition = utils.CacheDispatcherHosts
 			}
 		}
@@ -594,7 +594,7 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 						return err
 					}
 				}
-				cacheArgs.RateProfileIDs = ids
+				cacheArgs[utils.RateProfileIDs] = ids
 				cachePartition = utils.CacheRateProfiles
 			}
 		}
@@ -710,7 +710,7 @@ func (ldr *Loader) removeContent(loaderType, caching string) (err error) {
 //since we remove we don't need to compose the struct we only need the Tenant and the ID of the profile
 func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderData, caching string) (err error) {
 	var ids []string
-	var cacheArgs utils.ArgsCache
+	cacheArgs := make(map[string][]string)
 	var cachePartition string
 	switch loaderType {
 	case utils.MetaAttributes:
@@ -727,7 +727,7 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 					utils.NonTransactional, true); err != nil {
 					return err
 				}
-				cacheArgs.AttributeProfileIDs = ids
+				cacheArgs[utils.AttributeProfileIDs] = ids
 				cachePartition = utils.CacheAttributeProfiles
 			}
 		}
@@ -750,8 +750,8 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 				if err := ldr.dm.RemoveResource(tntIDStruct.Tenant, tntIDStruct.ID, utils.NonTransactional); err != nil {
 					return err
 				}
-				cacheArgs.ResourceProfileIDs = ids
-				cacheArgs.ResourceIDs = ids
+				cacheArgs[utils.ResourceProfileIDs] = ids
+				cacheArgs[utils.ResourceIDs] = ids
 				cachePartition = utils.CacheResourceProfiles
 			}
 		}
@@ -769,7 +769,7 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 					utils.NonTransactional, true); err != nil {
 					return err
 				}
-				cacheArgs.FilterIDs = ids
+				cacheArgs[utils.FilterIDs] = ids
 				cachePartition = utils.CacheFilters
 			}
 		}
@@ -790,8 +790,8 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 				if err := ldr.dm.RemoveStatQueue(tntIDStruct.Tenant, tntIDStruct.ID, utils.NonTransactional); err != nil {
 					return err
 				}
-				cacheArgs.StatsQueueProfileIDs = ids
-				cacheArgs.StatsQueueIDs = ids
+				cacheArgs[utils.StatsQueueProfileIDs] = ids
+				cacheArgs[utils.StatsQueueIDs] = ids
 				cachePartition = utils.CacheStatQueueProfiles
 			}
 		}
@@ -812,8 +812,8 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 				if err := ldr.dm.RemoveThreshold(tntIDStruct.Tenant, tntIDStruct.ID, utils.NonTransactional); err != nil {
 					return err
 				}
-				cacheArgs.ThresholdProfileIDs = ids
-				cacheArgs.ThresholdIDs = ids
+				cacheArgs[utils.ThresholdProfileIDs] = ids
+				cacheArgs[utils.ThresholdIDs] = ids
 				cachePartition = utils.CacheThresholdProfiles
 			}
 		}
@@ -831,7 +831,7 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 					tntIDStruct.ID, utils.NonTransactional, true); err != nil {
 					return err
 				}
-				cacheArgs.RouteProfileIDs = ids
+				cacheArgs[utils.RouteProfileIDs] = ids
 				cachePartition = utils.CacheRouteProfiles
 			}
 		}
@@ -849,7 +849,7 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 					tntIDStruct.ID, utils.NonTransactional, true); err != nil {
 					return err
 				}
-				cacheArgs.ChargerProfileIDs = ids
+				cacheArgs[utils.ChargerProfileIDs] = ids
 				cachePartition = utils.CacheChargerProfiles
 			}
 		}
@@ -867,7 +867,7 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 					tntIDStruct.ID, utils.NonTransactional, true); err != nil {
 					return err
 				}
-				cacheArgs.DispatcherProfileIDs = ids
+				cacheArgs[utils.DispatcherProfileIDs] = ids
 				cachePartition = utils.CacheDispatcherProfiles
 			}
 		}
@@ -885,7 +885,7 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 					tntIDStruct.ID, utils.NonTransactional); err != nil {
 					return err
 				}
-				cacheArgs.DispatcherHostIDs = ids
+				cacheArgs[utils.DispatcherHostIDs] = ids
 				cachePartition = utils.CacheDispatcherHosts
 			}
 		}
@@ -917,7 +917,7 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 					}
 				}
 
-				cacheArgs.RateProfileIDs = ids
+				cacheArgs[utils.RateProfileIDs] = ids
 				cachePartition = utils.CacheRateProfiles
 			}
 		}

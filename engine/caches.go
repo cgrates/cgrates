@@ -327,144 +327,14 @@ func (chS *CacheS) V1RemoveGroup(args *utils.ArgsGetGroupWithOpts,
 	return
 }
 
-func (chS *CacheS) reloadCache(chID string, IDs []string) error {
-	return chS.dm.CacheDataFromDB(chID, IDs, true)
-}
-
 func (chS *CacheS) V1ReloadCache(attrs utils.AttrReloadCacheWithOpts, reply *string) (err error) {
-	if len(attrs.DestinationIDs) != 0 {
-		// Reload Destinations
-		if err = chS.reloadCache(utils.DESTINATION_PREFIX, attrs.DestinationIDs); err != nil {
-			return
+	for key, ids := range attrs.ArgsCache {
+		if prfx, has := utils.ArgCacheToPrefix[key]; has && len(ids) != 0 {
+			if err = chS.dm.CacheDataFromDB(prfx, ids, true); err != nil {
+				return
+			}
 		}
 	}
-	if len(attrs.ReverseDestinationIDs) != 0 {
-		// Reload ReverseDestinations
-		if err = chS.reloadCache(utils.REVERSE_DESTINATION_PREFIX, attrs.ReverseDestinationIDs); err != nil {
-			return
-		}
-	}
-	if len(attrs.RatingPlanIDs) != 0 {
-		// RatingPlans
-		if err = chS.reloadCache(utils.RATING_PLAN_PREFIX, attrs.RatingPlanIDs); err != nil {
-			return
-		}
-	}
-	if len(attrs.RatingProfileIDs) != 0 {
-		// RatingProfiles
-		if err = chS.reloadCache(utils.RATING_PROFILE_PREFIX, attrs.RatingProfileIDs); err != nil {
-			return
-		}
-	}
-	if len(attrs.ActionIDs) != 0 {
-		// Actions
-		if err = chS.reloadCache(utils.ACTION_PREFIX, attrs.ActionIDs); err != nil {
-			return
-		}
-	}
-	if len(attrs.ActionPlanIDs) != 0 {
-		// ActionPlans
-		if err = chS.reloadCache(utils.ACTION_PLAN_PREFIX, attrs.ActionPlanIDs); err != nil {
-			return
-		}
-	}
-	if len(attrs.AccountActionPlanIDs) != 0 {
-		// AccountActionPlans
-		if err = chS.reloadCache(utils.AccountActionPlansPrefix, attrs.AccountActionPlanIDs); err != nil {
-			return
-		}
-	}
-	if len(attrs.ActionTriggerIDs) != 0 {
-		// ActionTriggers
-		if err = chS.reloadCache(utils.ACTION_TRIGGER_PREFIX, attrs.ActionTriggerIDs); err != nil {
-			return
-		}
-	}
-	if len(attrs.SharedGroupIDs) != 0 {
-		// SharedGroups
-		if err = chS.reloadCache(utils.SHARED_GROUP_PREFIX, attrs.SharedGroupIDs); err != nil {
-			return
-		}
-	}
-	if len(attrs.ResourceProfileIDs) != 0 {
-		// ResourceProfiles
-		if err = chS.reloadCache(utils.ResourceProfilesPrefix, attrs.ResourceProfileIDs); err != nil {
-			return
-		}
-	}
-	if len(attrs.ResourceIDs) != 0 {
-		// Resources
-		if err = chS.reloadCache(utils.ResourcesPrefix, attrs.ResourceIDs); err != nil {
-			return
-		}
-	}
-	if len(attrs.StatsQueueIDs) != 0 {
-		// StatQueues
-		if err = chS.reloadCache(utils.StatQueuePrefix, attrs.StatsQueueIDs); err != nil {
-			return
-		}
-	}
-	if len(attrs.StatsQueueProfileIDs) != 0 {
-		// StatQueueProfiles
-		if err = chS.reloadCache(utils.StatQueueProfilePrefix, attrs.StatsQueueProfileIDs); err != nil {
-			return
-		}
-	}
-	if len(attrs.ThresholdIDs) != 0 {
-		// Thresholds
-		if err = chS.reloadCache(utils.ThresholdPrefix, attrs.ThresholdIDs); err != nil {
-			return
-		}
-	}
-	if len(attrs.ThresholdProfileIDs) != 0 {
-		// ThresholdProfiles
-		if err = chS.reloadCache(utils.ThresholdProfilePrefix, attrs.ThresholdProfileIDs); err != nil {
-			return
-		}
-	}
-	if len(attrs.FilterIDs) != 0 {
-		// Filters
-		if err = chS.reloadCache(utils.FilterPrefix, attrs.FilterIDs); err != nil {
-			return
-		}
-	}
-	if len(attrs.RouteProfileIDs) != 0 {
-		// RouteProfiles
-		if err = chS.reloadCache(utils.RouteProfilePrefix, attrs.RouteProfileIDs); err != nil {
-			return
-		}
-	}
-	if len(attrs.AttributeProfileIDs) != 0 {
-		// AttributeProfile
-		if err = chS.reloadCache(utils.AttributeProfilePrefix, attrs.AttributeProfileIDs); err != nil {
-			return
-		}
-	}
-	if len(attrs.ChargerProfileIDs) != 0 {
-		// ChargerProfiles
-		if err = chS.reloadCache(utils.ChargerProfilePrefix, attrs.ChargerProfileIDs); err != nil {
-			return
-		}
-	}
-	if len(attrs.DispatcherProfileIDs) != 0 {
-		// DispatcherProfile
-		if err = chS.reloadCache(utils.DispatcherProfilePrefix, attrs.DispatcherProfileIDs); err != nil {
-			return
-		}
-	}
-	if len(attrs.DispatcherHostIDs) != 0 {
-		// DispatcherHosts
-		if err = chS.reloadCache(utils.DispatcherHostPrefix, attrs.DispatcherHostIDs); err != nil {
-			return
-		}
-	}
-	if len(attrs.RateProfileIDs) != 0 {
-		// RateProfiles
-		if err = chS.reloadCache(utils.RateProfilePrefix, attrs.RateProfileIDs); err != nil {
-			return
-		}
-	}
-
 	//get loadIDs from database for all types
 	loadIDs, err := chS.dm.GetItemLoadIDs(utils.EmptyString, false)
 	if err != nil {
@@ -484,31 +354,14 @@ func (chS *CacheS) V1ReloadCache(attrs utils.AttrReloadCacheWithOpts, reply *str
 	return nil
 }
 
-func (chS *CacheS) V1LoadCache(args utils.AttrReloadCacheWithOpts, reply *string) (err error) {
-	if err := chS.dm.LoadDataDBCache(
-		args.DestinationIDs,
-		args.ReverseDestinationIDs,
-		args.RatingPlanIDs,
-		args.RatingProfileIDs,
-		args.ActionIDs,
-		args.ActionPlanIDs,
-		args.AccountActionPlanIDs,
-		args.ActionTriggerIDs,
-		args.SharedGroupIDs,
-		args.ResourceProfileIDs,
-		args.ResourceIDs,
-		args.StatsQueueIDs,
-		args.StatsQueueProfileIDs,
-		args.ThresholdIDs,
-		args.ThresholdProfileIDs,
-		args.FilterIDs,
-		args.RouteProfileIDs,
-		args.AttributeProfileIDs,
-		args.ChargerProfileIDs,
-		args.DispatcherProfileIDs,
-		args.DispatcherHostIDs,
-		args.RateProfileIDs,
-	); err != nil {
+func (chS *CacheS) V1LoadCache(attrs utils.AttrReloadCacheWithOpts, reply *string) (err error) {
+	args := make(map[string][]string)
+	for key, ids := range attrs.ArgsCache {
+		if prfx, has := utils.ArgCacheToPrefix[key]; has {
+			args[prfx] = ids
+		}
+	}
+	if err := chS.dm.LoadDataDBCache(args); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	//get loadIDs for all types
@@ -520,7 +373,7 @@ func (chS *CacheS) V1LoadCache(args utils.AttrReloadCacheWithOpts, reply *string
 			return err
 		}
 	}
-	cacheLoadIDs := populateCacheLoadIDs(loadIDs, args.ArgsCache)
+	cacheLoadIDs := populateCacheLoadIDs(loadIDs, attrs.ArgsCache)
 	for key, val := range cacheLoadIDs {
 		chS.tCache.Set(utils.CacheLoadIDs, key, val, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
@@ -530,71 +383,14 @@ func (chS *CacheS) V1LoadCache(args utils.AttrReloadCacheWithOpts, reply *string
 }
 
 //populateCacheLoadIDs populate cacheLoadIDs based on attrs
-func populateCacheLoadIDs(loadIDs map[string]int64, attrs utils.ArgsCache) (cacheLoadIDs map[string]int64) {
+func populateCacheLoadIDs(loadIDs map[string]int64, attrs map[string][]string) (cacheLoadIDs map[string]int64) {
 	cacheLoadIDs = make(map[string]int64)
 	//based on IDs of each type populate cacheLoadIDs and add into cache
-	if attrs.DestinationIDs == nil || len(attrs.DestinationIDs) != 0 {
-		cacheLoadIDs[utils.CacheDestinations] = loadIDs[utils.CacheDestinations]
-	}
-	if attrs.ReverseDestinationIDs == nil || len(attrs.ReverseDestinationIDs) != 0 {
-		cacheLoadIDs[utils.CacheReverseDestinations] = loadIDs[utils.CacheReverseDestinations]
-	}
-	if attrs.RatingPlanIDs == nil || len(attrs.RatingPlanIDs) != 0 {
-		cacheLoadIDs[utils.CacheRatingPlans] = loadIDs[utils.CacheRatingPlans]
-	}
-	if attrs.RatingProfileIDs == nil || len(attrs.RatingProfileIDs) != 0 {
-		cacheLoadIDs[utils.CacheRatingProfiles] = loadIDs[utils.CacheRatingProfiles]
-	}
-	if attrs.ActionIDs == nil || len(attrs.ActionIDs) != 0 {
-		cacheLoadIDs[utils.CacheActions] = loadIDs[utils.CacheActions]
-	}
-	if attrs.ActionPlanIDs == nil || len(attrs.ActionPlanIDs) != 0 {
-		cacheLoadIDs[utils.CacheActionPlans] = loadIDs[utils.CacheActionPlans]
-	}
-	if attrs.AccountActionPlanIDs == nil || len(attrs.AccountActionPlanIDs) != 0 {
-		cacheLoadIDs[utils.CacheAccountActionPlans] = loadIDs[utils.CacheAccountActionPlans]
-	}
-	if attrs.ActionTriggerIDs == nil || len(attrs.ActionTriggerIDs) != 0 {
-		cacheLoadIDs[utils.CacheActionTriggers] = loadIDs[utils.CacheActionTriggers]
-	}
-	if attrs.SharedGroupIDs == nil || len(attrs.SharedGroupIDs) != 0 {
-		cacheLoadIDs[utils.CacheSharedGroups] = loadIDs[utils.CacheSharedGroups]
-	}
-	if attrs.ResourceProfileIDs == nil || len(attrs.ResourceProfileIDs) != 0 {
-		cacheLoadIDs[utils.CacheResourceProfiles] = loadIDs[utils.CacheResourceProfiles]
-	}
-	if attrs.ResourceIDs == nil || len(attrs.ResourceIDs) != 0 {
-		cacheLoadIDs[utils.CacheResources] = loadIDs[utils.CacheResources]
-	}
-	if attrs.StatsQueueProfileIDs == nil || len(attrs.StatsQueueProfileIDs) != 0 {
-		cacheLoadIDs[utils.CacheStatQueueProfiles] = loadIDs[utils.CacheStatQueueProfiles]
-	}
-	if attrs.StatsQueueIDs == nil || len(attrs.StatsQueueIDs) != 0 {
-		cacheLoadIDs[utils.CacheStatQueues] = loadIDs[utils.CacheStatQueues]
-	}
-	if attrs.ThresholdProfileIDs == nil || len(attrs.ThresholdProfileIDs) != 0 {
-		cacheLoadIDs[utils.CacheThresholdProfiles] = loadIDs[utils.CacheThresholdProfiles]
-	}
-	if attrs.ThresholdIDs == nil || len(attrs.ThresholdIDs) != 0 {
-		cacheLoadIDs[utils.CacheThresholds] = loadIDs[utils.CacheThresholds]
-	}
-	if attrs.FilterIDs == nil || len(attrs.FilterIDs) != 0 {
-		cacheLoadIDs[utils.CacheFilters] = loadIDs[utils.CacheFilters]
-	}
-	if attrs.RouteProfileIDs == nil || len(attrs.RouteProfileIDs) != 0 {
-		cacheLoadIDs[utils.CacheRouteProfiles] = loadIDs[utils.CacheRouteProfiles]
-	}
-	if attrs.AttributeProfileIDs == nil || len(attrs.AttributeProfileIDs) != 0 {
-		cacheLoadIDs[utils.CacheAttributeProfiles] = loadIDs[utils.CacheAttributeProfiles]
-	}
-	if attrs.ChargerProfileIDs == nil || len(attrs.ChargerProfileIDs) != 0 {
-		cacheLoadIDs[utils.CacheChargerProfiles] = loadIDs[utils.CacheChargerProfiles]
-	}
-	if attrs.DispatcherProfileIDs == nil || len(attrs.DispatcherProfileIDs) != 0 {
-		cacheLoadIDs[utils.CacheDispatcherProfiles] = loadIDs[utils.CacheDispatcherProfiles]
-	}
-	if attrs.RateProfileIDs == nil || len(attrs.RateProfileIDs) != 0 {
-		cacheLoadIDs[utils.CacheRateProfiles] = loadIDs[utils.CacheRateProfiles]
+	for key, ids := range attrs {
+		if inst, has := utils.ArgCacheToInstance[key]; has &&
+			(ids == nil || len(ids) != 0) {
+			cacheLoadIDs[inst] = loadIDs[inst]
+		}
 	}
 	return
 }

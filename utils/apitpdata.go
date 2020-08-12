@@ -438,32 +438,6 @@ type AttrGetAccountsCount struct {
 	Tenant string
 }
 
-type ArgsCache struct {
-	DestinationIDs        []string
-	ReverseDestinationIDs []string
-	RatingPlanIDs         []string
-	RatingProfileIDs      []string
-	ActionIDs             []string
-	ActionPlanIDs         []string
-	AccountActionPlanIDs  []string
-	ActionTriggerIDs      []string
-	SharedGroupIDs        []string
-	ResourceProfileIDs    []string
-	ResourceIDs           []string
-	StatsQueueIDs         []string
-	StatsQueueProfileIDs  []string
-	ThresholdIDs          []string
-	ThresholdProfileIDs   []string
-	FilterIDs             []string
-	RouteProfileIDs       []string
-	AttributeProfileIDs   []string
-	ChargerProfileIDs     []string
-	DispatcherProfileIDs  []string
-	DispatcherHostIDs     []string
-	DispatcherRoutesIDs   []string
-	RateProfileIDs        []string
-}
-
 type AttrExpFileCdrs struct {
 	CdrFormat           *string  // Cdr output file format <CdreCdrFormats>
 	FieldSeparator      *string  // Separator used between fields
@@ -1318,10 +1292,40 @@ type ArgsGetCacheItemWithOpts struct {
 	ArgsGetCacheItem
 }
 
+// NewAttrReloadCacheWithOpts returns the ArgCache populated with nil
+func NewAttrReloadCacheWithOpts() *AttrReloadCacheWithOpts {
+	return &AttrReloadCacheWithOpts{
+		ArgsCache: map[string][]string{
+			DestinationIDs:        nil,
+			ReverseDestinationIDs: nil,
+			RatingPlanIDs:         nil,
+			RatingProfileIDs:      nil,
+			ActionIDs:             nil,
+			ActionPlanIDs:         nil,
+			AccountActionPlanIDs:  nil,
+			ActionTriggerIDs:      nil,
+			SharedGroupIDs:        nil,
+			ResourceProfileIDs:    nil,
+			ResourceIDs:           nil,
+			StatsQueueIDs:         nil,
+			StatsQueueProfileIDs:  nil,
+			ThresholdIDs:          nil,
+			ThresholdProfileIDs:   nil,
+			FilterIDs:             nil,
+			RouteProfileIDs:       nil,
+			AttributeProfileIDs:   nil,
+			ChargerProfileIDs:     nil,
+			DispatcherProfileIDs:  nil,
+			DispatcherHostIDs:     nil,
+			RateProfileIDs:        nil,
+		},
+	}
+}
+
 type AttrReloadCacheWithOpts struct {
 	Opts map[string]interface{}
 	TenantArg
-	ArgsCache
+	ArgsCache map[string][]string
 }
 
 type AttrCacheIDsWithOpts struct {

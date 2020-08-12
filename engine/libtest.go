@@ -551,3 +551,30 @@ func GetDefaultEmptyCacheStats() map[string]*ltcache.CacheStats {
 		utils.CacheTBLTPRateProfiles:     {},
 	}
 }
+
+func GetDefaultEmptyArgCachePrefix() map[string][]string {
+	return map[string][]string{
+		utils.DESTINATION_PREFIX:         nil,
+		utils.REVERSE_DESTINATION_PREFIX: nil,
+		utils.RATING_PLAN_PREFIX:         nil,
+		utils.RATING_PROFILE_PREFIX:      nil,
+		utils.ACTION_PREFIX:              nil,
+		utils.ACTION_PLAN_PREFIX:         nil,
+		utils.AccountActionPlansPrefix:   nil,
+		utils.ACTION_TRIGGER_PREFIX:      nil,
+		utils.SHARED_GROUP_PREFIX:        nil,
+		utils.ResourceProfilesPrefix:     nil,
+		utils.ResourcesPrefix:            nil,
+		utils.StatQueuePrefix:            nil,
+		utils.StatQueueProfilePrefix:     nil,
+		utils.ThresholdPrefix:            nil,
+		utils.ThresholdProfilePrefix:     nil,
+		utils.FilterPrefix:               nil,
+		utils.RouteProfilePrefix:         nil,
+		utils.AttributeProfilePrefix:     nil,
+		utils.ChargerProfilePrefix:       nil,
+		utils.DispatcherProfilePrefix:    nil,
+		utils.DispatcherHostPrefix:       nil,
+		utils.RateProfilePrefix:          nil,
+	}
+}
