@@ -235,10 +235,9 @@ func (self *SQLStorage) RemTpData(table, tpid string, args map[string]string) er
 	if len(table) == 0 { // Remove tpid out of all tables
 		for _, tblName := range []string{utils.TBLTPTimings, utils.TBLTPDestinations, utils.TBLTPRates,
 			utils.TBLTPDestinationRates, utils.TBLTPRatingPlans, utils.TBLTPRatingProfiles,
-			utils.TBLTPSharedGroups, utils.TBLTPActions, utils.TBLTPActionPlans,
-			utils.TBLTPActionTriggers, utils.TBLTPAccountActions,
-			utils.TBLTPResources, utils.TBLTPStats, utils.TBLTPFilters,
-			utils.TBLTPRoutes, utils.TBLTPAttributes, utils.TBLTPRateProfiles,
+			utils.TBLTPSharedGroups, utils.TBLTPActions, utils.TBLTPActionTriggers,
+			utils.TBLTPAccountActions, utils.TBLTPResources, utils.TBLTPStats, utils.TBLTPThresholds,
+			utils.TBLTPFilters, utils.TBLTPActionPlans, utils.TBLTPRoutes, utils.TBLTPAttributes,
 			utils.TBLTPChargers, utils.TBLTPDispatchers, utils.TBLTPDispatcherHosts} {
 			if err := tx.Table(tblName).Where("tpid = ?", tpid).Delete(nil).Error; err != nil {
 				tx.Rollback()

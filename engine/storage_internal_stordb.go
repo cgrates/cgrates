@@ -1166,14 +1166,15 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 		for _, id := range fltrSlc.ids {
 			grpIDs := Cache.tCache.GetGroupItemIDs(utils.CacheCDRsTBL, utils.ConcatenatedKey(fltrSlc.key, id))
 			for _, id := range grpIDs {
-				if cdrMpIDs.Has(id) {
-					cdrMpIDs.Remove(id)
-					if cdrMpIDs.Size() == 0 {
-						if filter.Count {
-							return nil, 0, nil
-						}
-						return nil, 0, utils.ErrNotFound
+				if !cdrMpIDs.Has(id) {
+					continue
+				}
+				cdrMpIDs.Remove(id)
+				if cdrMpIDs.Size() == 0 {
+					if filter.Count {
+						return nil, 0, nil
 					}
+					return nil, 0, utils.ErrNotFound
 				}
 			}
 		}
@@ -1190,14 +1191,12 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 	var minUsage time.Duration
 	var maxUsage time.Duration
 	if len(filter.MinUsage) != 0 {
-		minUsage, err = utils.ParseDurationWithNanosecs(filter.MinUsage)
-		if err != nil {
+		if minUsage, err = utils.ParseDurationWithNanosecs(filter.MinUsage); err != nil {
 			return nil, 0, err
 		}
 	}
 	if len(filter.MaxUsage) != 0 {
-		maxUsage, err = utils.ParseDurationWithNanosecs(filter.MaxUsage)
-		if err != nil {
+		if maxUsage, err = utils.ParseDurationWithNanosecs(filter.MaxUsage); err != nil {
 			return nil, 0, err
 		}
 	}
@@ -1528,46 +1527,42 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 			}
 		}
 
-		if filter.OrderIDStart != nil {
-			if cdr.OrderID < *filter.OrderIDStart {
-				continue
-			}
+		if filter.OrderIDStart != nil &&
+			cdr.OrderID < *filter.OrderIDStart {
+			continue
 		}
-		if filter.OrderIDEnd != nil {
-			if cdr.OrderID >= *filter.OrderIDEnd {
-				continue
-			}
+		if filter.OrderIDEnd != nil &&
+			cdr.OrderID >= *filter.OrderIDEnd {
+			continue
 		}
-		if filter.AnswerTimeStart != nil && !filter.AnswerTimeStart.IsZero() { // With IsZero we keep backwards compatible with APIerSv1
-			if cdr.AnswerTime.Before(*filter.AnswerTimeStart) {
-				continue
-			}
+		if filter.AnswerTimeStart != nil &&
+			!filter.AnswerTimeStart.IsZero() && // With IsZero we keep backwards compatible with APIerSv1
+			cdr.AnswerTime.Before(*filter.AnswerTimeStart) {
+			continue
 		}
-		if filter.AnswerTimeEnd != nil && !filter.AnswerTimeEnd.IsZero() {
-			if cdr.AnswerTime.After(*filter.AnswerTimeEnd) {
-				continue
-			}
+		if filter.AnswerTimeEnd != nil &&
+			!filter.AnswerTimeEnd.IsZero() &&
+			cdr.AnswerTime.After(*filter.AnswerTimeEnd) {
+			continue
 		}
-		if filter.SetupTimeStart != nil && !filter.SetupTimeStart.IsZero() {
-			if cdr.SetupTime.Before(*filter.SetupTimeStart) {
-				continue
-			}
+		if filter.SetupTimeStart != nil &&
+			!filter.SetupTimeStart.IsZero() &&
+			cdr.SetupTime.Before(*filter.SetupTimeStart) {
+			continue
 		}
-		if filter.SetupTimeEnd != nil && !filter.SetupTimeEnd.IsZero() {
-			if cdr.SetupTime.Before(*filter.SetupTimeEnd) {
-				continue
-			}
+		if filter.SetupTimeEnd != nil &&
+			!filter.SetupTimeEnd.IsZero() &&
+			cdr.SetupTime.Before(*filter.SetupTimeEnd) {
+			continue
 		}
 
-		if len(filter.MinUsage) != 0 {
-			if cdr.Usage < minUsage {
-				continue
-			}
+		if len(filter.MinUsage) != 0 &&
+			cdr.Usage < minUsage {
+			continue
 		}
-		if len(filter.MaxUsage) != 0 {
-			if cdr.Usage > maxUsage {
-				continue
-			}
+		if len(filter.MaxUsage) != 0 &&
+			cdr.Usage > maxUsage {
+			continue
 		}
 
 		if filter.MinCost != nil {
@@ -1579,20 +1574,16 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 				if cdr.Cost < 0 {
 					continue
 				}
-			} else {
-				if cdr.Cost < *filter.MinCost || cdr.Cost > *filter.MaxCost {
-					continue
-				}
+			} else if cdr.Cost < *filter.MinCost || cdr.Cost > *filter.MaxCost {
+				continue
 			}
 		} else if filter.MaxCost != nil {
 			if *filter.MaxCost == -1.0 { // Non-rated CDRs
 				if cdr.Cost < 0 {
 					continue
 				}
-			} else { // Above limited CDRs, since MinCost is empty, make sure we query also NULL cost
-				if cdr.Cost >= *filter.MaxCost {
-					continue
-				}
+			} else if cdr.Cost >= *filter.MaxCost { // Above limited CDRs, since MinCost is empty, make sure we query also NULL cost
+				continue
 			}
 		}
 		if len(filter.ExtraFields) != 0 {
@@ -1631,16 +1622,14 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 			}
 		}
 
-		if filter.Paginator.Offset != nil {
-			if paginatorOffsetCounter <= *filter.Paginator.Offset {
-				paginatorOffsetCounter++
-				continue
-			}
+		if filter.Paginator.Offset != nil &&
+			paginatorOffsetCounter <= *filter.Paginator.Offset {
+			paginatorOffsetCounter++
+			continue
 		}
-		if filter.Paginator.Limit != nil {
-			if len(cdrs) >= *filter.Paginator.Limit {
-				break
-			}
+		if filter.Paginator.Limit != nil &&
+			len(cdrs) >= *filter.Paginator.Limit {
+			break
 		}
 		//pass all filters and append to slice
 		cdrs = append(cdrs, cdr)
@@ -1654,6 +1643,9 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 				cacheCommit(utils.NonTransactional), utils.NonTransactional)
 		}
 		return nil, 0, nil
+	}
+	if len(cdrs) == 0 {
+		return nil, 0, utils.ErrNotFound
 	}
 	if filter.OrderBy != "" {
 		separateVals := strings.Split(filter.OrderBy, utils.INFIELD_SEP)

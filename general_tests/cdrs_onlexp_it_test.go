@@ -571,4 +571,22 @@ func testCDRsOnExpStopEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
 	}
+	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	ch, err := conn.Channel()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer ch.Close()
+
+	if _, err = ch.QueueDelete("cgrates_cdrs", false, false, true); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err = ch.QueueDelete("queue1", false, false, true); err != nil {
+		t.Fatal(err)
+	}
 }

@@ -239,7 +239,7 @@ func importData(cfg *config.CGRConfig) (err error) {
 	}
 	if *flushStorDB {
 		if err = storDB.RemTpData(utils.EmptyString, cfg.LoaderCgrCfg().TpID, map[string]string{}); err != nil {
-			return err
+			return
 		}
 	}
 	csvImporter := engine.TPCSVImporter{
