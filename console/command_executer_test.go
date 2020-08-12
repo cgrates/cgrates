@@ -21,6 +21,8 @@ import (
 	"encoding/json"
 	"testing"
 	"time"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 func TestToJSON(t *testing.T) {
@@ -235,5 +237,19 @@ func TestGetFormatedSliceResult(t *testing.T) {
 	expected = `["test1","test2","test3"]`
 	if rply := getSliceAsString([]interface{}{"test1", "test2", "test3"}, dflt); rply != expected {
 		t.Errorf("Expecting: %s , received: %s", expected, rply)
+	}
+}
+
+func TestFromJSONInterestingFields2(t *testing.T) {
+	jsn := utils.ToJSON(&utils.TenantIDWithOpts{
+		TenantID: new(utils.TenantID),
+		Opts:     make(map[string]interface{}),
+	})
+
+	line := FromJSON([]byte(jsn), []string{"Tenant", "ID", "Opts"})
+	expected := `Tenant="" ID="" Opts={}`
+	if line != expected {
+		t.Log(jsn)
+		t.Errorf("Expected: %s got: '%s'", expected, line)
 	}
 }
