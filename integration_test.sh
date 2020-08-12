@@ -37,7 +37,7 @@ results+=($?)
 echo "go test github.com/cgrates/cgrates/apier/v1 -tags=offline $@"
 go test github.com/cgrates/cgrates/apier/v1 -tags=offline $@
 results+=($?)
-echo "go test github.com/cgrates/cgrates/cmd/cgr-loader -tags=offline $@"
+echo "go test github.com/cgrates/cgrates/cmd/cgr-loader -tags=integration $@"
 go test github.com/cgrates/cgrates/cmd/cgr-loader -tags=integration $@
 results+=($?)
 else
@@ -72,7 +72,7 @@ results+=($?)
 echo 'go test github.com/cgrates/cgrates/apier/v1 -tags=offline -dbtype=*internal'
 go test github.com/cgrates/cgrates/apier/v1 -tags=offline -dbtype=*internal
 results+=($?)
-echo "go test github.com/cgrates/cgrates/cmd/cgr-loader -tags=offline -dbtype=*internal"
+echo "go test github.com/cgrates/cgrates/cmd/cgr-loader -tags=integration -dbtype=*internal"
 go test github.com/cgrates/cgrates/cmd/cgr-loader -tags=integration -dbtype=*internal
 results+=($?)
 # SQL
@@ -106,7 +106,7 @@ results+=($?)
 echo 'go test github.com/cgrates/cgrates/apier/v1 -tags=offline -dbtype=*mysql'
 go test github.com/cgrates/cgrates/apier/v1 -tags=offline -dbtype=*mysql
 results+=($?)
-echo "go test github.com/cgrates/cgrates/cmd/cgr-loader -tags=offline -dbtype=*mysql"
+echo "go test github.com/cgrates/cgrates/cmd/cgr-loader -tags=integration -dbtype=*mysql"
 go test github.com/cgrates/cgrates/cmd/cgr-loader -tags=integration -dbtype=*mysql
 results+=($?)
 # Mongo
@@ -140,7 +140,7 @@ results+=($?)
 echo 'go test github.com/cgrates/cgrates/apier/v1 -tags=offline -dbtype=*mongo'
 go test github.com/cgrates/cgrates/apier/v1 -tags=offline -dbtype=*mongo
 results+=($?)
-echo "go test github.com/cgrates/cgrates/cmd/cgr-loader -tags=offline -dbtype=*mongo"
+echo "go test github.com/cgrates/cgrates/cmd/cgr-loader -tags=integration -dbtype=*mongo"
 go test github.com/cgrates/cgrates/cmd/cgr-loader -tags=integration -dbtype=*mongo
 results+=($?)
 # Postgres
@@ -174,9 +174,10 @@ results+=($?)
 echo 'go test github.com/cgrates/cgrates/apier/v1 -tags=offline -dbtype=*postgres'
 go test github.com/cgrates/cgrates/apier/v1 -tags=offline -dbtype=*postgres
 results+=($?)
-echo "go test github.com/cgrates/cgrates/cmd/cgr-loader -tags=offline -dbtype=*postgres"
+echo "go test github.com/cgrates/cgrates/cmd/cgr-loader -tags=integration -dbtype=*postgres"
 go test github.com/cgrates/cgrates/cmd/cgr-loader -tags=integration -dbtype=*postgres
 results+=($?)
+
 fi
 
 echo 'go test github.com/cgrates/cgrates/config -tags=integration'

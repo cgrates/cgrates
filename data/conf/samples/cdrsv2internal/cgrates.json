@@ -10,6 +10,7 @@
 
 "stor_db": {
 	"db_type": "*internal",
+	"string_indexed_fields": ["RunID"]
 },
 
 

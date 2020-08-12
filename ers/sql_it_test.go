@@ -151,14 +151,22 @@ func testSQLInitDB(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !db.HasTable("cdrs") {
-		db = db.CreateTable(new(engine.CDRsql))
-	}
-	if !db.HasTable("cdrs2") {
-		db = db.CreateTable(new(testModelSql))
-	}
-	db = db.Table(utils.CDRsTBL)
 	tx := db.Begin()
+	if !tx.HasTable("cdrs") {
+		tx = tx.CreateTable(new(engine.CDRsql))
+		if err = tx.Error; err != nil {
+			tx.Rollback()
+			t.Fatal(err)
+		}
+	}
+	if !tx.HasTable("cdrs2") {
+		tx = tx.CreateTable(new(testModelSql))
+		if err = tx.Error; err != nil {
+			tx.Rollback()
+			t.Fatal(err)
+		}
+	}
+	tx = tx.Table(utils.CDRsTBL)
 	cdrSql := cdr.AsCDRsql()
 	cdrSql.CreatedAt = time.Now()
 	saved := tx.Save(cdrSql)
@@ -167,6 +175,7 @@ func testSQLInitDB(t *testing.T) {
 		t.Fatal(err)
 	}
 	tx.Commit()
+	time.Sleep(10 * time.Millisecond)
 }
 
 func testSQLReader(t *testing.T) {
@@ -285,6 +294,7 @@ func testSQLPoster(t *testing.T) {
 func testSQLStop(t *testing.T) {
 	rdrExit <- struct{}{}
 	db = db.DropTable("cdrs2")
+	db = db.DropTable("cdrs")
 	if err := db.Close(); err != nil {
 		t.Error(err)
 	}

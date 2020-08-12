@@ -203,7 +203,7 @@ var (
 func TestLoadIt(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
-		ldrItCfgDir = "tutinternal"
+		t.SkipNow()
 	case utils.MetaMySQL:
 		ldrItCfgDir = "tutmysql"
 	case utils.MetaMongo:
@@ -303,7 +303,7 @@ func testLoadItStartLoaderRemove(t *testing.T) {
 }
 
 func testLoadItCheckAttributes2(t *testing.T) {
-	if _, err := db.GetAttributeProfileDrv("cgrates.org", "ATTR_1001_SIMPLEAUTH"); err != utils.ErrNotFound {
+	if _, err := db.GetAttributeProfileDrv("cgrates.org", "ATTR_1001_SESSIONAUTH"); err != utils.ErrNotFound {
 		t.Fatal(err)
 	}
 }
@@ -323,7 +323,7 @@ func testLoadItStartLoaderToStorDB(t *testing.T) {
 }
 
 func testLoadItStartLoaderFromStorDB(t *testing.T) {
-	cmd := exec.Command("cgr-loader", "-config_path="+ldrItCfgPath, "-path="+path.Join(*dataDir, "tariffplans", "tutorial"), "-caches_address=", "-scheduler_address=", "-from_stordb", "-tpid=TPID")
+	cmd := exec.Command("cgr-loader", "-config_path="+ldrItCfgPath, "-caches_address=", "-scheduler_address=", "-from_stordb", "-tpid=TPID")
 	output := bytes.NewBuffer(nil)
 	outerr := bytes.NewBuffer(nil)
 	cmd.Stdout = output
@@ -337,7 +337,7 @@ func testLoadItStartLoaderFromStorDB(t *testing.T) {
 }
 
 func testLoadItStartLoaderFlushStorDB(t *testing.T) {
-	cmd := exec.Command("cgr-loader", "-config_path="+ldrItCfgPath, "-path="+path.Join(*dataDir, "tariffplans", "tutorial"), "-caches_address=", "-scheduler_address=", "-flush_stordb", "-tpid=TPID")
+	cmd := exec.Command("cgr-loader", "-config_path="+ldrItCfgPath, "-path="+path.Join(*dataDir, "tariffplans", "dispatchers"), "-caches_address=", "-scheduler_address=", "-to_stordb", "-flush_stordb", "-tpid=TPID")
 	output := bytes.NewBuffer(nil)
 	outerr := bytes.NewBuffer(nil)
 	cmd.Stdout = output

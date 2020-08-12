@@ -364,7 +364,7 @@ func testV2CDRsGetCdrs3(t *testing.T) {
 	}
 	args = utils.RPCCDRsFilter{RunIDs: []string{"CustomerCharges"}, OriginIDs: []string{"testV2CDRsProcessCDR3"}}
 	if err := cdrsRpc.Call(utils.APIerSv2GetCDRs, &args, &cdrs); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Error("Unexpected error: ", err.Error())
+		t.Error("Unexpected error: ", err)
 	}
 }
 
@@ -461,7 +461,7 @@ func testV2CDRsGetCdrs5(t *testing.T) {
 		OriginIDs: []string{"testV2CDRsProcessCDR5"},
 	}
 	if err := cdrsRpc.Call(utils.APIerSv2GetCDRs, &args, &cdrs); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Fatal("Unexpected error: ", err.Error())
+		t.Fatal("Unexpected error: ", err)
 	}
 	args = utils.RPCCDRsFilter{
 		RunIDs:    []string{"CustomerCharges"},
