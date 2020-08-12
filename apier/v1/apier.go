@@ -156,8 +156,8 @@ func (apierSv1 *APIerSv1) SetDestination(attrs *utils.AttrSetDestination, reply 
 	}
 	if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
 		utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithOpts{
-			ArgsCache: utils.ArgsCache{ReverseDestinationIDs: dest.Prefixes,
-				DestinationIDs: []string{attrs.Id}},
+			ArgsCache: map[string][]string{utils.ReverseDestinationIDs: dest.Prefixes,
+				utils.DestinationIDs: []string{attrs.Id}},
 		}, reply); err != nil {
 		return err
 	}
@@ -232,7 +232,7 @@ func (apierSv1 *APIerSv1) LoadDestination(attrs *AttrLoadDestination, reply *str
 	}
 	if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
 		utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithOpts{
-			ArgsCache: utils.ArgsCache{DestinationIDs: []string{attrs.ID}},
+			ArgsCache: map[string][]string{utils.DestinationIDs: []string{attrs.ID}},
 		}, reply); err != nil {
 		return err
 	}
@@ -725,7 +725,7 @@ func (apierSv1 *APIerSv1) SetActionPlan(attrs *AttrSetActionPlan, reply *string)
 		}
 		if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
 			utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithOpts{
-				ArgsCache: utils.ArgsCache{ActionPlanIDs: []string{ap.Id}},
+				ArgsCache: map[string][]string{utils.ActionPlanIDs: []string{ap.Id}},
 			}, reply); err != nil {
 			return 0, err
 		}
@@ -738,7 +738,7 @@ func (apierSv1 *APIerSv1) SetActionPlan(attrs *AttrSetActionPlan, reply *string)
 			sl := prevAccountIDs.Slice()
 			if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
 				utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithOpts{
-					ArgsCache: utils.ArgsCache{AccountActionPlanIDs: sl},
+					ArgsCache: map[string][]string{utils.AccountActionPlanIDs: sl},
 				}, reply); err != nil {
 				return 0, err
 			}
@@ -924,7 +924,7 @@ func (apierSv1 *APIerSv1) RemoveActionPlan(attr *AttrGetActionPlan, reply *strin
 			sl := prevAccountIDs.Slice()
 			if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
 				utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithOpts{
-					ArgsCache: utils.ArgsCache{AccountActionPlanIDs: sl},
+					ArgsCache: map[string][]string{utils.AccountActionPlanIDs: sl},
 				}, reply); err != nil {
 				return 0, err
 			}

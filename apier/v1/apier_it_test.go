@@ -821,7 +821,7 @@ func testApierLoadAccountActions(t *testing.T) {
 	expectedStats[utils.CacheAccountActionPlans].Items = 1
 	expectedStats[utils.CacheActionPlans].Items = 1
 	expectedStats[utils.CacheActions].Items = 1
-	expectedStats[utils.CacheLoadIDs].Items = 21
+	expectedStats[utils.CacheLoadIDs].Items = 2
 	expectedStats[utils.CacheRPCConnections].Items = 1
 	if err := rater.Call(utils.CacheSv1GetCacheStats, new(utils.AttrCacheIDsWithOpts), &rcvStats); err != nil {
 		t.Error("Got error on CacheSv1.GetCacheStats: ", err.Error())
@@ -859,7 +859,7 @@ func testApierSetRatingProfile(t *testing.T) {
 	expectedStats[utils.CacheActions].Items = 1
 	expectedStats[utils.CacheRatingProfiles].Items = 1
 	expectedStats[utils.CacheRPCConnections].Items = 1
-	expectedStats[utils.CacheLoadIDs].Items = 21
+	expectedStats[utils.CacheLoadIDs].Items = 2
 	if err := rater.Call(utils.CacheSv1GetCacheStats, new(utils.AttrCacheIDsWithOpts), &rcvStats); err != nil {
 		t.Error("Got error on CacheSv1.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
@@ -951,7 +951,7 @@ func testAPIerSv1GetRatingProfile(t *testing.T) {
 // Test here ReloadCache
 func testApierReloadCache(t *testing.T) {
 	var reply string
-	arc := new(utils.ArgsCache)
+	arc := new(utils.AttrReloadCacheWithOpts)
 	// Simple test that command is executed without errors
 	if err := rater.Call(utils.CacheSv1ReloadCache, arc, &reply); err != nil {
 		t.Error("Got error on CacheSv1.ReloadCache: ", err.Error())
@@ -966,7 +966,7 @@ func testApierReloadCache(t *testing.T) {
 	expectedStats[utils.CacheRatingProfiles].Items = 2
 	expectedStats[utils.CacheRatingPlans].Items = 1
 	expectedStats[utils.CacheReverseDestinations].Items = 10
-	expectedStats[utils.CacheLoadIDs].Items = 21
+	expectedStats[utils.CacheLoadIDs].Items = 2
 	expectedStats[utils.CacheRPCConnections].Items = 1
 	if err := rater.Call(utils.CacheSv1GetCacheStats, new(utils.AttrCacheIDsWithOpts), &rcvStats); err != nil {
 		t.Error("Got error on CacheSv1.GetCacheStats: ", err.Error())
@@ -1476,7 +1476,7 @@ func testApierResetDataAfterLoadFromFolder(t *testing.T) {
 	}
 	var reply string
 	// Simple test that command is executed without errors
-	if err := rater.Call(utils.CacheSv1LoadCache, &utils.ArgsCache{}, &reply); err != nil {
+	if err := rater.Call(utils.CacheSv1LoadCache, utils.NewAttrReloadCacheWithOpts(), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error(reply)
@@ -1495,7 +1495,7 @@ func testApierResetDataAfterLoadFromFolder(t *testing.T) {
 	expStats[utils.CacheRouteProfiles].Items = 2
 	expStats[utils.CacheThresholdProfiles].Items = 1
 	expStats[utils.CacheThresholds].Items = 1
-	expStats[utils.CacheLoadIDs].Items = 21
+	expStats[utils.CacheLoadIDs].Items = 22
 
 	if err := rater.Call(utils.CacheSv1GetCacheStats, new(utils.AttrCacheIDsWithOpts), &rcvStats); err != nil {
 		t.Error(err)

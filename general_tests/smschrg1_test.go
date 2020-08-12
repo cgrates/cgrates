@@ -68,8 +68,7 @@ func TestSMSLoadCsvTpSmsChrg1(t *testing.T) {
 		t.Fatal(err)
 	}
 	csvr.WriteToDatabase(false, false)
-	dataDB.LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	dataDB.LoadDataDBCache(engine.GetDefaultEmptyArgCachePrefix())
 
 	if cachedRPlans := len(engine.Cache.GetItemIDs(utils.CacheRatingPlans, utils.EmptyString)); cachedRPlans != 1 {
 		t.Error("Wrong number of cached rating plans found", cachedRPlans)

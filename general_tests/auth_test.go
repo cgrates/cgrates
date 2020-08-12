@@ -108,8 +108,7 @@ cgrates.org,call,*any,2013-01-06T00:00:00Z,RP_ANY,`
 		t.Error("No account saved")
 	}
 
-	dbAuth.LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	dbAuth.LoadDataDBCache(engine.GetDefaultEmptyArgCachePrefix())
 
 	if cachedDests := len(engine.Cache.GetItemIDs(utils.CacheDestinations, "")); cachedDests != 1 {
 		t.Error("Wrong number of cached destinations found", cachedDests)

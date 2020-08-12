@@ -36,60 +36,60 @@ func GetCacheOpt(apiOpt *string) string {
 
 // composeArgsReload add the ItemID to AttrReloadCache
 // for a specific CacheID
-func composeArgsReload(args utils.ArgsGetCacheItem) (rpl utils.ArgsCache) {
+func composeArgsReload(args utils.ArgsGetCacheItem) (rpl map[string][]string) {
 	// ToDo: make the load cache API compatible with gob encoding
-	rpl = utils.ArgsCache{ // in case of load cache we check if the ids are nil so populate them here for the moment
-		DestinationIDs:        []string{},
-		ReverseDestinationIDs: []string{},
-		RatingPlanIDs:         []string{},
-		RatingProfileIDs:      []string{},
-		ActionIDs:             []string{},
-		ActionPlanIDs:         []string{},
-		AccountActionPlanIDs:  []string{},
-		ActionTriggerIDs:      []string{},
-		SharedGroupIDs:        []string{},
-		ResourceProfileIDs:    []string{},
-		ResourceIDs:           []string{},
-		StatsQueueIDs:         []string{},
-		StatsQueueProfileIDs:  []string{},
-		ThresholdIDs:          []string{},
-		ThresholdProfileIDs:   []string{},
-		FilterIDs:             []string{},
-		RouteProfileIDs:       []string{},
-		AttributeProfileIDs:   []string{},
-		ChargerProfileIDs:     []string{},
-		DispatcherProfileIDs:  []string{},
-		DispatcherHostIDs:     []string{},
-		DispatcherRoutesIDs:   []string{},
-		RateProfileIDs:        []string{},
+	rpl = map[string][]string{ // in case of load cache we check if the ids are nil so populate them here for the moment
+		utils.DestinationIDs:        {},
+		utils.ReverseDestinationIDs: {},
+		utils.RatingPlanIDs:         {},
+		utils.RatingProfileIDs:      {},
+		utils.ActionIDs:             {},
+		utils.ActionPlanIDs:         {},
+		utils.AccountActionPlanIDs:  {},
+		utils.ActionTriggerIDs:      {},
+		utils.SharedGroupIDs:        {},
+		utils.ResourceProfileIDs:    {},
+		utils.ResourceIDs:           {},
+		utils.StatsQueueIDs:         {},
+		utils.StatsQueueProfileIDs:  {},
+		utils.ThresholdIDs:          {},
+		utils.ThresholdProfileIDs:   {},
+		utils.FilterIDs:             {},
+		utils.RouteProfileIDs:       {},
+		utils.AttributeProfileIDs:   {},
+		utils.ChargerProfileIDs:     {},
+		utils.DispatcherProfileIDs:  {},
+		utils.DispatcherHostIDs:     {},
+		utils.DispatcherRoutesIDs:   {},
+		utils.RateProfileIDs:        {},
 	}
 	switch args.CacheID {
 	case utils.CacheResourceProfiles:
-		rpl.ResourceProfileIDs = []string{args.ItemID}
+		rpl[utils.ResourceProfileIDs] = []string{args.ItemID}
 	case utils.CacheResources:
-		rpl.ResourceIDs = []string{args.ItemID}
+		rpl[utils.ResourceIDs] = []string{args.ItemID}
 	case utils.CacheStatQueues:
-		rpl.StatsQueueIDs = []string{args.ItemID}
+		rpl[utils.StatsQueueIDs] = []string{args.ItemID}
 	case utils.CacheStatQueueProfiles:
-		rpl.StatsQueueProfileIDs = []string{args.ItemID}
+		rpl[utils.StatsQueueProfileIDs] = []string{args.ItemID}
 	case utils.CacheThresholds:
-		rpl.ThresholdIDs = []string{args.ItemID}
+		rpl[utils.ThresholdIDs] = []string{args.ItemID}
 	case utils.CacheThresholdProfiles:
-		rpl.ThresholdProfileIDs = []string{args.ItemID}
+		rpl[utils.ThresholdProfileIDs] = []string{args.ItemID}
 	case utils.CacheFilters:
-		rpl.FilterIDs = []string{args.ItemID}
+		rpl[utils.FilterIDs] = []string{args.ItemID}
 	case utils.CacheRouteProfiles:
-		rpl.RouteProfileIDs = []string{args.ItemID}
+		rpl[utils.RouteProfileIDs] = []string{args.ItemID}
 	case utils.CacheAttributeProfiles:
-		rpl.AttributeProfileIDs = []string{args.ItemID}
+		rpl[utils.AttributeProfileIDs] = []string{args.ItemID}
 	case utils.CacheChargerProfiles:
-		rpl.ChargerProfileIDs = []string{args.ItemID}
+		rpl[utils.ChargerProfileIDs] = []string{args.ItemID}
 	case utils.CacheDispatcherProfiles:
-		rpl.DispatcherProfileIDs = []string{args.ItemID}
+		rpl[utils.DispatcherProfileIDs] = []string{args.ItemID}
 	case utils.CacheDispatcherHosts:
-		rpl.DispatcherHostIDs = []string{args.ItemID}
+		rpl[utils.DispatcherHostIDs] = []string{args.ItemID}
 	case utils.CacheRateProfiles:
-		rpl.RateProfileIDs = []string{args.ItemID}
+		rpl[utils.RateProfileIDs] = []string{args.ItemID}
 	}
 	return
 }

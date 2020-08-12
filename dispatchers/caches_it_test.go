@@ -125,6 +125,7 @@ func testDspChcLoadAfterFolder(t *testing.T) {
 		TenantArg: utils.TenantArg{
 			Tenant: "cgrates.org",
 		},
+		ArgsCache: utils.NewAttrReloadCacheWithOpts().ArgsCache,
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -144,7 +145,7 @@ func testDspChcLoadAfterFolder(t *testing.T) {
 	expStats[utils.CacheRouteProfiles].Items = 3
 	expStats[utils.CacheThresholdProfiles].Items = 2
 	expStats[utils.CacheThresholds].Items = 2
-	expStats[utils.CacheLoadIDs].Items = 21
+	expStats[utils.CacheLoadIDs].Items = 22
 	if err := dispEngine.RPC.Call(utils.CacheSv1GetCacheStats, &args, &rcvStats); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expStats, rcvStats) {

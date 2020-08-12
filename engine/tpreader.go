@@ -800,8 +800,10 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 			var reply string
 			if err := connMgr.Call(tpr.cacheConns, nil,
 				utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithOpts{
-					ArgsCache: utils.ArgsCache{AccountActionPlanIDs: []string{id},
-						ActionPlanIDs: []string{accountAction.ActionPlanId}},
+					ArgsCache: map[string][]string{
+						utils.AccountActionPlanIDs: {id},
+						utils.ActionPlanIDs:        {accountAction.ActionPlanId},
+					},
 				}, &reply); err != nil {
 				return err
 			}
@@ -2435,29 +2437,29 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, opts map[string]i
 	//compose Reload Cache argument
 	cacheArgs := utils.AttrReloadCacheWithOpts{
 		Opts: opts,
-		ArgsCache: utils.ArgsCache{
-			DestinationIDs:        dstIds,
-			ReverseDestinationIDs: revDstIDs,
-			RatingPlanIDs:         rplIds,
-			RatingProfileIDs:      rpfIds,
-			ActionIDs:             actIds,
-			ActionPlanIDs:         aps,
-			AccountActionPlanIDs:  aapIDs,
-			SharedGroupIDs:        shgIds,
-			ResourceProfileIDs:    rspIDs,
-			ResourceIDs:           resIDs,
-			ActionTriggerIDs:      aatIDs,
-			StatsQueueIDs:         stqIDs,
-			StatsQueueProfileIDs:  stqpIDs,
-			ThresholdIDs:          trsIDs,
-			ThresholdProfileIDs:   trspfIDs,
-			FilterIDs:             flrIDs,
-			RouteProfileIDs:       routeIDs,
-			AttributeProfileIDs:   apfIDs,
-			ChargerProfileIDs:     chargerIDs,
-			DispatcherProfileIDs:  dppIDs,
-			DispatcherHostIDs:     dphIDs,
-			RateProfileIDs:        ratePrfIDs,
+		ArgsCache: map[string][]string{
+			utils.DestinationIDs:        dstIds,
+			utils.ReverseDestinationIDs: revDstIDs,
+			utils.RatingPlanIDs:         rplIds,
+			utils.RatingProfileIDs:      rpfIds,
+			utils.ActionIDs:             actIds,
+			utils.ActionPlanIDs:         aps,
+			utils.AccountActionPlanIDs:  aapIDs,
+			utils.SharedGroupIDs:        shgIds,
+			utils.ResourceProfileIDs:    rspIDs,
+			utils.ResourceIDs:           resIDs,
+			utils.ActionTriggerIDs:      aatIDs,
+			utils.StatsQueueIDs:         stqIDs,
+			utils.StatsQueueProfileIDs:  stqpIDs,
+			utils.ThresholdIDs:          trsIDs,
+			utils.ThresholdProfileIDs:   trspfIDs,
+			utils.FilterIDs:             flrIDs,
+			utils.RouteProfileIDs:       routeIDs,
+			utils.AttributeProfileIDs:   apfIDs,
+			utils.ChargerProfileIDs:     chargerIDs,
+			utils.DispatcherProfileIDs:  dppIDs,
+			utils.DispatcherHostIDs:     dphIDs,
+			utils.RateProfileIDs:        ratePrfIDs,
 		},
 	}
 

@@ -141,7 +141,7 @@ func testCacheSAfterLoadFromFolder(t *testing.T) {
 	}
 	reply := ""
 	// Simple test that command is executed without errors
-	if err := chcRPC.Call(utils.CacheSv1LoadCache, &utils.ArgsCache{}, &reply); err != nil {
+	if err := chcRPC.Call(utils.CacheSv1LoadCache, utils.NewAttrReloadCacheWithOpts(), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error(reply)
@@ -160,7 +160,7 @@ func testCacheSAfterLoadFromFolder(t *testing.T) {
 	expStats[utils.CacheRouteProfiles].Items = 2
 	expStats[utils.CacheThresholdProfiles].Items = 1
 	expStats[utils.CacheThresholds].Items = 1
-	expStats[utils.CacheLoadIDs].Items = 21
+	expStats[utils.CacheLoadIDs].Items = 22
 
 	if err := chcRPC.Call(utils.CacheSv1GetCacheStats, &utils.AttrCacheIDsWithOpts{}, &rcvStats); err != nil {
 		t.Error(err)
@@ -192,7 +192,7 @@ func testCacheSReload(t *testing.T) {
 	expStats := engine.GetDefaultEmptyCacheStats()
 	reply := ""
 	// Simple test that command is executed without errors
-	if err := chcRPC.Call(utils.CacheSv1LoadCache, &utils.ArgsCache{}, &reply); err != nil {
+	if err := chcRPC.Call(utils.CacheSv1LoadCache, utils.NewAttrReloadCacheWithOpts(), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error(reply)
@@ -215,7 +215,7 @@ func testCacheSReload(t *testing.T) {
 	expStats[utils.CacheRouteProfiles].Items = 2
 	expStats[utils.CacheThresholdProfiles].Items = 1
 	expStats[utils.CacheThresholds].Items = 1
-	expStats[utils.CacheLoadIDs].Items = 21
+	expStats[utils.CacheLoadIDs].Items = 22
 
 	if err := chcRPC.Call(utils.CacheSv1GetCacheStats, &utils.AttrCacheIDsWithOpts{}, &rcvStats); err != nil {
 		t.Error(err)
@@ -296,9 +296,8 @@ func testCacheSGetItemExpiryTime(t *testing.T) {
 }
 
 func testCacheSReloadCache(t *testing.T) {
-	reply := ""
-	arc := new(utils.ArgsCache)
-	if err := chcRPC.Call(utils.CacheSv1ReloadCache, arc, &reply); err != nil {
+	var reply string
+	if err := chcRPC.Call(utils.CacheSv1ReloadCache, new(utils.AttrReloadCacheWithOpts), &reply); err != nil {
 		t.Error("Got error on CacheSv1.ReloadCache: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling CacheSv1.ReloadCache got reply: ", reply)
