@@ -85,6 +85,15 @@ func (me MapEvent) GetTInt64(fldName string) (out int64, err error) {
 	return utils.IfaceAsTInt64(fldIface)
 }
 
+// GetFloat64 returns a field as float64 instance
+func (me MapEvent) GetFloat64(fldName string) (f float64, err error) {
+	iface, has := me[fldName]
+	if !has {
+		return f, utils.ErrNotFound
+	}
+	return utils.IfaceAsFloat64(iface)
+}
+
 func (me MapEvent) GetStringIgnoreErrors(fldName string) (out string) {
 	out, _ = me.GetString(fldName)
 	return

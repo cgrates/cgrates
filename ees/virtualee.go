@@ -20,7 +20,6 @@ package ees
 
 import (
 	"sync"
-	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -64,8 +63,14 @@ func (vEe *VirtualEe) OnEvicted(_ string, _ interface{}) {
 // ExportEvent implements EventExporter
 func (vEe *VirtualEe) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 	vEe.Lock()
-	defer vEe.Unlock()
-
+	defer func() {
+		if err != nil {
+			vEe.dc[utils.NegativeExports].(utils.StringSet).Add(cgrEv.ID)
+		} else {
+			vEe.dc[utils.PositiveExports].(utils.StringSet).Add(cgrEv.ID)
+		}
+		vEe.Unlock()
+	}()
 	vEe.dc[utils.NumberOfEvents] = vEe.dc[utils.NumberOfEvents].(int) + 1
 
 	req := utils.MapStorage{}
@@ -75,44 +80,8 @@ func (vEe *VirtualEe) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 	eeReq := NewEventExporterRequest(req, vEe.dc, cgrEv.Tenant, vEe.cgrCfg.GeneralCfg().DefaultTimezone,
 		vEe.filterS)
 	if err = eeReq.SetFields(vEe.cgrCfg.EEsCfg().Exporters[vEe.cfgIdx].ContentFields()); err != nil {
-		vEe.dc[utils.NegativeExports].(utils.StringSet).Add(cgrEv.ID)
 		return
 	}
-	if aTime, err := cgrEv.FieldAsTime(utils.AnswerTime, vEe.cgrCfg.GeneralCfg().DefaultTimezone); err == nil {
-		if vEe.dc[utils.FirstEventATime].(time.Time).IsZero() || vEe.dc[utils.FirstEventATime].(time.Time).Before(aTime) {
-			vEe.dc[utils.FirstEventATime] = aTime
-		}
-		if aTime.After(vEe.dc[utils.LastEventATime].(time.Time)) {
-			vEe.dc[utils.LastEventATime] = aTime
-		}
-	}
-	if oID, err := cgrEv.FieldAsInt64(utils.OrderID); err == nil {
-		if vEe.dc[utils.FirstExpOrderID].(int64) > oID || vEe.dc[utils.FirstExpOrderID].(int64) == 0 {
-			vEe.dc[utils.FirstExpOrderID] = oID
-		}
-		if vEe.dc[utils.LastExpOrderID].(int64) < oID {
-			vEe.dc[utils.LastExpOrderID] = oID
-		}
-	}
-	if cost, err := cgrEv.FieldAsFloat64(utils.Cost); err == nil {
-		vEe.dc[utils.TotalCost] = vEe.dc[utils.TotalCost].(float64) + cost
-	}
-	if tor, err := cgrEv.FieldAsString(utils.ToR); err == nil {
-		if usage, err := cgrEv.FieldAsDuration(utils.Usage); err == nil {
-			switch tor {
-			case utils.VOICE:
-				vEe.dc[utils.TotalDuration] = vEe.dc[utils.TotalDuration].(time.Duration) + usage
-			case utils.SMS:
-				vEe.dc[utils.TotalSMSUsage] = vEe.dc[utils.TotalSMSUsage].(time.Duration) + usage
-			case utils.MMS:
-				vEe.dc[utils.TotalMMSUsage] = vEe.dc[utils.TotalMMSUsage].(time.Duration) + usage
-			case utils.GENERIC:
-				vEe.dc[utils.TotalGenericUsage] = vEe.dc[utils.TotalGenericUsage].(time.Duration) + usage
-			case utils.DATA:
-				vEe.dc[utils.TotalDataUsage] = vEe.dc[utils.TotalDataUsage].(time.Duration) + usage
-			}
-		}
-	}
-	vEe.dc[utils.PositiveExports].(utils.StringSet).Add(cgrEv.ID)
+	updateEEMetrics(vEe.dc, cgrEv.Event, vEe.cgrCfg.GeneralCfg().DefaultTimezone)
 	return
 }

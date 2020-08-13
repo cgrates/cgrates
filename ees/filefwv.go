@@ -24,7 +24,6 @@ import (
 	"os"
 	"path"
 	"sync"
-	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -82,7 +81,14 @@ func (fFwv *FileFWVee) OnEvicted(_ string, _ interface{}) {
 // ExportEvent implements EventExporter
 func (fFwv *FileFWVee) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 	fFwv.Lock()
-	defer fFwv.Unlock()
+	defer func() {
+		if err != nil {
+			fFwv.dc[utils.NegativeExports].(utils.StringSet).Add(cgrEv.ID)
+		} else {
+			fFwv.dc[utils.PositiveExports].(utils.StringSet).Add(cgrEv.ID)
+		}
+		fFwv.Unlock()
+	}()
 	fFwv.dc[utils.NumberOfEvents] = fFwv.dc[utils.NumberOfEvents].(int) + 1
 	var records []string
 	req := utils.MapStorage{}
@@ -93,7 +99,6 @@ func (fFwv *FileFWVee) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 		fFwv.filterS)
 
 	if err = eeReq.SetFields(fFwv.cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].ContentFields()); err != nil {
-		fFwv.dc[utils.NegativeExports].(utils.StringSet).Add(cgrEv.ID)
 		return
 	}
 	for el := eeReq.cnt.GetFirstElement(); el != nil; el = el.Next() {
@@ -103,42 +108,7 @@ func (fFwv *FileFWVee) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 		}
 		records = append(records, strVal)
 	}
-	if aTime, err := cgrEv.FieldAsTime(utils.AnswerTime, fFwv.cgrCfg.GeneralCfg().DefaultTimezone); err == nil {
-		if fFwv.dc[utils.FirstEventATime].(time.Time).IsZero() || fFwv.dc[utils.FirstEventATime].(time.Time).Before(aTime) {
-			fFwv.dc[utils.FirstEventATime] = aTime
-		}
-		if aTime.After(fFwv.dc[utils.LastEventATime].(time.Time)) {
-			fFwv.dc[utils.LastEventATime] = aTime
-		}
-	}
-	if oID, err := cgrEv.FieldAsInt64(utils.OrderID); err == nil {
-		if fFwv.dc[utils.FirstExpOrderID].(int64) > oID || fFwv.dc[utils.FirstExpOrderID].(int64) == 0 {
-			fFwv.dc[utils.FirstExpOrderID] = oID
-		}
-		if fFwv.dc[utils.LastExpOrderID].(int64) < oID {
-			fFwv.dc[utils.LastExpOrderID] = oID
-		}
-	}
-	if cost, err := cgrEv.FieldAsFloat64(utils.Cost); err == nil {
-		fFwv.dc[utils.TotalCost] = fFwv.dc[utils.TotalCost].(float64) + cost
-	}
-	if tor, err := cgrEv.FieldAsString(utils.ToR); err == nil {
-		if usage, err := cgrEv.FieldAsDuration(utils.Usage); err == nil {
-			switch tor {
-			case utils.VOICE:
-				fFwv.dc[utils.TotalDuration] = fFwv.dc[utils.TotalDuration].(time.Duration) + usage
-			case utils.SMS:
-				fFwv.dc[utils.TotalSMSUsage] = fFwv.dc[utils.TotalSMSUsage].(time.Duration) + usage
-			case utils.MMS:
-				fFwv.dc[utils.TotalMMSUsage] = fFwv.dc[utils.TotalMMSUsage].(time.Duration) + usage
-			case utils.GENERIC:
-				fFwv.dc[utils.TotalGenericUsage] = fFwv.dc[utils.TotalGenericUsage].(time.Duration) + usage
-			case utils.DATA:
-				fFwv.dc[utils.TotalDataUsage] = fFwv.dc[utils.TotalDataUsage].(time.Duration) + usage
-			}
-		}
-	}
-	fFwv.dc[utils.PositiveExports].(utils.StringSet).Add(cgrEv.ID)
+	updateEEMetrics(fFwv.dc, cgrEv.Event, fFwv.cgrCfg.GeneralCfg().DefaultTimezone)
 	for _, record := range append(records, "\n") {
 		if _, err = io.WriteString(fFwv.file, record); err != nil {
 			return

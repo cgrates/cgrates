@@ -23,7 +23,6 @@ import (
 	"net/url"
 	"strings"
 	"sync"
-	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -65,8 +64,14 @@ func (httpPost *HTTPPost) OnEvicted(_ string, _ interface{}) {
 // ExportEvent implements EventExporter
 func (httpPost *HTTPPost) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 	httpPost.Lock()
-	defer httpPost.Unlock()
-
+	defer func() {
+		if err != nil {
+			httpPost.dc[utils.NegativeExports].(utils.StringSet).Add(cgrEv.ID)
+		} else {
+			httpPost.dc[utils.PositiveExports].(utils.StringSet).Add(cgrEv.ID)
+		}
+		httpPost.Unlock()
+	}()
 	httpPost.dc[utils.NumberOfEvents] = httpPost.dc[utils.NumberOfEvents].(int) + 1
 
 	var body interface{}
@@ -79,7 +84,6 @@ func (httpPost *HTTPPost) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 		httpPost.filterS)
 
 	if err = eeReq.SetFields(httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].ContentFields()); err != nil {
-		httpPost.dc[utils.NegativeExports].(utils.StringSet).Add(cgrEv.ID)
 		return
 	}
 	for el := eeReq.cnt.GetFirstElement(); el != nil; el = el.Next() {
@@ -96,42 +100,7 @@ func (httpPost *HTTPPost) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 		}
 		urlVals.Set(strings.Join(itm.Path, utils.NestingSep), utils.IfaceAsString(itm.Data))
 	}
-	if aTime, err := cgrEv.FieldAsTime(utils.AnswerTime, httpPost.cgrCfg.GeneralCfg().DefaultTimezone); err == nil {
-		if httpPost.dc[utils.FirstEventATime].(time.Time).IsZero() || httpPost.dc[utils.FirstEventATime].(time.Time).Before(aTime) {
-			httpPost.dc[utils.FirstEventATime] = aTime
-		}
-		if aTime.After(httpPost.dc[utils.LastEventATime].(time.Time)) {
-			httpPost.dc[utils.LastEventATime] = aTime
-		}
-	}
-	if oID, err := cgrEv.FieldAsInt64(utils.OrderID); err == nil {
-		if httpPost.dc[utils.FirstExpOrderID].(int64) > oID || httpPost.dc[utils.FirstExpOrderID].(int64) == 0 {
-			httpPost.dc[utils.FirstExpOrderID] = oID
-		}
-		if httpPost.dc[utils.LastExpOrderID].(int64) < oID {
-			httpPost.dc[utils.LastExpOrderID] = oID
-		}
-	}
-	if cost, err := cgrEv.FieldAsFloat64(utils.Cost); err == nil {
-		httpPost.dc[utils.TotalCost] = httpPost.dc[utils.TotalCost].(float64) + cost
-	}
-	if tor, err := cgrEv.FieldAsString(utils.ToR); err == nil {
-		if usage, err := cgrEv.FieldAsDuration(utils.Usage); err == nil {
-			switch tor {
-			case utils.VOICE:
-				httpPost.dc[utils.TotalDuration] = httpPost.dc[utils.TotalDuration].(time.Duration) + usage
-			case utils.SMS:
-				httpPost.dc[utils.TotalSMSUsage] = httpPost.dc[utils.TotalSMSUsage].(time.Duration) + usage
-			case utils.MMS:
-				httpPost.dc[utils.TotalMMSUsage] = httpPost.dc[utils.TotalMMSUsage].(time.Duration) + usage
-			case utils.GENERIC:
-				httpPost.dc[utils.TotalGenericUsage] = httpPost.dc[utils.TotalGenericUsage].(time.Duration) + usage
-			case utils.DATA:
-				httpPost.dc[utils.TotalDataUsage] = httpPost.dc[utils.TotalDataUsage].(time.Duration) + usage
-			}
-		}
-	}
-	httpPost.dc[utils.PositiveExports].(utils.StringSet).Add(cgrEv.ID)
+	updateEEMetrics(httpPost.dc, cgrEv.Event, httpPost.cgrCfg.GeneralCfg().DefaultTimezone)
 	body = urlVals
 	if err = httpPost.httpPoster.Post(body, utils.EmptyString); err != nil &&
 		httpPost.cgrCfg.GeneralCfg().FailedPostsDir != utils.META_NONE {

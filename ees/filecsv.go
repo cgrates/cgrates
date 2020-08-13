@@ -24,7 +24,6 @@ import (
 	"os"
 	"path"
 	"sync"
-	"time"
 
 	"github.com/cgrates/cgrates/engine"
 
@@ -91,8 +90,14 @@ func (fCsv *FileCSVee) OnEvicted(_ string, _ interface{}) {
 // ExportEvent implements EventExporter
 func (fCsv *FileCSVee) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 	fCsv.Lock()
-	defer fCsv.Unlock()
-
+	defer func() {
+		if err != nil {
+			fCsv.dc[utils.NegativeExports].(utils.StringSet).Add(cgrEv.ID)
+		} else {
+			fCsv.dc[utils.PositiveExports].(utils.StringSet).Add(cgrEv.ID)
+		}
+		fCsv.Unlock()
+	}()
 	fCsv.dc[utils.NumberOfEvents] = fCsv.dc[utils.NumberOfEvents].(int) + 1
 
 	var csvRecord []string
@@ -104,7 +109,6 @@ func (fCsv *FileCSVee) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 		fCsv.filterS)
 
 	if err = eeReq.SetFields(fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].ContentFields()); err != nil {
-		fCsv.dc[utils.NegativeExports].(utils.StringSet).Add(cgrEv.ID)
 		return
 	}
 	for el := eeReq.cnt.GetFirstElement(); el != nil; el = el.Next() {
@@ -114,42 +118,7 @@ func (fCsv *FileCSVee) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 		}
 		csvRecord = append(csvRecord, strVal)
 	}
-	if aTime, err := cgrEv.FieldAsTime(utils.AnswerTime, fCsv.cgrCfg.GeneralCfg().DefaultTimezone); err == nil {
-		if fCsv.dc[utils.FirstEventATime].(time.Time).IsZero() || fCsv.dc[utils.FirstEventATime].(time.Time).Before(aTime) {
-			fCsv.dc[utils.FirstEventATime] = aTime
-		}
-		if aTime.After(fCsv.dc[utils.LastEventATime].(time.Time)) {
-			fCsv.dc[utils.LastEventATime] = aTime
-		}
-	}
-	if oID, err := cgrEv.FieldAsInt64(utils.OrderID); err == nil {
-		if fCsv.dc[utils.FirstExpOrderID].(int64) > oID || fCsv.dc[utils.FirstExpOrderID].(int64) == 0 {
-			fCsv.dc[utils.FirstExpOrderID] = oID
-		}
-		if fCsv.dc[utils.LastExpOrderID].(int64) < oID {
-			fCsv.dc[utils.LastExpOrderID] = oID
-		}
-	}
-	if cost, err := cgrEv.FieldAsFloat64(utils.Cost); err == nil {
-		fCsv.dc[utils.TotalCost] = fCsv.dc[utils.TotalCost].(float64) + cost
-	}
-	if tor, err := cgrEv.FieldAsString(utils.ToR); err == nil {
-		if usage, err := cgrEv.FieldAsDuration(utils.Usage); err == nil {
-			switch tor {
-			case utils.VOICE:
-				fCsv.dc[utils.TotalDuration] = fCsv.dc[utils.TotalDuration].(time.Duration) + usage
-			case utils.SMS:
-				fCsv.dc[utils.TotalSMSUsage] = fCsv.dc[utils.TotalSMSUsage].(time.Duration) + usage
-			case utils.MMS:
-				fCsv.dc[utils.TotalMMSUsage] = fCsv.dc[utils.TotalMMSUsage].(time.Duration) + usage
-			case utils.GENERIC:
-				fCsv.dc[utils.TotalGenericUsage] = fCsv.dc[utils.TotalGenericUsage].(time.Duration) + usage
-			case utils.DATA:
-				fCsv.dc[utils.TotalDataUsage] = fCsv.dc[utils.TotalDataUsage].(time.Duration) + usage
-			}
-		}
-	}
-	fCsv.dc[utils.PositiveExports].(utils.StringSet).Add(cgrEv.ID)
+	updateEEMetrics(fCsv.dc, cgrEv.Event, fCsv.cgrCfg.GeneralCfg().DefaultTimezone)
 	fCsv.csvWriter.Write(csvRecord)
 	return
 }
