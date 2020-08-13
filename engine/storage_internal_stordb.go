@@ -1586,36 +1586,45 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 			}
 		}
 
-		if filter.Paginator.Offset != nil {
-			if paginatorOffsetCounter <= *filter.Paginator.Offset {
+		if filter.OrderBy == utils.EmptyString { // if do not have to order exit early
+			if filter.Paginator.Offset != nil &&
+				paginatorOffsetCounter <= *filter.Paginator.Offset {
 				paginatorOffsetCounter++
 				continue
 			}
-		}
-		if filter.Paginator.Limit != nil {
-			if len(cdrs) >= *filter.Paginator.Limit {
+			if filter.Paginator.Limit != nil &&
+				len(cdrs) >= *filter.Paginator.Limit {
 				break
 			}
 		}
 		//pass all filters and append to slice
 		cdrs = append(cdrs, cdr)
 	}
+	if filter.OrderBy != utils.EmptyString &&
+		filter.Paginator.Offset != nil &&
+		len(cdrs) < *filter.Paginator.Offset { // if we have offset populated but not enough cdrs return
+		if filter.Count {
+			return nil, 0, nil
+		}
+		return nil, 0, utils.ErrNotFound
+	}
 	if filter.Count {
+		if filter.Paginator.Limit != nil &&
+			len(cdrs) >= *filter.Paginator.Limit {
+			return nil, int64(*filter.Paginator.Limit), nil
+		}
 		return nil, int64(len(cdrs)), nil
 	}
-	if remove {
-		for _, cdr := range cdrs {
-			iDB.db.Remove(utils.CDRsTBL, utils.ConcatenatedKey(cdr.CGRID, cdr.RunID, cdr.OriginID),
-				cacheCommit(utils.NonTransactional), utils.NonTransactional)
+	if len(cdrs) == 0 {
+		if remove {
+			return nil, 0, nil
 		}
-		return nil, 0, nil
+		return nil, 0, utils.ErrNotFound
 	}
-	if filter.OrderBy != "" {
+
+	if filter.OrderBy != utils.EmptyString {
 		separateVals := strings.Split(filter.OrderBy, utils.INFIELD_SEP)
-		ascendent := true
-		if len(separateVals) == 2 && separateVals[1] == "desc" {
-			ascendent = false
-		}
+		ascendent := !(len(separateVals) == 2 && separateVals[1] == "desc")
 		switch separateVals[0] {
 		case utils.OrderID:
 			if ascendent {
@@ -1627,7 +1636,6 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 					return cdrs[i].OrderID > cdrs[j].OrderID
 				})
 			}
-
 		case utils.AnswerTime:
 			if ascendent {
 				sort.Slice(cdrs, func(i, j int) bool {
@@ -1638,7 +1646,6 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 					return cdrs[i].AnswerTime.After(cdrs[j].AnswerTime)
 				})
 			}
-
 		case utils.SetupTime:
 			if ascendent {
 				sort.Slice(cdrs, func(i, j int) bool {
@@ -1649,7 +1656,6 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 					return cdrs[i].SetupTime.After(cdrs[j].SetupTime)
 				})
 			}
-
 		case utils.Usage:
 			if ascendent {
 				sort.Slice(cdrs, func(i, j int) bool {
@@ -1660,7 +1666,6 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 					return cdrs[i].Usage > cdrs[j].Usage
 				})
 			}
-
 		case utils.Cost:
 			if ascendent {
 				sort.Slice(cdrs, func(i, j int) bool {
@@ -1671,10 +1676,25 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 					return cdrs[i].Cost > cdrs[j].Cost
 				})
 			}
-
 		default:
 			return nil, 0, fmt.Errorf("Invalid value : %s", separateVals[0])
 		}
+
+		if filter.Paginator.Offset != nil {
+			cdrs = cdrs[*filter.Paginator.Offset:]
+		}
+		if filter.Paginator.Limit != nil {
+			if len(cdrs) > *filter.Paginator.Limit {
+				cdrs = cdrs[:*filter.Paginator.Limit]
+			}
+		}
+	}
+	if remove {
+		for _, cdr := range cdrs {
+			iDB.db.Remove(utils.CDRsTBL, utils.ConcatenatedKey(cdr.CGRID, cdr.RunID, cdr.OriginID),
+				cacheCommit(utils.NonTransactional), utils.NonTransactional)
+		}
+		return nil, 0, nil
 	}
 	return
 }

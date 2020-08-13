@@ -23,6 +23,7 @@ import (
 	"errors"
 	"fmt"
 	"path"
+	"reflect"
 	"strconv"
 	"testing"
 	"time"
@@ -266,7 +267,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 			Destination: "1002",
 			SetupTime:   time.Date(2015, 12, 12, 14, 52, 0, 0, time.UTC),
 			AnswerTime:  time.Date(2015, 12, 12, 14, 52, 20, 0, time.UTC),
-			Usage:       time.Duration(35) * time.Second,
+			Usage:       35 * time.Second,
 			ExtraFields: map[string]string{"ExtraHeader1": "ExtraVal1", "ExtraHeader2": "ExtraVal2"},
 			CostSource:  "",
 			Cost:        -1,
@@ -286,7 +287,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 			Destination: "1002",
 			SetupTime:   time.Date(2015, 12, 12, 14, 52, 0, 0, time.UTC),
 			AnswerTime:  time.Date(2015, 12, 12, 14, 52, 20, 0, time.UTC),
-			Usage:       time.Duration(35) * time.Second,
+			Usage:       35 * time.Second,
 			ExtraFields: map[string]string{"ExtraHeader1": "ExtraVal1", "ExtraHeader2": "ExtraVal2"},
 			CostSource:  "testGetCDRs",
 			Cost:        0.17,
@@ -306,7 +307,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 			Destination: "1002",
 			SetupTime:   time.Date(2015, 12, 12, 14, 52, 0, 0, time.UTC),
 			AnswerTime:  time.Date(2015, 12, 12, 14, 52, 20, 0, time.UTC),
-			Usage:       time.Duration(35) * time.Second,
+			Usage:       35 * time.Second,
 			ExtraFields: map[string]string{"ExtraHeader1": "ExtraVal1", "ExtraHeader2": "ExtraVal2"},
 			CostSource:  "testGetCDRs",
 			Cost:        0.17,
@@ -326,7 +327,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 			Destination: "1007",
 			SetupTime:   time.Date(2015, 12, 29, 12, 58, 0, 0, time.UTC),
 			AnswerTime:  time.Date(2015, 12, 29, 12, 59, 0, 0, time.UTC),
-			Usage:       time.Duration(0) * time.Second,
+			Usage:       0,
 			ExtraFields: map[string]string{"ExtraHeader1": "ExtraVal1", "ExtraHeader2": "ExtraVal2"},
 			CostSource:  "rater1",
 			Cost:        0,
@@ -346,7 +347,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 			Destination: "1003",
 			SetupTime:   time.Date(2015, 12, 28, 12, 58, 0, 0, time.UTC),
 			AnswerTime:  time.Date(2015, 12, 28, 12, 58, 30, 0, time.UTC),
-			Usage:       time.Duration(125) * time.Second,
+			Usage:       125 * time.Second,
 			ExtraFields: map[string]string{},
 			CostSource:  "",
 			Cost:        -1,
@@ -366,7 +367,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 			Destination: "1003",
 			SetupTime:   time.Date(2015, 12, 28, 12, 58, 0, 0, time.UTC),
 			AnswerTime:  time.Date(2015, 12, 28, 12, 58, 30, 0, time.UTC),
-			Usage:       time.Duration(125) * time.Second,
+			Usage:       125 * time.Second,
 			ExtraFields: map[string]string{},
 			CostSource:  "testSetCDRs",
 			Cost:        -1,
@@ -387,7 +388,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 			Destination: "1007",
 			SetupTime:   time.Date(2015, 12, 14, 14, 52, 0, 0, time.UTC),
 			AnswerTime:  time.Date(2015, 12, 12, 14, 52, 20, 0, time.UTC),
-			Usage:       time.Duration(64) * time.Second,
+			Usage:       64 * time.Second,
 			ExtraFields: map[string]string{"ExtraHeader3": "ExtraVal3"},
 			CostSource:  "",
 			Cost:        -1,
@@ -407,7 +408,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 			Destination: "1007",
 			SetupTime:   time.Date(2015, 12, 14, 14, 52, 0, 0, time.UTC),
 			AnswerTime:  time.Date(2015, 12, 12, 14, 52, 20, 0, time.UTC),
-			Usage:       time.Duration(64) * time.Second,
+			Usage:       64 * time.Second,
 			ExtraFields: map[string]string{"ExtraHeader3": "ExtraVal3"},
 			CostSource:  "testSetCDRs",
 			Cost:        1.205,
@@ -427,7 +428,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 			Destination: "1002",
 			SetupTime:   time.Date(2015, 12, 15, 18, 22, 0, 0, time.UTC),
 			AnswerTime:  time.Date(2015, 12, 15, 18, 22, 0, 0, time.UTC),
-			Usage:       time.Duration(1) * time.Second,
+			Usage:       time.Second,
 			ExtraFields: map[string]string{"Service-Context-Id": "voice@huawei.com"},
 			CostSource:  "",
 			Cost:        -1,
@@ -447,7 +448,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 			Destination: "1002",
 			SetupTime:   time.Date(2015, 12, 15, 18, 22, 0, 0, time.UTC),
 			AnswerTime:  time.Date(2015, 12, 15, 18, 22, 0, 0, time.UTC),
-			Usage:       time.Duration(1) * time.Second,
+			Usage:       time.Second,
 			ExtraFields: map[string]string{"Service-Context-Id": "voice2@huawei.com"},
 			CostSource:  "rater",
 			Cost:        0.15,
@@ -810,6 +811,40 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 				return fmt.Errorf("testGetCDRs #98 %+v sould be smaller than %+v \n", CDRs[i].Cost, CDRs[i+1].Cost)
 			}
 		}
+	}
+
+	// Limit 5 with filter
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{Accounts: []string{"1001"}, Paginator: utils.Paginator{Limit: utils.IntPointer(2), Offset: utils.IntPointer(0)}}, false); err != nil {
+		return fmt.Errorf("testGetCDRs #99 err: %v", err)
+	} else if len(CDRs) != 2 {
+		return fmt.Errorf("testGetCDRs #100, unexpected number of CDRs returned: %+v", len(CDRs))
+	}
+
+	//Filter by OrderID with paginator
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{OrderBy: "OrderID", Paginator: utils.Paginator{Limit: utils.IntPointer(3)}}, false); err != nil {
+		return fmt.Errorf("testGetCDRs #101, err: %v", err)
+	} else if !reflect.DeepEqual(cdrs[:3], CDRs) {
+		return fmt.Errorf("testGetCDRs #102 Expected %+v received %+v \n", cdrs, CDRs)
+	}
+
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{OrderBy: "OrderID", Paginator: utils.Paginator{Limit: utils.IntPointer(5)}}, false); err != nil {
+		return fmt.Errorf("testGetCDRs #103, err: %v", err)
+	} else if !reflect.DeepEqual(cdrs[:5], CDRs) {
+		return fmt.Errorf("testGetCDRs #104 Expected %+v received %+v \n", cdrs, CDRs)
+	}
+
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{OrderBy: "OrderID", Paginator: utils.Paginator{Limit: utils.IntPointer(3), Offset: utils.IntPointer(2)}}, false); err != nil {
+		return fmt.Errorf("testGetCDRs #103, err: %v", err)
+	} else if !reflect.DeepEqual(cdrs[2:5], CDRs) {
+		return fmt.Errorf("testGetCDRs #104 Expected %+v received %+v \n", utils.ToJSON(cdrs[2:5]), utils.ToJSON(CDRs))
+	}
+
+	if _, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{Paginator: utils.Paginator{Limit: utils.IntPointer(3), Offset: utils.IntPointer(20)}}, false); err != utils.ErrNotFound {
+		return fmt.Errorf("testGetCDRs #105, err: %v", err)
+	}
+
+	if _, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{OrderBy: "OrderID", Paginator: utils.Paginator{Limit: utils.IntPointer(3), Offset: utils.IntPointer(20)}}, false); err != utils.ErrNotFound {
+		return fmt.Errorf("testGetCDRs #105, err: %v", err)
 	}
 	return nil
 }
