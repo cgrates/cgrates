@@ -91,6 +91,7 @@ cgrates (0.11.0~dev) UNRELEASED; urgency=medium
   * [EEs] Add support for *template type
   * [LoaderS] In case of empty output directory path don't move the processed file
   * [FilterS] Added *ipnet filter to check if the network contains the IP
+  * [CacheS] Updated ReloadCache and LoadCache APIs to use a map instead of a structure to be compatible with gob encoding
 
  -- DanB <danb@cgrates.org>  Wed, 19 Feb 2020 13:25:52 +0200
 

@@ -145,7 +145,20 @@ func testDspChcLoadAfterFolder(t *testing.T) {
 	expStats[utils.CacheRouteProfiles].Items = 3
 	expStats[utils.CacheThresholdProfiles].Items = 2
 	expStats[utils.CacheThresholds].Items = 2
-	expStats[utils.CacheLoadIDs].Items = 22
+	expStats[utils.CacheLoadIDs].Items = 33
+	expStats[utils.CacheTimings].Items = 10
+	expStats[utils.CacheThresholdFilterIndexes].Items = 2
+	expStats[utils.CacheThresholdFilterIndexes].Groups = 1
+	expStats[utils.CacheStatFilterIndexes].Items = 7
+	expStats[utils.CacheStatFilterIndexes].Groups = 1
+	expStats[utils.CacheRouteFilterIndexes].Items = 3
+	expStats[utils.CacheRouteFilterIndexes].Groups = 1
+	expStats[utils.CacheResourceFilterIndexes].Items = 3
+	expStats[utils.CacheResourceFilterIndexes].Groups = 1
+	expStats[utils.CacheChargerFilterIndexes].Items = 1
+	expStats[utils.CacheChargerFilterIndexes].Groups = 1
+	expStats[utils.CacheAttributeFilterIndexes].Items = 10
+	expStats[utils.CacheAttributeFilterIndexes].Groups = 4
 	if err := dispEngine.RPC.Call(utils.CacheSv1GetCacheStats, &args, &rcvStats); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expStats, rcvStats) {

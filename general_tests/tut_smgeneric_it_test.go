@@ -155,9 +155,22 @@ func testTutSMGCacheStats(t *testing.T) {
 	expectedStats[utils.CacheAttributeProfiles].Items = 2
 	expectedStats[utils.MetaDefault].Items = 1
 	expectedStats[utils.CacheActionTriggers].Items = 1
-	expectedStats[utils.CacheLoadIDs].Items = 22
+	expectedStats[utils.CacheLoadIDs].Items = 33
 	expectedStats[utils.CacheChargerProfiles].Items = 1
 	expectedStats[utils.CacheRPCConnections].Items = 2
+	expectedStats[utils.CacheTimings].Items = 14
+	expectedStats[utils.CacheThresholdFilterIndexes].Items = 10
+	expectedStats[utils.CacheThresholdFilterIndexes].Groups = 1
+	expectedStats[utils.CacheStatFilterIndexes].Items = 2
+	expectedStats[utils.CacheStatFilterIndexes].Groups = 1
+	expectedStats[utils.CacheRouteFilterIndexes].Items = 6
+	expectedStats[utils.CacheRouteFilterIndexes].Groups = 1
+	expectedStats[utils.CacheResourceFilterIndexes].Items = 6
+	expectedStats[utils.CacheResourceFilterIndexes].Groups = 1
+	expectedStats[utils.CacheChargerFilterIndexes].Items = 1
+	expectedStats[utils.CacheChargerFilterIndexes].Groups = 1
+	expectedStats[utils.CacheAttributeFilterIndexes].Items = 3
+	expectedStats[utils.CacheAttributeFilterIndexes].Groups = 2
 	if err := tutSMGRpc.Call(utils.CacheSv1GetCacheStats, new(utils.AttrCacheIDsWithOpts), &rcvStats); err != nil {
 		t.Error("Got error on CacheSv1.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {

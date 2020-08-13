@@ -1495,7 +1495,18 @@ func testApierResetDataAfterLoadFromFolder(t *testing.T) {
 	expStats[utils.CacheRouteProfiles].Items = 2
 	expStats[utils.CacheThresholdProfiles].Items = 1
 	expStats[utils.CacheThresholds].Items = 1
-	expStats[utils.CacheLoadIDs].Items = 22
+	expStats[utils.CacheLoadIDs].Items = 33
+	expStats[utils.CacheTimings].Items = 12
+	expStats[utils.CacheThresholdFilterIndexes].Items = 5
+	expStats[utils.CacheThresholdFilterIndexes].Groups = 1
+	expStats[utils.CacheStatFilterIndexes].Items = 2
+	expStats[utils.CacheStatFilterIndexes].Groups = 1
+	expStats[utils.CacheRouteFilterIndexes].Items = 2
+	expStats[utils.CacheRouteFilterIndexes].Groups = 1
+	expStats[utils.CacheResourceFilterIndexes].Items = 5
+	expStats[utils.CacheResourceFilterIndexes].Groups = 1
+	expStats[utils.CacheAttributeFilterIndexes].Items = 4
+	expStats[utils.CacheAttributeFilterIndexes].Groups = 1
 
 	if err := rater.Call(utils.CacheSv1GetCacheStats, new(utils.AttrCacheIDsWithOpts), &rcvStats); err != nil {
 		t.Error(err)
