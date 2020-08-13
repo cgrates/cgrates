@@ -231,11 +231,11 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithIDs, rply *st
 func newEEMetrics() utils.MapStorage {
 	return utils.MapStorage{
 		utils.NumberOfEvents:    0,
-		utils.TotalCost:         0.0,
+		utils.TotalCost:         float64(0.0),
 		utils.PositiveExports:   utils.StringSet{},
 		utils.NegativeExports:   utils.StringSet{},
-		utils.FirstExpOrderID:   0,
-		utils.LastExpOrderID:    0,
+		utils.FirstExpOrderID:   int64(0),
+		utils.LastExpOrderID:    int64(0),
 		utils.FirstEventATime:   time.Time{},
 		utils.LastEventATime:    time.Time{},
 		utils.TimeNow:           time.Now(),
@@ -244,5 +244,45 @@ func newEEMetrics() utils.MapStorage {
 		utils.TotalMMSUsage:     time.Duration(0),
 		utils.TotalGenericUsage: time.Duration(0),
 		utils.TotalDataUsage:    time.Duration(0),
+	}
+}
+
+func updateEEMetrics(dc utils.MapStorage, ev engine.MapEvent, timezone string) {
+	if aTime, err := ev.GetTime(utils.AnswerTime, timezone); err == nil {
+		if dc[utils.FirstEventATime].(time.Time).IsZero() ||
+			aTime.Before(dc[utils.FirstEventATime].(time.Time)) {
+			dc[utils.FirstEventATime] = aTime
+		}
+		if aTime.After(dc[utils.LastEventATime].(time.Time)) {
+			dc[utils.LastEventATime] = aTime
+		}
+	}
+	if oID, err := ev.GetTInt64(utils.OrderID); err == nil {
+		if dc[utils.FirstExpOrderID].(int64) == 0 ||
+			dc[utils.FirstExpOrderID].(int64) > oID {
+			dc[utils.FirstExpOrderID] = oID
+		}
+		if dc[utils.LastExpOrderID].(int64) < oID {
+			dc[utils.LastExpOrderID] = oID
+		}
+	}
+	if cost, err := ev.GetFloat64(utils.Cost); err == nil {
+		dc[utils.TotalCost] = dc[utils.TotalCost].(float64) + cost
+	}
+	if tor, err := ev.GetString(utils.ToR); err == nil {
+		if usage, err := ev.GetDuration(utils.Usage); err == nil {
+			switch tor {
+			case utils.VOICE:
+				dc[utils.TotalDuration] = dc[utils.TotalDuration].(time.Duration) + usage
+			case utils.SMS:
+				dc[utils.TotalSMSUsage] = dc[utils.TotalSMSUsage].(time.Duration) + usage
+			case utils.MMS:
+				dc[utils.TotalMMSUsage] = dc[utils.TotalMMSUsage].(time.Duration) + usage
+			case utils.GENERIC:
+				dc[utils.TotalGenericUsage] = dc[utils.TotalGenericUsage].(time.Duration) + usage
+			case utils.DATA:
+				dc[utils.TotalDataUsage] = dc[utils.TotalDataUsage].(time.Duration) + usage
+			}
+		}
 	}
 }

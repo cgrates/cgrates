@@ -689,6 +689,28 @@ func TestMapEventGetTInt64(t *testing.T) {
 	}
 }
 
+func TestMapEventGetFloat64(t *testing.T) {
+	if rply, err := mapEv.GetFloat64("test2"); err != nil {
+		t.Error(err)
+	} else if rply != float64(42) {
+		t.Errorf("Expecting %+v, received: %+v", float64(42), rply)
+	}
+
+	if rply, err := mapEv.GetFloat64("test3"); err != nil {
+		t.Error(err)
+	} else if rply != float64(42.3) {
+		t.Errorf("Expecting %+v, received: %+v", float64(42.3), rply)
+	}
+
+	if rply, err := mapEv.GetFloat64("test4"); err == nil {
+		t.Errorf("Expecting error, received: %+v with error %v", rply, err)
+	}
+
+	if rply, err := mapEv.GetFloat64("0test"); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expecting error: %v, received: %+v with error %v", utils.ErrNotFound, rply, err)
+	}
+}
+
 func TestMapEventGetDurationPtr(t *testing.T) {
 	if rply, err := mapEv.GetDurationPtr("test4"); err == nil {
 		t.Errorf("Expecting error, received: %+v with error %v", rply, err)

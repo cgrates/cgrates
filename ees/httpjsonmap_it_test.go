@@ -195,6 +195,7 @@ func testHTTPJsonMapExportEvent(t *testing.T) {
 					utils.Usage:       time.Duration(1),
 					utils.RunID:       utils.MetaDefault,
 					utils.Cost:        0.15,
+					utils.OrderID:     10,
 					"ExporterUsed":    "HTTPJsonMapExporter",
 					"ExtraFields": map[string]string{"extra1": "val_extra1",
 						"extra2": "val_extra2", "extra3": "val_extra3"},
