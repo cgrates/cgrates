@@ -336,16 +336,14 @@ func (chS *CacheS) V1ReloadCache(attrs utils.AttrReloadCacheWithOpts, reply *str
 		}
 	}
 	//get loadIDs from database for all types
-	loadIDs, err := chS.dm.GetItemLoadIDs(utils.EmptyString, false)
-	if err != nil {
-		if err == utils.ErrNotFound { // we can receive cache reload from LoaderS and we store the LoadID only after all Items was processed
-			loadIDs = make(map[string]int64)
-		} else {
-			return err
+	var loadIDs map[string]int64
+	if loadIDs, err = chS.dm.GetItemLoadIDs(utils.EmptyString, false); err != nil {
+		if err != utils.ErrNotFound { // we can receive cache reload from LoaderS and we store the LoadID only after all Items was processed
+			return
 		}
+		loadIDs = make(map[string]int64)
 	}
-	cacheLoadIDs := populateCacheLoadIDs(loadIDs, attrs.ArgsCache)
-	for key, val := range cacheLoadIDs {
+	for key, val := range populateCacheLoadIDs(loadIDs, attrs.ArgsCache) {
 		chS.tCache.Set(utils.CacheLoadIDs, key, val, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	}
@@ -361,20 +359,18 @@ func (chS *CacheS) V1LoadCache(attrs utils.AttrReloadCacheWithOpts, reply *strin
 			args[prfx] = ids
 		}
 	}
-	if err := chS.dm.LoadDataDBCache(args); err != nil {
+	if err = chS.dm.LoadDataDBCache(args); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	//get loadIDs for all types
-	loadIDs, err := chS.dm.GetItemLoadIDs(utils.EmptyString, false)
-	if err != nil {
-		if err == utils.ErrNotFound { // we can receive cache reload from LoaderS and we store the LoadID only after all Items was processed
-			loadIDs = make(map[string]int64)
-		} else {
-			return err
+	var loadIDs map[string]int64
+	if loadIDs, err = chS.dm.GetItemLoadIDs(utils.EmptyString, false); err != nil {
+		if err != utils.ErrNotFound { // we can receive cache reload from LoaderS and we store the LoadID only after all Items was processed
+			return
 		}
+		loadIDs = make(map[string]int64)
 	}
-	cacheLoadIDs := populateCacheLoadIDs(loadIDs, attrs.ArgsCache)
-	for key, val := range cacheLoadIDs {
+	for key, val := range populateCacheLoadIDs(loadIDs, attrs.ArgsCache) {
 		chS.tCache.Set(utils.CacheLoadIDs, key, val, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	}
@@ -395,7 +391,7 @@ func populateCacheLoadIDs(loadIDs map[string]int64, attrs map[string][]string) (
 	return
 }
 
-// Replicate replicate an item to ReplicationConns
+// ReplicateSet replicate an item to ReplicationConns
 func (chS *CacheS) ReplicateSet(chID, itmID string, value interface{}) (err error) {
 	if len(chS.cfg.CacheCfg().ReplicationConns) == 0 ||
 		!chS.cfg.CacheCfg().Partitions[chID].Replicate {

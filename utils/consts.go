@@ -166,6 +166,18 @@ var (
 		DispatcherProfileIDs:  DispatcherProfilePrefix,
 		DispatcherHostIDs:     DispatcherHostPrefix,
 		RateProfileIDs:        RateProfilePrefix,
+
+		TimingIDs:                  TimingsPrefix,
+		AttributeFilterIndexIDs:    AttributeFilterIndexes,
+		ResourceFilterIndexIDs:     ResourceFilterIndexes,
+		StatFilterIndexIDs:         StatFilterIndexes,
+		ThresholdFilterIndexIDs:    ThresholdFilterIndexes,
+		RouteFilterIndexIDs:        RouteFilterIndexes,
+		ChargerFilterIndexIDs:      ChargerFilterIndexes,
+		DispatcherFilterIndexIDs:   DispatcherFilterIndexes,
+		RateProfilesFilterIndexIDs: RateProfilesFilterIndexPrfx,
+		RateFilterIndexIDs:         RateFilterIndexPrfx,
+		FilterIndexIDs:             FilterIndexPrfx,
 	}
 	ArgCacheToInstance = map[string]string{
 		DestinationIDs:        CacheDestinations,
@@ -190,6 +202,18 @@ var (
 		DispatcherProfileIDs:  CacheDispatcherProfiles,
 		DispatcherHostIDs:     CacheDispatcherHosts,
 		RateProfileIDs:        CacheRateProfiles,
+
+		TimingIDs:                  CacheTimings,
+		AttributeFilterIndexIDs:    CacheAttributeFilterIndexes,
+		ResourceFilterIndexIDs:     CacheResourceFilterIndexes,
+		StatFilterIndexIDs:         CacheStatFilterIndexes,
+		ThresholdFilterIndexIDs:    CacheThresholdFilterIndexes,
+		RouteFilterIndexIDs:        CacheRouteFilterIndexes,
+		ChargerFilterIndexIDs:      CacheChargerFilterIndexes,
+		DispatcherFilterIndexIDs:   CacheDispatcherFilterIndexes,
+		RateProfilesFilterIndexIDs: CacheRateProfilesFilterIndexes,
+		RateFilterIndexIDs:         CacheRateFilterIndexes,
+		FilterIndexIDs:             CacheReverseFilterIndexes,
 	}
 )
 
@@ -463,7 +487,6 @@ const (
 	ActionPlans                 = "ActionPlans"
 	ActionTriggers              = "ActionTriggers"
 	SharedGroups                = "SharedGroups"
-	TimingIDs                   = "TimingIDs"
 	Timings                     = "Timings"
 	Rates                       = "Rates"
 	DestinationRates            = "DestinationRates"
@@ -2325,29 +2348,40 @@ const (
 
 // ArgCache constats
 const (
-	DestinationIDs        = "DestinationIDs"
-	ReverseDestinationIDs = "ReverseDestinationIDs"
-	RatingPlanIDs         = "RatingPlanIDs"
-	RatingProfileIDs      = "RatingProfileIDs"
-	ActionIDs             = "ActionIDs"
-	ActionPlanIDs         = "ActionPlanIDs"
-	AccountActionPlanIDs  = "AccountActionPlanIDs"
-	ActionTriggerIDs      = "ActionTriggerIDs"
-	SharedGroupIDs        = "SharedGroupIDs"
-	ResourceProfileIDs    = "ResourceProfileIDs"
-	ResourceIDs           = "ResourceIDs"
-	StatsQueueIDs         = "StatsQueueIDs"
-	StatsQueueProfileIDs  = "StatsQueueProfileIDs"
-	ThresholdIDs          = "ThresholdIDs"
-	ThresholdProfileIDs   = "ThresholdProfileIDs"
-	FilterIDs             = "FilterIDs"
-	RouteProfileIDs       = "RouteProfileIDs"
-	AttributeProfileIDs   = "AttributeProfileIDs"
-	ChargerProfileIDs     = "ChargerProfileIDs"
-	DispatcherProfileIDs  = "DispatcherProfileIDs"
-	DispatcherHostIDs     = "DispatcherHostIDs"
-	DispatcherRoutesIDs   = "DispatcherRoutesIDs"
-	RateProfileIDs        = "RateProfileIDs"
+	DestinationIDs             = "DestinationIDs"
+	ReverseDestinationIDs      = "ReverseDestinationIDs"
+	RatingPlanIDs              = "RatingPlanIDs"
+	RatingProfileIDs           = "RatingProfileIDs"
+	ActionIDs                  = "ActionIDs"
+	ActionPlanIDs              = "ActionPlanIDs"
+	AccountActionPlanIDs       = "AccountActionPlanIDs"
+	ActionTriggerIDs           = "ActionTriggerIDs"
+	SharedGroupIDs             = "SharedGroupIDs"
+	ResourceProfileIDs         = "ResourceProfileIDs"
+	ResourceIDs                = "ResourceIDs"
+	StatsQueueIDs              = "StatsQueueIDs"
+	StatsQueueProfileIDs       = "StatsQueueProfileIDs"
+	ThresholdIDs               = "ThresholdIDs"
+	ThresholdProfileIDs        = "ThresholdProfileIDs"
+	FilterIDs                  = "FilterIDs"
+	RouteProfileIDs            = "RouteProfileIDs"
+	AttributeProfileIDs        = "AttributeProfileIDs"
+	ChargerProfileIDs          = "ChargerProfileIDs"
+	DispatcherProfileIDs       = "DispatcherProfileIDs"
+	DispatcherHostIDs          = "DispatcherHostIDs"
+	DispatcherRoutesIDs        = "DispatcherRoutesIDs"
+	RateProfileIDs             = "RateProfileIDs"
+	TimingIDs                  = "TimingIDs"
+	AttributeFilterIndexIDs    = "AttributeFilterIndexIDs"
+	ResourceFilterIndexIDs     = "ResourceFilterIndexIDs"
+	StatFilterIndexIDs         = "StatFilterIndexIDs"
+	ThresholdFilterIndexIDs    = "ThresholdFilterIndexIDs"
+	RouteFilterIndexIDs        = "RouteFilterIndexIDs"
+	ChargerFilterIndexIDs      = "ChargerFilterIndexIDs"
+	DispatcherFilterIndexIDs   = "DispatcherFilterIndexIDs"
+	RateProfilesFilterIndexIDs = "RateProfilesFilterIndexIDs"
+	RateFilterIndexIDs         = "RateFilterIndexIDs"
+	FilterIndexIDs             = "FilterIndexIDs"
 )
 
 func buildCacheInstRevPrefixes() {

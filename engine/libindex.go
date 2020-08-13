@@ -351,7 +351,7 @@ func splitFilterIndex(tntCtxIdxKey string) (tntCtx, idxKey string, err error) {
 	splt := utils.SplitConcatenatedKey(tntCtxIdxKey) // tntCtx:filterType:fieldName:fieldVal
 	lsplt := len(splt)
 	if lsplt < 4 {
-		err = fmt.Errorf("WRONG_IDX_KEY_FORMAT")
+		err = fmt.Errorf("WRONG_IDX_KEY_FORMAT<%s>", tntCtxIdxKey)
 		return
 	}
 	tntCtx = utils.ConcatenatedKey(splt[:lsplt-3]...) // prefix may contain context/subsystems
