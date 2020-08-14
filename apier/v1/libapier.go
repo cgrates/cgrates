@@ -37,7 +37,6 @@ func GetCacheOpt(apiOpt *string) string {
 // composeArgsReload add the ItemID to AttrReloadCache
 // for a specific CacheID
 func composeArgsReload(args utils.ArgsGetCacheItem) (rpl map[string][]string) {
-	// ToDo: make the load cache API compatible with gob encoding
 	rpl = make(map[string][]string)
 	switch args.CacheID {
 	case utils.CacheResourceProfiles:

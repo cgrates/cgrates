@@ -26,19 +26,14 @@ import (
 // Binary string search in slice
 func IsSliceMember(ss []string, s string) bool {
 	sort.Strings(ss)
-	if i := sort.SearchStrings(ss, s); i < len(ss) && ss[i] == s {
-		return true
-	}
-	return false
+	return SliceHasMember(ss, s)
 }
 
 // SliceHasMember searches within a *sorted* slice
 // useful to search in shared vars (no slice sort)
 func SliceHasMember(ss []string, s string) bool {
-	if i := sort.SearchStrings(ss, s); i < len(ss) && ss[i] == s {
-		return true
-	}
-	return false
+	i := sort.SearchStrings(ss, s)
+	return i < len(ss) && ss[i] == s
 }
 
 // SliceWithoutMember removes s string from slice ss (if found)
@@ -105,4 +100,21 @@ func SliceStringToIface(slc []string) (ifc []interface{}) {
 		ifc[i] = itm
 	}
 	return
+}
+
+// Float64SliceHasMember searches within a *sorted* slice
+// useful to search in shared vars (no slice sort)
+func Float64SliceHasMember(ss []float64, s float64) bool {
+	i := sort.SearchFloat64s(ss, s)
+	return i < len(ss) && ss[i] == s
+}
+
+// HasPrefixSlice iterates over slice members and returns true if one the element has that prefix
+func HasPrefixSlice(prfxs []string, el string) bool {
+	for _, prfx := range prfxs {
+		if strings.HasPrefix(el, prfx) {
+			return true
+		}
+	}
+	return false
 }
