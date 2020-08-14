@@ -41,6 +41,14 @@ func TestSliceHasMember(t *testing.T) {
 	}
 }
 
+func TestFlaot64SliceHasMember(t *testing.T) {
+	if !Float64SliceHasMember([]float64{1, 2, 3, 4, 5}, 5) {
+		t.Error("Expecting: true, received: false")
+	}
+	if Float64SliceHasMember([]float64{1, 2, 3, 4, 5}, 6) {
+		t.Error("Expecting: true, received: false")
+	}
+}
 func TestSliceWithoutMember(t *testing.T) {
 	rcv := SliceWithoutMember([]string{"1", "2", "3", "4", "5"}, "5")
 	sort.Strings(rcv)
@@ -61,6 +69,15 @@ func TestSliceMemberHasPrefix(t *testing.T) {
 		t.Error("Expecting: true, received: false")
 	}
 	if SliceMemberHasPrefix([]string{"1", "2", "3", "4", "5"}, "*") {
+		t.Error("Expecting: true, received: false")
+	}
+}
+
+func TestHasPrefixSlice(t *testing.T) {
+	if !HasPrefixSlice([]string{"1", "2", "3", "4", "5"}, "123") {
+		t.Error("Expecting: true, received: false")
+	}
+	if HasPrefixSlice([]string{"1", "2", "3", "4", "5"}, "689") {
 		t.Error("Expecting: true, received: false")
 	}
 }

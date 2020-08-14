@@ -973,3 +973,61 @@ func TestAppendToSMCostFilter(t *testing.T) {
 		t.Errorf("Expected: %s ,received: %s ", ToJSON(expected), ToJSON(smfltr))
 	}
 }
+
+func TestCDRsFilterPrepare(t *testing.T) {
+	fltr := &CDRsFilter{
+		CGRIDs:          []string{"5", "6", "1", "3", "2", "4"},
+		NotCGRIDs:       []string{"5", "6", "1", "3", "2", "4"},
+		RunIDs:          []string{"5", "6", "1", "3", "2", "4"},
+		NotRunIDs:       []string{"5", "6", "1", "3", "2", "4"},
+		OriginIDs:       []string{"5", "6", "1", "3", "2", "4"},
+		NotOriginIDs:    []string{"5", "6", "1", "3", "2", "4"},
+		OriginHosts:     []string{"5", "6", "1", "3", "2", "4"},
+		NotOriginHosts:  []string{"5", "6", "1", "3", "2", "4"},
+		Sources:         []string{"5", "6", "1", "3", "2", "4"},
+		NotSources:      []string{"5", "6", "1", "3", "2", "4"},
+		ToRs:            []string{"5", "6", "1", "3", "2", "4"},
+		NotToRs:         []string{"5", "6", "1", "3", "2", "4"},
+		RequestTypes:    []string{"5", "6", "1", "3", "2", "4"},
+		NotRequestTypes: []string{"5", "6", "1", "3", "2", "4"},
+		Tenants:         []string{"5", "6", "1", "3", "2", "4"},
+		NotTenants:      []string{"5", "6", "1", "3", "2", "4"},
+		Categories:      []string{"5", "6", "1", "3", "2", "4"},
+		NotCategories:   []string{"5", "6", "1", "3", "2", "4"},
+		Accounts:        []string{"5", "6", "1", "3", "2", "4"},
+		NotAccounts:     []string{"5", "6", "1", "3", "2", "4"},
+		Subjects:        []string{"5", "6", "1", "3", "2", "4"},
+		NotSubjects:     []string{"5", "6", "1", "3", "2", "4"},
+		Costs:           []float64{5, 6, 1, 3, 2, 4},
+		NotCosts:        []float64{5, 6, 1, 3, 2, 4},
+	}
+	exp := &CDRsFilter{
+		CGRIDs:          []string{"1", "2", "3", "4", "5", "6"},
+		NotCGRIDs:       []string{"1", "2", "3", "4", "5", "6"},
+		RunIDs:          []string{"1", "2", "3", "4", "5", "6"},
+		NotRunIDs:       []string{"1", "2", "3", "4", "5", "6"},
+		OriginIDs:       []string{"1", "2", "3", "4", "5", "6"},
+		NotOriginIDs:    []string{"1", "2", "3", "4", "5", "6"},
+		OriginHosts:     []string{"1", "2", "3", "4", "5", "6"},
+		NotOriginHosts:  []string{"1", "2", "3", "4", "5", "6"},
+		Sources:         []string{"1", "2", "3", "4", "5", "6"},
+		NotSources:      []string{"1", "2", "3", "4", "5", "6"},
+		ToRs:            []string{"1", "2", "3", "4", "5", "6"},
+		NotToRs:         []string{"1", "2", "3", "4", "5", "6"},
+		RequestTypes:    []string{"1", "2", "3", "4", "5", "6"},
+		NotRequestTypes: []string{"1", "2", "3", "4", "5", "6"},
+		Tenants:         []string{"1", "2", "3", "4", "5", "6"},
+		NotTenants:      []string{"1", "2", "3", "4", "5", "6"},
+		Categories:      []string{"1", "2", "3", "4", "5", "6"},
+		NotCategories:   []string{"1", "2", "3", "4", "5", "6"},
+		Accounts:        []string{"1", "2", "3", "4", "5", "6"},
+		NotAccounts:     []string{"1", "2", "3", "4", "5", "6"},
+		Subjects:        []string{"1", "2", "3", "4", "5", "6"},
+		NotSubjects:     []string{"1", "2", "3", "4", "5", "6"},
+		Costs:           []float64{1, 2, 3, 4, 5, 6},
+		NotCosts:        []float64{1, 2, 3, 4, 5, 6},
+	}
+	if fltr.Prepare(); !reflect.DeepEqual(exp, fltr) {
+		t.Errorf("Expected %s,received %s", ToJSON(exp), ToJSON(fltr))
+	}
+}
