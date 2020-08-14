@@ -727,6 +727,38 @@ type CDRsFilter struct {
 	Paginator
 }
 
+// Prepare will sort all the slices in order to search more faster
+func (fltr *CDRsFilter) Prepare() {
+	sort.Strings(fltr.CGRIDs)
+	sort.Strings(fltr.NotCGRIDs)
+	sort.Strings(fltr.RunIDs)
+	sort.Strings(fltr.NotRunIDs)
+	sort.Strings(fltr.OriginIDs)
+	sort.Strings(fltr.NotOriginIDs)
+	sort.Strings(fltr.OriginHosts)
+	sort.Strings(fltr.NotOriginHosts)
+	sort.Strings(fltr.Sources)
+	sort.Strings(fltr.NotSources)
+	sort.Strings(fltr.ToRs)
+	sort.Strings(fltr.NotToRs)
+	sort.Strings(fltr.RequestTypes)
+	sort.Strings(fltr.NotRequestTypes)
+	sort.Strings(fltr.Tenants)
+	sort.Strings(fltr.NotTenants)
+	sort.Strings(fltr.Categories)
+	sort.Strings(fltr.NotCategories)
+	sort.Strings(fltr.Accounts)
+	sort.Strings(fltr.NotAccounts)
+	sort.Strings(fltr.Subjects)
+	sort.Strings(fltr.NotSubjects)
+	// sort.Strings(fltr.DestinationPrefixes)
+	// sort.Strings(fltr.NotDestinationPrefixes)
+
+	sort.Sort(sort.Float64Slice(fltr.Costs))
+	sort.Sort(sort.Float64Slice(fltr.NotCosts))
+
+}
+
 // RPCCDRsFilter is a filter used in Rpc calls
 // RPCCDRsFilter is slightly different than CDRsFilter by using string instead of Time filters
 type RPCCDRsFilter struct {
