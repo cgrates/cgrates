@@ -324,18 +324,7 @@ func testCDRsOnExpAMQPReplication(t *testing.T) {
 	}
 	defer ch.Close()
 
-	q, err := ch.QueueDeclare("cgrates_cdrs", true, false, false, false, nil)
-	if err != nil {
-		conn.Close()
-		t.Fatal(err)
-	}
-	q1, err := ch.QueueDeclare("queue1", true, false, false, false, nil)
-	if err != nil {
-		conn.Close()
-		t.Fatal(err)
-	}
-
-	msgs, err := ch.Consume(q.Name, "", true, false, false, false, nil)
+	msgs, err := ch.Consume("cgrates_cdrs", "", true, false, false, false, nil)
 	if err != nil {
 		conn.Close()
 		t.Fatal(err)
@@ -352,7 +341,7 @@ func testCDRsOnExpAMQPReplication(t *testing.T) {
 	case <-time.After(time.Duration(100 * time.Millisecond)):
 		t.Error("No message received from RabbitMQ")
 	}
-	if msgs, err = ch.Consume(q1.Name, "consumer", true, false, false, false, nil); err != nil {
+	if msgs, err = ch.Consume("queue1", "consumer", true, false, false, false, nil); err != nil {
 		conn.Close()
 		t.Fatal(err)
 	}
@@ -421,7 +410,7 @@ func testCDRsOnExpAMQPReplication(t *testing.T) {
 	}
 	defer ch.Close()
 
-	if msgs, err = ch.Consume(q.Name, "", true, false, false, false, nil); err != nil {
+	if msgs, err = ch.Consume("cgrates_cdrs", "", true, false, false, false, nil); err != nil {
 		t.Fatal(err)
 	}
 	select {
@@ -437,7 +426,7 @@ func testCDRsOnExpAMQPReplication(t *testing.T) {
 		t.Error("No message received from RabbitMQ")
 	}
 
-	if msgs, err = ch.Consume(q1.Name, "", true, false, false, false, nil); err != nil {
+	if msgs, err = ch.Consume("queue1", "", true, false, false, false, nil); err != nil {
 		t.Fatal(err)
 	}
 	select {
