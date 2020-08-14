@@ -1087,10 +1087,9 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 		if len(fltrSlc.ids) == 0 {
 			continue
 		}
-		grpMpIDs := utils.NewStringSet([]string{})
+		grpMpIDs := make(utils.StringSet)
 		for _, id := range fltrSlc.ids {
-			grpIDs := iDB.db.GetGroupItemIDs(utils.CDRsTBL, utils.ConcatenatedKey(fltrSlc.key, id))
-			grpMpIDs.AddSlice(grpIDs)
+			grpMpIDs.AddSlice(iDB.db.GetGroupItemIDs(utils.CDRsTBL, utils.ConcatenatedKey(fltrSlc.key, id)))
 		}
 		if grpMpIDs.Size() == 0 {
 			if filter.Count {
@@ -1100,14 +1099,14 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 		}
 		if cdrMpIDs == nil {
 			cdrMpIDs = grpMpIDs
-		} else {
-			cdrMpIDs.Intersect(grpMpIDs)
-			if cdrMpIDs.Size() == 0 {
-				if filter.Count {
-					return nil, 0, nil
-				}
-				return nil, 0, utils.ErrNotFound
+			continue
+		}
+		cdrMpIDs.Intersect(grpMpIDs)
+		if cdrMpIDs.Size() == 0 {
+			if filter.Count {
+				return nil, 0, nil
 			}
+			return nil, 0, utils.ErrNotFound
 		}
 	}
 	if cdrMpIDs == nil {
@@ -1119,16 +1118,16 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 			continue
 		}
 		for _, id := range fltrSlc.ids {
-			grpIDs := iDB.db.GetGroupItemIDs(utils.CDRsTBL, utils.ConcatenatedKey(fltrSlc.key, id))
-			for _, id := range grpIDs {
-				if cdrMpIDs.Has(id) {
-					cdrMpIDs.Remove(id)
-					if cdrMpIDs.Size() == 0 {
-						if filter.Count {
-							return nil, 0, nil
-						}
-						return nil, 0, utils.ErrNotFound
+			for _, id := range iDB.db.GetGroupItemIDs(utils.CDRsTBL, utils.ConcatenatedKey(fltrSlc.key, id)) {
+				if !cdrMpIDs.Has(id) {
+					continue
+				}
+				cdrMpIDs.Remove(id)
+				if cdrMpIDs.Size() == 0 {
+					if filter.Count {
+						return nil, 0, nil
 					}
+					return nil, 0, utils.ErrNotFound
 				}
 			}
 		}
@@ -1156,8 +1155,11 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 			return nil, 0, err
 		}
 	}
-
-	paginatorOffsetCounter := 0
+	var offset int
+	if filter.Paginator.Offset != nil {
+		offset = *filter.Paginator.Offset
+	}
+	filter.Prepare()
 	for key := range cdrMpIDs {
 		x, ok := iDB.db.Get(utils.CDRsTBL, key)
 		if !ok || x == nil {
@@ -1166,364 +1168,50 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 		cdr := x.(*CDR)
 
 		// default indexed filters
+		if (len(filter.CGRIDs) > 0 && !utils.SliceHasMember(filter.CGRIDs, cdr.CGRID)) ||
+			(len(filter.RunIDs) > 0 && !utils.SliceHasMember(filter.RunIDs, cdr.RunID)) ||
+			(len(filter.OriginIDs) > 0 && !utils.SliceHasMember(filter.OriginIDs, cdr.OriginID)) ||
+			(len(filter.OriginHosts) > 0 && !utils.SliceHasMember(filter.OriginHosts, cdr.OriginHost)) ||
+			(len(filter.Sources) > 0 && !utils.SliceHasMember(filter.Sources, cdr.Source)) ||
+			(len(filter.ToRs) > 0 && !utils.SliceHasMember(filter.ToRs, cdr.ToR)) ||
+			(len(filter.RequestTypes) > 0 && !utils.SliceHasMember(filter.RequestTypes, cdr.RequestType)) ||
+			(len(filter.Tenants) > 0 && !utils.SliceHasMember(filter.Tenants, cdr.Tenant)) ||
+			(len(filter.Categories) > 0 && !utils.SliceHasMember(filter.Categories, cdr.Category)) ||
+			(len(filter.Accounts) > 0 && !utils.SliceHasMember(filter.Accounts, cdr.Account)) ||
+			(len(filter.Subjects) > 0 && !utils.SliceHasMember(filter.Subjects, cdr.Subject)) ||
 
-		if len(filter.CGRIDs) > 0 {
-			matchCGRID := false
-			for _, cgrid := range filter.CGRIDs {
-				if cdr.CGRID == cgrid {
-					matchCGRID = true
-					break
-				}
-			}
-			if !matchCGRID {
-				continue
-			}
-		}
-		if len(filter.RunIDs) > 0 {
-			matchRunID := false
-			for _, runid := range filter.RunIDs {
-				if cdr.RunID == runid {
-					matchRunID = true
-					break
-				}
-			}
-			if !matchRunID {
-				continue
-			}
-		}
-		if len(filter.OriginIDs) > 0 {
-			matchOriginID := false
-			for _, originid := range filter.OriginIDs {
-				if cdr.OriginID == originid {
-					matchOriginID = true
-					break
-				}
-			}
-			if !matchOriginID {
-				continue
-			}
-		}
-		if len(filter.OriginHosts) > 0 {
-			matchOriginHost := false
-			for _, originHost := range filter.OriginHosts {
-				if cdr.OriginHost == originHost {
-					matchOriginHost = true
-					break
-				}
-			}
-			if !matchOriginHost {
-				continue
-			}
-		}
-		if len(filter.Sources) > 0 {
-			matchSource := false
-			for _, source := range filter.Sources {
-				if cdr.Source == source {
-					matchSource = true
-					break
-				}
-			}
-			if !matchSource {
-				continue
-			}
-		}
-		if len(filter.ToRs) > 0 {
-			matchToR := false
-			for _, tor := range filter.ToRs {
-				if cdr.ToR == tor {
-					matchToR = true
-					break
-				}
-			}
-			if !matchToR {
-				continue
-			}
-		}
-		if len(filter.RequestTypes) > 0 {
-			matchRequestType := false
-			for _, req := range filter.RequestTypes {
-				if cdr.RequestType == req {
-					matchRequestType = true
-					break
-				}
-			}
-			if !matchRequestType {
-				continue
-			}
-		}
-		if len(filter.Tenants) > 0 {
-			matchTenant := false
-			for _, tnt := range filter.Tenants {
-				if cdr.Tenant == tnt {
-					matchTenant = true
-					break
-				}
-			}
-			if !matchTenant {
-				continue
-			}
-		}
-		if len(filter.Categories) > 0 {
-			matchCategorie := false
-			for _, cat := range filter.Categories {
-				if cdr.Category == cat {
-					matchCategorie = true
-					break
-				}
-			}
-			if !matchCategorie {
-				continue
-			}
-		}
-		if len(filter.Accounts) > 0 {
-			matchAccount := false
-			for _, acc := range filter.Accounts {
-				if cdr.Account == acc {
-					matchAccount = true
-					break
-				}
-			}
-			if !matchAccount {
-				continue
-			}
-		}
-		if len(filter.Subjects) > 0 {
-			matchSubject := false
-			for _, subject := range filter.Subjects {
-				if cdr.Subject == subject {
-					matchSubject = true
-					break
-				}
-			}
-			if !matchSubject {
-				continue
-			}
-		}
-		if len(filter.DestinationPrefixes) > 0 {
-			matchdst := false
-			for _, dst := range filter.DestinationPrefixes {
-				if strings.HasPrefix(cdr.Destination, dst) {
-					matchdst = true
-					break
-				}
-			}
-			if !matchdst {
-				continue
-			}
-		}
+			(len(filter.NotCGRIDs) > 0 && utils.SliceHasMember(filter.NotCGRIDs, cdr.CGRID)) ||
+			(len(filter.NotRunIDs) > 0 && utils.SliceHasMember(filter.NotRunIDs, cdr.RunID)) ||
+			(len(filter.NotOriginIDs) > 0 && utils.SliceHasMember(filter.NotOriginIDs, cdr.OriginID)) ||
+			(len(filter.NotOriginHosts) > 0 && utils.SliceHasMember(filter.NotOriginHosts, cdr.OriginHost)) ||
+			(len(filter.NotSources) > 0 && utils.SliceHasMember(filter.NotSources, cdr.Source)) ||
+			(len(filter.NotToRs) > 0 && utils.SliceHasMember(filter.NotToRs, cdr.ToR)) ||
+			(len(filter.NotRequestTypes) > 0 && utils.SliceHasMember(filter.NotRequestTypes, cdr.RequestType)) ||
+			(len(filter.NotTenants) > 0 && utils.SliceHasMember(filter.NotTenants, cdr.Tenant)) ||
+			(len(filter.NotCategories) > 0 && utils.SliceHasMember(filter.NotCategories, cdr.Category)) ||
+			(len(filter.NotAccounts) > 0 && utils.SliceHasMember(filter.NotAccounts, cdr.Account)) ||
+			(len(filter.NotSubjects) > 0 && utils.SliceHasMember(filter.NotSubjects, cdr.Subject)) ||
 
-		if len(filter.NotCGRIDs) > 0 {
-			matchCGRID := true
-			for _, cgrid := range filter.NotCGRIDs {
-				if cdr.CGRID == cgrid {
-					matchCGRID = false
-					break
-				}
-			}
-			if !matchCGRID {
-				continue
-			}
-		}
-		if len(filter.NotRunIDs) > 0 {
-			matchRunID := true
-			for _, runid := range filter.NotRunIDs {
-				if cdr.RunID == runid {
-					matchRunID = false
-					break
-				}
-			}
-			if !matchRunID {
-				continue
-			}
-		}
-		if len(filter.NotOriginIDs) > 0 {
-			matchOriginID := true
-			for _, originID := range filter.NotOriginIDs {
-				if cdr.OriginID == originID {
-					matchOriginID = false
-					break
-				}
-			}
-			if !matchOriginID {
-				continue
-			}
-		}
-		if len(filter.NotOriginHosts) > 0 {
-			matchOriginHost := true
-			for _, originHost := range filter.NotOriginHosts {
-				if cdr.OriginHost == originHost {
-					matchOriginHost = false
-					break
-				}
-			}
-			if !matchOriginHost {
-				continue
-			}
-		}
-		if len(filter.NotSources) > 0 {
-			matchSource := true
-			for _, source := range filter.NotSources {
-				if cdr.Source == source {
-					matchSource = false
-					break
-				}
-			}
-			if !matchSource {
-				continue
-			}
-		}
-		if len(filter.NotToRs) > 0 {
-			matchToR := true
-			for _, tor := range filter.NotToRs {
-				if cdr.ToR == tor {
-					matchToR = false
-					break
-				}
-			}
-			if !matchToR {
-				continue
-			}
-		}
-		if len(filter.NotRequestTypes) > 0 {
-			matchRequestType := true
-			for _, req := range filter.NotRequestTypes {
-				if cdr.RequestType == req {
-					matchRequestType = false
-					break
-				}
-			}
-			if !matchRequestType {
-				continue
-			}
-		}
-		if len(filter.NotTenants) > 0 {
-			matchTenant := true
-			for _, tnt := range filter.NotTenants {
-				if cdr.Tenant == tnt {
-					matchTenant = false
-					break
-				}
-			}
-			if !matchTenant {
-				continue
-			}
-		}
-		if len(filter.NotCategories) > 0 {
-			matchCategorie := true
-			for _, cat := range filter.NotCategories {
-				if cdr.Category == cat {
-					matchCategorie = false
-					break
-				}
-			}
-			if !matchCategorie {
-				continue
-			}
-		}
-		if len(filter.NotAccounts) > 0 {
-			matchAccount := true
-			for _, acc := range filter.NotAccounts {
-				if cdr.Account == acc {
-					matchAccount = false
-					break
-				}
-			}
-			if !matchAccount {
-				continue
-			}
-		}
-		if len(filter.NotSubjects) > 0 {
-			matchSubject := true
-			for _, subject := range filter.NotSubjects {
-				if cdr.Subject == subject {
-					matchSubject = false
-					break
-				}
-			}
-			if !matchSubject {
-				continue
-			}
-		}
-		if len(filter.NotDestinationPrefixes) > 0 {
-			matchdst := true
-			for _, dst := range filter.NotDestinationPrefixes {
-				if strings.HasPrefix(cdr.Destination, dst) {
-					matchdst = false
-					break
-				}
-			}
-			if !matchdst {
-				continue
-			}
+			(len(filter.Costs) > 0 && !utils.Float64SliceHasMember(filter.Costs, cdr.Cost)) ||
+			(len(filter.NotCosts) > 0 && utils.Float64SliceHasMember(filter.NotCosts, cdr.Cost)) ||
+
+			(len(filter.DestinationPrefixes) > 0 && !utils.HasPrefixSlice(filter.DestinationPrefixes, cdr.Destination)) ||
+			(len(filter.NotDestinationPrefixes) > 0 && utils.HasPrefixSlice(filter.NotDestinationPrefixes, cdr.Destination)) ||
+
+			(filter.OrderIDStart != nil && cdr.OrderID < *filter.OrderIDStart) ||
+			(filter.OrderIDEnd != nil && cdr.OrderID >= *filter.OrderIDEnd) ||
+
+			(filter.AnswerTimeStart != nil && !filter.AnswerTimeStart.IsZero() && cdr.AnswerTime.Before(*filter.AnswerTimeStart)) ||
+			(filter.AnswerTimeEnd != nil && !filter.AnswerTimeEnd.IsZero() && cdr.AnswerTime.After(*filter.AnswerTimeEnd)) ||
+			(filter.SetupTimeStart != nil && !filter.SetupTimeStart.IsZero() && cdr.SetupTime.Before(*filter.SetupTimeStart)) ||
+			(filter.SetupTimeEnd != nil && !filter.SetupTimeEnd.IsZero() && cdr.SetupTime.Before(*filter.SetupTimeEnd)) ||
+
+			(len(filter.MinUsage) != 0 && cdr.Usage < minUsage) ||
+			(len(filter.MaxUsage) != 0 && cdr.Usage > maxUsage) {
+			continue
 		}
 
 		// normal filters
-		if len(filter.Costs) > 0 {
-			matchCost := false
-			for _, cost := range filter.Costs {
-				if cdr.Cost == cost {
-					matchCost = true
-					break
-				}
-			}
-			if !matchCost {
-				continue
-			}
-		}
-		if len(filter.NotCosts) > 0 {
-			matchCost := true
-			for _, cost := range filter.NotCosts {
-				if cdr.Cost == cost {
-					matchCost = false
-					break
-				}
-			}
-			if !matchCost {
-				continue
-			}
-		}
-
-		if filter.OrderIDStart != nil {
-			if cdr.OrderID < *filter.OrderIDStart {
-				continue
-			}
-		}
-		if filter.OrderIDEnd != nil {
-			if cdr.OrderID >= *filter.OrderIDEnd {
-				continue
-			}
-		}
-		if filter.AnswerTimeStart != nil && !filter.AnswerTimeStart.IsZero() { // With IsZero we keep backwards compatible with APIerSv1
-			if cdr.AnswerTime.Before(*filter.AnswerTimeStart) {
-				continue
-			}
-		}
-		if filter.AnswerTimeEnd != nil && !filter.AnswerTimeEnd.IsZero() {
-			if cdr.AnswerTime.After(*filter.AnswerTimeEnd) {
-				continue
-			}
-		}
-		if filter.SetupTimeStart != nil && !filter.SetupTimeStart.IsZero() {
-			if cdr.SetupTime.Before(*filter.SetupTimeStart) {
-				continue
-			}
-		}
-		if filter.SetupTimeEnd != nil && !filter.SetupTimeEnd.IsZero() {
-			if cdr.SetupTime.Before(*filter.SetupTimeEnd) {
-				continue
-			}
-		}
-
-		if len(filter.MinUsage) != 0 {
-			if cdr.Usage < minUsage {
-				continue
-			}
-		}
-		if len(filter.MaxUsage) != 0 {
-			if cdr.Usage > maxUsage {
-				continue
-			}
-		}
 
 		if filter.MinCost != nil {
 			if filter.MaxCost == nil {
@@ -1534,10 +1222,8 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 				if cdr.Cost < 0 {
 					continue
 				}
-			} else {
-				if cdr.Cost < *filter.MinCost || cdr.Cost > *filter.MaxCost {
-					continue
-				}
+			} else if cdr.Cost < *filter.MinCost || cdr.Cost >= *filter.MaxCost {
+				continue
 			}
 		} else if filter.MaxCost != nil {
 			if *filter.MaxCost == -1.0 { // Non-rated CDRs
@@ -1553,16 +1239,14 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 		if len(filter.ExtraFields) != 0 {
 			passFilter := true
 			for extFldID, extFldVal := range filter.ExtraFields {
+				val, has := cdr.ExtraFields[extFldID]
+				passFilter = val == extFldVal
 				if extFldVal == utils.MetaExists {
-					if _, has := cdr.ExtraFields[extFldID]; !has {
-						passFilter = false
-						break
-					}
-				} else if cdr.ExtraFields[extFldID] != extFldVal {
-					passFilter = false
+					passFilter = has
+				}
+				if !passFilter {
 					break
 				}
-
 			}
 			if !passFilter {
 				continue
@@ -1571,13 +1255,12 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 		if len(filter.NotExtraFields) != 0 {
 			passFilter := true
 			for notExtFldID, notExtFldVal := range filter.NotExtraFields {
+				val, has := cdr.ExtraFields[notExtFldID]
+				passFilter = val != notExtFldVal
 				if notExtFldVal == utils.MetaExists {
-					if _, has := cdr.ExtraFields[notExtFldID]; has {
-						passFilter = false
-						break
-					}
-				} else if cdr.ExtraFields[notExtFldID] == notExtFldVal {
-					passFilter = false
+					passFilter = !has
+				}
+				if !passFilter {
 					break
 				}
 			}
@@ -1587,9 +1270,8 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 		}
 
 		if filter.OrderBy == utils.EmptyString { // if do not have to order exit early
-			if filter.Paginator.Offset != nil &&
-				paginatorOffsetCounter <= *filter.Paginator.Offset {
-				paginatorOffsetCounter++
+			if offset > 0 {
+				offset--
 				continue
 			}
 			if filter.Paginator.Limit != nil &&
@@ -1600,15 +1282,14 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 		//pass all filters and append to slice
 		cdrs = append(cdrs, cdr)
 	}
-	if filter.OrderBy != utils.EmptyString &&
-		filter.Paginator.Offset != nil &&
-		len(cdrs) < *filter.Paginator.Offset { // if we have offset populated but not enough cdrs return
+	if len(cdrs) <= offset { // if we have offset populated but not enough cdrs return
 		if filter.Count {
 			return nil, 0, nil
 		}
 		return nil, 0, utils.ErrNotFound
 	}
 	if filter.Count {
+		cdrs = cdrs[offset:]
 		if filter.Paginator.Limit != nil &&
 			len(cdrs) >= *filter.Paginator.Limit {
 			return nil, int64(*filter.Paginator.Limit), nil
@@ -1680,9 +1361,7 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 			return nil, 0, fmt.Errorf("Invalid value : %s", separateVals[0])
 		}
 
-		if filter.Paginator.Offset != nil {
-			cdrs = cdrs[*filter.Paginator.Offset:]
-		}
+		cdrs = cdrs[offset:]
 		if filter.Paginator.Limit != nil {
 			if len(cdrs) > *filter.Paginator.Limit {
 				cdrs = cdrs[:*filter.Paginator.Limit]
