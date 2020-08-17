@@ -114,7 +114,7 @@
 		{
 			"id": "kafka_localhost",
 			"type": "*kafka_json_map",
-			"export_path": "localhost:9092?topic=cgrates_cdrs",
+			"export_path": "127.0.0.1:9092?topic=cgrates_cdrs",
 			"tenant": "cgrates.org",
 			"attempts": 1,
 			"fields":[
