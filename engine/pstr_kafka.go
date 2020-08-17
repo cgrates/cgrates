@@ -29,13 +29,13 @@ import (
 
 // NewKafkaPoster creates a kafka poster
 func NewKafkaPoster(dialURL string, attempts int) (*KafkaPoster, error) {
-	amqp := &KafkaPoster{
+	kfkPstr := &KafkaPoster{
 		attempts: attempts,
 	}
-	if err := amqp.parseURL(dialURL); err != nil {
+	if err := kfkPstr.parseURL(dialURL); err != nil {
 		return nil, err
 	}
-	return amqp, nil
+	return kfkPstr, nil
 }
 
 // KafkaPoster is a kafka poster
@@ -48,14 +48,19 @@ type KafkaPoster struct {
 }
 
 func (pstr *KafkaPoster) parseURL(dialURL string) error {
-	u, err := url.Parse(dialURL)
+	pstr.topic = defaultQueueID
+	i := strings.IndexByte(dialURL, '?')
+	if i < 0 {
+		pstr.dialURL = dialURL
+		return nil
+	}
+	pstr.dialURL = dialURL[:i]
+	rawQuery := dialURL[i+1:]
+	qry, err := url.ParseQuery(rawQuery)
 	if err != nil {
 		return err
 	}
-	qry := u.Query()
-
 	pstr.dialURL = strings.Split(dialURL, "?")[0]
-	pstr.topic = defaultQueueID
 	if vals, has := qry[utils.KafkaTopic]; has && len(vals) != 0 {
 		pstr.topic = vals[0]
 	}
