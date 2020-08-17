@@ -131,27 +131,23 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 		return
 	}
 	if ids == nil {
-		keyIDs, err := dm.DataDB().GetKeysForPrefix(prfx)
-		if err != nil {
-			return utils.NewCGRError(utils.DataManager,
-				utils.ServerErrorCaps,
-				err.Error(),
-				fmt.Sprintf("DataManager error <%s> querying keys for prefix: <%s>", err.Error(), prfx))
-		}
-		for _, keyID := range keyIDs {
-			if mustBeCached { // Only consider loading ids which are already in cache
-				if _, hasIt := Cache.Get(utils.CachePrefixToInstance[prfx], keyID[len(prfx):]); !hasIt {
-					continue
-				}
+		if mustBeCached {
+			ids = Cache.GetItemIDs(utils.CachePrefixToInstance[prfx], utils.EmptyString)
+		} else {
+			if ids, err = dm.DataDB().GetKeysForPrefix(prfx); err != nil {
+				return utils.NewCGRError(utils.DataManager,
+					utils.ServerErrorCaps,
+					err.Error(),
+					fmt.Sprintf("DataManager error <%s> querying keys for prefix: <%s>", err.Error(), prfx))
 			}
-			ids = append(ids, keyID[len(prfx):])
-		}
-		var nrItems int
-		if cCfg, has := dm.cacheCfg.Partitions[utils.CachePrefixToInstance[prfx]]; has {
-			nrItems = cCfg.Limit
-		}
-		if nrItems > 0 && nrItems < len(ids) { // More ids than cache config allows it, limit here
-			ids = ids[:nrItems]
+			if cCfg, has := dm.cacheCfg.Partitions[utils.CachePrefixToInstance[prfx]]; has &&
+				cCfg.Limit >= 0 &&
+				cCfg.Limit < len(ids) {
+				ids = ids[:cCfg.Limit]
+			}
+			for i := range ids {
+				ids[i] = strings.TrimPrefix(ids[i], prfx)
+			}
 		}
 	}
 	for _, dataID := range ids {
@@ -281,17 +277,15 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 			_, err = dm.GetItemLoadIDs(utils.EmptyString, true)
 		}
 		if err != nil {
-			if err == utils.ErrNotFound {
-				if errCh := Cache.Remove(utils.CachePrefixToInstance[prfx], dataID,
-					cacheCommit(utils.NonTransactional), utils.NonTransactional); errCh != nil {
-					return errCh
-				}
-				err = nil
-			} else {
+			if err != utils.ErrNotFound {
 				return utils.NewCGRError(utils.DataManager,
 					utils.ServerErrorCaps,
 					err.Error(),
 					fmt.Sprintf("error <%s> querying DataManager for category: <%s>, dataID: <%s>", err.Error(), prfx, dataID))
+			}
+			if err = Cache.Remove(utils.CachePrefixToInstance[prfx], dataID,
+				cacheCommit(utils.NonTransactional), utils.NonTransactional); err != nil {
+				return
 			}
 		}
 	}

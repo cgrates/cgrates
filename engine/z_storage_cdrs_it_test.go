@@ -455,9 +455,12 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 		},
 	}
 	// Store all CDRs
-	for _, cdr := range cdrs {
+	for i, cdr := range cdrs {
 		if err := cdrStorage.SetCDR(cdr, false); err != nil {
 			return fmt.Errorf("testGetCDRs #4 CDR: %+v, err: %v", cdr, err)
+		}
+		if *dbType == utils.MetaMySQL {
+			cdr.OrderID = int64(i + 1)
 		}
 	}
 	// All CDRs, no filter
@@ -823,28 +826,55 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 	//Filter by OrderID with paginator
 	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{OrderBy: "OrderID", Paginator: utils.Paginator{Limit: utils.IntPointer(3)}}, false); err != nil {
 		return fmt.Errorf("testGetCDRs #101, err: %v", err)
-	} else if !reflect.DeepEqual(cdrs[:3], CDRs) {
-		return fmt.Errorf("testGetCDRs #102 Expected %+v received %+v \n", cdrs, CDRs)
+	} else {
+		for i, cdr := range CDRs {
+			cdr.SetupTime = cdr.SetupTime.UTC()
+			cdr.AnswerTime = cdr.AnswerTime.UTC()
+			if *dbType == utils.MetaMongo {
+				cdrs[i].OrderID = cdr.OrderID
+			}
+		}
+		if !reflect.DeepEqual(cdrs[:3], CDRs) {
+			return fmt.Errorf("testGetCDRs #102 Expected %+v received %+v \n", utils.ToJSON(cdrs[:3]), utils.ToJSON(CDRs))
+		}
 	}
 
 	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{OrderBy: "OrderID", Paginator: utils.Paginator{Limit: utils.IntPointer(5)}}, false); err != nil {
 		return fmt.Errorf("testGetCDRs #103, err: %v", err)
-	} else if !reflect.DeepEqual(cdrs[:5], CDRs) {
-		return fmt.Errorf("testGetCDRs #104 Expected %+v received %+v \n", cdrs, CDRs)
+	} else {
+		for i, cdr := range CDRs {
+			cdr.SetupTime = cdr.SetupTime.UTC()
+			cdr.AnswerTime = cdr.AnswerTime.UTC()
+			if *dbType == utils.MetaMongo {
+				cdrs[i].OrderID = cdr.OrderID
+			}
+		}
+		if !reflect.DeepEqual(cdrs[:5], CDRs) {
+			return fmt.Errorf("testGetCDRs #104 Expected %+v received %+v \n", utils.ToJSON(cdrs[:5]), utils.ToJSON(CDRs))
+		}
 	}
 
 	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{OrderBy: "OrderID", Paginator: utils.Paginator{Limit: utils.IntPointer(3), Offset: utils.IntPointer(2)}}, false); err != nil {
-		return fmt.Errorf("testGetCDRs #103, err: %v", err)
-	} else if !reflect.DeepEqual(cdrs[2:5], CDRs) {
-		return fmt.Errorf("testGetCDRs #104 Expected %+v received %+v \n", utils.ToJSON(cdrs[2:5]), utils.ToJSON(CDRs))
+		return fmt.Errorf("testGetCDRs #105, err: %v", err)
+	} else {
+		for i, cdr := range CDRs {
+			cdr.SetupTime = cdr.SetupTime.UTC()
+			cdr.AnswerTime = cdr.AnswerTime.UTC()
+			if *dbType == utils.MetaMongo {
+				cdrs[i+2].OrderID = cdr.OrderID
+			}
+		}
+		if !reflect.DeepEqual(cdrs[2:5], CDRs) {
+			return fmt.Errorf("testGetCDRs #106 Expected %+v received %+v \n", utils.ToJSON(cdrs[2:5]), utils.ToJSON(CDRs))
+		}
 	}
 
 	if _, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{Paginator: utils.Paginator{Limit: utils.IntPointer(3), Offset: utils.IntPointer(20)}}, false); err != utils.ErrNotFound {
-		return fmt.Errorf("testGetCDRs #105, err: %v", err)
+		return fmt.Errorf("testGetCDRs #107, err: %v", err)
 	}
 
 	if _, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{OrderBy: "OrderID", Paginator: utils.Paginator{Limit: utils.IntPointer(3), Offset: utils.IntPointer(20)}}, false); err != utils.ErrNotFound {
-		return fmt.Errorf("testGetCDRs #105, err: %v", err)
+		return fmt.Errorf("testGetCDRs #108, err: %v", err)
 	}
 	return nil
 }

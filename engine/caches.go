@@ -329,7 +329,7 @@ func (chS *CacheS) V1RemoveGroup(args *utils.ArgsGetGroupWithOpts,
 
 func (chS *CacheS) V1ReloadCache(attrs utils.AttrReloadCacheWithOpts, reply *string) (err error) {
 	for key, ids := range attrs.ArgsCache {
-		if prfx, has := utils.ArgCacheToPrefix[key]; has && len(ids) != 0 {
+		if prfx, has := utils.ArgCacheToPrefix[key]; has {
 			if err = chS.dm.CacheDataFromDB(prfx, ids, true); err != nil {
 				return
 			}
