@@ -225,7 +225,7 @@ const CGRATES_CFG_JSON = `
 		"*rate_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 					// control rate filter indexes caching
 		"*reverse_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 					// control reverse filter indexes caching used only for set and remove filters 
 		"*dispatcher_routes": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 						// control dispatcher routes caching
-		"*dispatcher_loads": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},							// control dispatcher load ( in case of *load strategy )
+		"*dispatcher_loads": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},							// control dispatcher load( in case of *ratio ConnParams is present)
 		"*dispatchers": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 								// control dispatcher interface
 		"*diameter_messages": {"limit": -1, "ttl": "3h", "static_ttl": false, "replicate": false},						// diameter messages caching
 		"*rpc_responses": {"limit": 0, "ttl": "2s", "static_ttl": false, "replicate": false},							// RPC responses caching

@@ -159,6 +159,8 @@ func testDspChcLoadAfterFolder(t *testing.T) {
 	expStats[utils.CacheChargerFilterIndexes].Groups = 1
 	expStats[utils.CacheAttributeFilterIndexes].Items = 10
 	expStats[utils.CacheAttributeFilterIndexes].Groups = 4
+	expStats[utils.CacheReverseFilterIndexes].Items = 8
+	expStats[utils.CacheReverseFilterIndexes].Groups = 6
 	if err := dispEngine.RPC.Call(utils.CacheSv1GetCacheStats, &args, &rcvStats); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expStats, rcvStats) {

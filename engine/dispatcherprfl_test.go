@@ -252,3 +252,46 @@ func TestDispatcherHostCall(t *testing.T) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(etRPC), utils.ToJSON(tRPC))
 	}
 }
+
+func TestDispatcherHostIDsProfilesReorderFromIndex(t *testing.T) {
+	dConns := DispatcherHostIDs{"DSP_1", "DSP_2", "DSP_3"}
+	eConns := DispatcherHostIDs{"DSP_1", "DSP_2", "DSP_3"}
+	if dConns.ReorderFromIndex(0); !reflect.DeepEqual(eConns, dConns) {
+		t.Errorf("expecting: %+v, received: %+v", eConns, dConns)
+	}
+	dConns = DispatcherHostIDs{"DSP_1", "DSP_2", "DSP_3"}
+	if dConns.ReorderFromIndex(3); !reflect.DeepEqual(eConns, dConns) {
+		t.Errorf("expecting: %+v, received: %+v", eConns, dConns)
+	}
+	dConns = DispatcherHostIDs{"DSP_1", "DSP_2", "DSP_3"}
+	eConns = DispatcherHostIDs{"DSP_3", "DSP_1", "DSP_2"}
+	if dConns.ReorderFromIndex(2); !reflect.DeepEqual(eConns, dConns) {
+		t.Errorf("expecting: %+v, received: %+v", eConns, dConns)
+	}
+	dConns = DispatcherHostIDs{"DSP_1", "DSP_2", "DSP_3"}
+	eConns = DispatcherHostIDs{"DSP_2", "DSP_3", "DSP_1"}
+	if dConns.ReorderFromIndex(1); !reflect.DeepEqual(eConns, dConns) {
+		t.Errorf("expecting: %+v, received: %+v",
+			utils.ToJSON(eConns), utils.ToJSON(dConns))
+	}
+}
+
+func TestDispatcherHostIDsProfilesShuffle(t *testing.T) {
+	dConns := DispatcherHostIDs{"DSP_1", "DSP_2", "DSP_3", "DSP_4"}
+	oConns := DispatcherHostIDs{"DSP_1", "DSP_2", "DSP_3", "DSP_4"}
+	if dConns.Shuffle(); dConns[0] == oConns[0] ||
+		dConns[1] == oConns[1] || dConns[2] == oConns[2] ||
+		dConns[3] == oConns[3] {
+		t.Errorf("received: %s", utils.ToJSON(dConns))
+	}
+}
+
+func TestDispatcherHostIDsProfilesClone(t *testing.T) {
+	dConns := DispatcherHostIDs{"DSP_1", "DSP_2", "DSP_3"}
+	eConns := DispatcherHostIDs{"DSP_1", "DSP_2", "DSP_3"}
+	d2Conns := dConns.Clone()
+	d2Conns[0] = "DSP_4"
+	if !reflect.DeepEqual(eConns, dConns) {
+		t.Errorf("expecting: %+v, received: %+v", utils.ToJSON(eConns), utils.ToJSON(dConns))
+	}
+}

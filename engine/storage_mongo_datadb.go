@@ -699,6 +699,14 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 			result, err = ms.getField3(sctx, ColIndx, utils.ChargerFilterIndexes, "key")
 		case utils.DispatcherFilterIndexes:
 			result, err = ms.getField3(sctx, ColIndx, utils.DispatcherFilterIndexes, "key")
+		case utils.ActionPlanIndexes:
+			result, err = ms.getField3(sctx, ColIndx, utils.ActionPlanIndexes, "key")
+		case utils.RateProfilesFilterIndexPrfx:
+			result, err = ms.getField3(sctx, ColIndx, utils.RateProfilesFilterIndexPrfx, "key")
+		case utils.RateFilterIndexPrfx:
+			result, err = ms.getField3(sctx, ColIndx, utils.RateFilterIndexPrfx, "key")
+		case utils.FilterIndexPrfx:
+			result, err = ms.getField3(sctx, ColIndx, utils.FilterIndexPrfx, "key")
 		default:
 			err = fmt.Errorf("unsupported prefix in GetKeysForPrefix: %s", prefix)
 		}
