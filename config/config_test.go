@@ -1949,9 +1949,9 @@ func TestCgrCdfEventReader(t *testing.T) {
 func TestCgrCdfEventExporter(t *testing.T) {
 	eCfg := &EEsCfg{
 		Enabled:         false,
-		AttributeSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)},
+		AttributeSConns: []string{},
 		Cache: map[string]*CacheParamCfg{
-			utils.MetaFileCSV: &CacheParamCfg{
+			utils.MetaFileCSV: {
 				Limit:     -1,
 				TTL:       time.Duration(5 * time.Second),
 				StaticTTL: false,
@@ -1959,7 +1959,7 @@ func TestCgrCdfEventExporter(t *testing.T) {
 		},
 		Templates: map[string][]*FCTemplate{},
 		Exporters: []*EventExporterCfg{
-			&EventExporterCfg{
+			{
 				ID:            utils.MetaDefault,
 				Type:          utils.META_NONE,
 				FieldSep:      ",",

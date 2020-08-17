@@ -703,7 +703,7 @@ func testDspSessionProcessEvent2(t *testing.T) {
 	}
 	eAttrs := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_1001_SIMPLEAUTH"},
-		AlteredFields:   []string{"*req.Password", "*req.EventName"},
+		AlteredFields:   []string{"*req.EventName", "*req.Password"},
 		CGREventWithOpts: &utils.CGREventWithOpts{
 			Opts: map[string]interface{}{
 				utils.OptsAPIKey: "pse12345",
@@ -734,6 +734,7 @@ func testDspSessionProcessEvent2(t *testing.T) {
 		eAttrs.CGREvent.Event[utils.SetupTime] = args.CGREvent.Event[utils.SetupTime]
 		eAttrs.CGREvent.Event[utils.AnswerTime] = args.CGREvent.Event[utils.AnswerTime]
 	}
+	sort.Strings(rply.Attributes.AlteredFields)
 	if !reflect.DeepEqual(eAttrs, rply.Attributes) {
 		t.Errorf("expecting: %+v, received: %+v",
 			utils.ToJSON(eAttrs), utils.ToJSON(rply.Attributes))
