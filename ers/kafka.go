@@ -182,22 +182,28 @@ func (rdr *KafkaER) processMessage(msg []byte) (err error) {
 }
 
 func (rdr *KafkaER) setURL(dialURL string) (err error) {
-	var u *url.URL
-	if u, err = url.Parse(dialURL); err != nil {
+	rdr.topic = defaultTopic
+	rdr.groupID = defaultGroupID
+	rdr.maxWait = defaultMaxWait
+
+	i := strings.IndexByte(dialURL, '?')
+	if i < 0 {
+		rdr.dialURL = dialURL
 		return
 	}
-	qry := u.Query()
+	rdr.dialURL = dialURL[:i]
+	rawQuery := dialURL[i+1:]
+	var qry url.Values
+	if qry, err = url.ParseQuery(rawQuery); err != nil {
+		return
+	}
 
-	rdr.dialURL = strings.Split(dialURL, "?")[0]
-	rdr.topic = defaultTopic
 	if vals, has := qry[utils.KafkaTopic]; has && len(vals) != 0 {
 		rdr.topic = vals[0]
 	}
-	rdr.groupID = defaultGroupID
 	if vals, has := qry[utils.KafkaGroupID]; has && len(vals) != 0 {
 		rdr.groupID = vals[0]
 	}
-	rdr.maxWait = defaultMaxWait
 	if vals, has := qry[utils.KafkaMaxWait]; has && len(vals) != 0 {
 		rdr.maxWait, err = time.ParseDuration(vals[0])
 	}
