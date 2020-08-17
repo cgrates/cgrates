@@ -22,7 +22,6 @@ import (
 	"encoding/gob"
 	"fmt"
 	"sort"
-	"strconv"
 	"sync"
 
 	"github.com/cgrates/cgrates/engine"
@@ -44,7 +43,7 @@ type Dispatcher interface {
 	// to make sure we take decisions based on latest config
 	SetProfile(pfl *engine.DispatcherProfile)
 	// HostIDs returns the ordered list of host IDs
-	HostIDs() (hostIDs []string)
+	HostIDs() (hostIDs engine.DispatcherHostIDs)
 	// Dispatch is used to send the method over the connections given
 	Dispatch(routeID string, subsystem,
 		serviceMethod string, args interface{}, reply interface{}) (err error)
@@ -59,46 +58,35 @@ type strategyDispatcher interface {
 // newDispatcher constructs instances of Dispatcher
 func newDispatcher(dm *engine.DataManager, pfl *engine.DispatcherProfile) (d Dispatcher, err error) {
 	pfl.Hosts.Sort() // make sure the connections are sorted
+	hosts := pfl.Hosts.Clone()
 	switch pfl.Strategy {
 	case utils.MetaWeight:
 		d = &WeightDispatcher{
 			dm:       dm,
 			tnt:      pfl.Tenant,
-			hosts:    pfl.Hosts.Clone(),
-			strategy: new(singleResultstrategyDispatcher),
+			hosts:    hosts,
+			strategy: newSingleStrategyDispatcher(hosts, pfl.TenantID()),
 		}
 	case utils.MetaRandom:
 		d = &RandomDispatcher{
 			dm:       dm,
 			tnt:      pfl.Tenant,
-			hosts:    pfl.Hosts.Clone(),
-			strategy: new(singleResultstrategyDispatcher),
+			hosts:    hosts,
+			strategy: newSingleStrategyDispatcher(hosts, pfl.TenantID()),
 		}
 	case utils.MetaRoundRobin:
 		d = &RoundRobinDispatcher{
 			dm:       dm,
 			tnt:      pfl.Tenant,
-			hosts:    pfl.Hosts.Clone(),
-			strategy: new(singleResultstrategyDispatcher),
+			hosts:    hosts,
+			strategy: newSingleStrategyDispatcher(hosts, pfl.TenantID()),
 		}
 	case utils.MetaBroadcast:
-		d = &BroadcastDispatcher{
-			dm:       dm,
-			tnt:      pfl.Tenant,
-			hosts:    pfl.Hosts.Clone(),
-			strategy: new(brodcastStrategyDispatcher),
-		}
-	case utils.MetaLoad:
-		hosts := pfl.Hosts.Clone()
-		ls, err := newLoadStrategyDispatcher(hosts, pfl.TenantID())
-		if err != nil {
-			return nil, err
-		}
 		d = &WeightDispatcher{
 			dm:       dm,
 			tnt:      pfl.Tenant,
 			hosts:    hosts,
-			strategy: ls,
+			strategy: new(brodcastStrategyDispatcher),
 		}
 	default:
 		err = fmt.Errorf("unsupported dispatch strategy: <%s>", pfl.Strategy)
@@ -123,7 +111,7 @@ func (wd *WeightDispatcher) SetProfile(pfl *engine.DispatcherProfile) {
 	return
 }
 
-func (wd *WeightDispatcher) HostIDs() (hostIDs []string) {
+func (wd *WeightDispatcher) HostIDs() (hostIDs engine.DispatcherHostIDs) {
 	wd.RLock()
 	hostIDs = wd.hosts.HostIDs()
 	wd.RUnlock()
@@ -153,12 +141,12 @@ func (d *RandomDispatcher) SetProfile(pfl *engine.DispatcherProfile) {
 	return
 }
 
-func (d *RandomDispatcher) HostIDs() (hostIDs []string) {
+func (d *RandomDispatcher) HostIDs() (hostIDs engine.DispatcherHostIDs) {
 	d.RLock()
-	hosts := d.hosts.Clone()
+	hostIDs = d.hosts.HostIDs()
 	d.RUnlock()
-	hosts.Shuffle() // randomize the connections
-	return hosts.HostIDs()
+	hostIDs.Shuffle() // randomize the connections
+	return
 }
 
 func (d *RandomDispatcher) Dispatch(routeID string, subsystem,
@@ -184,16 +172,16 @@ func (d *RoundRobinDispatcher) SetProfile(pfl *engine.DispatcherProfile) {
 	return
 }
 
-func (d *RoundRobinDispatcher) HostIDs() (hostIDs []string) {
+func (d *RoundRobinDispatcher) HostIDs() (hostIDs engine.DispatcherHostIDs) {
 	d.RLock()
-	hosts := d.hosts.Clone()
-	hosts.ReorderFromIndex(d.hostIdx)
+	hostIDs = d.hosts.HostIDs()
+	hostIDs.ReorderFromIndex(d.hostIdx)
 	d.hostIdx++
 	if d.hostIdx >= len(d.hosts) {
 		d.hostIdx = 0
 	}
 	d.RUnlock()
-	return hosts.HostIDs()
+	return
 }
 
 func (d *RoundRobinDispatcher) Dispatch(routeID string, subsystem,
@@ -202,39 +190,9 @@ func (d *RoundRobinDispatcher) Dispatch(routeID string, subsystem,
 		serviceMethod, args, reply)
 }
 
-// BroadcastDispatcher will send the request to multiple hosts simultaneously
-type BroadcastDispatcher struct {
-	sync.RWMutex
-	dm       *engine.DataManager
-	tnt      string
-	hosts    engine.DispatcherHostProfiles
-	strategy strategyDispatcher
-}
-
-func (d *BroadcastDispatcher) SetProfile(pfl *engine.DispatcherProfile) {
-	d.Lock()
-	pfl.Hosts.Sort()
-	d.hosts = pfl.Hosts.Clone()
-	d.Unlock()
-	return
-}
-
-func (d *BroadcastDispatcher) HostIDs() (hostIDs []string) {
-	d.RLock()
-	hostIDs = d.hosts.HostIDs()
-	d.RUnlock()
-	return
-}
-
-func (d *BroadcastDispatcher) Dispatch(routeID string, subsystem,
-	serviceMethod string, args interface{}, reply interface{}) (lastErr error) { // no cache needed for this strategy because we need to call all connections
-	return d.strategy.dispatch(d.dm, routeID, subsystem, d.tnt, d.HostIDs(),
-		serviceMethod, args, reply)
-}
-
 type singleResultstrategyDispatcher struct{}
 
-func (_ *singleResultstrategyDispatcher) dispatch(dm *engine.DataManager, routeID string, subsystem, tnt string,
+func (*singleResultstrategyDispatcher) dispatch(dm *engine.DataManager, routeID string, subsystem, tnt string,
 	hostIDs []string, serviceMethod string, args interface{}, reply interface{}) (err error) {
 	var dH *engine.DispatcherHost
 	if routeID != utils.EmptyString {
@@ -270,7 +228,7 @@ func (_ *singleResultstrategyDispatcher) dispatch(dm *engine.DataManager, routeI
 
 type brodcastStrategyDispatcher struct{}
 
-func (_ *brodcastStrategyDispatcher) dispatch(dm *engine.DataManager, routeID string, subsystem, tnt string, hostIDs []string,
+func (*brodcastStrategyDispatcher) dispatch(dm *engine.DataManager, routeID string, subsystem, tnt string, hostIDs []string,
 	serviceMethod string, args interface{}, reply interface{}) (err error) {
 	var hasErrors bool
 	for _, hostID := range hostIDs {
@@ -295,13 +253,16 @@ func (_ *brodcastStrategyDispatcher) dispatch(dm *engine.DataManager, routeID st
 	return
 }
 
-func newLoadStrategyDispatcher(hosts engine.DispatcherHostProfiles, tntID string) (ls *loadStrategyDispatcher, err error) {
-	ls = &loadStrategyDispatcher{
-		tntID: tntID,
-		hosts: hosts,
+func newSingleStrategyDispatcher(hosts engine.DispatcherHostProfiles, tntID string) (ls strategyDispatcher) {
+	for _, host := range hosts {
+		if _, has := host.Params[utils.MetaRatio]; has {
+			return &loadStrategyDispatcher{
+				tntID: tntID,
+				hosts: hosts.Clone(),
+			}
+		}
 	}
-
-	return
+	return new(singleResultstrategyDispatcher)
 }
 
 type loadStrategyDispatcher struct {
@@ -318,8 +279,8 @@ func newLoadMetrics(hosts engine.DispatcherHostProfiles) (*LoadMetrics, error) {
 	for _, host := range hosts {
 		if strRatio, has := host.Params[utils.MetaRatio]; !has {
 			lM.HostsRatio[host.ID] = 1
-			lM.SumRatio += 1
-		} else if ratio, err := strconv.ParseInt(utils.IfaceAsString(strRatio), 10, 64); err != nil {
+			lM.SumRatio++
+		} else if ratio, err := utils.IfaceAsTInt64(strRatio); err != nil {
 			return nil, err
 		} else {
 			lM.HostsRatio[host.ID] = ratio
@@ -329,6 +290,7 @@ func newLoadMetrics(hosts engine.DispatcherHostProfiles) (*LoadMetrics, error) {
 	return lM, nil
 }
 
+// LoadMetrics the structure to save the metrix for load strategy
 type LoadMetrics struct {
 	mutex      sync.RWMutex
 	HostsLoad  map[string]int64
@@ -386,32 +348,45 @@ func (ld *loadStrategyDispatcher) dispatch(dm *engine.DataManager, routeID strin
 	return
 }
 
+// used to sort the host IDs based on costs
+type hostCosts struct {
+	ids   []string
+	costs []int64
+}
+
+func (hc *hostCosts) Len() int           { return len(hc.ids) }
+func (hc *hostCosts) Less(i, j int) bool { return hc.costs[i] < hc.costs[j] }
+func (hc *hostCosts) Swap(i, j int) {
+	hc.costs[i], hc.costs[j], hc.ids[i], hc.ids[j] = hc.costs[j], hc.costs[i], hc.ids[j], hc.ids[i]
+}
+
 func (lM *LoadMetrics) getHosts(hostIDs []string) []string {
-	costs := make([]int64, len(hostIDs))
+	hlp := &hostCosts{
+		ids:   hostIDs,
+		costs: make([]int64, len(hostIDs)),
+	}
 	lM.mutex.RLock()
 	for i, id := range hostIDs {
-		costs[i] = lM.HostsLoad[id]
-		if costs[i] >= lM.HostsRatio[id] {
-			costs[i] += lM.SumRatio
+		hlp.costs[i] = lM.HostsLoad[id]
+		if hlp.costs[i] >= lM.HostsRatio[id] {
+			hlp.costs[i] += lM.SumRatio
 		}
 	}
 	lM.mutex.RUnlock()
-	sort.Slice(hostIDs, func(i, j int) bool {
-		return costs[i] < costs[j]
-	})
-	return hostIDs
+	sort.Sort(hlp)
+	return hlp.ids
 }
 
 func (lM *LoadMetrics) incrementLoad(hostID, tntID string) {
 	lM.mutex.Lock()
-	lM.HostsLoad[hostID] += 1
+	lM.HostsLoad[hostID]++
 	engine.Cache.ReplicateSet(utils.CacheDispatcherLoads, tntID, lM)
 	lM.mutex.Unlock()
 }
 
 func (lM *LoadMetrics) decrementLoad(hostID, tntID string) {
 	lM.mutex.Lock()
-	lM.HostsLoad[hostID] -= 1
+	lM.HostsLoad[hostID]--
 	engine.Cache.ReplicateSet(utils.CacheDispatcherLoads, tntID, lM)
 	lM.mutex.Unlock()
 }

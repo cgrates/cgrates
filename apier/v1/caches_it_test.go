@@ -172,6 +172,8 @@ func testCacheSAfterLoadFromFolder(t *testing.T) {
 	expStats[utils.CacheResourceFilterIndexes].Groups = 1
 	expStats[utils.CacheAttributeFilterIndexes].Items = 4
 	expStats[utils.CacheAttributeFilterIndexes].Groups = 1
+	expStats[utils.CacheReverseFilterIndexes].Items = 10
+	expStats[utils.CacheReverseFilterIndexes].Groups = 7
 
 	if err := chcRPC.Call(utils.CacheSv1GetCacheStats, &utils.AttrCacheIDsWithOpts{}, &rcvStats); err != nil {
 		t.Error(err)
@@ -238,6 +240,8 @@ func testCacheSReload(t *testing.T) {
 	expStats[utils.CacheResourceFilterIndexes].Groups = 1
 	expStats[utils.CacheAttributeFilterIndexes].Items = 4
 	expStats[utils.CacheAttributeFilterIndexes].Groups = 1
+	expStats[utils.CacheReverseFilterIndexes].Items = 10
+	expStats[utils.CacheReverseFilterIndexes].Groups = 7
 
 	if err := chcRPC.Call(utils.CacheSv1GetCacheStats, &utils.AttrCacheIDsWithOpts{}, &rcvStats); err != nil {
 		t.Error(err)

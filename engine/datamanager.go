@@ -35,6 +35,8 @@ var (
 		utils.DispatcherFilterIndexes:     {},
 		utils.RateProfilesFilterIndexPrfx: {},
 		utils.RateFilterIndexPrfx:         {},
+		utils.ActionPlanIndexes:           {},
+		utils.FilterIndexPrfx:             {},
 	}
 	cachePrefixMap = utils.StringSet{
 		utils.DESTINATION_PREFIX:          {},
@@ -271,8 +273,12 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 			}
 			_, err = dm.GetIndexes(utils.CacheRateFilterIndexes, tntCtx, idxKey, false, true)
 		case utils.FilterIndexPrfx:
-			tntID := utils.NewTenantID(dataID)
-			_, err = dm.GetIndexes(utils.CacheReverseFilterIndexes, tntID.Tenant, tntID.ID, false, true)
+			idx := strings.LastIndexByte(dataID, utils.InInFieldSep[0])
+			if idx < 0 {
+				err = fmt.Errorf("WRONG_IDX_KEY_FORMAT<%s>", dataID)
+				return
+			}
+			_, err = dm.GetIndexes(utils.CacheReverseFilterIndexes, dataID[:idx], dataID[idx+1:], false, true)
 		case utils.LoadIDPrefix:
 			_, err = dm.GetItemLoadIDs(utils.EmptyString, true)
 		}

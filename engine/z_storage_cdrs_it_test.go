@@ -459,7 +459,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 		if err := cdrStorage.SetCDR(cdr, false); err != nil {
 			return fmt.Errorf("testGetCDRs #4 CDR: %+v, err: %v", cdr, err)
 		}
-		if *dbType == utils.MetaMySQL {
+		if *dbType == utils.MetaMySQL || *dbType == utils.MetaPostgres {
 			cdr.OrderID = int64(i + 1)
 		}
 	}

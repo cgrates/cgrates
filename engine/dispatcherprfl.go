@@ -168,3 +168,34 @@ func (dH *DispatcherHost) Call(serviceMethod string, args interface{}, reply int
 	}
 	return dH.rpcConn.Call(serviceMethod, args, reply)
 }
+
+type DispatcherHostIDs []string
+
+// ReorderFromIndex will consider idx as starting point for the reordered slice
+func (dHPrflIDs DispatcherHostIDs) ReorderFromIndex(idx int) {
+	initConns := dHPrflIDs.Clone()
+	for i := 0; i < len(dHPrflIDs); i++ {
+		if idx > len(dHPrflIDs)-1 {
+			idx = 0
+		}
+		dHPrflIDs[i] = initConns[idx]
+		idx++
+	}
+	return
+}
+
+// Shuffle will mix the connections in place
+func (dHPrflIDs DispatcherHostIDs) Shuffle() {
+	rand.Shuffle(len(dHPrflIDs), func(i, j int) {
+		dHPrflIDs[i], dHPrflIDs[j] = dHPrflIDs[j], dHPrflIDs[i]
+	})
+	return
+}
+
+func (dHPrflIDs DispatcherHostIDs) Clone() (cln DispatcherHostIDs) {
+	cln = make(DispatcherHostIDs, len(dHPrflIDs))
+	for i, dhID := range dHPrflIDs {
+		cln[i] = dhID
+	}
+	return
+}
