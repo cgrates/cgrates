@@ -69,7 +69,27 @@ func TestKafkaSetURL(t *testing.T) {
 		groupID: "cgrates",
 		maxWait: time.Millisecond,
 	}
-	if err := k.setURL(":"); err == nil {
+	if err := k.setURL("127.0.0.1?%"); err == nil {
 		t.Errorf("Expected error received: %v", err)
+	}
+
+	k = new(KafkaER)
+	expKafka = &KafkaER{
+		dialURL: "127.0.0.1:2013",
+		topic:   "cdrs",
+		groupID: "new",
+		maxWait: time.Second,
+	}
+	url = "127.0.0.1:2013?topic=cdrs&group_id=new&max_wait=1s"
+	if err := k.setURL(url); err != nil {
+		t.Fatal(err)
+	} else if expKafka.dialURL != k.dialURL {
+		t.Errorf("Expected: %s ,received: %s", expKafka.dialURL, k.dialURL)
+	} else if expKafka.topic != k.topic {
+		t.Errorf("Expected: %s ,received: %s", expKafka.topic, k.topic)
+	} else if expKafka.groupID != k.groupID {
+		t.Errorf("Expected: %s ,received: %s", expKafka.groupID, k.groupID)
+	} else if expKafka.maxWait != k.maxWait {
+		t.Errorf("Expected: %s ,received: %s", expKafka.maxWait, k.maxWait)
 	}
 }

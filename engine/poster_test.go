@@ -41,3 +41,28 @@ func TestAMQPPosterParseURL(t *testing.T) {
 		t.Errorf("Expected: %s ,recived: %s", utils.ToJSON(expected), utils.ToJSON(amqp))
 	}
 }
+
+func TestKafkaParseURL(t *testing.T) {
+	u := "127.0.0.1:9092?topic=cdr_billing"
+	exp := &KafkaPoster{
+		dialURL:  "127.0.0.1:9092",
+		topic:    "cdr_billing",
+		attempts: 10,
+	}
+	if kfk, err := NewKafkaPoster(u, 10); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(exp, kfk) {
+		t.Errorf("Expected: %s ,recived: %s", utils.ToJSON(exp), utils.ToJSON(kfk))
+	}
+	u = "localhost:9092?topic=cdr_billing"
+	exp = &KafkaPoster{
+		dialURL:  "localhost:9092",
+		topic:    "cdr_billing",
+		attempts: 10,
+	}
+	if kfk, err := NewKafkaPoster(u, 10); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(exp, kfk) {
+		t.Errorf("Expected: %s ,recived: %s", utils.ToJSON(exp), utils.ToJSON(kfk))
+	}
+}
