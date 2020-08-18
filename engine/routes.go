@@ -31,21 +31,21 @@ import (
 
 // Route defines routes related information used within a RouteProfile
 type Route struct {
-	ID              string // SupplierID
+	ID              string // RouteID
 	FilterIDs       []string
 	AccountIDs      []string
 	RatingPlanIDs   []string // used when computing price
 	ResourceIDs     []string // queried in some strategies
 	StatIDs         []string // queried in some strategies
 	Weight          float64
-	Blocker         bool // do not process further supplier after this one
+	Blocker         bool // do not process further route after this one
 	RouteParameters string
 
 	cacheRoute     map[string]interface{} // cache["*ratio"]=ratio
 	lazyCheckRules []*FilterRule
 }
 
-// RouteProfile represents the configuration of a Supplier profile
+// RouteProfile represents the configuration of a Route profile
 type RouteProfile struct {
 	Tenant             string
 	ID                 string // LCR Profile ID
@@ -69,7 +69,7 @@ func (rp *RouteProfile) compileCacheParameters() error {
 	if rp.Sorting == utils.MetaLoad {
 		// construct the map for ratio
 		ratioMap := make(map[string]int)
-		// []string{"supplierID:Ratio"}
+		// []string{"routeID:Ratio"}
 		for _, splIDWithRatio := range rp.SortingParameters {
 			splitted := strings.Split(splIDWithRatio, utils.CONCATENATED_KEY_SEP)
 			ratioVal, err := strconv.Atoi(splitted[1])
@@ -81,14 +81,14 @@ func (rp *RouteProfile) compileCacheParameters() error {
 		// add the ratio for each route
 		for _, route := range rp.Routes {
 			route.cacheRoute = make(map[string]interface{})
-			if ratioSupplier, has := ratioMap[route.ID]; !has { // in case that ratio isn't defined for specific suppliers check for default
+			if ratioRoute, has := ratioMap[route.ID]; !has { // in case that ratio isn't defined for specific routes check for default
 				if ratioDefault, has := ratioMap[utils.MetaDefault]; !has { // in case that *default ratio isn't defined take it from config
 					route.cacheRoute[utils.MetaRatio] = config.CgrConfig().RouteSCfg().DefaultRatio
 				} else {
 					route.cacheRoute[utils.MetaRatio] = ratioDefault
 				}
 			} else {
-				route.cacheRoute[utils.MetaRatio] = ratioSupplier
+				route.cacheRoute[utils.MetaRatio] = ratioRoute
 			}
 		}
 	}
@@ -314,7 +314,7 @@ func (rpS *RouteService) statMetrics(statIDs []string, tenant string) (stsMetric
 				&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: statID}}, &metrics); err != nil &&
 				err.Error() != utils.ErrNotFound.Error() {
 				utils.Logger.Warning(
-					fmt.Sprintf("<SupplierS> error: %s getting statMetrics for stat : %s", err.Error(), statID))
+					fmt.Sprintf("<%s> error: %s getting statMetrics for stat : %s", utils.RouteS, err.Error(), statID))
 			}
 			for key, val := range metrics {
 				//add value of metric in a slice in case that we get the same metric from different stat
@@ -350,8 +350,8 @@ func (rpS *RouteService) statMetricsForLoadDistribution(statIDs []string, tenant
 				&metrics); err != nil &&
 				err.Error() != utils.ErrNotFound.Error() {
 				utils.Logger.Warning(
-					fmt.Sprintf("<SupplierS> error: %s getting statMetrics for stat : %s",
-						err.Error(), statWithMetric[0]))
+					fmt.Sprintf("<%s> error: %s getting statMetrics for stat : %s",
+						utils.RouteS, err.Error(), statWithMetric[0]))
 			}
 			if len(statWithMetric) == 2 { // in case we have MetricID defined with StatID we consider only that metric
 				// check if statQueue have metric defined
@@ -387,7 +387,7 @@ func (rpS *RouteService) resourceUsage(resIDs []string, tenant string) (tUsage f
 			if err = rpS.connMgr.Call(rpS.cgrcfg.RouteSCfg().ResourceSConns, nil, utils.ResourceSv1GetResource,
 				&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: resID}}, &res); err != nil && err.Error() != utils.ErrNotFound.Error() {
 				utils.Logger.Warning(
-					fmt.Sprintf("<SupplierS> error: %s getting resource for ID : %s", err.Error(), resID))
+					fmt.Sprintf("<%s> error: %s getting resource for ID : %s", utils.RouteS, err.Error(), resID))
 				continue
 			}
 			tUsage += res.totalUsage()
@@ -424,6 +424,9 @@ func (rpS *RouteService) populateSortingData(ev *utils.CGREvent, route *Route,
 		} else {
 			if extraOpts.maxCost != 0 &&
 				costData[utils.Cost].(float64) > extraOpts.maxCost {
+				utils.Logger.Warning(
+					fmt.Sprintf("<%s> ignoring route with ID: %s, err: %s",
+						utils.RouteS, route.ID, utils.ErrMaxCostExceeded.Error()))
 				return nil, false, nil
 			}
 			for k, v := range costData {
@@ -439,7 +442,7 @@ func (rpS *RouteService) populateSortingData(ev *utils.CGREvent, route *Route,
 			if err != nil {
 				if extraOpts.ignoreErrors {
 					utils.Logger.Warning(
-						fmt.Sprintf("<%s> ignoring supplier with ID: %s, err: %s",
+						fmt.Sprintf("<%s> ignoring route with ID: %s, err: %s",
 							utils.RouteS, route.ID, err.Error()))
 					return nil, false, nil
 				}
@@ -451,7 +454,7 @@ func (rpS *RouteService) populateSortingData(ev *utils.CGREvent, route *Route,
 			if err != nil {
 				if extraOpts.ignoreErrors {
 					utils.Logger.Warning(
-						fmt.Sprintf("<%s> ignoring supplier with ID: %s, err: %s",
+						fmt.Sprintf("<%s> ignoring route with ID: %s, err: %s",
 							utils.RouteS, route.ID, err.Error()))
 					return nil, false, nil
 				}
@@ -461,7 +464,7 @@ func (rpS *RouteService) populateSortingData(ev *utils.CGREvent, route *Route,
 			for key, val := range metricSupp {
 				sortedSpl.SortingData[key] = val
 			}
-			//check if the supplier have the metric from sortingParameters
+			//check if the route have the metric from sortingParameters
 			//in case that the metric don't exist
 			//we use 10000000 for *pdd and -1 for others
 			for _, metric := range extraOpts.sortingParameters {
@@ -482,7 +485,7 @@ func (rpS *RouteService) populateSortingData(ev *utils.CGREvent, route *Route,
 		if err != nil {
 			if extraOpts.ignoreErrors {
 				utils.Logger.Warning(
-					fmt.Sprintf("<%s> ignoring supplier with ID: %s, err: %s",
+					fmt.Sprintf("<%s> ignoring route with ID: %s, err: %s",
 						utils.RouteS, route.ID, err.Error()))
 				return nil, false, nil
 			}
@@ -490,7 +493,7 @@ func (rpS *RouteService) populateSortingData(ev *utils.CGREvent, route *Route,
 		}
 		sortedSpl.SortingData[utils.ResourceUsage] = resTotalUsage
 	}
-	//filter the supplier
+	//filter the route
 	if len(route.lazyCheckRules) != 0 {
 		//construct the DP and pass it to filterS
 		dynDP := newDynamicDP(rpS.cgrcfg, rpS.connMgr, ev.Tenant, utils.MapStorage{
@@ -520,7 +523,7 @@ func (rpS *RouteService) sortedRoutesForEvent(args *ArgsGetRoutes) (sortedRoutes
 		return
 	}
 	rPrfl := rPrfs[0]
-	extraOpts, err := args.asOptsGetRoutes() // convert suppliers arguments into internal options used to limit data
+	extraOpts, err := args.asOptsGetRoutes() // convert routes arguments into internal options used to limit data
 	if err != nil {
 		return nil, err
 	}
@@ -545,7 +548,7 @@ func (rpS *RouteService) sortedRoutesForEvent(args *ArgsGetRoutes) (sortedRoutes
 		routeNew = append(routeNew, route)
 	}
 
-	sortedRoutes, err = rpS.sorter.SortSuppliers(rPrfl.ID, rPrfl.Sorting,
+	sortedRoutes, err = rpS.sorter.SortRoutes(rPrfl.ID, rPrfl.Sorting,
 		routeNew, args.CGREvent, extraOpts)
 	if err != nil {
 		return nil, err
