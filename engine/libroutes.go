@@ -37,8 +37,8 @@ type SortedRoute struct {
 type SortedRoutes struct {
 	ProfileID    string         // Profile matched
 	Sorting      string         // Sorting algorithm
-	Count        int            // number of suppliers returned
-	SortedRoutes []*SortedRoute // list of supplier IDs and SortingData data
+	Count        int            // number of routes returned
+	SortedRoutes []*SortedRoute // list of route IDs and SortingData data
 }
 
 // RouteIDs returns a list of route IDs
@@ -94,7 +94,7 @@ func (sSpls *SortedRoutes) SortHighestCost() {
 // SortQOS is part of sort interface,
 // sort based on Stats
 func (sSpls *SortedRoutes) SortQOS(params []string) {
-	//sort suppliers
+	//sort routes
 	sort.Slice(sSpls.SortedRoutes, func(i, j int) bool {
 		for _, param := range params {
 			//in case we have the same value for the current param we skip to the next one
@@ -209,7 +209,7 @@ func NewRouteSortDispatcher(lcrS *RouteService) (rsd RouteSortDispatcher, err er
 // and dispatch requests to them
 type RouteSortDispatcher map[string]RoutesSorter
 
-func (ssd RouteSortDispatcher) SortSuppliers(prflID, strategy string,
+func (ssd RouteSortDispatcher) SortRoutes(prflID, strategy string,
 	suppls []*Route, suplEv *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
 	sd, has := ssd[strategy]
 	if !has {

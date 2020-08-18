@@ -50,6 +50,7 @@ var (
 	ErrNoActiveSession          = errors.New("NO_ACTIVE_SESSION")
 	ErrPartiallyExecuted        = errors.New("PARTIALLY_EXECUTED")
 	ErrMaxUsageExceeded         = errors.New("MAX_USAGE_EXCEEDED")
+	ErrMaxCostExceeded          = errors.New("MAX_COST_EXCEEDED")
 	ErrFilterNotPassingNoCaps   = errors.New("filter not passing")
 	ErrNotConvertibleNoCaps     = errors.New("not convertible")
 	ErrMandatoryIeMissingNoCaps = errors.New("mandatory information missing")
