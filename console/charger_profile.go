@@ -18,46 +18,49 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import "github.com/cgrates/cgrates/utils"
+import (
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
+)
 
 func init() {
-	c := &CmdRemoveStatQueue{
-		name:      "statqueue_remove",
-		rpcMethod: utils.APIerSv1RemoveStatQueueProfile,
-		rpcParams: &utils.TenantIDWithCache{},
+	c := &CmdGetChargers{
+		name:      "charger_profile",
+		rpcMethod: utils.APIerSv1GetChargerProfile,
+		rpcParams: &utils.TenantID{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdRemoveStatQueue struct {
+type CmdGetChargers struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.TenantIDWithCache
+	rpcParams *utils.TenantID
 	*CommandExecuter
 }
 
-func (self *CmdRemoveStatQueue) Name() string {
+func (self *CmdGetChargers) Name() string {
 	return self.name
 }
 
-func (self *CmdRemoveStatQueue) RpcMethod() string {
+func (self *CmdGetChargers) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdRemoveStatQueue) RpcParams(reset bool) interface{} {
+func (self *CmdGetChargers) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.TenantIDWithCache{}
+		self.rpcParams = &utils.TenantID{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdRemoveStatQueue) PostprocessRpcParams() error {
+func (self *CmdGetChargers) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdRemoveStatQueue) RpcResult() interface{} {
-	var s string
-	return &s
+func (self *CmdGetChargers) RpcResult() interface{} {
+	var atr engine.ChargerProfile
+	return &atr
 }

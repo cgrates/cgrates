@@ -24,43 +24,42 @@ import (
 )
 
 func init() {
-	c := &CmdGetChargers{
-		name:      "chargers",
-		rpcMethod: utils.APIerSv1GetChargerProfile,
-		rpcParams: &utils.TenantID{},
+	c := &CmdDispatcherProfile{
+		name:      "dispatches_for_event",
+		rpcMethod: utils.DispatcherSv1GetProfileForEvent,
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdGetChargers struct {
+type CmdDispatcherProfile struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.TenantID
+	rpcParams *utils.CGREventWithOpts
 	*CommandExecuter
 }
 
-func (self *CmdGetChargers) Name() string {
+func (self *CmdDispatcherProfile) Name() string {
 	return self.name
 }
 
-func (self *CmdGetChargers) RpcMethod() string {
+func (self *CmdDispatcherProfile) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetChargers) RpcParams(reset bool) interface{} {
+func (self *CmdDispatcherProfile) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.TenantID{}
+		self.rpcParams = &utils.CGREventWithOpts{Opts: make(map[string]interface{})}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdGetChargers) PostprocessRpcParams() error {
+func (self *CmdDispatcherProfile) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetChargers) RpcResult() interface{} {
-	var atr engine.ChargerProfile
-	return &atr
+func (self *CmdDispatcherProfile) RpcResult() interface{} {
+	var s engine.DispatcherProfile
+	return &s
 }

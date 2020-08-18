@@ -24,42 +24,42 @@ import (
 )
 
 func init() {
-	c := &CmdDispatcherProfile{
-		name:      "dispatcherprofile",
-		rpcMethod: utils.DispatcherSv1GetProfileForEvent,
+	c := &CmdGetRoute{
+		name:      "route_profile",
+		rpcMethod: utils.APIerSv1GetRouteProfile,
+		rpcParams: &utils.TenantID{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
-// Commander implementation
-type CmdDispatcherProfile struct {
+type CmdGetRoute struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.CGREventWithOpts
+	rpcParams *utils.TenantID
 	*CommandExecuter
 }
 
-func (self *CmdDispatcherProfile) Name() string {
+func (self *CmdGetRoute) Name() string {
 	return self.name
 }
 
-func (self *CmdDispatcherProfile) RpcMethod() string {
+func (self *CmdGetRoute) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdDispatcherProfile) RpcParams(reset bool) interface{} {
+func (self *CmdGetRoute) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.CGREventWithOpts{Opts: make(map[string]interface{})}
+		self.rpcParams = &utils.TenantID{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdDispatcherProfile) PostprocessRpcParams() error {
+func (self *CmdGetRoute) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdDispatcherProfile) RpcResult() interface{} {
-	var s engine.DispatcherProfile
-	return &s
+func (self *CmdGetRoute) RpcResult() interface{} {
+	var atr engine.RouteProfile
+	return &atr
 }

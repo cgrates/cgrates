@@ -18,49 +18,46 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import (
-	v1 "github.com/cgrates/cgrates/apier/v1"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
-)
+import "github.com/cgrates/cgrates/utils"
 
 func init() {
-	c := &CmdSetRoute{
-		name:      "route_set",
-		rpcMethod: utils.APIerSv1SetRouteProfile,
-		rpcParams: &v1.RouteWithCache{},
+	c := &CmdRemoveStatQueue{
+		name:      "statqueue_profile_rem",
+		rpcMethod: utils.APIerSv1RemoveStatQueueProfile,
+		rpcParams: &utils.TenantIDWithCache{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
-type CmdSetRoute struct {
+// Commander implementation
+type CmdRemoveStatQueue struct {
 	name      string
 	rpcMethod string
-	rpcParams *v1.RouteWithCache
+	rpcParams *utils.TenantIDWithCache
 	*CommandExecuter
 }
 
-func (self *CmdSetRoute) Name() string {
+func (self *CmdRemoveStatQueue) Name() string {
 	return self.name
 }
 
-func (self *CmdSetRoute) RpcMethod() string {
+func (self *CmdRemoveStatQueue) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdSetRoute) RpcParams(reset bool) interface{} {
+func (self *CmdRemoveStatQueue) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &v1.RouteWithCache{RouteProfile: new(engine.RouteProfile)}
+		self.rpcParams = &utils.TenantIDWithCache{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdSetRoute) PostprocessRpcParams() error {
+func (self *CmdRemoveStatQueue) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdSetRoute) RpcResult() interface{} {
+func (self *CmdRemoveStatQueue) RpcResult() interface{} {
 	var s string
 	return &s
 }

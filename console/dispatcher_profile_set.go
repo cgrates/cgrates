@@ -18,45 +18,48 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import "github.com/cgrates/cgrates/utils"
+import (
+	v1 "github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/cgrates/utils"
+)
 
 func init() {
-	c := &CmdRemoveThreshold{
-		name:      "threshold_remove",
-		rpcMethod: utils.APIerSv1RemoveThresholdProfile,
-		rpcParams: &utils.TenantIDWithCache{},
+	c := &CmdSetDispatcherProfile{
+		name:      "dispatcher_profile_set",
+		rpcMethod: utils.APIerSv1SetDispatcherProfile,
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
-type CmdRemoveThreshold struct {
+// Commander implementation
+type CmdSetDispatcherProfile struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.TenantIDWithCache
+	rpcParams *v1.DispatcherWithCache
 	*CommandExecuter
 }
 
-func (self *CmdRemoveThreshold) Name() string {
+func (self *CmdSetDispatcherProfile) Name() string {
 	return self.name
 }
 
-func (self *CmdRemoveThreshold) RpcMethod() string {
+func (self *CmdSetDispatcherProfile) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdRemoveThreshold) RpcParams(reset bool) interface{} {
+func (self *CmdSetDispatcherProfile) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.TenantIDWithCache{}
+		self.rpcParams = new(v1.DispatcherWithCache)
 	}
 	return self.rpcParams
 }
 
-func (self *CmdRemoveThreshold) PostprocessRpcParams() error {
+func (self *CmdSetDispatcherProfile) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdRemoveThreshold) RpcResult() interface{} {
+func (self *CmdSetDispatcherProfile) RpcResult() interface{} {
 	var s string
 	return &s
 }

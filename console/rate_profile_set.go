@@ -19,48 +19,48 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
+	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 func init() {
-	c := &CmdSetStatQueue{
-		name:      "statqueue_set",
-		rpcMethod: utils.APIerSv1SetStatQueueProfile,
-		rpcParams: &engine.StatQueueWithCache{},
+	c := &CmdSetRateProfile{
+		name:      "rate_profile_set",
+		rpcMethod: utils.APIerSv1SetRateProfile,
+		rpcParams: &v1.RateProfileWithCache{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
-// Commander implementation
-type CmdSetStatQueue struct {
+type CmdSetRateProfile struct {
 	name      string
 	rpcMethod string
-	rpcParams *engine.StatQueueWithCache
+	rpcParams *v1.RateProfileWithCache
 	*CommandExecuter
 }
 
-func (self *CmdSetStatQueue) Name() string {
+func (self *CmdSetRateProfile) Name() string {
 	return self.name
 }
 
-func (self *CmdSetStatQueue) RpcMethod() string {
+func (self *CmdSetRateProfile) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdSetStatQueue) RpcParams(reset bool) interface{} {
+func (self *CmdSetRateProfile) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &engine.StatQueueWithCache{StatQueueProfile: new(engine.StatQueueProfile)}
+		self.rpcParams = &v1.RateProfileWithCache{RateProfileWithOpts: new(engine.RateProfileWithOpts)}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdSetStatQueue) PostprocessRpcParams() error {
+func (self *CmdSetRateProfile) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdSetStatQueue) RpcResult() interface{} {
+func (self *CmdSetRateProfile) RpcResult() interface{} {
 	var s string
 	return &s
 }

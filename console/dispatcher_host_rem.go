@@ -19,48 +19,46 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	v2 "github.com/cgrates/cgrates/apier/v2"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 func init() {
-	c := &CmdSetAttributes{
-		name:      "attributes_set",
-		rpcMethod: utils.APIerSv2SetAttributeProfile,
-		rpcParams: &v2.AttributeWithCache{},
+	c := &CmdRemoveDispatcherHost{
+		name:      "dispatcher_host_rem",
+		rpcMethod: utils.APIerSv1RemoveDispatcherHost,
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
-type CmdSetAttributes struct {
+// Commander implementation
+type CmdRemoveDispatcherHost struct {
 	name      string
 	rpcMethod string
-	rpcParams *v2.AttributeWithCache
+	rpcParams *utils.TenantIDWithCache
 	*CommandExecuter
 }
 
-func (self *CmdSetAttributes) Name() string {
+func (self *CmdRemoveDispatcherHost) Name() string {
 	return self.name
 }
 
-func (self *CmdSetAttributes) RpcMethod() string {
+func (self *CmdRemoveDispatcherHost) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdSetAttributes) RpcParams(reset bool) interface{} {
+func (self *CmdRemoveDispatcherHost) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &v2.AttributeWithCache{ExternalAttributeProfile: new(engine.ExternalAttributeProfile)}
+		self.rpcParams = new(utils.TenantIDWithCache)
 	}
 	return self.rpcParams
 }
 
-func (self *CmdSetAttributes) PostprocessRpcParams() error {
+func (self *CmdRemoveDispatcherHost) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdSetAttributes) RpcResult() interface{} {
+func (self *CmdRemoveDispatcherHost) RpcResult() interface{} {
 	var s string
 	return &s
 }

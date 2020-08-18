@@ -19,46 +19,48 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
+	v1 "github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 func init() {
-	c := &CmdGetDispatcherProfileIDs{
-		name:      "dispatcherprofile_ids",
-		rpcMethod: utils.APIerSv1GetDispatcherProfileIDs,
+	c := &CmdSetChargers{
+		name:      "charger_profile_set",
+		rpcMethod: utils.APIerSv1SetChargerProfile,
+		rpcParams: &v1.ChargerWithCache{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
-// Commander implementation
-type CmdGetDispatcherProfileIDs struct {
+type CmdSetChargers struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.TenantArgWithPaginator
+	rpcParams *v1.ChargerWithCache
 	*CommandExecuter
 }
 
-func (self *CmdGetDispatcherProfileIDs) Name() string {
+func (self *CmdSetChargers) Name() string {
 	return self.name
 }
 
-func (self *CmdGetDispatcherProfileIDs) RpcMethod() string {
+func (self *CmdSetChargers) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetDispatcherProfileIDs) RpcParams(reset bool) interface{} {
+func (self *CmdSetChargers) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = new(utils.TenantArgWithPaginator)
+		self.rpcParams = &v1.ChargerWithCache{ChargerProfile: new(engine.ChargerProfile)}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdGetDispatcherProfileIDs) PostprocessRpcParams() error {
+func (self *CmdSetChargers) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetDispatcherProfileIDs) RpcResult() interface{} {
-	var s []string
+func (self *CmdSetChargers) RpcResult() interface{} {
+	var s string
 	return &s
 }

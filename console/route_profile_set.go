@@ -20,47 +20,47 @@ package console
 
 import (
 	v1 "github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 func init() {
-	c := &CmdSetResource{
-		name:      "resource_set",
-		rpcMethod: utils.APIerSv1SetResourceProfile,
-		rpcParams: &v1.ResourceWithCache{},
+	c := &CmdSetRoute{
+		name:      "route_profile_set",
+		rpcMethod: utils.APIerSv1SetRouteProfile,
+		rpcParams: &v1.RouteWithCache{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
-// Commander implementation
-type CmdSetResource struct {
+type CmdSetRoute struct {
 	name      string
 	rpcMethod string
-	rpcParams *v1.ResourceWithCache
+	rpcParams *v1.RouteWithCache
 	*CommandExecuter
 }
 
-func (self *CmdSetResource) Name() string {
+func (self *CmdSetRoute) Name() string {
 	return self.name
 }
 
-func (self *CmdSetResource) RpcMethod() string {
+func (self *CmdSetRoute) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdSetResource) RpcParams(reset bool) interface{} {
+func (self *CmdSetRoute) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &v1.ResourceWithCache{}
+		self.rpcParams = &v1.RouteWithCache{RouteProfile: new(engine.RouteProfile)}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdSetResource) PostprocessRpcParams() error {
+func (self *CmdSetRoute) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdSetResource) RpcResult() interface{} {
+func (self *CmdSetRoute) RpcResult() interface{} {
 	var s string
 	return &s
 }

@@ -19,46 +19,48 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
+	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/utils"
 )
 
 func init() {
-	c := &CmdRemoveDispatcherHost{
-		name:      "dispatcher_host_remove",
-		rpcMethod: utils.APIerSv1RemoveDispatcherHost,
+	c := &CmdSetResource{
+		name:      "resource_profile_set",
+		rpcMethod: utils.APIerSv1SetResourceProfile,
+		rpcParams: &v1.ResourceWithCache{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdRemoveDispatcherHost struct {
+type CmdSetResource struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.TenantIDWithCache
+	rpcParams *v1.ResourceWithCache
 	*CommandExecuter
 }
 
-func (self *CmdRemoveDispatcherHost) Name() string {
+func (self *CmdSetResource) Name() string {
 	return self.name
 }
 
-func (self *CmdRemoveDispatcherHost) RpcMethod() string {
+func (self *CmdSetResource) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdRemoveDispatcherHost) RpcParams(reset bool) interface{} {
+func (self *CmdSetResource) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = new(utils.TenantIDWithCache)
+		self.rpcParams = &v1.ResourceWithCache{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdRemoveDispatcherHost) PostprocessRpcParams() error {
+func (self *CmdSetResource) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdRemoveDispatcherHost) RpcResult() interface{} {
+func (self *CmdSetResource) RpcResult() interface{} {
 	var s string
 	return &s
 }

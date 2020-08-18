@@ -18,48 +18,45 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import (
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
-)
+import "github.com/cgrates/cgrates/utils"
 
 func init() {
-	c := &CmdGetRoute{
-		name:      "route_get",
-		rpcMethod: utils.APIerSv1GetRouteProfile,
-		rpcParams: &utils.TenantID{},
+	c := &CmdRemoveAttributes{
+		name:      "attribute_profile_rem",
+		rpcMethod: utils.APIerSv1RemoveAttributeProfile,
+		rpcParams: &utils.TenantIDWithCache{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
-type CmdGetRoute struct {
+type CmdRemoveAttributes struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.TenantID
+	rpcParams *utils.TenantIDWithCache
 	*CommandExecuter
 }
 
-func (self *CmdGetRoute) Name() string {
+func (self *CmdRemoveAttributes) Name() string {
 	return self.name
 }
 
-func (self *CmdGetRoute) RpcMethod() string {
+func (self *CmdRemoveAttributes) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetRoute) RpcParams(reset bool) interface{} {
+func (self *CmdRemoveAttributes) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.TenantID{}
+		self.rpcParams = &utils.TenantIDWithCache{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdGetRoute) PostprocessRpcParams() error {
+func (self *CmdRemoveAttributes) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetRoute) RpcResult() interface{} {
-	var atr engine.RouteProfile
-	return &atr
+func (self *CmdRemoveAttributes) RpcResult() interface{} {
+	var s string
+	return &s
 }

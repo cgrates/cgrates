@@ -18,49 +18,45 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import (
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
-)
+import "github.com/cgrates/cgrates/utils"
 
 func init() {
-	c := &CmdSetThreshold{
-		name:      "threshold_set",
-		rpcMethod: utils.APIerSv1SetThresholdProfile,
-		rpcParams: &engine.ThresholdWithCache{},
+	c := &CmdRemoveChargers{
+		name:      "charger_profile_rem",
+		rpcMethod: utils.APIerSv1RemoveChargerProfile,
+		rpcParams: &utils.TenantID{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
-// Commander implementation
-type CmdSetThreshold struct {
+type CmdRemoveChargers struct {
 	name      string
 	rpcMethod string
-	rpcParams *engine.ThresholdWithCache
+	rpcParams *utils.TenantID
 	*CommandExecuter
 }
 
-func (self *CmdSetThreshold) Name() string {
+func (self *CmdRemoveChargers) Name() string {
 	return self.name
 }
 
-func (self *CmdSetThreshold) RpcMethod() string {
+func (self *CmdRemoveChargers) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdSetThreshold) RpcParams(reset bool) interface{} {
+func (self *CmdRemoveChargers) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &engine.ThresholdWithCache{ThresholdProfile: new(engine.ThresholdProfile)}
+		self.rpcParams = &utils.TenantID{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdSetThreshold) PostprocessRpcParams() error {
+func (self *CmdRemoveChargers) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdSetThreshold) RpcResult() interface{} {
+func (self *CmdRemoveChargers) RpcResult() interface{} {
 	var s string
 	return &s
 }
