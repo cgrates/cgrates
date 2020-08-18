@@ -279,9 +279,7 @@ func TestDispatcherHostIDsProfilesReorderFromIndex(t *testing.T) {
 func TestDispatcherHostIDsProfilesShuffle(t *testing.T) {
 	dConns := DispatcherHostIDs{"DSP_1", "DSP_2", "DSP_3", "DSP_4"}
 	oConns := DispatcherHostIDs{"DSP_1", "DSP_2", "DSP_3", "DSP_4"}
-	if dConns.Shuffle(); dConns[0] == oConns[0] ||
-		dConns[1] == oConns[1] || dConns[2] == oConns[2] ||
-		dConns[3] == oConns[3] {
+	if dConns.Shuffle(); reflect.DeepEqual(dConns, oConns) {
 		t.Errorf("received: %s", utils.ToJSON(dConns))
 	}
 }

@@ -1031,6 +1031,7 @@ const (
 	MetaBroadcast      = "*broadcast"
 	MetaRoundRobin     = "*round_robin"
 	MetaRatio          = "*ratio"
+	MetaDefaultRatio   = "*default_ratio"
 	ThresholdSv1       = "ThresholdSv1"
 	StatSv1            = "StatSv1"
 	ResourceSv1        = "ResourceSv1"
