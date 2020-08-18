@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package dispatchers
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/cgrates/cgrates/engine"
@@ -57,5 +58,35 @@ func TestLoadMetricsGetHosts(t *testing.T) {
 	}
 	if rply := lm.getHosts(hostsIDs.Clone()); rply[0] != "DSP_2" {
 		t.Errorf("Expected: %q ,received: %q", "DSP_2", rply[0])
+	}
+}
+
+func TestNewSingleStrategyDispatcher(t *testing.T) {
+	dhp := engine.DispatcherHostProfiles{
+		{ID: "DSP_1"},
+		{ID: "DSP_2"},
+		{ID: "DSP_3"},
+		{ID: "DSP_4"},
+		{ID: "DSP_5"},
+	}
+	var exp strategyDispatcher = new(singleResultstrategyDispatcher)
+	if rply := newSingleStrategyDispatcher(dhp, utils.EmptyString); !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expected:  singleResultstrategyDispatcher structure,received: %s", utils.ToJSON(rply))
+	}
+
+	dhp = engine.DispatcherHostProfiles{
+		{ID: "DSP_1"},
+		{ID: "DSP_2"},
+		{ID: "DSP_3"},
+		{ID: "DSP_4"},
+		{ID: "DSP_5", Params: map[string]interface{}{utils.MetaRatio: 1}},
+	}
+	exp = &loadStrategyDispatcher{
+		hosts: dhp,
+		tntID: "cgrates.org",
+	}
+	if rply := newSingleStrategyDispatcher(dhp, "cgrates.org"); !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expected:  loadStrategyDispatcher structure,received: %s", utils.ToJSON(rply))
+
 	}
 }

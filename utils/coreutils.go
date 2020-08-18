@@ -940,3 +940,9 @@ type SetIndexesArg struct {
 	TenantArg
 	Opts map[string]interface{}
 }
+
+type DurationArgs struct {
+	DurationTime time.Duration
+	Opts         map[string]interface{}
+	*TenantArg
+}

@@ -174,6 +174,7 @@ type ConfigSv1Interface interface {
 type CoreSv1Interface interface {
 	Status(arg *utils.TenantWithOpts, reply *map[string]interface{}) error
 	Ping(ign *utils.CGREventWithOpts, reply *string) error
+	Sleep(arg *utils.DurationArgs, reply *string) error
 }
 
 type RateSv1Interface interface {
