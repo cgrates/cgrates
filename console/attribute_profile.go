@@ -19,47 +19,48 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 func init() {
-	c := &CmdGetChargerIDs{
-		name:      "chargers_ids",
-		rpcMethod: utils.APIerSv1GetChargerProfileIDs,
-		rpcParams: &utils.TenantArgWithPaginator{},
+	c := &CmdGetAttributes{
+		name:      "attribute_profile",
+		rpcMethod: utils.APIerSv1GetAttributeProfile,
+		rpcParams: &utils.TenantID{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdGetChargerIDs struct {
+type CmdGetAttributes struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.TenantArgWithPaginator
+	rpcParams *utils.TenantID
 	*CommandExecuter
 }
 
-func (self *CmdGetChargerIDs) Name() string {
+func (self *CmdGetAttributes) Name() string {
 	return self.name
 }
 
-func (self *CmdGetChargerIDs) RpcMethod() string {
+func (self *CmdGetAttributes) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetChargerIDs) RpcParams(reset bool) interface{} {
+func (self *CmdGetAttributes) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.TenantArgWithPaginator{}
+		self.rpcParams = &utils.TenantID{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdGetChargerIDs) PostprocessRpcParams() error {
+func (self *CmdGetAttributes) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetChargerIDs) RpcResult() interface{} {
-	var atr []string
+func (self *CmdGetAttributes) RpcResult() interface{} {
+	var atr engine.AttributeProfile
 	return &atr
 }

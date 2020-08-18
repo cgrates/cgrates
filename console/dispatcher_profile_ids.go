@@ -23,43 +23,42 @@ import (
 )
 
 func init() {
-	c := &CmdRateProfileIDs{
-		name:      "rateprofile_ids",
-		rpcMethod: utils.APIerSv1GetRateProfileIDs,
-		rpcParams: &utils.TenantArgWithPaginator{},
+	c := &CmdGetDispatcherProfileIDs{
+		name:      "dispatcher_profile_ids",
+		rpcMethod: utils.APIerSv1GetDispatcherProfileIDs,
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdRateProfileIDs struct {
+type CmdGetDispatcherProfileIDs struct {
 	name      string
 	rpcMethod string
 	rpcParams *utils.TenantArgWithPaginator
 	*CommandExecuter
 }
 
-func (self *CmdRateProfileIDs) Name() string {
+func (self *CmdGetDispatcherProfileIDs) Name() string {
 	return self.name
 }
 
-func (self *CmdRateProfileIDs) RpcMethod() string {
+func (self *CmdGetDispatcherProfileIDs) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdRateProfileIDs) RpcParams(reset bool) interface{} {
+func (self *CmdGetDispatcherProfileIDs) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.TenantArgWithPaginator{}
+		self.rpcParams = new(utils.TenantArgWithPaginator)
 	}
 	return self.rpcParams
 }
 
-func (self *CmdRateProfileIDs) PostprocessRpcParams() error {
+func (self *CmdGetDispatcherProfileIDs) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdRateProfileIDs) RpcResult() interface{} {
-	var atr []string
-	return &atr
+func (self *CmdGetDispatcherProfileIDs) RpcResult() interface{} {
+	var s []string
+	return &s
 }

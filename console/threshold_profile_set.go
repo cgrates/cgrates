@@ -19,48 +19,48 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 func init() {
-	c := &CmdSetRateProfile{
-		name:      "rateprofile_set",
-		rpcMethod: utils.APIerSv1SetRateProfile,
-		rpcParams: &v1.RateProfileWithCache{},
+	c := &CmdSetThreshold{
+		name:      "threshold_profile_set",
+		rpcMethod: utils.APIerSv1SetThresholdProfile,
+		rpcParams: &engine.ThresholdWithCache{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
-type CmdSetRateProfile struct {
+// Commander implementation
+type CmdSetThreshold struct {
 	name      string
 	rpcMethod string
-	rpcParams *v1.RateProfileWithCache
+	rpcParams *engine.ThresholdWithCache
 	*CommandExecuter
 }
 
-func (self *CmdSetRateProfile) Name() string {
+func (self *CmdSetThreshold) Name() string {
 	return self.name
 }
 
-func (self *CmdSetRateProfile) RpcMethod() string {
+func (self *CmdSetThreshold) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdSetRateProfile) RpcParams(reset bool) interface{} {
+func (self *CmdSetThreshold) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &v1.RateProfileWithCache{RateProfileWithOpts: new(engine.RateProfileWithOpts)}
+		self.rpcParams = &engine.ThresholdWithCache{ThresholdProfile: new(engine.ThresholdProfile)}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdSetRateProfile) PostprocessRpcParams() error {
+func (self *CmdSetThreshold) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdSetRateProfile) RpcResult() interface{} {
+func (self *CmdSetThreshold) RpcResult() interface{} {
 	var s string
 	return &s
 }

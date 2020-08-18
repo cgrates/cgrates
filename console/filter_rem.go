@@ -21,9 +21,9 @@ package console
 import "github.com/cgrates/cgrates/utils"
 
 func init() {
-	c := &CmdRemoveResource{
-		name:      "resource_remove",
-		rpcMethod: utils.APIerSv1RemoveResourceProfile,
+	c := &CmdRemoveFilter{
+		name:      "filter_rem",
+		rpcMethod: utils.APIerSv1RemoveFilter,
 		rpcParams: &utils.TenantIDWithCache{},
 	}
 	commands[c.Name()] = c
@@ -31,33 +31,33 @@ func init() {
 }
 
 // Commander implementation
-type CmdRemoveResource struct {
+type CmdRemoveFilter struct {
 	name      string
 	rpcMethod string
 	rpcParams *utils.TenantIDWithCache
 	*CommandExecuter
 }
 
-func (self *CmdRemoveResource) Name() string {
+func (self *CmdRemoveFilter) Name() string {
 	return self.name
 }
 
-func (self *CmdRemoveResource) RpcMethod() string {
+func (self *CmdRemoveFilter) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdRemoveResource) RpcParams(reset bool) interface{} {
+func (self *CmdRemoveFilter) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.TenantIDWithCache{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdRemoveResource) PostprocessRpcParams() error {
+func (self *CmdRemoveFilter) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdRemoveResource) RpcResult() interface{} {
+func (self *CmdRemoveFilter) RpcResult() interface{} {
 	var s string
 	return &s
 }

@@ -18,49 +18,46 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import (
-	v1 "github.com/cgrates/cgrates/apier/v1"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
-)
+import "github.com/cgrates/cgrates/utils"
 
 func init() {
-	c := &CmdSetChargers{
-		name:      "chargers_set",
-		rpcMethod: utils.APIerSv1SetChargerProfile,
-		rpcParams: &v1.ChargerWithCache{},
+	c := &CmdRemoveResource{
+		name:      "resource_profile_rem",
+		rpcMethod: utils.APIerSv1RemoveResourceProfile,
+		rpcParams: &utils.TenantIDWithCache{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
-type CmdSetChargers struct {
+// Commander implementation
+type CmdRemoveResource struct {
 	name      string
 	rpcMethod string
-	rpcParams *v1.ChargerWithCache
+	rpcParams *utils.TenantIDWithCache
 	*CommandExecuter
 }
 
-func (self *CmdSetChargers) Name() string {
+func (self *CmdRemoveResource) Name() string {
 	return self.name
 }
 
-func (self *CmdSetChargers) RpcMethod() string {
+func (self *CmdRemoveResource) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdSetChargers) RpcParams(reset bool) interface{} {
+func (self *CmdRemoveResource) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &v1.ChargerWithCache{ChargerProfile: new(engine.ChargerProfile)}
+		self.rpcParams = &utils.TenantIDWithCache{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdSetChargers) PostprocessRpcParams() error {
+func (self *CmdRemoveResource) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdSetChargers) RpcResult() interface{} {
+func (self *CmdRemoveResource) RpcResult() interface{} {
 	var s string
 	return &s
 }

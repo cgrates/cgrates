@@ -21,43 +21,42 @@ package console
 import "github.com/cgrates/cgrates/utils"
 
 func init() {
-	c := &CmdRemoveFilter{
-		name:      "filter_remove",
-		rpcMethod: utils.APIerSv1RemoveFilter,
+	c := &CmdRemoveRoute{
+		name:      "route_profile_rem",
+		rpcMethod: utils.APIerSv1RemoveRouteProfile,
 		rpcParams: &utils.TenantIDWithCache{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
-// Commander implementation
-type CmdRemoveFilter struct {
+type CmdRemoveRoute struct {
 	name      string
 	rpcMethod string
 	rpcParams *utils.TenantIDWithCache
 	*CommandExecuter
 }
 
-func (self *CmdRemoveFilter) Name() string {
+func (self *CmdRemoveRoute) Name() string {
 	return self.name
 }
 
-func (self *CmdRemoveFilter) RpcMethod() string {
+func (self *CmdRemoveRoute) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdRemoveFilter) RpcParams(reset bool) interface{} {
+func (self *CmdRemoveRoute) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.TenantIDWithCache{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdRemoveFilter) PostprocessRpcParams() error {
+func (self *CmdRemoveRoute) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdRemoveFilter) RpcResult() interface{} {
+func (self *CmdRemoveRoute) RpcResult() interface{} {
 	var s string
 	return &s
 }

@@ -18,45 +18,48 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import "github.com/cgrates/cgrates/utils"
+import (
+	"github.com/cgrates/cgrates/utils"
+)
 
 func init() {
-	c := &CmdRemoveRateProfile{
-		name:      "rateprofile_remove",
-		rpcMethod: utils.APIerSv1RemoveRateProfile,
-		rpcParams: &utils.TenantIDWithCache{},
+	c := &CmdGetChargerIDs{
+		name:      "charger_profile_ids",
+		rpcMethod: utils.APIerSv1GetChargerProfileIDs,
+		rpcParams: &utils.TenantArgWithPaginator{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
-type CmdRemoveRateProfile struct {
+// Commander implementation
+type CmdGetChargerIDs struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.TenantIDWithCache
+	rpcParams *utils.TenantArgWithPaginator
 	*CommandExecuter
 }
 
-func (self *CmdRemoveRateProfile) Name() string {
+func (self *CmdGetChargerIDs) Name() string {
 	return self.name
 }
 
-func (self *CmdRemoveRateProfile) RpcMethod() string {
+func (self *CmdGetChargerIDs) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdRemoveRateProfile) RpcParams(reset bool) interface{} {
+func (self *CmdGetChargerIDs) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.TenantIDWithCache{}
+		self.rpcParams = &utils.TenantArgWithPaginator{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdRemoveRateProfile) PostprocessRpcParams() error {
+func (self *CmdGetChargerIDs) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdRemoveRateProfile) RpcResult() interface{} {
-	var s string
-	return &s
+func (self *CmdGetChargerIDs) RpcResult() interface{} {
+	var atr []string
+	return &atr
 }

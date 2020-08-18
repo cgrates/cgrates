@@ -19,48 +19,46 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 func init() {
-	c := &CmdGetRateProfile{
-		name:      "rateprofile",
-		rpcMethod: utils.APIerSv1GetRateProfile,
-		rpcParams: &utils.TenantID{},
+	c := &CmdRemoveDispatcherProfile{
+		name:      "dispatcher_profile_rem",
+		rpcMethod: utils.APIerSv1RemoveDispatcherProfile,
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdGetRateProfile struct {
+type CmdRemoveDispatcherProfile struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.TenantID
+	rpcParams *utils.TenantIDWithCache
 	*CommandExecuter
 }
 
-func (self *CmdGetRateProfile) Name() string {
+func (self *CmdRemoveDispatcherProfile) Name() string {
 	return self.name
 }
 
-func (self *CmdGetRateProfile) RpcMethod() string {
+func (self *CmdRemoveDispatcherProfile) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetRateProfile) RpcParams(reset bool) interface{} {
+func (self *CmdRemoveDispatcherProfile) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.TenantID{}
+		self.rpcParams = new(utils.TenantIDWithCache)
 	}
 	return self.rpcParams
 }
 
-func (self *CmdGetRateProfile) PostprocessRpcParams() error {
+func (self *CmdRemoveDispatcherProfile) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetRateProfile) RpcResult() interface{} {
-	var atr engine.RateProfile
-	return &atr
+func (self *CmdRemoveDispatcherProfile) RpcResult() interface{} {
+	var s string
+	return &s
 }

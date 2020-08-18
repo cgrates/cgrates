@@ -18,48 +18,45 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import (
-	"github.com/cgrates/cgrates/utils"
-)
+import "github.com/cgrates/cgrates/utils"
 
 func init() {
-	c := &CmdGetAttributeIDs{
-		name:      "attribute_ids",
-		rpcMethod: utils.APIerSv1GetAttributeProfileIDs,
-		rpcParams: &utils.TenantArgWithPaginator{},
+	c := &CmdRemoveThreshold{
+		name:      "threshold_profile_rem",
+		rpcMethod: utils.APIerSv1RemoveThresholdProfile,
+		rpcParams: &utils.TenantIDWithCache{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
-// Commander implementation
-type CmdGetAttributeIDs struct {
+type CmdRemoveThreshold struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.TenantArgWithPaginator
+	rpcParams *utils.TenantIDWithCache
 	*CommandExecuter
 }
 
-func (self *CmdGetAttributeIDs) Name() string {
+func (self *CmdRemoveThreshold) Name() string {
 	return self.name
 }
 
-func (self *CmdGetAttributeIDs) RpcMethod() string {
+func (self *CmdRemoveThreshold) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetAttributeIDs) RpcParams(reset bool) interface{} {
+func (self *CmdRemoveThreshold) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.TenantArgWithPaginator{}
+		self.rpcParams = &utils.TenantIDWithCache{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdGetAttributeIDs) PostprocessRpcParams() error {
+func (self *CmdRemoveThreshold) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetAttributeIDs) RpcResult() interface{} {
-	var atr []string
-	return &atr
+func (self *CmdRemoveThreshold) RpcResult() interface{} {
+	var s string
+	return &s
 }
