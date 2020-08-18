@@ -34,7 +34,7 @@ func TestLoadMetricsGetHosts(t *testing.T) {
 		{ID: "DSP_4", Params: map[string]interface{}{utils.MetaRatio: 1}},
 		{ID: "DSP_5", Params: map[string]interface{}{utils.MetaRatio: 1}},
 	}
-	lm, err := newLoadMetrics(dhp)
+	lm, err := newLoadMetrics(dhp, 1)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -70,7 +70,9 @@ func TestNewSingleStrategyDispatcher(t *testing.T) {
 		{ID: "DSP_5"},
 	}
 	var exp strategyDispatcher = new(singleResultstrategyDispatcher)
-	if rply := newSingleStrategyDispatcher(dhp, utils.EmptyString); !reflect.DeepEqual(exp, rply) {
+	if rply, err := newSingleStrategyDispatcher(dhp, map[string]interface{}{}, utils.EmptyString); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(exp, rply) {
 		t.Errorf("Expected:  singleResultstrategyDispatcher structure,received: %s", utils.ToJSON(rply))
 	}
 
@@ -82,11 +84,62 @@ func TestNewSingleStrategyDispatcher(t *testing.T) {
 		{ID: "DSP_5", Params: map[string]interface{}{utils.MetaRatio: 1}},
 	}
 	exp = &loadStrategyDispatcher{
-		hosts: dhp,
-		tntID: "cgrates.org",
+		hosts:        dhp,
+		tntID:        "cgrates.org",
+		defaultRatio: 1,
 	}
-	if rply := newSingleStrategyDispatcher(dhp, "cgrates.org"); !reflect.DeepEqual(exp, rply) {
+	if rply, err := newSingleStrategyDispatcher(dhp, map[string]interface{}{}, "cgrates.org"); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(exp, rply) {
 		t.Errorf("Expected:  loadStrategyDispatcher structure,received: %s", utils.ToJSON(rply))
+	}
 
+	dhp = engine.DispatcherHostProfiles{
+		{ID: "DSP_1"},
+		{ID: "DSP_2"},
+		{ID: "DSP_3"},
+		{ID: "DSP_4"},
+	}
+	exp = &loadStrategyDispatcher{
+		hosts:        dhp,
+		tntID:        "cgrates.org",
+		defaultRatio: 2,
+	}
+	if rply, err := newSingleStrategyDispatcher(dhp, map[string]interface{}{utils.MetaDefaultRatio: 2}, "cgrates.org"); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expected:  loadStrategyDispatcher structure,received: %s", utils.ToJSON(rply))
+	}
+
+	if _, err := newSingleStrategyDispatcher(dhp, map[string]interface{}{utils.MetaDefaultRatio: "A"}, "cgrates.org"); err == nil {
+		t.Fatalf("Expected error received: %v", err)
+	}
+}
+
+func TestNewLoadMetrics(t *testing.T) {
+	dhp := engine.DispatcherHostProfiles{
+		{ID: "DSP_1", Params: map[string]interface{}{utils.MetaRatio: 1}},
+		{ID: "DSP_2", Params: map[string]interface{}{utils.MetaRatio: 1}},
+		{ID: "DSP_3"},
+	}
+	exp := &LoadMetrics{
+		HostsLoad: map[string]int64{},
+		HostsRatio: map[string]int64{
+			"DSP_1": 1,
+			"DSP_2": 1,
+			"DSP_3": 2,
+		},
+		SumRatio: 4,
+	}
+	if lm, err := newLoadMetrics(dhp, 2); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(exp, lm) {
+		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(exp), utils.ToJSON(lm))
+	}
+	dhp = engine.DispatcherHostProfiles{
+		{ID: "DSP_1", Params: map[string]interface{}{utils.MetaRatio: "A"}},
+	}
+	if _, err := newLoadMetrics(dhp, 2); err == nil {
+		t.Errorf("Expected error received: %v", err)
 	}
 }

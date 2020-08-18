@@ -61,25 +61,37 @@ func newDispatcher(dm *engine.DataManager, pfl *engine.DispatcherProfile) (d Dis
 	hosts := pfl.Hosts.Clone()
 	switch pfl.Strategy {
 	case utils.MetaWeight:
+		var strDsp strategyDispatcher
+		if strDsp, err = newSingleStrategyDispatcher(hosts, pfl.StrategyParams, pfl.TenantID()); err != nil {
+			return
+		}
 		d = &WeightDispatcher{
 			dm:       dm,
 			tnt:      pfl.Tenant,
 			hosts:    hosts,
-			strategy: newSingleStrategyDispatcher(hosts, pfl.TenantID()),
+			strategy: strDsp,
 		}
 	case utils.MetaRandom:
+		var strDsp strategyDispatcher
+		if strDsp, err = newSingleStrategyDispatcher(hosts, pfl.StrategyParams, pfl.TenantID()); err != nil {
+			return
+		}
 		d = &RandomDispatcher{
 			dm:       dm,
 			tnt:      pfl.Tenant,
 			hosts:    hosts,
-			strategy: newSingleStrategyDispatcher(hosts, pfl.TenantID()),
+			strategy: strDsp,
 		}
 	case utils.MetaRoundRobin:
+		var strDsp strategyDispatcher
+		if strDsp, err = newSingleStrategyDispatcher(hosts, pfl.StrategyParams, pfl.TenantID()); err != nil {
+			return
+		}
 		d = &RoundRobinDispatcher{
 			dm:       dm,
 			tnt:      pfl.Tenant,
 			hosts:    hosts,
-			strategy: newSingleStrategyDispatcher(hosts, pfl.TenantID()),
+			strategy: strDsp,
 		}
 	case utils.MetaBroadcast:
 		d = &WeightDispatcher{
@@ -103,6 +115,7 @@ type WeightDispatcher struct {
 	strategy strategyDispatcher
 }
 
+// SetProfile used to implement Dispatcher interface
 func (wd *WeightDispatcher) SetProfile(pfl *engine.DispatcherProfile) {
 	wd.Lock()
 	pfl.Hosts.Sort()
@@ -111,6 +124,7 @@ func (wd *WeightDispatcher) SetProfile(pfl *engine.DispatcherProfile) {
 	return
 }
 
+// HostIDs used to implement Dispatcher interface
 func (wd *WeightDispatcher) HostIDs() (hostIDs engine.DispatcherHostIDs) {
 	wd.RLock()
 	hostIDs = wd.hosts.HostIDs()
@@ -118,6 +132,7 @@ func (wd *WeightDispatcher) HostIDs() (hostIDs engine.DispatcherHostIDs) {
 	return
 }
 
+// Dispatch used to implement Dispatcher interface
 func (wd *WeightDispatcher) Dispatch(routeID string, subsystem,
 	serviceMethod string, args interface{}, reply interface{}) (err error) {
 	return wd.strategy.dispatch(wd.dm, routeID, subsystem, wd.tnt, wd.HostIDs(),
@@ -134,6 +149,7 @@ type RandomDispatcher struct {
 	strategy strategyDispatcher
 }
 
+// SetProfile used to implement Dispatcher interface
 func (d *RandomDispatcher) SetProfile(pfl *engine.DispatcherProfile) {
 	d.Lock()
 	d.hosts = pfl.Hosts.Clone()
@@ -141,6 +157,7 @@ func (d *RandomDispatcher) SetProfile(pfl *engine.DispatcherProfile) {
 	return
 }
 
+// HostIDs used to implement Dispatcher interface
 func (d *RandomDispatcher) HostIDs() (hostIDs engine.DispatcherHostIDs) {
 	d.RLock()
 	hostIDs = d.hosts.HostIDs()
@@ -149,6 +166,7 @@ func (d *RandomDispatcher) HostIDs() (hostIDs engine.DispatcherHostIDs) {
 	return
 }
 
+// Dispatch used to implement Dispatcher interface
 func (d *RandomDispatcher) Dispatch(routeID string, subsystem,
 	serviceMethod string, args interface{}, reply interface{}) (err error) {
 	return d.strategy.dispatch(d.dm, routeID, subsystem, d.tnt, d.HostIDs(),
@@ -165,6 +183,7 @@ type RoundRobinDispatcher struct {
 	strategy strategyDispatcher
 }
 
+// SetProfile used to implement Dispatcher interface
 func (d *RoundRobinDispatcher) SetProfile(pfl *engine.DispatcherProfile) {
 	d.Lock()
 	d.hosts = pfl.Hosts.Clone()
@@ -172,6 +191,7 @@ func (d *RoundRobinDispatcher) SetProfile(pfl *engine.DispatcherProfile) {
 	return
 }
 
+// HostIDs used to implement Dispatcher interface
 func (d *RoundRobinDispatcher) HostIDs() (hostIDs engine.DispatcherHostIDs) {
 	d.RLock()
 	hostIDs = d.hosts.HostIDs()
@@ -184,6 +204,7 @@ func (d *RoundRobinDispatcher) HostIDs() (hostIDs engine.DispatcherHostIDs) {
 	return
 }
 
+// Dispatch used to implement Dispatcher interface
 func (d *RoundRobinDispatcher) Dispatch(routeID string, subsystem,
 	serviceMethod string, args interface{}, reply interface{}) (err error) {
 	return d.strategy.dispatch(d.dm, routeID, subsystem, d.tnt, d.HostIDs(),
@@ -253,24 +274,37 @@ func (*brodcastStrategyDispatcher) dispatch(dm *engine.DataManager, routeID stri
 	return
 }
 
-func newSingleStrategyDispatcher(hosts engine.DispatcherHostProfiles, tntID string) (ls strategyDispatcher) {
+func newSingleStrategyDispatcher(hosts engine.DispatcherHostProfiles, params map[string]interface{}, tntID string) (ls strategyDispatcher, err error) {
+	if dflt, has := params[utils.MetaDefaultRatio]; has {
+		var ratio int64
+		if ratio, err = utils.IfaceAsTInt64(dflt); err != nil {
+			return nil, err
+		}
+		return &loadStrategyDispatcher{
+			tntID:        tntID,
+			hosts:        hosts.Clone(),
+			defaultRatio: ratio,
+		}, nil
+	}
 	for _, host := range hosts {
 		if _, has := host.Params[utils.MetaRatio]; has {
 			return &loadStrategyDispatcher{
-				tntID: tntID,
-				hosts: hosts.Clone(),
-			}
+				tntID:        tntID,
+				hosts:        hosts.Clone(),
+				defaultRatio: 1,
+			}, nil
 		}
 	}
-	return new(singleResultstrategyDispatcher)
+	return new(singleResultstrategyDispatcher), nil
 }
 
 type loadStrategyDispatcher struct {
-	tntID string
-	hosts engine.DispatcherHostProfiles
+	tntID        string
+	hosts        engine.DispatcherHostProfiles
+	defaultRatio int64
 }
 
-func newLoadMetrics(hosts engine.DispatcherHostProfiles) (*LoadMetrics, error) {
+func newLoadMetrics(hosts engine.DispatcherHostProfiles, dfltRatio int64) (*LoadMetrics, error) {
 	lM := &LoadMetrics{
 		HostsLoad:  make(map[string]int64),
 		HostsRatio: make(map[string]int64),
@@ -278,8 +312,8 @@ func newLoadMetrics(hosts engine.DispatcherHostProfiles) (*LoadMetrics, error) {
 	}
 	for _, host := range hosts {
 		if strRatio, has := host.Params[utils.MetaRatio]; !has {
-			lM.HostsRatio[host.ID] = 1
-			lM.SumRatio++
+			lM.HostsRatio[host.ID] = dfltRatio
+			lM.SumRatio += dfltRatio
 		} else if ratio, err := utils.IfaceAsTInt64(strRatio); err != nil {
 			return nil, err
 		} else {
@@ -307,7 +341,7 @@ func (ld *loadStrategyDispatcher) dispatch(dm *engine.DataManager, routeID strin
 		if lM, canCast = x.(*LoadMetrics); !canCast {
 			return fmt.Errorf("cannot cast %+v to *LoadMetrics", x)
 		}
-	} else if lM, err = newLoadMetrics(ld.hosts); err != nil {
+	} else if lM, err = newLoadMetrics(ld.hosts, ld.defaultRatio); err != nil {
 		return
 	}
 
