@@ -57,3 +57,23 @@ func (dS *DispatcherService) CoreSv1Ping(args *utils.CGREventWithOpts, reply *st
 	}
 	return dS.Dispatch(args, utils.MetaCore, utils.CoreSv1Ping, args, reply)
 }
+
+func (dS *DispatcherService) CoreSv1Sleep(args *utils.DurationArgs,
+	reply *string) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.TenantArg != nil && args.TenantArg.Tenant != utils.EmptyString {
+		tnt = args.TenantArg.Tenant
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(utils.CoreSv1Sleep, tnt,
+			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(&utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
+			Tenant: tnt,
+		},
+		Opts: args.Opts,
+	}, utils.MetaCore, utils.CoreSv1Sleep, args, reply)
+}

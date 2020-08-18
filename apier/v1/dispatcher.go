@@ -34,11 +34,11 @@ func (apierSv1 *APIerSv1) GetDispatcherProfile(arg *utils.TenantID, reply *engin
 	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if dpp, err := apierSv1.DataManager.GetDispatcherProfile(arg.Tenant, arg.ID, true, true, utils.NonTransactional); err != nil {
+	dpp, err := apierSv1.DataManager.GetDispatcherProfile(arg.Tenant, arg.ID, true, true, utils.NonTransactional)
+	if err != nil {
 		return utils.APIErrorHandler(err)
-	} else {
-		*reply = *dpp
 	}
+	*reply = *dpp
 	return nil
 }
 
@@ -124,11 +124,11 @@ func (apierSv1 *APIerSv1) GetDispatcherHost(arg *utils.TenantID, reply *engine.D
 	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if dpp, err := apierSv1.DataManager.GetDispatcherHost(arg.Tenant, arg.ID, true, false, utils.NonTransactional); err != nil {
+	dpp, err := apierSv1.DataManager.GetDispatcherHost(arg.Tenant, arg.ID, true, false, utils.NonTransactional)
+	if err != nil {
 		return utils.APIErrorHandler(err)
-	} else {
-		*reply = *dpp
 	}
+	*reply = *dpp
 	return nil
 }
 
@@ -839,6 +839,10 @@ func (dS *DispatcherCoreSv1) Status(args *utils.TenantWithOpts, reply *map[strin
 // Ping used to detreminate if component is active
 func (dS *DispatcherCoreSv1) Ping(args *utils.CGREventWithOpts, reply *string) error {
 	return dS.dS.CoreSv1Ping(args, reply)
+}
+
+func (dS *DispatcherCoreSv1) Sleep(arg *utils.DurationArgs, reply *string) error {
+	return dS.dS.CoreSv1Sleep(arg, reply)
 }
 
 func NewDispatcherRALsV1(dps *dispatchers.DispatcherService) *DispatcherRALsV1 {

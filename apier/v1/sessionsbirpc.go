@@ -303,7 +303,7 @@ func (ssv1 *SessionSv1) BiRPCV1STIRIdentity(clnt *rpc2.Client,
 	return ssv1.Ss.BiRPCv1STIRIdentity(nil, args, reply)
 }
 
-func (ssv1 *SessionSv1) BiRPCV1Sleep(clnt *rpc2.Client, arg *DurationArgs,
+func (ssv1 *SessionSv1) BiRPCV1Sleep(clnt *rpc2.Client, arg *utils.DurationArgs,
 	reply *string) (err error) {
 	if err = utils.ConReqs.Allocate(); err != nil {
 		return
