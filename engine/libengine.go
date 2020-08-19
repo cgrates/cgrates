@@ -31,20 +31,16 @@ import (
 // NewRPCPool returns a new pool of connection with the given configuration
 func NewRPCPool(dispatchStrategy string, keyPath, certPath, caPath string, connAttempts, reconnects int,
 	connectTimeout, replyTimeout time.Duration, rpcConnCfgs []*config.RemoteHost,
-	internalConnChan chan rpcclient.ClientConnector, lazyConnect bool) (*rpcclient.RPCPool, error) {
+	internalConnChan chan rpcclient.ClientConnector, lazyConnect bool) (rpcPool *rpcclient.RPCPool, err error) {
 	var rpcClient *rpcclient.RPCClient
-	var err error
-	rpcPool := rpcclient.NewRPCPool(dispatchStrategy, replyTimeout)
-	atLestOneConnected := false // If one connected we don't longer return errors
+	var atLestOneConnected bool // If one connected we don't longer return errors
+	rpcPool = rpcclient.NewRPCPool(dispatchStrategy, replyTimeout)
 	for _, rpcConnCfg := range rpcConnCfgs {
 		if rpcConnCfg.Address == utils.MetaInternal {
 			rpcClient, err = rpcclient.NewRPCClient("", "", rpcConnCfg.TLS, keyPath, certPath, caPath, connAttempts,
 				reconnects, connectTimeout, replyTimeout, rpcclient.InternalRPC, internalConnChan, lazyConnect)
-		} else if utils.SliceHasMember([]string{utils.EmptyString, utils.MetaGOB, utils.MetaJSON}, rpcConnCfg.Transport) {
-			codec := rpcclient.GOBrpc
-			if rpcConnCfg.Transport != "" {
-				codec = rpcConnCfg.Transport
-			}
+		} else if utils.SliceHasMember([]string{utils.EmptyString, utils.MetaGOB, rpcclient.HTTPjson, utils.MetaJSON}, rpcConnCfg.Transport) {
+			codec := utils.FirstNonEmpty(rpcConnCfg.Transport, rpcclient.GOBrpc)
 			rpcClient, err = rpcclient.NewRPCClient(utils.TCP, rpcConnCfg.Address, rpcConnCfg.TLS, keyPath, certPath, caPath,
 				connAttempts, reconnects, connectTimeout, replyTimeout, codec, nil, lazyConnect)
 		} else {
@@ -58,7 +54,7 @@ func NewRPCPool(dispatchStrategy string, keyPath, certPath, caPath string, connA
 	if atLestOneConnected {
 		err = nil
 	}
-	return rpcPool, err
+	return
 }
 
 // IntRPC is the global variable that is used to comunicate with all the subsystems internally
