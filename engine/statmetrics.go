@@ -237,20 +237,22 @@ type StatACD struct {
 	val       *time.Duration // cached ACD value
 }
 
-// getValue returns acr.val
+// getValue returns acd.val
 func (acd *StatACD) getValue() time.Duration {
 	if acd.val == nil {
 		if (acd.MinItems > 0 && acd.Count < int64(acd.MinItems)) || (acd.Count == 0) {
-			acd.val = utils.DurationPointer(time.Duration((-1) * time.Nanosecond))
+			acd.val = utils.DurationPointer(-time.Nanosecond)
 		} else {
-			acd.val = utils.DurationPointer(time.Duration(acd.Sum.Nanoseconds() / acd.Count))
+			acd.val = utils.DurationPointer(utils.RoundStatDuration(
+				time.Duration(acd.Sum.Nanoseconds()/acd.Count),
+				config.CgrConfig().GeneralCfg().RoundingDecimals))
 		}
 	}
 	return *acd.val
 }
 
 func (acd *StatACD) GetStringValue(fmtOpts string) (valStr string) {
-	if val := acd.getValue(); val == time.Duration((-1)*time.Nanosecond) {
+	if val := acd.getValue(); val == -time.Nanosecond {
 		valStr = utils.NOT_AVAILABLE
 	} else {
 		valStr = fmt.Sprintf("%+v", acd.getValue())
@@ -263,7 +265,7 @@ func (acd *StatACD) GetValue() (v interface{}) {
 }
 
 func (acd *StatACD) GetFloat64Value() (v float64) {
-	if val := acd.getValue(); val == time.Duration((-1)*time.Nanosecond) {
+	if val := acd.getValue(); val == -time.Nanosecond {
 		v = -1.0
 	} else {
 		v = acd.getValue().Seconds()
@@ -330,7 +332,8 @@ func (acd *StatACD) Compress(queueLen int64, defaultID string) (eventIDs []strin
 		return
 	}
 	stat := &DurationWithCompress{
-		Duration:       time.Duration(acd.Sum.Nanoseconds() / acd.Count),
+		Duration: utils.RoundStatDuration(time.Duration(acd.Sum.Nanoseconds()/acd.Count),
+			config.CgrConfig().GeneralCfg().RoundingDecimals),
 		CompressFactor: int(acd.Count),
 	}
 	acd.Events = map[string]*DurationWithCompress{defaultID: stat}
@@ -370,7 +373,10 @@ func (tcd *StatTCD) getValue() time.Duration {
 		if (tcd.MinItems > 0 && tcd.Count < int64(tcd.MinItems)) || (tcd.Count == 0) {
 			tcd.val = utils.DurationPointer(time.Duration((-1) * time.Nanosecond))
 		} else {
-			tcd.val = utils.DurationPointer(time.Duration(tcd.Sum.Nanoseconds()))
+			tcd.val = utils.DurationPointer(utils.RoundStatDuration(
+				time.Duration(tcd.Sum.Nanoseconds()),
+				config.CgrConfig().GeneralCfg().RoundingDecimals))
+
 		}
 	}
 	return *tcd.val
@@ -458,7 +464,8 @@ func (tcd *StatTCD) Compress(queueLen int64, defaultID string) (eventIDs []strin
 		return
 	}
 	stat := &DurationWithCompress{
-		Duration:       time.Duration(tcd.Sum.Nanoseconds() / tcd.Count),
+		Duration: utils.RoundStatDuration(time.Duration(tcd.Sum.Nanoseconds()/tcd.Count),
+			config.CgrConfig().GeneralCfg().RoundingDecimals),
 		CompressFactor: int(tcd.Count),
 	}
 	tcd.Events = map[string]*DurationWithCompress{defaultID: stat}
@@ -498,7 +505,7 @@ func (acc *StatACC) getValue() float64 {
 		if (acc.MinItems > 0 && acc.Count < int64(acc.MinItems)) || (acc.Count == 0) {
 			acc.val = utils.Float64Pointer(STATS_NA)
 		} else {
-			acc.val = utils.Float64Pointer(utils.Round((acc.Sum / float64(acc.Count)),
+			acc.val = utils.Float64Pointer(utils.Round(acc.Sum/float64(acc.Count),
 				config.CgrConfig().GeneralCfg().RoundingDecimals, utils.ROUNDING_MIDDLE))
 		}
 	}
@@ -581,7 +588,7 @@ func (acc *StatACC) Compress(queueLen int64, defaultID string) (eventIDs []strin
 		return
 	}
 	stat := &StatWithCompress{
-		Stat: utils.Round((acc.Sum / float64(acc.Count)),
+		Stat: utils.Round(acc.Sum/float64(acc.Count),
 			config.CgrConfig().GeneralCfg().RoundingDecimals, utils.ROUNDING_MIDDLE),
 		CompressFactor: int(acc.Count),
 	}
@@ -748,7 +755,9 @@ func (pdd *StatPDD) getValue() time.Duration {
 		if (pdd.MinItems > 0 && pdd.Count < int64(pdd.MinItems)) || (pdd.Count == 0) {
 			pdd.val = utils.DurationPointer(time.Duration((-1) * time.Nanosecond))
 		} else {
-			pdd.val = utils.DurationPointer(time.Duration(pdd.Sum.Nanoseconds() / pdd.Count))
+			pdd.val = utils.DurationPointer(utils.RoundStatDuration(
+				time.Duration(pdd.Sum.Nanoseconds()/pdd.Count),
+				config.CgrConfig().GeneralCfg().RoundingDecimals))
 		}
 	}
 	return *pdd.val
@@ -835,7 +844,8 @@ func (pdd *StatPDD) Compress(queueLen int64, defaultID string) (eventIDs []strin
 		return
 	}
 	stat := &DurationWithCompress{
-		Duration:       time.Duration(pdd.Sum.Nanoseconds() / pdd.Count),
+		Duration: utils.RoundStatDuration(time.Duration(pdd.Sum.Nanoseconds()/pdd.Count),
+			config.CgrConfig().GeneralCfg().RoundingDecimals),
 		CompressFactor: int(pdd.Count),
 	}
 	pdd.Events = map[string]*DurationWithCompress{defaultID: stat}

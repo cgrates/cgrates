@@ -153,7 +153,7 @@ func UUIDSha1Prefix() string {
 //	Round(NaN) = NaN
 func Round(x float64, prec int, method string) float64 {
 	var rounder float64
-	maxPrec := 7 // define a max precison to cut float errors
+	maxPrec := 7 // define a max precision to cut float errors
 	if maxPrec < prec {
 		maxPrec = prec
 	}
@@ -181,6 +181,11 @@ func Round(x float64, prec int, method string) float64 {
 	}
 
 	return rounder / pow
+}
+
+//RoundStatDuration is used in engine package for stat metrics that has duration (e.g acd metric, tcd metric, etc...)
+func RoundStatDuration(x time.Duration, prec int) time.Duration {
+	return x.Round(time.Duration(math.Pow10(9 - prec)))
 }
 
 func getAddDuration(tmStr string) (addDur time.Duration, err error) {
