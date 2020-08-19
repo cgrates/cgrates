@@ -123,7 +123,7 @@ func testLoaderITInitStoreDB(t *testing.T) {
 		lCfg.StorDbCfg().ConnMaxLifetime, lCfg.StorDbCfg().StringIndexedFields,
 		lCfg.StorDbCfg().PrefixIndexedFields, lCfg.StorDbCfg().Items)
 	if err != nil {
-		t.Error("Error on opening database connection: ", err)
+		t.Fatal("Error on opening database connection: ", err)
 	}
 	storDb = db
 	// Creating the table serves also as reset since there is a drop prior to create
