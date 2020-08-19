@@ -65,6 +65,12 @@ func NewCustomJSONServerCodec(conn io.ReadWriteCloser) rpc.ServerCodec {
 	}
 }
 
+func DecodeServerRequest(r io.Reader) (req *serverRequest, err error) {
+	req = new(serverRequest)
+	err = json.NewDecoder(r).Decode(req)
+	return
+}
+
 type serverRequest struct {
 	Method  string           `json:"method"`
 	Params  *json.RawMessage `json:"params"`
@@ -76,6 +82,15 @@ func (r *serverRequest) reset() {
 	r.Method = ""
 	r.Params = nil
 	r.Id = nil
+}
+
+func WriteServerResponse(w io.Writer, id *json.RawMessage, result, err interface{}) error {
+	return json.NewEncoder(w).Encode(
+		serverResponse{
+			Id:     id,
+			Result: result,
+			Error:  err,
+		})
 }
 
 type serverResponse struct {
