@@ -34,9 +34,12 @@ import (
 func NewDispatcherService(dm *engine.DataManager,
 	cfg *config.CGRConfig, fltrS *engine.FilterS,
 	connMgr *engine.ConnManager) (*DispatcherService, error) {
-
-	return &DispatcherService{dm: dm, cfg: cfg,
-		fltrS: fltrS, connMgr: connMgr}, nil
+	return &DispatcherService{
+		dm:      dm,
+		cfg:     cfg,
+		fltrS:   fltrS,
+		connMgr: connMgr,
+	}, nil
 }
 
 // DispatcherService  is the service handling dispatching towards internal components

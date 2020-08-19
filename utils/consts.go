@@ -901,6 +901,7 @@ const (
 	FilterS     = "FilterS"
 	ThresholdS  = "ThresholdS"
 	DispatcherS = "DispatcherS"
+	DispatcherH = "DispatcherH"
 	LoaderS     = "LoaderS"
 	ChargerS    = "ChargerS"
 	CacheS      = "CacheS"
@@ -1540,6 +1541,11 @@ const (
 	DispatcherSv1GetProfileForEvent = "DispatcherSv1.GetProfileForEvent"
 	DispatcherSv1Apier              = "DispatcherSv1.Apier"
 	DispatcherServicePing           = "DispatcherService.Ping"
+)
+
+// DispatcherH APIs
+const (
+	DispatcherHv1RegisterHosts = "DispatcherHv1.RegisterHosts"
 )
 
 // RateProfile APIs
