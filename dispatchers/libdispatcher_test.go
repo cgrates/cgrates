@@ -114,7 +114,7 @@ func TestNewSingleStrategyDispatcher(t *testing.T) {
 	exp = &loadStrategyDispatcher{
 		hosts:        dhp,
 		tntID:        "cgrates.org",
-		defaultRatio: 1,
+		defaultRatio: 0,
 	}
 	if rply, err := newSingleStrategyDispatcher(dhp, map[string]interface{}{utils.MetaDefaultRatio: 0}, "cgrates.org"); err != nil {
 		t.Fatal(err)
@@ -137,7 +137,7 @@ func TestNewLoadMetrics(t *testing.T) {
 		HostsLoad: map[string]int64{},
 		HostsRatio: map[string]int64{
 			"DSP_1": 1,
-			"DSP_2": 1,
+			"DSP_2": 0,
 			"DSP_3": 2,
 		},
 	}
@@ -161,13 +161,14 @@ func TestLoadMetricsGetHosts2(t *testing.T) {
 		{ID: "DSP_3", Params: map[string]interface{}{utils.MetaRatio: 1}},
 		{ID: "DSP_4", Params: map[string]interface{}{utils.MetaRatio: 5}},
 		{ID: "DSP_5", Params: map[string]interface{}{utils.MetaRatio: 1}},
+		{ID: "DSP_6", Params: map[string]interface{}{utils.MetaRatio: 0}},
 	}
 	lm, err := newLoadMetrics(dhp, 1)
 	if err != nil {
 		t.Fatal(err)
 	}
 	hostsIDs := engine.DispatcherHostIDs(dhp.HostIDs())
-	exp := []string(hostsIDs.Clone())
+	exp := []string(hostsIDs.Clone())[:5]
 	if rply := lm.getHosts(hostsIDs.Clone()); !reflect.DeepEqual(exp, rply) {
 		t.Errorf("Expected: %+v ,received: %+v", exp, rply)
 	}
@@ -208,5 +209,29 @@ func TestLoadMetricsGetHosts2(t *testing.T) {
 		if rply := lm.getHosts(hostsIDs.Clone()); !reflect.DeepEqual(exp, rply) {
 			t.Errorf("Expected: %+v ,received: %+v", exp, rply)
 		}
+	}
+
+	dhp = engine.DispatcherHostProfiles{
+		{ID: "DSP_1", Params: map[string]interface{}{utils.MetaRatio: -1}},
+		{ID: "DSP_2", Params: map[string]interface{}{utils.MetaRatio: 3}},
+		{ID: "DSP_3", Params: map[string]interface{}{utils.MetaRatio: 1}},
+		{ID: "DSP_4", Params: map[string]interface{}{utils.MetaRatio: 5}},
+		{ID: "DSP_5", Params: map[string]interface{}{utils.MetaRatio: 1}},
+		{ID: "DSP_6", Params: map[string]interface{}{utils.MetaRatio: 0}},
+	}
+	lm, err = newLoadMetrics(dhp, 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	hostsIDs = engine.DispatcherHostIDs(dhp.HostIDs())
+	exp = []string(hostsIDs.Clone())[:5]
+	if rply := lm.getHosts(hostsIDs.Clone()); !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expected: %+v ,received: %+v", exp, rply)
+	}
+	for i := 0; i < 100; i++ {
+		if rply := lm.getHosts(hostsIDs.Clone()); !reflect.DeepEqual(exp, rply) {
+			t.Errorf("Expected: %+v ,received: %+v", exp, rply)
+		}
+		lm.incrementLoad(exp[0], utils.EmptyString)
 	}
 }

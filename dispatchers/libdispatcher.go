@@ -280,9 +280,6 @@ func newSingleStrategyDispatcher(hosts engine.DispatcherHostProfiles, params map
 		if ratio, err = utils.IfaceAsTInt64(dflt); err != nil {
 			return nil, err
 		}
-		if ratio <= 0 {
-			ratio = 1
-		}
 		return &loadStrategyDispatcher{
 			tntID:        tntID,
 			hosts:        hosts.Clone(),
@@ -318,9 +315,6 @@ func newLoadMetrics(hosts engine.DispatcherHostProfiles, dfltRatio int64) (*Load
 		} else if ratio, err := utils.IfaceAsTInt64(strRatio); err != nil {
 			return nil, err
 		} else {
-			if ratio <= 0 {
-				ratio = 1
-			}
 			lM.HostsRatio[host.ID] = ratio
 		}
 	}
@@ -399,12 +393,21 @@ func (hc *hostCosts) Swap(i, j int) {
 
 func (lM *LoadMetrics) getHosts(hostIDs []string) []string {
 	hlp := &hostCosts{
-		ids:      hostIDs,
-		multiple: make([]int64, len(hostIDs)),
+		ids:      make([]string, 0, len(hostIDs)),
+		multiple: make([]int64, 0, len(hostIDs)),
 	}
 	lM.mutex.RLock()
-	for i, id := range hostIDs {
-		hlp.multiple[i] = lM.HostsLoad[id] / lM.HostsRatio[id]
+
+	for _, id := range hostIDs {
+		switch {
+		case lM.HostsRatio[id] < 0:
+			hlp.multiple = append(hlp.multiple, 0)
+		case lM.HostsRatio[id] == 0:
+			continue
+		default:
+			hlp.multiple = append(hlp.multiple, lM.HostsLoad[id]/lM.HostsRatio[id])
+		}
+		hlp.ids = append(hlp.ids, id)
 	}
 	lM.mutex.RUnlock()
 	sort.Stable(hlp)
