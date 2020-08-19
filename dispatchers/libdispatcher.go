@@ -280,6 +280,9 @@ func newSingleStrategyDispatcher(hosts engine.DispatcherHostProfiles, params map
 		if ratio, err = utils.IfaceAsTInt64(dflt); err != nil {
 			return nil, err
 		}
+		if ratio <= 0 {
+			ratio = 1
+		}
 		return &loadStrategyDispatcher{
 			tntID:        tntID,
 			hosts:        hosts.Clone(),
@@ -308,17 +311,17 @@ func newLoadMetrics(hosts engine.DispatcherHostProfiles, dfltRatio int64) (*Load
 	lM := &LoadMetrics{
 		HostsLoad:  make(map[string]int64),
 		HostsRatio: make(map[string]int64),
-		SumRatio:   0,
 	}
 	for _, host := range hosts {
 		if strRatio, has := host.Params[utils.MetaRatio]; !has {
 			lM.HostsRatio[host.ID] = dfltRatio
-			lM.SumRatio += dfltRatio
 		} else if ratio, err := utils.IfaceAsTInt64(strRatio); err != nil {
 			return nil, err
 		} else {
+			if ratio <= 0 {
+				ratio = 1
+			}
 			lM.HostsRatio[host.ID] = ratio
-			lM.SumRatio += ratio
 		}
 	}
 	return lM, nil
@@ -329,7 +332,6 @@ type LoadMetrics struct {
 	mutex      sync.RWMutex
 	HostsLoad  map[string]int64
 	HostsRatio map[string]int64
-	SumRatio   int64
 }
 
 func (ld *loadStrategyDispatcher) dispatch(dm *engine.DataManager, routeID string, subsystem, tnt string, hostIDs []string,
@@ -384,30 +386,28 @@ func (ld *loadStrategyDispatcher) dispatch(dm *engine.DataManager, routeID strin
 
 // used to sort the host IDs based on costs
 type hostCosts struct {
-	ids   []string
-	costs []int64
+	ids      []string
+	multiple []int64
 }
 
 func (hc *hostCosts) Len() int           { return len(hc.ids) }
-func (hc *hostCosts) Less(i, j int) bool { return hc.costs[i] < hc.costs[j] }
+func (hc *hostCosts) Less(i, j int) bool { return hc.multiple[i] < hc.multiple[j] }
 func (hc *hostCosts) Swap(i, j int) {
-	hc.costs[i], hc.costs[j], hc.ids[i], hc.ids[j] = hc.costs[j], hc.costs[i], hc.ids[j], hc.ids[i]
+	hc.multiple[i], hc.multiple[j] = hc.multiple[j], hc.multiple[i]
+	hc.ids[i], hc.ids[j] = hc.ids[j], hc.ids[i]
 }
 
 func (lM *LoadMetrics) getHosts(hostIDs []string) []string {
 	hlp := &hostCosts{
-		ids:   hostIDs,
-		costs: make([]int64, len(hostIDs)),
+		ids:      hostIDs,
+		multiple: make([]int64, len(hostIDs)),
 	}
 	lM.mutex.RLock()
 	for i, id := range hostIDs {
-		hlp.costs[i] = lM.HostsLoad[id]
-		if hlp.costs[i] >= lM.HostsRatio[id] {
-			hlp.costs[i] += lM.SumRatio
-		}
+		hlp.multiple[i] = lM.HostsLoad[id] / lM.HostsRatio[id]
 	}
 	lM.mutex.RUnlock()
-	sort.Sort(hlp)
+	sort.Stable(hlp)
 	return hlp.ids
 }
 

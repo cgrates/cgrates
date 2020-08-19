@@ -111,6 +111,17 @@ func TestNewSingleStrategyDispatcher(t *testing.T) {
 		t.Errorf("Expected:  loadStrategyDispatcher structure,received: %s", utils.ToJSON(rply))
 	}
 
+	exp = &loadStrategyDispatcher{
+		hosts:        dhp,
+		tntID:        "cgrates.org",
+		defaultRatio: 1,
+	}
+	if rply, err := newSingleStrategyDispatcher(dhp, map[string]interface{}{utils.MetaDefaultRatio: 0}, "cgrates.org"); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expected:  loadStrategyDispatcher structure,received: %s", utils.ToJSON(rply))
+	}
+
 	if _, err := newSingleStrategyDispatcher(dhp, map[string]interface{}{utils.MetaDefaultRatio: "A"}, "cgrates.org"); err == nil {
 		t.Fatalf("Expected error received: %v", err)
 	}
@@ -119,7 +130,7 @@ func TestNewSingleStrategyDispatcher(t *testing.T) {
 func TestNewLoadMetrics(t *testing.T) {
 	dhp := engine.DispatcherHostProfiles{
 		{ID: "DSP_1", Params: map[string]interface{}{utils.MetaRatio: 1}},
-		{ID: "DSP_2", Params: map[string]interface{}{utils.MetaRatio: 1}},
+		{ID: "DSP_2", Params: map[string]interface{}{utils.MetaRatio: 0}},
 		{ID: "DSP_3"},
 	}
 	exp := &LoadMetrics{
@@ -129,7 +140,6 @@ func TestNewLoadMetrics(t *testing.T) {
 			"DSP_2": 1,
 			"DSP_3": 2,
 		},
-		SumRatio: 4,
 	}
 	if lm, err := newLoadMetrics(dhp, 2); err != nil {
 		t.Fatal(err)
@@ -141,5 +151,62 @@ func TestNewLoadMetrics(t *testing.T) {
 	}
 	if _, err := newLoadMetrics(dhp, 2); err == nil {
 		t.Errorf("Expected error received: %v", err)
+	}
+}
+
+func TestLoadMetricsGetHosts2(t *testing.T) {
+	dhp := engine.DispatcherHostProfiles{
+		{ID: "DSP_1", Params: map[string]interface{}{utils.MetaRatio: 2}},
+		{ID: "DSP_2", Params: map[string]interface{}{utils.MetaRatio: 3}},
+		{ID: "DSP_3", Params: map[string]interface{}{utils.MetaRatio: 1}},
+		{ID: "DSP_4", Params: map[string]interface{}{utils.MetaRatio: 5}},
+		{ID: "DSP_5", Params: map[string]interface{}{utils.MetaRatio: 1}},
+	}
+	lm, err := newLoadMetrics(dhp, 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	hostsIDs := engine.DispatcherHostIDs(dhp.HostIDs())
+	exp := []string(hostsIDs.Clone())
+	if rply := lm.getHosts(hostsIDs.Clone()); !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expected: %+v ,received: %+v", exp, rply)
+	}
+	for i := 0; i < 100; i++ {
+		for _, dh := range dhp {
+			for j := int64(0); j < lm.HostsRatio[dh.ID]; j++ {
+				if rply := lm.getHosts(hostsIDs.Clone()); !reflect.DeepEqual(exp, rply) {
+					t.Errorf("Expected for id<%s>: %+v ,received: %+v", dh.ID, exp, rply)
+				}
+				lm.incrementLoad(dh.ID, utils.EmptyString)
+			}
+			exp = append(exp[1:], exp[0])
+		}
+		exp = []string{"DSP_1", "DSP_2", "DSP_3", "DSP_4", "DSP_5"}
+		if rply := lm.getHosts(hostsIDs.Clone()); !reflect.DeepEqual(exp, rply) {
+			t.Errorf("Expected: %+v ,received: %+v", exp, rply)
+		}
+		lm.decrementLoad("DSP_4", utils.EmptyString)
+		lm.decrementLoad("DSP_4", utils.EmptyString)
+		lm.decrementLoad("DSP_2", utils.EmptyString)
+		exp = []string{"DSP_2", "DSP_4", "DSP_1", "DSP_3", "DSP_5"}
+		if rply := lm.getHosts(hostsIDs.Clone()); !reflect.DeepEqual(exp, rply) {
+			t.Errorf("Expected: %+v ,received: %+v", exp, rply)
+		}
+		lm.incrementLoad("DSP_2", utils.EmptyString)
+
+		exp = []string{"DSP_4", "DSP_1", "DSP_2", "DSP_3", "DSP_5"}
+		if rply := lm.getHosts(hostsIDs.Clone()); !reflect.DeepEqual(exp, rply) {
+			t.Errorf("Expected: %+v ,received: %+v", exp, rply)
+		}
+		lm.incrementLoad("DSP_4", utils.EmptyString)
+
+		if rply := lm.getHosts(hostsIDs.Clone()); !reflect.DeepEqual(exp, rply) {
+			t.Errorf("Expected: %+v ,received: %+v", exp, rply)
+		}
+		lm.incrementLoad("DSP_4", utils.EmptyString)
+		exp = []string{"DSP_1", "DSP_2", "DSP_3", "DSP_4", "DSP_5"}
+		if rply := lm.getHosts(hostsIDs.Clone()); !reflect.DeepEqual(exp, rply) {
+			t.Errorf("Expected: %+v ,received: %+v", exp, rply)
+		}
 	}
 }
