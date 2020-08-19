@@ -171,13 +171,14 @@ const CGRATES_CFG_JSON = `
 },
 
 
-"http": {										// HTTP server configuration
-	"json_rpc_url": "/jsonrpc",					// JSON RPC relative URL ("" to disable)
-	"ws_url": "/ws",							// WebSockets relative URL ("" to disable)
-	"freeswitch_cdrs_url": "/freeswitch_json",	// Freeswitch CDRS relative URL ("" to disable)
-	"http_cdrs": "/cdr_http",					// CDRS relative URL ("" to disable)
-	"use_basic_auth": false,					// use basic authentication
-	"auth_users": {},							// basic authentication usernames and base64-encoded passwords (eg: { "username1": "cGFzc3dvcmQ=", "username2": "cGFzc3dvcmQy "})
+"http": {													// HTTP server configuration
+	"json_rpc_url": "/jsonrpc",								// JSON RPC relative URL ("" to disable)
+	"dispatchers_registrar_url": "/dispatchers_registrar",	// dispatcherH registrar service relative URL
+	"ws_url": "/ws",										// WebSockets relative URL ("" to disable)
+	"freeswitch_cdrs_url": "/freeswitch_json",				// Freeswitch CDRS relative URL ("" to disable)
+	"http_cdrs": "/cdr_http",								// CDRS relative URL ("" to disable)
+	"use_basic_auth": false,								// use basic authentication
+	"auth_users": {},										// basic authentication usernames and base64-encoded passwords (eg: { "username1": "cGFzc3dvcmQ=", "username2": "cGFzc3dvcmQy "})
 },
 
 
@@ -928,6 +929,15 @@ const CGRATES_CFG_JSON = `
 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 	"attributes_conns": [],					// connections to AttributeS for API authorization, empty to disable auth functionality: <""|*internal|$rpc_conns_id>
+},
+
+
+"dispatcherh":{
+    "enabled": false,
+    "dispatchers_conns": [],
+	"host_ids": [],
+	"register_interval": "5m",
+	"register_transport": "*json",
 },
 
 

@@ -172,6 +172,7 @@ func NewDefaultCGRConfig() (cfg *CGRConfig, err error) {
 	cfg.routeSCfg = new(RouteSCfg)
 	cfg.sureTaxCfg = new(SureTaxCfg)
 	cfg.dispatcherSCfg = new(DispatcherSCfg)
+	cfg.dispatcherHCfg = new(DispatcherHCfg)
 	cfg.loaderCgrCfg = new(LoaderCgrCfg)
 	cfg.migratorCgrCfg = new(MigratorCgrCfg)
 	cfg.mailerCfg = new(MailerCfg)
@@ -292,6 +293,7 @@ type CGRConfig struct {
 	routeSCfg        *RouteSCfg        // RouteS config
 	sureTaxCfg       *SureTaxCfg       // SureTax config
 	dispatcherSCfg   *DispatcherSCfg   // DispatcherS config
+	dispatcherHCfg   *DispatcherHCfg   // DispatcherS config
 	loaderCgrCfg     *LoaderCgrCfg     // LoaderCgr config
 	migratorCgrCfg   *MigratorCgrCfg   // MigratorCgr config
 	mailerCfg        *MailerCfg        // Mailer config
@@ -366,7 +368,7 @@ func (cfg *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		cfg.loadMailerCfg, cfg.loadSureTaxCfg, cfg.loadDispatcherSCfg,
 		cfg.loadLoaderCgrCfg, cfg.loadMigratorCgrCfg, cfg.loadTlsCgrCfg,
 		cfg.loadAnalyzerCgrCfg, cfg.loadApierCfg, cfg.loadErsCfg, cfg.loadEesCfg,
-		cfg.loadRateSCfg, cfg.loadSIPAgentCfg} {
+		cfg.loadRateSCfg, cfg.loadSIPAgentCfg, cfg.loadDispatcherHCfg} {
 		if err = loadFunc(jsnCfg); err != nil {
 			return
 		}
@@ -661,6 +663,15 @@ func (cfg *CGRConfig) loadDispatcherSCfg(jsnCfg *CgrJsonCfg) (err error) {
 	return cfg.dispatcherSCfg.loadFromJsonCfg(jsnDispatcherSCfg)
 }
 
+// loadDispatcherHCfg loads the DispatcherS section of the configuration
+func (cfg *CGRConfig) loadDispatcherHCfg(jsnCfg *CgrJsonCfg) (err error) {
+	var jsnDispatcherHCfg *DispatcherHJsonCfg
+	if jsnDispatcherHCfg, err = jsnCfg.DispatcherHJsonCfg(); err != nil {
+		return
+	}
+	return cfg.dispatcherHCfg.loadFromJsonCfg(jsnDispatcherHCfg)
+}
+
 // loadLoaderCgrCfg loads the Loader section of the configuration
 func (cfg *CGRConfig) loadLoaderCgrCfg(jsnCfg *CgrJsonCfg) (err error) {
 	var jsnLoaderCgrCfg *LoaderCfgJson
@@ -882,6 +893,13 @@ func (cfg *CGRConfig) DispatcherSCfg() *DispatcherSCfg {
 	return cfg.dispatcherSCfg
 }
 
+// DispatcherHCfg returns the config for DispatcherS
+func (cfg *CGRConfig) DispatcherHCfg() *DispatcherHCfg {
+	cfg.lks[DispatcherSJson].Lock()
+	defer cfg.lks[DispatcherSJson].Unlock()
+	return cfg.dispatcherHCfg
+}
+
 // MigratorCgrCfg returns the config for Migrator
 func (cfg *CGRConfig) MigratorCgrCfg() *MigratorCgrCfg {
 	cfg.lks[CgrMigratorCfgJson].Lock()
@@ -1086,6 +1104,8 @@ func (cfg *CGRConfig) V1GetConfigSection(args *StringWithOpts, reply *map[string
 		jsonString = utils.ToJSON(cfg.SureTaxCfg())
 	case DispatcherSJson:
 		jsonString = utils.ToJSON(cfg.DispatcherSCfg())
+	case DispatcherHJson:
+		jsonString = utils.ToJSON(cfg.DispatcherHCfg())
 	case LoaderJson:
 		jsonString = utils.ToJSON(cfg.LoaderCfg())
 	case CgrLoaderCfgJson:
@@ -1222,6 +1242,7 @@ func (cfg *CGRConfig) getLoadFunctions() map[string]func(*CgrJsonCfg) error {
 		CgrLoaderCfgJson:   cfg.loadLoaderCgrCfg,
 		CgrMigratorCfgJson: cfg.loadMigratorCgrCfg,
 		DispatcherSJson:    cfg.loadDispatcherSCfg,
+		DispatcherHJson:    cfg.loadDispatcherHCfg,
 		AnalyzerCfgJson:    cfg.loadAnalyzerCgrCfg,
 		ApierS:             cfg.loadApierCfg,
 		RPCConnsJsonName:   cfg.loadRPCConns,
@@ -1552,6 +1573,7 @@ func (cfg *CGRConfig) AsMapInterface(separator string) map[string]interface{} {
 		utils.RouteSCfg:        cfg.routeSCfg.AsMapInterface(),
 		utils.SureTaxCfg:       cfg.sureTaxCfg.AsMapInterface(separator),
 		utils.DispatcherSCfg:   cfg.dispatcherSCfg.AsMapInterface(),
+		utils.DispatcherHCfg:   cfg.dispatcherHCfg.AsMapInterface(),
 		utils.LoaderCgrCfg:     cfg.loaderCgrCfg.AsMapInterface(),
 		utils.MigratorCgrCfg:   cfg.migratorCgrCfg.AsMapInterface(),
 		utils.MailerCfg:        cfg.mailerCfg.AsMapInterface(),
