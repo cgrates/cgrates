@@ -23,6 +23,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
+
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -355,13 +357,13 @@ func TestACDGetStringValue(t *testing.T) {
 	}
 	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_4",
 		Event: map[string]interface{}{
-			"Usage":      time.Duration(1 * time.Minute),
+			"Usage":      time.Duration(478433753 * time.Nanosecond),
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
 	ev5 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_5",
 		Event: map[string]interface{}{
-			"Usage":      time.Duration(1*time.Minute + 30*time.Second),
+			"Usage":      time.Duration(30*time.Second + 982433452*time.Nanosecond),
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
@@ -370,11 +372,11 @@ func TestACDGetStringValue(t *testing.T) {
 		t.Errorf("wrong acd value: %s", strVal)
 	}
 	acd.AddEvent(ev5)
-	if strVal := acd.GetStringValue(""); strVal != "1m15s" {
+	if strVal := acd.GetStringValue(""); strVal != "15.73043s" {
 		t.Errorf("wrong acd value: %s", strVal)
 	}
 	acd.RemEvent(ev2.ID)
-	if strVal := acd.GetStringValue(""); strVal != "1m15s" {
+	if strVal := acd.GetStringValue(""); strVal != "15.73043s" {
 		t.Errorf("wrong acd value: %s", strVal)
 	}
 	acd.RemEvent(ev5.ID)
@@ -572,11 +574,36 @@ func TestACDGetFloat64Value(t *testing.T) {
 		t.Errorf("wrong acd value: %v", strVal)
 	}
 	acd.AddEvent(ev5)
+	// by default rounding decimal is 5
+	if strVal := acd.GetFloat64Value(); strVal != 53.33333 {
+		t.Errorf("wrong acd value: %v", strVal)
+	}
+	// test for other rounding decimals
+	config.CgrConfig().GeneralCfg().RoundingDecimals = 0
+	acd.(*StatACD).val = nil
+	if strVal := acd.GetFloat64Value(); strVal != 53 {
+		t.Errorf("wrong acd value: %v", strVal)
+	}
+	config.CgrConfig().GeneralCfg().RoundingDecimals = 1
+	acd.(*StatACD).val = nil
+	if strVal := acd.GetFloat64Value(); strVal != 53.3 {
+		t.Errorf("wrong acd value: %v", strVal)
+	}
+	config.CgrConfig().GeneralCfg().RoundingDecimals = 9
+	acd.(*StatACD).val = nil
 	if strVal := acd.GetFloat64Value(); strVal != 53.333333333 {
 		t.Errorf("wrong acd value: %v", strVal)
 	}
+	config.CgrConfig().GeneralCfg().RoundingDecimals = -1
+	acd.(*StatACD).val = nil
+	if strVal := acd.GetFloat64Value(); strVal != 50 {
+		t.Errorf("wrong acd value: %v", strVal)
+	}
+	//change back the rounding decimals to default value
+	config.CgrConfig().GeneralCfg().RoundingDecimals = 5
+	acd.(*StatACD).val = nil
 	acd.RemEvent(ev2.ID)
-	if strVal := acd.GetFloat64Value(); strVal != 53.333333333 {
+	if strVal := acd.GetFloat64Value(); strVal != 53.33333 {
 		t.Errorf("wrong acd value: %v", strVal)
 	}
 	acd.RemEvent(ev4.ID)

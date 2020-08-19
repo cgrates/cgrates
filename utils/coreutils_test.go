@@ -171,6 +171,18 @@ func TestRound(t *testing.T) {
 	if result != expected {
 		t.Errorf("Expecting: %v, received:  %v", expected, result)
 	}
+
+	result = Round(14.37, 0, ROUNDING_MIDDLE)
+	expected = 14
+	if result != expected {
+		t.Errorf("Expecting: %v, received:  %v", expected, result)
+	}
+
+	result = Round(14.37, -1, ROUNDING_MIDDLE)
+	expected = 10
+	if result != expected {
+		t.Errorf("Expecting: %v, received:  %v", expected, result)
+	}
 }
 
 func TestParseTimeDetectLayout(t *testing.T) {
@@ -518,6 +530,38 @@ func TestRoundDuration(t *testing.T) {
 	expected = 120.0
 	if result != expected {
 		t.Errorf("Error rounding to minute5: expected %v was %v", expected, result)
+	}
+}
+
+func TestRoundStatDuration(t *testing.T) {
+	result := RoundStatDuration(time.Duration(1*time.Second+14565876*time.Nanosecond), 5)
+	expected := time.Duration(1*time.Second + 14570000*time.Nanosecond)
+	if result != expected {
+		t.Errorf("Expected %+v, received %+v", expected, result)
+	}
+
+	result = RoundStatDuration(time.Duration(1*time.Second+14565876*time.Nanosecond), 1)
+	expected = time.Duration(1 * time.Second)
+	if result != expected {
+		t.Errorf("Expected %+v, received %+v", expected, result)
+	}
+
+	result = RoundStatDuration(time.Duration(1*time.Second+14565876*time.Nanosecond), 9)
+	expected = time.Duration(1*time.Second + 14565876*time.Nanosecond)
+	if result != expected {
+		t.Errorf("Expected %+v, received %+v", expected, result)
+	}
+
+	result = RoundStatDuration(time.Duration(24*time.Second+14565876*time.Nanosecond), -1)
+	expected = time.Duration(20 * time.Second)
+	if result != expected {
+		t.Errorf("Expected %+v, received %+v", expected, result)
+	}
+
+	result = RoundStatDuration(time.Duration(24*time.Second+14565876*time.Nanosecond), 0)
+	expected = time.Duration(24 * time.Second)
+	if result != expected {
+		t.Errorf("Expected %+v, received %+v", expected, result)
 	}
 }
 
