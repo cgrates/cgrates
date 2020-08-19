@@ -22,12 +22,13 @@ import "github.com/cgrates/cgrates/utils"
 
 // HTTP config section
 type HTTPCfg struct {
-	HTTPJsonRPCURL        string            // JSON RPC relative URL ("" to disable)
-	HTTPWSURL             string            // WebSocket relative URL ("" to disable)
-	HTTPFreeswitchCDRsURL string            // Freeswitch CDRS relative URL ("" to disable)
-	HTTPCDRsURL           string            // CDRS relative URL ("" to disable)
-	HTTPUseBasicAuth      bool              // Use basic auth for HTTP API
-	HTTPAuthUsers         map[string]string // Basic auth user:password map (base64 passwords)
+	HTTPJsonRPCURL          string            // JSON RPC relative URL ("" to disable)
+	DispatchersRegistrarURL string            // dispatcherH registrar service relative URL
+	HTTPWSURL               string            // WebSocket relative URL ("" to disable)
+	HTTPFreeswitchCDRsURL   string            // Freeswitch CDRS relative URL ("" to disable)
+	HTTPCDRsURL             string            // CDRS relative URL ("" to disable)
+	HTTPUseBasicAuth        bool              // Use basic auth for HTTP API
+	HTTPAuthUsers           map[string]string // Basic auth user:password map (base64 passwords)
 }
 
 //loadFromJsonCfg loads Database config from JsonCfg
@@ -37,6 +38,9 @@ func (httpcfg *HTTPCfg) loadFromJsonCfg(jsnHttpCfg *HTTPJsonCfg) (err error) {
 	}
 	if jsnHttpCfg.Json_rpc_url != nil {
 		httpcfg.HTTPJsonRPCURL = *jsnHttpCfg.Json_rpc_url
+	}
+	if jsnHttpCfg.Dispatchers_registrar_url != nil {
+		httpcfg.DispatchersRegistrarURL = *jsnHttpCfg.Dispatchers_registrar_url
 	}
 	if jsnHttpCfg.Ws_url != nil {
 		httpcfg.HTTPWSURL = *jsnHttpCfg.Ws_url
@@ -64,11 +68,12 @@ func (httpcfg *HTTPCfg) AsMapInterface() map[string]interface{} {
 	}
 
 	return map[string]interface{}{
-		utils.HTTPJsonRPCURLCfg:        httpcfg.HTTPJsonRPCURL,
-		utils.HTTPWSURLCfg:             httpcfg.HTTPWSURL,
-		utils.HTTPFreeswitchCDRsURLCfg: httpcfg.HTTPFreeswitchCDRsURL,
-		utils.HTTPCDRsURLCfg:           httpcfg.HTTPCDRsURL,
-		utils.HTTPUseBasicAuthCfg:      httpcfg.HTTPUseBasicAuth,
-		utils.HTTPAuthUsersCfg:         httpUsers,
+		utils.HTTPJsonRPCURLCfg:          httpcfg.HTTPJsonRPCURL,
+		utils.DispatchersRegistrarURLCfg: httpcfg.DispatchersRegistrarURL,
+		utils.HTTPWSURLCfg:               httpcfg.HTTPWSURL,
+		utils.HTTPFreeswitchCDRsURLCfg:   httpcfg.HTTPFreeswitchCDRsURL,
+		utils.HTTPCDRsURLCfg:             httpcfg.HTTPCDRsURL,
+		utils.HTTPUseBasicAuthCfg:        httpcfg.HTTPUseBasicAuth,
+		utils.HTTPAuthUsersCfg:           httpUsers,
 	}
 }

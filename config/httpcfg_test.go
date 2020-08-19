@@ -70,6 +70,7 @@ func TestHTTPCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
 	"http": {										
 		"json_rpc_url": "/jsonrpc",					
+		"dispatchers_registrar_url": "/dispatchers_registrar",
 		"ws_url": "/ws",							
 		"freeswitch_cdrs_url": "/freeswitch_json",	
 		"http_cdrs": "/cdr_http",					
@@ -79,12 +80,13 @@ func TestHTTPCfgAsMapInterface(t *testing.T) {
 }`
 
 	eMap := map[string]interface{}{
-		"json_rpc_url":        "/jsonrpc",
-		"ws_url":              "/ws",
-		"freeswitch_cdrs_url": "/freeswitch_json",
-		"http_cdrs":           "/cdr_http",
-		"use_basic_auth":      false,
-		"auth_users":          map[string]interface{}{},
+		"json_rpc_url":              "/jsonrpc",
+		"dispatchers_registrar_url": "/dispatchers_registrar",
+		"ws_url":                    "/ws",
+		"freeswitch_cdrs_url":       "/freeswitch_json",
+		"http_cdrs":                 "/cdr_http",
+		"use_basic_auth":            false,
+		"auth_users":                map[string]interface{}{},
 	}
 
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {

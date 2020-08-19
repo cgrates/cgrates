@@ -18,7 +18,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
-import "encoding/json"
+import (
+	"encoding/json"
+)
 
 // General config section
 type GeneralJsonCfg struct {
@@ -62,12 +64,13 @@ type ListenJsonCfg struct {
 
 // HTTP config section
 type HTTPJsonCfg struct {
-	Json_rpc_url        *string
-	Ws_url              *string
-	Freeswitch_cdrs_url *string
-	Http_Cdrs           *string
-	Use_basic_auth      *bool
-	Auth_users          *map[string]string
+	Json_rpc_url              *string
+	Dispatchers_registrar_url *string
+	Ws_url                    *string
+	Freeswitch_cdrs_url       *string
+	Http_Cdrs                 *string
+	Use_basic_auth            *bool
+	Auth_users                *map[string]string
 }
 
 type TlsJsonCfg struct {
@@ -537,6 +540,14 @@ type DispatcherSJsonCfg struct {
 	Suffix_indexed_fields *[]string
 	Nested_fields         *bool // applies when indexed fields is not defined
 	Attributes_conns      *[]string
+}
+
+type DispatcherHJsonCfg struct {
+	Enabled            *bool
+	Dispatchers_conns  *[]string
+	Host_ids           *[]string
+	Register_interval  *string
+	Register_transport *string
 }
 
 type LoaderCfgJson struct {

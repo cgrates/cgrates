@@ -1921,12 +1921,13 @@ const (
 
 // HTTPCfg
 const (
-	HTTPJsonRPCURLCfg        = "json_rpc_url"
-	HTTPWSURLCfg             = "ws_url"
-	HTTPFreeswitchCDRsURLCfg = "freeswitch_cdrs_url"
-	HTTPCDRsURLCfg           = "http_cdrs"
-	HTTPUseBasicAuthCfg      = "use_basic_auth"
-	HTTPAuthUsersCfg         = "auth_users"
+	HTTPJsonRPCURLCfg          = "json_rpc_url"
+	DispatchersRegistrarURLCfg = "dispatchers_registrar_url"
+	HTTPWSURLCfg               = "ws_url"
+	HTTPFreeswitchCDRsURLCfg   = "freeswitch_cdrs_url"
+	HTTPCDRsURLCfg             = "http_cdrs"
+	HTTPUseBasicAuthCfg        = "use_basic_auth"
+	HTTPAuthUsersCfg           = "auth_users"
 )
 
 // FilterSCfg
@@ -2211,6 +2212,14 @@ const (
 	CacheDumpFieldsCfg          = "cache_dump_fields"
 )
 
+// DispatcherHCfg
+const (
+	DispatchersConnsCfg  = "dispatchers_conns"
+	HostIdsCfg           = "host_ids"
+	RegisterIntervalCfg  = "register_interval"
+	RegisterTransportCfg = "register_transport"
+)
+
 // CGRConfig
 const (
 	LoaderCfg        = "loaders"          // from JSON
@@ -2241,6 +2250,7 @@ const (
 	RouteSCfg        = "routes"           // from JSON
 	SureTaxCfg       = "suretax"          // from JSON
 	DispatcherSCfg   = "dispatchers"      // from JSON
+	DispatcherHCfg   = "dispatcherh"      // from JSON
 	LoaderCgrCfg     = "loader"           // from JSON
 	MigratorCgrCfg   = "migrator"         // from JSON
 	MailerCfg        = "mailer"           // from JSON
