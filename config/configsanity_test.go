@@ -132,11 +132,9 @@ func TestConfigSanityLoaders(t *testing.T) {
 		&LoaderSCfg{
 			Enabled: true,
 			TpInDir: "/not/exist",
-			Data: []*LoaderDataType{
-				&LoaderDataType{
-					Type: "strsdfing",
-				},
-			},
+			Data: []*LoaderDataType{{
+				Type: "strsdfing",
+			}},
 		},
 	}
 	expected := "<LoaderS> nonexistent folder: /not/exist"
@@ -149,11 +147,9 @@ func TestConfigSanityLoaders(t *testing.T) {
 			Enabled:  true,
 			TpInDir:  "/",
 			TpOutDir: "/",
-			Data: []*LoaderDataType{
-				&LoaderDataType{
-					Type: "wrongtype",
-				},
-			},
+			Data: []*LoaderDataType{{
+				Type: "wrongtype",
+			}},
 		},
 	}
 	expected = "<LoaderS> unsupported data type wrongtype"
@@ -166,17 +162,13 @@ func TestConfigSanityLoaders(t *testing.T) {
 			Enabled:  true,
 			TpInDir:  "/",
 			TpOutDir: "/",
-			Data: []*LoaderDataType{
-				&LoaderDataType{
+			Data: []*LoaderDataType{{
+				Type: utils.MetaStats,
+				Fields: []*FCTemplate{{
 					Type: utils.MetaStats,
-					Fields: []*FCTemplate{
-						&FCTemplate{
-							Type: utils.MetaStats,
-							Tag:  "test1",
-						},
-					},
-				},
-			},
+					Tag:  "test1",
+				}},
+			}},
 		},
 	}
 	expected = "<LoaderS> invalid field type *stats for *stats at test1"
@@ -637,38 +629,32 @@ func TestConfigSanityEventReader(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.sessionSCfg.Enabled = true
-	cfg.ersCfg.Readers = []*EventReaderCfg{
-		&EventReaderCfg{
-			ID:   "test",
-			Type: "wrongtype",
-		},
-	}
+	cfg.ersCfg.Readers = []*EventReaderCfg{{
+		ID:   "test",
+		Type: "wrongtype",
+	}}
 	expected = "<ERs> unsupported data type: wrongtype for reader with ID: test"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 
-	cfg.ersCfg.Readers = []*EventReaderCfg{
-		&EventReaderCfg{
-			ID:            "test2",
-			Type:          utils.MetaFileCSV,
-			ProcessedPath: "not/a/path",
-		},
-	}
+	cfg.ersCfg.Readers = []*EventReaderCfg{{
+		ID:            "test2",
+		Type:          utils.MetaFileCSV,
+		ProcessedPath: "not/a/path",
+	}}
 	expected = "<ERs> nonexistent folder: not/a/path for reader with ID: test2"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 
-	cfg.ersCfg.Readers = []*EventReaderCfg{
-		&EventReaderCfg{
-			ID:            "test3",
-			Type:          utils.MetaFileCSV,
-			ProcessedPath: "/",
-			SourcePath:    "/",
-			FieldSep:      "",
-		},
-	}
+	cfg.ersCfg.Readers = []*EventReaderCfg{{
+		ID:            "test3",
+		Type:          utils.MetaFileCSV,
+		ProcessedPath: "/",
+		SourcePath:    "/",
+		FieldSep:      "",
+	}}
 	expected = "<ERs> empty FieldSep for reader with ID: test3"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
@@ -728,7 +714,7 @@ func TestConfigSanityDataDB(t *testing.T) {
 
 	cfg.cacheCfg = &CacheCfg{
 		Partitions: map[string]*CacheParamCfg{
-			utils.CacheTimings: &CacheParamCfg{
+			utils.CacheTimings: {
 				Limit: 0,
 			},
 		},
@@ -738,7 +724,7 @@ func TestConfigSanityDataDB(t *testing.T) {
 	}
 	cfg.cacheCfg = &CacheCfg{
 		Partitions: map[string]*CacheParamCfg{
-			utils.CacheAccounts: &CacheParamCfg{
+			utils.CacheAccounts: {
 				Limit: 1,
 			},
 		},
@@ -771,7 +757,7 @@ func TestConfigSanityDataDB(t *testing.T) {
 	cfg.thresholdSCfg.Enabled = false
 
 	cfg.dataDbCfg.Items = map[string]*ItemOpt{
-		"test1": &ItemOpt{
+		"test1": {
 			Remote: true,
 		},
 	}
@@ -781,7 +767,7 @@ func TestConfigSanityDataDB(t *testing.T) {
 	}
 
 	cfg.dataDbCfg.Items = map[string]*ItemOpt{
-		"test2": &ItemOpt{
+		"test2": {
 			Remote:    false,
 			Replicate: true,
 		},
@@ -838,12 +824,12 @@ func TestConfigSanityDispatcher(t *testing.T) {
 func TestConfigSanityCacheS(t *testing.T) {
 	cfg, _ = NewDefaultCGRConfig()
 
-	cfg.cacheCfg.Partitions = map[string]*CacheParamCfg{"wrong_partition_name": &CacheParamCfg{Limit: 10}}
+	cfg.cacheCfg.Partitions = map[string]*CacheParamCfg{"wrong_partition_name": {Limit: 10}}
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != "<CacheS> partition <wrong_partition_name> not defined" {
 		t.Error(err)
 	}
 
-	cfg.cacheCfg.Partitions = map[string]*CacheParamCfg{utils.CacheLoadIDs: &CacheParamCfg{Limit: 9}}
+	cfg.cacheCfg.Partitions = map[string]*CacheParamCfg{utils.CacheLoadIDs: {Limit: 9}}
 	if err := cfg.checkConfigSanity(); err != nil {
 		t.Error(err)
 	}
@@ -853,7 +839,7 @@ func TestConfigSanityFilterS(t *testing.T) {
 	cfg, _ = NewDefaultCGRConfig()
 	cfg.filterSCfg.StatSConns = []string{utils.MetaInternal}
 
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != "<Stats> not enabled but requested by <FilterS> component." {
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != "<Stats> not enabled but requested by <FilterS> component" {
 		t.Error(err)
 	}
 	cfg.filterSCfg.StatSConns = []string{"test"}
@@ -865,7 +851,7 @@ func TestConfigSanityFilterS(t *testing.T) {
 
 	cfg.filterSCfg.ResourceSConns = []string{utils.MetaInternal}
 
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != "<ResourceS> not enabled but requested by <FilterS> component." {
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != "<ResourceS> not enabled but requested by <FilterS> component" {
 		t.Error(err)
 	}
 	cfg.filterSCfg.ResourceSConns = []string{"test"}
@@ -877,7 +863,7 @@ func TestConfigSanityFilterS(t *testing.T) {
 
 	cfg.filterSCfg.ApierSConns = []string{utils.MetaInternal}
 
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != "<ApierS> not enabled but requested by <FilterS> component." {
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != "<ApierS> not enabled but requested by <FilterS> component" {
 		t.Error(err)
 	}
 	cfg.filterSCfg.ApierSConns = []string{"test"}

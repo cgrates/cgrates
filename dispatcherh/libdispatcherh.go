@@ -55,36 +55,53 @@ func register(req *http.Request) (*json.RawMessage, error) {
 			utils.DispatcherH, err))
 		return nil, err
 	}
-	if sReq.Method != utils.DispatcherHv1RegisterHosts {
+	switch sReq.Method {
+	default:
 		err = errors.New("rpc: can't find service " + sReq.Method)
 		utils.Logger.Warning(fmt.Sprintf("<%s> Failed to register hosts because: %s",
 			utils.DispatcherH, err))
 		return sReq.Id, err
-	}
-	var dHs []*engine.DispatcherHost
-	params := []interface{}{dHs}
-	if err = json.Unmarshal(*sReq.Params, &params); err != nil {
-		utils.Logger.Warning(fmt.Sprintf("<%s> Failed to decode params because: %s",
-			utils.DispatcherH, err))
-		return sReq.Id, err
-	}
-	var addr string
-	if addr, err = getIP(req); err != nil {
-		utils.Logger.Warning(fmt.Sprintf("<%s> Failed to obtain the remote IP because: %s",
-			utils.DispatcherH, err))
-		return sReq.Id, err
-	}
-
-	for _, dH := range dHs {
-		if len(dH.Conns) != 1 { // ignore the hosts with no connections or more
-			continue
+	case utils.DispatcherHv1UnregisterHosts:
+		var dHIDs []string
+		params := []interface{}{dHIDs}
+		if err = json.Unmarshal(*sReq.Params, &params); err != nil {
+			utils.Logger.Warning(fmt.Sprintf("<%s> Failed to decode params because: %s",
+				utils.DispatcherH, err))
+			return sReq.Id, err
 		}
-		dH.Conns[0].Address = addr + dH.Conns[0].Address // the address contains the port
-		if err = engine.Cache.Set(utils.CacheDispatcherHosts, dH.Tenant, dH, nil,
-			false, utils.NonTransactional); err != nil {
-			utils.Logger.Warning(fmt.Sprintf("<%s> Failed to set DispatcherHost <%s> in cache because: %s",
-				utils.DispatcherH, dH.TenantID(), err))
-			continue
+		for _, id := range dHIDs {
+			if err = engine.Cache.Remove(utils.CacheDispatcherHosts, id, false, utils.NonTransactional); err != nil {
+				utils.Logger.Warning(fmt.Sprintf("<%s> Failed to remove DispatcherHost <%s> from cache because: %s",
+					utils.DispatcherH, id, err))
+				continue
+			}
+		}
+	case utils.DispatcherHv1RegisterHosts:
+		var dHs []*engine.DispatcherHost
+		params := []interface{}{dHs}
+		if err = json.Unmarshal(*sReq.Params, &params); err != nil {
+			utils.Logger.Warning(fmt.Sprintf("<%s> Failed to decode params because: %s",
+				utils.DispatcherH, err))
+			return sReq.Id, err
+		}
+		var addr string
+		if addr, err = getIP(req); err != nil {
+			utils.Logger.Warning(fmt.Sprintf("<%s> Failed to obtain the remote IP because: %s",
+				utils.DispatcherH, err))
+			return sReq.Id, err
+		}
+
+		for _, dH := range dHs {
+			if len(dH.Conns) != 1 { // ignore the hosts with no connections or more
+				continue
+			}
+			dH.Conns[0].Address = addr + dH.Conns[0].Address // the address contains the port
+			if err = engine.Cache.Set(utils.CacheDispatcherHosts, dH.Tenant, dH, nil,
+				false, utils.NonTransactional); err != nil {
+				utils.Logger.Warning(fmt.Sprintf("<%s> Failed to set DispatcherHost <%s> in cache because: %s",
+					utils.DispatcherH, dH.TenantID(), err))
+				continue
+			}
 		}
 	}
 	return sReq.Id, nil
