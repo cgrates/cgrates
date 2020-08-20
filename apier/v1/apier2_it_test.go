@@ -62,6 +62,7 @@ var (
 		testAPIerSetActionPlanDfltTime,
 		testAPIerLoadRatingPlan,
 		testAPIerLoadRatingPlan2,
+		testAPIerLoadRatingProfile,
 		testAPIerKillEngine,
 	}
 )
@@ -503,6 +504,122 @@ func testAPIerLoadRatingPlan2(t *testing.T) {
 	if err := apierRPC.Call(utils.APIerSv1LoadRatingPlan,
 		&AttrLoadRatingPlan{TPid: "TP_SAMPLE", RatingPlanId: "RPL_WITH_ERROR"}, &reply); err == nil {
 		t.Error("Expected to get error: ", err)
+	}
+
+}
+
+func testAPIerLoadRatingProfile(t *testing.T) {
+	var reply string
+	rpf := &utils.TPRatingProfile{
+		TPid:     "TP_SAMPLE",
+		LoadId:   "TP_SAMPLE",
+		Tenant:   "cgrates.org",
+		Category: "call",
+		Subject:  utils.META_ANY,
+		RatingPlanActivations: []*utils.TPRatingActivation{{
+			ActivationTime:   "2012-01-01T00:00:00Z",
+			RatingPlanId:     "RPl_SAMPLE_RATING_PLAN",
+			FallbackSubjects: utils.EmptyString,
+		}},
+	}
+	// add a TPRatingProfile
+	if err := apierRPC.Call(utils.APIerSv1SetTPRatingProfile, rpf, &reply); err != nil {
+		t.Error(err)
+	}
+	// load the TPRatingProfile into dataDB
+	argsRPrf := &utils.TPRatingProfile{
+		TPid: "TP_SAMPLE", LoadId: "TP_SAMPLE",
+		Tenant: "cgrates.org", Category: "call", Subject: "*any"}
+	if err := apierRPC.Call(utils.APIerSv1LoadRatingProfile, argsRPrf, &reply); err != nil {
+		t.Error(err)
+	}
+
+	// verify if was added correctly
+	var rpl engine.RatingProfile
+	attrGetRatingPlan := &utils.AttrGetRatingProfile{
+		Tenant: "cgrates.org", Category: "call", Subject: utils.META_ANY}
+	actTime, err := utils.ParseTimeDetectLayout("2012-01-01T00:00:00Z", utils.EmptyString)
+	if err != nil {
+		t.Error(err)
+	}
+	expected := engine.RatingProfile{
+		Id: "*out:cgrates.org:call:*any",
+		RatingPlanActivations: engine.RatingPlanActivations{
+			{
+				ActivationTime: actTime,
+				RatingPlanId:   "RPl_SAMPLE_RATING_PLAN",
+			},
+		},
+	}
+	if err := apierRPC.Call(utils.APIerSv1GetRatingProfile, attrGetRatingPlan, &rpl); err != nil {
+		t.Errorf("Got error on APIerSv1.GetRatingProfile: %+v", err)
+	} else if !reflect.DeepEqual(expected, rpl) {
+		t.Errorf("Calling APIerSv1.GetRatingProfile expected: %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rpl))
+	}
+
+	// add new RatingPlan
+	rp := &utils.TPRatingPlan{TPid: "TP_SAMPLE", ID: "RPl_SAMPLE_RATING_PLAN2",
+		RatingPlanBindings: []*utils.TPRatingPlanBinding{
+			{DestinationRatesId: "DR_SAMPLE_DESTINATION_RATE", TimingId: utils.META_ANY,
+				Weight: 10},
+		}}
+
+	if err := apierRPC.Call(utils.APIerSv1SetTPRatingPlan, rp, &reply); err != nil {
+		t.Error("Got error on APIerSv1.SetTPRatingPlan: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply received when calling APIerSv1.SetTPRatingPlan: ", reply)
+	}
+
+	if err := apierRPC.Call(utils.APIerSv1LoadRatingPlan, &AttrLoadRatingPlan{TPid: "TP_SAMPLE", RatingPlanId: "RPl_SAMPLE_RATING_PLAN2"}, &reply); err != nil {
+		t.Error("Got error on APIerSv1.LoadRatingPlan: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Calling APIerSv1.LoadRatingPlan got reply: ", reply)
+	}
+
+	// overwrite the existing TPRatingProfile with a new RatingPlanActivations
+	rpf = &utils.TPRatingProfile{
+		TPid:     "TP_SAMPLE",
+		LoadId:   "TP_SAMPLE",
+		Tenant:   "cgrates.org",
+		Category: "call",
+		Subject:  utils.META_ANY,
+		RatingPlanActivations: []*utils.TPRatingActivation{{
+			ActivationTime:   "2012-02-02T00:00:00Z",
+			RatingPlanId:     "RPl_SAMPLE_RATING_PLAN2",
+			FallbackSubjects: utils.EmptyString,
+		}},
+	}
+
+	if err := apierRPC.Call(utils.APIerSv1SetTPRatingProfile, rpf, &reply); err != nil {
+		t.Error(err)
+	}
+
+	// load the TPRatingProfile into dataDB
+	// because the RatingProfile exists the RatingPlanActivations will be merged
+	if err := apierRPC.Call(utils.APIerSv1LoadRatingProfile, argsRPrf, &reply); err != nil {
+		t.Error(err)
+	}
+	actTime2, err := utils.ParseTimeDetectLayout("2012-02-02T00:00:00Z", utils.EmptyString)
+	if err != nil {
+		t.Error(err)
+	}
+	expected = engine.RatingProfile{
+		Id: "*out:cgrates.org:call:*any",
+		RatingPlanActivations: engine.RatingPlanActivations{
+			{
+				ActivationTime: actTime,
+				RatingPlanId:   "RPl_SAMPLE_RATING_PLAN",
+			},
+			{
+				ActivationTime: actTime2,
+				RatingPlanId:   "RPl_SAMPLE_RATING_PLAN2",
+			},
+		},
+	}
+	if err := apierRPC.Call(utils.APIerSv1GetRatingProfile, attrGetRatingPlan, &rpl); err != nil {
+		t.Errorf("Got error on APIerSv1.GetRatingProfile: %+v", err)
+	} else if !reflect.DeepEqual(expected, rpl) {
+		t.Errorf("Calling APIerSv1.GetRatingProfile expected: %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rpl))
 	}
 
 }
