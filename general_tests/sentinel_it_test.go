@@ -27,6 +27,7 @@ import (
 	"os/exec"
 	"path"
 	"reflect"
+	"strconv"
 	"testing"
 
 	"github.com/cgrates/cgrates/config"
@@ -189,7 +190,7 @@ func testRedisSentinelInsertion(t *testing.T) {
 	index := 0
 	var result string
 	addFunc := func(t *testing.T, nrFail *int) {
-		alsPrf.ID = orgiginID + string(index)
+		alsPrf.ID = orgiginID + strconv.Itoa(index)
 		if err := sentinelRPC.Call(utils.APIerSv1SetAttributeProfile, alsPrf, &result); err != nil {
 			if err.Error() == "SERVER_ERROR: EOF" {
 				*nrFail = *nrFail + 1
