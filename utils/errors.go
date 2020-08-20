@@ -30,6 +30,7 @@ var (
 	ErrNoMoreData               = errors.New("NO_MORE_DATA")
 	ErrNotImplemented           = errors.New("NOT_IMPLEMENTED")
 	ErrNotFound                 = errors.New("NOT_FOUND")
+	ErrHostNotFound             = errors.New("HOST_NOT_FOUND")
 	ErrTimedOut                 = errors.New("TIMED_OUT")
 	ErrServerError              = errors.New("SERVER_ERROR")
 	ErrMaxRecursionDepth        = errors.New("MAX_RECURSION_DEPTH")
@@ -110,6 +111,7 @@ var (
 		ErrMaxIncrementsExceeded.Error():   ErrMaxIncrementsExceeded,
 		ErrIndexOutOfBounds.Error():        ErrIndexOutOfBounds,
 		ErrWrongPath.Error():               ErrWrongPath,
+		ErrHostNotFound.Error():            ErrHostNotFound,
 	}
 )
 

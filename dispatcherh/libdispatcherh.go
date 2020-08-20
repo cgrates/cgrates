@@ -32,6 +32,40 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
+// RegisterArgs the arguments to register the dispacher host
+type RegisterArgs struct {
+	Tenant    string
+	Opts      map[string]interface{}
+	IDs       []string
+	Port      string
+	Transport string
+	TLS       bool
+}
+
+// UnregisterArgs the arguments to unregister the dispacher host
+type UnregisterArgs struct {
+	Tenant string
+	Opts   map[string]interface{}
+	IDs    []string
+}
+
+// AsDispatcherHosts converts the arguments to DispatcherHosts
+func (rargs *RegisterArgs) AsDispatcherHosts(ip string) (dHs []*engine.DispatcherHost) {
+	dHs = make([]*engine.DispatcherHost, len(rargs.IDs))
+	for i, id := range rargs.IDs {
+		dHs[i] = &engine.DispatcherHost{
+			Tenant: rargs.Tenant,
+			ID:     id,
+			Conns: []*config.RemoteHost{{
+				Address:   ip + ":" + rargs.Port,
+				Transport: rargs.Transport,
+				TLS:       rargs.TLS,
+			}},
+		}
+	}
+	return
+}
+
 // Registar handdle for httpServer to register the dispatcher hosts
 func Registar(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
@@ -62,40 +96,36 @@ func register(req *http.Request) (*json.RawMessage, error) {
 			utils.DispatcherH, err))
 		return sReq.Id, err
 	case utils.DispatcherHv1UnregisterHosts:
-		var dHIDs []string
-		params := []interface{}{dHIDs}
+		var args UnregisterArgs
+		params := []interface{}{&args}
 		if err = json.Unmarshal(*sReq.Params, &params); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<%s> Failed to decode params because: %s",
 				utils.DispatcherH, err))
 			return sReq.Id, err
 		}
-		for _, id := range dHIDs {
-			if err = engine.Cache.Remove(utils.CacheDispatcherHosts, id, false, utils.NonTransactional); err != nil {
+		for _, id := range args.IDs {
+			if err = engine.Cache.Remove(utils.CacheDispatcherHosts, utils.ConcatenatedKey(args.Tenant, id), false, utils.NonTransactional); err != nil {
 				utils.Logger.Warning(fmt.Sprintf("<%s> Failed to remove DispatcherHost <%s> from cache because: %s",
 					utils.DispatcherH, id, err))
 				continue
 			}
 		}
 	case utils.DispatcherHv1RegisterHosts:
-		var dHs []*engine.DispatcherHost
-		params := []interface{}{dHs}
+		var dHs RegisterArgs
+		params := []interface{}{&dHs}
 		if err = json.Unmarshal(*sReq.Params, &params); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<%s> Failed to decode params because: %s",
 				utils.DispatcherH, err))
 			return sReq.Id, err
 		}
 		var addr string
-		if addr, err = getIP(req); err != nil {
+		if addr, err = getRemoteIP(req); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<%s> Failed to obtain the remote IP because: %s",
 				utils.DispatcherH, err))
 			return sReq.Id, err
 		}
 
-		for _, dH := range dHs {
-			if len(dH.Conns) != 1 { // ignore the hosts with no connections or more
-				continue
-			}
-			dH.Conns[0].Address = addr + dH.Conns[0].Address // the address contains the port
+		for _, dH := range dHs.AsDispatcherHosts(addr) {
 			if err = engine.Cache.Set(utils.CacheDispatcherHosts, dH.Tenant, dH, nil,
 				false, utils.NonTransactional); err != nil {
 				utils.Logger.Warning(fmt.Sprintf("<%s> Failed to set DispatcherHost <%s> in cache because: %s",
@@ -107,7 +137,7 @@ func register(req *http.Request) (*json.RawMessage, error) {
 	return sReq.Id, nil
 }
 
-func getIP(r *http.Request) (ip string, err error) {
+func getRemoteIP(r *http.Request) (ip string, err error) {
 	ip = r.Header.Get("X-REAL-IP")
 	if net.ParseIP(ip) != nil {
 		return
@@ -128,39 +158,33 @@ func getIP(r *http.Request) (ip string, err error) {
 	return
 }
 
-func getConnCfg(cfg *config.CGRConfig, transport string, tmpl *config.RemoteHost) (conn *config.RemoteHost, err error) {
+func getConnPort(cfg *config.CGRConfig, transport string, tls bool) (port string, err error) {
 	var address string
 	var extraPath string
 	switch transport {
 	case utils.MetaJSON:
-		if tmpl.TLS {
+		if tls {
 			address = cfg.ListenCfg().RPCJSONTLSListen
 		} else {
 			address = cfg.ListenCfg().RPCJSONListen
 		}
 	case utils.MetaGOB:
-		if tmpl.TLS {
+		if tls {
 			address = cfg.ListenCfg().RPCGOBTLSListen
 		} else {
 			address = cfg.ListenCfg().RPCGOBListen
 		}
 	case rpcclient.HTTPjson:
-		if tmpl.TLS {
+		if tls {
 			address = cfg.ListenCfg().HTTPTLSListen
 		} else {
 			address = cfg.ListenCfg().HTTPListen
 		}
 		extraPath = cfg.HTTPCfg().HTTPJsonRPCURL
 	}
-	var port string
 	if _, port, err = net.SplitHostPort(address); err != nil {
 		return
 	}
-	conn = &config.RemoteHost{
-		Address:     ":" + port + extraPath,
-		Synchronous: tmpl.Synchronous,
-		TLS:         tmpl.TLS,
-		Transport:   transport,
-	}
+	port += extraPath
 	return
 }

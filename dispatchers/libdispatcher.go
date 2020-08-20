@@ -228,11 +228,19 @@ func (*singleResultstrategyDispatcher) dispatch(dm *engine.DataManager, routeID 
 			}
 		}
 	}
+	var called bool
 	for _, hostID := range hostIDs {
 		if dH, err = dm.GetDispatcherHost(tnt, hostID, true, true, utils.NonTransactional); err != nil {
+			if err != utils.ErrNotFound {
+				utils.Logger.Warning(fmt.Sprintf("<%s> could not find host with ID %q",
+					utils.DispatcherS, hostID))
+				err = nil
+				continue
+			}
 			err = utils.NewErrDispatcherS(err)
 			return
 		}
+		called = true
 		if err = dH.Call(serviceMethod, args, reply); utils.IsNetworkError(err) {
 			continue
 		}
@@ -244,6 +252,10 @@ func (*singleResultstrategyDispatcher) dispatch(dm *engine.DataManager, routeID 
 		}
 		break
 	}
+	if !called { // in case we do not match any host
+		err = utils.ErrHostNotFound
+		return
+	}
 	return
 }
 
@@ -252,12 +264,20 @@ type brodcastStrategyDispatcher struct{}
 func (*brodcastStrategyDispatcher) dispatch(dm *engine.DataManager, routeID string, subsystem, tnt string, hostIDs []string,
 	serviceMethod string, args interface{}, reply interface{}) (err error) {
 	var hasErrors bool
+	var called bool
 	for _, hostID := range hostIDs {
 		var dH *engine.DispatcherHost
 		if dH, err = dm.GetDispatcherHost(tnt, hostID, true, true, utils.NonTransactional); err != nil {
+			if err != utils.ErrNotFound {
+				utils.Logger.Warning(fmt.Sprintf("<%s> could not find host with ID %q",
+					utils.DispatcherS, hostID))
+				err = nil
+				continue
+			}
 			err = utils.NewErrDispatcherS(err)
 			return
 		}
+		called = true
 		if err = dH.Call(serviceMethod, args, reply); utils.IsNetworkError(err) {
 			utils.Logger.Err(fmt.Sprintf("<%s> network error: <%s> at %s strategy for hostID %q",
 				utils.DispatcherS, err.Error(), utils.MetaBroadcast, hostID))
@@ -270,6 +290,9 @@ func (*brodcastStrategyDispatcher) dispatch(dm *engine.DataManager, routeID stri
 	}
 	if hasErrors { // rewrite err if not all call were succesfull
 		return utils.ErrPartiallyExecuted
+	} else if !called { // in case we do not match any host
+		err = utils.ErrHostNotFound
+		return
 	}
 	return
 }
@@ -356,11 +379,19 @@ func (ld *loadStrategyDispatcher) dispatch(dm *engine.DataManager, routeID strin
 			}
 		}
 	}
+	var called bool
 	for _, hostID := range lM.getHosts(hostIDs) {
 		if dH, err = dm.GetDispatcherHost(tnt, hostID, true, true, utils.NonTransactional); err != nil {
+			if err != utils.ErrNotFound {
+				utils.Logger.Warning(fmt.Sprintf("<%s> could not find host with ID %q",
+					utils.DispatcherS, hostID))
+				err = nil
+				continue
+			}
 			err = utils.NewErrDispatcherS(err)
 			return
 		}
+		called = true
 		lM.incrementLoad(hostID, ld.tntID)
 		err = dH.Call(serviceMethod, args, reply)
 		lM.decrementLoad(hostID, ld.tntID) // call ended
@@ -374,6 +405,10 @@ func (ld *loadStrategyDispatcher) dispatch(dm *engine.DataManager, routeID strin
 			}
 		}
 		break
+	}
+	if !called { // in case we do not match any host
+		err = utils.ErrHostNotFound
+		return
 	}
 	return
 }

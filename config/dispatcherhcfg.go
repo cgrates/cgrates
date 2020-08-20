@@ -28,9 +28,10 @@ import (
 type DispatcherHCfg struct {
 	Enabled           bool
 	DispatchersConns  []string
-	HostIDs           []string
+	HostIDs           map[string][]string
 	RegisterInterval  time.Duration
 	RegisterTransport string
+	RegisterTLS       bool
 }
 
 func (dps *DispatcherHCfg) loadFromJsonCfg(jsnCfg *DispatcherHJsonCfg) (err error) {
@@ -45,8 +46,9 @@ func (dps *DispatcherHCfg) loadFromJsonCfg(jsnCfg *DispatcherHJsonCfg) (err erro
 		copy(dps.DispatchersConns, *jsnCfg.Dispatchers_conns)
 	}
 	if jsnCfg.Host_ids != nil {
-		dps.HostIDs = make([]string, len(*jsnCfg.Host_ids))
-		copy(dps.HostIDs, *jsnCfg.Host_ids)
+		for tnt, id := range jsnCfg.Host_ids {
+			dps.HostIDs[tnt] = id
+		}
 	}
 	if jsnCfg.Register_interval != nil {
 		if dps.RegisterInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Register_interval); err != nil {
@@ -55,6 +57,9 @@ func (dps *DispatcherHCfg) loadFromJsonCfg(jsnCfg *DispatcherHJsonCfg) (err erro
 	}
 	if jsnCfg.Register_transport != nil {
 		dps.RegisterTransport = *jsnCfg.Register_transport
+	}
+	if jsnCfg.Register_tls != nil {
+		dps.RegisterTLS = *jsnCfg.Register_tls
 	}
 	return
 }

@@ -38,21 +38,24 @@ func TestDispatcherHCfgloadFromJsonCfg(t *testing.T) {
 	} else if !reflect.DeepEqual(daCfg, expected) {
 		t.Errorf("Expected: %+v ,recived: %+v", expected, daCfg)
 	}
+	daCfg.HostIDs = make(map[string][]string)
 	cfgJSONStr := `{
 		"dispatcherh":{
 			"enabled": true,
 			"dispatchers_conns": ["conn1","conn2"],
-			"host_ids": ["HOST1","HOST2"],
+			"host_ids": {"*default":["HOST1","HOST2"]},
 			"register_interval": "5m",
 			"register_transport": "*json",
+			"register_tls": true,
 		},
 }`
 	expected = DispatcherHCfg{
 		Enabled:           true,
 		DispatchersConns:  []string{"conn1", "conn2"},
-		HostIDs:           []string{"HOST1", "HOST2"},
+		HostIDs:           map[string][]string{utils.MetaDefault: {"HOST1", "HOST2"}},
 		RegisterInterval:  5 * time.Minute,
 		RegisterTransport: utils.MetaJSON,
+		RegisterTLS:       true,
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
@@ -81,15 +84,16 @@ func TestDispatcherHCfgAsMapInterface(t *testing.T) {
 		"dispatcherh":{
 			"enabled": true,
 			"dispatchers_conns": ["conn1","conn2"],
-			"host_ids": ["HOST1","HOST2"],
+			"host_ids": {"*default":["HOST1","HOST2"]},
 			"register_interval": "5m",
 			"register_transport": "*json",
 		},		
 }`
+	daCfg.HostIDs = make(map[string][]string)
 	eMap := map[string]interface{}{
 		"enabled":            true,
 		"dispatchers_conns":  []string{"conn1", "conn2"},
-		"host_ids":           []string{"HOST1", "HOST2"},
+		"host_ids":           map[string][]string{utils.MetaDefault: {"HOST1", "HOST2"}},
 		"register_interval":  5 * time.Minute,
 		"register_transport": "*json",
 	}
