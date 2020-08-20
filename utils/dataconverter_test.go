@@ -188,14 +188,14 @@ func TestNewDurationSecondsConverter(t *testing.T) {
 
 func TestDurationSecondsConverterConvert(t *testing.T) {
 	mS := &DurationSecondsConverter{}
-	if _, err := mS.Convert("string"); err.Error() != "time: invalid duration string" {
+	if _, err := mS.Convert("string"); err.Error() != "time: invalid duration \"string\"" {
 		t.Error(err)
 	}
 }
 
 func TestDurationNanosecondsConverterConvert(t *testing.T) {
 	nS := &DurationNanosecondsConverter{}
-	if _, err := nS.Convert("string"); err.Error() != "time: invalid duration string" {
+	if _, err := nS.Convert("string"); err.Error() != "time: invalid duration \"string\"" {
 		t.Error(err)
 	}
 }
