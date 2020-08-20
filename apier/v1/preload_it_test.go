@@ -64,7 +64,8 @@ func TestPreload(t *testing.T) {
 }
 
 func testCreateDirs(t *testing.T) {
-	for _, dir := range []string{"/tmp/In", "/tmp/Out"} {
+	for _, dir := range []string{"/tmp/In", "/tmp/Out", "/tmp/LoaderIn", "/tmp/SubpathWithoutMove",
+		"/tmp/SubpathLoaderWithMove", "/tmp/SubpathOut"} {
 		if err := os.RemoveAll(dir); err != nil {
 			t.Fatal("Error removing folder: ", dir, err)
 		}
@@ -162,7 +163,8 @@ func testPreloadITVerifyAttributes(t *testing.T) {
 }
 
 func testCleanupFiles(t *testing.T) {
-	for _, dir := range []string{"/tmp/In", "/tmp/Out"} {
+	for _, dir := range []string{"/tmp/In", "/tmp/Out", "/tmp/LoaderIn", "/tmp/SubpathWithoutMove",
+		"/tmp/SubpathLoaderWithMove", "/tmp/SubpathOut"} {
 		if err := os.RemoveAll(dir); err != nil {
 			t.Fatal("Error removing folder: ", dir, err)
 		}
