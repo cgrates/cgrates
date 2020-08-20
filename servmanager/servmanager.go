@@ -305,6 +305,10 @@ func (srvMngr *ServiceManager) handleReload() {
 			if err = srvMngr.reloadService(utils.SIPAgent); err != nil {
 				return
 			}
+		case <-srvMngr.GetConfig().GetReloadChan(config.DispatcherHJson):
+			if err = srvMngr.reloadService(utils.DispatcherH); err != nil {
+				return
+			}
 		}
 		// handle RPC server
 	}

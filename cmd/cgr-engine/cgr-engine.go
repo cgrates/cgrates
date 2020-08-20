@@ -114,7 +114,7 @@ func initServiceManagerV1(internalServiceManagerChan chan rpcclient.ClientConnec
 	internalServiceManagerChan <- srvMngr
 }
 
-func startRpc(server *utils.Server, internalRaterChan,
+func startRPC(server *utils.Server, internalRaterChan,
 	internalCdrSChan, internalRsChan, internalStatSChan,
 	internalAttrSChan, internalChargerSChan, internalThdSChan, internalSuplSChan,
 	internalSMGChan, internalAnalyzerSChan, internalDispatcherSChan,
@@ -439,6 +439,7 @@ func main() {
 	internalCDRServerChan := make(chan rpcclient.ClientConnector, 1)
 	internalAttributeSChan := make(chan rpcclient.ClientConnector, 1)
 	internalDispatcherSChan := make(chan rpcclient.ClientConnector, 1)
+	internalDispatcherHChan := make(chan rpcclient.ClientConnector, 1)
 	internalSessionSChan := make(chan rpcclient.ClientConnector, 1)
 	internalChargerSChan := make(chan rpcclient.ClientConnector, 1)
 	internalThresholdSChan := make(chan rpcclient.ClientConnector, 1)
@@ -480,6 +481,7 @@ func main() {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs):            internalEEsChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS):          internalRateSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaDispatchers):    internalDispatcherSChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaDispatcherh):    internalDispatcherHChan,
 	})
 
 	dmService := services.NewDataDBService(cfg, connManager)
@@ -525,6 +527,7 @@ func main() {
 	srvManager := servmanager.NewServiceManager(cfg, exitChan)
 	attrS := services.NewAttributeService(cfg, dmService, cacheS, filterSChan, server, internalAttributeSChan)
 	dspS := services.NewDispatcherService(cfg, dmService, cacheS, filterSChan, server, internalDispatcherSChan, connManager)
+	dspH := services.NewDispatcherHostsService(cfg, server, internalDispatcherSChan, connManager)
 	chrS := services.NewChargerService(cfg, dmService, cacheS, filterSChan, server,
 		internalChargerSChan, connManager)
 	tS := services.NewThresholdService(cfg, dmService, cacheS, filterSChan, server, internalThresholdSChan)
@@ -567,7 +570,7 @@ func main() {
 		services.NewRadiusAgent(cfg, filterSChan, exitChan, connManager),   // partial reload
 		services.NewDiameterAgent(cfg, filterSChan, exitChan, connManager), // partial reload
 		services.NewHTTPAgent(cfg, filterSChan, server, connManager),       // no reload
-		ldrs, anz, dspS, dmService, storDBService,
+		ldrs, anz, dspS, dspH, dmService, storDBService,
 		services.NewEventExporterService(cfg, filterSChan,
 			connManager, server, exitChan, internalEEsChan),
 		services.NewRateService(cfg, cacheS, filterSChan, dmService,
@@ -605,6 +608,9 @@ func main() {
 	engine.IntRPC.AddInternalRPCClient(utils.CoreSv1, internalCoreSv1Chan)
 	engine.IntRPC.AddInternalRPCClient(utils.RALsV1, internalRALsChan)
 	engine.IntRPC.AddInternalRPCClient(utils.RateSv1, internalRateSChan)
+	engine.IntRPC.AddInternalRPCClient(utils.EventExporterSv1, internalEEsChan)
+	engine.IntRPC.AddInternalRPCClient(utils.DispatcherSv1, internalDispatcherSChan)
+	// engine.IntRPC.AddInternalRPCClient(utils.DispatcherHv1, internalDispatcherHChan)
 
 	initConfigSv1(internalConfigChan, server)
 
@@ -613,7 +619,7 @@ func main() {
 	}
 
 	// Serve rpc connections
-	go startRpc(server, internalResponderChan, internalCDRServerChan,
+	go startRPC(server, internalResponderChan, internalCDRServerChan,
 		internalResourceSChan, internalStatSChan,
 		internalAttributeSChan, internalChargerSChan, internalThresholdSChan,
 		internalRouteSChan, internalSessionSChan, internalAnalyzerSChan,

@@ -449,6 +449,7 @@ const (
 	MetaBlockerError            = "*blocker_error"
 	MetaConfig                  = "*config"
 	MetaDispatchers             = "*dispatchers"
+	MetaDispatcherh             = "*dispatcherh"
 	MetaDispatcherHosts         = "*dispatcher_hosts"
 	MetaFilters                 = "*filters"
 	MetaCDRs                    = "*cdrs"
@@ -1537,6 +1538,7 @@ const (
 
 // DispatcherS APIs
 const (
+	DispatcherSv1                   = "DispatcherSv1"
 	DispatcherSv1Ping               = "DispatcherSv1.Ping"
 	DispatcherSv1GetProfileForEvent = "DispatcherSv1.GetProfileForEvent"
 	DispatcherSv1Apier              = "DispatcherSv1.Apier"
@@ -1545,7 +1547,8 @@ const (
 
 // DispatcherH APIs
 const (
-	DispatcherHv1RegisterHosts = "DispatcherHv1.RegisterHosts"
+	DispatcherHv1RegisterHosts   = "DispatcherHv1.RegisterHosts"
+	DispatcherHv1UnregisterHosts = "DispatcherHv1.UnregisterHosts"
 )
 
 // RateProfile APIs

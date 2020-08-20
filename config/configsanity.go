@@ -24,6 +24,7 @@ import (
 	"strings"
 
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 // Exported in cgr-engine
@@ -669,7 +670,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 	// FilterS sanity check
 	for _, connID := range cfg.filterSCfg.StatSConns {
 		if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.statsCfg.Enabled {
-			return fmt.Errorf("<%s> not enabled but requested by <%s> component.", utils.StatS, utils.FilterS)
+			return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.StatS, utils.FilterS)
 		}
 		if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
 			return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.FilterS, connID)
@@ -677,7 +678,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 	}
 	for _, connID := range cfg.filterSCfg.ResourceSConns {
 		if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.resourceSCfg.Enabled {
-			return fmt.Errorf("<%s> not enabled but requested by <%s> component.", utils.ResourceS, utils.FilterS)
+			return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.ResourceS, utils.FilterS)
 		}
 		if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
 			return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.FilterS, connID)
@@ -685,11 +686,46 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 	}
 	for _, connID := range cfg.filterSCfg.ApierSConns {
 		if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.apier.Enabled {
-			return fmt.Errorf("<%s> not enabled but requested by <%s> component.", utils.ApierS, utils.FilterS)
+			return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.ApierS, utils.FilterS)
 		}
 		if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
 			return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.FilterS, connID)
 		}
+	}
+
+	if cfg.dispatcherHCfg.Enabled {
+		if len(cfg.dispatcherHCfg.HostIDs) == 0 {
+			return fmt.Errorf("<%s> missing dispatcher host IDs", utils.DispatcherH)
+		}
+		if cfg.dispatcherHCfg.RegisterInterval <= 0 {
+			return fmt.Errorf("<%s> the register imterval needs to be bigger than 0", utils.DispatcherH)
+		}
+		if !utils.SliceHasMember([]string{utils.MetaGOB, rpcclient.HTTPjson, utils.MetaJSON}, cfg.dispatcherHCfg.RegisterTransport) {
+			return fmt.Errorf("<%s> unsupported transport: <%s>", utils.DispatcherH, cfg.dispatcherHCfg.RegisterTransport)
+		}
+		if len(cfg.dispatcherHCfg.DispatchersConns) == 0 {
+			return fmt.Errorf("<%s> missing dispatcher connection IDs", utils.DispatcherH)
+		}
+		for _, connID := range cfg.dispatcherHCfg.DispatchersConns {
+			if connID == utils.MetaInternal {
+				return fmt.Errorf("<%s> internal connection IDs are not supported", utils.DispatcherH)
+			}
+			connCfg, has := cfg.rpcConns[connID]
+			if !has {
+				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.DispatcherH, connID)
+			}
+			if len(connCfg.Conns) != 0 {
+				return fmt.Errorf("<%s> connection with id: <%s> needs to have only one host", utils.DispatcherH, connID)
+			}
+			if connCfg.Conns[0].Transport != rpcclient.HTTPjson {
+				return fmt.Errorf("<%s> connection with id: <%s> unsupported transport <%s>", utils.DispatcherH, connID, connCfg.Conns[0].Transport)
+			}
+		}
+
+		/*
+				DispatchersConns  []string
+			RegisterTransport string
+		*/
 	}
 
 	return nil
