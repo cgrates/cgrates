@@ -25,7 +25,6 @@ import (
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	v2 "github.com/cgrates/cgrates/apier/v2"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/dispatcherh"
 	"github.com/cgrates/cgrates/dispatchers"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
@@ -89,9 +88,6 @@ func (dspS *DispatcherService) Start() (err error) {
 	// for the moment we dispable Apier through dispatcher
 	// until we figured out a better sollution in case of gob server
 	// dspS.server.SetDispatched()
-	if len(dspS.cfg.HTTPCfg().DispatchersRegistrarURL) != 0 {
-		dspS.server.RegisterHttpFunc(dspS.cfg.HTTPCfg().DispatchersRegistrarURL, dispatcherh.Registar)
-	}
 
 	dspS.server.RpcRegister(v1.NewDispatcherSv1(dspS.dspS))
 

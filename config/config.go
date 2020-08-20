@@ -173,6 +173,7 @@ func NewDefaultCGRConfig() (cfg *CGRConfig, err error) {
 	cfg.sureTaxCfg = new(SureTaxCfg)
 	cfg.dispatcherSCfg = new(DispatcherSCfg)
 	cfg.dispatcherHCfg = new(DispatcherHCfg)
+	cfg.dispatcherHCfg.HostIDs = make(map[string][]string)
 	cfg.loaderCgrCfg = new(LoaderCgrCfg)
 	cfg.migratorCgrCfg = new(MigratorCgrCfg)
 	cfg.mailerCfg = new(MailerCfg)

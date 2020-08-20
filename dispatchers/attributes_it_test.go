@@ -145,7 +145,7 @@ func testDspAttrPingFailoverNotFoundHost(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]interface{}{
-				"EventName": "UnexistedHost",
+				"EventName": "NonexistingHost",
 			},
 		},
 		Opts: map[string]interface{}{

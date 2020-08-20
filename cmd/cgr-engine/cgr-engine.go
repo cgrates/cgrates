@@ -32,6 +32,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/cgrates/cgrates/dispatcherh"
 	"github.com/cgrates/cgrates/loaders"
 
 	v1 "github.com/cgrates/cgrates/apier/v1"
@@ -504,7 +505,9 @@ func main() {
 
 	// Rpc/http server
 	server := utils.NewServer()
-
+	if len(cfg.HTTPCfg().DispatchersRegistrarURL) != 0 {
+		server.RegisterHttpFunc(cfg.HTTPCfg().DispatchersRegistrarURL, dispatcherh.Registar)
+	}
 	if *httpPprofPath != "" {
 		go server.RegisterProfiler(*httpPprofPath)
 	}
