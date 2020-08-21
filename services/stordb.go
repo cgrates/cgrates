@@ -168,9 +168,7 @@ func (db *StorDBService) RegisterSyncChan(c chan engine.StorDB) {
 	db.Lock()
 	db.syncChans = append(db.syncChans, c)
 	if db.isRunning() {
-		for _, c := range db.syncChans {
-			c <- db.db
-		}
+		c <- db.db
 	}
 	db.Unlock()
 }

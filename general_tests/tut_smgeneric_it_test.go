@@ -171,6 +171,8 @@ func testTutSMGCacheStats(t *testing.T) {
 	expectedStats[utils.CacheChargerFilterIndexes].Groups = 1
 	expectedStats[utils.CacheAttributeFilterIndexes].Items = 3
 	expectedStats[utils.CacheAttributeFilterIndexes].Groups = 2
+	expectedStats[utils.CacheReverseFilterIndexes].Items = 15
+	expectedStats[utils.CacheReverseFilterIndexes].Groups = 13
 	if err := tutSMGRpc.Call(utils.CacheSv1GetCacheStats, new(utils.AttrCacheIDsWithOpts), &rcvStats); err != nil {
 		t.Error("Got error on CacheSv1.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {

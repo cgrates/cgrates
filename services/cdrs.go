@@ -81,12 +81,12 @@ func (cdrService *CDRServer) Start() (err error) {
 	datadb := <-dbchan
 	dbchan <- datadb
 
-	cdrService.Lock()
-	defer cdrService.Unlock()
-
 	storDBChan := make(chan engine.StorDB, 1)
 	cdrService.syncStop = make(chan struct{})
 	cdrService.storDB.RegisterSyncChan(storDBChan)
+
+	cdrService.Lock()
+	defer cdrService.Unlock()
 
 	cdrService.cdrS = engine.NewCDRServer(cdrService.cfg, storDBChan, datadb, filterS, cdrService.connMgr)
 	go func(cdrS *engine.CDRServer, stopChan chan struct{}) {

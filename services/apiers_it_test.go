@@ -40,11 +40,12 @@ func TestApiersReload(t *testing.T) {
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	engineShutdown := make(chan bool, 1)
+	engineShutdown := make(chan bool, 2)
 	chS := engine.NewCacheS(cfg, nil)
 	close(chS.GetPrecacheChannel(utils.CacheThresholdProfiles))
 	close(chS.GetPrecacheChannel(utils.CacheThresholds))
 	close(chS.GetPrecacheChannel(utils.CacheThresholdFilterIndexes))
+	close(chS.GetPrecacheChannel(utils.CacheActionPlans))
 
 	cfg.ThresholdSCfg().Enabled = true
 	cfg.SchedulerCfg().Enabled = true

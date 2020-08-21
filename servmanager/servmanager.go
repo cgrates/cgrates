@@ -168,10 +168,9 @@ func (srvMngr *ServiceManager) StartServices() (err error) {
 func (srvMngr *ServiceManager) AddServices(services ...Service) {
 	srvMngr.Lock()
 	for _, srv := range services {
-		if _, has := srvMngr.subsystems[srv.ServiceName()]; has { // do not rewrite the service
-			continue
+		if _, has := srvMngr.subsystems[srv.ServiceName()]; !has { // do not rewrite the service
+			srvMngr.subsystems[srv.ServiceName()] = srv
 		}
-		srvMngr.subsystems[srv.ServiceName()] = srv
 	}
 	srvMngr.Unlock()
 }

@@ -1443,7 +1443,7 @@ func (cfg *CGRConfig) reloadSections(sections ...string) (err error) {
 	subsystemsThatNeedDataDB := utils.NewStringSet([]string{DATADB_JSN, SCHEDULER_JSN,
 		RALS_JSN, CDRS_JSN, SessionSJson, ATTRIBUTE_JSN,
 		ChargerSCfgJson, RESOURCES_JSON, STATS_JSON, THRESHOLDS_JSON,
-		RouteSJson, LoaderJson, DispatcherSJson, RateSJson})
+		RouteSJson, LoaderJson, DispatcherSJson, RateSJson, ApierS})
 	subsystemsThatNeedStorDB := utils.NewStringSet([]string{STORDB_JSN, RALS_JSN, CDRS_JSN, ApierS})
 	needsDataDB := false
 	needsStorDB := false
