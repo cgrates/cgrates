@@ -32,21 +32,24 @@ import (
 
 // NewDispatcherHostsService returns the Dispatcher Service
 func NewDispatcherHostsService(cfg *config.CGRConfig, server *utils.Server,
-	internalChan chan rpcclient.ClientConnector, connMgr *engine.ConnManager) servmanager.Service {
+	internalChan chan rpcclient.ClientConnector, connMgr *engine.ConnManager,
+	exitChan chan bool) servmanager.Service {
 	return &DispatcherHostsService{
 		connChan: internalChan,
 		cfg:      cfg,
 		server:   server,
 		connMgr:  connMgr,
+		exitChan: exitChan,
 	}
 }
 
 // DispatcherHostsService implements Service interface
 type DispatcherHostsService struct {
 	sync.RWMutex
-	cfg     *config.CGRConfig
-	server  *utils.Server
-	connMgr *engine.ConnManager
+	cfg      *config.CGRConfig
+	server   *utils.Server
+	connMgr  *engine.ConnManager
+	exitChan chan bool
 
 	dspS *dispatcherh.DispatcherHostsService
 	// rpc      *v1.DispatcherHSv1
@@ -62,11 +65,13 @@ func (dspS *DispatcherHostsService) Start() (err error) {
 	dspS.Lock()
 	defer dspS.Unlock()
 
-	if dspS.dspS, err = dispatcherh.NewDispatcherHService(dspS.cfg, dspS.connMgr); err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<%s> Could not init, error: %s", utils.DispatcherH, err.Error()))
-		return
-	}
-
+	dspS.dspS = dispatcherh.NewDispatcherHService(dspS.cfg, dspS.connMgr)
+	go func(ds *dispatcherh.DispatcherHostsService, ext chan bool) {
+		if err := ds.ListenAndServe(); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.DispatcherH, err.Error()))
+			ext <- true
+		}
+	}(dspS.dspS, dspS.exitChan)
 	dspS.connChan <- dspS.dspS
 
 	return

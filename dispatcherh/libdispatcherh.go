@@ -70,11 +70,12 @@ func (rargs *RegisterArgs) AsDispatcherHosts(ip string) (dHs []*engine.Dispatche
 func Registar(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	w.Header().Set("Content-Type", "application/json")
-	result, errMessage := utils.OK, utils.EmptyString
+	var result interface{} = utils.OK
+	var errMessage interface{}
 	var err error
 	var id *json.RawMessage
 	if id, err = register(r); err != nil {
-		result, errMessage = utils.EmptyString, err.Error()
+		result, errMessage = nil, err.Error()
 	}
 	if err := utils.WriteServerResponse(w, id, result, errMessage); err != nil {
 		utils.Logger.Warning(fmt.Sprintf("<%s> Failed to write resonse because: %s",
@@ -83,12 +84,14 @@ func Registar(w http.ResponseWriter, r *http.Request) {
 }
 
 func register(req *http.Request) (*json.RawMessage, error) {
+	id := json.RawMessage("0")
 	sReq, err := utils.DecodeServerRequest(req.Body)
 	if err != nil {
 		utils.Logger.Warning(fmt.Sprintf("<%s> Failed to decode request because: %s",
 			utils.DispatcherH, err))
-		return nil, err
+		return &id, err
 	}
+	var hasErrors bool
 	switch sReq.Method {
 	default:
 		err = errors.New("rpc: can't find service " + sReq.Method)
@@ -104,12 +107,14 @@ func register(req *http.Request) (*json.RawMessage, error) {
 			return sReq.Id, err
 		}
 		for _, id := range args.IDs {
-			if err = engine.Cache.Remove(utils.CacheDispatcherHosts, utils.ConcatenatedKey(args.Tenant, id), false, utils.NonTransactional); err != nil {
+			if err = engine.Cache.Remove(utils.CacheDispatcherHosts, utils.ConcatenatedKey(args.Tenant, id), true, utils.NonTransactional); err != nil {
 				utils.Logger.Warning(fmt.Sprintf("<%s> Failed to remove DispatcherHost <%s> from cache because: %s",
 					utils.DispatcherH, id, err))
+				hasErrors = true
 				continue
 			}
 		}
+
 	case utils.DispatcherHv1RegisterHosts:
 		var dHs RegisterArgs
 		params := []interface{}{&dHs}
@@ -126,13 +131,17 @@ func register(req *http.Request) (*json.RawMessage, error) {
 		}
 
 		for _, dH := range dHs.AsDispatcherHosts(addr) {
-			if err = engine.Cache.Set(utils.CacheDispatcherHosts, dH.Tenant, dH, nil,
-				false, utils.NonTransactional); err != nil {
+			if err = engine.Cache.Set(utils.CacheDispatcherHosts, dH.TenantID(), dH, nil,
+				true, utils.NonTransactional); err != nil {
 				utils.Logger.Warning(fmt.Sprintf("<%s> Failed to set DispatcherHost <%s> in cache because: %s",
 					utils.DispatcherH, dH.TenantID(), err))
+				hasErrors = true
 				continue
 			}
 		}
+	}
+	if hasErrors {
+		return sReq.Id, utils.ErrPartiallyExecuted
 	}
 	return sReq.Id, nil
 }

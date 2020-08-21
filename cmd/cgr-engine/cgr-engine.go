@@ -530,7 +530,7 @@ func main() {
 	srvManager := servmanager.NewServiceManager(cfg, exitChan)
 	attrS := services.NewAttributeService(cfg, dmService, cacheS, filterSChan, server, internalAttributeSChan)
 	dspS := services.NewDispatcherService(cfg, dmService, cacheS, filterSChan, server, internalDispatcherSChan, connManager)
-	dspH := services.NewDispatcherHostsService(cfg, server, internalDispatcherSChan, connManager)
+	dspH := services.NewDispatcherHostsService(cfg, server, internalDispatcherSChan, connManager, exitChan)
 	chrS := services.NewChargerService(cfg, dmService, cacheS, filterSChan, server,
 		internalChargerSChan, connManager)
 	tS := services.NewThresholdService(cfg, dmService, cacheS, filterSChan, server, internalThresholdSChan)
