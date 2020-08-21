@@ -382,7 +382,7 @@ func (r *rpcRequest) Call() io.Reader {
 }
 
 func loadTLSConfig(serverCrt, serverKey, caCert string, serverPolicy int,
-	serverName string) (config tls.Config, err error) {
+	serverName string) (config *tls.Config, err error) {
 	cert, err := tls.LoadX509KeyPair(serverCrt, serverKey)
 	if err != nil {
 		log.Fatalf("Error: %s when load server keys", err)
@@ -409,7 +409,7 @@ func loadTLSConfig(serverCrt, serverKey, caCert string, serverPolicy int,
 		}
 	}
 
-	config = tls.Config{
+	config = &tls.Config{
 		Certificates: []tls.Certificate{cert},
 		ClientAuth:   tls.ClientAuthType(serverPolicy),
 		ClientCAs:    rootCAs,
@@ -432,7 +432,7 @@ func (s *Server) ServeGOBTLS(addr, serverCrt, serverKey, caCert string,
 	if err != nil {
 		return
 	}
-	listener, err := tls.Listen(TCP, addr, &config)
+	listener, err := tls.Listen(TCP, addr, config)
 	if err != nil {
 		log.Println(fmt.Sprintf("Error: %s when listening", err))
 		exitChan <- true
@@ -474,7 +474,7 @@ func (s *Server) ServeJSONTLS(addr, serverCrt, serverKey, caCert string,
 	if err != nil {
 		return
 	}
-	listener, err := tls.Listen(TCP, addr, &config)
+	listener, err := tls.Listen(TCP, addr, config)
 	if err != nil {
 		log.Println(fmt.Sprintf("Error: %s when listening", err))
 		exitChan <- true
@@ -561,7 +561,7 @@ func (s *Server) ServeHTTPTLS(addr, serverCrt, serverKey, caCert string, serverP
 	httpSrv := http.Server{
 		Addr:      addr,
 		Handler:   s.httpsMux,
-		TLSConfig: &config,
+		TLSConfig: config,
 	}
 	Logger.Info(fmt.Sprintf("<HTTPS> start listening at <%s>", addr))
 	if err := httpSrv.ListenAndServeTLS(serverCrt, serverKey); err != nil {

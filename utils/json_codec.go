@@ -71,6 +71,15 @@ func DecodeServerRequest(r io.Reader) (req *serverRequest, err error) {
 	return
 }
 
+// NewServerRequest used in dispatcherh tests
+func NewServerRequest(method string, params, id json.RawMessage) *serverRequest {
+	return &serverRequest{
+		Method: method,
+		Params: &params,
+		Id:     &id,
+	}
+}
+
 type serverRequest struct {
 	Method  string           `json:"method"`
 	Params  *json.RawMessage `json:"params"`

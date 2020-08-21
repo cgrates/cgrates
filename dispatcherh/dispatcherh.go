@@ -29,12 +29,12 @@ import (
 
 // NewDispatcherHService constructs a DispatcherHService
 func NewDispatcherHService(cfg *config.CGRConfig,
-	connMgr *engine.ConnManager) (*DispatcherHostsService, error) {
+	connMgr *engine.ConnManager) *DispatcherHostsService {
 	return &DispatcherHostsService{
 		cfg:     cfg,
 		connMgr: connMgr,
 		stop:    make(chan struct{}),
-	}, nil
+	}
 }
 
 // DispatcherHostsService  is the service handling dispatching towards internal components
@@ -46,7 +46,7 @@ type DispatcherHostsService struct {
 }
 
 // ListenAndServe will initialize the service
-func (dhS *DispatcherHostsService) ListenAndServe(exitChan chan bool) (err error) {
+func (dhS *DispatcherHostsService) ListenAndServe() (err error) {
 	utils.Logger.Info("Starting DispatcherH service")
 	for {
 		if err = dhS.registerHosts(); err != nil {
@@ -54,9 +54,6 @@ func (dhS *DispatcherHostsService) ListenAndServe(exitChan chan bool) (err error
 		}
 		select {
 		case <-dhS.stop:
-			return
-		case e := <-exitChan:
-			exitChan <- e // put back for the others listening for shutdown request
 			return
 		case <-time.After(dhS.cfg.DispatcherHCfg().RegisterInterval):
 		}
@@ -97,10 +94,6 @@ func (dhS *DispatcherHostsService) registerHosts() (err error) {
 				utils.Logger.Warning(fmt.Sprintf("<%s> Unable to set the hosts to the conn with ID <%s> because : %s",
 					utils.DispatcherH, connID, err))
 				continue
-			} else if rply != utils.OK {
-				utils.Logger.Warning(fmt.Sprintf("<%s> Unexpected reply recieved when setting the hosts: %s",
-					utils.DispatcherH, rply))
-				continue
 			}
 		}
 	}
@@ -121,15 +114,12 @@ func (dhS *DispatcherHostsService) unregisterHosts() {
 				utils.Logger.Warning(fmt.Sprintf("<%s> Unable to set the hosts with tenant<%s> to the conn with ID <%s> because : %s",
 					utils.DispatcherH, tnt, connID, err))
 				continue
-			} else if rply != utils.OK {
-				utils.Logger.Warning(fmt.Sprintf("<%s> Unexpected reply recieved when setting the hosts for tenant<%s>: %s",
-					utils.DispatcherH, tnt, rply))
-				continue
 			}
 		}
 	}
 }
 
-func (dhS *DispatcherHostsService) Call(_ string, _, _ interface{}) error {
+// Call only to implement rpcclient.ClientConnector interface
+func (*DispatcherHostsService) Call(_ string, _, _ interface{}) error {
 	return utils.ErrNotImplemented
 }
