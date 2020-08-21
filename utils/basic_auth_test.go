@@ -145,7 +145,7 @@ func TestVerifyCredential(t *testing.T) {
 		{"foo", "bar", map[string]string{"test": "1234", "foo": hashedPasswords["bar"]}, true},
 		{"foo", "1234", map[string]string{"test": "1234", "foo": hashedPasswords["bar"]}, false},
 		{"none", "1234", map[string]string{"test": "1234", "foo": hashedPasswords["bar"]}, false},
-		{"test", "1234", map[string]string{"test": "1234" + string(0), "foo": hashedPasswords["bar"]}, false},
+		{"test", "1234", map[string]string{"test": "12340", "foo": hashedPasswords["bar"]}, false},
 	}
 
 	for _, tt := range verifyCredentialTests {
