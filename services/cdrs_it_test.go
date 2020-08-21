@@ -63,7 +63,7 @@ func TestCdrsReload(t *testing.T) {
 	db := NewDataDBService(cfg, nil)
 	cfg.StorDbCfg().Type = utils.INTERNAL
 	stordb := NewStorDBService(cfg)
-	chrS := NewChargerService(cfg, db, chS, filterSChan, server, nil, nil)
+	chrS := NewChargerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil)
 	schS := NewSchedulerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil)
 	ralS := NewRalService(cfg, chS, server,
 		make(chan rpcclient.ClientConnector, 1),

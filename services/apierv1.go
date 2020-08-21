@@ -85,13 +85,12 @@ func (apiService *APIerSv1Service) Start() (err error) {
 	datadb := <-dbchan
 	dbchan <- datadb
 
-	apiService.Lock()
-	defer apiService.Unlock()
-
 	storDBChan := make(chan engine.StorDB, 1)
 	apiService.syncStop = make(chan struct{})
 	apiService.storDB.RegisterSyncChan(storDBChan)
 	stordb := <-storDBChan
+	apiService.Lock()
+	defer apiService.Unlock()
 
 	apiService.api = &v1.APIerSv1{
 		DataManager:      datadb,
