@@ -583,11 +583,18 @@ func testAPIerLoadRatingProfile(t *testing.T) {
 		Tenant:   "cgrates.org",
 		Category: "call",
 		Subject:  utils.META_ANY,
-		RatingPlanActivations: []*utils.TPRatingActivation{{
-			ActivationTime:   "2012-02-02T00:00:00Z",
-			RatingPlanId:     "RPl_SAMPLE_RATING_PLAN2",
-			FallbackSubjects: utils.EmptyString,
-		}},
+		RatingPlanActivations: []*utils.TPRatingActivation{
+			{
+				ActivationTime:   "2012-01-01T00:00:00Z",
+				RatingPlanId:     "RPl_SAMPLE_RATING_PLAN",
+				FallbackSubjects: utils.EmptyString,
+			},
+			{
+				ActivationTime:   "2012-02-02T00:00:00Z",
+				RatingPlanId:     "RPl_SAMPLE_RATING_PLAN2",
+				FallbackSubjects: utils.EmptyString,
+			},
+		},
 	}
 
 	if err := apierRPC.Call(utils.APIerSv1SetTPRatingProfile, rpf, &reply); err != nil {
