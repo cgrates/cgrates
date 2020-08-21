@@ -339,6 +339,7 @@ func (tpr *TpReader) LoadRatingProfilesFiltered(qriedRpf *utils.TPRatingProfile)
 		return err
 	}
 	for _, tpRpf := range rpfs {
+		resultRatingProfile = &RatingProfile{Id: tpRpf.KeyId()}
 		if tpr.dm.dataDB != nil { // check if we have a connection with dataDB and check if RatingProfile exists
 			if resultRatingProfile, err = tpr.dm.GetRatingProfile(tpRpf.KeyId(), false, utils.NonTransactional); err != nil {
 				if err == utils.ErrNotFound {
@@ -348,8 +349,6 @@ func (tpr *TpReader) LoadRatingProfilesFiltered(qriedRpf *utils.TPRatingProfile)
 					return err
 				}
 			}
-		} else {
-			resultRatingProfile = &RatingProfile{Id: tpRpf.KeyId()}
 		}
 
 		for _, tpRa := range tpRpf.RatingPlanActivations {
