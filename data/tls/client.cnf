@@ -1,0 +1,19 @@
+[ req ]
+prompt = no
+distinguished_name = server_distinguished_name
+req_extensions = v3_req
+
+[ server_distinguished_name ]
+commonName = localhost
+stateOrProvinceName = Bavaria
+countryName = DE
+emailAddress = contact@itsyscom.com
+organizationName = ITsysCOM
+organizationalUnitName = client
+
+[ v3_req ]
+subjectAltName = @alt_names
+
+[ alt_names ]
+DNS.0 = localhost
+IP.0 = 127.0.0.1

@@ -1,0 +1,39 @@
+[ ca ]
+default_ca = local_ca
+
+[ local_ca ]
+default_crl_days = 3650
+default_days = 3650
+
+policy = local_ca_policy
+x509_extensions = local_ca_extensions
+copy_extensions = copy
+
+[ local_ca_policy ]
+commonName = supplied
+stateOrProvinceName = supplied
+countryName = supplied
+emailAddress = supplied
+organizationName = supplied
+organizationalUnitName = supplied
+
+[ local_ca_extensions ]
+basicConstraints = CA:false
+
+[ req ]
+default_bits = 2048
+default_md = sha256
+prompt = no
+distinguished_name = root_ca_distinguished_name
+x509_extensions = root_ca_extensions
+
+[ root_ca_distinguished_name ]
+commonName = asd
+stateOrProvinceName = Bavaria
+countryName = DE
+emailAddress = contact@itsyscom.com
+organizationName = ITsysCOM
+organizationalUnitName = root
+
+[ root_ca_extensions ]
+basicConstraints = CA:true
