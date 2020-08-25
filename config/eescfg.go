@@ -28,11 +28,10 @@ type EEsCfg struct {
 	Enabled         bool
 	AttributeSConns []string
 	Cache           map[string]*CacheParamCfg
-	Templates       map[string][]*FCTemplate
 	Exporters       []*EventExporterCfg
 }
 
-func (eeS *EEsCfg) loadFromJsonCfg(jsnCfg *EEsJsonCfg, sep string, dfltExpCfg *EventExporterCfg, separator string) (err error) {
+func (eeS *EEsCfg) loadFromJsonCfg(jsnCfg *EEsJsonCfg, msgTemplates map[string][]*FCTemplate, sep string, dfltExpCfg *EventExporterCfg, separator string) (err error) {
 	if jsnCfg == nil {
 		return
 	}
@@ -59,17 +58,7 @@ func (eeS *EEsCfg) loadFromJsonCfg(jsnCfg *EEsJsonCfg, sep string, dfltExpCfg *E
 			}
 		}
 	}
-	if jsnCfg.Templates != nil {
-		if eeS.Templates == nil {
-			eeS.Templates = make(map[string][]*FCTemplate)
-		}
-		for k, jsnTpls := range jsnCfg.Templates {
-			if eeS.Templates[k], err = FCTemplatesFromFCTemplatesJsonCfg(jsnTpls, separator); err != nil {
-				return
-			}
-		}
-	}
-	return eeS.appendEEsExporters(jsnCfg.Exporters, eeS.Templates, sep, dfltExpCfg)
+	return eeS.appendEEsExporters(jsnCfg.Exporters, msgTemplates, sep, dfltExpCfg)
 }
 
 func (eeS *EEsCfg) appendEEsExporters(exporters *[]*EventExporterJsonCfg, msgTemplates map[string][]*FCTemplate, separator string, dfltExpCfg *EventExporterCfg) (err error) {

@@ -874,3 +874,71 @@ func TestConfigSanityFilterS(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 }
+
+func TestCheckConfigSanity(t *testing.T) {
+	// Rater checks
+	cfg, _ := NewDefaultCGRConfig()
+	cfg.ralsCfg = &RalsCfg{
+		Enabled:    true,
+		StatSConns: []string{utils.MetaInternal},
+	}
+	expected := "<StatS> not enabled but requested by <RALs> component."
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.statsCfg.Enabled = true
+	cfg.ralsCfg.ThresholdSConns = []string{utils.MetaInternal}
+
+	expected = "<ThresholdS> not enabled but requested by <RALs> component."
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.ralsCfg = &RalsCfg{
+		Enabled:         false,
+		StatSConns:      []string{},
+		ThresholdSConns: []string{},
+	}
+	// CDRServer checks
+	cfg.thresholdSCfg.Enabled = true
+	cfg.cdrsCfg = &CdrsCfg{
+		Enabled:       true,
+		ChargerSConns: []string{utils.MetaInternal},
+	}
+	expected = "<ChargerS> not enabled but requested by <CDRs> component."
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.chargerSCfg.Enabled = true
+	cfg.cdrsCfg.RaterConns = []string{utils.MetaInternal}
+
+	expected = "<RALs> not enabled but requested by <CDRs> component."
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.ralsCfg.Enabled = true
+	cfg.cdrsCfg.AttributeSConns = []string{utils.MetaInternal}
+	expected = "<AttributeS> not enabled but requested by <CDRs> component."
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.statsCfg.Enabled = false
+	cfg.attributeSCfg.Enabled = true
+	cfg.cdrsCfg.StatSConns = []string{utils.MetaInternal}
+	expected = "<StatS> not enabled but requested by <CDRs> component."
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.statsCfg.Enabled = true
+	cfg.cdrsCfg.OnlineCDRExports = []string{"stringy"}
+	expected = "<CDRs> cannot find exporter with ID: <stringy>"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.thresholdSCfg.Enabled = false
+	cfg.cdrsCfg.OnlineCDRExports = []string{"stringx"}
+	cfg.cdrsCfg.ThresholdSConns = []string{utils.MetaInternal}
+	expected = "<ThresholdS> not enabled but requested by <CDRs> component."
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+}

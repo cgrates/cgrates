@@ -287,7 +287,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.DiameterAgent, connID)
 			}
 		}
-		for prf, tmp := range cfg.diameterAgentCfg.Templates {
+		for prf, tmp := range cfg.templates {
 			for _, field := range tmp {
 				if field.Type != utils.META_NONE && field.Path == utils.EmptyString {
 					return fmt.Errorf("<%s> %s for template %s at %s", utils.DiameterAgent, utils.NewErrMandatoryIeMissing(utils.Path), prf, field.Tag)

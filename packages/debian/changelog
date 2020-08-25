@@ -97,6 +97,7 @@ cgrates (0.11.0~dev) UNRELEASED; urgency=medium
   * [DispatcherH] Added DispatcherH subsystem
   * [ERs] Added support for *amqp_json_map type
   * [DataDB] Moved all specific DB options in opts 
+  * [Config] Add new section "template"
 
  -- DanB <danb@cgrates.org>  Wed, 19 Feb 2020 13:25:52 +0200
 
