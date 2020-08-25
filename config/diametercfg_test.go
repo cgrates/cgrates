@@ -60,7 +60,6 @@ func TestDiameterAgentCfgloadFromJsonCfg(t *testing.T) {
 		VendorId:         0,
 		ProductName:      "CGRateS",
 		SyncedConnReqs:   true,
-		Templates:        make(map[string][]*FCTemplate),
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
@@ -105,7 +104,6 @@ func TestDiameterAgentCfgAsMapInterface(t *testing.T) {
 		"sessions_conns":       []string{"*internal"},
 		"synced_conn_requests": true,
 		"vendor_id":            0,
-		"templates":            map[string][]map[string]interface{}{},
 		"request_processors":   []map[string]interface{}{},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {

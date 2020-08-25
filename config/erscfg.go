@@ -28,11 +28,10 @@ import (
 type ERsCfg struct {
 	Enabled       bool
 	SessionSConns []string
-	Templates     map[string][]*FCTemplate
 	Readers       []*EventReaderCfg
 }
 
-func (erS *ERsCfg) loadFromJsonCfg(jsnCfg *ERsJsonCfg, sep string, dfltRdrCfg *EventReaderCfg, separator string) (err error) {
+func (erS *ERsCfg) loadFromJsonCfg(jsnCfg *ERsJsonCfg, msgTemplates map[string][]*FCTemplate, sep string, dfltRdrCfg *EventReaderCfg, separator string) (err error) {
 	if jsnCfg == nil {
 		return
 	}
@@ -50,17 +49,7 @@ func (erS *ERsCfg) loadFromJsonCfg(jsnCfg *ERsJsonCfg, sep string, dfltRdrCfg *E
 			}
 		}
 	}
-	if jsnCfg.Templates != nil {
-		if erS.Templates == nil {
-			erS.Templates = make(map[string][]*FCTemplate)
-		}
-		for k, jsnTpls := range jsnCfg.Templates {
-			if erS.Templates[k], err = FCTemplatesFromFCTemplatesJsonCfg(jsnTpls, separator); err != nil {
-				return
-			}
-		}
-	}
-	return erS.appendERsReaders(jsnCfg.Readers, erS.Templates, sep, dfltRdrCfg)
+	return erS.appendERsReaders(jsnCfg.Readers, msgTemplates, sep, dfltRdrCfg)
 }
 
 func (ers *ERsCfg) appendERsReaders(jsnReaders *[]*EventReaderJsonCfg, msgTemplates map[string][]*FCTemplate, sep string,

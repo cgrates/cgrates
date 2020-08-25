@@ -155,7 +155,6 @@ type CdrsJsonCfg struct {
 type ERsJsonCfg struct {
 	Enabled        *bool
 	Sessions_conns *[]string
-	Templates      map[string][]*FcTemplateJsonCfg
 	Readers        *[]*EventReaderJsonCfg
 }
 
@@ -187,7 +186,6 @@ type EEsJsonCfg struct {
 	Enabled          *bool
 	Attributes_conns *[]string
 	Cache            *map[string]*CacheParamJsonCfg
-	Templates        map[string][]*FcTemplateJsonCfg
 	Exporters        *[]*EventExporterJsonCfg
 }
 
@@ -345,7 +343,6 @@ type DiameterAgentJsonCfg struct {
 	Asr_template         *string
 	Rar_template         *string
 	Forced_disconnect    *string
-	Templates            map[string][]*FcTemplateJsonCfg
 	Request_processors   *[]*ReqProcessorJsnCfg
 }
 

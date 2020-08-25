@@ -1895,7 +1895,6 @@ func TestCgrCdfEventReader(t *testing.T) {
 	eCfg := &ERsCfg{
 		Enabled:       false,
 		SessionSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
-		Templates:     map[string][]*FCTemplate{},
 		Readers: []*EventReaderCfg{
 			{
 				ID:               utils.MetaDefault,
@@ -1960,7 +1959,6 @@ func TestCgrCdfEventExporter(t *testing.T) {
 				StaticTTL: false,
 			},
 		},
-		Templates: map[string][]*FCTemplate{},
 		Exporters: []*EventExporterCfg{
 			{
 				ID:            utils.MetaDefault,
@@ -2494,139 +2492,6 @@ func TestRpcConnsDefaults(t *testing.T) {
 	}
 }
 
-func TestCheckConfigSanity(t *testing.T) {
-	// Rater checks
-	cfg, _ := NewDefaultCGRConfig()
-	cfg.ralsCfg = &RalsCfg{
-		Enabled:    true,
-		StatSConns: []string{utils.MetaInternal},
-	}
-	expected := "<StatS> not enabled but requested by <RALs> component."
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
-	cfg.statsCfg.Enabled = true
-	cfg.ralsCfg.ThresholdSConns = []string{utils.MetaInternal}
+func TestTemplateConnsDefaults(t *testing.T) {
 
-	expected = "<ThresholdS> not enabled but requested by <RALs> component."
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
-	cfg.ralsCfg = &RalsCfg{
-		Enabled:         false,
-		StatSConns:      []string{},
-		ThresholdSConns: []string{},
-	}
-	// CDRServer checks
-	cfg.thresholdSCfg.Enabled = true
-	cfg.cdrsCfg = &CdrsCfg{
-		Enabled:       true,
-		ChargerSConns: []string{utils.MetaInternal},
-	}
-	expected = "<ChargerS> not enabled but requested by <CDRs> component."
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
-	cfg.chargerSCfg.Enabled = true
-	cfg.cdrsCfg.RaterConns = []string{utils.MetaInternal}
-
-	expected = "<RALs> not enabled but requested by <CDRs> component."
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
-	cfg.ralsCfg.Enabled = true
-	cfg.cdrsCfg.AttributeSConns = []string{utils.MetaInternal}
-	expected = "<AttributeS> not enabled but requested by <CDRs> component."
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
-	cfg.statsCfg.Enabled = false
-	cfg.attributeSCfg.Enabled = true
-	cfg.cdrsCfg.StatSConns = []string{utils.MetaInternal}
-	expected = "<StatS> not enabled but requested by <CDRs> component."
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
-	cfg.statsCfg.Enabled = true
-	cfg.cdrsCfg.OnlineCDRExports = []string{"stringy"}
-	expected = "<CDRs> cannot find exporter with ID: <stringy>"
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
-	cfg.thresholdSCfg.Enabled = false
-	cfg.cdrsCfg.OnlineCDRExports = []string{"stringx"}
-	cfg.cdrsCfg.ThresholdSConns = []string{utils.MetaInternal}
-	expected = "<ThresholdS> not enabled but requested by <CDRs> component."
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
-}
-
-func TestGeneralCfg(t *testing.T) {
-	var gencfg GeneralCfg
-	cfgJSONStr := `{
-		"general": {
-			"node_id": "",
-			"logger":"*syslog",
-			"log_level": 6,
-			"http_skip_tls_verify": false,
-			"rounding_decimals": 5,
-			"dbdata_encoding": "*msgpack",
-			"tpexport_dir": "/var/spool/cgrates/tpe",
-			"poster_attempts": 3,
-			"failed_posts_dir": "/var/spool/cgrates/failed_posts",
-			"failed_posts_ttl": "5s",
-			"default_request_type": "*rated",
-			"default_category": "call",
-			"default_tenant": "cgrates.org",
-			"default_timezone": "Local",
-			"default_caching":"*reload",
-			"connect_attempts": 5,
-			"reconnects": -1,
-			"connect_timeout": "1s",
-			"reply_timeout": "2s",
-			"locking_timeout": "0",
-			"digest_separator": ",",
-			"digest_equal": ":",
-			"rsr_separator": ";",
-			"max_parallel_conns": 100,
-		},
-}`
-	eMap := map[string]interface{}{
-		"node_id":                   "",
-		"logger":                    "*syslog",
-		"log_level":                 6,
-		"http_skip_tls_verify":      false,
-		"rounding_decimals":         5,
-		"dbdata_encoding":           "*msgpack",
-		"tpexport_dir":              "/var/spool/cgrates/tpe",
-		"poster_attempts":           3,
-		"failed_posts_dir":          "/var/spool/cgrates/failed_posts",
-		"failed_posts_ttl":          "5s",
-		"default_request_type":      "*rated",
-		"default_category":          "call",
-		"default_tenant":            "cgrates.org",
-		"default_timezone":          "Local",
-		"default_caching":           "*reload",
-		"connect_attempts":          5,
-		"reconnects":                -1,
-		"connect_timeout":           "1s",
-		"reply_timeout":             "2s",
-		"locking_timeout":           "0",
-		"digest_separator":          ",",
-		"digest_equal":              ":",
-		"rsr_separator":             ";",
-		"max_parallel_conns":        100,
-		utils.ConcurrentRequestsCfg: 0,
-		utils.ConcurrentStrategyCfg: utils.EmptyString,
-	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
-		t.Error(err)
-	} else if jsnGenCfg, err := jsnCfg.GeneralJsonCfg(); err != nil {
-		t.Error(err)
-	} else if err = gencfg.loadFromJsonCfg(jsnGenCfg); err != nil {
-		t.Error(err)
-	} else if rcv := gencfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("Expected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
-	}
 }

@@ -62,6 +62,7 @@ const (
 	RateSJson          = "rates"
 	RPCConnsJsonName   = "rpc_conns"
 	SIPAgentJson       = "sip_agent"
+	TemplatesJson      = "templates"
 )
 
 var (
@@ -69,7 +70,7 @@ var (
 		CACHE_JSN, FilterSjsn, RALS_JSN, CDRS_JSN, ERsJson, SessionSJson, AsteriskAgentJSN, FreeSWITCHAgentJSN,
 		KamailioAgentJSN, DA_JSN, RA_JSN, HttpAgentJson, DNSAgentJson, ATTRIBUTE_JSN, ChargerSCfgJson, RESOURCES_JSON, STATS_JSON,
 		THRESHOLDS_JSON, RouteSJson, LoaderJson, MAILER_JSN, SURETAX_JSON, CgrLoaderCfgJson, CgrMigratorCfgJson, DispatcherSJson,
-		AnalyzerCfgJson, ApierS, EEsJson, RateSJson, SIPAgentJson, DispatcherHJson}
+		AnalyzerCfgJson, ApierS, EEsJson, RateSJson, SIPAgentJson, DispatcherHJson, TemplatesJson}
 )
 
 // Loads the json config out of io.Reader, eg other sources than file, maybe over http
@@ -530,4 +531,16 @@ func (self CgrJsonCfg) SIPAgentJsonCfg() (*SIPAgentJsonCfg, error) {
 		return nil, err
 	}
 	return sipAgnt, nil
+}
+
+func (self CgrJsonCfg) TemplateSJsonCfg() (map[string][]*FcTemplateJsonCfg, error) {
+	rawCfg, hasKey := self[TemplatesJson]
+	if !hasKey {
+		return nil, nil
+	}
+	cfg := make(map[string][]*FcTemplateJsonCfg)
+	if err := json.Unmarshal(*rawCfg, &cfg); err != nil {
+		return nil, err
+	}
+	return cfg, nil
 }

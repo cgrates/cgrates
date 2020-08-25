@@ -138,6 +138,7 @@ func NewDefaultCGRConfig() (cfg *CGRConfig, err error) {
 	cfg.MaxCallDuration = time.Duration(3) * time.Hour // Hardcoded for now
 
 	cfg.rpcConns = make(map[string]*RPCConn)
+	cfg.templates = make(map[string][]*FCTemplate)
 	cfg.generalCfg = new(GeneralCfg)
 	cfg.generalCfg.NodeID = utils.UUIDSha1Prefix()
 	cfg.dataDbCfg = new(DataDbCfg)
@@ -272,6 +273,8 @@ type CGRConfig struct {
 
 	rpcConns map[string]*RPCConn
 
+	templates map[string][]*FCTemplate
+
 	generalCfg       *GeneralCfg       // General config
 	dataDbCfg        *DataDbCfg        // Database config
 	storDbCfg        *StorDbCfg        // StroreDb config
@@ -361,7 +364,7 @@ func (cfg *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 	// Load sections out of JSON config, stop on error
 	for _, loadFunc := range []func(*CgrJsonCfg) error{
 		cfg.loadRPCConns,
-		cfg.loadGeneralCfg, cfg.loadCacheCfg, cfg.loadListenCfg,
+		cfg.loadGeneralCfg, cfg.loadTemplateSCfg, cfg.loadCacheCfg, cfg.loadListenCfg,
 		cfg.loadHTTPCfg, cfg.loadDataDBCfg, cfg.loadStorDBCfg,
 		cfg.loadFilterSCfg, cfg.loadRalSCfg, cfg.loadSchedulerCfg,
 		cfg.loadCdrsCfg, cfg.loadSessionSCfg,
@@ -728,7 +731,7 @@ func (cfg *CGRConfig) loadErsCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnERsCfg, err = jsnCfg.ERsJsonCfg(); err != nil {
 		return
 	}
-	return cfg.ersCfg.loadFromJsonCfg(jsnERsCfg, cfg.generalCfg.RSRSep, cfg.dfltEvRdr, cfg.generalCfg.RSRSep)
+	return cfg.ersCfg.loadFromJsonCfg(jsnERsCfg, cfg.templates, cfg.generalCfg.RSRSep, cfg.dfltEvRdr, cfg.generalCfg.RSRSep)
 }
 
 // loadEesCfg loads the Ees section of the configuration
@@ -737,7 +740,7 @@ func (cfg *CGRConfig) loadEesCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnEEsCfg, err = jsnCfg.EEsJsonCfg(); err != nil {
 		return
 	}
-	return cfg.eesCfg.loadFromJsonCfg(jsnEEsCfg, cfg.generalCfg.RSRSep, cfg.dfltEvExp, cfg.generalCfg.RSRSep)
+	return cfg.eesCfg.loadFromJsonCfg(jsnEEsCfg, cfg.templates, cfg.generalCfg.RSRSep, cfg.dfltEvExp, cfg.generalCfg.RSRSep)
 }
 
 // loadRateSCfg loads the rates section of the configuration
@@ -756,6 +759,22 @@ func (cfg *CGRConfig) loadSIPAgentCfg(jsnCfg *CgrJsonCfg) (err error) {
 		return
 	}
 	return cfg.sipAgentCfg.loadFromJsonCfg(jsnSIPAgentCfg, cfg.generalCfg.RSRSep)
+}
+
+// loadTemplateSCfg loads the Template section of the configuration
+func (cfg *CGRConfig) loadTemplateSCfg(jsnCfg *CgrJsonCfg) (err error) {
+	var jsnTemplateCfg map[string][]*FcTemplateJsonCfg
+	if jsnTemplateCfg, err = jsnCfg.TemplateSJsonCfg(); err != nil {
+		return
+	}
+	if jsnTemplateCfg != nil {
+		for k, val := range jsnTemplateCfg {
+			if cfg.templates[k], err = FCTemplatesFromFCTemplatesJsonCfg(val, cfg.generalCfg.RSRSep); err != nil {
+				return
+			}
+		}
+	}
+	return
 }
 
 // SureTaxCfg use locking to retrieve the configuration, possibility later for runtime reload
@@ -1035,6 +1054,13 @@ func (cfg *CGRConfig) RPCConns() map[string]*RPCConn {
 	return cfg.rpcConns
 }
 
+// DiameterAgentCfg returns the config for Diameter Agent
+func (cfg *CGRConfig) TemplateCfg() map[string][]*FCTemplate {
+	cfg.lks[TemplatesJson].Lock()
+	defer cfg.lks[TemplatesJson].Unlock()
+	return cfg.templates
+}
+
 // GetReloadChan returns the reload chanel for the given section
 func (cfg *CGRConfig) GetReloadChan(sectID string) chan struct{} {
 	return cfg.rldChans[sectID]
@@ -1127,6 +1153,8 @@ func (cfg *CGRConfig) V1GetConfigSection(args *StringWithOpts, reply *map[string
 		jsonString = utils.ToJSON(cfg.RPCConns())
 	case SIPAgentJson:
 		jsonString = utils.ToJSON(cfg.SIPAgentCfg())
+	case TemplatesJson:
+		jsonString = utils.ToJSON(cfg.TemplateCfg())
 	default:
 		return errors.New("Invalid section")
 	}
@@ -1253,6 +1281,7 @@ func (cfg *CGRConfig) getLoadFunctions() map[string]func(*CgrJsonCfg) error {
 		RPCConnsJsonName:   cfg.loadRPCConns,
 		RateSJson:          cfg.loadRateSCfg,
 		SIPAgentJson:       cfg.loadSIPAgentCfg,
+		TemplatesJson:      cfg.loadTemplateSCfg,
 	}
 }
 

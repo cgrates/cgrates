@@ -39,7 +39,6 @@ type DiameterAgentCfg struct {
 	ASRTemplate       string
 	RARTemplate       string
 	ForcedDisconnect  string
-	Templates         map[string][]*FCTemplate
 	RequestProcessors []*RequestProcessor
 }
 
@@ -97,16 +96,6 @@ func (da *DiameterAgentCfg) loadFromJsonCfg(jsnCfg *DiameterAgentJsonCfg, separa
 	if jsnCfg.Forced_disconnect != nil {
 		da.ForcedDisconnect = *jsnCfg.Forced_disconnect
 	}
-	if jsnCfg.Templates != nil {
-		if da.Templates == nil {
-			da.Templates = make(map[string][]*FCTemplate)
-		}
-		for k, jsnTpls := range jsnCfg.Templates {
-			if da.Templates[k], err = FCTemplatesFromFCTemplatesJsonCfg(jsnTpls, separator); err != nil {
-				return
-			}
-		}
-	}
 	if jsnCfg.Request_processors != nil {
 		for _, reqProcJsn := range *jsnCfg.Request_processors {
 			rp := new(RequestProcessor)
@@ -130,16 +119,6 @@ func (da *DiameterAgentCfg) loadFromJsonCfg(jsnCfg *DiameterAgentJsonCfg, separa
 }
 
 func (ds *DiameterAgentCfg) AsMapInterface(separator string) map[string]interface{} {
-	templates := make(map[string][]map[string]interface{})
-	for key, value := range ds.Templates {
-		fcTemplate := make([]map[string]interface{}, len(value))
-		for i, val := range value {
-			fcTemplate[i] = val.AsMapInterface(separator)
-
-		}
-		templates[key] = fcTemplate
-	}
-
 	requestProcessors := make([]map[string]interface{}, len(ds.RequestProcessors))
 	for i, item := range ds.RequestProcessors {
 		requestProcessors[i] = item.AsMapInterface(separator)
@@ -170,7 +149,6 @@ func (ds *DiameterAgentCfg) AsMapInterface(separator string) map[string]interfac
 		utils.ASRTemplateCfg:       ds.ASRTemplate,
 		utils.RARTemplateCfg:       ds.RARTemplate,
 		utils.ForcedDisconnectCfg:  ds.ForcedDisconnect,
-		utils.TemplatesCfg:         templates,
 		utils.RequestProcessorsCfg: requestProcessors,
 	}
 }
