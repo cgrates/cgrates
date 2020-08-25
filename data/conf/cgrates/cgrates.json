@@ -31,6 +31,8 @@
 // 	"digest_equal": ":",									// equal symbol used in case of digests
 // 	"rsr_separator": ";",									// separator used within RSR fields
 // 	"max_parallel_conns": 100,								// the maximum number of connection used by the *parallel strategy
+// 	"concurrent_requests": 0,								// maximum concurrent request allowed ( 0 to disabled )
+// 	"concurrent_strategy": "*queue",						// strategy in case in case of concurrent requests reached
 // },
 
 
