@@ -694,14 +694,18 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 	}
 
 	if cfg.dispatcherHCfg.Enabled {
-		if len(cfg.dispatcherHCfg.HostIDs) == 0 {
+		if len(cfg.dispatcherHCfg.Hosts) == 0 {
 			return fmt.Errorf("<%s> missing dispatcher host IDs", utils.DispatcherH)
 		}
 		if cfg.dispatcherHCfg.RegisterInterval <= 0 {
 			return fmt.Errorf("<%s> the register imterval needs to be bigger than 0", utils.DispatcherH)
 		}
-		if !utils.SliceHasMember([]string{utils.MetaGOB, rpcclient.HTTPjson, utils.MetaJSON}, cfg.dispatcherHCfg.RegisterTransport) {
-			return fmt.Errorf("<%s> unsupported transport: <%s>", utils.DispatcherH, cfg.dispatcherHCfg.RegisterTransport)
+		for tnt, hosts := range cfg.dispatcherHCfg.Hosts {
+			for _, host := range hosts {
+				if !utils.SliceHasMember([]string{utils.MetaGOB, rpcclient.HTTPjson, utils.MetaJSON}, host.RegisterTransport) {
+					return fmt.Errorf("<%s> unsupported transport <%s> for host <%s>", utils.DispatcherH, host.RegisterTransport, utils.ConcatenatedKey(tnt, host.ID))
+				}
+			}
 		}
 		if len(cfg.dispatcherHCfg.DispatchersConns) == 0 {
 			return fmt.Errorf("<%s> missing dispatcher connection IDs", utils.DispatcherH)

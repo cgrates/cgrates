@@ -55,7 +55,7 @@ func TestDispatcherHostsService(t *testing.T) {
 		}},
 	}
 	cfg.DispatcherHCfg().Enabled = true
-	cfg.DispatcherHCfg().HostIDs = map[string][]string{utils.MetaDefault: {"Host1"}}
+	cfg.DispatcherHCfg().Hosts = map[string][]string{utils.MetaDefault: {"Host1"}}
 	cfg.DispatcherHCfg().RegisterInterval = 100 * time.Millisecond
 	cfg.DispatcherHCfg().RegisterTransport = utils.MetaJSON
 	cfg.DispatcherHCfg().DispatchersConns = []string{"conn1"}
@@ -80,7 +80,7 @@ func TestDispatcherHostsService(t *testing.T) {
 	} else if !reflect.DeepEqual(host1, x) {
 		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(host1), utils.ToJSON(x))
 	}
-	cfg.DispatcherHCfg().HostIDs = map[string][]string{utils.MetaDefault: {"Host2"}}
+	cfg.DispatcherHCfg().Hosts = map[string][]string{utils.MetaDefault: {"Host2"}}
 	config.CgrConfig().CacheCfg().Partitions[utils.CacheDispatcherHosts].Replicate = true
 	config.CgrConfig().CacheCfg().ReplicationConns = []string{"*localhost"}
 	if err = ds.registerHosts(); err != nil {
@@ -101,7 +101,7 @@ func TestDispatcherHostsService(t *testing.T) {
 	config.CgrConfig().CacheCfg().ReplicationConns = []string{}
 
 	host1.ID = "Host1"
-	cfg.DispatcherHCfg().HostIDs = map[string][]string{utils.MetaDefault: {"Host1"}}
+	cfg.DispatcherHCfg().Hosts = map[string][]string{utils.MetaDefault: {"Host1"}}
 	if err = ds.Shutdown(); err != nil {
 		t.Fatal(err)
 	}

@@ -545,8 +545,14 @@ type DispatcherSJsonCfg struct {
 type DispatcherHJsonCfg struct {
 	Enabled            *bool
 	Dispatchers_conns  *[]string
-	Host_ids           map[string][]string
+	Hosts              map[string][]DispatcherHRegistarJsonCfg
 	Register_interval  *string
+	Register_transport *string
+	Register_tls       *bool
+}
+
+type DispatcherHRegistarJsonCfg struct {
+	Id                 *string
 	Register_transport *string
 	Register_tls       *bool
 }
