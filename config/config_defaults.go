@@ -53,7 +53,7 @@ const CGRATES_CFG_JSON = `
 	"rsr_separator": ";",									// separator used within RSR fields
 	"max_parallel_conns": 100,								// the maximum number of connection used by the *parallel strategy
 	"concurrent_requests": 0,								// maximum concurrent request allowed ( 0 to disabled )
-	"concurrent_strategy": "*queue",						// strategy in case in case of concurrent requests reached
+	"concurrent_strategy": "*busy",							// strategy in case in case of concurrent requests reached
 },
 
 
