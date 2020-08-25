@@ -79,7 +79,7 @@ func (dhS *DispatcherHostsService) registerHosts() (err error) {
 		return
 	}
 	for _, connID := range dhS.cfg.DispatcherHCfg().DispatchersConns {
-		for tnt, ids := range dhS.cfg.DispatcherHCfg().HostIDs {
+		for tnt, ids := range dhS.cfg.DispatcherHCfg().Hosts {
 			if tnt == utils.MetaDefault {
 				tnt = dhS.cfg.GeneralCfg().DefaultTenant
 			}
@@ -103,7 +103,7 @@ func (dhS *DispatcherHostsService) registerHosts() (err error) {
 func (dhS *DispatcherHostsService) unregisterHosts() {
 	var rply string
 	for _, connID := range dhS.cfg.DispatcherHCfg().DispatchersConns {
-		for tnt, ids := range dhS.cfg.DispatcherHCfg().HostIDs {
+		for tnt, ids := range dhS.cfg.DispatcherHCfg().Hosts {
 			if tnt == utils.MetaDefault {
 				tnt = dhS.cfg.GeneralCfg().DefaultTenant
 			}

@@ -26,12 +26,10 @@ import (
 
 // DispatcherHCfg is the configuration of dispatcher hosts
 type DispatcherHCfg struct {
-	Enabled           bool
-	DispatchersConns  []string
-	HostIDs           map[string][]string
-	RegisterInterval  time.Duration
-	RegisterTransport string
-	RegisterTLS       bool
+	Enabled          bool
+	DispatchersConns []string
+	Hosts            map[string][]*DispatcherHRegistarCfg
+	RegisterInterval time.Duration
 }
 
 func (dps *DispatcherHCfg) loadFromJsonCfg(jsnCfg *DispatcherHJsonCfg) (err error) {
@@ -45,9 +43,11 @@ func (dps *DispatcherHCfg) loadFromJsonCfg(jsnCfg *DispatcherHJsonCfg) (err erro
 		dps.DispatchersConns = make([]string, len(*jsnCfg.Dispatchers_conns))
 		copy(dps.DispatchersConns, *jsnCfg.Dispatchers_conns)
 	}
-	if jsnCfg.Host_ids != nil {
-		for tnt, id := range jsnCfg.Host_ids {
-			dps.HostIDs[tnt] = id
+	if jsnCfg.Hosts != nil {
+		for tnt, hosts := range jsnCfg.Hosts {
+			for _, hostJSON := range hosts {
+				dps.Hosts[tnt] = append(dps.Hosts[tnt], NewDispatcherHRegistarCfg(hostJSON))
+			}
 		}
 	}
 	if jsnCfg.Register_interval != nil {
@@ -55,22 +55,49 @@ func (dps *DispatcherHCfg) loadFromJsonCfg(jsnCfg *DispatcherHJsonCfg) (err erro
 			return
 		}
 	}
-	if jsnCfg.Register_transport != nil {
-		dps.RegisterTransport = *jsnCfg.Register_transport
-	}
-	if jsnCfg.Register_tls != nil {
-		dps.RegisterTLS = *jsnCfg.Register_tls
-	}
 	return
 }
 
 func (dps *DispatcherHCfg) AsMapInterface() map[string]interface{} {
-	return map[string]interface{}{
-		utils.EnabledCfg:           dps.Enabled,
-		utils.DispatchersConnsCfg:  dps.DispatchersConns,
-		utils.HostIdsCfg:           dps.HostIDs,
-		utils.RegisterIntervalCfg:  dps.RegisterInterval,
-		utils.RegisterTransportCfg: dps.RegisterTransport,
+	hosts := make(map[string][]map[string]interface{})
+	for tnt, hs := range dps.Hosts {
+		for _, h := range hs {
+			hosts[tnt] = append(hosts[tnt], h.AsMapInterface())
+		}
 	}
+	return map[string]interface{}{
+		utils.EnabledCfg:          dps.Enabled,
+		utils.DispatchersConnsCfg: dps.DispatchersConns,
+		utils.HostsCfg:            hosts,
+		utils.RegisterIntervalCfg: dps.RegisterInterval,
+	}
+}
 
+type DispatcherHRegistarCfg struct {
+	ID                string
+	RegisterTransport string
+	RegisterTLS       bool
+}
+
+func NewDispatcherHRegistarCfg(jsnCfg DispatcherHRegistarJsonCfg) (dhr *DispatcherHRegistarCfg) {
+	dhr = new(DispatcherHRegistarCfg)
+	if jsnCfg.Id != nil {
+		dhr.ID = *jsnCfg.Id
+	}
+	dhr.RegisterTransport = utils.MetaJSON
+	if jsnCfg.Register_transport != nil {
+		dhr.RegisterTransport = *jsnCfg.Register_transport
+	}
+	if jsnCfg.Register_tls != nil {
+		dhr.RegisterTLS = *jsnCfg.Register_tls
+	}
+	return
+}
+
+func (dhr *DispatcherHRegistarCfg) AsMapInterface() map[string]interface{} {
+	return map[string]interface{}{
+		utils.IDCfg:                dhr.ID,
+		utils.RegisterTransportCfg: dhr.RegisterTransport,
+		utils.RegisterTLSCfg:       dhr.RegisterTLS,
+	}
 }

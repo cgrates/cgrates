@@ -2222,9 +2222,10 @@ const (
 // DispatcherHCfg
 const (
 	DispatchersConnsCfg  = "dispatchers_conns"
-	HostIdsCfg           = "host_ids"
+	HostsCfg             = "hosts"
 	RegisterIntervalCfg  = "register_interval"
 	RegisterTransportCfg = "register_transport"
+	RegisterTLSCfg       = "register_tls"
 )
 
 // CGRConfig
