@@ -164,7 +164,7 @@ func (apiService *APIerSv1Service) ShouldRun() bool {
 	return apiService.cfg.ApierCfg().Enabled
 }
 
-// GetDMChan returns the DataManager chanel
+// GetAPIerSv1Chan returns the DataManager chanel
 func (apiService *APIerSv1Service) GetAPIerSv1Chan() chan *v1.APIerSv1 {
 	apiService.RLock()
 	defer apiService.RUnlock()

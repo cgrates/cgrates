@@ -69,8 +69,9 @@ func TestCdrsReload(t *testing.T) {
 		make(chan rpcclient.ClientConnector, 1),
 		make(chan rpcclient.ClientConnector, 1),
 		engineShutdown, nil)
+	cdrsRPC := make(chan rpcclient.ClientConnector, 1)
 	cdrS := NewCDRServer(cfg, db, stordb, filterSChan, server,
-		make(chan rpcclient.ClientConnector, 1),
+		cdrsRPC,
 		nil)
 	srvMngr.AddServices(cdrS, ralS, schS, chrS,
 		NewLoaderService(cfg, db, filterSChan, server, engineShutdown,
@@ -97,7 +98,12 @@ func TestCdrsReload(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expecting OK ,received %s", reply)
 	}
-	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
+	select {
+	case d := <-cdrsRPC:
+		cdrsRPC <- d
+	case <-time.After(time.Second):
+		t.Fatal("It took to long to reload the cache")
+	}
 	if !cdrS.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}

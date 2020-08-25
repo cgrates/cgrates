@@ -182,9 +182,9 @@ func GetRoutePaginatorFromOpts(ev map[string]interface{}) (args Paginator, err e
 		return
 	}
 	//check if we have suppliersLimit in event and in case it has add it in args
-	limitIface, hasRoutesLimit := ev[RoutesLimit]
+	limitIface, hasRoutesLimit := ev[OptsRoutesLimit]
 	if hasRoutesLimit {
-		delete(ev, RoutesLimit)
+		delete(ev, OptsRoutesLimit)
 		var limit int64
 		if limit, err = IfaceAsInt64(limitIface); err != nil {
 			return
@@ -194,11 +194,11 @@ func GetRoutePaginatorFromOpts(ev map[string]interface{}) (args Paginator, err e
 		}
 	}
 	//check if we have offset in event and in case it has add it in args
-	offsetIface, hasRoutesOffset := ev[RoutesOffset]
+	offsetIface, hasRoutesOffset := ev[OptsRoutesOffset]
 	if !hasRoutesOffset {
 		return
 	}
-	delete(ev, RoutesOffset)
+	delete(ev, OptsRoutesOffset)
 	var offset int64
 	if offset, err = IfaceAsInt64(offsetIface); err != nil {
 		return

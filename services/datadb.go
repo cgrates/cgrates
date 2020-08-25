@@ -162,7 +162,7 @@ func (db *DataDBService) needsConnectionReload() bool {
 
 // GetDMChan returns the DataManager chanel
 func (db *DataDBService) GetDMChan() chan *engine.DataManager {
-	db.RLock()
-	defer db.RUnlock()
+	db.Lock()
+	defer db.Unlock()
 	return db.dbchan
 }
