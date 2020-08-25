@@ -49,8 +49,9 @@ func TestAttributeSReload(t *testing.T) {
 	server := utils.NewServer()
 	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
 	db := NewDataDBService(cfg, nil)
+	attrRPC := make(chan rpcclient.ClientConnector, 1)
 	attrS := NewAttributeService(cfg, db,
-		chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1),
+		chS, filterSChan, server, attrRPC,
 	)
 	engine.NewConnManager(cfg, nil)
 	srvMngr.AddServices(attrS,
@@ -74,7 +75,12 @@ func TestAttributeSReload(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expecting OK ,received %s", reply)
 	}
-	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
+	select {
+	case d := <-attrRPC:
+		attrRPC <- d
+	case <-time.After(time.Second):
+		t.Fatal("It took to long to reload the cache")
+	}
 	if !attrS.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}

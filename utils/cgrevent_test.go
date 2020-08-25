@@ -303,8 +303,8 @@ func TestCGREventconsumeRoutePaginator(t *testing.T) {
 	}
 	//normal check
 	opts = map[string]interface{}{
-		RoutesLimit:  18,
-		RoutesOffset: 20,
+		OptsRoutesLimit:  18,
+		OptsRoutesOffset: 20,
 	}
 
 	eOut = Paginator{
@@ -316,9 +316,9 @@ func TestCGREventconsumeRoutePaginator(t *testing.T) {
 		t.Error(err)
 	}
 	//check if *routes_limit and *routes_offset was deleted
-	if _, has := opts[RoutesLimit]; has {
+	if _, has := opts[OptsRoutesLimit]; has {
 		t.Errorf("*routes_limit wasn't deleted")
-	} else if _, has := opts[RoutesOffset]; has {
+	} else if _, has := opts[OptsRoutesOffset]; has {
 		t.Errorf("*routes_offset wasn't deleted")
 	}
 	if !reflect.DeepEqual(eOut, rcv) {
@@ -326,7 +326,7 @@ func TestCGREventconsumeRoutePaginator(t *testing.T) {
 	}
 	//check without *routes_limit, but with *routes_offset
 	opts = map[string]interface{}{
-		RoutesOffset: 20,
+		OptsRoutesOffset: 20,
 	}
 
 	eOut = Paginator{
@@ -337,9 +337,9 @@ func TestCGREventconsumeRoutePaginator(t *testing.T) {
 		t.Error(err)
 	}
 	//check if *routes_limit and *routes_offset was deleted
-	if _, has := opts[RoutesLimit]; has {
+	if _, has := opts[OptsRoutesLimit]; has {
 		t.Errorf("*routes_limit wasn't deleted")
-	} else if _, has := opts[RoutesOffset]; has {
+	} else if _, has := opts[OptsRoutesOffset]; has {
 		t.Errorf("*routes_offset wasn't deleted")
 	}
 	if !reflect.DeepEqual(eOut, rcv) {
@@ -347,7 +347,7 @@ func TestCGREventconsumeRoutePaginator(t *testing.T) {
 	}
 	//check with notAnInt at *routes_limit
 	opts = map[string]interface{}{
-		RoutesLimit: "Not an int",
+		OptsRoutesLimit: "Not an int",
 	}
 	eOut = Paginator{}
 	rcv, err = GetRoutePaginatorFromOpts(opts)
@@ -359,7 +359,7 @@ func TestCGREventconsumeRoutePaginator(t *testing.T) {
 	}
 	//check with notAnInt at and *routes_offset
 	opts = map[string]interface{}{
-		RoutesOffset: "Not an int",
+		OptsRoutesOffset: "Not an int",
 	}
 	eOut = Paginator{}
 	rcv, err = GetRoutePaginatorFromOpts(opts)

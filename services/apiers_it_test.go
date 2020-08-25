@@ -87,7 +87,7 @@ func TestApiersReload(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expecting OK ,received %s", reply)
 	}
-	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
+	time.Sleep(100 * time.Millisecond) //need to switch to gorutine
 	if !apiSv1.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
@@ -102,7 +102,7 @@ func TestApiersReload(t *testing.T) {
 	}
 	cfg.ApierCfg().Enabled = false
 	cfg.GetReloadChan(config.ApierS) <- struct{}{}
-	time.Sleep(10 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 	if apiSv1.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}

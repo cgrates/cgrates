@@ -762,8 +762,6 @@ const (
 	Preference               = "Preference"
 	Flags                    = "Flags"
 	Service                  = "Service"
-	MetaRoutesLimit          = "*routes_limit"
-	MetaRoutesOffset         = "*routes_offset"
 	ApierV                   = "ApierV"
 	MetaApier                = "*apier"
 	MetaAnalyzer             = "*analyzer"
@@ -2300,15 +2298,7 @@ var CGROptionsSet = NewStringSet([]string{OptsRatesStartTime, OptsSessionTTL, Op
 	OptsSessionTTLLastUsed, OptsSessionTTLLastUsage, OptsSessionTTLUsage, OptsDebitInterval, OptsStirATest,
 	OptsStirPayloadMaxDuration, OptsStirIdentity, OptsStirOriginatorTn, OptsStirOriginatorURI,
 	OptsStirDestinationTn, OptsStirDestinationURI, OptsStirPublicKeyPath, OptsStirPrivateKeyPath,
-	OptsAPIKey, OptsRouteID, OptsContext, OptsAttributesProcessRuns})
-
-// SessionS ProccessEvent posible options
-const (
-
-	// SupplierS
-	RoutesLimit  = "RoutesLimit"
-	RoutesOffset = "RoutesOffset"
-)
+	OptsAPIKey, OptsRouteID, OptsContext, OptsAttributesProcessRuns, OptsRoutesLimit, OptsRoutesOffset})
 
 // EventExporter metrics
 const (
@@ -2329,6 +2319,8 @@ const (
 
 // Event Opts
 const (
+	OptsRoutesLimit         = "*routes_limit"
+	OptsRoutesOffset        = "*routes_offset"
 	OptsRatesStartTime      = "*ratesStartTime"
 	OptsSessionTTL          = "*sessionTTL"
 	OptsSessionTTLMaxDelay  = "*sessionTTLMaxDelay"

@@ -176,7 +176,6 @@ func (srvMngr *ServiceManager) AddServices(services ...Service) {
 }
 
 func (srvMngr *ServiceManager) handleReload() {
-	var err error
 	for {
 		select {
 		case ext := <-srvMngr.engineShutdown:
@@ -192,122 +191,66 @@ func (srvMngr *ServiceManager) handleReload() {
 			}
 			return
 		case <-srvMngr.GetConfig().GetReloadChan(config.ATTRIBUTE_JSN):
-			if err = srvMngr.reloadService(utils.AttributeS); err != nil {
-				return
-			}
+			go srvMngr.reloadService(utils.AttributeS)
 		case <-srvMngr.GetConfig().GetReloadChan(config.ChargerSCfgJson):
-			if err = srvMngr.reloadService(utils.ChargerS); err != nil {
-				return
-			}
+			go srvMngr.reloadService(utils.ChargerS)
 		case <-srvMngr.GetConfig().GetReloadChan(config.THRESHOLDS_JSON):
-			if err = srvMngr.reloadService(utils.ThresholdS); err != nil {
-				return
-			}
+			go srvMngr.reloadService(utils.ThresholdS)
 		case <-srvMngr.GetConfig().GetReloadChan(config.STATS_JSON):
-			if err = srvMngr.reloadService(utils.StatS); err != nil {
-				return
-			}
+			go srvMngr.reloadService(utils.StatS)
 		case <-srvMngr.GetConfig().GetReloadChan(config.RESOURCES_JSON):
-			if err = srvMngr.reloadService(utils.ResourceS); err != nil {
-				return
-			}
+			go srvMngr.reloadService(utils.ResourceS)
 		case <-srvMngr.GetConfig().GetReloadChan(config.RouteSJson):
-			if err = srvMngr.reloadService(utils.RouteS); err != nil {
-				return
-			}
+			go srvMngr.reloadService(utils.RouteS)
 		case <-srvMngr.GetConfig().GetReloadChan(config.SCHEDULER_JSN):
-			if err = srvMngr.reloadService(utils.SchedulerS); err != nil {
-				return
-			}
+			go srvMngr.reloadService(utils.SchedulerS)
 		case <-srvMngr.GetConfig().GetReloadChan(config.RALS_JSN):
-			if err = srvMngr.reloadService(utils.RALService); err != nil {
-				return
-			}
+			go srvMngr.reloadService(utils.RALService)
 		case <-srvMngr.GetConfig().GetReloadChan(config.ApierS):
-			if err = srvMngr.reloadService(utils.APIerSv1); err != nil {
-				return
-			}
-			if err = srvMngr.reloadService(utils.APIerSv2); err != nil {
-				return
-			}
+			go func() {
+				srvMngr.reloadService(utils.APIerSv1)
+				srvMngr.reloadService(utils.APIerSv2)
+			}()
 		case <-srvMngr.GetConfig().GetReloadChan(config.CDRS_JSN):
-			if err = srvMngr.reloadService(utils.CDRServer); err != nil {
-				return
-			}
+			go srvMngr.reloadService(utils.CDRServer)
 		case <-srvMngr.GetConfig().GetReloadChan(config.SessionSJson):
-			if err = srvMngr.reloadService(utils.SessionS); err != nil {
-				return
-			}
+			go srvMngr.reloadService(utils.SessionS)
 		case <-srvMngr.GetConfig().GetReloadChan(config.ERsJson):
-			if err = srvMngr.reloadService(utils.ERs); err != nil {
-				return
-			}
+			go srvMngr.reloadService(utils.ERs)
 		case <-srvMngr.GetConfig().GetReloadChan(config.DNSAgentJson):
-			if err = srvMngr.reloadService(utils.DNSAgent); err != nil {
-				return
-			}
+			go srvMngr.reloadService(utils.DNSAgent)
 		case <-srvMngr.GetConfig().GetReloadChan(config.FreeSWITCHAgentJSN):
-			if err = srvMngr.reloadService(utils.FreeSWITCHAgent); err != nil {
-				return
-			}
+			go srvMngr.reloadService(utils.FreeSWITCHAgent)
 		case <-srvMngr.GetConfig().GetReloadChan(config.KamailioAgentJSN):
-			if err = srvMngr.reloadService(utils.KamailioAgent); err != nil {
-				return
-			}
+			go srvMngr.reloadService(utils.KamailioAgent)
 		case <-srvMngr.GetConfig().GetReloadChan(config.AsteriskAgentJSN):
-			if err = srvMngr.reloadService(utils.AsteriskAgent); err != nil {
-				return
-			}
+			go srvMngr.reloadService(utils.AsteriskAgent)
 		case <-srvMngr.GetConfig().GetReloadChan(config.RA_JSN):
-			if err = srvMngr.reloadService(utils.RadiusAgent); err != nil {
-				return
-			}
+			go srvMngr.reloadService(utils.RadiusAgent)
 		case <-srvMngr.GetConfig().GetReloadChan(config.DA_JSN):
-			if err = srvMngr.reloadService(utils.DiameterAgent); err != nil {
-				return
-			}
+			go srvMngr.reloadService(utils.DiameterAgent)
 		case <-srvMngr.GetConfig().GetReloadChan(config.HttpAgentJson):
-			if err = srvMngr.reloadService(utils.HTTPAgent); err != nil {
-				return
-			}
+			go srvMngr.reloadService(utils.HTTPAgent)
 		case <-srvMngr.GetConfig().GetReloadChan(config.LoaderJson):
-			if err = srvMngr.reloadService(utils.LoaderS); err != nil {
-				return
-			}
+			go srvMngr.reloadService(utils.LoaderS)
 		case <-srvMngr.GetConfig().GetReloadChan(config.AnalyzerCfgJson):
-			if err = srvMngr.reloadService(utils.AnalyzerS); err != nil {
-				return
-			}
+			go srvMngr.reloadService(utils.AnalyzerS)
 		case <-srvMngr.GetConfig().GetReloadChan(config.DispatcherSJson):
-			if err = srvMngr.reloadService(utils.DispatcherS); err != nil {
-				return
-			}
+			go srvMngr.reloadService(utils.DispatcherS)
 		case <-srvMngr.GetConfig().GetReloadChan(config.DATADB_JSN):
-			if err = srvMngr.reloadService(utils.DataDB); err != nil {
-				return
-			}
+			go srvMngr.reloadService(utils.DataDB)
 		case <-srvMngr.GetConfig().GetReloadChan(config.STORDB_JSN):
-			if err = srvMngr.reloadService(utils.StorDB); err != nil {
-				return
-			}
+			go srvMngr.reloadService(utils.StorDB)
 		case <-srvMngr.GetConfig().GetReloadChan(config.EEsJson):
-			if err = srvMngr.reloadService(utils.EventExporterS); err != nil {
-				return
-			}
+			go srvMngr.reloadService(utils.EventExporterS)
 		case <-srvMngr.GetConfig().GetReloadChan(config.RateSJson):
-			if err = srvMngr.reloadService(utils.RateS); err != nil {
-				return
-			}
+			go srvMngr.reloadService(utils.RateS)
 		case <-srvMngr.GetConfig().GetReloadChan(config.RPCConnsJsonName):
 			engine.Cache.Clear([]string{utils.CacheRPCConnections})
 		case <-srvMngr.GetConfig().GetReloadChan(config.SIPAgentJson):
-			if err = srvMngr.reloadService(utils.SIPAgent); err != nil {
-				return
-			}
+			go srvMngr.reloadService(utils.SIPAgent)
 		case <-srvMngr.GetConfig().GetReloadChan(config.DispatcherHJson):
-			if err = srvMngr.reloadService(utils.DispatcherH); err != nil {
-				return
-			}
+			go srvMngr.reloadService(utils.DispatcherH)
 		}
 		// handle RPC server
 	}

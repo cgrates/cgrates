@@ -294,7 +294,7 @@ type CGRConfig struct {
 	routeSCfg        *RouteSCfg        // RouteS config
 	sureTaxCfg       *SureTaxCfg       // SureTax config
 	dispatcherSCfg   *DispatcherSCfg   // DispatcherS config
-	dispatcherHCfg   *DispatcherHCfg   // DispatcherS config
+	dispatcherHCfg   *DispatcherHCfg   // DispatcherH config
 	loaderCgrCfg     *LoaderCgrCfg     // LoaderCgr config
 	migratorCgrCfg   *MigratorCgrCfg   // MigratorCgr config
 	mailerCfg        *MailerCfg        // Mailer config
@@ -664,7 +664,7 @@ func (cfg *CGRConfig) loadDispatcherSCfg(jsnCfg *CgrJsonCfg) (err error) {
 	return cfg.dispatcherSCfg.loadFromJsonCfg(jsnDispatcherSCfg)
 }
 
-// loadDispatcherHCfg loads the DispatcherS section of the configuration
+// loadDispatcherHCfg loads the DispatcherH section of the configuration
 func (cfg *CGRConfig) loadDispatcherHCfg(jsnCfg *CgrJsonCfg) (err error) {
 	var jsnDispatcherHCfg *DispatcherHJsonCfg
 	if jsnDispatcherHCfg, err = jsnCfg.DispatcherHJsonCfg(); err != nil {
@@ -894,7 +894,7 @@ func (cfg *CGRConfig) DispatcherSCfg() *DispatcherSCfg {
 	return cfg.dispatcherSCfg
 }
 
-// DispatcherHCfg returns the config for DispatcherS
+// DispatcherHCfg returns the config for DispatcherH
 func (cfg *CGRConfig) DispatcherHCfg() *DispatcherHCfg {
 	cfg.lks[DispatcherSJson].Lock()
 	defer cfg.lks[DispatcherSJson].Unlock()
