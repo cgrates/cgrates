@@ -65,6 +65,11 @@ var (
 		testLoaderLoadAttributesWithoutSubpathWithMove,
 		testLoaderVerifyOutDirWithSubpathWithMove,
 		testLoaderCheckAttributes,
+		testLoaderResetDataDB,
+		testLoaderPopulateDataForTemplateLoader,
+		testLoaderLoadAttributesForTemplateLoader,
+		testLoaderVerifyOutDirForTemplateLoader,
+		testLoaderCheckAttributes,
 		testLoaderKillEngine,
 	}
 )
@@ -293,6 +298,37 @@ func testLoaderLoadAttributesWithoutSubpathWithMove(t *testing.T) {
 func testLoaderVerifyOutDirWithSubpathWithMove(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
 	if outContent1, err := ioutil.ReadFile(path.Join("/tmp/SubpathOut/folder1", utils.AttributesCsv)); err != nil {
+		t.Error(err)
+	} else if engine.AttributesCSVContent != string(outContent1) {
+		t.Errorf("Expecting: %q, received: %q", engine.AttributesCSVContent, string(outContent1))
+	}
+}
+
+func testLoaderPopulateDataForTemplateLoader(t *testing.T) {
+	fileName := utils.AttributesCsv
+	tmpFilePath := path.Join("/tmp/", fileName)
+	if err := ioutil.WriteFile(tmpFilePath, []byte(engine.AttributesCSVContent), 0777); err != nil {
+		t.Fatal(err.Error())
+	}
+	if err := os.MkdirAll("/tmp/templateLoaderIn", 0755); err != nil {
+		t.Fatal("Error creating folder: /tmp/templateLoaderIn", err)
+	}
+	if err := os.Rename(tmpFilePath, path.Join("/tmp/templateLoaderIn", fileName)); err != nil {
+		t.Fatal("Error moving file to processing directory: ", err)
+	}
+}
+
+func testLoaderLoadAttributesForTemplateLoader(t *testing.T) {
+	var reply string
+	if err := loaderRPC.Call(utils.LoaderSv1Load,
+		&ArgsProcessFolder{LoaderID: "LoaderWithTemplate"}, &reply); err != nil {
+		t.Error(err)
+	}
+}
+
+func testLoaderVerifyOutDirForTemplateLoader(t *testing.T) {
+	time.Sleep(100 * time.Millisecond)
+	if outContent1, err := ioutil.ReadFile(path.Join("/tmp/templateLoaderOut", utils.AttributesCsv)); err != nil {
 		t.Error(err)
 	} else if engine.AttributesCSVContent != string(outContent1) {
 		t.Errorf("Expecting: %q, received: %q", engine.AttributesCSVContent, string(outContent1))
