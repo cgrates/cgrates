@@ -75,7 +75,7 @@ type LoaderDataType struct { //rename to LoaderDataType
 	Fields   []*FCTemplate
 }
 
-func (self *LoaderDataType) loadFromJsonCfg(jsnCfg *LoaderJsonDataType, separator string) (err error) {
+func (self *LoaderDataType) loadFromJsonCfg(jsnCfg *LoaderJsonDataType, msgTemplates map[string][]*FCTemplate, separator string) (err error) {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -92,11 +92,16 @@ func (self *LoaderDataType) loadFromJsonCfg(jsnCfg *LoaderJsonDataType, separato
 		if self.Fields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Fields, separator); err != nil {
 			return
 		}
+		if tpls, err := InflateTemplates(self.Fields, msgTemplates); err != nil {
+			return err
+		} else if tpls != nil {
+			self.Fields = tpls
+		}
 	}
 	return nil
 }
 
-func (self *LoaderSCfg) loadFromJsonCfg(jsnCfg *LoaderJsonCfg, separator string) (err error) {
+func (self *LoaderSCfg) loadFromJsonCfg(jsnCfg *LoaderJsonCfg, msgTemplates map[string][]*FCTemplate, separator string) (err error) {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -144,7 +149,7 @@ func (self *LoaderSCfg) loadFromJsonCfg(jsnCfg *LoaderJsonCfg, separator string)
 		data := make([]*LoaderDataType, len(*jsnCfg.Data))
 		for idx, jsnLoCfg := range *jsnCfg.Data {
 			data[idx] = NewDfltLoaderDataTypeConfig()
-			data[idx].loadFromJsonCfg(jsnLoCfg, separator)
+			data[idx].loadFromJsonCfg(jsnLoCfg, msgTemplates, separator)
 		}
 		self.Data = data
 	}
