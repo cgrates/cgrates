@@ -95,6 +95,7 @@ cgrates (0.11.0~dev) UNRELEASED; urgency=medium
   * [CGR-CONSOLE] Uniformize the commands between profile and subsystem
   * [StatS] Add rounding operation for duration metric (e.g. acd, tcd, etc...)
   * [DispatcherH] Added DispatcherH subsystem
+  * [ERs] Added support for *amqp_json_map type
 
  -- DanB <danb@cgrates.org>  Wed, 19 Feb 2020 13:25:52 +0200
 

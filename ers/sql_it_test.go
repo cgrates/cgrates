@@ -45,7 +45,7 @@ var (
 		testSQLEmptyTable,
 		testSQLPoster,
 
-		testSQLInitDB,
+		testSQLAddData,
 		testSQLReader2,
 
 		testSQLStop,
@@ -136,11 +136,12 @@ func (_ *testModelSql) TableName() string {
 
 func testSQLInitDBs(t *testing.T) {
 	var err error
-	if db, err = gorm.Open("mysql", fmt.Sprintf(dbConnString, "cgrates")); err != nil {
+	var db2 *gorm.DB
+	if db2, err = gorm.Open("mysql", fmt.Sprintf(dbConnString, "cgrates")); err != nil {
 		t.Fatal(err)
 	}
 
-	if _, err = db.DB().Exec(`CREATE DATABASE IF NOT EXISTS cgrates2;`); err != nil {
+	if _, err = db2.DB().Exec(`CREATE DATABASE IF NOT EXISTS cgrates2;`); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -166,6 +167,8 @@ func testSQLInitDB(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
+	tx.Commit()
+	tx = db.Begin()
 	tx = tx.Table(utils.CDRsTBL)
 	cdrSql := cdr.AsCDRsql()
 	cdrSql.CreatedAt = time.Now()
@@ -178,6 +181,19 @@ func testSQLInitDB(t *testing.T) {
 	time.Sleep(10 * time.Millisecond)
 }
 
+func testSQLAddData(t *testing.T) {
+	tx := db.Begin()
+	tx = tx.Table(utils.CDRsTBL)
+	cdrSql := cdr.AsCDRsql()
+	cdrSql.CreatedAt = time.Now()
+	saved := tx.Save(cdrSql)
+	if saved.Error != nil {
+		tx.Rollback()
+		t.Fatal(saved.Error)
+	}
+	tx.Commit()
+	time.Sleep(10 * time.Millisecond)
+}
 func testSQLReader(t *testing.T) {
 	rdrEvents = make(chan *erEvent, 1)
 	rdrErr = make(chan error, 1)
@@ -292,6 +308,9 @@ func testSQLPoster(t *testing.T) {
 }
 
 func testSQLStop(t *testing.T) {
+	if _, err := db.DB().Exec(`DROP DATABASE cgrates2;`); err != nil {
+		t.Fatal(err)
+	}
 	rdrExit <- struct{}{}
 	db = db.DropTable("cdrs2")
 	db = db.DropTable("cdrs")

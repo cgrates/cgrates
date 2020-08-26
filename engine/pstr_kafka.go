@@ -48,7 +48,7 @@ type KafkaPoster struct {
 }
 
 func (pstr *KafkaPoster) parseURL(dialURL string) error {
-	pstr.topic = defaultQueueID
+	pstr.topic = DefaultQueueID
 	i := strings.IndexByte(dialURL, '?')
 	if i < 0 {
 		pstr.dialURL = dialURL
