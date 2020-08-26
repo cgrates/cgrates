@@ -29,7 +29,8 @@ import (
 	"github.com/streadway/amqp"
 )
 
-var amqpQuery = []string{"cacertfile", "certfile", "keyfile", "verify", "server_name_indication", "auth_mechanism", "heartbeat", "connection_timeout", "channel_max"}
+// AMQPPosibleQuery the lists of posible AMQP values
+var AMQPPosibleQuery = []string{"cacertfile", "certfile", "keyfile", "verify", "server_name_indication", "auth_mechanism", "heartbeat", "connection_timeout", "channel_max"}
 
 // NewAMQPPoster creates a new amqp poster
 // "amqp://guest:guest@localhost:5672/?queueID=cgrates_cdrs"
@@ -62,25 +63,25 @@ func (pstr *AMQPPoster) parseURL(dialURL string) error {
 	}
 	qry := u.Query()
 	q := url.Values{}
-	for _, key := range amqpQuery {
+	for _, key := range AMQPPosibleQuery {
 		if vals, has := qry[key]; has && len(vals) != 0 {
 			q.Add(key, vals[0])
 		}
 	}
 	pstr.dialURL = strings.Split(dialURL, "?")[0] + "?" + q.Encode()
-	pstr.queueID = defaultQueueID
-	pstr.routingKey = defaultQueueID
-	if vals, has := qry[queueID]; has && len(vals) != 0 {
+	pstr.queueID = DefaultQueueID
+	pstr.routingKey = DefaultQueueID
+	if vals, has := qry[QueueID]; has && len(vals) != 0 {
 		pstr.queueID = vals[0]
 	}
-	if vals, has := qry[routingKey]; has && len(vals) != 0 {
+	if vals, has := qry[RoutingKey]; has && len(vals) != 0 {
 		pstr.routingKey = vals[0]
 	}
-	if vals, has := qry[exchange]; has && len(vals) != 0 {
+	if vals, has := qry[Exchange]; has && len(vals) != 0 {
 		pstr.exchange = vals[0]
-		pstr.exchangeType = defaultExchangeType
+		pstr.exchangeType = DefaultExchangeType
 	}
-	if vals, has := qry[exchangeType]; has && len(vals) != 0 {
+	if vals, has := qry[ExchangeType]; has && len(vals) != 0 {
 		pstr.exchangeType = vals[0]
 	}
 	return nil

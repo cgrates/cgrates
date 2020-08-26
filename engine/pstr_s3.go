@@ -63,8 +63,8 @@ func (pstr *S3Poster) parseURL(dialURL string) {
 
 	pstr.dialURL = strings.Split(dialURL, "?")[0]
 	pstr.dialURL = strings.TrimSuffix(pstr.dialURL, "/") // used to remove / to point to correct endpoint
-	pstr.queueID = defaultQueueID
-	if val, has := qry[queueID]; has {
+	pstr.queueID = DefaultQueueID
+	if val, has := qry[QueueID]; has {
 		pstr.queueID = val
 	}
 	if val, has := qry[folderPath]; has {

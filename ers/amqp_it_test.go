@@ -21,7 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ers
 
 import (
-	"context"
 	"fmt"
 	"reflect"
 	"testing"
@@ -30,27 +29,20 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	kafka "github.com/segmentio/kafka-go"
+	"github.com/streadway/amqp"
 )
 
-var (
-	rdrEvents chan *erEvent
-	rdrErr    chan error
-	rdrExit   chan struct{}
-	rdr       EventReader
-)
-
-func TestKafkaER(t *testing.T) {
+func TestAMQPER(t *testing.T) {
 	cfg, err := config.NewCGRConfigFromJsonStringWithDefaults(`{
 "ers": {									// EventReaderService
 	"enabled": true,						// starts the EventReader service: <true|false>
 	"readers": [
 		{
-			"id": "kafka",										// identifier of the EventReader profile
-			"type": "*kafka_json_map",							// reader type <*file_csv>
+			"id": "amqp",										// identifier of the EventReader profile
+			"type": "*amqp_json_map",							// reader type <*file_csv>
 			"run_delay":  "-1",									// sleep interval in seconds between consecutive runs, -1 to use automation via inotify or 0 to disable running all together
 			"concurrent_requests": 1024,						// maximum simultaneous requests/files to process, 0 for unlimited
-			"source_path": "localhost:9092",					// read data from this path
+			"source_path": "amqp://guest:guest@localhost:5672/?queue_id=cdrs3&consumer_tag=test-key&exchange=test-exchange&exchange_type=direct&routing_key=test-key",// read data from this path
 			// "processed_path": "/var/spool/cgrates/ers/out",	// move processed data here
 			"tenant": "cgrates.org",							// tenant used by import
 			"filters": [],										// limit parsing based on the filters
@@ -65,35 +57,48 @@ func TestKafkaER(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
+	utils.Logger.SetLogLevel(7)
 
 	rdrEvents = make(chan *erEvent, 1)
 	rdrErr = make(chan error, 1)
 	rdrExit = make(chan struct{}, 1)
 
-	if rdr, err = NewKafkaER(cfg, 1, rdrEvents,
+	if rdr, err = NewAMQPER(cfg, 1, rdrEvents,
 		rdrErr, new(engine.FilterS), rdrExit); err != nil {
 		t.Fatal(err)
 	}
-	w := kafka.NewWriter(kafka.WriterConfig{
-		Brokers: []string{"localhost:9092"},
-		Topic:   defaultTopic,
-	})
-	randomCGRID := utils.UUIDSha1Prefix()
-	w.WriteMessages(context.Background(),
-		kafka.Message{
-			Key:   []byte(randomCGRID), // for the momment we do not proccess the key
-			Value: []byte(fmt.Sprintf(`{"CGRID": "%s"}`, randomCGRID)),
-		},
-	)
+	connection, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer connection.Close()
 
-	w.Close()
+	channel, err := connection.Channel()
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	rdr.Serve()
-
+	randomCGRID := utils.UUIDSha1Prefix()
+	if err = channel.Publish(
+		"test-exchange", // publish to an exchange
+		"test-key",      // routing to 0 or more queues
+		false,           // mandatory
+		false,           // immediate
+		amqp.Publishing{
+			ContentType:  utils.CONTENT_JSON,
+			Body:         []byte(fmt.Sprintf(`{"CGRID": "%s"}`, randomCGRID)),
+			DeliveryMode: amqp.Persistent, // 1=non-persistent, 2=persistent
+		},
+	); err != nil {
+		t.Fatal(err)
+	}
 	select {
 	case err = <-rdrErr:
 		t.Error(err)
 	case ev := <-rdrEvents:
-		if ev.rdrCfg.ID != "kafka" {
+		if ev.rdrCfg.ID != "amqp" {
 			t.Errorf("Expected 'kakfa' received `%s`", ev.rdrCfg.ID)
 		}
 		expected := &utils.CGREvent{
@@ -109,6 +114,10 @@ func TestKafkaER(t *testing.T) {
 		}
 	case <-time.After(10 * time.Second):
 		t.Fatal("Timeout")
+	}
+
+	if _, err := channel.QueueDelete("cdrs3", false, false, false); err != nil {
+		t.Fatal(err)
 	}
 	rdrExit <- struct{}{}
 }

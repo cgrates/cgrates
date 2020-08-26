@@ -24,13 +24,14 @@ import (
 	"sync"
 )
 
+// General constants for posters
 const (
-	defaultQueueID      = "cgrates_cdrs"
-	defaultExchangeType = "direct"
-	queueID             = "queue_id"
-	exchange            = "exchange"
-	exchangeType        = "exchange_type"
-	routingKey          = "routing_key"
+	DefaultQueueID      = "cgrates_cdrs"
+	QueueID             = "queue_id"
+	DefaultExchangeType = "direct"
+	Exchange            = "exchange"
+	ExchangeType        = "exchange_type"
+	RoutingKey          = "routing_key"
 
 	awsToken   = "aws_token"
 	folderPath = "folder_path"
@@ -69,8 +70,8 @@ func parseURL(dialURL string) (URL string, qID string, err error) {
 	}
 	qry := u.Query()
 	URL = strings.Split(dialURL, "?")[0]
-	qID = defaultQueueID
-	if vals, has := qry[queueID]; has && len(vals) != 0 {
+	qID = DefaultQueueID
+	if vals, has := qry[QueueID]; has && len(vals) != 0 {
 		qID = vals[0]
 	}
 	return

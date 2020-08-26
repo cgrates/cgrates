@@ -54,6 +54,8 @@ func NewEventReader(cfg *config.CGRConfig, cfgIdx int,
 		return NewFlatstoreER(cfg, cfgIdx, rdrEvents, rdrErr, fltrS, rdrExit)
 	case utils.MetaJSON:
 		return NewJSONFileER(cfg, cfgIdx, rdrEvents, rdrErr, fltrS, rdrExit)
+	case utils.MetaAMQPjsonMap:
+		return NewAMQPER(cfg, cfgIdx, rdrEvents, rdrErr, fltrS, rdrExit)
 	}
 	return
 }
