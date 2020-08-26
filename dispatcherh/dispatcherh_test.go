@@ -55,16 +55,20 @@ func TestDispatcherHostsService(t *testing.T) {
 		}},
 	}
 	cfg.DispatcherHCfg().Enabled = true
-	cfg.DispatcherHCfg().Hosts = map[string][]string{utils.MetaDefault: {"Host1"}}
+	cfg.DispatcherHCfg().Hosts = map[string][]*config.DispatcherHRegistarCfg{
+		utils.MetaDefault: {
+			{
+				ID:                "Host1",
+				RegisterTransport: utils.MetaJSON,
+			},
+		},
+	}
 	cfg.DispatcherHCfg().RegisterInterval = 100 * time.Millisecond
-	cfg.DispatcherHCfg().RegisterTransport = utils.MetaJSON
 	cfg.DispatcherHCfg().DispatchersConns = []string{"conn1"}
 
 	ds := NewDispatcherHService(cfg, engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{}))
 
-	if err = ds.registerHosts(); err != nil {
-		t.Fatal(err)
-	}
+	ds.registerHosts()
 
 	host1 := &engine.DispatcherHost{
 		Tenant: "cgrates.org",
@@ -80,12 +84,17 @@ func TestDispatcherHostsService(t *testing.T) {
 	} else if !reflect.DeepEqual(host1, x) {
 		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(host1), utils.ToJSON(x))
 	}
-	cfg.DispatcherHCfg().Hosts = map[string][]string{utils.MetaDefault: {"Host2"}}
+	cfg.DispatcherHCfg().Hosts = map[string][]*config.DispatcherHRegistarCfg{
+		utils.MetaDefault: {
+			{
+				ID:                "Host2",
+				RegisterTransport: utils.MetaJSON,
+			},
+		},
+	}
 	config.CgrConfig().CacheCfg().Partitions[utils.CacheDispatcherHosts].Replicate = true
 	config.CgrConfig().CacheCfg().ReplicationConns = []string{"*localhost"}
-	if err = ds.registerHosts(); err != nil {
-		t.Fatal(err)
-	}
+	ds.registerHosts()
 	host1.ID = "Host2"
 	if x, ok := engine.Cache.Get(utils.CacheDispatcherHosts, host1.TenantID()); !ok {
 		t.Errorf("Expected to find Host2 in cache")
@@ -101,33 +110,23 @@ func TestDispatcherHostsService(t *testing.T) {
 	config.CgrConfig().CacheCfg().ReplicationConns = []string{}
 
 	host1.ID = "Host1"
-	cfg.DispatcherHCfg().Hosts = map[string][]string{utils.MetaDefault: {"Host1"}}
-	if err = ds.Shutdown(); err != nil {
-		t.Fatal(err)
+	cfg.DispatcherHCfg().Hosts = map[string][]*config.DispatcherHRegistarCfg{
+		utils.MetaDefault: {
+			{
+				ID:                "Host1",
+				RegisterTransport: utils.MetaJSON,
+			},
+		},
 	}
+	ds.Shutdown()
 	if _, ok := engine.Cache.Get(utils.CacheDispatcherHosts, host1.TenantID()); ok {
 		t.Errorf("Expected to not find Host2 in cache")
 	}
 
 	cfg.ListenCfg().RPCJSONListen = "2012"
-	if err = ds.registerHosts(); err == nil {
-		t.Fatal("Expected error received nil")
-	}
-
-	ds = NewDispatcherHService(cfg, engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{}))
-	config.CgrConfig().CacheCfg().Partitions[utils.CacheDispatcherHosts].Replicate = true
-	config.CgrConfig().CacheCfg().ReplicationConns = []string{"*localhost"}
-	if err = ds.ListenAndServe(); err == nil {
-		t.Fatal("Expected error received nil")
-	}
-
-	config.CgrConfig().CacheCfg().Partitions[utils.CacheDispatcherHosts].Replicate = false
-	config.CgrConfig().CacheCfg().ReplicationConns = []string{}
-	cfg.ListenCfg().RPCJSONListen = "127.0.0.1:2012"
+	ds.registerHosts()
 
 	ds = NewDispatcherHService(cfg, engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{}))
 	ds.Shutdown()
-	if err = ds.ListenAndServe(); err != nil {
-		t.Fatal(err)
-	}
+	ds.ListenAndServe()
 }

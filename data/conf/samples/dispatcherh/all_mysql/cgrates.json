@@ -109,10 +109,10 @@
 "dispatcherh":{
     "enabled": false,
     "dispatchers_conns": ["dispConn"],
-	"host_ids": {"*default":["ALL"]},  
+	"hosts": {
+		"*default":[{"ID":"ALL2", "register_transport": "*json", "register_tls": false}]
+	},  
 	"register_interval": "1s",
-	"register_transport": "*json",
-	"register_tls": false,
 },
 
 

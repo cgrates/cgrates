@@ -935,10 +935,8 @@ const CGRATES_CFG_JSON = `
 "dispatcherh":{
     "enabled": false,
     "dispatchers_conns": [],
-	"host_ids": {},  
+	"hosts": {},  
 	"register_interval": "5m",
-	"register_transport": "*json",
-	"register_tls": false,
 },
 
 

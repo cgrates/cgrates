@@ -32,14 +32,80 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
+// NewRegisterArgs creates the arguments for register hosts API
+func NewRegisterArgs(cfg *config.CGRConfig, tnt string, hostCfgs []*config.DispatcherHRegistarCfg) (rargs *RegisterArgs, err error) {
+	rargs = &RegisterArgs{
+		Tenant: tnt,
+		Opts:   make(map[string]interface{}),
+		Hosts:  make([]*RegisterHostCfg, len(hostCfgs)),
+	}
+	for i, hostCfg := range hostCfgs {
+		var port string
+		if port, err = getConnPort(cfg,
+			hostCfg.RegisterTransport,
+			hostCfg.RegisterTLS); err != nil {
+			utils.Logger.Warning(fmt.Sprintf("<%s> Unable to get the port because : %s",
+				utils.DispatcherH, err))
+			return
+		}
+		rargs.Hosts[i] = &RegisterHostCfg{
+			ID:        hostCfg.ID,
+			Port:      port,
+			Transport: hostCfg.RegisterTransport,
+			TLS:       hostCfg.RegisterTLS,
+		}
+	}
+	return
+}
+
 // RegisterArgs the arguments to register the dispacher host
 type RegisterArgs struct {
-	Tenant    string
-	Opts      map[string]interface{}
-	IDs       []string
+	Tenant string
+	Opts   map[string]interface{}
+	Hosts  []*RegisterHostCfg
+}
+
+// RegisterHostCfg the host config used to register
+type RegisterHostCfg struct {
+	ID        string
 	Port      string
 	Transport string
 	TLS       bool
+}
+
+// AsDispatcherHosts converts the arguments to DispatcherHosts
+func (rargs *RegisterArgs) AsDispatcherHosts(ip string) (dHs []*engine.DispatcherHost) {
+	dHs = make([]*engine.DispatcherHost, len(rargs.Hosts))
+	for i, hCfg := range rargs.Hosts {
+		dHs[i] = hCfg.AsDispatcherHost(rargs.Tenant, ip)
+	}
+	return
+}
+
+// AsDispatcherHost converts the arguments to DispatcherHosts
+func (rhc *RegisterHostCfg) AsDispatcherHost(tnt, ip string) *engine.DispatcherHost {
+	return &engine.DispatcherHost{
+		Tenant: tnt,
+		ID:     rhc.ID,
+		Conns: []*config.RemoteHost{{
+			Address:   ip + ":" + rhc.Port,
+			Transport: rhc.Transport,
+			TLS:       rhc.TLS,
+		}},
+	}
+}
+
+// NewUnregisterArgs creates the arguments for unregister hosts API
+func NewUnregisterArgs(tnt string, hostCfgs []*config.DispatcherHRegistarCfg) (uargs *UnregisterArgs) {
+	uargs = &UnregisterArgs{
+		Tenant: tnt,
+		Opts:   make(map[string]interface{}),
+		IDs:    make([]string, len(hostCfgs)),
+	}
+	for i, hostCfg := range hostCfgs {
+		uargs.IDs[i] = hostCfg.ID
+	}
+	return
 }
 
 // UnregisterArgs the arguments to unregister the dispacher host
@@ -47,23 +113,6 @@ type UnregisterArgs struct {
 	Tenant string
 	Opts   map[string]interface{}
 	IDs    []string
-}
-
-// AsDispatcherHosts converts the arguments to DispatcherHosts
-func (rargs *RegisterArgs) AsDispatcherHosts(ip string) (dHs []*engine.DispatcherHost) {
-	dHs = make([]*engine.DispatcherHost, len(rargs.IDs))
-	for i, id := range rargs.IDs {
-		dHs[i] = &engine.DispatcherHost{
-			Tenant: rargs.Tenant,
-			ID:     id,
-			Conns: []*config.RemoteHost{{
-				Address:   ip + ":" + rargs.Port,
-				Transport: rargs.Transport,
-				TLS:       rargs.TLS,
-			}},
-		}
-	}
-	return
 }
 
 // Registar handdle for httpServer to register the dispatcher hosts

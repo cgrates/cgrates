@@ -36,12 +36,22 @@ import (
 
 func TestRegisterArgsAsDispatcherHosts(t *testing.T) {
 	args := &RegisterArgs{
-		Tenant:    "cgrates.org",
-		IDs:       []string{"Host1", "Host2"},
-		Opts:      make(map[string]interface{}),
-		Port:      "2012",
-		TLS:       true,
-		Transport: utils.MetaJSON,
+		Tenant: "cgrates.org",
+		Hosts: []*RegisterHostCfg{
+			{
+				ID:        "Host1",
+				Port:      "2012",
+				TLS:       true,
+				Transport: utils.MetaJSON,
+			},
+			{
+				ID:        "Host2",
+				Port:      "2013",
+				TLS:       false,
+				Transport: utils.MetaGOB,
+			},
+		},
+		Opts: make(map[string]interface{}),
 	}
 	exp := []*engine.DispatcherHost{
 		{
@@ -57,9 +67,9 @@ func TestRegisterArgsAsDispatcherHosts(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "Host2",
 			Conns: []*config.RemoteHost{{
-				Address:   "127.0.0.1:2012",
-				TLS:       true,
-				Transport: utils.MetaJSON,
+				Address:   "127.0.0.1:2013",
+				TLS:       false,
+				Transport: utils.MetaGOB,
 			}},
 		},
 	}
@@ -162,12 +172,22 @@ func TestGetRemoteIP(t *testing.T) {
 
 func TestRegister(t *testing.T) {
 	ra := &RegisterArgs{
-		Tenant:    "cgrates.org",
-		IDs:       []string{"Host1", "Host2"},
-		Opts:      make(map[string]interface{}),
-		Port:      "2012",
-		TLS:       true,
-		Transport: utils.MetaJSON,
+		Tenant: "cgrates.org",
+		Hosts: []*RegisterHostCfg{
+			{
+				ID:        "Host1",
+				Port:      "2012",
+				TLS:       true,
+				Transport: utils.MetaJSON,
+			},
+			{
+				ID:        "Host2",
+				Port:      "2013",
+				TLS:       false,
+				Transport: utils.MetaGOB,
+			},
+		},
+		Opts: make(map[string]interface{}),
 	}
 	raJSON, err := json.Marshal([]interface{}{ra})
 	id := json.RawMessage("1")
@@ -204,9 +224,9 @@ func TestRegister(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "Host2",
 		Conns: []*config.RemoteHost{{
-			Address:   "127.0.0.1:2012",
-			TLS:       true,
-			Transport: utils.MetaJSON,
+			Address:   "127.0.0.1:2013",
+			TLS:       false,
+			Transport: utils.MetaGOB,
 		}},
 	}
 
@@ -319,12 +339,22 @@ func (*errRecorder) WriteHeader(statusCode int) {}
 func TestRegistar(t *testing.T) {
 	w := httptest.NewRecorder()
 	ra := &RegisterArgs{
-		Tenant:    "cgrates.org",
-		IDs:       []string{"Host1", "Host2"},
-		Opts:      make(map[string]interface{}),
-		Port:      "2012",
-		TLS:       true,
-		Transport: utils.MetaJSON,
+		Tenant: "cgrates.org",
+		Hosts: []*RegisterHostCfg{
+			{
+				ID:        "Host1",
+				Port:      "2012",
+				TLS:       true,
+				Transport: utils.MetaJSON,
+			},
+			{
+				ID:        "Host2",
+				Port:      "2013",
+				TLS:       false,
+				Transport: utils.MetaGOB,
+			},
+		},
+		Opts: make(map[string]interface{}),
 	}
 	raJSON, err := json.Marshal([]interface{}{ra})
 	id := json.RawMessage("1")

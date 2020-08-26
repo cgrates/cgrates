@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/cgrates/cgrates/config"
@@ -66,12 +65,7 @@ func (dspS *DispatcherHostsService) Start() (err error) {
 	defer dspS.Unlock()
 
 	dspS.dspS = dispatcherh.NewDispatcherHService(dspS.cfg, dspS.connMgr)
-	go func(ds *dispatcherh.DispatcherHostsService, ext chan bool) {
-		if err := ds.ListenAndServe(); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.DispatcherH, err.Error()))
-			ext <- true
-		}
-	}(dspS.dspS, dspS.exitChan)
+	go dspS.dspS.ListenAndServe()
 	dspS.connChan <- dspS.dspS
 
 	return
@@ -85,13 +79,11 @@ func (dspS *DispatcherHostsService) Reload() (err error) {
 // Shutdown stops the service
 func (dspS *DispatcherHostsService) Shutdown() (err error) {
 	dspS.Lock()
-	defer dspS.Unlock()
-	if err = dspS.dspS.Shutdown(); err != nil {
-		return
-	}
+	dspS.dspS.Shutdown()
 	dspS.dspS = nil
 	// dspS.rpc = nil
 	<-dspS.connChan
+	dspS.Unlock()
 	return
 }
 
