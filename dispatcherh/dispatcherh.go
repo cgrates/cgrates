@@ -46,12 +46,10 @@ type DispatcherHostsService struct {
 }
 
 // ListenAndServe will initialize the service
-func (dhS *DispatcherHostsService) ListenAndServe() (err error) {
+func (dhS *DispatcherHostsService) ListenAndServe() {
 	utils.Logger.Info("Starting DispatcherH service")
 	for {
-		if err = dhS.registerHosts(); err != nil {
-			return
-		}
+		dhS.registerHosts()
 		select {
 		case <-dhS.stop:
 			return
@@ -61,36 +59,26 @@ func (dhS *DispatcherHostsService) ListenAndServe() (err error) {
 }
 
 // Shutdown is called to shutdown the service
-func (dhS *DispatcherHostsService) Shutdown() error {
+func (dhS *DispatcherHostsService) Shutdown() {
 	utils.Logger.Info(fmt.Sprintf("<%s> service shutdown initialized", utils.DispatcherH))
 	dhS.unregisterHosts()
 	close(dhS.stop)
 	utils.Logger.Info(fmt.Sprintf("<%s> service shutdown complete", utils.DispatcherH))
-	return nil
+	return
 }
 
-func (dhS *DispatcherHostsService) registerHosts() (err error) {
-	var port string
-	if port, err = getConnPort(dhS.cfg,
-		dhS.cfg.DispatcherHCfg().RegisterTransport,
-		dhS.cfg.DispatcherHCfg().RegisterTLS); err != nil {
-		utils.Logger.Warning(fmt.Sprintf("<%s> Unable to get the port because : %s",
-			utils.DispatcherH, err))
-		return
-	}
+func (dhS *DispatcherHostsService) registerHosts() {
 	for _, connID := range dhS.cfg.DispatcherHCfg().DispatchersConns {
-		for tnt, ids := range dhS.cfg.DispatcherHCfg().Hosts {
+		for tnt, hostCfgs := range dhS.cfg.DispatcherHCfg().Hosts {
 			if tnt == utils.MetaDefault {
 				tnt = dhS.cfg.GeneralCfg().DefaultTenant
 			}
+			args, err := NewRegisterArgs(dhS.cfg, tnt, hostCfgs)
+			if err != nil {
+				continue
+			}
 			var rply string
-			if err := dhS.connMgr.Call([]string{connID}, nil, utils.DispatcherHv1RegisterHosts, &RegisterArgs{
-				Tenant:    tnt,
-				IDs:       ids,
-				Port:      port,
-				Transport: dhS.cfg.DispatcherHCfg().RegisterTransport,
-				TLS:       dhS.cfg.DispatcherHCfg().RegisterTLS,
-			}, &rply); err != nil {
+			if err := dhS.connMgr.Call([]string{connID}, nil, utils.DispatcherHv1RegisterHosts, args, &rply); err != nil {
 				utils.Logger.Warning(fmt.Sprintf("<%s> Unable to set the hosts to the conn with ID <%s> because : %s",
 					utils.DispatcherH, connID, err))
 				continue
@@ -103,14 +91,11 @@ func (dhS *DispatcherHostsService) registerHosts() (err error) {
 func (dhS *DispatcherHostsService) unregisterHosts() {
 	var rply string
 	for _, connID := range dhS.cfg.DispatcherHCfg().DispatchersConns {
-		for tnt, ids := range dhS.cfg.DispatcherHCfg().Hosts {
+		for tnt, hostCfgs := range dhS.cfg.DispatcherHCfg().Hosts {
 			if tnt == utils.MetaDefault {
 				tnt = dhS.cfg.GeneralCfg().DefaultTenant
 			}
-			if err := dhS.connMgr.Call([]string{connID}, nil, utils.DispatcherHv1UnregisterHosts, &UnregisterArgs{
-				Tenant: tnt,
-				IDs:    ids,
-			}, &rply); err != nil {
+			if err := dhS.connMgr.Call([]string{connID}, nil, utils.DispatcherHv1UnregisterHosts, NewUnregisterArgs(tnt, hostCfgs), &rply); err != nil {
 				utils.Logger.Warning(fmt.Sprintf("<%s> Unable to set the hosts with tenant<%s> to the conn with ID <%s> because : %s",
 					utils.DispatcherH, tnt, connID, err))
 				continue
