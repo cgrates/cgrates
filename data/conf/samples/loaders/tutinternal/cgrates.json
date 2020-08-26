@@ -167,6 +167,27 @@
 				],
 			},
 		],
+	},
+	{
+		"id": "LoaderWithTemplate",									// identifier of the Loader
+		"enabled": true,									// starts as service: <true|false>.
+		"dry_run": false,									// do not send the CDRs to CDRS, just parse them
+		"tenant": "cgrates.org",
+		"run_delay": 0,										// sleep interval in seconds between consecutive runs, 0 to use automation via inotify
+		"lock_filename": ".cgr.lock",						// Filename containing concurrency lock in case of delayed processing
+		"caches_conns": ["*internal"],
+		"field_separator": ",",								// separator used in case of csv files
+		"tp_in_dir": "/tmp/templateLoaderIn",		// absolute path towards the directory where the CDRs are stored
+		"tp_out_dir": "/tmp/templateLoaderOut",	// absolute path towards the directory where processed CDRs will be moved
+		"data":[
+			{
+				"type": "*attributes",						// data source type
+				"file_name": "Attributes.csv",				// file name in the tp_in_dir
+				"fields": [
+					{"tag": "AttributesFields","type": "*template", "value": "attrTemplateLoader"}
+				],
+			},
+		],
 	}
 ],
 
@@ -183,7 +204,21 @@
 	"attributes_conns": ["*internal"],
 },
 
-
+"templates": {
+	"attrTemplateLoader": [
+		{"tag": "TenantID", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
+		{"tag": "ProfileID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
+		{"tag": "Contexts", "path": "Contexts", "type": "*variable", "value": "~*req.2"},
+		{"tag": "FilterIDs", "path": "FilterIDs", "type": "*variable", "value": "~*req.3"},
+		{"tag": "ActivationInterval", "path": "ActivationInterval", "type": "*variable", "value": "~*req.4"},
+		{"tag": "AttributeFilterIDs", "path": "AttributeFilterIDs", "type": "*variable", "value": "~*req.5"},
+		{"tag": "Path", "path": "Path", "type": "*variable", "value": "~*req.6"},
+		{"tag": "Type", "path": "Type", "type": "*variable", "value": "~*req.7"},
+		{"tag": "Value", "path": "Value", "type": "*variable", "value": "~*req.8"},
+		{"tag": "Blocker", "path": "Blocker", "type": "*variable", "value": "~*req.9"},
+		{"tag": "Weight", "path": "Weight", "type": "*variable", "value": "~*req.10"},
+	],
+},
 
 "apiers": {
 	"enabled": true,
