@@ -225,7 +225,6 @@ func testConfigSReloadConfigFromJSONEEs(t *testing.T) {
 		"AttributeSConns": []interface{}{},
 		"Cache":           map[string]interface{}{"*file_csv": map[string]interface{}{"Limit": -1., "Precache": false, "Replicate": false, "StaticTTL": false, "TTL": 5000000000.}},
 		"Exporters":       []interface{}{eporter},
-		"Templates":       map[string]interface{}{},
 	}
 	var rpl map[string]interface{}
 	if err := configRPC.Call(utils.ConfigSv1GetJSONSection, &config.StringWithOpts{

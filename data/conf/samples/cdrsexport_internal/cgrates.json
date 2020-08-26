@@ -48,22 +48,6 @@
 
 "ees": {
 	"enabled": true,
-	"templates": {
-		"requiredFields": [
-			{"tag": "CGRID", "path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"},
-			{"tag": "RunID", "path": "*exp.RunID", "type": "*variable", "value": "~*req.RunID"},
-			{"tag": "ToR", "path": "*exp.ToR", "type": "*variable", "value": "~*req.ToR"},
-			{"tag": "OriginID", "path": "*exp.OriginID", "type": "*variable", "value": "~*req.OriginID"},
-			{"tag": "RequestType", "path": "*exp.RequestType", "type": "*variable", "value": "~*req.RequestType"},
-			{"tag": "Tenant", "path": "*exp.Tenant", "type": "*variable", "value": "~*req.Tenant"},
-			{"tag": "Category", "path": "*exp.Category", "type": "*variable", "value": "~*req.Category"},
-			{"tag": "Account", "path": "*exp.Account", "type": "*variable", "value": "~*req.Account"},
-			{"tag": "Subject", "path": "*exp.Subject", "type": "*variable", "value": "~*req.Subject"},
-			{"tag": "Destination", "path": "*exp.Destination", "type": "*variable", "value": "~*req.Destination"},
-
-			{"tag": "OrderID", "path": "*exp.OrderID", "type": "*variable", "value": "~*req.OrderID","filter":"*string:~*opts.AddOrderID:true"}
-		]
-	},
 	"exporters": [
 		{
 			"id": "http_localhost",
@@ -128,6 +112,23 @@
 			],
 		},
 	],
+},
+
+
+"templates": {
+	"requiredFields": [
+		{"tag": "CGRID", "path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"},
+		{"tag": "RunID", "path": "*exp.RunID", "type": "*variable", "value": "~*req.RunID"},
+		{"tag": "ToR", "path": "*exp.ToR", "type": "*variable", "value": "~*req.ToR"},
+		{"tag": "OriginID", "path": "*exp.OriginID", "type": "*variable", "value": "~*req.OriginID"},
+		{"tag": "RequestType", "path": "*exp.RequestType", "type": "*variable", "value": "~*req.RequestType"},
+		{"tag": "Tenant", "path": "*exp.Tenant", "type": "*variable", "value": "~*req.Tenant"},
+		{"tag": "Category", "path": "*exp.Category", "type": "*variable", "value": "~*req.Category"},
+		{"tag": "Account", "path": "*exp.Account", "type": "*variable", "value": "~*req.Account"},
+		{"tag": "Subject", "path": "*exp.Subject", "type": "*variable", "value": "~*req.Subject"},
+		{"tag": "Destination", "path": "*exp.Destination", "type": "*variable", "value": "~*req.Destination"},
+		{"tag": "OrderID", "path": "*exp.OrderID", "type": "*variable", "value": "~*req.OrderID","filter":"*string:~*opts.AddOrderID:true"}
+	]
 },
 
 

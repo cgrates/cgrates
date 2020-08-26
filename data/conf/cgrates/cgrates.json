@@ -304,7 +304,6 @@
 
 // "ers": {									// EventReaderService
 // 	"enabled": false,						// starts the EventReader service: <true|false>
-// 	"templates":{},							// default templates for ERs
 // 	"sessions_conns":["*internal"],			// RPC Connections IDs
 // 	"readers": [
 // 		{
@@ -347,7 +346,6 @@
 // 	"cache": {
 // 		"*file_csv": {"limit": -1, "ttl": "5s", "static_ttl": false},
 // 	},
-// 	"templates":{},							// default templates for EEs
 // 	"exporters": [
 // 		{
 // 			"id": "*default",									// identifier of the EventReader profile
@@ -476,62 +474,6 @@
 // 	"asr_template": "",											// enable AbortSession message being sent to client on DisconnectSession
 // 	"rar_template": "",											// template used to build the Re-Auth-Request
 // 	"forced_disconnect": "*none",								// the request to send to diameter on DisconnectSession <*none|*asr|*rar>
-// 	"templates":{												// default message templates
-// 		"*err": [
-// 				{"tag": "SessionId", "path": "*rep.Session-Id", "type": "*variable",
-// 					"value": "~*req.Session-Id", "mandatory": true},
-// 				{"tag": "OriginHost", "path": "*rep.Origin-Host", "type": "*variable",
-// 					"value": "~*vars.OriginHost", "mandatory": true},
-// 				{"tag": "OriginRealm", "path": "*rep.Origin-Realm", "type": "*variable",
-// 					"value": "~*vars.OriginRealm", "mandatory": true},
-// 		],
-// 		"*cca": [
-// 				{"tag": "SessionId", "path": "*rep.Session-Id", "type": "*variable",
-// 					"value": "~*req.Session-Id", "mandatory": true},
-// 				{"tag": "ResultCode", "path": "*rep.Result-Code", "type": "*constant",
-// 					"value": "2001"},
-// 				{"tag": "OriginHost", "path": "*rep.Origin-Host", "type": "*variable",
-// 					"value": "~*vars.OriginHost", "mandatory": true},
-// 				{"tag": "OriginRealm", "path": "*rep.Origin-Realm", "type": "*variable",
-// 					"value": "~*vars.OriginRealm", "mandatory": true},
-// 				{"tag": "AuthApplicationId", "path": "*rep.Auth-Application-Id", "type": "*variable",
-// 					 "value": "~*vars.*appid", "mandatory": true},
-// 				{"tag": "CCRequestType", "path": "*rep.CC-Request-Type", "type": "*variable",
-// 					"value": "~*req.CC-Request-Type", "mandatory": true},
-// 				{"tag": "CCRequestNumber", "path": "*rep.CC-Request-Number", "type": "*variable",
-// 					"value": "~*req.CC-Request-Number", "mandatory": true},
-// 		],
-// 		"*asr": [
-// 				{"tag": "SessionId", "path": "*diamreq.Session-Id", "type": "*variable",
-// 					"value": "~*req.Session-Id", "mandatory": true},
-// 				{"tag": "OriginHost", "path": "*diamreq.Origin-Host", "type": "*variable",
-// 					"value": "~*req.Destination-Host", "mandatory": true},
-// 				{"tag": "OriginRealm", "path": "*diamreq.Origin-Realm", "type": "*variable",
-// 					"value": "~*req.Destination-Realm", "mandatory": true},
-// 				{"tag": "DestinationRealm", "path": "*diamreq.Destination-Realm", "type": "*variable",
-// 					"value": "~*req.Origin-Realm", "mandatory": true},
-// 				{"tag": "DestinationHost", "path": "*diamreq.Destination-Host", "type": "*variable",
-// 					"value": "~*req.Origin-Host", "mandatory": true},
-// 				{"tag": "AuthApplicationId", "path": "*diamreq.Auth-Application-Id", "type": "*variable",
-// 					 "value": "~*vars.*appid", "mandatory": true},
-// 		],
-// 		"*rar": [
-// 			{"tag": "SessionId", "path": "*diamreq.Session-Id", "type": "*variable",
-// 				"value": "~*req.Session-Id", "mandatory": true},
-// 			{"tag": "OriginHost", "path": "*diamreq.Origin-Host", "type": "*variable",
-// 				"value": "~*req.Destination-Host", "mandatory": true},
-// 			{"tag": "OriginRealm", "path": "*diamreq.Origin-Realm", "type": "*variable",
-// 				"value": "~*req.Destination-Realm", "mandatory": true},
-// 			{"tag": "DestinationRealm", "path": "*diamreq.Destination-Realm", "type": "*variable",
-// 				"value": "~*req.Origin-Realm", "mandatory": true},
-// 			{"tag": "DestinationHost", "path": "*diamreq.Destination-Host", "type": "*variable",
-// 				"value": "~*req.Origin-Host", "mandatory": true},
-// 			{"tag": "AuthApplicationId", "path": "*diamreq.Auth-Application-Id", "type": "*variable",
-// 				 "value": "~*vars.*appid", "mandatory": true},
-// 			{"tag": "ReAuthRequestType", "path": "*diamreq.Re-Auth-Request-Type", "type": "*constant",
-// 				"value": "0"},
-// 		]
-// 	},
 // 	"request_processors": [				// list of processors to be applied to diameter messages
 // 	],
 // },
@@ -962,13 +904,68 @@
 // 	"sessions_conns": ["*internal"],
 // 	"timezone": "",						// timezone of the events if not specified  <UTC|Local|$IANA_TZ_DB>
 // 	"retransmission_timer": "1s",				// the duration to wait to receive an ACK before resending the reply
-// 	"templates":{						// default message templates
-// 		"*err": [
-// 				{"tag": "Request", "path": "*rep.Request", "type": "*constant",
-// 					"value": "SIP/2.0 500 Internal Server Error", "mandatory": true},
-// 		],
-// 	},
 // 	"request_processors": [				// request processors to be applied to SIP messages
+// 	],
+// },
+
+// "templates": {
+// 	"*err": [
+// 			{"tag": "SessionId", "path": "*rep.Session-Id", "type": "*variable",
+// 				"value": "~*req.Session-Id", "mandatory": true},
+// 			{"tag": "OriginHost", "path": "*rep.Origin-Host", "type": "*variable",
+// 				"value": "~*vars.OriginHost", "mandatory": true},
+// 			{"tag": "OriginRealm", "path": "*rep.Origin-Realm", "type": "*variable",
+// 				"value": "~*vars.OriginRealm", "mandatory": true},
+// 	],
+// 	"*cca": [
+// 			{"tag": "SessionId", "path": "*rep.Session-Id", "type": "*variable",
+// 				"value": "~*req.Session-Id", "mandatory": true},
+// 			{"tag": "ResultCode", "path": "*rep.Result-Code", "type": "*constant",
+// 				"value": "2001"},
+// 			{"tag": "OriginHost", "path": "*rep.Origin-Host", "type": "*variable",
+// 				"value": "~*vars.OriginHost", "mandatory": true},
+// 			{"tag": "OriginRealm", "path": "*rep.Origin-Realm", "type": "*variable",
+// 				"value": "~*vars.OriginRealm", "mandatory": true},
+// 			{"tag": "AuthApplicationId", "path": "*rep.Auth-Application-Id", "type": "*variable",
+// 				 "value": "~*vars.*appid", "mandatory": true},
+// 			{"tag": "CCRequestType", "path": "*rep.CC-Request-Type", "type": "*variable",
+// 				"value": "~*req.CC-Request-Type", "mandatory": true},
+// 			{"tag": "CCRequestNumber", "path": "*rep.CC-Request-Number", "type": "*variable",
+// 				"value": "~*req.CC-Request-Number", "mandatory": true},
+// 	],
+// 	"*asr": [
+// 			{"tag": "SessionId", "path": "*diamreq.Session-Id", "type": "*variable",
+// 				"value": "~*req.Session-Id", "mandatory": true},
+// 			{"tag": "OriginHost", "path": "*diamreq.Origin-Host", "type": "*variable",
+// 				"value": "~*req.Destination-Host", "mandatory": true},
+// 			{"tag": "OriginRealm", "path": "*diamreq.Origin-Realm", "type": "*variable",
+// 				"value": "~*req.Destination-Realm", "mandatory": true},
+// 			{"tag": "DestinationRealm", "path": "*diamreq.Destination-Realm", "type": "*variable",
+// 				"value": "~*req.Origin-Realm", "mandatory": true},
+// 			{"tag": "DestinationHost", "path": "*diamreq.Destination-Host", "type": "*variable",
+// 				"value": "~*req.Origin-Host", "mandatory": true},
+// 			{"tag": "AuthApplicationId", "path": "*diamreq.Auth-Application-Id", "type": "*variable",
+// 				 "value": "~*vars.*appid", "mandatory": true},
+// 	],
+// 	"*rar": [
+// 		{"tag": "SessionId", "path": "*diamreq.Session-Id", "type": "*variable",
+// 			"value": "~*req.Session-Id", "mandatory": true},
+// 		{"tag": "OriginHost", "path": "*diamreq.Origin-Host", "type": "*variable",
+// 			"value": "~*req.Destination-Host", "mandatory": true},
+// 		{"tag": "OriginRealm", "path": "*diamreq.Origin-Realm", "type": "*variable",
+// 			"value": "~*req.Destination-Realm", "mandatory": true},
+// 		{"tag": "DestinationRealm", "path": "*diamreq.Destination-Realm", "type": "*variable",
+// 			"value": "~*req.Origin-Realm", "mandatory": true},
+// 		{"tag": "DestinationHost", "path": "*diamreq.Destination-Host", "type": "*variable",
+// 			"value": "~*req.Origin-Host", "mandatory": true},
+// 		{"tag": "AuthApplicationId", "path": "*diamreq.Auth-Application-Id", "type": "*variable",
+// 			 "value": "~*vars.*appid", "mandatory": true},
+// 		{"tag": "ReAuthRequestType", "path": "*diamreq.Re-Auth-Request-Type", "type": "*constant",
+// 			"value": "0"},
+// 	],
+// 	"*errSip": [
+// 			{"tag": "Request", "path": "*rep.Request", "type": "*constant",
+// 				"value": "SIP/2.0 500 Internal Server Error", "mandatory": true},
 // 	],
 // },
 
