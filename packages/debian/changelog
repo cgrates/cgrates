@@ -98,6 +98,7 @@ cgrates (0.11.0~dev) UNRELEASED; urgency=medium
   * [ERs] Added support for *amqp_json_map type
   * [DataDB] Moved all specific DB options in opts 
   * [Config] Add new section "template"
+  * [LoaderS] Add support for *template type
 
  -- DanB <danb@cgrates.org>  Wed, 19 Feb 2020 13:25:52 +0200
 
