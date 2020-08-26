@@ -71,6 +71,15 @@ func TestEventExporterSReload(t *testing.T) {
 	if ees.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
+	fcTmp := &config.FCTemplate{Tag: "TenantID",
+		Path:      "Tenant",
+		Type:      utils.MetaVariable,
+		Value:     config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP),
+		Mandatory: true,
+		Layout:    time.RFC3339,
+	}
+	fcTmp.ComputePath()
+	cfg.TemplateCfg()["requiredFields"] = []*config.FCTemplate{fcTmp}
 	var reply string
 	if err := cfg.V1ReloadConfigFromPath(&config.ConfigReloadWithOpts{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "ees"),
