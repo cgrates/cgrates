@@ -47,7 +47,6 @@ func TestDiameterAgentCfgloadFromJsonCfg(t *testing.T) {
 	"vendor_id": 0,												// diameter Vendor-Id AVP used in replies
 	"product_name": "CGRateS",									// diameter Product-Name AVP used in replies
 	"synced_conn_requests": true,
-	"templates":{},
 	"request_processors": [],
 },
 }`
@@ -85,7 +84,6 @@ func TestDiameterAgentCfgAsMapInterface(t *testing.T) {
 		"vendor_id": 0,												
 		"product_name": "CGRateS",									
 		"synced_conn_requests": true,
-		"templates":{},
 		"request_processors": [],
 	},
 }`

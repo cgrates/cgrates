@@ -463,7 +463,6 @@ func testCGRConfigReloadERs(t *testing.T) {
 	expAttr := &ERsCfg{
 		Enabled:       true,
 		SessionSConns: []string{utils.MetaLocalHost},
-		Templates:     map[string][]*FCTemplate{},
 		Readers: []*EventReaderCfg{
 			{
 				ID:               utils.MetaDefault,
@@ -880,7 +879,6 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 		"SessionSConns": []string{
 			utils.MetaLocalHost,
 		},
-		"Templates": map[string]interface{}{},
 	}
 
 	cfg, _ := NewDefaultCGRConfig()
