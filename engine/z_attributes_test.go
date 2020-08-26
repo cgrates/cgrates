@@ -2748,3 +2748,199 @@ func TestProcessAttributeWithSameWheight(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eRply), utils.ToJSON(rcv))
 	}
 }
+
+func TestAttributeMultipleProcessWithFiltersExists(t *testing.T) {
+	defaultCfg, _ := config.NewDefaultCGRConfig()
+	defaultCfg.AttributeSCfg().IndexedSelects = false
+	data := NewInternalDB(nil, nil, true, defaultCfg.DataDbCfg().Items)
+	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	Cache.Clear(nil)
+	attrService, _ = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
+	attrPrf1Exists := &AttributeProfile{
+		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:        "ATTR_1_EXISTS",
+		Contexts:  []string{utils.MetaSessionS},
+		FilterIDs: []string{"*exists:~*req.InitialField:"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		},
+		Attributes: []*Attribute{
+			{
+				Path:  utils.MetaReq + utils.NestingSep + "Field1",
+				Value: config.NewRSRParsersMustCompile("Value1", utils.INFIELD_SEP),
+			},
+		},
+		Weight: 10,
+	}
+	attrPrf2Exists := &AttributeProfile{
+		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:        "ATTR_2_EXISTS",
+		Contexts:  []string{utils.MetaSessionS},
+		FilterIDs: []string{"*exists:~*req.Field1:"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		},
+		Attributes: []*Attribute{
+			{
+				Path:  utils.MetaReq + utils.NestingSep + "Field2",
+				Value: config.NewRSRParsersMustCompile("Value2", utils.INFIELD_SEP),
+			},
+		},
+		Weight: 20,
+	}
+	// Add attribute in DM
+	if err := dmAtr.SetAttributeProfile(attrPrf1Exists, true); err != nil {
+		t.Error(err)
+	}
+	if err = dmAtr.SetAttributeProfile(attrPrf2Exists, true); err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	// Add attribute in DM
+	if _, err := dmAtr.GetAttributeProfile(attrPrf1Exists.Tenant, attrPrf1Exists.ID, true, false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if _, err := dmAtr.GetAttributeProfile(attrPrf2Exists.Tenant, attrPrf2Exists.ID, true, false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	attrArgs := &AttrArgsProcessEvent{
+		Context:     utils.StringPointer(utils.MetaSessionS),
+		ProcessRuns: utils.IntPointer(4),
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+				ID:     utils.GenUUID(),
+				Event: map[string]interface{}{
+					"InitialField": "InitialValue",
+				},
+			},
+		},
+	}
+	eRply := &AttrSProcessEventReply{
+		MatchedProfiles: []string{"ATTR_1_EXISTS", "ATTR_2_EXISTS", "ATTR_1_EXISTS", "ATTR_2_EXISTS"},
+		AlteredFields: []string{utils.MetaReq + utils.NestingSep + "Field1",
+			utils.MetaReq + utils.NestingSep + "Field2"},
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+				ID:     utils.GenUUID(),
+				Event: map[string]interface{}{
+					"InitialField": "InitialValue",
+					"Field1":       "Value1",
+					"Field2":       "Value2",
+				},
+			},
+		},
+	}
+	var reply AttrSProcessEventReply
+	if err := attrService.V1ProcessEvent(attrArgs, &reply); err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {
+		t.Errorf("Expecting %+v, received: %+v", eRply.MatchedProfiles, reply.MatchedProfiles)
+	}
+	sort.Strings(reply.AlteredFields)
+	if !reflect.DeepEqual(eRply.AlteredFields, reply.AlteredFields) {
+		t.Errorf("Expecting %+v, received: %+v", eRply.AlteredFields, reply.AlteredFields)
+	}
+	if !reflect.DeepEqual(eRply.CGREvent.Event, reply.CGREvent.Event) {
+		t.Errorf("Expecting %+v, received: %+v", eRply.CGREvent.Event, reply.CGREvent.Event)
+	}
+}
+
+func TestAttributeMultipleProcessWithFiltersNotEmpty(t *testing.T) {
+	defaultCfg, _ := config.NewDefaultCGRConfig()
+	defaultCfg.AttributeSCfg().IndexedSelects = false
+	data := NewInternalDB(nil, nil, true, defaultCfg.DataDbCfg().Items)
+	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	Cache.Clear(nil)
+	attrService, _ = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
+	attrPrf1NotEmpty := &AttributeProfile{
+		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:        "ATTR_1_NOTEMPTY",
+		Contexts:  []string{utils.MetaSessionS},
+		FilterIDs: []string{"*notempty:~*req.InitialField:"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		},
+		Attributes: []*Attribute{
+			{
+				Path:  utils.MetaReq + utils.NestingSep + "Field1",
+				Value: config.NewRSRParsersMustCompile("Value1", utils.INFIELD_SEP),
+			},
+		},
+		Weight: 10,
+	}
+	attrPrf2NotEmpty := &AttributeProfile{
+		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:        "ATTR_2_NOTEMPTY",
+		Contexts:  []string{utils.MetaSessionS},
+		FilterIDs: []string{"*notempty:~*req.Field1:"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		},
+		Attributes: []*Attribute{
+			{
+				Path:  utils.MetaReq + utils.NestingSep + "Field2",
+				Value: config.NewRSRParsersMustCompile("Value2", utils.INFIELD_SEP),
+			},
+		},
+		Weight: 20,
+	}
+	// Add attribute in DM
+	if err := dmAtr.SetAttributeProfile(attrPrf1NotEmpty, true); err != nil {
+		t.Error(err)
+	}
+	if err = dmAtr.SetAttributeProfile(attrPrf2NotEmpty, true); err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	// Add attribute in DM
+	if _, err := dmAtr.GetAttributeProfile(attrPrf1NotEmpty.Tenant, attrPrf1NotEmpty.ID, true, false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if _, err := dmAtr.GetAttributeProfile(attrPrf2NotEmpty.Tenant, attrPrf2NotEmpty.ID, true, false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	attrArgs := &AttrArgsProcessEvent{
+		Context:     utils.StringPointer(utils.MetaSessionS),
+		ProcessRuns: utils.IntPointer(4),
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+				ID:     utils.GenUUID(),
+				Event: map[string]interface{}{
+					"InitialField": "InitialValue",
+				},
+			},
+		},
+	}
+	eRply := &AttrSProcessEventReply{
+		MatchedProfiles: []string{"ATTR_1_NOTEMPTY", "ATTR_2_NOTEMPTY", "ATTR_1_NOTEMPTY", "ATTR_2_NOTEMPTY"},
+		AlteredFields: []string{utils.MetaReq + utils.NestingSep + "Field1",
+			utils.MetaReq + utils.NestingSep + "Field2"},
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+				ID:     utils.GenUUID(),
+				Event: map[string]interface{}{
+					"InitialField": "InitialValue",
+					"Field1":       "Value1",
+					"Field2":       "Value2",
+				},
+			},
+		},
+	}
+	var reply AttrSProcessEventReply
+	if err := attrService.V1ProcessEvent(attrArgs, &reply); err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {
+		t.Errorf("Expecting %+v, received: %+v", eRply.MatchedProfiles, reply.MatchedProfiles)
+	}
+	sort.Strings(reply.AlteredFields)
+	if !reflect.DeepEqual(eRply.AlteredFields, reply.AlteredFields) {
+		t.Errorf("Expecting %+v, received: %+v", eRply.AlteredFields, reply.AlteredFields)
+	}
+	if !reflect.DeepEqual(eRply.CGREvent.Event, reply.CGREvent.Event) {
+		t.Errorf("Expecting %+v, received: %+v", eRply.CGREvent.Event, reply.CGREvent.Event)
+	}
+}
