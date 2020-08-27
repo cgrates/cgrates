@@ -88,9 +88,7 @@ func testLoaderITInitDataDB(t *testing.T) {
 	dbConn, err := NewDataDBConn(lCfg.DataDbCfg().DataDbType,
 		lCfg.DataDbCfg().DataDbHost, lCfg.DataDbCfg().DataDbPort, lCfg.DataDbCfg().DataDbName,
 		lCfg.DataDbCfg().DataDbUser, lCfg.DataDbCfg().DataDbPass, lCfg.GeneralCfg().DBDataEncoding,
-		lCfg.DataDbCfg().DataDbSentinelName, lCfg.DataDbCfg().RedisCluster,
-		lCfg.DataDbCfg().ClusterSync, lCfg.DataDbCfg().ClusterOnDownDelay,
-		lCfg.DataDbCfg().Items)
+		lCfg.DataDbCfg().Opts)
 	if err != nil {
 		t.Fatal("Error on dataDb connection: ", err.Error())
 	}
@@ -119,9 +117,8 @@ func testLoaderITInitStoreDB(t *testing.T) {
 	db, err := NewStorDBConn(lCfg.StorDbCfg().Type,
 		lCfg.StorDbCfg().Host, lCfg.StorDbCfg().Port, lCfg.StorDbCfg().Name,
 		lCfg.StorDbCfg().User, lCfg.StorDbCfg().Password, lCfg.GeneralCfg().DBDataEncoding,
-		lCfg.StorDbCfg().SSLMode, lCfg.StorDbCfg().MaxOpenConns, lCfg.StorDbCfg().MaxIdleConns,
-		lCfg.StorDbCfg().ConnMaxLifetime, lCfg.StorDbCfg().StringIndexedFields,
-		lCfg.StorDbCfg().PrefixIndexedFields, lCfg.StorDbCfg().Items)
+		lCfg.StorDbCfg().StringIndexedFields, lCfg.StorDbCfg().PrefixIndexedFields,
+		lCfg.StorDbCfg().Opts)
 	if err != nil {
 		t.Fatal("Error on opening database connection: ", err)
 	}

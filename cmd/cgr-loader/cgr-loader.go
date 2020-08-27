@@ -55,8 +55,16 @@ var (
 		"The DataDb user's password.")
 	dbDataEncoding = cgrLoaderFlags.String("dbdata_encoding", dfltCfg.GeneralCfg().DBDataEncoding,
 		"The encoding used to store object data in strings")
-	dbRedisSentinel = cgrLoaderFlags.String("redis_sentinel", dfltCfg.DataDbCfg().DataDbSentinelName,
+	dbRedisSentinel = cgrLoaderFlags.String("redis_sentinel", utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.RedisSentinelNameCfg]),
 		"The name of redis sentinel")
+	dbRedisCluster = cgrLoaderFlags.Bool("redis_cluster", false,
+		"Is the redis datadb a cluster")
+	dbRedisClusterSync = cgrLoaderFlags.String("cluster_sync", utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.ClusterSyncCfg]),
+		"The sync interval for the redis cluster")
+	dbRedisClusterDownDelay = cgrLoaderFlags.String("cluster_ondown_delay", utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.ClusterOnDownDelayCfg]),
+		"The delay before executing the commands if the redis cluster is in the CLUSTERDOWN state")
+	dbQueryTimeout = cgrLoaderFlags.String("query_timeout", utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.QueryTimeoutCfg]),
+		"The timeout for queries")
 
 	storDBType = cgrLoaderFlags.String("stordb_type", dfltCfg.StorDbCfg().Type,
 		"The type of the storDb database <*mysql|*postgres|*mongo>")
@@ -136,8 +144,22 @@ func loadConfig() (ldrCfg *config.CGRConfig) {
 		ldrCfg.DataDbCfg().DataDbPass = *dataDBPasswd
 	}
 
-	if *dbRedisSentinel != dfltCfg.DataDbCfg().DataDbSentinelName {
-		ldrCfg.DataDbCfg().DataDbSentinelName = *dbRedisSentinel
+	if *dbRedisSentinel != utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.RedisSentinelNameCfg]) {
+		ldrCfg.DataDbCfg().Opts[utils.RedisSentinelNameCfg] = *dbRedisSentinel
+	}
+
+	rdsCls, _ := utils.IfaceAsBool(dfltCfg.DataDbCfg().Opts[utils.RedisClusterCfg])
+	if *dbRedisCluster != rdsCls {
+		ldrCfg.DataDbCfg().Opts[utils.RedisClusterCfg] = *dbRedisCluster
+	}
+	if *dbRedisClusterSync != utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.ClusterSyncCfg]) {
+		ldrCfg.DataDbCfg().Opts[utils.ClusterSyncCfg] = *dbRedisClusterSync
+	}
+	if *dbRedisClusterDownDelay != utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.ClusterOnDownDelayCfg]) {
+		ldrCfg.DataDbCfg().Opts[utils.ClusterOnDownDelayCfg] = *dbRedisClusterDownDelay
+	}
+	if *dbQueryTimeout != utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.QueryTimeoutCfg]) {
+		ldrCfg.DataDbCfg().Opts[utils.QueryTimeoutCfg] = *dbQueryTimeout
 	}
 
 	if *dbDataEncoding != dfltCfg.GeneralCfg().DBDataEncoding {
@@ -292,9 +314,7 @@ func main() {
 			ldrCfg.DataDbCfg().DataDbHost, ldrCfg.DataDbCfg().DataDbPort,
 			ldrCfg.DataDbCfg().DataDbName, ldrCfg.DataDbCfg().DataDbUser,
 			ldrCfg.DataDbCfg().DataDbPass, ldrCfg.GeneralCfg().DBDataEncoding,
-			ldrCfg.DataDbCfg().DataDbSentinelName, ldrCfg.DataDbCfg().RedisCluster,
-			ldrCfg.DataDbCfg().ClusterSync, ldrCfg.DataDbCfg().ClusterOnDownDelay,
-			ldrCfg.DataDbCfg().Items); err != nil {
+			ldrCfg.DataDbCfg().Opts); err != nil {
 			log.Fatalf("Coud not open dataDB connection: %s", err.Error())
 		}
 		defer dataDB.Close()
@@ -304,10 +324,9 @@ func main() {
 		if storDB, err = engine.NewStorDBConn(ldrCfg.StorDbCfg().Type,
 			ldrCfg.StorDbCfg().Host, ldrCfg.StorDbCfg().Port,
 			ldrCfg.StorDbCfg().Name, ldrCfg.StorDbCfg().User,
-			ldrCfg.StorDbCfg().Password, ldrCfg.GeneralCfg().DBDataEncoding, ldrCfg.StorDbCfg().SSLMode,
-			ldrCfg.StorDbCfg().MaxOpenConns, ldrCfg.StorDbCfg().MaxIdleConns,
-			ldrCfg.StorDbCfg().ConnMaxLifetime, ldrCfg.StorDbCfg().StringIndexedFields,
-			ldrCfg.StorDbCfg().PrefixIndexedFields, ldrCfg.StorDbCfg().Items); err != nil {
+			ldrCfg.StorDbCfg().Password, ldrCfg.GeneralCfg().DBDataEncoding,
+			ldrCfg.StorDbCfg().StringIndexedFields, ldrCfg.StorDbCfg().PrefixIndexedFields,
+			ldrCfg.StorDbCfg().Opts); err != nil {
 			log.Fatalf("Coud not open storDB connection: %s", err.Error())
 		}
 		defer storDB.Close()

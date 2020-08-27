@@ -146,7 +146,7 @@ func testShrGrpITConnect(t *testing.T) {
 		shrGrpCfgIn.DataDbCfg().DataDbHost, shrGrpCfgIn.DataDbCfg().DataDbPort,
 		shrGrpCfgIn.DataDbCfg().DataDbName, shrGrpCfgIn.DataDbCfg().DataDbUser,
 		shrGrpCfgIn.DataDbCfg().DataDbPass, shrGrpCfgIn.GeneralCfg().DBDataEncoding,
-		config.CgrConfig().CacheCfg(), "", false, 0, 0, shrGrpCfgIn.DataDbCfg().Items)
+		config.CgrConfig().CacheCfg(), shrGrpCfgIn.DataDbCfg().Opts)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -154,7 +154,7 @@ func testShrGrpITConnect(t *testing.T) {
 		shrGrpCfgOut.DataDbCfg().DataDbHost, shrGrpCfgOut.DataDbCfg().DataDbPort,
 		shrGrpCfgOut.DataDbCfg().DataDbName, shrGrpCfgOut.DataDbCfg().DataDbUser,
 		shrGrpCfgOut.DataDbCfg().DataDbPass, shrGrpCfgOut.GeneralCfg().DBDataEncoding,
-		config.CgrConfig().CacheCfg(), "", false, 0, 0, shrGrpCfgOut.DataDbCfg().Items)
+		config.CgrConfig().CacheCfg(), shrGrpCfgOut.DataDbCfg().Opts)
 	if err != nil {
 		log.Fatal(err)
 	}

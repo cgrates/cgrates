@@ -72,9 +72,7 @@ func testInitDataDB(t *testing.T) {
 		cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort,
 		cfg.DataDbCfg().DataDbName, cfg.DataDbCfg().DataDbUser,
 		cfg.DataDbCfg().DataDbPass, cfg.GeneralCfg().DBDataEncoding,
-		"", cfg.DataDbCfg().RedisCluster,
-		cfg.DataDbCfg().ClusterSync, cfg.DataDbCfg().ClusterOnDownDelay,
-		cfg.DataDbCfg().Items)
+		cfg.DataDbCfg().Opts)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -83,10 +81,9 @@ func testInitDataDB(t *testing.T) {
 	storageDb, err = NewStorDBConn(cfg.StorDbCfg().Type,
 		cfg.StorDbCfg().Host, cfg.StorDbCfg().Port,
 		cfg.StorDbCfg().Name, cfg.StorDbCfg().User,
-		cfg.StorDbCfg().Password, cfg.GeneralCfg().DBDataEncoding, cfg.StorDbCfg().SSLMode,
-		cfg.StorDbCfg().MaxOpenConns, cfg.StorDbCfg().MaxIdleConns,
-		cfg.StorDbCfg().ConnMaxLifetime, cfg.StorDbCfg().StringIndexedFields,
-		cfg.StorDbCfg().PrefixIndexedFields, cfg.StorDbCfg().Items)
+		cfg.StorDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
+		cfg.StorDbCfg().StringIndexedFields, cfg.StorDbCfg().PrefixIndexedFields,
+		cfg.StorDbCfg().Opts)
 	if err != nil {
 		log.Fatal(err)
 	}

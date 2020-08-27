@@ -297,7 +297,7 @@ func TestRoutesSort(t *testing.T) {
 
 func TestRoutesPopulateRouteService(t *testing.T) {
 	defaultCfg, _ := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, true, defaultCfg.DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true)
 	dmSPP = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	defaultCfg.RouteSCfg().StringIndexedFields = nil
 	defaultCfg.RouteSCfg().PrefixIndexedFields = nil

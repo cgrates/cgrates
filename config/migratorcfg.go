@@ -20,30 +20,27 @@ package config
 
 import (
 	"strings"
-	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
 
 type MigratorCgrCfg struct {
-	OutDataDBType               string
-	OutDataDBHost               string
-	OutDataDBPort               string
-	OutDataDBName               string
-	OutDataDBUser               string
-	OutDataDBPassword           string
-	OutDataDBEncoding           string
-	OutDataDBRedisSentinel      string
-	OutDataDBRedisCluster       bool
-	OutDataDBClusterSync        time.Duration
-	OutDataDBClusterOndownDelay time.Duration
-	OutStorDBType               string
-	OutStorDBHost               string
-	OutStorDBPort               string
-	OutStorDBName               string
-	OutStorDBUser               string
-	OutStorDBPassword           string
-	UsersFilters                []string
+	OutDataDBType     string
+	OutDataDBHost     string
+	OutDataDBPort     string
+	OutDataDBName     string
+	OutDataDBUser     string
+	OutDataDBPassword string
+	OutDataDBEncoding string
+	OutStorDBType     string
+	OutStorDBHost     string
+	OutStorDBPort     string
+	OutStorDBName     string
+	OutStorDBUser     string
+	OutStorDBPassword string
+	UsersFilters      []string
+	OutDataDBOpts     map[string]interface{}
+	OutStorDBOpts     map[string]interface{}
 }
 
 func (mg *MigratorCgrCfg) loadFromJsonCfg(jsnCfg *MigratorCfgJson) (err error) {
@@ -71,9 +68,6 @@ func (mg *MigratorCgrCfg) loadFromJsonCfg(jsnCfg *MigratorCfgJson) (err error) {
 	if jsnCfg.Out_dataDB_encoding != nil {
 		mg.OutDataDBEncoding = strings.TrimPrefix(*jsnCfg.Out_dataDB_encoding, "*")
 	}
-	if jsnCfg.Out_dataDB_redis_sentinel != nil {
-		mg.OutDataDBRedisSentinel = *jsnCfg.Out_dataDB_redis_sentinel
-	}
 	if jsnCfg.Out_storDB_type != nil {
 		mg.OutStorDBType = *jsnCfg.Out_storDB_type
 	}
@@ -99,17 +93,14 @@ func (mg *MigratorCgrCfg) loadFromJsonCfg(jsnCfg *MigratorCfgJson) (err error) {
 		}
 	}
 
-	if jsnCfg.Out_dataDB_redis_cluster != nil {
-		mg.OutDataDBRedisCluster = *jsnCfg.Out_dataDB_redis_cluster
-	}
-	if jsnCfg.Out_dataDB_cluster_ondown_delay != nil {
-		if mg.OutDataDBClusterOndownDelay, err = utils.ParseDurationWithNanosecs(*jsnCfg.Out_dataDB_cluster_ondown_delay); err != nil {
-			return err
+	if jsnCfg.Out_dataDB_opts != nil {
+		for k, v := range jsnCfg.Out_dataDB_opts {
+			mg.OutDataDBOpts[k] = v
 		}
 	}
-	if jsnCfg.Out_dataDB_cluster_sync != nil {
-		if mg.OutDataDBClusterSync, err = utils.ParseDurationWithNanosecs(*jsnCfg.Out_dataDB_cluster_sync); err != nil {
-			return err
+	if jsnCfg.Out_storDB_opts != nil {
+		for k, v := range jsnCfg.Out_storDB_opts {
+			mg.OutStorDBOpts[k] = v
 		}
 	}
 	return nil
@@ -117,21 +108,22 @@ func (mg *MigratorCgrCfg) loadFromJsonCfg(jsnCfg *MigratorCfgJson) (err error) {
 
 func (mg *MigratorCgrCfg) AsMapInterface() map[string]interface{} {
 	return map[string]interface{}{
-		utils.OutDataDBTypeCfg:          mg.OutDataDBType,
-		utils.OutDataDBHostCfg:          mg.OutDataDBHost,
-		utils.OutDataDBPortCfg:          mg.OutDataDBPort,
-		utils.OutDataDBNameCfg:          mg.OutDataDBName,
-		utils.OutDataDBUserCfg:          mg.OutDataDBUser,
-		utils.OutDataDBPasswordCfg:      mg.OutDataDBPassword,
-		utils.OutDataDBEncodingCfg:      mg.OutDataDBEncoding,
-		utils.OutDataDBRedisSentinelCfg: mg.OutDataDBRedisSentinel,
-		utils.OutStorDBTypeCfg:          mg.OutStorDBType,
-		utils.OutStorDBHostCfg:          mg.OutStorDBHost,
-		utils.OutStorDBPortCfg:          mg.OutStorDBPort,
-		utils.OutStorDBNameCfg:          mg.OutStorDBName,
-		utils.OutStorDBUserCfg:          mg.OutStorDBUser,
-		utils.OutStorDBPasswordCfg:      mg.OutStorDBPassword,
-		utils.UsersFiltersCfg:           mg.UsersFilters,
+		utils.OutDataDBTypeCfg:     mg.OutDataDBType,
+		utils.OutDataDBHostCfg:     mg.OutDataDBHost,
+		utils.OutDataDBPortCfg:     mg.OutDataDBPort,
+		utils.OutDataDBNameCfg:     mg.OutDataDBName,
+		utils.OutDataDBUserCfg:     mg.OutDataDBUser,
+		utils.OutDataDBPasswordCfg: mg.OutDataDBPassword,
+		utils.OutDataDBEncodingCfg: mg.OutDataDBEncoding,
+		utils.OutStorDBTypeCfg:     mg.OutStorDBType,
+		utils.OutStorDBHostCfg:     mg.OutStorDBHost,
+		utils.OutStorDBPortCfg:     mg.OutStorDBPort,
+		utils.OutStorDBNameCfg:     mg.OutStorDBName,
+		utils.OutStorDBUserCfg:     mg.OutStorDBUser,
+		utils.OutStorDBPasswordCfg: mg.OutStorDBPassword,
+		utils.UsersFiltersCfg:      mg.UsersFilters,
+		utils.OutDataDBOptsCfg:     mg.OutDataDBOpts,
+		utils.OutStorDBOptsCfg:     mg.OutStorDBOpts,
 	}
 
 }

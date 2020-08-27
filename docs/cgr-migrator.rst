@@ -61,6 +61,14 @@ Customisable through the use of :ref:`JSON configuration <configuration>` or com
     	output StorDB user (default "*stordb")
   -redis_sentinel string
     	the name of redis sentinel
+  -redis_cluster bool
+    	Is the redis datadb a cluster
+  -cluster_sync string
+    	The sync interval for the redis cluster
+  -cluster_ondown_delay string
+    	The delay before executing the commands if thredis cluster is in the CLUSTERDOWN state
+  -query_timeout string
+    	The timeout for queries
   -stordb_host string
     	the StorDB host (default "127.0.0.1")
   -stordb_name string

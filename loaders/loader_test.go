@@ -33,7 +33,7 @@ import (
 )
 
 func TestLoaderProcessContentSingleFile(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
+	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
 		ldrID:         "TestLoaderProcessContent",
 		bufLoaderData: make(map[string][]LoaderData),
@@ -139,7 +139,7 @@ func TestLoaderProcessContentSingleFile(t *testing.T) {
 func TestLoaderProcessContentMultiFiles(t *testing.T) {
 	file1CSV := `ignored,ignored,ignored,ignored,ignored,,*req.Subject,1001,ignored,ignored`
 	file2CSV := `ignored,TestLoader2`
-	data := engine.NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
+	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
 		ldrID:         "TestLoaderProcessContentMultiFiles",
 		bufLoaderData: make(map[string][]LoaderData),
@@ -217,7 +217,7 @@ func TestLoaderProcessContentMultiFiles(t *testing.T) {
 }
 
 func TestLoaderProcessResource(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
+	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
 		ldrID:         "TestLoaderProcessResources",
 		bufLoaderData: make(map[string][]LoaderData),
@@ -335,7 +335,7 @@ func TestLoaderProcessResource(t *testing.T) {
 }
 
 func TestLoaderProcessFilters(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
+	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
 		ldrID:         "TestLoaderProcessFilters",
 		bufLoaderData: make(map[string][]LoaderData),
@@ -460,7 +460,7 @@ func TestLoaderProcessFilters(t *testing.T) {
 }
 
 func TestLoaderProcessThresholds(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
+	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
 		ldrID:         "TestLoaderProcessContent",
 		bufLoaderData: make(map[string][]LoaderData),
@@ -558,7 +558,7 @@ func TestLoaderProcessThresholds(t *testing.T) {
 }
 
 func TestLoaderProcessStats(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
+	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
 		ldrID:         "TestLoaderProcessContent",
 		bufLoaderData: make(map[string][]LoaderData),
@@ -680,7 +680,7 @@ func TestLoaderProcessStats(t *testing.T) {
 }
 
 func TestLoaderProcessRoutes(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
+	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
 		ldrID:         "TestLoaderProcessContent",
 		bufLoaderData: make(map[string][]LoaderData),
@@ -837,7 +837,7 @@ func TestLoaderProcessRoutes(t *testing.T) {
 }
 
 func TestLoaderProcessChargers(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
+	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
 		ldrID:         "TestLoaderProcessContent",
 		bufLoaderData: make(map[string][]LoaderData),
@@ -915,7 +915,7 @@ func TestLoaderProcessChargers(t *testing.T) {
 }
 
 func TestLoaderProcessDispatches(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
+	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
 		ldrID:         "TestLoaderProcessContent",
 		bufLoaderData: make(map[string][]LoaderData),
@@ -1067,7 +1067,7 @@ func TestLoaderProcessDispatches(t *testing.T) {
 }
 
 func TestLoaderProcessDispatcheHosts(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
+	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
 		ldrID:         "TestLoaderProcessContent",
 		bufLoaderData: make(map[string][]LoaderData),
@@ -1155,7 +1155,7 @@ func TestLoaderProcessDispatcheHosts(t *testing.T) {
 }
 
 func TestLoaderRemoveContentSingleFile(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
+	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
 		ldrID:         "TestLoaderProcessContent",
 		bufLoaderData: make(map[string][]LoaderData),
@@ -1239,7 +1239,7 @@ func TestLoaderRemoveContentSingleFile(t *testing.T) {
 }
 
 func TestLoaderProcessRateProfile(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
+	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
 		ldrID:         "TestLoaderProcessRateProfile",
 		bufLoaderData: make(map[string][]LoaderData),
@@ -1415,7 +1415,7 @@ func TestLoaderProcessRateProfile(t *testing.T) {
 }
 
 func TestLoaderProcessRateProfileRates(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
+	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
 		ldrID:         "TestLoaderProcessRateProfile",
 		bufLoaderData: make(map[string][]LoaderData),
@@ -1657,7 +1657,7 @@ cgrates.org,RP1,,,,,,,,,,RT_CHRISTMAS,,* * 24 12 *,30,false,0s,0.06,1m,1s
 }
 
 func TestLoaderRemoveRateProfileRates(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
+	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
 		ldrID:         "TestLoaderRemoveRateProfileRates",
 		bufLoaderData: make(map[string][]LoaderData),
@@ -1965,7 +1965,7 @@ cgrates.org,RP1,
 }
 
 func TestNewLoaderWithMultiFiles(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
+	data := engine.NewInternalDB(nil, nil, true)
 
 	ldrCfg := config.CgrConfig().LoaderCfg()[0].Clone()
 	ldrCfg.Data[0].Fields = []*config.FCTemplate{

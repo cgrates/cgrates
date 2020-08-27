@@ -250,6 +250,8 @@ func TestS3Poster(t *testing.T) {
 			Config: cfg,
 		},
 	)
+	s31 := s3.New(sess)
+	s31.DeleteObject(&s3.DeleteObjectInput{})
 	file := aws.NewWriteAtBuffer([]byte{})
 	// Create a SQS service client.
 	svc := s3manager.NewDownloader(sess)

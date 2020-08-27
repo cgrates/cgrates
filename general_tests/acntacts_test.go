@@ -29,7 +29,7 @@ import (
 var dbAcntActs *engine.DataManager
 
 func TestAcntActsSetStorage(t *testing.T) {
-	dataDB := engine.NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
+	dataDB := engine.NewInternalDB(nil, nil, true)
 	dbAcntActs = engine.NewDataManager(dataDB, config.CgrConfig().CacheCfg(), nil)
 	engine.SetDataStorage(dbAcntActs)
 }

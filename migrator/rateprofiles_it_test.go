@@ -128,7 +128,7 @@ func testRatePrfITConnect(t *testing.T) {
 		ratePrfCfgIn.DataDbCfg().DataDbHost, ratePrfCfgIn.DataDbCfg().DataDbPort,
 		ratePrfCfgIn.DataDbCfg().DataDbName, ratePrfCfgIn.DataDbCfg().DataDbUser,
 		ratePrfCfgIn.DataDbCfg().DataDbPass, ratePrfCfgIn.GeneralCfg().DBDataEncoding,
-		config.CgrConfig().CacheCfg(), "", false, 0, 0, ratePrfCfgIn.DataDbCfg().Items)
+		config.CgrConfig().CacheCfg(), ratePrfCfgIn.DataDbCfg().Opts)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -136,7 +136,7 @@ func testRatePrfITConnect(t *testing.T) {
 		ratePrfCfgOut.DataDbCfg().DataDbHost, ratePrfCfgOut.DataDbCfg().DataDbPort,
 		ratePrfCfgOut.DataDbCfg().DataDbName, ratePrfCfgOut.DataDbCfg().DataDbUser,
 		ratePrfCfgOut.DataDbCfg().DataDbPass, ratePrfCfgOut.GeneralCfg().DBDataEncoding,
-		config.CgrConfig().CacheCfg(), "", false, 0, 0, ratePrfCfgOut.DataDbCfg().Items)
+		config.CgrConfig().CacheCfg(), ratePrfCfgOut.DataDbCfg().Opts)
 	if err != nil {
 		log.Fatal(err)
 	}

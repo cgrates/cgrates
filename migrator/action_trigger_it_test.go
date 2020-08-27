@@ -147,7 +147,7 @@ func testActTrgITConnect(t *testing.T) {
 		actTrgCfgIn.DataDbCfg().DataDbHost, actTrgCfgIn.DataDbCfg().DataDbPort,
 		actTrgCfgIn.DataDbCfg().DataDbName, actTrgCfgIn.DataDbCfg().DataDbUser,
 		actTrgCfgIn.DataDbCfg().DataDbPass, actTrgCfgIn.GeneralCfg().DBDataEncoding,
-		config.CgrConfig().CacheCfg(), "", false, 0, 0, actTrgCfgIn.DataDbCfg().Items)
+		config.CgrConfig().CacheCfg(), actTrgCfgIn.DataDbCfg().Opts)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -155,7 +155,7 @@ func testActTrgITConnect(t *testing.T) {
 		actTrgCfgOut.DataDbCfg().DataDbHost, actTrgCfgOut.DataDbCfg().DataDbPort,
 		actTrgCfgOut.DataDbCfg().DataDbName, actTrgCfgOut.DataDbCfg().DataDbUser,
 		actTrgCfgOut.DataDbCfg().DataDbPass, actTrgCfgOut.GeneralCfg().DBDataEncoding,
-		config.CgrConfig().CacheCfg(), "", false, 0, 0, actTrgCfgOut.DataDbCfg().Items)
+		config.CgrConfig().CacheCfg(), actTrgCfgOut.DataDbCfg().Opts)
 	if err != nil {
 		log.Fatal(err)
 	}

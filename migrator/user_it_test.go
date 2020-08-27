@@ -80,7 +80,7 @@ func testUsrITConnect(t *testing.T) {
 		usrCfgIn.DataDbCfg().DataDbHost, usrCfgIn.DataDbCfg().DataDbPort,
 		usrCfgIn.DataDbCfg().DataDbName, usrCfgIn.DataDbCfg().DataDbUser,
 		usrCfgIn.DataDbCfg().DataDbPass, usrCfgIn.GeneralCfg().DBDataEncoding,
-		config.CgrConfig().CacheCfg(), "", false, 0, 0, usrCfgIn.DataDbCfg().Items)
+		config.CgrConfig().CacheCfg(), usrCfgIn.DataDbCfg().Opts)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -88,7 +88,7 @@ func testUsrITConnect(t *testing.T) {
 		usrCfgOut.DataDbCfg().DataDbHost, usrCfgOut.DataDbCfg().DataDbPort,
 		usrCfgOut.DataDbCfg().DataDbName, usrCfgOut.DataDbCfg().DataDbUser,
 		usrCfgOut.DataDbCfg().DataDbPass, usrCfgOut.GeneralCfg().DBDataEncoding,
-		config.CgrConfig().CacheCfg(), "", false, 0, 0, usrCfgOut.DataDbCfg().Items)
+		config.CgrConfig().CacheCfg(), usrCfgOut.DataDbCfg().Opts)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -54,19 +54,27 @@ var (
 	datadbUser     = cgrTesterFlags.String("datadb_user", cgrConfig.DataDbCfg().DataDbUser, "The DataDb user to sign in as.")
 	datadbPass     = cgrTesterFlags.String("datadb_pass", cgrConfig.DataDbCfg().DataDbPass, "The DataDb user's password.")
 	dbdataEncoding = cgrTesterFlags.String("dbdata_encoding", cgrConfig.GeneralCfg().DBDataEncoding, "The encoding used to store object data in strings.")
-	redisSentinel  = cgrTesterFlags.String("redis_sentinel", cgrConfig.DataDbCfg().DataDbSentinelName, "The name of redis sentinel")
-	raterAddress   = cgrTesterFlags.String("rater_address", "", "Rater address for remote tests. Empty for internal rater.")
-	tor            = cgrTesterFlags.String("tor", utils.VOICE, "The type of record to use in queries.")
-	category       = cgrTesterFlags.String("category", "call", "The Record category to test.")
-	tenant         = cgrTesterFlags.String("tenant", "cgrates.org", "The type of record to use in queries.")
-	subject        = cgrTesterFlags.String("subject", "1001", "The rating subject to use in queries.")
-	destination    = cgrTesterFlags.String("destination", "1002", "The destination to use in queries.")
-	json           = cgrTesterFlags.Bool("json", false, "Use JSON RPC")
-	version        = cgrTesterFlags.Bool("version", false, "Prints the application version.")
-	nilDuration    = time.Duration(0)
-	usage          = cgrTesterFlags.String("usage", "1m", "The duration to use in call simulation.")
-	fPath          = cgrTesterFlags.String("file_path", "", "read requests from file with path")
-	reqSep         = cgrTesterFlags.String("req_separator", "\n\n", "separator for requests in file")
+	redisSentinel  = cgrTesterFlags.String("redis_sentinel", utils.IfaceAsString(cgrConfig.DataDbCfg().Opts[utils.RedisSentinelNameCfg]), "The name of redis sentinel")
+	dbRedisCluster = cgrTesterFlags.Bool("redis_cluster", false,
+		"Is the redis datadb a cluster")
+	dbRedisClusterSync = cgrTesterFlags.String("cluster_sync", utils.IfaceAsString(cgrConfig.DataDbCfg().Opts[utils.ClusterSyncCfg]),
+		"The sync interval for the redis cluster")
+	dbRedisClusterDownDelay = cgrTesterFlags.String("cluster_ondown_delay", utils.IfaceAsString(cgrConfig.DataDbCfg().Opts[utils.ClusterOnDownDelayCfg]),
+		"The delay before executing the commands if the redis cluster is in the CLUSTERDOWN state")
+	dbQueryTimeout = cgrTesterFlags.String("query_timeout", utils.IfaceAsString(cgrConfig.DataDbCfg().Opts[utils.QueryTimeoutCfg]),
+		"The timeout for queries")
+	raterAddress = cgrTesterFlags.String("rater_address", "", "Rater address for remote tests. Empty for internal rater.")
+	tor          = cgrTesterFlags.String("tor", utils.VOICE, "The type of record to use in queries.")
+	category     = cgrTesterFlags.String("category", "call", "The Record category to test.")
+	tenant       = cgrTesterFlags.String("tenant", "cgrates.org", "The type of record to use in queries.")
+	subject      = cgrTesterFlags.String("subject", "1001", "The rating subject to use in queries.")
+	destination  = cgrTesterFlags.String("destination", "1002", "The destination to use in queries.")
+	json         = cgrTesterFlags.Bool("json", false, "Use JSON RPC")
+	version      = cgrTesterFlags.Bool("version", false, "Prints the application version.")
+	nilDuration  = time.Duration(0)
+	usage        = cgrTesterFlags.String("usage", "1m", "The duration to use in call simulation.")
+	fPath        = cgrTesterFlags.String("file_path", "", "read requests from file with path")
+	reqSep       = cgrTesterFlags.String("req_separator", "\n\n", "separator for requests in file")
 
 	err error
 )
@@ -76,9 +84,7 @@ func durInternalRater(cd *engine.CallDescriptorWithOpts) (time.Duration, error) 
 		tstCfg.DataDbCfg().DataDbHost, tstCfg.DataDbCfg().DataDbPort,
 		tstCfg.DataDbCfg().DataDbName, tstCfg.DataDbCfg().DataDbUser,
 		tstCfg.DataDbCfg().DataDbPass, tstCfg.GeneralCfg().DBDataEncoding,
-		tstCfg.DataDbCfg().DataDbSentinelName, tstCfg.DataDbCfg().RedisCluster,
-		tstCfg.DataDbCfg().ClusterSync, tstCfg.DataDbCfg().ClusterOnDownDelay,
-		tstCfg.DataDbCfg().Items)
+		tstCfg.DataDbCfg().Opts)
 	if err != nil {
 		return nilDuration, fmt.Errorf("Could not connect to data database: %s", err.Error())
 	}
@@ -195,8 +201,21 @@ func main() {
 	if *dbdataEncoding != "" {
 		tstCfg.GeneralCfg().DBDataEncoding = *dbdataEncoding
 	}
-	if *redisSentinel != "" {
-		tstCfg.DataDbCfg().DataDbSentinelName = *redisSentinel
+	if *redisSentinel != utils.IfaceAsString(cgrConfig.DataDbCfg().Opts[utils.RedisSentinelNameCfg]) {
+		tstCfg.DataDbCfg().Opts[utils.RedisSentinelNameCfg] = *redisSentinel
+	}
+	rdsCls, _ := utils.IfaceAsBool(cgrConfig.DataDbCfg().Opts[utils.RedisClusterCfg])
+	if *dbRedisCluster != rdsCls {
+		tstCfg.DataDbCfg().Opts[utils.RedisClusterCfg] = *dbRedisCluster
+	}
+	if *dbRedisClusterSync != utils.IfaceAsString(cgrConfig.DataDbCfg().Opts[utils.ClusterSyncCfg]) {
+		tstCfg.DataDbCfg().Opts[utils.ClusterSyncCfg] = *dbRedisClusterSync
+	}
+	if *dbRedisClusterDownDelay != utils.IfaceAsString(cgrConfig.DataDbCfg().Opts[utils.ClusterOnDownDelayCfg]) {
+		tstCfg.DataDbCfg().Opts[utils.ClusterOnDownDelayCfg] = *dbRedisClusterDownDelay
+	}
+	if *dbQueryTimeout != utils.IfaceAsString(cgrConfig.DataDbCfg().Opts[utils.QueryTimeoutCfg]) {
+		tstCfg.DataDbCfg().Opts[utils.QueryTimeoutCfg] = *dbQueryTimeout
 	}
 
 	if *cpuprofile != "" {

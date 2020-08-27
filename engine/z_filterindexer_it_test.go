@@ -73,7 +73,7 @@ var sTests = []func(t *testing.T){
 func TestFilterIndexerIT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
-		dataManager = NewDataManager(NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items),
+		dataManager = NewDataManager(NewInternalDB(nil, nil, true),
 			config.CgrConfig().CacheCfg(), nil)
 	case utils.MetaMySQL:
 		cfg, _ := config.NewDefaultCGRConfig()
@@ -96,7 +96,7 @@ func TestFilterIndexerIT(t *testing.T) {
 			mgoITCfg.StorDbCfg().Port, mgoITCfg.StorDbCfg().Name,
 			mgoITCfg.StorDbCfg().User, mgoITCfg.StorDbCfg().Password,
 			mgoITCfg.GeneralCfg().DBDataEncoding,
-			utils.StorDB, nil, false)
+			utils.StorDB, nil, false, 10*time.Second)
 		if err != nil {
 			t.Fatal(err)
 		}

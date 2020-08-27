@@ -91,20 +91,12 @@ type DbJsonCfg struct {
 	Db_name               *string
 	Db_user               *string
 	Db_password           *string
-	Max_open_conns        *int // Used only in case of storDb
-	Max_idle_conns        *int
-	Conn_max_lifetime     *int // Used only in case of storDb
 	String_indexed_fields *[]string
 	Prefix_indexed_fields *[]string
-	Redis_sentinel        *string
-	Query_timeout         *string
-	Sslmode               *string // Used only in case of storDb
-	Redis_cluster         *bool
-	Cluster_sync          *string
-	Cluster_ondown_delay  *string
 	Remote_conns          *[]string
 	Replication_conns     *[]string
 	Items                 *map[string]*ItemOptJson
+	Opts                  map[string]interface{}
 }
 
 type ItemOptJson struct {
@@ -569,24 +561,22 @@ type LoaderCfgJson struct {
 }
 
 type MigratorCfgJson struct {
-	Out_dataDB_type                 *string
-	Out_dataDB_host                 *string
-	Out_dataDB_port                 *string
-	Out_dataDB_name                 *string
-	Out_dataDB_user                 *string
-	Out_dataDB_password             *string
-	Out_dataDB_encoding             *string
-	Out_dataDB_redis_sentinel       *string
-	Out_dataDB_redis_cluster        *bool
-	Out_dataDB_cluster_sync         *string
-	Out_dataDB_cluster_ondown_delay *string
-	Out_storDB_type                 *string
-	Out_storDB_host                 *string
-	Out_storDB_port                 *string
-	Out_storDB_name                 *string
-	Out_storDB_user                 *string
-	Out_storDB_password             *string
-	Users_filters                   *[]string
+	Out_dataDB_type     *string
+	Out_dataDB_host     *string
+	Out_dataDB_port     *string
+	Out_dataDB_name     *string
+	Out_dataDB_user     *string
+	Out_dataDB_password *string
+	Out_dataDB_encoding *string
+	Out_storDB_type     *string
+	Out_storDB_host     *string
+	Out_storDB_port     *string
+	Out_storDB_name     *string
+	Out_storDB_user     *string
+	Out_storDB_password *string
+	Users_filters       *[]string
+	Out_dataDB_opts     map[string]interface{}
+	Out_storDB_opts     map[string]interface{}
 }
 
 type FcTemplateJsonCfg struct {

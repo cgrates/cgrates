@@ -3152,8 +3152,7 @@ func (dm *DataManager) SetRateProfileRates(rpp *RateProfile, withIndex bool) (er
 // Reconnect reconnects to the DB when the config was changed
 func (dm *DataManager) Reconnect(marshaller string, newcfg *config.DataDbCfg) (err error) {
 	d, err := NewDataDBConn(newcfg.DataDbType, newcfg.DataDbHost, newcfg.DataDbPort, newcfg.DataDbName,
-		newcfg.DataDbUser, newcfg.DataDbPass, marshaller, newcfg.DataDbSentinelName, newcfg.RedisCluster,
-		newcfg.ClusterSync, newcfg.ClusterOnDownDelay, newcfg.Items)
+		newcfg.DataDbUser, newcfg.DataDbPass, marshaller, newcfg.Opts)
 	if err != nil {
 		return
 	}

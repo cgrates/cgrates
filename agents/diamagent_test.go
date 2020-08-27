@@ -55,8 +55,7 @@ func (s *testMockSessionConn) CallBiRPC(_ rpcclient.ClientConnector, method stri
 }
 
 func TestProcessRequest(t *testing.T) {
-	dfltCfg, _ := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, true, dfltCfg.DataDbCfg().Items)
+	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filters := engine.NewFilterS(config.CgrConfig(), nil, dm) // no need for filterS but still try to configure the dm :D
 

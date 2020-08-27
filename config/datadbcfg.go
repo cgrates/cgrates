@@ -22,27 +22,22 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
 
 // DataDbCfg Database config
 type DataDbCfg struct {
-	DataDbType         string
-	DataDbHost         string // The host to connect to. Values that start with / are for UNIX domain sockets.
-	DataDbPort         string // The port to bind to.
-	DataDbName         string // The name of the database to connect to.
-	DataDbUser         string // The user to sign in as.
-	DataDbPass         string // The user's password.
-	DataDbSentinelName string
-	QueryTimeout       time.Duration
-	RedisCluster       bool
-	ClusterSync        time.Duration
-	ClusterOnDownDelay time.Duration
-	RmtConns           []string // Remote DataDB  connIDs
-	RplConns           []string // Replication connIDs
-	Items              map[string]*ItemOpt
+	DataDbType string
+	DataDbHost string   // The host to connect to. Values that start with / are for UNIX domain sockets.
+	DataDbPort string   // The port to bind to.
+	DataDbName string   // The name of the database to connect to.
+	DataDbUser string   // The user to sign in as.
+	DataDbPass string   // The user's password.
+	RmtConns   []string // Remote DataDB  connIDs
+	RplConns   []string // Replication connIDs
+	Items      map[string]*ItemOpt
+	Opts       map[string]interface{}
 }
 
 //loadFromJsonCfg loads Database config from JsonCfg
@@ -71,27 +66,6 @@ func (dbcfg *DataDbCfg) loadFromJsonCfg(jsnDbCfg *DbJsonCfg) (err error) {
 	}
 	if jsnDbCfg.Db_password != nil {
 		dbcfg.DataDbPass = *jsnDbCfg.Db_password
-	}
-	if jsnDbCfg.Redis_sentinel != nil {
-		dbcfg.DataDbSentinelName = *jsnDbCfg.Redis_sentinel
-	}
-	if jsnDbCfg.Query_timeout != nil {
-		if dbcfg.QueryTimeout, err = utils.ParseDurationWithNanosecs(*jsnDbCfg.Query_timeout); err != nil {
-			return err
-		}
-	}
-	if jsnDbCfg.Redis_cluster != nil {
-		dbcfg.RedisCluster = *jsnDbCfg.Redis_cluster
-	}
-	if jsnDbCfg.Cluster_ondown_delay != nil {
-		if dbcfg.ClusterOnDownDelay, err = utils.ParseDurationWithNanosecs(*jsnDbCfg.Cluster_ondown_delay); err != nil {
-			return err
-		}
-	}
-	if jsnDbCfg.Cluster_sync != nil {
-		if dbcfg.ClusterSync, err = utils.ParseDurationWithNanosecs(*jsnDbCfg.Cluster_sync); err != nil {
-			return err
-		}
 	}
 	if jsnDbCfg.Remote_conns != nil {
 		dbcfg.RmtConns = make([]string, len(*jsnDbCfg.Remote_conns))
@@ -125,21 +99,33 @@ func (dbcfg *DataDbCfg) loadFromJsonCfg(jsnDbCfg *DbJsonCfg) (err error) {
 			dbcfg.Items[kJsn] = val
 		}
 	}
+	if jsnDbCfg.Opts != nil {
+		for k, v := range jsnDbCfg.Opts {
+			dbcfg.Opts[k] = v
+		}
+	}
 	return nil
 }
 
 // Clone returns the cloned object
 func (dbcfg *DataDbCfg) Clone() *DataDbCfg {
+	itms := make(map[string]*ItemOpt)
+	for k, itm := range dbcfg.Items {
+		itms[k] = itm.Clone()
+	}
+	opts := make(map[string]interface{})
+	for k, v := range dbcfg.Opts {
+		opts[k] = v
+	}
 	return &DataDbCfg{
-		DataDbType:         dbcfg.DataDbType,
-		DataDbHost:         dbcfg.DataDbHost,
-		DataDbPort:         dbcfg.DataDbPort,
-		DataDbName:         dbcfg.DataDbName,
-		DataDbUser:         dbcfg.DataDbUser,
-		DataDbPass:         dbcfg.DataDbPass,
-		DataDbSentinelName: dbcfg.DataDbSentinelName,
-		QueryTimeout:       dbcfg.QueryTimeout,
-		Items:              dbcfg.Items,
+		DataDbType: dbcfg.DataDbType,
+		DataDbHost: dbcfg.DataDbHost,
+		DataDbPort: dbcfg.DataDbPort,
+		DataDbName: dbcfg.DataDbName,
+		DataDbUser: dbcfg.DataDbUser,
+		DataDbPass: dbcfg.DataDbPass,
+		Items:      itms,
+		Opts:       opts,
 	}
 }
 
@@ -148,24 +134,19 @@ func (dbcfg *DataDbCfg) AsMapInterface() map[string]interface{} {
 	for key, item := range dbcfg.Items {
 		items[key] = item.AsMapInterface()
 	}
-	var queryTimeout string = "0"
-	if dbcfg.QueryTimeout != 0 {
-		queryTimeout = dbcfg.QueryTimeout.String()
-	}
 	dbPort, _ := strconv.Atoi(dbcfg.DataDbPort)
 
 	return map[string]interface{}{
-		utils.DataDbTypeCfg:         utils.Meta + dbcfg.DataDbType,
-		utils.DataDbHostCfg:         dbcfg.DataDbHost,
-		utils.DataDbPortCfg:         dbPort,
-		utils.DataDbNameCfg:         dbcfg.DataDbName,
-		utils.DataDbUserCfg:         dbcfg.DataDbUser,
-		utils.DataDbPassCfg:         dbcfg.DataDbPass,
-		utils.DataDbSentinelNameCfg: dbcfg.DataDbSentinelName,
-		utils.QueryTimeoutCfg:       queryTimeout,
-		utils.RmtConnsCfg:           dbcfg.RmtConns,
-		utils.RplConnsCfg:           dbcfg.RplConns,
-		utils.ItemsCfg:              items,
+		utils.DataDbTypeCfg: utils.Meta + dbcfg.DataDbType,
+		utils.DataDbHostCfg: dbcfg.DataDbHost,
+		utils.DataDbPortCfg: dbPort,
+		utils.DataDbNameCfg: dbcfg.DataDbName,
+		utils.DataDbUserCfg: dbcfg.DataDbUser,
+		utils.DataDbPassCfg: dbcfg.DataDbPass,
+		utils.RmtConnsCfg:   dbcfg.RmtConns,
+		utils.RplConnsCfg:   dbcfg.RplConns,
+		utils.ItemsCfg:      items,
+		utils.OptsCfg:       dbcfg.Opts,
 	}
 }
 
@@ -203,4 +184,13 @@ func (itm *ItemOpt) loadFromJsonCfg(jsonItm *ItemOptJson) (err error) {
 		itm.APIKey = *jsonItm.Api_key
 	}
 	return
+}
+
+func (itm *ItemOpt) Clone() *ItemOpt {
+	return &ItemOpt{
+		Remote:    itm.Remote,
+		Replicate: itm.Replicate,
+		APIKey:    itm.APIKey,
+		RouteID:   itm.RouteID,
+	}
 }

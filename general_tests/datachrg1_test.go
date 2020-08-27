@@ -27,7 +27,7 @@ import (
 )
 
 func TestSetStorageDtChrg1(t *testing.T) {
-	dataDBInt := engine.NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
+	dataDBInt := engine.NewInternalDB(nil, nil, true)
 	dataDB = engine.NewDataManager(dataDBInt, config.CgrConfig().CacheCfg(), nil)
 	engine.SetDataStorage(dataDB)
 	engine.Cache.Clear(nil)

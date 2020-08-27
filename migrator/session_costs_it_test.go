@@ -86,20 +86,18 @@ func testSessionCostITConnect(t *testing.T) {
 	storDBIn, err := NewMigratorStorDB(sCostCfgIn.StorDbCfg().Type,
 		sCostCfgIn.StorDbCfg().Host, sCostCfgIn.StorDbCfg().Port,
 		sCostCfgIn.StorDbCfg().Name, sCostCfgIn.StorDbCfg().User,
-		sCostCfgIn.StorDbCfg().Password, sCostCfgIn.GeneralCfg().DBDataEncoding, sCostCfgIn.StorDbCfg().SSLMode,
-		sCostCfgIn.StorDbCfg().MaxOpenConns, sCostCfgIn.StorDbCfg().MaxIdleConns,
-		sCostCfgIn.StorDbCfg().ConnMaxLifetime, sCostCfgIn.StorDbCfg().StringIndexedFields,
-		sCostCfgIn.StorDbCfg().PrefixIndexedFields, sCostCfgIn.StorDbCfg().Items)
+		sCostCfgIn.StorDbCfg().Password, sCostCfgIn.GeneralCfg().DBDataEncoding,
+		sCostCfgIn.StorDbCfg().StringIndexedFields, sCostCfgIn.StorDbCfg().PrefixIndexedFields,
+		sCostCfgIn.StorDbCfg().Opts)
 	if err != nil {
 		t.Error(err)
 	}
 	storDBOut, err := NewMigratorStorDB(sCostCfgOut.StorDbCfg().Type,
 		sCostCfgOut.StorDbCfg().Host, sCostCfgOut.StorDbCfg().Port,
 		sCostCfgOut.StorDbCfg().Name, sCostCfgOut.StorDbCfg().User,
-		sCostCfgOut.StorDbCfg().Password, sCostCfgOut.GeneralCfg().DBDataEncoding, sCostCfgIn.StorDbCfg().SSLMode,
-		sCostCfgIn.StorDbCfg().MaxOpenConns, sCostCfgIn.StorDbCfg().MaxIdleConns,
-		sCostCfgIn.StorDbCfg().ConnMaxLifetime, sCostCfgIn.StorDbCfg().StringIndexedFields,
-		sCostCfgIn.StorDbCfg().PrefixIndexedFields, sCostCfgOut.StorDbCfg().Items)
+		sCostCfgOut.StorDbCfg().Password, sCostCfgOut.GeneralCfg().DBDataEncoding,
+		sCostCfgIn.StorDbCfg().StringIndexedFields, sCostCfgIn.StorDbCfg().PrefixIndexedFields,
+		sCostCfgOut.StorDbCfg().Opts)
 	if err != nil {
 		t.Error(err)
 	}

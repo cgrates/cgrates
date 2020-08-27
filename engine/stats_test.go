@@ -149,7 +149,7 @@ var (
 
 func TestStatQueuesPopulateService(t *testing.T) {
 	defaultCfg, _ := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, true, defaultCfg.DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true)
 	dmSTS = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 
 	defaultCfg.StatSCfg().StoreInterval = 1

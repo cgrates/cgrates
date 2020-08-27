@@ -59,10 +59,8 @@ func (db *StorDBService) Start() (err error) {
 	d, err := engine.NewStorDBConn(db.cfg.StorDbCfg().Type, db.cfg.StorDbCfg().Host,
 		db.cfg.StorDbCfg().Port, db.cfg.StorDbCfg().Name, db.cfg.StorDbCfg().User,
 		db.cfg.StorDbCfg().Password, db.cfg.GeneralCfg().DBDataEncoding,
-		db.cfg.StorDbCfg().SSLMode, db.cfg.StorDbCfg().MaxOpenConns,
-		db.cfg.StorDbCfg().MaxIdleConns, db.cfg.StorDbCfg().ConnMaxLifetime,
 		db.cfg.StorDbCfg().StringIndexedFields, db.cfg.StorDbCfg().PrefixIndexedFields,
-		db.cfg.StorDbCfg().Items)
+		db.cfg.StorDbCfg().Opts)
 	if err != nil { // Cannot configure getter database, show stopper
 		utils.Logger.Crit(fmt.Sprintf("Could not configure storDB: %s exiting!", err))
 		return
@@ -86,10 +84,8 @@ func (db *StorDBService) Reload() (err error) {
 		if d, err = engine.NewStorDBConn(db.cfg.StorDbCfg().Type, db.cfg.StorDbCfg().Host,
 			db.cfg.StorDbCfg().Port, db.cfg.StorDbCfg().Name, db.cfg.StorDbCfg().User,
 			db.cfg.StorDbCfg().Password, db.cfg.GeneralCfg().DBDataEncoding,
-			db.cfg.StorDbCfg().SSLMode, db.cfg.StorDbCfg().MaxOpenConns,
-			db.cfg.StorDbCfg().MaxIdleConns, db.cfg.StorDbCfg().ConnMaxLifetime,
 			db.cfg.StorDbCfg().StringIndexedFields, db.cfg.StorDbCfg().PrefixIndexedFields,
-			db.cfg.StorDbCfg().Items); err != nil {
+			db.cfg.StorDbCfg().Opts); err != nil {
 			return
 		}
 		db.db.Close()
@@ -104,7 +100,11 @@ func (db *StorDBService) Reload() (err error) {
 			return fmt.Errorf("can't conver StorDB of type %s to MongoStorage",
 				db.cfg.StorDbCfg().Type)
 		}
-		mgo.SetTTL(db.cfg.StorDbCfg().QueryTimeout)
+		var ttl time.Duration
+		if ttl, err = utils.IfaceAsDuration(db.cfg.StorDbCfg().Opts[utils.QueryTimeoutCfg]); err != nil {
+			return
+		}
+		mgo.SetTTL(ttl)
 	} else if db.cfg.StorDbCfg().Type == utils.POSTGRES ||
 		db.cfg.StorDbCfg().Type == utils.MYSQL {
 		msql, canCast := db.db.(*engine.SQLStorage)
@@ -112,9 +112,19 @@ func (db *StorDBService) Reload() (err error) {
 			return fmt.Errorf("can't conver StorDB of type %s to SQLStorage",
 				db.cfg.StorDbCfg().Type)
 		}
-		msql.Db.SetMaxOpenConns(db.cfg.StorDbCfg().MaxOpenConns)
-		msql.Db.SetMaxIdleConns(db.cfg.StorDbCfg().MaxIdleConns)
-		msql.Db.SetConnMaxLifetime(time.Duration(db.cfg.StorDbCfg().ConnMaxLifetime) * time.Second)
+		var maxConn, maxIdleConn, connMaxLifetime int64
+		if maxConn, err = utils.IfaceAsTInt64(db.cfg.StorDbCfg().Opts[utils.MaxOpenConnsCfg]); err != nil {
+			return
+		}
+		if maxIdleConn, err = utils.IfaceAsTInt64(db.cfg.StorDbCfg().Opts[utils.MaxIdleConnsCfg]); err != nil {
+			return
+		}
+		if connMaxLifetime, err = utils.IfaceAsTInt64(db.cfg.StorDbCfg().Opts[utils.ConnMaxLifetimeCfg]); err != nil {
+			return
+		}
+		msql.Db.SetMaxOpenConns(int(maxConn))
+		msql.Db.SetMaxIdleConns(int(maxIdleConn))
+		msql.Db.SetConnMaxLifetime(time.Duration(connMaxLifetime) * time.Second)
 	} else if db.cfg.StorDbCfg().Type == utils.INTERNAL {
 		idb, canCast := db.db.(*engine.InternalDB)
 		if !canCast {
@@ -192,9 +202,6 @@ func (db *StorDBService) needsConnectionReload() bool {
 		db.oldDBCfg.Password != db.cfg.StorDbCfg().Password {
 		return true
 	}
-	if db.cfg.StorDbCfg().Type == utils.POSTGRES &&
-		db.oldDBCfg.SSLMode != db.cfg.StorDbCfg().SSLMode {
-		return true
-	}
-	return false
+	return db.cfg.StorDbCfg().Type == utils.POSTGRES &&
+		utils.IfaceAsString(db.oldDBCfg.Opts[utils.SSLModeCfg]) != utils.IfaceAsString(db.cfg.StorDbCfg().Opts[utils.SSLModeCfg])
 }

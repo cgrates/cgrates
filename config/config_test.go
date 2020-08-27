@@ -358,11 +358,11 @@ func TestCgrCfgJSONDefaultsStorDB(t *testing.T) {
 	if cgrCfg.StorDbCfg().Password != "" {
 		t.Errorf("Expecting: , recived: %+v", cgrCfg.StorDbCfg().Password)
 	}
-	if cgrCfg.StorDbCfg().MaxOpenConns != 100 {
-		t.Errorf("Expecting: 100 , recived: %+v", cgrCfg.StorDbCfg().MaxOpenConns)
+	if cgrCfg.StorDbCfg().Opts[utils.MaxOpenConnsCfg] != 100. {
+		t.Errorf("Expecting: 100 , recived: %+v", cgrCfg.StorDbCfg().Opts[utils.MaxOpenConnsCfg])
 	}
-	if cgrCfg.StorDbCfg().MaxIdleConns != 10 {
-		t.Errorf("Expecting: 10 , recived: %+v", cgrCfg.StorDbCfg().MaxIdleConns)
+	if cgrCfg.StorDbCfg().Opts[utils.MaxIdleConnsCfg] != 10. {
+		t.Errorf("Expecting: 10 , recived: %+v", cgrCfg.StorDbCfg().Opts[utils.MaxIdleConnsCfg])
 	}
 	if !reflect.DeepEqual(cgrCfg.StorDbCfg().StringIndexedFields, []string{}) {
 		t.Errorf("Expecting: %+v , recived: %+v", []string{}, cgrCfg.StorDbCfg().StringIndexedFields)
@@ -1716,26 +1716,29 @@ func TestCgrLoaderCfgDefault(t *testing.T) {
 
 func TestCgrMigratorCfgDefault(t *testing.T) {
 	eMgrCfg := &MigratorCgrCfg{
-		OutDataDBType:               "redis",
-		OutDataDBHost:               "127.0.0.1",
-		OutDataDBPort:               "6379",
-		OutDataDBName:               "10",
-		OutDataDBUser:               "cgrates",
-		OutDataDBPassword:           "",
-		OutDataDBEncoding:           "msgpack",
-		OutDataDBClusterOndownDelay: 0,
-		OutDataDBClusterSync:        5 * time.Second,
-		OutDataDBRedisCluster:       false,
-		OutDataDBRedisSentinel:      "",
-		OutStorDBType:               "mysql",
-		OutStorDBHost:               "127.0.0.1",
-		OutStorDBPort:               "3306",
-		OutStorDBName:               "cgrates",
-		OutStorDBUser:               "cgrates",
-		OutStorDBPassword:           "",
+		OutDataDBType:     "redis",
+		OutDataDBHost:     "127.0.0.1",
+		OutDataDBPort:     "6379",
+		OutDataDBName:     "10",
+		OutDataDBUser:     "cgrates",
+		OutDataDBPassword: "",
+		OutDataDBEncoding: "msgpack",
+		OutStorDBType:     "mysql",
+		OutStorDBHost:     "127.0.0.1",
+		OutStorDBPort:     "3306",
+		OutStorDBName:     "cgrates",
+		OutStorDBUser:     "cgrates",
+		OutStorDBPassword: "",
+		OutDataDBOpts: map[string]interface{}{
+			utils.ClusterOnDownDelayCfg: "0",
+			utils.ClusterSyncCfg:        "5s",
+			utils.RedisClusterCfg:       false,
+			utils.RedisSentinelNameCfg:  "",
+		},
+		OutStorDBOpts: make(map[string]interface{}),
 	}
 	if !reflect.DeepEqual(cgrCfg.MigratorCgrCfg(), eMgrCfg) {
-		t.Errorf("received: %+v, expecting: %+v", utils.ToJSON(cgrCfg.MigratorCgrCfg()), utils.ToJSON(eMgrCfg))
+		t.Errorf("expected: %+v, received: %+v", utils.ToJSON(eMgrCfg), utils.ToJSON(cgrCfg.MigratorCgrCfg()))
 	}
 }
 

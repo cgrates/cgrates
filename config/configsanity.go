@@ -598,7 +598,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 	if cfg.storDbCfg.Type == utils.POSTGRES {
 		if !utils.IsSliceMember([]string{utils.PostgressSSLModeDisable, utils.PostgressSSLModeAllow,
 			utils.PostgressSSLModePrefer, utils.PostgressSSLModeRequire, utils.PostgressSSLModeVerifyCa,
-			utils.PostgressSSLModeVerifyFull}, cfg.storDbCfg.SSLMode) {
+			utils.PostgressSSLModeVerifyFull}, utils.IfaceAsString(cfg.storDbCfg.Opts[utils.SSLModeCfg])) {
 			return fmt.Errorf("<%s> unsuported sslmode for storDB", utils.StorDB)
 		}
 	}

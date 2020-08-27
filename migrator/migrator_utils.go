@@ -19,10 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package migrator
 
 import (
-	"errors"
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -34,13 +32,10 @@ var (
 )
 
 func NewMigratorDataDB(db_type, host, port, name, user, pass,
-	marshaler string, cacheCfg *config.CacheCfg, sentinelName string, isCluster bool,
-	clusterSync, clusterOnDownDelay time.Duration,
-	itemsCacheCfg map[string]*config.ItemOpt) (db MigratorDataDB, err error) {
-	dbCon, err := engine.NewDataDBConn(db_type,
-		host, port, name, user, pass, marshaler,
-		sentinelName, isCluster, clusterSync, clusterOnDownDelay,
-		itemsCacheCfg)
+	marshaler string, cacheCfg *config.CacheCfg,
+	opts map[string]interface{}) (db MigratorDataDB, err error) {
+	dbCon, err := engine.NewDataDBConn(db_type, host,
+		port, name, user, pass, marshaler, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -56,19 +51,18 @@ func NewMigratorDataDB(db_type, host, port, name, user, pass,
 		d = newInternalMigrator(dm)
 		db = d.(MigratorDataDB)
 	default:
-		err = errors.New(fmt.Sprintf("Unknown db '%s' valid options are '%s' or '%s or '%s'",
-			db_type, utils.REDIS, utils.MONGO, utils.INTERNAL))
+		err = fmt.Errorf("unknown db '%s' valid options are '%s' or '%s or '%s'",
+			db_type, utils.REDIS, utils.MONGO, utils.INTERNAL)
 	}
 	return d, nil
 }
 
-func NewMigratorStorDB(db_type, host, port, name, user, pass, marshaler, sslmode string,
-	maxConn, maxIdleConn, connMaxLifetime int, stringIndexedFields, prefixIndexedFields []string,
-	itemsCacheCfg map[string]*config.ItemOpt) (db MigratorStorDB, err error) {
+func NewMigratorStorDB(db_type, host, port, name, user, pass, marshaler string,
+	stringIndexedFields, prefixIndexedFields []string,
+	opts map[string]interface{}) (db MigratorStorDB, err error) {
 	var d MigratorStorDB
 	storDb, err := engine.NewStorDBConn(db_type, host, port, name, user,
-		pass, marshaler, sslmode, maxConn, maxIdleConn, connMaxLifetime,
-		stringIndexedFields, prefixIndexedFields, itemsCacheCfg)
+		pass, marshaler, stringIndexedFields, prefixIndexedFields, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -86,8 +80,8 @@ func NewMigratorStorDB(db_type, host, port, name, user, pass, marshaler, sslmode
 		d = newInternalStorDBMigrator(storDb)
 		db = d.(MigratorStorDB)
 	default:
-		err = errors.New(fmt.Sprintf("Unknown db '%s' valid options are [%s, %s, %s, %s]",
-			db_type, utils.MYSQL, utils.MONGO, utils.POSTGRES, utils.INTERNAL))
+		err = fmt.Errorf("Unknown db '%s' valid options are [%s, %s, %s, %s]",
+			db_type, utils.MYSQL, utils.MONGO, utils.POSTGRES, utils.INTERNAL)
 	}
 	return d, nil
 }

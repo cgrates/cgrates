@@ -21,7 +21,6 @@ package config
 import (
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -34,14 +33,10 @@ type StorDbCfg struct {
 	Name                string // The name of the database to connect to.
 	User                string // The user to sign in as.
 	Password            string // The user's password.
-	MaxOpenConns        int    // Maximum database connections opened
-	MaxIdleConns        int    // Maximum idle connections to keep opened
-	ConnMaxLifetime     int
 	StringIndexedFields []string
 	PrefixIndexedFields []string
-	QueryTimeout        time.Duration
-	SSLMode             string // for PostgresDB used to change default sslmode
 	Items               map[string]*ItemOpt
+	Opts                map[string]interface{}
 }
 
 // loadFromJsonCfg loads StoreDb config from JsonCfg
@@ -71,28 +66,16 @@ func (dbcfg *StorDbCfg) loadFromJsonCfg(jsnDbCfg *DbJsonCfg) (err error) {
 	if jsnDbCfg.Db_password != nil {
 		dbcfg.Password = *jsnDbCfg.Db_password
 	}
-	if jsnDbCfg.Max_open_conns != nil {
-		dbcfg.MaxOpenConns = *jsnDbCfg.Max_open_conns
-	}
-	if jsnDbCfg.Max_idle_conns != nil {
-		dbcfg.MaxIdleConns = *jsnDbCfg.Max_idle_conns
-	}
-	if jsnDbCfg.Conn_max_lifetime != nil {
-		dbcfg.ConnMaxLifetime = *jsnDbCfg.Conn_max_lifetime
-	}
 	if jsnDbCfg.String_indexed_fields != nil {
 		dbcfg.StringIndexedFields = *jsnDbCfg.String_indexed_fields
 	}
 	if jsnDbCfg.Prefix_indexed_fields != nil {
 		dbcfg.PrefixIndexedFields = *jsnDbCfg.Prefix_indexed_fields
 	}
-	if jsnDbCfg.Query_timeout != nil {
-		if dbcfg.QueryTimeout, err = utils.ParseDurationWithNanosecs(*jsnDbCfg.Query_timeout); err != nil {
-			return err
+	if jsnDbCfg.Opts != nil {
+		for k, v := range jsnDbCfg.Opts {
+			dbcfg.Opts[k] = v
 		}
-	}
-	if jsnDbCfg.Sslmode != nil {
-		dbcfg.SSLMode = *jsnDbCfg.Sslmode
 	}
 	if jsnDbCfg.Items != nil {
 		for kJsn, vJsn := range *jsnDbCfg.Items {
@@ -108,6 +91,10 @@ func (dbcfg *StorDbCfg) loadFromJsonCfg(jsnDbCfg *DbJsonCfg) (err error) {
 
 // Clone returns the cloned object
 func (dbcfg *StorDbCfg) Clone() *StorDbCfg {
+	items := make(map[string]*ItemOpt)
+	for key, item := range dbcfg.Items {
+		items[key] = item.Clone()
+	}
 	return &StorDbCfg{
 		Type:                dbcfg.Type,
 		Host:                dbcfg.Host,
@@ -115,14 +102,10 @@ func (dbcfg *StorDbCfg) Clone() *StorDbCfg {
 		Name:                dbcfg.Name,
 		User:                dbcfg.User,
 		Password:            dbcfg.Password,
-		MaxOpenConns:        dbcfg.MaxOpenConns,
-		MaxIdleConns:        dbcfg.MaxIdleConns,
-		ConnMaxLifetime:     dbcfg.ConnMaxLifetime,
 		StringIndexedFields: dbcfg.StringIndexedFields,
 		PrefixIndexedFields: dbcfg.PrefixIndexedFields,
-		QueryTimeout:        dbcfg.QueryTimeout,
-		SSLMode:             dbcfg.SSLMode,
-		Items:               dbcfg.Items,
+		Items:               items,
+		Opts:                dbcfg.Opts,
 	}
 }
 
@@ -130,10 +113,6 @@ func (dbcfg *StorDbCfg) AsMapInterface() map[string]interface{} {
 	items := make(map[string]interface{})
 	for key, item := range dbcfg.Items {
 		items[key] = item.AsMapInterface()
-	}
-	var queryTimeout string = "0"
-	if dbcfg.QueryTimeout != 0 {
-		queryTimeout = dbcfg.QueryTimeout.String()
 	}
 	dbPort, _ := strconv.Atoi(dbcfg.Port)
 
@@ -144,13 +123,9 @@ func (dbcfg *StorDbCfg) AsMapInterface() map[string]interface{} {
 		utils.DataDbNameCfg:          dbcfg.Name,
 		utils.DataDbUserCfg:          dbcfg.User,
 		utils.DataDbPassCfg:          dbcfg.Password,
-		utils.MaxOpenConnsCfg:        dbcfg.MaxOpenConns,
-		utils.MaxIdleConnsCfg:        dbcfg.MaxIdleConns,
-		utils.ConnMaxLifetimeCfg:     dbcfg.ConnMaxLifetime,
 		utils.StringIndexedFieldsCfg: dbcfg.StringIndexedFields,
 		utils.PrefixIndexedFieldsCfg: dbcfg.PrefixIndexedFields,
-		utils.QueryTimeoutCfg:        queryTimeout,
-		utils.SSLModeCfg:             dbcfg.SSLMode,
 		utils.ItemsCfg:               items,
+		utils.OptsCfg:                dbcfg.Opts,
 	}
 }
