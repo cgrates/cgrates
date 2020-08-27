@@ -79,7 +79,7 @@ var (
 )
 
 // Test start here
-func TestSuplSV1IT(t *testing.T) {
+func TestRouteSV1IT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		splSv1ConfDIR = "tutinternal"
@@ -137,7 +137,7 @@ func testV1RouteGetBeforeDataLoad(t *testing.T) {
 	if err := splSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
 		&utils.TenantID{
 			Tenant: "cgrates.org",
-			ID:     "SPL_WEIGHT_1",
+			ID:     "ROUTE_WEIGHT_1",
 		}, &suplsReply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -166,18 +166,18 @@ func testV1RouteGetWeightRoutes(t *testing.T) {
 		},
 	}
 	eSpls := engine.SortedRoutes{
-		ProfileID: "SPL_WEIGHT_1",
+		ProfileID: "ROUTE_WEIGHT_1",
 		Sorting:   utils.MetaWeight,
 		Count:     2,
 		SortedRoutes: []*engine.SortedRoute{
 			{
-				RouteID: "supplier2",
+				RouteID: "route2",
 				SortingData: map[string]interface{}{
 					utils.Weight: 20.0,
 				},
 			},
 			{
-				RouteID: "supplier1",
+				RouteID: "route1",
 				SortingData: map[string]interface{}{
 					utils.Weight: 10.0,
 				},
@@ -211,12 +211,12 @@ func testV1RouteGetLeastCostRoutes(t *testing.T) {
 		},
 	}
 	eSpls := engine.SortedRoutes{
-		ProfileID: "SPL_LEASTCOST_1",
+		ProfileID: "ROUTE_LEASTCOST_1",
 		Sorting:   utils.MetaLC,
 		Count:     3,
 		SortedRoutes: []*engine.SortedRoute{
 			{
-				RouteID: "supplier3",
+				RouteID: "route3",
 				SortingData: map[string]interface{}{
 					utils.Cost:         0.0136,
 					utils.RatingPlanID: "RP_SPECIAL_1002",
@@ -224,7 +224,7 @@ func testV1RouteGetLeastCostRoutes(t *testing.T) {
 				},
 			},
 			{
-				RouteID: "supplier1",
+				RouteID: "route1",
 				SortingData: map[string]interface{}{
 					utils.Cost:         0.0136,
 					utils.RatingPlanID: "RP_SPECIAL_1002",
@@ -232,7 +232,7 @@ func testV1RouteGetLeastCostRoutes(t *testing.T) {
 				},
 			},
 			{
-				RouteID: "supplier2",
+				RouteID: "route2",
 				SortingData: map[string]interface{}{
 					utils.Cost:         1.2667,
 					utils.RatingPlanID: "RP_RETAIL1",
@@ -267,12 +267,12 @@ func testV1RouteGetLeastCostRoutesWithoutUsage(t *testing.T) {
 		},
 	}
 	eSpls := engine.SortedRoutes{
-		ProfileID: "SPL_LEASTCOST_1",
+		ProfileID: "ROUTE_LEASTCOST_1",
 		Sorting:   utils.MetaLC,
 		Count:     3,
 		SortedRoutes: []*engine.SortedRoute{
 			{
-				RouteID: "supplier3",
+				RouteID: "route3",
 				SortingData: map[string]interface{}{
 					utils.Cost:         0.0102,
 					utils.RatingPlanID: "RP_SPECIAL_1002",
@@ -280,7 +280,7 @@ func testV1RouteGetLeastCostRoutesWithoutUsage(t *testing.T) {
 				},
 			},
 			{
-				RouteID: "supplier1",
+				RouteID: "route1",
 				SortingData: map[string]interface{}{
 					utils.Cost:         0.0102,
 					utils.RatingPlanID: "RP_SPECIAL_1002",
@@ -288,7 +288,7 @@ func testV1RouteGetLeastCostRoutesWithoutUsage(t *testing.T) {
 				},
 			},
 			{
-				RouteID: "supplier2",
+				RouteID: "route2",
 				SortingData: map[string]interface{}{
 					utils.Cost:         1.2,
 					utils.RatingPlanID: "RP_RETAIL1",
@@ -325,12 +325,12 @@ func testV1RouteGetLeastCostRoutesWithMaxCost(t *testing.T) {
 		},
 	}
 	eSpls := engine.SortedRoutes{
-		ProfileID: "SPL_LEASTCOST_1",
+		ProfileID: "ROUTE_LEASTCOST_1",
 		Sorting:   utils.MetaLC,
 		Count:     2,
 		SortedRoutes: []*engine.SortedRoute{
 			{
-				RouteID: "supplier3",
+				RouteID: "route3",
 				SortingData: map[string]interface{}{
 					utils.Cost:         0.0136,
 					utils.RatingPlanID: "RP_SPECIAL_1002",
@@ -338,7 +338,7 @@ func testV1RouteGetLeastCostRoutesWithMaxCost(t *testing.T) {
 				},
 			},
 			{
-				RouteID: "supplier1",
+				RouteID: "route1",
 				SortingData: map[string]interface{}{
 					utils.Cost:         0.0136,
 					utils.RatingPlanID: "RP_SPECIAL_1002",
@@ -400,12 +400,12 @@ func testV1RouteGetLeastCostRoutesWithMaxCost2(t *testing.T) {
 		},
 	}
 	eSpls := engine.SortedRoutes{
-		ProfileID: "SPL_LEASTCOST_1",
+		ProfileID: "ROUTE_LEASTCOST_1",
 		Sorting:   utils.MetaLC,
 		Count:     2,
 		SortedRoutes: []*engine.SortedRoute{
 			{
-				RouteID: "supplier3",
+				RouteID: "route3",
 				SortingData: map[string]interface{}{
 					utils.Cost:         0.1054,
 					utils.RatingPlanID: "RP_SPECIAL_1002",
@@ -413,7 +413,7 @@ func testV1RouteGetLeastCostRoutesWithMaxCost2(t *testing.T) {
 				},
 			},
 			{
-				RouteID: "supplier1",
+				RouteID: "route1",
 				SortingData: map[string]interface{}{
 					utils.Cost:         0.1054,
 					utils.RatingPlanID: "RP_SPECIAL_1002",
@@ -449,12 +449,12 @@ func testV1RouteGetHighestCostRoutes(t *testing.T) {
 		},
 	}
 	eSpls := engine.SortedRoutes{
-		ProfileID: "SPL_HIGHESTCOST_1",
+		ProfileID: "ROUTE_HIGHESTCOST_1",
 		Sorting:   utils.MetaHC,
 		Count:     3,
 		SortedRoutes: []*engine.SortedRoute{
 			{
-				RouteID: "supplier2",
+				RouteID: "route2",
 				SortingData: map[string]interface{}{
 					utils.Cost:         1.2667,
 					utils.RatingPlanID: "RP_RETAIL1",
@@ -462,7 +462,7 @@ func testV1RouteGetHighestCostRoutes(t *testing.T) {
 				},
 			},
 			{
-				RouteID: "supplier3",
+				RouteID: "route3",
 				SortingData: map[string]interface{}{
 					utils.Cost:         0.0136,
 					utils.RatingPlanID: "RP_SPECIAL_1002",
@@ -470,7 +470,7 @@ func testV1RouteGetHighestCostRoutes(t *testing.T) {
 				},
 			},
 			{
-				RouteID: "supplier1",
+				RouteID: "route1",
 				SortingData: map[string]interface{}{
 					utils.Cost:         0.0136,
 					utils.RatingPlanID: "RP_SPECIAL_1002",
@@ -676,7 +676,7 @@ func testV1RouteGetQOSRoutes(t *testing.T) {
 			},
 		},
 	}
-	expRouteIDs := []string{"supplier1", "supplier3", "supplier2"}
+	expRouteIDs := []string{"route1", "route3", "route2"}
 	var suplsReply engine.SortedRoutes
 	if err := splSv1Rpc.Call(utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err != nil {
@@ -686,8 +686,8 @@ func testV1RouteGetQOSRoutes(t *testing.T) {
 		for i, supl := range suplsReply.SortedRoutes {
 			rcvSupl[i] = supl.RouteID
 		}
-		if suplsReply.ProfileID != "SPL_QOS_1" {
-			t.Errorf("Expecting: SPL_QOS_1, received: %s",
+		if suplsReply.ProfileID != "ROUTE_QOS_1" {
+			t.Errorf("Expecting: ROUTE_QOS_1, received: %s",
 				suplsReply.ProfileID)
 		}
 		if !reflect.DeepEqual(rcvSupl, expRouteIDs) {
@@ -709,7 +709,7 @@ func testV1RouteGetQOSRoutes2(t *testing.T) {
 			},
 		},
 	}
-	expRouteIDs := []string{"supplier3", "supplier2", "supplier1"}
+	expRouteIDs := []string{"route3", "route2", "route1"}
 	var suplsReply engine.SortedRoutes
 	if err := splSv1Rpc.Call(utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err != nil {
@@ -719,8 +719,8 @@ func testV1RouteGetQOSRoutes2(t *testing.T) {
 		for i, supl := range suplsReply.SortedRoutes {
 			rcvSupl[i] = supl.RouteID
 		}
-		if suplsReply.ProfileID != "SPL_QOS_2" {
-			t.Errorf("Expecting: SPL_QOS_2, received: %s",
+		if suplsReply.ProfileID != "ROUTE_QOS_2" {
+			t.Errorf("Expecting: ROUTE_QOS_2, received: %s",
 				suplsReply.ProfileID)
 		}
 		if !reflect.DeepEqual(rcvSupl, expRouteIDs) {
@@ -742,7 +742,7 @@ func testV1RouteGetQOSRoutes3(t *testing.T) {
 			},
 		},
 	}
-	expRouteIDs := []string{"supplier1", "supplier3", "supplier2"}
+	expRouteIDs := []string{"route1", "route3", "route2"}
 	var suplsReply engine.SortedRoutes
 	if err := splSv1Rpc.Call(utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err != nil {
@@ -752,8 +752,8 @@ func testV1RouteGetQOSRoutes3(t *testing.T) {
 		for i, supl := range suplsReply.SortedRoutes {
 			rcvSupl[i] = supl.RouteID
 		}
-		if suplsReply.ProfileID != "SPL_QOS_3" {
-			t.Errorf("Expecting: SPL_QOS_3, received: %s",
+		if suplsReply.ProfileID != "ROUTE_QOS_3" {
+			t.Errorf("Expecting: ROUTE_QOS_3, received: %s",
 				suplsReply.ProfileID)
 		}
 		if !reflect.DeepEqual(rcvSupl, expRouteIDs) {
@@ -775,7 +775,7 @@ func testV1RouteGetQOSRoutesFiltred(t *testing.T) {
 			},
 		},
 	}
-	expRouteIDs := []string{"supplier1", "supplier3"}
+	expRouteIDs := []string{"route1", "route3"}
 	var suplsReply engine.SortedRoutes
 	if err := splSv1Rpc.Call(utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err != nil {
@@ -785,8 +785,8 @@ func testV1RouteGetQOSRoutesFiltred(t *testing.T) {
 		for i, supl := range suplsReply.SortedRoutes {
 			rcvSupl[i] = supl.RouteID
 		}
-		if suplsReply.ProfileID != "SPL_QOS_FILTRED" {
-			t.Errorf("Expecting: SPL_QOS_FILTRED, received: %s",
+		if suplsReply.ProfileID != "ROUTE_QOS_FILTRED" {
+			t.Errorf("Expecting: ROUTE_QOS_FILTRED, received: %s",
 				suplsReply.ProfileID)
 		}
 		if !reflect.DeepEqual(rcvSupl, expRouteIDs) {
@@ -812,7 +812,7 @@ func testV1RouteGetQOSRoutesFiltred2(t *testing.T) {
 			},
 		},
 	}
-	expRouteIDs := []string{"supplier3", "supplier2"}
+	expRouteIDs := []string{"route3", "route2"}
 	var suplsReply engine.SortedRoutes
 	if err := splSv1Rpc.Call(utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err != nil {
@@ -822,8 +822,8 @@ func testV1RouteGetQOSRoutesFiltred2(t *testing.T) {
 		for i, supl := range suplsReply.SortedRoutes {
 			rcvSupl[i] = supl.RouteID
 		}
-		if suplsReply.ProfileID != "SPL_QOS_FILTRED2" {
-			t.Errorf("Expecting: SPL_QOS_FILTRED2, received: %s",
+		if suplsReply.ProfileID != "ROUTE_QOS_FILTRED2" {
+			t.Errorf("Expecting: ROUTE_QOS_FILTRED2, received: %s",
 				suplsReply.ProfileID)
 		}
 		if !reflect.DeepEqual(rcvSupl, expRouteIDs) {
@@ -847,12 +847,12 @@ func testV1RouteGetRouteWithoutFilter(t *testing.T) {
 		},
 	}
 	eSpls := engine.SortedRoutes{
-		ProfileID: "SPL_WEIGHT_2",
+		ProfileID: "ROUTE_WEIGHT_2",
 		Sorting:   utils.MetaWeight,
 		Count:     1,
 		SortedRoutes: []*engine.SortedRoute{
 			{
-				RouteID: "supplier1",
+				RouteID: "route1",
 				SortingData: map[string]interface{}{
 					utils.Weight: 10.0,
 				},
@@ -885,7 +885,7 @@ func testV1RouteSetRouteProfiles(t *testing.T) {
 			SortingParameters: []string{"Param1", "Param2"},
 			Routes: []*engine.Route{
 				{
-					ID:              "SPL1",
+					ID:              "ROUTE1",
 					RatingPlanIDs:   []string{"RP1"},
 					FilterIDs:       []string{"FLTR_1"},
 					AccountIDs:      []string{"Acc"},
@@ -915,9 +915,9 @@ func testV1RouteSetRouteProfiles(t *testing.T) {
 }
 
 func testV1RouteGetRouteProfileIDs(t *testing.T) {
-	expected := []string{"SPL_HIGHESTCOST_1", "SPL_QOS_1", "SPL_QOS_2", "SPL_QOS_FILTRED", "SPL_QOS_FILTRED2",
-		"SPL_ACNT_1001", "SPL_LEASTCOST_1", "SPL_WEIGHT_2", "SPL_WEIGHT_1", "SPL_QOS_3",
-		"TEST_PROFILE1", "SPL_LOAD_DIST", "SPL_LCR"}
+	expected := []string{"ROUTE_HIGHESTCOST_1", "ROUTE_QOS_1", "ROUTE_QOS_2", "ROUTE_QOS_FILTRED", "ROUTE_QOS_FILTRED2",
+		"ROUTE_ACNT_1001", "ROUTE_LEASTCOST_1", "ROUTE_WEIGHT_2", "ROUTE_WEIGHT_1", "ROUTE_QOS_3",
+		"TEST_PROFILE1", "ROUTE_LOAD_DIST", "ROUTE_LCR"}
 	var result []string
 	if err := splSv1Rpc.Call(utils.APIerSv1GetRouteProfileIDs,
 		&utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{"cgrates.org"}}, &result); err != nil {
@@ -930,7 +930,7 @@ func testV1RouteGetRouteProfileIDs(t *testing.T) {
 func testV1RouteUpdateRouteProfiles(t *testing.T) {
 	splPrf.Routes = []*engine.Route{
 		{
-			ID:              "SPL1",
+			ID:              "ROUTE1",
 			RatingPlanIDs:   []string{"RP1"},
 			FilterIDs:       []string{"FLTR_1"},
 			AccountIDs:      []string{"Acc"},
@@ -941,7 +941,7 @@ func testV1RouteUpdateRouteProfiles(t *testing.T) {
 			RouteParameters: "SortingParameter1",
 		},
 		{
-			ID:              "SPL2",
+			ID:              "ROUTE2",
 			RatingPlanIDs:   []string{"RP2"},
 			FilterIDs:       []string{"FLTR_2"},
 			AccountIDs:      []string{"Acc"},
@@ -954,7 +954,7 @@ func testV1RouteUpdateRouteProfiles(t *testing.T) {
 	}
 	reverseRoutes := []*engine.Route{
 		{
-			ID:              "SPL2",
+			ID:              "ROUTE2",
 			RatingPlanIDs:   []string{"RP2"},
 			FilterIDs:       []string{"FLTR_2"},
 			AccountIDs:      []string{"Acc"},
@@ -965,7 +965,7 @@ func testV1RouteUpdateRouteProfiles(t *testing.T) {
 			RouteParameters: "SortingParameter2",
 		},
 		{
-			ID:              "SPL1",
+			ID:              "ROUTE1",
 			RatingPlanIDs:   []string{"RP1"},
 			FilterIDs:       []string{"FLTR_1"},
 			AccountIDs:      []string{"Acc"},
@@ -1035,7 +1035,7 @@ func testV1RouteGetRouteForEvent(t *testing.T) {
 	}
 	expected := engine.RouteProfile{
 		Tenant:    "cgrates.org",
-		ID:        "SPL_LCR",
+		ID:        "ROUTE_LCR",
 		FilterIDs: []string{"FLTR_TEST"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2017, 11, 27, 00, 00, 00, 00, time.UTC),
@@ -1044,7 +1044,7 @@ func testV1RouteGetRouteForEvent(t *testing.T) {
 		SortingParameters: []string{},
 		Routes: []*engine.Route{
 			&engine.Route{
-				ID:              "supplier_1",
+				ID:              "route_1",
 				FilterIDs:       nil,
 				AccountIDs:      nil,
 				RatingPlanIDs:   []string{"RP_TEST_1"},
@@ -1055,7 +1055,7 @@ func testV1RouteGetRouteForEvent(t *testing.T) {
 				RouteParameters: "",
 			},
 			&engine.Route{
-				ID:              "supplier_2",
+				ID:              "route_2",
 				FilterIDs:       nil,
 				AccountIDs:      nil,
 				RatingPlanIDs:   []string{"RP_TEST_2"},
@@ -1090,19 +1090,19 @@ func testV1RouteGetRouteForEvent(t *testing.T) {
 // Scenario: We create two rating plans RP_MOBILE and RP_LOCAL
 // RP_LOCAL contains destination for both mobile and local
 // and RP_MOBILE contains destinations only for mobile
-// Create a RouteProfile with *least_cost strategy with 2 suppliers
-// supplier1 have attached RP_LOCAL and supplier2 have attach RP_MOBILE
+// Create a RouteProfile with *least_cost strategy with 2 routes
+// route1 have attached RP_LOCAL and route2 have attach RP_MOBILE
 func testV1RoutesOneRouteWithoutDestination(t *testing.T) {
 	var reply *engine.RouteProfile
 	if err := splSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "SPL_DESTINATION"}, &reply); err == nil ||
+		&utils.TenantID{Tenant: "cgrates.org", ID: "ROUTE_DESTINATION"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 	splPrf = &RouteWithCache{
 		RouteProfile: &engine.RouteProfile{
 			Tenant:    "cgrates.org",
-			ID:        "SPL_DESTINATION",
+			ID:        "ROUTE_DESTINATION",
 			FilterIDs: []string{"*string:~*req.Account:SpecialCase"},
 			Sorting:   utils.MetaLC,
 			Routes: []*engine.Route{
@@ -1144,7 +1144,7 @@ func testV1RoutesOneRouteWithoutDestination(t *testing.T) {
 		},
 	}
 	eSpls := engine.SortedRoutes{
-		ProfileID: "SPL_DESTINATION",
+		ProfileID: "ROUTE_DESTINATION",
 		Sorting:   utils.MetaLC,
 		Count:     1,
 		SortedRoutes: []*engine.SortedRoute{

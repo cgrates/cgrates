@@ -200,18 +200,18 @@ func testSSv1ItProcessEventAuth(t *testing.T) {
 		t.Errorf("Unexpected ResourceAllocation: %s", rply.ResourceAllocation)
 	}
 	eSplrs := &engine.SortedRoutes{
-		ProfileID: "SPL_ACNT_1001",
+		ProfileID: "ROUTE_ACNT_1001",
 		Sorting:   utils.MetaWeight,
 		Count:     2,
 		SortedRoutes: []*engine.SortedRoute{
 			{
-				RouteID: "supplier1",
+				RouteID: "route1",
 				SortingData: map[string]interface{}{
 					"Weight": 20.0,
 				},
 			},
 			{
-				RouteID: "supplier2",
+				RouteID: "route2",
 				SortingData: map[string]interface{}{
 					"Weight": 10.0,
 				},

@@ -262,7 +262,7 @@ func testDspSessionAuthorize(t *testing.T) {
 	if *rply.ResourceAllocation == "" {
 		t.Errorf("Unexpected ResourceAllocation: %s", *rply.ResourceAllocation)
 	}
-	eSplrs := "supplier1,supplier2"
+	eSplrs := "route1,route2"
 	tp := strings.Split(*rply.RoutesDigest, ",")
 	sort.Strings(tp)
 	*rply.RoutesDigest = strings.Join(tp, ",")

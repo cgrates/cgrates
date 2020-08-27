@@ -235,18 +235,18 @@ func testSSv1ItAuth(t *testing.T) {
 		t.Errorf("Unexpected ResourceAllocation: %s", *rply.ResourceAllocation)
 	}
 	eSplrs := &engine.SortedRoutes{
-		ProfileID: "SPL_ACNT_1001",
+		ProfileID: "ROUTE_ACNT_1001",
 		Sorting:   utils.MetaWeight,
 		Count:     2,
 		SortedRoutes: []*engine.SortedRoute{
 			{
-				RouteID: "supplier1",
+				RouteID: "route1",
 				SortingData: map[string]interface{}{
 					"Weight": 20.0,
 				},
 			},
 			{
-				RouteID: "supplier2",
+				RouteID: "route2",
 				SortingData: map[string]interface{}{
 					"Weight": 10.0,
 				},
@@ -323,7 +323,7 @@ func testSSv1ItAuthWithDigest(t *testing.T) {
 	if *rply.ResourceAllocation == "" {
 		t.Errorf("Unexpected ResourceAllocation: %s", *rply.ResourceAllocation)
 	}
-	eSplrs := utils.StringPointer("supplier1,supplier2")
+	eSplrs := utils.StringPointer("route1,route2")
 	if *eSplrs != *rply.RoutesDigest {
 		t.Errorf("expecting: %v, received: %v", *eSplrs, *rply.RoutesDigest)
 	}
