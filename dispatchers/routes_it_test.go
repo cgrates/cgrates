@@ -140,12 +140,12 @@ func testDspSupGetSupFailover(t *testing.T) {
 		},
 	}
 	eRpl := &engine.SortedRoutes{
-		ProfileID: "SPL_ACNT_1002",
+		ProfileID: "ROUTE_ACNT_1002",
 		Sorting:   utils.MetaLC,
 		Count:     2,
 		SortedRoutes: []*engine.SortedRoute{
 			{
-				RouteID:         "supplier1",
+				RouteID:         "route1",
 				RouteParameters: "",
 				SortingData: map[string]interface{}{
 					utils.Cost:         0.3166,
@@ -154,7 +154,7 @@ func testDspSupGetSupFailover(t *testing.T) {
 				},
 			},
 			{
-				RouteID:         "supplier2",
+				RouteID:         "route2",
 				RouteParameters: "",
 				SortingData: map[string]interface{}{
 					utils.Cost:         0.6334,
@@ -229,12 +229,12 @@ func testDspSupTestAuthKey(t *testing.T) {
 func testDspSupTestAuthKey2(t *testing.T) {
 	var rpl *engine.SortedRoutes
 	eRpl := &engine.SortedRoutes{
-		ProfileID: "SPL_ACNT_1002",
+		ProfileID: "ROUTE_ACNT_1002",
 		Sorting:   utils.MetaLC,
 		Count:     2,
 		SortedRoutes: []*engine.SortedRoute{
 			{
-				RouteID:         "supplier1",
+				RouteID:         "route1",
 				RouteParameters: "",
 				SortingData: map[string]interface{}{
 					utils.Cost:         0.3166,
@@ -243,7 +243,7 @@ func testDspSupTestAuthKey2(t *testing.T) {
 				},
 			},
 			{
-				RouteID:         "supplier2",
+				RouteID:         "route2",
 				RouteParameters: "",
 				SortingData: map[string]interface{}{
 					utils.Cost:         0.6334,
@@ -297,12 +297,12 @@ func testDspSupGetSupRoundRobin(t *testing.T) {
 		},
 	}
 	eRpl := &engine.SortedRoutes{
-		ProfileID: "SPL_ACNT_1002",
+		ProfileID: "ROUTE_ACNT_1002",
 		Sorting:   utils.MetaLC,
 		Count:     2,
 		SortedRoutes: []*engine.SortedRoute{
 			{
-				RouteID:         "supplier1",
+				RouteID:         "route1",
 				RouteParameters: "",
 				SortingData: map[string]interface{}{
 					utils.Cost:         0.3166,
@@ -311,7 +311,7 @@ func testDspSupGetSupRoundRobin(t *testing.T) {
 				},
 			},
 			{
-				RouteID:         "supplier2",
+				RouteID:         "route2",
 				RouteParameters: "",
 				SortingData: map[string]interface{}{
 					utils.Cost:         0.6334,
@@ -374,7 +374,7 @@ func testDspSupGetSupplierForEvent(t *testing.T) {
 	}
 	expected := engine.RouteProfile{
 		Tenant:    "cgrates.org",
-		ID:        "SPL_ACNT_1002",
+		ID:        "ROUTE_ACNT_1002",
 		FilterIDs: []string{"FLTR_ACNT_1002"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2017, 11, 27, 00, 00, 00, 00, time.UTC),
@@ -383,7 +383,7 @@ func testDspSupGetSupplierForEvent(t *testing.T) {
 		SortingParameters: []string{},
 		Routes: []*engine.Route{
 			&engine.Route{
-				ID:              "supplier1",
+				ID:              "route1",
 				FilterIDs:       nil,
 				AccountIDs:      nil,
 				RatingPlanIDs:   []string{"RP_1002_LOW"},
@@ -394,7 +394,7 @@ func testDspSupGetSupplierForEvent(t *testing.T) {
 				RouteParameters: "",
 			},
 			&engine.Route{
-				ID:              "supplier2",
+				ID:              "route2",
 				FilterIDs:       nil,
 				AccountIDs:      nil,
 				RatingPlanIDs:   []string{"RP_1002"},

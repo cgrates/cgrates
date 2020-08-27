@@ -409,7 +409,7 @@ func testInternalRemoteITGetRoute(t *testing.T) {
 	var reply *engine.RouteProfile
 	splPrf := &engine.RouteProfile{
 		Tenant:    "cgrates.org",
-		ID:        "SPL_ACNT_1001",
+		ID:        "ROUTE_ACNT_1001",
 		FilterIDs: []string{"FLTR_ACNT_1001"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2017, 11, 27, 0, 0, 0, 0, time.UTC),
@@ -418,20 +418,20 @@ func testInternalRemoteITGetRoute(t *testing.T) {
 		SortingParameters: []string{},
 		Routes: []*engine.Route{
 			{
-				ID:     "supplier1",
+				ID:     "route1",
 				Weight: 10,
 			},
 			{
-				ID:     "supplier2",
+				ID:     "route2",
 				Weight: 20,
 			},
 		},
 		Weight: 20,
 	}
-	// supplier in reverse order
+	// routeProfile in reverse order
 	splPrf2 := &engine.RouteProfile{
 		Tenant:    "cgrates.org",
-		ID:        "SPL_ACNT_1001",
+		ID:        "ROUTE_ACNT_1001",
 		FilterIDs: []string{"FLTR_ACNT_1001"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2017, 11, 27, 0, 0, 0, 0, time.UTC),
@@ -440,11 +440,11 @@ func testInternalRemoteITGetRoute(t *testing.T) {
 		SortingParameters: []string{},
 		Routes: []*engine.Route{
 			{
-				ID:     "supplier2",
+				ID:     "route2",
 				Weight: 20,
 			},
 			{
-				ID:     "supplier1",
+				ID:     "route1",
 				Weight: 10,
 			},
 		},
@@ -456,7 +456,7 @@ func testInternalRemoteITGetRoute(t *testing.T) {
 	}
 
 	if err := internalRPC.Call(utils.APIerSv1GetRouteProfile,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "SPL_ACNT_1001"}, &reply); err != nil {
+		&utils.TenantID{Tenant: "cgrates.org", ID: "ROUTE_ACNT_1001"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(splPrf, reply) && !reflect.DeepEqual(splPrf2, reply) {
 		t.Errorf("Expecting: %+v, \n received: %+v", utils.ToJSON(splPrf), utils.ToJSON(reply))
