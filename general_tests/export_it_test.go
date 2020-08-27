@@ -347,7 +347,7 @@ func testExpVerifyRoutes(t *testing.T) {
 	var reply *engine.RouteProfile
 	splPrf := &engine.RouteProfile{
 		Tenant:    "cgrates.org",
-		ID:        "SPL_ACNT_1002",
+		ID:        "ROUTE_ACNT_1002",
 		FilterIDs: []string{"FLTR_ACNT_1002"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2017, 11, 27, 0, 0, 0, 0, time.UTC),
@@ -356,14 +356,14 @@ func testExpVerifyRoutes(t *testing.T) {
 		SortingParameters: []string{},
 		Routes: []*engine.Route{
 			{
-				ID:              "supplier1",
+				ID:              "route1",
 				RatingPlanIDs:   []string{"RP_1002_LOW"},
 				Weight:          10,
 				Blocker:         false,
 				RouteParameters: utils.EmptyString,
 			},
 			{
-				ID:              "supplier2",
+				ID:              "route2",
 				RatingPlanIDs:   []string{"RP_1002"},
 				Weight:          20,
 				Blocker:         false,
@@ -375,7 +375,7 @@ func testExpVerifyRoutes(t *testing.T) {
 
 	splPrf2 := &engine.RouteProfile{
 		Tenant:    "cgrates.org",
-		ID:        "SPL_ACNT_1002",
+		ID:        "ROUTE_ACNT_1002",
 		FilterIDs: []string{"FLTR_ACNT_1002"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2017, 11, 27, 0, 0, 0, 0, time.UTC),
@@ -384,14 +384,14 @@ func testExpVerifyRoutes(t *testing.T) {
 		SortingParameters: []string{},
 		Routes: []*engine.Route{
 			{
-				ID:              "supplier2",
+				ID:              "route2",
 				RatingPlanIDs:   []string{"RP_1002"},
 				Weight:          20,
 				Blocker:         false,
 				RouteParameters: utils.EmptyString,
 			},
 			{
-				ID:              "supplier1",
+				ID:              "route1",
 				RatingPlanIDs:   []string{"RP_1002_LOW"},
 				Weight:          10,
 				Blocker:         false,
@@ -401,7 +401,7 @@ func testExpVerifyRoutes(t *testing.T) {
 		Weight: 10,
 	}
 	if err := expRpc.Call(utils.APIerSv1GetRouteProfile,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "SPL_ACNT_1002"}, &reply); err != nil {
+		&utils.TenantID{Tenant: "cgrates.org", ID: "ROUTE_ACNT_1002"}, &reply); err != nil {
 		t.Fatal(err)
 	}
 	if *encoding == utils.MetaGOB {
