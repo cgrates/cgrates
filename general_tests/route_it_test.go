@@ -64,7 +64,7 @@ var (
 )
 
 // Test start here
-func TestSuplSV1IT(t *testing.T) {
+func TestRouteSV1IT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		splSv1ConfDIR = "tutinternal"
@@ -140,7 +140,7 @@ func testV1SplSSetSupplierProfilesWithoutRatingPlanIDs(t *testing.T) {
 			Sorting: utils.MetaLC,
 			Routes: []*engine.Route{
 				{
-					ID:         "SPL1",
+					ID:         "ROUTE1",
 					AccountIDs: []string{"accc"},
 					Weight:     20,
 					Blocker:    false,
@@ -194,7 +194,7 @@ func testV1SplSSetSupplierProfilesWithoutRatingPlanIDs(t *testing.T) {
 func testV1SplSAddNewSplPrf(t *testing.T) {
 	var reply *engine.RouteProfile
 	if err := splSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "SPL_ResourceTest"}, &reply); err == nil ||
+		&utils.TenantID{Tenant: "cgrates.org", ID: "ROUTE_ResourceTest"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -202,26 +202,26 @@ func testV1SplSAddNewSplPrf(t *testing.T) {
 	splPrf = &v1.RouteWithCache{
 		RouteProfile: &engine.RouteProfile{
 			Tenant:    "cgrates.org",
-			ID:        "SPL_ResourceTest",
+			ID:        "ROUTE_ResourceTest",
 			Sorting:   utils.MetaReas,
 			FilterIDs: []string{"*string:~*req.CustomField:ResourceTest"},
 			Routes: []*engine.Route{
-				//supplier1 will have ResourceUsage = 11
+				//route1 will have ResourceUsage = 11
 				{
-					ID:          "supplier1",
+					ID:          "route1",
 					ResourceIDs: []string{"ResourceSupplier1", "Resource2Supplier1"},
 					Weight:      20,
 					Blocker:     false,
 				},
-				//supplier2 and supplier3 will have the same ResourceUsage = 7
+				//route2 and route3 will have the same ResourceUsage = 7
 				{
-					ID:          "supplier2",
+					ID:          "route2",
 					ResourceIDs: []string{"ResourceSupplier2"},
 					Weight:      20,
 					Blocker:     false,
 				},
 				{
-					ID:          "supplier3",
+					ID:          "route3",
 					ResourceIDs: []string{"ResourceSupplier3"},
 					Weight:      35,
 					Blocker:     false,
@@ -237,7 +237,7 @@ func testV1SplSAddNewSplPrf(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	if err := splSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "SPL_ResourceTest"}, &reply); err != nil {
+		&utils.TenantID{Tenant: "cgrates.org", ID: "ROUTE_ResourceTest"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(splPrf.RouteProfile, reply) {
 		t.Errorf("Expecting: %+v, received: %+v", splPrf.RouteProfile, reply)
@@ -251,7 +251,7 @@ func testV1SplSAddNewResPrf(t *testing.T) {
 		ResourceProfile: &engine.ResourceProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ResourceSupplier1",
-			FilterIDs: []string{"*string:~*req.Supplier:supplier1", "*string:~*req.ResID:ResourceSupplier1"},
+			FilterIDs: []string{"*string:~*req.Supplier:route1", "*string:~*req.ResID:ResourceSupplier1"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -274,7 +274,7 @@ func testV1SplSAddNewResPrf(t *testing.T) {
 		ResourceProfile: &engine.ResourceProfile{
 			Tenant:    "cgrates.org",
 			ID:        "Resource2Supplier1",
-			FilterIDs: []string{"*string:~*req.Supplier:supplier1", "*string:~*req.ResID:Resource2Supplier1"},
+			FilterIDs: []string{"*string:~*req.Supplier:route1", "*string:~*req.ResID:Resource2Supplier1"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -297,7 +297,7 @@ func testV1SplSAddNewResPrf(t *testing.T) {
 		ResourceProfile: &engine.ResourceProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ResourceSupplier2",
-			FilterIDs: []string{"*string:~*req.Supplier:supplier2", "*string:~*req.ResID:ResourceSupplier2"},
+			FilterIDs: []string{"*string:~*req.Supplier:route2", "*string:~*req.ResID:ResourceSupplier2"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -320,7 +320,7 @@ func testV1SplSAddNewResPrf(t *testing.T) {
 		ResourceProfile: &engine.ResourceProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ResourceSupplier3",
-			FilterIDs: []string{"*string:~*req.Supplier:supplier3", "*string:~*req.ResID:ResourceSupplier3"},
+			FilterIDs: []string{"*string:~*req.Supplier:route3", "*string:~*req.ResID:ResourceSupplier3"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -350,7 +350,7 @@ func testV1SplSPopulateResUsage(t *testing.T) {
 				ID:     "Event1",
 				Event: map[string]interface{}{
 					"Account":  "1002",
-					"Supplier": "supplier1",
+					"Supplier": "route1",
 					"ResID":    "ResourceSupplier1",
 				},
 			},
@@ -375,7 +375,7 @@ func testV1SplSPopulateResUsage(t *testing.T) {
 				ID:     "Event2",
 				Event: map[string]interface{}{
 					"Account":  "1002",
-					"Supplier": "supplier1",
+					"Supplier": "route1",
 					"ResID":    "Resource2Supplier1",
 				},
 			},
@@ -399,7 +399,7 @@ func testV1SplSPopulateResUsage(t *testing.T) {
 				ID:     "Event3",
 				Event: map[string]interface{}{
 					"Account":  "1002",
-					"Supplier": "supplier2",
+					"Supplier": "route2",
 					"ResID":    "ResourceSupplier2",
 				},
 			},
@@ -423,7 +423,7 @@ func testV1SplSPopulateResUsage(t *testing.T) {
 				ID:     "Event4",
 				Event: map[string]interface{}{
 					"Account":  "1002",
-					"Supplier": "supplier3",
+					"Supplier": "route3",
 					"ResID":    "ResourceSupplier3",
 				},
 			},
@@ -453,7 +453,7 @@ func testV1SplSGetSortedSuppliers(t *testing.T) {
 			},
 		},
 	}
-	expSupplierIDs := []string{"supplier3", "supplier2", "supplier1"}
+	expSupplierIDs := []string{"route3", "route2", "route1"}
 	var suplsReply engine.SortedRoutes
 	if err := splSv1Rpc.Call(utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err != nil {
@@ -463,8 +463,8 @@ func testV1SplSGetSortedSuppliers(t *testing.T) {
 		for i, supl := range suplsReply.SortedRoutes {
 			rcvSupl[i] = supl.RouteID
 		}
-		if suplsReply.ProfileID != "SPL_ResourceTest" {
-			t.Errorf("Expecting: SPL_ResourceTest, received: %s",
+		if suplsReply.ProfileID != "ROUTE_ResourceTest" {
+			t.Errorf("Expecting: ROUTE_ResourceTest, received: %s",
 				suplsReply.ProfileID)
 		}
 		if !reflect.DeepEqual(rcvSupl, expSupplierIDs) {
@@ -477,7 +477,7 @@ func testV1SplSGetSortedSuppliers(t *testing.T) {
 func testV1SplSAddNewSplPrf2(t *testing.T) {
 	var reply *engine.RouteProfile
 	if err := splSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "SPL_ResourceDescendent"}, &reply); err == nil ||
+		&utils.TenantID{Tenant: "cgrates.org", ID: "ROUTE_ResourceDescendent"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -485,26 +485,26 @@ func testV1SplSAddNewSplPrf2(t *testing.T) {
 	splPrf = &v1.RouteWithCache{
 		RouteProfile: &engine.RouteProfile{
 			Tenant:    "cgrates.org",
-			ID:        "SPL_ResourceDescendent",
+			ID:        "ROUTE_ResourceDescendent",
 			Sorting:   utils.MetaReds,
 			FilterIDs: []string{"*string:~*req.CustomField:ResourceDescendent"},
 			Routes: []*engine.Route{
-				//supplier1 will have ResourceUsage = 11
+				//route1 will have ResourceUsage = 11
 				{
-					ID:          "supplier1",
+					ID:          "route1",
 					ResourceIDs: []string{"ResourceSupplier1", "Resource2Supplier1"},
 					Weight:      20,
 					Blocker:     false,
 				},
-				//supplier2 and supplier3 will have the same ResourceUsage = 7
+				//route2 and route3 will have the same ResourceUsage = 7
 				{
-					ID:          "supplier2",
+					ID:          "route2",
 					ResourceIDs: []string{"ResourceSupplier2"},
 					Weight:      20,
 					Blocker:     false,
 				},
 				{
-					ID:          "supplier3",
+					ID:          "route3",
 					ResourceIDs: []string{"ResourceSupplier3"},
 					Weight:      35,
 					Blocker:     false,
@@ -520,7 +520,7 @@ func testV1SplSAddNewSplPrf2(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	if err := splSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "SPL_ResourceDescendent"}, &reply); err != nil {
+		&utils.TenantID{Tenant: "cgrates.org", ID: "ROUTE_ResourceDescendent"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(splPrf.RouteProfile, reply) {
 		t.Errorf("Expecting: %+v, received: %+v", splPrf.RouteProfile, reply)
@@ -539,7 +539,7 @@ func testV1SplSGetSortedSuppliers2(t *testing.T) {
 			},
 		},
 	}
-	expSupplierIDs := []string{"supplier1", "supplier3", "supplier2"}
+	expSupplierIDs := []string{"route1", "route3", "route2"}
 	var suplsReply engine.SortedRoutes
 	if err := splSv1Rpc.Call(utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err != nil {
@@ -549,8 +549,8 @@ func testV1SplSGetSortedSuppliers2(t *testing.T) {
 		for i, supl := range suplsReply.SortedRoutes {
 			rcvSupl[i] = supl.RouteID
 		}
-		if suplsReply.ProfileID != "SPL_ResourceDescendent" {
-			t.Errorf("Expecting: SPL_ResourceDescendent, received: %s",
+		if suplsReply.ProfileID != "ROUTE_ResourceDescendent" {
+			t.Errorf("Expecting: ROUTE_ResourceDescendent, received: %s",
 				suplsReply.ProfileID)
 		}
 		if !reflect.DeepEqual(rcvSupl, expSupplierIDs) {
@@ -744,7 +744,7 @@ func testV1SplSGetSoredSuppliersWithLoad(t *testing.T) {
 	}
 	expSuppliers := []*engine.SortedRoute{
 		{
-			RouteID:         "supplier2",
+			RouteID:         "route2",
 			RouteParameters: "",
 			SortingData: map[string]interface{}{
 				"Load":   2.0,
@@ -752,7 +752,7 @@ func testV1SplSGetSoredSuppliersWithLoad(t *testing.T) {
 				"Weight": 20.0},
 		},
 		{
-			RouteID:         "supplier3",
+			RouteID:         "route3",
 			RouteParameters: "",
 			SortingData: map[string]interface{}{
 				"Load":   3.0,
@@ -760,7 +760,7 @@ func testV1SplSGetSoredSuppliersWithLoad(t *testing.T) {
 				"Weight": 35.0},
 		},
 		{
-			RouteID:         "supplier1",
+			RouteID:         "route1",
 			RouteParameters: "",
 			SortingData: map[string]interface{}{
 				"Load":   2.0,
@@ -774,8 +774,8 @@ func testV1SplSGetSoredSuppliersWithLoad(t *testing.T) {
 		ev, &suplsReply); err != nil {
 		t.Error(err)
 	} else {
-		if suplsReply.ProfileID != "SPL_LOAD_DIST" {
-			t.Errorf("Expecting: SPL_LOAD_DIST, received: %s",
+		if suplsReply.ProfileID != "ROUTE_LOAD_DIST" {
+			t.Errorf("Expecting: ROUTE_LOAD_DIST, received: %s",
 				suplsReply.ProfileID)
 		}
 		if !reflect.DeepEqual(suplsReply.SortedRoutes, expSuppliers) {
