@@ -676,7 +676,7 @@ func TestFilterNewRequestFilter(t *testing.T) {
 
 func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true)
 	dmFilterPass := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := FilterS{
 		cfg: cfg,
@@ -864,7 +864,7 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 
 func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true)
 	dmFilterPass := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := FilterS{
 		cfg: cfg,
@@ -972,7 +972,7 @@ func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
 
 func TestPassFilterMaxCost(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true)
 	dmFilterPass := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := FilterS{
 		cfg: cfg,
@@ -1024,7 +1024,7 @@ func TestPassFilterMaxCost(t *testing.T) {
 
 func TestPassFilterMissingField(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true)
 	dmFilterPass := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := FilterS{
 		cfg: cfg,
@@ -1070,7 +1070,7 @@ func TestPassFilterMissingField(t *testing.T) {
 
 func TestEventCostFilter(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true)
 	dmFilterPass := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := FilterS{
 		cfg: cfg,
@@ -1291,7 +1291,7 @@ func TestVerifyPrefixes(t *testing.T) {
 
 func TestPassPartial(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true)
 	dmFilterPass := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := FilterS{
 		cfg: cfg,

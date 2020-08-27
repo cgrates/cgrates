@@ -125,8 +125,8 @@ func TimeDecodeValue1(dc bsoncodec.DecodeContext, vr bsonrw.ValueReader, val ref
 }
 
 // NewMongoStorage givese new mongo driver
-func NewMongoStorage(host, port, db, user, pass, mrshlerStr, storageType string, cdrsIndexes []string,
-	isDataDB bool) (ms *MongoStorage, err error) {
+func NewMongoStorage(host, port, db, user, pass, mrshlerStr, storageType string,
+	cdrsIndexes []string, isDataDB bool, ttl time.Duration) (ms *MongoStorage, err error) {
 	url := host
 	if port != "" {
 		url += ":" + port
@@ -140,10 +140,6 @@ func NewMongoStorage(host, port, db, user, pass, mrshlerStr, storageType string,
 		dbName = strings.Split(db, "?")[0] // remove extra info after ?
 	}
 	ctx := context.Background()
-	ttl := config.CgrConfig().DataDbCfg().QueryTimeout
-	if !isDataDB {
-		ttl = config.CgrConfig().StorDbCfg().QueryTimeout
-	}
 	url = "mongodb://" + url
 	reg := bson.NewRegistryBuilder().RegisterDecoder(tTime, bsoncodec.ValueDecoderFunc(TimeDecodeValue1)).Build()
 	opt := options.Client().

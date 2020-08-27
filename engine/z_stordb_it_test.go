@@ -26,6 +26,7 @@ import (
 	"sort"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -67,7 +68,7 @@ func TestStorDBit(t *testing.T) {
 			t.Error(err)
 		}
 		config.SetCgrConfig(cfg)
-		storDB = NewInternalDB(nil, nil, false, cfg.StorDbCfg().Items)
+		storDB = NewInternalDB(nil, nil, false)
 	case utils.MetaMySQL:
 		if cfg, err = config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", "storage", "mysql")); err != nil {
 			t.Fatal(err)
@@ -75,8 +76,7 @@ func TestStorDBit(t *testing.T) {
 		if storDB, err = NewMySQLStorage(cfg.StorDbCfg().Host,
 			cfg.StorDbCfg().Port, cfg.StorDbCfg().Name,
 			cfg.StorDbCfg().User, cfg.StorDbCfg().Password,
-			cfg.StorDbCfg().MaxOpenConns, cfg.StorDbCfg().MaxIdleConns,
-			cfg.StorDbCfg().ConnMaxLifetime); err != nil {
+			100, 10, 0); err != nil {
 			t.Fatal(err)
 		}
 	case utils.MetaMongo:
@@ -87,7 +87,7 @@ func TestStorDBit(t *testing.T) {
 			cfg.StorDbCfg().Port, cfg.StorDbCfg().Name,
 			cfg.StorDbCfg().User, cfg.StorDbCfg().Password,
 			cfg.GeneralCfg().DBDataEncoding,
-			utils.StorDB, cfg.StorDbCfg().StringIndexedFields, false); err != nil {
+			utils.StorDB, cfg.StorDbCfg().StringIndexedFields, false, 10*time.Second); err != nil {
 			t.Fatal(err)
 		}
 	case utils.MetaPostgres:
@@ -97,8 +97,8 @@ func TestStorDBit(t *testing.T) {
 		if storDB, err = NewPostgresStorage(cfg.StorDbCfg().Host,
 			cfg.StorDbCfg().Port, cfg.StorDbCfg().Name,
 			cfg.StorDbCfg().User, cfg.StorDbCfg().Password,
-			cfg.StorDbCfg().SSLMode, cfg.StorDbCfg().MaxOpenConns,
-			cfg.StorDbCfg().MaxIdleConns, cfg.StorDbCfg().ConnMaxLifetime); err != nil {
+			utils.IfaceAsString(cfg.StorDbCfg().Opts[utils.SSLModeCfg]),
+			100, 10, 0); err != nil {
 			t.Fatal(err)
 		}
 	default:

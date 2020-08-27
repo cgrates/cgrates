@@ -75,12 +75,18 @@ func TestDataDBReload(t *testing.T) {
 		t.Errorf("Expected service to be running")
 	}
 	oldcfg := &config.DataDbCfg{
-		DataDbType:   utils.MONGO,
-		DataDbHost:   "127.0.0.1",
-		DataDbPort:   "27017",
-		DataDbName:   "10",
-		DataDbUser:   "cgrates",
-		QueryTimeout: 10 * time.Second,
+		DataDbType: utils.MONGO,
+		DataDbHost: "127.0.0.1",
+		DataDbPort: "27017",
+		DataDbName: "10",
+		DataDbUser: "cgrates",
+		Opts: map[string]interface{}{
+			utils.QueryTimeoutCfg:       "10s",
+			utils.ClusterOnDownDelayCfg: "0",
+			utils.ClusterSyncCfg:        "5s",
+			utils.RedisClusterCfg:       false,
+			utils.RedisSentinelNameCfg:  "",
+		},
 		Items: map[string]*config.ItemOpt{
 			utils.MetaAccounts: {
 				Replicate: false,

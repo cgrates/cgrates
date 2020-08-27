@@ -85,13 +85,12 @@ func testActionsInitCfg(t *testing.T) {
 func testActionsInitCdrsStore(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
-		actsCdrStore = NewInternalDB(actsCfg.StorDbCfg().StringIndexedFields, actsCfg.StorDbCfg().PrefixIndexedFields, true, actsCfg.StorDbCfg().Items)
+		actsCdrStore = NewInternalDB(actsCfg.StorDbCfg().StringIndexedFields, actsCfg.StorDbCfg().PrefixIndexedFields, true)
 	case utils.MetaMySQL:
 		if actsCdrStore, err = NewMySQLStorage(actsCfg.StorDbCfg().Host,
 			actsCfg.StorDbCfg().Port, actsCfg.StorDbCfg().Name,
 			actsCfg.StorDbCfg().User, actsCfg.StorDbCfg().Password,
-			actsCfg.StorDbCfg().MaxOpenConns, actsCfg.StorDbCfg().MaxIdleConns,
-			actsCfg.StorDbCfg().ConnMaxLifetime); err != nil {
+			100, 10, 0); err != nil {
 			t.Fatal("Could not connect to mysql", err.Error())
 		}
 	case utils.MetaMongo:
@@ -99,7 +98,7 @@ func testActionsInitCdrsStore(t *testing.T) {
 			actsCfg.StorDbCfg().Port, actsCfg.StorDbCfg().Name,
 			actsCfg.StorDbCfg().User, actsCfg.StorDbCfg().Password,
 			actsCfg.GeneralCfg().DBDataEncoding,
-			utils.StorDB, nil, false); err != nil {
+			utils.StorDB, nil, false, 10*time.Second); err != nil {
 			t.Fatal("Could not connect to mongo", err.Error())
 		}
 	case utils.MetaPostgres:

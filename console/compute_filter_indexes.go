@@ -34,7 +34,7 @@ func init() {
 type CmdComputeFilterIndexes struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.ArgsComputeFilterIndexIDs
+	rpcParams *utils.ArgsComputeFilterIndexes
 	*CommandExecuter
 }
 
@@ -48,7 +48,7 @@ func (self *CmdComputeFilterIndexes) RpcMethod() string {
 
 func (self *CmdComputeFilterIndexes) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.ArgsComputeFilterIndexIDs{}
+		self.rpcParams = &utils.ArgsComputeFilterIndexes{}
 	}
 	return self.rpcParams
 }

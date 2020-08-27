@@ -44,26 +44,31 @@ func TestStoreDbCfgloadFromJsonCfg(t *testing.T) {
 	"db_name": "cgrates",					// stor database name
 	"db_user": "cgrates",					// username to use when connecting to stordb
 	"db_password": "password",				// password to use when connecting to stordb
-	"max_open_conns": 100,					// maximum database connections opened, not applying for mongo
-	"max_idle_conns": 10,					// maximum database connections idle, not applying for mongo
-	"conn_max_lifetime": 0, 				// maximum amount of time in seconds a connection may be reused (0 for unlimited), not applying for mongo
+	"opts": {
+		"max_open_conns": 100,					// maximum database connections opened, not applying for mongo
+		"max_idle_conns": 10,					// maximum database connections idle, not applying for mongo
+		"conn_max_lifetime": 0, 				// maximum amount of time in seconds a connection may be reused (0 for unlimited), not applying for mongo
+	},
 	"string_indexed_fields": [],			// indexes on cdrs table to speed up queries, used in case of *mongo and *internal
 	"prefix_indexed_fields":[],				// prefix indexes on cdrs table to speed up queries, used in case of *internal
 	}
 }`
 	expected = StorDbCfg{
-		Type:                "mysql",
-		Host:                "127.0.0.1",
-		Port:                "3306",
-		Name:                "cgrates",
-		User:                "cgrates",
-		Password:            "password",
-		MaxOpenConns:        100,
-		MaxIdleConns:        10,
-		ConnMaxLifetime:     0,
+		Type:     "mysql",
+		Host:     "127.0.0.1",
+		Port:     "3306",
+		Name:     "cgrates",
+		User:     "cgrates",
+		Password: "password",
+		Opts: map[string]interface{}{
+			utils.MaxOpenConnsCfg:    100.,
+			utils.MaxIdleConnsCfg:    10.,
+			utils.ConnMaxLifetimeCfg: 0.,
+		},
 		StringIndexedFields: []string{},
 		PrefixIndexedFields: []string{},
 	}
+	dbcfg.Opts = make(map[string]interface{})
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if jsnStoreDbCfg, err := jsnCfg.DbJsonCfg(STORDB_JSN); err != nil {
@@ -71,7 +76,7 @@ func TestStoreDbCfgloadFromJsonCfg(t *testing.T) {
 	} else if err = dbcfg.loadFromJsonCfg(jsnStoreDbCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, dbcfg) {
-		t.Errorf("Expected: %+v , recived: %+v", expected, dbcfg)
+		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(dbcfg))
 	}
 }
 func TestStoreDbCfgloadFromJsonCfgPort(t *testing.T) {
@@ -81,8 +86,10 @@ func TestStoreDbCfgloadFromJsonCfgPort(t *testing.T) {
 	"db_type": "mongo",
 	}
 }`
+	dbcfg.Opts = make(map[string]interface{})
 	expected := StorDbCfg{
 		Type: "mongo",
+		Opts: make(map[string]interface{}),
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
@@ -102,6 +109,7 @@ func TestStoreDbCfgloadFromJsonCfgPort(t *testing.T) {
 	expected = StorDbCfg{
 		Type: "mongo",
 		Port: "27017",
+		Opts: make(map[string]interface{}),
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
@@ -121,6 +129,7 @@ func TestStoreDbCfgloadFromJsonCfgPort(t *testing.T) {
 	expected = StorDbCfg{
 		Type: "internal",
 		Port: "internal",
+		Opts: make(map[string]interface{}),
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
@@ -136,6 +145,7 @@ func TestStoreDbCfgloadFromJsonCfgPort(t *testing.T) {
 func TestStorDbCfgAsMapInterface(t *testing.T) {
 	var dbcfg StorDbCfg
 	dbcfg.Items = make(map[string]*ItemOpt)
+	dbcfg.Opts = make(map[string]interface{})
 	cfgJSONStr := `{
 		"stor_db": {								
 			"db_type": "*mysql",					
@@ -144,13 +154,15 @@ func TestStorDbCfgAsMapInterface(t *testing.T) {
 			"db_name": "cgrates",					
 			"db_user": "cgrates",					
 			"db_password": "",						
-			"max_open_conns": 100,					
-			"max_idle_conns": 10,					
-			"conn_max_lifetime": 0, 				
 			"string_indexed_fields": [],			
-			"prefix_indexed_fields":[],				
-			"query_timeout":"10s",
-			"sslmode":"disable",					
+			"prefix_indexed_fields":[],	
+			"opts": {	
+				"max_open_conns": 100,					
+				"max_idle_conns": 10,					
+				"conn_max_lifetime": 0, 			
+				"query_timeout":"10s",
+				"sslmode":"disable",					
+			},
 			"items":{
 				"session_costs": {}, 
 				"cdrs": {}, 		
@@ -165,13 +177,15 @@ func TestStorDbCfgAsMapInterface(t *testing.T) {
 		"db_name":               "cgrates",
 		"db_user":               "cgrates",
 		"db_password":           "",
-		"max_open_conns":        100,
-		"max_idle_conns":        10,
-		"conn_max_lifetime":     0,
 		"string_indexed_fields": []string{},
 		"prefix_indexed_fields": []string{},
-		"query_timeout":         "10s",
-		"sslmode":               "disable",
+		"opts": map[string]interface{}{
+			"max_open_conns":    100.,
+			"max_idle_conns":    10.,
+			"conn_max_lifetime": 0.,
+			"query_timeout":     "10s",
+			"sslmode":           "disable",
+		},
 		"items": map[string]interface{}{
 			"session_costs": map[string]interface{}{"remote": false, "replicate": false, "ApiKey": "", "RouteID": ""},
 			"cdrs":          map[string]interface{}{"remote": false, "replicate": false, "ApiKey": "", "RouteID": ""},

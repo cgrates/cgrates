@@ -699,8 +699,10 @@ func TestConfigSanityEventReader(t *testing.T) {
 func TestConfigSanityStorDB(t *testing.T) {
 	cfg, _ = NewDefaultCGRConfig()
 	cfg.storDbCfg = &StorDbCfg{
-		Type:    utils.POSTGRES,
-		SSLMode: "wrongSSLMode",
+		Type: utils.POSTGRES,
+		Opts: map[string]interface{}{
+			utils.SSLModeCfg: "wrongSSLMode",
+		},
 	}
 	expected := "<stor_db> unsuported sslmode for storDB"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {

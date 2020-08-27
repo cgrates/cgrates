@@ -1881,6 +1881,7 @@ const (
 	QueryTimeoutCfg        = "query_timeout"
 	SSLModeCfg             = "sslmode"
 	ItemsCfg               = "items"
+	OptsCfg                = "opts"
 )
 
 // DataDbCfg
@@ -1891,9 +1892,12 @@ const (
 	DataDbNameCfg         = "db_name"
 	DataDbUserCfg         = "db_user"
 	DataDbPassCfg         = "db_password"
-	DataDbSentinelNameCfg = "redis_sentinel"
+	RedisSentinelNameCfg  = "redis_sentinel"
 	RmtConnsCfg           = "remote_conns"
 	RplConnsCfg           = "replication_conns"
+	RedisClusterCfg       = "redis_cluster"
+	ClusterSyncCfg        = "cluster_sync"
+	ClusterOnDownDelayCfg = "cluster_ondown_delay"
 )
 
 // ItemOpt
@@ -2175,21 +2179,22 @@ const (
 
 // MigratorCgrCfg
 const (
-	OutDataDBTypeCfg          = "out_datadb_type"
-	OutDataDBHostCfg          = "out_datadb_host"
-	OutDataDBPortCfg          = "out_datadb_port"
-	OutDataDBNameCfg          = "out_datadb_name"
-	OutDataDBUserCfg          = "out_datadb_user"
-	OutDataDBPasswordCfg      = "out_datadb_password"
-	OutDataDBEncodingCfg      = "out_datadb_encoding"
-	OutDataDBRedisSentinelCfg = "out_datadb_redis_sentinel"
-	OutStorDBTypeCfg          = "out_stordb_type"
-	OutStorDBHostCfg          = "out_stordb_host"
-	OutStorDBPortCfg          = "out_stordb_port"
-	OutStorDBNameCfg          = "out_stordb_name"
-	OutStorDBUserCfg          = "out_stordb_user"
-	OutStorDBPasswordCfg      = "out_stordb_password"
-	UsersFiltersCfg           = "users_filters"
+	OutDataDBTypeCfg     = "out_datadb_type"
+	OutDataDBHostCfg     = "out_datadb_host"
+	OutDataDBPortCfg     = "out_datadb_port"
+	OutDataDBNameCfg     = "out_datadb_name"
+	OutDataDBUserCfg     = "out_datadb_user"
+	OutDataDBPasswordCfg = "out_datadb_password"
+	OutDataDBEncodingCfg = "out_datadb_encoding"
+	OutStorDBTypeCfg     = "out_stordb_type"
+	OutStorDBHostCfg     = "out_stordb_host"
+	OutStorDBPortCfg     = "out_stordb_port"
+	OutStorDBNameCfg     = "out_stordb_name"
+	OutStorDBUserCfg     = "out_stordb_user"
+	OutStorDBPasswordCfg = "out_stordb_password"
+	OutStorDBOptsCfg     = "out_stordb_opts"
+	OutDataDBOptsCfg     = "out_datadb_opts"
+	UsersFiltersCfg      = "users_filters"
 )
 
 // MailerCfg

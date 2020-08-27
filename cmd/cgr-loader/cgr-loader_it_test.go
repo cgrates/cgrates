@@ -27,7 +27,6 @@ import (
 	"path"
 	"reflect"
 	"testing"
-	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -51,17 +50,21 @@ func TestLoadConfig(t *testing.T) {
 	*dataDBPasswd = "toor"
 	*dbRedisSentinel = "sentinel1"
 	expDBcfg := &config.DataDbCfg{
-		DataDbType:         utils.REDIS,
-		DataDbHost:         "localhost",
-		DataDbPort:         "2012",
-		DataDbName:         "100",
-		DataDbUser:         "cgrates2",
-		DataDbPass:         "toor",
-		DataDbSentinelName: "sentinel1",
-		QueryTimeout:       10 * time.Second,
-		ClusterSync:        5 * time.Second,
-		RmtConns:           []string{},
-		RplConns:           []string{},
+		DataDbType: utils.REDIS,
+		DataDbHost: "localhost",
+		DataDbPort: "2012",
+		DataDbName: "100",
+		DataDbUser: "cgrates2",
+		DataDbPass: "toor",
+		Opts: map[string]interface{}{
+			utils.RedisSentinelNameCfg:  "sentinel1",
+			utils.QueryTimeoutCfg:       "10s",
+			utils.ClusterSyncCfg:        "5s",
+			utils.ClusterOnDownDelayCfg: "0",
+			utils.RedisClusterCfg:       false,
+		},
+		RmtConns: []string{},
+		RplConns: []string{},
 	}
 	// StorDB
 	*storDBType = utils.MetaPostgres
@@ -77,12 +80,15 @@ func TestLoadConfig(t *testing.T) {
 		Name:                "cgrates2",
 		User:                "10",
 		Password:            "toor",
-		MaxOpenConns:        100,
-		MaxIdleConns:        10,
-		SSLMode:             "disable",
 		StringIndexedFields: []string{},
 		PrefixIndexedFields: []string{},
-		QueryTimeout:        10 * time.Second,
+		Opts: map[string]interface{}{
+			utils.ConnMaxLifetimeCfg: 0.,
+			utils.QueryTimeoutCfg:    "10s",
+			utils.MaxOpenConnsCfg:    100.,
+			utils.MaxIdleConnsCfg:    10.,
+			utils.SSLModeCfg:         "disable",
+		},
 	}
 	// Loader
 	*tpid = "1"
@@ -258,9 +264,7 @@ func testLoadItConnectToDB(t *testing.T) {
 		ldrItCfg.DataDbCfg().DataDbHost, ldrItCfg.DataDbCfg().DataDbPort,
 		ldrItCfg.DataDbCfg().DataDbName, ldrItCfg.DataDbCfg().DataDbUser,
 		ldrItCfg.DataDbCfg().DataDbPass, ldrItCfg.GeneralCfg().DBDataEncoding,
-		ldrItCfg.DataDbCfg().DataDbSentinelName, ldrItCfg.DataDbCfg().RedisCluster,
-		ldrItCfg.DataDbCfg().ClusterSync, ldrItCfg.DataDbCfg().ClusterOnDownDelay,
-		ldrItCfg.DataDbCfg().Items); err != nil {
+		ldrItCfg.DataDbCfg().Opts); err != nil {
 		t.Fatal(err)
 	}
 }

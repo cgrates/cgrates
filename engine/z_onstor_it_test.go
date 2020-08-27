@@ -87,7 +87,7 @@ func TestOnStorIT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		sleepDelay = 10 * time.Millisecond
-		onStor = NewDataManager(NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items),
+		onStor = NewDataManager(NewInternalDB(nil, nil, true),
 			config.CgrConfig().CacheCfg(), nil)
 	case utils.MetaMySQL:
 		cfg, _ := config.NewDefaultCGRConfig()
@@ -111,7 +111,7 @@ func TestOnStorIT(t *testing.T) {
 			mgoITCfg.StorDbCfg().Port, mgoITCfg.StorDbCfg().Name,
 			mgoITCfg.StorDbCfg().User, mgoITCfg.StorDbCfg().Password,
 			mgoITCfg.GeneralCfg().DBDataEncoding,
-			utils.StorDB, nil, false); err != nil {
+			utils.StorDB, nil, false, 10*time.Second); err != nil {
 			t.Fatal(err)
 		}
 		onStorCfg = mgoITCfg.StorDbCfg().Name

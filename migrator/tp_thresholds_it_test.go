@@ -71,20 +71,18 @@ func testTpTresITConnect(t *testing.T) {
 	storDBIn, err := NewMigratorStorDB(tpTresCfgIn.StorDbCfg().Type,
 		tpTresCfgIn.StorDbCfg().Host, tpTresCfgIn.StorDbCfg().Port,
 		tpTresCfgIn.StorDbCfg().Name, tpTresCfgIn.StorDbCfg().User,
-		tpTresCfgIn.StorDbCfg().Password, tpTresCfgIn.GeneralCfg().DBDataEncoding, tpTresCfgIn.StorDbCfg().SSLMode,
-		tpTresCfgIn.StorDbCfg().MaxOpenConns, tpTresCfgIn.StorDbCfg().MaxIdleConns,
-		tpTresCfgIn.StorDbCfg().ConnMaxLifetime, tpTresCfgIn.StorDbCfg().StringIndexedFields,
-		tpTresCfgIn.StorDbCfg().PrefixIndexedFields, tpTresCfgIn.StorDbCfg().Items)
+		tpTresCfgIn.StorDbCfg().Password, tpTresCfgIn.GeneralCfg().DBDataEncoding,
+		tpTresCfgIn.StorDbCfg().StringIndexedFields, tpTresCfgIn.StorDbCfg().PrefixIndexedFields,
+		tpTresCfgIn.StorDbCfg().Opts)
 	if err != nil {
 		log.Fatal(err)
 	}
 	storDBOut, err := NewMigratorStorDB(tpTresCfgOut.StorDbCfg().Type,
 		tpTresCfgOut.StorDbCfg().Host, tpTresCfgOut.StorDbCfg().Port,
 		tpTresCfgOut.StorDbCfg().Name, tpTresCfgOut.StorDbCfg().User,
-		tpTresCfgOut.StorDbCfg().Password, tpTresCfgOut.GeneralCfg().DBDataEncoding, tpTresCfgIn.StorDbCfg().SSLMode,
-		tpTresCfgIn.StorDbCfg().MaxOpenConns, tpTresCfgIn.StorDbCfg().MaxIdleConns,
-		tpTresCfgIn.StorDbCfg().ConnMaxLifetime, tpTresCfgIn.StorDbCfg().StringIndexedFields,
-		tpTresCfgIn.StorDbCfg().PrefixIndexedFields, tpTresCfgOut.StorDbCfg().Items)
+		tpTresCfgOut.StorDbCfg().Password, tpTresCfgOut.GeneralCfg().DBDataEncoding,
+		tpTresCfgIn.StorDbCfg().StringIndexedFields, tpTresCfgIn.StorDbCfg().PrefixIndexedFields,
+		tpTresCfgOut.StorDbCfg().Opts)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -69,11 +69,6 @@ const CGRATES_CFG_JSON = `
 	"db_name": "10", 						// data_db database name to connect to
 	"db_user": "cgrates", 					// username to use when connecting to data_db
 	"db_password": "", 						// password to use when connecting to data_db
-	"redis_sentinel": "",					// the name of sentinel when used
-	"redis_cluster": false,					// if enabled the datadb will try to connect to the redis cluster
-	"cluster_sync": "5s",					// the sync interval for the redis cluster
-	"cluster_ondown_delay": "0",			// the delay before executing the commands if the redis cluster is in the CLUSTERDOWN state
-	"query_timeout":"10s",
 	"remote_conns":[],
 	"replication_conns":[],
 	"items":{
@@ -104,6 +99,13 @@ const CGRATES_CFG_JSON = `
 		"*load_ids":{"remote":false, "replicate":false}, 
 		"*indexes":{"remote":false, "replicate":false}, 
 	},
+	"opts":{
+		"redis_sentinel": "",					// the name of sentinel when used
+		"redis_cluster": false,					// if enabled the datadb will try to connect to the redis cluster
+		"cluster_sync": "5s",					// the sync interval for the redis cluster
+		"cluster_ondown_delay": "0",			// the delay before executing the commands if the redis cluster is in the CLUSTERDOWN state
+		"query_timeout":"10s",
+	}
 },
 
 
@@ -114,13 +116,15 @@ const CGRATES_CFG_JSON = `
 	"db_name": "cgrates",					// stor database name
 	"db_user": "cgrates",					// username to use when connecting to stor_db
 	"db_password": "",						// password to use when connecting to stor_db
-	"max_open_conns": 100,					// maximum database connections opened, not applying for mongo
-	"max_idle_conns": 10,					// maximum database connections idle, not applying for mongo
-	"conn_max_lifetime": 0, 				// maximum amount of time in seconds a connection may be reused (0 for unlimited), not applying for mongo
 	"string_indexed_fields": [],			// indexes on cdrs table to speed up queries, used in case of *mongo and *internal
 	"prefix_indexed_fields":[],				// prefix indexes on cdrs table to speed up queries, used in case of *internal
-	"query_timeout":"10s",
-	"sslmode":"disable",					// sslmode in case of *postgres
+	"opts": {
+		"max_open_conns": 100,					// maximum database connections opened, not applying for mongo
+		"max_idle_conns": 10,					// maximum database connections idle, not applying for mongo
+		"conn_max_lifetime": 0, 				// maximum amount of time in seconds a connection may be reused (0 for unlimited), not applying for mongo
+		"query_timeout":"10s",
+		"sslmode":"disable",					// sslmode in case of *postgres
+	},
 	"items":{
 		"*session_costs": {"remote":false, "replicate":false}, 
 		"*cdrs": {"remote":false, "replicate":false}, 		
@@ -906,11 +910,7 @@ const CGRATES_CFG_JSON = `
 	"out_datadb_name": "10",
 	"out_datadb_user": "cgrates",
 	"out_datadb_password": "",
-	"out_datadb_encoding" : "msgpack",
-	"out_datadb_redis_sentinel": "",					
-	"out_datadb_redis_cluster": false,					
-	"out_datadb_cluster_sync": "5s",					
-	"out_datadb_cluster_ondown_delay": "0",			
+	"out_datadb_encoding" : "msgpack",		
 	"out_stordb_type": "mysql",
 	"out_stordb_host": "127.0.0.1",
 	"out_stordb_port": "3306",
@@ -918,6 +918,13 @@ const CGRATES_CFG_JSON = `
 	"out_stordb_user": "cgrates",
 	"out_stordb_password": "",
 	"users_filters":[],
+	"out_datadb_opts":{
+		"redis_sentinel": "",					
+		"redis_cluster": false,					
+		"cluster_sync": "5s",					
+		"cluster_ondown_delay": "0",	
+	},
+	"out_stordb_opts":{},
 },
 
 

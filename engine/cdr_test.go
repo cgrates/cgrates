@@ -679,7 +679,7 @@ func TestCDRAsExportRecord(t *testing.T) {
 		t.Errorf("Expecting:\n%s\nReceived:\n%s", "1", expRecord[0])
 	}
 	defaultCfg, _ := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, true, defaultCfg.DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true)
 	dmForCDR := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	cfgCdrFld = &config.FCTemplate{
 		Tag:      "destination",

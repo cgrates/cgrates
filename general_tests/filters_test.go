@@ -39,7 +39,7 @@ func TestFilterPassDestinations(t *testing.T) {
 	connMgr := engine.NewConnManager(config.CgrConfig(), map[string]chan rpcclient.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier): internalAPIerSv1Chan,
 	})
-	data := engine.NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
+	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), connMgr)
 	internalAPIerSv1Chan <- &v1.APIerSv1{DataManager: dm}
 	engine.SetConnManager(connMgr)
@@ -90,7 +90,7 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier): internalAPIerSv1Chan,
 	})
-	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := engine.NewInternalDB(nil, nil, true)
 	dmFilterPass := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
 	filterS := engine.NewFilterS(cfg, connMgr, dmFilterPass)
 	if err := engine.Cache.Set(utils.CacheReverseDestinations, "+49",

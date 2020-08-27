@@ -24,8 +24,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cgrates/cgrates/config"
-
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -33,27 +31,40 @@ import (
 
 // NewDataDBConn creates a DataDB connection
 func NewDataDBConn(dbType, host, port, name, user,
-	pass, marshaler, sentinelName string, isCluster bool,
-	clusterSync, clusterOnDownDelay time.Duration,
-	itemsCacheCfg map[string]*config.ItemOpt) (d DataDB, err error) {
+	pass, marshaler string, opts map[string]interface{}) (d DataDB, err error) {
 	switch dbType {
 	case utils.REDIS:
 		var dbNo int
 		dbNo, err = strconv.Atoi(name)
 		if err != nil {
 			utils.Logger.Crit("Redis db name must be an integer!")
-			return nil, err
+			return
 		}
 		if port != "" && strings.Index(host, ":") == -1 {
 			host += ":" + port
 		}
+		var isCluster bool
+		if isCluster, err = utils.IfaceAsBool(opts[utils.RedisClusterCfg]); err != nil {
+			return
+		}
+		var clusterSync, clusterOnDownDelay time.Duration
+		if clusterSync, err = utils.IfaceAsDuration(opts[utils.ClusterSyncCfg]); err != nil {
+			return
+		}
+		if clusterOnDownDelay, err = utils.IfaceAsDuration(opts[utils.ClusterOnDownDelayCfg]); err != nil {
+			return
+		}
 		d, err = NewRedisStorage(host, dbNo, user, pass, marshaler,
-			utils.REDIS_MAX_CONNS, sentinelName, isCluster,
-			clusterSync, clusterOnDownDelay)
+			utils.REDIS_MAX_CONNS, utils.IfaceAsString(opts[utils.RedisSentinelNameCfg]),
+			isCluster, clusterSync, clusterOnDownDelay)
 	case utils.MONGO:
-		d, err = NewMongoStorage(host, port, name, user, pass, marshaler, utils.DataDB, nil, true)
+		var ttl time.Duration
+		if ttl, err = utils.IfaceAsDuration(opts[utils.QueryTimeoutCfg]); err != nil {
+			return
+		}
+		d, err = NewMongoStorage(host, port, name, user, pass, marshaler, utils.DataDB, nil, true, ttl)
 	case utils.INTERNAL:
-		d = NewInternalDB(nil, nil, true, itemsCacheCfg)
+		d = NewInternalDB(nil, nil, true)
 	default:
 		err = fmt.Errorf("unsupported db_type <%s>", dbType)
 	}
@@ -61,19 +72,43 @@ func NewDataDBConn(dbType, host, port, name, user,
 }
 
 // NewStorDBConn returns a StorDB(implements Storage interface) based on dbType
-func NewStorDBConn(dbType, host, port, name, user, pass, marshaler, sslmode string,
-	maxConn, maxIdleConn, connMaxLifetime int,
+func NewStorDBConn(dbType, host, port, name, user, pass, marshaler string,
 	stringIndexedFields, prefixIndexedFields []string,
-	itemsCacheCfg map[string]*config.ItemOpt) (db StorDB, err error) {
+	opts map[string]interface{}) (db StorDB, err error) {
 	switch dbType {
 	case utils.MONGO:
-		db, err = NewMongoStorage(host, port, name, user, pass, marshaler, utils.StorDB, stringIndexedFields, false)
+		var ttl time.Duration
+		if ttl, err = utils.IfaceAsDuration(opts[utils.QueryTimeoutCfg]); err != nil {
+			return nil, err
+		}
+		db, err = NewMongoStorage(host, port, name, user, pass, marshaler, utils.StorDB, stringIndexedFields, false, ttl)
 	case utils.POSTGRES:
-		db, err = NewPostgresStorage(host, port, name, user, pass, sslmode, maxConn, maxIdleConn, connMaxLifetime)
+		var maxConn, maxIdleConn, connMaxLifetime int64
+		if maxConn, err = utils.IfaceAsTInt64(opts[utils.MaxOpenConnsCfg]); err != nil {
+			return
+		}
+		if maxIdleConn, err = utils.IfaceAsTInt64(opts[utils.MaxIdleConnsCfg]); err != nil {
+			return
+		}
+		if connMaxLifetime, err = utils.IfaceAsTInt64(opts[utils.ConnMaxLifetimeCfg]); err != nil {
+			return
+		}
+		db, err = NewPostgresStorage(host, port, name, user, pass, utils.IfaceAsString(opts[utils.SSLModeCfg]),
+			int(maxConn), int(maxIdleConn), int(connMaxLifetime))
 	case utils.MYSQL:
-		db, err = NewMySQLStorage(host, port, name, user, pass, maxConn, maxIdleConn, connMaxLifetime)
+		var maxConn, maxIdleConn, connMaxLifetime int64
+		if maxConn, err = utils.IfaceAsTInt64(opts[utils.MaxOpenConnsCfg]); err != nil {
+			return
+		}
+		if maxIdleConn, err = utils.IfaceAsTInt64(opts[utils.MaxIdleConnsCfg]); err != nil {
+			return
+		}
+		if connMaxLifetime, err = utils.IfaceAsTInt64(opts[utils.ConnMaxLifetimeCfg]); err != nil {
+			return
+		}
+		db, err = NewMySQLStorage(host, port, name, user, pass, int(maxConn), int(maxIdleConn), int(connMaxLifetime))
 	case utils.INTERNAL:
-		db = NewInternalDB(stringIndexedFields, prefixIndexedFields, false, itemsCacheCfg)
+		db = NewInternalDB(stringIndexedFields, prefixIndexedFields, false)
 	default:
 		err = fmt.Errorf("unknown db '%s' valid options are [%s, %s, %s, %s]",
 			dbType, utils.MYSQL, utils.MONGO, utils.POSTGRES, utils.INTERNAL)

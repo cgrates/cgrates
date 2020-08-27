@@ -21,6 +21,7 @@ package services
 import (
 	"fmt"
 	"sync"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -59,9 +60,7 @@ func (db *DataDBService) Start() (err error) {
 		db.cfg.DataDbCfg().DataDbHost, db.cfg.DataDbCfg().DataDbPort,
 		db.cfg.DataDbCfg().DataDbName, db.cfg.DataDbCfg().DataDbUser,
 		db.cfg.DataDbCfg().DataDbPass, db.cfg.GeneralCfg().DBDataEncoding,
-		db.cfg.DataDbCfg().DataDbSentinelName, db.cfg.DataDbCfg().RedisCluster,
-		db.cfg.DataDbCfg().ClusterSync, db.cfg.DataDbCfg().ClusterOnDownDelay,
-		db.cfg.DataDbCfg().Items)
+		db.cfg.DataDbCfg().Opts)
 	if db.mandatoryDB() && err != nil { // Cannot configure getter database, show stopper
 		utils.Logger.Crit(fmt.Sprintf("Could not configure dataDb: %s exiting!", err))
 		return
@@ -93,12 +92,16 @@ func (db *DataDBService) Reload() (err error) {
 		return
 	}
 	if db.cfg.DataDbCfg().DataDbType == utils.MONGO {
+		var ttl time.Duration
+		if ttl, err = utils.IfaceAsDuration(db.cfg.DataDbCfg().Opts[utils.QueryTimeoutCfg]); err != nil {
+			return
+		}
 		mgo, canCast := db.dm.DataDB().(*engine.MongoStorage)
 		if !canCast {
 			return fmt.Errorf("can't conver DataDB of type %s to MongoStorage",
 				db.cfg.DataDbCfg().DataDbType)
 		}
-		mgo.SetTTL(db.cfg.DataDbCfg().QueryTimeout)
+		mgo.SetTTL(ttl)
 	}
 	return
 }
@@ -154,10 +157,11 @@ func (db *DataDBService) needsConnectionReload() bool {
 		db.oldDBCfg.DataDbPass != db.cfg.DataDbCfg().DataDbPass {
 		return true
 	}
-	if db.oldDBCfg.DataDbType == utils.REDIS {
-		return db.oldDBCfg.DataDbSentinelName != db.cfg.DataDbCfg().DataDbSentinelName
-	}
-	return false
+	return db.oldDBCfg.DataDbType == utils.REDIS &&
+		(db.oldDBCfg.Opts[utils.RedisSentinelNameCfg] != db.cfg.DataDbCfg().Opts[utils.RedisSentinelNameCfg] ||
+			db.oldDBCfg.Opts[utils.RedisClusterCfg] != db.cfg.DataDbCfg().Opts[utils.RedisClusterCfg] ||
+			db.oldDBCfg.Opts[utils.ClusterSyncCfg] != db.cfg.DataDbCfg().Opts[utils.ClusterSyncCfg] ||
+			db.oldDBCfg.Opts[utils.ClusterOnDownDelayCfg] != db.cfg.DataDbCfg().Opts[utils.ClusterOnDownDelayCfg])
 }
 
 // GetDMChan returns the DataManager chanel

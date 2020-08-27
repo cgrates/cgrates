@@ -19,8 +19,10 @@
 	"db_type": "redis",						// data_db type: <redis|mongo>
 	"db_host":"127.0.0.1:7001",
 	"db_name": "10", 						// data_db database name to connect to
-	"redis_cluster": true,
-	"cluster_sync": "100ms",				// the sync interval for the redis cluster
+	"opts": {
+		"redis_cluster": true,
+		"cluster_sync": "100ms",				// the sync interval for the redis cluster
+	},
 },
 
 

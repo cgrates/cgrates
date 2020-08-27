@@ -26,6 +26,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+// EventReader .
 type EventReader interface {
 	Config() *config.EventReaderCfg // return it's configuration
 	Serve() error                   // subscribe the reader on the path

@@ -70,20 +70,18 @@ func testTpAccActITConnect(t *testing.T) {
 	storDBIn, err := NewMigratorStorDB(tpAccActCfgIn.StorDbCfg().Type,
 		tpAccActCfgIn.StorDbCfg().Host, tpAccActCfgIn.StorDbCfg().Port,
 		tpAccActCfgIn.StorDbCfg().Name, tpAccActCfgIn.StorDbCfg().User,
-		tpAccActCfgIn.StorDbCfg().Password, tpAccActCfgIn.GeneralCfg().DBDataEncoding, tpAccActCfgIn.StorDbCfg().SSLMode,
-		tpAccActCfgIn.StorDbCfg().MaxOpenConns, tpAccActCfgIn.StorDbCfg().MaxIdleConns,
-		tpAccActCfgIn.StorDbCfg().ConnMaxLifetime, tpAccActCfgIn.StorDbCfg().StringIndexedFields,
-		tpAccActCfgIn.StorDbCfg().PrefixIndexedFields, tpAccActCfgIn.StorDbCfg().Items)
+		tpAccActCfgIn.StorDbCfg().Password, tpAccActCfgIn.GeneralCfg().DBDataEncoding,
+		tpAccActCfgIn.StorDbCfg().StringIndexedFields, tpAccActCfgIn.StorDbCfg().PrefixIndexedFields,
+		tpAccActCfgIn.StorDbCfg().Opts)
 	if err != nil {
 		log.Fatal(err)
 	}
 	storDBOut, err := NewMigratorStorDB(tpAccActCfgOut.StorDbCfg().Type,
 		tpAccActCfgOut.StorDbCfg().Host, tpAccActCfgOut.StorDbCfg().Port,
 		tpAccActCfgOut.StorDbCfg().Name, tpAccActCfgOut.StorDbCfg().User,
-		tpAccActCfgOut.StorDbCfg().Password, tpAccActCfgOut.GeneralCfg().DBDataEncoding, tpAccActCfgIn.StorDbCfg().SSLMode,
-		tpAccActCfgIn.StorDbCfg().MaxOpenConns, tpAccActCfgIn.StorDbCfg().MaxIdleConns,
-		tpAccActCfgIn.StorDbCfg().ConnMaxLifetime, tpAccActCfgIn.StorDbCfg().StringIndexedFields,
-		tpAccActCfgIn.StorDbCfg().PrefixIndexedFields, tpAccActCfgOut.StorDbCfg().Items)
+		tpAccActCfgOut.StorDbCfg().Password, tpAccActCfgOut.GeneralCfg().DBDataEncoding,
+		tpAccActCfgIn.StorDbCfg().StringIndexedFields, tpAccActCfgIn.StorDbCfg().PrefixIndexedFields,
+		tpAccActCfgOut.StorDbCfg().Opts)
 	if err != nil {
 		log.Fatal(err)
 	}

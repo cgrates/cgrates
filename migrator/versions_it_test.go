@@ -77,7 +77,7 @@ func testVrsITConnect(t *testing.T) {
 		vrsCfg.DataDbCfg().DataDbHost, vrsCfg.DataDbCfg().DataDbPort,
 		vrsCfg.DataDbCfg().DataDbName, vrsCfg.DataDbCfg().DataDbUser,
 		vrsCfg.DataDbCfg().DataDbPass, vrsCfg.GeneralCfg().DBDataEncoding,
-		config.CgrConfig().CacheCfg(), "", false, 0, 0, vrsCfg.DataDbCfg().Items)
+		config.CgrConfig().CacheCfg(), vrsCfg.DataDbCfg().Opts)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -85,10 +85,9 @@ func testVrsITConnect(t *testing.T) {
 	storDBOut, err := NewMigratorStorDB(vrsCfg.StorDbCfg().Type,
 		vrsCfg.StorDbCfg().Host, vrsCfg.StorDbCfg().Port,
 		vrsCfg.StorDbCfg().Name, vrsCfg.StorDbCfg().User,
-		vrsCfg.StorDbCfg().Password, vrsCfg.GeneralCfg().DBDataEncoding, vrsCfg.StorDbCfg().SSLMode,
-		vrsCfg.StorDbCfg().MaxOpenConns, vrsCfg.StorDbCfg().MaxIdleConns,
-		vrsCfg.StorDbCfg().ConnMaxLifetime, vrsCfg.StorDbCfg().StringIndexedFields,
-		vrsCfg.StorDbCfg().PrefixIndexedFields, vrsCfg.StorDbCfg().Items)
+		vrsCfg.StorDbCfg().Password, vrsCfg.GeneralCfg().DBDataEncoding,
+		vrsCfg.StorDbCfg().StringIndexedFields, vrsCfg.StorDbCfg().PrefixIndexedFields,
+		vrsCfg.StorDbCfg().Opts)
 	if err != nil {
 		t.Error(err)
 	}

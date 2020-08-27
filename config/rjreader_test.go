@@ -38,9 +38,9 @@ var (
 		"db_type": "redis",						// data_db type: <*redis|*mongo|*internal>
 		"db_host": "127.0.0.1",					/* data_db host address*/
 		"db_port": 6379, 						// data_db port to reach the database
-		"db_name": "10",/*/*asd*/ 						// data_db database name to connect to
-		"db_user": "*env:TESTVAR", 					// username to use when connecting to data_db
-		"db_password": ",/**/", 						// password to use when connecting to data_db
+		"db_name": "10",/*/*asd*/ 				// data_db database name to connect to
+		"db_user": "*env:TESTVAR", 				// username to use when connecting to data_db
+		"db_password": ",/**/", 				// password to use when connecting to data_db
 		"redis_sentinel":"",					// redis_sentinel is the name of sentinel
 	},/*Multiline coment 
 	Line1

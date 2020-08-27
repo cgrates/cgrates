@@ -81,6 +81,8 @@ func TestMigratorCgrCfgloadFromJsonCfg(t *testing.T) {
 
 func TestMigratorCgrCfgAsMapInterface(t *testing.T) {
 	var migcfg MigratorCgrCfg
+	migcfg.OutStorDBOpts = make(map[string]interface{})
+	migcfg.OutDataDBOpts = make(map[string]interface{})
 	cfgJSONStr := `{
 	"migrator": {
 		"out_datadb_type": "redis",
@@ -101,21 +103,22 @@ func TestMigratorCgrCfgAsMapInterface(t *testing.T) {
 }`
 	var users_filters []string
 	eMap := map[string]interface{}{
-		"out_datadb_type":           "redis",
-		"out_datadb_host":           "127.0.0.1",
-		"out_datadb_port":           "6379",
-		"out_datadb_name":           "10",
-		"out_datadb_user":           "cgrates",
-		"out_datadb_password":       "",
-		"out_datadb_encoding":       "msgpack",
-		"out_stordb_type":           "mysql",
-		"out_stordb_host":           "127.0.0.1",
-		"out_stordb_port":           "3306",
-		"out_stordb_name":           "cgrates",
-		"out_stordb_user":           "cgrates",
-		"out_stordb_password":       "",
-		"users_filters":             users_filters,
-		"out_datadb_redis_sentinel": "",
+		"out_datadb_type":     "redis",
+		"out_datadb_host":     "127.0.0.1",
+		"out_datadb_port":     "6379",
+		"out_datadb_name":     "10",
+		"out_datadb_user":     "cgrates",
+		"out_datadb_password": "",
+		"out_datadb_encoding": "msgpack",
+		"out_stordb_type":     "mysql",
+		"out_stordb_host":     "127.0.0.1",
+		"out_stordb_port":     "3306",
+		"out_stordb_name":     "cgrates",
+		"out_stordb_user":     "cgrates",
+		"out_stordb_password": "",
+		"users_filters":       users_filters,
+		"out_datadb_opts":     map[string]interface{}{},
+		"out_stordb_opts":     map[string]interface{}{},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
@@ -142,26 +145,31 @@ func TestMigratorCgrCfgAsMapInterface(t *testing.T) {
 			"out_stordb_user": "cgrates",
 			"out_stordb_password": "out_stordb_password",
 			"users_filters":["users","filters","Account"],
-			"out_datadb_redis_sentinel": "out_datadb_redis_sentinel",
+			"out_datadb_opts": {
+				"redis_sentinel": "out_datadb_redis_sentinel",
+			},
 		},
 	}`
 
 	eMap = map[string]interface{}{
-		"out_datadb_type":           "redis",
-		"out_datadb_host":           "127.0.0.1",
-		"out_datadb_port":           "6379",
-		"out_datadb_name":           "10",
-		"out_datadb_user":           "cgrates",
-		"out_datadb_password":       "out_datadb_password",
-		"out_datadb_encoding":       "msgpack",
-		"out_stordb_type":           "mysql",
-		"out_stordb_host":           "127.0.0.1",
-		"out_stordb_port":           "3306",
-		"out_stordb_name":           "cgrates",
-		"out_stordb_user":           "cgrates",
-		"out_stordb_password":       "out_stordb_password",
-		"users_filters":             []string{"users", "filters", "Account"},
-		"out_datadb_redis_sentinel": "out_datadb_redis_sentinel",
+		"out_datadb_type":     "redis",
+		"out_datadb_host":     "127.0.0.1",
+		"out_datadb_port":     "6379",
+		"out_datadb_name":     "10",
+		"out_datadb_user":     "cgrates",
+		"out_datadb_password": "out_datadb_password",
+		"out_datadb_encoding": "msgpack",
+		"out_stordb_type":     "mysql",
+		"out_stordb_host":     "127.0.0.1",
+		"out_stordb_port":     "3306",
+		"out_stordb_name":     "cgrates",
+		"out_stordb_user":     "cgrates",
+		"out_stordb_password": "out_stordb_password",
+		"users_filters":       []string{"users", "filters", "Account"},
+		"out_stordb_opts":     map[string]interface{}{},
+		"out_datadb_opts": map[string]interface{}{
+			"redis_sentinel": "out_datadb_redis_sentinel",
+		},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)

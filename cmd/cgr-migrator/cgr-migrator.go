@@ -63,8 +63,16 @@ var (
 		"the DataDB password")
 	inDBDataEncoding = cgrMigratorFlags.String("dbdata_encoding", dfltCfg.GeneralCfg().DBDataEncoding,
 		"the encoding used to store object Data in strings")
-	inDataDBRedisSentinel = cgrMigratorFlags.String("redis_sentinel", dfltCfg.DataDbCfg().DataDbSentinelName,
+	inDataDBRedisSentinel = cgrMigratorFlags.String("redis_sentinel", utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.RedisSentinelNameCfg]),
 		"the name of redis sentinel")
+	dbRedisCluster = cgrMigratorFlags.Bool("redis_cluster", false,
+		"Is the redis datadb a cluster")
+	dbRedisClusterSync = cgrMigratorFlags.String("cluster_sync", utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.ClusterSyncCfg]),
+		"The sync interval for the redis cluster")
+	dbRedisClusterDownDelay = cgrMigratorFlags.String("cluster_ondown_delay", utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.ClusterOnDownDelayCfg]),
+		"The delay before executing the commands if the redis cluster is in the CLUSTERDOWN state")
+	dbQueryTimeout = cgrMigratorFlags.String("query_timeout", utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.QueryTimeoutCfg]),
+		"The timeout for queries")
 
 	outDataDBType = cgrMigratorFlags.String("out_datadb_type", utils.MetaDataDB,
 		"output DataDB type <*redis|*mongo>")
@@ -157,8 +165,21 @@ func main() {
 	if *inDBDataEncoding != dfltCfg.GeneralCfg().DBDataEncoding {
 		mgrCfg.GeneralCfg().DBDataEncoding = *inDBDataEncoding
 	}
-	if *inDataDBRedisSentinel != dfltCfg.DataDbCfg().DataDbSentinelName {
-		mgrCfg.DataDbCfg().DataDbSentinelName = *inDataDBRedisSentinel
+	if *inDataDBRedisSentinel != utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.RedisSentinelNameCfg]) {
+		mgrCfg.DataDbCfg().Opts[utils.RedisSentinelNameCfg] = *inDataDBRedisSentinel
+	}
+	rdsCls, _ := utils.IfaceAsBool(dfltCfg.DataDbCfg().Opts[utils.RedisClusterCfg])
+	if *dbRedisCluster != rdsCls {
+		mgrCfg.DataDbCfg().Opts[utils.RedisClusterCfg] = *dbRedisCluster
+	}
+	if *dbRedisClusterSync != utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.ClusterSyncCfg]) {
+		mgrCfg.DataDbCfg().Opts[utils.ClusterSyncCfg] = *dbRedisClusterSync
+	}
+	if *dbRedisClusterDownDelay != utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.ClusterOnDownDelayCfg]) {
+		mgrCfg.DataDbCfg().Opts[utils.ClusterOnDownDelayCfg] = *dbRedisClusterDownDelay
+	}
+	if *dbQueryTimeout != utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.QueryTimeoutCfg]) {
+		mgrCfg.DataDbCfg().Opts[utils.QueryTimeoutCfg] = *dbQueryTimeout
 	}
 
 	// outDataDB
@@ -213,11 +234,11 @@ func main() {
 		mgrCfg.MigratorCgrCfg().OutDataDBEncoding = *outDBDataEncoding
 	}
 	if *outDataDBRedisSentinel == utils.MetaDataDB {
-		if dfltCfg.MigratorCgrCfg().OutDataDBRedisSentinel == mgrCfg.MigratorCgrCfg().OutDataDBRedisSentinel {
-			mgrCfg.MigratorCgrCfg().OutDataDBRedisSentinel = mgrCfg.DataDbCfg().DataDbSentinelName
+		if utils.IfaceAsString(dfltCfg.MigratorCgrCfg().OutDataDBOpts[utils.RedisSentinelNameCfg]) == utils.IfaceAsString(mgrCfg.MigratorCgrCfg().OutDataDBOpts[utils.RedisSentinelNameCfg]) {
+			mgrCfg.MigratorCgrCfg().OutDataDBOpts[utils.RedisSentinelNameCfg] = dfltCfg.DataDbCfg().Opts[utils.RedisSentinelNameCfg]
 		}
 	} else {
-		mgrCfg.MigratorCgrCfg().OutDataDBRedisSentinel = *outDataDBRedisSentinel
+		mgrCfg.MigratorCgrCfg().OutDataDBOpts[utils.RedisSentinelNameCfg] = *outDataDBRedisSentinel
 	}
 
 	sameDataDB = mgrCfg.MigratorCgrCfg().OutDataDBType == mgrCfg.DataDbCfg().DataDbType &&
@@ -230,9 +251,7 @@ func main() {
 		mgrCfg.DataDbCfg().DataDbHost, mgrCfg.DataDbCfg().DataDbPort,
 		mgrCfg.DataDbCfg().DataDbName, mgrCfg.DataDbCfg().DataDbUser,
 		mgrCfg.DataDbCfg().DataDbPass, mgrCfg.GeneralCfg().DBDataEncoding,
-		mgrCfg.CacheCfg(), mgrCfg.DataDbCfg().DataDbSentinelName, mgrCfg.DataDbCfg().RedisCluster,
-		mgrCfg.DataDbCfg().ClusterSync, mgrCfg.DataDbCfg().ClusterOnDownDelay,
-		mgrCfg.DataDbCfg().Items); err != nil {
+		mgrCfg.CacheCfg(), mgrCfg.DataDbCfg().Opts); err != nil {
 		log.Fatal(err)
 	}
 
@@ -242,9 +261,7 @@ func main() {
 		mgrCfg.MigratorCgrCfg().OutDataDBHost, mgrCfg.MigratorCgrCfg().OutDataDBPort,
 		mgrCfg.MigratorCgrCfg().OutDataDBName, mgrCfg.MigratorCgrCfg().OutDataDBUser,
 		mgrCfg.MigratorCgrCfg().OutDataDBPassword, mgrCfg.MigratorCgrCfg().OutDataDBEncoding,
-		mgrCfg.CacheCfg(), mgrCfg.MigratorCgrCfg().OutDataDBRedisSentinel,
-		mgrCfg.MigratorCgrCfg().OutDataDBRedisCluster, mgrCfg.MigratorCgrCfg().OutDataDBClusterSync,
-		mgrCfg.MigratorCgrCfg().OutDataDBClusterOndownDelay, mgrCfg.DataDbCfg().Items); err != nil {
+		mgrCfg.CacheCfg(), mgrCfg.MigratorCgrCfg().OutDataDBOpts); err != nil {
 		log.Fatal(err)
 	}
 
@@ -321,10 +338,8 @@ func main() {
 		mgrCfg.StorDbCfg().Host, mgrCfg.StorDbCfg().Port,
 		mgrCfg.StorDbCfg().Name, mgrCfg.StorDbCfg().User,
 		mgrCfg.StorDbCfg().Password, mgrCfg.GeneralCfg().DBDataEncoding,
-		mgrCfg.StorDbCfg().SSLMode, mgrCfg.StorDbCfg().MaxOpenConns,
-		mgrCfg.StorDbCfg().MaxIdleConns, mgrCfg.StorDbCfg().ConnMaxLifetime,
-		mgrCfg.StorDbCfg().StringIndexedFields,
-		mgrCfg.StorDbCfg().PrefixIndexedFields, mgrCfg.StorDbCfg().Items); err != nil {
+		mgrCfg.StorDbCfg().StringIndexedFields, mgrCfg.StorDbCfg().PrefixIndexedFields,
+		mgrCfg.StorDbCfg().Opts); err != nil {
 		log.Fatal(err)
 	}
 
@@ -334,10 +349,8 @@ func main() {
 		mgrCfg.MigratorCgrCfg().OutStorDBHost, mgrCfg.MigratorCgrCfg().OutStorDBPort,
 		mgrCfg.MigratorCgrCfg().OutStorDBName, mgrCfg.MigratorCgrCfg().OutStorDBUser,
 		mgrCfg.MigratorCgrCfg().OutStorDBPassword, mgrCfg.GeneralCfg().DBDataEncoding,
-		mgrCfg.StorDbCfg().SSLMode, mgrCfg.StorDbCfg().MaxOpenConns,
-		mgrCfg.StorDbCfg().MaxIdleConns, mgrCfg.StorDbCfg().ConnMaxLifetime,
-		mgrCfg.StorDbCfg().StringIndexedFields,
-		mgrCfg.StorDbCfg().PrefixIndexedFields, mgrCfg.StorDbCfg().Items); err != nil {
+		mgrCfg.StorDbCfg().StringIndexedFields, mgrCfg.StorDbCfg().PrefixIndexedFields,
+		mgrCfg.MigratorCgrCfg().OutStorDBOpts); err != nil {
 		log.Fatal(err)
 	}
 
