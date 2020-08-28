@@ -21,7 +21,6 @@ package v2
 import (
 	"time"
 
-	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -49,13 +48,8 @@ func (APIerSv2 *APIerSv2) SetAttributeProfile(arg *AttributeWithCache, reply *st
 		map[string]int64{utils.CacheAttributeProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	args := utils.ArgsGetCacheItem{
-		CacheID: utils.CacheAttributeProfiles,
-		ItemID:  alsPrf.TenantID(),
-	}
-	if err := APIerSv2.APIerSv1.CallCache(
-		v1.GetCacheOpt(arg.Cache),
-		args, arg.Opts); err != nil {
+	if err := APIerSv2.APIerSv1.CallCache(arg.Cache, alsPrf.Tenant, utils.CacheAttributeProfiles,
+		alsPrf.TenantID(), &alsPrf.FilterIDs, alsPrf.Contexts, arg.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

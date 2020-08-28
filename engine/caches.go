@@ -271,6 +271,19 @@ func (chS *CacheS) V1RemoveItem(args *utils.ArgsGetCacheItemWithOpts,
 	return
 }
 
+func (chS *CacheS) V1RemoveItems(args utils.AttrReloadCacheWithOpts,
+	reply *string) (err error) {
+	for key, ids := range args.ArgsCache {
+		if cacheID, has := utils.ArgCacheToInstance[key]; has {
+			for _, id := range ids {
+				chS.tCache.Remove(cacheID, id, true, utils.NonTransactional)
+			}
+		}
+	}
+	*reply = utils.OK
+	return
+}
+
 func (chS *CacheS) V1Clear(args *utils.AttrCacheIDsWithOpts,
 	reply *string) (err error) {
 	chS.tCache.Clear(args.CacheIDs)

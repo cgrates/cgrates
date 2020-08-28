@@ -28,7 +28,7 @@ import (
 )
 
 var (
-	filterIndexTypes = utils.NewStringSet([]string{utils.MetaPrefix, utils.MetaString, utils.MetaSuffix})
+	FilterIndexTypes = utils.NewStringSet([]string{utils.MetaPrefix, utils.MetaString, utils.MetaSuffix})
 )
 
 // newFilterIndex will get the index from DataManager if is not found it will create it
@@ -67,7 +67,7 @@ func newFilterIndex(dm *DataManager, idxItmType, tnt, ctx, itemID string, filter
 			return
 		}
 		for _, flt := range fltr.Rules {
-			if !filterIndexTypes.Has(flt.Type) {
+			if !FilterIndexTypes.Has(flt.Type) {
 				continue
 			}
 
@@ -477,7 +477,7 @@ func UpdateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 	newRules := utils.StringSet{}    // we only need to determine if we added new rules to rebuild
 	removeRules := utils.StringSet{} // but we need to know what indexes to remove
 	for _, flt := range newFlt.Rules {
-		if !filterIndexTypes.Has(flt.Type) {
+		if !FilterIndexTypes.Has(flt.Type) {
 			continue
 		}
 		isDyn := strings.HasPrefix(flt.Element, utils.DynamicDataPrefix)
@@ -498,7 +498,7 @@ func UpdateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 		}
 	}
 	for _, flt := range oldFlt.Rules {
-		if !filterIndexTypes.Has(flt.Type) {
+		if !FilterIndexTypes.Has(flt.Type) {
 			continue
 		}
 		isDyn := strings.HasPrefix(flt.Element, utils.DynamicDataPrefix)

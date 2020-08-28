@@ -108,6 +108,20 @@ var (
 		CacheDispatcherFilterIndexes:   DispatcherProfilePrefix,
 		CacheRateProfilesFilterIndexes: RateProfilePrefix,
 		CacheRateFilterIndexes:         RatePrefix,
+		CacheReverseFilterIndexes:      FilterPrefix,
+	}
+
+	CacheInstanceToCacheIndex = map[string]string{
+		CacheThresholdFilterIndexes:    CacheThresholdProfiles,
+		CacheResourceFilterIndexes:     CacheResourceProfiles,
+		CacheStatFilterIndexes:         CacheStatQueueProfiles,
+		CacheRouteFilterIndexes:        CacheRouteProfiles,
+		CacheAttributeFilterIndexes:    CacheAttributeProfiles,
+		CacheChargerFilterIndexes:      CacheChargerProfiles,
+		CacheDispatcherFilterIndexes:   CacheDispatcherProfiles,
+		CacheRateProfilesFilterIndexes: CacheRateProfiles,
+		// CacheRateFilterIndexes:         CacheRates,
+		CacheReverseFilterIndexes: CacheFilters,
 	}
 
 	// NonMonetaryBalances are types of balances which are not handled as monetary
@@ -179,6 +193,7 @@ var (
 		RateFilterIndexIDs:         RateFilterIndexPrfx,
 		FilterIndexIDs:             FilterIndexPrfx,
 	}
+	CacheInstanceToArg map[string]string
 	ArgCacheToInstance = map[string]string{
 		DestinationIDs:        CacheDestinations,
 		ReverseDestinationIDs: CacheReverseDestinations,
@@ -1581,6 +1596,7 @@ const (
 	CacheSv1HasItem           = "CacheSv1.HasItem"
 	CacheSv1GetItemExpiryTime = "CacheSv1.GetItemExpiryTime"
 	CacheSv1RemoveItem        = "CacheSv1.RemoveItem"
+	CacheSv1RemoveItems       = "CacheSv1.RemoveItems"
 	CacheSv1PrecacheStatus    = "CacheSv1.PrecacheStatus"
 	CacheSv1HasGroup          = "CacheSv1.HasGroup"
 	CacheSv1GetGroupItemIDs   = "CacheSv1.GetGroupItemIDs"
@@ -2407,6 +2423,10 @@ func buildCacheInstRevPrefixes() {
 	CachePrefixToInstance = make(map[string]string)
 	for k, v := range CacheInstanceToPrefix {
 		CachePrefixToInstance[v] = k
+	}
+	CacheInstanceToArg = make(map[string]string)
+	for k, v := range ArgCacheToInstance {
+		CacheInstanceToArg[v] = k
 	}
 }
 

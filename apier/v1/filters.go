@@ -44,11 +44,8 @@ func (apierSv1 *APIerSv1) SetFilter(arg *FilterWithCache, reply *string) error {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for Filter
-	argCache := utils.ArgsGetCacheItem{
-		CacheID: utils.CacheFilters,
-		ItemID:  arg.TenantID(),
-	}
-	if err := apierSv1.CallCache(GetCacheOpt(arg.Cache), argCache, arg.Opts); err != nil {
+	if err := apierSv1.CallCache(arg.Cache, arg.Tenant, utils.CacheFilters,
+		arg.TenantID(), nil, nil, arg.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -102,11 +99,8 @@ func (apierSv1 *APIerSv1) RemoveFilter(arg *utils.TenantIDWithCache, reply *stri
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for Filter
-	argCache := utils.ArgsGetCacheItem{
-		CacheID: utils.CacheFilters,
-		ItemID:  arg.TenantID(),
-	}
-	if err := apierSv1.CallCache(GetCacheOpt(arg.Cache), argCache, arg.Opts); err != nil {
+	if err := apierSv1.CallCache(arg.Cache, arg.Tenant, utils.CacheFilters,
+		arg.TenantID(), nil, nil, arg.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

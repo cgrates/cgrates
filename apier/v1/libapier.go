@@ -19,52 +19,75 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"github.com/cgrates/cgrates/config"
+	"strings"
+
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
-// GetCacheOpt receive the apiOpt and compare with default value
-// overwrite the default if it's present
-// visible in APIerSv2
-func GetCacheOpt(apiOpt *string) string {
-	cacheOpt := config.CgrConfig().GeneralCfg().DefaultCaching
-	if apiOpt != nil && *apiOpt != utils.EmptyString {
-		cacheOpt = *apiOpt
-	}
-	return cacheOpt
-}
-
 // composeArgsReload add the ItemID to AttrReloadCache
 // for a specific CacheID
-func composeArgsReload(args utils.ArgsGetCacheItem) (rpl map[string][]string) {
-	rpl = make(map[string][]string)
-	switch args.CacheID {
-	case utils.CacheResourceProfiles:
-		rpl[utils.ResourceProfileIDs] = []string{args.ItemID}
-	case utils.CacheResources:
-		rpl[utils.ResourceIDs] = []string{args.ItemID}
-	case utils.CacheStatQueues:
-		rpl[utils.StatsQueueIDs] = []string{args.ItemID}
-	case utils.CacheStatQueueProfiles:
-		rpl[utils.StatsQueueProfileIDs] = []string{args.ItemID}
-	case utils.CacheThresholds:
-		rpl[utils.ThresholdIDs] = []string{args.ItemID}
-	case utils.CacheThresholdProfiles:
-		rpl[utils.ThresholdProfileIDs] = []string{args.ItemID}
-	case utils.CacheFilters:
-		rpl[utils.FilterIDs] = []string{args.ItemID}
-	case utils.CacheRouteProfiles:
-		rpl[utils.RouteProfileIDs] = []string{args.ItemID}
-	case utils.CacheAttributeProfiles:
-		rpl[utils.AttributeProfileIDs] = []string{args.ItemID}
-	case utils.CacheChargerProfiles:
-		rpl[utils.ChargerProfileIDs] = []string{args.ItemID}
-	case utils.CacheDispatcherProfiles:
-		rpl[utils.DispatcherProfileIDs] = []string{args.ItemID}
-	case utils.CacheDispatcherHosts:
-		rpl[utils.DispatcherHostIDs] = []string{args.ItemID}
-	case utils.CacheRateProfiles:
-		rpl[utils.RateProfileIDs] = []string{args.ItemID}
+func (apierSv1 *APIerSv1) composeArgsReload(tnt, cacheID, itemID string, filterIDs *[]string, contexts []string, opts map[string]interface{}) (rpl utils.AttrReloadCacheWithOpts, err error) {
+	rpl = utils.AttrReloadCacheWithOpts{
+		TenantArg: utils.TenantArg{Tenant: tnt},
+		ArgsCache: map[string][]string{
+			utils.CacheInstanceToArg[cacheID]: {itemID},
+		},
+		Opts: opts,
+	}
+	if filterIDs == nil { // in case we remove a profile we do not need to reload the indexes
+		return
+	}
+	// popultate the indexes
+	idxCacheID := utils.CacheInstanceToCacheIndex[cacheID]
+	if len(*filterIDs) == 0 { // in case we do not have any filters reload the *none filter indexes
+		indxID := utils.ConcatenatedKey(utils.META_NONE, utils.META_ANY, utils.META_ANY)
+		if cacheID != utils.CacheAttributeProfiles &&
+			cacheID != utils.CacheDispatcherProfiles {
+			rpl.ArgsCache[idxCacheID] = []string{utils.ConcatenatedKey(tnt, indxID)}
+			return
+		}
+		rpl.ArgsCache[idxCacheID] = make([]string, len(contexts))
+		for i, ctx := range contexts {
+			rpl.ArgsCache[idxCacheID][i] = utils.ConcatenatedKey(tnt, ctx, indxID)
+		}
+	}
+	indxIDs := make([]string, 0, len(*filterIDs))
+	for _, id := range *filterIDs {
+		var fltr *engine.Filter
+		if fltr, err = apierSv1.DataManager.GetFilter(tnt, id, true, true, utils.NonTransactional); err != nil {
+			return
+		}
+		for _, flt := range fltr.Rules {
+			if !engine.FilterIndexTypes.Has(flt.Type) {
+				continue
+			}
+			isDyn := strings.HasPrefix(flt.Element, utils.DynamicDataPrefix)
+			for _, fldVal := range flt.Values {
+				if isDyn {
+					if !strings.HasPrefix(fldVal, utils.DynamicDataPrefix) {
+						indxIDs = append(indxIDs, utils.ConcatenatedKey(flt.Type, flt.Element[1:], fldVal))
+					}
+				} else if strings.HasPrefix(fldVal, utils.DynamicDataPrefix) {
+					indxIDs = append(indxIDs, utils.ConcatenatedKey(flt.Type, fldVal[1:], flt.Element))
+				}
+			}
+		}
+	}
+	if cacheID != utils.CacheAttributeProfiles &&
+		cacheID != utils.CacheDispatcherProfiles {
+		rpl.ArgsCache[idxCacheID] = make([]string, len(indxIDs))
+		for i, indxID := range indxIDs {
+			rpl.ArgsCache[idxCacheID][i] = utils.ConcatenatedKey(tnt, indxID)
+		}
+		return
+	}
+
+	rpl.ArgsCache[idxCacheID] = make([]string, 0, len(indxIDs)*len(indxIDs))
+	for _, ctx := range contexts {
+		for _, indxID := range indxIDs {
+			rpl.ArgsCache[idxCacheID] = append(rpl.ArgsCache[idxCacheID], utils.ConcatenatedKey(tnt, ctx, indxID))
+		}
 	}
 	return
 }

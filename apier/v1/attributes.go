@@ -111,11 +111,9 @@ func (apierSv1 *APIerSv1) SetAttributeProfile(alsWrp *AttributeWithCache, reply 
 	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheAttributeProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	args := utils.ArgsGetCacheItem{
-		CacheID: utils.CacheAttributeProfiles,
-		ItemID:  alsWrp.TenantID(),
-	}
-	if err := apierSv1.CallCache(GetCacheOpt(alsWrp.Cache), args, alsWrp.Opts); err != nil {
+
+	if err := apierSv1.CallCache(alsWrp.Cache, alsWrp.Tenant, utils.CacheAttributeProfiles,
+		alsWrp.TenantID(), &alsWrp.FilterIDs, alsWrp.Contexts, alsWrp.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -135,11 +133,8 @@ func (apierSv1 *APIerSv1) RemoveAttributeProfile(arg *utils.TenantIDWithCache, r
 	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheAttributeProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	args := utils.ArgsGetCacheItem{
-		CacheID: utils.CacheAttributeProfiles,
-		ItemID:  utils.ConcatenatedKey(arg.Tenant, arg.ID),
-	}
-	if err := apierSv1.CallCache(GetCacheOpt(arg.Cache), args, arg.Opts); err != nil {
+	if err := apierSv1.CallCache(arg.Cache, arg.Tenant, utils.CacheAttributeProfiles,
+		utils.ConcatenatedKey(arg.Tenant, arg.ID), nil, nil, arg.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

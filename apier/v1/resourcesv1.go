@@ -121,11 +121,8 @@ func (apierSv1 *APIerSv1) SetResourceProfile(arg *ResourceWithCache, reply *stri
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for ResourceProfile
-	argCache := utils.ArgsGetCacheItem{
-		CacheID: utils.CacheResourceProfiles,
-		ItemID:  arg.TenantID(),
-	}
-	if err := apierSv1.CallCache(GetCacheOpt(arg.Cache), argCache, arg.Opts); err != nil {
+	if err := apierSv1.CallCache(arg.Cache, arg.Tenant, utils.CacheResourceProfiles,
+		arg.TenantID(), &arg.FilterIDs, nil, arg.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//add the resource only if it's not present
@@ -139,11 +136,8 @@ func (apierSv1 *APIerSv1) SetResourceProfile(arg *ResourceWithCache, reply *stri
 			return utils.APIErrorHandler(err)
 		}
 		//handle caching for Resource
-		argCache = utils.ArgsGetCacheItem{
-			CacheID: utils.CacheResources,
-			ItemID:  arg.TenantID(),
-		}
-		if err := apierSv1.CallCache(GetCacheOpt(arg.Cache), argCache, arg.Opts); err != nil {
+		if err := apierSv1.CallCache(arg.Cache, arg.Tenant, utils.CacheResources,
+			arg.TenantID(), nil, nil, arg.Opts); err != nil {
 			return utils.APIErrorHandler(err)
 		}
 	}
@@ -161,11 +155,8 @@ func (apierSv1 *APIerSv1) RemoveResourceProfile(arg *utils.TenantIDWithCache, re
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for ResourceProfile
-	argCache := utils.ArgsGetCacheItem{
-		CacheID: utils.CacheResourceProfiles,
-		ItemID:  arg.TenantID(),
-	}
-	if err := apierSv1.CallCache(GetCacheOpt(arg.Cache), argCache, arg.Opts); err != nil {
+	if err := apierSv1.CallCache(arg.Cache, arg.Tenant, utils.CacheResourceProfiles,
+		arg.TenantID(), nil, nil, arg.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	if err := apierSv1.DataManager.RemoveResource(arg.Tenant, arg.ID, utils.NonTransactional); err != nil {
@@ -178,11 +169,8 @@ func (apierSv1 *APIerSv1) RemoveResourceProfile(arg *utils.TenantIDWithCache, re
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for Resource
-	argCache = utils.ArgsGetCacheItem{
-		CacheID: utils.CacheResources,
-		ItemID:  arg.TenantID(),
-	}
-	if err := apierSv1.CallCache(GetCacheOpt(arg.Cache), argCache, arg.Opts); err != nil {
+	if err := apierSv1.CallCache(arg.Cache, arg.Tenant, utils.CacheResources,
+		arg.TenantID(), nil, nil, arg.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
