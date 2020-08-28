@@ -2752,7 +2752,7 @@ func TestProcessAttributeWithSameWheight(t *testing.T) {
 func TestAttributeMultipleProcessWithFiltersExists(t *testing.T) {
 	defaultCfg, _ := config.NewDefaultCGRConfig()
 	defaultCfg.AttributeSCfg().IndexedSelects = false
-	data := NewInternalDB(nil, nil, true, defaultCfg.DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true)
 	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	Cache.Clear(nil)
 	attrService, _ = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
@@ -2850,7 +2850,7 @@ func TestAttributeMultipleProcessWithFiltersExists(t *testing.T) {
 func TestAttributeMultipleProcessWithFiltersNotEmpty(t *testing.T) {
 	defaultCfg, _ := config.NewDefaultCGRConfig()
 	defaultCfg.AttributeSCfg().IndexedSelects = false
-	data := NewInternalDB(nil, nil, true, defaultCfg.DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true)
 	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	Cache.Clear(nil)
 	attrService, _ = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
