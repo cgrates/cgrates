@@ -1338,51 +1338,12 @@ func (apierSv1 *APIerSv1) ReplayFailedPosts(args *ArgsReplyFailedPosts, reply *s
 	return nil
 }
 
-// CallCache caching the item based on cacheopt
-// visible in APIerSv2
-func (apierSv1 *APIerSv1) CallCache(cacheopt *string, tnt, cacheID, itemID string, filters *[]string, contexts []string, opts map[string]interface{}) (err error) {
-	var reply, method string
-	var args interface{}
-	cacheOpt := apierSv1.Config.GeneralCfg().DefaultCaching
-	if cacheopt != nil && *cacheopt != utils.EmptyString {
-		cacheOpt = *cacheopt
-	}
-	switch cacheOpt {
-	case utils.META_NONE:
-		return
-	case utils.MetaReload:
-		method = utils.CacheSv1ReloadCache
-		if args, err = apierSv1.composeArgsReload(tnt, cacheID, itemID, filters, contexts, opts); err != nil {
-			return
-		}
-	case utils.MetaLoad:
-		method = utils.CacheSv1LoadCache
-		if args, err = apierSv1.composeArgsReload(tnt, cacheID, itemID, filters, contexts, opts); err != nil {
-			return
-		}
-	case utils.MetaRemove:
-		method = utils.CacheSv1RemoveItems
-		if args, err = apierSv1.composeArgsReload(tnt, cacheID, itemID, filters, contexts, opts); err != nil {
-			return
-		}
-	case utils.MetaClear:
-		method = utils.CacheSv1Clear
-		args = &utils.AttrCacheIDsWithOpts{
-			TenantArg: utils.TenantArg{Tenant: tnt},
-			CacheIDs:  []string{cacheID, utils.CacheInstanceToCacheIndex[cacheID]},
-			Opts:      opts,
-		}
-	}
-	return apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
-		method, args, &reply)
-}
-
 func (apierSv1 *APIerSv1) GetLoadIDs(args *string, reply *map[string]int64) (err error) {
-	if loadIDs, err := apierSv1.DataManager.GetItemLoadIDs(*args, false); err != nil {
-		return err
-	} else {
-		*reply = loadIDs
+	var loadIDs map[string]int64
+	if loadIDs, err = apierSv1.DataManager.GetItemLoadIDs(*args, false); err != nil {
+		return
 	}
+	*reply = loadIDs
 	return
 }
 

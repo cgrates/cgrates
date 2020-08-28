@@ -25,6 +25,46 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+// CallCache caching the item based on cacheopt
+// visible in APIerSv2
+func (apierSv1 *APIerSv1) CallCache(cacheopt *string, tnt, cacheID, itemID string,
+	filters *[]string, contexts []string, opts map[string]interface{}) (err error) {
+	var reply, method string
+	var args interface{}
+	cacheOpt := apierSv1.Config.GeneralCfg().DefaultCaching
+	if cacheopt != nil && *cacheopt != utils.EmptyString {
+		cacheOpt = *cacheopt
+	}
+	switch cacheOpt {
+	case utils.META_NONE:
+		return
+	case utils.MetaReload:
+		method = utils.CacheSv1ReloadCache
+		if args, err = apierSv1.composeArgsReload(tnt, cacheID, itemID, filters, contexts, opts); err != nil {
+			return
+		}
+	case utils.MetaLoad:
+		method = utils.CacheSv1LoadCache
+		if args, err = apierSv1.composeArgsReload(tnt, cacheID, itemID, filters, contexts, opts); err != nil {
+			return
+		}
+	case utils.MetaRemove:
+		method = utils.CacheSv1RemoveItems
+		if args, err = apierSv1.composeArgsReload(tnt, cacheID, itemID, filters, contexts, opts); err != nil {
+			return
+		}
+	case utils.MetaClear:
+		method = utils.CacheSv1Clear
+		args = &utils.AttrCacheIDsWithOpts{
+			TenantArg: utils.TenantArg{Tenant: tnt},
+			CacheIDs:  []string{cacheID, utils.CacheInstanceToCacheIndex[cacheID]},
+			Opts:      opts,
+		}
+	}
+	return apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
+		method, args, &reply)
+}
+
 // composeArgsReload add the ItemID to AttrReloadCache
 // for a specific CacheID
 func (apierSv1 *APIerSv1) composeArgsReload(tnt, cacheID, itemID string, filterIDs *[]string, contexts []string, opts map[string]interface{}) (rpl utils.AttrReloadCacheWithOpts, err error) {
@@ -39,7 +79,7 @@ func (apierSv1 *APIerSv1) composeArgsReload(tnt, cacheID, itemID string, filterI
 		return
 	}
 	// popultate the indexes
-	idxCacheID := utils.CacheInstanceToCacheIndex[cacheID]
+	idxCacheID := utils.CacheInstanceToArg[utils.CacheInstanceToCacheIndex[cacheID]]
 	if len(*filterIDs) == 0 { // in case we do not have any filters reload the *none filter indexes
 		indxID := utils.ConcatenatedKey(utils.META_NONE, utils.META_ANY, utils.META_ANY)
 		if cacheID != utils.CacheAttributeProfiles &&
@@ -51,6 +91,7 @@ func (apierSv1 *APIerSv1) composeArgsReload(tnt, cacheID, itemID string, filterI
 		for i, ctx := range contexts {
 			rpl.ArgsCache[idxCacheID][i] = utils.ConcatenatedKey(tnt, ctx, indxID)
 		}
+		return
 	}
 	indxIDs := make([]string, 0, len(*filterIDs))
 	for _, id := range *filterIDs {
