@@ -642,3 +642,8 @@ type SIPAgentJsonCfg struct {
 	Templates            map[string][]*FcTemplateJsonCfg
 	Request_processors   *[]*ReqProcessorJsnCfg
 }
+
+type ConfigSCfgJson struct {
+	Enabled *bool
+	Listen  *string
+}

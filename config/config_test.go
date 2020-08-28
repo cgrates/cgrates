@@ -2492,6 +2492,13 @@ func TestRpcConnsDefaults(t *testing.T) {
 	}
 }
 
-func TestTemplateConnsDefaults(t *testing.T) {
+func TestCgrCfgJSONDefaultsConfigS(t *testing.T) {
+	eCfg := &ConfigSCfg{
+		Enabled: false,
+		Listen:  utils.EmptyString,
+	}
 
+	if !reflect.DeepEqual(cgrCfg.configSCfg, eCfg) {
+		t.Errorf("received: %+v, expecting: %+v", utils.ToJSON(cgrCfg.configSCfg), utils.ToJSON(eCfg))
+	}
 }
