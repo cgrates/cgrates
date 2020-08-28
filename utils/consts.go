@@ -112,16 +112,16 @@ var (
 	}
 
 	CacheInstanceToCacheIndex = map[string]string{
-		CacheThresholdFilterIndexes:    CacheThresholdProfiles,
-		CacheResourceFilterIndexes:     CacheResourceProfiles,
-		CacheStatFilterIndexes:         CacheStatQueueProfiles,
-		CacheRouteFilterIndexes:        CacheRouteProfiles,
-		CacheAttributeFilterIndexes:    CacheAttributeProfiles,
-		CacheChargerFilterIndexes:      CacheChargerProfiles,
-		CacheDispatcherFilterIndexes:   CacheDispatcherProfiles,
-		CacheRateProfilesFilterIndexes: CacheRateProfiles,
-		// CacheRateFilterIndexes:         CacheRates,
-		CacheReverseFilterIndexes: CacheFilters,
+		CacheThresholdProfiles:  CacheThresholdFilterIndexes,
+		CacheResourceProfiles:   CacheResourceFilterIndexes,
+		CacheStatQueueProfiles:  CacheStatFilterIndexes,
+		CacheRouteProfiles:      CacheRouteFilterIndexes,
+		CacheAttributeProfiles:  CacheAttributeFilterIndexes,
+		CacheChargerProfiles:    CacheChargerFilterIndexes,
+		CacheDispatcherProfiles: CacheDispatcherFilterIndexes,
+		CacheRateProfiles:       CacheRateProfilesFilterIndexes,
+		CacheFilters:            CacheReverseFilterIndexes,
+		// CacheRates:              CacheRateFilterIndexes,
 	}
 
 	// NonMonetaryBalances are types of balances which are not handled as monetary
