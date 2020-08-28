@@ -990,4 +990,11 @@ const CGRATES_CFG_JSON = `
 	],
 },
 
+
+"configs": {
+	"enabled": false,					// enables the ConfigS: <true|false>
+	"listen": "",			// address where to listen for config <x.y.z.y:1234>
+},
+
+
 }`

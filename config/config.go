@@ -189,6 +189,7 @@ func NewDefaultCGRConfig() (cfg *CGRConfig, err error) {
 	cfg.eesCfg.Cache = make(map[string]*CacheParamCfg)
 	cfg.rateSCfg = new(RateSCfg)
 	cfg.sipAgentCfg = new(SIPAgentCfg)
+	cfg.configSCfg = new(ConfigSCfg)
 
 	cfg.ConfigReloads = make(map[string]chan struct{})
 
@@ -311,6 +312,7 @@ type CGRConfig struct {
 	eesCfg           *EEsCfg           // EventExporter config
 	rateSCfg         *RateSCfg         // RateS config
 	sipAgentCfg      *SIPAgentCfg      // SIPAgent config
+	configSCfg       *ConfigSCfg       //ConfigS config
 }
 
 var posibleLoaderTypes = utils.NewStringSet([]string{utils.MetaAttributes,
@@ -376,7 +378,7 @@ func (cfg *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		cfg.loadMailerCfg, cfg.loadSureTaxCfg, cfg.loadDispatcherSCfg,
 		cfg.loadLoaderCgrCfg, cfg.loadMigratorCgrCfg, cfg.loadTlsCgrCfg,
 		cfg.loadAnalyzerCgrCfg, cfg.loadApierCfg, cfg.loadErsCfg, cfg.loadEesCfg,
-		cfg.loadRateSCfg, cfg.loadSIPAgentCfg, cfg.loadDispatcherHCfg} {
+		cfg.loadRateSCfg, cfg.loadSIPAgentCfg, cfg.loadDispatcherHCfg, cfg.loadConfigSCfg} {
 		if err = loadFunc(jsnCfg); err != nil {
 			return
 		}
@@ -775,6 +777,14 @@ func (cfg *CGRConfig) loadTemplateSCfg(jsnCfg *CgrJsonCfg) (err error) {
 		}
 	}
 	return
+}
+
+func (cfg *CGRConfig) loadConfigSCfg(jsnCfg *CgrJsonCfg) (err error) {
+	var jsnConfigSCfg *ConfigSCfgJson
+	if jsnConfigSCfg, err = jsnCfg.ConfigSJsonCfg(); err != nil {
+		return
+	}
+	return cfg.configSCfg.loadFromJsonCfg(jsnConfigSCfg)
 }
 
 // SureTaxCfg use locking to retrieve the configuration, possibility later for runtime reload
@@ -1282,6 +1292,7 @@ func (cfg *CGRConfig) getLoadFunctions() map[string]func(*CgrJsonCfg) error {
 		RateSJson:          cfg.loadRateSCfg,
 		SIPAgentJson:       cfg.loadSIPAgentCfg,
 		TemplatesJson:      cfg.loadTemplateSCfg,
+		ConfigSJson:        cfg.loadConfigSCfg,
 	}
 }
 
