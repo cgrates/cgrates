@@ -116,6 +116,7 @@ type CacheSv1Interface interface {
 	HasItem(args *utils.ArgsGetCacheItemWithOpts, reply *bool) error
 	GetItemExpiryTime(args *utils.ArgsGetCacheItemWithOpts, reply *time.Time) error
 	RemoveItem(args *utils.ArgsGetCacheItemWithOpts, reply *string) error
+	RemoveItems(args utils.AttrReloadCacheWithOpts, reply *string) error
 	Clear(cacheIDs *utils.AttrCacheIDsWithOpts, reply *string) error
 	GetCacheStats(cacheIDs *utils.AttrCacheIDsWithOpts, rply *map[string]*ltcache.CacheStats) error
 	PrecacheStatus(cacheIDs *utils.AttrCacheIDsWithOpts, rply *map[string]string) error

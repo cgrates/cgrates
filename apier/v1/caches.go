@@ -59,6 +59,12 @@ func (chSv1 *CacheSv1) RemoveItem(args *utils.ArgsGetCacheItemWithOpts,
 	return chSv1.cacheS.V1RemoveItem(args, reply)
 }
 
+// RemoveItems removes the Items with ID from cache
+func (chSv1 *CacheSv1) RemoveItems(args utils.AttrReloadCacheWithOpts,
+	reply *string) error {
+	return chSv1.cacheS.V1RemoveItems(args, reply)
+}
+
 // Clear will clear partitions in the cache (nil fol all, empty slice for none)
 func (chSv1 *CacheSv1) Clear(args *utils.AttrCacheIDsWithOpts,
 	reply *string) error {

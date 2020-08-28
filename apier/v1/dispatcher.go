@@ -83,11 +83,8 @@ func (apierSv1 *APIerSv1) SetDispatcherProfile(args *DispatcherWithCache, reply 
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for DispatcherProfile
-	argCache := utils.ArgsGetCacheItem{
-		CacheID: utils.CacheDispatcherProfiles,
-		ItemID:  args.TenantID(),
-	}
-	if err := apierSv1.CallCache(GetCacheOpt(args.Cache), argCache, args.Opts); err != nil {
+	if err := apierSv1.CallCache(args.Cache, args.Tenant, utils.CacheDispatcherProfiles,
+		args.TenantID(), &args.FilterIDs, args.Subsystems, args.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -108,11 +105,8 @@ func (apierSv1 *APIerSv1) RemoveDispatcherProfile(arg *utils.TenantIDWithCache, 
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for DispatcherProfile
-	argCache := utils.ArgsGetCacheItem{
-		CacheID: utils.CacheDispatcherProfiles,
-		ItemID:  arg.TenantID(),
-	}
-	if err := apierSv1.CallCache(GetCacheOpt(arg.Cache), argCache, arg.Opts); err != nil {
+	if err := apierSv1.CallCache(arg.Cache, arg.Tenant, utils.CacheDispatcherProfiles,
+		arg.TenantID(), nil, nil, arg.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -173,11 +167,8 @@ func (apierSv1 *APIerSv1) SetDispatcherHost(args *DispatcherHostWithCache, reply
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for DispatcherProfile
-	argCache := utils.ArgsGetCacheItem{
-		CacheID: utils.CacheDispatcherHosts,
-		ItemID:  args.TenantID(),
-	}
-	if err := apierSv1.CallCache(GetCacheOpt(args.Cache), argCache, args.Opts); err != nil {
+	if err := apierSv1.CallCache(args.Cache, args.Tenant, utils.CacheDispatcherHosts,
+		args.TenantID(), nil, nil, args.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -198,11 +189,8 @@ func (apierSv1 *APIerSv1) RemoveDispatcherHost(arg *utils.TenantIDWithCache, rep
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for DispatcherProfile
-	argCache := utils.ArgsGetCacheItem{
-		CacheID: utils.CacheDispatcherHosts,
-		ItemID:  arg.TenantID(),
-	}
-	if err := apierSv1.CallCache(GetCacheOpt(arg.Cache), argCache, arg.Opts); err != nil {
+	if err := apierSv1.CallCache(arg.Cache, arg.Tenant, utils.CacheDispatcherHosts,
+		arg.TenantID(), nil, nil, arg.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -602,6 +590,12 @@ func (dS *DispatcherCacheSv1) GetItemExpiryTime(args *utils.ArgsGetCacheItemWith
 func (dS *DispatcherCacheSv1) RemoveItem(args *utils.ArgsGetCacheItemWithOpts,
 	reply *string) error {
 	return dS.dS.CacheSv1RemoveItem(args, reply)
+}
+
+// RemoveItems removes the Item with ID from cache
+func (dS *DispatcherCacheSv1) RemoveItems(args utils.AttrReloadCacheWithOpts,
+	reply *string) error {
+	return dS.dS.CacheSv1RemoveItems(args, reply)
 }
 
 // Clear will clear partitions in the cache (nil fol all, empty slice for none)

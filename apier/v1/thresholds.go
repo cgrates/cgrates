@@ -127,11 +127,8 @@ func (apierSv1 *APIerSv1) SetThresholdProfile(args *engine.ThresholdWithCache, r
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for ThresholdProfile
-	argCache := utils.ArgsGetCacheItem{
-		CacheID: utils.CacheThresholdProfiles,
-		ItemID:  args.TenantID(),
-	}
-	if err := apierSv1.CallCache(GetCacheOpt(args.Cache), argCache, args.Opts); err != nil {
+	if err := apierSv1.CallCache(args.Cache, args.Tenant, utils.CacheThresholdProfiles,
+		args.TenantID(), &args.FilterIDs, nil, args.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 
@@ -142,11 +139,8 @@ func (apierSv1 *APIerSv1) SetThresholdProfile(args *engine.ThresholdWithCache, r
 			return err
 		}
 		//handle caching for Threshold
-		argCache = utils.ArgsGetCacheItem{
-			CacheID: utils.CacheThresholds,
-			ItemID:  args.TenantID(),
-		}
-		if err := apierSv1.CallCache(GetCacheOpt(args.Cache), argCache, args.Opts); err != nil {
+		if err := apierSv1.CallCache(args.Cache, args.Tenant, utils.CacheThresholds,
+			args.TenantID(), nil, nil, args.Opts); err != nil {
 			return utils.APIErrorHandler(err)
 		}
 	}
@@ -164,11 +158,8 @@ func (apierSv1 *APIerSv1) RemoveThresholdProfile(args *utils.TenantIDWithCache, 
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for ThresholdProfile
-	argCache := utils.ArgsGetCacheItem{
-		CacheID: utils.CacheThresholdProfiles,
-		ItemID:  args.TenantID(),
-	}
-	if err := apierSv1.CallCache(GetCacheOpt(args.Cache), argCache, args.Opts); err != nil {
+	if err := apierSv1.CallCache(args.Cache, args.Tenant, utils.CacheThresholdProfiles,
+		args.TenantID(), nil, nil, args.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	if err := apierSv1.DataManager.RemoveThreshold(args.Tenant, args.ID, utils.NonTransactional); err != nil {
@@ -181,11 +172,8 @@ func (apierSv1 *APIerSv1) RemoveThresholdProfile(args *utils.TenantIDWithCache, 
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for Threshold
-	argCache = utils.ArgsGetCacheItem{
-		CacheID: utils.CacheThresholds,
-		ItemID:  args.TenantID(),
-	}
-	if err := apierSv1.CallCache(GetCacheOpt(args.Cache), argCache, args.Opts); err != nil {
+	if err := apierSv1.CallCache(args.Cache, args.Tenant, utils.CacheThresholds,
+		args.TenantID(), nil, nil, args.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

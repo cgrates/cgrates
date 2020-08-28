@@ -130,6 +130,27 @@ func (dS *DispatcherService) CacheSv1RemoveItem(args *utils.ArgsGetCacheItemWith
 	}, utils.MetaCaches, utils.CacheSv1RemoveItem, args, reply)
 }
 
+// CacheSv1RemoveItems removes the Item with ID from cache
+func (dS *DispatcherService) CacheSv1RemoveItems(args utils.AttrReloadCacheWithOpts,
+	reply *string) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.TenantArg.Tenant != utils.EmptyString {
+		tnt = args.TenantArg.Tenant
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(utils.CacheSv1RemoveItems, tnt,
+			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(&utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
+			Tenant: tnt,
+		},
+		Opts: args.Opts,
+	}, utils.MetaCaches, utils.CacheSv1RemoveItems, args, reply)
+}
+
 // CacheSv1Clear will clear partitions in the cache (nil fol all, empty slice for none)
 func (dS *DispatcherService) CacheSv1Clear(args *utils.AttrCacheIDsWithOpts,
 	reply *string) (err error) {

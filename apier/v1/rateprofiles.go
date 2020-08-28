@@ -100,11 +100,8 @@ func (apierSv1 *APIerSv1) SetRateProfile(rPrf *RateProfileWithCache, reply *stri
 	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheRateProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	args := utils.ArgsGetCacheItem{
-		CacheID: utils.CacheRateProfiles,
-		ItemID:  rPrf.TenantID(),
-	}
-	if err := apierSv1.CallCache(GetCacheOpt(rPrf.Cache), args, rPrf.Opts); err != nil {
+	if err := apierSv1.CallCache(rPrf.Cache, rPrf.Tenant, utils.CacheRateProfiles,
+		rPrf.TenantID(), &rPrf.FilterIDs, nil, rPrf.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -124,11 +121,8 @@ func (apierSv1 *APIerSv1) SetRateProfileRates(rPrf *RateProfileWithCache, reply 
 	if err = apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheRateProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	args := utils.ArgsGetCacheItem{
-		CacheID: utils.CacheRateProfiles,
-		ItemID:  rPrf.TenantID(),
-	}
-	if err = apierSv1.CallCache(GetCacheOpt(rPrf.Cache), args, rPrf.Opts); err != nil {
+	if err = apierSv1.CallCache(rPrf.Cache, rPrf.Tenant, utils.CacheRateProfiles,
+		rPrf.TenantID(), &rPrf.FilterIDs, nil, rPrf.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -154,11 +148,8 @@ func (apierSv1 *APIerSv1) RemoveRateProfileRates(args *RemoveRPrfRates, reply *s
 	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheRateProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	argsCache := utils.ArgsGetCacheItem{
-		CacheID: utils.CacheRateProfiles,
-		ItemID:  utils.ConcatenatedKey(args.Tenant, args.ID),
-	}
-	if err := apierSv1.CallCache(GetCacheOpt(args.Cache), argsCache, args.Opts); err != nil {
+	if err := apierSv1.CallCache(args.Cache, args.Tenant, utils.CacheRateProfiles,
+		utils.ConcatenatedKey(args.Tenant, args.ID), nil, nil, args.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -178,11 +169,8 @@ func (apierSv1 *APIerSv1) RemoveRateProfile(arg *utils.TenantIDWithCache, reply 
 	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheRateProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	args := utils.ArgsGetCacheItem{
-		CacheID: utils.CacheRateProfiles,
-		ItemID:  utils.ConcatenatedKey(arg.Tenant, arg.ID),
-	}
-	if err := apierSv1.CallCache(GetCacheOpt(arg.Cache), args, arg.Opts); err != nil {
+	if err := apierSv1.CallCache(arg.Cache, arg.Tenant, utils.CacheRateProfiles,
+		utils.ConcatenatedKey(arg.Tenant, arg.ID), nil, nil, arg.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

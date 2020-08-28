@@ -75,11 +75,8 @@ func (apierSv1 *APIerSv1) SetStatQueueProfile(arg *engine.StatQueueWithCache, re
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for StatQueueProfile
-	argCache := utils.ArgsGetCacheItem{
-		CacheID: utils.CacheStatQueueProfiles,
-		ItemID:  arg.TenantID(),
-	}
-	if err := apierSv1.CallCache(GetCacheOpt(arg.Cache), argCache, arg.Opts); err != nil {
+	if err := apierSv1.CallCache(arg.Cache, arg.Tenant, utils.CacheStatQueueProfiles,
+		arg.TenantID(), &arg.FilterIDs, nil, arg.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	if has, err := apierSv1.DataManager.HasData(utils.StatQueuePrefix, arg.ID, arg.Tenant); err != nil {
@@ -98,11 +95,8 @@ func (apierSv1 *APIerSv1) SetStatQueueProfile(arg *engine.StatQueueWithCache, re
 			return utils.APIErrorHandler(err)
 		}
 		//handle caching for StatQueues
-		argCache = utils.ArgsGetCacheItem{
-			CacheID: utils.CacheStatQueues,
-			ItemID:  arg.TenantID(),
-		}
-		if err := apierSv1.CallCache(GetCacheOpt(arg.Cache), argCache, arg.Opts); err != nil {
+		if err := apierSv1.CallCache(arg.Cache, arg.Tenant, utils.CacheStatQueues,
+			arg.TenantID(), nil, nil, arg.Opts); err != nil {
 			return utils.APIErrorHandler(err)
 		}
 	}
@@ -120,11 +114,8 @@ func (apierSv1 *APIerSv1) RemoveStatQueueProfile(args *utils.TenantIDWithCache, 
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for StatQueueProfile
-	argCache := utils.ArgsGetCacheItem{
-		CacheID: utils.CacheStatQueueProfiles,
-		ItemID:  args.TenantID(),
-	}
-	if err := apierSv1.CallCache(GetCacheOpt(args.Cache), argCache, args.Opts); err != nil {
+	if err := apierSv1.CallCache(args.Cache, args.Tenant, utils.CacheStatQueueProfiles,
+		args.TenantID(), nil, nil, args.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	if err := apierSv1.DataManager.RemoveStatQueue(args.Tenant, args.ID, utils.NonTransactional); err != nil {
@@ -137,11 +128,8 @@ func (apierSv1 *APIerSv1) RemoveStatQueueProfile(args *utils.TenantIDWithCache, 
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for StatQueues
-	argCache = utils.ArgsGetCacheItem{
-		CacheID: utils.CacheStatQueues,
-		ItemID:  args.TenantID(),
-	}
-	if err := apierSv1.CallCache(GetCacheOpt(args.Cache), argCache, args.Opts); err != nil {
+	if err := apierSv1.CallCache(args.Cache, args.Tenant, utils.CacheStatQueues,
+		args.TenantID(), nil, nil, args.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

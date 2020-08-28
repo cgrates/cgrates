@@ -1340,39 +1340,41 @@ func (apierSv1 *APIerSv1) ReplayFailedPosts(args *ArgsReplyFailedPosts, reply *s
 
 // CallCache caching the item based on cacheopt
 // visible in APIerSv2
-func (apierSv1 *APIerSv1) CallCache(cacheOpt string, args utils.ArgsGetCacheItem, opts map[string]interface{}) (err error) {
-	var reply string
+func (apierSv1 *APIerSv1) CallCache(cacheopt *string, tnt, cacheID, itemID string, filters *[]string, contexts []string, opts map[string]interface{}) (err error) {
+	var reply, method string
+	var args interface{}
+	cacheOpt := apierSv1.Config.GeneralCfg().DefaultCaching
+	if cacheopt != nil && *cacheopt != utils.EmptyString {
+		cacheOpt = *cacheopt
+	}
 	switch cacheOpt {
 	case utils.META_NONE:
 		return
 	case utils.MetaReload:
-		if err = apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
-			utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithOpts{
-				ArgsCache: composeArgsReload(args), Opts: opts}, &reply); err != nil {
-			return err
+		method = utils.CacheSv1ReloadCache
+		if args, err = apierSv1.composeArgsReload(tnt, cacheID, itemID, filters, contexts, opts); err != nil {
+			return
 		}
 	case utils.MetaLoad:
-		if err = apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
-			utils.CacheSv1LoadCache, utils.AttrReloadCacheWithOpts{
-				ArgsCache: composeArgsReload(args), Opts: opts}, &reply); err != nil {
-			return err
+		method = utils.CacheSv1LoadCache
+		if args, err = apierSv1.composeArgsReload(tnt, cacheID, itemID, filters, contexts, opts); err != nil {
+			return
 		}
 	case utils.MetaRemove:
-		if err = apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
-			utils.CacheSv1RemoveItem,
-			&utils.ArgsGetCacheItemWithOpts{ArgsGetCacheItem: args, Opts: opts}, &reply); err != nil {
-			return err
+		method = utils.CacheSv1RemoveItems
+		if args, err = apierSv1.composeArgsReload(tnt, cacheID, itemID, filters, contexts, opts); err != nil {
+			return
 		}
 	case utils.MetaClear:
-		if err = apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
-			utils.CacheSv1Clear, &utils.AttrCacheIDsWithOpts{
-				CacheIDs: []string{args.CacheID},
-				Opts:     opts,
-			}, &reply); err != nil {
-			return err
+		method = utils.CacheSv1Clear
+		args = &utils.AttrCacheIDsWithOpts{
+			TenantArg: utils.TenantArg{Tenant: tnt},
+			CacheIDs:  []string{cacheID, utils.CacheInstanceToCacheIndex[cacheID]},
+			Opts:      opts,
 		}
 	}
-	return
+	return apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
+		method, args, &reply)
 }
 
 func (apierSv1 *APIerSv1) GetLoadIDs(args *string, reply *map[string]int64) (err error) {

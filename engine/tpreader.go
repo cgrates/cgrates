@@ -2479,7 +2479,7 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, opts map[string]i
 			return
 		}
 	case utils.MetaRemove:
-		if err = connMgr.Call(tpr.cacheConns, nil, utils.CacheSv1RemoveItem, cacheArgs, &reply); err != nil {
+		if err = connMgr.Call(tpr.cacheConns, nil, utils.CacheSv1RemoveItems, cacheArgs, &reply); err != nil {
 			return
 		}
 	case utils.MetaClear:
@@ -2514,6 +2514,9 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, opts map[string]i
 	if len(ratePrfIDs) != 0 {
 		cacheIDs = append(cacheIDs, utils.CacheRateProfilesFilterIndexes)
 		cacheIDs = append(cacheIDs, utils.CacheRateFilterIndexes)
+	}
+	if len(flrIDs) != 0 {
+		cacheIDs = append(cacheIDs, utils.CacheReverseFilterIndexes)
 	}
 	if verbose {
 		log.Print("Clearing indexes")

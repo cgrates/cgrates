@@ -78,11 +78,8 @@ func (apierSv1 *APIerSv1) SetChargerProfile(arg *ChargerWithCache, reply *string
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for ChargerProfile
-	argCache := utils.ArgsGetCacheItem{
-		CacheID: utils.CacheChargerProfiles,
-		ItemID:  arg.TenantID(),
-	}
-	if err := apierSv1.CallCache(GetCacheOpt(arg.Cache), argCache, arg.Opts); err != nil {
+	if err := apierSv1.CallCache(arg.Cache, arg.Tenant, utils.CacheChargerProfiles,
+		arg.TenantID(), &arg.FilterIDs, nil, arg.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -103,11 +100,8 @@ func (apierSv1 *APIerSv1) RemoveChargerProfile(arg *utils.TenantIDWithCache, rep
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for ChargerProfile
-	argCache := utils.ArgsGetCacheItem{
-		CacheID: utils.CacheChargerProfiles,
-		ItemID:  arg.TenantID(),
-	}
-	if err := apierSv1.CallCache(GetCacheOpt(arg.Cache), argCache, arg.Opts); err != nil {
+	if err := apierSv1.CallCache(arg.Cache, arg.Tenant, utils.CacheChargerProfiles,
+		arg.TenantID(), nil, nil, arg.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
