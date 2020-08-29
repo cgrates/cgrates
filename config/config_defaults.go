@@ -185,6 +185,7 @@ const CGRATES_CFG_JSON = `
 	"http_cdrs": "/cdr_http",								// CDRS relative URL ("" to disable)
 	"use_basic_auth": false,								// use basic authentication
 	"auth_users": {},										// basic authentication usernames and base64-encoded passwords (eg: { "username1": "cGFzc3dvcmQ=", "username2": "cGFzc3dvcmQy "})
+	"configs": "/configs"									// configs
 },
 
 
@@ -989,12 +990,4 @@ const CGRATES_CFG_JSON = `
 				"value": "SIP/2.0 500 Internal Server Error", "mandatory": true},
 	],
 },
-
-
-"configs": {
-	"enabled": false,					// enables the ConfigS: <true|false>
-	"listen": "",			// address where to listen for config <x.y.z.y:1234>
-},
-
-
 }`

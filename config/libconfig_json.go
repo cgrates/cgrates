@@ -71,6 +71,7 @@ type HTTPJsonCfg struct {
 	Http_Cdrs                 *string
 	Use_basic_auth            *bool
 	Auth_users                *map[string]string
+	Configs                   *string
 }
 
 type TlsJsonCfg struct {
