@@ -508,6 +508,9 @@ func main() {
 	if len(cfg.HTTPCfg().DispatchersRegistrarURL) != 0 {
 		server.RegisterHttpFunc(cfg.HTTPCfg().DispatchersRegistrarURL, dispatcherh.Registar)
 	}
+	if len(cfg.HTTPCfg().Configs) != 0 {
+		server.RegisterHttpFunc(cfg.HTTPCfg().Configs, config.HandlerConfigS)
+	}
 	if *httpPprofPath != "" {
 		go server.RegisterProfiler(*httpPprofPath)
 	}

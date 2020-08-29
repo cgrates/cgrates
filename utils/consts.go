@@ -1939,6 +1939,7 @@ const (
 	HTTPCDRsURLCfg             = "http_cdrs"
 	HTTPUseBasicAuthCfg        = "use_basic_auth"
 	HTTPAuthUsersCfg           = "auth_users"
+	Configs                    = "configs"
 )
 
 // FilterSCfg

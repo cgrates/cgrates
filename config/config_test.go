@@ -2491,14 +2491,3 @@ func TestRpcConnsDefaults(t *testing.T) {
 		t.Errorf("received: %+v,\n expecting: %+v", utils.ToJSON(cgrCfg.rpcConns), utils.ToJSON(eCfg))
 	}
 }
-
-func TestCgrCfgJSONDefaultsConfigS(t *testing.T) {
-	eCfg := &ConfigSCfg{
-		Enabled: false,
-		Listen:  utils.EmptyString,
-	}
-
-	if !reflect.DeepEqual(cgrCfg.configSCfg, eCfg) {
-		t.Errorf("received: %+v, expecting: %+v", utils.ToJSON(cgrCfg.configSCfg), utils.ToJSON(eCfg))
-	}
-}

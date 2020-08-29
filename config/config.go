@@ -189,7 +189,6 @@ func NewDefaultCGRConfig() (cfg *CGRConfig, err error) {
 	cfg.eesCfg.Cache = make(map[string]*CacheParamCfg)
 	cfg.rateSCfg = new(RateSCfg)
 	cfg.sipAgentCfg = new(SIPAgentCfg)
-	cfg.configSCfg = new(ConfigSCfg)
 
 	cfg.ConfigReloads = make(map[string]chan struct{})
 
@@ -312,7 +311,6 @@ type CGRConfig struct {
 	eesCfg           *EEsCfg           // EventExporter config
 	rateSCfg         *RateSCfg         // RateS config
 	sipAgentCfg      *SIPAgentCfg      // SIPAgent config
-	configSCfg       *ConfigSCfg       //ConfigS config
 }
 
 var posibleLoaderTypes = utils.NewStringSet([]string{utils.MetaAttributes,
@@ -378,7 +376,7 @@ func (cfg *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		cfg.loadMailerCfg, cfg.loadSureTaxCfg, cfg.loadDispatcherSCfg,
 		cfg.loadLoaderCgrCfg, cfg.loadMigratorCgrCfg, cfg.loadTlsCgrCfg,
 		cfg.loadAnalyzerCgrCfg, cfg.loadApierCfg, cfg.loadErsCfg, cfg.loadEesCfg,
-		cfg.loadRateSCfg, cfg.loadSIPAgentCfg, cfg.loadDispatcherHCfg, cfg.loadConfigSCfg} {
+		cfg.loadRateSCfg, cfg.loadSIPAgentCfg, cfg.loadDispatcherHCfg} {
 		if err = loadFunc(jsnCfg); err != nil {
 			return
 		}
@@ -777,14 +775,6 @@ func (cfg *CGRConfig) loadTemplateSCfg(jsnCfg *CgrJsonCfg) (err error) {
 		}
 	}
 	return
-}
-
-func (cfg *CGRConfig) loadConfigSCfg(jsnCfg *CgrJsonCfg) (err error) {
-	var jsnConfigSCfg *ConfigSCfgJson
-	if jsnConfigSCfg, err = jsnCfg.ConfigSJsonCfg(); err != nil {
-		return
-	}
-	return cfg.configSCfg.loadFromJsonCfg(jsnConfigSCfg)
 }
 
 // SureTaxCfg use locking to retrieve the configuration, possibility later for runtime reload
@@ -1292,7 +1282,6 @@ func (cfg *CGRConfig) getLoadFunctions() map[string]func(*CgrJsonCfg) error {
 		RateSJson:          cfg.loadRateSCfg,
 		SIPAgentJson:       cfg.loadSIPAgentCfg,
 		TemplatesJson:      cfg.loadTemplateSCfg,
-		ConfigSJson:        cfg.loadConfigSCfg,
 	}
 }
 
@@ -1628,4 +1617,69 @@ func (cfg *CGRConfig) AsMapInterface(separator string) map[string]interface{} {
 		utils.Apier:            cfg.apier.AsMapInterface(),
 		utils.ErsCfg:           cfg.ersCfg.AsMapInterface(separator),
 	}
+}
+
+// RegisterConfigs handler for httpServer to register the configs
+func HandlerConfigS(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	w.Header().Set("Content-Type", "application/json")
+	// check if the path exists
+	fi, err := os.Stat(r.URL.Path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			w.WriteHeader(404)
+		} else {
+			w.WriteHeader(500)
+		}
+		fmt.Fprintf(w, err.Error())
+		return
+	}
+	switch mode := fi.Mode(); {
+	case mode.IsDir():
+		handleConfigSFolder(r.URL.Path, w)
+	case mode.IsRegular():
+		handleConfigSFile(r.URL.Path, w)
+	}
+	return
+}
+
+func handleConfigSFolder(path string, w http.ResponseWriter) {
+	// if the path is a directory, read the directory, construct the config and load it in memory
+	cfg, err := NewCGRConfigFromPath(path)
+	if err != nil {
+		if err.Error() == utils.ErrPathNotReachable(path).Error() { // if we receive path error change the header of response to 404 Error NotFound
+			w.WriteHeader(404)
+		} else {
+			w.WriteHeader(500)
+		}
+		fmt.Fprintf(w, err.Error())
+		return
+	}
+	// convert the config into a json and send it
+	if _, err := w.Write([]byte(utils.ToJSON(cfg.AsMapInterface))); err != nil {
+		utils.Logger.Warning(fmt.Sprintf("<%s> Failed to write resonse because: %s",
+			utils.Configs, err))
+	}
+	return
+}
+
+func handleConfigSFile(path string, w http.ResponseWriter) {
+	// if the config is a file read the file and send it directly
+	f, err := os.Open(path)
+	if err != nil {
+		w.WriteHeader(404)
+		fmt.Fprintf(w, err.Error())
+		return
+	}
+	var b []byte
+	if _, err := io.ReadFull(f, b); err != nil {
+		w.WriteHeader(500)
+		fmt.Fprintf(w, err.Error())
+		return
+	}
+	if _, err := w.Write(b); err != nil {
+		utils.Logger.Warning(fmt.Sprintf("<%s> Failed to write resonse because: %s",
+			utils.Configs, err))
+	}
+	return
 }
