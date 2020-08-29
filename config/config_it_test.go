@@ -20,7 +20,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"io/ioutil"
 	"net"
+	"net/http/httptest"
 	"os"
 	"path"
 	"reflect"
@@ -52,6 +54,10 @@ var (
 		testCgrCfgV1ReloadConfigSection,
 		testCGRConfigReloadConfigFromJSONSessionS,
 		testCGRConfigReloadAll,
+		testHttpHandlerConfigSForNotExistFile,
+		testHttpHandlerConfigSForFile,
+		testHttpHandlerConfigSForNotExistFolder,
+		testHttpHandlerConfigSForFolder,
 	}
 )
 
@@ -1007,5 +1013,79 @@ func testCGRConfigReloadAll(t *testing.T) {
 	}
 	if !reflect.DeepEqual(expAttr, cfg.SessionSCfg()) {
 		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.SessionSCfg()))
+	}
+}
+
+func testHttpHandlerConfigSForNotExistFile(t *testing.T) {
+	req := httptest.NewRequest("GET", "http://127.0.0.1/usr/share/cgrates/conf/samples/NotExists/cgrates.json", nil)
+	w := httptest.NewRecorder()
+	HandlerConfigS(w, req)
+
+	resp := w.Result()
+	body, _ := ioutil.ReadAll(resp.Body)
+
+	if resp.Status != "404 Not Found" {
+		t.Errorf("Expected %+v , received: %+v ", "200 OK", resp.Status)
+	}
+	httpBodyMsgError := "stat /usr/share/cgrates/conf/samples/NotExists/cgrates.json: no such file or directory"
+	if httpBodyMsgError != string(body) {
+		t.Errorf("Expected %s , received: %s ", httpBodyMsgError, string(body))
+	}
+}
+
+func testHttpHandlerConfigSForFile(t *testing.T) {
+	req := httptest.NewRequest("GET", "http://127.0.0.1/usr/share/cgrates/conf/samples/tutmysql/cgrates.json", nil)
+	w := httptest.NewRecorder()
+	HandlerConfigS(w, req)
+
+	resp := w.Result()
+	body, _ := ioutil.ReadAll(resp.Body)
+
+	if resp.Status != "200 OK" {
+		t.Errorf("Expected %+v , received: %+v ", "200 OK", resp.Status)
+	}
+	if dat, err := ioutil.ReadFile("/usr/share/cgrates/conf/samples/tutmysql/cgrates.json"); err != nil {
+		t.Error(err)
+	} else if string(dat) != string(body) {
+		t.Errorf("Expected %s , received: %s ", string(dat), string(body))
+	}
+}
+
+func testHttpHandlerConfigSForNotExistFolder(t *testing.T) {
+	req := httptest.NewRequest("GET", "http://127.0.0.1/usr/share/cgrates/conf/samples/NotExists/", nil)
+	w := httptest.NewRecorder()
+	HandlerConfigS(w, req)
+
+	resp := w.Result()
+	body, _ := ioutil.ReadAll(resp.Body)
+
+	if resp.Status != "404 Not Found" {
+		t.Errorf("Expected %+v , received: %+v ", "200 OK", resp.Status)
+	}
+	httpBodyMsgError := "stat /usr/share/cgrates/conf/samples/NotExists/: no such file or directory"
+	if httpBodyMsgError != string(body) {
+		t.Errorf("Expected %s , received: %s ", httpBodyMsgError, string(body))
+	}
+}
+
+func testHttpHandlerConfigSForFolder(t *testing.T) {
+	req := httptest.NewRequest("GET", "http://127.0.0.1/usr/share/cgrates/conf/samples/diamagent_internal/", nil)
+	w := httptest.NewRecorder()
+	HandlerConfigS(w, req)
+
+	resp := w.Result()
+	body, _ := ioutil.ReadAll(resp.Body)
+
+	if resp.Status != "200 OK" {
+		t.Errorf("Expected %+v , received: %+v ", "200 OK", resp.Status)
+	}
+	cfg, err := NewCGRConfigFromPath("/usr/share/cgrates/conf/samples/diamagent_internal/")
+	if err != nil {
+		t.Error(err)
+	}
+	str := utils.ToJSON(cfg.AsMapInterface(cfg.generalCfg.RSRSep))
+	// we compare the length of the string because flags is a map and we receive it in different order
+	if len(str) != len(string(body)) {
+		t.Errorf("Expected %s ,\n\n received: %s ", str, string(body))
 	}
 }
