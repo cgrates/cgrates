@@ -24,6 +24,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
@@ -1647,16 +1648,12 @@ func handleConfigSFolder(path string, w http.ResponseWriter) {
 	// if the path is a directory, read the directory, construct the config and load it in memory
 	cfg, err := NewCGRConfigFromPath(path)
 	if err != nil {
-		if err.Error() == utils.ErrPathNotReachable(path).Error() { // if we receive path error change the header of response to 404 Error NotFound
-			w.WriteHeader(404)
-		} else {
-			w.WriteHeader(500)
-		}
+		w.WriteHeader(500)
 		fmt.Fprintf(w, err.Error())
 		return
 	}
 	// convert the config into a json and send it
-	if _, err := w.Write([]byte(utils.ToJSON(cfg.AsMapInterface))); err != nil {
+	if _, err := w.Write([]byte(utils.ToJSON(cfg.AsMapInterface(cfg.generalCfg.RSRSep)))); err != nil {
 		utils.Logger.Warning(fmt.Sprintf("<%s> Failed to write resonse because: %s",
 			utils.Configs, err))
 	}
@@ -1665,19 +1662,13 @@ func handleConfigSFolder(path string, w http.ResponseWriter) {
 
 func handleConfigSFile(path string, w http.ResponseWriter) {
 	// if the config is a file read the file and send it directly
-	f, err := os.Open(path)
+	dat, err := ioutil.ReadFile(path)
 	if err != nil {
-		w.WriteHeader(404)
-		fmt.Fprintf(w, err.Error())
-		return
-	}
-	var b []byte
-	if _, err := io.ReadFull(f, b); err != nil {
 		w.WriteHeader(500)
 		fmt.Fprintf(w, err.Error())
 		return
 	}
-	if _, err := w.Write(b); err != nil {
+	if _, err := w.Write(dat); err != nil {
 		utils.Logger.Warning(fmt.Sprintf("<%s> Failed to write resonse because: %s",
 			utils.Configs, err))
 	}
