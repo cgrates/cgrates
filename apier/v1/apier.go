@@ -1877,3 +1877,35 @@ func (apierSv1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *st
 	*reply = utils.OK
 	return nil
 }
+
+func (apierSv1 *APIerSv1) ExportCDRs(args *utils.ArgExportCDRs, reply *string) error {
+	if len(apierSv1.Config.ApierCfg().EEsConns) == 0 {
+		return utils.NewErrNotConnected(utils.EEs)
+	}
+	cdrsFltr, err := args.RPCCDRsFilter.AsCDRsFilter(apierSv1.Config.GeneralCfg().DefaultTimezone)
+	if err != nil {
+		return utils.NewErrServerError(err)
+	}
+	cdrs, _, err := apierSv1.CdrDb.GetCDRs(cdrsFltr, false)
+	if err != nil {
+		return err
+	} else if len(cdrs) == 0 {
+		return utils.ErrNotFound
+	}
+	withErros := false
+	for _, cdr := range cdrs {
+		if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().EEsConns, nil, utils.EventExporterSv1ProcessEvent,
+			utils.CGREventWithIDs{
+				IDs:              args.ExporterIDs,
+				CGREventWithOpts: &utils.CGREventWithOpts{CGREvent: cdr.AsCGREvent()},
+			}, &reply); err != nil {
+			utils.Logger.Warning(fmt.Sprintf("<%s> error: <%s> processing event: <%s> with <%s>",
+				utils.ApierS, err.Error(), utils.ToJSON(cdr.AsCGREvent()), utils.EventExporterS))
+			withErros = true
+		}
+	}
+	if withErros {
+		return utils.ErrPartiallyExecuted
+	}
+	return nil
+}
