@@ -1624,8 +1624,9 @@ func (cfg *CGRConfig) AsMapInterface(separator string) map[string]interface{} {
 func HandlerConfigS(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	w.Header().Set("Content-Type", "application/json")
-	// check if the path exists
-	fi, err := os.Stat(r.URL.Path)
+	// take out the /configs prefix and use the rest of url as path
+	path := strings.TrimPrefix(r.URL.Path, "/configs")
+	fi, err := os.Stat(path)
 	if err != nil {
 		if os.IsNotExist(err) {
 			w.WriteHeader(404)
@@ -1637,9 +1638,9 @@ func HandlerConfigS(w http.ResponseWriter, r *http.Request) {
 	}
 	switch mode := fi.Mode(); {
 	case mode.IsDir():
-		handleConfigSFolder(r.URL.Path, w)
+		handleConfigSFolder(path, w)
 	case mode.IsRegular():
-		handleConfigSFile(r.URL.Path, w)
+		handleConfigSFile(path, w)
 	}
 	return
 }
