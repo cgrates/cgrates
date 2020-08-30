@@ -1669,6 +1669,7 @@ func TestDfApierCfg(t *testing.T) {
 		Caches_conns:     &[]string{utils.MetaInternal},
 		Scheduler_conns:  &[]string{},
 		Attributes_conns: &[]string{},
+		Ees_conns:        &[]string{},
 	}
 	if cfg, err := dfCgrJSONCfg.ApierCfgJson(); err != nil {
 		t.Error(err)

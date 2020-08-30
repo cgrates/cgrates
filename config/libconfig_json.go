@@ -608,6 +608,7 @@ type ApierJsonCfg struct {
 	Caches_conns     *[]string
 	Scheduler_conns  *[]string
 	Attributes_conns *[]string
+	Ees_conns        *[]string
 }
 
 type STIRJsonCfg struct {

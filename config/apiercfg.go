@@ -30,6 +30,7 @@ type ApierCfg struct {
 	CachesConns     []string // connections towards Cache
 	SchedulerConns  []string // connections towards Scheduler
 	AttributeSConns []string // connections towards AttributeS
+	EEsConns        []string // connections towards EEs
 }
 
 func (aCfg *ApierCfg) loadFromJsonCfg(jsnCfg *ApierJsonCfg) (err error) {
@@ -69,6 +70,17 @@ func (aCfg *ApierCfg) loadFromJsonCfg(jsnCfg *ApierJsonCfg) (err error) {
 				aCfg.AttributeSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)
 			} else {
 				aCfg.AttributeSConns[idx] = conn
+			}
+		}
+	}
+	if jsnCfg.Ees_conns != nil {
+		aCfg.EEsConns = make([]string, len(*jsnCfg.Ees_conns))
+		for idx, connID := range *jsnCfg.Ees_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			if connID == utils.MetaInternal {
+				aCfg.EEsConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)
+			} else {
+				aCfg.EEsConns[idx] = connID
 			}
 		}
 	}
