@@ -1839,6 +1839,7 @@ func TestCgrCfgJSONDefaultApierCfg(t *testing.T) {
 		CachesConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)},
 		SchedulerConns:  []string{},
 		AttributeSConns: []string{},
+		EEsConns:        []string{},
 	}
 	if !reflect.DeepEqual(cgrCfg.apier, aCfg) {
 		t.Errorf("received: %+v, expecting: %+v", cgrCfg.apier, aCfg)
