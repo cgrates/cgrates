@@ -1511,3 +1511,8 @@ type TPIntervalRate struct {
 	Unit          string
 	Increment     string
 }
+
+type ArgExportCDRs struct {
+	ExporterIDs []string
+	RPCCDRsFilter
+}
