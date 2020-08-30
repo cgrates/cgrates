@@ -1895,10 +1895,10 @@ func (apierSv1 *APIerSv1) ExportCDRs(args *utils.ArgExportCDRs, reply *string) e
 	withErros := false
 	for _, cdr := range cdrs {
 		if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().EEsConns, nil, utils.EventExporterSv1ProcessEvent,
-			utils.CGREventWithIDs{
+			&utils.CGREventWithIDs{
 				IDs:              args.ExporterIDs,
 				CGREventWithOpts: &utils.CGREventWithOpts{CGREvent: cdr.AsCGREvent()},
-			}, &reply); err != nil {
+			}, reply); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<%s> error: <%s> processing event: <%s> with <%s>",
 				utils.ApierS, err.Error(), utils.ToJSON(cdr.AsCGREvent()), utils.EventExporterS))
 			withErros = true

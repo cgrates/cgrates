@@ -1513,6 +1513,7 @@ type TPIntervalRate struct {
 }
 
 type ArgExportCDRs struct {
-	ExporterIDs []string
+	ExporterIDs []string // exporterIDs is used to said which exporter are using to export the cdrs
+	Verbose     bool     // verbose is used to inform the user about the positive and negative exported cdrs
 	RPCCDRsFilter
 }
