@@ -68,12 +68,16 @@ func TestSureTaxCfgloadFromJsonCfg(t *testing.T) {
 		"tax_exemption_code_list": "",
 	},
 }`
+	tLocal, err := time.LoadLocation("Local")
+	if err != nil {
+		t.Error(err)
+	}
 	expected = SureTaxCfg{
 		Url:                  utils.EmptyString,
 		ClientNumber:         utils.EmptyString,
 		ValidationKey:        utils.EmptyString,
 		BusinessUnit:         utils.EmptyString,
-		Timezone:             &time.Location{},
+		Timezone:             tLocal,
 		IncludeLocalCost:     false,
 		ReturnFileCode:       "0",
 		ResponseGroup:        "03",
