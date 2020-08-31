@@ -1484,6 +1484,17 @@ func testAttributeSCachingMetaLoad(t *testing.T) {
 		t.Errorf("Expecting : %+v, received: %+v", expectedIDs, rcvKeys)
 	}
 
+	rcvKeys = nil
+	argsCache2 = utils.ArgsGetCacheItemIDs{
+		CacheID: utils.CacheAttributeFilterIndexes,
+	}
+	expectedIDs = []string{"cgrates.org:*sessions:*string:*req.InitialField:InitialValue"}
+	if err := attrSRPC.Call(utils.CacheSv1GetItemIDs, argsCache2, &rcvKeys); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(rcvKeys, expectedIDs) {
+		t.Errorf("Expecting : %+v, received: %+v", expectedIDs, rcvKeys)
+	}
+
 	//check in dataManager
 	expected := []string{"ATTR_1"}
 	var rcvIDs []string

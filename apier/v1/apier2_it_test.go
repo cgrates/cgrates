@@ -413,8 +413,13 @@ func testAPIerSetActionPlanDfltTime(t *testing.T) {
 					t.Errorf("Expected the nextRuntime to be after 1 hour,but received: <%+v>", utils.ToJSON(schedAct))
 				}
 			case "AP_MONTHLY":
-				if schedAct.NextRunTime.Before(time.Now().AddDate(0, 1, 0).Add(-1*time.Second)) ||
-					schedAct.NextRunTime.After(time.Now().AddDate(0, 1, 0).Add(1*time.Second)) {
+				// *monthly needs to mach exactly the day
+				tnow := time.Now()
+				expected := tnow.AddDate(0, 1, 0)
+				expected = time.Date(expected.Year(), expected.Month(), tnow.Day(), tnow.Hour(),
+					tnow.Minute(), tnow.Second(), 0, schedAct.NextRunTime.Location())
+				if schedAct.NextRunTime.Before(expected.Add(-1*time.Second)) ||
+					schedAct.NextRunTime.After(expected.Add(1*time.Second)) {
 					t.Errorf("Expected the nextRuntime to be after 1 month,but received: <%+v>", utils.ToJSON(schedAct))
 				}
 			}
