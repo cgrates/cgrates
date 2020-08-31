@@ -948,13 +948,13 @@ func testAccITAccountMonthlyEstimated(t *testing.T) {
 	atms1 := &AttrSetActionPlan{
 		Id:              "ATMS_1",
 		ReloadScheduler: true,
-		ActionPlan: []*AttrActionPlan{
-			&AttrActionPlan{ActionsId: "TOPUP_ACTION",
-				MonthDays: "31",
-				Time:      "00:00:00",
-				Weight:    20.0,
-				TimingID:  utils.MetaMonthlyEstimated},
-		},
+		ActionPlan: []*AttrActionPlan{{
+			ActionsId: "TOPUP_ACTION",
+			MonthDays: "31",
+			Time:      "00:00:00",
+			Weight:    20.0,
+			TimingID:  utils.MetaMonthlyEstimated,
+		}},
 	}
 	if err := accRPC.Call(utils.APIerSv1SetActionPlan, &atms1, &reply); err != nil {
 		t.Error("Got error on APIerSv1.SetActionPlan: ", err.Error())
@@ -990,7 +990,11 @@ func testAccITAccountMonthlyEstimated(t *testing.T) {
 		t.Errorf("Expected: %v,\n received: %v", 1, len(aps))
 	} else {
 		// verify the GetNextTimeStart
-		endOfMonth := utils.GetEndOfMonth(time.Now())
+
+		endOfMonth, err := utils.ParseTimeDetectLayout(utils.MetaMonthlyEstimated, "")
+		if err != nil {
+			t.Fatal(err)
+		}
 		if execDay := aps[0].ActionTimings[0].GetNextStartTime(time.Now()).Day(); execDay != endOfMonth.Day() {
 			t.Errorf("Expected: %v,\n received: %v", endOfMonth.Day(), execDay)
 		}
@@ -1002,7 +1006,7 @@ func testAccITMultipleBalance(t *testing.T) {
 		Tenant:  "cgrates.org",
 		Account: "testAccITMultipleBalance",
 		Balances: []*utils.AttrBalance{
-			&utils.AttrBalance{
+			{
 				BalanceType: utils.VOICE,
 				Value:       2 * float64(time.Second),
 				Balance: map[string]interface{}{
@@ -1010,7 +1014,7 @@ func testAccITMultipleBalance(t *testing.T) {
 					utils.RatingSubject: "*zero5ms",
 				},
 			},
-			&utils.AttrBalance{
+			{
 				BalanceType: utils.VOICE,
 				Value:       10 * float64(time.Second),
 				Balance: map[string]interface{}{
@@ -1018,7 +1022,7 @@ func testAccITMultipleBalance(t *testing.T) {
 					utils.RatingSubject: "*zero5ms",
 				},
 			},
-			&utils.AttrBalance{
+			{
 				BalanceType: utils.MONETARY,
 				Value:       10,
 				Balance: map[string]interface{}{

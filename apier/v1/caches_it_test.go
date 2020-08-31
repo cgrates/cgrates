@@ -53,6 +53,7 @@ var (
 		testCacheSGetItemExpiryTime,
 		testCacheSReloadCache,
 		testCacheSRemoveItem,
+		testCacheSRemoveItems,
 		testCacheSClear,
 		testCacheSReload,
 		testCacheSPrecacheStatus,
@@ -347,6 +348,70 @@ func testCacheSRemoveItem(t *testing.T) {
 	} else if remReply != utils.OK {
 		t.Errorf("Expected: %v , received:%v", utils.OK, remReply)
 	}
+	if err := chcRPC.Call(utils.CacheSv1HasItem, argsAPI, &reply); err != nil {
+		t.Error(err)
+	} else if reply {
+		t.Errorf("Expected: %v , received:%v", false, reply)
+	}
+}
+
+func testCacheSRemoveItems(t *testing.T) {
+	// var rcvKeys []string
+	// expKeys := []string{"cgrates.org:Stats1"}
+	// argsAPI2 := utils.ArgsGetCacheItemIDs{
+	// 	CacheID: utils.CacheStatQueueProfiles,
+	// }
+	// if err := chcRPC.Call(utils.CacheSv1GetItemIDs, argsAPI2, &rcvKeys); err != nil {
+	// 	t.Fatalf("Got error on APIerSv1.GetCacheStats: %s ", err.Error())
+	// }
+	// if !reflect.DeepEqual(expKeys, rcvKeys) {
+	// 	t.Errorf("Expected: %+v, received: %+v", expKeys, rcvKeys)
+	// }
+	var reply bool
+	argsAPI := utils.ArgsGetCacheItem{
+		CacheID: utils.CacheStatQueueProfiles,
+		ItemID:  "cgrates.org:Stats1",
+	}
+
+	if err := chcRPC.Call(utils.CacheSv1HasItem, argsAPI, &reply); err != nil {
+		t.Error(err)
+	} else if !reply {
+		t.Errorf("Expected: %v , received:%v", true, reply)
+	}
+	argsAPI = utils.ArgsGetCacheItem{
+		CacheID: utils.CacheRouteProfiles,
+		ItemID:  "cgrates.org:ROUTE_1",
+	}
+
+	if err := chcRPC.Call(utils.CacheSv1HasItem, argsAPI, &reply); err != nil {
+		t.Error(err)
+	} else if !reply {
+		t.Errorf("Expected: %v , received:%v", true, reply)
+	}
+	var remReply string
+	if err := chcRPC.Call(utils.CacheSv1RemoveItems, utils.AttrReloadCacheWithOpts{
+		Opts:      make(map[string]interface{}),
+		TenantArg: utils.TenantArg{Tenant: "cgrates.org"},
+		ArgsCache: map[string][]string{
+			utils.StatsQueueProfileIDs: {"cgrates.org:Stats1"},
+			utils.RouteProfileIDs:      {"cgrates.org:ROUTE_1"},
+		},
+	}, &remReply); err != nil {
+		t.Error(err)
+	} else if remReply != utils.OK {
+		t.Errorf("Expected: %v , received:%v", utils.OK, remReply)
+	}
+	if err := chcRPC.Call(utils.CacheSv1HasItem, argsAPI, &reply); err != nil {
+		t.Error(err)
+	} else if reply {
+		t.Errorf("Expected: %v , received:%v", false, reply)
+	}
+
+	argsAPI = utils.ArgsGetCacheItem{
+		CacheID: utils.CacheStatQueueProfiles,
+		ItemID:  "cgrates.org:Stats1",
+	}
+
 	if err := chcRPC.Call(utils.CacheSv1HasItem, argsAPI, &reply); err != nil {
 		t.Error(err)
 	} else if reply {
