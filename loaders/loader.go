@@ -276,8 +276,10 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 	lds map[string][]LoaderData, caching string) (err error) {
 	var ids []string
 	cacheArgs := make(map[string][]string)
+	var cacheIDs []string // verify if we need to clear indexe
 	switch loaderType {
 	case utils.MetaAttributes:
+		cacheIDs = []string{utils.CacheAttributeFilterIndexes}
 		for _, lDataSet := range lds {
 			attrModels := make(engine.TPAttributes, len(lDataSet))
 			for i, ld := range lDataSet {
@@ -306,6 +308,7 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 			cacheArgs[utils.AttributeProfileIDs] = ids
 		}
 	case utils.MetaResources:
+		cacheIDs = []string{utils.CacheResourceFilterIndexes}
 		for _, lDataSet := range lds {
 			resModels := make(engine.TpResources, len(lDataSet))
 			for i, ld := range lDataSet {
@@ -371,6 +374,7 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 			}
 		}
 	case utils.MetaStats:
+		cacheIDs = []string{utils.CacheStatFilterIndexes}
 		for _, lDataSet := range lds {
 			stsModels := make(engine.TpStats, len(lDataSet))
 			for i, ld := range lDataSet {
@@ -411,6 +415,7 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 			}
 		}
 	case utils.MetaThresholds:
+		cacheIDs = []string{utils.CacheThresholdFilterIndexes}
 		for _, lDataSet := range lds {
 			thModels := make(engine.TpThresholds, len(lDataSet))
 			for i, ld := range lDataSet {
@@ -443,6 +448,7 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 			}
 		}
 	case utils.MetaRoutes:
+		cacheIDs = []string{utils.CacheRouteFilterIndexes}
 		for _, lDataSet := range lds {
 			sppModels := make(engine.TPRoutes, len(lDataSet))
 			for i, ld := range lDataSet {
@@ -472,6 +478,7 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 			}
 		}
 	case utils.MetaChargers:
+		cacheIDs = []string{utils.CacheChargerFilterIndexes}
 		for _, lDataSet := range lds {
 			cppModels := make(engine.TPChargers, len(lDataSet))
 			for i, ld := range lDataSet {
@@ -501,6 +508,7 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 			}
 		}
 	case utils.MetaDispatchers:
+		cacheIDs = []string{utils.CacheDispatcherFilterIndexes}
 		for _, lDataSet := range lds {
 			dispModels := make(engine.TPDispatcherProfiles, len(lDataSet))
 			for i, ld := range lDataSet {
@@ -554,6 +562,7 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 			}
 		}
 	case utils.MetaRateProfiles:
+		cacheIDs = []string{utils.CacheRateProfilesFilterIndexes, utils.CacheRateFilterIndexes}
 		for _, lDataSet := range lds {
 			rpMdls := make(engine.RateProfileMdls, len(lDataSet))
 			for i, ld := range lDataSet {
@@ -618,6 +627,14 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 				return
 			}
 		}
+		if len(cacheIDs) != 0 {
+			if err = ldr.connMgr.Call(ldr.cacheConns, nil, utils.CacheSv1Clear, &utils.AttrCacheIDsWithOpts{
+				CacheIDs: cacheIDs,
+			}, &reply); err != nil {
+				return
+			}
+		}
+
 	}
 	return
 }
@@ -694,8 +711,10 @@ func (ldr *Loader) removeContent(loaderType, caching string) (err error) {
 func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderData, caching string) (err error) {
 	var ids []string
 	cacheArgs := make(map[string][]string)
+	var cacheIDs []string // verify if we need to clear indexe
 	switch loaderType {
 	case utils.MetaAttributes:
+		cacheIDs = []string{utils.CacheAttributeFilterIndexes}
 		for tntID := range lds {
 			if ldr.dryRun {
 				utils.Logger.Info(
@@ -714,6 +733,7 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 		}
 
 	case utils.MetaResources:
+		cacheIDs = []string{utils.CacheResourceFilterIndexes}
 		for tntID := range lds {
 			if ldr.dryRun {
 				utils.Logger.Info(
@@ -753,6 +773,7 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 			}
 		}
 	case utils.MetaStats:
+		cacheIDs = []string{utils.CacheStatFilterIndexes}
 		for tntID := range lds {
 			if ldr.dryRun {
 				utils.Logger.Info(
@@ -774,6 +795,7 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 			}
 		}
 	case utils.MetaThresholds:
+		cacheIDs = []string{utils.CacheThresholdFilterIndexes}
 		for tntID := range lds {
 			if ldr.dryRun {
 				utils.Logger.Info(
@@ -795,6 +817,7 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 			}
 		}
 	case utils.MetaRoutes:
+		cacheIDs = []string{utils.CacheRouteFilterIndexes}
 		for tntID := range lds {
 			if ldr.dryRun {
 				utils.Logger.Info(
@@ -812,6 +835,7 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 			}
 		}
 	case utils.MetaChargers:
+		cacheIDs = []string{utils.CacheChargerFilterIndexes}
 		for tntID := range lds {
 			if ldr.dryRun {
 				utils.Logger.Info(
@@ -829,6 +853,7 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 			}
 		}
 	case utils.MetaDispatchers:
+		cacheIDs = []string{utils.CacheDispatcherFilterIndexes}
 		for tntID := range lds {
 			if ldr.dryRun {
 				utils.Logger.Info(
@@ -863,6 +888,7 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 			}
 		}
 	case utils.MetaRateProfiles:
+		cacheIDs = []string{utils.CacheRateProfilesFilterIndexes, utils.CacheRateFilterIndexes}
 		for tntID, ldData := range lds {
 			if ldr.dryRun {
 				utils.Logger.Info(
@@ -923,6 +949,14 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 				return
 			}
 		}
+		if len(cacheIDs) != 0 {
+			if err = ldr.connMgr.Call(ldr.cacheConns, nil, utils.CacheSv1Clear, &utils.AttrCacheIDsWithOpts{
+				CacheIDs: cacheIDs,
+			}, &reply); err != nil {
+				return
+			}
+		}
+
 	}
 	return
 }
