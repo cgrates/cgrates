@@ -77,6 +77,7 @@ information, please see the [`CONTRIBUTING.md`](CONTRIBUTING.md) file.
 | @mintos5 | Michal Škuta |
 | @playingbogart | Eugene Bozhet |
 | @htrendev | Hristo Trendev |
+| @porosnicuadrian | Porosnicu Adrian |
 
 <!-- to sign, include a single line above this comment containing the following text:
 | @username | First Last |
