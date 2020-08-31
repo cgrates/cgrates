@@ -164,3 +164,7 @@ func (fCsv *FileCSVee) composeTrailer() (err error) {
 	}
 	return fCsv.csvWriter.Write(csvRecord)
 }
+
+func (fCsv *FileCSVee) GetMetrics() utils.MapStorage {
+	return fCsv.dc.Clone()
+}
