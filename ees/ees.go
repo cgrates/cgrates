@@ -230,25 +230,21 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithIDs, rply *st
 
 func newEEMetrics() utils.MapStorage {
 	return utils.MapStorage{
-		utils.NumberOfEvents:    0,
-		utils.TotalCost:         float64(0.0),
-		utils.PositiveExports:   utils.StringSet{},
-		utils.NegativeExports:   utils.StringSet{},
-		utils.FirstExpOrderID:   int64(0),
-		utils.LastExpOrderID:    int64(0),
-		utils.FirstEventATime:   time.Time{},
-		utils.LastEventATime:    time.Time{},
-		utils.TimeNow:           time.Now(),
-		utils.TotalDuration:     time.Duration(0),
-		utils.TotalSMSUsage:     time.Duration(0),
-		utils.TotalMMSUsage:     time.Duration(0),
-		utils.TotalGenericUsage: time.Duration(0),
-		utils.TotalDataUsage:    time.Duration(0),
+		utils.NumberOfEvents:  0,
+		utils.PositiveExports: utils.StringSet{},
+		utils.NegativeExports: utils.StringSet{},
+		utils.TimeNow:         time.Now(),
 	}
 }
 
 func updateEEMetrics(dc utils.MapStorage, ev engine.MapEvent, timezone string) {
 	if aTime, err := ev.GetTime(utils.AnswerTime, timezone); err == nil {
+		if _, has := dc[utils.FirstEventATime]; !has {
+			dc[utils.FirstEventATime] = time.Time{}
+		}
+		if _, has := dc[utils.LastEventATime]; !has {
+			dc[utils.LastEventATime] = time.Time{}
+		}
 		if dc[utils.FirstEventATime].(time.Time).IsZero() ||
 			aTime.Before(dc[utils.FirstEventATime].(time.Time)) {
 			dc[utils.FirstEventATime] = aTime
@@ -258,6 +254,12 @@ func updateEEMetrics(dc utils.MapStorage, ev engine.MapEvent, timezone string) {
 		}
 	}
 	if oID, err := ev.GetTInt64(utils.OrderID); err == nil {
+		if _, has := dc[utils.FirstExpOrderID]; !has {
+			dc[utils.FirstExpOrderID] = int64(0)
+		}
+		if _, has := dc[utils.LastExpOrderID]; !has {
+			dc[utils.LastExpOrderID] = int64(0)
+		}
 		if dc[utils.FirstExpOrderID].(int64) == 0 ||
 			dc[utils.FirstExpOrderID].(int64) > oID {
 			dc[utils.FirstExpOrderID] = oID
@@ -267,20 +269,38 @@ func updateEEMetrics(dc utils.MapStorage, ev engine.MapEvent, timezone string) {
 		}
 	}
 	if cost, err := ev.GetFloat64(utils.Cost); err == nil {
+		if _, has := dc[utils.TotalCost]; !has {
+			dc[utils.TotalCost] = float64(0.0)
+		}
 		dc[utils.TotalCost] = dc[utils.TotalCost].(float64) + cost
 	}
 	if tor, err := ev.GetString(utils.ToR); err == nil {
 		if usage, err := ev.GetDuration(utils.Usage); err == nil {
 			switch tor {
 			case utils.VOICE:
+				if _, has := dc[utils.TotalDuration]; !has {
+					dc[utils.TotalDuration] = time.Duration(0)
+				}
 				dc[utils.TotalDuration] = dc[utils.TotalDuration].(time.Duration) + usage
 			case utils.SMS:
+				if _, has := dc[utils.TotalSMSUsage]; !has {
+					dc[utils.TotalSMSUsage] = time.Duration(0)
+				}
 				dc[utils.TotalSMSUsage] = dc[utils.TotalSMSUsage].(time.Duration) + usage
 			case utils.MMS:
+				if _, has := dc[utils.TotalMMSUsage]; !has {
+					dc[utils.TotalMMSUsage] = time.Duration(0)
+				}
 				dc[utils.TotalMMSUsage] = dc[utils.TotalMMSUsage].(time.Duration) + usage
 			case utils.GENERIC:
+				if _, has := dc[utils.TotalGenericUsage]; !has {
+					dc[utils.TotalGenericUsage] = time.Duration(0)
+				}
 				dc[utils.TotalGenericUsage] = dc[utils.TotalGenericUsage].(time.Duration) + usage
 			case utils.DATA:
+				if _, has := dc[utils.TotalDataUsage]; !has {
+					dc[utils.TotalDataUsage] = time.Duration(0)
+				}
 				dc[utils.TotalDataUsage] = dc[utils.TotalDataUsage].(time.Duration) + usage
 			}
 		}
