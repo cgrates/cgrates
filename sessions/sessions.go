@@ -472,6 +472,11 @@ func (sS *SessionS) debitLoopSession(s *Session, sRunIdx int,
 	}
 	for {
 		s.Lock()
+		if s.debitStop == nil {
+			// session already closed (most probably from sessionEnd), fixes concurrency
+			s.Unlock()
+			return
+		}
 		var maxDebit time.Duration
 		if maxDebit, err = sS.debitSession(s, sRunIdx, dbtIvl, nil); err != nil {
 			utils.Logger.Warning(
