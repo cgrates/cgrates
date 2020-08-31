@@ -141,7 +141,7 @@ func (eeS *EventExporterS) attrSProcessEvent(cgrEv *utils.CGREventWithOpts, attr
 }
 
 // V1ProcessEvent will be called each time a new event is received from readers
-func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithIDs, rply *string) (err error) {
+func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithIDs, rply *map[string]utils.MapStorage) (err error) {
 	eeS.cfg.RLocks(config.EEsJson)
 	defer eeS.cfg.RUnlocks(config.EEsJson)
 
@@ -151,6 +151,8 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithIDs, rply *st
 
 	var wg sync.WaitGroup
 	var withErr bool
+	var metricMapLock sync.RWMutex
+	metricsMap := make(map[string]utils.MapStorage)
 	for cfgIdx, eeCfg := range eeS.cfg.EEsNoLksCfg().Exporters {
 		if eeCfg.Type == utils.META_NONE || // ignore *none type exporter
 			(lenExpIDs != 0 && !expIDs.Has(eeCfg.ID)) {
@@ -204,7 +206,7 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithIDs, rply *st
 		if eeCfg.Synchronous {
 			wg.Add(1) // wait for synchronous or file ones since these need to be done before continuing
 		}
-		go func(evict, sync bool) {
+		go func(evict, sync bool, ee EventExporter) {
 			if err := ee.ExportEvent(cgrEv.CGREvent); err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> with id <%s>, error: <%s>",
@@ -214,16 +216,25 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithIDs, rply *st
 			if evict {
 				ee.OnEvicted("", nil) // so we can close ie the file
 			}
+			metricMapLock.Lock()
+			metricsMap[ee.ID()] = ee.GetMetrics()
+			metricMapLock.Unlock()
 			if sync {
 				wg.Done()
 			}
-		}(!hasCache, eeCfg.Synchronous)
+		}(!hasCache, eeCfg.Synchronous, ee)
 	}
 	wg.Wait()
 	if withErr {
 		err = utils.ErrPartiallyExecuted
 	}
-	*rply = utils.OK
+
+	*rply = make(map[string]utils.MapStorage)
+	metricMapLock.Lock()
+	for k, v := range metricsMap {
+		(*rply)[k] = v
+	}
+	metricMapLock.Unlock()
 
 	return
 }

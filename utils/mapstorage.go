@@ -316,6 +316,17 @@ func (ms MapStorage) RemoteHost() net.Addr {
 	return LocalAddr()
 }
 
+func (ms MapStorage) Clone() (msClone MapStorage) {
+	if ms == nil {
+		return
+	}
+	msClone = make(MapStorage, len(ms))
+	for k, v := range ms {
+		msClone[k] = v
+	}
+	return
+}
+
 // ToDo: remove the following functions
 func getPathFromValue(in reflect.Value, prefix string) (out []string) {
 	switch in.Kind() {
