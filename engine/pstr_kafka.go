@@ -19,8 +19,6 @@ package engine
 
 import (
 	"context"
-	"net/url"
-	"strings"
 	"sync"
 
 	"github.com/cgrates/cgrates/utils"
@@ -28,14 +26,16 @@ import (
 )
 
 // NewKafkaPoster creates a kafka poster
-func NewKafkaPoster(dialURL string, attempts int) (*KafkaPoster, error) {
+func NewKafkaPoster(dialURL string, attempts int, opts map[string]interface{}) *KafkaPoster {
 	kfkPstr := &KafkaPoster{
+		dialURL:  dialURL,
 		attempts: attempts,
+		topic:    DefaultQueueID,
 	}
-	if err := kfkPstr.parseURL(dialURL); err != nil {
-		return nil, err
+	if vals, has := opts[utils.KafkaTopic]; has {
+		kfkPstr.topic = utils.IfaceAsString(vals)
 	}
-	return kfkPstr, nil
+	return kfkPstr
 }
 
 // KafkaPoster is a kafka poster
@@ -45,26 +45,6 @@ type KafkaPoster struct {
 	attempts   int
 	sync.Mutex // protect writer
 	writer     *kafka.Writer
-}
-
-func (pstr *KafkaPoster) parseURL(dialURL string) error {
-	pstr.topic = DefaultQueueID
-	i := strings.IndexByte(dialURL, '?')
-	if i < 0 {
-		pstr.dialURL = dialURL
-		return nil
-	}
-	pstr.dialURL = dialURL[:i]
-	rawQuery := dialURL[i+1:]
-	qry, err := url.ParseQuery(rawQuery)
-	if err != nil {
-		return err
-	}
-	pstr.dialURL = strings.Split(dialURL, "?")[0]
-	if vals, has := qry[utils.KafkaTopic]; has && len(vals) != 0 {
-		pstr.topic = vals[0]
-	}
-	return nil
 }
 
 // Post is the method being called when we need to post anything in the queue

@@ -30,16 +30,16 @@ import (
 )
 
 // NewAMQPv1Poster creates a poster for amqpv1
-func NewAMQPv1Poster(dialURL string, attempts int) (Poster, error) {
-	URL, qID, err := parseURL(dialURL)
-	if err != nil {
-		return nil, err
-	}
-	return &AMQPv1Poster{
-		dialURL:  URL,
-		queueID:  "/" + qID,
+func NewAMQPv1Poster(dialURL string, attempts int, opts map[string]interface{}) Poster {
+	pstr := &AMQPv1Poster{
+		dialURL:  dialURL,
+		queueID:  "/" + DefaultQueueID,
 		attempts: attempts,
-	}, nil
+	}
+	if vals, has := opts[QueueID]; has {
+		pstr.queueID = "/" + utils.IfaceAsString(vals)
+	}
+	return pstr
 }
 
 // AMQPv1Poster a poster for amqpv1

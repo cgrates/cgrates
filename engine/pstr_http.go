@@ -83,11 +83,20 @@ type HTTPPoster struct {
 	attempts    int
 }
 
-// Post will post the event
-func (pstr *HTTPPoster) Post(content interface{}, key string) (err error) {
+// PostValues will post the event
+func (pstr *HTTPPoster) PostValues(content interface{}) (err error) {
 	_, err = pstr.GetResponse(content)
 	return
 }
+
+// Post will post the event
+func (pstr *HTTPPoster) Post(content []byte, _ string) (err error) {
+	_, err = pstr.GetResponse(content)
+	return
+}
+
+// Close only yo implement the Poster interface
+func (*HTTPPoster) Close() {}
 
 // GetResponse will post the event and return the response
 func (pstr *HTTPPoster) GetResponse(content interface{}) (respBody []byte, err error) {
@@ -95,7 +104,6 @@ func (pstr *HTTPPoster) GetResponse(content interface{}) (respBody []byte, err e
 	var urlVals url.Values // Used when posting form
 	if pstr.contentType == utils.CONTENT_FORM {
 		urlVals = content.(url.Values)
-		body = []byte(urlVals.Encode())
 	} else {
 		body = content.([]byte)
 	}

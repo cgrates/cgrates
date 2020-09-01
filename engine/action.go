@@ -460,7 +460,7 @@ func callURL(ub *Account, a *Action, acs Actions, extraData interface{}) error {
 	if err != nil {
 		return err
 	}
-	err = pstr.Post(body, utils.EmptyString)
+	err = pstr.PostValues(body)
 	if err != nil && config.CgrConfig().GeneralCfg().FailedPostsDir != utils.META_NONE {
 		AddFailedPost(a.ExtraParameters, utils.MetaHTTPjson, utils.ActionsPoster+utils.HIERARCHY_SEP+a.ActionType, body)
 		err = nil
@@ -481,7 +481,7 @@ func callURLAsync(ub *Account, a *Action, acs Actions, extraData interface{}) er
 		return err
 	}
 	go func() {
-		err := pstr.Post(body, utils.EmptyString)
+		err := pstr.PostValues(body)
 		if err != nil && config.CgrConfig().GeneralCfg().FailedPostsDir != utils.META_NONE {
 			AddFailedPost(a.ExtraParameters, utils.MetaHTTPjson, utils.ActionsPoster+utils.HIERARCHY_SEP+a.ActionType, body)
 		}
@@ -1040,7 +1040,7 @@ func postEvent(ub *Account, a *Action, acs Actions, extraData interface{}) error
 	if err != nil {
 		return err
 	}
-	err = pstr.Post(body, utils.EmptyString)
+	err = pstr.PostValues(body)
 	if err != nil && config.CgrConfig().GeneralCfg().FailedPostsDir != utils.META_NONE {
 		AddFailedPost(a.ExtraParameters, utils.MetaHTTPjson, utils.ActionsPoster+utils.HIERARCHY_SEP+a.ActionType, body)
 		err = nil

@@ -35,7 +35,7 @@ func TestAMQPPosterParseURL(t *testing.T) {
 		routingKey:   "CGRCDR",
 	}
 	dialURL := "amqp://guest:guest@localhost:5672/?queue_id=q1&exchange=E1&routing_key=CGRCDR&heartbeat=5&exchange_type=fanout"
-	if err := amqp.parseURL(dialURL); err != nil {
+	if err := amqp.parseOpts(dialURL); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, amqp) {
 		t.Errorf("Expected: %s ,recived: %s", utils.ToJSON(expected), utils.ToJSON(amqp))
@@ -49,7 +49,7 @@ func TestKafkaParseURL(t *testing.T) {
 		topic:    "cdr_billing",
 		attempts: 10,
 	}
-	if kfk, err := NewKafkaPoster(u, 10); err != nil {
+	if kfk, err := NewKafkaPoster(u, 10, nil); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(exp, kfk) {
 		t.Errorf("Expected: %s ,recived: %s", utils.ToJSON(exp), utils.ToJSON(kfk))
@@ -60,7 +60,7 @@ func TestKafkaParseURL(t *testing.T) {
 		topic:    "cdr_billing",
 		attempts: 10,
 	}
-	if kfk, err := NewKafkaPoster(u, 10); err != nil {
+	if kfk, err := NewKafkaPoster(u, 10, nil); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(exp, kfk) {
 		t.Errorf("Expected: %s ,recived: %s", utils.ToJSON(exp), utils.ToJSON(kfk))

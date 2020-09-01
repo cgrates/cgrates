@@ -67,6 +67,7 @@ func TestEventExporterClone(t *testing.T) {
 		},
 		headerFields:  []*FCTemplate{},
 		trailerFields: []*FCTemplate{},
+		Opts:          make(map[string]interface{}),
 	}
 	for _, v := range orig.Fields {
 		v.ComputePath()
@@ -118,6 +119,7 @@ func TestEventExporterClone(t *testing.T) {
 		},
 		headerFields:  []*FCTemplate{},
 		trailerFields: []*FCTemplate{},
+		Opts:          make(map[string]interface{}),
 	}
 	for _, v := range initialOrig.Fields {
 		v.ComputePath()
@@ -365,6 +367,7 @@ func TestEventExporterSameID(t *testing.T) {
 				},
 				headerFields:  []*FCTemplate{},
 				trailerFields: []*FCTemplate{},
+				Opts:          make(map[string]interface{}),
 			},
 			{
 				ID:         "file_exporter1",
@@ -386,6 +389,7 @@ func TestEventExporterSameID(t *testing.T) {
 				},
 				headerFields:  []*FCTemplate{},
 				trailerFields: []*FCTemplate{},
+				Opts:          make(map[string]interface{}),
 			},
 		},
 	}

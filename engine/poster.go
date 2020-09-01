@@ -19,8 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"net/url"
-	"strings"
 	"sync"
 )
 
@@ -63,20 +61,6 @@ type Poster interface {
 	Close()
 }
 
-func parseURL(dialURL string) (URL string, qID string, err error) {
-	u, err := url.Parse(dialURL)
-	if err != nil {
-		return "", "", err
-	}
-	qry := u.Query()
-	URL = strings.Split(dialURL, "?")[0]
-	qID = DefaultQueueID
-	if vals, has := qry[QueueID]; has && len(vals) != 0 {
-		qID = vals[0]
-	}
-	return
-}
-
 // Close closes all cached posters
 func (pc *PosterCache) Close() {
 	for _, v := range pc.amqpCache {
@@ -95,111 +79,81 @@ func (pc *PosterCache) Close() {
 
 // GetAMQPPoster creates a new poster only if not already cached
 // uses dialURL as cache key
-func (pc *PosterCache) GetAMQPPoster(dialURL string, attempts int) (pstr Poster, err error) {
+func (pc *PosterCache) GetAMQPPoster(dialURL string, attempts int) (pstr Poster) {
 	pc.Lock()
 	defer pc.Unlock()
 	if _, hasIt := pc.amqpCache[dialURL]; !hasIt {
-		if pstr, err = NewAMQPPoster(dialURL, attempts); err != nil {
-			return nil, err
-		}
+		pstr = NewAMQPPoster(dialURL, attempts, nil)
 		pc.amqpCache[dialURL] = pstr
 	}
-	return pc.amqpCache[dialURL], nil
+	return pc.amqpCache[dialURL]
 }
 
 // GetAMQPv1Poster creates a new poster only if not already cached
-func (pc *PosterCache) GetAMQPv1Poster(dialURL string, attempts int) (pstr Poster, err error) {
+func (pc *PosterCache) GetAMQPv1Poster(dialURL string, attempts int) (pstr Poster) {
 	pc.Lock()
 	defer pc.Unlock()
 	if _, hasIt := pc.amqpv1Cache[dialURL]; !hasIt {
-		if pstr, err = NewAMQPv1Poster(dialURL, attempts); err != nil {
-			return nil, err
-		}
+		pstr = NewAMQPv1Poster(dialURL, attempts, nil)
 		pc.amqpv1Cache[dialURL] = pstr
 	}
-	return pc.amqpv1Cache[dialURL], nil
+	return pc.amqpv1Cache[dialURL]
 }
 
 // GetSQSPoster creates a new poster only if not already cached
-func (pc *PosterCache) GetSQSPoster(dialURL string, attempts int) (pstr Poster, err error) {
+func (pc *PosterCache) GetSQSPoster(dialURL string, attempts int) (pstr Poster) {
 	pc.Lock()
 	defer pc.Unlock()
 	if _, hasIt := pc.sqsCache[dialURL]; !hasIt {
-		if pstr, err = NewSQSPoster(dialURL, attempts); err != nil {
-			return nil, err
-		}
+		pstr = NewSQSPoster(dialURL, attempts, nil)
 		pc.sqsCache[dialURL] = pstr
 	}
-	return pc.sqsCache[dialURL], nil
+	return pc.sqsCache[dialURL]
 }
 
 // GetKafkaPoster creates a new poster only if not already cached
-func (pc *PosterCache) GetKafkaPoster(dialURL string, attempts int) (pstr Poster, err error) {
+func (pc *PosterCache) GetKafkaPoster(dialURL string, attempts int) (pstr Poster) {
 	pc.Lock()
 	defer pc.Unlock()
 	if _, hasIt := pc.kafkaCache[dialURL]; !hasIt {
-		if pstr, err = NewKafkaPoster(dialURL, attempts); err != nil {
-			return nil, err
-		}
+		pstr = NewKafkaPoster(dialURL, attempts, nil)
 		pc.kafkaCache[dialURL] = pstr
 	}
-	return pc.kafkaCache[dialURL], nil
+	return pc.kafkaCache[dialURL]
 }
 
 // GetS3Poster creates a new poster only if not already cached
-func (pc *PosterCache) GetS3Poster(dialURL string, attempts int) (pstr Poster, err error) {
+func (pc *PosterCache) GetS3Poster(dialURL string, attempts int) (pstr Poster) {
 	pc.Lock()
 	defer pc.Unlock()
 	if _, hasIt := pc.s3Cache[dialURL]; !hasIt {
-		if pstr, err = NewS3Poster(dialURL, attempts); err != nil {
-			return nil, err
-		}
+		pstr = NewS3Poster(dialURL, attempts, nil)
 		pc.s3Cache[dialURL] = pstr
 	}
-	return pc.s3Cache[dialURL], nil
+	return pc.s3Cache[dialURL]
 }
 
 func (pc *PosterCache) PostAMQP(dialURL string, attempts int,
 	content []byte) error {
-	amqpPoster, err := pc.GetAMQPPoster(dialURL, attempts)
-	if err != nil {
-		return err
-	}
-	return amqpPoster.Post(content, "")
+	return pc.GetAMQPPoster(dialURL, attempts).Post(content, "")
 }
 
 func (pc *PosterCache) PostAMQPv1(dialURL string, attempts int,
 	content []byte) error {
-	AMQPv1Poster, err := pc.GetAMQPv1Poster(dialURL, attempts)
-	if err != nil {
-		return err
-	}
-	return AMQPv1Poster.Post(content, "")
+	return pc.GetAMQPv1Poster(dialURL, attempts).Post(content, "")
 }
 
 func (pc *PosterCache) PostSQS(dialURL string, attempts int,
 	content []byte) error {
-	sqsPoster, err := pc.GetSQSPoster(dialURL, attempts)
-	if err != nil {
-		return err
-	}
-	return sqsPoster.Post(content, "")
+	return pc.GetSQSPoster(dialURL, attempts).Post(content, "")
 }
 
 func (pc *PosterCache) PostKafka(dialURL string, attempts int,
 	content []byte, key string) error {
-	kafkaPoster, err := pc.GetKafkaPoster(dialURL, attempts)
-	if err != nil {
-		return err
-	}
-	return kafkaPoster.Post(content, key)
+	return pc.GetKafkaPoster(dialURL, attempts).Post(content, key)
 }
 
 func (pc *PosterCache) PostS3(dialURL string, attempts int,
 	content []byte, key string) error {
-	sqsPoster, err := pc.GetS3Poster(dialURL, attempts)
-	if err != nil {
-		return err
-	}
-	return sqsPoster.Post(content, key)
+	return pc.GetS3Poster(dialURL, attempts).Post(content, key)
 }

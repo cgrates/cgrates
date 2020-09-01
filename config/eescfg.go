@@ -66,28 +66,27 @@ func (eeS *EEsCfg) appendEEsExporters(exporters *[]*EventExporterJsonCfg, msgTem
 		return
 	}
 	for _, jsnExp := range *exporters {
-		exp := new(EventExporterCfg)
-		if dfltExpCfg != nil {
-			exp = dfltExpCfg.Clone()
-		}
-		var haveID bool
+		var exp *EventExporterCfg
 		if jsnExp.Id != nil {
 			for _, exporter := range eeS.Exporters {
 				if exporter.ID == *jsnExp.Id {
 					exp = exporter
-					haveID = true
 					break
 				}
 			}
 		}
-
-		if err := exp.loadFromJsonCfg(jsnExp, msgTemplates, separator); err != nil {
-			return err
-		}
-		if !haveID {
+		if exp == nil {
+			if dfltExpCfg != nil {
+				exp = dfltExpCfg.Clone()
+			} else {
+				exp = new(EventExporterCfg)
+				exp.Opts = make(map[string]interface{})
+			}
 			eeS.Exporters = append(eeS.Exporters, exp)
 		}
-
+		if err = exp.loadFromJsonCfg(jsnExp, msgTemplates, separator); err != nil {
+			return
+		}
 	}
 	return
 }
@@ -123,6 +122,7 @@ type EventExporterCfg struct {
 	ID            string
 	Type          string
 	ExportPath    string
+	Opts          map[string]interface{}
 	Tenant        RSRParsers
 	Timezone      string
 	Filters       []string
@@ -213,6 +213,11 @@ func (eeC *EventExporterCfg) loadFromJsonCfg(jsnEec *EventExporterJsonCfg, msgTe
 			}
 		}
 	}
+	if jsnEec.Opts != nil {
+		for k, v := range jsnEec.Opts {
+			eeC.Opts[k] = v
+		}
+	}
 	return
 }
 
@@ -275,6 +280,10 @@ func (eeC *EventExporterCfg) Clone() (cln *EventExporterCfg) {
 	for idx, fld := range eeC.trailerFields {
 		cln.trailerFields[idx] = fld.Clone()
 	}
+	cln.Opts = make(map[string]interface{})
+	for k, v := range eeC.Opts {
+		cln.Opts[k] = v
+	}
 	return
 }
 
@@ -308,5 +317,6 @@ func (eeC *EventExporterCfg) AsMapInterface(separator string) map[string]interfa
 		utils.AttemptsCfg:         eeC.Attempts,
 		utils.FieldSeparatorCfg:   eeC.FieldSep,
 		utils.FieldsCfg:           fields,
+		utils.OptsCfg:             eeC.Opts,
 	}
 }
