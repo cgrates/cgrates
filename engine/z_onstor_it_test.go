@@ -111,7 +111,7 @@ func TestOnStorIT(t *testing.T) {
 			mgoITCfg.StorDbCfg().Port, mgoITCfg.StorDbCfg().Name,
 			mgoITCfg.StorDbCfg().User, mgoITCfg.StorDbCfg().Password,
 			mgoITCfg.GeneralCfg().DBDataEncoding,
-			utils.StorDB, nil, false, 10*time.Second); err != nil {
+			utils.StorDB, nil, 10*time.Second); err != nil {
 			t.Fatal(err)
 		}
 		onStorCfg = mgoITCfg.StorDbCfg().Name
