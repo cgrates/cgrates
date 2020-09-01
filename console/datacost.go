@@ -72,9 +72,9 @@ func (self *CmdGetDataCost) ClientArgs() []string {
 
 func (self *CmdGetDataCost) GetFormatedResult(result interface{}) string {
 	return GetFormatedResult(result, map[string]struct{}{
-		"Usage":              struct{}{},
-		"GroupIntervalStart": struct{}{},
-		"RateIncrement":      struct{}{},
-		"RateUnit":           struct{}{},
+		"Usage":              {},
+		"GroupIntervalStart": {},
+		"RateIncrement":      {},
+		"RateUnit":           {},
 	})
 }

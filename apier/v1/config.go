@@ -34,7 +34,7 @@ type ConfigSv1 struct {
 }
 
 // GetJSONSection will retrieve from CGRConfig a section
-func (cSv1 *ConfigSv1) GetJSONSection(section *config.StringWithOpts, reply *map[string]interface{}) (err error) {
+func (cSv1 *ConfigSv1) GetJSONSection(section *config.SectionWithOpts, reply *map[string]interface{}) (err error) {
 	return cSv1.cfg.V1GetConfigSection(section, reply)
 }
 

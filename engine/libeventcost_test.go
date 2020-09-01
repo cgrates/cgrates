@@ -31,13 +31,13 @@ func TestChargingIntervalPartiallyEquals(t *testing.T) {
 	ci1 := &ChargingInterval{
 		RatingID: "Rating1",
 		Increments: []*ChargingIncrement{
-			&ChargingIncrement{
+			{
 				AccountingID:   "Acc1",
 				CompressFactor: 2,
 				Cost:           2.345,
 				Usage:          time.Duration(2 * time.Second),
 			},
-			&ChargingIncrement{
+			{
 				AccountingID:   "Acc1",
 				CompressFactor: 2,
 				Cost:           1.23,
@@ -49,13 +49,13 @@ func TestChargingIntervalPartiallyEquals(t *testing.T) {
 	ci2 := &ChargingInterval{
 		RatingID: "Rating1",
 		Increments: []*ChargingIncrement{
-			&ChargingIncrement{
+			{
 				AccountingID:   "Acc1",
 				CompressFactor: 2,
 				Cost:           2.345,
 				Usage:          time.Duration(2 * time.Second),
 			},
-			&ChargingIncrement{
+			{
 				AccountingID:   "Acc1",
 				CompressFactor: 2,
 				Cost:           1.23,
@@ -82,19 +82,19 @@ func TestChargingIntervalUsage(t *testing.T) {
 	ci1 := &ChargingInterval{
 		RatingID: "Rating1",
 		Increments: []*ChargingIncrement{
-			&ChargingIncrement{
+			{
 				AccountingID:   "Acc1",
 				CompressFactor: 2,
 				Cost:           2.345,
 				Usage:          time.Duration(2 * time.Second),
 			},
-			&ChargingIncrement{
+			{
 				AccountingID:   "Acc1",
 				CompressFactor: 2,
 				Cost:           1.23,
 				Usage:          time.Duration(5 * time.Second),
 			},
-			&ChargingIncrement{
+			{
 				AccountingID:   "Acc1",
 				CompressFactor: 3,
 				Cost:           1.23,
@@ -114,19 +114,19 @@ func TestChargingIntervalTotalUsage(t *testing.T) {
 	ci1 := &ChargingInterval{
 		RatingID: "Rating1",
 		Increments: []*ChargingIncrement{
-			&ChargingIncrement{
+			{
 				AccountingID:   "Acc1",
 				CompressFactor: 2,
 				Cost:           2.345,
 				Usage:          time.Duration(2 * time.Second),
 			},
-			&ChargingIncrement{
+			{
 				AccountingID:   "Acc1",
 				CompressFactor: 2,
 				Cost:           1.23,
 				Usage:          time.Duration(5 * time.Second),
 			},
-			&ChargingIncrement{
+			{
 				AccountingID:   "Acc1",
 				CompressFactor: 3,
 				Cost:           1.23,
@@ -146,19 +146,19 @@ func TestChargingIntervalEventCostUsageIndex(t *testing.T) {
 	ci1 := &ChargingInterval{
 		RatingID: "Rating1",
 		Increments: []*ChargingIncrement{
-			&ChargingIncrement{
+			{
 				AccountingID:   "Acc1",
 				CompressFactor: 2,
 				Cost:           2.345,
 				Usage:          time.Duration(2 * time.Second),
 			},
-			&ChargingIncrement{
+			{
 				AccountingID:   "Acc1",
 				CompressFactor: 2,
 				Cost:           1.23,
 				Usage:          time.Duration(5 * time.Second),
 			},
-			&ChargingIncrement{
+			{
 				AccountingID:   "Acc1",
 				CompressFactor: 3,
 				Cost:           1.23,
@@ -179,19 +179,19 @@ func TestChargingIntervalStartTime(t *testing.T) {
 	ci1 := &ChargingInterval{
 		RatingID: "Rating1",
 		Increments: []*ChargingIncrement{
-			&ChargingIncrement{
+			{
 				AccountingID:   "Acc1",
 				CompressFactor: 2,
 				Cost:           2.345,
 				Usage:          time.Duration(2 * time.Second),
 			},
-			&ChargingIncrement{
+			{
 				AccountingID:   "Acc1",
 				CompressFactor: 2,
 				Cost:           1.23,
 				Usage:          time.Duration(5 * time.Second),
 			},
-			&ChargingIncrement{
+			{
 				AccountingID:   "Acc1",
 				CompressFactor: 3,
 				Cost:           1.23,
@@ -212,19 +212,19 @@ func TestChargingIntervalEndTime(t *testing.T) {
 	ci1 := &ChargingInterval{
 		RatingID: "Rating1",
 		Increments: []*ChargingIncrement{
-			&ChargingIncrement{
+			{
 				AccountingID:   "Acc1",
 				CompressFactor: 2,
 				Cost:           2.345,
 				Usage:          time.Duration(2 * time.Second),
 			},
-			&ChargingIncrement{
+			{
 				AccountingID:   "Acc1",
 				CompressFactor: 2,
 				Cost:           1.23,
 				Usage:          time.Duration(5 * time.Second),
 			},
-			&ChargingIncrement{
+			{
 				AccountingID:   "Acc1",
 				CompressFactor: 3,
 				Cost:           1.23,
@@ -245,19 +245,19 @@ func TestChargingIntervalCost(t *testing.T) {
 	ci1 := &ChargingInterval{
 		RatingID: "Rating1",
 		Increments: []*ChargingIncrement{
-			&ChargingIncrement{
+			{
 				AccountingID:   "Acc1",
 				CompressFactor: 2,
 				Cost:           2.345,
 				Usage:          time.Duration(2 * time.Second),
 			},
-			&ChargingIncrement{
+			{
 				AccountingID:   "Acc1",
 				CompressFactor: 2,
 				Cost:           1.23,
 				Usage:          time.Duration(5 * time.Second),
 			},
-			&ChargingIncrement{
+			{
 				AccountingID:   "Acc1",
 				CompressFactor: 3,
 				Cost:           1.23,
@@ -277,19 +277,19 @@ func TestChargingIntervalTotalCost(t *testing.T) {
 	ci1 := &ChargingInterval{
 		RatingID: "Rating1",
 		Increments: []*ChargingIncrement{
-			&ChargingIncrement{
+			{
 				AccountingID:   "Acc1",
 				CompressFactor: 2,
 				Cost:           2.345,
 				Usage:          time.Duration(2 * time.Second),
 			},
-			&ChargingIncrement{
+			{
 				AccountingID:   "Acc1",
 				CompressFactor: 2,
 				Cost:           1.23,
 				Usage:          time.Duration(5 * time.Second),
 			},
-			&ChargingIncrement{
+			{
 				AccountingID:   "Acc1",
 				CompressFactor: 3,
 				Cost:           1.23,
@@ -309,19 +309,19 @@ func TestChargingIntervalClone(t *testing.T) {
 	ci1 := &ChargingInterval{
 		RatingID: "Rating1",
 		Increments: []*ChargingIncrement{
-			&ChargingIncrement{
+			{
 				AccountingID:   "Acc1",
 				CompressFactor: 2,
 				Cost:           2.345,
 				Usage:          time.Duration(2 * time.Second),
 			},
-			&ChargingIncrement{
+			{
 				AccountingID:   "Acc1",
 				CompressFactor: 2,
 				Cost:           1.23,
 				Usage:          time.Duration(5 * time.Second),
 			},
-			&ChargingIncrement{
+			{
 				AccountingID:   "Acc1",
 				CompressFactor: 3,
 				Cost:           1.23,

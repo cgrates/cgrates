@@ -557,7 +557,7 @@ func testCGRConfigReloadFreeswitchAgent(t *testing.T) {
 		ExtraFields:       RSRParsers{},
 		MaxWaitConnection: 2 * time.Second,
 		EventSocketConns: []*FsConnCfg{
-			&FsConnCfg{
+			{
 				Address:    "1.2.3.4:8021",
 				Password:   "ClueCon",
 				Reconnects: 5,
@@ -900,7 +900,7 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 		t.Errorf("Expected: %s \n,received: %s", utils.OK, reply)
 	}
 
-	if err := cfg.V1GetConfigSection(&StringWithOpts{Section: ERsJson}, &rcv); err != nil {
+	if err := cfg.V1GetConfigSection(&SectionWithOpts{Section: ERsJson}, &rcv); err != nil {
 		t.Error(err)
 	} else if utils.ToJSON(expected) != utils.ToJSON(rcv) {
 		t.Errorf("Expected: %+v, \n received: %+v", utils.ToJSON(expected), utils.ToJSON(rcv))

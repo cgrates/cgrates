@@ -67,8 +67,8 @@ func (dS *DispatcherService) ThresholdSv1ProcessEvent(args *engine.ThresholdsArg
 
 func (dS *DispatcherService) ThresholdSv1GetThresholdIDs(args *utils.TenantWithOpts, tIDs *[]string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args.TenantArg != nil && args.TenantArg.Tenant != utils.EmptyString {
-		tnt = args.TenantArg.Tenant
+	if args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ThresholdSv1GetThresholdIDs,

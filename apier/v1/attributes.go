@@ -42,7 +42,7 @@ func (apierSv1 *APIerSv1) GetAttributeProfile(arg *utils.TenantIDWithOpts, reply
 }
 
 // GetAttributeProfileIDs returns list of attributeProfile IDs registered for a tenant
-func (apierSv1 *APIerSv1) GetAttributeProfileIDs(args *utils.TenantArgWithPaginator, attrPrfIDs *[]string) error {
+func (apierSv1 *APIerSv1) GetAttributeProfileIDs(args *utils.PaginatorWithTenant, attrPrfIDs *[]string) error {
 	if missing := utils.MissingStructFields(args, []string{utils.Tenant}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -64,7 +64,7 @@ func (apierSv1 *APIerSv1) GetAttributeProfileIDs(args *utils.TenantArgWithPagina
 
 // GetAttributeProfileIDsCount sets in reply var the total number of AttributeProfileIDs registered for a tenant
 // returns ErrNotFound in case of 0 AttributeProfileIDs
-func (apierSv1 *APIerSv1) GetAttributeProfileIDsCount(args *utils.TenantArg, reply *int) (err error) {
+func (apierSv1 *APIerSv1) GetAttributeProfileIDsCount(args *utils.TenantWithOpts, reply *int) (err error) {
 	if missing := utils.MissingStructFields(args, []string{utils.Tenant}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -80,6 +80,7 @@ func (apierSv1 *APIerSv1) GetAttributeProfileIDsCount(args *utils.TenantArg, rep
 	return
 }
 
+// AttributeWithCache the arguments for SetAttributeProfile
 type AttributeWithCache struct {
 	*engine.AttributeProfile
 	Cache *string
@@ -141,6 +142,7 @@ func (apierSv1 *APIerSv1) RemoveAttributeProfile(arg *utils.TenantIDWithCache, r
 	return nil
 }
 
+// NewAttributeSv1 returns the RPC Object for AttributeS
 func NewAttributeSv1(attrS *engine.AttributeService) *AttributeSv1 {
 	return &AttributeSv1{attrS: attrS}
 }
@@ -168,6 +170,7 @@ func (alSv1 *AttributeSv1) ProcessEvent(args *engine.AttrArgsProcessEvent,
 	return alSv1.attrS.V1ProcessEvent(args, reply)
 }
 
+// Ping return pong if the service is active
 func (alSv1 *AttributeSv1) Ping(ign *utils.CGREventWithOpts, reply *string) error {
 	*reply = utils.Pong
 	return nil

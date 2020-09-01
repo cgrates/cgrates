@@ -48,8 +48,8 @@ func (dS *DispatcherService) CacheSv1Ping(args *utils.CGREventWithOpts,
 func (dS *DispatcherService) CacheSv1GetItemIDs(args *utils.ArgsGetCacheItemIDsWithOpts,
 	reply *[]string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args.TenantArg.Tenant != utils.EmptyString {
-		tnt = args.TenantArg.Tenant
+	if args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.CacheSv1GetItemIDs, tnt,
@@ -69,8 +69,8 @@ func (dS *DispatcherService) CacheSv1GetItemIDs(args *utils.ArgsGetCacheItemIDsW
 func (dS *DispatcherService) CacheSv1HasItem(args *utils.ArgsGetCacheItemWithOpts,
 	reply *bool) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args.TenantArg.Tenant != utils.EmptyString {
-		tnt = args.TenantArg.Tenant
+	if args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.CacheSv1HasItem, tnt,
@@ -91,8 +91,8 @@ func (dS *DispatcherService) CacheSv1HasItem(args *utils.ArgsGetCacheItemWithOpt
 func (dS *DispatcherService) CacheSv1GetItemExpiryTime(args *utils.ArgsGetCacheItemWithOpts,
 	reply *time.Time) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args.TenantArg.Tenant != utils.EmptyString {
-		tnt = args.TenantArg.Tenant
+	if args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.CacheSv1GetItemExpiryTime, tnt,
@@ -113,8 +113,8 @@ func (dS *DispatcherService) CacheSv1GetItemExpiryTime(args *utils.ArgsGetCacheI
 func (dS *DispatcherService) CacheSv1RemoveItem(args *utils.ArgsGetCacheItemWithOpts,
 	reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args.TenantArg.Tenant != utils.EmptyString {
-		tnt = args.TenantArg.Tenant
+	if args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.CacheSv1RemoveItem, tnt,
@@ -134,8 +134,8 @@ func (dS *DispatcherService) CacheSv1RemoveItem(args *utils.ArgsGetCacheItemWith
 func (dS *DispatcherService) CacheSv1RemoveItems(args utils.AttrReloadCacheWithOpts,
 	reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args.TenantArg.Tenant != utils.EmptyString {
-		tnt = args.TenantArg.Tenant
+	if args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.CacheSv1RemoveItems, tnt,
@@ -155,8 +155,8 @@ func (dS *DispatcherService) CacheSv1RemoveItems(args utils.AttrReloadCacheWithO
 func (dS *DispatcherService) CacheSv1Clear(args *utils.AttrCacheIDsWithOpts,
 	reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args.TenantArg.Tenant != utils.EmptyString {
-		tnt = args.TenantArg.Tenant
+	if args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.CacheSv1Clear, tnt,
@@ -176,8 +176,8 @@ func (dS *DispatcherService) CacheSv1Clear(args *utils.AttrCacheIDsWithOpts,
 func (dS *DispatcherService) CacheSv1GetCacheStats(args *utils.AttrCacheIDsWithOpts,
 	reply *map[string]*ltcache.CacheStats) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args.TenantArg.Tenant != utils.EmptyString {
-		tnt = args.TenantArg.Tenant
+	if args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.CacheSv1GetCacheStats, tnt,
@@ -196,8 +196,8 @@ func (dS *DispatcherService) CacheSv1GetCacheStats(args *utils.AttrCacheIDsWithO
 // CacheSv1PrecacheStatus checks status of active precache processes
 func (dS *DispatcherService) CacheSv1PrecacheStatus(args *utils.AttrCacheIDsWithOpts, reply *map[string]string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args.TenantArg.Tenant != utils.EmptyString {
-		tnt = args.TenantArg.Tenant
+	if args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.CacheSv1PrecacheStatus, tnt,
@@ -217,8 +217,8 @@ func (dS *DispatcherService) CacheSv1PrecacheStatus(args *utils.AttrCacheIDsWith
 func (dS *DispatcherService) CacheSv1HasGroup(args *utils.ArgsGetGroupWithOpts,
 	reply *bool) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args.TenantArg.Tenant != utils.EmptyString {
-		tnt = args.TenantArg.Tenant
+	if args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.CacheSv1HasGroup, tnt,
@@ -234,12 +234,12 @@ func (dS *DispatcherService) CacheSv1HasGroup(args *utils.ArgsGetGroupWithOpts,
 	}, utils.MetaCaches, utils.CacheSv1HasGroup, args, reply)
 }
 
-// GetGroupItemIDs returns a list of itemIDs in a cache group
+// CacheSv1GetGroupItemIDs returns a list of itemIDs in a cache group
 func (dS *DispatcherService) CacheSv1GetGroupItemIDs(args *utils.ArgsGetGroupWithOpts,
 	reply *[]string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args.TenantArg.Tenant != utils.EmptyString {
-		tnt = args.TenantArg.Tenant
+	if args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.CacheSv1GetGroupItemIDs, tnt,
@@ -255,11 +255,11 @@ func (dS *DispatcherService) CacheSv1GetGroupItemIDs(args *utils.ArgsGetGroupWit
 	}, utils.MetaCaches, utils.CacheSv1GetGroupItemIDs, args, reply)
 }
 
-// RemoveGroup will remove a group and all items belonging to it from cache
+// CacheSv1RemoveGroup will remove a group and all items belonging to it from cache
 func (dS *DispatcherService) CacheSv1RemoveGroup(args *utils.ArgsGetGroupWithOpts, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args.TenantArg.Tenant != utils.EmptyString {
-		tnt = args.TenantArg.Tenant
+	if args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.CacheSv1RemoveGroup, tnt,
@@ -275,11 +275,11 @@ func (dS *DispatcherService) CacheSv1RemoveGroup(args *utils.ArgsGetGroupWithOpt
 	}, utils.MetaCaches, utils.CacheSv1RemoveGroup, args, reply)
 }
 
-// ReloadCache reloads cache from DB for a prefix or completely
+// CacheSv1ReloadCache reloads cache from DB for a prefix or completely
 func (dS *DispatcherService) CacheSv1ReloadCache(args utils.AttrReloadCacheWithOpts, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args.TenantArg.Tenant != utils.EmptyString {
-		tnt = args.TenantArg.Tenant
+	if args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.CacheSv1ReloadCache, tnt,
@@ -295,11 +295,11 @@ func (dS *DispatcherService) CacheSv1ReloadCache(args utils.AttrReloadCacheWithO
 	}, utils.MetaCaches, utils.CacheSv1ReloadCache, args, reply)
 }
 
-// LoadCache loads cache from DB for a prefix or completely
+// CacheSv1LoadCache loads cache from DB for a prefix or completely
 func (dS *DispatcherService) CacheSv1LoadCache(args utils.AttrReloadCacheWithOpts, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args.TenantArg.Tenant != utils.EmptyString {
-		tnt = args.TenantArg.Tenant
+	if args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.CacheSv1LoadCache, tnt,
@@ -315,11 +315,11 @@ func (dS *DispatcherService) CacheSv1LoadCache(args utils.AttrReloadCacheWithOpt
 	}, utils.MetaCaches, utils.CacheSv1LoadCache, args, reply)
 }
 
-// ReplicateRemove remove an item
+// CacheSv1ReplicateRemove remove an item
 func (dS *DispatcherService) CacheSv1ReplicateRemove(args *utils.ArgCacheReplicateRemove, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args.TenantArg.Tenant != utils.EmptyString {
-		tnt = args.TenantArg.Tenant
+	if args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.CacheSv1ReplicateRemove, tnt,
@@ -335,11 +335,11 @@ func (dS *DispatcherService) CacheSv1ReplicateRemove(args *utils.ArgCacheReplica
 	}, utils.MetaCaches, utils.CacheSv1ReplicateRemove, args, reply)
 }
 
-// ReplicateSet replicate an item
+// CacheSv1ReplicateSet replicate an item
 func (dS *DispatcherService) CacheSv1ReplicateSet(args *utils.ArgCacheReplicateSet, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args.TenantArg.Tenant != utils.EmptyString {
-		tnt = args.TenantArg.Tenant
+	if args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.CacheSv1ReplicateSet, tnt,

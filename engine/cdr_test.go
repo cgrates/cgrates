@@ -244,13 +244,13 @@ func TestFieldAsStringForCostDetails(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "AccountFromAccountSummary",
 			BalanceSummaries: []*BalanceSummary{
-				&BalanceSummary{
+				{
 					UUID:  "f9be602747f4",
 					ID:    "monetary",
 					Type:  utils.MONETARY,
 					Value: 0.5,
 				},
-				&BalanceSummary{
+				{
 					UUID:  "2e02510ab90a",
 					ID:    "voice",
 					Type:  utils.VOICE,
@@ -1198,7 +1198,7 @@ func TestCDRcombimedCdrFieldVal(t *testing.T) {
 	}
 	groupCDRs := []*CDR{
 		cdr,
-		&CDR{
+		{
 			CGRID:       utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
 			OrderID:     124,
 			ToR:         utils.VOICE,
@@ -1217,7 +1217,7 @@ func TestCDRcombimedCdrFieldVal(t *testing.T) {
 			Usage:       time.Duration(10) * time.Second,
 			Cost:        1.22,
 		},
-		&CDR{
+		{
 			CGRID:       utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
 			OrderID:     125,
 			ToR:         utils.VOICE,

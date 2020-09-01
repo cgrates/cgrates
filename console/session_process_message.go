@@ -72,7 +72,7 @@ func (self *CmdSessionsProcessEvent) RpcResult() interface{} {
 
 func (self *CmdSessionsProcessEvent) GetFormatedResult(result interface{}) string {
 	return GetFormatedResult(result, map[string]struct{}{
-		"Usage":    struct{}{},
-		"MaxUsage": struct{}{},
+		"Usage":    {},
+		"MaxUsage": {},
 	})
 }

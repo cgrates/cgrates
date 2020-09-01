@@ -91,9 +91,7 @@ func testDspGrdLock(t *testing.T) {
 	var reply string
 	if err := dispEngine.RPC.Call(utils.GuardianSv1RemoteLock, &AttrRemoteLockWithOpts{
 		AttrRemoteLock: args,
-		TenantArg: utils.TenantArg{
-			Tenant: "cgrates.org",
-		},
+		Tenant:         "cgrates.org",
 		Opts: map[string]interface{}{
 			utils.OptsAPIKey: "grd12345",
 		},
@@ -103,10 +101,8 @@ func testDspGrdLock(t *testing.T) {
 
 	var unlockReply []string
 	if err := dispEngine.RPC.Call(utils.GuardianSv1RemoteUnlock, &AttrRemoteUnlockWithOpts{
-		RefID: reply,
-		TenantArg: utils.TenantArg{
-			Tenant: "cgrates.org",
-		},
+		RefID:  reply,
+		Tenant: "cgrates.org",
 		Opts: map[string]interface{}{
 			utils.OptsAPIKey: "grd12345",
 		},

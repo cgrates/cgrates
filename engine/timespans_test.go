@@ -524,14 +524,14 @@ func TestTimespanSplitMultipleGroup(t *testing.T) {
 
 func TestTimespanExpandingPastEnd(t *testing.T) {
 	timespans := []*TimeSpan{
-		&TimeSpan{
+		{
 			TimeStart: time.Date(2013, 9, 10, 14, 30, 0, 0, time.UTC),
 			TimeEnd:   time.Date(2013, 9, 10, 14, 30, 30, 0, time.UTC),
 			RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{
 				&RGRate{RateIncrement: 60 * time.Second},
 			}}},
 		},
-		&TimeSpan{
+		{
 			TimeStart: time.Date(2013, 9, 10, 14, 30, 30, 0, time.UTC),
 			TimeEnd:   time.Date(2013, 9, 10, 14, 30, 45, 0, time.UTC),
 		},
@@ -548,14 +548,14 @@ func TestTimespanExpandingPastEnd(t *testing.T) {
 
 func TestTimespanExpandingDurationIndex(t *testing.T) {
 	timespans := []*TimeSpan{
-		&TimeSpan{
+		{
 			TimeStart: time.Date(2013, 9, 10, 14, 30, 0, 0, time.UTC),
 			TimeEnd:   time.Date(2013, 9, 10, 14, 30, 30, 0, time.UTC),
 			RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{
 				&RGRate{RateIncrement: 60 * time.Second},
 			}}},
 		},
-		&TimeSpan{
+		{
 			TimeStart: time.Date(2013, 9, 10, 14, 30, 30, 0, time.UTC),
 			TimeEnd:   time.Date(2013, 9, 10, 14, 30, 45, 0, time.UTC),
 		},
@@ -570,14 +570,14 @@ func TestTimespanExpandingDurationIndex(t *testing.T) {
 
 func TestTimespanExpandingRoundingPastEnd(t *testing.T) {
 	timespans := []*TimeSpan{
-		&TimeSpan{
+		{
 			TimeStart: time.Date(2013, 9, 10, 14, 30, 0, 0, time.UTC),
 			TimeEnd:   time.Date(2013, 9, 10, 14, 30, 20, 0, time.UTC),
 			RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{
 				&RGRate{RateIncrement: 15 * time.Second},
 			}}},
 		},
-		&TimeSpan{
+		{
 			TimeStart: time.Date(2013, 9, 10, 14, 30, 20, 0, time.UTC),
 			TimeEnd:   time.Date(2013, 9, 10, 14, 30, 40, 0, time.UTC),
 		},
@@ -594,18 +594,18 @@ func TestTimespanExpandingRoundingPastEnd(t *testing.T) {
 
 func TestTimespanExpandingPastEndMultiple(t *testing.T) {
 	timespans := []*TimeSpan{
-		&TimeSpan{
+		{
 			TimeStart: time.Date(2013, 9, 10, 14, 30, 0, 0, time.UTC),
 			TimeEnd:   time.Date(2013, 9, 10, 14, 30, 30, 0, time.UTC),
 			RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{
 				&RGRate{RateIncrement: 60 * time.Second},
 			}}},
 		},
-		&TimeSpan{
+		{
 			TimeStart: time.Date(2013, 9, 10, 14, 30, 30, 0, time.UTC),
 			TimeEnd:   time.Date(2013, 9, 10, 14, 30, 40, 0, time.UTC),
 		},
-		&TimeSpan{
+		{
 			TimeStart: time.Date(2013, 9, 10, 14, 30, 40, 0, time.UTC),
 			TimeEnd:   time.Date(2013, 9, 10, 14, 30, 50, 0, time.UTC),
 		},
@@ -622,18 +622,18 @@ func TestTimespanExpandingPastEndMultiple(t *testing.T) {
 
 func TestTimespanExpandingPastEndMultipleEqual(t *testing.T) {
 	timespans := []*TimeSpan{
-		&TimeSpan{
+		{
 			TimeStart: time.Date(2013, 9, 10, 14, 30, 0, 0, time.UTC),
 			TimeEnd:   time.Date(2013, 9, 10, 14, 30, 30, 0, time.UTC),
 			RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{
 				&RGRate{RateIncrement: 60 * time.Second},
 			}}},
 		},
-		&TimeSpan{
+		{
 			TimeStart: time.Date(2013, 9, 10, 14, 30, 30, 0, time.UTC),
 			TimeEnd:   time.Date(2013, 9, 10, 14, 30, 40, 0, time.UTC),
 		},
-		&TimeSpan{
+		{
 			TimeStart: time.Date(2013, 9, 10, 14, 30, 40, 0, time.UTC),
 			TimeEnd:   time.Date(2013, 9, 10, 14, 31, 00, 0, time.UTC),
 		},
@@ -650,14 +650,14 @@ func TestTimespanExpandingPastEndMultipleEqual(t *testing.T) {
 
 func TestTimespanExpandingBeforeEnd(t *testing.T) {
 	timespans := []*TimeSpan{
-		&TimeSpan{
+		{
 			TimeStart: time.Date(2013, 9, 10, 14, 30, 0, 0, time.UTC),
 			TimeEnd:   time.Date(2013, 9, 10, 14, 30, 30, 0, time.UTC),
 			RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{
 				&RGRate{RateIncrement: 45 * time.Second},
 			}}},
 		},
-		&TimeSpan{
+		{
 			TimeStart: time.Date(2013, 9, 10, 14, 30, 30, 0, time.UTC),
 			TimeEnd:   time.Date(2013, 9, 10, 14, 31, 0, 0, time.UTC),
 		},
@@ -676,18 +676,18 @@ func TestTimespanExpandingBeforeEnd(t *testing.T) {
 
 func TestTimespanExpandingBeforeEndMultiple(t *testing.T) {
 	timespans := []*TimeSpan{
-		&TimeSpan{
+		{
 			TimeStart: time.Date(2013, 9, 10, 14, 30, 0, 0, time.UTC),
 			TimeEnd:   time.Date(2013, 9, 10, 14, 30, 30, 0, time.UTC),
 			RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{
 				&RGRate{RateIncrement: 45 * time.Second},
 			}}},
 		},
-		&TimeSpan{
+		{
 			TimeStart: time.Date(2013, 9, 10, 14, 30, 30, 0, time.UTC),
 			TimeEnd:   time.Date(2013, 9, 10, 14, 30, 50, 0, time.UTC),
 		},
-		&TimeSpan{
+		{
 			TimeStart: time.Date(2013, 9, 10, 14, 30, 50, 0, time.UTC),
 			TimeEnd:   time.Date(2013, 9, 10, 14, 31, 00, 0, time.UTC),
 		},

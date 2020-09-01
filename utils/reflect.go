@@ -391,7 +391,6 @@ func GetUniformType(item interface{}) (interface{}, error) {
 	default:
 		return nil, errors.New("incomparable")
 	}
-	return item, nil
 }
 
 func GetBasicType(item interface{}) interface{} {
@@ -406,7 +405,6 @@ func GetBasicType(item interface{}) interface{} {
 	default:
 		return item
 	}
-	return item
 }
 
 // GreaterThan attempts to compare two items

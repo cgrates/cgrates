@@ -94,36 +94,36 @@ func TestUnitCountersClone(t *testing.T) {
 	}
 	ucs = UnitCounters{
 		"string1": []*UnitCounter{
-			&UnitCounter{
+			{
 				CounterType: "testCounterType1.1",
 			},
-			&UnitCounter{
+			{
 				CounterType: "testCounterType1.2",
 			},
 		},
 		"string2": []*UnitCounter{
-			&UnitCounter{
+			{
 				CounterType: "testCounterType2.1",
 			},
-			&UnitCounter{
+			{
 				CounterType: "testCounterType2.2",
 			},
 		},
 	}
 	eOut = UnitCounters{
 		"string1": []*UnitCounter{
-			&UnitCounter{
+			{
 				CounterType: "testCounterType1.1",
 			},
-			&UnitCounter{
+			{
 				CounterType: "testCounterType1.2",
 			},
 		},
 		"string2": []*UnitCounter{
-			&UnitCounter{
+			{
 				CounterType: "testCounterType2.1",
 			},
-			&UnitCounter{
+			{
 				CounterType: "testCounterType2.2",
 			},
 		},

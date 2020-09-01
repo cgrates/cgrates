@@ -36,8 +36,8 @@ type RatingProfile struct {
 // RatingProfileWithOpts is used in replicatorV1 for dispatcher
 type RatingProfileWithOpts struct {
 	*RatingProfile
-	utils.TenantArg
-	Opts map[string]interface{}
+	Tenant string
+	Opts   map[string]interface{}
 }
 
 type RatingPlanActivation struct {

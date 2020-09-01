@@ -44,7 +44,7 @@ func (apierSv1 *APIerSv1) GetRateProfile(arg *utils.TenantIDWithOpts, reply *eng
 }
 
 // GetRateProfileIDs returns list of rate profile IDs registered for a tenant
-func (apierSv1 *APIerSv1) GetRateProfileIDs(args *utils.TenantArgWithPaginator, attrPrfIDs *[]string) error {
+func (apierSv1 *APIerSv1) GetRateProfileIDs(args *utils.PaginatorWithTenant, attrPrfIDs *[]string) error {
 	if missing := utils.MissingStructFields(args, []string{utils.Tenant}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -66,7 +66,7 @@ func (apierSv1 *APIerSv1) GetRateProfileIDs(args *utils.TenantArgWithPaginator, 
 
 // GetRateProfileIDsCount sets in reply var the total number of RateProfileIDs registered for a tenant
 // returns ErrNotFound in case of 0 RateProfileIDs
-func (apierSv1 *APIerSv1) GetRateProfileIDsCount(args *utils.TenantArg, reply *int) (err error) {
+func (apierSv1 *APIerSv1) GetRateProfileIDsCount(args *utils.TenantWithOpts, reply *int) (err error) {
 	if missing := utils.MissingStructFields(args, []string{utils.Tenant}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

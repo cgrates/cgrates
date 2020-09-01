@@ -1885,7 +1885,7 @@ func TestCgrCfgV1GetConfigSection(t *testing.T) {
 	var rcv map[string]interface{}
 	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(jsnCfg); err != nil {
 		t.Error(err)
-	} else if err := cgrCfg.V1GetConfigSection(&StringWithOpts{Section: LISTEN_JSN}, &rcv); err != nil {
+	} else if err := cgrCfg.V1GetConfigSection(&SectionWithOpts{Section: LISTEN_JSN}, &rcv); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rcv) {
 		t.Errorf("Expected: %+v, received: %+v", expected, rcv)
@@ -2473,7 +2473,7 @@ func TestRpcConnsDefaults(t *testing.T) {
 		Strategy: rpcclient.PoolFirst,
 		PoolSize: 0,
 		Conns: []*RemoteHost{
-			&RemoteHost{
+			{
 				Address: utils.MetaInternal,
 			},
 		},
@@ -2482,7 +2482,7 @@ func TestRpcConnsDefaults(t *testing.T) {
 		Strategy: rpcclient.PoolFirst,
 		PoolSize: 0,
 		Conns: []*RemoteHost{
-			&RemoteHost{
+			{
 				Address:   "127.0.0.1:2012",
 				Transport: utils.MetaJSON,
 			},

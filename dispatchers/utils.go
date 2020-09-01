@@ -36,26 +36,26 @@ var ( //var used in all tests
 )
 
 type ArgsReplicateSessionsWithOpts struct {
-	Opts map[string]interface{}
-	utils.TenantArg
+	Opts   map[string]interface{}
+	Tenant string
 	sessions.ArgsReplicateSessions
 }
 
 type AttrRemoteLockWithOpts struct {
-	Opts map[string]interface{}
-	utils.TenantArg
+	Opts   map[string]interface{}
+	Tenant string
 	utils.AttrRemoteLock
 }
 
 type AttrRemoteUnlockWithOpts struct {
-	Opts map[string]interface{}
-	utils.TenantArg
-	RefID string
+	Opts   map[string]interface{}
+	Tenant string
+	RefID  string
 }
 
 type ArgStartServiceWithOpts struct {
-	Opts map[string]interface{}
-	utils.TenantArg
+	Opts   map[string]interface{}
+	Tenant string
 	servmanager.ArgStartService
 }
 

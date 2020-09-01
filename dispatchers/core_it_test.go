@@ -62,9 +62,7 @@ func TestDspCoreIT(t *testing.T) {
 func testDspCoreLoad(t *testing.T) {
 	var status map[string]interface{}
 	statusTnt := utils.TenantWithOpts{
-		TenantArg: &utils.TenantArg{
-			Tenant: "cgrates.org",
-		},
+		Tenant: "cgrates.org",
 		Opts: map[string]interface{}{
 			utils.OptsAPIKey:  "core12345",
 			utils.OptsRouteID: "core1",
@@ -79,9 +77,7 @@ func testDspCoreLoad(t *testing.T) {
 	}
 	dur := &utils.DurationArgs{
 		DurationTime: 500 * time.Millisecond,
-		TenantArg: &utils.TenantArg{
-			Tenant: "cgrates.org",
-		},
+		Tenant:       "cgrates.org",
 		Opts: map[string]interface{}{
 			utils.OptsAPIKey:  "core12345",
 			utils.OptsRouteID: "core1",
@@ -90,9 +86,7 @@ func testDspCoreLoad(t *testing.T) {
 	}
 	var rply string
 	statusTnt2 := utils.TenantWithOpts{
-		TenantArg: &utils.TenantArg{
-			Tenant: "cgrates.org",
-		},
+		Tenant: "cgrates.org",
 		Opts: map[string]interface{}{
 			utils.OptsAPIKey: "core12345",
 			"EventType":      "LoadDispatcher",

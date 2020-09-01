@@ -382,7 +382,7 @@ func testDspSupGetSupplierForEvent(t *testing.T) {
 		Sorting:           utils.MetaLC,
 		SortingParameters: []string{},
 		Routes: []*engine.Route{
-			&engine.Route{
+			{
 				ID:              "route1",
 				FilterIDs:       nil,
 				AccountIDs:      nil,
@@ -393,7 +393,7 @@ func testDspSupGetSupplierForEvent(t *testing.T) {
 				Blocker:         false,
 				RouteParameters: "",
 			},
-			&engine.Route{
+			{
 				ID:              "route2",
 				FilterIDs:       nil,
 				AccountIDs:      nil,

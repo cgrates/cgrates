@@ -43,7 +43,7 @@ func (apierSv1 *APIerSv1) GetDispatcherProfile(arg *utils.TenantID, reply *engin
 }
 
 // GetDispatcherProfileIDs returns list of dispatcherProfile IDs registered for a tenant
-func (apierSv1 *APIerSv1) GetDispatcherProfileIDs(tenantArg *utils.TenantArgWithPaginator, dPrfIDs *[]string) error {
+func (apierSv1 *APIerSv1) GetDispatcherProfileIDs(tenantArg *utils.PaginatorWithTenant, dPrfIDs *[]string) error {
 	if missing := utils.MissingStructFields(tenantArg, []string{utils.Tenant}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -127,7 +127,7 @@ func (apierSv1 *APIerSv1) GetDispatcherHost(arg *utils.TenantID, reply *engine.D
 }
 
 // GetDispatcherHostIDs returns list of dispatcherHost IDs registered for a tenant
-func (apierSv1 *APIerSv1) GetDispatcherHostIDs(tenantArg *utils.TenantArgWithPaginator, dPrfIDs *[]string) error {
+func (apierSv1 *APIerSv1) GetDispatcherHostIDs(tenantArg *utils.PaginatorWithTenant, dPrfIDs *[]string) error {
 	if missing := utils.MissingStructFields(tenantArg, []string{utils.Tenant}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -805,7 +805,7 @@ type DispatcherConfigSv1 struct {
 	dS *dispatchers.DispatcherService
 }
 
-func (dS *DispatcherConfigSv1) GetJSONSection(args *config.StringWithOpts, reply *map[string]interface{}) (err error) {
+func (dS *DispatcherConfigSv1) GetJSONSection(args *config.SectionWithOpts, reply *map[string]interface{}) (err error) {
 	return dS.dS.ConfigSv1GetJSONSection(args, reply)
 }
 

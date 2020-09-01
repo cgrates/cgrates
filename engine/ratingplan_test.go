@@ -224,8 +224,8 @@ func TestRatingPlanIsContinousEmpty(t *testing.T) {
 func TestRatingPlanIsContinousBlank(t *testing.T) {
 	rpl := &RatingPlan{
 		Timings: map[string]*RITiming{
-			"blank": &RITiming{StartTime: "00:00:00"},
-			"other": &RITiming{WeekDays: utils.WeekDays{1, 2, 3}, StartTime: "00:00:00"},
+			"blank": {StartTime: "00:00:00"},
+			"other": {WeekDays: utils.WeekDays{1, 2, 3}, StartTime: "00:00:00"},
 		},
 	}
 	if !rpl.isContinous() {
@@ -236,9 +236,9 @@ func TestRatingPlanIsContinousBlank(t *testing.T) {
 func TestRatingPlanIsContinousGood(t *testing.T) {
 	rpl := &RatingPlan{
 		Timings: map[string]*RITiming{
-			"first":  &RITiming{WeekDays: utils.WeekDays{1, 2, 3}, StartTime: "00:00:00"},
-			"second": &RITiming{WeekDays: utils.WeekDays{4, 5, 6}, StartTime: "00:00:00"},
-			"third":  &RITiming{WeekDays: utils.WeekDays{0}, StartTime: "00:00:00"},
+			"first":  {WeekDays: utils.WeekDays{1, 2, 3}, StartTime: "00:00:00"},
+			"second": {WeekDays: utils.WeekDays{4, 5, 6}, StartTime: "00:00:00"},
+			"third":  {WeekDays: utils.WeekDays{0}, StartTime: "00:00:00"},
 		},
 	}
 	if !rpl.isContinous() {
@@ -249,8 +249,8 @@ func TestRatingPlanIsContinousGood(t *testing.T) {
 func TestRatingPlanisContinousBad(t *testing.T) {
 	rpl := &RatingPlan{
 		Timings: map[string]*RITiming{
-			"first":  &RITiming{WeekDays: utils.WeekDays{1, 2, 3}, StartTime: "00:00:00"},
-			"second": &RITiming{WeekDays: utils.WeekDays{4, 5, 0}, StartTime: "00:00:00"},
+			"first":  {WeekDays: utils.WeekDays{1, 2, 3}, StartTime: "00:00:00"},
+			"second": {WeekDays: utils.WeekDays{4, 5, 0}, StartTime: "00:00:00"},
 		},
 	}
 	if rpl.isContinous() {
@@ -261,10 +261,10 @@ func TestRatingPlanisContinousBad(t *testing.T) {
 func TestRatingPlanIsContinousSpecial(t *testing.T) {
 	rpl := &RatingPlan{
 		Timings: map[string]*RITiming{
-			"special": &RITiming{Years: utils.Years{2015}, Months: utils.Months{5}, MonthDays: utils.MonthDays{1}, StartTime: "00:00:00"},
-			"first":   &RITiming{WeekDays: utils.WeekDays{1, 2, 3}, StartTime: "00:00:00"},
-			"second":  &RITiming{WeekDays: utils.WeekDays{4, 5, 6}, StartTime: "00:00:00"},
-			"third":   &RITiming{WeekDays: utils.WeekDays{0}, StartTime: "00:00:00"},
+			"special": {Years: utils.Years{2015}, Months: utils.Months{5}, MonthDays: utils.MonthDays{1}, StartTime: "00:00:00"},
+			"first":   {WeekDays: utils.WeekDays{1, 2, 3}, StartTime: "00:00:00"},
+			"second":  {WeekDays: utils.WeekDays{4, 5, 6}, StartTime: "00:00:00"},
+			"third":   {WeekDays: utils.WeekDays{0}, StartTime: "00:00:00"},
 		},
 	}
 	if !rpl.isContinous() {
@@ -275,11 +275,11 @@ func TestRatingPlanIsContinousSpecial(t *testing.T) {
 func TestRatingPlanIsContinousMultiple(t *testing.T) {
 	rpl := &RatingPlan{
 		Timings: map[string]*RITiming{
-			"special":  &RITiming{Years: utils.Years{2015}, Months: utils.Months{5}, MonthDays: utils.MonthDays{1}, StartTime: "00:00:00"},
-			"first":    &RITiming{WeekDays: utils.WeekDays{1, 2, 3}, StartTime: "00:00:00"},
-			"first_08": &RITiming{WeekDays: utils.WeekDays{1, 2, 3}, StartTime: "08:00:00"},
-			"second":   &RITiming{WeekDays: utils.WeekDays{4, 5, 6}, StartTime: "00:00:00"},
-			"third":    &RITiming{WeekDays: utils.WeekDays{0}, StartTime: "00:00:00"},
+			"special":  {Years: utils.Years{2015}, Months: utils.Months{5}, MonthDays: utils.MonthDays{1}, StartTime: "00:00:00"},
+			"first":    {WeekDays: utils.WeekDays{1, 2, 3}, StartTime: "00:00:00"},
+			"first_08": {WeekDays: utils.WeekDays{1, 2, 3}, StartTime: "08:00:00"},
+			"second":   {WeekDays: utils.WeekDays{4, 5, 6}, StartTime: "00:00:00"},
+			"third":    {WeekDays: utils.WeekDays{0}, StartTime: "00:00:00"},
 		},
 	}
 	if !rpl.isContinous() {
@@ -290,10 +290,10 @@ func TestRatingPlanIsContinousMultiple(t *testing.T) {
 func TestRatingPlanIsContinousMissing(t *testing.T) {
 	rpl := &RatingPlan{
 		Timings: map[string]*RITiming{
-			"special":  &RITiming{Years: utils.Years{2015}, Months: utils.Months{5}, MonthDays: utils.MonthDays{1}, StartTime: "00:00:00"},
-			"first_08": &RITiming{WeekDays: utils.WeekDays{1, 2, 3}, StartTime: "08:00:00"},
-			"second":   &RITiming{WeekDays: utils.WeekDays{4, 5, 6}, StartTime: "00:00:00"},
-			"third":    &RITiming{WeekDays: utils.WeekDays{0}, StartTime: "00:00:00"},
+			"special":  {Years: utils.Years{2015}, Months: utils.Months{5}, MonthDays: utils.MonthDays{1}, StartTime: "00:00:00"},
+			"first_08": {WeekDays: utils.WeekDays{1, 2, 3}, StartTime: "08:00:00"},
+			"second":   {WeekDays: utils.WeekDays{4, 5, 6}, StartTime: "00:00:00"},
+			"third":    {WeekDays: utils.WeekDays{0}, StartTime: "00:00:00"},
 		},
 	}
 	if rpl.isContinous() {
@@ -304,7 +304,7 @@ func TestRatingPlanIsContinousMissing(t *testing.T) {
 func TestRatingPlanSaneTimingsBad(t *testing.T) {
 	rpl := &RatingPlan{
 		Timings: map[string]*RITiming{
-			"one": &RITiming{Years: utils.Years{2015}, WeekDays: utils.WeekDays{time.Monday}, tag: "first"},
+			"one": {Years: utils.Years{2015}, WeekDays: utils.WeekDays{time.Monday}, tag: "first"},
 		},
 	}
 	if crazyTiming := rpl.getFirstUnsaneTiming(); crazyTiming == "" {
@@ -315,8 +315,8 @@ func TestRatingPlanSaneTimingsBad(t *testing.T) {
 func TestRatingPlanSaneTimingsGood(t *testing.T) {
 	rpl := &RatingPlan{
 		Timings: map[string]*RITiming{
-			"one": &RITiming{Years: utils.Years{2015}, tag: "first"},
-			"two": &RITiming{WeekDays: utils.WeekDays{0, 1, 2, 3, 4}, StartTime: "00:00:00", tag: "second"},
+			"one": {Years: utils.Years{2015}, tag: "first"},
+			"two": {WeekDays: utils.WeekDays{0, 1, 2, 3, 4}, StartTime: "00:00:00", tag: "second"},
 		},
 	}
 	if crazyTiming := rpl.getFirstUnsaneTiming(); crazyTiming != "" {
@@ -327,7 +327,7 @@ func TestRatingPlanSaneTimingsGood(t *testing.T) {
 func TestRatingPlanSaneRatingsEqual(t *testing.T) {
 	rpl := &RatingPlan{
 		Ratings: map[string]*RIRate{
-			"one": &RIRate{
+			"one": {
 				tag: "first",
 				Rates: RateGroups{
 					&RGRate{
@@ -350,7 +350,7 @@ func TestRatingPlanSaneRatingsEqual(t *testing.T) {
 func TestRatingPlanSaneRatingsNotMultiple(t *testing.T) {
 	rpl := &RatingPlan{
 		Ratings: map[string]*RIRate{
-			"one": &RIRate{
+			"one": {
 				tag: "first",
 				Rates: RateGroups{
 					&RGRate{
@@ -373,7 +373,7 @@ func TestRatingPlanSaneRatingsNotMultiple(t *testing.T) {
 func TestRatingPlanSaneRatingsGoot(t *testing.T) {
 	rpl := &RatingPlan{
 		Ratings: map[string]*RIRate{
-			"one": &RIRate{
+			"one": {
 				tag: "first",
 				Rates: RateGroups{
 					&RGRate{

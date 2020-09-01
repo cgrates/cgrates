@@ -43,8 +43,8 @@ func (dS *DispatcherService) ServiceManagerV1Ping(args *utils.CGREventWithOpts,
 func (dS *DispatcherService) ServiceManagerV1StartService(args ArgStartServiceWithOpts,
 	reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args.TenantArg.Tenant != utils.EmptyString {
-		tnt = args.TenantArg.Tenant
+	if args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ServiceManagerV1StartService, tnt,
@@ -63,8 +63,8 @@ func (dS *DispatcherService) ServiceManagerV1StartService(args ArgStartServiceWi
 func (dS *DispatcherService) ServiceManagerV1StopService(args ArgStartServiceWithOpts,
 	reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args.TenantArg.Tenant != utils.EmptyString {
-		tnt = args.TenantArg.Tenant
+	if args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ServiceManagerV1StopService, tnt,
@@ -83,8 +83,8 @@ func (dS *DispatcherService) ServiceManagerV1StopService(args ArgStartServiceWit
 func (dS *DispatcherService) ServiceManagerV1ServiceStatus(args ArgStartServiceWithOpts,
 	reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args.TenantArg.Tenant != utils.EmptyString {
-		tnt = args.TenantArg.Tenant
+	if args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ServiceManagerV1ServiceStatus, tnt,

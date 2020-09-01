@@ -39,7 +39,7 @@ func TestConvertExternalToProfile(t *testing.T) {
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 		},
 		Attributes: []*ExternalAttribute{
-			&ExternalAttribute{
+			{
 				Path:  utils.MetaReq + utils.NestingSep + "Account",
 				Value: "1001",
 			},
@@ -108,7 +108,7 @@ func TestConvertExternalToProfileMissing2(t *testing.T) {
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 		},
 		Attributes: []*ExternalAttribute{
-			&ExternalAttribute{
+			{
 				Path: utils.MetaReq + utils.NestingSep + "Account",
 			},
 		},
@@ -128,7 +128,7 @@ func TestNewAttributeFromInline(t *testing.T) {
 		Tenant:   config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:       attrID,
 		Contexts: []string{utils.META_ANY},
-		Attributes: []*Attribute{&Attribute{
+		Attributes: []*Attribute{{
 			Path:  utils.MetaReq + utils.NestingSep + "Field2",
 			Type:  utils.MetaSum,
 			Value: config.NewRSRParsersMustCompile("10;~*req.NumField;20", utils.INFIELD_SEP),
@@ -148,12 +148,12 @@ func TestNewAttributeFromInlineWithMultipleRuns(t *testing.T) {
 		Tenant:   config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:       attrID,
 		Contexts: []string{utils.META_ANY},
-		Attributes: []*Attribute{&Attribute{
+		Attributes: []*Attribute{{
 			Path:  utils.MetaReq + utils.NestingSep + "RequestType",
 			Type:  utils.META_CONSTANT,
 			Value: config.NewRSRParsersMustCompile("*rated", utils.INFIELD_SEP),
 		},
-			&Attribute{
+			{
 				Path:  utils.MetaReq + utils.NestingSep + "Category",
 				Type:  utils.META_CONSTANT,
 				Value: config.NewRSRParsersMustCompile("call", utils.INFIELD_SEP),

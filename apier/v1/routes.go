@@ -39,7 +39,7 @@ func (apierSv1 *APIerSv1) GetRouteProfile(arg *utils.TenantID, reply *engine.Rou
 }
 
 // GetRouteProfileIDs returns list of routeProfile IDs registered for a tenant
-func (apierSv1 *APIerSv1) GetRouteProfileIDs(args *utils.TenantArgWithPaginator, sppPrfIDs *[]string) error {
+func (apierSv1 *APIerSv1) GetRouteProfileIDs(args *utils.PaginatorWithTenant, sppPrfIDs *[]string) error {
 	if missing := utils.MissingStructFields(args, []string{utils.Tenant}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

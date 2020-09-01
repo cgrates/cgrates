@@ -126,7 +126,7 @@ func testCGRLoaderGetData(t *testing.T) {
 		"ATTR_1001_SESSIONAUTH", "ATTR_1002_SESSIONAUTH", "ATTR_1003_SESSIONAUTH",
 		"ATTR_ACC_ALIAS"}
 	var result []string
-	if err := cgrloaderRPC.Call(utils.APIerSv1GetAttributeProfileIDs, &utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{Tenant: "cgrates.org"}}, &result); err != nil {
+	if err := cgrloaderRPC.Call(utils.APIerSv1GetAttributeProfileIDs, &utils.PaginatorWithTenant{Tenant: "cgrates.org"}, &result); err != nil {
 		t.Error(err)
 	} else if len(expected) != len(result) {
 		t.Errorf("Expecting : %+v, received: %+v", expected, result)

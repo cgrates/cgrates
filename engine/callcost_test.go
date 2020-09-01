@@ -167,11 +167,11 @@ func TestCallCostGetDurationZero(t *testing.T) {
 func TestCallCostGetDuration(t *testing.T) {
 	cc := &CallCost{
 		Timespans: []*TimeSpan{
-			&TimeSpan{
+			{
 				TimeStart: time.Date(2013, 9, 10, 13, 40, 0, 0, time.UTC),
 				TimeEnd:   time.Date(2013, 9, 10, 13, 41, 0, 0, time.UTC),
 			},
-			&TimeSpan{
+			{
 				TimeStart: time.Date(2013, 9, 10, 13, 41, 0, 0, time.UTC),
 				TimeEnd:   time.Date(2013, 9, 10, 13, 41, 30, 0, time.UTC),
 			},

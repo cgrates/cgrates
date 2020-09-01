@@ -29,7 +29,7 @@ func NewCoreSv1(cS *engine.CoreService) *CoreSv1 {
 	return &CoreSv1{cS: cS}
 }
 
-// Exports RPC from RLs
+// CoreSv1 exports RPC from RLs
 type CoreSv1 struct {
 	cS *engine.CoreService
 }

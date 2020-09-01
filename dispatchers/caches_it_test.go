@@ -107,9 +107,7 @@ func testDspChcLoadAfterFolder(t *testing.T) {
 		Opts: map[string]interface{}{
 			utils.OptsAPIKey: "chc12345",
 		},
-		TenantArg: utils.TenantArg{
-			Tenant: "cgrates.org",
-		},
+		Tenant: "cgrates.org",
 	}
 	if err := dispEngine.RPC.Call(utils.CacheSv1GetCacheStats, args, &rcvStats); err != nil {
 		t.Error(err)
@@ -122,9 +120,7 @@ func testDspChcLoadAfterFolder(t *testing.T) {
 		Opts: map[string]interface{}{
 			utils.OptsAPIKey: "chc12345",
 		},
-		TenantArg: utils.TenantArg{
-			Tenant: "cgrates.org",
-		},
+		Tenant:    "cgrates.org",
 		ArgsCache: utils.NewAttrReloadCacheWithOpts().ArgsCache,
 	}, &reply); err != nil {
 		t.Error(err)
@@ -250,9 +246,7 @@ func testDspChcPrecacheStatus(t *testing.T) {
 		Opts: map[string]interface{}{
 			utils.OptsAPIKey: "chc12345",
 		},
-		TenantArg: utils.TenantArg{
-			Tenant: "cgrates.org",
-		},
+		Tenant: "cgrates.org",
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, reply) {
@@ -270,9 +264,7 @@ func testDspChcGetItemIDs(t *testing.T) {
 		Opts: map[string]interface{}{
 			utils.OptsAPIKey: "chc12345",
 		},
-		TenantArg: utils.TenantArg{
-			Tenant: "cgrates.org",
-		},
+		Tenant: "cgrates.org",
 	}
 	if err := dispEngine.RPC.Call(utils.CacheSv1GetItemIDs, argsAPI, &rcvKeys); err != nil {
 		t.Fatalf("Got error on APIerSv1.GetCacheStats: %s ", err.Error())
@@ -294,9 +286,7 @@ func testDspChcHasItem(t *testing.T) {
 		Opts: map[string]interface{}{
 			utils.OptsAPIKey: "chc12345",
 		},
-		TenantArg: utils.TenantArg{
-			Tenant: "cgrates.org",
-		},
+		Tenant: "cgrates.org",
 	}
 	if err := dispEngine.RPC.Call(utils.CacheSv1HasItem, argsAPI, &reply); err != nil {
 		t.Error(err)
@@ -316,9 +306,7 @@ func testDspChcGetItemExpiryTime(t *testing.T) {
 		Opts: map[string]interface{}{
 			utils.OptsAPIKey: "chc12345",
 		},
-		TenantArg: utils.TenantArg{
-			Tenant: "cgrates.org",
-		},
+		Tenant: "cgrates.org",
 	}
 	if err := dispEngine.RPC.Call(utils.CacheSv1GetItemExpiryTime, argsAPI, &reply); err != nil {
 		t.Error(err)
@@ -333,9 +321,7 @@ func testDspChcReloadCache(t *testing.T) {
 		Opts: map[string]interface{}{
 			utils.OptsAPIKey: "chc12345",
 		},
-		TenantArg: utils.TenantArg{
-			Tenant: "cgrates.org",
-		},
+		Tenant: "cgrates.org",
 	}, &reply); err != nil {
 		t.Error("Got error on CacheSv1.ReloadCache: ", err.Error())
 	} else if reply != utils.OK {
@@ -353,9 +339,7 @@ func testDspChcRemoveItem(t *testing.T) {
 		Opts: map[string]interface{}{
 			utils.OptsAPIKey: "chc12345",
 		},
-		TenantArg: utils.TenantArg{
-			Tenant: "cgrates.org",
-		},
+		Tenant: "cgrates.org",
 	}
 	if err := dispEngine.RPC.Call(utils.CacheSv1HasItem, argsAPI, &reply); err != nil {
 		t.Error(err)
@@ -381,9 +365,7 @@ func testDspChcClear(t *testing.T) {
 		Opts: map[string]interface{}{
 			utils.OptsAPIKey: "chc12345",
 		},
-		TenantArg: utils.TenantArg{
-			Tenant: "cgrates.org",
-		},
+		Tenant: "cgrates.org",
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -395,9 +377,7 @@ func testDspChcClear(t *testing.T) {
 		Opts: map[string]interface{}{
 			utils.OptsAPIKey: "chc12345",
 		},
-		TenantArg: utils.TenantArg{
-			Tenant: "cgrates.org",
-		},
+		Tenant: "cgrates.org",
 	}, &rcvStats); err != nil {
 		t.Error("Got error on CacheSv1.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(expStats, rcvStats) {

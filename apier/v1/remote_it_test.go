@@ -359,10 +359,10 @@ func testInternalRemoteITGetStatQueueProfile(t *testing.T) {
 		TTL:         -1,
 		MinItems:    0,
 		Metrics: []*engine.MetricWithFilters{
-			&engine.MetricWithFilters{
+			{
 				MetricID: utils.MetaTCC,
 			},
-			&engine.MetricWithFilters{
+			{
 				MetricID: utils.MetaTCD,
 			},
 		},
@@ -383,10 +383,10 @@ func testInternalRemoteITGetStatQueueProfile(t *testing.T) {
 		TTL:         -1,
 		MinItems:    0,
 		Metrics: []*engine.MetricWithFilters{
-			&engine.MetricWithFilters{
+			{
 				MetricID: utils.MetaTCD,
 			},
-			&engine.MetricWithFilters{
+			{
 				MetricID: utils.MetaTCC,
 			},
 		},
@@ -725,18 +725,18 @@ func testInternalRemoteITGetRouteProfile(t *testing.T) {
 				MaxCost:          0.6,
 				MaxCostStrategy:  "*free",
 				Rates: map[string]*engine.Rate{
-					"RT_WEEK": &engine.Rate{
+					"RT_WEEK": {
 						ID:             "RT_WEEK",
 						Weight:         0,
 						ActivationTime: "* * * * 1-5",
 						IntervalRates: []*engine.IntervalRate{
-							&engine.IntervalRate{
+							{
 								IntervalStart: time.Duration(0 * time.Second),
 								Value:         0.12,
 								Unit:          time.Duration(1 * time.Minute),
 								Increment:     time.Duration(1 * time.Minute),
 							},
-							&engine.IntervalRate{
+							{
 								IntervalStart: time.Duration(1 * time.Minute),
 								Value:         0.06,
 								Unit:          time.Duration(1 * time.Minute),
@@ -744,12 +744,12 @@ func testInternalRemoteITGetRouteProfile(t *testing.T) {
 							},
 						},
 					},
-					"RT_WEEKEND": &engine.Rate{
+					"RT_WEEKEND": {
 						ID:             "RT_WEEKEND",
 						Weight:         10,
 						ActivationTime: "* * * * 0,6",
 						IntervalRates: []*engine.IntervalRate{
-							&engine.IntervalRate{
+							{
 								IntervalStart: time.Duration(0 * time.Second),
 								Value:         0.06,
 								Unit:          time.Duration(1 * time.Minute),
@@ -757,12 +757,12 @@ func testInternalRemoteITGetRouteProfile(t *testing.T) {
 							},
 						},
 					},
-					"RT_CHRISTMAS": &engine.Rate{
+					"RT_CHRISTMAS": {
 						ID:             "RT_CHRISTMAS",
 						Weight:         30,
 						ActivationTime: "* * 24 12 *",
 						IntervalRates: []*engine.IntervalRate{
-							&engine.IntervalRate{
+							{
 								IntervalStart: time.Duration(0 * time.Second),
 								Value:         0.06,
 								Unit:          time.Duration(1 * time.Minute),
@@ -1142,10 +1142,10 @@ func testInternalReplicateStats(t *testing.T) {
 			QueueLength: 10,
 			TTL:         time.Duration(10) * time.Second,
 			Metrics: []*engine.MetricWithFilters{
-				&engine.MetricWithFilters{
+				{
 					MetricID: utils.MetaACD,
 				},
-				&engine.MetricWithFilters{
+				{
 					MetricID: utils.MetaTCD,
 				},
 			},

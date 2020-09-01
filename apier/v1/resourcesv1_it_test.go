@@ -716,7 +716,7 @@ func testV1RsGetResourceProfileIDs(t *testing.T) {
 	expected := []string{"ResGroup2", "ResGroup1", "ResGroup3", "RES_GR_TEST"}
 	sort.Strings(expected)
 	var result []string
-	if err := rlsV1Rpc.Call(utils.APIerSv1GetResourceProfileIDs, utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{Tenant: "cgrates.org"}}, &result); err != nil {
+	if err := rlsV1Rpc.Call(utils.APIerSv1GetResourceProfileIDs, utils.PaginatorWithTenant{Tenant: "cgrates.org"}, &result); err != nil {
 		t.Error(err)
 	}
 	sort.Strings(result)

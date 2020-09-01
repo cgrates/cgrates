@@ -746,18 +746,14 @@ func NewTenantID(tntID string) *TenantID {
 	return &TenantID{Tenant: tIDSplt[0], ID: ConcatenatedKey(tIDSplt[1:]...)}
 }
 
-type TenantArg struct {
+type PaginatorWithTenant struct {
 	Tenant string
-}
-
-type TenantArgWithPaginator struct {
-	TenantArg
 	Paginator
 }
 
 type TenantWithOpts struct {
-	*TenantArg
-	Opts map[string]interface{}
+	Tenant string
+	Opts   map[string]interface{}
 }
 
 type TenantID struct {
@@ -898,17 +894,16 @@ func LongExecTimeDetector(logID string, maxDur time.Duration) (endchan chan stru
 }
 
 type StringWithOpts struct {
-	Opts map[string]interface{}
-	TenantArg
-	Arg string
+	Opts   map[string]interface{}
+	Tenant string
+	Arg    string
 }
 
 func CastRPCErr(err error) error {
 	if _, has := ErrMap[err.Error()]; has {
 		return ErrMap[err.Error()]
-	} else {
-		return err
 	}
+	return err
 }
 
 // RandomInteger returns a random integer between min and max values
@@ -918,8 +913,8 @@ func RandomInteger(min, max int) int {
 
 type LoadIDsWithOpts struct {
 	LoadIDs map[string]int64
-	TenantArg
-	Opts map[string]interface{}
+	Tenant  string
+	Opts    map[string]interface{}
 }
 
 // IsURL returns if the path is an URL
@@ -933,8 +928,8 @@ type GetIndexesArg struct {
 	IdxItmType string
 	TntCtx     string
 	IdxKey     string
-	TenantArg
-	Opts map[string]interface{}
+	Tenant     string
+	Opts       map[string]interface{}
 }
 
 // SetIndexesArg the API arguments needed for seting an index
@@ -942,12 +937,12 @@ type SetIndexesArg struct {
 	IdxItmType string
 	TntCtx     string
 	Indexes    map[string]StringSet
-	TenantArg
-	Opts map[string]interface{}
+	Tenant     string
+	Opts       map[string]interface{}
 }
 
 type DurationArgs struct {
 	DurationTime time.Duration
 	Opts         map[string]interface{}
-	*TenantArg
+	Tenant       string
 }

@@ -42,7 +42,7 @@ var (
 			QueueLength: 10,
 			TTL:         time.Duration(10) * time.Second,
 			Metrics: []*MetricWithFilters{
-				&MetricWithFilters{
+				{
 					MetricID: "*sum#Usage",
 				},
 			},
@@ -62,7 +62,7 @@ var (
 			QueueLength: 10,
 			TTL:         time.Duration(10) * time.Second,
 			Metrics: []*MetricWithFilters{
-				&MetricWithFilters{
+				{
 					MetricID: "*sum#Usage",
 				},
 			},
@@ -82,7 +82,7 @@ var (
 			QueueLength: 10,
 			TTL:         time.Duration(10) * time.Second,
 			Metrics: []*MetricWithFilters{
-				&MetricWithFilters{
+				{
 					MetricID: "*sum#Usage",
 				},
 			},
@@ -372,7 +372,7 @@ func TestStatQueuesV1ProcessEvent(t *testing.T) {
 		QueueLength: 10,
 		TTL:         time.Duration(10) * time.Second,
 		Metrics: []*MetricWithFilters{
-			&MetricWithFilters{
+			{
 				MetricID: "*sum#Usage",
 			},
 		},

@@ -941,7 +941,7 @@ func testAPIerSv1GetRatingProfile(t *testing.T) {
 
 	expectedIds := []string{"call:dan", "call:*any"}
 	var result []string
-	if err := rater.Call(utils.APIerSv1GetRatingProfileIDs, &utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{Tenant: "cgrates.org"}}, &result); err != nil {
+	if err := rater.Call(utils.APIerSv1GetRatingProfileIDs, &utils.PaginatorWithTenant{Tenant: "cgrates.org"}, &result); err != nil {
 		t.Error(err)
 	} else if len(expectedIds) != len(result) {
 		t.Errorf("Expecting : %+v, received: %+v", expected, result)

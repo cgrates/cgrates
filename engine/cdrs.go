@@ -973,8 +973,8 @@ func (cdrS *CDRServer) V2StoreSessionCost(args *ArgsV2CDRSStoreSMCost, reply *st
 type ArgRateCDRs struct {
 	Flags []string
 	utils.RPCCDRsFilter
-	*utils.TenantArg
-	Opts map[string]interface{}
+	Tenant string
+	Opts   map[string]interface{}
 }
 
 // V1RateCDRs is used for re-/rate CDRs which are already stored within StorDB

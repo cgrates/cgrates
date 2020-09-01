@@ -281,7 +281,7 @@ func testSchedExecuteAction(t *testing.T) {
 	if err := schedRpc.Call(utils.APIerSv1SetActionPlan, &AttrSetActionPlan{
 		Id: "CustomAP",
 		ActionPlan: []*AttrActionPlan{
-			&AttrActionPlan{
+			{
 				ActionsId: "ACT_TOPUP_RST_10",
 				Time:      utils.MetaHourly,
 				Weight:    20.0},

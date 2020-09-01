@@ -180,8 +180,8 @@ type TPTiming struct {
 // TPTimingWithOpts is used in replicatorV1 for dispatcher
 type TPTimingWithOpts struct {
 	*TPTiming
-	TenantArg
-	Opts map[string]interface{}
+	Tenant string
+	Opts   map[string]interface{}
 }
 
 func NewTiming(ID, years, mounths, mounthdays, weekdays, time string) (rt *TPTiming) {
@@ -1308,19 +1308,19 @@ func AppendToSMCostFilter(smcFilter *SMCostFilter, fieldType, fieldName string,
 
 type RPCCDRsFilterWithOpts struct {
 	*RPCCDRsFilter
-	Opts map[string]interface{}
-	*TenantArg
+	Opts   map[string]interface{}
+	Tenant string
 }
 
 type ArgsGetCacheItemIDsWithOpts struct {
-	Opts map[string]interface{}
-	TenantArg
+	Opts   map[string]interface{}
+	Tenant string
 	ArgsGetCacheItemIDs
 }
 
 type ArgsGetCacheItemWithOpts struct {
-	Opts map[string]interface{}
-	TenantArg
+	Opts   map[string]interface{}
+	Tenant string
 	ArgsGetCacheItem
 }
 
@@ -1366,20 +1366,20 @@ func NewAttrReloadCacheWithOpts() *AttrReloadCacheWithOpts {
 }
 
 type AttrReloadCacheWithOpts struct {
-	Opts map[string]interface{}
-	TenantArg
+	Opts      map[string]interface{}
+	Tenant    string
 	ArgsCache map[string][]string
 }
 
 type AttrCacheIDsWithOpts struct {
-	Opts map[string]interface{}
-	TenantArg
+	Opts     map[string]interface{}
+	Tenant   string
 	CacheIDs []string
 }
 
 type ArgsGetGroupWithOpts struct {
-	Opts map[string]interface{}
-	TenantArg
+	Opts   map[string]interface{}
+	Tenant string
 	ArgsGetGroup
 }
 
@@ -1454,14 +1454,14 @@ type ArgCacheReplicateSet struct {
 	ItemID  string
 	Value   interface{}
 	Opts    map[string]interface{}
-	TenantArg
+	Tenant  string
 }
 
 type ArgCacheReplicateRemove struct {
 	CacheID string
 	ItemID  string
 	Opts    map[string]interface{}
-	TenantArg
+	Tenant  string
 }
 
 type AttrsExecuteActions struct {
@@ -1469,7 +1469,7 @@ type AttrsExecuteActions struct {
 	TimeStart    time.Time
 	TimeEnd      time.Time // replay the action timings between the two dates
 	Opts         map[string]interface{}
-	TenantArg
+	Tenant       string
 }
 
 type AttrsExecuteActionPlans struct {
@@ -1477,7 +1477,6 @@ type AttrsExecuteActionPlans struct {
 	Tenant        string
 	AccountID     string
 	Opts          map[string]interface{}
-	TenantArg
 }
 
 type TPRateProfile struct {

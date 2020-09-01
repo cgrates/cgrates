@@ -1074,14 +1074,14 @@ func (cfg *CGRConfig) Call(serviceMethod string,
 }
 
 // ToDo: move this structure in utils as is used in other packages
-type StringWithOpts struct {
-	Opts map[string]interface{}
-	utils.TenantArg
+type SectionWithOpts struct {
+	Opts    map[string]interface{}
+	Tenant  string
 	Section string
 }
 
 //V1GetConfigSection will retrieve from CGRConfig a section
-func (cfg *CGRConfig) V1GetConfigSection(args *StringWithOpts, reply *map[string]interface{}) (err error) {
+func (cfg *CGRConfig) V1GetConfigSection(args *SectionWithOpts, reply *map[string]interface{}) (err error) {
 	var jsonString string
 	switch args.Section {
 	case GENERAL_JSN:
@@ -1164,8 +1164,8 @@ func (cfg *CGRConfig) V1GetConfigSection(args *StringWithOpts, reply *map[string
 }
 
 type ConfigReloadWithOpts struct {
-	Opts map[string]interface{}
-	utils.TenantArg
+	Opts    map[string]interface{}
+	Tenant  string
 	Path    string
 	Section string
 }
@@ -1418,9 +1418,9 @@ func (cfg *CGRConfig) initChanels() {
 
 // JSONReloadWithOpts the API params for V1ReloadConfigFromJSON
 type JSONReloadWithOpts struct {
-	Opts map[string]interface{}
-	utils.TenantArg
-	JSON map[string]interface{}
+	Opts   map[string]interface{}
+	Tenant string
+	JSON   map[string]interface{}
 }
 
 // V1ReloadConfigFromJSON reloads the sections of configz

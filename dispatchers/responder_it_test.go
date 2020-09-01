@@ -71,9 +71,7 @@ func testDspResponderStatus(t *testing.T) {
 		t.Errorf("Received: %s", reply)
 	}
 	ev := utils.TenantWithOpts{
-		TenantArg: &utils.TenantArg{
-			Tenant: "cgrates.org",
-		},
+		Tenant: "cgrates.org",
 		Opts: map[string]interface{}{
 			utils.OptsAPIKey: "rsp12345",
 		},
@@ -108,9 +106,7 @@ func getNodeWithRoute(route string, t *testing.T) string {
 		},
 	}
 	ev := utils.TenantWithOpts{
-		TenantArg: &utils.TenantArg{
-			Tenant: "cgrates.org",
-		},
+		Tenant: "cgrates.org",
 		Opts: map[string]interface{}{
 			utils.OptsAPIKey:  "rsp12345",
 			utils.OptsRouteID: route,
@@ -145,9 +141,7 @@ func testDspResponderShutdown(t *testing.T) {
 	var reply string
 	var statusReply map[string]interface{}
 	ev := utils.TenantWithOpts{
-		TenantArg: &utils.TenantArg{
-			Tenant: "cgrates.org",
-		},
+		Tenant: "cgrates.org",
 		Opts: map[string]interface{}{
 			utils.OptsAPIKey: "rsp12345",
 		},
@@ -223,9 +217,7 @@ func testDspResponderInternal(t *testing.T) {
 		},
 	}
 	ev := utils.TenantWithOpts{
-		TenantArg: &utils.TenantArg{
-			Tenant: "cgrates.org",
-		},
+		Tenant: "cgrates.org",
 		Opts: map[string]interface{}{
 			utils.OptsAPIKey:  "rsp12345",
 			utils.OptsRouteID: route,

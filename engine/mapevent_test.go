@@ -458,28 +458,28 @@ func TestMapEventAsCDR(t *testing.T) {
 		RunID:     utils.MetaDefault,
 		StartTime: time.Date(2017, 1, 9, 16, 18, 21, 0, time.UTC),
 		Charges: []*ChargingInterval{
-			&ChargingInterval{
+			{
 				RatingID: "c1a5ab9",
 				Increments: []*ChargingIncrement{
-					&ChargingIncrement{
+					{
 						Usage:          time.Duration(0),
 						Cost:           0.1,
 						AccountingID:   "9bdad10",
 						CompressFactor: 1,
 					},
-					&ChargingIncrement{
+					{
 						Usage:          time.Duration(1 * time.Second),
 						Cost:           0,
 						AccountingID:   "3455b83",
 						CompressFactor: 10,
 					},
-					&ChargingIncrement{
+					{
 						Usage:          time.Duration(10 * time.Second),
 						Cost:           0.01,
 						AccountingID:   "a012888",
 						CompressFactor: 2,
 					},
-					&ChargingIncrement{
+					{
 						Usage:          time.Duration(1 * time.Second),
 						Cost:           0.005,
 						AccountingID:   "44d6c02",
@@ -488,10 +488,10 @@ func TestMapEventAsCDR(t *testing.T) {
 				},
 				CompressFactor: 1,
 			},
-			&ChargingInterval{
+			{
 				RatingID: "c1a5ab9",
 				Increments: []*ChargingIncrement{
-					&ChargingIncrement{
+					{
 						Usage:          time.Duration(1 * time.Second),
 						Cost:           0.01,
 						AccountingID:   "a012888",
@@ -500,22 +500,22 @@ func TestMapEventAsCDR(t *testing.T) {
 				},
 				CompressFactor: 4,
 			},
-			&ChargingInterval{
+			{
 				RatingID: "c1a5ab9",
 				Increments: []*ChargingIncrement{
-					&ChargingIncrement{
+					{
 						Usage:          time.Duration(1 * time.Second),
 						Cost:           0,
 						AccountingID:   "3455b83",
 						CompressFactor: 10,
 					},
-					&ChargingIncrement{
+					{
 						Usage:          time.Duration(10 * time.Second),
 						Cost:           0.01,
 						AccountingID:   "a012888",
 						CompressFactor: 2,
 					},
-					&ChargingIncrement{
+					{
 						Usage:          time.Duration(1 * time.Second),
 						Cost:           0.005,
 						AccountingID:   "44d6c02",
@@ -529,16 +529,16 @@ func TestMapEventAsCDR(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "dan",
 			BalanceSummaries: []*BalanceSummary{
-				&BalanceSummary{
+				{
 					Type:     "*monetary",
 					Value:    50,
 					Disabled: false},
-				&BalanceSummary{
+				{
 					ID:       "4b8b53d7-c1a1-4159-b845-4623a00a0165",
 					Type:     "*monetary",
 					Value:    25,
 					Disabled: false},
-				&BalanceSummary{
+				{
 					Type:     "*voice",
 					Value:    200,
 					Disabled: false,

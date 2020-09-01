@@ -920,7 +920,7 @@ func testV1RouteGetRouteProfileIDs(t *testing.T) {
 		"TEST_PROFILE1", "ROUTE_LOAD_DIST", "ROUTE_LCR"}
 	var result []string
 	if err := splSv1Rpc.Call(utils.APIerSv1GetRouteProfileIDs,
-		&utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{"cgrates.org"}}, &result); err != nil {
+		&utils.PaginatorWithTenant{Tenant: "cgrates.org"}, &result); err != nil {
 		t.Error(err)
 	} else if len(expected) != len(result) {
 		t.Errorf("Expecting : %+v, received: %+v", expected, result)
@@ -1043,7 +1043,7 @@ func testV1RouteGetRouteForEvent(t *testing.T) {
 		Sorting:           utils.MetaLC,
 		SortingParameters: []string{},
 		Routes: []*engine.Route{
-			&engine.Route{
+			{
 				ID:              "route_1",
 				FilterIDs:       nil,
 				AccountIDs:      nil,
@@ -1054,7 +1054,7 @@ func testV1RouteGetRouteForEvent(t *testing.T) {
 				Blocker:         false,
 				RouteParameters: "",
 			},
-			&engine.Route{
+			{
 				ID:              "route_2",
 				FilterIDs:       nil,
 				AccountIDs:      nil,

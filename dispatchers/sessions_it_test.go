@@ -762,9 +762,7 @@ func testDspSessionReplicate(t *testing.T) {
 		Opts: map[string]interface{}{
 			utils.OptsAPIKey: "ses12345",
 		},
-		TenantArg: utils.TenantArg{
-			Tenant: "cgrates.org",
-		},
+		Tenant: "cgrates.org",
 		ArgsReplicateSessions: sessions.ArgsReplicateSessions{
 			CGRID:   "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
 			Passive: false,
