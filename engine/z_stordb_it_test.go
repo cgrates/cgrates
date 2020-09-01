@@ -87,7 +87,7 @@ func TestStorDBit(t *testing.T) {
 			cfg.StorDbCfg().Port, cfg.StorDbCfg().Name,
 			cfg.StorDbCfg().User, cfg.StorDbCfg().Password,
 			cfg.GeneralCfg().DBDataEncoding,
-			utils.StorDB, cfg.StorDbCfg().StringIndexedFields, false, 10*time.Second); err != nil {
+			utils.StorDB, cfg.StorDbCfg().StringIndexedFields, 10*time.Second); err != nil {
 			t.Fatal(err)
 		}
 	case utils.MetaPostgres:

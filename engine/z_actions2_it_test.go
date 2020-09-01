@@ -98,7 +98,7 @@ func testActionsInitCdrsStore(t *testing.T) {
 			actsCfg.StorDbCfg().Port, actsCfg.StorDbCfg().Name,
 			actsCfg.StorDbCfg().User, actsCfg.StorDbCfg().Password,
 			actsCfg.GeneralCfg().DBDataEncoding,
-			utils.StorDB, nil, false, 10*time.Second); err != nil {
+			utils.StorDB, nil, 10*time.Second); err != nil {
 			t.Fatal("Could not connect to mongo", err.Error())
 		}
 	case utils.MetaPostgres:

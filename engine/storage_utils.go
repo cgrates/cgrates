@@ -62,7 +62,7 @@ func NewDataDBConn(dbType, host, port, name, user,
 		if ttl, err = utils.IfaceAsDuration(opts[utils.QueryTimeoutCfg]); err != nil {
 			return
 		}
-		d, err = NewMongoStorage(host, port, name, user, pass, marshaler, utils.DataDB, nil, true, ttl)
+		d, err = NewMongoStorage(host, port, name, user, pass, marshaler, utils.DataDB, nil, ttl)
 	case utils.INTERNAL:
 		d = NewInternalDB(nil, nil, true)
 	default:
@@ -81,7 +81,7 @@ func NewStorDBConn(dbType, host, port, name, user, pass, marshaler string,
 		if ttl, err = utils.IfaceAsDuration(opts[utils.QueryTimeoutCfg]); err != nil {
 			return nil, err
 		}
-		db, err = NewMongoStorage(host, port, name, user, pass, marshaler, utils.StorDB, stringIndexedFields, false, ttl)
+		db, err = NewMongoStorage(host, port, name, user, pass, marshaler, utils.StorDB, stringIndexedFields, ttl)
 	case utils.POSTGRES:
 		var maxConn, maxIdleConn, connMaxLifetime int64
 		if maxConn, err = utils.IfaceAsTInt64(opts[utils.MaxOpenConnsCfg]); err != nil {

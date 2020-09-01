@@ -1078,6 +1078,7 @@ func testDspRplActions(t *testing.T) {
 				ActionType: utils.LOG,
 			},
 		},
+		Key:    "KeyActions",
 		Tenant: "cgrates.org",
 		Opts: map[string]interface{}{
 			utils.OptsAPIKey: "repl12345",
@@ -1143,6 +1144,7 @@ func testDspRplActionPlan(t *testing.T) {
 				},
 			},
 		},
+		Key:    "KeyActionPlan",
 		Tenant: "cgrates.org",
 		Opts: map[string]interface{}{
 			utils.OptsAPIKey: "repl12345",
@@ -1197,6 +1199,7 @@ func testDspRplAccountActionPlans(t *testing.T) {
 	setAccountActionPlans := &engine.SetAccountActionPlansArgWithOpts{
 		AplIDs:    []string{"KeyAccountActionPlans"},
 		Overwrite: true,
+		AcntID:    "KeyAccountActionPlans",
 		Tenant:    "cgrates.org",
 		Opts: map[string]interface{}{
 			utils.OptsAPIKey: "repl12345",
@@ -1269,6 +1272,7 @@ func testDspRplRatingPlan(t *testing.T) {
 	// Get RatingPlan
 	var reply engine.RatingPlan
 	argsRatingPlan := &utils.StringWithOpts{
+		Arg:    "id",
 		Tenant: "cgrates.org",
 		Opts: map[string]interface{}{
 			utils.OptsAPIKey: "repl12345",
@@ -1325,6 +1329,7 @@ func testDspRplRatingProfile(t *testing.T) {
 	// Get RatingProfile
 	var reply engine.RatingProfile
 	argsRatingProfile := &utils.StringWithOpts{
+		Arg:    "idRatingProfile",
 		Tenant: "cgrates.org",
 		Opts: map[string]interface{}{
 			utils.OptsAPIKey: "repl12345",
@@ -1379,6 +1384,7 @@ func testDspRplDestination(t *testing.T) {
 	// Get Destination
 	var reply engine.Destination
 	argsDestination := &utils.StringWithOpts{
+		Arg:    "idDestination",
 		Tenant: "cgrates.org",
 		Opts: map[string]interface{}{
 			utils.OptsAPIKey: "repl12345",
@@ -1433,6 +1439,7 @@ func testDspRplLoadIDs(t *testing.T) {
 	// Get LoadIDs
 	var reply map[string]int64
 	argsLoadIDs := &utils.StringWithOpts{
+		Arg:    "idLoadIDs",
 		Tenant: "cgrates.org",
 		Opts: map[string]interface{}{
 			utils.OptsAPIKey: "repl12345",

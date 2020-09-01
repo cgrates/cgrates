@@ -96,7 +96,7 @@ func TestFilterIndexerIT(t *testing.T) {
 			mgoITCfg.StorDbCfg().Port, mgoITCfg.StorDbCfg().Name,
 			mgoITCfg.StorDbCfg().User, mgoITCfg.StorDbCfg().Password,
 			mgoITCfg.GeneralCfg().DBDataEncoding,
-			utils.StorDB, nil, false, 10*time.Second)
+			utils.StorDB, nil, 10*time.Second)
 		if err != nil {
 			t.Fatal(err)
 		}
