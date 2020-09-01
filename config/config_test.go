@@ -2174,6 +2174,7 @@ func TestCgrCdfEventExporter(t *testing.T) {
 				},
 				headerFields:  []*FCTemplate{},
 				trailerFields: []*FCTemplate{},
+				Opts:          make(map[string]interface{}),
 			},
 		},
 	}
@@ -2453,6 +2454,7 @@ func TestCgrCfgEventExporterDefault(t *testing.T) {
 		},
 		headerFields:  []*FCTemplate{},
 		trailerFields: []*FCTemplate{},
+		Opts:          make(map[string]interface{}),
 	}
 	for _, v := range eCfg.Fields {
 		v.ComputePath()

@@ -373,6 +373,7 @@ const CGRATES_CFG_JSON = `
 			"id": "*default",									// identifier of the EventReader profile
 			"type": "*none",									// exporter type 
 			"export_path": "/var/spool/cgrates/ees",			// path where the exported events will be placed
+			"opts": {},											// extra options for exporter
 			"tenant": "",										// tenant used in filterS.Pass
 			"timezone": "",										// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
 			"filters": [],										// limit parsing based on the filters

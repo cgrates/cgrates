@@ -21,7 +21,6 @@ package engine
 import (
 	"bytes"
 	"fmt"
-	"strings"
 	"sync"
 	"time"
 
@@ -33,12 +32,13 @@ import (
 )
 
 // NewS3Poster creates a s3 poster
-func NewS3Poster(dialURL string, attempts int) (Poster, error) {
+func NewS3Poster(dialURL string, attempts int, opts map[string]interface{}) Poster {
 	pstr := &S3Poster{
+		dialURL:  dialURL,
 		attempts: attempts,
 	}
-	pstr.parseURL(dialURL)
-	return pstr, nil
+	pstr.parseOpts(opts)
+	return pstr
 }
 
 // S3Poster is a s3 poster
@@ -58,29 +58,25 @@ type S3Poster struct {
 // Close for Poster interface
 func (pstr *S3Poster) Close() {}
 
-func (pstr *S3Poster) parseURL(dialURL string) {
-	qry := utils.GetUrlRawArguments(dialURL)
-
-	pstr.dialURL = strings.Split(dialURL, "?")[0]
-	pstr.dialURL = strings.TrimSuffix(pstr.dialURL, "/") // used to remove / to point to correct endpoint
+func (pstr *S3Poster) parseOpts(opts map[string]interface{}) {
 	pstr.queueID = DefaultQueueID
-	if val, has := qry[QueueID]; has {
-		pstr.queueID = val
+	if val, has := opts[QueueID]; has {
+		pstr.queueID = utils.IfaceAsString(val)
 	}
-	if val, has := qry[folderPath]; has {
-		pstr.folderPath = val
+	if val, has := opts[folderPath]; has {
+		pstr.folderPath = utils.IfaceAsString(val)
 	}
-	if val, has := qry[utils.AWSRegion]; has {
-		pstr.awsRegion = val
+	if val, has := opts[utils.AWSRegion]; has {
+		pstr.awsRegion = utils.IfaceAsString(val)
 	}
-	if val, has := qry[utils.AWSKey]; has {
-		pstr.awsID = val
+	if val, has := opts[utils.AWSKey]; has {
+		pstr.awsID = utils.IfaceAsString(val)
 	}
-	if val, has := qry[utils.AWSSecret]; has {
-		pstr.awsKey = val
+	if val, has := opts[utils.AWSSecret]; has {
+		pstr.awsKey = utils.IfaceAsString(val)
 	}
-	if val, has := qry[awsToken]; has {
-		pstr.awsToken = val
+	if val, has := opts[awsToken]; has {
+		pstr.awsToken = utils.IfaceAsString(val)
 	}
 }
 

@@ -155,7 +155,7 @@ func (expEv *ExportEvents) ReplayFailedPosts(attempts int) (failedEvents *Export
 			return expEv, err
 		}
 		for _, ev := range expEv.Events {
-			err = pstr.Post(ev, utils.EmptyString)
+			err = pstr.PostValues(ev)
 			if err != nil {
 				failedEvents.AddEvent(ev)
 			}

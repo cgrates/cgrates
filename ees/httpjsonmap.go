@@ -29,64 +29,81 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewHTTPJsonMapEe(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.FilterS,
-	dc utils.MapStorage) (httpJSON *HTTPJsonMapEe, err error) {
-	dc[utils.ExporterID] = cgrCfg.EEsCfg().Exporters[cfgIdx].ID
-	httpJSON = &HTTPJsonMapEe{
+func NewPosterJSONMapEE(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.FilterS,
+	dc utils.MapStorage) (pstrJSON *PosterJSONMapEE, err error) {
+	dc[utils.ExportID] = cgrCfg.EEsCfg().Exporters[cfgIdx].ID
+	pstrJSON = &PosterJSONMapEE{
 		id:      cgrCfg.EEsCfg().Exporters[cfgIdx].ID,
 		cgrCfg:  cgrCfg,
 		cfgIdx:  cfgIdx,
 		filterS: filterS,
 		dc:      dc,
 	}
-	if cgrCfg.EEsCfg().Exporters[cfgIdx].Type == utils.MetaHTTPjsonMap {
-		httpJSON.httpPoster, err = engine.NewHTTPPoster(cgrCfg.GeneralCfg().HttpSkipTlsVerify,
+	switch cgrCfg.EEsCfg().Exporters[cfgIdx].Type {
+	case utils.MetaHTTPjsonMap:
+		pstrJSON.poster, err = engine.NewHTTPPoster(cgrCfg.GeneralCfg().HttpSkipTlsVerify,
 			cgrCfg.GeneralCfg().ReplyTimeout, cgrCfg.EEsCfg().Exporters[cfgIdx].ExportPath,
 			utils.PosterTransportContentTypes[cgrCfg.EEsCfg().Exporters[cfgIdx].Type], cgrCfg.EEsCfg().Exporters[cfgIdx].Attempts)
+	case utils.MetaAMQPjsonMap:
+		pstrJSON.poster = engine.NewAMQPPoster(cgrCfg.EEsCfg().Exporters[cfgIdx].ExportPath,
+			cgrCfg.EEsCfg().Exporters[cfgIdx].Attempts, cgrCfg.EEsCfg().Exporters[cfgIdx].Opts)
+	case utils.MetaAMQPV1jsonMap:
+		pstrJSON.poster = engine.NewAMQPv1Poster(cgrCfg.EEsCfg().Exporters[cfgIdx].ExportPath,
+			cgrCfg.EEsCfg().Exporters[cfgIdx].Attempts, cgrCfg.EEsCfg().Exporters[cfgIdx].Opts)
+	case utils.MetaSQSjsonMap:
+		pstrJSON.poster = engine.NewSQSPoster(cgrCfg.EEsCfg().Exporters[cfgIdx].ExportPath,
+			cgrCfg.EEsCfg().Exporters[cfgIdx].Attempts, cgrCfg.EEsCfg().Exporters[cfgIdx].Opts)
+	case utils.MetaKafkajsonMap:
+		pstrJSON.poster = engine.NewKafkaPoster(cgrCfg.EEsCfg().Exporters[cfgIdx].ExportPath,
+			cgrCfg.EEsCfg().Exporters[cfgIdx].Attempts, cgrCfg.EEsCfg().Exporters[cfgIdx].Opts)
+	case utils.MetaS3jsonMap:
+		pstrJSON.poster = engine.NewS3Poster(cgrCfg.EEsCfg().Exporters[cfgIdx].ExportPath,
+			cgrCfg.EEsCfg().Exporters[cfgIdx].Attempts, cgrCfg.EEsCfg().Exporters[cfgIdx].Opts)
 	}
 	return
 }
 
-// HTTPJsonMapEe implements EventExporter interface for .csv files
-type HTTPJsonMapEe struct {
-	id         string
-	cgrCfg     *config.CGRConfig
-	cfgIdx     int // index of config instance within ERsCfg.Readers
-	filterS    *engine.FilterS
-	httpPoster *engine.HTTPPoster
-	dc         utils.MapStorage
+// PosterJSONMapEE implements EventExporter interface for .csv files
+type PosterJSONMapEE struct {
+	id      string
+	cgrCfg  *config.CGRConfig
+	cfgIdx  int // index of config instance within ERsCfg.Readers
+	filterS *engine.FilterS
+	poster  engine.Poster
+	dc      utils.MapStorage
 	sync.RWMutex
 }
 
 // ID returns the identificator of this exporter
-func (httpJson *HTTPJsonMapEe) ID() string {
-	return httpJson.id
+func (pstrEE *PosterJSONMapEE) ID() string {
+	return pstrEE.id
 }
 
 // OnEvicted implements EventExporter, doing the cleanup before exit
-func (httpJson *HTTPJsonMapEe) OnEvicted(string, interface{}) {
+func (pstrEE *PosterJSONMapEE) OnEvicted(string, interface{}) {
+	pstrEE.poster.Close()
 	return
 }
 
 // ExportEvent implements EventExporter
-func (httpJson *HTTPJsonMapEe) ExportEvent(cgrEv *utils.CGREvent) (err error) {
-	httpJson.Lock()
+func (pstrEE *PosterJSONMapEE) ExportEvent(cgrEv *utils.CGREvent) (err error) {
+	pstrEE.Lock()
 	defer func() {
 		if err != nil {
-			httpJson.dc[utils.NegativeExports].(utils.StringSet).Add(cgrEv.ID)
+			pstrEE.dc[utils.NegativeExports].(utils.StringSet).Add(cgrEv.ID)
 		} else {
-			httpJson.dc[utils.PositiveExports].(utils.StringSet).Add(cgrEv.ID)
+			pstrEE.dc[utils.PositiveExports].(utils.StringSet).Add(cgrEv.ID)
 		}
-		httpJson.Unlock()
+		pstrEE.Unlock()
 	}()
 
-	httpJson.dc[utils.NumberOfEvents] = httpJson.dc[utils.NumberOfEvents].(int64) + 1
+	pstrEE.dc[utils.NumberOfEvents] = pstrEE.dc[utils.NumberOfEvents].(int64) + 1
 
 	valMp := make(map[string]string)
-	eeReq := NewEventExporterRequest(utils.MapStorage(cgrEv.Event), httpJson.dc,
-		cgrEv.Tenant, httpJson.cgrCfg.GeneralCfg().DefaultTimezone, httpJson.filterS)
+	eeReq := NewEventExporterRequest(utils.MapStorage(cgrEv.Event), pstrEE.dc,
+		cgrEv.Tenant, pstrEE.cgrCfg.GeneralCfg().DefaultTimezone, pstrEE.filterS)
 
-	if err = eeReq.SetFields(httpJson.cgrCfg.EEsCfg().Exporters[httpJson.cfgIdx].ContentFields()); err != nil {
+	if err = eeReq.SetFields(pstrEE.cgrCfg.EEsCfg().Exporters[pstrEE.cfgIdx].ContentFields()); err != nil {
 		return
 	}
 	for el := eeReq.cnt.GetFirstElement(); el != nil; el = el.Next() {
@@ -104,44 +121,21 @@ func (httpJson *HTTPJsonMapEe) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 		}
 		valMp[strings.Join(itm.Path, utils.NestingSep)] = utils.IfaceAsString(itm.Data)
 	}
-	updateEEMetrics(httpJson.dc, cgrEv.Event, httpJson.cgrCfg.GeneralCfg().DefaultTimezone)
+	updateEEMetrics(pstrEE.dc, cgrEv.Event, pstrEE.cgrCfg.GeneralCfg().DefaultTimezone)
 	cgrID := utils.FirstNonEmpty(engine.MapEvent(cgrEv.Event).GetStringIgnoreErrors(utils.CGRID), utils.GenUUID())
 	runID := utils.FirstNonEmpty(engine.MapEvent(cgrEv.Event).GetStringIgnoreErrors(utils.RunID), utils.MetaDefault)
 	var body []byte
 	if body, err = json.Marshal(valMp); err != nil {
 		return
 	}
-	err = httpJson.post(body, utils.ConcatenatedKey(cgrID, runID))
-	return
-}
-
-func (httpJson *HTTPJsonMapEe) post(body []byte, key string) (err error) {
-	switch httpJson.cgrCfg.EEsCfg().Exporters[httpJson.cfgIdx].Type {
-	case utils.MetaHTTPjsonMap:
-		err = httpJson.httpPoster.Post(body, utils.EmptyString)
-	case utils.MetaAMQPjsonMap:
-		err = engine.PostersCache.PostAMQP(httpJson.cgrCfg.EEsCfg().Exporters[httpJson.cfgIdx].ExportPath,
-			httpJson.cgrCfg.EEsCfg().Exporters[httpJson.cfgIdx].Attempts, body)
-	case utils.MetaAMQPV1jsonMap:
-		err = engine.PostersCache.PostAMQPv1(httpJson.cgrCfg.EEsCfg().Exporters[httpJson.cfgIdx].ExportPath,
-			httpJson.cgrCfg.EEsCfg().Exporters[httpJson.cfgIdx].Attempts, body)
-	case utils.MetaSQSjsonMap:
-		err = engine.PostersCache.PostSQS(httpJson.cgrCfg.EEsCfg().Exporters[httpJson.cfgIdx].ExportPath,
-			httpJson.cgrCfg.EEsCfg().Exporters[httpJson.cfgIdx].Attempts, body)
-	case utils.MetaKafkajsonMap:
-		err = engine.PostersCache.PostKafka(httpJson.cgrCfg.EEsCfg().Exporters[httpJson.cfgIdx].ExportPath,
-			httpJson.cgrCfg.EEsCfg().Exporters[httpJson.cfgIdx].Attempts, body, key)
-	case utils.MetaS3jsonMap:
-		err = engine.PostersCache.PostS3(httpJson.cgrCfg.EEsCfg().Exporters[httpJson.cfgIdx].ExportPath,
-			httpJson.cgrCfg.EEsCfg().Exporters[httpJson.cfgIdx].Attempts, body, key)
-	}
-	if err != nil && httpJson.cgrCfg.GeneralCfg().FailedPostsDir != utils.META_NONE {
-		engine.AddFailedPost(httpJson.cgrCfg.EEsCfg().Exporters[httpJson.cfgIdx].ExportPath,
-			httpJson.cgrCfg.EEsCfg().Exporters[httpJson.cfgIdx].Type, utils.EventExporterS, body)
+	if err = pstrEE.poster.Post(body, utils.ConcatenatedKey(cgrID, runID)); err != nil &&
+		pstrEE.cgrCfg.GeneralCfg().FailedPostsDir != utils.META_NONE {
+		engine.AddFailedPost(pstrEE.cgrCfg.EEsCfg().Exporters[pstrEE.cfgIdx].ExportPath,
+			pstrEE.cgrCfg.EEsCfg().Exporters[pstrEE.cfgIdx].Type, utils.EventExporterS, body)
 	}
 	return
 }
 
-func (httpJson *HTTPJsonMapEe) GetMetrics() utils.MapStorage {
-	return httpJson.dc.Clone()
+func (pstrEE *PosterJSONMapEE) GetMetrics() utils.MapStorage {
+	return pstrEE.dc.Clone()
 }

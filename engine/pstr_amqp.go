@@ -20,8 +20,6 @@ package engine
 
 import (
 	"fmt"
-	"net/url"
-	"strings"
 	"sync"
 	"time"
 
@@ -34,14 +32,13 @@ var AMQPPosibleQuery = []string{"cacertfile", "certfile", "keyfile", "verify", "
 
 // NewAMQPPoster creates a new amqp poster
 // "amqp://guest:guest@localhost:5672/?queueID=cgrates_cdrs"
-func NewAMQPPoster(dialURL string, attempts int) (*AMQPPoster, error) {
+func NewAMQPPoster(dialURL string, attempts int, opts map[string]interface{}) *AMQPPoster {
 	amqp := &AMQPPoster{
 		attempts: attempts,
+		dialURL:  dialURL,
 	}
-	if err := amqp.parseURL(dialURL); err != nil {
-		return nil, err
-	}
-	return amqp, nil
+	amqp.parseOpts(opts)
+	return amqp
 }
 
 // AMQPPoster used to post cdrs to amqp
@@ -56,35 +53,23 @@ type AMQPPoster struct {
 	conn         *amqp.Connection
 }
 
-func (pstr *AMQPPoster) parseURL(dialURL string) error {
-	u, err := url.Parse(dialURL)
-	if err != nil {
-		return err
-	}
-	qry := u.Query()
-	q := url.Values{}
-	for _, key := range AMQPPosibleQuery {
-		if vals, has := qry[key]; has && len(vals) != 0 {
-			q.Add(key, vals[0])
-		}
-	}
-	pstr.dialURL = strings.Split(dialURL, "?")[0] + "?" + q.Encode()
+func (pstr *AMQPPoster) parseOpts(dialURL map[string]interface{}) {
 	pstr.queueID = DefaultQueueID
 	pstr.routingKey = DefaultQueueID
-	if vals, has := qry[QueueID]; has && len(vals) != 0 {
-		pstr.queueID = vals[0]
+	if vals, has := dialURL[QueueID]; has {
+		pstr.queueID = utils.IfaceAsString(vals)
 	}
-	if vals, has := qry[RoutingKey]; has && len(vals) != 0 {
-		pstr.routingKey = vals[0]
+	if vals, has := dialURL[RoutingKey]; has {
+		pstr.routingKey = utils.IfaceAsString(vals)
 	}
-	if vals, has := qry[Exchange]; has && len(vals) != 0 {
-		pstr.exchange = vals[0]
+	if vals, has := dialURL[Exchange]; has {
+		pstr.exchange = utils.IfaceAsString(vals)
 		pstr.exchangeType = DefaultExchangeType
 	}
-	if vals, has := qry[ExchangeType]; has && len(vals) != 0 {
-		pstr.exchangeType = vals[0]
+	if vals, has := dialURL[ExchangeType]; has {
+		pstr.exchangeType = utils.IfaceAsString(vals)
 	}
-	return nil
+	return
 }
 
 // Post is the method being called when we need to post anything in the queue

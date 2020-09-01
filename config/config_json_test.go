@@ -1848,6 +1848,7 @@ func TestDfEventExporterCfg(t *testing.T) {
 				Synchronous:       utils.BoolPointer(false),
 				Attempts:          utils.IntPointer(1),
 				Fields:            &eContentFlds,
+				Opts:              make(map[string]interface{}),
 			},
 		},
 	}

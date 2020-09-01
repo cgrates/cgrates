@@ -74,7 +74,6 @@ func (httpPost *HTTPPost) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 	}()
 	httpPost.dc[utils.NumberOfEvents] = httpPost.dc[utils.NumberOfEvents].(int64) + 1
 
-	var body interface{}
 	urlVals := url.Values{}
 	req := utils.MapStorage{}
 	for k, v := range cgrEv.Event {
@@ -101,11 +100,10 @@ func (httpPost *HTTPPost) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 		urlVals.Set(strings.Join(itm.Path, utils.NestingSep), utils.IfaceAsString(itm.Data))
 	}
 	updateEEMetrics(httpPost.dc, cgrEv.Event, httpPost.cgrCfg.GeneralCfg().DefaultTimezone)
-	body = urlVals
-	if err = httpPost.httpPoster.Post(body, utils.EmptyString); err != nil &&
+	if err = httpPost.httpPoster.PostValues(urlVals); err != nil &&
 		httpPost.cgrCfg.GeneralCfg().FailedPostsDir != utils.META_NONE {
 		engine.AddFailedPost(httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].ExportPath,
-			httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].Type, utils.EventExporterS, body)
+			httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].Type, utils.EventExporterS, urlVals)
 	}
 	return
 }

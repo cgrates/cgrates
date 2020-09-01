@@ -20,7 +20,6 @@ package engine
 
 import (
 	"fmt"
-	"strings"
 	"sync"
 	"time"
 
@@ -33,12 +32,12 @@ import (
 )
 
 // NewSQSPoster creates a poster for sqs
-func NewSQSPoster(dialURL string, attempts int) (Poster, error) {
+func NewSQSPoster(dialURL string, attempts int, opts map[string]interface{}) Poster {
 	pstr := &SQSPoster{
 		attempts: attempts,
 	}
-	pstr.parseURL(dialURL)
-	return pstr, nil
+	pstr.parseOpts(opts)
+	return pstr
 }
 
 // SQSPoster is a poster for sqs
@@ -59,26 +58,22 @@ type SQSPoster struct {
 // Close for Poster interface
 func (pstr *SQSPoster) Close() {}
 
-func (pstr *SQSPoster) parseURL(dialURL string) {
-	qry := utils.GetUrlRawArguments(dialURL)
-
-	pstr.dialURL = strings.Split(dialURL, "?")[0]
-	pstr.dialURL = strings.TrimSuffix(pstr.dialURL, "/") // used to remove / to point to correct endpoint
+func (pstr *SQSPoster) parseOpts(opts map[string]interface{}) {
 	pstr.queueID = DefaultQueueID
-	if val, has := qry[QueueID]; has {
-		pstr.queueID = val
+	if val, has := opts[QueueID]; has {
+		pstr.queueID = utils.IfaceAsString(val)
 	}
-	if val, has := qry[utils.AWSRegion]; has {
-		pstr.awsRegion = val
+	if val, has := opts[utils.AWSRegion]; has {
+		pstr.awsRegion = utils.IfaceAsString(val)
 	}
-	if val, has := qry[utils.AWSKey]; has {
-		pstr.awsID = val
+	if val, has := opts[utils.AWSKey]; has {
+		pstr.awsID = utils.IfaceAsString(val)
 	}
-	if val, has := qry[utils.AWSSecret]; has {
-		pstr.awsKey = val
+	if val, has := opts[utils.AWSSecret]; has {
+		pstr.awsKey = utils.IfaceAsString(val)
 	}
-	if val, has := qry[awsToken]; has {
-		pstr.awsToken = val
+	if val, has := opts[awsToken]; has {
+		pstr.awsToken = utils.IfaceAsString(val)
 	}
 	pstr.getQueueURL()
 }
