@@ -131,14 +131,14 @@ type AttrCDRSStoreSMCost struct {
 	Cost           *SMCost
 	CheckDuplicate bool
 	Opts           map[string]interface{}
-	*utils.TenantArg
+	Tenant         string
 }
 
 type ArgsV2CDRSStoreSMCost struct {
 	Cost           *V2SMCost
 	CheckDuplicate bool
 	Opts           map[string]interface{}
-	*utils.TenantArg
+	Tenant         string
 }
 
 type V2SMCost struct {

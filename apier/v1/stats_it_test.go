@@ -150,7 +150,7 @@ func testV1STSGetStats(t *testing.T) {
 	var reply []string
 	expectedIDs := []string{"Stats1"}
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueIDs,
-		&utils.TenantWithOpts{TenantArg: &utils.TenantArg{"cgrates.org"}}, &reply); err != nil {
+		&utils.TenantWithOpts{Tenant: "cgrates.org"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedIDs, reply) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedIDs, reply)
@@ -420,7 +420,7 @@ func testV1STSSetStatQueueProfile(t *testing.T) {
 func testV1STSGetStatQueueProfileIDs(t *testing.T) {
 	expected := []string{"Stats1", "TEST_PROFILE1"}
 	var result []string
-	if err := stsV1Rpc.Call(utils.APIerSv1GetStatQueueProfileIDs, &utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{Tenant: "cgrates.org"}}, &result); err != nil {
+	if err := stsV1Rpc.Call(utils.APIerSv1GetStatQueueProfileIDs, &utils.PaginatorWithTenant{Tenant: "cgrates.org"}, &result); err != nil {
 		t.Error(err)
 	} else if len(expected) != len(result) {
 		t.Errorf("Expecting : %+v, received: %+v", expected, result)
@@ -497,15 +497,15 @@ func testV1STSProcessMetricsWithFilter(t *testing.T) {
 			QueueLength: 100,
 			TTL:         time.Duration(1) * time.Second,
 			Metrics: []*engine.MetricWithFilters{
-				&engine.MetricWithFilters{
+				{
 					MetricID:  utils.MetaACD,
 					FilterIDs: []string{"*gt:~*req.Usage:10s"},
 				},
-				&engine.MetricWithFilters{
+				{
 					MetricID:  utils.MetaTCD,
 					FilterIDs: []string{"*gt:~*req.Usage:5s"},
 				},
-				&engine.MetricWithFilters{
+				{
 					MetricID:  utils.ConcatenatedKey(utils.MetaSum, utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+"CustomValue"),
 					FilterIDs: []string{"*exists:~*req.CustomValue:", "*gte:~*req.CustomValue:10.0"},
 				},
@@ -626,10 +626,10 @@ func testV1STSProcessStaticMetrics(t *testing.T) {
 			QueueLength: 100,
 			TTL:         time.Duration(1) * time.Second,
 			Metrics: []*engine.MetricWithFilters{
-				&engine.MetricWithFilters{
+				{
 					MetricID: utils.ConcatenatedKey(utils.MetaSum, "1"),
 				},
-				&engine.MetricWithFilters{
+				{
 					MetricID: utils.ConcatenatedKey(utils.MetaAverage, "2"),
 				},
 			},

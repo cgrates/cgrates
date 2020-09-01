@@ -124,8 +124,8 @@ func TestBalanceFilterClone(t *testing.T) {
 			"TimingIDs_false": false,
 		},
 		Timings: []*RITiming{
-			&RITiming{Years: utils.Years{2019}},
-			&RITiming{Months: utils.Months{4}},
+			{Years: utils.Years{2019}},
+			{Months: utils.Months{4}},
 		},
 		Disabled: utils.BoolPointer(true),
 		Factor:   &ValueFactor{AccountActionsCSVContent: 0.7},
@@ -158,8 +158,8 @@ func TestBalanceFilterClone(t *testing.T) {
 			"TimingIDs_false": false,
 		},
 		Timings: []*RITiming{
-			&RITiming{Years: utils.Years{2019}},
-			&RITiming{Months: utils.Months{4}},
+			{Years: utils.Years{2019}},
+			{Months: utils.Months{4}},
 		},
 		Disabled: utils.BoolPointer(true),
 		Factor:   &ValueFactor{AccountActionsCSVContent: 0.7},

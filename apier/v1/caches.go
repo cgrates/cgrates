@@ -30,7 +30,7 @@ func NewCacheSv1(cacheS *engine.CacheS) *CacheSv1 {
 	return &CacheSv1{cacheS: cacheS}
 }
 
-// Exports RPC from CacheS
+// CacheSv1 exports RPC from CacheS
 type CacheSv1 struct {
 	cacheS *engine.CacheS
 }

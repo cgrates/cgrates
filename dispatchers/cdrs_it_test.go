@@ -158,9 +158,7 @@ func testDspCDRsCountCDR(t *testing.T) {
 			Accounts: []string{"1001"},
 			RunIDs:   []string{utils.MetaDefault},
 		},
-		TenantArg: &utils.TenantArg{
-			Tenant: "cgrates.org",
-		},
+		Tenant: "cgrates.org",
 		Opts: map[string]interface{}{
 			utils.OptsAPIKey: "cdrs12345",
 		},
@@ -180,9 +178,7 @@ func testDspCDRsGetCDR(t *testing.T) {
 			Accounts: []string{"1001"},
 			RunIDs:   []string{utils.MetaDefault},
 		},
-		TenantArg: &utils.TenantArg{
-			Tenant: "cgrates.org",
-		},
+		Tenant: "cgrates.org",
 		Opts: map[string]interface{}{
 			utils.OptsAPIKey: "cdrs12345",
 		},
@@ -253,9 +249,7 @@ func testDspCDRsGetCDR2(t *testing.T) {
 			RunIDs:    []string{utils.MetaDefault},
 			OriginIDs: []string{"testDspCDRsProcessCDR"},
 		},
-		TenantArg: &utils.TenantArg{
-			Tenant: "cgrates.org",
-		},
+		Tenant: "cgrates.org",
 		Opts: map[string]interface{}{
 			utils.OptsAPIKey: "cdrs12345",
 		},
@@ -309,9 +303,7 @@ func testDspCDRsGetCDR3(t *testing.T) {
 			RunIDs:    []string{utils.MetaDefault},
 			OriginIDs: []string{"testDspCDRsProcessExternalCDR"},
 		},
-		TenantArg: &utils.TenantArg{
-			Tenant: "cgrates.org",
-		},
+		Tenant: "cgrates.org",
 		Opts: map[string]interface{}{
 			utils.OptsAPIKey: "cdrs12345",
 		},
@@ -457,9 +449,7 @@ func testDspCDRsCountCDRNoAuth(t *testing.T) {
 			Accounts: []string{"1001"},
 			RunIDs:   []string{utils.MetaDefault},
 		},
-		TenantArg: &utils.TenantArg{
-			Tenant: "cgrates.org",
-		},
+		Tenant: "cgrates.org",
 	}
 
 	if err := dispEngine.RPC.Call(utils.CDRsV1GetCDRsCount, args, &reply); err != nil {
@@ -476,9 +466,7 @@ func testDspCDRsGetCDRNoAuth(t *testing.T) {
 			Accounts: []string{"1001"},
 			RunIDs:   []string{utils.MetaDefault},
 		},
-		TenantArg: &utils.TenantArg{
-			Tenant: "cgrates.org",
-		},
+		Tenant: "cgrates.org",
 	}
 
 	if err := dispEngine.RPC.Call(utils.CDRsV1GetCDRs, &args, &reply); err != nil {
@@ -540,9 +528,7 @@ func testDspCDRsGetCDR2NoAuth(t *testing.T) {
 			RunIDs:    []string{utils.MetaDefault},
 			OriginIDs: []string{"testDspCDRsProcessCDR"},
 		},
-		TenantArg: &utils.TenantArg{
-			Tenant: "cgrates.org",
-		},
+		Tenant: "cgrates.org",
 	}
 
 	if err := dispEngine.RPC.Call(utils.CDRsV1GetCDRs, &args, &reply); err != nil {
@@ -590,9 +576,7 @@ func testDspCDRsGetCDR3NoAuth(t *testing.T) {
 			RunIDs:    []string{utils.MetaDefault},
 			OriginIDs: []string{"testDspCDRsProcessExternalCDR"},
 		},
-		TenantArg: &utils.TenantArg{
-			Tenant: "cgrates.org",
-		},
+		Tenant: "cgrates.org",
 	}
 
 	if err := dispEngine.RPC.Call(utils.CDRsV1GetCDRs, &args, &reply); err != nil {

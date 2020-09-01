@@ -47,8 +47,8 @@ type SharedGroup struct {
 // SharedGroupWithOpts is used in replicatorV1 for dispatcher
 type SharedGroupWithOpts struct {
 	*SharedGroup
-	utils.TenantArg
-	Opts map[string]interface{}
+	Tenant string
+	Opts   map[string]interface{}
 }
 
 type SharingParameters struct {

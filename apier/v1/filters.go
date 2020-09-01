@@ -66,7 +66,7 @@ func (apierSv1 *APIerSv1) GetFilter(arg *utils.TenantID, reply *engine.Filter) e
 }
 
 // GetFilterIDs returns list of Filter IDs registered for a tenant
-func (apierSv1 *APIerSv1) GetFilterIDs(args *utils.TenantArgWithPaginator, fltrIDs *[]string) error {
+func (apierSv1 *APIerSv1) GetFilterIDs(args *utils.PaginatorWithTenant, fltrIDs *[]string) error {
 	if missing := utils.MissingStructFields(args, []string{utils.Tenant}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

@@ -298,7 +298,7 @@ func testAPIerGetRatingPlanCost3(t *testing.T) {
 func testAPIerGetActionPlanIDs(t *testing.T) {
 	var reply []string
 	if err := apierRPC.Call(utils.APIerSv1GetActionPlanIDs,
-		&utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{Tenant: "cgrates.org"}},
+		&utils.PaginatorWithTenant{Tenant: "cgrates.org"},
 		&reply); err != nil {
 		t.Error(err)
 	} else if len(reply) != 1 {
@@ -312,7 +312,7 @@ func testAPIerGetRatingPlanIDs(t *testing.T) {
 	var reply []string
 	expected := []string{"RP_1002_LOW", "RP_1003", "RP_1001", "RP_MMS", "RP_SMS", "RP_1002"}
 	if err := apierRPC.Call(utils.APIerSv1GetRatingPlanIDs,
-		&utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{Tenant: "cgrates.org"}},
+		&utils.PaginatorWithTenant{Tenant: "cgrates.org"},
 		&reply); err != nil {
 		t.Error(err)
 	}
@@ -329,7 +329,7 @@ func testAPIerSetActionPlanDfltTime(t *testing.T) {
 	hourlyAP := &AttrSetActionPlan{
 		Id: "AP_HOURLY",
 		ActionPlan: []*AttrActionPlan{
-			&AttrActionPlan{
+			{
 				ActionsId: "ACT_TOPUP_RST_10",
 				Time:      utils.MetaHourly,
 				Weight:    20.0,
@@ -345,7 +345,7 @@ func testAPIerSetActionPlanDfltTime(t *testing.T) {
 	dailyAP := &AttrSetActionPlan{
 		Id: "AP_DAILY",
 		ActionPlan: []*AttrActionPlan{
-			&AttrActionPlan{
+			{
 				ActionsId: "ACT_TOPUP_RST_10",
 				Time:      utils.MetaDaily,
 				Weight:    20.0,
@@ -361,7 +361,7 @@ func testAPIerSetActionPlanDfltTime(t *testing.T) {
 	weeklyAP := &AttrSetActionPlan{
 		Id: "AP_WEEKLY",
 		ActionPlan: []*AttrActionPlan{
-			&AttrActionPlan{
+			{
 				ActionsId: "ACT_TOPUP_RST_10",
 				Time:      utils.MetaWeekly,
 				Weight:    20.0,
@@ -377,7 +377,7 @@ func testAPIerSetActionPlanDfltTime(t *testing.T) {
 	monthlyAP := &AttrSetActionPlan{
 		Id: "AP_MONTHLY",
 		ActionPlan: []*AttrActionPlan{
-			&AttrActionPlan{
+			{
 				ActionsId: "ACT_TOPUP_RST_10",
 				Time:      utils.MetaMonthly,
 				Weight:    20.0,

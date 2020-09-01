@@ -40,11 +40,11 @@ func TestSharedGroupClone(t *testing.T) {
 	sharedGroup = &SharedGroup{
 		Id: "testID",
 		AccountParameters: map[string]*SharingParameters{
-			"string1": &SharingParameters{
+			"string1": {
 				Strategy:      "strategyTEST1",
 				RatingSubject: "RatingSubjectTEST1",
 			},
-			"string2": &SharingParameters{
+			"string2": {
 				Strategy:      "strategyTEST2",
 				RatingSubject: "RatingSubjectTEST2",
 			},
@@ -57,11 +57,11 @@ func TestSharedGroupClone(t *testing.T) {
 	eOut = &SharedGroup{
 		Id: "testID",
 		AccountParameters: map[string]*SharingParameters{
-			"string1": &SharingParameters{
+			"string1": {
 				Strategy:      "strategyTEST1",
 				RatingSubject: "RatingSubjectTEST1",
 			},
-			"string2": &SharingParameters{
+			"string2": {
 				Strategy:      "strategyTEST2",
 				RatingSubject: "RatingSubjectTEST2",
 			},
@@ -114,7 +114,7 @@ func TestSharedSetGet(t *testing.T) {
 	sg := &SharedGroup{
 		Id: id,
 		AccountParameters: map[string]*SharingParameters{
-			"test": &SharingParameters{Strategy: STRATEGY_HIGHEST},
+			"test": {Strategy: STRATEGY_HIGHEST},
 		},
 		MemberIds: utils.NewStringMap("1", "2", "3"),
 	}
@@ -140,7 +140,7 @@ func TestSharedPopBalanceByStrategyLow(t *testing.T) {
 		&Balance{Value: 3.0},
 	}
 	sg := &SharedGroup{AccountParameters: map[string]*SharingParameters{
-		"test": &SharingParameters{Strategy: STRATEGY_LOWEST}},
+		"test": {Strategy: STRATEGY_LOWEST}},
 	}
 	sbc := sg.SortBalancesByStrategy(bc[1], bc)
 	if len(sbc) != 3 ||
@@ -157,7 +157,7 @@ func TestSharedPopBalanceByStrategyHigh(t *testing.T) {
 		&Balance{Value: 3.0},
 	}
 	sg := &SharedGroup{AccountParameters: map[string]*SharingParameters{
-		"test": &SharingParameters{Strategy: STRATEGY_HIGHEST}},
+		"test": {Strategy: STRATEGY_HIGHEST}},
 	}
 	sbc := sg.SortBalancesByStrategy(bc[0], bc)
 	if len(sbc) != 3 ||
@@ -174,7 +174,7 @@ func TestSharedPopBalanceByStrategyMineHigh(t *testing.T) {
 		&Balance{Value: 3.0},
 	}
 	sg := &SharedGroup{AccountParameters: map[string]*SharingParameters{
-		"test": &SharingParameters{Strategy: STRATEGY_MINE_HIGHEST}},
+		"test": {Strategy: STRATEGY_MINE_HIGHEST}},
 	}
 	sbc := sg.SortBalancesByStrategy(bc[0], bc)
 	if len(sbc) != 3 ||

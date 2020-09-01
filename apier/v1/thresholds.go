@@ -74,7 +74,7 @@ func (apierSv1 *APIerSv1) GetThresholdProfile(arg *utils.TenantID, reply *engine
 }
 
 // GetThresholdProfileIDs returns list of thresholdProfile IDs registered for a tenant
-func (apierSv1 *APIerSv1) GetThresholdProfileIDs(args *utils.TenantArgWithPaginator, thPrfIDs *[]string) error {
+func (apierSv1 *APIerSv1) GetThresholdProfileIDs(args *utils.PaginatorWithTenant, thPrfIDs *[]string) error {
 	if missing := utils.MissingStructFields(args, []string{utils.Tenant}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -96,7 +96,7 @@ func (apierSv1 *APIerSv1) GetThresholdProfileIDs(args *utils.TenantArgWithPagina
 
 // GetThresholdProfileIDsCount sets in reply var the total number of ThresholdProfileIDs registered for the received tenant
 // returns ErrNotFound in case of 0 ThresholdProfileIDs
-func (apierSv1 *APIerSv1) GetThresholdProfileIDsCount(args *utils.TenantArg, reply *int) (err error) {
+func (apierSv1 *APIerSv1) GetThresholdProfileIDsCount(args *utils.TenantWithOpts, reply *int) (err error) {
 	if missing := utils.MissingStructFields(&args, []string{utils.Tenant}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

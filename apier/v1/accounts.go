@@ -137,7 +137,7 @@ func (apierSv1 *APIerSv1) RemoveActionTiming(attrs *AttrRemoveActionTiming, repl
 		}
 		if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
 			utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithOpts{
-				ArgsCache: map[string][]string{utils.ActionPlanIDs: []string{attrs.ActionPlanId}},
+				ArgsCache: map[string][]string{utils.ActionPlanIDs: {attrs.ActionPlanId}},
 			}, reply); err != nil {
 			return 0, err
 		}
@@ -171,7 +171,7 @@ func (apierSv1 *APIerSv1) RemoveActionTiming(attrs *AttrRemoveActionTiming, repl
 	return nil
 }
 
-// Ads a new account into dataDb. If already defined, returns success.
+// SetAccount adds a new account into dataDb. If already defined, returns success.
 func (apierSv1 *APIerSv1) SetAccount(attr *utils.AttrSetAccount, reply *string) (err error) {
 	if missing := utils.MissingStructFields(attr, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -247,7 +247,7 @@ func (apierSv1 *APIerSv1) SetAccount(attr *utils.AttrSetAccount, reply *string) 
 				}
 				if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
 					utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithOpts{
-						ArgsCache: map[string][]string{utils.AccountActionPlanIDs: []string{accID}, utils.ActionPlanIDs: apIDs},
+						ArgsCache: map[string][]string{utils.AccountActionPlanIDs: {accID}, utils.ActionPlanIDs: apIDs},
 					}, reply); err != nil {
 					return 0, err
 				}
@@ -343,7 +343,7 @@ func (apierSv1 *APIerSv1) RemoveAccount(attr *utils.AttrRemoveAccount, reply *st
 	}
 	if err = apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
 		utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithOpts{
-			ArgsCache: map[string][]string{utils.AccountActionPlanIDs: []string{accID}},
+			ArgsCache: map[string][]string{utils.AccountActionPlanIDs: {accID}},
 		}, reply); err != nil {
 		return
 	}
@@ -688,7 +688,7 @@ func (apierSv1 *APIerSv1) RemoveBalances(attr *utils.AttrSetBalance, reply *stri
 	return nil
 }
 
-func (apierSv1 *APIerSv1) GetAccountsCount(attr *utils.TenantArg, reply *int) (err error) {
+func (apierSv1 *APIerSv1) GetAccountsCount(attr *utils.TenantWithOpts, reply *int) (err error) {
 	if len(attr.Tenant) == 0 {
 		return utils.NewErrMandatoryIeMissing("Tenant")
 	}

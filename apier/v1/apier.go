@@ -157,7 +157,7 @@ func (apierSv1 *APIerSv1) SetDestination(attrs *utils.AttrSetDestination, reply 
 	if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
 		utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithOpts{
 			ArgsCache: map[string][]string{utils.ReverseDestinationIDs: dest.Prefixes,
-				utils.DestinationIDs: []string{attrs.Id}},
+				utils.DestinationIDs: {attrs.Id}},
 		}, reply); err != nil {
 		return err
 	}
@@ -232,7 +232,7 @@ func (apierSv1 *APIerSv1) LoadDestination(attrs *AttrLoadDestination, reply *str
 	}
 	if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
 		utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithOpts{
-			ArgsCache: map[string][]string{utils.DestinationIDs: []string{attrs.ID}},
+			ArgsCache: map[string][]string{utils.DestinationIDs: {attrs.ID}},
 		}, reply); err != nil {
 		return err
 	}
@@ -451,7 +451,7 @@ func (apierSv1 *APIerSv1) SetRatingProfile(attrs *utils.AttrSetRatingProfile, re
 }
 
 // GetRatingProfileIDs returns list of resourceProfile IDs registered for a tenant
-func (apierSv1 *APIerSv1) GetRatingProfileIDs(args *utils.TenantArgWithPaginator, rsPrfIDs *[]string) error {
+func (apierSv1 *APIerSv1) GetRatingProfileIDs(args *utils.PaginatorWithTenant, rsPrfIDs *[]string) error {
 	if missing := utils.MissingStructFields(args, []string{utils.Tenant}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -725,7 +725,7 @@ func (apierSv1 *APIerSv1) SetActionPlan(attrs *AttrSetActionPlan, reply *string)
 		}
 		if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
 			utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithOpts{
-				ArgsCache: map[string][]string{utils.ActionPlanIDs: []string{ap.Id}},
+				ArgsCache: map[string][]string{utils.ActionPlanIDs: {ap.Id}},
 			}, reply); err != nil {
 			return 0, err
 		}
@@ -1385,7 +1385,7 @@ func (apierSv1 *APIerSv1) ComputeActionPlanIndexes(_ string, reply *string) (err
 }
 
 // GetActionPlanIDs returns list of ActionPlan IDs registered for a tenant
-func (apierSv1 *APIerSv1) GetActionPlanIDs(args *utils.TenantArgWithPaginator, attrPrfIDs *[]string) error {
+func (apierSv1 *APIerSv1) GetActionPlanIDs(args *utils.PaginatorWithTenant, attrPrfIDs *[]string) error {
 	prfx := utils.ACTION_PLAN_PREFIX
 	keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(utils.ACTION_PLAN_PREFIX)
 	if err != nil {
@@ -1403,7 +1403,7 @@ func (apierSv1 *APIerSv1) GetActionPlanIDs(args *utils.TenantArgWithPaginator, a
 }
 
 // GetRatingPlanIDs returns list of RatingPlan IDs registered for a tenant
-func (apierSv1 *APIerSv1) GetRatingPlanIDs(args *utils.TenantArgWithPaginator, attrPrfIDs *[]string) error {
+func (apierSv1 *APIerSv1) GetRatingPlanIDs(args *utils.PaginatorWithTenant, attrPrfIDs *[]string) error {
 	prfx := utils.RATING_PLAN_PREFIX
 	keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(utils.RATING_PLAN_PREFIX)
 	if err != nil {

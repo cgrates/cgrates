@@ -295,10 +295,10 @@ func testExpVerifyStats(t *testing.T) {
 		QueueLength: 100,
 		TTL:         time.Duration(-1),
 		Metrics: []*engine.MetricWithFilters{
-			&engine.MetricWithFilters{
+			{
 				MetricID: utils.MetaTCC,
 			},
-			&engine.MetricWithFilters{
+			{
 				MetricID: utils.MetaTCD,
 			},
 		},
@@ -319,10 +319,10 @@ func testExpVerifyStats(t *testing.T) {
 		QueueLength: 100,
 		TTL:         time.Duration(-1),
 		Metrics: []*engine.MetricWithFilters{
-			&engine.MetricWithFilters{
+			{
 				MetricID: utils.MetaTCD,
 			},
-			&engine.MetricWithFilters{
+			{
 				MetricID: utils.MetaTCC,
 			},
 		},

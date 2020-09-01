@@ -26,7 +26,7 @@ func init() {
 	c := &CmdGetAttributeIDs{
 		name:      "attributes_profile_ids",
 		rpcMethod: utils.APIerSv1GetAttributeProfileIDs,
-		rpcParams: &utils.TenantArgWithPaginator{},
+		rpcParams: &utils.PaginatorWithTenant{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -36,7 +36,7 @@ func init() {
 type CmdGetAttributeIDs struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.TenantArgWithPaginator
+	rpcParams *utils.PaginatorWithTenant
 	*CommandExecuter
 }
 
@@ -50,7 +50,7 @@ func (self *CmdGetAttributeIDs) RpcMethod() string {
 
 func (self *CmdGetAttributeIDs) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.TenantArgWithPaginator{}
+		self.rpcParams = &utils.PaginatorWithTenant{}
 	}
 	return self.rpcParams
 }

@@ -145,14 +145,14 @@ func TestEventExporterSameID(t *testing.T) {
 		Enabled:         true,
 		AttributeSConns: []string{"conn1"},
 		Cache: map[string]*CacheParamCfg{
-			utils.MetaFileCSV: &CacheParamCfg{
+			utils.MetaFileCSV: {
 				Limit:     -1,
 				TTL:       time.Duration(5 * time.Second),
 				StaticTTL: false,
 			},
 		},
 		Exporters: []*EventExporterCfg{
-			&EventExporterCfg{
+			{
 				ID:            utils.MetaDefault,
 				Type:          utils.META_NONE,
 				FieldSep:      ",",

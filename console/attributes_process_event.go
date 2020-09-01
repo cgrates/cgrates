@@ -73,6 +73,6 @@ func (self *CmdAttributesProcessEvent) RpcResult() interface{} {
 
 func (self *CmdAttributesProcessEvent) GetFormatedResult(result interface{}) string {
 	return GetFormatedResult(result, map[string]struct{}{
-		"Usage": struct{}{},
+		"Usage": {},
 	})
 }

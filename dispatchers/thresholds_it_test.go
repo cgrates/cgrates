@@ -256,9 +256,7 @@ func testDspThTestAuthKey3(t *testing.T) {
 	eIDs := []string{"THD_ACNT_1002"}
 
 	if err := dispEngine.RPC.Call(utils.ThresholdSv1GetThresholdIDs, &utils.TenantWithOpts{
-		TenantArg: &utils.TenantArg{
-			Tenant: "cgrates.org",
-		},
+		Tenant: "cgrates.org",
 		Opts: map[string]interface{}{
 			utils.OptsAPIKey: "thr12345",
 		},

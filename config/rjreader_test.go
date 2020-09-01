@@ -263,7 +263,7 @@ func TestIsWhiteSpace(t *testing.T) {
 
 func TestReadEnv(t *testing.T) {
 	key := "TESTVAR2"
-	if _, err := ReadEnv(key); !reflect.DeepEqual(err, utils.ErrEnvNotFound(key)) {
+	if _, err := ReadEnv(key); err == nil || err.Error() != utils.ErrEnvNotFound(key).Error() {
 		t.Errorf("Expected: %+v, recived: %+v", utils.ErrEnvNotFound(key), err)
 	}
 	expected := "cgRates"

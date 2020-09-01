@@ -1434,18 +1434,18 @@ func TestLoadRateProfiles(t *testing.T) {
 		MaxCost:          0.6,
 		MaxCostStrategy:  "*free",
 		Rates: map[string]*utils.TPRate{
-			"RT_WEEK": &utils.TPRate{
+			"RT_WEEK": {
 				ID:             "RT_WEEK",
 				Weight:         0,
 				ActivationTime: "* * * * 1-5",
 				IntervalRates: []*utils.TPIntervalRate{
-					&utils.TPIntervalRate{
+					{
 						IntervalStart: "0s",
 						Value:         0.12,
 						Unit:          "1m",
 						Increment:     "1m",
 					},
-					&utils.TPIntervalRate{
+					{
 						IntervalStart: "1m",
 						Value:         0.06,
 						Unit:          "1m",
@@ -1453,12 +1453,12 @@ func TestLoadRateProfiles(t *testing.T) {
 					},
 				},
 			},
-			"RT_WEEKEND": &utils.TPRate{
+			"RT_WEEKEND": {
 				ID:             "RT_WEEKEND",
 				Weight:         10,
 				ActivationTime: "* * * * 0,6",
 				IntervalRates: []*utils.TPIntervalRate{
-					&utils.TPIntervalRate{
+					{
 						IntervalStart: "0s",
 						Value:         0.06,
 						Unit:          "1m",
@@ -1466,12 +1466,12 @@ func TestLoadRateProfiles(t *testing.T) {
 					},
 				},
 			},
-			"RT_CHRISTMAS": &utils.TPRate{
+			"RT_CHRISTMAS": {
 				ID:             "RT_CHRISTMAS",
 				Weight:         30,
 				ActivationTime: "* * 24 12 *",
 				IntervalRates: []*utils.TPIntervalRate{
-					&utils.TPIntervalRate{
+					{
 						IntervalStart: "0s",
 						Value:         0.06,
 						Unit:          "1m",

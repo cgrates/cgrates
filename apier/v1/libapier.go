@@ -56,9 +56,9 @@ func (apierSv1 *APIerSv1) CallCache(cacheopt *string, tnt, cacheID, itemID strin
 	case utils.MetaClear:
 		method = utils.CacheSv1Clear
 		args = &utils.AttrCacheIDsWithOpts{
-			TenantArg: utils.TenantArg{Tenant: tnt},
-			CacheIDs:  []string{cacheID, utils.CacheInstanceToCacheIndex[cacheID]},
-			Opts:      opts,
+			Tenant:   tnt,
+			CacheIDs: []string{cacheID, utils.CacheInstanceToCacheIndex[cacheID]},
+			Opts:     opts,
 		}
 	}
 	return apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
@@ -69,7 +69,7 @@ func (apierSv1 *APIerSv1) CallCache(cacheopt *string, tnt, cacheID, itemID strin
 // for a specific CacheID
 func (apierSv1 *APIerSv1) composeArgsReload(tnt, cacheID, itemID string, filterIDs *[]string, contexts []string, opts map[string]interface{}) (rpl utils.AttrReloadCacheWithOpts, err error) {
 	rpl = utils.AttrReloadCacheWithOpts{
-		TenantArg: utils.TenantArg{Tenant: tnt},
+		Tenant: tnt,
 		ArgsCache: map[string][]string{
 			utils.CacheInstanceToArg[cacheID]: {itemID},
 		},

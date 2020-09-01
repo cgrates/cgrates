@@ -20,8 +20,6 @@ package engine
 
 import (
 	"math"
-
-	"github.com/cgrates/cgrates/utils"
 )
 
 /*
@@ -37,8 +35,8 @@ type RatingPlan struct {
 // RatingPlanWithOpts is used in replicatorV1 for dispatcher
 type RatingPlanWithOpts struct {
 	*RatingPlan
-	utils.TenantArg
-	Opts map[string]interface{}
+	Tenant string
+	Opts   map[string]interface{}
 }
 
 type RPRate struct {

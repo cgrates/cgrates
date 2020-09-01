@@ -204,9 +204,9 @@ func GetUB() *Account {
 		ID:            "rif",
 		AllowNegative: true,
 		BalanceMap: map[string]Balances{
-			utils.SMS:  Balances{&Balance{Value: 14, ExpirationDate: zeroTime}},
-			utils.DATA: Balances{&Balance{Value: 1024, ExpirationDate: zeroTime}},
-			utils.VOICE: Balances{&Balance{Weight: 20, DestinationIDs: utils.NewStringMap("NAT")},
+			utils.SMS:  {&Balance{Value: 14, ExpirationDate: zeroTime}},
+			utils.DATA: {&Balance{Value: 1024, ExpirationDate: zeroTime}},
+			utils.VOICE: {&Balance{Weight: 20, DestinationIDs: utils.NewStringMap("NAT")},
 				&Balance{Weight: 10, DestinationIDs: utils.NewStringMap("RET")}}},
 		UnitCounters:   UnitCounters{utils.SMS: []*UnitCounter{uc, uc}},
 		ActionTriggers: ActionTriggers{at, at, at},

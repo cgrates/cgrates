@@ -47,8 +47,7 @@ func (self *CmdStatus) RpcMethod() string {
 func (self *CmdStatus) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.TenantWithOpts{
-			TenantArg: new(utils.TenantArg),
-			Opts:      make(map[string]interface{}),
+			Opts: make(map[string]interface{}),
 		}
 	}
 	return self.rpcParams

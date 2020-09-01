@@ -149,7 +149,7 @@ func TestSerialDebit(t *testing.T) {
 	moneyConcurent := &Account{
 		ID: "cgrates.org:moneyp",
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: Balances{
+			utils.MONETARY: {
 				&Balance{Value: initialBalance, Weight: 10},
 			}},
 	}
@@ -186,7 +186,7 @@ func TestParallelDebit(t *testing.T) {
 	moneyConcurent := &Account{
 		ID: "cgrates.org:moneyp",
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: Balances{
+			utils.MONETARY: {
 				&Balance{Value: initialBalance, Weight: 10},
 			}},
 	}
@@ -253,7 +253,7 @@ func TestSplitSpansWeekend(t *testing.T) {
 				MatchedDestId:  "SPN_MOB",
 				ActivationTime: time.Date(2015, 4, 23, 0, 0, 0, 0, time.UTC),
 				RateIntervals: []*RateInterval{
-					&RateInterval{
+					{
 						Timing: &RITiming{
 							WeekDays:  []time.Weekday{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday},
 							StartTime: "08:00:00",
@@ -267,7 +267,7 @@ func TestSplitSpansWeekend(t *testing.T) {
 							},
 						},
 					},
-					&RateInterval{
+					{
 						Timing: &RITiming{
 							WeekDays:  []time.Weekday{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday},
 							StartTime: "00:00:00",
@@ -281,7 +281,7 @@ func TestSplitSpansWeekend(t *testing.T) {
 							},
 						},
 					},
-					&RateInterval{
+					{
 						Timing: &RITiming{
 							WeekDays:  []time.Weekday{time.Saturday, time.Sunday},
 							StartTime: "00:00:00",
@@ -1631,10 +1631,10 @@ func TestCDRefundIncrements(t *testing.T) {
 	ub := &Account{
 		ID: "test:ref",
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: Balances{
+			utils.MONETARY: {
 				&Balance{Uuid: "moneya", Value: 100},
 			},
-			utils.VOICE: Balances{
+			utils.VOICE: {
 				&Balance{Uuid: "minutea",
 					Value:          10 * float64(time.Second),
 					Weight:         20,
@@ -1669,10 +1669,10 @@ func TestCDRefundIncrementsZeroValue(t *testing.T) {
 	ub := &Account{
 		ID: "test:ref",
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: Balances{
+			utils.MONETARY: {
 				&Balance{Uuid: "moneya", Value: 100},
 			},
-			utils.VOICE: Balances{
+			utils.VOICE: {
 				&Balance{Uuid: "minutea", Value: 10, Weight: 20, DestinationIDs: utils.StringMap{"NAT": true}},
 				&Balance{Uuid: "minuteb", Value: 10, DestinationIDs: utils.StringMap{"RET": true}},
 			},
@@ -1698,7 +1698,7 @@ func TestCDDebitBalanceSubjectWithFallback(t *testing.T) {
 	acnt := &Account{
 		ID: "TCDDBSWF:account1",
 		BalanceMap: map[string]Balances{
-			utils.VOICE: Balances{
+			utils.VOICE: {
 				&Balance{ID: "voice1", Value: 60 * float64(time.Second),
 					RatingSubject: "SubjTCDDBSWF"},
 			}},
@@ -1710,7 +1710,7 @@ func TestCDDebitBalanceSubjectWithFallback(t *testing.T) {
 	rpSubj := &RatingPlan{
 		Id: "RP_TCDDBSWF",
 		Timings: map[string]*RITiming{
-			"30eab300": &RITiming{
+			"30eab300": {
 				Years:     utils.Years{},
 				Months:    utils.Months{},
 				MonthDays: utils.MonthDays{},
@@ -1719,10 +1719,10 @@ func TestCDDebitBalanceSubjectWithFallback(t *testing.T) {
 			},
 		},
 		Ratings: map[string]*RIRate{
-			"b457f86d": &RIRate{
+			"b457f86d": {
 
 				Rates: []*RGRate{
-					&RGRate{
+					{
 						GroupIntervalStart: 0,
 						Value:              0,
 						RateIncrement:      60 * time.Second,
@@ -1735,7 +1735,7 @@ func TestCDDebitBalanceSubjectWithFallback(t *testing.T) {
 		},
 		DestinationRates: map[string]RPRateList{
 			dst.Id: []*RPRate{
-				&RPRate{
+				{
 					Timing: "30eab300",
 					Rating: "b457f86d",
 					Weight: 10,
@@ -1746,7 +1746,7 @@ func TestCDDebitBalanceSubjectWithFallback(t *testing.T) {
 	rpDflt := &RatingPlan{
 		Id: "RP_DFLT",
 		Timings: map[string]*RITiming{
-			"30eab301": &RITiming{
+			"30eab301": {
 				Years:     utils.Years{},
 				Months:    utils.Months{},
 				MonthDays: utils.MonthDays{},
@@ -1755,9 +1755,9 @@ func TestCDDebitBalanceSubjectWithFallback(t *testing.T) {
 			},
 		},
 		Ratings: map[string]*RIRate{
-			"b457f861": &RIRate{
+			"b457f861": {
 				Rates: []*RGRate{
-					&RGRate{
+					{
 						GroupIntervalStart: 0,
 						Value:              0.01,
 						RateIncrement:      time.Second,
@@ -1770,7 +1770,7 @@ func TestCDDebitBalanceSubjectWithFallback(t *testing.T) {
 		},
 		DestinationRates: map[string]RPRateList{
 			dst.Id: []*RPRate{
-				&RPRate{
+				{
 					Timing: "30eab301",
 					Rating: "b457f861",
 					Weight: 10,

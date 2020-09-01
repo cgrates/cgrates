@@ -39,8 +39,8 @@ type Destination struct {
 
 type DestinationWithOpts struct {
 	*Destination
-	utils.TenantArg
-	Opts map[string]interface{}
+	Tenant string
+	Opts   map[string]interface{}
 }
 
 // returns prefix precision

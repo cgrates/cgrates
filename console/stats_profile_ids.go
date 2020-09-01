@@ -26,7 +26,7 @@ func init() {
 	c := &CmdGetStatQueueIDs{
 		name:      "stats_profile_ids",
 		rpcMethod: utils.APIerSv1GetStatQueueProfileIDs,
-		rpcParams: &utils.TenantArgWithPaginator{},
+		rpcParams: &utils.PaginatorWithTenant{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -36,7 +36,7 @@ func init() {
 type CmdGetStatQueueIDs struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.TenantArgWithPaginator
+	rpcParams *utils.PaginatorWithTenant
 	*CommandExecuter
 }
 
@@ -50,7 +50,7 @@ func (self *CmdGetStatQueueIDs) RpcMethod() string {
 
 func (self *CmdGetStatQueueIDs) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.TenantArgWithPaginator{}
+		self.rpcParams = &utils.PaginatorWithTenant{}
 	}
 	return self.rpcParams
 }

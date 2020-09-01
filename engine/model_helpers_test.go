@@ -86,11 +86,11 @@ func TestTpDestinationsAsMapDestinations(t *testing.T) {
 		TpDestination{Tpid: "TEST_TPID", Tag: "TEST_DEST2", Prefix: "+492"},
 	}
 	eOut = map[string]*Destination{
-		"TEST_DEST1": &Destination{
+		"TEST_DEST1": {
 			Id:       "TEST_DEST1",
 			Prefixes: []string{"+491"},
 		},
-		"TEST_DEST2": &Destination{
+		"TEST_DEST2": {
 			Id:       "TEST_DEST2",
 			Prefixes: []string{"+492"},
 		},
@@ -110,15 +110,15 @@ func TestTpDestinationsAsMapDestinations(t *testing.T) {
 		TpDestination{Tpid: "TEST_ID", Tag: "", Prefix: ""},
 	}
 	eOut = map[string]*Destination{
-		"TEST_DEST1": &Destination{
+		"TEST_DEST1": {
 			Id:       "TEST_DEST1",
 			Prefixes: []string{"+491"},
 		},
-		"TEST_DEST2": &Destination{
+		"TEST_DEST2": {
 			Id:       "TEST_DEST2",
 			Prefixes: []string{"+492"},
 		},
-		"": &Destination{
+		"": {
 			Id:       "",
 			Prefixes: []string{""},
 		},
@@ -126,7 +126,7 @@ func TestTpDestinationsAsMapDestinations(t *testing.T) {
 	if rcv, err = in.AsMapDestinations(); err != nil {
 		t.Error(err)
 	}
-	for key, _ := range rcv {
+	for key := range rcv {
 		if !reflect.DeepEqual(rcv[key], eOut[key]) {
 			t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut[key]), utils.ToJSON(rcv[key]))
 		}
@@ -185,13 +185,13 @@ func TestMapTPTimings(t *testing.T) {
 	}
 
 	tps = []*utils.ApierTPTiming{
-		&utils.ApierTPTiming{
+		{
 			TPid: "TPid1",
 			ID:   "ID1",
 		},
 	}
 	eOut = map[string]*utils.TPTiming{
-		"ID1": &utils.TPTiming{
+		"ID1": {
 			ID:        "ID1",
 			Years:     utils.Years{},
 			Months:    utils.Months{},
@@ -205,14 +205,14 @@ func TestMapTPTimings(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
 	}
 	tps = []*utils.ApierTPTiming{
-		&utils.ApierTPTiming{
+		{
 			TPid:   "TPid1",
 			ID:     "ID1",
 			Months: "1;2;3;4",
 		},
 	}
 	eOut = map[string]*utils.TPTiming{
-		"ID1": &utils.TPTiming{
+		"ID1": {
 			ID:        "ID1",
 			Years:     utils.Years{},
 			Months:    utils.Months{1, 2, 3, 4},
@@ -227,19 +227,19 @@ func TestMapTPTimings(t *testing.T) {
 	}
 	//same id error
 	tps = []*utils.ApierTPTiming{
-		&utils.ApierTPTiming{
+		{
 			TPid:   "TPid1",
 			ID:     "ID1",
 			Months: "1;2;3;4",
 		},
-		&utils.ApierTPTiming{
+		{
 			TPid:   "TPid1",
 			ID:     "ID1",
 			Months: "1;2;3;4",
 		},
 	}
 	eOut = map[string]*utils.TPTiming{
-		"ID1": &utils.TPTiming{
+		"ID1": {
 			ID:        "ID1",
 			Years:     utils.Years{},
 			Months:    utils.Months{1, 2, 3, 4},
@@ -262,7 +262,7 @@ func TestMapTPRates(t *testing.T) {
 	}
 
 	s = []*utils.TPRateRALs{
-		&utils.TPRateRALs{
+		{
 			ID:   "ID",
 			TPid: "TPid",
 			RateSlots: []*utils.RateSlot{
@@ -309,7 +309,7 @@ func TestMapTPRates(t *testing.T) {
 	}
 
 	s = []*utils.TPRateRALs{
-		&utils.TPRateRALs{
+		{
 			ID:   "",
 			TPid: "",
 			RateSlots: []*utils.RateSlot{
@@ -334,7 +334,7 @@ func TestMapTPRates(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
 	}
 	s = []*utils.TPRateRALs{
-		&utils.TPRateRALs{
+		{
 			ID:   "SameID",
 			TPid: "",
 			RateSlots: []*utils.RateSlot{
@@ -342,7 +342,7 @@ func TestMapTPRates(t *testing.T) {
 				{ConnectFee: 0.7},
 			},
 		},
-		&utils.TPRateRALs{
+		{
 			ID:   "SameID",
 			TPid: "",
 			RateSlots: []*utils.RateSlot{
@@ -364,7 +364,7 @@ func TestAPItoModelTimings(t *testing.T) {
 	}
 
 	ts = []*utils.ApierTPTiming{
-		&utils.ApierTPTiming{
+		{
 			TPid:   "TPid1",
 			ID:     "ID1",
 			Months: "1;2;3;4",
@@ -381,12 +381,12 @@ func TestAPItoModelTimings(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
 	}
 	ts = []*utils.ApierTPTiming{
-		&utils.ApierTPTiming{
+		{
 			TPid:   "TPid1",
 			ID:     "ID1",
 			Months: "1;2;3;4",
 		},
-		&utils.ApierTPTiming{
+		{
 			TPid:      "TPid2",
 			ID:        "ID2",
 			Months:    "1;2;3;4",
@@ -461,15 +461,15 @@ func TestAPItoModelRates(t *testing.T) {
 	}
 
 	rs = []*utils.TPRateRALs{
-		&utils.TPRateRALs{
+		{
 			ID:   "SomeID",
 			TPid: "TPid",
 			RateSlots: []*utils.RateSlot{
-				&utils.RateSlot{
+				{
 					ConnectFee: 0.7,
 					Rate:       0.8,
 				},
-				&utils.RateSlot{
+				{
 					ConnectFee: 0.77,
 					Rate:       0.88,
 				},
@@ -494,7 +494,7 @@ func TestAPItoModelRates(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
 	}
 	rs = []*utils.TPRateRALs{
-		&utils.TPRateRALs{
+		{
 			ID:        "SomeID",
 			TPid:      "TPid",
 			RateSlots: []*utils.RateSlot{},
@@ -569,7 +569,7 @@ func TestAPItoModelDestinationRates(t *testing.T) {
 		t.Errorf("Expecting: nil, received: %+v", rcv)
 	}
 	drs = []*utils.TPDestinationRate{
-		&utils.TPDestinationRate{
+		{
 			TPid: "TEST_TPID",
 			ID:   "TEST_DSTRATE",
 			DestinationRates: []*utils.DestinationRate{
@@ -632,11 +632,11 @@ func TestTpDestinationRatesAsTPDestinationRates(t *testing.T) {
 		},
 	}
 	eOut = []*utils.TPDestinationRate{
-		&utils.TPDestinationRate{
+		{
 			TPid: "Tpid",
 			ID:   "Tag",
 			DestinationRates: []*utils.DestinationRate{
-				&utils.DestinationRate{
+				{
 					DestinationId:    "DestinationsTag",
 					RateId:           "RatesTag",
 					RoundingMethod:   "*up",
@@ -665,7 +665,7 @@ func TestMapTPDestinationRates(t *testing.T) {
 	}
 
 	s = []*utils.TPDestinationRate{
-		&utils.TPDestinationRate{
+		{
 			TPid: "TEST_TPID",
 			ID:   "TEST_DSTRATE",
 			DestinationRates: []*utils.DestinationRate{
@@ -683,17 +683,17 @@ func TestMapTPDestinationRates(t *testing.T) {
 		},
 	}
 	eOut = map[string]*utils.TPDestinationRate{
-		"TEST_DSTRATE": &utils.TPDestinationRate{
+		"TEST_DSTRATE": {
 			TPid: "TEST_TPID",
 			ID:   "TEST_DSTRATE",
 			DestinationRates: []*utils.DestinationRate{
-				&utils.DestinationRate{
+				{
 					DestinationId:    "TEST_DEST1",
 					RateId:           "TEST_RATE1",
 					RoundingMethod:   "*up",
 					RoundingDecimals: 4,
 				},
-				&utils.DestinationRate{
+				{
 					DestinationId:    "TEST_DEST2",
 					RateId:           "TEST_RATE2",
 					RoundingMethod:   "*up",
@@ -708,12 +708,12 @@ func TestMapTPDestinationRates(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
 	}
 	s = []*utils.TPDestinationRate{
-		&utils.TPDestinationRate{
+		{
 			TPid:             "TEST_TPID",
 			ID:               "TEST_DSTRATE",
 			DestinationRates: []*utils.DestinationRate{},
 		},
-		&utils.TPDestinationRate{
+		{
 			TPid:             "TEST_TPID",
 			ID:               "TEST_DSTRATE",
 			DestinationRates: []*utils.DestinationRate{},
@@ -846,11 +846,11 @@ func TestAPItoModelRatingPlans(t *testing.T) {
 		t.Errorf("Expecting: nil, received: %+v", utils.ToJSON(rcv))
 	}
 	rps = []*utils.TPRatingPlan{
-		&utils.TPRatingPlan{
+		{
 			ID:   "ID",
 			TPid: "TPid",
 			RatingPlanBindings: []*utils.TPRatingPlanBinding{
-				&utils.TPRatingPlanBinding{
+				{
 					DestinationRatesId: "DestinationRatesId",
 					TimingId:           "TimingId",
 					Weight:             0.7,
@@ -985,14 +985,14 @@ func TestAPItoModelRatingProfiles(t *testing.T) {
 		t.Errorf("Expecting: nil, received: %+v", rcv)
 	}
 	rps = []*utils.TPRatingProfile{
-		&utils.TPRatingProfile{
+		{
 			TPid:     "TEST_TPID",
 			LoadId:   "TEST_LOADID",
 			Tenant:   "cgrates.org",
 			Category: "call",
 			Subject:  "*any",
 		},
-		&utils.TPRatingProfile{
+		{
 			TPid:     "TEST_TPID2",
 			LoadId:   "TEST_LOADID2",
 			Tenant:   "cgrates.org",
@@ -1113,7 +1113,7 @@ func TestAPItoModelSharedGroups(t *testing.T) {
 		t.Errorf("Expecting: nil, received: %+v", rcv)
 	}
 	sgs = []*utils.TPSharedGroups{
-		&utils.TPSharedGroups{
+		{
 			TPid: "TEST_TPID",
 			ID:   "SHARED_GROUP_TEST",
 			SharedGroups: []*utils.TPSharedGroup{
@@ -1148,7 +1148,7 @@ func TestAPItoModelSharedGroups(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
 	}
 	sgs = []*utils.TPSharedGroups{
-		&utils.TPSharedGroups{
+		{
 			TPid: "TEST_TPID",
 			ID:   "SHARED_GROUP_TEST",
 		},
@@ -1163,7 +1163,7 @@ func TestAPItoModelSharedGroups(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
 	}
 	sgs = []*utils.TPSharedGroups{
-		&utils.TPSharedGroups{
+		{
 			TPid: "TEST_TPID",
 			ID:   "SHARED_GROUP_TEST",
 			SharedGroups: []*utils.TPSharedGroup{
@@ -1177,7 +1177,7 @@ func TestAPItoModelSharedGroups(t *testing.T) {
 					RatingSubject: "special2"},
 			},
 		},
-		&utils.TPSharedGroups{
+		{
 			TPid: "TEST_TPID2",
 			ID:   "SHARED_GROUP_TEST2",
 			SharedGroups: []*utils.TPSharedGroup{
@@ -1320,7 +1320,7 @@ func TestAPItoModelActionPlans(t *testing.T) {
 		t.Errorf("Expecting: nil, received: %+v", rcv)
 	}
 	a = []*utils.TPActionPlan{
-		&utils.TPActionPlan{
+		{
 			TPid: "TEST_TPID",
 			ID:   "PACKAGE_10",
 			ActionPlan: []*utils.TPActionTiming{
@@ -1355,7 +1355,7 @@ func TestAPItoModelActionPlans(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
 	}
 	a = []*utils.TPActionPlan{
-		&utils.TPActionPlan{
+		{
 			TPid: "TEST_TPID",
 			ID:   "PACKAGE_10",
 		},
@@ -1578,7 +1578,7 @@ func TestAPItoModelActionTriggers(t *testing.T) {
 		t.Errorf("Expecting: nil, received: %+v", rcv)
 	}
 	ts = []*utils.TPActionTriggers{
-		&utils.TPActionTriggers{
+		{
 			TPid: "TEST_TPID",
 			ID:   "STANDARD_TRIGGERS",
 			ActionTriggers: []*utils.TPActionTrigger{
@@ -1700,11 +1700,11 @@ func TestAPItoModelActions(t *testing.T) {
 		t.Errorf("Expecting: nil, received: %+v", rcv)
 	}
 	as = []*utils.TPActions{
-		&utils.TPActions{
+		{
 			TPid: "TEST_TPID",
 			ID:   "TEST_ACTIONS",
 		},
-		&utils.TPActions{
+		{
 			TPid: "TEST_TPID2",
 			ID:   "TEST_ACTIONS2",
 		},
@@ -1723,7 +1723,7 @@ func TestAPItoModelActions(t *testing.T) {
 		t.Errorf("Expecting: %+v,\nreceived: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
 	}
 	as = []*utils.TPActions{
-		&utils.TPActions{
+		{
 			TPid: "TEST_TPID",
 			ID:   "TEST_ACTIONS",
 			Actions: []*utils.TPAction{
@@ -2225,7 +2225,7 @@ func TestAPItoModelAccountActions(t *testing.T) {
 		t.Errorf("Expecting: nil , Received: %+v", utils.ToIJSON(rcv))
 	}
 	aas = []*utils.TPAccountActions{
-		&utils.TPAccountActions{
+		{
 			TPid:             "TEST_TPID",
 			LoadId:           "TEST_LOADID",
 			Tenant:           "cgrates.org",
@@ -2233,7 +2233,7 @@ func TestAPItoModelAccountActions(t *testing.T) {
 			ActionPlanId:     "PACKAGE_10_SHARED_A_5",
 			ActionTriggersId: "STANDARD_TRIGGERS",
 		},
-		&utils.TPAccountActions{
+		{
 			TPid:             "TEST_TPID2",
 			LoadId:           "TEST_LOADID2",
 			Tenant:           "cgrates.org",
@@ -2667,13 +2667,13 @@ func TestAPItoModelTPFilter(t *testing.T) {
 	th = &utils.TPFilterProfile{
 		ID: "someID",
 		Filters: []*utils.TPFilter{
-			&utils.TPFilter{
+			{
 				Type:    utils.MetaPrefix,
 				Element: "Account",
 				Values:  []string{"1010"},
 			},
 
-			&utils.TPFilter{
+			{
 				Type:    utils.MetaPrefix,
 				Element: "Account",
 				Values:  []string{"0708"},
@@ -4161,18 +4161,18 @@ func TestRateProfileToAPI(t *testing.T) {
 		MaxCost:          0.6,
 		MaxCostStrategy:  "*free",
 		Rates: map[string]*Rate{
-			"RT_WEEK": &Rate{
+			"RT_WEEK": {
 				ID:             "RT_WEEK",
 				Weight:         0,
 				ActivationTime: "* * * * 1-5",
 				IntervalRates: []*IntervalRate{
-					&IntervalRate{
+					{
 						IntervalStart: time.Duration(0 * time.Second),
 						Value:         0.12,
 						Unit:          time.Duration(1 * time.Minute),
 						Increment:     time.Duration(1 * time.Minute),
 					},
-					&IntervalRate{
+					{
 						IntervalStart: time.Duration(1 * time.Minute),
 						Value:         0.06,
 						Unit:          time.Duration(1 * time.Minute),
@@ -4180,12 +4180,12 @@ func TestRateProfileToAPI(t *testing.T) {
 					},
 				},
 			},
-			"RT_WEEKEND": &Rate{
+			"RT_WEEKEND": {
 				ID:             "RT_WEEKEND",
 				Weight:         10,
 				ActivationTime: "* * * * 0,6",
 				IntervalRates: []*IntervalRate{
-					&IntervalRate{
+					{
 						IntervalStart: time.Duration(0 * time.Second),
 						Value:         0.06,
 						Unit:          time.Duration(1 * time.Minute),
@@ -4193,12 +4193,12 @@ func TestRateProfileToAPI(t *testing.T) {
 					},
 				},
 			},
-			"RT_CHRISTMAS": &Rate{
+			"RT_CHRISTMAS": {
 				ID:             "RT_CHRISTMAS",
 				Weight:         30,
 				ActivationTime: "* * 24 12 *",
 				IntervalRates: []*IntervalRate{
-					&IntervalRate{
+					{
 						IntervalStart: time.Duration(0 * time.Second),
 						Value:         0.06,
 						Unit:          time.Duration(1 * time.Minute),
@@ -4221,18 +4221,18 @@ func TestRateProfileToAPI(t *testing.T) {
 		MaxCost:            0.6,
 		MaxCostStrategy:    "*free",
 		Rates: map[string]*utils.TPRate{
-			"RT_WEEK": &utils.TPRate{
+			"RT_WEEK": {
 				ID:             "RT_WEEK",
 				Weight:         0,
 				ActivationTime: "* * * * 1-5",
 				IntervalRates: []*utils.TPIntervalRate{
-					&utils.TPIntervalRate{
+					{
 						IntervalStart: "0s",
 						Value:         0.12,
 						Unit:          "1m0s",
 						Increment:     "1m0s",
 					},
-					&utils.TPIntervalRate{
+					{
 						IntervalStart: "1m0s",
 						Value:         0.06,
 						Unit:          "1m0s",
@@ -4240,12 +4240,12 @@ func TestRateProfileToAPI(t *testing.T) {
 					},
 				},
 			},
-			"RT_WEEKEND": &utils.TPRate{
+			"RT_WEEKEND": {
 				ID:             "RT_WEEKEND",
 				Weight:         10,
 				ActivationTime: "* * * * 0,6",
 				IntervalRates: []*utils.TPIntervalRate{
-					&utils.TPIntervalRate{
+					{
 						IntervalStart: "0s",
 						Value:         0.06,
 						Unit:          "1m0s",
@@ -4253,12 +4253,12 @@ func TestRateProfileToAPI(t *testing.T) {
 					},
 				},
 			},
-			"RT_CHRISTMAS": &utils.TPRate{
+			"RT_CHRISTMAS": {
 				ID:             "RT_CHRISTMAS",
 				Weight:         30,
 				ActivationTime: "* * 24 12 *",
 				IntervalRates: []*utils.TPIntervalRate{
-					&utils.TPIntervalRate{
+					{
 						IntervalStart: "0s",
 						Value:         0.06,
 						Unit:          "1m0s",
@@ -4286,18 +4286,18 @@ func TestAPIToRateProfile(t *testing.T) {
 		MaxCost:          0.6,
 		MaxCostStrategy:  "*free",
 		Rates: map[string]*Rate{
-			"RT_WEEK": &Rate{
+			"RT_WEEK": {
 				ID:             "RT_WEEK",
 				Weight:         0,
 				ActivationTime: "* * * * 1-5",
 				IntervalRates: []*IntervalRate{
-					&IntervalRate{
+					{
 						IntervalStart: time.Duration(0 * time.Second),
 						Value:         0.12,
 						Unit:          time.Duration(1 * time.Minute),
 						Increment:     time.Duration(1 * time.Minute),
 					},
-					&IntervalRate{
+					{
 						IntervalStart: time.Duration(1 * time.Minute),
 						Value:         0.06,
 						Unit:          time.Duration(1 * time.Minute),
@@ -4305,12 +4305,12 @@ func TestAPIToRateProfile(t *testing.T) {
 					},
 				},
 			},
-			"RT_WEEKEND": &Rate{
+			"RT_WEEKEND": {
 				ID:             "RT_WEEKEND",
 				Weight:         10,
 				ActivationTime: "* * * * 0,6",
 				IntervalRates: []*IntervalRate{
-					&IntervalRate{
+					{
 						IntervalStart: time.Duration(0 * time.Second),
 						Value:         0.06,
 						Unit:          time.Duration(1 * time.Minute),
@@ -4318,12 +4318,12 @@ func TestAPIToRateProfile(t *testing.T) {
 					},
 				},
 			},
-			"RT_CHRISTMAS": &Rate{
+			"RT_CHRISTMAS": {
 				ID:             "RT_CHRISTMAS",
 				Weight:         30,
 				ActivationTime: "* * 24 12 *",
 				IntervalRates: []*IntervalRate{
-					&IntervalRate{
+					{
 						IntervalStart: time.Duration(0 * time.Second),
 						Value:         0.06,
 						Unit:          time.Duration(1 * time.Minute),
@@ -4346,18 +4346,18 @@ func TestAPIToRateProfile(t *testing.T) {
 		MaxCost:          0.6,
 		MaxCostStrategy:  "*free",
 		Rates: map[string]*utils.TPRate{
-			"RT_WEEK": &utils.TPRate{
+			"RT_WEEK": {
 				ID:             "RT_WEEK",
 				Weight:         0,
 				ActivationTime: "* * * * 1-5",
 				IntervalRates: []*utils.TPIntervalRate{
-					&utils.TPIntervalRate{
+					{
 						IntervalStart: "0s",
 						Value:         0.12,
 						Unit:          "1m0s",
 						Increment:     "1m0s",
 					},
-					&utils.TPIntervalRate{
+					{
 						IntervalStart: "1m0s",
 						Value:         0.06,
 						Unit:          "1m0s",
@@ -4365,12 +4365,12 @@ func TestAPIToRateProfile(t *testing.T) {
 					},
 				},
 			},
-			"RT_WEEKEND": &utils.TPRate{
+			"RT_WEEKEND": {
 				ID:             "RT_WEEKEND",
 				Weight:         10,
 				ActivationTime: "* * * * 0,6",
 				IntervalRates: []*utils.TPIntervalRate{
-					&utils.TPIntervalRate{
+					{
 						IntervalStart: "0s",
 						Value:         0.06,
 						Unit:          "1m0s",
@@ -4378,12 +4378,12 @@ func TestAPIToRateProfile(t *testing.T) {
 					},
 				},
 			},
-			"RT_CHRISTMAS": &utils.TPRate{
+			"RT_CHRISTMAS": {
 				ID:             "RT_CHRISTMAS",
 				Weight:         30,
 				ActivationTime: "* * 24 12 *",
 				IntervalRates: []*utils.TPIntervalRate{
-					&utils.TPIntervalRate{
+					{
 						IntervalStart: "0s",
 						Value:         0.06,
 						Unit:          "1m0s",
@@ -4414,18 +4414,18 @@ func TestAPItoModelTPRateProfile(t *testing.T) {
 		MaxCost:          0.6,
 		MaxCostStrategy:  "*free",
 		Rates: map[string]*utils.TPRate{
-			"RT_WEEK": &utils.TPRate{
+			"RT_WEEK": {
 				ID:             "RT_WEEK",
 				Weight:         0,
 				ActivationTime: "* * * * 1-5",
 				IntervalRates: []*utils.TPIntervalRate{
-					&utils.TPIntervalRate{
+					{
 						IntervalStart: "0s",
 						Value:         0.12,
 						Unit:          "1m0s",
 						Increment:     "1m0s",
 					},
-					&utils.TPIntervalRate{
+					{
 						IntervalStart: "1m",
 						Value:         0.06,
 						Unit:          "1m0s",
@@ -4613,18 +4613,18 @@ func TestAsTPRateProfile(t *testing.T) {
 		MaxCost:          0.6,
 		MaxCostStrategy:  "*free",
 		Rates: map[string]*utils.TPRate{
-			"RT_WEEK": &utils.TPRate{
+			"RT_WEEK": {
 				ID:             "RT_WEEK",
 				Weight:         0,
 				ActivationTime: "* * * * 1-5",
 				IntervalRates: []*utils.TPIntervalRate{
-					&utils.TPIntervalRate{
+					{
 						IntervalStart: "1m",
 						Value:         0.06,
 						Unit:          "1m",
 						Increment:     "1s",
 					},
-					&utils.TPIntervalRate{
+					{
 						IntervalStart: "0s",
 						Value:         0.12,
 						Unit:          "1m",

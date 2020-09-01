@@ -25,10 +25,10 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (dS *DispatcherService) ConfigSv1GetJSONSection(args *config.StringWithOpts, reply *map[string]interface{}) (err error) {
+func (dS *DispatcherService) ConfigSv1GetJSONSection(args *config.SectionWithOpts, reply *map[string]interface{}) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args.TenantArg.Tenant != utils.EmptyString {
-		tnt = args.TenantArg.Tenant
+	if args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ConfigSv1GetJSONSection, tnt,
@@ -46,8 +46,8 @@ func (dS *DispatcherService) ConfigSv1GetJSONSection(args *config.StringWithOpts
 
 func (dS *DispatcherService) ConfigSv1ReloadConfigFromPath(args *config.ConfigReloadWithOpts, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args.TenantArg.Tenant != utils.EmptyString {
-		tnt = args.TenantArg.Tenant
+	if args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ConfigSv1ReloadConfigFromPath, tnt,
@@ -65,8 +65,8 @@ func (dS *DispatcherService) ConfigSv1ReloadConfigFromPath(args *config.ConfigRe
 
 func (dS *DispatcherService) ConfigSv1ReloadConfigFromJSON(args *config.JSONReloadWithOpts, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args.TenantArg.Tenant != utils.EmptyString {
-		tnt = args.TenantArg.Tenant
+	if args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ConfigSv1ReloadConfigFromJSON, tnt,

@@ -106,8 +106,8 @@ func (dS *DispatcherService) StatSv1GetQueueFloatMetrics(args *utils.TenantIDWit
 func (dS *DispatcherService) StatSv1GetQueueIDs(args *utils.TenantWithOpts,
 	reply *[]string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args.TenantArg != nil && args.TenantArg.Tenant != utils.EmptyString {
-		tnt = args.TenantArg.Tenant
+	if args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.StatSv1GetQueueIDs, tnt,

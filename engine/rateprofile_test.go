@@ -31,18 +31,18 @@ func TestRateProfileSort(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "RP1",
 		Rates: map[string]*Rate{
-			"RT_WEEK": &Rate{
+			"RT_WEEK": {
 				ID:             "RT_WEEK",
 				Weight:         0,
 				ActivationTime: "* * * * 1-5",
 				IntervalRates: []*IntervalRate{
-					&IntervalRate{
+					{
 						IntervalStart: time.Duration(0 * time.Second),
 						Value:         0.12,
 						Unit:          time.Duration(1 * time.Minute),
 						Increment:     time.Duration(1 * time.Minute),
 					},
-					&IntervalRate{
+					{
 						IntervalStart: time.Duration(1 * time.Minute),
 						Value:         0.06,
 						Unit:          time.Duration(1 * time.Minute),
@@ -50,30 +50,30 @@ func TestRateProfileSort(t *testing.T) {
 					},
 				},
 			},
-			"RT_Custom": &Rate{
+			"RT_Custom": {
 				ID:             "RT_Custom",
 				Weight:         0,
 				ActivationTime: "* * * * 1-5",
 				IntervalRates: []*IntervalRate{
-					&IntervalRate{
+					{
 						IntervalStart: time.Duration(1 * time.Second),
 						Value:         0.12,
 						Unit:          time.Duration(1 * time.Minute),
 						Increment:     time.Duration(1 * time.Minute),
 					},
-					&IntervalRate{
+					{
 						IntervalStart: time.Duration(1 * time.Second),
 						Value:         0.19,
 						Unit:          time.Duration(1 * time.Minute),
 						Increment:     time.Duration(1 * time.Second),
 					},
-					&IntervalRate{
+					{
 						IntervalStart: time.Duration(15 * time.Second),
 						Value:         0.4,
 						Unit:          time.Duration(1 * time.Minute),
 						Increment:     time.Duration(1 * time.Second),
 					},
-					&IntervalRate{
+					{
 						IntervalStart: time.Duration(10 * time.Second),
 						Value:         0.27,
 						Unit:          time.Duration(1 * time.Minute),
@@ -81,24 +81,24 @@ func TestRateProfileSort(t *testing.T) {
 					},
 				},
 			},
-			"RT_WEEKEND": &Rate{
+			"RT_WEEKEND": {
 				ID:             "RT_WEEKEND",
 				Weight:         10,
 				ActivationTime: "* * * * 0,6",
 				IntervalRates: []*IntervalRate{
-					&IntervalRate{
+					{
 						IntervalStart: time.Duration(10 * time.Second),
 						Value:         0.06,
 						Unit:          time.Duration(1 * time.Minute),
 						Increment:     time.Duration(1 * time.Second),
 					},
-					&IntervalRate{
+					{
 						IntervalStart: time.Duration(1 * time.Minute),
 						Value:         0.18,
 						Unit:          time.Duration(1 * time.Minute),
 						Increment:     time.Duration(1 * time.Second),
 					},
-					&IntervalRate{
+					{
 						IntervalStart: time.Duration(18 * time.Second),
 						Value:         0.12,
 						Unit:          time.Duration(1 * time.Minute),
@@ -106,12 +106,12 @@ func TestRateProfileSort(t *testing.T) {
 					},
 				},
 			},
-			"RT_CHRISTMAS": &Rate{
+			"RT_CHRISTMAS": {
 				ID:             "RT_CHRISTMAS",
 				Weight:         30,
 				ActivationTime: "* * 24 12 *",
 				IntervalRates: []*IntervalRate{
-					&IntervalRate{
+					{
 						IntervalStart: time.Duration(0 * time.Second),
 						Value:         0.06,
 						Unit:          time.Duration(1 * time.Minute),
@@ -125,18 +125,18 @@ func TestRateProfileSort(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "RP1",
 		Rates: map[string]*Rate{
-			"RT_WEEK": &Rate{
+			"RT_WEEK": {
 				ID:             "RT_WEEK",
 				Weight:         0,
 				ActivationTime: "* * * * 1-5",
 				IntervalRates: []*IntervalRate{
-					&IntervalRate{
+					{
 						IntervalStart: time.Duration(0 * time.Second),
 						Value:         0.12,
 						Unit:          time.Duration(1 * time.Minute),
 						Increment:     time.Duration(1 * time.Minute),
 					},
-					&IntervalRate{
+					{
 						IntervalStart: time.Duration(1 * time.Minute),
 						Value:         0.06,
 						Unit:          time.Duration(1 * time.Minute),
@@ -144,24 +144,24 @@ func TestRateProfileSort(t *testing.T) {
 					},
 				},
 			},
-			"RT_WEEKEND": &Rate{
+			"RT_WEEKEND": {
 				ID:             "RT_WEEKEND",
 				Weight:         10,
 				ActivationTime: "* * * * 0,6",
 				IntervalRates: []*IntervalRate{
-					&IntervalRate{
+					{
 						IntervalStart: time.Duration(10 * time.Second),
 						Value:         0.06,
 						Unit:          time.Duration(1 * time.Minute),
 						Increment:     time.Duration(1 * time.Second),
 					},
-					&IntervalRate{
+					{
 						IntervalStart: time.Duration(18 * time.Second),
 						Value:         0.12,
 						Unit:          time.Duration(1 * time.Minute),
 						Increment:     time.Duration(1 * time.Second),
 					},
-					&IntervalRate{
+					{
 						IntervalStart: time.Duration(1 * time.Minute),
 						Value:         0.18,
 						Unit:          time.Duration(1 * time.Minute),
@@ -169,30 +169,30 @@ func TestRateProfileSort(t *testing.T) {
 					},
 				},
 			},
-			"RT_Custom": &Rate{
+			"RT_Custom": {
 				ID:             "RT_Custom",
 				Weight:         0,
 				ActivationTime: "* * * * 1-5",
 				IntervalRates: []*IntervalRate{
-					&IntervalRate{
+					{
 						IntervalStart: time.Duration(1 * time.Second),
 						Value:         0.12,
 						Unit:          time.Duration(1 * time.Minute),
 						Increment:     time.Duration(1 * time.Minute),
 					},
-					&IntervalRate{
+					{
 						IntervalStart: time.Duration(1 * time.Second),
 						Value:         0.19,
 						Unit:          time.Duration(1 * time.Minute),
 						Increment:     time.Duration(1 * time.Second),
 					},
-					&IntervalRate{
+					{
 						IntervalStart: time.Duration(10 * time.Second),
 						Value:         0.27,
 						Unit:          time.Duration(1 * time.Minute),
 						Increment:     time.Duration(1 * time.Second),
 					},
-					&IntervalRate{
+					{
 						IntervalStart: time.Duration(15 * time.Second),
 						Value:         0.4,
 						Unit:          time.Duration(1 * time.Minute),
@@ -200,12 +200,12 @@ func TestRateProfileSort(t *testing.T) {
 					},
 				},
 			},
-			"RT_CHRISTMAS": &Rate{
+			"RT_CHRISTMAS": {
 				ID:             "RT_CHRISTMAS",
 				Weight:         30,
 				ActivationTime: "* * 24 12 *",
 				IntervalRates: []*IntervalRate{
-					&IntervalRate{
+					{
 						IntervalStart: time.Duration(0 * time.Second),
 						Value:         0.06,
 						Unit:          time.Duration(1 * time.Minute),

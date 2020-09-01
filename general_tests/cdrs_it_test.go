@@ -614,7 +614,7 @@ func testV2CDRsGetThreshold1(t *testing.T) {
 	expected := []string{"THD_ACNT_1001", "THD_PoccessCDR"}
 	var result []string
 	if err := cdrsRpc.Call(utils.APIerSv1GetThresholdProfileIDs,
-		&utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{"cgrates.org"}}, &result); err != nil {
+		&utils.PaginatorWithTenant{Tenant: "cgrates.org"}, &result); err != nil {
 		t.Error(err)
 	} else if len(expected) != len(result) {
 		t.Errorf("Expecting : %+v, received: %+v", expected, result)

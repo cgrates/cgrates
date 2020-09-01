@@ -27,8 +27,8 @@ import (
 func (dS *DispatcherService) CoreSv1Status(args *utils.TenantWithOpts,
 	reply *map[string]interface{}) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args.TenantArg != nil && args.TenantArg.Tenant != utils.EmptyString {
-		tnt = args.TenantArg.Tenant
+	if args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.CoreSv1Status, tnt,
@@ -61,8 +61,8 @@ func (dS *DispatcherService) CoreSv1Ping(args *utils.CGREventWithOpts, reply *st
 func (dS *DispatcherService) CoreSv1Sleep(args *utils.DurationArgs,
 	reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args.TenantArg != nil && args.TenantArg.Tenant != utils.EmptyString {
-		tnt = args.TenantArg.Tenant
+	if args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.CoreSv1Sleep, tnt,

@@ -69,6 +69,6 @@ func (self *CmdGetThresholdProfile) RpcResult() interface{} {
 
 func (self *CmdGetThresholdProfile) GetFormatedResult(result interface{}) string {
 	return GetFormatedResult(result, map[string]struct{}{
-		"MinSleep": struct{}{},
+		"MinSleep": {},
 	})
 }

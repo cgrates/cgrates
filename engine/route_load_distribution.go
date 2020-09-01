@@ -24,17 +24,19 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+// NewLoadDistributionSorter .
 func NewLoadDistributionSorter(rS *RouteService) *LoadDistributionSorter {
 	return &LoadDistributionSorter{rS: rS,
 		sorting: utils.MetaLoad}
 }
 
-// ResourceAscendentSorter orders suppliers based on their Resource Usage
+// LoadDistributionSorter orders suppliers based on their Resource Usage
 type LoadDistributionSorter struct {
 	sorting string
 	rS      *RouteService
 }
 
+// SortRoutes .
 func (ws *LoadDistributionSorter) SortRoutes(prflID string,
 	routes []*Route, suplEv *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
 	sortedRoutes = &SortedRoutes{ProfileID: prflID,

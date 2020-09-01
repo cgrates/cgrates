@@ -35,7 +35,7 @@ func init() {
 type CmdGetDispatcherProfileIDs struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.TenantArgWithPaginator
+	rpcParams *utils.PaginatorWithTenant
 	*CommandExecuter
 }
 
@@ -49,7 +49,7 @@ func (self *CmdGetDispatcherProfileIDs) RpcMethod() string {
 
 func (self *CmdGetDispatcherProfileIDs) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = new(utils.TenantArgWithPaginator)
+		self.rpcParams = new(utils.PaginatorWithTenant)
 	}
 	return self.rpcParams
 }

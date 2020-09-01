@@ -301,7 +301,7 @@ func testInternalReplicateITRatingProfile(t *testing.T) {
 		Category: "call",
 		Subject:  "Subject",
 		RatingPlanActivations: []*utils.TPRatingActivation{
-			&utils.TPRatingActivation{
+			{
 				ActivationTime:   "2012-01-01T00:00:00Z",
 				RatingPlanId:     "RP_1001",
 				FallbackSubjects: "FallbackSubjects"},
@@ -648,10 +648,10 @@ func testInternalReplicateITDispatcherHost(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "DspHst1",
 			Conns: []*config.RemoteHost{
-				&config.RemoteHost{
+				{
 					Address: "*internal",
 				},
-				&config.RemoteHost{
+				{
 					Address:   ":2012",
 					Transport: utils.MetaJSON,
 					TLS:       true,
@@ -928,7 +928,7 @@ func testInternalReplicateITActionPlan(t *testing.T) {
 	atms1 := &AttrSetActionPlan{
 		Id: "ATMS_1",
 		ActionPlan: []*AttrActionPlan{
-			&AttrActionPlan{
+			{
 				ActionsId: "ACTS_1",
 				Time:      utils.ASAP,
 				Weight:    20.0},
@@ -1366,18 +1366,18 @@ func testInternalReplicateITRateProfile(t *testing.T) {
 				MaxCost:          0.6,
 				MaxCostStrategy:  "*free",
 				Rates: map[string]*engine.Rate{
-					"RT_WEEK": &engine.Rate{
+					"RT_WEEK": {
 						ID:             "RT_WEEK",
 						Weight:         0,
 						ActivationTime: "* * * * 1-5",
 						IntervalRates: []*engine.IntervalRate{
-							&engine.IntervalRate{
+							{
 								IntervalStart: time.Duration(0 * time.Second),
 								Value:         0.12,
 								Unit:          time.Duration(1 * time.Minute),
 								Increment:     time.Duration(1 * time.Minute),
 							},
-							&engine.IntervalRate{
+							{
 								IntervalStart: time.Duration(1 * time.Minute),
 								Value:         0.06,
 								Unit:          time.Duration(1 * time.Minute),
@@ -1385,12 +1385,12 @@ func testInternalReplicateITRateProfile(t *testing.T) {
 							},
 						},
 					},
-					"RT_WEEKEND": &engine.Rate{
+					"RT_WEEKEND": {
 						ID:             "RT_WEEKEND",
 						Weight:         10,
 						ActivationTime: "* * * * 0,6",
 						IntervalRates: []*engine.IntervalRate{
-							&engine.IntervalRate{
+							{
 								IntervalStart: time.Duration(0 * time.Second),
 								Value:         0.06,
 								Unit:          time.Duration(1 * time.Minute),
@@ -1398,12 +1398,12 @@ func testInternalReplicateITRateProfile(t *testing.T) {
 							},
 						},
 					},
-					"RT_CHRISTMAS": &engine.Rate{
+					"RT_CHRISTMAS": {
 						ID:             "RT_CHRISTMAS",
 						Weight:         30,
 						ActivationTime: "* * 24 12 *",
 						IntervalRates: []*engine.IntervalRate{
-							&engine.IntervalRate{
+							{
 								IntervalStart: time.Duration(0 * time.Second),
 								Value:         0.06,
 								Unit:          time.Duration(1 * time.Minute),

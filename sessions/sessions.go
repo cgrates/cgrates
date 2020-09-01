@@ -673,9 +673,7 @@ func (sS *SessionS) storeSCost(s *Session, sRunIdx int) (err error) {
 		Cost:           smCost,
 		CheckDuplicate: true,
 		Opts:           s.OptsStart,
-		TenantArg: &utils.TenantArg{
-			Tenant: s.Tenant,
-		},
+		Tenant:         s.Tenant,
 	}
 	var reply string
 	if err := sS.connMgr.Call(sS.cgrCfg.SessionSCfg().CDRsConns, nil, utils.CDRsV2StoreSessionCost,

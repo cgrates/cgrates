@@ -31,8 +31,8 @@ import (
 func TestComposeArgsReload(t *testing.T) {
 	apv1 := &APIerSv1{}
 	expArgs := utils.AttrReloadCacheWithOpts{
-		Opts:      make(map[string]interface{}),
-		TenantArg: utils.TenantArg{Tenant: "cgrates.org"},
+		Opts:   make(map[string]interface{}),
+		Tenant: "cgrates.org",
 		ArgsCache: map[string][]string{
 			utils.AttributeProfileIDs: {"cgrates.org:ATTR1"},
 		},
@@ -67,8 +67,8 @@ func TestComposeArgsReload(t *testing.T) {
 	}
 
 	expArgs = utils.AttrReloadCacheWithOpts{
-		Opts:      make(map[string]interface{}),
-		TenantArg: utils.TenantArg{Tenant: "cgrates.org"},
+		Opts:   make(map[string]interface{}),
+		Tenant: "cgrates.org",
 		ArgsCache: map[string][]string{
 			utils.StatsQueueProfileIDs: {"cgrates.org:Stat2"},
 			utils.StatFilterIndexIDs: {
@@ -133,9 +133,9 @@ func TestCallCache(t *testing.T) {
 	exp := &rpcRequest{
 		Method: utils.CacheSv1Clear,
 		Params: &utils.AttrCacheIDsWithOpts{
-			TenantArg: utils.TenantArg{Tenant: "cgrates.org"},
-			CacheIDs:  []string{utils.CacheStatQueueProfiles, utils.CacheStatFilterIndexes},
-			Opts:      make(map[string]interface{}),
+			Tenant:   "cgrates.org",
+			CacheIDs: []string{utils.CacheStatQueueProfiles, utils.CacheStatFilterIndexes},
+			Opts:     make(map[string]interface{}),
 		},
 	}
 	if err := apv1.CallCache(utils.StringPointer(utils.MetaClear), "cgrates.org", utils.CacheStatQueueProfiles, "", nil, nil, make(map[string]interface{})); err != nil {
@@ -149,8 +149,8 @@ func TestCallCache(t *testing.T) {
 	exp = &rpcRequest{
 		Method: utils.CacheSv1ReloadCache,
 		Params: utils.AttrReloadCacheWithOpts{
-			Opts:      make(map[string]interface{}),
-			TenantArg: utils.TenantArg{Tenant: "cgrates.org"},
+			Opts:   make(map[string]interface{}),
+			Tenant: "cgrates.org",
 			ArgsCache: map[string][]string{
 				utils.StatsQueueProfileIDs: {"cgrates.org:Stat2"},
 				utils.StatFilterIndexIDs: {

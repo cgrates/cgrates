@@ -29,7 +29,7 @@ import (
 func TestAsTransCacheConfig(t *testing.T) {
 	a := &CacheCfg{
 		Partitions: map[string]*CacheParamCfg{
-			"test": &CacheParamCfg{
+			"test": {
 				Limit:     50,
 				TTL:       time.Duration(60 * time.Second),
 				StaticTTL: true,
@@ -75,9 +75,9 @@ func TestCacheCfgloadFromJsonCfg(t *testing.T) {
 }`
 	expected = &CacheCfg{
 		Partitions: map[string]*CacheParamCfg{
-			"*destinations":         &CacheParamCfg{Limit: -1, TTL: time.Duration(0), StaticTTL: false, Precache: false},
-			"*reverse_destinations": &CacheParamCfg{Limit: -1, TTL: time.Duration(0), StaticTTL: false, Precache: false},
-			"*rating_plans":         &CacheParamCfg{Limit: -1, TTL: time.Duration(0), StaticTTL: false, Precache: false},
+			"*destinations":         {Limit: -1, TTL: time.Duration(0), StaticTTL: false, Precache: false},
+			"*reverse_destinations": {Limit: -1, TTL: time.Duration(0), StaticTTL: false, Precache: false},
+			"*rating_plans":         {Limit: -1, TTL: time.Duration(0), StaticTTL: false, Precache: false},
 		},
 	}
 	cachecfg = new(CacheCfg)

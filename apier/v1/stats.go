@@ -40,7 +40,7 @@ func (apierSv1 *APIerSv1) GetStatQueueProfile(arg *utils.TenantID, reply *engine
 }
 
 // GetStatQueueProfileIDs returns list of statQueueProfile IDs registered for a tenant
-func (apierSv1 *APIerSv1) GetStatQueueProfileIDs(args *utils.TenantArgWithPaginator, stsPrfIDs *[]string) error {
+func (apierSv1 *APIerSv1) GetStatQueueProfileIDs(args *utils.PaginatorWithTenant, stsPrfIDs *[]string) error {
 	if missing := utils.MissingStructFields(args, []string{utils.Tenant}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

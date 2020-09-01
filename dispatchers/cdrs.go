@@ -48,8 +48,8 @@ func (dS *DispatcherService) CDRsV1Ping(args *utils.CGREventWithOpts,
 // CDRsV1GetCDRs returns the CDRs that match the filter
 func (dS *DispatcherService) CDRsV1GetCDRs(args *utils.RPCCDRsFilterWithOpts, reply *[]*engine.CDR) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args.TenantArg != nil && args.TenantArg.Tenant != utils.EmptyString {
-		tnt = args.TenantArg.Tenant
+	if args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.CDRsV1GetCDRs, tnt,
@@ -68,8 +68,8 @@ func (dS *DispatcherService) CDRsV1GetCDRs(args *utils.RPCCDRsFilterWithOpts, re
 // CDRsV1GetCDRsCount counts the cdrs that match the filter
 func (dS *DispatcherService) CDRsV1GetCDRsCount(args *utils.RPCCDRsFilterWithOpts, reply *int64) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args.TenantArg != nil && args.TenantArg.Tenant != utils.EmptyString {
-		tnt = args.TenantArg.Tenant
+	if args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.CDRsV1GetCDRsCount, tnt,
@@ -87,8 +87,8 @@ func (dS *DispatcherService) CDRsV1GetCDRsCount(args *utils.RPCCDRsFilterWithOpt
 
 func (dS *DispatcherService) CDRsV1StoreSessionCost(args *engine.AttrCDRSStoreSMCost, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args.TenantArg != nil && args.TenantArg.Tenant != utils.EmptyString {
-		tnt = args.TenantArg.Tenant
+	if args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.CDRsV1StoreSessionCost, tnt,
@@ -106,8 +106,8 @@ func (dS *DispatcherService) CDRsV1StoreSessionCost(args *engine.AttrCDRSStoreSM
 
 func (dS *DispatcherService) CDRsV1RateCDRs(args *engine.ArgRateCDRs, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args.TenantArg != nil && args.TenantArg.Tenant != utils.EmptyString {
-		tnt = args.TenantArg.Tenant
+	if args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.CDRsV1RateCDRs, tnt,
@@ -193,8 +193,8 @@ func (dS *DispatcherService) CDRsV2ProcessEvent(args *engine.ArgV1ProcessEvent, 
 
 func (dS *DispatcherService) CDRsV2StoreSessionCost(args *engine.ArgsV2CDRSStoreSMCost, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args.TenantArg != nil && args.TenantArg.Tenant != utils.EmptyString {
-		tnt = args.TenantArg.Tenant
+	if args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.CDRsV2StoreSessionCost, tnt,

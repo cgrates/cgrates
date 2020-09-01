@@ -28,7 +28,7 @@ func NewAnalyzerSv1(aS *analyzers.AnalyzerService) *AnalyzerSv1 {
 	return &AnalyzerSv1{aS: aS}
 }
 
-// Exports RPC from RLs
+// AnalyzerSv1 exports RPC from RLs
 type AnalyzerSv1 struct {
 	aS *analyzers.AnalyzerService
 }
@@ -40,7 +40,7 @@ func (aSv1 *AnalyzerSv1) Call(serviceMethod string,
 }
 
 // Ping return pong if the service is active
-func (alSv1 *AnalyzerSv1) Ping(ign *utils.CGREvent, reply *string) error {
+func (aSv1 *AnalyzerSv1) Ping(ign *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

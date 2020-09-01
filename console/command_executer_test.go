@@ -153,7 +153,7 @@ func TestGetStringValue(t *testing.T) {
 	expected = `{"ID":"id1","TimeValue":"1s"}`
 	if rply := getStringValue(map[string]interface{}{
 		"ID":        "id1",
-		"TimeValue": int64(time.Second)}, map[string]struct{}{"TimeValue": struct{}{}}); rply != expected {
+		"TimeValue": int64(time.Second)}, map[string]struct{}{"TimeValue": {}}); rply != expected {
 		t.Errorf("Expecting: %s , received: %s", expected, rply)
 	}
 
@@ -188,7 +188,7 @@ func TestGetMapAsString(t *testing.T) {
 	expected = `{"ID":"id1","TimeValue":"1s"}`
 	if rply := getStringValue(map[string]interface{}{
 		"ID":        "id1",
-		"TimeValue": int64(time.Second)}, map[string]struct{}{"TimeValue": struct{}{}}); rply != expected {
+		"TimeValue": int64(time.Second)}, map[string]struct{}{"TimeValue": {}}); rply != expected {
 		t.Errorf("Expecting: %s , received: %s", expected, rply)
 	}
 }
@@ -211,7 +211,7 @@ func TestGetFormatedResult(t *testing.T) {
 }`
 	if rply := GetFormatedResult(map[string]interface{}{
 		"ID":        "id1",
-		"TimeValue": int64(time.Second)}, map[string]struct{}{"TimeValue": struct{}{}}); rply != expected {
+		"TimeValue": int64(time.Second)}, map[string]struct{}{"TimeValue": {}}); rply != expected {
 		t.Errorf("Expecting: %s , received: %s", expected, rply)
 	}
 
