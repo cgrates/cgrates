@@ -194,21 +194,15 @@ func testCsvExportEvent(t *testing.T) {
 			},
 		},
 	}
-	var reply string
+	var reply map[string]utils.MapStorage
 	if err := csvRpc.Call(utils.EventExporterSv1ProcessEvent, eventVoice, &reply); err != nil {
 		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("Expected %+v, received: %+v", utils.OK, reply)
 	}
 	if err := csvRpc.Call(utils.EventExporterSv1ProcessEvent, eventData, &reply); err != nil {
 		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("Expected %+v, received: %+v", utils.OK, reply)
 	}
 	if err := csvRpc.Call(utils.EventExporterSv1ProcessEvent, eventSMS, &reply); err != nil {
 		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("Expected %+v, received: %+v", utils.OK, reply)
 	}
 	time.Sleep(1 * time.Second)
 }
@@ -302,16 +296,12 @@ func testCsvExportComposedEvent(t *testing.T) {
 			},
 		},
 	}
-	var reply string
+	var reply map[string]utils.MapStorage
 	if err := csvRpc.Call(utils.EventExporterSv1ProcessEvent, eventVoice, &reply); err != nil {
 		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("Expected %+v, received: %+v", utils.OK, reply)
 	}
 	if err := csvRpc.Call(utils.EventExporterSv1ProcessEvent, eventSMS, &reply); err != nil {
 		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("Expected %+v, received: %+v", utils.OK, reply)
 	}
 	time.Sleep(1 * time.Second)
 }
@@ -378,10 +368,9 @@ func testCsvExportMaskedDestination(t *testing.T) {
 			},
 		},
 	}
-	if err := csvRpc.Call(utils.EventExporterSv1ProcessEvent, eventVoice, &reply); err != nil {
+	var rply map[string]utils.MapStorage
+	if err := csvRpc.Call(utils.EventExporterSv1ProcessEvent, eventVoice, &rply); err != nil {
 		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("Expected %+v, received: %+v", utils.OK, reply)
 	}
 	time.Sleep(1 * time.Second)
 }
@@ -498,21 +487,15 @@ func testCsvExportEventWithInflateTemplate(t *testing.T) {
 			},
 		},
 	}
-	var reply string
+	var reply map[string]utils.MapStorage
 	if err := csvRpc.Call(utils.EventExporterSv1ProcessEvent, eventVoice, &reply); err != nil {
 		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("Expected %+v, received: %+v", utils.OK, reply)
 	}
 	if err := csvRpc.Call(utils.EventExporterSv1ProcessEvent, eventData, &reply); err != nil {
 		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("Expected %+v, received: %+v", utils.OK, reply)
 	}
 	if err := csvRpc.Call(utils.EventExporterSv1ProcessEvent, eventSMS, &reply); err != nil {
 		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("Expected %+v, received: %+v", utils.OK, reply)
 	}
 	time.Sleep(1 * time.Second)
 }

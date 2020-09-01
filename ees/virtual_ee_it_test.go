@@ -127,11 +127,9 @@ func testVirtExportSupplierEvent(t *testing.T) {
 		},
 	}
 
-	var reply string
+	var reply map[string]utils.MapStorage
 	if err := virtRpc.Call(utils.EventExporterSv1ProcessEvent, supplierEvent, &reply); err != nil {
 		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("Expected %+v, received: %+v", utils.OK, reply)
 	}
 	time.Sleep(10 * time.Millisecond)
 }
@@ -164,11 +162,9 @@ func testVirtExportEvents(t *testing.T) {
 			},
 		},
 	}
-	var reply string
+	var reply map[string]utils.MapStorage
 	if err := virtRpc.Call(utils.EventExporterSv1ProcessEvent, eventVoice, &reply); err != nil {
 		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("Expected %+v, received: %+v", utils.OK, reply)
 	}
 	time.Sleep(1 * time.Second)
 }
