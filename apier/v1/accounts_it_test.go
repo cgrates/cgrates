@@ -990,11 +990,7 @@ func testAccITAccountMonthlyEstimated(t *testing.T) {
 		t.Errorf("Expected: %v,\n received: %v", 1, len(aps))
 	} else {
 		// verify the GetNextTimeStart
-
-		endOfMonth, err := utils.ParseTimeDetectLayout(utils.MetaMonthlyEstimated, "")
-		if err != nil {
-			t.Fatal(err)
-		}
+		endOfMonth := utils.GetEndOfMonth(time.Now())
 		if execDay := aps[0].ActionTimings[0].GetNextStartTime(time.Now()).Day(); execDay != endOfMonth.Day() {
 			t.Errorf("Expected: %v,\n received: %v", endOfMonth.Day(), execDay)
 		}
