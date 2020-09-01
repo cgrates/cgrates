@@ -203,11 +203,9 @@ func testHTTPJsonMapExportEvent(t *testing.T) {
 			},
 		},
 	}
-	var reply string
+	var reply map[string]utils.MapStorage
 	if err := httpJSONMapRpc.Call(utils.EventExporterSv1ProcessEvent, eventVoice, &reply); err != nil {
 		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("Expected %+v, received: %+v", utils.OK, reply)
 	}
 	time.Sleep(10 * time.Millisecond)
 	// verify HTTPJsonMap for eventVoice
@@ -226,8 +224,6 @@ func testHTTPJsonMapExportEvent(t *testing.T) {
 	}
 	if err := httpJSONMapRpc.Call(utils.EventExporterSv1ProcessEvent, eventData, &reply); err != nil {
 		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("Expected %+v, received: %+v", utils.OK, reply)
 	}
 	time.Sleep(10 * time.Millisecond)
 	// verify HTTPJsonMap for eventData
@@ -246,8 +242,6 @@ func testHTTPJsonMapExportEvent(t *testing.T) {
 	}
 	if err := httpJSONMapRpc.Call(utils.EventExporterSv1ProcessEvent, eventSMS, &reply); err != nil {
 		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("Expected %+v, received: %+v", utils.OK, reply)
 	}
 	time.Sleep(10 * time.Millisecond)
 	// verify HTTPJsonMap for eventSMS

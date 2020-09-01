@@ -200,11 +200,9 @@ func testHTTPExportEvent(t *testing.T) {
 			},
 		},
 	}
-	var reply string
+	var reply map[string]utils.MapStorage
 	if err := httpPostRpc.Call(utils.EventExporterSv1ProcessEvent, eventVoice, &reply); err != nil {
 		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("Expected %+v, received: %+v", utils.OK, reply)
 	}
 	time.Sleep(10 * time.Millisecond)
 	// verify HTTPValues for eventVoice
@@ -223,8 +221,6 @@ func testHTTPExportEvent(t *testing.T) {
 	}
 	if err := httpPostRpc.Call(utils.EventExporterSv1ProcessEvent, eventData, &reply); err != nil {
 		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("Expected %+v, received: %+v", utils.OK, reply)
 	}
 	time.Sleep(10 * time.Millisecond)
 	// verify HTTPValues for eventData
@@ -243,8 +239,6 @@ func testHTTPExportEvent(t *testing.T) {
 	}
 	if err := httpPostRpc.Call(utils.EventExporterSv1ProcessEvent, eventSMS, &reply); err != nil {
 		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("Expected %+v, received: %+v", utils.OK, reply)
 	}
 	time.Sleep(10 * time.Millisecond)
 	// verify HTTPValues for eventSMS

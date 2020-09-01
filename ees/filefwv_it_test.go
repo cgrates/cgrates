@@ -126,11 +126,9 @@ func testFwvExportEvent(t *testing.T) {
 			},
 		},
 	}
-	var reply string
+	var reply map[string]utils.MapStorage
 	if err := fwvRpc.Call(utils.EventExporterSv1ProcessEvent, event, &reply); err != nil {
 		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("Expected %+v, received: %+v", utils.OK, reply)
 	}
 	time.Sleep(1 * time.Second)
 }
