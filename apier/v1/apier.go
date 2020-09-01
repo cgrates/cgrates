@@ -1841,7 +1841,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *st
 	return nil
 }
 
-func (apierSv1 *APIerSv1) ExportCDRs(args *utils.ArgExportCDRs, reply *string) error {
+func (apierSv1 *APIerSv1) ExportCDRs(args *utils.ArgExportCDRs, reply *map[string]utils.MapStorage) error {
 	if len(apierSv1.Config.ApierCfg().EEsConns) == 0 {
 		return utils.NewErrNotConnected(utils.EEs)
 	}

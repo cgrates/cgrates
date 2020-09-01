@@ -85,3 +85,7 @@ func (vEe *VirtualEe) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 	updateEEMetrics(vEe.dc, cgrEv.Event, vEe.cgrCfg.GeneralCfg().DefaultTimezone)
 	return
 }
+
+func (vEe *VirtualEe) GetMetrics() utils.MapStorage {
+	return vEe.dc.Clone()
+}

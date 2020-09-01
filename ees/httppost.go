@@ -109,3 +109,7 @@ func (httpPost *HTTPPost) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 	}
 	return
 }
+
+func (httpPost *HTTPPost) GetMetrics() utils.MapStorage {
+	return httpPost.dc.Clone()
+}

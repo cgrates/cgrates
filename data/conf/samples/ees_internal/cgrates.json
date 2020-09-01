@@ -67,6 +67,7 @@
 			"tenant": "cgrates.org",
 			"flags": ["*attributes"],
 			"attribute_context": "customContext",
+			"synchronous": true,
 			"attempts": 1,
 			"field_separator": ",",
 			"fields":[
@@ -93,7 +94,7 @@
 "apiers": {
 	"enabled": true,
 	"scheduler_conns": ["*internal"],
-	"ees_conns": ["*internal"],
+	"ees_conns": ["*localhost"],
 },
 
 
