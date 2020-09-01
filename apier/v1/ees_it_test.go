@@ -143,30 +143,30 @@ func testEEsAddCDRs(t *testing.T) {
 	storedCdrs := []*engine.CDR{
 		{CGRID: "Cdr1",
 			OrderID: 1, ToR: utils.VOICE, OriginID: "OriginCDR1", OriginHost: "192.168.1.1", Source: "test",
-			RequestType: utils.META_RATED, Tenant: "cgrates.org",
-			Category: "call", Account: "1001", Subject: "1001", Destination: "+4986517174963", SetupTime: time.Now(),
-			AnswerTime: time.Now(), RunID: utils.MetaDefault, Usage: time.Duration(10) * time.Second,
+			RequestType: utils.META_NONE, Tenant: "cgrates.org",
+			Category: "call", Account: "1001", Subject: "1001", Destination: "+4986517174963", SetupTime: time.Date(2018, 10, 4, 15, 3, 10, 0, time.UTC),
+			AnswerTime: time.Date(2018, 10, 4, 15, 3, 10, 0, time.UTC), RunID: utils.MetaDefault, Usage: time.Duration(10) * time.Second,
 			ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
 		},
 		{CGRID: "Cdr2",
 			OrderID: 2, ToR: utils.VOICE, OriginID: "OriginCDR2", OriginHost: "192.168.1.1", Source: "test2",
-			RequestType: utils.META_RATED, Tenant: "cgrates.org", Category: "call",
-			Account: "1001", Subject: "1001", Destination: "+4986517174963", SetupTime: time.Now(),
-			AnswerTime: time.Now(), RunID: utils.MetaDefault, Usage: time.Duration(5) * time.Second,
+			RequestType: utils.META_NONE, Tenant: "cgrates.org", Category: "call",
+			Account: "1001", Subject: "1001", Destination: "+4986517174963", SetupTime: time.Date(2018, 10, 4, 15, 3, 10, 0, time.UTC),
+			AnswerTime: time.Date(2018, 10, 4, 15, 3, 10, 0, time.UTC), RunID: utils.MetaDefault, Usage: time.Duration(5) * time.Second,
 			ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
 		},
 		{CGRID: "Cdr3",
 			OrderID: 3, ToR: utils.VOICE, OriginID: "OriginCDR3", OriginHost: "192.168.1.1", Source: "test2",
-			RequestType: utils.META_RATED, Tenant: "cgrates.org", Category: "call",
-			Account: "1001", Subject: "1001", Destination: "+4986517174963", SetupTime: time.Now(),
-			AnswerTime: time.Now(), RunID: utils.MetaDefault, Usage: time.Duration(30) * time.Second,
+			RequestType: utils.META_NONE, Tenant: "cgrates.org", Category: "call",
+			Account: "1001", Subject: "1001", Destination: "+4986517174963", SetupTime: time.Date(2018, 10, 4, 15, 3, 10, 0, time.UTC),
+			AnswerTime: time.Date(2018, 10, 4, 15, 3, 10, 0, time.UTC), RunID: utils.MetaDefault, Usage: time.Duration(30) * time.Second,
 			ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
 		},
 		{CGRID: "Cdr4",
 			OrderID: 4, ToR: utils.VOICE, OriginID: "OriginCDR4", OriginHost: "192.168.1.1", Source: "test3",
-			RequestType: utils.META_RATED, Tenant: "cgrates.org", Category: "call",
-			Account: "1001", Subject: "1001", Destination: "+4986517174963", SetupTime: time.Now(),
-			AnswerTime: time.Time{}, RunID: utils.MetaDefault, Usage: time.Duration(0) * time.Second,
+			RequestType: utils.META_NONE, Tenant: "cgrates.org", Category: "call",
+			Account: "1001", Subject: "1001", Destination: "+4986517174963", SetupTime: time.Date(2018, 10, 4, 15, 3, 10, 0, time.UTC),
+			AnswerTime: time.Date(2018, 10, 4, 15, 3, 10, 0, time.UTC), RunID: utils.MetaDefault, Usage: time.Duration(0) * time.Second,
 			ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
 		},
 	}
@@ -185,11 +185,20 @@ func testEEsExportCDRs(t *testing.T) {
 	attr := &utils.ArgExportCDRs{
 		ExporterIDs: []string{"CSVExporter"},
 	}
-	var rply string
+	var rply map[string]utils.MapStorage
 	if err := eeSRPC.Call(utils.APIerSv1ExportCDRs, &attr, &rply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	}
-	time.Sleep(1 * time.Second)
+	time.Sleep(time.Second)
+	if rply["CSVExporter"]["FirstExpOrderID"] != 1.0 {
+		t.Errorf("Expected %+v, received: %+v", 1.0, rply["CSVExporter"]["FirstExpOrderID"])
+	} else if rply["CSVExporter"]["LastExpOrderID"] != 4.0 {
+		t.Errorf("Expected %+v, received: %+v", 4.0, rply["CSVExporter"]["LastExpOrderID"])
+	} else if rply["CSVExporter"]["NumberOfEvents"] != 4.0 {
+		t.Errorf("Expected %+v, received: %+v", 4.0, rply["CSVExporter"]["NumberOfEvents"])
+	} else if rply["CSVExporter"]["TotalCost"] != 4.04 {
+		t.Errorf("Expected %+v, received: %+v", 4.04, rply["CSVExporter"]["TotalCost"])
+	}
 }
 
 func testEEsVerifyExports(t *testing.T) {
@@ -206,10 +215,10 @@ func testEEsVerifyExports(t *testing.T) {
 	if len(files) != 1 {
 		t.Errorf("Expected %+v, received: %+v", 1, len(files))
 	}
-	eCnt := "Cdr3,*raw,*voice,OriginCDR3,*rated,cgrates.org,call,1001,1001,+4986517174963,2020-08-30T14:40:32+03:00,2020-08-30T14:40:32+03:00,30s,-1\n" +
-		"Cdr4,*raw,*voice,OriginCDR4,*rated,cgrates.org,call,1001,1001,+4986517174963,2020-08-30T14:40:32+03:00,0001-01-01T00:00:00Z,0s,0\n" +
-		"Cdr1,*raw,*voice,OriginCDR1,*rated,cgrates.org,call,1001,1001,+4986517174963,2020-08-30T14:40:32+03:00,2020-08-30T14:40:32+03:00,10s,-1\n" +
-		"Cdr2,*raw,*voice,OriginCDR2,*rated,cgrates.org,call,1001,1001,+4986517174963,2020-08-30T14:40:32+03:00,2020-08-30T14:40:32+03:00,5s,-1\n"
+	eCnt := "Cdr1,*raw,*voice,OriginCDR1,*none,cgrates.org,call,1001,1001,+4986517174963,2018-10-04T18:03:10+03:00,2018-10-04T18:03:10+03:00,10000000000,1.01\n" +
+		"Cdr2,*raw,*voice,OriginCDR2,*none,cgrates.org,call,1001,1001,+4986517174963,2018-10-04T18:03:10+03:00,2018-10-04T18:03:10+03:00,5000000000,1.01\n" +
+		"Cdr3,*raw,*voice,OriginCDR3,*none,cgrates.org,call,1001,1001,+4986517174963,2018-10-04T18:03:10+03:00,2018-10-04T18:03:10+03:00,30000000000,1.01\n" +
+		"Cdr4,*raw,*voice,OriginCDR4,*none,cgrates.org,call,1001,1001,+4986517174963,2018-10-04T18:03:10+03:00,2018-10-04T18:03:10+03:00,0,1.01\n"
 	if outContent1, err := ioutil.ReadFile(files[0]); err != nil {
 		t.Error(err)
 	} else if len(eCnt) != len(string(outContent1)) {

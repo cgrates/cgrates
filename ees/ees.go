@@ -153,6 +153,7 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithIDs, rply *ma
 	var withErr bool
 	var metricMapLock sync.RWMutex
 	metricsMap := make(map[string]utils.MapStorage)
+	isVerbose := cgrEv.HasField(utils.EEsVerbose)
 	for cfgIdx, eeCfg := range eeS.cfg.EEsNoLksCfg().Exporters {
 		if eeCfg.Type == utils.META_NONE || // ignore *none type exporter
 			(lenExpIDs != 0 && !expIDs.Has(eeCfg.ID)) {
@@ -206,7 +207,7 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithIDs, rply *ma
 		if eeCfg.Synchronous {
 			wg.Add(1) // wait for synchronous or file ones since these need to be done before continuing
 		}
-		go func(evict, sync bool, ee EventExporter) {
+		go func(evict, sync bool, ee EventExporter, eeCfg *config.EventExporterCfg) {
 			if err := ee.ExportEvent(cgrEv.CGREvent); err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> with id <%s>, error: <%s>",
@@ -219,14 +220,21 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithIDs, rply *ma
 			metricMapLock.Lock()
 			metricsMap[ee.ID()] = ee.GetMetrics()
 			metricMapLock.Unlock()
+			if isVerbose && !eeCfg.Synchronous {
+				utils.Logger.Warning(
+					fmt.Sprintf("<%s> with id <%s>, running verbosed export with syncronous false",
+						utils.EventExporterS, ee.ID()))
+				withErr = true
+			}
 			if sync {
 				wg.Done()
 			}
-		}(!hasCache, eeCfg.Synchronous, ee)
+		}(!hasCache, eeCfg.Synchronous, ee, eeCfg)
 	}
 	wg.Wait()
 	if withErr {
 		err = utils.ErrPartiallyExecuted
+		return
 	}
 
 	*rply = make(map[string]utils.MapStorage)
@@ -235,7 +243,6 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithIDs, rply *ma
 		(*rply)[k] = v
 	}
 	metricMapLock.Unlock()
-
 	return
 }
 

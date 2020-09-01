@@ -141,3 +141,7 @@ func (httpJson *HTTPJsonMapEe) post(body []byte, key string) (err error) {
 	}
 	return
 }
+
+func (httpJson *HTTPJsonMapEe) GetMetrics() utils.MapStorage {
+	return httpJson.dc.Clone()
+}

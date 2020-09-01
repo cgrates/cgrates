@@ -168,3 +168,7 @@ func (fFwv *FileFWVee) composeTrailer() (err error) {
 	}
 	return
 }
+
+func (fFwv *FileFWVee) GetMetrics() utils.MapStorage {
+	return fFwv.dc.Clone()
+}
