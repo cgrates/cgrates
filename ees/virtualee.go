@@ -28,7 +28,7 @@ import (
 
 func NewVirtualExporter(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.FilterS,
 	dc utils.MapStorage) (vEe *VirtualEe, err error) {
-	dc[utils.ExportID] = cgrCfg.EEsCfg().Exporters[cfgIdx].ID
+	dc[utils.ExporterID] = cgrCfg.EEsCfg().Exporters[cfgIdx].ID
 	vEe = &VirtualEe{id: cgrCfg.EEsCfg().Exporters[cfgIdx].ID,
 		cgrCfg: cgrCfg, cfgIdx: cfgIdx, filterS: filterS, dc: dc}
 	err = vEe.init()

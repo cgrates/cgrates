@@ -31,7 +31,7 @@ import (
 
 func NewHTTPPostEe(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.FilterS,
 	dc utils.MapStorage) (httpPost *HTTPPost, err error) {
-	dc[utils.ExportID] = cgrCfg.EEsCfg().Exporters[cfgIdx].ID
+	dc[utils.ExporterID] = cgrCfg.EEsCfg().Exporters[cfgIdx].ID
 	httpPost = &HTTPPost{id: cgrCfg.EEsCfg().Exporters[cfgIdx].ID,
 		cgrCfg: cgrCfg, cfgIdx: cfgIdx, filterS: filterS, dc: dc}
 	httpPost.httpPoster, err = engine.NewHTTPPoster(cgrCfg.GeneralCfg().HttpSkipTlsVerify,

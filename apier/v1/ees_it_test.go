@@ -184,20 +184,21 @@ func testEEsAddCDRs(t *testing.T) {
 func testEEsExportCDRs(t *testing.T) {
 	attr := &utils.ArgExportCDRs{
 		ExporterIDs: []string{"CSVExporter"},
+		Verbose:     true,
 	}
-	var rply map[string]utils.MapStorage
+	var rply map[string]interface{}
 	if err := eeSRPC.Call(utils.APIerSv1ExportCDRs, &attr, &rply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	}
 	time.Sleep(time.Second)
-	if rply["CSVExporter"]["FirstExpOrderID"] != 1.0 {
-		t.Errorf("Expected %+v, received: %+v", 1.0, rply["CSVExporter"]["FirstExpOrderID"])
-	} else if rply["CSVExporter"]["LastExpOrderID"] != 4.0 {
-		t.Errorf("Expected %+v, received: %+v", 4.0, rply["CSVExporter"]["LastExpOrderID"])
-	} else if rply["CSVExporter"]["NumberOfEvents"] != 4.0 {
-		t.Errorf("Expected %+v, received: %+v", 4.0, rply["CSVExporter"]["NumberOfEvents"])
-	} else if rply["CSVExporter"]["TotalCost"] != 4.04 {
-		t.Errorf("Expected %+v, received: %+v", 4.04, rply["CSVExporter"]["TotalCost"])
+	if rply["FirstExpOrderID"] != 1.0 {
+		t.Errorf("Expected %+v, received: %+v", 1.0, rply["FirstExpOrderID"])
+	} else if rply["LastExpOrderID"] != 4.0 {
+		t.Errorf("Expected %+v, received: %+v", 4.0, rply["LastExpOrderID"])
+	} else if rply["NumberOfEvents"] != 4.0 {
+		t.Errorf("Expected %+v, received: %+v", 4.0, rply["NumberOfEvents"])
+	} else if rply["TotalCost"] != 4.04 {
+		t.Errorf("Expected %+v, received: %+v", 4.04, rply["TotalCost"])
 	}
 }
 

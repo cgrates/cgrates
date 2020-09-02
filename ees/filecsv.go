@@ -33,7 +33,7 @@ import (
 
 func NewFileCSVee(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.FilterS,
 	dc utils.MapStorage) (fCsv *FileCSVee, err error) {
-	dc[utils.ExportID] = cgrCfg.EEsCfg().Exporters[cfgIdx].ID
+	dc[utils.ExporterID] = cgrCfg.EEsCfg().Exporters[cfgIdx].ID
 	fCsv = &FileCSVee{id: cgrCfg.EEsCfg().Exporters[cfgIdx].ID,
 		cgrCfg: cgrCfg, cfgIdx: cfgIdx, filterS: filterS, dc: dc}
 	err = fCsv.init()

@@ -141,7 +141,8 @@ func (eeS *EventExporterS) attrSProcessEvent(cgrEv *utils.CGREventWithOpts, attr
 }
 
 // V1ProcessEvent will be called each time a new event is received from readers
-func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithIDs, rply *map[string]utils.MapStorage) (err error) {
+// rply -> map[string]map[string]interface{}
+func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithIDs, rply *map[string]map[string]interface{}) (err error) {
 	eeS.cfg.RLocks(config.EEsJson)
 	defer eeS.cfg.RUnlocks(config.EEsJson)
 
@@ -153,7 +154,7 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithIDs, rply *ma
 	var withErr bool
 	var metricMapLock sync.RWMutex
 	metricsMap := make(map[string]utils.MapStorage)
-	isVerbose := cgrEv.HasField(utils.EEsVerbose)
+	_, hasVerbose := cgrEv.Opts[utils.OptsEEsVerbose]
 	for cfgIdx, eeCfg := range eeS.cfg.EEsNoLksCfg().Exporters {
 		if eeCfg.Type == utils.META_NONE || // ignore *none type exporter
 			(lenExpIDs != 0 && !expIDs.Has(eeCfg.ID)) {
@@ -207,7 +208,16 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithIDs, rply *ma
 		if eeCfg.Synchronous {
 			wg.Add(1) // wait for synchronous or file ones since these need to be done before continuing
 		}
-		go func(evict, sync bool, ee EventExporter, eeCfg *config.EventExporterCfg) {
+		metricMapLock.Lock()
+		metricsMap[ee.ID()] = utils.MapStorage{}
+		metricMapLock.Unlock()
+		// log the message before starting the gorutine, but still execute the exporter
+		if hasVerbose && !eeCfg.Synchronous {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> with id <%s>, running verbosed exporter with syncronous false",
+					utils.EventExporterS, ee.ID()))
+		}
+		go func(evict, sync bool, ee EventExporter) {
 			if err := ee.ExportEvent(cgrEv.CGREvent); err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> with id <%s>, error: <%s>",
@@ -217,19 +227,15 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithIDs, rply *ma
 			if evict {
 				ee.OnEvicted("", nil) // so we can close ie the file
 			}
-			metricMapLock.Lock()
-			metricsMap[ee.ID()] = ee.GetMetrics()
-			metricMapLock.Unlock()
-			if isVerbose && !eeCfg.Synchronous {
-				utils.Logger.Warning(
-					fmt.Sprintf("<%s> with id <%s>, running verbosed export with syncronous false",
-						utils.EventExporterS, ee.ID()))
-				withErr = true
+			if hasVerbose && eeCfg.Synchronous {
+				metricMapLock.Lock()
+				metricsMap[ee.ID()] = ee.GetMetrics()
+				metricMapLock.Unlock()
 			}
 			if sync {
 				wg.Done()
 			}
-		}(!hasCache, eeCfg.Synchronous, ee, eeCfg)
+		}(!hasCache, eeCfg.Synchronous, ee)
 	}
 	wg.Wait()
 	if withErr {
@@ -237,7 +243,7 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithIDs, rply *ma
 		return
 	}
 
-	*rply = make(map[string]utils.MapStorage)
+	*rply = make(map[string]map[string]interface{})
 	metricMapLock.Lock()
 	for k, v := range metricsMap {
 		(*rply)[k] = v
