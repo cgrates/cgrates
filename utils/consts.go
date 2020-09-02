@@ -806,7 +806,8 @@ const (
 	Attempts                 = "Attempts"
 	FieldSeparator           = "FieldSeparator"
 	ExportPath               = "ExportPath"
-	ExportID                 = "ExportID"
+	ExporterID               = "ExporterID"
+	ExporterIDs              = "ExporterIDs"
 	TimeNow                  = "TimeNow"
 	ExportFileName           = "ExportFileName"
 	GroupID                  = "GroupID"
@@ -856,7 +857,6 @@ const (
 	RouteID                  = "RouteID"
 	MetaMonthlyEstimated     = "*monthly_estimated"
 	ProcessRuns              = "ProcessRuns"
-	EEsVerbose               = "*eesVerbose"
 )
 
 // Migrator Action
@@ -2365,6 +2365,8 @@ const (
 	// DispatcherS
 	OptsAPIKey  = "*apiKey"
 	OptsRouteID = "*routeID"
+	// EEs
+	OptsEEsVerbose = "*eesVerbose"
 	// Others
 	OptsContext               = "*context"
 	Subsys                    = "*subsys"

@@ -1841,7 +1841,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *st
 	return nil
 }
 
-func (apierSv1 *APIerSv1) ExportCDRs(args *utils.ArgExportCDRs, reply *map[string]utils.MapStorage) error {
+func (apierSv1 *APIerSv1) ExportCDRs(args *utils.ArgExportCDRs, reply *map[string]interface{}) error {
 	if len(apierSv1.Config.ApierCfg().EEsConns) == 0 {
 		return utils.NewErrNotConnected(utils.EEs)
 	}
@@ -1856,12 +1856,20 @@ func (apierSv1 *APIerSv1) ExportCDRs(args *utils.ArgExportCDRs, reply *map[strin
 		return utils.ErrNotFound
 	}
 	withErros := false
+	var rplyCdr map[string]map[string]interface{}
 	for _, cdr := range cdrs {
+		argCdr := &utils.CGREventWithIDs{
+			IDs: args.ExporterIDs,
+			CGREventWithOpts: &utils.CGREventWithOpts{
+				CGREvent: cdr.AsCGREvent(),
+				Opts:     make(map[string]interface{}),
+			},
+		}
+		if args.Verbose {
+			argCdr.CGREventWithOpts.Opts[utils.EEsVerbose] = struct{}{}
+		}
 		if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().EEsConns, nil, utils.EventExporterSv1ProcessEvent,
-			&utils.CGREventWithIDs{
-				IDs:              args.ExporterIDs,
-				CGREventWithOpts: &utils.CGREventWithOpts{CGREvent: cdr.AsCGREvent()},
-			}, reply); err != nil {
+			argCdr, &rplyCdr); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<%s> error: <%s> processing event: <%s> with <%s>",
 				utils.ApierS, err.Error(), utils.ToJSON(cdr.AsCGREvent()), utils.EventExporterS))
 			withErros = true
@@ -1869,6 +1877,19 @@ func (apierSv1 *APIerSv1) ExportCDRs(args *utils.ArgExportCDRs, reply *map[strin
 	}
 	if withErros {
 		return utils.ErrPartiallyExecuted
+	}
+	// we consider only the last reply because it should have the metrics updated
+	if !args.Verbose {
+		(*reply)[utils.ExporterIDs] = make([]string, 0, len(rplyCdr))
+	}
+	for exporterID, metrics := range rplyCdr {
+		if !args.Verbose {
+			(*reply)[utils.ExporterIDs] = append((*reply)[utils.ExporterIDs].([]string), exporterID)
+		} else {
+			for k, v := range metrics {
+				(*reply)[k] = v
+			}
+		}
 	}
 	return nil
 }

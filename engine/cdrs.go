@@ -150,7 +150,8 @@ func (cdrS *CDRServer) rateCDR(cdr *CDRWithOpts) ([]*CDR, error) {
 	var cdrsRated []*CDR
 	_, hasLastUsed := cdr.ExtraFields[utils.LastUsed]
 	if utils.SliceHasMember([]string{utils.META_PREPAID, utils.PREPAID}, cdr.RequestType) &&
-		(cdr.Usage != 0 || hasLastUsed) && cdr.CostDetails == nil { // ToDo: Get rid of PREPAID as soon as we don't want to support it backwards
+		(cdr.Usage != 0 || hasLastUsed) && cdr.CostDetails == nil {
+		// ToDo: Get rid of PREPAID as soon as we don't want to support it backwards
 		// Should be previously calculated and stored in DB
 		fib := utils.Fib()
 		var smCosts []*SMCost
@@ -418,7 +419,7 @@ func (cdrS *CDRServer) statSProcessEvent(cgrEv *utils.CGREventWithOpts) (err err
 
 // eeSProcessEvent will process the event with the EEs component
 func (cdrS *CDRServer) eeSProcessEvent(cgrEv *utils.CGREventWithIDs) (err error) {
-	var reply string
+	var reply map[string]map[string]interface{}
 	if err = cdrS.connMgr.Call(cdrS.cgrCfg.CdrsCfg().EEsConns, nil,
 		utils.EventExporterSv1ProcessEvent,
 		cgrEv, &reply); err != nil &&
