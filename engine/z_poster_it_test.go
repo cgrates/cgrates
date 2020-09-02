@@ -23,7 +23,6 @@ import (
 	"context"
 	"encoding/json"
 	"flag"
-	"fmt"
 	"path/filepath"
 	"reflect"
 	"testing"
@@ -75,7 +74,7 @@ func TestHttpJsonPoster(t *testing.T) {
 	if err = pstr.PostValues(jsn); err == nil {
 		t.Error("Expected error")
 	}
-	AddFailedPost("http://localhost:8080/invalid", utils.CONTENT_JSON, "test1", jsn)
+	AddFailedPost("http://localhost:8080/invalid", utils.CONTENT_JSON, "test1", jsn, make(map[string]interface{}))
 	time.Sleep(2)
 	fs, err := filepath.Glob("/tmp/test1*")
 	if err != nil {
@@ -108,7 +107,7 @@ func TestHttpBytesPoster(t *testing.T) {
 	if err = pstr.PostValues(content); err == nil {
 		t.Error("Expected error")
 	}
-	AddFailedPost("http://localhost:8080/invalid", utils.CONTENT_JSON, "test2", content)
+	AddFailedPost("http://localhost:8080/invalid", utils.CONTENT_JSON, "test2", content, make(map[string]interface{}))
 	time.Sleep(2)
 	fs, err := filepath.Glob("/tmp/test2*")
 	if err != nil {
@@ -145,17 +144,18 @@ func TestSQSPoster(t *testing.T) {
 	awsKey := "replace-this-with-your-secret-key"
 	awsSecret := "replace-this-with-your-secret"
 	qname := "cgrates-cdrs"
-	//#####################################
 
-	// export_path for sqs:  "endpoint?aws_region=region&aws_key=IDkey&aws_secret=secret&aws_token=sessionToken&queue_id=cgrates-cdrs"
-	dialURL := fmt.Sprintf("%s?aws_region=%s&aws_key=%s&aws_secret=%s&queue_id=%s", endpoint, region, awsKey, awsSecret, qname)
+	opts := map[string]interface{}{
+		"aws_region": region,
+		"aws_key":    awsKey,
+		"aws_secret": awsSecret,
+		"queue_id":   qname,
+	}
+	//#####################################
 
 	body := "testString"
 
-	pstr, err := PostersCache.GetSQSPoster(dialURL, 5)
-	if err != nil {
-		t.Fatal(err)
-	}
+	pstr := NewSQSPoster(endpoint, 5, opts)
 	if err := pstr.Post([]byte(body), ""); err != nil {
 		t.Fatal(err)
 	}
@@ -225,17 +225,18 @@ func TestS3Poster(t *testing.T) {
 	awsKey := "replace-this-with-your-secret-key"
 	awsSecret := "replace-this-with-your-secret"
 	qname := "cgrates-cdrs"
-	//#####################################
 
-	// export_path for s3:  "endpoint?aws_region=region&aws_key=IDkey&aws_secret=secret&aws_token=sessionToken&queue_id=cgrates-cdrs"
-	dialURL := fmt.Sprintf("%s?aws_region=%s&aws_key=%s&aws_secret=%s&queue_id=%s", endpoint, region, awsKey, awsSecret, qname)
+	opts := map[string]interface{}{
+		"aws_region": region,
+		"aws_key":    awsKey,
+		"aws_secret": awsSecret,
+		"queue_id":   qname,
+	}
+	//#####################################
 
 	body := "testString"
 	key := "key1234"
-	pstr, err := PostersCache.GetS3Poster(dialURL, 5)
-	if err != nil {
-		t.Fatal(err)
-	}
+	pstr := NewS3Poster(endpoint, 5, opts)
 	if err := pstr.Post([]byte(body), key); err != nil {
 		t.Fatal(err)
 	}
@@ -284,17 +285,14 @@ func TestAMQPv1Poster(t *testing.T) {
 	// update this variables
 	endpoint := "amqps://RootManageSharedAccessKey:UlfIJ%2But11L0ZzA%2Fgpje8biFJeQihpWibJsUhaOi1DU%3D@cdrscgrates.servicebus.windows.net"
 	qname := "cgrates-cdrs"
+	opts := map[string]interface{}{
+		"queue_id": qname,
+	}
 	//#####################################
-
-	// export_path for amqpv1:  "amqps://admin:admin@endpoint?queue_id=cgrates_cdrs",
-	dialURL := fmt.Sprintf("%s?queue_id=%s", endpoint, qname)
 
 	body := "testString"
 
-	pstr, err := PostersCache.GetAMQPv1Poster(dialURL, 5)
-	if err != nil {
-		t.Fatal(err)
-	}
+	pstr := NewAMQPv1Poster(endpoint, 5, opts)
 	if err := pstr.Post([]byte(body), ""); err != nil {
 		t.Fatal(err)
 	}

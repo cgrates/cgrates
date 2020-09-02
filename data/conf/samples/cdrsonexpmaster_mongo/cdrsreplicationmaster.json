@@ -73,7 +73,13 @@
 		{
 			"id": "amqp_localhost",
 			"type": "*amqp_json_map",
-			"export_path": "amqp://guest:guest@localhost:5672/?queue_id=cgrates_cdrs&exchange=exchangename&exchange_type=fanout&routing_key=cgr_cdrs",
+			"export_path": "amqp://guest:guest@localhost:5672/",
+			"opts": {
+				"queue_id": "cgrates_cdrs",
+				"exchange": "exchangename",
+				"exchange_type": "fanout",
+				"routing_key": "cgr_cdrs",
+			},
 			"tenant": "cgrates.org",
 			"attempts": 3,
 			"fields":[
@@ -106,7 +112,10 @@
 		{
 			"id": "aws_test_file",
 			"type": "*amqpv1_json_map",
-			"export_path": "amqps://guest:guest@localhost:25672/?queue_id=cgrates_cdrs",
+			"export_path": "amqps://guest:guest@localhost:25672/",
+			"opts": {
+				"queue_id": "cgrates_cdrs",
+			},
 			"tenant": "cgrates.org",
 			"attempts": 1,
 			"fields":[
@@ -116,8 +125,14 @@
 		{
 			"id": "sqs_test_file",
 			"type": "*sqs_json_map",
-			// export_path for sqs:  "endpoint?aws_region=region&aws_key=IDkey&aws_secret=secret&aws_token=sessionToken&queue_id=cgrates-cdrs"
-			"export_path": "http://sqs.eu-west-2.amazonaws.com/?aws_region=eu-west-2&aws_key=testkey&aws_secret=testsecret&queue_id=cgrates-cdrs",
+			// export_path for sqs:  "endpoint"
+			"export_path": "http://sqs.eu-west-2.amazonaws.com/",
+			"opts": {
+				"aws_region": "eu-west-2",
+				"aws_key": "testkey",
+				"aws_secret": "testsecret",
+				"queue_id": "cgrates-cdrs",
+			},
 			"tenant": "cgrates.org",
 			"attempts": 1,
 			"fields":[
@@ -127,7 +142,10 @@
 		{
 			"id": "amqp_test_file",
 			"type": "*amqp_json_map",
-			"export_path": "amqp://guest:guest@localhost:25672/?queue_id=cgrates_cdrs",
+			"export_path": "amqp://guest:guest@localhost:25672/",
+			"opts": {
+				"queue_id": "cgrates_cdrs",
+			},
 			"tenant": "cgrates.org",
 			"attempts": 1,
 			"fields":[
@@ -137,7 +155,10 @@
 		{
 			"id": "kafka_localhost",
 			"type": "*kafka_json_map",
-			"export_path": "localhost:9092?topic=cgrates_cdrs",
+			"export_path": "localhost:9092",
+			"opts": {
+				"topic": "cgrates_cdrs",
+			},
 			"tenant": "cgrates.org",
 			"attempts": 1,
 			"fields":[
@@ -147,8 +168,14 @@
 		{
 			"id": "s3_test_file",
 			"type": "*s3_json_map",
-			// export_path for s3:  "endpoint?aws_region=region&aws_key=IDkey&aws_secret=secret&aws_token=sessionToken&queue_id=cgrates-cdrs"
-			"export_path": "http://s3.us-east-2.amazonaws.com/?aws_region=eu-west-2&aws_key=testkey&aws_secret=testsecret&queue_id=cgrates-cdrs",
+			// export_path for s3:  "endpoint"
+			"export_path": "http://s3.us-east-2.amazonaws.com/",
+			"opts": {
+				"aws_region": "eu-west-2",
+				"aws_key": "testkey",
+				"aws_secret": "testsecret",
+				"queue_id": "cgrates-cdrs",
+			},
 			"tenant": "cgrates.org",
 			"attempts": 1,
 			"fields":[
@@ -158,7 +185,10 @@
 		{
 			"id": "eventcost_filter",
 			"type": "*amqp_json_map",
-			"export_path": "amqp://guest:guest@wrongurl:25672/?queue_id=cgrates_cdrs",
+			"export_path": "amqp://guest:guest@wrongurl:25672/",
+			"opts": {
+				"queue_id": "cgrates_cdrs",
+			},
 			"tenant": "cgrates.org",
 			"filters":["*string:~*ec.Cost:100"],
 			"attempts": 1,

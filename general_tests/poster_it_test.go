@@ -19,20 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package general_tests
 
-import (
-	"encoding/json"
-	"fmt"
-	"io/ioutil"
-	"net/rpc"
-	"path"
-	"testing"
-	"time"
-
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
-)
-
+/*
 var (
 	pstrCfg       *config.CGRConfig
 	pstrRpc       *rpc.Client
@@ -337,3 +324,4 @@ func testPosterITStopCgrEngine(t *testing.T) {
 		t.Error(err)
 	}
 }
+*/

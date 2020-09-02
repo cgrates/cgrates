@@ -58,8 +58,13 @@ func writeFailedPosts(itmID string, value interface{}) {
 	return
 }
 
-func AddFailedPost(expPath, format, module string, ev interface{}) {
+func AddFailedPost(expPath, format, module string, ev interface{}, opts map[string]interface{}) {
 	key := utils.ConcatenatedKey(expPath, format, module)
+	// also in case of amqp,amqpv1,s3,sqs and kafka also separe them after queue id
+	if qID := utils.FirstNonEmpty(utils.IfaceAsString(opts[QueueID]),
+		utils.IfaceAsString(opts[utils.KafkaTopic])); len(qID) != 0 {
+		key = utils.ConcatenatedKey(key, qID)
+	}
 	var failedPost *ExportEvents
 	if x, ok := failedPostCache.Get(key); ok {
 		if x != nil {
@@ -70,6 +75,7 @@ func AddFailedPost(expPath, format, module string, ev interface{}) {
 		failedPost = &ExportEvents{
 			Path:   expPath,
 			Format: format,
+			Opts:   opts,
 			module: module,
 		}
 	}
@@ -101,6 +107,7 @@ func NewExportEventsFromFile(filePath string) (expEv *ExportEvents, err error) {
 type ExportEvents struct {
 	lk     sync.RWMutex
 	Path   string
+	Opts   map[string]interface{}
 	Format string
 	Events []interface{}
 	module string
@@ -142,8 +149,11 @@ func (expEv *ExportEvents) AddEvent(ev interface{}) {
 func (expEv *ExportEvents) ReplayFailedPosts(attempts int) (failedEvents *ExportEvents, err error) {
 	failedEvents = &ExportEvents{
 		Path:   expEv.Path,
+		Opts:   expEv.Opts,
 		Format: expEv.Format,
 	}
+	var pstr Poster
+	keyFunc := func() string { return utils.EmptyString }
 	switch expEv.Format {
 	case utils.MetaHTTPjsonCDR, utils.MetaHTTPjsonMap, utils.MetaHTTPjson, utils.MetaHTTPPost:
 		var pstr *HTTPPoster
@@ -160,42 +170,31 @@ func (expEv *ExportEvents) ReplayFailedPosts(attempts int) (failedEvents *Export
 				failedEvents.AddEvent(ev)
 			}
 		}
+		if len(failedEvents.Events) > 0 {
+			err = utils.ErrPartiallyExecuted
+		} else {
+			failedEvents = nil
+		}
+		return
 	case utils.MetaAMQPjsonCDR, utils.MetaAMQPjsonMap:
-		for _, ev := range expEv.Events {
-			err = PostersCache.PostAMQP(expEv.Path, attempts, ev.([]byte))
-			if err != nil {
-				failedEvents.AddEvent(ev)
-			}
-		}
+		pstr = NewAMQPPoster(expEv.Path, attempts, expEv.Opts)
 	case utils.MetaAMQPV1jsonMap:
-		for _, ev := range expEv.Events {
-			err = PostersCache.PostAMQPv1(expEv.Path, attempts, ev.([]byte))
-			if err != nil {
-				failedEvents.AddEvent(ev)
-			}
-		}
+		pstr = NewAMQPv1Poster(expEv.Path, attempts, expEv.Opts)
 	case utils.MetaSQSjsonMap:
-		for _, ev := range expEv.Events {
-			err = PostersCache.PostSQS(expEv.Path, attempts, ev.([]byte))
-			if err != nil {
-				failedEvents.AddEvent(ev)
-			}
-		}
+		pstr = NewSQSPoster(expEv.Path, attempts, expEv.Opts)
 	case utils.MetaKafkajsonMap:
-		for _, ev := range expEv.Events {
-			err = PostersCache.PostKafka(expEv.Path, attempts, ev.([]byte), utils.UUIDSha1Prefix())
-			if err != nil {
-				failedEvents.AddEvent(ev)
-			}
-		}
+		pstr = NewKafkaPoster(expEv.Path, attempts, expEv.Opts)
+		keyFunc = utils.UUIDSha1Prefix
 	case utils.MetaS3jsonMap:
-		for _, ev := range expEv.Events {
-			err = PostersCache.PostS3(expEv.Path, attempts, ev.([]byte), utils.UUIDSha1Prefix())
-			if err != nil {
-				failedEvents.AddEvent(ev)
-			}
+		pstr = NewS3Poster(expEv.Path, attempts, expEv.Opts)
+		keyFunc = utils.UUIDSha1Prefix
+	}
+	for _, ev := range expEv.Events {
+		if err = pstr.Post(ev.([]byte), keyFunc()); err != nil {
+			failedEvents.AddEvent(ev)
 		}
 	}
+	pstr.Close()
 	if len(failedEvents.Events) > 0 {
 		err = utils.ErrPartiallyExecuted
 	} else {

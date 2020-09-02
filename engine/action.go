@@ -99,11 +99,6 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 		utils.SetExpiry:                 setExpiryAction,
 		utils.MetaPublishAccount:        publishAccount,
 		utils.MetaPublishBalance:        publishBalance,
-		utils.MetaAMQPjsonMap:           sendAMQP,
-		utils.MetaAMQPV1jsonMap:         sendAWS,
-		utils.MetaSQSjsonMap:            sendSQS,
-		utils.MetaKafkajsonMap:          sendKafka,
-		utils.MetaS3jsonMap:             sendS3,
 		utils.MetaRemoveSessionCosts:    removeSessionCosts,
 		utils.MetaRemoveExpired:         removeExpired,
 		utils.MetaPostEvent:             postEvent,
@@ -384,71 +379,6 @@ func getOneData(ub *Account, extraData interface{}) ([]byte, error) {
 	return nil, nil
 }
 
-func sendAMQP(ub *Account, a *Action, acs Actions, extraData interface{}) error {
-	body, err := getOneData(ub, extraData)
-	if err != nil {
-		return err
-	}
-	err = PostersCache.PostAMQP(a.ExtraParameters, config.CgrConfig().GeneralCfg().PosterAttempts, body)
-	if err != nil && config.CgrConfig().GeneralCfg().FailedPostsDir != utils.META_NONE {
-		AddFailedPost(a.ExtraParameters, utils.MetaAMQPjsonMap, utils.ActionsPoster+utils.HIERARCHY_SEP+a.ActionType, body)
-		err = nil
-	}
-	return err
-}
-
-func sendAWS(ub *Account, a *Action, acs Actions, extraData interface{}) error {
-	body, err := getOneData(ub, extraData)
-	if err != nil {
-		return err
-	}
-	err = PostersCache.PostAMQPv1(a.ExtraParameters, config.CgrConfig().GeneralCfg().PosterAttempts, body)
-	if err != nil && config.CgrConfig().GeneralCfg().FailedPostsDir != utils.META_NONE {
-		AddFailedPost(a.ExtraParameters, utils.MetaAMQPV1jsonMap, utils.ActionsPoster+utils.HIERARCHY_SEP+a.ActionType, body)
-		err = nil
-	}
-	return err
-}
-
-func sendSQS(ub *Account, a *Action, acs Actions, extraData interface{}) error {
-	body, err := getOneData(ub, extraData)
-	if err != nil {
-		return err
-	}
-	err = PostersCache.PostSQS(a.ExtraParameters, config.CgrConfig().GeneralCfg().PosterAttempts, body)
-	if err != nil && config.CgrConfig().GeneralCfg().FailedPostsDir != utils.META_NONE {
-		AddFailedPost(a.ExtraParameters, utils.MetaSQSjsonMap, utils.ActionsPoster+utils.HIERARCHY_SEP+a.ActionType, body)
-		err = nil
-	}
-	return err
-}
-
-func sendKafka(ub *Account, a *Action, acs Actions, extraData interface{}) error {
-	body, err := getOneData(ub, extraData)
-	if err != nil {
-		return err
-	}
-	err = PostersCache.PostKafka(a.ExtraParameters, config.CgrConfig().GeneralCfg().PosterAttempts, body, utils.UUIDSha1Prefix())
-	if err != nil && config.CgrConfig().GeneralCfg().FailedPostsDir != utils.META_NONE {
-		AddFailedPost(a.ExtraParameters, utils.MetaKafkajsonMap, utils.ActionsPoster+utils.HIERARCHY_SEP+a.ActionType, body)
-		err = nil
-	}
-	return err
-}
-
-func sendS3(ub *Account, a *Action, acs Actions, extraData interface{}) error {
-	body, err := getOneData(ub, extraData)
-	if err != nil {
-		return err
-	}
-	err = PostersCache.PostS3(a.ExtraParameters, config.CgrConfig().GeneralCfg().PosterAttempts, body, utils.UUIDSha1Prefix())
-	if err != nil && config.CgrConfig().GeneralCfg().FailedPostsDir != utils.META_NONE {
-		AddFailedPost(a.ExtraParameters, utils.MetaS3jsonMap, utils.ActionsPoster+utils.HIERARCHY_SEP+a.ActionType, body)
-		err = nil
-	}
-	return err
-}
-
 func callURL(ub *Account, a *Action, acs Actions, extraData interface{}) error {
 	body, err := getOneData(ub, extraData)
 	if err != nil {
@@ -462,7 +392,7 @@ func callURL(ub *Account, a *Action, acs Actions, extraData interface{}) error {
 	}
 	err = pstr.PostValues(body)
 	if err != nil && config.CgrConfig().GeneralCfg().FailedPostsDir != utils.META_NONE {
-		AddFailedPost(a.ExtraParameters, utils.MetaHTTPjson, utils.ActionsPoster+utils.HIERARCHY_SEP+a.ActionType, body)
+		AddFailedPost(a.ExtraParameters, utils.MetaHTTPjson, utils.ActionsPoster+utils.HIERARCHY_SEP+a.ActionType, body, make(map[string]interface{}))
 		err = nil
 	}
 	return err
@@ -483,7 +413,7 @@ func callURLAsync(ub *Account, a *Action, acs Actions, extraData interface{}) er
 	go func() {
 		err := pstr.PostValues(body)
 		if err != nil && config.CgrConfig().GeneralCfg().FailedPostsDir != utils.META_NONE {
-			AddFailedPost(a.ExtraParameters, utils.MetaHTTPjson, utils.ActionsPoster+utils.HIERARCHY_SEP+a.ActionType, body)
+			AddFailedPost(a.ExtraParameters, utils.MetaHTTPjson, utils.ActionsPoster+utils.HIERARCHY_SEP+a.ActionType, body, make(map[string]interface{}))
 		}
 	}()
 	return nil
@@ -1042,7 +972,7 @@ func postEvent(ub *Account, a *Action, acs Actions, extraData interface{}) error
 	}
 	err = pstr.PostValues(body)
 	if err != nil && config.CgrConfig().GeneralCfg().FailedPostsDir != utils.META_NONE {
-		AddFailedPost(a.ExtraParameters, utils.MetaHTTPjson, utils.ActionsPoster+utils.HIERARCHY_SEP+a.ActionType, body)
+		AddFailedPost(a.ExtraParameters, utils.MetaHTTPjson, utils.ActionsPoster+utils.HIERARCHY_SEP+a.ActionType, body, make(map[string]interface{}))
 		err = nil
 	}
 	return err
