@@ -103,7 +103,8 @@ func (httpPost *HTTPPost) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 	if err = httpPost.httpPoster.PostValues(urlVals); err != nil &&
 		httpPost.cgrCfg.GeneralCfg().FailedPostsDir != utils.META_NONE {
 		engine.AddFailedPost(httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].ExportPath,
-			httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].Type, utils.EventExporterS, urlVals)
+			httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].Type, utils.EventExporterS, urlVals,
+			httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].Opts)
 	}
 	return
 }

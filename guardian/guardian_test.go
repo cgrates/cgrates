@@ -270,11 +270,11 @@ func BenchmarkGuardian(b *testing.B) {
 // BenchmarkGuardIDs-8   	 1000000	      8732 ns/op
 func BenchmarkGuardIDs(b *testing.B) {
 	for n := 0; n < b.N; n++ {
-		go func() {
-			if refID := Guardian.GuardIDs("", 0, strconv.Itoa(n)); refID != "" {
+		go func(i int) {
+			if refID := Guardian.GuardIDs("", 0, strconv.Itoa(i)); refID != "" {
 				time.Sleep(time.Microsecond)
 				Guardian.UnguardIDs(refID)
 			}
-		}()
+		}(n)
 	}
 }

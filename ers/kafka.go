@@ -23,8 +23,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"net/url"
-	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/agents"
@@ -60,9 +58,11 @@ func NewKafkaER(cfg *config.CGRConfig, cfgIdx int,
 			rdr.cap <- struct{}{}
 		}
 	}
+	rdr.dialURL = rdr.Config().SourcePath
 	er = rdr
-	err = rdr.setURL(rdr.Config().SourcePath)
+	err = rdr.setOpts(rdr.Config().Opts)
 	return
+
 }
 
 // KafkaER implements EventReader interface for kafka message
@@ -138,12 +138,12 @@ func (rdr *KafkaER) readLoop(r *kafka.Reader) {
 						utils.ERs, string(msg.Key), err.Error()))
 			}
 			if rdr.Config().ProcessedPath != utils.EmptyString { // post it
-				if err := engine.PostersCache.PostKafka(rdr.Config().ProcessedPath,
-					rdr.cgrCfg.GeneralCfg().PosterAttempts, msg.Value, string(msg.Key)); err != nil {
-					utils.Logger.Warning(
-						fmt.Sprintf("<%s> writing message %s error: %s",
-							utils.ERs, string(msg.Key), err.Error()))
-				}
+				// if err := engine.PostersCache.PostKafka(rdr.Config().ProcessedPath,
+				// rdr.cgrCfg.GeneralCfg().PosterAttempts, msg.Value, string(msg.Key)); err != nil {
+				// utils.Logger.Warning(
+				// fmt.Sprintf("<%s> writing message %s error: %s",
+				// utils.ERs, string(msg.Key), err.Error()))
+				// }
 			}
 			if rdr.Config().ConcurrentReqs != -1 {
 				rdr.cap <- struct{}{}
@@ -181,31 +181,19 @@ func (rdr *KafkaER) processMessage(msg []byte) (err error) {
 	return
 }
 
-func (rdr *KafkaER) setURL(dialURL string) (err error) {
+func (rdr *KafkaER) setOpts(opts map[string]interface{}) (err error) {
 	rdr.topic = defaultTopic
 	rdr.groupID = defaultGroupID
 	rdr.maxWait = defaultMaxWait
 
-	i := strings.IndexByte(dialURL, '?')
-	if i < 0 {
-		rdr.dialURL = dialURL
-		return
+	if vals, has := opts[utils.KafkaTopic]; has {
+		rdr.topic = utils.IfaceAsString(vals)
 	}
-	rdr.dialURL = dialURL[:i]
-	rawQuery := dialURL[i+1:]
-	var qry url.Values
-	if qry, err = url.ParseQuery(rawQuery); err != nil {
-		return
+	if vals, has := opts[utils.KafkaGroupID]; has {
+		rdr.groupID = utils.IfaceAsString(vals)
 	}
-
-	if vals, has := qry[utils.KafkaTopic]; has && len(vals) != 0 {
-		rdr.topic = vals[0]
-	}
-	if vals, has := qry[utils.KafkaGroupID]; has && len(vals) != 0 {
-		rdr.groupID = vals[0]
-	}
-	if vals, has := qry[utils.KafkaMaxWait]; has && len(vals) != 0 {
-		rdr.maxWait, err = time.ParseDuration(vals[0])
+	if vals, has := opts[utils.KafkaMaxWait]; has {
+		rdr.maxWait, err = utils.IfaceAsDuration(vals)
 	}
 	return
 }

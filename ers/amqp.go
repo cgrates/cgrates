@@ -21,8 +21,6 @@ package ers
 import (
 	"encoding/json"
 	"fmt"
-	"net/url"
-	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/agents"
@@ -41,7 +39,6 @@ const (
 func NewAMQPER(cfg *config.CGRConfig, cfgIdx int,
 	rdrEvents chan *erEvent, rdrErr chan error,
 	fltrS *engine.FilterS, rdrExit chan struct{}) (er EventReader, err error) {
-
 	rdr := &AMQPER{
 		cgrCfg:    cfg,
 		cfgIdx:    cfgIdx,
@@ -56,9 +53,9 @@ func NewAMQPER(cfg *config.CGRConfig, cfgIdx int,
 			rdr.cap <- struct{}{}
 		}
 	}
-	er = rdr
-	err = rdr.setURL(rdr.Config().SourcePath)
-	return
+	rdr.dialURL = rdr.Config().SourcePath
+	rdr.setOpts(rdr.Config().Opts)
+	return rdr, nil
 }
 
 // AMQPER implements EventReader interface for kafka message
@@ -171,12 +168,12 @@ func (rdr *AMQPER) readLoop(msgChan <-chan amqp.Delivery) {
 							utils.ERs, msg.MessageId, err.Error()))
 				}
 				if rdr.Config().ProcessedPath != utils.EmptyString { // post it
-					if err := engine.PostersCache.PostAMQP(rdr.Config().ProcessedPath,
-						rdr.cgrCfg.GeneralCfg().PosterAttempts, msg.Body); err != nil {
-						utils.Logger.Warning(
-							fmt.Sprintf("<%s> writing message %s error: %s",
-								utils.ERs, msg.MessageId, err.Error()))
-					}
+					// if err := engine.PostersCache.PostAMQP(rdr.Config().ProcessedPath,
+					// rdr.cgrCfg.GeneralCfg().PosterAttempts, msg.Body); err != nil {
+					// utils.Logger.Warning(
+					// fmt.Sprintf("<%s> writing message %s error: %s",
+					// utils.ERs, msg.MessageId, err.Error()))
+					// }
 				}
 				if rdr.Config().ConcurrentReqs != -1 {
 					rdr.cap <- struct{}{}
@@ -214,44 +211,26 @@ func (rdr *AMQPER) processMessage(msg []byte) (err error) {
 	return
 }
 
-func (rdr *AMQPER) setURL(dialURL string) (err error) {
-	var u *url.URL
-	if u, err = url.Parse(dialURL); err != nil {
-		return
-	}
-	qry := u.Query()
-	q := url.Values{}
-	for _, key := range engine.AMQPPosibleQuery {
-		if vals, has := qry[key]; has && len(vals) != 0 {
-			q.Add(key, vals[0])
-		}
-	}
-	rdr.dialURL = strings.Split(dialURL, "?")[0]
-	if params := q.Encode(); params != utils.EmptyString {
-		rdr.dialURL += "?" + params
-
-	}
+func (rdr *AMQPER) setOpts(opts map[string]interface{}) {
 	rdr.queueID = engine.DefaultQueueID
-	if vals, has := qry[engine.QueueID]; has && len(vals) != 0 {
-		rdr.queueID = vals[0]
+	if vals, has := opts[engine.QueueID]; has {
+		rdr.queueID = utils.IfaceAsString(vals)
 	}
 	rdr.tag = defaultConsumerTag
-	if vals, has := qry[consumerTag]; has && len(vals) != 0 {
-		rdr.tag = vals[0]
+	if vals, has := opts[consumerTag]; has {
+		rdr.tag = utils.IfaceAsString(vals)
 	}
 
-	if vals, has := qry[engine.RoutingKey]; has && len(vals) != 0 {
-		rdr.routingKey = vals[0]
+	if vals, has := opts[engine.RoutingKey]; has {
+		rdr.routingKey = utils.IfaceAsString(vals)
 	}
-	if vals, has := qry[engine.Exchange]; has && len(vals) != 0 {
-		rdr.exchange = vals[0]
+	if vals, has := opts[engine.Exchange]; has {
+		rdr.exchange = utils.IfaceAsString(vals)
 		rdr.exchangeType = engine.DefaultExchangeType
 	}
-	if vals, has := qry[engine.ExchangeType]; has && len(vals) != 0 {
-		rdr.exchangeType = vals[0]
+	if vals, has := opts[engine.ExchangeType]; has {
+		rdr.exchangeType = utils.IfaceAsString(vals)
 	}
-
-	return nil
 }
 
 func (rdr *AMQPER) close() (err error) {

@@ -87,14 +87,14 @@ func (v1ms *mongoStorDBMigrator) renameV1SMCosts() (err error) {
 		return err
 	}
 	return v1ms.mgoDB.DB().RunCommand(v1ms.mgoDB.GetContext(),
-		bson.D{{"create", utils.SessionCostsTBL}}).Err()
+		bson.D{{Key: "create", Value: utils.SessionCostsTBL}}).Err()
 }
 
 func (v1ms *mongoStorDBMigrator) createV1SMCosts() (err error) {
 	v1ms.mgoDB.DB().Collection(utils.OldSMCosts).Drop(v1ms.mgoDB.GetContext())
 	v1ms.mgoDB.DB().Collection(utils.SessionCostsTBL).Drop(v1ms.mgoDB.GetContext())
 	return v1ms.mgoDB.DB().RunCommand(v1ms.mgoDB.GetContext(),
-		bson.D{{"create", utils.OldSMCosts}, {"size", 1024}}).Err()
+		bson.D{{Key: "create", Value: utils.OldSMCosts}, {Key: "size", Value: 1024}}).Err()
 }
 
 //get

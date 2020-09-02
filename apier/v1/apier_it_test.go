@@ -1946,7 +1946,10 @@ func testApierReplayFldPosts(t *testing.T) {
 	bev = []byte(`{"CGRID":"88ed9c38005f07576a1e1af293063833b60edcc6"}`)
 	fileInPath := path.Join(*args.FailedRequestsInDir, fileName)
 	ev = &engine.ExportEvents{
-		Path:   "amqp://guest:guest@localhost:5672/?queue_id=cgrates_cdrs",
+		Path: "amqp://guest:guest@localhost:5672/",
+		Opts: map[string]interface{}{
+			"queue_id": "cgrates_cdrs",
+		},
 		Format: utils.MetaAMQPjsonMap,
 		Events: []interface{}{bev},
 	}

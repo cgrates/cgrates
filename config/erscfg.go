@@ -58,26 +58,26 @@ func (ers *ERsCfg) appendERsReaders(jsnReaders *[]*EventReaderJsonCfg, msgTempla
 		return
 	}
 	for _, jsnReader := range *jsnReaders {
-		rdr := new(EventReaderCfg)
-		if dfltRdrCfg != nil {
-			rdr = dfltRdrCfg.Clone()
-		}
-		var haveID bool
+		var rdr *EventReaderCfg
 		if jsnReader.Id != nil {
 			for _, reader := range ers.Readers {
 				if reader.ID == *jsnReader.Id {
 					rdr = reader
-					haveID = true
 					break
 				}
 			}
 		}
-
+		if rdr == nil {
+			if dfltRdrCfg != nil {
+				rdr = dfltRdrCfg.Clone()
+			} else {
+				rdr = new(EventReaderCfg)
+				rdr.Opts = make(map[string]interface{})
+			}
+			ers.Readers = append(ers.Readers, rdr)
+		}
 		if err := rdr.loadFromJsonCfg(jsnReader, msgTemplates, sep); err != nil {
 			return err
-		}
-		if !haveID {
-			ers.Readers = append(ers.Readers, rdr)
 		}
 
 	}
@@ -121,6 +121,7 @@ type EventReaderCfg struct {
 	ConcurrentReqs           int
 	SourcePath               string
 	ProcessedPath            string
+	Opts                     map[string]interface{}
 	XmlRootPath              utils.HierarchyPath
 	Tenant                   RSRParsers
 	Timezone                 string
@@ -222,16 +223,18 @@ func (er *EventReaderCfg) loadFromJsonCfg(jsnCfg *EventReaderJsonCfg, msgTemplat
 
 //Clone itself into a new EventReaderCfg
 func (er *EventReaderCfg) Clone() (cln *EventReaderCfg) {
-	cln = new(EventReaderCfg)
-	cln.ID = er.ID
-	cln.Type = er.Type
-	cln.FieldSep = er.FieldSep
-	cln.HeaderDefineChar = er.HeaderDefineChar
-	cln.RunDelay = er.RunDelay
-	cln.ConcurrentReqs = er.ConcurrentReqs
-	cln.SourcePath = er.SourcePath
-	cln.ProcessedPath = er.ProcessedPath
-	cln.XmlRootPath = er.XmlRootPath
+	cln = &EventReaderCfg{
+		ID:               er.ID,
+		Type:             er.Type,
+		FieldSep:         er.FieldSep,
+		HeaderDefineChar: er.HeaderDefineChar,
+		RunDelay:         er.RunDelay,
+		ConcurrentReqs:   er.ConcurrentReqs,
+		SourcePath:       er.SourcePath,
+		ProcessedPath:    er.ProcessedPath,
+		XmlRootPath:      er.XmlRootPath,
+		Opts:             make(map[string]interface{}),
+	}
 	if len(er.Tenant) != 0 {
 		cln.Tenant = make(RSRParsers, len(er.Tenant))
 		for idx, val := range er.Tenant {
@@ -255,6 +258,9 @@ func (er *EventReaderCfg) Clone() (cln *EventReaderCfg) {
 	cln.CacheDumpFields = make([]*FCTemplate, len(er.CacheDumpFields))
 	for idx, fld := range er.CacheDumpFields {
 		cln.CacheDumpFields[idx] = fld.Clone()
+	}
+	for k, v := range er.Opts {
+		cln.Opts[k] = v
 	}
 	return
 }
@@ -315,5 +321,6 @@ func (er *EventReaderCfg) AsMapInterface(separator string) map[string]interface{
 		utils.PartialCacheExpiryActionCfg: er.PartialCacheExpiryAction,
 		utils.FieldsCfg:                   fields,
 		utils.CacheDumpFieldsCfg:          cacheDumpFields,
+		utils.OptsCfg:                     er.Opts,
 	}
 }

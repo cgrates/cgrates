@@ -66,7 +66,7 @@ func Testv2ActionTriggerAsThreshold(t *testing.T) {
 		Tenant:             config.CgrConfig().GeneralCfg().DefaultTenant,
 		Blocker:            false,
 		Weight:             v2ATR.Weight,
-		ActivationInterval: &utils.ActivationInterval{v2ATR.ExpirationDate, v2ATR.ActivationDate},
+		ActivationInterval: &utils.ActivationInterval{ExpiryTime: v2ATR.ExpirationDate, ActivationTime: v2ATR.ActivationDate},
 		MinSleep:           v2ATR.MinSleep,
 	}
 	th := &engine.Threshold{

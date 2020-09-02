@@ -22,17 +22,15 @@ import (
 	"testing"
 )
 
-func TestAMQPSetURL(t *testing.T) {
+func TestAMQPSetOpts(t *testing.T) {
 	k := new(AMQPER)
+	k.dialURL = "amqp://localhost:2013"
 	expKafka := &AMQPER{
 		dialURL: "amqp://localhost:2013",
 		queueID: "cdrs",
 		tag:     "new",
 	}
-	url := "amqp://localhost:2013?queue_id=cdrs&consumer_tag=new"
-	if err := k.setURL(url); err != nil {
-		t.Fatal(err)
-	} else if expKafka.dialURL != k.dialURL {
+	if k.setOpts(map[string]interface{}{"queue_id": "cdrs", "consumer_tag": "new"}); expKafka.dialURL != k.dialURL {
 		t.Errorf("Expected: %s ,received: %s", expKafka.dialURL, k.dialURL)
 	} else if expKafka.queueID != k.queueID {
 		t.Errorf("Expected: %s ,received: %s", expKafka.queueID, k.queueID)
@@ -40,28 +38,17 @@ func TestAMQPSetURL(t *testing.T) {
 		t.Errorf("Expected: %s ,received: %s", expKafka.tag, k.tag)
 	}
 	k = new(AMQPER)
+	k.dialURL = "amqp://localhost:2013"
 	expKafka = &AMQPER{
 		dialURL: "amqp://localhost:2013",
 		queueID: "cgrates_cdrs",
 		tag:     "cgrates",
 	}
-	url = "amqp://localhost:2013"
-	if err := k.setURL(url); err != nil {
-		t.Fatal(err)
-	} else if expKafka.dialURL != k.dialURL {
+	if k.setOpts(map[string]interface{}{}); expKafka.dialURL != k.dialURL {
 		t.Errorf("Expected: %s ,received: %s", expKafka.dialURL, k.dialURL)
 	} else if expKafka.queueID != k.queueID {
 		t.Errorf("Expected: %s ,received: %s", expKafka.queueID, k.queueID)
 	} else if expKafka.tag != k.tag {
 		t.Errorf("Expected: %s ,received: %s", expKafka.tag, k.tag)
-	}
-	k = new(AMQPER)
-	expKafka = &AMQPER{
-		dialURL: "amqp://localhost:2013",
-		queueID: "cgrates",
-		tag:     "cgrates",
-	}
-	if err := k.setURL("127.0.0.1:2013?queue_id=cdrs&consumer_tag=new"); err == nil {
-		t.Errorf("Expected error received: %v", err)
 	}
 }

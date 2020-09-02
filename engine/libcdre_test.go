@@ -37,7 +37,7 @@ func TestSetFldPostCacheTTL(t *testing.T) {
 
 func TestAddFldPost(t *testing.T) {
 	SetFailedPostCacheTTL(time.Duration(5 * time.Second))
-	AddFailedPost("path1", "format1", "module1", "1")
+	AddFailedPost("path1", "format1", "module1", "1", make(map[string]interface{}))
 	x, ok := failedPostCache.Get(utils.ConcatenatedKey("path1", "format1", "module1"))
 	if !ok {
 		t.Error("Error reading from cache")
@@ -55,12 +55,13 @@ func TestAddFldPost(t *testing.T) {
 		Format: "format1",
 		module: "module1",
 		Events: []interface{}{"1"},
+		Opts:   make(map[string]interface{}),
 	}
 	if !reflect.DeepEqual(eOut, failedPost) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(failedPost))
 	}
-	AddFailedPost("path1", "format1", "module1", "2")
-	AddFailedPost("path2", "format2", "module2", "3")
+	AddFailedPost("path1", "format1", "module1", "2", make(map[string]interface{}))
+	AddFailedPost("path2", "format2", "module2", "3", map[string]interface{}{QueueID: "qID"})
 	x, ok = failedPostCache.Get(utils.ConcatenatedKey("path1", "format1", "module1"))
 	if !ok {
 		t.Error("Error reading from cache")
@@ -77,11 +78,12 @@ func TestAddFldPost(t *testing.T) {
 		Format: "format1",
 		module: "module1",
 		Events: []interface{}{"1", "2"},
+		Opts:   make(map[string]interface{}),
 	}
 	if !reflect.DeepEqual(eOut, failedPost) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(failedPost))
 	}
-	x, ok = failedPostCache.Get(utils.ConcatenatedKey("path2", "format2", "module2"))
+	x, ok = failedPostCache.Get(utils.ConcatenatedKey("path2", "format2", "module2", "qID"))
 	if !ok {
 		t.Error("Error reading from cache")
 	}
@@ -97,6 +99,7 @@ func TestAddFldPost(t *testing.T) {
 		Format: "format2",
 		module: "module2",
 		Events: []interface{}{"3"},
+		Opts:   map[string]interface{}{QueueID: "qID"},
 	}
 	if !reflect.DeepEqual(eOut, failedPost) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(failedPost))
