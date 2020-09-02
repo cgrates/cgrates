@@ -1866,7 +1866,7 @@ func (apierSv1 *APIerSv1) ExportCDRs(args *utils.ArgExportCDRs, reply *map[strin
 			},
 		}
 		if args.Verbose {
-			argCdr.CGREventWithOpts.Opts[utils.EEsVerbose] = struct{}{}
+			argCdr.CGREventWithOpts.Opts[utils.OptsEEsVerbose] = struct{}{}
 		}
 		if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().EEsConns, nil, utils.EventExporterSv1ProcessEvent,
 			argCdr, &rplyCdr); err != nil {
