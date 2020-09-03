@@ -81,11 +81,11 @@
 			"export_path": "http://s3.us-east-2.amazonaws.com/",
 			"opts": {
 				// posible options for s3:
-				"aws_region": "eu-west-2",
-				"aws_key": "testkey",
-				"aws_secret": "testsecret",
-				"queue_id": "cgrates-cdrs",
-				// "aws_token": "sessionToken",
+				"awsRegion": "eu-west-2",
+				"awsKey": "testkey",
+				"awsSecret": "testsecret",
+				"queueID": "cgrates-cdrs",
+				// "awsToken": "sessionToken",
 			},
 			"tenant": "cgrates.org",
 			"attempts": 1,

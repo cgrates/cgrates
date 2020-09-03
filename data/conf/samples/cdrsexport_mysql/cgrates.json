@@ -66,10 +66,10 @@
 			"type": "*amqp_json_map",
 			"export_path": "amqp://guest:guest@localhost:5672/",
 			"opts": {
-				"queue_id": "cgrates_cdrs",
+				"queueID": "cgrates_cdrs",
 				"exchange": "exchangename",
-				"exchange_type": "fanout",
-				"routing_key": "cgr_cdrs",
+				"exchangeType": "fanout",
+				"routingKey": "cgr_cdrs",
 			},
 			"tenant": "cgrates.org",
 			"attempts": 3,
@@ -82,7 +82,7 @@
 			"type": "*amqpv1_json_map",
 			"export_path": "amqps://guest:guest@localhost:25672/",
 			"opts": {
-				"queue_id": "cgrates_cdrs",
+				"queueID": "cgrates_cdrs",
 			},
 			"tenant": "cgrates.org",
 			"attempts": 1,
@@ -96,10 +96,10 @@
 			// export_path for sqs:  "endpoint"
 			"export_path": "http://sqs.eu-west-2.amazonaws.com/",
 			"opts": {
-				"aws_region": "eu-west-2",
-				"aws_key": "testkey",
-				"aws_secret": "testsecret",
-				"queue_id": "cgrates-cdrs",
+				"awsRegion": "eu-west-2",
+				"awsKey": "testkey",
+				"awsSecret": "testsecret",
+				"queueID": "cgrates-cdrs",
 			},
 			"tenant": "cgrates.org",
 			"attempts": 1,
@@ -126,10 +126,10 @@
 			// export_path for s3:  "endpoint"
 			"export_path": "http://s3.us-east-2.amazonaws.com/",
 			"opts": {
-				"aws_region": "eu-west-2",
-				"aws_key": "testkey",
-				"aws_secret": "testsecret",
-				"queue_id": "cgrates-cdrs",
+				"awsRegion": "eu-west-2",
+				"awsKey": "testkey",
+				"awsSecret": "testsecret",
+				"queueID": "cgrates-cdrs",
 			},
 			"tenant": "cgrates.org",
 			"attempts": 1,

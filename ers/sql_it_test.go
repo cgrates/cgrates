@@ -79,8 +79,13 @@ func testSQLInitConfig(t *testing.T) {
 					"type": "*sql",							// reader type <*file_csv>
 					"run_delay": "1",									// sleep interval in seconds between consecutive runs, -1 to use automation via inotify or 0 to disable running all together
 					"concurrent_requests": 1024,						// maximum simultaneous requests/files to process, 0 for unlimited
-					"source_path": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306?db_name=cgrates2",					// read data from this path
-					"processed_path": "db_name=cgrates2&table_name=cdrs2",	// move processed data here
+					"source_path": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",					// read data from this path
+					"opts": {
+						"dbName":"cgrates2",
+						"dbNameProcessed":"cgrates2",
+						"tableNameProcessed":"cdrs2",
+					},
+					"processed_path": "",	// move processed data here
 					"tenant": "cgrates.org",							// tenant used by import
 					"filters": [],										// limit parsing based on the filters
 					"flags": [],										// flags to influence the event processing

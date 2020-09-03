@@ -218,6 +218,11 @@ func (er *EventReaderCfg) loadFromJsonCfg(jsnCfg *EventReaderJsonCfg, msgTemplat
 			er.CacheDumpFields = tpls
 		}
 	}
+	if jsnCfg.Opts != nil {
+		for k, v := range jsnCfg.Opts {
+			er.Opts[k] = v
+		}
+	}
 	return
 }
 

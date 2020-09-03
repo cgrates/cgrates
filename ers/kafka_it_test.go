@@ -76,7 +76,7 @@ func TestKafkaER(t *testing.T) {
 	}
 	w := kafka.NewWriter(kafka.WriterConfig{
 		Brokers: []string{"localhost:9092"},
-		Topic:   defaultTopic,
+		Topic:   utils.KafkaDefaultTopic,
 	})
 	randomCGRID := utils.UUIDSha1Prefix()
 	w.WriteMessages(context.Background(),

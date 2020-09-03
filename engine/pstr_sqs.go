@@ -59,8 +59,8 @@ type SQSPoster struct {
 func (pstr *SQSPoster) Close() {}
 
 func (pstr *SQSPoster) parseOpts(opts map[string]interface{}) {
-	pstr.queueID = DefaultQueueID
-	if val, has := opts[QueueID]; has {
+	pstr.queueID = utils.DefaultQueueID
+	if val, has := opts[utils.QueueID]; has {
 		pstr.queueID = utils.IfaceAsString(val)
 	}
 	if val, has := opts[utils.AWSRegion]; has {
@@ -72,7 +72,7 @@ func (pstr *SQSPoster) parseOpts(opts map[string]interface{}) {
 	if val, has := opts[utils.AWSSecret]; has {
 		pstr.awsKey = utils.IfaceAsString(val)
 	}
-	if val, has := opts[awsToken]; has {
+	if val, has := opts[utils.AWSToken]; has {
 		pstr.awsToken = utils.IfaceAsString(val)
 	}
 	pstr.getQueueURL()

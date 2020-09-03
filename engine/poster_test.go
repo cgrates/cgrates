@@ -37,10 +37,10 @@ func TestAMQPPosterParseURL(t *testing.T) {
 		routingKey:   "CGRCDR",
 	}
 	opts := map[string]interface{}{
-		"queue_id":      "q1",
-		"exchange":      "E1",
-		"routing_key":   "CGRCDR",
-		"exchange_type": "fanout",
+		"queueID":      "q1",
+		"exchange":     "E1",
+		"routingKey":   "CGRCDR",
+		"exchangeType": "fanout",
 	}
 	amqp.parseOpts(opts)
 	if !reflect.DeepEqual(expected, amqp) {

@@ -23,16 +23,20 @@ import (
 	"time"
 )
 
-func TestKafkaSetURL(t *testing.T) {
+func TestKafkasetOpts(t *testing.T) {
 	k := new(KafkaER)
+	k.dialURL = "localhost:2013"
 	expKafka := &KafkaER{
 		dialURL: "localhost:2013",
 		topic:   "cdrs",
 		groupID: "new",
 		maxWait: time.Second,
 	}
-	url := "localhost:2013?topic=cdrs&group_id=new&max_wait=1s"
-	if err := k.setURL(url); err != nil {
+	if err := k.setOpts(map[string]interface{}{
+		"topic":   "cdrs",
+		"groupID": "new",
+		"maxWait": "1s",
+	}); err != nil {
 		t.Fatal(err)
 	} else if expKafka.dialURL != k.dialURL {
 		t.Errorf("Expected: %s ,received: %s", expKafka.dialURL, k.dialURL)
@@ -44,14 +48,14 @@ func TestKafkaSetURL(t *testing.T) {
 		t.Errorf("Expected: %s ,received: %s", expKafka.maxWait, k.maxWait)
 	}
 	k = new(KafkaER)
+	k.dialURL = "localhost:2013"
 	expKafka = &KafkaER{
 		dialURL: "localhost:2013",
 		topic:   "cgrates",
 		groupID: "cgrates",
 		maxWait: time.Millisecond,
 	}
-	url = "localhost:2013"
-	if err := k.setURL(url); err != nil {
+	if err := k.setOpts(map[string]interface{}{}); err != nil {
 		t.Fatal(err)
 	} else if expKafka.dialURL != k.dialURL {
 		t.Errorf("Expected: %s ,received: %s", expKafka.dialURL, k.dialURL)
@@ -61,27 +65,21 @@ func TestKafkaSetURL(t *testing.T) {
 		t.Errorf("Expected: %s ,received: %s", expKafka.groupID, k.groupID)
 	} else if expKafka.maxWait != k.maxWait {
 		t.Errorf("Expected: %s ,received: %s", expKafka.maxWait, k.maxWait)
-	}
-	k = new(KafkaER)
-	expKafka = &KafkaER{
-		dialURL: "localhost:2013",
-		topic:   "cgrates",
-		groupID: "cgrates",
-		maxWait: time.Millisecond,
-	}
-	if err := k.setURL("127.0.0.1?%"); err == nil {
-		t.Errorf("Expected error received: %v", err)
 	}
 
 	k = new(KafkaER)
+	k.dialURL = "127.0.0.1:2013"
 	expKafka = &KafkaER{
 		dialURL: "127.0.0.1:2013",
 		topic:   "cdrs",
 		groupID: "new",
 		maxWait: time.Second,
 	}
-	url = "127.0.0.1:2013?topic=cdrs&group_id=new&max_wait=1s"
-	if err := k.setURL(url); err != nil {
+	if err := k.setOpts(map[string]interface{}{
+		"topic":   "cdrs",
+		"groupID": "new",
+		"maxWait": "1s",
+	}); err != nil {
 		t.Fatal(err)
 	} else if expKafka.dialURL != k.dialURL {
 		t.Errorf("Expected: %s ,received: %s", expKafka.dialURL, k.dialURL)

@@ -219,6 +219,7 @@ func testConfigSReloadConfigFromJSONEEs(t *testing.T) {
 		"Tenant":        nil,
 		"Timezone":      "",
 		"Type":          "*none",
+		"Opts":          map[string]interface{}{},
 	}
 	exp := map[string]interface{}{
 		"Enabled":         true,

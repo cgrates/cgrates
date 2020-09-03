@@ -33,12 +33,6 @@ import (
 	kafka "github.com/segmentio/kafka-go"
 )
 
-const (
-	defaultTopic   = "cgrates"
-	defaultGroupID = "cgrates"
-	defaultMaxWait = time.Millisecond
-)
-
 // NewKafkaER return a new kafka event reader
 func NewKafkaER(cfg *config.CGRConfig, cfgIdx int,
 	rdrEvents chan *erEvent, rdrErr chan error,
@@ -59,6 +53,7 @@ func NewKafkaER(cfg *config.CGRConfig, cfgIdx int,
 		}
 	}
 	rdr.dialURL = rdr.Config().SourcePath
+	rdr.createPoster()
 	er = rdr
 	err = rdr.setOpts(rdr.Config().Opts)
 	return
@@ -81,6 +76,8 @@ type KafkaER struct {
 	rdrExit   chan struct{}
 	rdrErr    chan error
 	cap       chan struct{}
+
+	poster engine.Poster
 }
 
 // Config returns the curent configuration
@@ -137,13 +134,12 @@ func (rdr *KafkaER) readLoop(r *kafka.Reader) {
 					fmt.Sprintf("<%s> processing message %s error: %s",
 						utils.ERs, string(msg.Key), err.Error()))
 			}
-			if rdr.Config().ProcessedPath != utils.EmptyString { // post it
-				// if err := engine.PostersCache.PostKafka(rdr.Config().ProcessedPath,
-				// rdr.cgrCfg.GeneralCfg().PosterAttempts, msg.Value, string(msg.Key)); err != nil {
-				// utils.Logger.Warning(
-				// fmt.Sprintf("<%s> writing message %s error: %s",
-				// utils.ERs, string(msg.Key), err.Error()))
-				// }
+			if rdr.poster != nil { // post it
+				if err := rdr.poster.Post(msg.Value, string(msg.Key)); err != nil {
+					utils.Logger.Warning(
+						fmt.Sprintf("<%s> writing message %s error: %s",
+							utils.ERs, string(msg.Key), err.Error()))
+				}
 			}
 			if rdr.Config().ConcurrentReqs != -1 {
 				rdr.cap <- struct{}{}
@@ -182,9 +178,9 @@ func (rdr *KafkaER) processMessage(msg []byte) (err error) {
 }
 
 func (rdr *KafkaER) setOpts(opts map[string]interface{}) (err error) {
-	rdr.topic = defaultTopic
-	rdr.groupID = defaultGroupID
-	rdr.maxWait = defaultMaxWait
+	rdr.topic = utils.KafkaDefaultTopic
+	rdr.groupID = utils.KafkaDefaultGroupID
+	rdr.maxWait = utils.KafkaDefaultMaxWait
 
 	if vals, has := opts[utils.KafkaTopic]; has {
 		rdr.topic = utils.IfaceAsString(vals)
@@ -196,4 +192,14 @@ func (rdr *KafkaER) setOpts(opts map[string]interface{}) (err error) {
 		rdr.maxWait, err = utils.IfaceAsDuration(vals)
 	}
 	return
+}
+
+func (rdr *KafkaER) createPoster() {
+	processedOpt := getProcessOptions(rdr.Config().Opts)
+	if len(processedOpt) == 0 &&
+		len(rdr.Config().ProcessedPath) == 0 {
+		return
+	}
+	rdr.poster = engine.NewKafkaPoster(utils.FirstNonEmpty(rdr.Config().ProcessedPath, rdr.Config().SourcePath),
+		rdr.cgrCfg.GeneralCfg().PosterAttempts, processedOpt)
 }

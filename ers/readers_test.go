@@ -98,11 +98,13 @@ func TestNewKafkaReader(t *testing.T) {
 func TestNewSQLReader(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
 	fltr := &engine.FilterS{}
-	reader := cfg.ERsCfg().Readers[0]
+	reader := cfg.ERsCfg().Readers[0].Clone()
 	reader.Type = utils.MetaSQL
 	reader.ID = "file_reader"
 	reader.ConcurrentReqs = -1
-	reader.SourcePath = "*mysql://cgrates:CGRateS.org@127.0.0.1:3306?db_name=cgrates2"
+	reader.Opts = map[string]interface{}{"db_name": "cgrates2"}
+	reader.SourcePath = "*mysql://cgrates:CGRateS.org@127.0.0.1:3306"
+	reader.ProcessedPath = ""
 	cfg.ERsCfg().Readers = append(cfg.ERsCfg().Readers, reader)
 	if len(cfg.ERsCfg().Readers) != 2 {
 		t.Errorf("Expecting: <2>, received: <%+v>", len(cfg.ERsCfg().Readers))

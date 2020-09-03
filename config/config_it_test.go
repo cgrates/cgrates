@@ -485,6 +485,7 @@ func testCGRConfigReloadERs(t *testing.T) {
 				Fields:           content,
 				CacheDumpFields:  []*FCTemplate{},
 				XmlRootPath:      utils.HierarchyPath{utils.EmptyString},
+				Opts:             make(map[string]interface{}),
 			},
 			{
 				ID:               "file_reader1",
@@ -499,6 +500,7 @@ func testCGRConfigReloadERs(t *testing.T) {
 				Fields:           content,
 				CacheDumpFields:  []*FCTemplate{},
 				XmlRootPath:      utils.HierarchyPath{utils.EmptyString},
+				Opts:             make(map[string]interface{}),
 			},
 		},
 	}
@@ -857,6 +859,7 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 				"Timezone":                 "",
 				"Type":                     utils.META_NONE,
 				"XmlRootPath":              []interface{}{utils.EmptyString},
+				"Opts":                     make(map[string]interface{}),
 			},
 			map[string]interface{}{
 				"CacheDumpFields":  []interface{}{},
@@ -880,6 +883,7 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 				"Type":                     "*file_csv",
 				"XmlRootPath":              []interface{}{utils.EmptyString},
 				"Fields":                   content,
+				"Opts":                     make(map[string]interface{}),
 			},
 		},
 		"SessionSConns": []string{

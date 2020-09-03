@@ -21,6 +21,7 @@ package ers
 import (
 	"fmt"
 	"path/filepath"
+	"strings"
 
 	"github.com/cgrates/cgrates/utils"
 	"github.com/fsnotify/fsnotify"
@@ -63,5 +64,15 @@ func watchDir(dirPath string, f func(itmPath, itmID string) error,
 			}
 		}
 	}()
+	return
+}
+
+func getProcessOptions(opts map[string]interface{}) (proc map[string]interface{}) {
+	proc = make(map[string]interface{})
+	for k, v := range opts {
+		if strings.HasSuffix(k, utils.ProcessedOpt) {
+			proc[k[:len(k)-9]] = v
+		}
+	}
 	return
 }

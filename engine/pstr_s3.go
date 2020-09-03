@@ -59,11 +59,11 @@ type S3Poster struct {
 func (pstr *S3Poster) Close() {}
 
 func (pstr *S3Poster) parseOpts(opts map[string]interface{}) {
-	pstr.queueID = DefaultQueueID
-	if val, has := opts[QueueID]; has {
+	pstr.queueID = utils.DefaultQueueID
+	if val, has := opts[utils.QueueID]; has {
 		pstr.queueID = utils.IfaceAsString(val)
 	}
-	if val, has := opts[folderPath]; has {
+	if val, has := opts[utils.AWSFolderPath]; has {
 		pstr.folderPath = utils.IfaceAsString(val)
 	}
 	if val, has := opts[utils.AWSRegion]; has {
@@ -75,7 +75,7 @@ func (pstr *S3Poster) parseOpts(opts map[string]interface{}) {
 	if val, has := opts[utils.AWSSecret]; has {
 		pstr.awsKey = utils.IfaceAsString(val)
 	}
-	if val, has := opts[awsToken]; has {
+	if val, has := opts[utils.AWSToken]; has {
 		pstr.awsToken = utils.IfaceAsString(val)
 	}
 }

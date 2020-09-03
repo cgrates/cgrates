@@ -42,8 +42,15 @@ func TestAMQPER(t *testing.T) {
 			"type": "*amqp_json_map",							// reader type <*file_csv>
 			"run_delay":  "-1",									// sleep interval in seconds between consecutive runs, -1 to use automation via inotify or 0 to disable running all together
 			"concurrent_requests": 1024,						// maximum simultaneous requests/files to process, 0 for unlimited
-			"source_path": "amqp://guest:guest@localhost:5672/?queue_id=cdrs3&consumer_tag=test-key&exchange=test-exchange&exchange_type=direct&routing_key=test-key",// read data from this path
-			// "processed_path": "/var/spool/cgrates/ers/out",	// move processed data here
+			"source_path": "amqp://guest:guest@localhost:5672/",// read data from this path
+			"opts": {
+				"queueID": "cdrs3",
+				"consumerTag": "test-key",
+				"exchange": "test-exchange",
+				"exchangeType": "direct",
+				"routingKey": "test-key",
+			},
+			"processed_path": "",								// move processed data here
 			"tenant": "cgrates.org",							// tenant used by import
 			"filters": [],										// limit parsing based on the filters
 			"flags": [],										// flags to influence the event processing
@@ -99,7 +106,7 @@ func TestAMQPER(t *testing.T) {
 		t.Error(err)
 	case ev := <-rdrEvents:
 		if ev.rdrCfg.ID != "amqp" {
-			t.Errorf("Expected 'kakfa' received `%s`", ev.rdrCfg.ID)
+			t.Errorf("Expected 'amqp' received `%s`", ev.rdrCfg.ID)
 		}
 		expected := &utils.CGREvent{
 			Tenant: "cgrates.org",

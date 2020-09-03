@@ -1724,6 +1724,7 @@ func TestDfEventReaderCfg(t *testing.T) {
 				Flags:                   &[]string{},
 				Fields:                  &cdrFields,
 				Cache_dump_fields:       &[]*FcTemplateJsonCfg{},
+				Opts:                    make(map[string]interface{}),
 			},
 		},
 	}

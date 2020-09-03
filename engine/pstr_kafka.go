@@ -30,7 +30,7 @@ func NewKafkaPoster(dialURL string, attempts int, opts map[string]interface{}) *
 	kfkPstr := &KafkaPoster{
 		dialURL:  dialURL,
 		attempts: attempts,
-		topic:    DefaultQueueID,
+		topic:    utils.DefaultQueueID,
 	}
 	if vals, has := opts[utils.KafkaTopic]; has {
 		kfkPstr.topic = utils.IfaceAsString(vals)

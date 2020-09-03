@@ -18,6 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package utils
 
+import "time"
+
 var (
 	MainCDRFields = NewStringSet([]string{CGRID, Source, OriginHost, OriginID, ToR, RequestType, Tenant, Category,
 		Account, Subject, Destination, SetupTime, AnswerTime, Usage, COST, RATED, Partial, RunID,
@@ -1827,18 +1829,6 @@ const (
 	SIPAgent        = "SIPAgent"
 )
 
-// Poster
-const (
-	SQSPoster    = "SQSPoster"
-	S3Poster     = "S3Poster"
-	AWSRegion    = "aws_region"
-	AWSKey       = "aws_key"
-	AWSSecret    = "aws_secret"
-	KafkaTopic   = "topic"
-	KafkaGroupID = "group_id"
-	KafkaMaxWait = "max_wait"
-)
-
 // Google_API
 const (
 	MetaGoogleAPI             = "*gapi"
@@ -2420,6 +2410,44 @@ const (
 	RateProfilesFilterIndexIDs = "RateProfilesFilterIndexIDs"
 	RateFilterIndexIDs         = "RateFilterIndexIDs"
 	FilterIndexIDs             = "FilterIndexIDs"
+)
+
+// Poster and Event reader constants
+const (
+	SQSPoster     = "SQSPoster"
+	S3Poster      = "S3Poster"
+	AWSRegion     = "awsRegion"
+	AWSKey        = "awsKey"
+	AWSSecret     = "awsSecret"
+	AWSToken      = "awsToken"
+	AWSFolderPath = "folderPath"
+	KafkaTopic    = "topic"
+	KafkaGroupID  = "groupID"
+	KafkaMaxWait  = "maxWait"
+
+	// General constants for posters
+	DefaultQueueID      = "cgrates_cdrs"
+	QueueID             = "queueID"
+	DefaultExchangeType = "direct"
+	Exchange            = "exchange"
+	ExchangeType        = "exchangeType"
+	RoutingKey          = "routingKey"
+
+	// for ers:
+	AMQPDefaultConsumerTag = "cgrates"
+	AMQPConsumerTag        = "consumerTag"
+
+	KafkaDefaultTopic   = "cgrates"
+	KafkaDefaultGroupID = "cgrates"
+	KafkaDefaultMaxWait = time.Millisecond
+
+	SQLDBName         = "dbName"
+	SQLTableName      = "tableName"
+	SQLSSLMode        = "sslmode"
+	SQLDefaultSSLMode = "disable"
+	SQLDefaultDBName  = "cgrates"
+
+	ProcessedOpt = "Processed"
 )
 
 func buildCacheInstRevPrefixes() {

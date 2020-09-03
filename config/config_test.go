@@ -1936,6 +1936,7 @@ func TestCgrCdfEventReader(t *testing.T) {
 						Value: NewRSRParsersMustCompile("~*req.13", utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
 				},
 				CacheDumpFields: []*FCTemplate{},
+				Opts:            make(map[string]interface{}),
 			},
 		},
 	}
@@ -2231,6 +2232,7 @@ func TestCgrCfgEventReaderDefault(t *testing.T) {
 				Value: NewRSRParsersMustCompile("~*req.13", utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
 		},
 		CacheDumpFields: make([]*FCTemplate, 0),
+		Opts:            make(map[string]interface{}),
 	}
 	for _, v := range eCfg.Fields {
 		v.ComputePath()

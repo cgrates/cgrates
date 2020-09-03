@@ -49,6 +49,7 @@ func TestEventRedearClone(t *testing.T) {
 			},
 		},
 		CacheDumpFields: make([]*FCTemplate, 0),
+		Opts:            make(map[string]interface{}),
 	}
 	for _, v := range orig.Fields {
 		v.ComputePath()
@@ -80,6 +81,7 @@ func TestEventRedearClone(t *testing.T) {
 			},
 		},
 		CacheDumpFields: make([]*FCTemplate, 0),
+		Opts:            make(map[string]interface{}),
 	}
 	for _, v := range initialOrig.Fields {
 		v.ComputePath()
@@ -143,6 +145,7 @@ func TestEventReaderLoadFromJSON(t *testing.T) {
 						Value: NewRSRParsersMustCompile("~*req.13", utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
 				},
 				CacheDumpFields: make([]*FCTemplate, 0),
+				Opts:            make(map[string]interface{}),
 			},
 			{
 				ID:               "file_reader1",
@@ -183,6 +186,7 @@ func TestEventReaderLoadFromJSON(t *testing.T) {
 						Value: NewRSRParsersMustCompile("~*req.13", utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
 				},
 				CacheDumpFields: make([]*FCTemplate, 0),
+				Opts:            make(map[string]interface{}),
 			},
 		},
 	}
@@ -281,6 +285,7 @@ func TestEventReaderSameID(t *testing.T) {
 						Value: NewRSRParsersMustCompile("~*req.13", utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
 				},
 				CacheDumpFields: make([]*FCTemplate, 0),
+				Opts:            make(map[string]interface{}),
 			},
 			{
 				ID:               "file_reader1",
@@ -302,6 +307,7 @@ func TestEventReaderSameID(t *testing.T) {
 						Value: NewRSRParsersMustCompile("CustomValue2", utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
 				},
 				CacheDumpFields: make([]*FCTemplate, 0),
+				Opts:            make(map[string]interface{}),
 			},
 		},
 	}
@@ -404,6 +410,7 @@ func TestERsCfgAsMapInterface(t *testing.T) {
 					{"mandatory": true, "path": "*cgreq.AnswerTime", "tag": "AnswerTime", "type": "*variable", "value": "~*req.12"},
 					{"mandatory": true, "path": "*cgreq.Usage", "tag": "Usage", "type": "*variable", "value": "~*req.13"},
 				},
+				"opts": make(map[string]interface{}),
 			},
 			{
 				"cache_dump_fields":    []map[string]interface{}{},
@@ -437,6 +444,7 @@ func TestERsCfgAsMapInterface(t *testing.T) {
 				"tenant":                      "",
 				"timezone":                    "",
 				"xml_root_path":               []string{""},
+				"opts":                        make(map[string]interface{}),
 			},
 		},
 	}
