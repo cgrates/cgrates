@@ -33,10 +33,10 @@ import (
 func NewAMQPv1Poster(dialURL string, attempts int, opts map[string]interface{}) Poster {
 	pstr := &AMQPv1Poster{
 		dialURL:  dialURL,
-		queueID:  "/" + DefaultQueueID,
+		queueID:  "/" + utils.DefaultQueueID,
 		attempts: attempts,
 	}
-	if vals, has := opts[QueueID]; has {
+	if vals, has := opts[utils.QueueID]; has {
 		pstr.queueID = "/" + utils.IfaceAsString(vals)
 	}
 	return pstr

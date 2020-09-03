@@ -18,19 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package engine
 
-// General constants for posters
-const (
-	DefaultQueueID      = "cgrates_cdrs"
-	QueueID             = "queue_id"
-	DefaultExchangeType = "direct"
-	Exchange            = "exchange"
-	ExchangeType        = "exchange_type"
-	RoutingKey          = "routing_key"
-
-	awsToken   = "aws_token"
-	folderPath = "folder_path"
-)
-
 type Poster interface {
 	Post(body []byte, key string) error
 	Close()

@@ -35,14 +35,6 @@ import (
 	_ "github.com/lib/pq"
 )
 
-const (
-	dbName         = "db_name"
-	tableName      = "table_name"
-	sslMode        = "sslmode"
-	defaultSSLMode = "disable"
-	defaultDBName  = "cgrates"
-)
-
 // NewSQLEventReader return a new kafka event reader
 func NewSQLEventReader(cfg *config.CGRConfig, cfgIdx int,
 	rdrEvents chan *erEvent, rdrErr chan error,
@@ -62,7 +54,7 @@ func NewSQLEventReader(cfg *config.CGRConfig, cfgIdx int,
 			rdr.cap <- struct{}{}
 		}
 	}
-	if err = rdr.setURL(rdr.Config().SourcePath, rdr.Config().ProcessedPath); err != nil {
+	if err = rdr.setURL(rdr.Config().SourcePath, rdr.Config().ProcessedPath, rdr.Config().Opts); err != nil {
 		return
 	}
 	er = rdr
@@ -208,28 +200,27 @@ func (rdr *SQLEventReader) processMessage(msg map[string]interface{}) (err error
 	return
 }
 
-func (rdr *SQLEventReader) setURL(inURL, outURL string) (err error) {
+func (rdr *SQLEventReader) setURL(inURL, outURL string, opts map[string]interface{}) (err error) {
 	inURL = strings.TrimPrefix(inURL, utils.Meta)
 	var u *url.URL
 	if u, err = url.Parse(inURL); err != nil {
 		return
 	}
 	password, _ := u.User.Password()
-	qry := u.Query()
 	rdr.connType = u.Scheme
 
-	dbname := defaultDBName
-	if vals, has := qry[dbName]; has && len(vals) != 0 {
-		dbname = vals[0]
+	dbname := utils.SQLDefaultDBName
+	if vals, has := opts[utils.SQLDBName]; has {
+		dbname = utils.IfaceAsString(vals)
 	}
-	ssl := defaultSSLMode
-	if vals, has := qry[sslMode]; has && len(vals) != 0 {
-		ssl = vals[0]
+	ssl := utils.SQLDefaultSSLMode
+	if vals, has := opts[utils.SQLSSLMode]; has {
+		ssl = utils.IfaceAsString(vals)
 	}
 
 	rdr.tableName = utils.CDRsTBL
-	if vals, has := qry[tableName]; has && len(vals) != 0 {
-		rdr.tableName = vals[0]
+	if vals, has := opts[utils.SQLTableName]; has {
+		rdr.tableName = utils.IfaceAsString(vals)
 	}
 	switch rdr.connType {
 	case utils.MYSQL:
@@ -242,20 +233,18 @@ func (rdr *SQLEventReader) setURL(inURL, outURL string) (err error) {
 	}
 
 	// outURL
-	if len(outURL) == 0 {
+	processedOpt := getProcessOptions(opts)
+	if len(processedOpt) == 0 &&
+		len(outURL) == 0 {
 		return
 	}
 	var outUser, outPassword, outDBname, outSSL, outHost, outPort string
-	var oqry url.Values
-	if !strings.HasPrefix(outURL, utils.Meta) {
+	if len(outURL) == 0 {
 		rdr.expConnType = rdr.connType
 		outUser = u.User.Username()
 		outPassword = password
 		outHost = u.Hostname()
 		outPort = u.Port()
-		if oqry, err = url.ParseQuery(outURL); err != nil {
-			return
-		}
 	} else {
 		outURL = strings.TrimPrefix(outURL, utils.Meta)
 		var oURL *url.URL
@@ -267,20 +256,19 @@ func (rdr *SQLEventReader) setURL(inURL, outURL string) (err error) {
 		outUser = oURL.User.Username()
 		outHost = oURL.Hostname()
 		outPort = oURL.Port()
-		oqry = oURL.Query()
 	}
 
-	outDBname = defaultDBName
-	if vals, has := oqry[dbName]; has && len(vals) != 0 {
-		outDBname = vals[0]
+	outDBname = utils.SQLDefaultDBName
+	if vals, has := processedOpt[utils.SQLDBName]; has {
+		outDBname = utils.IfaceAsString(vals)
 	}
-	outSSL = defaultSSLMode
-	if vals, has := oqry[sslMode]; has && len(vals) != 0 {
-		outSSL = vals[0]
+	outSSL = utils.SQLDefaultSSLMode
+	if vals, has := processedOpt[utils.SQLSSLMode]; has {
+		outSSL = utils.IfaceAsString(vals)
 	}
 	rdr.expTableName = utils.CDRsTBL
-	if vals, has := oqry[tableName]; has && len(vals) != 0 {
-		rdr.expTableName = vals[0]
+	if vals, has := processedOpt[utils.SQLTableName]; has {
+		rdr.expTableName = utils.IfaceAsString(vals)
 	}
 
 	switch rdr.expConnType {

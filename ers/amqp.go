@@ -30,11 +30,6 @@ import (
 	"github.com/streadway/amqp"
 )
 
-const (
-	defaultConsumerTag = "cgrates"
-	consumerTag        = "consumer_tag"
-)
-
 // NewAMQPER return a new kafka event reader
 func NewAMQPER(cfg *config.CGRConfig, cfgIdx int,
 	rdrEvents chan *erEvent, rdrErr chan error,
@@ -55,6 +50,7 @@ func NewAMQPER(cfg *config.CGRConfig, cfgIdx int,
 	}
 	rdr.dialURL = rdr.Config().SourcePath
 	rdr.setOpts(rdr.Config().Opts)
+	rdr.createPoster()
 	return rdr, nil
 }
 
@@ -79,6 +75,8 @@ type AMQPER struct {
 
 	conn    *amqp.Connection
 	channel *amqp.Channel
+
+	poster engine.Poster
 }
 
 // Config returns the curent configuration
@@ -167,13 +165,12 @@ func (rdr *AMQPER) readLoop(msgChan <-chan amqp.Delivery) {
 						fmt.Sprintf("<%s> processing message %s error: %s",
 							utils.ERs, msg.MessageId, err.Error()))
 				}
-				if rdr.Config().ProcessedPath != utils.EmptyString { // post it
-					// if err := engine.PostersCache.PostAMQP(rdr.Config().ProcessedPath,
-					// rdr.cgrCfg.GeneralCfg().PosterAttempts, msg.Body); err != nil {
-					// utils.Logger.Warning(
-					// fmt.Sprintf("<%s> writing message %s error: %s",
-					// utils.ERs, msg.MessageId, err.Error()))
-					// }
+				if rdr.poster != nil { // post it
+					if err := rdr.poster.Post(msg.Body, utils.EmptyString); err != nil {
+						utils.Logger.Warning(
+							fmt.Sprintf("<%s> writing message %s error: %s",
+								utils.ERs, msg.MessageId, err.Error()))
+					}
 				}
 				if rdr.Config().ConcurrentReqs != -1 {
 					rdr.cap <- struct{}{}
@@ -212,28 +209,30 @@ func (rdr *AMQPER) processMessage(msg []byte) (err error) {
 }
 
 func (rdr *AMQPER) setOpts(opts map[string]interface{}) {
-	rdr.queueID = engine.DefaultQueueID
-	if vals, has := opts[engine.QueueID]; has {
+	rdr.queueID = utils.DefaultQueueID
+	if vals, has := opts[utils.QueueID]; has {
 		rdr.queueID = utils.IfaceAsString(vals)
 	}
-	rdr.tag = defaultConsumerTag
-	if vals, has := opts[consumerTag]; has {
+	rdr.tag = utils.AMQPDefaultConsumerTag
+	if vals, has := opts[utils.AMQPConsumerTag]; has {
 		rdr.tag = utils.IfaceAsString(vals)
 	}
-
-	if vals, has := opts[engine.RoutingKey]; has {
+	if vals, has := opts[utils.RoutingKey]; has {
 		rdr.routingKey = utils.IfaceAsString(vals)
 	}
-	if vals, has := opts[engine.Exchange]; has {
+	if vals, has := opts[utils.Exchange]; has {
 		rdr.exchange = utils.IfaceAsString(vals)
-		rdr.exchangeType = engine.DefaultExchangeType
+		rdr.exchangeType = utils.DefaultExchangeType
 	}
-	if vals, has := opts[engine.ExchangeType]; has {
+	if vals, has := opts[utils.ExchangeType]; has {
 		rdr.exchangeType = utils.IfaceAsString(vals)
 	}
 }
 
 func (rdr *AMQPER) close() (err error) {
+	if rdr.poster != nil {
+		rdr.poster.Close()
+	}
 	if rdr.channel != nil {
 		if err = rdr.channel.Cancel(rdr.tag, true); err != nil {
 			return
@@ -243,4 +242,14 @@ func (rdr *AMQPER) close() (err error) {
 		}
 	}
 	return rdr.conn.Close()
+}
+
+func (rdr *AMQPER) createPoster() {
+	processedOpt := getProcessOptions(rdr.Config().Opts)
+	if len(processedOpt) == 0 &&
+		len(rdr.Config().ProcessedPath) == 0 {
+		return
+	}
+	rdr.poster = engine.NewAMQPPoster(utils.FirstNonEmpty(rdr.Config().ProcessedPath, rdr.Config().SourcePath),
+		rdr.cgrCfg.GeneralCfg().PosterAttempts, processedOpt)
 }

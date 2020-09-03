@@ -1948,7 +1948,7 @@ func testApierReplayFldPosts(t *testing.T) {
 	ev = &engine.ExportEvents{
 		Path: "amqp://guest:guest@localhost:5672/",
 		Opts: map[string]interface{}{
-			"queue_id": "cgrates_cdrs",
+			"queueID": "cgrates_cdrs",
 		},
 		Format: utils.MetaAMQPjsonMap,
 		Events: []interface{}{bev},

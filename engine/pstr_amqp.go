@@ -27,9 +27,6 @@ import (
 	"github.com/streadway/amqp"
 )
 
-// AMQPPosibleQuery the lists of posible AMQP values
-var AMQPPosibleQuery = []string{"cacertfile", "certfile", "keyfile", "verify", "server_name_indication", "auth_mechanism", "heartbeat", "connection_timeout", "channel_max"}
-
 // NewAMQPPoster creates a new amqp poster
 // "amqp://guest:guest@localhost:5672/?queueID=cgrates_cdrs"
 func NewAMQPPoster(dialURL string, attempts int, opts map[string]interface{}) *AMQPPoster {
@@ -54,19 +51,19 @@ type AMQPPoster struct {
 }
 
 func (pstr *AMQPPoster) parseOpts(dialURL map[string]interface{}) {
-	pstr.queueID = DefaultQueueID
-	pstr.routingKey = DefaultQueueID
-	if vals, has := dialURL[QueueID]; has {
+	pstr.queueID = utils.DefaultQueueID
+	pstr.routingKey = utils.DefaultQueueID
+	if vals, has := dialURL[utils.QueueID]; has {
 		pstr.queueID = utils.IfaceAsString(vals)
 	}
-	if vals, has := dialURL[RoutingKey]; has {
+	if vals, has := dialURL[utils.RoutingKey]; has {
 		pstr.routingKey = utils.IfaceAsString(vals)
 	}
-	if vals, has := dialURL[Exchange]; has {
+	if vals, has := dialURL[utils.Exchange]; has {
 		pstr.exchange = utils.IfaceAsString(vals)
-		pstr.exchangeType = DefaultExchangeType
+		pstr.exchangeType = utils.DefaultExchangeType
 	}
-	if vals, has := dialURL[ExchangeType]; has {
+	if vals, has := dialURL[utils.ExchangeType]; has {
 		pstr.exchangeType = utils.IfaceAsString(vals)
 	}
 	return
