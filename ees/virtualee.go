@@ -71,7 +71,7 @@ func (vEe *VirtualEe) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 		}
 		vEe.Unlock()
 	}()
-	vEe.dc[utils.NumberOfEvents] = vEe.dc[utils.NumberOfEvents].(int) + 1
+	vEe.dc[utils.NumberOfEvents] = vEe.dc[utils.NumberOfEvents].(int64) + 1
 
 	req := utils.MapStorage{}
 	for k, v := range cgrEv.Event {

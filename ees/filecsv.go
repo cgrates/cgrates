@@ -98,7 +98,7 @@ func (fCsv *FileCSVee) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 		}
 		fCsv.Unlock()
 	}()
-	fCsv.dc[utils.NumberOfEvents] = fCsv.dc[utils.NumberOfEvents].(int) + 1
+	fCsv.dc[utils.NumberOfEvents] = fCsv.dc[utils.NumberOfEvents].(int64) + 1
 
 	var csvRecord []string
 	req := utils.MapStorage{}
