@@ -80,7 +80,7 @@ func (httpJson *HTTPJsonMapEe) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 		httpJson.Unlock()
 	}()
 
-	httpJson.dc[utils.NumberOfEvents] = httpJson.dc[utils.NumberOfEvents].(int) + 1
+	httpJson.dc[utils.NumberOfEvents] = httpJson.dc[utils.NumberOfEvents].(int64) + 1
 
 	valMp := make(map[string]string)
 	eeReq := NewEventExporterRequest(utils.MapStorage(cgrEv.Event), httpJson.dc,

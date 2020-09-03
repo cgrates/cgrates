@@ -89,7 +89,7 @@ func (fFwv *FileFWVee) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 		}
 		fFwv.Unlock()
 	}()
-	fFwv.dc[utils.NumberOfEvents] = fFwv.dc[utils.NumberOfEvents].(int) + 1
+	fFwv.dc[utils.NumberOfEvents] = fFwv.dc[utils.NumberOfEvents].(int64) + 1
 	var records []string
 	req := utils.MapStorage{}
 	for k, v := range cgrEv.Event {

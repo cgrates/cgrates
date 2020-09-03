@@ -29,6 +29,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/cgrates/ees"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/guardian"
@@ -1841,7 +1843,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *st
 	return nil
 }
 
-func (apierSv1 *APIerSv1) ExportCDRs(args *utils.ArgExportCDRs, reply *map[string]interface{}) error {
+func (apierSv1 *APIerSv1) ExportCDRs(args *utils.ArgExportCDRs, reply *map[string]interface{}) (err error) {
 	if len(apierSv1.Config.ApierCfg().EEsConns) == 0 {
 		return utils.NewErrNotConnected(utils.EEs)
 	}
@@ -1881,15 +1883,11 @@ func (apierSv1 *APIerSv1) ExportCDRs(args *utils.ArgExportCDRs, reply *map[strin
 	// we consider only the last reply because it should have the metrics updated
 	if !args.Verbose {
 		(*reply)[utils.ExporterIDs] = make([]string, 0, len(rplyCdr))
-	}
-	for exporterID, metrics := range rplyCdr {
-		if !args.Verbose {
+		for exporterID := range rplyCdr {
 			(*reply)[utils.ExporterIDs] = append((*reply)[utils.ExporterIDs].([]string), exporterID)
-		} else {
-			for k, v := range metrics {
-				(*reply)[k] = v
-			}
 		}
+	} else if *reply, err = ees.MergeEEMetrics(rplyCdr); err != nil {
+		return
 	}
-	return nil
+	return
 }

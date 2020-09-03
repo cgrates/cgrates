@@ -48,6 +48,8 @@ var (
 		testEEsAddCDRs,
 		testEEsExportCDRs,
 		testEEsVerifyExports,
+		testEEsExportCDRsMultipleExporters,
+		testEEsVerifyExportsMultipleExporters,
 		testEEsKillEngine,
 		testEEsCleanFolder,
 	}
@@ -73,7 +75,7 @@ func TestExportCDRs(t *testing.T) {
 }
 
 func testEEsPrepareFolder(t *testing.T) {
-	for _, dir := range []string{"/tmp/testCSV"} {
+	for _, dir := range []string{"/tmp/testCSV", "/tmp/testCSV2", "/tmp/testCSV3"} {
 		if err := os.RemoveAll(dir); err != nil {
 			t.Fatal("Error removing folder: ", dir, err)
 		}
@@ -190,7 +192,7 @@ func testEEsExportCDRs(t *testing.T) {
 	if err := eeSRPC.Call(utils.APIerSv1ExportCDRs, &attr, &rply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	}
-	time.Sleep(time.Second)
+	time.Sleep(2 * time.Second)
 	if rply["FirstExpOrderID"] != 1.0 {
 		t.Errorf("Expected %+v, received: %+v", 1.0, rply["FirstExpOrderID"])
 	} else if rply["LastExpOrderID"] != 4.0 {
@@ -216,10 +218,57 @@ func testEEsVerifyExports(t *testing.T) {
 	if len(files) != 1 {
 		t.Errorf("Expected %+v, received: %+v", 1, len(files))
 	}
-	eCnt := "Cdr1,*raw,*voice,OriginCDR1,*none,cgrates.org,call,1001,1001,+4986517174963,2018-10-04T18:03:10+03:00,2018-10-04T18:03:10+03:00,10000000000,1.01\n" +
-		"Cdr2,*raw,*voice,OriginCDR2,*none,cgrates.org,call,1001,1001,+4986517174963,2018-10-04T18:03:10+03:00,2018-10-04T18:03:10+03:00,5000000000,1.01\n" +
-		"Cdr3,*raw,*voice,OriginCDR3,*none,cgrates.org,call,1001,1001,+4986517174963,2018-10-04T18:03:10+03:00,2018-10-04T18:03:10+03:00,30000000000,1.01\n" +
-		"Cdr4,*raw,*voice,OriginCDR4,*none,cgrates.org,call,1001,1001,+4986517174963,2018-10-04T18:03:10+03:00,2018-10-04T18:03:10+03:00,0,1.01\n"
+	eCnt := "Cdr1,*raw,*voice,OriginCDR1,*none,cgrates.org,call,1001,1001,+4986517174963,2018-10-04T15:03:10Z,2018-10-04T15:03:10Z,10000000000,1.01\n" +
+		"Cdr2,*raw,*voice,OriginCDR2,*none,cgrates.org,call,1001,1001,+4986517174963,2018-10-04T15:03:10Z,2018-10-04T15:03:10Z,5000000000,1.01\n" +
+		"Cdr3,*raw,*voice,OriginCDR3,*none,cgrates.org,call,1001,1001,+4986517174963,2018-10-04T15:03:10Z,2018-10-04T15:03:10Z,30000000000,1.01\n" +
+		"Cdr4,*raw,*voice,OriginCDR4,*none,cgrates.org,call,1001,1001,+4986517174963,2018-10-04T15:03:10Z,2018-10-04T15:03:10Z,0,1.01\n"
+	if outContent1, err := ioutil.ReadFile(files[0]); err != nil {
+		t.Error(err)
+	} else if len(eCnt) != len(string(outContent1)) {
+		t.Errorf("Expecting: \n<%+v>, \nreceived: \n<%+v>", len(eCnt), len(string(outContent1)))
+		t.Errorf("Expecting: \n<%q>, \nreceived: \n<%q>", eCnt, string(outContent1))
+	}
+}
+
+func testEEsExportCDRsMultipleExporters(t *testing.T) {
+	attr := &utils.ArgExportCDRs{
+		ExporterIDs: []string{"CSVExporter", "CSVExporter2"},
+		Verbose:     true,
+	}
+	var rply map[string]interface{}
+	if err := eeSRPC.Call(utils.APIerSv1ExportCDRs, &attr, &rply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	}
+	time.Sleep(2 * time.Second)
+	if rply["FirstExpOrderID"] != 1.0 {
+		t.Errorf("Expected %+v, received: %+v", 1.0, rply["FirstExpOrderID"])
+	} else if rply["LastExpOrderID"] != 4.0 {
+		t.Errorf("Expected %+v, received: %+v", 4.0, rply["LastExpOrderID"])
+	} else if rply["NumberOfEvents"] != 8.0 {
+		t.Errorf("Expected %+v, received: %+v", 8.0, rply["NumberOfEvents"])
+	} else if rply["TotalCost"] != 8.08 {
+		t.Errorf("Expected %+v, received: %+v", 8.08, rply["TotalCost"])
+	}
+}
+
+func testEEsVerifyExportsMultipleExporters(t *testing.T) {
+	var files []string
+	err := filepath.Walk("/tmp/testCSV2/", func(path string, info os.FileInfo, err error) error {
+		if strings.HasSuffix(path, utils.CSVSuffix) {
+			files = append(files, path)
+		}
+		return nil
+	})
+	if err != nil {
+		t.Error(err)
+	}
+	if len(files) != 1 {
+		t.Errorf("Expected %+v, received: %+v", 1, len(files))
+	}
+	eCnt := "Cdr1,*raw,*voice,OriginCDR1,*none,cgrates.org,call,1001,1001,+4986517174963,2018-10-04T15:03:10Z,2018-10-04T15:03:10Z,10000000000,1.01\n" +
+		"Cdr2,*raw,*voice,OriginCDR2,*none,cgrates.org,call,1001,1001,+4986517174963,2018-10-04T15:03:10Z,2018-10-04T15:03:10Z,5000000000,1.01\n" +
+		"Cdr3,*raw,*voice,OriginCDR3,*none,cgrates.org,call,1001,1001,+4986517174963,2018-10-04T15:03:10Z,2018-10-04T15:03:10Z,30000000000,1.01\n" +
+		"Cdr4,*raw,*voice,OriginCDR4,*none,cgrates.org,call,1001,1001,+4986517174963,2018-10-04T15:03:10Z,2018-10-04T15:03:10Z,0,1.01\n"
 	if outContent1, err := ioutil.ReadFile(files[0]); err != nil {
 		t.Error(err)
 	} else if len(eCnt) != len(string(outContent1)) {
@@ -234,7 +283,7 @@ func testEEsKillEngine(t *testing.T) {
 }
 
 func testEEsCleanFolder(t *testing.T) {
-	for _, dir := range []string{"/tmp/testCSV"} {
+	for _, dir := range []string{"/tmp/testCSV", "/tmp/testCSV2", "/tmp/testCSV3"} {
 		if err := os.RemoveAll(dir); err != nil {
 			t.Fatal("Error removing folder: ", dir, err)
 		}
