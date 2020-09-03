@@ -193,14 +193,31 @@ func testEEsExportCDRs(t *testing.T) {
 		t.Error("Unexpected error: ", err.Error())
 	}
 	time.Sleep(2 * time.Second)
-	if rply["FirstExpOrderID"] != 1.0 {
-		t.Errorf("Expected %+v, received: %+v", 1.0, rply["FirstExpOrderID"])
-	} else if rply["LastExpOrderID"] != 4.0 {
-		t.Errorf("Expected %+v, received: %+v", 4.0, rply["LastExpOrderID"])
-	} else if rply["NumberOfEvents"] != 4.0 {
-		t.Errorf("Expected %+v, received: %+v", 4.0, rply["NumberOfEvents"])
-	} else if rply["TotalCost"] != 4.04 {
-		t.Errorf("Expected %+v, received: %+v", 4.04, rply["TotalCost"])
+	if len(rply) != 1 {
+		t.Errorf("Expected %+v, received: %+v", 1, len(rply))
+	} else {
+		val, _ := rply["CSVExporter"]
+		for k, v := range val.(map[string]interface{}) {
+			switch k {
+			case utils.FirstExpOrderID:
+				if v != 1.0 {
+					t.Errorf("Expected %+v, received: %+v", 1.0, v)
+				}
+			case utils.LastExpOrderID:
+				if v != 4.0 {
+					t.Errorf("Expected %+v, received: %+v", 4.0, v)
+				}
+			case utils.NumberOfEvents:
+				if v != 4.0 {
+					t.Errorf("Expected %+v, received: %+v", 4.0, v)
+				}
+			case utils.TotalCost:
+				if v != 4.04 {
+					t.Errorf("Expected %+v, received: %+v", 4.04, v)
+				}
+
+			}
+		}
 	}
 }
 
@@ -218,9 +235,9 @@ func testEEsVerifyExports(t *testing.T) {
 	if len(files) != 1 {
 		t.Errorf("Expected %+v, received: %+v", 1, len(files))
 	}
-	eCnt := "Cdr1,*raw,*voice,OriginCDR1,*none,cgrates.org,call,1001,1001,+4986517174963,2018-10-04T15:03:10Z,2018-10-04T15:03:10Z,10000000000,1.01\n" +
-		"Cdr2,*raw,*voice,OriginCDR2,*none,cgrates.org,call,1001,1001,+4986517174963,2018-10-04T15:03:10Z,2018-10-04T15:03:10Z,5000000000,1.01\n" +
-		"Cdr3,*raw,*voice,OriginCDR3,*none,cgrates.org,call,1001,1001,+4986517174963,2018-10-04T15:03:10Z,2018-10-04T15:03:10Z,30000000000,1.01\n" +
+	eCnt := "Cdr1,*raw,*voice,OriginCDR1,*none,cgrates.org,call,1001,1001,+4986517174963,2018-10-04T15:03:10Z,2018-10-04T15:03:10Z,10,1.01\n" +
+		"Cdr2,*raw,*voice,OriginCDR2,*none,cgrates.org,call,1001,1001,+4986517174963,2018-10-04T15:03:10Z,2018-10-04T15:03:10Z,5,1.01\n" +
+		"Cdr3,*raw,*voice,OriginCDR3,*none,cgrates.org,call,1001,1001,+4986517174963,2018-10-04T15:03:10Z,2018-10-04T15:03:10Z,30,1.01\n" +
 		"Cdr4,*raw,*voice,OriginCDR4,*none,cgrates.org,call,1001,1001,+4986517174963,2018-10-04T15:03:10Z,2018-10-04T15:03:10Z,0,1.01\n"
 	if outContent1, err := ioutil.ReadFile(files[0]); err != nil {
 		t.Error(err)
@@ -240,14 +257,33 @@ func testEEsExportCDRsMultipleExporters(t *testing.T) {
 		t.Error("Unexpected error: ", err.Error())
 	}
 	time.Sleep(2 * time.Second)
-	if rply["FirstExpOrderID"] != 1.0 {
-		t.Errorf("Expected %+v, received: %+v", 1.0, rply["FirstExpOrderID"])
-	} else if rply["LastExpOrderID"] != 4.0 {
-		t.Errorf("Expected %+v, received: %+v", 4.0, rply["LastExpOrderID"])
-	} else if rply["NumberOfEvents"] != 8.0 {
-		t.Errorf("Expected %+v, received: %+v", 8.0, rply["NumberOfEvents"])
-	} else if rply["TotalCost"] != 8.08 {
-		t.Errorf("Expected %+v, received: %+v", 8.08, rply["TotalCost"])
+	if len(rply) != 2 {
+		t.Errorf("Expected %+v, received: %+v", 1, len(rply))
+	} else {
+		for _, expID := range []string{"CSVExporter", "CSVExporter2"} {
+			val, _ := rply[expID]
+			for k, v := range val.(map[string]interface{}) {
+				switch k {
+				case utils.FirstExpOrderID:
+					if v != 1.0 {
+						t.Errorf("Expected %+v, received: %+v", 1.0, v)
+					}
+				case utils.LastExpOrderID:
+					if v != 4.0 {
+						t.Errorf("Expected %+v, received: %+v", 4.0, v)
+					}
+				case utils.NumberOfEvents:
+					if v != 4.0 {
+						t.Errorf("Expected %+v, received: %+v", 4.0, v)
+					}
+				case utils.TotalCost:
+					if v != 4.04 {
+						t.Errorf("Expected %+v, received: %+v", 4.04, v)
+					}
+
+				}
+			}
+		}
 	}
 }
 
@@ -265,9 +301,9 @@ func testEEsVerifyExportsMultipleExporters(t *testing.T) {
 	if len(files) != 1 {
 		t.Errorf("Expected %+v, received: %+v", 1, len(files))
 	}
-	eCnt := "Cdr1,*raw,*voice,OriginCDR1,*none,cgrates.org,call,1001,1001,+4986517174963,2018-10-04T15:03:10Z,2018-10-04T15:03:10Z,10000000000,1.01\n" +
-		"Cdr2,*raw,*voice,OriginCDR2,*none,cgrates.org,call,1001,1001,+4986517174963,2018-10-04T15:03:10Z,2018-10-04T15:03:10Z,5000000000,1.01\n" +
-		"Cdr3,*raw,*voice,OriginCDR3,*none,cgrates.org,call,1001,1001,+4986517174963,2018-10-04T15:03:10Z,2018-10-04T15:03:10Z,30000000000,1.01\n" +
+	eCnt := "Cdr1,*raw,*voice,OriginCDR1,*none,cgrates.org,call,1001,1001,+4986517174963,2018-10-04T15:03:10Z,2018-10-04T15:03:10Z,10,1.01\n" +
+		"Cdr2,*raw,*voice,OriginCDR2,*none,cgrates.org,call,1001,1001,+4986517174963,2018-10-04T15:03:10Z,2018-10-04T15:03:10Z,5,1.01\n" +
+		"Cdr3,*raw,*voice,OriginCDR3,*none,cgrates.org,call,1001,1001,+4986517174963,2018-10-04T15:03:10Z,2018-10-04T15:03:10Z,30,1.01\n" +
 		"Cdr4,*raw,*voice,OriginCDR4,*none,cgrates.org,call,1001,1001,+4986517174963,2018-10-04T15:03:10Z,2018-10-04T15:03:10Z,0,1.01\n"
 	if outContent1, err := ioutil.ReadFile(files[0]); err != nil {
 		t.Error(err)

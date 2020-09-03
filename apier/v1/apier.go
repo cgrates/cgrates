@@ -29,8 +29,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cgrates/cgrates/ees"
-
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/guardian"
@@ -1886,8 +1884,11 @@ func (apierSv1 *APIerSv1) ExportCDRs(args *utils.ArgExportCDRs, reply *map[strin
 		for exporterID := range rplyCdr {
 			(*reply)[utils.ExporterIDs] = append((*reply)[utils.ExporterIDs].([]string), exporterID)
 		}
-	} else if *reply, err = ees.MergeEEMetrics(rplyCdr); err != nil {
-		return
+	} else {
+		for exporterID, metrics := range rplyCdr {
+			(*reply)[exporterID] = metrics
+		}
+
 	}
 	return
 }
