@@ -1557,7 +1557,6 @@ func TestDfHttpJsonCfg(t *testing.T) {
 		Http_Cdrs:                 utils.StringPointer("/cdr_http"),
 		Use_basic_auth:            utils.BoolPointer(false),
 		Auth_users:                utils.MapStringStringPointer(map[string]string{}),
-		Configs_url:               utils.StringPointer("/configs/"),
 	}
 	if cfg, err := dfCgrJSONCfg.HttpJsonCfg(); err != nil {
 		t.Error(err)
