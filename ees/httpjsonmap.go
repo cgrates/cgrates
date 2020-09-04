@@ -101,7 +101,10 @@ func (pstrEE *PosterJSONMapEE) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 
 	valMp := make(map[string]string)
 	eeReq := NewEventExporterRequest(utils.MapStorage(cgrEv.Event), pstrEE.dc,
-		cgrEv.Tenant, pstrEE.cgrCfg.GeneralCfg().DefaultTimezone, pstrEE.filterS)
+		pstrEE.cgrCfg.EEsCfg().Exporters[pstrEE.cfgIdx].Tenant,
+		pstrEE.cgrCfg.GeneralCfg().DefaultTenant,
+		utils.FirstNonEmpty(pstrEE.cgrCfg.EEsCfg().Exporters[pstrEE.cfgIdx].Timezone,
+			pstrEE.cgrCfg.GeneralCfg().DefaultTimezone), pstrEE.filterS)
 
 	if err = eeReq.SetFields(pstrEE.cgrCfg.EEsCfg().Exporters[pstrEE.cfgIdx].ContentFields()); err != nil {
 		return
