@@ -1879,16 +1879,8 @@ func (apierSv1 *APIerSv1) ExportCDRs(args *utils.ArgExportCDRs, reply *map[strin
 		return utils.ErrPartiallyExecuted
 	}
 	// we consider only the last reply because it should have the metrics updated
-	if !args.Verbose {
-		(*reply)[utils.ExporterIDs] = make([]string, 0, len(rplyCdr))
-		for exporterID := range rplyCdr {
-			(*reply)[utils.ExporterIDs] = append((*reply)[utils.ExporterIDs].([]string), exporterID)
-		}
-	} else {
-		for exporterID, metrics := range rplyCdr {
-			(*reply)[exporterID] = metrics
-		}
-
+	for exporterID, metrics := range rplyCdr {
+		(*reply)[exporterID] = metrics
 	}
 	return
 }
