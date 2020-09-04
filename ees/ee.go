@@ -34,7 +34,13 @@ type EventExporter interface {
 }
 
 // NewEventExporter produces exporters
-func NewEventExporter(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.FilterS, dc utils.MapStorage) (ee EventExporter, err error) {
+func NewEventExporter(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.FilterS) (ee EventExporter, err error) {
+	var dc utils.MapStorage
+	if dc, err = newEEMetrics(utils.FirstNonEmpty(
+		cgrCfg.EEsCfg().Exporters[cfgIdx].Timezone,
+		cgrCfg.GeneralCfg().DefaultTimezone)); err != nil {
+		return
+	}
 	switch cgrCfg.EEsCfg().Exporters[cfgIdx].Type {
 	case utils.MetaFileCSV:
 		return NewFileCSVee(cgrCfg, cfgIdx, filterS, dc)

@@ -198,7 +198,7 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithIDs, rply *ma
 			}
 		}
 		if !isCached {
-			if ee, err = NewEventExporter(eeS.cfg, cfgIdx, eeS.filterS, newEEMetrics()); err != nil {
+			if ee, err = NewEventExporter(eeS.cfg, cfgIdx, eeS.filterS); err != nil {
 				return
 			}
 			if hasCache {
@@ -265,13 +265,19 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithIDs, rply *ma
 	return
 }
 
-func newEEMetrics() utils.MapStorage {
+func newEEMetrics(location string) (utils.MapStorage, error) {
+	tNow := time.Now()
+	loc, err := time.LoadLocation(location)
+	if err != nil {
+		return nil, err
+	}
 	return utils.MapStorage{
 		utils.NumberOfEvents:  int64(0),
 		utils.PositiveExports: utils.StringSet{},
 		utils.NegativeExports: utils.StringSet{},
-		utils.TimeNow:         time.Now(),
-	}
+		utils.TimeNow: time.Date(tNow.Year(), tNow.Month(), tNow.Day(),
+			tNow.Hour(), tNow.Minute(), tNow.Second(), tNow.Nanosecond(), loc),
+	}, nil
 }
 
 func updateEEMetrics(dc utils.MapStorage, ev engine.MapEvent, timezone string) {

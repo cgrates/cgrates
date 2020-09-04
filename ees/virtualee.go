@@ -77,12 +77,17 @@ func (vEe *VirtualEe) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 	for k, v := range cgrEv.Event {
 		req[k] = v
 	}
-	eeReq := NewEventExporterRequest(req, vEe.dc, cgrEv.Tenant, vEe.cgrCfg.GeneralCfg().DefaultTimezone,
+	eeReq := NewEventExporterRequest(req, vEe.dc,
+		vEe.cgrCfg.EEsCfg().Exporters[vEe.cfgIdx].Tenant,
+		vEe.cgrCfg.GeneralCfg().DefaultTenant,
+		utils.FirstNonEmpty(vEe.cgrCfg.EEsCfg().Exporters[vEe.cfgIdx].Timezone,
+			vEe.cgrCfg.GeneralCfg().DefaultTimezone),
 		vEe.filterS)
 	if err = eeReq.SetFields(vEe.cgrCfg.EEsCfg().Exporters[vEe.cfgIdx].ContentFields()); err != nil {
 		return
 	}
-	updateEEMetrics(vEe.dc, cgrEv.Event, vEe.cgrCfg.GeneralCfg().DefaultTimezone)
+	updateEEMetrics(vEe.dc, cgrEv.Event, utils.FirstNonEmpty(vEe.cgrCfg.EEsCfg().Exporters[vEe.cfgIdx].Timezone,
+		vEe.cgrCfg.GeneralCfg().DefaultTimezone))
 	return
 }
 

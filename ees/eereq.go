@@ -33,16 +33,24 @@ import (
 
 // NewEventExporterRequest returns a new EventExporterRequest
 func NewEventExporterRequest(req utils.DataProvider, dc utils.MapStorage,
-	tnt, timezone string, filterS *engine.FilterS) (eeR *EventExporterRequest) {
+	tntTpl config.RSRParsers,
+	dfltTenant, timezone string, filterS *engine.FilterS) (eeR *EventExporterRequest) {
 	eeR = &EventExporterRequest{
 		req:     req,
 		tmz:     timezone,
-		tnt:     tnt,
 		filterS: filterS,
 		cnt:     utils.NewOrderedNavigableMap(),
 		hdr:     utils.NewOrderedNavigableMap(),
 		trl:     utils.NewOrderedNavigableMap(),
 		dc:      dc,
+	}
+	// populate tenant
+	if tntIf, err := eeR.ParseField(
+		&config.FCTemplate{Type: utils.META_COMPOSED,
+			Value: tntTpl}); err == nil && tntIf.(string) != "" {
+		eeR.tnt = tntIf.(string)
+	} else {
+		eeR.tnt = dfltTenant
 	}
 	return
 }

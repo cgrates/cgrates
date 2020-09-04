@@ -95,7 +95,11 @@ func (fFwv *FileFWVee) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 	for k, v := range cgrEv.Event {
 		req[k] = v
 	}
-	eeReq := NewEventExporterRequest(req, fFwv.dc, cgrEv.Tenant, fFwv.cgrCfg.GeneralCfg().DefaultTimezone,
+	eeReq := NewEventExporterRequest(req, fFwv.dc,
+		fFwv.cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].Tenant,
+		fFwv.cgrCfg.GeneralCfg().DefaultTenant,
+		utils.FirstNonEmpty(fFwv.cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].Timezone,
+			fFwv.cgrCfg.GeneralCfg().DefaultTimezone),
 		fFwv.filterS)
 
 	if err = eeReq.SetFields(fFwv.cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].ContentFields()); err != nil {
@@ -108,7 +112,8 @@ func (fFwv *FileFWVee) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 		}
 		records = append(records, strVal)
 	}
-	updateEEMetrics(fFwv.dc, cgrEv.Event, fFwv.cgrCfg.GeneralCfg().DefaultTimezone)
+	updateEEMetrics(fFwv.dc, cgrEv.Event, utils.FirstNonEmpty(fFwv.cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].Timezone,
+		fFwv.cgrCfg.GeneralCfg().DefaultTimezone))
 	for _, record := range append(records, "\n") {
 		if _, err = io.WriteString(fFwv.file, record); err != nil {
 			return
@@ -123,7 +128,11 @@ func (fFwv *FileFWVee) composeHeader() (err error) {
 		return
 	}
 	var records []string
-	eeReq := NewEventExporterRequest(nil, fFwv.dc, fFwv.cgrCfg.GeneralCfg().DefaultTenant, fFwv.cgrCfg.GeneralCfg().DefaultTimezone,
+	eeReq := NewEventExporterRequest(nil, fFwv.dc,
+		fFwv.cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].Tenant,
+		fFwv.cgrCfg.GeneralCfg().DefaultTenant,
+		utils.FirstNonEmpty(fFwv.cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].Timezone,
+			fFwv.cgrCfg.GeneralCfg().DefaultTimezone),
 		fFwv.filterS)
 	if err = eeReq.SetFields(fFwv.cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].HeaderFields()); err != nil {
 		return
@@ -149,7 +158,11 @@ func (fFwv *FileFWVee) composeTrailer() (err error) {
 		return
 	}
 	var records []string
-	eeReq := NewEventExporterRequest(nil, fFwv.dc, fFwv.cgrCfg.GeneralCfg().DefaultTenant, fFwv.cgrCfg.GeneralCfg().DefaultTimezone,
+	eeReq := NewEventExporterRequest(nil, fFwv.dc,
+		fFwv.cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].Tenant,
+		fFwv.cgrCfg.GeneralCfg().DefaultTenant,
+		utils.FirstNonEmpty(fFwv.cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].Timezone,
+			fFwv.cgrCfg.GeneralCfg().DefaultTimezone),
 		fFwv.filterS)
 	if err = eeReq.SetFields(fFwv.cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].TrailerFields()); err != nil {
 		return
