@@ -1656,7 +1656,7 @@ func handleConfigSFolder(path string, w http.ResponseWriter) {
 	// convert the config into a json and send it
 	if _, err := w.Write([]byte(utils.ToJSON(cfg.AsMapInterface(cfg.generalCfg.RSRSep)))); err != nil {
 		utils.Logger.Warning(fmt.Sprintf("<%s> Failed to write resonse because: %s",
-			utils.Configs, err))
+			utils.ConfigSv1, err))
 	}
 	return
 }
@@ -1671,7 +1671,7 @@ func handleConfigSFile(path string, w http.ResponseWriter) {
 	}
 	if _, err := w.Write(dat); err != nil {
 		utils.Logger.Warning(fmt.Sprintf("<%s> Failed to write resonse because: %s",
-			utils.Configs, err))
+			utils.ConfigSv1, err))
 	}
 	return
 }

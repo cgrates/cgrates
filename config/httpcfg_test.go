@@ -76,7 +76,7 @@ func TestHTTPCfgAsMapInterface(t *testing.T) {
 		"http_cdrs": "/cdr_http",					
 		"use_basic_auth": false,					
 		"auth_users": {},	
-		"configs": "/configs"
+		"configs_url": "/configs/"
 	},
 }`
 
@@ -88,7 +88,7 @@ func TestHTTPCfgAsMapInterface(t *testing.T) {
 		"http_cdrs":                 "/cdr_http",
 		"use_basic_auth":            false,
 		"auth_users":                map[string]interface{}{},
-		"configs":                   "/configs",
+		"configs_url":               "/configs/",
 	}
 
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {

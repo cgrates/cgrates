@@ -185,7 +185,7 @@ const CGRATES_CFG_JSON = `
 	"http_cdrs": "/cdr_http",								// CDRS relative URL ("" to disable)
 	"use_basic_auth": false,								// use basic authentication
 	"auth_users": {},										// basic authentication usernames and base64-encoded passwords (eg: { "username1": "cGFzc3dvcmQ=", "username2": "cGFzc3dvcmQy "})
-	"configs": "/configs/"									// configs
+	"configs_url": "/configs/"								// configs
 },
 
 
