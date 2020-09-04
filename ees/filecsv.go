@@ -105,7 +105,10 @@ func (fCsv *FileCSVee) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 	for k, v := range cgrEv.Event {
 		req[k] = v
 	}
-	eeReq := NewEventExporterRequest(req, fCsv.dc, cgrEv.Tenant, fCsv.cgrCfg.GeneralCfg().DefaultTimezone,
+	eeReq := NewEventExporterRequest(req, fCsv.dc, fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].Tenant,
+		fCsv.cgrCfg.GeneralCfg().DefaultTenant,
+		utils.FirstNonEmpty(fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].Timezone,
+			fCsv.cgrCfg.GeneralCfg().DefaultTimezone),
 		fCsv.filterS)
 
 	if err = eeReq.SetFields(fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].ContentFields()); err != nil {
@@ -118,7 +121,8 @@ func (fCsv *FileCSVee) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 		}
 		csvRecord = append(csvRecord, strVal)
 	}
-	updateEEMetrics(fCsv.dc, cgrEv.Event, fCsv.cgrCfg.GeneralCfg().DefaultTimezone)
+	updateEEMetrics(fCsv.dc, cgrEv.Event, utils.FirstNonEmpty(fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].Timezone,
+		fCsv.cgrCfg.GeneralCfg().DefaultTimezone))
 	fCsv.csvWriter.Write(csvRecord)
 	return
 }
@@ -129,7 +133,10 @@ func (fCsv *FileCSVee) composeHeader() (err error) {
 		return
 	}
 	var csvRecord []string
-	eeReq := NewEventExporterRequest(nil, fCsv.dc, fCsv.cgrCfg.GeneralCfg().DefaultTenant, fCsv.cgrCfg.GeneralCfg().DefaultTimezone,
+	eeReq := NewEventExporterRequest(nil, fCsv.dc, fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].Tenant,
+		fCsv.cgrCfg.GeneralCfg().DefaultTenant,
+		utils.FirstNonEmpty(fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].Timezone,
+			fCsv.cgrCfg.GeneralCfg().DefaultTimezone),
 		fCsv.filterS)
 	if err = eeReq.SetFields(fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].HeaderFields()); err != nil {
 		return
@@ -150,7 +157,11 @@ func (fCsv *FileCSVee) composeTrailer() (err error) {
 		return
 	}
 	var csvRecord []string
-	eeReq := NewEventExporterRequest(nil, fCsv.dc, fCsv.cgrCfg.GeneralCfg().DefaultTenant, fCsv.cgrCfg.GeneralCfg().DefaultTimezone,
+	eeReq := NewEventExporterRequest(nil, fCsv.dc,
+		fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].Tenant,
+		fCsv.cgrCfg.GeneralCfg().DefaultTenant,
+		utils.FirstNonEmpty(fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].Timezone,
+			fCsv.cgrCfg.GeneralCfg().DefaultTimezone),
 		fCsv.filterS)
 	if err = eeReq.SetFields(fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].TrailerFields()); err != nil {
 		return

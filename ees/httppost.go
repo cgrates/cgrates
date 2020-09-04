@@ -79,7 +79,11 @@ func (httpPost *HTTPPost) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 	for k, v := range cgrEv.Event {
 		req[k] = v
 	}
-	eeReq := NewEventExporterRequest(req, httpPost.dc, cgrEv.Tenant, httpPost.cgrCfg.GeneralCfg().DefaultTimezone,
+	eeReq := NewEventExporterRequest(req, httpPost.dc,
+		httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].Tenant,
+		httpPost.cgrCfg.GeneralCfg().DefaultTenant,
+		utils.FirstNonEmpty(httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].Timezone,
+			httpPost.cgrCfg.GeneralCfg().DefaultTimezone),
 		httpPost.filterS)
 
 	if err = eeReq.SetFields(httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].ContentFields()); err != nil {

@@ -28,7 +28,7 @@ import (
 )
 
 func TestUpdateEEMetrics(t *testing.T) {
-	dc := newEEMetrics()
+	dc, _ := newEEMetrics(utils.EmptyString)
 	tnow := time.Now()
 	ev := engine.MapEvent{
 		utils.AnswerTime: tnow,
@@ -37,7 +37,7 @@ func TestUpdateEEMetrics(t *testing.T) {
 		utils.ToR:        utils.VOICE,
 		utils.Usage:      time.Second,
 	}
-	exp := newEEMetrics()
+	exp, _ := newEEMetrics(utils.EmptyString)
 	exp[utils.FirstEventATime] = tnow
 	exp[utils.LastEventATime] = tnow
 	exp[utils.FirstExpOrderID] = int64(1)
