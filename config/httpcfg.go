@@ -29,7 +29,7 @@ type HTTPCfg struct {
 	HTTPCDRsURL             string            // CDRS relative URL ("" to disable)
 	HTTPUseBasicAuth        bool              // Use basic auth for HTTP API
 	HTTPAuthUsers           map[string]string // Basic auth user:password map (base64 passwords)
-	Configs                 string
+	ConfigsURL              string
 }
 
 //loadFromJsonCfg loads Database config from JsonCfg
@@ -58,8 +58,8 @@ func (httpcfg *HTTPCfg) loadFromJsonCfg(jsnHttpCfg *HTTPJsonCfg) (err error) {
 	if jsnHttpCfg.Auth_users != nil {
 		httpcfg.HTTPAuthUsers = *jsnHttpCfg.Auth_users
 	}
-	if jsnHttpCfg.Configs != nil {
-		httpcfg.Configs = *jsnHttpCfg.Configs
+	if jsnHttpCfg.Configs_url != nil {
+		httpcfg.ConfigsURL = *jsnHttpCfg.Configs_url
 	}
 
 	return nil
@@ -79,6 +79,6 @@ func (httpcfg *HTTPCfg) AsMapInterface() map[string]interface{} {
 		utils.HTTPCDRsURLCfg:             httpcfg.HTTPCDRsURL,
 		utils.HTTPUseBasicAuthCfg:        httpcfg.HTTPUseBasicAuth,
 		utils.HTTPAuthUsersCfg:           httpUsers,
-		utils.Configs:                    httpcfg.Configs,
+		utils.ConfigsURL:                 httpcfg.ConfigsURL,
 	}
 }
