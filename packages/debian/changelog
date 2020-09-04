@@ -99,7 +99,8 @@ cgrates (0.11.0~dev) UNRELEASED; urgency=medium
   * [DataDB] Moved all specific DB options in opts 
   * [Config] Add new section "template"
   * [LoaderS] Add support for *template type
-
+  * [ActionS] Replaced the poster action with *export that will send the event to EEs
+  
  -- DanB <danb@cgrates.org>  Wed, 19 Feb 2020 13:25:52 +0200
 
 cgrates (0.10.0) UNRELEASED; urgency=medium
