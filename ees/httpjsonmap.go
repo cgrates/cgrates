@@ -31,7 +31,7 @@ import (
 
 func NewPosterJSONMapEE(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.FilterS,
 	dc utils.MapStorage) (pstrJSON *PosterJSONMapEE, err error) {
-	dc[utils.ExportID] = cgrCfg.EEsCfg().Exporters[cfgIdx].ID
+	dc[utils.ExporterID] = cgrCfg.EEsCfg().Exporters[cfgIdx].ID
 	pstrJSON = &PosterJSONMapEE{
 		id:      cgrCfg.EEsCfg().Exporters[cfgIdx].ID,
 		cgrCfg:  cgrCfg,

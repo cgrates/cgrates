@@ -103,6 +103,7 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 		utils.MetaRemoveExpired:         removeExpired,
 		utils.MetaPostEvent:             postEvent,
 		utils.MetaCDRAccount:            resetAccountCDR,
+		utils.MetaExport:                export,
 	}
 	f, exists := actionFuncMap[typ]
 	return f, exists
@@ -1022,4 +1023,44 @@ func resetAccountCDR(ub *Account, action *Action, acts Actions, _ interface{}) e
 		}
 	}
 	return nil
+}
+
+func export(ub *Account, a *Action, acs Actions, extraData interface{}) (err error) {
+	var cgrEv *utils.CGREvent
+	switch {
+	case ub != nil:
+		cgrEv = &utils.CGREvent{
+			Tenant: utils.NewTenantID(ub.ID).Tenant,
+			ID:     utils.GenUUID(),
+			Event: map[string]interface{}{
+				utils.Account:        ub.ID,
+				utils.EventType:      utils.AccountUpdate,
+				utils.EventSource:    utils.AccountService,
+				utils.AllowNegative:  ub.AllowNegative,
+				utils.Disabled:       ub.Disabled,
+				utils.BalanceMap:     ub.BalanceMap,
+				utils.UnitCounters:   ub.UnitCounters,
+				utils.ActionTriggers: ub.ActionTriggers,
+				utils.UpdateTime:     ub.UpdateTime,
+			},
+		}
+	case extraData != nil:
+		ev, canCast := extraData.(*utils.CGREvent)
+		if !canCast {
+			return
+		}
+		cgrEv = ev // only export  CGREvents
+	default:
+		return // nothing to post
+	}
+	args := &utils.CGREventWithIDs{
+		IDs: strings.Split(a.ExtraParameters, utils.INFIELD_SEP),
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			Opts:     make(map[string]interface{}),
+			CGREvent: cgrEv,
+		},
+	}
+	var rply map[string]map[string]interface{}
+	return connMgr.Call(config.CgrConfig().ApierCfg().EEsConns, nil,
+		utils.EventExporterSv1ProcessEvent, args, &rply)
 }
