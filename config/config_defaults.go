@@ -185,7 +185,6 @@ const CGRATES_CFG_JSON = `
 	"http_cdrs": "/cdr_http",								// CDRS relative URL ("" to disable)
 	"use_basic_auth": false,								// use basic authentication
 	"auth_users": {},										// basic authentication usernames and base64-encoded passwords (eg: { "username1": "cGFzc3dvcmQ=", "username2": "cGFzc3dvcmQy "})
-	"configs_url": "/configs/"								// configs
 },
 
 
@@ -918,9 +917,10 @@ const CGRATES_CFG_JSON = `
 	"rate_indexed_selects": true,			// enable profile matching exclusively on indexes
 	//"rate_string_indexed_fields": [],		// query indexes based on these fields for faster processing
 	"rate_prefix_indexed_fields": [],		// query indexes based on these fields for faster processing
-	"rate_suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
+	"rate_suffix_indexed_fields": [],		// query indexes based on these fields for faster processing
 	"rate_nested_fields": false,			// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 },
+
 
 "sip_agent": {							// SIP Agents, only used for redirections
 	"enabled": false,					// enables the SIP agent: <true|false>
@@ -932,6 +932,7 @@ const CGRATES_CFG_JSON = `
 	"request_processors": [				// request processors to be applied to SIP messages
 	],
 },
+
 
 "templates": {
 	"*err": [
@@ -993,4 +994,13 @@ const CGRATES_CFG_JSON = `
 				"value": "SIP/2.0 500 Internal Server Error", "mandatory": true},
 	],
 },
+
+
+"configs": {
+	"enabled": false,
+	"url": "/configs/",										// configs url 
+	"root_dir": "/var/spool/cgrates/configs",				// root directory in case of calling /configs request
+},
+
+
 }`

@@ -79,7 +79,7 @@ func TestEventExporterSReload(t *testing.T) {
 		Layout:    time.RFC3339,
 	}
 	fcTmp.ComputePath()
-	cfg.TemplateCfg()["requiredFields"] = []*config.FCTemplate{fcTmp}
+	cfg.TemplatesCfg()["requiredFields"] = []*config.FCTemplate{fcTmp}
 	var reply string
 	if err := cfg.V1ReloadConfigFromPath(&config.ConfigReloadWithOpts{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "ees"),
