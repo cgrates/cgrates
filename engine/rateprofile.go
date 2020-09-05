@@ -23,7 +23,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
-	"github.com/robfig/cron/v3"
+	"github.com/cgrates/cron"
 )
 
 // RateProfile represents the configuration of a Rate profile

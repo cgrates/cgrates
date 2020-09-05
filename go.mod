@@ -18,7 +18,7 @@ require (
 	github.com/cenkalti/hub v1.0.1 // indirect
 	github.com/cenkalti/rpc2 v0.0.0-20200203073230-5ce2854ce0fd
 	github.com/cgrates/aringo v0.0.0-20191121125609-d85002bd1667
-	github.com/cgrates/cron v1.2.0 // indirect
+	github.com/cgrates/cron v1.2.0
 	github.com/cgrates/fsock v0.0.0-20191107070144-e7a331109df7
 	github.com/cgrates/kamevapi v0.0.0-20191001125829-7dbc3ad58817
 	github.com/cgrates/ltcache v0.0.0-20181016092649-92fb7fa77cca
@@ -45,7 +45,6 @@ require (
 	github.com/peterh/liner v1.2.0
 	github.com/philhofer/fwd v1.0.0 // indirect
 	github.com/pquerna/ffjson v0.0.0-20190930134022-aa0246cd15f7 // indirect
-	github.com/robfig/cron/v3 v3.0.1
 	github.com/segmentio/kafka-go v0.3.7
 	github.com/streadway/amqp v1.0.0
 	github.com/tinylib/msgp v1.1.2 // indirect
