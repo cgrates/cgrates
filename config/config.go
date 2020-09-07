@@ -24,7 +24,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
@@ -1639,60 +1638,4 @@ func (cfg *CGRConfig) AsMapInterface(separator string) map[string]interface{} {
 		utils.Apier:            cfg.apier.AsMapInterface(),
 		utils.ErsCfg:           cfg.ersCfg.AsMapInterface(separator),
 	}
-}
-
-// RegisterConfigs handler for httpServer to register the configs
-func HandlerConfigS(w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
-	w.Header().Set("Content-Type", "application/json")
-	// take out the /configs prefix and use the rest of url as path
-	path := strings.TrimPrefix(r.URL.Path, "/configs")
-	fi, err := os.Stat(path)
-	if err != nil {
-		if os.IsNotExist(err) {
-			w.WriteHeader(404)
-		} else {
-			w.WriteHeader(500)
-		}
-		fmt.Fprintf(w, err.Error())
-		return
-	}
-	switch mode := fi.Mode(); {
-	case mode.IsDir():
-		handleConfigSFolder(path, w)
-	case mode.IsRegular():
-		handleConfigSFile(path, w)
-	}
-	return
-}
-
-func handleConfigSFolder(path string, w http.ResponseWriter) {
-	// if the path is a directory, read the directory, construct the config and load it in memory
-	cfg, err := NewCGRConfigFromPath(path)
-	if err != nil {
-		w.WriteHeader(500)
-		fmt.Fprintf(w, err.Error())
-		return
-	}
-	// convert the config into a json and send it
-	if _, err := w.Write([]byte(utils.ToJSON(cfg.AsMapInterface(cfg.generalCfg.RSRSep)))); err != nil {
-		utils.Logger.Warning(fmt.Sprintf("<%s> Failed to write resonse because: %s",
-			utils.ConfigSv1, err))
-	}
-	return
-}
-
-func handleConfigSFile(path string, w http.ResponseWriter) {
-	// if the config is a file read the file and send it directly
-	dat, err := ioutil.ReadFile(path)
-	if err != nil {
-		w.WriteHeader(500)
-		fmt.Fprintf(w, err.Error())
-		return
-	}
-	if _, err := w.Write(dat); err != nil {
-		utils.Logger.Warning(fmt.Sprintf("<%s> Failed to write resonse because: %s",
-			utils.ConfigSv1, err))
-	}
-	return
 }

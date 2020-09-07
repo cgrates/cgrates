@@ -15,6 +15,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
+import (
+	"fmt"
+	"io/ioutil"
+	"net/http"
+	"os"
+	"path"
+	"strings"
+
+	"github.com/cgrates/cgrates/utils"
+)
+
 // ConfigSCfg config for listening over http
 type ConfigSCfg struct {
 	Enabled bool
@@ -35,6 +46,63 @@ func (cScfg *ConfigSCfg) loadFromJsonCfg(jsnCfg *ConfigSCfgJson) (err error) {
 	}
 	if jsnCfg.Root_dir != nil {
 		cScfg.RootDir = *jsnCfg.Root_dir
+	}
+	return
+}
+
+// RegisterConfigs handler for httpServer to register the configs
+func HandlerConfigS(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	w.Header().Set("Content-Type", "application/json")
+	// take out the /configs prefix and use the rest of url as path
+	pth := strings.TrimPrefix(r.URL.Path, "/configs")
+	pth = path.Join(CgrConfig().ConfigSCfg().RootDir, pth)
+	fi, err := os.Stat(pth)
+	if err != nil {
+		if os.IsNotExist(err) {
+			w.WriteHeader(404)
+		} else {
+			w.WriteHeader(500)
+		}
+		fmt.Fprintf(w, err.Error())
+		return
+	}
+	switch mode := fi.Mode(); {
+	case mode.IsDir():
+		handleConfigSFolder(pth, w)
+	case mode.IsRegular():
+		handleConfigSFile(pth, w)
+	}
+	return
+}
+
+func handleConfigSFolder(path string, w http.ResponseWriter) {
+	// if the path is a directory, read the directory, construct the config and load it in memory
+	cfg, err := NewCGRConfigFromPath(path)
+	if err != nil {
+		w.WriteHeader(500)
+		fmt.Fprintf(w, err.Error())
+		return
+	}
+	// convert the config into a json and send it
+	if _, err := w.Write([]byte(utils.ToJSON(cfg.AsMapInterface(cfg.generalCfg.RSRSep)))); err != nil {
+		utils.Logger.Warning(fmt.Sprintf("<%s> Failed to write resonse because: %s",
+			utils.ConfigSv1, err))
+	}
+	return
+}
+
+func handleConfigSFile(path string, w http.ResponseWriter) {
+	// if the config is a file read the file and send it directly
+	dat, err := ioutil.ReadFile(path)
+	if err != nil {
+		w.WriteHeader(500)
+		fmt.Fprintf(w, err.Error())
+		return
+	}
+	if _, err := w.Write(dat); err != nil {
+		utils.Logger.Warning(fmt.Sprintf("<%s> Failed to write resonse because: %s",
+			utils.ConfigSv1, err))
 	}
 	return
 }
