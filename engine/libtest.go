@@ -363,7 +363,7 @@ func StartEngine(cfgPath string, waitEngine int) (*exec.Cmd, error) {
 	if !connected {
 		return nil, fmt.Errorf("engine did not open port <%s>", cfg.ListenCfg().RPCJSONListen)
 	}
-	time.Sleep(time.Duration(waitEngine) * time.Millisecond) // wait for rater to register all subsistems
+	time.Sleep(time.Duration(waitEngine) * time.Millisecond) // wait for rater to register all subsystems
 	return engine, nil
 }
 
