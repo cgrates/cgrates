@@ -21,7 +21,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"fmt"
 	"net/rpc"
+	"net/rpc/jsonrpc"
+	"os/exec"
 	"path"
 	"reflect"
 	"testing"
@@ -46,6 +49,9 @@ var (
 		testConfigSRPCConn,
 		testConfigSReloadConfigFromJSONSessionS,
 		testConfigSReloadConfigFromJSONEEs,
+		testConfigSKillEngine,
+		testConfigStartEngineWithConfigs,
+		testConfigStartEngineFromHTTP,
 		testConfigSKillEngine,
 	}
 )
@@ -239,6 +245,60 @@ func testConfigSReloadConfigFromJSONEEs(t *testing.T) {
 
 func testConfigSKillEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
+		t.Error(err)
+	}
+}
+
+func testConfigStartEngineWithConfigs(t *testing.T) {
+	var err error
+	configCfgPath = path.Join(*dataDir, "conf", "samples", "configs_active")
+	configCfg, err = config.NewCGRConfigFromPath(configCfgPath)
+	if err != nil {
+		t.Error(err)
+	}
+	if _, err := engine.StopStartEngine(configCfgPath, *waitRater); err != nil {
+		t.Fatal(err)
+	}
+	configRPC, err = newRPCClient(configCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
+	if err != nil {
+		t.Fatal(err)
+	}
+	var rply map[string]interface{}
+	if err := configRPC.Call(utils.CoreSv1Status, &utils.TenantWithOpts{}, &rply); err != nil {
+		t.Error(err)
+	} else if rply[utils.NodeID] != "EngineWithConfigSActive" {
+		t.Errorf("Expected %+v , received: %+v ", "EngineWithConfigSActive", rply)
+	}
+}
+
+func testConfigStartEngineFromHTTP(t *testing.T) {
+	enginePath, err := exec.LookPath("cgr-engine")
+	if err != nil {
+		t.Error(err)
+	}
+	engine := exec.Command(enginePath, "-config_path", "http://127.0.0.1:3080/configs/tutmysql/cgrates.json")
+	if err := engine.Start(); err != nil {
+		t.Error(err)
+	}
+	fib := utils.Fib()
+	var jsonClnt *rpc.Client
+	var connected bool
+	for i := 0; i < 200; i++ {
+		time.Sleep(time.Duration(fib()) * time.Millisecond)
+		if jsonClnt, err = jsonrpc.Dial(utils.TCP, "localhost:2012"); err != nil {
+			utils.Logger.Warning(fmt.Sprintf("Error <%s> when opening test connection to: <%s>",
+				err.Error(), "localhost:2012"))
+		} else {
+			connected = true
+			break
+		}
+	}
+	if !connected {
+		t.Errorf("engine did not open port <%s>", "localhost:2012")
+	}
+	time.Sleep(time.Duration(500) * time.Millisecond)
+	var rply map[string]interface{}
+	if err := jsonClnt.Call(utils.CoreSv1Status, &utils.TenantWithOpts{}, &rply); err != nil {
 		t.Error(err)
 	}
 }

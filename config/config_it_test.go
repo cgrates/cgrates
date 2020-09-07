@@ -1021,7 +1021,8 @@ func testCGRConfigReloadAll(t *testing.T) {
 }
 
 func testHttpHandlerConfigSForNotExistFile(t *testing.T) {
-	req := httptest.NewRequest("GET", "http://127.0.0.1/usr/share/cgrates/conf/samples/NotExists/cgrates.json", nil)
+	cgrCfg.configSCfg.RootDir = "/usr/share/cgrates/"
+	req := httptest.NewRequest("GET", "http://127.0.0.1/conf/samples/NotExists/cgrates.json", nil)
 	w := httptest.NewRecorder()
 	HandlerConfigS(w, req)
 
@@ -1038,7 +1039,8 @@ func testHttpHandlerConfigSForNotExistFile(t *testing.T) {
 }
 
 func testHttpHandlerConfigSForFile(t *testing.T) {
-	req := httptest.NewRequest("GET", "http://127.0.0.1/usr/share/cgrates/conf/samples/tutmysql/cgrates.json", nil)
+	cgrCfg.configSCfg.RootDir = "/usr/share/cgrates/"
+	req := httptest.NewRequest("GET", "http://127.0.0.1/conf/samples/tutmysql/cgrates.json", nil)
 	w := httptest.NewRecorder()
 	HandlerConfigS(w, req)
 
@@ -1056,7 +1058,8 @@ func testHttpHandlerConfigSForFile(t *testing.T) {
 }
 
 func testHttpHandlerConfigSForNotExistFolder(t *testing.T) {
-	req := httptest.NewRequest("GET", "http://127.0.0.1/usr/share/cgrates/conf/samples/NotExists/", nil)
+	cgrCfg.configSCfg.RootDir = "/usr/share/cgrates/"
+	req := httptest.NewRequest("GET", "http://127.0.0.1/conf/samples/NotExists/", nil)
 	w := httptest.NewRecorder()
 	HandlerConfigS(w, req)
 
@@ -1066,14 +1069,15 @@ func testHttpHandlerConfigSForNotExistFolder(t *testing.T) {
 	if resp.Status != "404 Not Found" {
 		t.Errorf("Expected %+v , received: %+v ", "200 OK", resp.Status)
 	}
-	httpBodyMsgError := "stat /usr/share/cgrates/conf/samples/NotExists/: no such file or directory"
+	httpBodyMsgError := "stat /usr/share/cgrates/conf/samples/NotExists: no such file or directory"
 	if httpBodyMsgError != string(body) {
 		t.Errorf("Expected %s , received: %s ", httpBodyMsgError, string(body))
 	}
 }
 
 func testHttpHandlerConfigSForFolder(t *testing.T) {
-	req := httptest.NewRequest("GET", "http://127.0.0.1/usr/share/cgrates/conf/samples/diamagent_internal/", nil)
+	cgrCfg.configSCfg.RootDir = "/usr/share/cgrates/"
+	req := httptest.NewRequest("GET", "http://127.0.0.1/conf/samples/diamagent_internal/", nil)
 	w := httptest.NewRecorder()
 	HandlerConfigS(w, req)
 
