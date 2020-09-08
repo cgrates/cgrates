@@ -81,6 +81,7 @@ var (
 		testV1STSProcessMetricsWithFilter,
 		testV1STSProcessStaticMetrics,
 		testV1STSProcessStatWithThreshold,
+		//testV1STSProcessCDRStat,
 		testV1STSStopEngine,
 	}
 )
@@ -800,6 +801,145 @@ func testV1STSProcessStatWithThreshold(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eTd.Hits, td.Hits) {
 		t.Errorf("expecting: %+v, received: %+v", eTd, td)
+	}
+}
+
+func testV1STSProcessCDRStat(t *testing.T) {
+	statConfig = &engine.StatQueueWithCache{
+		StatQueueProfile: &engine.StatQueueProfile{
+			Tenant:    "cgrates.org",
+			ID:        "StatForCDR",
+			FilterIDs: []string{"*string:~*req.OriginID:dsafdsaf"}, //custom filter for event
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			},
+			QueueLength: 100,
+			TTL:         time.Duration(1) * time.Second,
+			Metrics: []*engine.MetricWithFilters{
+				{
+					MetricID: utils.ConcatenatedKey(utils.MetaSum, "~*req.CostDetails.Usage"),
+				},
+			},
+			ThresholdIDs: []string{"*none"},
+			Blocker:      true,
+			Stored:       true,
+			Weight:       20,
+			MinItems:     1,
+		},
+	}
+	//set the custom statProfile
+	var result string
+	if err := stsV1Rpc.Call(utils.APIerSv1SetStatQueueProfile, statConfig, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	//verify it
+	var reply *engine.StatQueueProfile
+	if err := stsV1Rpc.Call(utils.APIerSv1GetStatQueueProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "StatForCDR"}, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(statConfig.StatQueueProfile, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(statConfig.StatQueueProfile), utils.ToJSON(reply))
+	}
+	//verify metrics
+	expectedIDs := []string{"StatForCDR"}
+	var metrics map[string]string
+	expectedMetrics := map[string]string{
+		utils.ConcatenatedKey(utils.MetaSum, "1"): utils.NOT_AVAILABLE,
+	}
+	//process event
+	cc := &engine.CallCost{
+		Category:    "generic",
+		Tenant:      "cgrates.org",
+		Subject:     "1001",
+		Account:     "1001",
+		Destination: "data",
+		ToR:         "*data",
+		Cost:        0,
+		AccountSummary: &engine.AccountSummary{
+			Tenant: "cgrates.org",
+			ID:     "AccountFromAccountSummary",
+			BalanceSummaries: []*engine.BalanceSummary{
+				{
+					UUID:  "f9be602747f4",
+					ID:    "monetary",
+					Type:  utils.MONETARY,
+					Value: 0.5,
+				},
+				{
+					UUID:  "2e02510ab90a",
+					ID:    "voice",
+					Type:  utils.VOICE,
+					Value: 10,
+				},
+			},
+		},
+	}
+
+	cdr := &engine.CDR{
+		CGRID:       utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
+		OrderID:     123,
+		ToR:         utils.VOICE,
+		OriginID:    "dsafdsaf",
+		OriginHost:  "192.168.1.1",
+		Source:      utils.UNIT_TEST,
+		RequestType: utils.META_RATED,
+		Tenant:      "cgrates.org",
+		Category:    "call",
+		Account:     "1002",
+		Subject:     "1001",
+		Destination: "+4986517174963",
+		SetupTime:   time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
+		AnswerTime:  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
+		RunID:       utils.MetaDefault,
+		Usage:       time.Duration(10) * time.Second,
+		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+		Cost:        1.01,
+		CostDetails: engine.NewEventCostFromCallCost(cc, "TestCDRTestCDRAsMapStringIface2", utils.MetaDefault),
+	}
+	cdr.CostDetails.Compute()
+
+	var reply2 []string
+	expected := []string{"StatForCDR"}
+	args := engine.StatsArgsProcessEvent{
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: cdr.AsCGREvent(),
+		},
+	}
+	if err := stsV1Rpc.Call(utils.StatSv1ProcessEvent, &args, &reply2); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply2, expected) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, reply2)
+	}
+	//verify metrics after first process
+	expectedMetrics = map[string]string{
+		utils.ConcatenatedKey(utils.MetaSum, "1"):     "1",
+		utils.ConcatenatedKey(utils.MetaAverage, "2"): "2",
+	}
+	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
+		&utils.TenantIDWithOpts{
+			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]}}, &metrics); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
+		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
+	}
+	//second process
+	if err := stsV1Rpc.Call(utils.StatSv1ProcessEvent, &args, &reply2); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply2, expected) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, reply2)
+	}
+	expectedMetrics = map[string]string{
+		utils.ConcatenatedKey(utils.MetaSum, "1"):     "2",
+		utils.ConcatenatedKey(utils.MetaAverage, "2"): "2",
+	}
+	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
+		&utils.TenantIDWithOpts{
+			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]}}, &metrics); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
+		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
 	}
 }
 
