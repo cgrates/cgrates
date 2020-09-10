@@ -412,7 +412,7 @@ func (dP *diameterDP) FieldAsInterface(fldPath []string) (data interface{}, err 
 				}
 			}
 			if !oneMatches {
-				return nil, utils.ErrFilterNotPassingNoCaps
+				return nil, utils.ErrNotFound // return NotFound and let the other subsystem handle it (e.g. FilterS )
 			}
 		}
 	}

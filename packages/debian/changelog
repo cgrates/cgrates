@@ -100,6 +100,7 @@ cgrates (0.11.0~dev) UNRELEASED; urgency=medium
   * [Config] Add new section "template"
   * [LoaderS] Add support for *template type
   * [ActionS] Replaced the poster action with *export that will send the event to EEs
+  * [AgentS] DiameterAgent return NOT_FOUND instead of "filter not passing" error and let other subsystem to handle this (e.g. FilterS)
   
  -- DanB <danb@cgrates.org>  Wed, 19 Feb 2020 13:25:52 +0200
 
