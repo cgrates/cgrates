@@ -25,6 +25,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/engine"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/fiorix/go-diameter/diam"
@@ -1088,5 +1090,89 @@ func TestNewDiamDataType(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exp, rply) {
 		t.Errorf("Expected<%T>: %v ,received<%T>: %v ", exp, exp, rply, rply)
+	}
+}
+
+func TestDiamAvpGroupIface(t *testing.T) {
+	avps := diam.NewRequest(diam.CreditControl, 4, nil)
+	avps.NewAVP("Multiple-Services-Credit-Control", avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(432, avp.Mbit, 0, datatype.Unsigned32(1)),
+		}})
+	avps.NewAVP("Multiple-Services-Credit-Control", avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(432, avp.Mbit, 0, datatype.Unsigned32(99)),
+		}})
+	dP := newDADataProvider(nil, avps)
+	eOut := interface{}(uint32(1))
+	if out, err := dP.FieldAsInterface([]string{"Multiple-Services-Credit-Control", "Rating-Group"}); err != nil {
+		t.Error(err)
+	} else if eOut != out {
+		t.Errorf("Expecting: %v, received: %v", eOut, out)
+	}
+	if out, err := dP.FieldAsInterface([]string{"Multiple-Services-Credit-Control", "Rating-Group[~Rating-Group(1)]"}); err != nil {
+		t.Error(err)
+	} else if eOut != out {
+		t.Errorf("Expecting: %v, received: %v", eOut, out)
+	}
+	eOut = interface{}(uint32(99))
+	if out, err := dP.FieldAsInterface([]string{"Multiple-Services-Credit-Control", "Rating-Group[1]"}); err != nil {
+		t.Error(err)
+	} else if eOut != out {
+		t.Errorf("Expecting: %v, received: %v", eOut, out)
+	}
+	if out, err := dP.FieldAsInterface([]string{"Multiple-Services-Credit-Control", "Rating-Group[~Rating-Group(99)]"}); err != nil {
+		t.Error(err)
+	} else if eOut != out {
+		t.Errorf("Expecting: %v, received: %v", eOut, out)
+	}
+	if _, err := dP.FieldAsInterface([]string{"Multiple-Services-Credit-Control", "Rating-Group[~Rating-Group(10)]"}); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+}
+
+func TestFilterWithDiameterDP(t *testing.T) {
+	avps := diam.NewRequest(diam.CreditControl, 4, nil)
+	avps.NewAVP("Multiple-Services-Credit-Control", avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(432, avp.Mbit, 0, datatype.Unsigned32(1)),
+		}})
+	avps.NewAVP("Multiple-Services-Credit-Control", avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(432, avp.Mbit, 0, datatype.Unsigned32(99)),
+		}})
+	dP := newDADataProvider(nil, avps)
+	cfg, _ := config.NewDefaultCGRConfig()
+	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items),
+		config.CgrConfig().CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, dm)
+	agReq := NewAgentRequest(dP, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
+
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*exists:~*req.Multiple-Services-Credit-Control.Rating-Group[~Rating-Group(99)]:"}, agReq); err != nil {
+		t.Error(err)
+	} else if !pass {
+		t.Errorf("Exptected true, received: %+v", pass)
+	}
+
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*exists:~*req.Multiple-Services-Credit-Control.Rating-Group[~Rating-Group(10)]:"}, agReq); err != nil {
+		t.Error(err)
+	} else if pass {
+		t.Errorf("Exptected false, received: %+v", pass)
+	}
+
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*string:~*req.Multiple-Services-Credit-Control.Rating-Group[~Rating-Group(10)]:12"}, agReq); err != nil {
+		t.Error(err)
+	} else if pass {
+		t.Errorf("Exptected false, received: %+v", pass)
+	}
+
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*string:~*req.Multiple-Services-Credit-Control.Rating-Group[~Rating-Group(1)]:1"}, agReq); err != nil {
+		t.Error(err)
+	} else if !pass {
+		t.Errorf("Exptected true, received: %+v", pass)
 	}
 }
