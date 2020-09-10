@@ -61,7 +61,6 @@ func TestAttributeSCfgloadFromJsonCfg(t *testing.T) {
 }
 
 func TestAttributeSCfgAsMapInterface(t *testing.T) {
-	var attscfg AttributeSCfg
 	cfgJSONStr := `{
 "attributes": {								
 	"enabled": true,									
@@ -70,20 +69,61 @@ func TestAttributeSCfgAsMapInterface(t *testing.T) {
 	},		
 }`
 	eMap := map[string]interface{}{
-		"enabled":               true,
-		"prefix_indexed_fields": []string{"*req.index1", "*req.index2"},
-		"process_runs":          3,
-		"indexed_selects":       false,
-		"nested_fields":         false,
-		"string_indexed_fields": []string{},
+		utils.EnabledCfg:             true,
+		utils.PrefixIndexedFieldsCfg: []string{"*req.index1", "*req.index2"},
+		utils.ProcessRunsCfg:         3,
+		utils.IndexedSelectsCfg:      true,
+		utils.NestedFieldsCfg:        false,
+		utils.SuffixIndexedFieldsCfg: []string{},
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if jsnAttSCfg, err := jsnCfg.AttributeServJsonCfg(); err != nil {
-		t.Error(err)
-	} else if err = attscfg.loadFromJsonCfg(jsnAttSCfg); err != nil {
-		t.Error(err)
-	} else if rcv := attscfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
+	} else if rcv := cgrCfg.attributeSCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	}
+}
+
+func TestAttributeSCfgAsMapInterface2(t *testing.T) {
+	cfgJSONStr := `{
+     "attributes": {
+           "suffix_indexed_fields": ["*req.index1","*req.index2"],
+           "nested_fields": true,
+           "enabled": true,
+           "process_runs": 7,
+     },
+}`
+	expectedMap := map[string]interface{}{
+		utils.EnabledCfg:             true,
+		utils.IndexedSelectsCfg:      true,
+		utils.PrefixIndexedFieldsCfg: []string{},
+		utils.SuffixIndexedFieldsCfg: []string{"*req.index1", "*req.index2"},
+		utils.NestedFieldsCfg:        true,
+		utils.ProcessRunsCfg:         7,
+	}
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+		t.Error(err)
+	} else if newMap := cgrCfg.attributeSCfg.AsMapInterface(); !reflect.DeepEqual(expectedMap, newMap) {
+		t.Errorf("Expected %+v \n, recieved %+v", utils.ToJSON(expectedMap), utils.ToJSON(newMap))
+	}
+}
+
+func TestAttributeSCfgAsMapInterface3(t *testing.T) {
+	myJSONStr := `
+{
+    "attributes": {}
+}
+`
+	expectedMap := map[string]interface{}{
+		utils.EnabledCfg:             false,
+		utils.IndexedSelectsCfg:      true,
+		utils.PrefixIndexedFieldsCfg: []string{},
+		utils.SuffixIndexedFieldsCfg: []string{},
+		utils.NestedFieldsCfg:        false,
+		utils.ProcessRunsCfg:         1,
+	}
+	if conv, err := NewCGRConfigFromJsonStringWithDefaults(myJSONStr); err != nil {
+		t.Error(err)
+	} else if newMap := conv.attributeSCfg.AsMapInterface(); !reflect.DeepEqual(expectedMap, newMap) {
+		t.Errorf("Expected %+v, recieved %+v", expectedMap, newMap)
 	}
 }
