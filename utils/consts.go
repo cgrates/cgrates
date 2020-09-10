@@ -1888,6 +1888,7 @@ const (
 	ConnMaxLifetimeCfg     = "conn_max_lifetime"
 	StringIndexedFieldsCfg = "string_indexed_fields"
 	PrefixIndexedFieldsCfg = "prefix_indexed_fields"
+	SuffixIndexedFieldsCfg = "suffix_indexed_fields"
 	QueryTimeoutCfg        = "query_timeout"
 	SSLModeCfg             = "sslmode"
 	ItemsCfg               = "items"
