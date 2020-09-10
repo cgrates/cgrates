@@ -12,6 +12,7 @@ cgrates (0.10.2~dev) UNRELEASED; urgency=medium
   * [RSRParsers] Added grave accent(`) char as a delimiter to not split tge RSR value
   * [SessionS] Rename from ResourceMessage to ResourceAllocation
   * [AgentS] Correctly verify flags for setting max usage in ProcessEvent
+  * [AgentS] DiameterAgent return NOT_FOUND instead of "filter not passing" error and let other subsystem to handle this (e.g. FilterS)
 
  -- DanB <danb@cgrates.org>  Tue, 12 May 2020 13:08:15 +0300
 
