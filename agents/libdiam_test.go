@@ -1110,22 +1110,26 @@ func TestDiamAvpGroupIface(t *testing.T) {
 	} else if eOut != out {
 		t.Errorf("Expecting: %v, received: %v", eOut, out)
 	}
+	dP.(*diameterDP).cache = utils.MapStorage{}
 	if out, err := dP.FieldAsInterface([]string{"Multiple-Services-Credit-Control", "Rating-Group[~Rating-Group(1)]"}); err != nil {
 		t.Error(err)
 	} else if eOut != out {
 		t.Errorf("Expecting: %v, received: %v", eOut, out)
 	}
+	dP.(*diameterDP).cache = utils.MapStorage{}
 	eOut = interface{}(uint32(99))
 	if out, err := dP.FieldAsInterface([]string{"Multiple-Services-Credit-Control", "Rating-Group[1]"}); err != nil {
 		t.Error(err)
 	} else if eOut != out {
 		t.Errorf("Expecting: %v, received: %v", eOut, out)
 	}
+	dP.(*diameterDP).cache = utils.MapStorage{}
 	if out, err := dP.FieldAsInterface([]string{"Multiple-Services-Credit-Control", "Rating-Group[~Rating-Group(99)]"}); err != nil {
 		t.Error(err)
 	} else if eOut != out {
 		t.Errorf("Expecting: %v, received: %v", eOut, out)
 	}
+	dP.(*diameterDP).cache = utils.MapStorage{}
 	if _, err := dP.FieldAsInterface([]string{"Multiple-Services-Credit-Control", "Rating-Group[~Rating-Group(10)]"}); err != utils.ErrNotFound {
 		t.Error(err)
 	}
@@ -1143,10 +1147,10 @@ func TestFilterWithDiameterDP(t *testing.T) {
 		}})
 	dP := newDADataProvider(nil, avps)
 	cfg, _ := config.NewDefaultCGRConfig()
-	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items),
+	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true),
 		config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	agReq := NewAgentRequest(dP, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
+	agReq := NewAgentRequest(dP, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 
 	if pass, err := filterS.Pass("cgrates.org",
 		[]string{"*exists:~*req.Multiple-Services-Credit-Control.Rating-Group[~Rating-Group(99)]:"}, agReq); err != nil {
