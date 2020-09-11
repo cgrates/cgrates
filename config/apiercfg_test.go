@@ -61,53 +61,45 @@ func TestApierCfgloadFromJsonCfg(t *testing.T) {
 	}
 }
 
-func TestApierCfgAsMapInterface(t *testing.T) {
-	var aCfg ApierCfg
+func TestApierCfgAsMapInterface1(t *testing.T) {
 	cfgJSONStr := `{
 	"apiers": {
-		"enabled": false,
 		"caches_conns":[],
-		"scheduler_conns": [],
-		"attributes_conns": [],
 	},
 }`
+	sls := make([]string, 0)
 	eMap := map[string]interface{}{
-		"enabled":          false,
-		"caches_conns":     []string{},
-		"scheduler_conns":  []string{},
-		"attributes_conns": []string{},
+		utils.EnabledCfg:         false,
+		utils.CachesConnsCfg:     sls,
+		utils.SchedulerConnsCfg:  sls,
+		utils.AttributeSConnsCfg: sls,
+		utils.EEsConnsCfg:        sls,
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if jsnaCfg, err := jsnCfg.ApierCfgJson(); err != nil {
-		t.Error(err)
-	} else if err = aCfg.loadFromJsonCfg(jsnaCfg); err != nil {
-		t.Error(err)
-	} else if rcv := aCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	} else if newMap := cgrCfg.apier.AsMapInterface(); !reflect.DeepEqual(newMap, eMap) {
+		t.Errorf("Expected %+v, recived %+v", eMap, newMap)
 	}
+}
 
-	cfgJSONStr = `{
-		"apiers": {
-			"enabled": false,
-			"caches_conns":["*internal"],
-			"scheduler_conns": ["*internal"],
-			"attributes_conns": ["*internal"],
-		},
-	}`
-	eMap = map[string]interface{}{
-		"enabled":          false,
-		"caches_conns":     []string{"*internal"},
-		"scheduler_conns":  []string{"*internal"},
-		"attributes_conns": []string{"*internal"},
+func TestApierCfgAsMapInterface2(t *testing.T) {
+	myJSONStr := `{
+    "apiers": {
+       "enabled": true,
+       "attributes_conns": ["conn1", "conn2"],
+       "ees_conns": ["*internal"],
+    },
+}`
+	expectedMap := map[string]interface{}{
+		utils.EnabledCfg:         true,
+		utils.CachesConnsCfg:     []string{"*internal"},
+		utils.SchedulerConnsCfg:  []string{},
+		utils.AttributeSConnsCfg: []string{"conn1", "conn2"},
+		utils.EEsConnsCfg:        []string{"*internal"},
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(myJSONStr); err != nil {
 		t.Error(err)
-	} else if jsnaCfg, err := jsnCfg.ApierCfgJson(); err != nil {
-		t.Error(err)
-	} else if err = aCfg.loadFromJsonCfg(jsnaCfg); err != nil {
-		t.Error(err)
-	} else if rcv := aCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	} else if newMap := cgrCfg.apier.AsMapInterface(); !reflect.DeepEqual(expectedMap, newMap) {
+		t.Errorf("Expected %+v, recived %+v", expectedMap, newMap)
 	}
 }

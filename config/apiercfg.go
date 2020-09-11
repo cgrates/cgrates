@@ -84,44 +84,56 @@ func (aCfg *ApierCfg) loadFromJsonCfg(jsnCfg *ApierJsonCfg) (err error) {
 			}
 		}
 	}
-
 	return nil
 }
 
-func (aCfg *ApierCfg) AsMapInterface() map[string]interface{} {
-	cachesConns := make([]string, len(aCfg.CachesConns))
-	for i, item := range aCfg.CachesConns {
-		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)
-		if item == buf {
-			cachesConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaCaches, utils.EmptyString)
-		} else {
-			cachesConns[i] = item
+func (aCfg *ApierCfg) AsMapInterface() (initialMap map[string]interface{}) {
+	initialMap = map[string]interface{}{
+		utils.EnabledCfg: aCfg.Enabled,
+	}
+	if aCfg.CachesConns != nil {
+		cachesConns := make([]string, len(aCfg.CachesConns))
+		for i, item := range aCfg.CachesConns {
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches) {
+				cachesConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaCaches, utils.EmptyString)
+			} else {
+				cachesConns[i] = item
+			}
 		}
+		initialMap[utils.CachesConnsCfg] = cachesConns
 	}
-	schedulerConns := make([]string, len(aCfg.SchedulerConns))
-	for i, item := range aCfg.SchedulerConns {
-		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler)
-		if item == buf {
-			schedulerConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaScheduler, utils.EmptyString)
-		} else {
-			schedulerConns[i] = item
+	if aCfg.SchedulerConns != nil {
+		schedulerConns := make([]string, len(aCfg.SchedulerConns))
+		for i, item := range aCfg.SchedulerConns {
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler) {
+				schedulerConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaScheduler, utils.EmptyString)
+			} else {
+				schedulerConns[i] = item
+			}
 		}
+		initialMap[utils.SchedulerConnsCfg] = schedulerConns
 	}
-	attributeSConns := make([]string, len(aCfg.AttributeSConns))
-	for i, item := range aCfg.AttributeSConns {
-		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)
-		if item == buf {
-			attributeSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaAttributes, utils.EmptyString)
-		} else {
-			attributeSConns[i] = item
+	if aCfg.AttributeSConns != nil {
+		attributeSConns := make([]string, len(aCfg.AttributeSConns))
+		for i, item := range aCfg.AttributeSConns {
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes) {
+				attributeSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaAttributes, utils.EmptyString)
+			} else {
+				attributeSConns[i] = item
+			}
 		}
+		initialMap[utils.AttributeSConnsCfg] = attributeSConns
 	}
-
-	return map[string]interface{}{
-		utils.EnabledCfg:         aCfg.Enabled,
-		utils.CachesConnsCfg:     cachesConns,
-		utils.SchedulerConnsCfg:  schedulerConns,
-		utils.AttributeSConnsCfg: attributeSConns,
+	if aCfg.EEsConns != nil {
+		eesConns := make([]string, len(aCfg.EEsConns))
+		for i, item := range aCfg.EEsConns {
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs) {
+				eesConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaEEs, utils.EmptyString)
+			} else {
+				eesConns[i] = item
+			}
+		}
+		initialMap[utils.EEsConnsCfg] = eesConns
 	}
-
+	return
 }
