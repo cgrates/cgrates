@@ -71,14 +71,14 @@ func (alS *AttributeSCfg) loadFromJsonCfg(jsnCfg *AttributeSJsonCfg) (err error)
 	return
 }
 
-func (alS *AttributeSCfg) AsMapInterface() map[string]interface{} {
-	initialMP := map[string]interface{}{
-		utils.EnabledCfg:             alS.Enabled,
-		utils.IndexedSelectsCfg:      alS.IndexedSelects,
-		utils.ProcessRunsCfg:         alS.ProcessRuns,
-		utils.NestedFieldsCfg:        alS.NestedFields,
+func (alS *AttributeSCfg) AsMapInterface() (initialMP map[string]interface{}) {
+	initialMP = map[string]interface{}{
+		utils.EnabledCfg:        alS.Enabled,
+		utils.IndexedSelectsCfg: alS.IndexedSelects,
+		utils.ProcessRunsCfg:    alS.ProcessRuns,
+		utils.NestedFieldsCfg:   alS.NestedFields,
 	}
-	if alS.StringIndexedFields  != nil {
+	if alS.StringIndexedFields != nil {
 		stringIndexedFields := make([]string, len(*alS.StringIndexedFields))
 		for i, item := range *alS.StringIndexedFields {
 			stringIndexedFields[i] = item
@@ -99,5 +99,5 @@ func (alS *AttributeSCfg) AsMapInterface() map[string]interface{} {
 		}
 		initialMP[utils.SuffixIndexedFieldsCfg] = suffixIndexedFields
 	}
-	return initialMP
+	return
 }
