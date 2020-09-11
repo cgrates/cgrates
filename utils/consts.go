@@ -1878,6 +1878,7 @@ const (
 	MaxParallelConnsCfg   = "max_parallel_conns"
 	ConcurrentRequestsCfg = "concurrent_requests"
 	ConcurrentStrategyCfg = "concurrent_strategy"
+	EEsConnsCfg           = "ees_conns"
 )
 
 // StorDbCfg
