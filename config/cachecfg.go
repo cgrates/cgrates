@@ -65,12 +65,12 @@ func (cParam *CacheParamCfg) AsMapInterface() map[string]interface{} {
 	if cParam.TTL != 0 {
 		TTL = cParam.TTL.String()
 	}
-
 	return map[string]interface{}{
 		utils.LimitCfg:     cParam.Limit,
 		utils.TTLCfg:       TTL,
 		utils.StaticTTLCfg: cParam.StaticTTL,
 		utils.PrecacheCfg:  cParam.Precache,
+		utils.ReplicateCfg: cParam.Replicate,
 	}
 }
 
@@ -127,19 +127,21 @@ func (cCfg *CacheCfg) AddTmpCaches() {
 	}
 }
 
-func (cCfg *CacheCfg) AsMapInterface() map[string]interface{} {
-	partitions := make(map[string]interface{}, len(cCfg.Partitions))
-	for key, value := range cCfg.Partitions {
-		partitions[key] = value.AsMapInterface()
+func (cCfg *CacheCfg) AsMapInterface() (initialMP map[string]interface{}) {
+	initialMP = make(map[string]interface{})
+	if cCfg.Partitions != nil {
+		partitions := make(map[string]interface{}, len(cCfg.Partitions))
+		for key, value := range cCfg.Partitions {
+			partitions[key] = value.AsMapInterface()
+		}
+		initialMP[utils.PartitionsCfg] = partitions
 	}
-	replicationConns := make([]string, len(cCfg.ReplicationConns))
-	for i, item := range cCfg.ReplicationConns {
-		replicationConns[i] = item
+	if cCfg.ReplicationConns != nil {
+		replicationConns := make([]string, len(cCfg.ReplicationConns))
+		for i, item := range cCfg.ReplicationConns {
+			replicationConns[i] = item
+		}
+		initialMP[utils.RplConnsCfg] = replicationConns
 	}
-
-	return map[string]interface{}{
-		utils.PartitionsCfg: partitions,
-		utils.RplConnsCfg:   replicationConns,
-	}
-
+	return
 }
