@@ -3666,6 +3666,9 @@ func (sS *SessionS) BiRPCv1DeactivateSessions(clnt rpcclient.ClientConnector,
 }
 
 func (sS *SessionS) processCDR(cgrEv *utils.CGREventWithOpts, flags []string, rply *string) (err error) {
+	if cgrEv.Tenant == "" {
+		cgrEv.Tenant = sS.cgrCfg.GeneralCfg().DefaultTenant
+	}
 	ev := engine.MapEvent(cgrEv.Event)
 	cgrID := GetSetCGRID(ev)
 	s := sS.getRelocateSession(cgrID,
