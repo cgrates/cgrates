@@ -144,85 +144,101 @@ func (cdrscfg *CdrsCfg) loadFromJsonCfg(jsnCdrsCfg *CdrsJsonCfg) (err error) {
 	return nil
 }
 
-func (cdrscfg *CdrsCfg) AsMapInterface() map[string]interface{} {
+func (cdrscfg *CdrsCfg) AsMapInterface() (initialMP map[string]interface{}) {
+	initialMP = map[string]interface{}{
+		utils.EnabledCfg:       cdrscfg.Enabled,
+		utils.StoreCdrsCfg:     cdrscfg.StoreCdrs,
+		utils.SMCostRetriesCfg: cdrscfg.SMCostRetries,
+	}
+
 	extraFields := make([]string, len(cdrscfg.ExtraFields))
 	for i, item := range cdrscfg.ExtraFields {
 		extraFields[i] = item.Rules
 	}
+	initialMP[utils.ExtraFieldsCfg] = extraFields
+
 	onlineCDRExports := make([]string, len(cdrscfg.OnlineCDRExports))
 	for i, item := range cdrscfg.OnlineCDRExports {
 		onlineCDRExports[i] = item
 	}
+	initialMP[utils.OnlineCDRExportsCfg] = onlineCDRExports
 
-	chargerSConns := make([]string, len(cdrscfg.ChargerSConns))
-	for i, item := range cdrscfg.ChargerSConns {
-		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)
-		if item == buf {
-			chargerSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaChargers, utils.EmptyString)
-		} else {
-			chargerSConns[i] = item
+	if cdrscfg.ChargerSConns != nil {
+		chargerSConns := make([]string, len(cdrscfg.ChargerSConns))
+		for i, item := range cdrscfg.ChargerSConns {
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers) {
+				chargerSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaChargers, utils.EmptyString)
+			} else {
+				chargerSConns[i] = item
+			}
 		}
+		initialMP[utils.ChargerSConnsCfg] = chargerSConns
 	}
-	RALsConns := make([]string, len(cdrscfg.RaterConns))
-	for i, item := range cdrscfg.RaterConns {
-		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder)
-
-		if item == buf {
-			RALsConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaResponder, utils.EmptyString)
-		} else {
-			RALsConns[i] = item
+	if cdrscfg.RaterConns != nil {
+		raterConns := make([]string, len(cdrscfg.RaterConns))
+		for i, item := range cdrscfg.RaterConns {
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder) {
+				raterConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaResponder, utils.EmptyString)
+			} else {
+				raterConns[i] = item
+			}
 		}
+		initialMP[utils.RALsConnsCfg] = raterConns
 	}
-
-	attributeSConns := make([]string, len(cdrscfg.AttributeSConns))
-	for i, item := range cdrscfg.AttributeSConns {
-		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)
-		if item == buf {
-			attributeSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaAttributes, utils.EmptyString)
-		} else {
-			attributeSConns[i] = item
+	if cdrscfg.AttributeSConns != nil {
+		attributeSConns := make([]string, len(cdrscfg.AttributeSConns))
+		for i, item := range cdrscfg.AttributeSConns {
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes) {
+				attributeSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaAttributes, utils.EmptyString)
+			} else {
+				attributeSConns[i] = item
+			}
 		}
+		initialMP[utils.AttributeSConnsCfg] = attributeSConns
 	}
-
-	thresholdSConns := make([]string, len(cdrscfg.ThresholdSConns))
-	for i, item := range cdrscfg.ThresholdSConns {
-		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)
-		if item == buf {
-			thresholdSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaThresholds, utils.EmptyString)
-		} else {
-			thresholdSConns[i] = item
+	if cdrscfg.ThresholdSConns != nil {
+		thresholdSConns := make([]string, len(cdrscfg.ThresholdSConns))
+		for i, item := range cdrscfg.ThresholdSConns {
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds) {
+				thresholdSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaThresholds, utils.EmptyString)
+			} else {
+				thresholdSConns[i] = item
+			}
 		}
+		initialMP[utils.ThresholdSConnsCfg] = thresholdSConns
 	}
-	statSConns := make([]string, len(cdrscfg.StatSConns))
-	for i, item := range cdrscfg.StatSConns {
-		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS)
-		if item == buf {
-			statSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaStatS, utils.EmptyString)
-		} else {
-			statSConns[i] = item
+	if cdrscfg.StatSConns != nil {
+		statSConns := make([]string, len(cdrscfg.StatSConns))
+		for i, item := range cdrscfg.StatSConns {
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS) {
+				statSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaStatS, utils.EmptyString)
+			} else {
+				statSConns[i] = item
+			}
 		}
+		initialMP[utils.StatSConnsCfg] = statSConns
 	}
-	schedulerConns := make([]string, len(cdrscfg.SchedulerConns))
-	for i, item := range cdrscfg.SchedulerConns {
-		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler)
-		if item == buf {
-			schedulerConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaScheduler, utils.EmptyString)
-		} else {
-			schedulerConns[i] = item
+	if cdrscfg.SchedulerConns != nil {
+		schedulerConns := make([]string, len(cdrscfg.SchedulerConns))
+		for i, item := range cdrscfg.SchedulerConns {
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler) {
+				schedulerConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaScheduler, utils.EmptyString)
+			} else {
+				schedulerConns[i] = item
+			}
 		}
+		initialMP[utils.SchedulerConnsCfg] = schedulerConns
 	}
-
-	return map[string]interface{}{
-		utils.EnabledCfg:          cdrscfg.Enabled,
-		utils.ExtraFieldsCfg:      extraFields,
-		utils.StoreCdrsCfg:        cdrscfg.StoreCdrs,
-		utils.SMCostRetriesCfg:    cdrscfg.SMCostRetries,
-		utils.ChargerSConnsCfg:    chargerSConns,
-		utils.RALsConnsCfg:        RALsConns,
-		utils.AttributeSConnsCfg:  attributeSConns,
-		utils.ThresholdSConnsCfg:  thresholdSConns,
-		utils.StatSConnsCfg:       statSConns,
-		utils.OnlineCDRExportsCfg: onlineCDRExports,
-		utils.SchedulerConnsCfg:   schedulerConns,
+	if cdrscfg.EEsConns != nil {
+		eesConns := make([]string, len(cdrscfg.EEsConns))
+		for i, item := range cdrscfg.EEsConns {
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs) {
+				eesConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaEEs, utils.EmptyString)
+			} else {
+				eesConns[i] = item
+			}
+		}
+		initialMP[utils.EEsConnsCfg] = eesConns
 	}
+	return
 }

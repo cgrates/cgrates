@@ -1987,6 +1987,7 @@ const (
 	ChargerSConnsCfg    = "chargers_conns"
 	AttributeSConnsCfg  = "attributes_conns"
 	OnlineCDRExportsCfg = "online_cdr_exports"
+	SessionCostRetires  = "session_cost_retries"
 )
 
 // SessionSCfg
