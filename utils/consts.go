@@ -2335,6 +2335,7 @@ const (
 	TotalSMSUsage     = "TotalSMSUsage"
 	TotalMMSUsage     = "TotalMMSUsage"
 	TotalGenericUsage = "TotalGenericUsage"
+	FilePath          = "FilePath"
 )
 
 // Event Opts
