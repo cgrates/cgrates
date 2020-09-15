@@ -51,9 +51,13 @@ type FileFWVee struct {
 
 // init will create all the necessary dependencies, including opening the file
 func (fFwv *FileFWVee) init() (err error) {
+	filePath := path.Join(fFwv.cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].ExportPath,
+		fFwv.id+utils.Underline+utils.UUIDSha1Prefix()+utils.FWVSuffix)
+	fFwv.Lock()
+	fFwv.dc[utils.FilePath] = filePath
+	fFwv.Unlock()
 	// create the file
-	if fFwv.file, err = os.Create(path.Join(fFwv.cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].ExportPath,
-		fFwv.id+utils.Underline+utils.UUIDSha1Prefix()+utils.FWVSuffix)); err != nil {
+	if fFwv.file, err = os.Create(filePath); err != nil {
 		return
 	}
 	return fFwv.composeHeader()

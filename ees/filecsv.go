@@ -55,8 +55,12 @@ type FileCSVee struct {
 // init will create all the necessary dependencies, including opening the file
 func (fCsv *FileCSVee) init() (err error) {
 	// create the file
-	if fCsv.file, err = os.Create(path.Join(fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].ExportPath,
-		fCsv.id+utils.Underline+utils.UUIDSha1Prefix()+utils.CSVSuffix)); err != nil {
+	filePath := path.Join(fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].ExportPath,
+		fCsv.id+utils.Underline+utils.UUIDSha1Prefix()+utils.CSVSuffix)
+	fCsv.Lock()
+	fCsv.dc[utils.FilePath] = filePath
+	fCsv.Unlock()
+	if fCsv.file, err = os.Create(filePath); err != nil {
 		return
 	}
 	fCsv.csvWriter = csv.NewWriter(fCsv.file)
