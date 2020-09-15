@@ -61,7 +61,6 @@ func TestChargerSCfgloadFromJsonCfg(t *testing.T) {
 }
 
 func TestChargerSCfgAsMapInterface(t *testing.T) {
-	var chgscfg ChargerSCfg
 	cfgJSONStr := `{
 	"chargers": {								
 		"enabled": false,						
@@ -72,24 +71,22 @@ func TestChargerSCfgAsMapInterface(t *testing.T) {
 	},	
 }`
 	eMap := map[string]interface{}{
-		"enabled":               false,
-		"attributes_conns":      []string{},
-		"indexed_selects":       true,
-		"prefix_indexed_fields": []string{},
-		"nested_fields":         false,
-		"string_indexed_fields": []string{},
+		utils.EnabledCfg:             false,
+		utils.AttributeSConnsCfg:     []string{},
+		utils.IndexedSelectsCfg:      true,
+		utils.PrefixIndexedFieldsCfg: []string{},
+		utils.NestedFieldsCfg:        false,
+		utils.SuffixIndexedFieldsCfg: []string{},
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if jsnChgCfg, err := jsnCfg.ChargerServJsonCfg(); err != nil {
-		t.Error(err)
-	} else if err = chgscfg.loadFromJsonCfg(jsnChgCfg); err != nil {
-		t.Error(err)
-	} else if rcv := chgscfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	} else if rcv := cgrCfg.chargerSCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
+		t.Errorf("Expected %+v, recieved %+v", eMap, rcv)
 	}
+}
 
-	cfgJSONStr = `{
+func TestChargerSCfgAsMapInterface1(t *testing.T) {
+	cfgJSONStr := `{
 		"chargers": {								
 			"enabled": false,						
 			"attributes_conns": ["*internal"],					
@@ -98,21 +95,39 @@ func TestChargerSCfgAsMapInterface(t *testing.T) {
 			"nested_fields": false,					
 		},	
 	}`
-	eMap = map[string]interface{}{
-		"enabled":               false,
-		"attributes_conns":      []string{"*internal"},
-		"indexed_selects":       true,
-		"prefix_indexed_fields": []string{},
-		"nested_fields":         false,
-		"string_indexed_fields": []string{},
+	eMap := map[string]interface{}{
+		utils.EnabledCfg:             false,
+		utils.AttributeSConnsCfg:     []string{"*internal"},
+		utils.IndexedSelectsCfg:      true,
+		utils.PrefixIndexedFieldsCfg: []string{},
+		utils.NestedFieldsCfg:        false,
+		utils.SuffixIndexedFieldsCfg: []string{},
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if jsnChgCfg, err := jsnCfg.ChargerServJsonCfg(); err != nil {
+	} else if rcv := cgrCfg.chargerSCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
+		t.Errorf("Expected %+v, recieved %+v", eMap, rcv)
+	}
+}
+
+func TestChargerSCfgAsMapInterface2(t *testing.T) {
+	cfgJSONStr := `{
+      "chargers": {
+          "prefix_indexed_fields": ["*req.DestinationPrefix"],
+          "suffix_indexed_fields": ["*req.Field1","*req.Field2","*req.Field3"],
+      },
+}`
+	eMap := map[string]interface{}{
+		utils.EnabledCfg:             false,
+		utils.AttributeSConnsCfg:     []string{},
+		utils.IndexedSelectsCfg:      true,
+		utils.PrefixIndexedFieldsCfg: []string{"*req.DestinationPrefix"},
+		utils.NestedFieldsCfg:        false,
+		utils.SuffixIndexedFieldsCfg: []string{"*req.Field1", "*req.Field2", "*req.Field3"},
+	}
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if err = chgscfg.loadFromJsonCfg(jsnChgCfg); err != nil {
-		t.Error(err)
-	} else if rcv := chgscfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	} else if rcv := cgrCfg.chargerSCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
+		t.Errorf("Expected %+v, received %+v", eMap, rcv)
 	}
 }

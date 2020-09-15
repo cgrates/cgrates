@@ -83,36 +83,43 @@ func (cS *ChargerSCfg) loadFromJsonCfg(jsnCfg *ChargerSJsonCfg) (err error) {
 	return
 }
 
-func (cS *ChargerSCfg) AsMapInterface() map[string]interface{} {
-	attributeSConns := make([]string, len(cS.AttributeSConns))
-	for i, item := range cS.AttributeSConns {
-		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)
-		if item == buf {
-			attributeSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaAttributes, utils.EmptyString)
-		} else {
-			attributeSConns[i] = item
-		}
+func (cS *ChargerSCfg) AsMapInterface() (initialMP map[string]interface{}) {
+	initialMP = map[string]interface{}{
+		utils.EnabledCfg:        cS.Enabled,
+		utils.IndexedSelectsCfg: cS.IndexedSelects,
+		utils.NestedFieldsCfg:   cS.NestedFields,
 	}
-	stringIndexedFields := []string{}
+	if cS.AttributeSConns != nil {
+		attributeSConns := make([]string, len(cS.AttributeSConns))
+		for i, item := range cS.AttributeSConns {
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes) {
+				attributeSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaAttributes, utils.EmptyString)
+			} else {
+				attributeSConns[i] = item
+			}
+		}
+		initialMP[utils.AttributeSConnsCfg] = attributeSConns
+	}
 	if cS.StringIndexedFields != nil {
-		stringIndexedFields = make([]string, len(*cS.StringIndexedFields))
+		stringIndexedFields := make([]string, len(*cS.StringIndexedFields))
 		for i, item := range *cS.StringIndexedFields {
 			stringIndexedFields[i] = item
 		}
+		initialMP[utils.StringIndexedFieldsCfg] = stringIndexedFields
 	}
-	prefixIndexedFields := []string{}
 	if cS.PrefixIndexedFields != nil {
-		prefixIndexedFields = make([]string, len(*cS.PrefixIndexedFields))
+		prefixIndexedFields := make([]string, len(*cS.PrefixIndexedFields))
 		for i, item := range *cS.PrefixIndexedFields {
 			prefixIndexedFields[i] = item
 		}
+		initialMP[utils.PrefixIndexedFieldsCfg] = prefixIndexedFields
 	}
-	return map[string]interface{}{
-		utils.EnabledCfg:             cS.Enabled,
-		utils.IndexedSelectsCfg:      cS.IndexedSelects,
-		utils.AttributeSConnsCfg:     attributeSConns,
-		utils.StringIndexedFieldsCfg: stringIndexedFields,
-		utils.PrefixIndexedFieldsCfg: prefixIndexedFields,
-		utils.NestedFieldsCfg:        cS.NestedFields,
+	if cS.SuffixIndexedFields != nil {
+		sufixIndexedFields := make([]string, len(*cS.SuffixIndexedFields))
+		for i, item := range *cS.SuffixIndexedFields {
+			sufixIndexedFields[i] = item
+		}
+		initialMP[utils.SuffixIndexedFieldsCfg] = sufixIndexedFields
 	}
+	return
 }
