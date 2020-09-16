@@ -169,8 +169,12 @@ func (itm *ItemOpt) AsMapInterface() (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
 		utils.RemoteCfg:    itm.Remote,
 		utils.ReplicateCfg: itm.Replicate,
-		utils.RouteID:      itm.RouteID,
-		utils.APIKey:       itm.APIKey,
+	}
+	if itm.APIKey != utils.EmptyString {
+		initialMP[utils.ApiKeyCfg] = itm.APIKey
+	}
+	if itm.RouteID != utils.EmptyString {
+		initialMP[utils.RouteIDCfg] = itm.RouteID
 	}
 	return
 }
