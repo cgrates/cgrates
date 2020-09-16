@@ -447,7 +447,10 @@ func TestDataDbCfgAsMapInterface(t *testing.T) {
 	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else {
-		rcv := cgrCfg.dataDbCfg.AsMapInterface()
+		rcv, err := cgrCfg.dataDbCfg.AsMapInterface()
+		if err != nil {
+			t.Error(err)
+		}
 		if !reflect.DeepEqual(eMap[utils.ItemsCfg].(map[string]interface{})[utils.MetaAccounts],
 			rcv[utils.ItemsCfg].(map[string]interface{})[utils.MetaAccounts]) {
 			t.Errorf("Expected %+v, received %+v", eMap[utils.ItemsCfg].(map[string]interface{})[utils.MetaAccounts],
@@ -473,7 +476,9 @@ func TestDataDbCfgAsMapInterface(t *testing.T) {
 		t.Error(err)
 	} else if err = dbcfg.loadFromJsonCfg(jsnDataDbCfg); err != nil {
 		t.Error(err)
-	} else if rcv := dbcfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
+	} else if rcv, err := dbcfg.AsMapInterface(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("Expected %+v, recieved %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }

@@ -1601,11 +1601,11 @@ func (cfg *CGRConfig) AsMapInterface(separator string) map[string]interface{} {
 	}
 
 	return map[string]interface{}{
-		utils.LoaderCfg:        loaderCfg,
-		utils.HttpAgentCfg:     httpAgentCfg,
-		utils.RpcConns:         rpcConns,
-		utils.GeneralCfg:       cfg.generalCfg.AsMapInterface(),
-		utils.DataDbCfg:        cfg.dataDbCfg.AsMapInterface(),
+		utils.LoaderCfg:    loaderCfg,
+		utils.HttpAgentCfg: httpAgentCfg,
+		utils.RpcConns:     rpcConns,
+		utils.GeneralCfg:   cfg.generalCfg.AsMapInterface(),
+		//utils.DataDbCfg:        cfg.dataDbCfg.AsMapInterface(),
 		utils.StorDbCfg:        cfg.storDbCfg.AsMapInterface(),
 		utils.TlsCfg:           cfg.tlsCfg.AsMapInterface(),
 		utils.CacheCfg:         cfg.cacheCfg.AsMapInterface(),

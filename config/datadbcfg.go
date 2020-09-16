@@ -129,7 +129,7 @@ func (dbcfg *DataDbCfg) Clone() *DataDbCfg {
 	}
 }
 
-func (dbcfg *DataDbCfg) AsMapInterface() (initialMP map[string]interface{}) {
+func (dbcfg *DataDbCfg) AsMapInterface() (initialMP map[string]interface{}, err error) {
 	initialMP = map[string]interface{}{
 		utils.DataDbTypeCfg: utils.Meta + dbcfg.DataDbType,
 		utils.DataDbHostCfg: dbcfg.DataDbHost,
@@ -148,7 +148,10 @@ func (dbcfg *DataDbCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		initialMP[utils.ItemsCfg] = items
 	}
 	if dbcfg.DataDbPort != "" {
-		dbPort, _ := strconv.Atoi(dbcfg.DataDbPort)
+		var dbPort int
+		if dbPort, err = strconv.Atoi(dbcfg.DataDbPort); err != nil {
+			return
+		}
 		initialMP[utils.DataDbPortCfg] = dbPort
 	}
 	return
