@@ -109,23 +109,27 @@ func (dbcfg *StorDbCfg) Clone() *StorDbCfg {
 	}
 }
 
-func (dbcfg *StorDbCfg) AsMapInterface() map[string]interface{} {
-	items := make(map[string]interface{})
-	for key, item := range dbcfg.Items {
-		items[key] = item.AsMapInterface()
-	}
-	dbPort, _ := strconv.Atoi(dbcfg.Port)
-
-	return map[string]interface{}{
+func (dbcfg *StorDbCfg) AsMapInterface() (initialMP map[string]interface{}) {
+	initialMP = map[string]interface{}{
 		utils.DataDbTypeCfg:          utils.Meta + dbcfg.Type,
 		utils.DataDbHostCfg:          dbcfg.Host,
-		utils.DataDbPortCfg:          dbPort,
 		utils.DataDbNameCfg:          dbcfg.Name,
 		utils.DataDbUserCfg:          dbcfg.User,
 		utils.DataDbPassCfg:          dbcfg.Password,
 		utils.StringIndexedFieldsCfg: dbcfg.StringIndexedFields,
 		utils.PrefixIndexedFieldsCfg: dbcfg.PrefixIndexedFields,
-		utils.ItemsCfg:               items,
 		utils.OptsCfg:                dbcfg.Opts,
 	}
+	if dbcfg.Items != nil {
+		items := make(map[string]interface{})
+		for key, item := range dbcfg.Items {
+			items[key] = item.AsMapInterface()
+		}
+		initialMP[utils.ItemsCfg] = items
+	}
+	if dbcfg.Port != utils.EmptyString {
+		dbPort, _ := strconv.Atoi(dbcfg.Port)
+		initialMP[utils.DataDbPortCfg] = dbPort
+	}
+	return
 }
