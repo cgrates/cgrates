@@ -187,8 +187,8 @@ func TestStorDbCfgAsMapInterface(t *testing.T) {
 			"sslmode":           "disable",
 		},
 		"items": map[string]interface{}{
-			"session_costs": map[string]interface{}{"remote": false, "replicate": false, "ApiKey": "", "RouteID": ""},
-			"cdrs":          map[string]interface{}{"remote": false, "replicate": false, "ApiKey": "", "RouteID": ""},
+			"session_costs": map[string]interface{}{"remote": false, "replicate": false},
+			"cdrs":          map[string]interface{}{"remote": false, "replicate": false},
 		},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {

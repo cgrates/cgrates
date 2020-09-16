@@ -1914,6 +1914,8 @@ const (
 
 // ItemOpt
 const (
+	ApiKeyCfg    = "api_key"
+	RouteIDCfg   = "route_id"
 	RemoteCfg    = "remote"
 	ReplicateCfg = "replicate"
 	TTLCfg       = "ttl"
@@ -1999,6 +2001,7 @@ const (
 	RouteSConnsCfg         = "routes_conns"
 	AttrSConnsCfg          = "attributes_conns"
 	ReplicationConnsCfg    = "replication_conns"
+	RemoteConnsCfg         = "remote_conns"
 	DebitIntervalCfg       = "debit_interval"
 	StoreSCostsCfg         = "store_session_costs"
 	MinCallDurationCfg     = "min_call_duration"

@@ -403,9 +403,6 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 }
 
 func TestDataDbCfgAsMapInterface(t *testing.T) {
-	var dbcfg DataDbCfg
-	dbcfg.Opts = make(map[string]interface{})
-	dbcfg.Items = make(map[string]*ItemOpt)
 	cfgJSONStr := `{
 	"data_db": {								
 		"db_type": "*redis",					
@@ -421,27 +418,27 @@ func TestDataDbCfgAsMapInterface(t *testing.T) {
 		"remote_conns":[],
 		"replication_conns":[],
 		"items":{
-			"*accounts":{"remote":true, "replicate":false}, 					
-			"*reverse_destinations": {"remote":false, "replicate":false},
+			"*accounts":{"remote":true, "replicate":false, "api_key": "randomVal", "route_id": "randomVal"}, 					
+			"*reverse_destinations": {"remote":false, "replicate":false, "api_key": "randomVal", "route_id": "randomVal"},
 		},
 	},		
 }`
 	eMap := map[string]interface{}{
-		"db_type":     "*redis",
-		"db_host":     "127.0.0.1",
-		"db_port":     6379,
-		"db_name":     "10",
-		"db_user":     "cgrates",
-		"db_password": "",
-		"opts": map[string]interface{}{
-			"redis_sentinel": "",
-			"query_timeout":  "10s",
+		utils.DataDbTypeCfg: "*redis",
+		utils.DataDbHostCfg: "127.0.0.1",
+		utils.DataDbPortCfg: 6379,
+		utils.DataDbNameCfg: "10",
+		utils.DataDbUserCfg: "cgrates",
+		utils.DataDbPassCfg: "",
+		utils.OptsCfg: map[string]interface{}{
+			utils.RedisSentinelNameCfg: "",
+			utils.QueryTimeoutCfg:      "10s",
 		},
-		"remote_conns":      []string{},
-		"replication_conns": []string{},
-		"items": map[string]interface{}{
-			"*accounts":             map[string]interface{}{"remote": true, "replicate": false, "ApiKey": "", "RouteID": ""},
-			"*reverse_destinations": map[string]interface{}{"remote": false, "replicate": false, "ApiKey": "", "RouteID": ""},
+		utils.RemoteConnsCfg:      []string{},
+		utils.ReplicationConnsCfg: []string{},
+		utils.ItemsCfg: map[string]interface{}{
+			utils.MetaAccounts:            map[string]interface{}{utils.RemoteCfg: true, utils.ReplicateCfg: false, utils.ApiKeyCfg: "randomVal", utils.RouteIDCfg: "randomVal"},
+			utils.MetaReverseDestinations: map[string]interface{}{utils.RemoteCfg: false, utils.ReplicateCfg: false, utils.ApiKeyCfg: "randomVal", utils.RouteIDCfg: "randomVal"},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
@@ -460,25 +457,5 @@ func TestDataDbCfgAsMapInterface(t *testing.T) {
 			t.Errorf("Expected %+v, received %+v", eMap[utils.ItemsCfg].(map[string]interface{})[utils.MetaReverseDestinations],
 				rcv[utils.ItemsCfg].(map[string]interface{})[utils.MetaReverseDestinations])
 		}
-	}
-
-	/*if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
-		t.Error(err)
-	} else if rcv := cgrCfg.dataDbCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
-	}
-
-	*/
-
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
-		t.Error(err)
-	} else if jsnDataDbCfg, err := jsnCfg.DbJsonCfg(DATADB_JSN); err != nil {
-		t.Error(err)
-	} else if err = dbcfg.loadFromJsonCfg(jsnDataDbCfg); err != nil {
-		t.Error(err)
-	} else if rcv, err := dbcfg.AsMapInterface(); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("Expected %+v, recieved %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
