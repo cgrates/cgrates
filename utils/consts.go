@@ -2152,6 +2152,7 @@ const (
 
 // SureTax
 const (
+	RootDirCfg              = "root_dir"
 	UrlCfg                  = "url"
 	ClientNumberCfg         = "client_number"
 	ValidationKeyCfg        = "validation_key"

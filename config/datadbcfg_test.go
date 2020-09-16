@@ -444,6 +444,29 @@ func TestDataDbCfgAsMapInterface(t *testing.T) {
 			"*reverse_destinations": map[string]interface{}{"remote": false, "replicate": false, "ApiKey": "", "RouteID": ""},
 		},
 	}
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+		t.Error(err)
+	} else {
+		rcv := cgrCfg.dataDbCfg.AsMapInterface()
+		if !reflect.DeepEqual(eMap[utils.ItemsCfg].(map[string]interface{})[utils.MetaAccounts],
+			rcv[utils.ItemsCfg].(map[string]interface{})[utils.MetaAccounts]) {
+			t.Errorf("Expected %+v, received %+v", eMap[utils.ItemsCfg].(map[string]interface{})[utils.MetaAccounts],
+				rcv[utils.ItemsCfg].(map[string]interface{})[utils.MetaAccounts])
+		} else if !reflect.DeepEqual(eMap[utils.ItemsCfg].(map[string]interface{})[utils.MetaReverseDestinations],
+			rcv[utils.ItemsCfg].(map[string]interface{})[utils.MetaReverseDestinations]) {
+			t.Errorf("Expected %+v, received %+v", eMap[utils.ItemsCfg].(map[string]interface{})[utils.MetaReverseDestinations],
+				rcv[utils.ItemsCfg].(map[string]interface{})[utils.MetaReverseDestinations])
+		}
+	}
+
+	/*if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+		t.Error(err)
+	} else if rcv := cgrCfg.dataDbCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	}
+
+	*/
+
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if jsnDataDbCfg, err := jsnCfg.DbJsonCfg(DATADB_JSN); err != nil {
@@ -451,6 +474,6 @@ func TestDataDbCfgAsMapInterface(t *testing.T) {
 	} else if err = dbcfg.loadFromJsonCfg(jsnDataDbCfg); err != nil {
 		t.Error(err)
 	} else if rcv := dbcfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("Expected: %+v ,\n recived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("Expected %+v, recieved %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }

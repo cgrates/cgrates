@@ -72,7 +72,7 @@ func TestDiameterAgentCfgloadFromJsonCfg(t *testing.T) {
 }
 
 func TestDiameterAgentCfgAsMapInterface(t *testing.T) {
-	var dacfg DiameterAgentCfg
+	//var dacfg DiameterAgentCfg
 	cfgJSONStr := `{
 	"diameter_agent": {
 		"enabled": false,											
@@ -89,12 +89,12 @@ func TestDiameterAgentCfgAsMapInterface(t *testing.T) {
 }`
 	eMap := map[string]interface{}{
 		"asr_template":         "",
-		"concurrent_requests":  0,
+		"concurrent_requests":  -1,
 		"dictionaries_path":    "/usr/share/cgrates/diameter/dict/",
 		"enabled":              false,
-		"forced_disconnect":    "",
+		"forced_disconnect":    "*none",
 		"listen":               "127.0.0.1:3868",
-		"listen_net":           "",
+		"listen_net":           "tcp",
 		"origin_host":          "CGR-DA",
 		"origin_realm":         "cgrates.org",
 		"product_name":         "CGRateS",
@@ -104,13 +104,20 @@ func TestDiameterAgentCfgAsMapInterface(t *testing.T) {
 		"vendor_id":            0,
 		"request_processors":   []map[string]interface{}{},
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if jsnDaCfg, err := jsnCfg.DiameterAgentJsonCfg(); err != nil {
-		t.Error(err)
-	} else if err = dacfg.loadFromJsonCfg(jsnDaCfg, utils.INFIELD_SEP); err != nil {
-		t.Error(err)
-	} else if rcv := dacfg.AsMapInterface(utils.EmptyString); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("Expected: %+v,\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	} else if rcv := cgrCfg.diameterAgentCfg.AsMapInterface(utils.EmptyString); !reflect.DeepEqual(rcv, eMap) {
+		t.Errorf("Expected %+v \n, received %+v", eMap, rcv)
 	}
+	/*
+		if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+			t.Error(err)
+		} else if jsnDaCfg, err := jsnCfg.DiameterAgentJsonCfg(); err != nil {
+			t.Error(err)
+		} else if err = dacfg.loadFromJsonCfg(jsnDaCfg, utils.INFIELD_SEP); err != nil {
+			t.Error(err)
+		} else if rcv := dacfg.AsMapInterface(utils.EmptyString); !reflect.DeepEqual(eMap, rcv) {
+			t.Errorf("Expected: %+v,\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		}
+	*/
 }
