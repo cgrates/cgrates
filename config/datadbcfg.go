@@ -129,25 +129,29 @@ func (dbcfg *DataDbCfg) Clone() *DataDbCfg {
 	}
 }
 
-func (dbcfg *DataDbCfg) AsMapInterface() map[string]interface{} {
-	items := make(map[string]interface{})
-	for key, item := range dbcfg.Items {
-		items[key] = item.AsMapInterface()
-	}
-	dbPort, _ := strconv.Atoi(dbcfg.DataDbPort)
-
-	return map[string]interface{}{
+func (dbcfg *DataDbCfg) AsMapInterface() (initialMP map[string]interface{}) {
+	initialMP = map[string]interface{}{
 		utils.DataDbTypeCfg: utils.Meta + dbcfg.DataDbType,
 		utils.DataDbHostCfg: dbcfg.DataDbHost,
-		utils.DataDbPortCfg: dbPort,
 		utils.DataDbNameCfg: dbcfg.DataDbName,
 		utils.DataDbUserCfg: dbcfg.DataDbUser,
 		utils.DataDbPassCfg: dbcfg.DataDbPass,
 		utils.RmtConnsCfg:   dbcfg.RmtConns,
 		utils.RplConnsCfg:   dbcfg.RplConns,
-		utils.ItemsCfg:      items,
 		utils.OptsCfg:       dbcfg.Opts,
 	}
+	if dbcfg.Items != nil {
+		items := make(map[string]interface{}, len(dbcfg.Items))
+		for key, item := range dbcfg.Items {
+			items[key] = item.AsMapInterface()
+		}
+		initialMP[utils.ItemsCfg] = items
+	}
+	if dbcfg.DataDbPort != "" {
+		dbPort, _ := strconv.Atoi(dbcfg.DataDbPort)
+		initialMP[utils.DataDbPortCfg] = dbPort
+	}
+	return
 }
 
 type ItemOpt struct {
@@ -158,13 +162,14 @@ type ItemOpt struct {
 	APIKey  string
 }
 
-func (itm *ItemOpt) AsMapInterface() map[string]interface{} {
-	return map[string]interface{}{
+func (itm *ItemOpt) AsMapInterface() (initialMP map[string]interface{}) {
+	initialMP = map[string]interface{}{
 		utils.RemoteCfg:    itm.Remote,
 		utils.ReplicateCfg: itm.Replicate,
 		utils.RouteID:      itm.RouteID,
 		utils.APIKey:       itm.APIKey,
 	}
+	return
 }
 
 func (itm *ItemOpt) loadFromJsonCfg(jsonItm *ItemOptJson) (err error) {

@@ -118,37 +118,40 @@ func (da *DiameterAgentCfg) loadFromJsonCfg(jsnCfg *DiameterAgentJsonCfg, separa
 	return
 }
 
-func (ds *DiameterAgentCfg) AsMapInterface(separator string) map[string]interface{} {
-	requestProcessors := make([]map[string]interface{}, len(ds.RequestProcessors))
-	for i, item := range ds.RequestProcessors {
-		requestProcessors[i] = item.AsMapInterface(separator)
+func (ds *DiameterAgentCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
+	initialMP = map[string]interface{}{
+		utils.EnabledCfg:          ds.Enabled,
+		utils.ListenNetCfg:        ds.ListenNet,
+		utils.ListenCfg:           ds.Listen,
+		utils.DictionariesPathCfg: ds.DictionariesPath,
+		utils.OriginHostCfg:       ds.OriginHost,
+		utils.OriginRealmCfg:      ds.OriginRealm,
+		utils.VendorIdCfg:         ds.VendorId,
+		utils.ProductNameCfg:      ds.ProductName,
+		utils.ConcurrentReqsCfg:   ds.ConcurrentReqs,
+		utils.SyncedConnReqsCfg:   ds.SyncedConnReqs,
+		utils.ASRTemplateCfg:      ds.ASRTemplate,
+		utils.RARTemplateCfg:      ds.RARTemplate,
+		utils.ForcedDisconnectCfg: ds.ForcedDisconnect,
 	}
-
-	sessionSConns := make([]string, len(ds.SessionSConns))
-	for i, item := range ds.SessionSConns {
-		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
-		if item == buf {
-			sessionSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaSessionS, utils.EmptyString)
-		} else {
-			sessionSConns[i] = item
+	if ds.RequestProcessors != nil {
+		requestProcessors := make([]map[string]interface{}, len(ds.RequestProcessors))
+		for i, item := range ds.RequestProcessors {
+			requestProcessors[i] = item.AsMapInterface(separator)
 		}
+		initialMP[utils.RequestProcessorsCfg] = requestProcessors
 	}
-
-	return map[string]interface{}{
-		utils.EnabledCfg:           ds.Enabled,
-		utils.ListenNetCfg:         ds.ListenNet,
-		utils.ListenCfg:            ds.Listen,
-		utils.DictionariesPathCfg:  ds.DictionariesPath,
-		utils.SessionSConnsCfg:     sessionSConns,
-		utils.OriginHostCfg:        ds.OriginHost,
-		utils.OriginRealmCfg:       ds.OriginRealm,
-		utils.VendorIdCfg:          ds.VendorId,
-		utils.ProductNameCfg:       ds.ProductName,
-		utils.ConcurrentReqsCfg:    ds.ConcurrentReqs,
-		utils.SyncedConnReqsCfg:    ds.SyncedConnReqs,
-		utils.ASRTemplateCfg:       ds.ASRTemplate,
-		utils.RARTemplateCfg:       ds.RARTemplate,
-		utils.ForcedDisconnectCfg:  ds.ForcedDisconnect,
-		utils.RequestProcessorsCfg: requestProcessors,
+	if ds.SessionSConns != nil {
+		sessionSConns := make([]string, len(ds.SessionSConns))
+		for i, item := range ds.SessionSConns {
+			buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
+			if item == buf {
+				sessionSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaSessionS, utils.EmptyString)
+			} else {
+				sessionSConns[i] = item
+			}
+		}
+		initialMP[utils.SessionSConnsCfg] = sessionSConns
 	}
+	return
 }
