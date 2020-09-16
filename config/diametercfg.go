@@ -134,13 +134,13 @@ func (ds *DiameterAgentCfg) AsMapInterface(separator string) (initialMP map[stri
 		utils.RARTemplateCfg:      ds.RARTemplate,
 		utils.ForcedDisconnectCfg: ds.ForcedDisconnect,
 	}
-	if ds.RequestProcessors != nil {
-		requestProcessors := make([]map[string]interface{}, len(ds.RequestProcessors))
-		for i, item := range ds.RequestProcessors {
-			requestProcessors[i] = item.AsMapInterface(separator)
-		}
-		initialMP[utils.RequestProcessorsCfg] = requestProcessors
+
+	requestProcessors := make([]map[string]interface{}, len(ds.RequestProcessors))
+	for i, item := range ds.RequestProcessors {
+		requestProcessors[i] = item.AsMapInterface(separator)
 	}
+	initialMP[utils.RequestProcessorsCfg] = requestProcessors
+
 	if ds.SessionSConns != nil {
 		sessionSConns := make([]string, len(ds.SessionSConns))
 		for i, item := range ds.SessionSConns {
