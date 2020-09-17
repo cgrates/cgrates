@@ -361,7 +361,6 @@ func TestHttpAgentCfgappendHttpAgntProcCfgs(t *testing.T) {
 }
 
 func TestHttpAgentCfgAsMapInterface(t *testing.T) {
-	var httpcfg HttpAgentCfgs
 	cfgJSONStr := `{
 		
 "http_agent": [
@@ -377,8 +376,8 @@ func TestHttpAgentCfgAsMapInterface(t *testing.T) {
 				"filters": ["*string:~*req.request_type:OutboundAUTH","*string:~*req.Msisdn:497700056231"],
 				"tenant": "cgrates.org",
 				"flags": ["*dryrun"],
-				"request_fields":[
-				],
+                "timezone": "",
+				"request_fields":[],
 				"reply_fields":[
 					{"tag": "Allow", "path": "*rep.response.Allow", "type": "*constant",
 						"value": "1", "mandatory": true},
@@ -398,37 +397,33 @@ func TestHttpAgentCfgAsMapInterface(t *testing.T) {
 }`
 	eMap := []map[string]interface{}{
 		{
-			"id":              "conecto1",
-			"url":             "/conecto",
-			"sessions_conns":  []string{"*localhost"},
-			"request_payload": "*url",
-			"reply_payload":   "*xml",
-			"request_processors": []map[string]interface{}{
+			utils.IdCfg:             "conecto1",
+			utils.UrlCfg:            "/conecto",
+			utils.SessionSConnsCfg:  []string{"*localhost"},
+			utils.RequestPayloadCfg: "*url",
+			utils.ReplyPayloadCfg:   "*xml",
+			utils.RequestProcessorsCfg: []map[string]interface{}{
 				{
-					"id":             "OutboundAUTHDryRun",
-					"filters":        []string{"*string:~*req.request_type:OutboundAUTH", "*string:~*req.Msisdn:497700056231"},
-					"tenant":         "cgrates.org",
-					"flags":          []string{"*dryrun"},
-					"Timezone":       "",
-					"request_fields": []map[string]interface{}{},
-					"reply_fields": []map[string]interface{}{
-						{"tag": "Allow", "path": "*rep.response.Allow", "type": "*constant", "value": "1", "mandatory": true},
-						{"tag": "Concatenated1", "path": "*rep.response.Concatenated", "type": "*composed", "value": "~*req.MCC;/", "mandatory": true},
-						{"tag": "Concatenated2", "path": "*rep.response.Concatenated", "type": "*composed", "value": "Val1"},
-						{"tag": "MaxDuration", "path": "*rep.response.MaxDuration", "type": "*constant", "value": "1200", "blocker": true},
-						{"tag": "Unused", "path": "*rep.response.Unused", "type": "*constant", "value": "0"},
+					utils.IdCfg:            "OutboundAUTHDryRun",
+					utils.FilterSCfg:       []string{"*string:~*req.request_type:OutboundAUTH", "*string:~*req.Msisdn:497700056231"},
+					utils.TenantCfg:        "cgrates.org",
+					utils.FlagsCfg:         []string{"*dryrun"},
+					utils.TimezoneCfg:      "",
+					utils.RequestFieldsCfg: []map[string]interface{}{},
+					utils.ReplyFieldsCfg: []map[string]interface{}{
+						{utils.TagCfg: "Allow", utils.PathCfg: "*rep.response.Allow", utils.TypeCfg: "*constant", utils.ValueCfg: "1", utils.MandatoryCfg: true},
+						{utils.TagCfg: "Concatenated1", utils.PathCfg: "*rep.response.Concatenated", utils.TypeCfg: "*composed", utils.ValueCfg: "~*req.MCC;/", utils.MandatoryCfg: true},
+						{utils.TagCfg: "Concatenated2", utils.PathCfg: "*rep.response.Concatenated", utils.TypeCfg: "*composed", utils.ValueCfg: "Val1"},
+						{utils.TagCfg: "MaxDuration", utils.PathCfg: "*rep.response.MaxDuration", utils.TypeCfg: "*constant", utils.ValueCfg: "1200", utils.BlockerCfg: true},
+						{utils.TagCfg: "Unused", utils.PathCfg: "*rep.response.Unused", utils.TypeCfg: "*constant", utils.ValueCfg: "0"},
 					},
 				},
 			},
 		},
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if jsnhttpCfg, err := jsnCfg.HttpAgentJsonCfg(); err != nil {
-		t.Error(err)
-	} else if err = httpcfg.loadFromJsonCfg(jsnhttpCfg, utils.INFIELD_SEP); err != nil {
-		t.Error(err)
-	} else if rcv := httpcfg.AsMapInterface(";"); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("Expected: %+v,\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	} else if rcv := cgrCfg.httpAgentCfg.AsMapInterface(cgrCfg.generalCfg.RSRSep); !reflect.DeepEqual(eMap, rcv) {
+		t.Errorf("Expected %+v, recieved %+v", eMap, rcv)
 	}
 }

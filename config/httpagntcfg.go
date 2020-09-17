@@ -45,17 +45,16 @@ func (hcfgs *HttpAgentCfgs) loadFromJsonCfg(jsnHttpAgntCfg *[]*HttpAgentJsonCfg,
 		if !haveID {
 			*hcfgs = append(*hcfgs, hac)
 		}
-
 	}
 	return nil
 }
 
-func (hcfgs *HttpAgentCfgs) AsMapInterface(separator string) []map[string]interface{} {
-	mp := make([]map[string]interface{}, len(*hcfgs))
+func (hcfgs *HttpAgentCfgs) AsMapInterface(separator string) (mp []map[string]interface{}) {
+	mp = make([]map[string]interface{}, len(*hcfgs))
 	for i, item := range *hcfgs {
 		mp[i] = item.AsMapInterface(separator)
 	}
-	return mp
+	return
 }
 
 type HttpAgentCfg struct {
@@ -126,18 +125,19 @@ func (ca *HttpAgentCfg) loadFromJsonCfg(jsnCfg *HttpAgentJsonCfg, separator stri
 	return nil
 }
 
-func (ca *HttpAgentCfg) AsMapInterface(separator string) map[string]interface{} {
+func (ca *HttpAgentCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
+	initialMP = map[string]interface{}{
+		utils.IDCfg:             ca.ID,
+		utils.UrlCfg:            ca.Url,
+		utils.SessionSConnsCfg:  ca.SessionSConns,
+		utils.RequestPayloadCfg: ca.RequestPayload,
+		utils.ReplyPayloadCfg:   ca.ReplyPayload,
+	}
+
 	requestProcessors := make([]map[string]interface{}, len(ca.RequestProcessors))
 	for i, item := range ca.RequestProcessors {
 		requestProcessors[i] = item.AsMapInterface(separator)
 	}
-
-	return map[string]interface{}{
-		utils.IDCfg:                ca.ID,
-		utils.UrlCfg:               ca.Url,
-		utils.SessionSConnsCfg:     ca.SessionSConns,
-		utils.RequestPayloadCfg:    ca.RequestPayload,
-		utils.ReplyPayloadCfg:      ca.ReplyPayload,
-		utils.RequestProcessorsCfg: requestProcessors,
-	}
+	initialMP[utils.RequestProcessorsCfg] = requestProcessors
+	return
 }
