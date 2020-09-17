@@ -811,7 +811,6 @@ const (
 	Attempts                 = "Attempts"
 	FieldSeparator           = "FieldSeparator"
 	ExportPath               = "ExportPath"
-	ExporterID               = "ExporterID"
 	ExporterIDs              = "ExporterIDs"
 	TimeNow                  = "TimeNow"
 	ExportFileName           = "ExportFileName"

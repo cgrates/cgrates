@@ -31,7 +31,6 @@ import (
 )
 
 func NewFileFWVee(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.FilterS, dc utils.MapStorage) (fFwv *FileFWVee, err error) {
-	dc[utils.ExporterID] = cgrCfg.EEsCfg().Exporters[cfgIdx].ID
 	fFwv = &FileFWVee{id: cgrCfg.EEsCfg().Exporters[cfgIdx].ID,
 		cgrCfg: cgrCfg, cfgIdx: cfgIdx, filterS: filterS, dc: dc}
 	err = fFwv.init()
@@ -54,7 +53,7 @@ func (fFwv *FileFWVee) init() (err error) {
 	filePath := path.Join(fFwv.cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].ExportPath,
 		fFwv.id+utils.Underline+utils.UUIDSha1Prefix()+utils.FWVSuffix)
 	fFwv.Lock()
-	fFwv.dc[utils.FilePath] = filePath
+	fFwv.dc[utils.ExportPath] = filePath
 	fFwv.Unlock()
 	// create the file
 	if fFwv.file, err = os.Create(filePath); err != nil {

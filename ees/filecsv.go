@@ -33,7 +33,6 @@ import (
 
 func NewFileCSVee(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.FilterS,
 	dc utils.MapStorage) (fCsv *FileCSVee, err error) {
-	dc[utils.ExporterID] = cgrCfg.EEsCfg().Exporters[cfgIdx].ID
 	fCsv = &FileCSVee{id: cgrCfg.EEsCfg().Exporters[cfgIdx].ID,
 		cgrCfg: cgrCfg, cfgIdx: cfgIdx, filterS: filterS, dc: dc}
 	err = fCsv.init()
@@ -58,7 +57,7 @@ func (fCsv *FileCSVee) init() (err error) {
 	filePath := path.Join(fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].ExportPath,
 		fCsv.id+utils.Underline+utils.UUIDSha1Prefix()+utils.CSVSuffix)
 	fCsv.Lock()
-	fCsv.dc[utils.FilePath] = filePath
+	fCsv.dc[utils.ExportPath] = filePath
 	fCsv.Unlock()
 	if fCsv.file, err = os.Create(filePath); err != nil {
 		return
