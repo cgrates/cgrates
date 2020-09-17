@@ -113,17 +113,6 @@ func TestDispatcherHCfgloadFromJsonCfg(t *testing.T) {
 }
 
 func TestDispatcherHCfgAsMapInterface(t *testing.T) {
-	var daCfg, expected DispatcherHCfg
-	if err := daCfg.loadFromJsonCfg(nil); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(daCfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, daCfg)
-	}
-	if err := daCfg.loadFromJsonCfg(new(DispatcherHJsonCfg)); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(daCfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, daCfg)
-	}
 	cfgJSONStr := `{
 		"dispatcherh":{
 			"enabled": true,
@@ -145,33 +134,103 @@ func TestDispatcherHCfgAsMapInterface(t *testing.T) {
 			"register_interval": "5m",
 		},		
 }`
-	daCfg.Hosts = make(map[string][]*DispatcherHRegistarCfg)
 	eMap := map[string]interface{}{
-		"enabled":           true,
-		"dispatchers_conns": []string{"conn1", "conn2"},
-		"hosts": map[string][]map[string]interface{}{
+		utils.EnabledCfg:          true,
+		utils.DispatchersConnsCfg: []string{"conn1", "conn2"},
+		utils.HostsCfg: map[string][]map[string]interface{}{
 			utils.MetaDefault: {
 				{
-					"id":                 "Host1",
-					"register_transport": "*json",
-					"register_tls":       false,
+					utils.IdCfg:                "Host1",
+					utils.RegisterTransportCfg: "*json",
+					utils.RegisterTLSCfg:       false,
 				},
 				{
-					"id":                 "Host2",
-					"register_transport": "*gob",
-					"register_tls":       false,
+					utils.IdCfg:                "Host2",
+					utils.RegisterTransportCfg: "*gob",
+					utils.RegisterTLSCfg:       false,
 				},
 			},
 		},
-		"register_interval": 5 * time.Minute,
+		utils.RegisterIntervalCfg: 5 * time.Minute,
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if jsnDaCfg, err := jsnCfg.DispatcherHJsonCfg(); err != nil {
+	} else if rcv := cgrCfg.dispatcherHCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
+		t.Errorf("Expected %+v, received %+v", eMap, rcv)
+	}
+}
+
+func TestDispatcherHCfgAsMapInterface1(t *testing.T) {
+	cfgJSONStr := `{
+     "dispatcherh":{
+          "enabled": true,
+          "dispatchers_conns":["conn1"],
+          "hosts": {
+             "*default": [
+             {
+                  "ID":"",
+                  "register_transport": "*json",
+                  "register_tls":false,
+             },
+             {
+                  "ID":"host2",
+                  "register_transport": "",
+                  "register_tls":true,
+             },
+          ]
+          },
+          "register_interval": "1m",
+     },
+
+}`
+	eMap := map[string]interface{}{
+		utils.EnabledCfg:          true,
+		utils.DispatchersConnsCfg: []string{"conn1"},
+		utils.HostsCfg: map[string][]map[string]interface{}{
+			utils.MetaDefault: {
+				{
+					utils.IDCfg:                utils.EmptyString,
+					utils.RegisterTransportCfg: utils.MetaJSON,
+					utils.RegisterTLSCfg:       false,
+				},
+				{
+					utils.IDCfg:                "host2",
+					utils.RegisterTransportCfg: utils.EmptyString,
+					utils.RegisterTLSCfg:       true,
+				},
+			},
+		},
+		utils.RegisterIntervalCfg: 1 * time.Minute,
+	}
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if err = daCfg.loadFromJsonCfg(jsnDaCfg); err != nil {
+	} else {
+		rcv := cgrCfg.dispatcherHCfg.AsMapInterface()
+		if !reflect.DeepEqual(eMap[utils.HostsCfg].(map[string][]map[string]interface{})[utils.IdCfg],
+			rcv[utils.HostsCfg].(map[string][]map[string]interface{})[utils.IdCfg]) {
+			t.Errorf("Expected %+v, received %+v", eMap[utils.HostsCfg].(map[string][]map[string]interface{})[utils.IdCfg],
+				rcv[utils.HostsCfg].(map[string][]map[string]interface{})[utils.IdCfg])
+		} else if !reflect.DeepEqual(eMap[utils.HostsCfg], rcv[utils.HostsCfg]) {
+			t.Errorf("Expected %+v, received %+v", eMap[utils.HostsCfg], rcv[utils.HostsCfg])
+		} else if !reflect.DeepEqual(eMap, rcv) {
+			t.Errorf("Expected %+v, received %+v", eMap, rcv)
+		}
+	}
+}
+
+func TestDispatcherHCfgAsMapInterface2(t *testing.T) {
+	cfgJSONStr := `{
+      "dispatcherh": {},
+}`
+	eMap := map[string]interface{}{
+		utils.EnabledCfg:          false,
+		utils.DispatchersConnsCfg: []string{},
+		utils.HostsCfg:            map[string][]map[string]interface{}{},
+		utils.RegisterIntervalCfg: 5 * time.Minute,
+	}
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if rcv := daCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	} else if rcv := cgrCfg.dispatcherHCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
+		t.Errorf("Expected %+v, received %+v", eMap, rcv)
 	}
 }
