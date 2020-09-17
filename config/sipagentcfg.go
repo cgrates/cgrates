@@ -100,28 +100,31 @@ func (da *SIPAgentCfg) loadFromJsonCfg(jsnCfg *SIPAgentJsonCfg, sep string) (err
 	return
 }
 
-func (da *SIPAgentCfg) AsMapInterface(separator string) map[string]interface{} {
+func (da *SIPAgentCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
+	initialMP = map[string]interface{}{
+		utils.EnabledCfg:             da.Enabled,
+		utils.ListenCfg:              da.Listen,
+		utils.ListenNetCfg:           da.ListenNet,
+		utils.TimezoneCfg:            da.Timezone,
+		utils.RetransmissionTimerCfg: da.RetransmissionTimer,
+	}
+
 	requestProcessors := make([]map[string]interface{}, len(da.RequestProcessors))
 	for i, item := range da.RequestProcessors {
 		requestProcessors[i] = item.AsMapInterface(separator)
 	}
-	sessionSConns := make([]string, len(da.SessionSConns))
-	for i, item := range da.SessionSConns {
-		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
-		if item == buf {
-			sessionSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaSessionS, utils.EmptyString)
-		} else {
-			sessionSConns[i] = item
+	initialMP[utils.RequestProcessorsCfg] = requestProcessors
+
+	if da.SessionSConns != nil {
+		sessionSConns := make([]string, len(da.SessionSConns))
+		for i, item := range da.SessionSConns {
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS) {
+				sessionSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaSessionS, utils.EmptyString)
+			} else {
+				sessionSConns[i] = item
+			}
 		}
+		initialMP[utils.SessionSConnsCfg] = sessionSConns
 	}
-
-	return map[string]interface{}{
-		utils.EnabledCfg:           da.Enabled,
-		utils.ListenCfg:            da.Listen,
-		utils.ListenNetCfg:         da.ListenNet,
-		utils.SessionSConnsCfg:     sessionSConns,
-		utils.TimezoneCfg:          da.Timezone,
-		utils.RequestProcessorsCfg: requestProcessors,
-	}
-
+	return
 }

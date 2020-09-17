@@ -1982,13 +1982,14 @@ const (
 
 // CdrsCfg
 const (
-	ExtraFieldsCfg      = "extra_fields"
-	StoreCdrsCfg        = "store_cdrs"
-	SMCostRetriesCfg    = "session_cost_retries"
-	ChargerSConnsCfg    = "chargers_conns"
-	AttributeSConnsCfg  = "attributes_conns"
-	OnlineCDRExportsCfg = "online_cdr_exports"
-	SessionCostRetires  = "session_cost_retries"
+	ExtraFieldsCfg         = "extra_fields"
+	StoreCdrsCfg           = "store_cdrs"
+	SMCostRetriesCfg       = "session_cost_retries"
+	ChargerSConnsCfg       = "chargers_conns"
+	AttributeSConnsCfg     = "attributes_conns"
+	RetransmissionTimerCfg = "retransmission_timer"
+	OnlineCDRExportsCfg    = "online_cdr_exports"
+	SessionCostRetires     = "session_cost_retries"
 )
 
 // SessionSCfg
