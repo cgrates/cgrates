@@ -58,19 +58,22 @@ func (dps *DispatcherHCfg) loadFromJsonCfg(jsnCfg *DispatcherHJsonCfg) (err erro
 	return
 }
 
-func (dps *DispatcherHCfg) AsMapInterface() map[string]interface{} {
-	hosts := make(map[string][]map[string]interface{})
-	for tnt, hs := range dps.Hosts {
-		for _, h := range hs {
-			hosts[tnt] = append(hosts[tnt], h.AsMapInterface())
-		}
-	}
-	return map[string]interface{}{
+func (dps *DispatcherHCfg) AsMapInterface() (initialMP map[string]interface{}) {
+	initialMP = map[string]interface{}{
 		utils.EnabledCfg:          dps.Enabled,
 		utils.DispatchersConnsCfg: dps.DispatchersConns,
-		utils.HostsCfg:            hosts,
 		utils.RegisterIntervalCfg: dps.RegisterInterval,
 	}
+	if dps.Hosts != nil {
+		hosts := make(map[string][]map[string]interface{})
+		for tnt, hs := range dps.Hosts {
+			for _, h := range hs {
+				hosts[tnt] = append(hosts[tnt], h.AsMapInterface())
+			}
+		}
+		initialMP[utils.HostsCfg] = hosts
+	}
+	return
 }
 
 type DispatcherHRegistarCfg struct {
@@ -94,10 +97,11 @@ func NewDispatcherHRegistarCfg(jsnCfg DispatcherHRegistarJsonCfg) (dhr *Dispatch
 	return
 }
 
-func (dhr *DispatcherHRegistarCfg) AsMapInterface() map[string]interface{} {
-	return map[string]interface{}{
+func (dhr *DispatcherHRegistarCfg) AsMapInterface() (initialMP map[string]interface{}) {
+	initialMP = map[string]interface{}{
 		utils.IDCfg:                dhr.ID,
 		utils.RegisterTransportCfg: dhr.RegisterTransport,
 		utils.RegisterTLSCfg:       dhr.RegisterTLS,
 	}
+	return
 }
