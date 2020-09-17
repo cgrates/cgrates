@@ -20,6 +20,7 @@ package config
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -65,7 +66,6 @@ func TestSIPAgentCfgloadFromJsonCfg(t *testing.T) {
 }
 
 func TestSIPAgentCfgAsMapInterface(t *testing.T) {
-	var dnsCfg SIPAgentCfg
 	cfgJSONStr := `{
 	"sip_agent": {
 		"enabled": false,
@@ -73,41 +73,43 @@ func TestSIPAgentCfgAsMapInterface(t *testing.T) {
 		"listen_net": "udp",
 		"sessions_conns": ["*internal"],
 		"timezone": "",
+        "retransmission_timer": "2s",
 		"request_processors": [
 		],
 	},
 }`
 	eMap := map[string]interface{}{
-		"enabled":            false,
-		"listen":             "127.0.0.1:5060",
-		"listen_net":         "udp",
-		"sessions_conns":     []string{"*internal"},
-		"timezone":           "",
-		"request_processors": []map[string]interface{}{},
+		utils.EnabledCfg:             false,
+		utils.ListenCfg:              "127.0.0.1:5060",
+		utils.ListenNetCfg:           "udp",
+		utils.SessionSConnsCfg:       []string{"*internal"},
+		utils.TimezoneCfg:            "",
+		utils.RetransmissionTimerCfg: 2 * time.Second,
+		utils.RequestProcessorsCfg:   []map[string]interface{}{},
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if jsnDaCfg, err := jsnCfg.SIPAgentJsonCfg(); err != nil {
-		t.Error(err)
-	} else if err = dnsCfg.loadFromJsonCfg(jsnDaCfg, utils.INFIELD_SEP); err != nil {
-		t.Error(err)
-	} else if rcv := dnsCfg.AsMapInterface(utils.EmptyString); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	} else if rcv := cgrCfg.sipAgentCfg.AsMapInterface(cgrCfg.generalCfg.RSRSep); !reflect.DeepEqual(eMap, rcv) {
+		t.Errorf("Expected %+v, received %+v", eMap, rcv)
 	}
+}
 
-	cfgJSONStr = `{
+func TestSIPAgentCfgAsMapInterface1(t *testing.T) {
+	cfgJSONStr := `{
 		"sip_agent": {
 			"enabled": false,
 			"listen": "127.0.0.1:5060",
 			"listen_net": "udp",
 			"sessions_conns": ["*internal"],
 			"timezone": "UTC",
+            "retransmission_timer": "5s",
 			"request_processors": [
 			{
 				"id": "OutboundAUTHDryRun",
 				"filters": ["*string:~*req.request_type:OutboundAUTH","*string:~*req.Msisdn:497700056231"],
 				"tenant": "cgrates.org",
 				"flags": ["*dryrun"],
+                "timezone":       "",
 				"request_fields":[
 				],
 				"reply_fields":[
@@ -126,37 +128,84 @@ func TestSIPAgentCfgAsMapInterface(t *testing.T) {
 			],
 		},
 	}`
-	eMap = map[string]interface{}{
-		"enabled":        false,
-		"listen":         "127.0.0.1:5060",
-		"listen_net":     "udp",
-		"sessions_conns": []string{"*internal"},
-		"timezone":       "UTC",
-		"request_processors": []map[string]interface{}{
+	eMap := map[string]interface{}{
+		utils.EnabledCfg:             false,
+		utils.ListenCfg:              "127.0.0.1:5060",
+		utils.ListenNetCfg:           "udp",
+		utils.SessionSConnsCfg:       []string{"*internal"},
+		utils.TimezoneCfg:            "UTC",
+		utils.RetransmissionTimerCfg: 5 * time.Second,
+		utils.RequestProcessorsCfg: []map[string]interface{}{
 			{
-				"id":             "OutboundAUTHDryRun",
-				"filters":        []string{"*string:~*req.request_type:OutboundAUTH", "*string:~*req.Msisdn:497700056231"},
-				"tenant":         "cgrates.org",
-				"flags":          []string{"*dryrun"},
-				"Timezone":       "",
-				"request_fields": []map[string]interface{}{},
-				"reply_fields": []map[string]interface{}{
-					{"tag": "Allow", "path": "*rep.response.Allow", "type": "*constant", "value": "1", "mandatory": true},
-					{"tag": "Concatenated1", "path": "*rep.response.Concatenated", "type": "*composed", "value": "~*req.MCC;/", "mandatory": true},
-					{"tag": "Concatenated2", "path": "*rep.response.Concatenated", "type": "*composed", "value": "Val1"},
-					{"tag": "MaxDuration", "path": "*rep.response.MaxDuration", "type": "*constant", "value": "1200", "blocker": true},
-					{"tag": "Unused", "path": "*rep.response.Unused", "type": "*constant", "value": "0"},
+				utils.IdCfg:            "OutboundAUTHDryRun",
+				utils.FilterSCfg:       []string{"*string:~*req.request_type:OutboundAUTH", "*string:~*req.Msisdn:497700056231"},
+				utils.TenantCfg:        "cgrates.org",
+				utils.FlagsCfg:         []string{"*dryrun"},
+				utils.TimezoneCfg:      "",
+				utils.RequestFieldsCfg: []map[string]interface{}{},
+				utils.ReplyFieldsCfg: []map[string]interface{}{
+					{utils.TagCfg: "Allow", utils.PathCfg: "*rep.response.Allow", utils.TypeCfg: "*constant", utils.ValueCfg: "1", utils.MandatoryCfg: true},
+					{utils.TagCfg: "Concatenated1", utils.PathCfg: "*rep.response.Concatenated", utils.TypeCfg: "*composed", utils.ValueCfg: "~*req.MCC;/", utils.MandatoryCfg: true},
+					{utils.TagCfg: "Concatenated2", utils.PathCfg: "*rep.response.Concatenated", utils.TypeCfg: "*composed", utils.ValueCfg: "Val1"},
+					{utils.TagCfg: "MaxDuration", utils.PathCfg: "*rep.response.MaxDuration", utils.TypeCfg: "*constant", utils.ValueCfg: "1200", utils.BlockerCfg: true},
+					{utils.TagCfg: "Unused", utils.PathCfg: "*rep.response.Unused", utils.TypeCfg: "*constant", utils.ValueCfg: "0"},
 				},
 			},
 		},
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if jsnDaCfg, err := jsnCfg.SIPAgentJsonCfg(); err != nil {
+	} else if rcv := cgrCfg.sipAgentCfg.AsMapInterface(cgrCfg.generalCfg.RSRSep); !reflect.DeepEqual(rcv, eMap) {
+		t.Errorf("Expected %+v \n, received %+v", eMap, rcv)
+	}
+}
+
+func TestSIPAgentCfgAsMapInterface2(t *testing.T) {
+	cfgJSONStr := `{
+	"sip_agent": {
+		"enabled": true,
+		"listen": "",
+		"sessions_conns": ["*conn1", "*conn2"],
+		"request_processors": [
+         {
+			"id": "Register",
+			"filters": ["*notstring:~*vars.Method:INVITE"],
+            "tenant": "cgrates.org",
+			"flags": ["*none"],
+            "timezone": "",
+			"request_fields": [],
+			"reply_fields": [
+               {"tag": "Request","path": "*rep.Request","type": "*constant","value": "SIP/2.0 405 Method Not Allowed",},
+			],
+		},
+    ],
+
+	}
+}`
+	eMap := map[string]interface{}{
+		utils.EnabledCfg:             true,
+		utils.ListenCfg:              "",
+		utils.ListenNetCfg:           "udp",
+		utils.SessionSConnsCfg:       []string{"*conn1", "*conn2"},
+		utils.TimezoneCfg:            "",
+		utils.RetransmissionTimerCfg: 1 * time.Second,
+		utils.RequestProcessorsCfg: []map[string]interface{}{
+			{
+				utils.IdCfg:            "Register",
+				utils.FilterSCfg:       []string{"*notstring:~*vars.Method:INVITE"},
+				utils.TenantCfg:        "cgrates.org",
+				utils.FlagsCfg:         []string{"*none"},
+				utils.TimezoneCfg:      "",
+				utils.RequestFieldsCfg: []map[string]interface{}{},
+				utils.ReplyFieldsCfg: []map[string]interface{}{
+					{utils.TagCfg: "Request", utils.PathCfg: "*rep.Request", utils.TypeCfg: "*constant", utils.ValueCfg: "SIP/2.0 405 Method Not Allowed"},
+				},
+			},
+		},
+	}
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if err = dnsCfg.loadFromJsonCfg(jsnDaCfg, utils.INFIELD_SEP); err != nil {
-		t.Error(err)
-	} else if rcv := dnsCfg.AsMapInterface(";"); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	} else if rcv := cgrCfg.sipAgentCfg.AsMapInterface(cgrCfg.generalCfg.RSRSep); !reflect.DeepEqual(rcv, eMap) {
+		t.Errorf("Expected %+v \n, received %+v", eMap, rcv)
 	}
 }
