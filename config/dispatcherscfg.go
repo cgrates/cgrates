@@ -83,38 +83,43 @@ func (dps *DispatcherSCfg) loadFromJsonCfg(jsnCfg *DispatcherSJsonCfg) (err erro
 	return nil
 }
 
-func (dps *DispatcherSCfg) AsMapInterface() map[string]interface{} {
-	stringIndexedFields := []string{}
+func (dps *DispatcherSCfg) AsMapInterface() (initialMP map[string]interface{}) {
+	initialMP = map[string]interface{}{
+		utils.EnabledCfg:        dps.Enabled,
+		utils.IndexedSelectsCfg: dps.IndexedSelects,
+		utils.NestedFieldsCfg:   dps.NestedFields,
+	}
 	if dps.StringIndexedFields != nil {
-		stringIndexedFields = make([]string, len(*dps.StringIndexedFields))
+		stringIndexedFields := make([]string, len(*dps.StringIndexedFields))
 		for i, item := range *dps.StringIndexedFields {
 			stringIndexedFields[i] = item
 		}
+		initialMP[utils.StringIndexedFieldsCfg] = stringIndexedFields
 	}
-	prefixIndexedFields := []string{}
 	if dps.PrefixIndexedFields != nil {
-		prefixIndexedFields = make([]string, len(*dps.PrefixIndexedFields))
+		prefixIndexedFields := make([]string, len(*dps.PrefixIndexedFields))
 		for i, item := range *dps.PrefixIndexedFields {
 			prefixIndexedFields[i] = item
 		}
+		initialMP[utils.PrefixIndexedFieldsCfg] = prefixIndexedFields
 	}
-	attributeSConns := make([]string, len(dps.AttributeSConns))
-	for i, item := range dps.AttributeSConns {
-		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)
-		if item == buf {
-			attributeSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaAttributes, utils.EmptyString)
-		} else {
-			attributeSConns[i] = item
+	if dps.SuffixIndexedFields != nil {
+		suffixIndexedFields := make([]string, len(*dps.SuffixIndexedFields))
+		for i, item := range *dps.SuffixIndexedFields {
+			suffixIndexedFields[i] = item
 		}
+		initialMP[utils.SuffixIndexedFieldsCfg] = suffixIndexedFields
 	}
-
-	return map[string]interface{}{
-		utils.EnabledCfg:             dps.Enabled,
-		utils.IndexedSelectsCfg:      dps.IndexedSelects,
-		utils.StringIndexedFieldsCfg: stringIndexedFields,
-		utils.PrefixIndexedFieldsCfg: prefixIndexedFields,
-		utils.AttributeSConnsCfg:     attributeSConns,
-		utils.NestedFieldsCfg:        dps.NestedFields,
+	if dps.AttributeSConns != nil {
+		attributeSConns := make([]string, len(dps.AttributeSConns))
+		for i, item := range dps.AttributeSConns {
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes) {
+				attributeSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaAttributes, utils.EmptyString)
+			} else {
+				attributeSConns[i] = item
+			}
+		}
+		initialMP[utils.AttributeSConnsCfg] = attributeSConns
 	}
-
+	return
 }

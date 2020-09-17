@@ -67,72 +67,74 @@ func TestDispatcherSCfgloadFromJsonCfg(t *testing.T) {
 }
 
 func TestDispatcherSCfgAsMapInterface(t *testing.T) {
-	var daCfg, expected DispatcherSCfg
-	if err := daCfg.loadFromJsonCfg(nil); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(daCfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, daCfg)
-	}
-	if err := daCfg.loadFromJsonCfg(new(DispatcherSJsonCfg)); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(daCfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, daCfg)
-	}
 	cfgJSONStr := `{
 		"dispatchers":{
 			"enabled": false,
 			"indexed_selects":true,
-			//"string_indexed_fields": [],
 			"prefix_indexed_fields": [],
+            "suffix_indexed_fields": [],
 			"nested_fields": false,
 			"attributes_conns": [],
 		},
 		
 }`
 	eMap := map[string]interface{}{
-		"enabled":               false,
-		"indexed_selects":       true,
-		"prefix_indexed_fields": []string{},
-		"nested_fields":         false,
-		"attributes_conns":      []string{},
-		"string_indexed_fields": []string{},
+		utils.EnabledCfg:             false,
+		utils.IndexedSelectsCfg:      true,
+		utils.PrefixIndexedFieldsCfg: []string{},
+		utils.SuffixIndexedFieldsCfg: []string{},
+		utils.NestedFieldsCfg:        false,
+		utils.AttributeSConnsCfg:     []string{},
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if jsnDaCfg, err := jsnCfg.DispatcherSJsonCfg(); err != nil {
-		t.Error(err)
-	} else if err = daCfg.loadFromJsonCfg(jsnDaCfg); err != nil {
-		t.Error(err)
-	} else if rcv := daCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	} else if rcv := cgrCfg.dispatcherSCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
+		t.Errorf("Expected %+v, received %+v", eMap, rcv)
 	}
+}
 
-	cfgJSONStr = `{
+func TestDispatcherSCfgAsMapInterface1(t *testing.T) {
+	cfgJSONStr := `{
 		"dispatchers":{
 			"enabled": false,
 			"indexed_selects":true,
-			"string_indexed_fields": ["*req.string","*req.indexed","*req.fields"],
 			"prefix_indexed_fields": ["*req.prefix","*req.indexed","*req.fields"],
+            "suffix_indexed_fields": [],
 			"nested_fields": false,
 			"attributes_conns": ["*internal"],
 		},
 		
 }`
-	eMap = map[string]interface{}{
-		"enabled":               false,
-		"indexed_selects":       true,
-		"prefix_indexed_fields": []string{"*req.prefix", "*req.indexed", "*req.fields"},
-		"nested_fields":         false,
-		"attributes_conns":      []string{"*internal"},
-		"string_indexed_fields": []string{"*req.string", "*req.indexed", "*req.fields"},
+	eMap := map[string]interface{}{
+		utils.EnabledCfg:             false,
+		utils.IndexedSelectsCfg:      true,
+		utils.PrefixIndexedFieldsCfg: []string{"*req.prefix", "*req.indexed", "*req.fields"},
+		utils.SuffixIndexedFieldsCfg: []string{},
+		utils.NestedFieldsCfg:        false,
+		utils.AttributeSConnsCfg:     []string{"*internal"},
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if jsnDaCfg, err := jsnCfg.DispatcherSJsonCfg(); err != nil {
+	} else if rcv := cgrCfg.dispatcherSCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
+		t.Errorf("Expected %+v, received %+v", eMap, rcv)
+	}
+}
+
+func TestDispatcherSCfgAsMapInterface2(t *testing.T) {
+	cfgJSONStr := `{
+		"dispatchers":{},
+}`
+	eMap := map[string]interface{}{
+		utils.EnabledCfg:             false,
+		utils.IndexedSelectsCfg:      true,
+		utils.PrefixIndexedFieldsCfg: []string{},
+		utils.SuffixIndexedFieldsCfg: []string{},
+		utils.NestedFieldsCfg:        false,
+		utils.AttributeSConnsCfg:     []string{},
+	}
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if err = daCfg.loadFromJsonCfg(jsnDaCfg); err != nil {
-		t.Error(err)
-	} else if rcv := daCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	} else if rcv := cgrCfg.dispatcherSCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
+		t.Errorf("Expected %+v, received %+v", eMap, rcv)
 	}
 }
