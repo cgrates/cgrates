@@ -82,30 +82,32 @@ func (da *DNSAgentCfg) loadFromJsonCfg(jsnCfg *DNSAgentJsonCfg, sep string) (err
 	return
 }
 
-func (da *DNSAgentCfg) AsMapInterface(separator string) map[string]interface{} {
+func (da *DNSAgentCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
+	initialMP = map[string]interface{}{
+		utils.EnabledCfg:   da.Enabled,
+		utils.ListenCfg:    da.Listen,
+		utils.ListenNetCfg: da.ListenNet,
+		utils.TimezoneCfg:  da.Timezone,
+	}
+
 	requestProcessors := make([]map[string]interface{}, len(da.RequestProcessors))
 	for i, item := range da.RequestProcessors {
 		requestProcessors[i] = item.AsMapInterface(separator)
 	}
-	sessionSConns := make([]string, len(da.SessionSConns))
-	for i, item := range da.SessionSConns {
-		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
-		if item == buf {
-			sessionSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaSessionS, utils.EmptyString)
-		} else {
-			sessionSConns[i] = item
+	initialMP[utils.RequestProcessorsCfg] = requestProcessors
+
+	if da.SessionSConns != nil {
+		sessionSConns := make([]string, len(da.SessionSConns))
+		for i, item := range da.SessionSConns {
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS) {
+				sessionSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaSessionS, utils.EmptyString)
+			} else {
+				sessionSConns[i] = item
+			}
 		}
+		initialMP[utils.SessionSConnsCfg] = sessionSConns
 	}
-
-	return map[string]interface{}{
-		utils.EnabledCfg:           da.Enabled,
-		utils.ListenCfg:            da.Listen,
-		utils.ListenNetCfg:         da.ListenNet,
-		utils.SessionSConnsCfg:     sessionSConns,
-		utils.TimezoneCfg:          da.Timezone,
-		utils.RequestProcessorsCfg: requestProcessors,
-	}
-
+	return
 }
 
 // RequestProcessor is the request processor configuration
@@ -156,33 +158,37 @@ func (rp *RequestProcessor) loadFromJsonCfg(jsnCfg *ReqProcessorJsnCfg, sep stri
 	return nil
 }
 
-func (rp *RequestProcessor) AsMapInterface(separator string) map[string]interface{} {
-	replyFields := make([]map[string]interface{}, len(rp.ReplyFields))
-	for i, item := range rp.ReplyFields {
-		replyFields[i] = item.AsMapInterface(separator)
+func (rp *RequestProcessor) AsMapInterface(separator string) (initialMP map[string]interface{}) {
+	initialMP = map[string]interface{}{
+		utils.IDCfg:       rp.ID,
+		utils.FiltersCfg:  rp.Filters,
+		utils.FlagsCfg:    rp.Flags.SliceFlags(),
+		utils.TimezoneCfg: rp.Timezone,
 	}
-
-	requestFields := make([]map[string]interface{}, len(rp.RequestFields))
-	for i, item := range rp.RequestFields {
-		requestFields[i] = item.AsMapInterface(separator)
-	}
-	var tenant string
 	if rp.Tenant != nil {
-		values := make([]string, len(rp.Tenant))
-		for i, item := range rp.Tenant {
-			values[i] = item.Rules
+		var tenant string
+		if rp.Tenant != nil {
+			values := make([]string, len(rp.Tenant))
+			for i, item := range rp.Tenant {
+				values[i] = item.Rules
+			}
+			tenant = strings.Join(values, separator)
 		}
-		tenant = strings.Join(values, separator)
+		initialMP[utils.TenantCfg] = tenant
 	}
-
-	return map[string]interface{}{
-		utils.IDCfg:            rp.ID,
-		utils.TenantCfg:        tenant,
-		utils.FiltersCfg:       rp.Filters,
-		utils.FlagsCfg:         rp.Flags.SliceFlags(),
-		utils.TimezoneCfgC:     rp.Timezone,
-		utils.RequestFieldsCfg: requestFields,
-		utils.ReplyFieldsCfg:   replyFields,
+	if rp.RequestFields != nil {
+		requestFields := make([]map[string]interface{}, len(rp.RequestFields))
+		for i, item := range rp.RequestFields {
+			requestFields[i] = item.AsMapInterface(separator)
+		}
+		initialMP[utils.RequestFieldsCfg] = requestFields
 	}
-
+	if rp.ReplyFields != nil {
+		replyFields := make([]map[string]interface{}, len(rp.ReplyFields))
+		for i, item := range rp.ReplyFields {
+			replyFields[i] = item.AsMapInterface(separator)
+		}
+		initialMP[utils.ReplyFieldsCfg] = replyFields
+	}
+	return
 }

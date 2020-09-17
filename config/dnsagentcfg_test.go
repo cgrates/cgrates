@@ -96,7 +96,6 @@ func TestRequestProcessorloadFromJsonCfg(t *testing.T) {
 }
 
 func TestDNSAgentCfgAsMapInterface(t *testing.T) {
-	var dnsCfg DNSAgentCfg
 	cfgJSONStr := `{
 	"dns_agent": {
 		"enabled": false,
@@ -104,29 +103,27 @@ func TestDNSAgentCfgAsMapInterface(t *testing.T) {
 		"listen_net": "udp",
 		"sessions_conns": ["*internal"],
 		"timezone": "",
-		"request_processors": [
-		],
+		"request_processors": [],
 	},
 }`
 	eMap := map[string]interface{}{
-		"enabled":            false,
-		"listen":             "127.0.0.1:2053",
-		"listen_net":         "udp",
-		"sessions_conns":     []string{"*internal"},
-		"timezone":           "",
-		"request_processors": []map[string]interface{}{},
-	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
-		t.Error(err)
-	} else if jsnDaCfg, err := jsnCfg.DNSAgentJsonCfg(); err != nil {
-		t.Error(err)
-	} else if err = dnsCfg.loadFromJsonCfg(jsnDaCfg, utils.INFIELD_SEP); err != nil {
-		t.Error(err)
-	} else if rcv := dnsCfg.AsMapInterface(utils.EmptyString); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
-	}
 
-	cfgJSONStr = `{
+		utils.EnabledCfg:           false,
+		utils.ListenCfg:            "127.0.0.1:2053",
+		utils.ListenNetCfg:         "udp",
+		utils.SessionSConnsCfg:     []string{"*internal"},
+		utils.TimezoneCfg:          "",
+		utils.RequestProcessorsCfg: []map[string]interface{}{},
+	}
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+		t.Error(err)
+	} else if rcv := cgrCfg.dnsAgentCfg.AsMapInterface(utils.EmptyString); !reflect.DeepEqual(eMap, rcv) {
+		t.Errorf("Expecetd %+v, received %+v", eMap, rcv)
+	}
+}
+
+func TestDNSAgentCfgAsMapInterface1(t *testing.T) {
+	cfgJSONStr := `{
 		"dns_agent": {
 			"enabled": false,
 			"listen": "127.0.0.1:2053",
@@ -139,8 +136,8 @@ func TestDNSAgentCfgAsMapInterface(t *testing.T) {
 				"filters": ["*string:~*req.request_type:OutboundAUTH","*string:~*req.Msisdn:497700056231"],
 				"tenant": "cgrates.org",
 				"flags": ["*dryrun"],
-				"request_fields":[
-				],
+                "timezone": "UTC",
+				"request_fields":[],
 				"reply_fields":[
 					{"tag": "Allow", "path": "*rep.response.Allow", "type": "*constant",
 						"value": "1", "mandatory": true},
@@ -157,38 +154,33 @@ func TestDNSAgentCfgAsMapInterface(t *testing.T) {
 			],
 		},
 	}`
-	eMap = map[string]interface{}{
-		"enabled":        false,
-		"listen":         "127.0.0.1:2053",
-		"listen_net":     "udp",
-		"sessions_conns": []string{"*internal"},
-		"timezone":       "UTC",
-		"request_processors": []map[string]interface{}{
+	eMap := map[string]interface{}{
+		utils.EnabledCfg:       false,
+		utils.ListenCfg:        "127.0.0.1:2053",
+		utils.ListenNetCfg:     "udp",
+		utils.SessionSConnsCfg: []string{"*internal"},
+		utils.TimezoneCfg:      "UTC",
+		utils.RequestProcessorsCfg: []map[string]interface{}{
 			{
-				"id":             "OutboundAUTHDryRun",
-				"filters":        []string{"*string:~*req.request_type:OutboundAUTH", "*string:~*req.Msisdn:497700056231"},
-				"tenant":         "cgrates.org",
-				"flags":          []string{"*dryrun"},
-				"Timezone":       "",
-				"request_fields": []map[string]interface{}{},
-				"reply_fields": []map[string]interface{}{
-					{"tag": "Allow", "path": "*rep.response.Allow", "type": "*constant", "value": "1", "mandatory": true},
-					{"tag": "Concatenated1", "path": "*rep.response.Concatenated", "type": "*composed", "value": "~*req.MCC;/", "mandatory": true},
-					{"tag": "Concatenated2", "path": "*rep.response.Concatenated", "type": "*composed", "value": "Val1"},
-					{"tag": "MaxDuration", "path": "*rep.response.MaxDuration", "type": "*constant", "value": "1200", "blocker": true},
-					{"tag": "Unused", "path": "*rep.response.Unused", "type": "*constant", "value": "0"},
+				utils.IdCfg:            "OutboundAUTHDryRun",
+				utils.FilterSCfg:       []string{"*string:~*req.request_type:OutboundAUTH", "*string:~*req.Msisdn:497700056231"},
+				utils.TenantCfg:        "cgrates.org",
+				utils.FlagsCfg:         []string{"*dryrun"},
+				utils.TimezoneCfg:      "UTC",
+				utils.RequestFieldsCfg: []map[string]interface{}{},
+				utils.ReplyFieldsCfg: []map[string]interface{}{
+					{utils.TagCfg: "Allow", utils.PathCfg: "*rep.response.Allow", utils.TypeCfg: "*constant", utils.ValueCfg: "1", utils.MandatoryCfg: true},
+					{utils.TagCfg: "Concatenated1", utils.PathCfg: "*rep.response.Concatenated", utils.TypeCfg: "*composed", utils.ValueCfg: "~*req.MCC;/", utils.MandatoryCfg: true},
+					{utils.TagCfg: "Concatenated2", utils.PathCfg: "*rep.response.Concatenated", utils.TypeCfg: "*composed", utils.ValueCfg: "Val1"},
+					{utils.TagCfg: "MaxDuration", utils.PathCfg: "*rep.response.MaxDuration", utils.TypeCfg: "*constant", utils.ValueCfg: "1200", utils.BlockerCfg: true},
+					{utils.TagCfg: "Unused", utils.PathCfg: "*rep.response.Unused", utils.TypeCfg: "*constant", utils.ValueCfg: "0"},
 				},
 			},
 		},
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if jsnDaCfg, err := jsnCfg.DNSAgentJsonCfg(); err != nil {
-		t.Error(err)
-	} else if err = dnsCfg.loadFromJsonCfg(jsnDaCfg, utils.INFIELD_SEP); err != nil {
-		t.Error(err)
-	} else if rcv := dnsCfg.AsMapInterface(";"); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	} else if rcv := cgrCfg.dnsAgentCfg.AsMapInterface(cgrCfg.generalCfg.RSRSep); !reflect.DeepEqual(eMap, rcv) {
+		t.Errorf("Expecetd %+v \n, received %+v", utils.ToIJSON(eMap), utils.ToIJSON(rcv))
 	}
-
 }
