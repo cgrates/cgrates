@@ -31,7 +31,7 @@ type EEsCfg struct {
 	Exporters       []*EventExporterCfg
 }
 
-func (eeS *EEsCfg) loadFromJsonCfg(jsnCfg *EEsJsonCfg, msgTemplates map[string][]*FCTemplate, sep string, dfltExpCfg *EventExporterCfg, separator string) (err error) {
+func (eeS *EEsCfg) loadFromJsonCfg(jsnCfg *EEsJsonCfg, msgTemplates map[string][]*FCTemplate, sep string, dfltExpCfg *EventExporterCfg) (err error) {
 	if jsnCfg == nil {
 		return
 	}
@@ -106,16 +106,26 @@ func (eeS *EEsCfg) Clone() (cln *EEsCfg) {
 	return
 }
 
-func (eeS *EEsCfg) AsMapInterface(separator string) map[string]interface{} {
-	exporters := make([]map[string]interface{}, len(eeS.Exporters))
-	for i, item := range eeS.Exporters {
-		exporters[i] = item.AsMapInterface(separator)
-	}
-	return map[string]interface{}{
+func (eeS *EEsCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
+	initialMP = map[string]interface{}{
 		utils.EnabledCfg:         eeS.Enabled,
 		utils.AttributeSConnsCfg: eeS.AttributeSConns,
-		utils.ExportersCfg:       exporters,
 	}
+	if eeS.Cache != nil {
+		cache := make(map[string]interface{}, len(eeS.Cache))
+		for key, value := range eeS.Cache {
+			cache[key] = value.AsMapInterface()
+		}
+		initialMP[utils.CacheCfg] = cache
+	}
+	if eeS.Exporters != nil {
+		exporters := make([]map[string]interface{}, len(eeS.Exporters))
+		for i, item := range eeS.Exporters {
+			exporters[i] = item.AsMapInterface(separator)
+		}
+		initialMP[utils.ExportersCfg] = exporters
+	}
+	return
 }
 
 type EventExporterCfg struct {
@@ -287,27 +297,12 @@ func (eeC *EventExporterCfg) Clone() (cln *EventExporterCfg) {
 	return
 }
 
-func (eeC *EventExporterCfg) AsMapInterface(separator string) map[string]interface{} {
-	var tenant string
-	if eeC.Tenant != nil {
-		values := make([]string, len(eeC.Tenant))
-		for i, item := range eeC.Tenant {
-			values[i] = item.Rules
-		}
-		tenant = strings.Join(values, separator)
-	}
-
-	fields := make([]map[string]interface{}, 0, len(eeC.Fields))
-	for _, fld := range eeC.Fields {
-		fields = append(fields, fld.AsMapInterface(separator))
-	}
-
-	return map[string]interface{}{
+func (eeC *EventExporterCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
+	initialMP = map[string]interface{}{
 		utils.IDCfg:               eeC.ID,
 		utils.TypeCfg:             eeC.Type,
 		utils.ExportPath:          eeC.ExportPath,
 		utils.ExportPathCfg:       eeC.FieldSep,
-		utils.TenantCfg:           tenant,
 		utils.TimezoneCfg:         eeC.Timezone,
 		utils.FiltersCfg:          eeC.Filters,
 		utils.FlagsCfg:            eeC.Flags.SliceFlags(),
@@ -316,7 +311,23 @@ func (eeC *EventExporterCfg) AsMapInterface(separator string) map[string]interfa
 		utils.SynchronousCfg:      eeC.Synchronous,
 		utils.AttemptsCfg:         eeC.Attempts,
 		utils.FieldSeparatorCfg:   eeC.FieldSep,
-		utils.FieldsCfg:           fields,
 		utils.OptsCfg:             eeC.Opts,
 	}
+	if eeC.Tenant != nil {
+		var tenant string
+		values := make([]string, len(eeC.Tenant))
+		for i, item := range eeC.Tenant {
+			values[i] = item.Rules
+		}
+		tenant = strings.Join(values, separator)
+		initialMP[utils.TenantCfg] = tenant
+	}
+	if eeC.Fields != nil {
+		fields := make([]map[string]interface{}, 0, len(eeC.Fields))
+		for _, fld := range eeC.Fields {
+			fields = append(fields, fld.AsMapInterface(separator))
+		}
+		initialMP[utils.FieldsCfg] = fields
+	}
+	return
 }

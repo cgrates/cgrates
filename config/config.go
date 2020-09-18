@@ -743,7 +743,7 @@ func (cfg *CGRConfig) loadEesCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnEEsCfg, err = jsnCfg.EEsJsonCfg(); err != nil {
 		return
 	}
-	return cfg.eesCfg.loadFromJsonCfg(jsnEEsCfg, cfg.templates, cfg.generalCfg.RSRSep, cfg.dfltEvExp, cfg.generalCfg.RSRSep)
+	return cfg.eesCfg.loadFromJsonCfg(jsnEEsCfg, cfg.templates, cfg.generalCfg.RSRSep, cfg.dfltEvExp)
 }
 
 // loadRateSCfg loads the rates section of the configuration
