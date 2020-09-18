@@ -2260,7 +2260,8 @@ const (
 	DataDbCfg        = "data_db"          // from JSON
 	StorDbCfg        = "stor_db"          // from JSON
 	TlsCfg           = "tls"              // from JSON
-	CacheCfg         = "caches"           // from JSON
+	CacheCfg         = "cache"            //from JSON
+	CachesCfg        = "caches"           // from JSON
 	HttpCfg          = "http"             // from JSON
 	FilterSCfg       = "filters"          // from JSON
 	RalsCfg          = "rals"             // from JSON

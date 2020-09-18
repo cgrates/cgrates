@@ -60,18 +60,20 @@ func (cParam *CacheParamCfg) loadFromJsonCfg(jsnCfg *CacheParamJsonCfg) error {
 	return nil
 }
 
-func (cParam *CacheParamCfg) AsMapInterface() map[string]interface{} {
-	var TTL string = ""
-	if cParam.TTL != 0 {
-		TTL = cParam.TTL.String()
-	}
-	return map[string]interface{}{
+func (cParam *CacheParamCfg) AsMapInterface() (initialMP map[string]interface{}) {
+	initialMP = map[string]interface{}{
 		utils.LimitCfg:     cParam.Limit,
-		utils.TTLCfg:       TTL,
 		utils.StaticTTLCfg: cParam.StaticTTL,
 		utils.PrecacheCfg:  cParam.Precache,
 		utils.ReplicateCfg: cParam.Replicate,
 	}
+
+	var TTL string = utils.EmptyString
+	if cParam.TTL != 0 {
+		TTL = cParam.TTL.String()
+	}
+	initialMP[utils.TTLCfg] = TTL
+	return
 }
 
 // CacheCfg used to store the cache config

@@ -451,6 +451,6 @@ func TestERsCfgAsMapInterface(t *testing.T) {
 	if cfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cfg.ersCfg.AsMapInterface(utils.EmptyString); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToIJSON(eMap), utils.ToIJSON(rcv))
 	}
 }

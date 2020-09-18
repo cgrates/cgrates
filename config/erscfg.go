@@ -99,16 +99,19 @@ func (erS *ERsCfg) Clone() (cln *ERsCfg) {
 	return
 }
 
-func (erS *ERsCfg) AsMapInterface(separator string) map[string]interface{} {
-	readers := make([]map[string]interface{}, len(erS.Readers))
-	for i, item := range erS.Readers {
-		readers[i] = item.AsMapInterface(separator)
-	}
-	return map[string]interface{}{
+func (erS *ERsCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
+	initialMP = map[string]interface{}{
 		utils.EnabledCfg:       erS.Enabled,
 		utils.SessionSConnsCfg: erS.SessionSConns,
-		utils.ReadersCfg:       readers,
 	}
+	if erS.Readers != nil {
+		readers := make([]map[string]interface{}, len(erS.Readers))
+		for i, item := range erS.Readers {
+			readers[i] = item.AsMapInterface(separator)
+		}
+		initialMP[utils.ReadersCfg] = readers
+	}
+	return
 }
 
 type EventReaderCfg struct {
@@ -270,10 +273,29 @@ func (er *EventReaderCfg) Clone() (cln *EventReaderCfg) {
 	return
 }
 
-func (er *EventReaderCfg) AsMapInterface(separator string) map[string]interface{} {
-	xmlRootPath := make([]string, len(er.XmlRootPath))
-	for i, item := range er.XmlRootPath {
-		xmlRootPath[i] = item
+func (er *EventReaderCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
+	initialMP = map[string]interface{}{
+		utils.IDCfg:                       er.ID,
+		utils.TypeCfg:                     er.Type,
+		utils.RowLengthCfg:                er.RowLength,
+		utils.FieldSepCfg:                 er.FieldSep,
+		utils.HeaderDefCharCfg:            er.HeaderDefineChar,
+		utils.ConcurrentReqsCfg:           er.ConcurrentReqs,
+		utils.SourcePathCfg:               er.SourcePath,
+		utils.ProcessedPathCfg:            er.ProcessedPath,
+		utils.TimezoneCfg:                 er.Timezone,
+		utils.FiltersCfg:                  er.Filters,
+		utils.FlagsCfg:                    er.Flags.SliceFlags(),
+		utils.FailedCallsPrefixCfg:        er.FailedCallsPrefix,
+		utils.PartialCacheExpiryActionCfg: er.PartialCacheExpiryAction,
+		utils.OptsCfg:                     er.Opts,
+	}
+	if er.XmlRootPath != nil {
+		xmlRootPath := make([]string, len(er.XmlRootPath))
+		for i, item := range er.XmlRootPath {
+			xmlRootPath[i] = item
+		}
+		initialMP[utils.XmlRootPathCfg] = xmlRootPath
 	}
 	var tenant string
 	if er.Tenant != nil {
@@ -282,16 +304,23 @@ func (er *EventReaderCfg) AsMapInterface(separator string) map[string]interface{
 			values[i] = item.Rules
 		}
 		tenant = strings.Join(values, separator)
+		initialMP[utils.TenantCfg] = tenant
+	}
+	if er.Fields != nil {
+		fields := make([]map[string]interface{}, len(er.Fields))
+		for i, item := range er.Fields {
+			fields[i] = item.AsMapInterface(separator)
+		}
+		initialMP[utils.FieldsCfg] = fields
+	}
+	if er.CacheDumpFields != nil {
+		cacheDumpFields := make([]map[string]interface{}, len(er.CacheDumpFields))
+		for i, item := range er.CacheDumpFields {
+			cacheDumpFields[i] = item.AsMapInterface(separator)
+		}
+		initialMP[utils.CacheDumpFieldsCfg] = cacheDumpFields
 	}
 
-	fields := make([]map[string]interface{}, len(er.Fields))
-	for i, item := range er.Fields {
-		fields[i] = item.AsMapInterface(separator)
-	}
-	cacheDumpFields := make([]map[string]interface{}, len(er.CacheDumpFields))
-	for i, item := range er.CacheDumpFields {
-		cacheDumpFields[i] = item.AsMapInterface(separator)
-	}
 	var runDelay string
 	if er.RunDelay > 0 {
 		runDelay = er.RunDelay.String()
@@ -300,32 +329,12 @@ func (er *EventReaderCfg) AsMapInterface(separator string) map[string]interface{
 	} else {
 		runDelay = "-1"
 	}
+	initialMP[utils.RunDelayCfg] = runDelay
 
-	var partialRecordCache string = "0"
 	if er.PartialRecordCache != 0 {
-		partialRecordCache = er.PartialRecordCache.String()
+		initialMP[utils.PartialRecordCacheCfg] = er.PartialRecordCache.String()
+	} else {
+		initialMP[utils.PartialRecordCacheCfg] = "0"
 	}
-
-	return map[string]interface{}{
-		utils.IDCfg:                       er.ID,
-		utils.TypeCfg:                     er.Type,
-		utils.RowLengthCfg:                er.RowLength,
-		utils.FieldSepCfg:                 er.FieldSep,
-		utils.HeaderDefCharCfg:            er.HeaderDefineChar,
-		utils.RunDelayCfg:                 runDelay,
-		utils.ConcurrentReqsCfg:           er.ConcurrentReqs,
-		utils.SourcePathCfg:               er.SourcePath,
-		utils.ProcessedPathCfg:            er.ProcessedPath,
-		utils.XmlRootPathCfg:              xmlRootPath,
-		utils.TenantCfg:                   tenant,
-		utils.TimezoneCfg:                 er.Timezone,
-		utils.FiltersCfg:                  er.Filters,
-		utils.FlagsCfg:                    er.Flags.SliceFlags(),
-		utils.FailedCallsPrefixCfg:        er.FailedCallsPrefix,
-		utils.PartialRecordCacheCfg:       partialRecordCache,
-		utils.PartialCacheExpiryActionCfg: er.PartialCacheExpiryAction,
-		utils.FieldsCfg:                   fields,
-		utils.CacheDumpFieldsCfg:          cacheDumpFields,
-		utils.OptsCfg:                     er.Opts,
-	}
+	return
 }
