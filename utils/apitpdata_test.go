@@ -745,28 +745,28 @@ func TestTPActivationIntervalAsActivationInterval(t *testing.T) {
 	tPActivationInterval.ActivationTime = "wrongActivationTime"
 	rcv, err = tPActivationInterval.AsActivationInterval("")
 	if err == nil {
-		t.Errorf("Wrong ActivationTime not processed")
+		t.Errorf("Wrong ActivationTimes not processed")
 	}
 }
 
 func TestActivationIntervalIsActiveAtTime(t *testing.T) {
 	activationInterval := new(ActivationInterval)
 
-	//case ActivationTime = Expiry = 0001-01-01 00:00:00 +0000 UTC
+	//case ActivationTimes = Expiry = 0001-01-01 00:00:00 +0000 UTC
 	activationInterval.ActivationTime = time.Time{}
 	activationInterval.ExpiryTime = time.Time{}
 	rcv := activationInterval.IsActiveAtTime(time.Time{})
 	if !rcv {
-		t.Errorf("ActivationTime = Expiry = time.Time{}, expecting 0 ")
+		t.Errorf("ActivationTimes = Expiry = time.Time{}, expecting 0 ")
 	}
 	activationInterval.ActivationTime = time.Date(2018, time.April, 18, 23, 0, 0, 0, time.UTC)
 	activationInterval.ExpiryTime = time.Date(2020, time.April, 18, 23, 0, 0, 0, time.UTC)
 
-	//atTime < ActivationTime
+	//atTime < ActivationTimes
 	atTime := time.Date(2017, time.April, 18, 23, 0, 0, 0, time.UTC)
 	rcv = activationInterval.IsActiveAtTime(atTime)
 	if rcv {
-		t.Errorf("atTime < ActivationTime, expecting 0 ")
+		t.Errorf("atTime < ActivationTimes, expecting 0 ")
 	}
 
 	//atTime > ExpiryTime
@@ -780,14 +780,14 @@ func TestActivationIntervalIsActiveAtTime(t *testing.T) {
 	atTime = time.Date(2019, time.April, 18, 23, 0, 0, 0, time.UTC) //tTime
 	rcv = activationInterval.IsActiveAtTime(atTime)
 	if !rcv {
-		t.Errorf("ActivationTime < atTime < ExpiryTime. Expecting 1 ")
+		t.Errorf("ActivationTimes < atTime < ExpiryTime. Expecting 1 ")
 	}
-	//ActivationTime > ExpiryTime
+	//ActivationTimes > ExpiryTime
 	activationInterval.ActivationTime = time.Date(2020, time.April, 18, 23, 0, 0, 0, time.UTC) //tTime
 	activationInterval.ExpiryTime = time.Date(2018, time.April, 18, 23, 0, 0, 0, time.UTC)     //tTime
 	rcv = activationInterval.IsActiveAtTime(atTime)
 	if rcv {
-		t.Errorf("ActivationTime > ExpiryTime. Expecting 0 ")
+		t.Errorf("ActivationTimes > ExpiryTime. Expecting 0 ")
 	}
 }
 

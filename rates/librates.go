@@ -64,7 +64,7 @@ func orderRatesOnIntervals(aRts []*engine.Rate, sTime time.Time, usage time.Dura
 	cronSTime := sTime.Add(time.Duration(-1 * time.Minute)) // cron min verbosity is minute
 	endTime := sTime.Add(usage)                             // cover also the last unit used
 	// index the received rates
-	rtIdx := make(map[time.Time]*ratesWithWinner) // map[ActivationTime]*ratesWithWinner
+	rtIdx := make(map[time.Time]*ratesWithWinner) // map[ActivationTimes]*ratesWithWinner
 	for _, rt := range aRts {
 		nextRunTime := rt.NextActivationTime(cronSTime)
 		if nextRunTime.After(endTime) {
@@ -151,7 +151,7 @@ func orderRatesOnIntervals(aRts []*engine.Rate, sTime time.Time, usage time.Dura
 						} else {
 							rtIdx[nextRunTime].add(rt)
 						}
-						if sTimeIdx == len(sortedATimes)-1 { // last index, higher than the last ActivationTime
+						if sTimeIdx == len(sortedATimes)-1 { // last index, higher than the last ActivationTimes
 							//fmt.Println("adding as last")
 							sortedATimes = append(sortedATimes, nextRunTime)
 						} else { // Insert before current index

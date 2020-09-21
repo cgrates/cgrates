@@ -3227,12 +3227,12 @@ func APItoRateProfile(tpRp *utils.TPRateProfile, timezone string) (rp *RateProfi
 	}
 	for key, rate := range tpRp.Rates {
 		rp.Rates[key] = &Rate{
-			ID:             rate.ID,
-			Weight:         rate.Weight,
-			Blocker:        rate.Blocker,
-			FilterIDs:      rate.FilterIDs,
-			ActivationTime: rate.ActivationTime,
-			IntervalRates:  make([]*IntervalRate, len(rate.IntervalRates)),
+			ID:              rate.ID,
+			Weight:          rate.Weight,
+			Blocker:         rate.Blocker,
+			FilterIDs:       rate.FilterIDs,
+			ActivationTimes: rate.ActivationTime,
+			IntervalRates:   make([]*IntervalRate, len(rate.IntervalRates)),
 		}
 		for i, iRate := range rate.IntervalRates {
 			rp.Rates[key].IntervalRates[i] = new(IntervalRate)
@@ -3273,7 +3273,7 @@ func RateProfileToAPI(rp *RateProfile) (tpRp *utils.TPRateProfile) {
 			Weight:         rate.Weight,
 			Blocker:        rate.Blocker,
 			FilterIDs:      rate.FilterIDs,
-			ActivationTime: rate.ActivationTime,
+			ActivationTime: rate.ActivationTimes,
 			IntervalRates:  make([]*utils.TPIntervalRate, len(rate.IntervalRates)),
 		}
 		for i, iRate := range rate.IntervalRates {

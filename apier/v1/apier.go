@@ -403,7 +403,7 @@ func (apierSv1 *APIerSv1) SetRatingProfile(attrs *utils.AttrSetRatingProfile, re
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	for _, rpa := range attrs.RatingPlanActivations {
-		if missing := utils.MissingStructFields(rpa, []string{"ActivationTime", "RatingPlanId"}); len(missing) != 0 {
+		if missing := utils.MissingStructFields(rpa, []string{"ActivationTimes", "RatingPlanId"}); len(missing) != 0 {
 			return fmt.Errorf("%s:RatingPlanActivation:%v", utils.ErrMandatoryIeMissing.Error(), missing)
 		}
 	}
