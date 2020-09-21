@@ -66,36 +66,49 @@ func TestHTTPCfgloadFromJsonCfg(t *testing.T) {
 }
 
 func TestHTTPCfgAsMapInterface(t *testing.T) {
-	var httpcfg HTTPCfg
 	cfgJSONStr := `{
-	"http": {										
-		"json_rpc_url": "/jsonrpc",					
-		"dispatchers_registrar_url": "/dispatchers_registrar",
-		"ws_url": "/ws",							
-		"freeswitch_cdrs_url": "/freeswitch_json",	
-		"http_cdrs": "/cdr_http",					
-		"use_basic_auth": false,					
-		"auth_users": {},	
-	},
+	"http": {},
 }`
-
 	eMap := map[string]interface{}{
-		"json_rpc_url":              "/jsonrpc",
-		"dispatchers_registrar_url": "/dispatchers_registrar",
-		"ws_url":                    "/ws",
-		"freeswitch_cdrs_url":       "/freeswitch_json",
-		"http_cdrs":                 "/cdr_http",
-		"use_basic_auth":            false,
-		"auth_users":                map[string]interface{}{},
+		utils.HTTPJsonRPCURLCfg:          "/jsonrpc",
+		utils.DispatchersRegistrarURLCfg: "/dispatchers_registrar",
+		utils.HTTPWSURLCfg:               "/ws",
+		utils.HTTPFreeswitchCDRsURLCfg:   "/freeswitch_json",
+		utils.HTTPCDRsURLCfg:             "/cdr_http",
+		utils.HTTPUseBasicAuthCfg:        false,
+		utils.HTTPAuthUsersCfg:           map[string]interface{}{},
 	}
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+		t.Error(err)
+	} else if rcv := cgrCfg.httpCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
+		t.Errorf("Expected %+v, received %+v", eMap, rcv)
+	}
+}
 
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+func TestHTTPCfgAsMapInterface1(t *testing.T) {
+	cfgJSONStr := `{
+	"http": {
+       "json_rpc_url": "/rpc",					
+	   "ws_url": "",	
+	   "use_basic_auth": true,					
+	   "auth_users": {"user1": "authenticated", "user2": "authenticated"},
+     },
+}`
+	eMap := map[string]interface{}{
+		utils.HTTPJsonRPCURLCfg:          "/rpc",
+		utils.DispatchersRegistrarURLCfg: "/dispatchers_registrar",
+		utils.HTTPWSURLCfg:               "",
+		utils.HTTPFreeswitchCDRsURLCfg:   "/freeswitch_json",
+		utils.HTTPCDRsURLCfg:             "/cdr_http",
+		utils.HTTPUseBasicAuthCfg:        true,
+		utils.HTTPAuthUsersCfg: map[string]interface{}{
+			"user1": "authenticated",
+			"user2": "authenticated",
+		},
+	}
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if jsnhttpCfg, err := jsnCfg.HttpJsonCfg(); err != nil {
-		t.Error(err)
-	} else if err = httpcfg.loadFromJsonCfg(jsnhttpCfg); err != nil {
-		t.Error(err)
-	} else if rcv := httpcfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("Expected: %+v ,\n recived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	} else if rcv := cgrCfg.httpCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
+		t.Errorf("Expected %+v, received %+v", eMap, rcv)
 	}
 }
