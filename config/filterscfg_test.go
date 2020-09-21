@@ -56,27 +56,37 @@ func TestFilterSCfgloadFromJsonCfg(t *testing.T) {
 }
 
 func TestFilterSCfgAsMapInterface(t *testing.T) {
-	var fscfg FilterSCfg
 	cfgJSONStr := `{
 		"filters": {								
 			"stats_conns": ["*localhost"],						
-			"resources_conns": [],					
-			"apiers_conns": [],						
+			"resources_conns": ["*conn1", "*conn2"],
 	},
 }`
-	var emptySlice []string
 	eMap := map[string]interface{}{
-		"stats_conns":     []string{"*localhost"},
-		"resources_conns": emptySlice,
-		"apiers_conns":    emptySlice,
+		utils.StatSConnsCfg:     []string{utils.MetaLocalHost},
+		utils.ResourceSConnsCfg: []string{"*conn1", "*conn2"},
+		utils.ApierSConnsCfg:    []string{},
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if jsnFsCfg, err := jsnCfg.FilterSJsonCfg(); err != nil {
+	} else if rcv := cgrCfg.filterSCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
+		t.Errorf("Expected %+v, received %+v", eMap, rcv)
+	}
+
+}
+
+func TestFilterSCfgAsMapInterface2(t *testing.T) {
+	cfgJSONStr := `{
+      "filters": {}
+}`
+	eMap := map[string]interface{}{
+		utils.StatSConnsCfg:     []string{},
+		utils.ResourceSConnsCfg: []string{},
+		utils.ApierSConnsCfg:    []string{},
+	}
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if err = fscfg.loadFromJsonCfg(jsnFsCfg); err != nil {
-		t.Error(err)
-	} else if rcv := fscfg.AsMapInterface(); reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("Expected: %+v ,\n recived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	} else if rcv := cgrCfg.filterSCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
+		t.Errorf("Expected %+v, received %+v", eMap, rcv)
 	}
 }
