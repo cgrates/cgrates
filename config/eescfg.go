@@ -322,6 +322,7 @@ func (eeC *EventExporterCfg) AsMapInterface(separator string) (initialMP map[str
 		tenant = strings.Join(values, separator)
 		initialMP[utils.TenantCfg] = tenant
 	}
+
 	if eeC.Fields != nil {
 		fields := make([]map[string]interface{}, 0, len(eeC.Fields))
 		for _, fld := range eeC.Fields {
