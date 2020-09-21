@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 	"time"
@@ -95,7 +96,6 @@ func TestGeneralCfgloadFromJsonCfg(t *testing.T) {
 }
 
 func TestGeneralCfgAsMapInterface(t *testing.T) {
-	var gencfg GeneralCfg
 	cfgJSONStr := `{
 		"general": {
 			"node_id": "",											
@@ -125,40 +125,78 @@ func TestGeneralCfgAsMapInterface(t *testing.T) {
 		},
 	}`
 	eMap := map[string]interface{}{
-		"node_id":                   "",
-		"logger":                    "*syslog",
-		"log_level":                 6,
-		"http_skip_tls_verify":      false,
-		"rounding_decimals":         5,
-		"dbdata_encoding":           "*msgpack",
-		"tpexport_dir":              "/var/spool/cgrates/tpe",
-		"poster_attempts":           3,
-		"failed_posts_dir":          "/var/spool/cgrates/failed_posts",
-		"failed_posts_ttl":          "5s",
-		"default_request_type":      "*rated",
-		"default_category":          "call",
-		"default_tenant":            "cgrates.org",
-		"default_timezone":          "Local",
-		"default_caching":           "*reload",
-		"connect_attempts":          5,
-		"reconnects":                -1,
-		"connect_timeout":           "1s",
-		"reply_timeout":             "2s",
-		"locking_timeout":           "0",
-		"digest_separator":          ",",
-		"digest_equal":              ":",
-		"rsr_separator":             ";",
-		"max_parallel_conns":        100,
+		utils.NodeIDCfg:             "",
+		utils.LoggerCfg:             "*syslog",
+		utils.LogLevelCfg:           6,
+		utils.HttpSkipTlsVerifyCfg:  false,
+		utils.RoundingDecimalsCfg:   5,
+		utils.DBDataEncodingCfg:     "*msgpack",
+		utils.TpExportPathCfg:       "/var/spool/cgrates/tpe",
+		utils.PosterAttemptsCfg:     3,
+		utils.FailedPostsDirCfg:     "/var/spool/cgrates/failed_posts",
+		utils.FailedPostsTTLCfg:     "5s",
+		utils.DefaultReqTypeCfg:     "*rated",
+		utils.DefaultCategoryCfg:    "call",
+		utils.DefaultTenantCfg:      "cgrates.org",
+		utils.DefaultTimezoneCfg:    "Local",
+		utils.DefaultCachingCfg:     "*reload",
+		utils.ConnectAttemptsCfg:    5,
+		utils.ReconnectsCfg:         -1,
+		utils.ConnectTimeoutCfg:     "1s",
+		utils.ReplyTimeoutCfg:       "2s",
+		utils.LockingTimeoutCfg:     "0",
+		utils.DigestSeparatorCfg:    ",",
+		utils.DigestEqualCfg:        ":",
+		utils.RSRSepCfg:             ";",
+		utils.MaxParallelConnsCfg:   100,
 		utils.ConcurrentRequestsCfg: 0,
-		utils.ConcurrentStrategyCfg: utils.EmptyString,
+		utils.ConcurrentStrategyCfg: utils.MetaBusy,
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err == nil {
+		fmt.Println(cgrCfg)
+		//t.Error(err)
+	} else if rcv := cgrCfg.generalCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
+		t.Errorf("Expected %+v \n, recevied %+v", eMap, rcv)
+	}
+}
+
+func TestGeneralCfgAsMapInterface1(t *testing.T) {
+	cfgJSONStr := `{
+      "general": {
+            "node_id": "ENGINE1"
+        }
+}`
+	eMap := map[string]interface{}{
+		utils.NodeIDCfg:             "ENGINE1",
+		utils.LoggerCfg:             "*syslog",
+		utils.LogLevelCfg:           6,
+		utils.HttpSkipTlsVerifyCfg:  false,
+		utils.RoundingDecimalsCfg:   5,
+		utils.DBDataEncodingCfg:     "*msgpack",
+		utils.TpExportPathCfg:       "/var/spool/cgrates/tpe",
+		utils.PosterAttemptsCfg:     3,
+		utils.FailedPostsDirCfg:     "/var/spool/cgrates/failed_posts",
+		utils.FailedPostsTTLCfg:     "5s",
+		utils.DefaultReqTypeCfg:     "*rated",
+		utils.DefaultCategoryCfg:    "call",
+		utils.DefaultTenantCfg:      "cgrates.org",
+		utils.DefaultTimezoneCfg:    "Local",
+		utils.DefaultCachingCfg:     "*reload",
+		utils.ConnectAttemptsCfg:    5,
+		utils.ReconnectsCfg:         -1,
+		utils.ConnectTimeoutCfg:     "1s",
+		utils.ReplyTimeoutCfg:       "2s",
+		utils.LockingTimeoutCfg:     "0",
+		utils.DigestSeparatorCfg:    ",",
+		utils.DigestEqualCfg:        ":",
+		utils.RSRSepCfg:             ";",
+		utils.MaxParallelConnsCfg:   100,
+		utils.ConcurrentRequestsCfg: 0,
+		utils.ConcurrentStrategyCfg: utils.MetaBusy,
+	}
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if jsnGenCfg, err := jsnCfg.GeneralJsonCfg(); err != nil {
-		t.Error(err)
-	} else if err = gencfg.loadFromJsonCfg(jsnGenCfg); err != nil {
-		t.Error(err)
-	} else if rcv := gencfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	} else if rcv := cgrCfg.generalCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
+		t.Errorf("Expected %+v \n, recevied %+v", eMap, rcv)
 	}
 }

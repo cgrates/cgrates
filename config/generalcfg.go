@@ -151,25 +151,8 @@ func (gencfg *GeneralCfg) loadFromJsonCfg(jsnGeneralCfg *GeneralJsonCfg) (err er
 	return nil
 }
 
-func (gencfg *GeneralCfg) AsMapInterface() map[string]interface{} {
-	var lockingTimeout string = "0"
-	var failedPostsTTL string = "0"
-	var connectTimeout string = "0"
-	var replyTimeout string = "0"
-	if gencfg.LockingTimeout != 0 {
-		lockingTimeout = gencfg.LockingTimeout.String()
-	}
-	if gencfg.FailedPostsTTL != 0 {
-		failedPostsTTL = gencfg.FailedPostsTTL.String()
-	}
-	if gencfg.ConnectTimeout != 0 {
-		connectTimeout = gencfg.ConnectTimeout.String()
-	}
-	if gencfg.ReplyTimeout != 0 {
-		replyTimeout = gencfg.ReplyTimeout.String()
-	}
-
-	return map[string]interface{}{
+func (gencfg *GeneralCfg) AsMapInterface() (initialMP map[string]interface{}) {
+	initialMP = map[string]interface{}{
 		utils.NodeIDCfg:             gencfg.NodeID,
 		utils.LoggerCfg:             gencfg.Logger,
 		utils.LogLevelCfg:           gencfg.LogLevel,
@@ -179,7 +162,6 @@ func (gencfg *GeneralCfg) AsMapInterface() map[string]interface{} {
 		utils.TpExportPathCfg:       gencfg.TpExportPath,
 		utils.PosterAttemptsCfg:     gencfg.PosterAttempts,
 		utils.FailedPostsDirCfg:     gencfg.FailedPostsDir,
-		utils.FailedPostsTTLCfg:     failedPostsTTL,
 		utils.DefaultReqTypeCfg:     gencfg.DefaultReqType,
 		utils.DefaultCategoryCfg:    gencfg.DefaultCategory,
 		utils.DefaultTenantCfg:      gencfg.DefaultTenant,
@@ -187,9 +169,6 @@ func (gencfg *GeneralCfg) AsMapInterface() map[string]interface{} {
 		utils.DefaultCachingCfg:     gencfg.DefaultCaching,
 		utils.ConnectAttemptsCfg:    gencfg.ConnectAttempts,
 		utils.ReconnectsCfg:         gencfg.Reconnects,
-		utils.ConnectTimeoutCfg:     connectTimeout,
-		utils.ReplyTimeoutCfg:       replyTimeout,
-		utils.LockingTimeoutCfg:     lockingTimeout,
 		utils.DigestSeparatorCfg:    gencfg.DigestSeparator,
 		utils.DigestEqualCfg:        gencfg.DigestEqual,
 		utils.RSRSepCfg:             gencfg.RSRSep,
@@ -197,4 +176,29 @@ func (gencfg *GeneralCfg) AsMapInterface() map[string]interface{} {
 		utils.ConcurrentRequestsCfg: gencfg.ConcurrentRequests,
 		utils.ConcurrentStrategyCfg: gencfg.ConcurrentStrategy,
 	}
+
+	if gencfg.LockingTimeout != 0 {
+		initialMP[utils.LockingTimeoutCfg] = gencfg.LockingTimeout.String()
+	} else {
+		initialMP[utils.LockingTimeoutCfg] = "0"
+	}
+
+	if gencfg.FailedPostsTTL != 0 {
+		initialMP[utils.FailedPostsTTLCfg] = gencfg.FailedPostsTTL.String()
+	} else {
+		initialMP[utils.FailedPostsTTLCfg] = "0"
+	}
+
+	if gencfg.ConnectTimeout != 0 {
+		initialMP[utils.ConnectTimeoutCfg] = gencfg.ConnectTimeout.String()
+	} else {
+		initialMP[utils.ConnectTimeoutCfg] = "0"
+	}
+
+	if gencfg.ReplyTimeout != 0 {
+		initialMP[utils.ReplyTimeoutCfg] = gencfg.ReplyTimeout.String()
+	} else {
+		initialMP[utils.ReplyTimeoutCfg] = "0"
+	}
+	return
 }
