@@ -298,14 +298,13 @@ func (er *EventReaderCfg) AsMapInterface(separator string) (initialMP map[string
 		initialMP[utils.XmlRootPathCfg] = xmlRootPath
 	}
 	var tenant string
-	if er.Tenant != nil {
-		values := make([]string, len(er.Tenant))
-		for i, item := range er.Tenant {
-			values[i] = item.Rules
-		}
-		tenant = strings.Join(values, separator)
-		initialMP[utils.TenantCfg] = tenant
+	values := make([]string, len(er.Tenant))
+	for i, item := range er.Tenant {
+		values[i] = item.Rules
 	}
+	tenant = strings.Join(values, separator)
+	initialMP[utils.TenantCfg] = tenant
+
 	if er.Fields != nil {
 		fields := make([]map[string]interface{}, len(er.Fields))
 		for i, item := range er.Fields {

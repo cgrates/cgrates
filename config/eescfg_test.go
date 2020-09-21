@@ -735,7 +735,6 @@ func TestEEsCfgloadFromJsonCfg(t *testing.T) {
 	} else if err := cgrCfg.eesCfg.loadFromJsonCfg(jsonCfg, cgrCfg.templates, cgrCfg.generalCfg.RSRSep, cgrCfg.dfltEvExp); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedCfg, cgrCfg.eesCfg) {
-
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedCfg), utils.ToJSON(cgrCfg.eesCfg))
 	}
 }
