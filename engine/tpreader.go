@@ -1120,15 +1120,9 @@ func (tpr *TpReader) LoadStatsFiltered(tag string) (err error) {
 			return
 		}
 		mapSTs[utils.TenantID{Tenant: st.Tenant, ID: st.ID}] = st
+		tpr.statQueues = append(tpr.statQueues, &utils.TenantID{Tenant: st.Tenant, ID: st.ID})
 	}
 	tpr.sqProfiles = mapSTs
-	for tntID := range mapSTs {
-		if has, err := tpr.dm.HasData(utils.StatQueuePrefix, tntID.ID, tntID.Tenant); err != nil {
-			return err
-		} else if !has {
-			tpr.statQueues = append(tpr.statQueues, &utils.TenantID{Tenant: tntID.Tenant, ID: tntID.ID})
-		}
-	}
 	return nil
 }
 
@@ -1621,18 +1615,55 @@ func (tpr *TpReader) WriteToDatabase(verbose, disable_reverse bool) (err error) 
 	}
 	for _, sqTntID := range tpr.statQueues {
 		metrics := make(map[string]StatMetric)
-		for _, metric := range tpr.sqProfiles[utils.TenantID{Tenant: sqTntID.Tenant, ID: sqTntID.ID}].Metrics {
-			var stsMetric StatMetric
-			if stsMetric, err = NewStatMetric(metric.MetricID,
-				tpr.sqProfiles[utils.TenantID{Tenant: sqTntID.Tenant, ID: sqTntID.ID}].MinItems,
-				metric.FilterIDs); err != nil {
+		var sq *StatQueue
+		sq, err = tpr.dm.GetStatQueue(sqTntID.Tenant, sqTntID.ID, true, false, utils.NonTransactional)
+		if err != nil && err != utils.ErrNotFound {
+			return
+		}
+		if err == utils.ErrNotFound {
+			// if the statQueue didn't exists simply initiate all the metrics
+			for _, metric := range tpr.sqProfiles[*sqTntID].Metrics {
+				var stsMetric StatMetric
+				if stsMetric, err = NewStatMetric(metric.MetricID,
+					tpr.sqProfiles[*sqTntID].MinItems,
+					metric.FilterIDs); err != nil {
+					return
+				}
+				metrics[metric.MetricID] = stsMetric
+			}
+			sq = &StatQueue{Tenant: sqTntID.Tenant, ID: sqTntID.ID, SQMetrics: metrics}
+		} else {
+			for _, metric := range tpr.sqProfiles[*sqTntID].Metrics {
+				if _, has := sq.SQMetrics[metric.MetricID]; !has {
+					var stsMetric StatMetric
+					if stsMetric, err = NewStatMetric(metric.MetricID,
+						tpr.sqProfiles[*sqTntID].MinItems,
+						metric.FilterIDs); err != nil {
+						return
+					}
+					metrics[metric.MetricID] = stsMetric
+				} else {
+					metrics[metric.MetricID] = sq.SQMetrics[metric.MetricID]
+				}
+			}
+			sq.SQMetrics = metrics
+			var ttl *time.Duration
+			if tpr.sqProfiles[*sqTntID].TTL != utils.EmptyString {
+				ttl = new(time.Duration)
+				if *ttl, err = utils.ParseDurationWithNanosecs(tpr.sqProfiles[*sqTntID].TTL); err != nil {
+					return
+				}
+				if *ttl <= 0 {
+					ttl = nil
+				}
+			}
+			// if the user define a statQueue with an existing metric check if we need to update it based on queue length
+			if err = sq.UpdateStatQueue(ttl, tpr.sqProfiles[*sqTntID].QueueLength); err != nil {
 				return
 			}
-			metrics[metric.MetricID] = stsMetric
 		}
-		sq := &StatQueue{Tenant: sqTntID.Tenant, ID: sqTntID.ID, SQMetrics: metrics}
 		if err = tpr.dm.SetStatQueue(sq); err != nil {
-			return
+			return err
 		}
 		if verbose {
 			log.Print("\t", sqTntID.TenantID())
