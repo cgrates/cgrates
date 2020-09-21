@@ -726,9 +726,9 @@ func testInternalRemoteITGetRouteProfile(t *testing.T) {
 				MaxCostStrategy:  "*free",
 				Rates: map[string]*engine.Rate{
 					"RT_WEEK": {
-						ID:             "RT_WEEK",
-						Weight:         0,
-						ActivationTime: "* * * * 1-5",
+						ID:              "RT_WEEK",
+						Weight:          0,
+						ActivationTimes: "* * * * 1-5",
 						IntervalRates: []*engine.IntervalRate{
 							{
 								IntervalStart: time.Duration(0 * time.Second),
@@ -745,9 +745,9 @@ func testInternalRemoteITGetRouteProfile(t *testing.T) {
 						},
 					},
 					"RT_WEEKEND": {
-						ID:             "RT_WEEKEND",
-						Weight:         10,
-						ActivationTime: "* * * * 0,6",
+						ID:              "RT_WEEKEND",
+						Weight:          10,
+						ActivationTimes: "* * * * 0,6",
 						IntervalRates: []*engine.IntervalRate{
 							{
 								IntervalStart: time.Duration(0 * time.Second),
@@ -758,9 +758,9 @@ func testInternalRemoteITGetRouteProfile(t *testing.T) {
 						},
 					},
 					"RT_CHRISTMAS": {
-						ID:             "RT_CHRISTMAS",
-						Weight:         30,
-						ActivationTime: "* * 24 12 *",
+						ID:              "RT_CHRISTMAS",
+						Weight:          30,
+						ActivationTimes: "* * 24 12 *",
 						IntervalRates: []*engine.IntervalRate{
 							{
 								IntervalStart: time.Duration(0 * time.Second),

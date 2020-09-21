@@ -32,9 +32,9 @@ func TestRateProfileSort(t *testing.T) {
 		ID:     "RP1",
 		Rates: map[string]*Rate{
 			"RT_WEEK": {
-				ID:             "RT_WEEK",
-				Weight:         0,
-				ActivationTime: "* * * * 1-5",
+				ID:              "RT_WEEK",
+				Weight:          0,
+				ActivationTimes: "* * * * 1-5",
 				IntervalRates: []*IntervalRate{
 					{
 						IntervalStart: time.Duration(0 * time.Second),
@@ -51,9 +51,9 @@ func TestRateProfileSort(t *testing.T) {
 				},
 			},
 			"RT_Custom": {
-				ID:             "RT_Custom",
-				Weight:         0,
-				ActivationTime: "* * * * 1-5",
+				ID:              "RT_Custom",
+				Weight:          0,
+				ActivationTimes: "* * * * 1-5",
 				IntervalRates: []*IntervalRate{
 					{
 						IntervalStart: time.Duration(1 * time.Second),
@@ -82,9 +82,9 @@ func TestRateProfileSort(t *testing.T) {
 				},
 			},
 			"RT_WEEKEND": {
-				ID:             "RT_WEEKEND",
-				Weight:         10,
-				ActivationTime: "* * * * 0,6",
+				ID:              "RT_WEEKEND",
+				Weight:          10,
+				ActivationTimes: "* * * * 0,6",
 				IntervalRates: []*IntervalRate{
 					{
 						IntervalStart: time.Duration(10 * time.Second),
@@ -107,9 +107,9 @@ func TestRateProfileSort(t *testing.T) {
 				},
 			},
 			"RT_CHRISTMAS": {
-				ID:             "RT_CHRISTMAS",
-				Weight:         30,
-				ActivationTime: "* * 24 12 *",
+				ID:              "RT_CHRISTMAS",
+				Weight:          30,
+				ActivationTimes: "* * 24 12 *",
 				IntervalRates: []*IntervalRate{
 					{
 						IntervalStart: time.Duration(0 * time.Second),
@@ -126,9 +126,9 @@ func TestRateProfileSort(t *testing.T) {
 		ID:     "RP1",
 		Rates: map[string]*Rate{
 			"RT_WEEK": {
-				ID:             "RT_WEEK",
-				Weight:         0,
-				ActivationTime: "* * * * 1-5",
+				ID:              "RT_WEEK",
+				Weight:          0,
+				ActivationTimes: "* * * * 1-5",
 				IntervalRates: []*IntervalRate{
 					{
 						IntervalStart: time.Duration(0 * time.Second),
@@ -145,9 +145,9 @@ func TestRateProfileSort(t *testing.T) {
 				},
 			},
 			"RT_WEEKEND": {
-				ID:             "RT_WEEKEND",
-				Weight:         10,
-				ActivationTime: "* * * * 0,6",
+				ID:              "RT_WEEKEND",
+				Weight:          10,
+				ActivationTimes: "* * * * 0,6",
 				IntervalRates: []*IntervalRate{
 					{
 						IntervalStart: time.Duration(10 * time.Second),
@@ -170,9 +170,9 @@ func TestRateProfileSort(t *testing.T) {
 				},
 			},
 			"RT_Custom": {
-				ID:             "RT_Custom",
-				Weight:         0,
-				ActivationTime: "* * * * 1-5",
+				ID:              "RT_Custom",
+				Weight:          0,
+				ActivationTimes: "* * * * 1-5",
 				IntervalRates: []*IntervalRate{
 					{
 						IntervalStart: time.Duration(1 * time.Second),
@@ -201,9 +201,9 @@ func TestRateProfileSort(t *testing.T) {
 				},
 			},
 			"RT_CHRISTMAS": {
-				ID:             "RT_CHRISTMAS",
-				Weight:         30,
-				ActivationTime: "* * 24 12 *",
+				ID:              "RT_CHRISTMAS",
+				Weight:          30,
+				ActivationTimes: "* * 24 12 *",
 				IntervalRates: []*IntervalRate{
 					{
 						IntervalStart: time.Duration(0 * time.Second),
@@ -223,9 +223,9 @@ func TestRateProfileSort(t *testing.T) {
 
 func TestRateProfileCompile(t *testing.T) {
 	rt := &Rate{
-		ID:             "RT_CHRISTMAS",
-		Weight:         30,
-		ActivationTime: "* * 24 12 *",
+		ID:              "RT_CHRISTMAS",
+		Weight:          30,
+		ActivationTimes: "* * 24 12 *",
 	}
 	if err := rt.Compile(); err != nil {
 		t.Error(err)
@@ -237,9 +237,9 @@ func TestRateProfileCompile(t *testing.T) {
 		t.Errorf("Expected: %v,\n received: %v", exp, rcv)
 	}
 	rt = &Rate{
-		ID:             "RT_CHRISTMAS",
-		Weight:         30,
-		ActivationTime: utils.EmptyString,
+		ID:              "RT_CHRISTMAS",
+		Weight:          30,
+		ActivationTimes: utils.EmptyString,
 	}
 	if err := rt.Compile(); err != nil {
 		t.Error(err)
@@ -251,9 +251,9 @@ func TestRateProfileCompile(t *testing.T) {
 	}
 
 	rt = &Rate{
-		ID:             "RT_CHRISTMAS",
-		Weight:         30,
-		ActivationTime: "error",
+		ID:              "RT_CHRISTMAS",
+		Weight:          30,
+		ActivationTimes: "error",
 	}
 	if err := rt.Compile(); err == nil || err.Error() != "expected exactly 5 fields, found 1: [error]" {
 		t.Error(err)
