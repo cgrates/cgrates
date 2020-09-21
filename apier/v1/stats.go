@@ -61,44 +61,73 @@ func (apierSv1 *APIerSv1) GetStatQueueProfileIDs(args *utils.PaginatorWithTenant
 }
 
 // SetStatQueueProfile alters/creates a StatQueueProfile
-func (apierSv1 *APIerSv1) SetStatQueueProfile(arg *engine.StatQueueWithCache, reply *string) error {
+func (apierSv1 *APIerSv1) SetStatQueueProfile(arg *engine.StatQueueWithCache, reply *string) (err error) {
 	if missing := utils.MissingStructFields(arg.StatQueueProfile, []string{"Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := apierSv1.DataManager.SetStatQueueProfile(arg.StatQueueProfile, true); err != nil {
+	if err = apierSv1.DataManager.SetStatQueueProfile(arg.StatQueueProfile, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheStatQueueProfiles and CacheStatQueues and store it in database
 	//make 1 insert for both StatQueueProfile and StatQueue instead of 2
 	loadID := time.Now().UnixNano()
-	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheStatQueueProfiles: loadID, utils.CacheStatQueues: loadID}); err != nil {
+	if err = apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheStatQueueProfiles: loadID, utils.CacheStatQueues: loadID}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for StatQueueProfile
-	if err := apierSv1.CallCache(arg.Cache, arg.Tenant, utils.CacheStatQueueProfiles,
+	if err = apierSv1.CallCache(arg.Cache, arg.Tenant, utils.CacheStatQueueProfiles,
 		arg.TenantID(), &arg.FilterIDs, nil, arg.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	if has, err := apierSv1.DataManager.HasData(utils.StatQueuePrefix, arg.ID, arg.Tenant); err != nil {
-		return err
-	} else if !has {
-		//compose metrics for StatQueue
-		metrics := make(map[string]engine.StatMetric)
+	metrics := make(map[string]engine.StatMetric)
+	var sq *engine.StatQueue
+	sq, err = apierSv1.DataManager.GetStatQueue(arg.Tenant, arg.ID, true, false, utils.NonTransactional)
+	if err != nil && err != utils.ErrNotFound {
+		return
+	}
+	if err == utils.ErrNotFound {
+		// if the statQueue didn't exists simply initiate all the metrics
 		for _, metric := range arg.Metrics {
-			if stsMetric, err := engine.NewStatMetric(metric.MetricID, arg.MinItems, metric.FilterIDs); err != nil {
-				return utils.APIErrorHandler(err)
-			} else {
+			var stsMetric engine.StatMetric
+			if stsMetric, err = engine.NewStatMetric(metric.MetricID,
+				arg.MinItems,
+				metric.FilterIDs); err != nil {
+				return
+			}
+			metrics[metric.MetricID] = stsMetric
+		}
+		sq = &engine.StatQueue{Tenant: arg.Tenant, ID: arg.ID, SQMetrics: metrics}
+	} else {
+		for _, metric := range arg.Metrics {
+			if _, has := sq.SQMetrics[metric.MetricID]; !has {
+				var stsMetric engine.StatMetric
+				if stsMetric, err = engine.NewStatMetric(metric.MetricID,
+					arg.MinItems,
+					metric.FilterIDs); err != nil {
+					return
+				}
 				metrics[metric.MetricID] = stsMetric
+			} else {
+				metrics[metric.MetricID] = sq.SQMetrics[metric.MetricID]
 			}
 		}
-		if err := apierSv1.DataManager.SetStatQueue(&engine.StatQueue{Tenant: arg.Tenant, ID: arg.ID, SQMetrics: metrics}); err != nil {
-			return utils.APIErrorHandler(err)
+		sq.SQMetrics = metrics
+		// if the user define a statQueue with an existing metric check if we need to update it based on queue length
+		var ttl *time.Duration
+		if arg.TTL > 0 {
+			ttl = &arg.TTL
 		}
-		//handle caching for StatQueues
-		if err := apierSv1.CallCache(arg.Cache, arg.Tenant, utils.CacheStatQueues,
-			arg.TenantID(), nil, nil, arg.Opts); err != nil {
-			return utils.APIErrorHandler(err)
+		if err = sq.UpdateStatQueue(ttl, arg.QueueLength); err != nil {
+			return
 		}
+	}
+	if err = apierSv1.DataManager.SetStatQueue(sq); err != nil {
+		return err
+	}
+	//handle caching for StatQueues
+	if err := apierSv1.CallCache(arg.Cache, arg.Tenant, utils.CacheStatQueues,
+		arg.TenantID(), nil, nil, arg.Opts); err != nil {
+		return utils.APIErrorHandler(err)
 	}
 
 	*reply = utils.OK

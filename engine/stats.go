@@ -197,7 +197,7 @@ func (sS *StatService) matchingStatQueuesForEvent(args *StatsArgsProcessEvent) (
 		if sqPrfl.Stored && sq.dirty == nil {
 			sq.dirty = utils.BoolPointer(false)
 		}
-		if sqPrfl.TTL >= 0 {
+		if sqPrfl.TTL > 0 {
 			sq.ttl = utils.DurationPointer(sqPrfl.TTL)
 		}
 		sq.sqPrfl = sqPrfl
