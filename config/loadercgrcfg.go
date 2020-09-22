@@ -83,25 +83,20 @@ func (ld *LoaderCgrCfg) loadFromJsonCfg(jsnCfg *LoaderCfgJson) (err error) {
 	return nil
 }
 
-func (ld *LoaderCgrCfg) AsMapInterface() map[string]interface{} {
-	gapiCredentials := make([]byte, len(ld.GapiCredentials))
-	for i, item := range ld.GapiCredentials {
-		gapiCredentials[i] = item
+func (ld *LoaderCgrCfg) AsMapInterface() (initialMP map[string]interface{}) {
+	initialMP = map[string]interface{}{
+		utils.TpIDCfg:           ld.TpID,
+		utils.DataPathCfg:       ld.DataPath,
+		utils.DisableReverseCfg: ld.DisableReverse,
+		utils.FieldSeparatorCfg: string(ld.FieldSeparator),
+		utils.CachesConnsCfg:    ld.CachesConns,
+		utils.SchedulerConnsCfg: ld.SchedulerConns,
 	}
-
-	gapiToken := make([]byte, len(ld.GapiToken))
-	for i, item := range ld.GapiToken {
-		gapiToken[i] = item
+	if ld.GapiCredentials != nil {
+		initialMP[utils.GapiCredentialsCfg] = ld.GapiCredentials
 	}
-
-	return map[string]interface{}{
-		utils.TpIDCfg:            ld.TpID,
-		utils.DataPathCfg:        ld.DataPath,
-		utils.DisableReverseCfg:  ld.DisableReverse,
-		utils.FieldSeparatorCfg:  string(ld.FieldSeparator),
-		utils.CachesConnsCfg:     ld.CachesConns,
-		utils.SchedulerConnsCfg:  ld.SchedulerConns,
-		utils.GapiCredentialsCfg: gapiCredentials,
-		utils.GapiTokenCfg:       gapiToken,
+	if ld.GapiToken != nil {
+		initialMP[utils.GapiTokenCfg] = ld.GapiToken
 	}
+	return
 }
