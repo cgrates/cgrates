@@ -26,6 +26,7 @@ import (
 	"os"
 	"path"
 	"strings"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -407,7 +408,12 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 					}
 					metrics[metric.MetricID] = stsMetric
 				}
-				if err := ldr.dm.SetStatQueue(&engine.StatQueue{Tenant: stsPrf.Tenant, ID: stsPrf.ID, SQMetrics: metrics}); err != nil {
+				var ttl *time.Duration
+				if stsPrf.TTL > 0 {
+					ttl = &stsPrf.TTL
+				}
+				if err := ldr.dm.SetStatQueue(&engine.StatQueue{Tenant: stsPrf.Tenant, ID: stsPrf.ID}, stsPrf.Metrics,
+					stsPrf.MinItems, ttl, stsPrf.QueueLength, false); err != nil {
 					return err
 				}
 				cacheArgs[utils.StatsQueueProfileIDs] = ids

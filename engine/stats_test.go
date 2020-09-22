@@ -236,7 +236,7 @@ func TestStatQueuesPopulateStatsService(t *testing.T) {
 		dmSTS.SetStatQueueProfile(statQueueProfile, true)
 	}
 	for _, statQueue := range stqs {
-		dmSTS.SetStatQueue(statQueue)
+		dmSTS.SetStatQueue(statQueue, nil, 0, nil, 0, true)
 	}
 	//Test each statQueueProfile from cache
 	for _, sqp := range sqps {
@@ -385,7 +385,7 @@ func TestStatQueuesV1ProcessEvent(t *testing.T) {
 	if err := dmSTS.SetStatQueueProfile(sqPrf, true); err != nil {
 		t.Error(err)
 	}
-	if err := dmSTS.SetStatQueue(sq); err != nil {
+	if err := dmSTS.SetStatQueue(sq, nil, 0, nil, 0, true); err != nil {
 		t.Error(err)
 	}
 	if tempStat, err := dmSTS.GetStatQueueProfile(sqPrf.Tenant,

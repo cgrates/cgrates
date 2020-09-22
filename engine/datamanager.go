@@ -18,6 +18,7 @@ package engine
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -568,11 +569,73 @@ func (dm *DataManager) GetStatQueue(tenant, id string,
 }
 
 // SetStatQueue converts to StoredStatQueue and stores the result in dataDB
-func (dm *DataManager) SetStatQueue(sq *StatQueue) (err error) {
+func (dm *DataManager) SetStatQueue(sq *StatQueue, metrics []*MetricWithFilters,
+	minItems int, ttl *time.Duration, queueLength int, simpleSet bool) (err error) {
 	if dm == nil {
 		err = utils.ErrNoDatabaseConn
 		return
 	}
+	if !simpleSet {
+		tnt := sq.Tenant // save the tenant
+		id := sq.ID      // save the ID from the initial StatQueue
+		// handle metrics for statsQueue
+		sq, err = dm.GetStatQueue(tnt, id, true, false, utils.NonTransactional)
+		if err != nil && err != utils.ErrNotFound {
+			return
+		}
+		if err == utils.ErrNotFound {
+			sq = &StatQueue{Tenant: tnt, ID: id, SQMetrics: make(map[string]StatMetric)}
+			// if the statQueue didn't exists simply initiate all the metrics
+			for _, metric := range metrics {
+				var stsMetric StatMetric
+				if stsMetric, err = NewStatMetric(metric.MetricID,
+					minItems,
+					metric.FilterIDs); err != nil {
+					return
+				}
+				sq.SQMetrics[metric.MetricID] = stsMetric
+			}
+		} else {
+			for sqMetricID, _ := range sq.SQMetrics {
+				// we consider that the metric needs to be removed
+				needsRemove := true
+				for _, metric := range metrics {
+					// in case we found the metric in the metrics define by the user we leave it
+					if sqMetricID == metric.MetricID {
+						needsRemove = false
+						break
+					}
+					if _, has := sq.SQMetrics[metric.MetricID]; !has {
+						var stsMetric StatMetric
+						if stsMetric, err = NewStatMetric(metric.MetricID,
+							minItems,
+							metric.FilterIDs); err != nil {
+							return
+						}
+						sq.SQMetrics[metric.MetricID] = stsMetric
+					}
+				}
+				if needsRemove {
+					delete(sq.SQMetrics, sqMetricID)
+				}
+			}
+			// if the user define a statQueue with an existing metric check if we need to update it based on queue length
+			sq.ttl = ttl
+			if err = sq.remExpired(); err != nil {
+				return
+			}
+			if len(sq.SQItems) > queueLength {
+				for i := 0; i < queueLength-len(sq.SQItems); i++ {
+					item := sq.SQItems[0]
+					if err = sq.remEventWithID(item.EventID); err != nil {
+						return
+					}
+					sq.SQItems = sq.SQItems[1:]
+				}
+			}
+		}
+	}
+
 	var ssq *StoredStatQueue
 	if dm.dataDB.GetStorageType() != utils.MetaInternal ||
 		config.CgrConfig().DataDbCfg().Items[utils.MetaStatQueues].Replicate {

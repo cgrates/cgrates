@@ -107,7 +107,7 @@ func (m *Migrator) migrateCurrentStats() (err error) {
 		if sgs == nil || m.dryRun {
 			continue
 		}
-		if err := m.dmOut.DataManager().SetStatQueue(sgs); err != nil {
+		if err := m.dmOut.DataManager().SetStatQueue(sgs, nil, 0, nil, 0, true); err != nil {
 			return err
 		}
 		if err := m.dmIN.DataManager().RemoveStatQueue(tntID[0], tntID[1], utils.NonTransactional); err != nil {
@@ -236,7 +236,7 @@ func (m *Migrator) migrateStats() (err error) {
 			if err = m.dmOut.DataManager().SetStatQueueProfile(v4sts, true); err != nil {
 				return
 			}
-			if err = m.dmOut.DataManager().SetStatQueue(v3Stats); err != nil {
+			if err = m.dmOut.DataManager().SetStatQueue(v3Stats, nil, 0, nil, 0, true); err != nil {
 				return
 			}
 		}
