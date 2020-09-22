@@ -26,6 +26,7 @@ import (
 	"os/exec"
 	"path"
 	"reflect"
+	"strconv"
 	"testing"
 
 	"github.com/cgrates/cgrates/config"
@@ -194,7 +195,7 @@ func testRedisSentinelInsertion(t *testing.T) {
 			}
 		}
 		index = index + 1
-		id = orgiginID + string(index)
+		id = orgiginID + strconv.Itoa(index)
 	}
 	forFunc1 := func(t *testing.T) {
 		for i := 0; i < 25; i++ {
