@@ -325,8 +325,10 @@ func (sS *SessionS) setSTerminator(s *Session, opts engine.MapEvent) {
 			if s.sTerminator.ttlLastUsage != nil {
 				lastUsage = *s.sTerminator.ttlLastUsage
 			}
+			s.Lock()
 			sS.forceSTerminate(s, lastUsage, s.sTerminator.ttlUsage,
 				s.sTerminator.ttlLastUsed)
+			s.Unlock()
 		case <-s.sTerminator.endChan:
 			s.sTerminator.timer.Stop()
 		}
@@ -1337,11 +1339,13 @@ func (sS *SessionS) syncSessions() {
 		if len(ss) == 0 {
 			continue
 		}
+		ss[0].Lock()
 		if err := sS.forceSTerminate(ss[0], 0, nil, nil); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> failed force-terminating session: <%s>, err: <%s>",
 					utils.SessionS, cgrID, err.Error()))
 		}
+		ss[0].Unlock()
 	}
 }
 
@@ -3589,6 +3593,7 @@ func (sS *SessionS) BiRPCv1ForceDisconnect(clnt rpcclient.ClientConnector,
 		if len(ss) == 0 {
 			continue
 		}
+		ss[0].Lock()
 		if errTerm := sS.forceSTerminate(ss[0], 0, nil, nil); errTerm != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf(
@@ -3596,6 +3601,7 @@ func (sS *SessionS) BiRPCv1ForceDisconnect(clnt rpcclient.ClientConnector,
 					utils.SessionS, ss[0].cgrID(), errTerm.Error()))
 			err = utils.ErrPartiallyExecuted
 		}
+		ss[0].Unlock()
 	}
 	if err == nil {
 		*reply = utils.OK
@@ -3679,6 +3685,8 @@ func (sS *SessionS) processCDR(cgrEv *utils.CGREventWithOpts, flags []string, rp
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> ProcessCDR called for active session with CGRID: <%s>",
 				utils.SessionS, cgrID))
+		s.Lock() // events update session panic
+		defer s.Unlock()
 	} else if sIface, has := engine.Cache.Get(utils.CacheClosedSessions, cgrID); has {
 		// found in cache
 		s = sIface.(*Session)
