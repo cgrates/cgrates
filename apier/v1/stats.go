@@ -79,49 +79,12 @@ func (apierSv1 *APIerSv1) SetStatQueueProfile(arg *engine.StatQueueWithCache, re
 		arg.TenantID(), &arg.FilterIDs, nil, arg.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	metrics := make(map[string]engine.StatMetric)
-	var sq *engine.StatQueue
-	sq, err = apierSv1.DataManager.GetStatQueue(arg.Tenant, arg.ID, true, false, utils.NonTransactional)
-	if err != nil && err != utils.ErrNotFound {
-		return
+	var ttl *time.Duration
+	if arg.TTL > 0 {
+		ttl = &arg.TTL
 	}
-	if err == utils.ErrNotFound {
-		// if the statQueue didn't exists simply initiate all the metrics
-		for _, metric := range arg.Metrics {
-			var stsMetric engine.StatMetric
-			if stsMetric, err = engine.NewStatMetric(metric.MetricID,
-				arg.MinItems,
-				metric.FilterIDs); err != nil {
-				return
-			}
-			metrics[metric.MetricID] = stsMetric
-		}
-		sq = &engine.StatQueue{Tenant: arg.Tenant, ID: arg.ID, SQMetrics: metrics}
-	} else {
-		for _, metric := range arg.Metrics {
-			if _, has := sq.SQMetrics[metric.MetricID]; !has {
-				var stsMetric engine.StatMetric
-				if stsMetric, err = engine.NewStatMetric(metric.MetricID,
-					arg.MinItems,
-					metric.FilterIDs); err != nil {
-					return
-				}
-				metrics[metric.MetricID] = stsMetric
-			} else {
-				metrics[metric.MetricID] = sq.SQMetrics[metric.MetricID]
-			}
-		}
-		sq.SQMetrics = metrics
-		// if the user define a statQueue with an existing metric check if we need to update it based on queue length
-		var ttl *time.Duration
-		if arg.TTL > 0 {
-			ttl = &arg.TTL
-		}
-		if err = sq.UpdateStatQueue(ttl, arg.QueueLength); err != nil {
-			return
-		}
-	}
-	if err = apierSv1.DataManager.SetStatQueue(sq); err != nil {
+	if err = apierSv1.DataManager.SetStatQueue(&engine.StatQueue{Tenant: arg.Tenant, ID: arg.ID}, arg.Metrics,
+		arg.MinItems, ttl, arg.QueueLength, false); err != nil {
 		return err
 	}
 	//handle caching for StatQueues
