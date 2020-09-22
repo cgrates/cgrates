@@ -62,7 +62,6 @@ func TestMailerCfgloadFromJsonCfg(t *testing.T) {
 }
 
 func TestMailerCfgAsMapInterface(t *testing.T) {
-	var mailcfg MailerCfg
 	cfgJSONStr := `{
 	"mailer": {
 		"server": "",
@@ -72,42 +71,31 @@ func TestMailerCfgAsMapInterface(t *testing.T) {
 		},
 }`
 	eMap := map[string]interface{}{
-		"server":        "",
-		"auth_user":     "",
-		"auth_password": "",
-		"from_address":  "",
+		utils.MailerServerCfg:   "",
+		utils.MailerAuthUserCfg: "",
+		utils.MailerAuthPassCfg: "",
+		utils.MailerFromAddrCfg: "",
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if jsnMailCfg, err := jsnCfg.MailerJsonCfg(); err != nil {
-		t.Error(err)
-	} else if err = mailcfg.loadFromJsonCfg(jsnMailCfg); err != nil {
-		t.Error(err)
-	} else if rcv := mailcfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	} else if rcv := cgrCfg.mailerCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
+		t.Errorf("Expected %+v, received %+v", eMap, rcv)
 	}
+}
 
-	cfgJSONStr = `{
-		"mailer": {
-			"server": "localhost",
-			"auth_user": "cgrates",
-			"auth_password": "CGRateS.org",
-			"from_address": "cgr-mailer@localhost.localdomain",
-			},
-	}`
-	eMap = map[string]interface{}{
-		"server":        "localhost",
-		"auth_user":     "cgrates",
-		"auth_password": "CGRateS.org",
-		"from_address":  "cgr-mailer@localhost.localdomain",
+func TestMailerCfgAsMapInterface1(t *testing.T) {
+	cfgJSONStr := `{
+		"mailer": {},
+}`
+	eMap := map[string]interface{}{
+		utils.MailerServerCfg:   "localhost",
+		utils.MailerAuthUserCfg: "cgrates",
+		utils.MailerAuthPassCfg: "CGRateS.org",
+		utils.MailerFromAddrCfg: "cgr-mailer@localhost.localdomain",
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if jsnMailCfg, err := jsnCfg.MailerJsonCfg(); err != nil {
-		t.Error(err)
-	} else if err = mailcfg.loadFromJsonCfg(jsnMailCfg); err != nil {
-		t.Error(err)
-	} else if rcv := mailcfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	} else if rcv := cgrCfg.mailerCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
+		t.Errorf("Expected %+v, received %+v", eMap, rcv)
 	}
 }
