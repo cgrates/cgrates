@@ -106,8 +106,8 @@ func (mg *MigratorCgrCfg) loadFromJsonCfg(jsnCfg *MigratorCfgJson) (err error) {
 	return nil
 }
 
-func (mg *MigratorCgrCfg) AsMapInterface() map[string]interface{} {
-	return map[string]interface{}{
+func (mg *MigratorCgrCfg) AsMapInterface() (initialMP map[string]interface{}) {
+	initialMP = map[string]interface{}{
 		utils.OutDataDBTypeCfg:     mg.OutDataDBType,
 		utils.OutDataDBHostCfg:     mg.OutDataDBHost,
 		utils.OutDataDBPortCfg:     mg.OutDataDBPort,
@@ -121,9 +121,15 @@ func (mg *MigratorCgrCfg) AsMapInterface() map[string]interface{} {
 		utils.OutStorDBNameCfg:     mg.OutStorDBName,
 		utils.OutStorDBUserCfg:     mg.OutStorDBUser,
 		utils.OutStorDBPasswordCfg: mg.OutStorDBPassword,
-		utils.UsersFiltersCfg:      mg.UsersFilters,
 		utils.OutDataDBOptsCfg:     mg.OutDataDBOpts,
 		utils.OutStorDBOptsCfg:     mg.OutStorDBOpts,
 	}
 
+	userFilters := make([]string, len(mg.UsersFilters))
+	for i, item := range mg.UsersFilters {
+		userFilters[i] = item
+	}
+	initialMP[utils.UsersFiltersCfg] = userFilters
+
+	return
 }
