@@ -45,16 +45,15 @@ func (mailcfg *MailerCfg) loadFromJsonCfg(jsnMailerCfg *MailerJsonCfg) (err erro
 	if jsnMailerCfg.From_address != nil {
 		mailcfg.MailerFromAddr = *jsnMailerCfg.From_address
 	}
-
 	return nil
 }
 
-func (mailcfg *MailerCfg) AsMapInterface() map[string]interface{} {
-	return map[string]interface{}{
+func (mailcfg *MailerCfg) AsMapInterface() (initialMP map[string]interface{}) {
+	initialMP = map[string]interface{}{
 		utils.MailerServerCfg:   mailcfg.MailerServer,
 		utils.MailerAuthUserCfg: mailcfg.MailerAuthUser,
 		utils.MailerAuthPassCfg: mailcfg.MailerAuthPass,
 		utils.MailerFromAddrCfg: mailcfg.MailerFromAddr,
 	}
-
+	return
 }
