@@ -90,64 +90,48 @@ func TestKamConnCfgloadFromJsonCfg(t *testing.T) {
 }
 
 func TestKamAgentCfgAsMapInterface(t *testing.T) {
-	var kamagcfg KamAgentCfg
 	cfgJSONStr := `{
 		"kamailio_agent": {
-			"enabled": false,
-			"sessions_conns": [""],
-			"create_cdr": false,
-			"timezone": "",
+			"sessions_conns": ["*conn1","*conn2"],
+			"create_cdr": true,
+			"timezone": "UTC",
 			"evapi_conns":[
-				{"address": "127.0.0.1:8448", "reconnects": 5}
+				{"address": "127.0.0.1:8448", "reconnects": 5, "alias": ""}
 			],
 		},
 	}`
 	eMap := map[string]interface{}{
-		"enabled":        false,
-		"sessions_conns": []string{""},
-		"create_cdr":     false,
-		"timezone":       "",
-		"evapi_conns": []map[string]interface{}{
-			{"address": "127.0.0.1:8448", "reconnects": 5, "alias": ""},
+		utils.EnabledCfg:       false,
+		utils.SessionSConnsCfg: []string{"*conn1", "*conn2"},
+		utils.CreateCdrCfg:     true,
+		utils.TimezoneCfg:      "UTC",
+		utils.EvapiConnsCfg: []map[string]interface{}{
+			{utils.AddressCfg: "127.0.0.1:8448", utils.ReconnectsCfg: 5, utils.AliasCfg: ""},
 		},
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if jsnKamAgCfg, err := jsnCfg.KamAgentJsonCfg(); err != nil {
-		t.Error(err)
-	} else if err = kamagcfg.loadFromJsonCfg(jsnKamAgCfg); err != nil {
-		t.Error(err)
-	} else if rcv := kamagcfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	} else if rcv := cgrCfg.kamAgentCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
+		t.Errorf("Expected %+v \n, received %+v", eMap, rcv)
 	}
+}
 
-	cfgJSONStr = `{
-	"kamailio_agent": {
-		"enabled": false,
-		"sessions_conns": ["*internal"],
-		"create_cdr": false,
-		"timezone": "",
-		"evapi_conns":[
-			{"address": "127.0.0.1:8448", "reconnects": 5}
-		],
-	},
+func TestKamAgentCfgAsMapInterface1(t *testing.T) {
+	cfgJSONStr := `{
+	"kamailio_agent": {},
 }`
-	eMap = map[string]interface{}{
-		"enabled":        false,
-		"sessions_conns": []string{"*internal"},
-		"create_cdr":     false,
-		"timezone":       "",
-		"evapi_conns": []map[string]interface{}{
-			{"address": "127.0.0.1:8448", "reconnects": 5, "alias": ""},
+	eMap := map[string]interface{}{
+		utils.EnabledCfg:       false,
+		utils.SessionSConnsCfg: []string{"*internal"},
+		utils.CreateCdrCfg:     false,
+		utils.TimezoneCfg:      "",
+		utils.EvapiConnsCfg: []map[string]interface{}{
+			{utils.AddressCfg: "127.0.0.1:8448", utils.ReconnectsCfg: 5, utils.AliasCfg: ""},
 		},
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if jsnKamAgCfg, err := jsnCfg.KamAgentJsonCfg(); err != nil {
-		t.Error(err)
-	} else if err = kamagcfg.loadFromJsonCfg(jsnKamAgCfg); err != nil {
-		t.Error(err)
-	} else if rcv := kamagcfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	} else if rcv := cgrCfg.kamAgentCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
+		t.Errorf("Expected %+v \n, received %+v", eMap, rcv)
 	}
 }

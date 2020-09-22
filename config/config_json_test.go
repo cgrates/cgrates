@@ -711,11 +711,12 @@ func TestKamAgentJsonCfg(t *testing.T) {
 				Reconnects: utils.IntPointer(5),
 			},
 		},
+		Timezone: utils.StringPointer(utils.EmptyString),
 	}
 	if cfg, err := dfCgrJSONCfg.KamAgentJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
-		t.Errorf("Expecting: %s, received: %s: ",
+		t.Errorf("Expecting: %s \n, received: %s: ",
 			utils.ToJSON(eCfg), utils.ToJSON(cfg))
 	}
 }

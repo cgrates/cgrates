@@ -314,6 +314,7 @@ type KamAgentJsonCfg struct {
 	Sessions_conns *[]string
 	Create_cdr     *bool
 	Evapi_conns    *[]*KamConnJsonCfg
+	Timezone       *string
 }
 
 // Represents one connection instance towards Kamailio
