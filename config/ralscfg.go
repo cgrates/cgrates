@@ -112,41 +112,64 @@ func (ralsCfg *RalsCfg) loadFromJsonCfg(jsnRALsCfg *RalsJsonCfg) (err error) {
 	return nil
 }
 
-func (ralsCfg *RalsCfg) AsMapInterface() map[string]interface{} {
-	maxComputed := make(map[string]interface{})
-	for key, item := range ralsCfg.MaxComputedUsage {
-		if key == utils.ANY || key == utils.VOICE {
-			maxComputed[key] = item.String()
-		} else {
-			maxComputed[key] = strconv.Itoa(int(item))
-		}
-	}
-
-	cacheSConns := make([]string, len(ralsCfg.CacheSConns))
-	for i, item := range ralsCfg.CacheSConns {
-		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)
-		if item == buf {
-			cacheSConns[i] = strings.ReplaceAll(item, ":*caches", utils.EmptyString)
-		} else {
-			cacheSConns[i] = item
-		}
-	}
-
-	balanceRating := make(map[string]interface{})
-	for key, item := range ralsCfg.BalanceRatingSubject {
-		balanceRating[key] = item
-	}
-
-	return map[string]interface{}{
+func (ralsCfg *RalsCfg) AsMapInterface() (initialMP map[string]interface{}) {
+	initialMP = map[string]interface{}{
 		utils.EnabledCfg:                 ralsCfg.Enabled,
-		utils.ThresholdSConnsCfg:         ralsCfg.ThresholdSConns,
-		utils.StatSConnsCfg:              ralsCfg.StatSConns,
-		utils.CacheSConnsCfg:             cacheSConns,
 		utils.RpSubjectPrefixMatchingCfg: ralsCfg.RpSubjectPrefixMatching,
 		utils.RemoveExpiredCfg:           ralsCfg.RemoveExpired,
-		utils.MaxComputedUsageCfg:        maxComputed,
-		utils.BalanceRatingSubjectCfg:    balanceRating,
 		utils.MaxIncrementsCfg:           ralsCfg.MaxIncrements,
 		utils.Dynaprepaid_actionplansCfg: ralsCfg.DynaprepaidActionPlans,
 	}
+	if ralsCfg.ThresholdSConns != nil {
+		threSholds := make([]string, len(ralsCfg.ThresholdSConns))
+		for i, item := range ralsCfg.ThresholdSConns {
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds) {
+				threSholds[i] = strings.ReplaceAll(item, ":*thresholds", utils.EmptyString)
+			} else {
+				threSholds[i] = item
+			}
+		}
+		initialMP[utils.ThresholdSConnsCfg] = threSholds
+	}
+	if ralsCfg.StatSConns != nil {
+		statS := make([]string, len(ralsCfg.StatSConns))
+		for i, item := range ralsCfg.StatSConns {
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS) {
+				statS[i] = strings.ReplaceAll(item, ":*stats", utils.EmptyString)
+			} else {
+				statS[i] = item
+			}
+		}
+		initialMP[utils.StatSConnsCfg] = statS
+	}
+	if ralsCfg.MaxComputedUsage != nil {
+		maxComputed := make(map[string]interface{})
+		for key, item := range ralsCfg.MaxComputedUsage {
+			if key == utils.ANY || key == utils.VOICE {
+				maxComputed[key] = item.String()
+			} else {
+				maxComputed[key] = strconv.Itoa(int(item))
+			}
+		}
+		initialMP[utils.MaxComputedUsageCfg] = maxComputed
+	}
+	if ralsCfg.CacheSConns != nil {
+		cacheSConns := make([]string, len(ralsCfg.CacheSConns))
+		for i, item := range ralsCfg.CacheSConns {
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches) {
+				cacheSConns[i] = strings.ReplaceAll(item, ":*caches", utils.EmptyString)
+			} else {
+				cacheSConns[i] = item
+			}
+		}
+		initialMP[utils.CachesConnsCfg] = cacheSConns
+	}
+	if ralsCfg.BalanceRatingSubject != nil {
+		balanceRating := make(map[string]interface{})
+		for key, item := range ralsCfg.BalanceRatingSubject {
+			balanceRating[key] = item
+		}
+		initialMP[utils.BalanceRatingSubjectCfg] = balanceRating
+	}
+	return
 }
