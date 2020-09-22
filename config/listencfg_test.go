@@ -20,6 +20,8 @@ package config
 import (
 	"reflect"
 	"testing"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 func TestListenCfgloadFromJsonCfg(t *testing.T) {
@@ -60,5 +62,49 @@ func TestListenCfgloadFromJsonCfg(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, lstcfg) {
 		t.Errorf("Expected: %+v , recived: %+v", expected, lstcfg)
+	}
+}
+
+func TestListenCfgAsMapInterface(t *testing.T) {
+	cfgJSONStr := `{
+        "listen": {},
+}`
+	eMap := map[string]interface{}{
+		utils.RPCJSONListenCfg:    "127.0.0.1:2012",
+		utils.RPCGOBListenCfg:     "127.0.0.1:2013",
+		utils.HttpCfg:             "127.0.0.1:2080",
+		utils.RPCJSONTLSListenCfg: "127.0.0.1:2022",
+		utils.RPCGOBTLSListenCfg:  "127.0.0.1:2023",
+		utils.HTTPTLSListenCfg:    "127.0.0.1:2280",
+	}
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+		t.Error(err)
+	} else if rcv := cgrCfg.listenCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
+		t.Errorf("Expected %+v, received %+v", eMap, rcv)
+	}
+}
+
+func TestListenCfgAsMapInterface1(t *testing.T) {
+	cfgJSONStr := `{
+	"listen": {
+		"rpc_json": "127.0.0.1:2010",			
+        "rpc_gob": "127.0.0.1:2018",			
+        "rpc_json_tls" : "127.0.0.1:2025",		
+        "rpc_gob_tls": "127.0.0.1:2001",		
+        "http_tls": "127.0.0.1:2288",			
+	}
+}`
+	eMap := map[string]interface{}{
+		utils.RPCJSONListenCfg:    "127.0.0.1:2010",
+		utils.RPCGOBListenCfg:     "127.0.0.1:2018",
+		utils.HttpCfg:             "127.0.0.1:2080",
+		utils.RPCJSONTLSListenCfg: "127.0.0.1:2025",
+		utils.RPCGOBTLSListenCfg:  "127.0.0.1:2001",
+		utils.HTTPTLSListenCfg:    "127.0.0.1:2288",
+	}
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+		t.Error(err)
+	} else if rcv := cgrCfg.listenCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
+		t.Errorf("Expected %+v, received %+v", eMap, rcv)
 	}
 }
