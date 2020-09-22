@@ -56,8 +56,8 @@ func (lstcfg *ListenCfg) loadFromJsonCfg(jsnListenCfg *ListenJsonCfg) (err error
 	return nil
 }
 
-func (lstcfg *ListenCfg) AsMapInterface() map[string]interface{} {
-	return map[string]interface{}{
+func (lstcfg *ListenCfg) AsMapInterface() (initialMP map[string]interface{}) {
+	initialMP = map[string]interface{}{
 		utils.RPCJSONListenCfg:    lstcfg.RPCJSONListen,
 		utils.RPCGOBListenCfg:     lstcfg.RPCGOBListen,
 		utils.HTTPListenCfg:       lstcfg.HTTPListen,
@@ -65,4 +65,5 @@ func (lstcfg *ListenCfg) AsMapInterface() map[string]interface{} {
 		utils.RPCGOBTLSListenCfg:  lstcfg.RPCGOBTLSListen,
 		utils.HTTPTLSListenCfg:    lstcfg.HTTPTLSListen,
 	}
+	return
 }
