@@ -626,7 +626,6 @@ func testV1STSProcessStaticMetrics(t *testing.T) {
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			},
 			QueueLength: 100,
-			TTL:         time.Duration(1) * time.Second,
 			Metrics: []*engine.MetricWithFilters{
 				{
 					MetricID: utils.ConcatenatedKey(utils.MetaSum, "1"),
