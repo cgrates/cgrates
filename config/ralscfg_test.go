@@ -77,61 +77,75 @@ func TestRalsCfgFromJsonCfg(t *testing.T) {
 }
 
 func TestRalsCfgAsMapInterface(t *testing.T) {
-	var ralscfg RalsCfg
-	ralscfg.MaxComputedUsage = make(map[string]time.Duration)
-	ralscfg.BalanceRatingSubject = make(map[string]string)
 	cfgJSONStr := `{
 	"rals": {
-		"enabled": false,						
-		"thresholds_conns": [],					
-		"stats_conns": [],						
-		"caches_conns":["*internal"],			
-		"rp_subject_prefix_matching": false,	
-		"remove_expired":true,					
-		"max_computed_usage": {					
-			"*any": "189h",
-			"*voice": "72h",
-			"*data": "107374182400",
-			"*sms": "10000",
-			"*mms": "10000"
-		},
-		"max_increments": 1000000,
-		"balance_rating_subject":{				
-			"*any": "*zero1ns",
-			"*voice": "*zero1s"
-		},
-		"dynaprepaid_actionplans": [],			
-	},
+        "enabled": true,						
+	    "thresholds_conns": ["*internal"],					
+	    "stats_conns": ["*conn1","*conn2"],						
+	    "users_conns": ["*internal"],						
+	    "rp_subject_prefix_matching": true,	
+	    "max_computed_usage": {					// do not compute usage higher than this, prevents memory overload
+		   "*voice": "48h",
+		   "*sms": "5000"
+        }, 
+    },
 }`
 	eMap := map[string]interface{}{
-		"enabled":                    false,
-		"thresholds_conns":           []string{},
-		"stats_conns":                []string{},
-		"caches_conns":               []string{"*internal"},
-		"rp_subject_prefix_matching": false,
-		"remove_expired":             true,
-		"max_computed_usage": map[string]interface{}{
+		utils.EnabledCfg:                 true,
+		utils.ThresholdSConnsCfg:         []string{"*internal"},
+		utils.StatSConnsCfg:              []string{"*conn1", "*conn2"},
+		utils.CachesConnsCfg:             []string{"*internal"},
+		utils.RpSubjectPrefixMatchingCfg: true,
+		utils.RemoveExpiredCfg:           true,
+		utils.MaxComputedUsageCfg: map[string]interface{}{
+			"*any":   "189h0m0s",
+			"*voice": "48h0m0s",
+			"*data":  "107374182400",
+			"*sms":   "5000",
+			"*mms":   "10000",
+		},
+		utils.MaxIncrementsCfg: 1000000,
+		utils.BalanceRatingSubjectCfg: map[string]interface{}{
+			"*any":   "*zero1ns",
+			"*voice": "*zero1s",
+		},
+		utils.Dynaprepaid_actionplansCfg: []string{},
+	}
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+		t.Error(err)
+	} else if rcv := cgrCfg.ralsCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	}
+}
+
+func TestRalsCfgAsMapInterface1(t *testing.T) {
+	cfgJSONStr := `{
+     "rals": {}
+}`
+	eMap := map[string]interface{}{
+		utils.EnabledCfg:                 false,
+		utils.ThresholdSConnsCfg:         []string{},
+		utils.StatSConnsCfg:              []string{},
+		utils.CachesConnsCfg:             []string{"*internal"},
+		utils.RpSubjectPrefixMatchingCfg: false,
+		utils.RemoveExpiredCfg:           true,
+		utils.MaxComputedUsageCfg: map[string]interface{}{
 			"*any":   "189h0m0s",
 			"*voice": "72h0m0s",
 			"*data":  "107374182400",
 			"*sms":   "10000",
 			"*mms":   "10000",
 		},
-		"max_increments": 1000000,
-		"balance_rating_subject": map[string]interface{}{
+		utils.MaxIncrementsCfg: 1000000,
+		utils.BalanceRatingSubjectCfg: map[string]interface{}{
 			"*any":   "*zero1ns",
 			"*voice": "*zero1s",
 		},
-		"dynaprepaid_actionplans": []string{},
+		utils.Dynaprepaid_actionplansCfg: []string{},
 	}
-
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if jsnRalsCfg, err := jsnCfg.RalsJsonCfg(); err != nil {
-		t.Error(err)
-	} else if err = ralscfg.loadFromJsonCfg(jsnRalsCfg); err != nil {
-		t.Error(err)
-	} else if rcv := ralscfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("Expected: %+v ,\n recived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	} else if rcv := cgrCfg.ralsCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
