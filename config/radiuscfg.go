@@ -100,41 +100,45 @@ func (self *RadiusAgentCfg) loadFromJsonCfg(jsnCfg *RadiusAgentJsonCfg, separato
 	return
 }
 
-func (ra *RadiusAgentCfg) AsMapInterface(separator string) map[string]interface{} {
-	clientSecrets := make(map[string]interface{}, len(ra.ClientSecrets))
-	for key, val := range ra.ClientSecrets {
-		clientSecrets[key] = val
+func (ra *RadiusAgentCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
+	initialMP = map[string]interface{}{
+		utils.EnabledCfg:    ra.Enabled,
+		utils.ListenNetCfg:  ra.ListenNet,
+		utils.ListenAuthCfg: ra.ListenAuth,
+		utils.ListenAcctCfg: ra.ListenAcct,
+	}
+	if ra.ClientSecrets != nil {
+		clientSecrets := make(map[string]interface{}, len(ra.ClientSecrets))
+		for key, val := range ra.ClientSecrets {
+			clientSecrets[key] = val
+		}
+		initialMP[utils.ClientSecretsCfg] = clientSecrets
 	}
 
-	clientDictionaries := make(map[string]interface{}, len(ra.ClientDictionaries))
-	for key, val := range ra.ClientDictionaries {
-		clientDictionaries[key] = val
+	if ra.ClientDictionaries != nil {
+		clientDictionaries := make(map[string]interface{}, len(ra.ClientDictionaries))
+		for key, val := range ra.ClientDictionaries {
+			clientDictionaries[key] = val
+		}
+		initialMP[utils.ClientDictionariesCfg] = clientDictionaries
 	}
 
 	requestProcessors := make([]map[string]interface{}, len(ra.RequestProcessors))
 	for i, item := range ra.RequestProcessors {
 		requestProcessors[i] = item.AsMapInterface(separator)
 	}
+	initialMP[utils.RequestProcessorsCfg] = requestProcessors
 
-	sessionSConns := make([]string, len(ra.SessionSConns))
-	for i, item := range ra.SessionSConns {
-		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
-		if item == buf {
-			sessionSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaSessionS, utils.EmptyString)
-		} else {
-			sessionSConns[i] = item
+	if ra.SessionSConns != nil {
+		sessionSConns := make([]string, len(ra.SessionSConns))
+		for i, item := range ra.SessionSConns {
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS) {
+				sessionSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaSessionS, utils.EmptyString)
+			} else {
+				sessionSConns[i] = item
+			}
 		}
+		initialMP[utils.SessionSConnsCfg] = sessionSConns
 	}
-
-	return map[string]interface{}{
-		utils.EnabledCfg:            ra.Enabled,
-		utils.ListenNetCfg:          ra.ListenNet,
-		utils.ListenAuthCfg:         ra.ListenAuth,
-		utils.ListenAcctCfg:         ra.ListenAcct,
-		utils.ClientSecretsCfg:      clientSecrets,
-		utils.ClientDictionariesCfg: clientDictionaries,
-		utils.SessionSConnsCfg:      sessionSConns,
-		utils.RequestProcessorsCfg:  requestProcessors,
-	}
-
+	return
 }

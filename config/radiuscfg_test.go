@@ -72,45 +72,84 @@ func TestRadiusAgentCfgloadFromJsonCfg(t *testing.T) {
 }
 
 func TestRadiusAgentCfgAsMapInterface(t *testing.T) {
-	var racfg RadiusAgentCfg
 	cfgJSONStr := `{
 	"radius_agent": {
-		"enabled": false,
-		"listen_net": "udp",
-		"listen_auth": "127.0.0.1:1812",
-		"listen_acct": "127.0.0.1:1813",
-		"client_secrets": {
-			"*default": "CGRateS.org"
-		},
-		"client_dictionaries": {
-			"*default": "/usr/share/cgrates/radius/dict/",
-		},
-		"sessions_conns": ["*internal"],
-		"request_processors": [
-		],
-	},
+         "enabled": true,												
+         "listen_auth": "127.0.0.1:1816",							
+         "listen_acct": "127.0.0.1:1892",							
+
+	     "client_dictionaries": {									
+	    	"*default": "/usr/share/cgrates/",			
+	     },
+	     "sessions_conns": ["*conn1","*conn2"],
+         "request_processors": [
+			{
+				"id": "OutboundAUTHDryRun",
+				"filters": ["*string:~*req.request_type:OutboundAUTH","*string:~*req.Msisdn:497700056231"],
+				"tenant": "cgrates.org",
+				"flags": ["*dryrun"],
+				"request_fields":[],
+				"reply_fields":[
+					{"tag": "Allow", "path": "*rep.response.Allow", "type": "*constant", 
+						"value": "1", "mandatory": true},
+				],
+			},],									
+     },
 }`
 	eMap := map[string]interface{}{
-		"enabled":     false,
-		"listen_net":  "udp",
-		"listen_auth": "127.0.0.1:1812",
-		"listen_acct": "127.0.0.1:1813",
-		"client_secrets": map[string]interface{}{
-			"*default": "CGRateS.org",
+		utils.EnabledCfg:    true,
+		utils.ListenNetCfg:  "udp",
+		utils.ListenAuthCfg: "127.0.0.1:1816",
+		utils.ListenAcctCfg: "127.0.0.1:1892",
+		utils.ClientSecretsCfg: map[string]interface{}{
+			utils.MetaDefault: "CGRateS.org",
 		},
-		"client_dictionaries": map[string]interface{}{
-			"*default": "/usr/share/cgrates/radius/dict/",
+		utils.ClientDictionariesCfg: map[string]interface{}{
+			utils.MetaDefault: "/usr/share/cgrates/",
 		},
-		"sessions_conns":     []string{"*internal"},
-		"request_processors": []map[string]interface{}{},
+		utils.SessionSConnsCfg: []string{"*conn1", "*conn2"},
+		utils.RequestProcessorsCfg: []map[string]interface{}{
+			{
+				utils.IdCfg:            "OutboundAUTHDryRun",
+				utils.FilterSCfg:       []string{"*string:~*req.request_type:OutboundAUTH", "*string:~*req.Msisdn:497700056231"},
+				utils.TenantCfg:        "cgrates.org",
+				utils.FlagsCfg:         []string{"*dryrun"},
+				utils.TimezoneCfg:      "",
+				utils.RequestFieldsCfg: []map[string]interface{}{},
+				utils.ReplyFieldsCfg: []map[string]interface{}{
+					{utils.TagCfg: "Allow", utils.PathCfg: "*rep.response.Allow", utils.TypeCfg: "*constant", utils.ValueCfg: "1", utils.MandatoryCfg: true},
+				},
+			},
+		},
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if jsnRaCfg, err := jsnCfg.RadiusAgentJsonCfg(); err != nil {
+	} else if rcv := cgrCfg.radiusAgentCfg.AsMapInterface(cgrCfg.generalCfg.RSRSep); !reflect.DeepEqual(rcv, eMap) {
+		t.Errorf("Expecetd %+v \n, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	}
+}
+
+func TestRadiusAgentCfgAsMapInterface1(t *testing.T) {
+	cfgJSONStr := `{
+	"radius_agent": {},
+}`
+	eMap := map[string]interface{}{
+		utils.EnabledCfg:    false,
+		utils.ListenNetCfg:  "udp",
+		utils.ListenAuthCfg: "127.0.0.1:1812",
+		utils.ListenAcctCfg: "127.0.0.1:1813",
+		utils.ClientSecretsCfg: map[string]interface{}{
+			utils.MetaDefault: "CGRateS.org",
+		},
+		utils.ClientDictionariesCfg: map[string]interface{}{
+			utils.MetaDefault: "/usr/share/cgrates/radius/dict/",
+		},
+		utils.SessionSConnsCfg:     []string{"*internal"},
+		utils.RequestProcessorsCfg: []map[string]interface{}{},
+	}
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if err = racfg.loadFromJsonCfg(jsnRaCfg, utils.INFIELD_SEP); err != nil {
-		t.Error(err)
-	} else if rcv := racfg.AsMapInterface(utils.EmptyString); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	} else if rcv := cgrCfg.radiusAgentCfg.AsMapInterface(cgrCfg.generalCfg.RSRSep); !reflect.DeepEqual(rcv, eMap) {
+		t.Errorf("Expecetd %+v \n, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
