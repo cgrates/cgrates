@@ -108,7 +108,6 @@ func TestLoaderSCfgloadFromJsonCfg(t *testing.T) {
 }
 
 func TestLoaderCfgAsMapInterface(t *testing.T) {
-	var loadscfg LoaderSCfg
 	cfgJSONStr := `{
 			"loaders": [												
 	{
@@ -127,8 +126,8 @@ func TestLoaderCfgAsMapInterface(t *testing.T) {
 				"type": "*attributes",						
 				"file_name": "Attributes.csv",				
 				"fields": [
-					{"tag": "TenantID", "path": "Tenant", "type": "*variable", "value": "~0", "mandatory": true},
-					{"tag": "ProfileID", "path": "ID", "type": "*variable", "value": "~1", "mandatory": true},
+					{"tag": "TenantID", "path": "Tenant", "type": "*variable", "value": "~req.0", "mandatory": true},
+					{"tag": "ProfileID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
 					],
 				},
 			],
@@ -136,48 +135,59 @@ func TestLoaderCfgAsMapInterface(t *testing.T) {
 	],
 	
 }`
-	eMap := map[string]interface{}{
-		"id":              "*default",
-		"enabled":         false,
-		"tenant":          "",
-		"dry_run":         false,
-		"run_delay":       "0",
-		"lock_filename":   ".cgr.lck",
-		"caches_conns":    []string{"*internal"},
-		"field_separator": ",",
-		"tp_in_dir":       "/var/spool/cgrates/loader/in",
-		"tp_out_dir":      "/var/spool/cgrates/loader/out",
-		"data": []map[string]interface{}{
-			{
-				"type":      "*attributes",
-				"file_name": "Attributes.csv",
-				"fields": []map[string]interface{}{
-					{
-						"tag":       "TenantID",
-						"path":      "Tenant",
-						"type":      "*variable",
-						"value":     "~0",
-						"mandatory": true,
-					}, {
-						"tag":       "ProfileID",
-						"path":      "ID",
-						"type":      "*variable",
-						"value":     "~1",
-						"mandatory": true,
+	eMap := []map[string]interface{}{
+		{
+			utils.IdCfg:             "*default",
+			utils.EnabledCfg:        false,
+			utils.TenantCfg:         "",
+			utils.DryRunCfg:         false,
+			utils.RunDelayCfg:       "0",
+			utils.LockFileNameCfg:   ".cgr.lck",
+			utils.CachesConnsCfg:    []string{"*internal"},
+			utils.FieldSeparatorCfg: ",",
+			utils.TpInDirCfg:        "/var/spool/cgrates/loader/in",
+			utils.TpOutDirCfg:       "/var/spool/cgrates/loader/out",
+			utils.DataCfg: []map[string]interface{}{
+				{
+					utils.TypeCfg:     "*attributes",
+					utils.FilenameCfg: "Attributes.csv",
+					utils.FieldsCfg: []map[string]interface{}{
+						{
+							utils.TagCfg:       "TenantID",
+							utils.PathCfg:      "Tenant",
+							utils.TypeCfg:      "*variable",
+							utils.ValueCfg:     "~*req.0",
+							utils.MandatoryCfg: true,
+						}, {
+							utils.TagCfg:       "ProfileID",
+							utils.PathCfg:      "ID",
+							utils.TypeCfg:      "*variable",
+							utils.ValueCfg:     "~*req.1",
+							utils.MandatoryCfg: true,
+						},
 					},
 				},
 			},
 		},
 	}
-
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cfgCgr, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if jsnLoadersCfg, err := jsnCfg.LoaderJsonCfg(); err != nil {
-		t.Error(err)
-	} else if err = loadscfg.loadFromJsonCfg(jsnLoadersCfg[0], nil, utils.INFIELD_SEP); err != nil {
-		t.Error(err)
-	} else if rcv := loadscfg.AsMapInterface(""); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	} else {
+		rcv := cgrCfg.loaderCfg.AsMapInterface(cfgCgr.generalCfg.RSRSep)
+		if !reflect.DeepEqual(eMap[0][utils.DataCfg].([]map[string]interface{})[0][utils.FieldsCfg].([]map[string]interface{})[0],
+			rcv[0][utils.DataCfg].([]map[string]interface{})[0][utils.FieldsCfg].([]map[string]interface{})[0]) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap[0][utils.DataCfg].([]map[string]interface{})[0][utils.FieldsCfg].([]map[string]interface{})[0]),
+				utils.ToJSON(rcv[0][utils.DataCfg].([]map[string]interface{})[0][utils.FieldsCfg].([]map[string]interface{})[0]))
+		} else if !reflect.DeepEqual(eMap[0][utils.DataCfg].([]map[string]interface{})[0][utils.FieldsCfg].([]map[string]interface{})[1],
+			rcv[0][utils.DataCfg].([]map[string]interface{})[0][utils.FieldsCfg].([]map[string]interface{})[1]) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap[0][utils.DataCfg].([]map[string]interface{})[0][utils.FieldsCfg].([]map[string]interface{})[1]),
+				utils.ToJSON(rcv[0][utils.DataCfg].([]map[string]interface{})[0][utils.FieldsCfg].([]map[string]interface{})[1]))
+		} else if !reflect.DeepEqual(eMap[0][utils.CachesConnsCfg], rcv[0][utils.CachesConnsCfg]) {
+			t.Errorf("Expecetd %+v, received %+v", eMap[0][utils.CachesConnsCfg], rcv[0][utils.CachesConnsCfg])
+		} else if !reflect.DeepEqual(eMap[0][utils.TpInDirCfg], rcv[0][utils.TpInDirCfg]) {
+			t.Errorf("Expecetd %+v, received %+v", eMap[0][utils.TpInDirCfg], rcv[0][utils.TpInDirCfg])
+		} else if !reflect.DeepEqual(eMap[0][utils.LockFileNameCfg], rcv[0][utils.LockFileNameCfg]) {
+			t.Errorf("Expecetd %+v, received %+v", eMap[0][utils.LockFileNameCfg], rcv[0][utils.LockFileNameCfg])
+		}
 	}
-
 }

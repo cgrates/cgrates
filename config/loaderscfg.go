@@ -36,6 +36,14 @@ func NewDfltLoaderSCfg() *LoaderSCfg {
 // LoaderSCfgs to export some methods for LoaderS profiles
 type LoaderSCfgs []*LoaderSCfg
 
+func (ldrs LoaderSCfgs) AsMapInterface(separator string) (loaderCfg []map[string]interface{}) {
+	loaderCfg = make([]map[string]interface{}, len(ldrs))
+	for i, item := range ldrs {
+		loaderCfg[i] = item.AsMapInterface(separator)
+	}
+	return
+}
+
 // Enabled returns true if Loader Service is enabled
 func (ldrs LoaderSCfgs) Enabled() bool {
 	for _, ldr := range ldrs {
@@ -229,7 +237,6 @@ func (l *LoaderSCfg) AsMapInterface(separator string) map[string]interface{} {
 			cacheSConns[i] = item
 		}
 	}
-
 	return map[string]interface{}{
 		utils.IdCfg:             l.Id,
 		utils.EnabledCfg:        l.Enabled,
