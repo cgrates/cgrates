@@ -47,12 +47,13 @@ func (self *KamConnCfg) loadFromJsonCfg(jsnCfg *KamConnJsonCfg) error {
 	return nil
 }
 
-func (kamCfg *KamConnCfg) AsMapInterface() map[string]interface{} {
-	return map[string]interface{}{
+func (kamCfg *KamConnCfg) AsMapInterface() (initialMP map[string]interface{}) {
+	initialMP = map[string]interface{}{
 		utils.AliasCfg:      kamCfg.Alias,
 		utils.AddressCfg:    kamCfg.Address,
 		utils.ReconnectsCfg: kamCfg.Reconnects,
 	}
+	return
 }
 
 // SM-Kamailio config section
@@ -92,31 +93,35 @@ func (ka *KamAgentCfg) loadFromJsonCfg(jsnCfg *KamAgentJsonCfg) error {
 			ka.EvapiConns[idx].loadFromJsonCfg(jsnConnCfg)
 		}
 	}
+	if jsnCfg.Timezone != nil {
+		ka.Timezone = *jsnCfg.Timezone
+	}
 	return nil
 }
 
-func (ka *KamAgentCfg) AsMapInterface() map[string]interface{} {
-	evapiConns := make([]map[string]interface{}, len(ka.EvapiConns))
-	for i, item := range ka.EvapiConns {
-		evapiConns[i] = item.AsMapInterface()
+func (ka *KamAgentCfg) AsMapInterface() (initialMP map[string]interface{}) {
+	initialMP = map[string]interface{}{
+		utils.EnabledCfg:   ka.Enabled,
+		utils.CreateCdrCfg: ka.CreateCdr,
+		utils.TimezoneCfg:  ka.Timezone,
 	}
-
-	sessionSConns := make([]string, len(ka.SessionSConns))
-	for i, item := range ka.SessionSConns {
-		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
-		if item == buf {
-			sessionSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaSessionS, utils.EmptyString)
-		} else {
-			sessionSConns[i] = item
+	if ka.EvapiConns != nil {
+		evapiConns := make([]map[string]interface{}, len(ka.EvapiConns))
+		for i, item := range ka.EvapiConns {
+			evapiConns[i] = item.AsMapInterface()
 		}
+		initialMP[utils.EvapiConnsCfg] = evapiConns
 	}
-
-	return map[string]interface{}{
-		utils.EnabledCfg:       ka.Enabled,
-		utils.SessionSConnsCfg: sessionSConns,
-		utils.CreateCdrCfg:     ka.CreateCdr,
-		utils.EvapiConnsCfg:    evapiConns,
-		utils.TimezoneCfg:      ka.Timezone,
+	if ka.SessionSConns != nil {
+		sessionSConns := make([]string, len(ka.SessionSConns))
+		for i, item := range ka.SessionSConns {
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS) {
+				sessionSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaSessionS, utils.EmptyString)
+			} else {
+				sessionSConns[i] = item
+			}
+		}
+		initialMP[utils.SessionSConnsCfg] = sessionSConns
 	}
-
+	return
 }
