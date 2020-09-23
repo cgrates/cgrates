@@ -62,17 +62,29 @@ func (rC *RPCConn) loadFromJsonCfg(jsnCfg *RPCConnsJson) (err error) {
 	return
 }
 
-func (rC *RPCConn) AsMapInterface() map[string]interface{} {
-	conns := make([]map[string]interface{}, len(rC.Conns))
-	for i, item := range rC.Conns {
-		conns[i] = item.AsMapInterface()
-	}
+type RpcConns map[string]*RPCConn
 
-	return map[string]interface{}{
+func (rC RpcConns) AsMapInterface() (rpcConns map[string]interface{}) {
+	rpcConns = make(map[string]interface{})
+	for key, value := range rC {
+		rpcConns[key] = value.AsMapInterface()
+	}
+	return
+}
+
+func (rC *RPCConn) AsMapInterface() (initialMP map[string]interface{}) {
+	initialMP = map[string]interface{}{
 		utils.StrategyCfg: rC.Strategy,
 		utils.PoolSize:    rC.PoolSize,
-		utils.Conns:       conns,
 	}
+	if rC.Conns != nil {
+		conns := make([]map[string]interface{}, len(rC.Conns))
+		for i, item := range rC.Conns {
+			conns[i] = item.AsMapInterface()
+		}
+		initialMP[utils.Conns] = conns
+	}
+	return
 }
 
 // One connection to Rater

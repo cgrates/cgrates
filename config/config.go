@@ -272,7 +272,7 @@ type CGRConfig struct {
 	ConfigReloads map[string]chan struct{} // Signals to specific entities that a config reload should occur
 	rldChans      map[string]chan struct{} // index here the channels used for reloads
 
-	rpcConns map[string]*RPCConn
+	rpcConns RpcConns
 
 	templates map[string][]*FCTemplate
 
