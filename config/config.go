@@ -191,6 +191,7 @@ func NewDefaultCGRConfig() (cfg *CGRConfig, err error) {
 	cfg.rateSCfg = new(RateSCfg)
 	cfg.sipAgentCfg = new(SIPAgentCfg)
 	cfg.configSCfg = new(ConfigSCfg)
+	cfg.apiBanCfg = new(APIBanCfg)
 
 	cfg.ConfigReloads = make(map[string]chan struct{})
 
@@ -314,6 +315,7 @@ type CGRConfig struct {
 	rateSCfg         *RateSCfg         // RateS config
 	sipAgentCfg      *SIPAgentCfg      // SIPAgent config
 	configSCfg       *ConfigSCfg       //ConfigS config
+	apiBanCfg        *APIBanCfg        // APIBan config
 }
 
 var posibleLoaderTypes = utils.NewStringSet([]string{utils.MetaAttributes,
@@ -380,7 +382,7 @@ func (cfg *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		cfg.loadLoaderCgrCfg, cfg.loadMigratorCgrCfg, cfg.loadTlsCgrCfg,
 		cfg.loadAnalyzerCgrCfg, cfg.loadApierCfg, cfg.loadErsCfg, cfg.loadEesCfg,
 		cfg.loadRateSCfg, cfg.loadSIPAgentCfg, cfg.loadDispatcherHCfg,
-		cfg.loadConfigSCfg} {
+		cfg.loadConfigSCfg, cfg.loadAPIBanCgrCfg} {
 		if err = loadFunc(jsnCfg); err != nil {
 			return
 		}
@@ -718,6 +720,15 @@ func (cfg *CGRConfig) loadAnalyzerCgrCfg(jsnCfg *CgrJsonCfg) (err error) {
 		return
 	}
 	return cfg.analyzerSCfg.loadFromJsonCfg(jsnAnalyzerCgrCfg)
+}
+
+// loadAPIBanCgrCfg loads the Analyzer section of the configuration
+func (cfg *CGRConfig) loadAPIBanCgrCfg(jsnCfg *CgrJsonCfg) (err error) {
+	var jsnAnalyzerCgrCfg *APIBanJsonCfg
+	if jsnAnalyzerCgrCfg, err = jsnCfg.ApiBanCfgJson(); err != nil {
+		return
+	}
+	return cfg.apiBanCfg.loadFromJsonCfg(jsnAnalyzerCgrCfg)
 }
 
 // loadApierCfg loads the Apier section of the configuration
@@ -1080,6 +1091,13 @@ func (cfg *CGRConfig) ConfigSCfg() *ConfigSCfg {
 	return cfg.configSCfg
 }
 
+// APIBanCfg reads the Apier configuration
+func (cfg *CGRConfig) APIBanCfg() *APIBanCfg {
+	cfg.lks[APIBanCfgJson].Lock()
+	defer cfg.lks[APIBanCfgJson].Unlock()
+	return cfg.apiBanCfg
+}
+
 // GetReloadChan returns the reload chanel for the given section
 func (cfg *CGRConfig) GetReloadChan(sectID string) chan struct{} {
 	return cfg.rldChans[sectID]
@@ -1176,6 +1194,8 @@ func (cfg *CGRConfig) V1GetConfigSection(args *SectionWithOpts, reply *map[strin
 		jsonString = utils.ToJSON(cfg.TemplatesCfg())
 	case ConfigSJson:
 		jsonString = utils.ToJSON(cfg.ConfigSCfg())
+	case APIBanCfgJson:
+		jsonString = utils.ToJSON(cfg.APIBanCfg())
 	default:
 		return errors.New("Invalid section")
 	}
@@ -1304,6 +1324,7 @@ func (cfg *CGRConfig) getLoadFunctions() map[string]func(*CgrJsonCfg) error {
 		SIPAgentJson:       cfg.loadSIPAgentCfg,
 		TemplatesJson:      cfg.loadTemplateSCfg,
 		ConfigSJson:        cfg.loadConfigSCfg,
+		APIBanCfgJson:      cfg.loadAPIBanCgrCfg,
 	}
 }
 
@@ -1527,6 +1548,7 @@ func (cfg *CGRConfig) reloadSections(sections ...string) (err error) {
 		case STORDB_JSN: // reloaded before
 		case LISTEN_JSN:
 		case TlsCfgJson: // nothing to reload
+		case APIBanCfgJson: // nothing to reload
 		case HTTP_JSN:
 		case SCHEDULER_JSN:
 			cfg.rldChans[SCHEDULER_JSN] <- struct{}{}
@@ -1638,5 +1660,6 @@ func (cfg *CGRConfig) AsMapInterface(separator string) map[string]interface{} {
 		utils.AnalyzerSCfg:     cfg.analyzerSCfg.AsMapInterface(),
 		utils.Apier:            cfg.apier.AsMapInterface(),
 		utils.ErsCfg:           cfg.ersCfg.AsMapInterface(separator),
+		APIBanCfgJson:          cfg.apiBanCfg.AsMapInterface(),
 	}
 }

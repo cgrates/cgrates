@@ -2292,7 +2292,11 @@ const (
 	AnalyzerSCfg     = "analyzers"        // from JSON
 	Apier            = "apiers"           // from JSON
 	ErsCfg           = "ers"              // from JSON
+)
 
+// APIBanCfg
+const (
+	KeysCfg = "keys"
 )
 
 // STIR/SHAKEN
