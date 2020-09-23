@@ -21,6 +21,8 @@ package config
 import (
 	"reflect"
 	"testing"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 func TestRateSConfigloadFromJsonCfg(t *testing.T) {
@@ -51,5 +53,61 @@ func TestRateSConfigloadFromJsonCfg(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rateCfg) {
 		t.Errorf("Expected: %+v , recived: %+v", expected, rateCfg)
+	}
+}
+
+func TestRatesCfgAsMapInterface(t *testing.T) {
+	cfgJSONStr := `{
+      "rates": {}
+}`
+	eMap := map[string]interface{}{
+		utils.EnabledCfg:                 false,
+		utils.IndexedSelectsCfg:          true,
+		utils.PrefixIndexedFieldsCfg:     []string{},
+		utils.SuffixIndexedFieldsCfg:     []string{},
+		utils.NestedFieldsCfg:            false,
+		utils.RateIndexedSelectsCfg:      true,
+		utils.RatePrefixIndexedFieldsCfg: []string{},
+		utils.RateSuffixIndexedFieldsCfg: []string{},
+		utils.RateNestedFieldsCfg:        false,
+	}
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+		t.Error(err)
+	} else if rcv := cgrCfg.rateSCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
+		t.Errorf("Expected %+v \n, received %+v", eMap, rcv)
+	}
+}
+
+func TestRatesCfgAsMapInterface1(t *testing.T) {
+	cfgJSONStr := `{
+     "rates": {
+	        "enabled": true,
+	        "indexed_selects": false,				
+	         //"string_indexed_fields": [],			
+            "prefix_indexed_fields": ["*req.index1", "*req.index2"],			
+            "suffix_indexed_fields": ["*req.index1"],			
+	        "nested_fields": true,					
+	        "rate_indexed_selects": false,			
+	        //"rate_string_indexed_fields": [],		
+	         "rate_prefix_indexed_fields": ["*req.index1", "*req.index2"],		
+         	"rate_suffix_indexed_fields": ["*req.index1", "*req.index2", "*req.index3"],		
+	        "rate_nested_fields": true,			
+     },
+}`
+	eMap := map[string]interface{}{
+		utils.EnabledCfg:                 true,
+		utils.IndexedSelectsCfg:          false,
+		utils.PrefixIndexedFieldsCfg:     []string{"*req.index1", "*req.index2"},
+		utils.SuffixIndexedFieldsCfg:     []string{"*req.index1"},
+		utils.NestedFieldsCfg:            true,
+		utils.RateIndexedSelectsCfg:      false,
+		utils.RatePrefixIndexedFieldsCfg: []string{"*req.index1", "*req.index2"},
+		utils.RateSuffixIndexedFieldsCfg: []string{"*req.index1", "*req.index2", "*req.index3"},
+		utils.RateNestedFieldsCfg:        true,
+	}
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+		t.Error(err)
+	} else if rcv := cgrCfg.rateSCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
+		t.Errorf("Expected %+v \n, received %+v", eMap, rcv)
 	}
 }

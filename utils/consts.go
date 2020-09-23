@@ -2130,6 +2130,7 @@ const (
 	RateNestedFieldsCfg        = "rate_nested_fields"
 	RateStringIndexedFieldsCfg = "rate_string_indexed_fields"
 	RatePrefixIndexedFieldsCfg = "rate_prefix_indexed_fields"
+	RateSuffixIndexedFieldsCfg = "rate_suffix_indexed_fields"
 )
 
 // FC Template

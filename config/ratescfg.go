@@ -101,44 +101,55 @@ func (rCfg *RateSCfg) loadFromJsonCfg(jsnCfg *RateSJsonCfg) (err error) {
 	return
 }
 
-func (rCfg *RateSCfg) AsMapInterface() map[string]interface{} {
-	stringIndexedFields := []string{}
+func (rCfg *RateSCfg) AsMapInterface() (initialMP map[string]interface{}) {
+	initialMP = map[string]interface{}{
+		utils.EnabledCfg:            rCfg.Enabled,
+		utils.IndexedSelectsCfg:     rCfg.IndexedSelects,
+		utils.NestedFieldsCfg:       rCfg.NestedFields,
+		utils.RateIndexedSelectsCfg: rCfg.RateIndexedSelects,
+		utils.RateNestedFieldsCfg:   rCfg.RateNestedFields,
+	}
 	if rCfg.StringIndexedFields != nil {
-		stringIndexedFields = make([]string, len(*rCfg.StringIndexedFields))
+		stringIndexedFields := make([]string, len(*rCfg.StringIndexedFields))
 		for i, item := range *rCfg.StringIndexedFields {
 			stringIndexedFields[i] = item
 		}
+		initialMP[utils.StringIndexedFieldsCfg] = stringIndexedFields
 	}
-	prefixIndexedFields := []string{}
 	if rCfg.PrefixIndexedFields != nil {
-		prefixIndexedFields = make([]string, len(*rCfg.PrefixIndexedFields))
+		prefixIndexedFields := make([]string, len(*rCfg.PrefixIndexedFields))
 		for i, item := range *rCfg.PrefixIndexedFields {
 			prefixIndexedFields[i] = item
 		}
+		initialMP[utils.PrefixIndexedFieldsCfg] = prefixIndexedFields
 	}
-	rateStringIndexedFields := []string{}
+	if rCfg.SuffixIndexedFields != nil {
+		sufixIndexedFields := make([]string, len(*rCfg.SuffixIndexedFields))
+		for i, item := range *rCfg.SuffixIndexedFields {
+			sufixIndexedFields[i] = item
+		}
+		initialMP[utils.SuffixIndexedFieldsCfg] = sufixIndexedFields
+	}
 	if rCfg.RateStringIndexedFields != nil {
-		rateStringIndexedFields = make([]string, len(*rCfg.RateStringIndexedFields))
+		rateStringIndexedFields := make([]string, len(*rCfg.RateStringIndexedFields))
 		for i, item := range *rCfg.RateStringIndexedFields {
 			rateStringIndexedFields[i] = item
 		}
+		initialMP[utils.RateStringIndexedFieldsCfg] = rateStringIndexedFields
 	}
-	ratePrefixIndexedFields := []string{}
 	if rCfg.RatePrefixIndexedFields != nil {
-		ratePrefixIndexedFields = make([]string, len(*rCfg.RatePrefixIndexedFields))
+		ratePrefixIndexedFields := make([]string, len(*rCfg.RatePrefixIndexedFields))
 		for i, item := range *rCfg.RatePrefixIndexedFields {
 			ratePrefixIndexedFields[i] = item
 		}
+		initialMP[utils.RatePrefixIndexedFieldsCfg] = ratePrefixIndexedFields
 	}
-	return map[string]interface{}{
-		utils.EnabledCfg:                 rCfg.Enabled,
-		utils.IndexedSelectsCfg:          rCfg.IndexedSelects,
-		utils.StringIndexedFieldsCfg:     stringIndexedFields,
-		utils.PrefixIndexedFieldsCfg:     prefixIndexedFields,
-		utils.NestedFieldsCfg:            rCfg.NestedFields,
-		utils.RateIndexedSelectsCfg:      rCfg.RateIndexedSelects,
-		utils.RateStringIndexedFieldsCfg: rateStringIndexedFields,
-		utils.RatePrefixIndexedFieldsCfg: ratePrefixIndexedFields,
-		utils.RateNestedFieldsCfg:        rCfg.RateNestedFields,
+	if rCfg.RateSuffixIndexedFields != nil {
+		rateSufixIndexedFields := make([]string, len(*rCfg.RateSuffixIndexedFields))
+		for i, item := range *rCfg.RateSuffixIndexedFields {
+			rateSufixIndexedFields[i] = item
+		}
+		initialMP[utils.RateSuffixIndexedFieldsCfg] = rateSufixIndexedFields
 	}
+	return
 }
