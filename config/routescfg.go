@@ -123,71 +123,77 @@ func (rts *RouteSCfg) loadFromJsonCfg(jsnCfg *RouteSJsonCfg) (err error) {
 	return nil
 }
 
-func (rts *RouteSCfg) AsMapInterface() map[string]interface{} {
-
-	stringIndexedFields := []string{}
+func (rts *RouteSCfg) AsMapInterface() (initialMP map[string]interface{}) {
+	initialMP = map[string]interface{}{
+		utils.EnabledCfg:        rts.Enabled,
+		utils.IndexedSelectsCfg: rts.IndexedSelects,
+		utils.DefaultRatioCfg:   rts.DefaultRatio,
+		utils.NestedFieldsCfg:   rts.NestedFields,
+	}
 	if rts.StringIndexedFields != nil {
-		stringIndexedFields = make([]string, len(*rts.StringIndexedFields))
+		stringIndexedFields := make([]string, len(*rts.StringIndexedFields))
 		for i, item := range *rts.StringIndexedFields {
 			stringIndexedFields[i] = item
 		}
+		initialMP[utils.StringIndexedFieldsCfg] = stringIndexedFields
 	}
-	prefixIndexedFields := []string{}
 	if rts.PrefixIndexedFields != nil {
-		prefixIndexedFields = make([]string, len(*rts.PrefixIndexedFields))
+		prefixIndexedFields := make([]string, len(*rts.PrefixIndexedFields))
 		for i, item := range *rts.PrefixIndexedFields {
 			prefixIndexedFields[i] = item
 		}
+		initialMP[utils.PrefixIndexedFieldsCfg] = prefixIndexedFields
 	}
-	attributeSConns := make([]string, len(rts.AttributeSConns))
-	for i, item := range rts.AttributeSConns {
-		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)
-		if item == buf {
-			attributeSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaAttributes, utils.EmptyString)
-		} else {
-			attributeSConns[i] = item
+	if rts.SuffixIndexedFields != nil {
+		suffixIndexedFieldsCfg := make([]string, len(*rts.SuffixIndexedFields))
+		for i, item := range *rts.SuffixIndexedFields {
+			suffixIndexedFieldsCfg[i] = item
 		}
+		initialMP[utils.SuffixIndexedFieldsCfg] = suffixIndexedFieldsCfg
 	}
-	ralSConns := make([]string, len(rts.RALsConns))
-	for i, item := range rts.RALsConns {
-		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder)
-
-		if item == buf {
-			ralSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaResponder, utils.EmptyString)
-		} else {
-			ralSConns[i] = item
+	if rts.AttributeSConns != nil {
+		attributeSConns := make([]string, len(rts.AttributeSConns))
+		for i, item := range rts.AttributeSConns {
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes) {
+				attributeSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaAttributes, utils.EmptyString)
+			} else {
+				attributeSConns[i] = item
+			}
 		}
+		initialMP[utils.AttributeSConnsCfg] = attributeSConns
 	}
-	resourceSConns := make([]string, len(rts.ResourceSConns))
-	for i, item := range rts.ResourceSConns {
-		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)
-		if item == buf {
-			resourceSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaResources, utils.EmptyString)
-		} else {
-			resourceSConns[i] = item
+	if rts.RALsConns != nil {
+		ralSConns := make([]string, len(rts.RALsConns))
+		for i, item := range rts.RALsConns {
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder) {
+				ralSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaResponder, utils.EmptyString)
+			} else {
+				ralSConns[i] = item
+			}
 		}
+		initialMP[utils.RALsConnsCfg] = ralSConns
 	}
-	statSConns := make([]string, len(rts.StatSConns))
-	for i, item := range rts.StatSConns {
-		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS)
-		if item == buf {
-			statSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaStatS, utils.EmptyString)
-		} else {
-			statSConns[i] = item
+	if rts.ResourceSConns != nil {
+		resourceSConns := make([]string, len(rts.ResourceSConns))
+		for i, item := range rts.ResourceSConns {
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources) {
+				resourceSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaResources, utils.EmptyString)
+			} else {
+				resourceSConns[i] = item
+			}
 		}
+		initialMP[utils.ResourceSConnsCfg] = resourceSConns
 	}
-
-	return map[string]interface{}{
-		utils.EnabledCfg:             rts.Enabled,
-		utils.IndexedSelectsCfg:      rts.IndexedSelects,
-		utils.StringIndexedFieldsCfg: stringIndexedFields,
-		utils.PrefixIndexedFieldsCfg: prefixIndexedFields,
-		utils.AttributeSConnsCfg:     attributeSConns,
-		utils.ResourceSConnsCfg:      resourceSConns,
-		utils.StatSConnsCfg:          statSConns,
-		utils.RALsConnsCfg:           ralSConns,
-		utils.DefaultRatioCfg:        rts.DefaultRatio,
-		utils.NestedFieldsCfg:        rts.NestedFields,
+	if rts.StatSConns != nil {
+		statSConns := make([]string, len(rts.StatSConns))
+		for i, item := range rts.StatSConns {
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS) {
+				statSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaStatS, utils.EmptyString)
+			} else {
+				statSConns[i] = item
+			}
+		}
+		initialMP[utils.StatSConnsCfg] = statSConns
 	}
-
+	return
 }

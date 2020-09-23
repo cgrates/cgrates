@@ -66,74 +66,58 @@ func TestRouteSCfgloadFromJsonCfg(t *testing.T) {
 }
 
 func TestRouteSCfgAsMapInterface(t *testing.T) {
-	var supscfg RouteSCfg
 	cfgJSONStr := `{
-	"routes": {
-		"enabled": false,
-		"indexed_selects":true,
-		"prefix_indexed_fields": [],
-		"nested_fields": false,
-		"attributes_conns": [],
-		"resources_conns": [],
-		"stats_conns": [],
-		"rals_conns": [],
-		"default_ratio":1
-	},
+	"routes": {},
 }`
 	eMap := map[string]interface{}{
-		"enabled":               false,
-		"indexed_selects":       true,
-		"prefix_indexed_fields": []string{},
-		"string_indexed_fields": []string{},
-		"nested_fields":         false,
-		"attributes_conns":      []string{},
-		"resources_conns":       []string{},
-		"stats_conns":           []string{},
-		"rals_conns":            []string{},
-		"default_ratio":         1,
+		utils.EnabledCfg:             false,
+		utils.IndexedSelectsCfg:      true,
+		utils.PrefixIndexedFieldsCfg: []string{},
+		utils.SuffixIndexedFieldsCfg: []string{},
+		utils.NestedFieldsCfg:        false,
+		utils.AttributeSConnsCfg:     []string{},
+		utils.ResourceSConnsCfg:      []string{},
+		utils.StatSConnsCfg:          []string{},
+		utils.RALsConnsCfg:           []string{},
+		utils.DefaultRatioCfg:        1,
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if jsnSupSCfg, err := jsnCfg.RouteSJsonCfg(); err != nil {
-		t.Error(err)
-	} else if err = supscfg.loadFromJsonCfg(jsnSupSCfg); err != nil {
-		t.Error(err)
-	} else if rcv := supscfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	} else if rcv := cgrCfg.routeSCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
+}
 
-	cfgJSONStr = `{
+func TestRouteSCfgAsMapInterface1(t *testing.T) {
+	cfgJSONStr := `{
 		"routes": {
-			"enabled": false,
-			"indexed_selects":true,
+			"enabled": true,
+			"indexed_selects":false,
 			"prefix_indexed_fields": ["*req.prefix","*req.indexed","*req.fields"],
-			"nested_fields": false,
+            "suffix_indexed_fields": ["*req.prefix","*req.indexed"],
+			"nested_fields": true,
 			"attributes_conns": ["*internal"],
 			"resources_conns": ["*internal"],
 			"stats_conns": ["*internal"],
 			"rals_conns": ["*internal"],
-			"default_ratio":1
+			"default_ratio":2,
 		},
 	}`
-	eMap = map[string]interface{}{
-		"enabled":               false,
-		"indexed_selects":       true,
-		"prefix_indexed_fields": []string{"*req.prefix", "*req.indexed", "*req.fields"},
-		"string_indexed_fields": []string{},
-		"nested_fields":         false,
-		"attributes_conns":      []string{"*internal"},
-		"resources_conns":       []string{"*internal"},
-		"stats_conns":           []string{"*internal"},
-		"rals_conns":            []string{"*internal"},
-		"default_ratio":         1,
+	eMap := map[string]interface{}{
+		utils.EnabledCfg:             true,
+		utils.IndexedSelectsCfg:      false,
+		utils.PrefixIndexedFieldsCfg: []string{"*req.prefix", "*req.indexed", "*req.fields"},
+		utils.SuffixIndexedFieldsCfg: []string{"*req.prefix", "*req.indexed"},
+		utils.NestedFieldsCfg:        true,
+		utils.AttributeSConnsCfg:     []string{"*internal"},
+		utils.ResourceSConnsCfg:      []string{"*internal"},
+		utils.StatSConnsCfg:          []string{"*internal"},
+		utils.RALsConnsCfg:           []string{"*internal"},
+		utils.DefaultRatioCfg:        2,
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if jsnSupSCfg, err := jsnCfg.RouteSJsonCfg(); err != nil {
-		t.Error(err)
-	} else if err = supscfg.loadFromJsonCfg(jsnSupSCfg); err != nil {
-		t.Error(err)
-	} else if rcv := supscfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	} else if rcv := cgrCfg.routeSCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
