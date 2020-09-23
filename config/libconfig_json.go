@@ -652,3 +652,8 @@ type ConfigSCfgJson struct {
 	Url      *string
 	Root_dir *string
 }
+
+type APIBanJsonCfg struct {
+	Enabled *bool
+	Keys    *[]string
+}

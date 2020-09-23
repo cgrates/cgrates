@@ -1003,4 +1003,9 @@ const CGRATES_CFG_JSON = `
 },
 
 
+"apiban": {
+	"enabled": false,
+	"keys": [],
+},
+
 }`
