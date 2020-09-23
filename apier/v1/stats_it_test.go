@@ -1071,7 +1071,7 @@ func testV1STSProcessStatWithThreshold2(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "THD_Stat2",
 			FilterIDs: []string{"*string:~*req.EventType:StatUpdate",
-				"*string:~*req.StatID:StatWithThreshold", "*exists:~*req.*sum#2:", "*gt:~*req.*sum#2:1"},
+				"*string:~*req.StatID:StatWithThreshold2", "*exists:~*req.*sum#2:", "*gt:~*req.*sum#2:1"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 			},
