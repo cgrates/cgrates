@@ -83,6 +83,7 @@ var (
 		testV1STSProcessStatWithThreshold,
 		//testV1STSProcessCDRStat,
 		testV1STSOverWriteStats,
+		testV1STSProcessStatWithThreshold2,
 		testV1STSStopEngine,
 	}
 )
@@ -1032,6 +1033,88 @@ func testV1STSOverWriteStats(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics2, metrics2) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics2, metrics2)
+	}
+}
+
+func testV1STSProcessStatWithThreshold2(t *testing.T) {
+	stTh := &engine.StatQueueWithCache{
+		StatQueueProfile: &engine.StatQueueProfile{
+			Tenant:    "cgrates.org",
+			ID:        "StatWithThreshold2",
+			FilterIDs: []string{"*string:~*req.CustomEvent2:CustomEvent2"}, //custom filter for event
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			},
+			QueueLength: 100,
+			TTL:         time.Duration(1) * time.Second,
+			Metrics: []*engine.MetricWithFilters{
+				{
+					MetricID: utils.MetaTCD,
+				},
+				{
+					MetricID: utils.MetaSum + utils.HashtagSep + "2",
+				},
+			},
+			Stored:   true,
+			Weight:   20,
+			MinItems: 1,
+		},
+	}
+	var result string
+	if err := stsV1Rpc.Call(utils.APIerSv1SetStatQueueProfile, stTh, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	thSts := &engine.ThresholdWithCache{
+		ThresholdProfile: &engine.ThresholdProfile{
+			Tenant: "cgrates.org",
+			ID:     "THD_Stat2",
+			FilterIDs: []string{"*string:~*req.EventType:StatUpdate",
+				"*string:~*req.StatID:StatWithThreshold", "*exists:~*req.*sum#2:", "*gt:~*req.*sum#2:1"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			},
+			MaxHits:   -1,
+			MinSleep:  time.Duration(5 * time.Minute),
+			Weight:    20.0,
+			ActionIDs: []string{"LOG_WARNING"},
+			Async:     true,
+		},
+	}
+	if err := stsV1Rpc.Call(utils.APIerSv1SetThresholdProfile, thSts, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	//process event
+	var reply2 []string
+	expected := []string{"StatWithThreshold2"}
+	args := engine.StatsArgsProcessEvent{
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "event1",
+				Event: map[string]interface{}{
+					"CustomEvent2": "CustomEvent2",
+					utils.Usage:    time.Duration(45 * time.Second),
+				},
+			},
+		},
+	}
+	if err := stsV1Rpc.Call(utils.StatSv1ProcessEvent, &args, &reply2); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply2, expected) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, reply2)
+	}
+
+	var td engine.Threshold
+	eTd := engine.Threshold{Tenant: "cgrates.org", ID: "THD_Stat2", Hits: 1}
+	if err := stsV1Rpc.Call(utils.ThresholdSv1GetThreshold,
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_Stat"}}, &td); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eTd.Hits, td.Hits) {
+		t.Errorf("expecting: %+v, received: %+v", eTd, td)
 	}
 }
 
