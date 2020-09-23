@@ -604,7 +604,7 @@ func testV1SplSPopulateStats(t *testing.T) {
 
 	var metrics map[string]string
 	expectedMetrics := map[string]string{
-		utils.ConcatenatedKey(utils.MetaSum, utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+"LoadReq"): "2",
+		utils.MetaSum + utils.HashtagSep + utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + "LoadReq": "2",
 	}
 	if err := splSv1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
 		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stat_Supplier1"}},
@@ -718,7 +718,7 @@ func testV1SplSPopulateStats(t *testing.T) {
 	}
 
 	expectedMetrics = map[string]string{
-		utils.ConcatenatedKey(utils.MetaSum, utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+"LoadReq"): "3",
+		utils.MetaSum + utils.HashtagSep + utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + "LoadReq": "3",
 	}
 
 	if err := splSv1Rpc.Call(utils.StatSv1GetQueueStringMetrics,

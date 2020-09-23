@@ -126,13 +126,13 @@ Following metrics are implemented:
 	Distinct destination count will keep the number of unique destinations found in *Events*. Relies on *Destination* field in the *Event*.
 
 \*sum
-	Generic metric to calculate mathematical sum for a specific field in the *Events*. Format: <*\*sum:FieldName*>.
+	Generic metric to calculate mathematical sum for a specific field in the *Events*. Format: <*\*sum#FieldName*>.
 
 \*average
-	Generic metric to calculate the mathematical average of a specific field in the *Events*. Format: <*\*average:FieldName*>.
+	Generic metric to calculate the mathematical average of a specific field in the *Events*. Format: <*\*average#FieldName*>.
 
 \*distinct
-	Generic metric to return the distinct number of appearance of a field name within *Events*. Format: <*\*distinct:FieldName*>.
+	Generic metric to return the distinct number of appearance of a field name within *Events*. Format: <*\*distinct#FieldName*>.
 
 
 Use cases
