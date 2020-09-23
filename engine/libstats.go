@@ -327,12 +327,6 @@ func (sq *StatQueue) Expand() {
 	sq.SQItems = newSQItems
 }
 
-//UpdateStatQueue will update the statQueue metrics based on a new ttl and queueLength
-func (sq *StatQueue) UpdateStatQueue(ttl *time.Duration, queueLen int) (err error) {
-
-	return
-}
-
 // StatQueues is a sortable list of StatQueue
 type StatQueues []*StatQueue
 
