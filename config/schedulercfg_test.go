@@ -58,26 +58,38 @@ func TestSchedulerCfgloadFromJsonCfg(t *testing.T) {
 }
 
 func TestSchedulerCfgAsMapInterface(t *testing.T) {
-	var schdcfg SchedulerCfg
 	cfgJSONStr := `{
-	"schedulers": {
-		"enabled": true,				
-		"cdrs_conns": [],				
-		"filters": [],
-	},
+	"schedulers": {},
 }`
 	eMap := map[string]interface{}{
-		"enabled":    true,
-		"cdrs_conns": []string{},
-		"filters":    []string{},
+		utils.EnabledCfg:   false,
+		utils.CDRsConnsCfg: []string{},
+		utils.FiltersCfg:   []string{},
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if jsnSchCfg, err := jsnCfg.SchedulerJsonCfg(); err != nil {
-		t.Error(err)
-	} else if err = schdcfg.loadFromJsonCfg(jsnSchCfg); err != nil {
-		t.Error(err)
-	} else if rcv := schdcfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	} else if rcv := cgrCfg.schedulerCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
+
+}
+
+func TestSchedulerCfgAsMapInterface1(t *testing.T) {
+	cfgJSONStr := `{
+	"schedulers": {
+       "enabled": true,
+       "cdrs_conns": ["*internal"],
+    },
+}`
+	eMap := map[string]interface{}{
+		utils.EnabledCfg:   true,
+		utils.CDRsConnsCfg: []string{"*internal"},
+		utils.FiltersCfg:   []string{},
+	}
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+		t.Error(err)
+	} else if rcv := cgrCfg.schedulerCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	}
+
 }

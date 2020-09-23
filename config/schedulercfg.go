@@ -18,7 +18,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
-import "github.com/cgrates/cgrates/utils"
+import (
+	"strings"
+
+	"github.com/cgrates/cgrates/utils"
+)
 
 type SchedulerCfg struct {
 	Enabled   bool
@@ -53,10 +57,21 @@ func (schdcfg *SchedulerCfg) loadFromJsonCfg(jsnCfg *SchedulerJsonCfg) error {
 	return nil
 }
 
-func (schdcfg *SchedulerCfg) AsMapInterface() map[string]interface{} {
-	return map[string]interface{}{
-		utils.EnabledCfg:   schdcfg.Enabled,
-		utils.CDRsConnsCfg: schdcfg.CDRsConns,
-		utils.FiltersCfg:   schdcfg.Filters,
+func (schdcfg *SchedulerCfg) AsMapInterface() (initialMP map[string]interface{}) {
+	initialMP = map[string]interface{}{
+		utils.EnabledCfg: schdcfg.Enabled,
+		utils.FiltersCfg: schdcfg.Filters,
 	}
+	if schdcfg.CDRsConns != nil {
+		cdrsConns := make([]string, len(schdcfg.CDRsConns))
+		for i, item := range schdcfg.CDRsConns {
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs) {
+				cdrsConns[i] = strings.ReplaceAll(item, ":*cdrs", utils.EmptyString)
+			} else {
+				cdrsConns[i] = item
+			}
+		}
+		initialMP[utils.CDRsConnsCfg] = cdrsConns
+	}
+	return
 }
