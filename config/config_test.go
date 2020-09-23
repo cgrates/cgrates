@@ -2471,7 +2471,7 @@ func TestCgrCfgEventExporterDefault(t *testing.T) {
 }
 
 func TestRpcConnsDefaults(t *testing.T) {
-	eCfg := make(map[string]*RPCConn)
+	eCfg := make(RpcConns)
 	// hardoded the *internal and *localhost connections
 	eCfg[utils.MetaInternal] = &RPCConn{
 		Strategy: rpcclient.PoolFirst,

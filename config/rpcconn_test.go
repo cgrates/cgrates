@@ -56,3 +56,84 @@ func TestRPCConnsAsMapInterface(t *testing.T) {
 		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
+
+func TestRpcConnAsMapInterface(t *testing.T) {
+	cfgJSONStr := `{
+      "rpc_conns": {}
+}`
+	eMap := map[string]interface{}{
+		utils.MetaInternal: map[string]interface{}{
+			utils.Conns: []map[string]interface{}{
+				{
+					utils.TLS:            false,
+					utils.AddressCfg:     utils.MetaInternal,
+					utils.SynchronousCfg: false,
+					utils.TransportCfg:   utils.EmptyString,
+				},
+			},
+			utils.PoolSize:    0,
+			utils.StrategyCfg: utils.MetaFirst,
+		},
+		utils.MetaLocalHost: map[string]interface{}{
+			utils.Conns: []map[string]interface{}{
+				{
+					utils.TLS:            false,
+					utils.AddressCfg:     "127.0.0.1:2012",
+					utils.SynchronousCfg: false,
+					utils.TransportCfg:   "*json",
+				},
+			},
+			utils.PoolSize:    0,
+			utils.StrategyCfg: utils.MetaFirst,
+		},
+	}
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+		t.Error(err)
+	} else if rcv := cgrCfg.rpcConns.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	}
+}
+
+func TestRpcConnAsMapInterface1(t *testing.T) {
+	cfgJSONStr := `{
+     "rpc_conns": {
+	     "*localhost": {
+		     "conns": [
+                  {"address": "127.0.0.1:2018", "TLS": true, "synchronous": true, "transport": "*json"},
+             ],
+             "poolSize": 2,
+	      },
+     },		
+}`
+	eMap := map[string]interface{}{
+		utils.MetaInternal: map[string]interface{}{
+			utils.Conns: []map[string]interface{}{
+				{
+					utils.TLS:            false,
+					utils.AddressCfg:     utils.MetaInternal,
+					utils.SynchronousCfg: false,
+					utils.TransportCfg:   utils.EmptyString,
+				},
+			},
+			utils.PoolSize:    0,
+			utils.StrategyCfg: utils.MetaFirst,
+		},
+		utils.MetaLocalHost: map[string]interface{}{
+			utils.Conns: []map[string]interface{}{
+				{
+					utils.TLS:            true,
+					utils.AddressCfg:     "127.0.0.1:2018",
+					utils.SynchronousCfg: true,
+					utils.TransportCfg:   "*json",
+				},
+			},
+			utils.PoolSize:    2,
+			utils.StrategyCfg: utils.MetaFirst,
+		},
+	}
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+		t.Error(err)
+	} else if rcv := cgrCfg.rpcConns.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	}
+}
