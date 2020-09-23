@@ -486,7 +486,7 @@ func testV2CDRsSetStats(t *testing.T) {
 			FilterIDs: []string{"*string:~*req.OriginID:testV2CDRsProcessCDR5"},
 			// QueueLength: 10,
 			Metrics: []*engine.MetricWithFilters{{
-				MetricID: "*sum:~*req.Usage",
+				MetricID: "*sum#~*req.Usage",
 			}},
 			ThresholdIDs: []string{utils.META_NONE},
 			Blocker:      true,
@@ -598,7 +598,7 @@ func testV2CDRsGetStats1(t *testing.T) {
 	expectedIDs := []string{"STS_PoccessCDR"}
 	var metrics map[string]string
 	expectedMetrics := map[string]string{
-		utils.ConcatenatedKey(utils.MetaSum, utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+utils.Usage): utils.NOT_AVAILABLE,
+		utils.MetaSum + utils.HashtagSep + utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage: utils.NOT_AVAILABLE,
 	}
 	if err := cdrsRpc.Call(utils.StatSv1GetQueueStringMetrics,
 		&utils.TenantIDWithOpts{
@@ -667,7 +667,7 @@ func testV2CDRsGetStats2(t *testing.T) {
 	expectedIDs := []string{"STS_PoccessCDR"}
 	var metrics map[string]string
 	expectedMetrics := map[string]string{
-		utils.ConcatenatedKey(utils.MetaSum, utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+utils.Usage): "60000000000",
+		utils.MetaSum + utils.HashtagSep + utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage: "120000000000",
 	}
 	if err := cdrsRpc.Call(utils.StatSv1GetQueueStringMetrics,
 		&utils.TenantIDWithOpts{

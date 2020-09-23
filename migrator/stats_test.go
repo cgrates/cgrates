@@ -159,8 +159,8 @@ func TestRemakeQueue(t *testing.T) {
 		}},
 		SQMetrics: map[string]engine.StatMetric{
 			"*tcc":                nil,
-			"*sum:~*req.Usage":    nil,
-			"*avreage:~*req.Cost": nil,
+			"*sum#~*req.Usage":    nil,
+			"*average#~*req.Cost": nil,
 		},
 		MinItems: 2,
 	}
@@ -170,8 +170,8 @@ func TestRemakeQueue(t *testing.T) {
 		SQItems: sq.SQItems,
 		SQMetrics: map[string]engine.StatMetric{
 			"*tcc":                nil,
-			"*sum:~*req.Usage":    nil,
-			"*avreage:~*req.Cost": nil,
+			"*sum#~*req.Usage":    nil,
+			"*average#~*req.Cost": nil,
 		},
 		MinItems: sq.MinItems,
 	}

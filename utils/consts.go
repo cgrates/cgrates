@@ -861,6 +861,7 @@ const (
 	RouteID                  = "RouteID"
 	MetaMonthlyEstimated     = "*monthly_estimated"
 	ProcessRuns              = "ProcessRuns"
+	HashtagSep               = "#"
 )
 
 // Migrator Action
