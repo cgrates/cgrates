@@ -93,44 +93,52 @@ func (st *StatSCfg) loadFromJsonCfg(jsnCfg *StatServJsonCfg) (err error) {
 	return nil
 }
 
-func (st *StatSCfg) AsMapInterface() map[string]interface{} {
-	var storeInterval string = ""
-	if st.StoreInterval != 0 {
-		storeInterval = st.StoreInterval.String()
+func (st *StatSCfg) AsMapInterface() (initialMP map[string]interface{}) {
+	initialMP = map[string]interface{}{
+		utils.EnabledCfg:                st.Enabled,
+		utils.IndexedSelectsCfg:         st.IndexedSelects,
+		utils.StoreUncompressedLimitCfg: st.StoreUncompressedLimit,
+		utils.NestedFieldsCfg:           st.NestedFields,
 	}
-	stringIndexedFields := []string{}
+	if st.StoreInterval != 0 {
+		initialMP[utils.StoreIntervalCfg] = st.StoreInterval.String()
+	} else {
+		initialMP[utils.StoreIntervalCfg] = utils.EmptyString
+	}
 	if st.StringIndexedFields != nil {
-		stringIndexedFields = make([]string, len(*st.StringIndexedFields))
+		stringIndexedFields := make([]string, len(*st.StringIndexedFields))
 		for i, item := range *st.StringIndexedFields {
 			stringIndexedFields[i] = item
 		}
+
+		initialMP[utils.StringIndexedFieldsCfg] = stringIndexedFields
 	}
-	prefixIndexedFields := []string{}
 	if st.PrefixIndexedFields != nil {
-		prefixIndexedFields = make([]string, len(*st.PrefixIndexedFields))
+		prefixIndexedFields := make([]string, len(*st.PrefixIndexedFields))
 		for i, item := range *st.PrefixIndexedFields {
 			prefixIndexedFields[i] = item
 		}
+
+		initialMP[utils.PrefixIndexedFieldsCfg] = prefixIndexedFields
 	}
-	thresholdSConns := make([]string, len(st.ThresholdSConns))
-	for i, item := range st.ThresholdSConns {
-		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)
-		if item == buf {
-			thresholdSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaThresholds, utils.EmptyString)
-		} else {
-			thresholdSConns[i] = item
+	if st.SuffixIndexedFields != nil {
+		suffixIndexedFields := make([]string, len(*st.SuffixIndexedFields))
+		for i, item := range *st.SuffixIndexedFields {
+			suffixIndexedFields[i] = item
 		}
-	}
+		initialMP[utils.SuffixIndexedFieldsCfg] = suffixIndexedFields
 
-	return map[string]interface{}{
-		utils.EnabledCfg:                st.Enabled,
-		utils.IndexedSelectsCfg:         st.IndexedSelects,
-		utils.StoreIntervalCfg:          storeInterval,
-		utils.StoreUncompressedLimitCfg: st.StoreUncompressedLimit,
-		utils.ThresholdSConnsCfg:        thresholdSConns,
-		utils.StringIndexedFieldsCfg:    stringIndexedFields,
-		utils.PrefixIndexedFieldsCfg:    prefixIndexedFields,
-		utils.NestedFieldsCfg:           st.NestedFields,
 	}
-
+	if st.ThresholdSConns != nil {
+		thresholdSConns := make([]string, len(st.ThresholdSConns))
+		for i, item := range st.ThresholdSConns {
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds) {
+				thresholdSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaThresholds, utils.EmptyString)
+			} else {
+				thresholdSConns[i] = item
+			}
+		}
+		initialMP[utils.ThresholdSConnsCfg] = thresholdSConns
+	}
+	return
 }
