@@ -76,31 +76,38 @@ func (t *ThresholdSCfg) loadFromJsonCfg(jsnCfg *ThresholdSJsonCfg) (err error) {
 	return nil
 }
 
-func (t *ThresholdSCfg) AsMapInterface() map[string]interface{} {
-	var storeInterval string = ""
-	if t.StoreInterval != 0 {
-		storeInterval = t.StoreInterval.String()
+func (t *ThresholdSCfg) AsMapInterface() (initialMP map[string]interface{}) {
+	initialMP = map[string]interface{}{
+		utils.EnabledCfg:        t.Enabled,
+		utils.IndexedSelectsCfg: t.IndexedSelects,
+		utils.NestedFieldsCfg:   t.NestedFields,
 	}
-	stringIndexedFields := []string{}
+	if t.StoreInterval != 0 {
+		initialMP[utils.StoreIntervalCfg] = t.StoreInterval.String()
+	} else {
+		initialMP[utils.StoreIntervalCfg] = utils.EmptyString
+	}
+
 	if t.StringIndexedFields != nil {
-		stringIndexedFields = make([]string, len(*t.StringIndexedFields))
+		stringIndexedFields := make([]string, len(*t.StringIndexedFields))
 		for i, item := range *t.StringIndexedFields {
 			stringIndexedFields[i] = item
 		}
+		initialMP[utils.StringIndexedFieldsCfg] = stringIndexedFields
 	}
-	prefixIndexedFields := []string{}
 	if t.PrefixIndexedFields != nil {
-		prefixIndexedFields = make([]string, len(*t.PrefixIndexedFields))
+		prefixIndexedFields := make([]string, len(*t.PrefixIndexedFields))
 		for i, item := range *t.PrefixIndexedFields {
 			prefixIndexedFields[i] = item
 		}
+		initialMP[utils.PrefixIndexedFieldsCfg] = prefixIndexedFields
 	}
-	return map[string]interface{}{
-		utils.EnabledCfg:             t.Enabled,
-		utils.IndexedSelectsCfg:      t.IndexedSelects,
-		utils.StoreIntervalCfg:       storeInterval,
-		utils.StringIndexedFieldsCfg: stringIndexedFields,
-		utils.PrefixIndexedFieldsCfg: prefixIndexedFields,
-		utils.NestedFieldsCfg:        t.NestedFields,
+	if t.SuffixIndexedFields != nil {
+		suffixIndexedFields := make([]string, len(*t.SuffixIndexedFields))
+		for i, item := range *t.SuffixIndexedFields {
+			suffixIndexedFields[i] = item
+		}
+		initialMP[utils.SuffixIndexedFieldsCfg] = suffixIndexedFields
 	}
+	return
 }
