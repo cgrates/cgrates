@@ -1144,11 +1144,8 @@ func (tpr *TpReader) LoadThresholdsFiltered(tag string) (err error) {
 	}
 	tpr.thProfiles = mapTHs
 	for tntID := range mapTHs {
-		if has, err := tpr.dm.HasData(utils.ThresholdPrefix, tntID.ID, tntID.Tenant); err != nil {
-			return err
-		} else if !has {
-			tpr.thresholds = append(tpr.thresholds, &utils.TenantID{Tenant: tntID.Tenant, ID: tntID.ID})
-		}
+		tpr.thresholds = append(tpr.thresholds, &utils.TenantID{Tenant: tntID.Tenant, ID: tntID.ID})
+
 	}
 	return nil
 }
@@ -1664,7 +1661,13 @@ func (tpr *TpReader) WriteToDatabase(verbose, disable_reverse bool) (err error) 
 		log.Print("Thresholds:")
 	}
 	for _, thd := range tpr.thresholds {
-		if err = tpr.dm.SetThreshold(&Threshold{Tenant: thd.Tenant, ID: thd.ID}); err != nil {
+		var minSleep time.Duration
+		if tpr.thProfiles[*thd].MinSleep != utils.EmptyString {
+			if minSleep, err = utils.ParseDurationWithNanosecs(tpr.thProfiles[*thd].MinSleep); err != nil {
+				return
+			}
+		}
+		if err = tpr.dm.SetThreshold(&Threshold{Tenant: thd.Tenant, ID: thd.ID}, minSleep, false); err != nil {
 			return
 		}
 		if verbose {

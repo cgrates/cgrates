@@ -66,7 +66,7 @@ func (m *Migrator) migrateCurrentThresholds() (err error) {
 		if ths == nil || m.dryRun {
 			continue
 		}
-		if err := m.dmOut.DataManager().SetThreshold(ths); err != nil {
+		if err := m.dmOut.DataManager().SetThreshold(ths, 0, true); err != nil {
 			return err
 		}
 		if err := m.dmIN.DataManager().RemoveThreshold(tntID[0], tntID[1], utils.NonTransactional); err != nil {
@@ -202,7 +202,7 @@ func (m *Migrator) migrateThresholds() (err error) {
 				if err = m.dmOut.DataManager().SetFilter(filter, true); err != nil {
 					return
 				}
-				if err = m.dmOut.DataManager().SetThreshold(th); err != nil {
+				if err = m.dmOut.DataManager().SetThreshold(th, 0, true); err != nil {
 					return
 				}
 			}
@@ -326,7 +326,7 @@ func (m *Migrator) SasThreshold(v2ATR *engine.ActionTrigger) (err error) {
 				return err
 			}
 		}
-		if err := m.dmOut.DataManager().SetThreshold(th); err != nil {
+		if err := m.dmOut.DataManager().SetThreshold(th, 0, true); err != nil {
 			return err
 		}
 		if err := m.dmOut.DataManager().SetThresholdProfile(thp, true); err != nil {
