@@ -125,36 +125,8 @@ func TestSessionSCfgloadFromJsonCfg(t *testing.T) {
 
 func TestSessionSCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
-	"sessions": {
-       "enabled": false,						// starts the session service: <true|false>
-	"listen_bijson": "127.0.0.1:2014",		// address where to listen for bidirectional JSON-RPC requests
-	"chargers_conns": [],					// connections to ChargerS for session forking <""|*internal|$rpc_conns_id>
-	"rals_conns": [],						// connections to RALs for rating/accounting <""|*internal|$rpc_conns_id>
-	"cdrs_conns": [],						// connections to CDRs for CDR posting <""|*internal|$rpc_conns_id>
-	"resources_conns": [],					// connections to ResourceS for resources monitoring <""|*internal|$rpc_conns_id>
-	"thresholds_conns": [],					// connections to ThresholdS for reporting session events <""|*internal|$rpc_conns_id>
-	"stats_conns": [],						// connections to StatS for reporting session events <""|*internal|$rpc_conns_id>
-	"routes_conns": [],						// connections to RouteS for querying routes for event <""|*internal|$rpc_conns_id>
-	"attributes_conns": [],					// connections to AttributeS for altering event fields <""|*internal|$rpc_conns_id>
-	"replication_conns": [],				// replicate sessions towards these session services
-	"debit_interval": "0s",					// interval to perform debits on.
-	"store_session_costs": false,			// enable storing of the session costs within CDRs
-	"min_call_duration": "0s",				// only authorize calls with allowed duration higher than this
-	"max_call_duration": "3h",				// maximum call duration a prepaid call can last
-	"session_ttl": "0s",					// time after a session with no updates is terminated, not defined by default
-	"session_indexes": [],					// index sessions based on these fields for GetActiveSessions API
-	"client_protocol": 1.0,					// version of protocol to use when acting as JSON-PRC client <"0","1.0">
-	"channel_sync_interval": "0",			// sync channels to detect stale sessions (0 to disable)
-	"terminate_attempts": 5,				// attempts to get the session before terminating it
-	"alterable_fields": [],					// the session fields that can be updated
-	"stir": {
-		"allowed_attest": ["*any"],			// the default attest for stir/shaken authentication <*any|A|B|C>
-		"payload_maxduration": "-1", 		// the duration that stir header is valid after it was created
-		"default_attest": "A",				// the default attest level if not mentioned in API
-		"publickey_path": "",				// the path to the public key 
-		"privatekey_path": "",				// the path to the private key
-	},
-	"scheduler_conns": [],},
+	"sessions": {},
+
 }`
 	eMap := map[string]interface{}{
 		utils.EnabledCfg:             false,
@@ -316,20 +288,7 @@ func TestFsAgentCfgloadFromJsonCfg2(t *testing.T) {
 
 func TestFsAgentCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
-	"freeswitch_agent": {
-		"enabled": false,
-		"sessions_conns": ["*internal"],
-		"subscribe_park": true,
-		"create_cdr": false,
-		"extra_fields": [],
-		"low_balance_ann_file": "",
-		"empty_balance_context": "",
-		"empty_balance_ann_file": "",
-		"max_wait_connection": "2s",
-		"event_socket_conns":[
-			{"address": "127.0.0.1:8021", "password": "ClueCon", "reconnects": 5,"alias":""}
-		],
-	},
+	"freeswitch_agent": {},
 }`
 	eMap := map[string]interface{}{
 		utils.EnabledCfg:             false,
@@ -343,6 +302,39 @@ func TestFsAgentCfgAsMapInterface(t *testing.T) {
 		utils.MaxWaitConnectionCfg:   "2s",
 		utils.EventSocketConnsCfg: []map[string]interface{}{
 			{utils.AddressCfg: "127.0.0.1:8021", utils.Password: "ClueCon", utils.ReconnectsCfg: 5, utils.AliasCfg: "127.0.0.1:8021"},
+		},
+	}
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+		t.Error(err)
+	} else if rcv := cgrCfg.fsAgentCfg.AsMapInterface(cgrCfg.generalCfg.RSRSep); !reflect.DeepEqual(rcv, eMap) {
+		t.Errorf("Expected %+v \n, recevied %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	}
+}
+
+func TestFsAgentCfgAsMapInterface1(t *testing.T) {
+	cfgJSONStr := `{
+	"freeswitch_agent": {
+          "enabled": true,						
+          "sessions_conns": ["*conn1","*conn2"],
+	      "subscribe_park": false,					
+	      "create_cdr": true,
+	      "max_wait_connection": "7s",			
+	      "event_socket_conns":[					
+		      {"address": "127.0.0.1:8000", "password": "ClueCon123", "reconnects": 8, "alias": "127.0.0.1:8000"}
+	],},
+}`
+	eMap := map[string]interface{}{
+		utils.EnabledCfg:             true,
+		utils.SessionSConnsCfg:       []string{"*conn1", "*conn2"},
+		utils.SubscribeParkCfg:       false,
+		utils.CreateCdrCfg:           true,
+		utils.ExtraFieldsCfg:         "",
+		utils.LowBalanceAnnFileCfg:   "",
+		utils.EmptyBalanceContextCfg: "",
+		utils.EmptyBalanceAnnFileCfg: "",
+		utils.MaxWaitConnectionCfg:   "7s",
+		utils.EventSocketConnsCfg: []map[string]interface{}{
+			{utils.AddressCfg: "127.0.0.1:8000", utils.Password: "ClueCon123", utils.ReconnectsCfg: 8, utils.AliasCfg: "127.0.0.1:8000"},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
@@ -452,24 +444,48 @@ func TestAsteriskAgentCfgloadFromJsonCfg(t *testing.T) {
 		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(asagcfg))
 	}
 }
-
 func TestAsteriskAgentCfgAsMapInterface(t *testing.T) {
+	cfgJSONStr := `{
+	"asterisk_agent": {},
+}`
+	eMap := map[string]interface{}{
+		utils.EnabledCfg:             false,
+		utils.SessionSConnsCfg:       []string{"*internal"},
+		utils.CreateCdrCfg:           false,
+		utils.LowBalanceAnnFileCfg:   utils.EmptyString,
+		utils.EmptyBalanceContext:    utils.EmptyString,
+		utils.EmptyBalanceAnnFileCfg: utils.EmptyString,
+		utils.AsteriskConnsCfg: []map[string]interface{}{
+			{utils.AliasCfg: "", utils.AddressCfg: "127.0.0.1:8088", utils.UserCf: "cgrates", utils.Password: "CGRateS.org", utils.ConnectAttemptsCfg: 3, utils.ReconnectsCfg: 5},
+		},
+	}
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+		t.Error(err)
+	} else if rcv := cgrCfg.asteriskAgentCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
+		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	}
+}
+
+func TestAsteriskAgentCfgAsMapInterface1(t *testing.T) {
 	cfgJSONStr := `{
 	"asterisk_agent": {
 		"enabled": true,
-		"sessions_conns": ["*internal"],
-		"create_cdr": false,
+		"sessions_conns": ["*conn1","*conn2"],
+		"create_cdr": true,
 		"asterisk_conns":[
-			{"address": "127.0.0.1:8088", "user": "cgrates", "password": "CGRateS.org", "connect_attempts": 3,"reconnects": 5}
+			{"address": "127.0.0.1:8089","connect_attempts": 5,"reconnects": 8}
 		],
 	},
 }`
 	eMap := map[string]interface{}{
-		"enabled":        true,
-		"sessions_conns": []string{"*internal"},
-		"create_cdr":     false,
-		"asterisk_conns": []map[string]interface{}{
-			{"alias": "", "address": "127.0.0.1:8088", "user": "cgrates", "password": "CGRateS.org", "connect_attempts": 3, "reconnects": 5},
+		utils.EnabledCfg:             true,
+		utils.SessionSConnsCfg:       []string{"*conn1", "*conn2"},
+		utils.CreateCdrCfg:           true,
+		utils.LowBalanceAnnFileCfg:   utils.EmptyString,
+		utils.EmptyBalanceContext:    utils.EmptyString,
+		utils.EmptyBalanceAnnFileCfg: utils.EmptyString,
+		utils.AsteriskConnsCfg: []map[string]interface{}{
+			{utils.AliasCfg: "", utils.AddressCfg: "127.0.0.1:8089", utils.UserCf: "cgrates", utils.Password: "CGRateS.org", utils.ConnectAttemptsCfg: 5, utils.ReconnectsCfg: 8},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {

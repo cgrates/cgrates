@@ -689,8 +689,11 @@ func (aCfg *AsteriskAgentCfg) loadFromJsonCfg(jsnCfg *AsteriskAgentJsonCfg) (err
 
 func (aCfg *AsteriskAgentCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
-		utils.EnabledCfg:   aCfg.Enabled,
-		utils.CreateCDRCfg: aCfg.CreateCDR,
+		utils.EnabledCfg:             aCfg.Enabled,
+		utils.CreateCDRCfg:           aCfg.CreateCDR,
+		utils.LowBalanceAnnFileCfg:   aCfg.LowBalanceAnnFile,
+		utils.EmptyBalanceContext:    aCfg.EmptyBalanceContext,
+		utils.EmptyBalanceAnnFileCfg: aCfg.EmptyBalanceAnnFile,
 	}
 	if aCfg.AsteriskConns != nil {
 		conns := make([]map[string]interface{}, len(aCfg.AsteriskConns))
@@ -699,16 +702,17 @@ func (aCfg *AsteriskAgentCfg) AsMapInterface() (initialMP map[string]interface{}
 		}
 		initialMP[utils.AsteriskConnsCfg] = conns
 	}
-
-	sessionSConns := make([]string, len(aCfg.SessionSConns))
-	for i, item := range aCfg.SessionSConns {
-		if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS) {
-			sessionSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaSessionS, utils.EmptyString)
-		} else {
-			sessionSConns[i] = item
+	if aCfg.SessionSConns != nil {
+		sessionSConns := make([]string, len(aCfg.SessionSConns))
+		for i, item := range aCfg.SessionSConns {
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS) {
+				sessionSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaSessionS, utils.EmptyString)
+			} else {
+				sessionSConns[i] = item
+			}
 		}
+		initialMP[utils.SessionSConnsCfg] = sessionSConns
 	}
-	initialMP[utils.SessionSConnsCfg] = sessionSConns
 	return
 }
 
