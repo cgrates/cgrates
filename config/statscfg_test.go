@@ -63,76 +63,52 @@ func TestStatSCfgloadFromJsonCfg(t *testing.T) {
 }
 
 func TestStatSCfgAsMapInterface(t *testing.T) {
-	var statscfg, expected StatSCfg
-	if err := statscfg.loadFromJsonCfg(nil); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(statscfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, statscfg)
+	cfgJSONStr := `{
+		"stats": {},	
+}`
+	eMap := map[string]interface{}{
+		utils.EnabledCfg:                false,
+		utils.StoreIntervalCfg:          utils.EmptyString,
+		utils.StoreUncompressedLimitCfg: 0,
+		utils.ThresholdSConnsCfg:        []string{},
+		utils.IndexedSelectsCfg:         true,
+		utils.PrefixIndexedFieldsCfg:    []string{},
+		utils.SuffixIndexedFieldsCfg:    []string{},
+		utils.NestedFieldsCfg:           false,
 	}
-	if err := statscfg.loadFromJsonCfg(new(StatServJsonCfg)); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(statscfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, statscfg)
+	} else if rcv := cgrCfg.statsCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
+		t.Errorf("Expected %+v \n, received %+v", eMap, rcv)
 	}
+}
+
+func TestStatSCfgAsMapInterface1(t *testing.T) {
 	cfgJSONStr := `{
 		"stats": {							
-			"enabled": false,				
-			"store_interval": "",			
-			"store_uncompressed_limit": 0,	
-			"thresholds_conns": [],			
-			"indexed_selects":true,			
-			"prefix_indexed_fields": [],	
-			"nested_fields": false,	
-		},	
-		}`
-	eMap := map[string]interface{}{
-		"enabled":                  false,
-		"store_interval":           "",
-		"store_uncompressed_limit": 0,
-		"thresholds_conns":         []string{},
-		"indexed_selects":          true,
-		"prefix_indexed_fields":    []string{},
-		"nested_fields":            false,
-		"string_indexed_fields":    []string{},
-	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
-		t.Error(err)
-	} else if jsnStatSCfg, err := jsnCfg.StatSJsonCfg(); err != nil {
-		t.Error(err)
-	} else if err = statscfg.loadFromJsonCfg(jsnStatSCfg); err != nil {
-		t.Error(err)
-	} else if rcv := statscfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
-	}
-
-	cfgJSONStr = `{
-		"stats": {							
-			"enabled": false,				
+			"enabled": true,				
 			"store_interval": "72h",			
-			"store_uncompressed_limit": 0,	
+			"store_uncompressed_limit": 1,	
 			"thresholds_conns": ["*internal"],			
-			"indexed_selects":true,			
-			"prefix_indexed_fields": ["*req.prefix_indexed_fields1","*req.prefix_indexed_fields2"],	
-			"nested_fields": false,	
+			"indexed_selects":false,			
+			"prefix_indexed_fields": ["*req.prefix_indexed_fields1","*req.prefix_indexed_fields2"],
+            "suffix_indexed_fields":["*req.suffix_indexed_fields"],
+			"nested_fields": true,	
 		},	
-		}`
-	eMap = map[string]interface{}{
-		"enabled":                  false,
-		"store_interval":           "72h0m0s",
-		"store_uncompressed_limit": 0,
-		"thresholds_conns":         []string{"*internal"},
-		"indexed_selects":          true,
-		"prefix_indexed_fields":    []string{"*req.prefix_indexed_fields1", "*req.prefix_indexed_fields2"},
-		"nested_fields":            false,
-		"string_indexed_fields":    []string{},
+}`
+	eMap := map[string]interface{}{
+		utils.EnabledCfg:                true,
+		utils.StoreIntervalCfg:          "72h0m0s",
+		utils.StoreUncompressedLimitCfg: 1,
+		utils.ThresholdSConnsCfg:        []string{"*internal"},
+		utils.IndexedSelectsCfg:         false,
+		utils.PrefixIndexedFieldsCfg:    []string{"*req.prefix_indexed_fields1", "*req.prefix_indexed_fields2"},
+		utils.SuffixIndexedFieldsCfg:    []string{"*req.suffix_indexed_fields"},
+		utils.NestedFieldsCfg:           true,
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if jsnStatSCfg, err := jsnCfg.StatSJsonCfg(); err != nil {
-		t.Error(err)
-	} else if err = statscfg.loadFromJsonCfg(jsnStatSCfg); err != nil {
-		t.Error(err)
-	} else if rcv := statscfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	} else if rcv := cgrCfg.statsCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
+		t.Errorf("Expected %+v \n, received %+v", eMap, rcv)
 	}
 }
