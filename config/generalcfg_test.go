@@ -18,7 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
-	"fmt"
 	"reflect"
 	"testing"
 	"time"
@@ -98,7 +97,7 @@ func TestGeneralCfgloadFromJsonCfg(t *testing.T) {
 func TestGeneralCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
 		"general": {
-			"node_id": "",											
+			"node_id": "cgrates",											
 			"logger":"*syslog",										
 			"log_level": 6,											
 			"http_skip_tls_verify": false,							
@@ -125,7 +124,7 @@ func TestGeneralCfgAsMapInterface(t *testing.T) {
 		},
 	}`
 	eMap := map[string]interface{}{
-		utils.NodeIDCfg:             "",
+		utils.NodeIDCfg:             "cgrates",
 		utils.LoggerCfg:             "*syslog",
 		utils.LogLevelCfg:           6,
 		utils.HttpSkipTlsVerifyCfg:  false,
@@ -152,11 +151,10 @@ func TestGeneralCfgAsMapInterface(t *testing.T) {
 		utils.ConcurrentRequestsCfg: 0,
 		utils.ConcurrentStrategyCfg: utils.MetaBusy,
 	}
-	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err == nil {
-		fmt.Println(cgrCfg)
-		//t.Error(err)
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+		t.Error(err)
 	} else if rcv := cgrCfg.generalCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
-		t.Errorf("Expected %+v \n, recevied %+v", eMap, rcv)
+		t.Errorf("Expected %+v \n, recevied %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
 
