@@ -68,39 +68,27 @@ func TestTlsCfgloadFromJsonCfg(t *testing.T) {
 	}
 }
 func TestTlsCfgAsMapInterface(t *testing.T) {
-	var tlscfg TlsCfg
 	cfgJSONStr := `	{
-	"tls": {
-		"server_certificate" : "",			
-		"server_key":"",					
-		"client_certificate" : "",			
-		"client_key":"",					
-		"ca_certificate":"",				
-		"server_policy":4,					
-		"server_name":"",
-	},
+	"tls": {},
 }`
 	eMap := map[string]interface{}{
-		"server_certificate": "",
-		"server_key":         "",
-		"client_certificate": "",
-		"client_key":         "",
-		"ca_certificate":     "",
-		"server_policy":      4,
-		"server_name":        "",
+		utils.ServerCerificateCfg: utils.EmptyString,
+		utils.ServerKeyCfg:        utils.EmptyString,
+		utils.ServerPolicyCfg:     4,
+		utils.ServerNameCfg:       utils.EmptyString,
+		utils.ClientCerificateCfg: utils.EmptyString,
+		utils.ClientKeyCfg:        utils.EmptyString,
+		utils.CaCertificateCfg:    utils.EmptyString,
 	}
-
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if jsntlsCfg, err := jsnCfg.TlsCfgJson(); err != nil {
-		t.Error(err)
-	} else if err = tlscfg.loadFromJsonCfg(jsntlsCfg); err != nil {
-		t.Error(err)
-	} else if rcv := tlscfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("Expected: %+v,\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	} else if rcv := cgrCfg.tlsCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
+}
 
-	cfgJSONStr = `	{
+func TestTlsCfgAsMapInterface1(t *testing.T) {
+	cfgJSONStr := `	{
 	"tls":{
 		"server_certificate" : "path/To/Server/Cert",			
 		"server_key":"path/To/Server/Key",					
@@ -111,23 +99,18 @@ func TestTlsCfgAsMapInterface(t *testing.T) {
 		"server_policy":3,					
 	},
 }`
-	eMap = map[string]interface{}{
-		"server_certificate": "path/To/Server/Cert",
-		"server_key":         "path/To/Server/Key",
-		"client_certificate": "path/To/Client/Cert",
-		"client_key":         "path/To/Client/Key",
-		"ca_certificate":     "path/To/CA/Cert",
-		"server_name":        "TestServerName",
-		"server_policy":      3,
+	eMap := map[string]interface{}{
+		utils.ServerCerificateCfg: "path/To/Server/Cert",
+		utils.ServerKeyCfg:        "path/To/Server/Key",
+		utils.ServerPolicyCfg:     3,
+		utils.ServerNameCfg:       "TestServerName",
+		utils.ClientCerificateCfg: "path/To/Client/Cert",
+		utils.ClientKeyCfg:        "path/To/Client/Key",
+		utils.CaCertificateCfg:    "path/To/CA/Cert",
 	}
-
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if jsntlsCfg, err := jsnCfg.TlsCfgJson(); err != nil {
-		t.Error(err)
-	} else if err = tlscfg.loadFromJsonCfg(jsntlsCfg); err != nil {
-		t.Error(err)
-	} else if rcv := tlscfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("Expected: %+v,\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	} else if rcv := cgrCfg.tlsCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
