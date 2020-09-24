@@ -57,23 +57,33 @@ func TestAnalyzerSCfgloadFromJsonCfg(t *testing.T) {
 }
 
 func TestAnalyzerSCfgAsMapInterface(t *testing.T) {
-	var alS AnalyzerSCfg
 	cfgJSONStr := `{
-		"analyzers":{
-			"enabled":false
-		},
-		
+		"analyzers":{},
+    }
 }`
 	eMap := map[string]interface{}{
-		"enabled": false,
+		utils.EnabledCfg: false,
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if jsnalS, err := jsnCfg.AnalyzerCfgJson(); err != nil {
+	} else if rcv := cgrCfg.analyzerSCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
+		t.Errorf("Expected: %+v , recived: %+v", eMap, rcv)
+	}
+}
+
+func TestAnalyzerSCfgAsMapInterface1(t *testing.T) {
+	cfgJSONStr := `{
+		"analyzers":{
+            "enabled": true,  
+        },
+    }
+}`
+	eMap := map[string]interface{}{
+		utils.EnabledCfg: true,
+	}
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if err = alS.loadFromJsonCfg(jsnalS); err != nil {
-		t.Error(err)
-	} else if rcv := alS.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	} else if rcv := cgrCfg.analyzerSCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
+		t.Errorf("Expected: %+v , recived: %+v", eMap, rcv)
 	}
 }
