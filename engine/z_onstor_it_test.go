@@ -1658,7 +1658,7 @@ func testOnStorITThreshold(t *testing.T) {
 		true, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.SetThreshold(th); err != nil {
+	if err := onStor.SetThreshold(th, 0, true); err != nil {
 		t.Error(err)
 	}
 	//get from database
@@ -1676,7 +1676,7 @@ func testOnStorITThreshold(t *testing.T) {
 	}
 	//update
 	th.Hits = 20
-	if err := onStor.SetThreshold(th); err != nil {
+	if err := onStor.SetThreshold(th, 0, true); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(sleepDelay)

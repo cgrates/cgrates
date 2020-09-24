@@ -446,7 +446,7 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 				if err := ldr.dm.SetThresholdProfile(thPrf, true); err != nil {
 					return err
 				}
-				if err := ldr.dm.SetThreshold(&engine.Threshold{Tenant: thPrf.Tenant, ID: thPrf.ID}); err != nil {
+				if err := ldr.dm.SetThreshold(&engine.Threshold{Tenant: thPrf.Tenant, ID: thPrf.ID}, thPrf.MinSleep, false); err != nil {
 					return err
 				}
 				cacheArgs[utils.ThresholdProfileIDs] = ids

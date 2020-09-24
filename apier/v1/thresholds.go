@@ -131,18 +131,13 @@ func (apierSv1 *APIerSv1) SetThresholdProfile(args *engine.ThresholdWithCache, r
 		args.TenantID(), &args.FilterIDs, nil, args.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-
-	if has, err := apierSv1.DataManager.HasData(utils.ThresholdPrefix, args.ID, args.Tenant); err != nil {
+	if err := apierSv1.DataManager.SetThreshold(&engine.Threshold{Tenant: args.Tenant, ID: args.ID}, args.MinSleep, false); err != nil {
 		return err
-	} else if !has {
-		if err := apierSv1.DataManager.SetThreshold(&engine.Threshold{Tenant: args.Tenant, ID: args.ID}); err != nil {
-			return err
-		}
-		//handle caching for Threshold
-		if err := apierSv1.CallCache(args.Cache, args.Tenant, utils.CacheThresholds,
-			args.TenantID(), nil, nil, args.Opts); err != nil {
-			return utils.APIErrorHandler(err)
-		}
+	}
+	//handle caching for Threshold
+	if err := apierSv1.CallCache(args.Cache, args.Tenant, utils.CacheThresholds,
+		args.TenantID(), nil, nil, args.Opts); err != nil {
+		return utils.APIErrorHandler(err)
 	}
 
 	*reply = utils.OK

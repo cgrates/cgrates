@@ -872,10 +872,28 @@ func (dm *DataManager) GetThreshold(tenant, id string,
 	return
 }
 
-func (dm *DataManager) SetThreshold(th *Threshold) (err error) {
+func (dm *DataManager) SetThreshold(th *Threshold, snooze time.Duration, simpleSet bool) (err error) {
 	if dm == nil {
 		err = utils.ErrNoDatabaseConn
 		return
+	}
+	if !simpleSet {
+		tnt := th.Tenant // save the tenant
+		id := th.ID      // save the ID from the initial Threshold
+		th, err = dm.GetThreshold(tnt, id, true, false, utils.NonTransactional)
+		if err != nil && err != utils.ErrNotFound {
+			return
+		}
+		if err == utils.ErrNotFound {
+			th = &Threshold{Tenant: tnt, ID: id, Hits: 0}
+		} else {
+			if th.tPrfl == nil {
+				if th.tPrfl, err = dm.GetThresholdProfile(th.Tenant, th.ID, true, false, utils.NonTransactional); err != nil {
+					return
+				}
+			}
+			th.Snooze = th.Snooze.Add(-th.tPrfl.MinSleep).Add(snooze)
+		}
 	}
 	if err = dm.DataDB().SetThresholdDrv(th); err != nil {
 		return
