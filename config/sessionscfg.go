@@ -299,160 +299,165 @@ func (scfg *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) (err error) {
 	return scfg.STIRCfg.loadFromJSONCfg(jsnCfg.Stir)
 }
 
-func (scfg *SessionSCfg) AsMapInterface() map[string]interface{} {
-	var debitInterval string = "0"
+func (scfg *SessionSCfg) AsMapInterface() (initialMP map[string]interface{}) {
+	initialMP = map[string]interface{}{
+		utils.EnabledCfg:           scfg.Enabled,
+		utils.ListenBijsonCfg:      scfg.ListenBijson,
+		utils.ReplicationConnsCfg:  scfg.ReplicationConns,
+		utils.StoreSCostsCfg:       scfg.StoreSCosts,
+		utils.SessionIndexesCfg:    scfg.SessionIndexes.Slice(),
+		utils.ClientProtocolCfg:    scfg.ClientProtocol,
+		utils.TerminateAttemptsCfg: scfg.TerminateAttempts,
+		utils.AlterableFieldsCfg:   scfg.AlterableFields.AsSlice(),
+		utils.STIRCfg:              scfg.STIRCfg.AsMapInterface(),
+	}
 	if scfg.DebitInterval != 0 {
-		debitInterval = scfg.DebitInterval.String()
+		initialMP[utils.DebitIntervalCfg] = scfg.DebitInterval.String()
+	} else if scfg.DebitInterval == 0 {
+		initialMP[utils.DebitIntervalCfg] = "0"
 	}
-	var minCallDuration string = "0"
 	if scfg.MinCallDuration != 0 {
-		minCallDuration = scfg.MinCallDuration.String()
+		initialMP[utils.MinCallDurationCfg] = scfg.MinCallDuration.String()
+	} else if scfg.MinCallDuration == 0 {
+		initialMP[utils.MinCallDurationCfg] = "0"
 	}
-	var maxCallDuration string = "0"
 	if scfg.MaxCallDuration != 0 {
-		maxCallDuration = scfg.MaxCallDuration.String()
+		initialMP[utils.MaxCallDurationCfg] = scfg.MaxCallDuration.String()
+	} else if scfg.MaxCallDuration == 0 {
+		initialMP[utils.MaxCallDurationCfg] = "0"
 	}
-	var sessionTTL string = "0"
 	if scfg.SessionTTL != 0 {
-		sessionTTL = scfg.SessionTTL.String()
+		initialMP[utils.SessionTTLCfg] = scfg.SessionTTL.String()
+	} else if scfg.SessionTTL == 0 {
+		initialMP[utils.SessionTTLCfg] = "0"
 	}
-	var sessionTTLMaxDelay string = "0"
 	if scfg.SessionTTLMaxDelay != nil {
-		sessionTTLMaxDelay = scfg.SessionTTLMaxDelay.String()
+		initialMP[utils.SessionTTLMaxDelayCfg] = scfg.SessionTTLMaxDelay.String()
 	}
-	var sessionTTLLastUsed string = "0"
 	if scfg.SessionTTLLastUsed != nil {
-		sessionTTLLastUsed = scfg.SessionTTLLastUsed.String()
+		initialMP[utils.SessionTTLLastUsedCfg] = scfg.SessionTTLLastUsed.String()
 	}
-	var sessionTTLUsage string = "0"
 	if scfg.SessionTTLUsage != nil {
-		sessionTTLUsage = scfg.SessionTTLUsage.String()
+		initialMP[utils.SessionTTLUsageCfg] = scfg.SessionTTLUsage.String()
 	}
-	var sessionTTLLastUsage string = "0"
 	if scfg.SessionTTLLastUsage != nil {
-		sessionTTLLastUsage = scfg.SessionTTLLastUsage.String()
+		initialMP[utils.SessionTTLLastUsageCfg] = scfg.SessionTTLLastUsage.String()
 	}
-	var channelSyncInterval string = "0"
 	if scfg.ChannelSyncInterval != 0 {
-		channelSyncInterval = scfg.ChannelSyncInterval.String()
+		initialMP[utils.ChannelSyncIntervalCfg] = scfg.ChannelSyncInterval.String()
+	} else if scfg.ChannelSyncInterval == 0 {
+		initialMP[utils.ChannelSyncIntervalCfg] = "0"
 	}
-	var minDurLowBalance string = "0"
 	if scfg.MinDurLowBalance != 0 {
-		minDurLowBalance = scfg.MinDurLowBalance.String()
+		initialMP[utils.MinDurLowBalanceCfg] = scfg.MinDurLowBalance.String()
 	}
-
-	chargerSConns := make([]string, len(scfg.ChargerSConns))
-	for i, item := range scfg.ChargerSConns {
-		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)
-		if item == buf {
-			chargerSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaChargers, utils.EmptyString)
-		} else {
-			chargerSConns[i] = item
+	if scfg.ChargerSConns != nil {
+		chargerSConns := make([]string, len(scfg.ChargerSConns))
+		for i, item := range scfg.ChargerSConns {
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers) {
+				chargerSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaChargers, utils.EmptyString)
+			} else {
+				chargerSConns[i] = item
+			}
 		}
+		initialMP[utils.ChargerSConnsCfg] = chargerSConns
 	}
-	RALsConns := make([]string, len(scfg.RALsConns))
-	for i, item := range scfg.RALsConns {
-		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder)
-
-		if item == buf {
-			RALsConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaResponder, utils.EmptyString)
-		} else {
-			RALsConns[i] = item
+	if scfg.RALsConns != nil {
+		RALsConns := make([]string, len(scfg.RALsConns))
+		for i, item := range scfg.RALsConns {
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder) {
+				RALsConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaResponder, utils.EmptyString)
+			} else {
+				RALsConns[i] = item
+			}
 		}
+		initialMP[utils.RALsConnsCfg] = RALsConns
 	}
-	resSConns := make([]string, len(scfg.ResSConns))
-	for i, item := range scfg.ResSConns {
-		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)
-		if item == buf {
-			resSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaResources, utils.EmptyString)
-		} else {
-			resSConns[i] = item
+	if scfg.ResSConns != nil {
+		resSConns := make([]string, len(scfg.ResSConns))
+		for i, item := range scfg.ResSConns {
+			buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)
+			if item == buf {
+				resSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaResources, utils.EmptyString)
+			} else {
+				resSConns[i] = item
+			}
 		}
+		initialMP[utils.ResourceSConnsCfg] = resSConns
 	}
-	threshSConns := make([]string, len(scfg.ThreshSConns))
-	for i, item := range scfg.ThreshSConns {
-		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)
-		if item == buf {
-			threshSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaThresholds, utils.EmptyString)
-		} else {
-			threshSConns[i] = item
+	if scfg.ThreshSConns != nil {
+		threshSConns := make([]string, len(scfg.ThreshSConns))
+		for i, item := range scfg.ThreshSConns {
+			buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)
+			if item == buf {
+				threshSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaThresholds, utils.EmptyString)
+			} else {
+				threshSConns[i] = item
+			}
 		}
+		initialMP[utils.ThresholdSConnsCfg] = threshSConns
 	}
-	statSConns := make([]string, len(scfg.StatSConns))
-	for i, item := range scfg.StatSConns {
-		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS)
-		if item == buf {
-			statSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaStatS, utils.EmptyString)
-		} else {
-			statSConns[i] = item
+	if scfg.StatSConns != nil {
+		statSConns := make([]string, len(scfg.StatSConns))
+		for i, item := range scfg.StatSConns {
+			buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS)
+			if item == buf {
+				statSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaStatS, utils.EmptyString)
+			} else {
+				statSConns[i] = item
+			}
 		}
+		initialMP[utils.StatSConnsCfg] = statSConns
 	}
-	routesConns := make([]string, len(scfg.RouteSConns))
-	for i, item := range scfg.RouteSConns {
-		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRoutes)
-		if item == buf {
-			routesConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaRoutes, utils.EmptyString)
-		} else {
-			routesConns[i] = item
+	if scfg.RouteSConns != nil {
+		routesConns := make([]string, len(scfg.RouteSConns))
+		for i, item := range scfg.RouteSConns {
+			buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRoutes)
+			if item == buf {
+				routesConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaRoutes, utils.EmptyString)
+			} else {
+				routesConns[i] = item
+			}
 		}
+		initialMP[utils.RouteSConnsCfg] = routesConns
 	}
-	attrSConns := make([]string, len(scfg.AttrSConns))
-	for i, item := range scfg.AttrSConns {
-		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)
-		if item == buf {
-			attrSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaAttributes, utils.EmptyString)
-		} else {
-			attrSConns[i] = item
+	if scfg.AttrSConns != nil {
+		attrSConns := make([]string, len(scfg.AttrSConns))
+		for i, item := range scfg.AttrSConns {
+			buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)
+			if item == buf {
+				attrSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaAttributes, utils.EmptyString)
+			} else {
+				attrSConns[i] = item
+			}
 		}
+		initialMP[utils.AttributeSConnsCfg] = attrSConns
 	}
-	CDRsConns := make([]string, len(scfg.CDRsConns))
-	for i, item := range scfg.CDRsConns {
-		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)
-		if item == buf {
-			CDRsConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaCDRs, utils.EmptyString)
-		} else {
-			CDRsConns[i] = item
+	if scfg.CDRsConns != nil {
+		CDRsConns := make([]string, len(scfg.CDRsConns))
+		for i, item := range scfg.CDRsConns {
+			buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)
+			if item == buf {
+				CDRsConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaCDRs, utils.EmptyString)
+			} else {
+				CDRsConns[i] = item
+			}
 		}
+		initialMP[utils.CDRsConnsCfg] = CDRsConns
 	}
-	schedulerConns := make([]string, len(scfg.SchedulerConns))
-	for i, item := range scfg.SchedulerConns {
-		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler)
-		if item == buf {
-			schedulerConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaScheduler, utils.EmptyString)
-		} else {
-			schedulerConns[i] = item
+	if scfg.SchedulerConns != nil {
+		schedulerConns := make([]string, len(scfg.SchedulerConns))
+		for i, item := range scfg.SchedulerConns {
+			buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler)
+			if item == buf {
+				schedulerConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaScheduler, utils.EmptyString)
+			} else {
+				schedulerConns[i] = item
+			}
 		}
+		initialMP[utils.SchedulerConnsCfg] = schedulerConns
 	}
-	return map[string]interface{}{
-		utils.EnabledCfg:             scfg.Enabled,
-		utils.ListenBijsonCfg:        scfg.ListenBijson,
-		utils.ChargerSConnsCfg:       chargerSConns,
-		utils.RALsConnsCfg:           RALsConns,
-		utils.ResSConnsCfg:           resSConns,
-		utils.ThreshSConnsCfg:        threshSConns,
-		utils.StatSConnsCfg:          statSConns,
-		utils.RouteSConnsCfg:         routesConns,
-		utils.AttrSConnsCfg:          attrSConns,
-		utils.CDRsConnsCfg:           CDRsConns,
-		utils.ReplicationConnsCfg:    scfg.ReplicationConns,
-		utils.DebitIntervalCfg:       debitInterval,
-		utils.StoreSCostsCfg:         scfg.StoreSCosts,
-		utils.MinCallDurationCfg:     minCallDuration,
-		utils.MaxCallDurationCfg:     maxCallDuration,
-		utils.SessionTTLCfg:          sessionTTL,
-		utils.SessionTTLMaxDelayCfg:  sessionTTLMaxDelay,
-		utils.SessionTTLLastUsedCfg:  sessionTTLLastUsed,
-		utils.SessionTTLUsageCfg:     sessionTTLUsage,
-		utils.SessionTTLLastUsageCfg: sessionTTLLastUsage,
-		utils.SessionIndexesCfg:      scfg.SessionIndexes.Slice(),
-		utils.ClientProtocolCfg:      scfg.ClientProtocol,
-		utils.ChannelSyncIntervalCfg: channelSyncInterval,
-		utils.TerminateAttemptsCfg:   scfg.TerminateAttempts,
-		utils.AlterableFieldsCfg:     scfg.AlterableFields.AsSlice(),
-		utils.MinDurLowBalanceCfg:    minDurLowBalance,
-		utils.SchedulerConnsCfg:      schedulerConns,
-		utils.STIRCfg:                scfg.STIRCfg.AsMapInterface(),
-	}
+	return
 }
 
 type FsAgentCfg struct {
@@ -523,48 +528,48 @@ func (fscfg *FsAgentCfg) loadFromJsonCfg(jsnCfg *FreeswitchAgentJsonCfg) error {
 	return nil
 }
 
-func (fscfg *FsAgentCfg) AsMapInterface(separator string) map[string]interface{} {
-	sessionSConns := make([]string, len(fscfg.SessionSConns))
-	for i, item := range fscfg.SessionSConns {
-		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
-		if item == buf {
-			sessionSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaSessionS, utils.EmptyString)
-		} else {
-			sessionSConns[i] = item
-		}
+func (fscfg *FsAgentCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
+	initialMP = map[string]interface{}{
+		utils.EnabledCfg:             fscfg.Enabled,
+		utils.SubscribeParkCfg:       fscfg.SubscribePark,
+		utils.CreateCdrCfg:           fscfg.CreateCdr,
+		utils.LowBalanceAnnFileCfg:   fscfg.LowBalanceAnnFile,
+		utils.EmptyBalanceContextCfg: fscfg.EmptyBalanceContext,
+		utils.EmptyBalanceAnnFileCfg: fscfg.EmptyBalanceAnnFile,
 	}
-
-	var extraFields string
+	if fscfg.SessionSConns != nil {
+		sessionSConns := make([]string, len(fscfg.SessionSConns))
+		for i, item := range fscfg.SessionSConns {
+			buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
+			if item == buf {
+				sessionSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaSessionS, utils.EmptyString)
+			} else {
+				sessionSConns[i] = item
+			}
+		}
+		initialMP[utils.SessionSConnsCfg] = sessionSConns
+	}
 	if fscfg.ExtraFields != nil {
 		values := make([]string, len(fscfg.ExtraFields))
 		for i, item := range fscfg.ExtraFields {
 			values[i] = item.Rules
 		}
-		extraFields = strings.Join(values, separator)
+		initialMP[utils.ExtraFieldsCfg] = strings.Join(values, separator)
 	}
 
-	var maxWaitConnection string = ""
 	if fscfg.MaxWaitConnection != 0 {
-		maxWaitConnection = fscfg.MaxWaitConnection.String()
+		initialMP[utils.MaxWaitConnectionCfg] = fscfg.MaxWaitConnection.String()
+	} else {
+		initialMP[utils.MaxWaitConnectionCfg] = utils.EmptyString
 	}
-
-	eventSocketConns := make([]map[string]interface{}, len(fscfg.EventSocketConns))
-	for key, item := range fscfg.EventSocketConns {
-		eventSocketConns[key] = item.AsMapInterface()
+	if fscfg.EventSocketConns != nil {
+		eventSocketConns := make([]map[string]interface{}, len(fscfg.EventSocketConns))
+		for key, item := range fscfg.EventSocketConns {
+			eventSocketConns[key] = item.AsMapInterface()
+		}
+		initialMP[utils.EventSocketConnsCfg] = eventSocketConns
 	}
-
-	return map[string]interface{}{
-		utils.EnabledCfg:             fscfg.Enabled,
-		utils.SessionSConnsCfg:       sessionSConns,
-		utils.SubscribeParkCfg:       fscfg.SubscribePark,
-		utils.CreateCdrCfg:           fscfg.CreateCdr,
-		utils.ExtraFieldsCfg:         extraFields,
-		utils.LowBalanceAnnFileCfg:   fscfg.LowBalanceAnnFile,
-		utils.EmptyBalanceContextCfg: fscfg.EmptyBalanceContext,
-		utils.EmptyBalanceAnnFileCfg: fscfg.EmptyBalanceAnnFile,
-		utils.MaxWaitConnectionCfg:   maxWaitConnection,
-		utils.EventSocketConnsCfg:    eventSocketConns,
-	}
+	return
 }
 
 // Returns the first cached default value for a FreeSWITCHAgent connection
@@ -682,28 +687,29 @@ func (aCfg *AsteriskAgentCfg) loadFromJsonCfg(jsnCfg *AsteriskAgentJsonCfg) (err
 	return nil
 }
 
-func (aCfg *AsteriskAgentCfg) AsMapInterface() map[string]interface{} {
-	conns := make([]map[string]interface{}, len(aCfg.AsteriskConns))
-	for i, item := range aCfg.AsteriskConns {
-		conns[i] = item.AsMapInterface()
+func (aCfg *AsteriskAgentCfg) AsMapInterface() (initialMP map[string]interface{}) {
+	initialMP = map[string]interface{}{
+		utils.EnabledCfg:   aCfg.Enabled,
+		utils.CreateCDRCfg: aCfg.CreateCDR,
+	}
+	if aCfg.AsteriskConns != nil {
+		conns := make([]map[string]interface{}, len(aCfg.AsteriskConns))
+		for i, item := range aCfg.AsteriskConns {
+			conns[i] = item.AsMapInterface()
+		}
+		initialMP[utils.AsteriskConnsCfg] = conns
 	}
 
 	sessionSConns := make([]string, len(aCfg.SessionSConns))
 	for i, item := range aCfg.SessionSConns {
-		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
-		if item == buf {
+		if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS) {
 			sessionSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaSessionS, utils.EmptyString)
 		} else {
 			sessionSConns[i] = item
 		}
 	}
-
-	return map[string]interface{}{
-		utils.EnabledCfg:       aCfg.Enabled,
-		utils.SessionSConnsCfg: sessionSConns,
-		utils.CreateCDRCfg:     aCfg.CreateCDR,
-		utils.AsteriskConnsCfg: conns,
-	}
+	initialMP[utils.SessionSConnsCfg] = sessionSConns
+	return
 }
 
 // STIRcfg the confuguration structure for STIR
@@ -739,21 +745,21 @@ func (stirCfg *STIRcfg) loadFromJSONCfg(jsnCfg *STIRJsonCfg) (err error) {
 	return nil
 }
 
-func (stirCfg *STIRcfg) AsMapInterface() map[string]interface{} {
-	var payloadMaxduration string = "0"
-	if stirCfg.PayloadMaxduration == 0 {
-		payloadMaxduration = "0"
-	} else if stirCfg.PayloadMaxduration == -1 {
-		payloadMaxduration = "-1"
-	} else {
+func (stirCfg *STIRcfg) AsMapInterface() (initialMP map[string]interface{}) {
+	initialMP = map[string]interface{}{
+		utils.DefaultAttestCfg:  stirCfg.DefaultAttest,
+		utils.PublicKeyPathCfg:  stirCfg.PublicKeyPath,
+		utils.PrivateKeyPathCfg: stirCfg.PrivateKeyPath,
+		utils.AllowedAtestCfg:   stirCfg.AllowedAttest.AsSlice(),
+	}
+	var payloadMaxduration string
+	if stirCfg.PayloadMaxduration > 0 {
 		payloadMaxduration = stirCfg.PayloadMaxduration.String()
+	} else if stirCfg.PayloadMaxduration == 0 {
+		payloadMaxduration = "0"
+	} else {
+		payloadMaxduration = "-1"
 	}
-
-	return map[string]interface{}{
-		utils.DefaultAttestCfg:      stirCfg.DefaultAttest,
-		utils.PublicKeyPathCfg:      stirCfg.PublicKeyPath,
-		utils.PrivateKeyPathCfg:     stirCfg.PrivateKeyPath,
-		utils.AllowedAtestCfg:       stirCfg.AllowedAttest.AsSlice(),
-		utils.PayloadMaxdurationCfg: payloadMaxduration,
-	}
+	initialMP[utils.PayloadMaxdurationCfg] = payloadMaxduration
+	return
 }
