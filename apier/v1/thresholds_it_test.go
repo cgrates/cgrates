@@ -211,6 +211,7 @@ var (
 		testV1TSUpdateThresholdProfile,
 		testV1TSRemoveThresholdProfile,
 		testV1TSMaxHits,
+		testV1TSUpdateSnooze,
 		testV1TSStopEngine,
 	}
 )
@@ -575,6 +576,90 @@ func testV1TSMaxHits(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Err : %+v \n, td : %+v", err, utils.ToJSON(td))
 	}
+}
+
+func testV1TSUpdateSnooze(t *testing.T) {
+	var reply string
+	// check if exist
+	if err := tSv1Rpc.Call(utils.APIerSv1GetThresholdProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "TH4"}, &reply); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	customTh := &engine.ThresholdWithCache{
+		ThresholdProfile: &engine.ThresholdProfile{
+			Tenant:    "cgrates.org",
+			ID:        "TH4",
+			FilterIDs: []string{"*string:~*req.CustomEv:SnoozeEv"},
+			MinSleep:  10 * time.Minute,
+			Weight:    100,
+		},
+	}
+	//set
+	if err := tSv1Rpc.Call(utils.APIerSv1SetThresholdProfile, customTh, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+
+	var ids []string
+	eIDs := []string{"TH4"}
+	thEvent := &engine.ThresholdsArgsProcessEvent{
+		ThresholdIDs: []string{"TH4"},
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{ // hitting TH4
+				Tenant: "cgrates.org",
+				ID:     "event1",
+				Event: map[string]interface{}{
+					"CustomEv": "SnoozeEv",
+				},
+			},
+		},
+	}
+	tNow := time.Now()
+	//process event
+	if err := tSv1Rpc.Call(utils.ThresholdSv1ProcessEvent, thEvent, &ids); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(ids, eIDs) {
+		t.Errorf("Expecting ids: %s, received: %s", eIDs, ids)
+	}
+	//check threshold after first process ( hits : 1)
+	var td engine.Threshold
+	eTd := engine.Threshold{Tenant: "cgrates.org", ID: "TH4", Hits: 1}
+	if err := tSv1Rpc.Call(utils.ThresholdSv1GetThreshold,
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "TH4"}}, &td); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eTd.Hits, td.Hits) {
+		t.Errorf("expecting: %+v, received: %+v", eTd, td)
+	} else if !(td.Snooze.After(tNow.Add(9*time.Minute)) && td.Snooze.Before(tNow.Add(11*time.Minute))) { // Snooze time should be between time.Now + 9 min and time.Now + 11 min
+		t.Errorf("expecting: %+v, received: %+v", tNow.Add(10*time.Minute), td.Snooze)
+	}
+
+	customTh2 := &engine.ThresholdWithCache{
+		ThresholdProfile: &engine.ThresholdProfile{
+			Tenant:    "cgrates.org",
+			ID:        "TH4",
+			FilterIDs: []string{"*string:~*req.CustomEv:SnoozeEv"},
+			MinSleep:  5 * time.Minute,
+			Weight:    100,
+		},
+	}
+	//set
+	if err := tSv1Rpc.Call(utils.APIerSv1SetThresholdProfile, customTh2, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+
+	if err := tSv1Rpc.Call(utils.ThresholdSv1GetThreshold,
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "TH4"}}, &td); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eTd.Hits, td.Hits) {
+		t.Errorf("expecting: %+v, received: %+v", eTd, td)
+	} else if !(td.Snooze.After(tNow.Add(4*time.Minute)) && td.Snooze.Before(tNow.Add(6*time.Minute))) { // Snooze time should be between time.Now + 9 min and time.Now + 11 min
+		t.Errorf("expecting: %+v, received: %+v", tNow.Add(10*time.Minute), td.Snooze)
+	}
+
 }
 
 func testV1TSStopEngine(t *testing.T) {
