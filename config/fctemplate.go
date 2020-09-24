@@ -200,6 +200,19 @@ func (fc *FCTemplate) Clone() *FCTemplate {
 	return cln
 }
 
+type FcTemplates map[string][]*FCTemplate
+
+func (sCft FcTemplates) AsMapInterface(separator string) (initialMP map[string][]map[string]interface{}) {
+	initialMP = make(map[string][]map[string]interface{})
+	for key, value := range sCft {
+		initialMP[key] = make([]map[string]interface{}, len(value))
+		for i, item := range value {
+			initialMP[key][i] = item.AsMapInterface(separator)
+		}
+	}
+	return
+}
+
 func (fc *FCTemplate) AsMapInterface(separator string) (mp map[string]interface{}) {
 	mp = make(map[string]interface{})
 	if fc.Tag != utils.EmptyString {
@@ -265,7 +278,6 @@ func (fc *FCTemplate) AsMapInterface(separator string) (mp map[string]interface{
 	if fc.MaskLen != 0 {
 		mp[utils.MaskLenCfg] = fc.MaskLen
 	}
-
 	return
 }
 

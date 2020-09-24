@@ -274,7 +274,7 @@ type CGRConfig struct {
 
 	rpcConns RpcConns
 
-	templates map[string][]*FCTemplate
+	templates FcTemplates
 
 	generalCfg       *GeneralCfg       // General config
 	dataDbCfg        *DataDbCfg        // Database config
