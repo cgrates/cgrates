@@ -124,90 +124,80 @@ func TestSessionSCfgloadFromJsonCfg(t *testing.T) {
 }
 
 func TestSessionSCfgAsMapInterface(t *testing.T) {
-	var sescfg SessionSCfg
-	sescfg.STIRCfg = new(STIRcfg)
 	cfgJSONStr := `{
 	"sessions": {
-		"enabled": false,
-		"listen_bijson": "127.0.0.1:2014",
-		"chargers_conns": [],
-		"rals_conns": [],
-		"cdrs_conns": [],
-		"resources_conns": [],
-		"thresholds_conns": [],
-		"stats_conns": [],
-		"suppliers_conns": [],
-		"attributes_conns": [],
-		"replication_conns": [],
-		"debit_interval": "0s",
-		"store_session_costs": false,
-		"min_call_duration": "0s",
-		"max_call_duration": "3h",
-		"session_ttl": "0s",
-		"session_indexes": [],
-		"client_protocol": 1.0,
-		"channel_sync_interval": "0",
-		"terminate_attempts": 5,
-		"alterable_fields": [],
-		"stir": {
-			"allowed_attest": ["*any"],
-			"payload_maxduration": "-1",
-			"default_attest": "A",
-			"publickey_path": "",
-			"privatekey_path": "",
-		},
-		"scheduler_conns": [],
+       "enabled": false,						// starts the session service: <true|false>
+	"listen_bijson": "127.0.0.1:2014",		// address where to listen for bidirectional JSON-RPC requests
+	"chargers_conns": [],					// connections to ChargerS for session forking <""|*internal|$rpc_conns_id>
+	"rals_conns": [],						// connections to RALs for rating/accounting <""|*internal|$rpc_conns_id>
+	"cdrs_conns": [],						// connections to CDRs for CDR posting <""|*internal|$rpc_conns_id>
+	"resources_conns": [],					// connections to ResourceS for resources monitoring <""|*internal|$rpc_conns_id>
+	"thresholds_conns": [],					// connections to ThresholdS for reporting session events <""|*internal|$rpc_conns_id>
+	"stats_conns": [],						// connections to StatS for reporting session events <""|*internal|$rpc_conns_id>
+	"routes_conns": [],						// connections to RouteS for querying routes for event <""|*internal|$rpc_conns_id>
+	"attributes_conns": [],					// connections to AttributeS for altering event fields <""|*internal|$rpc_conns_id>
+	"replication_conns": [],				// replicate sessions towards these session services
+	"debit_interval": "0s",					// interval to perform debits on.
+	"store_session_costs": false,			// enable storing of the session costs within CDRs
+	"min_call_duration": "0s",				// only authorize calls with allowed duration higher than this
+	"max_call_duration": "3h",				// maximum call duration a prepaid call can last
+	"session_ttl": "0s",					// time after a session with no updates is terminated, not defined by default
+	"session_indexes": [],					// index sessions based on these fields for GetActiveSessions API
+	"client_protocol": 1.0,					// version of protocol to use when acting as JSON-PRC client <"0","1.0">
+	"channel_sync_interval": "0",			// sync channels to detect stale sessions (0 to disable)
+	"terminate_attempts": 5,				// attempts to get the session before terminating it
+	"alterable_fields": [],					// the session fields that can be updated
+	"stir": {
+		"allowed_attest": ["*any"],			// the default attest for stir/shaken authentication <*any|A|B|C>
+		"payload_maxduration": "-1", 		// the duration that stir header is valid after it was created
+		"default_attest": "A",				// the default attest level if not mentioned in API
+		"publickey_path": "",				// the path to the public key 
+		"privatekey_path": "",				// the path to the private key
 	},
+	"scheduler_conns": [],},
 }`
 	eMap := map[string]interface{}{
-		"enabled":                false,
-		"listen_bijson":          "127.0.0.1:2014",
-		"chargers_conns":         []string{},
-		"rals_conns":             []string{},
-		"cdrs_conns":             []string{},
-		"resources_conns":        []string{},
-		"thresholds_conns":       []string{},
-		"stats_conns":            []string{},
-		"routes_conns":           []string{},
-		"attributes_conns":       []string{},
-		"replication_conns":      []string{},
-		"debit_interval":         "0",
-		"store_session_costs":    false,
-		"min_call_duration":      "0",
-		"max_call_duration":      "3h0m0s",
-		"min_dur_low_balance":    "0",
-		"session_ttl":            "0",
-		"session_indexes":        []string{},
-		"client_protocol":        1.0,
-		"channel_sync_interval":  "0",
-		"terminate_attempts":     5,
-		"alterable_fields":       []string{},
-		"session_ttl_last_used":  "0",
-		"session_ttl_max_delay":  "0",
-		"session_ttl_usage":      "0",
-		"session_ttl_last_usage": "0",
-		"stir": map[string]interface{}{
-			"allowed_attest":      []string{"*any"},
-			"payload_maxduration": "-1",
-			"default_attest":      "A",
-			"publickey_path":      "",
-			"privatekey_path":     "",
+		utils.EnabledCfg:             false,
+		utils.ListenBijsonCfg:        "127.0.0.1:2014",
+		utils.ChargerSConnsCfg:       []string{},
+		utils.RALsConnsCfg:           []string{},
+		utils.CDRsConnsCfg:           []string{},
+		utils.ResourceSConnsCfg:      []string{},
+		utils.ThresholdSConnsCfg:     []string{},
+		utils.StatSConnsCfg:          []string{},
+		utils.RouteSConnsCfg:         []string{},
+		utils.AttributeSConnsCfg:     []string{},
+		utils.ReplicationConnsCfg:    []string{},
+		utils.DebitIntervalCfg:       "0",
+		utils.StoreSCostsCfg:         false,
+		utils.MinCallDurationCfg:     "0",
+		utils.MaxCallDurationCfg:     "3h0m0s",
+		utils.SessionTTLCfg:          "0",
+		utils.SessionIndexesCfg:      []string{},
+		utils.ClientProtocolCfg:      1.0,
+		utils.ChannelSyncIntervalCfg: "0",
+		utils.TerminateAttemptsCfg:   5,
+		utils.AlterableFieldsCfg:     []string{},
+		utils.STIRCfg: map[string]interface{}{
+			utils.AllowedAtestCfg:       []string{"*any"},
+			utils.PayloadMaxdurationCfg: "-1",
+			utils.DefaultAttestCfg:      "A",
+			utils.PublicKeyPathCfg:      "",
+			utils.PrivateKeyPathCfg:     "",
 		},
-		"scheduler_conns": []string{},
+		utils.SchedulerConnsCfg: []string{},
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if jsnSesCfg, err := jsnCfg.SessionSJsonCfg(); err != nil {
-		t.Error(err)
-	} else if err = sescfg.loadFromJsonCfg(jsnSesCfg); err != nil {
-		t.Error(err)
-	} else if rcv := sescfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	} else if rcv := cgrCfg.sessionSCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
-	cfgJSONStr = `{
+}
+func TestSessionSCfgAsMapInterface1(t *testing.T) {
+	cfgJSONStr := `{
 		"sessions": {
-			"enabled": false,
-			"listen_bijson": "127.0.0.1:2014",
+			"enabled": true,
+			"listen_bijson": "127.0.0.1:2018",
 			"chargers_conns": ["*internal"],
 			"rals_conns": ["*internal"],
 			"cdrs_conns": ["*internal"],
@@ -217,70 +207,58 @@ func TestSessionSCfgAsMapInterface(t *testing.T) {
 			"routes_conns": ["*internal"],
 			"attributes_conns": ["*internal"],
 			"replication_conns": ["*localhost"],
-			"debit_interval": "0s",
-			"store_session_costs": false,
-			"min_call_duration": "0s",
-			"max_call_duration": "3h",
-			"session_ttl": "0s",
-			"session_indexes": [],
-			"client_protocol": 1.0,
-			"channel_sync_interval": "0",
-			"terminate_attempts": 5,
-			"alterable_fields": [],
+			"debit_interval": "8s",
+			"store_session_costs": true,
+			"min_call_duration": "1s",
+			"max_call_duration": "1h",
+			"session_ttl": "1s",
+			"client_protocol": 2.0,
+			"terminate_attempts": 10,
 			"stir": {
-				"allowed_attest": ["*any"],
+				"allowed_attest": ["*any1","*any2"],
 				"payload_maxduration": "-1",
-				"default_attest": "A",
+				"default_attest": "B",
 				"publickey_path": "",
 				"privatekey_path": "",
 			},
 			"scheduler_conns": ["*internal"],
 		},
 	}`
-	eMap = map[string]interface{}{
-		"enabled":                false,
-		"listen_bijson":          "127.0.0.1:2014",
-		"chargers_conns":         []string{"*internal"},
-		"rals_conns":             []string{"*internal"},
-		"cdrs_conns":             []string{"*internal"},
-		"resources_conns":        []string{"*internal"},
-		"thresholds_conns":       []string{"*internal"},
-		"stats_conns":            []string{"*internal"},
-		"routes_conns":           []string{"*internal"},
-		"attributes_conns":       []string{"*internal"},
-		"replication_conns":      []string{"*localhost"},
-		"debit_interval":         "0",
-		"store_session_costs":    false,
-		"min_call_duration":      "0",
-		"max_call_duration":      "3h0m0s",
-		"min_dur_low_balance":    "0",
-		"session_ttl":            "0",
-		"session_indexes":        []string{},
-		"client_protocol":        1.0,
-		"channel_sync_interval":  "0",
-		"terminate_attempts":     5,
-		"alterable_fields":       []string{},
-		"session_ttl_last_used":  "0",
-		"session_ttl_max_delay":  "0",
-		"session_ttl_usage":      "0",
-		"session_ttl_last_usage": "0",
-		"stir": map[string]interface{}{
-			"allowed_attest":      []string{"*any"},
-			"payload_maxduration": "-1",
-			"default_attest":      "A",
-			"publickey_path":      "",
-			"privatekey_path":     "",
+	eMap := map[string]interface{}{
+		utils.EnabledCfg:             true,
+		utils.ListenBijsonCfg:        "127.0.0.1:2018",
+		utils.ChargerSConnsCfg:       []string{"*internal"},
+		utils.RALsConnsCfg:           []string{"*internal"},
+		utils.CDRsConnsCfg:           []string{"*internal"},
+		utils.ResourceSConnsCfg:      []string{"*internal"},
+		utils.ThresholdSConnsCfg:     []string{"*internal"},
+		utils.StatSConnsCfg:          []string{"*internal"},
+		utils.RouteSConnsCfg:         []string{"*internal"},
+		utils.AttributeSConnsCfg:     []string{"*internal"},
+		utils.ReplicationConnsCfg:    []string{"*localhost"},
+		utils.DebitIntervalCfg:       "8s",
+		utils.StoreSCostsCfg:         true,
+		utils.MinCallDurationCfg:     "1s",
+		utils.MaxCallDurationCfg:     "1h0m0s",
+		utils.SessionTTLCfg:          "1s",
+		utils.SessionIndexesCfg:      []string{},
+		utils.ClientProtocolCfg:      2.0,
+		utils.ChannelSyncIntervalCfg: "0",
+		utils.TerminateAttemptsCfg:   10,
+		utils.AlterableFieldsCfg:     []string{},
+		utils.STIRCfg: map[string]interface{}{
+			utils.AllowedAtestCfg:       []string{"*any1", "*any2"},
+			utils.PayloadMaxdurationCfg: "-1",
+			utils.DefaultAttestCfg:      "B",
+			utils.PublicKeyPathCfg:      "",
+			utils.PrivateKeyPathCfg:     "",
 		},
-		"scheduler_conns": []string{"*internal"},
+		utils.SchedulerConnsCfg: []string{"*internal"},
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if jsnSesCfg, err := jsnCfg.SessionSJsonCfg(); err != nil {
-		t.Error(err)
-	} else if err = sescfg.loadFromJsonCfg(jsnSesCfg); err != nil {
-		t.Error(err)
-	} else if rcv := sescfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", eMap, rcv)
+	} else if rcv := cgrCfg.sessionSCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
 
@@ -337,7 +315,6 @@ func TestFsAgentCfgloadFromJsonCfg2(t *testing.T) {
 }
 
 func TestFsAgentCfgAsMapInterface(t *testing.T) {
-	var fsagcfg FsAgentCfg
 	cfgJSONStr := `{
 	"freeswitch_agent": {
 		"enabled": false,
@@ -345,8 +322,7 @@ func TestFsAgentCfgAsMapInterface(t *testing.T) {
 		"subscribe_park": true,
 		"create_cdr": false,
 		"extra_fields": [],
-		//"min_dur_low_balance": "5s",
-		//"low_balance_ann_file": "",
+		"low_balance_ann_file": "",
 		"empty_balance_context": "",
 		"empty_balance_ann_file": "",
 		"max_wait_connection": "2s",
@@ -356,27 +332,23 @@ func TestFsAgentCfgAsMapInterface(t *testing.T) {
 	},
 }`
 	eMap := map[string]interface{}{
-		"enabled":                false,
-		"sessions_conns":         []string{"*internal"},
-		"subscribe_park":         true,
-		"create_cdr":             false,
-		"extra_fields":           "",
-		"low_balance_ann_file":   "",
-		"empty_balance_context":  "",
-		"empty_balance_ann_file": "",
-		"max_wait_connection":    "2s",
-		"event_socket_conns": []map[string]interface{}{
-			{"address": "127.0.0.1:8021", "password": "ClueCon", "reconnects": 5, "alias": "127.0.0.1:8021"},
+		utils.EnabledCfg:             false,
+		utils.SessionSConnsCfg:       []string{"*internal"},
+		utils.SubscribeParkCfg:       true,
+		utils.CreateCdrCfg:           false,
+		utils.ExtraFieldsCfg:         "",
+		utils.LowBalanceAnnFileCfg:   "",
+		utils.EmptyBalanceContextCfg: "",
+		utils.EmptyBalanceAnnFileCfg: "",
+		utils.MaxWaitConnectionCfg:   "2s",
+		utils.EventSocketConnsCfg: []map[string]interface{}{
+			{utils.AddressCfg: "127.0.0.1:8021", utils.Password: "ClueCon", utils.ReconnectsCfg: 5, utils.AliasCfg: "127.0.0.1:8021"},
 		},
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if jsnFsAgCfg, err := jsnCfg.FreeswitchAgentJsonCfg(); err != nil {
-		t.Error(err)
-	} else if err = fsagcfg.loadFromJsonCfg(jsnFsAgCfg); err != nil {
-		t.Error(err)
-	} else if rcv := fsagcfg.AsMapInterface(""); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	} else if rcv := cgrCfg.fsAgentCfg.AsMapInterface(cgrCfg.generalCfg.RSRSep); !reflect.DeepEqual(rcv, eMap) {
+		t.Errorf("Expected %+v \n, recevied %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
 
@@ -482,7 +454,6 @@ func TestAsteriskAgentCfgloadFromJsonCfg(t *testing.T) {
 }
 
 func TestAsteriskAgentCfgAsMapInterface(t *testing.T) {
-	var asagcfg AsteriskAgentCfg
 	cfgJSONStr := `{
 	"asterisk_agent": {
 		"enabled": true,
@@ -501,13 +472,9 @@ func TestAsteriskAgentCfgAsMapInterface(t *testing.T) {
 			{"alias": "", "address": "127.0.0.1:8088", "user": "cgrates", "password": "CGRateS.org", "connect_attempts": 3, "reconnects": 5},
 		},
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if jsnAsAgCfg, err := jsnCfg.AsteriskAgentJsonCfg(); err != nil {
-		t.Error(err)
-	} else if err = asagcfg.loadFromJsonCfg(jsnAsAgCfg); err != nil {
-		t.Error(err)
-	} else if rcv := asagcfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
+	} else if rcv := cgrCfg.asteriskAgentCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
 		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }

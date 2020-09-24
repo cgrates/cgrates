@@ -132,8 +132,7 @@ func TestLoaderCfgAsMapInterface(t *testing.T) {
 				},
 			],
 		},
-	],
-	
+	],	
 }`
 	eMap := []map[string]interface{}{
 		{

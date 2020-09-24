@@ -2036,6 +2036,7 @@ const (
 	EmptyBalanceAnnFileCfg = "empty_balance_ann_file"
 	MaxWaitConnectionCfg   = "max_wait_connection"
 	EventSocketConnsCfg    = "event_socket_conns"
+	EmptyBalanceContext    = "empty_balance_context"
 )
 
 // From Config

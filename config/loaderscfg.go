@@ -200,54 +200,60 @@ func (self *LoaderSCfg) Clone() *LoaderSCfg {
 	return clnLoader
 }
 
-func (lData *LoaderDataType) AsMapInterface(separator string) map[string]interface{} {
+func (lData *LoaderDataType) AsMapInterface(separator string) (initialMP map[string]interface{}) {
+	initialMP = map[string]interface{}{
+		utils.TypeCf:      lData.Type,
+		utils.FilenameCfg: lData.Filename,
+	}
+
 	fields := make([]map[string]interface{}, len(lData.Fields))
 	for i, item := range lData.Fields {
 		fields[i] = item.AsMapInterface(separator)
 	}
+	initialMP[utils.FieldsCfg] = fields
 
-	return map[string]interface{}{
-		utils.TypeCf:      lData.Type,
-		utils.FilenameCfg: lData.Filename,
-		utils.FieldsCfg:   fields,
-	}
+	return
 }
 
-func (l *LoaderSCfg) AsMapInterface(separator string) map[string]interface{} {
-	tenant := make([]string, len(l.Tenant))
-	for i, item := range l.Tenant {
-		tenant[i] = item.Rules
-	}
-	strings.Join(tenant, utils.EmptyString)
-
-	data := make([]map[string]interface{}, len(l.Data))
-	for i, item := range l.Data {
-		data[i] = item.AsMapInterface(separator)
-	}
-	var runDelay string = "0"
-	if l.RunDelay != 0 {
-		runDelay = l.RunDelay.String()
-	}
-	cacheSConns := make([]string, len(l.CacheSConns))
-	for i, item := range l.CacheSConns {
-		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)
-		if item == buf {
-			cacheSConns[i] = strings.ReplaceAll(item, ":*caches", utils.EmptyString)
-		} else {
-			cacheSConns[i] = item
-		}
-	}
-	return map[string]interface{}{
+func (l *LoaderSCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
+	initialMP = map[string]interface{}{
 		utils.IdCfg:             l.Id,
 		utils.EnabledCfg:        l.Enabled,
-		utils.TenantCfg:         strings.Join(tenant, utils.EmptyString),
 		utils.DryRunCfg:         l.DryRun,
-		utils.RunDelayCfg:       runDelay,
 		utils.LockFileNameCfg:   l.LockFileName,
-		utils.CacheSConnsCfg:    cacheSConns,
 		utils.FieldSeparatorCfg: l.FieldSeparator,
 		utils.TpInDirCfg:        l.TpInDir,
 		utils.TpOutDirCfg:       l.TpOutDir,
-		utils.DataCfg:           data,
 	}
+	if l.Tenant != nil {
+		tenant := make([]string, len(l.Tenant))
+		for i, item := range l.Tenant {
+			tenant[i] = item.Rules
+		}
+		initialMP[utils.TenantCfg] = strings.Join(tenant, utils.EmptyString)
+	}
+	if l.Data != nil {
+		data := make([]map[string]interface{}, len(l.Data))
+		for i, item := range l.Data {
+			data[i] = item.AsMapInterface(separator)
+		}
+		initialMP[utils.DataCfg] = data
+	}
+	if l.RunDelay != 0 {
+		initialMP[utils.RunDelayCfg] = l.RunDelay.String()
+	} else {
+		initialMP[utils.RunDelayCfg] = "0"
+	}
+	if l.CacheSConns != nil {
+		cacheSConns := make([]string, len(l.CacheSConns))
+		for i, item := range l.CacheSConns {
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches) {
+				cacheSConns[i] = strings.ReplaceAll(item, ":*caches", utils.EmptyString)
+			} else {
+				cacheSConns[i] = item
+			}
+		}
+		initialMP[utils.CachesConnsCfg] = cacheSConns
+	}
+	return
 }
