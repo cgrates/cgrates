@@ -112,72 +112,96 @@ func TestSureTaxCfgloadFromJsonCfg(t *testing.T) {
 }
 
 func TestSureTaxCfgAsMapInterface(t *testing.T) {
-	var sureTaxCfg SureTaxCfg
 	cfgJSONStr := `{
-	"suretax": {
-		"url": "",
-		"client_number": "",
-		"validation_key": "",
-		"business_unit": "",
-		"timezone": "UTC",
-		"include_local_cost": false,
-		"return_file_code": "0",
-		"response_group": "03",
-		"response_type": "D4",
-		"regulatory_code": "03",
-		"client_tracking": "~*req.CGRID",
-		"customer_number": "~*req.Subject",
-		"orig_number":  "~*req.Subject",
-		"term_number": "~*req.Destination",
-		"bill_to_number": "",
-		"zipcode": "",
-		"plus4": "",
-		"p2pzipcode": "",
-		"p2pplus4": "",
-		"units": "1",
-		"unit_type": "00",
-		"tax_included": "0",
-		"tax_situs_rule": "04",
-		"trans_type_code": "010101",
-		"sales_type_code": "R",
-		"tax_exemption_code_list": "",
-	},
+	"suretax": {},
 }`
 	eMap := map[string]interface{}{
-		"url":                     "",
-		"client_number":           "",
-		"validation_key":          "",
-		"business_unit":           "",
-		"timezone":                "UTC",
-		"include_local_cost":      false,
-		"return_file_code":        "0",
-		"response_group":          "03",
-		"response_type":           "D4",
-		"regulatory_code":         "03",
-		"client_tracking":         "~*req.CGRID",
-		"customer_number":         "~*req.Subject",
-		"orig_number":             "~*req.Subject",
-		"term_number":             "~*req.Destination",
-		"bill_to_number":          "",
-		"zipcode":                 "",
-		"plus4":                   "",
-		"p2pzipcode":              "",
-		"p2pplus4":                "",
-		"units":                   "1",
-		"unit_type":               "00",
-		"tax_included":            "0",
-		"tax_situs_rule":          "04",
-		"trans_type_code":         "010101",
-		"sales_type_code":         "R",
-		"tax_exemption_code_list": "",
+		utils.UrlCfg:                  utils.EmptyString,
+		utils.ClientNumberCfg:         utils.EmptyString,
+		utils.ValidationKeyCfg:        utils.EmptyString,
+		utils.BusinessUnitCfg:         utils.EmptyString,
+		utils.TimezoneCfg:             "Local",
+		utils.IncludeLocalCostCfg:     false,
+		utils.ReturnFileCodeCfg:       "0",
+		utils.ResponseGroupCfg:        "03",
+		utils.ResponseTypeCfg:         "D4",
+		utils.RegulatoryCodeCfg:       "03",
+		utils.ClientTrackingCfg:       "~*req.CGRID",
+		utils.CustomerNumberCfg:       "~*req.Subject",
+		utils.OrigNumberCfg:           "~*req.Subject",
+		utils.TermNumberCfg:           "~*req.Destination",
+		utils.BillToNumberCfg:         utils.EmptyString,
+		utils.ZipcodeCfg:              utils.EmptyString,
+		utils.Plus4Cfg:                utils.EmptyString,
+		utils.P2PZipcodeCfg:           utils.EmptyString,
+		utils.P2PPlus4Cfg:             utils.EmptyString,
+		utils.UnitsCfg:                "1",
+		utils.UnitTypeCfg:             "00",
+		utils.TaxIncludedCfg:          "0",
+		utils.TaxSitusRuleCfg:         "04",
+		utils.TransTypeCodeCfg:        "010101",
+		utils.SalesTypeCodeCfg:        "R",
+		utils.TaxExemptionCodeListCfg: utils.EmptyString,
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if sureTax, err := jsnCfg.SureTaxJsonCfg(); err != nil {
+	} else if rcv := cgrCfg.sureTaxCfg.AsMapInterface(cgrCfg.generalCfg.RSRSep); !reflect.DeepEqual(rcv, eMap) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	}
+}
+
+func TestSureTaxCfgAsMapInterface1(t *testing.T) {
+	cfgJSONStr := `{
+	"suretax": {
+		"timezone":                "UTC",
+		"include_local_cost":      true,
+		"return_file_code":        "0",
+		"response_group":          "04",
+		"response_type":           "A4",
+		"regulatory_code":         "04",
+		"client_tracking":         "~*req.Destination",
+		"customer_number":         "~*req.Destination",
+		"orig_number":             "~*req.Destination",
+		"term_number":             "~*req.CGRID",
+		"units":                   "7",
+		"unit_type":               "02",
+		"tax_included":            "1",
+		"tax_situs_rule":          "03",
+		"trans_type_code":         "01010101",
+		"sales_type_code":         "B",
+    },
+}`
+	eMap := map[string]interface{}{
+		utils.UrlCfg:                  utils.EmptyString,
+		utils.ClientNumberCfg:         utils.EmptyString,
+		utils.ValidationKeyCfg:        utils.EmptyString,
+		utils.BusinessUnitCfg:         utils.EmptyString,
+		utils.TimezoneCfg:             "UTC",
+		utils.IncludeLocalCostCfg:     true,
+		utils.ReturnFileCodeCfg:       "0",
+		utils.ResponseGroupCfg:        "04",
+		utils.ResponseTypeCfg:         "A4",
+		utils.RegulatoryCodeCfg:       "04",
+		utils.ClientTrackingCfg:       "~*req.Destination",
+		utils.CustomerNumberCfg:       "~*req.Destination",
+		utils.OrigNumberCfg:           "~*req.Destination",
+		utils.TermNumberCfg:           "~*req.CGRID",
+		utils.BillToNumberCfg:         utils.EmptyString,
+		utils.ZipcodeCfg:              utils.EmptyString,
+		utils.Plus4Cfg:                utils.EmptyString,
+		utils.P2PZipcodeCfg:           utils.EmptyString,
+		utils.P2PPlus4Cfg:             utils.EmptyString,
+		utils.UnitsCfg:                "7",
+		utils.UnitTypeCfg:             "02",
+		utils.TaxIncludedCfg:          "1",
+		utils.TaxSitusRuleCfg:         "03",
+		utils.TransTypeCodeCfg:        "01010101",
+		utils.SalesTypeCodeCfg:        "B",
+		utils.TaxExemptionCodeListCfg: utils.EmptyString,
+	}
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if err = sureTaxCfg.loadFromJsonCfg(sureTax); err != nil {
-		t.Error(err)
-	} else if rcv := sureTaxCfg.AsMapInterface(utils.EmptyString); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	} else if rcv := cgrCfg.sureTaxCfg.AsMapInterface(cgrCfg.generalCfg.RSRSep); !reflect.DeepEqual(rcv, eMap) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
