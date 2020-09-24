@@ -333,3 +333,61 @@ func TestFCTemplateClone(t *testing.T) {
 		t.Errorf("expected: %s ,received: %s", utils.ToJSON(initialSmpl), utils.ToJSON(cloned))
 	}
 }
+
+func TestFCTemplateAsMapInterface(t *testing.T) {
+	cfgJSONStr := `{
+     "templates": {
+           "custom_template": [
+              {
+                "tag": "Tenant",
+                "type": "*composed",
+                "path": "Tenant",
+                "filters" : ["val1","val2"],
+                "value": "cgrates.org",
+                "width": 10,
+                "strip": "strp", 
+                "padding": "pdding",
+                "mandatory": true,
+                "attribute_id": "random.val",
+                "new_branch": true,
+                "timezone": "Local",
+                "blocker": true,
+                "layout": "",
+                "cost_shift_digits": 10,
+                "rounding_decimals": 1,
+                "mask_destinationd_id": "randomVal",
+                "mask_length": 10,
+            },
+           ],
+     }
+}`
+	eMap := map[string]interface{}{
+		"custom_template": []map[string]interface{}{
+			{
+				utils.TagCfg:              "Tenant",
+				utils.TypeCfg:             "*composed",
+				utils.PathCfg:             "Tenant",
+				utils.FiltersCfg:          []string{"val1", "val2"},
+				utils.ValueCfg:            "cgrates.org",
+				utils.WidthCfg:            10,
+				utils.StripCfg:            "strp",
+				utils.PaddingCfg:          "pdding",
+				utils.MandatoryCfg:        true,
+				utils.AttributeIDCfg:      "random.val",
+				utils.NewBranchCfg:        true,
+				utils.TimezoneCfg:         "Local",
+				utils.BlockerCfg:          true,
+				utils.LayoutCfg:           "",
+				utils.CostShiftDigitsCfg:  10,
+				utils.RoundingDecimalsCfg: 1,
+				utils.MaskDestIDCfg:       "randomVal",
+				utils.MaskLenCfg:          10,
+			},
+		},
+	}
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+		t.Error(err)
+	} else if rcv := cgrCfg.templates.AsMapInterface(cgrCfg.generalCfg.RSRSep); !reflect.DeepEqual(eMap["custom_template"], rcv["custom_template"]) {
+		t.Errorf("Expected %+v \n, recieved %+v", utils.ToJSON(eMap["custom_template"]), utils.ToJSON(rcv["custom_template"]))
+	}
+}
