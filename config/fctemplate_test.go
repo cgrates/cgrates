@@ -391,3 +391,66 @@ func TestFCTemplateAsMapInterface(t *testing.T) {
 		t.Errorf("Expected %+v \n, recieved %+v", utils.ToJSON(eMap["custom_template"]), utils.ToJSON(rcv["custom_template"]))
 	}
 }
+
+func TestFCTemplateAsMapInterface1(t *testing.T) {
+	cfgJSONStr := `{
+      "templates": {
+        "*err": [
+			{"tag": "SessionId", "path": "*rep.Session-Id", "type": "*variable",
+				"value": "~*req.Session-Id", "mandatory": true},
+			{"tag": "OriginHost", "path": "*rep.Origin-Host", "type": "*variable",
+				"value": "~*vars.OriginHost", "mandatory": true},
+			{"tag": "OriginRealm", "path": "*rep.Origin-Realm", "type": "*variable",
+				"value": "~*vars.OriginRealm", "mandatory": true},
+	    ],
+         "*asr": [
+			{"tag": "SessionId", "path": "*diamreq.Session-Id", "type": "*variable",
+				"value": "~*req.Session-Id", "mandatory": true},
+			{"tag": "OriginHost", "path": "*diamreq.Origin-Host", "type": "*variable",
+				"value": "~*req.Destination-Host", "mandatory": true},
+			{"tag": "OriginRealm", "path": "*diamreq.Origin-Realm", "type": "*variable",
+				"value": "~*req.Destination-Realm", "mandatory": true},
+			{"tag": "DestinationRealm", "path": "*diamreq.Destination-Realm", "type": "*variable",
+				"value": "~*req.Origin-Realm", "mandatory": true},
+			{"tag": "DestinationHost", "path": "*diamreq.Destination-Host", "type": "*variable",
+				"value": "~*req.Origin-Host", "mandatory": true},
+			{"tag": "AuthApplicationId", "path": "*diamreq.Auth-Application-Id", "type": "*variable",
+				 "value": "~*vars.*appid", "mandatory": true},
+	     ],
+    }
+}`
+	eMap := map[string]interface{}{
+		utils.MetaErr: []map[string]interface{}{
+			{utils.TagCfg: "SessionId", utils.PathCfg: "*rep.Session-Id", utils.TypeCfg: "*variable",
+				utils.ValueCfg: "~*req.Session-Id", utils.MandatoryCfg: true},
+			{utils.TagCfg: "OriginHost", utils.PathCfg: "*rep.Origin-Host", utils.TypeCfg: "*variable",
+				utils.ValueCfg: "~*vars.OriginHost", utils.MandatoryCfg: true},
+			{utils.TagCfg: "OriginRealm", utils.PathCfg: "*rep.Origin-Realm", utils.TypeCfg: "*variable",
+				utils.ValueCfg: "~*vars.OriginRealm", utils.MandatoryCfg: true},
+		},
+		utils.MetaASR: []map[string]interface{}{
+			{utils.TagCfg: "SessionId", utils.PathCfg: "*diamreq.Session-Id", utils.TypeCfg: "*variable",
+				utils.ValueCfg: "~*req.Session-Id", utils.MandatoryCfg: true},
+			{utils.TagCfg: "OriginHost", utils.PathCfg: "*diamreq.Origin-Host", utils.TypeCfg: "*variable",
+				utils.ValueCfg: "~*req.Destination-Host", utils.MandatoryCfg: true},
+			{utils.TagCfg: "OriginRealm", utils.PathCfg: "*diamreq.Origin-Realm", utils.TypeCfg: "*variable",
+				utils.ValueCfg: "~*req.Destination-Realm", utils.MandatoryCfg: true},
+			{utils.TagCfg: "DestinationRealm", utils.PathCfg: "*diamreq.Destination-Realm", utils.TypeCfg: "*variable",
+				utils.ValueCfg: "~*req.Origin-Realm", utils.MandatoryCfg: true},
+			{utils.TagCfg: "DestinationHost", utils.PathCfg: "*diamreq.Destination-Host", utils.TypeCfg: "*variable",
+				utils.ValueCfg: "~*req.Origin-Host", utils.MandatoryCfg: true},
+			{utils.TagCfg: "AuthApplicationId", utils.PathCfg: "*diamreq.Auth-Application-Id", utils.TypeCfg: "*variable",
+				utils.ValueCfg: "~*vars.*appid", utils.MandatoryCfg: true},
+		},
+	}
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+		t.Error(err)
+	} else {
+		rcv := cgrCfg.templates.AsMapInterface(cgrCfg.generalCfg.RSRSep)
+		if !reflect.DeepEqual(eMap[utils.MetaErr], rcv[utils.MetaErr]) {
+			t.Errorf("Expected %+v \n, recieved %+v", utils.ToJSON(eMap[utils.MetaErr]), utils.ToJSON(rcv[utils.MetaErr]))
+		} else if !reflect.DeepEqual(eMap[utils.MetaASR], rcv[utils.MetaASR]) {
+			t.Errorf("Expected %+v \n, recieved %+v", utils.ToJSON(eMap[utils.MetaASR]), utils.ToJSON(rcv[utils.MetaASR]))
+		}
+	}
+}
