@@ -25,51 +25,94 @@ import (
 )
 
 func TestDataDbCfgloadFromJsonCfg(t *testing.T) {
-	var dbcfg, expected DataDbCfg
-	if err := dbcfg.loadFromJsonCfg(nil); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(dbcfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, dbcfg)
+	jsonCfg := &DbJsonCfg{
+		Db_type:           utils.StringPointer("redis"),
+		Db_host:           utils.StringPointer("127.0.0.1"),
+		Db_port:           utils.IntPointer(6379),
+		Db_name:           utils.StringPointer("10"),
+		Db_user:           utils.StringPointer("cgrates"),
+		Db_password:       utils.StringPointer("password"),
+		Remote_conns:      &[]string{"*conn1"},
+		Replication_conns: &[]string{"*conn1"},
+		Items: &map[string]*ItemOptJson{
+			utils.MetaAccounts: {
+				Replicate: utils.BoolPointer(true),
+				Remote:    utils.BoolPointer(true),
+			},
+			utils.MetaReverseDestinations: {
+				Replicate: utils.BoolPointer(true),
+			},
+			utils.MetaDestinations: {
+				Replicate: utils.BoolPointer(false),
+			},
+		},
+		Opts: map[string]interface{}{
+			utils.RedisSentinelNameCfg: "sentinel",
+		},
 	}
-	if err := dbcfg.loadFromJsonCfg(new(DbJsonCfg)); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(dbcfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, dbcfg)
-	}
-	cfgJSONStr := `{
-"data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
-	"db_type": "*redis",					// data_db type: <*redis|*mongo|*internal>
-	"db_host": "127.0.0.1",					// data_db host address
-	"db_port": -1,	 						// data_db port to reach the database
-	"db_name": "10", 						// data_db database name to connect to
-	"db_user": "cgrates", 					// username to use when connecting to data_db
-	"db_password": "password",				// password to use when connecting to data_db
-	"opts":{
-		"redis_sentinel":"sentinel",			// redis_sentinel is the name of sentinel
-	}}
-}`
-	dbcfg.Opts = make(map[string]interface{})
-	expected = DataDbCfg{
+	expected := &DataDbCfg{
 		DataDbType: "redis",
 		DataDbHost: "127.0.0.1",
 		DataDbPort: "6379",
 		DataDbName: "10",
 		DataDbUser: "cgrates",
 		DataDbPass: "password",
+		RmtConns:   []string{"*conn1"},
+		RplConns:   []string{"*conn1"},
+		Items: map[string]*ItemOpt{
+			utils.MetaAccounts: {
+				Replicate: true,
+				Remote:    true,
+			},
+			utils.MetaReverseDestinations: {
+				Replicate: true,
+			},
+			utils.MetaDestinations: {
+				Replicate: false,
+			},
+		},
 		Opts: map[string]interface{}{
 			utils.RedisSentinelNameCfg: "sentinel",
 		},
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if jsnCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if jsnDataDbCfg, err := jsnCfg.DbJsonCfg(DATADB_JSN); err != nil {
+	} else if err = jsnCfg.dataDbCfg.loadFromJsonCfg(jsonCfg); err != nil {
 		t.Error(err)
-	} else if err = dbcfg.loadFromJsonCfg(jsnDataDbCfg); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expected, dbcfg) {
-		t.Errorf("Expected: %+v , recived: %+v", expected, dbcfg)
+	} else {
+		if !reflect.DeepEqual(expected.Items[utils.MetaAccounts], jsnCfg.dataDbCfg.Items[utils.MetaAccounts]) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected.Items[utils.MetaAccounts]),
+				utils.ToJSON(jsnCfg.dataDbCfg.Items[utils.MetaAccounts]))
+		} else if !reflect.DeepEqual(expected.Opts[utils.RedisSentinelNameCfg], jsnCfg.dataDbCfg.Opts[utils.RedisSentinelNameCfg]) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected.Opts[utils.RedisSentinelNameCfg]),
+				utils.ToJSON(jsnCfg.dataDbCfg.Opts[utils.RedisSentinelNameCfg]))
+		} else if !reflect.DeepEqual(expected.RplConns, jsnCfg.dataDbCfg.RplConns) {
+			t.Errorf("Expected %+v \n, received %+v", expected.RplConns, jsnCfg.dataDbCfg.RplConns)
+		}
 	}
 }
+
+func TestItemCfgloadFromJson(t *testing.T) {
+	jsonCfg := &ItemOptJson{
+		Remote:    utils.BoolPointer(true),
+		Replicate: utils.BoolPointer(true),
+		Api_key:   utils.StringPointer("randomVal"),
+		Route_id:  utils.StringPointer("randomID"),
+	}
+	expected := &ItemOpt{
+		Remote:    true,
+		Replicate: true,
+		APIKey:    "randomVal",
+		RouteID:   "randomID",
+	}
+	rcv := new(ItemOpt)
+	if err := rcv.loadFromJsonCfg(jsonCfg); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
 func TestDataDbCfgloadFromJsonCfgPort(t *testing.T) {
 	var dbcfg DataDbCfg
 	dbcfg.Opts = make(map[string]interface{})
