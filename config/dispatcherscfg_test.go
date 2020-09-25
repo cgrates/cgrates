@@ -26,43 +26,28 @@ import (
 )
 
 func TestDispatcherSCfgloadFromJsonCfg(t *testing.T) {
-	var daCfg, expected DispatcherSCfg
-	if err := daCfg.loadFromJsonCfg(nil); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(daCfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, daCfg)
+	jsonCfg := &DispatcherSJsonCfg{
+		Enabled:               utils.BoolPointer(true),
+		Indexed_selects:       utils.BoolPointer(true),
+		Prefix_indexed_fields: &[]string{"*req.prefix", "*req.indexed", "*req.fields"},
+		Suffix_indexed_fields: &[]string{"*req.prefix", "*req.indexed", "*req.fields"},
+		Attributes_conns:      &[]string{"*internal"},
+		Nested_fields:         utils.BoolPointer(true),
 	}
-	if err := daCfg.loadFromJsonCfg(new(DispatcherSJsonCfg)); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(daCfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, daCfg)
-	}
-	cfgJSONStr := `{
-		"dispatchers":{
-			"enabled": false,
-			"indexed_selects":true,
-			//"string_indexed_fields": [],
-			"prefix_indexed_fields": [],
-			"nested_fields": false,
-			"attributes_conns": [],
-		},
-		
-}`
-	expected = DispatcherSCfg{
-		Enabled:             false,
+	expected := &DispatcherSCfg{
+		Enabled:             true,
 		IndexedSelects:      true,
-		PrefixIndexedFields: &[]string{},
-		AttributeSConns:     []string{},
-		NestedFields:        false,
+		PrefixIndexedFields: &[]string{"*req.prefix", "*req.indexed", "*req.fields"},
+		SuffixIndexedFields: &[]string{"*req.prefix", "*req.indexed", "*req.fields"},
+		AttributeSConns:     []string{"*internal:*attributes"},
+		NestedFields:        true,
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if jsnCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if jsnDaCfg, err := jsnCfg.DispatcherSJsonCfg(); err != nil {
+	} else if err = jsnCfg.dispatcherSCfg.loadFromJsonCfg(jsonCfg); err != nil {
 		t.Error(err)
-	} else if err = daCfg.loadFromJsonCfg(jsnDaCfg); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expected, daCfg) {
-		t.Errorf("Expected: %+v,\nRecived: %+v", utils.ToJSON(expected), utils.ToJSON(daCfg))
+	} else if !reflect.DeepEqual(expected, jsnCfg.dispatcherSCfg) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsnCfg.dispatcherSCfg))
 	}
 }
 

@@ -27,52 +27,36 @@ import (
 )
 
 func TestDispatcherHCfgloadFromJsonCfg(t *testing.T) {
-	var daCfg, expected DispatcherHCfg
-	if err := daCfg.loadFromJsonCfg(nil); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(daCfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, daCfg)
-	}
-	if err := daCfg.loadFromJsonCfg(new(DispatcherHJsonCfg)); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(daCfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, daCfg)
-	}
-	daCfg.Hosts = make(map[string][]*DispatcherHRegistarCfg)
-	cfgJSONStr := `{
-		"dispatcherh":{
-			"enabled": true,
-			"dispatchers_conns": ["conn1","conn2"],
-			"hosts": {
-				"*default": [
-					{
-						"ID": "Host1",
-						"register_transport": "*json",
-						"register_tls": false
-					},
-					{
-						"ID": "Host2",
-						"register_transport": "*gob",
-						"register_tls": false
-					}
-				],
-				"cgrates.net": [
-					{
-						"ID": "Host1",
-						"register_transport": "*json",
-						"register_tls": true
-					},
-					{
-						"ID": "Host2",
-						"register_transport": "*gob",
-						"register_tls": true
-					}
-				]
+	jsonCfg := &DispatcherHJsonCfg{
+		Enabled:           utils.BoolPointer(true),
+		Dispatchers_conns: &[]string{"conn1", "conn2"},
+		Hosts: map[string][]DispatcherHRegistarJsonCfg{
+			utils.MetaDefault: {
+				{
+					Id:                 utils.StringPointer("Host1"),
+					Register_transport: utils.StringPointer(utils.MetaJSON),
+				},
+				{
+					Id:                 utils.StringPointer("Host2"),
+					Register_transport: utils.StringPointer(utils.MetaGOB),
+				},
 			},
-			"register_interval": "5m",
+			"cgrates.net": {
+				{
+					Id:                 utils.StringPointer("Host1"),
+					Register_transport: utils.StringPointer(utils.MetaJSON),
+					Register_tls:       utils.BoolPointer(true),
+				},
+				{
+					Id:                 utils.StringPointer("Host2"),
+					Register_transport: utils.StringPointer(utils.MetaGOB),
+					Register_tls:       utils.BoolPointer(true),
+				},
+			},
 		},
-}`
-	expected = DispatcherHCfg{
+		Register_interval: utils.StringPointer("5"),
+	}
+	expected := &DispatcherHCfg{
 		Enabled:          true,
 		DispatchersConns: []string{"conn1", "conn2"},
 		Hosts: map[string][]*DispatcherHRegistarCfg{
@@ -99,17 +83,16 @@ func TestDispatcherHCfgloadFromJsonCfg(t *testing.T) {
 				},
 			},
 		},
-		RegisterInterval: 5 * time.Minute,
+		RegisterInterval: time.Duration(5),
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if jsnCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if jsnDaCfg, err := jsnCfg.DispatcherHJsonCfg(); err != nil {
+	} else if err = jsnCfg.dispatcherHCfg.loadFromJsonCfg(jsonCfg); err != nil {
 		t.Error(err)
-	} else if err = daCfg.loadFromJsonCfg(jsnDaCfg); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expected, daCfg) {
-		t.Errorf("Expected: %+v,\nRecived: %+v", utils.ToJSON(expected), utils.ToJSON(daCfg))
+	} else if !reflect.DeepEqual(expected, jsnCfg.dispatcherHCfg) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsnCfg.dispatcherHCfg))
 	}
+
 }
 
 func TestDispatcherHCfgAsMapInterface(t *testing.T) {
