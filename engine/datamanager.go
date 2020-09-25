@@ -20,6 +20,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/baningo"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/ltcache"
@@ -73,6 +74,7 @@ var (
 		utils.RateProfilesFilterIndexPrfx: {},
 		utils.RateFilterIndexPrfx:         {},
 		utils.FilterIndexPrfx:             {},
+		utils.MetaAPIBan:                  {}, // not realy a prefix as this is not stored in DB
 	}
 )
 
@@ -133,7 +135,8 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 	if dm.cacheCfg.Partitions[utils.CachePrefixToInstance[prfx]].Limit == 0 {
 		return
 	}
-	if ids == nil {
+	if ids == nil &&
+		prfx != utils.MetaAPIBan { // no need for ids in this case
 		if mustBeCached {
 			ids = Cache.GetItemIDs(utils.CachePrefixToInstance[prfx], utils.EmptyString)
 		} else {
@@ -282,6 +285,8 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 			_, err = dm.GetIndexes(utils.CacheReverseFilterIndexes, dataID[:idx], dataID[idx+1:], false, true)
 		case utils.LoadIDPrefix:
 			_, err = dm.GetItemLoadIDs(utils.EmptyString, true)
+		case utils.MetaAPIBan:
+			_, err = dm.GetAPIBan(utils.EmptyString, config.CgrConfig().APIBanCfg().Keys, false, false, true)
 		}
 		if err != nil {
 			if err != utils.ErrNotFound {
@@ -3355,6 +3360,45 @@ func (dm *DataManager) RemoveIndexes(idxItmType, tntCtx, idxKey string) (err err
 				},
 			}, &reply); err != nil {
 			err = utils.CastRPCErr(err)
+		}
+	}
+	return
+}
+
+func (dm *DataManager) GetAPIBan(ip string, apiKeys []string, single, cacheRead, cacheWrite bool) (banned bool, err error) {
+	if cacheRead {
+		if x, ok := Cache.Get(utils.MetaAPIBan, ip); ok && x != nil { // Attempt to find in cache first
+			return x.(bool), nil
+		}
+	}
+	if single {
+		if banned, err = baningo.CheckIP(ip, apiKeys...); err != nil {
+			return
+		}
+		if cacheWrite {
+			if err = Cache.Set(utils.MetaAPIBan, ip, banned, nil, true, utils.NonTransactional); err != nil {
+				return false, err
+			}
+		}
+		return
+	}
+	var bannedIPs []string
+	if bannedIPs, err = baningo.GetBannedIPs(apiKeys...); err != nil {
+		return
+	}
+	for _, bannedIP := range bannedIPs {
+		if bannedIP == ip {
+			banned = true
+		}
+		if cacheWrite {
+			if err = Cache.Set(utils.MetaAPIBan, bannedIP, true, nil, true, utils.NonTransactional); err != nil {
+				return false, err
+			}
+		}
+	}
+	if len(ip) != 0 && !banned && cacheWrite {
+		if err = Cache.Set(utils.MetaAPIBan, ip, false, nil, true, utils.NonTransactional); err != nil {
+			return false, err
 		}
 	}
 	return

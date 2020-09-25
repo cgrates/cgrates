@@ -64,6 +64,10 @@ github.com/cenkalti/rpc2 v0.0.0-20200203073230-5ce2854ce0fd/go.mod h1:v2npkhrXyk
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
 github.com/cgrates/aringo v0.0.0-20191121125609-d85002bd1667 h1:eNku7bwLtSTpn6FQUUTnqohuGWC8jij1KNqDZ2QkGRE=
 github.com/cgrates/aringo v0.0.0-20191121125609-d85002bd1667/go.mod h1:l0xi5JUVqxL4P7RZ9YitbSCiOtjMY2j7JBOCJIysRWk=
+github.com/cgrates/baningo v0.0.0-20200925101338-ccea0136bbb1 h1:MM3w9bIb8DpJ+px6BQ0CkEmn0CLneAS4VHmmdZnje14=
+github.com/cgrates/baningo v0.0.0-20200925101338-ccea0136bbb1/go.mod h1:3SwVROaS1Iml5lqEhj0gRhDRtmbBgypZpKcEkVTSleU=
+github.com/cgrates/baningo v0.0.0-20200925111414-e65b237006c9 h1:WwluddhgQoHkB72AzbC781qtB2xJLt+B9Rc2+NYy0Ts=
+github.com/cgrates/baningo v0.0.0-20200925111414-e65b237006c9/go.mod h1:3SwVROaS1Iml5lqEhj0gRhDRtmbBgypZpKcEkVTSleU=
 github.com/cgrates/cron v0.0.0-20200906113840-dd008627fdca h1:neuTTEjWsM+WXRyJ+MF1OzsNc+e7DGjrNZKIEIr8x4A=
 github.com/cgrates/cron v0.0.0-20200906113840-dd008627fdca/go.mod h1:I9cUDn/uzkakr0hmYTjXkQqf6wagg44L2p01gSYRRz0=
 github.com/cgrates/fsock v0.0.0-20191107070144-e7a331109df7 h1:dxtBWRAr62vRRKkExmJZ0u1EbCw/y0vOkSfdFND5qXw=

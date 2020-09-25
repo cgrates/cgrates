@@ -53,7 +53,7 @@ var (
 		CacheDispatcherRoutes, CacheDispatcherLoads, CacheDiameterMessages, CacheRPCResponses,
 		CacheClosedSessions, CacheCDRIDs, CacheLoadIDs, CacheRPCConnections, CacheRatingProfilesTmp,
 		CacheUCH, CacheSTIR, CacheEventCharges, CacheRateProfiles, CacheRateProfilesFilterIndexes,
-		CacheRateFilterIndexes, CacheReverseFilterIndexes,
+		CacheRateFilterIndexes, CacheReverseFilterIndexes, MetaAPIBan,
 		// only internalDB
 		CacheVersions, CacheAccounts,
 		CacheTBLTPTimings, CacheTBLTPDestinations, CacheTBLTPRates, CacheTBLTPDestinationRates,
@@ -98,6 +98,7 @@ var (
 		CacheAccounts:                  ACCOUNT_PREFIX,
 		CacheRateFilterIndexes:         RateFilterIndexPrfx,
 		CacheReverseFilterIndexes:      FilterIndexPrfx,
+		MetaAPIBan:                     MetaAPIBan, // special case as it is not in a DB
 	}
 	CachePrefixToInstance map[string]string    // will be built on init
 	CacheIndexesToPrefix  = map[string]string{ // used by match index to get all the ids when index selects is disabled and for compute indexes
@@ -261,6 +262,7 @@ const (
 	ROUNDING_DOWN                = "*down"
 	ANY                          = "*any"
 	MetaAll                      = "*all"
+	MetaSingle                   = "*single"
 	ZERO                         = "*zero"
 	ASAP                         = "*asap"
 	COMMENT_CHAR                 = '#'
@@ -1085,6 +1087,7 @@ const (
 	MetaResources      = "*resources"
 	MetaEqual          = "*eq"
 	MetaIPNet          = "*ipnet"
+	MetaAPIBan         = "*apiban"
 
 	MetaNotString       = "*notstring"
 	MetaNotPrefix       = "*notprefix"
@@ -1098,6 +1101,7 @@ const (
 	MetaNotResources    = "*notresources"
 	MetaNotEqual        = "*noteq"
 	MetaNotIPNet        = "*notipnet"
+	MetaNotAPIBan       = "*notapiban"
 
 	MetaEC = "*ec"
 )

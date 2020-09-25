@@ -243,6 +243,7 @@ const CGRATES_CFG_JSON = `
 		"*rpc_connections": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},							// RPC connections caching
 		"*uch": {"limit": -1, "ttl": "3h", "static_ttl": false, "replicate": false},									// User cache
 		"*stir": {"limit": -1, "ttl": "3h", "static_ttl": false, "replicate": false},									// stirShaken cache keys
+		"*apiban":{"limit": -1, "ttl": "2m", "static_ttl": false, "replicate": false}, 
 		
 		// only for *internal database
 		"*versions": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},									// for version storing
