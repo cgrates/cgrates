@@ -29,7 +29,7 @@ import (
 func TestDispatcherHCfgloadFromJsonCfg(t *testing.T) {
 	jsonCfg := &DispatcherHJsonCfg{
 		Enabled:           utils.BoolPointer(true),
-		Dispatchers_conns: &[]string{"conn1", "conn2"},
+		Dispatchers_conns: &[]string{"*conn1", "*conn2"},
 		Hosts: map[string][]DispatcherHRegistarJsonCfg{
 			utils.MetaDefault: {
 				{
@@ -58,7 +58,7 @@ func TestDispatcherHCfgloadFromJsonCfg(t *testing.T) {
 	}
 	expected := &DispatcherHCfg{
 		Enabled:          true,
-		DispatchersConns: []string{"conn1", "conn2"},
+		DispatchersConns: []string{"*conn1", "*conn2"},
 		Hosts: map[string][]*DispatcherHRegistarCfg{
 			utils.MetaDefault: {
 				{
@@ -92,14 +92,13 @@ func TestDispatcherHCfgloadFromJsonCfg(t *testing.T) {
 	} else if !reflect.DeepEqual(expected, jsnCfg.dispatcherHCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsnCfg.dispatcherHCfg))
 	}
-
 }
 
 func TestDispatcherHCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
 		"dispatcherh":{
 			"enabled": true,
-			"dispatchers_conns": ["conn1","conn2"],
+			"dispatchers_conns": ["*conn1","*conn2"],
 			"hosts": {
 				"*default": [
 					{
@@ -119,7 +118,7 @@ func TestDispatcherHCfgAsMapInterface(t *testing.T) {
 }`
 	eMap := map[string]interface{}{
 		utils.EnabledCfg:          true,
-		utils.DispatchersConnsCfg: []string{"conn1", "conn2"},
+		utils.DispatchersConnsCfg: []string{"*conn1", "*conn2"},
 		utils.HostsCfg: map[string][]map[string]interface{}{
 			utils.MetaDefault: {
 				{

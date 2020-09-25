@@ -112,9 +112,6 @@ func TestSureTaxCfgloadFromJsonCfg(t *testing.T) {
 }
 
 func TestSureTaxCfgAsMapInterface(t *testing.T) {
-	cfgJSONStr := `{
-	"suretax": {},
-}`
 	eMap := map[string]interface{}{
 		utils.UrlCfg:                  utils.EmptyString,
 		utils.ClientNumberCfg:         utils.EmptyString,
@@ -143,7 +140,7 @@ func TestSureTaxCfgAsMapInterface(t *testing.T) {
 		utils.SalesTypeCodeCfg:        "R",
 		utils.TaxExemptionCodeListCfg: utils.EmptyString,
 	}
-	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+	if cgrCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.sureTaxCfg.AsMapInterface(cgrCfg.generalCfg.RSRSep); !reflect.DeepEqual(rcv, eMap) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
