@@ -25,42 +25,54 @@ import (
 )
 
 func TestDNSAgentCfgloadFromJsonCfg(t *testing.T) {
-	var dnsCfg, expected DNSAgentCfg
-	if err := dnsCfg.loadFromJsonCfg(nil, utils.INFIELD_SEP); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(dnsCfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, dnsCfg)
+	jsnCfg := &DNSAgentJsonCfg{
+		Enabled:        utils.BoolPointer(true),
+		Listen:         utils.StringPointer("127.0.0.1:2053"),
+		Listen_net:     utils.StringPointer("udp"),
+		Sessions_conns: &[]string{"*conn1"},
+		Timezone:       utils.StringPointer("UTC"),
+		Request_processors: &[]*ReqProcessorJsnCfg{
+			{
+				ID:             utils.StringPointer("OutboundAUTHDryRun"),
+				Filters:        &[]string{"*string:~*req.request_type:OutboundAUTH", "*string:~*req.Msisdn:497700056231"},
+				Flags:          &[]string{"*dryrun"},
+				Timezone:       utils.StringPointer("UTC"),
+				Request_fields: &[]*FcTemplateJsonCfg{},
+				Reply_fields: &[]*FcTemplateJsonCfg{
+					{Tag: utils.StringPointer("Allow"), Path: utils.StringPointer("*rep.response.Allow"), Type: utils.StringPointer("constant"),
+						Mandatory: utils.BoolPointer(true), Layout: utils.StringPointer(utils.EmptyString)},
+				},
+			},
+		},
 	}
-	if err := dnsCfg.loadFromJsonCfg(new(DNSAgentJsonCfg), utils.INFIELD_SEP); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(dnsCfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, dnsCfg)
-	}
-	cfgJSONStr := `{
-"dns_agent": {
-	"enabled": false,											// enables the DNS agent: <true|false>
-	"listen": "127.0.0.1:2053",									// address where to listen for DNS requests <x.y.z.y:1234>
-	"listen_net": "udp",										// network to listen on <udp|tcp|tcp-tls>
-	"sessions_conns": ["*internal"],
-	"timezone": "UTC",												// timezone of the events if not specified  <UTC|Local|$IANA_TZ_DB>
-	"request_processors": [										// request processors to be applied to DNS messages
-	],
-},
-}`
-	expected = DNSAgentCfg{
+	expected := &DNSAgentCfg{
+		Enabled:       true,
 		Listen:        "127.0.0.1:2053",
 		ListenNet:     "udp",
-		SessionSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
+		SessionSConns: []string{"*conn1"},
 		Timezone:      "UTC",
+		RequestProcessors: []*RequestProcessor{
+			{
+				ID:            "OutboundAUTHDryRun",
+				Filters:       []string{"*string:~*req.request_type:OutboundAUTH", "*string:~*req.Msisdn:497700056231"},
+				Flags:         utils.FlagsWithParamsFromSlice([]string{utils.MetaDryRun}),
+				Timezone:      "UTC",
+				RequestFields: []*FCTemplate{},
+				ReplyFields: []*FCTemplate{
+					{Tag: "Allow", Path: "*rep.response.Allow", Type: "constant", Mandatory: true, Layout: utils.EmptyString},
+				},
+			},
+		},
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	for _, v := range expected.RequestProcessors[0].ReplyFields {
+		v.ComputePath()
+	}
+	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if jsnDaCfg, err := jsnCfg.DNSAgentJsonCfg(); err != nil {
+	} else if err = jsonCfg.dnsAgentCfg.loadFromJsonCfg(jsnCfg, jsonCfg.generalCfg.RSRSep); err != nil {
 		t.Error(err)
-	} else if err = dnsCfg.loadFromJsonCfg(jsnDaCfg, utils.INFIELD_SEP); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expected, dnsCfg) {
-		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(dnsCfg))
+	} else if !reflect.DeepEqual(jsonCfg.dnsAgentCfg, expected) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.dnsAgentCfg))
 	}
 }
 
