@@ -54,6 +54,8 @@ var (
 	}
 )
 
+// this tests may fail because of apiban limit( 5 requests per 2 minutes for an APIKey)
+// if needed add more APIKeys
 func TestPrecacheIT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
@@ -146,6 +148,7 @@ func testPrecacheRestartEngine(t *testing.T) {
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
+	time.Sleep(2 * time.Second) // let the *apiban cache to be populated
 }
 
 func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
@@ -302,6 +305,7 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 		utils.CacheTBLTPDispatchers:      {},
 		utils.CacheTBLTPDispatcherHosts:  {},
 		utils.CacheTBLTPRateProfiles:     {},
+		utils.MetaAPIBan:                 {Items: 254},
 	}
 	if err := precacheRPC.Call(utils.CacheSv1GetCacheStats, args, &reply); err != nil {
 		t.Error(err.Error())
