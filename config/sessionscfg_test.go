@@ -19,6 +19,7 @@ package config
 
 import (
 	"reflect"
+	"sort"
 	"testing"
 	"time"
 
@@ -187,7 +188,7 @@ func TestSessionSCfgAsMapInterface1(t *testing.T) {
 			"client_protocol": 2.0,
 			"terminate_attempts": 10,
 			"stir": {
-				"allowed_attest": ["*any1","*any2"],
+				"allowed_attest": ["any1","any2"],
 				"payload_maxduration": "-1",
 				"default_attest": "B",
 				"publickey_path": "",
@@ -199,15 +200,15 @@ func TestSessionSCfgAsMapInterface1(t *testing.T) {
 	eMap := map[string]interface{}{
 		utils.EnabledCfg:             true,
 		utils.ListenBijsonCfg:        "127.0.0.1:2018",
-		utils.ChargerSConnsCfg:       []string{"*internal"},
-		utils.RALsConnsCfg:           []string{"*internal"},
-		utils.CDRsConnsCfg:           []string{"*internal"},
-		utils.ResourceSConnsCfg:      []string{"*internal"},
-		utils.ThresholdSConnsCfg:     []string{"*internal"},
-		utils.StatSConnsCfg:          []string{"*internal"},
-		utils.RouteSConnsCfg:         []string{"*internal"},
-		utils.AttributeSConnsCfg:     []string{"*internal"},
-		utils.ReplicationConnsCfg:    []string{"*localhost"},
+		utils.ChargerSConnsCfg:       []string{utils.MetaInternal},
+		utils.RALsConnsCfg:           []string{utils.MetaInternal},
+		utils.CDRsConnsCfg:           []string{utils.MetaInternal},
+		utils.ResourceSConnsCfg:      []string{utils.MetaInternal},
+		utils.ThresholdSConnsCfg:     []string{utils.MetaInternal},
+		utils.StatSConnsCfg:          []string{utils.MetaInternal},
+		utils.RouteSConnsCfg:         []string{utils.MetaInternal},
+		utils.AttributeSConnsCfg:     []string{utils.MetaInternal},
+		utils.ReplicationConnsCfg:    []string{utils.MetaLocalHost},
 		utils.DebitIntervalCfg:       "8s",
 		utils.StoreSCostsCfg:         true,
 		utils.MinCallDurationCfg:     "1s",
@@ -219,7 +220,7 @@ func TestSessionSCfgAsMapInterface1(t *testing.T) {
 		utils.TerminateAttemptsCfg:   10,
 		utils.AlterableFieldsCfg:     []string{},
 		utils.STIRCfg: map[string]interface{}{
-			utils.AllowedAtestCfg:       []string{"*any1", "*any2"},
+			utils.AllowedAtestCfg:       []string{"any1", "any2"},
 			utils.PayloadMaxdurationCfg: "-1",
 			utils.DefaultAttestCfg:      "B",
 			utils.PublicKeyPathCfg:      "",
@@ -227,9 +228,13 @@ func TestSessionSCfgAsMapInterface1(t *testing.T) {
 		},
 		utils.SchedulerConnsCfg: []string{"*internal"},
 	}
-	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+	cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr)
+	if err != nil {
 		t.Error(err)
-	} else if rcv := cgrCfg.sessionSCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
+	}
+	rcv := cgrCfg.sessionSCfg.AsMapInterface()
+	sort.Strings(rcv[utils.STIRCfg].(map[string]interface{})[utils.AllowedAtestCfg].([]string))
+	if !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
