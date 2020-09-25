@@ -25,50 +25,38 @@ import (
 )
 
 func TestCdrsCfgloadFromJsonCfg(t *testing.T) {
-	var cdrscfg, expected CdrsCfg
-	if err := cdrscfg.loadFromJsonCfg(nil); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(cdrscfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, cdrscfg)
+	jsonCfg := &CdrsJsonCfg{
+		Enabled:              utils.BoolPointer(true),
+		Store_cdrs:           utils.BoolPointer(true),
+		Session_cost_retries: utils.IntPointer(1),
+		Chargers_conns:       &[]string{"*internal"},
+		Rals_conns:           &[]string{"*internal"},
+		Attributes_conns:     &[]string{"*internal"},
+		Thresholds_conns:     &[]string{"*internal"},
+		Stats_conns:          &[]string{"*conn1", "*conn2"},
+		Online_cdr_exports:   &[]string{"randomVal"},
+		Scheduler_conns:      &[]string{"*internal"},
+		Ees_conns:            &[]string{"*internal"},
 	}
-	if err := cdrscfg.loadFromJsonCfg(new(CdrsJsonCfg)); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(cdrscfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, cdrscfg)
+	expected := &CdrsCfg{
+		Enabled:          true,
+		StoreCdrs:        true,
+		SMCostRetries:    1,
+		ChargerSConns:    []string{"*internal:*chargers"},
+		RaterConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder)},
+		AttributeSConns:  []string{"*internal:*attributes"},
+		ThresholdSConns:  []string{"*internal:*thresholds"},
+		StatSConns:       []string{"*conn1", "*conn2"},
+		OnlineCDRExports: []string{"randomVal"},
+		SchedulerConns:   []string{"*internal:*scheduler"},
+		EEsConns:         []string{"*internal:*ees"},
 	}
-	cfgJSONStr := `{
-"cdrs": {
-	"enabled": false,						// start the CDR Server service:  <true|false>
-	"extra_fields": [],						// extra fields to store in CDRs for non-generic CDRs
-	"store_cdrs": true,						// store cdrs in storDb
-	"session_cost_retries": 5,				// number of queries to sessions_costs before recalculating CDR
-	"chargers_conns": [],					// address where to reach the charger service, empty to disable charger functionality: <""|*internal|x.y.z.y:1234>
-	"rals_conns": ["*internal"],
-	"attributes_conns": [],					// address where to reach the attribute service, empty to disable attributes functionality: <""|*internal|x.y.z.y:1234>
-	"thresholds_conns": [],					// address where to reach the thresholds service, empty to disable thresholds functionality: <""|*internal|x.y.z.y:1234>
-	"stats_conns": [],						// address where to reach the stat service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
-	"online_cdr_exports":[],				// list of CDRE profiles to use for real-time CDR exports
-    "ees_conns": [],                        // connections to EventExporter
-	},
-}`
-	expected = CdrsCfg{
-		StoreCdrs:       true,
-		SMCostRetries:   5,
-		ChargerSConns:   []string{},
-		RaterConns:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder)},
-		AttributeSConns: []string{},
-		ThresholdSConns: []string{},
-		StatSConns:      []string{},
-		EEsConns:        []string{},
-	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if jsnCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if jsnCdrsCfg, err := jsnCfg.CdrsJsonCfg(); err != nil {
+	} else if err = jsnCfg.cdrsCfg.loadFromJsonCfg(jsonCfg); err != nil {
 		t.Error(err)
-	} else if err = cdrscfg.loadFromJsonCfg(jsnCdrsCfg); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expected, cdrscfg) {
-		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(cdrscfg))
+	} else if !reflect.DeepEqual(expected, jsnCfg.cdrsCfg) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsnCfg.cdrsCfg))
 	}
 }
 

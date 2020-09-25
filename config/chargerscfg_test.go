@@ -25,38 +25,28 @@ import (
 )
 
 func TestChargerSCfgloadFromJsonCfg(t *testing.T) {
-	var chgscfg, expected ChargerSCfg
-	if err := chgscfg.loadFromJsonCfg(nil); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(chgscfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, chgscfg)
+	jsonCfg := &ChargerSJsonCfg{
+		Enabled:               utils.BoolPointer(true),
+		Indexed_selects:       utils.BoolPointer(true),
+		Attributes_conns:      &[]string{"*internal"},
+		Prefix_indexed_fields: &[]string{"*req.Field1", "*req.Field2"},
+		Suffix_indexed_fields: &[]string{"*req.Field1", "*req.Field2"},
+		Nested_fields:         utils.BoolPointer(true),
 	}
-	if err := chgscfg.loadFromJsonCfg(new(ChargerSJsonCfg)); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(chgscfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, chgscfg)
-	}
-	cfgJSONStr := `{
-"chargers": {								// Charger service
-	"enabled": true,						// starts charger service: <true|false>.
-	"attributes_conns": [],					// address where to reach the AttributeS <""|127.0.0.1:2013>
-	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
-	"prefix_indexed_fields": ["*req.index1", "*req.index2"],			// query indexes based on these fields for faster processing
-},	
-}`
-	expected = ChargerSCfg{
+	expected := &ChargerSCfg{
 		Enabled:             true,
-		AttributeSConns:     []string{},
-		PrefixIndexedFields: &[]string{"*req.index1", "*req.index2"},
+		IndexedSelects:      true,
+		AttributeSConns:     []string{"*internal:*attributes"},
+		PrefixIndexedFields: &[]string{"*req.Field1", "*req.Field2"},
+		SuffixIndexedFields: &[]string{"*req.Field1", "*req.Field2"},
+		NestedFields:        true,
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if jsncfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if jsnChgCfg, err := jsnCfg.ChargerServJsonCfg(); err != nil {
+	} else if err = jsncfg.chargerSCfg.loadFromJsonCfg(jsonCfg); err != nil {
 		t.Error(err)
-	} else if err = chgscfg.loadFromJsonCfg(jsnChgCfg); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expected, chgscfg) {
-		t.Errorf("Expected: %+v , recived: %+v", expected, chgscfg)
+	} else if !reflect.DeepEqual(expected, jsncfg.chargerSCfg) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsncfg.chargerSCfg))
 	}
 }
 
