@@ -51,76 +51,56 @@ func TestAsTransCacheConfig(t *testing.T) {
 }
 
 func TestCacheCfgloadFromJsonCfg(t *testing.T) {
-	var cachecfg, expected *CacheCfg
-	cachecfg = new(CacheCfg)
-	expected = new(CacheCfg)
-	if err := cachecfg.loadFromJsonCfg(nil); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(cachecfg, expected) {
-		t.Errorf("Expected: %+v ,received: %+v", expected, cachecfg)
-	}
-	if err := cachecfg.loadFromJsonCfg(new(CacheJsonCfg)); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(cachecfg, expected) {
-		t.Errorf("Expected: %+v ,received: %+v", expected, cachecfg)
-	}
-	cfgJSONStr := `{
-"caches":{
-	"partitions": {
-		"*destinations": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},			
-		"*reverse_destinations": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},	
-		"*rating_plans": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},
+	jsonCfg := &CacheJsonCfg{
+		Partitions: &map[string]*CacheParamJsonCfg{
+			utils.MetaDestinations: {
+				Limit:      utils.IntPointer(10),
+				Ttl:        utils.StringPointer("2"),
+				Static_ttl: utils.BoolPointer(true),
+				Precache:   utils.BoolPointer(true),
+				Replicate:  utils.BoolPointer(true),
+			},
 		},
-	},
-}`
-	expected = &CacheCfg{
+		Replication_conns: &[]string{"conn1", "conn2"},
+	}
+	expected := &CacheCfg{
 		Partitions: map[string]*CacheParamCfg{
-			"*destinations":         {Limit: -1, TTL: time.Duration(0), StaticTTL: false, Precache: false},
-			"*reverse_destinations": {Limit: -1, TTL: time.Duration(0), StaticTTL: false, Precache: false},
-			"*rating_plans":         {Limit: -1, TTL: time.Duration(0), StaticTTL: false, Precache: false},
+			utils.MetaDestinations: {Limit: 10, TTL: time.Duration(2), StaticTTL: true, Precache: true, Replicate: true},
 		},
+		ReplicationConns: []string{"conn1", "conn2"},
 	}
-	cachecfg = new(CacheCfg)
-	cachecfg.Partitions = make(map[string]*CacheParamCfg)
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if jsnCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if jsnCacheCfg, err := jsnCfg.CacheJsonCfg(); err != nil {
+	} else if err = jsnCfg.cacheCfg.loadFromJsonCfg(jsonCfg); err != nil {
 		t.Error(err)
-	} else if err = cachecfg.loadFromJsonCfg(jsnCacheCfg); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expected, cachecfg) {
-		t.Errorf("Expected: %+v , received: %+v", expected, cachecfg)
+	} else {
+		if !reflect.DeepEqual(expected.Partitions[utils.MetaDestinations], jsnCfg.cacheCfg.Partitions[utils.MetaDestinations]) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected.Partitions[utils.MetaDestinations]),
+				utils.ToJSON(jsnCfg.cacheCfg.Partitions[utils.MetaDestinations]))
+		} else if !reflect.DeepEqual(jsnCfg.cacheCfg.ReplicationConns, expected.ReplicationConns) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected.ReplicationConns), utils.ToJSON(jsnCfg.cacheCfg.ReplicationConns))
+		}
 	}
 }
 
 func TestCacheParamCfgloadFromJsonCfg(t *testing.T) {
-	var fscocfg, expected CacheParamCfg
-	if err := fscocfg.loadFromJsonCfg(nil); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(fscocfg, expected) {
-		t.Errorf("Expected: %+v ,received: %+v", expected, fscocfg)
-	}
-	if err := fscocfg.loadFromJsonCfg(new(CacheParamJsonCfg)); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(fscocfg, expected) {
-		t.Errorf("Expected: %+v ,received: %+v", expected, fscocfg)
-	}
 	json := &CacheParamJsonCfg{
 		Limit:      utils.IntPointer(5),
 		Ttl:        utils.StringPointer("1s"),
 		Static_ttl: utils.BoolPointer(true),
 		Precache:   utils.BoolPointer(true),
 	}
-	expected = CacheParamCfg{
+	expected := &CacheParamCfg{
 		Limit:     5,
 		TTL:       time.Duration(time.Second),
 		StaticTTL: true,
 		Precache:  true,
 	}
-	if err = fscocfg.loadFromJsonCfg(json); err != nil {
+	rcv := new(CacheParamCfg)
+	if err := rcv.loadFromJsonCfg(json); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(expected, fscocfg) {
-		t.Errorf("Expected: %+v , received: %+v", utils.ToJSON(expected), utils.ToJSON(fscocfg))
+	} else if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
 }
 

@@ -25,34 +25,18 @@ import (
 )
 
 func TestAnalyzerSCfgloadFromJsonCfg(t *testing.T) {
-	var alS, expected AnalyzerSCfg
-	if err := alS.loadFromJsonCfg(nil); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(alS, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, alS)
+	jsonCfg := &AnalyzerSJsonCfg{
+		Enabled: utils.BoolPointer(false),
 	}
-	if err := alS.loadFromJsonCfg(new(AnalyzerSJsonCfg)); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(alS, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, alS)
-	}
-	cfgJSONStr := `{
-		"analyzers":{								// AnalyzerS config
-			"enabled":false							// starts AnalyzerS service: <true|false>.
-		},
-		
-}`
-	expected = AnalyzerSCfg{
+	expected := &AnalyzerSCfg{
 		Enabled: false,
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if jsnCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if jsnalS, err := jsnCfg.AnalyzerCfgJson(); err != nil {
+	} else if err = jsnCfg.analyzerSCfg.loadFromJsonCfg(jsonCfg); err != nil {
 		t.Error(err)
-	} else if err = alS.loadFromJsonCfg(jsnalS); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expected, alS) {
-		t.Errorf("Expected: %+v , recived: %+v", expected, alS)
+	} else if !reflect.DeepEqual(jsnCfg.analyzerSCfg, expected) {
+		t.Errorf("Expected %+v \n, received %+v", expected, jsnCfg.analyzerSCfg)
 	}
 }
 

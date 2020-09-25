@@ -25,38 +25,28 @@ import (
 )
 
 func TestAttributeSCfgloadFromJsonCfg(t *testing.T) {
-	var attscfg, expected AttributeSCfg
-	if err := attscfg.loadFromJsonCfg(nil); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(attscfg, expected) {
-		t.Errorf("Expected: %+v ,received: %+v", expected, attscfg)
+	jsonCfg := &AttributeSJsonCfg{
+		Enabled:               utils.BoolPointer(true),
+		Indexed_selects:       utils.BoolPointer(false),
+		Prefix_indexed_fields: &[]string{"*req.index1", "*req.index2"},
+		Suffix_indexed_fields: &[]string{"*req.index1"},
+		Process_runs:          utils.IntPointer(1),
+		Nested_fields:         utils.BoolPointer(true),
 	}
-	if err := attscfg.loadFromJsonCfg(new(AttributeSJsonCfg)); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(attscfg, expected) {
-		t.Errorf("Expected: %+v ,received: %+v", expected, attscfg)
-	}
-	cfgJSONStr := `{
-"attributes": {								// Attribute service
-	"enabled": true,						// starts attribute service: <true|false>.
-	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
-	"prefix_indexed_fields": ["*req.index1","*req.index2"],			// query indexes based on these fields for faster processing
-	"process_runs": 1,						// number of run loops when processing event
-	},		
-}`
-	expected = AttributeSCfg{
+	expected := &AttributeSCfg{
 		Enabled:             true,
+		IndexedSelects:      false,
 		PrefixIndexedFields: &[]string{"*req.index1", "*req.index2"},
+		SuffixIndexedFields: &[]string{"*req.index1"},
 		ProcessRuns:         1,
+		NestedFields:        true,
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if jsnCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if jsnAttSCfg, err := jsnCfg.AttributeServJsonCfg(); err != nil {
+	} else if err = jsnCfg.attributeSCfg.loadFromJsonCfg(jsonCfg); err != nil {
 		t.Error(err)
-	} else if err = attscfg.loadFromJsonCfg(jsnAttSCfg); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expected, attscfg) {
-		t.Errorf("Expected: %+v , received: %+v", expected, attscfg)
+	} else if !reflect.DeepEqual(expected, jsnCfg.attributeSCfg) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected), utils.ToJSON(jsnCfg.attributeSCfg))
 	}
 }
 
