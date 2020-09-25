@@ -57,7 +57,8 @@
 		"*charger_filter_indexes" : {"limit": 10000, "ttl":"0s", "precache": true},
 		"*dispatcher_profiles" : {"limit": 10000, "ttl":"0s", "precache": true},
 		"*dispatcher_hosts" : {"limit": 10000, "ttl":"0s", "precache": true},
-		"*dispatcher_routes" : {"limit": 10000, "ttl":"0s", "precache": false}
+		"*dispatcher_routes" : {"limit": 10000, "ttl":"0s", "precache": false},
+		"*apiban" : {"limit": 254, "ttl":"0s", "precache": true}
 	},
 },
 
@@ -86,6 +87,11 @@
 "apiers": {
 	"enabled": true,
 	"scheduler_conns": ["*internal"],
+},
+
+
+"apiban": {
+	"keys": ["4c8140a0d7ec506e03ac59283eea8a9a", "559bbfa6808558b3197bf4960bbc1635", "2efdcd5d3d1b3a3ab4d71636b7b6d847"],
 },
 
 

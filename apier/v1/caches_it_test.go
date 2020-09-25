@@ -246,7 +246,9 @@ func testCacheSReload(t *testing.T) {
 
 	if err := chcRPC.Call(utils.CacheSv1GetCacheStats, &utils.AttrCacheIDsWithOpts{}, &rcvStats); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(expStats, rcvStats) {
+	}
+	rcvStats[utils.MetaAPIBan].Items = 0
+	if !reflect.DeepEqual(expStats, rcvStats) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expStats), utils.ToJSON(rcvStats))
 	}
 }
@@ -442,8 +444,10 @@ func testCacheSPrecacheStatus(t *testing.T) {
 		expected[k] = utils.MetaReady
 	}
 	if err := chcRPC.Call(utils.CacheSv1PrecacheStatus, &utils.AttrCacheIDsWithOpts{}, &reply); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expected, reply) {
+		t.Fatal(err)
+	}
+	reply[utils.MetaAPIBan] = utils.MetaReady // do not check the status for this partition
+	if !reflect.DeepEqual(expected, reply) {
 		t.Errorf("Expected: %v , received:%v", utils.ToJSON(expected), utils.ToJSON(reply))
 	}
 }

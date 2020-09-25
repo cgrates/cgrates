@@ -135,8 +135,9 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 	if dm.cacheCfg.Partitions[utils.CachePrefixToInstance[prfx]].Limit == 0 {
 		return
 	}
-	if ids == nil &&
-		prfx != utils.MetaAPIBan { // no need for ids in this case
+	if prfx == utils.MetaAPIBan { // no need for ids in this case
+		ids = []string{utils.EmptyString}
+	} else if ids == nil {
 		if mustBeCached {
 			ids = Cache.GetItemIDs(utils.CachePrefixToInstance[prfx], utils.EmptyString)
 		} else {
