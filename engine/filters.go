@@ -223,16 +223,16 @@ var supportedFiltersType utils.StringSet = utils.NewStringSet([]string{
 	utils.MetaTimings, utils.MetaRSR, utils.MetaDestinations,
 	utils.MetaEmpty, utils.MetaExists, utils.MetaLessThan, utils.MetaLessOrEqual,
 	utils.MetaGreaterThan, utils.MetaGreaterOrEqual, utils.MetaEqual,
-	utils.MetaNotEqual, utils.MetaIPNet})
+	utils.MetaNotEqual, utils.MetaIPNet, utils.MetaAPIBan})
 var needsFieldName utils.StringSet = utils.NewStringSet([]string{
 	utils.MetaString, utils.MetaPrefix, utils.MetaSuffix,
 	utils.MetaTimings, utils.MetaRSR, utils.MetaDestinations, utils.MetaLessThan,
 	utils.MetaEmpty, utils.MetaExists, utils.MetaLessOrEqual, utils.MetaGreaterThan,
-	utils.MetaGreaterOrEqual, utils.MetaEqual, utils.MetaNotEqual, utils.MetaIPNet})
+	utils.MetaGreaterOrEqual, utils.MetaEqual, utils.MetaNotEqual, utils.MetaIPNet, utils.MetaAPIBan})
 var needsValues utils.StringSet = utils.NewStringSet([]string{utils.MetaString, utils.MetaPrefix,
 	utils.MetaSuffix, utils.MetaTimings, utils.MetaRSR, utils.MetaDestinations,
 	utils.MetaLessThan, utils.MetaLessOrEqual, utils.MetaGreaterThan, utils.MetaGreaterOrEqual,
-	utils.MetaEqual, utils.MetaNotEqual, utils.MetaIPNet})
+	utils.MetaEqual, utils.MetaNotEqual, utils.MetaIPNet, utils.MetaAPIBan})
 
 // NewFilterRule returns a new filter
 func NewFilterRule(rfType, fieldName string, vals []string) (*FilterRule, error) {
@@ -335,6 +335,8 @@ func (fltr *FilterRule) Pass(dDP utils.DataProvider) (result bool, err error) {
 		result, err = fltr.passEqualTo(dDP)
 	case utils.MetaIPNet, utils.MetaNotIPNet:
 		result, err = fltr.passIPNet(dDP)
+	case utils.MetaAPIBan, utils.MetaNotAPIBan:
+		result, err = fltr.passAPIBan(dDP)
 	default:
 		err = utils.ErrPrefixNotErrNotImplemented(fltr.Type)
 	}
@@ -598,6 +600,21 @@ func (fltr *FilterRule) passIPNet(dDP utils.DataProvider) (bool, error) {
 		}
 	}
 	return false, nil
+}
+
+func (fltr *FilterRule) passAPIBan(dDP utils.DataProvider) (bool, error) {
+	strVal, err := fltr.rsrElement.ParseDataProvider(dDP)
+	if err != nil {
+		if err == utils.ErrNotFound {
+			return false, nil
+		}
+		return false, err
+	}
+	if fltr.Values[0] != utils.MetaAll &&
+		fltr.Values[0] != utils.MetaSingle { // force only valid values
+		return false, fmt.Errorf("invalid value for apiban filter: <%s>", fltr.Values[0])
+	}
+	return dm.GetAPIBan(strVal, config.CgrConfig().APIBanCfg().Keys, fltr.Values[0] != utils.MetaAll, true, true)
 }
 
 func newDynamicDP(cfg *config.CGRConfig, connMgr *ConnManager,

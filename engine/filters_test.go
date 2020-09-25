@@ -15,10 +15,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"net/http"
+	"net/http/httptest"
 	"reflect"
 	"testing"
 	"time"
 
+	"github.com/cgrates/baningo"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -1455,5 +1458,108 @@ func TestFilterPassIPNet(t *testing.T) {
 	}
 	if _, err := rf.Pass(cd); err == nil {
 		t.Error(err)
+	}
+}
+
+func TestAPIBan(t *testing.T) {
+	var counter int
+	testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "GET" {
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			return
+		}
+		responses := map[string]struct {
+			code int
+			body []byte
+		}{
+			"/testKey/check/1.2.3.251": {code: http.StatusOK, body: []byte(`{"ipaddress":["1.2.3.251"], "ID":"987654321"}`)},
+			"/testKey/check/1.2.3.254": {code: http.StatusBadRequest, body: []byte(`{"ipaddress":["not blocked"], "ID":"none"}`)},
+		}
+		if val, has := responses[r.URL.EscapedPath()]; has {
+			w.WriteHeader(val.code)
+			if val.body != nil {
+				w.Write(val.body)
+			}
+			return
+		}
+		counter++
+		w.WriteHeader(http.StatusOK)
+		if counter < 2 {
+			_, _ = w.Write([]byte(`{"ipaddress": ["1.2.3.251", "1.2.3.252"], "ID": "100"}`))
+		} else {
+			_, _ = w.Write([]byte(`{"ID": "none"}`))
+			counter = 0
+		}
+	}))
+	defer testServer.Close()
+	baningo.RootURL = testServer.URL + "/"
+
+	dp := utils.MapStorage{
+		utils.MetaReq: utils.MapStorage{
+			"bannedIP":  "1.2.3.251",
+			"bannedIP2": "1.2.3.252",
+			"IP":        "1.2.3.253",
+			"IP2":       "1.2.3.254",
+		},
+	}
+	cfg, _ := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true)
+	dmFilterPass := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	filterS := FilterS{
+		cfg: cfg,
+		dm:  dmFilterPass,
+	}
+	config.CgrConfig().APIBanCfg().Keys = []string{"testKey"}
+	if pass, err := filterS.Pass("cgrates.org", []string{"*apiban:~*req.IP:*all"}, dp); err != nil {
+		t.Fatal(err)
+	} else if pass {
+		t.Error("Expected not to pass")
+	}
+	// from cache
+	if pass, err := filterS.Pass("cgrates.org", []string{"*apiban:~*req.IP:*all"}, dp); err != nil {
+		t.Fatal(err)
+	} else if pass {
+		t.Error("Expected not to pass")
+	}
+	if pass, err := filterS.Pass("cgrates.org", []string{"*apiban:~*req.IP2:*single"}, dp); err != nil {
+		t.Fatal(err)
+	} else if pass {
+		t.Error("Expected not to pass")
+	}
+	Cache.Clear([]string{utils.MetaAPIBan})
+	if pass, err := filterS.Pass("cgrates.org", []string{"*apiban:~*req.bannedIP:*single"}, dp); err != nil {
+		t.Fatal(err)
+	} else if !pass {
+		t.Error("Expected to pass")
+	}
+	if pass, err := filterS.Pass("cgrates.org", []string{"*apiban:~*req.bannedIP2:*all"}, dp); err != nil {
+		t.Fatal(err)
+	} else if !pass {
+		t.Error("Expected to pass")
+	}
+
+	if pass, err := filterS.Pass("cgrates.org", []string{"*apiban:~*req.notFound:*all"}, dp); err != nil {
+		t.Fatal(err)
+	} else if pass {
+		t.Error("Expected not to pass")
+	}
+	expErr := "invalid value for apiban filter: <*any>"
+	if _, err := filterS.Pass("cgrates.org", []string{"*apiban:~*req.IP:*any"}, dp); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error %s received: %v", expErr, err)
+	}
+	baningo.RootURL = "http://127.0.0.1:80/"
+
+	expErr = `Get "http://127.0.0.1:80/testKey/banned/100": dial tcp 127.0.0.1:80: connect: connection refused`
+	if _, err := filterS.Pass("cgrates.org", []string{"*apiban:~*req.IP:*all"}, dp); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error %s received: %v", expErr, err)
+	}
+	expErr = `Get "http://127.0.0.1:80/testKey/check/1.2.3.253": dial tcp 127.0.0.1:80: connect: connection refused`
+	if _, err := filterS.Pass("cgrates.org", []string{"*apiban:~*req.IP:*single"}, dp); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error %s received: %v", expErr, err)
+	}
+
+	expErr = `invalid converter value in string: <*>, err: unsupported converter definition: <*>`
+	if _, err := filterS.Pass("cgrates.org", []string{"*apiban:~*req.<~*req.IP>{*}:*all"}, dp); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error %s received: %v", expErr, err)
 	}
 }

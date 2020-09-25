@@ -290,6 +290,9 @@ func TestCacheJsonCfg(t *testing.T) {
 			utils.CacheTBLTPRateProfiles: {Limit: utils.IntPointer(-1),
 				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 				Replicate: utils.BoolPointer(false)},
+			utils.MetaAPIBan: {Limit: utils.IntPointer(-1),
+				Ttl: utils.StringPointer("2m"), Static_ttl: utils.BoolPointer(false),
+				Replicate: utils.BoolPointer(false)},
 		},
 		Replication_conns: &[]string{},
 	}
