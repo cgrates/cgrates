@@ -25,39 +25,26 @@ import (
 )
 
 func TestApierCfgloadFromJsonCfg(t *testing.T) {
-	var aCfg, expected ApierCfg
-	if err := aCfg.loadFromJsonCfg(nil); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(aCfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, aCfg)
+	jsonCfg := &ApierJsonCfg{
+		Enabled:          utils.BoolPointer(false),
+		Caches_conns:     &[]string{"*internal:*caches"},
+		Scheduler_conns:  &[]string{"*conn1"},
+		Attributes_conns: &[]string{"*internal:*attributes"},
+		Ees_conns:        &[]string{"*conn1", "*conn2"},
 	}
-	if err := aCfg.loadFromJsonCfg(new(ApierJsonCfg)); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(aCfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, aCfg)
-	}
-	cfgJSONStr := `{
-	"apiers": {
-		"enabled": false,
-		"caches_conns":["*internal"],
-		"scheduler_conns": [],
-		"attributes_conns": [],
-	},
-}`
-	expected = ApierCfg{
+	expected := &ApierCfg{
 		Enabled:         false,
 		CachesConns:     []string{"*internal:*caches"},
-		SchedulerConns:  []string{},
-		AttributeSConns: []string{},
+		SchedulerConns:  []string{"*conn1"},
+		AttributeSConns: []string{"*internal:*attributes"},
+		EEsConns:        []string{"*conn1", "*conn2"},
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if jsnCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if jsnaCfg, err := jsnCfg.ApierCfgJson(); err != nil {
+	} else if err = jsnCfg.apier.loadFromJsonCfg(jsonCfg); err != nil {
 		t.Error(err)
-	} else if err = aCfg.loadFromJsonCfg(jsnaCfg); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expected, aCfg) {
-		t.Errorf("Expected: %+v , recived: %+v", expected, aCfg)
+	} else if !reflect.DeepEqual(expected, jsnCfg.apier) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsnCfg.apier))
 	}
 }
 
