@@ -1109,7 +1109,7 @@ func (sS *SessionS) newSession(cgrEv *utils.CGREventWithOpts, resID, clntConnID 
 		CGRID:         cgrID,
 		Tenant:        cgrEv.Tenant,
 		ResourceID:    resID,
-		EventStart:    cgrEv.Event,
+		EventStart:    engine.MapEvent(cgrEv.Event).Clone(), // decouple the event from the request so we can avoid concurrency with debit and ttl
 		OptsStart:     engine.MapEvent(cgrEv.Opts).Clone(),
 		ClientConnID:  clntConnID,
 		DebitInterval: dbtItval,
@@ -1124,7 +1124,7 @@ func (sS *SessionS) newSession(cgrEv *utils.CGREventWithOpts, resID, clntConnID 
 	}
 	s.SRuns = make([]*SRun, len(chrgrs))
 	for i, chrgr := range chrgrs {
-		me := engine.MapEvent(chrgr.CGREvent.Event).Clone()
+		me := engine.MapEvent(chrgr.CGREvent.Event)
 		startTime := me.GetTimeIgnoreErrors(utils.AnswerTime,
 			sS.cgrCfg.GeneralCfg().DefaultTimezone)
 		if startTime.IsZero() { // AnswerTime not parsable, try SetupTime
@@ -2185,7 +2185,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.ClientConnector,
 	if args.GetAttributes {
 		rplyAttr, err := sS.processAttributes(args.CGREvent, args.AttributeIDs, args.Opts)
 		if err == nil {
-			args.CGREvent = rplyAttr.CGREvent.Clone() // avoid concurrency with rply.Attributes
+			args.CGREvent = rplyAttr.CGREvent
 			args.Opts = rplyAttr.Opts
 			rply.Attributes = &rplyAttr
 		} else if err.Error() != utils.ErrNotFound.Error() {
@@ -2208,8 +2208,8 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.ClientConnector,
 			Units:   1,
 		}
 		var allocMessage string
-		if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().ResSConns, nil, utils.ResourceSv1AllocateResources,
-			attrRU, &allocMessage); err != nil {
+		if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().ResSConns, nil,
+			utils.ResourceSv1AllocateResources, attrRU, &allocMessage); err != nil {
 			return utils.NewErrResourceS(err)
 		}
 		rply.ResourceAllocation = &allocMessage
