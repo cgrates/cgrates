@@ -25,43 +25,30 @@ import (
 )
 
 func TestHTTPCfgloadFromJsonCfg(t *testing.T) {
-	var httpcfg, expected HTTPCfg
-	if err := httpcfg.loadFromJsonCfg(nil); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(httpcfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, httpcfg)
+	cfgJSONStr := &HTTPJsonCfg{
+		Json_rpc_url:              utils.StringPointer("/jsonrpc"),
+		Ws_url:                    utils.StringPointer("/ws"),
+		Dispatchers_registrar_url: utils.StringPointer("/randomUrl"),
+		Freeswitch_cdrs_url:       utils.StringPointer("/freeswitch_json"),
+		Http_Cdrs:                 utils.StringPointer("/cdr_http"),
+		Use_basic_auth:            utils.BoolPointer(false),
+		Auth_users:                utils.MapStringStringPointer(map[string]string{}),
 	}
-	if err := httpcfg.loadFromJsonCfg(new(HTTPJsonCfg)); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(httpcfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, httpcfg)
+	expected := &HTTPCfg{
+		HTTPJsonRPCURL:          "/jsonrpc",
+		HTTPWSURL:               "/ws",
+		DispatchersRegistrarURL: "/randomUrl",
+		HTTPFreeswitchCDRsURL:   "/freeswitch_json",
+		HTTPCDRsURL:             "/cdr_http",
+		HTTPUseBasicAuth:        false,
+		HTTPAuthUsers:           map[string]string{},
 	}
-	cfgJSONStr := `{
-"http": {										// HTTP server configuration
-	"json_rpc_url": "/jsonrpc",					// JSON RPC relative URL ("" to disable)
-	"ws_url": "/ws",							// WebSockets relative URL ("" to disable)
-	"freeswitch_cdrs_url": "/freeswitch_json",	// Freeswitch CDRS relative URL ("" to disable)
-	"http_cdrs": "/cdr_http",					// CDRS relative URL ("" to disable)
-	"use_basic_auth": false,					// use basic authentication
-	"auth_users": {},							// basic authentication usernames and base64-encoded passwords (eg: { "username1": "cGFzc3dvcmQ=", "username2": "cGFzc3dvcmQy "})
-	},
-}`
-	expected = HTTPCfg{
-		HTTPJsonRPCURL:        "/jsonrpc",
-		HTTPWSURL:             "/ws",
-		HTTPFreeswitchCDRsURL: "/freeswitch_json",
-		HTTPCDRsURL:           "/cdr_http",
-		HTTPUseBasicAuth:      false,
-		HTTPAuthUsers:         map[string]string{},
-	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cfgJsn, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if jsnhttpCfg, err := jsnCfg.HttpJsonCfg(); err != nil {
+	} else if err = cfgJsn.httpCfg.loadFromJsonCfg(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if err = httpcfg.loadFromJsonCfg(jsnhttpCfg); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expected, httpcfg) {
-		t.Errorf("Expected: %+v , recived: %+v", expected, httpcfg)
+	} else if !reflect.DeepEqual(expected, cfgJsn.httpCfg) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(cfgJsn.httpCfg))
 	}
 }
 
