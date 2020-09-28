@@ -2421,7 +2421,7 @@ func (sS *SessionS) BiRPCv1UpdateSession(clnt rpcclient.ClientConnector,
 	if args.GetAttributes {
 		rplyAttr, err := sS.processAttributes(args.CGREvent, args.AttributeIDs, args.Opts)
 		if err == nil {
-			args.CGREvent = rplyAttr.CGREvent.Clone()
+			args.CGREvent = rplyAttr.CGREvent
 			args.Opts = rplyAttr.Opts
 			rply.Attributes = &rplyAttr
 		} else if err.Error() != utils.ErrNotFound.Error() {
@@ -2452,7 +2452,7 @@ func (sS *SessionS) BiRPCv1UpdateSession(clnt rpcclient.ClientConnector,
 			}
 		}
 		var sRunsUsage map[string]time.Duration
-		if sRunsUsage, err = sS.updateSession(s, ev.Clone(), args.Opts, false); err != nil {
+		if sRunsUsage, err = sS.updateSession(s, ev, args.Opts, false); err != nil {
 			return utils.NewErrRALs(err)
 		}
 		var maxUsage time.Duration
@@ -2907,7 +2907,7 @@ func (sS *SessionS) BiRPCv1ProcessMessage(clnt rpcclient.ClientConnector,
 		var maxUsage time.Duration
 		if maxUsage, err = sS.chargeEvent(&utils.CGREventWithOpts{
 			CGREvent: args.CGREvent,
-			Opts:     engine.MapEvent(args.Opts).Clone(),
+			Opts:     args.Opts,
 		}, args.ForceDuration); err != nil {
 			return err
 		}
@@ -3111,7 +3111,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 					return utils.NewErrAttributeS(err)
 				}
 			} else {
-				cgrEv.CGREvent = rplyAttr.CGREvent.Clone()
+				cgrEv.CGREvent = rplyAttr.CGREvent
 				cgrEv.Opts = rplyAttr.Opts
 				rply.Attributes[runID] = &rplyAttr
 			}
@@ -3521,7 +3521,7 @@ func (sS *SessionS) BiRPCv1GetCost(clnt rpcclient.ClientConnector,
 		rplyAttr, err := sS.processAttributes(args.CGREvent,
 			argsFlagsWithParams.ParamsSlice(utils.MetaAttributes, utils.MetaIDs), args.Opts)
 		if err == nil {
-			args.CGREvent = rplyAttr.CGREvent.Clone()
+			args.CGREvent = rplyAttr.CGREvent
 			args.Opts = rplyAttr.Opts
 			rply.Attributes = &rplyAttr
 		} else if err.Error() != utils.ErrNotFound.Error() {
@@ -3529,7 +3529,7 @@ func (sS *SessionS) BiRPCv1GetCost(clnt rpcclient.ClientConnector,
 		}
 	}
 	//compose the CallDescriptor with Args
-	me := engine.MapEvent(args.CGREvent.Event).Clone()
+	me := engine.MapEvent(args.CGREvent.Event)
 	startTime := me.GetTimeIgnoreErrors(utils.AnswerTime,
 		sS.cgrCfg.GeneralCfg().DefaultTimezone)
 	if startTime.IsZero() { // AnswerTime not parsable, try SetupTime
