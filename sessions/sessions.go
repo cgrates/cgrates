@@ -1239,6 +1239,7 @@ func (sS *SessionS) transitSState(cgrID string, psv bool) (s *Session) {
 		return
 	}
 	s = ss[0]
+	s.Lock()
 	sS.unregisterSession(cgrID, !psv)
 	sS.registerSession(s, psv)
 	if !psv {
@@ -1247,6 +1248,7 @@ func (sS *SessionS) transitSState(cgrID string, psv bool) (s *Session) {
 		s.stopSTerminator()
 		s.stopDebitLoops()
 	}
+	s.Unlock()
 	return
 }
 
@@ -1702,8 +1704,8 @@ func (sS *SessionS) BiRPCv1SetPassiveSession(clnt rpcclient.ClientConnector,
 	if aSs := sS.getSessions(s.CGRID, false); len(aSs) != 0 { // found active session, transit to passive
 		aSs[0].Lock()
 		sS.unregisterSession(s.CGRID, false)
-		s.stopSTerminator()
-		s.stopDebitLoops()
+		aSs[0].stopSTerminator()
+		aSs[0].stopDebitLoops()
 		aSs[0].Unlock()
 	}
 	sS.registerSession(s, true)
@@ -2235,7 +2237,10 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.ClientConnector,
 		if err != nil {
 			return err
 		}
-		if s.debitStop != nil { //active debit
+		s.RLock() // avoid concurrency with activeDebit
+		isPrepaid := s.debitStop != nil
+		s.RUnlock()
+		if isPrepaid { //active debit
 			rply.MaxUsage = &sS.cgrCfg.SessionSCfg().MaxCallDuration
 		} else {
 			var sRunsUsage map[string]time.Duration
@@ -3377,7 +3382,10 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 					return err
 				}
 				sRunsMaxUsage := make(map[string]time.Duration)
-				if s.debitStop != nil { //active debit
+				s.RLock()
+				isPrepaid := s.debitStop != nil
+				s.RUnlock()
+				if isPrepaid { //active debit
 					for _, sr := range s.SRuns {
 						sRunsMaxUsage[sr.CD.RunID] = sS.cgrCfg.SessionSCfg().MaxCallDuration
 					}
