@@ -381,6 +381,7 @@ func testSSv1ItInitiateSession(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "TestSSv1ItInitiateSession",
 				Event: map[string]interface{}{
+					utils.CGRID:       "5668666d6b8e44eb949042f25ce0796ec3592ff9",
 					utils.Tenant:      "cgrates.org",
 					utils.ToR:         utils.VOICE,
 					utils.Account:     "1001",
@@ -498,6 +499,7 @@ func testSSv1ItUpdateSession(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "TestSSv1ItUpdateSession",
 				Event: map[string]interface{}{
+					utils.CGRID:       "5668666d6b8e44eb949042f25ce0796ec3592ff9",
 					utils.Tenant:      "cgrates.org",
 					utils.ToR:         utils.VOICE,
 					utils.Account:     "1001",
@@ -809,6 +811,7 @@ func testSSv1ItForceUpdateSession(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "TestSSv1ItUpdateSession",
 				Event: map[string]interface{}{
+					utils.CGRID:       "70876773b294f0e1476065f8d18bb9ec6bcb3d5f",
 					utils.Tenant:      "cgrates.org",
 					utils.Category:    "call",
 					utils.ToR:         utils.VOICE,
