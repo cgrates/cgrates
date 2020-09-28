@@ -1053,7 +1053,7 @@ func (sS *SessionS) forkSession(s *Session, forceDuration bool) (err error) {
 	}
 	s.SRuns = make([]*SRun, len(chrgrs))
 	for i, chrgr := range chrgrs {
-		me := engine.MapEvent(chrgr.CGREvent.Event).Clone()
+		me := engine.MapEvent(chrgr.CGREvent.Event)
 		startTime := me.GetTimeIgnoreErrors(utils.AnswerTime,
 			sS.cgrCfg.GeneralCfg().DefaultTimezone)
 		if startTime.IsZero() { // AnswerTime not parsable, try SetupTime
@@ -1347,7 +1347,7 @@ func (sS *SessionS) initSession(tnt string, evStart engine.MapEvent, clntConnID 
 		CGRID:         cgrID,
 		Tenant:        tnt,
 		ResourceID:    resID,
-		EventStart:    evStart,
+		EventStart:    evStart.Clone(),
 		ClientConnID:  clntConnID,
 		DebitInterval: dbtItval,
 		ArgDispatcher: argDisp,
@@ -2139,7 +2139,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.ClientConnector,
 		rplyAttr, err := sS.processAttributes(args.CGREvent, args.ArgDispatcher,
 			args.AttributeIDs)
 		if err == nil {
-			args.CGREvent = rplyAttr.CGREvent.Clone() // avoid concurrency with rply.Attributes
+			args.CGREvent = rplyAttr.CGREvent
 			rply.Attributes = &rplyAttr
 		} else if err.Error() != utils.ErrNotFound.Error() {
 			return utils.NewErrAttributeS(err)
@@ -2362,7 +2362,7 @@ func (sS *SessionS) BiRPCv1UpdateSession(clnt rpcclient.ClientConnector,
 		rplyAttr, err := sS.processAttributes(args.CGREvent, args.ArgDispatcher,
 			args.AttributeIDs)
 		if err == nil {
-			args.CGREvent = rplyAttr.CGREvent.Clone()
+			args.CGREvent = rplyAttr.CGREvent
 			rply.Attributes = &rplyAttr
 		} else if err.Error() != utils.ErrNotFound.Error() {
 			return utils.NewErrAttributeS(err)
@@ -3049,7 +3049,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 		rplyAttr, err := sS.processAttributes(args.CGREvent, args.ArgDispatcher,
 			argsFlagsWithParams.ParamsSlice(utils.MetaAttributes))
 		if err == nil {
-			args.CGREvent = rplyAttr.CGREvent.Clone()
+			args.CGREvent = rplyAttr.CGREvent
 			rply.Attributes = &rplyAttr
 		} else if err.Error() != utils.ErrNotFound.Error() {
 			return utils.NewErrAttributeS(err)
