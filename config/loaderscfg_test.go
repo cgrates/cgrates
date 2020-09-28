@@ -26,41 +26,34 @@ import (
 )
 
 func TestLoaderSCfgloadFromJsonCfg(t *testing.T) {
-	var loadscfg, expected LoaderSCfg
-	if err := loadscfg.loadFromJsonCfg(nil, nil, utils.INFIELD_SEP); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(loadscfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, loadscfg)
-	}
-	if err := loadscfg.loadFromJsonCfg(new(LoaderJsonCfg), nil, utils.INFIELD_SEP); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(loadscfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, loadscfg)
-	}
-	cfgJSONStr := `{
-"loaders": [
-	{
-		"id": "*default",									// identifier of the Loader
-		"enabled": false,									// starts as service: <true|false>.
-		"tenant": "cgrates.org",							// tenant used in filterS.Pass
-		"dry_run": false,									// do not send the CDRs to CDRS, just parse them
-		"run_delay": 0,										// sleep interval in seconds between consecutive runs, 0 to use automation via inotify
-		"lock_filename": ".cgr.lck",						// Filename containing concurrency lock in case of delayed processing
-		"caches_conns": ["*internal"],
-		"field_separator": ",",								// separator used in case of csv files
-		"tp_in_dir": "/var/spool/cgrates/loader/in",		// absolute path towards the directory where the CDRs are stored
-		"tp_out_dir": "/var/spool/cgrates/loader/out",		// absolute path towards the directory where processed CDRs will be moved
-		"data":[											// data profiles to load
+	cfgJSONStr := &LoaderJsonCfg{
+		ID:              utils.StringPointer(utils.MetaDefault),
+		Enabled:         utils.BoolPointer(true),
+		Tenant:          utils.StringPointer("cgrates.org"),
+		Dry_run:         utils.BoolPointer(true),
+		Run_delay:       utils.IntPointer(10),
+		Lock_filename:   utils.StringPointer(".cgr.lck"),
+		Caches_conns:    &[]string{utils.MetaInternal},
+		Field_separator: utils.StringPointer(","),
+		Tp_in_dir:       utils.StringPointer("/var/spool/cgrates/loader/in"),
+		Tp_out_dir:      utils.StringPointer("/var/spool/cgrates/loader/out"),
+		Data: &[]*LoaderJsonDataType{
 			{
-				"type": "*attributes",						// data source type
-				"file_name": "Attributes.csv",				// file name in the tp_in_dir
-				"fields": [
-					{"tag": "TenantID", "path": "Tenant", "type": "*composed", "value": "~0", "mandatory": true},
-				],
-			},]
-		}
-	]
-}`
+				Type:      utils.StringPointer(utils.MetaAttributes),
+				File_name: utils.StringPointer("Attributes.csv"),
+				Fields: &[]*FcTemplateJsonCfg{
+					{
+						Tag:       utils.StringPointer("TenantID"),
+						Path:      utils.StringPointer("Tenant"),
+						Type:      utils.StringPointer(utils.META_COMPOSED),
+						Value:     utils.StringPointer("~0"),
+						Mandatory: utils.BoolPointer(true),
+						Layout:    utils.StringPointer(string(time.RFC3339)),
+					},
+				},
+			},
+		},
+	}
 	val, err := NewRSRParsers("~0", utils.INFIELD_SEP)
 	if err != nil {
 		t.Error(err)
@@ -69,41 +62,47 @@ func TestLoaderSCfgloadFromJsonCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	expected = LoaderSCfg{
-		Id:             utils.MetaDefault,
-		Tenant:         ten,
-		LockFileName:   ".cgr.lck",
-		CacheSConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)},
-		FieldSeparator: ",",
-		TpInDir:        "/var/spool/cgrates/loader/in",
-		TpOutDir:       "/var/spool/cgrates/loader/out",
-		Data: []*LoaderDataType{
-			{
-				Type:     "*attributes",
-				Filename: "Attributes.csv",
-				Fields: []*FCTemplate{
-					{
-						Tag:       "TenantID",
-						Path:      "Tenant",
-						pathSlice: []string{"Tenant"},
-						pathItems: utils.PathItems{{Field: "Tenant"}},
-						Type:      "*composed",
-						Value:     val,
-						Mandatory: true,
-						Layout:    time.RFC3339,
+	expected := LoaderSCfgs{
+		{
+			Id:             utils.MetaDefault,
+			Tenant:         ten,
+			LockFileName:   ".cgr.lck",
+			CacheSConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)},
+			FieldSeparator: ",",
+			TpInDir:        "/var/spool/cgrates/loader/in",
+			TpOutDir:       "/var/spool/cgrates/loader/out",
+			Data: []*LoaderDataType{
+				{
+					Type:     "*attributes",
+					Filename: "Attributes.csv",
+					Fields: []*FCTemplate{
+						{
+							Tag:       "TenantID",
+							Path:      "Tenant",
+							pathSlice: []string{"Tenant"},
+							pathItems: utils.PathItems{{Field: "Tenant"}},
+							Type:      "*composed",
+							Value:     val,
+							Mandatory: true,
+							Layout:    time.RFC3339,
+						},
 					},
 				},
 			},
 		},
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if jsnCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if jsnLoadersCfg, err := jsnCfg.LoaderJsonCfg(); err != nil {
+	} else if err = jsnCfg.loaderCfg.LoadFromJsonSlice(cfgJSONStr, jsnCfg.templates, jsnCfg.generalCfg.RSRSep); err != nil {
 		t.Error(err)
-	} else if err = loadscfg.loadFromJsonCfg(jsnLoadersCfg[0], nil, utils.INFIELD_SEP); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expected, loadscfg) {
-		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(loadscfg))
+	} else if !reflect.DeepEqual(expected[0].Tenant, jsnCfg.loaderCfg[0].Tenant) {
+		t.Errorf("Expected %+v \n, received %+v", expected[0].Tenant, jsnCfg.loaderCfg[0].Tenant)
+	} else if !reflect.DeepEqual(expected[0].CacheSConns, jsnCfg.loaderCfg[0].CacheSConns) {
+		t.Errorf("Expected %+v \n, received %+v", expected[0].CacheSConns, jsnCfg.loaderCfg[0].CacheSConns)
+	} else if !reflect.DeepEqual(expected[0].Data[0].Filename, jsnCfg.loaderCfg[0].Data[0].Filename) {
+		t.Errorf("Expected %+v \n, received %+v", expected[0].Data[0].Filename, jsnCfg.loaderCfg[0].Data[0].Filename)
+	} else if !reflect.DeepEqual(expected[0].Data[0].Fields[0], jsnCfg.loaderCfg[0].Data[0].Fields[0]) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected[0].Data[0].Fields[0]), utils.ToJSON(jsnCfg.loaderCfg[0].Data[0].Fields[0]))
 	}
 }
 
