@@ -25,40 +25,32 @@ import (
 )
 
 func TestKamAgentCfgloadFromJsonCfg(t *testing.T) {
-	var kamagcfg, expected KamAgentCfg
-	if err := kamagcfg.loadFromJsonCfg(nil); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(kamagcfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, kamagcfg)
+	cfgJson := &KamAgentJsonCfg{
+		Enabled:        utils.BoolPointer(true),
+		Sessions_conns: &[]string{"*internal"},
+		Create_cdr:     utils.BoolPointer(true),
+		Evapi_conns: &[]*KamConnJsonCfg{
+			{
+				Alias:      utils.StringPointer("randomAlias"),
+				Address:    utils.StringPointer("127.0.0.1:8448"),
+				Reconnects: utils.IntPointer(10),
+			},
+		},
+		Timezone: utils.StringPointer("Local"),
 	}
-	if err := kamagcfg.loadFromJsonCfg(new(KamAgentJsonCfg)); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(kamagcfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, kamagcfg)
-	}
-	cfgJSONStr := `{
-"kamailio_agent": {
-	"enabled": false,						// starts SessionManager service: <true|false>
-	"sessions_conns": ["*internal"],
-	"create_cdr": false,					// create CDR out of events and sends them to CDRS component
-	"timezone": "",							// timezone of the Kamailio server
-	"evapi_conns":[							// instantiate connections to multiple Kamailio servers
-		{"address": "127.0.0.1:8448", "reconnects": 5}
-	],
-},
-}`
-	expected = KamAgentCfg{
+	expected := &KamAgentCfg{
+		Enabled:       true,
 		SessionSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
-		EvapiConns:    []*KamConnCfg{{Address: "127.0.0.1:8448", Reconnects: 5}},
+		CreateCdr:     true,
+		EvapiConns:    []*KamConnCfg{{Address: "127.0.0.1:8448", Reconnects: 10, Alias: "randomAlias"}},
+		Timezone:      "Local",
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if jsnCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if jsnKamAgCfg, err := jsnCfg.KamAgentJsonCfg(); err != nil {
+	} else if err = jsnCfg.kamAgentCfg.loadFromJsonCfg(cfgJson); err != nil {
 		t.Error(err)
-	} else if err = kamagcfg.loadFromJsonCfg(jsnKamAgCfg); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expected, kamagcfg) {
-		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(kamagcfg))
+	} else if !reflect.DeepEqual(expected, jsnCfg.kamAgentCfg) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsnCfg.kamAgentCfg))
 	}
 }
 
