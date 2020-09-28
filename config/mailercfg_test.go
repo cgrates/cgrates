@@ -25,39 +25,24 @@ import (
 )
 
 func TestMailerCfgloadFromJsonCfg(t *testing.T) {
-	var mailcfg, expected MailerCfg
-	if err := mailcfg.loadFromJsonCfg(nil); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(mailcfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, mailcfg)
+	cfgJSON := &MailerJsonCfg{
+		Server:        utils.StringPointer("localhost"),
+		Auth_user:     utils.StringPointer("cgrates"),
+		Auth_password: utils.StringPointer("CGRateS.org"),
+		From_address:  utils.StringPointer("cgr-mailer@localhost.localdomain"),
 	}
-	if err := mailcfg.loadFromJsonCfg(new(MailerJsonCfg)); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(mailcfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, mailcfg)
-	}
-	cfgJSONStr := `{
-"mailer": {
-	"server": "localhost",								// the server to use when sending emails out
-	"auth_user": "cgrates",								// authenticate to email server using this user
-	"auth_password": "CGRateS.org",						// authenticate to email server with this password
-	"from_address": "cgr-mailer@localhost.localdomain"	// from address used when sending emails out
-	},
-}`
-	expected = MailerCfg{
+	expected := &MailerCfg{
 		MailerServer:   "localhost",
 		MailerAuthUser: "cgrates",
 		MailerAuthPass: "CGRateS.org",
 		MailerFromAddr: "cgr-mailer@localhost.localdomain",
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if jsnCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if jsnMailCfg, err := jsnCfg.MailerJsonCfg(); err != nil {
+	} else if err = jsnCfg.mailerCfg.loadFromJsonCfg(cfgJSON); err != nil {
 		t.Error(err)
-	} else if err = mailcfg.loadFromJsonCfg(jsnMailCfg); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expected, mailcfg) {
-		t.Errorf("Expected: %+v , recived: %+v", expected, mailcfg)
+	} else if !reflect.DeepEqual(expected, jsnCfg.mailerCfg) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsnCfg.mailerCfg))
 	}
 }
 
