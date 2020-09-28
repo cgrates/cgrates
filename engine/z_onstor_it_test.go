@@ -1248,7 +1248,7 @@ func testOnStorITResource(t *testing.T) {
 		true, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.SetResource(res); err != nil {
+	if err := onStor.SetResource(res, nil, 0, true); err != nil {
 		t.Error(err)
 	}
 	//get from database
@@ -1266,7 +1266,7 @@ func testOnStorITResource(t *testing.T) {
 	}
 	//update
 	res.TTLIdx = []string{"RU1", "RU2"}
-	if err := onStor.SetResource(res); err != nil {
+	if err := onStor.SetResource(res, nil, 0, true); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(sleepDelay)

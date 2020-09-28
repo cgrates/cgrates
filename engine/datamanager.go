@@ -1343,10 +1343,36 @@ func (dm *DataManager) GetResource(tenant, id string, cacheRead, cacheWrite bool
 	return
 }
 
-func (dm *DataManager) SetResource(rs *Resource) (err error) {
+func (dm *DataManager) SetResource(rs *Resource, ttl *time.Duration, usageLimit float64, simpleSet bool) (err error) {
 	if dm == nil {
 		err = utils.ErrNoDatabaseConn
 		return
+	}
+	if !simpleSet {
+		// do stuff
+		tnt := rs.Tenant // save the tenant
+		id := rs.ID      // save the ID from the initial StatQueue
+		// handle metrics for statsQueue
+		rs, err = dm.GetResource(tnt, id, true, false, utils.NonTransactional)
+		if err != nil && err != utils.ErrNotFound {
+			return
+		}
+		if err == utils.ErrNotFound {
+			rs = &Resource{Tenant: tnt, ID: id, Usages: make(map[string]*ResourceUsage)}
+			// if the resource didn't exists simply initiate the Usages
+		} else {
+			rs.ttl = ttl
+			rs.removeExpiredUnits()
+			for rsUsage, _ := range rs.Usages {
+				if rs.totalUsage() > usageLimit {
+					if err = rs.clearUsage(rsUsage); err != nil {
+						return
+					}
+				} else {
+					break
+				}
+			}
+		}
 	}
 	if err = dm.DataDB().SetResourceDrv(rs); err != nil {
 		return
