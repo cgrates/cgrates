@@ -26,40 +26,32 @@ import (
 )
 
 func TestLoaderCgrCfgloadFromJsonCfg(t *testing.T) {
-	var loadscfg, expected LoaderCgrCfg
-	if err := loadscfg.loadFromJsonCfg(nil); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(loadscfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, loadscfg)
+	cfgJSON := &LoaderCfgJson{
+		Tpid:             utils.StringPointer("randomID"),
+		Data_path:        utils.StringPointer("./"),
+		Disable_reverse:  utils.BoolPointer(true),
+		Field_separator:  utils.StringPointer(";"),
+		Caches_conns:     &[]string{utils.MetaInternal},
+		Scheduler_conns:  &[]string{utils.MetaInternal},
+		Gapi_credentials: &json.RawMessage{12, 13, 60},
+		Gapi_token:       &json.RawMessage{13, 16},
 	}
-	if err := loadscfg.loadFromJsonCfg(new(LoaderCfgJson)); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(loadscfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, loadscfg)
+	expected := &LoaderCgrCfg{
+		TpID:            "randomID",
+		DataPath:        "./",
+		DisableReverse:  true,
+		FieldSeparator:  rune(';'),
+		CachesConns:     []string{"*internal:*caches"},
+		SchedulerConns:  []string{"*internal:*scheduler"},
+		GapiCredentials: json.RawMessage{12, 13, 60},
+		GapiToken:       json.RawMessage{13, 16},
 	}
-	cfgJSONStr := `{
-"loader": {									// loader for tariff plans out of .csv files
-	"tpid": "",								// tariff plan identificator
-	"data_path": "",						// path towards tariff plan files
-	"disable_reverse": false,				// disable reverse computing
-	"field_separator": ";",					// separator used in case of csv files
-	"caches_conns":["*localhost"],
-	"scheduler_conns": ["*localhost"],
-},
-}`
-	expected = LoaderCgrCfg{
-		FieldSeparator: rune(';'),
-		CachesConns:    []string{utils.MetaLocalHost},
-		SchedulerConns: []string{utils.MetaLocalHost},
-	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if jsnCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if jsnLoadersCfg, err := jsnCfg.LoaderCfgJson(); err != nil {
+	} else if err = jsnCfg.loaderCgrCfg.loadFromJsonCfg(cfgJSON); err != nil {
 		t.Error(err)
-	} else if err = loadscfg.loadFromJsonCfg(jsnLoadersCfg); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expected, loadscfg) {
-		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(loadscfg))
+	} else if !reflect.DeepEqual(expected, jsnCfg.loaderCgrCfg) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsnCfg.loaderCgrCfg))
 	}
 }
 
