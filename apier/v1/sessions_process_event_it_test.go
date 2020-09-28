@@ -230,6 +230,7 @@ func testSSv1ItProcessEventAuth(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "testSSv1ItProcessEventAuth",
 				Event: map[string]interface{}{
+					utils.CGRID:       "4be779c004d9f784e836db9ffd41b50319d71fe8",
 					utils.Tenant:      "cgrates.org",
 					utils.ToR:         utils.VOICE,
 					utils.Account:     "1001",
@@ -306,6 +307,7 @@ func testSSv1ItProcessEventInitiateSession(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "testSSv1ItProcessEventInitiateSession",
 				Event: map[string]interface{}{
+					utils.CGRID:       "4be779c004d9f784e836db9ffd41b50319d71fe8",
 					utils.Tenant:      "cgrates.org",
 					utils.ToR:         utils.VOICE,
 					utils.Account:     "1001",
@@ -372,6 +374,7 @@ func testSSv1ItProcessEventUpdateSession(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "testSSv1ItProcessEventUpdateSession",
 				Event: map[string]interface{}{
+					utils.CGRID:       "4be779c004d9f784e836db9ffd41b50319d71fe8",
 					utils.Tenant:      "cgrates.org",
 					utils.ToR:         utils.VOICE,
 					utils.Account:     "1001",
