@@ -28,6 +28,7 @@ require (
 	github.com/cgrates/sipingo v1.0.1-0.20200514112313-699ebc1cdb8e
 	github.com/creack/pty v1.1.11
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/elastic/go-elasticsearch v0.0.0
 	github.com/ericlagergren/decimal v0.0.0-20191206042408-88212e6cfca9
 	github.com/fiorix/go-diameter/v4 v4.0.1
 	github.com/fortytw2/leaktest v1.3.0 // indirect

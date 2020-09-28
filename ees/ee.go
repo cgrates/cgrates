@@ -52,6 +52,8 @@ func NewEventExporter(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.Filt
 		return NewPosterJSONMapEE(cgrCfg, cfgIdx, filterS, dc)
 	case utils.MetaVirt:
 		return NewVirtualExporter(cgrCfg, cfgIdx, filterS, dc)
+	case utils.MetaElastic:
+		return NewElasticExporter(cgrCfg, cfgIdx, filterS, dc)
 	default:
 		return nil, fmt.Errorf("unsupported exporter type: <%s>", cgrCfg.EEsCfg().Exporters[cfgIdx].Type)
 	}
