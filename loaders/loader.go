@@ -335,10 +335,13 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 				if err := ldr.dm.SetResourceProfile(res, true); err != nil {
 					return err
 				}
+				var ttl *time.Duration
+				if res.UsageTTL > 0 {
+					ttl = &res.UsageTTL
+				}
 				if err := ldr.dm.SetResource(
 					&engine.Resource{Tenant: res.Tenant,
-						ID:     res.ID,
-						Usages: make(map[string]*engine.ResourceUsage)}); err != nil {
+						ID: res.ID}, ttl, res.Limit, false); err != nil {
 					return err
 				}
 				cacheArgs[utils.ResourceProfileIDs] = ids

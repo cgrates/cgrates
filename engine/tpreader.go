@@ -1092,16 +1092,10 @@ func (tpr *TpReader) LoadResourceProfilesFiltered(tag string) (err error) {
 		if err = verifyInlineFilterS(rl.FilterIDs); err != nil {
 			return
 		}
+		tpr.resources = append(tpr.resources, &utils.TenantID{Tenant: rl.Tenant, ID: rl.ID})
 		mapRsPfls[utils.TenantID{Tenant: rl.Tenant, ID: rl.ID}] = rl
 	}
 	tpr.resProfiles = mapRsPfls
-	for tntID := range mapRsPfls {
-		if has, err := tpr.dm.HasData(utils.ResourcesPrefix, tntID.ID, tntID.Tenant); err != nil {
-			return err
-		} else if !has {
-			tpr.resources = append(tpr.resources, &utils.TenantID{Tenant: tntID.Tenant, ID: tntID.ID})
-		}
-	}
 	return nil
 }
 
@@ -1579,7 +1573,24 @@ func (tpr *TpReader) WriteToDatabase(verbose, disable_reverse bool) (err error) 
 		log.Print("Resources:")
 	}
 	for _, rTid := range tpr.resources {
-		if err = tpr.dm.SetResource(&Resource{Tenant: rTid.Tenant, ID: rTid.ID, Usages: make(map[string]*ResourceUsage)}); err != nil {
+		var ttl *time.Duration
+		if tpr.resProfiles[*rTid].UsageTTL != utils.EmptyString {
+			ttl = new(time.Duration)
+			if *ttl, err = utils.ParseDurationWithNanosecs(tpr.resProfiles[*rTid].UsageTTL); err != nil {
+				return
+			}
+			if *ttl <= 0 {
+				ttl = nil
+			}
+		}
+		var limit float64
+		if tpr.resProfiles[*rTid].Limit != utils.EmptyString {
+			if limit, err = strconv.ParseFloat(tpr.resProfiles[*rTid].Limit, 64); err != nil {
+				return
+			}
+		}
+		if err = tpr.dm.SetResource(
+			&Resource{Tenant: rTid.Tenant, ID: rTid.ID}, ttl, limit, false); err != nil {
 			return
 		}
 		if verbose {

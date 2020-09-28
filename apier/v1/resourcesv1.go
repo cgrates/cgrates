@@ -105,41 +105,38 @@ type ResourceWithCache struct {
 }
 
 //SetResourceProfile adds a new resource configuration
-func (apierSv1 *APIerSv1) SetResourceProfile(arg *ResourceWithCache, reply *string) error {
+func (apierSv1 *APIerSv1) SetResourceProfile(arg *ResourceWithCache, reply *string) (err error) {
 	if missing := utils.MissingStructFields(arg.ResourceProfile, []string{"Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := apierSv1.DataManager.SetResourceProfile(arg.ResourceProfile, true); err != nil {
+	if err = apierSv1.DataManager.SetResourceProfile(arg.ResourceProfile, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheResourceProfiles and CacheResources and store it in database
 	//make 1 insert for both ResourceProfile and Resources instead of 2
 	loadID := time.Now().UnixNano()
-	if err := apierSv1.DataManager.SetLoadIDs(
+	if err = apierSv1.DataManager.SetLoadIDs(
 		map[string]int64{utils.CacheResourceProfiles: loadID,
 			utils.CacheResources: loadID}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for ResourceProfile
-	if err := apierSv1.CallCache(arg.Cache, arg.Tenant, utils.CacheResourceProfiles,
+	if err = apierSv1.CallCache(arg.Cache, arg.Tenant, utils.CacheResourceProfiles,
 		arg.TenantID(), &arg.FilterIDs, nil, arg.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	//add the resource only if it's not present
-	if has, err := apierSv1.DataManager.HasData(utils.ResourcesPrefix, arg.ID, arg.Tenant); err != nil {
-		return err
-	} else if !has {
-		if err := apierSv1.DataManager.SetResource(
-			&engine.Resource{Tenant: arg.Tenant,
-				ID:     arg.ID,
-				Usages: make(map[string]*engine.ResourceUsage)}); err != nil {
-			return utils.APIErrorHandler(err)
-		}
-		//handle caching for Resource
-		if err := apierSv1.CallCache(arg.Cache, arg.Tenant, utils.CacheResources,
-			arg.TenantID(), nil, nil, arg.Opts); err != nil {
-			return utils.APIErrorHandler(err)
-		}
+	var ttl *time.Duration
+	if arg.UsageTTL > 0 {
+		ttl = &arg.UsageTTL
+	}
+	if err = apierSv1.DataManager.SetResource(&engine.Resource{Tenant: arg.Tenant, ID: arg.ID},
+		ttl, arg.Limit, false); err != nil {
+		return
+	}
+	//handle caching for Resource
+	if err = apierSv1.CallCache(arg.Cache, arg.Tenant, utils.CacheResources,
+		arg.TenantID(), nil, nil, arg.Opts); err != nil {
+		return utils.APIErrorHandler(err)
 	}
 
 	*reply = utils.OK

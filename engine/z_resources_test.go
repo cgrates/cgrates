@@ -27,15 +27,13 @@ import (
 )
 
 var (
-	r1, r2               *Resource
-	ru1, ru2, ru3        *ResourceUsage
-	rs                   Resources
-	cloneExpTimeResource time.Time
-	expTimeResource      = time.Now().Add(time.Duration(20 * time.Minute))
-	timeDurationExample  = time.Duration(10) * time.Second
-	resService           *ResourceService
-	dmRES                *DataManager
-	resprf               = []*ResourceProfile{
+	r1, r2              *Resource
+	ru1, ru2            *ResourceUsage
+	rs                  Resources
+	timeDurationExample = time.Duration(10) * time.Second
+	resService          *ResourceService
+	dmRES               *DataManager
+	resprf              = []*ResourceProfile{
 		{
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ResourceProfile1",
@@ -400,10 +398,10 @@ func TestResourceV1AuthorizeResourceMissingStruct(t *testing.T) {
 		},
 		Units: 20,
 	}
-	if err := resService.V1AuthorizeResources(argsMissingTenant, reply); err.Error() != "MANDATORY_IE_MISSING: [Tenant Event]" {
+	if err := resService.V1AuthorizeResources(argsMissingTenant, reply); err != nil && err.Error() != "MANDATORY_IE_MISSING: [Tenant Event]" {
 		t.Error(err.Error())
 	}
-	if err := resService.V1AuthorizeResources(argsMissingUsageID, reply); err.Error() != "MANDATORY_IE_MISSING: [Event]" {
+	if err := resService.V1AuthorizeResources(argsMissingUsageID, reply); err != nil && err.Error() != "MANDATORY_IE_MISSING: [Event]" {
 		t.Error(err.Error())
 	}
 }
@@ -482,7 +480,7 @@ func TestResourceAddResourceProfile(t *testing.T) {
 		dmRES.SetResourceProfile(resProfile, true)
 	}
 	for _, res := range resourceTest {
-		dmRES.SetResource(res)
+		dmRES.SetResource(res, nil, 0, true)
 	}
 	//Test each resourceProfile from cache
 	for _, resPrf := range resprf {
@@ -544,7 +542,7 @@ func TestResourceUsageTTLCase1(t *testing.T) {
 	if err := dmRES.SetResourceProfile(resprf[0], true); err != nil {
 		t.Error(err)
 	}
-	if err := dmRES.SetResource(resourceTest[0]); err != nil {
+	if err := dmRES.SetResource(resourceTest[0], nil, 0, true); err != nil {
 		t.Error(err)
 	}
 	mres, err := resService.matchingResourcesForEvent(resEvs[0],
@@ -571,7 +569,7 @@ func TestResourceUsageTTLCase2(t *testing.T) {
 	if err := dmRES.SetResourceProfile(resprf[0], true); err != nil {
 		t.Error(err)
 	}
-	if err := dmRES.SetResource(resourceTest[0]); err != nil {
+	if err := dmRES.SetResource(resourceTest[0], nil, 0, true); err != nil {
 		t.Error(err)
 	}
 	mres, err := resService.matchingResourcesForEvent(resEvs[0],
@@ -598,7 +596,7 @@ func TestResourceUsageTTLCase3(t *testing.T) {
 	if err := dmRES.SetResourceProfile(resprf[0], true); err != nil {
 		t.Error(err)
 	}
-	if err := dmRES.SetResource(resourceTest[0]); err != nil {
+	if err := dmRES.SetResource(resourceTest[0], nil, 0, true); err != nil {
 		t.Error(err)
 	}
 	mres, err := resService.matchingResourcesForEvent(resEvs[0],
@@ -625,7 +623,7 @@ func TestResourceUsageTTLCase4(t *testing.T) {
 	if err := dmRES.SetResourceProfile(resprf[0], true); err != nil {
 		t.Error(err)
 	}
-	if err := dmRES.SetResource(resourceTest[0]); err != nil {
+	if err := dmRES.SetResource(resourceTest[0], nil, 0, true); err != nil {
 		t.Error(err)
 	}
 	mres, err := resService.matchingResourcesForEvent(resEvs[0],
