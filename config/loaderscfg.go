@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"log"
 	"strings"
 	"time"
 
@@ -35,6 +36,19 @@ func NewDfltLoaderSCfg() *LoaderSCfg {
 
 // LoaderSCfgs to export some methods for LoaderS profiles
 type LoaderSCfgs []*LoaderSCfg
+
+func (ldrs *LoaderSCfgs) LoadFromJsonSlice(snCfg *LoaderJsonCfg, msgTemplates map[string][]*FCTemplate, separator string) error {
+	if snCfg == nil {
+		return nil
+	} else {
+		for _, item := range *ldrs {
+			if err := item.loadFromJsonCfg(snCfg, msgTemplates, separator); err != nil {
+				log.Fatal(err)
+			}
+		}
+	}
+	return nil
+}
 
 func (ldrs LoaderSCfgs) AsMapInterface(separator string) (loaderCfg []map[string]interface{}) {
 	loaderCfg = make([]map[string]interface{}, len(ldrs))
