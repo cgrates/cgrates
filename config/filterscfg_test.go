@@ -25,33 +25,22 @@ import (
 )
 
 func TestFilterSCfgloadFromJsonCfg(t *testing.T) {
-	var fscfg, expected FilterSCfg
-	if err := fscfg.loadFromJsonCfg(nil); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(fscfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, fscfg)
+	cfgJSONS := &FilterSJsonCfg{
+		Stats_conns:     &[]string{utils.MetaInternal},
+		Resources_conns: &[]string{utils.MetaInternal},
+		Apiers_conns:    &[]string{utils.MetaInternal},
 	}
-	if err := fscfg.loadFromJsonCfg(new(FilterSJsonCfg)); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(fscfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, fscfg)
+	expected := &FilterSCfg{
+		StatSConns:     []string{"*internal:*stats"},
+		ResourceSConns: []string{"*internal:*resources"},
+		ApierSConns:    []string{"*internal:*apier"},
 	}
-	cfgJSONStr := `{
-"filters": {								// Filters configuration (*new)
-	"stats_conns": ["*localhost"],		// address where to reach the stat service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
-	},
-}`
-	expected = FilterSCfg{
-		StatSConns: []string{utils.MetaLocalHost},
-	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if jsnCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if jsnFsCfg, err := jsnCfg.FilterSJsonCfg(); err != nil {
+	} else if err = jsnCfg.filterSCfg.loadFromJsonCfg(cfgJSONS); err != nil {
 		t.Error(err)
-	} else if err = fscfg.loadFromJsonCfg(jsnFsCfg); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expected, fscfg) {
-		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(fscfg))
+	} else if !reflect.DeepEqual(expected, jsnCfg.filterSCfg) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsnCfg.filterSCfg))
 	}
 }
 
