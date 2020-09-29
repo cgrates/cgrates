@@ -26,33 +26,34 @@ import (
 )
 
 func TestRateSConfigloadFromJsonCfg(t *testing.T) {
-	var rateCfg, expected RateSCfg
-	if err := rateCfg.loadFromJsonCfg(nil); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(rateCfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, rateCfg)
+	cfgJSON := &RateSJsonCfg{
+		Enabled:                    utils.BoolPointer(true),
+		Indexed_selects:            utils.BoolPointer(true),
+		Prefix_indexed_fields:      &[]string{"*req.index1"},
+		Suffix_indexed_fields:      &[]string{"*req.index1"},
+		Nested_fields:              utils.BoolPointer(true),
+		Rate_indexed_selects:       utils.BoolPointer(true),
+		Rate_prefix_indexed_fields: &[]string{"*req.index1"},
+		Rate_suffix_indexed_fields: &[]string{"*req.index1"},
+		Rate_nested_fields:         utils.BoolPointer(true),
 	}
-	if err := rateCfg.loadFromJsonCfg(new(RateSJsonCfg)); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(rateCfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, rateCfg)
+	expected := &RateSCfg{
+		Enabled:                 true,
+		IndexedSelects:          true,
+		PrefixIndexedFields:     &[]string{"*req.index1"},
+		SuffixIndexedFields:     &[]string{"*req.index1"},
+		NestedFields:            true,
+		RateIndexedSelects:      true,
+		RatePrefixIndexedFields: &[]string{"*req.index1"},
+		RateSuffixIndexedFields: &[]string{"*req.index1"},
+		RateNestedFields:        true,
 	}
-	cfgJSONStr := `{
-"rates": {					
-	"enabled": true,		
-},	
-}`
-	expected = RateSCfg{
-		Enabled: true,
-	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if jsnRateSCfg, err := jsnCfg.RateCfgJson(); err != nil {
+	} else if err = jsonCfg.rateSCfg.loadFromJsonCfg(cfgJSON); err != nil {
 		t.Error(err)
-	} else if err = rateCfg.loadFromJsonCfg(jsnRateSCfg); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expected, rateCfg) {
-		t.Errorf("Expected: %+v , recived: %+v", expected, rateCfg)
+	} else if !reflect.DeepEqual(expected, jsonCfg.rateSCfg) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.rateSCfg))
 	}
 }
 
