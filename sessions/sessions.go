@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"math/rand"
 	"reflect"
+	"runtime"
 	"strings"
 	"sync"
 	"time"
@@ -333,7 +334,7 @@ func (sS *SessionS) setSTerminator(s *Session, opts engine.MapEvent) {
 			s.sTerminator.timer.Stop()
 		}
 	}()
-	time.Sleep(1) // force context switching
+	runtime.Gosched() // force context switching
 }
 
 // forceSTerminate is called when a session times-out or it is forced from CGRateS side
@@ -1364,7 +1365,7 @@ func (sS *SessionS) initSessionDebitLoops(s *Session) {
 				s.debitStop = make(chan struct{})
 			}
 			go sS.debitLoopSession(s, i, s.DebitInterval)
-			time.Sleep(1) // allow the goroutine to be executed
+			runtime.Gosched() // allow the goroutine to be executed
 		}
 	}
 }

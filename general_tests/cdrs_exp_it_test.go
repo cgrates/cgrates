@@ -33,6 +33,7 @@ import (
 	"os/exec"
 	"path"
 	"reflect"
+	"runtime"
 	"testing"
 	"time"
 
@@ -206,7 +207,7 @@ func testCDRsExpPrepareAMQP(t *testing.T) {
 }
 
 func testCDRsExpStartEngine(t *testing.T) {
-	time.Sleep(1)
+	runtime.Gosched()
 	if _, err := engine.StopStartEngine(cdrsExpCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}

@@ -21,6 +21,7 @@ package engine
 import (
 	"encoding/gob"
 	"fmt"
+	"runtime"
 	"sync"
 	"time"
 
@@ -219,8 +220,8 @@ func (chS *CacheS) Precache() (err error) {
 			wg.Done()
 		}(cacheID)
 	}
-	time.Sleep(1) // switch context
-	go func() {   // report wg.Wait on doneChan
+	runtime.Gosched() // switch context
+	go func() {       // report wg.Wait on doneChan
 		wg.Wait()
 		close(doneChan)
 	}()
