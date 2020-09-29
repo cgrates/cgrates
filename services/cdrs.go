@@ -20,8 +20,8 @@ package services
 
 import (
 	"fmt"
+	"runtime"
 	"sync"
-	"time"
 
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	v2 "github.com/cgrates/cgrates/apier/v2"
@@ -95,7 +95,7 @@ func (cdrService *CDRServer) Start() (err error) {
 			// erS.exitChan <- true
 		}
 	}(cdrService.cdrS, cdrService.syncStop)
-	time.Sleep(1)
+	runtime.Gosched()
 	utils.Logger.Info("Registering CDRS HTTP Handlers.")
 	cdrService.cdrS.RegisterHandlersToServer(cdrService.server)
 	utils.Logger.Info("Registering CDRS RPC service.")

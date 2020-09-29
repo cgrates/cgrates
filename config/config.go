@@ -28,6 +28,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"sync"
 	"time"
@@ -1514,7 +1515,7 @@ func (cfg *CGRConfig) reloadSections(sections ...string) (err error) {
 			break
 		}
 	}
-	time.Sleep(1)
+	runtime.Gosched()
 	for _, section := range sections {
 		switch section {
 		default:
