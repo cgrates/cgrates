@@ -26,40 +26,30 @@ import (
 )
 
 func TestResourceSConfigloadFromJsonCfg(t *testing.T) {
-	var rlcfg, expected ResourceSConfig
-	if err := rlcfg.loadFromJsonCfg(nil); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(rlcfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, rlcfg)
+	cfgJSON := &ResourceSJsonCfg{
+		Enabled:               utils.BoolPointer(true),
+		Indexed_selects:       utils.BoolPointer(true),
+		Thresholds_conns:      &[]string{utils.MetaInternal},
+		Store_interval:        utils.StringPointer("2s"),
+		Prefix_indexed_fields: &[]string{"*req.index1"},
+		Suffix_indexed_fields: &[]string{"*req.index1"},
+		Nested_fields:         utils.BoolPointer(true),
 	}
-	if err := rlcfg.loadFromJsonCfg(new(ResourceSJsonCfg)); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(rlcfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, rlcfg)
-	}
-	cfgJSONStr := `{
-"resources": {								// Resource service (*new)
-	"enabled": true,						// starts ResourceLimiter service: <true|false>.
-	"store_interval": "1s",					// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
-	"thresholds_conns": [],					// address where to reach the thresholds service, empty to disable thresholds functionality: <""|*internal|x.y.z.y:1234>
-	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
-	"prefix_indexed_fields": ["*req.index1", "*req.index2"],			// query indexes based on these fields for faster processing
-},	
-}`
-	expected = ResourceSConfig{
+	expected := &ResourceSConfig{
 		Enabled:             true,
-		StoreInterval:       time.Duration(time.Second),
-		ThresholdSConns:     []string{},
-		PrefixIndexedFields: &[]string{"*req.index1", "*req.index2"},
+		IndexedSelects:      true,
+		StoreInterval:       time.Duration(2 * time.Second),
+		ThresholdSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)},
+		PrefixIndexedFields: &[]string{"*req.index1"},
+		SuffixIndexedFields: &[]string{"*req.index1"},
+		NestedFields:        true,
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cfgJson, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if jsnRlcCfg, err := jsnCfg.ResourceSJsonCfg(); err != nil {
+	} else if err = cfgJson.resourceSCfg.loadFromJsonCfg(cfgJSON); err != nil {
 		t.Error(err)
-	} else if err = rlcfg.loadFromJsonCfg(jsnRlcCfg); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expected, rlcfg) {
-		t.Errorf("Expected: %+v , recived: %+v", expected, rlcfg)
+	} else if !reflect.DeepEqual(expected, cfgJson.resourceSCfg) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(cfgJson.resourceSCfg))
 	}
 }
 
