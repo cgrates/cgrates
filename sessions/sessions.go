@@ -319,21 +319,21 @@ func (sS *SessionS) setSTerminator(s *Session, opts engine.MapEvent) {
 	}
 
 	// schedule automatic termination
-	go func() {
+	go func(endChan chan struct{}, timer *time.Timer) {
 		select {
-		case <-s.sTerminator.timer.C:
+		case <-timer.C:
+			s.Lock()
 			lastUsage := s.sTerminator.ttl
 			if s.sTerminator.ttlLastUsage != nil {
 				lastUsage = *s.sTerminator.ttlLastUsage
 			}
-			s.Lock()
 			sS.forceSTerminate(s, lastUsage, s.sTerminator.ttlUsage,
 				s.sTerminator.ttlLastUsed)
 			s.Unlock()
-		case <-s.sTerminator.endChan:
-			s.sTerminator.timer.Stop()
+		case <-endChan:
+			timer.Stop()
 		}
-	}()
+	}(s.sTerminator.endChan, s.sTerminator.timer)
 	runtime.Gosched() // force context switching
 }
 
