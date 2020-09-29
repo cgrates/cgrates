@@ -25,57 +25,54 @@ import (
 )
 
 func TestMigratorCgrCfgloadFromJsonCfg(t *testing.T) {
-	var migcfg, expected MigratorCgrCfg
-	if err := migcfg.loadFromJsonCfg(nil); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(migcfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, migcfg)
+	cfgJSON := &MigratorCfgJson{
+		Out_dataDB_type:     utils.StringPointer(utils.REDIS),
+		Out_dataDB_host:     utils.StringPointer("127.0.0.1"),
+		Out_dataDB_port:     utils.StringPointer("6379"),
+		Out_dataDB_name:     utils.StringPointer("10"),
+		Out_dataDB_user:     utils.StringPointer(utils.CGRATES),
+		Out_dataDB_password: utils.StringPointer(utils.EmptyString),
+		Out_dataDB_encoding: utils.StringPointer(utils.MSGPACK),
+		Out_storDB_type:     utils.StringPointer(utils.MYSQL),
+		Out_storDB_host:     utils.StringPointer("127.0.0.1"),
+		Out_storDB_port:     utils.StringPointer("3306"),
+		Out_storDB_name:     utils.StringPointer(utils.CGRATES),
+		Out_storDB_user:     utils.StringPointer(utils.CGRATES),
+		Out_storDB_password: utils.StringPointer(utils.EmptyString),
+		Out_dataDB_opts: map[string]interface{}{
+			utils.RedisClusterCfg: true,
+			utils.ClusterSyncCfg:  "10s",
+		},
+		Out_storDB_opts: map[string]interface{}{},
 	}
-	if err := migcfg.loadFromJsonCfg(new(MigratorCfgJson)); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(migcfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, migcfg)
-	}
-	cfgJSONStr := `{
-"migrator": {
-	"out_datadb_type": "redis",
-	"out_datadb_host": "127.0.0.1",
-	"out_datadb_port": "6379",
-	"out_datadb_name": "10",
-	"out_datadb_user": "cgrates",
-	"out_datadb_password": "",
-	"out_datadb_encoding" : "msgpack",
-	"out_stordb_type": "mysql",
-	"out_stordb_host": "127.0.0.1",
-	"out_stordb_port": "3306",
-	"out_stordb_name": "cgrates",
-	"out_stordb_user": "cgrates",
-	"out_stordb_password": "",
-},	
-}`
-	expected = MigratorCgrCfg{
-		OutDataDBType:     "redis",
+	expected := &MigratorCgrCfg{
+		OutDataDBType:     utils.REDIS,
 		OutDataDBHost:     "127.0.0.1",
 		OutDataDBPort:     "6379",
 		OutDataDBName:     "10",
-		OutDataDBUser:     "cgrates",
-		OutDataDBPassword: "",
-		OutDataDBEncoding: "msgpack",
-		OutStorDBType:     "mysql",
+		OutDataDBUser:     utils.CGRATES,
+		OutDataDBPassword: utils.EmptyString,
+		OutDataDBEncoding: utils.MSGPACK,
+		OutStorDBType:     utils.MYSQL,
 		OutStorDBHost:     "127.0.0.1",
 		OutStorDBPort:     "3306",
-		OutStorDBName:     "cgrates",
-		OutStorDBUser:     "cgrates",
-		OutStorDBPassword: "",
+		OutStorDBName:     utils.CGRATES,
+		OutStorDBUser:     utils.CGRATES,
+		OutStorDBPassword: utils.EmptyString,
+		OutDataDBOpts: map[string]interface{}{
+			utils.RedisSentinelNameCfg:  utils.EmptyString,
+			utils.RedisClusterCfg:       true,
+			utils.ClusterSyncCfg:        "10s",
+			utils.ClusterOnDownDelayCfg: "0",
+		},
+		OutStorDBOpts: map[string]interface{}{},
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cfgJson, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if jsnThSCfg, err := jsnCfg.MigratorCfgJson(); err != nil {
+	} else if err = cfgJson.migratorCgrCfg.loadFromJsonCfg(cfgJSON); err != nil {
 		t.Error(err)
-	} else if err = migcfg.loadFromJsonCfg(jsnThSCfg); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expected, migcfg) {
-		t.Errorf("Expected: %+v , recived: %+v", expected, migcfg)
+	} else if !reflect.DeepEqual(expected, cfgJson.migratorCgrCfg) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(cfgJson.migratorCgrCfg))
 	}
 }
 
