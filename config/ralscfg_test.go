@@ -26,53 +26,54 @@ import (
 )
 
 func TestRalsCfgFromJsonCfg(t *testing.T) {
-	var ralscfg, expected RalsCfg
-	if err := ralscfg.loadFromJsonCfg(nil); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(ralscfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, ralscfg)
+	cfgJSON := &RalsJsonCfg{
+		Enabled:                    utils.BoolPointer(true),
+		Thresholds_conns:           &[]string{utils.MetaInternal},
+		Stats_conns:                &[]string{utils.MetaInternal},
+		CacheS_conns:               &[]string{utils.MetaInternal},
+		Rp_subject_prefix_matching: utils.BoolPointer(true),
+		Remove_expired:             utils.BoolPointer(true),
+		Max_computed_usage: &map[string]string{
+			utils.ANY:   "189h0m0s",
+			utils.VOICE: "72h0m0s",
+			utils.DATA:  "107374182400",
+			utils.SMS:   "5000",
+			utils.MMS:   "10000",
+		},
+		Max_increments: utils.IntPointer(1000000),
+		Balance_rating_subject: &map[string]string{
+			utils.META_ANY:   "*zero1ns",
+			utils.META_VOICE: "*zero1s",
+		},
+		Dynaprepaid_actionplans: &[]string{},
 	}
-	if err := ralscfg.loadFromJsonCfg(new(RalsJsonCfg)); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(ralscfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, ralscfg)
-	}
-	cfgJSONStr := `{
-"rals": {
-	"enabled": false,						// enable Rater service: <true|false>
-	"thresholds_conns": [],					// address where to reach the thresholds service, empty to disable thresholds functionality: <""|*internal|x.y.z.y:1234>
-	"stats_conns": [],						// address where to reach the stat service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
-	"users_conns": [],						// address where to reach the user service, empty to disable user profile functionality: <""|*internal|x.y.z.y:1234>
-	"rp_subject_prefix_matching": false,	// enables prefix matching for the rating profile subject
-	"max_computed_usage": {					// do not compute usage higher than this, prevents memory overload
-		"*any": "189h",
-		"*voice": "72h",
-		"*data": "107374182400",
-		"*sms": "10000"
-	},
-},
-}`
-	ralscfg.MaxComputedUsage = make(map[string]time.Duration)
-	expected = RalsCfg{
-		Enabled:                 false,
-		ThresholdSConns:         []string{},
-		StatSConns:              []string{},
-		RpSubjectPrefixMatching: false,
+	expected := &RalsCfg{
+		Enabled:                 true,
+		ThresholdSConns:         []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)},
+		StatSConns:              []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS)},
+		CacheSConns:             []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)},
+		RpSubjectPrefixMatching: true,
+		RemoveExpired:           true,
 		MaxComputedUsage: map[string]time.Duration{
 			utils.ANY:   time.Duration(189 * time.Hour),
 			utils.VOICE: time.Duration(72 * time.Hour),
 			utils.DATA:  time.Duration(107374182400),
-			utils.SMS:   time.Duration(10000),
+			utils.SMS:   time.Duration(5000),
+			utils.MMS:   time.Duration(10000),
 		},
+		MaxIncrements: 1000000,
+		BalanceRatingSubject: map[string]string{
+			utils.META_ANY:   "*zero1ns",
+			utils.META_VOICE: "*zero1s",
+		},
+		DynaprepaidActionPlans: []string{},
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cfgJson, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if jsnRalsCfg, err := jsnCfg.RalsJsonCfg(); err != nil {
+	} else if err = cfgJson.ralsCfg.loadFromJsonCfg(cfgJSON); err != nil {
 		t.Error(err)
-	} else if err = ralscfg.loadFromJsonCfg(jsnRalsCfg); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expected, ralscfg) {
-		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(ralscfg))
+	} else if !reflect.DeepEqual(expected, cfgJson.ralsCfg) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(cfgJson.ralsCfg))
 	}
 }
 

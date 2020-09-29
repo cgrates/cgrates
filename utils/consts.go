@@ -336,6 +336,7 @@ const (
 	MAX_COST_DISCONNECT          = "*disconnect"
 	META_OUT                     = "*out"
 	META_ANY                     = "*any"
+	META_VOICE                   = "*voice"
 	ACD                          = "ACD"
 	TASKS_KEY                    = "tasks"
 	ACTION_PLAN_PREFIX           = "apl_"
