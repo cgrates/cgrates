@@ -25,35 +25,22 @@ import (
 )
 
 func TestSchedulerCfgloadFromJsonCfg(t *testing.T) {
-	var schdcfg, expected SchedulerCfg
-	if err := schdcfg.loadFromJsonCfg(nil); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(schdcfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, schdcfg)
+	cfgJSONS := &SchedulerJsonCfg{
+		Enabled:    utils.BoolPointer(true),
+		Cdrs_conns: &[]string{utils.MetaInternal},
+		Filters:    &[]string{},
 	}
-	if err := schdcfg.loadFromJsonCfg(new(SchedulerJsonCfg)); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(schdcfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, schdcfg)
-	}
-	cfgJSONStr := `{
-"schedulers": {
-	"enabled": true,				// start Scheduler service: <true|false>
-	"cdrs_conns": [],				// address where to reach CDR Server, empty to disable CDR capturing <*internal|x.y.z.y:1234>
-	},
-}`
-	expected = SchedulerCfg{
+	expected := &SchedulerCfg{
 		Enabled:   true,
-		CDRsConns: []string{},
+		CDRsConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
+		Filters:   []string{},
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if jsnSchCfg, err := jsnCfg.SchedulerJsonCfg(); err != nil {
+	} else if err = jsonCfg.schedulerCfg.loadFromJsonCfg(cfgJSONS); err != nil {
 		t.Error(err)
-	} else if err = schdcfg.loadFromJsonCfg(jsnSchCfg); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expected, schdcfg) {
-		t.Errorf("Expected: %+v , recived: %+v", expected, schdcfg)
+	} else if !reflect.DeepEqual(expected, jsonCfg.schedulerCfg) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.schedulerCfg))
 	}
 }
 
