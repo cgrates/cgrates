@@ -20,8 +20,8 @@ package services
 
 import (
 	"fmt"
+	"runtime"
 	"sync"
-	"time"
 
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
@@ -111,7 +111,7 @@ func (apiService *APIerSv1Service) Start() (err error) {
 			// erS.exitChan <- true
 		}
 	}(apiService.api, apiService.syncStop)
-	time.Sleep(1)
+	runtime.Gosched()
 
 	if !apiService.cfg.DispatcherSCfg().Enabled {
 		apiService.server.RpcRegister(apiService.api)

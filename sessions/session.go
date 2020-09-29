@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package sessions
 
 import (
+	"runtime"
 	"sync"
 	"time"
 
@@ -246,7 +247,7 @@ func (s *Session) stopSTerminator() {
 func (s *Session) stopDebitLoops() {
 	if s.debitStop != nil {
 		close(s.debitStop) // Stop automatic debits
-		time.Sleep(1)
+		runtime.Gosched()
 		s.debitStop = nil
 	}
 }
