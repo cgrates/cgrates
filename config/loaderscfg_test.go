@@ -26,35 +26,30 @@ import (
 )
 
 func TestLoaderSCfgloadFromJsonCfg(t *testing.T) {
-	cfgJSONStr := &LoaderJsonCfg{
-		ID:              utils.StringPointer(utils.MetaDefault),
-		Enabled:         utils.BoolPointer(true),
-		Tenant:          utils.StringPointer("cgrates.org"),
-		Dry_run:         utils.BoolPointer(true),
-		Run_delay:       utils.IntPointer(10),
-		Lock_filename:   utils.StringPointer(".cgr.lck"),
-		Caches_conns:    &[]string{utils.MetaInternal},
-		Field_separator: utils.StringPointer(","),
-		Tp_in_dir:       utils.StringPointer("/var/spool/cgrates/loader/in"),
-		Tp_out_dir:      utils.StringPointer("/var/spool/cgrates/loader/out"),
-		Data: &[]*LoaderJsonDataType{
+	cfgJSONStr := `{
+			"loaders": [
+	{
+		"id": "*default",
+		"enabled": true,
+		"tenant": "cgrates.org",
+		"lock_filename": ".cgr.lck",
+		"caches_conns": ["*internal"],
+		"field_separator": ",",
+		"tp_in_dir": "/var/spool/cgrates/loader/in",
+		"tp_out_dir": "/var/spool/cgrates/loader/out",
+		"data":[
 			{
-				Type:      utils.StringPointer(utils.MetaAttributes),
-				File_name: utils.StringPointer("Attributes.csv"),
-				Fields: &[]*FcTemplateJsonCfg{
-					{
-						Tag:       utils.StringPointer("TenantID"),
-						Path:      utils.StringPointer("Tenant"),
-						Type:      utils.StringPointer(utils.META_COMPOSED),
-						Value:     utils.StringPointer("~0"),
-						Mandatory: utils.BoolPointer(true),
-						Layout:    utils.StringPointer(string(time.RFC3339)),
-					},
+				"type": "*attributes",
+				"file_name": "Attributes.csv",
+				"fields": [
+					{"tag": "TenantID", "path": "Tenant", "type": "*composed", "value": "~req.0", "mandatory": true,"layout": "2006-01-02T15:04:05Z07:00"},
+					],
 				},
-			},
+			],
 		},
-	}
-	val, err := NewRSRParsers("~0", utils.INFIELD_SEP)
+	],
+}`
+	val, err := NewRSRParsers("~req.0", utils.INFIELD_SEP)
 	if err != nil {
 		t.Error(err)
 	}
@@ -64,6 +59,7 @@ func TestLoaderSCfgloadFromJsonCfg(t *testing.T) {
 	}
 	expected := LoaderSCfgs{
 		{
+			Enabled:        true,
 			Id:             utils.MetaDefault,
 			Tenant:         ten,
 			LockFileName:   ".cgr.lck",
@@ -81,7 +77,7 @@ func TestLoaderSCfgloadFromJsonCfg(t *testing.T) {
 							Path:      "Tenant",
 							pathSlice: []string{"Tenant"},
 							pathItems: utils.PathItems{{Field: "Tenant"}},
-							Type:      "*composed",
+							Type:      utils.META_COMPOSED,
 							Value:     val,
 							Mandatory: true,
 							Layout:    time.RFC3339,
@@ -91,18 +87,15 @@ func TestLoaderSCfgloadFromJsonCfg(t *testing.T) {
 			},
 		},
 	}
-	if jsnCfg, err := NewDefaultCGRConfig(); err != nil {
+	newCfg := new(CGRConfig)
+	newCfg.generalCfg = new(GeneralCfg)
+	newCfg.generalCfg.RSRSep = ";"
+	if jsonCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if err = jsnCfg.loaderCfg.LoadFromJsonSlice(cfgJSONStr, jsnCfg.templates, jsnCfg.generalCfg.RSRSep); err != nil {
+	} else if err = newCfg.loadLoaderSCfg(jsonCfg); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(expected[0].Tenant, jsnCfg.loaderCfg[0].Tenant) {
-		t.Errorf("Expected %+v \n, received %+v", expected[0].Tenant, jsnCfg.loaderCfg[0].Tenant)
-	} else if !reflect.DeepEqual(expected[0].CacheSConns, jsnCfg.loaderCfg[0].CacheSConns) {
-		t.Errorf("Expected %+v \n, received %+v", expected[0].CacheSConns, jsnCfg.loaderCfg[0].CacheSConns)
-	} else if !reflect.DeepEqual(expected[0].Data[0].Filename, jsnCfg.loaderCfg[0].Data[0].Filename) {
-		t.Errorf("Expected %+v \n, received %+v", expected[0].Data[0].Filename, jsnCfg.loaderCfg[0].Data[0].Filename)
-	} else if !reflect.DeepEqual(expected[0].Data[0].Fields[0], jsnCfg.loaderCfg[0].Data[0].Fields[0]) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected[0].Data[0].Fields[0]), utils.ToJSON(jsnCfg.loaderCfg[0].Data[0].Fields[0]))
+	} else if !reflect.DeepEqual(expected, newCfg.loaderCfg) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(newCfg.loaderCfg))
 	}
 }
 
