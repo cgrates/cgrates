@@ -730,10 +730,10 @@ func (sS *SessionS) warnSession(connID string, ev map[string]interface{}) (err e
 	clnt := sS.biJClnt(connID)
 	if clnt == nil {
 		return fmt.Errorf("calling %s requires bidirectional JSON connection, connID: <%s>",
-			utils.SessionSv1DisconnectWarning, connID)
+			utils.SessionSv1WarnDisconnect, connID)
 	}
 	var rply string
-	if err = clnt.conn.Call(utils.SessionSv1DisconnectWarning,
+	if err = clnt.conn.Call(utils.SessionSv1WarnDisconnect,
 		ev, &rply); err != nil {
 		if err != utils.ErrNotImplemented {
 			utils.Logger.Warning(fmt.Sprintf("<%s> failed to warn session: <%s>, err: <%s>",

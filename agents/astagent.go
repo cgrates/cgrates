@@ -388,8 +388,8 @@ func (*AsteriskAgent) V1DisconnectPeer(args *utils.DPRArgs, reply *string) (err 
 	return utils.ErrNotImplemented
 }
 
-// V1DisconnectWarning is used to implement the sessions.BiRPClient interface
-func (sma *AsteriskAgent) V1DisconnectWarning(args map[string]interface{}, reply *string) (err error) {
+// V1WarnDisconnect is used to implement the sessions.BiRPClient interface
+func (sma *AsteriskAgent) V1WarnDisconnect(args map[string]interface{}, reply *string) (err error) {
 	channelID := engine.NewMapEvent(args).GetStringIgnoreErrors(utils.OriginID)
 	if err = sma.playFileOnChannel(channelID, sma.cgrCfg.AsteriskAgentCfg().LowBalanceAnnFile); err != nil {
 		utils.Logger.Warning(
