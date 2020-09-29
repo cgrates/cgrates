@@ -25,8 +25,35 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+func TestRPCConnsloadFromJsonCfg(t *testing.T) {
+	cfgJSONStr := `{
+      "rpc_conn": {}
+}`
+	expected := RpcConns{
+		utils.MetaInternal: {
+			Strategy: utils.MetaFirst,
+			PoolSize: 0,
+			Conns: []*RemoteHost{
+				{
+					Address:     utils.MetaInternal,
+					Transport:   utils.EmptyString,
+					Synchronous: false,
+					TLS:         false,
+				},
+			},
+		},
+	}
+	newCfg := new(CGRConfig)
+	if jsonCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+		t.Error(err)
+	} else if err = newCfg.loadRPCConns(jsonCfg); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, newCfg.rpcConns) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(newCfg.rpcConns))
+	}
+}
+
 func TestRPCConnsAsMapInterface(t *testing.T) {
-	var cfg RPCConn
 	cfgJSONStr := `{
 		"rpc_conns": {
 			"*localhost": {
@@ -35,61 +62,34 @@ func TestRPCConnsAsMapInterface(t *testing.T) {
 		},	
 }`
 	eMap := map[string]interface{}{
-		"poolSize": 0,
-		"strategy": "",
-		"conns": []map[string]interface{}{
-			{
-				"address":     "127.0.0.1:2012",
-				"transport":   "*json",
-				"synchronous": false,
-				"TLS":         false,
-			},
-		},
-	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
-		t.Error(err)
-	} else if jsnRPCCfg, err := jsnCfg.RPCConnJsonCfg(); err != nil {
-		t.Error(err)
-	} else if err = cfg.loadFromJsonCfg(jsnRPCCfg["*localhost"]); err != nil {
-		t.Error(err)
-	} else if rcv := cfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
-	}
-}
-
-func TestRpcConnAsMapInterface(t *testing.T) {
-	cfgJSONStr := `{
-      "rpc_conns": {}
-}`
-	eMap := map[string]interface{}{
-		utils.MetaInternal: map[string]interface{}{
-			utils.Conns: []map[string]interface{}{
-				{
-					utils.TLS:            false,
-					utils.AddressCfg:     utils.MetaInternal,
-					utils.SynchronousCfg: false,
-					utils.TransportCfg:   utils.EmptyString,
-				},
-			},
-			utils.PoolSize:    0,
-			utils.StrategyCfg: utils.MetaFirst,
-		},
 		utils.MetaLocalHost: map[string]interface{}{
-			utils.Conns: []map[string]interface{}{
-				{
-					utils.TLS:            false,
-					utils.AddressCfg:     "127.0.0.1:2012",
-					utils.SynchronousCfg: false,
-					utils.TransportCfg:   "*json",
-				},
-			},
 			utils.PoolSize:    0,
 			utils.StrategyCfg: utils.MetaFirst,
+			utils.Conns: []map[string]interface{}{
+				{
+					utils.AddressCfg:     "127.0.0.1:2012",
+					utils.TransportCfg:   "*json",
+					utils.SynchronousCfg: false,
+					utils.TLS:            false,
+				},
+			},
+		},
+		utils.MetaInternal: map[string]interface{}{
+			utils.StrategyCfg: utils.MetaFirst,
+			utils.PoolSize:    0,
+			utils.Conns: []map[string]interface{}{
+				{
+					utils.AddressCfg:     utils.MetaInternal,
+					utils.TransportCfg:   utils.EmptyString,
+					utils.SynchronousCfg: false,
+					utils.TLS:            false,
+				},
+			},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if rcv := cgrCfg.rpcConns.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
+	} else if rcv := cgrCfg.rpcConns.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
