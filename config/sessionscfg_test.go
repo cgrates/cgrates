@@ -62,65 +62,76 @@ func TestFsAgentCfgloadFromJsonCfg1(t *testing.T) {
 }
 
 func TestSessionSCfgloadFromJsonCfg(t *testing.T) {
-	var sescfg, expected SessionSCfg
-	if err := sescfg.loadFromJsonCfg(nil); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(sescfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, sescfg)
+	cfgJSON := &SessionSJsonCfg{
+		Enabled:               utils.BoolPointer(true),
+		Listen_bijson:         utils.StringPointer("127.0.0.1:2018"),
+		Chargers_conns:        &[]string{utils.MetaInternal},
+		Rals_conns:            &[]string{utils.MetaInternal},
+		Resources_conns:       &[]string{utils.MetaInternal},
+		Thresholds_conns:      &[]string{utils.MetaInternal},
+		Stats_conns:           &[]string{utils.MetaInternal},
+		Routes_conns:          &[]string{utils.MetaInternal},
+		Attributes_conns:      &[]string{utils.MetaInternal},
+		Cdrs_conns:            &[]string{utils.MetaInternal},
+		Replication_conns:     &[]string{"*conn1"},
+		Debit_interval:        utils.StringPointer("2"),
+		Store_session_costs:   utils.BoolPointer(true),
+		Min_call_duration:     utils.StringPointer("1"),
+		Max_call_duration:     utils.StringPointer("100"),
+		Session_ttl:           utils.StringPointer("0"),
+		Session_indexes:       &[]string{},
+		Client_protocol:       utils.Float64Pointer(2.5),
+		Channel_sync_interval: utils.StringPointer("10"),
+		Terminate_attempts:    utils.IntPointer(6),
+		Alterable_fields:      &[]string{},
+		Min_dur_low_balance:   utils.StringPointer("1"),
+		Scheduler_conns:       &[]string{utils.MetaInternal},
+		Stir: &STIRJsonCfg{
+			Allowed_attest:      &[]string{utils.META_ANY},
+			Payload_maxduration: utils.StringPointer("-1"),
+			Default_attest:      utils.StringPointer("A"),
+			Publickey_path:      utils.StringPointer("randomPath"),
+			Privatekey_path:     utils.StringPointer("randomPath"),
+		},
 	}
-	if err := sescfg.loadFromJsonCfg(new(SessionSJsonCfg)); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(sescfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, sescfg)
+	expected := &SessionSCfg{
+		Enabled:             true,
+		ListenBijson:        "127.0.0.1:2018",
+		ChargerSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)},
+		RALsConns:           []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder)},
+		ResSConns:           []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)},
+		ThreshSConns:        []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)},
+		StatSConns:          []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS)},
+		RouteSConns:         []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRoutes)},
+		AttrSConns:          []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)},
+		CDRsConns:           []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
+		ReplicationConns:    []string{"*conn1"},
+		DebitInterval:       time.Duration(2),
+		StoreSCosts:         true,
+		MinCallDuration:     time.Duration(1),
+		MaxCallDuration:     time.Duration(100),
+		SessionTTL:          time.Duration(0),
+		SessionIndexes:      utils.StringMap{},
+		ClientProtocol:      2.5,
+		ChannelSyncInterval: time.Duration(10),
+		TerminateAttempts:   6,
+		AlterableFields:     utils.StringSet{},
+		MinDurLowBalance:    time.Duration(1),
+		SchedulerConns:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler)},
+		STIRCfg: &STIRcfg{
+			AllowedAttest:      utils.StringSet{utils.META_ANY: {}},
+			PayloadMaxduration: time.Duration(-1),
+			DefaultAttest:      "A",
+			PrivateKeyPath:     "randomPath",
+			PublicKeyPath:      "randomPath",
+		},
 	}
-	cfgJSONStr := `{
-"sessions": {
-	"enabled": false,						// starts session manager service: <true|false>
-	"listen_bijson": "127.0.0.1:2014",		// address where to listen for bidirectional JSON-RPC requests
-	"chargers_conns": [],					// address where to reach the charger service, empty to disable charger functionality: <""|*internal|x.y.z.y:1234>
-	"rals_conns": ["*internal"],
-	"cdrs_conns": ["*internal"],
-	"resources_conns": [],					// address where to reach the ResourceS <""|*internal|127.0.0.1:2013>
-	"thresholds_conns": [],					// address where to reach the ThresholdS <""|*internal|127.0.0.1:2013>
-	"stats_conns": [],						// address where to reach the StatS <""|*internal|127.0.0.1:2013>
-	"routes_conns": [],						// address where to reach the RouteS <""|*internal|127.0.0.1:2013>
-	"attributes_conns": [],					// address where to reach the AttributeS <""|*internal|127.0.0.1:2013>
-	"replication_conns": [],				// replicate sessions towards these session services
-	"debit_interval": "0s",					// interval to perform debits on.
-	"min_call_duration": "0s",				// only authorize calls with allowed duration higher than this
-	"max_call_duration": "3h",				// maximum call duration a prepaid call can last
-	"session_ttl": "0s",					// time after a session with no updates is terminated, not defined by default
-	//"session_ttl_max_delay": "",			// activates session_ttl randomization and limits the maximum possible delay
-	//"session_ttl_last_used": "",			// tweak LastUsed for sessions timing-out, not defined by default
-	//"session_ttl_usage": "",				// tweak Usage for sessions timing-out, not defined by default
-	"session_indexes": [],					// index sessions based on these fields for GetActiveSessions API
-	"client_protocol": 1.0,					// version of protocol to use when acting as JSON-PRC client <"0","1.0">
-	"channel_sync_interval": "0",			// sync channels regularly (0 to disable sync session)
-},
-}`
-	expected = SessionSCfg{
-		ListenBijson:     "127.0.0.1:2014",
-		ChargerSConns:    []string{},
-		RALsConns:        []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder)},
-		ResSConns:        []string{},
-		ThreshSConns:     []string{},
-		StatSConns:       []string{},
-		RouteSConns:      []string{},
-		AttrSConns:       []string{},
-		CDRsConns:        []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
-		ReplicationConns: []string{},
-		MaxCallDuration:  time.Duration(3 * time.Hour),
-		SessionIndexes:   map[string]bool{},
-		ClientProtocol:   1,
-	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if jsnSesCfg, err := jsnCfg.SessionSJsonCfg(); err != nil {
+	} else if err = jsonCfg.sessionSCfg.loadFromJsonCfg(cfgJSON); err != nil {
 		t.Error(err)
-	} else if err = sescfg.loadFromJsonCfg(jsnSesCfg); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expected, sescfg) {
-		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(sescfg))
+	} else if !reflect.DeepEqual(expected, jsonCfg.sessionSCfg) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.sessionSCfg))
 	}
 }
 
@@ -240,54 +251,50 @@ func TestSessionSCfgAsMapInterface1(t *testing.T) {
 }
 
 func TestFsAgentCfgloadFromJsonCfg2(t *testing.T) {
-	var fsagcfg, expected FsAgentCfg
-	if err := fsagcfg.loadFromJsonCfg(nil); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(fsagcfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, fsagcfg)
+	fsAgentJsnCfg := &FreeswitchAgentJsonCfg{
+		Enabled:                utils.BoolPointer(true),
+		Sessions_conns:         &[]string{utils.MetaInternal},
+		Create_cdr:             utils.BoolPointer(true),
+		Subscribe_park:         utils.BoolPointer(true),
+		Low_balance_ann_file:   utils.StringPointer("randomFile"),
+		Empty_balance_ann_file: utils.StringPointer("randomEmptyFile"),
+		Empty_balance_context:  utils.StringPointer("randomEmptyContext"),
+		Max_wait_connection:    utils.StringPointer("2"),
+		Extra_fields:           &[]string{},
+		Event_socket_conns: &[]*FsConnJsonCfg{
+			{
+				Address:    utils.StringPointer("1.2.3.4:8021"),
+				Password:   utils.StringPointer("ClueCon"),
+				Reconnects: utils.IntPointer(5),
+				Alias:      utils.StringPointer("127.0.0.1:8021"),
+			},
+		},
 	}
-	if err := fsagcfg.loadFromJsonCfg(new(FreeswitchAgentJsonCfg)); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(fsagcfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, fsagcfg)
+	expected := &FsAgentCfg{
+		Enabled:             true,
+		SessionSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
+		SubscribePark:       true,
+		CreateCdr:           true,
+		LowBalanceAnnFile:   "randomFile",
+		EmptyBalanceAnnFile: "randomEmptyFile",
+		EmptyBalanceContext: "randomEmptyContext",
+		MaxWaitConnection:   time.Duration(2),
+		ExtraFields:         RSRParsers{},
+		EventSocketConns: []*FsConnCfg{
+			{
+				Address:    "1.2.3.4:8021",
+				Password:   "ClueCon",
+				Reconnects: 5,
+				Alias:      "127.0.0.1:8021",
+			},
+		},
 	}
-	cfgJSONStr := `{
-"freeswitch_agent": {
-	"enabled": false,						// starts the FreeSWITCH agent: <true|false>
-	"sessions_conns": ["*internal"],
-	"subscribe_park": true,					// subscribe via fsock to receive park events
-	"create_cdr": false,					// create CDR out of events and sends them to CDRS component
-	"extra_fields": [],						// extra fields to store in auth/CDRs when creating them
-	//"min_dur_low_balance": "5s",			// threshold which will trigger low balance warnings for prepaid calls (needs to be lower than debit_interval)
-	//"low_balance_ann_file": "",			// file to be played when low balance is reached for prepaid calls
-	"empty_balance_context": "",			// if defined, prepaid calls will be transferred to this context on empty balance
-	"empty_balance_ann_file": "",			// file to be played before disconnecting prepaid calls on empty balance (applies only if no context defined)
-	"max_wait_connection": "2s",			// maximum duration to wait for a connection to be retrieved from the pool
-	"event_socket_conns":[					// instantiate connections to multiple FreeSWITCH servers
-		{"address": "127.0.0.1:8021", "password": "ClueCon", "reconnects": 5,"alias":""}
-	],
-},
-}`
-	expected = FsAgentCfg{
-		SessionSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
-		SubscribePark:     true,
-		MaxWaitConnection: time.Duration(2 * time.Second),
-		ExtraFields:       RSRParsers{},
-		EventSocketConns: []*FsConnCfg{{
-			Address:    "127.0.0.1:8021",
-			Password:   "ClueCon",
-			Reconnects: 5,
-			Alias:      "127.0.0.1:8021",
-		}},
-	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if jsnFsAgCfg, err := jsnCfg.FreeswitchAgentJsonCfg(); err != nil {
+	} else if err = jsonCfg.fsAgentCfg.loadFromJsonCfg(fsAgentJsnCfg); err != nil {
 		t.Error(err)
-	} else if err = fsagcfg.loadFromJsonCfg(jsnFsAgCfg); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expected, fsagcfg) {
-		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(fsagcfg))
+	} else if !reflect.DeepEqual(expected, jsonCfg.fsAgentCfg) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.fsAgentCfg))
 	}
 }
 
@@ -407,30 +414,30 @@ func TestRemoteHostloadFromJsonCfg(t *testing.T) {
 }
 
 func TestAsteriskAgentCfgloadFromJsonCfg(t *testing.T) {
-	var asagcfg, expected AsteriskAgentCfg
-	if err := asagcfg.loadFromJsonCfg(nil); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(asagcfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, asagcfg)
+	cfgJSON := &AsteriskAgentJsonCfg{
+		Enabled:                utils.BoolPointer(true),
+		Sessions_conns:         &[]string{utils.MetaInternal},
+		Create_cdr:             utils.BoolPointer(true),
+		Low_balance_ann_file:   utils.StringPointer("randomFile"),
+		Empty_balance_context:  utils.StringPointer("randomContext"),
+		Empty_balance_ann_file: utils.StringPointer("randomAnnFile"),
+		Asterisk_conns: &[]*AstConnJsonCfg{
+			{
+				Address:          utils.StringPointer("127.0.0.1:8088"),
+				User:             utils.StringPointer(utils.CGRATES),
+				Password:         utils.StringPointer("CGRateS.org"),
+				Connect_attempts: utils.IntPointer(3),
+				Reconnects:       utils.IntPointer(5),
+			},
+		},
 	}
-	if err := asagcfg.loadFromJsonCfg(new(AsteriskAgentJsonCfg)); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(asagcfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, asagcfg)
-	}
-	cfgJSONStr := `{
-"asterisk_agent": {
-	"enabled": true,						// starts the Asterisk agent: <true|false>
-	"sessions_conns": ["*internal"],
-	"create_cdr": false,					// create CDR out of events and sends it to CDRS component
-	"asterisk_conns":[						// instantiate connections to multiple Asterisk servers
-		{"address": "127.0.0.1:8088", "user": "cgrates", "password": "CGRateS.org", "connect_attempts": 3,"reconnects": 5}
-	],
-},
-}`
-	expected = AsteriskAgentCfg{
-		Enabled:       true,
-		SessionSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
+	expected := &AsteriskAgentCfg{
+		Enabled:             true,
+		SessionSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
+		CreateCDR:           true,
+		LowBalanceAnnFile:   "randomFile",
+		EmptyBalanceContext: "randomContext",
+		EmptyBalanceAnnFile: "randomAnnFile",
 		AsteriskConns: []*AsteriskConnCfg{{
 			Address:         "127.0.0.1:8088",
 			User:            "cgrates",
@@ -439,16 +446,15 @@ func TestAsteriskAgentCfgloadFromJsonCfg(t *testing.T) {
 			Reconnects:      5,
 		}},
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if jsnAsAgCfg, err := jsnCfg.AsteriskAgentJsonCfg(); err != nil {
+	} else if err = jsonCfg.asteriskAgentCfg.loadFromJsonCfg(cfgJSON); err != nil {
 		t.Error(err)
-	} else if err = asagcfg.loadFromJsonCfg(jsnAsAgCfg); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expected, asagcfg) {
-		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(asagcfg))
+	} else if !reflect.DeepEqual(expected, jsonCfg.asteriskAgentCfg) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.asteriskAgentCfg))
 	}
 }
+
 func TestAsteriskAgentCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
 	"asterisk_agent": {},
