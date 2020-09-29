@@ -57,10 +57,11 @@ const (
 func NewAsteriskAgent(cgrCfg *config.CGRConfig, astConnIdx int,
 	connMgr *engine.ConnManager) (*AsteriskAgent, error) {
 	sma := &AsteriskAgent{
-		cgrCfg:      cgrCfg,
-		astConnIdx:  astConnIdx,
-		connMgr:     connMgr,
-		eventsCache: make(map[string]*utils.CGREventWithOpts),
+		cgrCfg:         cgrCfg,
+		astConnIdx:     astConnIdx,
+		connMgr:        connMgr,
+		eventsCache:    make(map[string]*utils.CGREventWithOpts),
+		astTerminateEv: make(map[string]chan struct{}),
 	}
 	return sma, nil
 }
@@ -75,6 +76,9 @@ type AsteriskAgent struct {
 	astErrChan  chan error
 	eventsCache map[string]*utils.CGREventWithOpts // used to gather information about events during various phases
 	evCacheMux  sync.RWMutex                       // Protect eventsCache
+
+	astTerminateEv    map[string]chan struct{}
+	astTerminateEvMux sync.RWMutex
 }
 
 func (sma *AsteriskAgent) connectAsterisk() (err error) {
@@ -197,8 +201,7 @@ func (sma *AsteriskAgent) handleStasisStart(ev *SMAsteriskEvent) {
 			return
 		}
 		//  Set absolute timeout for non-postpaid calls
-		if !sma.setChannelVar(ev.ChannelID(), CGRMaxSessionTime,
-			strconv.Itoa(int(authReply.MaxUsage.Seconds()*1000))) {
+		if !sma.setMaxCallDuration(ev.ChannelID(), *authReply.MaxUsage) {
 			return
 		}
 	}
@@ -244,10 +247,7 @@ func (sma *AsteriskAgent) handleChannelStateChange(ev *SMAsteriskEvent) {
 		return
 	}
 	sma.evCacheMux.Lock()
-	err := ev.UpdateCGREvent(cgrEvDisp.CGREvent) // Updates the event directly in the cache
-	for k, v := range ev.opts {
-		cgrEvDisp.Opts[k] = v
-	}
+	err := ev.UpdateCGREvent(cgrEvDisp) // Updates the event directly in the cache
 	sma.evCacheMux.Unlock()
 	if err != nil {
 		sma.hangupChannel(ev.ChannelID(),
@@ -281,29 +281,36 @@ func (sma *AsteriskAgent) handleChannelStateChange(ev *SMAsteriskEvent) {
 
 // Channel disconnect
 func (sma *AsteriskAgent) handleChannelDestroyed(ev *SMAsteriskEvent) {
+	chID := ev.ChannelID()
+	// astTerminateEv    map[/string]chan struct{}
+	sma.astTerminateEvMux.Lock()
+	if end, has := sma.astTerminateEv[chID]; has {
+		delete(sma.astTerminateEv, chID)
+		close(end)
+	}
+	sma.astTerminateEvMux.Unlock()
+
 	sma.evCacheMux.RLock()
-	cgrEvDisp, hasIt := sma.eventsCache[ev.ChannelID()]
+	cgrEvDisp, hasIt := sma.eventsCache[chID]
 	sma.evCacheMux.RUnlock()
 	if !hasIt { // Not handled by us
 		return
 	}
 	sma.evCacheMux.Lock()
-	err := ev.UpdateCGREvent(cgrEvDisp.CGREvent) // Updates the event directly in the cache
-	for k, v := range ev.opts {
-		cgrEvDisp.Opts[k] = v
-	}
+	delete(sma.eventsCache, chID)       // delete the event from cache as we do not need to keep it here forever
+	err := ev.UpdateCGREvent(cgrEvDisp) // Updates the event directly in the cache
 	sma.evCacheMux.Unlock()
 	if err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> error: %s when attempting to destroy session for channelID: %s",
-				utils.AsteriskAgent, err.Error(), ev.ChannelID()))
+				utils.AsteriskAgent, err.Error(), chID))
 		return
 	}
 	// populate terminate session args
 	tsArgs := ev.V1TerminateSessionArgs(*cgrEvDisp)
 	if tsArgs == nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> event: %s cannot generate terminate session arguments",
-			utils.AsteriskAgent, ev.ChannelID()))
+			utils.AsteriskAgent, chID))
 		return
 	}
 
@@ -312,7 +319,7 @@ func (sma *AsteriskAgent) handleChannelDestroyed(ev *SMAsteriskEvent) {
 		utils.SessionSv1TerminateSession,
 		tsArgs, &reply); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> Error: %s when attempting to terminate session for channelID: %s",
-			utils.AsteriskAgent, err.Error(), ev.ChannelID()))
+			utils.AsteriskAgent, err.Error(), chID))
 	}
 	if sma.cgrCfg.AsteriskAgentCfg().CreateCDR {
 		if err := sma.connMgr.Call(sma.cgrCfg.AsteriskAgentCfg().SessionSConns, sma,
@@ -322,7 +329,7 @@ func (sma *AsteriskAgent) handleChannelDestroyed(ev *SMAsteriskEvent) {
 				Opts:     cgrEvDisp.Opts,
 			}, &reply); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> Error: %s when attempting to process CDR for channelID: %s",
-				utils.AsteriskAgent, err.Error(), ev.ChannelID()))
+				utils.AsteriskAgent, err.Error(), chID))
 		}
 	}
 
@@ -381,9 +388,9 @@ func (*AsteriskAgent) V1DisconnectPeer(args *utils.DPRArgs, reply *string) (err 
 	return utils.ErrNotImplemented
 }
 
-// DisconnectWarning is used to implement the sessions.BiRPClient interface
-func (sma *AsteriskAgent) DisconnectWarning(args map[string]interface{}, reply *string) (err error) {
-	channelID := engine.NewMapEvent(args).GetStringIgnoreErrors(channelID)
+// V1DisconnectWarning is used to implement the sessions.BiRPClient interface
+func (sma *AsteriskAgent) V1DisconnectWarning(args map[string]interface{}, reply *string) (err error) {
+	channelID := engine.NewMapEvent(args).GetStringIgnoreErrors(utils.OriginID)
 	if err = sma.playFileOnChannel(channelID, sma.cgrCfg.AsteriskAgentCfg().LowBalanceAnnFile); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> failed play file <%s> on channel <%s> because: %s",
@@ -407,15 +414,35 @@ func (sma *AsteriskAgent) playFileOnChannel(channelID, file string) (err error) 
 }
 
 // Sets the call timeout valid of starting of the call
-func (sma *AsteriskAgent) setMaxCallDuration(channelID string, connIdx int,
-	maxDur time.Duration, destNr string) (err error) {
+func (sma *AsteriskAgent) setMaxCallDuration(channelID string, maxDur time.Duration) (success bool) {
+	if len(sma.cgrCfg.AsteriskAgentCfg().EmptyBalanceContext) == 0 &&
+		len(sma.cgrCfg.AsteriskAgentCfg().EmptyBalanceAnnFile) == 0 {
+		//  Set absolute timeout for non-postpaid calls
+		return sma.setChannelVar(channelID, CGRMaxSessionTime,
+			strconv.Itoa(int(maxDur.Seconds()*1000)))
+	}
+	end := make(chan struct{})
+	sma.astTerminateEvMux.Lock()
+	sma.astTerminateEv[channelID] = end
+	sma.astTerminateEvMux.Unlock()
+	go func(channelID string, dur time.Duration, end chan struct{}) {
+		select {
+		case <-end:
+		case <-time.After(dur):
+			sma.doOnMaxCallDuration(channelID)
+		}
+	}(channelID, maxDur, end)
+	return true
+}
+
+func (sma *AsteriskAgent) doOnMaxCallDuration(channelID string) (err error) {
 	if len(sma.cgrCfg.AsteriskAgentCfg().EmptyBalanceContext) != 0 {
 		if _, err = sma.astConn.Call(aringo.HTTP_POST, fmt.Sprintf("http://%s/ari/channels/%s/continue",
 			sma.cgrCfg.AsteriskAgentCfg().AsteriskConns[sma.astConnIdx].Address, channelID),
 			url.Values{"context": {sma.cgrCfg.AsteriskAgentCfg().EmptyBalanceContext}}); err != nil {
 			utils.Logger.Err(
 				fmt.Sprintf("<%s> Could not transfer the call to empty balance context, error: <%s>, channelID: %v",
-					utils.FreeSWITCHAgent, err.Error(), connIdx))
+					utils.AsteriskAgent, err.Error(), channelID))
 		}
 		return
 	}

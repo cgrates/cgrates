@@ -451,8 +451,8 @@ func (*FSsessions) V1DisconnectPeer(args *utils.DPRArgs, reply *string) (err err
 	return utils.ErrNotImplemented
 }
 
-// DisconnectWarning is called when call goes under the minimum duration threshold, so FreeSWITCH can play an announcement message
-func (fsa *FSsessions) DisconnectWarning(args map[string]interface{}, reply *string) (err error) {
+// V1DisconnectWarning is called when call goes under the minimum duration threshold, so FreeSWITCH can play an announcement message
+func (fsa *FSsessions) V1DisconnectWarning(args map[string]interface{}, reply *string) (err error) {
 	if fsa.cfg.LowBalanceAnnFile == utils.EmptyString {
 		*reply = utils.OK
 		return

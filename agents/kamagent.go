@@ -432,7 +432,7 @@ func (*KamailioAgent) V1DisconnectPeer(args *utils.DPRArgs, reply *string) (err 
 	return utils.ErrNotImplemented
 }
 
-// DisconnectWarning is used to implement the sessions.BiRPClient interface
-func (*KamailioAgent) DisconnectWarning(args map[string]interface{}, reply *string) (err error) {
+// V1DisconnectWarning is used to implement the sessions.BiRPClient interface
+func (*KamailioAgent) V1DisconnectWarning(args map[string]interface{}, reply *string) (err error) {
 	return utils.ErrNotImplemented
 }

@@ -48,7 +48,7 @@ type BiRPClient interface {
 	V1GetActiveSessionIDs(ignParam string, sessionIDs *[]*SessionID) (err error)
 	V1ReAuthorize(originID string, reply *string) (err error)
 	V1DisconnectPeer(args *utils.DPRArgs, reply *string) (err error)
-	DisconnectWarning(args map[string]interface{}, reply *string) (err error)
+	V1DisconnectWarning(args map[string]interface{}, reply *string) (err error)
 }
 
 // GetSetCGRID will populate the CGRID key if not present and return it
