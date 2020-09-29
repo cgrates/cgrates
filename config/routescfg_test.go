@@ -25,43 +25,36 @@ import (
 )
 
 func TestRouteSCfgloadFromJsonCfg(t *testing.T) {
-	var supscfg, expected RouteSCfg
-	if err := supscfg.loadFromJsonCfg(nil); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(supscfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, supscfg)
+	cfgJSON := &RouteSJsonCfg{
+		Enabled:               utils.BoolPointer(true),
+		Indexed_selects:       utils.BoolPointer(true),
+		Prefix_indexed_fields: &[]string{"*req.index1", "*req.index2"},
+		Suffix_indexed_fields: &[]string{"*req.index1", "*req.index2"},
+		Attributes_conns:      &[]string{utils.MetaInternal},
+		Resources_conns:       &[]string{utils.MetaInternal},
+		Stats_conns:           &[]string{utils.MetaInternal},
+		Rals_conns:            &[]string{utils.MetaInternal},
+		Default_ratio:         utils.IntPointer(10),
+		Nested_fields:         utils.BoolPointer(true),
 	}
-	if err := supscfg.loadFromJsonCfg(new(RouteSJsonCfg)); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(supscfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, supscfg)
-	}
-	cfgJSONStr := `{
-"routes": {								// Route service 
-	"enabled": false,						// starts RouteS service: <true|false>.
-	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
-	"prefix_indexed_fields": ["*req.index1", "*req.index2"],			// query indexes based on these fields for faster processing
-	"attributes_conns": [],					// address where to reach the AttributeS <""|127.0.0.1:2013>
-	"resources_conns": [],					// address where to reach the Resource service, empty to disable functionality: <""|*internal|x.y.z.y:1234>
-	"stats_conns": [],						// address where to reach the Stat service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
-	"default_ratio":1,
-},
-}`
-	expected = RouteSCfg{
+	expected := &RouteSCfg{
+		Enabled:             true,
+		IndexedSelects:      true,
 		PrefixIndexedFields: &[]string{"*req.index1", "*req.index2"},
-		AttributeSConns:     []string{},
-		ResourceSConns:      []string{},
-		StatSConns:          []string{},
-		DefaultRatio:        1,
+		SuffixIndexedFields: &[]string{"*req.index1", "*req.index2"},
+		AttributeSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)},
+		ResourceSConns:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)},
+		StatSConns:          []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS)},
+		RALsConns:           []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder)},
+		DefaultRatio:        10,
+		NestedFields:        true,
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if jsnSupSCfg, err := jsnCfg.RouteSJsonCfg(); err != nil {
+	} else if err = jsonCfg.routeSCfg.loadFromJsonCfg(cfgJSON); err != nil {
 		t.Error(err)
-	} else if err = supscfg.loadFromJsonCfg(jsnSupSCfg); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expected, supscfg) {
-		t.Errorf("Expected: %+v , recived: %+v", expected, supscfg)
+	} else if !reflect.DeepEqual(expected, jsonCfg.routeSCfg) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.routeSCfg))
 	}
 }
 
