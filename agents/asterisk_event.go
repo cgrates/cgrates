@@ -196,7 +196,7 @@ func (smaEv *SMAsteriskEvent) ExtraParameters() (extraParams map[string]string) 
 	return
 }
 
-func (smaEv *SMAsteriskEvent) UpdateCGREvent(cgrEv *utils.CGREvent) error {
+func (smaEv *SMAsteriskEvent) UpdateCGREvent(cgrEv *utils.CGREventWithOpts) error {
 	resCGREv := *cgrEv
 	switch smaEv.EventType() {
 	case ARIChannelStateChange:
@@ -207,20 +207,21 @@ func (smaEv *SMAsteriskEvent) UpdateCGREvent(cgrEv *utils.CGREvent) error {
 		resCGREv.Event[utils.DISCONNECT_CAUSE] = smaEv.DisconnectCause()
 		if _, hasIt := resCGREv.Event[utils.AnswerTime]; !hasIt {
 			resCGREv.Event[utils.Usage] = "0s"
+		} else if aTime, err := utils.IfaceAsTime(resCGREv.Event[utils.AnswerTime],
+			config.CgrConfig().GeneralCfg().DefaultTimezone); err != nil {
+			return err
+		} else if aTime.IsZero() {
+			resCGREv.Event[utils.Usage] = "0s"
 		} else {
-			if aTime, err := utils.IfaceAsTime(resCGREv.Event[utils.AnswerTime],
-				config.CgrConfig().GeneralCfg().DefaultTimezone); err != nil {
+			actualTime, err := utils.ParseTimeDetectLayout(smaEv.Timestamp(), "")
+			if err != nil {
 				return err
-			} else if aTime.IsZero() {
-				resCGREv.Event[utils.Usage] = "0s"
-			} else {
-				actualTime, err := utils.ParseTimeDetectLayout(smaEv.Timestamp(), "")
-				if err != nil {
-					return err
-				}
-				resCGREv.Event[utils.Usage] = actualTime.Sub(aTime).String()
 			}
+			resCGREv.Event[utils.Usage] = actualTime.Sub(aTime).String()
 		}
+	}
+	for k, v := range smaEv.opts {
+		resCGREv.Opts[k] = v
 	}
 	*cgrEv = resCGREv
 	return nil
