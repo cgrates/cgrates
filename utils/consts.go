@@ -1540,7 +1540,7 @@ const (
 	SMGenericV1InitiateSession           = "SMGenericV1.InitiateSession"
 	SessionSv1ReAuthorize                = "SessionSv1.ReAuthorize"
 	SessionSv1DisconnectPeer             = "SessionSv1.DisconnectPeer"
-	SessionSv1DisconnectWarning          = "SessionSv1.DisconnectWarning"
+	SessionSv1WarnDisconnect             = "SessionSv1.WarnDisconnect"
 	SessionSv1STIRAuthenticate           = "SessionSv1.STIRAuthenticate"
 	SessionSv1STIRIdentity               = "SessionSv1.STIRIdentity"
 	SessionSv1Sleep                      = "SessionSv1.Sleep"
