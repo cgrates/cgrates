@@ -22,8 +22,8 @@ package engine
 import (
 	"net/rpc"
 	"path"
+	"runtime"
 	"testing"
-	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -269,7 +269,7 @@ func testActionsUpdateBalance(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv1.ExecuteAction received: %s", reply)
 	}
-	time.Sleep(1)
+	runtime.Gosched()
 	attrsEA2 := &utils.AttrExecuteAction{Tenant: attrsSetAccount.Tenant, Account: attrsSetAccount.Account, ActionsId: changeBlockerAction.ActionsId}
 	if err := actsRPC.Call(utils.APIerSv1ExecuteAction, attrsEA2, &reply); err != nil {
 		t.Error("Got error on APIerSv1.ExecuteAction: ", err.Error())
