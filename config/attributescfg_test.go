@@ -28,6 +28,7 @@ func TestAttributeSCfgloadFromJsonCfg(t *testing.T) {
 	jsonCfg := &AttributeSJsonCfg{
 		Enabled:               utils.BoolPointer(true),
 		Indexed_selects:       utils.BoolPointer(false),
+		String_indexed_fields: &[]string{"*req.index1"},
 		Prefix_indexed_fields: &[]string{"*req.index1", "*req.index2"},
 		Suffix_indexed_fields: &[]string{"*req.index1"},
 		Process_runs:          utils.IntPointer(1),
@@ -36,6 +37,7 @@ func TestAttributeSCfgloadFromJsonCfg(t *testing.T) {
 	expected := &AttributeSCfg{
 		Enabled:             true,
 		IndexedSelects:      false,
+		StringIndexedFields: &[]string{"*req.index1"},
 		PrefixIndexedFields: &[]string{"*req.index1", "*req.index2"},
 		SuffixIndexedFields: &[]string{"*req.index1"},
 		ProcessRuns:         1,
@@ -54,12 +56,14 @@ func TestAttributeSCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
 "attributes": {								
 	"enabled": true,									
-	"prefix_indexed_fields": ["*req.index1","*req.index2"],			
+	"prefix_indexed_fields": ["*req.index1","*req.index2"],		
+    "string_indexed_fields": ["*req.index1"],
 	"process_runs": 3,						
 	},		
 }`
 	eMap := map[string]interface{}{
 		utils.EnabledCfg:             true,
+		utils.StringIndexedFieldsCfg: []string{"*req.index1"},
 		utils.PrefixIndexedFieldsCfg: []string{"*req.index1", "*req.index2"},
 		utils.ProcessRunsCfg:         3,
 		utils.IndexedSelectsCfg:      true,
