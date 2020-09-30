@@ -40,12 +40,14 @@ func TestRadiusAgentCfgloadFromJsonCfg(t *testing.T) {
 				Filters:        &[]string{"*string:~*req.request_type:OutboundAUTH", "*string:~*req.Msisdn:497700056231"},
 				Flags:          &[]string{utils.MetaDryRun},
 				Timezone:       utils.StringPointer(utils.EmptyString),
+				Tenant:         utils.StringPointer("~*req.CGRID"),
 				Request_fields: &[]*FcTemplateJsonCfg{},
 				Reply_fields: &[]*FcTemplateJsonCfg{
 					{
 						Tag:       utils.StringPointer("Allow"),
 						Path:      utils.StringPointer("*rep.response.Allow"),
 						Type:      utils.StringPointer(utils.META_CONSTANT),
+						Value:     utils.StringPointer("1"),
 						Mandatory: utils.BoolPointer(true),
 						Layout:    utils.StringPointer(string(time.RFC3339)),
 					},
@@ -67,12 +69,14 @@ func TestRadiusAgentCfgloadFromJsonCfg(t *testing.T) {
 				Filters:       []string{"*string:~*req.request_type:OutboundAUTH", "*string:~*req.Msisdn:497700056231"},
 				Flags:         utils.FlagsWithParams{utils.MetaDryRun: {}},
 				Timezone:      utils.EmptyString,
+				Tenant:        NewRSRParsersMustCompile("~*req.CGRID", utils.INFIELD_SEP),
 				RequestFields: []*FCTemplate{},
 				ReplyFields: []*FCTemplate{
 					{
 						Tag:       "Allow",
 						Path:      "*rep.response.Allow",
 						Type:      utils.META_CONSTANT,
+						Value:     NewRSRParsersMustCompile("1", utils.INFIELD_SEP),
 						Mandatory: true,
 						Layout:    time.RFC3339,
 					},

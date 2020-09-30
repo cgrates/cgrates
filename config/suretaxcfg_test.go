@@ -27,66 +27,53 @@ import (
 )
 
 func TestSureTaxCfgloadFromJsonCfg(t *testing.T) {
-	var sureTaxCfg, expected SureTaxCfg
-	if err := sureTaxCfg.loadFromJsonCfg(nil); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(sureTaxCfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, sureTaxCfg)
+	cfgJSON := &SureTaxJsonCfg{
+		Url:                     utils.StringPointer("randomURL"),
+		Client_number:           utils.StringPointer("randomClient"),
+		Validation_key:          utils.StringPointer("randomKey"),
+		Business_unit:           utils.StringPointer("randomUnit"),
+		Timezone:                utils.StringPointer("Local"),
+		Include_local_cost:      utils.BoolPointer(true),
+		Return_file_code:        utils.StringPointer("1"),
+		Response_group:          utils.StringPointer("06"),
+		Response_type:           utils.StringPointer("A3"),
+		Regulatory_code:         utils.StringPointer("06"),
+		Client_tracking:         utils.StringPointer("~*req.Destination1"),
+		Customer_number:         utils.StringPointer("~*req.Destination1"),
+		Orig_number:             utils.StringPointer("~*req.Destination1"),
+		Term_number:             utils.StringPointer("~*req.CGRID"),
+		Bill_to_number:          utils.StringPointer(utils.EmptyString),
+		Zipcode:                 utils.StringPointer(utils.EmptyString),
+		Plus4:                   utils.StringPointer(utils.EmptyString),
+		P2PZipcode:              utils.StringPointer(utils.EmptyString),
+		P2PPlus4:                utils.StringPointer(utils.EmptyString),
+		Units:                   utils.StringPointer("1"),
+		Unit_type:               utils.StringPointer("00"),
+		Tax_included:            utils.StringPointer("0"),
+		Tax_situs_rule:          utils.StringPointer("04"),
+		Trans_type_code:         utils.StringPointer("010101"),
+		Sales_type_code:         utils.StringPointer("R"),
+		Tax_exemption_code_list: utils.StringPointer(utils.EmptyString),
 	}
-	if err := sureTaxCfg.loadFromJsonCfg(new(SureTaxJsonCfg)); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(sureTaxCfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, sureTaxCfg)
-	}
-	cfgJSONStr := `{
-	"suretax": {
-		"url": "",
-		"client_number": "",
-		"validation_key": "",
-		"business_unit": "",
-		"timezone": "Local",
-		"include_local_cost": false,
-		"return_file_code": "0",
-		"response_group": "03",
-		"response_type": "D4",
-		"regulatory_code": "03",
-		"client_tracking": "~*req.CGRID",
-		"customer_number": "~*req.Subject",
-		"orig_number":  "~*req.Subject",
-		"term_number": "~*req.Destination",
-		"bill_to_number": "",
-		"zipcode": "",
-		"plus4": "",
-		"p2pzipcode": "",
-		"p2pplus4": "",
-		"units": "1",
-		"unit_type": "00",
-		"tax_included": "0",
-		"tax_situs_rule": "04",
-		"trans_type_code": "010101",
-		"sales_type_code": "R",
-		"tax_exemption_code_list": "",
-	},
-}`
 	tLocal, err := time.LoadLocation("Local")
 	if err != nil {
 		t.Error(err)
 	}
-	expected = SureTaxCfg{
-		Url:                  utils.EmptyString,
-		ClientNumber:         utils.EmptyString,
-		ValidationKey:        utils.EmptyString,
-		BusinessUnit:         utils.EmptyString,
+	expected := &SureTaxCfg{
+		Url:                  "randomURL",
+		ClientNumber:         "randomClient",
+		ValidationKey:        "randomKey",
+		BusinessUnit:         "randomUnit",
 		Timezone:             tLocal,
-		IncludeLocalCost:     false,
-		ReturnFileCode:       "0",
-		ResponseGroup:        "03",
-		ResponseType:         "D4",
-		RegulatoryCode:       "03",
-		ClientTracking:       NewRSRParsersMustCompile("~*req.CGRID", utils.INFIELD_SEP),
-		CustomerNumber:       NewRSRParsersMustCompile("~*req.Subject", utils.INFIELD_SEP),
-		OrigNumber:           NewRSRParsersMustCompile("~*req.Subject", utils.INFIELD_SEP),
-		TermNumber:           NewRSRParsersMustCompile("~*req.Destination", utils.INFIELD_SEP),
+		IncludeLocalCost:     true,
+		ReturnFileCode:       "1",
+		ResponseGroup:        "06",
+		ResponseType:         "A3",
+		RegulatoryCode:       "06",
+		ClientTracking:       NewRSRParsersMustCompile("~*req.Destination1", utils.INFIELD_SEP),
+		CustomerNumber:       NewRSRParsersMustCompile("~*req.Destination1", utils.INFIELD_SEP),
+		OrigNumber:           NewRSRParsersMustCompile("~*req.Destination1", utils.INFIELD_SEP),
+		TermNumber:           NewRSRParsersMustCompile("~*req.CGRID", utils.INFIELD_SEP),
 		BillToNumber:         NewRSRParsersMustCompile(utils.EmptyString, utils.INFIELD_SEP),
 		Zipcode:              NewRSRParsersMustCompile(utils.EmptyString, utils.INFIELD_SEP),
 		Plus4:                NewRSRParsersMustCompile(utils.EmptyString, utils.INFIELD_SEP),
@@ -100,18 +87,16 @@ func TestSureTaxCfgloadFromJsonCfg(t *testing.T) {
 		SalesTypeCode:        NewRSRParsersMustCompile("R", utils.INFIELD_SEP),
 		TaxExemptionCodeList: NewRSRParsersMustCompile(utils.EmptyString, utils.INFIELD_SEP),
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if sureTax, err := jsnCfg.SureTaxJsonCfg(); err != nil {
+	} else if err = jsonCfg.sureTaxCfg.loadFromJsonCfg(cfgJSON); err != nil {
 		t.Error(err)
-	} else if err = sureTaxCfg.loadFromJsonCfg(sureTax); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expected, sureTaxCfg) {
-		t.Errorf("Expected: %+v,\nRecived: %+v", utils.ToJSON(expected), utils.ToJSON(sureTaxCfg))
+	} else if !reflect.DeepEqual(expected, jsonCfg.sureTaxCfg) {
+		t.Errorf("Expecetd %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.sureTaxCfg))
 	}
 }
 
-func TestSureTaxCfgAsMapInterface1(t *testing.T) {
+func TestSureTaxCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
 	"suretax": {
 		"timezone":                "UTC",
