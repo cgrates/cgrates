@@ -82,8 +82,8 @@
 "sessions": {
 	"enabled": true,
 	"session_ttl": "50ms",
-	"chargers_conns": ["*internal"],
-	"rals_conns": ["*internal"],
+	"chargers_conns": ["*localhost"],
+	"rals_conns": ["*localhost"],
 	"cdrs_conns": ["*internal"],
 	"resources_conns": ["*internal"],
 	"thresholds_conns": ["*internal"],
