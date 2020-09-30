@@ -26,37 +26,28 @@ import (
 )
 
 func TestThresholdSCfgloadFromJsonCfg(t *testing.T) {
-	var thscfg, expected ThresholdSCfg
-	if err := thscfg.loadFromJsonCfg(nil); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(thscfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, thscfg)
+	cfgJSON := &ThresholdSJsonCfg{
+		Enabled:               utils.BoolPointer(true),
+		Indexed_selects:       utils.BoolPointer(true),
+		Store_interval:        utils.StringPointer("2"),
+		Prefix_indexed_fields: &[]string{"*req.index1"},
+		Suffix_indexed_fields: &[]string{"*req.index1"},
+		Nested_fields:         utils.BoolPointer(true),
 	}
-	if err := thscfg.loadFromJsonCfg(new(ThresholdSJsonCfg)); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(thscfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, thscfg)
+	expected := &ThresholdSCfg{
+		Enabled:             true,
+		IndexedSelects:      true,
+		StoreInterval:       time.Duration(2),
+		PrefixIndexedFields: &[]string{"*req.index1"},
+		SuffixIndexedFields: &[]string{"*req.index1"},
+		NestedFields:        true,
 	}
-	cfgJSONStr := `{
-"thresholds": {								// Threshold service (*new)
-	"enabled": false,						// starts ThresholdS service: <true|false>.
-	"store_interval": "2h",					// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
-	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
-	"prefix_indexed_fields": ["*req.index1", "*req.index2"],			// query indexes based on these fields for faster processing
-	},		
-}`
-	expected = ThresholdSCfg{
-		StoreInterval:       time.Duration(time.Hour * 2),
-		PrefixIndexedFields: &[]string{"*req.index1", "*req.index2"},
-	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if jsnThSCfg, err := jsnCfg.ThresholdSJsonCfg(); err != nil {
+	} else if err = jsonCfg.thresholdSCfg.loadFromJsonCfg(cfgJSON); err != nil {
 		t.Error(err)
-	} else if err = thscfg.loadFromJsonCfg(jsnThSCfg); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expected, thscfg) {
-		t.Errorf("Expected: %+v , recived: %+v", expected, thscfg)
+	} else if !reflect.DeepEqual(expected, jsonCfg.thresholdSCfg) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.thresholdSCfg))
 	}
 }
 
