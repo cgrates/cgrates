@@ -525,6 +525,7 @@ const (
 	MetaHourly                  = "*hourly"
 	ID                          = "ID"
 	Address                     = "Address"
+	Addresses                   = "Addresses"
 	Transport                   = "Transport"
 	TLS                         = "TLS"
 	Subsystems                  = "Subsystems"
