@@ -22,3 +22,5 @@ cgrates.com,ATTR_TNT_ALIAS,*any,,,,*req.RequestType,*constant,*prepaid,,
 cgrates.com,ATTR_TNT_ALIAS,*any,,,,*tenant,*constant,cgrates.org,,
 cgrates.com,ATTR_TNT_1001,*any,*string:~*req.Account:1001,,,*tenant,*constant,cgrates.org,,
 cgrates.com,ATTR_TNT_DISC,*any,*string:~*req.Account:testDiamInitWithSessionDisconnect,,,*tenant,*constant,cgrates.org,,
+cgrates.com,ATTR_ACC_EMULATE_TERMINATE,*any,*string:~*req.SubscriberId:testDiamItEmulateTerminate,,,*req.Account,*constant,testDiamItEmulateTerminate,false,10
+cgrates.com,ATTR_ACC_EMULATE_TERMINATE,*any,,,,*req.RequestType,*constant,*prepaid,,
