@@ -25,29 +25,16 @@ import (
 )
 
 func TestTlsCfgloadFromJsonCfg(t *testing.T) {
-	var tlscfg, expected TlsCfg
-	if err := tlscfg.loadFromJsonCfg(nil); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(tlscfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, tlscfg)
+	cfgJSON := &TlsJsonCfg{
+		Server_certificate: utils.StringPointer("path/To/Server/Cert"),
+		Server_key:         utils.StringPointer("path/To/Server/Key"),
+		Ca_certificate:     utils.StringPointer("path/To/CA/Cert"),
+		Client_certificate: utils.StringPointer("path/To/Client/Cert"),
+		Client_key:         utils.StringPointer("path/To/Client/Key"),
+		Server_name:        utils.StringPointer("TestServerName"),
+		Server_policy:      utils.IntPointer(3),
 	}
-	if err := tlscfg.loadFromJsonCfg(new(TlsJsonCfg)); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(tlscfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, tlscfg)
-	}
-	cfgJSONStr := `	{
-	"tls":{
-		"server_certificate" : "path/To/Server/Cert",			
-		"server_key":"path/To/Server/Key",					
-		"client_certificate" : "path/To/Client/Cert",			
-		"client_key":"path/To/Client/Key",					
-		"ca_certificate":"path/To/CA/Cert",							
-		"server_name":"TestServerName",
-		"server_policy":3,					
-		},
-	}`
-	expected = TlsCfg{
+	expected := &TlsCfg{
 		ServerCerificate: "path/To/Server/Cert",
 		ServerKey:        "path/To/Server/Key",
 		CaCertificate:    "path/To/CA/Cert",
@@ -56,17 +43,15 @@ func TestTlsCfgloadFromJsonCfg(t *testing.T) {
 		ServerName:       "TestServerName",
 		ServerPolicy:     3,
 	}
-
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if jsntlsCfg, err := jsnCfg.TlsCfgJson(); err != nil {
+	} else if err = jsonCfg.tlsCfg.loadFromJsonCfg(cfgJSON); err != nil {
 		t.Error(err)
-	} else if err = tlscfg.loadFromJsonCfg(jsntlsCfg); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expected, tlscfg) {
-		t.Errorf("Expected: %+v , recived: %+v", expected, tlscfg)
+	} else if !reflect.DeepEqual(expected, jsonCfg.tlsCfg) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.tlsCfg))
 	}
 }
+
 func TestTlsCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `	{
 	"tls": {},
