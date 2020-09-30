@@ -25,60 +25,78 @@ import (
 )
 
 func TestStoreDbCfgloadFromJsonCfg(t *testing.T) {
-	var dbcfg, expected StorDbCfg
-	if err := dbcfg.loadFromJsonCfg(nil); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(dbcfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, dbcfg)
-	}
-	if err := dbcfg.loadFromJsonCfg(new(DbJsonCfg)); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(dbcfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, dbcfg)
-	}
-	cfgJSONStr := `{
-"stor_db": {								// database used to store offline tariff plans and CDRs
-	"db_type": "*mysql",					// stor database type to use: <*mongo|*mysql|*postgres|*internal>
-	"db_host": "127.0.0.1",					// the host to connect to
-	"db_port": 3306,						// the port to reach the stordb
-	"db_name": "cgrates",					// stor database name
-	"db_user": "cgrates",					// username to use when connecting to stordb
-	"db_password": "password",				// password to use when connecting to stordb
-	"opts": {
-		"max_open_conns": 100,					// maximum database connections opened, not applying for mongo
-		"max_idle_conns": 10,					// maximum database connections idle, not applying for mongo
-		"conn_max_lifetime": 0, 				// maximum amount of time in seconds a connection may be reused (0 for unlimited), not applying for mongo
-	},
-	"string_indexed_fields": [],			// indexes on cdrs table to speed up queries, used in case of *mongo and *internal
-	"prefix_indexed_fields":[],				// prefix indexes on cdrs table to speed up queries, used in case of *internal
-	}
-}`
-	expected = StorDbCfg{
-		Type:     "mysql",
-		Host:     "127.0.0.1",
-		Port:     "3306",
-		Name:     "cgrates",
-		User:     "cgrates",
-		Password: "password",
+	cfgJSON := &DbJsonCfg{
+		Db_type:               utils.StringPointer(utils.MYSQL),
+		Db_host:               utils.StringPointer("127.0.0.1"),
+		Db_port:               utils.IntPointer(-1),
+		Db_name:               utils.StringPointer(utils.CGRATES),
+		Db_user:               utils.StringPointer(utils.CGRATES),
+		Db_password:           utils.StringPointer("pass123"),
+		String_indexed_fields: &[]string{"*req.index1"},
+		Prefix_indexed_fields: &[]string{"*req.index1"},
+		Remote_conns:          &[]string{"*conn1"},
+		Replication_conns:     &[]string{"*conn1"},
+		Items: &map[string]*ItemOptJson{
+			utils.MetaSessionsCosts: {
+				Remote:    utils.BoolPointer(true),
+				Replicate: utils.BoolPointer(true),
+			},
+			utils.MetaCDRs: {
+				Remote:    utils.BoolPointer(true),
+				Replicate: utils.BoolPointer(false),
+			},
+		},
 		Opts: map[string]interface{}{
 			utils.MaxOpenConnsCfg:    100.,
 			utils.MaxIdleConnsCfg:    10.,
 			utils.ConnMaxLifetimeCfg: 0.,
 		},
-		StringIndexedFields: []string{},
-		PrefixIndexedFields: []string{},
 	}
-	dbcfg.Opts = make(map[string]interface{})
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	expected := &StorDbCfg{
+		Type:                utils.MYSQL,
+		Host:                "127.0.0.1",
+		Port:                "-1",
+		Name:                utils.CGRATES,
+		User:                utils.CGRATES,
+		Password:            "pass123",
+		StringIndexedFields: []string{"*req.index1"},
+		PrefixIndexedFields: []string{"*req.index1"},
+		RmtConns:            []string{"*conn1"},
+		RplConns:            []string{"*conn1"},
+		Items: map[string]*ItemOpt{
+			utils.MetaSessionsCosts: {
+				Remote:    true,
+				Replicate: true,
+			},
+			utils.MetaCDRs: {
+				Remote:    true,
+				Replicate: false,
+			},
+		},
+		Opts: map[string]interface{}{
+			utils.MaxOpenConnsCfg:    100.,
+			utils.MaxIdleConnsCfg:    10.,
+			utils.ConnMaxLifetimeCfg: 0.,
+			utils.QueryTimeoutCfg:    "10s",
+			utils.SSLModeCfg:         "disable",
+		},
+	}
+	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if jsnStoreDbCfg, err := jsnCfg.DbJsonCfg(STORDB_JSN); err != nil {
+	} else if err = jsonCfg.storDbCfg.loadFromJsonCfg(cfgJSON); err != nil {
 		t.Error(err)
-	} else if err = dbcfg.loadFromJsonCfg(jsnStoreDbCfg); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expected, dbcfg) {
-		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(dbcfg))
+	} else if !reflect.DeepEqual(expected.Items[utils.MetaSessionsCosts], jsonCfg.storDbCfg.Items[utils.MetaSessionsCosts]) {
+		t.Errorf("Expected %+v \n, recevied %+v", utils.ToJSON(expected.Items[utils.MetaSessionsCosts]),
+			utils.ToJSON(jsonCfg.storDbCfg.Items[utils.MetaSessionsCosts]))
+	} else if !reflect.DeepEqual(expected.Opts, jsonCfg.storDbCfg.Opts) {
+		t.Errorf("Expected %+v \n, recevied %+v", utils.ToJSON(expected.Opts), utils.ToJSON(jsonCfg.storDbCfg.Opts))
+	} else if !reflect.DeepEqual(expected.RplConns, jsonCfg.storDbCfg.RplConns) {
+		t.Errorf("Expected %+v \n, recevied %+v", utils.ToJSON(expected.RplConns), utils.ToJSON(jsonCfg.storDbCfg.RplConns))
+	} else if !reflect.DeepEqual(expected.RmtConns, jsonCfg.storDbCfg.RmtConns) {
+		t.Errorf("Expected %+v \n, recevied %+v", utils.ToJSON(expected.RmtConns), utils.ToJSON(jsonCfg.storDbCfg.RmtConns))
 	}
 }
+
 func TestStoreDbCfgloadFromJsonCfgPort(t *testing.T) {
 	var dbcfg StorDbCfg
 	cfgJSONStr := `{

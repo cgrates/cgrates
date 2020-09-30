@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -35,6 +36,8 @@ type StorDbCfg struct {
 	Password            string // The user's password.
 	StringIndexedFields []string
 	PrefixIndexedFields []string
+	RmtConns            []string // Remote DataDB  connIDs
+	RplConns            []string // Replication connIDs
 	Items               map[string]*ItemOpt
 	Opts                map[string]interface{}
 }
@@ -72,6 +75,24 @@ func (dbcfg *StorDbCfg) loadFromJsonCfg(jsnDbCfg *DbJsonCfg) (err error) {
 	if jsnDbCfg.Prefix_indexed_fields != nil {
 		dbcfg.PrefixIndexedFields = *jsnDbCfg.Prefix_indexed_fields
 	}
+	if jsnDbCfg.Remote_conns != nil {
+		dbcfg.RmtConns = make([]string, len(*jsnDbCfg.Remote_conns))
+		for i, item := range *jsnDbCfg.Remote_conns {
+			if item == utils.MetaInternal {
+				return fmt.Errorf("Remote connection ID needs to be different than *internal")
+			}
+			dbcfg.RmtConns[i] = item
+		}
+	}
+	if jsnDbCfg.Replication_conns != nil {
+		dbcfg.RplConns = make([]string, len(*jsnDbCfg.Replication_conns))
+		for i, item := range *jsnDbCfg.Replication_conns {
+			if item == utils.MetaInternal {
+				return fmt.Errorf("Replication connection ID needs to be different than *internal")
+			}
+			dbcfg.RplConns[i] = item
+		}
+	}
 	if jsnDbCfg.Opts != nil {
 		for k, v := range jsnDbCfg.Opts {
 			dbcfg.Opts[k] = v
@@ -104,6 +125,8 @@ func (dbcfg *StorDbCfg) Clone() *StorDbCfg {
 		Password:            dbcfg.Password,
 		StringIndexedFields: dbcfg.StringIndexedFields,
 		PrefixIndexedFields: dbcfg.PrefixIndexedFields,
+		RmtConns:            dbcfg.RmtConns,
+		RplConns:            dbcfg.RplConns,
 		Items:               items,
 		Opts:                dbcfg.Opts,
 	}
@@ -118,6 +141,8 @@ func (dbcfg *StorDbCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		utils.DataDbPassCfg:          dbcfg.Password,
 		utils.StringIndexedFieldsCfg: dbcfg.StringIndexedFields,
 		utils.PrefixIndexedFieldsCfg: dbcfg.PrefixIndexedFields,
+		utils.RmtConnsCfg:            dbcfg.RmtConns,
+		utils.RpcConns:               dbcfg.RplConns,
 		utils.OptsCfg:                dbcfg.Opts,
 	}
 	if dbcfg.Items != nil {
