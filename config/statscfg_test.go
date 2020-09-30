@@ -26,39 +26,32 @@ import (
 )
 
 func TestStatSCfgloadFromJsonCfg(t *testing.T) {
-	var statscfg, expected StatSCfg
-	if err := statscfg.loadFromJsonCfg(nil); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(statscfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, statscfg)
+	cfgJSON := &StatServJsonCfg{
+		Enabled:                  utils.BoolPointer(true),
+		Indexed_selects:          utils.BoolPointer(true),
+		Store_interval:           utils.StringPointer("2"),
+		Store_uncompressed_limit: utils.IntPointer(10),
+		Thresholds_conns:         &[]string{utils.MetaInternal},
+		Prefix_indexed_fields:    &[]string{"*req.index1", "*req.index2"},
+		Suffix_indexed_fields:    &[]string{"*req.index1", "*req.index2"},
+		Nested_fields:            utils.BoolPointer(true),
 	}
-	if err := statscfg.loadFromJsonCfg(new(StatServJsonCfg)); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(statscfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, statscfg)
+	expected := &StatSCfg{
+		Enabled:                true,
+		IndexedSelects:         true,
+		StoreInterval:          time.Duration(2),
+		StoreUncompressedLimit: 10,
+		ThresholdSConns:        []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)},
+		PrefixIndexedFields:    &[]string{"*req.index1", "*req.index2"},
+		SuffixIndexedFields:    &[]string{"*req.index1", "*req.index2"},
+		NestedFields:           true,
 	}
-	cfgJSONStr := `{
-"stats": {									// Stat service (*new)
-	"enabled": false,						// starts Stat service: <true|false>.
-	"store_interval": "2s",					// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
-	"thresholds_conns": [],					// address where to reach the thresholds service, empty to disable thresholds functionality: <""|*internal|x.y.z.y:1234>
-	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
-	"prefix_indexed_fields": ["*req.index1", "*req.index2"],			// query indexes based on these fields for faster processing
-},	
-}`
-	expected = StatSCfg{
-		StoreInterval:       time.Duration(time.Second * 2),
-		ThresholdSConns:     []string{},
-		PrefixIndexedFields: &[]string{"*req.index1", "*req.index2"},
-	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if jsnStatSCfg, err := jsnCfg.StatSJsonCfg(); err != nil {
+	} else if err = jsonCfg.statsCfg.loadFromJsonCfg(cfgJSON); err != nil {
 		t.Error(err)
-	} else if err = statscfg.loadFromJsonCfg(jsnStatSCfg); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expected, statscfg) {
-		t.Errorf("Expected: %+v , recived: %+v", expected, statscfg)
+	} else if !reflect.DeepEqual(expected, jsonCfg.statsCfg) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.statsCfg))
 	}
 }
 
