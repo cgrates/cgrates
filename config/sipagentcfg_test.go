@@ -26,42 +26,90 @@ import (
 )
 
 func TestSIPAgentCfgloadFromJsonCfg(t *testing.T) {
-	var dnsCfg, expected SIPAgentCfg
-	if err := dnsCfg.loadFromJsonCfg(nil, utils.INFIELD_SEP); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(dnsCfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, dnsCfg)
+	cfgJSONS := &SIPAgentJsonCfg{
+		Enabled:              utils.BoolPointer(true),
+		Listen:               utils.StringPointer("127.0.0.1:5060"),
+		Listen_net:           utils.StringPointer("udp"),
+		Sessions_conns:       &[]string{utils.MetaInternal},
+		Timezone:             utils.StringPointer("local"),
+		Retransmission_timer: utils.StringPointer("1"),
+		Templates: map[string][]*FcTemplateJsonCfg{
+			utils.TemplatesCfg: {
+				{
+					Tag:       utils.StringPointer("SessionId"),
+					Path:      utils.StringPointer("*rep.Session-Id"),
+					Type:      utils.StringPointer(utils.MetaVariable),
+					Mandatory: utils.BoolPointer(true),
+				},
+			},
+		},
+		Request_processors: &[]*ReqProcessorJsnCfg{
+			{
+				ID:             utils.StringPointer("OutboundAUTHDryRun"),
+				Filters:        &[]string{"*string:~*req.request_type:OutboundAUTH", "*string:~*req.Msisdn:497700056231"},
+				Flags:          &[]string{utils.MetaDryRun},
+				Timezone:       utils.StringPointer("local"),
+				Request_fields: &[]*FcTemplateJsonCfg{},
+				Reply_fields: &[]*FcTemplateJsonCfg{
+					{
+						Tag:       utils.StringPointer("SessionId"),
+						Path:      utils.StringPointer("*rep.Session-Id"),
+						Type:      utils.StringPointer(utils.MetaVariable),
+						Mandatory: utils.BoolPointer(true),
+					},
+				},
+			},
+		},
 	}
-	if err := dnsCfg.loadFromJsonCfg(new(SIPAgentJsonCfg), utils.INFIELD_SEP); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(dnsCfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, dnsCfg)
+	expected := &SIPAgentCfg{
+		Enabled:             true,
+		Listen:              "127.0.0.1:5060",
+		ListenNet:           "udp",
+		SessionSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
+		Timezone:            "local",
+		RetransmissionTimer: time.Duration(1),
+		Templates: map[string][]*FCTemplate{
+			utils.TemplatesCfg: {
+				{
+					Tag:       "SessionId",
+					Path:      "*rep.Session-Id",
+					Type:      utils.MetaVariable,
+					Mandatory: true,
+					Layout:    time.RFC3339,
+				},
+			},
+		},
+		RequestProcessors: []*RequestProcessor{
+			{
+				ID:            "OutboundAUTHDryRun",
+				Filters:       []string{"*string:~*req.request_type:OutboundAUTH", "*string:~*req.Msisdn:497700056231"},
+				Flags:         utils.FlagsWithParams{utils.MetaDryRun: {}},
+				Timezone:      "local",
+				RequestFields: []*FCTemplate{},
+				ReplyFields: []*FCTemplate{
+					{
+						Tag:       "SessionId",
+						Path:      "*rep.Session-Id",
+						Type:      utils.MetaVariable,
+						Mandatory: true,
+						Layout:    time.RFC3339,
+					},
+				},
+			},
+		},
 	}
-	cfgJSONStr := `{
-"sip_agent": {
-	"enabled": false,											// enables the DNS agent: <true|false>
-	"listen": "127.0.0.1:5060",									// address where to listen for DNS requests <x.y.z.y:1234>
-	"listen_net": "udp",										// network to listen on <udp|tcp|tcp-tls>
-	"sessions_conns": ["*internal"],
-	"timezone": "UTC",												// timezone of the events if not specified  <UTC|Local|$IANA_TZ_DB>
-	"request_processors": [										// request processors to be applied to DNS messages
-	],
-},
-}`
-	expected = SIPAgentCfg{
-		Listen:        "127.0.0.1:5060",
-		ListenNet:     "udp",
-		SessionSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
-		Timezone:      "UTC",
+	for _, r := range expected.Templates[utils.TemplatesCfg] {
+		r.ComputePath()
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	for _, r := range expected.RequestProcessors[0].ReplyFields {
+		r.ComputePath()
+	}
+	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if jsnDaCfg, err := jsnCfg.SIPAgentJsonCfg(); err != nil {
+	} else if err = jsonCfg.sipAgentCfg.loadFromJsonCfg(cfgJSONS, jsonCfg.generalCfg.RSRSep); err != nil {
 		t.Error(err)
-	} else if err = dnsCfg.loadFromJsonCfg(jsnDaCfg, utils.INFIELD_SEP); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expected, dnsCfg) {
-		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(dnsCfg))
+	} else if !reflect.DeepEqual(expected, jsonCfg.sipAgentCfg) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.sipAgentCfg))
 	}
 }
 
