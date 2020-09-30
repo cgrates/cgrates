@@ -71,6 +71,8 @@ func TestCacheCfgloadFromJsonCfg(t *testing.T) {
 	}
 	if jsnCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
+	} else if err = jsnCfg.cacheCfg.loadFromJsonCfg(nil); err != nil {
+		t.Error(err)
 	} else if err = jsnCfg.cacheCfg.loadFromJsonCfg(jsonCfg); err != nil {
 		t.Error(err)
 	} else {
@@ -97,7 +99,9 @@ func TestCacheParamCfgloadFromJsonCfg(t *testing.T) {
 		Precache:  true,
 	}
 	rcv := new(CacheParamCfg)
-	if err := rcv.loadFromJsonCfg(json); err != nil {
+	if err := rcv.loadFromJsonCfg(nil); err != nil {
+		t.Error(err)
+	} else if err := rcv.loadFromJsonCfg(json); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
