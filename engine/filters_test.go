@@ -1547,13 +1547,13 @@ func TestAPIBan(t *testing.T) {
 	if _, err := filterS.Pass("cgrates.org", []string{"*apiban:~*req.IP:*any"}, dp); err == nil || err.Error() != expErr {
 		t.Errorf("Expected error %s received: %v", expErr, err)
 	}
-	baningo.RootURL = "http://127.0.0.1:80/"
+	baningo.RootURL = "http://127.0.0.1:12345/"
 
-	expErr = `Get "http://127.0.0.1:80/testKey/banned/100": dial tcp 127.0.0.1:80: connect: connection refused`
+	expErr = `Get "http://127.0.0.1:12345/testKey/banned/100": dial tcp 127.0.0.1:12345: connect: connection refused`
 	if _, err := filterS.Pass("cgrates.org", []string{"*apiban:~*req.IP:*all"}, dp); err == nil || err.Error() != expErr {
 		t.Errorf("Expected error %s received: %v", expErr, err)
 	}
-	expErr = `Get "http://127.0.0.1:80/testKey/check/1.2.3.253": dial tcp 127.0.0.1:80: connect: connection refused`
+	expErr = `Get "http://127.0.0.1:12345/testKey/check/1.2.3.253": dial tcp 127.0.0.1:12345: connect: connection refused`
 	if _, err := filterS.Pass("cgrates.org", []string{"*apiban:~*req.IP:*single"}, dp); err == nil || err.Error() != expErr {
 		t.Errorf("Expected error %s received: %v", expErr, err)
 	}
