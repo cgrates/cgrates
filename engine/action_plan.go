@@ -129,18 +129,35 @@ func (at *ActionTiming) GetNextStartTime(t1 time.Time) (t time.Time) {
 	}
 	at.stCache = cronexpr.MustParse(i.Timing.CronString()).Next(t1)
 	if i.Timing.ID == utils.MetaMonthlyEstimated {
-		clnRITiming := at.Timing.Timing.Clone()
+		day := at.Timing.Timing.MonthDays[0]
+		if lastDay := utils.GetEndOfMonth(t1).Day(); lastDay <= day { // clamp the day to last day of month in order to corectly compare the time
+			day = lastDay
+		}
+		if at.stCache.Month() == t1.Month()+2 ||
+			(utils.GetEndOfMonth(t1).Day() < at.Timing.Timing.MonthDays[0] &&
+				at.stCache.Month() == t1.Month()+1) {
+			lastDay := utils.GetEndOfMonth(at.stCache).Day()
+			at.stCache = at.stCache.AddDate(0, 0, -lastDay)
+		}
+		/*clnRITiming := at.Timing.Timing.Clone()
 		mnt := t1.Month()
-		if t1.Day() >= clnRITiming.MonthDays[0] {
-			mnt++
-			if mnt == 13 { // special case in case of december next month is January
+		day := clnRITiming.MonthDays[0]
+		if lastDay := utils.GetEndOfMonth(t1).Day(); lastDay <= day { // clamp the day to last day of month in order to corectly compare the time
+			day = lastDay
+		}
+		if t1.Day() > day || // in case we missed the day
+			(t1.Day() == day && //  did not miss the day but need to check if we missed the start time
+				t1.Sub(t1.Truncate(24*time.Hour)) >=
+					at.stCache.Sub(at.stCache.Truncate(24*time.Hour))) {
+			// the StartTime is before t1 so try nextMonth
+			if mnt++; mnt == 13 { // special case in case of december next month is January
 				mnt = 1
 			}
 		}
 		for at.stCache.Month() > mnt {
 			clnRITiming.MonthDays[0]--
 			at.stCache = cronexpr.MustParse(clnRITiming.CronString()).Next(t1)
-		}
+		}*/
 	}
 	return at.stCache
 }
