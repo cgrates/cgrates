@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ees
 
 import (
+	"strings"
 	"sync"
 
 	"github.com/cgrates/cgrates/config"
@@ -48,9 +49,11 @@ type ElasticEe struct {
 
 // init will create all the necessary dependencies, including opening the file
 func (eEe *ElasticEe) init() (err error) {
-	// compose the config out of opts
 	// create the client
-	if eEe.eClnt, err = elasticsearch.NewDefaultClient(); err != nil {
+	if eEe.eClnt, err = elasticsearch.NewClient(
+		elasticsearch.Config{
+			Addresses: strings.Split(eEe.cgrCfg.EEsCfg().Exporters[eEe.cfgIdx].ExportPath, utils.INFIELD_SEP),
+		}); err != nil {
 		return
 	}
 	return
