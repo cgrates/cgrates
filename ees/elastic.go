@@ -19,8 +19,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ees
 
 import (
+	"context"
+	"encoding/json"
+	"fmt"
 	"strings"
 	"sync"
+
+	"github.com/elastic/go-elasticsearch/esapi"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -40,6 +45,7 @@ func NewElasticExporter(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.Fi
 type ElasticEe struct {
 	id      string
 	eClnt   *elasticsearch.Client
+	index   string
 	cgrCfg  *config.CGRConfig
 	cfgIdx  int // index of config instance within ERsCfg.Readers
 	filterS *engine.FilterS
@@ -55,6 +61,11 @@ func (eEe *ElasticEe) init() (err error) {
 			Addresses: strings.Split(eEe.cgrCfg.EEsCfg().Exporters[eEe.cfgIdx].ExportPath, utils.INFIELD_SEP),
 		}); err != nil {
 		return
+	}
+	if val, has := eEe.cgrCfg.EEsCfg().Exporters[eEe.cfgIdx].Opts[utils.Index]; !has {
+		eEe.index = utils.CDRsTBL
+	} else {
+		eEe.index = utils.IfaceAsString(val)
 	}
 	return
 }
@@ -86,6 +97,7 @@ func (eEe *ElasticEe) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 	for k, v := range cgrEv.Event {
 		req[k] = v
 	}
+	valMp := make(map[string]string)
 	eeReq := NewEventExporterRequest(req, eEe.dc,
 		eEe.cgrCfg.EEsCfg().Exporters[eEe.cfgIdx].Tenant,
 		eEe.cgrCfg.GeneralCfg().DefaultTenant,
@@ -95,8 +107,45 @@ func (eEe *ElasticEe) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 	if err = eeReq.SetFields(eEe.cgrCfg.EEsCfg().Exporters[eEe.cfgIdx].ContentFields()); err != nil {
 		return
 	}
+	for el := eeReq.cnt.GetFirstElement(); el != nil; el = el.Next() {
+		var nmIt utils.NMInterface
+		if nmIt, err = eeReq.cnt.Field(el.Value); err != nil {
+			return
+		}
+		itm, isNMItem := nmIt.(*config.NMItem)
+		if !isNMItem {
+			err = fmt.Errorf("cannot encode reply value: %s, err: not NMItems", utils.ToJSON(el.Value))
+			return
+		}
+		if itm == nil {
+			continue // all attributes, not writable to diameter packet
+		}
+		valMp[strings.Join(itm.Path, utils.NestingSep)] = utils.IfaceAsString(itm.Data)
+	}
 	updateEEMetrics(eEe.dc, cgrEv.Event, utils.FirstNonEmpty(eEe.cgrCfg.EEsCfg().Exporters[eEe.cfgIdx].Timezone,
 		eEe.cgrCfg.GeneralCfg().DefaultTimezone))
+	// Set up the request object
+	cgrID := utils.FirstNonEmpty(engine.MapEvent(cgrEv.Event).GetStringIgnoreErrors(utils.CGRID), utils.GenUUID())
+	runID := utils.FirstNonEmpty(engine.MapEvent(cgrEv.Event).GetStringIgnoreErrors(utils.RunID), utils.MetaDefault)
+	eReq := esapi.IndexRequest{
+		Index:      eEe.index,
+		DocumentID: utils.ConcatenatedKey(cgrID, runID),
+		Body:       strings.NewReader(utils.ToJSON(valMp)),
+		Refresh:    "true",
+	}
+	var resp *esapi.Response
+	if resp, err = eReq.Do(context.Background(), eEe.eClnt); err != nil {
+		resp.Body.Close()
+		return
+	} else if resp.IsError() {
+		var e map[string]interface{}
+		if err = json.NewDecoder(resp.Body).Decode(&e); err != nil {
+			return
+		} else {
+			utils.Logger.Warning(fmt.Sprintf("<%s> Exporter with id: <%s> received error: <%+v> when indexing document",
+				utils.EventExporterS, eEe.id, e))
+		}
+	}
 	return
 }
 

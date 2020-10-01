@@ -865,6 +865,7 @@ const (
 	MetaMonthlyEstimated     = "*monthly_estimated"
 	ProcessRuns              = "ProcessRuns"
 	HashtagSep               = "#"
+	Index                    = "index"
 )
 
 // Migrator Action

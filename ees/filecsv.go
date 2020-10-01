@@ -126,8 +126,7 @@ func (fCsv *FileCSVee) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 	}
 	updateEEMetrics(fCsv.dc, cgrEv.Event, utils.FirstNonEmpty(fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].Timezone,
 		fCsv.cgrCfg.GeneralCfg().DefaultTimezone))
-	fCsv.csvWriter.Write(csvRecord)
-	return
+	return fCsv.csvWriter.Write(csvRecord)
 }
 
 // Compose and cache the header
