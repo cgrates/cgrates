@@ -112,6 +112,7 @@ func TestConfigSanityCDRServer(t *testing.T) {
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
+
 	cfg.cdrsCfg.ThresholdSConns = []string{"test"}
 	expected = "<CDRs> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
@@ -124,6 +125,7 @@ func TestConfigSanityCDRServer(t *testing.T) {
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
+
 }
 
 func TestConfigSanityLoaders(t *testing.T) {
@@ -140,6 +142,21 @@ func TestConfigSanityLoaders(t *testing.T) {
 	expected := "<LoaderS> nonexistent folder: /not/exist"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+
+	cfg.loaderCfg = LoaderSCfgs{
+		&LoaderSCfg{
+			Enabled:  true,
+			TpInDir:  "/",
+			TpOutDir: "/not/exist",
+			Data: []*LoaderDataType{{
+				Type: "strsdfing",
+			}},
+		},
+	}
+	expected = "<LoaderS> nonexistent folder: /not/exist"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q received: %+q", expected, err)
 	}
 
 	cfg.loaderCfg = LoaderSCfgs{
@@ -172,6 +189,26 @@ func TestConfigSanityLoaders(t *testing.T) {
 		},
 	}
 	expected = "<LoaderS> invalid field type *stats for *stats at test1"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+
+	cfg.loaderCfg = LoaderSCfgs{
+		&LoaderSCfg{
+			Enabled:  true,
+			TpInDir:  "/",
+			TpOutDir: "/",
+			Data: []*LoaderDataType{{
+				Type: utils.MetaStats,
+				Fields: []*FCTemplate{{
+					Type: utils.META_COMPOSED,
+					Tag:  "test1",
+					Path: utils.EmptyString,
+				}},
+			}},
+		},
+	}
+	expected = "<LoaderS> MANDATORY_IE_MISSING: [Path] for *stats at test1"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
