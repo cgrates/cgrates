@@ -3430,3 +3430,33 @@ func (dm *DataManager) GetAPIBan(ip string, apiKeys []string, single, cacheRead,
 	}
 	return
 }
+
+// CheckFilters returns the filters IDs are valid
+func (dm *DataManager) CheckFilters(tenant string, ids []string) (ok bool) {
+	for _, id := range ids {
+		if strings.HasPrefix(id, utils.Meta) {
+			if _, err := NewFilterFromInline(tenant, id); err != nil {
+				return
+			}
+		} else if dm == nil {
+			return
+		} else if x, has := Cache.Get(utils.CacheFilters, utils.ConcatenatedKey(tenant, id)); has && x == nil {
+			return
+		} else if has, err := dm.DataDB().HasDataDrv(utils.FilterPrefix, id, tenant); err != nil || !has {
+			if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaFilters]; err == utils.ErrNotFound && itm.Remote {
+				var fltr *Filter
+				err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil, utils.ReplicatorSv1GetFilter,
+					&utils.TenantIDWithOpts{
+						TenantID: &utils.TenantID{Tenant: tenant, ID: id},
+						Opts: map[string]interface{}{
+							utils.OptsAPIKey:  itm.APIKey,
+							utils.OptsRouteID: itm.RouteID,
+						}}, &fltr)
+			}
+			if err != nil {
+				return
+			}
+		}
+	}
+	return true
+}

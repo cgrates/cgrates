@@ -109,6 +109,14 @@ func (at *ActionTiming) Clone() (cln *ActionTiming) {
 	return
 }
 
+// getDayOrEndOfMonth returns the day if is a valid date relative to t1 month
+func getDayOrEndOfMonth(day int, t1 time.Time) int {
+	if lastDay := utils.GetEndOfMonth(t1).Day(); lastDay <= day { // clamp the day to last day of month in order to corectly compare the time
+		day = lastDay
+	}
+	return day
+}
+
 func (at *ActionTiming) GetNextStartTime(t1 time.Time) (t time.Time) {
 	if !at.stCache.IsZero() {
 		return at.stCache
@@ -129,35 +137,17 @@ func (at *ActionTiming) GetNextStartTime(t1 time.Time) (t time.Time) {
 	}
 	at.stCache = cronexpr.MustParse(i.Timing.CronString()).Next(t1)
 	if i.Timing.ID == utils.MetaMonthlyEstimated {
-		day := at.Timing.Timing.MonthDays[0]
-		if lastDay := utils.GetEndOfMonth(t1).Day(); lastDay <= day { // clamp the day to last day of month in order to corectly compare the time
-			day = lastDay
-		}
+		// substract a month from at.stCache only if we skip 2 months
+		// or we skip a month because mentioned MonthDay is after the last day of the current month
 		if at.stCache.Month() == t1.Month()+2 ||
 			(utils.GetEndOfMonth(t1).Day() < at.Timing.Timing.MonthDays[0] &&
 				at.stCache.Month() == t1.Month()+1) {
 			lastDay := utils.GetEndOfMonth(at.stCache).Day()
-			at.stCache = at.stCache.AddDate(0, 0, -lastDay)
-		}
-		/*clnRITiming := at.Timing.Timing.Clone()
-		mnt := t1.Month()
-		day := clnRITiming.MonthDays[0]
-		if lastDay := utils.GetEndOfMonth(t1).Day(); lastDay <= day { // clamp the day to last day of month in order to corectly compare the time
-			day = lastDay
-		}
-		if t1.Day() > day || // in case we missed the day
-			(t1.Day() == day && //  did not miss the day but need to check if we missed the start time
-				t1.Sub(t1.Truncate(24*time.Hour)) >=
-					at.stCache.Sub(at.stCache.Truncate(24*time.Hour))) {
-			// the StartTime is before t1 so try nextMonth
-			if mnt++; mnt == 13 { // special case in case of december next month is January
-				mnt = 1
+			// only change the time if the new one is after t1
+			if tmp := at.stCache.AddDate(0, 0, -lastDay); tmp.After(t1) {
+				at.stCache = tmp
 			}
 		}
-		for at.stCache.Month() > mnt {
-			clnRITiming.MonthDays[0]--
-			at.stCache = cronexpr.MustParse(clnRITiming.CronString()).Next(t1)
-		}*/
 	}
 	return at.stCache
 }

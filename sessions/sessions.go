@@ -3759,7 +3759,6 @@ func (sS *SessionS) processThreshold(cgrEv *utils.CGREvent, thIDs []string, opts
 		thEv.ThresholdIDs = thIDs
 	}
 	//initialize the returned variable
-	tIDs = make([]string, 0)
 	err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().ThreshSConns, nil, utils.ThresholdSv1ProcessEvent, thEv, &tIDs)
 	return
 }
@@ -3781,7 +3780,6 @@ func (sS *SessionS) processStats(cgrEv *utils.CGREvent, stsIDs []string, opts ma
 		statArgs.StatIDs = stsIDs
 	}
 	//initialize the returned variable
-	sIDs = make([]string, 0)
 	err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().StatSConns, nil, utils.StatSv1ProcessEvent, statArgs, &sIDs)
 	return
 }
