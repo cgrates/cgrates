@@ -59,6 +59,7 @@ var (
 		testAttributeSProcessEventWithNoneSubstitute3,
 		testAttributeSProcessEventWithHeader,
 		testAttributeSGetAttPrfIDs,
+		testAttributeSSetAlsPrfBrokenReference,
 		testAttributeSGetAlsPrfBeforeSet,
 		testAttributeSSetAlsPrf,
 		testAttributeSUpdateAlsPrf,
@@ -748,6 +749,38 @@ func testAttributeSGetAttPrfIDs(t *testing.T) {
 		t.Error(err)
 	} else if 10 < len(result) {
 		t.Errorf("Expecting : %+v, received: %+v", expected, result)
+	}
+}
+
+func testAttributeSSetAlsPrfBrokenReference(t *testing.T) {
+	alsPrf = &AttributeWithCache{
+		AttributeProfile: &engine.AttributeProfile{
+			Tenant:    "cgrates.org",
+			ID:        "ApierTest",
+			Contexts:  []string{utils.MetaSessionS, utils.MetaCDRs},
+			FilterIDs: []string{"FLTR_ACNT_danBroken", "FLTR_DST_DEBroken"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			},
+			Attributes: []*engine.Attribute{
+				{
+					Path:  utils.MetaReq + utils.NestingSep + "FL1",
+					Value: config.NewRSRParsersMustCompile("Al1", utils.INFIELD_SEP),
+				},
+			},
+			Weight: 20,
+		},
+	}
+	var result string
+	if err := attrSRPC.Call(utils.APIerSv1SetAttributeProfile, alsPrf, &result); err == nil {
+		t.Error(err)
+	}
+	var reply *engine.AttributeProfile
+	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfile,
+		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}}, &reply); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Fatal(err)
 	}
 }
 
