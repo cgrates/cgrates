@@ -351,6 +351,30 @@
 			"fields":[
 				{"tag": "RequiredTemplate","type": "*template", "value": "requiredFields"},
 			],
+		},
+		{
+			"id": "ElasticsearchExporter",
+			"type": "*elastic",
+			"export_path": "http://localhost:9200",
+			"tenant": "cgrates.org",
+			"attempts": 1,
+			"filters": ["*string:~*req.ExporterUsed:ElasticExporter"],
+			"fields":[
+				{"tag": "CGRID", "path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"},
+				{"tag": "RunID", "path": "*exp.RunID", "type": "*variable", "value": "~*req.RunID"},
+				{"tag": "ToR", "path": "*exp.ToR", "type": "*variable", "value": "~*req.ToR"},
+				{"tag": "OriginID", "path": "*exp.OriginID", "type": "*variable", "value": "~*req.OriginID"},
+				{"tag": "RequestType", "path": "*exp.RequestType", "type": "*variable", "value": "~*req.RequestType"},
+				{"tag": "Tenant", "path": "*exp.Tenant", "type": "*variable", "value": "~*req.Tenant"},
+				{"tag": "Category", "path": "*exp.Category", "type": "*variable", "value": "~*req.Category"},
+				{"tag": "Account", "path": "*exp.Account", "type": "*variable", "value": "~*req.Account"},
+				{"tag": "Subject", "path": "*exp.Subject", "type": "*variable", "value": "~*req.Subject"},
+				{"tag": "Destination", "path": "*exp.Destination", "type": "*variable", "value": "~*req.Destination"},
+				{"tag": "SetupTime", "path": "*exp.SetupTime", "type": "*variable", "value": "~*req.SetupTime"},
+				{"tag": "AnswerTime", "path": "*exp.AnswerTime", "type": "*variable", "value": "~*req.AnswerTime"},
+				{"tag": "Usage", "path": "*exp.Usage", "type": "*variable", "value": "~*req.Usage"},
+				{"tag": "Cost", "path": "*exp.Cost", "type": "*variable", "value": "~*req.Cost{*round:4}"},
+			],
 		}
 	]
 },

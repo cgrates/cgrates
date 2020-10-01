@@ -103,6 +103,7 @@ cgrates (0.11.0~dev) UNRELEASED; urgency=medium
   * [AgentS] DiameterAgent return NOT_FOUND instead of "filter not passing" error and let other subsystem to handle this (e.g. FilterS)
   * [StatS] Change format of metricID when specifying fields ( e.g. *sum#~*req.FieldName )
   * [FilterS] Added *apiban filter
+  * [EEs] Add support for *elastic exporter
   
  -- DanB <danb@cgrates.org>  Wed, 19 Feb 2020 13:25:52 +0200
 
