@@ -104,6 +104,7 @@ func (cCfg *CacheCfg) loadFromJsonCfg(jsnCfg *CacheJsonCfg) (err error) {
 			cCfg.ReplicationConns[idx] = connID
 		}
 	}
+
 	return nil
 }
 

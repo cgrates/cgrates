@@ -27,7 +27,7 @@ import (
 
 func TestRPCConnsloadFromJsonCfg(t *testing.T) {
 	cfgJSONStr := `{
-"rpc_conn": {}
+      "rpc_conn": {}
 }`
 	expected := RpcConns{
 		utils.MetaInternal: {
@@ -42,23 +42,8 @@ func TestRPCConnsloadFromJsonCfg(t *testing.T) {
 				},
 			},
 		},
-		utils.MetaLocalHost: {
-			Strategy: utils.MetaFirst,
-			PoolSize: 0,
-			Conns: []*RemoteHost{
-				{
-					Address:     "127.0.0.1:2012",
-					Transport:   utils.MetaJSON,
-					Synchronous: false,
-					TLS:         false,
-				},
-			},
-		},
 	}
-	newCfg, err := NewDefaultCGRConfig()
-	if err != nil {
-		t.Fatal(err)
-	}
+	newCfg := new(CGRConfig)
 	if jsonCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if err = newCfg.loadRPCConns(jsonCfg); err != nil {

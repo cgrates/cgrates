@@ -397,6 +397,7 @@ func (cfg *CGRConfig) loadRPCConns(jsnCfg *CgrJsonCfg) (err error) {
 		return
 	}
 	// hardoded the *internal connection
+	cfg.rpcConns = make(RpcConns)
 	cfg.rpcConns[utils.MetaInternal] = &RPCConn{
 		Strategy: rpcclient.PoolFirst,
 		PoolSize: 0,
