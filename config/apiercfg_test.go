@@ -27,17 +27,17 @@ import (
 func TestApierCfgloadFromJsonCfg(t *testing.T) {
 	jsonCfg := &ApierJsonCfg{
 		Enabled:          utils.BoolPointer(false),
-		Caches_conns:     &[]string{utils.MetaInternal, "*conn1"},
-		Scheduler_conns:  &[]string{utils.MetaInternal, "*conn1"},
-		Attributes_conns: &[]string{utils.MetaInternal, "*conn1"},
-		Ees_conns:        &[]string{utils.MetaInternal, "*conn1"},
+		Caches_conns:     &[]string{"*internal:*caches"},
+		Scheduler_conns:  &[]string{"*conn1"},
+		Attributes_conns: &[]string{"*internal:*attributes"},
+		Ees_conns:        &[]string{"*conn1", "*conn2"},
 	}
 	expected := &ApierCfg{
 		Enabled:         false,
-		CachesConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), "*conn1"},
-		SchedulerConns:  []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler), "*conn1"},
-		AttributeSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"},
-		EEsConns:        []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs), "*conn1"},
+		CachesConns:     []string{"*internal:*caches"},
+		SchedulerConns:  []string{"*conn1"},
+		AttributeSConns: []string{"*internal:*attributes"},
+		EEsConns:        []string{"*conn1", "*conn2"},
 	}
 	if jsnCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
@@ -73,22 +73,20 @@ func TestApierCfgAsMapInterface2(t *testing.T) {
 	myJSONStr := `{
     "apiers": {
        "enabled": true,
-       "attributes_conns": ["*internal:*attributes", "*conn1"],
-       "ees_conns": ["*internal:*ees", "*conn1"],
-       "caches_conns": ["*internal:*caches", "*conn1"],
-       "scheduler_conns": ["*internal:*scheduler", "*conn1"],
+       "attributes_conns": ["conn1", "conn2"],
+       "ees_conns": ["*internal"],
     },
 }`
 	expectedMap := map[string]interface{}{
 		utils.EnabledCfg:         true,
-		utils.CachesConnsCfg:     []string{utils.MetaInternal, "*conn1"},
-		utils.SchedulerConnsCfg:  []string{utils.MetaInternal, "*conn1"},
-		utils.AttributeSConnsCfg: []string{utils.MetaInternal, "*conn1"},
-		utils.EEsConnsCfg:        []string{utils.MetaInternal, "*conn1"},
+		utils.CachesConnsCfg:     []string{"*internal"},
+		utils.SchedulerConnsCfg:  []string{},
+		utils.AttributeSConnsCfg: []string{"conn1", "conn2"},
+		utils.EEsConnsCfg:        []string{"*internal"},
 	}
 	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(myJSONStr); err != nil {
 		t.Error(err)
 	} else if newMap := cgrCfg.apier.AsMapInterface(); !reflect.DeepEqual(expectedMap, newMap) {
-		t.Errorf("Expected %+v \n, recived %+v", utils.ToJSON(expectedMap), utils.ToJSON(newMap))
+		t.Errorf("Expected %+v, recived %+v", expectedMap, newMap)
 	}
 }

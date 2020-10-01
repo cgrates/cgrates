@@ -1880,10 +1880,6 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.ClientConnector,
 	if args.CGREvent.ID == "" {
 		args.CGREvent.ID = utils.GenUUID()
 	}
-	if args.CGREvent.Tenant == "" {
-		args.CGREvent.Tenant = sS.cgrCfg.GeneralCfg().DefaultTenant
-	}
-
 	// RPC caching
 	if sS.cgrCfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit != 0 {
 		cacheKey := utils.ConcatenatedKey(utils.SessionSv1AuthorizeEvent, args.CGREvent.ID)
@@ -1907,6 +1903,9 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.ClientConnector,
 	if !args.GetAttributes && !args.AuthorizeResources &&
 		!args.GetMaxUsage && !args.GetRoutes {
 		return utils.NewErrMandatoryIeMissing("subsystems")
+	}
+	if args.CGREvent.Tenant == "" {
+		args.CGREvent.Tenant = sS.cgrCfg.GeneralCfg().DefaultTenant
 	}
 	if args.GetAttributes {
 		rplyAttr, err := sS.processAttributes(args.CGREvent, args.AttributeIDs, args.Opts)
@@ -2161,9 +2160,6 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.ClientConnector,
 	var withErrors bool
 	if args.CGREvent.ID == "" {
 		args.CGREvent.ID = utils.GenUUID()
-	}
-	if args.CGREvent.Tenant == "" {
-		args.CGREvent.Tenant = sS.cgrCfg.GeneralCfg().DefaultTenant
 	}
 
 	// RPC caching
