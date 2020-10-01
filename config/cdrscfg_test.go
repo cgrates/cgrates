@@ -29,27 +29,27 @@ func TestCdrsCfgloadFromJsonCfg(t *testing.T) {
 		Enabled:              utils.BoolPointer(true),
 		Store_cdrs:           utils.BoolPointer(true),
 		Session_cost_retries: utils.IntPointer(1),
-		Chargers_conns:       &[]string{utils.MetaInternal},
-		Rals_conns:           &[]string{utils.MetaInternal},
-		Attributes_conns:     &[]string{utils.MetaInternal},
-		Thresholds_conns:     &[]string{utils.MetaInternal},
-		Stats_conns:          &[]string{"*conn1", "*conn2"},
+		Chargers_conns:       &[]string{utils.MetaInternal, "*conn1"},
+		Rals_conns:           &[]string{utils.MetaInternal, "*conn1"},
+		Attributes_conns:     &[]string{utils.MetaInternal, "*conn1"},
+		Thresholds_conns:     &[]string{utils.MetaInternal, "*conn1"},
+		Stats_conns:          &[]string{utils.MetaInternal, "*conn1"},
 		Online_cdr_exports:   &[]string{"randomVal"},
-		Scheduler_conns:      &[]string{utils.MetaInternal},
-		Ees_conns:            &[]string{utils.MetaInternal},
+		Scheduler_conns:      &[]string{utils.MetaInternal, "*conn1"},
+		Ees_conns:            &[]string{utils.MetaInternal, "*conn1"},
 	}
 	expected := &CdrsCfg{
 		Enabled:          true,
 		StoreCdrs:        true,
 		SMCostRetries:    1,
-		ChargerSConns:    []string{"*internal:*chargers"},
-		RaterConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder)},
-		AttributeSConns:  []string{"*internal:*attributes"},
-		ThresholdSConns:  []string{"*internal:*thresholds"},
-		StatSConns:       []string{"*conn1", "*conn2"},
+		ChargerSConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers), "*conn1"},
+		RaterConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder), "*conn1"},
+		AttributeSConns:  []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"},
+		ThresholdSConns:  []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"},
+		StatSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"},
 		OnlineCDRExports: []string{"randomVal"},
-		SchedulerConns:   []string{"*internal:*scheduler"},
-		EEsConns:         []string{"*internal:*ees"},
+		SchedulerConns:   []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler), "*conn1"},
+		EEsConns:         []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs), "*conn1"},
 	}
 	if jsnCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
@@ -60,97 +60,53 @@ func TestCdrsCfgloadFromJsonCfg(t *testing.T) {
 	}
 }
 
-func TestExtraFieldsinAsMapInterface(t *testing.T) {
-	cfgJSONStr := `{
-	"cdrs": {
-		"enabled": true,
-		"extra_fields": ["~effective_caller_id_number:s/(\\d+)/+$1/","~Custom_Val:s/(\\d+)/+$1/"],
-		"chargers_conns":["*localhost"],
-		"store_cdrs": true,
-		"online_cdr_exports": []
-	},
-	}`
-	expectedExtra := []string{`~effective_caller_id_number:s/(\d+)/+$1/`, "~Custom_Val:s/(\\d+)/+$1/"}
-	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+func TestExtraFieldsinloadFromJsonCfg(t *testing.T) {
+	cfgJSON := &CdrsJsonCfg{
+		Extra_fields: &[]string{utils.EmptyString},
+	}
+	expectedErrMessage := "Empty RSRField in rule: "
+	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if rcv := cgrCfg.cdrsCfg.AsMapInterface(); !reflect.DeepEqual(rcv[utils.ExtraFieldsCfg], expectedExtra) {
-		t.Errorf("Expected %+v \n, recieved %+v \n", expectedExtra, rcv[utils.ExtraFieldsCfg])
+	} else if err = jsonCfg.cdrsCfg.loadFromJsonCfg(cfgJSON); err == nil || err.Error() != expectedErrMessage {
+		t.Errorf("Expected %+v, received %+v", expectedErrMessage, err)
 	}
 }
 
 func TestCdrsCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
 	"cdrs": {
-		"enabled": false,						
-		"extra_fields": ["~Custom_Val:s/(\\d+)/+$1/"],
+		"enabled": true,						
+		"extra_fields": ["PayPalAccount", "LCRProfile", "ResourceID"],
 		"store_cdrs": true,						
 		"session_cost_retries": 5,				
-		"chargers_conns":["*localhost"],				
-		"rals_conns": ["*internal"],
-		"attributes_conns": [],					
-		"thresholds_conns": [],					
-		"stats_conns": [],						
-		"online_cdr_exports":[],
-		"scheduler_conns": [],		
-        "ees_conns": [],
+		"chargers_conns":["*internal:*chargers","*conn1"],			
+		"rals_conns": ["*internal:*responder","*conn1"],
+		"attributes_conns": ["*internal:*attributes","*conn1"],					
+		"thresholds_conns": ["*internal:*thresholds","*conn1"],					
+		"stats_conns": ["*internal:*stats","*conn1"],						
+		"online_cdr_exports":["http_localhost", "amqp_localhost", "http_test_file"],
+		"scheduler_conns": ["*internal:*scheduler","*conn1"],		
+        "ees_conns": ["*internal:*ees","*conn1"],
 	},
 }`
-	eMap := map[string]interface{}{
-		utils.EnabledCfg:          false,
-		utils.ExtraFieldsCfg:      []string{"~Custom_Val:s/(\\d+)/+$1/"},
-		utils.StoreCdrsCfg:        true,
-		utils.SessionCostRetires:  5,
-		utils.ChargerSConnsCfg:    []string{"*localhost"},
-		utils.RALsConnsCfg:        []string{"*internal"},
-		utils.AttributeSConnsCfg:  []string{},
-		utils.ThresholdSConnsCfg:  []string{},
-		utils.StatSConnsCfg:       []string{},
-		utils.OnlineCDRExportsCfg: []string{},
-		utils.SchedulerConnsCfg:   []string{},
-		utils.EEsConnsCfg:         []string{},
-	}
-	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
-		t.Error(err)
-	} else if rcv := cgrCfg.cdrsCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
-		t.Errorf("Expected %+v \n, recieved %+v ", eMap, rcv)
-	}
-}
-
-func TestCdrsCfgAsMapInterface1(t *testing.T) {
-	cfgJSONStr := `{
-		"cdrs": {
-			"enabled": true,						
-			"extra_fields": ["PayPalAccount", "LCRProfile", "ResourceID"],
-			"store_cdrs": true,						
-			"session_cost_retries": 9,				
-			"chargers_conns":["*internal"],				
-			"rals_conns": ["*internal"],
-			"attributes_conns": ["*internal"],					
-			"thresholds_conns": ["*internal"],					
-			"stats_conns": ["*internal"],						
-			"online_cdr_exports":["http_localhost", "amqp_localhost", "http_test_file", "amqp_test_file","aws_test_file","sqs_test_file","kafka_localhost","s3_test_file"],
-			"scheduler_conns": ["*internal"],	
-            "ees_conns": [],
-		},
-	}`
 	eMap := map[string]interface{}{
 		utils.EnabledCfg:          true,
 		utils.ExtraFieldsCfg:      []string{"PayPalAccount", "LCRProfile", "ResourceID"},
 		utils.StoreCdrsCfg:        true,
-		utils.SessionCostRetires:  9,
-		utils.ChargerSConnsCfg:    []string{"*internal"},
-		utils.RALsConnsCfg:        []string{"*internal"},
-		utils.AttributeSConnsCfg:  []string{"*internal"},
-		utils.ThresholdSConnsCfg:  []string{"*internal"},
-		utils.StatSConnsCfg:       []string{"*internal"},
-		utils.OnlineCDRExportsCfg: []string{"http_localhost", "amqp_localhost", "http_test_file", "amqp_test_file", "aws_test_file", "sqs_test_file", "kafka_localhost", "s3_test_file"},
-		utils.SchedulerConnsCfg:   []string{"*internal"},
-		utils.EEsConnsCfg:         []string{},
+		utils.SessionCostRetires:  5,
+		utils.ChargerSConnsCfg:    []string{utils.MetaInternal, "*conn1"},
+		utils.RALsConnsCfg:        []string{utils.MetaInternal, "*conn1"},
+		utils.AttributeSConnsCfg:  []string{utils.MetaInternal, "*conn1"},
+		utils.ThresholdSConnsCfg:  []string{utils.MetaInternal, "*conn1"},
+		utils.StatSConnsCfg:       []string{utils.MetaInternal, "*conn1"},
+		utils.OnlineCDRExportsCfg: []string{"http_localhost", "amqp_localhost", "http_test_file"},
+		utils.SchedulerConnsCfg:   []string{utils.MetaInternal, "*conn1"},
+		utils.EEsConnsCfg:         []string{utils.MetaInternal, "*conn1"},
 	}
 	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.cdrsCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
-		t.Errorf("Expected %+v \n, recieved %+v", eMap, rcv)
+		t.Errorf("Expected %+v \n, recieved %+v ", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
 
