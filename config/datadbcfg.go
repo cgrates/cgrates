@@ -124,6 +124,8 @@ func (dbcfg *DataDbCfg) Clone() *DataDbCfg {
 		DataDbName: dbcfg.DataDbName,
 		DataDbUser: dbcfg.DataDbUser,
 		DataDbPass: dbcfg.DataDbPass,
+		RplConns:   dbcfg.RplConns,
+		RmtConns:   dbcfg.RmtConns,
 		Items:      itms,
 		Opts:       opts,
 	}
@@ -150,7 +152,7 @@ func (dbcfg *DataDbCfg) AsMapInterface() (initialMP map[string]interface{}, err 
 	if dbcfg.DataDbPort != "" {
 		var dbPort int
 		if dbPort, err = strconv.Atoi(dbcfg.DataDbPort); err != nil {
-			return
+			return nil, err
 		}
 		initialMP[utils.DataDbPortCfg] = dbPort
 	}
