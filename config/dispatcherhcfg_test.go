@@ -142,6 +142,18 @@ func TestDispatcherHCfgAsMapInterface(t *testing.T) {
 	}
 }
 
+func TestDispatcherCfgParseWithNanoSec(t *testing.T) {
+	jsonCfg := &DispatcherHJsonCfg{
+		Register_interval: utils.StringPointer("1ss"),
+	}
+	expErrMessage := "time: unknown unit \"ss\" in duration \"1ss\""
+	if jsnCfg, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err = jsnCfg.dispatcherHCfg.loadFromJsonCfg(jsonCfg); err == nil || err.Error() != expErrMessage {
+		t.Errorf("Expected %+v \n, recevied %+v", expErrMessage, err)
+	}
+}
+
 func TestDispatcherHCfgAsMapInterface1(t *testing.T) {
 	cfgJSONStr := `{
      "dispatcherh":{
