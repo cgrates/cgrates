@@ -688,7 +688,7 @@ func testV1RsSetResourceProfile(t *testing.T) {
 		ResourceProfile: &engine.ResourceProfile{
 			Tenant:    "cgrates.org",
 			ID:        "RES_GR_TEST",
-			FilterIDs: []string{"*string:~*req.Account:1001"},
+			FilterIDs: []string{"*wrong:inline"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -704,7 +704,12 @@ func testV1RsSetResourceProfile(t *testing.T) {
 	}
 
 	var result string
+	expErr := "SERVER_ERROR: broken reference to filter: *wrong:inline for item with ID: cgrates.org:RES_GR_TEST"
+	if err := rlsV1Rpc.Call(utils.APIerSv1SetResourceProfile, rlsConfig, &result); err == nil || err.Error() != expErr {
+		t.Fatalf("Expected error: %q, received: %v", expErr, err)
+	}
 
+	rlsConfig.FilterIDs = []string{"*string:~*req.Account:1001"}
 	if err := rlsV1Rpc.Call(utils.APIerSv1SetResourceProfile, rlsConfig, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {

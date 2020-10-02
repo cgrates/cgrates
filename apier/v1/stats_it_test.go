@@ -351,40 +351,13 @@ func testV1STSGetStatsAfterRestart(t *testing.T) {
 }
 
 func testV1STSSetStatQueueProfile(t *testing.T) {
-	var reply *engine.StatQueueProfile
-	filter = &FilterWithCache{
-		Filter: &engine.Filter{
-			Tenant: "cgrates.org",
-			ID:     "FLTR_1",
-			Rules: []*engine.FilterRule{
-				{
-					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
-					Type:    utils.MetaString,
-					Values:  []string{"1001"},
-				},
-			},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
-		},
-	}
 	var result string
-	if err := stsV1Rpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
-		t.Error(err)
-	} else if result != utils.OK {
-		t.Error("Unexpected reply returned", result)
-	}
-	if err := stsV1Rpc.Call(utils.APIerSv1GetStatQueueProfile,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &reply); err == nil ||
-		err.Error() != utils.ErrNotFound.Error() {
-		t.Error(err)
-	}
+	var reply *engine.StatQueueProfile
 	statConfig = &engine.StatQueueWithCache{
 		StatQueueProfile: &engine.StatQueueProfile{
 			Tenant:    "cgrates.org",
 			ID:        "TEST_PROFILE1",
-			FilterIDs: []string{"FLTR_1"},
+			FilterIDs: []string{"*wrong:inline"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -405,6 +378,44 @@ func testV1STSSetStatQueueProfile(t *testing.T) {
 			Weight:       20,
 			MinItems:     1,
 		},
+	}
+
+	expErr := "SERVER_ERROR: broken reference to filter: *wrong:inline for item with ID: cgrates.org:TEST_PROFILE1"
+	if err := stsV1Rpc.Call(utils.APIerSv1SetStatQueueProfile, statConfig, &result); err == nil || err.Error() != expErr {
+		t.Fatalf("Expected error: %q, received: %v", expErr, err)
+	}
+	if err := stsV1Rpc.Call(utils.APIerSv1GetStatQueueProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &reply); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Fatal(err)
+	}
+	statConfig.FilterIDs = []string{"FLTR_1"}
+	filter = &FilterWithCache{
+		Filter: &engine.Filter{
+			Tenant: "cgrates.org",
+			ID:     "FLTR_1",
+			Rules: []*engine.FilterRule{
+				{
+					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
+					Type:    utils.MetaString,
+					Values:  []string{"1001"},
+				},
+			},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			},
+		},
+	}
+	if err := stsV1Rpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	if err := stsV1Rpc.Call(utils.APIerSv1GetStatQueueProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &reply); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
 	}
 
 	if err := stsV1Rpc.Call(utils.APIerSv1SetStatQueueProfile, statConfig, &result); err != nil {

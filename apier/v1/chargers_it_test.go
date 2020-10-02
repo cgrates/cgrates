@@ -354,7 +354,7 @@ func testChargerSSetChargerProfile(t *testing.T) {
 		ChargerProfile: &engine.ChargerProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ApierTest",
-			FilterIDs: []string{"*string:~*req.Account:1001", "*string:~Account:1002"},
+			FilterIDs: []string{"*wrong:inline"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 				ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
@@ -365,12 +365,23 @@ func testChargerSSetChargerProfile(t *testing.T) {
 		},
 	}
 	var result string
+	expErr := "SERVER_ERROR: broken reference to filter: *wrong:inline for item with ID: cgrates.org:ApierTest"
+	if err := chargerRPC.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &result); err == nil || err.Error() != expErr {
+		t.Fatalf("Expected error: %q, received: %v", expErr, err)
+	}
+	var reply *engine.ChargerProfile
+	if err := chargerRPC.Call(utils.APIerSv1GetChargerProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Fatal(err)
+	}
+
+	chargerProfile.FilterIDs = []string{"*string:~*req.Account:1001", "*string:~Account:1002"}
 	if err := chargerRPC.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	var reply *engine.ChargerProfile
 	if err := chargerRPC.Call(utils.APIerSv1GetChargerProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err != nil {
 		t.Error(err)

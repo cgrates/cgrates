@@ -213,7 +213,7 @@ func testV1RatePrfSetRateProfileRates(t *testing.T) {
 	rPrf := &engine.RateProfile{
 		Tenant:           "cgrates.org",
 		ID:               "RP1",
-		FilterIDs:        []string{"*string:~*req.Subject:1001"},
+		FilterIDs:        []string{"*wrong:inline"},
 		Weight:           0,
 		ConnectFee:       0.1,
 		RoundingMethod:   "*up",
@@ -238,6 +238,15 @@ func testV1RatePrfSetRateProfileRates(t *testing.T) {
 		},
 	}
 	var reply string
+	expErr := "SERVER_ERROR: broken reference to filter: *wrong:inline for item with ID: cgrates.org:RP1"
+	if err := ratePrfRpc.Call(utils.APIerSv1SetRateProfile,
+		&RateProfileWithCache{
+			RateProfileWithOpts: &engine.RateProfileWithOpts{
+				RateProfile: rPrf},
+		}, &reply); err == nil || err.Error() != expErr {
+		t.Fatalf("Expected error: %q, received: %v", expErr, err)
+	}
+	rPrf.FilterIDs = []string{"*string:~*req.Subject:1001"}
 	if err := ratePrfRpc.Call(utils.APIerSv1SetRateProfile,
 		&RateProfileWithCache{
 			RateProfileWithOpts: &engine.RateProfileWithOpts{
@@ -299,6 +308,18 @@ func testV1RatePrfSetRateProfileRates(t *testing.T) {
 			},
 		},
 	}
+
+	rPrfRates.Rates["RT_WEEK"].FilterIDs = []string{"*wrong:inline"}
+	expErr = "SERVER_ERROR: broken reference to filter: *wrong:inline for rate with ID: RT_WEEK"
+	if err := ratePrfRpc.Call(utils.APIerSv1SetRateProfileRates,
+		&RateProfileWithCache{
+			RateProfileWithOpts: &engine.RateProfileWithOpts{
+				RateProfile: rPrfRates},
+		}, &reply); err == nil || err.Error() != expErr {
+		t.Fatalf("Expected error: %q, received: %v", expErr, err)
+	}
+	rPrfRates.Rates["RT_WEEK"].FilterIDs = nil
+
 	if err := ratePrfRpc.Call(utils.APIerSv1SetRateProfileRates,
 		&RateProfileWithCache{
 			RateProfileWithOpts: &engine.RateProfileWithOpts{
@@ -376,7 +397,6 @@ func testV1RatePrfSetRateProfileRates(t *testing.T) {
 		t.Errorf("Expecting: %+v, \n received: %+v",
 			utils.ToJSON(rPrfUpdated), utils.ToJSON(rply))
 	}
-
 }
 
 func testV1RatePrfRemoveRateProfileRates(t *testing.T) {

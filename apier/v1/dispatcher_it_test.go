@@ -125,21 +125,30 @@ func testDispatcherSRPCConn(t *testing.T) {
 
 func testDispatcherSSetDispatcherProfile(t *testing.T) {
 	var reply string
+	dispatcherProfile = &DispatcherWithCache{
+		DispatcherProfile: &engine.DispatcherProfile{
+			Tenant:    "cgrates.org",
+			ID:        "Dsp1",
+			FilterIDs: []string{"*wrong:inline"},
+			Strategy:  utils.MetaFirst,
+			Weight:    20,
+		},
+	}
+
+	expErr := "SERVER_ERROR: broken reference to filter: *wrong:inline for item with ID: cgrates.org:Dsp1"
+	if err := dispatcherRPC.Call(utils.APIerSv1SetDispatcherProfile,
+		dispatcherProfile,
+		&reply); err == nil || err.Error() != expErr {
+		t.Fatalf("Expected error: %q, received: %v", expErr, err)
+	}
+
 	if err := dispatcherRPC.Call(utils.APIerSv1GetDispatcherProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "Dsp1"},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 
-	dispatcherProfile = &DispatcherWithCache{
-		DispatcherProfile: &engine.DispatcherProfile{
-			Tenant:    "cgrates.org",
-			ID:        "Dsp1",
-			FilterIDs: []string{"*string:~*req.Account:1001"},
-			Strategy:  utils.MetaFirst,
-			Weight:    20,
-		},
-	}
+	dispatcherProfile.FilterIDs = []string{"*string:~*req.Account:1001"}
 
 	if err := dispatcherRPC.Call(utils.APIerSv1SetDispatcherProfile,
 		dispatcherProfile,
