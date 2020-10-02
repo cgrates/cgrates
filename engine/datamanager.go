@@ -997,10 +997,12 @@ func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile, withIndex bool)
 		err = utils.ErrNoDatabaseConn
 		return
 	}
-	if brokenReference := dm.checkFilters(th.Tenant, th.FilterIDs); len(brokenReference) != 0 {
-		// if we get a broken filter do not set the profile
-		return fmt.Errorf("broken reference to filter: %+v for item with ID: %+v",
-			brokenReference, th.TenantID())
+	if withIndex {
+		if brokenReference := dm.checkFilters(th.Tenant, th.FilterIDs); len(brokenReference) != 0 {
+			// if we get a broken filter do not set the profile
+			return fmt.Errorf("broken reference to filter: %+v for item with ID: %+v",
+				brokenReference, th.TenantID())
+		}
 	}
 	oldTh, err := dm.GetThresholdProfile(th.Tenant, th.ID, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
@@ -1130,10 +1132,12 @@ func (dm *DataManager) SetStatQueueProfile(sqp *StatQueueProfile, withIndex bool
 		err = utils.ErrNoDatabaseConn
 		return
 	}
-	if brokenReference := dm.checkFilters(sqp.Tenant, sqp.FilterIDs); len(brokenReference) != 0 {
-		// if we get a broken filter do not set the profile
-		return fmt.Errorf("broken reference to filter: %+v for item with ID: %+v",
-			brokenReference, sqp.TenantID())
+	if withIndex {
+		if brokenReference := dm.checkFilters(sqp.Tenant, sqp.FilterIDs); len(brokenReference) != 0 {
+			// if we get a broken filter do not set the profile
+			return fmt.Errorf("broken reference to filter: %+v for item with ID: %+v",
+				brokenReference, sqp.TenantID())
+		}
 	}
 	oldSts, err := dm.GetStatQueueProfile(sqp.Tenant, sqp.ID, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
@@ -1480,10 +1484,12 @@ func (dm *DataManager) SetResourceProfile(rp *ResourceProfile, withIndex bool) (
 		err = utils.ErrNoDatabaseConn
 		return
 	}
-	if brokenReference := dm.checkFilters(rp.Tenant, rp.FilterIDs); len(brokenReference) != 0 {
-		// if we get a broken filter do not set the profile
-		return fmt.Errorf("broken reference to filter: %+v for item with ID: %+v",
-			brokenReference, rp.TenantID())
+	if withIndex {
+		if brokenReference := dm.checkFilters(rp.Tenant, rp.FilterIDs); len(brokenReference) != 0 {
+			// if we get a broken filter do not set the profile
+			return fmt.Errorf("broken reference to filter: %+v for item with ID: %+v",
+				brokenReference, rp.TenantID())
+		}
 	}
 	oldRes, err := dm.GetResourceProfile(rp.Tenant, rp.ID, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
@@ -2369,10 +2375,12 @@ func (dm *DataManager) SetRouteProfile(rpp *RouteProfile, withIndex bool) (err e
 		err = utils.ErrNoDatabaseConn
 		return
 	}
-	if brokenReference := dm.checkFilters(rpp.Tenant, rpp.FilterIDs); len(brokenReference) != 0 {
-		// if we get a broken filter do not set the profile
-		return fmt.Errorf("broken reference to filter: %+v for item with ID: %+v",
-			brokenReference, rpp.TenantID())
+	if withIndex {
+		if brokenReference := dm.checkFilters(rpp.Tenant, rpp.FilterIDs); len(brokenReference) != 0 {
+			// if we get a broken filter do not set the profile
+			return fmt.Errorf("broken reference to filter: %+v for item with ID: %+v",
+				brokenReference, rpp.TenantID())
+		}
 	}
 	oldRpp, err := dm.GetRouteProfile(rpp.Tenant, rpp.ID, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
@@ -2508,10 +2516,12 @@ func (dm *DataManager) SetAttributeProfile(ap *AttributeProfile, withIndex bool)
 		err = utils.ErrNoDatabaseConn
 		return
 	}
-	if brokenReference := dm.checkFilters(ap.Tenant, ap.FilterIDs); len(brokenReference) != 0 {
-		// if we get a broken filter do not set the profile
-		return fmt.Errorf("broken reference to filter: %+v for item with ID: %+v",
-			brokenReference, ap.TenantID())
+	if withIndex {
+		if brokenReference := dm.checkFilters(ap.Tenant, ap.FilterIDs); len(brokenReference) != 0 {
+			// if we get a broken filter do not set the profile
+			return fmt.Errorf("broken reference to filter: %+v for item with ID: %+v",
+				brokenReference, ap.TenantID())
+		}
 	}
 	oldAP, err := dm.GetAttributeProfile(ap.Tenant, ap.ID, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
@@ -2644,10 +2654,12 @@ func (dm *DataManager) SetChargerProfile(cpp *ChargerProfile, withIndex bool) (e
 		err = utils.ErrNoDatabaseConn
 		return
 	}
-	if brokenReference := dm.checkFilters(cpp.Tenant, cpp.FilterIDs); len(brokenReference) != 0 {
-		// if we get a broken filter do not set the profile
-		return fmt.Errorf("broken reference to filter: %+v for item with ID: %+v",
-			brokenReference, cpp.TenantID())
+	if withIndex {
+		if brokenReference := dm.checkFilters(cpp.Tenant, cpp.FilterIDs); len(brokenReference) != 0 {
+			// if we get a broken filter do not set the profile
+			return fmt.Errorf("broken reference to filter: %+v for item with ID: %+v",
+				brokenReference, cpp.TenantID())
+		}
 	}
 	oldCpp, err := dm.GetChargerProfile(cpp.Tenant, cpp.ID, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
@@ -2777,10 +2789,12 @@ func (dm *DataManager) SetDispatcherProfile(dpp *DispatcherProfile, withIndex bo
 		err = utils.ErrNoDatabaseConn
 		return
 	}
-	if brokenReference := dm.checkFilters(dpp.Tenant, dpp.FilterIDs); len(brokenReference) != 0 {
-		// if we get a broken filter do not set the profile
-		return fmt.Errorf("broken reference to filter: %+v for item with ID: %+v",
-			brokenReference, dpp.TenantID())
+	if withIndex {
+		if brokenReference := dm.checkFilters(dpp.Tenant, dpp.FilterIDs); len(brokenReference) != 0 {
+			// if we get a broken filter do not set the profile
+			return fmt.Errorf("broken reference to filter: %+v for item with ID: %+v",
+				brokenReference, dpp.TenantID())
+		}
 	}
 	oldDpp, err := dm.GetDispatcherProfile(dpp.Tenant, dpp.ID, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
@@ -3092,10 +3106,12 @@ func (dm *DataManager) SetRateProfile(rpp *RateProfile, withIndex bool) (err err
 		err = utils.ErrNoDatabaseConn
 		return
 	}
-	if brokenReference := dm.checkFilters(rpp.Tenant, rpp.FilterIDs); len(brokenReference) != 0 {
-		// if we get a broken filter do not set the profile
-		return fmt.Errorf("broken reference to filter: %+v for item with ID: %+v",
-			brokenReference, rpp.TenantID())
+	if withIndex {
+		if brokenReference := dm.checkFilters(rpp.Tenant, rpp.FilterIDs); len(brokenReference) != 0 {
+			// if we get a broken filter do not set the profile
+			return fmt.Errorf("broken reference to filter: %+v for item with ID: %+v",
+				brokenReference, rpp.TenantID())
+		}
 	}
 	oldRpp, err := dm.GetRateProfile(rpp.Tenant, rpp.ID, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
@@ -3261,11 +3277,13 @@ func (dm *DataManager) SetRateProfileRates(rpp *RateProfile, withIndex bool) (er
 		err = utils.ErrNoDatabaseConn
 		return
 	}
-	for _, rate := range rpp.Rates {
-		if brokenReference := dm.checkFilters(rpp.Tenant, rate.FilterIDs); len(brokenReference) != 0 {
-			// if we get a broken filter do not update the rates
-			return fmt.Errorf("broken reference to filter: %+v for rate with ID: %+v",
-				brokenReference, rate.ID)
+	if withIndex {
+		for _, rate := range rpp.Rates {
+			if brokenReference := dm.checkFilters(rpp.Tenant, rate.FilterIDs); len(brokenReference) != 0 {
+				// if we get a broken filter do not update the rates
+				return fmt.Errorf("broken reference to filter: %+v for rate with ID: %+v",
+					brokenReference, rate.ID)
+			}
 		}
 	}
 	oldRpp, err := dm.GetRateProfile(rpp.Tenant, rpp.ID, true, false, utils.NonTransactional)
