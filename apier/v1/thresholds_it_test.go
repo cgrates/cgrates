@@ -207,6 +207,7 @@ var (
 		testV1TSGetThresholdsAfterProcess,
 		testV1TSGetThresholdsAfterRestart,
 		testv1TSGetThresholdProfileIDs,
+		testV1TSSetThresholdProfileBrokenReference,
 		testV1TSSetThresholdProfile,
 		testV1TSUpdateThresholdProfile,
 		testV1TSRemoveThresholdProfile,
@@ -393,6 +394,37 @@ func testV1TSGetThresholdsAfterRestart(t *testing.T) {
 		t.Error(err)
 	} else if td.Snooze.IsZero() { // make sure Snooze time was reset during execution
 		t.Errorf("received: %+v", td)
+	}
+}
+
+func testV1TSSetThresholdProfileBrokenReference(t *testing.T) {
+	var reply *engine.ThresholdProfile
+	var result string
+	tPrfl = &engine.ThresholdWithCache{
+		ThresholdProfile: &engine.ThresholdProfile{
+			Tenant:    "cgrates.org",
+			ID:        "THD_Test",
+			FilterIDs: []string{"NonExistingFilter"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			},
+			MaxHits:   -1,
+			MinSleep:  time.Duration(5 * time.Minute),
+			Blocker:   false,
+			Weight:    20.0,
+			ActionIDs: []string{"ACT_1"},
+			Async:     true,
+		},
+	}
+	expErr := "SERVER_ERROR: broken reference to filter: NonExistingFilter for item with ID: cgrates.org:THD_Test"
+	if err := tSv1Rpc.Call(utils.APIerSv1SetThresholdProfile, tPrfl, &result); err == nil || err.Error() != expErr {
+		t.Fatalf("Expected error: %q, received: %v", expErr, err)
+	}
+	if err := tSv1Rpc.Call(utils.APIerSv1GetThresholdProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test"}, &reply); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Fatal(err)
 	}
 }
 

@@ -870,17 +870,11 @@ func testV1RouteGetRouteWithoutFilter(t *testing.T) {
 }
 
 func testV1RouteSetRouteProfiles(t *testing.T) {
-	var reply *engine.RouteProfile
-	if err := splSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &reply); err == nil ||
-		err.Error() != utils.ErrNotFound.Error() {
-		t.Error(err)
-	}
 	splPrf = &RouteWithCache{
 		RouteProfile: &engine.RouteProfile{
 			Tenant:            "cgrates.org",
 			ID:                "TEST_PROFILE1",
-			FilterIDs:         []string{"FLTR_1"},
+			FilterIDs:         []string{"FLTR_NotFound"},
 			Sorting:           "Sort1",
 			SortingParameters: []string{"Param1", "Param2"},
 			Routes: []*engine.Route{
@@ -901,6 +895,18 @@ func testV1RouteSetRouteProfiles(t *testing.T) {
 	}
 
 	var result string
+	expErr := "SERVER_ERROR: broken reference to filter: FLTR_NotFound for item with ID: cgrates.org:TEST_PROFILE1"
+	if err := splSv1Rpc.Call(utils.APIerSv1SetRouteProfile, splPrf, &result); err == nil || err.Error() != expErr {
+		t.Fatalf("Expected error: %q, received: %v", expErr, err)
+	}
+
+	var reply *engine.RouteProfile
+	if err := splSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &reply); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	splPrf.FilterIDs = []string{"FLTR_1"}
 	if err := splSv1Rpc.Call(utils.APIerSv1SetRouteProfile, splPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {

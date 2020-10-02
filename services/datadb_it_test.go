@@ -87,6 +87,8 @@ func TestDataDBReload(t *testing.T) {
 			utils.RedisClusterCfg:       false,
 			utils.RedisSentinelNameCfg:  "",
 		},
+		RmtConns: []string{},
+		RplConns: []string{},
 		Items: map[string]*config.ItemOpt{
 			utils.MetaAccounts: {
 				Replicate: false,
