@@ -865,7 +865,6 @@ const (
 	MetaMonthlyEstimated     = "*monthly_estimated"
 	ProcessRuns              = "ProcessRuns"
 	HashtagSep               = "#"
-	Index                    = "index"
 )
 
 // Migrator Action
@@ -2382,6 +2381,18 @@ const (
 	OptsRouteID = "*routeID"
 	// EEs
 	OptsEEsVerbose = "*eesVerbose"
+	// EEs Elasticsearch options
+	Index               = "index"
+	IfPrimaryTerm       = "if_primary_term"
+	IfSeqNo             = "if_seq_no"
+	OpType              = "op_type"
+	Pipeline            = "pipeline"
+	RequireAlias        = "require_alias"
+	Routing             = "routing"
+	Timeout             = "timeout"
+	VersionLow          = "version"
+	VersionType         = "version_type"
+	WaitForActiveShards = "wait_for_active_shards"
 	// Others
 	OptsContext               = "*context"
 	Subsys                    = "*subsys"
