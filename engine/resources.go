@@ -289,7 +289,7 @@ func (rs Resources) allocateResource(ru *ResourceUsage, dryRun bool) (alcMessage
 				err = fmt.Errorf("empty configuration for resourceID: %s", r.TenantID())
 				return
 			}
-			if r.rPrf.Limit >= r.totalUsage()+ru.Units {
+			if r.rPrf.Limit >= r.totalUsage()+ru.Units || r.rPrf.Limit == -1 {
 				if alcMessage == "" {
 					if r.rPrf.AllocationMessage != "" {
 						alcMessage = r.rPrf.AllocationMessage
