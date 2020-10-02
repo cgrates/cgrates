@@ -62,6 +62,7 @@ var (
 		testV1RsGetResourceProfileAfterDelete,
 		testV1RsResourcePing,
 		testV1RsMatchNotFound,
+		testV1RsAllocateUnlimited,
 		testV1RsStopEngine,
 	}
 )
@@ -837,6 +838,72 @@ func testV1RsMatchNotFound(t *testing.T) {
 		argsRU, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
+}
+
+func testV1RsAllocateUnlimited(t *testing.T) {
+	rlsConfig = &ResourceWithCache{
+		ResourceProfile: &engine.ResourceProfile{
+			Tenant:    "cgrates.org",
+			ID:        "RES_ULTIMITED",
+			FilterIDs: []string{"*string:~*req.CustomField:UnlimitedEvent"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			},
+			UsageTTL:          time.Duration(-1),
+			Limit:             -1,
+			AllocationMessage: "CustomUnlimitedMessage",
+			Stored:            true,
+			Weight:            20,
+			ThresholdIDs:      []string{utils.META_NONE},
+		},
+	}
+
+	var result string
+	if err := rlsV1Rpc.Call(utils.APIerSv1SetResourceProfile, rlsConfig, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	var reply string
+	argsRU := utils.ArgRSv1ResourceUsage{
+		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e51",
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     utils.UUIDSha1Prefix(),
+				Event: map[string]interface{}{
+					"CustomField": "UnlimitedEvent"},
+			},
+		},
+		Units: 1,
+	}
+	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResources,
+		argsRU, &reply); err != nil {
+		t.Error(err)
+	} else if reply != "CustomUnlimitedMessage" {
+		t.Errorf("Expecting: %+v, received: %+v", "CustomUnlimitedMessage", reply)
+	}
+
+	var rplyRes *engine.Resource
+	expRes := &engine.Resource{
+		Tenant: "cgrates.org",
+		ID:     "RES_ULTIMITED",
+		Usages: map[string]*engine.ResourceUsage{
+			"651a8db2-4f67-4cf8-b622-169e8a482e51": &engine.ResourceUsage{
+				Tenant: "cgrates.org",
+				ID:     "651a8db2-4f67-4cf8-b622-169e8a482e51",
+				Units:  1,
+			},
+		},
+	}
+	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResource, &utils.TenantIDWithOpts{
+		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RES_ULTIMITED"},
+	}, &rplyRes); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expRes, rplyRes) {
+		t.Errorf("Expecting: %+v, received: %+v", expRes, rplyRes)
+	}
+
 }
 
 func testV1RsStopEngine(t *testing.T) {
