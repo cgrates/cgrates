@@ -529,15 +529,20 @@ func TestDataDbCfgAsMapInterface(t *testing.T) {
 	}
 }
 
-func TestDataDBPortStrAtoi(t *testing.T) {
-	cfgStr := `{
-	"data_db": {									
-		"db_port": "6o79", 	
-    }
-}`
-	expected := "json: cannot unmarshal string into Go struct field DbJsonCfg.Db_port of type int"
-	if _, err := NewCGRConfigFromJsonStringWithDefaults(cfgStr); err == nil || err.Error() != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
+func TestDataDBPortStrconvAtoi(t *testing.T) {
+	cfgJSONSTR := `{
+        "data_db": {
+             "db_port": 6079,
+        }
+    }`
+	if cfgJson, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONSTR); err != nil {
+		t.Error(err)
+	} else {
+		cfgJson.dataDbCfg.DataDbPort = "6o79"
+		expected := "strconv.Atoi: parsing \"6o79\": invalid syntax"
+		if _, err := cfgJson.dataDbCfg.AsMapInterface(); err == nil || err.Error() != expected {
+			t.Errorf("Expected %+q \n,received %+q", expected, err)
+		}
 	}
 }
 
