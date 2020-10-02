@@ -1362,8 +1362,10 @@ func (sS *SessionS) initSession(tnt string, evStart engine.MapEvent, clntConnID 
 		return nil, err
 	}
 	if !isMsg {
+		s.Lock() // avoid endsession before initialising
 		sS.initSessionDebitLoops(s)
-		sS.registerSession(s, false) // make the session available to the rest of the system
+		sS.registerSession(s, false)
+		s.Unlock()
 	}
 	return
 }
