@@ -99,6 +99,10 @@ func (eeS *EEsCfg) Clone() (cln *EEsCfg) {
 	for idx, sConn := range eeS.AttributeSConns {
 		cln.AttributeSConns[idx] = sConn
 	}
+	cln.Cache = make(map[string]*CacheParamCfg)
+	for key, value := range eeS.Cache {
+		cln.Cache[key] = value
+	}
 	cln.Exporters = make([]*EventExporterCfg, len(eeS.Exporters))
 	for idx, exp := range eeS.Exporters {
 		cln.Exporters[idx] = exp.Clone()
