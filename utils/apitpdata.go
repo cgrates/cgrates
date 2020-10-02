@@ -41,7 +41,6 @@ type PaginatorWithSearch struct {
 type Paginator struct {
 	Limit  *int // Limit the number of items returned
 	Offset *int // Offset of the first item returned (eg: use Limit*Page in case of PerPage items)
-
 }
 
 func (pgnt *Paginator) PaginateStringSlice(in []string) (out []string) {
@@ -73,6 +72,25 @@ func (pgnt *Paginator) PaginateStringSlice(in []string) (out []string) {
 		out[i] = itm
 	}
 	return
+}
+
+// Clone creates a clone of the object
+func (pgnt Paginator) Clone() Paginator {
+	var limit *int
+	if pgnt.Limit != nil {
+		limit = new(int)
+		*limit = *pgnt.Limit
+	}
+
+	var offset *int
+	if pgnt.Offset != nil {
+		offset = new(int)
+		*offset = *pgnt.Offset
+	}
+	return Paginator{
+		Limit:  limit,
+		Offset: offset,
+	}
 }
 
 // TPDestination represents one destination in storDB
@@ -963,6 +981,34 @@ type ArgRSv1ResourceUsage struct {
 	UsageID  string // ResourceUsage Identifier
 	UsageTTL *time.Duration
 	Units    float64
+	clnb     bool //rpcclonable
+}
+
+// SetCloneable sets if the args should be clonned on internal connections
+func (attr *ArgRSv1ResourceUsage) SetCloneable(rpcCloneable bool) {
+	attr.clnb = rpcCloneable
+}
+
+// RPCClone implements rpcclient.RPCCloner interface
+func (attr *ArgRSv1ResourceUsage) RPCClone() (interface{}, error) {
+	if !attr.clnb {
+		return attr, nil
+	}
+	return attr.Clone(), nil
+}
+
+// Clone creates a clone of the object
+func (attr *ArgRSv1ResourceUsage) Clone() *ArgRSv1ResourceUsage {
+	var usageTTL *time.Duration
+	if attr.UsageTTL != nil {
+		usageTTL = DurationPointer(*attr.UsageTTL)
+	}
+	return &ArgRSv1ResourceUsage{
+		UsageID:          attr.UsageID,
+		UsageTTL:         usageTTL,
+		Units:            attr.Units,
+		CGREventWithOpts: attr.CGREventWithOpts.Clone(),
+	}
 }
 
 type ArgsComputeFilterIndexIDs struct {

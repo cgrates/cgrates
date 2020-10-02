@@ -720,6 +720,35 @@ func (cdrS *CDRServer) V1ProcessCDR(cdr *CDRWithOpts, reply *string) (err error)
 type ArgV1ProcessEvent struct {
 	Flags []string
 	utils.CGREventWithOpts
+	clnb bool //rpcclonable
+}
+
+// SetCloneable sets if the args should be clonned on internal connections
+func (attr *ArgV1ProcessEvent) SetCloneable(rpcCloneable bool) {
+	attr.clnb = rpcCloneable
+}
+
+// RPCClone implements rpcclient.RPCCloner interface
+func (attr *ArgV1ProcessEvent) RPCClone() (interface{}, error) {
+	if !attr.clnb {
+		return attr, nil
+	}
+	return attr.Clone(), nil
+}
+
+// Clone creates a clone of the object
+func (attr *ArgV1ProcessEvent) Clone() *ArgV1ProcessEvent {
+	var flags []string
+	if attr.Flags != nil {
+		flags = make([]string, len(attr.Flags))
+		for i, id := range attr.Flags {
+			flags[i] = id
+		}
+	}
+	return &ArgV1ProcessEvent{
+		Flags:            flags,
+		CGREventWithOpts: *attr.CGREventWithOpts.Clone(),
+	}
 }
 
 // V1ProcessEvent will process the CGREvent

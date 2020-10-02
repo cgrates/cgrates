@@ -302,6 +302,35 @@ func (tS *ThresholdService) matchingThresholdsForEvent(args *ThresholdsArgsProce
 type ThresholdsArgsProcessEvent struct {
 	ThresholdIDs []string
 	*utils.CGREventWithOpts
+	clnb bool //rpcclonable
+}
+
+// SetCloneable sets if the args should be clonned on internal connections
+func (attr *ThresholdsArgsProcessEvent) SetCloneable(rpcCloneable bool) {
+	attr.clnb = rpcCloneable
+}
+
+// RPCClone implements rpcclient.RPCCloner interface
+func (attr *ThresholdsArgsProcessEvent) RPCClone() (interface{}, error) {
+	if !attr.clnb {
+		return attr, nil
+	}
+	return attr.Clone(), nil
+}
+
+// Clone creates a clone of the object
+func (attr *ThresholdsArgsProcessEvent) Clone() *ThresholdsArgsProcessEvent {
+	var thIDs []string
+	if attr.ThresholdIDs != nil {
+		thIDs = make([]string, len(attr.ThresholdIDs))
+		for i, id := range attr.ThresholdIDs {
+			thIDs[i] = id
+		}
+	}
+	return &ThresholdsArgsProcessEvent{
+		ThresholdIDs:     thIDs,
+		CGREventWithOpts: attr.CGREventWithOpts.Clone(),
+	}
 }
 
 // processEvent processes a new event, dispatching to matching thresholds

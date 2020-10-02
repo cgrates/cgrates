@@ -162,6 +162,46 @@ type AttrArgsProcessEvent struct {
 	Context      *string // attach the event to a context
 	ProcessRuns  *int    // number of loops for ProcessEvent
 	*utils.CGREventWithOpts
+	clnb bool //rpcclonable
+}
+
+// SetCloneable sets if the args should be clonned on internal connections
+func (attr *AttrArgsProcessEvent) SetCloneable(rpcCloneable bool) {
+	attr.clnb = rpcCloneable
+}
+
+// RPCClone implements rpcclient.RPCCloner interface
+func (attr *AttrArgsProcessEvent) RPCClone() (interface{}, error) {
+	if !attr.clnb {
+		return attr, nil
+	}
+	return attr.Clone(), nil
+}
+
+// Clone creates a clone of the object
+func (attr *AttrArgsProcessEvent) Clone() *AttrArgsProcessEvent {
+	var attrIDs []string
+	if attr.AttributeIDs != nil {
+		attrIDs = make([]string, len(attr.AttributeIDs))
+		for i, id := range attr.AttributeIDs {
+			attrIDs[i] = id
+		}
+	}
+	var ctx *string
+	if attr.Context != nil {
+		ctx = utils.StringPointer(*attr.Context)
+	}
+	var procRuns *int
+	if attr.ProcessRuns != nil {
+		procRuns = new(int)
+		*procRuns = *attr.ProcessRuns
+	}
+	return &AttrArgsProcessEvent{
+		AttributeIDs:     attrIDs,
+		Context:          ctx,
+		ProcessRuns:      procRuns,
+		CGREventWithOpts: attr.CGREventWithOpts.Clone(),
+	}
 }
 
 // processEvent will match event with attribute profile and do the necessary replacements
