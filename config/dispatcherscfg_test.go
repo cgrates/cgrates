@@ -29,17 +29,19 @@ func TestDispatcherSCfgloadFromJsonCfg(t *testing.T) {
 	jsonCfg := &DispatcherSJsonCfg{
 		Enabled:               utils.BoolPointer(true),
 		Indexed_selects:       utils.BoolPointer(true),
+		String_indexed_fields: &[]string{"*req.prefix", "*req.indexed"},
 		Prefix_indexed_fields: &[]string{"*req.prefix", "*req.indexed", "*req.fields"},
 		Suffix_indexed_fields: &[]string{"*req.prefix", "*req.indexed", "*req.fields"},
-		Attributes_conns:      &[]string{"*internal"},
+		Attributes_conns:      &[]string{utils.MetaInternal, "*conn1"},
 		Nested_fields:         utils.BoolPointer(true),
 	}
 	expected := &DispatcherSCfg{
 		Enabled:             true,
 		IndexedSelects:      true,
+		StringIndexedFields: &[]string{"*req.prefix", "*req.indexed"},
 		PrefixIndexedFields: &[]string{"*req.prefix", "*req.indexed", "*req.fields"},
 		SuffixIndexedFields: &[]string{"*req.prefix", "*req.indexed", "*req.fields"},
-		AttributeSConns:     []string{"*internal:*attributes"},
+		AttributeSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"},
 		NestedFields:        true,
 	}
 	if jsnCfg, err := NewDefaultCGRConfig(); err != nil {
@@ -83,20 +85,22 @@ func TestDispatcherSCfgAsMapInterface1(t *testing.T) {
 		"dispatchers":{
 			"enabled": false,
 			"indexed_selects":true,
+            "string_indexed_fields": ["*req.prefix"],
 			"prefix_indexed_fields": ["*req.prefix","*req.indexed","*req.fields"],
-            "suffix_indexed_fields": [],
+            "suffix_indexed_fields": ["*req.prefix"],
 			"nested_fields": false,
-			"attributes_conns": ["*internal"],
+			"attributes_conns": ["*internal:*attributes", "*conn1"],
 		},
 		
 }`
 	eMap := map[string]interface{}{
 		utils.EnabledCfg:             false,
 		utils.IndexedSelectsCfg:      true,
+		utils.StringIndexedFieldsCfg: []string{"*req.prefix"},
 		utils.PrefixIndexedFieldsCfg: []string{"*req.prefix", "*req.indexed", "*req.fields"},
-		utils.SuffixIndexedFieldsCfg: []string{},
+		utils.SuffixIndexedFieldsCfg: []string{"*req.prefix"},
 		utils.NestedFieldsCfg:        false,
-		utils.AttributeSConnsCfg:     []string{"*internal"},
+		utils.AttributeSConnsCfg:     []string{"*internal", "*conn1"},
 	}
 	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
