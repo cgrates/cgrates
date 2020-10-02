@@ -227,6 +227,35 @@ func (sS *StatService) Call(serviceMethod string, args interface{}, reply interf
 type StatsArgsProcessEvent struct {
 	StatIDs []string
 	*utils.CGREventWithOpts
+	clnb bool //rpcclonable
+}
+
+// SetCloneable sets if the args should be clonned on internal connections
+func (attr *StatsArgsProcessEvent) SetCloneable(rpcCloneable bool) {
+	attr.clnb = rpcCloneable
+}
+
+// RPCClone implements rpcclient.RPCCloner interface
+func (attr *StatsArgsProcessEvent) RPCClone() (interface{}, error) {
+	if !attr.clnb {
+		return attr, nil
+	}
+	return attr.Clone(), nil
+}
+
+// Clone creates a clone of the object
+func (attr *StatsArgsProcessEvent) Clone() *StatsArgsProcessEvent {
+	var statsIDs []string
+	if attr.StatIDs != nil {
+		statsIDs = make([]string, len(attr.StatIDs))
+		for i, id := range attr.StatIDs {
+			statsIDs[i] = id
+		}
+	}
+	return &StatsArgsProcessEvent{
+		StatIDs:          statsIDs,
+		CGREventWithOpts: attr.CGREventWithOpts.Clone(),
+	}
 }
 
 // processEvent processes a new event, dispatching to matching queues

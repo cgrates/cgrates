@@ -573,6 +573,30 @@ type ArgsGetRoutes struct {
 	MaxCost      string // toDo: try with interface{} here
 	*utils.CGREventWithOpts
 	utils.Paginator
+	clnb bool //rpcclonable
+}
+
+// SetCloneable sets if the args should be clonned on internal connections
+func (attr *ArgsGetRoutes) SetCloneable(rpcCloneable bool) {
+	attr.clnb = rpcCloneable
+}
+
+// RPCClone implements rpcclient.RPCCloner interface
+func (attr *ArgsGetRoutes) RPCClone() (interface{}, error) {
+	if !attr.clnb {
+		return attr, nil
+	}
+	return attr.Clone(), nil
+}
+
+// Clone creates a clone of the object
+func (attr *ArgsGetRoutes) Clone() *ArgsGetRoutes {
+	return &ArgsGetRoutes{
+		IgnoreErrors:     attr.IgnoreErrors,
+		MaxCost:          attr.MaxCost,
+		Paginator:        attr.Paginator.Clone(),
+		CGREventWithOpts: attr.CGREventWithOpts.Clone(),
+	}
 }
 
 func (args *ArgsGetRoutes) asOptsGetRoutes() (opts *optsGetRoutes, err error) {
