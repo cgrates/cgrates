@@ -29,7 +29,7 @@ func TestDNSAgentCfgloadFromJsonCfg(t *testing.T) {
 		Enabled:        utils.BoolPointer(true),
 		Listen:         utils.StringPointer("127.0.0.1:2053"),
 		Listen_net:     utils.StringPointer("udp"),
-		Sessions_conns: &[]string{"*conn1"},
+		Sessions_conns: &[]string{utils.MetaInternal, "*conn1"},
 		Timezone:       utils.StringPointer("UTC"),
 		Request_processors: &[]*ReqProcessorJsnCfg{
 			{
@@ -49,7 +49,7 @@ func TestDNSAgentCfgloadFromJsonCfg(t *testing.T) {
 		Enabled:       true,
 		Listen:        "127.0.0.1:2053",
 		ListenNet:     "udp",
-		SessionSConns: []string{"*conn1"},
+		SessionSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS), "*conn1"},
 		Timezone:      "UTC",
 		RequestProcessors: []*RequestProcessor{
 			{
@@ -107,6 +107,86 @@ func TestRequestProcessorloadFromJsonCfg(t *testing.T) {
 	}
 }
 
+func TestRequestProcessorDNSAgentloadFromJsonCfg(t *testing.T) {
+	cfgJSON := &DNSAgentJsonCfg{
+		Request_processors: &[]*ReqProcessorJsnCfg{
+			{
+				Tenant: utils.StringPointer("a{*"),
+			},
+		},
+	}
+	expected := "invalid converter terminator in rule: <a{*>"
+	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err := jsonCfg.dnsAgentCfg.loadFromJsonCfg(cfgJSON, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
+func TestRequestProcessorDNSAgentloadFromJsonCfg1(t *testing.T) {
+	cfgJSONStr := `{ 
+      "dns_agent": {
+        "request_processors": [
+	        {
+		       "id": "random",
+            },
+         ]
+       }
+}`
+	cfgJSON := &DNSAgentJsonCfg{
+		Request_processors: &[]*ReqProcessorJsnCfg{
+			{
+				ID: utils.StringPointer("random"),
+			},
+		},
+	}
+	if jsonCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+		t.Error(err)
+	} else if err = jsonCfg.dnsAgentCfg.loadFromJsonCfg(cfgJSON, jsonCfg.generalCfg.RSRSep); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestRequestProcessorReplyFieldsloadFromJsonCfg(t *testing.T) {
+	cfgJSON := &DNSAgentJsonCfg{
+		Request_processors: &[]*ReqProcessorJsnCfg{
+			{
+				Reply_fields: &[]*FcTemplateJsonCfg{
+					{
+						Value: utils.StringPointer("a{*"),
+					},
+				},
+			},
+		},
+	}
+	expected := "invalid converter terminator in rule: <a{*>"
+	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err := jsonCfg.dnsAgentCfg.loadFromJsonCfg(cfgJSON, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
+func TestRequestProcessorRequestFieldsloadFromJsonCfg(t *testing.T) {
+	cfgJSON := &DNSAgentJsonCfg{
+		Request_processors: &[]*ReqProcessorJsnCfg{
+			{
+				Request_fields: &[]*FcTemplateJsonCfg{
+					{
+						Value: utils.StringPointer("a{*"),
+					},
+				},
+			},
+		},
+	}
+	expected := "invalid converter terminator in rule: <a{*>"
+	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err := jsonCfg.dnsAgentCfg.loadFromJsonCfg(cfgJSON, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
 func TestDNSAgentCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
 	"dns_agent": {
@@ -140,7 +220,7 @@ func TestDNSAgentCfgAsMapInterface1(t *testing.T) {
 			"enabled": false,
 			"listen": "127.0.0.1:2053",
 			"listen_net": "udp",
-			"sessions_conns": ["*internal"],
+			"sessions_conns": ["*internal:*sessions", "*conn1"],
 			"timezone": "UTC",
 			"request_processors": [
 			{
@@ -170,7 +250,7 @@ func TestDNSAgentCfgAsMapInterface1(t *testing.T) {
 		utils.EnabledCfg:       false,
 		utils.ListenCfg:        "127.0.0.1:2053",
 		utils.ListenNetCfg:     "udp",
-		utils.SessionSConnsCfg: []string{"*internal"},
+		utils.SessionSConnsCfg: []string{utils.MetaInternal, "*conn1"},
 		utils.TimezoneCfg:      "UTC",
 		utils.RequestProcessorsCfg: []map[string]interface{}{
 			{
