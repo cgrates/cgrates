@@ -81,8 +81,11 @@
 },
 
 
-"attributes": {							// Attribute service
-	"enabled": true,				// starts Attribute service: <true|false>.
+"attributes": {
+	"enabled": true,
+	"stats_conns": ["*localhost"],
+	"resources_conns": ["*localhost"],
+	"apiers_conns": ["*localhost"]
 },
 
 
