@@ -53,6 +53,9 @@ func TestEESClone(t *testing.T) {
 			"field_separator": ",",								
 			"fields":[											
 				{"tag": "CGRID", "path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"},
+                {"tag": "CGRID", "path": "*hdr.CGRID", "type": "*variable", "value": "~*req.CGRID"},
+                {"tag": "CGRID", "path": "*trl.CGRID", "type": "*variable", "value": "~*req.CGRID"},
+                {"tag": "CGRID", "path": "*uch.CGRID", "type": "*variable", "value": "~*req.CGRID"},
 			],
 		},
 	],
@@ -308,6 +311,27 @@ func TestEESClone(t *testing.T) {
 						Value:  NewRSRParsersMustCompile("~*req.CGRID", utils.INFIELD_SEP),
 						Layout: time.RFC3339,
 					},
+					{
+						Tag:    utils.CGRID,
+						Path:   "*hdr.CGRID",
+						Type:   utils.MetaVariable,
+						Value:  NewRSRParsersMustCompile("~*req.CGRID", utils.INFIELD_SEP),
+						Layout: time.RFC3339,
+					},
+					{
+						Tag:    utils.CGRID,
+						Path:   "*trl.CGRID",
+						Type:   utils.MetaVariable,
+						Value:  NewRSRParsersMustCompile("~*req.CGRID", utils.INFIELD_SEP),
+						Layout: time.RFC3339,
+					},
+					{
+						Tag:    utils.CGRID,
+						Path:   "*uch.CGRID",
+						Type:   utils.MetaVariable,
+						Value:  NewRSRParsersMustCompile("~*req.CGRID", utils.INFIELD_SEP),
+						Layout: time.RFC3339,
+					},
 				},
 				contentFields: []*FCTemplate{
 					{
@@ -317,20 +341,50 @@ func TestEESClone(t *testing.T) {
 						Value:  NewRSRParsersMustCompile("~*req.CGRID", utils.INFIELD_SEP),
 						Layout: time.RFC3339,
 					},
+					{
+						Tag:    utils.CGRID,
+						Path:   "*uch.CGRID",
+						Type:   utils.MetaVariable,
+						Value:  NewRSRParsersMustCompile("~*req.CGRID", utils.INFIELD_SEP),
+						Layout: time.RFC3339,
+					},
 				},
-				headerFields:  []*FCTemplate{},
-				trailerFields: []*FCTemplate{},
+				headerFields: []*FCTemplate{
+					{
+						Tag:    utils.CGRID,
+						Path:   "*hdr.CGRID",
+						Type:   utils.MetaVariable,
+						Value:  NewRSRParsersMustCompile("~*req.CGRID", utils.INFIELD_SEP),
+						Layout: time.RFC3339,
+					},
+				},
+				trailerFields: []*FCTemplate{
+					{
+						Tag:    utils.CGRID,
+						Path:   "*trl.CGRID",
+						Type:   utils.MetaVariable,
+						Value:  NewRSRParsersMustCompile("~*req.CGRID", utils.INFIELD_SEP),
+						Layout: time.RFC3339,
+					},
+				},
 				Opts: map[string]interface{}{
 					utils.MetaDefault: "randomVal",
 				},
 			},
 		},
 	}
+
 	for _, profile := range expected.Exporters {
 		for _, v := range profile.Fields {
 			v.ComputePath()
 		}
-		for _, v := range profile.contentFields {
+		for _, v := range profile.ContentFields() {
+			v.ComputePath()
+		}
+		for _, v := range profile.HeaderFields() {
+			v.ComputePath()
+		}
+		for _, v := range profile.TrailerFields() {
 			v.ComputePath()
 		}
 	}
@@ -341,6 +395,57 @@ func TestEESClone(t *testing.T) {
 		if !reflect.DeepEqual(cloneCfg, expected) {
 			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(cloneCfg))
 		}
+	}
+}
+
+func TestEventExporterFieldloadFromJsonCfg(t *testing.T) {
+	eventExporterJson := &EEsJsonCfg{
+		Exporters: &[]*EventExporterJsonCfg{
+			{
+				Fields: &[]*FcTemplateJsonCfg{
+					{
+						Value: utils.StringPointer("a{*"),
+					},
+				},
+			},
+		},
+	}
+	expected := "invalid converter terminator in rule: <a{*>"
+	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err = jsonCfg.eesCfg.loadFromJsonCfg(eventExporterJson, jsonCfg.templates, jsonCfg.generalCfg.RSRSep, jsonCfg.dfltEvExp); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
+func TestEventExporterFieldloadFromJsonCfg1(t *testing.T) {
+	eventExporterJson := &EEsJsonCfg{
+		Exporters: &[]*EventExporterJsonCfg{
+			{
+				Fields: &[]*FcTemplateJsonCfg{
+					{
+						Type: utils.StringPointer(utils.MetaTemplate),
+					},
+				},
+			},
+		},
+	}
+	expected := "no template with id: <>"
+	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err = jsonCfg.eesCfg.loadFromJsonCfg(eventExporterJson, jsonCfg.templates, jsonCfg.generalCfg.RSRSep, jsonCfg.dfltEvExp); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
+func TestEventExporterloadFromJsonCfg(t *testing.T) {
+	jsonCfg, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	eventExporter := new(EventExporterCfg)
+	if err := eventExporter.loadFromJsonCfg(nil, jsonCfg.templates, jsonCfg.generalCfg.RSRSep); err != nil {
+		t.Error(err)
 	}
 }
 
@@ -374,12 +479,12 @@ func TestEESExportersloadFromJsonCfg(t *testing.T) {
 	} else if err = jsonCfg.eesCfg.loadFromJsonCfg(eesCfg, jsonCfg.templates, jsonCfg.generalCfg.RSRSep, jsonCfg.dfltEvExp); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
-	eesCfg = &EEsJsonCfg{
+	eesCfgExporter := &EEsJsonCfg{
 		Exporters: nil,
 	}
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.eesCfg.loadFromJsonCfg(eesCfg, jsonCfg.templates, jsonCfg.generalCfg.RSRSep, jsonCfg.dfltEvExp); err != nil {
+	} else if err = jsonCfg.eesCfg.loadFromJsonCfg(eesCfgExporter, jsonCfg.templates, jsonCfg.generalCfg.RSRSep, jsonCfg.dfltEvExp); err != nil {
 		t.Error(err)
 	}
 }
@@ -665,7 +770,6 @@ func TestEventExporterSameID(t *testing.T) {
 	],
 }
 }`
-
 	if cfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedEEsCfg, cfg.eesCfg) {
@@ -673,7 +777,7 @@ func TestEventExporterSameID(t *testing.T) {
 	}
 }
 
-func TestEEsCfgloadFromJsonCfg(t *testing.T) {
+func TestEEsCfgloadFromJsonCfgCase1(t *testing.T) {
 	jsonCfg := &EEsJsonCfg{
 		Enabled:          utils.BoolPointer(true),
 		Attributes_conns: &[]string{"*conn1", "*conn2"},
@@ -980,6 +1084,335 @@ func TestEEsCfgloadFromJsonCfg(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedCfg, cgrCfg.eesCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedCfg), utils.ToJSON(cgrCfg.eesCfg))
+	}
+}
+
+func TestEEsCfgloadFromJsonCfgCase2(t *testing.T) {
+	jsonCfg := &EEsJsonCfg{
+		Enabled:          utils.BoolPointer(true),
+		Attributes_conns: &[]string{"*conn1", "*conn2"},
+		Cache: &map[string]*CacheParamJsonCfg{
+			utils.MetaFileCSV: {
+				Limit:      utils.IntPointer(-2),
+				Ttl:        utils.StringPointer("1s"),
+				Static_ttl: utils.BoolPointer(false),
+			},
+		},
+		Exporters: &[]*EventExporterJsonCfg{
+			{
+				Id:              utils.StringPointer("CSVExporter"),
+				Type:            utils.StringPointer("*file_csv"),
+				Filters:         &[]string{},
+				Attribute_ids:   &[]string{},
+				Flags:           &[]string{"*dryrun"},
+				Export_path:     utils.StringPointer("/tmp/testCSV"),
+				Tenant:          nil,
+				Timezone:        utils.StringPointer("UTC"),
+				Synchronous:     utils.BoolPointer(true),
+				Attempts:        utils.IntPointer(1),
+				Field_separator: utils.StringPointer(","),
+				Fields: &[]*FcTemplateJsonCfg{
+					{
+						Tag:    utils.StringPointer(utils.AnswerTime),
+						Path:   utils.StringPointer("*exp.AnswerTime"),
+						Type:   utils.StringPointer(utils.MetaTemplate),
+						Value:  utils.StringPointer("randomVal"),
+						Layout: utils.StringPointer(time.RFC3339),
+					},
+				},
+			},
+		},
+	}
+	expectedCfg := &EEsCfg{
+		Enabled:         true,
+		AttributeSConns: []string{"*conn1", "*conn2"},
+		Cache: map[string]*CacheParamCfg{
+			utils.MetaFileCSV: {
+				Limit:     -2,
+				TTL:       1 * time.Second,
+				StaticTTL: false,
+			},
+		},
+		Exporters: []*EventExporterCfg{
+			{
+				ID:            utils.MetaDefault,
+				Type:          utils.META_NONE,
+				FieldSep:      ",",
+				Tenant:        nil,
+				ExportPath:    "/var/spool/cgrates/ees",
+				Attempts:      1,
+				Timezone:      utils.EmptyString,
+				Filters:       []string{},
+				AttributeSIDs: []string{},
+				Flags:         utils.FlagsWithParams{},
+				contentFields: []*FCTemplate{
+					{
+						Tag:    utils.CGRID,
+						Path:   "*exp.CGRID",
+						Type:   utils.MetaVariable,
+						Value:  NewRSRParsersMustCompile("~*req.CGRID", utils.INFIELD_SEP),
+						Layout: time.RFC3339,
+					},
+					{
+						Tag:    utils.RunID,
+						Path:   "*exp.RunID",
+						Type:   utils.MetaVariable,
+						Value:  NewRSRParsersMustCompile("~*req.RunID", utils.INFIELD_SEP),
+						Layout: time.RFC3339,
+					},
+					{
+						Tag:    utils.ToR,
+						Path:   "*exp.ToR",
+						Type:   utils.MetaVariable,
+						Value:  NewRSRParsersMustCompile("~*req.ToR", utils.INFIELD_SEP),
+						Layout: time.RFC3339,
+					},
+					{
+						Tag:    utils.OriginID,
+						Path:   "*exp.OriginID",
+						Type:   utils.MetaVariable,
+						Value:  NewRSRParsersMustCompile("~*req.OriginID", utils.INFIELD_SEP),
+						Layout: time.RFC3339,
+					},
+					{
+						Tag:    utils.RequestType,
+						Path:   "*exp.RequestType",
+						Type:   utils.MetaVariable,
+						Value:  NewRSRParsersMustCompile("~*req.RequestType", utils.INFIELD_SEP),
+						Layout: time.RFC3339,
+					},
+					{
+						Tag:    utils.Tenant,
+						Path:   "*exp.Tenant",
+						Type:   utils.MetaVariable,
+						Value:  NewRSRParsersMustCompile("~*req.Tenant", utils.INFIELD_SEP),
+						Layout: time.RFC3339,
+					},
+					{
+						Tag:    utils.Category,
+						Path:   "*exp.Category",
+						Type:   utils.MetaVariable,
+						Value:  NewRSRParsersMustCompile("~*req.Category", utils.INFIELD_SEP),
+						Layout: time.RFC3339,
+					},
+					{
+						Tag:    utils.Account,
+						Path:   "*exp.Account",
+						Type:   utils.MetaVariable,
+						Value:  NewRSRParsersMustCompile("~*req.Account", utils.INFIELD_SEP),
+						Layout: time.RFC3339,
+					},
+					{
+						Tag:    utils.Subject,
+						Path:   "*exp.Subject",
+						Type:   utils.MetaVariable,
+						Value:  NewRSRParsersMustCompile("~*req.Subject", utils.INFIELD_SEP),
+						Layout: time.RFC3339,
+					},
+					{
+						Tag:    utils.Destination,
+						Path:   "*exp.Destination",
+						Type:   utils.MetaVariable,
+						Value:  NewRSRParsersMustCompile("~*req.Destination", utils.INFIELD_SEP),
+						Layout: time.RFC3339,
+					},
+					{
+						Tag:    utils.SetupTime,
+						Path:   "*exp.SetupTime",
+						Type:   utils.MetaVariable,
+						Value:  NewRSRParsersMustCompile("~*req.SetupTime", utils.INFIELD_SEP),
+						Layout: "2006-01-02T15:04:05Z07:00",
+					},
+					{
+						Tag:    utils.AnswerTime,
+						Path:   "*exp.AnswerTime",
+						Type:   utils.MetaVariable,
+						Value:  NewRSRParsersMustCompile("~*req.AnswerTime", utils.INFIELD_SEP),
+						Layout: "2006-01-02T15:04:05Z07:00",
+					},
+					{
+						Tag:    utils.Usage,
+						Path:   "*exp.Usage",
+						Type:   utils.MetaVariable,
+						Value:  NewRSRParsersMustCompile("~*req.Usage", utils.INFIELD_SEP),
+						Layout: time.RFC3339,
+					},
+					{
+						Tag:    utils.Cost,
+						Path:   "*exp.Cost",
+						Type:   utils.MetaVariable,
+						Value:  NewRSRParsersMustCompile("~*req.Cost{*round:4}", utils.INFIELD_SEP),
+						Layout: time.RFC3339,
+					},
+				},
+				Fields: []*FCTemplate{
+					{
+						Tag:    utils.CGRID,
+						Path:   "*exp.CGRID",
+						Type:   utils.MetaVariable,
+						Value:  NewRSRParsersMustCompile("~*req.CGRID", utils.INFIELD_SEP),
+						Layout: time.RFC3339,
+					},
+					{
+						Tag:    utils.RunID,
+						Path:   "*exp.RunID",
+						Type:   utils.MetaVariable,
+						Value:  NewRSRParsersMustCompile("~*req.RunID", utils.INFIELD_SEP),
+						Layout: time.RFC3339,
+					},
+					{
+						Tag:    utils.ToR,
+						Path:   "*exp.ToR",
+						Type:   utils.MetaVariable,
+						Value:  NewRSRParsersMustCompile("~*req.ToR", utils.INFIELD_SEP),
+						Layout: time.RFC3339,
+					},
+					{
+						Tag:    utils.OriginID,
+						Path:   "*exp.OriginID",
+						Type:   utils.MetaVariable,
+						Value:  NewRSRParsersMustCompile("~*req.OriginID", utils.INFIELD_SEP),
+						Layout: time.RFC3339,
+					},
+					{
+						Tag:    utils.RequestType,
+						Path:   "*exp.RequestType",
+						Type:   utils.MetaVariable,
+						Value:  NewRSRParsersMustCompile("~*req.RequestType", utils.INFIELD_SEP),
+						Layout: time.RFC3339,
+					},
+					{
+						Tag:    utils.Tenant,
+						Path:   "*exp.Tenant",
+						Type:   utils.MetaVariable,
+						Value:  NewRSRParsersMustCompile("~*req.Tenant", utils.INFIELD_SEP),
+						Layout: time.RFC3339,
+					},
+					{
+						Tag:    utils.Category,
+						Path:   "*exp.Category",
+						Type:   utils.MetaVariable,
+						Value:  NewRSRParsersMustCompile("~*req.Category", utils.INFIELD_SEP),
+						Layout: time.RFC3339,
+					},
+					{
+						Tag:    utils.Account,
+						Path:   "*exp.Account",
+						Type:   utils.MetaVariable,
+						Value:  NewRSRParsersMustCompile("~*req.Account", utils.INFIELD_SEP),
+						Layout: time.RFC3339,
+					},
+					{
+						Tag:    utils.Subject,
+						Path:   "*exp.Subject",
+						Type:   utils.MetaVariable,
+						Value:  NewRSRParsersMustCompile("~*req.Subject", utils.INFIELD_SEP),
+						Layout: time.RFC3339,
+					},
+					{
+						Tag:    utils.Destination,
+						Path:   "*exp.Destination",
+						Type:   utils.MetaVariable,
+						Value:  NewRSRParsersMustCompile("~*req.Destination", utils.INFIELD_SEP),
+						Layout: time.RFC3339,
+					},
+					{
+						Tag:    utils.SetupTime,
+						Path:   "*exp.SetupTime",
+						Type:   utils.MetaVariable,
+						Value:  NewRSRParsersMustCompile("~*req.SetupTime", utils.INFIELD_SEP),
+						Layout: "2006-01-02T15:04:05Z07:00",
+					},
+					{
+						Tag:    utils.AnswerTime,
+						Path:   "*exp.AnswerTime",
+						Type:   utils.MetaVariable,
+						Value:  NewRSRParsersMustCompile("~*req.AnswerTime", utils.INFIELD_SEP),
+						Layout: "2006-01-02T15:04:05Z07:00",
+					},
+					{
+						Tag:    utils.Usage,
+						Path:   "*exp.Usage",
+						Type:   utils.MetaVariable,
+						Value:  NewRSRParsersMustCompile("~*req.Usage", utils.INFIELD_SEP),
+						Layout: time.RFC3339,
+					},
+					{
+						Tag:    utils.Cost,
+						Path:   "*exp.Cost",
+						Type:   utils.MetaVariable,
+						Value:  NewRSRParsersMustCompile("~*req.Cost{*round:4}", utils.INFIELD_SEP),
+						Layout: time.RFC3339,
+					},
+				},
+				headerFields:  []*FCTemplate{},
+				trailerFields: []*FCTemplate{},
+				Opts:          make(map[string]interface{}),
+			},
+			{
+				ID:            "CSVExporter",
+				Type:          "*file_csv",
+				Filters:       []string{},
+				AttributeSIDs: []string{},
+				Flags:         utils.FlagsWithParamsFromSlice([]string{utils.MetaDryRun}),
+				ExportPath:    "/tmp/testCSV",
+				Tenant:        nil,
+				Timezone:      "UTC",
+				Synchronous:   true,
+				Attempts:      1,
+				FieldSep:      ",",
+				headerFields:  []*FCTemplate{},
+				trailerFields: []*FCTemplate{},
+				contentFields: []*FCTemplate{
+					{
+						Tag:    utils.CGRID,
+						Path:   "*exp.CGRID",
+						Type:   utils.MetaVariable,
+						Value:  NewRSRParsersMustCompile("~*req.CGRID", utils.INFIELD_SEP),
+						Layout: time.RFC3339,
+					},
+				},
+				Opts: make(map[string]interface{}),
+				Fields: []*FCTemplate{
+					{
+						Tag:    utils.CGRID,
+						Path:   "*exp.CGRID",
+						Type:   utils.MetaVariable,
+						Value:  NewRSRParsersMustCompile("~*req.CGRID", utils.INFIELD_SEP),
+						Layout: time.RFC3339,
+					},
+				},
+			},
+		},
+	}
+	msgTemplates := map[string][]*FCTemplate{
+		"randomVal": {
+			{
+				Tag:    utils.CGRID,
+				Path:   "*exp.CGRID",
+				Type:   utils.MetaVariable,
+				Value:  NewRSRParsersMustCompile("~*req.CGRID", utils.INFIELD_SEP),
+				Layout: time.RFC3339,
+			},
+		},
+	}
+	for _, profile := range expectedCfg.Exporters {
+		for _, v := range profile.Fields {
+			v.ComputePath()
+		}
+		for _, v := range profile.contentFields {
+			v.ComputePath()
+		}
+		for _, v := range msgTemplates["randomVal"] {
+			v.ComputePath()
+		}
+	}
+	if jsnCfg, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err = jsnCfg.eesCfg.loadFromJsonCfg(jsonCfg, msgTemplates, jsnCfg.generalCfg.RSRSep, jsnCfg.dfltEvExp); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedCfg, jsnCfg.eesCfg) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedCfg), utils.ToJSON(jsnCfg.eesCfg))
 	}
 }
 
