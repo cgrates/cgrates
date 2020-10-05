@@ -232,16 +232,18 @@ func (er *EventReaderCfg) loadFromJsonCfg(jsnCfg *EventReaderJsonCfg, msgTemplat
 //Clone itself into a new EventReaderCfg
 func (er *EventReaderCfg) Clone() (cln *EventReaderCfg) {
 	cln = &EventReaderCfg{
-		ID:               er.ID,
-		Type:             er.Type,
-		FieldSep:         er.FieldSep,
-		HeaderDefineChar: er.HeaderDefineChar,
-		RunDelay:         er.RunDelay,
-		ConcurrentReqs:   er.ConcurrentReqs,
-		SourcePath:       er.SourcePath,
-		ProcessedPath:    er.ProcessedPath,
-		XmlRootPath:      er.XmlRootPath,
-		Opts:             make(map[string]interface{}),
+		ID:                       er.ID,
+		Type:                     er.Type,
+		FieldSep:                 er.FieldSep,
+		HeaderDefineChar:         er.HeaderDefineChar,
+		RunDelay:                 er.RunDelay,
+		ConcurrentReqs:           er.ConcurrentReqs,
+		SourcePath:               er.SourcePath,
+		ProcessedPath:            er.ProcessedPath,
+		XmlRootPath:              er.XmlRootPath,
+		PartialCacheExpiryAction: er.PartialCacheExpiryAction,
+		PartialRecordCache:       er.PartialRecordCache,
+		Opts:                     make(map[string]interface{}),
 	}
 	if len(er.Tenant) != 0 {
 		cln.Tenant = make(RSRParsers, len(er.Tenant))
