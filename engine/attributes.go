@@ -359,7 +359,8 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent, evNm utils
 			}
 			substitute = strconv.Itoa(int(t.Unix()))
 		default: // backwards compatible in case that Type is empty
-			substitute, err = attribute.Value.ParseDataProvider(evNm)
+			substitute, err = attribute.Value.ParseDataProvider(newDynamicDP(alS.cgrcfg.AttributeSCfg().ResourceSConns,
+				alS.cgrcfg.AttributeSCfg().StatSConns, alS.cgrcfg.AttributeSCfg().ApierSConns, args.Tenant, evNm))
 		}
 
 		if err != nil {
