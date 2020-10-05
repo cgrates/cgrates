@@ -536,7 +536,10 @@ const CGRATES_CFG_JSON = `
 
 
 "attributes": {								// AttributeS config
-	"enabled": false,						// starts attribute service: <true|false>.
+	"enabled": false,						// starts attribute service: <true|false>
+	"stats_conns": [],						// connections to StatS, empty to disable: <""|*internal|$rpc_conns_id>
+	"resources_conns": [],					// connections to ResourceS, empty to disable: <""|*internal|$rpc_conns_id>
+	"apiers_conns": [],						// connections to ApierS, empty to disable: <""|*internal|$rpc_conns_id>
 	"indexed_selects": true,				// enable profile matching exclusively on indexes
 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing

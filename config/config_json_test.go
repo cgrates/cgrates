@@ -825,12 +825,15 @@ func TestDNSAgentJsonCfg(t *testing.T) {
 func TestDfAttributeServJsonCfg(t *testing.T) {
 	eCfg := &AttributeSJsonCfg{
 		Enabled:               utils.BoolPointer(false),
+		Stats_conns:           &[]string{},
+		Resources_conns:       &[]string{},
+		Apiers_conns:          &[]string{},
 		Indexed_selects:       utils.BoolPointer(true),
 		String_indexed_fields: nil,
 		Prefix_indexed_fields: &[]string{},
 		Suffix_indexed_fields: &[]string{},
-		Process_runs:          utils.IntPointer(1),
 		Nested_fields:         utils.BoolPointer(false),
+		Process_runs:          utils.IntPointer(1),
 	}
 	if cfg, err := dfCgrJSONCfg.AttributeServJsonCfg(); err != nil {
 		t.Error(err)
