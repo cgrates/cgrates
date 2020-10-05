@@ -33,7 +33,6 @@ func NewFilterS(cfg *config.CGRConfig, connMgr *ConnManager, dm *DataManager) (f
 		cfg:     cfg,
 		connMgr: connMgr,
 	}
-
 	return
 }
 
@@ -53,7 +52,8 @@ func (fS *FilterS) Pass(tenant string, filterIDs []string,
 	if len(filterIDs) == 0 {
 		return true, nil
 	}
-	dDP := newDynamicDP(fS.cfg, fS.connMgr, tenant, ev)
+	dDP := newDynamicDP(fS.cfg.FilterSCfg().ResourceSConns, fS.cfg.FilterSCfg().StatSConns,
+		fS.cfg.FilterSCfg().ApierSConns, tenant, ev)
 	for _, fltrID := range filterIDs {
 		f, err := fS.dm.GetFilter(tenant, fltrID,
 			true, true, utils.NonTransactional)
@@ -117,7 +117,8 @@ func (fS *FilterS) LazyPass(tenant string, filterIDs []string,
 		return true, nil, nil
 	}
 	pass = true
-	dDP := newDynamicDP(fS.cfg, fS.connMgr, tenant, ev)
+	dDP := newDynamicDP(fS.cfg.FilterSCfg().ResourceSConns, fS.cfg.FilterSCfg().StatSConns,
+		fS.cfg.FilterSCfg().ApierSConns, tenant, ev)
 	for _, fltrID := range filterIDs {
 		var f *Filter
 		f, err = fS.dm.GetFilter(tenant, fltrID,
@@ -617,104 +618,6 @@ func (fltr *FilterRule) passAPIBan(dDP utils.DataProvider) (bool, error) {
 	return dm.GetAPIBan(strVal, config.CgrConfig().APIBanCfg().Keys, fltr.Values[0] != utils.MetaAll, true, true)
 }
 
-func newDynamicDP(cfg *config.CGRConfig, connMgr *ConnManager,
-	tenant string, initialDP utils.DataProvider) *dynamicDP {
-	return &dynamicDP{
-		cfg:       cfg,
-		connMgr:   connMgr,
-		tenant:    tenant,
-		initialDP: initialDP,
-		cache:     utils.MapStorage{},
-	}
-}
-
-type dynamicDP struct {
-	cfg       *config.CGRConfig
-	connMgr   *ConnManager
-	tenant    string
-	initialDP utils.DataProvider
-
-	cache utils.MapStorage
-}
-
-func (dDP *dynamicDP) String() string { return dDP.initialDP.String() }
-
-func (dDP *dynamicDP) FieldAsString(fldPath []string) (string, error) {
-	val, err := dDP.FieldAsInterface(fldPath)
-	if err != nil {
-		return "", err
-	}
-	return utils.IfaceAsString(val), nil
-}
-
-func (dDP *dynamicDP) RemoteHost() net.Addr {
-	return utils.LocalAddr()
-}
-
-var initialDPPrefixes = utils.NewStringSet([]string{utils.MetaReq, utils.MetaVars,
-	utils.MetaCgreq, utils.MetaCgrep, utils.MetaRep, utils.MetaCGRAReq,
-	utils.MetaAct, utils.MetaEC, utils.MetaUCH, utils.MetaOpts})
-
-func (dDP *dynamicDP) FieldAsInterface(fldPath []string) (val interface{}, err error) {
-	if len(fldPath) == 0 {
-		return nil, utils.ErrNotFound
-	}
-	if initialDPPrefixes.Has(fldPath[0]) {
-		return dDP.initialDP.FieldAsInterface(fldPath)
-	}
-	val, err = dDP.cache.FieldAsInterface(fldPath)
-	if err == utils.ErrNotFound { // in case not found in cache try to populate it
-		return dDP.fieldAsInterface(fldPath)
-	}
-	return
-}
-
-func (dDP *dynamicDP) fieldAsInterface(fldPath []string) (val interface{}, err error) {
-	if len(fldPath) < 2 {
-		return nil, fmt.Errorf("invalid fieldname <%s>", fldPath)
-	}
-	switch fldPath[0] {
-	case utils.MetaAccounts:
-		// sample of fieldName : ~*accounts.1001.BalanceMap.*monetary[0].Value
-		// split the field name in 3 parts
-		// fieldNameType (~*accounts), accountID(1001) and quried part (BalanceMap.*monetary[0].Value)
-
-		var account Account
-		if err = dDP.connMgr.Call(dDP.cfg.FilterSCfg().ApierSConns, nil, utils.APIerSv2GetAccount,
-			&utils.AttrGetAccount{Tenant: dDP.tenant, Account: fldPath[1]}, &account); err != nil {
-			return
-		}
-		//construct dataProvider from account and set it furthder
-		dp := config.NewObjectDP(account)
-		dDP.cache.Set(fldPath[:2], dp)
-		return dp.FieldAsInterface(fldPath[2:])
-	case utils.MetaResources:
-		// sample of fieldName : ~*resources.ResourceID.Field
-		var reply *Resource
-		if err := dDP.connMgr.Call(dDP.cfg.FilterSCfg().ResourceSConns, nil, utils.ResourceSv1GetResource,
-			&utils.TenantID{Tenant: dDP.tenant, ID: fldPath[1]}, &reply); err != nil {
-			return nil, err
-		}
-		dp := config.NewObjectDP(reply)
-		dDP.cache.Set(fldPath[:2], dp)
-		return dp.FieldAsInterface(fldPath[2:])
-	case utils.MetaStats:
-		// sample of fieldName : ~*stats.StatID.*acd
-		var statValues map[string]float64
-
-		if err := dDP.connMgr.Call(dDP.cfg.FilterSCfg().StatSConns, nil, utils.StatSv1GetQueueFloatMetrics,
-			&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: dDP.tenant, ID: fldPath[1]}},
-			&statValues); err != nil {
-			return nil, err
-		}
-		for k, v := range statValues {
-			dDP.cache.Set([]string{utils.MetaStats, fldPath[1], k}, v)
-		}
-		return dDP.cache.FieldAsInterface(fldPath)
-	default: // in case of constant we give an empty DataProvider ( empty navigable map )
-	}
-	return nil, utils.ErrNotFound
-}
 func verifyInlineFilterS(fltrs []string) (err error) {
 	for _, fl := range fltrs {
 		if strings.HasPrefix(fl, utils.Meta) {

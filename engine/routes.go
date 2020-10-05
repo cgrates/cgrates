@@ -496,10 +496,12 @@ func (rpS *RouteService) populateSortingData(ev *utils.CGREvent, route *Route,
 	//filter the route
 	if len(route.lazyCheckRules) != 0 {
 		//construct the DP and pass it to filterS
-		dynDP := newDynamicDP(rpS.cgrcfg, rpS.connMgr, ev.Tenant, utils.MapStorage{
-			utils.MetaReq:  ev.Event,
-			utils.MetaVars: sortedSpl.SortingData,
-		})
+		dynDP := newDynamicDP(rpS.cgrcfg.FilterSCfg().ResourceSConns, rpS.cgrcfg.FilterSCfg().StatSConns,
+			rpS.cgrcfg.FilterSCfg().ApierSConns,
+			ev.Tenant, utils.MapStorage{
+				utils.MetaReq:  ev.Event,
+				utils.MetaVars: sortedSpl.SortingData,
+			})
 
 		for _, rule := range route.lazyCheckRules { // verify the rules remaining from PartialPass
 			if pass, err = rule.Pass(dynDP); err != nil {

@@ -134,6 +134,9 @@ func testCGRConfigReloadAttributeS(t *testing.T) {
 	}
 	expAttr := &AttributeSCfg{
 		Enabled:             true,
+		ApierSConns:         []string{},
+		ResourceSConns:      []string{},
+		StatSConns:          []string{},
 		StringIndexedFields: &[]string{utils.MetaReq + utils.NestingSep + utils.Account},
 		PrefixIndexedFields: &[]string{},
 		SuffixIndexedFields: &[]string{},

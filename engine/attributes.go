@@ -235,18 +235,21 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent, evNm utils
 		case utils.META_CONSTANT:
 			substitute, err = attribute.Value.ParseValue(utils.EmptyString)
 		case utils.MetaVariable, utils.META_COMPOSED:
-			substitute, err = attribute.Value.ParseDataProvider(evNm)
+			substitute, err = attribute.Value.ParseDataProvider(newDynamicDP(alS.cgrcfg.AttributeSCfg().ResourceSConns,
+				alS.cgrcfg.AttributeSCfg().StatSConns, alS.cgrcfg.AttributeSCfg().ApierSConns, args.Tenant, evNm))
 		case utils.META_USAGE_DIFFERENCE:
 			if len(attribute.Value) != 2 {
 				return nil, fmt.Errorf("invalid arguments <%s>", utils.ToJSON(attribute.Value))
 			}
 			var strVal1 string
-			if strVal1, err = attribute.Value[0].ParseDataProvider(evNm); err != nil {
+			if strVal1, err = attribute.Value[0].ParseDataProvider(newDynamicDP(alS.cgrcfg.AttributeSCfg().ResourceSConns,
+				alS.cgrcfg.AttributeSCfg().StatSConns, alS.cgrcfg.AttributeSCfg().ApierSConns, args.Tenant, evNm)); err != nil {
 				rply = nil
 				return
 			}
 			var strVal2 string
-			if strVal2, err = attribute.Value[1].ParseDataProvider(evNm); err != nil {
+			if strVal2, err = attribute.Value[1].ParseDataProvider(newDynamicDP(alS.cgrcfg.AttributeSCfg().ResourceSConns,
+				alS.cgrcfg.AttributeSCfg().StatSConns, alS.cgrcfg.AttributeSCfg().ApierSConns, args.Tenant, evNm)); err != nil {
 				rply = nil
 				return
 			}
@@ -263,7 +266,8 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent, evNm utils
 			substitute = tEnd.Sub(tStart).String()
 		case utils.MetaSum:
 			var ifaceVals []interface{}
-			if ifaceVals, err = attribute.Value.GetIfaceFromValues(evNm); err != nil {
+			if ifaceVals, err = attribute.Value.GetIfaceFromValues(newDynamicDP(alS.cgrcfg.AttributeSCfg().ResourceSConns,
+				alS.cgrcfg.AttributeSCfg().StatSConns, alS.cgrcfg.AttributeSCfg().ApierSConns, args.Tenant, evNm)); err != nil {
 				rply = nil
 				return
 			}
@@ -275,7 +279,8 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent, evNm utils
 			substitute = utils.IfaceAsString(ifaceSum)
 		case utils.MetaDifference:
 			var ifaceVals []interface{}
-			if ifaceVals, err = attribute.Value.GetIfaceFromValues(evNm); err != nil {
+			if ifaceVals, err = attribute.Value.GetIfaceFromValues(newDynamicDP(alS.cgrcfg.AttributeSCfg().ResourceSConns,
+				alS.cgrcfg.AttributeSCfg().StatSConns, alS.cgrcfg.AttributeSCfg().ApierSConns, args.Tenant, evNm)); err != nil {
 				rply = nil
 				return
 			}
@@ -287,7 +292,8 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent, evNm utils
 			substitute = utils.IfaceAsString(ifaceSum)
 		case utils.MetaMultiply:
 			var ifaceVals []interface{}
-			if ifaceVals, err = attribute.Value.GetIfaceFromValues(evNm); err != nil {
+			if ifaceVals, err = attribute.Value.GetIfaceFromValues(newDynamicDP(alS.cgrcfg.AttributeSCfg().ResourceSConns,
+				alS.cgrcfg.AttributeSCfg().StatSConns, alS.cgrcfg.AttributeSCfg().ApierSConns, args.Tenant, evNm)); err != nil {
 				rply = nil
 				return
 			}
@@ -299,7 +305,8 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent, evNm utils
 			substitute = utils.IfaceAsString(ifaceSum)
 		case utils.MetaDivide:
 			var ifaceVals []interface{}
-			if ifaceVals, err = attribute.Value.GetIfaceFromValues(evNm); err != nil {
+			if ifaceVals, err = attribute.Value.GetIfaceFromValues(newDynamicDP(alS.cgrcfg.AttributeSCfg().ResourceSConns,
+				alS.cgrcfg.AttributeSCfg().StatSConns, alS.cgrcfg.AttributeSCfg().ApierSConns, args.Tenant, evNm)); err != nil {
 				rply = nil
 				return
 			}
@@ -315,7 +322,8 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent, evNm utils
 					utils.ToJSON(attribute.Value), utils.MetaValueExponent)
 			}
 			var strVal1 string
-			if strVal1, err = attribute.Value[0].ParseDataProvider(evNm); err != nil {
+			if strVal1, err = attribute.Value[0].ParseDataProvider(newDynamicDP(alS.cgrcfg.AttributeSCfg().ResourceSConns,
+				alS.cgrcfg.AttributeSCfg().StatSConns, alS.cgrcfg.AttributeSCfg().ApierSConns, args.Tenant, evNm)); err != nil {
 				rply = nil
 				return
 			}
@@ -325,7 +333,8 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent, evNm utils
 					strVal1, utils.MetaValueExponent)
 			}
 			var strVal2 string
-			if strVal2, err = attribute.Value[1].ParseDataProvider(evNm); err != nil {
+			if strVal2, err = attribute.Value[1].ParseDataProvider(newDynamicDP(alS.cgrcfg.AttributeSCfg().ResourceSConns,
+				alS.cgrcfg.AttributeSCfg().StatSConns, alS.cgrcfg.AttributeSCfg().ApierSConns, args.Tenant, evNm)); err != nil {
 				rply = nil
 				return
 			}
@@ -338,7 +347,8 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent, evNm utils
 				alS.cgrcfg.GeneralCfg().RoundingDecimals, utils.ROUNDING_MIDDLE), 'f', -1, 64)
 		case utils.MetaUnixTimestamp:
 			var val string
-			if val, err = attribute.Value.ParseDataProvider(evNm); err != nil {
+			if val, err = attribute.Value.ParseDataProvider(newDynamicDP(alS.cgrcfg.AttributeSCfg().ResourceSConns,
+				alS.cgrcfg.AttributeSCfg().StatSConns, alS.cgrcfg.AttributeSCfg().ApierSConns, args.Tenant, evNm)); err != nil {
 				rply = nil
 				return
 			}

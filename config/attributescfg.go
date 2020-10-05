@@ -23,6 +23,9 @@ import "github.com/cgrates/cgrates/utils"
 // AttributeSCfg is the configuration of attribute service
 type AttributeSCfg struct {
 	Enabled             bool
+	ResourceSConns      []string
+	StatSConns          []string
+	ApierSConns         []string
 	IndexedSelects      bool
 	StringIndexedFields *[]string
 	PrefixIndexedFields *[]string
@@ -37,6 +40,39 @@ func (alS *AttributeSCfg) loadFromJsonCfg(jsnCfg *AttributeSJsonCfg) (err error)
 	}
 	if jsnCfg.Enabled != nil {
 		alS.Enabled = *jsnCfg.Enabled
+	}
+	if jsnCfg.Stats_conns != nil {
+		alS.StatSConns = make([]string, len(*jsnCfg.Stats_conns))
+		for idx, connID := range *jsnCfg.Stats_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			if connID == utils.MetaInternal {
+				alS.StatSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS)
+			} else {
+				alS.StatSConns[idx] = connID
+			}
+		}
+	}
+	if jsnCfg.Resources_conns != nil {
+		alS.ResourceSConns = make([]string, len(*jsnCfg.Resources_conns))
+		for idx, connID := range *jsnCfg.Resources_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			if connID == utils.MetaInternal {
+				alS.ResourceSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)
+			} else {
+				alS.ResourceSConns[idx] = connID
+			}
+		}
+	}
+	if jsnCfg.Apiers_conns != nil {
+		alS.ApierSConns = make([]string, len(*jsnCfg.Apiers_conns))
+		for idx, connID := range *jsnCfg.Apiers_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			if connID == utils.MetaInternal {
+				alS.ApierSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier)
+			} else {
+				alS.ApierSConns[idx] = connID
+			}
+		}
 	}
 	if jsnCfg.Indexed_selects != nil {
 		alS.IndexedSelects = *jsnCfg.Indexed_selects
@@ -74,6 +110,9 @@ func (alS *AttributeSCfg) loadFromJsonCfg(jsnCfg *AttributeSJsonCfg) (err error)
 func (alS *AttributeSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
 		utils.EnabledCfg:        alS.Enabled,
+		utils.StatSConnsCfg:     alS.StatSConns,
+		utils.ResourceSConnsCfg: alS.ResourceSConns,
+		utils.ApierSConnsCfg:    alS.ApierSConns,
 		utils.IndexedSelectsCfg: alS.IndexedSelects,
 		utils.ProcessRunsCfg:    alS.ProcessRuns,
 		utils.NestedFieldsCfg:   alS.NestedFields,

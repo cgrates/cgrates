@@ -36,6 +36,9 @@ func TestAttributeSCfgloadFromJsonCfg(t *testing.T) {
 	}
 	expected := &AttributeSCfg{
 		Enabled:             true,
+		ApierSConns:         []string{},
+		StatSConns:          []string{},
+		ResourceSConns:      []string{},
 		IndexedSelects:      false,
 		StringIndexedFields: &[]string{"*req.index1"},
 		PrefixIndexedFields: &[]string{"*req.index1", "*req.index2"},
@@ -63,6 +66,9 @@ func TestAttributeSCfgAsMapInterface(t *testing.T) {
 }`
 	eMap := map[string]interface{}{
 		utils.EnabledCfg:             true,
+		utils.StatSConnsCfg:          []string{},
+		utils.ResourceSConnsCfg:      []string{},
+		utils.ApierSConnsCfg:         []string{},
 		utils.StringIndexedFieldsCfg: []string{"*req.index1"},
 		utils.PrefixIndexedFieldsCfg: []string{"*req.index1", "*req.index2"},
 		utils.ProcessRunsCfg:         3,
@@ -88,6 +94,9 @@ func TestAttributeSCfgAsMapInterface2(t *testing.T) {
 }`
 	expectedMap := map[string]interface{}{
 		utils.EnabledCfg:             true,
+		utils.StatSConnsCfg:          []string{},
+		utils.ResourceSConnsCfg:      []string{},
+		utils.ApierSConnsCfg:         []string{},
 		utils.IndexedSelectsCfg:      true,
 		utils.PrefixIndexedFieldsCfg: []string{},
 		utils.SuffixIndexedFieldsCfg: []string{"*req.index1", "*req.index2"},
@@ -109,6 +118,9 @@ func TestAttributeSCfgAsMapInterface3(t *testing.T) {
 `
 	expectedMap := map[string]interface{}{
 		utils.EnabledCfg:             false,
+		utils.StatSConnsCfg:          []string{},
+		utils.ResourceSConnsCfg:      []string{},
+		utils.ApierSConnsCfg:         []string{},
 		utils.IndexedSelectsCfg:      true,
 		utils.PrefixIndexedFieldsCfg: []string{},
 		utils.SuffixIndexedFieldsCfg: []string{},

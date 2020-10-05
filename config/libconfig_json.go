@@ -395,6 +395,9 @@ type ReqProcessorJsnCfg struct {
 // Attribute service config section
 type AttributeSJsonCfg struct {
 	Enabled               *bool
+	Stats_conns           *[]string
+	Resources_conns       *[]string
+	Apiers_conns          *[]string
 	Indexed_selects       *bool
 	String_indexed_fields *[]string
 	Prefix_indexed_fields *[]string
