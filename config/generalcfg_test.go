@@ -83,6 +83,46 @@ func TestGeneralCfgloadFromJsonCfg(t *testing.T) {
 	}
 }
 
+func TestGeneralParseDurationCfgloadFromJsonCfg(t *testing.T) {
+	cfgJSON := &GeneralJsonCfg{
+		Connect_timeout: utils.StringPointer("1ss"),
+	}
+	expected := "time: unknown unit \"ss\" in duration \"1ss\""
+	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err = jsonCfg.generalCfg.loadFromJsonCfg(cfgJSON); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %v", expected, err)
+	}
+
+	cfgJSON1 := &GeneralJsonCfg{
+		Reply_timeout: utils.StringPointer("1ss"),
+	}
+	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err = jsonCfg.generalCfg.loadFromJsonCfg(cfgJSON1); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %v", expected, err)
+	}
+
+	cfgJSON2 := &GeneralJsonCfg{
+		Failed_posts_ttl: utils.StringPointer("1ss"),
+	}
+	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err = jsonCfg.generalCfg.loadFromJsonCfg(cfgJSON2); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %v", expected, err)
+	}
+
+	cfgJSON3 := &GeneralJsonCfg{
+		Locking_timeout: utils.StringPointer("1ss"),
+	}
+	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err = jsonCfg.generalCfg.loadFromJsonCfg(cfgJSON3); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %v", expected, err)
+	}
+
+}
+
 func TestGeneralCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
 		"general": {
@@ -105,7 +145,7 @@ func TestGeneralCfgAsMapInterface(t *testing.T) {
 			"reconnects": -1,										
 			"connect_timeout": "1s",								
 			"reply_timeout": "2s",									
-			"locking_timeout": "0",									
+			"locking_timeout": "1s",									
 			"digest_separator": ",",								
 			"digest_equal": ":",									
 			"rsr_separator": ";",									
@@ -132,7 +172,7 @@ func TestGeneralCfgAsMapInterface(t *testing.T) {
 		utils.ReconnectsCfg:         -1,
 		utils.ConnectTimeoutCfg:     "1s",
 		utils.ReplyTimeoutCfg:       "2s",
-		utils.LockingTimeoutCfg:     "0",
+		utils.LockingTimeoutCfg:     "1s",
 		utils.DigestSeparatorCfg:    ",",
 		utils.DigestEqualCfg:        ":",
 		utils.RSRSepCfg:             ";",
@@ -150,7 +190,11 @@ func TestGeneralCfgAsMapInterface(t *testing.T) {
 func TestGeneralCfgAsMapInterface1(t *testing.T) {
 	cfgJSONStr := `{
       "general": {
-            "node_id": "ENGINE1"
+            "node_id": "ENGINE1",
+            "locking_timeout": "0",
+            "failed_posts_ttl": "0s",
+            "connect_timeout": "0s",
+            "reply_timeout": "0s",
         }
 }`
 	eMap := map[string]interface{}{
@@ -163,7 +207,7 @@ func TestGeneralCfgAsMapInterface1(t *testing.T) {
 		utils.TpExportPathCfg:       "/var/spool/cgrates/tpe",
 		utils.PosterAttemptsCfg:     3,
 		utils.FailedPostsDirCfg:     "/var/spool/cgrates/failed_posts",
-		utils.FailedPostsTTLCfg:     "5s",
+		utils.FailedPostsTTLCfg:     "0",
 		utils.DefaultReqTypeCfg:     "*rated",
 		utils.DefaultCategoryCfg:    "call",
 		utils.DefaultTenantCfg:      "cgrates.org",
@@ -171,8 +215,8 @@ func TestGeneralCfgAsMapInterface1(t *testing.T) {
 		utils.DefaultCachingCfg:     "*reload",
 		utils.ConnectAttemptsCfg:    5,
 		utils.ReconnectsCfg:         -1,
-		utils.ConnectTimeoutCfg:     "1s",
-		utils.ReplyTimeoutCfg:       "2s",
+		utils.ConnectTimeoutCfg:     "0",
+		utils.ReplyTimeoutCfg:       "0",
 		utils.LockingTimeoutCfg:     "0",
 		utils.DigestSeparatorCfg:    ",",
 		utils.DigestEqualCfg:        ":",
@@ -184,6 +228,6 @@ func TestGeneralCfgAsMapInterface1(t *testing.T) {
 	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.generalCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
-		t.Errorf("Expected %+v \n, recevied %+v", eMap, rcv)
+		t.Errorf("Expected %+v \n, recevied %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
