@@ -373,7 +373,6 @@ func TestEESClone(t *testing.T) {
 			},
 		},
 	}
-
 	for _, profile := range expected.Exporters {
 		for _, v := range profile.Fields {
 			v.ComputePath()
