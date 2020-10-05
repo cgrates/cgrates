@@ -26,14 +26,14 @@ import (
 
 func TestFilterSCfgloadFromJsonCfg(t *testing.T) {
 	cfgJSONS := &FilterSJsonCfg{
-		Stats_conns:     &[]string{utils.MetaInternal},
-		Resources_conns: &[]string{utils.MetaInternal},
-		Apiers_conns:    &[]string{utils.MetaInternal},
+		Stats_conns:     &[]string{utils.MetaInternal, "*conn1"},
+		Resources_conns: &[]string{utils.MetaInternal, "*conn1"},
+		Apiers_conns:    &[]string{utils.MetaInternal, "*conn1"},
 	}
 	expected := &FilterSCfg{
-		StatSConns:     []string{"*internal:*stats"},
-		ResourceSConns: []string{"*internal:*resources"},
-		ApierSConns:    []string{"*internal:*apier"},
+		StatSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"},
+		ResourceSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), "*conn1"},
+		ApierSConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier), "*conn1"},
 	}
 	if jsnCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
@@ -47,21 +47,21 @@ func TestFilterSCfgloadFromJsonCfg(t *testing.T) {
 func TestFilterSCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
 		"filters": {								
-			"stats_conns": ["*localhost"],						
-			"resources_conns": ["*conn1", "*conn2"],
+			"stats_conns": ["*internal:*stats", "*conn1"],						
+			"resources_conns": ["*internal:*resources", "*conn1"],
+            "apiers_conns": ["*internal:*apier", "*conn1"],
 	},
 }`
 	eMap := map[string]interface{}{
-		utils.StatSConnsCfg:     []string{utils.MetaLocalHost},
-		utils.ResourceSConnsCfg: []string{"*conn1", "*conn2"},
-		utils.ApierSConnsCfg:    []string{},
+		utils.StatSConnsCfg:     []string{utils.MetaInternal, "*conn1"},
+		utils.ResourceSConnsCfg: []string{utils.MetaInternal, "*conn1"},
+		utils.ApierSConnsCfg:    []string{utils.MetaInternal, "*conn1"},
 	}
 	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.filterSCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
 		t.Errorf("Expected %+v, received %+v", eMap, rcv)
 	}
-
 }
 
 func TestFilterSCfgAsMapInterface2(t *testing.T) {

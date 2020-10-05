@@ -18,7 +18,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
-import "github.com/cgrates/cgrates/utils"
+import (
+	"strings"
+
+	"github.com/cgrates/cgrates/utils"
+)
 
 type FilterSCfg struct {
 	StatSConns     []string
@@ -67,10 +71,39 @@ func (fSCfg *FilterSCfg) loadFromJsonCfg(jsnCfg *FilterSJsonCfg) (err error) {
 }
 
 func (fSCfg *FilterSCfg) AsMapInterface() (initialMP map[string]interface{}) {
-	initialMP = map[string]interface{}{
-		utils.StatSConnsCfg:     fSCfg.StatSConns,
-		utils.ResourceSConnsCfg: fSCfg.ResourceSConns,
-		utils.ApierSConnsCfg:    fSCfg.ApierSConns,
+	initialMP = make(map[string]interface{})
+	if fSCfg.StatSConns != nil {
+		statSConns := make([]string, len(fSCfg.StatSConns))
+		for i, item := range fSCfg.StatSConns {
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS) {
+				statSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaStatS, utils.EmptyString)
+			} else {
+				statSConns[i] = item
+			}
+		}
+		initialMP[utils.StatSConnsCfg] = statSConns
+	}
+	if fSCfg.ResourceSConns != nil {
+		resourceSConns := make([]string, len(fSCfg.ResourceSConns))
+		for i, item := range fSCfg.ResourceSConns {
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources) {
+				resourceSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaResources, utils.EmptyString)
+			} else {
+				resourceSConns[i] = item
+			}
+		}
+		initialMP[utils.ResourceSConnsCfg] = resourceSConns
+	}
+	if fSCfg.ApierSConns != nil {
+		apierConns := make([]string, len(fSCfg.ApierSConns))
+		for i, item := range fSCfg.ApierSConns {
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier) {
+				apierConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaApier, utils.EmptyString)
+			} else {
+				apierConns[i] = item
+			}
+		}
+		initialMP[utils.ApierSConnsCfg] = apierConns
 	}
 	return
 }
