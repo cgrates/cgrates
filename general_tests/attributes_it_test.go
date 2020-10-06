@@ -538,7 +538,7 @@ func testAttributeSProcessEventWithLibPhoneNumber(t *testing.T) {
 					Type: utils.MetaVariable,
 					Value: config.RSRParsers{
 						&config.RSRParser{
-							Rules: "~*libphonenumber.*req.Destination",
+							Rules: "~*libphonenumber.<~*req.Destination>",
 						},
 					},
 				},

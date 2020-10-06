@@ -297,13 +297,14 @@ func TestAttributeProcessEvent(t *testing.T) {
 		AlteredFields:    []string{utils.MetaReq + utils.NestingSep + "Account"},
 		CGREventWithOpts: attrEvs[0].CGREventWithOpts,
 	}
-	atrp, err := attrService.processEvent(attrEvs[0], utils.MapStorage{
+	eNM := utils.MapStorage{
 		utils.MetaReq:  attrEvs[0].CGREvent.Event,
 		utils.MetaOpts: attrEvs[0].Opts,
 		utils.MetaVars: utils.MapStorage{
 			utils.ProcessRuns: utils.NewNMData(0),
 		},
-	}, utils.EmptyString)
+	}
+	atrp, err := attrService.processEvent(attrEvs[0], eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -314,13 +315,15 @@ func TestAttributeProcessEvent(t *testing.T) {
 
 func TestAttributeProcessEventWithNotFound(t *testing.T) {
 	attrEvs[3].CGREvent.Event["Account"] = "1010" //Field added in event after process
-	if _, err := attrService.processEvent(attrEvs[3], utils.MapStorage{
+	eNM := utils.MapStorage{
 		utils.MetaReq:  attrEvs[3].CGREvent.Event,
 		utils.MetaOpts: attrEvs[3].Opts,
 		utils.MetaVars: utils.MapStorage{
 			utils.ProcessRuns: utils.NewNMData(0),
 		},
-	}, utils.EmptyString); err == nil || err != utils.ErrNotFound {
+	}
+	if _, err := attrService.processEvent(attrEvs[3], eNM,
+		newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Error: %+v", err)
 	}
 }
@@ -333,13 +336,14 @@ func TestAttributeProcessEventWithIDs(t *testing.T) {
 		AlteredFields:    []string{utils.MetaReq + utils.NestingSep + "Account"},
 		CGREventWithOpts: attrEvs[3].CGREventWithOpts,
 	}
-	if atrp, err := attrService.processEvent(attrEvs[3], utils.MapStorage{
+	eNM := utils.MapStorage{
 		utils.MetaReq:  attrEvs[3].CGREvent.Event,
 		utils.MetaOpts: attrEvs[3].Opts,
 		utils.MetaVars: utils.MapStorage{
 			utils.ProcessRuns: utils.NewNMData(0),
 		},
-	}, utils.EmptyString); err != nil {
+	}
+	if atrp, err := attrService.processEvent(attrEvs[3], eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString); err != nil {
 	} else if !reflect.DeepEqual(eRply, atrp) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eRply), utils.ToJSON(atrp))
 	}
@@ -2003,13 +2007,14 @@ func TestProcessAttributeConstant(t *testing.T) {
 			},
 		},
 	}
-	rcv, err := attrService.processEvent(ev, utils.MapStorage{
+	eNM := utils.MapStorage{
 		utils.MetaReq:  ev.CGREvent.Event,
 		utils.MetaOpts: ev.Opts,
 		utils.MetaVars: utils.MapStorage{
 			utils.ProcessRuns: utils.NewNMData(0),
 		},
-	}, utils.EmptyString)
+	}
+	rcv, err := attrService.processEvent(ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -2065,13 +2070,14 @@ func TestProcessAttributeVariable(t *testing.T) {
 			},
 		},
 	}
-	rcv, err := attrService.processEvent(ev, utils.MapStorage{
+	eNM := utils.MapStorage{
 		utils.MetaReq:  ev.CGREvent.Event,
 		utils.MetaOpts: ev.Opts,
 		utils.MetaVars: utils.MapStorage{
 			utils.ProcessRuns: utils.NewNMData(0),
 		},
-	}, utils.EmptyString)
+	}
+	rcv, err := attrService.processEvent(ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -2134,13 +2140,14 @@ func TestProcessAttributeComposed(t *testing.T) {
 			},
 		},
 	}
-	rcv, err := attrService.processEvent(ev, utils.MapStorage{
+	eNM := utils.MapStorage{
 		utils.MetaReq:  ev.CGREvent.Event,
 		utils.MetaOpts: ev.Opts,
 		utils.MetaVars: utils.MapStorage{
 			utils.ProcessRuns: utils.NewNMData(0),
 		},
-	}, utils.EmptyString)
+	}
+	rcv, err := attrService.processEvent(ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -2198,13 +2205,14 @@ func TestProcessAttributeUsageDifference(t *testing.T) {
 			},
 		},
 	}
-	rcv, err := attrService.processEvent(ev, utils.MapStorage{
+	eNM := utils.MapStorage{
 		utils.MetaReq:  ev.CGREvent.Event,
 		utils.MetaOpts: ev.Opts,
 		utils.MetaVars: utils.MapStorage{
 			utils.ProcessRuns: utils.NewNMData(0),
 		},
-	}, utils.EmptyString)
+	}
+	rcv, err := attrService.processEvent(ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -2262,13 +2270,14 @@ func TestProcessAttributeSum(t *testing.T) {
 			},
 		},
 	}
-	rcv, err := attrService.processEvent(ev, utils.MapStorage{
+	eNM := utils.MapStorage{
 		utils.MetaReq:  ev.CGREvent.Event,
 		utils.MetaOpts: ev.Opts,
 		utils.MetaVars: utils.MapStorage{
 			utils.ProcessRuns: utils.NewNMData(0),
 		},
-	}, utils.EmptyString)
+	}
+	rcv, err := attrService.processEvent(ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -2326,13 +2335,14 @@ func TestProcessAttributeDiff(t *testing.T) {
 			},
 		},
 	}
-	rcv, err := attrService.processEvent(ev, utils.MapStorage{
+	eNM := utils.MapStorage{
 		utils.MetaReq:  ev.CGREvent.Event,
 		utils.MetaOpts: ev.Opts,
 		utils.MetaVars: utils.MapStorage{
 			utils.ProcessRuns: utils.NewNMData(0),
 		},
-	}, utils.EmptyString)
+	}
+	rcv, err := attrService.processEvent(ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -2390,13 +2400,14 @@ func TestProcessAttributeMultiply(t *testing.T) {
 			},
 		},
 	}
-	rcv, err := attrService.processEvent(ev, utils.MapStorage{
+	eNM := utils.MapStorage{
 		utils.MetaReq:  ev.CGREvent.Event,
 		utils.MetaOpts: ev.Opts,
 		utils.MetaVars: utils.MapStorage{
 			utils.ProcessRuns: utils.NewNMData(0),
 		},
-	}, utils.EmptyString)
+	}
+	rcv, err := attrService.processEvent(ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -2454,13 +2465,14 @@ func TestProcessAttributeDivide(t *testing.T) {
 			},
 		},
 	}
-	rcv, err := attrService.processEvent(ev, utils.MapStorage{
+	eNM := utils.MapStorage{
 		utils.MetaReq:  ev.CGREvent.Event,
 		utils.MetaOpts: ev.Opts,
 		utils.MetaVars: utils.MapStorage{
 			utils.ProcessRuns: utils.NewNMData(0),
 		},
-	}, utils.EmptyString)
+	}
+	rcv, err := attrService.processEvent(ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -2518,13 +2530,14 @@ func TestProcessAttributeValueExponent(t *testing.T) {
 			},
 		},
 	}
-	rcv, err := attrService.processEvent(ev, utils.MapStorage{
+	eNM := utils.MapStorage{
 		utils.MetaReq:  ev.CGREvent.Event,
 		utils.MetaOpts: ev.Opts,
 		utils.MetaVars: utils.MapStorage{
 			utils.ProcessRuns: utils.NewNMData(0),
 		},
-	}, utils.EmptyString)
+	}
+	rcv, err := attrService.processEvent(ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -2582,13 +2595,14 @@ func TestProcessAttributeUnixTimeStamp(t *testing.T) {
 			},
 		},
 	}
-	rcv, err := attrService.processEvent(ev, utils.MapStorage{
+	eNM := utils.MapStorage{
 		utils.MetaReq:  ev.CGREvent.Event,
 		utils.MetaOpts: ev.Opts,
 		utils.MetaVars: utils.MapStorage{
 			utils.ProcessRuns: utils.NewNMData(0),
 		},
-	}, utils.EmptyString)
+	}
+	rcv, err := attrService.processEvent(ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}

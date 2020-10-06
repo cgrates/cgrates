@@ -60,6 +60,7 @@ func (objDP *ObjectDP) FieldAsInterface(fldPath []string) (data interface{}, err
 	if data, has = objDP.getCache(strings.Join(fldPath, utils.NestingSep)); has {
 		return
 	}
+	data = obj // in case the fldPath is empty we need to return the whole object
 	var prevFld string
 	for _, fld := range fldPath {
 		var slctrStr string
