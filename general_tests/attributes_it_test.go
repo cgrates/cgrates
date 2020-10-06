@@ -24,6 +24,7 @@ import (
 	"path"
 	"reflect"
 	"sort"
+	"strings"
 	"testing"
 	"time"
 
@@ -49,9 +50,13 @@ var (
 		testAttributeSLoadFromFolder,
 		testAttributeSProcessEvent,
 		testAttributeSProcessEventWithAccount,
+		testAttributeSProcessEventWithAccountFull,
 		testAttributeSProcessEventWithStat,
+		testAttributeSProcessEventWithStatFull,
 		testAttributeSProcessEventWithResource,
+		testAttributeSProcessEventWithResourceFull,
 		testAttributeSProcessEventWithLibPhoneNumber,
+		testAttributeSProcessEventWithLibPhoneNumberFull,
 		testAttributeSStopEngine,
 	}
 )
@@ -122,6 +127,7 @@ func testAttributeSLoadFromFolder(t *testing.T) {
 	}
 	time.Sleep(500 * time.Millisecond)
 }
+
 func testAttributeSProcessEvent(t *testing.T) {
 	ev := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer(utils.MetaSessionS),
@@ -248,6 +254,101 @@ func testAttributeSProcessEventWithAccount(t *testing.T) {
 	}
 }
 
+func testAttributeSProcessEventWithAccountFull(t *testing.T) {
+	// add new attribute profile
+	var result string
+	alsPrf := &v1.AttributeWithCache{
+		AttributeProfile: &engine.AttributeProfile{
+			Tenant:    "cgrates.org",
+			ID:        "ATTR_ACCOUNT2",
+			Contexts:  []string{utils.META_ANY},
+			FilterIDs: []string{"*string:~*req.EventName:AddFullAccount"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			},
+			Attributes: []*engine.Attribute{
+				{
+					Path: utils.MetaReq + utils.NestingSep + "FullAccount",
+					Type: utils.MetaVariable,
+					Value: config.RSRParsers{
+						&config.RSRParser{
+							Rules: "~*accounts.1001",
+						},
+					},
+				},
+			},
+			Blocker: false,
+			Weight:  10,
+		},
+	}
+	alsPrf.Compile()
+	if err := attrRPC.Call(utils.APIerSv1SetAttributeProfile, alsPrf, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	var replyAttr *engine.AttributeProfile
+	if err := attrRPC.Call(utils.APIerSv1GetAttributeProfile,
+		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_ACCOUNT2"}}, &replyAttr); err != nil {
+		t.Fatal(err)
+	}
+	replyAttr.Compile()
+	if !reflect.DeepEqual(alsPrf.AttributeProfile, replyAttr) {
+		t.Errorf("Expecting : %+v, received: %+v", alsPrf.AttributeProfile, replyAttr)
+	}
+
+	ev := &engine.AttrArgsProcessEvent{
+		Context: utils.StringPointer(utils.MetaSessionS),
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testAttributeSProcessEventWithAccount2",
+				Event: map[string]interface{}{
+					"EventName": "AddFullAccount",
+				},
+			},
+		},
+	}
+
+	eRply := engine.AttrSProcessEventReply{
+		MatchedProfiles: []string{"ATTR_ACCOUNT2"},
+		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "FullAccount"},
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testAttributeSProcessEventWithAccount2",
+				Event: map[string]interface{}{
+					"EventName":   "AddFullAccount",
+					"FullAccount": "{\"ID\":\"cgrates.org:1001\",\"BalanceMap\":{\"*monetary\":[{\"Uuid\":\"18160631-a4ae-4078-8048-b4c6b87a36c6\",\"ID\":\"\",\"Value\":10,\"ExpirationDate\":\"0001-01-01T00:00:00Z\",\"Weight\":10,\"DestinationIDs\":{},\"RatingSubject\":\"\",\"Categories\":{},\"SharedGroups\":{},\"Timings\":null,\"TimingIDs\":{},\"Disabled\":false,\"Factor\":null,\"Blocker\":false}]},\"UnitCounters\":null,\"ActionTriggers\":null,\"AllowNegative\":false,\"Disabled\":false,\"UpdateTime\":\"2020-10-06T12:43:51.805Z\"}",
+				},
+			},
+		},
+	}
+	sort.Strings(eRply.AlteredFields)
+	var rplyEv engine.AttrSProcessEventReply
+	if err := attrRPC.Call(utils.AttributeSv1ProcessEvent,
+		ev, &rplyEv); err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(rplyEv.MatchedProfiles, eRply.MatchedProfiles) {
+		t.Errorf("Expecting: %s, received: %s",
+			utils.ToJSON(eRply.MatchedProfiles), utils.ToJSON(rplyEv.MatchedProfiles))
+	} else if !reflect.DeepEqual(rplyEv.AlteredFields, eRply.AlteredFields) {
+		t.Errorf("Expecting: %s, received: %s",
+			utils.ToJSON(eRply.AlteredFields), utils.ToJSON(rplyEv.AlteredFields))
+	}
+	// some fields are generated(e.g. BalanceID) and compare only some part of the string
+	strAcc := utils.IfaceAsString(rplyEv.CGREvent.Event["FullAccount"])
+	if !strings.Contains(strAcc, "\"ID\":\"cgrates.org:1001\"") {
+		t.Errorf("Expecting: %s, received: %s",
+			"\"ID\":\"cgrates.org:1001\"", strAcc)
+	} else if !strings.Contains(strAcc, "\"UnitCounters\":null,\"ActionTriggers\":null,\"AllowNegative\":false,\"Disabled\":false") {
+		t.Errorf("Expecting: %s, received: %s",
+			"\"UnitCounters\":null,\"ActionTriggers\":null,\"AllowNegative\":false,\"Disabled\":false", strAcc)
+	}
+}
+
 func testAttributeSProcessEventWithStat(t *testing.T) {
 	// simulate some stat event
 	var reply []string
@@ -355,6 +456,90 @@ func testAttributeSProcessEventWithStat(t *testing.T) {
 				Event: map[string]interface{}{
 					"EventName": "AddStatEvent",
 					"AcdMetric": "11",
+				},
+			},
+		},
+	}
+	sort.Strings(eRply.AlteredFields)
+	var rplyEv engine.AttrSProcessEventReply
+	if err := attrRPC.Call(utils.AttributeSv1ProcessEvent,
+		ev, &rplyEv); err != nil {
+		t.Fatal(err)
+	}
+	sort.Strings(rplyEv.AlteredFields)
+	if !reflect.DeepEqual(eRply, rplyEv) {
+		t.Errorf("Expecting: %s, received: %s",
+			utils.ToJSON(eRply), utils.ToJSON(rplyEv))
+	}
+}
+
+func testAttributeSProcessEventWithStatFull(t *testing.T) {
+	// add new attribute profile
+	alsPrf := &v1.AttributeWithCache{
+		AttributeProfile: &engine.AttributeProfile{
+			Tenant:    "cgrates.org",
+			ID:        "ATTR_STATS2",
+			Contexts:  []string{utils.META_ANY},
+			FilterIDs: []string{"*string:~*req.EventName:AddFullStats"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			},
+			Attributes: []*engine.Attribute{
+				{
+					Path: utils.MetaReq + utils.NestingSep + "AllMetrics",
+					Type: utils.MetaVariable,
+					Value: config.RSRParsers{
+						&config.RSRParser{
+							Rules: "~*stats.Stat_1",
+						},
+					},
+				},
+			},
+			Blocker: false,
+			Weight:  10,
+		},
+	}
+	alsPrf.Compile()
+	var result string
+	if err := attrRPC.Call(utils.APIerSv1SetAttributeProfile, alsPrf, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	var replyAttr *engine.AttributeProfile
+	if err := attrRPC.Call(utils.APIerSv1GetAttributeProfile,
+		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_STATS2"}}, &replyAttr); err != nil {
+		t.Fatal(err)
+	}
+	replyAttr.Compile()
+	if !reflect.DeepEqual(alsPrf.AttributeProfile, replyAttr) {
+		t.Errorf("Expecting : %+v, received: %+v", alsPrf.AttributeProfile, replyAttr)
+	}
+
+	ev := &engine.AttrArgsProcessEvent{
+		Context: utils.StringPointer(utils.MetaSessionS),
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testAttributeSProcessEventWithStat",
+				Event: map[string]interface{}{
+					"EventName": "AddFullStats",
+				},
+			},
+		},
+	}
+
+	eRply := engine.AttrSProcessEventReply{
+		MatchedProfiles: []string{"ATTR_STATS2"},
+		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "AllMetrics"},
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testAttributeSProcessEventWithStat",
+				Event: map[string]interface{}{
+					"EventName":  "AddFullStats",
+					"AllMetrics": "{\"*acd\":11,\"*asr\":100,\"*tcd\":22}",
 				},
 			},
 		},
@@ -519,7 +704,188 @@ func testAttributeSProcessEventWithResource(t *testing.T) {
 	}
 }
 
+func testAttributeSProcessEventWithResourceFull(t *testing.T) {
+	// add new attribute profile
+	var result string
+	alsPrf := &v1.AttributeWithCache{
+		AttributeProfile: &engine.AttributeProfile{
+			Tenant:    "cgrates.org",
+			ID:        "ATTR_RESOURCE2",
+			Contexts:  []string{utils.META_ANY},
+			FilterIDs: []string{"*string:~*req.EventName:AddFullResource"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			},
+			Attributes: []*engine.Attribute{
+				{
+					Path: utils.MetaReq + utils.NestingSep + "FullResource",
+					Type: utils.MetaVariable,
+					Value: config.RSRParsers{
+						&config.RSRParser{
+							Rules: "~*resources.ResTest",
+						},
+					},
+				},
+			},
+			Blocker: false,
+			Weight:  10,
+		},
+	}
+	alsPrf.Compile()
+	if err := attrRPC.Call(utils.APIerSv1SetAttributeProfile, alsPrf, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	var replyAttr *engine.AttributeProfile
+	if err := attrRPC.Call(utils.APIerSv1GetAttributeProfile,
+		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_RESOURCE2"}}, &replyAttr); err != nil {
+		t.Fatal(err)
+	}
+	replyAttr.Compile()
+	if !reflect.DeepEqual(alsPrf.AttributeProfile, replyAttr) {
+		t.Errorf("Expecting : %+v, received: %+v", alsPrf.AttributeProfile, replyAttr)
+	}
+
+	ev := &engine.AttrArgsProcessEvent{
+		Context: utils.StringPointer(utils.MetaSessionS),
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testAttributeSProcessEventWithResource2",
+				Event: map[string]interface{}{
+					"EventName": "AddFullResource",
+				},
+			},
+		},
+	}
+
+	eRply := engine.AttrSProcessEventReply{
+		MatchedProfiles: []string{"ATTR_RESOURCE2"},
+		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "FullResource"},
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testAttributeSProcessEventWithResource2",
+				Event: map[string]interface{}{
+					"EventName":    "AddFullResource",
+					"FullResource": "{\"Tenant\":\"cgrates.org\",\"ID\":\"ResTest\",\"Usages\":{\"651a8db2-4f67-4cf8-b622-169e8a482e21\":{\"Tenant\":\"cgrates.org\",\"ID\":\"651a8db2-4f67-4cf8-b622-169e8a482e21\",\"ExpiryTime\":\"2020-10-06T16:12:52.450804203+03:00\",\"Units\":3},\"651a8db2-4f67-4cf8-b622-169e8a482e22\":{\"Tenant\":\"cgrates.org\",\"ID\":\"651a8db2-4f67-4cf8-b622-169e8a482e22\",\"ExpiryTime\":\"2020-10-06T16:12:52.451034151+03:00\",\"Units\":2}},\"TTLIdx\":[\"651a8db2-4f67-4cf8-b622-169e8a482e21\",\"651a8db2-4f67-4cf8-b622-169e8a482e22\"]}",
+				},
+			},
+		},
+	}
+	sort.Strings(eRply.AlteredFields)
+	var rplyEv engine.AttrSProcessEventReply
+	if err := attrRPC.Call(utils.AttributeSv1ProcessEvent,
+		ev, &rplyEv); err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(rplyEv.MatchedProfiles, eRply.MatchedProfiles) {
+		t.Errorf("Expecting: %s, received: %s",
+			utils.ToJSON(eRply.MatchedProfiles), utils.ToJSON(rplyEv.MatchedProfiles))
+	} else if !reflect.DeepEqual(rplyEv.AlteredFields, eRply.AlteredFields) {
+		t.Errorf("Expecting: %s, received: %s",
+			utils.ToJSON(eRply.AlteredFields), utils.ToJSON(rplyEv.AlteredFields))
+	}
+	// some fields are generated(e.g. Time) and compare only some part of the string
+	strRes := utils.IfaceAsString(rplyEv.CGREvent.Event["FullResource"])
+	if !strings.Contains(strRes, "{\"Tenant\":\"cgrates.org\",\"ID\":\"ResTest\",\"Usages\":{") {
+		t.Errorf("Expecting: %s, received: %s",
+			"{\"Tenant\":\"cgrates.org\",\"ID\":\"ResTest\",\"Usages\":{", strRes)
+	} else if !strings.Contains(strRes, ",\"TTLIdx\":[") {
+		t.Errorf("Expecting: %s, received: %s",
+			",\"TTLIdx\":[", strRes)
+	}
+}
+
 func testAttributeSProcessEventWithLibPhoneNumber(t *testing.T) {
+	// add new attribute profile
+	var result string
+	alsPrf := &v1.AttributeWithCache{
+		AttributeProfile: &engine.AttributeProfile{
+			Tenant:    "cgrates.org",
+			ID:        "ATTR_LIBPHONENUMBER2",
+			Contexts:  []string{utils.META_ANY},
+			FilterIDs: []string{"*string:~*req.EventName:AddDestinationCarrier"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			},
+			Attributes: []*engine.Attribute{
+				{
+					Path: utils.MetaReq + utils.NestingSep + "DestinationCarrier",
+					Type: utils.MetaVariable,
+					Value: config.RSRParsers{
+						&config.RSRParser{
+							Rules: "~*libphonenumber.<~*req.Destination>.Carrier",
+						},
+					},
+				},
+			},
+			Blocker: false,
+			Weight:  10,
+		},
+	}
+	alsPrf.Compile()
+	if err := attrRPC.Call(utils.APIerSv1SetAttributeProfile, alsPrf, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	var replyAttr *engine.AttributeProfile
+	if err := attrRPC.Call(utils.APIerSv1GetAttributeProfile,
+		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_LIBPHONENUMBER2"}}, &replyAttr); err != nil {
+		t.Fatal(err)
+	}
+	replyAttr.Compile()
+	if !reflect.DeepEqual(alsPrf.AttributeProfile, replyAttr) {
+		t.Errorf("Expecting : %+v, received: %+v", alsPrf.AttributeProfile, replyAttr)
+	}
+
+	ev := &engine.AttrArgsProcessEvent{
+		Context: utils.StringPointer(utils.MetaSessionS),
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testAttributeSProcessEventWithLibPhoneNumber2",
+				Event: map[string]interface{}{
+					"EventName":   "AddDestinationCarrier",
+					"Destination": "+447779330921",
+				},
+			},
+		},
+	}
+
+	eRply := engine.AttrSProcessEventReply{
+		MatchedProfiles: []string{"ATTR_LIBPHONENUMBER2"},
+		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "DestinationCarrier"},
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testAttributeSProcessEventWithLibPhoneNumber2",
+				Event: map[string]interface{}{
+					"EventName":          "AddDestinationCarrier",
+					"Destination":        "+447779330921",
+					"DestinationCarrier": "Orange",
+				},
+			},
+		},
+	}
+	sort.Strings(eRply.AlteredFields)
+	var rplyEv engine.AttrSProcessEventReply
+	if err := attrRPC.Call(utils.AttributeSv1ProcessEvent,
+		ev, &rplyEv); err != nil {
+		t.Fatal(err)
+	}
+	sort.Strings(rplyEv.AlteredFields)
+	if !reflect.DeepEqual(eRply, rplyEv) {
+		t.Errorf("Expecting: %+v, received: %+v",
+			utils.ToJSON(eRply), utils.ToJSON(rplyEv))
+	}
+}
+
+func testAttributeSProcessEventWithLibPhoneNumberFull(t *testing.T) {
 	// add new attribute profile
 	var result string
 	alsPrf := &v1.AttributeWithCache{

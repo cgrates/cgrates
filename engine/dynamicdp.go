@@ -169,8 +169,7 @@ func (dDP *libphonenumberDP) FieldAsInterface(fldPath []string) (val interface{}
 		val = dDP.cache
 		return
 	}
-	val, err = dDP.cache.FieldAsInterface(fldPath)
-	if err == utils.ErrNotFound { // in case not found in cache try to populate it
+	if val, err = dDP.cache.FieldAsInterface(fldPath); err == utils.ErrNotFound { // in case not found in cache try to populate it
 		return dDP.fieldAsInterface(fldPath)
 	}
 	return
