@@ -25,7 +25,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestRadiusAgentCfgloadFromJsonCfg(t *testing.T) {
+func TestRadiusAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 	cfgJSON := &RadiusAgentJsonCfg{
 		Enabled:             utils.BoolPointer(true),
 		Listen_net:          utils.StringPointer(utils.UDP),
@@ -93,6 +93,56 @@ func TestRadiusAgentCfgloadFromJsonCfg(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, cfgJson.radiusAgentCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(cfgJson.radiusAgentCfg))
+	}
+}
+
+func TestRadiusAgentCfgloadFromJsonCfgCase2(t *testing.T) {
+	cfgJSONStr := `{
+	"radius_agent": {
+         "request_processors": [
+			{
+				"id": "OutboundAUTHDryRun",
+			},
+         ],									
+     },
+}`
+	cfgJSON := &RadiusAgentJsonCfg{
+		Request_processors: &[]*ReqProcessorJsnCfg{
+			{
+				ID: utils.StringPointer("OutboundAUTHDryRun"),
+			},
+		},
+	}
+	expected := &RadiusAgentCfg{
+		RequestProcessors: []*RequestProcessor{
+			{
+				ID: "OutboundAUTHDryRun",
+			},
+		},
+	}
+	if jsonCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+		t.Error(err)
+	} else if err = jsonCfg.radiusAgentCfg.loadFromJsonCfg(cfgJSON, jsonCfg.generalCfg.RSRSep); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(jsonCfg.radiusAgentCfg.RequestProcessors[0].ID, expected.RequestProcessors[0].ID) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(jsonCfg.radiusAgentCfg.RequestProcessors[0].ID),
+			utils.ToJSON(expected.RequestProcessors[0].ID))
+	}
+}
+
+func TestRadiusAgentCfgloadFromJsonCfgCase3(t *testing.T) {
+	cfgJSON := &RadiusAgentJsonCfg{
+		Request_processors: &[]*ReqProcessorJsnCfg{
+			{
+				Tenant: utils.StringPointer("a{*"),
+			},
+		},
+	}
+	expected := "invalid converter terminator in rule: <a{*>"
+	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err = jsonCfg.radiusAgentCfg.loadFromJsonCfg(cfgJSON, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
 
