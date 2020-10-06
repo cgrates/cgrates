@@ -25,12 +25,12 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestRalsCfgFromJsonCfg(t *testing.T) {
+func TestRalsCfgFromJsonCfgCase1(t *testing.T) {
 	cfgJSON := &RalsJsonCfg{
 		Enabled:                    utils.BoolPointer(true),
-		Thresholds_conns:           &[]string{utils.MetaInternal},
-		Stats_conns:                &[]string{utils.MetaInternal},
-		CacheS_conns:               &[]string{utils.MetaInternal},
+		Thresholds_conns:           &[]string{utils.MetaInternal, "*conn1"},
+		Stats_conns:                &[]string{utils.MetaInternal, "*conn1"},
+		CacheS_conns:               &[]string{utils.MetaInternal, "*conn1"},
 		Rp_subject_prefix_matching: utils.BoolPointer(true),
 		Remove_expired:             utils.BoolPointer(true),
 		Max_computed_usage: &map[string]string{
@@ -45,13 +45,13 @@ func TestRalsCfgFromJsonCfg(t *testing.T) {
 			utils.META_ANY:   "*zero1ns",
 			utils.META_VOICE: "*zero1s",
 		},
-		Dynaprepaid_actionplans: &[]string{},
+		Dynaprepaid_actionplans: &[]string{"randomPlans"},
 	}
 	expected := &RalsCfg{
 		Enabled:                 true,
-		ThresholdSConns:         []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)},
-		StatSConns:              []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS)},
-		CacheSConns:             []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)},
+		ThresholdSConns:         []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"},
+		StatSConns:              []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS), "*conn1"},
+		CacheSConns:             []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), "*conn1"},
 		RpSubjectPrefixMatching: true,
 		RemoveExpired:           true,
 		MaxComputedUsage: map[string]time.Duration{
@@ -66,7 +66,7 @@ func TestRalsCfgFromJsonCfg(t *testing.T) {
 			utils.META_ANY:   "*zero1ns",
 			utils.META_VOICE: "*zero1s",
 		},
-		DynaprepaidActionPlans: []string{},
+		DynaprepaidActionPlans: []string{"randomPlans"},
 	}
 	if cfgJson, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
@@ -77,13 +77,27 @@ func TestRalsCfgFromJsonCfg(t *testing.T) {
 	}
 }
 
-func TestRalsCfgAsMapInterface(t *testing.T) {
+func TestRalsCfgFromJsonCfgCase2(t *testing.T) {
+	cfgJSON := &RalsJsonCfg{
+		Max_computed_usage: &map[string]string{
+			utils.ANY: "189hh",
+		},
+	}
+	expected := "time: unknown unit \"hh\" in duration \"189hh\""
+	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err = jsonCfg.ralsCfg.loadFromJsonCfg(cfgJSON); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
+func TestRalsCfgAsMapInterfaceCase1(t *testing.T) {
 	cfgJSONStr := `{
 	"rals": {
         "enabled": true,						
-	    "thresholds_conns": ["*internal"],					
-	    "stats_conns": ["*conn1","*conn2"],						
-	    "users_conns": ["*internal"],						
+	    "thresholds_conns": ["*internal:*thresholds", "*conn1"],					
+	    "caches_conns": ["*internal:*caches", "*conn1"],						
+	    "stats_conns": ["*internal:*stats", "*conn1"],						
 	    "rp_subject_prefix_matching": true,	
 	    "max_computed_usage": {					// do not compute usage higher than this, prevents memory overload
 		   "*voice": "48h",
@@ -93,9 +107,9 @@ func TestRalsCfgAsMapInterface(t *testing.T) {
 }`
 	eMap := map[string]interface{}{
 		utils.EnabledCfg:                 true,
-		utils.ThresholdSConnsCfg:         []string{"*internal"},
-		utils.StatSConnsCfg:              []string{"*conn1", "*conn2"},
-		utils.CachesConnsCfg:             []string{"*internal"},
+		utils.ThresholdSConnsCfg:         []string{utils.MetaInternal, "*conn1"},
+		utils.StatSConnsCfg:              []string{utils.MetaInternal, "*conn1"},
+		utils.CachesConnsCfg:             []string{utils.MetaInternal, "*conn1"},
 		utils.RpSubjectPrefixMatchingCfg: true,
 		utils.RemoveExpiredCfg:           true,
 		utils.MaxComputedUsageCfg: map[string]interface{}{
@@ -119,15 +133,18 @@ func TestRalsCfgAsMapInterface(t *testing.T) {
 	}
 }
 
-func TestRalsCfgAsMapInterface1(t *testing.T) {
+func TestRalsCfgAsMapInterfaceCase2(t *testing.T) {
 	cfgJSONStr := `{
-     "rals": {}
+     "rals": {
+           "caches_conns": ["*conn1"],
+           "stats_conns": ["*internal:*stats"],
+     }
 }`
 	eMap := map[string]interface{}{
 		utils.EnabledCfg:                 false,
 		utils.ThresholdSConnsCfg:         []string{},
-		utils.StatSConnsCfg:              []string{},
-		utils.CachesConnsCfg:             []string{"*internal"},
+		utils.StatSConnsCfg:              []string{utils.MetaInternal},
+		utils.CachesConnsCfg:             []string{"*conn1"},
 		utils.RpSubjectPrefixMatchingCfg: false,
 		utils.RemoveExpiredCfg:           true,
 		utils.MaxComputedUsageCfg: map[string]interface{}{
