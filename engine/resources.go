@@ -28,7 +28,6 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 func init() {
@@ -310,8 +309,7 @@ func NewResourceService(dm *DataManager, cgrcfg *config.CGRConfig,
 
 // ResourceService is the service handling resources
 type ResourceService struct {
-	dm              *DataManager              // So we can load the data in cache and index it
-	thdS            rpcclient.ClientConnector // allows applying filters based on stats
+	dm              *DataManager // So we can load the data in cache and index it
 	filterS         *FilterS
 	storedResources utils.StringMap // keep a record of resources which need saving, map[resID]bool
 	srMux           sync.RWMutex    // protects storedResources
@@ -411,7 +409,7 @@ func (rS *ResourceService) runBackup() {
 
 // processThresholds will pass the event for resource to ThresholdS
 func (rS *ResourceService) processThresholds(r *Resource, argDispatcher *utils.ArgDispatcher) (err error) {
-	if rS.thdS == nil {
+	if len(rS.cgrcfg.ResourceSCfg().ThresholdSConns) == 0 {
 		return
 	}
 	var thIDs []string
@@ -771,10 +769,4 @@ func (rS *ResourceService) Reload() {
 // StartLoop starts the gorutine with the backup loop
 func (rS *ResourceService) StartLoop() {
 	go rS.runBackup()
-}
-
-// SetThresholdConnection sets the new connection to the threshold service
-// only used on reload
-func (rS *ResourceService) SetThresholdConnection(thdS rpcclient.ClientConnector) {
-	rS.thdS = thdS
 }
