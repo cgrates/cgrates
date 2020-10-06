@@ -43,7 +43,9 @@ func TestMigratorCgrCfgloadFromJsonCfg(t *testing.T) {
 			utils.RedisClusterCfg: true,
 			utils.ClusterSyncCfg:  "10s",
 		},
-		Out_storDB_opts: map[string]interface{}{},
+		Out_storDB_opts: map[string]interface{}{
+			utils.RedisClusterCfg: true,
+		},
 	}
 	expected := &MigratorCgrCfg{
 		OutDataDBType:     utils.REDIS,
@@ -65,7 +67,9 @@ func TestMigratorCgrCfgloadFromJsonCfg(t *testing.T) {
 			utils.ClusterSyncCfg:        "10s",
 			utils.ClusterOnDownDelayCfg: "0",
 		},
-		OutStorDBOpts: map[string]interface{}{},
+		OutStorDBOpts: map[string]interface{}{
+			utils.RedisClusterCfg: true,
+		},
 	}
 	if cfgJson, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
