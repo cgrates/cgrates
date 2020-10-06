@@ -68,14 +68,6 @@ type LoaderSCfg struct {
 	Data           []*LoaderDataType
 }
 
-func NewDfltLoaderDataTypeConfig() *LoaderDataType {
-	if dfltLoaderDataTypeConfig == nil {
-		return new(LoaderDataType) // No defaults, most probably we are building the defaults now
-	}
-	dfltVal := *dfltLoaderDataTypeConfig // Copy the value instead of it's pointer
-	return &dfltVal
-}
-
 type LoaderDataType struct { //rename to LoaderDataType
 	Type     string
 	Filename string
@@ -156,7 +148,7 @@ func (self *LoaderSCfg) loadFromJsonCfg(jsnCfg *LoaderJsonCfg, msgTemplates map[
 	if jsnCfg.Data != nil {
 		data := make([]*LoaderDataType, len(*jsnCfg.Data))
 		for idx, jsnLoCfg := range *jsnCfg.Data {
-			data[idx] = NewDfltLoaderDataTypeConfig()
+			data[idx] = new(LoaderDataType)
 			if err := data[idx].loadFromJsonCfg(jsnLoCfg, msgTemplates, separator); err != nil {
 				return err
 			}

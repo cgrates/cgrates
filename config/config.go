@@ -39,14 +39,13 @@ import (
 )
 
 var (
-	dbDefaultsCfg            dbDefaults
-	cgrCfg                   *CGRConfig  // will be shared
-	dfltFsConnConfig         *FsConnCfg  // Default FreeSWITCH Connection configuration, built out of json default configuration
-	dfltKamConnConfig        *KamConnCfg // Default Kamailio Connection configuration
-	dfltRemoteHost           *RemoteHost
-	dfltAstConnCfg           *AsteriskConnCfg
-	dfltLoaderConfig         *LoaderSCfg
-	dfltLoaderDataTypeConfig *LoaderDataType
+	dbDefaultsCfg     dbDefaults
+	cgrCfg            *CGRConfig  // will be shared
+	dfltFsConnConfig  *FsConnCfg  // Default FreeSWITCH Connection configuration, built out of json default configuration
+	dfltKamConnConfig *KamConnCfg // Default Kamailio Connection configuration
+	dfltRemoteHost    *RemoteHost
+	dfltAstConnCfg    *AsteriskConnCfg
+	dfltLoaderConfig  *LoaderSCfg
 )
 
 func newDbDefaults() dbDefaults {
@@ -221,6 +220,8 @@ func NewDefaultCGRConfig() (cfg *CGRConfig, err error) {
 	dfltKamConnConfig = cfg.kamAgentCfg.EvapiConns[0]
 	dfltAstConnCfg = cfg.asteriskAgentCfg.AsteriskConns[0]
 	dfltLoaderConfig = cfg.loaderCfg[0].Clone()
+	dfltRemoteHost = new(RemoteHost)
+	*dfltRemoteHost = *cfg.rpcConns[utils.MetaLocalHost].Conns[0]
 	err = cfg.checkConfigSanity()
 	return
 }
