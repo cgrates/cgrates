@@ -28,6 +28,9 @@ func TestAttributeSCfgloadFromJsonCfg(t *testing.T) {
 	jsonCfg := &AttributeSJsonCfg{
 		Enabled:               utils.BoolPointer(true),
 		Indexed_selects:       utils.BoolPointer(false),
+		Resources_conns:       &[]string{"*internal", "*conn1"},
+		Stats_conns:           &[]string{"*internal", "*conn1"},
+		Apiers_conns:          &[]string{"*internal", "*conn1"},
 		String_indexed_fields: &[]string{"*req.index1"},
 		Prefix_indexed_fields: &[]string{"*req.index1", "*req.index2"},
 		Suffix_indexed_fields: &[]string{"*req.index1"},
@@ -36,9 +39,9 @@ func TestAttributeSCfgloadFromJsonCfg(t *testing.T) {
 	}
 	expected := &AttributeSCfg{
 		Enabled:             true,
-		ApierSConns:         []string{},
-		StatSConns:          []string{},
-		ResourceSConns:      []string{},
+		ApierSConns:         []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier), "*conn1"},
+		StatSConns:          []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"},
+		ResourceSConns:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), "*conn1"},
 		IndexedSelects:      false,
 		StringIndexedFields: &[]string{"*req.index1"},
 		PrefixIndexedFields: &[]string{"*req.index1", "*req.index2"},

@@ -157,7 +157,9 @@ func (self *LoaderSCfg) loadFromJsonCfg(jsnCfg *LoaderJsonCfg, msgTemplates map[
 		data := make([]*LoaderDataType, len(*jsnCfg.Data))
 		for idx, jsnLoCfg := range *jsnCfg.Data {
 			data[idx] = NewDfltLoaderDataTypeConfig()
-			data[idx].loadFromJsonCfg(jsnLoCfg, msgTemplates, separator)
+			if err := data[idx].loadFromJsonCfg(jsnLoCfg, msgTemplates, separator); err != nil {
+				return err
+			}
 		}
 		self.Data = data
 	}
