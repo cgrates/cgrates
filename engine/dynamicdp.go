@@ -122,41 +122,115 @@ func (dDP *dynamicDP) fieldAsInterface(fldPath []string) (val interface{}, err e
 		}
 		return dDP.cache.FieldAsInterface(fldPath)
 	case utils.MetaLibPhoneNumber:
-		if len(fldPath) < 3 {
-			return nil, fmt.Errorf("invalid fieldname <%s> for libphonenumber", fldPath)
-		}
-		// sample of fieldName ~*libphonenumber.*req.Destination
-		// or ~*libphonenumber.*req.Destination.Carrier
-		fieldFromDP, err := dDP.initialDP.FieldAsString(fldPath[1:3])
-		if err != nil {
-			utils.Logger.Warning(fmt.Sprintf("Received error: <%+v> when getting Destination for libphonenumber", err))
-			return nil, err
-		}
-		num, err := phonenumbers.Parse(fieldFromDP, utils.EmptyString)
+		// sample of fieldName ~*libphonenumber.<~*req.Destination>
+		// or ~*libphonenumber.<~*req.Destination>.Carrier
+		dp, err := newLibPhoneNumberDP(fldPath[1])
 		if err != nil {
 			return nil, err
 		}
-		// add the fields from libphonenumber
-		dDP.cache.Set([]string{utils.MetaLibPhoneNumber, fieldFromDP, "CountryCode"}, num.CountryCode)
-		dDP.cache.Set([]string{utils.MetaLibPhoneNumber, fieldFromDP, "NationalNumber"}, num.GetNationalNumber())
-		dDP.cache.Set([]string{utils.MetaLibPhoneNumber, fieldFromDP, "Region"}, phonenumbers.GetRegionCodeForNumber(num))
-		dDP.cache.Set([]string{utils.MetaLibPhoneNumber, fieldFromDP, "NumberType"}, phonenumbers.GetNumberType(num))
-		geoLocation, err := phonenumbers.GetGeocodingForNumber(num, phonenumbers.GetRegionCodeForNumber(num))
-		if err != nil {
-			utils.Logger.Warning(fmt.Sprintf("Received error: <%+v> when getting GeoLocation for number %+v", err, num))
-		}
-		dDP.cache.Set([]string{utils.MetaLibPhoneNumber, fieldFromDP, "GeoLocation"}, geoLocation)
-		carrier, err := phonenumbers.GetCarrierForNumber(num, phonenumbers.GetRegionCodeForNumber(num))
-		if err != nil {
-			utils.Logger.Warning(fmt.Sprintf("Received error: <%+v> when getting Carrier for number %+v", err, num))
-		}
-		dDP.cache.Set([]string{utils.MetaLibPhoneNumber, fieldFromDP, "Carrier"}, carrier)
-		path := []string{utils.MetaLibPhoneNumber, fieldFromDP}
-		if len(fldPath) == 4 {
-			path = append(path, fldPath[3])
-		}
-		return dDP.cache.FieldAsInterface(path)
+		dDP.cache.Set(fldPath[:2], dp)
+		return dp.FieldAsInterface(fldPath[2:])
 	default: // in case of constant we give an empty DataProvider ( empty navigable map )
 	}
 	return nil, utils.ErrNotFound
+}
+
+func newLibPhoneNumberDP(number string) (dp utils.DataProvider, err error) {
+	num, err := phonenumbers.Parse(number, utils.EmptyString)
+	if err != nil {
+		return nil, err
+	}
+	return &libphonenumberDP{pNumber: num, cache: make(utils.MapStorage)}, nil
+
+}
+
+type libphonenumberDP struct {
+	pNumber *phonenumbers.PhoneNumber
+	cache   utils.MapStorage
+}
+
+func (dDP *libphonenumberDP) String() string { return dDP.pNumber.String() }
+
+func (dDP *libphonenumberDP) FieldAsString(fldPath []string) (string, error) {
+	val, err := dDP.FieldAsInterface(fldPath)
+	if err != nil {
+		return "", err
+	}
+	return utils.IfaceAsString(val), nil
+}
+
+func (dDP *libphonenumberDP) RemoteHost() net.Addr {
+	return utils.LocalAddr()
+}
+
+func (dDP *libphonenumberDP) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+	if len(fldPath) == 0 {
+		dDP.initCache()
+		val = dDP.cache
+		return
+	}
+	val, err = dDP.cache.FieldAsInterface(fldPath)
+	if err == utils.ErrNotFound { // in case not found in cache try to populate it
+		return dDP.fieldAsInterface(fldPath)
+	}
+	return
+}
+
+func (dDP *libphonenumberDP) fieldAsInterface(fldPath []string) (val interface{}, err error) {
+	if len(fldPath) != 1 {
+		return nil, fmt.Errorf("invalid field path <%+v> for libphonenumberDP", fldPath)
+	}
+	switch fldPath[0] {
+	case "CountryCode":
+		val = dDP.pNumber.CountryCode
+	case "NationalNumber":
+		val = dDP.pNumber.GetNationalNumber()
+	case "Region":
+		val = phonenumbers.GetRegionCodeForNumber(dDP.pNumber)
+	case "NumberType":
+		val = phonenumbers.GetNumberType(dDP.pNumber)
+	case "GeoLocation":
+		geoLocation, err := phonenumbers.GetGeocodingForNumber(dDP.pNumber, phonenumbers.GetRegionCodeForNumber(dDP.pNumber))
+		if err != nil {
+			utils.Logger.Warning(fmt.Sprintf("Received error: <%+v> when getting GeoLocation for number %+v", err, dDP.pNumber))
+		}
+		val = geoLocation
+	case "Carrier":
+		carrier, err := phonenumbers.GetCarrierForNumber(dDP.pNumber, phonenumbers.GetRegionCodeForNumber(dDP.pNumber))
+		if err != nil {
+			utils.Logger.Warning(fmt.Sprintf("Received error: <%+v> when getting Carrier for number %+v", err, dDP.pNumber))
+		}
+		val = carrier
+	}
+	dDP.cache[fldPath[0]] = val
+	return
+}
+
+func (dDP *libphonenumberDP) initCache() {
+	if _, has := dDP.cache["CountryCode"]; !has {
+		dDP.cache["CountryCode"] = dDP.pNumber.CountryCode
+	}
+	if _, has := dDP.cache["NationalNumber"]; !has {
+		dDP.cache["NationalNumber"] = dDP.pNumber.GetNationalNumber()
+	}
+	if _, has := dDP.cache["Region"]; !has {
+		dDP.cache["Region"] = phonenumbers.GetRegionCodeForNumber(dDP.pNumber)
+	}
+	if _, has := dDP.cache["NumberType"]; !has {
+		dDP.cache["NumberType"] = phonenumbers.GetNumberType(dDP.pNumber)
+	}
+	if _, has := dDP.cache["GeoLocation"]; !has {
+		geoLocation, err := phonenumbers.GetGeocodingForNumber(dDP.pNumber, phonenumbers.GetRegionCodeForNumber(dDP.pNumber))
+		if err != nil {
+			utils.Logger.Warning(fmt.Sprintf("Received error: <%+v> when getting GeoLocation for number %+v", err, dDP.pNumber))
+		}
+		dDP.cache["GeoLocation"] = geoLocation
+	}
+	if _, has := dDP.cache["Carrier"]; !has {
+		carrier, err := phonenumbers.GetCarrierForNumber(dDP.pNumber, phonenumbers.GetRegionCodeForNumber(dDP.pNumber))
+		if err != nil {
+			utils.Logger.Warning(fmt.Sprintf("Received error: <%+v> when getting Carrier for number %+v", err, dDP.pNumber))
+		}
+		dDP.cache["Carrier"] = carrier
+	}
 }
