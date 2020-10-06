@@ -19,6 +19,8 @@ import (
 	"fmt"
 	"net"
 
+	"github.com/nyaruka/phonenumbers"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -119,6 +121,41 @@ func (dDP *dynamicDP) fieldAsInterface(fldPath []string) (val interface{}, err e
 			dDP.cache.Set([]string{utils.MetaStats, fldPath[1], k}, v)
 		}
 		return dDP.cache.FieldAsInterface(fldPath)
+	case utils.MetaLibPhoneNumber:
+		if len(fldPath) < 3 {
+			return nil, fmt.Errorf("invalid fieldname <%s> for libphonenumber", fldPath)
+		}
+		// sample of fieldName ~*libphonenumber.*req.Destination
+		// or ~*libphonenumber.*req.Destination.Carrier
+		fieldFromDP, err := dDP.initialDP.FieldAsString(fldPath[1:3])
+		if err != nil {
+			utils.Logger.Warning(fmt.Sprintf("Received error: <%+v> when getting Destination for libphonenumber", err))
+			return nil, err
+		}
+		num, err := phonenumbers.Parse(fieldFromDP, utils.EmptyString)
+		if err != nil {
+			return nil, err
+		}
+		// add the fields from libphonenumber
+		dDP.cache.Set([]string{utils.MetaLibPhoneNumber, fieldFromDP, "CountryCode"}, num.CountryCode)
+		dDP.cache.Set([]string{utils.MetaLibPhoneNumber, fieldFromDP, "NationalNumber"}, num.GetNationalNumber())
+		dDP.cache.Set([]string{utils.MetaLibPhoneNumber, fieldFromDP, "Region"}, phonenumbers.GetRegionCodeForNumber(num))
+		dDP.cache.Set([]string{utils.MetaLibPhoneNumber, fieldFromDP, "NumberType"}, phonenumbers.GetNumberType(num))
+		geoLocation, err := phonenumbers.GetGeocodingForNumber(num, phonenumbers.GetRegionCodeForNumber(num))
+		if err != nil {
+			utils.Logger.Warning(fmt.Sprintf("Received error: <%+v> when getting GeoLocation for number %+v", err, num))
+		}
+		dDP.cache.Set([]string{utils.MetaLibPhoneNumber, fieldFromDP, "GeoLocation"}, geoLocation)
+		carrier, err := phonenumbers.GetCarrierForNumber(num, phonenumbers.GetRegionCodeForNumber(num))
+		if err != nil {
+			utils.Logger.Warning(fmt.Sprintf("Received error: <%+v> when getting Carrier for number %+v", err, num))
+		}
+		dDP.cache.Set([]string{utils.MetaLibPhoneNumber, fieldFromDP, "Carrier"}, carrier)
+		path := []string{utils.MetaLibPhoneNumber, fieldFromDP}
+		if len(fldPath) == 4 {
+			path = append(path, fldPath[3])
+		}
+		return dDP.cache.FieldAsInterface(path)
 	default: // in case of constant we give an empty DataProvider ( empty navigable map )
 	}
 	return nil, utils.ErrNotFound
