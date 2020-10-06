@@ -365,6 +365,314 @@ func TestEventReaderFieldsloadFromJsonCfg(t *testing.T) {
 	}
 }
 
+func TestERSloadFromJsonCase1(t *testing.T) {
+	cfgJSON := &ERsJsonCfg{
+		Readers: &[]*EventReaderJsonCfg{
+			{
+				Fields: &[]*FcTemplateJsonCfg{
+					{
+
+						Type: utils.StringPointer(utils.MetaTemplate),
+					},
+				},
+			},
+		},
+	}
+	expected := "no template with id: <>"
+	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err = jsonCfg.ersCfg.loadFromJsonCfg(cfgJSON, jsonCfg.templates, jsonCfg.generalCfg.RSRSep, jsonCfg.dfltEvRdr, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+func TestERSloadFromJsonCase2(t *testing.T) {
+	cfgJSON := &ERsJsonCfg{
+		Readers: &[]*EventReaderJsonCfg{
+			{
+				Cache_dump_fields: &[]*FcTemplateJsonCfg{
+					{
+
+						Type: utils.StringPointer(utils.MetaTemplate),
+					},
+				},
+			},
+		},
+	}
+	expected := "no template with id: <>"
+	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err = jsonCfg.ersCfg.loadFromJsonCfg(cfgJSON, jsonCfg.templates, jsonCfg.generalCfg.RSRSep, jsonCfg.dfltEvRdr, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
+func TestERSloadFromJsonCase3(t *testing.T) {
+	cfgJSON := &ERsJsonCfg{
+		Enabled:        utils.BoolPointer(true),
+		Sessions_conns: &[]string{"*conn1"},
+		Readers: &[]*EventReaderJsonCfg{
+			{
+				Id:                          utils.StringPointer("file_reader1"),
+				Type:                        utils.StringPointer(utils.MetaFileCSV),
+				Row_length:                  utils.IntPointer(5),
+				Field_separator:             utils.StringPointer(","),
+				Header_define_character:     utils.StringPointer(":"),
+				Run_delay:                   utils.StringPointer("-1"),
+				Concurrent_requests:         utils.IntPointer(1024),
+				Source_path:                 utils.StringPointer("/tmp/ers/in"),
+				Processed_path:              utils.StringPointer("/tmp/ers/out"),
+				Xml_root_path:               utils.StringPointer(""),
+				Tenant:                      nil,
+				Timezone:                    utils.StringPointer(""),
+				Filters:                     nil,
+				Flags:                       &[]string{},
+				Failed_calls_prefix:         nil,
+				Partial_cache_expiry_action: utils.StringPointer(""),
+				Partial_record_cache:        utils.StringPointer("0"),
+				Fields: &[]*FcTemplateJsonCfg{
+					{
+						Tag:    utils.StringPointer(utils.AnswerTime),
+						Path:   utils.StringPointer("*cgreq.AnswerTime"),
+						Type:   utils.StringPointer(utils.MetaTemplate),
+						Value:  utils.StringPointer("randomTemplate"),
+						Layout: utils.StringPointer("2006-01-02T15:04:05Z07:00"),
+					},
+				},
+			},
+		},
+	}
+	expectedERsCfg := &ERsCfg{
+		Enabled:       true,
+		SessionSConns: []string{"*conn1"},
+		Readers: []*EventReaderCfg{
+			{
+				ID:               utils.MetaDefault,
+				Type:             utils.META_NONE,
+				FieldSep:         ",",
+				HeaderDefineChar: ":",
+				RunDelay:         time.Duration(0),
+				ConcurrentReqs:   1024,
+				SourcePath:       "/var/spool/cgrates/ers/in",
+				ProcessedPath:    "/var/spool/cgrates/ers/out",
+				XmlRootPath:      utils.HierarchyPath{utils.EmptyString},
+				Tenant:           nil,
+				Timezone:         utils.EmptyString,
+				Filters:          []string{},
+				Flags:            utils.FlagsWithParams{},
+				Fields: []*FCTemplate{
+					{Tag: utils.ToR, Path: utils.MetaCgreq + utils.NestingSep + utils.ToR, Type: utils.MetaVariable,
+						Value: NewRSRParsersMustCompile("~*req.2", utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
+					{Tag: utils.OriginID, Path: utils.MetaCgreq + utils.NestingSep + utils.OriginID, Type: utils.MetaVariable,
+						Value: NewRSRParsersMustCompile("~*req.3", utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
+					{Tag: utils.RequestType, Path: utils.MetaCgreq + utils.NestingSep + utils.RequestType, Type: utils.MetaVariable,
+						Value: NewRSRParsersMustCompile("~*req.4", utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
+					{Tag: utils.Tenant, Path: utils.MetaCgreq + utils.NestingSep + utils.Tenant, Type: utils.MetaVariable,
+						Value: NewRSRParsersMustCompile("~*req.6", utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
+					{Tag: utils.Category, Path: utils.MetaCgreq + utils.NestingSep + utils.Category, Type: utils.MetaVariable,
+						Value: NewRSRParsersMustCompile("~*req.7", utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
+					{Tag: utils.Account, Path: utils.MetaCgreq + utils.NestingSep + utils.Account, Type: utils.MetaVariable,
+						Value: NewRSRParsersMustCompile("~*req.8", utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
+					{Tag: utils.Subject, Path: utils.MetaCgreq + utils.NestingSep + utils.Subject, Type: utils.MetaVariable,
+						Value: NewRSRParsersMustCompile("~*req.9", utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
+					{Tag: utils.Destination, Path: utils.MetaCgreq + utils.NestingSep + utils.Destination, Type: utils.MetaVariable,
+						Value: NewRSRParsersMustCompile("~*req.10", utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
+					{Tag: utils.SetupTime, Path: utils.MetaCgreq + utils.NestingSep + utils.SetupTime, Type: utils.MetaVariable,
+						Value: NewRSRParsersMustCompile("~*req.11", utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
+					{Tag: utils.AnswerTime, Path: utils.MetaCgreq + utils.NestingSep + utils.AnswerTime, Type: utils.MetaVariable,
+						Value: NewRSRParsersMustCompile("~*req.12", utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
+					{Tag: utils.Usage, Path: utils.MetaCgreq + utils.NestingSep + utils.Usage, Type: utils.MetaVariable,
+						Value: NewRSRParsersMustCompile("~*req.13", utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
+				},
+				CacheDumpFields: make([]*FCTemplate, 0),
+				Opts:            make(map[string]interface{}),
+			},
+			{
+				ID:                       "file_reader1",
+				Type:                     utils.MetaFileCSV,
+				RowLength:                5,
+				FieldSep:                 ",",
+				HeaderDefineChar:         ":",
+				RunDelay:                 time.Duration(-1),
+				ConcurrentReqs:           1024,
+				SourcePath:               "/tmp/ers/in",
+				ProcessedPath:            "/tmp/ers/out",
+				XmlRootPath:              utils.HierarchyPath{utils.EmptyString},
+				Tenant:                   nil,
+				Timezone:                 utils.EmptyString,
+				Filters:                  nil,
+				Flags:                    utils.FlagsWithParams{},
+				PartialCacheExpiryAction: "",
+				PartialRecordCache:       time.Duration(0),
+				Fields: []*FCTemplate{
+					{
+						Tag:    utils.CGRID,
+						Path:   "*exp.CGRID",
+						Type:   utils.MetaVariable,
+						Layout: time.RFC3339,
+					},
+				},
+				CacheDumpFields: make([]*FCTemplate, 0),
+				Opts:            make(map[string]interface{}),
+			},
+		},
+	}
+	msgTemplates := map[string][]*FCTemplate{
+		"randomTemplate": {
+			{
+				Tag:    utils.CGRID,
+				Path:   "*exp.CGRID",
+				Type:   utils.MetaVariable,
+				Layout: time.RFC3339,
+			},
+		},
+	}
+	for _, v := range expectedERsCfg.Readers[0].Fields {
+		v.ComputePath()
+	}
+	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err = jsonCfg.ersCfg.loadFromJsonCfg(cfgJSON, msgTemplates, jsonCfg.generalCfg.RSRSep, jsonCfg.dfltEvRdr, jsonCfg.generalCfg.RSRSep); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedERsCfg, jsonCfg.ersCfg) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedERsCfg), utils.ToJSON(jsonCfg.ersCfg))
+	}
+}
+
+func TestERSloadFromJsonCase4(t *testing.T) {
+	cfgJSON := &ERsJsonCfg{
+		Enabled:        utils.BoolPointer(true),
+		Sessions_conns: &[]string{"*conn1"},
+		Readers: &[]*EventReaderJsonCfg{
+			{
+				Id:                          utils.StringPointer("file_reader1"),
+				Type:                        utils.StringPointer(utils.MetaFileCSV),
+				Row_length:                  utils.IntPointer(5),
+				Field_separator:             utils.StringPointer(","),
+				Header_define_character:     utils.StringPointer(":"),
+				Run_delay:                   utils.StringPointer("-1"),
+				Concurrent_requests:         utils.IntPointer(1024),
+				Source_path:                 utils.StringPointer("/tmp/ers/in"),
+				Processed_path:              utils.StringPointer("/tmp/ers/out"),
+				Xml_root_path:               utils.StringPointer(""),
+				Tenant:                      nil,
+				Timezone:                    utils.StringPointer(""),
+				Filters:                     nil,
+				Flags:                       &[]string{},
+				Failed_calls_prefix:         nil,
+				Partial_cache_expiry_action: utils.StringPointer(""),
+				Partial_record_cache:        utils.StringPointer("0"),
+				Fields:                      &[]*FcTemplateJsonCfg{},
+				Cache_dump_fields: &[]*FcTemplateJsonCfg{
+					{
+						Tag:   utils.StringPointer("OriginID"),
+						Path:  utils.StringPointer("*exp.OriginID"),
+						Type:  utils.StringPointer(utils.MetaTemplate),
+						Value: utils.StringPointer("randomTemplate"),
+					},
+				},
+			},
+		},
+	}
+	expectedERsCfg := &ERsCfg{
+		Enabled:       true,
+		SessionSConns: []string{"*conn1"},
+		Readers: []*EventReaderCfg{
+			{
+				ID:               utils.MetaDefault,
+				Type:             utils.META_NONE,
+				FieldSep:         ",",
+				HeaderDefineChar: ":",
+				RunDelay:         time.Duration(0),
+				ConcurrentReqs:   1024,
+				SourcePath:       "/var/spool/cgrates/ers/in",
+				ProcessedPath:    "/var/spool/cgrates/ers/out",
+				XmlRootPath:      utils.HierarchyPath{utils.EmptyString},
+				Tenant:           nil,
+				Timezone:         utils.EmptyString,
+				Filters:          []string{},
+				Flags:            utils.FlagsWithParams{},
+				Fields: []*FCTemplate{
+					{Tag: utils.ToR, Path: utils.MetaCgreq + utils.NestingSep + utils.ToR, Type: utils.MetaVariable,
+						Value: NewRSRParsersMustCompile("~*req.2", utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
+					{Tag: utils.OriginID, Path: utils.MetaCgreq + utils.NestingSep + utils.OriginID, Type: utils.MetaVariable,
+						Value: NewRSRParsersMustCompile("~*req.3", utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
+					{Tag: utils.RequestType, Path: utils.MetaCgreq + utils.NestingSep + utils.RequestType, Type: utils.MetaVariable,
+						Value: NewRSRParsersMustCompile("~*req.4", utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
+					{Tag: utils.Tenant, Path: utils.MetaCgreq + utils.NestingSep + utils.Tenant, Type: utils.MetaVariable,
+						Value: NewRSRParsersMustCompile("~*req.6", utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
+					{Tag: utils.Category, Path: utils.MetaCgreq + utils.NestingSep + utils.Category, Type: utils.MetaVariable,
+						Value: NewRSRParsersMustCompile("~*req.7", utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
+					{Tag: utils.Account, Path: utils.MetaCgreq + utils.NestingSep + utils.Account, Type: utils.MetaVariable,
+						Value: NewRSRParsersMustCompile("~*req.8", utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
+					{Tag: utils.Subject, Path: utils.MetaCgreq + utils.NestingSep + utils.Subject, Type: utils.MetaVariable,
+						Value: NewRSRParsersMustCompile("~*req.9", utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
+					{Tag: utils.Destination, Path: utils.MetaCgreq + utils.NestingSep + utils.Destination, Type: utils.MetaVariable,
+						Value: NewRSRParsersMustCompile("~*req.10", utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
+					{Tag: utils.SetupTime, Path: utils.MetaCgreq + utils.NestingSep + utils.SetupTime, Type: utils.MetaVariable,
+						Value: NewRSRParsersMustCompile("~*req.11", utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
+					{Tag: utils.AnswerTime, Path: utils.MetaCgreq + utils.NestingSep + utils.AnswerTime, Type: utils.MetaVariable,
+						Value: NewRSRParsersMustCompile("~*req.12", utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
+					{Tag: utils.Usage, Path: utils.MetaCgreq + utils.NestingSep + utils.Usage, Type: utils.MetaVariable,
+						Value: NewRSRParsersMustCompile("~*req.13", utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
+				},
+				CacheDumpFields: make([]*FCTemplate, 0),
+				Opts:            make(map[string]interface{}),
+			},
+			{
+				ID:                       "file_reader1",
+				Type:                     utils.MetaFileCSV,
+				RowLength:                5,
+				FieldSep:                 ",",
+				HeaderDefineChar:         ":",
+				RunDelay:                 time.Duration(-1),
+				ConcurrentReqs:           1024,
+				SourcePath:               "/tmp/ers/in",
+				ProcessedPath:            "/tmp/ers/out",
+				XmlRootPath:              utils.HierarchyPath{utils.EmptyString},
+				Tenant:                   nil,
+				Timezone:                 utils.EmptyString,
+				Filters:                  nil,
+				Flags:                    utils.FlagsWithParams{},
+				PartialCacheExpiryAction: "",
+				PartialRecordCache:       time.Duration(0),
+				Fields:                   []*FCTemplate{},
+				CacheDumpFields: []*FCTemplate{
+					{
+						Tag:   "OrderID",
+						Path:  "*exp.OrderID",
+						Type:  "*variable",
+						Value: NewRSRParsersMustCompile("~*req.OrderID", utils.INFIELD_SEP),
+					},
+				},
+				Opts: make(map[string]interface{}),
+			},
+		},
+	}
+	msgTemplates := map[string][]*FCTemplate{
+		"randomTemplate": {
+			{
+				Tag:   "OrderID",
+				Path:  "*exp.OrderID",
+				Type:  "*variable",
+				Value: NewRSRParsersMustCompile("~*req.OrderID", utils.INFIELD_SEP),
+			},
+		},
+	}
+	for _, v := range expectedERsCfg.Readers[0].CacheDumpFields {
+		v.ComputePath()
+	}
+	for _, v := range expectedERsCfg.Readers[0].Fields {
+		v.ComputePath()
+	}
+	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err = jsonCfg.ersCfg.loadFromJsonCfg(cfgJSON, msgTemplates, jsonCfg.generalCfg.RSRSep, jsonCfg.dfltEvRdr, jsonCfg.generalCfg.RSRSep); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedERsCfg, jsonCfg.ersCfg) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedERsCfg), utils.ToJSON(jsonCfg.ersCfg))
+	}
+}
+
 func TestEventReaderCacheDumpFieldsloadFromJsonCfg(t *testing.T) {
 	cfgJSON := &ERsJsonCfg{
 		Readers: &[]*EventReaderJsonCfg{
