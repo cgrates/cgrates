@@ -25,7 +25,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestHttpAgentCfgsloadFromJsonCfg(t *testing.T) {
+func TestHttpAgentCfgsloadFromJsonCfgCase1(t *testing.T) {
 	cfgJSON := &[]*HttpAgentJsonCfg{
 		{
 			Id:              utils.StringPointer("RandomID"),
@@ -88,7 +88,7 @@ func TestHttpAgentCfgsloadFromJsonCfg(t *testing.T) {
 	}
 }
 
-func TestHttpAgentCfgsloadFromJsonCfg1(t *testing.T) {
+func TestHttpAgentCfgsloadFromJsonCfgCase2(t *testing.T) {
 	cfgJSON := &[]*HttpAgentJsonCfg{
 		{
 			Id:              utils.StringPointer("conecto1"),
@@ -229,7 +229,7 @@ func TestHttpAgentCfgsloadFromJsonCfg1(t *testing.T) {
 	}
 }
 
-func TestHttpAgentCfgloadFromJsonCfg(t *testing.T) {
+func TestHttpAgentCfgloadFromJsonCfgCase3(t *testing.T) {
 	jsnhttpCfg := &HttpAgentJsonCfg{
 		Id:              utils.StringPointer("conecto1"),
 		Url:             utils.StringPointer("/conecto"),
@@ -267,6 +267,137 @@ func TestHttpAgentCfgloadFromJsonCfg(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, httpcfg) {
 		t.Errorf("Expected: %+v \n, recived: %+v", utils.ToJSON(expected), utils.ToJSON(httpcfg))
+	}
+}
+
+func TestHttpAgentCfgloadFromJsonCfgCase4(t *testing.T) {
+	cfgJSON := &[]*HttpAgentJsonCfg{
+		{
+			Id:              utils.StringPointer("conecto1"),
+			Url:             utils.StringPointer("/conecto"),
+			Sessions_conns:  &[]string{utils.MetaLocalHost},
+			Request_payload: utils.StringPointer(utils.MetaUrl),
+			Reply_payload:   utils.StringPointer(utils.MetaXml),
+			Request_processors: &[]*ReqProcessorJsnCfg{
+				{
+					ID:             utils.StringPointer("OutboundAUTHDryRun"),
+					Filters:        &[]string{"*string:*req.request_type:OutboundAUTH", "*string:*req.Msisdn:497700056231"},
+					Tenant:         utils.StringPointer("cgrates.org"),
+					Flags:          &[]string{utils.MetaDryRun},
+					Request_fields: &[]*FcTemplateJsonCfg{},
+					Reply_fields: &[]*FcTemplateJsonCfg{
+						{
+							Tag:       utils.StringPointer("Allow"),
+							Path:      utils.StringPointer("response.Allow"),
+							Type:      utils.StringPointer(utils.META_CONSTANT),
+							Value:     utils.StringPointer("1"),
+							Mandatory: utils.BoolPointer(true),
+							Layout:    utils.StringPointer("2006-01-02T15:04:05Z07:00"),
+						},
+					},
+				},
+				{
+					ID:      utils.StringPointer("mtcall_cdr"),
+					Filters: &[]string{"*string:*req.request_type:MTCALL_CDR"},
+					Tenant:  utils.StringPointer("cgrates.org"),
+					Flags:   &[]string{utils.MetaCDRs},
+					Request_fields: &[]*FcTemplateJsonCfg{
+						{
+							Tag:       utils.StringPointer("RequestType"),
+							Path:      utils.StringPointer("RequestType"),
+							Type:      utils.StringPointer(utils.META_CONSTANT),
+							Value:     utils.StringPointer("*pseudoprepaid"),
+							Mandatory: utils.BoolPointer(true),
+							Layout:    utils.StringPointer("2006-01-02T15:04:05Z07:00"),
+						},
+					},
+					Reply_fields: &[]*FcTemplateJsonCfg{
+						{
+							Tag:       utils.StringPointer("CDR_ID"),
+							Path:      utils.StringPointer("CDR_RESPONSE.CDR_ID"),
+							Type:      utils.StringPointer(utils.META_COMPOSED),
+							Value:     utils.StringPointer("~*req.CDR_ID"),
+							Mandatory: utils.BoolPointer(true),
+							Layout:    utils.StringPointer("2006-01-02T15:04:05Z07:00"),
+						},
+					},
+				}},
+		},
+		{
+			Id:              utils.StringPointer("conecto_xml"),
+			Url:             utils.StringPointer("/conecto_xml"),
+			Sessions_conns:  &[]string{utils.MetaLocalHost},
+			Request_payload: utils.StringPointer("*xml"),
+			Reply_payload:   utils.StringPointer("*xml"),
+			Request_processors: &[]*ReqProcessorJsnCfg{
+				{
+					ID:             utils.StringPointer("cdr_from_xml"),
+					Tenant:         utils.StringPointer("a{*"),
+					Flags:          &[]string{utils.MetaCDRs},
+					Request_fields: &[]*FcTemplateJsonCfg{},
+					Reply_fields:   &[]*FcTemplateJsonCfg{},
+				},
+			},
+		},
+	}
+	expected := "invalid converter terminator in rule: <a{*>"
+	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err = jsonCfg.httpAgentCfg.loadFromJsonCfg(cfgJSON, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
+func TestHttpAgentCfgloadFromJsonCfgCase5(t *testing.T) {
+	cfgJSON := &[]*HttpAgentJsonCfg{
+		{
+			Request_processors: nil,
+		},
+	}
+	jsonCfg, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	if err := jsonCfg.httpAgentCfg.loadFromJsonCfg(cfgJSON, jsonCfg.generalCfg.RSRSep); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestHttpAgentCfgloadFromJsonCfgCase6(t *testing.T) {
+	jsonCfg, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	httpAgentCfg := new(HttpAgentCfg)
+	if err := httpAgentCfg.loadFromJsonCfg(nil, jsonCfg.generalCfg.RSRSep); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestHttpAgentCfgloadFromJsonCfgCase7(t *testing.T) {
+	cfgJSONStr := `{
+"http_agent": [
+	{
+		"id": "RandomID",
+		},
+	],	
+}`
+	cfgJSON := &[]*HttpAgentJsonCfg{
+		{
+			Id: utils.StringPointer("RandomID"),
+		},
+	}
+	expected := HttpAgentCfgs{
+		{
+			ID: "RandomID",
+		},
+	}
+	if jsnCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+		t.Error(err)
+	} else if err = jsnCfg.httpAgentCfg.loadFromJsonCfg(cfgJSON, jsnCfg.generalCfg.RSRSep); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(&expected, &jsnCfg.httpAgentCfg) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsnCfg.httpAgentCfg))
 	}
 }
 
