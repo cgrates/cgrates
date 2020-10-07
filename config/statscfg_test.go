@@ -25,13 +25,14 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestStatSCfgloadFromJsonCfg(t *testing.T) {
+func TestStatSCfgloadFromJsonCfgCase1(t *testing.T) {
 	cfgJSON := &StatServJsonCfg{
 		Enabled:                  utils.BoolPointer(true),
 		Indexed_selects:          utils.BoolPointer(true),
 		Store_interval:           utils.StringPointer("2"),
 		Store_uncompressed_limit: utils.IntPointer(10),
-		Thresholds_conns:         &[]string{utils.MetaInternal},
+		Thresholds_conns:         &[]string{utils.MetaInternal, "*conn1"},
+		String_indexed_fields:    &[]string{"*req.string"},
 		Prefix_indexed_fields:    &[]string{"*req.index1", "*req.index2"},
 		Suffix_indexed_fields:    &[]string{"*req.index1", "*req.index2"},
 		Nested_fields:            utils.BoolPointer(true),
@@ -41,7 +42,8 @@ func TestStatSCfgloadFromJsonCfg(t *testing.T) {
 		IndexedSelects:         true,
 		StoreInterval:          time.Duration(2),
 		StoreUncompressedLimit: 10,
-		ThresholdSConns:        []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)},
+		ThresholdSConns:        []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"},
+		StringIndexedFields:    &[]string{"*req.string"},
 		PrefixIndexedFields:    &[]string{"*req.index1", "*req.index2"},
 		SuffixIndexedFields:    &[]string{"*req.index1", "*req.index2"},
 		NestedFields:           true,
@@ -52,6 +54,18 @@ func TestStatSCfgloadFromJsonCfg(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, jsonCfg.statsCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.statsCfg))
+	}
+}
+
+func TestStatSCfgloadFromJsonCfgCase2(t *testing.T) {
+	statscfgJson := &StatServJsonCfg{
+		Store_interval: utils.StringPointer("1ss"),
+	}
+	expected := "time: unknown unit \"ss\" in duration \"1ss\""
+	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err = jsonCfg.statsCfg.loadFromJsonCfg(statscfgJson); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
 
@@ -82,8 +96,9 @@ func TestStatSCfgAsMapInterface1(t *testing.T) {
 			"enabled": true,				
 			"store_interval": "72h",			
 			"store_uncompressed_limit": 1,	
-			"thresholds_conns": ["*internal"],			
+			"thresholds_conns": ["*internal:*thresholds", "*conn1"],			
 			"indexed_selects":false,			
+            "string_indexed_fields": ["*req.string"],
 			"prefix_indexed_fields": ["*req.prefix_indexed_fields1","*req.prefix_indexed_fields2"],
             "suffix_indexed_fields":["*req.suffix_indexed_fields"],
 			"nested_fields": true,	
@@ -93,8 +108,9 @@ func TestStatSCfgAsMapInterface1(t *testing.T) {
 		utils.EnabledCfg:                true,
 		utils.StoreIntervalCfg:          "72h0m0s",
 		utils.StoreUncompressedLimitCfg: 1,
-		utils.ThresholdSConnsCfg:        []string{"*internal"},
+		utils.ThresholdSConnsCfg:        []string{utils.MetaInternal, "*conn1"},
 		utils.IndexedSelectsCfg:         false,
+		utils.StringIndexedFieldsCfg:    []string{"*req.string"},
 		utils.PrefixIndexedFieldsCfg:    []string{"*req.prefix_indexed_fields1", "*req.prefix_indexed_fields2"},
 		utils.SuffixIndexedFieldsCfg:    []string{"*req.suffix_indexed_fields"},
 		utils.NestedFieldsCfg:           true,
