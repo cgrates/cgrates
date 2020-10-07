@@ -26,7 +26,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestSureTaxCfgloadFromJsonCfg(t *testing.T) {
+func TestSureTaxCfgloadFromJsonCfgCase1(t *testing.T) {
 	cfgJSON := &SureTaxJsonCfg{
 		Url:                     utils.StringPointer("randomURL"),
 		Client_number:           utils.StringPointer("randomClient"),
@@ -96,6 +96,210 @@ func TestSureTaxCfgloadFromJsonCfg(t *testing.T) {
 	}
 }
 
+func TestSureTaxCfgloadFromJsonCfgCase2(t *testing.T) {
+	cfgJSON := &SureTaxJsonCfg{
+		Timezone: utils.StringPointer("/"),
+	}
+	expected := "time: invalid location name"
+	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err = jsonCfg.sureTaxCfg.loadFromJsonCfg(cfgJSON); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
+func TestSureTaxCfgloadFromJsonCfgCase3(t *testing.T) {
+	cfgJSON := &SureTaxJsonCfg{
+		Client_tracking: utils.StringPointer("a{*"),
+	}
+	expected := "invalid converter terminator in rule: <a{*>"
+	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err = jsonCfg.sureTaxCfg.loadFromJsonCfg(cfgJSON); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
+func TestSureTaxCfgloadFromJsonCfgCase4(t *testing.T) {
+	cfgJSON := &SureTaxJsonCfg{
+		Customer_number: utils.StringPointer("a{*"),
+	}
+	expected := "invalid converter terminator in rule: <a{*>"
+	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err = jsonCfg.sureTaxCfg.loadFromJsonCfg(cfgJSON); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
+func TestSureTaxCfgloadFromJsonCfgCase5(t *testing.T) {
+	cfgJSON := &SureTaxJsonCfg{
+		Orig_number: utils.StringPointer("a{*"),
+	}
+	expected := "invalid converter terminator in rule: <a{*>"
+	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err = jsonCfg.sureTaxCfg.loadFromJsonCfg(cfgJSON); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
+func TestSureTaxCfgloadFromJsonCfgCase6(t *testing.T) {
+	cfgJSON := &SureTaxJsonCfg{
+		Term_number: utils.StringPointer("a{*"),
+	}
+	expected := "invalid converter terminator in rule: <a{*>"
+	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err = jsonCfg.sureTaxCfg.loadFromJsonCfg(cfgJSON); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
+func TestSureTaxCfgloadFromJsonCfgCase7(t *testing.T) {
+	cfgJSON := &SureTaxJsonCfg{
+		Bill_to_number: utils.StringPointer("a{*"),
+	}
+	expected := "invalid converter terminator in rule: <a{*>"
+	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err = jsonCfg.sureTaxCfg.loadFromJsonCfg(cfgJSON); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
+func TestSureTaxCfgloadFromJsonCfgCase8(t *testing.T) {
+	cfgJSON := &SureTaxJsonCfg{
+		Zipcode: utils.StringPointer("a{*"),
+	}
+	expected := "invalid converter terminator in rule: <a{*>"
+	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err = jsonCfg.sureTaxCfg.loadFromJsonCfg(cfgJSON); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
+func TestSureTaxCfgloadFromJsonCfgCase9(t *testing.T) {
+	cfgJSON := &SureTaxJsonCfg{
+		Plus4: utils.StringPointer("a{*"),
+	}
+	expected := "invalid converter terminator in rule: <a{*>"
+	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err = jsonCfg.sureTaxCfg.loadFromJsonCfg(cfgJSON); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
+func TestSureTaxCfgloadFromJsonCfgCase10(t *testing.T) {
+	cfgJSON := &SureTaxJsonCfg{
+		P2PZipcode: utils.StringPointer("a{*"),
+	}
+	expected := "invalid converter terminator in rule: <a{*>"
+	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err = jsonCfg.sureTaxCfg.loadFromJsonCfg(cfgJSON); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
+func TestSureTaxCfgloadFromJsonCfgCase11(t *testing.T) {
+	cfgJSON := &SureTaxJsonCfg{
+		P2PPlus4: utils.StringPointer("a{*"),
+	}
+	expected := "invalid converter terminator in rule: <a{*>"
+	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err = jsonCfg.sureTaxCfg.loadFromJsonCfg(cfgJSON); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
+func TestSureTaxCfgloadFromJsonCfgCase12(t *testing.T) {
+	cfgJSON := &SureTaxJsonCfg{
+		Units: utils.StringPointer("a{*"),
+	}
+	expected := "invalid converter terminator in rule: <a{*>"
+	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err = jsonCfg.sureTaxCfg.loadFromJsonCfg(cfgJSON); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
+func TestSureTaxCfgloadFromJsonCfgCase13(t *testing.T) {
+	cfgJSON := &SureTaxJsonCfg{
+		Unit_type: utils.StringPointer("a{*"),
+	}
+	expected := "invalid converter terminator in rule: <a{*>"
+	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err = jsonCfg.sureTaxCfg.loadFromJsonCfg(cfgJSON); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
+func TestSureTaxCfgloadFromJsonCfgCase14(t *testing.T) {
+	cfgJSON := &SureTaxJsonCfg{
+		Tax_included: utils.StringPointer("a{*"),
+	}
+	expected := "invalid converter terminator in rule: <a{*>"
+	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err = jsonCfg.sureTaxCfg.loadFromJsonCfg(cfgJSON); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
+func TestSureTaxCfgloadFromJsonCfgCase15(t *testing.T) {
+	cfgJSON := &SureTaxJsonCfg{
+		Tax_situs_rule: utils.StringPointer("a{*"),
+	}
+	expected := "invalid converter terminator in rule: <a{*>"
+	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err = jsonCfg.sureTaxCfg.loadFromJsonCfg(cfgJSON); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
+func TestSureTaxCfgloadFromJsonCfgCase16(t *testing.T) {
+	cfgJSON := &SureTaxJsonCfg{
+		Trans_type_code: utils.StringPointer("a{*"),
+	}
+	expected := "invalid converter terminator in rule: <a{*>"
+	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err = jsonCfg.sureTaxCfg.loadFromJsonCfg(cfgJSON); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
+func TestSureTaxCfgloadFromJsonCfgCase17(t *testing.T) {
+	cfgJSON := &SureTaxJsonCfg{
+		Sales_type_code: utils.StringPointer("a{*"),
+	}
+	expected := "invalid converter terminator in rule: <a{*>"
+	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err = jsonCfg.sureTaxCfg.loadFromJsonCfg(cfgJSON); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
+func TestSureTaxCfgloadFromJsonCfgCase18(t *testing.T) {
+	cfgJSON := &SureTaxJsonCfg{
+		Tax_exemption_code_list: utils.StringPointer("a{*"),
+	}
+	expected := "invalid converter terminator in rule: <a{*>"
+	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err = jsonCfg.sureTaxCfg.loadFromJsonCfg(cfgJSON); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
 func TestSureTaxCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
 	"suretax": {
@@ -108,6 +312,11 @@ func TestSureTaxCfgAsMapInterface(t *testing.T) {
 		"client_tracking":         "~*req.Destination",
 		"customer_number":         "~*req.Destination",
 		"orig_number":             "~*req.Destination",
+        "bill_to_number": "randomNumber",					
+	    "zipcode": "randomCode",							
+	    "plus4": "randomValue",							
+	    "p2pzipcode": "randomCode",						
+	    "p2pplus4": "randomValue",
 		"term_number":             "~*req.CGRID",
 		"units":                   "7",
 		"unit_type":               "02",
@@ -115,6 +324,7 @@ func TestSureTaxCfgAsMapInterface(t *testing.T) {
 		"tax_situs_rule":          "03",
 		"trans_type_code":         "01010101",
 		"sales_type_code":         "B",
+        "tax_exemption_code_list": "randomCode"
     },
 }`
 	eMap := map[string]interface{}{
@@ -132,18 +342,18 @@ func TestSureTaxCfgAsMapInterface(t *testing.T) {
 		utils.CustomerNumberCfg:       "~*req.Destination",
 		utils.OrigNumberCfg:           "~*req.Destination",
 		utils.TermNumberCfg:           "~*req.CGRID",
-		utils.BillToNumberCfg:         utils.EmptyString,
-		utils.ZipcodeCfg:              utils.EmptyString,
-		utils.Plus4Cfg:                utils.EmptyString,
-		utils.P2PZipcodeCfg:           utils.EmptyString,
-		utils.P2PPlus4Cfg:             utils.EmptyString,
+		utils.BillToNumberCfg:         "randomNumber",
+		utils.ZipcodeCfg:              "randomCode",
+		utils.Plus4Cfg:                "randomValue",
+		utils.P2PZipcodeCfg:           "randomCode",
+		utils.P2PPlus4Cfg:             "randomValue",
 		utils.UnitsCfg:                "7",
 		utils.UnitTypeCfg:             "02",
 		utils.TaxIncludedCfg:          "1",
 		utils.TaxSitusRuleCfg:         "03",
 		utils.TransTypeCodeCfg:        "01010101",
 		utils.SalesTypeCodeCfg:        "B",
-		utils.TaxExemptionCodeListCfg: utils.EmptyString,
+		utils.TaxExemptionCodeListCfg: "randomCode",
 	}
 	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
