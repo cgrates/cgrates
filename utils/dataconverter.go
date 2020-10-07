@@ -84,6 +84,8 @@ func NewDataConverter(params string) (conv DataConverter, err error) {
 		return new(SIPURIUserConverter), nil
 	case params == MetaSIPURIMethod:
 		return new(SIPURIMethodConverter), nil
+	case params == MetaUnixTime:
+		return new(UnixTimeConverter), nil
 	case strings.HasPrefix(params, MetaLibPhoneNumber):
 		if len(params) == len(MetaLibPhoneNumber) {
 			return NewPhoneNumberConverter("")
@@ -351,6 +353,7 @@ type TimeStringConverter struct {
 	Layout string
 }
 
+// Convert implements DataConverter interface
 func (tS *TimeStringConverter) Convert(in interface{}) (
 	out interface{}, err error) {
 	tm, err := ParseTimeDetectLayout(in.(string), EmptyString)
@@ -371,5 +374,19 @@ func (*String2HexConverter) Convert(in interface{}) (o interface{}, err error) {
 		return
 	}
 	o = "0x" + out
+	return
+}
+
+// UnixTimeConverter converts the interface in the unix time
+type UnixTimeConverter struct{}
+
+// Convert implements DataConverter interface
+func (tS *UnixTimeConverter) Convert(in interface{}) (
+	out interface{}, err error) {
+	var tm time.Time
+	if tm, err = ParseTimeDetectLayout(in.(string), EmptyString); err != nil {
+		return
+	}
+	out = tm.Unix()
 	return
 }
