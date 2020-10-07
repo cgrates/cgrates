@@ -25,7 +25,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestSIPAgentCfgloadFromJsonCfg(t *testing.T) {
+func TestSIPAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 	cfgJSONS := &SIPAgentJsonCfg{
 		Enabled:              utils.BoolPointer(true),
 		Listen:               utils.StringPointer("127.0.0.1:5060"),
@@ -110,6 +110,81 @@ func TestSIPAgentCfgloadFromJsonCfg(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, jsonCfg.sipAgentCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.sipAgentCfg))
+	}
+}
+
+func TestSIPAgentCfgloadFromJsonCfgCase2(t *testing.T) {
+	cfgJSON := &SIPAgentJsonCfg{
+		Retransmission_timer: utils.StringPointer("1ss"),
+	}
+	expected := "time: unknown unit \"ss\" in duration \"1ss\""
+	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err = jsonCfg.sipAgentCfg.loadFromJsonCfg(cfgJSON, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
+func TestSIPAgentCfgloadFromJsonCfgCase3(t *testing.T) {
+	cfgJSON := &SIPAgentJsonCfg{
+		Templates: map[string][]*FcTemplateJsonCfg{
+			utils.TemplatesCfg: {
+				{
+					Value: utils.StringPointer("a{*"),
+				},
+			},
+		},
+	}
+	expected := "invalid converter terminator in rule: <a{*>"
+	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err = jsonCfg.sipAgentCfg.loadFromJsonCfg(cfgJSON, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
+func TestSIPAgentCfgloadFromJsonCfgCase4(t *testing.T) {
+	cfgJSONStr := `{
+	"sip_agent": {
+		"request_processors": [
+             {
+               "id": "randomID",
+             },
+		],
+	},
+}`
+	sipAgentJson := &SIPAgentJsonCfg{
+		Request_processors: &[]*ReqProcessorJsnCfg{{
+			ID: utils.StringPointer("randomID"),
+		}},
+	}
+	expected := &SIPAgentCfg{
+		RequestProcessors: []*RequestProcessor{
+			{
+				ID: "randomID",
+			},
+		},
+	}
+	if jsonCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+		t.Error(err)
+	} else if err = jsonCfg.sipAgentCfg.loadFromJsonCfg(sipAgentJson, jsonCfg.generalCfg.RSRSep); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected.RequestProcessors[0].ID, jsonCfg.sipAgentCfg.RequestProcessors[0].ID) {
+		t.Errorf("Expected %+v, received %+v", expected.RequestProcessors[0].ID, jsonCfg.sipAgentCfg.RequestProcessors[0].ID)
+	}
+}
+
+func TestSIPAgentCfgloadFromJsonCfgCase5(t *testing.T) {
+	sipAgentJson := &SIPAgentJsonCfg{
+		Request_processors: &[]*ReqProcessorJsnCfg{{
+			Tenant: utils.StringPointer("a{*"),
+		}},
+	}
+	expected := "invalid converter terminator in rule: <a{*>"
+	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err = jsonCfg.sipAgentCfg.loadFromJsonCfg(sipAgentJson, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
 
