@@ -200,6 +200,28 @@ func testHTTPExportEvent(t *testing.T) {
 			},
 		},
 	}
+
+	eventSMSNoFields := &utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "SMSEvent",
+			Time:   utils.TimePointer(time.Now()),
+			Event: map[string]interface{}{
+				utils.CGRID:       utils.Sha1("sms2", time.Unix(1383813745, 0).UTC().String()),
+				utils.ToR:         utils.SMS,
+				utils.OriginID:    "sms2",
+				utils.RequestType: utils.META_RATED,
+				utils.Tenant:      "cgrates.org",
+				utils.Category:    "call",
+				utils.Account:     "1001",
+				utils.Subject:     "1001",
+				utils.Destination: "1002",
+				utils.RunID:       utils.MetaDefault,
+				"ExporterUsed":    "HTTPPostExporterWithNoFields",
+			},
+		},
+	}
+
 	var reply map[string]utils.MapStorage
 	if err := httpPostRpc.Call(utils.EventExporterSv1ProcessEvent, eventVoice, &reply); err != nil {
 		t.Error(err)
@@ -251,6 +273,16 @@ func testHTTPExportEvent(t *testing.T) {
 		utils.Destination: utils.IfaceAsString(eventSMS.Event[utils.Destination]),
 		utils.Cost:        utils.IfaceAsString(eventSMS.Event[utils.Cost]),
 	} {
+		if rcv := httpValues.Get(key); rcv != strVal {
+			t.Errorf("Expected %+v, received: %+v", strVal, rcv)
+		}
+	}
+	if err := httpPostRpc.Call(utils.EventExporterSv1ProcessEvent, eventSMSNoFields, &reply); err != nil {
+		t.Error(err)
+	}
+	time.Sleep(10 * time.Millisecond)
+	// verify HTTPValues for eventSMS
+	for key, strVal := range eventSMSNoFields.Event {
 		if rcv := httpValues.Get(key); rcv != strVal {
 			t.Errorf("Expected %+v, received: %+v", strVal, rcv)
 		}

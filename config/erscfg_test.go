@@ -834,3 +834,15 @@ func TestERsloadFromJsonCfg(t *testing.T) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedERsCfg), utils.ToJSON(cgrCfg.ersCfg))
 	}
 }
+
+func TestGetDefaultExporter(t *testing.T) {
+	ees := new(EEsCfg)
+	if dft := ees.GetDefaultExporter(); dft != nil {
+		t.Fatalf("Expeceted no default cfg, received: %s", utils.ToJSON(dft))
+	}
+	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if dft := cfgCgr.EEsCfg().GetDefaultExporter(); dft == nil || dft.ID != utils.MetaDefault {
+		t.Fatalf("Unexpected default cfg returned: %s", utils.ToJSON(dft))
+	}
+}
