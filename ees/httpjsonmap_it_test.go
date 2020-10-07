@@ -203,6 +203,26 @@ func testHTTPJsonMapExportEvent(t *testing.T) {
 			},
 		},
 	}
+
+	eventSMSNoFields := &utils.CGREventWithIDs{
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "SMSEvent",
+				Time:   utils.TimePointer(time.Now()),
+				Event: map[string]interface{}{
+					utils.CGRID:       utils.Sha1("sms2", time.Unix(1383813745, 0).UTC().String()),
+					utils.ToR:         utils.SMS,
+					utils.Tenant:      "cgrates.org",
+					utils.Category:    "call",
+					utils.Account:     "1001",
+					utils.Destination: "1002",
+					utils.RunID:       utils.MetaDefault,
+					"ExporterUsed":    "HTTPJsonMapExporterWithNoFields",
+				},
+			},
+		},
+	}
 	var reply map[string]utils.MapStorage
 	if err := httpJSONMapRpc.Call(utils.EventExporterSv1ProcessEvent, eventVoice, &reply); err != nil {
 		t.Error(err)
@@ -256,6 +276,17 @@ func testHTTPJsonMapExportEvent(t *testing.T) {
 	} {
 		if rcv := httpJsonMap[key]; rcv != strVal {
 			t.Errorf("Expected %+v, received: %+v", strVal, rcv)
+		}
+	}
+
+	if err := httpJSONMapRpc.Call(utils.EventExporterSv1ProcessEvent, eventSMSNoFields, &reply); err != nil {
+		t.Error(err)
+	}
+	time.Sleep(10 * time.Millisecond)
+	// verify HTTPJsonMap for eventSMS
+	for key, strVal := range eventSMSNoFields.Event {
+		if rcv := httpJsonMap[key]; rcv != strVal {
+			t.Errorf("Expected %q, received: %q", strVal, rcv)
 		}
 	}
 }

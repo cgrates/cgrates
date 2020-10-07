@@ -104,10 +104,7 @@ func (fCsv *FileCSVee) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 	fCsv.dc[utils.NumberOfEvents] = fCsv.dc[utils.NumberOfEvents].(int64) + 1
 
 	var csvRecord []string
-	req := utils.MapStorage{}
-	for k, v := range cgrEv.Event {
-		req[k] = v
-	}
+	req := utils.MapStorage(cgrEv.Event)
 	eeReq := NewEventExporterRequest(req, fCsv.dc, fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].Tenant,
 		fCsv.cgrCfg.GeneralCfg().DefaultTenant,
 		utils.FirstNonEmpty(fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].Timezone,

@@ -195,6 +195,9 @@ results+=($?)
 
 fi
 
+echo "go test github.com/cgrates/cgrates/ees -tags=integration"
+go test github.com/cgrates/cgrates/ees -tags=integration
+results+=($?)
 echo 'go test github.com/cgrates/cgrates/config -tags=integration'
 go test github.com/cgrates/cgrates/config -tags=integration
 results+=($?)

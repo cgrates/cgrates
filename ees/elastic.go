@@ -135,34 +135,35 @@ func (eEe *ElasticEe) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 	}()
 	eEe.dc[utils.NumberOfEvents] = eEe.dc[utils.NumberOfEvents].(int64) + 1
 
-	req := utils.MapStorage{}
-	for k, v := range cgrEv.Event {
-		req[k] = v
-	}
-	valMp := make(map[string]string)
-	eeReq := NewEventExporterRequest(req, eEe.dc,
-		eEe.cgrCfg.EEsCfg().Exporters[eEe.cfgIdx].Tenant,
-		eEe.cgrCfg.GeneralCfg().DefaultTenant,
-		utils.FirstNonEmpty(eEe.cgrCfg.EEsCfg().Exporters[eEe.cfgIdx].Timezone,
-			eEe.cgrCfg.GeneralCfg().DefaultTimezone),
-		eEe.filterS)
-	if err = eeReq.SetFields(eEe.cgrCfg.EEsCfg().Exporters[eEe.cfgIdx].ContentFields()); err != nil {
-		return
-	}
-	for el := eeReq.cnt.GetFirstElement(); el != nil; el = el.Next() {
-		var nmIt utils.NMInterface
-		if nmIt, err = eeReq.cnt.Field(el.Value); err != nil {
+	valMp := make(map[string]interface{})
+	if len(eEe.cgrCfg.EEsCfg().Exporters[eEe.cfgIdx].ContentFields()) == 0 {
+		valMp = cgrEv.Event
+	} else {
+		req := utils.MapStorage(cgrEv.Event)
+		eeReq := NewEventExporterRequest(req, eEe.dc,
+			eEe.cgrCfg.EEsCfg().Exporters[eEe.cfgIdx].Tenant,
+			eEe.cgrCfg.GeneralCfg().DefaultTenant,
+			utils.FirstNonEmpty(eEe.cgrCfg.EEsCfg().Exporters[eEe.cfgIdx].Timezone,
+				eEe.cgrCfg.GeneralCfg().DefaultTimezone),
+			eEe.filterS)
+		if err = eeReq.SetFields(eEe.cgrCfg.EEsCfg().Exporters[eEe.cfgIdx].ContentFields()); err != nil {
 			return
 		}
-		itm, isNMItem := nmIt.(*config.NMItem)
-		if !isNMItem {
-			err = fmt.Errorf("cannot encode reply value: %s, err: not NMItems", utils.ToJSON(el.Value))
-			return
+		for el := eeReq.cnt.GetFirstElement(); el != nil; el = el.Next() {
+			var nmIt utils.NMInterface
+			if nmIt, err = eeReq.cnt.Field(el.Value); err != nil {
+				return
+			}
+			itm, isNMItem := nmIt.(*config.NMItem)
+			if !isNMItem {
+				err = fmt.Errorf("cannot encode reply value: %s, err: not NMItems", utils.ToJSON(el.Value))
+				return
+			}
+			if itm == nil {
+				continue // all attributes, not writable to diameter packet
+			}
+			valMp[strings.Join(itm.Path, utils.NestingSep)] = utils.IfaceAsString(itm.Data)
 		}
-		if itm == nil {
-			continue // all attributes, not writable to diameter packet
-		}
-		valMp[strings.Join(itm.Path, utils.NestingSep)] = utils.IfaceAsString(itm.Data)
 	}
 	updateEEMetrics(eEe.dc, cgrEv.Event, utils.FirstNonEmpty(eEe.cgrCfg.EEsCfg().Exporters[eEe.cfgIdx].Timezone,
 		eEe.cgrCfg.GeneralCfg().DefaultTimezone))
