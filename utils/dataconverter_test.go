@@ -852,3 +852,24 @@ func TestStringHexConvertor(t *testing.T) {
 		t.Errorf("expecting: %+v, received: %+v", expected, rpl)
 	}
 }
+
+func TestUnixTimeConverter(t *testing.T) {
+	exp := new(UnixTimeConverter)
+	cnv, err := NewDataConverter(MetaUnixTime)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(exp, cnv) {
+		t.Errorf("Expecting: %+v, received: %+v", exp, cnv)
+	}
+
+	expected := int64(1436280728)
+	if rcv, err := cnv.Convert("2015-07-07T14:52:08Z"); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
+	}
+	if _, err := cnv.Convert("NotAValidTime"); err == nil {
+		t.Errorf("Expected error received %v", err)
+	}
+}
