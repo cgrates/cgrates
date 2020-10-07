@@ -323,13 +323,13 @@ func TestNewEventCostFromCallCost(t *testing.T) {
 		Account:     "dan",
 		Destination: "+4986517174963",
 		ToR:         utils.VOICE,
-		Cost:        0.85,
+		Cost:        0.75,
 		RatedUsage:  120.0,
 		Timespans: TimeSpans{
 			&TimeSpan{
 				TimeStart: time.Date(2017, 1, 9, 16, 18, 21, 0, time.UTC),
 				TimeEnd:   time.Date(2017, 1, 9, 16, 19, 21, 0, time.UTC),
-				Cost:      0.25,
+				Cost:      0.15,
 				RateInterval: &RateInterval{ // standard rating
 					Timing: &RITiming{
 						StartTime: "00:00:00",
@@ -354,6 +354,16 @@ func TestNewEventCostFromCallCost(t *testing.T) {
 				MatchedDestId:  "GERMANY",
 				RatingPlanId:   "RPL_RETAIL1",
 				CompressFactor: 1,
+				RoundIncrement: &Increment{
+					Cost: 0.1,
+					BalanceInfo: &DebitInfo{
+						Monetary: &MonetaryInfo{UUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
+							ID:    utils.MetaDefault,
+							Value: 9.9},
+						AccountID: "cgrates.org:dan",
+					},
+					CompressFactor: 1,
+				},
 				Increments: Increments{
 					&Increment{ // ConnectFee
 						Cost: 0.1,
@@ -500,10 +510,15 @@ func TestNewEventCostFromCallCost(t *testing.T) {
 						AccountingID:   "906bfd0f-035c-40a3-93a8-46f71627983e",
 						CompressFactor: 30,
 					},
+					{
+						Cost:           -0.1,
+						AccountingID:   "44e97dec-8a7e-43d0-8b0a-e34a152",
+						CompressFactor: 1,
+					},
 				},
 				CompressFactor: 1,
 				usage:          utils.DurationPointer(time.Duration(60 * time.Second)),
-				cost:           utils.Float64Pointer(0.25),
+				cost:           utils.Float64Pointer(0.15),
 				ecUsageIdx:     utils.DurationPointer(time.Duration(0)),
 			},
 			{
@@ -567,6 +582,13 @@ func TestNewEventCostFromCallCost(t *testing.T) {
 				BalanceUUID:   "9d54a9e9-d610-4c82-bcb5-a315b9a65089",
 				Units:         1,
 				ExtraChargeID: "*none",
+			},
+			"44e97dec-8a7e-43d0-8b0a-e34a152": &BalanceCharge{
+				AccountID:     "cgrates.org:dan",
+				BalanceUUID:   "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
+				RatingID:      "*rounding",
+				Units:         0.1,
+				ExtraChargeID: "",
 			},
 		},
 		RatingFilters: RatingFilters{
@@ -675,6 +697,21 @@ func TestNewEventCostFromCallCost(t *testing.T) {
 		t.Errorf("Expecting: %s, received: %s",
 			utils.ToJSON(eEC.Rates[eEC.Rating[eEC.Accounting[eEC.Charges[0].Increments[2].AccountingID].RatingID].RatesID]),
 			utils.ToJSON(ec.Rates[ec.Rating[ec.Accounting[ec.Charges[0].Increments[2].AccountingID].RatingID].RatesID]))
+	}
+
+	// Compare to expected EC
+	if !reflect.DeepEqual(eEC.Accounting[eEC.Charges[0].Increments[3].AccountingID],
+		ec.Accounting[ec.Charges[0].Increments[3].AccountingID]) {
+		t.Errorf("Expecting: %s, received: %s",
+			utils.ToJSON(eEC.Accounting[eEC.Charges[0].Increments[3].AccountingID]),
+			utils.ToJSON(ec.Accounting[ec.Charges[0].Increments[3].AccountingID]))
+	}
+	ec.Charges[0].Increments[3].AccountingID = eEC.Charges[0].Increments[3].AccountingID
+	if !reflect.DeepEqual(eEC.Charges[0].Increments[3],
+		ec.Charges[0].Increments[3]) {
+		t.Errorf("Expecting: %s, received: %s",
+			utils.ToJSON(eEC.Charges[0].Increments[3]),
+			utils.ToJSON(ec.Charges[0].Increments[3]))
 	}
 	if len(ec.Accounting) != len(eEC.Accounting) {
 		t.Errorf("Expecting: %+v, received: %+v", eEC, ec)
