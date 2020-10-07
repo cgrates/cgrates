@@ -74,10 +74,7 @@ func (httpPost *HTTPPost) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 	httpPost.dc[utils.NumberOfEvents] = httpPost.dc[utils.NumberOfEvents].(int64) + 1
 
 	urlVals := url.Values{}
-	req := utils.MapStorage{}
-	for k, v := range cgrEv.Event {
-		req[k] = v
-	}
+	req := utils.MapStorage(cgrEv.Event)
 	eeReq := NewEventExporterRequest(req, httpPost.dc,
 		httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].Tenant,
 		httpPost.cgrCfg.GeneralCfg().DefaultTenant,

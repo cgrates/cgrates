@@ -72,10 +72,7 @@ func (vEe *VirtualEe) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 	}()
 	vEe.dc[utils.NumberOfEvents] = vEe.dc[utils.NumberOfEvents].(int64) + 1
 
-	req := utils.MapStorage{}
-	for k, v := range cgrEv.Event {
-		req[k] = v
-	}
+	req := utils.MapStorage(cgrEv.Event)
 	eeReq := NewEventExporterRequest(req, vEe.dc,
 		vEe.cgrCfg.EEsCfg().Exporters[vEe.cfgIdx].Tenant,
 		vEe.cgrCfg.GeneralCfg().DefaultTenant,

@@ -375,6 +375,17 @@
 				{"tag": "Usage", "path": "*exp.Usage", "type": "*variable", "value": "~*req.Usage"},
 				{"tag": "Cost", "path": "*exp.Cost", "type": "*variable", "value": "~*req.Cost{*round:4}"},
 			],
+		},
+		{
+			"id": "HTTPJsonMapExporterWithNoFields",
+			"type": "*http_json_map",
+			"export_path": "http://127.0.0.1:12081/event_json_map_http",
+			"tenant": "cgrates.org",
+			"flags": ["*attributes"],
+			"attribute_context": "customContext",
+			"attempts": 1,
+			"filters": ["*string:~*req.ExporterUsed:HTTPJsonMapExporterWithNoFields"],
+			"fields":[]
 		}
 	]
 },
