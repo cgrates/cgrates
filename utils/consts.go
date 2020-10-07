@@ -662,6 +662,7 @@ const (
 	FileName                    = "FileName"
 	MetaBusy                    = "*busy"
 	MetaQueue                   = "*queue"
+	MetaRounding                = "*rounding"
 )
 
 // Migrator Action

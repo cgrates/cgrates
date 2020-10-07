@@ -56,49 +56,73 @@ func NewEventCostFromCallCost(cc *CallCost, cgrID, runID string) (ec *EventCost)
 			"DestinationID": ts.MatchedDestId, "RatingPlanID": ts.RatingPlanId}
 		cIl.RatingID = ec.ratingIDForRateInterval(ts.RateInterval, rf)
 		if len(ts.Increments) != 0 {
-			cIl.Increments = make([]*ChargingIncrement, len(ts.Increments))
+			cIl.Increments = make([]*ChargingIncrement, 0, len(ts.Increments)+1)
 		}
-		for j, incr := range ts.Increments {
-			cIt := &ChargingIncrement{
-				Usage:          incr.Duration,
-				Cost:           incr.Cost,
-				CompressFactor: incr.CompressFactor}
-			if incr.BalanceInfo == nil {
-				continue
-			}
-			//AccountingID
-			if incr.BalanceInfo.Unit != nil {
-				// 2 balances work-around
-				ecUUID := utils.META_NONE // populate no matter what due to Unit not nil
-				if incr.BalanceInfo.Monetary != nil {
-					if uuid := ec.Accounting.GetIDWithSet(
-						&BalanceCharge{
-							AccountID:   incr.BalanceInfo.AccountID,
-							BalanceUUID: incr.BalanceInfo.Monetary.UUID,
-							Units:       incr.Cost,
-							RatingID:    ec.ratingIDForRateInterval(incr.BalanceInfo.Monetary.RateInterval, rf),
-						}); uuid != "" {
-						ecUUID = uuid
-					}
-				}
-				cIt.AccountingID = ec.Accounting.GetIDWithSet(
-					&BalanceCharge{
-						AccountID:     incr.BalanceInfo.AccountID,
-						BalanceUUID:   incr.BalanceInfo.Unit.UUID,
-						Units:         incr.BalanceInfo.Unit.Consumed,
-						RatingID:      ec.ratingIDForRateInterval(incr.BalanceInfo.Unit.RateInterval, rf),
-						ExtraChargeID: ecUUID})
-			} else if incr.BalanceInfo.Monetary != nil { // Only monetary
-				cIt.AccountingID = ec.Accounting.GetIDWithSet(
-					&BalanceCharge{
-						AccountID:   incr.BalanceInfo.AccountID,
-						BalanceUUID: incr.BalanceInfo.Monetary.UUID,
-						Units:       incr.Cost,
-						RatingID:    ec.ratingIDForRateInterval(incr.BalanceInfo.Monetary.RateInterval, rf)})
-			}
-			cIl.Increments[j] = cIt
+		for _, incr := range ts.Increments {
+			cIl.Increments = append(cIl.Increments, ec.newChargingIncrement(incr, rf, false))
+		}
+		if ts.RoundIncrement != nil {
+			rIncr := ec.newChargingIncrement(ts.RoundIncrement, rf, true)
+			rIncr.Cost = -rIncr.Cost
+			cIl.Increments = append(cIl.Increments, rIncr)
 		}
 		ec.Charges[i] = cIl
+	}
+	return
+}
+
+// newChargingIncrement creates ChargingIncrement from a Increment
+// special case if is the roundIncrement the rateID is *rounding
+func (ec *EventCost) newChargingIncrement(incr *Increment, rf RatingMatchedFilters, roundedIncrement bool) (cIt *ChargingIncrement) {
+	cIt = &ChargingIncrement{
+		Usage:          incr.Duration,
+		Cost:           incr.Cost,
+		CompressFactor: incr.CompressFactor,
+	}
+	if incr.BalanceInfo == nil {
+		return
+	}
+	rateID := utils.MetaRounding
+	//AccountingID
+	if incr.BalanceInfo.Unit != nil {
+		// 2 balances work-around
+		ecUUID := utils.META_NONE // populate no matter what due to Unit not nil
+		if incr.BalanceInfo.Monetary != nil {
+			if !roundedIncrement {
+				rateID = ec.ratingIDForRateInterval(incr.BalanceInfo.Monetary.RateInterval, rf)
+			}
+			if uuid := ec.Accounting.GetIDWithSet(
+				&BalanceCharge{
+					AccountID:   incr.BalanceInfo.AccountID,
+					BalanceUUID: incr.BalanceInfo.Monetary.UUID,
+					Units:       incr.Cost,
+					RatingID:    rateID,
+				}); uuid != "" {
+				ecUUID = uuid
+			}
+		}
+		if !roundedIncrement {
+			rateID = ec.ratingIDForRateInterval(incr.BalanceInfo.Unit.RateInterval, rf)
+		}
+		cIt.AccountingID = ec.Accounting.GetIDWithSet(
+			&BalanceCharge{
+				AccountID:     incr.BalanceInfo.AccountID,
+				BalanceUUID:   incr.BalanceInfo.Unit.UUID,
+				Units:         incr.BalanceInfo.Unit.Consumed,
+				RatingID:      rateID,
+				ExtraChargeID: ecUUID,
+			})
+	} else if incr.BalanceInfo.Monetary != nil { // Only monetary
+		if !roundedIncrement {
+			rateID = ec.ratingIDForRateInterval(incr.BalanceInfo.Monetary.RateInterval, rf)
+		}
+		cIt.AccountingID = ec.Accounting.GetIDWithSet(
+			&BalanceCharge{
+				AccountID:   incr.BalanceInfo.AccountID,
+				BalanceUUID: incr.BalanceInfo.Monetary.UUID,
+				Units:       incr.Cost,
+				RatingID:    rateID,
+			})
 	}
 	return
 }
@@ -343,69 +367,92 @@ func (ec *EventCost) AsCallCost(tor string) *CallCost {
 		ToR:            utils.FirstNonEmpty(tor, utils.VOICE),
 		Cost:           ec.GetCost(),
 		RatedUsage:     float64(ec.GetUsage().Nanoseconds()),
-		AccountSummary: ec.AccountSummary}
+		AccountSummary: ec.AccountSummary,
+	}
 	cc.Timespans = make(TimeSpans, len(ec.Charges))
 	for i, cIl := range ec.Charges {
-		ts := &TimeSpan{Cost: cIl.Cost(),
+		ts := &TimeSpan{
+			Cost:           cIl.Cost(),
 			DurationIndex:  *cIl.Usage(),
-			CompressFactor: cIl.CompressFactor}
+			CompressFactor: cIl.CompressFactor,
+		}
 		if cIl.ecUsageIdx == nil { // index was not populated yet
 			ec.ComputeEventCostUsageIndexes()
 		}
 		ts.TimeStart = ec.StartTime.Add(*cIl.ecUsageIdx)
 		ts.TimeEnd = ts.TimeStart.Add(
 			time.Duration(cIl.Usage().Nanoseconds() * int64(cIl.CompressFactor)))
-		if cIl.RatingID != "" {
-			if ec.Rating[cIl.RatingID].RatingFiltersID != "" {
-				rfs := ec.RatingFilters[ec.Rating[cIl.RatingID].RatingFiltersID]
-				ts.MatchedSubject = rfs[utils.Subject].(string)
-				ts.MatchedPrefix = rfs[utils.DestinationPrefix].(string)
-				ts.MatchedDestId = rfs[utils.DestinationID].(string)
-				ts.RatingPlanId = rfs[utils.RatingPlanID].(string)
-			}
+		if cIl.RatingID != "" &&
+			ec.Rating[cIl.RatingID].RatingFiltersID != "" {
+			rfs := ec.RatingFilters[ec.Rating[cIl.RatingID].RatingFiltersID]
+			ts.MatchedSubject = rfs[utils.Subject].(string)
+			ts.MatchedPrefix = rfs[utils.DestinationPrefix].(string)
+			ts.MatchedDestId = rfs[utils.DestinationID].(string)
+			ts.RatingPlanId = rfs[utils.RatingPlanID].(string)
 		}
 		ts.RateInterval = ec.rateIntervalForRatingID(cIl.RatingID)
-		if len(cIl.Increments) != 0 {
-			ts.Increments = make(Increments, len(cIl.Increments))
-		}
-		for j, cInc := range cIl.Increments {
-			incr := &Increment{Duration: cInc.Usage, Cost: cInc.Cost, CompressFactor: cInc.CompressFactor, BalanceInfo: new(DebitInfo)}
-			if cInc.AccountingID != "" {
-				cBC := ec.Accounting[cInc.AccountingID]
-				incr.BalanceInfo.AccountID = cBC.AccountID
-				var balanceType string
-				if cBC.BalanceUUID != "" {
-					if ec.AccountSummary != nil {
-						for _, b := range ec.AccountSummary.BalanceSummaries {
-							if b.UUID == cBC.BalanceUUID {
-								balanceType = b.Type
-								break
-							}
-						}
-					}
-				}
-				if utils.SliceHasMember([]string{utils.DATA, utils.VOICE}, balanceType) && cBC.ExtraChargeID == "" {
-					cBC.ExtraChargeID = utils.META_NONE // mark the balance to be exported as Unit type
-				}
-				if cBC.ExtraChargeID != "" { // have both monetary and data
-					// Work around, enforce logic with 2 balances for *voice/*monetary combination
-					// so we can stay compatible with CallCost
-					incr.BalanceInfo.Unit = &UnitInfo{UUID: cBC.BalanceUUID, Consumed: cBC.Units}
-					incr.BalanceInfo.Unit.RateInterval = ec.rateIntervalForRatingID(cBC.RatingID)
-					if cBC.ExtraChargeID != utils.META_NONE {
-						cBC = ec.Accounting[cBC.ExtraChargeID] // overwrite original balance so we can process it in one place
-					}
-				}
-				if cBC.ExtraChargeID != utils.META_NONE {
-					incr.BalanceInfo.Monetary = &MonetaryInfo{UUID: cBC.BalanceUUID}
-					incr.BalanceInfo.Monetary.RateInterval = ec.rateIntervalForRatingID(cBC.RatingID)
-				}
+
+		incrs := cIl.Increments
+		if l := len(cIl.Increments); l != 0 {
+			if ec.Accounting[cIl.Increments[l-1].AccountingID].RatingID == utils.MetaRounding {
+				// special case: if the last increment is has the ratingID equal to *roundig
+				// we consider it as the roundIncrement
+				l--
+				incrs = incrs[:l]
+				ts.RoundIncrement = ec.newIntervalFromCharge(cIl.Increments[l-1])
+				ts.RoundIncrement.Cost = -ts.RoundIncrement.Cost
 			}
-			ts.Increments[j] = incr
+			ts.Increments = make(Increments, l)
+		}
+		for j, cInc := range incrs {
+			ts.Increments[j] = ec.newIntervalFromCharge(cInc)
 		}
 		cc.Timespans[i] = ts
 	}
 	return cc
+}
+
+// newIntervalFromCharge creates Increment from a ChargingIncrement
+func (ec *EventCost) newIntervalFromCharge(cInc *ChargingIncrement) (incr *Increment) {
+	incr = &Increment{
+		Duration:       cInc.Usage,
+		Cost:           cInc.Cost,
+		CompressFactor: cInc.CompressFactor,
+		BalanceInfo:    new(DebitInfo),
+	}
+	if len(cInc.AccountingID) == 0 {
+		return
+	}
+	cBC := ec.Accounting[cInc.AccountingID]
+	incr.BalanceInfo.AccountID = cBC.AccountID
+	var balanceType string
+	if cBC.BalanceUUID != "" {
+		if ec.AccountSummary != nil {
+			for _, b := range ec.AccountSummary.BalanceSummaries {
+				if b.UUID == cBC.BalanceUUID {
+					balanceType = b.Type
+					break
+				}
+			}
+		}
+	}
+	if utils.SliceHasMember([]string{utils.DATA, utils.VOICE}, balanceType) && cBC.ExtraChargeID == "" {
+		cBC.ExtraChargeID = utils.META_NONE // mark the balance to be exported as Unit type
+	}
+	if cBC.ExtraChargeID != "" { // have both monetary and data
+		// Work around, enforce logic with 2 balances for *voice/*monetary combination
+		// so we can stay compatible with CallCost
+		incr.BalanceInfo.Unit = &UnitInfo{UUID: cBC.BalanceUUID, Consumed: cBC.Units}
+		incr.BalanceInfo.Unit.RateInterval = ec.rateIntervalForRatingID(cBC.RatingID)
+		if cBC.ExtraChargeID != utils.META_NONE {
+			cBC = ec.Accounting[cBC.ExtraChargeID] // overwrite original balance so we can process it in one place
+		}
+	}
+	if cBC.ExtraChargeID != utils.META_NONE {
+		incr.BalanceInfo.Monetary = &MonetaryInfo{UUID: cBC.BalanceUUID}
+		incr.BalanceInfo.Monetary.RateInterval = ec.rateIntervalForRatingID(cBC.RatingID)
+	}
+	return
 }
 
 // ratingGetIDFomEventCost retrieves UUID based on data from another EventCost
