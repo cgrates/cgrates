@@ -598,14 +598,8 @@ func (sS *SessionS) refundSession(s *Session, sRunIdx int, rUsage time.Duration)
 // storeSCost will post the session cost to CDRs
 // not thread safe, need to be handled in a layer above
 func (sS *SessionS) storeSCost(s *Session, sRunIdx int) (err error) {
-	if sRunIdx >= len(s.SRuns) {
-		return errors.New("sRunIdx out of range")
-	}
 	sr := s.SRuns[sRunIdx]
-	if sr.EventCost == nil {
-		return // no costs to save, ignore the operation
-	}
-	smCost := &engine.V2SMCost{
+	smCost := &engine.SMCost{
 		CGRID:       s.CGRID,
 		CostSource:  utils.MetaSessionS,
 		RunID:       sr.Event.GetStringIgnoreErrors(utils.RunID),
@@ -614,7 +608,7 @@ func (sS *SessionS) storeSCost(s *Session, sRunIdx int) (err error) {
 		Usage:       sr.TotalUsage,
 		CostDetails: sr.EventCost,
 	}
-	argSmCost := &engine.ArgsV2CDRSStoreSMCost{
+	argSmCost := &engine.AttrCDRSStoreSMCost{
 		Cost:           smCost,
 		CheckDuplicate: true,
 		ArgDispatcher:  s.ArgDispatcher,
@@ -623,23 +617,46 @@ func (sS *SessionS) storeSCost(s *Session, sRunIdx int) (err error) {
 		},
 	}
 	var reply string
-	if err := sS.connMgr.Call(sS.cgrCfg.SessionSCfg().CDRsConns, nil, utils.CDRsV2StoreSessionCost,
-		argSmCost, &reply); err != nil {
-		if err == utils.ErrExists {
+	// use the v1 because it doesn't do rounding refund
+	if err := sS.connMgr.Call(sS.cgrCfg.SessionSCfg().CDRsConns, nil, utils.CDRsV1StoreSessionCost,
+		argSmCost, &reply); err != nil && err == utils.ErrExists {
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s> refunding session: <%s> error: <%s>",
+				utils.SessionS, s.CGRID, err.Error()))
+		if err = sS.refundSession(s, sRunIdx, sr.CD.GetDuration()); err != nil { // refund entire duration
 			utils.Logger.Warning(
-				fmt.Sprintf("<%s> refunding session: <%s> error: <%s>",
-					utils.SessionS, s.CGRID, err.Error()))
-			if err = sS.refundSession(s, sRunIdx, sr.CD.GetDuration()); err != nil { // refund entire duration
-				utils.Logger.Warning(
-					fmt.Sprintf(
-						"<%s> failed refunding session: <%s>, srIdx: <%d>, error: <%s>",
-						utils.SessionS, s.CGRID, sRunIdx, err.Error()))
-			}
-		} else {
-			return err
+				fmt.Sprintf(
+					"<%s> failed refunding session: <%s>, srIdx: <%d>, error: <%s>",
+					utils.SessionS, s.CGRID, sRunIdx, err.Error()))
+		}
+		err = nil
+	}
+	return err
+}
+
+// roundCost will round the EventCost and will refund the extra debited increments
+// should be called only at the endSession
+// not thread safe, need to be handled in a layer above
+func (sS *SessionS) roundCost(s *Session, sRunIdx int) (err error) {
+	sr := s.SRuns[sRunIdx]
+	runID := sr.Event.GetStringIgnoreErrors(utils.RunID)
+	cc := sr.EventCost.AsCallCost(utils.EmptyString)
+	cc.Round()
+	if roundIncrements := cc.GetRoundIncrements(); len(roundIncrements) != 0 {
+		cd := cc.CreateCallDescriptor()
+		cd.CgrID = s.CGRID
+		cd.RunID = runID
+		cd.Increments = roundIncrements
+		var response float64
+		if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().ResSConns, nil,
+			utils.ResponderRefundRounding,
+			&engine.CallDescriptorWithArgDispatcher{CallDescriptor: cd},
+			&response); err != nil {
+			return
 		}
 	}
-	return nil
+	sr.EventCost = engine.NewEventCostFromCallCost(cc, s.CGRID, runID)
+	return
 }
 
 // disconnectSession will send disconnect from SessionS to clients
@@ -1478,6 +1495,20 @@ func (sS *SessionS) endSession(s *Session, tUsage, lastUsage *time.Duration,
 							utils.SessionS, s.CGRID, sRunIdx, err.Error()))
 				}
 			}
+			if err := sS.roundCost(s, sRunIdx); err != nil { // will round the cost and refund the extra increment
+				utils.Logger.Warning(
+					fmt.Sprintf("<%s> failed rounding  session cost for <%s>, srIdx: <%d>, error: <%s>",
+						utils.SessionS, s.CGRID, sRunIdx, err.Error()))
+			}
+
+			if sS.cgrCfg.SessionSCfg().StoreSCosts {
+				if err := sS.storeSCost(s, sRunIdx); err != nil {
+					utils.Logger.Warning(
+						fmt.Sprintf("<%s> failed storing session cost for <%s>, srIdx: <%d>, error: <%s>",
+							utils.SessionS, s.CGRID, sRunIdx, err.Error()))
+				}
+			}
+
 			// set cost fields
 			sr.Event[utils.Cost] = sr.EventCost.GetCost()
 			sr.Event[utils.CostDetails] = utils.ToJSON(sr.EventCost) // avoid map[string]interface{} when decoding
@@ -1491,14 +1522,6 @@ func (sS *SessionS) endSession(s *Session, tUsage, lastUsage *time.Duration,
 		if aTime != nil {
 			sr.Event[utils.AnswerTime] = *aTime
 		}
-		if sS.cgrCfg.SessionSCfg().StoreSCosts {
-			if err := sS.storeSCost(s, sRunIdx); err != nil {
-				utils.Logger.Warning(
-					fmt.Sprintf("<%s> failed storing session cost for <%s>, srIdx: <%d>, error: <%s>",
-						utils.SessionS, s.CGRID, sRunIdx, err.Error()))
-			}
-		}
-
 	}
 	engine.Cache.Set(utils.CacheClosedSessions, s.CGRID, s,
 		nil, true, utils.NonTransactional)

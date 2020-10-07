@@ -446,9 +446,8 @@ func (ts *TimeSpan) CalculateCost() float64 {
 			return 0
 		}
 		return ts.RateInterval.GetCost(ts.GetDuration(), ts.GetGroupStart())
-	} else {
-		return ts.Increments.GetTotalCost() * float64(ts.GetCompressFactor())
 	}
+	return ts.Increments.GetTotalCost() * float64(ts.GetCompressFactor())
 }
 
 func (ts *TimeSpan) setRatingInfo(rp *RatingInfo) {
