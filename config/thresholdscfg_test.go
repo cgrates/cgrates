@@ -25,11 +25,12 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestThresholdSCfgloadFromJsonCfg(t *testing.T) {
+func TestThresholdSCfgloadFromJsonCfgCase1(t *testing.T) {
 	cfgJSON := &ThresholdSJsonCfg{
 		Enabled:               utils.BoolPointer(true),
 		Indexed_selects:       utils.BoolPointer(true),
 		Store_interval:        utils.StringPointer("2"),
+		String_indexed_fields: &[]string{"*req.prefix"},
 		Prefix_indexed_fields: &[]string{"*req.index1"},
 		Suffix_indexed_fields: &[]string{"*req.index1"},
 		Nested_fields:         utils.BoolPointer(true),
@@ -38,6 +39,7 @@ func TestThresholdSCfgloadFromJsonCfg(t *testing.T) {
 		Enabled:             true,
 		IndexedSelects:      true,
 		StoreInterval:       time.Duration(2),
+		StringIndexedFields: &[]string{"*req.prefix"},
 		PrefixIndexedFields: &[]string{"*req.index1"},
 		SuffixIndexedFields: &[]string{"*req.index1"},
 		NestedFields:        true,
@@ -51,7 +53,19 @@ func TestThresholdSCfgloadFromJsonCfg(t *testing.T) {
 	}
 }
 
-func TestThresholdSCfgAsMapInterface(t *testing.T) {
+func TestThresholdSCfgloadFromJsonCfgCase2(t *testing.T) {
+	cfgJSON := &ThresholdSJsonCfg{
+		Store_interval: utils.StringPointer("1ss"),
+	}
+	expected := "time: unknown unit \"ss\" in duration \"1ss\""
+	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err = jsonCfg.thresholdSCfg.loadFromJsonCfg(cfgJSON); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
+func TestThresholdSCfgAsMapInterfaceCase1(t *testing.T) {
 	cfgJSONStr := `{
 		"thresholds": {},		
 }`
@@ -70,12 +84,13 @@ func TestThresholdSCfgAsMapInterface(t *testing.T) {
 	}
 }
 
-func TestThresholdSCfgAsMapInterface1(t *testing.T) {
+func TestThresholdSCfgAsMapInterfaceCase2(t *testing.T) {
 	cfgJSONStr := `{
 		"thresholds": {								
 			"enabled": true,						
 			"store_interval": "96h",					
 			"indexed_selects": false,	
+            "string_indexed_fields": ["*req.string"],
 			"prefix_indexed_fields": ["*req.prefix","*req.indexed","*req.fields"],	
             "suffix_indexed_fields": ["*req.suffix_indexed_fields1", "*req.suffix_indexed_fields2"],		
 			"nested_fields": true,					
@@ -85,6 +100,7 @@ func TestThresholdSCfgAsMapInterface1(t *testing.T) {
 		utils.EnabledCfg:             true,
 		utils.StoreIntervalCfg:       "96h0m0s",
 		utils.IndexedSelectsCfg:      false,
+		utils.StringIndexedFieldsCfg: []string{"*req.string"},
 		utils.PrefixIndexedFieldsCfg: []string{"*req.prefix", "*req.indexed", "*req.fields"},
 		utils.SuffixIndexedFieldsCfg: []string{"*req.suffix_indexed_fields1", "*req.suffix_indexed_fields2"},
 		utils.NestedFieldsCfg:        true,
