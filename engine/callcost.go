@@ -203,8 +203,9 @@ func (cc *CallCost) Round() {
 		//log.Print(cost, roundedCost, correctionCost)
 		if correctionCost != 0 {
 			ts.RoundIncrement = &Increment{
-				Cost:        correctionCost,
-				BalanceInfo: inc.BalanceInfo,
+				Cost:           correctionCost,
+				BalanceInfo:    inc.BalanceInfo,
+				CompressFactor: 1,
 			}
 			totalCorrectionCost += correctionCost
 			ts.Cost += correctionCost

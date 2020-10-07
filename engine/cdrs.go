@@ -175,7 +175,7 @@ func (cdrS *CDRServer) rateCDR(cdr *CDRWithOpts) ([]*CDR, error) {
 				cdrClone.OriginID = smCost.OriginID
 				if cdr.Usage == 0 {
 					cdrClone.Usage = smCost.Usage
-				} else if smCost.CostDetails.GetUsage() != cdr.Usage {
+				} else if smCost.Usage != cdr.Usage {
 					if _, err = cdrS.refundEventCost(smCost.CostDetails, // ToDo: need to maybe mark it in the future in the processed flags
 						cdrClone.RequestType, cdrClone.ToR); err != nil {
 						return nil, err
@@ -988,7 +988,7 @@ func (cdrS *CDRServer) V2StoreSessionCost(args *ArgsV2CDRSStoreSMCost, reply *st
 			OriginID:    args.Cost.OriginID,
 			CostSource:  args.Cost.CostSource,
 			Usage:       args.Cost.Usage,
-			CostDetails: args.Cost.CostDetails},
+			CostDetails: NewEventCostFromCallCost(cc, args.Cost.CGRID, args.Cost.RunID)},
 		args.CheckDuplicate); err != nil {
 		err = utils.NewErrServerError(err)
 		return
