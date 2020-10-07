@@ -56,6 +56,7 @@ var (
 		testAttributeSProcessEventWithResource,
 		testAttributeSProcessEventWithResourceFull,
 		testAttributeSProcessEventWithLibPhoneNumber,
+		testAttributeSProcessEventWithLibPhoneNumberComposed,
 		testAttributeSProcessEventWithLibPhoneNumberFull,
 		testAttributeSStopEngine,
 	}
@@ -885,6 +886,110 @@ func testAttributeSProcessEventWithLibPhoneNumber(t *testing.T) {
 	}
 }
 
+func testAttributeSProcessEventWithLibPhoneNumberComposed(t *testing.T) {
+	// add new attribute profile
+	var result string
+	alsPrf := &v1.AttributeWithCache{
+		AttributeProfile: &engine.AttributeProfile{
+			Tenant:    "cgrates.org",
+			ID:        "ATTR_LIBPHONENUMBER_COMPOSED",
+			Contexts:  []string{utils.META_ANY},
+			FilterIDs: []string{"*string:~*req.EventName:AddComposedInfo"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			},
+			Attributes: []*engine.Attribute{
+				{
+					Path: utils.MetaReq + utils.NestingSep + "DestinationCarrier",
+					Type: utils.META_COMPOSED,
+					Value: config.RSRParsers{
+						&config.RSRParser{
+							Rules: "~*libphonenumber.<~*req.Destination>.Carrier",
+						},
+					},
+				},
+				{
+					Path: utils.MetaReq + utils.NestingSep + "DestinationCarrier",
+					Type: utils.META_COMPOSED,
+					Value: config.RSRParsers{
+						&config.RSRParser{
+							Rules: ";",
+						},
+					},
+				},
+				{
+					Path: utils.MetaReq + utils.NestingSep + "DestinationCarrier",
+					Type: utils.META_COMPOSED,
+					Value: config.RSRParsers{
+						&config.RSRParser{
+							Rules: "~*libphonenumber.<~*req.Destination>.CountryCode",
+						},
+					},
+				},
+			},
+			Blocker: false,
+			Weight:  10,
+		},
+	}
+	alsPrf.Compile()
+	if err := attrRPC.Call(utils.APIerSv1SetAttributeProfile, alsPrf, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	var replyAttr *engine.AttributeProfile
+	if err := attrRPC.Call(utils.APIerSv1GetAttributeProfile,
+		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_LIBPHONENUMBER_COMPOSED"}}, &replyAttr); err != nil {
+		t.Fatal(err)
+	}
+	replyAttr.Compile()
+	if !reflect.DeepEqual(alsPrf.AttributeProfile, replyAttr) {
+		t.Errorf("Expecting : %+v, received: %+v", alsPrf.AttributeProfile, replyAttr)
+	}
+
+	ev := &engine.AttrArgsProcessEvent{
+		Context: utils.StringPointer(utils.MetaSessionS),
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testAttributeSProcessEventWithLibPhoneNumberComposed",
+				Event: map[string]interface{}{
+					"EventName":   "AddComposedInfo",
+					"Destination": "+447779330921",
+				},
+			},
+		},
+	}
+
+	eRply := engine.AttrSProcessEventReply{
+		MatchedProfiles: []string{"ATTR_LIBPHONENUMBER_COMPOSED"},
+		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "DestinationCarrier"},
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testAttributeSProcessEventWithLibPhoneNumberComposed",
+				Event: map[string]interface{}{
+					"EventName":          "AddComposedInfo",
+					"Destination":        "+447779330921",
+					"DestinationCarrier": "Orange;44",
+				},
+			},
+		},
+	}
+	sort.Strings(eRply.AlteredFields)
+	var rplyEv engine.AttrSProcessEventReply
+	if err := attrRPC.Call(utils.AttributeSv1ProcessEvent,
+		ev, &rplyEv); err != nil {
+		t.Fatal(err)
+	}
+	sort.Strings(rplyEv.AlteredFields)
+	if !reflect.DeepEqual(eRply, rplyEv) {
+		t.Errorf("Expecting: %+v, received: %+v",
+			utils.ToJSON(eRply), utils.ToJSON(rplyEv))
+	}
+}
+
 func testAttributeSProcessEventWithLibPhoneNumberFull(t *testing.T) {
 	// add new attribute profile
 	var result string
@@ -953,7 +1058,7 @@ func testAttributeSProcessEventWithLibPhoneNumberFull(t *testing.T) {
 				Event: map[string]interface{}{
 					"EventName":          "AddDestinationDetails",
 					"Destination":        "+447779330921",
-					"DestinationDetails": "{\"Carrier\":\"Orange\",\"CountryCode\":44,\"GeoLocation\":\"\",\"NationalNumber\":7779330921,\"NumberType\":1,\"Region\":\"GB\"}",
+					"DestinationDetails": "{\"Carrier\":\"Orange\",\"CountryCode\":44,\"CountryCodeSource\":1,\"Extension\":\"\",\"GeoLocation\":\"\",\"ItalianLeadingZero\":false,\"LengthOfNationalDestinationCode\":0,\"NationalNumber\":7779330921,\"NumberOfLeadingZeros\":1,\"NumberType\":1,\"PreferredDomesticCarrierCode\":\"\",\"RawInput\":\"+447779330921\",\"Region\":\"GB\"}",
 				},
 			},
 		},
