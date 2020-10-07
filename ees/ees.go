@@ -262,6 +262,9 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithIDs, rply *ma
 
 	}
 	metricMapLock.Unlock()
+	if len(*rply) == 0 {
+		return utils.ErrNotFound
+	}
 	return
 }
 
