@@ -31,6 +31,15 @@ type EEsCfg struct {
 	Exporters       []*EventExporterCfg
 }
 
+func (eeS *EEsCfg) GetDefaultExporter() *EventExporterCfg {
+	for _, es := range eeS.Exporters {
+		if es.ID == utils.MetaDefault {
+			return es
+		}
+	}
+	return nil
+}
+
 func (eeS *EEsCfg) loadFromJsonCfg(jsnCfg *EEsJsonCfg, msgTemplates map[string][]*FCTemplate, sep string, dfltExpCfg *EventExporterCfg) (err error) {
 	if jsnCfg == nil {
 		return

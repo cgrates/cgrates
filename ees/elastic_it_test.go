@@ -205,6 +205,25 @@ func testElasticExportEvents(t *testing.T) {
 			},
 		},
 	}
+
+	eventSMSNoFields := &utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "SMSEvent",
+			Time:   utils.TimePointer(time.Now()),
+			Event: map[string]interface{}{
+				utils.CGRID:       utils.Sha1("sms2", time.Unix(1383813745, 0).UTC().String()),
+				utils.ToR:         utils.SMS,
+				utils.Tenant:      "cgrates.org",
+				utils.Category:    "call",
+				utils.Account:     "1001",
+				utils.Subject:     "1001",
+				utils.Destination: "1002",
+				utils.RunID:       utils.MetaDefault,
+				"ExporterUsed":    "ElasticExporterWithNoFields",
+			},
+		},
+	}
 	var reply map[string]utils.MapStorage
 	if err := elasticRpc.Call(utils.EventExporterSv1ProcessEvent, eventVoice, &reply); err != nil {
 		t.Error(err)
@@ -213,6 +232,9 @@ func testElasticExportEvents(t *testing.T) {
 		t.Error(err)
 	}
 	if err := elasticRpc.Call(utils.EventExporterSv1ProcessEvent, eventSMS, &reply); err != nil {
+		t.Error(err)
+	}
+	if err := elasticRpc.Call(utils.EventExporterSv1ProcessEvent, eventSMSNoFields, &reply); err != nil {
 		t.Error(err)
 	}
 }
@@ -297,6 +319,21 @@ func testElasticVerifyExports(t *testing.T) {
 				utils.Tenant:      "cgrates.org",
 				utils.ToR:         "*voice",
 				utils.Usage:       "10000000000",
+			}
+			if !reflect.DeepEqual(eMp, hit.(map[string]interface{})["_source"]) {
+				t.Errorf("Expected %+v, received: %+v", eMp, hit.(map[string]interface{})["_source"])
+			}
+		case utils.Sha1("sms2", time.Unix(1383813745, 0).UTC().String()) + ":*default":
+			eMp := map[string]interface{}{
+				utils.CGRID:       utils.Sha1("sms2", time.Unix(1383813745, 0).UTC().String()),
+				utils.ToR:         utils.SMS,
+				utils.Tenant:      "cgrates.org",
+				utils.Category:    "call",
+				utils.Account:     "1001",
+				utils.Subject:     "1001",
+				utils.Destination: "1002",
+				utils.RunID:       utils.MetaDefault,
+				"ExporterUsed":    "ElasticExporterWithNoFields",
 			}
 			if !reflect.DeepEqual(eMp, hit.(map[string]interface{})["_source"]) {
 				t.Errorf("Expected %+v, received: %+v", eMp, hit.(map[string]interface{})["_source"])

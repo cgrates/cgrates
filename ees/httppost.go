@@ -74,30 +74,35 @@ func (httpPost *HTTPPost) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 	httpPost.dc[utils.NumberOfEvents] = httpPost.dc[utils.NumberOfEvents].(int64) + 1
 
 	urlVals := url.Values{}
-	req := utils.MapStorage(cgrEv.Event)
-	eeReq := NewEventExporterRequest(req, httpPost.dc,
-		httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].Tenant,
-		httpPost.cgrCfg.GeneralCfg().DefaultTenant,
-		utils.FirstNonEmpty(httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].Timezone,
-			httpPost.cgrCfg.GeneralCfg().DefaultTimezone),
-		httpPost.filterS)
-
-	if err = eeReq.SetFields(httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].ContentFields()); err != nil {
-		return
-	}
-	for el := eeReq.cnt.GetFirstElement(); el != nil; el = el.Next() {
-		var nmIt utils.NMInterface
-		if nmIt, err = eeReq.cnt.Field(el.Value); err != nil {
+	if len(httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].ContentFields()) == 0 {
+		for k, v := range cgrEv.Event {
+			urlVals.Set(k, utils.IfaceAsString(v))
+		}
+	} else {
+		req := utils.MapStorage(cgrEv.Event)
+		eeReq := NewEventExporterRequest(req, httpPost.dc,
+			httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].Tenant,
+			httpPost.cgrCfg.GeneralCfg().DefaultTenant,
+			utils.FirstNonEmpty(httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].Timezone,
+				httpPost.cgrCfg.GeneralCfg().DefaultTimezone),
+			httpPost.filterS)
+		if err = eeReq.SetFields(httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].ContentFields()); err != nil {
 			return
 		}
-		itm, isNMItem := nmIt.(*config.NMItem)
-		if !isNMItem {
-			return fmt.Errorf("cannot encode reply value: %s, err: not NMItems", utils.ToJSON(el.Value))
+		for el := eeReq.cnt.GetFirstElement(); el != nil; el = el.Next() {
+			var nmIt utils.NMInterface
+			if nmIt, err = eeReq.cnt.Field(el.Value); err != nil {
+				return
+			}
+			itm, isNMItem := nmIt.(*config.NMItem)
+			if !isNMItem {
+				return fmt.Errorf("cannot encode reply value: %s, err: not NMItems", utils.ToJSON(el.Value))
+			}
+			if itm == nil {
+				continue // all attributes, not writable to diameter packet
+			}
+			urlVals.Set(strings.Join(itm.Path, utils.NestingSep), utils.IfaceAsString(itm.Data))
 		}
-		if itm == nil {
-			continue // all attributes, not writable to diameter packet
-		}
-		urlVals.Set(strings.Join(itm.Path, utils.NestingSep), utils.IfaceAsString(itm.Data))
 	}
 	updateEEMetrics(httpPost.dc, cgrEv.Event, httpPost.cgrCfg.GeneralCfg().DefaultTimezone)
 	if err = httpPost.httpPoster.PostValues(urlVals); err != nil &&

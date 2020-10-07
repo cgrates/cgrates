@@ -102,6 +102,10 @@ func (fCsv *FileCSVee) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 		fCsv.Unlock()
 	}()
 	fCsv.dc[utils.NumberOfEvents] = fCsv.dc[utils.NumberOfEvents].(int64) + 1
+	fields := fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].ContentFields()
+	if len(fields) == 0 { // use the default fields in case of empty fields for exporter
+		fields = fCsv.cgrCfg.EEsCfg().GetDefaultExporter().ContentFields()
+	}
 
 	var csvRecord []string
 	req := utils.MapStorage(cgrEv.Event)
@@ -111,7 +115,7 @@ func (fCsv *FileCSVee) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 			fCsv.cgrCfg.GeneralCfg().DefaultTimezone),
 		fCsv.filterS)
 
-	if err = eeReq.SetFields(fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].ContentFields()); err != nil {
+	if err = eeReq.SetFields(fields); err != nil {
 		return
 	}
 	for el := eeReq.cnt.GetFirstElement(); el != nil; el = el.Next() {
