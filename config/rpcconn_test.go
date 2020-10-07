@@ -25,10 +25,19 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestRPCConnsloadFromJsonCfg(t *testing.T) {
-	cfgJSONStr := `{
-"rpc_conn": {}
-}`
+func TestRPCConnsloadFromJsonCfgCase1(t *testing.T) {
+	cfgJSON := &RPCConnsJson{
+		Strategy: utils.StringPointer(utils.MetaFirst),
+		PoolSize: utils.IntPointer(1),
+		Conns: &[]*RemoteHostJson{
+			{
+				Address:     utils.StringPointer("127.0.0.1:2012"),
+				Transport:   utils.StringPointer("*json"),
+				Synchronous: utils.BoolPointer(false),
+				Tls:         utils.BoolPointer(false),
+			},
+		},
+	}
 	expected := RpcConns{
 		utils.MetaInternal: {
 			Strategy: utils.MetaFirst,
@@ -44,27 +53,31 @@ func TestRPCConnsloadFromJsonCfg(t *testing.T) {
 		},
 		utils.MetaLocalHost: {
 			Strategy: utils.MetaFirst,
-			PoolSize: 0,
+			PoolSize: 1,
 			Conns: []*RemoteHost{
 				{
 					Address:     "127.0.0.1:2012",
-					Transport:   utils.MetaJSON,
+					Transport:   "*json",
 					Synchronous: false,
 					TLS:         false,
 				},
 			},
 		},
 	}
-	newCfg, err := NewDefaultCGRConfig()
-	if err != nil {
-		t.Fatal(err)
+	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err = jsonCfg.rpcConns[utils.MetaLocalHost].loadFromJsonCfg(cfgJSON); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(jsonCfg.rpcConns, expected) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.rpcConns))
 	}
-	if jsonCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+}
+
+func TestRPCConnsloadFromJsonCfgCase2(t *testing.T) {
+	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = newCfg.loadRPCConns(jsonCfg); err != nil {
+	} else if err = jsonCfg.rpcConns[utils.MetaLocalHost].loadFromJsonCfg(nil); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(expected, newCfg.rpcConns) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(newCfg.rpcConns))
 	}
 }
 
