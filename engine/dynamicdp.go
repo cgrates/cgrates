@@ -136,7 +136,7 @@ func (dDP *dynamicDP) fieldAsInterface(fldPath []string) (val interface{}, err e
 }
 
 func newLibPhoneNumberDP(number string) (dp utils.DataProvider, err error) {
-	num, err := phonenumbers.Parse(number, utils.EmptyString)
+	num, err := phonenumbers.ParseAndKeepRawInput(number, utils.EmptyString)
 	if err != nil {
 		return nil, err
 	}
@@ -165,7 +165,7 @@ func (dDP *libphonenumberDP) RemoteHost() net.Addr {
 
 func (dDP *libphonenumberDP) FieldAsInterface(fldPath []string) (val interface{}, err error) {
 	if len(fldPath) == 0 {
-		dDP.initCache()
+		dDP.setDefaultFields()
 		val = dDP.cache
 		return
 	}
@@ -181,7 +181,7 @@ func (dDP *libphonenumberDP) fieldAsInterface(fldPath []string) (val interface{}
 	}
 	switch fldPath[0] {
 	case "CountryCode":
-		val = dDP.pNumber.CountryCode
+		val = dDP.pNumber.GetCountryCode()
 	case "NationalNumber":
 		val = dDP.pNumber.GetNationalNumber()
 	case "Region":
@@ -200,14 +200,29 @@ func (dDP *libphonenumberDP) fieldAsInterface(fldPath []string) (val interface{}
 			utils.Logger.Warning(fmt.Sprintf("Received error: <%+v> when getting Carrier for number %+v", err, dDP.pNumber))
 		}
 		val = carrier
+	case "LengthOfNationalDestinationCode":
+		val = phonenumbers.GetLengthOfNationalDestinationCode(dDP.pNumber)
+	case "RawInput":
+		val = dDP.pNumber.GetRawInput()
+	case "Extension":
+		val = dDP.pNumber.GetExtension()
+	case "NumberOfLeadingZeros":
+		val = dDP.pNumber.GetNumberOfLeadingZeros()
+	case "ItalianLeadingZero":
+		val = dDP.pNumber.GetItalianLeadingZero()
+	case "PreferredDomesticCarrierCode":
+		val = dDP.pNumber.GetPreferredDomesticCarrierCode()
+	case "CountryCodeSource":
+		val = dDP.pNumber.GetCountryCodeSource()
+
 	}
 	dDP.cache[fldPath[0]] = val
 	return
 }
 
-func (dDP *libphonenumberDP) initCache() {
+func (dDP *libphonenumberDP) setDefaultFields() {
 	if _, has := dDP.cache["CountryCode"]; !has {
-		dDP.cache["CountryCode"] = dDP.pNumber.CountryCode
+		dDP.cache["CountryCode"] = dDP.pNumber.GetCountryCode()
 	}
 	if _, has := dDP.cache["NationalNumber"]; !has {
 		dDP.cache["NationalNumber"] = dDP.pNumber.GetNationalNumber()
@@ -231,5 +246,26 @@ func (dDP *libphonenumberDP) initCache() {
 			utils.Logger.Warning(fmt.Sprintf("Received error: <%+v> when getting Carrier for number %+v", err, dDP.pNumber))
 		}
 		dDP.cache["Carrier"] = carrier
+	}
+	if _, has := dDP.cache["LengthOfNationalDestinationCode"]; !has {
+		dDP.cache["LengthOfNationalDestinationCode"] = phonenumbers.GetLengthOfNationalDestinationCode(dDP.pNumber)
+	}
+	if _, has := dDP.cache["RawInput"]; !has {
+		dDP.cache["RawInput"] = dDP.pNumber.GetRawInput()
+	}
+	if _, has := dDP.cache["Extension"]; !has {
+		dDP.cache["Extension"] = dDP.pNumber.GetExtension()
+	}
+	if _, has := dDP.cache["NumberOfLeadingZeros"]; !has {
+		dDP.cache["NumberOfLeadingZeros"] = dDP.pNumber.GetNumberOfLeadingZeros()
+	}
+	if _, has := dDP.cache["ItalianLeadingZero"]; !has {
+		dDP.cache["ItalianLeadingZero"] = dDP.pNumber.GetItalianLeadingZero()
+	}
+	if _, has := dDP.cache["PreferredDomesticCarrierCode"]; !has {
+		dDP.cache["PreferredDomesticCarrierCode"] = dDP.pNumber.GetPreferredDomesticCarrierCode()
+	}
+	if _, has := dDP.cache["CountryCodeSource"]; !has {
+		dDP.cache["CountryCodeSource"] = dDP.pNumber.GetCountryCodeSource()
 	}
 }
