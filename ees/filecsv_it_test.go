@@ -58,6 +58,7 @@ var (
 		testCsvVerifyMaskedDestination,
 		testCsvExportEventWithInflateTemplate,
 		testCsvVerifyExportsWithInflateTemplate,
+		testCsvExportNotFoundExporter,
 		testStopCgrEngine,
 		testCleanDirectory,
 	}
@@ -525,4 +526,43 @@ func testCsvVerifyExportsWithInflateTemplate(t *testing.T) {
 	} else if eCnt != string(outContent1) {
 		t.Errorf("Expecting: \n<%q>, \nreceived: \n<%q>", eCnt, string(outContent1))
 	}
+}
+
+func testCsvExportNotFoundExporter(t *testing.T) {
+	eventVoice := &utils.CGREventWithIDs{
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "voiceEvent",
+				Time:   utils.TimePointer(time.Now()),
+				Event: map[string]interface{}{
+					utils.CGRID:       utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
+					utils.ToR:         utils.VOICE,
+					utils.OriginID:    "dsafdsaf",
+					utils.OriginHost:  "192.168.1.1",
+					utils.RequestType: utils.META_RATED,
+					utils.Tenant:      "cgrates.org",
+					utils.Category:    "call",
+					utils.Account:     "1001",
+					utils.Subject:     "1001",
+					utils.Destination: "1002",
+					utils.SetupTime:   time.Unix(1383813745, 0).UTC(),
+					utils.AnswerTime:  time.Unix(1383813746, 0).UTC(),
+					utils.Usage:       time.Duration(10) * time.Second,
+					utils.RunID:       utils.MetaDefault,
+					utils.Cost:        1.01,
+					"ExporterUsed":    "ExporterNotFound",
+					"ExtraFields": map[string]string{"extra1": "val_extra1",
+						"extra2": "val_extra2", "extra3": "val_extra3"},
+				},
+			},
+		},
+	}
+
+	var reply map[string]utils.MapStorage
+	if err := csvRpc.Call(utils.EventExporterSv1ProcessEvent, eventVoice, &reply); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+
 }
