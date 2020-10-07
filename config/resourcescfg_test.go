@@ -25,12 +25,13 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestResourceSConfigloadFromJsonCfg(t *testing.T) {
+func TestResourceSConfigloadFromJsonCfgCase1(t *testing.T) {
 	cfgJSON := &ResourceSJsonCfg{
 		Enabled:               utils.BoolPointer(true),
 		Indexed_selects:       utils.BoolPointer(true),
-		Thresholds_conns:      &[]string{utils.MetaInternal},
+		Thresholds_conns:      &[]string{utils.MetaInternal, "*conn1"},
 		Store_interval:        utils.StringPointer("2s"),
+		String_indexed_fields: &[]string{"*req.index1"},
 		Prefix_indexed_fields: &[]string{"*req.index1"},
 		Suffix_indexed_fields: &[]string{"*req.index1"},
 		Nested_fields:         utils.BoolPointer(true),
@@ -39,7 +40,8 @@ func TestResourceSConfigloadFromJsonCfg(t *testing.T) {
 		Enabled:             true,
 		IndexedSelects:      true,
 		StoreInterval:       time.Duration(2 * time.Second),
-		ThresholdSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)},
+		ThresholdSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"},
+		StringIndexedFields: &[]string{"*req.index1"},
 		PrefixIndexedFields: &[]string{"*req.index1"},
 		SuffixIndexedFields: &[]string{"*req.index1"},
 		NestedFields:        true,
@@ -50,6 +52,18 @@ func TestResourceSConfigloadFromJsonCfg(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, cfgJson.resourceSCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(cfgJson.resourceSCfg))
+	}
+}
+
+func TestResourceSConfigloadFromJsonCfgCase2(t *testing.T) {
+	cfgJSON := &ResourceSJsonCfg{
+		Store_interval: utils.StringPointer("2ss"),
+	}
+	expected := "time: unknown unit \"ss\" in duration \"2ss\""
+	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err = jsonCfg.resourceSCfg.loadFromJsonCfg(cfgJSON); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
 
@@ -78,8 +92,9 @@ func TestResourceSConfigAsMapInterface1(t *testing.T) {
 		"resources": {								
 			"enabled": true,						
 			"store_interval": "7m",					
-			"thresholds_conns": ["*internal"],					
-			"indexed_selects":true,					
+			"thresholds_conns": ["*internal:*thresholds", "*conn1"],					
+			"indexed_selects":true,		
+            "string_indexed_fields": ["*req.index1"],
 			"prefix_indexed_fields": ["*req.prefix_indexed_fields1","*req.prefix_indexed_fields2"],
             "suffix_indexed_fields": ["*req.prefix_indexed_fields1"],
 			"nested_fields": true,					
@@ -88,8 +103,9 @@ func TestResourceSConfigAsMapInterface1(t *testing.T) {
 	eMap := map[string]interface{}{
 		utils.EnabledCfg:             true,
 		utils.StoreIntervalCfg:       "7m0s",
-		utils.ThresholdSConnsCfg:     []string{"*internal"},
+		utils.ThresholdSConnsCfg:     []string{utils.MetaInternal, "*conn1"},
 		utils.IndexedSelectsCfg:      true,
+		utils.StringIndexedFieldsCfg: []string{"*req.index1"},
 		utils.PrefixIndexedFieldsCfg: []string{"*req.prefix_indexed_fields1", "*req.prefix_indexed_fields2"},
 		utils.SuffixIndexedFieldsCfg: []string{"*req.prefix_indexed_fields1"},
 		utils.NestedFieldsCfg:        true,
