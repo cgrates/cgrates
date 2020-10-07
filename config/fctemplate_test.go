@@ -49,6 +49,49 @@ func TestNewFCTemplateFromFCTemplateJsonCfg(t *testing.T) {
 	}
 }
 
+func TestFCTemplateInflateTemplate(t *testing.T) {
+	fcTemplate := []*FCTemplate{
+		{
+			Type:  utils.MetaTemplate,
+			Value: NewRSRParsersMustCompile("1sa{*duration}", utils.INFIELD_SEP),
+		},
+	}
+	expected := "time: unknown unit \"sa\" in duration \"1sa\""
+	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if _, err := InflateTemplates(fcTemplate, jsonCfg.templates); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
+func TestFCTemplatePathItems(t *testing.T) {
+	fcTemplate := FCTemplate{
+		Path: "*req.Account[1].Balance[*monetary].Value",
+	}
+	expected := utils.PathItems{
+		{
+			Field: "*req",
+			Index: nil,
+		},
+		{
+			Field: "Account",
+			Index: utils.StringPointer("1"),
+		},
+		{
+			Field: "Balance",
+			Index: utils.StringPointer("*monetary"),
+		},
+		{
+			Field: "Value",
+			Index: nil,
+		},
+	}
+	fcTemplate.ComputePath()
+	if !reflect.DeepEqual(expected, fcTemplate.GetPathItems()) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected), utils.ToJSON(fcTemplate))
+	}
+}
+
 func TestFCTemplatesFromFCTemplatesJsonCfg(t *testing.T) {
 	jsnCfgs := []*FcTemplateJsonCfg{
 		{
