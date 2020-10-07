@@ -24,7 +24,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestStoreDbCfgloadFromJsonCfg(t *testing.T) {
+func TestStoreDbCfgloadFromJsonCfgCase1(t *testing.T) {
 	cfgJSON := &DbJsonCfg{
 		Db_type:               utils.StringPointer(utils.MYSQL),
 		Db_host:               utils.StringPointer("127.0.0.1"),
@@ -94,6 +94,41 @@ func TestStoreDbCfgloadFromJsonCfg(t *testing.T) {
 		t.Errorf("Expected %+v \n, recevied %+v", utils.ToJSON(expected.RplConns), utils.ToJSON(jsonCfg.storDbCfg.RplConns))
 	} else if !reflect.DeepEqual(expected.RmtConns, jsonCfg.storDbCfg.RmtConns) {
 		t.Errorf("Expected %+v \n, recevied %+v", utils.ToJSON(expected.RmtConns), utils.ToJSON(jsonCfg.storDbCfg.RmtConns))
+	}
+}
+
+func TestStoreDbCfgloadFromJsonCfgCase2(t *testing.T) {
+	storDbJson := &DbJsonCfg{
+		Replication_conns: &[]string{utils.MetaInternal},
+	}
+	expected := "Replication connection ID needs to be different than *internal"
+	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err = jsonCfg.storDbCfg.loadFromJsonCfg(storDbJson); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", storDbJson, expected)
+	}
+}
+
+func TestStoreDbCfgloadFromJsonCfgCase3(t *testing.T) {
+	storDbJson := &DbJsonCfg{
+		Remote_conns: &[]string{utils.MetaInternal},
+	}
+	expected := "Remote connection ID needs to be different than *internal"
+	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err = jsonCfg.storDbCfg.loadFromJsonCfg(storDbJson); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", storDbJson, expected)
+	}
+}
+
+func TestStoreDbCfgloadFromJsonCfgCase4(t *testing.T) {
+	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else {
+		clonedStoreDb := jsonCfg.storDbCfg.Clone()
+		if !reflect.DeepEqual(clonedStoreDb, jsonCfg.storDbCfg) {
+			t.Errorf("Expected %+v, received %+v", utils.ToJSON(clonedStoreDb), utils.ToJSON(jsonCfg.storDbCfg))
+		}
 	}
 }
 
