@@ -28,24 +28,26 @@ func TestRouteSCfgloadFromJsonCfg(t *testing.T) {
 	cfgJSON := &RouteSJsonCfg{
 		Enabled:               utils.BoolPointer(true),
 		Indexed_selects:       utils.BoolPointer(true),
+		String_indexed_fields: &[]string{"*req.index1"},
 		Prefix_indexed_fields: &[]string{"*req.index1", "*req.index2"},
 		Suffix_indexed_fields: &[]string{"*req.index1", "*req.index2"},
-		Attributes_conns:      &[]string{utils.MetaInternal},
-		Resources_conns:       &[]string{utils.MetaInternal},
-		Stats_conns:           &[]string{utils.MetaInternal},
-		Rals_conns:            &[]string{utils.MetaInternal},
+		Attributes_conns:      &[]string{utils.MetaInternal, "*conn1"},
+		Resources_conns:       &[]string{utils.MetaInternal, "*conn1"},
+		Stats_conns:           &[]string{utils.MetaInternal, "*conn1"},
+		Rals_conns:            &[]string{utils.MetaInternal, "*conn1"},
 		Default_ratio:         utils.IntPointer(10),
 		Nested_fields:         utils.BoolPointer(true),
 	}
 	expected := &RouteSCfg{
 		Enabled:             true,
 		IndexedSelects:      true,
+		StringIndexedFields: &[]string{"*req.index1"},
 		PrefixIndexedFields: &[]string{"*req.index1", "*req.index2"},
 		SuffixIndexedFields: &[]string{"*req.index1", "*req.index2"},
-		AttributeSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)},
-		ResourceSConns:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)},
-		StatSConns:          []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS)},
-		RALsConns:           []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder)},
+		AttributeSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"},
+		ResourceSConns:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), "*conn1"},
+		StatSConns:          []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS), "*conn1"},
+		RALsConns:           []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder), "*conn1"},
 		DefaultRatio:        10,
 		NestedFields:        true,
 	}
@@ -86,31 +88,33 @@ func TestRouteSCfgAsMapInterface1(t *testing.T) {
 		"routes": {
 			"enabled": true,
 			"indexed_selects":false,
+            "string_indexed_fields": ["*req.string"],
 			"prefix_indexed_fields": ["*req.prefix","*req.indexed","*req.fields"],
             "suffix_indexed_fields": ["*req.prefix","*req.indexed"],
 			"nested_fields": true,
-			"attributes_conns": ["*internal"],
-			"resources_conns": ["*internal"],
-			"stats_conns": ["*internal"],
-			"rals_conns": ["*internal"],
+			"attributes_conns": ["*internal:*attributes", "*conn1"],
+			"resources_conns": ["*internal:*resources", "*conn1"],
+			"stats_conns": ["*internal:*stats", "*conn1"],
+			"rals_conns": ["*internal:*responder", "*conn1"],
 			"default_ratio":2,
 		},
 	}`
 	eMap := map[string]interface{}{
 		utils.EnabledCfg:             true,
 		utils.IndexedSelectsCfg:      false,
+		utils.StringIndexedFieldsCfg: []string{"*req.string"},
 		utils.PrefixIndexedFieldsCfg: []string{"*req.prefix", "*req.indexed", "*req.fields"},
 		utils.SuffixIndexedFieldsCfg: []string{"*req.prefix", "*req.indexed"},
 		utils.NestedFieldsCfg:        true,
-		utils.AttributeSConnsCfg:     []string{"*internal"},
-		utils.ResourceSConnsCfg:      []string{"*internal"},
-		utils.StatSConnsCfg:          []string{"*internal"},
-		utils.RALsConnsCfg:           []string{"*internal"},
+		utils.AttributeSConnsCfg:     []string{utils.MetaInternal, "*conn1"},
+		utils.ResourceSConnsCfg:      []string{utils.MetaInternal, "*conn1"},
+		utils.StatSConnsCfg:          []string{utils.MetaInternal, "*conn1"},
+		utils.RALsConnsCfg:           []string{utils.MetaInternal, "*conn1"},
 		utils.DefaultRatioCfg:        2,
 	}
 	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.routeSCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("Expected %+v, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
