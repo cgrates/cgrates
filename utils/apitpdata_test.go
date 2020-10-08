@@ -116,6 +116,17 @@ func TestNewRateSlot(t *testing.T) {
 	}
 }
 
+func TestClonePaginator(t *testing.T) {
+	expectedPaginator := Paginator{
+		Limit:  IntPointer(2),
+		Offset: IntPointer(0),
+	}
+	clonedPaginator := expectedPaginator.Clone()
+	if !reflect.DeepEqual(expectedPaginator, clonedPaginator) {
+		t.Errorf("Expected %+v, received %+v", ToJSON(expectedPaginator), ToJSON(clonedPaginator))
+	}
+}
+
 func TestSetDurations(t *testing.T) {
 	rs := &RateSlot{
 		RateUnit:           "1",
@@ -717,6 +728,57 @@ func TestRPCCDRsFilterAsCDRsFilter(t *testing.T) {
 	}
 }
 
+func TestArgRSv1ResourceUsageCloneCase1(t *testing.T) {
+	expectedArgRSv1 := &ArgRSv1ResourceUsage{
+		clnb: true,
+	}
+	newArgRSv1 := new(ArgRSv1ResourceUsage)
+	newArgRSv1.SetCloneable(true)
+	if !reflect.DeepEqual(expectedArgRSv1, newArgRSv1) {
+		t.Errorf("Expected %+v, received %+v", expectedArgRSv1, newArgRSv1)
+	}
+}
+
+func TestArgRSv1ResourceUsageCloneCase2(t *testing.T) {
+	newArgRSv1 := &ArgRSv1ResourceUsage{
+		CGREventWithOpts: &CGREventWithOpts{
+			Opts: map[string]interface{}{},
+			CGREvent: &CGREvent{
+				Tenant: "*req.CGRID",
+			},
+		},
+		UsageID:  "randomID",
+		UsageTTL: DurationPointer(time.Duration(2)),
+		Units:    1.0,
+	}
+	if replyArgRsv1, err := newArgRSv1.RPCClone(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(newArgRSv1, replyArgRsv1) {
+		t.Errorf("Expected %+v \n, received %+v", ToJSON(newArgRSv1), ToJSON(replyArgRsv1))
+	}
+}
+
+func TestArgRSv1ResourceUsageCloneCase3(t *testing.T) {
+	newArgRSv1 := &ArgRSv1ResourceUsage{
+		CGREventWithOpts: &CGREventWithOpts{
+			Opts: map[string]interface{}{},
+			CGREvent: &CGREvent{
+				Tenant: "*req.CGRID",
+				Event:  map[string]interface{}{},
+			},
+		},
+		UsageID:  "randomID",
+		UsageTTL: DurationPointer(time.Duration(2)),
+		Units:    1.0,
+		clnb:     true,
+	}
+	if replyArgRsv1, err := newArgRSv1.RPCClone(); err != nil {
+		t.Error(err)
+	} else if newArgRSv1.clnb = false; !reflect.DeepEqual(newArgRSv1, replyArgRsv1) {
+		t.Errorf("Expected %+v \n, received %+v", ToJSON(newArgRSv1), ToJSON(replyArgRsv1))
+	}
+}
+
 func TestTPActivationIntervalAsActivationInterval(t *testing.T) {
 	tPActivationInterval := &TPActivationInterval{
 		ActivationTime: "2019-04-04T11:45:26.371Z",
@@ -1029,5 +1091,49 @@ func TestCDRsFilterPrepare(t *testing.T) {
 	}
 	if fltr.Prepare(); !reflect.DeepEqual(exp, fltr) {
 		t.Errorf("Expected %s,received %s", ToJSON(exp), ToJSON(fltr))
+	}
+}
+
+func TestNewAttrReloadCacheWithOpts(t *testing.T) {
+	newAttrReloadCache := &AttrReloadCacheWithOpts{
+		ArgsCache: map[string][]string{
+			DestinationIDs:             nil,
+			ReverseDestinationIDs:      nil,
+			RatingPlanIDs:              nil,
+			RatingProfileIDs:           nil,
+			ActionIDs:                  nil,
+			ActionPlanIDs:              nil,
+			AccountActionPlanIDs:       nil,
+			ActionTriggerIDs:           nil,
+			SharedGroupIDs:             nil,
+			ResourceProfileIDs:         nil,
+			ResourceIDs:                nil,
+			StatsQueueIDs:              nil,
+			StatsQueueProfileIDs:       nil,
+			ThresholdIDs:               nil,
+			ThresholdProfileIDs:        nil,
+			FilterIDs:                  nil,
+			RouteProfileIDs:            nil,
+			AttributeProfileIDs:        nil,
+			ChargerProfileIDs:          nil,
+			DispatcherProfileIDs:       nil,
+			DispatcherHostIDs:          nil,
+			RateProfileIDs:             nil,
+			TimingIDs:                  nil,
+			AttributeFilterIndexIDs:    nil,
+			ResourceFilterIndexIDs:     nil,
+			StatFilterIndexIDs:         nil,
+			ThresholdFilterIndexIDs:    nil,
+			RouteFilterIndexIDs:        nil,
+			ChargerFilterIndexIDs:      nil,
+			DispatcherFilterIndexIDs:   nil,
+			RateProfilesFilterIndexIDs: nil,
+			RateFilterIndexIDs:         nil,
+			FilterIndexIDs:             nil,
+		},
+	}
+	eMap := NewAttrReloadCacheWithOpts()
+	if !reflect.DeepEqual(eMap, newAttrReloadCache) {
+		t.Errorf("Expected %+v \n, received %+v", eMap, newAttrReloadCache)
 	}
 }
