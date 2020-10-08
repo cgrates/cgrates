@@ -32,9 +32,9 @@ import (
 )
 
 // NewEventExporterRequest returns a new EventExporterRequest
-func NewEventExporterRequest(req utils.DataProvider, dc utils.MapStorage,
-	tntTpl config.RSRParsers,
-	dfltTenant, timezone string, filterS *engine.FilterS) (eeR *EventExporterRequest) {
+func NewEventExporterRequest(req utils.DataProvider, dc, opts utils.MapStorage,
+	tntTpl config.RSRParsers, dfltTenant, timezone string,
+	filterS *engine.FilterS) (eeR *EventExporterRequest) {
 	eeR = &EventExporterRequest{
 		req:     req,
 		tmz:     timezone,
@@ -43,6 +43,7 @@ func NewEventExporterRequest(req utils.DataProvider, dc utils.MapStorage,
 		hdr:     utils.NewOrderedNavigableMap(),
 		trl:     utils.NewOrderedNavigableMap(),
 		dc:      dc,
+		opts:    opts,
 	}
 	// populate tenant
 	if tntIf, err := eeR.ParseField(
@@ -66,6 +67,7 @@ type EventExporterRequest struct {
 	hdr  *utils.OrderedNavigableMap // Used in reply to access the request that was send
 	trl  *utils.OrderedNavigableMap // Used in reply to access the request that was send
 	dc   utils.MapStorage
+	opts utils.MapStorage
 
 	filterS *engine.FilterS
 }
@@ -95,6 +97,8 @@ func (eeR *EventExporterRequest) FieldAsInterface(fldPath []string) (val interfa
 		}
 	case utils.MetaDC:
 		val, err = eeR.dc.FieldAsInterface(fldPath[1:])
+	case utils.MetaOpts:
+		val, err = eeR.opts.FieldAsInterface(fldPath[1:])
 	}
 	if err != nil {
 		return

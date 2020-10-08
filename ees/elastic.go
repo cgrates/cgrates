@@ -123,7 +123,7 @@ func (eEe *ElasticEe) OnEvicted(_ string, _ interface{}) {
 }
 
 // ExportEvent implements EventExporter
-func (eEe *ElasticEe) ExportEvent(cgrEv *utils.CGREvent) (err error) {
+func (eEe *ElasticEe) ExportEvent(cgrEv *utils.CGREventWithOpts) (err error) {
 	eEe.Lock()
 	defer func() {
 		if err != nil {
@@ -140,7 +140,7 @@ func (eEe *ElasticEe) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 		valMp = cgrEv.Event
 	} else {
 		req := utils.MapStorage(cgrEv.Event)
-		eeReq := NewEventExporterRequest(req, eEe.dc,
+		eeReq := NewEventExporterRequest(req, eEe.dc, cgrEv.Opts,
 			eEe.cgrCfg.EEsCfg().Exporters[eEe.cfgIdx].Tenant,
 			eEe.cgrCfg.GeneralCfg().DefaultTenant,
 			utils.FirstNonEmpty(eEe.cgrCfg.EEsCfg().Exporters[eEe.cfgIdx].Timezone,

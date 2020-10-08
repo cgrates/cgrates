@@ -395,6 +395,9 @@ func testActionsitThresholdCDrLog(t *testing.T) {
 					utils.COST:        -1.0,
 				},
 			},
+			Opts: map[string]interface{}{
+				utils.MetaEventType: utils.CDR,
+			},
 		},
 	}
 	var ids []string
@@ -647,33 +650,37 @@ func testActionsitThresholdPostEvent(t *testing.T) {
 	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, thReply) {
 		t.Errorf("Expecting: %+v, received: %+v", tPrfl.ThresholdProfile, thReply)
 	}
-	ev := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "cdrev1",
-		Event: map[string]interface{}{
-			utils.EventType:   utils.CDR,
-			"field_extr1":     "val_extr1",
-			"fieldextr2":      "valextr2",
-			utils.CGRID:       utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
-			utils.RunID:       utils.MetaRaw,
-			utils.OrderID:     123,
-			utils.OriginHost:  "192.168.1.1",
-			utils.Source:      utils.UNIT_TEST,
-			utils.OriginID:    "dsafdsaf",
-			utils.RequestType: utils.META_RATED,
-			utils.Tenant:      "cgrates.org",
-			utils.SetupTime:   time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
-			utils.PDD:         time.Duration(0) * time.Second,
-			utils.AnswerTime:  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
-			utils.Usage:       time.Duration(10) * time.Second,
-			utils.ROUTE:       "SUPPL1",
-			utils.COST:        -1.0,
+	ev := &utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "cdrev1",
+			Event: map[string]interface{}{
+				"field_extr1":     "val_extr1",
+				"fieldextr2":      "valextr2",
+				utils.CGRID:       utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
+				utils.RunID:       utils.MetaRaw,
+				utils.OrderID:     123,
+				utils.OriginHost:  "192.168.1.1",
+				utils.Source:      utils.UNIT_TEST,
+				utils.OriginID:    "dsafdsaf",
+				utils.RequestType: utils.META_RATED,
+				utils.Tenant:      "cgrates.org",
+				utils.SetupTime:   time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
+				utils.PDD:         time.Duration(0) * time.Second,
+				utils.AnswerTime:  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
+				utils.Usage:       time.Duration(10) * time.Second,
+				utils.ROUTE:       "SUPPL1",
+				utils.COST:        -1.0,
+			},
+		},
+		Opts: map[string]interface{}{
+			utils.MetaEventType: utils.CDR,
 		},
 	}
 	var ids []string
 	eIDs := []string{"THD_PostEvent"}
 	if err := actsLclRpc.Call(utils.ThresholdSv1ProcessEvent, &ThresholdsArgsProcessEvent{
-		CGREventWithOpts: &utils.CGREventWithOpts{CGREvent: ev}}, &ids); err != nil {
+		CGREventWithOpts: ev}, &ids); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ids, eIDs) {
 		t.Errorf("Expecting ids: %s, received: %s", eIDs, ids)

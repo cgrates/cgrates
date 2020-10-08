@@ -551,7 +551,6 @@ const (
 	Meta                     = "*"
 	MetaSysLog               = "*syslog"
 	MetaStdLog               = "*stdout"
-	EventType                = "EventType"
 	EventSource              = "EventSource"
 	AccountID                = "AccountID"
 	ResourceID               = "ResourceID"
@@ -2400,6 +2399,8 @@ const (
 	Subsys                    = "*subsys"
 	OptsAttributesProcessRuns = "*processRuns"
 	OptsDispatcherMethod      = "*method"
+	MetaEventType             = "*eventType"
+	EventType                 = "EventType"
 )
 
 // Event Flags

@@ -436,6 +436,10 @@ func (rS *ResourceService) processThresholds(r *Resource, opts map[string]interf
 		}
 		thIDs = r.rPrf.ThresholdIDs
 	}
+	if opts == nil {
+		opts = make(map[string]interface{})
+	}
+	opts[utils.MetaEventType] = utils.ResourceUpdate
 	thEv := &ThresholdsArgsProcessEvent{ThresholdIDs: thIDs,
 		CGREventWithOpts: &utils.CGREventWithOpts{
 			CGREvent: &utils.CGREvent{
@@ -462,12 +466,15 @@ func (rS *ResourceService) processThresholds(r *Resource, opts map[string]interf
 }
 
 // matchingResourcesForEvent returns ordered list of matching resources which are active by the time of the call
-func (rS *ResourceService) matchingResourcesForEvent(ev *utils.CGREvent,
+func (rS *ResourceService) matchingResourcesForEvent(ev *utils.CGREventWithOpts,
 	evUUID string, usageTTL *time.Duration) (rs Resources, err error) {
 	matchingResources := make(map[string]*Resource)
 	var isCached bool
 	var rIDs utils.StringSet
-	evNm := utils.MapStorage{utils.MetaReq: ev.Event}
+	evNm := utils.MapStorage{
+		utils.MetaReq:  ev.Event,
+		utils.MetaOpts: ev.Opts,
+	}
 	if x, ok := Cache.Get(utils.CacheEventResources, evUUID); ok { // The ResourceIDs were cached as utils.StringSet{"resID":bool}
 		isCached = true
 		if x == nil {
@@ -593,7 +600,7 @@ func (rS *ResourceService) V1ResourcesForEvent(args utils.ArgRSv1ResourceUsage, 
 	// end of RPC caching
 
 	var mtcRLs Resources
-	if mtcRLs, err = rS.matchingResourcesForEvent(args.CGREvent, args.UsageID, args.UsageTTL); err != nil {
+	if mtcRLs, err = rS.matchingResourcesForEvent(args.CGREventWithOpts, args.UsageID, args.UsageTTL); err != nil {
 		return err
 	}
 	*reply = mtcRLs
@@ -631,7 +638,7 @@ func (rS *ResourceService) V1AuthorizeResources(args utils.ArgRSv1ResourceUsage,
 	// end of RPC caching
 
 	var mtcRLs Resources
-	if mtcRLs, err = rS.matchingResourcesForEvent(args.CGREvent, args.UsageID, args.UsageTTL); err != nil {
+	if mtcRLs, err = rS.matchingResourcesForEvent(args.CGREventWithOpts, args.UsageID, args.UsageTTL); err != nil {
 		return err
 	}
 	var alcMessage string
@@ -680,7 +687,7 @@ func (rS *ResourceService) V1AllocateResource(args utils.ArgRSv1ResourceUsage, r
 	// end of RPC caching
 
 	var mtcRLs Resources
-	if mtcRLs, err = rS.matchingResourcesForEvent(args.CGREvent, args.UsageID,
+	if mtcRLs, err = rS.matchingResourcesForEvent(args.CGREventWithOpts, args.UsageID,
 		args.UsageTTL); err != nil {
 		return err
 	}
@@ -747,7 +754,7 @@ func (rS *ResourceService) V1ReleaseResource(args utils.ArgRSv1ResourceUsage, re
 	// end of RPC caching
 
 	var mtcRLs Resources
-	if mtcRLs, err = rS.matchingResourcesForEvent(args.CGREvent, args.UsageID,
+	if mtcRLs, err = rS.matchingResourcesForEvent(args.CGREventWithOpts, args.UsageID,
 		args.UsageTTL); err != nil {
 		return err
 	}

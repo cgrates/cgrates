@@ -91,7 +91,7 @@ func (fCsv *FileCSVee) OnEvicted(_ string, _ interface{}) {
 }
 
 // ExportEvent implements EventExporter
-func (fCsv *FileCSVee) ExportEvent(cgrEv *utils.CGREvent) (err error) {
+func (fCsv *FileCSVee) ExportEvent(cgrEv *utils.CGREventWithOpts) (err error) {
 	fCsv.Lock()
 	defer func() {
 		if err != nil {
@@ -109,7 +109,8 @@ func (fCsv *FileCSVee) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 
 	var csvRecord []string
 	req := utils.MapStorage(cgrEv.Event)
-	eeReq := NewEventExporterRequest(req, fCsv.dc, fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].Tenant,
+	eeReq := NewEventExporterRequest(req, fCsv.dc, cgrEv.Opts,
+		fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].Tenant,
 		fCsv.cgrCfg.GeneralCfg().DefaultTenant,
 		utils.FirstNonEmpty(fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].Timezone,
 			fCsv.cgrCfg.GeneralCfg().DefaultTimezone),
@@ -136,7 +137,8 @@ func (fCsv *FileCSVee) composeHeader() (err error) {
 		return
 	}
 	var csvRecord []string
-	eeReq := NewEventExporterRequest(nil, fCsv.dc, fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].Tenant,
+	eeReq := NewEventExporterRequest(nil, fCsv.dc, nil,
+		fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].Tenant,
 		fCsv.cgrCfg.GeneralCfg().DefaultTenant,
 		utils.FirstNonEmpty(fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].Timezone,
 			fCsv.cgrCfg.GeneralCfg().DefaultTimezone),
@@ -160,7 +162,7 @@ func (fCsv *FileCSVee) composeTrailer() (err error) {
 		return
 	}
 	var csvRecord []string
-	eeReq := NewEventExporterRequest(nil, fCsv.dc,
+	eeReq := NewEventExporterRequest(nil, fCsv.dc, nil,
 		fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].Tenant,
 		fCsv.cgrCfg.GeneralCfg().DefaultTenant,
 		utils.FirstNonEmpty(fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].Timezone,

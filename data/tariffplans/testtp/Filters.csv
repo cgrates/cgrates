@@ -27,4 +27,4 @@ cgrates.org,FLTR_RES_1,*gte,~*req.Usage,10.0,
 cgrates.org,FLTR_DST_FS,*destinations,~*req.Destination,DST_FS,2014-07-29T15:00:00Z
 cgrates.org,FLTR_RES_GR3,*string,~*req.Account,3001,2014-07-29T15:00:00Z
 cgrates.org,FLTR_STS1,*string,~*req.Account,1001;1002,2014-07-29T15:00:00Z
-cgrates.org,FLTR_CDR_UPDATE,*string,~*req.EventType,CDR,2014-07-29T15:00:00Z
+cgrates.org,FLTR_CDR_UPDATE,*string,~*opts.*eventType,CDR,2014-07-29T15:00:00Z

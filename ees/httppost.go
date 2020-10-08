@@ -61,7 +61,7 @@ func (httpPost *HTTPPost) OnEvicted(_ string, _ interface{}) {
 }
 
 // ExportEvent implements EventExporter
-func (httpPost *HTTPPost) ExportEvent(cgrEv *utils.CGREvent) (err error) {
+func (httpPost *HTTPPost) ExportEvent(cgrEv *utils.CGREventWithOpts) (err error) {
 	httpPost.Lock()
 	defer func() {
 		if err != nil {
@@ -80,7 +80,7 @@ func (httpPost *HTTPPost) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 		}
 	} else {
 		req := utils.MapStorage(cgrEv.Event)
-		eeReq := NewEventExporterRequest(req, httpPost.dc,
+		eeReq := NewEventExporterRequest(req, httpPost.dc, cgrEv.Opts,
 			httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].Tenant,
 			httpPost.cgrCfg.GeneralCfg().DefaultTenant,
 			utils.FirstNonEmpty(httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].Timezone,

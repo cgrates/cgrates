@@ -151,7 +151,10 @@ func (sS *StatService) StoreStatQueue(sq *StatQueue) (err error) {
 
 // matchingStatQueuesForEvent returns ordered list of matching resources which are active by the time of the call
 func (sS *StatService) matchingStatQueuesForEvent(args *StatsArgsProcessEvent) (sqs StatQueues, err error) {
-	evNm := utils.MapStorage{utils.MetaReq: args.Event}
+	evNm := utils.MapStorage{
+		utils.MetaReq:  args.Event,
+		utils.MetaOpts: args.Opts,
+	}
 	sqIDs := utils.NewStringSet(args.StatIDs)
 	if len(sqIDs) == 0 {
 		sqIDs, err = MatchingItemIDsForEvent(evNm,
@@ -268,6 +271,10 @@ func (sS *StatService) processEvent(args *StatsArgsProcessEvent) (statQueueIDs [
 	if len(matchSQs) == 0 {
 		return nil, utils.ErrNotFound
 	}
+	if args.Opts == nil {
+		args.Opts = make(map[string]interface{})
+	}
+	args.Opts[utils.MetaEventType] = utils.StatUpdate
 	var stsIDs []string
 	var withErrors bool
 	for _, sq := range matchSQs {
