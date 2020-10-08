@@ -590,19 +590,15 @@ func testCall1003Cdrs(t *testing.T) {
 func testCallStatMetrics(t *testing.T) {
 	var metrics map[string]string
 	firstStatMetrics1 := map[string]string{
-		utils.MetaTCC: "1.35346",
-		utils.MetaTCD: "2m27s",
-	}
-	firstStatMetrics2 := map[string]string{
-		utils.MetaTCC: "1.35009",
-		utils.MetaTCD: "2m25s",
-	}
-	firstStatMetrics3 := map[string]string{
 		utils.MetaTCC: "1.34009",
 		utils.MetaTCD: "2m24s",
 	}
+	firstStatMetrics3 := map[string]string{
+		utils.MetaTCC: "1.33998",
+		utils.MetaTCD: "2m24s",
+	}
 	firstStatMetrics4 := map[string]string{
-		utils.MetaTCC: "1.35346",
+		utils.MetaTCC: "1.35332",
 		utils.MetaTCD: "2m24s",
 	}
 	secondStatMetrics1 := map[string]string{
@@ -622,7 +618,6 @@ func testCallStatMetrics(t *testing.T) {
 		metrics[utils.MetaTCD] = strings.Split(metrics[utils.MetaTCD], ".")[0] + "s"
 	}
 	if !reflect.DeepEqual(firstStatMetrics1, metrics) &&
-		!reflect.DeepEqual(firstStatMetrics2, metrics) &&
 		!reflect.DeepEqual(firstStatMetrics3, metrics) &&
 		!reflect.DeepEqual(firstStatMetrics4, metrics) {
 		t.Errorf("expecting: %+v, received reply: %s", firstStatMetrics1, metrics)
