@@ -208,6 +208,10 @@ func TestIsNetworkError(t *testing.T) {
 	if !IsNetworkError(err) {
 		t.Errorf("syscall.ECONNRESET should be consider a network error")
 	}
+	err = &net.DNSError{Err: "DNSError"}
+	if !IsNetworkError(err) {
+		t.Errorf("DNSError should be consider a network error")
+	}
 	err = fmt.Errorf("NOT_FOUND")
 	if IsNetworkError(err) {
 		t.Errorf("%s error should not be consider a network error", err)
@@ -235,6 +239,27 @@ func TestNewErrChargerS(t *testing.T) {
 	expected := `CHARGERS_ERROR:NOT_FOUND`
 	if rcv := NewErrChargerS(ErrNotFound); rcv.Error() != expected {
 		t.Errorf("Expecting: %q, received: %q", expected, rcv.Error())
+	}
+}
+
+func TestNewErrStatS(t *testing.T) {
+	expected := "STATS_ERROR:NOT_FOUND"
+	if rcv := NewErrStatS(ErrNotFound); rcv.Error() != expected {
+		t.Errorf("Expecetd %+q, receiveed %+q", expected, rcv.Error())
+	}
+}
+
+func TestNewErrCDRS(t *testing.T) {
+	expected := "CDRS_ERROR:NOT_FOUND"
+	if rcv := NewErrCDRS(ErrNotFound); rcv.Error() != expected {
+		t.Errorf("Expected %+q, received %+q", expected, rcv.Error())
+	}
+}
+
+func TestNewErrThresholdS(t *testing.T) {
+	expected := "THRESHOLDS_ERROR:NOT_FOUND"
+	if rcv := NewErrThresholdS(ErrNotFound); rcv.Error() != expected {
+		t.Errorf("Expected %+q, received %+q", expected, rcv.Error())
 	}
 }
 
