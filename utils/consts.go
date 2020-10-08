@@ -136,7 +136,7 @@ var (
 
 const (
 	CGRateS                      = "CGRateS"
-	VERSION                      = "v0.10.2~dev"
+	VERSION                      = "v0.10.2"
 	DIAMETER_FIRMWARE_REVISION   = 918
 	REDIS_MAX_CONNS              = 10
 	CGRATES                      = "cgrates"
