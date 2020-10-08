@@ -63,50 +63,50 @@ func (eEe *ElasticEe) init() (err error) {
 		return
 	}
 	//parse opts
-	if val, has := eEe.cgrCfg.EEsCfg().Exporters[eEe.cfgIdx].Opts[utils.OptsIndex]; !has {
+	if val, has := eEe.cgrCfg.EEsCfg().Exporters[eEe.cfgIdx].Opts[utils.ElsIndex]; !has {
 		eEe.opts.Index = utils.CDRsTBL
 	} else {
 		eEe.opts.Index = utils.IfaceAsString(val)
 	}
-	if val, has := eEe.cgrCfg.EEsCfg().Exporters[eEe.cfgIdx].Opts[utils.OptsIfPrimaryTerm]; has {
+	if val, has := eEe.cgrCfg.EEsCfg().Exporters[eEe.cfgIdx].Opts[utils.ElsIfPrimaryTerm]; has {
 		var intVal int64
 		if intVal, err = utils.IfaceAsTInt64(val); err != nil {
 			return
 		}
 		eEe.opts.IfPrimaryTerm = utils.IntPointer(int(intVal))
 	}
-	if val, has := eEe.cgrCfg.EEsCfg().Exporters[eEe.cfgIdx].Opts[utils.OptsIfSeqNo]; has {
+	if val, has := eEe.cgrCfg.EEsCfg().Exporters[eEe.cfgIdx].Opts[utils.ElsIfSeqNo]; has {
 		var intVal int64
 		if intVal, err = utils.IfaceAsTInt64(val); err != nil {
 			return
 		}
 		eEe.opts.IfSeqNo = utils.IntPointer(int(intVal))
 	}
-	if val, has := eEe.cgrCfg.EEsCfg().Exporters[eEe.cfgIdx].Opts[utils.OptsOpType]; has {
+	if val, has := eEe.cgrCfg.EEsCfg().Exporters[eEe.cfgIdx].Opts[utils.ElsOpType]; has {
 		eEe.opts.OpType = utils.IfaceAsString(val)
 	}
-	if val, has := eEe.cgrCfg.EEsCfg().Exporters[eEe.cfgIdx].Opts[utils.OptsPipeline]; has {
+	if val, has := eEe.cgrCfg.EEsCfg().Exporters[eEe.cfgIdx].Opts[utils.ElsPipeline]; has {
 		eEe.opts.Pipeline = utils.IfaceAsString(val)
 	}
-	if val, has := eEe.cgrCfg.EEsCfg().Exporters[eEe.cfgIdx].Opts[utils.OptsRouting]; has {
+	if val, has := eEe.cgrCfg.EEsCfg().Exporters[eEe.cfgIdx].Opts[utils.ElsRouting]; has {
 		eEe.opts.Routing = utils.IfaceAsString(val)
 	}
-	if val, has := eEe.cgrCfg.EEsCfg().Exporters[eEe.cfgIdx].Opts[utils.OptsTimeout]; has {
+	if val, has := eEe.cgrCfg.EEsCfg().Exporters[eEe.cfgIdx].Opts[utils.ElsTimeout]; has {
 		if eEe.opts.Timeout, err = utils.IfaceAsDuration(val); err != nil {
 			return
 		}
 	}
-	if val, has := eEe.cgrCfg.EEsCfg().Exporters[eEe.cfgIdx].Opts[utils.VersionLow]; has {
+	if val, has := eEe.cgrCfg.EEsCfg().Exporters[eEe.cfgIdx].Opts[utils.ElsVersionLow]; has {
 		var intVal int64
 		if intVal, err = utils.IfaceAsTInt64(val); err != nil {
 			return
 		}
 		eEe.opts.Version = utils.IntPointer(int(intVal))
 	}
-	if val, has := eEe.cgrCfg.EEsCfg().Exporters[eEe.cfgIdx].Opts[utils.OptsVersionType]; has {
+	if val, has := eEe.cgrCfg.EEsCfg().Exporters[eEe.cfgIdx].Opts[utils.ElsVersionType]; has {
 		eEe.opts.VersionType = utils.IfaceAsString(val)
 	}
-	if val, has := eEe.cgrCfg.EEsCfg().Exporters[eEe.cfgIdx].Opts[utils.OptsWaitForActiveShards]; has {
+	if val, has := eEe.cgrCfg.EEsCfg().Exporters[eEe.cfgIdx].Opts[utils.ElsWaitForActiveShards]; has {
 		eEe.opts.WaitForActiveShards = utils.IfaceAsString(val)
 	}
 	return
