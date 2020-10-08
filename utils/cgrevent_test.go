@@ -371,6 +371,13 @@ func TestCGREventconsumeRoutePaginator(t *testing.T) {
 	}
 }
 
+func TestCGREventconsumeRoutePaginatorCase1(t *testing.T) {
+	opts := map[string]interface{}{}
+	if _, err := GetRoutePaginatorFromOpts(opts); err != nil {
+		t.Error(err)
+	}
+}
+
 func TestCGREventWithOptsClone(t *testing.T) {
 	//empty check
 	cgrEventWithOpts := new(CGREventWithOpts)
