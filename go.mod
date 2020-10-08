@@ -24,7 +24,7 @@ require (
 	github.com/cgrates/ltcache v0.0.0-20181016092649-92fb7fa77cca
 	github.com/cgrates/radigo v0.0.0-20200102144505-ef98592ff532
 	github.com/cgrates/rpcclient v0.0.0-20200528120144-984f478f0a69
-	github.com/creack/pty v1.1.7
+	github.com/creack/pty v1.1.11
 	github.com/fiorix/go-diameter v3.0.3-0.20190716165154-f4823472d0e0+incompatible
 	github.com/fortytw2/leaktest v1.3.0 // indirect
 	github.com/fsnotify/fsnotify v1.4.8-0.20190312181446-1485a34d5d57
@@ -55,6 +55,7 @@ require (
 	golang.org/x/crypto v0.0.0-20200728195943-123391ffb6de // indirect
 	golang.org/x/net v0.0.0-20190909003024-a7b16738d86b
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
+	golang.org/x/sys v0.0.0-20201008064518-c1f3e3309c71 // indirect
 	google.golang.org/api v0.10.0
 	pack.ag/amqp v0.12.2
 )
