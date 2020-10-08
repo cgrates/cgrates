@@ -153,6 +153,9 @@ func testV1FIdxCaProcessEventWithNotFound(t *testing.T) {
 					utils.Account:   "1001",
 				},
 			},
+			Opts: map[string]interface{}{
+				utils.MetaEventType: utils.BalanceUpdate,
+			},
 		},
 	}
 	var thIDs []string
@@ -223,6 +226,9 @@ func testV1FIdxCaSetThresholdProfile(t *testing.T) {
 					utils.Account:   "1001",
 				},
 			},
+			Opts: map[string]interface{}{
+				utils.MetaEventType: utils.BalanceUpdate,
+			},
 		},
 	}
 	var thIDs []string
@@ -250,6 +256,9 @@ func testV1FIdxCaGetThresholdFromTP(t *testing.T) {
 					utils.BalanceID: utils.MetaDefault,
 					utils.Units:     12.3,
 				},
+			},
+			Opts: map[string]interface{}{
+				utils.MetaEventType: utils.BalanceUpdate,
 			},
 		},
 	}
@@ -323,6 +332,9 @@ func testV1FIdxCaUpdateThresholdProfile(t *testing.T) {
 					utils.Account:   "1001",
 				},
 			},
+			Opts: map[string]interface{}{
+				utils.MetaEventType: utils.AccountUpdate,
+			},
 		},
 	}
 	var thIDs []string
@@ -342,6 +354,9 @@ func testV1FIdxCaUpdateThresholdProfile(t *testing.T) {
 					utils.EventType: utils.AccountUpdate,
 					utils.Account:   "1002",
 				},
+			},
+			Opts: map[string]interface{}{
+				utils.MetaEventType: utils.AccountUpdate,
 			},
 		},
 	}
@@ -412,6 +427,9 @@ func testV1FIdxCaUpdateThresholdProfileFromTP(t *testing.T) {
 					utils.EventType: utils.BalanceUpdate,
 				},
 			},
+			Opts: map[string]interface{}{
+				utils.MetaEventType: utils.BalanceUpdate,
+			},
 		},
 	}
 	var thIDs []string
@@ -429,6 +447,9 @@ func testV1FIdxCaUpdateThresholdProfileFromTP(t *testing.T) {
 					utils.Account:   "1003",
 					utils.EventType: utils.BalanceUpdate,
 				},
+			},
+			Opts: map[string]interface{}{
+				utils.MetaEventType: utils.BalanceUpdate,
 			},
 		},
 	}
@@ -453,6 +474,9 @@ func testV1FIdxCaRemoveThresholdProfile(t *testing.T) {
 					utils.EventType: utils.AccountUpdate,
 				},
 			},
+			Opts: map[string]interface{}{
+				utils.MetaEventType: utils.AccountUpdate,
+			},
 		},
 	}
 	var thIDs []string
@@ -472,6 +496,9 @@ func testV1FIdxCaRemoveThresholdProfile(t *testing.T) {
 					utils.Account:   "1003",
 					utils.EventType: utils.BalanceUpdate,
 				},
+			},
+			Opts: map[string]interface{}{
+				utils.MetaEventType: utils.BalanceUpdate,
 			},
 		},
 	}
@@ -530,6 +557,9 @@ func testV1FIdxCaGetStatQueuesWithNotFound(t *testing.T) {
 					utils.EventType: utils.AccountUpdate,
 					utils.Account:   "1001",
 				},
+			},
+			Opts: map[string]interface{}{
+				utils.MetaEventType: utils.AccountUpdate,
 			},
 		},
 	}
@@ -608,6 +638,9 @@ func testV1FIdxCaSetStatQueueProfile(t *testing.T) {
 					"Val":           10,
 				},
 			},
+			Opts: map[string]interface{}{
+				utils.MetaEventType: utils.AccountUpdate,
+			},
 		},
 	}
 	var reply []string
@@ -675,6 +708,9 @@ func testV1FIdxCaGetStatQueuesFromTP(t *testing.T) {
 					utils.Cost:       12.1,
 				},
 			},
+			Opts: map[string]interface{}{
+				utils.MetaEventType: utils.AccountUpdate,
+			},
 		},
 	}
 	if err := tFIdxCaRpc.Call(utils.StatSv1ProcessEvent, &tEv, &reply); err != nil {
@@ -694,6 +730,9 @@ func testV1FIdxCaGetStatQueuesFromTP(t *testing.T) {
 					utils.Usage:      time.Duration(45 * time.Second),
 					utils.Cost:       12.1,
 				},
+			},
+			Opts: map[string]interface{}{
+				utils.MetaEventType: utils.AccountUpdate,
 			},
 		},
 	}
@@ -772,6 +811,9 @@ func testV1FIdxCaUpdateStatQueueProfile(t *testing.T) {
 					"Val":           10,
 				},
 			},
+			Opts: map[string]interface{}{
+				utils.MetaEventType: utils.BalanceUpdate,
+			},
 		},
 	}
 	if err := tFIdxCaRpc.Call(utils.StatSv1ProcessEvent, tEv, &reply); err != nil {
@@ -835,6 +877,9 @@ func testV1FIdxCaUpdateStatQueueProfileFromTP(t *testing.T) {
 					utils.Cost:       12.1,
 				},
 			},
+			Opts: map[string]interface{}{
+				utils.MetaEventType: utils.AccountUpdate,
+			},
 		},
 	}
 	var ids []string
@@ -861,6 +906,9 @@ func testV1FIdxCaRemoveStatQueueProfile(t *testing.T) {
 					"Val":           10,
 				},
 			},
+			Opts: map[string]interface{}{
+				utils.MetaEventType: utils.BalanceUpdate,
+			},
 		},
 	}
 	if err := tFIdxCaRpc.Call(utils.StatSv1ProcessEvent, tEv, &reply); err != nil {
@@ -881,6 +929,9 @@ func testV1FIdxCaRemoveStatQueueProfile(t *testing.T) {
 					utils.Usage:      time.Duration(45 * time.Second),
 					utils.Cost:       12.1,
 				},
+			},
+			Opts: map[string]interface{}{
+				utils.MetaEventType: utils.AccountUpdate,
 			},
 		},
 	}

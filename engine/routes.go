@@ -153,8 +153,11 @@ func (rpS *RouteService) Shutdown() error {
 }
 
 // matchingRouteProfilesForEvent returns ordered list of matching resources which are active by the time of the call
-func (rpS *RouteService) matchingRouteProfilesForEvent(ev *utils.CGREvent, singleResult bool) (matchingRPrf []*RouteProfile, err error) {
-	evNm := utils.MapStorage{utils.MetaReq: ev.Event}
+func (rpS *RouteService) matchingRouteProfilesForEvent(ev *utils.CGREventWithOpts, singleResult bool) (matchingRPrf []*RouteProfile, err error) {
+	evNm := utils.MapStorage{
+		utils.MetaReq:  ev.Event,
+		utils.MetaOpts: ev.Opts,
+	}
 	rPrfIDs, err := MatchingItemIDsForEvent(evNm,
 		rpS.cgrcfg.RouteSCfg().StringIndexedFields,
 		rpS.cgrcfg.RouteSCfg().PrefixIndexedFields,
@@ -521,7 +524,7 @@ func (rpS *RouteService) sortedRoutesForEvent(args *ArgsGetRoutes) (sortedRoutes
 		args.CGREvent.Event[utils.Usage] = time.Duration(time.Minute) // make sure we have default set for Usage
 	}
 	var rPrfs []*RouteProfile
-	if rPrfs, err = rpS.matchingRouteProfilesForEvent(args.CGREvent, true); err != nil {
+	if rPrfs, err = rpS.matchingRouteProfilesForEvent(args.CGREventWithOpts, true); err != nil {
 		return
 	}
 	rPrfl := rPrfs[0]
@@ -689,7 +692,7 @@ func (rpS *RouteService) V1GetRouteProfilesForEvent(args *utils.CGREventWithOpts
 	} else if args.CGREvent.Event == nil {
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
-	sPs, err := rpS.matchingRouteProfilesForEvent(args.CGREvent, false)
+	sPs, err := rpS.matchingRouteProfilesForEvent(args, false)
 	if err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)

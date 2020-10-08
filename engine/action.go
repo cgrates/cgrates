@@ -1026,26 +1026,31 @@ func resetAccountCDR(ub *Account, action *Action, acts Actions, _ interface{}) e
 }
 
 func export(ub *Account, a *Action, acs Actions, extraData interface{}) (err error) {
-	var cgrEv *utils.CGREvent
+	var cgrEv *utils.CGREventWithOpts
 	switch {
 	case ub != nil:
-		cgrEv = &utils.CGREvent{
-			Tenant: utils.NewTenantID(ub.ID).Tenant,
-			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
-				utils.Account:        ub.ID,
-				utils.EventType:      utils.AccountUpdate,
-				utils.EventSource:    utils.AccountService,
-				utils.AllowNegative:  ub.AllowNegative,
-				utils.Disabled:       ub.Disabled,
-				utils.BalanceMap:     ub.BalanceMap,
-				utils.UnitCounters:   ub.UnitCounters,
-				utils.ActionTriggers: ub.ActionTriggers,
-				utils.UpdateTime:     ub.UpdateTime,
+		cgrEv = &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: utils.NewTenantID(ub.ID).Tenant,
+				ID:     utils.GenUUID(),
+				Event: map[string]interface{}{
+					utils.Account:        ub.ID,
+					utils.EventType:      utils.AccountUpdate,
+					utils.EventSource:    utils.AccountService,
+					utils.AllowNegative:  ub.AllowNegative,
+					utils.Disabled:       ub.Disabled,
+					utils.BalanceMap:     ub.BalanceMap,
+					utils.UnitCounters:   ub.UnitCounters,
+					utils.ActionTriggers: ub.ActionTriggers,
+					utils.UpdateTime:     ub.UpdateTime,
+				},
+			},
+			Opts: map[string]interface{}{
+				utils.MetaEventType: utils.AccountUpdate,
 			},
 		}
 	case extraData != nil:
-		ev, canCast := extraData.(*utils.CGREvent)
+		ev, canCast := extraData.(*utils.CGREventWithOpts)
 		if !canCast {
 			return
 		}
@@ -1054,11 +1059,8 @@ func export(ub *Account, a *Action, acs Actions, extraData interface{}) (err err
 		return // nothing to post
 	}
 	args := &utils.CGREventWithIDs{
-		IDs: strings.Split(a.ExtraParameters, utils.INFIELD_SEP),
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			Opts:     make(map[string]interface{}),
-			CGREvent: cgrEv,
-		},
+		IDs:              strings.Split(a.ExtraParameters, utils.INFIELD_SEP),
+		CGREventWithOpts: cgrEv,
 	}
 	var rply map[string]map[string]interface{}
 	return connMgr.Call(config.CgrConfig().ApierCfg().EEsConns, nil,

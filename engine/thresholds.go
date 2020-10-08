@@ -105,7 +105,7 @@ func (t *Threshold) ProcessEvent(args *ThresholdsArgsProcessEvent, dm *DataManag
 		at := &ActionTiming{
 			Uuid:      utils.GenUUID(),
 			ActionsID: actionSetID,
-			ExtraData: args.CGREvent,
+			ExtraData: args.CGREventWithOpts,
 		}
 		if acntID != "" {
 			at.accountIDs = utils.NewStringMap(acntID)
@@ -240,7 +240,10 @@ func (tS *ThresholdService) StoreThreshold(t *Threshold) (err error) {
 
 // matchingThresholdsForEvent returns ordered list of matching thresholds which are active for an Event
 func (tS *ThresholdService) matchingThresholdsForEvent(args *ThresholdsArgsProcessEvent) (ts Thresholds, err error) {
-	evNm := utils.MapStorage{utils.MetaReq: args.Event}
+	evNm := utils.MapStorage{
+		utils.MetaReq:  args.Event,
+		utils.MetaOpts: args.Opts,
+	}
 	tIDs := utils.NewStringSet(args.ThresholdIDs)
 	if len(tIDs) == 0 {
 		tIDs, err = MatchingItemIDsForEvent(evNm,

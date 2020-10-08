@@ -392,7 +392,10 @@ func (cdrS *CDRServer) thdSProcessEvent(cgrEv *utils.CGREventWithOpts) (err erro
 	thArgs := &ThresholdsArgsProcessEvent{
 		CGREventWithOpts: cgrEv.Clone(),
 	}
-	thArgs.CGREvent.Event[utils.EventType] = utils.CDR
+	if thArgs.Opts == nil {
+		thArgs.Opts = make(map[string]interface{})
+	}
+	thArgs.Opts[utils.MetaEventType] = utils.CDR
 	if err = cdrS.connMgr.Call(cdrS.cgrCfg.CdrsCfg().ThresholdSConns, nil,
 		utils.ThresholdSv1ProcessEvent,
 		thArgs, &tIDs); err != nil &&

@@ -675,7 +675,7 @@ func (b *Balance) debitMoney(cd *CallDescriptor, ub *Account, moneyBalances Bala
 	return cc, nil
 }
 
-// Converts the balance towards compressed information to be displayed
+// AsBalanceSummary converts the balance towards compressed information to be displayed
 func (b *Balance) AsBalanceSummary(typ string) *BalanceSummary {
 	bd := &BalanceSummary{UUID: b.Uuid, ID: b.ID, Type: typ, Value: b.Value, Disabled: b.Disabled}
 	if bd.ID == "" {
@@ -688,17 +688,24 @@ func (b *Balance) Publish() {
 	if b.account == nil {
 		return
 	}
-	accountId := b.account.ID
-	acntTnt := utils.NewTenantID(accountId)
-	cgrEv := &utils.CGREvent{
-		Tenant: acntTnt.Tenant,
-		ID:     utils.GenUUID(),
-		Event: map[string]interface{}{
-			utils.EventType:   utils.BalanceUpdate,
-			utils.EventSource: utils.AccountService,
-			utils.Account:     acntTnt.ID,
-			utils.BalanceID:   b.ID,
-			utils.Units:       b.Value}}
+	accountID := b.account.ID
+	acntTnt := utils.NewTenantID(accountID)
+	cgrEv := &utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
+			Tenant: acntTnt.Tenant,
+			ID:     utils.GenUUID(),
+			Event: map[string]interface{}{
+				utils.EventType:   utils.BalanceUpdate,
+				utils.EventSource: utils.AccountService,
+				utils.Account:     acntTnt.ID,
+				utils.BalanceID:   b.ID,
+				utils.Units:       b.Value,
+			},
+		},
+		Opts: map[string]interface{}{
+			utils.MetaEventType: utils.BalanceUpdate,
+		},
+	}
 	if !b.ExpirationDate.IsZero() {
 		cgrEv.Event[utils.ExpiryTime] = b.ExpirationDate.Format(time.RFC3339)
 	}
@@ -707,8 +714,7 @@ func (b *Balance) Publish() {
 			var reply []string
 			if err := connMgr.Call(config.CgrConfig().RalsCfg().StatSConns, nil,
 				utils.StatSv1ProcessEvent, &StatsArgsProcessEvent{
-					CGREventWithOpts: &utils.CGREventWithOpts{
-						CGREvent: cgrEv}}, &reply); err != nil &&
+					CGREventWithOpts: cgrEv}, &reply); err != nil &&
 				err.Error() != utils.ErrNotFound.Error() {
 				utils.Logger.Warning(
 					fmt.Sprintf("<AccountS> error: %s processing balance event %+v with StatS.",
@@ -721,8 +727,7 @@ func (b *Balance) Publish() {
 			var tIDs []string
 			if err := connMgr.Call(config.CgrConfig().RalsCfg().ThresholdSConns, nil,
 				utils.ThresholdSv1ProcessEvent, &ThresholdsArgsProcessEvent{
-					CGREventWithOpts: &utils.CGREventWithOpts{
-						CGREvent: cgrEv}}, &tIDs); err != nil &&
+					CGREventWithOpts: cgrEv}, &tIDs); err != nil &&
 				err.Error() != utils.ErrNotFound.Error() {
 				utils.Logger.Warning(
 					fmt.Sprintf("<AccountS> error: %s processing balance event %+v with ThresholdS.",
@@ -827,6 +832,9 @@ func (bc Balances) SaveDirtyBalances(acc *Account) {
 							utils.Units:       b.Value,
 						},
 					},
+					Opts: map[string]interface{}{
+						utils.MetaEventType: utils.BalanceUpdate,
+					},
 				},
 			}
 			if !b.ExpirationDate.IsZero() {
@@ -863,6 +871,9 @@ func (bc Balances) SaveDirtyBalances(acc *Account) {
 							utils.AllowNegative: acnt.AllowNegative,
 							utils.Disabled:      acnt.Disabled,
 						},
+					},
+					Opts: map[string]interface{}{
+						utils.MetaEventType: utils.AccountUpdate,
 					},
 				},
 			}

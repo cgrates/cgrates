@@ -85,7 +85,7 @@ func (pstrEE *PosterJSONMapEE) OnEvicted(string, interface{}) {
 }
 
 // ExportEvent implements EventExporter
-func (pstrEE *PosterJSONMapEE) ExportEvent(cgrEv *utils.CGREvent) (err error) {
+func (pstrEE *PosterJSONMapEE) ExportEvent(cgrEv *utils.CGREventWithOpts) (err error) {
 	pstrEE.Lock()
 	defer func() {
 		if err != nil {
@@ -102,7 +102,7 @@ func (pstrEE *PosterJSONMapEE) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 	if len(pstrEE.cgrCfg.EEsCfg().Exporters[pstrEE.cfgIdx].ContentFields()) == 0 {
 		valMp = cgrEv.Event
 	} else {
-		eeReq := NewEventExporterRequest(utils.MapStorage(cgrEv.Event), pstrEE.dc,
+		eeReq := NewEventExporterRequest(utils.MapStorage(cgrEv.Event), pstrEE.dc, cgrEv.Opts,
 			pstrEE.cgrCfg.EEsCfg().Exporters[pstrEE.cfgIdx].Tenant,
 			pstrEE.cgrCfg.GeneralCfg().DefaultTenant,
 			utils.FirstNonEmpty(pstrEE.cgrCfg.EEsCfg().Exporters[pstrEE.cfgIdx].Timezone,

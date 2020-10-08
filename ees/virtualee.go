@@ -60,7 +60,7 @@ func (vEe *VirtualEe) OnEvicted(_ string, _ interface{}) {
 }
 
 // ExportEvent implements EventExporter
-func (vEe *VirtualEe) ExportEvent(cgrEv *utils.CGREvent) (err error) {
+func (vEe *VirtualEe) ExportEvent(cgrEv *utils.CGREventWithOpts) (err error) {
 	vEe.Lock()
 	defer func() {
 		if err != nil {
@@ -73,7 +73,7 @@ func (vEe *VirtualEe) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 	vEe.dc[utils.NumberOfEvents] = vEe.dc[utils.NumberOfEvents].(int64) + 1
 
 	req := utils.MapStorage(cgrEv.Event)
-	eeReq := NewEventExporterRequest(req, vEe.dc,
+	eeReq := NewEventExporterRequest(req, vEe.dc, cgrEv.Opts,
 		vEe.cgrCfg.EEsCfg().Exporters[vEe.cfgIdx].Tenant,
 		vEe.cgrCfg.GeneralCfg().DefaultTenant,
 		utils.FirstNonEmpty(vEe.cgrCfg.EEsCfg().Exporters[vEe.cfgIdx].Timezone,

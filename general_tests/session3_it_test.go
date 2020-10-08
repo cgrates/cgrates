@@ -169,8 +169,9 @@ func testSes3ItProcessEvent(t *testing.T) {
 		AlteredFields:   []string{"*req.OfficeGroup"},
 		CGREventWithOpts: &utils.CGREventWithOpts{
 			Opts: map[string]interface{}{
-				utils.Subsys:     utils.MetaSessionS,
-				utils.OptsAPIKey: "ses12345",
+				utils.Subsys:        utils.MetaSessionS,
+				utils.OptsAPIKey:    "ses12345",
+				utils.MetaEventType: utils.StatUpdate,
 			},
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",

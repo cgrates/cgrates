@@ -82,7 +82,7 @@ func (fFwv *FileFWVee) OnEvicted(_ string, _ interface{}) {
 }
 
 // ExportEvent implements EventExporter
-func (fFwv *FileFWVee) ExportEvent(cgrEv *utils.CGREvent) (err error) {
+func (fFwv *FileFWVee) ExportEvent(cgrEv *utils.CGREventWithOpts) (err error) {
 	fFwv.Lock()
 	defer func() {
 		if err != nil {
@@ -95,7 +95,7 @@ func (fFwv *FileFWVee) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 	fFwv.dc[utils.NumberOfEvents] = fFwv.dc[utils.NumberOfEvents].(int64) + 1
 	var records []string
 	req := utils.MapStorage(cgrEv.Event)
-	eeReq := NewEventExporterRequest(req, fFwv.dc,
+	eeReq := NewEventExporterRequest(req, fFwv.dc, cgrEv.Opts,
 		fFwv.cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].Tenant,
 		fFwv.cgrCfg.GeneralCfg().DefaultTenant,
 		utils.FirstNonEmpty(fFwv.cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].Timezone,
@@ -128,7 +128,7 @@ func (fFwv *FileFWVee) composeHeader() (err error) {
 		return
 	}
 	var records []string
-	eeReq := NewEventExporterRequest(nil, fFwv.dc,
+	eeReq := NewEventExporterRequest(nil, fFwv.dc, nil,
 		fFwv.cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].Tenant,
 		fFwv.cgrCfg.GeneralCfg().DefaultTenant,
 		utils.FirstNonEmpty(fFwv.cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].Timezone,
@@ -158,7 +158,7 @@ func (fFwv *FileFWVee) composeTrailer() (err error) {
 		return
 	}
 	var records []string
-	eeReq := NewEventExporterRequest(nil, fFwv.dc,
+	eeReq := NewEventExporterRequest(nil, fFwv.dc, nil,
 		fFwv.cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].Tenant,
 		fFwv.cgrCfg.GeneralCfg().DefaultTenant,
 		utils.FirstNonEmpty(fFwv.cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].Timezone,

@@ -52,6 +52,9 @@ var (
 						utils.Disabled:      false,
 						utils.Units:         12.3},
 				},
+				Opts: map[string]interface{}{
+					utils.MetaEventType: utils.AccountUpdate,
+				},
 			},
 		},
 		{
@@ -66,6 +69,9 @@ var (
 						utils.Units:      12.3,
 						utils.ExpiryTime: time.Date(2009, 11, 10, 23, 00, 0, 0, time.UTC),
 					},
+				},
+				Opts: map[string]interface{}{
+					utils.MetaEventType: utils.BalanceUpdate,
 				},
 			},
 		},
@@ -86,6 +92,9 @@ var (
 						"PDD":           "2s",
 					},
 				},
+				Opts: map[string]interface{}{
+					utils.MetaEventType: utils.StatUpdate,
+				},
 			},
 		},
 		{
@@ -102,6 +111,9 @@ var (
 						"TCD":           "1h",
 					},
 				},
+				Opts: map[string]interface{}{
+					utils.MetaEventType: utils.StatUpdate,
+				},
 			},
 		},
 		{
@@ -117,19 +129,8 @@ var (
 						"TCD":           "3h1s",
 					},
 				},
-			},
-		},
-		{
-			CGREventWithOpts: &utils.CGREventWithOpts{
-				CGREvent: &utils.CGREvent{ // hitting THD_RES_1
-					Tenant: "cgrates.org",
-					ID:     "event6",
-					Event: map[string]interface{}{
-						utils.EventType:  utils.ResourceUpdate,
-						utils.Account:    "1002",
-						utils.ResourceID: "RES_GRP_1",
-						utils.Usage:      10.0,
-					},
+				Opts: map[string]interface{}{
+					utils.MetaEventType: utils.StatUpdate,
 				},
 			},
 		},
@@ -145,6 +146,9 @@ var (
 						utils.Usage:      10.0,
 					},
 				},
+				Opts: map[string]interface{}{
+					utils.MetaEventType: utils.ResourceUpdate,
+				},
 			},
 		},
 		{
@@ -158,6 +162,26 @@ var (
 						utils.ResourceID: "RES_GRP_1",
 						utils.Usage:      10.0,
 					},
+				},
+				Opts: map[string]interface{}{
+					utils.MetaEventType: utils.ResourceUpdate,
+				},
+			},
+		},
+		{
+			CGREventWithOpts: &utils.CGREventWithOpts{
+				CGREvent: &utils.CGREvent{ // hitting THD_RES_1
+					Tenant: "cgrates.org",
+					ID:     "event6",
+					Event: map[string]interface{}{
+						utils.EventType:  utils.ResourceUpdate,
+						utils.Account:    "1002",
+						utils.ResourceID: "RES_GRP_1",
+						utils.Usage:      10.0,
+					},
+				},
+				Opts: map[string]interface{}{
+					utils.MetaEventType: utils.ResourceUpdate,
 				},
 			},
 		},
@@ -167,7 +191,6 @@ var (
 					Tenant: "cgrates.org",
 					ID:     "cdrev1",
 					Event: map[string]interface{}{
-						utils.EventType:   utils.CDR,
 						"field_extr1":     "val_extr1",
 						"fieldextr2":      "valextr2",
 						utils.CGRID:       utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
@@ -190,6 +213,9 @@ var (
 						utils.ROUTE:       "SUPPL1",
 						utils.COST:        -1.0,
 					},
+				},
+				Opts: map[string]interface{}{
+					utils.MetaEventType: utils.CDR,
 				},
 			},
 		},

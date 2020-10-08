@@ -218,7 +218,7 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithIDs, rply *ma
 					utils.EventExporterS, ee.ID()))
 		}
 		go func(evict, sync bool, ee EventExporter) {
-			if err := ee.ExportEvent(cgrEv.CGREvent); err != nil {
+			if err := ee.ExportEvent(cgrEv.CGREventWithOpts); err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> with id <%s>, error: <%s>",
 						utils.EventExporterS, ee.ID(), err.Error()))
