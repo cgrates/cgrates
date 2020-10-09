@@ -120,9 +120,11 @@ func testFwvExportEvent(t *testing.T) {
 					utils.Usage:       time.Duration(10) * time.Second,
 					utils.RunID:       utils.MetaDefault,
 					utils.Cost:        2.34567,
-					"ExporterUsed":    "FWVExporter",
 					"ExtraFields":     map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 				},
+			},
+			Opts: map[string]interface{}{
+				"ExporterUsed": "FWVExporter",
 			},
 		},
 	}
