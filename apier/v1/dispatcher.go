@@ -31,10 +31,14 @@ import (
 
 // GetDispatcherProfile returns a Dispatcher Profile
 func (apierSv1 *APIerSv1) GetDispatcherProfile(arg *utils.TenantID, reply *engine.DispatcherProfile) error {
-	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	dpp, err := apierSv1.DataManager.GetDispatcherProfile(arg.Tenant, arg.ID, true, true, utils.NonTransactional)
+	tnt := arg.Tenant
+	if tnt == utils.EmptyString {
+		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
+	}
+	dpp, err := apierSv1.DataManager.GetDispatcherProfile(tnt, arg.ID, true, true, utils.NonTransactional)
 	if err != nil {
 		return utils.APIErrorHandler(err)
 	}
@@ -44,10 +48,10 @@ func (apierSv1 *APIerSv1) GetDispatcherProfile(arg *utils.TenantID, reply *engin
 
 // GetDispatcherProfileIDs returns list of dispatcherProfile IDs registered for a tenant
 func (apierSv1 *APIerSv1) GetDispatcherProfileIDs(tenantArg *utils.PaginatorWithTenant, dPrfIDs *[]string) error {
-	if missing := utils.MissingStructFields(tenantArg, []string{utils.Tenant}); len(missing) != 0 { //Params missing
-		return utils.NewErrMandatoryIeMissing(missing...)
-	}
 	tenant := tenantArg.Tenant
+	if tenant == utils.EmptyString {
+		tenant = apierSv1.Config.GeneralCfg().DefaultTenant
+	}
 	prfx := utils.DispatcherProfilePrefix + tenant + ":"
 	keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
 	if err != nil {
@@ -115,10 +119,14 @@ func (apierSv1 *APIerSv1) RemoveDispatcherProfile(arg *utils.TenantIDWithCache, 
 
 // GetDispatcherHost returns a Dispatcher Host
 func (apierSv1 *APIerSv1) GetDispatcherHost(arg *utils.TenantID, reply *engine.DispatcherHost) error {
-	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	dpp, err := apierSv1.DataManager.GetDispatcherHost(arg.Tenant, arg.ID, true, false, utils.NonTransactional)
+	tnt := arg.Tenant
+	if tnt == utils.EmptyString {
+		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
+	}
+	dpp, err := apierSv1.DataManager.GetDispatcherHost(tnt, arg.ID, true, false, utils.NonTransactional)
 	if err != nil {
 		return utils.APIErrorHandler(err)
 	}
@@ -128,10 +136,10 @@ func (apierSv1 *APIerSv1) GetDispatcherHost(arg *utils.TenantID, reply *engine.D
 
 // GetDispatcherHostIDs returns list of dispatcherHost IDs registered for a tenant
 func (apierSv1 *APIerSv1) GetDispatcherHostIDs(tenantArg *utils.PaginatorWithTenant, dPrfIDs *[]string) error {
-	if missing := utils.MissingStructFields(tenantArg, []string{utils.Tenant}); len(missing) != 0 { //Params missing
-		return utils.NewErrMandatoryIeMissing(missing...)
-	}
 	tenant := tenantArg.Tenant
+	if tenant == utils.EmptyString {
+		tenant = apierSv1.Config.GeneralCfg().DefaultTenant
+	}
 	prfx := utils.DispatcherHostPrefix + tenant + ":"
 	keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
 	if err != nil {
