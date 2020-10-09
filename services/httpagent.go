@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
+	"fmt"
 	"sync"
 
 	"github.com/cgrates/cgrates/agents"
@@ -61,7 +62,7 @@ func (ha *HTTPAgent) Start() (err error) {
 
 	ha.Lock()
 	defer ha.Unlock()
-	utils.Logger.Info("Starting HTTP agent")
+	utils.Logger.Info(fmt.Sprintf("<%s> successfully started HTTPAgent", utils.HttpAgentCfg))
 	for _, agntCfg := range ha.cfg.HttpAgentCfg() {
 		ha.server.RegisterHttpHandler(agntCfg.Url,
 			agents.NewHTTPAgent(ha.connMgr, agntCfg.SessionSConns, filterS,
