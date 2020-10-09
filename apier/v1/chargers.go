@@ -27,10 +27,14 @@ import (
 
 // GetChargerProfile returns a Charger Profile
 func (apierSv1 *APIerSv1) GetChargerProfile(arg *utils.TenantID, reply *engine.ChargerProfile) error {
-	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if cpp, err := apierSv1.DataManager.GetChargerProfile(arg.Tenant, arg.ID, true, true, utils.NonTransactional); err != nil {
+	tnt := arg.Tenant
+	if tnt == utils.EmptyString {
+		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
+	}
+	if cpp, err := apierSv1.DataManager.GetChargerProfile(tnt, arg.ID, true, true, utils.NonTransactional); err != nil {
 		return utils.APIErrorHandler(err)
 	} else {
 		*reply = *cpp
@@ -40,10 +44,11 @@ func (apierSv1 *APIerSv1) GetChargerProfile(arg *utils.TenantID, reply *engine.C
 
 // GetChargerProfileIDs returns list of chargerProfile IDs registered for a tenant
 func (apierSv1 *APIerSv1) GetChargerProfileIDs(args *utils.PaginatorWithTenant, chPrfIDs *[]string) error {
-	if missing := utils.MissingStructFields(args, []string{utils.Tenant}); len(missing) != 0 { //Params missing
-		return utils.NewErrMandatoryIeMissing(missing...)
+	tnt := args.Tenant
+	if tnt == utils.EmptyString {
+		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
-	prfx := utils.ChargerProfilePrefix + args.Tenant + ":"
+	prfx := utils.ChargerProfilePrefix + tnt + ":"
 	keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
 	if err != nil {
 		return err

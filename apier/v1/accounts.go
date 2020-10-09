@@ -38,10 +38,14 @@ type AccountActionTiming struct {
 }
 
 func (apierSv1 *APIerSv1) GetAccountActionPlan(attrs *utils.TenantAccount, reply *[]*AccountActionTiming) error {
-	if missing := utils.MissingStructFields(attrs, []string{"Tenant", "Account"}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(attrs, []string{utils.Account}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(strings.Join(missing, ","), "")
 	}
-	acntID := utils.ConcatenatedKey(attrs.Tenant, attrs.Account)
+	tnt := attrs.Tenant
+	if tnt == utils.EmptyString {
+		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
+	}
+	acntID := utils.ConcatenatedKey(tnt, attrs.Account)
 	acntATsIf, err := guardian.Guardian.Guard(func() (interface{}, error) {
 		acntAPids, err := apierSv1.DataManager.GetAccountActionPlans(acntID, false, utils.NonTransactional)
 		if err != nil && err != utils.ErrNotFound {
@@ -91,10 +95,14 @@ func (apierSv1 *APIerSv1) RemoveActionTiming(attrs *AttrRemoveActionTiming, repl
 	}
 	var accID string
 	if len(attrs.Account) != 0 { // Presence of Account requires complete account details to be provided
-		if missing := utils.MissingStructFields(attrs, []string{"Tenant", "Account"}); len(missing) != 0 {
+		if missing := utils.MissingStructFields(attrs, []string{utils.Account}); len(missing) != 0 {
 			return utils.NewErrMandatoryIeMissing(missing...)
 		}
-		accID = utils.ConcatenatedKey(attrs.Tenant, attrs.Account)
+		tnt := attrs.Tenant
+		if tnt == utils.EmptyString {
+			tnt = apierSv1.Config.GeneralCfg().DefaultTenant
+		}
+		accID = utils.ConcatenatedKey(tnt, attrs.Account)
 	}
 
 	var remAcntAPids []string // list of accounts who's indexes need modification
@@ -173,10 +181,14 @@ func (apierSv1 *APIerSv1) RemoveActionTiming(attrs *AttrRemoveActionTiming, repl
 
 // SetAccount adds a new account into dataDb. If already defined, returns success.
 func (apierSv1 *APIerSv1) SetAccount(attr *utils.AttrSetAccount, reply *string) (err error) {
-	if missing := utils.MissingStructFields(attr, []string{"Tenant", "Account"}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(attr, []string{utils.Account}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	accID := utils.ConcatenatedKey(attr.Tenant, attr.Account)
+	tnt := attr.Tenant
+	if tnt == utils.EmptyString {
+		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
+	}
+	accID := utils.ConcatenatedKey(tnt, attr.Account)
 	dirtyActionPlans := make(map[string]*engine.ActionPlan)
 	_, err = guardian.Guardian.Guard(func() (interface{}, error) {
 		var ub *engine.Account
@@ -294,11 +306,15 @@ func (apierSv1 *APIerSv1) SetAccount(attr *utils.AttrSetAccount, reply *string) 
 }
 
 func (apierSv1 *APIerSv1) RemoveAccount(attr *utils.AttrRemoveAccount, reply *string) (err error) {
-	if missing := utils.MissingStructFields(attr, []string{"Tenant", "Account"}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(attr, []string{utils.Account}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
+	tnt := attr.Tenant
+	if tnt == utils.EmptyString {
+		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
+	}
 	dirtyActionPlans := make(map[string]*engine.ActionPlan)
-	accID := utils.ConcatenatedKey(attr.Tenant, attr.Account)
+	accID := utils.ConcatenatedKey(tnt, attr.Account)
 	_, err = guardian.Guardian.Guard(func() (interface{}, error) {
 		// remove it from all action plans
 		_, err := guardian.Guardian.Guard(func() (interface{}, error) {
@@ -428,7 +444,7 @@ func (apierSv1 *APIerSv1) DebitBalance(attr *AttrAddBalance, reply *string) erro
 }
 
 func (apierSv1 *APIerSv1) modifyBalance(aType string, attr *AttrAddBalance, reply *string) (err error) {
-	if missing := utils.MissingStructFields(attr, []string{"Tenant", "Account", "BalanceType", "Value"}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(attr, []string{utils.Account, utils.BalanceType, utils.Value}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	var balance *engine.BalanceFilter
@@ -439,8 +455,11 @@ func (apierSv1 *APIerSv1) modifyBalance(aType string, attr *AttrAddBalance, repl
 	if attr.Value != 0 {
 		balance.Value = &utils.ValueFormula{Static: math.Abs(attr.Value)}
 	}
-
-	accID := utils.ConcatenatedKey(attr.Tenant, attr.Account)
+	tnt := attr.Tenant
+	if tnt == utils.EmptyString {
+		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
+	}
+	accID := utils.ConcatenatedKey(tnt, attr.Account)
 	if _, err = apierSv1.DataManager.GetAccount(accID); err != nil {
 		// create account if does not exist
 		account := &engine.Account{
@@ -502,7 +521,7 @@ func (apierSv1 *APIerSv1) modifyBalance(aType string, attr *AttrAddBalance, repl
 // SetBalance sets the balance for the given account
 // if the account is not already created it will create the account also
 func (apierSv1 *APIerSv1) SetBalance(attr *utils.AttrSetBalance, reply *string) (err error) {
-	if missing := utils.MissingStructFields(attr, []string{"Tenant", "Account", "BalanceType"}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(attr, []string{utils.Account, utils.BalanceType}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	var balance *engine.BalanceFilter
@@ -517,8 +536,12 @@ func (apierSv1 *APIerSv1) SetBalance(attr *utils.AttrSetBalance, reply *string) 
 		(balance.Uuid == nil || *balance.Uuid == "") {
 		return utils.NewErrMandatoryIeMissing("BalanceID", "or", "BalanceUUID")
 	}
+	tnt := attr.Tenant
+	if tnt == utils.EmptyString {
+		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
+	}
 
-	accID := utils.ConcatenatedKey(attr.Tenant, attr.Account)
+	accID := utils.ConcatenatedKey(tnt, attr.Account)
 	if _, err = apierSv1.DataManager.GetAccount(accID); err != nil {
 		// create account if not exists
 		account := &engine.Account{
@@ -576,11 +599,15 @@ func (apierSv1 *APIerSv1) SetBalance(attr *utils.AttrSetBalance, reply *string) 
 // SetBalances sets multiple balances for the given account
 // if the account is not already created it will create the account also
 func (apierSv1 *APIerSv1) SetBalances(attr *utils.AttrSetBalances, reply *string) (err error) {
-	if missing := utils.MissingStructFields(attr, []string{"Tenant", "Account", "Balances"}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(attr, []string{utils.Account, utils.Balances}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
+	tnt := attr.Tenant
+	if tnt == utils.EmptyString {
+		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
+	}
 
-	accID := utils.ConcatenatedKey(attr.Tenant, attr.Account)
+	accID := utils.ConcatenatedKey(tnt, attr.Account)
 	if _, err = apierSv1.DataManager.GetAccount(accID); err != nil {
 		// create account if not exists
 		account := &engine.Account{
@@ -655,7 +682,7 @@ func (apierSv1 *APIerSv1) SetBalances(attr *utils.AttrSetBalances, reply *string
 
 // RemoveBalances remove the matching balances for the account
 func (apierSv1 *APIerSv1) RemoveBalances(attr *utils.AttrSetBalance, reply *string) (err error) {
-	if missing := utils.MissingStructFields(attr, []string{"Tenant", "Account", "BalanceType"}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(attr, []string{utils.Account, utils.BalanceType}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	var balance *engine.BalanceFilter
@@ -663,8 +690,12 @@ func (apierSv1 *APIerSv1) RemoveBalances(attr *utils.AttrSetBalance, reply *stri
 		return
 	}
 	balance.Type = utils.StringPointer(attr.BalanceType)
+	tnt := attr.Tenant
+	if tnt == utils.EmptyString {
+		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
+	}
 
-	accID := utils.ConcatenatedKey(attr.Tenant, attr.Account)
+	accID := utils.ConcatenatedKey(tnt, attr.Account)
 	if _, err := apierSv1.DataManager.GetAccount(accID); err != nil {
 		return utils.ErrNotFound
 	}

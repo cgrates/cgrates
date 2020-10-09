@@ -104,6 +104,7 @@ var (
 		testApierRemAccountActionTriggers,
 		testApierSetAccount,
 		testApierGetAccountActionPlan,
+		testApierGetAccountActionPlanWithoutTenant,
 		testApierITGetScheduledActionsForAccount,
 		testApierRemUniqueIDActionTiming,
 		testApierGetAccount,
@@ -1306,6 +1307,20 @@ func testApierSetAccount(t *testing.T) {
 func testApierGetAccountActionPlan(t *testing.T) {
 	var reply []*AccountActionTiming
 	req := utils.TenantAccount{Tenant: "cgrates.org", Account: "dan7"}
+	if err := rater.Call(utils.APIerSv1GetAccountActionPlan, &req, &reply); err != nil {
+		t.Error("Got error on APIerSv1.GetAccountActionPlan: ", err.Error())
+	} else if len(reply) != 1 {
+		t.Error("Unexpected action plan received: ", utils.ToJSON(reply))
+	} else {
+		if reply[0].ActionPlanId != "ATMS_1" {
+			t.Errorf("Unexpected ActionoveAccountPlanId received")
+		}
+	}
+}
+
+func testApierGetAccountActionPlanWithoutTenant(t *testing.T) {
+	var reply []*AccountActionTiming
+	req := utils.TenantAccount{Account: "dan7"}
 	if err := rater.Call(utils.APIerSv1GetAccountActionPlan, &req, &reply); err != nil {
 		t.Error("Got error on APIerSv1.GetAccountActionPlan: ", err.Error())
 	} else if len(reply) != 1 {

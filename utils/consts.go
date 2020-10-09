@@ -292,6 +292,7 @@ const (
 	Category                     = "Category"
 	Contexts                     = "Contexts"
 	Account                      = "Account"
+	Balances                     = "Balances"
 	Subject                      = "Subject"
 	Destination                  = "Destination"
 	SetupTime                    = "SetupTime"

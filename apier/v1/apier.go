@@ -399,7 +399,7 @@ func (apierSv1 *APIerSv1) ImportTariffPlanFromFolder(attrs *utils.AttrImportTPFr
 
 // Sets a specific rating profile working with data directly in the DataDB without involving storDb
 func (apierSv1 *APIerSv1) SetRatingProfile(attrs *utils.AttrSetRatingProfile, reply *string) (err error) {
-	if missing := utils.MissingStructFields(attrs, []string{"Tenant", "ToR", "Subject", "RatingPlanActivations"}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(attrs, []string{"ToR", "Subject", "RatingPlanActivations"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	for _, rpa := range attrs.RatingPlanActivations {
@@ -407,8 +407,12 @@ func (apierSv1 *APIerSv1) SetRatingProfile(attrs *utils.AttrSetRatingProfile, re
 			return fmt.Errorf("%s:RatingPlanActivation:%v", utils.ErrMandatoryIeMissing.Error(), missing)
 		}
 	}
+	tnt := attrs.Tenant
+	if tnt == utils.EmptyString {
+		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
+	}
 	keyID := utils.ConcatenatedKey(utils.META_OUT,
-		attrs.Tenant, attrs.Category, attrs.Subject)
+		tnt, attrs.Category, attrs.Subject)
 	var rpfl *engine.RatingProfile
 	if !attrs.Overwrite {
 		if rpfl, err = apierSv1.DataManager.GetRatingProfile(keyID, false, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
@@ -434,7 +438,7 @@ func (apierSv1 *APIerSv1) SetRatingProfile(attrs *utils.AttrSetRatingProfile, re
 			&engine.RatingPlanActivation{
 				ActivationTime: at,
 				RatingPlanId:   ra.RatingPlanId,
-				FallbackKeys: utils.FallbackSubjKeys(attrs.Tenant,
+				FallbackKeys: utils.FallbackSubjKeys(tnt,
 					attrs.Category, ra.FallbackSubjects)})
 	}
 	if err := apierSv1.DataManager.SetRatingProfile(rpfl, utils.NonTransactional); err != nil {
@@ -452,10 +456,11 @@ func (apierSv1 *APIerSv1) SetRatingProfile(attrs *utils.AttrSetRatingProfile, re
 
 // GetRatingProfileIDs returns list of resourceProfile IDs registered for a tenant
 func (apierSv1 *APIerSv1) GetRatingProfileIDs(args *utils.PaginatorWithTenant, rsPrfIDs *[]string) error {
-	if missing := utils.MissingStructFields(args, []string{utils.Tenant}); len(missing) != 0 { //Params missing
-		return utils.NewErrMandatoryIeMissing(missing...)
+	tnt := args.Tenant
+	if tnt == utils.EmptyString {
+		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
-	prfx := utils.RATING_PROFILE_PREFIX + "*out:" + args.Tenant + ":"
+	prfx := utils.RATING_PROFILE_PREFIX + "*out:" + tnt + ":"
 	keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
 	if err != nil {
 		return err
@@ -472,8 +477,11 @@ func (apierSv1 *APIerSv1) GetRatingProfileIDs(args *utils.PaginatorWithTenant, r
 }
 
 func (apierSv1 *APIerSv1) GetRatingProfile(attrs *utils.AttrGetRatingProfile, reply *engine.RatingProfile) (err error) {
-	if missing := utils.MissingStructFields(attrs, []string{"Tenant", "Category", "Subject"}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(attrs, []string{utils.Category, utils.Subject}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	if attrs.Tenant == utils.EmptyString {
+		attrs.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	if rpPrf, err := apierSv1.DataManager.GetRatingProfile(attrs.GetID(),
 		false, utils.NonTransactional); err != nil {
