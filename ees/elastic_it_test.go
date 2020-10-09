@@ -140,10 +140,12 @@ func testElasticExportEvents(t *testing.T) {
 					utils.Usage:       time.Duration(10) * time.Second,
 					utils.RunID:       utils.MetaDefault,
 					utils.Cost:        1.01,
-					"ExporterUsed":    "ElasticExporter",
 					"ExtraFields": map[string]string{"extra1": "val_extra1",
 						"extra2": "val_extra2", "extra3": "val_extra3"},
 				},
+			},
+			Opts: map[string]interface{}{
+				"ExporterUsed": "ElasticExporter",
 			},
 		},
 	}
@@ -170,10 +172,12 @@ func testElasticExportEvents(t *testing.T) {
 					utils.Usage:       time.Duration(10) * time.Nanosecond,
 					utils.RunID:       utils.MetaDefault,
 					utils.Cost:        0.012,
-					"ExporterUsed":    "ElasticExporter",
 					"ExtraFields": map[string]string{"extra1": "val_extra1",
 						"extra2": "val_extra2", "extra3": "val_extra3"},
 				},
+			},
+			Opts: map[string]interface{}{
+				"ExporterUsed": "ElasticExporter",
 			},
 		},
 	}
@@ -199,10 +203,12 @@ func testElasticExportEvents(t *testing.T) {
 				utils.Usage:       time.Duration(1),
 				utils.RunID:       utils.MetaDefault,
 				utils.Cost:        0.15,
-				"ExporterUsed":    "ElasticExporter",
 				"ExtraFields": map[string]string{"extra1": "val_extra1",
 					"extra2": "val_extra2", "extra3": "val_extra3"},
 			},
+		},
+		Opts: map[string]interface{}{
+			"ExporterUsed": "ElasticExporter",
 		},
 	}
 
@@ -220,8 +226,10 @@ func testElasticExportEvents(t *testing.T) {
 				utils.Subject:     "1001",
 				utils.Destination: "1002",
 				utils.RunID:       utils.MetaDefault,
-				"ExporterUsed":    "ElasticExporterWithNoFields",
 			},
+		},
+		Opts: map[string]interface{}{
+			"ExporterUsed": "ElasticExporterWithNoFields",
 		},
 	}
 	var reply map[string]utils.MapStorage
@@ -333,7 +341,6 @@ func testElasticVerifyExports(t *testing.T) {
 				utils.Subject:     "1001",
 				utils.Destination: "1002",
 				utils.RunID:       utils.MetaDefault,
-				"ExporterUsed":    "ElasticExporterWithNoFields",
 			}
 			if !reflect.DeepEqual(eMp, hit.(map[string]interface{})["_source"]) {
 				t.Errorf("Expected %+v, received: %+v", eMp, hit.(map[string]interface{})["_source"])

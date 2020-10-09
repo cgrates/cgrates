@@ -121,8 +121,10 @@ func testVirtExportSupplierEvent(t *testing.T) {
 					utils.Usage:       time.Duration(10) * time.Second,
 					utils.RunID:       "SupplierRun",
 					utils.Cost:        1.23,
-					"ExporterUsed":    "RouteExporter",
 				},
+			},
+			Opts: map[string]interface{}{
+				"ExporterUsed": "RouteExporter",
 			},
 		},
 	}
@@ -157,8 +159,10 @@ func testVirtExportEvents(t *testing.T) {
 					utils.Usage:       time.Duration(10) * time.Second,
 					utils.RunID:       "SupplierRun",
 					utils.Cost:        1.01,
-					"ExporterUsed":    "CSVExporterFromVirt",
 				},
+			},
+			Opts: map[string]interface{}{
+				"ExporterUsed": "CSVExporterFromVirt",
 			},
 		},
 	}

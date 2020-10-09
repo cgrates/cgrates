@@ -128,10 +128,12 @@ func testCsvExportEvent(t *testing.T) {
 					utils.Usage:       time.Duration(10) * time.Second,
 					utils.RunID:       utils.MetaDefault,
 					utils.Cost:        1.01,
-					"ExporterUsed":    "CSVExporter",
 					"ExtraFields": map[string]string{"extra1": "val_extra1",
 						"extra2": "val_extra2", "extra3": "val_extra3"},
 				},
+			},
+			Opts: map[string]interface{}{
+				"ExporterUsed": "CSVExporter",
 			},
 		},
 	}
@@ -158,10 +160,12 @@ func testCsvExportEvent(t *testing.T) {
 					utils.Usage:       time.Duration(10) * time.Nanosecond,
 					utils.RunID:       utils.MetaDefault,
 					utils.Cost:        0.012,
-					"ExporterUsed":    "CSVExporter",
 					"ExtraFields": map[string]string{"extra1": "val_extra1",
 						"extra2": "val_extra2", "extra3": "val_extra3"},
 				},
+			},
+			Opts: map[string]interface{}{
+				"ExporterUsed": "CSVExporter",
 			},
 		},
 	}
@@ -188,10 +192,12 @@ func testCsvExportEvent(t *testing.T) {
 					utils.Usage:       time.Duration(1),
 					utils.RunID:       utils.MetaDefault,
 					utils.Cost:        0.15,
-					"ExporterUsed":    "CSVExporter",
 					"ExtraFields": map[string]string{"extra1": "val_extra1",
 						"extra2": "val_extra2", "extra3": "val_extra3"},
 				},
+			},
+			Opts: map[string]interface{}{
+				"ExporterUsed": "CSVExporter",
 			},
 		},
 	}
@@ -220,7 +226,7 @@ func testCsvVerifyExports(t *testing.T) {
 		t.Error(err)
 	}
 	if len(files) != 1 {
-		t.Errorf("Expected %+v, received: %+v", 1, len(files))
+		t.Fatalf("Expected %+v, received: %+v", 1, len(files))
 	}
 	eCnt := "dbafe9c8614c785a65aabd116dd3959c3c56f7f6,*default,*voice,dsafdsaf,*rated,cgrates.org,call,1001,1001,1002,2013-11-07T08:42:25Z,2013-11-07T08:42:26Z,10000000000,1.01" +
 		"\n" +
@@ -259,10 +265,12 @@ func testCsvExportComposedEvent(t *testing.T) {
 					utils.Usage:         time.Duration(10) * time.Second,
 					utils.RunID:         utils.MetaDefault,
 					utils.Cost:          1.016374,
-					"ExporterUsed":      "CSVExporterComposed",
 					"ExtraFields": map[string]string{"extra1": "val_extra1",
 						"extra2": "val_extra2", "extra3": "val_extra3"},
 				},
+			},
+			Opts: map[string]interface{}{
+				"ExporterUsed": "CSVExporterComposed",
 			},
 		},
 	}
@@ -290,10 +298,12 @@ func testCsvExportComposedEvent(t *testing.T) {
 					utils.Usage:         time.Duration(1),
 					utils.RunID:         utils.MetaDefault,
 					utils.Cost:          0.155462,
-					"ExporterUsed":      "CSVExporterComposed",
 					"ExtraFields": map[string]string{"extra1": "val_extra1",
 						"extra2": "val_extra2", "extra3": "val_extra3"},
 				},
+			},
+			Opts: map[string]interface{}{
+				"ExporterUsed": "CSVExporterComposed",
 			},
 		},
 	}
@@ -364,8 +374,10 @@ func testCsvExportMaskedDestination(t *testing.T) {
 					utils.Usage:       time.Duration(10) * time.Second,
 					utils.RunID:       utils.MetaDefault,
 					utils.Cost:        1.01,
-					"ExporterUsed":    "CSVMaskedDestination",
 				},
+			},
+			Opts: map[string]interface{}{
+				"ExporterUsed": "CSVMaskedDestination",
 			},
 		},
 	}
@@ -421,10 +433,12 @@ func testCsvExportEventWithInflateTemplate(t *testing.T) {
 					utils.Usage:       time.Duration(10) * time.Second,
 					utils.RunID:       utils.MetaDefault,
 					utils.Cost:        1.01,
-					"ExporterUsed":    "CSVExporterWIthTemplate",
 					"ExtraFields": map[string]string{"extra1": "val_extra1",
 						"extra2": "val_extra2", "extra3": "val_extra3"},
 				},
+			},
+			Opts: map[string]interface{}{
+				"ExporterUsed": "CSVExporterWIthTemplate",
 			},
 		},
 	}
@@ -451,10 +465,12 @@ func testCsvExportEventWithInflateTemplate(t *testing.T) {
 					utils.Usage:       time.Duration(10) * time.Nanosecond,
 					utils.RunID:       utils.MetaDefault,
 					utils.Cost:        0.012,
-					"ExporterUsed":    "CSVExporterWIthTemplate",
 					"ExtraFields": map[string]string{"extra1": "val_extra1",
 						"extra2": "val_extra2", "extra3": "val_extra3"},
 				},
+			},
+			Opts: map[string]interface{}{
+				"ExporterUsed": "CSVExporterWIthTemplate",
 			},
 		},
 	}
@@ -481,10 +497,12 @@ func testCsvExportEventWithInflateTemplate(t *testing.T) {
 					utils.Usage:       time.Duration(1),
 					utils.RunID:       utils.MetaDefault,
 					utils.Cost:        0.15,
-					"ExporterUsed":    "CSVExporterWIthTemplate",
 					"ExtraFields": map[string]string{"extra1": "val_extra1",
 						"extra2": "val_extra2", "extra3": "val_extra3"},
 				},
+			},
+			Opts: map[string]interface{}{
+				"ExporterUsed": "CSVExporterWIthTemplate",
 			},
 		},
 	}
@@ -551,10 +569,12 @@ func testCsvExportNotFoundExporter(t *testing.T) {
 					utils.Usage:       time.Duration(10) * time.Second,
 					utils.RunID:       utils.MetaDefault,
 					utils.Cost:        1.01,
-					"ExporterUsed":    "ExporterNotFound",
 					"ExtraFields": map[string]string{"extra1": "val_extra1",
 						"extra2": "val_extra2", "extra3": "val_extra3"},
 				},
+			},
+			Opts: map[string]interface{}{
+				"ExporterUsed": "ExporterNotFound",
 			},
 		},
 	}

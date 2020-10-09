@@ -135,10 +135,13 @@ func testHTTPJsonMapExportEvent(t *testing.T) {
 					utils.Usage:       time.Duration(10) * time.Second,
 					utils.RunID:       utils.MetaDefault,
 					utils.Cost:        1.01,
-					"ExporterUsed":    "HTTPJsonMapExporter",
 					"ExtraFields": map[string]string{"extra1": "val_extra1",
 						"extra2": "val_extra2", "extra3": "val_extra3"},
 				},
+			},
+			Opts: map[string]interface{}{
+				"ExporterUsed":      "HTTPJsonMapExporter",
+				utils.MetaEventType: utils.CDR,
 			},
 		},
 	}
@@ -165,10 +168,13 @@ func testHTTPJsonMapExportEvent(t *testing.T) {
 					utils.Usage:       time.Duration(10) * time.Nanosecond,
 					utils.RunID:       utils.MetaDefault,
 					utils.Cost:        0.012,
-					"ExporterUsed":    "HTTPJsonMapExporter",
 					"ExtraFields": map[string]string{"extra1": "val_extra1",
 						"extra2": "val_extra2", "extra3": "val_extra3"},
 				},
+			},
+			Opts: map[string]interface{}{
+				"ExporterUsed":      "HTTPJsonMapExporter",
+				utils.MetaEventType: utils.CDR,
 			},
 		},
 	}
@@ -196,10 +202,13 @@ func testHTTPJsonMapExportEvent(t *testing.T) {
 					utils.RunID:       utils.MetaDefault,
 					utils.Cost:        0.15,
 					utils.OrderID:     10,
-					"ExporterUsed":    "HTTPJsonMapExporter",
 					"ExtraFields": map[string]string{"extra1": "val_extra1",
 						"extra2": "val_extra2", "extra3": "val_extra3"},
 				},
+			},
+			Opts: map[string]interface{}{
+				"ExporterUsed":      "HTTPJsonMapExporter",
+				utils.MetaEventType: utils.CDR,
 			},
 		},
 	}
@@ -218,8 +227,10 @@ func testHTTPJsonMapExportEvent(t *testing.T) {
 					utils.Account:     "1001",
 					utils.Destination: "1002",
 					utils.RunID:       utils.MetaDefault,
-					"ExporterUsed":    "HTTPJsonMapExporterWithNoFields",
 				},
+			},
+			Opts: map[string]interface{}{
+				"ExporterUsed": "HTTPJsonMapExporterWithNoFields",
 			},
 		},
 	}
@@ -237,6 +248,7 @@ func testHTTPJsonMapExportEvent(t *testing.T) {
 		utils.Subject:     utils.IfaceAsString(eventVoice.Event[utils.Subject]),
 		utils.Destination: utils.IfaceAsString(eventVoice.Event[utils.Destination]),
 		utils.Cost:        utils.IfaceAsString(eventVoice.Event[utils.Cost]),
+		utils.EventType:   utils.CDR,
 	} {
 		if rcv := httpJsonMap[key]; rcv != strVal {
 			t.Errorf("Expected %+v, received: %+v", strVal, rcv)
@@ -255,6 +267,7 @@ func testHTTPJsonMapExportEvent(t *testing.T) {
 		utils.Subject:     utils.IfaceAsString(eventData.Event[utils.Subject]),
 		utils.Destination: utils.IfaceAsString(eventData.Event[utils.Destination]),
 		utils.Cost:        utils.IfaceAsString(eventData.Event[utils.Cost]),
+		utils.EventType:   utils.CDR,
 	} {
 		if rcv := httpJsonMap[key]; rcv != strVal {
 			t.Errorf("Expected %+v, received: %+v", strVal, rcv)
@@ -273,6 +286,7 @@ func testHTTPJsonMapExportEvent(t *testing.T) {
 		utils.Subject:     utils.IfaceAsString(eventSMS.Event[utils.Subject]),
 		utils.Destination: utils.IfaceAsString(eventSMS.Event[utils.Destination]),
 		utils.Cost:        utils.IfaceAsString(eventSMS.Event[utils.Cost]),
+		utils.EventType:   utils.CDR,
 	} {
 		if rcv := httpJsonMap[key]; rcv != strVal {
 			t.Errorf("Expected %+v, received: %+v", strVal, rcv)

@@ -148,7 +148,10 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithIDs, rply *ma
 
 	expIDs := utils.NewStringSet(cgrEv.IDs)
 	lenExpIDs := expIDs.Size()
-	cgrDp := utils.MapStorage{utils.MetaReq: cgrEv.Event}
+	cgrDp := utils.MapStorage{
+		utils.MetaReq:  cgrEv.Event,
+		utils.MetaOpts: cgrEv.Opts,
+	}
 
 	var wg sync.WaitGroup
 	var withErr bool
