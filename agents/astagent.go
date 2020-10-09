@@ -97,6 +97,8 @@ func (sma *AsteriskAgent) ListenAndServe() (err error) {
 	if err = sma.connectAsterisk(); err != nil {
 		return
 	}
+	utils.Logger.Info(fmt.Sprintf("<%s> successfully connected to Asterisk at: <%s>",
+		utils.AsteriskAgent, sma.cgrCfg.AsteriskAgentCfg().AsteriskConns[sma.astConnIdx].Address))
 	for {
 		select {
 		case err = <-sma.astErrChan:
