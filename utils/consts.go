@@ -991,6 +991,11 @@ const (
 	MetaRemoveExpired         = "*remove_expired"
 	MetaPostEvent             = "*post_event"
 	MetaCDRAccount            = "*reset_account_cdr"
+	ActionID                  = "ActionID"
+	ActionType                = "ActionType"
+	ActionValue               = "ActionValue"
+	BalanceValue              = "BalanceValue"
+	ExtraParameters           = "ExtraParameters"
 )
 
 // Migrator Metas

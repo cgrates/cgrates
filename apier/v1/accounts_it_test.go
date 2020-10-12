@@ -385,7 +385,7 @@ func testAccITSetBalanceWithExtraData(t *testing.T) {
 func testAccITSetBalanceWithExtraData2(t *testing.T) {
 	extraDataMap := map[string]interface{}{
 		"ExtraField": "ExtraValue",
-		"ActionVal":  "~ActionValue",
+		"ActionVal":  "~*req.ActionValue",
 	}
 	var reply string
 	attrs := &utils.AttrSetBalance{
