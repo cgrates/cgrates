@@ -76,8 +76,11 @@ type DispatcherWithCache struct {
 
 //SetDispatcherProfile add/update a new Dispatcher Profile
 func (apierSv1 *APIerSv1) SetDispatcherProfile(args *DispatcherWithCache, reply *string) error {
-	if missing := utils.MissingStructFields(args.DispatcherProfile, []string{"Tenant", "ID"}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(args.DispatcherProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	if args.Tenant == utils.EmptyString {
+		args.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	if err := apierSv1.DataManager.SetDispatcherProfile(args.DispatcherProfile, true); err != nil {
 		return utils.APIErrorHandler(err)
@@ -97,10 +100,14 @@ func (apierSv1 *APIerSv1) SetDispatcherProfile(args *DispatcherWithCache, reply 
 
 //RemoveDispatcherProfile remove a specific Dispatcher Profile
 func (apierSv1 *APIerSv1) RemoveDispatcherProfile(arg *utils.TenantIDWithCache, reply *string) error {
-	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := apierSv1.DataManager.RemoveDispatcherProfile(arg.Tenant,
+	tnt := arg.Tenant
+	if tnt == utils.EmptyString {
+		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
+	}
+	if err := apierSv1.DataManager.RemoveDispatcherProfile(tnt,
 		arg.ID, utils.NonTransactional, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
@@ -109,8 +116,8 @@ func (apierSv1 *APIerSv1) RemoveDispatcherProfile(arg *utils.TenantIDWithCache, 
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for DispatcherProfile
-	if err := apierSv1.CallCache(arg.Cache, arg.Tenant, utils.CacheDispatcherProfiles,
-		arg.TenantID(), nil, nil, arg.Opts); err != nil {
+	if err := apierSv1.CallCache(arg.Cache, tnt, utils.CacheDispatcherProfiles,
+		utils.ConcatenatedKey(tnt, arg.ID), nil, nil, arg.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -164,8 +171,11 @@ type DispatcherHostWithCache struct {
 
 //SetDispatcherHost add/update a new Dispatcher Host
 func (apierSv1 *APIerSv1) SetDispatcherHost(args *DispatcherHostWithCache, reply *string) error {
-	if missing := utils.MissingStructFields(args.DispatcherHost, []string{"Tenant", "ID"}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(args.DispatcherHost, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	if args.Tenant == utils.EmptyString {
+		args.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	if err := apierSv1.DataManager.SetDispatcherHost(args.DispatcherHost); err != nil {
 		return utils.APIErrorHandler(err)
@@ -185,10 +195,14 @@ func (apierSv1 *APIerSv1) SetDispatcherHost(args *DispatcherHostWithCache, reply
 
 //RemoveDispatcherHost remove a specific Dispatcher Host
 func (apierSv1 *APIerSv1) RemoveDispatcherHost(arg *utils.TenantIDWithCache, reply *string) error {
-	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := apierSv1.DataManager.RemoveDispatcherHost(arg.Tenant,
+	tnt := arg.Tenant
+	if tnt == utils.EmptyString {
+		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
+	}
+	if err := apierSv1.DataManager.RemoveDispatcherHost(tnt,
 		arg.ID, utils.NonTransactional); err != nil {
 		return utils.APIErrorHandler(err)
 	}
@@ -197,8 +211,8 @@ func (apierSv1 *APIerSv1) RemoveDispatcherHost(arg *utils.TenantIDWithCache, rep
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for DispatcherProfile
-	if err := apierSv1.CallCache(arg.Cache, arg.Tenant, utils.CacheDispatcherHosts,
-		arg.TenantID(), nil, nil, arg.Opts); err != nil {
+	if err := apierSv1.CallCache(arg.Cache, tnt, utils.CacheDispatcherHosts,
+		utils.ConcatenatedKey(tnt, arg.ID), nil, nil, arg.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
