@@ -72,8 +72,11 @@ type ChargerWithCache struct {
 
 //SetChargerProfile add/update a new Charger Profile
 func (apierSv1 *APIerSv1) SetChargerProfile(arg *ChargerWithCache, reply *string) error {
-	if missing := utils.MissingStructFields(arg.ChargerProfile, []string{"Tenant", "ID"}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(arg.ChargerProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	if arg.Tenant == utils.EmptyString {
+		arg.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	if err := apierSv1.DataManager.SetChargerProfile(arg.ChargerProfile, true); err != nil {
 		return utils.APIErrorHandler(err)
@@ -93,10 +96,14 @@ func (apierSv1 *APIerSv1) SetChargerProfile(arg *ChargerWithCache, reply *string
 
 //RemoveChargerProfile remove a specific Charger Profile
 func (apierSv1 *APIerSv1) RemoveChargerProfile(arg *utils.TenantIDWithCache, reply *string) error {
-	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := apierSv1.DataManager.RemoveChargerProfile(arg.Tenant,
+	tnt := arg.Tenant
+	if tnt == utils.EmptyString {
+		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
+	}
+	if err := apierSv1.DataManager.RemoveChargerProfile(tnt,
 		arg.ID, utils.NonTransactional, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
@@ -105,8 +112,8 @@ func (apierSv1 *APIerSv1) RemoveChargerProfile(arg *utils.TenantIDWithCache, rep
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for ChargerProfile
-	if err := apierSv1.CallCache(arg.Cache, arg.Tenant, utils.CacheChargerProfiles,
-		arg.TenantID(), nil, nil, arg.Opts); err != nil {
+	if err := apierSv1.CallCache(arg.Cache, tnt, utils.CacheChargerProfiles,
+		utils.ConcatenatedKey(tnt, arg.ID), nil, nil, arg.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

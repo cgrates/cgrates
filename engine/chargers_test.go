@@ -191,18 +191,18 @@ func TestChargerSetChargerProfiles(t *testing.T) {
 }
 
 func TestChargerMatchingChargerProfilesForEvent(t *testing.T) {
-	if _, err = chargerSrv.matchingChargerProfilesForEvent(chargerEvents[2]); err == nil ||
+	if _, err = chargerSrv.matchingChargerProfilesForEvent(chargerEvents[2].Tenant, chargerEvents[2]); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Error: %+v", err)
 	}
 
-	if rcv, err := chargerSrv.matchingChargerProfilesForEvent(chargerEvents[0]); err != nil {
+	if rcv, err := chargerSrv.matchingChargerProfilesForEvent(chargerEvents[0].Tenant, chargerEvents[0]); err != nil {
 		t.Errorf("Error: %+v", err)
 	} else if !reflect.DeepEqual(cPPs[0], rcv[0]) {
 		t.Errorf("Expecting: %+v, received: %+v ", cPPs[0], rcv[0])
 	}
 
-	if rcv, err := chargerSrv.matchingChargerProfilesForEvent(chargerEvents[1]); err != nil {
+	if rcv, err := chargerSrv.matchingChargerProfilesForEvent(chargerEvents[1].Tenant, chargerEvents[1]); err != nil {
 		t.Errorf("Error: %+v", err)
 	} else if !reflect.DeepEqual(cPPs[1], rcv[0]) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(cPPs[1]), utils.ToJSON(rcv))
@@ -220,7 +220,7 @@ func TestChargerProcessEvent(t *testing.T) {
 		},
 	}
 	rpl[0].CGREvent.Event[utils.RunID] = cPPs[0].RunID
-	rcv, err := chargerSrv.processEvent(&utils.CGREventWithOpts{
+	rcv, err := chargerSrv.processEvent(rpl[0].CGREvent.Tenant, &utils.CGREventWithOpts{
 		CGREvent: chargerEvents[0].CGREvent,
 		Opts:     chargerEvents[0].Opts,
 	})
