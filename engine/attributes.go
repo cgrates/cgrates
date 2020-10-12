@@ -61,14 +61,14 @@ func (alS *AttributeService) Shutdown() (err error) {
 	return
 }
 
-// matchingAttributeProfilesForEvent returns ordered list of matching resources which are active by the time of the call
-func (alS *AttributeService) attributeProfileForEvent(args *AttrArgsProcessEvent, evNm utils.MapStorage, lastID string) (matchAttrPrfl *AttributeProfile, err error) {
+// attributeProfileForEvent returns the matching attribute
+func (alS *AttributeService) attributeProfileForEvent(tnt string, args *AttrArgsProcessEvent, evNm utils.MapStorage, lastID string) (matchAttrPrfl *AttributeProfile, err error) {
 	var attrIDs []string
 	contextVal := utils.MetaDefault
 	if args.Context != nil && *args.Context != "" {
 		contextVal = *args.Context
 	}
-	attrIdxKey := utils.ConcatenatedKey(args.Tenant, contextVal)
+	attrIdxKey := utils.ConcatenatedKey(tnt, contextVal)
 	if len(args.AttributeIDs) != 0 {
 		attrIDs = args.AttributeIDs
 	} else {
@@ -89,7 +89,7 @@ func (alS *AttributeService) attributeProfileForEvent(args *AttrArgsProcessEvent
 				alS.cgrcfg.AttributeSCfg().PrefixIndexedFields,
 				alS.cgrcfg.AttributeSCfg().SuffixIndexedFields,
 				alS.dm, utils.CacheAttributeFilterIndexes,
-				utils.ConcatenatedKey(args.Tenant, utils.META_ANY),
+				utils.ConcatenatedKey(tnt, utils.META_ANY),
 				alS.cgrcfg.AttributeSCfg().IndexedSelects,
 				alS.cgrcfg.AttributeSCfg().NestedFields); err != nil {
 				return nil, err
@@ -98,7 +98,7 @@ func (alS *AttributeService) attributeProfileForEvent(args *AttrArgsProcessEvent
 		attrIDs = aPrflIDs.AsSlice()
 	}
 	for _, apID := range attrIDs {
-		aPrfl, err := alS.dm.GetAttributeProfile(args.Tenant, apID, true, true, utils.NonTransactional)
+		aPrfl, err := alS.dm.GetAttributeProfile(tnt, apID, true, true, utils.NonTransactional)
 		if err != nil {
 			if err == utils.ErrNotFound {
 				continue
@@ -113,7 +113,7 @@ func (alS *AttributeService) attributeProfileForEvent(args *AttrArgsProcessEvent
 			!aPrfl.ActivationInterval.IsActiveAtTime(*args.Time) { // not active
 			continue
 		}
-		if pass, err := alS.filterS.Pass(args.Tenant, aPrfl.FilterIDs,
+		if pass, err := alS.filterS.Pass(tnt, aPrfl.FilterIDs,
 			evNm); err != nil {
 			return nil, err
 		} else if !pass {
@@ -205,10 +205,10 @@ func (attr *AttrArgsProcessEvent) Clone() *AttrArgsProcessEvent {
 }
 
 // processEvent will match event with attribute profile and do the necessary replacements
-func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent, evNm utils.MapStorage, dynDP utils.DataProvider, lastID string) (
+func (alS *AttributeService) processEvent(tnt string, args *AttrArgsProcessEvent, evNm utils.MapStorage, dynDP utils.DataProvider, lastID string) (
 	rply *AttrSProcessEventReply, err error) {
 	var attrPrf *AttributeProfile
-	if attrPrf, err = alS.attributeProfileForEvent(args, evNm, lastID); err != nil {
+	if attrPrf, err = alS.attributeProfileForEvent(tnt, args, evNm, lastID); err != nil {
 		return
 	}
 	rply = &AttrSProcessEventReply{
@@ -219,11 +219,12 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent, evNm utils
 		},
 		blocker: attrPrf.Blocker,
 	}
+	rply.Tenant = tnt
 	for _, attribute := range attrPrf.Attributes {
 		//in case that we have filter for attribute send them to FilterS to be processed
 		if len(attribute.FilterIDs) != 0 {
 			var pass bool
-			if pass, err = alS.filterS.Pass(args.Tenant, attribute.FilterIDs,
+			if pass, err = alS.filterS.Pass(tnt, attribute.FilterIDs,
 				evNm); err != nil {
 				return
 			} else if !pass {
@@ -394,7 +395,11 @@ func (alS *AttributeService) V1GetAttributeForEvent(args *AttrArgsProcessEvent,
 	if args.CGREvent == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
-	attrPrf, err := alS.attributeProfileForEvent(args, utils.MapStorage{
+	tnt := args.Tenant
+	if tnt == utils.EmptyString {
+		tnt = alS.cgrcfg.GeneralCfg().DefaultTenant
+	}
+	attrPrf, err := alS.attributeProfileForEvent(tnt, args, utils.MapStorage{
 		utils.MetaReq:  args.CGREvent.Event,
 		utils.MetaOpts: args.Opts,
 		utils.MetaVars: utils.MapStorage{
@@ -420,6 +425,11 @@ func (alS *AttributeService) V1ProcessEvent(args *AttrArgsProcessEvent,
 	if args.Event == nil {
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
+	tnt := args.Tenant
+	if tnt == utils.EmptyString {
+		tnt = alS.cgrcfg.GeneralCfg().DefaultTenant
+	}
+
 	processRuns := alS.cgrcfg.AttributeSCfg().ProcessRuns
 	if args.ProcessRuns != nil && *args.ProcessRuns != 0 {
 		processRuns = *args.ProcessRuns
@@ -440,7 +450,7 @@ func (alS *AttributeService) V1ProcessEvent(args *AttrArgsProcessEvent,
 	for i := 0; i < processRuns; i++ {
 		(eNV[utils.MetaVars].(utils.MapStorage))[utils.ProcessRuns] = utils.NewNMData(i + 1)
 		var evRply *AttrSProcessEventReply
-		evRply, err = alS.processEvent(args, eNV, dynDP, lastID)
+		evRply, err = alS.processEvent(tnt, args, eNV, dynDP, lastID)
 		if err != nil {
 			if err != utils.ErrNotFound {
 				err = utils.NewErrServerError(err)

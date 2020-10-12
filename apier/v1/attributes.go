@@ -27,11 +27,15 @@ import (
 
 // GetAttributeProfile returns an Attribute Profile
 func (apierSv1 *APIerSv1) GetAttributeProfile(arg *utils.TenantIDWithOpts, reply *engine.AttributeProfile) (err error) {
-	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
+	tnt := arg.Tenant
+	if tnt == utils.EmptyString {
+		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
+	}
 	var alsPrf *engine.AttributeProfile
-	if alsPrf, err = apierSv1.DataManager.GetAttributeProfile(arg.Tenant, arg.ID, true, true, utils.NonTransactional); err != nil {
+	if alsPrf, err = apierSv1.DataManager.GetAttributeProfile(tnt, arg.ID, true, true, utils.NonTransactional); err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}
@@ -91,8 +95,11 @@ type AttributeWithCache struct {
 
 //SetAttributeProfile add/update a new Attribute Profile
 func (apierSv1 *APIerSv1) SetAttributeProfile(alsWrp *AttributeWithCache, reply *string) error {
-	if missing := utils.MissingStructFields(alsWrp.AttributeProfile, []string{utils.Tenant, utils.ID, utils.Attributes}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(alsWrp.AttributeProfile, []string{utils.ID, utils.Attributes}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	if alsWrp.Tenant == utils.EmptyString {
+		alsWrp.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	for _, attr := range alsWrp.Attributes {
 		if attr.Path == utils.EmptyString {
