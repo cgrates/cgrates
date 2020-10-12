@@ -67,7 +67,7 @@ func TestSQL(t *testing.T) {
 
 func testSQLInitConfig(t *testing.T) {
 	var err error
-	if sqlCfg, err = config.NewCGRConfigFromJsonStringWithDefaults(`{
+	if sqlCfg, err = config.NewCGRConfigFromJSONStringWithDefaults(`{
 		"stor_db": {
 			"db_password": "CGRateS.org",
 		},

@@ -78,7 +78,7 @@ func TestLoaderCgrCfgAsMapInterface(t *testing.T) {
 		utils.GapiCredentialsCfg: json.RawMessage(`".gapi/credentials.json"`),
 		utils.GapiTokenCfg:       json.RawMessage(`".gapi/token.json"`),
 	}
-	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.loaderCgrCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))

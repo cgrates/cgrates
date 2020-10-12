@@ -355,7 +355,7 @@ func TestSureTaxCfgAsMapInterface(t *testing.T) {
 		utils.SalesTypeCodeCfg:        "B",
 		utils.TaxExemptionCodeListCfg: "randomCode",
 	}
-	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.sureTaxCfg.AsMapInterface(cgrCfg.generalCfg.RSRSep); !reflect.DeepEqual(rcv, eMap) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))

@@ -235,7 +235,7 @@ func TestEnabledCase2(t *testing.T) {
 		},
 	],	
 }`
-	if jsonCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+	if jsonCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if enabled := jsonCfg.loaderCfg.Enabled(); !enabled {
 		t.Errorf("Expected %+v", enabled)
@@ -304,7 +304,7 @@ func TestLoaderCfgAsMapInterfaceCase1(t *testing.T) {
 			},
 		},
 	}
-	if cfgCgr, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+	if cfgCgr, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else {
 		rcv := cgrCfg.loaderCfg.AsMapInterface(cfgCgr.generalCfg.RSRSep)
@@ -388,7 +388,7 @@ func TestLoaderCfgAsMapInterfaceCase2(t *testing.T) {
 			},
 		},
 	}
-	if jsonCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+	if jsonCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := jsonCfg.loaderCfg.AsMapInterface(jsonCfg.generalCfg.RSRSep); !reflect.DeepEqual(rcv[0][utils.Tenant], eMap[0][utils.Tenant]) {
 		t.Errorf("Expected %+v, received %+v", rcv[0][utils.Tenant], eMap[0][utils.Tenant])

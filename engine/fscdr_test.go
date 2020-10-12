@@ -506,7 +506,7 @@ func TestFsCdrDDazRSRExtraFields(t *testing.T) {
     }
 }`)
 	var err error
-	fsCdrCfg, err = config.NewCGRConfigFromJsonStringWithDefaults(eFieldsCfg)
+	fsCdrCfg, err = config.NewCGRConfigFromJSONStringWithDefaults(eFieldsCfg)
 	expCdrExtra := utils.ParseRSRFieldsMustCompile(`~effective_caller_id_number:s/(\d+)/+$1/`, utils.INFIELD_SEP)
 	if err != nil {
 		t.Error("Could not parse the config", err.Error())

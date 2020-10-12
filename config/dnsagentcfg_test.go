@@ -140,7 +140,7 @@ func TestRequestProcessorDNSAgentloadFromJsonCfg1(t *testing.T) {
 			},
 		},
 	}
-	if jsonCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+	if jsonCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if err = jsonCfg.dnsAgentCfg.loadFromJsonCfg(cfgJSON, jsonCfg.generalCfg.RSRSep); err != nil {
 		t.Error(err)
@@ -207,7 +207,7 @@ func TestDNSAgentCfgAsMapInterface(t *testing.T) {
 		utils.TimezoneCfg:          "",
 		utils.RequestProcessorsCfg: []map[string]interface{}{},
 	}
-	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.dnsAgentCfg.AsMapInterface(utils.EmptyString); !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("Expecetd %+v, received %+v", eMap, rcv)
@@ -270,7 +270,7 @@ func TestDNSAgentCfgAsMapInterface1(t *testing.T) {
 			},
 		},
 	}
-	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.dnsAgentCfg.AsMapInterface(cgrCfg.generalCfg.RSRSep); !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("Expecetd %+v \n, received %+v", utils.ToIJSON(eMap), utils.ToIJSON(rcv))

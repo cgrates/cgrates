@@ -20,6 +20,7 @@ package config
 
 import (
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/cgrates/cgrates/utils"
@@ -58,7 +59,7 @@ func TestConfigsAsMapInterface(t *testing.T) {
 		utils.UrlCfg:     "",
 		utils.RootDirCfg: "/var/spool/cgrates/configs",
 	}
-	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgsJSONStr); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgsJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.configSCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
 		t.Errorf("Expected %+v, received %+v", eMap, rcv)
@@ -74,9 +75,28 @@ func TestConfigsAsMapInterface2(t *testing.T) {
 		utils.UrlCfg:     "/configs/",
 		utils.RootDirCfg: "/var/spool/cgrates/configs",
 	}
-	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgsJSONStr); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgsJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.configSCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
 		t.Errorf("Expected %+v, received %+v", eMap, rcv)
+	}
+}
+
+func TestNewCGRConfigFromPathWithoutEnv(t *testing.T) {
+	cfgsJSONStr := `{
+		"general": {
+			"node_id": "*env:NODE_ID",
+		},
+  }`
+	cfg, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = cfg.loadConfigFromReader(strings.NewReader(cfgsJSONStr), []func(*CgrJsonCfg) error{cfg.loadFromJSONCfg}, true); err != nil {
+		t.Fatal(err)
+	}
+	exp := "*env:NODE_ID"
+	if cfg.GeneralCfg().NodeID != exp {
+		t.Errorf("Expected %+v, received %+v", exp, cfg.GeneralCfg().NodeID)
 	}
 }

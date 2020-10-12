@@ -41,7 +41,7 @@ var (
 )
 
 func TestKafkaER(t *testing.T) {
-	cfg, err := config.NewCGRConfigFromJsonStringWithDefaults(`{
+	cfg, err := config.NewCGRConfigFromJSONStringWithDefaults(`{
 "ers": {									// EventReaderService
 	"enabled": true,						// starts the EventReader service: <true|false>
 	"readers": [

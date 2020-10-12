@@ -62,7 +62,7 @@ func TestCgrCfgLoadWithDefaults(t *testing.T) {
 		{Address: "1.2.3.4:8021", Password: "ClueCon", Reconnects: 3, Alias: "123"},
 		{Address: "1.2.3.5:8021", Password: "ClueCon", Reconnects: 5, Alias: "124"},
 	}
-	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(jsnCfg); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(jsnCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCgrCfg.fsAgentCfg, cgrCfg.fsAgentCfg) {
 		t.Errorf("Expected: %+v, received: %+v", eCgrCfg.fsAgentCfg, cgrCfg.fsAgentCfg)
@@ -77,7 +77,7 @@ func TestCgrCfgDataDBPortWithoutDynamic(t *testing.T) {
 	}
 }`
 
-	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(jsnCfg); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(jsnCfg); err != nil {
 		t.Error(err)
 	} else if cgrCfg.DataDbCfg().DataDbType != utils.MONGO {
 		t.Errorf("Expected: %+v, received: %+v", cgrCfg.DataDbCfg().DataDbType, utils.MONGO)
@@ -91,7 +91,7 @@ func TestCgrCfgDataDBPortWithoutDynamic(t *testing.T) {
 	}
 }`
 
-	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(jsnCfg); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(jsnCfg); err != nil {
 		t.Error(err)
 	} else if cgrCfg.DataDbCfg().DataDbType != utils.INTERNAL {
 		t.Errorf("Expected: %+v, received: %+v", cgrCfg.DataDbCfg().DataDbType, utils.INTERNAL)
@@ -109,7 +109,7 @@ func TestCgrCfgDataDBPortWithDymanic(t *testing.T) {
 	}
 }`
 
-	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(jsnCfg); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(jsnCfg); err != nil {
 		t.Error(err)
 	} else if cgrCfg.DataDbCfg().DataDbType != utils.MONGO {
 		t.Errorf("Expected: %+v, received: %+v", cgrCfg.DataDbCfg().DataDbType, utils.MONGO)
@@ -124,7 +124,7 @@ func TestCgrCfgDataDBPortWithDymanic(t *testing.T) {
 	}
 }`
 
-	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(jsnCfg); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(jsnCfg); err != nil {
 		t.Error(err)
 	} else if cgrCfg.DataDbCfg().DataDbType != utils.INTERNAL {
 		t.Errorf("Expected: %+v, received: %+v", cgrCfg.DataDbCfg().DataDbType, utils.INTERNAL)
@@ -141,7 +141,7 @@ func TestCgrCfgStorDBPortWithoutDynamic(t *testing.T) {
 	}
 }`
 
-	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(jsnCfg); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(jsnCfg); err != nil {
 		t.Error(err)
 	} else if cgrCfg.StorDbCfg().Type != utils.MONGO {
 		t.Errorf("Expected: %+v, received: %+v", cgrCfg.StorDbCfg().Type, utils.MONGO)
@@ -159,7 +159,7 @@ func TestCgrCfgStorDBPortWithDymanic(t *testing.T) {
 	}
 }`
 
-	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(jsnCfg); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(jsnCfg); err != nil {
 		t.Error(err)
 	} else if cgrCfg.StorDbCfg().Type != utils.MONGO {
 		t.Errorf("Expected: %+v, received: %+v", cgrCfg.StorDbCfg().Type, utils.MONGO)
@@ -178,7 +178,7 @@ func TestCgrCfgListener(t *testing.T) {
 	}
 }`
 
-	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(jsnCfg); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(jsnCfg); err != nil {
 		t.Error(err)
 	} else if cgrCfg.ListenCfg().RPCGOBTLSListen != "127.0.0.1:2023" {
 		t.Errorf("Expected: 127.0.0.1:2023 , received: %+v", cgrCfg.ListenCfg().RPCGOBTLSListen)
@@ -213,7 +213,7 @@ func TestHttpAgentCfg(t *testing.T) {
 			RequestProcessors: nil,
 		},
 	}
-	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(jsnCfg); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(jsnCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCgrCfg.HttpAgentCfg(), cgrCfg.HttpAgentCfg()) {
 		t.Errorf("Expected: %s, received: %s",
@@ -445,7 +445,7 @@ func TestCgrCfgJSONLoadCDRS(t *testing.T) {
 },
 }
 	`
-	cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(jsnCfg)
+	cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(jsnCfg)
 	if err != nil {
 		t.Error(err)
 	}
@@ -1764,7 +1764,7 @@ func TestCgrMigratorCfg2(t *testing.T) {
 },
 }`
 
-	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(jsnCfg); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(jsnCfg); err != nil {
 		t.Error(err)
 	} else if cgrCfg.MigratorCgrCfg().OutDataDBHost != "0.0.0.0" {
 		t.Errorf("Expected: 0.0.0.0 , received: %+v", cgrCfg.MigratorCgrCfg().OutDataDBHost)
@@ -1796,7 +1796,7 @@ func TestCfgTlsCfg(t *testing.T) {
 		ServerName:       "TestServerName",
 		ServerPolicy:     3,
 	}
-	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(jsnCfg); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(jsnCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCgrCfg.TlsCfg(), cgrCfg.TlsCfg()) {
 		t.Errorf("Expected: %s, received: %s",
@@ -1885,7 +1885,7 @@ func TestCgrCfgV1GetConfigSection(t *testing.T) {
 		"RPCJSONTLSListen": "127.0.0.1:2022",
 	}
 	var rcv map[string]interface{}
-	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(jsnCfg); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(jsnCfg); err != nil {
 		t.Error(err)
 	} else if err := cgrCfg.V1GetConfigSection(&SectionWithOpts{Section: LISTEN_JSN}, &rcv); err != nil {
 		t.Error(err)

@@ -76,7 +76,7 @@ func TestRatesCfgAsMapInterface(t *testing.T) {
 		utils.RateSuffixIndexedFieldsCfg: []string{},
 		utils.RateNestedFieldsCfg:        false,
 	}
-	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.rateSCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
 		t.Errorf("Expected %+v \n, received %+v", eMap, rcv)
@@ -112,7 +112,7 @@ func TestRatesCfgAsMapInterface1(t *testing.T) {
 		utils.RateSuffixIndexedFieldsCfg: []string{"*req.index1", "*req.index2", "*req.index3"},
 		utils.RateNestedFieldsCfg:        true,
 	}
-	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.rateSCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
 		t.Errorf("Expected %+v \n, received %+v", eMap, rcv)
