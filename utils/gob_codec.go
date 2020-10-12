@@ -16,7 +16,6 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-// Most of the logic follows standard library implementation in this file
 package utils
 
 import (
@@ -27,18 +26,12 @@ import (
 	"net/rpc"
 )
 
-type concReqsGobServerCodec struct {
-	rwc       io.ReadWriteCloser
-	dec       *gob.Decoder
-	enc       *gob.Encoder
-	encBuf    *bufio.Writer
-	closed    bool
-	allocated bool // populated if we have allocated a channel for concurrent requests
-}
+// All of the logic follows standard library implementation in this file
+// Only here to use as object
 
-func NewConcReqsGobServerCodec(conn io.ReadWriteCloser) rpc.ServerCodec {
+func newGobServerCodec(conn io.ReadWriteCloser) rpc.ServerCodec {
 	buf := bufio.NewWriter(conn)
-	return &concReqsGobServerCodec{
+	return &gobServerCodec{
 		rwc:    conn,
 		dec:    gob.NewDecoder(conn),
 		enc:    gob.NewEncoder(buf),
@@ -46,25 +39,23 @@ func NewConcReqsGobServerCodec(conn io.ReadWriteCloser) rpc.ServerCodec {
 	}
 }
 
-func (c *concReqsGobServerCodec) ReadRequestHeader(r *rpc.Request) error {
+type gobServerCodec struct {
+	rwc    io.ReadWriteCloser
+	dec    *gob.Decoder
+	enc    *gob.Encoder
+	encBuf *bufio.Writer
+	closed bool
+}
+
+func (c *gobServerCodec) ReadRequestHeader(r *rpc.Request) error {
 	return c.dec.Decode(r)
 }
 
-func (c *concReqsGobServerCodec) ReadRequestBody(body interface{}) error {
-	if err := ConReqs.Allocate(); err != nil {
-		return err
-	}
-	c.allocated = true
+func (c *gobServerCodec) ReadRequestBody(body interface{}) error {
 	return c.dec.Decode(body)
 }
 
-func (c *concReqsGobServerCodec) WriteResponse(r *rpc.Response, body interface{}) (err error) {
-	if c.allocated {
-		defer func() {
-			ConReqs.Deallocate()
-			c.allocated = false
-		}()
-	}
+func (c *gobServerCodec) WriteResponse(r *rpc.Response, body interface{}) (err error) {
 	if err = c.enc.Encode(r); err != nil {
 		if c.encBuf.Flush() == nil {
 			// Gob couldn't encode the header. Should not happen, so if it does,
@@ -86,7 +77,7 @@ func (c *concReqsGobServerCodec) WriteResponse(r *rpc.Response, body interface{}
 	return c.encBuf.Flush()
 }
 
-func (c *concReqsGobServerCodec) Close() error {
+func (c *gobServerCodec) Close() error {
 	if c.closed {
 		// Only call c.rwc.Close once; otherwise the semantics are undefined.
 		return nil
