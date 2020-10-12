@@ -24,6 +24,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
+
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
@@ -2602,13 +2604,22 @@ func (r *RPCMock) Call(method string, args interface{}, rply interface{}) error 
 	return nil
 }
 
-/*
-NEED TO REVIEW THIS TEST
 func TestCdrLogAction(t *testing.T) {
-	bakSch := schedCdrsConns
 	mock := RPCMock{}
-	schedCdrsConns = &mock
-	defer func() { schedCdrsConns = bakSch }()
+
+	dfltCfg, err := config.NewDefaultCGRConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	dfltCfg.SchedulerCfg().CDRsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)}
+	config.SetCgrConfig(dfltCfg)
+
+	internalChan := make(chan rpcclient.ClientConnector, 1)
+	internalChan <- &mock
+
+	NewConnManager(dfltCfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs): internalChan,
+	})
 
 	var extraData interface{}
 	acc := &Account{
@@ -2631,7 +2642,7 @@ func TestCdrLogAction(t *testing.T) {
 	a := &Action{
 		Id:              "CDRLog1",
 		ActionType:      utils.CDRLOG,
-		ExtraParameters: "{\"BalanceID\":\"~BalanceID\",\"ActionID\":\"~ActionID\",\"BalanceValue\":\"~BalanceValue\"}",
+		ExtraParameters: "{\"BalanceID\":\"~*req.BalanceID\",\"ActionID\":\"~*req.ActionID\",\"BalanceValue\":\"~*req.BalanceValue\"}",
 		Weight:          50,
 	}
 	acs := Actions{
@@ -2655,7 +2666,7 @@ func TestCdrLogAction(t *testing.T) {
 	if mock.args == nil {
 		t.Fatalf("Expected a call to %s", utils.CDRsV1ProcessEvent)
 	}
-	expCgrEv := utils.CGREvent{
+	expCgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     mock.args.CGREvent.ID,
 		Event: map[string]interface{}{
@@ -2689,7 +2700,7 @@ func TestCdrLogAction(t *testing.T) {
 		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(expCgrEv), utils.ToJSON(mock.args.CGREvent))
 	}
 }
-*/
+
 /**************** Benchmarks ********************************/
 
 func BenchmarkUUID(b *testing.B) {
