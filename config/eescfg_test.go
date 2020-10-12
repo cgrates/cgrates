@@ -387,7 +387,7 @@ func TestEESClone(t *testing.T) {
 			v.ComputePath()
 		}
 	}
-	if jsonCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+	if jsonCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else {
 		cloneCfg := jsonCfg.eesCfg.Clone()
@@ -769,7 +769,7 @@ func TestEventExporterSameID(t *testing.T) {
 	],
 }
 }`
-	if cfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+	if cfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedEEsCfg, cfg.eesCfg) {
 		t.Errorf("Expected: %+v ,\n recived: %+v", utils.ToJSON(expectedEEsCfg), utils.ToJSON(cfg.eesCfg))
@@ -1494,7 +1494,7 @@ func TestEEsCfgAsMapInterface(t *testing.T) {
 			},
 		},
 	}
-	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else {
 		rcv := cgrCfg.eesCfg.AsMapInterface(cgrCfg.generalCfg.RSRSep)

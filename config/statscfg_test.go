@@ -83,7 +83,7 @@ func TestStatSCfgAsMapInterface(t *testing.T) {
 		utils.SuffixIndexedFieldsCfg:    []string{},
 		utils.NestedFieldsCfg:           false,
 	}
-	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.statsCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
 		t.Errorf("Expected %+v \n, received %+v", eMap, rcv)
@@ -115,7 +115,7 @@ func TestStatSCfgAsMapInterface1(t *testing.T) {
 		utils.SuffixIndexedFieldsCfg:    []string{"*req.suffix_indexed_fields"},
 		utils.NestedFieldsCfg:           true,
 	}
-	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.statsCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
 		t.Errorf("Expected %+v \n, received %+v", eMap, rcv)

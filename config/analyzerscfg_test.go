@@ -48,7 +48,7 @@ func TestAnalyzerSCfgAsMapInterface(t *testing.T) {
 	eMap := map[string]interface{}{
 		utils.EnabledCfg: false,
 	}
-	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.analyzerSCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
 		t.Errorf("Expected: %+v , recived: %+v", eMap, rcv)
@@ -65,7 +65,7 @@ func TestAnalyzerSCfgAsMapInterface1(t *testing.T) {
 	eMap := map[string]interface{}{
 		utils.EnabledCfg: true,
 	}
-	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.analyzerSCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
 		t.Errorf("Expected: %+v , recived: %+v", eMap, rcv)

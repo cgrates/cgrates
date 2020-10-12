@@ -65,7 +65,7 @@ func TestHTTPCfgAsMapInterface(t *testing.T) {
 		utils.HTTPUseBasicAuthCfg:        false,
 		utils.HTTPAuthUsersCfg:           map[string]interface{}{},
 	}
-	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.httpCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
 		t.Errorf("Expected %+v, received %+v", eMap, rcv)
@@ -93,7 +93,7 @@ func TestHTTPCfgAsMapInterface1(t *testing.T) {
 			"user2": "authenticated",
 		},
 	}
-	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.httpCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
 		t.Errorf("Expected %+v, received %+v", eMap, rcv)

@@ -78,7 +78,7 @@ func HandlerConfigS(w http.ResponseWriter, r *http.Request) {
 
 func handleConfigSFolder(path string, w http.ResponseWriter) {
 	// if the path is a directory, read the directory, construct the config and load it in memory
-	cfg, err := NewCGRConfigFromPath(path)
+	cfg, err := newCGRConfigFromPathWithoutEnv(path)
 	if err != nil {
 		w.WriteHeader(500)
 		fmt.Fprintf(w, err.Error())

@@ -73,7 +73,7 @@ func TestDispatcherSCfgAsMapInterface(t *testing.T) {
 		utils.NestedFieldsCfg:        false,
 		utils.AttributeSConnsCfg:     []string{},
 	}
-	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.dispatcherSCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("Expected %+v, received %+v", eMap, rcv)
@@ -102,7 +102,7 @@ func TestDispatcherSCfgAsMapInterface1(t *testing.T) {
 		utils.NestedFieldsCfg:        false,
 		utils.AttributeSConnsCfg:     []string{"*internal", "*conn1"},
 	}
-	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.dispatcherSCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("Expected %+v, received %+v", eMap, rcv)
@@ -121,7 +121,7 @@ func TestDispatcherSCfgAsMapInterface2(t *testing.T) {
 		utils.NestedFieldsCfg:        false,
 		utils.AttributeSConnsCfg:     []string{},
 	}
-	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.dispatcherSCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("Expected %+v, received %+v", eMap, rcv)

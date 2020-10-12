@@ -61,7 +61,7 @@ func TestMailerCfgAsMapInterface(t *testing.T) {
 		utils.MailerAuthPassCfg: "",
 		utils.MailerFromAddrCfg: "",
 	}
-	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.mailerCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("Expected %+v, received %+v", eMap, rcv)
@@ -78,7 +78,7 @@ func TestMailerCfgAsMapInterface1(t *testing.T) {
 		utils.MailerAuthPassCfg: "CGRateS.org",
 		utils.MailerFromAddrCfg: "cgr-mailer@localhost.localdomain",
 	}
-	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.mailerCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("Expected %+v, received %+v", eMap, rcv)

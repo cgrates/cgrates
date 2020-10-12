@@ -131,6 +131,7 @@ func SetCgrConfig(cfg *CGRConfig) {
 	cgrCfg = cfg
 }
 
+// NewDefaultCGRConfig returns the default configuration
 func NewDefaultCGRConfig() (cfg *CGRConfig, err error) {
 	cfg = new(CGRConfig)
 	cfg.initChanels()
@@ -194,11 +195,11 @@ func NewDefaultCGRConfig() (cfg *CGRConfig, err error) {
 
 	cfg.ConfigReloads = make(map[string]chan struct{})
 
-	var cgrJsonCfg *CgrJsonCfg
-	if cgrJsonCfg, err = NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON)); err != nil {
+	var cgrJSONCfg *CgrJsonCfg
+	if cgrJSONCfg, err = NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON)); err != nil {
 		return
 	}
-	if err = cfg.loadFromJsonCfg(cgrJsonCfg); err != nil {
+	if err = cfg.loadFromJSONCfg(cgrJSONCfg); err != nil {
 		return
 	}
 
@@ -226,28 +227,41 @@ func NewDefaultCGRConfig() (cfg *CGRConfig, err error) {
 	return
 }
 
-func NewCGRConfigFromJsonStringWithDefaults(cfgJsonStr string) (cfg *CGRConfig, err error) {
+// NewCGRConfigFromJSONStringWithDefaults returns the given config with the default option loaded
+func NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr string) (cfg *CGRConfig, err error) {
 	cfg, _ = NewDefaultCGRConfig()
 	jsnCfg := new(CgrJsonCfg)
-	if err = NewRjReaderFromBytes([]byte(cfgJsonStr)).Decode(jsnCfg); err != nil {
+	if err = NewRjReaderFromBytes([]byte(cfgJSONStr)).Decode(jsnCfg); err != nil {
 		return
-	} else if err = cfg.loadFromJsonCfg(jsnCfg); err != nil {
+	} else if err = cfg.loadFromJSONCfg(jsnCfg); err != nil {
 		return
 	}
 	return
 }
 
-// Reads all .json files out of a folder/subfolders and loads them up in lexical order
+// NewCGRConfigFromPath reads all json files out of a folder/subfolders and loads them up in lexical order
 func NewCGRConfigFromPath(path string) (cfg *CGRConfig, err error) {
 	if cfg, err = NewDefaultCGRConfig(); err != nil {
 		return
 	}
 	cfg.ConfigPath = path
 
-	if err = cfg.loadConfigFromPath(path, []func(*CgrJsonCfg) error{cfg.loadFromJsonCfg}); err != nil {
+	if err = cfg.loadConfigFromPath(path, []func(*CgrJsonCfg) error{cfg.loadFromJSONCfg}, false); err != nil {
 		return
 	}
 	err = cfg.checkConfigSanity()
+	return
+}
+
+// newCGRConfigFromPathWithoutEnv reads all json files out of a folder/subfolders and loads them up in lexical order
+// it will not read *env variables and will not checkConfigSanity as it is not needed for configs
+func newCGRConfigFromPathWithoutEnv(path string) (cfg *CGRConfig, err error) {
+	if cfg, err = NewDefaultCGRConfig(); err != nil {
+		return
+	}
+	cfg.ConfigPath = path
+
+	err = cfg.loadConfigFromPath(path, []func(*CgrJsonCfg) error{cfg.loadFromJSONCfg}, true)
 	return
 }
 
@@ -258,7 +272,7 @@ func isHidden(fileName string) bool {
 	return strings.HasPrefix(fileName, ".")
 }
 
-// Holds system configuration, defaults are overwritten with values from config file if found
+// CGRConfig holds system configuration, defaults are overwritten with values from config file if found
 type CGRConfig struct {
 	lks             map[string]*sync.RWMutex
 	MaxCallDuration time.Duration // The maximum call duration (used by responder when querying DerivedCharging) // ToDo: export it in configuration file
@@ -332,6 +346,7 @@ var possibleExporterTypes = utils.NewStringSet([]string{utils.MetaFileCSV, utils
 	utils.MetaHTTPPost, utils.MetaHTTPjsonMap, utils.MetaAMQPjsonMap, utils.MetaAMQPV1jsonMap, utils.MetaSQSjsonMap,
 	utils.MetaKafkajsonMap, utils.MetaS3jsonMap, utils.MetaElastic, utils.MetaVirt})
 
+// LazySanityCheck used after check config sanity to display warnings related to the config
 func (cfg *CGRConfig) LazySanityCheck() {
 	for _, expID := range cfg.cdrsCfg.OnlineCDRExports {
 		for _, ee := range cfg.eesCfg.Exporters {
@@ -366,7 +381,7 @@ func (cfg *CGRConfig) LazySanityCheck() {
 }
 
 // Loads from json configuration object, will be used for defaults, config from file and reload, might need lock
-func (cfg *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
+func (cfg *CGRConfig) loadFromJSONCfg(jsnCfg *CgrJsonCfg) (err error) {
 	// Load sections out of JSON config, stop on error
 	for _, loadFunc := range []func(*CgrJsonCfg) error{
 		cfg.loadRPCConns,
@@ -1058,6 +1073,7 @@ func (cfg *CGRConfig) EEsNoLksCfg() *EEsCfg {
 	return cfg.eesCfg
 }
 
+// RateSCfg reads the RateS configuration
 func (cfg *CGRConfig) RateSCfg() *RateSCfg {
 	cfg.lks[RateSJson].RLock()
 	defer cfg.lks[RateSJson].RUnlock()
@@ -1243,7 +1259,7 @@ func (cfg *CGRConfig) RLocks(lkIDs ...string) {
 	}
 }
 
-// RLocks will read-lock locks with IDs.
+// RUnlocks will read-unlock locks with IDs.
 // User needs to know what he is doing since this can panic
 func (cfg *CGRConfig) RUnlocks(lkIDs ...string) {
 	for _, lkID := range lkIDs {
@@ -1345,15 +1361,16 @@ func (cfg *CGRConfig) loadCfgWithLocks(path, section string) (err error) {
 		defer cfg.lks[section].Unlock()
 		loadFuncs = append(loadFuncs, fnct)
 	}
-	return cfg.loadConfigFromPath(path, loadFuncs)
+	return cfg.loadConfigFromPath(path, loadFuncs, false)
 }
 
-func (*CGRConfig) loadConfigFromReader(rdr io.Reader, loadFuncs []func(jsnCfg *CgrJsonCfg) error) (err error) {
+func (*CGRConfig) loadConfigFromReader(rdr io.Reader, loadFuncs []func(jsnCfg *CgrJsonCfg) error, envOff bool) (err error) {
 	jsnCfg := new(CgrJsonCfg)
 	var rjr *rjReader
 	if rjr, err = NewRjReader(rdr); err != nil {
 		return
 	}
+	rjr.envOff = envOff
 	defer rjr.Close() // make sure we make the buffer nil
 	if err = rjr.Decode(jsnCfg); err != nil {
 		return
@@ -1367,7 +1384,7 @@ func (*CGRConfig) loadConfigFromReader(rdr io.Reader, loadFuncs []func(jsnCfg *C
 }
 
 // Reads all .json files out of a folder/subfolders and loads them up in lexical order
-func (cfg *CGRConfig) loadConfigFromPath(path string, loadFuncs []func(jsnCfg *CgrJsonCfg) error) (err error) {
+func (cfg *CGRConfig) loadConfigFromPath(path string, loadFuncs []func(jsnCfg *CgrJsonCfg) error, envOff bool) (err error) {
 	if utils.IsURL(path) {
 		return cfg.loadConfigFromHTTP(path, loadFuncs) // prefix protocol
 	}
@@ -1381,12 +1398,12 @@ func (cfg *CGRConfig) loadConfigFromPath(path string, loadFuncs []func(jsnCfg *C
 		return fmt.Errorf("path: %s not a directory", path)
 	}
 	if fi.IsDir() {
-		return cfg.loadConfigFromFolder(path, loadFuncs)
+		return cfg.loadConfigFromFolder(path, loadFuncs, envOff)
 	}
 	return
 }
 
-func (cfg *CGRConfig) loadConfigFromFolder(cfgDir string, loadFuncs []func(jsnCfg *CgrJsonCfg) error) (err error) {
+func (cfg *CGRConfig) loadConfigFromFolder(cfgDir string, loadFuncs []func(jsnCfg *CgrJsonCfg) error, envOff bool) (err error) {
 	jsonFilesFound := false
 	if err = filepath.Walk(cfgDir, func(path string, info os.FileInfo, err error) (werr error) {
 		if !info.IsDir() || isHidden(info.Name()) { // also ignore hidden files and folders
@@ -1409,7 +1426,7 @@ func (cfg *CGRConfig) loadConfigFromFolder(cfgDir string, loadFuncs []func(jsnCf
 				return
 			}
 
-			werr = cfg.loadConfigFromReader(cfgFile, loadFuncs)
+			werr = cfg.loadConfigFromReader(cfgFile, loadFuncs, envOff)
 			cfgFile.Close()
 			if werr != nil {
 				werr = fmt.Errorf("file <%s>:%s", jsonFilePath, werr.Error())
@@ -1439,7 +1456,7 @@ func (cfg *CGRConfig) loadConfigFromHTTP(urlPaths string, loadFuncs []func(jsnCf
 		if err != nil {
 			return utils.ErrPathNotReachable(urlPath)
 		}
-		err = cfg.loadConfigFromReader(cfgReq.Body, loadFuncs)
+		err = cfg.loadConfigFromReader(cfgReq.Body, loadFuncs, false)
 		cfgReq.Body.Close()
 		if err != nil {
 			err = fmt.Errorf("url <%s>:%s", urlPath, err.Error())
@@ -1513,7 +1530,7 @@ func (cfg *CGRConfig) loadCfgFromJSONWithLocks(rdr io.Reader, sections []string)
 		defer cfg.lks[section].Unlock()
 		loadFuncs = append(loadFuncs, fnct)
 	}
-	return cfg.loadConfigFromReader(rdr, loadFuncs)
+	return cfg.loadConfigFromReader(rdr, loadFuncs, false)
 }
 
 func (cfg *CGRConfig) reloadSections(sections ...string) (err error) {
@@ -1608,6 +1625,7 @@ func (cfg *CGRConfig) reloadSections(sections ...string) (err error) {
 	return
 }
 
+// AsMapInterface returns the config as a map[string]interface{}
 func (cfg *CGRConfig) AsMapInterface(separator string) map[string]interface{} {
 	rpcConns := make(map[string]map[string]interface{}, len(cfg.rpcConns))
 	for key, val := range cfg.rpcConns {

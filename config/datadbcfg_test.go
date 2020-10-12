@@ -510,7 +510,7 @@ func TestDataDbCfgAsMapInterface(t *testing.T) {
 			utils.MetaReverseDestinations: map[string]interface{}{utils.RemoteCfg: false, utils.ReplicateCfg: false, utils.ApiKeyCfg: "randomVal", utils.RouteIDCfg: "randomVal"},
 		},
 	}
-	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else {
 		rcv, err := cgrCfg.dataDbCfg.AsMapInterface()
@@ -535,7 +535,7 @@ func TestDataDBPortStrconvAtoi(t *testing.T) {
              "db_port": 6079,
         }
     }`
-	if cfgJson, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONSTR); err != nil {
+	if cfgJson, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONSTR); err != nil {
 		t.Error(err)
 	} else {
 		cfgJson.dataDbCfg.DataDbPort = "6o79"

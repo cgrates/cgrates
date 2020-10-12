@@ -112,7 +112,7 @@ func TestRequestProcessorloadFromJsonCfg2(t *testing.T) {
 			},
 		},
 	}
-	if jsonCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+	if jsonCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if err = jsonCfg.diameterAgentCfg.loadFromJsonCfg(cfgJSON, jsonCfg.generalCfg.RSRSep); err != nil {
 		t.Error(err)
@@ -184,7 +184,7 @@ func TestDiameterAgentCfgAsMapInterface(t *testing.T) {
 			},
 		},
 	}
-	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else {
 		for _, v := range cgrCfg.diameterAgentCfg.RequestProcessors[0].ReplyFields {
@@ -227,7 +227,7 @@ func TestDiameterAgentCfgAsMapInterface1(t *testing.T) {
 		utils.VendorIdCfg:           0,
 		utils.RequestProcessorsCfg:  []map[string]interface{}{},
 	}
-	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.diameterAgentCfg.AsMapInterface(cgrCfg.generalCfg.RSRSep); !reflect.DeepEqual(rcv, eMap) {
 		t.Errorf("Expected %+v \n, received %+v", eMap, rcv)
