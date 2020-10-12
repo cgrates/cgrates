@@ -53,6 +53,8 @@ var (
 		testDispatcherSUpdateDispatcherProfile,
 		testDispatcherSGetDispatcherProfileCache,
 		testDispatcherSRemDispatcherProfile,
+		testDispatcherSSetDispatcherProfileWithoutTenant,
+		testDispatcherSRemDispatcherProfileWithoutTenant,
 
 		testDispatcherSSetDispatcherHost,
 		testDispatcherSGetDispatcherHostIDs,
@@ -372,6 +374,49 @@ func testDispatcherSRemDispatcherHost(t *testing.T) {
 
 func testDispatcherSKillEngine(t *testing.T) {
 	if err := engine.KillEngine(*waitRater); err != nil {
+		t.Error(err)
+	}
+}
+
+func testDispatcherSSetDispatcherProfileWithoutTenant(t *testing.T) {
+	dispatcherProfile = &DispatcherWithCache{
+		DispatcherProfile: &engine.DispatcherProfile{
+			ID:        "Dsp1",
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			Strategy:  utils.MetaFirst,
+			Weight:    20,
+		},
+	}
+	var reply string
+	if err := dispatcherRPC.Call(utils.APIerSv1SetDispatcherProfile, dispatcherProfile, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+	dispatcherProfile.DispatcherProfile.Tenant = "cgrates.org"
+	var result *engine.DispatcherProfile
+	if err := dispatcherRPC.Call(utils.APIerSv1GetDispatcherProfile,
+		&utils.TenantID{ID: "Dsp1"},
+		&result); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(dispatcherProfile.DispatcherProfile, result) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(dispatcherProfile.DispatcherProfile), utils.ToJSON(result))
+	}
+}
+
+func testDispatcherSRemDispatcherProfileWithoutTenant(t *testing.T) {
+	var reply string
+	if err := dispatcherRPC.Call(utils.APIerSv1RemoveDispatcherProfile,
+		&utils.TenantIDWithCache{ID: "Dsp1"},
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+	var result *engine.DispatcherProfile
+	if err := dispatcherRPC.Call(utils.APIerSv1GetDispatcherProfile,
+		&utils.TenantID{ID: "Dsp1"},
+		&result); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
