@@ -241,7 +241,7 @@ func TestStorDbCfgAsMapInterface(t *testing.T) {
 			utils.CdrsCfg:         map[string]interface{}{utils.RemoteCfg: false, utils.ReplicateCfg: false},
 		},
 	}
-	if cfgCgr, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+	if cfgCgr, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else {
 		rcv := cfgCgr.storDbCfg.AsMapInterface()

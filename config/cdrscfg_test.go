@@ -103,7 +103,7 @@ func TestCdrsCfgAsMapInterface(t *testing.T) {
 		utils.SchedulerConnsCfg:   []string{utils.MetaInternal, "*conn1"},
 		utils.EEsConnsCfg:         []string{utils.MetaInternal, "*conn1"},
 	}
-	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.cdrsCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
 		t.Errorf("Expected %+v \n, recieved %+v ", utils.ToJSON(eMap), utils.ToJSON(rcv))
@@ -133,7 +133,7 @@ func TestCdrsCfgAsMapInterface2(t *testing.T) {
 		utils.SchedulerConnsCfg:   []string{},
 		utils.EEsConnsCfg:         []string{"conn1"},
 	}
-	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJsonStr); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJsonStr); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.cdrsCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
 		t.Errorf("Expected %+v \n, recieved %+v", eMap, rcv)

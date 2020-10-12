@@ -428,7 +428,7 @@ func TestFCTemplateAsMapInterface(t *testing.T) {
 			},
 		},
 	}
-	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.templates.AsMapInterface(cgrCfg.generalCfg.RSRSep); !reflect.DeepEqual(eMap["custom_template"], rcv["custom_template"]) {
 		t.Errorf("Expected %+v \n, recieved %+v", utils.ToJSON(eMap["custom_template"]), utils.ToJSON(rcv["custom_template"]))
@@ -486,7 +486,7 @@ func TestFCTemplateAsMapInterface1(t *testing.T) {
 				utils.ValueCfg: "~*vars.*appid", utils.MandatoryCfg: true},
 		},
 	}
-	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else {
 		rcv := cgrCfg.templates.AsMapInterface(cgrCfg.generalCfg.RSRSep)

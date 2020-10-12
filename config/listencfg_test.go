@@ -62,7 +62,7 @@ func TestListenCfgAsMapInterface(t *testing.T) {
 		utils.RPCGOBTLSListenCfg:  "127.0.0.1:2023",
 		utils.HTTPTLSListenCfg:    "127.0.0.1:2280",
 	}
-	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.listenCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("Expected %+v, received %+v", eMap, rcv)
@@ -87,7 +87,7 @@ func TestListenCfgAsMapInterface1(t *testing.T) {
 		utils.RPCGOBTLSListenCfg:  "127.0.0.1:2001",
 		utils.HTTPTLSListenCfg:    "127.0.0.1:2288",
 	}
-	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.listenCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("Expected %+v, received %+v", eMap, rcv)

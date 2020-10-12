@@ -62,7 +62,7 @@ func TestApierCfgAsMapInterface1(t *testing.T) {
 		utils.AttributeSConnsCfg: sls,
 		utils.EEsConnsCfg:        sls,
 	}
-	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if newMap := cgrCfg.apier.AsMapInterface(); !reflect.DeepEqual(newMap, eMap) {
 		t.Errorf("Expected %+v, recived %+v", eMap, newMap)
@@ -86,7 +86,7 @@ func TestApierCfgAsMapInterface2(t *testing.T) {
 		utils.AttributeSConnsCfg: []string{utils.MetaInternal, "*conn1"},
 		utils.EEsConnsCfg:        []string{utils.MetaInternal, "*conn1"},
 	}
-	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(myJSONStr); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(myJSONStr); err != nil {
 		t.Error(err)
 	} else if newMap := cgrCfg.apier.AsMapInterface(); !reflect.DeepEqual(expectedMap, newMap) {
 		t.Errorf("Expected %+v \n, recived %+v", utils.ToJSON(expectedMap), utils.ToJSON(newMap))

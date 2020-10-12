@@ -70,7 +70,7 @@ func TestChargerSCfgAsMapInterface(t *testing.T) {
 		utils.NestedFieldsCfg:        false,
 		utils.SuffixIndexedFieldsCfg: []string{},
 	}
-	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.chargerSCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("Expected %+v, recieved %+v", eMap, rcv)
@@ -98,7 +98,7 @@ func TestChargerSCfgAsMapInterface1(t *testing.T) {
 		utils.NestedFieldsCfg:        false,
 		utils.SuffixIndexedFieldsCfg: []string{"*req.Field1", "*req.Field2", "*req.Field3"},
 	}
-	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.chargerSCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("Expected %+v, recieved %+v", eMap, rcv)

@@ -174,7 +174,7 @@ func TestCachesCfgAsMapInterface1(t *testing.T) {
 		},
 		utils.ReplicationConnsCfg: []string{},
 	}
-	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else {
 		newMap := cgrCfg.cacheCfg.AsMapInterface()
@@ -201,7 +201,7 @@ func TestCachesCfgAsMapInterface2(t *testing.T) {
 		},
 		utils.ReplicationConnsCfg: []string{"conn1", "conn2"},
 	}
-	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else {
 		newMap := cgrCfg.cacheCfg.AsMapInterface()

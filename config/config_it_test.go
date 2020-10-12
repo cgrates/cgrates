@@ -74,7 +74,7 @@ func testNewCgrJsonCfgFromHttp(t *testing.T) {
 		t.Fatal(err)
 	}
 	err = expVal.loadConfigFromPath(path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"),
-		[]func(*CgrJsonCfg) error{expVal.loadFromJsonCfg})
+		[]func(*CgrJsonCfg) error{expVal.loadFromJSONCfg}, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -87,7 +87,7 @@ func testNewCgrJsonCfgFromHttp(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err = rply.loadConfigFromPath(addr, []func(*CgrJsonCfg) error{rply.loadFromJsonCfg}); err != nil {
+	if err = rply.loadConfigFromPath(addr, []func(*CgrJsonCfg) error{rply.loadFromJSONCfg}, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expVal, rply) {
 		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(expVal), utils.ToJSON(rply))

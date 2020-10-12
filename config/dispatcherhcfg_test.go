@@ -135,7 +135,7 @@ func TestDispatcherHCfgAsMapInterface(t *testing.T) {
 		},
 		utils.RegisterIntervalCfg: 5 * time.Minute,
 	}
-	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.dispatcherHCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("Expected %+v, received %+v", eMap, rcv)
@@ -196,7 +196,7 @@ func TestDispatcherHCfgAsMapInterface1(t *testing.T) {
 		},
 		utils.RegisterIntervalCfg: 1 * time.Minute,
 	}
-	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else {
 		rcv := cgrCfg.dispatcherHCfg.AsMapInterface()
@@ -222,7 +222,7 @@ func TestDispatcherHCfgAsMapInterface2(t *testing.T) {
 		utils.HostsCfg:            map[string][]map[string]interface{}{},
 		utils.RegisterIntervalCfg: 5 * time.Minute,
 	}
-	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.dispatcherHCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("Expected %+v, received %+v", eMap, rcv)

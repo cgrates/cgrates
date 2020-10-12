@@ -180,7 +180,7 @@ func TestGeneralCfgAsMapInterface(t *testing.T) {
 		utils.ConcurrentRequestsCfg: 0,
 		utils.ConcurrentStrategyCfg: utils.MetaBusy,
 	}
-	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.generalCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
 		t.Errorf("Expected %+v \n, recevied %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
@@ -225,7 +225,7 @@ func TestGeneralCfgAsMapInterface1(t *testing.T) {
 		utils.ConcurrentRequestsCfg: 0,
 		utils.ConcurrentStrategyCfg: utils.MetaBusy,
 	}
-	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.generalCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
 		t.Errorf("Expected %+v \n, recevied %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))

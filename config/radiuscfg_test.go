@@ -120,7 +120,7 @@ func TestRadiusAgentCfgloadFromJsonCfgCase2(t *testing.T) {
 			},
 		},
 	}
-	if jsonCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+	if jsonCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if err = jsonCfg.radiusAgentCfg.loadFromJsonCfg(cfgJSON, jsonCfg.generalCfg.RSRSep); err != nil {
 		t.Error(err)
@@ -197,7 +197,7 @@ func TestRadiusAgentCfgAsMapInterface(t *testing.T) {
 			},
 		},
 	}
-	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.radiusAgentCfg.AsMapInterface(cgrCfg.generalCfg.RSRSep); !reflect.DeepEqual(rcv, eMap) {
 		t.Errorf("Expecetd %+v \n, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
@@ -222,7 +222,7 @@ func TestRadiusAgentCfgAsMapInterface1(t *testing.T) {
 		utils.SessionSConnsCfg:     []string{"*internal"},
 		utils.RequestProcessorsCfg: []map[string]interface{}{},
 	}
-	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.radiusAgentCfg.AsMapInterface(cgrCfg.generalCfg.RSRSep); !reflect.DeepEqual(rcv, eMap) {
 		t.Errorf("Expecetd %+v \n, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))

@@ -392,7 +392,7 @@ func TestHttpAgentCfgloadFromJsonCfgCase7(t *testing.T) {
 			ID: "RandomID",
 		},
 	}
-	if jsnCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+	if jsnCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if err = jsnCfg.httpAgentCfg.loadFromJsonCfg(cfgJSON, jsnCfg.generalCfg.RSRSep); err != nil {
 		t.Error(err)
@@ -557,7 +557,7 @@ func TestHttpAgentCfgAsMapInterface(t *testing.T) {
 			},
 		},
 	}
-	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.httpAgentCfg.AsMapInterface(cgrCfg.generalCfg.RSRSep); !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("Expected %+v, recieved %+v", eMap, rcv)

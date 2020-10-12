@@ -31,8 +31,6 @@ import (
 )
 
 // creates a new rjReader from a io.Reader
-
-// creates a new rjReader from a io.Reader
 func NewRjReader(rdr io.Reader) (r *rjReader, err error) {
 	var b []byte
 	b, err = ioutil.ReadAll(rdr)
@@ -77,13 +75,16 @@ type rjReader struct {
 	buf        []byte
 	isInString bool // ignore character in strings
 	indx       int  // used to parse the buffer
+	envOff     bool
 }
 
 // Read implementation
 func (rjr *rjReader) Read(p []byte) (n int, err error) {
 	for n = range p {
 		p[n], err = rjr.ReadByte()
-		if p[n] == '*' && rjr.checkMeta() {
+		if !rjr.envOff &&
+			p[n] == '*' &&
+			rjr.checkMeta() {
 			if err = rjr.replaceEnv(rjr.indx - 1); err != nil {
 				return
 			}
