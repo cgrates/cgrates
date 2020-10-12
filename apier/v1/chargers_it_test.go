@@ -90,6 +90,8 @@ var (
 		testChargerSPing,
 		testChargerSProcessWithNotFoundAttribute,
 		testChargerSProccessEventWithProcceSRunS,
+		testChargerSSetChargerProfileWithoutTenant,
+		testChargerSRemChargerProfileWithoutTenant,
 		testChargerSKillEngine,
 	}
 )
@@ -272,6 +274,30 @@ func testChargerSGetChargersForEvent(t *testing.T) {
 	} else if !reflect.DeepEqual(result, chargerProfiles) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(chargerProfiles), utils.ToJSON(result))
 	}
+
+	chargerProfiles = &engine.ChargerProfiles{
+		&engine.ChargerProfile{
+			Tenant:    "cgrates.org",
+			ID:        "Charger1",
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
+			},
+			RunID:        utils.MetaDefault,
+			AttributeIDs: []string{"ATTR_1001_SIMPLEAUTH"},
+			Weight:       20,
+		},
+	}
+	chargerEvent[0].CGREvent.Tenant = utils.EmptyString
+	if err := chargerRPC.Call(utils.ChargerSv1GetChargersForEvent,
+		&utils.CGREventWithOpts{
+			CGREvent: chargerEvent[0].CGREvent,
+			Opts:     chargerEvent[0].Opts,
+		}, &result); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(result, chargerProfiles) {
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(chargerProfiles), utils.ToJSON(result))
+	}
 }
 
 func testChargerSGetChargersForEvent2(t *testing.T) {
@@ -279,7 +305,7 @@ func testChargerSGetChargersForEvent2(t *testing.T) {
 	if err := chargerRPC.Call(utils.ChargerSv1GetChargersForEvent,
 		&utils.CGREventWithOpts{
 			CGREvent: &utils.CGREvent{ // matching Charger1
-				Tenant: "cgrates.org",
+				Tenant: utils.EmptyString,
 				ID:     "event1",
 				Event: map[string]interface{}{
 					utils.Account: "1015",
@@ -347,6 +373,15 @@ func testChargerSProcessEvent(t *testing.T) {
 	if !reflect.DeepEqual(result, processedEv) {
 		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(processedEv), utils.ToJSON(result))
 	}
+
+	chargerEvent[2].Tenant = utils.EmptyString
+	if err := chargerRPC.Call(utils.ChargerSv1ProcessEvent, chargerEvent[2], &result); err != nil {
+		t.Fatal(err)
+	}
+	sort.Strings(result[0].AlteredFields)
+	if !reflect.DeepEqual(result, processedEv) {
+		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(processedEv), utils.ToJSON(result))
+	}
 }
 
 func testChargerSSetChargerProfile(t *testing.T) {
@@ -393,6 +428,11 @@ func testChargerSSetChargerProfile(t *testing.T) {
 func testChargerSGetChargerProfileIDs(t *testing.T) {
 	expected := []string{"Charger1", "Charger2", "ApierTest", "ChargerNotMatching"}
 	var result []string
+	if err := chargerRPC.Call(utils.APIerSv1GetChargerProfileIDs, utils.PaginatorWithTenant{}, &result); err != nil {
+		t.Error(err)
+	} else if len(expected) != len(result) {
+		t.Errorf("Expecting : %+v, received: %+v", expected, result)
+	}
 	if err := chargerRPC.Call(utils.APIerSv1GetChargerProfileIDs, utils.PaginatorWithTenant{Tenant: "cgrates.org"}, &result); err != nil {
 		t.Error(err)
 	} else if len(expected) != len(result) {
@@ -582,5 +622,53 @@ func testChargerSProccessEventWithProcceSRunS(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(result2, processedEv) {
 		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(processedEv), utils.ToJSON(result2))
+	}
+}
+
+func testChargerSSetChargerProfileWithoutTenant(t *testing.T) {
+	chargerProfile = &ChargerWithCache{
+		ChargerProfile: &engine.ChargerProfile{
+			ID:        "randomID",
+			FilterIDs: []string{"*string:~*req.Account:1010"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			},
+			RunID:        utils.MetaDefault,
+			AttributeIDs: []string{"Attr1", "Attr2"},
+			Weight:       20,
+		},
+	}
+	var reply string
+	if err := chargerRPC.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+	chargerProfile.ChargerProfile.Tenant = "cgrates.org"
+	var result *engine.ChargerProfile
+	if err := chargerRPC.Call(utils.APIerSv1GetChargerProfile,
+		&utils.TenantID{ID: "randomID"},
+		&result); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(chargerProfile.ChargerProfile, result) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(chargerProfile.ChargerProfile), utils.ToJSON(result))
+	}
+}
+
+func testChargerSRemChargerProfileWithoutTenant(t *testing.T) {
+	var reply string
+	if err := chargerRPC.Call(utils.APIerSv1RemoveChargerProfile,
+		&utils.TenantIDWithCache{ID: "randomID"},
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+	var result *engine.ChargerProfile
+	if err := chargerRPC.Call(utils.APIerSv1GetChargerProfile,
+		&utils.TenantID{ID: "randomID"},
+		&result); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
 	}
 }
