@@ -186,7 +186,7 @@ func testConcReqsOnHTTPBusy(t *testing.T) {
 				return
 			}
 			resp.Body.Close()
-			if strings.Contains(string(contents), "denying request due to maximum active requests reached") {
+			if strings.Contains(string(contents), utils.ErrMaxConcurentRPCExceeded.Error()) {
 				lock.Lock()
 				fldAPIs++
 				lock.Unlock()

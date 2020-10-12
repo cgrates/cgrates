@@ -19,7 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
-	"fmt"
+	"io"
+	"net/rpc"
+	"net/rpc/jsonrpc"
 )
 
 var ConReqs *ConcReqs
@@ -42,8 +44,7 @@ func NewConReqs(reqs int, strategy string) *ConcReqs {
 	return cR
 }
 
-var errDeny = fmt.Errorf("denying request due to maximum active requests reached")
-
+// Allocate will reserve a channel for the API call
 func (cR *ConcReqs) Allocate() (err error) {
 	if cR.limit == 0 {
 		return
@@ -51,7 +52,7 @@ func (cR *ConcReqs) Allocate() (err error) {
 	switch cR.strategy {
 	case MetaBusy:
 		if len(cR.aReqs) == 0 {
-			return errDeny
+			return ErrMaxConcurentRPCExceededNoCaps
 		}
 		fallthrough
 	case MetaQueue:
@@ -60,6 +61,7 @@ func (cR *ConcReqs) Allocate() (err error) {
 	return
 }
 
+// Deallocate will free a channel for the API call
 func (cR *ConcReqs) Deallocate() {
 	if cR.limit == 0 {
 		return
@@ -67,3 +69,39 @@ func (cR *ConcReqs) Deallocate() {
 	cR.aReqs <- struct{}{}
 	return
 }
+
+func newConcReqsGOBCodec(conn io.ReadWriteCloser) rpc.ServerCodec {
+	return newConcReqsServerCodec(newGobServerCodec(conn))
+}
+
+func newConcReqsJSONCodec(conn io.ReadWriteCloser) rpc.ServerCodec {
+	return newConcReqsServerCodec(jsonrpc.NewServerCodec(conn))
+}
+
+func newConcReqsServerCodec(sc rpc.ServerCodec) rpc.ServerCodec {
+	return &concReqsServerCodec2{sc: sc}
+}
+
+type concReqsServerCodec2 struct {
+	sc rpc.ServerCodec
+}
+
+func (c *concReqsServerCodec2) ReadRequestHeader(r *rpc.Request) error {
+	return c.sc.ReadRequestHeader(r)
+}
+
+func (c *concReqsServerCodec2) ReadRequestBody(x interface{}) error {
+	if err := ConReqs.Allocate(); err != nil {
+		return err
+	}
+	return c.sc.ReadRequestBody(x)
+}
+func (c *concReqsServerCodec2) WriteResponse(r *rpc.Response, x interface{}) error {
+	if r.Error == ErrMaxConcurentRPCExceededNoCaps.Error() {
+		r.Error = ErrMaxConcurentRPCExceeded.Error()
+	} else {
+		defer ConReqs.Deallocate()
+	}
+	return c.sc.WriteResponse(r, x)
+}
+func (c *concReqsServerCodec2) Close() error { return c.sc.Close() }

@@ -87,13 +87,10 @@ func (t *Threshold) TenantID() string {
 // ProcessEvent processes an ThresholdEvent
 // concurrentActions limits the number of simultaneous action sets executed
 func (t *Threshold) ProcessEvent(args *ThresholdsArgsProcessEvent, dm *DataManager) (err error) {
-	if t.Snooze.After(time.Now()) { // snoozed, not executing actions
-		return
-	}
-	if t.Hits < t.tPrfl.MinHits { // number of hits was not met, will not execute actions
-		return
-	}
-	if t.tPrfl.MaxHits != -1 && t.Hits > t.tPrfl.MaxHits {
+	if t.Snooze.After(time.Now()) || // snoozed, not executing actions
+		t.Hits < t.tPrfl.MinHits || // number of hits was not met, will not execute actions
+		(t.tPrfl.MaxHits != -1 &&
+			t.Hits > t.tPrfl.MaxHits) {
 		return
 	}
 	acnt, _ := args.FieldAsString(utils.Account)
@@ -111,18 +108,14 @@ func (t *Threshold) ProcessEvent(args *ThresholdsArgsProcessEvent, dm *DataManag
 			at.accountIDs = utils.NewStringMap(acntID)
 		}
 		if t.tPrfl.Async {
-
 			go func() {
 				if errExec := at.Execute(nil, nil); errExec != nil {
 					utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed executing actions: %s, error: %s", actionSetID, errExec.Error()))
 				}
 			}()
-
-		} else {
-			if errExec := at.Execute(nil, nil); errExec != nil {
-				utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed executing actions: %s, error: %s", actionSetID, errExec.Error()))
-				err = utils.ErrPartiallyExecuted
-			}
+		} else if errExec := at.Execute(nil, nil); errExec != nil {
+			utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed executing actions: %s, error: %s", actionSetID, errExec.Error()))
+			err = utils.ErrPartiallyExecuted
 		}
 	}
 	return
@@ -373,11 +366,10 @@ func (tS *ThresholdService) processEvent(args *ThresholdsArgsProcessEvent) (thre
 		}
 		t.Snooze = time.Now().Add(t.tPrfl.MinSleep)
 		// recurrent threshold
+		*t.dirty = true // mark it to be saved
 		if tS.cgrcfg.ThresholdSCfg().StoreInterval == -1 {
-			*t.dirty = true
 			tS.StoreThreshold(t)
 		} else {
-			*t.dirty = true // mark it to be saved
 			tS.stMux.Lock()
 			tS.storedTdIDs[t.TenantID()] = true
 			tS.stMux.Unlock()
