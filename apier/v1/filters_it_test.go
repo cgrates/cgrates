@@ -53,6 +53,8 @@ var (
 		testFilterGetFilterAfterUpdate,
 		testFilterRemoveFilter,
 		testFilterGetFilterAfterRemove,
+		testFilterSetFilterWithoutTenant,
+		testFilterRemoveFilterWithoutTenant,
 		testFilterKillEngine,
 	}
 )
@@ -148,6 +150,11 @@ func testFilterSetFilter(t *testing.T) {
 func testFilterGetFilterIDs(t *testing.T) {
 	expected := []string{"Filter1"}
 	var result []string
+	if err := filterRPC.Call(utils.APIerSv1GetFilterIDs, &utils.PaginatorWithTenant{}, &result); err != nil {
+		t.Error(err)
+	} else if len(expected) != len(result) {
+		t.Errorf("Expecting : %+v, received: %+v", expected, result)
+	}
 	if err := filterRPC.Call(utils.APIerSv1GetFilterIDs, &utils.PaginatorWithTenant{Tenant: "cgrates.org"}, &result); err != nil {
 		t.Error(err)
 	} else if len(expected) != len(result) {
@@ -216,6 +223,57 @@ func testFilterGetFilterAfterRemove(t *testing.T) {
 
 func testFilterKillEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
+		t.Error(err)
+	}
+}
+
+func testFilterSetFilterWithoutTenant(t *testing.T) {
+	filter = &FilterWithCache{
+		Filter: &engine.Filter{
+			ID: "FilterWithoutTenant",
+			Rules: []*engine.FilterRule{
+				{
+					Element: utils.MetaString,
+					Type:    "~Account",
+					Values:  []string{"1001", "1002"},
+				},
+			},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			},
+		},
+	}
+	var reply string
+	if err := filterRPC.Call(utils.APIerSv1SetFilter, filter, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+	var result *engine.Filter
+	filter.Filter.Tenant = "cgrates.org"
+	if err := filterRPC.Call(utils.APIerSv1GetFilter,
+		&utils.TenantID{ID: "FilterWithoutTenant"},
+		&result); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(result, filter.Filter) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(filter.Filter), utils.ToJSON(result))
+	}
+}
+
+func testFilterRemoveFilterWithoutTenant(t *testing.T) {
+	var reply string
+	if err := filterRPC.Call(utils.APIerSv1RemoveFilter,
+		&utils.TenantIDWithCache{ID: "FilterWithoutTenant"},
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+	var result *engine.Filter
+	if err := filterRPC.Call(utils.APIerSv1GetFilter,
+		&utils.TenantID{ID: "FilterWithoutTenant"},
+		&result); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }

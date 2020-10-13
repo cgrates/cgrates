@@ -33,8 +33,11 @@ type FilterWithCache struct {
 
 //SetFilter add a new Filter
 func (apierSv1 *APIerSv1) SetFilter(arg *FilterWithCache, reply *string) error {
-	if missing := utils.MissingStructFields(arg.Filter, []string{"Tenant", "ID"}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(arg.Filter, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	if arg.Tenant == utils.EmptyString {
+		arg.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	if err := apierSv1.DataManager.SetFilter(arg.Filter, true); err != nil {
 		return utils.APIErrorHandler(err)
@@ -54,10 +57,14 @@ func (apierSv1 *APIerSv1) SetFilter(arg *FilterWithCache, reply *string) error {
 
 //GetFilter returns a Filter
 func (apierSv1 *APIerSv1) GetFilter(arg *utils.TenantID, reply *engine.Filter) error {
-	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if fltr, err := apierSv1.DataManager.GetFilter(arg.Tenant, arg.ID, true, true, utils.NonTransactional); err != nil {
+	tnt := arg.Tenant
+	if tnt == utils.EmptyString {
+		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
+	}
+	if fltr, err := apierSv1.DataManager.GetFilter(tnt, arg.ID, true, true, utils.NonTransactional); err != nil {
 		return utils.APIErrorHandler(err)
 	} else {
 		*reply = *fltr
@@ -67,10 +74,11 @@ func (apierSv1 *APIerSv1) GetFilter(arg *utils.TenantID, reply *engine.Filter) e
 
 // GetFilterIDs returns list of Filter IDs registered for a tenant
 func (apierSv1 *APIerSv1) GetFilterIDs(args *utils.PaginatorWithTenant, fltrIDs *[]string) error {
-	if missing := utils.MissingStructFields(args, []string{utils.Tenant}); len(missing) != 0 { //Params missing
-		return utils.NewErrMandatoryIeMissing(missing...)
+	tnt := args.Tenant
+	if tnt == utils.EmptyString {
+		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
-	prfx := utils.FilterPrefix + args.Tenant + ":"
+	prfx := utils.FilterPrefix + tnt + ":"
 	keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
 	if err != nil {
 		return err
@@ -88,10 +96,14 @@ func (apierSv1 *APIerSv1) GetFilterIDs(args *utils.PaginatorWithTenant, fltrIDs 
 
 //RemoveFilter  remove a specific filter
 func (apierSv1 *APIerSv1) RemoveFilter(arg *utils.TenantIDWithCache, reply *string) error {
-	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := apierSv1.DataManager.RemoveFilter(arg.Tenant, arg.ID, utils.NonTransactional, true); err != nil {
+	tnt := arg.Tenant
+	if tnt == utils.EmptyString {
+		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
+	}
+	if err := apierSv1.DataManager.RemoveFilter(tnt, arg.ID, utils.NonTransactional, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheFilters and store it in database
@@ -99,8 +111,8 @@ func (apierSv1 *APIerSv1) RemoveFilter(arg *utils.TenantIDWithCache, reply *stri
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for Filter
-	if err := apierSv1.CallCache(arg.Cache, arg.Tenant, utils.CacheFilters,
-		arg.TenantID(), nil, nil, arg.Opts); err != nil {
+	if err := apierSv1.CallCache(arg.Cache, tnt, utils.CacheFilters,
+		utils.ConcatenatedKey(tnt, arg.ID), nil, nil, arg.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
