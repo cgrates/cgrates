@@ -54,6 +54,7 @@ func NewAgentRequest(req utils.DataProvider,
 	}
 	ar = &AgentRequest{
 		Request:    req,
+		Tenant:     dfltTenant,
 		Vars:       vars,
 		CGRRequest: utils.NewOrderedNavigableMap(),
 		diamreq:    utils.NewOrderedNavigableMap(), // special case when CGRateS is building the request
@@ -65,13 +66,12 @@ func NewAgentRequest(req utils.DataProvider,
 		Trailer:    trailer,
 		Opts:       opts,
 	}
-	// populate tenant
-	if tntIf, err := ar.ParseField(
-		&config.FCTemplate{Type: utils.META_COMPOSED,
-			Value: tntTpl}); err == nil && tntIf.(string) != "" {
-		ar.Tenant = tntIf.(string)
-	} else {
-		ar.Tenant = dfltTenant
+	if tntTpl != nil {
+		if tntIf, err := ar.ParseField(
+			&config.FCTemplate{Type: utils.META_COMPOSED,
+				Value: tntTpl}); err == nil && tntIf.(string) != "" {
+			ar.Tenant = tntIf.(string)
+		}
 	}
 	ar.Vars.Set(utils.PathItems{{Field: utils.NodeID}}, utils.NewNMData(config.CgrConfig().GeneralCfg().NodeID))
 	return
