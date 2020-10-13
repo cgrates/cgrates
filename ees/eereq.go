@@ -37,6 +37,7 @@ func NewEventExporterRequest(req utils.DataProvider, dc, opts utils.MapStorage,
 	filterS *engine.FilterS) (eeR *EventExporterRequest) {
 	eeR = &EventExporterRequest{
 		req:     req,
+		tnt:     dfltTenant,
 		tmz:     timezone,
 		filterS: filterS,
 		cnt:     utils.NewOrderedNavigableMap(),
@@ -45,13 +46,12 @@ func NewEventExporterRequest(req utils.DataProvider, dc, opts utils.MapStorage,
 		dc:      dc,
 		opts:    opts,
 	}
-	// populate tenant
-	if tntIf, err := eeR.ParseField(
-		&config.FCTemplate{Type: utils.META_COMPOSED,
-			Value: tntTpl}); err == nil && tntIf.(string) != "" {
-		eeR.tnt = tntIf.(string)
-	} else {
-		eeR.tnt = dfltTenant
+	if tntTpl != nil {
+		if tntIf, err := eeR.ParseField(
+			&config.FCTemplate{Type: utils.META_COMPOSED,
+				Value: tntTpl}); err == nil && tntIf.(string) != "" {
+			eeR.tnt = tntIf.(string)
+		}
 	}
 	return
 }
