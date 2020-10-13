@@ -61,6 +61,8 @@ var (
 		testDispatcherSUpdateDispatcherHost,
 		testDispatcherSGetDispatcherHostCache,
 		testDispatcherSRemDispatcherHost,
+		testDispatcherSSetDispatcherHostWithoutTenant,
+		testDispatcherSRemDispatcherHostWithoutTenant,
 
 		testDispatcherSKillEngine,
 	}
@@ -416,6 +418,56 @@ func testDispatcherSRemDispatcherProfileWithoutTenant(t *testing.T) {
 	var result *engine.DispatcherProfile
 	if err := dispatcherRPC.Call(utils.APIerSv1GetDispatcherProfile,
 		&utils.TenantID{ID: "Dsp1"},
+		&result); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+}
+
+func testDispatcherSSetDispatcherHostWithoutTenant(t *testing.T) {
+	dispatcherHost = &DispatcherHostWithCache{
+		DispatcherHost: &engine.DispatcherHost{
+			ID: "DspHst7",
+			Conns: []*config.RemoteHost{
+				{
+					Address: "*internal",
+				},
+				{
+					Address:   ":2012",
+					Transport: utils.MetaJSON,
+					TLS:       true,
+				},
+			},
+		},
+	}
+	var reply string
+	if err := dispatcherRPC.Call(utils.APIerSv1SetDispatcherHost, dispatcherHost, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+	dispatcherHost.DispatcherHost.Tenant = "cgrates.org"
+	var result *engine.DispatcherHost
+	if err := dispatcherRPC.Call(utils.APIerSv1GetDispatcherHost,
+		&utils.TenantID{ID: "DspHst7"},
+		&result); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(result, dispatcherHost.DispatcherHost) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(dispatcherHost.DispatcherHost), utils.ToJSON(result))
+	}
+}
+
+func testDispatcherSRemDispatcherHostWithoutTenant(t *testing.T) {
+	var reply string
+	if err := dispatcherRPC.Call(utils.APIerSv1RemoveDispatcherHost,
+		&utils.TenantIDWithCache{ID: "DspHst7"},
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+	var result *engine.DispatcherHost
+	if err := dispatcherRPC.Call(utils.APIerSv1GetDispatcherHost,
+		&utils.TenantID{ID: "DspHst7"},
 		&result); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}

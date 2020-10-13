@@ -180,6 +180,26 @@ func testDspDspv1GetProfileForEvent(t *testing.T) {
 	if !reflect.DeepEqual(expected, reply) {
 		t.Errorf("expected: %s ,\n received: %s", utils.ToJSON(expected), utils.ToJSON(reply))
 	}
+
+	arg2 := utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
+			ID: "testDspvWithoutTenant",
+			Event: map[string]interface{}{
+				utils.EVENT_NAME: "Event1",
+			},
+		},
+		Opts: map[string]interface{}{
+			utils.Subsys: utils.META_ANY,
+		},
+	}
+	expected.Hosts.Sort()
+	if err := dspRPC.Call(utils.DispatcherSv1GetProfileForEvent, &arg2, &reply); err != nil {
+		t.Fatal(err)
+	}
+	reply.Hosts.Sort()
+	if !reflect.DeepEqual(expected, reply) {
+		t.Errorf("expected: %s ,\n received: %s", utils.ToJSON(expected), utils.ToJSON(reply))
+	}
 }
 
 func testDspDspv1GetProfileForEventWithMethod(t *testing.T) {

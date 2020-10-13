@@ -113,13 +113,13 @@ func (dS *DispatcherService) authorize(method, tenant string, apiKey string, evT
 
 // dispatcherForEvent returns a dispatcher instance configured for specific event
 // or utils.ErrNotFound if none present
-func (dS *DispatcherService) dispatcherProfileForEvent(ev *utils.CGREventWithOpts,
+func (dS *DispatcherService) dispatcherProfileForEvent(tnt string, ev *utils.CGREventWithOpts,
 	subsys string) (dPrlf *engine.DispatcherProfile, err error) {
 	// find out the matching profiles
-	anyIdxPrfx := utils.ConcatenatedKey(ev.Tenant, utils.META_ANY)
+	anyIdxPrfx := utils.ConcatenatedKey(tnt, utils.META_ANY)
 	idxKeyPrfx := anyIdxPrfx
 	if subsys != "" {
-		idxKeyPrfx = utils.ConcatenatedKey(ev.Tenant, subsys)
+		idxKeyPrfx = utils.ConcatenatedKey(tnt, subsys)
 	}
 	evNm := utils.MapStorage{
 		utils.MetaReq:  ev.CGREvent.Event,
@@ -151,7 +151,7 @@ func (dS *DispatcherService) dispatcherProfileForEvent(ev *utils.CGREventWithOpt
 		}
 	}
 	for prflID := range prflIDs {
-		prfl, err := dS.dm.GetDispatcherProfile(ev.Tenant, prflID, true, true, utils.NonTransactional)
+		prfl, err := dS.dm.GetDispatcherProfile(tnt, prflID, true, true, utils.NonTransactional)
 		if err != nil {
 			if err != utils.ErrNotFound {
 				return nil, err
@@ -166,7 +166,7 @@ func (dS *DispatcherService) dispatcherProfileForEvent(ev *utils.CGREventWithOpt
 			!prfl.ActivationInterval.IsActiveAtTime(*ev.Time) { // not active
 			continue
 		}
-		if pass, err := dS.fltrS.Pass(ev.Tenant, prfl.FilterIDs,
+		if pass, err := dS.fltrS.Pass(tnt, prfl.FilterIDs,
 			evNm); err != nil {
 			return nil, err
 		} else if !pass {
@@ -185,7 +185,11 @@ func (dS *DispatcherService) dispatcherProfileForEvent(ev *utils.CGREventWithOpt
 // Dispatch is the method forwarding the request towards the right connection
 func (dS *DispatcherService) Dispatch(ev *utils.CGREventWithOpts, subsys string,
 	serviceMethod string, args interface{}, reply interface{}) (err error) {
-	dPrfl, errDsp := dS.dispatcherProfileForEvent(ev, subsys)
+	tnt := ev.Tenant
+	if tnt == utils.EmptyString {
+		tnt = dS.cfg.GeneralCfg().DefaultTenant
+	}
+	dPrfl, errDsp := dS.dispatcherProfileForEvent(tnt, ev, subsys)
 	if errDsp != nil {
 		return utils.NewErrDispatcherS(errDsp)
 	}
@@ -206,7 +210,11 @@ func (dS *DispatcherService) Dispatch(ev *utils.CGREventWithOpts, subsys string,
 
 func (dS *DispatcherService) V1GetProfileForEvent(ev *utils.CGREventWithOpts,
 	dPfl *engine.DispatcherProfile) (err error) {
-	retDPfl, errDpfl := dS.dispatcherProfileForEvent(ev, utils.IfaceAsString(ev.Opts[utils.Subsys]))
+	tnt := ev.Tenant
+	if tnt == utils.EmptyString {
+		tnt = dS.cfg.GeneralCfg().DefaultTenant
+	}
+	retDPfl, errDpfl := dS.dispatcherProfileForEvent(tnt, ev, utils.IfaceAsString(ev.Opts[utils.Subsys]))
 	if errDpfl != nil {
 		return utils.NewErrDispatcherS(errDpfl)
 	}
