@@ -63,6 +63,8 @@ var (
 		testV1RsResourcePing,
 		testV1RsMatchNotFound,
 		testV1RsAllocateUnlimited,
+		testV1RsGetResourceProfileWithoutTenant,
+		testV1RsRemResourceProfileWithoutTenant,
 		testV1RsStopEngine,
 	}
 )
@@ -722,6 +724,9 @@ func testV1RsGetResourceProfileIDs(t *testing.T) {
 	expected := []string{"ResGroup2", "ResGroup1", "ResGroup3", "RES_GR_TEST"}
 	sort.Strings(expected)
 	var result []string
+	if err := rlsV1Rpc.Call(utils.APIerSv1GetResourceProfileIDs, utils.PaginatorWithTenant{}, &result); err != nil {
+		t.Error(err)
+	}
 	if err := rlsV1Rpc.Call(utils.APIerSv1GetResourceProfileIDs, utils.PaginatorWithTenant{Tenant: "cgrates.org"}, &result); err != nil {
 		t.Error(err)
 	}
@@ -908,6 +913,58 @@ func testV1RsAllocateUnlimited(t *testing.T) {
 
 func testV1RsStopEngine(t *testing.T) {
 	if err := engine.KillEngine(*waitRater); err != nil {
+		t.Error(err)
+	}
+}
+
+func testV1RsGetResourceProfileWithoutTenant(t *testing.T) {
+	rlsConfig = &ResourceWithCache{
+		ResourceProfile: &engine.ResourceProfile{
+			ID:        rlsConfig.ID,
+			FilterIDs: []string{"*string:~*req.CustomField:UnlimitedEvent"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			},
+			UsageTTL:          time.Duration(1) * time.Nanosecond,
+			Limit:             10,
+			AllocationMessage: "MessageAllocation",
+			Blocker:           true,
+			Stored:            true,
+			Weight:            20,
+			ThresholdIDs:      []string{"Val1"},
+		},
+	}
+	var reply string
+	if err := rlsV1Rpc.Call(utils.APIerSv1SetResourceProfile, rlsConfig, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+	rlsConfig.Tenant = "cgrates.org"
+	var result *engine.ResourceProfile
+	if err := rlsV1Rpc.Call(utils.APIerSv1GetResourceProfile,
+		&utils.TenantID{ID: rlsConfig.ID},
+		&result); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rlsConfig.ResourceProfile, result) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(rlsConfig.ResourceProfile), utils.ToJSON(result))
+	}
+}
+
+func testV1RsRemResourceProfileWithoutTenant(t *testing.T) {
+	var reply string
+	if err := rlsV1Rpc.Call(utils.APIerSv1RemoveResourceProfile,
+		&utils.TenantIDWithCache{ID: rlsConfig.ID},
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+	var result *engine.ResourceProfile
+	if err := rlsV1Rpc.Call(utils.APIerSv1GetResourceProfile,
+		&utils.TenantID{ID: rlsConfig.ID},
+		&result); err == nil || utils.ErrNotFound.Error() != err.Error() {
 		t.Error(err)
 	}
 }
