@@ -67,6 +67,8 @@ var (
 		testV1RouteUpdateRouteProfiles,
 		testV1RouteRemRouteProfiles,
 		testV1RouteGetRouteForEvent,
+		testV1RouteSetRouteProfilesWithoutTenant,
+		testV1RouteRemRouteProfilesWithoutTenant,
 		// reset the database and load the TP again
 		testV1RouteInitDataDb,
 		testV1RouteFromFolder,
@@ -926,6 +928,13 @@ func testV1RouteGetRouteProfileIDs(t *testing.T) {
 		"TEST_PROFILE1", "ROUTE_LOAD_DIST", "ROUTE_LCR"}
 	var result []string
 	if err := splSv1Rpc.Call(utils.APIerSv1GetRouteProfileIDs,
+		&utils.PaginatorWithTenant{}, &result); err != nil {
+		t.Error(err)
+	} else if len(expected) != len(result) {
+		t.Errorf("Expecting : %+v, received: %+v", expected, result)
+	}
+
+	if err := splSv1Rpc.Call(utils.APIerSv1GetRouteProfileIDs,
 		&utils.PaginatorWithTenant{Tenant: "cgrates.org"}, &result); err != nil {
 		t.Error(err)
 	} else if len(expected) != len(result) {
@@ -1091,6 +1100,19 @@ func testV1RouteGetRouteForEvent(t *testing.T) {
 	if !reflect.DeepEqual(expected, *supProf[0]) {
 		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(expected), utils.ToJSON(supProf))
 	}
+	/*
+		ev.Tenant = utils.EmptyString
+		ev.ID = "randomID"
+		expected.ID = "randomID"
+		if err := splSv1Rpc.Call(utils.RouteSv1GetRouteProfilesForEvent,
+			ev, &supProf); err != nil {
+			t.Fatal(err)
+		}
+		if !reflect.DeepEqual(expected, *supProf[0]) {
+			t.Errorf("Expected: %s ,received: %s", utils.ToJSON(expected), utils.ToJSON(supProf))
+		}
+
+	*/
 }
 
 // Scenario: We create two rating plans RP_MOBILE and RP_LOCAL
@@ -1509,6 +1531,62 @@ func testV1RouteAccountWithRatingPlan(t *testing.T) {
 
 func testV1RouteStopEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
+		t.Error(err)
+	}
+}
+
+func testV1RouteSetRouteProfilesWithoutTenant(t *testing.T) {
+	splPrf = &RouteWithCache{
+		RouteProfile: &engine.RouteProfile{
+			Tenant:            "cgrates.org",
+			ID:                "TEST_PROFILE10",
+			FilterIDs:         []string{"FLTR_1"},
+			Sorting:           "Sort1",
+			SortingParameters: []string{"Param1", "Param2"},
+			Routes: []*engine.Route{
+				{
+					ID:              "ROUTE1",
+					RatingPlanIDs:   []string{"RP1"},
+					FilterIDs:       []string{"FLTR_1"},
+					AccountIDs:      []string{"Acc"},
+					ResourceIDs:     []string{"Res1", "ResGroup2"},
+					StatIDs:         []string{"Stat1"},
+					Weight:          20,
+					Blocker:         false,
+					RouteParameters: "SortingParameter1",
+				},
+			},
+			Weight: 10,
+		},
+	}
+	var reply string
+	if err := splSv1Rpc.Call(utils.APIerSv1SetRouteProfile, splPrf, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+	splPrf.Tenant = "cgrates.org"
+	var result *engine.RouteProfile
+	if err := splSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
+		&utils.TenantID{ID: "TEST_PROFILE10"},
+		&result); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(result, splPrf.RouteProfile) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(splPrf.RouteProfile), utils.ToJSON(result))
+	}
+}
+
+func testV1RouteRemRouteProfilesWithoutTenant(t *testing.T) {
+	var reply string
+	if err := splSv1Rpc.Call(utils.APIerSv1RemoveRouteProfile,
+		&utils.TenantIDWithCache{ID: "TEST_PROFILE10"},
+		&reply); err != nil {
+		t.Error(err)
+	}
+	var result *engine.RouteProfile
+	if err := splSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
+		&utils.TenantID{ID: "TEST_PROFILE10"},
+		&result); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
