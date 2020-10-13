@@ -1,4 +1,4 @@
-%global version 0.10.1~dev
+%global version 0.11.0~dev
 %global git_commit %(echo $gitLastCommit)
 %global releaseTag %(echo $rpmTag)
 
@@ -32,7 +32,7 @@ CGRateS is a very fast and easy scalable real-time charging system for Telecom e
 %prep
 %setup -q -n %{name}-%{version} -c
 mkdir -p src/github.com/cgrates
-ln -sf ../../../%{name}-%{git_commit} src/github.com/cgrates/cgrates
+ln -sf ../../../$(ls |grep %{name}-) src/github.com/cgrates/cgrates
 
 %pre
 getent group %{name} >/dev/null || groupadd -r %{name}
@@ -52,6 +52,8 @@ fi
 /bin/chown -R %{name}:%{name} %{_logdir}
 /bin/chown -R %{name}:%{name} %{_spooldir}
 /bin/chown -R %{name}:%{name} %{_libdir}
+sudo systemctl restart syslog
+sudo systemctl restart rsyslog
 
 %preun
 %if 0%{?fedora} > 16 || 0%{?rhel} > 6
@@ -75,7 +77,16 @@ cd $RPM_BUILD_DIR/%{name}-%{version}/src/github.com/cgrates/cgrates
 %install
 rm -rf $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT%{_datarootdir}/%{name}
-cp -rpf src/github.com/cgrates/cgrates/data/* $RPM_BUILD_ROOT%{_datarootdir}/%{name}
+cp -rpf src/github.com/cgrates/cgrates/data/conf/ $RPM_BUILD_ROOT%{_datarootdir}/%{name}
+cp -rpf src/github.com/cgrates/cgrates/data/diameter/ $RPM_BUILD_ROOT%{_datarootdir}/%{name}
+cp -rpf src/github.com/cgrates/cgrates/data/postman/ $RPM_BUILD_ROOT%{_datarootdir}/%{name}
+cp -rpf src/github.com/cgrates/cgrates/data/radius/ $RPM_BUILD_ROOT%{_datarootdir}/%{name}
+cp -rpf src/github.com/cgrates/cgrates/data/tariffplans/ $RPM_BUILD_ROOT%{_datarootdir}/%{name}
+cp -rpf src/github.com/cgrates/cgrates/data/tutorial_tests/ $RPM_BUILD_ROOT%{_datarootdir}/%{name}
+cp -rpf src/github.com/cgrates/cgrates/data/tutorials/ $RPM_BUILD_ROOT%{_datarootdir}/%{name}
+cp -rpf src/github.com/cgrates/cgrates/data/storage/mongo $RPM_BUILD_ROOT%{_datarootdir}/%{name}/storage
+cp -rpf src/github.com/cgrates/cgrates/data/storage/mysql $RPM_BUILD_ROOT%{_datarootdir}/%{name}/storage
+cp -rpf src/github.com/cgrates/cgrates/data/storage/postgres $RPM_BUILD_ROOT%{_datarootdir}/%{name}/storage
 install -D -m 0644 -p src/github.com/cgrates/cgrates/data/conf/%{name}/%{name}.json $RPM_BUILD_ROOT%{_sysconfdir}/%{name}/%{name}.json
 install -D -m 0755 -p bin/cgr-console $RPM_BUILD_ROOT%{_bindir}/cgr-console
 install -D -m 0755 -p bin/cgr-engine $RPM_BUILD_ROOT%{_bindir}/cgr-engine
@@ -90,6 +101,10 @@ mkdir -p $RPM_BUILD_ROOT%{_spooldir}/tpe
 mkdir -p $RPM_BUILD_ROOT%{_spooldir}/failed_posts
 mkdir -p $RPM_BUILD_ROOT%{_libdir}/history
 mkdir -p $RPM_BUILD_ROOT%{_libdir}/cache_dump
+mkdir -p $RPM_BUILD_ROOT/etc/logrotate.d
+mkdir -p $RPM_BUILD_ROOT/etc/rsyslog.d
+install -m 755 src/github.com/cgrates/cgrates/data/conf/logging/logrotate.conf $RPM_BUILD_ROOT/etc/logrotate.d/%{name}
+install -m 755 src/github.com/cgrates/cgrates/data/conf/logging/rsyslog.conf $RPM_BUILD_ROOT/etc/rsyslog.d/%{name}.conf
 install -D -m 0644 -p src/github.com/cgrates/cgrates/packages/redhat_fedora/%{name}.options $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig/%{name}
 %if 0%{?fedora} > 16 || 0%{?rhel} > 6
 	install -D -m 0644 -p src/github.com/cgrates/cgrates/packages/redhat_fedora/%{name}.service $RPM_BUILD_ROOT%{_unitdir}/%{name}.service
@@ -106,6 +121,8 @@ install -D -m 0644 -p src/github.com/cgrates/cgrates/packages/redhat_fedora/%{na
 %{_spooldir}/*
 %{_libdir}/*
 %{_sysconfdir}/sysconfig/%{name}
+/etc/logrotate.d/%{name}
+/etc/rsyslog.d/%{name}.conf
 %if 0%{?fedora} > 16 || 0%{?rhel} > 6
 	%{_unitdir}/%{name}.service
 %else
